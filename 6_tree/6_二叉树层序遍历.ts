@@ -35,6 +35,7 @@ const bt: BinaryTree = {
   },
 }
 
+// 返回值的第h层是一个装满该层节点值的数组number[][]
 const getLevelOrder = (root: BinaryTree | null) => {
   if (!root) return []
   const queue: [BinaryTree, number][] = [[root, 0]]

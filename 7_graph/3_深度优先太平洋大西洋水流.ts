@@ -2,10 +2,11 @@ const foo = (matrix: number[][]) => {
   if (!matrix || !matrix[0]) return []
   const m = matrix.length
   const n = matrix[0].length
-  // m行n列矩阵
+  // 1.m行n列矩阵
   const flow1 = Array.from({ length: m }, () => Array(n).fill(false))
   const flow2 = Array.from({ length: m }, () => Array(n).fill(false))
 
+  // 2. dfs行列，相邻点操作
   const dfs = (r: number, c: number, flow: boolean[][]) => {
     flow[r][c] = true
     // 相邻节点
@@ -20,9 +21,9 @@ const foo = (matrix: number[][]) => {
       // 3.逆流而上
       if (
         nextR >= 0 &&
-        nextR <= m &&
+        nextR < m &&
         nextC >= 0 &&
-        nextC <= n &&
+        nextC < n &&
         !flow[nextR][nextC] &&
         matrix[nextR][nextC] >= matrix[r][c]
       ) {
@@ -31,7 +32,7 @@ const foo = (matrix: number[][]) => {
     })
   }
 
-  // 沿着海岸线逆流而上
+  // 3.沿着海岸线逆流而上,开始dfs
   for (let r = 0; r < m; r++) {
     dfs(r, 0, flow1)
     dfs(r, n - 1, flow2)
@@ -42,7 +43,7 @@ const foo = (matrix: number[][]) => {
     dfs(m - 1, c, flow2)
   }
 
-  // 对比能留到两个大洋里的坐标
+  // 4.对比能留到两个大洋里的坐标,求结果
   const res = []
   for (let r = 0; r < m; r++) {
     for (let c = 0; c < n; c++) {
@@ -57,3 +58,4 @@ const foo = (matrix: number[][]) => {
 
 // 时间复杂度m*n
 // 空间复杂度m*n
+// console.log(foo())

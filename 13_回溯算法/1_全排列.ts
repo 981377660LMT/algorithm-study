@@ -8,12 +8,13 @@ const permute = (nums: number[]) => {
   const res: number[][] = []
 
   const backTrack = (path: number[]) => {
-    // 递归终点
-    if (path.length === 3) res.push(path)
+    // 1.递归终点
+    if (path.length === nums.length) res.push(path)
 
     nums.forEach(num => {
-      // 排除死路
+      // 2.排除死路
       if (path.includes(num)) return
+      // 3. 递归
       backTrack(path.concat(num))
     })
   }

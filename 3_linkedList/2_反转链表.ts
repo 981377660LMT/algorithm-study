@@ -1,7 +1,7 @@
 class Node {
-  value: number | undefined
+  value: number
   next: Node | undefined
-  constructor(value?: number, next?: Node) {
+  constructor(value: number = 0, next?: Node) {
     this.value = value
     this.next = next
   }

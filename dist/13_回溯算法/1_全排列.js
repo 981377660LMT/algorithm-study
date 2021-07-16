@@ -9,13 +9,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const permute = (nums) => {
     const res = [];
     const backTrack = (path) => {
-        // 递归终点
-        if (path.length === 3)
+        // 1.递归终点
+        if (path.length === nums.length)
             res.push(path);
         nums.forEach(num => {
-            // 排除死路
+            // 2.排除死路
             if (path.includes(num))
                 return;
+            // 3. 递归
             backTrack(path.concat(num));
         });
     };

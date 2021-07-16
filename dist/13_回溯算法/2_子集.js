@@ -1,19 +1,10 @@
-'use strict'
-Object.defineProperty(exports, '__esModule', { value: true })
-const subsets = nums => {
-  const res = []
-  const bt = (path, volumn, start) => {
-    if (path.length === volumn) {
-      res.push(path)
-      return
-    }
-    for (let index = start; index < nums.length; index++) {
-      bt(path.concat(nums[index]), volumn, start + 1)
-    }
-  }
-  for (let index = 0; index <= nums.length; index++) {
-    bt([], index, 0)
-  }
-  return res
-}
-console.log(subsets([1, 2, 3]))
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * @description 二进制版求子集
+ * @description 时间复杂度O(n)
+ */
+const subsets = (nums) => Array.from({ length: Math.pow(2, nums.length) }, (_, k) => k)
+    .map(num => num.toString(2).padStart(nums.length, '0').split(''))
+    .map(item => item.map((isNeed, index) => isNeed === '1' && nums[index]).filter(v => v !== false));
+console.log(subsets([1, 2, 3]));

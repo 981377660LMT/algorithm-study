@@ -29,6 +29,7 @@ const bt = {
         },
     },
 };
+// 返回值的第h层是一个装满该层节点值的数组number[][]
 const getLevelOrder = (root) => {
     if (!root)
         return [];
