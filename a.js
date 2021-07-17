@@ -33,3 +33,9 @@ const newState = ++state % 4
 console.log(newState)
 
 console.assert(1 === 2, 'wrong')
+
+const arr = []
+arr.push(1, 2)
+console.log(arr[4])
+
+console.log(...arr.keys(), ...arr.entries())

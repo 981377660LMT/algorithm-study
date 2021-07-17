@@ -7,12 +7,14 @@ const graph = {
     3: [3],
 };
 const visited = new Set();
-// const dfs = (n: number) => {
-//   console.log(n)
-//   // 多了一步
-//   visited.add(n)
-//   graph[n].forEach(c => !visited.has(c) && dfs(c))
-// }
+const dfs = (n) => {
+    // visited.add(n)
+    console.log(n);
+    // 多了一步
+    graph[n].forEach(c => !visited.has(c) && dfs(c));
+};
+// 注意:bfs的初始化queue有时候会搭配度排序使用
+// 见课程表二的bfs
 const bfs = (n) => {
     visited.add(n);
     const queue = [n];
@@ -28,5 +30,5 @@ const bfs = (n) => {
     }
     // visited.add(n)
 };
-// dfs(2)
+dfs(2);
 bfs(2);
