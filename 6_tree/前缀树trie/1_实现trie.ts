@@ -68,11 +68,13 @@ class Trie implements ITrie {
   }
 }
 
-const trie = new Trie()
-trie.insert('google')
-console.dir(trie, { depth: 5 })
+if (require.main === module) {
+  const trie = new Trie()
+  trie.insert('google')
+  console.dir(trie, { depth: 4 })
 
-console.log(trie.search('google'))
-console.log(trie.startsWith('agoo'))
+  console.log(trie.search('google'))
+  console.log(trie.startsWith('agoo'))
+}
 
 export { Trie }

@@ -39,3 +39,7 @@ arr.push(1, 2)
 console.log(arr[4])
 
 console.log(...arr.keys(), ...arr.entries())
+
+console.log([1, 2, 3].slice(0, -1))
+
+console.log(undefined + 1 || 1, undefined + 1)

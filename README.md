@@ -25,6 +25,9 @@ Shift+F11|单步跳出|跳出函数
 
 1. 栈
    - 应用场景:十进制转二进制，判断字符串括号是否有效，函数调用堆栈
+   - 单调栈适合的题目是求解**下一个大于 xxx 或者下一个小于 xxx** 这种题目
+   - Stack over flow :函数的临时变量是存储在栈区;没有出口的递归调用栈会超出最大深度
+   - Maximum call stack size exceeded
 2. 队列
    - 应用场景:JS 异步中的任务队列，计算最近请求次数
 3. 链表(有时候直接用首部 Node 来表示链表)
@@ -56,6 +59,13 @@ Shift+F11|单步跳出|跳出函数
 
    ```
 
+   - | 操作       | 单链表 | 双链表 |
+     | ---------- | ------ | ------ |
+     | append     | 1      | 1      |
+     | appendleft | 1      | 1      |
+     | remove     | n      | 1      |
+     | find       | n      | 1      |
+
 4. 集合
    - 应用场景:JS 异步中的任务队列，计算最近请求次数
 5. 字典
@@ -64,7 +74,8 @@ Shift+F11|单步跳出|跳出函数
 6. 树(分层数据抽象模型)
 
    - Object+Array
-   - 遍历方法
+   - 遍历方法 dfs(大多数情况) bfs(层序遍历)
+   - 递归 (最长同值路径，相同的树，验证树的某些性质等...)
    - 应用场景:DOM 树，级联选择，树形控件
      深度优先遍历 JSON
 
@@ -93,6 +104,7 @@ Shift+F11|单步跳出|跳出函数
    - 二元关系，道路航班
    - Object+Array **map 实现的邻接矩阵，邻接表,入度数组**
    - 深度优先广度优先 dfs bfs(queue)
+   - 邻接矩阵 number[][],邻接表 Map<number,numner[]>
 8. 堆
    - 特殊的完全二叉树(完全填满，最后一层从左向右填充)
    - 最大堆/最小堆
@@ -146,6 +158,7 @@ Shift+F11|单步跳出|跳出函数
     - 遇到岔路：走一条**路**没走通，走回来
     - 递归模拟所有的路
     - 例子:输出全排列
+    - 可以引入 **memo** 来辅助回溯
 
 回顾与总结
 与前端最重要的是**链表**与**树**(JSON/对象)
@@ -157,6 +170,42 @@ Shift+F11|单步跳出|跳出函数
 
 15. 并查集(union find)
 
-16. 字符串杂题:优美的方法是**转数组**然后 map filter reduce((pre,cur,index,arr)=>...)
+    - 并查集适用于合并集合，查找哪些元素属于同一组，**有相同根的元素为一组**
+    - 如果 a 与 b 属于同一组，那么就 uniona 与 b;以后找元素属于哪个组时只需要 find(这个元素)找到属于哪个根元素
+    - 例如很多邮箱都属于同一个人，就 union 这些邮箱；回来分类时找根邮箱即可
 
-17. 子数组问题(subArray)：双指针(滑动窗口)+Map 保存状态/画折线图(与求和相关的，例如最大和子串)
+16. 滑动窗口(sliding window)
+    - 适合解决**定长**(子)数组的问题
+    - 减少 while 循环
+
+```TS
+class UnionFind<T> {
+  private map: Map<T, T>
+
+  constructor() {
+    this.map = new Map()
+  }
+
+  // key不存在时(find返回key自身)，会设置key1指向k2
+  union(key1: T, key2: T) {
+    const root1 = this.find(key1)
+    const root2 = this.find(key2)
+    if (root1 !== root2) {
+      this.map.set(root1, root2)
+    }
+  }
+
+  // key不存在时，返回key自身
+  find(key: T) {
+    while (this.map.has(key)) {
+      key = this.map.get(key)!
+    }
+    return key
+  }
+}
+
+```
+
+1.  字符串杂题:优美的方法是**转数组**然后 map filter reduce((pre,cur,index,arr)=>...)
+
+2.  子数组问题(subArray)：双指针(滑动窗口)+Map 保存状态/画折线图(与求和相关的，例如最大和子串)

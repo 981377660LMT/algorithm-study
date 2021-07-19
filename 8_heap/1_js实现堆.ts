@@ -4,7 +4,7 @@
 // 4.获取堆大小 size
 
 class MinHeap {
-  constructor(private heap: number[], private volumn?: number) {
+  constructor(private heap: number[], private volumn: number = Infinity) {
     this.heap = heap
     this.volumn = volumn
   }

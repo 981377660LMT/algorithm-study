@@ -52,3 +52,5 @@ const isSameTree = (t1: BinaryTree | null, t2: BinaryTree | null) => {
 }
 
 console.log(isSameTree(bt, bt))
+
+export {}

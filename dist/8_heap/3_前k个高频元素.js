@@ -17,7 +17,7 @@ const _1_js___1 = require("./1_js\u5B9E\u73B0\u5806");
 const topKFrequent = (nums, k) => {
     const map = new Map();
     nums.forEach(num => {
-        map.set(num, map.has(num) ? map.get(num) + 1 : 1);
+        map.set(num, map.get(num) + 1 || 1);
     });
     const h = new _1_js___1.MinHeap([], k);
     map.forEach((value, key) => {

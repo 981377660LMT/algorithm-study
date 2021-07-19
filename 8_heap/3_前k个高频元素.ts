@@ -18,7 +18,7 @@ import { MinHeap } from './1_js实现堆'
 const topKFrequent = (nums: number[], k: number) => {
   const map = new Map<number, number>()
   nums.forEach(num => {
-    map.set(num, map.has(num) ? map.get(num)! + 1 : 1)
+    map.set(num, map.get(num)! + 1 || 1)
   })
   const h = new MinHeap([], k)
   map.forEach((value, key) => {

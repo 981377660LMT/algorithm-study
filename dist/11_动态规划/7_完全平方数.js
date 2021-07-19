@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+// 给你一个整数 n ，返回和为 n 的完全平方数的 最少数量 。
+// 这个方法太慢了复杂度O(n**3/2)
+const numSqures = (n) => {
+    // 递推式:最接近的一个完全平方数加上剩下的走递推
+    const dp = Array(n + 1).fill(Infinity);
+    dp[0] = 0;
+    dp[1] = 1;
+    for (let i = 1; i <= n; i++) {
+        // 使用j取代了不必要的数组
+        for (let j = 1; j * j <= i; j++) {
+            dp[i] = Math.min(dp[i], dp[i - j * j] + 1);
+        }
+    }
+    return dp[n];
+};
+console.log(numSqures(12));

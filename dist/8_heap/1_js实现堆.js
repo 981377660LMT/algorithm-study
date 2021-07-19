@@ -6,7 +6,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MinHeap = void 0;
 class MinHeap {
-    constructor(heap, volumn) {
+    constructor(heap, volumn = Infinity) {
         this.heap = heap;
         this.volumn = volumn;
         this.heap = heap;

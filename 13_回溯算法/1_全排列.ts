@@ -7,7 +7,7 @@
 const permute = (nums: number[]) => {
   const res: number[][] = []
 
-  const backTrack = (path: number[]) => {
+  const bt = (path: number[]) => {
     // 1.递归终点
     if (path.length === nums.length) res.push(path)
 
@@ -15,10 +15,10 @@ const permute = (nums: number[]) => {
       // 2.排除死路
       if (path.includes(num)) return
       // 3. 递归
-      backTrack(path.concat(num))
+      bt(path.concat(num))
     })
   }
-  backTrack([])
+  bt([])
 
   return res
 }
