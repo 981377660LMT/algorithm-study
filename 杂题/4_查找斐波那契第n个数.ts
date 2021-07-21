@@ -2,6 +2,7 @@
 // 给定 1，返回 0
 // 给定 2，返回 1
 // 给定 10，返回 34
+// 复杂度O(2^n)
 function cachedF(n: number): number {
   const cache = new Map<number, number>()
 

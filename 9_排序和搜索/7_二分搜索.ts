@@ -3,6 +3,7 @@ const biSearch = (arr: number[], target: number): number => {
 
   let leftPoint = 0
   let rightPoint = arr.length - 1
+  // 注意可取等号
   while (leftPoint <= rightPoint) {
     const mid = Math.floor((leftPoint + rightPoint) / 2)
     const midElement = arr[mid]

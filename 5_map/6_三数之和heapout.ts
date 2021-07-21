@@ -1,5 +1,6 @@
 // 不推荐这样做
 // javascript heap out of memory
+// 参见双指针指针
 const threeSum = (nums: number[]) => {
   if (nums.length < 3) return []
   const res: number[][] = []

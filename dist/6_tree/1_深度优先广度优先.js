@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+// 1. 根节点与子节点的对应关系
 const tree = {
     val: 'a',
     children: [
@@ -35,6 +36,7 @@ const tree = {
  *
  * @description 访问根节点;对根节点的children挨个进行深度优先遍历
  */
+// 2.dfs
 const dfs = (root) => {
     console.log(root?.val);
     root?.children.forEach(dfs);

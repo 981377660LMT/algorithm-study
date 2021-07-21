@@ -19,9 +19,8 @@ const reverseList = (head: Node) => {
   let n1: Node | undefined = undefined
   let n2: Node | undefined = head
   while (n2) {
-    //@ts-ignore
     // n2的下一个Node;n2一开始是head,反转后head的next是undefined
-    const tmp = n2.next
+    const tmp: Node | undefined = n2.next
     // 最重要的关系，为串联节点做准备
     n2.next = n1
     n1 = n2

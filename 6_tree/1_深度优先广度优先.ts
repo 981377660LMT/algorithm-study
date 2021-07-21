@@ -2,7 +2,7 @@ interface Tree {
   val: string
   children: (Tree | undefined)[]
 }
-
+// 1. 根节点与子节点的对应关系
 const tree = {
   val: 'a',
   children: [
@@ -39,6 +39,7 @@ const tree = {
  *
  * @description 访问根节点;对根节点的children挨个进行深度优先遍历
  */
+// 2.dfs
 const dfs = (root: Tree | undefined) => {
   console.log(root?.val)
   root?.children.forEach(dfs)
@@ -51,7 +52,7 @@ const dfs = (root: Tree | undefined) => {
 const bfs = (root: Tree | undefined) => {
   const queue = [root]
 
-  while (queue.length > 0) {
+  while (queue.length) {
     const queueHead = queue.shift()
     console.log(queueHead?.val)
     queueHead?.children.forEach(child => {
@@ -60,6 +61,7 @@ const bfs = (root: Tree | undefined) => {
   }
 }
 
+// 3.从根节点开始dfs
 // dfs(tree)
 // bfs(tree)
 export {}

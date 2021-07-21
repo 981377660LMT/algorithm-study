@@ -62,7 +62,7 @@ const inOrder = (root: BinaryTree | null) => {
       stack.push(root)
       root = root.left
     } else {
-      // 没有左节点了
+      // 没有左节点了,换右节点继续
       root = stack.pop()!
       result.push(root.val)
       root = root.right

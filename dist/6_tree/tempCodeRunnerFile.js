@@ -1,2 +1,2 @@
 "use strict";
-push;
+graph.has(nodeId) && ;

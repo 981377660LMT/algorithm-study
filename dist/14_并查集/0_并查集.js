@@ -1,4 +1,7 @@
 "use strict";
+// 并查集适用于合并集合，查找哪些元素属于同一组
+// 如果a与b属于同一组，那么就uniona与b;以后找元素属于哪个组时只需要find(这个元素)找到属于哪个根元素
+// 例如很多邮箱都属于同一个人，就union这些邮箱
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UnionFind = void 0;
 // 并查集是一种数据结构，并(Union)代表合并，查(Find)代表查找，用来查找两根元素是否具有公共的根。
@@ -46,12 +49,12 @@ class UnionFind {
         }
         return this;
     }
-    /**
-     * @description 判断两个节点是否处于同一个连通分量的时候，就要判断他们的祖先是否相同。
-     */
-    isConnected(key1, key2) {
-        return this.find(key1) === this.find(key2);
-    }
+    // /**
+    //  * @description 判断两个节点是否处于同一个连通分量的时候，就要判断他们的祖先是否相同。
+    //  */
+    // isConnected(key1: U, key2: U): boolean {
+    //   return this.find(key1) === this.find(key2)
+    // }
     /**
      *
      * @param key 查找祖先；如果节点的父节点不为空或者symbol，那就不断迭代。

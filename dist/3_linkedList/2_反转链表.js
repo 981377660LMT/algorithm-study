@@ -11,13 +11,14 @@ const b = new Node(2);
 const c = new Node(3);
 a.next = b;
 b.next = c;
+// 迭代法反转
 const reverseList = (head) => {
     // 注意p1p2都是node
     let n1 = undefined;
     let n2 = head;
     while (n2) {
         //@ts-ignore
-        // p2的下一个Node
+        // n2的下一个Node;n2一开始是head,反转后head的next是undefined
         const tmp = n2.next;
         // 最重要的关系，为串联节点做准备
         n2.next = n1;

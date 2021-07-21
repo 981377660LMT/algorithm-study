@@ -1,6 +1,6 @@
 // 分治算法
 
-// 合并两个已经被排好序的数组
+// 合并两个有序数组
 const mergeTwo = (arr1: number[], arr2: number[]) => {
   const res: number[] = []
 
@@ -17,7 +17,7 @@ const mergeTwo = (arr1: number[], arr2: number[]) => {
   return [...res, ...arr1, ...arr2]
 }
 
-// 分 递归 合
+// 分left/right 递归 合
 const mergeSort = (arr: number[]): number[] => {
   if (arr.length <= 1) return arr
 

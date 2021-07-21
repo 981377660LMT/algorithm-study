@@ -18,6 +18,7 @@ c.next = d
 d.next = e
 
 // 节点添加到数组，然后重新创建
+// 便利了两遍链表
 const removeNthFromEnd = (head: Node | undefined, n: number) => {
   const newNode = new Node()
   let newNodeP = newNode
