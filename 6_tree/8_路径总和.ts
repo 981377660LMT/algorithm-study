@@ -39,12 +39,12 @@ const bt: BinaryTree = {
 // 是否存在一条路径之和等于目标和
 // 每一个节点对应一个路径之和，dfs时记录当前路径的节点值得和
 // 空间复杂度为递归堆栈高度
-const inorderTraversal = (root: BinaryTree | null, target: number) => {
+const sum = (root: BinaryTree | null, target: number) => {
   if (!root) return false
-  const allRoutes = []
+  const allRoutes: number[][] = []
   let hasPath = false
 
-  const dfs = (root: BinaryTree | null, sum: number) => {
+  const dfs = (root: BinaryTree | null, sum: number, path: number[]) => {
     if (!root) return false
     console.log(root.val, sum)
 
@@ -52,17 +52,18 @@ const inorderTraversal = (root: BinaryTree | null, target: number) => {
     if (!root.left && !root.right) {
       if (sum === target) {
         hasPath = true
+        allRoutes.push(path)
       }
     }
 
-    root.left && dfs(root.left, sum + root.left.val)
-    root.right && dfs(root.right, sum + root.right.val)
+    root.left && dfs(root.left, sum + root.left.val, [...path, root.left.val])
+    root.right && dfs(root.right, sum + root.right.val, [...path, root.right.val])
   }
 
-  dfs(root, root.val)
+  dfs(root, root.val, [root.val])
 
-  return hasPath
+  return [hasPath, allRoutes]
 }
 
-console.log(inorderTraversal(bt, 7))
+console.log(sum(bt, 7))
 export {}

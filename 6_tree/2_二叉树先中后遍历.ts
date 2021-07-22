@@ -43,7 +43,7 @@ const preOrder = (root: BinaryTree | null) => {
   root.right && preOrder(root.right)
 }
 
-// 左根右
+// 左根右(用于二分搜索树较多)
 const inOrder = (root: BinaryTree | null) => {
   if (!root) return []
   root.left && inOrder(root.left)

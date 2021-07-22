@@ -1,3 +1,5 @@
+// 深度优先
+// 二叉树
 interface BinaryTree {
   val: number
   left: BinaryTree | null
@@ -34,15 +36,24 @@ const bt: BinaryTree = {
   },
 }
 
-// 时间复杂 O(树的节点数)
-// 空间复杂 O(树的高度)
-const reverseBinaryTree = (bt: BinaryTree) => {
-  if (!bt) return
-  ;[bt.left, bt.right] = [bt.right, bt.left]
-  bt.left && reverseBinaryTree(bt.left)
-  bt.right && reverseBinaryTree(bt.right)
+// 求二叉树左叶子之和 dfs多一个判断条件
+const leftSum = (root: BinaryTree | null) => {
+  if (!root) return false
+  let sum = 0
+
+  const dfs = (root: BinaryTree | null, isLeft: boolean) => {
+    if (!root) return false
+
+    // 左叶子节点
+    if (!root.left && !root.right && isLeft) sum += root.val
+
+    root.left && dfs(root.left, true)
+    root.right && dfs(root.right, false)
+  }
+  dfs(root, false)
+
+  return sum
 }
 
-reverseBinaryTree(bt)
-console.log(bt)
+console.log(leftSum(bt))
 export {}

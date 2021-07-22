@@ -41,6 +41,7 @@ const tree = {
  */
 // 2.dfs
 const dfs = (root: Tree | undefined) => {
+  if (!root) return
   console.log(root?.val)
   root?.children.forEach(dfs)
 }

@@ -37,7 +37,6 @@ const findLadders = (beginWord: string, endWord: string, wordList: string[]): st
 
         if (visited.has(next)) continue
         levelMap.set(next, dis + 1)
-        console.log(levelMap, 999)
         queue.push([next, dis + 1])
         visited.add(next)
       }
@@ -48,7 +47,7 @@ const findLadders = (beginWord: string, endWord: string, wordList: string[]): st
 
   // 注意这里dfs不能用visited因为是回溯，要经过一个节点多次，通过level可以保证不循环
   const dfs = (beginWord: string, tmp: string[]) => {
-    console.log(beginWord, tmp)
+    // console.log(beginWord, tmp)
     if (beginWord === endWord) {
       return res.push(tmp)
     }
@@ -61,7 +60,7 @@ const findLadders = (beginWord: string, endWord: string, wordList: string[]): st
   }
   dfs(beginWord, [beginWord])
 
-  console.log(levelMap, wordMap)
+  // console.log(levelMap, wordMap)
 
   return res
 }
