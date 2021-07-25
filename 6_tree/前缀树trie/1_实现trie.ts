@@ -71,7 +71,7 @@ class Trie implements ITrie {
 if (require.main === module) {
   const trie = new Trie()
   trie.insert('google')
-  console.dir(trie, { depth: 4 })
+  console.dir(trie, { depth: null })
 
   console.log(trie.search('google'))
   console.log(trie.startsWith('agoo'))

@@ -28,30 +28,33 @@ const qs = (arr: number[]) => partition(arr, 0, arr.length - 1)
  * @summary 元素都相同的数组 O(n)
  */
 const partition = (arr: number[], l: number, r: number) => {
-  // 优化，随机取标定点，以解决近乎有序的列表
-  // const randIndex = randint(l, r)
-  // swap(arr, l, randIndex)
+  if (arr.length <= 1) return
+  if (l >= r) return
 
-  // 注意起始点
+  // 优化，随机取标定点，以解决近乎有序的列表
+  const randIndex = randint(l, r)
+  swap(arr, l, randIndex)
+
   const pivot = arr[l]
   let leftPoint = l
-  let midPoint = l + 1
-  let rightPoint = r + 1
-  while (midPoint < rightPoint) {
+  let midPoint = l
+  let rightPoint = r
+  while (midPoint <= rightPoint) {
     if (arr[midPoint] < pivot) {
       swap(arr, leftPoint, midPoint)
       leftPoint++
       midPoint++
-    } else if (arr[rightPoint] > pivot) {
-      rightPoint--
+    } else if (arr[midPoint] > pivot) {
       swap(arr, midPoint, rightPoint)
+      rightPoint--
     } else {
       midPoint++
     }
   }
-  console.log(leftPoint, midPoint, rightPoint)
-  // pivot放中间
-  // swap(arr, l, leftPoint)
+
+  partition(arr, l, leftPoint - 1)
+  partition(arr, rightPoint + 1, r)
+
   return arr
 }
 
@@ -66,9 +69,9 @@ const randint = (start: number, end: number) => {
 
 const swap = (arr: number[], i: number, j: number) => ([[arr[i], arr[j]]] = [[arr[j], arr[i]]])
 
-// const arr = [4, 1, 2, 5, 3, 6, 7]
-// qs(arr)
-// console.log(arr)
+const arr = [4, 3, 2, 5, 6, 7, 8, 3, 2, 4, 1]
+qs(arr)
+console.log(arr)
 
-console.log(qs([4, 3, 2, 5, 6, 7, 8, 3, 2, 4, 1]))
+// console.log(qs([4, 3, 2, 5, 6, 7, 8, 3, 2, 4, 1]))
 export {}

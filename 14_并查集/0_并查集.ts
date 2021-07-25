@@ -6,18 +6,28 @@
 // 集代表这是一个以字典为基础的数据结构，基本功能是合并集合中的元素，
 // 查找集合中的元素。
 // 并查集的典型应用是有关连通分量的问题，
-// 并查集解决单个问题（添加，合并，查找）的时间复杂度都是O(1)(因为都是用的map的set和get方法)。
+// 并查集解决单个问题（添加，合并，查找）的时间复杂度都是O(h)(因为都是用的map的set和get方法)。
 class UnionFind<U = unknown> {
   static rootSymbol = Symbol.for('UnionFind_Root')
   // 记录每个节点的父节点
   // 如果节点互相连通（从一个节点可以达到另一个节点），那么他们的祖先是相同的。
   private parent: Map<U, U | symbol>
   // 记录无向图连通域数量
-  count: number
+  private count: number
 
   constructor() {
     this.parent = new Map()
     this.count = 0
+  }
+
+  get size() {
+    return this.count
+  }
+
+  isConnected(key1: U, key2: U) {
+    const root1 = this.find(key1)
+    const root2 = this.find(key2)
+    return root1 !== undefined && root2 !== undefined && this.find(key1) === this.find(key2)
   }
 
   /**
@@ -83,6 +93,9 @@ if (require.main === module) {
   const union = new UnionFind<number>()
   union.add(1).add(2).add(3).add(4).union(2, 3).union(4, 3).add(6)
   console.dir(union, { depth: null })
+  console.log(union.find(1))
+  console.log(union.isConnected(4, 2))
+  console.log(union.isConnected(4, 1))
 }
 
 export { UnionFind }

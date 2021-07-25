@@ -2,18 +2,20 @@ class TreeNode {
   value: number
   left: TreeNode | null
   right: TreeNode | null
+  height: number
 
   constructor(value: number = 0) {
     this.value = value
     this.left = null
     this.right = null
+    this.height = 1
   }
 }
 
 // 我们的二分搜索树不包含重复元素
-class BST<BSTNodeValue extends number> {
-  private root: TreeNode | null
-  private _size: number
+class BST {
+  protected root: TreeNode | null
+  protected _size: number
   constructor() {
     this.root = null
     this._size = 0
@@ -93,8 +95,8 @@ class BST<BSTNodeValue extends number> {
   /**
    * @description BST查找元素是否包含
    */
-  contains<N extends BSTNodeValue>(val: N): boolean {
-    return this._contains<N>(this.root, val)
+  contains(val: number): boolean {
+    return this._contains(this.root, val)
   }
 
   /**
@@ -102,7 +104,7 @@ class BST<BSTNodeValue extends number> {
    * @param node 以node为根的二分搜索树
    * @param val 查询包含的元素
    */
-  private _contains<N extends BSTNodeValue>(node: TreeNode | null, val: N): boolean {
+  private _contains(node: TreeNode | null, val: number): boolean {
     if (node == null) return false
     if (node.value === val) {
       return true
@@ -116,43 +118,41 @@ class BST<BSTNodeValue extends number> {
   /**
    * @description BST添加新元素(递归比非递归简单)
    */
-  insert<N extends BSTNodeValue>(insertedNode: N): this {
+  insert(insertedNode: number) {
     if (this.root == null) {
       this.root = new TreeNode(insertedNode)
       this._size++
     } else {
-      this._insert<N>(this.root, insertedNode)
+      this._insert(this.root, insertedNode)
     }
+
     return this
   }
 
   /**
    *
    * @param node 以node为根的二分搜索树
-   * @param insertedNode 插入的元素
+   * @param val 插入的元素
    * @description 有待改进
    */
-  private _insert<N extends BSTNodeValue>(node: TreeNode | null, insertedNode: N): void {
+  protected _insert(node: TreeNode | null, val: number): void {
     if (node == null) return
 
     // 递归终止条件
-    if (node.value === insertedNode) {
-      return
-    } else if (node.value > insertedNode && !node.left) {
-      node.left = new TreeNode(insertedNode)
-      this._size++
-      return
-    } else if (node.value < insertedNode && !node.right) {
-      node.right = new TreeNode(insertedNode)
-      this._size++
-      return
-    }
-
-    // 递归插入
-    if (node.value > insertedNode) {
-      this._insert(node.left, insertedNode)
-    } else {
-      this._insert(node.right, insertedNode)
+    if (node.value > val) {
+      if (!node.left) {
+        node.left = new TreeNode(val)
+        this._size++
+      } else {
+        this._insert(node.left, val)
+      }
+    } else if (node.value < val) {
+      if (!node.right) {
+        node.right = new TreeNode(val)
+        this._size++
+      } else {
+        this._insert(node.right, val)
+      }
     }
   }
 

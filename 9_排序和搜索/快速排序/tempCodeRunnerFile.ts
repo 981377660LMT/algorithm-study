@@ -1,2 +1,0 @@
-
-  // swap(arr, l, randIndex)
