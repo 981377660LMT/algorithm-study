@@ -86,4 +86,4 @@ if __name__ == '__main__':
     filename = 'play_with_graph_algorithms/chapter02/g.txt'
     adj_set = AdjSet(filename)
     print(adj_set)
-    
+

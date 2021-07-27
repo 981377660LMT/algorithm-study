@@ -1,5 +1,4 @@
 class AdjList:
-
     def __init__(self, filename):
         lines = None
         with open(filename, 'r') as f:
@@ -71,4 +70,4 @@ if __name__ == '__main__':
     print(__file__)
     adj_list = AdjList(filename)
     print(adj_list)
-    
+

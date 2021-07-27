@@ -1,6 +1,6 @@
 // 第i轮，不断找最小值，然后跟数组第i项交换
-const selectSort = (arr: number[]) => {
-  if (arr.length <= 1) return arr
+const selectSort = (arr: number[]): void => {
+  if (arr.length <= 1) return
 
   for (let i = 0; i < arr.length - 1; i++) {
     let minIndex = i

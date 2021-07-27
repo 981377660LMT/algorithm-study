@@ -3,12 +3,104 @@
 // 平衡因子：左右子树高度之差 必须不能超过1
 // 什么时候维持平衡:插入/删除节点时 更新父节点平衡因子
 
+// avl的局限性:重新计算高度相等之后，祖先节点不需要维护平衡了
+// 红黑树的平均性能高于avl
+
 import { BST, TreeNode } from './BST'
 
 // AVL 树也是一个二叉搜索树，所以可以直接继承上篇实现的二叉搜索树 BinarySearchTree
-class AVLTree extends BST {
+class AVL extends BST {
   constructor() {
     super()
+  }
+
+  override delete(val: number) {
+    this.root = this._delete(this.root, val)
+    return this
+  }
+
+  /**
+   * 二分搜索树删除节点:1.只有左孩子的节点2.只有右孩子的节点3.左右孩子都有的节点
+   * 将删除节点的前驱/后继节点的值顶上来，递归删除原来的前驱/后继节点
+   * @summary 记得return root
+   */
+  protected override _delete(root: TreeNode | null, val: number) {
+    if (!root) return null
+    // 接住各个条件的返回，最后统一维护
+    let tmpReturnNode: TreeNode | null = null
+
+    if (root.value < val) {
+      root.right = this._delete(root.right, val)
+      tmpReturnNode = root
+    } else if (root.value > val) {
+      root.left = this._delete(root.left, val)
+      tmpReturnNode = root
+    } else {
+      // 待删除结点左子树为空
+      if (!root.left) {
+        const rightNode = root.right
+        root.right = null
+        this._size--
+        tmpReturnNode = rightNode
+      }
+      // 待删除结点右子树为空
+      else if (!root.right) {
+        const leftNode = root.left
+        root.left = null
+        this._size--
+        tmpReturnNode = leftNode
+      }
+      // 待删除结点左右子树都不为空
+      // 找后继节点代替
+      else {
+        let rootP: TreeNode | null = root.right
+
+        while (rootP.left) {
+          rootP = rootP?.left
+        }
+        root.value = rootP.value
+        root.right = this._delete(root.right, root.value)
+        tmpReturnNode = root
+      }
+    }
+
+    if (!tmpReturnNode) return tmpReturnNode
+
+    // 对tmpReturnNode 三步检查
+    tmpReturnNode.height =
+      1 + Math.max(this.getNodeHeight(tmpReturnNode.left), this.getNodeHeight(tmpReturnNode.right))
+
+    const balanceFactor = this.getBalanceFactor(tmpReturnNode)
+    if (Math.abs(balanceFactor) > 1) {
+      console.log('danger tmpReturnNode:', tmpReturnNode)
+      console.log(balanceFactor)
+      console.log(this.getBalanceFactor(tmpReturnNode.left))
+      console.log(this.getBalanceFactor(tmpReturnNode.right))
+    }
+
+    // 插入的元素在不平衡节点的左侧的左侧(LL) 右旋转
+    if (balanceFactor > 1 && this.getBalanceFactor(tmpReturnNode.left) > 0) {
+      return this.rightRotate(tmpReturnNode)
+    }
+
+    // 插入的元素在不平衡节点的右侧的右侧(RR) 左旋转
+    if (balanceFactor < -1 && this.getBalanceFactor(tmpReturnNode.right) < 0) {
+      return this.leftRotate(tmpReturnNode)
+    }
+
+    // 插入的元素在不平衡节点的左侧的右侧(LR) 左孩子左旋转 不平衡节点右旋转
+    if (balanceFactor > 1 && this.getBalanceFactor(tmpReturnNode.left) < 0) {
+      tmpReturnNode.left = this.leftRotate(tmpReturnNode.left!)
+      return this.rightRotate(tmpReturnNode)
+    }
+
+    // 插入的元素在不平衡节点的右侧的左侧(RL) 右子右旋转 不平衡节点左旋转
+    if (balanceFactor < -1 && this.getBalanceFactor(tmpReturnNode.right) > 0) {
+      tmpReturnNode.right = this.rightRotate(tmpReturnNode.right!)
+      return this.leftRotate(tmpReturnNode)
+    }
+
+    return tmpReturnNode
   }
 
   /**
@@ -65,6 +157,7 @@ class AVLTree extends BST {
    * @param node 以node为根的二分搜索树
    * @param insertedNode 插入的元素
    * @description 自底向上组装树，遇到不平衡的节点就旋转
+   * @summary 计算高度 计算平衡因子 维护平衡二叉树
    */
   protected override _insert(node: TreeNode | null, val: number): TreeNode | null {
     if (node == null) return node
@@ -174,9 +267,10 @@ class AVLTree extends BST {
   }
 }
 
-const avl = new AVLTree()
+const avl = new AVL()
 
 avl.insert(3).insert(6).insert(4)
+avl.delete(4)
 console.dir(avl, { depth: null })
 // console.log(avl.isBST)
 console.log(avl.isBalanced)

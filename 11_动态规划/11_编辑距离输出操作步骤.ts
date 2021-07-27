@@ -1,15 +1,19 @@
+type NodeType = 'INSERT' | 'REMOVE' | 'REPLACE' | 'SILENT'
+
+class Node {
+  private value: number
+  private type: NodeType
+  constructor(value: number, type: NodeType) {
+    this.value = value
+    this.type = type
+  }
+}
+
 /**
  * @param {string} word1
  * @param {string} word2
  * @return {number}
- * @description 不优化的diff算法O(n^3)的原因’
- * 传统Diff算法需要找到两个树的最小更新方式，所以需要[两两]对比每个叶子节点是否相同，
- * 对比就需要O(n^2)次了，
- * 再加上更新（移动、创建、删除）时需要遍历一次，所以是O(n^3)。
- * React认为：一个ReactElement的type不同，那么内容基本不会复用，所以直接删除节点，
- * 添加新节点，这是一个非常大的优化，大大减少了对比时间复杂度。
- * @description 你可以对一个单词进行如下三种操作:增删改
- * @summary 萊文斯坦距離
+ * @description 给 dp 数组增加额外的信息即可
  */
 const minDistance = function (word1: string, word2: string) {
   const dpRow = word1.length + 1

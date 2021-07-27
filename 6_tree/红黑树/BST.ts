@@ -3,12 +3,15 @@ class TreeNode {
   left: TreeNode | null
   right: TreeNode | null
   height: number
+  color: 'RED' | 'BLACK'
 
   constructor(value: number = 0) {
     this.value = value
     this.left = null
     this.right = null
     this.height = 1
+    // 默认红颜色，为融合准备
+    this.color = 'RED'
   }
 }
 
