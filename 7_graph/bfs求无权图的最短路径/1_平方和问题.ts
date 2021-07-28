@@ -3,16 +3,17 @@
 // 问题转化为这个有向无权图中从n到0的最短路径
 // 树中层序遍历就是广度优先遍历(bfs的queue那一套方法)
 // 三步:
-// 1.初始化queue和visited
+// 1.初始化queue和visited 反向求解
 // 2.queue中shift出
 // 3.push新的节点
 const numSqures = (n: number) => {
   // 节点编号/走了几步
-  // 初始值
+  // 初始值 反向求解 走到0
   const queue: [number, number][] = [[n, 0]]
   const visited = new Set<number>()
 
   // bfs
+  // 反向求解
   while (queue.length) {
     const [num, steps] = queue.shift()!
     if (num === 0) return steps
