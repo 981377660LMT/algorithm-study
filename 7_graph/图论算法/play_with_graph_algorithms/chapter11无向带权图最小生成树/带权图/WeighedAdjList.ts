@@ -18,13 +18,18 @@ class WeightedAdjList implements Graph<WeightedAdjList> {
   constructor(
     public readonly V: number,
     public readonly E: number,
-    public readonly adjList: Map<number, number>[]
+    public readonly adjList: Map<number, number>[],
+    public readonly directed: boolean,
+    public readonly outDegrees: number[],
+    public readonly inDegrees: number[]
   ) {}
 
-  static async asyncBuild(fileName: string): Promise<WeightedAdjList> {
+  static async asyncBuild(fileName: string, directed: boolean = false): Promise<WeightedAdjList> {
     const fileReader = await FileReader.asyncBuild(fileName)
     const V = parseInt(fileReader.fileData[0][0])
     const E = parseInt(fileReader.fileData[0][1])
+    const outDegrees = Array<number>(V).fill(0)
+    const inDegrees = Array<number>(V).fill(0)
     // 第i位存储对应的点j与权值
     const adjList: Map<number, number>[] = Array.from({ length: V }, () => new Map())
 
@@ -36,10 +41,18 @@ class WeightedAdjList implements Graph<WeightedAdjList> {
       if (adjList[v1].has(v2) || adjList[v2].has(v1)) throw new Error('检测到平行边')
 
       adjList[v1].set(v2, weight)
-      adjList[v2].set(v1, weight)
+
+      if (!directed) {
+        adjList[v2].set(v1, weight)
+      }
+
+      if (directed) {
+        outDegrees[v1]++
+        inDegrees[v2]++
+      }
     })
 
-    return new WeightedAdjList(V, E, adjList)
+    return new WeightedAdjList(V, E, adjList, directed, outDegrees, inDegrees)
   }
 
   hasEdge(v: number, w: number): boolean {
@@ -58,20 +71,31 @@ class WeightedAdjList implements Graph<WeightedAdjList> {
   }
 
   degree(v: number): number {
-    return this.adj(v).length
+    if (this.directed) {
+      return this.outDegrees[v] - this.inDegrees[v]
+    } else {
+      return this.adj(v).length
+    }
   }
 
   cloneAdj(): WeightedAdjList {
     return new WeightedAdjList(
       this.V,
       this.E,
-      this.adjList.map(map => new Map(map))
+      this.adjList.map(map => new Map(map)),
+      this.directed,
+      this.outDegrees,
+      this.inDegrees
     )
   }
 
   removeEdge(v: number, w: number): boolean {
     this.validateVertex(v, w)
-    return this.adjList[v].delete(w) && this.adjList[w].delete(v)
+    if (this.directed) {
+      this.outDegrees[v]--
+      this.inDegrees[w]--
+    }
+    return this.adjList[v].delete(w) && (this.directed || this.adjList[w].delete(v))
   }
 
   getWeight(v: number, w: number): number {
@@ -96,7 +120,7 @@ class WeightedEdge {
 if (require.main === module) {
   const main = async () => {
     const fileName = path.join(__dirname, '../g.txt')
-    const wam = await WeightedAdjList.asyncBuild(fileName)
+    const wam = await WeightedAdjList.asyncBuild(fileName, true)
     console.log(wam.adjList)
     console.log(wam.getWeight(3, 1))
   }

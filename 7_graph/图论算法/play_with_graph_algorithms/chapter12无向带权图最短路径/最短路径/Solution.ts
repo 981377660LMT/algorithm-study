@@ -96,7 +96,7 @@ class Solution {
     (5) 最后再进行一次松弛操作，如果有更新最短距离dis，则肯定有负权环，没有意义
     ```
     @description 可以直接应用于有向图
-    @description O(V*E)
+    @description 最差复杂度O(V*E)
     @description 松弛操作时改变pre数组
    */
   bellmanFord(start: number) {
@@ -110,6 +110,7 @@ class Solution {
     const relax = (a: number, b: number) => {
       if (dis[a] + this.adjList.getWeight(a, b) < dis[b]) {
         dis[b] = dis[a] + this.adjList.getWeight(a, b)
+        pre[b] = a
       }
     }
 
@@ -129,13 +130,39 @@ class Solution {
       }
     }
 
-    return { dis, hasNegativeCycle }
+    return { dis, pre, hasNegativeCycle }
   }
 
   /**
-   *@description 三重循环
+   * @description 求所有点对最短路径
+   * @description 三重循环
+   * @description 如果有负权环 则dis[v][v]<0
    */
-  floyd() {}
+  floyd() {
+    const V = this.adjList.V
+    const dis = Array.from<number, number[]>({ length: V }, () => Array(V).fill(Infinity))
+    for (let v = 0; v < V; v++) {
+      dis[v][v] = 0
+      this.adjList.adj(v).forEach(w => (dis[v][w] = this.adjList.getWeight(v, w)))
+    }
+    let hasNegativeCycle = false
+
+    for (let mid = 0; mid < V; mid++) {
+      for (let left = 0; left < V; left++) {
+        for (let right = 0; right < V; right++) {
+          if (dis[left][mid] + dis[mid][right] < dis[left][right]) {
+            dis[left][right] = dis[left][mid] + dis[mid][right]
+          }
+        }
+      }
+    }
+
+    for (let v = 0; v < V; v++) {
+      if (dis[v][v] < 0) hasNegativeCycle = true
+    }
+
+    return { dis, hasNegativeCycle }
+  }
 
   static async asyncBuild(fileName: string) {
     const weightedAdjList = await WeightedAdjList.asyncBuild(fileName)
@@ -152,6 +179,7 @@ if (require.main === module) {
     console.log(solution.edgeList)
     console.log(solution.dijkstra(0))
     console.log(solution.bellmanFord(0))
+    console.log(solution.floyd())
   }
   main()
 }

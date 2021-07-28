@@ -1,3 +1,4 @@
+import path from 'path'
 import { AdjMap } from '../../../chapter02图的基本表示/图的基本表示/2_邻接表'
 import { WeightedAdjList } from '../../../chapter11无向带权图最小生成树/带权图/WeighedAdjList'
 
@@ -23,12 +24,16 @@ class DFS {
     this.dfs()
   }
 
-  static async asyncBuild(type: 'AdjMap' | 'WeightedAdjList', fileName: string) {
+  static async asyncBuild(
+    type: 'AdjMap' | 'WeightedAdjList',
+    fileName: string,
+    directed: boolean = false
+  ) {
     if (type === 'AdjMap') {
-      const adjMap = await AdjMap.asyncBuild(fileName)
+      const adjMap = await AdjMap.asyncBuild(fileName, directed)
       return new DFS(adjMap)
     } else {
-      const weightedAdjList = await WeightedAdjList.asyncBuild(fileName)
+      const weightedAdjList = await WeightedAdjList.asyncBuild(fileName, directed)
       return new DFS(weightedAdjList)
     }
   }
@@ -75,10 +80,10 @@ class DFS {
     return this.metaInfo!.isBiPartical
   }
 
-  getWeight(v: number, w: number) {
-    if (this.adjMap instanceof WeightedAdjList) {
-    }
-  }
+  // getWeight(v: number, w: number) {
+  //   if (this.adjMap instanceof WeightedAdjList) {
+  //   }
+  // }
 
   /**
    * @param start 从哪个顶点开始 不传则默认每个顶点
@@ -149,29 +154,44 @@ class DFS {
     root: number,
     path: number[],
     visited: Map<number, number>,
-    metaInfo: MetaInfo
+    metaInfo: MetaInfo,
+    // 用于检测有向图的环
+    onPath: Set<number> = new Set()
   ): void {
     // 表示cur属于root所在的连通分量
     visited.set(cur, root)
     path.push(cur)
+    onPath.add(cur)
     const { verticalColors, curColor } = metaInfo.colors
     verticalColors[cur] = curColor
 
+    // console.log(visited, cur, path, onPath)
     this.adjMap.adj(cur).forEach(w => {
       if (!this.isVisited(visited, w)) {
         metaInfo.colors.curColor = (1 - curColor) as 0 | 1
-        this._dfs(w, root, path, visited, metaInfo)
+        this._dfs(w, root, path, visited, metaInfo, onPath)
       } else {
         // 二分图中，对于访问过的节点，颜色要与相邻不同
         if (verticalColors[cur] === verticalColors[w]) {
           metaInfo.isBiPartical = false
         }
-        // 检测环，走回了之前走过的非上一个节点的节点
-        if (cur !== path[path.length - 1]) {
-          metaInfo.hasLoop = true
+
+        // console.log(map, path)
+        // 检测无向图的环，走回了之前走过的非上一个节点的节点
+        if (!this.adjMap.directed) {
+          if (cur !== path[path.length - 1]) {
+            metaInfo.hasLoop = true
+          }
+        } else {
+          // 检测有向图的环,需要记录路径。回退时清除点
+          if (onPath.has(w)) {
+            metaInfo.hasLoop = true
+          }
         }
       }
     })
+
+    onPath.delete(cur)
   }
 
   private isVisited(visited: Map<number, number>, key: number) {
@@ -181,15 +201,16 @@ class DFS {
 
 if (require.main === module) {
   const main = async () => {
-    const dfs = await DFS.asyncBuild('WeightedAdjList', '../g4.txt')
+    const fileName = path.join(__dirname, '../g4.txt')
+    const dfs = await DFS.asyncBuild('WeightedAdjList', fileName, true)
     // console.log(dfs.connectDetail)
     // console.log(dfs.CCCount)
     // console.log(dfs.connectDetail)
     // console.log(dfs.isConnected(1, 5))
     // console.log(dfs.dfs(1))
     // console.log(dfs.path(1, 2))
-    // console.log(dfs.hasLoop)
-    console.log(dfs.isBiPartial)
+    console.log(dfs.hasLoop)
+    // console.log(dfs.isBiPartial)
   }
   main()
 }

@@ -132,4 +132,67 @@ Map<number,number>[]
 | Prim    | O(ElogE) | 借助优先队列(最小堆) |
 
 11. 最短路径算法
-1. Dijkstra 找最小值=>确定解=>更新
+    Dijkstra 找最小值=>确定解=>更新
+
+12. 有向图环检测:程序模块引用/任务调度/学习计划依赖
+    无向图检测有环:重复到达即有环
+    **有向图检测有环**: 1.重复到达不一定有环，要保证重复到达的点在现在的路径上，即 dfs 回溯时去除 path 中的点 2.拓扑排序
+
+    有向无环图:DAG
+
+两个有向图算法:
+**拓扑排序算法**:入度+队列，顺便做环检测 O(V+E)
+学了 1 号课程才能学 2 号课程
+对入度数组排序，**入度为 0 的点开始遍历**,这个点的 next 入度减一
+如果入度降将为 0， 则将节点入队
+排序结果不唯一
+**如果拓扑排序无解则说明有向图有环**
+
+```TS
+  topoSort() {
+    let hasCycle = false
+    const res: number[] = []
+    const queue: number[] = this.dfs.adjMap.outDegrees.filter(inDegree => inDegree === 0)
+    console.log(this.dfs.adjMap)
+    while (queue.length) {
+      const v = queue.shift()!
+      res.push(v)
+      this.dfs.adjMap.adj(v).forEach(w => {
+        this.dfs.adjMap.outDegrees[w]--
+        this.dfs.adjMap.outDegrees[w] === 0 && queue.push(w)
+      })
+    }
+
+    if (res.length < this.dfs.adjMap.V) {
+      hasCycle = true
+      res.splice(0)
+    }
+
+    return { res, hasCycle }
+  }
+```
+
+**求解有向图强连通分量(Strong Critial Connection)**
+将所有强连通分量看做一个点，得到的有向图一定是 DAG
+**kosaraju 算法**
+反图的 DFS 后序的逆序做 CC
+
+13. **最大流算法**:EK 算法 O(VE^2):在残量图找增广路径(BFS)
+
+14. 二分图匹配问题两种方法
+    最大匹配/完全匹配
+    **最大流算法**(MaxFlow)
+    **匈牙利算法**(Hangurian)：从 左侧非匹配点出发 从右向左走永远走匹配边 终止于另外一个非匹配点:增广路径
+    则最大匹配数加一
+    匈牙利算法 BFS/DFS **关键** O(VE)
+
+todo:
+
+0. MaxFlow
+1. 匈牙利和最大流问题匹配
+2. 重看后两张
+3. dijk 与 prim 的优先队列优化
+4. kosaraju
+5. 复习整个文件夹
+
+说明:使用 **DFS**这个类 读取图
