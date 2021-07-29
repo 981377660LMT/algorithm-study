@@ -10,7 +10,7 @@ interface Graph<T> {
 }
 
 class AdjMap implements Graph<AdjMap> {
-  protected constructor(
+  constructor(
     public readonly V: number,
     public readonly E: number,
     public readonly adjMap: Map<number, Set<number>>,

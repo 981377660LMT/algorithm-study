@@ -1,6 +1,6 @@
 import path from 'path'
 import { DFS } from '../../chapter04深度优先遍历应用/c03dfs/图的深度优先遍历/dfs'
-import { UnionFind } from '../../chapter11无向带权图最小生成树/带权图/UnionFind'
+import { PriorityQueue } from '../../chapter11无向带权图最小生成树/带权图/PriorityQueue'
 import {
   WeightedAdjList,
   WeightedEdge,
@@ -10,7 +10,6 @@ class Solution {
   public readonly adjList: WeightedAdjList
   public readonly edgeList: WeightedEdge[]
   private readonly cc: DFS
-  private readonly uf: UnionFind
 
   private constructor(weightedAdjList: WeightedAdjList, cc: DFS) {
     this.adjList = weightedAdjList
@@ -26,9 +25,6 @@ class Solution {
       })
       .sort((e1, e2) => e1.weight - e2.weight)
     this.edgeList = edges
-
-    this.uf = new UnionFind<number>()
-    edges.forEach(edge => this.uf.add(edge.v1).add(edge.v2))
   }
 
   /**
@@ -38,9 +34,10 @@ class Solution {
    * 1. 找最近的点v
    * 2. v加入visited
    * 3. 利用v更新相邻的没看过的点
-   * @description 复杂度O(V^2)
+   * @description 未优化时复杂度O(V^2)
    * @description pre数组求解路径，更新与dis数组更新同步
    * @description 不能处理负权边
+   * @@description 使用优先队列优化
    */
   dijkstra(start: number): {
     dis: number[]
@@ -52,7 +49,6 @@ class Solution {
     dis[start] = 0
     const pre = Array<number>(this.adjList.V).fill(-1)
     pre[start] = start
-
     const visited = new Set<number>()
 
     while (true) {
@@ -72,7 +68,7 @@ class Solution {
       // 2.加入visited
       visited.add(nearestV)
 
-      // 3.利用nearestV点来更新其相邻节点w与原点s的距离
+      // 3.利用nearestV点来更新其相邻节点next与原点的距离
       for (const next of this.adjList.adj(nearestV)) {
         if (!visited.has(next)) {
           if (dis[nearestV] + this.adjList.getWeight(nearestV, next) < dis[next]) {
@@ -86,6 +82,47 @@ class Solution {
     return { dis, pre }
   }
 
+  /**
+   *
+   * @param start 使用优先队列保存每次循环开始时dis数组的最小值
+   */
+  optimizedDijkstra(start: number) {
+    class Node {
+      constructor(public id: number, public dis: number) {}
+    }
+    const dis = Array<number>(this.adjList.V).fill(Infinity)
+    dis[start] = 0
+    const pre = Array<number>(this.adjList.V).fill(-1)
+    pre[start] = start
+    const visited = new Set<number>()
+
+    const compareFunction = (a: Node, b: Node) => a?.dis - b?.dis
+    const priorityQueue = new PriorityQueue<Node>(compareFunction)
+    priorityQueue.push(new Node(0, 0))
+
+    while (priorityQueue.length) {
+      // 1.每次都从离原点最近的没更新过的点开始更新(性能瓶颈：可使用优先队列优化成ElogE)
+      const nearestNode = priorityQueue.shift()
+      const nearestV = nearestNode.id
+      if (visited.has(nearestV)) continue
+
+      // 2.加入visited
+      visited.add(nearestV)
+
+      // 3.利用nearestV点来更新其相邻节点next与原点s的距离
+      for (const next of this.adjList.adj(nearestV)) {
+        if (!visited.has(next)) {
+          if (dis[nearestV] + this.adjList.getWeight(nearestV, next) < dis[next]) {
+            dis[next] = dis[nearestV] + this.adjList.getWeight(nearestV, next)
+            priorityQueue.push(new Node(next, dis[next]))
+            pre[next] = nearestV
+          }
+        }
+      }
+    }
+
+    return { dis, pre }
+  }
   /**
    * @description
    * ```js
@@ -175,11 +212,12 @@ if (require.main === module) {
   const main = async () => {
     const fileName = path.join(__dirname, '../g.txt')
     const solution = await Solution.asyncBuild(fileName)
-    console.log(solution.adjList)
-    console.log(solution.edgeList)
-    console.log(solution.dijkstra(0))
-    console.log(solution.bellmanFord(0))
-    console.log(solution.floyd())
+    // console.log(solution.adjList)
+    // console.log(solution.edgeList)
+    // console.log(solution.dijkstra(0))
+    console.log(solution.optimizedDijkstra(0))
+    // console.log(solution.bellmanFord(0))
+    // console.log(solution.floyd())
   }
   main()
 }

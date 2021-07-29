@@ -95,7 +95,26 @@ class WeightedAdjList implements Graph<WeightedAdjList> {
       this.outDegrees[v]--
       this.inDegrees[w]--
     }
+
     return this.adjList[v].delete(w) && (this.directed || this.adjList[w].delete(v))
+  }
+
+  addEdge(v1: number, v2: number, weight: number) {
+    this.validateVertex(v1, v2)
+    if (v1 === v2) throw new Error('检测到自环边')
+    if (this.directed) {
+      if (!this.adjList[v1]) this.adjList[v1] = new Map()
+      if (this.adjList[v1].has(v2)) throw new Error('检测到平行边')
+      this.adjList[v1].set(v2, weight)
+      this.outDegrees[v1] = this.outDegrees[v1] + 1 || 1
+      this.inDegrees[v2] = this.inDegrees[v2] + 1 || 1
+    } else {
+      if (!this.adjList[v1]) this.adjList[v1] = new Map()
+      if (!this.adjList[v2]) this.adjList[v2] = new Map()
+      if (this.adjList[v1].has(v2) || this.adjList[v2].has(v1)) throw new Error('检测到平行边')
+      this.adjList[v1].set(v2, weight)
+      this.adjList[v2].set(v1, weight)
+    }
   }
 
   getWeight(v: number, w: number): number {
@@ -103,7 +122,26 @@ class WeightedAdjList implements Graph<WeightedAdjList> {
     if (this.adjList[v].has(w)) {
       return this.adjList[v].get(w)!
     }
+
     throw new Error(`不存在${v}到${w}的边`)
+  }
+
+  setWeight(v: number, w: number, weight: number): boolean {
+    this.validateVertex(v, w)
+    if (this.directed) {
+      if (!this.adjList[v]?.has(w)) {
+        throw new Error(`不存在${v}到${w}的边`)
+      }
+      this.adjList[v].set(w, weight)
+    } else {
+      if (!this.adjList[v]?.has(w) || !this.adjList[w]?.has(v)) {
+        throw new Error(`不存在${v}到${w}的边`)
+      }
+      this.adjList[v].set(w, weight)
+      this.adjList[w].set(v, weight)
+    }
+
+    return true
   }
 
   protected validateVertex(...vArr: number[]): void {

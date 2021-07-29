@@ -20,14 +20,16 @@
 5. bfs 模板
 
 ```TS
-const solution = () => {
+const solution = (start:number) => {
   // pre 存路径
-  const pre = new Map<number, number>()
-  const queue: number[] = [0]
-  const visited = new Set([0])
-  let end = -1
+  const pre = new number[] = Array(V).fill(-1)
+  const queue: number[] = []
+  // 可以用pre代替
+  // const visited = new Set([start])
+  pre[start]=start
+  queue.push(start)
 
-  const bfs = () => {
+  const bfs = (start:number) => {
     while (queue.length) {
       const cur = queue.shift()!
       // 1. if(结束条件) return  end=...
@@ -37,25 +39,43 @@ const solution = () => {
       for (const next of 下一个状态) {
         if (!visited.has(next)) {
           queue.push(next)
-          pre.set(next, cur)
-          visited.add(next)
+          pre[next]=cur
+          // visited.add(next)
         }
       }
     }
   }
-  bfs()
+  bfs(start)
 
   // 3.从路径倒推
   let p = end
-  const res: number[] = [end]
-  while (pre.get(p)) {
-    p = pre.get(p)!
+  const res: number[] = []
+  while (pre[p]!==start) {
     res.push(p)
+    p = pre[p]
   }
-  res.push(0)
+  res.push(start)
 
   return res.reverse()
 }
+
+```
+
+从 pre 数组求路径
+
+```TS
+  private getAugPath(pre: number[], start: number, end: number) {
+    const res: number[] = []
+    let p = end
+
+    while (pre[p] !== start) {
+      res.push(p)
+      p = pre[p]
+    }
+    res.push(start)
+
+    return res.reverse()
+  }
 
 ```
 
@@ -177,22 +197,25 @@ Map<number,number>[]
 **kosaraju 算法**
 反图的 DFS 后序的逆序做 CC
 
-13. **最大流算法**:EK 算法 O(VE^2):在残量图找增广路径(BFS)
+https://www.bilibili.com/video/BV1Pv41157xh/?spm_id_from=333.788.recommend_more_video.0
 
-14. 二分图匹配问题两种方法
+13. **最大流算法**:
+    FF 算法:加反向路径给一个反悔的机会 FF 算法很慢 最坏循环次数是网络流的大小边数 即 O(`f*E`)
+    EK 算法 O(VE^2):FF 算法的特例 第一步寻找最短路径(无权图最短路径) 在残量图找增广路径(用 BFS)
+    最大流算法建模解决分配问题:棒球比赛
+    容量:
+
+    1. 对于每种状态有多少场胜利需要分配(离开源点的容量),
+    2. 胜利流向哪个队(中间交叉的容量),
+    3. 每个队还能允许多少场胜利(流向汇点的容量)
+
+    看最大流是多少，**能不能接纳从源点的流量总合**
+
+14. **二分图(BipartiteGraph)**匹配问题两种方法
     最大匹配/完全匹配
-    **最大流算法**(MaxFlow)
+    **最大流算法**(MaxFlow):新建虚拟的源点和汇点，无向图转换为有向图,所有边容量为 1,流入汇点的每一个流量即为一个匹配
     **匈牙利算法**(Hangurian)：从 左侧非匹配点出发 从右向左走永远走匹配边 终止于另外一个非匹配点:增广路径
     则最大匹配数加一
     匈牙利算法 BFS/DFS **关键** O(VE)
-
-todo:
-
-0. MaxFlow
-1. 匈牙利和最大流问题匹配
-2. 重看后两张
-3. dijk 与 prim 的优先队列优化
-4. kosaraju
-5. 复习整个文件夹
 
 说明:使用 **DFS**这个类 读取图

@@ -15,13 +15,16 @@ interface MetaInfo {
  */
 class DFS {
   public readonly adjMap: AdjMap | WeightedAdjList
-  private _CCCount?: number
-  private connect?: Map<number, number>
-  private metaInfo?: MetaInfo
+  public CCCount: number
+  private connect: Map<number, number>
+  private metaInfo: MetaInfo
 
-  private constructor(adjMap: AdjMap | WeightedAdjList) {
+  constructor(adjMap: AdjMap | WeightedAdjList) {
     this.adjMap = adjMap
-    this.dfs()
+    this.CCCount = 0
+    const { connect, metaInfo } = this.dfs()
+    this.connect = connect
+    this.metaInfo = metaInfo
   }
 
   static async asyncBuild(
@@ -36,16 +39,6 @@ class DFS {
       const weightedAdjList = await WeightedAdjList.asyncBuild(fileName, directed)
       return new DFS(weightedAdjList)
     }
-  }
-
-  /**
-   * @description 连通分量
-   */
-  get CCCount() {
-    if (this._CCCount === undefined) {
-      this.dfs()
-    }
-    return this._CCCount!
   }
 
   /**
@@ -80,6 +73,11 @@ class DFS {
     return this.metaInfo!.isBiPartical
   }
 
+  get colors() {
+    if (!this.isBiPartial) throw new Error('不是二分图')
+    return this.metaInfo.colors.verticalColors
+  }
+
   // getWeight(v: number, w: number) {
   //   if (this.adjMap instanceof WeightedAdjList) {
   //   }
@@ -91,7 +89,7 @@ class DFS {
    * @description 求无向图的联通情况:用visitedMap存节点与起始点对应关系，表示属于不同的连通分量/没有访问过
    * @description 求单源路径问题:只dfs起始点
    * @description 环检测:path记录走过的路，visitedSet记录看过的点，走回了之前走过的非上一个节点的节点则return有环true
-   * @description 二分图检测:遍历整个图间隔染色0/1，对于访问过的节点，颜色要与相邻不同
+   * @description 二分图检测:遍历整个图间隔染色0/1，对于访问过的节点，颜色要与next不同
    */
   dfs(start?: number) {
     const path: number[] = []
@@ -115,7 +113,7 @@ class DFS {
         if (!this.isVisited(visited, v)) {
           this._dfs(v, v, path, visited, metaInfo)
           // 求解无向图连通分量
-          this._CCCount ? this._CCCount++ : (this._CCCount = 1)
+          this.CCCount++
         }
       }
     }
@@ -184,6 +182,7 @@ class DFS {
           }
         } else {
           // 检测有向图的环,需要记录路径。回退时清除点
+          // 有向图的环检测也可用拓扑排序
           if (onPath.has(w)) {
             metaInfo.hasLoop = true
           }

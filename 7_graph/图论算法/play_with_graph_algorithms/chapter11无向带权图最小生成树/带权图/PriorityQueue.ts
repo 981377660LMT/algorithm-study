@@ -1,3 +1,26 @@
+// 注意要改一下最小堆里的比较逻辑
+class PriorityQueue<Item> {
+  private minHeap: MinHeap<Item>
+  constructor(compareFunction: (a: Item, b: Item) => number) {
+    this.minHeap = new MinHeap(compareFunction)
+  }
+
+  get length() {
+    return this.minHeap.size
+  }
+
+  // O(log(h))
+  push(val: Item) {
+    this.minHeap.push(val)
+    return this
+  }
+
+  // O(log(h))
+  shift() {
+    return this.minHeap.shift()
+  }
+}
+
 // 1.插入 push
 // 2.删除堆顶 shift
 // 3.获取堆顶 peek
@@ -124,4 +147,4 @@ class MinHeap<Item> {
   }
 }
 
-export { MinHeap }
+export { PriorityQueue }
