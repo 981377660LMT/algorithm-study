@@ -278,16 +278,6 @@ class UnionFind<T> {
 
 3.  python 内置
 
-4.  todo
-
-- 剑指 offer
-- top100
-- mooc 算法课
-- 程序员面试金典
-- 哥谭 blog
-- 力扣加加
-- 编程之法
-
 算法:思考问题的方式
 对一组数据排序：快速排序算法(nlogn)
 不能忽略算法使用的环境
@@ -319,3 +309,22 @@ class UnionFind<T> {
 
 一定要重视算法与数据结构 每天坚持刷题
 归纳、分类、与总结
+
+4. todo
+
+- 力扣加加
+- lucifer 的博客
+- 哥谭 blog
+- top100
+- 剑指 offer
+- 程序员面试金典
+- 力扣加加的题
+- 编程之法
+- 大前端宝典
+- python cookbook
+- go 收藏
+- go 算法
+- go mooc
+- nestjs 微服务
+- figma 设计
+- 拉钩/珠峰课程

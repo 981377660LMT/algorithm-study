@@ -8,10 +8,10 @@
 // 并查集的典型应用是有关连通分量的问题，
 // 并查集解决单个问题（添加，合并，查找）的时间复杂度都是O(h)(因为都是用的map的set和get方法)。
 class UnionFind<U = unknown> {
-  static rootSymbol = Symbol.for('UnionFind_Root')
+  private static readonly rootSymbol = Symbol.for('UnionFind_Root')
   // 记录每个节点的父节点
   // 如果节点互相连通（从一个节点可以达到另一个节点），那么他们的祖先是相同的。
-  private parent: Map<U, U | symbol>
+  private readonly parent: Map<U, U | symbol>
   // 记录无向图连通域数量
   private count: number
 

@@ -41,7 +41,7 @@ const bt: TreeNode = {
     },
   },
 }
-
+// 提示:可以直接中序遍历，并一边遍历一边判断遍历结果是否是单调递增的，如果不是则提前返回 False 即可。
 const isValidBST = (root: TreeNode) => {
   if (!root) return true
   let isValidBST = true
