@@ -149,6 +149,16 @@ var pruneTree = function (root) {
   }
   ```
 
+- 计算子树高度
+
+```Python
+def dfs(node):
+  if not node: return 0
+  l = dfs(node.left)
+  r = dfs(node.right)
+  return max(l, r) + 1
+```
+
 - 边界
   空节点
   叶子节点
