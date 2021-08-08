@@ -7,12 +7,15 @@ class MinHeap<Item> {
   private heap: Item[]
   private volumn: number
   private compareFunction: (a: Item, b: Item) => number
-  private static defaultCompareFunction = (a: any, b: any) => a - b
+  static defaultCompareFunction = (a: any, b: any) => a - b
 
-  constructor(compareFunction: (a: Item, b: Item) => number = MinHeap.defaultCompareFunction) {
-    this.compareFunction = compareFunction
+  constructor(
+    compareFunction: (a: Item, b: Item) => number = MinHeap.defaultCompareFunction,
+    volumn: number = Infinity
+  ) {
     this.heap = []
-    this.volumn = Infinity
+    this.compareFunction = compareFunction
+    this.volumn = volumn
   }
 
   /**
@@ -100,7 +103,7 @@ class MinHeap<Item> {
       this.shiftDown(leftChildIndex)
     }
 
-    if (this.compareFunction(this.heap[leftChildIndex], this.heap[index]) < 0) {
+    if (this.compareFunction(this.heap[rightChildIndex], this.heap[index]) < 0) {
       this.swap(rightChildIndex, index)
       this.shiftDown(rightChildIndex)
     }

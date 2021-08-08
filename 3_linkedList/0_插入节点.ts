@@ -20,3 +20,5 @@ inserted.next = b.next
 cur.next = inserted
 
 console.dir(a, { depth: null })
+
+export {}

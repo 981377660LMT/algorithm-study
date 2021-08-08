@@ -1,5 +1,5 @@
 /**
- * @description 有两个水桶,一个装5升，一个装3升。怎么利用这两个水桶，得到4升水?
+ * @description 有两个水桶,一个装5升，一个装3升。怎么利用这两个水桶，得到4升水? (推广到x,y,x)
  * @description 状态转移有哪些情况 6种
  * @description x,y 即为10*x+y 状态压缩
  * @description 狼🐏菜农夫的问题也可这种思路

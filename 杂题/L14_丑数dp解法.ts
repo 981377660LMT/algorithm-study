@@ -9,11 +9,11 @@ const nthUglyNumber = (n: number) => {
   let j = 0
   let k = 0
 
-  while (!res[n - 1]) {
+  for (let index = 1; index < n; index++) {
     const nextI = res[i] * 2
     const nextJ = res[j] * 3
     const nextK = res[k] * 5
-    const nextUglyNumber = Math.min.call(null, nextI, nextJ, nextK)
+    const nextUglyNumber = Math.min(nextI, nextJ, nextK)
 
     if (nextUglyNumber === nextI) i++
     if (nextUglyNumber === nextJ) j++

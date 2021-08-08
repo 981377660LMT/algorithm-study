@@ -23,7 +23,7 @@ class MinHeap<Item> {
    */
   push(val: Item) {
     if (this.heap.length >= this.volumn) {
-      this.shift()
+      this.pop()
     }
 
     this.heap.push(val)
@@ -36,7 +36,7 @@ class MinHeap<Item> {
    * @description 用数组尾部元素替换堆顶(直接删除会破坏堆结构),然后下移动直至子节点都大于新堆顶
    * @description 时间复杂度为`O(log(h))`
    */
-  shift() {
+  pop() {
     const top = this.peek()
     const last = this.heap.pop()!
     if (this.size !== 0) {
@@ -106,6 +106,7 @@ class MinHeap<Item> {
     }
   }
 
+  // 从0开始算index
   private getParentIndex(index: number) {
     // 二进制数向右移动一位，相当于Math.floor((index-1)/2)
     return (index - 1) >> 1

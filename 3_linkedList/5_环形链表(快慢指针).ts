@@ -19,6 +19,7 @@ b.next = c
 c.next = d
 d.next = b
 
+// 检测有环
 const hasCycle = (node: Node): boolean => {
   let fastNode: Node | undefined = node
   let slowNode: Node | undefined = node
@@ -36,6 +37,47 @@ const hasCycle = (node: Node): boolean => {
 
 console.log(hasCycle(a))
 console.dir(a, { depth: null })
+
+// 检测有环
+// 返回链表开始入环的第一个节点。 如果链表无环，则返回 null。
+// 使用visited记录
+// const detectCycle = (node: Node): Node | null => {
+//   let fastNode: Node | undefined = node
+//   const visited = new Set<Node>()
+
+//   while (fastNode) {
+//     if (visited.has(fastNode)) return fastNode
+//     fastNode = fastNode.next
+//   }
+
+//   return null
+// }
+
+// 快慢指针在相遇之处找入口节点
+// O(1)空间
+// 相遇时快节点路程为慢节点两倍，比慢节点多绕了n个内圈y
+// A-B=ny 且A=2B 得 B=ny 则慢节点再走x即可到达环的起点
+const detectCycle = (node: Node): Node | undefined => {
+  let fastNode: Node | undefined = node
+  let slowNode: Node | undefined = node
+
+  while (fastNode) {
+    fastNode = fastNode.next?.next
+    slowNode = slowNode?.next
+    if (slowNode === fastNode) {
+      slowNode = node
+      while (slowNode !== fastNode) {
+        slowNode = slowNode?.next
+        fastNode = fastNode?.next
+      }
+      return slowNode
+    }
+  }
+
+  return undefined
+}
+
+console.log(detectCycle(a))
 
 // O(n)
 export {}

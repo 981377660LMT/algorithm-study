@@ -56,6 +56,12 @@ const q: TreeNode = {
 }
 
 /**
+ * @description 若 root 为 p，q 的公共祖先，有三种情况
+
+                p, q 分别在 root 的左右子树；
+                p === root 切 q 在 p 的左右子树；
+                q === root 且 p 在 q 的左右子树。
+
  * @description 在root之下递归寻找p与q的最近祖先
  *              递归返回的内容是包含目标节点的子节点
  *              如果某一个子节点同时包含两个目标节点，则返回该节点
@@ -63,14 +69,16 @@ const q: TreeNode = {
  *              否则返回为null
  */
 const lowestCommonAncestor = (root: TreeNode | null, p: TreeNode, q: TreeNode): TreeNode | null => {
-  if (!root || root.val === p.val || root.val === q.val) return root
+  if (root === null || root.val === p.val || root.val === q.val) return root
   // 左子树中存在p或q
   const detectLeft = lowestCommonAncestor(root.left, p, q)
   // 右子树中存在p或q
   const detectRight = lowestCommonAncestor(root.right, p, q)
-  if (!detectLeft) return detectRight
-  if (!detectRight) return detectLeft
-  // 左右都有则为root本身
+
+  if (detectLeft === null && detectRight === null) return null
+  if (detectLeft === null) return detectRight
+  if (detectRight === null) return detectLeft
+  // p, q 分别在 root 的左右子树；
   return root
 }
 

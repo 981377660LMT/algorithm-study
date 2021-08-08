@@ -1,10 +1,13 @@
 import { MinHeap } from './minheap'
 
 // 内部使用了堆
-class PriotiryQueue<Item> {
+class PriorityQueue<Item = unknown> {
   private minHeap: MinHeap<Item>
-  constructor() {
-    this.minHeap = new MinHeap()
+  constructor(
+    compareFunction: (a: Item, b: Item) => number = MinHeap.defaultCompareFunction,
+    volumn: number = Infinity
+  ) {
+    this.minHeap = new MinHeap<Item>(compareFunction, volumn)
   }
 
   get length() {
@@ -23,14 +26,19 @@ class PriotiryQueue<Item> {
   }
 }
 
-const pq = new PriotiryQueue()
-pq.push(5).push(2).push(3)
-console.log(pq)
-console.log(pq.shift())
-console.log(pq)
-console.log(pq.shift())
-console.log(pq)
-console.log(pq.shift())
-console.log(pq.shift())
-console.log(pq.shift())
+if (require.main === module) {
+  const pq = new PriorityQueue()
+  pq.push(5).push(2).push(3)
+  console.log(pq)
+  console.log(pq.shift())
+  console.log(pq)
+  console.log(pq.shift())
+  console.log(pq)
+  console.log(pq.shift())
+  console.log(pq.shift())
+  console.log(pq.shift())
+}
+
 // 优先队列的优势:不需要一次性知道所有数据/数据流读取数据时/极大规模数据(1T)
+
+export { PriorityQueue }
