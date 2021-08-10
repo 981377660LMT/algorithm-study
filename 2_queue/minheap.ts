@@ -3,7 +3,7 @@
 // 3.获取堆顶 peek
 // 4.获取堆大小 size
 
-class MinHeap<Item> {
+class MinHeap<Item = number> {
   private heap: Item[]
   private volumn: number
   private compareFunction: (a: Item, b: Item) => number
@@ -40,14 +40,17 @@ class MinHeap<Item> {
    * @description 时间复杂度为`O(log(h))`
    */
   shift() {
-    const top = this.peek()
-    const last = this.heap.pop()!
-    if (this.size !== 0) {
+    if (this.size === 0) {
+      return undefined
+    } else if (this.size === 1) {
+      return this.heap.pop()!
+    } else {
+      const top = this.peek()
+      const last = this.heap.pop()!
       this.heap[0] = last
       this.shiftDown(0)
+      return top
     }
-
-    return top
   }
 
   peek() {
@@ -62,11 +65,11 @@ class MinHeap<Item> {
    * 取出堆顶元素，替换成val;
    * 一次O(log(h)的操作)
    */
-  replace(val: Item) {
-    this.heap[0] = val
-    this.shiftDown(0)
-    return this
-  }
+  // replace(val: Item) {
+  //   this.heap[0] = val
+  //   this.shiftDown(0)
+  //   return this
+  // }
 
   /**
    *
@@ -88,22 +91,37 @@ class MinHeap<Item> {
   private shiftUp(index: number) {
     if (index <= 0) return
     const parentIndex = this.getParentIndex(index)
-    while (this.compareFunction(this.heap[parentIndex], this.heap[index]) > 0) {
+
+    while (
+      this.heap[parentIndex] &&
+      this.heap[index] &&
+      this.compareFunction(this.heap[parentIndex], this.heap[index]) > 0
+    ) {
       this.swap(parentIndex, index)
       this.shiftUp(parentIndex)
     }
   }
 
   // 下移
+  // 注意while/if里都要写索引 因为后面是改变索引
   private shiftDown(index: number) {
     const leftChildIndex = this.getLeftChildIndex(index)
     const rightChildIndex = this.getRightChildIndex(index)
-    if (this.compareFunction(this.heap[leftChildIndex], this.heap[index]) < 0) {
+
+    if (
+      this.heap[leftChildIndex] &&
+      this.heap[index] &&
+      this.compareFunction(this.heap[leftChildIndex], this.heap[index]) < 0
+    ) {
       this.swap(leftChildIndex, index)
       this.shiftDown(leftChildIndex)
     }
 
-    if (this.compareFunction(this.heap[rightChildIndex], this.heap[index]) < 0) {
+    if (
+      this.heap[rightChildIndex] &&
+      this.heap[index] &&
+      this.compareFunction(this.heap[rightChildIndex], this.heap[index]) < 0
+    ) {
       this.swap(rightChildIndex, index)
       this.shiftDown(rightChildIndex)
     }
