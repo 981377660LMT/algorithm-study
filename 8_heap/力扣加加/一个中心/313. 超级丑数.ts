@@ -19,7 +19,7 @@ const nthSuperUglyNumber = function (n: number, primes: number[]): number {
     const head = pq.shift()
     // 去重
     if (head === res && pq.length) continue
-    res = head
+    res = head!
     count++
     primes.forEach(prime => pq.push(prime * res))
   }

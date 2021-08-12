@@ -11,7 +11,7 @@ const swimInWater = function (grid: number[][]): number {
   const n = grid.length
 
   // 能力检测
-  // 这里使用yield 碰到结果就暂停后面的函数运行(因为yield可以冲出递归)
+  // 这里使用yield 碰到结果就暂停后面的函数运行(大海捞针,yield可以冲出递归调用栈)
   function* dfs(mid: number, x: number, y: number, visited: Set<string>): Generator<boolean> {
     if (x === n - 1 && y === n - 1) yield true
     const next = [

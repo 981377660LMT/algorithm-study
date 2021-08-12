@@ -32,6 +32,7 @@ const bt: TreeNode = {
 
 // 给定一个二叉树，判断它是否是高度平衡的二叉树。
 // 一棵高度平衡二叉树定义为一个:二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1
+// 自底向上
 const isBalanced = (root: TreeNode) => {
   // dfs计算节点高度
   const dfs = (root: TreeNode | null): number => {

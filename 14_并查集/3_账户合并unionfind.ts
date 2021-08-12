@@ -60,10 +60,6 @@ const accountMerge = (accounts: string[][]) => {
   }
 
   return res
-
-  console.dir(uf)
-  console.log(emailToUserMap)
-  console.log(rootEmailToEmail)
 }
 
 console.log(

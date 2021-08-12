@@ -24,6 +24,7 @@ for i in range(M):
       dfs(i, j)
 ```
 
+有时候我们甚至可以不用 visited 来标记每个 cell 的访问情况， 而是直接原地标记，这种算法的空间复杂度会更好
 原地标记
 
 ```Python
@@ -50,3 +51,5 @@ for i in range(M):
    for j in range(N):
       dfs(i, j)
 ```
+
+不同的题目要**考虑好 visited 是使用 set 传引用还是设置 0/-1**

@@ -22,6 +22,10 @@ class UnionFind<T> {
     }
     return key
   }
+
+  isConnected(key1: T, key2: T) {
+    return this.find(key1) === this.find(key2)
+  }
 }
 
 const unionFind = new UnionFind()

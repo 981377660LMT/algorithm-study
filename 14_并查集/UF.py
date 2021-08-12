@@ -16,8 +16,10 @@ class UF:
             self.parent[x] = self.find(self.parent[x])
             return self.parent[x]
         return x
+
     def union(self, p, q):
-        if self.connected(p, q): return
+        if self.connected(p, q):
+            return
         # 小的树挂到大的树上， 使树尽量平衡
         leader_p = self.find(p)
         leader_q = self.find(q)
@@ -28,5 +30,6 @@ class UF:
             self.parent[leader_q] = leader_p
             self.size[leader_p] += self.size[leader_q]
         self.cnt -= 1
+
     def connected(self, p, q):
         return self.find(p) == self.find(q)
