@@ -27,7 +27,7 @@ class TrieNode {
 // Trie:root节点(TrieNode或者Map<string,TriNode>)
 // TrieNode:孩子节点(Map<string,Trie>或者Array<TrieNode>),结束flag,对应的值
 class Trie implements ITrie {
-  private root: TrieNode
+  protected root: TrieNode
 
   constructor() {
     this.root = new TrieNode()

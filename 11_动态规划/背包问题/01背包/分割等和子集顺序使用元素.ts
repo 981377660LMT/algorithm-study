@@ -15,6 +15,7 @@ const canPartition = function (nums: number[]) {
 
   for (let i = 0; i < dpRow; i++) {
     const num = nums[i]
+    // 倒叙的原因是后面需要前面先决定
     for (let j = volume; j >= num; j--) {
       // dp[j]不使用第i个物品
       // dp[j-num]使用第i个物品

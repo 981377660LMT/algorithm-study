@@ -19,7 +19,7 @@ const combinationSum = (candidates: number[], target: number): number[][] => {
     }
 
     for (let i = index; i < len; i++) {
-      // 限制每个重复的元素只能在开头第一个被使用
+      // 规定每个重复的元素只能在开头第一个(i===index)被使用
       if (i > index && candidates[i] === candidates[i - 1]) continue
 
       const next = candidates[i]

@@ -7,7 +7,7 @@
 const solveNQueens = function (n: number): string[][] {
   const res: string[][] = []
 
-  // path表示每行存第几列，记录列数
+  // path表示每行把皇后存第几列，记录列数
   const bt = (path: number[], curRow: number) => {
     if (curRow === n) {
       res.push(path.map(col => '.'.repeat(col) + 'Q' + '.'.repeat(n - col - 1)))

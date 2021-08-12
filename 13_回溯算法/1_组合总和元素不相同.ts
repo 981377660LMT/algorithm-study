@@ -2,7 +2,7 @@
  * @param {number[]} candidates
  * @param {number} target
  * @return {number[][]}
- * @description candidate 中的每个元素都是独一无二的 每个元素可使用多次。
+ * @description 无重复元素的数组candidate 中的每个元素都是独一无二的 每个元素可使用多次。
  * @description 如何去除重复的元素? 例如 [2,2,3] [2,3,2] [3,2,2] 使用index保持索引不减
  */
 const combinationSum = (candidates: number[], target: number): number[][] => {
@@ -20,6 +20,7 @@ const combinationSum = (candidates: number[], target: number): number[][] => {
     for (let i = index; i < len; i++) {
       const next = candidates[i]
       path.push(next)
+      // i 数字可以重复使用
       bt(path, sum + next, i)
       path.pop()
     }

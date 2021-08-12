@@ -9,13 +9,15 @@ const permute = (nums: number[]) => {
 
   const bt = (path: number[]) => {
     // 1.递归终点
-    if (path.length === nums.length) res.push(path)
+    if (path.length === nums.length) return res.push(path.slice())
 
     nums.forEach(num => {
       // 2.排除死路
       if (path.includes(num)) return
       // 3. 递归
-      bt(path.concat(num))
+      path.push(num)
+      bt(path)
+      path.pop()
     })
   }
   bt([])

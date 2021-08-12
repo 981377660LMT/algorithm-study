@@ -14,8 +14,8 @@ var wordBreak = function (s, wordDict) {
 
   for (let i = 0; i <= s.length; i++) {
     for (const word of set) {
-      if (i >= word.length && set.has(s.slice(i - word.length, i)))
-        dp[i] = dp[i] || dp[i - word.length]
+      if (i >= word.length && dp[i - word.length] && s.slice(i - word.length, i) === word)
+        dp[i] = true
     }
   }
 

@@ -32,19 +32,19 @@ const findAnagrams = (s: string, p: string): number[] => {
   while (r < s.length - 1) {
     l++
     r++
-    const preL = s[l - 1]
-    const curR = s[r]
-    if (lackMap.has(preL)) {
-      const count = lackMap.get(preL)!
+    const pre = s[l - 1]
+    const cur = s[r]
+    if (lackMap.has(pre)) {
+      const count = lackMap.get(pre)!
 
       if (count >= 0) lackNum++
-      lackMap.set(preL, count + 1)
+      lackMap.set(pre, count + 1)
     }
 
-    if (lackMap.has(curR)) {
-      const count = lackMap.get(curR)!
+    if (lackMap.has(cur)) {
+      const count = lackMap.get(cur)!
       if (count > 0) lackNum--
-      lackMap.set(curR, count - 1)
+      lackMap.set(cur, count - 1)
     }
     console.log(l, r, lackMap, lackNum)
     lackNum === 0 && res.push(l)

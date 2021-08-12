@@ -4,19 +4,20 @@
 // 关键是lackMap与lackNum记录
 const minWindow = (s: string, t: string): string => {
   if (s.length < t.length) return ''
+  // 缺少的对应关系,负数代表多了
   const lackMap = new Map<string, number>()
+  // 缺少的数量,非负数
   let lackNum = t.length
   let l = 0
   let r = t.length - 1
   let minLength = Infinity
-  const memo: [number, number] = [Infinity, Infinity]
+  const res: [number, number] = [Infinity, Infinity]
 
-  // 初始化
+  // 初始化lackMap与lackNum
   for (const letter of t) {
     const count = lackMap.get(letter) || 0
     lackMap.set(letter, count + 1)
   }
-
   for (let i = l; i <= r; i++) {
     const letter = s[i]
     if (lackMap.has(letter)) {
@@ -30,35 +31,36 @@ const minWindow = (s: string, t: string): string => {
   if (lackNum === 0) return s.slice(l, r + 1)
 
   while (r < s.length - 1) {
+    // 不符合条件，扩张右边
     while (lackNum > 0) {
       if (r > s.length - 1) break
       r++
-      const curR = s[r]
-      if (lackMap.has(curR)) {
-        const count = lackMap.get(curR)!
+      const cur = s[r]
+      if (lackMap.has(cur)) {
+        const count = lackMap.get(cur)!
         if (count > 0) lackNum--
-        lackMap.set(curR, count - 1)
+        lackMap.set(cur, count - 1)
       }
     }
-    console.log(l, r, lackMap, lackNum, minLength)
 
+    // 符合条件，更新答案，开始收缩左边
     while (lackNum === 0) {
       if (r - l + 1 < minLength) {
         minLength = r - l + 1
-        memo[0] = l
-        memo[1] = r + 1
+        res[0] = l
+        res[1] = r + 1
       }
       l++
-      const preL = s[l - 1]
-      if (lackMap.has(preL)) {
-        const count = lackMap.get(preL)!
+      const pre = s[l - 1]
+      if (lackMap.has(pre)) {
+        const count = lackMap.get(pre)!
         if (count >= 0) lackNum++
-        lackMap.set(preL, count + 1)
+        lackMap.set(pre, count + 1)
       }
     }
   }
 
-  return minLength === Infinity ? '' : s.slice(memo[0], memo[1])
+  return minLength === Infinity ? '' : s.slice(res[0], res[1])
 }
 
 console.log(minWindow('ADOBECODEBANC', 'ABC'))

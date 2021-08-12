@@ -1,10 +1,11 @@
 /**
  * @param {number[]} nums
  * @return {number[][]}
+ * 排序+规定每个重复的元素只能在开头第一个(i===index)被使用
  */
 const subsets = (nums: number[]): number[][] => {
   const res: number[][] = []
-  nums.sort()
+  nums.sort((a, b) => a - b)
 
   const bt = (volume: number, path: number[] = [], index: number = 0) => {
     if (path.length === volume) {
@@ -12,6 +13,7 @@ const subsets = (nums: number[]): number[][] => {
     }
 
     for (let i = index; i < nums.length; i++) {
+      // 规定每个重复的元素只能在开头第一个(i===index)被使用
       if (i !== index && nums[i] === nums[i - 1]) continue
       path.push(nums[i])
       bt(volume, path, i + 1)
