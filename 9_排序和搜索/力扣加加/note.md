@@ -20,14 +20,14 @@
   let r = arr.length - 1
   // 因此当 left <= right 的时候，解空间都不为空，此时我们都需要继续搜索
   while (l <= r) {
-    const mid = Math.floor((l + r) / 2)
+    const mid = (l + r) >> 1
     const midElement = arr[mid]
     if (midElement === target) {
-      return mid
+     r--
     } else if (midElement < target) {
       // mid 根本就不是答案，直接更新 l = mid + 1，从而将 mid 从解空间排除
       l = mid + 1
-    } else if (midElement >= target)  {
+    } else if (midElement > target)  {
       // midElement >= target :将 mid 从解空间排除，继续看看有没有更好的
       r = mid - 1
     }
@@ -41,7 +41,7 @@
   改成
 
   ```JS
-   } else if (midElement <= target) {
+   } else if (midElement < target) {
       l = mid + 1
     } else if (midElement > target)  {
       r = mid - 1
@@ -95,3 +95,5 @@ def count_bs(nums, k):
 有的是需要你自己构造有序序列。这种类型的题目通常难度不低，需要大家有一定的观察能力。
 
 堆的一种很重要的用法是求第 k 大的数，而二分法也可以求第 k 大的数，只不过二者的思路完全不同。
+
+**有无重复元素对二分算法影响很大，我们需要小心对待。**

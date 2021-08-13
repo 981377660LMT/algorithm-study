@@ -30,7 +30,7 @@ const findRadius = function (houses: number[], heaters: number[]): number {
   let r = Math.max(houses[houses.length - 1] - heaters[0], heaters[heaters.length - 1] - houses[0])
 
   while (l <= r) {
-    const mid = Math.floor((l + r) / 2)
+    const mid = (l + r) >> 1
     if (canCover(mid)) {
       r = mid - 1
     } else {

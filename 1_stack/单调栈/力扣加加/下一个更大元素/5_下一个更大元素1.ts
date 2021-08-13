@@ -2,11 +2,11 @@
 // stack加map
 const nextGreaterElement = (nums1: number[], nums2: number[]) => {
   const stack: number[] = []
-  const map = new Map()
+  const map = new Map<number, number>()
 
   nums2.forEach(num => {
-    while (stack.length && num > stack[stack.length - 1]) {
-      map.set(stack.pop(), num)
+    while (stack.length && stack[stack.length - 1] < num) {
+      map.set(stack.pop()!, num)
     }
     stack.push(num)
   })

@@ -14,11 +14,11 @@ const bisectLeft = (arr: number[], target: number): number => {
     const mid = Math.floor((l + r) / 2)
     const midElement = arr[mid]
     if (midElement === target) {
-      return mid
+      r--
     } else if (midElement < target) {
       // mid 根本就不是答案，直接更新 l = mid + 1，从而将 mid 从解空间排除
       l = mid + 1
-    } else if (midElement >= target) {
+    } else if (midElement > target) {
       // midElement >= target :将 mid 从解空间排除，继续看看有没有更好的
       r = mid - 1
     }
@@ -28,8 +28,9 @@ const bisectLeft = (arr: number[], target: number): number => {
 }
 
 if (require.main === module) {
-  const arr = [1, 2, 3, 4, 5, 6, 7]
-  console.log(bisectLeft(arr, 3))
+  // const arr = [7, 7, 7, 7, 7, 7]
+  const arr = [6, 7, 8, 9]
+  console.log(bisectLeft(arr, 7))
 }
 
 export { bisectLeft }

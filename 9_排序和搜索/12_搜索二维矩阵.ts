@@ -1,4 +1,5 @@
 // 编写一个高效的算法来判断 m x n 矩阵中，是否存在一个目标值
+// 需要注意的是，数组是不存在重复元素的。
 // 矩阵是单调递增的 O(m + n)
 const searchMatrix = (matrix: number[][], target: number) => {
   let l = 0
@@ -7,7 +8,7 @@ const searchMatrix = (matrix: number[][], target: number) => {
 
   // 注意这里的逻辑
   while (l <= r) {
-    const mid = Math.floor((l + r) / 2)
+    const mid = (l + r) >> 1
     if (matrix[mid][0] === target) {
       return true
     } else if (matrix[mid][0] > target) {
@@ -24,7 +25,7 @@ const searchMatrix = (matrix: number[][], target: number) => {
   let a = 0
   let b = matrix[0].length - 1
   while (a <= b) {
-    const mid = Math.floor((a + b) / 2)
+    const mid = (a + b) >> 1
     if (matrix[row][mid] === target) {
       return true
     } else if (matrix[row][mid] < target) {

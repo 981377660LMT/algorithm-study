@@ -8,8 +8,8 @@ const bisectRight = (arr: number[], target: number): number => {
     const mid = Math.floor((l + r) / 2)
     const midElement = arr[mid]
     if (midElement === target) {
-      return mid
-    } else if (midElement <= target) {
+      l++
+    } else if (midElement < target) {
       // mid 根本就不是答案，直接更新 l = mid + 1，从而将 mid 从解空间排除
       l = mid + 1
     } else if (midElement > target) {
