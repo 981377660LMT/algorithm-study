@@ -61,9 +61,9 @@ const detectCycle = (node: Node): Node | undefined => {
   let fastNode: Node | undefined = node
   let slowNode: Node | undefined = node
 
-  while (fastNode) {
-    fastNode = fastNode.next?.next
-    slowNode = slowNode?.next
+  while (fastNode && fastNode.next) {
+    fastNode = fastNode.next.next
+    slowNode = slowNode!.next
     if (slowNode === fastNode) {
       slowNode = node
       while (slowNode !== fastNode) {
