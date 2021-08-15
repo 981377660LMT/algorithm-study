@@ -23,3 +23,4 @@ const longestOnes = function (nums: number[], k: number): number {
 }
 
 console.log(longestOnes([0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1], 3))
+export default 1
