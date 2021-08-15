@@ -1,22 +1,22 @@
-class Node {
+class ListNode {
   constructor(
     public val: string,
     public isWord = false,
-    public children: Map<string, Node> = new Map()
+    public children: Map<string, ListNode> = new Map()
   ) {}
 }
 
 class StreamCheckerTrie {
-  private root: Node
+  private root: ListNode
 
   constructor() {
-    this.root = new Node('')
+    this.root = new ListNode('')
   }
 
   insert(s: string) {
     let rootP = this.root
     for (const letter of s) {
-      if (!rootP.children.has(letter)) rootP.children.set(letter, new Node(letter))
+      if (!rootP.children.has(letter)) rootP.children.set(letter, new ListNode(letter))
       const next = rootP.children.get(letter)!
       rootP = next
     }

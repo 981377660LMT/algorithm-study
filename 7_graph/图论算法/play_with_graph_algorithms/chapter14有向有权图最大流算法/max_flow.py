@@ -4,7 +4,6 @@ from play_with_graph_algorithms.chapter13.weighted_graph import WeightedGraph
 
 
 class MaxFlow:
-
     def __init__(self, network, s, t, empty_graph=False, directed=True, V=None):
         if not network.is_directed():
             raise ValueError('MaxFlow only works in directed graph!')

@@ -36,25 +36,17 @@ const bt: BinaryTree = {
   },
 }
 
-// 求二叉树左叶子之和
-// dfs搜索携带参数,这题也可以直接把父节点带着dfs
-const leftSum = (root: BinaryTree | null) => {
+// 是否存在根节点到叶子节点的一条路径之和等于目标和
+const hasPathSum = (root: BinaryTree | null, target: number): boolean => {
   if (!root) return false
-  let sum = 0
 
-  const dfs = (root: BinaryTree | null, isLeft: boolean) => {
-    if (!root) return
-
-    // 左叶子节点
-    if (!root.left && !root.right && isLeft) sum += root.val
-
-    root.left && dfs(root.left, true)
-    root.right && dfs(root.right, false)
+  // 如果是叶子结点，则看该结点值是否等于剩下的 sum
+  if (root.left === null && root.right === null) {
+    return root.val === target
   }
-  dfs(root, false)
 
-  return sum
+  return hasPathSum(root.left, target - root.val) || hasPathSum(root.right, target - root.val)
 }
 
-console.log(leftSum(bt))
+console.log(hasPathSum(bt, 7))
 export {}

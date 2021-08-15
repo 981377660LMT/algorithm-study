@@ -47,7 +47,7 @@ const bt: BinaryTree = {
 // 2.当前层处理
 // 3.进入下一层（可携带当前层变更后的状态进入下一层）
 // 4.清理该层数据（回溯）
-const sum = (root: BinaryTree | null, target: number): number => {
+const pathSum = (root: BinaryTree | null, target: number): number => {
   if (!root) return 0
   let res = 0
   let curSum = 0
@@ -77,5 +77,5 @@ const sum = (root: BinaryTree | null, target: number): number => {
   return res
 }
 
-console.log(sum(bt, 7))
+console.log(pathSum(bt, 7))
 export {}

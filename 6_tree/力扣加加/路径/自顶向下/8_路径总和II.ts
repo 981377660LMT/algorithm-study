@@ -36,16 +36,14 @@ const bt: BinaryTree = {
   },
 }
 
-// 是否存在一条路径之和等于目标和
-// 每一个节点对应一个路径之和，dfs时记录当前路径的节点值得和
-// 空间复杂度为递归堆栈高度
-const sum = (root: BinaryTree | null, target: number) => {
+// 求出根节点到叶子节点的一条路径之和等于目标和
+const pathSum = (root: BinaryTree | null, target: number) => {
   if (!root) return false
   const allRoutes: number[][] = []
   let hasPath = false
 
   const dfs = (root: BinaryTree | null, sum: number, path: number[]) => {
-    if (!root) return false
+    if (!root) return
     console.log(root.val, sum)
 
     // 叶子节点
@@ -56,8 +54,15 @@ const sum = (root: BinaryTree | null, target: number) => {
       }
     }
 
-    root.left && dfs(root.left, sum + root.left.val, [...path, root.left.val])
-    root.right && dfs(root.right, sum + root.right.val, [...path, root.right.val])
+    if (root.left) {
+      path.push(root.left.val)
+      dfs(root.left, sum + root.left.val, path)
+    }
+    if (root.right) {
+      path.push(root.right.val)
+      dfs(root.left, sum + root.right.val, path)
+    }
+
     path.pop()
   }
   dfs(root, root.val, [root.val])
@@ -65,5 +70,5 @@ const sum = (root: BinaryTree | null, target: number) => {
   return [hasPath, allRoutes]
 }
 
-console.log(sum(bt, 7))
+console.log(pathSum(bt, 7))
 export {}

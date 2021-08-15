@@ -3,7 +3,7 @@
  * @return {number}
  * @description 归并排序mergeTwo的时候用两个指针统计逆序对
  */
-const reversePairs = function (nums: number[]) {
+const reversePairs = function (nums: number[]): number {
   let ans = 0
 
   // 合并两个有序数组

@@ -14,6 +14,8 @@ import { BinaryTree } from '../Tree'
 const buildTree = (preorder: number[], inorder: number[]): BinaryTree | null => {
   // # 实际上inorder 和 postorder一定是长度相等的
   if (!preorder.length || !inorder.length) return null
+
+  // 先找根
   const rootValue = preorder[0]
   const root = new BinaryTree(rootValue)
   const rootIndex = inorder.indexOf(rootValue)
@@ -27,3 +29,5 @@ const buildTree = (preorder: number[], inorder: number[]): BinaryTree | null => 
 console.log(buildTree([3, 9, 20, 15, 7], [9, 3, 15, 20, 7]))
 
 export { buildTree }
+// 时间复杂度：由于每次递归我们的 inorder 和 preorder 的总数都会减 1，因此我们要递归 N 次，故时间复杂度为 $O(N)$，其中 N 为节点个数。
+// 空间复杂度：我们使用了递归，也就是借助了额外的栈空间来完成， 由于栈的深度为 N，因此总的空间复杂度为 $O(N)$，其中 N 为节点个数。

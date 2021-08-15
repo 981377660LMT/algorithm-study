@@ -1,5 +1,5 @@
-import { BinaryTree } from '../Tree'
-import { deserializeNode } from '../构建类/297二叉树的序列化与反序列化'
+import { BinaryTree } from '../../Tree'
+import { deserializeNode } from '../../构建类/297二叉树的序列化与反序列化'
 
 /**
  * @param {BinaryTree} root
@@ -14,12 +14,12 @@ const maxPathSum = (root: BinaryTree): number => {
   if (!root) return 0
   let max = -Infinity
 
+  // 经过root的最大路径长
   const dfs = (root: BinaryTree | null): number => {
     if (!root) return 0
     const leftMax = dfs(root.left)
     const rightMax = dfs(root.right)
     max = Math.max(max, root.val + leftMax + rightMax)
-    // 返回的是作为子节点的最大贡献
     return Math.max(0, root.val + leftMax, root.val + rightMax)
   }
   dfs(root)

@@ -7,7 +7,7 @@ interface TreeNode {
 const bt: TreeNode = {
   val: 1,
   left: {
-    val: 2,
+    val: 1,
     left: {
       val: 4,
       left: null,
@@ -48,15 +48,20 @@ const bt2: TreeNode = {
 const longestUnivaluePath = (root: TreeNode) => {
   if (!root) return 0
   let res = 0
-  const helper = (v: number, curNode: TreeNode | null): number => {
-    if (!curNode) return 0
-    // left包括了curNode在内和左边的长度
-    const left = helper(curNode.val, curNode.left)
-    const right = helper(curNode.val, curNode.right)
+  const dfs = (root: TreeNode | null): number => {
+    if (!root) return 0
+
+    let left = dfs(root.left)
+    let right = dfs(root.right)
+    if (root.left && root.val === root.left.val) left++
+    else left = 0
+    if (root.right && root.val === root.right.val) right++
+    else right = 0
+
     res = Math.max(res, left + right)
-    return curNode.val === v ? Math.max(left, right) + 1 : 0
+    return Math.max(left, right)
   }
-  helper(root.val, root)
+  dfs(root)
   return res
 }
 
