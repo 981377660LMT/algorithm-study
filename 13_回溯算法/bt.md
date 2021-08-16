@@ -44,3 +44,20 @@
       path.pop()
     }
 ```
+
+1. push 结果 时要 push 浅拷贝
+2. 如果递归参数是引用要回溯 pop
+3. 要求元素不能重用时要**排序**并带上 index(start)参数并且限制每个重复的元素只能在开头第一个被使用
+   **如果不允许排序(491. 递增子序列),则不能限制每个重复的元素只能在开头第一个被使用,而是在每一轮 bt 中创建一个 set 记录用过的数字,即记录已经使用过的 next**
+
+```JS
+  const visited = new Set<number>()
+  for (let i = start; i < nums.length; i++) {
+    // if (i > start && nums[i] === nums[i - 1]) continue
+    if (visited.has(nums[i])) continue
+    visited.add(nums[i])
+    path.push(nums[i])
+    bt(i + 1, path)
+    path.pop()
+  }
+```

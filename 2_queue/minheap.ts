@@ -11,9 +11,10 @@ class MinHeap<Item = number> {
 
   constructor(
     compareFunction: (a: Item, b: Item) => number = MinHeap.defaultCompareFunction,
-    volumn: number = Infinity
+    volumn: number = Infinity,
+    heap: Item[] = []
   ) {
-    this.heap = []
+    this.heap = heap
     this.compareFunction = compareFunction
     this.volumn = volumn
   }

@@ -7,16 +7,16 @@
  */
 var lengthOfLIS = function (nums) {
   if (nums.length === 0) return 0
-  const lis = Array(nums.length).fill(1)
+  const dp = Array(nums.length).fill(1)
 
   for (let i = 1; i < nums.length; i++) {
     // 状态转移方程
     for (let j = 0; j < i; j++) {
-      if (nums[j] < nums[i]) lis[i] = Math.max(lis[i], lis[j] + 1)
+      if (nums[j] < nums[i]) dp[i] = Math.max(dp[i], dp[j] + 1)
     }
   }
-
-  return Math.max.apply(null, lis)
+  console.log(dp)
+  return Math.max.apply(null, dp)
 }
 
 console.log(lengthOfLIS([10, 9, 2, 5, 3, 7, 101, 18]))

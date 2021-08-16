@@ -5,9 +5,22 @@ class PriorityQueue<Item = number> {
   private minHeap: MinHeap<Item>
   constructor(
     compareFunction: (a: Item, b: Item) => number = MinHeap.defaultCompareFunction,
-    volumn: number = Infinity
+    volumn: number = Infinity,
+    heap: Item[] = []
   ) {
-    this.minHeap = new MinHeap<Item>(compareFunction, volumn)
+    this.minHeap = new MinHeap<Item>(compareFunction, volumn, heap)
+  }
+
+  static createPriorityQueue<Item = number>({
+    compareFunction = MinHeap.defaultCompareFunction,
+    volumn = Infinity,
+    heap = [],
+  }: {
+    compareFunction?: (a: Item, b: Item) => number
+    volumn?: number
+    heap?: Item[]
+  }) {
+    return new PriorityQueue(compareFunction, volumn, heap)
   }
 
   get length() {
@@ -27,6 +40,10 @@ class PriorityQueue<Item = number> {
 
   peek() {
     return this.minHeap.peek()
+  }
+
+  heapify() {
+    this.minHeap.heapify()
   }
 }
 

@@ -1,4 +1,4 @@
-import { bisectLeft } from '../../9_排序和搜索/7_二分搜索寻找最左插入位置'
+import { bisectLeft } from '../../../9_排序和搜索/7_二分搜索寻找最左插入位置'
 
 /**
  * @link https://leetcode-cn.com/problems/russian-doll-envelopes/solution/ti-mu-zong-jie-zui-chang-shang-sheng-zi-twyhq/
@@ -10,7 +10,6 @@ import { bisectLeft } from '../../9_排序和搜索/7_二分搜索寻找最左�
 const maxEnvelopes = function (envelopes: number[][]): number {
   if (envelopes.length <= 1) return envelopes.length
 
-  const height = envelopes.map(item => item[1])
   // 保证[6,7]在[6,4]前面 保证后面的比较逻辑成立
   envelopes.sort((a, b) => a[0] - b[0] || b[1] - a[1])
   const LIS: number[] = [envelopes[0][1]]

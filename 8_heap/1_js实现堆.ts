@@ -124,5 +124,3 @@ class MinHeap<Item> {
     ;[this.heap[parentIndex], this.heap[index]] = [this.heap[index], this.heap[parentIndex]]
   }
 }
-
-export { MinHeap }
