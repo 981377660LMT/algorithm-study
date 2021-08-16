@@ -1,14 +1,14 @@
-const graph = require('./graph');
+const graph = require('./graph')
 
-const visited = new Set();
-const dfs = (n) => {
-    console.log(n);
-    visited.add(n);
-    graph[n].forEach(c => {
-        if(!visited.has(c)){
-            dfs(c);
-        }
-    });
-};
+const visited = new Set()
+const dfs = n => {
+  console.log(n)
+  visited.add(n)
+  graph[n].forEach(c => {
+    if (!visited.has(c)) {
+      dfs(c)
+    }
+  })
+}
 
-dfs(2);
+dfs(2)

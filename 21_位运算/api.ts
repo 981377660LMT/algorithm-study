@@ -20,3 +20,9 @@ console.log(Number(5).toString(2))
 console.log(Number(3 ^ 5).toString(2))
 const MSB = Number(3 ^ 5).toString(2).length - 1
 assert.notStrictEqual((3 >> MSB) & 1, (5 >> MSB) & 1)
+
+// MSB启示我们只需要比较异或的前缀就可以看出一些性质
+// 例如异或是否比某个数大
+// 只需要比较前缀请即可
+// 如果一个数 a 的前缀和另外一个数 b 的前缀是一样的，
+// 那么 c 和 a 或者 c 和 b 的异或的结构前缀部分一定也是一样的

@@ -13,6 +13,8 @@ const c = new Node(3)
 a.next = b
 b.next = c
 
+// 递归法反转和迭代法反转都要会
+
 // 迭代法反转
 const reverseList = (head: Node) => {
   // 注意p1p2都是node
