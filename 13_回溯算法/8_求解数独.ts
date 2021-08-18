@@ -3,24 +3,27 @@
  * @return {void} Do not return anything, modify board in-place instead.
  */
 const solveSudoku = function (board: string[][]): void {
-  const n = board.length
-
-  const isValidPosition = (
-    board: string[][],
-    row: number,
-    col: number,
-    n: number,
-    char: string
-  ) => {
-    const blockRow = Math.floor(row / 3) * 3
-    const blockCol = Math.floor(col / 3) * 3
-    for (let i = 0; i < n; i++) {
-      // 验证行列没有且九宫格内没有
-      if (board[row][i] === char || board[i][col] === char) return false
-      const curRow = blockRow + Math.floor(i / 3)
-      const curCol = blockCol + Math.floor(i % 3)
-      if (board[curRow][curCol] === char) return false
+  console.log(board.length)
+  const isValidPosition = (board: string[][], row: number, col: number, char: string) => {
+    // 判断行里是否重复
+    for (let j = 0; j < 9; j++) {
+      if (board[row][j] === char) return false
     }
+
+    // 判断列里是否重复
+    for (let i = 0; i < 9; i++) {
+      if (board[i][col] === char) return false
+    }
+
+    // 判断9方格里是否重复
+    const startRow = Math.floor(row / 3) * 3
+    const startCol = Math.floor(col / 3) * 3
+    for (let i = startRow; i < startRow + 3; i++) {
+      for (let j = startCol; j < startCol + 3; j++) {
+        if (board[i][j] === char) return false
+      }
+    }
+
     return true
   }
 
@@ -30,29 +33,26 @@ const solveSudoku = function (board: string[][]): void {
    * @param n
    * @returns 表示点是否排好了
    */
-  const bt = (board: string[][], n: number): boolean => {
-    for (let row = 0; row < n; row++) {
-      for (let col = 0; col < n; col++) {
+  const bt = (board: string[][]): boolean => {
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
         if (board[row][col] !== '.') continue
-
         for (let i = 1; i <= 9; i++) {
           const char = i.toString()
-          if (isValidPosition(board, row, col, n, char)) {
+          if (isValidPosition(board, row, col, char)) {
             board[row][col] = char
-            if (bt(board, n)) return true
+            if (bt(board)) return true
+            board[row][col] = '.'
           }
         }
-
         // 回溯，还没有排好
-        board[row][col] = '.'
         return false
       }
     }
-
     // 所有点都continue了，即所有点都已经填好了
     return true
   }
-  bt(board, n)
+  bt(board)
 }
 
 const sudoku = [

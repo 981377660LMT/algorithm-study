@@ -9,8 +9,6 @@
 //   return list.slice(0, k).map(item => item[0])
 // }
 
-import { MinHeap } from './1_js实现堆'
-
 // console.log(topKFrequent([1, 2, 3, 1, 2, 3, 1, 1, 5, 5, 5, 5], 2))
 
 // 如何让复杂度不超过nlog(n)
@@ -30,3 +28,5 @@ const topKFrequent = (nums: number[], k: number) => {
 // insert和pop时间复杂度是log(k)
 // 最后复杂夫是nlog(k) 由于nlog(n)
 // 空间复杂度是map o(n)
+
+export default 1
