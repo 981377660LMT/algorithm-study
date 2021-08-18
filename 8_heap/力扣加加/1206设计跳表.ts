@@ -2,7 +2,7 @@
 // 跳表相比于树堆与红黑树，其功能与性能相当，并且跳表的代码长度相较下更短，
 // 其设计思想与链表相似。
 // 在Redis中的有序集合（Sorted Set）就是用跳表来实现的
-
+// 跳表支持区间查询
 import assert from 'assert'
 
 class SkipNode {

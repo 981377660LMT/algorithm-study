@@ -96,7 +96,7 @@ class Solution {
     pre[start] = start
     const visited = new Set<number>()
 
-    const compareFunction = (a: Node, b: Node) => a?.dis - b?.dis
+    const compareFunction = (a: Node, b: Node) => a.dis - b.dis
     const priorityQueue = new PriorityQueue<Node>(compareFunction)
     priorityQueue.push(new Node(0, 0))
 
