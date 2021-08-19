@@ -34,6 +34,7 @@ const strStr = function (haystack: string, needle: string): number {
   return -1
 }
 
+// 求lps数组
 const calculateLPS = (s: string): number[] => {
   // lps[i]表示[0,i]这一段字符串中lps的长度
   const lps: number[] = Array(s.length).fill(0)

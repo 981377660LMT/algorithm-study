@@ -18,9 +18,8 @@ const findRepeatedDnaSequences = function (s: string): string[] {
     cur = cur.slice(1) + s[j]
     if (visited.has(cur)) {
       res.add(cur)
-    } else {
-      visited.add(cur)
     }
+    visited.add(cur)
   }
 
   return [...res]

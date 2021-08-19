@@ -78,14 +78,14 @@ def ability_test_bs(nums):
 4. 计数二分
 
 ```python
-def count_bs(nums, k):
-  def count_not_greater(mid):
+def main(nums, k):
+  def count(mid):
     pass
   l, r = 0, len(A) - 1
   while l <= r:
       mid = (l + r) // 2
       # 只有这里和最左二分不一样
-      if count_not_greater(mid) > k: r = mid - 1
+      if count(mid) > k: r = mid - 1
       else: l = mid + 1
   return l
 ```

@@ -1,2 +1,1 @@
-console.log(~~(2 / 3))
-console.log(~~
+console.log('asd'.slice(0, 2) + 'hhh' + 'asd'.slice(2))
