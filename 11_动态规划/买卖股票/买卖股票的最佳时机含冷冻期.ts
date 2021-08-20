@@ -12,13 +12,15 @@
  * dp[i][2]：第i天冷冻期只有一种情况，当天持有股票且卖出；
  */
 const maxProfit = (prices: number[]) => {
-  // 与状态有关
   const len = prices.length
-  if (len === 0) return 0
+  if (len < 2) {
+    return 0
+  }
+
   const dp = Array.from({ length: len }, () => Array(3).fill(0))
   dp[0][0] = 0
   dp[0][1] = -prices[0]
-  dp[0][2] = 0
+  dp[0][2] = -Infinity
   for (let i = 1; i < len; i++) {
     dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][2])
     dp[i][1] = Math.max(dp[i - 1][0] - prices[i], dp[i - 1][1])

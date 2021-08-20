@@ -6,7 +6,7 @@
  */
 const canPartition = function (nums: number[]) {
   const sum = nums.reduce((pre, cur) => pre + cur, 0)
-  const volume = sum / 2 + 1
+  const volume = sum / 2
   if (!Number.isInteger(volume)) return false
   const dpRow = nums.length
   const dp = Array<boolean>(volume + 1).fill(false)

@@ -8,6 +8,7 @@ var nextGreaterElements = function (nums) {
   const res = Array(n).fill(-1)
   const stack = []
 
+  // i全部模
   for (let i = 0; i < 2 * n; i++) {
     while (stack.length && nums[stack[stack.length - 1]] < nums[i % n]) {
       const tmp = stack.pop()

@@ -6,13 +6,14 @@
  */
 const topKFrequent = function (nums: number[], k: number): number[] {
   const res = []
-  const map = new Map()
+  const counter = new Map<number, number>()
+  // 将频率作为数组下标
   const bucket: Set<number>[] = []
 
-  nums.forEach(num => map.set(num, map.get(num) + 1 || 1))
+  nums.forEach(num => counter.set(num, (counter.get(num) || 0) + 1))
 
-  for (const [num, count] of map) {
-    bucket[count] = (bucket[count] || new Set()).add(num)
+  for (const [num, freq] of counter) {
+    bucket[freq] = (bucket[freq] || new Set()).add(num)
   }
 
   for (let i = bucket.length - 1; i >= 0; i--) {

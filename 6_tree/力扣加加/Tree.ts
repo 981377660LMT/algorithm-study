@@ -2,10 +2,10 @@ class BinaryTree {
   val: number
   left: BinaryTree | null
   right: BinaryTree | null
-  constructor(val: number) {
+  constructor(val: number, left: BinaryTree | null = null, right: BinaryTree | null = null) {
     this.val = val
-    this.left = null
-    this.right = null
+    this.left = left
+    this.right = right
   }
 }
 

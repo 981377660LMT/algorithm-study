@@ -1,3 +1,4 @@
+// 寻找l到r的最长回文子串(连续的)
 const helper = (s: string, l: number, r: number) => {
   while (l >= 0 && r < s.length && s[l] === s[r]) {
     l--

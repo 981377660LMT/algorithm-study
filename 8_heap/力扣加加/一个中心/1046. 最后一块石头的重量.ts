@@ -12,8 +12,8 @@ const lastStoneWeight = function (stones: number[]) {
   stones.forEach(stone => pq.push(stone))
 
   while (pq.length >= 2) {
-    const head1 = pq.shift()
-    const head2 = pq.shift()
+    const head1 = pq.shift()!
+    const head2 = pq.shift()!
     if (head1 === head2) continue
     pq.push(head1 - head2)
   }
@@ -22,3 +22,5 @@ const lastStoneWeight = function (stones: number[]) {
 }
 
 console.log(lastStoneWeight([2, 7, 4, 1, 8, 1]))
+
+export default 1

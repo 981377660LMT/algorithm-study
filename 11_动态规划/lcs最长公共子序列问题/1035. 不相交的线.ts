@@ -2,6 +2,7 @@
  * @param {number[]} nums1
  * @param {number[]} nums2
  * @return {number}
+ * 只要相对顺序不改变，链接相同数字的直线就不会相交。
  * 如果想要不相交，则必然相对位置要一致，换句话说就是：公共子序列
  */
 const maxUncrossedLines = (nums1: number[], nums2: number[]): number => {

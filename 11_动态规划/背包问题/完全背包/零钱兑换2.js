@@ -2,7 +2,8 @@
  * @param {number} amount
  * @param {number[]} coins
  * @return {number}
- * @description 计算并返回可以凑成总金额的硬币组合数:不考虑排列顺序的完全背包问题
+ * @description 计算并返回可以凑成总金额的硬币组合数
+ * 不考虑排列顺序的完全背包问题
  */
 var change = function (amount, coins) {
   const dp = Array(amount + 1).fill(0)

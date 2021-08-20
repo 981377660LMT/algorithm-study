@@ -6,7 +6,8 @@
  * @description 考虑排列顺序的完全背包问题 容量是s,length worddict是物体
  */
 var wordBreak = function (s, wordDict) {
-  if (!wordDict) return false
+  if (wordDict.length === 0) return false
+  // 背包
   const set = new Set(wordDict)
   const dp = Array(s.length + 1).fill(false)
   // dp[i]表示以 i 结尾的字符串是否可以被 wordDict 中组合而成
