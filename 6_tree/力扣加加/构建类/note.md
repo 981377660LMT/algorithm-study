@@ -5,3 +5,12 @@
 3.  其他
 
 二叉搜索树的构建
+
+构建类的模板
+
+```JS
+const root = new BinaryTree(...)
+root.left = helper(...)
+root.right = helper(...)
+return root
+```

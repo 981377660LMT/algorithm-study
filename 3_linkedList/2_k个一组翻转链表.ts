@@ -20,7 +20,7 @@ d.next = e
 // 思路和两个一组翻转链表相同
 // 每 k 个节点一组进行翻转
 // 1.判断存在
-// 2.reverse
+// 2.reverseTwo
 // 3.递归
 const reverseKGroup = (head: Node, k: number): Node => {
   // 1.判断连续的k个节点是否存在 否则返回head
@@ -32,7 +32,7 @@ const reverseKGroup = (head: Node, k: number): Node => {
     if (!headP) return head
   }
 
-  const reverse = (head: Node) => {
+  const reverseTwo = (head: Node) => {
     let p1: Node | undefined = undefined
     let p2: Node | undefined = head
     while (p2) {
@@ -43,10 +43,10 @@ const reverseKGroup = (head: Node, k: number): Node => {
     }
     return p1
   }
-  // 2. reverse k 这一段 反转后headP在头部
+  // 2. reverseTwo k 这一段 反转后headP在头部
   const next = headP.next
   headP.next = undefined
-  reverse(head)
+  reverseTwo(head)
 
   // 3.递归
   head.next = reverseKGroup(next!, k)

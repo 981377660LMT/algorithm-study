@@ -11,52 +11,36 @@
 const strStr = function (haystack: string, needle: string): number {
   if (needle.length === 0) return 0
   if (haystack.length < needle.length) return -1
-  // haystack指针
-  let i = 0
-  // needle指针
-  let j = 0
-  const lps = calculateLPS(needle)
 
-  while (i < haystack.length && j < needle.length) {
-    if (j === 0 || haystack[i] === needle[j]) {
-      i++
-      j++
-    } else {
-      // j回到指定位置
-      j = lps[j]
+  const lps = getLPS(needle)
+  let j = 0
+  for (let i = 0; i < haystack.length; i++) {
+    while (j > 0 && haystack[i] !== needle[j]) {
+      j = lps[j - 1]
     }
+    if (haystack[i] === needle[j]) j++
+    // 找到头了
     if (j === needle.length) {
-      console.log(i, j)
-      return i - j
+      return i - needle.length + 1
     }
   }
-  // console.log(lps)
   return -1
 }
 
 // 求lps数组
-const calculateLPS = (s: string): number[] => {
+const getLPS = (pattern: string): number[] => {
   // lps[i]表示[0,i]这一段字符串中lps的长度
-  const lps: number[] = Array(s.length).fill(0)
-  let lpsLen = 0
-  let i = 1
-  // 3种状态
-  while (i < s.length) {
-    if (s[i] === s[lpsLen]) {
-      lpsLen++
-      lps[i] = lpsLen
-      i++
-    } else {
-      if (lpsLen - 1 >= 0) {
-        // 不匹配则回退查询
-        lpsLen = lps[lpsLen - 1]
-      } else {
-        // 查不到放弃 置为0 前进
-        lps[i] = 0
-        i++
-      }
+  const lps: number[] = []
+  let j = 0
+  lps.push(j)
+
+  for (let i = 1; i < pattern.length; i++) {
+    while (j > 0 && pattern[i] !== pattern[j]) {
+      //  回退到最长公共前缀结尾处
+      j = lps[j - 1]
     }
-    // console.log(i, s)
+    if (pattern[i] === pattern[j]) j++
+    lps.push(j)
   }
 
   return lps
@@ -64,4 +48,5 @@ const calculateLPS = (s: string): number[] => {
 
 console.log(strStr('abcdaabcdfabcdababcdg', 'abcdab'))
 
+// 10
 export {}

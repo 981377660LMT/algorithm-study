@@ -1,15 +1,28 @@
-const removeElement = (nums: number[], val: number) => {
-  for (let i = 0; i < nums.length; i++) {
-    const element = nums[i]
+const removeElement0 = (nums: number[], val: number) => {
+  for (let j = 0; j < nums.length; j++) {
+    const element = nums[j]
     if (element === val) {
-      nums.splice(i, 1)
-      i--
+      nums.splice(j, 1)
+      j--
     }
   }
 
   return nums
 }
 
+// 双指针 没见过的就搬过来
+const removeElement = (nums: number[], val: number) => {
+  const n = nums.length
+  let i = 0
+  for (let j = 0; j < n; j++) {
+    if (nums[j] !== val) {
+      nums[i] = nums[j]
+      i++
+    }
+  }
+
+  return i
+}
 console.log(removeElement([0, 1, 2, 2, 3, 0, 4, 2], 2))
 console.log(removeElement([3, 2, 2, 3], 3))
 

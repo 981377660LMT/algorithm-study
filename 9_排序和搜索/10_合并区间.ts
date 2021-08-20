@@ -7,10 +7,9 @@ const merge = (intervals: number[][]): number[][] => {
 
   for (let index = 1; index < intervals.length; index++) {
     const interval = intervals[index]
-    const preLeft = res[res.length - 1][0]
-    const preRight = res[res.length - 1][1]
-    const curLeft = interval[0]
-    const curRight = interval[1]
+    const [preLeft, preRight] = res[res.length - 1]
+    const [curLeft, curRight] = interval
+
     // 三种关系:包含，相交，相离
     if (curRight <= preRight) {
       continue

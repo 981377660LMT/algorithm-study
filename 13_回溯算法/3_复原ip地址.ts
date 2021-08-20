@@ -24,7 +24,9 @@ const restoreIpAddress = (s: string): string[] => {
       // 2.排除不合的
       if (isValidString(sub)) {
         // 3.继续bt
-        bt(path.concat(sub), subString.slice(i))
+        path.push(sub)
+        bt(path, subString.slice(i))
+        path.pop()
       }
     }
   }

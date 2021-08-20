@@ -2,21 +2,15 @@
  *
  * @param prices 股票的价格
  * @summary 上帝视角：局部最优，见好就收，见差不动 画图
+ * 给定一个数组 prices ，其中 prices[i] 是一支给定股票第 i 天的价格。
+ * 设计一个算法来计算你所能获取的最大利润。
  */
 const maxProfit = (prices: number[]) => {
-  if (prices.length === 0) return 0
-  let allProfit = 0
-  let currentPrice = prices[0]
-
-  for (let index = 1; index < prices.length; index++) {
-    const priceToday = prices[index]
-    if (priceToday > currentPrice) {
-      allProfit += priceToday - currentPrice
-      currentPrice = priceToday
-    }
+  let result = 0
+  for (let i = 1; i < prices.length; i++) {
+    result += Math.max(prices[i] - prices[i - 1], 0)
   }
-
-  return allProfit
+  return result
 }
 
 console.log(maxProfit([1, 2, 3, 4, 5]))

@@ -14,6 +14,21 @@ a.next = b
 b.next = c
 
 // 递归法反转和迭代法反转都要会
+// 递归法反转
+
+const reverseList1 = (head: Node | undefined) => {
+  const reverse = (pre: Node | undefined, cur: Node | undefined): Node => {
+    if (!cur) return pre!
+    const tmp = cur.next
+    cur.next = pre
+    // 如下递归的写法，其实就是做了这两步
+    //     // pre = cur;
+    //     // cur = temp;
+    return reverse(cur, tmp)
+  }
+
+  return reverse(undefined, head)
+}
 
 // 迭代法反转
 const reverseList = (head: Node) => {

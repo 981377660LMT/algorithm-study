@@ -14,7 +14,8 @@ var combine = function (n: number, k: number) {
     }
 
     // 这里不一定要遍历到n
-    // i到n中至少要有k-path.length个元素 提速10%
+    // i 大于n - (k - path.length) + 1则之后path装不满k个数了
+
     for (let i = index + 1; i <= n - (k - path.length) + 1; i++) {
       path.push(i)
       bt(path, i)

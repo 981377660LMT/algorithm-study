@@ -6,6 +6,7 @@
  * 返回滑动窗口中的最大值。
  */
 const maxSlidingWindow = function (nums: number[], k: number): number[] {
+  // 存放的是元素下标，为了取值方便
   const monoStack: number[] = []
   const res: number[] = []
 
@@ -15,9 +16,9 @@ const maxSlidingWindow = function (nums: number[], k: number): number[] {
     }
     monoStack.push(i)
 
-    // remove first element if it's outside the window
+    // 判断当前最大值（即队首元素）是否在窗口中，若不在便将其弹出
     if (i - k === monoStack[0]) monoStack.shift()
-    // 需要添加了
+    // 当达到窗口大小时便开始向结果中添加数据
     if (i >= k - 1) {
       res.push(nums[monoStack[0]])
     }

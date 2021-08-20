@@ -75,7 +75,7 @@ const lowestCommonAncestor = (root: TreeNode | null, p: TreeNode, q: TreeNode): 
   // 右子树中存在p或q
   const detectRight = lowestCommonAncestor(root.right, p, q)
 
-  if (detectLeft === null && detectRight === null) return null
+  // if (detectLeft === null && detectRight === null) return null
   if (detectLeft === null) return detectRight
   if (detectRight === null) return detectLeft
   // p, q 分别在 root 的左右子树；

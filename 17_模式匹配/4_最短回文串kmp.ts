@@ -6,33 +6,26 @@
  */
 const shortestPalindrome = function (s: string): string {
   const tmp = s + '$' + s.split('').reverse().join('')
-  const lps = calculateLPS(tmp)
+  console.log(tmp)
+  const lps = getLPS(tmp)
   const samePrefixCount = lps[tmp.length - 1]
   const add = s.slice(samePrefixCount).split('').reverse().join('')
   return add + s
 }
-
-const calculateLPS = (s: string): number[] => {
+// 求lps数组
+const getLPS = (pattern: string): number[] => {
   // lps[i]表示[0,i]这一段字符串中lps的长度
-  const lps: number[] = Array(s.length).fill(0)
-  let lpsLen = 0
-  let i = 1
-  // 3种状态
-  while (i < s.length) {
-    if (s[i] === s[lpsLen]) {
-      lpsLen++
-      lps[i] = lpsLen
-      i++
-    } else {
-      if (lpsLen - 1 >= 0) {
-        // 不匹配则回退查询
-        lpsLen = lps[lpsLen - 1]
-      } else {
-        // 查不到放弃 置为0 前进
-        lps[i] = 0
-        i++
-      }
+  const lps: number[] = []
+  let j = 0
+  lps.push(j)
+
+  for (let i = 1; i < pattern.length; i++) {
+    while (j > 0 && pattern[i] !== pattern[j]) {
+      //  回退到最长公共前缀结尾处
+      j = lps[j - 1]
     }
+    if (pattern[i] === pattern[j]) j++
+    lps.push(j)
   }
 
   return lps

@@ -185,3 +185,27 @@ run-length encode(游程编码)
 使用游程编码可以将其描述为：5A4B3C
 
 平衡二叉搜索树的查找和有序数组的二分查找本质都是一样的，只是数据的存储方式不同罢了。那为什么有了有序数组二分，还需要二叉搜索树呢？原因在于树的结构对于**动态数据**比较友好，比如数据是频繁变动的，比如经常添加和删除，那么就可以使用二叉搜索树。
+
+常用判断边界条件
+**检查两个 root 都不为 空**
+
+```JS
+const helper = (root1: BinaryTree | null, root2: BinaryTree | null): BinaryTree | null => {
+    if (!root1) return root2
+    if (!root2) return root1
+    ...
+  }
+```
+
+这等价于写法
+
+```JS
+if(root1&&root1){
+
+
+return ...
+}
+return root1||root1
+```
+
+但是前者更加优雅

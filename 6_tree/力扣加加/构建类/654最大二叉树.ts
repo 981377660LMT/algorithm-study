@@ -9,18 +9,18 @@ import { BinaryTree } from '../Tree'
    右子树是通过数组中 最大值右边部分 递归构造出的最大二叉树。
  */
 const constructMaximumBinaryTree = (nums: number[]): BinaryTree | null => {
-  const con = (arr: number[], left: number, right: number): BinaryTree | null => {
+  const helper = (arr: number[], left: number, right: number): BinaryTree | null => {
     if (left > right) return null
     let maxIndex = left
     for (let index = left; index <= right; index++) {
       if (arr[index] > arr[maxIndex]) maxIndex = index
     }
     const root = new BinaryTree(arr[maxIndex])
-    root.left = con(arr, left, maxIndex - 1)
-    root.right = con(arr, maxIndex + 1, right)
+    root.left = helper(arr, left, maxIndex - 1)
+    root.right = helper(arr, maxIndex + 1, right)
     return root
   }
-  return con(nums, 0, nums.length - 1)
+  return helper(nums, 0, nums.length - 1)
 }
 
 console.dir(constructMaximumBinaryTree([3, 2, 1, 6, 0, 5]), { depth: null })

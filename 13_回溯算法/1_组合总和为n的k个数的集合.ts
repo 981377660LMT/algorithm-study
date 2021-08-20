@@ -8,7 +8,7 @@
 const combinationSum = (k: number, n: number): number[][] => {
   const res: number[][] = []
 
-  const bt = (path: number[], sum: number, index: number, visited: boolean[]) => {
+  const bt = (path: number[], sum: number, index: number) => {
     if (path.length === k) {
       if (sum === n) res.push(path.slice())
       return
@@ -16,11 +16,11 @@ const combinationSum = (k: number, n: number): number[][] => {
 
     for (let i = index; i < 10; i++) {
       path.push(i)
-      bt(path, sum + i, i + 1, visited)
+      bt(path, sum + i, i + 1)
       path.pop()
     }
   }
-  bt([], 0, 1, [])
+  bt([], 0, 1)
 
   return res
 }

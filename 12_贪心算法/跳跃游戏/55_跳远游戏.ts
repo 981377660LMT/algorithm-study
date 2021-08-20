@@ -1,7 +1,9 @@
+// 判断你是否能够到达最后一个位置。
 const canJump = (nums: number[]): boolean => {
   if (nums.length === 1) return true
   let maxCanJumpIndex = 0
 
+  // 求最大覆盖范围
   for (let curIndex = 0; curIndex < nums.length - 1; curIndex++) {
     const curValue = nums[curIndex]
     maxCanJumpIndex = Math.max(maxCanJumpIndex, curIndex + curValue)

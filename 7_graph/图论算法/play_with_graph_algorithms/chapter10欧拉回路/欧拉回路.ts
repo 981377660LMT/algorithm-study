@@ -26,6 +26,12 @@ class EulerLoop {
     return true
   }
 
+  /**
+   * @description Hierholzer算法(插入回路法)
+   * （1）选择任一顶点为起点，入栈curPath，深度搜索访问顶点，将经过的边都删除，经过的顶点入栈curPath。
+    （2）如果当前顶点没有相邻边，则将该顶点从curPath出栈到loop。
+    （3）loop中的顶点逆序，就是从起点出发的欧拉回路。(当然顺序也是)
+   */
   get eulerLoop(): number[] {
     if (!this.hasEulerLoop) return []
     const res: number[] = []
@@ -34,9 +40,10 @@ class EulerLoop {
     const stack: number[] = [cur]
 
     while (stack.length) {
+      console.log(stack, res)
       if (clonedAdjMap.degree(cur) !== 0) {
         stack.push(cur)
-        const next = clonedAdjMap.adj(cur).shift()!
+        const next = clonedAdjMap.adj(cur).pop()!
         clonedAdjMap.removeEdge(cur, next)
         cur = next
       } else {

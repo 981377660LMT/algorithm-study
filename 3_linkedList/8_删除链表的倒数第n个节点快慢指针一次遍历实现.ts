@@ -26,13 +26,14 @@ const removeNthFromEnd = (head: Node | undefined, n: number) => {
     fast = fast?.next
   }
 
-  while (fast) {
+  // 注意这里是fast?.next而不是fast 要让 slow成为要删除的节点的前一个结点
+  while (fast?.next) {
     fast = fast.next
     slow = slow?.next
   }
 
   // 删除此节点
-  slow!.value = slow?.next?.value!
+  // slow!.value = slow?.next?.value!
   slow!.next = slow?.next?.next
 
   return head

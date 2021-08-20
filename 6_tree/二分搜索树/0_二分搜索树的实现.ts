@@ -245,7 +245,7 @@ class BST<BSTNodeValue extends number> {
         return leftNode
       }
       // 待删除结点左右子树都不为空
-      //  找后继节点代替
+      //  找后继/前驱节点代替(这里找的是后继)
       else {
         let rootP: TreeNode | null = root.right
 
