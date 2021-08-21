@@ -8,12 +8,13 @@ import { UnionFind } from '../0_并查集'
  */
 const findRedundantConnection = function (edges: number[][]): number[] {
   const uf = new UnionFind()
+  const res: number[][] = []
   for (const [v, w] of edges) {
     uf.add(v).add(w)
-    if (uf.isConnected(v, w)) return [v, w]
-    uf.union(v, w)
+    if (uf.isConnected(v, w)) res.push([v, w])
+    else uf.union(v, w)
   }
-  return [Infinity, Infinity]
+  return res.pop()!
 }
 
 console.log(

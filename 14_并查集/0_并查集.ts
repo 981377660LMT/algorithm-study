@@ -7,7 +7,15 @@
 // 查找集合中的元素。
 // 并查集的典型应用是有关连通分量的问题，
 // 并查集解决单个问题（添加，合并，查找）的时间复杂度都是O(h)(因为都是用的map的set和get方法)。
-class UnionFind<U = unknown> {
+
+interface IUnionFind<U> {
+  isConnected: (key1: U, key2: U) => boolean
+  add: (key: U) => this
+  union: (key1: U, key2: U) => this
+  find: (key: U) => U | undefined
+}
+
+class UnionFind<U = unknown> implements IUnionFind<U> {
   private static readonly rootSymbol = Symbol.for('UnionFind_Root')
   // 记录每个节点的父节点
   // 如果节点互相连通（从一个节点可以达到另一个节点），那么他们的祖先是相同的。
@@ -61,6 +69,7 @@ class UnionFind<U = unknown> {
     const root1 = this.find(key1)
     const root2 = this.find(key2)
     if (root1 !== undefined && root2 !== undefined && root1 !== root2) {
+      // key1 指向key2
       this.parent.set(root1, root2)
       this.count--
     }
