@@ -1,4 +1,4 @@
-import { betweenK } from '../api'
+import { betweenK } from '../前缀和api'
 
 /**
  * @param {number[]} nums

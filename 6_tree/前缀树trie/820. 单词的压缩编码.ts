@@ -12,7 +12,7 @@ const minimumLengthEncoding = function (words: string[]): number {
   let res = 0
   const trie = new Trie()
 
-  words = words.sort((a, b) => b.length - a.length).map(word => word.split('').reverse().join(''))
+  words.sort((a, b) => b.length - a.length).map(word => word.split('').reverse().join(''))
 
   words.forEach(word => {
     if (!trie.startsWith(word)) {

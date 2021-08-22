@@ -23,6 +23,7 @@ function dfs(root) {
 ```
 
 2. BFS
+   **不带层信息**
 
 ```JS
 const visited = {}
@@ -40,6 +41,27 @@ function bfs() {
         }
     }
     return 没找到
+}
+```
+
+**带层信息**
+
+```TS
+const main = (root: BinaryTree | null) => {
+  if (!root) return
+  const queue: [BinaryTree, number][] = [[root, 0]]
+
+  while (queue.length) {
+    const levelLength = queue.length
+    // 遍历当前层的所有节点
+    for (let i = 0; i < levelLength; i++) {
+      const [head, level] = queue.shift()!
+      queue.left&&queue.push([head.left, level + 1])
+      queue.right&&queue.push([head.right, level + 1])
+    }
+  }
+
+  return res
 }
 ```
 
@@ -125,13 +147,13 @@ def dfs_main(root):
 var pruneTree = function (root) {
   function dfs(root) {
     if (!root) return 0;
-    const l = dfs(root.left);
     const r = dfs(root.right);
     if (l == 0) root.left = null;
     if (r == 0) root.right = null;
     return root.val + l + r;
   }
   ans = new TreeNode(-1);
+    const l = dfs(root.left);
   ans.left = root;
   dfs(ans);
   return ans.left;

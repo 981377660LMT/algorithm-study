@@ -28,7 +28,7 @@ const replaceWords = function (dictionary: string[], sentence: string): string {
   const trie = new WordTrie()
 
   dictionary.forEach(w => trie.insert(w))
-  sentence.split(/\s+/g).forEach(w => res.push(trie.searchWord(w)))
+  sentence.split(/\s+/).forEach(w => res.push(trie.searchWord(w)))
 
   return res.join(' ')
 }

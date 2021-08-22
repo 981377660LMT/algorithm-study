@@ -1,5 +1,7 @@
 # js-algorithm
 
+JS,TS 刷题时大数问题可用 BigInt 或者求余解决
+
 分析算法，找到算法的瓶颈部分，然后选取合适的数据结构和算法来优化
 
 数据结构：线性/树/图
@@ -365,3 +367,20 @@ int function1(int x, int n) {
 
 - 平台原因：不是所有的硬件平台都能访问任意内存地址上的任意数据，某些硬件平台只能在某些地址处取某些特定类型的数据，否则抛出硬件异常。为了同一个程序可以在多平台运行，需要内存对齐。
 - 硬件原因：经过内存对齐后，CPU 访问内存的速度大大提升。
+
+**git 提交规范**
+
+feat: add hat wobble
+^--^ ^------------^
+| |
+| +-> Summary in present tense.
+|
++-------> Type: chore, docs, feat, fix, refactor, style, or test.
+
+**feat**: (new feature for the user, not a new feature for build script)
+**fix**: (bug fix for the user, not a fix to a build script)
+**docs**: (changes to the documentation)
+**style**: (formatting, missing semi colons, etc; no production code change)
+**refactor**: (refactoring production code, eg. renaming a variable)
+**test**: (adding missing tests, refactoring tests; no production code change)
+**chore**: (updating grunt tasks etc; no production code change)

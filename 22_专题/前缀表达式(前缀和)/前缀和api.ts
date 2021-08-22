@@ -1,5 +1,6 @@
 // 总的连续子数组个数等于：以索引为 0 结尾的子数组个数 + 以索引为 1 结尾的子数组个数 + ... + 以索引为 n - 1 结尾的子数组个数
 
+// 一维前缀和
 const getPrefixArray = (arr: number[]): number[] => {
   const arrCopy = arr.slice()
   arrCopy.reduce((pre, _, index, arr) => (arr[index] += pre))
@@ -30,7 +31,7 @@ const countSubArray2 = (arr: number[]): number => {
   return res
 }
 
-// 子数组的全部元素都不大于 k的子数组个数
+// （连续)子数组的全部元素都不大于 k的子数组个数
 // atMostK 就是灵魂方法，一定要掌握，不明白建议多看几遍。
 const atMostK = (k: number, nums: number[]): number => {
   let res = 0
@@ -61,3 +62,25 @@ if (require.main === module) {
 }
 
 export { getPrefixArray, atMostK, exactK, betweenK }
+
+// 补充
+/////////////////////////////////////////////////////////
+// 二维前缀和
+const getPrefixArray2 = function (mat: number[][], k: number): void {
+  const m = mat.length
+  const n = mat[0].length
+  const pre = Array.from<number, number[]>({ length: m }, () => Array(n).fill(0))
+
+  // 求前缀和
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      pre[i][j] =
+        (i > 0 ? pre[i - 1][j] : 0) +
+        (j > 0 ? pre[i][j - 1] : 0) -
+        (i > 0 && j > 0 ? pre[i - 1][j - 1] : 0) +
+        mat[i][j]
+    }
+  }
+
+  console.table(pre)
+}

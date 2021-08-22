@@ -13,11 +13,11 @@ interface ITrie {
 // 使用前缀树的话插入查找和前缀的复杂度为O(k),k为字符串长度
 
 class TrieNode {
-  val?: string
+  val: string
   isWord: boolean
   children: Map<string, TrieNode>
 
-  constructor(val?: string, isWord: boolean = false) {
+  constructor(val: string, isWord: boolean = false) {
     this.val = val
     this.isWord = isWord
     this.children = new Map()
@@ -30,7 +30,7 @@ class Trie implements ITrie {
   protected root: TrieNode
 
   constructor() {
-    this.root = new TrieNode()
+    this.root = new TrieNode('')
   }
 
   insert(word: string): Trie {

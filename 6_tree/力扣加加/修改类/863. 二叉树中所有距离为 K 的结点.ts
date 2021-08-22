@@ -11,6 +11,7 @@ type NodeWithParent = AddPropRecursively<BinaryTree, { parent?: BinaryTree | nul
  * @description 返回到目标结点 target 距离为 K 的所有结点的值的列表。 答案可以以任何顺序返回。
  * @description 为了标记节点是否访问过，节点需要添加isVisited 但是为了方便让所有节点val不同
  * @description 先dfs找到这个点 并且增加parent节点(当成图) 然后从这个target出发bfs
+ * @summary 这道题就是先把二叉树转化图,再用图的bfs,求得解
  */
 
 const distanceK = function (root: NodeWithParent, target: number, k: number): number[] {
@@ -50,5 +51,7 @@ const distanceK = function (root: NodeWithParent, target: number, k: number): nu
   return res
 }
 
-console.dir(distanceK(deserializeNode([3, 5, 1, 6, 2, 0, 8, null, null, 7, 4])!, 5, 2), { depth: null })
+console.dir(distanceK(deserializeNode([3, 5, 1, 6, 2, 0, 8, null, null, 7, 4])!, 5, 2), {
+  depth: null,
+})
 // [ 1, 7, 4 ]

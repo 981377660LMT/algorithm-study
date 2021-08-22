@@ -11,7 +11,7 @@ const biSearch = (arr: number[], target: number): number => {
   let r = arr.length - 1
   // 因此当 left <= right 的时候，解空间都不为空，此时我们都需要继续搜索
   while (l <= r) {
-    const mid = Math.floor((l + r) / 2)
+    const mid = (l + r) >> 1
     const midElement = arr[mid]
     if (midElement === target) {
       return mid

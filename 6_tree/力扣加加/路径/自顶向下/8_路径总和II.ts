@@ -1,4 +1,7 @@
 // 深度优先
+
+import { deserializeNode } from '../../构建类/297二叉树的序列化与反序列化'
+
 // 二叉树
 interface BinaryTree {
   val: number
@@ -44,13 +47,12 @@ const pathSum = (root: BinaryTree | null, target: number) => {
 
   const dfs = (root: BinaryTree | null, sum: number, path: number[]) => {
     if (!root) return
-    console.log(root.val, sum)
-
+    console.log(path)
     // 叶子节点
     if (!root.left && !root.right) {
       if (sum === target) {
         hasPath = true
-        allRoutes.push([...path])
+        allRoutes.push(path.slice())
       }
     }
 
@@ -60,9 +62,8 @@ const pathSum = (root: BinaryTree | null, target: number) => {
     }
     if (root.right) {
       path.push(root.right.val)
-      dfs(root.left, sum + root.right.val, path)
+      dfs(root.right, sum + root.right.val, path)
     }
-
     path.pop()
   }
   dfs(root, root.val, [root.val])
@@ -70,5 +71,5 @@ const pathSum = (root: BinaryTree | null, target: number) => {
   return [hasPath, allRoutes]
 }
 
-console.log(pathSum(bt, 7))
+console.log(pathSum(deserializeNode([5, 4, 8, 11, null, 13, 4, 7, 2, null, null, 5, 1]), 22))
 export {}
