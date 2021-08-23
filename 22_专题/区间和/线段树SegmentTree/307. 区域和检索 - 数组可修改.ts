@@ -1,4 +1,4 @@
-import { SegmentTree } from './线段树'
+import { SegmentTree } from './区间和线段树'
 
 class NumArray {
   private segmentTree: SegmentTree<number>

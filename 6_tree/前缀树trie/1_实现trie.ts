@@ -52,6 +52,11 @@ class Trie implements ITrie {
     return this.traverse(prefix) !== null
   }
 
+  delete(word: string): void {
+    const node = this.traverse(word)
+    node && (node.isWord = false)
+  }
+
   /**
    *
    * @param word 返回val为word的TrieNode
@@ -77,4 +82,4 @@ if (require.main === module) {
   console.log(trie.startsWith('agoo'))
 }
 
-export { Trie }
+export { Trie, TrieNode }

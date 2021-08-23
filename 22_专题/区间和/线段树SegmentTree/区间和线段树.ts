@@ -9,6 +9,7 @@ interface ISegmentTree<S> {
 // 比如[0,1,2,3,4] 左节点存储的[0,1,2] 右节点存储的[3,4]
 // 比如[0,1,2,3,4,5] 左节点存储的[0,1,2] 右节点存储的[3,4,5]
 // 动态查询 O(logn)
+// 注意建树/查询/更新最后都要后序merge
 class SegmentTree<S> implements ISegmentTree<S> {
   private data: S[]
   private tree: S[]
@@ -49,6 +50,7 @@ class SegmentTree<S> implements ISegmentTree<S> {
     const rightTreeIndex = this.rightChild(rootIndex)
     this.buildSegementTree(leftTreeIndex, left, mid)
     this.buildSegementTree(rightTreeIndex, mid + 1, right)
+
     this.tree[rootIndex] = this.mergeFunc(this.tree[leftTreeIndex], this.tree[rightTreeIndex])
   }
 
@@ -91,6 +93,7 @@ class SegmentTree<S> implements ISegmentTree<S> {
       const leftResult = this._query(leftTreeIndex, left, mid, queryLeft, mid)
       // 右边找右边的query范围
       const rightResult = this._query(rightTreeIndex, mid + 1, right, mid + 1, queryRight)
+
       return this.mergeFunc(leftResult, rightResult)
     }
   }

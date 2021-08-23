@@ -34,7 +34,7 @@ const bfs = (n: Node) => {
   console.log(n)
   n.key = n.id
   n.children.map(node => {
-    return bfs(node)
+    bfs(node)
   })
 }
 

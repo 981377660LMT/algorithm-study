@@ -9,7 +9,7 @@ class TreeNode {
   }
 }
 
-// bfs
+// 根据层序遍历反序列化
 const arrayToTree = (arr: (number | null)[]) => {
   const toNode = (item: number | null) => (item == null ? null : new TreeNode(item))
 
