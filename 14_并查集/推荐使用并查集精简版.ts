@@ -14,7 +14,7 @@ const useUnionFind = (size: number) => {
   const union = (key1: number, key2: number) => {
     const root1 = find(key1)
     const root2 = find(key2)
-    // 这一步优化很关键:总是让大的根指向小的根
+    // rank优化:总是让大的根指向小的根
     parent[Math.max(root1, root2)] = Math.min(root1, root2)
   }
 

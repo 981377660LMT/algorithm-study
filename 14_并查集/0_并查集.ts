@@ -22,9 +22,12 @@ class UnionFind<U = unknown> implements IUnionFind<U> {
   private readonly parent: Map<U, U | symbol>
   // 记录无向图连通域数量
   private count: number
+  // rank优化 union时连接到rank较大的根上
+  private rank: Map<U, number>
 
   constructor() {
     this.parent = new Map()
+    this.rank = new Map()
     this.count = 0
   }
 
@@ -46,6 +49,7 @@ class UnionFind<U = unknown> implements IUnionFind<U> {
     if (!this.parent.has(key)) {
       this.parent.set(key, UnionFind.rootSymbol)
       this.count++
+      this.rank.set(key, 1)
     }
     return this
   }
@@ -69,8 +73,17 @@ class UnionFind<U = unknown> implements IUnionFind<U> {
     const root1 = this.find(key1)
     const root2 = this.find(key2)
     if (root1 !== undefined && root2 !== undefined && root1 !== root2) {
-      // key1 指向key2
-      this.parent.set(root1, root2)
+      // rank优化
+      const rank1 = this.rank.get(root1)!
+      const rank2 = this.rank.get(root2)!
+      if (rank1 > rank2) {
+        this.parent.set(root2, root1)
+      } else if (rank1 < rank2) {
+        this.parent.set(root1, root2)
+      } else {
+        this.parent.set(root1, root2)
+        this.rank.set(root2, this.rank.get(root2)! + 1)
+      }
       this.count--
     }
     return this

@@ -1,1 +1,2 @@
-  // arr.unshift(0)
+//@ts-ignore
+console.log(1 - undefined)
