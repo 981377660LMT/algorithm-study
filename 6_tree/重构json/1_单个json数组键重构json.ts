@@ -1,12 +1,10 @@
 const foo = ['a', 'b', 'c', 1]
 
-const gen = (arr: any[]): object => {
-  const head = arr.shift()!
-  return {
-    [head]: arr.length <= 1 ? arr[0] : gen(arr),
-  }
+const gen = (arr: (string | number)[], index: number): unknown => {
+  if (index === arr.length - 1) return arr[index]
+  return { [arr[index]]: gen(arr, index + 1) }
 }
 
-console.dir(gen(foo), { depth: null })
+console.log(gen(foo, 0))
 
 export {}

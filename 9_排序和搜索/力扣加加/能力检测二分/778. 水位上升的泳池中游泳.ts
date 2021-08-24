@@ -13,6 +13,7 @@ const swimInWater = function (grid: number[][]): number {
   // 能力检测
   // 这里使用yield 碰到结果就暂停后面的函数运行(大海捞针,yield可以冲出递归调用栈)
   function* dfs(mid: number, x: number, y: number, visited: Set<string>): Generator<boolean> {
+    if (grid[x][y] > mid) yield false
     if (x === n - 1 && y === n - 1) yield true
     const next = [
       [x - 1, y],
@@ -35,6 +36,7 @@ const swimInWater = function (grid: number[][]): number {
       }
     }
 
+    // visited没必要重置 因为如果到达这个位置一样不可达 所以时间复杂度是n2而不是指数级别
     // visited.delete(`${x}#${y}`)
   }
 
@@ -45,8 +47,21 @@ const swimInWater = function (grid: number[][]): number {
     grid.map(row => Math.max.apply(null, row))
   )
 
+  // let startX = Infinity
+  // let startY = Infinity
+  // searchStart: for (let i = 0; i < n; i++) {
+  //   for (let j = 0; j < n; j++) {
+  //     if (grid[i][j] === 0) {
+  //       startX = i
+  //       startY = j
+  //       break searchStart
+  //     }
+  //   }
+  // }
+
   while (l <= r) {
-    const mid = Math.floor((l + r) / 2)
+    const mid = (l + r) >> 1
+    console.log(mid)
     // 最左二分
     if (dfs(mid, 0, 0, new Set<string>(['0#0'])).next().value) {
       r = mid - 1
@@ -58,13 +73,19 @@ const swimInWater = function (grid: number[][]): number {
   return l
 }
 
+// console.log(
+//   swimInWater([
+//     [0, 1, 2, 3, 4],
+//     [24, 23, 22, 21, 5],
+//     [12, 13, 14, 15, 16],
+//     [11, 17, 18, 19, 20],
+//     [10, 9, 8, 7, 6],
+//   ])
+// )
 console.log(
   swimInWater([
-    [0, 1, 2, 3, 4],
-    [24, 23, 22, 21, 5],
-    [12, 13, 14, 15, 16],
-    [11, 17, 18, 19, 20],
-    [10, 9, 8, 7, 6],
+    [3, 2],
+    [0, 1],
   ])
 )
 // 输出: 16

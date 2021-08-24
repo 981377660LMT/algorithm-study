@@ -4,9 +4,13 @@ const json = {
 }
 
 const dfs = (n, path) => {
-  console.log(n, path)
+  if (typeof n !== 'object') {
+    console.log(n, path)
+  }
   Object.keys(n).forEach(k => {
-    dfs(n[k], path.concat(k))
+    path.push(k)
+    dfs(n[k], path)
+    path.pop()
   })
 }
 

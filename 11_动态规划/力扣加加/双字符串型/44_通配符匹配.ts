@@ -2,6 +2,10 @@
  * @param {string} s
  * @param {string} p
  * @return {boolean}
+ * 注意 这里不是正则的正确用法 只是举例子
+ * '?' 可以匹配任何单个字符。
+   '*' 可以匹配任意字符串（包括空字符串）。例子: a* 可以与 ab 匹配 ,不能与空字符串匹配
+   dp 维度加一在字符串动态规划问题中很常见，特别是要考虑空字符串的情况下，
  */
 const isMatch = function (s: string, p: string): boolean {
   const dp = Array.from<boolean, boolean[]>({ length: s.length + 1 }, () =>
@@ -19,8 +23,8 @@ const isMatch = function (s: string, p: string): boolean {
   for (let i = 1; i < s.length + 1; i++) {
     for (let j = 1; j < p.length + 1; j++) {
       if (p[j - 1] === '*') {
-        // 前面已经匹配，加了之后更加匹配
-        // 前面未匹配，缩短源字符串看是否匹配 'aa', '*'
+        // 1.s少一位
+        // 2.p 少一位
         dp[i][j] = dp[i - 1][j] || dp[i][j - 1]
       } else if (p[j - 1] === s[i - 1] || p[j - 1] === '?') {
         dp[i][j] = dp[i - 1][j - 1]

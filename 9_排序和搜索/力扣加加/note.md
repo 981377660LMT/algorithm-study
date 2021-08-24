@@ -73,9 +73,20 @@ def ability_test_bs(nums):
   return l
 ```
 
-2. 前缀和二分:如果数组全是正的，那么其前缀和就是一个严格递增的数组
-3. 插入排序二分:自行维护有序序列
-4. 计数二分
+2. 前缀和二分:如果数组全是正的，那么其前缀和就是一个严格递增的数组，我们有时候可以基于它来做二分。
+3. 插入排序二分:不断插入并维护序列有序，进而利用有序做一些事情。
+
+```Python
+  d = []
+  for a in A:
+      i = bisect.bisect_left(d, a)
+      if d and i < len(d):
+          d[i] = a
+      else:
+          d.append(a)
+```
+
+4. 计数二分:本质也是能力检测
 
 ```python
 def main(nums, k):

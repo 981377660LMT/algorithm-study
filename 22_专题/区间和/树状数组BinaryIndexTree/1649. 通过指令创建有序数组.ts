@@ -1,4 +1,5 @@
 /**
+ * https://leetcode-pp.github.io/leetcode-cheat/?tab=data-structure-vis
  * @param instructions 1 <= instructions.length <= 105
  * @description
  * 你需要 从左到右 遍历 instructions 中的元素，将它们依次插入 nums 数组中

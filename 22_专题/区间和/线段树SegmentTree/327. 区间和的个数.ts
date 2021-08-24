@@ -1,4 +1,5 @@
 // 数组 A 有多少个连续的子数组，其元素只和在 [lower, upper]的范围内。
+// 1 <= nums.length <= 10**5
 function countRangeSum(nums: number[], lower: number, upper: number): number {}
 
 console.log(countRangeSum([-2, 5, -1], -2, 2))
