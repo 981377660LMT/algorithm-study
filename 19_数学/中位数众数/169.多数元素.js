@@ -13,17 +13,18 @@
 // 减到0就重新换个数开始计数，总能找到最多的那个
 // 假设你方人口超过总人口一半以上，并且能保证每个人口出去干仗都能一对一同归于尽。最后还有人活下来的国家就是胜利。
 var majorityElement = function (nums) {
-  let moore = nums[0]
+  let candidate = 0
   let count = 0
-  for (const anotherMoore of nums) {
-    if (moore === anotherMoore) count++
-    else count--
-    if (count === 0) {
-      moore = anotherMoore
+  for (const num of nums) {
+    if (candidate === num) count++
+    else if (count === 0) {
+      candidate = num
       count = 1
+    } else {
+      count--
     }
   }
-  return moore
+  return candidate
 }
 
 console.log(majorityElement([2, 2, 1, 1, 1, 2, 2]))

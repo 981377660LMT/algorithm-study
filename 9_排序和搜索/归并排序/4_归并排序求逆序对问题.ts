@@ -6,7 +6,14 @@
 const reversePairs = function (nums: number[]): number {
   let ans = 0
 
-  // 合并两个有序数组
+  //
+  /**
+   *
+   * @param arr1 左边的数组
+   * @param arr2 右边的数组
+   * @description 合并两个有序数组
+   * 这两个数组在源数组中元素下标 为i<j的关系
+   */
   const mergeTwo = (arr1: number[], arr2: number[]) => {
     const ll = arr1.length
     const rl = arr2.length
@@ -19,6 +26,7 @@ const reversePairs = function (nums: number[]): number {
         res[index] = arr2[r++]
       } else if (r >= rl) {
         res[index] = arr1[l++]
+        // 后面的全都大
       } else if (arr1[l] > arr2[r]) {
         ans += ll - l
         res[index] = arr2[r++]
