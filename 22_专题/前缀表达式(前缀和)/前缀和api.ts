@@ -1,5 +1,17 @@
 // 总的连续子数组个数等于：以索引为 0 结尾的子数组个数 + 以索引为 1 结尾的子数组个数 + ... + 以索引为 n - 1 结尾的子数组个数
 
+// 添加了S0项的前缀和 求第 1 2 3 项的和 就是 S3-S0
+const getPre = (nums: number[]): number[] => {
+  const len = nums.length
+  const pre = Array<number>(len + 1).fill(0)
+  for (let i = 1; i <= len; i++) {
+    pre[i] = pre[i - 1] + nums[i - 1]
+  }
+  return pre
+}
+
+console.log(getPre([1, 2, 3, 4, 5]))
+
 // 一维前缀和
 const getPrefixArray = (arr: number[]): number[] => {
   const arrCopy = arr.slice()

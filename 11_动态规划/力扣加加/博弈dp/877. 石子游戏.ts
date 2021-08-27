@@ -1,5 +1,5 @@
 /**
- * @param {number[]} piles
+ * @param {number[]} piles piles.length 是偶数。 sum(piles) 是奇数。
  * @return {boolean}
  * @description
  * 偶数堆石子排成一行，每堆都有正整数颗石子 piles[i] 。
@@ -30,3 +30,5 @@ const stoneGame = function (piles: number[]): boolean {
 console.log(stoneGame([5, 3, 4, 5]))
 
 export {}
+// 一共 100 只弓箭 你和你的对手共用。你们每次只能射出一支箭或者两支箭，射击交替进行，设计一个算法，保证自己获胜。
+// 先手，剩下的是 3 的倍数就行（100-1=99），然后按照 3 的倍数射箭必赢。 比如你先拿了 1，剩下 99 个。 对手拿了 1，你就拿 2。这样持续 33 次就赢了。如果对手拿了 2 个，你就拿 1 个，这样持续 33 次你也是赢的。

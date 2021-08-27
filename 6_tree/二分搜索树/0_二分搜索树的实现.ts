@@ -14,6 +14,7 @@ class TreeNode {
 class BST<BSTNodeValue extends number> {
   private root: TreeNode | null
   private _size: number
+
   constructor() {
     this.root = null
     this._size = 0

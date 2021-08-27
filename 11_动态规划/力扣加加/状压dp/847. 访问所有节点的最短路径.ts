@@ -40,3 +40,5 @@ const shortestPathLength = function (graph: number[][]): number {
 }
 
 console.log(shortestPathLength([[1, 2, 3], [0], [0], [0]]))
+
+export {}

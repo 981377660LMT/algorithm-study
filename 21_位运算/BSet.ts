@@ -11,6 +11,7 @@ class BSet {
   }
 
   has(n: number) {
+    // return ((this.state >> n) & 1) === 1
     return (this.state & (1 << n)) === 1 << n
   }
 

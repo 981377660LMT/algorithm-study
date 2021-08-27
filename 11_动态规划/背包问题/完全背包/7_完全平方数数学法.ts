@@ -19,12 +19,14 @@ const numSquares = (n: number) => {
   if (n % 8 === 7) return 4
 
   for (let i = 0; i <= n; i++) {
-    if (isSquare(n - i * i)) return 2
+    if (n < i ** 2) break
+    if (isSquare(n - i ** 2)) return 2
   }
 
   return 3
 }
 
 console.log(numSquares(12))
+console.log(numSquares(8))
 
 export {}
