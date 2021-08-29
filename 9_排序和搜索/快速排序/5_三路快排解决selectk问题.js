@@ -30,14 +30,17 @@ const partition = (arr, l, r) => {
   let midPoint = l
   let rightPoint = r
   while (midPoint <= rightPoint) {
+    // 小于pivot
     if (arr[midPoint] < pivot) {
       swap(arr, leftPoint, midPoint)
       leftPoint++
       midPoint++
     } else if (arr[midPoint] > pivot) {
+      // 大于pivot
       swap(arr, midPoint, rightPoint)
       rightPoint--
     } else {
+      // 等于pivot
       midPoint++
     }
   }

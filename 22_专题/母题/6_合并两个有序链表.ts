@@ -18,7 +18,7 @@ const c2 = new Node(6)
 a2.next = b2
 b2.next = c2
 
-// 这里使用递归写法
+// 递归写法
 const mergeTwoList = (head1: Node | null, head2: Node | null): Node | null => {
   if (!head1) return head2
   if (!head2) return head1
@@ -31,5 +31,30 @@ const mergeTwoList = (head1: Node | null, head2: Node | null): Node | null => {
   }
 }
 
-console.dir(mergeTwoList(a1, a2), { depth: null })
+// 非递归写法
+const merge = (head1: Node | null, head2: Node | null): Node | null => {
+  if (!head1) return head2
+  if (!head2) return head1
+  const dummy = new Node(-1)
+  let dummyP: Node | null = dummy
+  let head1P: Node | null = head1
+  let head2P: Node | null = head2
+
+  while (head1P && head2P) {
+    if (head1P.value <= head2P.value) {
+      dummyP.next = head1P
+      head1P = head1P.next
+    } else {
+      dummyP.next = head2P
+      head2P = head2P.next
+    }
+    dummyP = dummyP?.next
+  }
+
+  dummyP.next = head1P || head2P
+  return dummy.next
+}
+
+// console.dir(mergeTwoList(a1, a2), { depth: null })
+console.dir(merge(a1, a2), { depth: null })
 export default 1

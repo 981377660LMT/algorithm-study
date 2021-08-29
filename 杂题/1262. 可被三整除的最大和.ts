@@ -28,7 +28,7 @@ const maxSumDivThree = function (nums: number[]): number {
       state = [a, b, c]
     }
   }
-
+  console.log(state)
   return state[0]
 }
 

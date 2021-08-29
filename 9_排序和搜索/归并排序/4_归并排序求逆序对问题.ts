@@ -23,7 +23,7 @@ const reversePairs = function (nums: number[]): number {
     for (let index = 0; index < ll + rl; index++) {
       // 超出的情况
       if (l >= ll) {
-        res[index] = arr2[r++]
+        res[index] = arr2[r]
       } else if (r >= rl) {
         res[index] = arr1[l++]
         // 后面的全都大

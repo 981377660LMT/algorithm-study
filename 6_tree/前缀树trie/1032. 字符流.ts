@@ -64,3 +64,5 @@ console.log(streamChecker.query('a'))
 console.log(streamChecker.query('b'))
 console.log(streamChecker.query('c'))
 console.log(streamChecker.query('d')) // cd在里面，true
+
+export {}

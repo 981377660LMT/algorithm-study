@@ -48,6 +48,7 @@ const reverseList = (head: Node, start: number, end: number) => {
 
   let p3: Node | undefined = undefined
   let p4 = p2
+  // 这个部分是两两反转节点
   while (i <= end) {
     const tmp = p2?.next
     p2!.next = p3

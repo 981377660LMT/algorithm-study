@@ -29,7 +29,7 @@ const addTwo = (l1: Node, l2: Node): Node => {
   let p2: Node | undefined = l2
   const newNode = new Node(0)
   let p3 = newNode
-  let overflow = 0
+  let carry = 0
 
   while (p1) {
     stack1.push(p1.value!)
@@ -43,8 +43,8 @@ const addTwo = (l1: Node, l2: Node): Node => {
   while (stack1.length || stack2.length) {
     const v1 = stack1.pop() || 0
     const v2 = stack2.pop() || 0
-    const sum = v1 + v2 + overflow
-    overflow = Math.floor(sum / 10)
+    const sum = v1 + v2 + carry
+    carry = Math.floor(sum / 10)
     const res = sum % 10
 
     // 注意这里创建的是新的头节点,不是新的next节点
@@ -53,8 +53,8 @@ const addTwo = (l1: Node, l2: Node): Node => {
     p3 = head
   }
 
-  if (overflow) {
-    const head = new Node(overflow)
+  if (carry) {
+    const head = new Node(carry)
     head.next = p3
     p3 = head
   }

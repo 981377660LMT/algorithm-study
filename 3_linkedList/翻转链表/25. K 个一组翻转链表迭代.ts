@@ -24,6 +24,9 @@ d.next = e
 // 3.递归
 const reverseKGroup = (head: Node, k: number): Node => {
   if (k === 1) return head
+  if (!head || !head.next) return head
+
+  // 反转一整段
   const reverse = (head: Node) => {
     let p1: Node | undefined = undefined
     let p2: Node | undefined = head
@@ -35,6 +38,7 @@ const reverseKGroup = (head: Node, k: number): Node => {
     }
     return p1
   }
+
   const dummy = new Node(0, head)
   let dummyP: Node = dummy
 

@@ -12,6 +12,7 @@ class Node {
 const mergeTwo = (l1: Node, l2: Node) => {
   const res = new Node(0)
   let p = res
+  // 假装queue是一个优先队列
   const queue: Node[] = l1.value > l2.value ? [l2, l1] : [l1, l2]
   while (queue.length) {
     const head = queue.shift()!
