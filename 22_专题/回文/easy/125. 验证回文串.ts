@@ -2,6 +2,8 @@
  * @param {string} s
  * @return {boolean}
  * @description 只考虑字母和数字字符，可以忽略字母的大小写。
+ * 如果两个指针的元素不相同，则直接返回 false,
+   如果两个指针的元素相同，我们同时更新头尾指针，循环。 直到头尾指针相遇。
  */
 var isPalindrome = function (s: string): boolean {
   const isLetterOrNumber = (code: number) => {

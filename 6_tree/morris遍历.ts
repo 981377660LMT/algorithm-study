@@ -74,3 +74,5 @@ const morris = (root: BinaryTree) => {
   }
 }
 morris(bt)
+
+export {}

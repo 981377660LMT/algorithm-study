@@ -40,7 +40,7 @@ const addTwo = (l1: Node, l2: Node): Node => {
     n3.next = new Node(overflow)
   }
 
-  return l3
+  return l3.next!
 }
 
 console.log(addTwo(a, a))

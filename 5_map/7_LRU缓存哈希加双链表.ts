@@ -15,10 +15,14 @@ class ListNode<K, V> {
 /**
  * @summary 本质上是 散列表+双端链表
  * @description
- * 散列表O(1) 根据key找到对应的node的val
- * 双端链表适合遍历keys
+ * 根据题目要求,存储的数据需要保证顺序关系(逻辑层面) ===> 使用数组,链表等保证顺序关系
+   同时需要对数据进行频繁的增删, 时间复杂度 O(1) ==> 使用链表等
+   对数据进行读取时, 时间复杂度 O(1) ===> 使用哈希表 最终采取双向链表 + 哈希表
+   双向链表按最后一次访问的时间的顺序进行排列, 链表头部为最近访问的节点
+   哈希表,以关键字为键,以链表节点的地址为值
+ * 
  */
-class LRU<K extends PropertyKey, V> {
+class LRUCache<K extends PropertyKey, V> {
   private size: number
   private capacity: number
   private data: Record<K, ListNode<K, V>>
@@ -30,10 +34,8 @@ class LRU<K extends PropertyKey, V> {
     this.size = 0
     this.capacity = capacity
     this.data = Object.create(null)
-    // @ts-ignore
-    this.head = new ListNode<K, V>()
-    // @ts-ignore
-    this.tail = new ListNode<K, V>()
+    this.head = new ListNode<K, V>(undefined as unknown as K, undefined as unknown as V)
+    this.tail = new ListNode<K, V>(undefined as unknown as K, undefined as unknown as V)
     this.head.next = this.tail
     this.tail.pre = this.head
   }
@@ -104,7 +106,7 @@ class LRU<K extends PropertyKey, V> {
 }
 
 if (require.main === module) {
-  const cache = new LRU(2)
+  const cache = new LRUCache(2)
   cache.put(1, 1)
   assert.strictEqual(cache.get(1), 1)
   cache.put(2, 2)

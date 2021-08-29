@@ -11,6 +11,19 @@ temp = 待插入位置的前驱节点.next
 待插入指针.next = temp
 **删除**
 pre.next=pre.next.next
+
+```JS
+ while (dummyP && dummyP.next) {
+    let next: Node | undefined = dummyP.next
+    if (next.value === val) {
+      dummyP.next = next.next
+      next = next.next
+    }
+    // 只有下个节点不是要删除的节点才更新 current
+    if (!next || next.value !== val) dummyP = next
+  }
+```
+
 **遍历**
 当前指针 = 头指针
 while 当前节点不为空 {
@@ -18,7 +31,7 @@ print(当前节点)
 当前指针 = 当前指针.next
 }
 
-**翻转**
+**翻转整段链表**
 tmp=p2.next
 p2.next=p1
 p1=p2
