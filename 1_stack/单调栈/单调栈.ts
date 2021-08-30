@@ -13,7 +13,7 @@ const findNextLarge = (nums: number[]) => {
     // 栈不为空且当前元素大于栈顶元素
     // 说明当前元素是栈顶元素的下一个更大元素
     // while循环表示当前元素是栈中所有已存元素的下一个更大元素
-    while (monoStack.length > 0 && num > monoStack[monoStack.length - 1]) {
+    while (monoStack.length && num > monoStack[monoStack.length - 1]) {
       memo.set(monoStack.pop()!, num)
     }
     monoStack.push(num)
