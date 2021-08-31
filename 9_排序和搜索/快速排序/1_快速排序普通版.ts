@@ -1,5 +1,3 @@
-const qs = (arr: number[]) => qucikSort(arr, 0, arr.length - 1)
-
 /**
  *
  * @param arr
@@ -12,6 +10,31 @@ const qs = (arr: number[]) => qucikSort(arr, 0, arr.length - 1)
  * 解决:随机partion 生成[l,r]的随机值
  */
 const qucikSort = (arr: number[], l: number, r: number): void => {
+  /**
+   *
+   * @param arr
+   * @param l
+   * @param r
+   * @description arr[l]是pivot
+   * @description 要分为小于pivot 等于pivot 大于pivot三个部分
+   */
+  const partition = (arr: number[], l: number, r: number) => {
+    let pivotIndex = l
+    const pivot = arr[l]
+    for (let i = l + 1; i <= r; i++) {
+      if (arr[i] < pivot) {
+        pivotIndex++
+        ;[[arr[i], arr[pivotIndex]]] = [[arr[pivotIndex], arr[i]]]
+      }
+    }
+
+    // 待比较数据放入最终位置
+    ;[[arr[l], arr[pivotIndex]]] = [[arr[pivotIndex], arr[l]]]
+
+    // 返回待比较数据最终位置
+    return pivotIndex
+  }
+
   if (arr.length <= 1) return
   if (l >= r) return
   // 最基础的partition
@@ -20,32 +43,8 @@ const qucikSort = (arr: number[], l: number, r: number): void => {
   qucikSort(arr, pivotIndex + 1, r)
 }
 
-/**
- *
- * @param arr
- * @param l
- * @param r
- * @description arr[l]是pivot
- * @description 将小于pivot的数移到pivot前面 形成一个递增的序列
- */
-const partition = (arr: number[], l: number, r: number) => {
-  let pivotIndex = l
-  const pivot = arr[l]
-  for (let i = l + 1; i <= r; i++) {
-    if (arr[i] < pivot) {
-      pivotIndex++
-      ;[[arr[i], arr[pivotIndex]]] = [[arr[pivotIndex], arr[i]]]
-    }
-  }
-
-  // pivot放中间
-  ;[[arr[l], arr[pivotIndex]]] = [[arr[pivotIndex], arr[l]]]
-
-  return pivotIndex
-}
-
 const arr = [4, 1, 2, 5, 3, 6, 7]
-qs(arr)
+qucikSort(arr, 0, arr.length - 1)
 console.log(arr)
 
 export {}

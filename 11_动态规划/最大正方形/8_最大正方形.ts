@@ -1,6 +1,6 @@
 // 在一个由 '0' 和 '1' 组成的二维矩阵内，找到只包含 '1' 的最大正方形，并返回其面积。
 
-// dp[i][j]代表以[i][j]为右下角的正方形的最大边长
+// dp[i][j]代表以[i][j]为右下角的正方形的最大边长 这里直接在原矩阵修改
 const maximalSquare = (matrix: string[][]) => {
   // const dp = Array.from(Array(matrix.length), () => Array(matrix[0].length).fill(0))
   // console.table(dp)
@@ -13,7 +13,7 @@ const maximalSquare = (matrix: string[][]) => {
           matrix[i][j] = Math.min(matrix[i][j - 1], matrix[i - 1][j], matrix[i - 1][j - 1]) + 1
         }
       }
-      //@ts-ignore
+      // @ts-ignore
       max = Math.max(max, matrix[i][j])
     }
   }

@@ -32,6 +32,12 @@ const deleteNode = (head: Node | undefined, val: number): Node | undefined => {
 
   return dummy.next
 }
+const deleteNode2 = (head: Node | undefined, val: number): Node | undefined => {
+  if (!head) return head
+  head.next = deleteNode2(head.next, val)
+  if (head.value === val) return head.next
+  else return head
+}
 
 console.dir(deleteNode(a, 2), { depth: null })
 

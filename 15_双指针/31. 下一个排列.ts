@@ -20,6 +20,15 @@ const nextPermutation = function (nums: number[]) {
     nums.push.apply(nums, preSorted.concat(sorted, postSorted))
     return nums
   }
+
+  const reverseRange = (nums: number[], i: number, j: number) => {
+    while (i < j) {
+      ;[nums[i], nums[j]] = [nums[j], nums[i]]
+      i++
+      j--
+    }
+  }
+
   loop: for (let i = nums.length - 1; i >= 0; i--) {
     for (let j = nums.length - 1; j > i; j--) {
       // 后面大于前面
@@ -27,7 +36,9 @@ const nextPermutation = function (nums: number[]) {
         console.log(i, j)
         // 交换玩排序
         ;[nums[i], nums[j]] = [nums[j], nums[i]]
-        partialSort(nums, i + 1, nums.length, (a, b) => a - b)
+        // 这里可以换成 reverseRange
+        // partialSort(nums, i + 1, nums.length, (a, b) => a - b)
+        reverseRange(nums, i + 1, nums.length - 1)
         mono = false
         break loop
       }

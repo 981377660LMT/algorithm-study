@@ -46,7 +46,8 @@ const serialize1 = (root: NAryNode<number>): string => {
   return res.join(',')
 }
 
-// 思路：对root的每一个孩子， root.children.push(dfs())
+// 思路：对root的每一个孩子，
+// root.children.push(dfs())
 const deserialize1 = (s: string): NAryNode<string> | null => {
   if (!s.length) return null
   function* genVal() {
@@ -86,8 +87,8 @@ const serialize2 = (root: NAryNode<number>): string => {
 }
 
 // 这也是反序列二叉树的解法:
-// 1.建立childnode
-// 2.push childnode到children
+// 1.建立root
+// 2.push childnode到root
 // 3.push childnode到queue
 const deserialize2 = (s: string): NAryNode<string> | null => {
   if (!s.length) return null
@@ -117,3 +118,8 @@ console.log(serialize1(tree))
 console.log(serialize2(tree))
 console.dir(deserialize1('1,3,3,2,5,0,6,0,2,0,4,0'), { depth: null })
 // console.dir(deserialize2('1,3,4,0,2,0,3,2,6,0,5,0'), { depth: null })
+
+// 总结
+// 对于json(n叉树)
+// dfs是从左往右深入处理
+// bfs是对每层的键从上往下处理

@@ -3,16 +3,16 @@ const lengthOfLongestSubstring = (s: string): number => {
   let left = 0
   let right = 0
   let max = 0
-  const map = new Map<string, boolean>()
+  const set = new Set<string>()
 
   while (right <= s.length - 1) {
-    if (!map.has(s[right])) {
-      map.set(s[right], true)
-      max = Math.max(map.size, max)
+    if (!set.has(s[right])) {
+      set.add(s[right])
+      max = Math.max(set.size, max)
       right++
     } else {
       left++
-      map.delete(s[left - 1])
+      set.delete(s[left - 1])
     }
   }
 

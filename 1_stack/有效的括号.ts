@@ -14,7 +14,7 @@ const isValid = (str: string) => {
       stack.push(s)
     } else if (rightBrackets.includes(s)) {
       // 判断栈顶元素与当前右括号的关系，匹配则弹出左括号
-      const last = stack.slice(-1)[0]
+      const last = stack[stack.length - 1]
       if (leftBrackets.indexOf(last) === rightBrackets.indexOf(s)) {
         stack.pop()
       } else {

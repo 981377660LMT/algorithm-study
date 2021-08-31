@@ -1,5 +1,3 @@
-const qs = (arr: number[]) => qucikSort(arr, 0, arr.length - 1)
-
 /**
  *
  * @param arr
@@ -18,50 +16,51 @@ const qs = (arr: number[]) => qucikSort(arr, 0, arr.length - 1)
  * 解决:重新设计partition算法 双路快排
  */
 const qucikSort = (arr: number[], l: number, r: number): void => {
-  if (arr.length <= 1) return
-  if (l >= r) return
-  // 最基础的partition
-  const pivotIndex = partition(arr, l, r)
-  qucikSort(arr, l, pivotIndex - 1)
-  qucikSort(arr, pivotIndex + 1, r)
-}
-
-/**
- *
- * @description arr[l]是pivot
- * @description 将小于pivot的数移到pivot前面 形成一个递增的序列
- */
-const partition = (arr: number[], l: number, r: number) => {
-  // 优化，随机取标定点，以解决近乎有序的列表
-  const randIndex = randint(l, r)
-  ;[[arr[l], arr[randIndex]]] = [[arr[randIndex], arr[l]]]
-
-  let pivotIndex = l
-  const pivot = arr[l]
-  for (let i = l + 1; i <= r; i++) {
-    if (arr[i] < pivot) {
-      pivotIndex++
-      ;[[arr[i], arr[pivotIndex]]] = [[arr[pivotIndex], arr[i]]]
+  /**
+   *
+   * @description arr[l]是pivot
+   * @description 要分为小于pivot 等于pivot 大于pivot三个部分
+   */
+  const partition = (arr: number[], l: number, r: number): number => {
+    /**
+     * @description 生成[start,end]的随机整数
+     */
+    const randint = (start: number, end: number) => {
+      if (start > end) throw new Error('invalid interval')
+      const amplitude = end - start
+      return Math.floor((amplitude + 1) * Math.random()) + start
     }
+
+    // 优化，随机取标定点，以解决近乎有序的列表
+    const randIndex = randint(l, r)
+    ;[[arr[l], arr[randIndex]]] = [[arr[randIndex], arr[l]]]
+
+    let pivotIndex = l
+    const pivot = arr[l]
+    for (let i = l + 1; i <= r; i++) {
+      if (arr[i] < pivot) {
+        // 这里要先移pivotIndex是因为不能动最左边的比较元素 比较元素要最后移到自己的位置
+        pivotIndex++
+        ;[[arr[i], arr[pivotIndex]]] = [[arr[pivotIndex], arr[i]]]
+      }
+    }
+
+    // pivot放到中间应有的位置
+    ;[[arr[l], arr[pivotIndex]]] = [[arr[pivotIndex], arr[l]]]
+
+    return pivotIndex
   }
 
-  // pivot放中间
-  ;[[arr[l], arr[pivotIndex]]] = [[arr[pivotIndex], arr[l]]]
-
-  return pivotIndex
-}
-
-/**
- * @description 生成[start,end]的随机整数
- */
-const randint = (start: number, end: number) => {
-  if (start > end) throw new Error('invalid interval')
-  const amplitude = end - start
-  return Math.floor((amplitude + 1) * Math.random()) + start
+  if (l < r) {
+    // 最基础的partition
+    const pivotIndex = partition(arr, l, r)
+    qucikSort(arr, l, pivotIndex - 1)
+    qucikSort(arr, pivotIndex + 1, r)
+  }
 }
 
 const arr = [4, 1, 2, 5, 3, 6, 7]
-qs(arr)
+qucikSort(arr, 0, arr.length - 1)
 console.log(arr)
 
 export {}

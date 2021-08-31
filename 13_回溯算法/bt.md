@@ -70,3 +70,20 @@
 子集问题：一个 N 个数的集合里有多少符合条件的子集
 排列问题：N 个数按一定规则全排列，有几种排列方式
 棋盘问题：N 皇后，解数独等等
+//////////////////////////////////////////////////////
+**尝试删除每一个位置的元素** 模板:
+例题见 1_stack\括号\301. 删除无效的括号.ts
+
+```JS
+for (const item of queue) {
+  for (let i = 0; i < item.length; i++) {
+    // 尝试去掉每一个位置的元素
+      const next = item.slice(0, i) + item.slice(i + 1)
+      if (!visited.has(next)) {
+        queue.push(next)
+        visited.add(next)
+    }
+  }
+}
+
+```

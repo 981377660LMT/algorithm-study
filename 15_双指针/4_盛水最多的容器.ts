@@ -1,4 +1,5 @@
 // O(n)时间复杂
+// 最大面积一定是当前的面积或者通过移动短的端点得到
 const maxArea = (height: number[]) => {
   let max = 0
   let left = 0

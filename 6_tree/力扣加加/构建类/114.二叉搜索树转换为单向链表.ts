@@ -1,4 +1,4 @@
-import { deserializeNode } from '../力扣加加/构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from './297二叉树的序列化与反序列化'
 
 class TreeNode {
   val: number
@@ -17,6 +17,11 @@ class TreeNode {
 // cur.left = None
 // pre.right = cur
 // pre = cur
+// 展开后的单链表应该与二叉树 中序遍历 顺序相同。
+
+/**
+ * @summary 二叉树转链表 关键是要记录pre节点
+ */
 function convertBiNode(root: TreeNode | undefined): TreeNode | undefined {
   if (!root) return root
   let res: TreeNode | undefined = undefined
@@ -25,11 +30,13 @@ function convertBiNode(root: TreeNode | undefined): TreeNode | undefined {
   const dfs = (root: TreeNode | undefined) => {
     if (!root) return
     dfs(root.left)
+
     // 当第一次执行到下面这一行代码，恰好是在最左下角:此时res是最左叶子节点
     !res && (res = root)
     root.left = undefined
     pre && (pre.right = root)
     pre = root
+
     dfs(root.right)
   }
   dfs(root)

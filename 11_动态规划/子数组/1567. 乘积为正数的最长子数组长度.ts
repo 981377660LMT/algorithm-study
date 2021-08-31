@@ -9,6 +9,7 @@ var getMaxLen = function (nums: number[]): number {
   const n = nums.length
   const positive = Array<number>(n).fill(0)
   const negative = Array<number>(n).fill(0)
+  let max = -Infinity
 
   if (nums[0] < 0) {
     negative[0] = 1
@@ -27,8 +28,9 @@ var getMaxLen = function (nums: number[]): number {
       if (negative[i - 1] !== 0) positive[i] = negative[i - 1] + 1
     }
   }
-
+  console.log(max)
   return Math.max.apply(null, positive)
 }
 
 console.log(getMaxLen([1, -2, -3, 4]))
+console.log(getMaxLen([2, 3, -2, 4]))

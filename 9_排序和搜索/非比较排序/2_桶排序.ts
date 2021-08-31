@@ -1,4 +1,5 @@
 // 分桶，排序，合并
+// 桶排序是计数排序的升级版。它也是利用函数的映射关系。
 const bucketSort = (arr: number[], size: number): number[] => {
   const res: number[] = []
   const min = Math.min.apply(null, arr)

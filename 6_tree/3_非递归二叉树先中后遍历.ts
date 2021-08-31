@@ -1,5 +1,7 @@
 // 堆栈
 
+import { deserializeNode } from './力扣加加/构建类/297二叉树的序列化与反序列化'
+
 interface BinaryTree {
   val: number
   left: BinaryTree | null
@@ -80,7 +82,7 @@ const inOrder = (root: BinaryTree | null) => {
   const stack: [0 | 1, BinaryTree][] = [[0, root]]
 
   while (stack.length) {
-    const [color, head] = stack.shift()!
+    const [color, head] = stack.pop()!
     if (color === 0) {
       // 对于没见过的节点，这样可以保证出栈的顺序是left mid right
       head.right && stack.push([0, head.right])
@@ -106,7 +108,7 @@ const inOrder = (root: BinaryTree | null) => {
 // }
 
 // preOrder(bt)
-console.log(inOrder(bt))
+console.log(inOrder(deserializeNode([1, null, 2, 3])))
 // postOrder(bt)
 
 export {}

@@ -30,15 +30,22 @@ const longestValidParentheses = function (s: string): number {
   }
 
   // 寻找最长的连续的0的长度
-  const markString = mark.join('')
-  const match = markString.match(/(0)\1*/g)
-  if (!match) return 0
-  return Math.max.apply(
-    null,
-    match.map(zeros => zeros.length)
-  )
+  const zeroLength = mark
+    .join('')
+    .split('1')
+    .map(v => v.length)
+  return Math.max.apply(null, zeroLength)
+  // return
+  // console.log(mark)
+  // const markString = mark.join('')
+  // const match = markString.match(/(0)\1*/g)
+  // if (!match) return 0
+  // return Math.max.apply(
+  //   null,
+  //   match.map(zeros => zeros.length)
+  // )
 }
 
-console.log(longestValidParentheses('(()'))
+console.log(longestValidParentheses('(()))()())(()'))
 
 export default 1

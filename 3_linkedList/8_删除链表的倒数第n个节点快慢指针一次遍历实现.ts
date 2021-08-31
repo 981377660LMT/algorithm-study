@@ -20,8 +20,10 @@ d.next = e
 // 先用快慢指针定位到要删除的节点
 // 见删除某一个节点的操作
 const removeNthFromEnd = (head: Node | undefined, n: number) => {
-  let slow = head
-  let fast = head
+  const dummy = new Node(0, head)
+  let slow: Node | undefined = dummy
+  let fast: Node | undefined = dummy
+
   for (let index = 0; index < n; index++) {
     fast = fast?.next
   }
@@ -36,7 +38,7 @@ const removeNthFromEnd = (head: Node | undefined, n: number) => {
   // slow!.value = slow?.next?.value!
   slow!.next = slow?.next?.next
 
-  return head
+  return dummy.next
 }
 
 console.dir(removeNthFromEnd(a, 2), { depth: null })
