@@ -44,19 +44,20 @@ const bt: TreeNode = {
 
 // 思路:中序遍历
 const kthSmallest = (root: TreeNode, k: number): number => {
-  const res: number[] = []
-  const inorder = (root: TreeNode | null) => {
+  function* inorder(root: TreeNode | null): Generator<number> {
     //no need to keep going after reach k-th number
-    if (!root || res.length >= k) return
+    if (!root) return
     root.left && inorder(root.left)
-    res.push(root.val)
+
+    if (k === 1) yield root.val
+    console.log(k, 666, root)
+    k--
     root.right && inorder(root.right)
   }
-  inorder(root)
-  // root.left && console.log(root.val)
-  return res[k - 1]
+  console.log(k)
+  return inorder(root).next().value
 }
 
-console.dir(kthSmallest(bt, 2), { depth: null })
+console.dir(kthSmallest(bt, 4), { depth: null })
 
 export {}

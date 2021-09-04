@@ -7,7 +7,7 @@
 const findSubstringInWraproundString = function (p: string): number {
   // p = '$' + p
   let pre = 1
-  // 以某个字母结尾的子串个数（bc abc 则取6 因为 abc包含了bc的情况,最长的连续子串一定是包含了比它短的连续子串),防止重复计算
+  // 以某个字母结尾的子串个数（bcabc 则取6=1+2+3 因为 abc包含了bc的情况,最长的连续子串一定是包含了比它短的连续子串),防止重复计算
   const mapper = new Map<string, number>([[p[0], 1]])
 
   for (let i = 1; i < p.length; i++) {

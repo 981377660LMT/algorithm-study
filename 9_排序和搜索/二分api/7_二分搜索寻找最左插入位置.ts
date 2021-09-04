@@ -30,7 +30,7 @@ const bisectLeft = (arr: number[], target: number): number => {
 if (require.main === module) {
   // const arr = [7, 7, 7, 7, 7, 7]
   const arr = [6, 7, 8, 9]
-  console.log(bisectLeft(arr, 7))
+  console.log(bisectLeft(arr, 5))
 }
 
 export { bisectLeft }

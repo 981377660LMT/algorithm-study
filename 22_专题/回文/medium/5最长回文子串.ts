@@ -17,6 +17,7 @@ import { helper } from './母题_中心扩展寻找最长的回文串'
 // console.log(longestPalindrome('abccccdd'))
 ////////////////////////////////////////////////////////////////////
 // 给你一个字符串 s，找到 s 中最长的回文子串。
+// O(n^2) 朴素中心扩展
 const longestPalindrome2 = (str: string): string => {
   if (str.length <= 1) return str
   let res = ''

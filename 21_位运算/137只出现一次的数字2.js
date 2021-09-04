@@ -9,14 +9,14 @@ const singleNumber = function (nums) {
   return (3 * sum([...new Set(nums)]) - sum(nums)) / 2
 }
 
-// 考察每位1出现的次数是否为3的倍数的方法
+// 对每位统计 如果次数不为三的倍数 则 只出现了一次的元素的二进制在这位上是1
 const singleNumber = function (nums) {
   let res = 0
   for (let i = 0; i < 32; i++) {
     let count = 0
-    const bit = 1 << i
-    for (const num of nums) (num & bit) !== 0 && count++
-    count % 3 !== 0 && (res |= bit)
+    const mask = 1 << i
+    for (const num of nums) (num & mask) !== 0 && count++
+    count % 3 !== 0 && (res |= mask)
   }
   return res
 }

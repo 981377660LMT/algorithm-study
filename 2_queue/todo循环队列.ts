@@ -21,7 +21,7 @@ class CircularQueue {
     this.size = 0
   }
 
-  // 入队tail后移
+  // 入队tail移 this.tail = (this.tail + 1) % this.maxSize
   enQueue(value: number): boolean {
     if (this.isFull()) return false
     this.tail = (this.tail + 1) % this.maxSize
@@ -30,7 +30,7 @@ class CircularQueue {
     return true
   }
 
-  // 出队head前移
+  // 出队head移 this.head = (this.head + 1) % this.maxSize
   deQueue(): boolean {
     if (this.isEmpty()) return false
     if (this.head === this.tail) {

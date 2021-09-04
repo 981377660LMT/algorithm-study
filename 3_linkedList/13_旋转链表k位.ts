@@ -24,32 +24,26 @@ d.next = e
 // 2.断开第k-1个节点与后面的连接
 // 2.将第k个节点后的这一段接在原来的头上
 const rotateRight = (head: Node, k: number) => {
-  const dummy = new Node(0)
+  const dummy = new Node(0, head)
+  let fast: Node | undefined = dummy
+  let slow: Node | undefined = dummy
+  let len = 0
 
-  const last = findLastK(head, 1)
-  const lastK = findLastK(head, k)
-  const lastKPre = findLastK(head, k + 1)
-  dummy.next = lastK
-  lastKPre!.next = undefined
-  last!.next = head
+  while (fast && fast.next) {
+    fast = fast.next
+    len++
+  }
+  console.log(len)
+  k = k % len
+  for (let i = 0; i <= len - k; i++) {
+    slow = slow?.next
+  }
+
+  fast.next = dummy.next
+  dummy.next = slow?.next
+  slow!.next = undefined
 
   return dummy.next
-}
-
-const findLastK = (head: Node, k: number) => {
-  let slow: Node | undefined = head
-  let fast: Node | undefined = head
-
-  for (let i = 0; i < k; i++) {
-    fast = fast?.next
-  }
-
-  while (fast) {
-    slow = slow?.next
-    fast = fast?.next
-  }
-
-  return slow
 }
 
 // const k = findLastK(a, 2)

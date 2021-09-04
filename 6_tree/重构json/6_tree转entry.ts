@@ -42,3 +42,5 @@ const dfs = (cur: NestDict | string, path: string[], res: Dict<string> = {}) => 
 }
 
 console.log(dfs(entry, []))
+
+export {}

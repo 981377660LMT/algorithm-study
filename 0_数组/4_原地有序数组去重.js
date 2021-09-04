@@ -14,7 +14,11 @@ var removeDuplicates = function (nums) {
     }
   }
 
+  // 原地移除
+  nums.length = slowP + 1
   return slowP + 1
 }
 
-console.log(removeDuplicates([0, 0, 1, 1, 1, 2, 2, 3, 3, 4]))
+const a = [0, 0, 1, 1, 1, 2, 2, 3, 3, 4]
+console.log(removeDuplicates(a))
+console.log(a)
