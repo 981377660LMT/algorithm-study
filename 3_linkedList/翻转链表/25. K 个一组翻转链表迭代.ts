@@ -71,5 +71,6 @@ const reverseKGroup = (head: Node, k: number): Node => {
 }
 
 console.dir(reverseKGroup(a, 3), { depth: null })
+console.dir(reverseKGroup(a, 2), { depth: null })
 // 3,2,1,4,5
 export {}

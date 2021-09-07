@@ -25,12 +25,15 @@ const insertSort = (head: Node | undefined) => {
 
   while (cur) {
     let last: Node | undefined = cur.next
-    // 需要三节点法反转p1,p2这一段链表
+
+    // 后一个元素比前一个元素小
     if (last && last.value < cur.value) {
-      // 从 dummy 到 cur 线性遍历找第一个满足条件的位置并插入
+      // 从 开头dummy 到 cur 线性遍历找第一个满足条件的位置并插入
       while (dummyP.next && dummyP.next.value < last.value) {
         dummyP = dummyP.next
       }
+
+      // 待交换的节点 tmp 和 last
       const tmp = dummyP.next
       cur.next = last.next
       last.next = tmp

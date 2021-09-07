@@ -390,3 +390,9 @@ feat: add hat wobble
 **refactor**: (refactoring production code, eg. renaming a variable)
 **test**: (adding missing tests, refactoring tests; no production code change)
 **chore**: (updating grunt tasks etc; no production code change)
+
+```JS
+Math.floor 与 ~~(双按位非)的区别
+~将input截取为32位(>=2^32就不成立)  谨慎使用  作用是是数字向0取整
+很想Math.trunc 但是~~失败时返回0 而Math.trunc失败时返回NaN
+```

@@ -18,7 +18,7 @@ b.next = c
 c.random = a
 
 // 构造这个链表的 深拷贝。
-// 遍历两次
+// 启示：深拷贝可以 建立单项映射关系 遍历两次
 const copyRandomList = (head: RandomNode) => {
   if (!head) return
   const map = new WeakMap<RandomNode, RandomNode | undefined>()
@@ -31,8 +31,8 @@ const copyRandomList = (head: RandomNode) => {
 
   headP = head
   while (headP) {
-    map.get(headP)!.next = map.get(headP.next!) || undefined
-    map.get(headP)!.random = map.get(headP.random!) || undefined
+    headP.next && (map.get(headP)!.next = map.get(headP.next))
+    headP.random && (map.get(headP)!.random = map.get(headP.random))
     headP = headP.next
   }
 

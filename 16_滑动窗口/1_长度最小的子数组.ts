@@ -1,7 +1,7 @@
 // 找出该数组中满足其和 ≥ target 的长度最小的 连续子数组
 // 如果你已经实现 O(n) 时间复杂度的解法,
 // 请尝试设计一个 O(n log(n)) 时间复杂度的解法。
-const minSubArrayLen = (target: number, nums: number[]) => {
+const minSubArrayLen = (target: number, nums: number[]): number => {
   let res = 0
   let l = 0
   let r = 0
@@ -31,7 +31,7 @@ const minSubArrayLen = (target: number, nums: number[]) => {
 
   return res
 }
-
+// 如果是和 === target呢？ 同理
 console.log(minSubArrayLen(7, [2, 3, 1, 2, 4, 3]))
 
 export {}

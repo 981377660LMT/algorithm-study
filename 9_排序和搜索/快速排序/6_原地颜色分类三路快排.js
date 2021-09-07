@@ -44,7 +44,7 @@
  */
 var sortColors = function (nums) {
   let l = 0
-  let i = 0
+  let m = 0
   let r = nums.length - 1
 
   const swap = (i, j) => {
@@ -52,19 +52,20 @@ var sortColors = function (nums) {
   }
 
   // 注意结束
-  while (i <= r) {
-    switch (nums[i]) {
+  while (m <= r) {
+    switch (nums[m]) {
       case 0:
-        swap(i, l)
-        i++
+        swap(m, l)
+        m++
         l++
         break
       case 1:
-        i++
+        m++
         break
       case 2:
-        swap(i, r)
-        r--
+        swap(m, r)
+        r-- // 此时不能移动m 因为要处理新过来的数
+
         break
       default:
         break

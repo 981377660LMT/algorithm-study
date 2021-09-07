@@ -12,6 +12,7 @@ const removeDuplicates = function (nums: number[]): number {
   // fast将值丢给前面的slow指针 slow指针检查是否有K个 没有则允许赋值前进
   while (fast < nums.length) {
     if (nums[slow - K] !== nums[fast]) {
+      // 注意这里是先赋值再前进
       nums[slow] = nums[fast]
       slow++
     }

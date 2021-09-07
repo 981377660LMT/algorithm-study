@@ -10,6 +10,7 @@ var setZeroes = function (matrix: number[][]): void {
   const n = matrix[0].length
   const firstRowHasZero = matrix[0].some(v => v === 0)
 
+  // 不用管第一行了
   for (let i = 1; i < m; i++) {
     for (let j = 0; j < n; j++) {
       matrix[i][j] === 0 && ((matrix[0][j] = 0), (matrix[i][0] = 0))

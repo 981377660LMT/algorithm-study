@@ -30,7 +30,7 @@ const solve = (board: string[][]): void => {
     })
   }
 
-  // 思路就是从边缘dfs遍历连接边缘的
+  // 思路就是从边缘dfs遍历连接边缘的 把这些点拯救出来
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
       if (board[i][j] === 'O' && ([0, m - 1].includes(i) || [0, n - 1].includes(j))) dfs(i, j)

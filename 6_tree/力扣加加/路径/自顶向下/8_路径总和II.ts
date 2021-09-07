@@ -52,22 +52,24 @@ const pathSum = (root: BinaryTree | null, target: number) => {
     if (!root.left && !root.right) {
       if (sum === target) {
         hasPath = true
-        allRoutes.push(path.slice())
+        return allRoutes.push(path.slice())
       }
     }
 
     if (root.left) {
       path.push(root.left.val)
       dfs(root.left, sum + root.left.val, path)
+      path.pop()
     }
+
     if (root.right) {
       path.push(root.right.val)
       dfs(root.right, sum + root.right.val, path)
+      path.pop()
     }
-    path.pop()
   }
-  dfs(root, root.val, [root.val])
 
+  dfs(root, root.val, [root.val])
   return [hasPath, allRoutes]
 }
 

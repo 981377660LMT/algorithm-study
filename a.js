@@ -43,3 +43,6 @@ console.log(...arr.keys(), ...arr.entries())
 console.log([1, 2, 3].slice(0, -1))
 
 console.log(undefined + 1 || 1, undefined + 1)
+
+console.log(Math.trunc('1.121323435'))
+console.log(Math.trunc('-1.121323435'))
