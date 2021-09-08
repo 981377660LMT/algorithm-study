@@ -20,10 +20,6 @@ const entry: Dict<string> = {
 //   }
 // }
 
-interface NestDict {
-  [key: string]: NestDict | string
-}
-
 type Dict<T> = Record<PropertyKey, T>
 
 // 类似于前缀树

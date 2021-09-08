@@ -6,15 +6,13 @@
  * @description 缺点：如果t很长 那么都要跑一遍
  */
 var isSubsequence1 = function (s: string, t: string): boolean {
-  let i = 0,
-    j = 0
-  while (j < t.length) {
-    if (s[i] === t[j]) {
-      i++
-    }
-    if (i === s.length) return true
+  let i = 0
+  let j = 0
+  while (i < s.length && j < t.length) {
+    if (s[i] === t[j]) i++
     j++
   }
+
   return i === s.length
 }
 

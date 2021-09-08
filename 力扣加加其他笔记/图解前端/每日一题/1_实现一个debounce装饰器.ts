@@ -30,6 +30,7 @@ export {}
 function funcDebounce(fn: (...args: any[]) => any, delay: number) {
   let timer: NodeJS.Timer | null = null
 
+  // this的指向要跟原来函数一样
   return function (this: any, ...args: any[]) {
     if (timer) clearTimeout(timer)
     timer = setTimeout(() => {

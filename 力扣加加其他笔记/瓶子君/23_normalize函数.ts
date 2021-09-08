@@ -26,3 +26,5 @@ const normalize = (str: string): Node<string> => {
 
 console.log(normalize('[abc[bcd[def]]]'))
 console.log(normalize('abc'))
+
+export {}

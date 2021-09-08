@@ -129,3 +129,71 @@ this 在严格模式下绑定到 undefined
 ////////////////////////////////////////////////////////////////////////////////
 数组和对象的关系是什么
 对象的 key 可以是 string/symbol 数组的 key 是 number
+////////////////////////////////////////////////////////////////////////////////
+[cookie 讲解](https://github.com/mqyqingfeng/Blog/issues/157)
+跨域:域名/端口/协议必须相同
+跨站:
+Cookie 中的「同站」判断就比较宽松：只要两个 URL 的 eTLD+1 相同即可
+**eTLD 表示有效顶级域名**
+举几个例子，www.taobao.com 和 www.baidu.com 是跨站，www.a.taobao.com 和 www.b.taobao.com 是同站，a.github.io 和 b.github.io 是跨站(注意是跨站)。
+
+SameSite 属性可以让 Cookie 在跨站请求时不会被发送，从而可以阻止跨站请求伪造攻击（CSRF）。
+之前默认是 None 的，Chrome80 后默认是 Lax。
+
+SameSite 可以有下面三种值：
+Strict 仅允许一方请求携带 Cookie，即浏览器将只发送相同站点请求的 Cookie，即当前网页 URL 与请求目标 URL 完全一致。
+Lax 允许部分第三方请求携带 Cookie
+None 无论是否跨站都会发送 Cookie
+
+解决方案就是设置 SameSite 为 none。但是必须 https
+HTTP 接口不支持 SameSite=none
+////////////////////////////////////////////////////////////////////////////////
+css 怎么开启硬件加速(GPU 加速)
+浏览器在处理下面的 css 的时候，会使用 GPU 渲染
+
+transform（当 3D 变换的样式出现时会使用 GPU 加速）
+opacity
+filter
+will-change
+////////////////////////////////////////////////////////////////////////////////
+flex:1 是哪些属性组成的
+flex 实际上是 flex-grow、flex-shrink 和 flex-basis 三个属性的缩写。
+
+flex-grow：定义项目的的放大比例
+默认为 0，即 即使存在剩余空间，也不会放大；
+所有项目的 flex-grow 为 1：等分剩余空间（自动放大占位）；
+flex-grow 为 n 的项目，占据的空间（放大的比例）是 flex-grow 为 1 的 n 倍。
+
+flex-basis： 定义在分配多余空间之前，项目占据的主轴空间（main size），浏览器根据此属性计算主轴是否有多余空间
+默认值为 auto，即 项目原本大小；
+设置后项目将占据固定空间。
+
+////////////////////////////////////////////////////////////////////////////////
+协商缓存命中返回 304 (from disk)
+请求头 If-Modified-Since 的日期与响应头的 last-modified 一致
+请求头 if-none-match 的 hash 与响应头的 etag 一致
+这两种情况会返回 Status Code: 304
+强缓存命中返回 200 200（from cache）
+////////////////////////////////////////////////////////////////////////////////
+HTML5 新接口，可以改变网址(存在跨域限制)而不刷新页面，这个强大的特性后来用到了单页面应用如：vue-router，react-router-dom 中。
+用 history.pushState()或者 history.replaceState()不会触发 popstate 事件
+popstate 事件会在点击后退、前进按钮(或调用 history.back()、history.forward()、history.go()方法)时触发
+////////////////////////////////////////////////////////////////////////////////
+
+```JS
+Function.prototype === Function.__proto__; //true
+```
+
+////////////////////////////////////////////////////////////////////////////////
+![require 基本原理](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0f1dbabee4d849d3a3e018c91f04c619~tplv-k3u1fbpfcp-watermark.awebp)
+
+```JS
+
+{
+  "a.js": "hello world",
+  "b.js": function add(){},
+  "c.js": 2,
+  "d.js": { num: 2 }
+}
+
+```

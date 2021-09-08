@@ -16,6 +16,13 @@ npx ts-jest config:init
 
 ```
 
+```JSON
+  "scripts": {
+    "test": "jest --config ./jest.config.js",
+    "coverage": "npm run test -- --coverage"  // --表示给jest传参
+  },
+```
+
 找不到名称“jest”:ts 的选项 types 需要加入["jest"]
 **最好的做法是不去管 types 选项** jest 会自动被识别
 
@@ -28,3 +35,7 @@ npx ts-jest config:init
 
 vue-cli 的 jest 配置
 https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-unit-jest
+
+常见的 ci
+travis.ci
+github action (.github/workflows/test-coverage.yml)

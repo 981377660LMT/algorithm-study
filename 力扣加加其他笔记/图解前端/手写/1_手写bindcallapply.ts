@@ -25,13 +25,13 @@ Function.prototype.myBind = function (thisArg: any, ...argArray: any[]): any {
   return (...restArgs: any[]) => this.call(thisArg, ...argArray, ...restArgs)
 }
 
-// test
+// $test
 const aaaa = {
   name: 'name of a',
 }
-function test(this: any, ...msg: any[]) {
+function $test(this: any, ...msg: any[]) {
   console.log(this.name)
   console.log(...msg)
 }
-const t = test.myBind(aaaa, 'hello')
+const t = $test.myBind(aaaa, 'hello')
 t('world')
