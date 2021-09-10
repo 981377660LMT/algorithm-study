@@ -23,20 +23,25 @@ e.next = f
 // 链表的第一个节点视为奇数节点，第二个节点视为偶数节点
 // 请尝试使用原地算法完成。你的算法的空间复杂度应为 O(1)，时间复杂度应为 O(nodes)，nodes 为节点总数。
 const oddEvenList = (head: Node) => {
-  if (!head) return head
-  let odd = head
-  // 最后odd.next要接到headNext
-  let headNext = head.next
-  // 如何确定边界条件 看odd是否能继续接(不管headNext,因为最后是odd接headNext)
-  while (odd?.next?.next) {
-    const tmp = odd.next
-    odd.next = odd.next.next
-    odd = tmp.next!
-    tmp.next = odd.next
+  if (!head || !head.next) return head
+  const dummy1 = new Node(0, head)
+  const dummy2 = new Node(0, head.next)
+  let odd = dummy1.next
+  let even = dummy2.next
+
+  while (odd && odd.next && even && even.next) {
+    const oddNext = odd.next.next
+    const evenNext = even.next.next
+    odd.next = oddNext
+    even.next = evenNext
+
+    odd = oddNext
+    even = evenNext
   }
 
-  odd.next = headNext
-  return head
+  odd!.next = dummy2.next
+
+  return dummy1.next
 }
 
 console.dir(oddEvenList(a), { depth: null })

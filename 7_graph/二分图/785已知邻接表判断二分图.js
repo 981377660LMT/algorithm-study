@@ -17,6 +17,7 @@ const isBipartite = graph => {
    * @param {number} cur
    * @param {number[]} colors
    * @param {Set<number>} visited
+   * 优化：使用color===-1 代替visited集合
    */
   const dfs = (cur, color, colors, visited) => {
     visited.add(cur)

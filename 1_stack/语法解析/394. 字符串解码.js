@@ -10,28 +10,22 @@ const decodeString = function (s) {
   const stack = []
 
   for (const letter of s) {
-    if (letter !== ']') {
+    if (letter === ']') {
+      let repeatStr = ''
+      let repeatCount = ''
+      while (stack.length && stack[stack.length - 1] !== '[') {
+        repeatStr = stack.pop() + repeatStr
+      }
+      // pop 掉 "["
+      stack.pop()
+      while (stack.length && isNumeric(stack[stack.length - 1])) {
+        repeatCount = stack.pop() + repeatCount
+      }
+
+      stack.push(repeatStr.repeat(+repeatCount))
+    } else {
       stack.push(letter)
-      continue
     }
-
-    let word = ''
-    let cur = stack.pop()
-    while (cur !== '[') {
-      word = cur + word
-      cur = stack.pop()
-    }
-
-    let count = ''
-    cur = stack.pop()
-    while (isNumeric(cur)) {
-      // 字符串表示数字保证正确
-      count = cur + count
-      cur = stack.pop()
-    }
-
-    stack.push(cur)
-    stack.push(word.repeat(parseInt(count)))
   }
 
   return stack.join('')
