@@ -33,6 +33,7 @@ const isBipartite = graph => {
       }
     }
   }
+
   for (let v = 0; v < graph.length; v++) {
     !visited.has(v) && dfs(v, 0, colors, visited)
   }

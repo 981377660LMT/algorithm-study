@@ -1,4 +1,4 @@
-import { UnionFind } from '../../14_并查集/0_并查集'
+import { useUnionFind } from './推荐使用并查集精简版'
 
 /**
  * @param {string[]} grid
@@ -7,19 +7,22 @@ import { UnionFind } from '../../14_并查集/0_并查集'
  * 返回区域的数目。
  * 并查集
  * @link https://leetcode-cn.com/problems/regions-cut-by-slashes/solution/js-bing-cha-ji-kan-wo-de-wen-zi-tu-jiu-hao-dong-li/
+ * @summary
+ * 大概把每一个小方块看成如下图
+ *      0
+      3   1
+        2
+        
  */
 const regionsBySlashes = function (grid: string[]): number {
   const N = grid.length
-  const uf = new UnionFind<number>()
+  const uf = useUnionFind(4 * N ** 2)
 
   for (let i = 0; i < N; i++) {
     for (let j = 0; j < N; j++) {
       const cur = grid[i][j]
       const pos = i * N + j // 索引转换为 0 1 2 3 4 5...
-      uf.add(pos * 4 + 0)
-        .add(pos * 4 + 1)
-        .add(pos * 4 + 2)
-        .add(pos * 4 + 3)
+
       switch (cur) {
         case ' ':
           uf.union(pos * 4 + 0, pos * 4 + 1)
@@ -36,13 +39,16 @@ const regionsBySlashes = function (grid: string[]): number {
           uf.union(pos * 4 + 2, pos * 4 + 3)
           break
       }
+
       const top = i - 1 >= 0 ? grid[i - 1][j] : null
       const left = j - 1 >= 0 ? grid[i][j - 1] : null
+
       if (top) {
         // 连接当前方块和上边的方块
         let topPos = pos - N
         uf.union(pos * 4 + 0, topPos * 4 + 2)
       }
+
       if (left) {
         // 连接当前方块和左边的方块
         let leftPos = pos - 1
@@ -50,7 +56,8 @@ const regionsBySlashes = function (grid: string[]): number {
       }
     }
   }
-  return uf.size
+
+  return uf.getCount()
 }
 
 console.log(regionsBySlashes(['/\\', '\\/']))

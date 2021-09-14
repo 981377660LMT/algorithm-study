@@ -20,12 +20,15 @@ const verticalTraversal = (root: BinaryTree | null): number[][] => {
     root.right && inOrder(root.right, x + 1, y + 1)
   }
   inOrder(root, 0, 0)
-  tmp.sort((a, b) => a[0] - b[0] || a[1] - b[1])
+  tmp.sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2])
 
   // x值为key的map
   const map = new Map<number, number[]>()
   for (const item of tmp) {
-    map.set(item[0], map.get(item[0])?.concat(item[2]) || [item[2]])
+    const key = item[0]
+    const val = item[2]
+    !map.has(key) && map.set(key, [])
+    map.get(key)!.push(val)
   }
 
   return [...map.values()]
@@ -35,5 +38,7 @@ console.dir(verticalTraversal(deserializeNode([3, 9, 20, null, null, 15, 7])!), 
   depth: null,
 })
 // 输出：[[9],[3,15],[20],[7]]
-
+console.dir(verticalTraversal(deserializeNode([1, 2, 3, 4, 6, 5, 7])!), {
+  depth: null,
+})
 export {}

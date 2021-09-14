@@ -4,11 +4,11 @@
  * @return {number}
  * @description 每一次操作时，你应当移除数组 nums 最左边或最右边的元素，然后从 x 中减去该元素的值。请注意，需要 修改 数组以供接下来的操作使用。
  * 返回 最小操作数
- * @summary 求和为定值sum(nums)-x的最长子序列: 滑动窗口
+ * @summary 求和为定值sum(nums)-x的最长子数组: 滑动窗口
  */
 const minOperations = function (nums: number[], x: number): number {
   let l = 0
-  let res = -Infinity
+  let res = 0
   let sum = 0
   const target = nums.reduce((pre, cur) => pre + cur, 0) - x
 

@@ -15,6 +15,7 @@ console.log(getPre([1, 2, 3, 4, 5]))
 // 一维前缀和
 const getPrefixArray = (arr: number[]): number[] => {
   const arrCopy = arr.slice()
+  // arrCopy.unshift(0)  要不要S0
   arrCopy.reduce((pre, _, index, arr) => (arr[index] += pre))
   return arrCopy
 }

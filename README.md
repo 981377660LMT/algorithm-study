@@ -9,6 +9,9 @@ JS,TS 刷题时大数问题可用 BigInt 或者求余解决
 https://visualgo.net/zh
 JavaScript 实现数据结构与算法
 
+在 leetcode 中使用 JS
+datastructures-js/queue 官方可用的堆队列库
+
 ```JS
 /**
  * @description 特点

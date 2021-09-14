@@ -23,7 +23,7 @@
 
 const useUnionFind = (size: number) => {
   // const parent = Array.from<number, number>({ length: size }, (_, i) => i)
-  let count = size
+  let count = size // 一开始的联通分量个数
   const parent = new Map<number, number>()
   for (let i = 0; i < size; i++) {
     parent.set(i, i)

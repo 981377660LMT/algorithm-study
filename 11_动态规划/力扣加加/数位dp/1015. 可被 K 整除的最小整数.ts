@@ -19,7 +19,7 @@ var smallestRepunitDivByK = function (k: number): number {
   const modSet = new Set<number>()
 
   for (let i = 1; i < k + 1; i++) {
-    mod = (10 * mod + 1) % k
+    mod = (10 * mod + 1) % k // 下一个数
     if (mod === 0) return i
     if (modSet.has(mod)) return -1
     modSet.add(mod)
