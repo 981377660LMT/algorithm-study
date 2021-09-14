@@ -12,7 +12,7 @@ const predictPartyVictory = function (senate: string): string {
   while (queue.length) {
     const head = queue.shift()!
     if (monoStack.length === 0 || monoStack[monoStack.length - 1] === head) monoStack.push(head)
-    else queue.push(monoStack.pop()!)
+    else queue.push(monoStack.pop()!) // 后面被前面干掉了 前面重新回去
   }
   return monoStack[0] === 'R' ? 'Radiant' : 'Dire'
 }
