@@ -36,6 +36,7 @@ class BinaryIndexedTree implements IBIT {
    * 单点修改：tree数组下标x处的值加k
    */
   add(x: number, k: number) {
+    if (x === 0) return
     for (let i = x; i <= this.size; i += this.lowbit(i)) {
       this.tree[i] += k
     }
@@ -53,6 +54,16 @@ class BinaryIndexedTree implements IBIT {
       res += this.tree[i]
     }
     return res
+  }
+
+  /**
+   *
+   * @param left  nums下标
+   * @param right  nums下标
+   * @returns 区域和
+   */
+  sumRange(left: number, right: number): number {
+    return this.query(right + 1) - this.query(left)
   }
 
   /**

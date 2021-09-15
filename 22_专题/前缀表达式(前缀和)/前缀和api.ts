@@ -2,10 +2,9 @@
 
 // 添加了S0项的前缀和 求第 1 2 3 项的和 就是 S3-S0
 const getPre = (nums: number[]): number[] => {
-  const len = nums.length
-  const pre = Array<number>(len + 1).fill(0)
-  for (let i = 1; i <= len; i++) {
-    pre[i] = pre[i - 1] + nums[i - 1]
+  const pre = [0]
+  for (const num of nums) {
+    pre.push(pre[pre.length - 1] + num)
   }
   return pre
 }
