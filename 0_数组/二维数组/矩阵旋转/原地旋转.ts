@@ -1,6 +1,7 @@
 // 先转置后镜像对称
 /**
  Do not return anything, modify matrix in-place instead.
+ NxN的矩阵
  */
 const rotate = (matrix: number[][]): void => {
   // 转置

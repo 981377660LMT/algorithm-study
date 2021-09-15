@@ -8,6 +8,7 @@ class BIT {
   }
 
   add(x: number, k: number) {
+    if (x <= 0) throw Error('树状数组索引必须为正整数')
     for (let i = x; i <= this.size; i += this.lowbit(i)) {
       this.tree[i] += k
     }
@@ -22,7 +23,7 @@ class BIT {
   }
 
   sumRange(left: number, right: number) {
-    return this.query(right + 1) - this.query(left)
+    return this.query(right) - this.query(left - 1)
   }
 
   private lowbit(x: number) {
@@ -39,8 +40,11 @@ class BIT {
  * 数组 A 有多少个连续的子数组，其元素只和在 [lower, upper]的范围内。
  * 即：前缀和之差不超过[lower,upper]
  * @summary
- * 需要利用哈希表离散化
- * 存在问题
+ * 0.准备好需要用于树状数组查询/更新的所有值(即前缀和和前缀和减去upper/lower)
+   1.set+map离散化所有值
+   2.对每一个前缀和pre[i]，查询[pre[i]-upper,pre[i]-lower]间的个数，查询完后更新树状数组
+   @link
+   https://leetcode-cn.com/problems/count-of-range-sum/solution/jstsshu-zhuang-shu-zu-jie-fa-by-cao-mei-0icur/
  */
 const countRangeSum = (nums: number[], lower: number, upper: number): number => {
   const pre = [0]
@@ -48,6 +52,7 @@ const countRangeSum = (nums: number[], lower: number, upper: number): number => 
     pre.push(pre[pre.length - 1] + num)
   }
 
+  // 离散化
   const allNums = new Set<number>()
   for (const val of pre) {
     allNums
@@ -61,7 +66,7 @@ const countRangeSum = (nums: number[], lower: number, upper: number): number => 
   for (const [key, realValue] of [...allNums].sort((a, b) => a - b).entries()) {
     map.set(realValue, key + 1)
   }
-  console.log(allNums, map)
+  console.log(pre, allNums, map)
   // Map(8) {
   //   -4 => 1,
   //   -2 => 2,
@@ -72,12 +77,15 @@ const countRangeSum = (nums: number[], lower: number, upper: number): number => 
   //   4 => 7,
   //   5 => 8
   // }
+
   let res = 0
   const bit = new BIT(map.size)
   for (let i = 0; i < pre.length; i++) {
     const realValue = pre[i]
     const left = map.get(realValue - upper)!
     const right = map.get(realValue - lower)!
+    console.log(realValue - upper, realValue, realValue - lower)
+    console.log(left, map.get(realValue), right)
     res += bit.sumRange(left, right)
     bit.add(map.get(realValue)!, 1)
   }

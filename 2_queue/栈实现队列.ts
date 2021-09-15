@@ -1,6 +1,7 @@
+// 使用两个数组的栈方法（push, pop） 实现队列
 // pop的时候注意一下
 
-class Stack {
+class Queue {
   private input: unknown[]
   private output: unknown[]
 
@@ -13,23 +14,24 @@ class Stack {
     this.input.push(x)
   }
 
-  pop() {
+  shift() {
     const size = this.output.length
     if (size) {
-      return this.output.shift()
+      return this.output.pop()
     }
     while (this.input.length) {
       this.output.push(this.input.pop())
     }
-    return this.output.shift()
+    return this.output.pop()
   }
 }
 
-const stack = new Stack()
-stack.push(1)
-stack.push(2)
-stack.push(3)
-console.log(stack.pop())
-console.log(stack.pop())
-console.log(stack.pop())
-console.log(stack.pop())
+const queue = new Queue()
+queue.push(1)
+queue.push(2)
+queue.push(3)
+
+console.log(queue.shift())
+console.log(queue.shift())
+console.log(queue.shift())
+console.log(queue.shift())

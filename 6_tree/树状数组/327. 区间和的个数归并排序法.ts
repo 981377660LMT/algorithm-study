@@ -1,4 +1,4 @@
-import { BinaryIndexedTree } from './BIT'
+import { BIT } from './BIT'
 
 /**
  *
@@ -9,15 +9,7 @@ import { BinaryIndexedTree } from './BIT'
  * 数组 A 有多少个连续的子数组，其元素只和在 [lower, upper]的范围内。
  * 即：前缀和之差不超过[lower,upper]
  */
-const countRangeSum = (nums: number[], lower: number, upper: number): number => {
-  const bit = new BinaryIndexedTree(nums)
-  let res = 0
-  for (let i = nums.length; i >= 0; i--) {
-    res
-  }
-
-  return res
-}
+const countRangeSum = (nums: number[], lower: number, upper: number): number => {}
 
 console.log(countRangeSum([-2, 5, -1], -2, 2))
 // 输出：3

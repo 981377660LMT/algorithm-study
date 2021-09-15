@@ -32,6 +32,14 @@
 
 //   return res
 // }
+/**
+ *
+ * @param nums
+ * @returns
+ * 给你一个整数数组 nums ，返回 nums 中作为 摆动序列 的 最长子序列的长度
+ * @summary
+ *  贪心:只有真正的V型（波峰或者波谷位置）翻转才会增加摆动序列的长度。
+ */
 const wiggleMaxLength = (nums: number[]): number => {
   let res = 1
   let state: 'initial' | 'needUp' | 'needDown' = 'initial'

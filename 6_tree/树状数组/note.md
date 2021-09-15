@@ -3,7 +3,11 @@
 多次将某个区间变成同一个数，用「线段树」
 其他情况，用「树状数组」
 
-```TS
+树状数组求解区间问题时
+长处就是可以**用 logn 的复杂度动态更新单个值和区间查询**
+
+````TS
+// tree的0号位置不存值;初始化「树状数组」，要默认数组是从 1 开始
 class BIT {
   private size: number
   private tree: number[]
@@ -13,7 +17,13 @@ class BIT {
     this.tree = Array(size + 1).fill(0)
   }
 
-  // 最好x都离散化正数
+    /**
+   *
+   * @param x (离散化后)的树状数组索引
+   * @param k 增加的值
+   * @description
+   * 单点修改：tree数组下标x处的值加k
+   */
   add(x: number, k: number) {
     if (x <= 0) throw Error('查询索引应为正整数')
     for (let i = x; i <= this.size; i += this.lowbit(i)) {
@@ -21,6 +31,12 @@ class BIT {
     }
   }
 
+  /**
+   *
+   * @param x
+   * @description
+   * 区间查询：返回前x项的值
+   */
   query(x: number) {
     let res = 0
     for (let i = x; i > 0; i -= this.lowbit(i)) {
@@ -30,19 +46,36 @@ class BIT {
   }
 
   sumRange(left: number, right: number) {
-    return this.query(right + 1) - this.query(left)
+    return this.query(right) - this.query(left-1)
   }
 
+ /**
+   *
+   * @param x
+   * @returns x 的二进制表示中，最低位的1和后面的0构成的数。
+   * @example
+   * ```js
+   * console.log(3 & -3) // 1
+   * console.log(4 & -4) // 4
+   *
+   * ```
+   */
   private lowbit(x: number) {
     return x & -x
   }
 }
-```
+````
+
+离散化+查询更新
+相同模板解决三道困难
+[315. 计算右侧小于当前元素的个数
+](https://leetcode-cn.com/problems/count-of-smaller-numbers-after-self/solution/shu-zhuang-shu-zu-jie-fa-by-cao-mei-nai-b0zbw/)[327. 区间和的个数
+](https://leetcode-cn.com/problems/count-of-range-sum/solution/jstsshu-zhuang-shu-zu-jie-fa-by-cao-mei-0icur/)[493. 翻转对
+](https://leetcode-cn.com/problems/reverse-pairs/solution/jstsshu-zhuang-shu-zu-jie-fa-by-cao-mei-uowff/)
 
 # 注意
 
-一般来说
-处理的数组需要进行离散化
+一般来说需要将用于查询/修改的所有值需要进行离散化(set+并排序，map 映射成树状数组的索引，相对大小不变)
 
 ```JS
   const set = new Set(nums)

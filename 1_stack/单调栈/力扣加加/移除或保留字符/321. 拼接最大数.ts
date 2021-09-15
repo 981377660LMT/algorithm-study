@@ -22,7 +22,8 @@ const maxNumber = (nums1: number[], nums2: number[], k: number): number[] => {
       }
       stack.push(i)
     }
-    return stack.map(index => arr[index])
+    // 注意slice
+    return stack.slice(0, k).map(index => arr[index])
   }
 
   /**
@@ -31,16 +32,15 @@ const maxNumber = (nums1: number[], nums2: number[], k: number): number[] => {
    * @param arr2 归并排序的数组
    */
   const merge = (nums1: number[], nums2: number[]) => {
-    const arr1 = nums1.slice()
-    const arr2 = nums2.slice()
+    // 一直shift 先转成deque比较好
     const res: number[] = []
 
-    while (arr1.length && arr2.length) {
-      if (arr1[0] < arr2[0]) res.push(arr1.shift()!)
-      else res.push(arr2.shift()!)
+    while (nums1.length || nums2.length) {
+      // 数组比大小隐式转换成数字(parseInt)
+      const bigger = nums1 > nums2 ? nums1 : nums2
+      res.push(bigger.shift()!)
     }
-
-    return [...res, ...arr1, ...arr2]
+    return res
   }
 
   for (let i = 0; i <= k; i++) {
@@ -54,4 +54,5 @@ const maxNumber = (nums1: number[], nums2: number[], k: number): number[] => {
   return max
 }
 
-console.log(maxNumber([3, 4, 6, 5], [9, 1, 2, 5, 8, 3], 5))
+// console.log(maxNumber([3, 4, 6, 5], [9, 1, 2, 5, 8, 3], 5))
+console.log(maxNumber([6, 7, 5], [4, 8, 1], 3))

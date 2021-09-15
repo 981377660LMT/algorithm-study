@@ -17,6 +17,7 @@
 // }
 // 解法 2: 布赖恩·克尼根算法（推荐）
 // 它是借助 num & (num - 1) 来直接去除 num 的二进制中最右边的 1。
+// 例如6 & 5:0b110 变为 0b100
 var hammingDistance = function (x: number, y: number): number {
   let res = 0
   let xor = x ^ y

@@ -13,30 +13,25 @@ interface IBIT {
  * 3. tree[x]节点覆盖的长度等于lowbit(x)
  * 4. 树的高度为logn+1
  */
-class BinaryIndexedTree implements IBIT {
-  private nums: number[]
+// tree的0号位置不存值;初始化「树状数组」，要默认数组是从 1 开始
+class BIT implements IBIT {
+  public size: number
   private tree: number[]
-  private size: number
 
-  constructor(nums: number[]) {
-    this.nums = nums
-    this.size = nums.length
-    this.tree = Array(this.size + 1).fill(0)
-    // tree的0号位置不存值;初始化「树状数组」，要默认数组是从 1 开始
-    for (let i = 0; i < this.size; i++) {
-      this.add(i + 1, nums[i])
-    }
+  constructor(size: number) {
+    this.size = size
+    this.tree = Array(size + 1).fill(0)
   }
 
   /**
    *
-   * @param x
-   * @param k
+   * @param x (离散化后)的树状数组索引
+   * @param k 增加的值
    * @description
    * 单点修改：tree数组下标x处的值加k
    */
   add(x: number, k: number) {
-    if (x === 0) return
+    if (x <= 0) throw Error('查询索引应为正整数')
     for (let i = x; i <= this.size; i += this.lowbit(i)) {
       this.tree[i] += k
     }
@@ -46,7 +41,7 @@ class BinaryIndexedTree implements IBIT {
    *
    * @param x
    * @description
-   * 区间查询：返回前x项的和
+   * 区间查询：返回前x项的值
    */
   query(x: number) {
     let res = 0
@@ -56,20 +51,14 @@ class BinaryIndexedTree implements IBIT {
     return res
   }
 
-  /**
-   *
-   * @param left  nums下标
-   * @param right  nums下标
-   * @returns 区域和
-   */
-  sumRange(left: number, right: number): number {
-    return this.query(right + 1) - this.query(left)
+  sumRange(left: number, right: number) {
+    return this.query(right) - this.query(left - 1)
   }
 
   /**
    *
    * @param x
-   * @returns x 的二进制表示中，最低位的 1 的位置。
+   * @returns x 的二进制表示中，最低位的1和后面的0构成的数。
    * @example
    * ```js
    * console.log(3 & -3) // 1
@@ -83,13 +72,13 @@ class BinaryIndexedTree implements IBIT {
 }
 
 if (require.main === module) {
-  const bit = new BinaryIndexedTree([1, 2, 3, 4, 5])
+  const bit = new BIT(5)
   console.log(bit.query(1))
   bit.add(1, 3)
   console.log(bit.query(1))
 }
 
-export { BinaryIndexedTree }
+export { BIT }
 
 // 利用数组实现前缀和，查询本来是 O(1)，但是对于频繁更新的数组，每次重新计算前缀和，时间复杂度 O(n)。
 // 此时树状数组的优势便立即显现。

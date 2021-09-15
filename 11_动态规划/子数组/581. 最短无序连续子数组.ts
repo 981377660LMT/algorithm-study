@@ -15,7 +15,7 @@ const findUnsortedSubarray = function (nums: number[]): number {
   let max = nums[0]
   let min = nums[n - 1]
 
-  // high的右边可以不排序
+  // 从左到右找high high的右边可以不排序
   for (let i = 0; i < n; i++) {
     if (nums[i] >= max) {
       max = nums[i]
@@ -24,7 +24,7 @@ const findUnsortedSubarray = function (nums: number[]): number {
     }
   }
 
-  // low的左边可以不排序
+  // 从右到左找low low的左边可以不排序
   for (let i = n - 1; i >= 0; i--) {
     if (nums[i] <= min) {
       min = nums[i]

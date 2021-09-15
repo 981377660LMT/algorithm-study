@@ -1,15 +1,18 @@
-import { BinaryIndexedTree } from './BIT'
+import { BIT } from './BIT'
 
 /**
  * 动态区间和求解
  */
 class NumArray {
   private nums: number[]
-  private bit: BinaryIndexedTree
+  private bit: BIT
 
   constructor(nums: number[]) {
     this.nums = nums
-    this.bit = new BinaryIndexedTree(nums)
+    this.bit = new BIT(nums.length)
+    for (let i = 0; i < this.bit.size; i++) {
+      this.bit.add(i + 1, nums[i])
+    }
   }
 
   update(index: number, val: number): void {

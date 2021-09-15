@@ -5,25 +5,38 @@
  * @description 泡泡堂
  * O(1):使用了第 0 行和第 0 列来保存 matrix[1:M][1:N] 中是否出现了 0
  */
-var setZeroes = function (matrix: number[][]): void {
+const setZeroes = function (matrix: number[][]): void {
   const m = matrix.length
   const n = matrix[0].length
   const firstRowHasZero = matrix[0].some(v => v === 0)
+  const firstColHasZero = matrix.map(row => row[0]).some(v => v === 0)
 
-  // 不用管第一行了
+  // 标记
   for (let i = 1; i < m; i++) {
-    for (let j = 0; j < n; j++) {
+    for (let j = 1; j < n; j++) {
       matrix[i][j] === 0 && ((matrix[0][j] = 0), (matrix[i][0] = 0))
     }
   }
 
+  // 置零
   for (let i = 1; i < m; i++) {
-    for (let j = n - 1; ~j; j--) {
-      ;(matrix[0][j] === 0 || matrix[i][0] === 0) && (matrix[i][j] = 0)
+    for (let j = 1; j < n; j++) {
+      if (matrix[0][j] === 0 || matrix[i][0] === 0) matrix[i][j] = 0
     }
   }
 
-  firstRowHasZero && (matrix[0] = Array(n).fill(0))
+  // 清理
+  if (firstRowHasZero) {
+    for (let j = 0; j < n; j++) {
+      matrix[0][j] = 0
+    }
+  }
+
+  if (firstColHasZero) {
+    for (let i = 0; i < m; i++) {
+      matrix[i][0] = 0
+    }
+  }
 }
 
 console.log(

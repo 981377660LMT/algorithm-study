@@ -1,4 +1,5 @@
 import { largestRectangleArea } from './84. 柱状图中最大的矩形'
+
 /**
  * @param {string[][]} matrix
  * @return {number}
@@ -18,6 +19,7 @@ const maximalRectangle = function (matrix: string[][]): number {
       if (matrix[i][j] === '1') candidates[i][j] = (i - 1 >= 0 ? candidates[i - 1][j] : 0) + 1
     }
   }
+
   console.table(candidates)
 
   return Math.max.apply(null, candidates.map(largestRectangleArea))
@@ -31,6 +33,7 @@ const maximalRectangle = function (matrix: string[][]): number {
 //     ['1', '0', '0', '1', '0'],
 //   ])
 // )
+
 console.log(
   maximalRectangle([
     ['0', '1'],

@@ -82,3 +82,36 @@ console.log(detectCycle(a))
 
 // O(n)
 export {}
+
+// 快慢指针还能判断回文/找到中点/找到倒数第k个结点
+
+const aa = new Node(1)
+const bb = new Node(2)
+const cc = new Node(3)
+const dd = new Node(4)
+const ee = new Node(5)
+aa.next = bb
+bb.next = cc
+cc.next = dd
+dd.next = ee
+
+/**
+ *
+ * @param head  长为len的链表
+ * @returns 返回(index>>1)下标处的节点
+ * 例如5个节点时返回(5-1)>>1===2处的节点
+ * 例如6个节点时返回(6-1)>>1===2处的节点
+ */
+const findMid = (head: Node) => {
+  let fastNode: Node | undefined = head
+  let slowNode: Node | undefined = head
+  while (fastNode && fastNode.next && fastNode.next.next) {
+    fastNode = fastNode.next.next
+    slowNode = slowNode?.next
+  }
+
+  return slowNode
+}
+
+console.log(findMid(aa))
+console.log(findMid(bb))
