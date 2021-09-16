@@ -5,3 +5,30 @@
 - 同时，如果要求你转化为**平衡二叉搜索树**，则可以选择排序数组(或链表)的**中点**，左边的元素为左子树， 右边的元素为右子树即可。
 
 习惯：链表的根写 head,树的根写 root
+chang'yong'fang
+
+常用方法:
+
+1. 中序遍历看大小
+2. 中序遍历加 pre
+   `面试题 04.06. 后继者`
+   `2_验证二分搜索树`
+
+```JS
+const isValidBST = (root: TreeNode) => {
+  if (!root) return true
+
+  let pre: TreeNode | null = null
+  const inorder = (root: TreeNode | null): boolean => {
+    if (!root) return true
+    if (!inorder(root.left)) return false
+    if (pre && pre.val >= root.val) return false
+    // pre最开始是在最左下角
+    pre = root
+    if (!inorder(root.right)) return false
+    return true
+  }
+
+  return inorder(root)
+}
+```

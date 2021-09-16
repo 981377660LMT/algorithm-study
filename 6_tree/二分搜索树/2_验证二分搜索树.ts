@@ -1,3 +1,5 @@
+import { deserializeNode } from '../力扣加加/构建类/297二叉树的序列化与反序列化'
+
 interface TreeNode {
   val: number
   left: TreeNode | null
@@ -41,8 +43,7 @@ const bt: TreeNode = {
     },
   },
 }
-// 1.可以直接中序遍历，并一边遍历一边判断遍历结果是否是单调递增的，如果不是则提前返回 False 即可。
-// 2. 容易想到的做法
+// -1.错误的写法：没有考虑整个范围
 // const isValidBST = (root: TreeNode) => {
 //   if (!root) return true
 //   let isValidBST = true
@@ -63,21 +64,40 @@ const bt: TreeNode = {
 //   return isValidBST
 // }
 
-// 3.比较难理解的递归中序遍历
+//////////////////////////////////////////////////////////////////////////////////////////
+// 1. 一般的做法
+// https://leetcode-cn.com/problems/legal-binary-search-tree-lcci/solution/shu-ju-jie-gou-he-suan-fa-san-chong-jie-7h7zj/
+// 注意不要忽略了一个每个节点的上限和下限
+const isValidBST1 = (root: TreeNode) => {
+  if (!root) return true
+
+  const isValidRoot = (root: TreeNode | null, min: number, max: number): boolean => {
+    if (!root) return true
+    if (root.val >= max || root.val <= min) return false
+    return isValidRoot(root.left, min, root.val) && isValidRoot(root.right, root.val, max)
+  }
+
+  return isValidRoot(root, -Infinity, Infinity)
+}
+
+// 2.带pre的递归中序遍历
 const isValidBST = (root: TreeNode) => {
   if (!root) return true
+
   let pre: TreeNode | null = null
-  const dfs = (root: TreeNode | null): boolean => {
+  const inorder = (root: TreeNode | null): boolean => {
     if (!root) return true
-    if (!dfs(root.left)) return false
+    if (!inorder(root.left)) return false
     if (pre && pre.val >= root.val) return false
     // pre最开始是在最左下角
     pre = root
-    if (!dfs(root.right)) return false
+    if (!inorder(root.right)) return false
     return true
   }
-  return dfs(root)
+
+  return inorder(root)
 }
-console.dir(isValidBST(bt), { depth: null })
+console.dir(isValidBST1(deserializeNode([10, 5, 15, null, null, 6, 20])!), { depth: null })
+// console.dir(isValidBST(deserializeNode([10, 5, 15, null, null, 6, 20])!), { depth: null })
 
 export {}
