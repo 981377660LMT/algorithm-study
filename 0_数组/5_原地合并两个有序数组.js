@@ -8,17 +8,18 @@
  */
 var merge = function (nums1, m, nums2, n) {
   let insertPostion = m + n - 1
-  m--
-  n--
+  let mIndex = m - 1
+  let nIndex = n - 1
+
   // nums2用完即结束
-  while (n >= 0) {
+  while (nIndex >= 0) {
     // 注意nums1为空的情况
-    if (nums1[m] > nums2[n]) {
-      nums1[insertPostion] = nums1[m]
-      m--
+    if (nums1[mIndex] > nums2[nIndex]) {
+      nums1[insertPostion] = nums1[mIndex]
+      mIndex--
     } else {
-      nums1[insertPostion] = nums2[n]
-      n--
+      nums1[insertPostion] = nums2[nIndex]
+      nIndex--
     }
 
     insertPostion--

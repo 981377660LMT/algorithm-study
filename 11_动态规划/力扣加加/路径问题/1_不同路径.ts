@@ -1,6 +1,6 @@
-const uniquePath = (m: number, n: number) => {
+const uniquePath = (m: number, n: number): number => {
   const dp: number[][] = Array.from({ length: m }, () => Array(n).fill(Infinity))
-  
+
   for (let i = 0; i < n; i++) {
     dp[0][i] = 1
   }

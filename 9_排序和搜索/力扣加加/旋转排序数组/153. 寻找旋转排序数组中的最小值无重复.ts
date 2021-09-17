@@ -6,12 +6,13 @@ const findMin = function (nums: number[]): number {
   let l = 0
   let r = nums.length - 1
 
+  // 循环外返回，不能取等号
   while (l < r) {
     const mid = (l + r) >> 1
     if (nums[mid] > nums[r]) {
       l = mid + 1
     } else if (nums[mid] < nums[r]) {
-      // 不能 mid-1 如果mid最小值就跳过了
+      // 不能 mid-1 如果mid最小值(最低谷)就跳过了
       r = mid
     }
   }

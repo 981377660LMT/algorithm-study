@@ -1,4 +1,4 @@
-import { bisectLeft } from '../../../9_排序和搜索/7_二分搜索寻找最左插入位置'
+import { bisectLeft } from '../../../9_排序和搜索/二分api/7_二分搜索寻找最左插入位置'
 
 /**
  * @link https://leetcode-cn.com/problems/russian-doll-envelopes/solution/ti-mu-zong-jie-zui-chang-shang-sheng-zi-twyhq/

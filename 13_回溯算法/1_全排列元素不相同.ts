@@ -7,20 +7,21 @@
 const permute = (nums: number[]) => {
   const res: number[][] = []
 
-  const bt = (path: number[]) => {
+  const bt = (path: number[], visited: Set<number>) => {
     // 1.递归终点
     if (path.length === nums.length) return res.push(path.slice())
-
-    nums.forEach(num => {
+    for (let i = 0; i < nums.length; i++) {
       // 2.排除死路
-      if (path.includes(num)) return
+      if (visited.has(nums[i])) continue
       // 3. 递归
-      path.push(num)
-      bt(path)
+      path.push(nums[i])
+      visited.add(nums[i])
+      bt(path, visited)
       path.pop()
-    })
+      visited.delete(nums[i])
+    }
   }
-  bt([])
+  bt([], new Set())
 
   return res
 }

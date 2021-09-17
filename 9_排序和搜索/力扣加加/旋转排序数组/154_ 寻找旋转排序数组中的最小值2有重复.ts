@@ -10,6 +10,7 @@ const findMin = function (nums: number[]): number {
   let l = 0
   let r = nums.length - 1
 
+  // 循环外返回，不能取等号
   while (l < r) {
     const mid = (l + r) >> 1
     if (nums[mid] > nums[r]) {
