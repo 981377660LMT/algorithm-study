@@ -8,7 +8,7 @@
 var missingNumber = function (nums) {
   let res = 0
   for (let i = 0; i < nums.length; i++) {
-    res = res ^ i ^ nums[i]
+    res ^= i ^ nums[i]
   }
 
   return res ^ nums.length

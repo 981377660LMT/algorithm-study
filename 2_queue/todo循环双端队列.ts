@@ -3,25 +3,25 @@
 // 我们就不能插入下一个元素，即使在队列前面仍有空间。
 // 但是使用循环队列，
 // 我们能使用这些空间去存储新的值。
-class CircularDeque {
+class MyCircularDeque {
   private maxSize: number
-  private data: Uint16Array
+  private data: Array<number>
   private head: number
   private tail: number
   private size: number
 
-  constructor({ maxSize }: { maxSize: number }) {
+  constructor(maxSize: number) {
     this.maxSize = maxSize
-    this.data = new Uint16Array(maxSize)
-    this.head = 0
-    this.tail = -1
+    this.data = []
+    this.head = 0 // 从-1开始向前存
+    this.tail = -1 // 从0开始向后存
     this.size = 0
   }
 
   // head前移
   insertFront(value: number): boolean {
     if (this.isFull()) return false
-    this.head = (this.head - 1) % this.maxSize
+    this.head = (this.head - 1 + this.maxSize) % this.maxSize
     this.data[this.head] = value
     this.size++
     return true
@@ -30,7 +30,7 @@ class CircularDeque {
   // tail后移
   insertLast(value: number): boolean {
     if (this.isFull()) return false
-    this.tail = (this.tail + 1) % this.maxSize
+    this.tail = (this.tail + 1 + this.maxSize) % this.maxSize
     this.data[this.tail] = value
     this.size++
     return true
@@ -39,7 +39,7 @@ class CircularDeque {
   // head后移
   deleteFront(): boolean {
     if (this.isEmpty()) return false
-    this.head = (this.head + 1) % this.maxSize
+    this.head = (this.head + 1 + this.maxSize) % this.maxSize
     this.size--
     return true
   }
@@ -47,17 +47,17 @@ class CircularDeque {
   // tail前移
   deleteLast(): boolean {
     if (this.isEmpty()) return false
-    this.tail = (this.tail - 1) % this.maxSize
+    this.tail = (this.tail - 1 + this.maxSize) % this.maxSize
     this.size--
     return true
   }
 
-  front(): number {
-    return this.isEmpty() ? -1 : this.data[this.head]
+  getFront(): number {
+    return this.isEmpty() ? -1 : this.data[(this.head + this.maxSize) % this.maxSize]
   }
 
-  rear(): number {
-    return this.isEmpty() ? -1 : this.data[this.tail]
+  getRear(): number {
+    return this.isEmpty() ? -1 : this.data[(this.tail + this.maxSize) % this.maxSize]
   }
 
   isEmpty(): boolean {
@@ -69,15 +69,13 @@ class CircularDeque {
   }
 }
 
-const cq = new CircularDeque({ maxSize: 5 })
+const cq = new MyCircularDeque(3)
 
-cq.insertLast(1)
-cq.insertLast(1)
-// cq.insertLast(2)
-// cq.deleteFront()
-// cq.deleteFront()
-// cq.insertFront(2)
-
+console.log(cq.insertFront(9))
 console.log(cq)
+console.log(cq.getRear())
+console.log(cq.insertFront(9))
+
+// console.log(cq)
 
 export default 1

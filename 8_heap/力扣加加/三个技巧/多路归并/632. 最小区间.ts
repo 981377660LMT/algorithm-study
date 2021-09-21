@@ -11,10 +11,13 @@ import { PriorityQueue } from '../../../../2_queue/todo优先级队列'
 const smallestRange = function (nums: number[][]): number[] {
   let l = -Infinity
   let r = Infinity
-  const pq = new PriorityQueue<[number, number, number]>((a, b) => a[0] - b[0])
-  for (let i = 0; i < nums.length; i++) {
-    pq.push([nums[i][0], i, 0])
-  }
+  const pq = new PriorityQueue<[number, number, number]>(
+    (a, b) => a[0] - b[0],
+    Infinity,
+    nums.map((row, index) => [row[0], index, 0])
+  )
+  pq.heapify()
+
   let max = Math.max(...nums.map(row => row[0]))
 
   while (true) {

@@ -24,3 +24,5 @@ var plusOne = function (digits: number[]): number[] {
   return res.reverse()
 }
 ```
+
+js 数组负数下标

@@ -5,6 +5,9 @@
  * 找出并返回字典中最长的字符串，该字符串可以通过删除 s 中的某些字符得到。
  * 如果答案不止一个，返回长度最长且字典序最小的字符串
  */
+// 需要多次调用时，使用数组+哈希 map (单词很多时，空间开销极大)
+// 对每个word,**倒序**记录从该位置开始往后s中的字符第一次出现的位置
+
 const findLongestWord = function (s: string, dictionary: string[]): string {
   dictionary.sort((a, b) => b.localeCompare(a))
   const n = s.length
@@ -42,6 +45,22 @@ const findLongestWord = function (s: string, dictionary: string[]): string {
   return res
 }
 
-console.log(findLongestWord('abpcplea', ['ale', 'apple', 'monkey', 'plea']))
+// 只用调用一次时
+const findLongestWord2 = function (s: string, dictionary: string[]): string {
+  let res = ''
+
+  for (const word of dictionary) {
+    let hit = 0
+    for (let i = 0; i < s.length; i++) if (s[i] === word[hit]) hit++
+    // 可以匹配
+    if (hit === word.length) {
+      // 等于要判断字典序在前
+      if (word.length > res.length || (word.length === res.length && word < res)) res = word
+    }
+  }
+
+  return res
+}
+console.log(findLongestWord2('abpcplea', ['ale', 'apple', 'monkey', 'plea']))
 
 export default 1

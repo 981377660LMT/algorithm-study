@@ -1,10 +1,10 @@
 import assert from 'assert'
 
 class ListNode<K, V> {
-  key: K
-  val: V
   pre!: ListNode<K, V>
   next!: ListNode<K, V>
+  key: K
+  val: V
 
   constructor(key: K, val: V) {
     this.key = key

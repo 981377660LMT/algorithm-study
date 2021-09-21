@@ -3,16 +3,20 @@
 // 3.获取堆顶 peek
 // 4.获取堆大小 size
 
-class MinHeap<Item> {
-  private heap: Item[]
-  private volumn: number
-  private compareFunction: (a: Item, b: Item) => number
-  private static defaultCompareFunction = (a: any, b: any) => a - b
+class MinHeap<Item = number> {
+  protected heap: Item[]
+  protected volumn: number
+  protected compareFunction: (a: Item, b: Item) => number
+  static defaultCompareFunction = (a: any, b: any) => a - b
 
-  constructor(compareFunction: (a: Item, b: Item) => number = MinHeap.defaultCompareFunction) {
+  constructor(
+    compareFunction: (a: Item, b: Item) => number = MinHeap.defaultCompareFunction,
+    volumn: number = Infinity,
+    heap: Item[] = []
+  ) {
+    this.heap = heap
     this.compareFunction = compareFunction
-    this.heap = []
-    this.volumn = Infinity
+    this.volumn = volumn
   }
 
   /**
@@ -23,7 +27,7 @@ class MinHeap<Item> {
    */
   push(val: Item) {
     if (this.heap.length >= this.volumn) {
-      this.pop()
+      this.shift()
     }
 
     this.heap.push(val)
@@ -36,15 +40,18 @@ class MinHeap<Item> {
    * @description 用数组尾部元素替换堆顶(直接删除会破坏堆结构),然后下移动直至子节点都大于新堆顶
    * @description 时间复杂度为`O(log(h))`
    */
-  pop() {
-    const top = this.peek()
-    const last = this.heap.pop()!
-    if (this.size !== 0) {
+  shift() {
+    if (this.size === 0) {
+      return undefined
+    } else if (this.size === 1) {
+      return this.heap.pop()!
+    } else {
+      const top = this.peek()
+      const last = this.heap.pop()!
       this.heap[0] = last
       this.shiftDown(0)
+      return top
     }
-
-    return top
   }
 
   peek() {
@@ -59,11 +66,11 @@ class MinHeap<Item> {
    * 取出堆顶元素，替换成val;
    * 一次O(log(h)的操作)
    */
-  replace(val: Item) {
-    this.heap[0] = val
-    this.shiftDown(0)
-    return this
-  }
+  // replace(val: Item) {
+  //   this.heap[0] = val
+  //   this.shiftDown(0)
+  //   return this
+  // }
 
   /**
    *
@@ -82,33 +89,51 @@ class MinHeap<Item> {
    * @param index 数组中的index
    * @returns
    */
-  private shiftUp(index: number) {
+  protected shiftUp(index: number) {
     if (index <= 0) return
     const parentIndex = this.getParentIndex(index)
-    while (this.compareFunction(this.heap[parentIndex], this.heap[index]) > 0) {
+
+    while (
+      this.heap[parentIndex] !== undefined &&
+      this.heap[index] !== undefined &&
+      this.compareFunction(this.heap[parentIndex], this.heap[index]) > 0
+    ) {
       this.swap(parentIndex, index)
       this.shiftUp(parentIndex)
     }
   }
 
   // 下移
-  private shiftDown(index: number) {
+  // 注意while/if里都要写索引 因为后面是改变索引
+  protected shiftDown(index: number) {
     const leftChildIndex = this.getLeftChildIndex(index)
     const rightChildIndex = this.getRightChildIndex(index)
-    if (this.compareFunction(this.heap[leftChildIndex], this.heap[index]) < 0) {
+
+    if (
+      this.heap[leftChildIndex] !== undefined &&
+      this.heap[index] !== undefined &&
+      this.compareFunction(this.heap[leftChildIndex], this.heap[index]) < 0
+    ) {
       this.swap(leftChildIndex, index)
       this.shiftDown(leftChildIndex)
     }
 
-    if (this.compareFunction(this.heap[leftChildIndex], this.heap[index]) < 0) {
+    if (
+      this.heap[rightChildIndex] !== undefined &&
+      this.heap[index] !== undefined &&
+      this.compareFunction(this.heap[rightChildIndex], this.heap[index]) < 0
+    ) {
       this.swap(rightChildIndex, index)
       this.shiftDown(rightChildIndex)
     }
   }
 
-  // 从0开始算index
+  protected swap(parentIndex: number, index: number) {
+    ;[this.heap[parentIndex], this.heap[index]] = [this.heap[index], this.heap[parentIndex]]
+  }
+
   private getParentIndex(index: number) {
-    // 二进制数向右移动一位，相当于Math.floor((index-1)/2)
+    // 减一后二进制数向右移动一位，相当于Math.floor((index-1)/2)
     return (index - 1) >> 1
   }
 
@@ -119,8 +144,6 @@ class MinHeap<Item> {
   private getRightChildIndex(index: number) {
     return index * 2 + 2
   }
-
-  private swap(parentIndex: number, index: number) {
-    ;[this.heap[parentIndex], this.heap[index]] = [this.heap[index], this.heap[parentIndex]]
-  }
 }
+
+export { MinHeap }

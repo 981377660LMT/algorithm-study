@@ -33,5 +33,5 @@ function $test(this: any, ...msg: any[]) {
   console.log(this.name)
   console.log(...msg)
 }
-const t = $test.myBind(aaaa, 'hello')
-t('world')
+const small = $test.myBind(aaaa, 'hello')
+small('world')

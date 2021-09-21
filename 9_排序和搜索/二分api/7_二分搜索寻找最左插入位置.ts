@@ -5,7 +5,7 @@
    如果 nums[mid] 大于目标值， 说明目标值在 mid 左侧，这个时候解空间可缩小为 [left, mid - 1] （mid 以及 mid 右侧的数字被我们排除在外）
  */
 const bisectLeft = (arr: number[], target: number): number => {
-  if (arr.length === 0) return -1
+  if (arr.length === 0) return 0
 
   let l = 0
   let r = arr.length - 1
@@ -29,8 +29,8 @@ const bisectLeft = (arr: number[], target: number): number => {
 
 if (require.main === module) {
   // const arr = [7, 7, 7, 7, 7, 7]
-  const arr = [6, 7, 8, 9]
-  console.log(bisectLeft(arr, 5))
+  const arr = [-3, -1, 1, 3]
+  console.log(bisectLeft(arr, 1))
 }
 
 export { bisectLeft }

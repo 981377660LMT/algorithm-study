@@ -1,15 +1,17 @@
-type NumSet = Set<number>
-type Value = number
+type ArrayIndexSet = Set<number>
+type ArrayValue = number
 
 class RandomizedCollection {
-  private map: Map<Value, NumSet>
+  private map: Map<ArrayValue, ArrayIndexSet>
   private arr: number[]
   private size: number
+
   constructor() {
     this.map = new Map()
     this.arr = []
     this.size = 0
   }
+
   /**
    *
    * @param val
@@ -32,18 +34,24 @@ class RandomizedCollection {
   remove(val: number): boolean {
     console.log(this.arr, this.map)
     if (!this.map.has(val) || this.map.get(val)?.size === 0) return false
-    const len = this.size
+
+    const lastValIndex = this.size - 1
+    const lastVal = this.arr[lastValIndex]
     const removeIndex = this.map.get(val)!.keys().next().value
-    const lastVal = this.arr[len - 1]
-    // 更新arr
+
+    // 待删除的元素删除removeIndex
+    this.map.get(val)?.delete(removeIndex)
+    // 先加再删，处理一个元素的情况
+    // 最后一个元素值加入removeIndex
+    // 最后一个元素值移除之前最后一个元素值的位置
+    this.map.get(lastVal)?.add(removeIndex).delete(lastValIndex)
+
+    // removeIndex处置为最后一个元素值
     this.arr[removeIndex] = lastVal
+    // pop操作
     this.arr.pop()
-    // 更新map:更新lastVal和val对应的map
-    this.map.get(lastVal)?.delete(len - 1)
-    lastVal !== val && this.map.get(lastVal)?.add(removeIndex)
-    this.map.get(val)!.delete(removeIndex)
-    this.map.get(val)!.size === 0 && this.map.delete(val)
     this.size--
+
     return true
   }
 
@@ -56,12 +64,23 @@ class RandomizedCollection {
   }
 }
 
+// const obj = new RandomizedCollection()
+// obj.insert(0)
+// obj.insert(1)
+// obj.remove(0)
+// obj.insert(2)
+// obj.remove(1)
+// console.log(obj)
+// console.log(obj.getRandom())
 const obj = new RandomizedCollection()
 obj.insert(0)
-obj.insert(1)
 obj.remove(0)
-obj.insert(2)
-obj.remove(1)
-console.log(obj)
+obj.insert(-1)
+obj.remove(0)
 console.log(obj.getRandom())
+console.log(obj.getRandom())
+console.log(obj.getRandom())
+console.log(obj.getRandom())
+console.log(obj.getRandom())
+console.log(obj)
 export {}

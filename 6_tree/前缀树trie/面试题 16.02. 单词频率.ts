@@ -58,3 +58,5 @@ console.log(wordsFrequency.get('have'))
 console.log(wordsFrequency.get('an'))
 console.log(wordsFrequency.get('apple'))
 console.log(wordsFrequency.get('pen'))
+
+export {}

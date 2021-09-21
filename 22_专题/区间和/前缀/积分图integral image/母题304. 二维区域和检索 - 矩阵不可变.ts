@@ -21,10 +21,10 @@ class NumMatrix {
   // 注意这里的减1
   sumRegion(row1: number, col1: number, row2: number, col2: number) {
     return (
-      this.pre[row2 + 1][col2 + 1] -
+      this.pre[row2 + 1][col2 + 1] +
+      this.pre[row1][col1] -
       this.pre[row2 + 1][col1] -
-      this.pre[row1][col2 + 1] +
-      this.pre[row1][col1]
+      this.pre[row1][col2 + 1]
     )
   }
 }

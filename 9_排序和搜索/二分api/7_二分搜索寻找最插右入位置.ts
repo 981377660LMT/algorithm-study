@@ -1,5 +1,5 @@
 const bisectRight = (arr: number[], target: number): number => {
-  if (arr.length === 0) return -1
+  if (arr.length === 0) return 0
 
   let l = 0
   let r = arr.length - 1

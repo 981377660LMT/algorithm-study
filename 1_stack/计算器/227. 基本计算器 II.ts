@@ -7,7 +7,7 @@ var calculate = function (s: string): number {
   s = s.startsWith('-') ? '0' + s + '$' : s + '$'
   const tokens = s.split(/([\+\-\*\/\$])/g).filter(v => v.trim())
 
-  console.log(tokens)
+  // console.log(tokens)
   const opt = new Set(['+', '-', '*', '/', '$'])
   const numStack: number[] = []
   const optStack: string[] = []

@@ -94,8 +94,8 @@ class MinHeap<Item = number> {
     const parentIndex = this.getParentIndex(index)
 
     while (
-      this.heap[parentIndex] &&
-      this.heap[index] &&
+      this.heap[parentIndex] !== undefined &&
+      this.heap[index] !== undefined &&
       this.compareFunction(this.heap[parentIndex], this.heap[index]) > 0
     ) {
       this.swap(parentIndex, index)
@@ -110,8 +110,8 @@ class MinHeap<Item = number> {
     const rightChildIndex = this.getRightChildIndex(index)
 
     if (
-      this.heap[leftChildIndex] &&
-      this.heap[index] &&
+      this.heap[leftChildIndex] !== undefined &&
+      this.heap[index] !== undefined &&
       this.compareFunction(this.heap[leftChildIndex], this.heap[index]) < 0
     ) {
       this.swap(leftChildIndex, index)
@@ -119,8 +119,8 @@ class MinHeap<Item = number> {
     }
 
     if (
-      this.heap[rightChildIndex] &&
-      this.heap[index] &&
+      this.heap[rightChildIndex] !== undefined &&
+      this.heap[index] !== undefined &&
       this.compareFunction(this.heap[rightChildIndex], this.heap[index]) < 0
     ) {
       this.swap(rightChildIndex, index)
@@ -129,7 +129,7 @@ class MinHeap<Item = number> {
   }
 
   private getParentIndex(index: number) {
-    // 二进制数向右移动一位，相当于Math.floor((index-1)/2)
+    // 减一后二进制数向右移动一位，相当于Math.floor((index-1)/2)
     return (index - 1) >> 1
   }
 

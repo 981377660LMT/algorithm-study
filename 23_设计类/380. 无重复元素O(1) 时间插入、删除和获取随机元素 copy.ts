@@ -1,6 +1,9 @@
 type Key = number
 type Value = number
 
+/**
+ * 哈希堆的思想来源
+ */
 class RandomizedSet {
   private map: Map<Value, Key>
   private arr: number[]

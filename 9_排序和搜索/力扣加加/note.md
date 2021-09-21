@@ -59,6 +59,7 @@
 四大应用(**如何构造解空间。更多的情况则是如何构建有序序列。**)
 
 1. 能力检测二分
+   `1970. 你能穿过矩阵的最后一天`
 
 ```Python
 def ability_test_bs(nums):
@@ -70,7 +71,7 @@ def ability_test_bs(nums):
       # 只有这里和最左二分不一样
       if possible(mid): l = mid + 1
       else: r = mid - 1
-  return l
+  return l   # 如果是最右检测则返回r
 ```
 
 2. 前缀和二分:如果数组全是正的，那么其前缀和就是一个严格递增的数组，我们有时候可以基于它来做二分。
