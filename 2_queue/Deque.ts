@@ -1,14 +1,14 @@
 class Deque<T> {
-  private maxSize: number
+  private capacity: number
   private data: T[]
   private head: number
   private tail: number
   private size: number
 
-  constructor(maxSize: number) {
-    this.maxSize = maxSize
+  constructor(capacity: number) {
+    this.capacity = capacity
     this.data = []
-    this.head = 0 // 从-1开始向前存
+    this.head = 0 // 从-1开始'向前'存
     this.tail = -1 // 从0开始向后存
     this.size = 0
   }
@@ -16,7 +16,7 @@ class Deque<T> {
   // head前移
   unshift(value: T): boolean {
     if (this.isFull()) return false
-    this.head = (this.head - 1 + this.maxSize) % this.maxSize
+    this.head = (this.head - 1 + this.capacity) % this.capacity
     this.data[this.head] = value
     this.size++
     return true
@@ -25,7 +25,7 @@ class Deque<T> {
   // tail后移
   push(value: T): boolean {
     if (this.isFull()) return false
-    this.tail = (this.tail + 1 + this.maxSize) % this.maxSize
+    this.tail = (this.tail + 1 + this.capacity) % this.capacity
     this.data[this.tail] = value
     this.size++
     return true
@@ -35,7 +35,7 @@ class Deque<T> {
   shift(): T | undefined {
     if (this.isEmpty()) return undefined
     const front = this.front()
-    this.head = (this.head + 1 + this.maxSize) % this.maxSize
+    this.head = (this.head + 1 + this.capacity) % this.capacity
     this.size--
     return front
   }
@@ -44,7 +44,7 @@ class Deque<T> {
   pop(): T | undefined {
     if (this.isEmpty()) return undefined
     const rear = this.rear()
-    this.tail = (this.tail - 1 + this.maxSize) % this.maxSize
+    this.tail = (this.tail - 1 + this.capacity) % this.capacity
     this.size--
     return rear
   }
@@ -54,7 +54,7 @@ class Deque<T> {
     const times = this.size
     for (let i = 0; i < times; i++) {
       callback(this.data[head], i, this.data)
-      head = (head + 1 + this.maxSize) % this.maxSize
+      head = (head + 1 + this.capacity) % this.capacity
     }
   }
 
@@ -71,7 +71,7 @@ class Deque<T> {
   }
 
   private isFull(): boolean {
-    return this.size === this.maxSize
+    return this.size === this.capacity
   }
 }
 

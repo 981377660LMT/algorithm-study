@@ -1,8 +1,9 @@
 from play_with_graph_algorithms.chapter02.adj_set import AdjSet as Graph
 
+# 这个实现有问题
+
 
 class CycleDetection:
-
     def __init__(self, G):
         self._G = G
         self._visited = [False] * G.V

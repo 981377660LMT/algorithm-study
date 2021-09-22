@@ -25,7 +25,7 @@ class ListNode<K, V> {
 class LRUCache<K extends PropertyKey, V> {
   private size: number
   private capacity: number
-  private data: Record<K, ListNode<K, V>>
+  private keyToListNode: Record<K, ListNode<K, V>>
   // head与tail不用来存储值
   private head: ListNode<K, V>
   private tail: ListNode<K, V>
@@ -33,9 +33,9 @@ class LRUCache<K extends PropertyKey, V> {
   constructor(capacity: number) {
     this.size = 0
     this.capacity = capacity
-    this.data = Object.create(null)
-    this.head = new ListNode<K, V>(undefined as unknown as K, undefined as unknown as V)
-    this.tail = new ListNode<K, V>(undefined as unknown as K, undefined as unknown as V)
+    this.keyToListNode = Object.create(null)
+    this.head = new ListNode<K, V>(undefined as any, undefined as any)
+    this.tail = new ListNode<K, V>(undefined as any, undefined as any)
     this.head.next = this.tail
     this.tail.pre = this.head
   }
@@ -45,8 +45,8 @@ class LRUCache<K extends PropertyKey, V> {
    * @param key 如果关键字 key 存在于缓存中，则返回关键字的值，否则返回 -1 。
    */
   get(key: K) {
-    if (this.data[key] !== undefined) {
-      const node = this.data[key]
+    if (this.keyToListNode[key] !== undefined) {
+      const node = this.keyToListNode[key]
       // console.log(node)
       this.removeNode(node)
       this.appendHead(node)
@@ -65,18 +65,18 @@ class LRUCache<K extends PropertyKey, V> {
   put(key: K, value: V) {
     let node: ListNode<K, V>
 
-    if (this.data[key] !== undefined) {
-      node = this.data[key]
+    if (this.keyToListNode[key] !== undefined) {
+      node = this.keyToListNode[key]
       this.removeNode(node)
       node.val = value
     } else {
       node = new ListNode(key, value)
-      this.data[key] = node
+      this.keyToListNode[key] = node
       if (this.size < this.capacity) {
         this.size++
       } else {
         const key = this.removeTail()
-        delete this.data[key]
+        delete this.keyToListNode[key]
       }
     }
 

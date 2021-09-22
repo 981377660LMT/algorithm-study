@@ -8,116 +8,66 @@
 // 并查集的典型应用是有关连通分量的问题，
 // 并查集解决单个问题（添加，合并，查找）的时间复杂度都是O(h)(因为都是用的map的set和get方法)。
 
-interface IUnionFind<U> {
-  isConnected: (key1: U, key2: U) => boolean
-  add: (key: U) => this
-  union: (key1: U, key2: U) => this
-  find: (key: U) => U | undefined
+interface IUnionFind {
+  union: (key1: number, key2: number) => this
+  find: (key: number) => number
+  isConnected: (key1: number, key2: number) => boolean
 }
 
-class UnionFind<U = unknown> implements IUnionFind<U> {
-  private static readonly rootSymbol = Symbol.for('UnionFind_Root')
+class UnionFind implements IUnionFind {
   // 记录每个节点的父节点
   // 如果节点互相连通（从一个节点可以达到另一个节点），那么他们的祖先是相同的。
-  private readonly parent: Map<U, U | symbol>
-  // 记录无向图连通域数量
-  private count: number
+  private readonly parent: number[]
   // rank优化 union时连接到rank较大的根上
-  private rank: Map<U, number>
+  private readonly rank: number[]
+  // 记录无向图连通域数量
+  public count: number
 
-  constructor() {
-    this.parent = new Map()
-    this.rank = new Map()
-    this.count = 0
+  constructor(size: number) {
+    this.count = size
+    this.parent = Array.from({ length: size }, (_, i) => i)
+    this.rank = Array(size).fill(1)
   }
 
-  get size() {
-    return this.count
-  }
-
-  isConnected(key1: U, key2: U) {
+  union(key1: number, key2: number): this {
     const root1 = this.find(key1)
     const root2 = this.find(key2)
-    return root1 !== undefined && root2 !== undefined && this.find(key1) === this.find(key2)
-  }
-
-  /**
-   *
-   * @param key 把一个新节点添加到并查集中，它的父节点应该为UnionFind.rootSymbol。
-   */
-  add(key: U): this {
-    if (!this.parent.has(key)) {
-      this.parent.set(key, UnionFind.rootSymbol)
-      this.count++
-      this.rank.set(key, 1)
+    if (root1 === root2) return this
+    // 小树接到大树下面，平衡性优化
+    const rank1 = this.rank[root1]
+    const rank2 = this.rank[root2]
+    if (rank1 > rank2) {
+      this.parent[root2] = root1
+    } else if (rank1 < rank2) {
+      this.parent[root1] = root2
+    } else {
+      this.parent[root1] = root2
+      this.rank[root2]++
     }
+    this.count--
     return this
   }
 
-  /**
-   *
-   * @description 如果两个节点是连通的，那么就要把他们合并，也就是他们的祖先是相同的。
-   * @example
-   * ```js
-   * const union = new UnionFind<number>()
-   * union.add(1).add(2).add(3).add(4).union(2, 3).union(4, 3)
-   * console.dir(union, { depth: null })
-   *
-   * // output:
-   * UnionFind {
-   *   parent: Map(4) { 1 => undefined, 2 => 3, 3 => undefined, 4 => 3 }
-   * }
-   * ```
-   */
-  union(key1: U, key2: U): this {
-    const root1 = this.find(key1)
-    const root2 = this.find(key2)
-    if (root1 !== undefined && root2 !== undefined && root1 !== root2) {
-      // rank优化
-      const rank1 = this.rank.get(root1)!
-      const rank2 = this.rank.get(root2)!
-      if (rank1 > rank2) {
-        this.parent.set(root2, root1)
-      } else if (rank1 < rank2) {
-        this.parent.set(root1, root2)
-      } else {
-        this.parent.set(root1, root2)
-        this.rank.set(root2, this.rank.get(root2)! + 1)
-      }
-      this.count--
+  find(key: number): number {
+    while (this.parent[key] !== key) {
+      this.parent[key] = this.parent[this.parent[key]] // 进行路径压缩
+      key = this.parent[key]
     }
-    return this
+    return key
   }
 
-  // /**
-  //  * @description 判断两个节点是否处于同一个连通分量的时候，就要判断他们的祖先是否相同。
-  //  */
-  // isConnected(key1: U, key2: U): boolean {
-  //   return this.find(key1) === this.find(key2)
-  // }
-
-  /**
-   *
-   * @param key 查找祖先；如果节点的父节点不为空或者symbol，那就不断迭代。
-   * @returns 返回undefined代表key不在并查集中
-   */
-  find(key: U): U | undefined {
-    let root = key as any
-    if (!this.parent.has(root)) return undefined
-    while (this.parent.get(root) !== UnionFind.rootSymbol) {
-      root = this.parent.get(root)
-    }
-    return root
+  isConnected(key1: number, key2: number): boolean {
+    return this.find(key1) === this.find(key2)
   }
 }
 
 if (require.main === module) {
-  const union = new UnionFind<number>()
-  union.add(1).add(2).add(3).add(4).union(2, 3).union(4, 3).add(6)
-  console.dir(union, { depth: null })
-  console.log(union.find(1))
-  console.log(union.isConnected(4, 2))
-  console.log(union.isConnected(4, 1))
+  const uf = new UnionFind(5)
+  uf.union(2, 3).union(4, 3)
+  console.dir(uf, { depth: null })
+  console.log(uf.find(1))
+  console.log(uf.isConnected(4, 2))
+  console.log(uf.isConnected(4, 1))
 }
 
 export { UnionFind }

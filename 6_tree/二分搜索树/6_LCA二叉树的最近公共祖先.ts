@@ -78,7 +78,9 @@ const lowestCommonAncestor = (root: TreeNode | null, p: TreeNode, q: TreeNode): 
   // 排除有一个不存在的情况
   if (detectLeft === null) return detectRight
   if (detectRight === null) return detectLeft
+  // 这里是二叉树的后序遍历:
   // p, q 分别在 root 的左右子树；
+  // p和q出发往上走，第一次相交的节点就是这个root
   return root
 }
 
