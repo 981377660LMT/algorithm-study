@@ -25,7 +25,7 @@ const solution = (start:number) => {
   const pre = new number[] = Array(V).fill(-1)
   const queue: number[] = []
   // 可以用pre代替
-  // const visited = new Set([start])
+  const visited = new Set([start])
   pre[start]=start
   queue.push(start)
 

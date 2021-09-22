@@ -25,6 +25,7 @@ const pick = (dataStream: number[], k: number) => {
   }
 
   for (let i = k; i < dataStream.length; i++) {
+    // [0,i]
     const rand = Math.floor(Math.random() * (i + 1))
     if (rand <= k - 1) {
       reservoir[rand] = dataStream[i]

@@ -45,11 +45,13 @@ function bfs() {
 ```
 
 **带层信息**
+while 循环控制一层一层往下走，for 循环利用长度变量控制从左到右遍历每一层二叉树节点。
 
 ```TS
 const main = (root: BinaryTree | null) => {
   if (!root) return
   const queue: [BinaryTree, number][] = [[root, 0]]
+  let depth=1
 
   while (queue.length) {
     const levelLength = queue.length
@@ -59,6 +61,7 @@ const main = (root: BinaryTree | null) => {
       queue.left&&queue.push([head.left, level + 1])
       queue.right&&queue.push([head.right, level + 1])
     }
+    depth++;
   }
 
   return res

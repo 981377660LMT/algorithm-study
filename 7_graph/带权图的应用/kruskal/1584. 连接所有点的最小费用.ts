@@ -23,6 +23,7 @@ const minCostConnectPoints = function (points: number[][]): number {
     for (const [u, v, w] of edges) {
       const root1 = find(u)
       const root2 = find(v)
+      // 不连通
       if (root1 !== root2) {
         res += w
         parent[Math.max(root1, root2)] = Math.min(root1, root2)
