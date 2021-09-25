@@ -1,4 +1,4 @@
-import { Trie, TrieNode } from './1_实现trie'
+import { Trie, TrieNode } from './实现trie/1_实现trie'
 
 class WordTrie extends Trie {
   // 因为需要匹配'.'，需要递归遍历节点

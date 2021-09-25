@@ -11,6 +11,7 @@ function countPrimes(n: number): number {
   for (let i = 2; i < n; i++) {
     if (visited[i]) continue
     res++
+    console.log(i)
     for (let j = i * i; j < n; j += i) {
       visited[j] = true
     }

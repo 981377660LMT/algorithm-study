@@ -11,11 +11,23 @@
 const multiply = (num1: string, num2: string): string => {
   if (num1 === '0' || num2 === '0') return '0'
 
+  const arr1 = num1.split('').map(Number)
+  const arr2 = num2.split('').map(Number)
+  const res: number[] = Array(arr1.length + arr2.length - 1).fill(0)
+  for (let i = 0; i < arr1.length; i++) {
+    for (let j = 0; j < arr2.length; j++) {
+      res[i + j] += arr1[i] * arr2[j]
+    }
+  }
+
+  handleCarry(res)
+  return res.join('')
+
   /**
    * @param arr   4   13  28  27  18
    * @description 整理： c[i + 1] += c[i] / 10, c[i] %= 10, 从低位开始。
    */
-  const handleCarry = (arr: number[]): void => {
+  function handleCarry(arr: number[]): void {
     let carry = 0
     for (let i = arr.length - 1; i >= 1; i--) {
       carry = ~~(arr[i] / 10)
@@ -30,18 +42,6 @@ const multiply = (num1: string, num2: string): string => {
       arr.unshift(carry)
     }
   }
-
-  const arr1 = num1.split('').map(Number)
-  const arr2 = num2.split('').map(Number)
-  const res: number[] = Array(arr1.length + arr2.length - 1).fill(0)
-  for (let i = 0; i < arr1.length; i++) {
-    for (let j = 0; j < arr2.length; j++) {
-      res[i + j] += arr1[i] * arr2[j]
-    }
-  }
-
-  handleCarry(res)
-  return res.join('')
 }
 
 console.log(323 * 456)

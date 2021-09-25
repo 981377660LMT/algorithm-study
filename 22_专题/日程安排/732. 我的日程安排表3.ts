@@ -14,6 +14,14 @@ class MyCalendar {
     this.overlapCount = overlapCount
   }
 
+  /**
+   * 
+   * @param start 
+   * @param end 
+   * @returns 
+   * 时间复杂度：O(N^2)
+     N 指的是日程安排的数量。对于每个新的日程安排，我们遍历 count 需要 O(N) 的时间
+   */
   book(start: number, end: number): boolean {
     this.count.set(start, (this.count.get(start) || 0) + 1)
     this.count.set(end, (this.count.get(end) || 0) - 1)

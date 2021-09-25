@@ -16,6 +16,7 @@ const canJump = (nums: number[]) => {
     next = Math.max(next, i + nums[i])
     // 需要做出决定，pre跳到最远的cur
     if (cur === i) {
+      if (cur >= next) return -1 // 无法到达
       cur = next
       step++
     }
@@ -24,7 +25,10 @@ const canJump = (nums: number[]) => {
   return step
 }
 
-console.log(canJump([2, 3, 1, 1, 4]))
-console.log(canJump([2, 3, 0, 1, 4]))
+if (require.main === module) {
+  console.log(canJump([2, 3, 1, 1, 4]))
+  console.log(canJump([2, 3, 0, 1, 4]))
+  console.log(canJump([1, 0, 0]))
+}
 
 export {}

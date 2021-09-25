@@ -1,4 +1,4 @@
-import { Trie } from './1_实现trie'
+import { Trie } from './实现trie/1_实现trie'
 
 // 若其中有多个可行的答案，则返回答案中字典序最小的单词。
 // 给出一个字符串数组words组成的一本英语词典。

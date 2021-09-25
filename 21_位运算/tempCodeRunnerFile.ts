@@ -1,5 +1,4 @@
-var convertToBaseN = function (num: number, n: number): string {
-  if (num < 0) return `-${convertToBaseN(num * -1, n)}`
-  if (num < n) return `${n}`
-  return convertToBaseN(num / n, n) + convertToBaseN(num % n, n)
-}
+// @ts-ignore
+// 1.判断两个非0的数是否异号
+console.log(-1 ^ 2)
+// 利用的是补码编码的符号位

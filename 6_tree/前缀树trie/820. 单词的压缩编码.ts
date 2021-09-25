@@ -1,4 +1,4 @@
-import { Trie } from './1_实现trie'
+import { Trie } from './实现trie/1_实现trie'
 
 /**
  * @param {string[]} words

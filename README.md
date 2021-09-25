@@ -7,10 +7,8 @@
 - 剑指 offer
 - 编程之法
 - 宫水三叶
-- 霜神笔记
-- code up网站以及公众号
-- 牛客网
-- go mooc
+- code up 网站以及公众号
+- 牛客网 https://www.nowcoder.com/intelligentTest 题库
 - 一个脑洞很大的程序员的微信
 
 JS,TS 刷题时大数问题可用 BigInt 或者求余解决

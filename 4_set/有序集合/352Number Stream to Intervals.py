@@ -1,6 +1,6 @@
 from sortedcontainers import SortedDict
 
-# 左查右 右查左
+# 左查右 右查左(参考考场就座)
 class StreamSummary:
     def __init__(self):
       self.start=SortedDict() # 表示以 x 为区间左端点的区间的右端点

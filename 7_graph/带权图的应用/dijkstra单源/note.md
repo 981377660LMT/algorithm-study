@@ -55,14 +55,13 @@ int[] dijkstra(int start, List<Integer>[] graph);
   while (priorityQueue.length) {
     // 3.每次都从离原点最近的没更新过的点开始更新(性能瓶颈：可使用优先队列优化成ElogE)
     const [cur, maxWeight] = priorityQueue.shift()!
-    if (visited.has(cur)) continue
     if (cur === end) return maxWeight
 
+    if (visited.has(cur)) continue
     visited.add(cur)
 
     // 4.利用cur点来更新其相邻节点next与原点的距离
     for (const [next, weight] of adjList[cur]) {
-      if (visited.has(next)) continue
       if (dist[cur] + weight < dist[next]) {
         dist[next] = dist[cur] + weight
         priorityQueue.push([next, dist[next]])

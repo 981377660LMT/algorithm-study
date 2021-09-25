@@ -26,13 +26,11 @@ class MinHeap<Item = number> {
    * @description 时间复杂度为`O(log(h))`
    */
   push(val: Item) {
-    if (this.heap.length >= this.volumn) {
-      this.shift()
-    }
-
     this.heap.push(val)
     this.shiftUp(this.heap.length - 1)
-
+    while (this.heap.length > this.volumn) {
+      this.shift()
+    }
     return this.size
   }
 

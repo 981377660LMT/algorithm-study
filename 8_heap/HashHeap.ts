@@ -40,7 +40,7 @@ class HashHeap<Item = number> extends MinHeap<Item> {
   }
 
   remove(val: Item) {
-    if (!this.size || this.hash.get(val)) return
+    if (!this.size || !this.hash.has(val)) return
     const removeIndex = this.hash.get(val)!
     this.swap(this.size - 1, removeIndex)
     this.heap.pop()
@@ -52,15 +52,22 @@ class HashHeap<Item = number> extends MinHeap<Item> {
   }
 
   static main() {
-    const hashHeap = new HashHeap((a, b) => a - b)
-    hashHeap.push(19)
-    hashHeap.push(2)
-    hashHeap.push(31)
-    console.log(hashHeap)
+    const hashHeap = new HashHeap<number[]>((a, b) => a[1] - a[0] - (b[1] - b[0]))
+    const intervalA = [1, 2]
+    const intervalB = [3, 8]
+    const intervalC = [7, 9]
+    hashHeap.push(intervalA)
+    hashHeap.push(intervalB)
+    hashHeap.push(intervalC)
+    hashHeap.remove(intervalB)
+    hashHeap.remove(intervalB)
+    hashHeap.remove(intervalB)
     console.log(hashHeap.shift())
     console.log(hashHeap)
   }
 }
 
-// HashHeap.main()
+if (require.main === module) {
+  HashHeap.main()
+}
 export { HashHeap }

@@ -26,6 +26,6 @@ const longestPalindromeSubseq = function (s: string): number {
   return dp[0][len - 1]
 }
 
-console.log(longestPalindromeSubseq('bbbab'))
+// console.log(longestPalindromeSubseq('bbbab'))
 
-export default 1
+export { longestPalindromeSubseq }

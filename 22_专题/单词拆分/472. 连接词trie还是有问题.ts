@@ -1,4 +1,4 @@
-import { Trie } from '../../6_tree/前缀树trie/1_实现trie'
+import { Trie } from '../../6_tree/前缀树trie/实现trie/1_实现trie'
 
 class WordTrie extends Trie {
   // 不如hashmap的写法

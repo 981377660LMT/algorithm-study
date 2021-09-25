@@ -1,16 +1,16 @@
-class Deque<T> {
-  private capacity: number
-  private data: T[]
+class ArrayDeque<T = number> {
+  private readonly capacity: number
+  private readonly data: T[]
   private head: number
   private tail: number
-  private size: number
+  public length: number
 
   constructor(capacity: number) {
     this.capacity = capacity
     this.data = []
     this.head = 0 // 从-1开始'向前'存
     this.tail = -1 // 从0开始向后存
-    this.size = 0
+    this.length = 0
   }
 
   // head前移
@@ -18,7 +18,7 @@ class Deque<T> {
     if (this.isFull()) return false
     this.head = (this.head - 1 + this.capacity) % this.capacity
     this.data[this.head] = value
-    this.size++
+    this.length++
     return true
   }
 
@@ -27,7 +27,7 @@ class Deque<T> {
     if (this.isFull()) return false
     this.tail = (this.tail + 1 + this.capacity) % this.capacity
     this.data[this.tail] = value
-    this.size++
+    this.length++
     return true
   }
 
@@ -36,7 +36,7 @@ class Deque<T> {
     if (this.isEmpty()) return undefined
     const front = this.front()
     this.head = (this.head + 1 + this.capacity) % this.capacity
-    this.size--
+    this.length--
     return front
   }
 
@@ -45,40 +45,40 @@ class Deque<T> {
     if (this.isEmpty()) return undefined
     const rear = this.rear()
     this.tail = (this.tail - 1 + this.capacity) % this.capacity
-    this.size--
+    this.length--
     return rear
   }
 
   forEach(callback: (value: T, index: number, array: T[]) => void): void {
     let head = this.head
-    const times = this.size
+    const times = this.length
     for (let i = 0; i < times; i++) {
       callback(this.data[head], i, this.data)
       head = (head + 1 + this.capacity) % this.capacity
     }
   }
 
-  private front(): T | undefined {
-    return this.isEmpty() ? undefined : this.data[this.head]
+  front(): T | undefined {
+    return this.isEmpty() ? undefined : this.data[(this.head + this.capacity) % this.capacity]
   }
 
-  private rear(): T | undefined {
-    return this.isEmpty() ? undefined : this.data[this.tail]
+  rear(): T | undefined {
+    return this.isEmpty() ? undefined : this.data[(this.tail + this.capacity) % this.capacity]
   }
 
-  private isEmpty(): boolean {
-    return this.size === 0
+  isEmpty(): boolean {
+    return this.length === 0
   }
 
-  private isFull(): boolean {
-    return this.size === this.capacity
+  isFull(): boolean {
+    return this.length === this.capacity
   }
 }
 
-export { Deque }
+export { ArrayDeque }
 
 if (require.main === module) {
-  const deque = new Deque<number>(4)
+  const deque = new ArrayDeque<number>(4)
   deque.push(1)
   deque.unshift(2)
   console.log(deque)

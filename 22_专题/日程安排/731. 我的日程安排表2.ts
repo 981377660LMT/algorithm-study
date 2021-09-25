@@ -9,7 +9,7 @@ class MyCalendar {
    * 用JS的map每次遍历需要排序。如果你使用的是 Java，可以直接使用现成的数据结构 TreeMap。
    * 与HashMap相比，TreeMap是一个能比较元素大小的Map集合，会对传入的key进行了大小排序
    * TreeMap实现了红黑树的结构，形成了一颗二叉树。
-   * @summary O(n^2)
+   * @summary 此处为O(nlogn) 如果是treemap则为O(n)遍历复杂度
    */
   book(start: number, end: number): boolean {
     this.count.set(start, (this.count.get(start) || 0) + 1)
