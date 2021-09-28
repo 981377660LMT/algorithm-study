@@ -6,3 +6,5 @@ const intersection = (arr1: number[], arr2: number[]) =>
 
 console.log(intersection([1, 2, 3], [1]))
 export {}
+// 关键思想是存储大数组 遍历小数组
+// 1570. 两个稀疏向量的点积

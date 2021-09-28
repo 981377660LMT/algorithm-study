@@ -4,9 +4,12 @@
  */
 const calculate = function (s: string): number {
   // 哨兵  类似"-1+3"或"1+(-1+2)"第一位是负数的表达式，会有问题 要加入0
-  s = s.startsWith('-') ? '0' + s + ')' : s + ')'
+  // 加入')'保证所有操作符最后出栈
+  s = s.startsWith('-') ? '0' + s + ')' : s + ')' // "-1 - (-1)" => "0-1 - (-1)"
+  s = s.replace(/\(\-/g, '(0-') // "1 - (-1)" => "1 - (0-1)"
+  s = s.replace(/\(\+/g, '(0+') // "1 - (+1)" => "1 - (0+1)"
   const tokens = s.split(/([\(\)\+\-\*\/])/g).filter(v => v.trim())
-  const opt = new Set(['+', '-', '(', ')'])
+  const opt = new Set(['+', '-', '(', ')', '*', '/'])
   const numStack: number[] = []
   const optStack: string[] = []
   const evaluate = {
@@ -26,8 +29,6 @@ const calculate = function (s: string): number {
       case '(':
       case ')':
         return NaN
-      case '$':
-        return -1
       default:
         throw new Error('Not Valid Operator')
     }
@@ -59,9 +60,11 @@ const calculate = function (s: string): number {
   return numStack[0]
 }
 
-console.log(calculate('(1+(4+5+2)-3)+(6+8)'))
-console.log(calculate('2-1+2'))
-console.log(calculate('2147483647'))
-console.log(calculate('-2+ 1'))
+// console.log(calculate('(1+(4+5+2)-3)+(6+8)'))
+// console.log(calculate('2-1+2'))
+// console.log(calculate('2147483647'))
+// console.log(calculate('-2+ 1'))
+// console.log(calculate('1-(-2)'))
+console.log(calculate('6-4/2'))
 
 export default 1

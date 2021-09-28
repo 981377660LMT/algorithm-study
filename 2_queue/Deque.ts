@@ -62,6 +62,7 @@ class ArrayDeque<T = number> {
     return this.isEmpty() ? undefined : this.data[(this.head + this.capacity) % this.capacity]
   }
 
+  // fix:deque 注意所有下标要加容量后取模
   rear(): T | undefined {
     return this.isEmpty() ? undefined : this.data[(this.tail + this.capacity) % this.capacity]
   }

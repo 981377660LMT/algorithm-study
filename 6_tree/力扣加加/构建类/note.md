@@ -14,3 +14,5 @@ root.left = helper(...)
 root.right = helper(...)
 return root
 ```
+
+前序+后序可以确定一棵树 层次单独就可以确定一棵树

@@ -1,4 +1,4 @@
-import { BinaryTree } from '../6_tree/力扣加加/Tree'
+import { BinaryTree } from '../../6_tree/力扣加加/Tree'
 
 // 设计迭代器的时候提前把所有的值遍历并且保存起来的做法并不好
 // 把递归转成迭代，基本想法就是用栈:迭代时计算 next  节点
@@ -18,8 +18,6 @@ class BSTIterator {
       root = root.left
     }
   }
-
-  static main() {}
 
   /**
    * 弹出栈顶的节点；

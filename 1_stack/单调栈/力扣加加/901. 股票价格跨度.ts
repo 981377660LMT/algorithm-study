@@ -2,13 +2,13 @@ class StockSpanner {
   constructor(private prices: [number, number][] = [[Infinity, 0]]) {}
 
   next(price: number) {
-    let res = 1
-    while (this.prices.length && this.prices[this.prices.length - 1][0] < price) {
-      res += this.prices[this.prices.length - 1][1]
+    let gap = 1
+    while (this.prices.length && this.prices[this.prices.length - 1][0] <= price) {
+      gap += this.prices[this.prices.length - 1][1]
       this.prices.pop()
     }
-    this.prices.push([price, res])
-    return res
+    this.prices.push([price, gap])
+    return gap
   }
 }
 

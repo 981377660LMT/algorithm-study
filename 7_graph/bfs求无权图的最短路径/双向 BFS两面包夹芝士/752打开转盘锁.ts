@@ -30,7 +30,7 @@ const openLock = (deadends: string[], target: string): number => {
       if (queue2.has(cur)) return res
       visited.add(cur)
 
-      for (const next of getNextStates(cur)) {
+      for (const next of getNextState(cur)) {
         if (visited.has(next)) continue
         tmp.add(next)
       }
@@ -43,7 +43,7 @@ const openLock = (deadends: string[], target: string): number => {
   return -1
 
   // 八个临边
-  function getNextStates(s: string): string[] {
+  function getNextState(s: string): string[] {
     const ans: string[] = []
     for (let i = 0; i < s.length; i++) {
       ans.push(s.slice(0, i) + ((+s[i] + 1) % 10).toString() + s.slice(i + 1))

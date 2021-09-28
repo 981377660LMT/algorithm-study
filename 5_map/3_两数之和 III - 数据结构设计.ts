@@ -49,3 +49,5 @@ class TwoSum2 {
 }
 
 // leetcode的测试用例读少写多
+
+export {}

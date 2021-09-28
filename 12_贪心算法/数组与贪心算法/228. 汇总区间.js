@@ -7,14 +7,15 @@ var summaryRanges = function (nums) {
   nums.push(Infinity) // 哨兵元素
   let pre = nums[0]
   for (let i = 1; i < nums.length; i++) {
-    if (nums[i] - nums[i - 1] > 1) {
-      if (nums[i - 1] === pre) {
-        res.push(pre.toString())
-      } else {
-        res.push(`${pre}->${nums[i - 1]}`)
-      }
-      pre = nums[i]
+    if (nums[i] - nums[i - 1] === 1) continue
+    if (nums[i - 1] === pre) {
+      // 只有一个数
+      res.push(pre.toString())
+    } else {
+      // 一段数
+      res.push(`${pre}->${nums[i - 1]}`)
     }
+    pre = nums[i]
   }
 
   return res

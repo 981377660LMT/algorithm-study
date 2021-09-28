@@ -2,14 +2,16 @@
 
 ## todo
 
+把所有简单题都过一遍 然后记录一下**母题**
+
+- 精选 200 题
 - 力扣加加
 - lucifer 的博客
-- 剑指 offer
-- 编程之法
 - 宫水三叶
-- code up 网站以及公众号
+- code up 公众号
 - 牛客网 https://www.nowcoder.com/intelligentTest 题库
 - 一个脑洞很大的程序员的微信
+- code up 网站
 
 JS,TS 刷题时大数问题可用 BigInt 或者求余解决
 

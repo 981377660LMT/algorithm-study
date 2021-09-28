@@ -41,7 +41,7 @@ class BIT implements IBIT {
    *
    * @param x
    * @description
-   * 区间查询：返回前x项的值
+   * 区间查询：返回前x项的值(包含x)
    */
   query(x: number) {
     let res = 0

@@ -10,3 +10,7 @@ const validTree = (n: number, edges: number[][]) => {
   }
   return true
 }
+// 判断图是不是树，满足两点
+
+// 是连通图
+// 不存在环

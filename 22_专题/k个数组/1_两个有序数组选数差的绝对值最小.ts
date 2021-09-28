@@ -19,3 +19,5 @@ const minDiff = (arr1: number[], arr2: number[]): number => {
 
 console.log(minDiff([10, 20, 30, 40], [25, 28, 7]))
 export default 1
+
+export { minDiff }

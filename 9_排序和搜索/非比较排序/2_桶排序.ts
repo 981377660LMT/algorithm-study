@@ -8,7 +8,8 @@ const bucketSort = (arr: number[], size: number): number[] => {
   const bucket = Array.from<number, number[]>({ length: count }, () => [])
 
   arr.forEach(num => {
-    const index = Math.floor((num - min) / size)
+    const index = Math.floor((num - min) / size) // 偏移量
+
     bucket[index].push(num)
   })
 

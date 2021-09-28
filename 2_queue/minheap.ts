@@ -24,6 +24,7 @@ class MinHeap<Item = number> {
    * @param val 插入的值
    * @description 将值插入数组(堆)的尾部，然后上移直至父节点不超过它
    * @description 时间复杂度为`O(log(h))`
+   * heapq.heappushpop
    */
   push(val: Item) {
     this.heap.push(val)

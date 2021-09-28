@@ -1,13 +1,14 @@
-type Key = number
+type Index = number
 type Value = number
 
 /**
  * 哈希堆的思想来源
  */
 class RandomizedSet {
-  private map: Map<Value, Key>
-  private arr: number[]
-  private size: number
+  protected map: Map<Value, Index>
+  protected arr: number[]
+  protected size: number
+
   constructor() {
     this.map = new Map()
     this.arr = []
@@ -50,10 +51,4 @@ class RandomizedSet {
   }
 }
 
-/**
- * Your RandomizedSet object will be instantiated and called as such:
- * var obj = new RandomizedSet()
- * var param_1 = obj.insert(val)
- * var param_2 = obj.remove(val)
- * var param_3 = obj.getRandom()
- */
+export { RandomizedSet }

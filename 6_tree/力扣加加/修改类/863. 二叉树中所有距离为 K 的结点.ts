@@ -17,21 +17,22 @@ type NodeWithParent = AddPropRecursively<BinaryTree, { parent?: BinaryTree | nul
 const distanceK = function (root: NodeWithParent, target: number, k: number): number[] {
   if (!root) return []
   const res: number[] = []
+  const targetNode = findTargetNode(root, null)
+  if (!targetNode) return []
+  dfs(targetNode, 0, new Set([targetNode.val]))
+  return res
 
-  const findTargetNode = (
+  function findTargetNode(
     root: NodeWithParent | null,
     parent: NodeWithParent | null
-  ): NodeWithParent | null => {
+  ): NodeWithParent | null {
     if (!root) return null
-    root.parent = parent
+    root.parent = parent // 标记了parent 将有向图转无向图
     if (root.val === target) return root
     return findTargetNode(root.left, root) || findTargetNode(root.right, root)
   }
 
-  const targetNode = findTargetNode(root, null)
-  if (!targetNode) return []
-
-  const bfs = (root: NodeWithParent | null, steps: number, visited: Set<number>): void => {
+  function dfs(root: NodeWithParent | null, steps: number, visited: Set<number>): void {
     if (!root) return
     if (steps === k) {
       res.push(root.val)
@@ -42,13 +43,10 @@ const distanceK = function (root: NodeWithParent, target: number, k: number): nu
     for (const nextNode of next) {
       if (nextNode && !visited.has(nextNode.val)) {
         visited.add(nextNode.val)
-        bfs(nextNode, steps + 1, visited)
+        dfs(nextNode, steps + 1, visited)
       }
     }
   }
-  bfs(targetNode, 0, new Set([targetNode.val]))
-
-  return res
 }
 
 console.dir(distanceK(deserializeNode([3, 5, 1, 6, 2, 0, 8, null, null, 7, 4])!, 5, 2), {
