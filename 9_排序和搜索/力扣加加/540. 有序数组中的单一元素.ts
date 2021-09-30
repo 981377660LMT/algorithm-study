@@ -1,6 +1,6 @@
 // 这里不用位运算O(n)而是二分的方法O(logn) 因为数组有序
 /**
- * @param {number[]} nums
+ * @param {number[]} nums   长度为奇数
  * @return {number}
  * 当mid为偶数时，mid两边的数字个数为偶数个
  * 统一mid为奇数和偶数的情况，当mid为奇数的时候，将mid左移一位
@@ -14,7 +14,7 @@ const singleNonDuplicate = function (nums: number[]): number {
   // 因此当 left <= right 的时候，解空间都不为空，此时我们都需要继续搜索
   while (l <= r) {
     let mid = (l + r) >> 1
-    if (mid % 2 === 1) mid--
+    if (mid % 2 === 1) mid-- // 仅对偶数索引进行二分搜索
     if (nums[mid] === nums[mid + 1]) l = mid + 2
     else r = mid - 1
   }

@@ -14,29 +14,19 @@ const maxCoins = function (nums: number[]): number {
   // 首尾添加1，方便处理边界情况
   nums.unshift(1)
   nums.push(1)
-  const len = nums.length
-  console.log(len)
-  const dp = Array.from({ length: len }, () => Array(len).fill(0))
-  const rangeBest = (i: number, j: number) => {
-    let max = 0
-    for (let k = i + 1; k < j; k++) {
-      const left = dp[i][k]
-      const right = dp[k][j]
-      const sum = left + nums[i] * nums[k] * nums[j] + right
-      max = Math.max(max, sum)
-    }
-    dp[i][j] = max
-  }
+  const n = nums.length
+  const dp = Array.from({ length: n + 1 }, () => Array(n).fill(0))
 
-  // l为区间长度,从2开始
-  for (let l = 2; l < len; l++) {
-    for (let i = 0; l + i < len; i++) {
-      rangeBest(i, i + l)
+  for (let l = 0; l < n; l++) {
+    for (let i = 0; i < n - l; i++) {
+      const j = i + l
+      for (let k = i + 1; k < j; k++) {
+        dp[i][j] = Math.max(dp[i][j], dp[i][k] + dp[k][j] + nums[i] * nums[k] * nums[j])
+      }
     }
   }
-  console.table(dp)
 
-  return dp[0][len - 1]
+  return dp[0][dp[0].length - 1]
 }
 
 console.log(maxCoins([3, 1, 5, 8]))

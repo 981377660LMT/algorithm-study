@@ -9,7 +9,7 @@ const findLadders = (beginWord: string, endWord: string, wordList: string[]): st
   wordSet.delete(beginWord)
   if (!wordSet.has(endWord)) return res
   const { adjMap, levelMap } = bfs()
-  dfs(beginWord, [beginWord])
+  dfs(beginWord, [beginWord], adjMap, levelMap)
   return res
 
   function bfs() {
@@ -47,8 +47,13 @@ const findLadders = (beginWord: string, endWord: string, wordList: string[]): st
     }
   }
 
-  // 通过level可以保证dfs是沿着bfs走的最短路径
-  function dfs(curWord: string, path: string[]) {
+  // 通过levelMap可以保证dfs是沿着bfs走的最短路径
+  function dfs(
+    curWord: string,
+    path: string[],
+    adjMap: Map<string, Set<string>>,
+    levelMap: Map<string, number>
+  ) {
     if (curWord === endWord) {
       return res.push(path.slice())
     }
@@ -57,15 +62,20 @@ const findLadders = (beginWord: string, endWord: string, wordList: string[]): st
       for (const next of adjMap.get(curWord)!) {
         if (levelMap.get(next) === levelMap.get(curWord)! + 1) {
           path.push(next)
-          dfs(next, path)
+          dfs(next, path, adjMap, levelMap)
           path.pop()
         }
       }
     }
   }
 }
+
 //
 console.dir(findLadders('hot', 'dog', ['hot', 'dog', 'dot']), { depth: null })
 // console.dir(findLadders('hot', 'dog', ['hot', 'dog']), { depth: null })
 
 export {}
+// 我们在 BFS 中，
+// 就把每个节点的所有相邻节点保存到 adjMap 中，
+// 就省去了 DFS 再去找相邻节点的时间
+// 在 DFS 中，我们每次都根据节点的层数levelMap来进行深搜

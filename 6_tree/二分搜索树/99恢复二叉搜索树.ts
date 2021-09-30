@@ -19,7 +19,7 @@ const recoverTree = function (root: BinaryTree) {
     inorder(root.left)
     if (preNode.val > root.val) {
       // console.log(preNode, root)
-      if (!firstNode) firstNode = preNode
+      if (!firstNode) firstNode = preNode // first只定一次
       secondNode = root
     }
     preNode = root

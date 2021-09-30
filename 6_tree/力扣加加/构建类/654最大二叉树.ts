@@ -9,6 +9,13 @@ import { BinaryTree } from '../Tree'
    右子树是通过数组中 最大值右边部分 递归构造出的最大二叉树。
  */
 const constructMaximumBinaryTree = (nums: number[]): BinaryTree | null => {
+  /**
+   *
+   * @param arr
+   * @param left
+   * @param right
+   * @returns  以这一段构建树
+   */
   const helper = (arr: number[], left: number, right: number): BinaryTree | null => {
     if (left > right) return null
     let maxIndex = left

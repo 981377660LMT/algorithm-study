@@ -54,8 +54,8 @@ const deserializeBFS = (data: string): BinaryTree | null => {
 
   return inner(arr)
 }
-console.log(serializeBFS(null))
-console.log(deserializeBFS('NULL'))
+// console.log(serializeBFS(null))
+// console.log(deserializeBFS('NULL'))
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -88,7 +88,7 @@ const deserializeDFS = (data: string) => {
   return dfs(arr)
 }
 
-console.log(serializeDFS(deserializeDFS('1,2,NULL')))
+// console.log(serializeDFS(deserializeDFS('1,2,NULL')))
 
 /////////////////////////////////////////////////////////////////////////////////
 

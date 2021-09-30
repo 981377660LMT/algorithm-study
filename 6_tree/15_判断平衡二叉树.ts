@@ -44,7 +44,19 @@ const isBalanced = (root: TreeNode) => {
   }
   return dfs(root) !== Infinity
 }
-
-console.dir(isBalanced(bt), { depth: null })
+const isBalanced2 = (root: TreeNode) => {
+  // dfs计算节点高度
+  let res = true
+  const dfs = (root: TreeNode | null): number => {
+    if (root == null) return 0
+    const left = 1 + dfs(root.left)
+    const right = 1 + dfs(root.right)
+    if (Math.abs(left - right) > 1) res = false
+    return Math.max(left, right)
+  }
+  dfs(root)
+  return res
+}
+console.dir(isBalanced2(bt), { depth: null })
 
 export {}

@@ -30,6 +30,7 @@ const isSubsequence2 = (s: string, t: string) => {
     !map.has(t[i]) && map.set(t[i], [])
     map.get(t[i])!.push(i)
   }
+
   console.log(map)
   let index = -Infinity
   // 保证每次index都要比上一次大

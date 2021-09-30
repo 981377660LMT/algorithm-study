@@ -30,11 +30,10 @@ const longestValidParentheses = function (s: string): number {
   }
 
   // 寻找最长的连续的0的长度
-  const zeroLength = mark
+  return mark
     .join('')
     .split('1')
-    .map(v => v.length)
-  return Math.max.apply(null, zeroLength)
+    .reduce((pre, cur) => Math.max(pre, cur.length), 0)
   // return
   // console.log(mark)
   // const markString = mark.join('')

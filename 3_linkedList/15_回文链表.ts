@@ -20,17 +20,17 @@ d.next = e
 // 想一下回文字符串判断(双指针，一个前移，一个后移，判断相等)
 // 解法1：遍历链表存val到数组，再用数组的方法判断
 // 两个字符串一个头插一个尾插
-const isPalindrome = (head: Node) => {
-  let str1 = ''
-  let str2 = ''
-  while (head) {
-    str1 = str1 + head.value
-    str2 = head.value + str2
-    head = head.next!
-  }
+// const isPalindrome = (head: Node) => {
+//   let str1 = ''
+//   let str2 = ''
+//   while (head) {
+//     str1 = str1 + head.value
+//     str2 = head.value + str2
+//     head = head.next!
+//   }
 
-  return str1 === str2
-}
+//   return str1 === str2
+// }
 
 // 解法2：快慢指针O(n) 时间复杂度和 O(1) 空间复杂度解决
 const isPalindrome2 = (head: Node) => {

@@ -4,11 +4,10 @@
 // 二分查找:考虑到开始导数大于0，最后导数小于0，因此如果mid导数大于0，则在右边，导数小于0则在左边
 const findPeakElement = (nums: number[]) => {
   let l = 0,
-    r = nums.length - 1,
-    mid: number
+    r = nums.length - 1
 
   while (l < r) {
-    mid = Math.floor((l + r) / 2)
+    const mid = Math.floor((l + r) / 2)
     if (nums[mid] > nums[mid + 1]) {
       if (nums[mid] > nums[mid - 1]) {
         return mid

@@ -41,3 +41,5 @@ const search = function (arr: number[], target: number): number {
 console.log(search([5, 5, 5, 1, 2, 3, 4, 5], 5))
 console.log(search([15, 16, 19, 20, 25, 1, 3, 4, 5, 7, 10, 14], 5))
 // 0
+
+export {}

@@ -11,24 +11,26 @@ import { fix } from './最长连续 1 模型'
 const characterReplacement = function (s: string, k: number): number {
   if (!s.length) return 0
   const BASE = 65
-  const map = Array<number>(26).fill(0)
+  const counter = Array<number>(26).fill(0)
 
   let l = 0
   let r = 0
+  let res = 0
   let maxTimes = 0
 
   while (r < s.length) {
     const cur = s[r].codePointAt(0)! - BASE
-    map[cur]++
-    maxTimes = Math.max(maxTimes, map[cur])
+    counter[cur]++
+    maxTimes = Math.max(maxTimes, counter[cur])
     if (r - l + 1 > maxTimes + k) {
-      map[s[l].codePointAt(0)! - BASE]--
+      counter[s[l].codePointAt(0)! - BASE]--
       l++
     }
+    res = Math.max(res, r - l + 1)
     r++
   }
 
-  return r - l
+  return res
 }
 
 // 不太好 没有做到空间换时间
