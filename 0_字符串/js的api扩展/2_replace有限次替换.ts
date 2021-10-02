@@ -2,8 +2,7 @@
 const replace = function (str: string, searchValue: string, replaceValue: string, limit = 1) {
   const searchValueRegexp = new RegExp(searchValue, 'g')
   return str.replace(searchValueRegexp, match => {
-    limit--
-    return limit >= 0 ? replaceValue : match
+    return --limit >= 0 ? replaceValue : match
   })
 }
 // String.prototype.replace(searchValue, replaceValue)

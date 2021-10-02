@@ -7,7 +7,7 @@
  * 能够由 letters 里的字母拼写出的 任意 属于 words 单词子集中，分数最高的单词集合的得分。
  * 单词表 words 中每个单词只能计分（使用）一次。
  * 可以只使用字母表 letters 中的部分字母，但是每个字母最多被使用一次。
- * @summary 暴力解法
+ * @summary 暴力枚举解法
  */
 const maxScoreWords = function (words: string[], letters: string[], score: number[]) {
   let res = 0
@@ -41,6 +41,7 @@ const maxScoreWords = function (words: string[], letters: string[], score: numbe
     return res
   }
 
+  // 二进制枚举子集 从全选开始
   for (let i = 2 ** len - 1; i >= 0; i--) {
     const flagArray = i.toString(2).padStart(len, '0').split('')
     res = Math.max(res, countStore(flagArray))

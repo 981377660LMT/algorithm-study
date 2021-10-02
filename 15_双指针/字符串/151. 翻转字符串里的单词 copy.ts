@@ -11,7 +11,7 @@ const reverseWords = (s: string): string => {
   const strArr = Array.from(s)
 
   // 删除多余空格
-  removeExtraSpaces(strArr)
+  // removeExtraSpaces(strArr)
   // 翻转
   reverse(strArr, 0, strArr.length - 1)
 
@@ -45,10 +45,7 @@ const reverseWords = (s: string): string => {
   }
 
   // 翻转从 start 到 end 的字符
-  function reverse(strArr: string[], start: number, end: number) {
-    let left = start
-    let right = end
-
+  function reverse(strArr: string[], left: number, right: number) {
     while (left < right) {
       // 交换
       ;[strArr[left], strArr[right]] = [strArr[right], strArr[left]]

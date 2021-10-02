@@ -91,3 +91,5 @@ class BIT {
 1. 手动维护一个有序的数组(java-treeset,python-sortedList) 是 O(n^2)还是 O(nlogn)取决于使用的数据结构**插入**的复杂度
 2. 归并排序的性质
 3. 树状数组终极解决法
+
+**持久化树状数组**

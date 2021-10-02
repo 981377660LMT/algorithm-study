@@ -18,7 +18,7 @@ class UnionFind implements IUnionFind {
   // 记录每个节点的父节点
   // 如果节点互相连通（从一个节点可以达到另一个节点），那么他们的祖先是相同的。
   private readonly parent: number[]
-  // rank优化 union时连接到rank较大的根上
+  // rank优化 union时连接到rank较大的根上 且rank表示每个根连了多少点
   private readonly rank: number[]
   // 记录无向图连通域数量
   public count: number
@@ -30,26 +30,21 @@ class UnionFind implements IUnionFind {
   }
 
   union(key1: number, key2: number): this {
-    const root1 = this.find(key1)
-    const root2 = this.find(key2)
+    let root1 = this.find(key1)
+    let root2 = this.find(key2)
     if (root1 === root2) return this
-    // 小树接到大树下面，平衡性优化
-    const rank1 = this.rank[root1]
-    const rank2 = this.rank[root2]
-    if (rank1 > rank2) {
-      this.parent[root2] = root1
-    } else if (rank1 < rank2) {
-      this.parent[root1] = root2
-    } else {
-      this.parent[root1] = root2
-      this.rank[root2]++
+    // 小树root1接到大树root2下面，平衡性优化
+    if (this.rank[root1] > this.rank[root2]) {
+      ;[root1, root2] = [root2, root1]
     }
+    this.parent[root1] = root2
+    this.rank[root2] += this.rank[root1]
     this.count--
     return this
   }
 
   find(key: number): number {
-    while (this.parent[key] !== key) {
+    while (this.parent[key] !== undefined && this.parent[key] !== key) {
       this.parent[key] = this.parent[this.parent[key]] // 进行路径压缩
       key = this.parent[key]
     }

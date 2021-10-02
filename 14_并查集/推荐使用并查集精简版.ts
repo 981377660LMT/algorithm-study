@@ -6,7 +6,7 @@ const useUnionFindArray = (size: number) => {
   const parent = Array.from<number, number>({ length: size }, (_, i) => i)
 
   const find = (key: number) => {
-    while (parent[key] !== key) {
+    while ((parent[key] !== undefined && parent[key]) !== key) {
       // 进行路径压缩
       parent[key] = parent[parent[key]]
       key = parent[key]

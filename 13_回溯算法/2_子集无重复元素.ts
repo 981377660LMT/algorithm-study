@@ -1,6 +1,7 @@
 /**
  * @description 二进制版求子集
  * @description 时间复杂度O(n)
+ * 位运算版参考`1863. 找出所有子集的异或总和再求和`
  */
 const subsets = (nums: number[]) =>
   Array.from({ length: Math.pow(2, nums.length) }, (_, k) => k)
@@ -11,6 +12,6 @@ const subsets = (nums: number[]) =>
         .filter(v => v !== Infinity)
     )
 
-console.log(subsets([1, 2, 3]))
-
 export {}
+
+console.log(subsets([1, 2, 3]))

@@ -14,7 +14,8 @@ const minCostConnectPoints = function (points: number[][]): number {
     const parent = Array.from<number, number>({ length: size }, (_, i) => i)
 
     const find = (key: number) => {
-      while (parent[key] !== key) {
+      while (parent[key] && parent[key] !== key) {
+        parent[key] = parent[parent[key]]
         key = parent[key]
       }
       return key
@@ -58,3 +59,5 @@ console.log(
 )
 
 export default 1
+
+1

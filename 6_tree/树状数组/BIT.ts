@@ -51,6 +51,13 @@ class BIT implements IBIT {
     return res
   }
 
+  /**
+   *
+   * @param left
+   * @param right
+   * @returns
+   * `range[0,b]` 的计数情况减去 `range[0, a-1]` 的计数情况来得出 `[a,b]` 的计数情况
+   */
   sumRange(left: number, right: number) {
     return this.query(right) - this.query(left - 1)
   }

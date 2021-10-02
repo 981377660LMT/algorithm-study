@@ -1,3 +1,5 @@
+import { bisectRight } from '../../9_排序和搜索/二分/7_二分搜索寻找最插右入位置'
+
 /**
  * @param {number[]} nums
  * @return {number}

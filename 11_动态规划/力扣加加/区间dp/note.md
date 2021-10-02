@@ -15,7 +15,7 @@ def helper(self, ns: List[int]) :
         for i in range(N-l): # 以 i 为 开头  // i+l要小于n
             j = i + l           # 以 j 为 终点
             for k in range(i,j): # 以 k 为分割点，进行分治
-                // Todo 业务逻辑
+                dp[i,j] = max/min(dp[i,j], dp[i,k] + dp[k+1, j] + cost)
 ```
 
 注意 js 里 l 要从 1 开始 (使 j-1>=0)
@@ -30,7 +30,7 @@ def helper(self, ns: List[int]) :
     for (let i = 0; i < n - l; i++) {
       const j = i + l
       for (let k = i; k < j; k++) {
-        ...
+        dp[i,j] = max/min(dp[i,j], dp[i,k] + dp[k+1, j] + cost)
       }
     }
   }

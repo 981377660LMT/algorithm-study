@@ -34,6 +34,7 @@ const vDom = {
 //   </span>
 // </div>
 
+// leetcode`克隆图`
 function dfs(vNode: VirtualDom | string) {
   if (typeof vNode === 'string') return document.createTextNode(vNode)
   const dom = document.createElement(vNode.tag)
@@ -47,3 +48,5 @@ function dfs(vNode: VirtualDom | string) {
   vNode.children && vNode.children.forEach(child => dom.appendChild(dfs(child)))
   return dom
 }
+
+export {}

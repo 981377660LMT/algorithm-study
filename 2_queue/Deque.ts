@@ -3,7 +3,13 @@ class ArrayDeque<T = number> {
   private readonly data: T[]
   private head: number
   private tail: number
-  public length: number
+  public length: number;
+
+  *[Symbol.iterator]() {
+    while (this.length) {
+      yield this.shift()!
+    }
+  }
 
   constructor(capacity: number) {
     this.capacity = capacity
@@ -82,8 +88,9 @@ if (require.main === module) {
   const deque = new ArrayDeque<number>(4)
   deque.push(1)
   deque.unshift(2)
-  console.log(deque)
-  console.log(deque.shift())
-  console.log(deque)
-  console.log(deque.pop())
+  // console.log(deque)
+  // console.log(deque.shift())
+  // console.log(deque)
+  // console.log(deque.pop())
+  const arr = Array.from(deque)
 }

@@ -43,8 +43,8 @@ c++--multiset<>----------pytho3--sortedcontainers.SortedList()
 
 区间重叠判断的思路
 
-1. 两个区间交叉:[a,b]与[c,d] 等价于 a<=d&&b>=c
-2. 设 i = bisect.bisect_right(self.intervals, start)
+1. 是否与一个区间交叉:[a,b]与[c,d] 等价于 a<=d&&b>=c
+2. 是否与多个区间交叉:设 i = bisect.bisect_right(self.intervals, start)
    j = bisect.bisect_left(self.intervals, end)
    如果 i%2 为奇数 则说明 **start is in some stored interval**
    **新插入的区间起点与前面老的区间重叠了**

@@ -41,6 +41,7 @@ const bt: BinaryTree = {
 
 // 是否存在一条子路径之和等于目标和
 // 子路径 不需要从根节点开始，也不需要在叶子节点结束，但是路径方向必须是向下的（只能从父节点到子节点）。
+// 若路径方向不定 则要用后序遍历 dfs返回多个值`124.二叉树中的最大路径和`
 const pathSum = (root: BinaryTree | null, target: number): number => {
   if (root === null) return 0
   const dfs = (root: BinaryTree | null, sum: number): number => {

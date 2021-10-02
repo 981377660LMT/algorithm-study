@@ -31,29 +31,6 @@ for 快指针 in 可迭代集合
 返回 res
 ```
 
-模板 2：
-
-```jsx
-const res: number[] = []
-// lackMap与lackNum记录
-const lackMap = new Map<string, number>()
-let lackNum = p.length
-let l = 0
-let r = p.length - 1
-
-// 初始化...
- // 开始移动滑动窗口
-while (r < s.length - 1) {
-  // 不符合条件，扩张右边
-  while (lackNum > 0) {
-  }
-  // 符合条件，更新答案，开始收缩左边
-  while (lackNum === 0) {
-
-  }
-}
-```
-
 此外，连续区间的问题还可用前缀和解决
 **连续子数组:前缀和**:**画图可以解决问题**
 、930. 和相同的二元子数组前缀和.ts

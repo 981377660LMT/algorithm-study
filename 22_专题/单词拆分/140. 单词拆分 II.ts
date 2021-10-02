@@ -9,23 +9,22 @@ const wordBreak = function (s: string, wordDict: string[]): string[] {
   const store = new Set(wordDict)
   const res: string[] = []
 
-  const bt = (path: string[], remain: string) => {
-    if (remain.length === 0) {
+  const bt = (path: string[], index: number) => {
+    if (index === s.length) {
       res.push(path.join(' '))
-      return path.pop()
+      return
     }
 
-    for (let i = 0; i < remain.length; i++) {
-      const next = remain.slice(0, i + 1)
+    for (let i = index; i < s.length; i++) {
+      const next = s.slice(index, i + 1)
       if (store.has(next)) {
         path.push(next)
-        bt(path, remain.slice(i + 1))
+        bt(path, i + 1)
+        path.pop()
       }
     }
-
-    path.pop()
   }
-  bt([], s)
+  bt([], 0)
 
   return res
 }

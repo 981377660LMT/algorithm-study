@@ -37,7 +37,7 @@ const arrayToTree = (arr: ArrayItem[]) => {
   return res
 }
 
-const arr: ArrayItem[] = [
+const jump: ArrayItem[] = [
   { id: 0, name: '总公司' },
   { id: 1, name: '分公司1' },
   { id: 2, name: '分公司2' },
@@ -50,4 +50,4 @@ const arr: ArrayItem[] = [
   { id: 122, name: '分公司1-2-2' },
 ]
 
-console.dir(arrayToTree(arr), { depth: null })
+console.dir(arrayToTree(jump), { depth: null })

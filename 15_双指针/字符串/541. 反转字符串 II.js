@@ -4,9 +4,9 @@
  * @return {string}
  * @summary i每次加k 用一个变量记录这次要不要反转
  */
-const reverseStr = function (s: string, k: number): string {
+const reverseStr = function (s, k) {
   if (k > s.length) return s.split('').reverse().join('')
-  const reverse = (arr: string[], l: number, r: number) => {
+  const reverse = (arr, l, r) => {
     while (l < r) {
       ;[arr[l], arr[r]] = [arr[r], arr[l]]
       l++
