@@ -20,8 +20,8 @@ import { bisectLeft } from '../../../9_排序和搜索/7_二分搜索寻找最�
 const minOperations = (target: number[], arr: number[]): number => {
   const visited = new Set(target)
   // 实际不建议这样写 内存消耗很大
-  const indexMapper = new Map(Array.from(target.entries()).map(([i, v]) => [v, i]))
-  arr = arr.filter(v => visited.has(v)).map(v => indexMapper.get(v)!)
+  const valueToIndex = new Map([...target.entries()].map(([i, v]) => [v, i]))
+  arr = arr.filter(v => visited.has(v)).map(v => valueToIndex.get(v)!)
   if (arr.length <= 1) return target.length - arr.length
 
   const LIS: number[] = [arr[0]]
@@ -33,12 +33,12 @@ const minOperations = (target: number[], arr: number[]): number => {
     }
   }
 
-  console.log(indexMapper, arr)
+  console.log(valueToIndex, arr)
   return target.length - LIS.length
 }
 
-console.log(minOperations([11, 16, 20, 1, 2, 13, 7, 6, 12, 3], [11, 13, 3, 7, 7, 1, 10, 12, 14, 1]))
-// 输出：6
+console.log(minOperations([5, 1, 3], [9, 4, 2, 3, 4]))
+// 输出：2
 // 解释：你可以添加 5 和 1 ，使得 arr 变为 [5,9,4,1,2,3,4] ，target 为 arr 的子序列。
 
 export default 1

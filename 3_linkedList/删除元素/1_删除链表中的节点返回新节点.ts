@@ -18,16 +18,16 @@ b.next = c
 const deleteNode = (head: Node | undefined, val: number): Node | undefined => {
   if (!head) return head
   const dummy = new Node(0, head)
-  let dummyP: Node | undefined = dummy
+  let dummyP = dummy
 
   while (dummyP && dummyP.next) {
-    let next: Node | undefined = dummyP.next
+    const next = dummyP.next
     if (next.value === val) {
       dummyP.next = next.next
-      next = next.next
+    } else {
+      // 只有下个节点不是要删除的节点才更新 current
+      dummyP = next
     }
-    // 只有下个节点不是要删除的节点才更新 current
-    if (!next || next.value !== val) dummyP = next
   }
 
   return dummy.next

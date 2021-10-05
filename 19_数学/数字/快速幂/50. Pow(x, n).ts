@@ -29,8 +29,8 @@ const myPow2 = function (x: number, n: number): number {
     let res = 1
     while (n) {
       if (n & 1) res *= x
-      x *= x
-      n >>= 1
+      x = x ** 2
+      n >>>= 1
     }
     return res
   }

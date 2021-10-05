@@ -2,16 +2,15 @@
 
 ## todo
 
-把所有简单题都过一遍 然后记录一下**母题**
+把所有简单题都过一遍 然后记录一下**母题** 困难题不要硬想
 
-- 精选 200 题
-- 力扣加加
-- lucifer 的博客
 - 宫水三叶
+- 剑指 offer
 - code up 公众号
-- 牛客网 https://www.nowcoder.com/intelligentTest 题库
-- 一个脑洞很大的程序员的微信
 - code up 网站
+- 牛客网 https://www.nowcoder.com/intelligentTest 题库
+
+**以后再刷完 leetcode 保证高效**
 
 JS,TS 刷题时大数问题可用 BigInt 或者求余解决
 

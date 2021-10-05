@@ -1,4 +1,4 @@
-function tictactoe(board: string[]): string {
+function judgeTictactoe(board: string[]): string {
   const m = board.length
   const n = board[0].length
   // 提取正对角线：
@@ -13,7 +13,7 @@ function tictactoe(board: string[]): string {
     }
   }
 
-  for (const char of ['X', 'O']) {
+  for (const char of ['A', 'B']) {
     if (board.some(row => row === char.repeat(m))) return char
     if (col.some(col => col.join('') === char.repeat(m))) return char
     if (mainDiagonal.join('') === char.repeat(m)) return char
@@ -23,6 +23,8 @@ function tictactoe(board: string[]): string {
   return board.some(row => row.includes(' ')) ? 'Pending' : 'Draw'
 }
 
-console.log(tictactoe(['O X', ' XO', 'X O']))
-console.log(tictactoe(['OOX', 'XXO', 'OXO']))
-console.log(tictactoe(['OOX', 'XXO', 'OX ']))
+export { judgeTictactoe }
+
+// console.log(tictactoe(['O X', ' XO', 'X O']))
+// console.log(tictactoe(['OOX', 'XXO', 'OXO']))
+// console.log(tictactoe(['OOX', 'XXO', 'OX ']))

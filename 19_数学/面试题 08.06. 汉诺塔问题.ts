@@ -7,14 +7,16 @@
  C：终点
  关注起点和终点即可
  */
-function hanota(A: number[], B: number[], C: number[]): void {
-  const move = (n: number, A: number[], B: number[], C: number[]) => {
-    if (n === 1) return C.push(A.pop()!)
-    move(n - 1, A, C, B)
-    C.push(A.pop()!)
-    move(n - 1, B, A, C)
+function hanota(from: number[], tmp: number[], to: number[]): void {
+  const move = (n: number, from: number[], tmp: number[], to: number[]) => {
+    if (n === 1) {
+      return to.push(from.pop()!)
+    }
+    move(n - 1, from, to, tmp) // 第一个移到中间
+    to.push(from.pop()!) // 最大的移到第三个
+    move(n - 1, tmp, from, to) // 中间的移到第三个
   }
-  move(A.length, A, B, C)
+  move(from.length, from, tmp, to)
 }
 const C: number[] = []
 console.log(hanota([2, 1, 0], [], C))
@@ -25,3 +27,16 @@ console.log(hanota([2, 1, 0], [], C))
 // 以上是汉诺塔的整体操作，其中移动n-1个盘子的操作是递归操作
 console.log(C)
 export {}
+function hanota2(from: string, tmp: string, to: string): void {
+  const move = (n: number, from: string, tmp: string, to: string) => {
+    if (n === 1) {
+      return console.log(`from ${from} to ${to}`)
+    }
+    move(n - 1, from, to, tmp) // 第一个移到中间
+    move(1, from, tmp, to)
+    move(n - 1, tmp, from, to) // 中间的移到第三个
+  }
+  move(3, from, tmp, to)
+}
+
+hanota2('a', 'b', 'c')

@@ -95,3 +95,40 @@
 12. 四个命令概括了 Git 的所有套路
     git 的三个「分区」
     Git 的三个分区分别是：working directory，stage/index area，commit history。
+
+13. eslint 中的魔法数
+    eslint 有一个 rule 是 no-magic-number. (就是说，常量定义应该拿出来而不应该写在代码里)
+
+真的魔法数字(字符串吧)就是不好的么？
+
+```JS
+// 一般的
+// 这在大家眼中已然成为了一种共识，那么这种所谓的魔法数字代码的不可读问题就不存在了。 我们仍可以轻易知道代码的含义。
+MS = 0;
+if (type === "day") {
+  MS = 24 * 60 * 60 * 1000;
+}
+if (type === "week") {
+  MS = 7 * 24 * 60 * 60 * 1000;
+}
+
+// 变量命令不是越长越好，越具体越好，而是根据具体的限定范围
+// 比如你在 queue 的 class 中定义的 size 字段可以直接叫 size ，而不是 queue_size。
+MS = 0;
+const HOURS_PER_DAY = 24;
+const MINUTES_PER_HOUR = 60;
+const SECONDs_PER_MINUTE = 60;
+const MS_PER_SECOND = 1000;
+const DAYS_PER_WEEK = 7;
+if (type === "day") {
+  MS = HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDs_PER_MINUTE * MS_PER_SECOND;
+}
+if (type === "week") {
+  MS =
+    DAYS_PER_WEEK *
+    HOURS_PER_DAY *
+    MINUTES_PER_HOUR *
+    SECONDs_PER_MINUTE *
+    MS_PER_SECOND;
+}
+```

@@ -62,3 +62,5 @@ const alienOrder = function (words: string[]): string {
 
 console.log(alienOrder(['wrt', 'wrf', 'er', 'ett', 'rftt']))
 // 输出："wertf"
+
+export {}

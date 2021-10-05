@@ -12,6 +12,7 @@
 // dp[i+1][1]的计算有两种情况：
 // 删除位置i的数：dp[i+1][1]=dp[i][0]
 // 删除其他位置的数：dp[i+1][1]=dp[i][1]+arr[i]
+// 最大子数组的进阶版本。
 const maximumSum = (arr: number[]): number => {
   const n = arr.length
   if (n === 1) return arr[0]
@@ -20,11 +21,13 @@ const maximumSum = (arr: number[]): number => {
     -Infinity,
     -Infinity,
   ])
+
   for (let i = 0; i < n; i++) {
-    dp[i + 1][0] = Math.max(dp[i][0] + arr[i], arr[i])
-    dp[i + 1][1] = Math.max(dp[i][1] + arr[i], dp[i][0])
+    dp[i + 1][0] = Math.max(dp[i][0] + arr[i], arr[i]) // 不删除元素，以i结尾的连续子数组最大和
+    dp[i + 1][1] = Math.max(dp[i][1] + arr[i], dp[i][0]) // 删除其中一个得到的最大值有两种情况（1，删除i 2. 不删除i）
     res = Math.max(res, dp[i + 1][0], dp[i + 1][1])
   }
+
   return res
 }
 
