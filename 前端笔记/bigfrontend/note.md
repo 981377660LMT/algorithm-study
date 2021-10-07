@@ -145,3 +145,25 @@
     c、inline 元素的 margin 和 padding 属性，水平方向的 padding-left, padding-right, margin-left, margin-right 都产生边距效果；但竖直方向的 padding-top, padding-bottom, margin-top, margin-bottom 不会产生边距效果。
 23. 解释下浮动和它的工作原理？清除浮动的技巧？
 24. em 与 rem 的重要区别： 它们计算的规则一个是依赖父元素另一个是依赖根元素计算
+25. box-sizing 属性的的用法
+    box-sizing:content-box： padding 和 border 不被包含在定义的 width 和 height 之内
+    box-sizing:border-box： padding 和 border 被包含在定义的 width 和 height 之内
+26. 浏览器标准模式和怪异模式之间的区别是什么？
+    标准模式是指，浏览器按 W3C 标准解析执行代码；怪异模式则是使用浏览器自己的方式解析执行代码
+    浏览器解析时到底使用标准模式还是怪异模式，与你网页中的 DTD 声明直接相关
+    设置行内元素的高宽： 在 Standards 模式下，给<span>等行内元素设置 wdith 和 height 都不会生效，而在 quirks 模式下，则会生效。
+27. 说说你对边距折叠的理解?
+    a、参加折叠的 margin 都是正值：取其中 margin 较大的值为最终 margin 值。
+    b、参与折叠的 margin 都是负值：取的是其中绝对值较大的，然后，从 0 位置，负向位移。
+    c、参与折叠的 margin 中有正值，有负值：先取出负 margin 中绝对值中最大的，然后，和正 margin 值中最大的 margin 相加。
+28. 隐藏元素的方式有哪些？
+    a、使用 CSS 的 display:none，不会占有原来的位置
+    b、使用 CSS 的 visibility:hidden，会占有原来的位置
+    c、使用 HTML5 中的新增属性 hidden="hidden"，不会占有原来的位置
+29. 如何产生 BFC
+    a、float 的值不为 none
+    b、overflow 的值不为 visible
+    c、display 的值为 table-cell, table-caption, inline-block 中的任何一个
+    d、position 的值不为 relative 和 static
+30. 如何解决多个元素重叠问题？
+    z-index 属性

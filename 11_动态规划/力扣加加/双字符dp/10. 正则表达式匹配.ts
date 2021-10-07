@@ -25,28 +25,18 @@ const isMatch = function (s: string, p: string): boolean {
 
   for (let i = 1; i < m + 1; i++) {
     for (let j = 1; j < n + 1; j++) {
-      // 先讨论匹配任意多次
-      // * 的含义是 匹配零个或多个前面的那一个元素，所以要考虑他前面的元素 p[j-1]
-      // * 跟着他前一个字符走，前一个能匹配上 s[i]，* 才能有用
       if (p[j - 1] === '*') {
-        // *前面的元素匹配s[i-1]
-        if (p[j - 2] === s[i - 1] || p[j - 2] === '.') {
-          // 1.s少一位
-          // 2.p 少一位
-          // 3. *表示0个字符
-          dp[i][j] = dp[i - 1][j] || dp[i][j - 1] || dp[i][j - 2]
-        } else {
-          // * 也无能为力，只能让前一个字符消失
-          dp[i][j] = dp[i][j - 2]
-        }
-        // 在讨论相等或匹配任意一次
-      } else if (p[j - 1] === s[i - 1] || p[j - 1] === '.') {
-        dp[i][j] = dp[i - 1][j - 1]
+        if (dp[i][j - 2]) dp[i][j] = true
+        else if (dp[i - 1][j] && s[i - 1] === p[j - 2]) dp[i][j] = true
+        else if (dp[i - 1][j] && p[j - 2] === '.') dp[i][j] = true
+      } else {
+        if (dp[i - 1][j - 1] && s[i - 1] === p[j - 1]) dp[i][j] = true
+        else if (dp[i - 1][j - 1] && p[j - 1] === '.') dp[i][j] = true
       }
     }
   }
 
-  console.table(dp)
+  // console.table(dp)
   return dp[m][n]
 }
 
