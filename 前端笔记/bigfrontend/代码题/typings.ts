@@ -1,3 +1,4 @@
-type Func = (...args: any[]) => any
+type Func<T = unknown> = (...args: any[]) => T
+type AsyncFunc<T = unknown> = (...args: any[]) => Promise<T>
 
-export { Func }
+export { Func, AsyncFunc }
