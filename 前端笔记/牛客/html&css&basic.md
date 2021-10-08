@@ -167,3 +167,114 @@
     d、position 的值不为 relative 和 static
 30. 如何解决多个元素重叠问题？
     z-index 属性
+31. 说一下 http 和 https
+32. WebSocket 的实现和应用
+    WebSocket 是基于 Http 协议的，或者说借用了 Http 协议来完成一部分握手，在握手阶段与 Http 是相同的。我们来看一个 websocket 握手协议的实现，基本是 2 个属性，upgrade，connection。
+33. head 请求和 options 请求
+    head：类似于 get 请求，只不过返回的响应中没有具体的内容，**用户获取报头**
+    options：允许客户端查看服务器的性能，比如说**服务器支持的请求方式**等等。
+34. 一个图片 url 访问后直接下载怎样实现？
+    - 设置 response header 中的 disposition-type 为 attachment
+    - h5 新增的 download 属性
+    ```HTML
+    <a href="/images/logo.png" download="/images/logo.png">
+        <img border="0" src="/images/logo.png" alt="runoob.com" >
+    </a>
+    ```
+35. 几个很实用的 BOM 属性对象方法?
+    Bom 是浏览器对象。有哪些常用的 Bom 属性呢？
+36. drag API
+    dragstart：事件主体是被拖放元素，在开始拖放被拖放元素时触发，。
+    drag：事件主体是被拖放元素，在正在拖放被拖放元素时触发。
+    dragend：事件主体是被拖放元素，在整个拖放操作结束时触发
+    dragenter：事件主体是目标元素，在被拖放元素进入某元素时触发。
+    dragover：事件主体是目标元素，在被拖放在某元素内移动时触发。
+    dragleave：事件主体是目标元素，在被拖放元素移出目标元素是触发。
+    drop：事件主体是目标元素，在目标元素完全接受被拖放元素时触发。
+37. 说一下 http2.0
+
+    HTTP2.0 是基于 1999 年发布的 HTTP1.0 之后的首次更新。
+    新特性
+
+    1. 提升访问速度：相比 HTTP1.0，请求资源所需时间更少，访问速度更快。
+    2. 允许多路复用：多路复用允许同时通过单一的 HTTP/2 连接发送多重请求-响应信息。改善了在 HTTP1.1 中，浏览器客户端在同一时间，针对同一域名下的请求有一定数量限制（连接数量），超过限制会被阻塞。
+    3. 二进制分帧：HTTP2.0 会将所有的传输信息分割为更小的信息或者帧，并对他们进行二进制编码。
+    4. 首部压缩：使报头更紧凑，更快速传输，有利于移动网络环境。
+    5. 服务器端推送（server push）：还没有收到浏览器的请求，服务器就把各种资源推送给浏览器。 比如，浏览器只请求了 index.html，但是服务器把 index.html、style.css、example.png 全部发送给浏览器。
+
+38. 400:Bad Request 请求报文中存在语法错误
+    401:Unauthorized 例如 token 不对
+    403:Forbidden 没有该权限
+39. 一句话概括 RESTFUL
+    就是用 URL 定位资源，用 HTTP 描述操作
+40. fetch 发送 2 次请求的原因
+    fetch 方法对于 HTTP GET 方式不会发送两次请求。
+    fetch 发送 post 请求(复杂请求)需要发送两次的原因是，第一次是向服务器发送一个 options 请求询问服务器是否支持修改请求头(此时返回状态码 No Content 204)，如果可以才在第二次中发送真正的请求
+41. Cookie、sessionStorage、localStorage 的区别
+
+    - cookie 数据始终在同源的 http 请求中携带(即使不需要)，即 cookie 在浏览器和服务器间来回传递 cookie 数据还有路径（path）的概念，可以限制。cookie 只属于某个路径下
+
+    - 存储大小限制也不同，cookie 数据不能超过 4K，同时因为每次 http 请求都会携带 cookie，所以 cookie 只适合保存很小的数据，如回话标识。webStorage 虽然也有存储大小的限制，但是比 cookie 大得多，可以达到 5M 或更大
+
+    - 数据的有效期不同 sessionStorage：仅在当前的浏览器窗口关闭有效；localStorage：始终有效，窗口或浏览器关闭也一直保存，因此用作持久数据；cookie：只在设置的 cookie 过期时间之前一直有效，即使窗口和浏览器关闭
+
+    - 作用域不同 sessionStorage：不在不同的浏览器窗口中共享，即使是同一个页面；localStorage：在所有同源窗口都是共享的；cookie：也是在所有同源窗口中共享的
+
+42. 说一下 web worker
+    Web Worker 的作用：为单线程的 JS 创造多线程环境。 43. iframe 是什么？有什么缺点？
+    定义：iframe 元素会创建包含另一个文档的内联框架
+    提示：可以将提示文字放在<iframe></iframe>之间，来提示某些不支持 iframe 的浏览器
+    缺点：
+
+        会阻塞主页面的 onload 事件
+
+        搜索引擎无法解读这种页面，不利于 SEO
+
+        iframe 和主页面共享连接池，而浏览器对相同区域有限制所以会影响性能。
+
+43. 讲讲 viewport 和移动端布局
+
+    ```HTML
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+
+    ```
+
+    content 里面的这些属性必须知道
+    width: 控制 viewport 的大小，可以是一个指定的值，或者是特殊值，如 device-width 是为设备指定的宽度。
+
+    height： 和 width 相对应，指定高度
+
+    initial-scale： 初始缩放比例，也是当前页面第一次 load 的时候缩放的比例。
+
+    maximum-scale： 允许用户缩放的最大比例。
+
+    minimum-scale： 允许用户缩放的最小比例。
+
+    user-scalable： 用户是否可以手动缩放。
+
+44. click 在 ios 上有 300ms 延迟，原因及如何解决？
+    原因：ios 上有双击缩放的功能，点击一次屏幕浏览器无法判断用户是想要进行单击操作还是双击操作，所以要等待 300ms 是否有第二次点击
+    解决方法：
+    (1)粗暴型，禁用缩放
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+
+    (2)利用 FastClick，其原理是：
+
+    检测到 touchend 事件后，立刻出发模拟 click 事件，并且把浏览器 300 毫秒之后真正出发的事件给阻断掉
+
+45. addEventListener 参数
+    addEventListener(event, function, useCapture)
+    其中，event 指定事件名；function 指定要事件触发时执行的函数；useCapture 指定事件是否在捕获或冒泡阶段执行。
+46. cookie session 区别
+    参考回答：
+    1.  cookie 数据存放在客户的浏览器上，session 数据放在服务器上。
+    2.  cookie 不是很安全，别人可以分析存放在本地的 COOKIE 并进行 COOKIE 欺骗.考虑到安全应当使用 session。
+    3.  session 会在一定时间内保存在服务器上。当访问增多，会比较占用你服务器的性能.考虑到减轻服务器性能方面，应当使用 COOKIE。
+    4.  单个 cookie 保存的数据不能超过 4K，很多浏览器都限制一个站点最多保存 20 个 cookie。
+47. iframe 通信，同源和不同源两种情况，多少种方法
+    ??? todo
+    同源:根据父页面以及 cookie，
+    不同源:设置子域的方法。
+48. http 常用请求头
+49. 常见状态码
+    https://blog.csdn.net/qq_44647809/article/details/115276258

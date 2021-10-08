@@ -1,5 +1,5 @@
 interface GetNextState<State> {
-  (curState: State): State[]
+  (curState: State): Iterable<State>
 }
 
 /**

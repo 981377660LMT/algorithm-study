@@ -6,8 +6,11 @@ class ArrayDeque<T = number> {
   public length: number;
 
   *[Symbol.iterator]() {
-    while (this.length) {
-      yield this.shift()!
+    let head = this.head
+    const times = this.length
+    for (let i = 0; i < times; i++) {
+      yield this.data[head]
+      head = (head + 1 + this.capacity) % this.capacity
     }
   }
 
@@ -92,5 +95,7 @@ if (require.main === module) {
   // console.log(deque.shift())
   // console.log(deque)
   // console.log(deque.pop())
-  const arr = Array.from(deque)
+  for (const num of deque) {
+    console.log(num)
+  }
 }

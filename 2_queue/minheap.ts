@@ -65,11 +65,11 @@ class MinHeap<Item = number> {
    * 取出堆顶元素，替换成val;
    * 一次O(log(h)的操作)
    */
-  // replace(val: Item) {
-  //   this.heap[0] = val
-  //   this.shiftDown(0)
-  //   return this
-  // }
+  heappushpop(val: Item) {
+    this.heap[0] = val
+    this.shiftDown(0)
+    return this
+  }
 
   /**
    *

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
+    "jsx": "preserve",
+    "experimentalDecorators": true,
+    "noImplicitOverride": true,
+    "downlevelIteration": true,
+    "strictFunctionTypes": true,
+    "sourceMap": true,
+    "strict": true,
+    "lib": ["ESNext", "DOM"]
+  },
+  "exclude": ["node_modules", "**/node_modules/*"]
+}

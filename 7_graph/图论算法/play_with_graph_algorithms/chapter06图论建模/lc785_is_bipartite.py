@@ -1,5 +1,4 @@
 class Solution:
-
     def is_partite(self, graph):
         V = len(graph)
         visited = [False] * V
@@ -26,5 +25,5 @@ class Solution:
 
 if __name__ == '__main__':
     sol = Solution()
-    data = [[1,3], [0,2], [1,3], [0,2]]
+    data = [[1, 3], [0, 2], [1, 3], [0, 2]]
     print(sol.is_partite(data))

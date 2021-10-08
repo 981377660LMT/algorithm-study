@@ -1,4 +1,4 @@
-type Token = 'SIGN' | 'DIGIT' | 'DOT' | 'EXP'
+type Token = 'SIGN' | 'DIGIT' | 'DOT' | 'EXP' | 'NONE'
 
 /**
  * @param {string} s
@@ -7,7 +7,7 @@ type Token = 'SIGN' | 'DIGIT' | 'DOT' | 'EXP'
  * @summary
  * 状态转移规则很繁琐
  */
-var isNumber = function (s: string): boolean {
+const isNumber = function (s: string): boolean {
   const states = {
     start: { SIGN: 'sign1', DIGIT: 'digit1', DOT: 'dot1' },
     sign1: { DIGIT: 'digit1', DOT: 'dot1' }, // 非exp后的符号
@@ -18,22 +18,22 @@ var isNumber = function (s: string): boolean {
     dot2: { DIGIT: 'digit2', EXP: 'exp', END: '' }, // 前面有数字
     exp: { SIGN: 'sign2', DIGIT: 'D' },
     D: { DIGIT: 'D', END: '' },
-  } as Record<string, Partial<Record<Token | 'END', string>>>
+  } as Record<string, Partial<Record<Token, string>>>
 
   const isDigit = (x: any) => !isNaN(parseFloat(x)) && isFinite(x)
 
-  const getTokenType = (str: string): Token | '' => {
+  const getTokenType = (str: string): Token => {
     if (str === '.') return 'DOT'
     else if (['+', '-'].includes(str)) return 'SIGN'
     else if (['E', 'e'].includes(str)) return 'EXP'
     else if (isDigit(str)) return 'DIGIT'
-    return ''
+    return 'NONE'
   }
 
   let state = 'start'
   for (const char of s) {
     const tokenType = getTokenType(char)
-    if (!!state || tokenType === '') return false
+    if (!(tokenType in states[state])) return false
     // 状态转移
     state = states[state][tokenType]!
   }
@@ -44,3 +44,4 @@ var isNumber = function (s: string): boolean {
 
 console.log(isNumber('.1'))
 console.log(isNumber('e'))
+console.log(isNumber('1 '))

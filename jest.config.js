@@ -3,7 +3,7 @@
  */
 module.exports = {
   // preset:'',
-  roots: ['<rootDir>/力扣加加其他笔记'],
+  roots: ['<rootDir>/前端笔记'],
   testMatch: ['**/__tests__/*.[jt]s?(x)', '**/*.test.[jt]s?(x)'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest',

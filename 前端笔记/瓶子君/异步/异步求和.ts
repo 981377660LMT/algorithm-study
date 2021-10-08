@@ -45,3 +45,5 @@ async function test() {
   console.log(await sumAll2(1, 2, 3, 4, 5, 6))
 }
 test()
+
+export {}

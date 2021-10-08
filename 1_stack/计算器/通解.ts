@@ -5,9 +5,10 @@
 const calculate = function (s: string): number {
   // 哨兵  类似"-1+3"或"1+(-1+2)"第一位是负数的表达式，会有问题 要加入0
   // 加入')'保证所有操作符最后出栈
-  s = s.startsWith('-') ? '0' + s + ')' : s + ')'
+  s = s.startsWith('-') ? '0' + s + ')' : s + ')' // "-1 - (-1)" => "0-1 - (-1)"
+  s = s.replace(/\(\-/g, '(0-') // "1 - (-1)" => "1 - (0-1)"
+  s = s.replace(/\(\+/g, '(0+') // "1 - (+1)" => "1 - (0+1)"
   const tokens = s.split(/([\(\)\+\-\*\/])/g).filter(v => v.trim())
-  console.log(tokens)
   const opt = new Set(['+', '-', '(', ')', '*', '/'])
   const numStack: number[] = []
   const optStack: string[] = []
@@ -28,8 +29,6 @@ const calculate = function (s: string): number {
       case '(':
       case ')':
         return NaN
-      case '$':
-        return -1
       default:
         throw new Error('Not Valid Operator')
     }
@@ -50,7 +49,6 @@ const calculate = function (s: string): number {
         optStack.push(token)
       } else {
         while (optStack.length && optStack[optStack.length - 1] !== '(') {
-          console.log(numStack, optStack)
           const [num2, num1] = [numStack.pop(), numStack.pop()] as [number, number]
           numStack.push(evaluate[optStack.pop()!](num1, num2))
         }
