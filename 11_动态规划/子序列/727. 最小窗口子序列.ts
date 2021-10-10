@@ -1,4 +1,4 @@
-import { bisectRight } from '../../9_排序和搜索/二分api/7_二分搜索寻找最插右入位置'
+import { bisectRight } from '../../9_排序和搜索/二分/7_二分搜索寻找最插右入位置'
 
 /**
  *

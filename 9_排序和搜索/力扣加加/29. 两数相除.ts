@@ -10,7 +10,17 @@
    10/3 可以减 1 次3 吗 可以减 2 次3 吗  可以减 4次3吗 ...
  */
 const divide = function (dividend: number, divisor: number): number {
-  const helper = (dividend: number, divisor: number): number => {
+  const MAX = 2 ** 31
+  const isNegative = dividend !== 0 && (dividend ^ divisor) < 0
+  const res = helper(Math.abs(dividend), Math.abs(divisor))
+
+  if (res > MAX - 1 || res < -1 * MAX) {
+    return MAX - 1
+  }
+
+  return isNegative ? -1 * res : res
+
+  function helper(dividend: number, divisor: number): number {
     if (dividend === 0) return 0
     if (dividend < divisor) return 0
     if (divisor === 1) return dividend
@@ -23,15 +33,6 @@ const divide = function (dividend: number, divisor: number): number {
     const remain = dividend - Math.floor(curDivisor / 2)
     return res + helper(remain, divisor)
   }
-  const MAX = 2 ** 31
-  const isNegative = dividend !== 0 && dividend * divisor < 0
-  const res = helper(Math.abs(dividend), Math.abs(divisor))
-
-  if (res > MAX - 1 || res < -1 * MAX) {
-    return MAX - 1
-  }
-
-  return isNegative ? -1 * res : res
 }
 
 console.log(divide(-2147483648, 1))

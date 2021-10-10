@@ -2,7 +2,7 @@
  * @param {string} s
  * @param {string} t
  * @return {string}
- * 返回 s 中涵盖 t 所有字符的最小子串。
+ * 返回 s 中涵盖 t 所有字符的最小子串（含有所有字符的最短字符串）。
  * 如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 ""
  */
 var minWindow = function (s, t) {
@@ -35,3 +35,5 @@ var minWindow = function (s, t) {
 
   return res
 }
+
+console.log(minWindow('ADOBECODEBANC', 'ABC'))

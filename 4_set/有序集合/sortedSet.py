@@ -8,7 +8,7 @@ scores.add(4)
 
 print(scores)
 
-# 充当Java TreeMap
+# 充当Java TreeMap  用的不如SortedList多
 scores = SortedDict()
 scores[3] = 2
 scores[1] = 2

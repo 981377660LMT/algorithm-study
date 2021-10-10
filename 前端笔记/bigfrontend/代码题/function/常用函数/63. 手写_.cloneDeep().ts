@@ -1,6 +1,6 @@
 // 简单起见，该题目中你只需要支持：
 
-// 基础数据类型 及其wrapper object。
+// 基础数据类型(包括Symbol) 及其wrapper object。
 // 简单Object（仅需处理可枚举属性）
 // 数组Array
 
@@ -22,4 +22,4 @@ function cloneDeep(obj: any) {
   return res
 }
 
-console.log(cloneDeep({ a: { b: { c: 3 }, d: 4 } }))
+console.log(cloneDeep({ a: { b: { c: 3 }, d: 4, e: Symbol() } }))

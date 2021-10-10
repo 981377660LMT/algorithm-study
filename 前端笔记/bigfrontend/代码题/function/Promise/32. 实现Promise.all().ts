@@ -28,23 +28,16 @@ function all2(arr: any[]): Promise<any[]> {
   return new Promise((resolve, reject) => {
     const res: any[] = []
     let fulfilledCount = 0
-    let isErrored = false
 
     // 3.
     for (const [index, promise] of promises.entries()) {
-      promise.then(
-        value => {
-          if (isErrored) return
-          res[index] = value
+      promise
+        .then(data => {
+          res[index] = data
           fulfilledCount++
           if (fulfilledCount === promises.length) resolve(res)
-        },
-        reason => {
-          if (isErrored) return
-          isErrored = true
-          reject(reason)
-        }
-      )
+        })
+        .catch(reject)
     }
   })
 }

@@ -11,3 +11,15 @@ var firstUniqChar = function (s) {
   }
   return -1
 }
+
+// LinkedHashMap 插入键有序
+var firstUniqChar2 = function (s) {
+  const counter = new Map()
+  for (const char of s) {
+    counter.set(char, (counter.get(char) || 0) + 1)
+  }
+  for (const [key, count] of counter) {
+    if (count === 1) return key
+  }
+  return -1
+}

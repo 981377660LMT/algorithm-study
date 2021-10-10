@@ -7,7 +7,7 @@ function throttle(func: Function, wait: number) {
   let timer: NodeJS.Timer | null = null
   let lastArgs: any = null
 
-  // 此处是取最后传入参数的节流类型
+  // 此处是取最后传入的参数执行
   return function (this: any, ...args: any[]) {
     if (timer) {
       lastArgs = args

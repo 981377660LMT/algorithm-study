@@ -1,4 +1,6 @@
-from sortedcontainers import SortedDict
+from  sortedcontainers import SortedDict
+
+
 
 # 左查右 右查左(参考考场就座)
 class StreamSummary:

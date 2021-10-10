@@ -40,7 +40,7 @@ class BIT {
  * @link
  * https://leetcode-cn.com/problems/count-of-smaller-numbers-after-self/solution/shu-zhuang-shu-zu-de-xiang-xi-fen-xi-by-yangbingji/
  */
-var countSmaller = function (nums: number[]): number[] {
+const countSmaller = function (nums: number[]): number[] {
   // 离散化
   const set = new Set(nums)
   const map = new Map<number, number>()

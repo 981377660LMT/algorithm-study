@@ -6,17 +6,17 @@
  * @summary 相当于循环移动字符串
  */
 const reverseLeftWords = function (s: string, n: number): string {
-  const reverse = (str: string, left: number, right: number) => {
-    let strArr = str.split('')
+  const sb = s.split('')
+  const reverse = (sb: string[], left: number, right: number) => {
     for (; left < right; left++, right--) {
-      ;[strArr[left], strArr[right]] = [strArr[right], strArr[left]]
+      ;[sb[left], sb[right]] = [sb[right], sb[left]]
     }
-    return strArr.join('')
   }
 
-  s = reverse(s, 0, n - 1)
-  s = reverse(s, n, s.length - 1)
-  return reverse(s, 0, s.length - 1)
+  reverse(sb, 0, n - 1)
+  reverse(sb, n, sb.length - 1)
+  reverse(sb, 0, sb.length - 1)
+  return sb.join('')
 }
 
 console.log(reverseLeftWords('abcdefg', 2))

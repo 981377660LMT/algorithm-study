@@ -66,7 +66,7 @@ const lowestCommonAncestor = (root: TreeNode, p: TreeNode, q: TreeNode) => {
       break
     }
   }
-  return root.val
+  return root
 }
 
 // 递归法 O(h) O(h)

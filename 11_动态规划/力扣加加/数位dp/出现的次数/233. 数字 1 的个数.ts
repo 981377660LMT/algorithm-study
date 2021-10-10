@@ -18,7 +18,7 @@ function countDigitOne(n: number): number {
   const base = 10 ** (len - 1) // n四位数的话基数就是1000
   const remainder = n % base
   const times = ~~(n / base)
-  const oneInBase = times === 1 ? n - base + 1 : base // 最高位为1的len位数个数
+  const oneInBase = times === 1 ? n - base + 1 : base // 最高位为1的len位数个数(1000到1999这类)
 
   return countDigitOne(base - 1) * times + oneInBase + countDigitOne(remainder)
 }

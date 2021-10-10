@@ -12,7 +12,7 @@
  */
 const lastRemaining = (n: number, m: number): number => {
   if (n === 1) return 0
-  return (lastRemaining(n - 1, m) + m) % n
+  return (lastRemaining(n - 1, m) + m) % n // 平移
 }
 
 console.log(lastRemaining(5, 3))

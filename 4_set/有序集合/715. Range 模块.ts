@@ -49,12 +49,12 @@ class RangeModule {
     return (l & 1) === 1 && l == r
   }
 
-  private overlap(left: number, right: number, idOdd: boolean): void {
+  private overlap(left: number, right: number, isOdd: boolean): void {
     const l = bisectLeft(this.range, left)
     const r = bisectRight(this.range, right)
     const merge: number[] = []
-    if ((l & 1) === Number(idOdd)) merge.push(left)
-    if ((r & 1) === Number(idOdd)) merge.push(right)
+    if ((l & 1) === Number(isOdd)) merge.push(left)
+    if ((r & 1) === Number(isOdd)) merge.push(right)
     // 修改 ranges 的 [l:r-1] 部分
     this.range.splice(l, r - l, ...merge)
   }
