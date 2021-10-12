@@ -46,3 +46,5 @@ function normalize(path: string): string[] {
 }
 
 // console.log(normalize('a.b.c[1]'))
+
+export {}
