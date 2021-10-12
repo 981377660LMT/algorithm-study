@@ -20,7 +20,7 @@ function from(
     })
   }
 
-  if (Object.prototype.toString.call(input) === '[Object Promise]') {
+  if (Object.prototype.toString.call(input) === '[object Promise]') {
     return new Observable(async sub => {
       try {
         const res = await input
@@ -33,7 +33,8 @@ function from(
   }
 
   // @ts-ignore
-  if (typeof input[Symbol.iterator] === 'function' || typeof input.next === 'function') {
+  // isIterable
+  if (input != null && typeof input[Symbol.iterator] === 'function') {
     return new Observable(sub => {
       try {
         // @ts-ignore

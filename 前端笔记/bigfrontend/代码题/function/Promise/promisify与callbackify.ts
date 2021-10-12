@@ -2,7 +2,7 @@ import type { AsyncFunc, PromiseFunc } from './typings'
 
 // 化为fs.promises.readdir('path.txt')
 function promisify(asyncFunc: AsyncFunc): PromiseFunc {
-  return (arg: unknown) => {
+  return function (arg: any) {
     return new Promise((resolve, reject) => {
       asyncFunc(arg, (err, res) => {
         if (err) return reject(err)

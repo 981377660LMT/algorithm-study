@@ -6,8 +6,8 @@ import type { Id, Subscriber, Subscription } from './typings'
 
 class Observable {
   private setup: (subscriber: Subscriber) => void
-  private id: number
-  private subRecord: Map<Id, Subscriber> // 支持多个订阅
+  private id: Id
+  private subRecord: Map<Id, Subscription> // 支持多个订阅
 
   constructor(setup: (subscriber: Subscriber) => void) {
     this.setup = setup
@@ -44,8 +44,8 @@ class Observable {
       },
     }
 
-    this.setup(subscriberWrapper)
     this.subRecord.set(subscriberWrapper.id, subscriberWrapper)
+    this.setup(subscriberWrapper)
     return subscriberWrapper
   }
 }

@@ -1,32 +1,43 @@
-import { MinHeap } from '../../2_queue/minheap'
-import { PriorityQueue } from '../../2_queue/todo优先级队列'
-
-// 建堆的时间和空间复杂度为 $O(N)$。
-// heappop 的时间复杂度为 $O(logN)$。
-// 时间复杂度：$O(NlogN)$，其中 N 是矩阵中的数字总数。
-// 空间复杂度：$O(N)$，其中 N 是矩阵中的数字总数。
-
-// 两种思想:
-// 1. 一种是优先队列
-// 2. 一种是分治
-// 这里使用优先队列 分治法见合并k个链表
-const mergeK = (...arrs: number[][]): number[] => {
-  const res: number[] = []
-  const tmp: number[] = []
-  for (const arr of arrs) {
-    for (const num of arr) {
-      tmp.push(num)
-    }
-  }
-  const pq = PriorityQueue.createPriorityQueue({ heap: tmp })
-  pq.heapify()
-
-  while (pq.length) {
-    res.push(pq.shift()!)
-  }
-
-  return res
+/**
+ * @param {number[][]} arrList
+ * non-descending integer array
+ * @return {number[]}
+ */
+function merge(arrList: number[][]): number[] {
+  // your code here
+  if (arrList.length === 0) return []
+  if (arrList.length === 1) return arrList[0]
+  if (arrList.length === 2) return mergeTwo(arrList[0], arrList[1])
+  const mid = arrList.length >> 1
+  const left = arrList.slice(0, mid)
+  const right = arrList.slice(mid, arrList.length)
+  return mergeTwo(merge(left), merge(right))
 }
 
-console.log(mergeK([10, 20, 30, 40], [7, 25, 26], [2, 5, 80]))
-export default 1
+function mergeTwo(nums1: number[], nums2: number[]) {
+  const res: number[] = []
+  let i = 0
+  let j = 0
+
+  while (i < nums1.length && j < nums2.length) {
+    if (nums1[i] < nums2[j]) {
+      res.push(nums1[i])
+      i++
+    } else {
+      res.push(nums2[j])
+      j++
+    }
+  }
+
+  // 连接剩余的元素，防止没有把两个数组遍历完整
+  return [...res, ...nums1.slice(i), ...nums2.slice(j)]
+}
+
+console.log(
+  merge([
+    [1, 1, 1, 100, 1000, 10000],
+    [1, 2, 2, 2, 200, 200, 1000],
+    [1000000, 10000001],
+    [2, 3, 3],
+  ])
+)

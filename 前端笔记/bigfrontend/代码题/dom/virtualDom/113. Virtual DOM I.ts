@@ -1,13 +1,12 @@
-// https://bigfrontend.dev/zh/problem/Virtual-DOM-I/discuss
-interface IProps {
-  children?: (VirtualDom | string)[] | string
-  [attr: string]: any
-}
-
 interface VirtualDom {
   type: keyof HTMLElementTagNameMap | string
-  props: IProps
+  props: {
+    children?: Children[] | Children
+    [attr: string]: any
+  }
 }
+
+type Children = VirtualDom | string
 
 /**
  * @param {Node}

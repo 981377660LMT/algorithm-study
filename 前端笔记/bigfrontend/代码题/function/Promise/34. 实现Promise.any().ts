@@ -13,15 +13,17 @@
  * @return {Promise}
  */
 function any(arr: any[]): Promise<any> {
-  // your code here
   if (arr.length === 0) return Promise.resolve([])
 
+  // 1
   const promises = arr.map(item => (item instanceof Promise ? item : Promise.resolve(item)))
 
+  // 2
   return new Promise((resolve, reject) => {
     const errors: Error[] = []
     let errorCount = 0
 
+    // 3
     for (const [index, promise] of promises.entries()) {
       promise.then(resolve).catch(err => {
         errors[index] = err

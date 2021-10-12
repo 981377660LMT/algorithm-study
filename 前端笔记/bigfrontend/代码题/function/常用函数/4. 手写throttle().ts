@@ -3,27 +3,21 @@
  * @param {number} wait
  */
 function throttle(func: Function, wait: number) {
-  // your code here
   let timer: NodeJS.Timer | null = null
   let lastArgs: any = null
 
   // 此处是取最后传入的参数执行
   return function (this: any, ...args: any[]) {
-    if (timer) {
-      lastArgs = args
-    } else {
-      // 是否立即执行
+    if (!timer) {
+      // 立即执行
       func.apply(this, args)
       timer = setTimeout(() => {
+        // 冷却后也执行
         lastArgs && func.apply(this, lastArgs)
         timer = null
       }, wait)
+    } else {
+      lastArgs = args
     }
   }
 }
-
-if (require.main === module) {
-}
-
-// throttle在定时器里面清
-// debounce在定时器外面清

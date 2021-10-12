@@ -9,13 +9,14 @@ const validIPAddress = function (IP: string): string {
   if (arr4.length === 4) {
     // 如果用正则表达式判断每组数小于256比较繁杂
     // 这里先用正则判断是否为3位数字以内
-    // 注意单个0要单独判断，避免出现01.01.01.01这样的情况
+    // IPv4不支持开头的0，比如 01.01.01.01 是无效的。
     // 再判断数字是否小于256即可
     if (arr4.every(part => part.match(/^0$|^([1-9]\d{0,2})$/) && Number(part) <= 255)) {
       return 'IPv4'
     }
   } else if (arr6.length === 8) {
     // 直接判断8组数均为4位以内16进制数即可
+    // IPv6允许打头的0存在。
     if (arr6.every(part => part.match(/^[0-9a-fA-F]{1,4}$/))) {
       return 'IPv6'
     }

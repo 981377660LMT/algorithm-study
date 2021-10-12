@@ -17,14 +17,13 @@ b.next = c
 // 递归法反转
 
 const reverseList1 = (head: Node | undefined) => {
-  const reverse = (pre: Node | undefined, cur: Node | undefined): Node => {
-    if (!cur) return pre!
-    const tmp = cur.next
+  if (!head || !head.next) return head
+
+  const reverse = (pre: Node | undefined, cur: Node | undefined): Node | undefined => {
+    if (!cur) return pre // 到头了
+    const next = cur.next
     cur.next = pre
-    // 如下递归的写法，其实就是做了这两步
-    //     // pre = cur;
-    //     // cur = temp;
-    return reverse(cur, tmp)
+    return reverse(cur, next)
   }
 
   return reverse(undefined, head)
@@ -47,5 +46,5 @@ const reverseList = (head: Node) => {
   return n1
 }
 
-console.log(reverseList(a))
+console.log(reverseList1(a))
 export {}

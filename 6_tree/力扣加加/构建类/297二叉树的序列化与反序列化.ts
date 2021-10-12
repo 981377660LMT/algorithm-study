@@ -62,10 +62,10 @@ const deserializeBFS = (data: string): BinaryTree | null => {
 // 使用dfs
 // 简洁的做法
 const serializeDFS = (root: BinaryTree | null): string => {
-  if (!root) return 'NULL'
+  if (!root) return '_'
   const res: string[] = []
   const dfs = (root: BinaryTree | null) => {
-    if (!root) return res.push('NULL')
+    if (!root) return res.push('_')
     res.push(root.val.toString())
     dfs(root.left)
     dfs(root.right)
@@ -75,7 +75,7 @@ const serializeDFS = (root: BinaryTree | null): string => {
 }
 
 const deserializeDFS = (data: string) => {
-  const arr = data.split(',').map(v => (v === 'NULL' ? null : Number(v)))
+  const arr = data.split(',').map(v => (v === '_' ? null : Number(v)))
   const dfs = (arr: (number | null)[]) => {
     const val = arr.shift()
     if (val == null) return null

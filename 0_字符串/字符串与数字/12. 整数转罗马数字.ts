@@ -11,11 +11,11 @@ const intToRoman = function (num: number): string {
   let res: string[] = []
   let index = 0
   while (num) {
-    const count = ~~(num / arab[index])
-    for (let i = 0; i < count; i++) {
+    const [div, mod] = [~~(num / arab[index]), num % arab[index]]
+    for (let i = 0; i < div; i++) {
       res.push(roman[index])
     }
-    num %= arab[index]
+    num = mod
     index++
   }
   return res.join('')

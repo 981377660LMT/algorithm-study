@@ -3,10 +3,13 @@
  * @return {number}
  */
 const mySqrt = function (x: number): number {
+  if (x === Infinity) return Infinity
+  if (!Number.isFinite(x) || x < 0) return NaN
+
   let l = 0
-  let r = ~~(x / 2) + 1
+  let r = x >> 1
   while (l <= r) {
-    const mid = ~~((l + r) / 2)
+    const mid = (l + r) >> 1
 
     if (mid ** 2 <= x && x < (mid + 1) ** 2) {
       return mid
@@ -20,3 +23,5 @@ const mySqrt = function (x: number): number {
 }
 
 console.log(mySqrt(8))
+
+export {}

@@ -36,3 +36,31 @@ var findMedianSortedArrays = function (nums1: number[], nums2: number[]): number
 
 console.log(findMedianSortedArrays([1, 2], [3, 4]))
 export {}
+
+/**
+ * @param {number[]} arr1 - sorted integer array
+ * @param {number[]} arr2 - sorted integer array
+ * @returns {number}
+ * O(m+n) 双指针 找出两个正序数组的中位数等价于找出两个正序数组中的第k小数
+ */
+function median(arr1: number[], arr2: number[]): number {
+  let totalLen = arr1.length + arr2.length
+  if (totalLen === 0) throw new Error('invalid length')
+  let step = (totalLen >> 1) + 1
+
+  let m1 = 0,
+    m2 = 0,
+    p1 = 0,
+    p2 = 0
+
+  while (step--) {
+    m1 = m2
+    if ((arr1[p1] || Infinity) < (arr2[p2] || Infinity)) {
+      m2 = arr1[p1++]
+    } else {
+      m2 = arr2[p2++]
+    }
+  }
+
+  return totalLen % 2 === 0 ? (m1 + m2) / 2 : m2
+}

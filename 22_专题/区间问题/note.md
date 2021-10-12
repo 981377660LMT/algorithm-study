@@ -6,4 +6,8 @@
 ```JS
 预处理
 intervals.sort((a, b) => a[0] - b[0] || b[1] - a[1])
+记录preEnd
+区间相交只需比较 preEnd 与此区间的start 大小
+更新preEnd=Math.max(preEnd,end)
+`82. 寻找合适开会的时间`
 ```

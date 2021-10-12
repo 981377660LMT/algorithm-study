@@ -1,18 +1,20 @@
-// You can use Observer which is bundled to your code
+// Observables 是unicast的，意味着每一个subscription都是相互独立的。
+// 为了创造multicast，你需要使用Subject。
+
 import { from } from './70. 实现Observable.from()'
 
-import type { Id, Observable, Subscriber } from './typings'
+import type { Id, Observable, Observer, Subscription } from './typings'
 
-class Subject implements Observable, Subscriber {
+class Subject implements Observable, Observer {
   private id: number
-  private subRecord: Map<Id, Subscriber>
+  private subRecord: Map<Id, Observer>
 
   constructor() {
     this.id = 0
     this.subRecord = new Map()
   }
 
-  subscribe(subscriber: Subscriber) {
+  subscribe(subscriber: Observer): Subscription {
     const id = this.id++
     this.subRecord.set(id, subscriber)
     return {
@@ -22,19 +24,19 @@ class Subject implements Observable, Subscriber {
     }
   }
 
-  next(value: any) {
+  next(value: any): void {
     ;[...this.subRecord.values()].forEach(subscriber => {
       subscriber.next(value)
     })
   }
 
-  error(error: Error) {
+  error(error: Error): void {
     ;[...this.subRecord.values()].forEach(subscriber => {
       subscriber.error(error)
     })
   }
 
-  complete() {
+  complete(): void {
     ;[...this.subRecord.values()].forEach(subscriber => {
       subscriber.complete()
     })

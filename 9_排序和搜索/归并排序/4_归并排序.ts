@@ -32,7 +32,7 @@ const mergeSort = (arr: number[]): number[] => {
   return mergeTwo(mergeSort(left), mergeSort(right))
 }
 
-const arr = [4, 1, 2, 5, 3, 6, 7]
+const arr = [4, 2, 100, 99, 10000, -1, 99, 2]
 
 console.log(mergeSort(arr))
 export {}

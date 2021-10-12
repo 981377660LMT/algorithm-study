@@ -8,15 +8,15 @@ import { deserializeNode } from '../构建类/297二叉树的序列化与反序�
  * 对位于 (row, col) 的每个结点而言，
  * 其左右子结点分别位于 (row + 1, col - 1) 和 (row + 1, col + 1) 。
  * 树的根结点位于 (0, 0) 。
- * @description 为了先记录最左边的信息，采用中序遍历
+ * @description
  */
 const verticalTraversal = (root: BinaryTree | null): number[][] => {
   if (!root) return []
 
   const tmp: [number, number, number][] = []
   const inOrder = (root: BinaryTree, x: number, y: number) => {
-    root.left && inOrder(root.left, x - 1, y + 1)
     tmp.push([x, y, root.val])
+    root.left && inOrder(root.left, x - 1, y + 1)
     root.right && inOrder(root.right, x + 1, y + 1)
   }
   inOrder(root, 0, 0)
@@ -38,7 +38,12 @@ console.dir(verticalTraversal(deserializeNode([3, 9, 20, null, null, 15, 7])!), 
   depth: null,
 })
 // 输出：[[9],[3,15],[20],[7]]
-console.dir(verticalTraversal(deserializeNode([1, 2, 3, 4, 6, 5, 7])!), {
-  depth: null,
-})
+console.dir(
+  verticalTraversal(
+    deserializeNode([1, 3, 2, null, 4, 5, null, 6, 13, 7, 8, 14, 12, 10, null, null, 11, 9])!
+  ),
+  {
+    depth: null,
+  }
+)
 export {}

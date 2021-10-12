@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+
 # K4(ON(SO3)2)2
 class Solution:
     def countOfAtoms(self, s: str) -> str:

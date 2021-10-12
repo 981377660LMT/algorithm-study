@@ -1,7 +1,8 @@
 type Callback = (error: Error | null, res: any) => void
 
 /**
- * @example
+ * @example 
+ * 回调形式读取文件
  * ```js
  * fs.readFile('input.txt', function (err, data) {
     if (err) return console.error(err);

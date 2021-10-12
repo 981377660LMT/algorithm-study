@@ -29,3 +29,5 @@ decrypt(secretMsg, key) === msg
 console.log(secretMsg) // secretMsg !== msg
 
 console.log(decrypt(secretMsg, key) === msg) // true
+
+export {}
