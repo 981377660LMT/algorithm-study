@@ -59,6 +59,7 @@ async function generateFiles(
   dir = dirname(process.cwd()),
   extName = '.md'
 ): Promise<void> {
+  console.log(dir, __dirname, process.cwd())
   for (const fileName of fileNames) {
     const destination = resolve(dir, fileName) + extName
     await writeFile(destination, '')
