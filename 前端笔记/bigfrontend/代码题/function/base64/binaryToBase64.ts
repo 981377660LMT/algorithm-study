@@ -25,6 +25,7 @@ function binaryTobase64(binary: string): string {
  * 二进制长度要凑成6的倍数：
  * 8bit：补4个0
  * 16bit:补2个0
+ * 加几个等号其实没啥特殊意义 只是在binary上标记原始信息
  */
 function normalize(binary: string): [string, string] {
   if (binary.length % 24 === 8) return [binary + '0000', '==']

@@ -7,6 +7,8 @@ import { from } from './70. 实现Observable.from()'
  * @param {any} input
  * @return {(observable: Observable) => Observable}
  * 它把value map到另外一个value，从而生成一个新的event stream。
+ * @summary
+ * 接收一个流 返回新的流
  */
 function map(transform: Function): (observable: Observable) => Observable {
   // your code here

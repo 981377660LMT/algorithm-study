@@ -9,7 +9,8 @@
     "strictFunctionTypes": true,
     "sourceMap": true,
     "strict": true,
-    "lib": ["ESNext", "DOM"]
+    "lib": ["ESNext", "DOM"],
+    "esModuleInterop": true
   },
   "exclude": ["node_modules", "**/node_modules/*"]
 }

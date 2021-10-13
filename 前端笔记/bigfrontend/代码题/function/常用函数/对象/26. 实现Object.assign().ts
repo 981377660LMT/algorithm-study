@@ -1,3 +1,8 @@
+// 实际上`展开语法`的内部逻辑和Object.assign() 是一样的(source)。以下两行代码完全等价。
+
+// let aClone = { ...a };
+// let aClone = Object.assign({}, a);
+
 // /**
 //  * @param {any} target
 //  * @param {any[]} sources

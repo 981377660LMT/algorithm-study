@@ -6,6 +6,7 @@ interface StoredNode extends Node {
 }
 
 // 思路：使用Symbol来验证身份
+// 也可以用node.dataset来 挂载 id
 class NodeStore {
   private store: Record<symbol, any>
 

@@ -1,7 +1,15 @@
 // fetchList is provided for you
 declare const fetchList: (since?: number) => Promise<{ items: { id: number }[] }>
 
-// you can change this to generator function if you want
+/**
+ *
+ * @param amount
+ * @returns
+ * 第一个request，直接调用fetchList，从response中取得最后一个item的id - lastItemId
+ * 调用fetchList(lastItemId)获取下一个response
+ * API 一次只返回5个item，加上一些过滤，实际的返回值中可能比5更少。如果一个都没有返回的话，就意味着服务器已经没有可以返回的了，我们需要停止调用。
+ * 请实现一个函数用来获取任意数量的item
+ */
 const fetchListWithAmount = async (amount = 5) => {
   // your code here
   const result: { id: number }[] = []

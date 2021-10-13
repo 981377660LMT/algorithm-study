@@ -10,7 +10,7 @@
 // "BFE.dev is fantastic"
 
 function t(translation: string, data: any = {}): string {
-  return translation.replace(/{{(.*?)}}/g, (_, g1) => data[g1] || '')
+  return translation.replace(/{{(.*?)}}/g, (_, g1) => data[g1] ?? '')
 }
 
 t('BFE.dev is {{{evaluation}', { evaluation: 'fantastic' })

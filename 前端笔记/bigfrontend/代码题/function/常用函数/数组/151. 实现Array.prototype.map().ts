@@ -8,11 +8,20 @@ Array.prototype.myMap = function <U>(
   callbackfn: (value: any, index: number, array: any[]) => U,
   thisArg?: any
 ): U[] {
-  // your code here
   const res: U[] = []
-  this.forEach((...args) => {
-    const index = args[1]
-    res[index] = callbackfn.apply(thisArg, args)
-  })
+  const len = this.length
+  for (let i = 0; i < len; i++) {
+    // 空值需要忽略
+    if (i in this) {
+      res[i] = callbackfn.call(thisArg, this[i], i, this)
+    }
+  }
   return res
+}
+
+if (require.main === module) {
+  const testArr = Array(2)
+  console.log(0 in testArr)
+  console.log(1 in testArr)
+  console.log(2 in testArr)
 }
