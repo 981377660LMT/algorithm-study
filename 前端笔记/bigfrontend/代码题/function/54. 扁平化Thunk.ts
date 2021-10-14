@@ -9,7 +9,6 @@ type Callback = (error: Error | null, result: any | Thunk) => void
  * 把加强的callback传进thunk，连续执行
  */
 function flattenThunk(thunk: Thunk): Thunk {
-  // your code here
   return callback => {
     const inhancedCallback: Callback = (err, res) => {
       if (err) callback(err, undefined)
@@ -22,19 +21,22 @@ function flattenThunk(thunk: Thunk): Thunk {
 }
 
 if (require.main === module) {
-  const func1 = (cb: Callback) => {
+  const func1: Thunk = (cb: Callback) => {
     setTimeout(() => cb(null, 'ok'), 10)
   }
 
-  const func2 = (cb: Callback) => {
+  const func2: Thunk = (cb: Callback) => {
     setTimeout(() => cb(null, func1), 10)
   }
 
-  const func3 = (cb: Callback) => {
+  const func3: Thunk = (cb: Callback) => {
     setTimeout(() => cb(null, func2), 10)
   }
 
   flattenThunk(func3)((error, data) => {
-    console.log(data) // 'ok'
+    if (error) console.error(error)
+    else console.log(data) // 'ok'
   })
 }
+
+export { flattenThunk }

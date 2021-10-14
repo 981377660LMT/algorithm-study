@@ -45,7 +45,7 @@ class LRUCache<K extends PropertyKey, V> {
    * @param key 如果关键字 key 存在于缓存中，则返回关键字的值，否则返回 -1 。
    */
   get(key: K) {
-    if (this.keyToListNode[key] !== undefined) {
+    if (this.keyToListNode[key] != undefined) {
       const node = this.keyToListNode[key]
       // console.log(node)
       this.removeNode(node)
@@ -65,7 +65,7 @@ class LRUCache<K extends PropertyKey, V> {
   put(key: K, value: V) {
     let node: ListNode<K, V>
 
-    if (this.keyToListNode[key] !== undefined) {
+    if (this.keyToListNode[key] != undefined) {
       node = this.keyToListNode[key]
       this.removeNode(node)
       node.val = value
@@ -83,14 +83,14 @@ class LRUCache<K extends PropertyKey, V> {
     this.appendHead(node)
   }
 
-  private removeNode(node: ListNode<K, V>) {
+  private removeNode(node: ListNode<K, V>): void {
     const preNode = node.pre
     const nextNode = node.next
     preNode.next = nextNode
     nextNode.pre = preNode
   }
 
-  private appendHead(node: ListNode<K, V>) {
+  private appendHead(node: ListNode<K, V>): void {
     const firstNode = this.head.next
     this.head.next = node
     node.next = firstNode
@@ -98,7 +98,7 @@ class LRUCache<K extends PropertyKey, V> {
     firstNode.pre = node
   }
 
-  private removeTail() {
+  private removeTail(): K {
     const key = this.tail.pre.key
     this.removeNode(this.tail.pre)
     return key

@@ -6,16 +6,17 @@
  */
 const isAnagram = function (s: string, t: string): boolean {
   if (s.length !== t.length) return false
-  const resSet = Array<number>(26).fill(0)
+  if (s === t) return false
+  const counter = Array<number>(26).fill(0)
   const base = 'a'.codePointAt(0)!
 
   for (const i of s) {
-    resSet[i.codePointAt(0)! - base]++
+    counter[i.codePointAt(0)! - base]++
   }
 
   for (const i of t) {
-    if (resSet[i.codePointAt(0)! - base] === 0) return false
-    resSet[i.codePointAt(0)! - base]--
+    if (counter[i.codePointAt(0)! - base] === 0) return false
+    counter[i.codePointAt(0)! - base]--
   }
 
   return true

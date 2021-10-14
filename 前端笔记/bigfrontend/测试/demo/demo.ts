@@ -1,4 +1,4 @@
-import { crawl } from '../../回答/crawl'
+import { crawl } from '../../../crawl'
 
 crawl({
   url: 'https://bigfrontend.dev/zh/quiz?',

@@ -24,7 +24,7 @@ class Node {
   我们可以将 child 指针当作二叉树中指向左子树的 left 指针。
   同样，next 指针可以当作是二叉树中的 right 指针
   @summary 很像 6_tree\力扣加加\构建类\114. 二叉树展开为链表.ts
-  使用pre来穿针引线
+  使用pre来穿针引线 因为最后链表起点是根节点 所以先序遍历
  */
 function flatten(head: Node | undefined): Node | undefined {
   const dummy = new Node(0, undefined, head, undefined)
@@ -34,9 +34,9 @@ function flatten(head: Node | undefined): Node | undefined {
     if (!root) return
 
     pre.next = root
-    const [left, right] = [root.child, root.next]
-    root.child = root.next = undefined
     root.prev = pre
+    const [left, right] = [root.child, root.next]
+    root.child = root.next = undefined // 最后只保留next 和 prev
     pre = root
 
     dfs(left)

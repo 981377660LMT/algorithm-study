@@ -24,8 +24,8 @@ const addTwo = (l1: Node, l2: Node): Node => {
 
   // 遍历链表
   while (n1 || n2) {
-    const n1Value = n1?.value || 0
-    const n2Value = n2?.value || 0
+    const n1Value = n1?.value ?? 0
+    const n2Value = n2?.value ?? 0
     const sum = n1Value + n2Value + overflow
     overflow = Math.floor(sum / 10)
     n3.next = new Node(sum % 10)

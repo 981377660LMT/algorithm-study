@@ -4,6 +4,7 @@
 // 也可以使用 26个质数，代表26个字符，质数相乘结果一定不相等
 const groupAnagrams = (strs: string[]): string[][] => {
   const map = new Map<string, string[]>()
+
   strs.forEach(str => {
     const key = str.split('').sort().join('')
     if (map.has(key)) {
@@ -12,6 +13,7 @@ const groupAnagrams = (strs: string[]): string[][] => {
       map.set(key, [str])
     }
   })
+
   return [...map.values()]
 }
 

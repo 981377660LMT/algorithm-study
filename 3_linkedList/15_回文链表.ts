@@ -34,18 +34,29 @@ d.next = e
 
 // 解法2：快慢指针O(n) 时间复杂度和 O(1) 空间复杂度解决
 const isPalindrome2 = (head: Node) => {
-  const findMid = (head: Node): Node | undefined => {
+  const mid = findMid(head)
+  let head1: Node | undefined = head
+  let head2: Node | undefined = reverse(mid?.next)
+  while (head1 && head2) {
+    if (head1.value !== head2?.value) return false
+    head1 = head1.next
+    head2 = head2.next
+  }
+
+  return true
+
+  function findMid(head: Node): Node | undefined {
     let fastNode: Node | undefined = head
     let slowNode: Node | undefined = head
-    while (fastNode && fastNode.next && fastNode.next.next) {
+    while (fastNode && fastNode.next) {
       fastNode = fastNode.next.next
       slowNode = slowNode?.next
     }
 
-    return slowNode
+    return slowNode?.next
   }
 
-  const reverse = (head: Node | undefined): Node | undefined => {
+  function reverse(head: Node | undefined): Node | undefined {
     if (!head) return head
     let pre: Node | undefined = undefined
     let cur: Node | undefined = head
@@ -57,19 +68,8 @@ const isPalindrome2 = (head: Node) => {
     }
     return pre
   }
-
-  const mid = findMid(head)
-  let head1: Node | undefined = head
-  let head2: Node | undefined = reverse(mid?.next)
-  while (head1 && head2) {
-    if (head1.value !== head2?.value) return false
-    head1 = head1.next
-    head2 = head2.next
-  }
-
-  return true
 }
 
-console.dir(isPalindrome(a), { depth: null })
+console.dir(isPalindrome2(a), { depth: null })
 
 export {}

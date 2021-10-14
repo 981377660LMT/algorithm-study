@@ -43,13 +43,13 @@ const addTwo = (l1: Node, l2: Node): Node => {
   let p1 = convertNode(l1)
   let p2 = convertNode(l2)
   let p3 = newNode
-  let overflow = 0
+  let carry = 0
 
   while (p1 || p2) {
-    const v1 = p1?.value || 0
-    const v2 = p2?.value || 0
-    const sum = v1 + v2 + overflow
-    overflow = Math.floor(sum / 10)
+    const v1 = p1?.value ?? 0
+    const v2 = p2?.value ?? 0
+    const sum = v1 + v2 + carry
+    carry = Math.floor(sum / 10)
     const res = sum % 10
     const nextNode = new Node(res)
     p3.next = nextNode
@@ -59,8 +59,8 @@ const addTwo = (l1: Node, l2: Node): Node => {
     p3 = p3.next
   }
 
-  if (overflow) {
-    p3.next = new Node(overflow)
+  if (carry) {
+    p3.next = new Node(carry)
   }
 
   return convertNode(newNode.next!)!

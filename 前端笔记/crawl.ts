@@ -1,4 +1,4 @@
-import { dirname, resolve } from 'path'
+import { resolve } from 'path'
 import { writeFile } from 'fs/promises'
 
 import axios from 'axios'
@@ -11,14 +11,6 @@ interface Options {
   dirName?: string
   extName?: `.${string}`
 }
-
-// todo
-// interface FileGenerator {
-//   getSourceFrom: (url: string) => Promise<string>
-//   parseFromSource: <T>(source: string, xPathExpression: string) => Promise<T>
-//   normalizeData: <T>(data: T) => Promise<string[]>
-//   generateFiles: (fileNames: string[], dir?: string, extName?: `.${string}`) => Promise<void>
-// }
 
 /**
  *
@@ -68,6 +60,15 @@ async function generateFiles(
 /**
  * @description
  * generate files
+ * @example
+ * ```js
+ *   crawl({
+ *     url: 'https://bigfrontend.dev/zh/question',
+ *     xPathExpression: "//ul[@class='List__ListItems-sc-1p5i700-1 kUISA-D']//li//text()",
+ *     dirName: __dirname,
+ *     extName: '.md',
+ *   }).catch(e => console.log(e))
+ * ```
  */
 async function crawl(options: Options): Promise<void> {
   const { url, xPathExpression, dirName, extName } = options
@@ -77,13 +78,13 @@ async function crawl(options: Options): Promise<void> {
   await generateFiles(normalizedFileNames, dirName, extName)
 }
 
-if (require.main === module) {
-  crawl({
-    url: 'https://bigfrontend.dev/zh/question',
-    xPathExpression: "//ul[@class='List__ListItems-sc-1p5i700-1 kUISA-D']//li//text()",
-    dirName: __dirname,
-    extName: '.md',
-  }).catch(e => console.log(e))
-}
+// if (require.main === module) {
+//   crawl({
+//     url: 'https://bigfrontend.dev/zh/question',
+//     xPathExpression: "//ul[@class='List__ListItems-sc-1p5i700-1 kUISA-D']//li//text()",
+//     dirName: __dirname,
+//     extName: '.md',
+//   }).catch(e => console.log(e))
+// }
 
 export { crawl }

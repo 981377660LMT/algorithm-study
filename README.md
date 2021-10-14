@@ -8,7 +8,8 @@
 - code up 网站
 - 牛客网 https://www.nowcoder.com/intelligentTest 题库
 - 组件参考 elementUI
-- https://bigfrontend.dev/zh/problem
+- https://www.30secondsofcode.org/
+- 霜神
 
 JS,TS 刷题时大数问题可用 BigInt 或者求余解决
 

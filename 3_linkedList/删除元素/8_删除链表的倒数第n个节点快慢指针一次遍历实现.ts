@@ -19,6 +19,7 @@ d.next = e
 
 // 先用快慢指针定位到要删除的节点
 // 见删除某一个节点的操作
+// 1 <= n <= sz
 const removeNthFromEnd = (head: Node | undefined, n: number) => {
   const dummy = new Node(0, head)
   let slow: Node | undefined = dummy
