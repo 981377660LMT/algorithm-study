@@ -10,6 +10,7 @@ class WordTrie extends Trie {
       if (!next) return word
       res += letter
       rootP = next
+      // 如果继承词有许多可以形成它的词根，则用最短的词根替换它。
       if (rootP.isWord) return res
     }
 

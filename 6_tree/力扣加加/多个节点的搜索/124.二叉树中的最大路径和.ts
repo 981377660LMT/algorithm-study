@@ -27,6 +27,7 @@ const maxPathSum = (root: BinaryTree | null): number => {
     return Math.max(0, Math.max(leftMax, rightMax) + root.val)
   }
   dfs(root)
+
   return max
 }
 

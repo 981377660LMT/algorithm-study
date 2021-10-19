@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .hover-rotate {
+        /* 在父元素上使用 overflow: hidden 来隐藏图像转换中的多余部分 */
+        overflow: hidden;
+        margin: 8px;
+        min-width: 240px;
+        max-width: 320px;
+        width: 100%;
+      }
+
+      .hover-rotate img {
+        transition: all 0.3s;
+        box-sizing: border-box;
+        max-width: 100%;
+      }
+
+      .hover-rotate:hover img {
+        transform: scale(1.3) rotate(5deg);
+      }
+    </style>
+  </head>
+  <body>
+    <figure class="hover-rotate">
+      <img src="https://picsum.photos/id/669/600/800.jpg" />
+    </figure>
+  </body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Typewriter effect</title>
+    <style>
+      .typewriter-effect {
+        display: flex;
+        justify-content: center;
+        font-family: monospace;
+      }
+
+      .typewriter-effect > .text {
+        max-width: 0;
+        animation: typing 3s steps(var(--characters)) infinite;
+        /* 使用white-space: nowrap 和overflow: hidden 隐藏使内容不可见的必要 */
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      /* 使用: after 伪元素将插入符号添加到容器元素 */
+      .typewriter-effect:after {
+        content: ' |';
+        animation: blink 1s infinite;
+        animation-timing-function: step-end;
+      }
+
+      /* 定义两个动画，键入以动画的字符和闪烁动画的插入符号 */
+      @keyframes typing {
+        75%,
+        100% {
+          /* 1ch 就是数字0 的宽度 */
+          /* 使用 JavaScript 为内部元素设置文本并设置包含字符数的 -- characters 变量。此变量用于使文本动画化。 */
+          max-width: calc(var(--characters) * 1ch);
+        }
+      }
+
+      @keyframes blink {
+        0%,
+        75%,
+        100% {
+          opacity: 1;
+        }
+        25% {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="typewriter-effect">
+      <div class="text" id="typewriter-text"></div>
+    </div>
+
+    <script>
+      const typeWriter = document.getElementById('typewriter-text')
+      const text = 'Lorem ipsum dolor sit amet.'
+
+      typeWriter.innerHTML = text
+      typeWriter.style.setProperty('--characters', text.length)
+    </script>
+  </body>
+</html>

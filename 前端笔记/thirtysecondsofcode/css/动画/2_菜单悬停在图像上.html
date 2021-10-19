@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>当用户悬停在图像上时显示一个菜单覆盖</title>
+    <style>
+      .hover-menu {
+        position: relative;
+        /* 关键 */
+        overflow: hidden;
+        margin: 8px;
+        min-width: 340px;
+        max-width: 480px;
+        max-height: 290px;
+        width: 100%;
+        background: #000;
+        /* 行内居中 */
+        text-align: center;
+        box-sizing: border-box;
+      }
+
+      .hover-menu * {
+        box-sizing: border-box;
+      }
+
+      .hover-menu img {
+        position: relative;
+        max-width: 100%;
+        top: 0;
+        right: 0;
+        opacity: 1;
+        transition: 0.3s ease-in-out;
+      }
+
+      .hover-menu div {
+        position: absolute;
+        top: 0;
+        left: -120px; /* 将 < div > 的左侧属性设置为元素宽度的负值 */
+        width: 120px;
+        height: 100%;
+        padding: 8px 4px;
+        background: #000;
+        transition: 0.3s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .hover-menu div a {
+        display: block;
+        line-height: 2;
+        color: #fff;
+        text-decoration: none;
+        opacity: 0.8;
+        padding: 5px 15px;
+        position: relative;
+        transition: 0.3s ease-in-out;
+      }
+
+      .hover-menu div a:hover {
+        text-decoration: underline;
+      }
+
+      /* 使图像动画鼠标悬停，创建一个滑动效果 */
+      .hover-menu:hover img {
+        opacity: 0.4;
+        right: -120px;
+      }
+
+      /* 使图像动画鼠标悬停，创建一个滑动效果 */
+      .hover-menu:hover div {
+        left: 0;
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <figure class="hover-menu">
+      <img src="https://picsum.photos/id/1060/800/480.jpg" alt="foo" />
+      <div>
+        <a href="#">Home</a>
+        <a href="#">Pricing</a>
+        <a href="#">About</a>
+      </div>
+    </figure>
+  </body>
+</html>

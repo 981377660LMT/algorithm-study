@@ -21,7 +21,7 @@ function inorderSuccessor(root: BinaryTree | null, p: BinaryTree | null): Binary
     yield* inorder(root.right)
   }
 
-  return inorder(root).next().value || null
+  return inorder(root).next().value ?? null
 }
 
 console.log(inorderSuccessor(deserializeNode([2, 1, 3]), deserializeNode([1])))

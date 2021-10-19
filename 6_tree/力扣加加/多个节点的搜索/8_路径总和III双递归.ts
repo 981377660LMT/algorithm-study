@@ -44,6 +44,7 @@ const bt: BinaryTree = {
 // 若路径方向不定 则要用后序遍历 dfs返回多个值`124.二叉树中的最大路径和`
 const pathSum = (root: BinaryTree | null, target: number): number => {
   if (root === null) return 0
+
   const dfs = (root: BinaryTree | null, sum: number): number => {
     if (root === null) return 0
     sum -= root.val

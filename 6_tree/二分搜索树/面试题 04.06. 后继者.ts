@@ -18,7 +18,7 @@ var inorderSuccessor = function (root: BinaryTree, p: BinaryTree): BinaryTree {
     yield* inorder(root.right)
   }
 
-  return inorder(root).next().value || null
+  return inorder(root).next().value ?? null
 }
 
 console.log(inorderSuccessor(deserializeNode([5, 3, 6, 2, 4, null, null, 1])!, new BinaryTree(6)))

@@ -5,9 +5,9 @@
  */
 const dailyTemperatures = function (temperatures: number[]): number[] {
   // temperatures.unshift(0)
-  // temperatures.push(0)
+  // temperatures.push(0)  可以不用
   const n = temperatures.length
-  let res: number[] = Array(temperatures.length).fill(0)
+  const res: number[] = Array(n).fill(0)
   const stack: number[] = []
   for (let i = 0; i < n; i++) {
     while (stack.length && temperatures[stack[stack.length - 1]] < temperatures[i]) {

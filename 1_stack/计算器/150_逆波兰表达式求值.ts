@@ -12,12 +12,12 @@ const evalRPN = function (tokens: string[]): number {
     '/': (a: number, b: number) => ~~(a / b),
   } as Record<string, (a: number, b: number) => number>
 
-  for (const letter of tokens) {
-    if (!operators.has(letter)) {
-      stack.push(parseInt(letter))
+  for (const char of tokens) {
+    if (!operators.has(char)) {
+      stack.push(Number(char))
     } else {
       const [num2, num1] = [stack.pop(), stack.pop()] as [number, number]
-      stack.push(evaluate[letter](num1, num2))
+      stack.push(evaluate[char](num1, num2))
     }
   }
 

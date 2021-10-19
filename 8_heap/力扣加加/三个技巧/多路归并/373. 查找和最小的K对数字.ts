@@ -3,7 +3,7 @@ import { MinHeap } from '../../../../2_queue/minheap'
 function kSmallestPairs(nums1: number[], nums2: number[], k: number): number[][] {
   const res: number[][] = []
 
-  const pq = new MinHeap<[number, number, number]>((a, b) => a[0] - b[0])
+  const pq = new MinHeap<[sum: number, row: number, col: number]>((a, b) => a[0] - b[0])
   const pushNext = (i: number, j: number) => {
     if (i < nums1.length && j < nums2.length) {
       pq.push([nums1[i] + nums2[j], i, j])

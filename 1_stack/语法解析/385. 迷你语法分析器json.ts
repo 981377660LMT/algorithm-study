@@ -9,7 +9,7 @@ declare class NestedInteger {
   getList(): NestedInteger[]
 }
 
-interface NestedArray<T> extends Array<NestedArray<T> | T> {}
+type NestedArray<T> = Array<NestedArray<T> | T> | T
 
 function deserialize(s: string): NestedInteger {
   const dfs = (input: NestedArray<number> | number): NestedInteger => {

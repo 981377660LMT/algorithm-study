@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image overlay on hover</title>
+    <style>
+      .hover-img {
+        background-color: #000;
+        color: #fff;
+        display: inline-block;
+        margin: 8px;
+        max-width: 320px;
+        min-width: 240px;
+        overflow: hidden;
+        position: relative;
+        text-align: center;
+        width: 100%;
+      }
+
+      .hover-img * {
+        box-sizing: border-box;
+        transition: all 0.45s ease;
+      }
+
+      /* 使用:before 之前和:after 之后的伪元素分别为上下条形的叠加。设置他们的不透明度，变换和过渡，以产生期望的效果。 */
+      .hover-img:before,
+      .hover-img:after {
+        background-color: rgba(0, 0, 0, 0.5);
+        border-top: 32px solid rgba(0, 0, 0, 0.5);
+        border-bottom: 32px solid rgba(0, 0, 0, 0.5);
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        content: '';
+        transition: all 0.3s ease;
+        z-index: 1;
+        opacity: 0;
+        /* scaleY() 函数函数用于在Y轴方向上缩放元素 */
+        transform: scaleY(3);
+      }
+
+      .hover-img img {
+        vertical-align: top;
+        max-width: 100%;
+        backface-visibility: hidden;
+      }
+
+      .hover-img figcaption {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        align-items: center;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        line-height: 1.1em;
+        opacity: 0;
+        z-index: 2;
+        transition-delay: 0.1s;
+        font-size: 24px;
+        font-family: sans-serif;
+        font-weight: 400;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+
+      .hover-img:hover:before,
+      .hover-img:hover:after {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      /* >子选择器，匹配直接后代 */
+      .hover-img:hover > img {
+        opacity: 0.7;
+      }
+
+      .hover-img:hover figcaption {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <figure class="hover-img">
+      <img src="https://picsum.photos/id/200/440/320.jpg" />
+      <figcaption>
+        <h3>Lorem <br />Ipsum</h3>
+        <!-- <h3>HTML <figure> 元素代表一段独立的内容, 经常与说明（caption） <figcaption> 配合使用, 并且作为一个独立的引用单元</h3> -->
+      </figcaption>
+    </figure>
+  </body>
+</html>

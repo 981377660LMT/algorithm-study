@@ -13,10 +13,10 @@ interface Options {
 }
 
 interface ICrawler {
-  crawl: () => Promise<void>
+  crawl(): Promise<void>
 }
 
-class Crawler implements ICrawler {
+abstract class Crawler implements ICrawler {
   private url: string
   private xPathExpression: string
   private dirName?: string
@@ -39,13 +39,16 @@ class Crawler implements ICrawler {
    */
   constructor(url: string, xPathExpression: string, dirName?: string, extName?: `.${string}`)
   constructor(...args: any[]) {
-    if (args.length === 1 && typeof args[0] === 'object') {
+    const paramIsOptions = args.length === 1 && typeof args[0] === 'object'
+    const paramIsNotOptions = args.length >= 2 && args.length <= 4
+
+    if (paramIsOptions) {
       const { url, xPathExpression, dirName = process.cwd(), extName = '.md' } = args[0] as Options
       this.url = url
       this.xPathExpression = xPathExpression
       this.dirName = dirName
       this.extName = extName
-    } else if (args.length >= 2 && args.length <= 4) {
+    } else if (paramIsNotOptions) {
       const [url, xPathExpression, dirName, extName] = args
       this.url = url
       this.xPathExpression = xPathExpression
@@ -58,7 +61,6 @@ class Crawler implements ICrawler {
 
   public async crawl(): Promise<void> {
     const html = await this.getSourceFrom(this.url)
-    // console.log(html)
     const fileNames = await this.parseFromSource(html, this.xPathExpression)
     const normalizedFileNames = await this.normalizeData(fileNames)
     await this.generateFiles(normalizedFileNames)

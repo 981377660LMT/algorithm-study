@@ -3,6 +3,7 @@
  * @param {Function} SuperType
  * @param {Function} SubType
  * @returns
+ * 寄生组合式继承
  */
 const myExtends = (SuperType, SubType) => {
   // your code here

@@ -8,8 +8,8 @@
 // 注意我们的目标是:对每一根柱子，找到右第一个比当前值小的值 => 单调栈
 // 在 heights 首尾添加了两个哨兵元素，这样我们可以保证所有的柱子都会出栈。
 const largestRectangleArea = function (heights: number[]): number {
-  heights.unshift(0)
-  heights.push(0)
+  heights.unshift(0) // 便于计算宽度
+  heights.push(0) // 所有元素出栈
   const n = heights.length
   let res = 0
   const stack: number[] = []
@@ -24,7 +24,6 @@ const largestRectangleArea = function (heights: number[]): number {
     stack.push(i)
   }
 
-  console.log(stack)
   return res
 }
 

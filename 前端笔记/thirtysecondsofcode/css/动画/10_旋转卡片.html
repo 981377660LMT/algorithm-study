@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rotating Card</title>
+    <style>
+      .card {
+        perspective: 150rem;
+        position: relative;
+        height: 40rem;
+        max-width: 400px;
+        margin: 2rem;
+        box-shadow: none;
+        background: none;
+      }
+
+      .card-side {
+        height: 35rem;
+        border-radius: 15px;
+        transition: all 0.8s ease;
+        /* 这里将卡片的背面可见性设置为零 */
+        backface-visibility: hidden;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 80%;
+        padding: 2rem;
+        color: white;
+      }
+
+      .card-side.back {
+        transform: rotateY(-180deg);
+        background-color: #4158d0;
+        background-image: linear-gradient(43deg, #4158d0 0%, #c850c0 46%, #ffcc70 100%);
+      }
+
+      .card-side.front {
+        background-color: #0093e9;
+        background-image: linear-gradient(160deg, #0093e9 0%, #80d0c7 100%);
+      }
+
+      .card:hover .card-side.front {
+        transform: rotateY(180deg);
+      }
+
+      .card:hover .card-side.back {
+        transform: rotateY(0deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="card-side front">
+        <div>Front Side</div>
+      </div>
+      <div class="card-side back">
+        <div>Back Side</div>
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Set the backface-visibility of the cards to none.
+将卡片的背面可见性设置为零。
+Initially, set rotateY for the back side of the card to -180deg and the front side to 0deg.
+最初，为卡的背面设置 rotateY 为 -180度，前面设置为0deg。
+Upon hover, set rotateY for the front side to 180deg and backside to 0deg.
+悬停时，将前侧设置为180度，后侧设置为0度。
+Set the appropriate perspective value to create the rotate effect.
+设置适当的透视值以创建旋转效果。 -->

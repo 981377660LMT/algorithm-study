@@ -68,6 +68,7 @@ const isSubPath = function (head: Node, root: BinaryTree | null): boolean {
     if (head.value !== root.val) return false
     return dfs(head.next, root.left) || dfs(head.next, root.right)
   }
+
   return dfs(head, root) || isSubPath(head, root.left) || isSubPath(head, root.right)
 }
 

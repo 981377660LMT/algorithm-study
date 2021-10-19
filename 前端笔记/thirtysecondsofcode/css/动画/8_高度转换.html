@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Height transition 手风琴</title>
+    <style>
+      .el {
+        transition: max-height 0.3s;
+        overflow: hidden;
+        /* max-height 指定初始高度为0 */
+        max-height: 0;
+      }
+
+      /* hover 伪类将 max-height 更改为 JavaScript 设置的 -- max-height 变量的值。 */
+      .trigger:hover > .el {
+        max-height: var(--max-height);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="trigger">
+      当元素的高度未知时，元素的高度从0转换为自动。
+      <div class="el">Additional content</div>
+    </div>
+    <script>
+      let el = document.querySelector('.el')
+      let height = el.scrollHeight
+      el.style.setProperty('--max-height', height + 'px')
+    </script>
+  </body>
+</html>

@@ -9,11 +9,8 @@ import { deserializeNode } from '../构建类/297二叉树的序列化与反序�
 const pruneTree = function (root: BinaryTree): BinaryTree | null {
   root.left && (root.left = pruneTree(root.left))
   root.right && (root.right = pruneTree(root.right))
-  if (root.val === 0 && !root.left && !root.right) {
-    return null
-  } else {
-    return root
-  }
+  if (root.val === 0 && root.left == null && root.right == null) return null
+  else return root
 }
 
 console.dir(pruneTree(deserializeNode([1, 0, 1, 0, 0, 0, 1])!), { depth: null })

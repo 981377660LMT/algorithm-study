@@ -10,7 +10,8 @@
     "sourceMap": true,
     "strict": true,
     "lib": ["ESNext", "DOM"],
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "noUnusedLocals": true
   },
   "exclude": ["node_modules", "**/node_modules/*"]
 }

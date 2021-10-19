@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Staggered animation</title>
+    <style>
+      .container {
+        overflow-x: hidden;
+        width: 100%;
+      }
+
+      .menu-toggler {
+        display: none;
+      }
+
+      .menu-toggler-label {
+        cursor: pointer;
+        font-size: 20px;
+        font-weight: bold;
+      }
+
+      .stagger-menu {
+        list-style-type: none;
+        margin: 16px 0;
+        padding: 0;
+      }
+
+      .stagger-menu li {
+        margin-bottom: 8px;
+        font-size: 18px;
+        opacity: 0;
+        /* 移动父元素 100%宽度 */
+        transform: translateX(100%);
+        transition-property: opacity, transform;
+        transition-duration: 0.3s;
+        transition-timing-function: cubic-bezier(0.75, -0.015, 0.565, 1.055);
+      }
+
+      /* '~'匹配所有在指定元素之后的同级某个元素 */
+      .menu-toggler:checked ~ .stagger-menu li {
+        opacity: 1;
+        transform: translateX(0);
+        /* CSS自定义属性 */
+        /* 通过在 :root 伪类上设置自定义属性，然后在整个文档需要的地方使用，可以减少这样的重复性 */
+        transition-delay: calc(0.055s * var(--delay));
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <input type="checkbox" name="menu" id="menu" class="menu-toggler" />
+      <label for="menu" class="menu-toggler-label">Menu</label>
+      <ul class="stagger-menu">
+        <!-- 设置inline变量 -->
+        <li style="--delay: 0">Home</li>
+        <li style="--delay: 1">Pricing</li>
+        <li style="--delay: 2">Account</li>
+        <li style="--delay: 3">Support</li>
+        <li style="--delay: 4">About</li>
+      </ul>
+    </div>
+  </body>
+</html>

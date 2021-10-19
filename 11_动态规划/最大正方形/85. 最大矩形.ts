@@ -22,7 +22,7 @@ const maximalRectangle = function (matrix: string[][]): number {
 
   console.table(candidates)
 
-  return Math.max.apply(null, candidates.map(largestRectangleArea))
+  return Math.max.apply(null, candidates.map(largestRectangleArea)) // 每一行都是一个柱状图中最大的矩形
 }
 
 // console.log(
