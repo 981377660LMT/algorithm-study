@@ -4,8 +4,11 @@
  * @return {number[][]}
  * 你需要确保列表中的区间仍然有序且不重叠（如果有必要的话，可以合并区间）。
  */
-var insert = function (intervals: number[][], newInterval: number[]): number[][] {
-  const bisectInsort = (target: number[][], inserted: number[]) => {
+const insert = function (intervals: number[][], newInterval: number[]): number[][] {
+  bisectInsort(intervals, newInterval)
+  return mergeSortedArray(intervals)
+
+  function bisectInsort(target: number[][], inserted: number[]) {
     const num = inserted[0]
     let l = 0
     let r = target.length - 1
@@ -17,9 +20,7 @@ var insert = function (intervals: number[][], newInterval: number[]): number[][]
     target.splice(l, 0, inserted)
   }
 
-  bisectInsort(intervals, newInterval)
-
-  const mergeSortedArray = (nums: number[][]) => {
+  function mergeSortedArray(nums: number[][]) {
     const res: number[][] = [nums[0]]
     for (let index = 1; index < nums.length; index++) {
       const interval = nums[index]
@@ -38,8 +39,6 @@ var insert = function (intervals: number[][], newInterval: number[]): number[][]
     }
     return res
   }
-
-  return mergeSortedArray(intervals)
 }
 
 console.log(

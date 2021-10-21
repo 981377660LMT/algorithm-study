@@ -33,11 +33,10 @@ const partition = (nums: number[], l: number, r: number): number => {
 
 // 最后要让pivotIndex为k 前面的k个数就是满足题意的
 const divide = (nums: number[], l: number, r: number, k: number): void => {
-  if (l < r) {
-    const pivotIndex = partition(nums, l, r)
-    if (pivotIndex > k) divide(nums, l, pivotIndex - 1, k)
-    else if (pivotIndex < k) divide(nums, pivotIndex + 1, r, k)
-  }
+  if (l > r) return
+  const pivotIndex = partition(nums, l, r)
+  if (pivotIndex > k) divide(nums, l, pivotIndex - 1, k)
+  else if (pivotIndex < k) divide(nums, pivotIndex + 1, r, k)
 }
 
 // 找第(前)k小的数 k>=1

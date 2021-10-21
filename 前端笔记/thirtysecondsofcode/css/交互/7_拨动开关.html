@@ -1,0 +1,61 @@
+<!-- 只使用 CSS 创建切换开关。 -->
+<!-- Use the for attribute to associate the <label> with the checkbox <input> element.
+  使用 for 属性将 < label > 与复选框 < input > 元素关联。
+  Use the :after pseudo-element of the <label> to create a circular knob for the switch.
+  使用 < label > 的: after 伪元素为开关创建一个圆形旋钮。
+  Use the :checked pseudo-class selector to change the position of the knob, using transform: translateX(20px) and the background-color of the switch.
+  使用: checked 伪类选择器改变旋钮的位置，使用 transform: translateX (20px)和开关的背景颜色。
+  Use position: absolute and left: -9999px to visually hide the <input> element.
+  使用绝对位置和左边位置:-9999像素来直观地隐藏 < input > 元素。
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 20px;
+        background-color: rgba(0, 0, 0, 0.25);
+        border-radius: 20px;
+        transition: all 0.3s;
+      }
+
+      .switch:after {
+        cursor: pointer;
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border-radius: 18px;
+        background-color: rgb(5, 2, 2);
+        top: 1px;
+        left: 1px;
+        transition: all 0.3s;
+      }
+
+      /* 相邻兄弟选择器 */
+      input[type='checkbox']:checked + .switch:after {
+        transform: translateX(20px);
+      }
+
+      input[type='checkbox']:checked + .switch {
+        background-color: rgb(44, 41, 41);
+      }
+
+      .offscreen {
+        position: absolute;
+        left: -9999px;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="checkbox" id="toggle" class="offscreen" />
+    <label for="toggle" class="switch"></label>
+  </body>
+</html>

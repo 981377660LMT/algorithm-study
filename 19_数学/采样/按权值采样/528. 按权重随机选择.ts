@@ -12,8 +12,11 @@ class Solution {
    */
   constructor(w: number[]) {
     // 计算前缀和，这样可以生成一个随机数，根据数的大小对应分布的坐标
-    this.pre = w.slice()
-    this.pre.reduce((pre, _, index, array) => (array[index] += pre))
+    this.pre = Array(w.length).fill(0)
+    for (let i = 0; i < this.pre.length; i++) {
+      this.pre[i] = (this.pre[i - 1] ?? 0) + w[i]
+    }
+    console.log(this.pre)
   }
 
   // 选取下标 i 的概率为 w[i] / sum(w) 。

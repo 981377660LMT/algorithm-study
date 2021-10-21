@@ -1,0 +1,40 @@
+<!-- 如果某个窗体的任何子窗体被聚焦，则更改该窗体的外观。 -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      form {
+        border: 2px solid #52b882;
+        padding: 8px;
+        border-radius: 2px;
+      }
+
+      /* focus-within 将样式应用于父元素 */
+      form:focus-within {
+        background: #7cf0bd;
+      }
+
+      label {
+        display: inline-block;
+        width: 72px;
+      }
+
+      input {
+        margin: 4px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <form>
+      <label for="username">Username:</label>
+      <input id="username" type="text" />
+      <br />
+      <label for="password">Password:</label>
+      <input id="password" type="text" />
+    </form>
+  </body>
+</html>

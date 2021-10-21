@@ -1,0 +1,27 @@
+<!-- 使用transition 动画改变opacity。 -->
+<!-- 使用: hover 和: not 伪类选择器更改所有元素的不透明度，除了鼠标超过0.5的元素 -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      span {
+        padding: 0 16px;
+        transition: opacity 0.4s;
+      }
+
+      .sibling-fade:hover span:not(:hover) {
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sibling-fade">
+      <span>Item 1</span> <span>Item 2</span> <span>Item 3</span> <span>Item 4</span>
+      <span>Item 5</span> <span>Item 6</span>
+    </div>
+  </body>
+</html>

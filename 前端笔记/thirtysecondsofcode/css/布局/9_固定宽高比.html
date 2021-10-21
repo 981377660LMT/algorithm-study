@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Constant width to height ratio</title>
+    <style>
+      .constant-width-to-height-ratio {
+        background: #9c27b0;
+        width: 50%;
+      }
+
+      .constant-width-to-height-ratio:before {
+        content: '';
+        /* 高度与宽度的比例可以根据需要调整。例如，padding-top 为100% 将创建一个响应矩形(1:1的比例)。 */
+        padding-top: 10%;
+        float: left;
+      }
+
+      .constant-width-to-height-ratio:after {
+        content: '';
+        display: block;
+        clear: both;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="constant-width-to-height-ratio">sd</div>
+  </body>
+</html>

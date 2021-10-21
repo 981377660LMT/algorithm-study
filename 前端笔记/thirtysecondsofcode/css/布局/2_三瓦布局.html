@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3-tile layout</title>
+    <style>
+      .tiles {
+        width: 600px;
+        font-size: 0;
+        margin: 0 auto;
+      }
+      /* 使用 display: inline-block 创建平铺布局，不使用 float、 flex 或 grid。 */
+      /* 将 width 与 calc 结合使用，可以将容器的宽度均匀地分为3列。 */
+      .tile {
+        width: calc(600px / 3);
+        display: inline-block;
+      }
+
+      .tile h2 {
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tiles">
+      <div class="tile">
+        <img src="https://via.placeholder.com/200x150" />
+        <h2>30 Seconds of CSS</h2>
+      </div>
+      <div class="tile">
+        <img src="https://via.placeholder.com/200x150" />
+        <h2>30 Seconds of CSS</h2>
+      </div>
+      <div class="tile">
+        <img src="https://via.placeholder.com/200x150" />
+        <h2>30 Seconds of CSS</h2>
+      </div>
+    </div>
+  </body>
+</html>

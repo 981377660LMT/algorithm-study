@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .input-box {
+        display: flex;
+        align-items: center;
+        max-width: 300px;
+        background: #fff;
+        border: 1px solid #a0a0a0;
+        border-radius: 4px;
+        padding-left: 0.5rem;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+
+      .input-box .prefix {
+        font-weight: 300;
+        font-size: 14px;
+        color: #999;
+      }
+
+      /* 从 < input > 字段中删除边框和轮廓。将它们应用于父元素，使其看起来像一个输入框。 */
+      .input-box input {
+        flex-grow: 1;
+        font-size: 14px;
+        background: #fff;
+        border: none;
+        outline: none;
+        padding: 0.5rem;
+      }
+
+      /* 当用户与 < input > 字段交互时，使用伪类中的: focus 选择器相应地对父元素进行样式化。 */
+      .input-box:focus-within {
+        border-color: #777;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="input-box">
+      <span class="prefix">+30</span>
+      <input type="tel" placeholder="210 123 4567" />
+    </div>
+  </body>
+</html>
+<!-- img、input属于行内块元素 -->

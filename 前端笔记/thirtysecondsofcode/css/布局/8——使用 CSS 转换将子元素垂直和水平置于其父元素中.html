@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transform centering</title>
+    <style>
+      .parent {
+        position: relative;
+        width: 250px;
+        height: 250px;
+        border: 1px solid #9c27b0;
+      }
+
+      .child {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="parent">
+      <div class="child">Centered content</div>
+    </div>
+  </body>
+</html>

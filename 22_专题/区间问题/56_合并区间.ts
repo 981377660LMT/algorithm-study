@@ -21,6 +21,7 @@ const merge = (intervals: number[][]): number[][] => {
         res.push(nums[index])
       }
     }
+
     return res
   }
 

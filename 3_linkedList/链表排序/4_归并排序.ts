@@ -44,16 +44,15 @@ const sortList = (head: Node | undefined): Node | undefined => {
 
   const mergeSort = (head: Node | undefined): Node | undefined => {
     if (!head || !head.next) return head
-    const dummy = new Node(-1, head)
 
     // 快慢指针寻找中点
-    // 注意这里慢节点从dummy开始
-    let slow: Node | undefined = dummy
+    let slow: Node | undefined = head
     let fast: Node | undefined = head
-    while (fast && fast.next) {
+    while (fast && fast.next && fast.next.next) {
       fast = fast.next.next
       slow = slow!.next
     }
+
     const head2 = slow!.next
     slow!.next = undefined
     return merge(mergeSort(head), mergeSort(head2))

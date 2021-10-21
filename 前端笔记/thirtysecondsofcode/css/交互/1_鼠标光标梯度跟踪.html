@@ -1,0 +1,59 @@
+<!-- 一个悬停效果，其中梯度跟随鼠标光标。 -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mouse cursor gradient tracking</title>
+    <style>
+      .mouse-cursor-gradient-tracking {
+        position: relative;
+        background: #7983ff;
+        padding: 0.5rem 1rem;
+        font-size: 1.2rem;
+        border: none;
+        color: white;
+        cursor: pointer;
+        outline: none;
+        overflow: hidden;
+      }
+
+      .mouse-cursor-gradient-tracking span {
+        position: relative;
+      }
+
+      .mouse-cursor-gradient-tracking:before {
+        --size: 0;
+        content: '';
+        position: absolute;
+        left: var(--x);
+        top: var(--y);
+        width: var(--size);
+        height: var(--size);
+        background: radial-gradient(circle closest-side, pink, transparent);
+        transform: translate(-50%, -50%);
+        transition: width 0.2s ease, height 0.2s ease;
+      }
+
+      .mouse-cursor-gradient-tracking:hover:before {
+        --size: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="mouse-cursor-gradient-tracking">
+      <span>Hover me</span>
+    </button>
+    <script>
+      let btn = document.querySelector('.mouse-cursor-gradient-tracking')
+      btn.addEventListener('mousemove', e => {
+        let rect = e.target.getBoundingClientRect()
+        let innerX = e.clientX - rect.left
+        let innerY = e.clientY - rect.top
+        btn.style.setProperty('--x', innerX + 'px')
+        btn.style.setProperty('--y', innerY + 'px')
+      })
+    </script>
+  </body>
+</html>

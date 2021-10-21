@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .hamburger-menu {
+        display: flex;
+        flex-flow: column wrap;
+        justify-content: space-between;
+        height: 2.5rem;
+        width: 2.5rem;
+        cursor: pointer;
+      }
+
+      .hamburger-menu .bar {
+        height: 5px;
+        background: black;
+        border-radius: 5px;
+        margin: 3px 0px;
+        /* 旋转中心 */
+        transform-origin: left;
+        transition: all 0.4s;
+      }
+
+      .hamburger-menu:hover .top {
+        transform: rotate(45deg);
+      }
+
+      .hamburger-menu:hover .middle {
+        opacity: 0;
+      }
+
+      .hamburger-menu:hover .bottom {
+        transform: rotate(-45deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hamburger-menu">
+      <div class="bar top"></div>
+      <div class="bar middle"></div>
+      <div class="bar bottom"></div>
+    </div>
+  </body>
+</html>

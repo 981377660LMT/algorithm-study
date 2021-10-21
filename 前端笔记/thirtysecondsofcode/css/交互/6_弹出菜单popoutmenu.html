@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Popout menu</title>
+    <style>
+      .reference {
+        position: relative;
+        background: tomato;
+        width: 100px;
+        height: 80px;
+      }
+
+      .popout-menu {
+        position: absolute;
+        /* 隐藏最初隐藏弹出菜单，允许应用过渡 */
+        visibility: hidden;
+        /* 使用left: 100% 将弹出菜单移动到父菜单的右边。 */
+        left: 100%;
+        background: #9c27b0;
+        color: white;
+        padding: 16px;
+      }
+
+      .reference:hover > .popout-menu,
+      .reference:focus > .popout-menu,
+      .reference:focus-within > .popout-menu {
+        visibility: visible;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reference" tabindex="0">
+      <div class="popout-menu">Popout menu</div>
+    </div>
+  </body>
+</html>

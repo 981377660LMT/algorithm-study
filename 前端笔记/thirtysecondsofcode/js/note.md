@@ -39,6 +39,8 @@ const concatAb = [].concat(a, c); // [1, 2, 3, 'hi']
    要使对象不可变，我们可以使用 Object.freeze () ，它将防止添加新属性，并在一定程度上防止删除和更改现有属性
    它执行的是浅冻结
 5. encodeURI ()和 encodeURIComponent () 有什么区别
+   encodeURI()不会对本身属于 URI 的特殊字符进行编码，例如**冒号、正斜杠、问号和井字号**；
+   而 encodeURIComponent()则会对它发现的任何非标准字符进行编码
 
 ```JS
 const partOfURL = 'my-page#with,speci@l&/"characters"?';

@@ -1,0 +1,42 @@
+<!-- 基本原理：主要就是利用 script 标签的src属性没有跨域的限制，
+通过指向一个需要访问的地址，
+由服务端返回一个预先定义好的 Javascript 函数的调用，
+并且将服务器数据以该函数参数的形式传递过来，此方法需要前后端配合完成。
+只能进行GET请求 -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      window.jsonpCallback = function (res) {
+        console.log(res)
+      }
+    </script>
+    <script
+      src="http://localhost:8080/api/jsonp?id=1&cb=jsonpCallback"
+      type="text/javascript"
+    ></script>
+  </body>
+</html>
+
+<!-- 后端返回jsonpCallback({ title: 'title1' }) -->
+
+<!-- const Koa = require('koa');
+const app = new Koa();
+const items = [{ id: 1, title: 'title1' }, { id: 2, title: 'title2' }]
+
+app.use(async (ctx, next) => {
+  if (ctx.path === '/api/jsonp') {
+    const { cb, id } = ctx.query;
+    const title = items.find(item => item.id == id)['title']
+    ctx.body = `${cb}(${JSON.stringify({title})})`;
+    return;
+  }
+})
+console.log('listen 8080...')
+app.listen(8080); -->

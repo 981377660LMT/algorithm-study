@@ -24,8 +24,7 @@ const combinationSum = (candidates: number[], target: number): number[][] => {
 
       const next = candidates[i]
       path.push(next)
-      // 注意这里i+1限制不能取到重复的元素
-      bt(path, sum + next, i + 1)
+      bt(path, sum + next, i)
       path.pop()
     }
   }

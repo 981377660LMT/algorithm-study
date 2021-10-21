@@ -1,0 +1,33 @@
+<!-- 适合一个位置的图像适当地在其容器内，同时保持其长宽比。 -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .image {
+        background: #34495e;
+        border: 1px solid #34495e;
+        width: 200px;
+        height: 200px;
+      }
+      /* object-fit: contain 包含适合整个图像在容器中，同时保持其长宽比。 */
+      .image-contain {
+        object-fit: contain;
+        object-position: center;
+      }
+
+      /* object-fit: cover，以填补与图像的容器，同时保持其长宽比 */
+      .image-cover {
+        object-fit: cover;
+        object-position: right top;
+      }
+    </style>
+  </head>
+  <body>
+    <img class="image image-contain" src="https://picsum.photos/600/200" />
+    <img class="image image-cover" src="https://picsum.photos/600/200" />
+  </body>
+</html>

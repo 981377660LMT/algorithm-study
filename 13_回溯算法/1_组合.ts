@@ -4,6 +4,7 @@
  * @return {number[][]}
  * @description 组合要去除排列重复的元素?  保持递增顺序即可保证唯一
  * @description 回溯法剪枝
+ * 返回范围 [1, n] 中所有可能的 k 个数的组合。
  */
 var combine = function (n: number, k: number) {
   const res: number[][] = []

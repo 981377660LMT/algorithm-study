@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Horizontal scroll snap</title>
+    <style>
+      .horizontal-snap {
+        margin: 0 auto;
+        display: grid;
+        grid-auto-flow: row;
+        /* grid-auto-flow: column; */
+        gap: 1rem;
+        height: calc(180px + 1rem);
+        padding: 1rem;
+        width: 480px;
+        overflow-y: auto;
+        /* overscroll-behavior-x: contain; */
+        overscroll-behavior-y: contain;
+        /* scroll-snap-type: x mandatory; */
+        scroll-snap-type: y mandatory;
+      }
+
+      .horizontal-snap img {
+        width: 180px;
+        max-width: none;
+        object-fit: contain;
+        border-radius: 1rem;
+      }
+
+      .horizontal-snap > a {
+        scroll-snap-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="horizontal-snap">
+      <a href="#"><img src="https://picsum.photos/id/1067/640/640" /></a>
+      <a href="#"><img src="https://picsum.photos/id/122/640/640" /></a>
+      <a href="#"><img src="https://picsum.photos/id/188/640/640" /></a>
+      <a href="#"><img src="https://picsum.photos/id/249/640/640" /></a>
+      <a href="#"><img src="https://picsum.photos/id/257/640/640" /></a>
+      <a href="#"><img src="https://picsum.photos/id/259/640/640" /></a>
+      <a href="#"><img src="https://picsum.photos/id/283/640/640" /></a>
+      <a href="#"><img src="https://picsum.photos/id/288/640/640" /></a>
+      <a href="#"><img src="https://picsum.photos/id/299/640/640" /></a>
+    </div>
+  </body>
+</html>
+
+<!-- scroll-snap-type: x/y -->
+<!-- scroll-snap-align: start/end/center -->

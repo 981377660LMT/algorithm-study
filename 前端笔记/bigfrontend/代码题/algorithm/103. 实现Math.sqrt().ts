@@ -7,7 +7,7 @@ function mySqrt(x: any): number {
   if (!Number.isFinite(x) || x < 0) return NaN
 
   let l = 0
-  let r = ~~(x / 2) + 1
+  let r = x >> 1
   while (l <= r) {
     const m = (l + r) >> 1
     if (m ** 2 <= x && x < (m + 1) ** 2) {
