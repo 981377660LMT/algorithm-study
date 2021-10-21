@@ -11,8 +11,8 @@
     "strict": true,
     "lib": ["ESNext", "DOM"],
     "esModuleInterop": true,
-    "noUnusedLocals": true,
-    "isolatedModules": true
+    "noUnusedLocals": true
+    // "isolatedModules": true
   },
   "exclude": ["node_modules", "**/node_modules/*"]
 }

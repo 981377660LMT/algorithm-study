@@ -128,5 +128,32 @@ Promise.resolve('2')
 'finally'
 'finally2后面的then函数' '2'
 
-至于为什么`finally2的打印要在finally前面`，请看下一个例子中的解析。
+因为每次执行完then 都返回新的微任务 入队 队列不断shift push 注意顺序
 ```
+
+finally 中要是抛出的是一个异常是怎样的：
+
+```JS
+Promise.resolve('1')
+  .finally(() => {
+    console.log('finally1')
+    throw new Error('我是finally中抛出的异常')
+  })
+  .then(res => {
+    console.log('finally后面的then函数', res)
+  })
+  .catch(err => {
+    console.log('捕获错误', err)
+  })
+'finally1'
+'捕获错误' Error: 我是finally中抛出的异常
+但是如果改为return new Error('我是finally中抛出的异常')，打印出来的就是'finally后面的then函数 1'
+```
+
+Promise.all 使用场景
+一些游戏类的素材比较多的应用，打开网页时，预先加载需要用到的各种资源如图片、flash 以及各种静态文件。所有的都加载完后，我们再进行页面的初始化。
+Promise.race 使用场景
+我们可以用 race 给某个异步请求设置超时时间，并且在超时后执行相应的操作
+
+async await
+**紧跟着 await 后面的语句相当于放到了 new Promise 中，下一行及之后的语句相当于放在 Promise.then 中**
