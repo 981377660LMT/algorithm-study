@@ -70,3 +70,86 @@ btn.addEventListener('click', () => {
 ```
 
 11. 闭包产生的本质就是，当前环境中存在指向父级作用域的引用。
+12. Array(3)和 Array(3, 4)的区别？
+
+```JS
+console.log(Array(3)) // [empty x 3]
+console.log(Array(3, 4)) // [3, 4]
+console.log(Array.of(3, 4)) // [3, 4]
+```
+
+13. Proxy get 的第三个参数 receiver(接受者)
+    如果 target 对象中指定了 getter，receiver 则为 getter 调用时的 this 值。
+
+```JS
+var obj = {
+  fn: function () {
+    console.log('lindaidai')
+  }
+}
+var obj1 = new Proxy(obj, {
+  get (target, key, receiver) {
+    console.log(receiver === obj1) // true
+    console.log(receiver === target) // false
+    return target[key]
+  }
+})
+obj1.fn()
+
+```
+
+14. 使用 delete 删除数组元素，其长度是不会改变的。
+    把数组理解为是一个特殊的对象，其中的每一项转换为对象的伪代码为：
+
+```JS
+key: value
+// 对应:
+0: 1
+1: 2
+2: 3
+length: 3
+
+```
+
+delete 操作符删除一个数组元素时，相当于移除了数组中的一个属性，被删除的元素已经不再属于该数组。但是这种改变并不会影响数组的 length 属性。 15. 15. 8
+
+15. “自动插入分号”，简称 ASI (Automatic Semicolon Insertion)
+
+```JS
+function getName () {
+  return
+  {
+    name: 'LinDaiDai'
+  }
+}
+console.log(getName())
+
+相当于
+function getName () {
+  return;
+  {
+    name: 'LinDaiDai'
+  }
+}
+console.log(getName())
+
+
+因此最终的结果也就是undefined。
+```
+
+16. 按位取反，为什么~2 = -3
+    计算机中用补码存储数据
+    原码：最高位为符号位，剩余位（数据位）为 x 的绝对值。
+    反码：如果 x 为正数，则与原码相同；如果 x 为负数，符号位保持不变，数据位取反。
+    补码：如果 x 为正数，则与原码相同；**如果 x 为负数，符号位保持不变，数据位取反，然后加 1（若符号位有进位，则舍弃进位）。**
+
+    1. 0000 0010
+    2. 1111 1101
+    3. 1000 0011 `2->3 补码转源码`
+    4. -3
+
+17. [,,,]的长度
+    3
+    尾后逗号的概念
+18. 如何判断当前脚本运行在浏览器还是 node 环境中？
+19. 如何判断一个对象是否为空对象 Object.keys()：

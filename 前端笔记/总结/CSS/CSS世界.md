@@ -145,3 +145,78 @@ html.getBoundingClientRect().width：获取html的宽度(窗口的宽度)
 15. animation 有一个 steps()功能符知道吗？
     steps()功能符可以让动画不连续。
     和贝塞尔曲线(cubic-bezier()修饰符)一样，都可以作为 animation 的第三个属性值。和贝塞尔曲线的区别：贝塞尔曲线像是滑梯且有 4 个关键字(参数)，而 steps 像是楼梯坡道且只有 number 和 position 两个关键字。
+16. 如何让<p>测试 空格</p>这两个词之间的空格变大
+    通过给 p 标签设置 word-spacing，将这个属性设置成自己想要的值。
+    将这个空格用一个 span 标签包裹起来，然后设置 span 标签的 letter-spacing 或者 word-spacing。
+    **letter-spacing 添加字母(letter)之间的空白，而 word-spacing 添加每个单词(word)之间的空白。**
+    letter-spacing 把中文之间的间隙也放大了，而 word-spacing 则不放大中文之间的间隙。
+17. 如何解决 inline-block 空白问题？
+    给父级设置 font-size: 0
+
+```HTML
+<style>
+.sub {
+  background: hotpink;
+  display: inline-block;
+  /* 给父级设置font-size: 0 */
+}
+</style>
+<body>
+  <div class="super">
+    <div class="sub">
+      孩子
+    </div>
+    <div class="sub">
+      孩子
+    </div>
+    <div class="sub">
+      孩子
+    </div>
+  </div>
+</body>
+
+```
+
+18. 脱离文档流是不是指该元素从 DOM 树中脱离
+    并不会，DOM 树是 HTML 页面的层级结构，指的是元素与元素之间的关系，例如包裹我的是我的父级，与我并列的是我的兄弟级，类似这样的关系称之为层级结构。
+    而文档流则类似于排队，我本应该在队伍中的，然而我脱离了队伍，但是我与我的父亲，兄弟，儿子的关系还在
+19. 如何让 Chrome 浏览器支持小于 12px 的字体大小
+    使用：-webkit-transform: scale(0.8);
+20. 空元素(单标签)元素有哪些？
+<br />
+<hr />
+<input />
+<img />
+<link />
+<meta>
+
+21. b 与 strong 的区别以及 i 和 em 的区别？
+    被<b>和<strong>包裹的文字会被加粗
+    被<i>和<em>包裹的文字会以斜体的方式呈现
+    <b>标签和<i>标签都是「自然样式标签」，都只是在样式上加粗和变斜，并没有什么实际的意义。并且据了解，这两种标签在 HTML4.01 中已经不被推荐使用了。<strong>标签和<em>的话是「语义样式标签」。就像是<h1>、<h2>一样都有自己的语义。<em>表示一般的强调文本，而<strong>表示更强的强调文本。另外在使用阅读设备的时候，<strong>会重读(这点呆呆也没有实践过所以不太敢保证)。
+22. http-equiv
+    equivalent(元信息元素的附加属性)
+    content-security-policy
+    它允许页面作者定义当前页的内容策略。 内容策略主要指定允许的服务器源和脚本端点，这有助于防止跨站点脚本攻击。
+    refresh
+    这个属性指定:
+    如果 content 只包含一个正整数，则为重新载入页面的时间间隔(秒)；
+    如果 content 包含一个正整数，并且后面跟着字符串 ';url=' 和一个合法的 URL，则是重定向到指定链接的时间间隔(秒)
+
+23. 获取元素的属性
+    **注:** 以下四个属性只能读取 不能对元素进行修改;
+    1.offsetWidth 获取元素的实际宽度 包含 border 和 padding 在内
+    2.offsetHeight 获取元素的实际高度 包含 border 和 padding 在内
+    3.offsetLeft 元素定位之后相对于参照物父容器的偏移
+    4.offsetTop 元素定位之后相对于参照物父容器的偏移
+24. 选择器 https://github.com/LinDaiDai/niubility-coding-js/blob/master/CSS/CSS%E7%9A%84%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86.md
+    子代选择器 ： 只选择直系的后代 .class_1 > p { }
+    **同级元素通用选择器** 用法：选择器 1~选择器 2{ }
+    俩个选择器之间需要有相同的父级
+    选择器 2 必须处于选择器 1 的后面
+    选择具有相同的父级，并且加载顺序处于后面的内容
+    **相邻兄弟选择器** 用法： 选择器 1+选择器 2{ }
+    俩个选择器必须是兄弟关系(也就是要有同一个父级)
+    俩个选择器必须是紧挨着的
+    选择的是相连接的后面的兄弟
+    **可以看到选择器 +和~的区别就是+只针对一项元素,而~可能是多项的。**
