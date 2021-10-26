@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .container {
+        background: #f5f6f9;
+        color: #333;
+        padding: 8px 0;
+      }
+
+      .pretty-text-underline {
+        display: inline;
+        text-shadow: 1px 1px #f5f6f9, -1px 1px #f5f6f9, -1px -1px #f5f6f9, 1px -1px #f5f6f9;
+        background-image: linear-gradient(90deg, currentColor 100%, transparent 100%);
+        background-position: bottom;
+        background-repeat: no-repeat;
+        background-size: 100% 1px;
+      }
+
+      .pretty-text-underline::selection {
+        background-color: rgba(0, 150, 255, 0.3);
+        text-shadow: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <p class="pretty-text-underline">Pretty text underline without clipping descenders.</p>
+    </div>
+  </body>
+</html>

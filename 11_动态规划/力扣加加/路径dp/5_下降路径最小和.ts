@@ -5,18 +5,15 @@ function minFallingPathSum(grid: number[][]): number {
   dp[0] = grid[0]
 
   for (let i = 1; i < len; i++) {
-    let min = Math.min.apply(null, dp[i - 1])
     for (let j = 0; j < len; j++) {
-      if (dp[i - 1][j] !== min) dp[i][j] = min + grid[i][j]
-      else
-        dp[i][j] =
-          Math.min(
-            Math.min.apply(null, dp[i - 1].slice(0, j)),
-            Math.min.apply(null, dp[i - 1].slice(j + 1))
-          ) + grid[i][j]
+      dp[i][j] =
+        Math.min(
+          Math.min.apply(null, dp[i - 1].slice(0, j)),
+          Math.min.apply(null, dp[i - 1].slice(j + 1))
+        ) + grid[i][j]
     }
   }
-  console.table(dp)
+
   return Math.min.apply(null, dp[len - 1])
 }
 

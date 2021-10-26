@@ -220,3 +220,74 @@ html.getBoundingClientRect().width：获取html的宽度(窗口的宽度)
     俩个选择器必须是紧挨着的
     选择的是相连接的后面的兄弟
     **可以看到选择器 +和~的区别就是+只针对一项元素,而~可能是多项的。**
+25. 如何去除 CSS 注释？
+    用正则/\/_[\s\S]_?\*\//全局匹配注释，替换为空字符串
+    用工程化工具，如 cssnano 来去除注释
+26. 伪类 伪元素
+    伪类选择器 a:hover
+    伪元素选择器 a::before
+27. 什么是继承
+    CSS 属性分为非继承属性和 继承属性
+
+    常见的继承属性：
+    字体 font 系列
+    文本 text-align text-ident line-height letter-spacing
+    颜色 color
+    列表 list-style
+    可见性 visibility
+    光标 cursor
+
+    容易被误认为继承属性的 非继承属性：
+    透明度 opacity
+    背景 background 系列
+
+28. 何计算 CSS 选择器的优先级？
+    |选择器|权重|
+    -----|-----|-----
+    |style=""| 1000|
+    |ID | 100|
+    |类、伪类、属性| 10|
+    |标签、伪元素| 1|
+29. 百分比 % 相对于谁？
+    百分比总是相对于父元素，无论是设置 font-size 或 width 等。如果父元素的相应属性，经浏览器计算后，仍无绝对值，那么 % 的实际效果等同于 默认值，如 height: 100%
+30. 对比块、内联和内联块盒子
+    块盒子：display:block
+    换行
+    width 和 height 生效
+    竖直方向 padding 和 margin 生效
+
+    内联盒子：display:inline
+    不换行
+    width 和 height **无效**
+    竖直方向 padding 和 margin **无效**
+
+    内联块盒子：display:inline-block
+    **不换行**
+    width 和 height 生效
+    竖直方向 padding 和 margin 生效
+
+31. 什么是层叠上下文
+    层叠上下文是元素在 Z 轴上的层次关系集合并影响渲染顺序，设置 z-index 可改变 position 不为 static 的元素的层叠顺序
+    z-index，常用来：
+
+    **改善兼容性**
+    解决遮挡问题
+    解决滚动穿透问题
+
+    **提升移动端体验**
+    如通过-webkit-overflow-scrolling: touch 增加滚动回弹效果
+
+    **性能优化**
+    将频繁变化的内容单独一层放置
+
+32. BEM
+    块元素修饰符，全称是 Block Element Modifier
+    定义了一种 CSS 的命名规则，用于解决命名冲突：
+    `.block-name__element-name--modifier-name`
+    .块名\_\_元素名--修饰符（元素名和修饰符都可为空）
+    其中：
+
+    Block：块，忽略结构和优先级，具有独立意义的实体
+    Element：元素，块内部没有独立意义的实体
+    Modifier：修饰符，标识块或元素的外观、行为、状态被修改
+    含有修饰符的类名不可独立出现，通常跟在不含修饰符的类名后

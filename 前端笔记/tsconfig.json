@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2020",
-    "jsx": "preserve",
+    "jsx": "react",
     "experimentalDecorators": true,
     "noImplicitOverride": true,
     "downlevelIteration": true,

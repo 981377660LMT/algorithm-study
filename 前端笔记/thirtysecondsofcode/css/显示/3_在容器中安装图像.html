@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .image {
+        background: #34495e;
+        border: 1px solid #34495e;
+        width: 200px;
+        height: 200px;
+      }
+
+      .image-contain {
+        object-fit: contain;
+        object-position: center;
+      }
+
+      .image-cover {
+        object-fit: cover;
+        object-position: right top;
+      }
+    </style>
+  </head>
+  <body>
+    <img class="image image-contain" src="https://picsum.photos/600/200" />
+    <img class="image image-cover" src="https://picsum.photos/600/200" />
+  </body>
+</html>

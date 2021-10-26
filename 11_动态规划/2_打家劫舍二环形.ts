@@ -4,6 +4,7 @@ const maxMoney = (nums: number[]) => {
   const len = nums.length
   if (len === 0) return 0
   if (len === 1) return nums[0]
+
   const maxMoneyRange = (nums: number[], start: number, end: number): number => {
     if (start === end) return nums[start]
     const dp = Array(nums.length).fill(0)
@@ -14,6 +15,7 @@ const maxMoney = (nums: number[]) => {
     }
     return dp[end]
   }
+
   const money1 = maxMoneyRange(nums, 0, len - 2)
   const money2 = maxMoneyRange(nums, 1, len - 1)
   return Math.max(money1, money2)
