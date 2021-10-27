@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pprint import pprint
 from json import dumps, loads
 
@@ -7,7 +7,7 @@ AdjList = Pairs
 
 
 class Neuron:
-    def __init__(self, id: int, children: List['Neuron'] = None) -> None:
+    def __init__(self, id: int, children: Optional[List['Neuron']] = None) -> None:
         self.id = id
         self.children = [] if children is None else children
 
