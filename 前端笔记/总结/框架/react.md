@@ -187,3 +187,8 @@ export default class FileComponent extends Component {
 4. hooks 的出现就是为了取代 HOC(高阶组件就是一个没有副作用的纯函数。) HOC 逻辑复杂 少用 HOC
    这也论证了`多用组合,少用继承`的设计原则
    发展 Mixin=>HOC=>Hooks
+
+5. setState 更新原理彻底理解
+6. 事件机制了解
+7. Fiber 了解
+8. redux 精通

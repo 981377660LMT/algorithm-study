@@ -111,3 +111,34 @@ nextTick(cb)
 9. Vue3 做了哪些优化
    响应式的原理不同
    更加细致的静态标记
+
+10. Vue 实现响应式
+    - initData(vm)
+    - new Observer(value) // 观测过了就不会重复观测(看 value 里的`__ob__`是不是 instanceof Observer)
+    - walk(obj)
+    - defineReactive(obj) // 定义响应式
+    - Object.defineProperty  
+      get 中收集依赖 **dep.depend()**
+      set 中更新时 **dep.notify()**
+11. Vue 如何检测数组变化
+    函数劫持 重写了 **data 里的数组原型 上的 7 个数组方法** `data.arr.__proto__=MyArray`
+    里面会手动 dep.notify()通知视图更新
+    数组里的对象继续递归观测
+12. Vue 为何异步渲染
+    防止频繁更新
+    - dep.notify() 通知 Watcher 更新
+    - subs[i].update() 依次调用 Watcher 的 update
+    - queueWatcher 将 watcher 去重(根据 watcher 的 id 去重)后放到队列
+    - nextTick（flushCallbacks) 异步清空 watcher 队列
+13. nextTick 实现原理
+14. Computed 实现
+    - initComputed(vm,opts.computed)
+    - new Watcher
+    - watcher.**dirty** 为 true 则重新计算值
+15. watch 中的 deep:true 如何实现的
+    递归 好性能
+16. Vue 的生命周期
+17. ajax 请求放哪里
+    created 中 dom 还未渲染出来
+    **非 SSR**:mounted
+    **SSR**:created
