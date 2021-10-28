@@ -188,7 +188,201 @@ export default class FileComponent extends Component {
    这也论证了`多用组合,少用继承`的设计原则
    发展 Mixin=>HOC=>Hooks
 
-5. setState 更新原理彻底理解
-6. 事件机制了解
-7. Fiber 了解
-8. redux 精通
+5. 事件机制
+   事件绑定到 root 事件冒泡实例化生成统一的 SyntheticEvent
+   再 dispatchEvent event 对象交由对应的 handler 处理
+   为什么合成事件:跨平台、挂到 document 减少消耗、频繁解绑
+6. batchUpdate 机制(基于 transaction 机制,影响 setState 的 `异步`)
+   setState 机制，batchUpdate 机制，transaction 机制
+
+   1. newState 存入 pending 队列
+   2. 调用函数前 isBatchingUpdates=true,调用函数后 isBatchingUpdates=false（transaction 机制;**类似于 python 的 上下文管理器 contextManager**）。执行 setState 时 判断是否处于 patchUpdate 是则保存组件到 dirtyComponents 不是则遍历 dirtyComponents 调用 updateComponent
+
+```Python
+这段代码的作用是任何对列表的修改只有当所有代码运行完成并且不出现异常的情况下才会生效
+from contextlib import contextmanager
+
+@contextmanager
+def list_transaction(orig_list):
+    working = list(orig_list)
+    yield working
+    orig_list[:] = working
+
+>>> items = [1, 2, 3]
+>>> with list_transaction(items) as working:
+...     working.append(4)
+...     working.append(5)
+...
+>>> items
+[1, 2, 3, 4, 5]
+>>> with list_transaction(items) as working:
+...     working.append(6)
+...     working.append(7)
+...     raise RuntimeError('oops')
+...
+Traceback (most recent call last):
+    File "<stdin>", line 4, in <module>
+RuntimeError: oops
+>>> items
+[1, 2, 3, 4, 5]
+>>>
+```
+
+7. Fiber 如何优化性能
+8. react 渲染和更新的过程
+   jsx 渲染、setState 更新页面(React 默认全部重新渲染)
+9. redux 精通
+
+10. react 事件和 DOM 事件区别
+11. react16 所有事件挂载到 document react17 绑定到 root **有利于多个 react 版本共存**
+12. event 是 SyntheticEvent ，模拟出来 DOM 事件所有能力
+    event.nativeEvent 是原生事件对象
+13. dispatchEvent 机制
+14. React 性能优化
+    1. Key
+    2. 销毁
+    3. 异步组件
+    4. pure/memo
+15. jsx 本质
+    createElement 返回 vNode
+
+    ```JS
+        // DOM Elements
+        function createElement<P extends DOMAttributes<T>, T extends Element>(
+        type: string,
+        props?: ClassAttributes<T> & P | null,
+        ...children: ReactNode[]): DOMElement<P, T>;
+
+        // Custom components
+        function createElement<P extends {}>(
+        type: FunctionComponent<P> | ComponentClass<P> | string,
+        props?: Attributes & P | null,
+        ...children: ReactNode[]): ReactElement<P>;
+    ```
+
+16. 组件通信
+    1. props 传数据/传函数
+17. setState 为何使用不可变值
+
+```JS
+
+// 不可变值（函数式编程，纯函数） - 数组
+const list5Copy = this.state.list5.slice()
+list5Copy.splice(2, 0, 'a') // 中间插入/删除
+this.setState({
+    list1: this.state.list1.concat(100), // 追加
+    list2: [...this.state.list2, 100], // 追加
+    list3: this.state.list3.slice(0, 3), // 截取
+    list4: this.state.list4.filter(item => item > 100), // 筛选
+    list5: list5Copy // 其他操作
+})
+// 注意，不能直接对 this.state.list 进行 push pop splice 等，这样违反不可变值
+
+// 不可变值 - 对象
+this.setState({
+    obj1: Object.assign({}, this.state.obj1, {a: 100}),
+    obj2: {...this.state.obj2, a: 100}
+})
+// 注意，不能直接对 this.state.obj 进行属性设置，这样违反不可变值
+
+```
+
+14. setState 批量更新合并
+
+```JS
+    第四，state 异步更新的话，更新前会被合并 ----------------------------
+
+    // 传入对象，会被合并（类似 Object.assign ）。执行结果只一次 +1
+    this.setState({
+        count: this.state.count + 1
+    })
+    this.setState({
+        count: this.state.count + 1
+    })
+    this.setState({
+        count: this.state.count + 1
+    })
+
+    // 传入函数，不会被合并。执行结果是 +3
+    this.setState((prevState, props) => {
+        return {
+            count: prevState.count + 1
+        }
+    })
+    this.setState((prevState, props) => {
+        return {
+            count: prevState.count + 1
+        }
+    })
+    this.setState((prevState, props) => {
+        return {
+            count: prevState.count + 1
+        }
+    })
+```
+
+15. setState 同步还是异步:无所谓，看是否命中 batchUpdate 机制(生命周期，react 中注册的事件即 React 可以管理的入口;定时器，自定义 DOM 事件 React 管不到的入口)
+
+```JS
+
+    第三，setState 可能是异步更新（有可能是同步更新） ----------------------------
+
+    this.setState({
+        count: this.state.count + 1
+    }, () => {
+        // 联想 Vue $nextTick - DOM
+        console.log('count by callback', this.state.count) // 回调函数中可以拿到最新的 state
+    })
+    console.log('count', this.state.count) // 异步的，拿不到最新值
+
+    // setTimeout 中 setState 是同步的
+    setTimeout(() => {
+        this.setState({
+            count: this.state.count + 1
+        })
+        console.log('count in setTimeout', this.state.count)
+    }, 0)
+
+    自己定义的 DOM 事件，setState 是同步的。再 componentDidMount 中
+```
+
+16. React.StrictMode 带来的问题
+17. ReactRom.createPortal
+    使用场景:fixed 需要放在 body 第一层级
+18. 异步组件:
+    React.lazy(()=>import())
+    React.Suspense
+19. SCU 默认返回什么 (true,可以渲染)
+    React 默认就是全部重新渲染
+20. SCU 要配合不可变值
+
+```JS
+  onSubmitTitle = (title) => {
+        // 正确的用法
+        this.setState({
+            list: this.state.list.concat({
+                id: `id-${Date.now()}`,
+                title
+            })
+        })
+
+        // // 为了演示 SCU ，故意写的错误用法
+        // this.state.list.push({
+        //     id: `id-${Date.now()}`,
+        //     title
+        // })
+        // this.setState({
+        //     list: this.state.list
+        // })
+    }
+```
+
+21. immutabel.js  
+    彻底的不可变值
+    ```JS
+    const arr = [1, 2, 3]
+    arr.push(4) // 被修改
+    const arr1 = a.concat(4) // 重新生成 arr1 ，但 arr 是一直不变的
+    ```
+22. 什么是 renderProps
+    类似于 vue 里的作用域插槽 传下去是一个函数 可以获取子组件里的 props 或 state

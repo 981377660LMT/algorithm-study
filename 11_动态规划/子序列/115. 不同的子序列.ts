@@ -7,12 +7,12 @@
  */
 const numDistinct = function (s: string, t: string): number {
   const dp = Array.from({ length: s.length + 1 }, () => Array(t.length + 1).fill(0))
-  for (let i = 0; i <= s.length; i++) {
+  for (let i = 0; i < s.length + 1; i++) {
     dp[i][0] = 1
   }
 
-  for (let i = 1; i <= s.length; i++) {
-    for (let j = 1; j <= t.length; j++) {
+  for (let i = 1; i < s.length + 1; i++) {
+    for (let j = 1; j < t.length + 1; j++) {
       if (s[i - 1] === t[j - 1]) {
         dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j] // 选不选最后一位 选就是dp[i-1][j-1] 不选就是 dp[i-1][j]
       } else {

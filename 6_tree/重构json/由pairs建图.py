@@ -57,15 +57,7 @@ def build(num: int, pairs: Pairs) -> List['Neuron']:
 
 
 if __name__ == '__main__':
-    pairs = [
-        [1, 2],
-        [1, 3],
-        [2, 3],
-        [4, 5],
-        [5, 6],
-        [7, 8],
-        [9, 10],
-    ]
+    pairs = [[1, 2], [1, 3], [2, 3], [4, 5], [5, 6], [7, 8], [9, 10], [10, 9]]
     neurons = build(10, pairs)
     pprint(
         [loads(dumps(neuron, default=lambda obj: obj.__dict__)) for neuron in neurons],

@@ -7,10 +7,11 @@
  * @summary 注意到x-y=target,x+y=Sum,等价于的01背包问题
  * 问题转换为：只使用 +运算符凑出(sum + target) / 2
  */
-var findTargetSumWays = function (nums, target) {
+const findTargetSumWays = (nums, target) => {
   const sum = nums.reduce((pre, cur) => pre + cur, 0)
+  if ((sum + target) & 1) return 0
+
   const volume = (sum + target) / 2
-  if (!Number.isInteger(volume)) return 0
   const dp = Array(volume + 1).fill(0)
   // 我们定义 dp[0] = 1 表示只有当不选取任何元素时，元素之和才为 0，因此只有 1 种方案。
   dp[0] = 1

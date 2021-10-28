@@ -4,15 +4,13 @@ const minPathSum = (grid: number[][]) => {
   const m = grid.length
   const n = grid[0].length
   const minPathSumMatrix = Array.from({ length: m }, () => Array(n).fill(Infinity))
-  const firstRow = grid[0]
-  const firstColum = grid.map(arr => arr[0])
 
   // 初始化
-  for (let i = 0; i < n; i++) {
-    minPathSumMatrix[0][i] = firstRow.slice(0, i + 1).reduce((pre, cur) => pre + cur, 0)
+  for (let j = 0; j < n; j++) {
+    minPathSumMatrix[0][j] = grid[0][j] + (j >= 1 ? minPathSumMatrix[0][j - 1] : 0)
   }
   for (let i = 0; i < m; i++) {
-    minPathSumMatrix[i][0] = firstColum.slice(0, i + 1).reduce((pre, cur) => pre + cur, 0)
+    minPathSumMatrix[i][0] = grid[i][0] + (i >= 1 ? minPathSumMatrix[i - 1][0] : 0)
   }
 
   for (let i = 1; i < m; i++) {

@@ -5,7 +5,7 @@
  * 本题求钱币最小个数，那么钱币有顺序和没有顺序都可以，都不影响钱币的最小个数。。
    所以本题并不强调集合是组合还是排列。
  */
-const canPartition = function (nums: number[], amount: number) {
+const coinChange = function (nums: number[], amount: number) {
   // dp[i]表示面值为i时需要硬币的最少数量
   const dp = Array(amount + 1).fill(Infinity)
   dp[0] = 0
@@ -16,9 +16,10 @@ const canPartition = function (nums: number[], amount: number) {
       }
     }
   }
+
   return dp[amount] === Infinity ? -1 : dp[amount]
 }
 
-console.dir(canPartition([1, 2, 5], 11), { depth: null })
+console.dir(coinChange([1, 2, 5], 11), { depth: null })
 
 export {}

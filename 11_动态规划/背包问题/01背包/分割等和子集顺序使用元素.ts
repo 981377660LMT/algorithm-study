@@ -6,14 +6,13 @@
  */
 const canPartition = function (nums: number[]) {
   const sum = nums.reduce((pre, cur) => pre + cur, 0)
-  const volume = sum / 2
-  if (!Number.isInteger(volume)) return false
-  const dpRow = nums.length
-  const dp = Array<boolean>(volume + 1).fill(false)
+  if (sum & 1) return false
 
+  const volume = sum / 2
+  const dp = Array<boolean>(volume + 1).fill(false)
   dp[0] = true
 
-  for (let i = 0; i < dpRow; i++) {
+  for (let i = 0; i < nums.length; i++) {
     const num = nums[i]
     // 倒叙的原因是后面需要前面先决定
     for (let j = volume; j >= num; j--) {

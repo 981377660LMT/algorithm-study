@@ -3,13 +3,12 @@
 ## todo
 
 - 宫水三叶
-- 剑指 offer
 - code up 公众号
 - code up 网站
 - 牛客网 https://www.nowcoder.com/intelligentTest 题库
 - 组件参考 elementUI
-- https://www.30secondsofcode.org/
 - 霜神
+- 剩余题目按照分类做
 
 JS,TS 刷题时大数问题可用 BigInt 或者求余解决
 

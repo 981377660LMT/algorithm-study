@@ -82,8 +82,8 @@ React 16 之前的版本比对更新 VirtualDOM 的过程是采用循环加递�
 
 在 Fiber 方案中，为了实现任务的终止再继续，DOM 比对算法被分成了两部分：
 
-1. 构建 Fiber (可中断)
-2. 提交 Commit (不可中断)
+1. 构建 Fiber:拆分 reconciliation(和解) (可中断),Diff 计算
+2. 提交 Commit (不可中断)，将 Fiber 渲染成 DOM
 
 DOM 初始渲染: virtualDOM -> Fiber -> Fiber[] -> DOM
 
@@ -99,9 +99,9 @@ DOM 更新操作: newFiber vs oldFiber -> Fiber[] -> DOM
   tag          节点标记 (对具体类型的分类 hostRoot || hostComponent || classComponent || functionComponent)
   effects      数组, 存储需要更改的 fiber 对象
   effectTag    当前 Fiber 要被执行的操作 (新增, 删除, 修改)
-  parent       当前 Fiber 的父级 Fiber
-  child        当前 Fiber 的子级 Fiber
-  sibling      当前 Fiber 的下一个兄弟 Fiber
+  `parent`       当前 Fiber 的父级 Fiber
+  `child`        当前 Fiber 的子级 Fiber
+  `sibling`      当前 Fiber 的下一个兄弟 Fiber
   alternate    Fiber 备份 fiber 比对时使用
 }
 ```

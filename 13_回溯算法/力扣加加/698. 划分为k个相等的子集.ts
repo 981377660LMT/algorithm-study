@@ -16,17 +16,16 @@ const canPartitionKSubsets = function (nums: number[], k: number): boolean {
   const visited = Array<boolean>(nums.length).fill(false)
   function* bt(remain: number, start: number, curSum: number): Generator<boolean> {
     if (remain === 0) yield true
-    // when a subset is found, we launch another search to find the
-    // remaining subsets from the unvisited elements.
+
     if (curSum === target) yield* bt(remain - 1, 0, 0)
     for (let i = start; i < nums.length; i++) {
       const element = nums[i]
+
       if (visited[i]) continue
       visited[i] = true
-      // launch a search to find other elements that will sum up to
-      // the target with the current element.
+
       yield* bt(remain, i + 1, curSum + element)
-      // reset to enable backtracking
+
       visited[i] = false
     }
   }
