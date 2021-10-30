@@ -23,3 +23,4 @@ function cloneDeep(obj: any) {
 }
 
 console.log(cloneDeep({ a: { b: { c: 3 }, d: 4, e: Symbol() } }))
+export {}

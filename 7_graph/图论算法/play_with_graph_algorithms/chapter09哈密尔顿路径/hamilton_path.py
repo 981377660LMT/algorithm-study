@@ -2,7 +2,6 @@ from play_with_graph_algorithms.chapter02.adj_set import AdjSet as Graph
 
 
 class HamiltonPath:
-
     def __init__(self, G, s):
         self._G = G
         self._s = s
@@ -23,7 +22,7 @@ class HamiltonPath:
             if not self._visited[w]:
                 if self._dfs(w, v, left):
                     return True
-        
+
         self._visited[v] = False
 
         return False
@@ -32,7 +31,7 @@ class HamiltonPath:
         res = []
         if self._end == -1:
             return res
-        
+
         curr = self._end
         while curr != self._s:
             res.append(curr)
@@ -43,7 +42,6 @@ class HamiltonPath:
 
 
 class HamiltonPathV2:
-
     def __init__(self, G, s):
         self._G = G
         self._s = s
@@ -52,7 +50,7 @@ class HamiltonPathV2:
         self._dfs(0, s, s, G.V)
 
     def _dfs(self, visited, v, parent, left):
-        visited += (1 << v)
+        visited += 1 << v
         self._pre[v] = parent
         left -= 1
         if left == 0:
@@ -70,7 +68,7 @@ class HamiltonPathV2:
         res = []
         if self._end == -1:
             return res
-        
+
         curr = self._end
         while curr != self._s:
             res.append(curr)

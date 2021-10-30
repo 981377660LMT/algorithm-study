@@ -153,3 +153,39 @@ console.log(getName())
     尾后逗号的概念
 18. 如何判断当前脚本运行在浏览器还是 node 环境中？
 19. 如何判断一个对象是否为空对象 Object.keys()：
+20. 闭包的内存如何释放
+
+```JS
+const fn = function() {
+    let num = 0;
+
+    return function() {
+        return num += 1;
+    }
+}
+
+let f1 = fn();
+
+f1(); // 1
+f1(); // 2
+f1(); // 3
+
+f1 = null;  // 释放
+
+f1 = fn();
+
+f1(); // 1
+f1(); // 2
+f1(); // 3
+```
+
+21. hooks 两条规范
+    1. 只能用于 React 函数组件和自定义 hook 中
+    2. 只能用于顶层代码，不能用于分支语句
+       eslint 插件 eslint-plugin-react-hooks
+       为什么？
+       内部实现是数组
+22. React Hooks 的坑
+    1. useState 初始化值只初始化一次(参考实现)
+    2. useEffect 内部不能修改 state
+    3. useEffect 依赖不能为非 state 的引用类型，否则死循环
