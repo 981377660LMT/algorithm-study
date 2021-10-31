@@ -6,6 +6,7 @@ function numSimilarGroups(strs: string[]): number {
 
   for (let i = 0; i < strs.length; i++) {
     for (let j = i + 1; j < strs.length; j++) {
+      // 相似字符串具有传递性=>并查集
       if (isSimilar(strs[i], strs[j])) uf.union(i, j)
     }
   }

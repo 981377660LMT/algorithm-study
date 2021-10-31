@@ -1,17 +1,16 @@
-import { UnionFind } from './0_并查集'
+import { useUnionFindArray } from './推荐使用并查集精简版'
 
-const findCircleNum = (isConnected: number[][]) => {
-  const uf = new UnionFind<number>()
+const findCircleNum = (isConnected: number[][]): number => {
+  const uf = useUnionFindArray(isConnected.length)
   for (let i = 0; i < isConnected.length; i++) {
-    uf.add(i)
-    for (let j = 0; j < isConnected.length; j++) {
+    for (let j = i; j < isConnected.length; j++) {
       if (isConnected[i][j] === 1) {
         uf.union(i, j)
       }
     }
   }
-  console.log(uf)
-  return uf.count
+
+  return uf.getCount()
 }
 
 console.log(

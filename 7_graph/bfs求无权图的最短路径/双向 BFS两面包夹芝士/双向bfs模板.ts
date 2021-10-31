@@ -1,4 +1,4 @@
-interface GetNextState<State> {
+interface GetNextStates<State> {
   (curState: State): Iterable<State>
 }
 
@@ -13,7 +13,7 @@ interface GetNextState<State> {
 function bibfs<State = string>(
   start: State,
   target: State,
-  getNextState: GetNextState<State>
+  getNextStates: GetNextStates<State>
 ): number {
   // 用集合不用队列，可以快速判断元素是否存在
   let queue1 = new Set<State>([start])
@@ -35,7 +35,7 @@ function bibfs<State = string>(
       if (visited.has(cur)) continue
       visited.add(cur)
 
-      for (const next of getNextState(cur)) {
+      for (const next of getNextStates(cur)) {
         nextQueue.add(next)
       }
     }

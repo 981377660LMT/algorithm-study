@@ -445,3 +445,13 @@ requestIdleCallback(workLoop)
    其实是链头的不断上移做到的。
 
    <img src="./images/10.png" align="left"/>
+
+总结：
+
+1. fiber 是一个用于增量更新的数据结构
+   - 分片执行
+   - React 核心的算法包含了三个核心部分: - Scheduler， Reconciliation， Renderer
+     scheduler 用于决定何时去执行任务
+     Reconciliation 决定哪部分需要更新
+     renderer 使用 Reconciliation 的计算结果，然后将这部分差异，最小化更新到视图(在 DOM 中，这部分的工作由 React-DOM 来完成)
+2. fiber 是一个虚拟调用栈:递归改迭代

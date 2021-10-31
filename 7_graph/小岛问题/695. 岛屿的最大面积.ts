@@ -7,7 +7,7 @@ const maxAreaOfIsland = (grid: number[][]): number => {
   const n = grid[0].length
 
   // 2. dfs: 碰到为1的陆地就开始深度遍历并标记为已看过(0)
-  const dfs = (row: number, column: number, visited: Set<string>) => {
+  const dfs = (row: number, column: number, visited: Set<number>) => {
     res = Math.max(res, visited.size)
     ;[
       [row - 1, column],
@@ -23,9 +23,9 @@ const maxAreaOfIsland = (grid: number[][]): number => {
         nextColumn >= 0 &&
         nextColumn < n &&
         grid[nextRow][nextColumn] === 1 &&
-        !visited.has(`${nextRow}#${nextColumn}`)
+        !visited.has(nextRow * n + nextColumn)
       ) {
-        visited.add(`${nextRow}#${nextColumn}`)
+        visited.add(nextRow * n + nextColumn)
         dfs(nextRow, nextColumn, visited)
         // 这句很关键 回溯时标记为0 可以避免之后无效的dfs
         grid[nextRow][nextColumn] = 0
@@ -37,7 +37,7 @@ const maxAreaOfIsland = (grid: number[][]): number => {
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
       if (grid[i][j] === 1) {
-        dfs(i, j, new Set([`${i}#${j}`]))
+        dfs(i, j, new Set([i * n + j]))
       }
     }
   }

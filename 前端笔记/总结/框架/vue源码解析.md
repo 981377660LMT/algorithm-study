@@ -334,14 +334,133 @@ get() {
     对列表元素进行添加和删除，很好地帮助我们实现了列表的过渡效果
 19. VuRouter
     Vue-Router 的能力十分强大，它支持 hash、history、abstract 3 种路由方式，提供了 <router-link> 和 <router-view> 2 种组件，还提供了简单的路由配置和一系列好用的 API。
+
     1. 路由注册 Vue.use(VueRouter)
        当用户执行 Vue.use(VueRouter) 的时候，实际上就是在执行 install 函数，为了确保 install 逻辑只执行一次，用了 install.installed 变量做已安装的标志位。另外用一个全局的 `_Vue` 来接收参数 Vue，因为作为 Vue 的插件对 Vue 对象是有依赖的，但又不能去单独去 import Vue，因为那样会增加包体积，所以就通过这种方式拿到 Vue 对象。
        Vue-Router 安装最重要的一步就是利用 Vue.mixin 去把 **beforeCreate 和 destroyed 钩子函数注入到每一个组件中**。
        接着给 Vue 原型上定义了 $router 和 $route 2 个属性的 get 方法，这就是为什么我们可以在组件实例上可以访问 this.$router 以及 this.$route，它们的作用之后介绍。
        接着又通过 Vue.component 方法定义了全局的 <router-link> 和 <router-view> 2 个组件，这也是为什么我们在写模板的时候可以使用这两个标签，它们的作用也是之后介绍。
     2. VueRouter 对象
-    3. matcher
-    4. 路径切换
+       简易自制版：
+
+       ```TS
+        let _Vue = null
+
+        interface IVueRouter {
+          options: object
+          data: object
+          routeMap: object
+          init: () => void
+          createRouteMap: () => void
+          initComponent: (Vue: object) => void
+          initEvent: () => void
+        }
+
+        /**
+        * options 是传入的routes配置
+        * data是响应式的，记录currentRoute (使用vue.observable创建响应式数据，数据变化时视图重新渲染)
+        * routeMap记录组件与路由对应关系
+        * initEvent注册popState事件
+        */
+        class VueRouter implements IVueRouter {
+          options: object
+          data: { current: string }
+          routeMap: object
+          static installed: boolean = false
+          static install(Vue: object): void {
+            if (VueRouter.installed) {
+              return
+            }
+
+            VueRouter.installed = true
+            _Vue = Vue
+            _Vue.mixin({
+              beforeCreate() {
+                if (this.$options.router) {
+                  _Vue.prototype.$router = this.$options.router
+                }
+              },
+            })
+          }
+
+          constructor(options: object) {
+            this.options = options
+            this.routeMap = {}
+            // observable
+            this.data = _Vue.observable({
+              current: '/',
+            })
+            this.init()
+          }
+
+
+
+          init() {
+            this.createRouteMap()
+            this.initComponent(_Vue)
+            this.initEvent()
+          }
+
+          initEvent() {
+            // popstate当历史发生变化时触发
+            window.addEventListener('popstate', () => {
+              this.data.current = window.location.pathname
+            })
+          }
+
+          initComponent(Vue: object) {
+            Vue.component('router-link', {
+              props: {
+                to: String,
+              },
+              render(h) {
+                return h(
+                  'a',
+                  {
+                    attrs: {
+                      href: this.to,
+                    },
+                    on: {
+                      click: this.clickhander,
+                    },
+                  },
+                  [this.$slots.default]
+                )
+              },
+              methods: {
+                clickhander(e) {
+                  history.pushState({}, '', this.to)
+                  this.$router.data.current = this.to
+                  e.preventDefault()
+                },
+              },
+              // template:"<a :href='to'><slot></slot><>"
+            })
+
+            const self = this
+
+            Vue.component('router-view', {
+              render(h) {
+                // self.data.current
+                const cm = self.routeMap[self.data.current]
+                // 渲染组件
+                return h(cm)
+              },
+            })
+          }
+
+          /**
+          * 创建route-link与route-view
+          */
+          createRouteMap() {
+            //遍历所有的路由规则 吧路由规则解析成键值对的形式存储到routeMap中
+            this.options.routes.forEach(route => {
+              this.routeMap[route.path] = route.component
+            })
+          }
+        }
+       ```
+
 20. Vuex
 21. Vue.use 实现
 22. Vue.mixin 实现

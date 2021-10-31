@@ -16,8 +16,8 @@ const enum Color {
  * 求二分图有两种思路，一个是着色法，另外一个是并查集
  */
 const isBipartite = (adjList: number[][]): boolean => {
-  const colors = Array<Color>(adjList.length).fill(Color.Unvisited)
   let res = true
+  const colors = Array<Color>(adjList.length).fill(Color.Unvisited)
 
   for (let i = 0; i < adjList.length; i++) {
     if (colors[i] === Color.Unvisited) dfs(i, Color.Red)

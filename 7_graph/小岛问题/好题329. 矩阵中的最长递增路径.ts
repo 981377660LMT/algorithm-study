@@ -2,8 +2,10 @@
  * @param {number[][]} matrix 1 <= m, n <= 200
  * @return {number}
  * @summary 需要带记忆化搜索
+ * 时间复杂度：O(mn)，其中 m 和 n 分别是矩阵的行数和列数
+ * 深度优先搜索的时间复杂度是 O(V+E)O(V+E)，其中 VV 是节点数，EE 是边数
  */
-var longestIncreasingPath = function (matrix: number[][]): number {
+function longestIncreasingPath(matrix: number[][]): number {
   const m = matrix.length
   const n = matrix[0].length
   const memo = Array.from({ length: m }, () => Array(n).fill(0))

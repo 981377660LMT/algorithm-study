@@ -5,87 +5,112 @@
 2.  Vue 中 hash 模式和 history 模式的区别
     hash 模式的 URL 中会夹杂着#号，而 history 没有
     hash 模式是依靠 **onhashchange** 事件(监听 location.hash 的改变)，而 history 模式是主要是依靠的 HTML5 history 中新增的两个方法，**pushState**()可以改变 url 地址且不会发送请求，**replaceState**()可以读取历史记录栈,还可以对浏览器记录进行修改。
-    利用 pushState, replaceState 可以改变 url 同时浏览器不刷新，并且通过 **popstate** 监听浏览器历史记录的方式，完成一系列的异步动作。
+    利用 pushState, replaceState 可以改变 url 同时浏览器不刷新，并且通过 **onpopstate** 监听浏览器历史记录的方式，完成一系列的异步动作。
 
----
-
-    ````JS
+    ```JS
     window.onhashchange = function(event){
     // location.hash 获取到的是包括#号的，如"#heading-3"
     // 所以可以截取一下
     let hash = location.hash.slice(1);
     }
 
-        ```
-    ````
 
-3. 要获取当前时间你会放到 computed 还是 methods 里？
-   放在 methods 中，因为 computed 会有惰性，并不能知道 new Date()的改变。
-4. MVVM
-   MVVM 是 Model-View-ViewModel 缩写，**也就是把 MVC 中的 Controller 演变成 ViewModel(Vue 对象 就是 ViewModel)**。Model 层代表数据模型，View 代表 UI 组件，ViewModel 是 View 和 Model 层的桥梁，数据会绑定到 viewModel 层并自动将数据渲染到页面中，视图变化的时候会通知 viewModel 层更新数据。
-5. 4.nextTick 知道吗，实现原理是什么？
-   它主要是为了解决：例如一个 data 中的数据它的改变会导致视图的更新，而在某一个很短的时间被改变了很多次，假如是 1000 次，每一次的改变如果都都将促发数据中的 setter 并按流程跑下来直到修改真实 DOM，那 DOM 就会被更新 1000 次，这样的做法肯定是非常低效的。
-   Vue.js 源码中分别用 Promise、setTimeout、setImmediate 等方式定义了一个异步方法 nextTick，它接收的是一个回调函数，多次调用 nextTick 会将传入的回调函数存入队列中，当当前栈的任务都执行完毕之后才来执行这个队列中刚刚存储的那些回调函数，并且通过这个异步方法清空当前队列。
-6. 接口请求一般放在哪个生命周期中？
-   接口请求一般放在 mounted 中，但需要注意的是服务端渲染时不支持 mounted，需要放到 created 中。
-7. Vue 模版编译原理三步
-   Vue 模版编译，也就是 compilte 阶段，它其实就是将 template 转化为 render function 的过程，它会经过以下三个阶段：
+    ```
 
-   1. **parse** 阶段将 template 字符串通过各种正则表达式生成一颗抽象语法树 AST，在解析的过程中是通过 while 不断循环这个字符串，每解析完一个标签指针向下移动；并且用栈来建立节点间的层级关系，也就是用来保存解析好的标签头。
+    现在 router 还新增了 abstract 模式,为了支持移动端、后端等各个环境。
 
-   2. **optimize** 阶段将生成的抽象语法树 AST 进行静态标记，这些被标记为静态的节点在后面的 patch 过程中会被跳过对比，从而达到优化的目的。标记的主要过程是为每个节点设置类似于 **static** 这样的属性，或者给根节点设置一个 **staticRoot** 属性表明这是不是一个静态根。这些被标记为静态的节点在后面的 patch 过程中会被跳过对比，从而达到优化的目的。
+3.  要获取当前时间你会放到 computed 还是 methods 里？
+    放在 methods 中，因为 computed 会有惰性，并不能知道 new Date()的改变。
+4.  MVVM
+    MVVM 是 Model-View-ViewModel 缩写，**也就是把 MVC 中的 Controller 演变成 ViewModel(Vue 对象 就是 ViewModel)**。Model 层代表数据模型，View 代表 UI 组件，ViewModel 是 View 和 Model 层的桥梁，数据会绑定到 viewModel 层并自动将数据渲染到页面中，视图变化的时候会通知 viewModel 层更新数据。
+5.  nextTick 知道吗，实现原理是什么？
+    它主要是为了解决：例如一个 data 中的数据它的改变会导致视图的更新，而在某一个很短的时间被改变了很多次，假如是 1000 次，每一次的改变如果都都将促发数据中的 setter 并按流程跑下来直到修改真实 DOM，那 DOM 就会被更新 1000 次，这样的做法肯定是非常低效的。
+    Vue.js 源码中分别用 Promise、setTimeout、setImmediate 等方式定义了一个异步方法 nextTick，它接收的是一个回调函数，多次调用 nextTick 会将传入的回调函数存入队列中，当当前栈的任务都执行完毕之后才来执行这个队列中刚刚存储的那些回调函数，并且通过这个异步方法清空当前队列。
+6.  接口请求一般放在哪个生命周期中？
+    接口请求一般放在 mounted 中，但需要注意的是服务端渲染时不支持 mounted，需要放到 created 中。
+7.  Vue 模版编译原理三步
 
 ```JS
-https://github.com/LinDaiDai/niubility-coding-js/blob/master/%E6%A1%86%E6%9E%B6-%E5%BA%93/Vue/vuejs%E6%BA%90%E7%A0%81-%E6%A8%A1%E7%89%88%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86.md
-// 判断是否是静态节点
-function isStatic (node) {
-  const { type } = node
-  if (type === 2) { // 表达式节点
-    return false
-  } else if (type === 3) { // 文本节点
-    return true
-  }
-  return (!node.if && !node.for) // 不存在if和for
-}
-
+ const template = `<p>{{message}}</p>` 转成
+ with(this){return createElement('p',[createTextVNode(toString(message))])}
+ //  其中this是vue实例
 ```
 
-vue3 中的优化：11
+    Vue 模版编译，也就是 compile 阶段，它其实就是将 **template** 转化为 **render 函数** 的过程，它会经过以下三个阶段：
 
-3. 在进入到 **generate** 阶段之前，说明已经生成了被静态标记过的 AST，而 generate 就是将 AST 转化为 render function 字符串。
+    1.  **parse** 阶段将 template 字符串通过各种正则表达式生成一颗抽象语法树 AST，在解析的过程中是通过 while 不断循环这个字符串，每解析完一个标签指针向下移动；并且用栈来建立节点间的层级关系，也就是用来保存解析好的标签头。
 
-4. keep-alive 了解吗
-   keep-alive 中运用了 LRU 算法。可以实现组件缓存，当组件切换时不会对当前组件进行卸载
-5. SSR 了解吗
-   远古技术
-   SSR 也就是服务端渲染，也就是将 Vue 在客户端把标签渲染成 HTML 的工作放在服务端完成，然后再把 html 直接返回给客户端。
-   SSR 有着更好的 SEO、并且首屏加载速度更快等优点。不过它也有一些缺点，比如我们的开发条件会受到限制，服务器端渲染只**支持 beforeCreate 和 created 两个钩子**，当我们需要一些外部扩展库时需要特殊处理，服务端渲染应用程序也需要处于 Node.js 的运行环境。还有就是服务器会有更大的负载需求。
-6. Vue 的 diff 算法
-   简单来说，diff 算法有以下过程
+    2.  **optimize** 阶段将生成的抽象语法树 AST 进行静态标记，这些被标记为静态的节点在后面的 patch 过程中会被跳过对比，从而达到优化的目的。标记的主要过程是为每个节点设置类似于 **static** 这样的属性，或者给根节点设置一个 **staticRoot** 属性表明这是不是一个静态根。这些被标记为静态的节点在后面的 patch 过程中会被跳过对比，从而达到优化的目的。
 
-   1. 先同级比较再比较子节点
-   2. 先判断一方有子节点和一方没有子节点的情况。如果新的一方有子节点，旧的一方没有，相当于新的子节点替代了原来没有的节点；同理，如果新的一方没有子节点，旧的一方有，相当于要把老的节点删除。
-   3. 再来比较都有子节点的情况，这里是 diff 的核心。首先会通过判断两个节点的 key、tag、isComment、data 同时定义或不定义以及当标签类型为 input 的时候 type 相不相同来确定两个节点是不是相同的节点，如果不是的话就将新节点替换旧节点。
-   4. **如果是相同节点的话才会进入到 patchVNode 阶段**。在这个阶段核心是采用**双指针**，双端比较的算法，同时从新旧节点的两端进行比较，在这个过程中，会用到模版编译时的静态标记配合 key 来跳过对比静态节点，如果不是的话再进行其它的比较。
-      整体的执行思路如下：
+    ```JS
+    https://github.com/LinDaiDai/niubility-coding-js/blob/master/%E6%A1%86%E6%9E%B6-%E5%BA%93/Vue/vuejs%E6%BA%90%E7%A0%81-%E6%A8%A1%E7%89%88%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86.md
+    // 判断是否是静态节点
+    function isStatic (node) {
+        const { type } = node
+        if (type === 2) { // 表达式节点
+            return false
+        } else if (type === 3) { // 文本节点
+            return true
+        }
+        return (!node.if && !node.for) // 不存在if和for
+    }
 
-      1. vnode 头对比 oldVnode 头
-         vnode 尾对比 oldVnode 尾
-         vnode 头对比 oldVnode 尾
-         vnode 尾对比 oldVnode 头
+    ```
 
-      只要符合一种情况就进行 patch，移动节点，移动下标等操作
 
-      2. 都不对再在 oldChild 中找一个 key 和 newStart 相同的节点
-         找不到，新建一个。
-         找到，获取这个节点，判断它和 newStartVnode 是不是同一个节点
-         如果是相同节点，进行 patch 然后将这个节点插入到 oldStart 之前，newStart 下标继续移动
-         如果不是相同节点，需要执行 createElm 创建新元素
+        vue3 中的优化：
+        1. patchFlag
+        2. hoistStatic
+        3. cacheHandler
 
-      为什么会有头对尾、尾对头的操作？
-      **可以快速检测出 reverse 操作，加快 diff 效率**
+    3. 在进入到 **generate** 阶段之前，说明已经生成了被静态标记过的 AST，而 generate 就是将 AST 转化为 render function 字符串。
 
-7. nextTick 中的 waiting 是什么时候变为 true 的呢
+1.  with 语法
+    使用 with 改变 {} 作用域内自由变量的查找规则，当作 obj 属性来找
+    找不到报错
+
+```JS
+const obj={
+    a:1,
+    b:2
+}
+with(obj){
+    console.log(a)
+    console.log(b)
+}
+```
+
+9.  keep-alive 了解吗
+    keep-alive 中运用了 LRU 算法。可以实现组件缓存，当组件切换时不会对当前组件进行卸载
+10. SSR 了解吗
+    远古技术
+    SSR 也就是服务端渲染，也就是将 Vue 在客户端把标签渲染成 HTML 的工作放在服务端完成，然后再把 html 直接返回给客户端。
+    SSR 有着更好的 SEO、并且首屏加载速度更快等优点。不过它也有一些缺点，比如我们的开发条件会受到限制，服务器端渲染只**支持 beforeCreate 和 created 两个钩子**，当我们需要一些外部扩展库时需要特殊处理，服务端渲染应用程序也需要处于 Node.js 的运行环境。还有就是服务器会有更大的负载需求。
+11. Vue 的 diff 算法
+    简单来说，diff 算法有以下过程
+
+    1. **patch**:先同级比较再比较子节点。如果相同 vnodenode(通过 tag 和 key 判断) ,走 **patchVNode**,否则重建。
+    2. **patchVNode**:先判断一方有子节点和一方没有子节点的情况。如果新的一方有子节点，旧的一方没有，相当于新的子节点替代了原来没有的节点；同理，如果新的一方没有子节点，旧的一方有，相当于要把老的节点删除。再来比较都有子节点的情况，直接进 **updateChildren**。
+    3. **updateChildren** : **如果是相同节点的话才会进入到 updateChildren 阶段**。在这个阶段核心是采用**双指针**，双端比较的算法，同时从新旧节点的两端进行比较，在这个过程中，会用到模版编译时的静态标记配合 key 来跳过对比静态节点，如果不是的话再进行其它的比较。
+       整体的执行思路如下：
+
+       1. vnode 头对比 oldVnode 头
+          vnode 尾对比 oldVnode 尾
+          vnode 头对比 oldVnode 尾
+          vnode 尾对比 oldVnode 头
+
+       只要符合一种情况就进行 **patchVNode**，移动节点，移动下标等操作
+
+       2. 都不对再在 老节点的 **KeyToIndexMap** 中找一个 key 和 newStart 相同的节点
+          找不到，新建一个。
+          找到，获取这个节点，判断它和 newStartVnode 是不是同一个节点(还要比较 type)
+          如果是相同节点，进行 **patchVNode** 然后将这个老节点，newStart 下标继直接搬过来，继续移动
+          如果不是相同节点，需要执行 createElm 创建新元素
+
+       为什么会有头对尾、尾对头的操作？
+       **可以快速检测出 reverse 操作，加快 diff 效率**
+
+12. nextTick 中的 waiting 是什么时候变为 true 的呢
 
 **在下次 DOM 更新循环结束之后**
 nextTick 的实现
@@ -330,7 +355,18 @@ created 钩子函数中可以访问到数据，在 mounted 钩子函数中可以
 
     6. 创建完 watcher 的实例后会调用一次 watcher.get() 方法，该方法会调用 updateComponent(), updateComponent()又会调用 vm.render() 以及 **vm.update()**,vm.\_update()会调用 vm.**patch**()挂载真实 dom,并将真实 dom 记录于 vm.$el 中。
 
-39. 请简述虚拟 DOM 中 Key 的作用和好处。
+    总结：
+
+    - 解析模板为 render 函数(或在开发环境已完成,vue-loader)
+    - 触发；响应式 vm.render 函数会触发 getter
+    - 执行 render 生成 vnode 并 patch
+
+39. Vue 更新过程(详细过程见 Vue 源码解析:响应式原理)
+    总结：
+    触发 setter
+    重新 render ,patch
+    nextTick 异步渲染
+40. 请简述虚拟 DOM 中 Key 的作用和好处。
 
 解析：
 
@@ -338,3 +374,299 @@ created 钩子函数中可以访问到数据，在 mounted 钩子函数中可以
 ​ 好处： 在执行 updateChildren 对比新旧 Vnode 的子节点差异时，通过设置 key 可以进行更高效的比较，便于复用节点。 降低创建销毁节点成本，从而减少 dom 操作，提升更新 dom 的性能。
 
 40. 如何理解 MVVM(**数据驱动视图**)
+    很久以前就有组件化 **ejs 模板引擎的 include**
+    View:DOM
+    ViewModel:Vue
+    Model:Object
+    **解耦了 V 和 M 层**
+41. Proxy 与 Object.defineProperty 的区别
+
+    1. Object.defineProperty
+       深度监听需要递归到底
+       无法监听新增属性(Vue.set Vue.delete)
+       不能监听数组变化
+
+    2. Proxy
+       lazy 监听
+       可监听新属性
+       可监听数组变化
+       无法兼容所有浏览器，无法 polyfill
+
+42. JS 模拟 DOM 结构
+
+```HTML
+    <div id="div1" class="container">
+      <p>vdom</p>
+      <ul style="font-size: 20px">
+        <li>a</li>
+      </ul>
+    </div>
+```
+
+```TS
+简易版虚拟DOM
+interface VirtualDom {
+  type: keyof HTMLElementTagNameMap
+  props: {
+    children?: Children[] | Children
+    [attr: string]: any
+  }
+}
+
+type Children = VirtualDom | string
+
+const vdom: VirtualDom = {
+  type: 'div1',
+  props: {
+    className: 'container',
+    id: 'div1',
+    children: [
+      { type: 'p', props: { children: 'vdom' } },
+      {
+        type: 'ul',
+        props: {
+          style: 'font-size:20px',
+          children: {
+            type: 'li',
+            props: {
+              children: 'a',
+            },
+          },
+        },
+      },
+    ],
+  },
+}
+
+```
+
+43. hash 路由特点
+    1. 触发网页跳转
+    2. 不刷新页面
+    3. 不提交到 server
+44. Vue3 比 Vue2 的优势/新功能
+    - createApp 方法挂载到 Vue 上=>方法挂载到根实例 app 上
+    - emits 属性 emits 时**子组件声明 emits 名字** setup 里 emit
+    - 生命周期
+    - 多事件
+    - Fragment
+    - 移除.sync 变为 v-model
+
+```JS
+<Component v-model:title='pageTitle' />
+是以下的缩写:
+<Component :title='pageTitle' @update:title='pageTitle=$event' />
+
+```
+
+    - 异步组件写法
+    - 移除 filter
+    - teleport
+    - Suspense Suspense 内部有一个具名插槽 fallback
+    - CompositionAPI
+
+45. Vue3 生命周期
+    Options API 生命周期 改名
+
+    ```JS
+    beforeCreate() {
+        console.log('beforeCreate')
+    },
+    created() {
+        console.log('created')
+    },
+    beforeMount() {
+        console.log('beforeMount')
+    },
+    mounted() {
+        console.log('mounted')
+    },
+    beforeUpdate() {
+        console.log('beforeUpdate')
+    },
+    updated() {
+        console.log('updated')
+    },
+    // beforeDestroy 改名
+    beforeUnmount() {
+        console.log('beforeUnmount')
+    },
+    // destroyed 改名
+    unmounted() {
+        console.log('unmounted')
+    }
+    ```
+
+    Composition API 生命周期
+
+    ```JS
+        // 等于 beforeCreate 和 created
+        setup() {
+            console.log('setup')
+
+            onBeforeMount(() => {
+                console.log('onBeforeMount')
+            })
+            onMounted(() => {
+                console.log('onMounted')
+            })
+            onBeforeUpdate(() => {
+                console.log('onBeforeUpdate')
+            })
+            onUpdated(() => {
+                console.log('onUpdated')
+            })
+            onBeforeUnmount(() => {
+                console.log('onBeforeUnmount')
+            })
+            onUnmounted(() => {
+                console.log('onUnmounted')
+            })
+        },
+    ```
+
+46. CompositionAPI
+
+    - 代码组织
+    - 逻辑复用
+    - 类型推导
+
+47. CompositionAPI 与 reactHooks 区别
+
+    - 前者 **setup 只被调一次** 而后者函数会被调很多次
+    - 前者无需 useMemo/useCallback 因为 setup 只调一次
+    - 前者无需顾虑顺序 后者需要保证 hooks 调用顺序
+    - 前者 ref 加 reactive 比 useState 难以理解
+
+48. 为什么需要 ref
+    - 返回值类型会丢失响应式
+    - setep/computed/合成函数 都有可能返回值类型
+    - 如果 vue 不定义 ref 用户会自造 ref，反而混乱
+49. 为什么 ref 需要.value
+    - ref 是一个对象，vaue 存值
+    - 通过.value 的 get 和 set 实现响应式
+    - 用于模板和 reactive 不需要.value 其余需要
+50. 为什么需要 toRef toRefs
+    不创造响应式，延续响应式
+51. proxy 模拟
+
+    ```JS
+    // 创建响应式
+    function reactive(target = {}) {
+    if (typeof target !== 'object' || target == null) {
+        // 不是对象或数组，则返回
+        return target
+    }
+
+    // 代理配置
+    const proxyConf = {
+        get(target, key, receiver) {
+        // 只处理本身（非原型的）属性
+        const ownKeys = Reflect.ownKeys(target)
+        const result = Reflect.get(target, key, receiver)
+        // 深度监听:惰性的监听，只有被用到才递归监听
+        // 性能如何提升的？
+        return reactive(result)
+        },
+        set(target, key, val, receiver) {
+        // 重复的数据，不处理
+        if (val === target[key]) {
+            return true
+        }
+        const ownKeys = Reflect.ownKeys(target)
+        const result = Reflect.set(target, key, val, receiver)
+        return result // 是否设置成功
+        },
+        deleteProperty(target, key) {
+        const result = Reflect.deleteProperty(target, key)
+        return result // 是否删除成功
+        },
+    }
+
+    // 生成代理对象
+    const observed = new Proxy(target, proxyConf)
+    return observed
+    }
+    ```
+
+52. setup 内如何获取实例
+    CompositionAPI 里没有 this
+    **getCurrentInstance**
+53. Vue3 为什么比 Vue2 快
+    https://vue-next-template-explorer.netlify.app/
+
+    1. proxy
+    2. patchFlag
+       编译模板时动态节点做标记,分为 Text PROPS 等类型
+       diff 算法时可以区分动静态结点/不同动态节点
+       **输入做了标记** 从而 diff 性能得到提高
+       优化并不只是 diff 算法 而是整个流程
+    3. hoistStatic
+       将静态节点定义提升到父作用域缓存
+       多个相邻的静态节点会被合并(相邻的静态节点多到一定程度会被合并)
+       空间换时间
+
+       ```HTML
+       <div>Hello World!</div>
+       <div>{{ma}}</div>
+       ```
+
+       ```JS
+
+        import { createElementVNode as _createElementVNode, toDisplayString as _toDisplayString, Fragment as _Fragment, openBlock as _openBlock, createElementBlock as _createElementBlock } from "vue"
+
+        const _hoisted_1 = /*#__PURE__*/_createElementVNode("div", null, "Hello World!", -1 /* HOISTED */)
+
+        export function render(_ctx, _cache, $props, $setup, $data, $options) {
+            return (_openBlock(), _createElementBlock(_Fragment, null, [
+                _hoisted_1,
+                _createElementVNode("div", null, _toDisplayString(_ctx.ma), 1 /* TEXT */)
+            ], 64 /* STABLE_FRAGMENT */))
+        }
+
+       ```
+
+    4. cacheHandler
+       缓存事件
+
+       ```HTML
+        <div>Hello World!</div>
+        <div @click="clickHandler">haha</div>
+       ```
+
+       ```JS
+       不开cacheHandler
+        const _hoisted_1 = /*#__PURE__*/_createElementVNode("div", null, "Hello World!", -1 /* HOISTED */)
+        const _hoisted_2 = ["onClick"]  // 缓存事件
+
+        export function render(_ctx, _cache, $props, $setup, $data, $options) {
+        return (_openBlock(), _createElementBlock(_Fragment, null, [
+            _hoisted_1,
+            _createElementVNode("div", { onClick: _ctx.clickHandler }, "haha", 8 /* PROPS */, _hoisted_2)
+        ], 64 /* STABLE_FRAGMENT */))
+        }
+
+        开cacheHandler
+        const _hoisted_1 = /*#__PURE__*/_createElementVNode("div", null, "Hello World!", -1 /* HOISTED */)
+
+        export function render(_ctx, _cache, $props, $setup, $data, $options) {
+        return (_openBlock(), _createElementBlock(_Fragment, null, [
+            _hoisted_1,
+            _createElementVNode("div", {
+            onClick: _cache[0] || (_cache[0] = (...args) => (_ctx.clickHandler && _ctx.clickHandler(...args)))
+            }, "haha")
+        ], 64 /* STABLE_FRAGMENT */))
+        }
+       ```
+
+    5. SSR 优化
+       静态节点绕过 vdom
+       动态节点还是要
+    6. tree-shaking
+       根据模板里的属性动态 import 处理函数
+
+54. jsx 与 template
+    jsx 已经是 ES 规范
+    template 还是 Vue 自家规范
+    **jsx 写 slot 更加方便**
+    更推荐使用 jsx

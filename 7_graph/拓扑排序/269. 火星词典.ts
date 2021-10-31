@@ -14,20 +14,17 @@ const alienOrder = function (words: string[]): string {
 
   // 对每个key，value必须在key之后(value入度加1)
   const adjMap = new Map<string, Set<string>>()
-  for (let i = 0; i < words.length; i++) {
-    const preWord = words[i]
-    const preLen = preWord.length
-    for (let j = i + 1; j < words.length; j++) {
-      const nextWord = words[j]
-      const nextLen = nextWord.length
-      // 判断输入是不是合法的。 比如 'wrd' 应该在'wr' 后面
-      if (preLen > nextLen && preWord.slice(0, nextLen) === nextWord) return ''
-      for (let k = 0; k < Math.min(preLen, nextLen); k++) {
-        if (preWord[k] !== nextWord[k]) {
-          !adjMap.has(preWord[k]) && adjMap.set(preWord[k], new Set())
-          adjMap.get(preWord[k])!.add(nextWord[k])
-          break // 只能判断一对
-        }
+  for (let i = 0; i < words.length - 1; i++) {
+    const [preWord, nextWord] = [words[i], words[i + 1]]
+    const [preLen, nextLen] = [preWord.length, nextWord.length]
+
+    // 判断输入是不是合法的。 比如 'wrd' 应该在'wr' 后面
+    if (preLen > nextLen && preWord.slice(0, nextLen) === nextWord) return ''
+    for (let k = 0; k < Math.min(preLen, nextLen); k++) {
+      if (preWord[k] !== nextWord[k]) {
+        !adjMap.has(preWord[k]) && adjMap.set(preWord[k], new Set())
+        adjMap.get(preWord[k])!.add(nextWord[k])
+        break // 只能判断一对
       }
     }
   }
