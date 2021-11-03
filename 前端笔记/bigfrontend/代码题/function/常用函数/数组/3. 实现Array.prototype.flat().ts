@@ -1,25 +1,25 @@
-type Func = (arr: Array<any>, depth?: number) => Array<any>
+type Flat<A = any> = (arr: A[], depth?: number) => A[]
 
-const flat: Func = function (arr, depth = 1) {
+const flat1: Flat = function (arr, depth = 1) {
   // your imeplementation here
   const res: any[] = []
 
   for (const item of arr) {
-    if (Array.isArray(item) && depth) res.push(...flat(item, depth - 1))
+    if (Array.isArray(item) && depth) res.push(...flat1(item, depth - 1))
     else res.push(item)
   }
 
   return res
 }
 
-const flat2: Func = function (arr, depth = 1) {
+const flat2: Flat = function (arr, depth = 1) {
   // your imeplementation here
   const res: any[] = []
-  const stack: any[] = arr.map(item => [item, depth])
-  console.log(stack)
-  while (stack.length) {
-    const [item, depth] = stack.shift()!
-    if (Array.isArray(item) && depth) stack.push(...item.map(v => [v, depth - 1]))
+  const queue: any[] = arr.map(item => [item, depth])
+  console.log(queue)
+  while (queue.length) {
+    const [item, depth] = queue.shift()!
+    if (Array.isArray(item) && depth) queue.push(...item.map(value => [value, depth - 1]))
     else res.push(item)
   }
 

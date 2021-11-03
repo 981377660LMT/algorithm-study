@@ -4,7 +4,7 @@
  * @return {number}
  * 左到右的顺序依次比较它们的修订号。比较修订号时，只需比较 忽略任何前导零后的整数值 。
  */
-var compareVersion = function (version1: string, version2: string): number {
+const compareVersion = function (version1: string, version2: string): number {
   const v1 = version1.split('.')
   const v2 = version2.split('.')
   const len = Math.max(v1.length, v2.length)

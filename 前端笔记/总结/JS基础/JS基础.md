@@ -189,3 +189,27 @@ f1(); // 3
     1. useState 初始化值只初始化一次(参考实现)
     2. useEffect 内部不能修改 state
     3. useEffect 依赖不能为非 state 的引用类型，否则死循环
+23. 原型链上接近神的男人->Object.prototype
+24. 原型链判断
+
+```JS
+Object.prototype.__proto__; //null
+Function.prototype.__proto__; //Object.prototype
+Object.__proto__; //Function.prototype
+Object instanceof Function; //true
+Function instanceof Object; //true
+Function.prototype === Function.__proto__; //true
+
+
+```
+
+25. 介绍一下`__proto__`和 prototype
+    `__proto__`是每个对象都有的属性
+    prototype 是函数才有的属性
+26. use strict 效果?
+    严格模式指定一个 script 标签内的代码在严格条件下执行。
+    “use strict” 指令只允许出现在脚本或函数的开头。
+    严格模式下不允许使用未声明的变量
+    函数参数不能重名
+    函数内 this 默认不再指向 window，默认为 undefined。
+    delete 删除不可配置的属性报错

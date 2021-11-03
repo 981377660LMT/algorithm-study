@@ -3,6 +3,7 @@
  * @return {number}
  */
 const myAtoi1 = function (s: string): number {
+  // 正负与数字可理解
   const pattern = /^[-+]?\d+/g
   const match = s.trim().match(pattern)
   return match ? Math.max(Math.min(Number(match[0]), 2 ** 31 - 1), -(2 ** 31)) : 0

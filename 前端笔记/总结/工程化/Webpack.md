@@ -248,3 +248,107 @@ babel-polyfill和babel-runtime
 
 
 ```
+
+问题
+
+1. webpack 具体的作用
+   1. 代码转换
+   2. 文件优化
+   3. 代码分割
+   4. 模块合并
+   5. 自动刷新
+2. webpack 常见有哪些配置
+   1. Entry：入口，Webpack 执行构建的第一步将从 Entry 开始，可抽象成输入。
+   2. Output：输出结果，在 Webpack 经过一系列处理并得出最终想要的代码后输出结果。
+   3. mode：提供 mode 配置选项，告知 webpack 使用相应模式的内置优化
+   4. Module：模块，在 Webpack 里一切皆模块，一个模块对应着一个文件。
+   5. Chunk：代码块，一个 Chunk 由多个模块组合而成，用于代码合并与分割。
+   6. Loader：模块转换器，用于把模块原内容按照需求转换成新内容。
+   7. Plugin：扩展插件，在 Webpack 构建流程中的特定时机注入扩展逻辑来改变构建结果或做你想要的事情。
+3. webpack 工作流程
+   1. 参数解析：从配置文件和 Shell 语句中读取与合并参数，得出最终的参数(mergeOptions)
+   2. 找到入口文件：从 Entry 里配置的 Module 开始递归解析 Entry 依赖的所有 Module
+   3. 调用 Loader 编译文件：每找到一个 Module， 就会根据配置的 Loader 去找出对应的转换规则
+   4. 遍历 AST，收集依赖：对 Module 进行转换后，再解析出当前 Module 依赖的 Module
+   5. 生成 Chunk：这些模块会以 Entry 为单位进行分组，一个 Entry 和其所有依赖的 Module 被分到一个组也就是一个 Chunk
+   6. 输出文件：最后 Webpack 会把所有 Chunk 转换成文件输出
+4. 常见 Loader 配置以及工作流程
+
+```JS
+// webpack.config.js
+module.exports = {
+  module: {
+    rules: [
+     {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      },
+      { test: /\.js$/, use: 'babel-loader' },
+      {
+        test: /\.css$/,
+        use: [
+          { loader: 'style-loader' },
+          { loader: 'css-loader' },
+          { loader: 'postcss-loader' },
+        ]
+      }
+    ]
+  }
+};
+
+```
+
+         1. webpack.config.js 里配置了一个 模块 的 Loader；
+         2. 遇到 相应模块 文件时，触发了 该模块的 loader;
+         3. loader 接受了一个表示该 模块 文件内容的 source;
+         4. loader 使用 webapck 提供的一系列 api 对 source 进行转换，得到一个 result(js 代码);
+         5. 将 result 返回或者传递给下一个 Loader，直到处理完毕。
+
+5. 常见 plugin 配置以及简易原理
+   html-webpack-plugin 这个插件很重要，作用一是创建 HTML 页面文件到你的输出目录，作用二是将 webpack 打包后的 chunk 自动引入到这个 HTML 中
+   DefinePlugin 定义全局常量
+   UglifyJsPlugin js 压缩
+   插件就像是一个插入到生产线中的一个功能，在特定的时机对生产线上的资源做处理。webpack 通过 Tapable 来组织这条复杂的生产线。 webpack 在编译过代码程中，会触发一系列 Tapable 钩子事件，插件所做的，就是找到相应的钩子，往上面挂上自己的任务，也就是注册事件，这样，当 webpack 构建的时候，插件注册的事件就会随着钩子的触发而执行了。
+6. webpack 打包速度太慢怎么办
+   1. 缩小编译范围，减少不必要的编译工作，即 modules、mainFields、noParse、includes、exclude、alias 全部用起来。
+
+```JS
+const resolve = dir => path.join(__dirname, '..', dir);
+resolve: {
+    modules: [ // 指定以下目录寻找第三方模块，避免webpack往父级目录递归搜索
+        resolve('src'),
+        resolve('node_modules'),
+        resolve(config.common.layoutPath)
+    ],
+    mainFields: ['main'], // 只采用main字段作为入口文件描述字段，减少搜索步骤
+    alias: {
+        vue$: "vue/dist/vue.common",
+        "@": resolve("src") // 缓存src目录为@符号，避免重复寻址
+    }
+},
+module: {
+    noParse: /jquery|lodash/, // 忽略未采用模块化的文件，因此jquery或lodash将不会被下面的loaders解析
+    // noParse: function(content) {
+    //     return /jquery|lodash/.test(content)
+    // },
+    rules: [
+        {
+            test: /\.js$/,
+            include: [ // 表示只解析以下目录，减少loader处理范围
+                resolve("src"),
+                resolve(config.common.layoutPath)
+            ],
+            exclude: file => /test/.test(file), // 排除test目录文件
+            loader: "happypack/loader?id=happy-babel" // 后面会介绍
+        },
+    ]
+}
+
+```
+
+2.  webpack-parallel-uglify-plugin 插件（优化 js 压缩过程）
+    webpack-parallel-uglify-plugin 能够把任务分解给多个子进程去并发的执行，子进程处理完后再把结果发送给主进程，从而实现并发编译，进而大幅提升 js 压缩速度
+3.  HappyPack
+    在 webpack 运行在 node 中打包的时候是单线程去一件一件事情的做，HappyPack 可以开启多个子进程去并发执行，子进程处理完后把结果交给主进程
+4.  DLL 动态链接
+    第三方库不是经常更新，打包的时候希望分开打包，来提升打包速度。打包 dll 需要新建一个 webpack 配置文件（webpack.dll.config.js），在打包 dll 的时候，webpack 做一个索引，写在 manifest 文件中。然后打包项目文件时只需要读取 manifest 文件。

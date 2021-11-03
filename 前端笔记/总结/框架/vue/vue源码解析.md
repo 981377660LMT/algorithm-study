@@ -136,6 +136,36 @@ export class Observer {
   ...
 ```
 
+```JS
+// src/observer/index.js
+
+// Object.defineProperty数据劫持核心 兼容性在ie9以及以上
+function defineReactive(data, key, value) {
+  observe(value);
+
+  let dep = new Dep(); // 为每个属性实例化一个Dep
+
+  Object.defineProperty(data, key, {
+    get() {
+      // 页面取值的时候 可以把watcher收集到dep里面--依赖收集
+      if (Dep.target) {
+        // 如果有watcher dep就会保存watcher 同时watcher也会保存dep
+        dep.depend();
+      }
+      return value;
+    },
+    set(newValue) {
+      if (newValue === value) return;
+      // 如果赋值的新值也是一个对象  需要观测
+      observe(newValue);
+      value = newValue;
+      dep.notify(); // 通知渲染watcher去更新--派发更新
+    },
+  });
+}
+
+```
+
 ## 响应式对象(Observer 先给对象的属性遍历添加 getter 和 setter,然后再用于依赖收集和派发更新,配置依赖观测)
 
 响应式对象，核心就是利用 Object.defineProperty 给数据添加了 getter 和 setter，目的就是为了在我们访问数据以及写数据的时候能自动执行一些逻辑：**getter 做的事情是依赖收集，setter 做的事情是派发更新**
@@ -155,7 +185,7 @@ export default class Dep {
 }
 ```
 
-Dep 是一个 Class，它定义了一些属性和方法，**这里需要特别注意的是它有一个静态属性 target，这是一个全局唯一 Watcher**，这是一个非常巧妙的设计，因为在同一时间只能有一个全局的 Watcher 被计算，另外它的自身属性 subs 也是 Watcher 的数组。
+Dep 是一个 Class，它定义了一些属性和方法，**这里需要特别注意的是它有一个静态属性 Dep.target，这是一个全局唯一 Watcher**，这是一个非常巧妙的设计，因为在同一时间只能有一个全局的 Watcher 被计算，另外它的自身属性 subs 也是 Watcher 的数组。
 
 ## 派发更新(可观察对象 Dep.notify() 触发所有的 观察者 watcher 的 update())：
 
@@ -228,17 +258,72 @@ getData(res).then(()=>{
 6. nextTick
    vue 异步更新，本质上是 js 事件机制的一种运用，优先考虑了具有高优先级的 microtask，为了兼容，又做了降级策略。(Promise=>MutationObserver=>setImmediate=>setTimeout)
 
+   ```JS
+   let callbacks = [];
+   let pending = false;
+   function flushCallbacks() {
+     pending = false; //把标志还原为false
+     // 依次执行回调
+     for (let i = 0; i < callbacks.length; i++) {
+       callbacks[i]();
+     }
+   }
+   let timerFunc; //定义异步方法  采用优雅降级
+   if (typeof Promise !== "undefined") {
+     // 如果支持promise
+     const p = Promise.resolve();
+     timerFunc = () => {
+       p.then(flushCallbacks);
+     };
+   } else if (typeof MutationObserver !== "undefined") {
+     // MutationObserver 主要是监听dom变化 也是一个异步方法
+     let counter = 1;
+     const observer = new MutationObserver(flushCallbacks);
+     const textNode = document.createTextNode(String(counter));
+     observer.observe(textNode, {
+       characterData: true,
+     });
+     timerFunc = () => {
+       counter = (counter + 1) % 2;
+       textNode.data = String(counter);
+     };
+   } else if (typeof setImmediate !== "undefined") {
+     // 如果前面都不支持 判断setImmediate
+     timerFunc = () => {
+       setImmediate(flushCallbacks);
+     };
+   } else {
+     // 最后降级采用setTimeout
+     timerFunc = () => {
+       setTimeout(flushCallbacks, 0);
+     };
+   }
+
+   export function nextTick(cb) {
+     // 除了渲染watcher  还有用户自己手动调用的nextTick 一起被收集到数组
+     callbacks.push(cb);
+     if (!pending) {
+       // 如果多次调用nextTick  只会执行一次异步 等异步队列清空(flushCallbacks)之后再把标志变为false
+       pending = true;
+       timerFunc();
+     }
+   }
+
+   ```
+
    1. for 循环更新 count 数值，dom 会被更新 100 次吗？
       不会，因为 queueWatcher 函数做了过滤，相同的 watcher 对象不会被重复添加。
 
    2. nextTick 是如何做到监听 dom 更新完毕的？
       vue 用异步队列的方式来控制 DOM 更新和 nextTick 回调先后执行，保证了能在 dom 更新后在执行回调。
+   3. 数据更新是微任务与宏任务对渲染的影响
+      因为根据 HTML 标准，会在宏任务执行结束之后，在下一个宏任务开始执行之前，UI 都会重新渲染。如果在 microtask 中就完成数据更新，当 macro-task 结束就可以得到最新的 UI 了。如果新建一个 macro-task 来做数据更新的话，那么渲染会执行两次
 
-7. Vue.set
+1. Vue.set
    当我们去给这个对象添加一个新的属性的时候，是不能够触发它的 setter 的
    Vue 为了解决这个问题，定义了一个全局 API Vue.set 方法
 
-8. Vue 不能检测到以下变动的数组
+1. Vue 不能检测到以下变动的数组
 
 ```
 1.当你利用索引直接设置一个项时，例如：vm.items[indexOfItem] = newValue
@@ -246,7 +331,7 @@ getData(res).then(()=>{
 ```
 
 9. 计算属性(computed watcher) VS 侦听属性(user watcher)
-   **三种类型的 Watcher 对象**
+   **三种类型的 Watcher 对象,Watcher 的`多态`**
    创建顺序：计算属性 Watcher、用户 Watcher (侦听器)、渲染 Watcher
 
 ## 计算属性 computed 是怎么实现的
@@ -254,7 +339,7 @@ getData(res).then(()=>{
 computed 的依赖收集是借助 vue 的 watcher 来实现的，我们称之为 computed watcher,每一个计算属性会对应一个 computed watcher 对象,computed watcher 同时持有一个 **dep 实例**(每个响应式数据都有).
 `vm._render`触发了计算属性的 getter，它会拿到计算属性对应的 watcher，然后执行 `watcher.depend()`,然后再执行 `watcher.evaluate()` 去求值.
 判断 `this.dirty`，如果为 true 则通过 `this.get()` 求值，然后把 this.dirty 设置为 false。在求值过程中，会执行 `value = this.getter.call(vm, vm)`，这实际上就是执行了计算属性定义的 getter 函数
-一旦我们对计算属性依赖的数据做修改，则会触发 setter 过程，通知所有订阅它变化的 watcher 更新，执行 `watcher.update()` 方法,通过 `this.get()` 求值。
+一旦我们对计算属性依赖的数据做修改，则会触发 setter 过程，通知所有订阅它变化的 watcher 更新，执行 `watcher.update()` 方法,通过 `this.get()` 求值,dirty 变为 true。
 **当计算属性最终计算的值发生变化**才会触发渲染 watcher 重新渲染
 
 ## 侦听属性 watch 是怎么实现的
@@ -462,8 +547,8 @@ get() {
        ```
 
 20. Vuex
-21. Vue.use 实现
-22. Vue.mixin 实现
+
+21. Vue.mixin 实现
     ```JS
     export function initMixin (Vue: GlobalAPI) {
       Vue.mixin = function (mixin: Object) {
@@ -472,3 +557,120 @@ get() {
       }
     }
     ```
+
+在 init 初始化的时候调用 **mergeOptions/mergeHook** 来进行选项合并 之后在需要调用生命周期的地方运用 **callHook** 来执行用户传入的相关方法(在 mountComponent 方法里面调用相关的生命周期 callHook)
+
+```JS
+Vue.prototype._init = function (options) {
+  const vm = this;
+  // 这里的this代表调用_init方法的对象(实例对象)
+  //  this.$options就是用户new Vue的时候传入的属性和全局的Vue.options合并之后的结果
+
+  vm.$options = mergeOptions(vm.constructor.options, options);
+  callHook(vm, "beforeCreate"); //初始化数据之前
+  // 初始化状态
+  initState(vm);
+  callHook(vm, "created"); //初始化数据之后
+  // 如果有el属性 进行模板渲染
+  if (vm.$options.el) {
+    vm.$mount(vm.$options.el);
+  }
+};
+
+// src/lifecycle.js
+export function mountComponent(vm, el) {
+  vm.$el = el;
+  // 引入watcher的概念 这里注册一个渲染watcher 执行vm._update(vm._render())方法渲染视图
+  callHook(vm, "beforeMount"); //初始渲染之前
+  let updateComponent = () => {
+    vm._update(vm._render());
+  };
+  new Watcher(
+    vm,
+    updateComponent,
+    () => {
+      callHook(vm, "beforeUpdate"); //更新之前
+    },
+    true
+  );
+  callHook(vm, "mounted"); //渲染完成之后
+}
+
+```
+
+23. 组件原理 Vue.component
+    组件创建和渲染流程 其中 Vue.extend 这一 api 是创建组件的核心
+    Vue.extend( options )
+    使用基础 Vue 构造器，创建一个“子类”
+
+```JS
+// 创建构造器
+var Profile = Vue.extend({
+  template: '<p>{{firstName}} {{lastName}} aka {{alias}}</p>',
+  data: function () {
+    return {
+      firstName: 'Walter',
+      lastName: 'White',
+      alias: 'Heisenberg'
+    }
+  }
+})
+// 创建 Profile 实例，并挂载到一个元素上。
+new Profile().$mount('#mount-point')
+```
+
+23. Vue api 实现
+    - Vue.set
+
+```JS
+function set(target: Array<any> | Object, key: any, val: any): any
+...
+const ob = (target: any).__ob__;
+// 如果对象本身就不是响应式 不需要将其定义成响应式属性
+if (!ob) {
+  target[key] = val;
+  return val;
+}
+
+// 利用defineReactive   实际就是Object.defineProperty 将新增的属性定义成响应式的
+defineReactive(ob.value, key, val);
+ob.dep.notify(); // 通知视图更新
+return val;
+```
+
+- Vue.observable
+  核心就是调用 observe 方法将传入的数据变成响应式对象
+
+```JS
+Vue.observable = <T>(obj: T): T => {
+  observe(obj);
+  return obj;
+};
+```
+
+- Vue.options
+  Vue.options 是存放组件 指令和过滤器的容器 并且 `Vue.options._base` 指向 Vue 构造函数
+- Vue.use
+  Vue.use 主要用于插件的注册 调用插件的 install 方法 并且**把自身 Vue 传到插件的 install 方法** 这样可以避免第三方插件强依赖 Vue
+- Vue.extend
+  Vue.extend 使用基础 Vue 构造器，创建一个“子类”。参数是一个包含组件选项的对象
+  <!-- 相当于 class MyVue extends Vue -->
+
+```JS
+export default function initExtend(Vue) {
+  let cid = 0; //组件的唯一标识
+  // 创建子类继承Vue父类 便于属性扩展
+  Vue.extend = function (extendOptions) {
+    // 创建子类的构造函数 并且调用初始化方法
+    const Sub = function VueComponent(options) {
+      this._init(options); //调用Vue初始化方法
+    };
+    Sub.cid = cid++;
+    Sub.prototype = Object.create(this.prototype); // 子类原型指向父类
+    Sub.prototype.constructor = Sub; //constructor指向自己
+    Sub.options = mergeOptions(this.options, extendOptions); //合并自己的options和父类的options
+    return Sub;
+  };
+}
+
+```

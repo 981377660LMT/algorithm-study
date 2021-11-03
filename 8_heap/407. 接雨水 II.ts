@@ -1,8 +1,5 @@
 import { MinHeap } from './minheap'
 
-type Value = number
-type Row = number
-type Col = number
 /**
  *
  * @param heightMap
@@ -14,41 +11,41 @@ type Col = number
  */
 function trapRainWater(heightMap: number[][]): number {
   if (!heightMap.length || !heightMap[0].length) return 0
+
   let res = 0
-  const rows = heightMap.length
-  const cols = heightMap[0].length
-  const pq = new MinHeap<[Value, Row, Col]>((a, b) => a[0] - b[0])
-  const visited = new Set<string>()
+  const m = heightMap.length
+  const n = heightMap[0].length
+  const pq = new MinHeap<[value: number, row: number, col: number]>((a, b) => a[0] - b[0])
+  const visited = new Set<number>()
   // 四个边
-  for (let r = 0; r < rows; r++) {
+  for (let r = 0; r < m; r++) {
     pq.push([heightMap[r][0], r, 0])
-    visited.add(`${r}#${0}`)
-    pq.push([heightMap[r][cols - 1], r, cols - 1])
-    visited.add(`${r}#${cols - 1}`)
+    visited.add(r * n)
+    pq.push([heightMap[r][n - 1], r, n - 1])
+    visited.add(r * n + n - 1)
   }
-  for (let c = 1; c < cols - 1; c++) {
+  for (let c = 1; c < n - 1; c++) {
     pq.push([heightMap[0][c], 0, c])
-    visited.add(`${0}#${c}`)
-    pq.push([heightMap[rows - 1][c], rows - 1, c])
-    visited.add(`${rows - 1}#${c}`)
+    visited.add(c)
+    pq.push([heightMap[m - 1][c], m - 1, c])
+    visited.add((m - 1) * n + c)
   }
 
   // 优先队列bfs
   while (pq.size) {
-    const [h, r, c] = pq.shift()!
+    const [height, row, col] = pq.shift()!
     for (const [dr, dc] of [
       [1, 0],
       [-1, 0],
       [0, 1],
       [0, -1],
     ]) {
-      const [nextR, nextC] = [r + dr, c + dc]
-      console.log(h, r, c)
-      const key = `${nextR}#${nextC}`
-      if (!visited.has(key) && nextR >= 0 && nextR < rows && nextC >= 0 && nextC < cols) {
+      const [nextR, nextC] = [row + dr, col + dc]
+      const key = nextR * n + nextC
+      if (!visited.has(key) && nextR >= 0 && nextR < m && nextC >= 0 && nextC < n) {
         visited.add(key)
-        res += Math.max(0, h - heightMap[nextR][nextC])
-        pq.push([Math.max(h, heightMap[nextR][nextC]), nextR, nextC])
+        res += Math.max(0, height - heightMap[nextR][nextC])
+        pq.push([Math.max(height, heightMap[nextR][nextC]), nextR, nextC])
       }
     }
   }

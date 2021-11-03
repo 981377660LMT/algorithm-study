@@ -35,6 +35,7 @@ class App1 extends React.Component<IAppProps, IAppState> {
     return <div>{this.state.val}</div> // 3
   }
 }
+
 //////////////////////////////////////////////////////////////////////
 interface IApp2Props {}
 

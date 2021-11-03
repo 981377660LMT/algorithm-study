@@ -7,38 +7,14 @@
  */
 const nextPermutation = function (nums: number[]) {
   let mono = true
-  const partialSort = <T = number>(
-    nums: T[],
-    start: number,
-    end: number,
-    compareFn?: (a: T, b: T) => number
-  ) => {
-    const preSorted = nums.slice(0, start)
-    const postSorted = nums.slice(end)
-    const sorted = nums.slice(start, end).sort(compareFn)
-    nums.length = 0
-    nums.push.apply(nums, preSorted.concat(sorted, postSorted))
-    return nums
-  }
 
-  const reverseRange = (nums: number[], i: number, j: number) => {
-    while (i < j) {
-      ;[nums[i], nums[j]] = [nums[j], nums[i]]
-      i++
-      j--
-    }
-  }
-
-  loop: for (let i = nums.length - 1; i >= 0; i--) {
-    for (let j = nums.length - 1; j > i; j--) {
+  loop: for (let left = nums.length - 1; left >= 0; left--) {
+    for (let right = nums.length - 1; right > left; right--) {
       // 后面大于前面
-      if (nums[j] > nums[i]) {
-        console.log(i, j)
+      if (nums[right] > nums[left]) {
         // 交换玩排序
-        ;[nums[i], nums[j]] = [nums[j], nums[i]]
-        // 这里可以换成 reverseRange
-        // partialSort(nums, i + 1, nums.length, (a, b) => a - b)
-        reverseRange(nums, i + 1, nums.length - 1)
+        ;[nums[left], nums[right]] = [nums[right], nums[left]]
+        reverseRange(nums, left + 1, nums.length - 1)
         mono = false
         break loop
       }
@@ -46,7 +22,16 @@ const nextPermutation = function (nums: number[]) {
   }
 
   mono && nums.reverse()
+
   return nums
+
+  function reverseRange(nums: number[], i: number, j: number) {
+    while (i < j) {
+      ;[nums[i], nums[j]] = [nums[j], nums[i]]
+      i++
+      j--
+    }
+  }
 }
 
 // console.log(nextPermutation([1, 2, 3]))
@@ -57,3 +42,8 @@ const nextPermutation = function (nums: number[]) {
 // 1324
 console.log(nextPermutation([2, 3, 1]))
 export default 1
+
+// 先找出最大的索引 k 满足 nums[k] < nums[k+1]，如果不存在，就翻转整个数组；
+// 再找出另一个最大索引 l 满足 nums[l] > nums[k]；
+// 交换 nums[l] 和 nums[k]；
+// 最后翻转 nums[k+1:]。

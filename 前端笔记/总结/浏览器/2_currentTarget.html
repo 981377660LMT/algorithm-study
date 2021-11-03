@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="a">
+      aaaa
+      <div id="b">
+        bbbb
+        <div id="c">
+          cccc
+          <div id="d">dddd</div>
+        </div>
+      </div>
+    </div>
+    <script>
+      //  event.currentTarget始终是监听事件者，而event.target是事件的真正发出者
+      // 当我们点击最里层的元素d的时候，会依次输出:
+      // target:d&currentTarget:d
+      // target:d&currentTarget:c
+      // target:d&currentTarget:b
+      // target:d&currentTarget:a
+      document.getElementById('a').addEventListener('click', function (e) {
+        console.log('target:' + e.target.id + '&currentTarget:' + e.currentTarget.id)
+      })
+      document.getElementById('b').addEventListener('click', function (e) {
+        console.log('target:' + e.target.id + '&currentTarget:' + e.currentTarget.id)
+      })
+      document.getElementById('c').addEventListener('click', function (e) {
+        console.log('target:' + e.target.id + '&currentTarget:' + e.currentTarget.id)
+      })
+      document.getElementById('d').addEventListener('click', function (e) {
+        console.log('target:' + e.target.id + '&currentTarget:' + e.currentTarget.id)
+      })
+    </script>
+  </body>
+</html>

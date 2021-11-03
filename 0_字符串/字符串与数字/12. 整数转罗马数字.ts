@@ -8,7 +8,7 @@ const intToRoman = function (num: number): string {
   const roman = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I']
   const arab = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
 
-  let res: string[] = []
+  const res: string[] = []
   let index = 0
   while (num) {
     const [div, mod] = [~~(num / arab[index]), num % arab[index]]
@@ -18,6 +18,7 @@ const intToRoman = function (num: number): string {
     num = mod
     index++
   }
+
   return res.join('')
 }
 

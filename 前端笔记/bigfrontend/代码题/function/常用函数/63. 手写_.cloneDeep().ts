@@ -24,3 +24,8 @@ function cloneDeep(obj: any) {
 
 console.log(cloneDeep({ a: { b: { c: 3 }, d: 4, e: Symbol() } }))
 export {}
+
+// Object.keys() 返回对象的可枚举属性
+// Reflect.ownKeys() :
+// 相当于
+// Object.getOwnPropertyNames(target) concat(Object.getOwnPropertySymbols(target)

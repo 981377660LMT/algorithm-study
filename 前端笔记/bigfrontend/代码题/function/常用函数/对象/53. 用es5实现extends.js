@@ -7,7 +7,7 @@
  */
 const myExtends = (SuperType, SubType) => {
   // your code here
-  function myClass(...contructorArgs) {
+  function MyClass(...contructorArgs) {
     // 构造函数初始化
     SuperType.apply(this, contructorArgs)
     SubType.apply(this, contructorArgs)
@@ -16,13 +16,13 @@ const myExtends = (SuperType, SubType) => {
   }
 
   // 找实例方法
-  Object.setPrototypeOf(myClass.prototype, SubType.prototype)
+  Object.setPrototypeOf(MyClass.prototype, SubType.prototype)
   Object.setPrototypeOf(SubType.prototype, SuperType.prototype)
 
   // 找静态方法
-  Object.setPrototypeOf(myClass, SuperType)
+  Object.setPrototypeOf(MyClass, SuperType)
 
-  return myClass
+  return MyClass
 }
 
 if (require.main === module) {

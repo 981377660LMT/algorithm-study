@@ -9,12 +9,13 @@ const convert = function (s: string, numRows: number): string {
   if (numRows <= 1) return s
   const res = Array.from<number, string[]>({ length: numRows }, () => [])
 
-  let flag = -1
-  let index = 0
+  let direction = -1
+  let row = 0
   for (const char of s) {
-    res[index].push(char)
-    if (index === 0 || index === numRows - 1) flag *= -1
-    index += flag
+    // 尽头
+    if (row === 0 || row === numRows - 1) direction *= -1
+    res[row].push(char)
+    row += direction
   }
 
   return res.map(arr => arr.join('')).join('')

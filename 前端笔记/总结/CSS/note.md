@@ -291,3 +291,34 @@ html.getBoundingClientRect().width：获取html的宽度(窗口的宽度)
     Element：元素，块内部没有独立意义的实体
     Modifier：修饰符，标识块或元素的外观、行为、状态被修改
     含有修饰符的类名不可独立出现，通常跟在不含修饰符的类名后
+
+33. css 的渲染层合成是什么 浏览器如何创建新的渲染层
+    在 DOM 树中每个节点都会对应一个渲染对象（RenderObject），当它们的**渲染对象处于相同的坐标空间（z 轴空间）时，就会形成一个 RenderLayers，也就是渲染层**。渲染层将保证页面元素以正确的顺序堆叠，这时候就会出现层合成（composite），从而正确处理透明元素和重叠元素的显示。对于有位置重叠的元素的页面，这个过程尤其重要，因为一旦图层的合并顺序出错，将会导致元素显示异常。
+
+    - 浏览器如何创建新的渲染层
+      overflow 不为 visible
+      有 CSS transform 属性且值不为 none
+      有明确的定位属性（relative、fixed、sticky、absolute）
+      opacity < 1
+
+34. css 优先级是怎么计算的
+    1.  第一优先级：!important 会覆盖页面内任何位置的元素样式
+    2.  内联样式，如 style="color: green"，权值为 1000
+    3.  ID 选择器，如#app，权值为 0100
+    4.  类、伪类、属性选择器，如.foo, :first-child, div[class="foo"]，权值为 0010
+    5.  标签、伪元素选择器，如 div::first-line，权值为 0001
+    6.  通配符、子类选择器、兄弟选择器，如\*, >, +，权值为 0000
+    7.  继承的样式没有权值
+35. css 怎么开启硬件加速(GPU 加速)
+    浏览器在处理下面的 css 的时候，会使用 GPU 渲染
+
+- transform（当 3D 变换的样式出现时会使用 GPU 加速）
+- opacity
+- filter
+- will-change
+  采用 transform: translateZ(0)
+  采用 transform: translate3d(0, 0, 0)
+  使用 CSS 的 will-change 属性。 will-change 可以设置为 opacity、transform、top、left、bottom、right。
+
+36. 透明度 opacity 和 rgba 的区别
+    最大的不同是 opacity 作用于元素，以及元素内的所有内容的透明度，而 rgba()只作用于元素的颜色或其背景色。

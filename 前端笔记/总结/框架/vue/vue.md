@@ -23,12 +23,22 @@
     放在 methods 中，因为 computed 会有惰性，并不能知道 new Date()的改变。
 4.  MVVM
     MVVM 是 Model-View-ViewModel 缩写，**也就是把 MVC 中的 Controller 演变成 ViewModel(Vue 对象 就是 ViewModel)**。Model 层代表数据模型，View 代表 UI 组件，ViewModel 是 View 和 Model 层的桥梁，数据会绑定到 viewModel 层并自动将数据渲染到页面中，视图变化的时候会通知 viewModel 层更新数据。
-5.  nextTick 知道吗，实现原理是什么？
+5.  MVC 和 MVVM 区别
+    MVC 的思想：一句话描述就是 Controller 负责将 Model 的数据用 View 显示出来，换句话说就是在 Controller 里面把 Model 的数据赋值给 View，解耦。
+    MVVM 与 MVC 最大的区别就是：它实现了 View 和 Model 的自动同步，也就是当 Model 的属性改变时，我们不用再自己手动操作 Dom 元素，来改变 View 的显示，而是改变属性后该属性对应 View 层显示会自动改变（对应 Vue 数据驱动的思想）
+    为什么官方要说 Vue 没有完全遵循 MVVM 思想呢？
+    严格的 MVVM 要求 View 不能和 Model 直接通信，而 Vue 提供了$refs 这个属性，让 Model 可以直接操作 View，违反了这一规定，所以说 Vue 没有完全遵循 MVVM。
+
+6.  nextTick 知道吗，实现原理是什么？
     它主要是为了解决：例如一个 data 中的数据它的改变会导致视图的更新，而在某一个很短的时间被改变了很多次，假如是 1000 次，每一次的改变如果都都将促发数据中的 setter 并按流程跑下来直到修改真实 DOM，那 DOM 就会被更新 1000 次，这样的做法肯定是非常低效的。
     Vue.js 源码中分别用 Promise、setTimeout、setImmediate 等方式定义了一个异步方法 nextTick，它接收的是一个回调函数，多次调用 nextTick 会将传入的回调函数存入队列中，当当前栈的任务都执行完毕之后才来执行这个队列中刚刚存储的那些回调函数，并且通过这个异步方法清空当前队列。
-6.  接口请求一般放在哪个生命周期中？
-    接口请求一般放在 mounted 中，但需要注意的是服务端渲染时不支持 mounted，需要放到 created 中。
-7.  Vue 模版编译原理三步
+7.  接口请求一般放在哪个生命周期中？
+    如果异步请求不需要依赖 Dom 推荐在 created 钩子函数中调用异步请求，因为在 created 钩子函数中调用异步请求有以下优点：
+    能更快获取到服务端数据，减少页面 loading 时间；
+    ssr 不支持 beforeMount 、mounted 钩子函数，所以放在 created 中有助于一致性；
+    也可以放到 mounted 中，但需要注意的是服务端渲染时不支持 mounted
+
+8.  Vue 模版编译原理三步
 
 ```JS
  const template = `<p>{{message}}</p>` 转成
@@ -188,6 +198,15 @@ nextTick(cb)
     **SSR**:created
 18. vue if show 的实现
     最终编译出的虚拟 dom 带有指令
+    v-if 在编译过程中会被转化成三元表达式,条件不满足时不渲染此节点。
+    v-show 会被编译成指令，条件不满足时控制样式将对应节点隐藏 （display:none）
+    display:none、visibility:hidden 和 opacity:0 之间的区别？
+    display:none 不占位
+    属性|是否占据空间|事件绑定是否触发
+    -----|-----|-----
+    display:none|x|x
+    visibility:hidden|√|x
+    opacity:0|√|√
 19. 为什么 for if 不能连用
     **vue-for 的优先级高于 vue-if**
     每次渲染都会先循环再进行条件判断(就是我会把所有的代码**先渲染出来**在进行条件判断，这样就造成了性能的浪费)
@@ -226,7 +245,15 @@ nextTick(cb)
 22. vue 事件绑定原理
     @click.native 与@click
     生成虚拟 dom 时，组件中的@click 变成 **on** @click.native 变成 **nativeOn**
-23. v-model 是:value+@input 的语法糖
+23. v-model
+
+    - 在普通标签上是:
+      value+@input 的语法糖，并且会处理拼音输入法的问题，
+      text 和 textarea 元素使用 value property 和 input 事件；
+      checkbox 和 radio 使用 checked property 和 change 事件；
+      select 字段将 value 作为 prop 并将 change 作为事件。
+
+    - 在组件上是:value+@input 的语法糖
 
 24. v-html 问题 :XSS 攻击/可能会替换掉标签内的子元素
     `<img src="" onerror="alert(1)" />`
@@ -349,6 +376,37 @@ created 钩子函数中可以访问到数据，在 mounted 钩子函数中可以
     3. 在 this.init() 内部最终会调用 entry-runtime-with-compiler.js 中的 vm.**$mount()**,用于获取 render 函数。
 
     4. $mount 获取 render 过程: 如果用户没有传入 render,会将 template 编译为 **render**，如果 template 也没有，则将 el 中的内容作为模版，通过 compileToFunctions() 生成 render。
+
+    ```JS
+       // src/init.js
+
+       Vue.prototype.$mount = function (el) {
+       const vm = this;
+       const options = vm.$options;
+       el = document.querySelector(el);
+
+       // 如果不存在render属性
+       if (!options.render) {
+           // 如果存在template属性
+           let template = options.template;
+
+           if (!template && el) {
+           // 如果不存在render和template 但是存在el属性 直接将模板赋值到el所在的外层html结构（就是el本身 并不是父元素）
+           template = el.outerHTML;
+           }
+
+           // 最终需要把tempalte模板转化成render函数
+           if (template) {
+           const render = compileToFunctions(template);
+           options.render = render;
+           }
+       }
+
+       // 将当前组件实例挂载到真实的el节点上面
+       return mountComponent(vm, el);
+       };
+
+    ```
 
     5. 接下来调用 runtime/index.js 中的 $mount, 重新获取 el 并调用 mountComponent() 方法。
        mountComponent 用于触发 beforeMount，定义 updateComponent,创建 watcher 实例，触发 mounted,并最终返回 vm 实例。
@@ -667,6 +725,96 @@ const vdom: VirtualDom = {
 
 54. jsx 与 template
     jsx 已经是 ES 规范
-    template 还是 Vue 自家规范
+    template 还是 Vue 自家规范，但是可读性更好
     **jsx 写 slot 更加方便**
-    更推荐使用 jsx
+    组件更推荐使用 jsx
+55. 怎样理解 Vue 的单向数据流
+    数据总是从父组件传到子组件，子组件没有权利修改父组件传过来的数据，只能请求父组件对原始数据进行修改。这样会防止从子组件意外改变父级组件的状态，从而导致你的应用的数据流向难以理解。
+    如果实在要改变父组件的 prop 值 可以再 data 里面定义一个变量 并用 prop 的值初始化它 之后用$emit 通知父组件去修改
+56. Vue 的父子组件生命周期钩子函数执行顺序
+    加载渲染过程
+    父 beforeCreate->父 created->父 beforeMount->子 beforeCreate->子 created->子 beforeMount->子 mounted->父 mounted
+    子组件更新过程
+    父 beforeUpdate->子 beforeUpdate->子 updated->父 updated
+    销毁过程
+    父 beforeDestroy->子 beforeDestroy->子 destroyed->父 destroyed
+57. vue-router 动态路由是什么 有什么问题
+
+```JS
+const router = new VueRouter({
+  routes: [
+    // 动态路径参数 以冒号开头
+    { path: "/user/:id", component: User },
+  ],
+});
+```
+
+58. vue-router 组件复用导致路由参数失效怎么办？
+    通过 watch 监听路由参数再发请求
+
+```JS
+watch: { //通过watch来监听路由变化
+ "$route": function(){
+ this.getData(this.$route.params.xxx);
+ }
+}
+```
+
+59. 谈一下对 vuex 的个人理解
+    vuex 是专门为 vue 提供的全局状态管理系统，用于多个组件中数据共享、数据缓存等。（无法持久化、内部核心原理是通过**创造一个全局实例 new Vue**）
+    State：定义了应用状态的数据结构，可以在这里设置默认的初始状态。
+    Getter：允许组件从 Store 中获取数据，mapGetters 辅助函数仅仅是将 store 中的 getter 映射到局部计算属性。
+    Mutation：是唯一更改 store 中状态的方法，且必须是同步函数。
+    Action：用于提交 mutation，而不是直接变更状态，可以包含任意异步操作。
+    Module：允许将单一的 Store 拆分为多个 store 且同时保存在单一的状态树中。
+    之所以拆成 mutation 和 action 是为了实现时间旅行功能(devtools 记录状态变化)
+60. Vuex 页面刷新数据丢失怎么解决
+    推荐使用 vuex-persist 插件，它就是为 Vuex 持久化存储而生的一个插件。不需要你手动存取 storage ，而是直接将状态保存至 cookie 或者 localStorage 中
+61. Vuex 为什么要分模块并且加命名空间
+    抽离
+62. 写过自定义指令吗 原理是什么
+    1. 在生成 ast 语法树时，遇到指令会给当前元素添加 directives 属性
+    2. 通过 genDirectives 生成指令代码
+    3. 在 patch 前将指令的钩子提取到 cbs 中,在 patch 过程中调用对应的钩子
+    4. 当执行指令对应钩子函数时，调用对应指令定义的方法
+63. Vue 修饰符有哪些
+    .stop 阻止事件继续传播
+    .prevent 阻止标签默认行为
+    .capture 使用事件捕获模式,即元素自身触发的事件先在此处处理，然后才交由内部元素进行处理
+    .self 只当在 event.target 是当前元素自身时触发处理函数
+    .once 事件将只会触发一次
+    .passive 告诉浏览器你不想阻止事件的默认行为
+64. 生命周期钩子是如何实现的
+    对应阶段 callHook
+
+```JS
+export function callHook(vm, hook) {
+  // 依次执行生命周期对应的方法
+  const handlers = vm.$options[hook];
+  if (handlers) {
+    for (let i = 0; i < handlers.length; i++) {
+      handlers[i].call(vm); //生命周期里面的this指向当前实例
+    }
+  }
+}
+
+// 调用的时候
+Vue.prototype._init = function (options) {
+  const vm = this;
+  vm.$options = mergeOptions(vm.constructor.options, options);
+  callHook(vm, "beforeCreate"); //初始化数据之前
+  // 初始化状态
+  initState(vm);
+  callHook(vm, "created"); //初始化数据之后
+  if (vm.$options.el) {
+    vm.$mount(vm.$options.el);
+  }
+};
+```
+
+65. vue-router 中路由方法 pushState 和 replaceState 能否触发 popSate 事件
+    答案是：不能
+    注意:用 history.pushState()或者 history.replaceState()不会触发 popstate 事件
+    只有在做出浏览器动作时，才会触发该事件，如用户点击浏览器的回退按钮（或者在 Javascript 代码中调用 history.back()）
+    注意:仅改变网址,网页不会真的跳转,也不会获取到新的内容,本质上网页还停留在原页面
+    popstate 事件会在点击后退、前进按钮(或调用 history.back()、history.forward()、history.go()方法)时触发
