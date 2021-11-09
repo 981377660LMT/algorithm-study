@@ -1,0 +1,19 @@
+from bisect import bisect_right
+from typing import List
+from functools import partial
+
+nums = [1, 2, 3, 4, 5]
+
+
+def queryExist(nums: List[float], query: int) -> bool:
+    if not nums:
+        return False
+    index = bisect_right(nums, query)
+    return index != 0  # 等于则query比后面都小
+
+
+queryExistInNums = partial(queryExist, nums)
+print(queryExistInNums(6))
+print(queryExistInNums(3))
+print(queryExistInNums(1))
+print(queryExistInNums(0))

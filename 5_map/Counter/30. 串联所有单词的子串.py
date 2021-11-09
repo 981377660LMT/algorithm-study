@@ -1,6 +1,7 @@
 from typing import List
 from collections import Counter
 
+
 # 长度相同 的单词 words
 # 找出 s 中恰好可以由 words 中所有单词串联形成的子串的起始位置。
 class Solution:
@@ -21,7 +22,6 @@ class Solution:
             for _ in range(n):
                 sliced.append(s[start : start + word_len])
                 start += word_len
-            print(Counter(sliced), target)
             if Counter(sliced) == target:
                 res.append(i)
             i += 1

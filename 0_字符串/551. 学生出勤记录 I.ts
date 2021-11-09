@@ -4,7 +4,8 @@
  */
 var checkRecord = function (s: string): boolean {
   // check if there are more than 2 As and 3 continuous Ls
-  return !/^.*(A.*A|L{3,}).*$/.test(s)
+  // return !/^.*(A.*A|L{3,}).*$/.test(s)
+  return !s.includes('LLL') && s.split('A').length < 3
 }
 
 console.log(checkRecord('PPALLP'))

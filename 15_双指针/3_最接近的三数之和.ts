@@ -23,6 +23,8 @@ const threeSumClosest = (nums: number[], target: number): number => {
         i++
       }
     }
+
+    // while (nums[l] === nums[l + 1]) l++
   }
 
   return closestSum

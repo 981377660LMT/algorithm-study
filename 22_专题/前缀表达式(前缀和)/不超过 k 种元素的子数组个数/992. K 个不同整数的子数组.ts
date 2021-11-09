@@ -12,15 +12,17 @@ const subarraysWithKDistinct = function (nums: number[], k: number): number {
 
     for (let r = 0; r < nums.length; r++) {
       const cur = nums[r]
-      map.set(cur, map.get(cur)! + 1 || 1)
+      map.set(cur, (map.get(cur)! || 0) + 1)
+
       while (map.size > n) {
-        l++
-        const pre = nums[l - 1]
+        const pre = nums[l]
         const count = map.get(pre)!
         if (count === 1) map.delete(pre)
         else map.set(pre, count - 1)
+        l++
       }
-      res += r - l + 1
+
+      res += r - l + 1 // 以r结尾的子数组，多少个合理
     }
 
     return res

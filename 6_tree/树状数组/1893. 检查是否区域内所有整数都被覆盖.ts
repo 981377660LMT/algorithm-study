@@ -35,3 +35,23 @@ console.log(
 // - 2 被第一个区间覆盖。
 // - 3 和 4 被第二个区间覆盖。
 // - 5 被第三个区间覆盖。
+
+//  差分
+function isCovered2(ranges: number[][], left: number, right: number): boolean {
+  const diff = Array<number>(52).fill(0)
+
+  for (const [start, end] of ranges) {
+    diff[start]++
+    diff[end + 1]--
+  }
+
+  for (let i = 1; i < 52; i++) {
+    diff[i] += diff[i - 1]
+  }
+
+  for (let i = left; i <= right; i++) {
+    if (diff[i] === 0) return false
+  }
+
+  return true
+}

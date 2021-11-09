@@ -1,7 +1,7 @@
 // 维护一个有序数组即可
 
-import { bisectLeft } from '../../../../9_排序和搜索/二分api/7_二分搜索寻找最左插入位置'
-import { bisectInsort } from '../../../../9_排序和搜索/二分api/7_二分搜索插入元素'
+import { bisectLeft } from '../../../../9_排序和搜索/二分/7_二分搜索寻找最左插入位置'
+import { bisectInsort } from '../../../../9_排序和搜索/二分/7_二分搜索插入元素'
 
 // 用二分方法维护
 function medianSlidingWindow(nums: number[], k: number): number[] {

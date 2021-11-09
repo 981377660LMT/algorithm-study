@@ -6,24 +6,23 @@
  * 每行最小值是2 ** (level - 1)，最大值是2 ** level - 1，其中 level 是树的深度。
  */
 function pathInZigZagTree(label: number): number[] {
-  const getLevel = (num: number) => {
-    let res = 0
-    while (2 ** res - 1 < num) res++
-    return res
-  }
-
   const res: number[] = []
   let level = getLevel(label)
+
   while (level) {
     res.push(label)
     const min = 2 ** (level - 1)
     const max = 2 ** level - 1
-    const match = min + max - label
+    const match = min + max - label // 对称
     label = match >> 1
     level--
   }
 
   return res.reverse()
+
+  function getLevel(num: number) {
+    return ~~Math.log2(num) + 1
+  }
 }
 
 console.log(pathInZigZagTree(14))

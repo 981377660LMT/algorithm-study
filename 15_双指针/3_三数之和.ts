@@ -10,7 +10,7 @@ const threeSum = (nums: number[]) => {
 
   console.log(nums)
   for (let p1 = 0; p1 < nums.length - 2; p1++) {
-    // 定一(最左边的数要不超过0，否则三数之和必不为0)
+    // 定一移二(最左边的数要不超过0，否则三数之和必不为0)
     // 加速循环
     if (nums[p1] > target) break
 
@@ -33,6 +33,7 @@ const threeSum = (nums: number[]) => {
         p3--
       }
     }
+
     // "定一"的元素相等时跳过本次循环避免重复
     while (nums[p1] === nums[p1 + 1]) p1++
   }

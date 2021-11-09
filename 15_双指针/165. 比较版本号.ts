@@ -19,5 +19,6 @@ const compareVersion = function (version1: string, version2: string): number {
 }
 
 console.log(compareVersion('1.01', '1.001'))
+console.log(compareVersion('7.5.2.4', '7.5.3'))
 // @ts-ignore
 console.log(parseInt(undefined) || 0)

@@ -5,22 +5,23 @@
  */
 const generateMatrix = function (n: number): number[][] {
   const res = Array.from<number, number[]>({ length: n }, () => Array(n).fill(Infinity))
-  let i = 0,
-    j = 0,
-    di = 0,
-    dj = 1
+  let row = 0,
+    col = 0,
+    dRow = 0,
+    dCol = 1
   let cur = 1
+
   while (cur <= n ** 2) {
-    res[i][j] = cur
+    res[row][col] = cur
     // 拐弯的时候判断一下是不是已经走过了
     // j + dj + col 还要加col是因为%计算的是商而不是mod 需要变成正数
-    if (res[(i + di + n) % n][(j + dj + n) % n] < cur) {
+    if (res[(row + dRow + n) % n][(col + dCol + n) % n] !== Infinity) {
       // 逆时针旋转90度
-      ;[di, dj] = [dj, -di]
+      ;[dRow, dCol] = [dCol, -dRow]
     }
     cur++
-    i += di
-    j += dj
+    row += dRow
+    col += dCol
   }
 
   return res

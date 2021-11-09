@@ -40,14 +40,15 @@ function containsNearbyAlmostDuplicate2(nums: number[], k: number, t: number): b
   if (k === 0) return false
   if (nums.length <= 1) return false
   const valueByBucket = new Map<number, number>()
+
   for (const [index, num] of nums.entries()) {
-    console.log([index, num, nums])
     const bucket = Math.floor(num / (t + 1))
     if (valueByBucket.has(bucket)) return true
-    if (valueByBucket.has(bucket - 1) && Math.abs(num - valueByBucket.get(bucket - 1)!) <= k)
+    if (valueByBucket.has(bucket - 1) && Math.abs(num - valueByBucket.get(bucket - 1)!) <= t)
       return true
-    if (valueByBucket.has(bucket + 1) && Math.abs(num - valueByBucket.get(bucket + 1)!) <= k)
+    if (valueByBucket.has(bucket + 1) && Math.abs(num - valueByBucket.get(bucket + 1)!) <= t)
       return true
+
     valueByBucket.set(bucket, num)
     if (index - k >= 0) valueByBucket.delete(Math.floor(nums[index - k] / (t + 1)))
   }

@@ -2,7 +2,7 @@
  * @param {string} columnTitle
  * @return {number}
  */
-var titleToNumber = function (columnTitle) {
+const titleToNumber = function (columnTitle) {
   let res = 0
   let radix = 1
 

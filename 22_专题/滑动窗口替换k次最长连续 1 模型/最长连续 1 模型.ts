@@ -7,10 +7,9 @@
  */
 const fix = (str: string, target: string, k: number): number => {
   let l = 0
-  let r = 0
   let res = 0
 
-  while (r < str.length) {
+  for (let r = 0; r < str.length; r++) {
     if (str[r] !== target) k--
 
     while (k < 0) {
@@ -19,7 +18,6 @@ const fix = (str: string, target: string, k: number): number => {
     }
 
     res = Math.max(res, r - l + 1)
-    r++
   }
 
   return res

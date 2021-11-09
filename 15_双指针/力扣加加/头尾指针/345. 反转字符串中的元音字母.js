@@ -2,7 +2,7 @@
  * @param {string} s
  * @return {string}
  */
-var reverseVowels = function (s) {
+const reverseVowels = function (s) {
   if (s.length <= 1) return s
 
   const res = s.split('')

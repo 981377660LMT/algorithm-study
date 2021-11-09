@@ -19,13 +19,12 @@ const fractionToDecimal = function (numerator: number, denominator: number): str
   const res: string[] = []
 
   // 处理符号问题
-  const isNegative = numerator > 0 !== denominator > 0
+  const isNegative = (numerator ^ denominator) < 0
   isNegative && res.push('-')
   ;[numerator, denominator] = [Math.abs(numerator), Math.abs(denominator)]
 
   // 处理小数问题  这里不能用 ~~ 会出现符号
   let [div, mod] = [Math.floor(numerator / denominator), numerator % denominator]
-  console.log(div, mod)
   res.push(div.toString())
   if (mod === 0) return res.join('')
   res.push('.')
@@ -57,3 +56,4 @@ export default 1
 const a = [1, 2, 3] as any[]
 a.splice(1, 0, '(')
 console.log(a)
+console.log(-1 ^ -2)

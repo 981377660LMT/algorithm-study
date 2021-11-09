@@ -213,3 +213,100 @@ Function.prototype === Function.__proto__; //true
     函数参数不能重名
     函数内 this 默认不再指向 window，默认为 undefined。
     delete 删除不可配置的属性报错
+27. 什么是闭包
+    闭包是函数和声明该函数的词法环境的组合。也就是说，它是一个内部函数，可以访问外部函数或封闭函数的变量。
+28. null 与 undefined
+    null:指示变量没有值
+    undefined:表示变量本身不存在
+
+29. 什么是 typed Array
+    typed Array 是 ECMAScript 6 API 中用于**处理二进制数据的类数组对象**,
+30. 什么是 ArrayBuffer
+    ArrayBuffer 对象用于表示一般的、固定长度的**原始二进制数据缓冲区**
+
+```JS
+let buffer = new ArrayBuffer(16); // create a buffer of length 16
+alert(buffer.byteLength); // 16
+
+为了操作 ArrayBuffer，我们需要使用一个“ view”对象。
+
+//Create a DataView referring to the buffer
+let view = new DataView(buffer);
+```
+
+31. 是否所有对象都有原型
+    用户创建的基本对象或使用 new 关键字创建的对象没有。
+32. 如果我们把两个数组相加会发生什么
+    如果将两个数组相加，它会将它们都转换为字符串并连接起来
+
+```JS
+console.log(['a'] + ['b']);  // "ab"
+console.log([] + []); // ""
+console.log(![] + []); // "false", because ![] returns false.
+```
+
+33. 如何创建复制到剪贴板按钮
+
+```JS
+document.querySelector("#copy-button").onclick = function() {
+  // Select the content
+  document.querySelector("#copy-input").select();
+  // Copy to the clipboard
+  document.execCommand('copy');
+};
+
+```
+
+34. 如何在网页上禁用右键
+
+```HTML
+<body oncontextmenu="return false;">
+```
+
+35. shim 和 polyfill 的区别是什么
+    shim 是一个库，它只使用旧环境的方法为旧环境带来新的 API。它不一定局限于 web 应用程序。
+    而 polyfill 是一段代码(或插件) ，它提供了开发人员希望**浏览器**本身提供的技术。
+36. 什么是尾递归(Tail Call)
+    当函数调用是尾部调用时，程序或代码**不会为递归创建额外的堆栈帧**。
+
+```JS
+function factorial(n, acc = 1) {
+  if (n === 0) {
+    return acc
+  }
+  return factorial(n - 1, n * acc)
+}
+console.log(factorial(5)); //120
+
+```
+
+37. 如何检测一个函数是否被调用为构造函数
+
+```JS
+function Myfunc() {
+   if (new.target) {
+      console.log('called with new');
+   } else {
+      console.log('not called with new');
+   }
+}
+
+new Myfunc(); // called with new
+Myfunc(); // not called with new
+Myfunc.call({}); not called with new
+
+```
+
+38. isNaN 和 number.isNaN 有什么区别？
+    全局函数 isNaN 先将参数转换为 Number 如果结果值为 NaN，则返回 true。
+
+```JS
+isNaN(‘hello’);   // true
+Number.isNaN('hello'); // false
+```
+
+建议用 Number.isNaN
+
+// TODO
+
+39. js 垃圾回收

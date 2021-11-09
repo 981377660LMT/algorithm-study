@@ -13,7 +13,7 @@ const triangleNumber = (nums: number[]): number => {
     while (nums[p1] === 0) p1++
     while (p1 < p2) {
       if (nums[p1] + nums[p2] > nums[p3]) {
-        res += p2 - p1
+        res += p2 - p1 // 左边全部移过去
         p2--
       } else {
         p1++

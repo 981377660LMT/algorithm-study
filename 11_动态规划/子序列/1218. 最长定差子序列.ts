@@ -1,5 +1,6 @@
 type Value = number
 type Count = number
+
 /**
  * @param {number[]} arr
  * @param {number} difference
@@ -9,6 +10,7 @@ type Count = number
 var longestSubsequence = function (arr: number[], difference: number): number {
   // 结尾
   const map = new Map<Value, Count>()
+
   for (const num of arr) {
     const pre = num - difference
     if (map.has(pre)) map.set(num, map.get(pre)! + 1)

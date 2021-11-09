@@ -14,20 +14,21 @@ const characterReplacement = function (s: string, k: number): number {
   const counter = Array<number>(26).fill(0)
 
   let l = 0
-  let r = 0
   let res = 0
-  let maxTimes = 0
+  let maxCount = 0
 
-  while (r < s.length) {
-    const cur = s[r].codePointAt(0)! - BASE
-    counter[cur]++
-    maxTimes = Math.max(maxTimes, counter[cur])
-    if (r - l + 1 > maxTimes + k) {
+  for (let r = 0; r < s.length; r++) {
+    const curChar = s[r].codePointAt(0)! - BASE
+    counter[curChar]++
+    maxCount = Math.max(maxCount, counter[curChar])
+
+    // 超出
+    if (r - l + 1 > maxCount + k) {
       counter[s[l].codePointAt(0)! - BASE]--
       l++
     }
+
     res = Math.max(res, r - l + 1)
-    r++
   }
 
   return res

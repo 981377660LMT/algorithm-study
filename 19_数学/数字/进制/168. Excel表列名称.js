@@ -5,11 +5,13 @@
  */
 const convertToTitle = function (columnNumber) {
   const res = []
-  while (columnNumber) {
+
+  while (columnNumber >= 1) {
     columnNumber--
-    const cur = String.fromCodePoint(~~(columnNumber % 26) + 65)
+    const [div, mod] = [~~(columnNumber / 26), columnNumber % 26]
+    const cur = String.fromCodePoint(mod + 65)
     res.push(cur)
-    columnNumber = ~~(columnNumber / 26)
+    columnNumber = div
   }
 
   return res.reverse().join('')

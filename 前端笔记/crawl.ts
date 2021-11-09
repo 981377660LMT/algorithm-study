@@ -72,8 +72,8 @@ async function generateFiles(
  */
 async function crawl(options: Options): Promise<void> {
   const { url, xPathExpression, dirName, extName } = options
-  const html = await getSourceFrom(url)
-  const fileNames = await parseFromSource(html, xPathExpression)
+  const source = await getSourceFrom(url)
+  const fileNames = await parseFromSource(source, xPathExpression)
   const normalizedFileNames = await normalizeData(fileNames)
   await generateFiles(normalizedFileNames, dirName, extName)
 }

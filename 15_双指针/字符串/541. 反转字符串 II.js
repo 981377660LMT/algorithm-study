@@ -6,15 +6,9 @@
  */
 const reverseStr = function (s, k) {
   if (k > s.length) return s.split('').reverse().join('')
-  const reverse = (arr, l, r) => {
-    while (l < r) {
-      ;[arr[l], arr[r]] = [arr[r], arr[l]]
-      l++
-      r--
-    }
-  }
+
   const len = s.length
-  let res = s.split('')
+  const res = s.split('')
 
   for (let i = 0; i < len; i += 2 * k) {
     const l = i
@@ -24,6 +18,14 @@ const reverseStr = function (s, k) {
   }
 
   return res.join('')
+
+  function reverse(arr, l, r) {
+    while (l < r) {
+      ;[arr[l], arr[r]] = [arr[r], arr[l]]
+      l++
+      r--
+    }
+  }
 }
 
 // 每 2k 个字符反转前 k 个字符。

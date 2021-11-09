@@ -7,7 +7,6 @@
  */
 // 需要多次调用时，使用数组+哈希 map (单词很多时，空间开销极大)
 // 对每个word,**倒序**记录从该位置开始往后s中的字符第一次出现的位置
-
 const findLongestWord = function (s: string, dictionary: string[]): string {
   dictionary.sort((a, b) => b.localeCompare(a))
   const n = s.length
@@ -51,7 +50,10 @@ const findLongestWord2 = function (s: string, dictionary: string[]): string {
 
   for (const word of dictionary) {
     let hit = 0
-    for (let i = 0; i < s.length; i++) if (s[i] === word[hit]) hit++
+    for (let i = 0; i < s.length; i++) {
+      if (s[i] === word[hit]) hit++
+      if (hit === word.length) break
+    }
     // 可以匹配
     if (hit === word.length) {
       // 等于要判断字典序在前

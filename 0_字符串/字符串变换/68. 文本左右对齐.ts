@@ -28,7 +28,7 @@ const fullJustify = function (words: string[], maxWidth: number): string[] {
         for (let i = 0; i < lineWords.length; i++) {
           tmp.push(lineWords[i])
           // 除了最后一个单词外，其他单词后面都要跟特定长度的空格 spare空间分给前面的几个位置
-          if (i < lineWords.length - 1)
+          if (i !== lineWords.length - 1)
             tmp.push(' '.repeat(spaceInterval + (i < spaceSpare ? 1 : 0)))
         }
         res.push(tmp.join(''))

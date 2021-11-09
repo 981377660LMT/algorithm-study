@@ -5,7 +5,7 @@ from collections import defaultdict
 class Solution:
     def countOfAtoms(self, s: str) -> str:
         dic = defaultdict(int)
-        num_stack = [1]
+        cur_rate = [1]  # 记录当前倍率
         lower = ''
         count = ''
 
@@ -16,12 +16,12 @@ class Solution:
             elif cur.islower():
                 lower = cur + lower
             elif cur == ')':
-                num_stack.append(num_stack[-1] * int(count or '1'))
+                cur_rate.append(cur_rate[-1] * int(count or '1'))
                 count = ''
             elif cur == '(':
-                num_stack.pop()
+                cur_rate.pop()
             elif cur.isupper():
-                dic[cur + lower] += num_stack[-1] * int(count or '1')
+                dic[cur + lower] += cur_rate[-1] * int(count or '1')
                 lower = ''
                 count = ''
 
@@ -32,3 +32,5 @@ class Solution:
 
 
 print(Solution().countOfAtoms('K4(ON(SO3)2)2'))
+# 输出："K4N2O14S4"
+# 解释：原子的数量是 {'K': 4, 'N': 2, 'O': 14, 'S': 4}。

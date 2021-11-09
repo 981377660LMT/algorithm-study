@@ -997,4 +997,104 @@ export function scheduleUpdateOnFiber(
 
 ```
 
-56. commit 阶段？
+56. react-i18next 的问题
+    依赖于 i18next 的方案，对于庞大的业务项目有个很蛋疼的问题，那就是 json 文件的维护。每次产品迭代都需要增加新的配置，那么这份配置由谁来维护，怎么维护，都会有很多问题，而且如果你的项目要支持几十个国家的语言，那么这几十份文件又怎么维护。
+
+    所以现在大厂比较常用的方案是，**使用 AST，每次开发完新版本，通过 AST 去扫描所有的代码**，找出代码中的中文，以中文为 key，调用智能翻译服务，去帮项目**自动生成 json 文件**。这样，再也不需要人为去维护 json 文件，一切都依赖工具进行自动化。目前已经有大厂开源，比如滴滴的 di18n，阿里的 kiwi。
+    解析 AST:访问者模式
+
+57. 说说你对 windowing 的了解
+    展示长列表
+    如果你的应用会渲染大量的列表数据，我们建议使用一种称为‘windowing’的技术，这种技术下在任何给定的时间内只会渲染一小部分数据列表，并可以减少列表项的重复渲染（即再次渲染已经渲染过的数据）。
+
+    react-window 和 react-virtualized 都是流行的使用 windowing 技术的库，他们都提供了一系列可重用的组件，这些组件能够帮助你以最好的性能展示列表以及表格数据
+
+58. 类组件 render 方法返回是什么?
+
+```JS
+render(): ReactNode;
+
+
+type ReactText = string | number;
+type ReactChild = ReactElement | ReactText;
+
+interface ReactNodeArray extends Array<ReactNode> {}
+type ReactFragment = {} | ReactNodeArray;
+type ReactNode = ReactChild | ReactFragment | ReactPortal | boolean | null | undefined;
+
+```
+
+59. 你有用过 React 的插槽(Portals)吗？怎么用
+
+```JS
+通过ReactDOM.createPortal(child, container)创建，是ReactDOM提供的接口，可以实现将子节点渲染到父组件DOM层次结构之外的DOM节点。
+如果一个子组件的真实DOM结构必须渲染到当前组件外，但又想保留这两者的父子关系，就可以用Protals。
+```
+
+60. 为什么说 React 中的 props 是只读的
+    单向数据流：
+    保证 react 的单向数据流的设计模式，使状态更可预测。
+    如果允许自组件修改，那么一个父组件将状态传递给好几个子组件，这几个子组件随意修改，就完全不可预测，不知道在什么地方修改了状态。
+    所以我们必须像纯函数一样保护 props 不被修改，
+61. 如果组件的属性没有传值，那么它的默认值是什么
+
+```JSX
+如果你没给 prop 赋值，它的默认值是 true。以下两个 JSX 表达式是等价的：
+<MyTextBox autocomplete />
+<MyTextBox autocomplete={true} />
+```
+
+62. 如何给非控组件设置默认的值？
+
+```JSX
+<input defaultValue="123" />
+```
+
+63. useEffect 和 useLayoutEffect 区别
+    都在 commit 第三阶段执行
+    useEffect 是异步的，会被打断。
+    useLayoutEffect 是同步的，不会被打断。大量计算就会造成渲染阻塞。
+64. React 根据不同的环境打包不同的域名？
+    如果是 CRA 的项目的话，可以使用.env .env.development .env.production 文件来区分不同的环境；
+    比如生产环境域名http://www.prod.com，开发环境域名http://www.deve.com，
+    则可以分别设置 REACT_APP_BASE_URL = 'http://www.prod.com'和REACT_APP_BASE_URL = 'http://www.deve.com'，
+    然后在程序中使用 process.env.REACT_APP_BASE_URL 来获取基础路径，此时打包的时候会根据不同的环境打包不同的域名
+65. 使用 React 的 memo 和 forwardRef 包装的组件为什么提示 children 类型不对？
+    过去使用 Component、FC 等类型定义组件时一般不需要我们定义 props 里 children 的类型，因为在上述类型里已经帮你默认加上了 { children?: ReactNode } 的定义。但是@types/react 的**维护者认为这样导致 children 几乎没有类型约束**，组件开发者应该显式地声明 children 类型。**所以对新的 API 应该都不会自动加上 children 的定义了，需要开发者手动添加**。
+
+```TSX
+interface IButtonProps {
+  children: React.ReactNode
+}
+
+const Input = React.forwardRef<HTMLInputElement, IButtonProps>((props, ref) => {
+  const { children } = props
+  return (
+    <div>
+      {children}
+      <input ref={ref} />
+    </div>
+  )
+})
+```
+
+66. 删除节点后是否需要将手动将事件解绑？
+    如果你要做 DOM 操作，不要直接写在 Controller（或其他）地方，而是要写在组件（比如 Directive）里
+67. React-Router 的<Link>标签和<a>标签有什么区别
+    Link 组件最终会渲染为 HTML 标签 <a>，它的 to、query、hash 属性会被组合在一起并渲染为 href 属性。虽然 Link 被渲染为超链接，但在内部实现上使用脚本拦截了浏览器的默认行为，然后调用了 history.pushState 方法。
+
+    Link 只负责触发 url 变更，Route 只负责根据 url 渲染组件
+    相比于 <a> 标签，<Link> 避免了不必要的渲染
+
+68. 为什么 redux 能做到局部渲染呢？
+    reducer 从根往最子级的 reducer 中间各层总是返回一个新的 state，这样的话，就会引起组件的大范围的 re-render，但是这是可避免的
+
+    合理的利用 **selector**：在 connect 函数中的第一个函数 mapStateToProps 中从 store state 中返回当前组件需要使用的 props，需要一个筛选，这个筛选函数就叫做 selector，需要尽量细化传入的 store state，即使根 state 发生了引用的变更，但是它下面的属性值可能是大部分都还是原来的引用，引用了这个老引用的情况下，是不会引起组件的 re-render 的;正因为如此，因为一般都不会将整个 store state 组为组件的 props 进行引用，所以利用这一点就可以实现局部渲染
+
+69. redux 它的三个原则是什么
+    - 单一数据源: 整个应用的只有一个 store，store 的 state 存在于唯一的 object tree 上
+    - state 只读：state 不可操作，要修改 state，需要触发 action，让 reducer 函数中返回一个全新引用的 state
+    - reducer 纯函数：reducer 是用来描述 action 如何改变 state 的函数，它必须是一个纯函数
+70. props.children.map 和 js 的 map 有什么区别？为什么优先选择 react 的？
+    React.Children.map 能够处理未知数据类型，即使 React.children 是 null 和 undefined 也能够正确处理。
+    React.Children.forEach 一样的原理。
