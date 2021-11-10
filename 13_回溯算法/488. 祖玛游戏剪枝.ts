@@ -10,35 +10,22 @@
  */
 const findMinStep = function (board: string, hand: string): number {
   let res = Infinity
+
   // 存储手上的球的种类和个数，这么做是为了后面快速判断连续的球是否可以被消除
   const handCounter = new Map<string, number>()
   for (const ball of hand) handCounter.set(ball, (handCounter.get(ball) || 0) + 1)
 
-  // 3个碰到一起就消除
-  const removeBall = (str: string): string => {
-    const shouldRemovePattern = /(\w)\1{2,}/g
-    const shouldRemove = shouldRemovePattern.test(str)
-    if (shouldRemove) {
-      return removeBall(str.replace(shouldRemovePattern, ''))
-    } else {
-      return str
-    }
-  }
+  bt(board, 0, new Set())
 
-  const genKey = (curBoard: string, counter: Map<string, number>): string => {
-    const handBallKey = Array.from(counter.entries())
-      .sort((a, b) => a[0].codePointAt(0)! - b[0].codePointAt(0)!)
-      .map(item => item[0].repeat(item[1]))
-      .join('')
-    return `${curBoard}$${handBallKey}`
-  }
+  return res === Infinity ? -1 : res
 
-  const bt = (curBoard: string, step: number, visited: Set<string>) => {
+  function bt(curBoard: string, step: number, visited: Set<string>) {
     const key = genKey(curBoard, handCounter)
     if (visited.has(key)) return
     visited.add(key)
 
     if (curBoard.length === 0) return (res = Math.min(res, step))
+
     // 每个球每个插入位置暴力bt
     for (const handBall of handCounter.keys()) {
       if (handCounter.get(handBall)! <= 0) continue
@@ -55,9 +42,25 @@ const findMinStep = function (board: string, hand: string): number {
       }
     }
   }
-  bt(board, 0, new Set())
 
-  return res === Infinity ? -1 : res
+  // 3个碰到一起就消除
+  function removeBall(str: string): string {
+    const shouldRemovePattern = /(\w)\1{2,}/g
+    const shouldRemove = shouldRemovePattern.test(str)
+    if (shouldRemove) {
+      return removeBall(str.replace(shouldRemovePattern, ''))
+    } else {
+      return str
+    }
+  }
+
+  function genKey(curBoard: string, counter: Map<string, number>): string {
+    const handBallKey = Array.from(counter.entries())
+      .sort((a, b) => a[0].codePointAt(0)! - b[0].codePointAt(0)!)
+      .map(item => item[0].repeat(item[1]))
+      .join('')
+    return `${curBoard}$${handBallKey}`
+  }
 }
 
 console.log(findMinStep('WWRRBBWW', 'WRBRW'))

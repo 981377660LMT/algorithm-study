@@ -2,7 +2,8 @@ https://github.com/huanzhiyazi/articles/issues/26
 
 传输控制协议：将应用层的数据流分割成报文段发送给目标节点的 TCP 层
 
-1. 为什么需要三次握手呢？关键的原因是 **通信双方为了相互确认对方收发信息的能力都是正常的**
+1. 为什么需要三次握手呢？关键的原因是 **为了防止已失效的连接请求报文段突然又传送到了服务端，因而产生错误。**
+   客户端发送的连接请求如果在网络中滞留，那么就会隔很长一段时间才能收到服务器端发回的连接确认。客户端等待一个超时重传时间之后，就会重新请求连接。**但是这个滞留的连接请求最后还是会到达服务器，如果不进行三次握手，那么服务器就会打开两个连接。**如果有第三次握手，客户端会忽略服务器之后发送的对滞留连接请求的连接确认，不进行第三次握手，因此就不会再次打开连接。
    ![3](https://raw.githubusercontent.com/huanzhiyazi/articles/master/%E6%8A%80%E6%9C%AF/%E7%BD%91%E7%BB%9C/%E7%90%86%E8%A7%A3TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%92%8C%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/images/tcp_connect.png)
 
    1. 客户端先向服务器发送 SYN(SyncNumber) 报文，如果服务器收到之后，便能确认客户端发送信息能力正常，但此时还不确定客户端接收信息能力是否正常。
@@ -14,11 +15,15 @@ https://github.com/huanzhiyazi/articles/issues/26
    - 服务 ACK M+1,SYN N /Server SYN_RECV
    - 客户 ACK N+1 /双方 ESTABLISHED
      之后建立全双工通信
-     **首次握手的隐患**:SYN 超时，Server 第三次没有收到 Client 的 ACK 会导致 Server 不断重试 1s 2s 4s 8s 16s 32s 至超时
+
+     **首次握手的隐患**:SYN 超时，Server 第三次没有收到 Client 的 ACK 会导致 Server 不断重试 1s 2s 4s 8s 16s 32s 至超时(RTO 的值是指数增⻓)
      Linux 默认 63s 才断开连接
+
      服务器会有 **SYN Flood** 风险 **有人恶意发 SYN 报文就溜了**
      应对：SYN 队列满了以后，通过 tcp_syncookies 回发 Sync Cookie **若为正常连接则 Client 会回发 SYN Cookie** 依然可以建立连接
-     **保活机制**：建立连接后，Client 出现故障怎么办？向对方发送保活探测报文，retry 后收不到则断开
+
+     **保活机制**：建立连接后，Client 出现故障怎么办？每隔⼀个时间间
+     隔向对方发送保活探测报文，retry 后收不到则断开
 
 2. 需要四次挥手断开连接的关键原因是，**通信双方为了相互确认对方不再发送数据给自己了,都需要 ACK 与 FIN 报文**
    ![4](https://raw.githubusercontent.com/huanzhiyazi/articles/master/%E6%8A%80%E6%9C%AF/%E7%BD%91%E7%BB%9C/%E7%90%86%E8%A7%A3TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%92%8C%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/images/tcp_disconnect.png)
@@ -37,7 +42,8 @@ https://github.com/huanzhiyazi/articles/issues/26
    服务器大量 CLOSE_WAIT 的原因
    对方关闭 socket 连接 我方忙于读或写 **没有及时关闭连接**
 
-3. TCP 的滑动窗口
+3. TCP 的滑动窗口(核心)
+   解决的问题：可靠性+传输速率
    RTT 和 RTO
    RTT:Round Trip Time 发一个数据包到对应的 ACK 所花费的时间
    RTO:Retransmission TimeOut :重传时间间隔，根据 RTT 计算出的
@@ -50,10 +56,14 @@ https://github.com/huanzhiyazi/articles/issues/26
    无法确认报文段中数据片丢失部分，因此整段重发
 
    窗口指**允许对方发送的数据量**
+   窗口里:已接收(ACK)+正在发+未发送
 
 4. TCP 可靠传输
    停止等待协议 超时重传
 5. TCP 流量控制
+   流量控制是为了控制发送方发送速率，保证接收方来得及接收。
+   **接收方发送的确认报文中的窗口字段**可以用来控制发送方窗口大小，从而影响发送方的发送速率。将窗口字段设置为 0，则发送方不能发送数据
+
 6. TCP 拥塞控制(4 个 TCP 拥塞避免算法)
    慢开始拥塞避免 快重传快恢复
 7. TCP 黏包问题：基于字节流的 TCP 不存在消息/数据包的概念，因此**在应用层字节流被错误拆分导致 TCP 粘包**
@@ -62,14 +72,20 @@ https://github.com/huanzhiyazi/articles/issues/26
    解决：基于长度的标识/基于特殊分隔符
    粘包源于 Nagel 算法：缓冲合并字节流数据减少数据包+批量发送提升 TCP 传输能力，缓冲区超过最大数据段(MSS) 或者上一个数据段被确认(ACK)后发送
 
-8. UDP 协议头部:16 位源端口，16 位目的端口，16 位 UDP 长度，16 位 UDP 校验和 (共 8 字节)
+8. 头部比较
+   UDP 协议头部:16 位源端口，16 位目的端口，16 位 UDP 长度，16 位 UDP 校验和 (固定的 8 字节)
+
    TCP 协议头部:16 位源端口，16 位目的端口,以及
    **Sequence Number** 是包的序号，每个字节都有唯一的序号，用来解决网络包乱序（reordering）问题。
    **Acknowledgement Number**是包的确认号 就是 ACK——用于确认收到，用来解决不丢包的问题。
    **Window** 又叫 Advertised-Window，也就是著名的滑动窗口（Sliding Window），用于解决流控的。
    窗口 2 字节，指明允许对方发送的数据量，数据缓冲空间有限
    **TCP Flag** ，控制位，也就是包的类型，主要是用于操控 TCP 的状态机的。
+
 9. VPN (网络层)
    虚拟专用网技术
    公司内网/校园网/工业专用网
    专用 IP 地址：内网地址 ABC 三类 10 172 192.168
+
+10. 如何在 linux 中查看 TCP 状态?
+    netstat -napt

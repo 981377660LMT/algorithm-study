@@ -1,34 +1,25 @@
 思路都是用 map 记录数字对应的索引/出现次数
 
-```C++
-/* 滑动窗口算法框架 */
-void slidingWindow(string s, string t) {
-    unordered_map<char, int> need, window;
-    for (char c : t) need[c]++;
+变长滑窗模板：
 
-    int left = 0, right = 0;
-    int valid = 0;
-    while (right < s.size()) {
-        // c 是将移入窗口的字符
-        char c = s[right];
-        // 右移窗口
-        right++;
-        // 进行窗口内数据的一系列更新
-        ...
+```JS
+  let res = 0
+  let sum = 0
+  let left = 0
 
-        /*** debug 输出的位置 ***/
-        printf("window: [%d, %d)\n", left, right);
-        /********************/
+  for (let right = 0; right < array.length; right++) {
+    // 处理新元素
+    sum+=...
 
-        // 判断左侧窗口是否要收缩
-        while (window needs shrink) {
-            // d 是将移出窗口的字符
-            char d = s[left];
-            // 左移窗口
-            left++;
-            // 进行窗口内数据的一系列更新
-            ...
-        }
+    // 需要调整
+    while (sum>k) {
+      ...
+      left++
     }
-}
+
+    // 结算
+    res=Math.max(res,right-left+1)
+  }
+
+  return res
 ```

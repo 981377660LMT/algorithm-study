@@ -13,8 +13,8 @@ const fix = (str: string, target: string, k: number): number => {
     if (str[r] !== target) k--
 
     while (k < 0) {
+      if (str[l] !== target) k++
       l++
-      if (str[l - 1] !== target) k++
     }
 
     res = Math.max(res, r - l + 1)

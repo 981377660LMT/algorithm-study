@@ -1098,3 +1098,6 @@ const Input = React.forwardRef<HTMLInputElement, IButtonProps>((props, ref) => {
 70. props.children.map 和 js 的 map 有什么区别？为什么优先选择 react 的？
     React.Children.map 能够处理未知数据类型，即使 React.children 是 null 和 undefined 也能够正确处理。
     React.Children.forEach 一样的原理。
+71. react 组件何时请求异步数据——WillMount 或者 DidMount?
+    官方推荐 fetch data 是在 componentDidMount 中执行
+    理由是跟服务器端渲染（同构）有关系，如果在 componentWillMount 里面获取数据，fetch data 会执行两次，一次在服务器端一次在客户端。在 componentDidMount 中可以解决这个问题。

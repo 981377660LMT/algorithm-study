@@ -247,7 +247,8 @@ html.getBoundingClientRect().width：获取html的宽度(窗口的宽度)
     |style=""| 1000|
     |ID | 100|
     |类、伪类、属性| 10|
-    |标签、伪元素| 1|
+    |元素、伪元素| 1|
+    |关系、通配符| 0|
 29. 百分比 % 相对于谁？
     百分比总是相对于父元素，无论是设置 font-size 或 width 等。如果父元素的相应属性，经浏览器计算后，仍无绝对值，那么 % 的实际效果等同于 默认值，如 height: 100%
 30. 对比块、内联和内联块盒子
@@ -322,3 +323,5 @@ html.getBoundingClientRect().width：获取html的宽度(窗口的宽度)
 
 36. 透明度 opacity 和 rgba 的区别
     最大的不同是 opacity 作用于元素，以及元素内的所有内容的透明度，而 rgba()只作用于元素的颜色或其背景色。
+37. background-color 属性可以覆盖 background-image 属性吗？
+    当元素本身设置了 background-image 属性时，**如果设置了 background-color，图片不会被覆盖，**background-color 会在 image 底层；如果设置的是 background，那么图片会被颜色给覆盖掉。

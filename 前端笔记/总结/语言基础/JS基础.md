@@ -310,3 +310,56 @@ Number.isNaN('hello'); // false
 // TODO
 
 39. js 垃圾回收
+40. JavaScript 中数组是如何存储的？**快速组/慢数组。**
+    https://blog.csdn.net/wanderlustLee/article/details/100929118
+    同种类型数据的数组分配连续的内存空间
+    存在非同种类型数据的数组使用哈希映射分配内存空间
+
+    `快数组`:连续的存储空间；数组长度可变，是内部通过扩容和收缩机制实现，类似 Java 中的 ArrayList 扩容形式，达到一定的阈值则拷贝内存到一个更大的空间中。**新容量 = 旧容量 + 50% + 16**
+    `慢数组`:是一个以数字为键的 HashTable，他不用开辟大块的连续空间从而节省内存
+
+    `快数组慢数组何时变换？`
+
+    - 如果不指定容量新创建的数组都是快数组形式的，如果指定容量，预分配数组长度小于等于 1024，也是以快数组形式存放，如果大于 1024，就会使用哈希表来存放。
+    - 对数组赋值时使用远超当前数组的容量（超过的容量由 kMaxGap 决定，为 1024），这样会出现大量空洞，这时候要对数组分配大量空间则将可能造成存储空间的浪费，为了空间的优化，**会转化为慢数组。**
+
+    在遍历方面，快数组比慢数组快了很多。快数组就是以空间换时间的方式，申请了大块连续内存，提高效率。慢数组以时间换空间，不必申请连续的空间，节省了内存，但需要付出效率变差的代价。
+
+    **扩展：ArrayBuffer**
+    在后面，JS 在 ES6 也推出了**分配连续内存的数组**，这就 ArrayBuffer。ArrayBuffer 会从内存中申请设定的二进制大小的空间，但是并不能直接操作 ArrayBuffer，需要通过 TypedArray/DataView 构建一个视图，通过视图来操作这个内存。
+
+    ```TS
+    interface ArrayBuffer {
+        /**
+         * Read-only. The length of the ArrayBuffer (in bytes).
+        */
+        readonly byteLength: number;
+
+        /**
+         * Returns a section of an ArrayBuffer.
+        */
+        slice(begin: number, end?: number): ArrayBuffer;
+    }
+    ```
+
+    ```TS
+    这行代码就申请了1kb的内存区域。
+    var bf = new ArrayBuffer(1024);
+    var a = new Uint8Array(bf);  // 数组的长度也是1024
+    var b = new Int32Array(bf);  // 数组的长度是1024/4=256
+
+    type Test = Exclude<keyof Array<any>, keyof Uint8Array>
+    可以看到 TypedArray确实是长度固定的
+    type Test = typeof Symbol.unscopables | "pop" | "push" | "concat" | "shift" | "splice" | "unshift" | "flatMap" | "flat"
+    ```
+
+41. 说说对原生 JavaScript 的理解？
+    多范式语言
+    事件驱动 / 全是异步 IO
+42. 高性能的 JavaScript 开发在语法层面你觉得有哪些可以提升性能？
+    假如支持海象表达式的话...会提升一些
+43. 在 JavaScript 中如何实现对象的私有属性?
+    IIFE 实现
+44. async / await 和 Promise 的区别?
+    await 会等待异步代码执行，**会阻塞代码**（使用时要考虑性能）
+    async / await 在调试方面会更加方便

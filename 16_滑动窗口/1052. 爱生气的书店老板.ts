@@ -12,6 +12,7 @@ function maxSatisfied(customers: number[], grumpy: number[], minutes: number): n
     if (grumpy[i] === 0) customersWhenNotGrumpy += customers[i]
   }
 
+  // 初始化
   for (let i = 0; i < minutes; i++) {
     if (grumpy[i] === 1) retain += customers[i]
   }
