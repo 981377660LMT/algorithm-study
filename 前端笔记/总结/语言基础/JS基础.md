@@ -363,3 +363,101 @@ Number.isNaN('hello'); // false
 44. async / await 和 Promise 的区别?
     await 会等待异步代码执行，**会阻塞代码**（使用时要考虑性能）
     async / await 在调试方面会更加方便
+
+https://github.com/lin-123/javascript/blob/cn/README.md
+
+45. aribnb
+    由于 Symbols 和 BigInts 不能被正确的 polyfill。所以不应在不能原生支持这些类型的环境或浏览器中使用他们。
+
+    将你的所有缩写放在对象声明的前面。因为这样能更方便地知道有哪些属性用了缩写。
+
+    对象浅拷贝时，更推荐使用扩展运算符（即 ... 运算符），而不是 Object.assign
+
+    当需要动态生成字符串时，使用模板字符串而不是字符串拼接。
+
+    不要对参数重新赋值:参数重新赋值会导致意外行为，尤其是对 arguments。这也会导致优化问题，特别是在 V8 引擎里。
+
+    **用 Number.isNaN 代替全局的 isNaN**
+    **用 Number.isFinite 代替 isFinite**
+    全局 `isNaN 强制把非数字转成数字`， 然后对于任何强转后为 NaN 的变量都返回 true
+
+    ```JS
+    Number.isNaN(Number('1.2.3')) // true
+    isNaN('1.2.3')  // true
+    ```
+
+    把 const 和 let 分别放一起。(先 const 后 let)
+
+    除非外部库或框架需要使用特定的非静态方法，否则类方法应该使用 this 或被写成静态方法(**不用 this 就用静态**)
+
+    一个空的构造函数或只是代表父类的构造函数是不需要写的。
+
+    **多个返回值用对象的解构，而不是数组解构。**
+
+    不要使用链式声明变量;**链式声明变量会创建隐式全局变量**
+
+    ```JS
+        // bad
+    (function example() {
+      // JavaScript 将这一段解释为
+      // let a = ( b = ( c = 1 ) );
+      // let 只对变量 a 起作用; 变量 b 和 c 都变成了全局变量
+      let a = b = c = 1;
+    }());
+
+    console.log(a); // undefined
+    console.log(b); // 1
+    console.log(c); // 1
+    ```
+
+    布尔值要用缩写，而字符串和数字要明确使用比较操作符。
+
+    ```JS
+      // bad
+      if (isValid === true) {
+        // ...
+      }
+
+      // good
+      if (isValid) {
+        // ...
+      }
+
+      // bad
+      if (name) {
+        // ...
+      }
+
+      // good
+      if (name !== '') {
+        // ...
+      }
+
+      // bad
+      if (collection.length) {
+        // ...
+      }
+
+      // good
+      if (collection.length > 0) {
+        // ...
+      }
+    ```
+
+    用圆括号来组合操作符
+
+    不要用选择操作符代替控制语句。
+
+    ```JS
+    // bad
+    !isRunning && startRunning();
+
+    // good
+    if (!isRunning) {
+      startRunning();
+    }
+    ```
+
+    用移位运算要小心。数字是用 64-位表示的，但移位运算常常返回的是 32 为整形
+
+    **不要用前置或后置下划线**

@@ -5,7 +5,6 @@
 - 宫水三叶
 - code up 公众号
 - code up 网站
-- 牛客网 https://www.nowcoder.com/intelligentTest 题库
 - 组件参考 elementUI
 - 霜神
 - 剩余题目按照分类做

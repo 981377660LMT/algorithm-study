@@ -325,3 +325,82 @@ html.getBoundingClientRect().width：获取html的宽度(窗口的宽度)
     最大的不同是 opacity 作用于元素，以及元素内的所有内容的透明度，而 rgba()只作用于元素的颜色或其背景色。
 37. background-color 属性可以覆盖 background-image 属性吗？
     当元素本身设置了 background-image 属性时，**如果设置了 background-color，图片不会被覆盖，**background-color 会在 image 底层；如果设置的是 background，那么图片会被颜色给覆盖掉。
+
+38. css/sass
+    类名建议使用破折号代替驼峰法。如果你使用 BEM，也可以使用下划线（参见下面的 OOCSS 和 BEM）。
+
+    不要使用 ID 选择器。ID 选择器给你的规则声明带来了不必要的高优先级
+
+```HTML
+<article class="listing-card listing-card--featured">
+
+  <h1 class="listing-card__title">Adorable 2BR in the sunny Mission</h1>
+
+  <div class="listing-card__content">
+    <p>Vestibulum id ligula porta felis euismod semper.</p>
+  </div>
+
+</article>
+```
+
+```CSS
+.listing-card { }
+.listing-card--featured { }
+.listing-card__title { }
+.listing-card__content { }
+
+
+.listing-card 是一个块（block），表示高层次的组件。
+.listing-card__title 是一个元素（element），它属于 .listing-card 的一部分，因此块是由元素组成的。
+.listing-card--featured 是一个修饰符（modifier），表示这个块与 .listing-card 有着不同的状态或者变化。
+```
+
+在定义无边框样式时，使用 0 代替 none。
+
+```CSS
+.foo {
+  border: 0;
+}
+```
+
+使用 .scss 的语法，不使用 .sass 原本的语法。
+
+sass 变量名应使用破折号（例如 $my-variable）代替 camelCased 和 snake_cased
+
+请不要让嵌套选择器的深度超过 3 层！
+
+```CSS
+.page-container {
+  .content {
+    .profile {
+      // STOP!
+    }
+  }
+}
+```
+
+**应避免使用 @extend 指令**
+你只需要通过 **mixin** 让样式表更符合 DRY 原则就足够了
+
+属性声明的排序
+
+1. 属性声明
+2. @include 声明(@mixin 与 @include)
+3. 嵌套选择器
+
+```CSS
+.btn {
+  background: green;
+  font-weight: bold;
+  @include transition(background 0.5s ease);
+
+  .icon {
+    margin-right: 10px;
+  }
+}
+```
+
+39. z-index 有什么需要注意的地方
+    - **默认值，auto。 不创建新的局部层叠上下文**。 也就是说，该元素的层叠水平（真正的层叠顺序）和其父元素是一样的。
+    - 整数。 可以是负数，0，正数。 这个会创建层叠上下文。
+    - 只作用与定位元素，非定位元素无效

@@ -1,3 +1,5 @@
+http://www.imooc.com/wiki/sasslesson/sassmixins.html
+
 1. Sass 嵌套（Nested）
 
 ```scss
@@ -19,3 +21,5 @@
 ```
 
 嵌套规则很有用很方便，但是你很难想象它实际会生成多少 CSS 语句，嵌套的越深，那么编译为 CSS 的语句就越多，同时消耗的资源也会越多，所以开发者尽量不要嵌套特别深的层级！
+
+2. 变量/@mixin 与@include/嵌套/循环/插值#{}/@function/ 使用 @use 替代 @import
