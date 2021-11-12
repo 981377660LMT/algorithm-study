@@ -7,7 +7,7 @@ nodejs 事件循环六部
 **定**时器检测阶段(timers)：本阶段执行 **timer** 的回调，即 setTimeout、setInterval 里面的回调函数。
 I/O 事件**回**调阶段(I/O callbacks)：fs.readFile(path,cb)。
 **闲**置阶段(idle, prepare)：仅系统内部使用。
-**轮**询阶段(poll)：问操作系统准备好了没；检索新的 I/O 事件;执行与 I/O 相关的回调（几乎所有情况下，除了关闭的回调函数，那些由计时器和 setImmediate() 调度的之外），其余情况 node 将在适当的时候在此阻塞。
+**轮**询阶段(epoll)：问操作系统准备好了没；检索新的 I/O 事件;执行与 I/O 相关的回调（几乎所有情况下，除了关闭的回调函数，那些由计时器和 setImmediate() 调度的之外），其余情况 node 将在适当的时候在此阻塞。
 **检**查阶段(check)：**setImmediate**() 回调函数在这里执行
 **关**闭事件回调阶段(close callback)：一些关闭的回调函数，如：socket.on(‘close’, …)。
 `定 回 闲 轮 检 关`

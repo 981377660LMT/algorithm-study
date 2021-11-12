@@ -1,6 +1,7 @@
 /**
  * 元素可能相同
  * @summary 如果存在相等 返回最左边的索引
+ * 最难题
  *
  */
 const search = function (arr: number[], target: number): number {

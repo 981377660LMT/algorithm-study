@@ -13,14 +13,14 @@ const findMin = function (nums: number[]): number {
   // 循环外返回，不能取等号
   while (l < r) {
     const mid = (l + r) >> 1
-    if (nums[mid] > nums[r]) {
-      l = mid + 1
-    } else if (nums[mid] < nums[r]) {
-      r = mid
-    } else {
+    if (nums[mid] === nums[r]) {
       // 重复多了这一句
       // 当中间值等于右边，将右边界移过来，因为左边可能还有相等的值
       r--
+    } else if (nums[mid] > nums[r]) {
+      l = mid + 1
+    } else if (nums[mid] < nums[r]) {
+      r = mid
     }
   }
 

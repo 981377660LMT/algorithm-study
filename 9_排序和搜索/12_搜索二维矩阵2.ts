@@ -14,6 +14,7 @@ const searchMatrix = (matrix: number[][], target: number) => {
   const n = matrix[0].length
   let row = m - 1
   let col = 0
+
   while (row >= 0 && col < n) {
     if (matrix[row][col] === target) return true
     if (matrix[row][col] > target) row--

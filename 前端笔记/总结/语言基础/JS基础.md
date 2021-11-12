@@ -461,3 +461,51 @@ https://github.com/lin-123/javascript/blob/cn/README.md
     用移位运算要小心。数字是用 64-位表示的，但移位运算常常返回的是 32 为整形
 
     **不要用前置或后置下划线**
+
+46. ArrayBuffer 对象
+    ArrayBuffer 对象、TypedArray 视图和 DataView 视图是 JavaScript **操作二进制数据**的一个接口
+    这个接口的原始设计目的，与 WebGL 项目有关。所谓 WebGL，就是指浏览器与显卡之间的通信接口，为了满足 JavaScript 与显卡之间大量的、实时的数据交换，它们之间的数据通信必须是二进制的，而不能是传统的文本格式
+    存在一种机制，可以像 C 语言那样，直接操作字节，将 4 个字节的 32 位整数，以二进制形式原封不动地送入显卡，脚本的性能就会大幅提升。
+    **二进制数组由三类对象组成**
+    （1）ArrayBuffer 对象：代表内存之中的`一段二进制数据`，`可以通过“视图”进行操作`。“视图”部署了数组接口，这意味着，可以用数组的方法操作内存。
+
+    ArrayBuffer 和 Buffer 有何区别？
+    ArrayBuffer[1] 对象用来表示通用的、固定长度的原始二进制数据缓冲区，是一个字节数组，可读但不可直接写。
+
+    Buffer[2] 是 Node.JS 中用于操作 ArrayBuffer 的视图，是 `TypedArray[3] 的一种`。
+
+    Blob 是一种二进制对象(包括字符，文件等等)，es6 对其进行了补充
+    File 是基于 Blob 的一种二进制文件对象,扩展了 Blob，es6 同样进行了补充
+    ArrayBuffer 是 ES6 新引入的二进制缓冲区
+    Buffer 是 Nodejs 内置的二进制缓冲区，Buffer 相当于 ES6 中 Uint8Array(属于 TypedArray)的一种扩展
+
+    （2）TypedArray 视图：共包括 9 种类型的视图，比如 Uint8Array（无符号 8 位整数）数组视图, Int16Array（16 位整数）数组视图, Float32Array（32 位浮点数）数组视图等等。
+
+    （3）DataView 视图：**可以自定义复合格式**的视图，比如第一个字节是 Uint8（无符号 8 位整数）、第二、三个字节是 Int16（16 位整数）、第四个字节开始是 Float32（32 位浮点数）等等，此外还可以自定义字节序。
+
+    `简单说，ArrayBuffer 对象代表原始的二进制数据，TypedArray 视图用来读写简单类型的二进制数据，DataView 视图用来读写复杂类型的二进制数据。`
+
+47. 多线程通信:共享内存 SharedArrayBuffer
+    JavaScript 是单线程的，Web worker 引入了多线程：主线程用来与用户互动，Worker 线程用来承担计算任务。每个线程的数据都是隔离的，通过 postMessage()通信
+    ES2017 引入 SharedArrayBuffer，允许 Worker 线程与主线程共享同一块内存。SharedArrayBuffer 的 API 与 ArrayBuffer 一模一样，唯一的区别是后者无法共享数据。
+
+    ```JS
+    // 主线程
+
+    // 新建 1KB 共享内存
+    const sharedBuffer = new SharedArrayBuffer(1024);
+
+    // 主线程将共享内存的地址发送出去
+    w.postMessage(sharedBuffer);
+
+    // 在共享内存上建立视图，供写入数据
+    const sharedArray = new Int32Array(sharedBuffer);
+    ```
+
+48. Atomics 对象
+    SharedArrayBuffer API 提供 Atomics 对象，保证所有共享内存的操作都是“原子性”的，并且可以在所有线程内同步
+    Atomics.store()，Atomics.load()
+
+    store()方法用来向共享内存写入数据，load()方法用来从共享内存读出数据。比起直接的读写操作，它们的好处是保证了读写操作的原子性。
+
+    Atomics.wait()，Atomics.notify()

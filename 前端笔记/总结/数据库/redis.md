@@ -45,3 +45,13 @@
 
     RDB:异步备份
     AOF：将 redis **每一句命令 append 到文件**；同步；最安全
+
+应用场景
+
+11. 只允许三个人登录的场景
+    Redis list 的实现为一个**双向链表**
+    redis 队列
+    lpush、rpush、lpop、rpop
+    twitter 的关注列表、粉丝列表等都可以用 Redis 的 list 结构来实现
+12. Hash
+    Redis Hash 对应 Value 内部实际就是一个 HashMap，实际这里会有 2 种不同实现，这个 Hash 的成员比较少时 Redis 为了节省内存会采用类似一维数组的方式来紧凑存储，而不会采用真正的 HashMap 结构

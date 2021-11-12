@@ -23,15 +23,15 @@ function maxSumSubmatrix(matrix: number[][], k: number): number {
   // 固定上下
   for (let top = 1; top <= m; top++) {
     for (let bottom = top; bottom <= m; bottom++) {
-      const treeSet = [0]
+      const sortedList = [0]
       // 遍历子矩阵的右边界
       for (let right = 1; right <= n; right++) {
         const sum = pre[bottom][right] - pre[top - 1][right]
-        const leftIndex = bisectLeft(treeSet, sum - k)
-        if (leftIndex < treeSet.length) {
-          res = Math.max(res, sum - treeSet[leftIndex])
+        const leftIndex = bisectLeft(sortedList, sum - k)
+        if (leftIndex !== sortedList.length) {
+          res = Math.max(res, sum - sortedList[leftIndex])
         }
-        bisectInsort(treeSet, sum)
+        bisectInsort(sortedList, sum)
       }
     }
   }

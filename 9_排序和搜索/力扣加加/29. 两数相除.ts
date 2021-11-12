@@ -7,32 +7,34 @@
    整数除法的结果应当截去（truncate）其小数部分
    假设我们的环境只能存储 32 位有符号整数，其数值范围是 [−231,  231 − 1]。本题中，如果除法结果溢出，则返回 231 − 1。
    @summary
-   10/3 可以减 1 次3 吗 可以减 2 次3 吗  可以减 4次3吗 ...
+   从2^31试到2^0 
+   直到被除数被减到比除数小，
+   每个能满足除出来的最大的2的幂都加入答案
+   也可以理解为每次计算出答案的32位中的某一位
  */
 const divide = function (dividend: number, divisor: number): number {
-  const MAX = 2 ** 31
-  const isNegative = dividend !== 0 && (dividend ^ divisor) < 0
-  const res = helper(Math.abs(dividend), Math.abs(divisor))
+  if (dividend === 0) return 0
 
-  if (res > MAX - 1 || res < -1 * MAX) {
-    return MAX - 1
+  const [MAX, MIN] = [2 ** 31 - 1, -1 * 2 ** 31]
+  const isNegative = (dividend ^ divisor) < 0
+  let [posDividend, posDivisor] = [Math.abs(dividend), Math.abs(divisor)]
+  let res = 0
+
+  for (let i = 31; ~i; i--) {
+    // 找出满足条件的最大的倍数,全部用二进制数考虑
+    if (posDividend >>> i >= posDivisor) {
+      // 累加上这个倍数
+      res += 1 << i
+      // 被除数减去这个倍数*b
+      posDividend -= posDivisor << i
+    }
+  }
+
+  if (res >= MAX || res <= MIN) {
+    return MAX
   }
 
   return isNegative ? -1 * res : res
-
-  function helper(dividend: number, divisor: number): number {
-    if (dividend === 0) return 0
-    if (dividend < divisor) return 0
-    if (divisor === 1) return dividend
-    let curDivisor = 2 * divisor
-    let res = 1
-    while (dividend - curDivisor > 0) {
-      curDivisor += curDivisor
-      res += res
-    }
-    const remain = dividend - Math.floor(curDivisor / 2)
-    return res + helper(remain, divisor)
-  }
 }
 
 console.log(divide(-2147483648, 1))

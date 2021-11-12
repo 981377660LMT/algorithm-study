@@ -19,7 +19,7 @@ const containsNearbyAlmostDuplicate = (nums: number[], k: number, t: number): bo
 
   for (let i = 0; i < nums.length; i++) {
     const num = nums[i]
-    const bucket = Math.floor(num / (t + 1)) // 这里不能用~~ 因为可能是负数
+    const bucket = Math.floor(num / (t + 1))
     if (valueByBucket.has(bucket)) return true
     if (valueByBucket.has(bucket - 1) && Math.abs(num - valueByBucket.get(bucket - 1)!) <= t)
       return true
@@ -27,7 +27,7 @@ const containsNearbyAlmostDuplicate = (nums: number[], k: number, t: number): bo
       return true
     valueByBucket.set(bucket, num)
 
-    if (i >= k) valueByBucket.delete(~~(nums[i - k] / (t + 1)))
+    if (i >= k) valueByBucket.delete(Math.floor(nums[i - k] / (t + 1)))
   }
   return false
 }
