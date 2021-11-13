@@ -4,7 +4,7 @@
  * @return {number}
  */
 var shipWithinDays = function (weights, days) {
-  const sum = weights.reduce((pre, cur) => pre + cur)
+  const sum = weights.reduce((pre, cur) => pre + cur, 0)
   const possible = mid => {
     let curWeight = 0
     let needDays = 1

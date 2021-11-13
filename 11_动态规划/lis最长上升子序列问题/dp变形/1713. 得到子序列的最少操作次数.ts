@@ -1,4 +1,4 @@
-import { bisectLeft } from '../../../9_排序和搜索/7_二分搜索寻找最左插入位置'
+import { bisectLeft } from '../../../9_排序和搜索/二分/7_二分搜索寻找最左插入位置'
 
 /**
  * @param {number[]} target 1 <= target.length, arr.length <= 10**5 且 target 数组元素各不相同
@@ -15,25 +15,25 @@ import { bisectLeft } from '../../../9_排序和搜索/7_二分搜索寻找最�
  * 根据target中互不相同，我们知道每个数字对应的坐标唯一;
    于是最长公共子序列等价于arr用target的坐标转换后构成最长的上升子序列.
    不管怎么样，公共子序列在target中必然是从左到右的，那么他们的坐标自然是从小到大的
- * 同时最长上升子序列问题（LIS）存在使用「维护单调序列 + 二分」的贪心解法，复杂度为 O(n\log{n})O(nlogn)
+ * 同时最长上升子序列问题（LIS）存在使用「维护单调序列 + 二分」的贪心解法，复杂度为 O(nlogn)
  */
 const minOperations = (target: number[], arr: number[]): number => {
-  const visited = new Set(target)
+  const store = new Set<number>(target)
   // 实际不建议这样写 内存消耗很大
-  const valueToIndex = new Map([...target.entries()].map(([i, v]) => [v, i]))
-  arr = arr.filter(v => visited.has(v)).map(v => valueToIndex.get(v)!)
-  if (arr.length <= 1) return target.length - arr.length
+  const valueToIndex = new Map<number, number>([...target.entries()].map(([i, v]) => [v, i]))
+  const intersection = arr.filter(num => store.has(num)).map(v => valueToIndex.get(v)!)
+  if (intersection.length <= 1) return target.length - intersection.length
 
-  const LIS: number[] = [arr[0]]
-  for (let i = 1; i < arr.length; i++) {
-    if (arr[i] > LIS[LIS.length - 1]) {
-      LIS.push(arr[i])
+  const LIS: number[] = [intersection[0]]
+  for (let i = 1; i < intersection.length; i++) {
+    if (intersection[i] > LIS[LIS.length - 1]) {
+      LIS.push(intersection[i])
     } else {
-      LIS[bisectLeft(LIS, arr[i])] = arr[i]
+      LIS[bisectLeft(LIS, intersection[i])] = intersection[i]
     }
   }
 
-  console.log(valueToIndex, arr)
+  console.log(valueToIndex, intersection)
   return target.length - LIS.length
 }
 

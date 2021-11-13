@@ -75,6 +75,7 @@ function maximizeXor(nums: number[], queries: number[][]): number[] {
       trie.insert(nums[idx])
       idx++
     }
+
     if (nums[0] > queries[i][1]) {
       res[queries[i][2]] = -1
     } else {

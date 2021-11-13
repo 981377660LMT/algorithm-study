@@ -89,3 +89,10 @@ https://github.com/huanzhiyazi/articles/issues/26
 
 10. 如何在 linux 中查看 TCP 状态?
     netstat -napt
+
+11. tcp 怎么保证可靠传输
+    1. 校验和
+    2. ACK/SYN
+    3. 超时重传 「超时重传时间 RTO 的值」是⼀个动态变化的值
+    4. 流量控制
+    5. 拥塞控制
