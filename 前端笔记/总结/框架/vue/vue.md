@@ -1271,3 +1271,8 @@ template 和 render, 开发时各有优缺点, 不过在线上尽量不要有 te
      Untils 目录存放工具 js 文件
      API 目录存放封装好的与后端交互的逻辑
      Assets 存放静态文件
+119. provide 和 inject 原理
+     在初始化阶段， Vue 会遍历当前组件 inject 选项中的所有键名，拿这个键名在上级组件中的 `_provided` 属性里面进行查找，如果找到了就使用对应的值，如果找不到则再向上一级查找，直到查找完根组件为止，最终如果没有找到则使用默认值，通过这样层层向上查找的方式最终实现 provide 和 inject 的数据传递机制。
+     这里没有讲到 provide 的初始化，因为比较简单，就是将 provide 选项挂载在了 `_provided` 属性上。
+
+以上就是 provide 和 inject 的实现原理。

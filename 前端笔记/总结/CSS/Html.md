@@ -70,6 +70,7 @@
     - [67. Chrome 中的 Waterfall ？](#67-chrome-中的-waterfall-)
     - [68. 扫描二维码登录网页是什么原理，前后两个事件是如何联系的？](#68-扫描二维码登录网页是什么原理前后两个事件是如何联系的)
     - [69. Html 规范中为什么要求引用资源不加协议头`http`或者`https`？](#69-html-规范中为什么要求引用资源不加协议头http或者https)
+    - [70. WebAssembly 是什么？](#70-webassembly-是什么)
 
 #### 1. DOCTYPE 的作用是什么？
 
@@ -847,3 +848,33 @@ trident 内核 （ie 浏览器） -ms
 详细资料可以参考：
 [《协议相对 URL》](https://www.ludou.org/the-protocol-relative-url.html)
 [《Why you need protocol-relative URLs _now_》](https://www.tuicool.com/articles/nEjU7b)
+
+#### 70. WebAssembly 是什么？
+
+**面向 Web 的通用二进制和文本格式**
+WebAssembly 是二进制代码， 执行效率肯定比 js 源代码高
+WebAssembly 不是为了取代 js ， 而是为了增强 js 运行效率， 是 js 的一个强有力的补充
+
+```JS
+WebAssembly.compile(new Uint8Array(`
+  00 61 73 6d  01 00 00 00  01 0c 02 60  02 7f 7f 01
+  7f 60 01 7f  01 7f 03 03  02 00 01 07  10 02 03 61
+  64 64 00 00  06 73 71 75  61 72 65 00  01 0a 13 02
+  08 00 20 00  20 01 6a 0f  0b 08 00 20  00 20 00 6c
+  0f 0b`.trim().split(/[\s\r\n]+/g).map(str => parseInt(str, 16))
+)).then(module => {
+  const instance = new WebAssembly.Instance(module)
+  const { add, square } = instance.exports
+
+  console.log('2 + 4 =', add(2, 4))
+  console.log('3^2 =', square(3))
+  console.log('(2 + 5)^2 =', square(add(2 + 5)))
+
+})
+```
+
+1. WebAssembly `不是一门语言， 是一个编译工具`
+2. 经过 WebAssebly 编译的二进制代码，可以运行在 浏览器中， 并使用 JavaScript 进行调用
+3. 编写 WebAssembly 的语言， 目前有 C/C++， 以后可能会有更多 （目前还没有找到其他语言的范例）
+4. WebAssembly 有一定程度的 Web 代码加密作用
+5. WebAssebly 还处在初期开发阶段， 非常的不成熟，在最新的测试版浏览器中才有支持，工具链使用也相当繁琐。

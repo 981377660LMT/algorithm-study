@@ -13,7 +13,7 @@ const shellSort = (nums: number[]) => {
   //上面是设置动态增量算法 增量元素互质
   //下面是其实是插入排序 和 冒泡排序交换位置
   while (gap >= 1) {
-    for (let i = 0; i < len; i++) {
+    for (let i = 1; i < len; i++) {
       // 插入排序gap版
       for (let j = i; j >= gap && arr[j] < arr[j - gap]; j -= gap) {
         ;[arr[j], arr[j - gap]] = [arr[j - gap], arr[j]]
@@ -28,3 +28,6 @@ shellSort(arr)
 console.log(arr)
 
 export {}
+// 希尔排序的基本思想是把数组按下标的一定增量分组，
+// 对每组使用直接插入排序算法排序；随着增量逐渐减少，每组包含的元
+// 素越来越多，当增量减至 1 时，整个数组恰被分成一组，算法便终止。

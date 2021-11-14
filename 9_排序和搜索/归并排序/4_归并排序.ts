@@ -17,8 +17,17 @@ const mergeTwo = (arr1: number[], arr2: number[]) => {
     }
   }
 
-  // 连接剩余的元素，防止没有把两个数组遍历完整
-  return [...res, ...arr1.slice(i), ...arr2.slice(j)]
+  // 如果是左边数组还有剩余，则把剩余的元素全部加入到结果数组中。
+  while (i < arr1.length) {
+    res.push(arr1[i++])
+  }
+
+  // 如果是右边数组还有剩余，则把剩余的元素全部加入到结果数组中。
+  while (j < arr2.length) {
+    res.push(arr2[j++])
+  }
+
+  return res
 }
 
 // 分left/right 递归 合

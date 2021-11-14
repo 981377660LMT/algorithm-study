@@ -1,7 +1,7 @@
 // 假设要表示的数据集合的容量是n，那么申请的 bit 位是10*n。
 const BYTE_SIZE = 8 // 1byte = 8bit
 
-class BitMap {
+class Bitset {
   private bytes: Buffer
   private size: number
 
@@ -17,27 +17,27 @@ class BitMap {
    *   0000 0010（表示1）
    *   ......
    */
-  set(num: number) {
+  add(num: number) {
     if (num > this.size) return
-    const byteIndex = ~~(num / BYTE_SIZE)
-    const bitIndex = num % BYTE_SIZE
+    const row = ~~(num / BYTE_SIZE)
+    const col = num % BYTE_SIZE
     // 对应的字节的bit位置位0
-    this.bytes[byteIndex] = this.bytes[byteIndex] | (1 << bitIndex)
+    this.bytes[row] = this.bytes[row] | (1 << col)
   }
 
   has(num: number) {
     if (num > this.size) return
-    const byteIndex = ~~(num / BYTE_SIZE)
-    const bitIndex = num % BYTE_SIZE
-    return (this.bytes[byteIndex] & (1 << bitIndex)) !== 0
+    const row = ~~(num / BYTE_SIZE)
+    const col = num % BYTE_SIZE
+    return (this.bytes[row] & (1 << col)) !== 0
   }
 }
 
 if (require.main === module) {
-  const bitmap = new BitMap(10)
-  bitmap.set(76)
+  const bitmap = new Bitset(10)
+  bitmap.add(76)
   console.log(bitmap.has(76))
   console.log(bitmap)
 }
 
-export { BitMap }
+export { Bitset }

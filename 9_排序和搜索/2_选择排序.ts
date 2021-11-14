@@ -1,4 +1,4 @@
-// 第i轮，不断找最小值，然后跟数组第i项交换
+// 每一趟从待排序的数据元素中选择最小（或最大）的一个元素作为首元素，直到所有元素排完为止
 const selectSort = (arr: number[]): void => {
   if (arr.length <= 1) return
 

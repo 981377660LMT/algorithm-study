@@ -21,6 +21,7 @@ const qucikSort = (arr: number[], l: number, r: number): void => {
   const partition = (arr: number[], l: number, r: number) => {
     let pivotIndex = l
     const pivot = arr[l]
+
     for (let i = l + 1; i <= r; i++) {
       if (arr[i] < pivot) {
         pivotIndex++
@@ -35,8 +36,9 @@ const qucikSort = (arr: number[], l: number, r: number): void => {
     return pivotIndex
   }
 
-  if (arr.length <= 1) return
   if (l >= r) return
+  if (arr.length <= 1) return
+
   // 最基础的partition
   const pivotIndex = partition(arr, l, r)
   qucikSort(arr, l, pivotIndex - 1)

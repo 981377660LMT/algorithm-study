@@ -1,4 +1,4 @@
-class BSet {
+class BitAPI {
   public state: number
 
   constructor() {
@@ -11,8 +11,8 @@ class BSet {
   }
 
   has(n: number) {
-    // return ((this.state >> n) & 1) === 1
-    return (this.state & (1 << n)) === 1 << n
+    return ((this.state >> n) & 1) === 1
+    // return (this.state & (1 << n)) === 1 << n
   }
 
   delete(n: number) {
@@ -39,7 +39,6 @@ class BSet {
   }
 }
 
-export { BSet }
 console.log(2 ** 1000)
 console.log(Number.MAX_VALUE)
 console.log(Number.MAX_SAFE_INTEGER)

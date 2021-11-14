@@ -509,3 +509,15 @@ https://github.com/lin-123/javascript/blob/cn/README.md
     store()方法用来向共享内存写入数据，load()方法用来从共享内存读出数据。比起直接的读写操作，它们的好处是保证了读写操作的原子性。
 
     Atomics.wait()，Atomics.notify()
+
+49. 类数组有哪些
+    `有 length 属性的对象就叫类数组`(见 TS ArrayLike 接口)
+
+    ```JS
+    const arrayLike = { length: 2, a: 12, 0: 9 }
+    console.log(Array.from(arrayLike))
+
+    [ 9, undefined ]
+    ```
+
+    arguments NodeList HTMLCollection
