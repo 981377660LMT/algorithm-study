@@ -521,3 +521,36 @@ https://github.com/lin-123/javascript/blob/cn/README.md
     ```
 
     arguments NodeList HTMLCollection
+
+50. 如何理解声明式(declarative)与命令式(imperative)
+    声明式(declarative)是结果导向的，命令式(imperative)是过程导向的。它们都有自己适用的场景和局限，于是现实中的编程语言常常都有两者的身影。
+    命令式编程（Imperative）：详细的命令机器怎么（How）去处理一件事情以达到你想要的结果（What）；
+    声明式编程（ Declarative）：只告诉你想要的结果（What），机器自己摸索过程（How）
+    React 是声明式的
+
+命令式编程（Imperative)会一步一步的告诉程序该怎么运行
+
+```JS
+var array = [1,2,3]
+var output = []
+for(var i = 0; i < array.length; i++)
+{
+  var tmp = array[i] * 2
+  output.push (tmp)
+}
+console.log (output) //=> [2,4,6]
+```
+
+如果使用声明式编程（ Declarative）则会是这样
+
+```JS
+var array = [1,2,3,]
+var output = array.map (function (n)
+{
+  return n * 2
+})
+console.log (output) //=> [2,4,6]
+```
+
+通常情况下我们常用的大部分编程语言：c，java，c++等都是命令式编程语言。而像正则表达式（regular expressions）或者逻辑语言（Prolog）则为声明式语言。
+声明式语言包包括数据库查询语言（SQL，XQuery），正则表达式，逻辑编程，`函数式编程`和组态管理系统。
