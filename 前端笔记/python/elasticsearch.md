@@ -8,4 +8,8 @@ https://jishuin.proginn.com/p/763bfbd31fed
 链接：https://www.nowcoder.com/discuss/760292?source_id=discuss_experience_nctrack&channel=-1
 来源：牛客网
 
-4.ES 中数据量有多大？查询耗时多少？耗时的瓶颈在哪，怎么去排查的？ 5.对 ES 做了哪些查询的优化？ 6.你这个部分的 ES 索引是怎么设计的？为什么要这用这种数据类型？ 7.分词器是用的哪个？为什么要用这个？
+4. ES 中数据量有多大？查询耗时多少？耗时的瓶颈在哪，怎么去排查的？
+5. 对 ES 做了哪些查询的优化？
+6. 你这个部分的 ES 索引是怎么设计的？为什么要这用这种数据类型？
+7. 分词器是用的哪个？为什么要用这个？
+   kuromoji 分词和 ik 分词(ik-smart 以及)
