@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>视频本地预览示例</title>
+  </head>
+  <body>
+    <h3>阿宝哥：视频本地预览示例</h3>
+    <input type="file" accept="video/*" onchange="loadFile(event)" />
+    <video id="previewContainer" controls width="480" height="270" style="display: none"></video>
+
+    <script>
+      const loadFile = function (event) {
+        const reader = new FileReader()
+        reader.onload = function () {
+          const output = document.querySelector('#previewContainer')
+          output.style.display = 'block'
+          output.src = URL.createObjectURL(new Blob([reader.result]))
+        }
+        reader.readAsArrayBuffer(event.target.files[0])
+      }
+    </script>
+  </body>
+</html>

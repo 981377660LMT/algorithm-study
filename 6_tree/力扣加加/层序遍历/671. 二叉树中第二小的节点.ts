@@ -5,6 +5,7 @@ function findSecondMinimumValue(root: BinaryTree | null): number {
   const queue = [root]
   const res = new Set<number>()
   while (queue.length) {
+    // dfs 因为是pop
     const cur = queue.pop()!
     res.add(cur.val)
     cur.left && queue.push(cur.left)

@@ -1,0 +1,3 @@
+GET http://www.example.com HTTP/1.1
+# Range: bytes=0-1023
+Range: bytes=0-50,50-100

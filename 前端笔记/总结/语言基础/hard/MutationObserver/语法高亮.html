@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MutationObserver 实战之语法高亮</title>
+    <style>
+      #code-container {
+        border: 1px dashed grey;
+        padding: 5px;
+        width: 550px;
+        height: 200px;
+      }
+    </style>
+    <link
+      href="https://cdn.bootcdn.net/ajax/libs/prism/9000.0.1/themes/prism.min.css"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdn.bootcdn.net/ajax/libs/prism/9000.0.1/prism.min.js"
+      data-manual
+    ></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/prism/9000.0.1/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/prism/9000.0.1/components/prism-css.min.js"></script>
+  </head>
+  <body>
+    <h3>阿宝哥：MutationObserver 实战之语法高亮</h3>
+    <div id="code-container"></div>
+    <script>
+      let observer = new MutationObserver(mutations => {
+        for (let mutation of mutations) {
+          // 获取新增的DOM节点
+          for (let node of mutation.addedNodes) {
+            // 只处理HTML元素，跳过其他节点，比如文本节点
+            if (!(node instanceof HTMLElement)) continue
+
+            // 检查插入的节点是否为代码段
+            if (node.matches('pre[class*="language-"]')) {
+              Prism.highlightElement(node)
+            }
+
+            // 检查插入节点的子节点是否为代码段
+            for (let elem of node.querySelectorAll('pre[class*="language-"]')) {
+              Prism.highlightElement(elem)
+            }
+          }
+        }
+      })
+
+      let codeContainer = document.querySelector('#code-container')
+
+      observer.observe(codeContainer, { childList: true, subtree: true })
+      // 动态插入带有代码段的内容
+      codeContainer.innerHTML = `下面是一个JavaScript代码段：
+        <pre class="language-javascript"><code> let greeting = "大家好，我是阿宝哥"; </code></pre>
+        <div>另一个CSS代码段：</div>
+        <div>
+          <pre class="language-css">
+             <code>#code-container { border: 1px dashed grey; padding: 5px; } </code>
+          </pre>
+        </div>
+        `
+    </script>
+  </body>
+</html>

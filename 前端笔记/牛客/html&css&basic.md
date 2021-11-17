@@ -66,8 +66,15 @@
 10. 介绍一下你对浏览器内核的理解？
     **渲染引擎**(layout engineer 或 Rendering Engine), 浏览器的内核的不同对于网页的语法解释会有不同，所以渲染的效果也不相同; 和 **JS 引擎**,解析和执行 javascript 来实现网页的动态效果。
     最开始渲染引擎和 JS 引擎并没有区分的很明确，后来 JS 引擎越来越独立，内核就倾向于只指渲染引擎。
-11. iframe 有那些缺点
-    \*iframe 会阻塞主页面的 Onload 事件； \*搜索引擎的检索程序无法解读这种页面，不利于 SEO;
+11. iframe 有那些优缺点
+    优点：
+
+    1. 解决加载缓慢的第三方内容如图标和广告等的加载问题
+    2. 并行加载脚本
+       缺点:
+    3. iframe 会阻塞主页面的 Onload 事件
+    4. 搜索引擎的检索程序无法解读这种页面，不利于 SEO;
+
 12. 如何实现浏览器内多个标签页之间的通信?
     WebSocket、 SharedWorker ；
     也可以调用 localstorage、 cookies 等本地存储方式；
@@ -278,3 +285,22 @@
 48. http 常用请求头
 49. 常见状态码
     https://blog.csdn.net/qq_44647809/article/details/115276258
+50. 什么是 FOUC（无样式内容闪烁）？你如何来避免 FOUC？
+    FOUC - Flash Of Unstyled Content 文档样式闪烁
+    引用 CSS 文件的@import 就是造成这个问题的罪魁祸首。I
+    IE 会先加载整个 HTML 文档的 DOM，然后再去导入外部的 CSS 文件，因此，在页面 DOM 加载完成到 CSS 导入完成中间会有一段时间页面上的内容是没有样式的，这段时间的长短跟网速，电脑速度都有关系。
+    解决方法简单的出奇，只要在<head>之间加入一个<link>或者<script>元素就可以了。
+51. js 延迟加载的方式有哪些？
+    1. defer 和 async
+    2. 动态创建 DOM 方式（创建 script，插入到 DOM 中，加载完毕后 callBack）
+    3. 按需异步载入 js
+52. document.write 和 innerHTML 的区别
+    document.write 只能重绘整个页面
+
+        innerHTML 可以重绘页面的一部分
+
+53. 哪些操作会造成内存泄漏？
+    1. setTimeout 的第一个参数使用字符串而非函数的话，会引发内存泄漏。
+    2. 闭包
+    3. 控制台日志
+    4. 循环（在两个对象彼此引用且彼此保留时，就会产生一个循环）

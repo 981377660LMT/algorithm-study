@@ -27,23 +27,6 @@ const reverseWords = (s: string): string => {
 
   return strArr.join('')
 
-  function removeExtraSpaces(strArr: string[]) {
-    let slowIndex = 0
-    let fastIndex = 0
-
-    while (fastIndex < strArr.length) {
-      // 移除开始位置和重复的空格
-      if (strArr[fastIndex] === ' ' && (fastIndex === 0 || strArr[fastIndex - 1] === ' ')) {
-        fastIndex++
-      } else {
-        strArr[slowIndex++] = strArr[fastIndex++]
-      }
-    }
-
-    // 移除末尾空格
-    strArr.length = strArr[slowIndex - 1] === ' ' ? slowIndex - 1 : slowIndex
-  }
-
   // 翻转从 start 到 end 的字符
   function reverse(strArr: string[], left: number, right: number) {
     while (left < right) {

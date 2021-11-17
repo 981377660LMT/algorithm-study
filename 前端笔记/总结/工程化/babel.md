@@ -57,3 +57,5 @@ const { code } = generate(ast);
 // code:  var a = 1;
 console.log('code: ', code);
 ```
+
+2. Babel 中的 stage-0,stage-1,stage-2 以及 stage-3 是什么意思

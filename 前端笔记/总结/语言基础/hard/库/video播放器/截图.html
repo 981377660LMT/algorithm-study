@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>播放器截图示例</title>
+  </head>
+  <body>
+    <h3>阿宝哥：播放器截图示例</h3>
+    <video id="video" controls="controls" width="460" height="270" crossorigin="anonymous">
+      <!-- 请替换为实际视频地址 -->
+      <source src="https://xxx.com/vid_159411468092581" />
+    </video>
+    <button onclick="captureVideo()">截图</button>
+    <script>
+      let video = document.querySelector('#video')
+      let canvas = document.createElement('canvas')
+      let img = document.createElement('img')
+      img.crossOrigin = ''
+      let ctx = canvas.getContext('2d')
+
+      function captureVideo() {
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        img.src = canvas.toDataURL()
+        document.body.append(img)
+      }
+    </script>
+  </body>
+</html>

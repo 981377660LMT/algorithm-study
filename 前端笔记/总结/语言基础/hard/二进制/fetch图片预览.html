@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>获取远程图片预览示例</title>
+  </head>
+  <body>
+    <h3>阿宝哥：获取远程图片预览示例</h3>
+    <img id="previewContainer" style="width: 50%" />
+
+    <script>
+      const image = document.querySelector('#previewContainer')
+      fetch('https://avatars3.githubusercontent.com/u/4220799')
+        .then(response => response.blob())
+        .then(blob => {
+          const objectURL = URL.createObjectURL(blob)
+          image.src = objectURL
+        })
+    </script>
+  </body>
+</html>

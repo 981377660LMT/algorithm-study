@@ -31,7 +31,7 @@ const swimInWater = function (grid: number[][]): number {
         grid[nextX][nextY] <= mid &&
         !visited.has(`${nextX}#${nextY}`)
       ) {
-        visited.add(`${nextX}#${nextY}`)ty
+        visited.add(`${nextX}#${nextY}`)
         yield* dfs(mid, nextX, nextY, visited)
       }
     }
@@ -47,21 +47,9 @@ const swimInWater = function (grid: number[][]): number {
     grid.map(row => Math.max.apply(null, row))
   )
 
-  // let startX = Infinity
-  // let startY = Infinity
-  // searchStart: for (let i = 0; i < n; i++) {
-  //   for (let j = 0; j < n; j++) {
-  //     if (grid[i][j] === 0) {
-  //       startX = i
-  //       startY = j
-  //       break searchStart
-  //     }
-  //   }
-  // }
-
   while (l <= r) {
     const mid = (l + r) >> 1
-    console.log(mid)
+
     // 最左二分
     if (dfs(mid, 0, 0, new Set<string>(['0#0'])).next().value) {
       r = mid - 1

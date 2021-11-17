@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>使用 Canvas 播放视频</title>
+  </head>
+  <body>
+    <h3>阿宝哥：使用 Canvas 播放视频</h3>
+    <video id="video" controls="controls" style="display: none">
+      <!-- 请替换为实际视频地址 -->
+      <source src="https://xxx.com/vid_159411468092581" />
+    </video>
+    <canvas id="myCanvas" width="460" height="270" style="border: 1px solid blue"></canvas>
+    <div>
+      <button id="playBtn">播放</button>
+      <button id="pauseBtn">暂停</button>
+    </div>
+    <script>
+      const video = document.querySelector('#video')
+      const canvas = document.querySelector('#myCanvas')
+      const playBtn = document.querySelector('#playBtn')
+      const pauseBtn = document.querySelector('#pauseBtn')
+      const context = canvas.getContext('2d')
+      let timerId = null
+
+      function draw() {
+        if (video.paused || video.ended) return
+        context.clearRect(0, 0, canvas.width, canvas.height)
+        context.drawImage(video, 0, 0, canvas.width, canvas.height)
+        timerId = setTimeout(draw, 0)
+      }
+
+      playBtn.addEventListener('click', () => {
+        if (!video.paused) return
+        video.play()
+        draw()
+      })
+
+      pauseBtn.addEventListener('click', () => {
+        if (video.paused) return
+        video.pause()
+        clearTimeout(timerId)
+      })
+    </script>
+  </body>
+</html>
