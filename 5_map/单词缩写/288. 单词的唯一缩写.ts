@@ -1,5 +1,6 @@
 class ValidWordAbbr {
   private record: Map<string, Set<string>>
+
   constructor(dictionary: string[]) {
     this.record = new Map()
     for (const word of dictionary) {
@@ -13,9 +14,12 @@ class ValidWordAbbr {
   isUnique(word: string): boolean {
     const n = word.length
     if (n <= 2) return true
+
     const abbr = this.getAbbr(word)
     if (!this.record.has(abbr)) return true // 没有任何其他单词的 缩写 与该单词 word 的 缩写 相同
-    return this.record.get(abbr)!.size === 1 && this.record.get(abbr)!.has(word) // 所有 缩写 与该单词 word 的 缩写 相同的单词都与 word 相同
+
+    const wordSet = this.record.get(abbr)!
+    return wordSet.has(word) && wordSet.size === 1 // 所有 缩写 与该单词 word 的 缩写 相同的单词都与 word 相同
   }
 
   private getAbbr(word: string) {

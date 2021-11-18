@@ -1,22 +1,3 @@
-// const lengthToString = (str: string) => {
-//   const len = str.length
-//   const stringBuilder: number[] = []
-//   for (let i = 3; ~i; i--) {
-//     stringBuilder[3 - i] = (len >> (i * 8)) & 0xff
-//   }
-//   return stringBuilder.join('')
-// }
-
-// const stringToLength = (str: string) => {
-//   const len = 0
-//   const stringBuilder: number[] = []
-//   for (let i = 3; ~i; i--) {
-//     stringBuilder[3 - i] = (len >> (i * 8)) & 0xff
-//   }
-//   return len
-// }
-
-// console.log(lengthToString('asassdgfhh'))
 /**
  * Encodes a list of strings to a single string.
  * 注意不能用join join会无视空字符串
@@ -71,3 +52,5 @@ console.log(encode(['', '']))
 console.log(['', '', 'a'].join('b'))
 console.log('a'.split('a').slice(0, -1))
 console.log(['', null, 'a', false, undefined].join('11')) // join会无视空字符串和null/undefined
+
+export {}
