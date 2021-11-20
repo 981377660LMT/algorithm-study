@@ -4,7 +4,7 @@ function minTotalDistance(grid: number[][]): number {
   const yNums: number[] = []
   for (let i = 0; i < grid.length; i++) {
     for (let j = 0; j < grid[i].length; j++) {
-      if (grid[i][j]) {
+      if (grid[i][j] === 1) {
         xNums.push(i)
         yNums.push(j)
       }
@@ -25,7 +25,6 @@ function minTotalDistance(grid: number[][]): number {
     res += Math.abs(y - yMiddle)
   }
 
-  console.log([xMiddle, yMiddle])
   return res
 }
 

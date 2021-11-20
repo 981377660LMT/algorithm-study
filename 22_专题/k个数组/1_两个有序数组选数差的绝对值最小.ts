@@ -9,6 +9,7 @@ const minDiff = (arr1: number[], arr2: number[]): number => {
   let res = Infinity
   let l1 = 0
   let l2 = 0
+
   while (l1 < arr1.length && l2 < arr2.length) {
     res = Math.min(res, Math.abs(arr1[l1] - arr2[l2]))
     // 小的向后移
@@ -16,8 +17,8 @@ const minDiff = (arr1: number[], arr2: number[]): number => {
   }
   return res
 }
-
-console.log(minDiff([10, 20, 30, 40], [25, 28, 7]))
-export default 1
+if (require.main === module) {
+  console.log(minDiff([10, 20, 30, 40], [25, 28, 7]))
+}
 
 export { minDiff }

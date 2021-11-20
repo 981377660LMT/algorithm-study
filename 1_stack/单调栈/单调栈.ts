@@ -10,15 +10,15 @@ const findNextLarge = (nums: number[]) => {
   const monoStack: number[] = []
   const memo: Map<number, number> = new Map()
 
-  nums.forEach(num => {
+  for (let i = 0; i < nums.length; i++) {
     // 栈不为空且当前元素大于栈顶元素
     // 说明当前元素是栈顶元素的下一个更大元素
     // while循环表示当前元素是栈中所有已存元素的下一个更大元素
-    while (monoStack.length && num > monoStack[monoStack.length - 1]) {
-      memo.set(monoStack.pop()!, num)
+    while (monoStack.length > 0 && nums[i] > nums[monoStack[monoStack.length - 1]]) {
+      memo.set(monoStack.pop()!, nums[i])
     }
-    monoStack.push(num)
-  })
+    monoStack.push(i)
+  }
 
   console.log(memo, monoStack)
 }

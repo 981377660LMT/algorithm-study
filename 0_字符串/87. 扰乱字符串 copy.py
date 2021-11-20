@@ -15,3 +15,8 @@ class Solution:
                 return True
         return False
 
+
+class Solution:
+    def replaceDigits(self, s: str) -> str:
+        return ''.join([chr(ord(s[i - 1]) + int(v)) if i % 2 else v for i, v in enumerate(s)])
+

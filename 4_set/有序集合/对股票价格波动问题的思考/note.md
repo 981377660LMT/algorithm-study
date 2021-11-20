@@ -8,3 +8,9 @@
 **模拟**
 模拟 SortedList:bisect+切片
 模拟 Multiset:SortedList 就是 multiset (全 logn);SortedDict 记录次数就是 SortedList
+
+使用 dict 的好处:
+使用 sortedList 的好处:
+
+总结:
+`id + dict + sortedList 三件套`

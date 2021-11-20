@@ -1,35 +1,39 @@
 // pop的时候注意一下
 
-class Stack {
-  private input: unknown[]
-  private output: unknown[]
+class MyStack {
+  private inputQueue: unknown[]
+  private outputQueue: unknown[]
 
   constructor() {
-    this.input = []
-    this.output = []
+    this.inputQueue = []
+    this.outputQueue = []
   }
 
   push(x: number) {
-    this.input.push(x)
+    this.inputQueue.push(x)
   }
 
   pop() {
-    const size = this.output.length
-    if (size) {
-      return this.output.shift()
+    while (this.inputQueue.length > 1) {
+      this.outputQueue.push(this.inputQueue.shift())
     }
-    while (this.input.length) {
-      this.output.push(this.input.pop())
-    }
-    return this.output.shift()
+    const res = this.inputQueue.shift()
+    ;[this.inputQueue, this.outputQueue] = [this.outputQueue, this.inputQueue]
+    return res
+  }
+
+  empty() {
+    return this.inputQueue.length === 0 && this.outputQueue.length === 0
+  }
+
+  top() {
+    return this.inputQueue[this.inputQueue.length - 1]
   }
 }
 
-const stack = new Stack()
+const stack = new MyStack()
 stack.push(1)
-stack.push(2)
-stack.push(3)
+
 console.log(stack.pop())
-console.log(stack.pop())
-console.log(stack.pop())
-console.log(stack.pop())
+console.log(stack)
+console.log(stack.empty())

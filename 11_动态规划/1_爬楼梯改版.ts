@@ -8,11 +8,13 @@
 const climbStairs = (n: number, m: number): number => {
   const dp = Array<number>(n + 1).fill(0)
   dp[0] = 1
-  for (let i = 1; i <= n; i++) {
-    for (let j = 1; j <= m; j++) {
-      if (i - j >= 0) dp[i] += dp[i - j]
+
+  for (let volumn = 1; volumn <= n; volumn++) {
+    for (let weight = 1; weight <= m; weight++) {
+      if (volumn - weight >= 0) dp[volumn] += dp[volumn - weight]
     }
   }
+
   return dp[n]
 }
 

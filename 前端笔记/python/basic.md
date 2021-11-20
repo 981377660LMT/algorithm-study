@@ -442,3 +442,41 @@ print a  # 1
 52. 静态链接和动态链接
     静态链接方法：静态链接的时候，载入代码就会把程序会用到的动态代码或动态代码的地址确定下来(类似**import**)
     动态链接方法：使用这种方式的程序并不在一开始就完成动态链接，而是直到真正调用动态库代码时，载入程序才计算(被调用的那部分)动态代码的逻辑地址，(类似**require**)
+53. 元类？
+    元类的作用就是用来创建类的。
+
+```Python
+klass = MetaClass()     # 元类创建类
+obj = klass()           # 类创建实例
+```
+
+类属性` __metaclass__`可以是一个方法，也可以是一个类。
+
+```Python
+def create_class(name, bases, attr):
+    print 'create class by method...'
+    # 什么事都没做 直接用type创建了一个类
+    return type(name, bases, attr)
+
+class A(object):
+    # 创建类的过程交给了一个方法
+    __metaclass__ = create_class
+
+# Output:
+# create class by method ...
+```
+
+```Python
+class B(type):
+    # 必须定义 __new__ 方法 返回一个类
+    def __new__(cls, name, bases, attr):
+        print 'create class by B ...'
+        return type(name, bases, attr)
+
+class A(object):
+    # 创建类的过程交给了B
+    __metaclass__ = B
+
+# Output:
+# create class by B ...
+```

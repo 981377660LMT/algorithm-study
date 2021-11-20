@@ -8,7 +8,7 @@ import { bisectRight } from '../../9_排序和搜索/二分api/7_二分搜索寻
  * 返回 A 的任意排列，使其相对于 B 的优势最大化。
  * 我们需要每次找一个比B[i]大的数，但是最接近B[i]的数，相当于A的上等马->B的中等马
    如果找不到，那么我们就给B[i]一个最小的数，相当于A的下等马->B的上等马
-
+  
  */
 const advantageCount1 = function (nums1: number[], nums2: number[]): number[] {
   nums1.sort((a, b) => a - b)

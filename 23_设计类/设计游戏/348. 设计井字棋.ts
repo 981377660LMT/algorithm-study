@@ -6,6 +6,7 @@ class TicTacToe {
   private rows: number[][]
   private cols: number[][]
   private diagnols: number[][]
+
   constructor(n: number) {
     this.n = n
     // 3 表示 player1 和 player2，索引 0 是无用的

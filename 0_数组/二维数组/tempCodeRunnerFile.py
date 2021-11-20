@@ -1,0 +1,1 @@
+map(int, str(num)) for num in range(1, 10)

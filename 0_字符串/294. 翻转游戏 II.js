@@ -7,16 +7,16 @@
  */
 var canWin = function (currentState) {
   const memo = {}
-  return inner(currentState)
+  return dfs(currentState)
 
-  function inner(str) {
+  function dfs(str) {
     if (str in memo) return memo[str]
 
     n = str.length
     for (let i = 0; i < n - 1; i++) {
       // 自己可以且对方不能赢
       if (str[i] === '+' && str[i + 1] === '+') {
-        if (!inner(str.slice(0, i) + '--' + str.slice(i + 2))) {
+        if (!dfs(str.slice(0, i) + '--' + str.slice(i + 2))) {
           memo[str] = true
           return true
         }

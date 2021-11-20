@@ -11,7 +11,7 @@ import { MinHeap } from '../../2_queue/minheap'
 const minDiffK = (...arrs: number[][]): number => {
   arrs.forEach(arr => arr.sort((a, b) => a - b))
   let res = Infinity
-  const minHeap = new MinHeap<[number, number, number]>(
+  const minHeap = new MinHeap<[value: number, row: number, col: number]>(
     (a, b) => a[0] - b[0],
     Infinity,
     arrs.map((arr, row) => [arr[0], row, 0])

@@ -12,16 +12,17 @@ class NumMatrix {
     this.n = matrix[0].length
     this.matrix = matrix
     this.bit = new BIT(this.m * this.n)
+
     for (let i = 0; i < this.m; i++) {
       for (let j = 0; j < this.n; j++) {
-        const index = this.getIndex(i, j)
+        const index = this.getTreeIndex(i, j)
         this.bit.add(index, matrix[i][j])
       }
     }
   }
 
   update(row: number, col: number, val: number): void {
-    const index = this.getIndex(row, col)
+    const index = this.getTreeIndex(row, col)
     const diff = val - this.matrix[row][col]
     this.bit.add(index, diff)
     this.matrix[row][col] = val // 不要忘了更新原来的矩阵
@@ -30,14 +31,14 @@ class NumMatrix {
   sumRegion(row1: number, col1: number, row2: number, col2: number): number {
     let res = 0
     for (let row = row1; row <= row2; row++) {
-      const leftIndex = this.getIndex(row, col1)
-      const rightIndex = this.getIndex(row, col2)
+      const leftIndex = this.getTreeIndex(row, col1)
+      const rightIndex = this.getTreeIndex(row, col2)
       res += this.bit.sumRange(leftIndex, rightIndex)
     }
     return res
   }
 
-  private getIndex(row: number, col: number) {
+  private getTreeIndex(row: number, col: number) {
     return this.n * row + col + 1 // 注意这里加一 让树状数组查询索引是正数
   }
 }

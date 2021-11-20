@@ -1,36 +1,26 @@
-const useUnionFindMap = () => {
-  let count = 0 // 一开始的联通分量个数
-  const parent = new Map<number, number>()
+const useUnionFindArray = (size: number) => {
+  const parent = Array.from<number, number>({ length: size }, (_, i) => i)
 
-  const add = (key: number) => {
-    if (parent.has(key)) return
-    parent.set(key, key)
-    count++
-  }
-
-  const find = (val: number) => {
-    while (parent.get(val) !== val) {
-      val = parent.get(val)!
+  const find = (key: number) => {
+    while ((parent[key] !== undefined && parent[key]) !== key) {
+      // 进行路径压缩
+      parent[key] = parent[parent[key]]
+      key = parent[key]
     }
-
-    return val
+    return key
   }
 
   const union = (key1: number, key2: number) => {
-    if (isConnected(key1, key2)) return
     const root1 = find(key1)
     const root2 = find(key2)
     if (root1 === root2) return
-    // rank优化:总是让大的根指向小的根
-    parent.set(Math.max(root1, root2), Math.min(root1, root2))
-    count--
+    // 简单rank优化:总是让大的根指向小的根
+    parent[Math.max(root1, root2)] = Math.min(root1, root2)
   }
 
   const isConnected = (key1: number, key2: number) => find(key1) === find(key2)
 
-  const getCount = () => count
-
-  return { add, union, find, isConnected, getCount }
+  return { union, find, isConnected }
 }
 
 /**
@@ -51,12 +41,19 @@ const useUnionFindMap = () => {
  */
 function numIslands2(m: number, n: number, positions: number[][]): number[] {
   const res: number[] = []
-  const island = new Set<number>()
-  const uf = useUnionFindMap()
+  const visited = new Set<number>()
+  const uf = useUnionFindArray(m * n)
+  let count = 0
 
   for (const [x, y] of positions) {
-    uf.add(x * n + y)
-    island.add(x * n + y)
+    // 重复的岛屿
+    if (visited.has(x * n + y)) {
+      res.push(count)
+      continue
+    }
+
+    visited.add(x * n + y)
+    count++
 
     for (const [dx, dy] of [
       [0, 1],
@@ -64,12 +61,15 @@ function numIslands2(m: number, n: number, positions: number[][]): number[] {
       [1, 0],
       [-1, 0],
     ]) {
-      const [nextI, nextY] = [x + dx, y + dy]
-      if (nextI >= 0 && nextI < m && nextY >= 0 && nextY < n && island.has(nextI * n + nextY))
-        uf.union(x * n + y, nextI * n + nextY)
+      const [nextX, nextY] = [x + dx, y + dy]
+      if (nextX >= 0 && nextX < m && nextY >= 0 && nextY < n && visited.has(nextX * n + nextY)) {
+        if (uf.isConnected(x * n + y, nextX * n + nextY)) continue
+        uf.union(x * n + y, nextX * n + nextY)
+        count--
+      }
     }
 
-    res.push(uf.getCount())
+    res.push(count)
   }
 
   return res

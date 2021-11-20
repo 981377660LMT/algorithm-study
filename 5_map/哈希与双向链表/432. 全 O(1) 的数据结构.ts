@@ -123,3 +123,5 @@ console.log(allOne.getMinKey())
 allOne.inc('leet')
 console.log(allOne.getMaxKey())
 console.log(allOne.getMinKey())
+
+export {}

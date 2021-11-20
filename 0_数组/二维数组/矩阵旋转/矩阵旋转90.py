@@ -7,6 +7,7 @@ class Solution:
         Do not return anything, modify matrix in-place instead.
         """
         matrix[:] = zip(*matrix[::-1])
+        # zip(*matrix)表示转置矩阵
 
 
 a = [

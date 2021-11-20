@@ -26,3 +26,5 @@ function numSplits(s: string): number {
 }
 
 console.log(numSplits('aacaba'))
+
+export {}

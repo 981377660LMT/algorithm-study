@@ -25,6 +25,7 @@ function longestConsecutive1(root: BinaryTree | null): number {
 
   return res
 }
+
 function longestConsecutive(root: BinaryTree | null): number {
   if (!root) return 0
 

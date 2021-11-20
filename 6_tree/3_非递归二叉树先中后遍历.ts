@@ -42,37 +42,33 @@ const bt: BinaryTree = {
 const preOrder = (root: BinaryTree | null) => {
   if (!root) return []
   const stack = [root]
-  while (stack.length > 0) {
-    const head = stack.pop()
+  const res: number[] = []
 
-    console.log(head?.val)
-    head?.right && stack.push(head.right)
-    head?.left && stack.push(head.left)
+  while (stack.length > 0) {
+    const head = stack.pop()!
+    res.push(head.val)
+    head.right && stack.push(head.right)
+    head.left && stack.push(head.left)
   }
+
+  return res
 }
 
-// 左根右
-// 参考递归版，一开始丢进了所有左子树
-// const inOrder = (root: BinaryTree | null) => {
-//   if (!root) return []
-//   const stack = []
-//   const result = []
+// 左右根=>根右左再reverse
+const postOrder = (root: BinaryTree | null) => {
+  if (!root) return []
+  const stack = [root]
+  const res: number[] = []
 
-//   while (stack.length > 0 || root) {
-//     if (root) {
-//       // 先找所有左节点、
-//       stack.push(root)
-//       root = root.left
-//     } else {
-//       // 没有左节点了,换右节点继续
-//       root = stack.pop()!
-//       result.push(root.val)
-//       root = root.right
-//     }
-//   }
+  while (stack.length > 0) {
+    const head = stack.pop()!
+    res.push(head.val)
+    head.left && stack.push(head.left)
+    head.right && stack.push(head.right)
+  }
 
-//   return result
-// }
+  return res.reverse()
+}
 
 // 迭代中序遍历二色标记法
 // 0表示未见过 1表示见过
@@ -81,7 +77,7 @@ const inOrder = (root: BinaryTree | null) => {
   const result: number[] = []
   const stack: [0 | 1, BinaryTree][] = [[0, root]]
 
-  while (stack.length) {
+  while (stack.length > 0) {
     const [color, head] = stack.pop()!
     if (color === 0) {
       // 对于没见过的节点，这样可以保证出栈的顺序是left mid right
@@ -95,17 +91,6 @@ const inOrder = (root: BinaryTree | null) => {
 
   return result
 }
-// 根右左
-// const postOrder = (root: BinaryTree | null) => {
-//   if (!root) return []
-//   const stack = [root]
-//   while (stack.length > 0) {
-//     const head = stack.pop()
-//     console.log(head?.val)
-//     head?.left && stack.push(head.left)
-//     head?.right && stack.push(head.right)
-//   }
-// }
 
 // preOrder(bt)
 console.log(inOrder(deserializeNode([1, null, 2, 3])))

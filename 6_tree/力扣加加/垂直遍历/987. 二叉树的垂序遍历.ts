@@ -14,15 +14,15 @@ const verticalTraversal = (root: BinaryTree | null): number[][] => {
   if (!root) return []
 
   const tmp: [number, number, number][] = []
-  const inOrder = (root: BinaryTree, x: number, y: number) => {
+  const dfs = (root: BinaryTree, x: number, y: number) => {
     tmp.push([x, y, root.val])
-    root.left && inOrder(root.left, x - 1, y + 1)
-    root.right && inOrder(root.right, x + 1, y + 1)
+    root.left && dfs(root.left, x - 1, y + 1)
+    root.right && dfs(root.right, x + 1, y + 1)
   }
-  inOrder(root, 0, 0)
+  dfs(root, 0, 0)
   tmp.sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2])
 
-  // x值为key的map
+  // 以x值为key的map
   const map = new Map<number, number[]>()
   for (const item of tmp) {
     const key = item[0]

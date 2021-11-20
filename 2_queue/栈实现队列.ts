@@ -1,32 +1,43 @@
 // 使用两个数组的栈方法（push, pop） 实现队列
 // pop的时候注意一下
 
-class Queue {
-  private input: unknown[]
-  private output: unknown[]
+class MyQueue {
+  private inputStack: unknown[]
+  private outputStack: unknown[]
 
   constructor() {
-    this.input = []
-    this.output = []
+    this.inputStack = []
+    this.outputStack = []
   }
 
   push(x: number) {
-    this.input.push(x)
+    this.inputStack.push(x)
   }
 
   shift() {
-    const size = this.output.length
-    if (size) {
-      return this.output.pop()
+    if (this.outputStack.length > 0) {
+      return this.outputStack.pop()
     }
-    while (this.input.length) {
-      this.output.push(this.input.pop())
+    while (this.inputStack.length > 0) {
+      this.outputStack.push(this.inputStack.pop())
     }
-    return this.output.pop()
+    return this.outputStack.pop()
+  }
+
+  empty() {
+    return this.inputStack.length === 0 && this.outputStack.length === 0
+  }
+
+  peek() {
+    if (this.outputStack.length > 0) return this.outputStack[this.outputStack.length - 1]
+    while (this.inputStack.length > 0) {
+      this.outputStack.push(this.inputStack.pop())
+    }
+    return this.outputStack[this.outputStack.length - 1]
   }
 }
 
-const queue = new Queue()
+const queue = new MyQueue()
 queue.push(1)
 queue.push(2)
 queue.push(3)

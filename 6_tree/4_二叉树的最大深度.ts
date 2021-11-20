@@ -37,32 +37,6 @@ const bt: BinaryTree = {
   },
 }
 
-// interface NodeMemo {
-//   depth: number
-//   node: BinaryTree
-// }
-
-// // 循环了每个节点，时间复杂度O(n)
-// // 空间复杂度是递归层数，最坏二叉树最大深度O(n)，最好O(log(n))
-// const getDepth = (root: BinaryTree | null, depth: number = 0, memo: NodeMemo[] = []) => {
-//   if (!root) return []
-//   let dep = depth + 1
-//   memo.push({ node: root, depth: dep })
-//   root.left && getDepth(root.left, dep, memo)
-//   root.right && getDepth(root.right, dep, memo)
-
-//   return memo
-// }
-
-// const nodes = getDepth(bt)
-
-// console.log(
-//   Math.max.apply(
-//     null,
-//     nodes.map(node => node.depth)
-//   )
-// )
-
 // 深度优先遍历
 // 时间复杂度O(节点数)
 // 空间复杂度:形成函数调用堆栈,为dfs嵌套层数,最坏直线O(n)，最好O(log(n))
