@@ -22,6 +22,7 @@ class Solution:
                         queue.append((x + dx, y + dy))
             return False
 
+        # 最右能力二分
         l = 0
         r = row * col
         while l <= r:

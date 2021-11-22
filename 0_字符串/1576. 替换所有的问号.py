@@ -8,6 +8,7 @@ from string import ascii_lowercase
 
 class Solution:
     def modifyString(self, s: str) -> str:
+        # sentinel
         sb = list('#' + s + '#')
 
         for index in range(len(sb)):

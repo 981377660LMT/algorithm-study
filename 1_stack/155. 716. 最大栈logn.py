@@ -19,6 +19,7 @@ class MaxStack:
         self.sorted_values.remove((value, id))
         return value
 
+    # 注意revered返回迭代器 此处是O(1)操作
     def top(self) -> int:
         return next(reversed(self.id_to_value.values()))
 

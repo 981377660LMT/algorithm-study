@@ -3,7 +3,7 @@
 // 有点像有序的完全背包
 function respace(dictionary: string[], sentence: string): number {
   const len = sentence.length
-  if (!len) return 0
+  if (len === 0) return 0
   const dp = Array<number>(len + 1).fill(0)
 
   for (let i = 1; i <= len; i++) {
@@ -15,6 +15,7 @@ function respace(dictionary: string[], sentence: string): number {
       if (sentence.slice(i - len, i) === word && i - len >= 0) dp[i] = Math.min(dp[i], dp[i - len])
     }
   }
+
   return dp[len]
 }
 

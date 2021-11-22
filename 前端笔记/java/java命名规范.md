@@ -119,8 +119,30 @@ e.g. "make"这个词太业余了，可以有更加专业的动词替换：
 生成：- (NSArray \*)generate/create/calculateListViewModels;
 有副作用：- (void)`setup`/`update`ListViewModels;
 
+e.g. "find" 似乎用于 js 内置 api find/findIndex 接受一个 predicate 函数
+属于`查询方法前缀`： get、find。
+`搜索性查询方法`前缀应该用：query、search。
+`统计类前缀：count。`
+`操作类前缀：insert、add、create、update、delete。`
+
 e.g. "stop"本身没啥问题，只是可能存在更优的固定搭配：
 kill + thread
 terminate + app / runloop
 pause / remove + animation 尽量避免给变量取名为 ret, tmp, case, num 等空泛的词，请绞尽脑汁取一个语义化的名字。
 前后缀可以丰富含义，rawContent, escapedString, stringifiedText, stayTimeMs
+
+也可以模拟内置 api 命名风格
+
+## 类定义的顺序
+
+l 静态成员变量 / Static Fields
+l 静态初始化块 / Static Initializers
+l 成员变量 / Fields
+l 初始化块 / Initializers
+l 构造器 / Constructors
+l 静态成员方法 / Static Methods
+l 成员方法 / Methods
+l `重载自 Object 的方法如 toString(), hashCode() 和 main 方法`
+l 类型(内部类) / Types(Inner Classes)
+
+同等的顺序下，再按 `public, protected,default, private` 的顺序排列。

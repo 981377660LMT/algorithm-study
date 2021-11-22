@@ -1,0 +1,6 @@
+console.log(1 << 30, 2 ** 30)
+console.log((1 << 30) + (1 << 30), 2 ** 31)
+console.log(1 << 31, -(2 ** 31))
+console.log(1 << 32)
+console.log(1 << 33)
+console.log(1 << 64)
