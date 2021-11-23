@@ -59,7 +59,7 @@ class TreeAncestor2 {
       if (k & 1) node = this.lift[bit][node]
       if (node === -1) break
       bit++
-      k >>= 1
+      k >>>= 1
     }
     return node
   }
@@ -73,3 +73,9 @@ console.log(lca.getKthAncestor(6, 3))
 // 倍增法（英语：binary lifting），顾名思义就是翻倍。
 // 它能够使线性的处理转化为对数级的处理，大大地优化时间复杂度。
 // 这个方法在很多算法中均有应用，其中最常用的是RMQ 区间最大（最小）值问题和求LCA（最近公共祖先）
+
+// 思考 求出 list以后怎么求两个点的LCA呢?
+// 1. 根据depth数组 下面的结点往上跳 跳到他们一样高
+// 2. 最左能力二分 两个一起上跳mid 一样就缩小步伐
+
+// 实际上题中给出的 parent数组是可以在dfs中更新求出来的

@@ -19,7 +19,7 @@
 // }
 // 先计数再遍历
 // 两个 1 重复了，需要有一个增加到 2，这样 2 的数量变成了三个。在三个 2 中，又有两个需要增加到 3，然后又出现了两个 3…… 以此类推，
-const minIncrementForUnique = function (nums: number[]): number {
+const minIncrementForUnique = function (nums: readonly number[]): number {
   let res = 0
   const counter: number[] = []
   for (let i = 0; i < nums.length; i++) {

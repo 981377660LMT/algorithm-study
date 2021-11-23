@@ -72,3 +72,19 @@ int[] dijkstra(int start, List<Integer>[] graph);
   return Infinity
 
 ```
+
+4. 如果我们要打印具体路径呢？
+   其实很简单，我们只需要用一个` pre[]数组存储每个点的父节点即可`
+   单源最短路的起点是固定的，所以每条路有且仅有一个祖先节点，一步步溯源上去的路径是唯一的
+   每当更新一个点的 dist 时，顺便更新一下它的 pre。
+
+```JS
+// 4.利用cur点来更新其相邻节点next与原点的距离
+    for (const [next, weight] of adjList[cur]) {
+      if (dist[cur] + weight < dist[next]) {
+        dist[next] = dist[cur] + weight
+        pre[next]=cur  // 这里
+        priorityQueue.push([next, dist[next]])
+      }
+    }
+```

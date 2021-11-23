@@ -2,7 +2,7 @@
 // 当这个差很大时、不是整数(其实可以map成整数) 不适合计数排序
 // 桶排序做出了弥补
 
-const sortColors = (nums: number[]) => {
+const sortColors = (nums: readonly number[]) => {
   const count: number[] = [0, 0, 0]
   const res: number[] = []
 

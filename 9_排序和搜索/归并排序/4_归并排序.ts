@@ -2,7 +2,7 @@
 // 当元素数量很少时(16)可以用插入排序代替
 
 // 合并两个有序数组
-const mergeTwo = (arr1: number[], arr2: number[]) => {
+const mergeTwo = (arr1: readonly number[], arr2: readonly number[]) => {
   const res: number[] = []
   let i = 0
   let j = 0
@@ -31,7 +31,7 @@ const mergeTwo = (arr1: number[], arr2: number[]) => {
 }
 
 // 分left/right 递归 合
-const mergeSort = (arr: number[]): number[] => {
+const mergeSort = (arr: readonly number[]): readonly number[] => {
   if (arr.length <= 1) return arr
 
   const mid = Math.floor(arr.length / 2)

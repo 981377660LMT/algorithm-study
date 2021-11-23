@@ -1,3 +1,4 @@
+type Binary = (a: number, b: number) => number
 /**
  * @param {string} s  s 由数字、'+'、'-'、'('、')'、和 ' ' 组成
  * @return {number}
@@ -12,12 +13,12 @@ const calculate = function (s: string): number {
   const opt = new Set(['+', '-', '(', ')', '*', '/'])
   const numStack: number[] = []
   const optStack: string[] = []
-  const evaluate = {
-    '+': (a: number, b: number) => a + b,
-    '-': (a: number, b: number) => a - b,
-    '*': (a: number, b: number) => a * b,
-    '/': (a: number, b: number) => ~~(a / b),
-  } as Record<string, (a: number, b: number) => number>
+  const evaluate: Record<string, Binary> = {
+    '+': (a, b) => a + b,
+    '-': (a, b) => a - b,
+    '*': (a, b) => a * b,
+    '/': (a, b) => ~~(a / b),
+  }
   const getOperatorWeight = (operator: string) => {
     switch (operator) {
       case '+':
@@ -30,7 +31,7 @@ const calculate = function (s: string): number {
       case ')':
         return NaN
       default:
-        throw new Error('Not Valid Operator')
+        throw new Error('Invalid Operator')
     }
   }
 

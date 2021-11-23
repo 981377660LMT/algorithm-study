@@ -1,4 +1,4 @@
-const qucikSort = (arr: number[]): number[] => {
+const qucikSort = (arr: readonly number[]): readonly number[] => {
   if (arr.length <= 1) return arr
   // 最基础的partition
   const start = arr[0]
