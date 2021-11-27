@@ -32,7 +32,7 @@ class Trie {
    *
    * @param num
    * @summary
-   * 求num与树中异或值严格小于high的个数
+   * 求num与树中异或值小于等于high的个数
    * @description
    * 传入当前要比较的数字和limit数字，同时右移动
    * 如果limit在某位为0，那么校验数字不能出现异或为1的情况,校验数字结果会大于limit，不符合我们的要求
@@ -43,23 +43,26 @@ class Trie {
     let root: TrieNode | undefined = this.root
     let res = 0
 
-    for (let i = this.N; i >= 0; i--) {
+    for (let i = this.N; ~i; i--) {
       if (!root) break
       const bit = (num >> i) & 1
       const bitLimit = (high >> i) & 1
 
       if (bitLimit === 1) {
-        if (root.children[bit]) {
+        if (root.children[bit] != undefined) {
+          // 异或在这位取0的数都可以
           res += root.children[bit]!.count
         }
-        // 切换分支
+        // 切换分支，这位异或取1继续看(有可能切到undefined)
         root = root.children[1 - bit]
       } else {
+        // 异或只能取0
         root = root.children[bit]
       }
     }
 
-    return res
+    // 注意这里,最后一个要算
+    return res + (root != undefined ? root.count : 0)
   }
 }
 
@@ -76,7 +79,7 @@ function countPairs(nums: number[], low: number, high: number): number {
 
   for (const num of nums) {
     trie.insert(num)
-    res += trie.search(num, high + 1) - trie.search(num, low)
+    res += trie.search(num, high) - trie.search(num, low - 1)
   }
 
   return res

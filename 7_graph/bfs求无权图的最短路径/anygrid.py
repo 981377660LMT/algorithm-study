@@ -1,0 +1,3 @@
+grid = [[], []]
+print(any(grid))
+

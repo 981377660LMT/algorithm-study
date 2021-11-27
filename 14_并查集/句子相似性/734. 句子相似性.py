@@ -3,7 +3,7 @@
 
 # 注意相似关系是'不'具有传递性的。例如，如果 "great" 和 "fine" 是相似的，
 # "fine" 和 "good" 是相似的，但是 "great" 和 "good" 未必是相似的。
-
+# 即：必须要严格的一对一映射关系=>元组
 
 from typing import List
 

@@ -1,4 +1,4 @@
-import { HashHeap } from '../../8_heap/HashHeap'
+import { MinHeap } from '../../../2_queue/minheap'
 
 type Height = number
 type Position = number
@@ -25,7 +25,7 @@ const getSkyline = function (buildings: number[][]): number[][] {
 
   // 记录进行了 删除操作的高度->删除次数
   const deleteCount = new Map<number, number>()
-  const queue = new HashHeap((a, b) => b - a)
+  const queue = new MinHeap((a, b) => b - a)
   // 把一个完整轮廓的「右下角」那个点也取到，所以需要先添加一个 0。
   queue.push(0)
 
@@ -41,8 +41,19 @@ const getSkyline = function (buildings: number[][]): number[][] {
       deleteCount.set(point[1], (deleteCount.get(point[1]) || 0) + 1)
     }
 
+    while (queue.size > 0) {
+      const top = queue.peek()
+      if (deleteCount.has(top)) {
+        if (deleteCount.get(top) === 1) deleteCount.delete(top)
+        else deleteCount.set(top, deleteCount.get(top)! - 1)
+        queue.shift()
+      } else {
+        break
+      }
+    }
+
+    // 堆内高度变化则遇到了`关键点`
     const curMaxHeight = queue.peek()
-    // console.log(queue)
     if (preMaxHeight !== curMaxHeight) {
       res.push([point[0], curMaxHeight])
       preMaxHeight = curMaxHeight

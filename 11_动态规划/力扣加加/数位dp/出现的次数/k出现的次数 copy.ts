@@ -1,21 +1,25 @@
 /**
- * @param {number} n n <= 10^9
- * @return {number}
+ * @param {number} upper n <= 10^9
+ * @return {number}  [0,n]有多少个k
  */
-const numberOfKsInRange = function (n: number, k: number): number {
-  if (n <= k - 1) return 0
-  if (n < 10) return 1
+const find = function (upper: number, k: number): number {
+  if (upper <= k - 1) return 0
+  if (upper < 10) return 1
 
-  const len = n.toString().length
-  const base = 10 ** (len - 1) // n四位数的话基数就是1000
-  const remainder = n % base
-  const times = ~~(n / base)
-  let baseCount // 最高位为2的次数
-  if (times <= k - 1) baseCount = 0
-  else if (times === k) baseCount = n - k * base + 1
-  else baseCount = base
-
-  return numberOfKsInRange(base - 1, k) * times + baseCount + numberOfKsInRange(remainder, k)
+  // 举例:upper=124,k=3
+  const [div, mod] = [~~(upper / 10), upper % 10]
+  // 1. 先算k在个位出现的次数
+  let res = div + find(mod, k)
+  // 2. k在十位数及以上部分x出现的次数：
+  // 0-11(0-119) 此时个位数可取0-9 10位 除去前导0 所以是(find(div, k) - find(div - 1, k)) * (mod + 1)
+  // 12(120-124) 此时个位数可取(mod + 1)位 所以是(find(div, k) - find(div - 1, k)) * (mod + 1)
+  res += (find(div - 1, k) - find(0, k)) * 10 + (find(div, k) - find(div - 1, k)) * (mod + 1)
+  return res
 }
 
-console.log(numberOfKsInRange(251, 2))
+if (require.main === module) {
+  console.log(find(251, 2))
+  console.log(find(10, 0))
+}
+
+export { find as numberOfKsInRange }

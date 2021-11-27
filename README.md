@@ -6,7 +6,6 @@
 - code up 公众号
 - code up 网站
 - 组件参考 elementUI
-- 霜神
 - 剩余题目按照分类做
 
 JS,TS 刷题时大数问题可用 BigInt 或者求余解决

@@ -18,16 +18,20 @@ const atMostNGivenDigitSet = function (digits: string[], n: number): number {
 
   // 等于len位时 n的高位向低位对比
   for (let i = 0; i < len; i++) {
-    const target = n.toString()[i]
-    const lessThan = nums.filter(v => v < Number(target)).length
+    const upper = Number(n.toString()[i])
+    // 在此位能取的数
+    const lessThan = nums.filter(v => v < upper).length
     res += lessThan * digits.length ** (len - i - 1)
-    if (!nums.includes(Number(target))) break
-    else if (i === len - 1) res++ // 相等情况
+    console.log(res, lessThan)
+
+    // 如果存在upper 那么这一轮digits里的upper是不能作为这一位的 还要继续循环往下看
+    if (!nums.includes(upper)) break
+    else if (i === len - 1) res++ // 相等情况，即可以凑成相等
   }
 
   return res
 }
 
-console.log(atMostNGivenDigitSet(['1', '3', '5', '7'], 111))
+console.log(atMostNGivenDigitSet(['1', '3', '5', '7'], 786))
 
 export {}

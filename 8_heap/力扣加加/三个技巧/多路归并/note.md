@@ -1,7 +1,7 @@
 模板
 
-1. pq push 起始值
-2. 获取 k 个结果
+1. pq push 起始值 (val,row,col) 或者 (val,i,j)
+2. 获取 k 个结果(push/pop)
 3. push 下一个
 
 ```JS

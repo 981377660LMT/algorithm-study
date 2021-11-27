@@ -1,15 +1,13 @@
 class NumMatrix {
-  private matrix: number[][]
   private pre: number[][]
 
   constructor(matrix: number[][]) {
-    this.matrix = matrix
     // 加一便于处理
-    const m = matrix.length + 1
-    const n = matrix[0].length + 1
-    const pre = Array.from<number, number[]>({ length: m }, () => Array(n).fill(0))
-    for (let i = 1; i < m; i++) {
-      for (let j = 1; j < n; j++) {
+    const m = matrix.length
+    const n = matrix[0].length
+    const pre = Array.from<number, number[]>({ length: m + 1 }, () => Array(n + 1).fill(0))
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
         // 注意这里的减1
         pre[i][j] = matrix[i - 1][j - 1] + pre[i - 1][j] + pre[i][j - 1] - pre[i - 1][j - 1]
       }
@@ -17,7 +15,6 @@ class NumMatrix {
     this.pre = pre
   }
 
-  // 注意这里的减1
   sumRegion(row1: number, col1: number, row2: number, col2: number) {
     return (
       this.pre[row2 + 1][col2 + 1] +
@@ -41,7 +38,7 @@ function getMaxMatrix(matrix: number[][]): number[] {
 
   // 先固定上下两条边
   for (let top = 0; top < m; top++) {
-    for (let bottom = 0; bottom < m; bottom++) {
+    for (let bottom = top; bottom < m; bottom++) {
       let localMax = 0
       let left = 0
 
@@ -54,6 +51,7 @@ function getMaxMatrix(matrix: number[][]): number[] {
           res = [top, left, bottom, right]
         }
 
+        // left直接跳到下一个，不取这个
         if (localMax < 0) {
           localMax = 0
           left = right + 1

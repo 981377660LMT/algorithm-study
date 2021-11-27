@@ -1,2 +1,1 @@
- # if flag >= 2:
-                #     b
+visited_bike & (1 << next_bike)) 

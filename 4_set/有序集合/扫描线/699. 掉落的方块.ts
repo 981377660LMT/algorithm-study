@@ -11,7 +11,6 @@ class Interval {
     O(n^2)解法
  */
 const fallingSquares = function (positions: number[][]): number[] {
-  // 维护两个数组，一个代表所有投影的点 ps，一个代表轮廓线的高度 hs
   const res: number[] = []
   const intervals: Interval[] = []
 
@@ -33,11 +32,13 @@ const fallingSquares = function (positions: number[][]): number[] {
    */
   function getHeight(intervals: Interval[], cur: Interval): number {
     let preMaxHeight = 0
+
     for (const interval of intervals) {
       if (interval.end <= cur.start) continue
       if (interval.start >= cur.end) continue
       preMaxHeight = Math.max(preMaxHeight, interval.height)
     }
+
     cur.height += preMaxHeight
     intervals.push(cur)
     return cur.height
@@ -80,3 +81,4 @@ console.log(
 // 方块最大高度为5。
 
 // 因此，我们返回结果[2, 5, 5]。
+export {}

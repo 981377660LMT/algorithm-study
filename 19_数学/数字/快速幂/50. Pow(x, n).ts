@@ -28,7 +28,7 @@ const myPow2 = function (x: number, n: number): number {
   while (n) {
     //如果n的当前末位为1,res乘上当前的x,x自乘,n往右移一位
     if (n & 1) res *= x
-    x = x ** 2
+    x *= x
     n >>>= 1
   }
 

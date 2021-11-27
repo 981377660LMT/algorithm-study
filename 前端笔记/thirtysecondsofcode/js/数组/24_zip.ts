@@ -7,3 +7,4 @@ function zip<T>(...arrs: any[][]) {
     Array.from({ length: arrs.length }, (_, row) => arrs[row][col])
   )
 }
+export {}

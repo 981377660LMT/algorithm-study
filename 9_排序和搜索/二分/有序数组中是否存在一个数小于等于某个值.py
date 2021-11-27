@@ -2,8 +2,6 @@ from bisect import bisect_right
 from typing import List
 from functools import partial
 
-nums = [1, 2, 3, 4, 5]
-
 
 def queryExist(nums: List[float], query: int) -> bool:
     if not nums:
@@ -12,6 +10,7 @@ def queryExist(nums: List[float], query: int) -> bool:
     return index != 0  # 等于则query比后面都小
 
 
+nums = [1, 2, 3, 4, 5]
 queryExistInNums = partial(queryExist, nums)
 print(queryExistInNums(6))
 print(queryExistInNums(3))

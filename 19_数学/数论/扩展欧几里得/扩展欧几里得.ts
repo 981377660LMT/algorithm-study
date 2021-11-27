@@ -15,6 +15,7 @@ function exgcd(a: number, b: number): [x: number, y: number, gcd: number] {
   ;[x, y] = [y, x - ~~(a / b) * y]
   return [x, y, gcd]
 }
+
 if (require.main === module) {
   console.log(exgcd(3, 10))
 }

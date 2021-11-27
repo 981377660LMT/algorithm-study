@@ -4,16 +4,24 @@
  * @return {number}
  */
 const kthSmallest = function (matrix: number[][], k: number): number {
+  const [m, n] = [matrix.length, matrix[0].length]
+  // 老技巧：左下角开始出发
   const count = (mid: number) => {
-    let count = 0
-    for (let i = 0; i < matrix.length; i++) {
-      for (let j = 0; j < matrix[0].length; j++) {
-        if (matrix[i][j] <= mid) count++
-        else break
+    let [r, c] = [m - 1, 0]
+    let res = 0
+
+    while (r >= 0 && c < n) {
+      if (matrix[r][c] <= mid) {
+        res += r + 1
+        c++
+      } else {
+        r--
       }
     }
-    return count
+
+    return res
   }
+
   let l = matrix[0][0]
   let r = matrix[matrix.length - 1][matrix[0].length - 1] + 1
 

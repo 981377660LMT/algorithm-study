@@ -17,10 +17,10 @@ function pipe2(this: any, funcs: Array<(arg: any) => any>): (arg: any) => any {
   return arg => funcs.reduce((pre, cur) => cur.call(this, pre), arg)
 }
 
-const times = (y: number) => (x: number) => x * y
+const div = (y: number) => (x: number) => x * y
 const plus = (y: number) => (x: number) => x + y
 const subtract = (y: number) => (x: number) => x - y
 const divide = (y: number) => (x: number) => x / y
 
-console.log(pipe([times(2), plus(3), times(4)])(1)) // 20  // (x * 2 + 3) * 4
-console.log(pipe2([times(2), plus(3), times(4)])(1)) // 20  // (x * 2 + 3) * 4
+console.log(pipe([div(2), plus(3), div(4)])(1)) // 20  // (x * 2 + 3) * 4
+console.log(pipe2([div(2), plus(3), div(4)])(1)) // 20  // (x * 2 + 3) * 4
