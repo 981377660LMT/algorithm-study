@@ -6,11 +6,11 @@
 var peakIndexInMountainArray = function (arr) {
   let [l, r] = [0, arr.length - 1]
 
-  while (l < r) {
+  while (l <= r) {
     const mid = (l + r) >> 1
 
     if (arr[mid] > arr[mid + 1]) {
-      r = mid
+      r = mid - 1
     } else {
       l = mid + 1
     }

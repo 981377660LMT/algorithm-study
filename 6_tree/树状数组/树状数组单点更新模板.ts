@@ -1,3 +1,5 @@
+// 树状数组天生用来动态维护数组前缀和
+// 单点修改，区间查询
 interface IBIT {
   add: (x: number, k: number) => void
   query: (x: number) => number
@@ -14,6 +16,7 @@ interface IBIT {
  * 4. 树的高度为logn+1
  */
 // tree的0号位置不存值;初始化「树状数组」，要默认数组是从 1 开始
+
 class BIT implements IBIT {
   public size: number
   private tree: number[]
@@ -41,7 +44,7 @@ class BIT implements IBIT {
    *
    * @param x
    * @description
-   * 区间查询：返回前x项的值(包含x)
+   * 区间查询：返回前x项的值(包含x)；前缀和
    */
   query(x: number) {
     let res = 0

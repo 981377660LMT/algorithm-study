@@ -13,6 +13,7 @@ const maximalSquare = (matrix: string[][]) => {
           matrix[i][j] = Math.min(matrix[i][j - 1], matrix[i - 1][j], matrix[i - 1][j - 1]) + 1
         }
       }
+
       // @ts-ignore
       max = Math.max(max, matrix[i][j])
     }

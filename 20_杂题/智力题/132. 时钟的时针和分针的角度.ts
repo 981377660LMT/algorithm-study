@@ -22,3 +22,4 @@ console.log(angle('12:00'))
 
 console.log(angle('23:30'))
 // 165
+export {}

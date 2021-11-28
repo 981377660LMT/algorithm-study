@@ -1,4 +1,4 @@
-import { BIT } from '../../../../6_tree/树状数组/BIT'
+import { BIT } from '../../../../6_tree/树状数组/树状数组单点更新模板'
 
 // 把二维矩阵转化为一维数组，然后使用树状数组
 class NumMatrix {

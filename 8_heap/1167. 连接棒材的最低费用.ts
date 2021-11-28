@@ -1,5 +1,6 @@
 import { MinHeap } from './minheap'
 
+// 哈夫曼编码的思想
 function connectSticks(sticks: number[]): number {
   if (sticks.length === 1) return 0
   if (sticks.length === 2) return sticks[0] + sticks[1]

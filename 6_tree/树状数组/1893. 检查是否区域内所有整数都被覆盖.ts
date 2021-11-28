@@ -1,7 +1,7 @@
 // 1 <= ranges.length <= 50
 // 1 <= starti <= endi <= 50
 
-import { BIT } from './BIT'
+import { BIT } from './树状数组单点更新模板'
 
 // 1 <= left <= right <= 50
 function isCovered(ranges: number[][], left: number, right: number): boolean {

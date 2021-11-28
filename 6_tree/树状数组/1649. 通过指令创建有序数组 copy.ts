@@ -2,7 +2,7 @@
 // 每一次插入操作的 代价 是以下两者的 较小值 ：
 // nums 中 严格小于  instructions[i] 的数字数目。
 
-import { BIT } from './BIT'
+import { BIT } from './树状数组单点更新模板'
 
 // nums 中 严格大于  instructions[i] 的数字数目。
 // 1 <= instructions.length <= 10**5

@@ -1,4 +1,4 @@
-import { useUnionFind } from './推荐使用并查集精简版'
+import { useUnionFindArray } from '../推荐使用并查集精简版'
 
 /**
  * @param {string[]} grid
@@ -16,7 +16,7 @@ import { useUnionFind } from './推荐使用并查集精简版'
  */
 const regionsBySlashes = function (grid: string[]): number {
   const N = grid.length
-  const uf = useUnionFind(4 * N ** 2)
+  const uf = useUnionFindArray(4 * N ** 2)
 
   for (let i = 0; i < N; i++) {
     for (let j = 0; j < N; j++) {

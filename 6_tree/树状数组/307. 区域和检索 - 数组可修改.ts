@@ -1,4 +1,4 @@
-import { BIT } from './BIT'
+import { BIT } from './树状数组单点更新模板'
 
 /**
  * 动态区间和求解
