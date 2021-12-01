@@ -20,7 +20,7 @@ const findCheapestPrice = function (
   const dist = Array<number>(n).fill(Infinity)
   dist[src] = 0
 
-  // 最多k个中转点
+  // 最多k个中转点，即更新k+1次
   for (let i = 0; i < k + 1; i++) {
     const clone = dist.slice()
     for (const [u, v, w] of flights) {

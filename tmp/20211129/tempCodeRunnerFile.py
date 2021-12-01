@@ -1,0 +1,1 @@
+            print(cur, preNum, s[cur:10], len(s))

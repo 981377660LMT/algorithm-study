@@ -7,18 +7,18 @@
    100 - 999: 900 * 3 digits
  */
 const findNthDigit = function (n: number): number {
-  let num = 9
+  let count = 9
   let digit = 1
-  while (n > num * digit) {
-    n -= num * digit
-    num *= 10
+  while (n > count * digit) {
+    n -= count * digit
+    count *= 10
     digit++
   }
+
   const base = 10 ** (digit - 1)
-  const offset = Math.ceil(n / digit) - 1
-  const indexInDigit = (n - 1) % digit
-  console.log(base, offset, indexInDigit)
-  return parseInt((base + offset).toString()[indexInDigit])
+  const [div, mod] = [~~((n - 1) / digit), (n - 1) % digit]
+
+  return parseInt((base + div).toString()[mod])
 }
 
 console.log(findNthDigit(11))

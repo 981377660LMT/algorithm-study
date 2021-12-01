@@ -5,7 +5,7 @@
 
 算法需要，自己修改
 
-删除一般是 dfs 前序 递归删除
+删除一般是 dfs 后序
 
 ```JS
     root.left = dfs(root.left, 删除条件/标志位)

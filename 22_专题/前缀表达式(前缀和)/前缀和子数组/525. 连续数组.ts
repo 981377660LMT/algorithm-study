@@ -9,16 +9,16 @@
 const findMaxLength = function (nums: number[]): number {
   const pre = new Map<number, number>([[0, -1]])
   let sum = 0
-  let max = 0
+  let res = 0
 
   for (let i = 0; i < nums.length; i++) {
     const cur = nums[i]
     sum += cur === 0 ? -1 : 1
-    if (pre.has(sum)) max = Math.max(max, i - pre.get(sum)!)
+    if (pre.has(sum)) res = Math.max(res, i - pre.get(sum)!)
     else pre.set(sum, i)
   }
 
-  return max
+  return res
 }
 
 console.log(findMaxLength([0, 1, 0]))

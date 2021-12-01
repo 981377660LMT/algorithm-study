@@ -1,5 +1,5 @@
 /**
- * @param {number[]} encoded
+ * @param {number[]} encoded  给你编码后的数组 encoded 和原数组 arr 的第一个元素 first
  * @param {number} first
  * @return {number[]}
  * 经编码后变为长度为 n - 1 的另一个整数数组 encoded ，其中 encoded[i] = arr[i] XOR arr[i + 1]

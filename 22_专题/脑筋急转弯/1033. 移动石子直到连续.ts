@@ -5,9 +5,9 @@
 function numMovesStones(a: number, b: number, c: number): number[] {
   ;[a, b, c] = [a, b, c].sort((a, b) => a - b)
   if (c - a === 2) return [0, 0]
-  // 若a、c任一与b差值小于等于2，则可一步到位
-  if (b - a <= 2 || c - b <= 2) return [1, c - b - 1 + (b - a - 1)]
-  else return [2, c - b - 1 + (b - a - 1)]
+  // 若a、c任一与b差值小于等于2，则可一步到位;最慢是a和c全部一步一步往中间靠拢
+  if (b - a <= 2 || c - b <= 2) return [1, c - (b + 1) + (b - (a + 1))]
+  else return [2, c - (b + 1) + (b - (a + 1))]
 }
 
 // 输入：a = 1, b = 2, c = 5

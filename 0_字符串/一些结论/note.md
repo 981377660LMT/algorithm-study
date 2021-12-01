@@ -21,3 +21,11 @@ right=s[half:]
 for addIndex in range(len(w)):
     nextChar=w[:addIndex] + addChar + w[addIndex:]
 ```
+
+4. 枚举分割非空子串
+
+```Python
+for i in range(1,len(s)):
+    if backtrack(s[i:], int(s[:i])):
+        return True
+```
