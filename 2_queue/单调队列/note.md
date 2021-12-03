@@ -16,3 +16,26 @@ i >= k - 1 需要开始添加了
    `862. 和至少为 K 的最短子数组`
 
    单减的双端单调队列 队首可以维持最大值 起到最大堆的作用
+
+**1499. 满足不等式的最大值.py**
+当使用堆来维护有序的子序列/子数组时，考虑使用单调队列
+每次搜索到一个新的 point，我们可以通过单调队列，`直接取出之前的点中target的最大值`。不过，`每次取出元素前，我们需要检验一下，这个元素的 x 值是否满足限制条件。`
+
+```Python
+queue = deque()
+res = -0x7FFFFFFF
+
+for x, y in points:
+   # 1. 过期的数据
+   while queue and queue[0][1] < x - k:
+         queue.popleft()
+
+   # 2.更新结果
+   if queue:
+         res = max(res, queue[0][0] + x + y)
+
+   # 3.入队
+   while queue and queue[-1][0] <= y - x:
+         queue.pop()
+   queue.append((y - x, x))
+```

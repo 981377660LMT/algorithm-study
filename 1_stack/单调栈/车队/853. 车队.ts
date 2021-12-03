@@ -9,8 +9,10 @@ function carFleet(target: number, position: number[], speed: number[]): number {
     while (stack.length && time >= stack[stack.length - 1]) {
       stack.pop()
     }
+
     stack.push(time)
   }
+
   return stack.length
 }
 

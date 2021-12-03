@@ -2,6 +2,8 @@ import collections
 from itertools import zip_longest
 
 # 给定一个字符串S，检查是否能重新排布其中的字母，使得两相邻的字符不同。
+
+
 # 如果最多的字符不超过一半，可以进行排布，排布方法是
 # 按照字符的个数进行排序，然后依次输出到数组中，
 class Solution:

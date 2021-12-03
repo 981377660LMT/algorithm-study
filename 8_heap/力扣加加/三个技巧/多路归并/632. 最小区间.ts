@@ -1,4 +1,4 @@
-import { PriorityQueue } from '../../../../2_queue/todo优先级队列'
+import { MinHeap } from '../../../../2_queue/minheap'
 
 /**
  * @param {number[][]} nums
@@ -11,7 +11,7 @@ import { PriorityQueue } from '../../../../2_queue/todo优先级队列'
 const smallestRange = function (nums: number[][]): number[] {
   let l = -Infinity
   let r = Infinity
-  const pq = new PriorityQueue<[number, number, number]>(
+  const pq = new MinHeap<[number, number, number]>(
     (a, b) => a[0] - b[0],
     Infinity,
     nums.map((row, index) => [row[0], index, 0])

@@ -18,11 +18,16 @@
 const leastInterval = (tasks: string[], n: number): number => {
   const counter = new Map<string, number>()
   tasks.forEach(task => counter.set(task, (counter.get(task) || 0) + 1))
-  const vals = [...counter.values()]
-  const bucketNum = Math.max.apply(null, vals)
-  const lastBucketCount = vals.filter(v => v === bucketNum).length
-  const time = (bucketNum - 1) * (n + 1) + lastBucketCount
-  return Math.max(tasks.length, time)
+
+  const taskCount = [...counter.values()]
+  const maxCount = Math.max.apply(null, taskCount)
+
+  // 数量最大的任务个数
+  const maxTaskCount = taskCount.filter(v => v === maxCount).length
+  const time = (maxCount - 1) * (n + 1) + maxTaskCount
+
+  // 任务种类较少，填不满桶时/任务种类较少，填不满桶时
+  return Math.max(time, tasks.length)
 }
 
 console.log(leastInterval(['A', 'A', 'A', 'B', 'B', 'B'], 2))

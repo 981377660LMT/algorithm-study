@@ -16,6 +16,7 @@ const maxMoney = (nums: number[]) => {
     return dp[end]
   }
 
+  // 取不取第一块
   const money1 = maxMoneyRange(nums, 0, len - 2)
   const money2 = maxMoneyRange(nums, 1, len - 1)
   return Math.max(money1, money2)
