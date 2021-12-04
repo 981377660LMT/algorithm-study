@@ -1,0 +1,1 @@
+self.large[0] - self.small[0]
