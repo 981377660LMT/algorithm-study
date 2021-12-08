@@ -11,9 +11,11 @@ const PredictTheWinner = function (nums: number[]): boolean {
     dp[i][i] = nums[i]
   }
 
+  // 枚举区间长度
   for (let l = 1; l < n; l++) {
     for (let i = 0; i < n - l; i++) {
       const j = i + l
+      // 取左边还是右边
       dp[i][j] = Math.max(nums[i] - dp[i + 1][j], nums[j] - dp[i][j - 1])
     }
   }

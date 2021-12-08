@@ -6,3 +6,14 @@ When seeing the word **consecutive sequence**, think about using **Prefix Sum** 
 两个 atMostK:
 **不超过 k 种元素的子数组个数**:水果成栏问题,K 个不同整数的子数组问题
 **全部元素都不大于 k 的子数组个数**：区间子数组个数
+
+```Python
+preSum = [0]
+for num in nums:
+    preSum.append(preSum[-1] + num)
+```
+
+此时：
+`注意 preSum[i+1]的含义:arr[0]+arr[1]+...+arr[i]`不要弄混了
+**i+1 表示前 i+1 个数 因此是 0-i 这 i+1 项**
+`[i,j]这一段的和是 preSum[j+1]-preSum[i]`

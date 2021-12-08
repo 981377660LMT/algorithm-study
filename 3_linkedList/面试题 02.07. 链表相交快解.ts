@@ -31,10 +31,12 @@ e.next = b
 const getIntersectionNode = function (headA: ListNode, headB: ListNode): ListNode | undefined {
   let a: ListNode | undefined = headA
   let b: ListNode | undefined = headB
+
   while (a !== b) {
-    a = a === undefined ? headB : a.next
-    b = b === undefined ? headA : b.next
+    a = a.next || headB
+    b = b.next || headA
   }
+
   return a
 }
 

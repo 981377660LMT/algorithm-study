@@ -2,6 +2,7 @@ import { Trie } from '../../6_tree/前缀树trie/实现trie/1_实现trie'
 
 class WordTrie extends Trie {
   // 不如hashmap的写法
+  // 超时：需要添加cache?
   searchWord(s: string, found = 0): boolean {
     if (s.length === 0) return found >= 2
     let node = this.root
@@ -32,7 +33,7 @@ const findAllConcatenatedWordsInADict = function (words: string[]): string[] {
 
   for (const word of words) trie.insert(word)
   for (const word of words) {
-    if (trie.search(word)) res.push(word)
+    if (trie.searchWord(word)) res.push(word)
   }
 
   return res

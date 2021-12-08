@@ -1,1 +1,1 @@
-visited_bike & (1 << next_bike)) 
+dfs(person + 1, state), [person] + dfs(person + 1, state | cand[person])

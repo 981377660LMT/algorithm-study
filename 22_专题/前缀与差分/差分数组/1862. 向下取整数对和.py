@@ -42,3 +42,4 @@ print(Solution().sumOfFlooredPairs(nums=[2, 5, 9]))
 # 我们计算每一个数对商向下取整的结果并求和得到 10 。
 
 # 分數 的英文是 fraciton ，上面的 分子 是 numerator ，下面的 分母 是 denominator 。
+

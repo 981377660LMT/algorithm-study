@@ -28,6 +28,6 @@ class Solution {
   }
 }
 
-const big = new Solution()
-console.log(big.solve('radr'))
-big.test()
+const big1 = new Solution()
+console.log(big1.solve('radr'))
+big1.test()

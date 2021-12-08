@@ -15,15 +15,15 @@ const characterReplacement = function (s: string, k: number): number {
 
   let l = 0
   let res = 0
-  let maxCount = 0
+  let preMaxCount = 0
 
   for (let r = 0; r < s.length; r++) {
     const curChar = s[r].codePointAt(0)! - BASE
     counter[curChar]++
-    maxCount = Math.max(maxCount, counter[curChar])
+    preMaxCount = Math.max(preMaxCount, counter[curChar])
 
-    // 超出
-    if (r - l + 1 > maxCount + k) {
+    // 超出 如果maxCount不涨 就不会更新结果 所以只需关注maxCount历史最大值
+    if (r - l + 1 > preMaxCount + k) {
       counter[s[l].codePointAt(0)! - BASE]--
       l++
     }

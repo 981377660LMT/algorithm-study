@@ -8,8 +8,10 @@ function compress(str: string): string {
   // your code here
   let count = 0
   const sb: string[] = []
+
   for (let i = 0; i < str.length; i++) {
     count++
+
     if (str[i] !== str[i + 1]) {
       sb.push(str[i])
       count > 1 && sb.push(count.toString())

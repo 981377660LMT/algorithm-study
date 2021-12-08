@@ -25,5 +25,5 @@ dfs`847. 访问所有节点的最短路径.ts`
 关键点:
 
 1. bfs:三个参数存队列,dfs:三个参数为传参
-2. visited 记录(数组或者 set 记录(`cur,visited`))
+2. visited 记录(数组或者 set 记录(`cur,visitedState`))
 3. `visited === targe`t 则返回 cost
