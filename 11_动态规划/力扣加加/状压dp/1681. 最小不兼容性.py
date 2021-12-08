@@ -5,37 +5,50 @@
 '''
 
 from typing import List
-from collections import Counter
+from functools import lru_cache
+from itertools import combinations
+
+# 1 <= k <= nums.length <= 16
+# nums.length 能被 k 整除。
+
+# 引入优化：每组的第一个元素必定是剩下元素中最小的那个。
+# 有了这个优化后等于每组减少了一个元素，排列组合取4个变成了取3个就能大幅缩短时间。
+INF = 0x7FFFFFFF
 
 
 class Solution:
     def minimumIncompatibility(self, nums: List[int], k: int) -> float:
-        if (max(Counter(nums).values())) > k:
-            return -1
-        res = float('inf')
-        nums.sort(reverse=True)
-        arr = [[] for _ in range(k)]
-        upper = len(nums) // k
+        size = len(nums) // k
+        if size == 1:
+            return 0
+        nums.sort()
 
-        def bt(index: int):
-            if index == len(nums):
-                nonlocal res
-                res = min(res, sum(arr[i][0] - arr[i][-1] for i in range(k)))
-                return True
-            flag = 0
-            for j in range(k):
-                if not arr[j] or len(arr[j]) < upper and arr[j][-1] != nums[index]:
-                    arr[j].append(nums[index])
-                    if bt(index + 1):
-                        flag += 1
-                    arr[j].pop()
-                    # nums[i] can be assigned to arr[j] and arr[j+1]
-                if flag >= 2:
-                    break
-            return flag != 0
+        @lru_cache(None)
+        def dfs(state: int) -> int:
+            available = [i for i in range(len(nums)) if not state & (1 << i)]
+            if not available:
+                return 0
 
-        bt(0)
-        return res
+            res = INF
+            for group in combinations(available[1:], size - 1):
+                group = (available[0],) + group
+                if len(set([nums[i] for i in group])) < size:
+                    continue
+                nextState = state
+                for i in group:
+                    nextState |= 1 << i
+                res = min(res, dfs(nextState) + nums[group[-1]] - nums[group[0]])
+
+            return res
+
+        res = dfs(0)
+        dfs.cache_clear()
+
+        return res if res != INF else -1
 
 
 print(Solution().minimumIncompatibility([6, 3, 8, 1, 3, 1, 2, 2], 4))
+# 输出：6
+# 解释：最优的子集分配为 [1,2]，[2,3]，[6,8] 和 [1,3] 。
+# 不兼容性和为 (2-1) + (3-2) + (8-6) + (3-1) = 6 。
+

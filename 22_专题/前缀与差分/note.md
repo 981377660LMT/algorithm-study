@@ -16,4 +16,4 @@ for num in nums:
 此时：
 `注意 preSum[i+1]的含义:arr[0]+arr[1]+...+arr[i]`不要弄混了
 **i+1 表示前 i+1 个数 因此是 0-i 这 i+1 项**
-`[i,j]这一段的和是 preSum[j+1]-preSum[i]`
+`[i,j]这一段的和是 preSum[j+1]-preSum[i]` 一共`(j-i+1)`个数

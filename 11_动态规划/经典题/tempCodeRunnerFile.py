@@ -1,2 +1,1 @@
-:
-            #     return 0
+nums1[cur] ^ nums2[next]
