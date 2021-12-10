@@ -1,0 +1,1 @@
+degree[i] + degree[j] - int(adjList[i][j])

@@ -19,6 +19,9 @@ c.random = a
 
 // 构造这个链表的 深拷贝。
 // 启示：深拷贝可以 建立单项映射关系 遍历两次
+
+// 第一次初始化新的node存到map
+// 第二次建立指针关系
 const copyRandomList = (head: RandomNode) => {
   if (!head) return
   const record = new WeakMap<RandomNode, RandomNode | undefined>()

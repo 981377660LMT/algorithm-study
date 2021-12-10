@@ -1,22 +1,29 @@
 import { BinaryTree } from '../Tree'
+import { deserializeNode } from './297二叉树的序列化与反序列化'
 
-const distanceK = function (root: BinaryTree) {
-  if (!root) return
-  const adjMap: Map<number, Set<number>> = new Map()
+const distanceK = function (root: BinaryTree | null) {
+  const adjMap: Map<number, number[]> = new Map()
 
-  const dfs = (root: BinaryTree) => {
-    if (root.left) {
-      adjMap.set(root.val, (adjMap.get(root.val) || new Set()).add(root.left.val))
-      adjMap.set(root.left.val, (adjMap.get(root.left.val) || new Set()).add(root.val))
-      dfs(root.left)
+  const dfs = (root: BinaryTree | null, parent: BinaryTree | null) => {
+    if (!root) return
+    if (parent) {
+      !adjMap.has(root.val) && adjMap.set(root.val, [])
+      !adjMap.has(parent.val) && adjMap.set(parent.val, [])
+      adjMap.get(root.val)!.push(parent.val)
+      adjMap.get(parent.val)!.push(root.val)
     }
-    if (root.right) {
-      adjMap.set(root.val, (adjMap.get(root.val) || new Set()).add(root.right.val))
-      adjMap.set(root.right.val, (adjMap.get(root.right.val) || new Set()).add(root.val))
-      dfs(root.right)
-    }
+
+    dfs(root.left, root)
+    dfs(root.right, root)
   }
-  dfs(root)
+
+  dfs(root, null)
+  return adjMap
 }
 
 export default 1
+
+console.log(distanceK(deserializeNode([1, 2, 3, 45])))
+console.log(distanceK(deserializeNode([1])))
+
+// 注意叶子节点root满足 adjMap.get(root)!.length===1

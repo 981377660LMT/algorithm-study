@@ -8,6 +8,7 @@ const calculate = function (s: string): number {
   s = s.startsWith('-') ? '0' + s + ')' : s + ')' // "-1 - (-1)" => "0-1 - (-1)"
   s = s.replace(/\(\-/g, '(0-') // "1 - (-1)" => "1 - (0-1)"
   s = s.replace(/\(\+/g, '(0+') // "1 - (+1)" => "1 - (0+1)"
+
   const tokens = s.split(/([\(\)\+\-\*\/])/g).filter(v => v.trim())
   const opt = new Set(['+', '-', '(', ')', '*', '/'])
   const numStack: number[] = []
@@ -18,6 +19,7 @@ const calculate = function (s: string): number {
     '*': (a: number, b: number) => a * b,
     '/': (a: number, b: number) => ~~(a / b),
   } as Record<string, (a: number, b: number) => number>
+
   const getOperatorWeight = (operator: string) => {
     switch (operator) {
       case '+':

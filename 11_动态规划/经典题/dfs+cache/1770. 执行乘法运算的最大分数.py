@@ -34,6 +34,7 @@ class Solution:
 
 
 print(Solution().maximumScore(nums=[1, 2, 3], multipliers=[3, 2, 1]))
+print(Solution().maximumScore(nums=[2, 5, 4, 3, 1], multipliers=[3, 5, 1, 2, 4]))
 # 输出：14
 # 解释：一种最优解决方案如下：
 # - 选择末尾处的整数 3 ，[1,2,3] ，得 3 * 3 = 9 分，累加到分数中。

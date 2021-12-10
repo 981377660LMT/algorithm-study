@@ -106,12 +106,12 @@ function deserializeNode(data: (number | null)[]): BinaryTree | null {
   const queue: (BinaryTree | null)[] = [root]
 
   while (queue.length) {
-    const head = queue.shift()
-    if (head) {
-      head.left = genNode(data.shift())
-      head.right = genNode(data.shift())
-      head.left && queue.push(head.left)
-      head.right && queue.push(head.right)
+    const cur = queue.shift()
+    if (cur) {
+      cur.left = genNode(data.shift())
+      cur.right = genNode(data.shift())
+      cur.left && queue.push(cur.left)
+      cur.right && queue.push(cur.right)
     }
   }
 
