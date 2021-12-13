@@ -1,4 +1,4 @@
-import { HashHeap } from '../../8_heap/HashHeap'
+import { HashHeap } from '../../../8_heap/HashHeap'
 
 type Start = number
 type End = number

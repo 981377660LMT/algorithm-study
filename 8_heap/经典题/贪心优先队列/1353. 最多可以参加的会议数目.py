@@ -20,7 +20,7 @@ class Solution:
                 heappush(pq, events[event_index][1])
                 event_index += 1
 
-            # 已经结束的会议
+            # 已经结束的会议(结束时间小于当前时间)
             while pq and pq[0] < day:
                 heappop(pq)
 

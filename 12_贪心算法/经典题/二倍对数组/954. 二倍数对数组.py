@@ -7,6 +7,7 @@ class Solution:
     def canReorderDoubled(self, arr: List[int]) -> bool:
         counter = Counter(arr)
         for key in sorted(counter, key=abs):
+            # 映射
             if counter[key] > counter[key * 2]:
                 return False
             counter[key * 2] -= counter[key]

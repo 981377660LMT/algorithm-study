@@ -10,3 +10,4 @@ function work(num: number) {
     }, 1000)
   )
 }
+export {}

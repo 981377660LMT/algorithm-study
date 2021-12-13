@@ -16,6 +16,7 @@ const maximalRectangle = function (matrix: string[][]): number {
 
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
+      // 高度
       if (matrix[i][j] === '1') candidates[i][j] = (i - 1 >= 0 ? candidates[i - 1][j] : 0) + 1
     }
   }

@@ -2,7 +2,7 @@ import collections
 
 # 需要保证每个数最后正好出现一次
 # 不多：使用visited保证最多出现一次
-# 不少：使用counter防止多删
+# 不少：使用remain_counter防止多删
 
 
 class Solution:

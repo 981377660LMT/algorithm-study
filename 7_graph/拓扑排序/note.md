@@ -5,7 +5,23 @@ ps:
    **是因为一个任务必须在等到所有的依赖任务都完成之后才能开始开始执行。**
 2. 拓扑排序只能针对有向无环图，进行拓扑排序之前要进行环检测
 
-拓扑排序模板
+拓扑排序模板(需要 adjList+indegree 两大件)
+
+```Python
+        # 0.返回拓扑排序结果
+        def get_top_order(graph, indegree):
+            top_order = []
+            stack = [node for node in range(len(graph)) if indegree[node] == 0]
+            while stack:
+                cur = stack.pop()
+                top_order.append(cur)
+                for next in graph[cur]:
+                    indegree[next] -= 1
+                    if indegree[next] == 0:
+                        stack.append(next)
+            return top_order if len(top_order) == len(graph) else []
+
+```
 
 ```JS
 
