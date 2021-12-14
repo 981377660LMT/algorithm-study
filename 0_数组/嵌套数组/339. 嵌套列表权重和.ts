@@ -41,8 +41,10 @@
 function depthSum(nestedList: NestedInteger[]): number {
   return dfs(nestedList, 1)
 
+  // 想象一下二叉树的dfs
   function dfs(nestedList: NestedInteger[], depth: number): number {
     let res = 0
+
     for (const listOrInteger of nestedList) {
       if (listOrInteger.isInteger()) {
         res += listOrInteger.getInteger()! * depth

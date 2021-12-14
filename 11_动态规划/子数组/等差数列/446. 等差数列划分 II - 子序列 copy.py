@@ -10,7 +10,8 @@ class Solution(object):
             for j in range(i):
                 diff = nums[i] - nums[j]
                 res += dp[(j, diff)]
-                diff[(i, diff)] += dp[(j, diff)] + 1
+                dp[(i, diff)] += dp[(j, diff)] + 1
+        print(dp)
         return res
 
 

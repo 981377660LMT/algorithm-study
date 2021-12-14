@@ -7,7 +7,7 @@ class TrieNode {
   }
 }
 
-class Trie {
+class XORTrie {
   private root: TrieNode
   private N: number
 
@@ -75,7 +75,7 @@ class Trie {
  */
 function countPairs(nums: number[], low: number, high: number): number {
   let res = 0
-  const trie = new Trie(14)
+  const trie = new XORTrie(14)
 
   for (const num of nums) {
     trie.insert(num)
@@ -85,7 +85,10 @@ function countPairs(nums: number[], low: number, high: number): number {
   return res
 }
 
-console.log(countPairs([1, 4, 2, 7], 2, 6))
+if (require.main === module) {
+  console.log(countPairs([1, 4, 2, 7], 2, 6))
+}
 
-export {}
+// export { XORTrie }
 // console.log(1 ^ 4)
+export {}

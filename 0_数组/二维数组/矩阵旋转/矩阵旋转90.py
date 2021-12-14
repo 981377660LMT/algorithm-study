@@ -1,6 +1,6 @@
 from typing import List
 
-
+# 转置口诀:zip星负一
 class Solution:
     def rotate(self, matrix: List[List[int]]) -> None:
         """

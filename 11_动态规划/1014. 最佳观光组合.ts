@@ -2,6 +2,7 @@
  * @param {number[]} values  2 <= values.length <= 50000
  * @return {number}
  * @summary
+ * dp来做，稍微给这个公式变形成A[i]+i+A[j]-j，这样就可以看成是左A[i]+i和右A[j]-j两部分和的最大值
  * 对于数组的每一项A[j] - j 我们都去前面找最大的 A[i] + i （这样才能保证结果最大）。
  */
 const maxScoreSightseeingPair = function (values: number[]): number {

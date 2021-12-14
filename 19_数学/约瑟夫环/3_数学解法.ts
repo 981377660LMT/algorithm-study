@@ -14,7 +14,13 @@ const lastRemaining = (n: number, m: number): number => {
   if (n === 1) return 0
   return (lastRemaining(n - 1, m) + m) % n // 平移
 }
-
+// const lastRemaining2 = (n: number, m: number): number => {
+//   let res = 0
+//   for (let i = 1; i <= n; i++) {
+//     res = (res + m) % i
+//   }
+//   return res
+// }
 console.log(lastRemaining(5, 3))
 // console.log(lastRemaining(10, 17))
 
