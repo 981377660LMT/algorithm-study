@@ -9,7 +9,7 @@
 // 并查集解决单个问题（添加，合并，查找）的时间复杂度都是O(h)(因为都是用的map的set和get方法)。
 
 interface IUnionFind {
-  union: (key1: number, key2: number) => this
+  union: (key1: number, key2: number) => boolean
   find: (key: number) => number
   isConnected: (key1: number, key2: number) => boolean
 }
@@ -21,30 +21,30 @@ class UnionFind implements IUnionFind {
   // rank优化 union时连接到rank较大的根上 且rank表示每个根连了多少点
   private readonly rank: number[]
   // 记录无向图连通域数量
-  public count: number
+  public part: number
 
   constructor(size: number) {
-    this.count = size
+    this.part = size
     this.parent = Array.from({ length: size }, (_, i) => i)
     this.rank = Array(size).fill(1)
   }
 
-  union(key1: number, key2: number): this {
+  union(key1: number, key2: number): boolean {
     let root1 = this.find(key1)
     let root2 = this.find(key2)
-    if (root1 === root2) return this
+    if (root1 === root2) return false
     // 小树root1接到大树root2下面，平衡性优化
     if (this.rank[root1] > this.rank[root2]) {
       ;[root1, root2] = [root2, root1]
     }
     this.parent[root1] = root2
     this.rank[root2] += this.rank[root1]
-    this.count--
-    return this
+    this.part--
+    return true
   }
 
   find(key: number): number {
-    while (this.parent[key] !== undefined && this.parent[key] !== key) {
+    while (this.parent[key] != undefined && this.parent[key] !== key) {
       this.parent[key] = this.parent[this.parent[key]] // 进行路径压缩
       key = this.parent[key]
     }
@@ -58,7 +58,8 @@ class UnionFind implements IUnionFind {
 
 if (require.main === module) {
   const uf = new UnionFind(5)
-  uf.union(2, 3).union(4, 3)
+  uf.union(2, 3)
+  uf.union(4, 3)
   console.dir(uf, { depth: null })
   console.log(uf.find(1))
   console.log(uf.isConnected(4, 2))

@@ -3,7 +3,7 @@
  * @param {string} t
  * @return {boolean}
  */
-var isIsomorphic = function (s, t) {
+function isIsomorphic(s, t) {
   if (s.length !== t.length) return false
 
   const sMap = new Map()

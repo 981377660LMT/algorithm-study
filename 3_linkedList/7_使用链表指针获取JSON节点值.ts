@@ -12,3 +12,4 @@ path.forEach(key => {
 })
 
 console.log(p)
+export {}

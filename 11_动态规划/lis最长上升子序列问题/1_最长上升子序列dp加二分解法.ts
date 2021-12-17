@@ -11,6 +11,7 @@ const lengthOfLIS = function (nums: number[]): number {
   if (nums.length <= 1) return nums.length
   const LIS: number[] = [nums[0]]
 
+  // 不可取相等:使用bisectLeft
   for (let i = 1; i < nums.length; i++) {
     if (nums[i] > LIS[LIS.length - 1]) {
       LIS.push(nums[i])

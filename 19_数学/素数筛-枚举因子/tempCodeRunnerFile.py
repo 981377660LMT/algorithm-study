@@ -1,0 +1,1 @@
+                res[i] = index + 1

@@ -45,3 +45,11 @@ for i in range(1,len(s)):
     if backtrack(s[i:], int(s[:i])):
         return True
 ```
+
+6. 旋转字符串
+   左移 i 位
+   S[i:] + S[:i]
+   S[i:] + S[:i] for i in range(len(S))
+   右移 i 位
+   S[-i:] + S[:-i]
+   S[-i:] + S[:-i] for i in range(len(S))

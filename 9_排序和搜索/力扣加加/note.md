@@ -92,13 +92,14 @@ def ability_test_bs(nums):
 ```python
 def main(nums, k):
   def count(mid):
+    # 小于等于mid的答案数
     pass
   l, r = 0, len(A) - 1
   while l <= r:
       mid = (l + r) // 2
       # 只有这里和最左二分不一样
-      if count(mid) > k: r = mid - 1
-      else: l = mid + 1
+      if count(mid) < k:l = mid + 1
+      else: r = mid - 1
   return l
 ```
 

@@ -9,8 +9,8 @@
 // 最终i和j中较小的值就是我们最终开始的位置
 // 相反如果是最大表示法的话，我们就要求解字典序最大的字符串，那么我们只需要在执行第二或第三个操作时选择较大的那个位置较好了
 // https://a-wimpy-boy.blog.csdn.net/article/details/80136776?spm=1001.2101.3001.6650.1&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no_search_link&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no_search_link
-function findMinimunIsomorphic(str: string): number {
-  if (str.length <= 1) return 0
+function findMinimunIsomorphic(str: string): string {
+  if (str.length <= 1) return str
 
   const n = str.length
   let i = 0
@@ -33,7 +33,9 @@ function findMinimunIsomorphic(str: string): number {
     k = 0
   }
 
-  return i > j ? j : i
+  const res = i > j ? j : i
+  console.log(i, j)
+  return str.slice(res) + str.slice(0, res)
 }
 
 console.log(findMinimunIsomorphic('bcaijab'))

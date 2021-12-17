@@ -92,3 +92,10 @@ var findLongestChain = function (pairs: number[][]) {
 3.bisectRight找到之前的最右区间，根据 存在/不存在pre 列转移方程
 
 ```
+
+严格递增
+插入时 bisectLeft
+`1_最长上升子序列dp加二分解法.ts`
+不严格递增
+插入时 bisectRight
+`1964. 找出到每个位置为止最长的有效障碍赛跑路线.py`

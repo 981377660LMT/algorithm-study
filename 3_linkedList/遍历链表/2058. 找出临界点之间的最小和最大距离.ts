@@ -6,4 +6,33 @@
 
 // 1 <= Node.val <= 105
 
-function nodesBetweenCriticalPoints(head: ListNode | null): number[] {}
+// 维护上一个和第一个临界点的位置
+function nodesBetweenCriticalPoints(head: ListNode | null): number[] {
+  let [minDist, maxDist] = [-1, -1]
+  let [firstPeek, lastPeek] = [-1, -1]
+  let index = 0
+  let headP = head
+
+  while (headP?.next?.next) {
+    const [x, y, z] = [headP.val, headP.next.val, headP.next.next.val]
+
+    // y是极值
+    if (y > Math.max(x, z) || y < Math.min(x, z)) {
+      if (lastPeek !== -1) {
+        minDist = minDist === -1 ? index + 1 - lastPeek : Math.min(minDist, index + 1 - lastPeek)
+        maxDist = Math.max(maxDist, index + 1 - firstPeek)
+      }
+
+      if (firstPeek === -1) {
+        firstPeek = index + 1
+      }
+
+      lastPeek = index + 1
+    }
+
+    index++
+    headP = headP.next
+  }
+
+  return [minDist, maxDist]
+}

@@ -6,3 +6,4 @@ const r = String.raw
 
 const unescapedPath = r`C:\web\index.html`
 console.log(unescapedPath)
+export {}

@@ -1,0 +1,1 @@
+nums[index] & 1
