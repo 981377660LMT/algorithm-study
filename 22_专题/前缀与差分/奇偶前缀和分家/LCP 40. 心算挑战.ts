@@ -4,7 +4,7 @@
 
 // 思路：从大到小排序，选择奇数的数量要是偶数个
 function maxmiumScore(cards: number[], cnt: number): number {
-  cards.sort((a, b) => b - a)
+  cards = cards.slice().sort((a, b) => b - a)
   const oddPre: number[] = [0]
   const evenPre: number[] = [0]
 
@@ -16,7 +16,7 @@ function maxmiumScore(cards: number[], cnt: number): number {
     }
   }
 
-  // 枚举所有组合中奇数的个数 k（k必须是偶数） 和 cnt - k（需判断是否足够）个偶数，它们都取最大则该轮组合结果最大
+  // 枚举所有组合中奇数的个数 k（k必须是偶数） 和 cnt - k 个偶数，它们都取最大则该轮组合结果最大
   let res = 0
   for (let oddPick = 0; oddPick < oddPre.length; oddPick += 2) {
     if (cnt - oddPick >= 0 && cnt - oddPick < evenPre.length)

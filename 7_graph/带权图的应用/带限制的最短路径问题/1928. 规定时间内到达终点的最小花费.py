@@ -10,7 +10,7 @@ Cost, ID, Time = int, int, int
 
 
 class Solution:
-    def minCost(self, maxTime: int, edges: List[List[int]], passingFees: List[int]) -> int:
+    def minCost2(self, maxTime: int, edges: List[List[int]], passingFees: List[int]) -> int:
         n = len(passingFees)
         adjList = [[] for _ in range(n)]
         for u, v, t in edges:
@@ -28,6 +28,30 @@ class Solution:
                 return cur_cost
             if cur_time < visited[cur_id]:
                 visited[cur_id] = cur_time
+                for next_id, next_time in adjList[cur_id]:
+                    heappush(pq, (cur_cost + passingFees[next_id], next_id, cur_time + next_time))
+        return -1
+
+    def minCost(self, maxTime: int, edges: List[List[int]], passingFees: List[int]) -> int:
+        n = len(passingFees)
+        adjList = [[] for _ in range(n)]
+        for u, v, t in edges:
+            adjList[u].append((v, t))
+            adjList[v].append((u, t))
+
+        pq: List[Tuple[Cost, ID, Time]] = [(passingFees[0], 0, 0)]
+        dist = [[0x7FFFFFFF] * (maxTime + 1) for _ in range(n)]
+
+        while pq:
+            cur_cost, cur_id, cur_time = heappop(pq)
+            if cur_time > maxTime:
+                continue
+
+            if cur_id == n - 1:
+                return cur_cost
+
+            if cur_cost < dist[cur_id][cur_time]:
+                dist[cur_id][cur_time] = cur_cost
                 for next_id, next_time in adjList[cur_id]:
                     heappush(pq, (cur_cost + passingFees[next_id], next_id, cur_time + next_time))
         return -1

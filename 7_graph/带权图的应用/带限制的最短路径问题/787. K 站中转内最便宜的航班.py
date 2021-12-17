@@ -14,7 +14,7 @@ from typing import List
 from heapq import heappop, heappush
 
 
-# p3超时 需要用bellman ford
+# pq超时 需要用bellman ford
 class Solution:
     def findCheapestPrice(
         self, n: int, flights: List[List[int]], src: int, dst: int, k: int

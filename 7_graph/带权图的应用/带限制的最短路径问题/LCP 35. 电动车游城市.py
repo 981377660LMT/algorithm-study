@@ -24,7 +24,7 @@ class Solution:
             adjList[u].append((v, w))
 
         pq = [(0, start, 0)]
-        visited = [[0x7FFFFFFF for _ in range(full_power + 1)] for _ in range(n)]
+        dist = [[0x7FFFFFFF for _ in range(full_power + 1)] for _ in range(n)]
 
         while pq:
             cost, cur, power = heappop(pq)
@@ -32,19 +32,19 @@ class Solution:
             if cur == end:
                 return cost
 
-            if cost > visited[cur][power]:
+            if cost > dist[cur][power]:
                 continue
 
             # 充一个电
             if power < full_power:
-                if cost + charge[cur] < visited[cur][power + 1]:
-                    visited[cur][power + 1] = cost + charge[cur]
+                if cost + charge[cur] < dist[cur][power + 1]:
+                    dist[cur][power + 1] = cost + charge[cur]
                     heappush(pq, (cost + charge[cur], cur, power + 1))
 
             # 不充，继续走
             for next, weight in adjList[cur]:
-                if power - weight >= 0 and cost + weight < visited[next][power - weight]:
-                    visited[next][power - weight] = cost + weight
+                if power - weight >= 0 and cost + weight < dist[next][power - weight]:
+                    dist[next][power - weight] = cost + weight
                     heappush(pq, (cost + weight, next, power - weight))
         return -1
 
