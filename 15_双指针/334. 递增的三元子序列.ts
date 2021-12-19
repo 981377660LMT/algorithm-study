@@ -7,7 +7,7 @@
  * 三个变量，分别记录最小值，第二小值，第三小值。
  * 只要我们能够填满这三个变量就返回 true，否则返回 false。
  */
-var increasingTriplet = function (nums: number[]): boolean {
+function increasingTriplet(nums: number[]): boolean {
   let min = nums[0]
   let mid = Infinity
   for (const num of nums) {

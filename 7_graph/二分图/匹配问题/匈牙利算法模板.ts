@@ -1,19 +1,34 @@
 function hungarian(adjList: number[][]) {
   let maxMatching = 0
-  let visited: boolean[]
-  const matching = Array<number>(adjList.length).fill(-1)
+  const matched = Array<number>(adjList.length).fill(-1)
 
-  const colors = bisect(adjList)
+  const colors = genColor(adjList)
   for (let i = 0; i < adjList.length; i++) {
-    visited = Array<boolean>(adjList.length).fill(false)
-    if (colors[i] === 0 && matching[i] === -1) {
-      if (dfs(i)) maxMatching++
+    const visited = Array<boolean>(adjList.length).fill(false)
+    if (colors[i] === 0 && matched[i] === -1) {
+      if (dfs(i, visited)) maxMatching++
     }
   }
 
   return maxMatching
 
-  function bisect(adjList: number[][]): number[] {
+  function dfs(boy: number, visited: boolean[]): boolean {
+    if (visited[boy]) return false
+    visited[boy] = true
+
+    for (const girl of adjList[boy]) {
+      // 女孩还没配对,或则可以找到增广路径
+      if (matched[girl] === -1 || dfs(matched[girl], visited)) {
+        matched[boy] = girl
+        matched[girl] = boy
+        return true
+      }
+    }
+
+    return false
+  }
+
+  function genColor(adjList: number[][]): number[] {
     const colors = Array<number>(adjList.length).fill(-1)
 
     const dfs = (cur: number, color: number) => {
@@ -33,21 +48,6 @@ function hungarian(adjList: number[][]) {
     }
 
     return colors
-  }
-
-  function dfs(cur: number): boolean {
-    if (visited[cur]) return false
-    visited[cur] = true
-
-    for (const next of adjList[cur]) {
-      if (matching[next] === -1 || dfs(matching[next])) {
-        matching[cur] = next
-        matching[next] = cur
-        return true
-      }
-    }
-
-    return false
   }
 }
 

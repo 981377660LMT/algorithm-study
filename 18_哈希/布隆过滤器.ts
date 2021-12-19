@@ -1,7 +1,7 @@
 // 海量数据处理以及缓存穿透这两个场景让我认识了 布隆过滤器
 // https://javaguide.cn/cs-basics/data-structure/bloom-filter/
 
-import { Bitset } from './BitSet'
+import { BitSet } from './BitSet'
 
 class SimpleHasher {
   constructor(private capacity: number, private seed: number) {}
@@ -32,7 +32,7 @@ interface IBloomFilter {
 class BloomFilter implements IBloomFilter {
   private static DEFAULT_SIZE: number = 2 << 24
   private static SEEDS: number[] = [3, 13, 46, 71, 91, 134]
-  private bits: Bitset = new Bitset(BloomFilter.DEFAULT_SIZE)
+  private bits: BitSet = new BitSet(BloomFilter.DEFAULT_SIZE)
   private hasherArray: SimpleHasher[] = []
 
   /**

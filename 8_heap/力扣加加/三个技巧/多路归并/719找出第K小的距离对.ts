@@ -29,15 +29,15 @@ const smallestDistancePair = function (nums: number[], k: number): number {
 
   /**
    *
-   * @param n 距离不大于n的点对数
+   * @param mid 距离不大于mid的点对数
    * @description 复杂度O(n) 是一个滑动窗口
    */
-  function countNGT(n: number): number {
+  function countNGT(mid: number): number {
     let count = 0
     let left = 0
 
     for (let right = 0; right < nums.length; right++) {
-      while (nums[right] - nums[left] > n) {
+      while (nums[right] - nums[left] > mid) {
         left++
       }
 

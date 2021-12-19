@@ -1,4 +1,6 @@
-class Bitset {
+// 40亿个QQ号，怎么样去重  BitSet
+
+class BitSet {
   private words: Uint8Array
 
   constructor(nBits: number) {
@@ -20,10 +22,10 @@ class Bitset {
 }
 
 if (require.main === module) {
-  const bitSet = new Bitset(10000)
+  const bitSet = new BitSet(10000)
   bitSet.add(1000)
   console.log(bitSet.has(1000))
   console.log(bitSet.has(1001))
 }
 
-export { Bitset }
+export { BitSet }

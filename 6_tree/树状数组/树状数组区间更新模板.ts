@@ -58,7 +58,6 @@ class BIT {
   }
 }
 
-export {}
 if (require.main === module) {
   const bit = new BIT(10)
   // console.log(bit.query(2))
@@ -72,3 +71,5 @@ if (require.main === module) {
   // console.log(bit.query(4))
   // console.log(bit.query(5))
 }
+
+export {}

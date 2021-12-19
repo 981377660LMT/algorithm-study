@@ -12,18 +12,20 @@ from collections import defaultdict
 # 扫描线：记录pre,扫描cur
 class Solution:
     def splitPainting(self, segments: List[List[int]]) -> List[List[int]]:
-        dic = defaultdict(int)
-        for left, right, delta in segments:
-            dic[left] += delta
-            dic[right] -= delta
+        deltaDict = defaultdict(int)
+        for start, end, delta in segments:
+            deltaDict[start] += delta
+            deltaDict[end] -= delta
 
         res = []
-        pre = -1
-        for cur in sorted(dic):
-            if dic[pre] > 0:
-                res.append([pre, cur, dic[pre]])
-            dic[cur] += dic[pre]
+        # 区间起点,累加高度
+        pre, preSum = 0, 0
+        for cur in sorted(deltaDict):
+            delta = deltaDict[cur]
+            if preSum > 0:
+                res.append([pre, cur, preSum])
             pre = cur
+            preSum += delta
         return res
 
 

@@ -28,9 +28,9 @@ function radixSort(array: readonly number[]): readonly number[] {
   // 2进制时
   // offset 变成 << 操作
   // 模10 变成 &1 操作
-  function getDigitValue(decimal: number, digit: number) {
+  function getDigitValue(num: number, digit: number) {
     const offset = 10 ** digit
-    return ~~(decimal / offset) % 10
+    return ~~(num / offset) % 10
   }
 }
 
@@ -38,3 +38,4 @@ const array = [3, 44, 38, 5, 47, 15, 36, 26, 27, 2, 46, 4, 19, 50, 48]
 console.log('原始array:', array)
 const newArr = radixSort(array)
 console.log('newArr:', newArr)
+export {}

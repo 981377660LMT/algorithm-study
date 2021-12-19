@@ -5,14 +5,15 @@
 // 婚姻介绍所找对象登记到Map
 const twoSum = (arr: number[], target: number) => {
   const map = new Map<number, number>()
+
   for (let index = 0; index < arr.length; index++) {
     const element = arr[index]
     if (map.has(element)) {
-      return [map.get(element), index]
-    } else {
-      const matchValue = target - element
-      map.set(matchValue, index)
+      return [map.get(element)!, index]
     }
+
+    const matchValue = target - element
+    map.set(matchValue, index)
   }
 }
 
