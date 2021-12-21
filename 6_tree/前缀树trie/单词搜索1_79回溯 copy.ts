@@ -15,7 +15,8 @@ const exist = (board: string[][], word: string): boolean => {
     [0, -1],
   ]
 
-  const bt = (x: number, y: number, step: number): boolean => {
+  // 一般题目返回布尔值，dfs就返回布尔值
+  const dfs = (x: number, y: number, step: number): boolean => {
     console.log(board[x][y], word[step])
     // 1. 回溯终点
     if (board[x][y] !== word[step]) return false
@@ -29,7 +30,7 @@ const exist = (board: string[][], word: string): boolean => {
       const nextColumn = y + dy
       // 在矩阵中
       if (nextRow >= 0 && nextRow < r && nextColumn >= 0 && nextColumn < c) {
-        if (bt(nextRow, nextColumn, step + 1)) {
+        if (dfs(nextRow, nextColumn, step + 1)) {
           return true
         }
       }
@@ -43,7 +44,7 @@ const exist = (board: string[][], word: string): boolean => {
   // 4.每个点开始回溯
   for (let i = 0; i < r; i++) {
     for (let j = 0; j < c; j++) {
-      if (bt(i, j, 0)) return true
+      if (dfs(i, j, 0)) return true
     }
   }
 

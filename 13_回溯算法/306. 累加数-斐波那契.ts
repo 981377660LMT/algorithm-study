@@ -32,7 +32,7 @@ const isAdditiveNumber = function (num: string): boolean {
   }
 
   const bt = (num1: string, num2: string, rest: string): boolean => {
-    if (!rest) return true
+    if (rest === '') return true
     const sum = addStrings(num1, num2)
     if (!rest.startsWith(sum)) {
       return false

@@ -9,7 +9,7 @@ const minSubArrayLen = (target: number, nums: number[]): number => {
   if (!nums.length) return 0
   let l = 0
   let sum = 0
-  let res = Infinity
+  let res = 0
   for (let r = 0; r < nums.length; r++) {
     sum += nums[r]
     while (sum >= target) {
@@ -19,7 +19,7 @@ const minSubArrayLen = (target: number, nums: number[]): number => {
     }
   }
 
-  return res === Infinity ? 0 : res
+  return res
 }
 // 如果是和 === target呢？ 同理
 console.log(minSubArrayLen(7, [2, 3, 1, 2, 4, 3]))

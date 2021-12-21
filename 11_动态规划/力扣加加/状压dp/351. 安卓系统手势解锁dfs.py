@@ -23,7 +23,7 @@ class Solution:
                 return 1
 
             # 本次算不算
-            res = 0 if count < m else 1
+            res = int(count >= m)
             for next in range(9):
                 if visited & (1 << next) or isInvalidTransfer(visited, cur, next):
                     continue

@@ -13,7 +13,7 @@ function largestBSTSubtree(root: BinaryTree | null): number {
     const [leftMin, leftMax, leftCount] = dfs(root.left)
     const [rightMin, rightMax, rightCount] = dfs(root.right)
 
-    // 缩小范围接父节点
+    // 前驱后继
     if (root.val > leftMax && root.val < rightMin) {
       return [Math.min(leftMin, root.val), Math.max(rightMax, root.val), 1 + leftCount + rightCount]
     }

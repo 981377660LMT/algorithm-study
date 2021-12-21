@@ -6,7 +6,7 @@ const reverse = function (x: number): number {
   if (x < 0) return -1 * reverse(x * -1)
 
   let res = 0
-  while (x) {
+  while (x > 0) {
     const [div, mod] = [~~(x / 10), x % 10]
     x = div
     res = res * 10 + mod

@@ -41,7 +41,7 @@ export {}
 function totalNQueens(n: number): number {
   let res = 0
   const bt = (n: number, row: number, col: number, mainDiagonal: number, subDiagonal: number) => {
-    if (row >= n) return res++
+    if (row == n) return res++
     let validPosition = ~(col | mainDiagonal | subDiagonal) & ((1 << n) - 1)
     while (validPosition) {
       const nextPosition = validPosition & -validPosition // 选取右边最后一个1

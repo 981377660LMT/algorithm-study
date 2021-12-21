@@ -1,4 +1,4 @@
-import { helper } from './母题_中心扩展寻找最长的回文串'
+import { maxExpand } from './母题_中心扩展寻找最长的回文串'
 
 // 给定一个包含大写字母和小写字母的字符串，找到通过这些字母构造成的最长的回文串的长度。
 // 注意是构造成的
@@ -18,6 +18,7 @@ import { helper } from './母题_中心扩展寻找最长的回文串'
 ////////////////////////////////////////////////////////////////////
 // 给你一个字符串 s，找到 s 中最长的回文子串。
 // O(n^2) 朴素中心扩展
+// 回文串一定是对称的，所以我们可以每次循环选择一个中心，进行左右扩展，判断左右字符是否相等即可。
 const longestPalindrome2 = (str: string): string => {
   if (str.length <= 1) return str
   let res = ''
@@ -25,12 +26,13 @@ const longestPalindrome2 = (str: string): string => {
 
   for (let i = 0; i < str.length; i++) {
     // odd case, like "aba"
-    tmp = helper(str, i, i)
+    tmp = maxExpand(str, i, i)
     tmp.length > res.length && (res = tmp)
     // even case, like "abba"
-    tmp = helper(str, i, i + 1)
+    tmp = maxExpand(str, i, i + 1)
     tmp.length > res.length && (res = tmp)
   }
+
   return res
 }
 console.log(longestPalindrome2('abccccdd'))

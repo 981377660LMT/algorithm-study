@@ -7,20 +7,20 @@
  */
 const maxSlidingWindow = function (nums: number[], k: number): number[] {
   // 存放的是元素下标，为了取值方便
-  const monoStack: number[] = []
+  const queue: number[] = []
   const res: number[] = []
 
   for (let i = 0; i < nums.length; i++) {
-    while (monoStack.length && nums[monoStack[monoStack.length - 1]] < nums[i]) {
-      monoStack.pop()
+    while (queue.length && nums[queue[queue.length - 1]] < nums[i]) {
+      queue.pop()
     }
-    monoStack.push(i)
+    queue.push(i)
 
     // 判断当前最大值（即队首元素）是否在窗口中，若不在便将其弹出
-    if (i - k === monoStack[0]) monoStack.shift()
+    if (i - k === queue[0]) queue.shift()
     // 当达到窗口大小时便开始向结果中添加数据
     if (i >= k - 1) {
-      res.push(nums[monoStack[0]])
+      res.push(nums[queue[0]])
     }
   }
 

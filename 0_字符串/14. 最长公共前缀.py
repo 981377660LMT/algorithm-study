@@ -6,14 +6,25 @@ from typing import List
 
 class Solution:
     def longestCommonPrefix(self, strs: List[str]) -> str:
-        res = ''
+        res = []
         cols = zip(*strs)
         for col in cols:
             if len(set(col)) == 1:
-                res += col[0]
+                res.append(col[0])
             else:
                 break
-        return res
+        return ''.join(res)
+
+    # 只需要比较最大最小的公共前缀就是整个数组的公共前缀
+    def longestCommonPrefix2(self, strs):
+        if not strs:
+            return ""
+        s1 = min(strs)
+        s2 = max(strs)
+        for i, x in enumerate(s1):
+            if x != s2[i]:
+                return s2[:i]
+        return s1
 
 
 print(Solution().longestCommonPrefix(["flower", "flow", "flight"]))

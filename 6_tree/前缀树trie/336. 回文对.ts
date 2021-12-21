@@ -13,33 +13,33 @@ function palindromePairs(words: string[]): number[][] {
   const isPalindrome = (str: string) => reversed(str) === str
 
   const res: number[][] = []
-  const wordToIndexMap = new Map<string, number>()
+  const matchIndex = new Map<string, number>()
   const palindromStr: number[] = []
 
   for (const [index, word] of words.entries()) {
-    wordToIndexMap.set(reversed(word), index)
+    matchIndex.set(reversed(word), index)
     if (isPalindrome(word)) palindromStr.push(index)
   }
 
   for (let i = 0; i < words.length; i++) {
     const word = words[i]
 
-    if (word) {
+    if (word !== '') {
       for (let j = 0; j < words.length - 1; j++) {
         const [left, right] = [word.slice(0, j), word.slice(j)]
         console.log(left, right)
         // 是否存在在单词左边加 使得成为回文串
-        if (isPalindrome(left) && wordToIndexMap.has(right) && i !== wordToIndexMap.get(right)!) {
-          res.push([wordToIndexMap.get(right)!, i])
+        if (isPalindrome(left) && matchIndex.has(right) && i !== matchIndex.get(right)!) {
+          res.push([matchIndex.get(right)!, i])
         }
 
         // 是否存在在单词右边加 使得成为回文串
-        if (isPalindrome(right) && wordToIndexMap.has(left) && i !== wordToIndexMap.get(left)!) {
-          res.push([i, wordToIndexMap.get(left)!])
+        if (isPalindrome(right) && matchIndex.has(left) && i !== matchIndex.get(left)!) {
+          res.push([i, matchIndex.get(left)!])
         }
       }
     } else {
-      // 空字符串
+      // 空字符串，注意空字符串只有一个(一组 互不相同 的单词)
       for (const index of palindromStr) {
         if (index !== i) {
           res.push([index, i])

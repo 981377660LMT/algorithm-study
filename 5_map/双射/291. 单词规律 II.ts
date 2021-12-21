@@ -14,16 +14,16 @@ function wordPatternMatch(pattern: string, s: string): boolean {
     const mappingWordOfCurChar = charToWord.get(curChar)
 
     for (let i = 1; i <= words.length; i++) {
-      const curWord = words.slice(0, i)
+      const wordCand = words.slice(0, i)
 
       // 同时不存在,curWord和curChar都没用过
-      if (mappingWordOfCurChar == undefined && !visitedWord.has(curWord)) {
-        charToWord.set(curChar, curWord)
-        visitedWord.add(curWord)
+      if (mappingWordOfCurChar == undefined && !visitedWord.has(wordCand)) {
+        charToWord.set(curChar, wordCand)
+        visitedWord.add(wordCand)
         if (bt(patterns.slice(1), words.slice(i))) return true
         charToWord.delete(curChar)
-        visitedWord.delete(curWord)
-      } else if (mappingWordOfCurChar === curWord) {
+        visitedWord.delete(wordCand)
+      } else if (mappingWordOfCurChar === wordCand) {
         // 同时存在，双射
         if (bt(patterns.slice(1), words.slice(i))) return true
       }

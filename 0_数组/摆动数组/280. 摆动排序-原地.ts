@@ -23,3 +23,4 @@ function wiggleSort(nums: number[]): void {
 const testArray = [3, 5, 2, 1, 6, 4]
 wiggleSort(testArray)
 console.log(testArray)
+export {}

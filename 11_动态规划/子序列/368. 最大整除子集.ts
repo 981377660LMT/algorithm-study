@@ -1,6 +1,7 @@
 /**
  * @param {number[]} nums
  * @return {number[]}
+ * 有点像LIS问题
  */
 const largestDivisibleSubset = function (nums: number[]): number[] {
   nums.sort((a, b) => a - b)
