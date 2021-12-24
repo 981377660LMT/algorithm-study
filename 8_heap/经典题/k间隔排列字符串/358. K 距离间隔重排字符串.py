@@ -15,22 +15,22 @@ class Solution:
         pq = [(-freq, char) for char, freq in counter.items()]
         heapify(pq)
 
-        sb = []
+        res = []
         window = deque()
 
         while pq:
             freq, char = heappop(pq)
             freq *= -1
 
-            sb.append(char)
+            res.append(char)
             window.append((freq - 1, char))
-
+            # 凑齐k个
             if len(window) == k:
                 freq, char = window.popleft()
                 if freq > 0:
                     heappush(pq, (-freq, char))
 
-        return ''.join(sb) if len(sb) == len(s) else ''
+        return ''.join(res) if len(res) == len(s) else ''
 
 
 print(Solution().rearrangeString(s="aabbcc", k=3))

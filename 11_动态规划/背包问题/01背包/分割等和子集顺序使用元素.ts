@@ -8,7 +8,7 @@ const canPartition = function (nums: number[]) {
   const sum = nums.reduce((pre, cur) => pre + cur, 0)
   if (sum & 1) return false
 
-  const volume = sum / 2
+  const volume = sum >> 1
   const dp = Array<boolean>(volume + 1).fill(false)
   dp[0] = true
 

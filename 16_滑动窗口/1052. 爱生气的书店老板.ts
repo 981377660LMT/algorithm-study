@@ -12,16 +12,10 @@ function maxSatisfied(customers: number[], grumpy: number[], minutes: number): n
     if (grumpy[i] === 0) customersWhenNotGrumpy += customers[i]
   }
 
-  // 初始化
-  for (let i = 0; i < minutes; i++) {
-    if (grumpy[i] === 1) retain += customers[i]
-  }
-
-  maxRetain = retain
-
-  for (let i = minutes; i < n; i++) {
-    retain += customers[i] * grumpy[i] - customers[i - minutes] * grumpy[i - minutes]
-    maxRetain = Math.max(maxRetain, retain)
+  for (let i = 0; i < n; i++) {
+    retain += customers[i] * grumpy[i]
+    if (i >= minutes) retain -= customers[i - minutes] * grumpy[i - minutes]
+    if (i >= minutes - 1) maxRetain = Math.max(maxRetain, retain)
   }
 
   return customersWhenNotGrumpy + maxRetain
