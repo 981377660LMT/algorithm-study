@@ -90,6 +90,7 @@ abstract class Crawler implements ICrawler {
    */
   protected async parseFromSource(source: string, xPathExpression: string): Promise<string[]> {
     const dom = new DOMParser().parseFromString(source)
+    console.log(dom, 777)
     const textNodes = select(xPathExpression, dom) as Text[]
     return textNodes.map(textNode => textNode.data)
   }

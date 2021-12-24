@@ -6,7 +6,7 @@ import { BitSet } from './BitSet'
 class SimpleHasher {
   constructor(private capacity: number, private seed: number) {}
 
-  private static getHashCode(str: string) {
+  private static genHashCode(str: string) {
     let hash = 0
 
     for (const char of str) {
@@ -18,8 +18,8 @@ class SimpleHasher {
     return hash | 0 // Convert to 32bit integer
   }
 
-  getHash(value: string): number {
-    const hashCode = SimpleHasher.getHashCode(value)
+  genHash(value: string): number {
+    const hashCode = SimpleHasher.genHashCode(value)
     return Math.abs((this.seed * (hashCode ^ (hashCode >>> 16))) & (this.capacity - 1))
   }
 }
@@ -46,13 +46,13 @@ class BloomFilter implements IBloomFilter {
 
   add(value: string): void {
     for (const hasher of this.hasherArray) {
-      this.bits.add(hasher.getHash(value))
+      this.bits.add(hasher.genHash(value))
     }
   }
 
   has(value: string): boolean {
     for (const hasher of this.hasherArray) {
-      if (!this.bits.has(hasher.getHash(value))) return false
+      if (!this.bits.has(hasher.genHash(value))) return false
     }
 
     return true

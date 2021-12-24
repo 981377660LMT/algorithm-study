@@ -7,10 +7,13 @@ class Solution:
     def longestStrChain(self, words: List[str]) -> int:
         res = 0
         dp = defaultdict(int)
+
         for w in sorted(words, key=len):
-            for remove in range(len(w)):
-                dp[w] = max(dp[w], dp[w[:remove] + w[(remove + 1) :]] + 1)
+            for i in range(len(w)):
+                removed = w[:i] + w[i + 1 :]
+                dp[w] = max(dp[w], dp[removed] + 1)
             res = max(res, dp[w])
+
         return res
 
 

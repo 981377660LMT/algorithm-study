@@ -17,15 +17,16 @@ class TreeNode:
 class Solution:
     def recoverFromPreorder(self, traversal: str) -> Optional['TreeNode']:
         # 字典树
-        record = {-1: TreeNode(0)}
+        rootByDepth = {}
 
         # 直接加入或覆盖键key为深度dep的树字典
         def addTree(val: str, depth: int) -> None:
-            record[depth] = TreeNode(int(val))
-            if not record[depth - 1].left:
-                record[depth - 1].left = record[depth]
-            else:
-                record[depth - 1].right = record[depth]
+            rootByDepth[depth] = TreeNode(int(val))
+            if depth - 1 in rootByDepth:
+                if not rootByDepth[depth - 1].left:
+                    rootByDepth[depth - 1].left = rootByDepth[depth]
+                else:
+                    rootByDepth[depth - 1].right = rootByDepth[depth]
 
         val, depth = '', 0
         # 添加哨兵
@@ -38,7 +39,7 @@ class Solution:
             else:
                 depth += 1
 
-        return record[0]
+        return rootByDepth[0]
 
 
 print(Solution().recoverFromPreorder("1-2--3---4-5--6---7"))

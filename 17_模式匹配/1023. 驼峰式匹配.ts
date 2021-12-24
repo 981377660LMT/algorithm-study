@@ -7,7 +7,7 @@
  * 1.如果大写在pattern中不存在 则返回false
  * 2.如果匹配长度小于pattern长度 返回false
  */
-const camelMatch = function (queries: string[], pattern: string): boolean[] {
+function camelMatch(queries: string[], pattern: string): boolean[] {
   return queries.map(query => {
     let hit = 0
     for (const char of query) {

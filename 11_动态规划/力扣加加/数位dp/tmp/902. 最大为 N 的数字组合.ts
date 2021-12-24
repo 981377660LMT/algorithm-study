@@ -24,14 +24,15 @@ const atMostNGivenDigitSet = function (digits: string[], n: number): number {
     res += lessThan * digits.length ** (len - i - 1)
     console.log(res, lessThan)
 
-    // 如果存在upper 那么这一轮digits里的upper是不能作为这一位的 还要继续循环往下看
+    // 如果存在upper 则不必继续看了比n小的已经看完
     if (!nums.includes(upper)) break
-    else if (i === len - 1) res++ // 相等情况，即可以凑成相等
+    if (i === len - 1) res++ // 等于n
   }
 
   return res
 }
 
 console.log(atMostNGivenDigitSet(['1', '3', '5', '7'], 786))
+console.log(atMostNGivenDigitSet(['1', '3', '5', '7'], 100))
 
 export {}

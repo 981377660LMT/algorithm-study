@@ -8,16 +8,17 @@ class Solution:
     def eatenApples(self, apples: List[int], days: List[int]) -> int:
         res = 0
         pq = []
-        index = 0
-        while pq or index < len(apples):
-            if index < len(apples):
-                heappush(pq, [index + days[index], apples[index]])
-            while pq and (pq[0][0] <= index or pq[0][1] == 0):
+        day = 0
+        while pq or day < len(apples):
+            if day < len(apples):
+                # 先吃腐烂早的
+                heappush(pq, [day + days[day], apples[day]])
+            while pq and (pq[0][0] <= day or pq[0][1] == 0):
                 heappop(pq)
             if pq:
                 res += 1
                 pq[0][1] -= 1
-            index += 1
+            day += 1
         return res
 
 

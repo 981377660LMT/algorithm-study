@@ -53,3 +53,5 @@ for i in range(1,len(s)):
    右移 i 位
    S[-i:] + S[:-i]
    S[-i:] + S[:-i] for i in range(len(S))
+
+7. 切片右端点满足条件 right <= arr.length

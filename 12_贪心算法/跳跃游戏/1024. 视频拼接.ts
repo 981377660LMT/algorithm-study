@@ -15,7 +15,7 @@ var videoStitching = function (clips: number[][], time: number): number {
   }
 
   const res = maxJump(jumps, time)
-  return res === -1 ? -1 : res
+  return res
 }
 
 console.log(

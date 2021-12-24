@@ -4,7 +4,7 @@
  * @param target 需要到达的点
  * @returns  需要的最小步数
  */
-const maxJump = (jumps: number[], target: number): number => {
+function maxJump(jumps: number[], target: number): number {
   let cur = 0
   let next = 0
   let step = 0

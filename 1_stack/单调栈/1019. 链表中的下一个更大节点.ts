@@ -17,7 +17,7 @@ b.next = c
  * @param {Node} head
  * @return {number[]}
  */
-var nextLargerNodes = function (head: Node): number[] {
+function nextLargerNodes(head: Node): number[] {
   const res: number[] = []
   const stack: [number, number][] = []
   let headP: Node | undefined = head

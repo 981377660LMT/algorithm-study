@@ -15,15 +15,14 @@ var allCellsDistOrder = function (
   rCenter: number,
   cCenter: number
 ): number[][] {
-  const bucket: number[][][] = []
+  const bucket = Array.from<unknown, [row: number, col: number][]>({ length: 200 }, () => [])
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
       const dis = Math.abs(i - rCenter) + Math.abs(j - cCenter)
-      !bucket[dis] && (bucket[dis] = [])
       bucket[dis].push([i, j])
     }
   }
-
+  console.log(bucket)
   return bucket.flat()
 }
 
