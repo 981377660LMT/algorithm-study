@@ -5,24 +5,29 @@
  * 求行与行之间所有值都相等([1 1 1]/[0 0 0])的最大行数。
  * 如果两个行是可以通过翻转相同的列达到全行相同，那么就要满足，两行的相同的位置上的值异或之后等于全1 。
  * 也就是说001 与110是一样的
- * 怎么让他们一样呢 0开头让每位与0异或 1开头每位与1异或 字符串作为key存储
+ * 怎么让他们一样呢 `0开头让每位与0异或 1开头每位与1异或 字符串作为key存储`
  *
  */
 const maxEqualRowsAfterFlips = function (matrix: number[][]): number {
-  const map = new Map<string, number>()
+  const rowCounter = new Map<string, number>()
   let res = 0
+
   for (const row of matrix) {
+    const sb: number[] = []
     let mask = row[0] === 0 ? 0 : 1
-    let key = ''
 
     for (const num of row) {
-      key += (num ^ mask).toString()
+      sb.push(num ^ mask)
     }
 
-    map.set(key, (map.get(key) || 0) + 1)
-    res = Math.max(res, map.get(key)!)
+    const state = sb.join('')
+
+    rowCounter.set(state, (rowCounter.get(state) || 0) + 1)
+    res = Math.max(res, rowCounter.get(state)!)
   }
-  console.log(map.values())
+
+  console.log(rowCounter.values())
+
   return res
 }
 

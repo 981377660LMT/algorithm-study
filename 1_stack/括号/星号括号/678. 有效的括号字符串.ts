@@ -3,9 +3,11 @@
  * @return {boolean}
  * 给定一个只包含三种字符的字符串：（ ，） 和 *，写一个函数来检验这个字符串是否为有效字符串。
  * * 可以被视为单个右括号 ) ，或单个左括号 ( ，或一个空字符串。
+ * @summary 某些位置的括号可以任意转换的问题
  */
-var checkValidString = function (s: string): boolean {
-  const traverse = (str: string, reversed = false) => {
+function checkValidString(s: string): boolean {
+  return traverse(s) && traverse(s, true)
+  function traverse(str: string, reversed = false) {
     reversed && (str = str.split('').reverse().join(''))
     let count = 0
     let flag = reversed ? -1 : 1
@@ -30,8 +32,6 @@ var checkValidString = function (s: string): boolean {
 
     return true
   }
-
-  return traverse(s) && traverse(s, true)
 }
 
 console.log(checkValidString('(*))'))

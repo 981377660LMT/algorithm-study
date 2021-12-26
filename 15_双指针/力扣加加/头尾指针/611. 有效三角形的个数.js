@@ -2,7 +2,7 @@
  * @param {number[]} nums
  * @return {number}
  */
-var triangleNumber = function (nums) {
+function triangleNumber(nums) {
   nums.sort((a, b) => a - b)
 
   let res = 0

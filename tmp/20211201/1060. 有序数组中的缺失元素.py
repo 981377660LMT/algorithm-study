@@ -32,7 +32,7 @@ class Solution:
         print(nums[l], nums[r], l, r)
 
         # 疑惑
-        return nums[0] + k + r
+        return nums[0] + k - 1 + l
 
 
 print(Solution().missingElement(nums=[4, 7, 9, 10], k=3))

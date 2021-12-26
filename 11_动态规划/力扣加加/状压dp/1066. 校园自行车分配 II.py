@@ -13,19 +13,21 @@ class Solution:
 
         @lru_cache(None)
         def dfs(cur: int, visited_bike: int) -> int:
-            if cur >= len(workers):
+            if cur == len(workers):
                 return 0
 
-            min_cost = 0x7FFFFFFF
+            res = 0x7FFFFFFF
             for next_bike in range(len(bikes)):
                 if ((visited_bike >> next_bike) & 1) == 1:
                     continue
                 next_cost = dfs(cur + 1, visited_bike | (1 << next_bike))
-                min_cost = min(min_cost, dists[cur][next_bike] + next_cost)
+                res = min(res, dists[cur][next_bike] + next_cost)
 
-            return min_cost
+            return res
 
-        return dfs(0, 0)
+        res = dfs(0, 0)
+        dfs.cache_clear()
+        return res
 
 
 print(Solution().assignBikes([[0, 0], [2, 1]], [[1, 2], [3, 3]]))

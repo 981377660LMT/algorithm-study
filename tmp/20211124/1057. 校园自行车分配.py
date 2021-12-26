@@ -11,17 +11,23 @@ from itertools import product
 class Solution:
     def assignBikes(self, workers: List[List[int]], bikes: List[List[int]]) -> List[int]:
         m, n = len(workers), len(bikes)
-        pairs = []
+        cands = []
         for i, j in product(range(m), range(n)):
             dis = abs(workers[i][0] - bikes[j][0]) + abs(workers[i][1] - bikes[j][1])
-            pairs.append((dis, i, j))
+            cands.append((dis, i, j))
+
         res = [0] * m
+        hit = 0
         s1, s2 = set(), set()
-        for dis, i, j in sorted(pairs):
+        for dis, i, j in sorted(cands):
             if i not in s1 and j not in s2:
                 res[i] = j
+
                 s1.add(i)
                 s2.add(j)
+                hit += 1
+                if hit == m:
+                    return res
 
         return res
 

@@ -20,13 +20,12 @@ function numSubmatrixSumTarget(matrix: number[][], target: number): number {
   // 固定上下
   for (let top = 1; top <= m; top++) {
     for (let bottom = top; bottom <= m; bottom++) {
-      const map = new Map<number, number>()
+      const counter = new Map<number, number>([[0, 1]])
       // 遍历子矩阵的右边界，两数之和问题
       for (let right = 1; right <= n; right++) {
         const sum = pre[bottom][right] - pre[top - 1][right]
-        if (sum === target) res++
-        if (map.has(sum - target)) res += map.get(sum - target)!
-        map.set(sum, (map.get(sum) || 0) + 1)
+        if (counter.has(sum - target)) res += counter.get(sum - target)!
+        counter.set(sum, (counter.get(sum) || 0) + 1)
       }
     }
   }

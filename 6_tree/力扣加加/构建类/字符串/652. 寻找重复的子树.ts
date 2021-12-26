@@ -6,6 +6,7 @@ function findDuplicateSubtrees(root: BinaryTree | null): Array<BinaryTree | null
   const counter = new Map<string, BinaryTree[]>()
   const dfs = (root: BinaryTree | null): string => {
     if (!root) return ''
+
     const l = dfs(root.left)
     const r = dfs(root.right)
     const key = `${root.val}#${l}#${r}`
@@ -21,3 +22,19 @@ function findDuplicateSubtrees(root: BinaryTree | null): Array<BinaryTree | null
   }
   return res
 }
+
+// 如果是多叉树呢？1948
+// function genHash(root: TrieNode, counter: Map<string, number>): void {
+//   // 这句话很关键
+//   if (root.children.size === 0) return
+
+//   const sb: string[] = []
+//   for (const [childName, child] of root.children.entries()) {
+//     genHash(child, counter)
+//     sb.push(`${childName}(${child.subtreeHash})`)
+//   }
+
+//   sb.sort()
+//   root.subtreeHash = sb.join('')
+//   counter.set(root.subtreeHash, (counter.get(root.subtreeHash) || 0) + 1)
+// }

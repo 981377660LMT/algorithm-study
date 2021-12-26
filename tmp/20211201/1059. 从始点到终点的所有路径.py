@@ -19,18 +19,14 @@ class Solution:
             # 没有后继了
             if len(adjList[cur]) == 0:
                 return cur == destination
-
             for next in adjList[cur]:
                 if visited[next]:
                     return False
                 visited[next] = True
-
                 # 所有路径都要满足
                 if not dfs(next):
                     return False
-
                 visited[next] = False
-
             return True
 
         adjList = [[] for _ in range(n)]
@@ -41,7 +37,7 @@ class Solution:
         if len(adjList[destination]) > 0:
             return False
 
-        visited = [False for _ in range(n)]
+        visited = [False] * n
         visited[source] = True
 
         return dfs(source)

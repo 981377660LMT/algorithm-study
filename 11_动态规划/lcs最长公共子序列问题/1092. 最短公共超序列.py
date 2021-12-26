@@ -15,7 +15,7 @@ class Solution:
                         dp[i][j] = dp[i - 1][j]
                     else:
                         dp[i][j] = dp[i][j - 1]
-
+        print(dp)
         i, j = 0, 0
         lcs = dp[m][n]
         sb = []

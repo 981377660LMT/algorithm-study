@@ -3,9 +3,9 @@ from typing import List
 
 class Solution:
     def indexPairs(self, text: str, words: List[str]) -> List[List[int]]:
-        tree = {}
+        trie = {}
         for w in words:
-            root = tree
+            root = trie
             for char in w:
                 if char not in root:
                     root[char] = {}
@@ -14,14 +14,14 @@ class Solution:
 
         res = []
         n = len(text)
-        for start, _ in enumerate(text):
-            root = tree
-            cur = start
-            while cur < n and text[cur] in root:
-                root = root[text[cur]]
-                cur += 1
+        for left in range(len(text)):
+            root = trie
+            right = left
+            while right < n and text[right] in root:
+                root = root[text[right]]
+                right += 1
                 if "is_word" in root:
-                    res.append([start, cur - 1])
+                    res.append([left, right - 1])
         return res
 
 

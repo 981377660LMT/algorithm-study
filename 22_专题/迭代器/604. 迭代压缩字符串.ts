@@ -1,40 +1,41 @@
 class StringIterator {
+  private raw: string
+  private cur: string
+  private curRemain: number // 当前字符剩余的数目
   private nextCharIndex: number // compressedString 中下一个要生成的字符
-  private remain: number // 当前字符剩余的数目
-  private compressedString: string
-  private curChar: string
   constructor(compressedString: string) {
-    this.compressedString = compressedString
+    this.raw = compressedString
+    this.cur = ' '
+    this.curRemain = 0
     this.nextCharIndex = 0
-    this.remain = 0
-    this.curChar = ' '
   }
 
   next(): string {
     if (!this.hasNext()) return ' '
-    this.upgradeQuery()
-    this.remain--
-    return this.curChar
+    this.mayMove()
+    this.curRemain--
+    return this.cur
   }
 
   hasNext(): boolean {
-    return this.nextCharIndex < this.compressedString.length || this.remain !== 0
+    return this.nextCharIndex < this.raw.length || this.curRemain !== 0
   }
 
-  private upgradeQuery() {
-    if (this.remain === 0) {
-      this.curChar = this.compressedString.charAt(this.nextCharIndex++)
+  private mayMove(): void {
+    if (this.curRemain === 0) {
+      this.cur = this.raw.charAt(this.nextCharIndex++)
       while (
-        this.nextCharIndex < this.compressedString.length &&
-        this.isDigit(this.compressedString.charAt(this.nextCharIndex))
+        this.nextCharIndex < this.raw.length &&
+        this.isDigit(this.raw.charAt(this.nextCharIndex))
       ) {
-        this.remain = this.remain * 10 + Number(this.compressedString.charAt(this.nextCharIndex++))
+        this.curRemain = this.curRemain * 10 + Number(this.raw.charAt(this.nextCharIndex++))
       }
     }
   }
 
-  private isDigit(x: any) {
-    return !isNaN(parseFloat(x)) && isFinite(x)
+  private isDigit(s: string): boolean {
+    const code = s.codePointAt(0)!
+    return code >= 48 && code <= 57
   }
 }
 

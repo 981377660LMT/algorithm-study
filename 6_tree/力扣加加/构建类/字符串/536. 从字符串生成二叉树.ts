@@ -15,7 +15,7 @@ function str2tree(s: string): BinaryTree | null {
     const rootValMatch = str.match(/^-?\d+/g)
     const rootVal = rootValMatch ? rootValMatch[0] : ''
     const [left, right] = extractBracket(str)
-    const root = new BinaryTree(parseInt(rootVal))
+    const root = new BinaryTree(Number(rootVal))
     root.left = dfs(left.slice(1, -1))
     root.right = dfs(right.slice(1, -1))
     return root

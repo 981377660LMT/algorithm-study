@@ -8,11 +8,11 @@ function sufficientSubset(root: BinaryTree | null, limit: number): BinaryTree | 
   dfs(dummy, 0)
   return dummy.left
 
-  function dfs(root: BinaryTree | null, pathSum: number): number {
+  function dfs(root: BinaryTree | null, preSum: number): number {
     if (!root) return -Infinity
-    if (!root.left && !root.right) return pathSum + root.val
-    const left = dfs(root.left, pathSum + root.val)
-    const right = dfs(root.right, pathSum + root.val)
+    if (!root.left && !root.right) return preSum + root.val
+    const left = dfs(root.left, preSum + root.val)
+    const right = dfs(root.right, preSum + root.val)
     if (left < limit) root.left = null
     if (right < limit) root.right = null
     return Math.max(left, right)

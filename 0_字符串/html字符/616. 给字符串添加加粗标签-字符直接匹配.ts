@@ -2,25 +2,27 @@
 // 输出："<b>abc</b>xyz<b>123</b>"
 function addBoldTag(s: string, words: string[]): string {
   const n = s.length
-  const boldChar = Array<boolean>(n).fill(false)
+  const boldChars = Array<boolean>(n).fill(false)
 
+  // 找到需要bold的字符
   for (const word of words) {
     let start = 0
     while (true) {
       const position = s.indexOf(word, start)
       if (position === -1) break
       for (let i = 0; i < word.length; i++) {
-        boldChar[position + i] = true
+        boldChars[position + i] = true
       }
       start = position + 1
     }
   }
 
-  console.log(boldChar)
+  console.log(boldChars)
   const sb: string[] = []
   let i = 0
   while (i < n) {
-    while (i < n && !boldChar[i]) {
+    // 找到下一个bold位置
+    while (i < n && !boldChars[i]) {
       sb.push(s[i])
       i++
     }
@@ -28,11 +30,10 @@ function addBoldTag(s: string, words: string[]): string {
     if (i === n) break
 
     sb.push('<b>')
-    while (i < n && boldChar[i]) {
+    while (i < n && boldChars[i]) {
       sb.push(s[i])
       i++
     }
-
     sb.push('</b>')
   }
 

@@ -12,17 +12,18 @@
 # O(n^2)
 class Solution:
     def shortestWay(self, source: str, target: str) -> int:
-        res = i = 0
-        while i < len(target):
-            j = 0
-            preI = i
+        res = 0
+        hit = 0
+        while hit < len(target):
+            i = 0
+            preHit = hit
 
-            while i < len(target) and j < len(source):
-                if target[i] == source[j]:
-                    i += 1
-                j += 1
+            while hit < len(target) and i < len(source):
+                if target[hit] == source[i]:
+                    hit += 1
+                i += 1
 
-            if i == preI:
+            if i == preHit:
                 return -1
 
             res += 1

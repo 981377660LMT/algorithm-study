@@ -15,7 +15,7 @@ function highlightKeywords(html: string, keywords: string[]): string {
     .split(/\s+/g)
     .map(word => {
       if (keywords.includes(word)) return `<em>${word}</em>`
-      return word.replace(pattern, match => `<em>${match}</em>`).replace('</em><em>', '')
+      return word.replace(pattern, match => `<em>${match}</em>`).replace(/\<\/em\>\<em\>/g, '')
     })
     .join(' ')
 }
@@ -24,3 +24,4 @@ function highlightKeywords(html: string, keywords: string[]): string {
 console.log(highlightKeywords('Hello FrontEnd Lovers', ['Hello', 'Front', 'JavaScript']))
 // 'Hello <em>FrontEnd</em> Lovers'
 console.log(highlightKeywords('Hello FrontEnd Lovers', ['Front', 'FrontEnd', 'JavaScript']))
+export {}

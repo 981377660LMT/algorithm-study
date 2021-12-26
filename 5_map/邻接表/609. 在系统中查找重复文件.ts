@@ -3,18 +3,18 @@
  * @return {string[][]}
  */
 const findDuplicate = function (paths: string[]): string[][] {
-  const map = new Map<string, string[]>()
+  const fileNamesByContent = new Map<string, string[]>()
 
   for (const path of paths) {
     const [root, ...files] = path.split(/\s+/)
     for (const file of files) {
       const [fileName, content] = file.split('(')
-      !map.has(content) && map.set(content, [])
-      map.get(content)!.push(`${root}/${fileName}`)
+      !fileNamesByContent.has(content) && fileNamesByContent.set(content, [])
+      fileNamesByContent.get(content)!.push(`${root}/${fileName}`)
     }
   }
 
-  return [...map.values()].filter(v => v.length >= 2)
+  return [...fileNamesByContent.values()].filter(v => v.length >= 2)
 }
 
 console.log(

@@ -2,6 +2,7 @@ from typing import List
 from math import floor, ceil
 
 # topk
+# 1029 两地调度
 class Solution:
     def minimizeError(self, prices: List[str], target: int) -> str:
         prices_ = [float(i) for i in prices]
@@ -9,7 +10,6 @@ class Solution:
         floor_prices = [floor(i) for i in prices_]
         ceil_prices = [ceil(i) for i in prices_]
         Min, Max = sum(floor_prices), sum(ceil_prices)
-        print(Min, Max, sum(prices_))
         if target < Min or target > Max:
             return '-1'
 
@@ -21,8 +21,6 @@ class Solution:
         ]
 
         diff = sorted(diff, reverse=True)
-        print(diff)
-
         return '%.3f' % (diff_sum - sum(diff[:k]))
 
 

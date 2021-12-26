@@ -3,11 +3,11 @@ class Solution:
     def confusingNumber(self, n: int) -> bool:
         d = dict(zip('01689', '01986'))
         res, s = '', str(n)
-        for x in s[::-1]:
-            if x not in d:
+        for char in s:
+            if char not in d:
                 return False
-            res += d[x]
-        return res != s
+            res += d[char]
+        return res[::-1] != s
 
 
 print(Solution().confusingNumber(89))

@@ -8,8 +8,15 @@
  * @summary 勒让德定理
  */
 const trailingZeroes = function (n: number): number {
+  let res = 0
+  while (n !== 0) {
+    const div = Math.floor(n / 5)
+    res += div
+    n = div
+  }
+  return res
   return n === 0 ? 0 : ~~(n / 5) + trailingZeroes(~~(n / 5))
 }
 
-// console.log(trailingZeroes(5))
+console.log(trailingZeroes(5))
 export { trailingZeroes }
