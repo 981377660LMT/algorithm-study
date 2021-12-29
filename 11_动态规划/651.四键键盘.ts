@@ -5,9 +5,10 @@ const maxA = (n: number) => {
 
   for (let i = 1; i <= n; i++) {
     for (let j = 2; j < i; j++) {
-      // 全选 & 复制 dp[j-2]，连续粘贴 i - j 次  i-1=(j-2)+(i-j+1)
-      // 其中 j 变量减 2 是给 ctrl+A/ctrl+C 留下操作数
-      dp[i] = Math.max(dp[i], dp[j - 2] * (i - j + 1))
+      // j是按ctrl+C的地方 从2开始是因为前面至少有一个全选和复制的操作
+      // 例如从第三步开始复制,那么现在有dp[j-2]个a
+      // i-j是连续按了多少次ctrl+V，+1是因为原来就有dp[j-2]的A在那里
+      dp[i] = Math.max(dp[i], dp[j - 2] * (i - (j + 1) + 1 + 1))
     }
   }
 

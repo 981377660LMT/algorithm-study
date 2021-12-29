@@ -5,11 +5,14 @@
 
 //思路： 檢查每個位置i=0~N-1，把所有字串的第i位抽掉放進 set，若 set 裡的個數比原先字典少，表示有重複
 function differByOne(dict: string[]): boolean {
-  const n = dict[0].length
+  const visited = new Set<string>()
 
-  for (let i = 0; i < n; i++) {
-    if (new Set(dict.map(word => word.slice(0, i) + word.slice(i + 1))).size < dict.length)
-      return true
+  for (const word of dict) {
+    for (let i = 0; i < word.length; i++) {
+      const slice = word.slice(0, i) + '*' + word.slice(i + 1)
+      if (visited.has(slice)) return true
+      visited.add(slice)
+    }
   }
 
   return false

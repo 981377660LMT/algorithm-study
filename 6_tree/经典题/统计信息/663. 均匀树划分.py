@@ -27,7 +27,7 @@ class Solution:
             return total
 
         total = dfs(root)
-        # 检查整棵树的一半权值是否出现（但不能是整棵树之和）。
+        # 检查整棵树的一半权值是否出现（但不能是整棵树之和，所以要减total的1）。
         counter[total] -= 1
         target = total / 2
         return counter[target] >= 1

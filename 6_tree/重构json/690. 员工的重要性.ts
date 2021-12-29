@@ -8,6 +8,7 @@ class Employee {
     this.subordinates = subordinates
   }
 }
+
 /**
  *
  * @param employees  它包含了员工 唯一的 id ，重要度 和 直系下属的 id 。
@@ -23,10 +24,9 @@ function getImportance(employees: Employee[], id: number): number {
     const employee = idToEmployee.get(id)!
     const { importance, subordinates } = employee
     res += importance
-    for (const child of subordinates) {
-      dfs(child)
-    }
+    for (const child of subordinates) dfs(child)
   }
+
   dfs(id)
   return res
 }

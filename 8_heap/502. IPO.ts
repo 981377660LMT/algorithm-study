@@ -17,25 +17,25 @@ import { MinHeap } from './minheap'
  * 即：当前所有可以启动的项目全部放入大根堆，然后选一个利润最大的，重复k轮
  */
 function findMaximizedCapital(k: number, w: number, profits: number[], capital: number[]): number {
-  const minCapitalQueue = new MinHeap<[number, number]>((a, b) => a[0] - b[0])
-  const maxProfitQueue = new MinHeap<[number, number]>((a, b) => b[0] - a[0])
+  const capQueue = new MinHeap<[cap: number, index: number]>((a, b) => a[0] - b[0])
+  const profQueue = new MinHeap<[prof: number, index: number]>((a, b) => b[0] - a[0])
 
   for (let i = 0; i < capital.length; i++) {
-    minCapitalQueue.push([capital[i], i])
+    capQueue.push([capital[i], i])
   }
 
-  let availableCapital = w
+  let curCap = w
   for (let i = 0; i < k; i++) {
-    // 所有可以启动的项目全部放入大根堆，然后选利润最大的
-    while (minCapitalQueue.size && minCapitalQueue.peek()[0] <= availableCapital) {
-      const [_, index] = minCapitalQueue.shift()!
-      maxProfitQueue.push([profits[index], index])
+    // 所有可以启动的项目全部放入大根堆，然后选一个利润最大的
+    while (capQueue.size > 0 && capQueue.peek()[0] <= curCap) {
+      const [_, index] = capQueue.shift()!
+      profQueue.push([profits[index], index])
     }
-    if (!maxProfitQueue.size) break
-    availableCapital += maxProfitQueue.shift()![0]
+    if (profQueue.size === 0) break
+    curCap += profQueue.shift()![0]
   }
 
-  return availableCapital
+  return curCap
 }
 
 console.log(findMaximizedCapital(2, 0, [1, 2, 3], [0, 1, 1]))

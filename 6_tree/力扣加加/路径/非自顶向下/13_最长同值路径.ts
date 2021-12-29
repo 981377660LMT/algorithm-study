@@ -48,20 +48,15 @@ const bt2: TreeNode = {
 const longestUnivaluePath = (root: TreeNode) => {
   if (!root) return 0
   let res = 0
-  const dfs = (root: TreeNode | null): number => {
+  const helper = (parentValue: number, root: TreeNode | null): number => {
     if (!root) return 0
-
-    let left = dfs(root.left)
-    let right = dfs(root.right)
-    if (root.left && root.val === root.left.val) left++
-    else left = 0
-    if (root.right && root.val === root.right.val) right++
-    else right = 0
-
+    // 注意：两个节点之间的路径长度由它们之间的边数表示。
+    const left = helper(root.val, root.left)
+    const right = helper(root.val, root.right)
     res = Math.max(res, left + right)
-    return Math.max(left, right)
+    return root.val === parentValue ? Math.max(left, right) + 1 : 0
   }
-  dfs(root)
+  helper(root.val, root)
   return res
 }
 

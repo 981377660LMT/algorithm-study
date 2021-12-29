@@ -2,16 +2,16 @@ import { randint } from '../randint'
 
 // 尽量最少调用随机函数 Math.random()，并且优化时间和空间复杂度。
 class Solution {
-  private length: number
+  private total: number
   private rows: number
   private cols: number
-  private blackListMap: Map<number, number>
+  private black: Map<number, number>
 
   constructor(m: number, n: number) {
-    this.length = m * n
+    this.total = m * n
     this.rows = m
     this.cols = n
-    this.blackListMap = new Map<number, number>()
+    this.black = new Map<number, number>()
   }
 
   /**
@@ -22,22 +22,25 @@ class Solution {
    * 每次flip后都将flip的值记录到黑名单中，并将其映射到最后一个数上
    */
   flip(): number[] {
-    if (this.length <= 0) return []
-    this.length--
-    const rand = randint(0, this.length)
-    // rand 如果在黑名单 内 那么就把rand 对应的白名单里的那个数置为1 然后再映射到另一个白名单的数
-    const res = this.blackListMap.get(rand) || rand
-    this.blackListMap.set(rand, this.blackListMap.get(this.length) || this.length)
-
-    return [~~(res / this.cols), res % this.cols]
+    if (this.total <= 0) return []
+    this.total--
+    const choose = randint(0, this.total)
+    const white = this.getWhite(choose)
+    // choose 映射到另一个白名单的数
+    this.black.set(choose, this.getWhite(this.total))
+    return [~~(white / this.cols), white % this.cols]
   }
 
   /**
    * 将所有的值都重新置为 0
    */
   reset(): void {
-    this.length = this.rows * this.cols
-    this.blackListMap.clear()
+    this.total = this.rows * this.cols
+    this.black.clear()
+  }
+
+  private getWhite(num: number): number {
+    return this.black.get(num) || num
   }
 }
 

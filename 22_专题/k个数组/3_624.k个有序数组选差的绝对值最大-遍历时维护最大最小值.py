@@ -4,10 +4,14 @@ from typing import List
 # 你的任务就是去找到最大距离
 
 # 总结：遍历，不断维护min与max
+INF = 0x7FFFFFFF
+
+
 class Solution:
     def maxDistance(self, arrays: List[List[int]]) -> int:
         n = len(arrays)
         res = 0
+        # 注意要初始化,一个数组只能选一个
         minVal = arrays[0][0]
         maxVal = arrays[0][-1]
         for i in range(1, n):

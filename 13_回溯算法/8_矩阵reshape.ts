@@ -12,22 +12,26 @@ const matrixReshape = function (mat: number[][], r: number, c: number): number[]
   if (m * n != r * c) {
     return mat
   }
+
   const res = Array.from<number, number[]>({ length: r }, () => Array(c).fill(0))
   for (let i = 0; i < m * n; i++) {
     res[~~(i / c)][i % c] = mat[~~(i / n)][i % n]
   }
+
   return res
 }
 
-console.log(
-  matrixReshape(
-    [
-      [1, 2],
-      [3, 4],
-    ],
-    1,
-    4
+if (require.main === module) {
+  console.log(
+    matrixReshape(
+      [
+        [1, 2],
+        [3, 4],
+      ],
+      1,
+      4
+    )
   )
-)
+}
 
-export default 1
+export { matrixReshape }

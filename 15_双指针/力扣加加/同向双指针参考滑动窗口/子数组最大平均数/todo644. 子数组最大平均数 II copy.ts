@@ -8,6 +8,7 @@
  */
 const findMaxAverage = function (nums: number[], k: number): number {
   let res = -Infinity
+
   for (let i = 0; i < nums.length - k + 1; i++) {
     let sum = 0
     for (let j = i; j < nums.length; j++) {

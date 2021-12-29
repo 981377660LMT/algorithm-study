@@ -1,7 +1,9 @@
 import { MinHeap } from '../../../2_queue/minheap'
+
 type Distance = number
 type RingIndex = number
 type KeyIndex = number
+
 /**
  * @param {string} ring  ring，表示刻在外环上的编码 最初，ring 的第一个字符与12:00方向对齐
  * @param {string} key  key，表示需要拼写的关键词
@@ -13,27 +15,28 @@ type KeyIndex = number
  * 旋转的最终目的是将字符串 ring 的一个字符与 12:00 方向对齐，并且这个字符必须等于字符 key[i] 。
  */
 const findRotateSteps = function (ring: string, key: string): number {
-  const charToIndex = new Map<string, number[]>()
+  const charPos = new Map<string, number[]>()
   for (let i = 0; i < ring.length; i++) {
-    !charToIndex.has(ring[i]) && charToIndex.set(ring[i], [])
-    charToIndex.get(ring[i])!.push(i)
+    !charPos.has(ring[i]) && charPos.set(ring[i], [])
+    charPos.get(ring[i])!.push(i)
   }
 
-  const visited = new Set<string>('0#0')
+  const visited = new Set<string>()
   const queue = new MinHeap<[Distance, RingIndex, KeyIndex]>((a, b) => a[0] - b[0])
   queue.push([0, 0, 0])
 
   while (queue.size) {
-    const [dis, ringIndex, keyIndex] = queue.shift()!
+    const [dis, cur, steps] = queue.shift()!
 
-    if (keyIndex === key.length) return dis + key.length // 按下需要1步
+    if (steps === key.length) return dis + key.length // 按下需要1步
 
-    const k = `${ringIndex}#${keyIndex}`
-    if (visited.has(k)) continue
-    visited.add(k)
+    const curKey = `${cur}#${steps}`
+    if (visited.has(curKey)) continue
+    visited.add(curKey)
 
-    for (const next of charToIndex.get(key[keyIndex]) || []) {
-      queue.push([dis + getDistance(ringIndex, next), next, keyIndex + 1])
+    // 不能用dist数组是因为权值不是确定的，需要用visited；直接全部入堆
+    for (const next of charPos.get(key[steps]) || []) {
+      queue.push([dis + getDistance(cur, next), next, steps + 1])
     }
   }
 
@@ -45,5 +48,6 @@ const findRotateSteps = function (ring: string, key: string): number {
 }
 
 console.log(findRotateSteps('godding', 'gd'))
+console.log(findRotateSteps('caotmcaataijjxi', 'oatjiioicitatajtijciocjcaaxaaatmctxamacaamjjx'))
 
 export {}

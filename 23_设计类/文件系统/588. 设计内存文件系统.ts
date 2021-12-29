@@ -21,7 +21,7 @@ class FileSystem {
   // 你的返回结果（包括文件和子文件夹）应该按字典序排列。
   ls(path: string): string[] {
     let root = this.root
-    const pathList = path.split('/').filter(v => v)
+    const pathList = path.split('/').filter(v => v !== '')
     for (const name of pathList) {
       root = root.children.get(name)! // 用户不会获取不存在文件的内容
     }
@@ -31,25 +31,25 @@ class FileSystem {
   }
 
   mkdir(path: string): void {
-    this.tranverse(path)
+    this.tranverseAndMakeFile(path)
   }
 
   // 如果文件不存在，你需要创建包含给定文件内容的文件。
   // 如果文件已经存在，那么你需要将给定的文件内容 追加 在原本内容的后面
   addContentToFile(filePath: string, content: string): void {
-    const root = this.tranverse(filePath)
+    const root = this.tranverseAndMakeFile(filePath)
     root.isFile = true
     root.content += content
   }
 
   // 输入 文件路径 ，以字符串形式返回该文件的 内容 。
   readContentFromFile(filePath: string): string {
-    return this.tranverse(filePath).content
+    return this.tranverseAndMakeFile(filePath).content
   }
 
-  private tranverse(filePath: string) {
+  private tranverseAndMakeFile(filePath: string) {
     let root = this.root
-    const pathList = filePath.split('/').filter(v => v)
+    const pathList = filePath.split('/').filter(f => f !== '')
     for (const name of pathList) {
       if (!root.children.has(name)) root.children.set(name, new File(''))
       root = root.children.get(name)!

@@ -9,7 +9,8 @@ class Solution:
             return str(int(n) - 1)
         if n == '11':
             return '9'
-        a, b = n[: (len(n) + 1) // 2], n[(len(n) + 1) // 2 :]
+        half = (len(n) + 1) >> 1
+        a, b = n[:half], n[half:]
         temp = [str(int(a) - 1), a, str(int(a) + 1)]
         temp = [i + i[len(b) - 1 :: -1] for i in temp]
         print(temp)

@@ -10,10 +10,12 @@ import { BinaryTree } from '../../Tree'
 function str2tree(s: string): BinaryTree | null {
   if (!s) return null
 
-  const dfs = (str: string): BinaryTree | null => {
+  return dfs(s)
+
+  function dfs(str: string): BinaryTree | null {
     if (!str) return null
-    const rootValMatch = str.match(/^-?\d+/g)
-    const rootVal = rootValMatch ? rootValMatch[0] : ''
+    const firstBracket = str.indexOf('(')
+    const rootVal = firstBracket === -1 ? str : str.slice(0, firstBracket)
     const [left, right] = extractBracket(str)
     const root = new BinaryTree(Number(rootVal))
     root.left = dfs(left.slice(1, -1))
@@ -21,18 +23,20 @@ function str2tree(s: string): BinaryTree | null {
     return root
   }
 
-  return dfs(s)
-
   function extractBracket(str: string) {
     const res: number[] = []
     const bracket = new Set(['(', ')'])
-    let count = 0
+    let level = 0
+
     for (let i = 0; i < str.length; i++) {
       if (!bracket.has(str[i])) continue
-      if (count === 0) res.push(i)
-      if (str[i] === '(') count++
-      else count--
-      if (count === 0) res.push(i)
+
+      if (level === 0) res.push(i)
+
+      if (str[i] === '(') level++
+      else level--
+
+      if (level === 0) res.push(i)
     }
 
     const left = str.slice(res[0] || 0, res[1] + 1 || 0)

@@ -8,7 +8,7 @@ import { PriorityQueue } from '../../2_queue/todo优先级队列'
  * 最小值用堆来维护，最大值随指针移动而改变，
  * @description 思路与有序矩阵那道题差不多,每次移动shift出的那行的指针
  */
-const smallestRange = function (nums: number[][]): number[] {
+const smallestRange = (nums: number[][]): number[] => {
   let l = -Infinity
   let r = Infinity
   const pq = new PriorityQueue<[number, number, number]>(

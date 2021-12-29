@@ -16,36 +16,35 @@
     https://leetcode-cn.com/problems/erect-the-fence/solution/an-zhuang-zha-lan-by-leetcode/
     时间复杂度：O(nlog(n))。
   */
-const outerTrees = function (points: number[][]) {
+const outerTrees = (points: [x: number, y: number][]) => {
   if (points.length <= 1) return points
   points.sort((a, b) => a[0] - b[0] || a[1] - b[1])
-  const result: number[][] = []
+  const cand: [x: number, y: number][] = []
 
   //寻找凸壳的下半部分
   for (let i = 0; i < points.length; i++) {
     while (
-      result.length >= 2 &&
-      crossProduct(result[result.length - 2], result[result.length - 1], points[i]) > 0
+      cand.length >= 2 &&
+      crossProduct(cand[cand.length - 2], cand[cand.length - 1], points[i]) > 0
     ) {
-      result.pop()
+      cand.pop()
     }
-    result.push(points[i])
+    cand.push(points[i])
   }
 
   // 目前求解出来的部分只包括凸壳的下半部分。现在我们需要求出凸壳的上半部分
   // result.pop()
-
   for (let i = points.length - 1; i >= 0; i--) {
     while (
-      result.length >= 2 &&
-      crossProduct(result[result.length - 2], result[result.length - 1], points[i]) > 0
+      cand.length >= 2 &&
+      crossProduct(cand[cand.length - 2], cand[cand.length - 1], points[i]) > 0
     ) {
-      result.pop()
+      cand.pop()
     }
-    result.push(points[i])
+    cand.push(points[i])
   }
 
-  return [...new Set(result)]
+  return [...new Set(cand)]
 
   /**
    *

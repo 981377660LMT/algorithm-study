@@ -10,11 +10,14 @@
  */
 const countBinarySubstrings = function (s: string): number {
   const matched = s.match(/([01])\1*/g)!.map(v => v.length)
+
+  console.log(matched)
   let res = 0
   matched.reduce((pre, cur) => {
     res += Math.min(pre, cur)
     return cur
   })
+
   return res
 }
 

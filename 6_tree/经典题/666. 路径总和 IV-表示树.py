@@ -14,20 +14,20 @@ class Solution:
         self.res = 0
         valueByNode = {n // 10: n % 10 for n in nums}  # 结点id:结点的值
 
-        def dfs(root: int, s: int):
+        def dfs(root: int, pathSum: int):
             if root not in valueByNode:
                 return
 
-            s += valueByNode[root]
+            pathSum += valueByNode[root]
             depth, pos = divmod(root, 10)
             left = (depth + 1) * 10 + 2 * pos - 1
             right = left + 1
 
             if left not in valueByNode and right not in valueByNode:
-                self.res += s
+                self.res += pathSum
             else:
-                dfs(left, s)
-                dfs(right, s)
+                dfs(left, pathSum)
+                dfs(right, pathSum)
 
         dfs(nums[0] // 10, 0)
         return self.res

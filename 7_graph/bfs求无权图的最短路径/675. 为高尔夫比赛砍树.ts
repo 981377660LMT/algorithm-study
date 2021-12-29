@@ -2,6 +2,14 @@ import { ArrayDeque } from '../../2_queue/Deque'
 
 // 把所有的树然后按照高度排序，利用BFS寻找两树之间的最短距离。
 function cutOffTree(forest: number[][]): number {
+  const [m, n] = [forest.length, forest[0].length]
+  const dir = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ]
+
   const trees: number[][] = []
   for (let i = 0; i < forest.length; i++) {
     for (let j = 0; j < forest[i].length; j++) {
@@ -32,14 +40,7 @@ function cutOffTree(forest: number[][]): number {
     treeRow: number,
     treeCol: number
   ): number {
-    const [m, n] = [forest.length, forest[0].length]
-    const dir = [
-      [1, 0],
-      [-1, 0],
-      [0, 1],
-      [0, -1],
-    ]
-    const queue = new ArrayDeque<[number, number, number]>(10 ** 4)
+    const queue = new ArrayDeque<[row: number, col: number, cost: number]>(10 ** 4)
     queue.push([startRow, startCol, 0])
     const visited = new Set<number>([startRow * n + startCol])
 

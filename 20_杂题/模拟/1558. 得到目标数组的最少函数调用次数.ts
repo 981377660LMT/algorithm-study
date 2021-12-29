@@ -10,7 +10,7 @@
    让序列中某个数减 1(单个算)；
    让序列中所有数全体除以 2(一起算取最大)。
  */
-var minOperations = function (nums: number[]): number {
+function minOperations(nums: number[]): number {
   let add = 0
   let maxMulti = 0
   for (let num of nums) {

@@ -79,8 +79,8 @@ class AutocompleteSystem {
       const res = this.trie.search(this.curSearch)
       return res
         .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-        .slice(0, K)
         .map(item => item[0])
+        .slice(0, K)
     }
   }
 

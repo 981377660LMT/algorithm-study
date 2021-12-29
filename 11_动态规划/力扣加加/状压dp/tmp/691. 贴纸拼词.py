@@ -21,6 +21,7 @@ class Solution:
                 return 0
             res = float('inf')
             for sticker in stickers:
+                # 剪枝
                 if target[0] not in sticker:
                     continue
                 replacedWord = addSticker(sticker, target)

@@ -10,7 +10,7 @@ class Solution:
             if line[0] == 'x':
                 line = '1' + line
             text = line.replace('+x', '+1x').replace('-x', '-1x').replace('-', '+-').split('+')
-            text = [i for i in text if len(i) > 0]
+            text = [seg for seg in text if len(seg) > 0]
 
             x = sum([int(t[:-1]) for t in text if t[-1] == 'x'])  # coefficient
             num = sum([int(t) for t in text if t[-1] != 'x'])  # constant

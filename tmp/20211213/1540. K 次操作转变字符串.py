@@ -7,9 +7,7 @@ class Solution:
         n = len(s)
         dist = [0 for _ in range(26)]  # 这个距离需要操作几次
         for i in range(n):
-            diff = ord(t[i]) - ord(s[i])
-            if diff < 0:
-                diff += 26  # s去找t
+            diff = min((ord(t[i]) - ord(s[i])) % 26, (ord(s[i]) - ord(t[i]) % 26))
             # 第diff轮需要的总操作次数
             dist[diff] += 1
         print(dist)

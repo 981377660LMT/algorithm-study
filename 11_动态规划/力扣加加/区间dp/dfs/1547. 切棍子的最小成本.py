@@ -12,8 +12,7 @@ from functools import lru_cache
 # 1000. 合并石头的最低成本.py
 class Solution:
     def minCost(self, n: int, cuts: List[int]) -> int:
-        cuts.extend([0, n])
-        cuts.sort()
+        cuts = [0] + cuts + [n]
 
         @lru_cache(None)
         def dfs(left: int, right: int) -> int:

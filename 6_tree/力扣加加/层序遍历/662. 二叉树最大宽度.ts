@@ -39,6 +39,7 @@ const bt: BinaryTree = {
 
 // type NodeIndex = number
 
+// 完全二叉树的做法
 // const widthOfBinaryTree = (root: BinaryTree | null): number => {
 //   if (!root) return 0
 //   const queue: [BinaryTree, NodeIndex][] = [[root, 0]]
@@ -65,12 +66,11 @@ const bt: BinaryTree = {
 
 type Position = bigint
 
-// 非完全二叉树的做法:每层position从0开始计算(不是索引)
 // js计数溢出
 // JS中最大安全整数是2的53次方减1.
 // 那么一旦这颗树的高度超过了53层，我们的计数就会溢出了
 // 使用 BigInt 解决超出 js 所能表示的最大数问题
-const widthOfBinaryTree = (root: BinaryTree | null): number | bigint => {
+const widthOfBinaryTree = (root: BinaryTree | null): number => {
   if (!root) return 0
   const queue: [BinaryTree, Position][] = [[root, 0n]]
   let res = 0n
@@ -83,12 +83,41 @@ const widthOfBinaryTree = (root: BinaryTree | null): number | bigint => {
 
       if (i === 0) min = pos
       if (i === levelLength - 1) max = pos
-      head.left && queue.push([head.left, pos * 2n])
-      head.right && queue.push([head.right, pos * 2n + 1n])
+      head.left && queue.push([head.left, pos * 2n + 1n])
+      head.right && queue.push([head.right, pos * 2n + 2n])
     }
 
-    const tmp = max - min + 1n
-    tmp > res && (res = tmp)
+    const cand = max - min + 1n
+    cand > res && (res = cand)
+  }
+
+  return Number(res)
+}
+
+// 为什么可以不使用bigint
+// 因为题干:答案在32位有符号整数的表示范围内，计算位置不用乘2而是直接<<左移，舍弃了不合题意的答案
+function widthOfBinaryTree2(root: BinaryTree | null): number {
+  if (!root) return 0
+
+  const queue: [BinaryTree, number][] = [[root, 0]]
+  let res = 0
+
+  while (queue.length > 0) {
+    const levelLength = queue.length
+    let min = 0
+    let max = 0
+    for (let i = 0; i < levelLength; i++) {
+      const [head, pos] = queue.shift()!
+      if (i === 0) min = pos
+      if (i === levelLength - 1) max = pos
+      // 注意这里不再乘2而是位移 为什么可以?
+      // 因为答案在32位有符号整数的表示范围内。
+      head.left && queue.push([head.left, (pos << 1) + 1])
+      head.right && queue.push([head.right, (pos << 1) + 2])
+    }
+
+    const cand = max - min + 1
+    cand > res && (res = cand)
   }
 
   return res

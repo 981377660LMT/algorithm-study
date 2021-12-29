@@ -41,8 +41,11 @@ const nextPermutation = function (nums: number[]) {
 // // 输出：[1,2,3]
 // console.log(nextPermutation([1, 2, 4, 3]))
 // 1324
-console.log(nextPermutation([2, 3, 1]))
-export default 1
+
+if (require.main === module) {
+  console.log(nextPermutation([2, 3, 1]))
+}
+export { nextPermutation }
 
 // 先找出最大的索引 k 满足 nums[k] < nums[k+1]，如果不存在，就翻转整个数组；
 // 再找出另一个最大索引 l 满足 nums[l] > nums[k]；

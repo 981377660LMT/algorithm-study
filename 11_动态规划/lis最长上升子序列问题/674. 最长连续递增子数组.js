@@ -1,5 +1,5 @@
 // 与LIS问题的区别是 这个题目需要连续
-var findLengthOfLCIS = function (nums) {
+function findLengthOfLCIS(nums) {
   let len = 1,
     maxLen = 0
 
@@ -8,5 +8,6 @@ var findLengthOfLCIS = function (nums) {
     else len = 1
     maxLen = Math.max(len, maxLen)
   }
+
   return maxLen
 }

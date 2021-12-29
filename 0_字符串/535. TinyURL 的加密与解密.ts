@@ -17,10 +17,10 @@
 
 const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 // tinyURL 到 longURL映射
-const codeDB = new Map<string, string>()
+const mysqlStore = new Map<string, string>()
 // longURL 到 tinyURL映射
-const urlDB = new Map<string, string>()
-const getCode = () => {
+const redisCache = new Map<string, string>()
+const genCode = () => {
   const code = Array.from({ length: 6 }, () => chars.charAt(~~(Math.random() * 62)))
   return 'http://tinyurl.com/' + code.join('')
 }
@@ -29,11 +29,11 @@ const getCode = () => {
  * Encodes a URL to a shortened URL.
  */
 function encode(longUrl: string): string {
-  if (urlDB.has(longUrl)) return urlDB.get(longUrl)!
-  let code = getCode()
-  while (codeDB.has(code)) code = getCode()
-  codeDB.set(code, longUrl)
-  urlDB.set(longUrl, code)
+  if (redisCache.has(longUrl)) return redisCache.get(longUrl)!
+  let code = genCode()
+  while (mysqlStore.has(code)) code = genCode()
+  mysqlStore.set(code, longUrl)
+  redisCache.set(longUrl, code)
   return code
 }
 
@@ -41,10 +41,11 @@ function encode(longUrl: string): string {
  * Decodes a shortened URL to its original URL.
  */
 function decode(shortUrl: string): string {
-  return codeDB.get(shortUrl)!
+  return mysqlStore.get(shortUrl)!
 }
 
 /**
  * Your functions will be called as such:
  * decode(encode(strs));
  */
+export {}

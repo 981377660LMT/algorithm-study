@@ -21,15 +21,15 @@ class Solution:
             adjMap[b].append(a)
 
         @lru_cache(None)
-        def dfs(curId: int, visitedLen: int) -> Tuple[int, List[int]]:
-            if visitedLen == target:
+        def dfs(curId: int, steps: int) -> Tuple[int, List[int]]:
+            if steps == target:
                 return 0, []
 
             cost, path = INF, []
             for next in adjMap[curId]:
-                nextCost, nextPath = dfs(next, visitedLen + 1)
+                nextCost, nextPath = dfs(next, steps + 1)
                 costCand, pathCand = (
-                    nextCost + (names[curId] != targetPath[visitedLen]),
+                    nextCost + (names[curId] != targetPath[steps]),
                     [curId] + nextPath,
                 )
                 if costCand < cost:

@@ -22,6 +22,7 @@ const findMaxAverage = function (nums: number[], k: number): number {
   return l
 
   // 存在长度不小于k的子数组平均数大于等于average 使用前缀和求子数组和
+  // 前缀和全部平移 average 即只需要前缀和>=0
   function check(average: number): boolean {
     const preSum = Array<number>(nums.length + 1).fill(0)
     for (let i = 1; i < preSum.length; i++) {

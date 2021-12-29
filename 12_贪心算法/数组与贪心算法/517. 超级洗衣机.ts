@@ -7,21 +7,21 @@
  * @link
  * https://leetcode-cn.com/problems/super-washing-machines/comments/29839
  */
-var findMinMoves = function (machines: number[]): number {
+function findMinMoves(machines: number[]): number {
   const sum = machines.reduce((pre, cur) => pre + cur)
   const target = sum / machines.length
   if (target % 1) return -1
 
-  let needToMoveForOne = 0
-  let needToMoveTotal = 0
-  let max = 0
+  let toRight = 0
+  let total = 0
+  let res = 0
   machines.forEach(machine => {
-    needToMoveForOne = machine - target
-    needToMoveTotal += needToMoveForOne
-    max = Math.max(max, needToMoveForOne, Math.abs(needToMoveTotal))
+    toRight = machine - target
+    total += toRight
+    res = Math.max(res, toRight, Math.abs(total))
   })
 
-  return max
+  return res
 }
 
 console.log(findMinMoves([1, 0, 5]))

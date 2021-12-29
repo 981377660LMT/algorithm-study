@@ -10,6 +10,7 @@
 var knightProbability = function (n: number, k: number, row: number, column: number): number {
   const memo = new Map<string, number>()
   const next: [number, number][] = []
+  // `这段逻辑很巧妙`
   for (const dx of [-2, -1, 1, 2]) {
     for (const dy of [-2, -1, 1, 2]) {
       if (Math.abs(dx) + Math.abs(dy) === 3) next.push([dx, dy])

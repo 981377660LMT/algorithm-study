@@ -1,19 +1,37 @@
 // 找到给定的二维数组中最大的岛屿面积。
 const maxAreaOfIsland = (grid: number[][]): number => {
   let res = 0
+  let resCand = 0
 
   // 1. 确定行列
   const m = grid.length
   const n = grid[0].length
 
-  // 2. dfs: 碰到为1的陆地就开始深度遍历并标记为已看过(0)
-  const dfs = (row: number, column: number, visited: Set<number>) => {
-    res = Math.max(res, visited.size)
+  // 3. 开始dfs
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (grid[i][j] === 1) {
+        resCand = 0
+        dfs(i, j)
+        res = Math.max(res, resCand)
+      }
+    }
+  }
+
+  return res
+
+  // 2. dfs原地标记,同时cand++
+  function dfs(row: number, col: number): void {
+    if (grid[row][col] === 1) {
+      grid[row][col] = 0
+      resCand++
+    }
+
     ;[
-      [row - 1, column],
-      [row + 1, column],
-      [row, column - 1],
-      [row, column + 1],
+      [row - 1, col],
+      [row + 1, col],
+      [row, col - 1],
+      [row, col + 1],
     ].forEach(([nextRow, nextColumn]) => {
       // 1.在矩阵中
       // 2.是陆地
@@ -22,27 +40,12 @@ const maxAreaOfIsland = (grid: number[][]): number => {
         nextRow < m &&
         nextColumn >= 0 &&
         nextColumn < n &&
-        grid[nextRow][nextColumn] === 1 &&
-        !visited.has(nextRow * n + nextColumn)
+        grid[nextRow][nextColumn] === 1
       ) {
-        visited.add(nextRow * n + nextColumn)
-        dfs(nextRow, nextColumn, visited)
-        // 这句很关键 回溯时标记为0 可以避免之后无效的dfs
-        grid[nextRow][nextColumn] = 0
+        dfs(nextRow, nextColumn)
       }
     })
   }
-
-  // 3. 开始dfs
-  for (let i = 0; i < m; i++) {
-    for (let j = 0; j < n; j++) {
-      if (grid[i][j] === 1) {
-        dfs(i, j, new Set([i * n + j]))
-      }
-    }
-  }
-
-  return res
 }
 
 console.log(

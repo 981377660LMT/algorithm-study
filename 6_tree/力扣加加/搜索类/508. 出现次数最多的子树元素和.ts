@@ -16,7 +16,7 @@ function findFrequentTreeSum(root: BinaryTree | null): number[] {
     const left = dfs(root.left)
     const right = dfs(root.right)
     const sum = root.val + right + left
-    counter.set(sum, (counter.get(sum) || 0) + 1) // 只需统计本层 不需统计left和right
+    counter.set(sum, (counter.get(sum) || 0) + 1) // 只需统计本层
     return sum
   }
   dfs(root)

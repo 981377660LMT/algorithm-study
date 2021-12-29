@@ -12,18 +12,18 @@ type Index = number
  */
 const checkSubarraySum = function (nums: number[], k: number): boolean {
   // -1 位置和为0
-  const pre = new Map<SumMod, Index>([[0, -1]])
+  const first = new Map<SumMod, Index>([[0, -1]])
   let sum = 0
 
   for (let i = 0; i < nums.length; i++) {
     sum += nums[i]
     const mod = sum % k
-    if (pre.has(mod)) {
-      if (i - pre.get(mod)! >= 2) {
+    if (first.has(mod)) {
+      if (i - first.get(mod)! >= 2) {
         return true
       }
     } else {
-      pre.set(mod, i)
+      first.set(mod, i)
     }
   }
 

@@ -1,21 +1,30 @@
 from typing import List
+from collections import defaultdict
 from functools import lru_cache
+
+
+class TrieNode(object):
+    """docstring for TrieNode."""
+
+    def __init__(self):
+        self.children = defaultdict(TrieNode)
+        self.isWord = False
 
 
 class Trie:
     def __init__(self):
-        self.root = {}
+        self.root = TrieNode()
 
-    def insert(self, word):
+    def insert(self, word) -> None:
         root = self.root
         for char in word:
-            if char not in root:
-                root[char] = {}
-            root = root[char]
-        root['#'] = 1
+            if char not in root.children:
+                root.children[char] = TrieNode()
+            root = root.children[char]
+        root.isWord = True
 
     @lru_cache(None)
-    def countWords(self, word):
+    def search(self, word) -> float:
         if not word:
             return 0
 
@@ -23,12 +32,12 @@ class Trie:
         res = float('-inf')
 
         for i, char in enumerate(word):
-            if char not in root:
+            if char not in root.children:
                 return res
 
-            root = root[char]
-            if '#' in root:
-                res = max(res, 1 + self.countWords(word[i + 1 :]))
+            root = root.children[char]
+            if root.isWord:
+                res = max(res, 1 + self.search(word[i + 1 :]))
 
         return res
 
@@ -43,7 +52,7 @@ class Solution:
         for word in words:
             self.trie.insert(word)
         for word in words:
-            if self.trie.countWords(word) >= 2:
+            if self.trie.search(word) >= 2:
                 res.append(word)
         return res
 

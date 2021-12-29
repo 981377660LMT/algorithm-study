@@ -16,14 +16,19 @@ function isPossibleDivide(nums: number[], k: number): boolean {
 
   for (const num of nums) {
     if (counter.get(num) === 0) continue // 用完了
-    for (let j = 0; j < k; j++) {
-      const next = num + j
-      if (!counter.has(next) || counter.get(next) === 0) return false
-      counter.set(next, counter.get(next)! - 1)
+    // 耗尽这一段
+    for (let i = 0; i < k; i++) {
+      const need = num + i
+      if (!counter.has(need) || counter.get(need) === 0) return false
+      counter.set(need, counter.get(need)! - 1)
     }
   }
 
   return true
 }
 
-console.log(isPossibleDivide([1, 2, 3, 3, 4, 4, 5, 6], 4))
+if (require.main === module) {
+  console.log(isPossibleDivide([1, 2, 3, 3, 4, 4, 5, 6], 4))
+}
+
+export { isPossibleDivide }

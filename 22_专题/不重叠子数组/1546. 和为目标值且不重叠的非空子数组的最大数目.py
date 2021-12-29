@@ -9,8 +9,8 @@ class Solution:
             running_sum += num
             if running_sum - target in lookup:
                 res += 1
-                # reset the map
-                lookup = {}
+                # 关键
+                lookup.clear()
             lookup[running_sum] = i
         return res
 

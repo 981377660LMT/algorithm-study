@@ -1,4 +1,5 @@
 // 把4个数求24点, 转化为3个数求24点, 再转化为2个数, 最后变1个数
+// 一共有 9216 种可能性
 function judgePoint24(cards: number[]): boolean {
   if (cards.length === 1) return Math.abs(cards[0] - 24) < 1e-6
 

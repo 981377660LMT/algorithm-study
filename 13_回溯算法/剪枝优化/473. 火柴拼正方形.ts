@@ -8,20 +8,19 @@
  */
 var makesquare = function (matchsticks: number[]): boolean {
   const sum = matchsticks.reduce((pre, cur) => pre + cur)
-  const div = sum / 4
-  const mod = sum % 4
-  if (mod) return false
+  if (sum % 4) return false
 
-  const res = [0, 0, 0, 0]
+  const target = sum / 4
+  const group = [0, 0, 0, 0]
   matchsticks.reverse() // 降序排序，优先选择权值大的可以减少搜索树的规模。
 
   const bt = (index: number): boolean => {
-    if (index === matchsticks.length) return res.every(v => v === div)
+    if (index === matchsticks.length) return group.every(v => v === target)
     for (let j = 0; j < 4; j++) {
-      if (matchsticks[index] + res[j] <= div) {
-        res[j] += matchsticks[index]
+      if (matchsticks[index] + group[j] <= target) {
+        group[j] += matchsticks[index]
         if (bt(index + 1)) return true
-        res[j] -= matchsticks[index]
+        group[j] -= matchsticks[index]
       }
     }
     return false

@@ -12,13 +12,13 @@ const findClosestElements = function (arr: number[], k: number, x: number): numb
   if (n === k) return arr
   let l = 0
   let r = n - 1
-  let remove = n - k
+  let removeCount = n - k
 
-  while (remove) {
+  while (removeCount > 0) {
     // 尽量左移 因为整数 a 比整数 b 更接近 x 需要满足 |a - x| == |b - x| 且 a < b
     if (x - arr[l] <= arr[r] - x) r--
     else l++
-    remove--
+    removeCount--
   }
 
   return arr.slice(l, r + 1)

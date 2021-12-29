@@ -1,11 +1,12 @@
 import { randint } from '../randint'
 
-type NumberInBlackList = number
-type NumberInWhiteList = number
+type Black = number
+type White = number
 
 class Solution {
   private whiteListLength: number
-  private blackListMap: Map<NumberInBlackList, NumberInWhiteList>
+  private black: Map<Black, White>
+
   /**
    *
    *
@@ -15,7 +16,7 @@ class Solution {
    */
   constructor(n: number, blacklist: number[]) {
     this.whiteListLength = n - blacklist.length
-    this.blackListMap = new Map()
+    this.black = new Map()
     const set = new Set(blacklist)
     let lastIndex = n - 1
     for (const num of blacklist) {
@@ -25,7 +26,7 @@ class Solution {
       while (set.has(lastIndex)) {
         lastIndex--
       }
-      this.blackListMap.set(num, lastIndex--)
+      this.black.set(num, lastIndex--)
     }
   }
 
@@ -40,7 +41,7 @@ class Solution {
    */
   pick(): number {
     const rand = randint(0, this.whiteListLength - 1)
-    return this.blackListMap.has(rand) ? this.blackListMap.get(rand)! : rand
+    return this.black.get(rand) || rand
   }
 }
 

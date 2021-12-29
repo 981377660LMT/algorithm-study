@@ -10,7 +10,7 @@ function shoppingOffers(price: number[], special: number[][], needs: number[]): 
     let res = needs.reduce((pre, _, index, needs) => pre + needs[index] * price[index], 0)
     for (const sp of special) {
       // 更新needs，减去礼包能够提供的数量
-      const newNeeds = Array.from(needs, (need, index) => need - sp[index])
+      const newNeeds = needs.map((need, index) => need - sp[index])
       // 判断能否购买，会不会礼包超过需要购买数量
       if (newNeeds.every(need => need >= 0)) {
         res = Math.min(res, dfs(newNeeds) + sp[sp.length - 1])

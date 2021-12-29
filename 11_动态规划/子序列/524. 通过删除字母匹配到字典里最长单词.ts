@@ -54,6 +54,7 @@ const findLongestWord2 = function (s: string, dictionary: string[]): string {
       if (s[i] === word[hit]) hit++
       if (hit === word.length) break
     }
+
     // 可以匹配
     if (hit === word.length) {
       // 等于要判断字典序在前

@@ -8,7 +8,7 @@ from functools import lru_cache
 # 如果无法到达 N 位置，请返回一个空数组。
 # A 数组的长度范围 [1, 1000].
 
-INF = 0x7FFFFFFF
+INF = 0x3FFFFFFF
 
 # 总结：
 # 要获取路径，我们使用dfs后序
@@ -16,9 +16,10 @@ INF = 0x7FFFFFFF
 
 class Solution:
     def cheapestJump(self, coins: List[int], maxJump: int) -> List[int]:
+        # 从index=cur跳到index=0
         @lru_cache(None)
         def dfs(cur: int) -> Tuple[int, List[int]]:
-            # 因为0才为开始，所以我们倒序dfs 返回cost 和 path
+            # 返回cost 和 path
             if cur == 0:
                 return (0, [1])
 
