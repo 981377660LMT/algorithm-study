@@ -8,17 +8,20 @@
  * 只要我们能够填满这三个变量就返回 true，否则返回 false。
  */
 function increasingTriplet(nums: number[]): boolean {
-  let min = nums[0]
+  if (nums.length <= 2) return false
+
+  let left = nums[0]
   let mid = Infinity
   for (const num of nums) {
-    if (num <= min) {
-      min = num
+    if (num <= left) {
+      left = num
     } else if (num <= mid) {
       mid = num
     } else {
       return true
     }
   }
+
   return false
 }
 

@@ -25,9 +25,11 @@ class HitCounter {
         break
       }
     }
+
     return this.curCount
   }
 }
+
 export {}
 // 设计一个敲击计数器，使它可以统计在过去5分钟(300秒)内被敲击次数。
 // 如果每秒的敲击次数是一个很大的数字，你的计数器可以应对吗

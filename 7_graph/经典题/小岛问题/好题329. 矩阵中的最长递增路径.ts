@@ -3,7 +3,7 @@
  * @return {number}
  * @summary 需要带记忆化搜索
  * 时间复杂度：O(mn)，其中 m 和 n 分别是矩阵的行数和列数
- * 深度优先搜索的时间复杂度是 O(V+E)O(V+E)，其中 VV 是节点数，EE 是边数
+ * 深度优先搜索的时间复杂度是 O(V+E)，其中 V 是节点数，E 是边数
  */
 function longestIncreasingPath(matrix: number[][]): number {
   const m = matrix.length
@@ -12,6 +12,7 @@ function longestIncreasingPath(matrix: number[][]): number {
 
   const dfs = (x: number, y: number): number => {
     if (memo[x][y]) return memo[x][y]
+
     let res = 1
     for (const [dx, dy] of [
       [-1, 0],

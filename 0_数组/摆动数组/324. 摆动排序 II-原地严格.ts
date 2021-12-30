@@ -6,10 +6,12 @@
 function wiggleSort(nums: number[]): void {
   const n = nums.length
   nums.sort((a, b) => a - b)
+
   // 小大小大... 小不能少于大
-  let mid = (n + 1) >> 1
-  const small = nums.slice(0, mid)
-  const big = nums.slice(mid)
+  let half = (n + 1) >> 1
+  const small = nums.slice(0, half)
+  const big = nums.slice(half)
+
   for (let i = 0; i < nums.length; i++) {
     if (i & 1) {
       nums[i] = big.pop()!

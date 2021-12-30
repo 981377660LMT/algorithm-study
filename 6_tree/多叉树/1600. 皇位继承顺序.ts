@@ -16,8 +16,7 @@ class ThroneInheritance {
   constructor(kingName: string) {
     this.root = new Node(kingName)
     this.deathSet = new Set()
-    this.nameToNode = new Map()
-    this.nameToNode.set(kingName, this.root)
+    this.nameToNode = new Map([[kingName, this.root]])
   }
 
   // 为某个特定的节点新增一个孩子

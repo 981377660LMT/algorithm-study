@@ -7,15 +7,15 @@
  */
 const removeInvalidParentheses = function (s: string): string[] {
   const isValid = (str: string): boolean => {
-    let res = 0
+    let level = 0
 
     for (const char of str) {
-      if (char === '(') res++
-      else if (char === ')') res--
-      if (res < 0) return false
+      if (char === '(') level++
+      else if (char === ')') level--
+      if (level < 0) return false
     }
 
-    return res === 0
+    return level === 0
   }
 
   const visited = new Set<string>()

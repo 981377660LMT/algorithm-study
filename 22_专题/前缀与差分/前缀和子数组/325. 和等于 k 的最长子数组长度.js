@@ -3,15 +3,15 @@
  * @param {number} k
  * @return {number}
  */
-var maxSubArrayLen = function (nums, k) {
+function maxSubArrayLen(nums, k) {
   let res = 0
   let sum = 0
-  const pre = new Map([[0, -1]])
+  const first = new Map([[0, -1]])
 
   for (let i = 0; i < nums.length; i++) {
     sum += nums[i]
-    !pre.has(sum) && pre.set(sum, i) // 只存一次，存最早出现的那次
-    if (pre.has(sum - k)) res = Math.max(res, i - pre.get(sum - k))
+    !first.has(sum) && first.set(sum, i) // 只存一次，存最早出现的那次
+    if (first.has(sum - k)) res = Math.max(res, i - first.get(sum - k))
   }
 
   return res

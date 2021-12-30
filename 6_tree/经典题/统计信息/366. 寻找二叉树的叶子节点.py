@@ -22,16 +22,15 @@ class Solution:
     def findLeaves(self, root: TreeNode) -> List[List[int]]:
         nodes = defaultdict(list)
 
-        def dfs(root: TreeNode) -> int:
+        def dfs(root: Optional[TreeNode]) -> int:
             if not root:
                 return 0
-            l = dfs(root.left)
-            r = dfs(root.right)
-            height = max(l, r)
+            left = dfs(root.left)
+            right = dfs(root.right)
+            height = max(left, right)
             nodes[height].append(root.val)
             return height + 1
 
         dfs(root)
-
         return [list(n) for n in nodes.values()]
 

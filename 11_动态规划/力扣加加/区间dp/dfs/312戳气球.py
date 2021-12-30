@@ -9,8 +9,9 @@ class Solution:
 
         @lru_cache(None)
         def dfs(left: int, right: int) -> int:
-            if left >= right - 1:
+            if left + 1 >= right:
                 return 0
+
             res = 0
             for mid in range(left + 1, right):
                 res = max(

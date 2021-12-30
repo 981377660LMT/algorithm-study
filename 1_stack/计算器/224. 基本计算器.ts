@@ -1,4 +1,5 @@
 type Binary = (a: number, b: number) => number
+
 /**
  * @param {string} s  s 由数字、'+'、'-'、'('、')'、和 ' ' 组成
  * @return {number}

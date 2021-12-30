@@ -7,6 +7,7 @@
 const countNumbersWithUniqueDigits = function (n: number): number {
   if (n === 0) return 1
   if (n === 1) return 10
+  if (n >= 11) return 0
   // 最高位9中选法(1-9) 其余n-1位有 9 8 7 ...
   let res = 9
   for (let i = 0; i < n - 1; i++) {

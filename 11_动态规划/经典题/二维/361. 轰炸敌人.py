@@ -11,8 +11,9 @@ from typing import List
 # 暴力:O(n^3) 可以看到暴力时有很多重复的计算 优化:相邻两个格子可以dp
 class Solution:
     def maxKilledEnemies(self, grid: List[List[str]]) -> int:
-        if not grid or not grid[0]:
+        if not any(grid):
             return 0
+
         row = len(grid)
         col = len(grid[0])
         dp = [[0] * col for _ in range(row)]

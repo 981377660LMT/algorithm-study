@@ -25,6 +25,8 @@ class Twitter(object):
         self.followees[followerId].discard(followeeId)
 
 
-test = [(-1, 1), (0, 1)]
-print([(a, b) for a, b in itertools.islice(test, 3)])
-
+if __name__ == '__main__':
+    test = [(-1, 1), (0, 1)]
+    print([(a, b) for a, b in itertools.islice(test, 3)])
+    pq = [12, 3, 66]
+    print(*heapq.merge(pq, [2, 3, 4]))

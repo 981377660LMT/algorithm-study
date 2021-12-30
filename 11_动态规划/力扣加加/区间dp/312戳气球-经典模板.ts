@@ -14,6 +14,7 @@ const maxCoins = function (nums: number[]): number {
   // 首尾添加1，方便处理边界情况
   nums.unshift(1)
   nums.push(1)
+
   const n = nums.length
   const dp = Array.from({ length: n + 1 }, () => Array(n).fill(0))
   for (let l = 0; l < n; l++) {

@@ -2,10 +2,9 @@
 
 ## todo
 
-- 宫水三叶的 wiki
-- code up 网站
+- 优化答案(每天 50 题)
 - 组件参考 elementUI
-- 优化答案(每天 100 题)
+- code up 网站
 
 JS,TS 刷题时大数问题可用 BigInt 或者求余解决
 

@@ -12,21 +12,22 @@ from collections import deque, Counter, defaultdict
 # 所以只需要检查 s 中那个数字的前面有没有小于它的(移到左边没有阻拦)，如果有就不能转换！
 class Solution:
     def isTransformable(self, s: str, t: str) -> bool:
-        lis_s = list([int(ch) for ch in s])
-        lis_t = list([int(ch) for ch in t])
-        counter_s = Counter(lis_s)
-        counter_t = Counter(lis_t)
-        if counter_s != counter_t:
+        ls = list([int(ch) for ch in s])
+        lt = list([int(ch) for ch in t])
+        cs = Counter(ls)
+        ct = Counter(lt)
+        if cs != ct:
             return False
 
-        q_s = defaultdict(deque)
-        for i, x in enumerate(lis_s):
-            q_s[x].append(i)
+        indexes = defaultdict(deque)
+        for i, x in enumerate(ls):
+            indexes[x].append(i)
+
         # print(q_s)
-        for x in lis_t:
-            firstIndex = q_s[x].popleft()
+        for x in lt:
+            firstIndex = indexes[x].popleft()
             for smaller in range(x):
-                if q_s[smaller] and q_s[smaller][0] < firstIndex:
+                if indexes[smaller] and indexes[smaller][0] < firstIndex:
                     return False
 
         return True

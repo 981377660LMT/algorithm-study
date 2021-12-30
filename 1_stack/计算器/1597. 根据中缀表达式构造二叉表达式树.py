@@ -16,7 +16,7 @@ class Node:
 class Solution:
     def expTree(self, s: str) -> 'Node':
         weight = dict(zip('(+-*/', [0, 1, 1, 2, 2]))
-        numStack, optStack = [], []
+        nodeStack, optStack = [], []
 
         s += ')'
 
@@ -24,19 +24,19 @@ class Solution:
             if left:
                 optStack.append(left)
             elif num:
-                numStack.append(Node(num))
+                nodeStack.append(Node(num))
             elif opt:
                 while optStack and weight[optStack[-1]] >= weight[opt]:
-                    num1, num2 = numStack.pop(), numStack.pop()
-                    numStack.append(Node(optStack.pop(), num2, num1))
+                    node1, node2 = nodeStack.pop(), nodeStack.pop()
+                    nodeStack.append(Node(optStack.pop(), node2, node1))
                 optStack.append(opt)
             else:
                 while optStack and optStack[-1] != '(':
-                    num1, num2 = numStack.pop(), numStack.pop()
-                    numStack.append(Node(optStack.pop(), num2, num1))
+                    node1, node2 = nodeStack.pop(), nodeStack.pop()
+                    nodeStack.append(Node(optStack.pop(), node2, node1))
                 optStack and optStack.pop()
 
-        return numStack[0]
+        return nodeStack[0]
 
 
 print(Solution().expTree(s="3*4-2*5"))

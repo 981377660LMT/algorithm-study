@@ -12,7 +12,31 @@
 const isAdditiveNumber = function (num: string): boolean {
   if (num.length <= 2) return false
 
-  const addStrings = (num1: string, num2: string): string => {
+  // 出发点 dfs [0,i] [i+1,j]
+  for (let i = 0; i < num.length - 1; i++) {
+    for (let j = i + 1; j < num.length; j++) {
+      const num1 = num.slice(0, i + 1)
+      const num2 = num.slice(i + 1, j + 1)
+      const rest = num.slice(j + 1)
+      if (num1.length > 1 && num1[0] === '0') return false
+      // 剪枝
+      if (num2.length > 1 && num2[0] === '0') break
+      if (rest.length < num1.length || rest.length < num2.length) break
+      if (dfs(num1, num2, rest)) return true
+    }
+  }
+
+  return false
+
+  function dfs(num1: string, num2: string, rest: string): boolean {
+    if (rest === '') return true
+    const sum = addStrings(num1, num2)
+    // 剪枝
+    if (!rest.startsWith(sum)) return false
+    return dfs(num2, sum, rest.slice(sum.length))
+  }
+
+  function addStrings(num1: string, num2: string): string {
     let i = num1.length - 1
     let j = num2.length - 1
     let carry = 0
@@ -30,31 +54,6 @@ const isAdditiveNumber = function (num: string): boolean {
 
     return res
   }
-
-  const bt = (num1: string, num2: string, rest: string): boolean => {
-    if (rest === '') return true
-    const sum = addStrings(num1, num2)
-    if (!rest.startsWith(sum)) {
-      return false
-    }
-    return bt(num2, sum, rest.slice(sum.length))
-  }
-
-  // 出发点 bt
-  for (let i = 0; i < num.length - 1; i++) {
-    for (let j = i + 1; j < num.length; j++) {
-      const num1 = num.slice(0, i + 1)
-      const num2 = num.slice(i + 1, j + 1)
-      const rest = num.slice(j + 1)
-      if (num1.length > 1 && num1[0] === '0') return false
-      // 剪枝
-      if (num2.length > 1 && num2[0] === '0') break
-      if (rest.length < num1.length || rest.length < num2.length) break
-      if (bt(num1, num2, rest)) return true
-    }
-  }
-
-  return false
 }
 
 console.log(isAdditiveNumber('199100199'))

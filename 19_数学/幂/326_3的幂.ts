@@ -3,8 +3,9 @@
  * @return {boolean}
  */
 var isPowerOfThree = function (n: number): boolean {
+  if (n <= 0) return false
   const res = Math.log(n) / Math.log(3)
-  return n > 0 && parseFloat(res.toFixed(10)) === Math.floor(res)
+  return parseFloat(res.toFixed(10)) === Math.floor(res)
 }
 
 console.log(isPowerOfThree(9))

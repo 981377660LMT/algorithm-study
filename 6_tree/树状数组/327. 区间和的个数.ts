@@ -46,7 +46,7 @@ class BIT {
    @link
    https://leetcode-cn.com/problems/count-of-range-sum/solution/jstsshu-zhuang-shu-zu-jie-fa-by-cao-mei-0icur/
  */
-const countRangeSum = (nums: number[], lower: number, upper: number): number => {
+function countRangeSum(nums: number[], lower: number, upper: number): number {
   const pre = [0]
   for (const num of nums) {
     pre.push(pre[pre.length - 1] + num)
@@ -62,7 +62,7 @@ const countRangeSum = (nums: number[], lower: number, upper: number): number => 
   }
 
   const map = new Map()
-  // 利用哈希表进行离散化
+  // 把要用到的值利用哈希表进行离散化
   for (const [key, realValue] of [...allNums].sort((a, b) => a - b).entries()) {
     map.set(realValue, key + 1)
   }
@@ -84,8 +84,6 @@ const countRangeSum = (nums: number[], lower: number, upper: number): number => 
     const realValue = pre[i]
     const left = map.get(realValue - upper)!
     const right = map.get(realValue - lower)!
-    console.log(realValue - upper, realValue, realValue - lower)
-    console.log(left, map.get(realValue), right)
     res += bit.sumRange(left, right)
     bit.add(map.get(realValue)!, 1)
   }
