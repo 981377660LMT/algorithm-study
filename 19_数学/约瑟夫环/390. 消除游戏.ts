@@ -1,15 +1,23 @@
-// 类似约瑟夫环
-// 从左到右，从第一个数字开始，每隔一个数字进行删除，直到列表的末尾。
-// 第二步，在剩下的数字中，从右到左，从倒数第一个数字开始，每隔一个数字进行删除，直到列表开头。
-// 返回长度为 n 的列表中，最后剩下的数字。
+// 从左到右， 还是从右到左，每次都要消除 一半的数
+// 关注何时消除队首元素:`从左到右` 或者 `从右到左，数组为奇数个`，才会消除第一个。
+
 function lastRemaining(n: number): number {
-  // 对称性
-  // 我们使用 f(n) 表示 从左到右(forward) 的最终结果，使用 b(n)表示 从右到左(backward) 的最终结果
-  // 当 n = 1 时，存在 f(n) = 1, b(n) = 1
-  // 对于任意 n，存在 f(n) + b(n) = n + 1
-  // 对于 n > 2 的情况下，f(n) = 2 * b(n / 2)
-  // 所以：f(n) = 2 * (n / 2 + 1 - f(n / 2))
-  return n === 1 ? 1 : 2 * (~~(n / 2) + 1 - lastRemaining(~~(n / 2)))
+  let remain = n
+  let isToRight = true
+  let res = 1
+  let step = 1
+
+  while (remain > 1) {
+    if (isToRight || (remain & 1) === 1) {
+      res += step
+    }
+
+    isToRight = !isToRight
+    step *= 2
+    remain >>>= 1
+  }
+
+  return res
 }
 
 console.log(lastRemaining(9))

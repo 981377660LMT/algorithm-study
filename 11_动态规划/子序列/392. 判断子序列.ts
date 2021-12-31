@@ -32,8 +32,10 @@ const isSubsequence2 = (s: string, t: string) => {
   }
 
   console.log(map)
-  let index = -Infinity
+
   // 保证每次index都要比上一次大
+  let pre = -1
+
   for (const char of s) {
     if (!map.has(char)) return false
     const indexes = map.get(char)!
@@ -43,12 +45,11 @@ const isSubsequence2 = (s: string, t: string) => {
     let r = indexes.length - 1
     while (l <= r) {
       const mid = (l + r) >> 1
-      if (indexes[mid] < index) l = mid + 1
-      else if (indexes[mid] > index) r = mid - 1
-      else l++
+      if (indexes[mid] <= pre) l = mid + 1
+      else if (indexes[mid] > pre) r = mid - 1
     }
     if (l === indexes.length) return false
-    index = indexes[l]
+    pre = indexes[l]
   }
 
   return true

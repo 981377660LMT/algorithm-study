@@ -10,7 +10,7 @@ declare class NestedInteger {
 }
 
 function deserialize(s: string): NestedInteger {
-  if (!s) return new NestedInteger()
+  if (s === '') return new NestedInteger()
   if (s[0] !== '[') return new NestedInteger(Number(s)) // 整数
   if (s.length <= 2) return new NestedInteger() // 空列表
 

@@ -18,7 +18,7 @@ const findNthDigit = function (n: number): number {
   const base = 10 ** (digit - 1)
   const [div, mod] = [~~((n - 1) / digit), (n - 1) % digit]
 
-  return parseInt((base + div).toString()[mod])
+  return Number((base + div).toString()[mod])
 }
 
 console.log(findNthDigit(11))

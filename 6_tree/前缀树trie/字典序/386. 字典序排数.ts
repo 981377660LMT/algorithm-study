@@ -7,19 +7,19 @@
  */
 const lexicalOrder = function (n: number): number[] {
   const res: number[] = []
-  const dfs = (cur: number, limit: number, path: number[]) => {
+  dfs(0, n)
+  return res
+
+  function dfs(cur: number, limit: number): void {
     for (let i = 0; i <= 9; i++) {
       const next = cur * 10 + i
       // when larger than n, return to the previous level
       if (next > limit) return
       if (next === 0) continue
-      path.push(next)
-      dfs(next, limit, path)
+      res.push(next)
+      dfs(next, limit)
     }
   }
-
-  dfs(0, n, res)
-  return res
 }
 
 const lexicalOrder2 = function (n: number): number[] {

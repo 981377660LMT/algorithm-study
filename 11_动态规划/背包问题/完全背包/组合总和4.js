@@ -4,9 +4,10 @@
  * @return {number}
  * @description 考虑排列顺序的完全背包问题
  */
-var combinationSum4 = function (nums, target) {
+function combinationSum4(nums, target) {
   const dp = Array(target + 1).fill(0)
   dp[0] = 1
+
   for (let i = 1; i <= target; i++) {
     for (let num of nums) {
       if (i - num >= 0) dp[i] += dp[i - num]
