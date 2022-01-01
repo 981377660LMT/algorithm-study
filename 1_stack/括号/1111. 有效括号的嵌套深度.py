@@ -2,9 +2,20 @@ from typing import List
 
 # 给你一个「有效括号字符串」 seq，请你将其分成`两个`不相交的有效括号字符串，A 和 B，并使这两个字符串的深度最小。
 # 划分方案用一个长度为 seq.length 的答案数组 answer 表示，编码规则如下：
+
+# 为0的部分对应seq的括号是A字符串，为1的部分对应seq的括号是B字符串
 class Solution:
     def maxDepthAfterSplit(self, seq: str) -> List[int]:
-        return [i & 1 ^ (seq[i] == '(') for i in range(len(seq))]
+        res = []
+        level = 0
+        for char in seq:
+            if char == '(':
+                level += 1
+                res.append(level % 2)
+            if char == ')':
+                res.append(level % 2)
+                level -= 1
+        return res
 
 
 print(Solution().maxDepthAfterSplit("()(())()"))

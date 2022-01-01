@@ -11,7 +11,7 @@ class Solution:
         for start in (0, 1):
             for i in range(start, n, 2):
                 diff = 0
-                # 如果大了,就要减,比较两边
+                # 比较两边，如果大了，就要减
                 if i > 0:
                     diff = max(diff, nums[i] - nums[i - 1] + 1)
                 if i + 1 < n:

@@ -24,6 +24,7 @@ class Solution:
         def dfs(i: int, pre: int) -> int:
             if i >= len(arr1):
                 return 0
+
             j = bisect_right(store, pre)
             swap = 1 + dfs(i + 1, store[j]) if j < len(store) else INF
             noswap = dfs(i + 1, arr1[i]) if arr1[i] > pre else INF

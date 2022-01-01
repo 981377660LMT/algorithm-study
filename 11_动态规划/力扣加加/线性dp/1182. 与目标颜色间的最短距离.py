@@ -8,7 +8,7 @@ from typing import List
 class Solution:
     def shortestDistanceColor(self, colors: List[int], queries: List[List[int]]) -> List[int]:
         n = len(colors)
-        dp = [[0x7FFFFFFF] * 3 for i in range(n)]
+        dp = [[0x7FFFFFFF] * 3 for _ in range(n)]
         pre1 = pre2 = pre3 = -1
 
         for i in range(n):

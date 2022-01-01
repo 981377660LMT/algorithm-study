@@ -7,7 +7,7 @@ from heapq import heappop, heappush
 # 所以只需要找出在第一个边长为sideLength正方形内的哪些位置放置1能使得整个矩形内的1最多即可
 # 遍历第一个边长为sideLength正方形内的每个点，找出前maxOnes个能使得在矩阵内放尽可能多的点即可。
 
-
+# 计算左上角正方形的每个格子在整个矩形中有多少个等效位置，取等效位置最多的前maxOnes个即可
 class Solution:
     def maximumNumberOfOnes(self, width: int, height: int, sideLength: int, maxOnes: int) -> int:
         pq = []

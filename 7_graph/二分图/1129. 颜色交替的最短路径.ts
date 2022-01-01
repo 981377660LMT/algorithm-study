@@ -1,8 +1,3 @@
-const enum Color {
-  Red = 1,
-  Blue = -1,
-}
-
 /**
  * 
  * @param n   1 <= n <= 100
@@ -22,47 +17,33 @@ function shortestAlternatingPaths(
   red_edges: number[][],
   blue_edges: number[][]
 ): number[] {
+  // 建图
   const res = Array<number>(n).fill(Infinity)
   const redAdjList = Array.from<number, number[]>({ length: n }, () => [])
   const blueAdjList = Array.from<number, number[]>({ length: n }, () => [])
   for (const [v, w] of red_edges) redAdjList[v].push(w)
   for (const [v, w] of blue_edges) blueAdjList[v].push(w)
+  const adjList: Record<number, number[][]> = {
+    0: redAdjList,
+    1: blueAdjList,
+  }
 
-  // 因为自环和平行边的存在，对于已访问过的节点，不能再用通常的visited[nodeid]来判定
-  const visited = new Set<string>()
-  const queue: [number, Color][] = [
-    [0, Color.Red],
-    [0, Color.Blue],
+  // bfs
+  const visited = Array.from<unknown, [boolean, boolean]>({ length: n }, () => [false, false])
+  const queue: [cur: number, color: number, steps: number][] = [
+    [0, 0, 0],
+    [0, 1, 0],
   ]
-  let steps = 0
 
-  console.log(redAdjList, blueAdjList)
   while (queue.length) {
-    console.log(res)
-    const len = queue.length
+    const [cur, color, steps] = queue.shift()!
+    res[cur] = Math.min(res[cur], steps)
 
-    for (let i = 0; i < len; i++) {
-      const [cur, color] = queue.shift()!
-      res[cur] = Math.min(res[cur], steps)
-
-      if (color === Color.Blue) {
-        for (const next of redAdjList[cur]) {
-          const key = `${color}#${next}`
-          if (visited.has(key)) continue
-          visited.add(key)
-          queue.push([next, Color.Red])
-        }
-      } else if (color === Color.Red) {
-        for (const next of blueAdjList[cur]) {
-          const key = `${color}#${next}`
-          if (visited.has(key)) continue
-          visited.add(key)
-          queue.push([next, Color.Blue])
-        }
-      }
+    for (const next of adjList[color][cur]) {
+      if (visited[next][color]) continue
+      visited[next][color] = true
+      queue.push([next, color ^ 1, steps + 1])
     }
-
-    steps++
   }
 
   return res.map(v => (v === Infinity ? -1 : v))

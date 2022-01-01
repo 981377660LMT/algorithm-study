@@ -9,6 +9,7 @@
 const numRollsToTarget = function (d: number, f: number, target: number): number {
   const dp = Array.from<number, number[]>({ length: d + 1 }, () => Array(target + 1).fill(0))
   dp[0][0] = 1
+
   // 枚举物品组（每个骰子）
   for (let i = 1; i <= d; i++) {
     // 枚举背包容量（所掷得的总点数）

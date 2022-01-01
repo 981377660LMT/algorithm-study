@@ -13,7 +13,7 @@ from heapq import heapify, heappop, heappush
 # 每次选取两个最小的点，合并成一个新的点
 # 最后root的值就是总的最小值
 
-
+# 一个街区只能由一个工人来完成建造
 class Solution:
     def minBuildTime(self, blocks: List[int], split: int) -> int:
         pq = blocks[:]

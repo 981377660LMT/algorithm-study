@@ -10,13 +10,14 @@ class Solution:
     def minSwaps(self, data: List[int]) -> int:
         n = len(data)
         windowSize = data.count(1)
-        curOnes = sum(data[:windowSize])
-        res = windowSize - curOnes
+        res, curOnes = 0x7FFFFFFF, 0
 
-        for right in range(windowSize, n):
+        for right in range(n):
             curOnes += data[right]
-            curOnes -= data[right - windowSize]
-            res = min(res, windowSize - curOnes)
+            if right >= windowSize:
+                curOnes -= data[right - windowSize]
+            if right >= windowSize - 1:
+                res = min(res, windowSize - curOnes)
 
         return res
 

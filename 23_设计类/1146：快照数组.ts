@@ -1,20 +1,22 @@
 // snap 备忘录模式
+// [map,map,map,...,map,map]
 
-import { bisectLeft } from '../9_排序和搜索/二分api/7_二分搜索寻找最左插入位置'
+import { bisectLeft } from '../9_排序和搜索/二分/7_二分搜索寻找最左插入位置'
 
-// 优化，字典数组 + 二分查找
+// 字典数组 + 二分查找
 type SnapId = number
 type Value = number
 
 class SnapshotArray {
-  private data: Map<SnapId, Value>[]
+  private actions: Map<SnapId, Value>[]
   private snapId: number
+
   /**
    *
    * @param length 初始化一个与指定长度相等的 类数组 的数据结构。初始时，每个元素都等于 0
    */
   constructor(length: number) {
-    this.data = Array.from({ length }, () => new Map<number, number>())
+    this.actions = Array.from({ length }, () => new Map<SnapId, Value>())
     this.snapId = 0
   }
 
@@ -25,7 +27,7 @@ class SnapshotArray {
    * data[index].keys() 为 index 变更的所有记录
    */
   set(index: number, val: number): void {
-    this.data[index].set(this.snapId, val)
+    this.actions[index].set(this.snapId, val)
   }
 
   /**
@@ -44,16 +46,15 @@ class SnapshotArray {
   /**
    *
    * @param index
-   * @param snap_id 根据指定的 snap_id 选择快照，并返回该快照指定索引 index 的值
+   * @param snapId 根据指定的 snap_id 选择快照，并返回该快照指定索引 index 的值
    * 如果快照恰好存在, 直接返回
    * 不存在则进行二分搜索, 查找快照前最后一次修改
    */
-  get(index: number, snap_id: number): number | null {
-    console.log(this.data)
-    const map = this.data[index]
-    if (map.has(snap_id)) return map.get(snap_id)!
-    const snapIds = [...this.data[index].keys()]
-    const pos = bisectLeft(snapIds, snap_id)
+  get(index: number, snapId: number): number | null {
+    const map = this.actions[index]
+    if (map.has(snapId)) return map.get(snapId)!
+    const snapIds = [...this.actions[index].keys()]
+    const pos = bisectLeft(snapIds, snapId)
     return map.get(snapIds[pos - 1]) || null
   }
 }

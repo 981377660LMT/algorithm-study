@@ -6,7 +6,9 @@ class Solution:
     def canConvert(self, str1: str, str2: str) -> bool:
         if str1 == str2:
             return True
-        return len(set(zip(str1, str2))) == len(set(str1)) and len(set(str2)) < 26
+        if len(set(str2)) == 26:
+            return False
+        return len(set(zip(str1, str2))) == len(set(str1))
 
 
 # 输入：str1 = "aabcc", str2 = "ccdee"

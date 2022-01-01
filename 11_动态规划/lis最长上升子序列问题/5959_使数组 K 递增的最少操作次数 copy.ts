@@ -42,3 +42,4 @@ function bisectRight(arr: number[], target: number): number {
 
   return l
 }
+export {}

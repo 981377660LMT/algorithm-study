@@ -1,4 +1,4 @@
-import { bisectRight } from '../../9_排序和搜索/二分api/7_二分搜索寻找最插右入位置'
+import { bisectRight } from '../../9_排序和搜索/二分/7_二分搜索寻找最插右入位置'
 
 /**
  * @param {string[]} queries
@@ -10,8 +10,20 @@ import { bisectRight } from '../../9_排序和搜索/二分api/7_二分搜索寻
  * @summary
  * 离线排序
  */
-const numSmallerByFrequency = function (queries: string[], words: string[]): number[] {
-  const getLowestFreq = (word: string): number => {
+function numSmallerByFrequency(queries: string[], words: string[]): number[] {
+  const res = Array<number>(queries.length).fill(0)
+  const freqs = words.map(getLowestFreq).sort((a, b) => a - b)
+
+  for (let i = 0; i < queries.length; i++) {
+    const query = queries[i]
+    const queryFreq = getLowestFreq(query)
+    // f(queries[i]) < f(W) 的 词的数目
+    res[i] = words.length - bisectRight(freqs, queryFreq)
+  }
+
+  return res
+
+  function getLowestFreq(word: string): number {
     let smallestChar = word.codePointAt(0)!
     let count = 1
 
@@ -27,17 +39,6 @@ const numSmallerByFrequency = function (queries: string[], words: string[]): num
 
     return count
   }
-
-  const res = Array<number>(queries.length).fill(0)
-  const wordsFreq = words.map(getLowestFreq).sort((a, b) => a - b)
-
-  for (let i = 0; i < queries.length; i++) {
-    const query = queries[i]
-    const queryFreq = getLowestFreq(query)
-    res[i] = words.length - bisectRight(wordsFreq, queryFreq)
-  }
-
-  return res
 }
 
 console.log(numSmallerByFrequency(['bbb', 'cc'], ['a', 'aa', 'aaa', 'aaaa']))
