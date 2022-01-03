@@ -5,13 +5,14 @@
  * 请你计算从 Li 到 Ri 的 XOR 值
  * @summary 我们利用了异或的性质 x ^ y ^ x = y
  */
-const xorQueries = function (arr: number[], queries: number[][]): number[] {
+function xorQueries(arr: number[], queries: number[][]): number[] {
   // 前缀异或数组
-  arr.unshift(0)
-  arr.reduce((pre, _, index, array) => (array[index] ^= pre))
-  console.log(arr)
-  // arr[l] 表示l之前的 不含l的异或值
-  return queries.map(([l, r]) => arr[l] ^ arr[r + 1])
+  const preXOR = Array<number>(arr.length + 1).fill(0)
+  for (let i = 1; i < preXOR.length; i++) {
+    preXOR[i] = preXOR[i - 1] ^ arr[i - 1]
+  }
+
+  return queries.map(([l, r]) => preXOR[l] ^ preXOR[r + 1])
 }
 
 console.log(

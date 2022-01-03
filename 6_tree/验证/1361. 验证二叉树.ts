@@ -5,6 +5,7 @@
 // 如果节点 i 没有左子节点，那么 leftChild[i] 就等于 -1。右子节点也符合该规则。
 // bfs更好 因为可以直接return
 function validateBinaryTreeNodes(n: number, leftChild: number[], rightChild: number[]): boolean {
+  // 1. 找根节点
   let root = Infinity
   const children = new Set<number>([...leftChild, ...rightChild])
   for (let i = 0; i < n; i++) {
@@ -14,11 +15,12 @@ function validateBinaryTreeNodes(n: number, leftChild: number[], rightChild: num
     }
   }
 
+  // 2. bfs 所有节点都被访问到且仅被访问一次
   const queue = [root]
   const visited = Array<boolean>(n).fill(false)
 
   while (queue.length > 0) {
-    const cur = queue.shift()!
+    const cur = queue.pop()!
     if (visited[cur]) return false
     visited[cur] = true
     if (leftChild[cur] !== -1) queue.push(leftChild[cur])
@@ -30,3 +32,7 @@ function validateBinaryTreeNodes(n: number, leftChild: number[], rightChild: num
 
 export {}
 console.log(validateBinaryTreeNodes(4, [1, -1, 3, -1], [2, -1, -1, -1]))
+
+export {}
+console.log(validateBinaryTreeNodes(4, [1, -1, 3, -1], [2, -1, -1, -1]))
+console.log(validateBinaryTreeNodes(3, [1, -1, -1], [-1, -1, 1]))

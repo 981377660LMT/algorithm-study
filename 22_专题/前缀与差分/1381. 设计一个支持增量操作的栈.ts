@@ -1,14 +1,14 @@
 type Index = number
-type ShouldAdd = number
+type Delta = number
 
 class CustomStack {
   private stack: number[]
   private maxSize: number
-  private record: Map<Index, ShouldAdd>
+  private diff: Map<Index, Delta>
   constructor(maxSize: number) {
     this.maxSize = maxSize
     this.stack = []
-    this.record = new Map()
+    this.diff = new Map()
   }
 
   push(x: number): void {
@@ -20,10 +20,10 @@ class CustomStack {
   pop(): number {
     if (this.stack.length === 0) return -1
     const index = this.stack.length - 1
-    const shouldAdd = this.record.get(index) || 0
-    this.record.delete(index)
-    this.record.set(index - 1, (this.record.get(index - 1) || 0) + shouldAdd)
-    return this.stack.pop()! + shouldAdd
+    const delta = this.diff.get(index) || 0
+    this.diff.delete(index)
+    this.diff.set(index - 1, (this.diff.get(index - 1) || 0) + delta)
+    return this.stack.pop()! + delta
   }
 
   /**
@@ -37,7 +37,7 @@ class CustomStack {
    */
   increment(k: number, val: number): void {
     const key = Math.min(this.stack.length, k) - 1
-    this.record.set(key, (this.record.get(key) || 0) + val)
+    this.diff.set(key, (this.diff.get(key) || 0) + val)
   }
 }
 

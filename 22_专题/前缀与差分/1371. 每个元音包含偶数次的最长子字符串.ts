@@ -9,16 +9,16 @@ const findTheLongestSubstring = function (s: string): number {
   let state = 0b00000
   // 每种状态最早出现的索引
   const visited = new Map<number, number>([[state, -1]])
-  const record = {
+  const mask: Record<string, number> = {
     a: 1 << 0,
     e: 1 << 1,
     i: 1 << 2,
     o: 1 << 3,
     u: 1 << 4,
-  } as { [k: string]: number }
+  }
 
   for (let i = 0; i < s.length; i++) {
-    if (s[i] in record) state ^= record[s[i]]
+    if (s[i] in mask) state ^= mask[s[i]]
     if (!visited.has(state)) visited.set(state, i)
     else res = Math.max(res, i - visited.get(state)!)
   }

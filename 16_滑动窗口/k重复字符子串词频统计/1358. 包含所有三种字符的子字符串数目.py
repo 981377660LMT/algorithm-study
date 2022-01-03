@@ -2,9 +2,9 @@
 class Solution:
     def numberOfSubstrings(self, s: str) -> int:
         res = left = 0
-        counter = {c: 0 for c in 'abc'}
-        for j in range(len(s)):
-            counter[s[j]] += 1
+        counter = {char: 0 for char in 'abc'}
+        for right in range(len(s)):
+            counter[s[right]] += 1
             while all(counter.values()):
                 counter[s[left]] -= 1
                 left += 1

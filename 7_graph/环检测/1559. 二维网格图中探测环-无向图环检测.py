@@ -11,18 +11,16 @@ from typing import List, Optional, Tuple
 
 class Solution:
     def containsCycle(self, grid: List[List[str]]) -> bool:
-        def dfs(cur: Tuple[int, int], parent: Optional[Tuple[int, int]]) -> bool:
+        def dfs(cur: Tuple[int, int], pre: Optional[Tuple[int, int]]) -> bool:
             if cur in visited:
                 return True
             visited.add(cur)
+
             nx, ny = cur
             nexts = [
                 (cx, cy)
                 for cx, cy in [[nx + 1, ny], [nx - 1, ny], [nx, ny + 1], [nx, ny - 1]]
-                if 0 <= cx < m
-                and 0 <= cy < n
-                and grid[cx][cy] == grid[nx][ny]
-                and (cx, cy) != parent
+                if 0 <= cx < m and 0 <= cy < n and grid[cx][cy] == grid[nx][ny] and (cx, cy) != pre
             ]
 
             for next in nexts:

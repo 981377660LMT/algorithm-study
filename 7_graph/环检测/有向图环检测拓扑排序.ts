@@ -1,27 +1,22 @@
-const hasCycle = (n: number, prerequisites: [number, number][]) => {
-  if (prerequisites.length === 0) return false
-
-  const inDegrees = Array<number>(n).fill(0)
-  const adjList = Array.from<unknown, number[]>({ length: n }, () => [])
-  for (const [cur, pre] of prerequisites) {
-    inDegrees[cur]++
-    adjList[pre].push(cur)
+const hasCycle = (adjList: number[][]) => {
+  const n = adjList.length
+  const indegrees = Array<number>(n).fill(0)
+  for (const [_, next] of adjList) {
+    indegrees[next]++
   }
 
   const queue: number[] = []
-  inDegrees.forEach((v, i) => !v && queue.push(i))
+  indegrees.forEach((degree, i) => degree === 0 && queue.push(i))
 
-  let count = 0
-  while (queue.length) {
+  while (queue.length > 0) {
     const cur = queue.shift()!
-    count++
     for (const next of adjList[cur]) {
-      inDegrees[next]--
-      if (inDegrees[next] === 0) queue.push(next)
+      indegrees[next]--
+      if (indegrees[next] === 0) queue.push(next)
     }
   }
 
-  return count !== n
+  return indegrees.some(degree => degree !== 0)
 }
 
 export {}

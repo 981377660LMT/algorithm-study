@@ -1,7 +1,7 @@
 class Node {
   value: number
-  next: Node | undefined
-  constructor(value: number, next?: Node) {
+  next: Node | null
+  constructor(value: number, next: Node | null = null) {
     this.value = value
     this.next = next
   }
@@ -62,7 +62,7 @@ const isSubPath = function (head: Node, root: BinaryTree | null): boolean {
   if (!root) return false
 
   // 以root为节点是否存在
-  const dfs = (head: Node | null | undefined, root: BinaryTree | null): boolean => {
+  const dfs = (head: Node | null, root: BinaryTree | null): boolean => {
     if (!head) return true
     if (!root) return false
     if (head.value !== root.val) return false

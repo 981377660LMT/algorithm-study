@@ -15,9 +15,9 @@ class Solution:
         # 贪心
         for num in sorted(digits, reverse=True):
             # 前导，[0]表示没有前导
-            for preVal in dp[:] + [0]:
-                curVal = preVal * 10 + num
-                dp[curVal % 3] = max(dp[curVal % 3], curVal)
+            for pre in dp[:] + [0]:
+                cur = pre * 10 + num
+                dp[cur % 3] = max(dp[cur % 3], cur)
 
         return str(dp[0]) if dp[0] != -1 else ''
 

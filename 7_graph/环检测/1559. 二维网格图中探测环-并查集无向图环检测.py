@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List
 
 # 你需要检查 grid 中是否存在 相同值 形成的环。
 # 一个环是一条开始和结束于同一个格子的长度 大于等于 4 的路径

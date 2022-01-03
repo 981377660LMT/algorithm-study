@@ -7,14 +7,15 @@ from functools import lru_cache
 from itertools import accumulate, groupby, combinations
 from math import gcd
 
+MOD = int(1e9 + 7)
+INF = 0x7FFFFFFF
+
 
 class Solution:
-    def mostWordsFound(self, sentences: List[str]) -> int:
-        return max([len(w.split(' ')) for w in sentences])
+    def checkString(self, s: str) -> bool:
+        return 'ba' not in s
 
 
-print(
-    Solution().mostWordsFound(
-        ["alice and bob love leetcode", "i think so too", "this is great thanks very much"]
-    )
-)
+print(Solution().checkString("aaabbb"))
+print(Solution().checkString("abab"))
+print(Solution().checkString("bbb"))

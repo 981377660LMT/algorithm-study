@@ -3,10 +3,11 @@ function angleClock(hour: number, minutes: number): number {
   const angleMin = (minutes / 60) * 360
   const angleHour = (hour / 12) * 360 + angleMin / 12
 
-  const angleDiff = Math.abs(angleMin - angleHour)
-  const finalAngle = angleDiff > 180 ? 360 - angleDiff : angleDiff
+  return getCycleDist(angleMin, angleHour, 360)
 
-  return finalAngle
+  function getCycleDist(n1: number, n2: number, mod: number): number {
+    return Math.min((n1 - n2 + mod) % mod, (n2 - n1 + mod) % mod)
+  }
 }
 
 console.log(angleClock(3, 15))

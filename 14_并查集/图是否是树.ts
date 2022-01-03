@@ -14,3 +14,4 @@ const validTree = (n: number, edges: number[][]) => {
 
 // 是连通图
 // 不存在环
+export { validTree }

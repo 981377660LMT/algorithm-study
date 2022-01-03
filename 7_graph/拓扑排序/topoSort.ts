@@ -1,27 +1,28 @@
-function topoSort(adjMap: Map<string, Set<string>>, charSet: Set<string>) {
-  const indegrees = new Map<string, number>()
-  for (const charSet of adjMap.values()) {
-    for (const char of charSet) {
-      indegrees.set(char, (indegrees.get(char) || 0) + 1)
+// 计算每个点在拓扑排序中的最大深度
+function topoSort(adjList: number[], indegrees: number[]): number[] {
+  const n = adjList.length
+  const topoLevels = Array<number>(n).fill(0)
+  let level = 0
+  let queue: number[] = []
+  indegrees.forEach((degree, id) => degree === 0 && queue.push(id))
+
+  while (queue.length > 0) {
+    const len = queue.length
+    const nextQueue: number[] = []
+    level++
+
+    for (let _ = 0; _ < len; _++) {
+      const cur = queue.pop()!
+      const next = adjList[cur]
+      indegrees[next]--
+      if (indegrees[next] === 0) nextQueue.push(next)
+      topoLevels[next] = level
     }
+
+    queue = nextQueue
   }
 
-  // 入度为0的点
-  const queue = [...charSet].filter(char => !indegrees.has(char))
-  const res: string[] = []
-  while (queue.length) {
-    console.log(queue, indegrees, adjMap)
-    const cur = queue.shift()!
-    res.push(cur)
-    for (const next of adjMap.get(cur) || []) {
-      indegrees.set(next, indegrees.get(next)! - 1)
-      if (indegrees.get(next) === 0) {
-        queue.push(next)
-      }
-    }
-  }
-
-  return res.length === charSet.size ? res : []
+  return topoLevels
 }
 
-export { topoSort }
+// 数组用s结尾比较好

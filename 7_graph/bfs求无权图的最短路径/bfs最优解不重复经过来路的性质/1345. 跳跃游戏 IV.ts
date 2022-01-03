@@ -10,32 +10,32 @@ import { ArrayDeque } from '../../../2_queue/Deque'
    j 满足：arr[i] == arr[j] 且 i != j
    即：前跳 后跳 跳到另一个相等处
  */
-const minJumps = function (arr: number[]): number {
+function minJumps(arr: number[]): number {
   if (arr.length === 1) return 0
-  const adjMap = new Map<number, number[]>()
+  const indexes = new Map<number, number[]>()
   arr.forEach((val, index) => {
-    !adjMap.has(val) && adjMap.set(val, [])
-    adjMap.get(val)!.push(index)
+    !indexes.has(val) && indexes.set(val, [])
+    indexes.get(val)!.push(index)
   })
 
-  const visited = new Set()
+  const visited = new Set<number>()
   const queue = new ArrayDeque(5 * 10 ** 4)
   queue.push(0)
   let steps = 0
 
-  while (queue.length) {
+  while (queue.length > 0) {
     const len = queue.length
 
     for (let i = 0; i < len; i++) {
       const curIndex = queue.shift()!
       if (curIndex === arr.length - 1) return steps
       visited.add(curIndex)
-      for (const next of [...adjMap.get(arr[curIndex])!, curIndex - 1, curIndex + 1]) {
+      for (const next of [...indexes.get(arr[curIndex])!, curIndex - 1, curIndex + 1]) {
         if (next >= 0 && next < arr.length && !visited.has(next)) {
           queue.push(next)
           // 这个高度的，已经visit了，防止后面同高度的点浪费时间，再去判断是否visit
           // 之前的已经不用去看了 类似于2_单词接龙 删除已经看过的词 之后才接近答案
-          adjMap.set(arr[curIndex], [])
+          indexes.set(arr[curIndex], [])
         }
       }
     }

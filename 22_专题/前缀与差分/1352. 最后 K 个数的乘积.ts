@@ -1,24 +1,21 @@
 class ProductOfNumbers {
-  private pre: number[]
-
-  constructor() {
-    this.pre = [1]
-  }
+  private preProduct: number[] = [1]
 
   // 将数字 num 添加到当前数字列表的最后面
   add(num: number): void {
-    if (num === 0) this.pre = [1]
-    else {
-      this.pre.push(num * this.pre[this.pre.length - 1])
+    if (num === 0) {
+      this.preProduct = [1]
+    } else {
+      this.preProduct.push(num * this.preProduct.at(-1)!)
     }
   }
 
   // 返回当前数字列表中，最后 k 个数字的乘积。
   // 你可以假设当前列表中始终 至少 包含 k 个数字
   getProduct(k: number): number {
-    const len = this.pre.length
-    if (len - k >= 1) {
-      return this.pre[len - 1] / this.pre[len - k - 1]
+    const len = this.preProduct.length
+    if (len - k - 1 >= 0) {
+      return this.preProduct[len - 1] / this.preProduct[len - k - 1]
     }
     // pre 数组的长度小于 k，说明末尾 k 个数里肯定有 0，直接输出 0 即可
     return 0

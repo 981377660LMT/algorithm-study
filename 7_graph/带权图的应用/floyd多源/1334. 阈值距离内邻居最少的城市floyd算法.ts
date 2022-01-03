@@ -15,9 +15,11 @@ function findTheCity(n: number, edges: number[][], distanceThreshold: number): n
     dist[i][j] = w
     dist[j][i] = w
   }
+
   for (let i = 0; i < n; i++) {
     dist[i][i] = 0
   }
+
   for (let m = 0; m < n; m++) {
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
@@ -35,6 +37,7 @@ function findTheCity(n: number, edges: number[][], distanceThreshold: number): n
     for (const dis of dist[i]) {
       dis <= distanceThreshold && count++
     }
+
     if (count <= minNeighbors) {
       res = i
       minNeighbors = count

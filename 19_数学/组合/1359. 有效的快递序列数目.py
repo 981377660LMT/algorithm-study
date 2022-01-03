@@ -1,4 +1,5 @@
 from functools import lru_cache
+from math import factorial
 
 MOD = int(1e9 + 7)
 
@@ -13,8 +14,12 @@ class Solution:
             res %= MOD
         return res
 
+    def countOrders2(self, n: int) -> int:
+        return factorial(2 * n) * pow(2 ** n, MOD - 2, MOD) % MOD
+
 
 print(Solution().countOrders(n=2))
+print(Solution().countOrders2(n=2))
 
 # 输出：6
 # 解释：所有可能的序列包括：
