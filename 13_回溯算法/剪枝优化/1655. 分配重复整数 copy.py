@@ -14,27 +14,26 @@ from collections import Counter, defaultdict
 
 
 class Solution:
-    def canDistribute(self, nums: List[int], customers: List[int]) -> bool:
-
-        customers.sort(reverse=True)
+    def canDistribute(self, nums: List[int], quantity: List[int]) -> bool:
+        quantity.sort(reverse=True)
         freqCounter = defaultdict(int, Counter(Counter(nums).values()))
 
         def bt(i: int) -> bool:
-            if i == len(customers):
+            if i == len(quantity):
                 return True
             for freq, count in list(freqCounter.items()):
-                if freq >= customers[i] and count > 0:
+                if freq >= quantity[i] and count > 0:
                     freqCounter[freq] -= 1
-                    freqCounter[freq - customers[i]] += 1
+                    freqCounter[freq - quantity[i]] += 1
                     if bt(i + 1):
                         return True
                     freqCounter[freq] += 1
-                    freqCounter[freq - customers[i]] -= 1
+                    freqCounter[freq - quantity[i]] -= 1
             return False
 
         return bt(0)
 
 
-print(Solution().canDistribute([1, 1, 2, 2], customers=[2, 2]))
+print(Solution().canDistribute([1, 1, 2, 2], quantity=[2, 2]))
 # 输出：true
 # 解释：第 0 位顾客得到 [1,1] ，第 1 位顾客得到 [2,2] 。

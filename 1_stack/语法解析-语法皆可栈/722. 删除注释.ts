@@ -2,7 +2,7 @@
  * @param {string[]} source
  * @return {string[]}
  */
-const removeComments = function (source: string[]): string[] {
+const removeComments = (source: string[]): string[] => {
   // 注意 不可以加flag 's'即点匹配换行符   因为只有/* */允许多行匹配 而// 只允许单行匹配
   // 要用[\s\S]*?表示包括换行符的所有字符
   // 为了消除// 后所有字符 我们不能使用非贪婪匹配?

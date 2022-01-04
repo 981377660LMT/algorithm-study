@@ -10,7 +10,7 @@ class Solution:
         n = len(scores)
         # 对年龄排序后寻找LIS
         team = sorted(zip(ages, scores))
-        print(team)
+
         dp = [score for _, score in team]
         for i in range(1, n):
             for j in range(i):

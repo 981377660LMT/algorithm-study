@@ -8,11 +8,10 @@
  * @summary 时间复杂度O(n!)
  */
 const slidingPuzzle = (board: number[][]): number => {
-  let res = -1
   const initState = board.map(row => row.join('')).reduce((pre, cur) => pre + cur, '')
   const queue: [string, number, number][] = [[initState, initState.indexOf('0'), 0]]
   const visited = new Set([initState])
-  const nextIndexMapping: { [k: number]: number[] } = {
+  const adjMap: Record<number, number[]> = {
     0: [1, 3],
     1: [0, 2, 4],
     2: [1, 5],
@@ -26,22 +25,19 @@ const slidingPuzzle = (board: number[][]): number => {
     return tmp.join('')
   }
 
-  const bfs = () => {
-    while (queue.length) {
-      const [curState, curIndex, steps] = queue.shift()!
-      if (curState === '123450') return (res = steps)
-      for (const nextIndex of nextIndexMapping[curIndex]) {
-        const nextState = getNextState(curState, curIndex, nextIndex)
-        if (!visited.has(nextState)) {
-          visited.add(nextState)
-          queue.push([nextState, nextIndex, steps + 1])
-        }
+  while (queue.length) {
+    const [curState, curIndex, steps] = queue.shift()!
+    if (curState === '123450') return steps
+    for (const nextIndex of adjMap[curIndex]) {
+      const nextState = getNextState(curState, curIndex, nextIndex)
+      if (!visited.has(nextState)) {
+        visited.add(nextState)
+        queue.push([nextState, nextIndex, steps + 1])
       }
     }
   }
-  bfs()
 
-  return res
+  return -1
 }
 
 console.log(

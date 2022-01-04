@@ -9,7 +9,7 @@
  * 786. 第 K 个最小的素数分数.py
  */
 const smallestDistancePair = function (nums: number[], k: number): number {
-  nums.sort((a, b) => a - b)
+  nums = nums.slice().sort((a, b) => a - b)
 
   // 距离最大最小值之差
   let left = 0
@@ -18,10 +18,10 @@ const smallestDistancePair = function (nums: number[], k: number): number {
   while (left <= right) {
     const mid = (left + right) >> 1
     // 如果不大于距离k的点对数正好是k个，并不代表第K小的距离对的距离就是K，因为有可能比K小
-    if (countNGT(mid) >= k) {
-      right = mid - 1
-    } else {
+    if (countNGT(mid) < k) {
       left = mid + 1
+    } else {
+      right = mid - 1
     }
   }
 

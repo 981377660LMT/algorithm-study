@@ -6,8 +6,7 @@ type Interval = [number, number]
  * [start, end]含有0～24的整数，意味着当前时间段已经有安排。
  */
 function findMeetingSlots(schedules: Interval[][]): Interval[] {
-  // your code here
-  let times = schedules.flat().sort((a, b) => a[0] - b[0])
+  const times = schedules.flat().sort((a, b) => a[0] - b[0])
   // [ [ 8, 9 ], [ 10, 13 ], [ 11, 12 ], [ 13, 15 ], [ 13, 18 ] ]
   const res: Interval[] = []
   let preEnd = 0

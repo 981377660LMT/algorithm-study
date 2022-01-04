@@ -4,8 +4,8 @@
 When seeing the word **consecutive sequence**, think about using **Prefix Sum** strategy.
 
 两个 atMostK:
-**不超过 k 种元素的子数组个数**:水果成栏问题,K 个不同整数的子数组问题
-**全部元素都不大于 k 的子数组个数**：区间子数组个数
+**不超过 k 种元素的子数组个数**:水果成栏问题,K 个不同整数的子数组问题：滑窗
+**全部元素都不大于 k 的子数组个数**：`795. 区间子数组个数`
 
 ```Python
 preSum = [0]

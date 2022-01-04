@@ -2,14 +2,19 @@
  * @param {number} n n 的范围是 [1, 4]
  * @param {number} k k 的范围是 [1, 10] k^n 最大可能为 4096。
  * @return {string}
- * 密码是 n 位数, 密码的每一位是 k 位序列 0, 1, ..., k-1 中的一个 。
- * 保险箱会自动记住最后 n 位输入
- * 请返回一个能打开保险箱的最短字符串。
+  返回一个最短的字符串满足：n位每位由0~k-1构成的字符串都是其子串
  * 如何在一个最短的串内枚举所有的n位k进制数排列:这种序列称之为 de Bruijn序列。
  */
 const crackSafe = function (n: number, k: number): string {
   const res: string[] = []
-  const dfs = (cur: string, visited: Set<string>, path: string[]) => {
+
+  // 开始的选择
+  const start = '0'.repeat(n - 1)
+  dfs(start, new Set<string>(), res)
+  res.push(start)
+  return res.join('')
+
+  function dfs(cur: string, visited: Set<string>, path: string[]) {
     for (let i = 0; i < k; i++) {
       const newSubstring = cur + i.toString()
       if (visited.has(newSubstring)) continue
@@ -18,11 +23,6 @@ const crackSafe = function (n: number, k: number): string {
       path.push(i.toString())
     }
   }
-  // 开始的选择
-  const start = '0'.repeat(n - 1)
-  dfs(start, new Set<string>(), res)
-  res.push(start)
-  return res.join('')
 }
 
 console.log(crackSafe(2, 2))

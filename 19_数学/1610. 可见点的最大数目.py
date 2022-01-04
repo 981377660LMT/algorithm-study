@@ -7,6 +7,8 @@ from bisect import bisect_right
 
 # 你的视野就是角度范围 [d - angle/2, d + angle/2] 所指示的那片区域。
 # 1 <= points.length <= 105
+
+
 class Solution:
     def visiblePoints(self, points: List[List[int]], angle: int, location: List[int]) -> int:
         sameCount = 0

@@ -22,6 +22,7 @@ class Solution:
             if not root:
                 return None
 
+            # 待删除的结点
             if root.right in visited:
                 return None
 

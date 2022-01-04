@@ -17,7 +17,7 @@ const distanceLimitedPathsExist = function (
   const res = Array<boolean>(queries.length).fill(false)
   edgeList.sort((a, b) => a[2] - b[2])
   queries.sort((a, b) => a[2] - b[2])
-  const uf = new UnionFind()
+  const uf = new UnionFind(n)
 
   let j = 0
   for (let i = 0; i < queries.length; i++) {
@@ -25,7 +25,7 @@ const distanceLimitedPathsExist = function (
 
     while (j < edgeList.length && edgeList[j][2] < limit) {
       const [u, v] = edgeList[j]
-      uf.add(u).add(v).union(u, v)
+      uf.union(u, v)
       j++
     }
 

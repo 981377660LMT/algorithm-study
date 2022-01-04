@@ -5,11 +5,12 @@
  */
 const maxLengthBetweenEqualCharacters = function (s: string): number {
   let res = -1
-  const firstIndexRecord = new Map<string, number>()
+  const first = new Map<string, number>()
+
   for (let i = 0; i < s.length; i++) {
     const cur = s[i]
-    if (firstIndexRecord.has(cur)) res = Math.max(res, i - firstIndexRecord.get(cur)! - 1)
-    else firstIndexRecord.set(cur, i)
+    if (first.has(cur)) res = Math.max(res, i - first.get(cur)! - 1)
+    else first.set(cur, i)
   }
 
   return res

@@ -15,6 +15,8 @@ from typing import Tuple
 # 第二个方法的思路是，一个格子一个格子自的搜索（而非一行一行的搜索）。每搜索一个格子，它只可能影响它左边的和上边的格子。
 # 状态是：dp[x][y][in][ex][laststate]。
 # 所以我们只需要知道最近的n个格子的填入情况，就可以统计幸福度的变化。
+
+
 class Solution:
     def getMaxGridHappiness(
         self, m: int, n: int, introvertsCount: int, extrovertsCount: int

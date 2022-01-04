@@ -11,7 +11,7 @@ function minimumMountainRemovals(nums: number[]): number {
     const left = lengthOfLIS(nums.slice(0, peakIndex + 1))
     const right = lengthOfLIS(nums.slice(peakIndex).reverse())
     if (left === 1 || right === 1) continue // 没有
-    res = Math.min(res, nums.length - left - right + 1)
+    res = Math.min(res, nums.length + 1 - left - right)
     if (res === 0) return 0
   }
 

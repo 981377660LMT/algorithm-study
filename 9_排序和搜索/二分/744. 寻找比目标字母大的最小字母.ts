@@ -11,7 +11,7 @@ function nextGreatestLetter(letters: string[], target: string): string {
     else if (midElement > target) r = mid - 1
   }
 
-  return letters[l] || letters[0]
+  return l === letters.length ? letters[0] : letters[l]
 }
 
 console.log(nextGreatestLetter(['c', 'f', 'j'], 'a'))

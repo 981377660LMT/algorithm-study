@@ -3,11 +3,11 @@ from typing import List
 
 class Solution:
     def slowestKey(self, releaseTimes: List[int], keysPressed: str) -> str:
-        n = len(releaseTimes)
-        for i in range(n - 1, 0, -1):
-            releaseTimes[i] = releaseTimes[i] - releaseTimes[i - 1]
-
-        return max(list(zip(releaseTimes, keysPressed)))[1]
+        start = [0] + releaseTimes
+        end = releaseTimes
+        duration = [e - s for s, e in zip(start, end)]
+        cands = [keysPressed[i] for i, du in enumerate(duration) if du == max(duration)]
+        return max(cands)
 
 
 print(Solution().slowestKey([9, 29, 49, 50], "cbcd"))

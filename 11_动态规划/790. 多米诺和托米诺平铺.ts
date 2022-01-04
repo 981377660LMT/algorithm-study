@@ -18,7 +18,7 @@ const numTilings = function (n: number): number {
 
   return dp[n] % mod
 }
-console.log(10e1)
+
 console.log(10 ** 9)
 
 console.log(numTilings(3))

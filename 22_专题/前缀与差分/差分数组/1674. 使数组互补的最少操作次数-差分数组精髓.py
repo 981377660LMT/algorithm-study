@@ -4,7 +4,7 @@
 # n 是偶数。2 <= n <= 105
 
 # https://leetcode-cn.com/problems/minimum-moves-to-make-array-complementary/solution/jie-zhe-ge-wen-ti-xue-xi-yi-xia-chai-fen-shu-zu-on/
-# 差分统计 以目标和为主线
+# 差分统计 `给 [l, r] 的区间加上一个数字 a, 只需要 diff[l] += a，diff[r + 1] -= a。`
 # 我们考虑任意一个数对(a,b)，不妨假设a≤b。假设最终选定的和值为target
 # 令target从数轴最左端开始向右移动 (1+a) (a+b) (a+b+1) (b+limit+1) 四个位置需要更新差分数组
 # 最后，我们遍历（扫描）差分数组，就可以找到令总操作次数最小的target，同时可以得到最少的操作次数。
@@ -13,21 +13,30 @@ from typing import List
 
 class Solution:
     def minMoves(self, nums: List[int], limit: int) -> int:
-        diff = [0] * (2 * limit + 2)  # 差分数组
+        diff = [0] * (2 * limit + 2)  # 最终互补的数字和为 x，需要的操作数
         n = len(nums)
 
         for i in range(n // 2):
             a, b = sorted((nums[i], nums[~i]))
-            diff[a + 1] -= 1
-            diff[a + b] -= 1
-            diff[a + b + 1] += 1
-            diff[b + limit + 1] += 1
+            # 调两个数
+            lower, upper = [2, 2 * limit]
+            diff[lower] += 2
+            diff[upper + 1] -= 2
+            # 调一个数
+            lower, upper = [1 + a, limit + b]
+            diff[lower] += -1
+            diff[upper + 1] -= -1
+            # 调零个数
+            lower, upper = [a + b, a + b]
+            diff[lower] += -1
+            diff[upper + 1] -= -1
 
-        cur = n
         res = n
+        curSum = 0
+        # [2,2*limit]间的最小值
         for i in range(2, 2 * limit + 1):
-            cur += diff[i]
-            res = min(res, cur)
+            curSum += diff[i]
+            res = min(res, curSum)
         return res
 
 

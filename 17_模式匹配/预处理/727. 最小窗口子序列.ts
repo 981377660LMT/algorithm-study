@@ -10,33 +10,34 @@ import { bisectRight } from '../../9_排序和搜索/二分/7_二分搜索寻找
  */
 function minWindow(s1: string, s2: string): string {
   if (s1.length < s2.length) return ''
-  let res = ''
 
-  const set = new Set(s2)
+  let res = ''
+  const s2Set = new Set(s2)
   // 记录s2中每个字符在s1中的出现位置 不断寻找下一个即可
-  const charToIndex = new Map<string, number[]>()
+  const indexes = new Map<string, number[]>()
   for (let i = 0; i < s1.length; i++) {
-    if (set.has(s1[i])) {
-      !charToIndex.has(s1[i]) && charToIndex.set(s1[i], [])
-      charToIndex.get(s1[i])!.push(i)
+    if (s2Set.has(s1[i])) {
+      !indexes.has(s1[i]) && indexes.set(s1[i], [])
+      indexes.get(s1[i])!.push(i)
     }
   }
 
-  for (const first of charToIndex.get(s2[0]) || []) {
-    let last = first
-    let hit = 1 // 匹配的字符个数
+  // 枚举出发点
+  for (const start of indexes.get(s2[0]) || []) {
+    let cur = start
+    let hit = 1 // 已匹配的字符个数
     for (let i = 1; i < s2.length; i++) {
       const nextChar = s2[i]
-      if (!charToIndex.has(nextChar)) continue
-      const indexes = charToIndex.get(nextChar)!
-      const nextIndex = bisectRight(indexes, last)
-      if (nextIndex >= indexes.length) continue
-      last = indexes[nextIndex]
+      if (!indexes.has(nextChar)) break
+      const lis = indexes.get(nextChar)!
+      const nextIndex = bisectRight(lis, cur)
+      if (nextIndex >= lis.length) break
+      cur = lis[nextIndex]
       hit++
     }
 
-    if (hit === s2.length && (res === '' || last - first + 1 < res.length)) {
-      res = s1.slice(first, last + 1)
+    if (hit === s2.length && (res === '' || cur - start + 1 < res.length)) {
+      res = s1.slice(start, cur + 1)
     }
   }
 
@@ -52,3 +53,4 @@ function minWindow(s1: string, s2: string): string {
 // console.log(minWindow('abcdebdde', 'bde'))
 console.log(minWindow('cnhczmccqouqadqtmjjzl', 'mm'))
 console.log(minWindow('jmeqksfrsdcmsiwvaovztaqenprpvnbstl', 'k'))
+export {}

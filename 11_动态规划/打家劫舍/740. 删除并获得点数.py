@@ -1,4 +1,5 @@
 from typing import List
+from collections import Counter
 
 # 选择任意一个 nums[i] ，删除它并获得 nums[i] 的点数。
 # 之后，你必须删除 所有 等于 nums[i] - 1 和 nums[i] + 1 的元素。
@@ -10,11 +11,9 @@ from typing import List
 class Solution:
     def deleteAndEarn(self, nums: List[int]) -> int:
         n = max(nums)
-        counter = [0 for _ in range(n + 1)]
-        for num in nums:
-            counter[num] += 1
+        counter = Counter(nums)
 
-        dp = [0 for _ in range(n + 1)]
+        dp = [0] * (n + 1)
         dp[0] = 0
         dp[1] = counter[1]
 

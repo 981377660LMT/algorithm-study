@@ -10,9 +10,9 @@ from typing import List
 class Solution:
     # 贪心:我们遍历每个偶数位置 2 * i ，把它的对象安排到它右边的奇数位置 2 * i + 1。
     def minSwapsCouples(self, row: List[int]) -> int:
-
         n = len(row)
         res = 0
+
         for i in range(0, n, 2):
             if row[i] == row[i + 1] ^ 1:
                 continue
@@ -21,6 +21,7 @@ class Solution:
                 if row[i] == row[j] ^ 1:
                     row[i + 1], row[j] = row[j], row[i + 1]
             res += 1
+
         return res
 
 

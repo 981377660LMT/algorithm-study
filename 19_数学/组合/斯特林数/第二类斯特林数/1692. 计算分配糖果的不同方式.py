@@ -8,7 +8,7 @@ class Solution:
             dp[i][i] = 1
         for i in range(1, k + 1):
             for j in range(i + 1, n + 1):
-                # 第1颗糖独占1盒 dp[i-1][j-1]
+                # 新的糖独占1盒 dp[i-1][j-1]
                 # 不独占一盒随意放 i*dp[i][j - 1]
                 dp[i][j] = (dp[i - 1][j - 1] + i * dp[i][j - 1]) % int(1e9 + 7)
         return dp[-1][-1]

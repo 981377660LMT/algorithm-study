@@ -24,6 +24,7 @@ class Solution:
                     for i in range(26)
                     if chr(ord('a') + i) != char
                 )
+                # 取到两端的
                 + 2
             )
 

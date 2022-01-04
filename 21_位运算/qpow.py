@@ -15,3 +15,8 @@ def qpow(base: int, exp: int, mod: int) -> int:
 
 print(qpow(200, 300, int(1e9 + 7)))
 
+from collections import defaultdict
+
+d = defaultdict(int, {1: [2]})
+
+print(d[1], d[2])

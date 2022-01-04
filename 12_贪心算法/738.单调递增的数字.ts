@@ -11,17 +11,17 @@ const monotoneIncreasingDigits = function (n: number): number {
   const digits = n.toString()
 
   let mid = 0
-  let mono = true
+  let isIncreased = true
   for (let i = 0; i < digits.length - 1; i++) {
     if (Number(digits[i + 1]) > Number(digits[i])) mid = i + 1
     if (Number(digits[i + 1]) < Number(digits[i])) {
-      mono = false
+      isIncreased = false
       break
     }
   }
   console.log(digits, mid)
 
-  if (mono) return n
+  if (isIncreased) return n
   return Number(
     digits.slice(0, mid) + String(Number(digits[mid]) - 1) + '9'.repeat(digits.length - 1 - mid)
   )

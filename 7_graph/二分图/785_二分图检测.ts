@@ -1,9 +1,9 @@
 import { useUnionFindArray } from '../../14_并查集/推荐使用并查集精简版'
 
-const enum Color {
+enum Color {
+  Unvisited = -1,
   Red = 0,
-  Black,
-  Unvisited,
+  Black = 1,
 }
 
 /**
@@ -15,28 +15,26 @@ const enum Color {
  * @summary dfs染色 visited时相邻节点不同色 0/-1
  * 求二分图有两种思路，一个是着色法，另外一个是并查集
  */
-const isBipartite = (adjList: number[][]): boolean => {
-  let res = true
+function isBipartite(adjList: number[][]): boolean {
   const colors = Array<Color>(adjList.length).fill(Color.Unvisited)
 
   for (let i = 0; i < adjList.length; i++) {
-    if (colors[i] === Color.Unvisited) dfs(i, Color.Red)
+    if (colors[i] !== Color.Unvisited) continue
+    if (!dfs(i, Color.Red)) return false
   }
 
-  return res
+  return true
 
-  function dfs(cur: number, color: Color) {
+  function dfs(cur: number, color: Color): boolean {
     colors[cur] = color
 
     for (const next of adjList[cur]) {
       if (colors[next] === Color.Unvisited) {
-        dfs(next, color ^ 1)
-      } else {
-        if (colors[cur] === colors[next]) {
-          return (res = false)
-        }
-      }
+        if (!dfs(next, color ^ 1)) return false
+      } else if (colors[cur] === colors[next]) return false
     }
+
+    return true
   }
 }
 
@@ -57,20 +55,24 @@ const isBipartite2 = (adjList: number[][]): boolean => {
   return true
 }
 
-console.log(
-  isBipartite([
-    [1, 2, 3],
-    [0, 2],
-    [0, 1, 3],
-    [0, 2],
-  ])
-)
+if (require.main === module) {
+  console.log(
+    isBipartite([
+      [1, 2, 3],
+      [0, 2],
+      [0, 1, 3],
+      [0, 2],
+    ])
+  )
 
-console.log(
-  isBipartite([
-    [1, 3],
-    [0, 2],
-    [1, 3],
-    [0, 2],
-  ])
-)
+  console.log(
+    isBipartite([
+      [1, 3],
+      [0, 2],
+      [1, 3],
+      [0, 2],
+    ])
+  )
+}
+
+export { isBipartite }

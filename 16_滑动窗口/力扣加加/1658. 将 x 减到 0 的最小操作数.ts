@@ -7,22 +7,24 @@
  * @summary 求和为定值sum(nums)-x的最长子数组: 滑动窗口
  */
 const minOperations = function (nums: number[], x: number): number {
-  let l = 0
-  let res = 0
-  let sum = 0
   const target = nums.reduce((pre, cur) => pre + cur, 0) - x
+  let res = 0
+  let curSum = 0
+  let left = 0
 
   // 注意这里
   if (target === 0) return nums.length
 
-  for (let r = 0; r < nums.length; r++) {
-    sum += nums[r]
-    while (sum > target) {
-      l++
-      sum -= nums[l - 1]
+  for (let right = 0; right < nums.length; right++) {
+    curSum += nums[right]
+
+    while (curSum > target) {
+      curSum -= nums[left]
+      left++
     }
-    if (sum === target) {
-      res = Math.max(res, r - l + 1)
+
+    if (curSum === target) {
+      res = Math.max(res, right - left + 1)
     }
   }
 

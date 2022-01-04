@@ -1,4 +1,4 @@
-import { useUnionFind } from '../推荐使用并查集精简版'
+import { useUnionFindArray } from '../推荐使用并查集精简版'
 
 /**
  * @param {number} n
@@ -16,15 +16,15 @@ const distanceLimitedPathsExist = function (
   queries: number[][]
 ): boolean[] {
   const res = Array<boolean>(queries.length).fill(false)
-  const uf = useUnionFind(n)
+  const uf = useUnionFindArray(n)
   edgeList.sort((a, b) => a[2] - b[2])
   queries = queries.map((v, i) => [...v, i]).sort((a, b) => a[2] - b[2])
 
-  let j = 0
-  queries.forEach(([from, to, weight, index]) => {
-    while (j < edgeList.length && edgeList[j][2] < weight) {
-      uf.union(edgeList[j][0], edgeList[j][1])
-      j++
+  let edgeIndex = 0
+  queries.forEach(([from, to, limit, index]) => {
+    while (edgeIndex < edgeList.length && edgeList[edgeIndex][2] < limit) {
+      uf.union(edgeList[edgeIndex][0], edgeList[edgeIndex][1])
+      edgeIndex++
     }
     if (uf.isConnected(from, to)) res[index] = true
   })
@@ -47,6 +47,7 @@ console.log(
     ]
   )
 )
+
 // 输出：[false,true]
 
 // 什么叫在线算法？就是依次处理每一个 query，对每一个 query 的计算，

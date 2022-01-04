@@ -1,6 +1,7 @@
 // 请你以字符串形式，返回一个与它相似度最大且可以简写的颜色(最后的结果都是 00 11 22 33 44 55 66 77 88 99 aa bb cc dd ee ff)
 // color.length == 7
 // color[0] == '#'
+// `x11, 0x22, 0x33, 0x44... 都是 0x11 的倍数;00 到 ff 中找到一个相似度最大的;除以17，>8四舍五入`
 const OFFSET = 17
 function similarRGB(color: string): string {
   const helper = (target: string): string => {

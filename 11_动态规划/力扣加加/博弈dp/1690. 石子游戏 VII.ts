@@ -11,8 +11,10 @@ const stoneGameVII = function (stones: number[]): number {
   const sum = stones.reduce((pre, cur) => pre + cur)
   const memo = new Map<string, number>()
 
+  return dfs(0, len - 1, sum)
+
   // 当前先手时能拿到的相对最大值
-  const dfs = (left: number, right: number, sum: number): number => {
+  function dfs(left: number, right: number, sum: number): number {
     if (right === left) return 0
     const key = `${left}#${right}`
     if (memo.has(key)) return memo.get(key)!
@@ -24,8 +26,6 @@ const stoneGameVII = function (stones: number[]): number {
     memo.set(key, res)
     return res
   }
-
-  return dfs(0, len - 1, sum)
 }
 
 console.log(stoneGameVII([5, 3, 1, 4, 2]))

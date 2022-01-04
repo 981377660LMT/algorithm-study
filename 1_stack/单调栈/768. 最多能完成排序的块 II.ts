@@ -9,7 +9,7 @@ function maxChunksToSorted(arr: number[]): number {
   // 来了小的 要看前面是不是都比它小 如果不是 必须合在一起
   // 考虑整体，比如 [4,2,2,1,1] 这样的测试用例，实际上只应该返回 1，原因是后面碰得到了 1，使得前面不应该分块。
   for (const num of arr) {
-    if (stack.length && stack[stack.length - 1] > num) {
+    if (stack.length > 0 && stack[stack.length - 1] > num) {
       // 不是分割区块，而是`融合`区块,我们需要将融合后的区块的最大值重新放回栈
       const top = stack.pop()!
       while (stack.length && stack[stack.length - 1] > num) {

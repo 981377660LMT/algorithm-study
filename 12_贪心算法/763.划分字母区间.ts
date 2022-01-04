@@ -1,3 +1,5 @@
+const BASE = 97
+
 /**
  * @param {string} s
  * @return {number[]}
@@ -9,26 +11,25 @@
  */
 const partitionLabels = function (s: string): number[] {
   const len = s.length
-  const base = 97
-  const splitLength: number[] = []
-  const maxRightIndex = Array<number>(26).fill(-1)
+
+  const splitLengths: number[] = []
+  const rightmostIndex = Array<number>(26).fill(-1)
 
   for (let i = 0; i < len; i++) {
-    maxRightIndex[s[i].codePointAt(0)! - base] = i
+    rightmostIndex[s[i].codePointAt(0)! - BASE] = i
   }
 
-  let l = 0
-  let r = 0
-  for (let i = 0; i < len; i++) {
-    r = Math.max(r, maxRightIndex[s[i].codePointAt(0)! - base])
-    if (i === r) {
-      splitLength.push(r - l + 1)
-      l = i + 1
+  let left = 0
+  let splitCand = 0
+  for (let right = 0; right < len; right++) {
+    splitCand = Math.max(splitCand, rightmostIndex[s[right].codePointAt(0)! - BASE])
+    if (right === splitCand) {
+      splitLengths.push(splitCand - left + 1)
+      left = right + 1
     }
   }
 
-  // console.log(splitLength)
-  return splitLength
+  return splitLengths
 }
 
 console.log(partitionLabels('ababcbacadefegdehijhklij'))

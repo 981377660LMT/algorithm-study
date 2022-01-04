@@ -18,6 +18,7 @@ class Solution:
             idx = idx_by_char[word[w_i]]
             if not idx or s_i > idx[-1]:
                 return False
+
             left = idx[bisect_left(idx, s_i)]
             return is_sub(word, w_i + 1, left + 1)
 
