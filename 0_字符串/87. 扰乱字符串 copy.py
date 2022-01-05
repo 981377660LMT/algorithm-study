@@ -1,6 +1,6 @@
 import functools
 
-
+# 1 <= s1.length <= 30
 class Solution:
     @functools.lru_cache(None)
     def isScramble(self, s1: str, s2: str) -> bool:
@@ -16,7 +16,7 @@ class Solution:
         return False
 
 
-class Solution:
-    def replaceDigits(self, s: str) -> str:
-        return ''.join([chr(ord(s[i - 1]) + int(v)) if i % 2 else v for i, v in enumerate(s)])
+# class Solution:
+#     def replaceDigits(self, s: str) -> str:
+#         return ''.join([chr(ord(s[i - 1]) + int(v)) if i % 2 else v for i, v in enumerate(s)])
 

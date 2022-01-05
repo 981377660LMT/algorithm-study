@@ -35,20 +35,15 @@ const bt: BinaryTree = {
 }
 
 // 快速比较两个json
-const isSameTree = (t1: BinaryTree | null, t2: BinaryTree | null) => {
-  // 递归的终点
-  if (!t1 && !t2) return true
-  if (
-    t1 &&
-    t2 &&
-    t1.val === t2.val &&
-    isSameTree(t1.left, t2.left) &&
-    isSameTree(t1.right, t2.right)
-  ) {
-    return true
-  }
+const isSameTree = (root1: BinaryTree | null, root2: BinaryTree | null): boolean => {
+  if (root1 == null && root2 == null) return true
+  if (root1 == null || root2 == null) return false // If only one of the sub trees are empty
 
-  return false
+  return (
+    root1.val === root2.val &&
+    isSameTree(root1.left, root2.left) &&
+    isSameTree(root1.right, root2.right)
+  )
 }
 
 console.log(isSameTree(bt, bt))

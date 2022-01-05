@@ -1,5 +1,5 @@
 import { promisify } from './promisify与callbackify'
-import type { AsyncFunc, Callback, PromiseFunc } from './typings'
+import type { AsyncFunc, Callback } from './typings'
 
 /**
  * @param {AsyncFunc[]} funcs

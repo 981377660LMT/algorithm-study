@@ -12,7 +12,7 @@ class Solution:
     def numberOfUniqueGoodSubsequences(self, binary: str) -> int:
         endswith = [0] * 2
         for char in binary:
-            endswith[int(char)] = sum(endswith) + int(char) % MOD
+            endswith[int(char)] = sum(endswith) + int(char)
         return (sum(endswith) + int('0' in binary)) % MOD
 
 

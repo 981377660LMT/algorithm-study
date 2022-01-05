@@ -13,7 +13,7 @@ const splitArray = function (nums: number[], m: number): number {
   let r = nums.reduce((pre, cur) => pre + cur, 0)
   while (l <= r) {
     const mid = (l + r) >> 1
-    const count = countAtMid(nums, mid)
+    const count = countNGT(nums, mid)
     if (count > m) {
       l = mid + 1
     } else {
@@ -29,7 +29,7 @@ const splitArray = function (nums: number[], m: number): number {
    * @param mid
    * @returns 每个子数组和不超过mid 至少需要分成多少个子数组
    */
-  function countAtMid(nums: number[], mid: number): number {
+  function countNGT(nums: number[], mid: number): number {
     let res = 1
     let curSum = 0
 

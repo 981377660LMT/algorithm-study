@@ -13,7 +13,7 @@ from math import ceil, floor
 
 class Solution:
     def kthSmallestProduct(self, nums1: List[int], nums2: List[int], k: int) -> int:
-        def count(mid: int) -> int:
+        def countNGT(mid: int) -> int:
             """Return count of products <= val."""
             res = 0
             for x in nums1:
@@ -42,7 +42,7 @@ class Solution:
 
         while left <= right:
             mid = left + right >> 1
-            if count(mid) < k:
+            if countNGT(mid) < k:
                 left = mid + 1
             else:
                 right = mid - 1

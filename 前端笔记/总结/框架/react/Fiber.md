@@ -257,7 +257,6 @@ React 在执行完一个任务单元后，查看是否有其他的高优先级�
 Fiber 的工作分为两个阶段：**render 阶段和 commit 阶段**。
 
 render 阶段：构建 Fiber 对象，构建链表，在链表中标记要执行的 DOM 操作 ，可中断。
-
 commit 阶段：根据构建好的链表进行 DOM 操作，不可中断。
 
 <img src="./images/07.png" align="left"/>

@@ -14,20 +14,22 @@ const recoverTree = function (root: BinaryTree) {
   let secondNode: BinaryTree | undefined = undefined
   let preNode: BinaryTree = new BinaryTree(-Infinity)
 
-  const inorder = (root: BinaryTree | null) => {
+  inorder(root)
+  ;[firstNode!.val, secondNode!.val] = [secondNode!.val, firstNode!.val]
+  return root
+
+  function inorder(root: BinaryTree | null) {
     if (!root) return
     inorder(root.left)
+
     if (preNode.val > root.val) {
-      // console.log(preNode, root)
       if (!firstNode) firstNode = preNode // first只定一次
       secondNode = root
     }
     preNode = root
+
     inorder(root.right)
   }
-  inorder(root)
-  ;[firstNode!.val, secondNode!.val] = [secondNode!.val, firstNode!.val]
-  return root
 }
 
 console.dir(recoverTree(deserializeNode([2, 3, null, null, 1])!), { depth: null })

@@ -11,6 +11,7 @@ class Solution:
     def countPalindromicSubsequence(self, s: str) -> int:
         res = 0
         for char in ascii_lowercase:
+            # 首次和末次出现的位置
             left, right = s.find(char), s.rfind(char)
             if left > -1:
                 res += len(set(s[left + 1 : right]))

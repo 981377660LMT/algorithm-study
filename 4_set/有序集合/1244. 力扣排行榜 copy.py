@@ -7,6 +7,7 @@ class Leaderboard:
         self.record = defaultdict()
         self.scores = SortedList(key=lambda x: -x)
 
+    # 更新操作一般都是删除原来的，重新添加新的
     def addScore(self, playerId: int, score: int) -> None:
         if playerId not in self.record:
             self.scores.add(score)

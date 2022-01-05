@@ -38,3 +38,6 @@ print(Solution().maximumAlternatingSubarraySum(nums=[4, 2, 5, 3]))
 # 输出：7
 # 解释：最优子序列为 [4,2,5] ，交替和为 (4 + 5) - 2 = 7 。
 print(Solution().maximumAlternatingSubarraySum2(nums=[3, -1, 1, 2]))
+
+# 子序列:选或不选
+# 子数组：选或只选

@@ -4,7 +4,7 @@ from typing import List
 # 这也能二分?:看到K-th元素的题目第一反应一般都是二分搜索，此时我们可以通过二分搜索查询是否是第K个答案。
 class Solution:
     def kthSmallestSubarraySum(self, nums: List[int], k: int) -> int:
-        def count(mid) -> int:
+        def countNGT(mid) -> int:
             """"和小于等于mid的子数组数"""
 
             res, curSum, left = 0, 0, 0
@@ -20,7 +20,7 @@ class Solution:
         while left <= right:
             mid = (left + right) >> 1
             # 找最左，尽量把右边移过来
-            if count(mid) < k:
+            if countNGT(mid) < k:
                 left = mid + 1
             else:
                 right = mid - 1

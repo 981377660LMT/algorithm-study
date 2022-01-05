@@ -26,5 +26,6 @@ function canBeIncreasing(nums: number[]): boolean {
   }
 }
 
-export {}
 console.log(canBeIncreasing([2, 3, 1, 2]))
+
+export {}

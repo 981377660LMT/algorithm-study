@@ -2,7 +2,7 @@
  * @param {number[]} piles
  * @return {boolean}
  */
-var nimGame = function (piles: number[]): boolean {
+function nimGame(piles: number[]): boolean {
   let xor = 0
   piles.forEach(pile => (xor ^= pile))
   return xor !== 0

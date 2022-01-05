@@ -1,3 +1,5 @@
+区间 dp 很多是 n<=100 因为是 `O(n^3)`
+
 1. **左右端点为参数型**
    `375. 猜数字大小 II copy.py`
    `730. 统计不同回文子序列-经典模板.py`
@@ -21,7 +23,7 @@ class Solution:
             for i in range(left, right):
                 if arr[i] == arr[left]:
 
-                    res = min(res, max(1, dfs(left + 1, i)) + dfs(i + 1, right))
+                    res = min(res, max( dfs(left + 1, i) + dfs(i + 1, right))
 
             return res
 

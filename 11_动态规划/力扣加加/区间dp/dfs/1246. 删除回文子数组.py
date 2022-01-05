@@ -8,7 +8,7 @@ from functools import lru_cache
 
 class Solution:
     def minimumMoves(self, arr: List[int]) -> int:
-        @lru_cache(maxsize=None)
+        @lru_cache(typed=False, maxsize=None)
         def dfs(left: int, right: int) -> int:
             if left >= right:
                 return 0
@@ -18,6 +18,7 @@ class Solution:
             res = 0x7FFFFFFF
             for i in range(left, right):
                 if arr[i] == arr[left]:
+                    # 注意这个max，左边必须删除一个
                     res = min(res, max(1, dfs(left + 1, i)) + dfs(i + 1, right))
 
             return res

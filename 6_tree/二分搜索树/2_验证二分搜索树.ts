@@ -85,7 +85,9 @@ const isValidBST = (root: TreeNode) => {
   if (!root) return true
 
   let pre: TreeNode | null = null
-  const inorder = (root: TreeNode | null): boolean => {
+  return inorder(root)
+
+  function inorder(root: TreeNode | null): boolean {
     if (!root) return true
     if (!inorder(root.left)) return false
     if (pre && pre.val >= root.val) return false
@@ -94,8 +96,6 @@ const isValidBST = (root: TreeNode) => {
     if (!inorder(root.right)) return false
     return true
   }
-
-  return inorder(root)
 }
 console.dir(isValidBST1(deserializeNode([10, 5, 15, null, null, 6, 20])!), { depth: null })
 // console.dir(isValidBST(deserializeNode([10, 5, 15, null, null, 6, 20])!), { depth: null })

@@ -27,4 +27,4 @@ class Solution:
 print(Solution().maximumAlternatingSubarraySum(nums=[4, 2, 5, 3]))
 # 输出：7
 # 解释：最优子序列为 [4,2,5] ，交替和为 (4 + 5) - 2 = 7 。
-print(Solution().maxAlternatingSum(nums=[3, -1, 1, 2]))
+print(Solution().maximumAlternatingSubarraySum(nums=[3, -1, 1, 2]))

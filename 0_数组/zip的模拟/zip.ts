@@ -15,7 +15,7 @@
 //   return arr
 // }
 
-function* zip(...arr: ArrayLike<any>[]) {
+function* zip<T>(...arr: ArrayLike<T>[]) {
   const length = Math.min(...arr.map(arrlike => arrlike.length))
   for (let i = 0; i < length; i++) {
     yield arr.map(arrlike => arrlike[i])

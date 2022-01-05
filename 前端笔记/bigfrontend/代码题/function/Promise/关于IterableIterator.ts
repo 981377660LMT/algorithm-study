@@ -1,11 +1,11 @@
 const iter = Array.from([() => {}, () => {}]).entries()
 
-for (const [index, item] of iter) {
+for (const [index, _item] of iter) {
   console.log(index) // 0
   break
 }
 
-for (const [index, item] of iter) {
+for (const [index, _item] of iter) {
   console.log(index) // 1
   break
 }

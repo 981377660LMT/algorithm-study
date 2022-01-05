@@ -7,6 +7,7 @@
 # 此题的特别之处在于counter是记录滑窗外的字符
 from collections import Counter
 
+
 # 子串:滑动窗口
 class Solution:
     def balancedString(self, s: str) -> int:
@@ -28,3 +29,4 @@ class Solution:
 
 
 print(Solution().balancedString("QQWE"))
+

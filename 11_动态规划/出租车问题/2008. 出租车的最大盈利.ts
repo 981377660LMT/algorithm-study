@@ -22,9 +22,9 @@ function maxTaxiEarnings(n: number, rides: number[][]): number {
 
   for (let i = 1; i < rides.length; i++) {
     const preIndex = bisectRight(rides, i)
+    // 带或不带
     if (preIndex === 0) {
-      // 带或不带
-      dp[i] = Math.max(dp[i], dp[i - 1])
+      dp[i] = Math.max(dp[i - 1], rides[i][1] - rides[i][0] + rides[i][2])
     } else {
       dp[i] = Math.max(dp[i - 1], dp[preIndex - 1] + rides[i][1] - rides[i][0] + rides[i][2])
     }
@@ -40,8 +40,7 @@ function maxTaxiEarnings(n: number, rides: number[][]): number {
     while (l <= r) {
       const mid = (l + r) >> 1
       const preEnd = rides[mid][1]
-      if (preEnd === curStart) l++
-      else if (preEnd > curStart) r = mid - 1
+      if (preEnd > curStart) r = mid - 1
       else l = mid + 1
     }
 

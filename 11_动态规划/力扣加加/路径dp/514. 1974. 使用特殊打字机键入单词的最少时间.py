@@ -13,8 +13,8 @@ class Solution:
         cur_ascii = 97
         for char in word:
             next_ascii = ord(char)
-            # 这两段加起来长26
-            move += min(abs(next_ascii - cur_ascii), 26 - abs(next_ascii - cur_ascii))
+            # 环上两点距离公式
+            move += min((next_ascii - cur_ascii) % 26, (cur_ascii - next_ascii) % 26)
             cur_ascii = next_ascii
 
         return typing + move

@@ -18,10 +18,10 @@
 // [41:0x4d9d750]     3188 ms: Scavenge 108.4 (146.7) -> 108.4 (146.7) MB, 0.5 / 0.0 ms  (average mu = 0.971, current mu = 0.975) allocation failure
 // <--- JS stacktrace --->
 // FATAL ERROR: MarkCompactCollector: young object promotion failed Allocation failed - JavaScript heap out of memory
-var removeDuplicates = function (s: string, k: number): string {
-  const stack: [string, number][] = []
+function removeDuplicates(s: string, k: number): string {
+  const stack: [char: string, count: number][] = []
   for (const char of s) {
-    if (!stack.length || stack[stack.length - 1][0] !== char) stack.push([char, 1])
+    if (stack.length === 0 || stack[stack.length - 1][0] !== char) stack.push([char, 1])
     else if (stack[stack.length - 1][1] + 1 < k) stack[stack.length - 1][1]++
     else stack.pop()
   }

@@ -6,6 +6,7 @@ function minCostToMoveChips(position: number[]): number {
   for (let i = 0; i < position.length; i++) {
     position[i] % 2 ? odd++ : even++
   }
+
   return Math.min(odd, even)
 }
 

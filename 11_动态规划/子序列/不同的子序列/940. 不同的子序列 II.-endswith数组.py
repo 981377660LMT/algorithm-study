@@ -13,7 +13,6 @@ class Solution:
         endswith = [0] * 26
         for char in s:
             endswith[ord(char) - ord('a')] = sum(endswith) + 1
-            print(endswith)
         return sum(endswith) % (int(1e9 + 7))
 
 

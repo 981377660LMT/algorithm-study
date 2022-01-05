@@ -6,7 +6,7 @@
 const kthSmallest = function (matrix: number[][], k: number): number {
   const [m, n] = [matrix.length, matrix[0].length]
   // 老技巧：左下角开始出发
-  const count = (mid: number) => {
+  const countNGT = (mid: number) => {
     let [r, c] = [m - 1, 0]
     let res = 0
 
@@ -27,7 +27,7 @@ const kthSmallest = function (matrix: number[][], k: number): number {
 
   while (l <= r) {
     const mid = ~~((l + r) / 2)
-    if (count(mid) < k) l = mid + 1
+    if (countNGT(mid) < k) l = mid + 1
     else r = mid - 1
   }
 

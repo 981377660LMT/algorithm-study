@@ -11,16 +11,10 @@ const shiftGrid = function (grid: number[][], k: number): number[][] {
 
   const flatten = grid.flat()
   k = k % flatten.length
-  const reverse = (arr: number[], l: number, r: number) => {
-    while (l < r) {
-      ;[arr[l], arr[r]] = [arr[r], arr[l]]
-      l++
-      r--
-    }
-  }
-  reverse(flatten, 0, flatten.length - 1)
+
   reverse(flatten, 0, k - 1)
   reverse(flatten, k, flatten.length - 1)
+  reverse(flatten, 0, flatten.length - 1)
 
   for (let i = 0; i < flatten.length; i++) {
     const row = ~~(i / n)
@@ -29,6 +23,14 @@ const shiftGrid = function (grid: number[][], k: number): number[][] {
   }
 
   return res
+
+  function reverse(arr: number[], l: number, r: number) {
+    while (l < r) {
+      ;[arr[l], arr[r]] = [arr[r], arr[l]]
+      l++
+      r--
+    }
+  }
 }
 
 console.log(

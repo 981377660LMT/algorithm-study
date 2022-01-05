@@ -1,5 +1,4 @@
-import { UnionFind } from '../0_并查集'
-import { useUnionFind } from '../推荐使用并查集精简版'
+import { useUnionFindArray } from '../推荐使用并查集精简版'
 
 /**
  * @param {string} s
@@ -11,28 +10,26 @@ import { useUnionFind } from '../推荐使用并查集精简版'
  * 第一次提交超时
  */
 const smallestStringWithSwaps = function (s: string, pairs: number[][]): string {
-  const groupMap = new Map<number, string[]>()
-  const uf = useUnionFind(s.length)
-  for (const [v, w] of pairs) {
-    uf.union(v, w)
-  }
+  const groups = new Map<number, string[]>()
+  const uf = useUnionFindArray(s.length)
+  for (const [v, w] of pairs) uf.union(v, w)
 
   // 记录每个字符串所属组的根节点
   for (let i = 0; i < s.length; i++) {
     const root = uf.find(i)
-    if (!groupMap.has(root)) groupMap.set(root, [])
-    groupMap.get(root)!.push(s[i])
+    if (!groups.has(root)) groups.set(root, [])
+    groups.get(root)!.push(s[i])
   }
 
   // 字典序在前的先去 以便之后pop
-  for (const [_, v] of groupMap) {
-    v.sort((a, b) => b.localeCompare(a))
+  for (const [_, g] of groups) {
+    g.sort((a, b) => b.localeCompare(a))
   }
 
   const res = Array<string>(s.length)
   for (let i = 0; i < s.length; i++) {
     const root = uf.find(i)
-    res.push(groupMap.get(root)!.pop()!)
+    res.push(groups.get(root)!.pop()!)
   }
 
   return res.join('')

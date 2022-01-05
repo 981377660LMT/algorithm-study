@@ -18,6 +18,7 @@ function waysToBuildRooms(prevRoom: number[]): number {
     for (const next of adjMap.get(cur)!) {
       const [subNodeCount, subSortCount] = dfs(next)
       curNodeCount += subNodeCount
+      // 新的拓扑排序方案数为: 当前的拓扑排序方案数 * 从nodes个位置里选nodes_个位置分配给该子树 * 子树的拓扑排序方案数
       curSortCount =
         (((subSortCount * curSortCount) % MOD) * comb(curNodeCount, subNodeCount)) % MOD
     }

@@ -32,3 +32,4 @@ const balancedString = function (s: string): number {
 console.log(balancedString('QWER'))
 // @ts-ignore
 // console.log(~~undefined)
+console.log('asas'.split(''))

@@ -10,7 +10,7 @@
  */
 const findKthNumber = function (m: number, n: number, k: number): number {
   // 小于等于mid的个数
-  const count = (mid: number): number => {
+  const countNGT = (mid: number): number => {
     let count = 0
     // 统计每行符合条件的个数
     for (let i = 1; i <= m; i++) {
@@ -24,7 +24,7 @@ const findKthNumber = function (m: number, n: number, k: number): number {
   let r = m * n
   while (l <= r) {
     const mid = ~~((l + r) / 2)
-    if (count(mid) < k) l = mid + 1
+    if (countNGT(mid) < k) l = mid + 1
     else r = mid - 1
   }
 
