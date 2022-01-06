@@ -1,19 +1,30 @@
-import string
+from collections import Counter
 
 
 class Solution:
     def checkInclusion(self, s1: str, s2: str) -> bool:
         if len(s1) > len(s2):
             return False
-        target_counter = {k: 0 for k in string.ascii_lowercase}
-        cur_counter = {k: 0 for k in string.ascii_lowercase}
-        for char in s1:
-            target_counter[char] += 1
-        for i in range(len(s2)):
-            cur_counter[s2[i]] += 1
-            if i >= len(s1):
-                cur_counter[s2[i - len(s1)]] -= 1
-            if cur_counter == target_counter:
+
+        m, n = len(s1), len(s2)
+        left = 0
+        needCount = m
+        needCounter = Counter(s1)
+
+        for right in range(n):
+            if needCounter[s2[right]] > 0:
+                needCount -= 1
+            needCounter[s2[right]] -= 1
+            right += 1
+
+            if needCount == 0:
                 return True
+
+            if right - left >= m:
+                if needCounter[s2[left]] >= 0:
+                    needCount += 1
+                needCounter[s2[left]] += 1
+                left += 1
+
         return False
 

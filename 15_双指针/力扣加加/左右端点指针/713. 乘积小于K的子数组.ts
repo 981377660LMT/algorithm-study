@@ -26,8 +26,8 @@ const numSubarrayProductLessThanK = function (nums: number[], k: number): number
 
     product = product * cur
     while (product >= k) {
+      product /= nums[l]
       l++
-      product /= nums[l - 1]
     }
     console.log(nums.slice(l, r + 1), product)
     res += r - l + 1

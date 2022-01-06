@@ -2,22 +2,26 @@
 function printNumbers(n: number): number[] {
   const res: string[] = []
 
-  const bt = (index: number, digit: number, path: string[]) => {
-    if (index === digit) return res.push(path.join(''))
-    for (let next = 0; next <= 9; next++) {
-      path.push(next.toString())
-      bt(index + 1, digit, path)
-      path.pop()
-    }
-  }
-
-  for (let digit = 1; digit <= n; digit++) {
+  for (let length = 1; length <= n; length++) {
     for (let first = 1; first <= 9; first++) {
-      bt(1, digit, [first.toString()])
+      bt(1, length, [first.toString()])
     }
   }
 
   return res.map(Number)
+
+  function bt(index: number, length: number, path: string[]): void {
+    if (index === length) {
+      res.push(path.join(''))
+      return
+    }
+
+    for (let next = 0; next <= 9; next++) {
+      path.push(next.toString())
+      bt(index + 1, length, path)
+      path.pop()
+    }
+  }
 }
 
 console.log(printNumbers(2))

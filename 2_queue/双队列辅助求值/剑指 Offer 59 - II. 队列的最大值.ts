@@ -7,7 +7,7 @@ class MaxQueue {
   }
 
   max_value(): number {
-    return this.maxQueue[0] || -1
+    return this.maxQueue[0] ?? -1
   }
 
   push_back(value: number): void {
@@ -19,10 +19,10 @@ class MaxQueue {
   }
 
   pop_front(): number {
-    if (!this.queue.length) return -1
-    const value = this.queue.shift()!
-    value === this.maxQueue[0] && this.maxQueue.shift() // 最大值出队
-    return value
+    if (this.queue.length === 0) return -1
+    const head = this.queue.shift()!
+    head === this.maxQueue[0] && this.maxQueue.shift() // 最大值出队
+    return head
   }
 }
 

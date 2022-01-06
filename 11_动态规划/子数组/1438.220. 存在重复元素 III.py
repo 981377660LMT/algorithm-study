@@ -14,7 +14,7 @@ class Solution:
         left, right, = 0, 0
         while right < len(nums):
             if right - left > k:
-                sortedList.remove(nums[left])
+                sortedList.discard(nums[left])
                 left += 1
             index = bisect.bisect_left(sortedList, nums[right] - t)  # 第一个 >= (num-t)的index
             if index != len(sortedList) and sortedList[index] <= nums[right] + t:

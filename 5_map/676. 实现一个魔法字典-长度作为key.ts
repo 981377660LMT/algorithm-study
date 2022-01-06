@@ -1,40 +1,8 @@
-class BadMagicDictionary {
-  private extendedSet: Set<string>
+type WordLength = number
 
-  constructor() {
-    this.extendedSet = new Set()
-  }
-
-  /**
-   *
-   * @param dictionary 1 <= dictionary.length <= 100
-   */
-  buildDict(dictionary: string[]): void {
-    dictionary.forEach(d => {
-      for (let i = 0; i < d.length; i++) {
-        for (let j = 0; j < 26; j++) {
-          const next = d.slice(0, i) + String.fromCodePoint(j + 97) + d.slice(i + 1)
-          if (next === d) continue
-          this.extendedSet.add(next)
-        }
-      }
-    })
-  }
-
-  /**
-   *
-   * @param searchWord
-   * 请判定能否只将这个单词中一个字母换成另一个字母，使得所形成的新单词存在于你构建的字典中。
-   */
-  search(searchWord: string): boolean {
-    return this.extendedSet.has(searchWord)
-  }
-}
-
-type Length = number
 // 优化后的
 class GoodMagicDictionary {
-  private root: Map<Length, string[]>
+  private root: Map<WordLength, string[]>
 
   constructor() {
     this.root = new Map()
