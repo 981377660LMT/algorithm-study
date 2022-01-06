@@ -8,8 +8,10 @@
 const wordBreak = function (s: string, wordDict: string[]): string[] {
   const store = new Set(wordDict)
   const res: string[] = []
+  bt([], 0)
+  return res
 
-  const bt = (path: string[], index: number) => {
+  function bt(path: string[], index: number): void {
     if (index === s.length) {
       res.push(path.join(' '))
       return
@@ -24,9 +26,6 @@ const wordBreak = function (s: string, wordDict: string[]): string[] {
       }
     }
   }
-  bt([], 0)
-
-  return res
 }
 
 console.log(wordBreak('pineapplepenapple', ['apple', 'pen', 'applepen', 'pine', 'pineapple']))

@@ -12,9 +12,9 @@ const shiftGrid = function (grid: number[][], k: number): number[][] {
   const flatten = grid.flat()
   k = k % flatten.length
 
+  reverse(flatten, 0, flatten.length - 1)
   reverse(flatten, 0, k - 1)
   reverse(flatten, k, flatten.length - 1)
-  reverse(flatten, 0, flatten.length - 1)
 
   for (let i = 0; i < flatten.length; i++) {
     const row = ~~(i / n)

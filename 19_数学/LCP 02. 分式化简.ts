@@ -1,5 +1,5 @@
 // 将一个连分数化成最简分数
-function fraction(cont: number[]): number[] {
+function fraction(cont: number[]): [numerator: number, demonimator: number] {
   if (cont.length === 1) return [cont[0], 1]
   const last = fraction(cont.slice(1))
   return [cont[0] * last[0] + last[1], last[0]]

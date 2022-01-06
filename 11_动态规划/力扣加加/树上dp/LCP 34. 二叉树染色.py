@@ -15,12 +15,13 @@ class Solution:
     def maxValue(self, root: 'TreeNode', k: int) -> int:
         def dfs(root: Optional[TreeNode]) -> List[int]:
             if not root:
-                return [0 for _ in range(k + 1)]
+                return [0] * (k + 1)
+
             left = dfs(root.left)
             right = dfs(root.right)
 
             # dp[i]以root为根结点的树，染色后，连着i个蓝色结点的最大值
-            dp = [0 for _ in range(k + 1)]
+            dp = [0] * (k + 1)
 
             # 不是蓝色
             for i in range(k + 1):

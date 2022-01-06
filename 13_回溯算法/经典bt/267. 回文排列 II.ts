@@ -38,3 +38,4 @@ function generatePalindromes(s: string): string[] {
 
 console.log(generatePalindromes('aabb'))
 // 输出: ["abba", "baab"]
+export {}

@@ -13,3 +13,5 @@ const containsNearbyDuplicate = function (nums, k) {
   }
   return false
 }
+
+export {}

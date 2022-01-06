@@ -66,8 +66,8 @@ class BIT {
 const MOD = 1e9 + 7
 function bonus(n: number, leadership: number[][], operations: number[][]): number[] {
   const adjList = Array.from<number, number[]>({ length: n + 1 }, () => [])
-  const start = Array<number>(n + 1).fill(0)
-  const end = Array<number>(n + 1).fill(0)
+  const start = Array<number>(n + 1).fill(0) // 子树最开始的结点序号
+  const end = Array<number>(n + 1).fill(0) // 本身最后映射到几
   let id = 1
 
   for (const [u, v] of leadership) {
@@ -97,11 +97,13 @@ function bonus(n: number, leadership: number[][], operations: number[][]): numbe
 
   return res
 
+  // dfs序
   function dfs(cur: number): void {
     start[cur] = id
     for (const next of adjList[cur]) {
       dfs(next)
     }
+    // id在dfs过程中被改变了
     end[cur] = id
     id++
   }

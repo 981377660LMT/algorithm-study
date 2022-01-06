@@ -1,16 +1,9 @@
 #剑指 Offer 03 数组中重复的数字
-
-#剑指 Offer 04 二维数组中的查找
-
-#剑指 Offer 05 替换空格
-
-#剑指 Offer 06 从尾到头打印链表
-
-#剑指 Offer 07 重建二叉树
-
-#剑指 Offer 09 用两个栈实现队列
+`原地哈希`
 
 #剑指 Offer 10- I 斐波那契数列
+`矩阵快速幂`
+![图 2](../images/e4d6d0dd1cf0c785986fecca1fe8c9d51c207b60a1e0a5f1dfadb882916d3a79.png)
 
 #剑指 Offer 10- II 青蛙跳台阶问题
 
