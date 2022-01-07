@@ -1,7 +1,0 @@
- 2)
-cache.put(3, 3)
-cache.put(4, 4)
-console.log(cache.get(1))
-console.log(cache.get(3))
-cache.put(2, 2)
-console.log(cache.get(3))

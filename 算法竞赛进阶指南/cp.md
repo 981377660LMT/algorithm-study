@@ -18,3 +18,5 @@ Python 设置最大递归深度
 import sys
 sys.setrecursionlimit(10000)
 ```
+
+题目中 n 很小：回溯、状压 dfs、枚举参数、枚举子集

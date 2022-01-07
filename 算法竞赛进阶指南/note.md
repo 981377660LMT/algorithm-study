@@ -133,7 +133,7 @@ Editor:对顶栈
 ## 队列
 
 单调队列
-有长度限制的最大`子数组和`问题：
+有长度限制的最大`子序列和`问题：
 注意不是https://leetcode-cn.com/problems/constrained-subsequence-sum/!!!
 找两个位置 x 和 y 使得 S[y]-S[x]最大`并且 y-x<=M`
 (长度在 10^5 量级)

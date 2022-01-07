@@ -21,6 +21,7 @@ class Solution:
     ) -> int:
         adjList = [[] for _ in range(n)]
         for u, v, w in flights:
+
             adjList[u].append((v, w))
 
         pq = [(0, src, k + 1)]
