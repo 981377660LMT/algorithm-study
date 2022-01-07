@@ -13,7 +13,7 @@ class RecentCounter {
   ping(time: number) {
     this.queue.push(time)
     // 不满足的queue[0]全部出队列
-    while (this.queue.length && this.queue.front()! + 3000 < time) {
+    while (this.queue.length && this.queue.at(0)! + 3000 < time) {
       this.queue.shift()
     }
 

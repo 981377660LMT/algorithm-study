@@ -1,3 +1,5 @@
+import assert from 'assert'
+
 class ArrayDeque<T = number> {
   private readonly capacity: number
   private readonly data: T[]
@@ -22,7 +24,11 @@ class ArrayDeque<T = number> {
     }
   }
 
-  at(index: number): T | undefined {}
+  at(index: number): T | undefined {
+    if (index < 0) index += this.length
+    const pos = (this.head + index + this.capacity) % this.capacity
+    return this.data[pos]
+  }
 
   // head前移
   unshift(value: T): boolean {
@@ -69,20 +75,20 @@ class ArrayDeque<T = number> {
     }
   }
 
-  front(): T | undefined {
+  // fix:deque 注意所有下标要加容量后取模
+  private front(): T | undefined {
     return this.isEmpty() ? undefined : this.data[(this.head + this.capacity) % this.capacity]
   }
 
-  // fix:deque 注意所有下标要加容量后取模
-  rear(): T | undefined {
+  private rear(): T | undefined {
     return this.isEmpty() ? undefined : this.data[(this.tail + this.capacity) % this.capacity]
   }
 
-  isEmpty(): boolean {
+  private isEmpty(): boolean {
     return this.length === 0
   }
 
-  isFull(): boolean {
+  private isFull(): boolean {
     return this.length === this.capacity
   }
 }
@@ -91,13 +97,18 @@ export { ArrayDeque }
 
 if (require.main === module) {
   const deque = new ArrayDeque<number>(4)
+
   deque.push(1)
   deque.unshift(2)
-  // console.log(deque)
-  // console.log(deque.shift())
-  // console.log(deque)
-  // console.log(deque.pop())
+
   for (const num of deque) {
     console.log(num)
   }
+
+  assert.strictEqual(deque.at(0), 2)
+  assert.strictEqual(deque.at(1), 1)
+  assert.strictEqual(deque.at(2), void 0)
+  assert.strictEqual(deque.at(-1), 1)
+  assert.strictEqual(deque.at(-2), 2)
+  assert.strictEqual(deque.at(-3), void 0)
 }

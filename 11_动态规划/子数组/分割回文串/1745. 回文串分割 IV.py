@@ -5,15 +5,15 @@ class Solution:
         if len(s) < 3:
             return False
 
-        def is_backword(word):
+        def isPalindrome(word):
             return word == word[::-1]
 
         n = len(s)
         for i in range(1, n):
-            if not is_backword(s[:i]):
+            if not isPalindrome(s[:i]):
                 continue
             for j in range(i + 1, n):
-                if is_backword(s[i:j]) and is_backword(s[j:]):
+                if isPalindrome(s[i:j]) and isPalindrome(s[j:]):
                     return True
         return False
 

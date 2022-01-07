@@ -3,13 +3,13 @@ from sortedcontainers import SortedList
 
 class MRUQueue:
     def __init__(self, n: int):
-        self.maxOrderIndex = n
+        self.id = n
         self.arr = SortedList([[v, v] for v in range(1, n + 1)])
 
     def fetch(self, k: int) -> int:
-        order, val = self.arr.pop(k - 1)
-        self.maxOrderIndex += 1
-        self.arr.add([self.maxOrderIndex, val])
+        _, val = self.arr.pop(k - 1)
+        self.id += 1
+        self.arr.add([self.id, val])
         return val
 
 

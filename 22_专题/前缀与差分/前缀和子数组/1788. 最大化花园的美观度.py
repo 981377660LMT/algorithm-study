@@ -16,9 +16,9 @@ from collections import defaultdict
 # 3. 计算前缀和的时候忽略掉负数，但在最后求和的时候要把两端的负数加上（因为中间的负数花都可以移除，两端不行）
 class Solution:
     def maximumBeauty(self, flowers: List[int]) -> int:
-        indexMap = defaultdict(list)
+        indexes = defaultdict(list)
         for i, flower in enumerate(flowers):
-            indexMap[flower].append(i)
+            indexes[flower].append(i)
 
         preSum = [0]
         for flower in flowers:
@@ -26,7 +26,7 @@ class Solution:
             preSum.append(preSum[-1] + max(0, flower))
 
         res = -0x7FFFFFFF
-        for indexes in indexMap.values():
+        for indexes in indexes.values():
             if len(indexes) <= 1:
                 continue
             first, last = indexes[0], indexes[-1]

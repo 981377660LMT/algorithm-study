@@ -23,7 +23,7 @@ class UnionFind:
         return True
 
 
-# 1. 获取根节点对应的连通块
+# 1. 并查集获取帮派邻接表
 # 2. 计算每个连通块对应的source元素与target的差集
 class Solution:
     def minimumHammingDistance(
