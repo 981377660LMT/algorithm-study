@@ -2,7 +2,7 @@ from typing import List
 
 
 class Solution:
-    def __maxDistance(self, colors: List[int]) -> int:
+    def maxDistance1(self, colors: List[int]) -> int:
         return max(
             abs(i - j)
             for i in range(len(colors))
@@ -10,20 +10,12 @@ class Solution:
             if colors[i] != colors[j]
         )
 
+    # 只需找到第一个和首尾不同的房子
     def maxDistance(self, colors: List[int]) -> int:
-        if colors[0] != colors[-1]:
-            return len(colors) - 1
-        first, last = colors[0], colors[-1]
-        res1, res2 = 0, 0
-        for i in range(1, len(colors)):
-            if colors[i] != last:
-                res1 = i
-                break
-        for i in range(len(colors) - 1, 0, -1):
-            if colors[i] != first:
-                res2 = i
-                break
-        return max(len(colors) - res1 - 1, res2)
+        n = len(colors)
+        cand1 = next((i for i in range(n) if colors[i] != colors[-1]), 0)
+        cand2 = next((i for i in range(n - 1, -1, -1) if colors[i] != colors[0]), n - 1)
+        return max(n - 1 - cand1, cand2)
 
 
 print(Solution().maxDistance([1, 1, 1, 6, 1, 1, 1]))

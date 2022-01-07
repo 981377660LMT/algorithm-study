@@ -7,6 +7,7 @@ from heapq import heappop, heappush
 # 请你返回让网格图至少有一条有效路径的最小代价。
 
 # 看成最短路问题，需要改方向的边为1，不需要的边为0
+# 0/1最短路其实可以不用pq 用deque就行
 # new_cost = cost if grid[i][j] == idx + 1 else cost + 1 (移动的方向与当前箭头方向一致)
 
 

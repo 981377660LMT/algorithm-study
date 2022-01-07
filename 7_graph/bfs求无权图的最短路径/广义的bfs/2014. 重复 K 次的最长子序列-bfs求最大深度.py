@@ -9,15 +9,15 @@ class Solution:
     def longestSubsequenceRepeatedK(self, s: str, k: int) -> str:
         def check(cand: str) -> bool:
             """Return True if cand is a k-repeated sub-sequence of s."""
-            s_idx, count = 0, 0
+            matchIndex, hit = 0, 0
             for char in s:
-                if char == cand[s_idx]:
-                    s_idx += 1
-                    if s_idx == len(cand):
-                        count += 1
-                        if count == k:
+                if char == cand[matchIndex]:
+                    matchIndex += 1
+                    if matchIndex == len(cand):
+                        hit += 1
+                        if hit == k:
                             return True
-                        s_idx = 0
+                        matchIndex = 0
             return False
 
         counter = [0] * 26

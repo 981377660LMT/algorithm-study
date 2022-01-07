@@ -6,7 +6,7 @@
  * @return {number}
  * 使 M 对应的二进制数字插入 N 对应的二进制数字的第 i ~ j 位区域，不足之处用 0 补齐
  */
-var insertBits = function (N: number, M: number, i: number, j: number): number {
+function insertBits(N: number, M: number, i: number, j: number): number {
   // 1.把N的i到j位置为0
   // 2.把M的数值左移i位
   // 3.将N的i到j位加上M

@@ -29,6 +29,7 @@ class Solution:
                     need -= 1
             if char == letter:
                 remain -= 1
+
         return ''.join(stack)
 
 

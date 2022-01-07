@@ -3,7 +3,15 @@ class ArrayDeque<T = number> {
   private readonly data: T[]
   private head: number
   private tail: number
-  public length: number;
+  public length: number
+
+  constructor(capacity: number) {
+    this.capacity = capacity
+    this.data = []
+    this.head = 0 // 从-1开始'向前'存
+    this.tail = -1 // 从0开始向后存
+    this.length = 0
+  }
 
   *[Symbol.iterator]() {
     let head = this.head
@@ -14,13 +22,7 @@ class ArrayDeque<T = number> {
     }
   }
 
-  constructor(capacity: number) {
-    this.capacity = capacity
-    this.data = []
-    this.head = 0 // 从-1开始'向前'存
-    this.tail = -1 // 从0开始向后存
-    this.length = 0
-  }
+  at(index: number): T | undefined {}
 
   // head前移
   unshift(value: T): boolean {

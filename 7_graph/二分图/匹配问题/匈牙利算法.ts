@@ -41,7 +41,7 @@ function hungarian(adjList: number[][]): number {
   function bisect(adjList: number[][]) {
     const colors = Array<number>(adjList.length).fill(-1)
 
-    const dfs = (cur: number, color: number) => {
+    const dfs = (cur: number, color: number): void => {
       colors[cur] = color
       for (const next of adjList[cur]) {
         if (colors[next] === -1) {

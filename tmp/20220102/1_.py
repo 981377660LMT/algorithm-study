@@ -4,7 +4,7 @@ from heapq import heapify, heappop, heappush
 from sortedcontainers import SortedList, SortedDict
 from bisect import bisect_left, bisect_right
 from functools import lru_cache, reduce
-from itertools import accumulate, groupby, combinations, permutations, product
+from itertools import accumulate, groupby, combinations, permutations, product, chain
 from math import gcd, sqrt, ceil, floor, comb
 
 MOD = int(1e9 + 7)

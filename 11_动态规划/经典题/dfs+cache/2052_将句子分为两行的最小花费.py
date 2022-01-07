@@ -30,34 +30,28 @@ class Solution:
         return dfs(1, word_len[0])
 
     # 改用dfs+剪枝
+
     def minimumCost(self, sentence: str, k: int) -> int:
-
-        words = sentence.split(' ')
-        n = len(words)
-        word_len = []
-        for w in words:
-            word_len.append(len(w))
-
+        word_lens = list(map(len, sentence.split(' ')))
         res = 0x7FFFFFFF
 
-        @functools.lru_cache(None)
         def dfs(index: int, width: int, pathSum: int) -> None:
             nonlocal res
 
-            # 关键的剪枝1:超出res就返回
+            # 剪枝1:超出res就返回
             if pathSum > res:
                 return
 
-            if index == n:
+            if index == len(word_lens):
                 res = min(res, pathSum)
                 return
 
-            # 2.这是更最关键的剪枝:优先把好的放前面搜素
-            if width + word_len[index] + 1 <= k:
-                dfs(index + 1, width + word_len[index] + 1, pathSum)
-            dfs(index + 1, word_len[index], pathSum + (k - width) ** 2)
+            # 剪枝2:优先把好的放前面搜素
+            if width + word_lens[index] + 1 <= k:
+                dfs(index + 1, width + word_lens[index] + 1, pathSum)
+            dfs(index + 1, word_lens[index], pathSum + (k - width) ** 2)
 
-        dfs(1, word_len[0], 0)
+        dfs(1, word_lens[0], 0)
         return res
 
 

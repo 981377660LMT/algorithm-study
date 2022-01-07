@@ -12,9 +12,10 @@
   所以0.8125的二进制是0.1101
 
  */
-const printBin = function (num: number): string {
+const printBin = (num: number): string => {
   const res: string[] = ['0.']
-  while (num) {
+
+  while (num > 0) {
     num *= 2
     const integer = ~~num
     const decimal = num - integer

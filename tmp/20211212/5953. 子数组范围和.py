@@ -7,7 +7,7 @@ INF = 0x7FFFFFFF
 # 返回 nums 中 所有 子数组范围的 和 。
 
 
-# 暴力
+# dp
 class Solution1:
     def subArrayRanges(self, nums: List[int]) -> int:
         res = 0

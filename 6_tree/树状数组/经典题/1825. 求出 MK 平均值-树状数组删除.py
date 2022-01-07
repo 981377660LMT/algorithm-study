@@ -1,4 +1,4 @@
-from collections import deque
+from collections import deque, defaultdict
 
 # MK 平均值 按照如下步骤计算：
 
@@ -33,8 +33,8 @@ class MKAverage:
     def calculateMKAverage(self) -> int:
         if len(self.data) < self.m:
             return -1
-        left = self.__find_k(self.k)  # 第k小的数
-        right = self.__find_k(self.m - self.k)  # 最k大的数
+        left = self._find_k(self.k)  # 第k小的数
+        right = self._find_k(self.m - self.k)  # 最k大的数
         sum1 = self.sum_tree.query(left)
         sum2 = self.sum_tree.query(right)
         smaller_count1 = self.count_tree.query(left)
@@ -46,7 +46,7 @@ class MKAverage:
         return (sum2 - sum1) // (self.m - self.k * 2)
 
     # 寻找第k小的数
-    def __find_k(self, k):
+    def _find_k(self, k):
         left, right = 0, 100000
         while left <= right:
             mid = (left + right) >> 1
@@ -57,23 +57,24 @@ class MKAverage:
         return left
 
 
+# tree直接用dict 省去离散化步骤
 class FenwickTree:
     def __init__(self, n):
         self.size = n
-        self.tree = [0 for _ in range(n + 1)]  # 索引从1开始，索引0不记录内容
+        self.tree = defaultdict(int)
 
     @staticmethod
-    def __lowbit(index):
+    def _lowbit(index):
         return index & -index
 
     def add(self, index, delta):
         while index <= self.size:
             self.tree[index] += delta
-            index += self.__lowbit(index)
+            index += self._lowbit(index)
 
     def query(self, index):
         res = 0
         while index > 0:
             res += self.tree[index]
-            index -= self.__lowbit(index)
+            index -= self._lowbit(index)
         return res

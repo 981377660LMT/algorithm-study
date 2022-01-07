@@ -4,6 +4,7 @@ class MovingAverage {
   private queue: ArrayDeque
   private size: number
   private sum: number
+
   constructor(size: number) {
     this.queue = new ArrayDeque(size)
     this.size = size
