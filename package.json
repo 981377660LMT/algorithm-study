@@ -1,8 +1,8 @@
 {
-  "name": "js-algorithm",
+  "name": "ts-algorithm",
   "version": "1.0.0",
-  "description": "数据结构：线性/树/图 可视化 https://visualgo.net/zh JavaScript 实现数据结构与算法",
-  "main": "a.js",
+  "description": "ts-algorithm",
+  "main": "index.js",
   "scripts": {
     "test": "jest --config ./jest.config.js",
     "coverage": "npm run test -- --coverage"
