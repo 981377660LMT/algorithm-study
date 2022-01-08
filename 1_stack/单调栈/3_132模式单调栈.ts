@@ -19,6 +19,7 @@ const find132Pattern = (nums: number[]): boolean => {
     while (stack.length && stack[stack.length - 1] < cur) {
       mid = stack.pop()!
     }
+
     stack.push(cur)
   }
 

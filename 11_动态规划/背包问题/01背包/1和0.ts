@@ -4,7 +4,7 @@
  * @param {number} n
  * @return {number}
  * @description 找出并返回 strs 的最大子集的大小，该子集中 最多 有 m 个 0 和 n 个 1
- * @summary 两个维度的01背包问题 不是多重背包
+ * @summary 两个维度的01背包问题 外层物品，内层容量倒序
  */
 const findMaxForm = function (strs: string[], m: number, n: number) {
   // dp[i][j]：最多有i个0和j个1的strs的最大子集的大小为dp[i][j]
@@ -19,6 +19,7 @@ const findMaxForm = function (strs: string[], m: number, n: number) {
       letter === '0' && zeros++
       letter === '1' && ones++
     }
+
     // 记得01背包问题递推容量是倒序
     for (let i = m; i >= zeros; i--) {
       for (let j = n; j >= ones; j--) {

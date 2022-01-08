@@ -3,7 +3,7 @@
  * @return {number}
  * O(n)时间
  */
-var thirdMax = function (nums) {
+function thirdMax(nums) {
   let first = -Infinity
   let second = -Infinity
   let third = -Infinity

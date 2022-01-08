@@ -8,10 +8,10 @@
  */
 const reconstructQueue = function (people: number[][]): number[][] {
   const res: number[][] = []
-  people.sort((a, b) => b[0] - a[0] || a[1] - b[1])
+  people.sort((a, b) => -(a[0] - b[0]) || a[1] - b[1])
   console.log(people)
-  for (const person of people) {
-    res.splice(person[1], 0, person)
+  for (const p of people) {
+    res.splice(p[1], 0, p)
   }
   return res
 }

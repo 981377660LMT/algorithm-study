@@ -5,16 +5,16 @@ from functools import lru_cache
 class Solution:
     def canCross(self, stones: List[int]) -> bool:
         end = stones[-1]
-        s = set(stones)
+        available = set(stones)
 
         @lru_cache(None)
-        def dfs(stone: int, step: int) -> bool:
-            if stone == end:
+        def dfs(index: int, pre_step: int) -> bool:
+            if index == end:
                 return True
-            for next_step in [step - 1, step, step + 1]:
+            for next_step in [pre_step - 1, pre_step, pre_step + 1]:
                 if next_step <= 0:
                     continue
-                if next_step + stone in s and dfs(next_step + stone, next_step):
+                if next_step + index in available and dfs(next_step + index, next_step):
                     return True
             return False
 
