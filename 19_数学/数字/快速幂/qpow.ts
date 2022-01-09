@@ -1,19 +1,28 @@
 const MOD = 1e9 + 7
-function qpow(a: number, n: number): number {
-  let res = 1
+/**
+ *
+ * @param a
+ * @param n
+ * @param mod
+ * @returns a^n
+ */
+function qpow(a: number, n: number, mod: number): number {
+  let [_a, _n, _mod] = [BigInt(a), BigInt(n), BigInt(mod)]
+  let res = 1n
 
-  while (n) {
-    if (n & 1) {
-      res *= a
-      // res %= MOD
+  while (_n) {
+    if (_n & 1n) {
+      res *= _a
+      res %= _mod
     }
 
-    a *= a
-    // a %= MOD
-    n >>>= 1
+    // 此处可能超出2^53-1 需要大数 (1e9-7*(1e9-7已经超出))
+    _a *= _a
+    _a %= _mod
+    _n >>= 1n
   }
 
-  return res
+  return Number(res)
 }
 
 export { qpow }

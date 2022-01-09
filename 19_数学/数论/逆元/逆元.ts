@@ -1,7 +1,5 @@
-import { GCD } from '../../最大公约数/gcd'
-import { isPrime } from '../../素数/isPrime'
+import { qpow } from '../../数字/快速幂/qpow'
 import { exgcd } from '../扩展欧几里得/扩展欧几里得'
-import { qpow } from './逆元求comb'
 
 /**
  *
@@ -20,7 +18,7 @@ function calInv1(num: number, p: number): number {
 
 function calInv2(num: bigint, p: bigint): bigint {
   // if (GCD(num, p) !== 1 || !isPrime(p)) throw new Error('无法用费马小定理求逆元')
-  return qpow(num, p - 2n)
+  return qpow(Number(num), Number(p - 2n), 1e9 + 7)
 }
 
 if (require.main === module) {

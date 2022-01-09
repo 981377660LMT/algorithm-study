@@ -2,7 +2,7 @@
 // 其实是找最小点覆盖，即求二分图的最大匹配，跑匈牙利算法
 function minimumOperations(grid: number[][]): number {
   const [row, col] = [grid.length, grid[0].length]
-  const adjMap = new Map<number, number[]>()
+  const adjMap = new Map<number, Set<number>>()
 
   for (let r = 0; r < row; r++) {
     for (let c = 0; c < col; c++) {
@@ -12,18 +12,18 @@ function minimumOperations(grid: number[][]): number {
 
       if (r - 1 >= 0 && grid[r - 1][c] === 1) {
         const up = (r - 1) * col + c
-        !adjMap.has(up) && adjMap.set(up, [])
-        adjMap.get(up)!.push(cur)
-        !adjMap.has(cur) && adjMap.set(cur, [])
-        adjMap.get(cur)!.push(up)
+        !adjMap.has(up) && adjMap.set(up, new Set())
+        adjMap.get(up)!.add(cur)
+        !adjMap.has(cur) && adjMap.set(cur, new Set())
+        adjMap.get(cur)!.add(up)
       }
 
       if (c - 1 >= 0 && grid[r][c - 1] === 1) {
         const left = r * col + c - 1
-        !adjMap.has(left) && adjMap.set(left, [])
-        adjMap.get(left)!.push(cur)
-        !adjMap.has(cur) && adjMap.set(cur, [])
-        adjMap.get(cur)!.push(left)
+        !adjMap.has(left) && adjMap.set(left, new Set())
+        adjMap.get(left)!.add(cur)
+        !adjMap.has(cur) && adjMap.set(cur, new Set())
+        adjMap.get(cur)!.add(left)
       }
     }
   }
@@ -31,7 +31,7 @@ function minimumOperations(grid: number[][]): number {
   return hungarian(adjMap)
 }
 
-function hungarian(adjMap: Map<number, number[]>): number {
+function hungarian(adjMap: Map<number, Set<number>>): number {
   let maxMatching = 0
   const visited = new Set<number>()
   const matching = new Map<number, number>()
@@ -66,7 +66,7 @@ function hungarian(adjMap: Map<number, number[]>): number {
   }
 
   // 二分图检测、获取colors
-  function bisect(adjMap: Map<number, number[]>): Map<number, number> {
+  function bisect(adjMap: Map<number, Set<number>>): Map<number, number> {
     const colors = new Map<number, number>()
 
     const dfs = (cur: number, color: number): void => {

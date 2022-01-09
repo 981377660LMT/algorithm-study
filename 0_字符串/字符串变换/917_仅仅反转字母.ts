@@ -1,4 +1,4 @@
-import { isalpha } from '../../utils/string'
+import { isalpha } from '../string'
 
 function reverseOnlyLetters(s: string): string {
   const sb = s.split('')

@@ -47,4 +47,4 @@ if (require.main === module) {
   console.log(Number(BigInt(2 ** 100)))
 }
 
-export { comb, qpow }
+export { comb }

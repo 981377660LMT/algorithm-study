@@ -1,18 +1,20 @@
+import assert from 'assert'
+
 class RBTreeNode<T = number> {
   data: T
   color: number
-  left?: RBTreeNode<T>
-  right?: RBTreeNode<T>
-  parent?: RBTreeNode<T>
+  left: RBTreeNode<T> | null
+  right: RBTreeNode<T> | null
+  parent: RBTreeNode<T> | null
 
   constructor(data: T) {
     this.data = data
-    this.left = this.right = this.parent = undefined
+    this.left = this.right = this.parent = null
     this.color = 0
   }
 
-  sibling(): RBTreeNode<T> | undefined {
-    if (!this.parent) return undefined // sibling null if no parent
+  sibling(): RBTreeNode<T> | null {
+    if (!this.parent) return null // sibling null if no parent
     return this.isOnLeft() ? this.parent.right : this.parent.left
   }
 
@@ -25,15 +27,15 @@ class RBTreeNode<T = number> {
   }
 }
 
-type CompareFunction<T = number> = (a: T, b: T) => boolean
+type CompareFunction<T = unknown> = (a: T, b: T) => number
 
 class RBTree<T = number> {
-  root?: RBTreeNode<T>
+  root: RBTreeNode<T> | null
   private compare: CompareFunction<T>
-  static defaultCompare = (a: any, b: any) => a < b
+  static defaultCompare = (a: any, b: any) => a - b
 
-  constructor(compare = RBTree.defaultCompare) {
-    this.root = undefined
+  constructor(compare: CompareFunction<T> = RBTree.defaultCompare) {
+    this.root = null
     this.compare = compare
   }
 
@@ -49,9 +51,9 @@ class RBTree<T = number> {
     return true
   }
 
-  find(data: T): RBTreeNode<T> | undefined {
+  find(data: T): RBTreeNode<T> | null {
     const node = this.search(data)
-    return node && node.data === data ? node : undefined
+    return node && node.data === data ? node : null
   }
 
   deleteByValue(val: T): boolean {
@@ -62,7 +64,7 @@ class RBTree<T = number> {
   }
 
   *inOrder(root = this.root): Generator<T, unknown, unknown> {
-    if (!root) return
+    if (root == null) return
     yield* this.inOrder(root.left)
     yield root.data
     yield* this.inOrder(root.right)
@@ -70,7 +72,7 @@ class RBTree<T = number> {
 
   private rotateLeft(pt: RBTreeNode<T>): void {
     const right = pt.right
-    pt.right = right?.left
+    pt.right = right?.left ?? null
     if (pt.right) pt.right.parent = pt
     right!.parent = pt.parent
     if (!pt.parent) this.root = right
@@ -82,7 +84,7 @@ class RBTree<T = number> {
 
   private rotateRight(pt: RBTreeNode<T>): void {
     const left = pt.left
-    pt.left = left?.right
+    pt.left = left?.right ?? null
     if (pt.left) pt.left.parent = pt
     left!.parent = pt.parent
     if (!pt.parent) this.root = left
@@ -105,8 +107,8 @@ class RBTree<T = number> {
   }
 
   private fixAfterInsert(pt: RBTreeNode<T>): void {
-    let parent: RBTreeNode<T> | undefined = undefined
-    let grandParent: RBTreeNode<T> | undefined = undefined
+    let parent: RBTreeNode<T> | null = null
+    let grandParent: RBTreeNode<T> | null = null
     while (pt !== this.root && pt.color !== 1 && pt.parent?.color === 0) {
       parent = pt.parent
       grandParent = pt.parent.parent
@@ -145,7 +147,7 @@ class RBTree<T = number> {
         /*  Case : 1
                           The uncle of pt is also red
                           Only Recoloring required */
-        if (uncle != undefined && uncle.color === 0) {
+        if (uncle != null && uncle.color === 0) {
           grandParent!.color = 0
           parent.color = 1
           uncle.color = 1
@@ -174,7 +176,7 @@ class RBTree<T = number> {
   // searches for given value
   // if found returns the node (used for delete)
   // else returns the last node while traversing (used in insert)
-  private search(val: T): RBTreeNode<T> | undefined {
+  private search(val: T): RBTreeNode<T> | null {
     let p = this.root
     while (p) {
       if (this.compare(val, p.data)) {
@@ -191,11 +193,11 @@ class RBTree<T = number> {
   private deleteNode(v: RBTreeNode<T>): void {
     const u = BSTreplace(v)
     // True when u and v are both black
-    const uvBlack = (u == undefined || u.color === 1) && v.color === 1
+    const uvBlack = (u == null || u.color === 1) && v.color === 1
     const parent = v.parent
     if (!u) {
       // u is null therefore v is leaf
-      if (v === this.root) this.root = undefined
+      if (v === this.root) this.root = null
       // v is root, making root null
       else {
         if (uvBlack) {
@@ -210,8 +212,8 @@ class RBTree<T = number> {
           }
         }
         // delete v from the tree
-        if (v.isOnLeft()) parent!.left = undefined
-        else parent!.right = undefined
+        if (v.isOnLeft()) parent!.left = null
+        else parent!.right = null
       }
       return
     }
@@ -220,7 +222,7 @@ class RBTree<T = number> {
       if (v === this.root) {
         // v is root, assign the value of u to v, and delete u
         v.data = u.data
-        v.left = v.right = undefined
+        v.left = v.right = null
       } else {
         // Detach v from tree and move u up
         if (v.isOnLeft()) parent!.left = u
@@ -345,9 +347,14 @@ class TreeSet<T = number> {
     return deleted
   }
 
+  /**
+   *
+   * @param val
+   * @returns 大于等于val的第一个数
+   */
   ceiling(val: T): T | undefined {
     let p = this.tree.root
-    let higher = undefined
+    let higher = null
     while (p) {
       if (!this.compare(p.data, val)) {
         higher = p
@@ -359,9 +366,14 @@ class TreeSet<T = number> {
     return higher?.data
   }
 
+  /**
+   *
+   * @param val
+   * @returns 小于等于val的第一个数
+   */
   floor(val: T): T | undefined {
     let p = this.tree.root
-    let lower = undefined
+    let lower = null
     while (p) {
       if (!this.compare(val, p.data)) {
         lower = p
@@ -373,9 +385,14 @@ class TreeSet<T = number> {
     return lower?.data
   }
 
+  /**
+   *
+   * @param val
+   * @returns 严格大于val的第一个数
+   */
   higher(val: T): T | undefined {
     let p = this.tree.root
-    let higher = undefined
+    let higher = null
     while (p) {
       if (this.compare(val, p.data)) {
         higher = p
@@ -387,9 +404,14 @@ class TreeSet<T = number> {
     return higher?.data
   }
 
+  /**
+   *
+   * @param val
+   * @returns 严格小于val的第一个数
+   */
   lower(val: T): T | undefined {
     let p = this.tree.root
-    let lower = undefined
+    let lower = null
     while (p) {
       if (this.compare(p.data, val)) {
         lower = p
@@ -415,7 +437,7 @@ class TreeSet<T = number> {
 }
 
 /**
- * @description C++里的multiset
+ * @description C++ 里的multiset
  */
 class TreeMultiSet<T = number> {
   private _size: number
@@ -423,7 +445,7 @@ class TreeMultiSet<T = number> {
   private counts: Map<T, number>
   private compare: CompareFunction<T>
 
-  constructor(collection: Iterable<T> = [], compare = RBTree.defaultCompare) {
+  constructor(collection: Iterable<T> = [], compare: CompareFunction<T> = RBTree.defaultCompare) {
     this._size = 0
     this.tree = new RBTree(compare)
     this.counts = new Map()
@@ -535,11 +557,40 @@ class TreeMultiSet<T = number> {
 
 if (require.main === module) {
   const treeSet = new TreeSet()
+
+  // add
   treeSet.add(1)
   treeSet.add(2)
-  console.log(treeSet.size)
-  console.log(treeSet.has(1))
-  console.log(treeSet.has(2))
+  assert.strictEqual(treeSet.size, 2)
+  assert.strictEqual(treeSet.has(1), true)
+  assert.strictEqual(treeSet.has(2), true)
+  assert.strictEqual(treeSet.has(3), false)
+  treeSet.add(2)
+  assert.strictEqual(treeSet.size, 2)
+
+  // delete
+  treeSet.delete(2)
+  assert.strictEqual(treeSet.size, 1)
+
+  // keys
+  assert.deepStrictEqual([...treeSet.keys()], [1])
+
+  // lower higher floor ceiling
+  treeSet.add(1)
+  treeSet.add(2)
+  treeSet.add(3)
+  treeSet.add(4)
+  treeSet.add(5)
+  assert.strictEqual(treeSet.higher(2), 3)
+  assert.strictEqual(treeSet.higher(5), undefined)
+  assert.strictEqual(treeSet.lower(2), 1)
+  assert.strictEqual(treeSet.lower(1), undefined)
+  assert.strictEqual(treeSet.floor(1), 1)
+  assert.strictEqual(treeSet.floor(0.9), undefined)
+  assert.strictEqual(treeSet.ceiling(5), 5)
+  assert.strictEqual(treeSet.ceiling(5.1), undefined)
+
+  const treeMultiSet = new TreeMultiSet<number>([], (a: number, b: number) => a - b)
 }
 
 export { TreeSet, TreeMultiSet }

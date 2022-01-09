@@ -18,5 +18,8 @@ function product<T>(arr: T[][]): T[][] {
   }
 }
 
-console.log(product([['A', 'a'], ['1'], ['B', 'b'], ['2']]))
-export {}
+if (require.main === module) {
+  console.log(product([['A', 'a'], ['1'], ['B', 'b'], ['2']]))
+}
+
+export { product }

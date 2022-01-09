@@ -72,4 +72,4 @@ if (require.main === module) {
   // console.log(bit.query(5))
 }
 
-export {}
+export { BIT }

@@ -20,4 +20,4 @@ if (require.main === module) {
   console.log(combinationsWithReplacement([1, 1, 3, 4], 2))
 }
 
-export {}
+export { combinationsWithReplacement }

@@ -1,4 +1,4 @@
-function combinations(nums: number[]) {
+function permutations(nums: number[]) {
   const res: number[][] = []
 
   const bt = (path: number[], visited: boolean[]) => {
@@ -19,5 +19,6 @@ function combinations(nums: number[]) {
 }
 
 if (require.main === module) {
-  console.log(combinations([1, 1, 0]))
+  console.log(permutations([1, 1, 0]))
 }
+export { permutations }

@@ -1,6 +1,6 @@
 // # 如果你熟悉 Shell 编程，那么一定了解过花括号展开，它可以用来生成任意字符串。
 
-import { isalpha } from '../../../utils/string'
+import { isalpha } from '../../../0_字符串/string'
 
 // # 1 <= S.length <= 50
 // # 你可以假设题目中不存在嵌套的花括号

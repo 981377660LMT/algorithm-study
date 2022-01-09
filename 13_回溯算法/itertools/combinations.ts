@@ -20,4 +20,4 @@ if (require.main === module) {
   console.log(combinations([1, 1, 3, 4], 2))
 }
 
-export {}
+export { combinations }
