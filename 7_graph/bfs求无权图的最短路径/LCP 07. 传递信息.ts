@@ -1,4 +1,4 @@
-import { ArrayDeque } from '../../2_queue/Deque'
+import { ArrayDeque } from '../../2_queue/Deque/ArrayDeque'
 
 /**
  * @param {number} n  有 n 名玩家，所有玩家编号分别为 0 ～ n-1，其中小朋友 A 的编号为 0

@@ -1,4 +1,4 @@
-import { ArrayDeque } from '../../2_queue/Deque'
+import { ArrayDeque } from '../../2_queue/Deque/ArrayDeque'
 import { BinaryTree } from '../力扣加加/Tree'
 
 /**

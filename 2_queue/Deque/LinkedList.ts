@@ -7,9 +7,12 @@ class ListNode<T = number> {
   }
 }
 
+/**
+ * @description 双向链表
+ */
 class LinkedList<T = number> {
-  head: ListNode<T>
-  tail: ListNode<T>
+  private head: ListNode<T>
+  private tail: ListNode<T>
   length: number
 
   constructor() {
@@ -20,7 +23,7 @@ class LinkedList<T = number> {
     this.length = 0
   }
 
-  unshift(val: T) {
+  unshift(val: T): number {
     const node = new ListNode(val)
     const next = this.head.next
     this.head.next = node
@@ -31,16 +34,16 @@ class LinkedList<T = number> {
     return this.length
   }
 
-  shift() {
+  shift(): T | undefined {
     if (this.length > 0) {
       const first = this.head.next
       this.remove(first)
-      return first
+      return first.value
     }
     return undefined
   }
 
-  push(val: T) {
+  push(val: T): number {
     const node = new ListNode(val)
     const prev = this.tail.prev
     this.tail.prev = node
@@ -51,26 +54,26 @@ class LinkedList<T = number> {
     return this.length
   }
 
-  pop() {
+  pop(): T | undefined {
     if (this.length > 0) {
       const last = this.tail.prev
       this.remove(last)
-      return last
+      return last.value
     }
     return undefined
   }
 
-  first() {
+  first(): T | undefined {
     if (this.length === 0) return undefined
     return this.head.next.value
   }
 
-  last() {
+  last(): T | undefined {
     if (this.length === 0) return undefined
     return this.tail.prev.value
   }
 
-  private remove(node: ListNode<T>) {
+  private remove(node: ListNode<T>): void {
     const prev = node.prev
     const next = node.next
     prev.next = next
@@ -78,7 +81,7 @@ class LinkedList<T = number> {
   }
 }
 
-export {}
+export { LinkedList }
 
 // java查找链表元素：起点折半查找 这样最坏情况也只要找一半就可以了。
 // Node<E> node(int index) {

@@ -1,5 +1,5 @@
 import { LinkedList } from '../3_linkedList/LinkedList'
-import { ArrayDeque } from './Deque'
+import { ArrayDeque } from './Deque/ArrayDeque'
 
 /**
  * @description 特点

@@ -1,4 +1,4 @@
-import { ArrayDeque } from '../../2_queue/Deque'
+import { ArrayDeque } from '../../2_queue/Deque/ArrayDeque'
 
 class CombinationIterator {
   private queue: ArrayDeque<string>

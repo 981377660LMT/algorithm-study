@@ -17,7 +17,7 @@ type PopLength<T extends any[]> = T extends [...infer F, number] ? [...F]['lengt
 
 type MinusOne<N extends number> = PopLength<MakeArray<`${N}`>>
 
-type NestedArray<ArrayItem, Depth extends number> = Depth extends 1
+type NestedArray<ArrayItem = any, Depth extends number = 1> = Depth extends 1
   ? ArrayItem[]
   : NestedArray<ArrayItem[], MinusOne<Depth>>
 
@@ -29,17 +29,26 @@ type NestedArray<ArrayItem, Depth extends number> = Depth extends 1
  */
 function make<T = number, S extends number[] = []>(
   initValue: T,
-  ...sizes: S
+  ...size: S
 ): NestedArray<T, S['length']> {
-  const dimension = sizes.length
-  if (dimension === 1) return Array(sizes[0]).fill(initValue) as any
-  return Array.from({ length: sizes.shift()! }, () => make(initValue, ...sizes)) as any
+  const dimension = size.length
+  if (dimension === 1) return Array(size[0]).fill(initValue) as any
+  return Array.from({ length: size.shift()! }, () => make(initValue, ...size)) as any
 }
 
 if (require.main === module) {
   console.log(make(2, 10))
   console.log(make(2, 2, 3))
   console.log(make(0, 2, 3, 4))
+  // [
+  //   2, 2, 2, 2, 2,
+  //   2, 2, 2, 2, 2
+  // ]
+  // [ [ 2, 2, 2 ], [ 2, 2, 2 ] ]
+  // [
+  //   [ [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ] ],
+  //   [ [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ] ]
+  // ]
 }
 
 export { make }

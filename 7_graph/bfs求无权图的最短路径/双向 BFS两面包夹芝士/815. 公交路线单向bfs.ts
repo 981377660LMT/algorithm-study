@@ -1,5 +1,5 @@
 import { useUnionFindArray } from '../../../14_并查集/推荐使用并查集精简版'
-import { ArrayDeque } from '../../../2_queue/Deque'
+import { ArrayDeque } from '../../../2_queue/Deque/ArrayDeque'
 
 type Station = number
 type RouteIndex = number

@@ -27,16 +27,22 @@ class RBTreeNode<T = number> {
   }
 }
 
-type CompareFunction<T = unknown> = (a: T, b: T) => number
+type CompareFunction<T, R extends 'number' | 'boolean'> = (
+  a: T,
+  b: T
+) => R extends 'number' ? number : boolean
 
 class RBTree<T = number> {
   root: RBTreeNode<T> | null
-  private compare: CompareFunction<T>
+  private compare: CompareFunction<T, 'boolean'>
   static defaultCompare = (a: any, b: any) => a - b
 
-  constructor(compare: CompareFunction<T> = RBTree.defaultCompare) {
+  constructor(compare: CompareFunction<T, 'number'> = RBTree.defaultCompare) {
     this.root = null
-    this.compare = compare
+    this.compare = (a: any, b: any) => {
+      const isSmaller = compare(a, b)
+      return isSmaller < 0
+    }
   }
 
   insert(data: T): boolean {
@@ -63,11 +69,18 @@ class RBTree<T = number> {
     return true
   }
 
-  *inOrder(root = this.root): Generator<T, unknown, unknown> {
+  *inOrder(root = this.root): Generator<T, any, any> {
     if (root == null) return
     yield* this.inOrder(root.left)
     yield root.data
     yield* this.inOrder(root.right)
+  }
+
+  *reverseInOrder(root = this.root): Generator<T, any, any> {
+    if (root == null) return
+    yield* this.reverseInOrder(root.right)
+    yield root.data
+    yield* this.reverseInOrder(root.left)
   }
 
   private rotateLeft(pt: RBTreeNode<T>): void {
@@ -318,12 +331,15 @@ class RBTree<T = number> {
 class TreeSet<T = number> {
   private _size: number
   private tree: RBTree<T>
-  private compare: CompareFunction<T>
+  private compare: CompareFunction<T, 'boolean'>
 
   constructor(collection: Iterable<T> = [], compare = RBTree.defaultCompare) {
     this._size = 0
     this.tree = new RBTree(compare)
-    this.compare = compare
+    this.compare = (a: any, b: any) => {
+      const isSmaller = compare(a, b)
+      return isSmaller < 0
+    }
     for (const val of collection) this.add(val)
   }
 
@@ -423,16 +439,47 @@ class TreeSet<T = number> {
     return lower?.data
   }
 
-  *[Symbol.iterator](): Generator<T, void, unknown> {
+  first(): T | undefined {
+    return this.tree.inOrder().next().value
+  }
+
+  last(): T | undefined {
+    return this.tree.reverseInOrder().next().value
+  }
+
+  shift(): T | undefined {
+    const first = this.first()
+    if (first == undefined) return undefined
+    this.delete(first)
+    return first
+  }
+
+  pop(): T | undefined {
+    const last = this.last()
+    if (last == undefined) return undefined
+    this.delete(last)
+    return last
+  }
+
+  *[Symbol.iterator](): Generator<T, void, void> {
     yield* this.values()
   }
 
-  *keys(): Generator<T, void, unknown> {
+  *keys(): Generator<T, void, void> {
     yield* this.values()
   }
 
-  *values(): Generator<T, void, unknown> {
+  *values(): Generator<T, undefined, void> {
     yield* this.tree.inOrder()
+    return undefined
+  }
+
+  /**
+   * Return a generator for reverse order traversing the set
+   */
+  *rvalues(): Generator<T, undefined, void> {
+    yield* this.tree.inOrder()
+    return undefined
   }
 }
 
@@ -443,13 +490,19 @@ class TreeMultiSet<T = number> {
   private _size: number
   private tree: RBTree<T>
   private counts: Map<T, number>
-  private compare: CompareFunction<T>
+  private compare: CompareFunction<T, 'boolean'>
 
-  constructor(collection: Iterable<T> = [], compare: CompareFunction<T> = RBTree.defaultCompare) {
+  constructor(
+    collection: Iterable<T> = [],
+    compare: CompareFunction<T, 'number'> = RBTree.defaultCompare
+  ) {
     this._size = 0
     this.tree = new RBTree(compare)
     this.counts = new Map()
-    this.compare = compare
+    this.compare = (a: any, b: any) => {
+      const isSmaller = compare(a, b)
+      return isSmaller < 0
+    }
     for (const val of collection) this.add(val)
   }
 
@@ -461,18 +514,21 @@ class TreeMultiSet<T = number> {
     return !!this.tree.find(val)
   }
 
-  add(val: T): void {
-    this.tree.insert(val)
+  add(val: T): boolean {
+    const added = this.tree.insert(val)
     this.increase(val)
     this._size++
+    return added
   }
 
-  delete(val: T): void {
+  delete(val: T): boolean {
+    if (!this.has(val)) return false
     this.decrease(val)
     if (this.count(val) === 0) {
       this.tree.deleteByValue(val)
     }
     this._size--
+    return true
   }
 
   count(val: T): number {
@@ -535,15 +591,53 @@ class TreeMultiSet<T = number> {
     return lower?.data
   }
 
-  *keys(): Generator<T, void, unknown> {
+  first(): T | undefined {
+    return this.tree.inOrder().next().value
+  }
+
+  last(): T | undefined {
+    return this.tree.reverseInOrder().next().value
+  }
+
+  shift(): T | undefined {
+    const first = this.first()
+    if (first == undefined) return undefined
+    this.delete(first)
+    return first
+  }
+
+  pop(): T | undefined {
+    const last = this.last()
+    if (last == undefined) return undefined
+    this.delete(last)
+    return last
+  }
+
+  *[Symbol.iterator](): Generator<T, void, void> {
     yield* this.values()
   }
 
-  *values(): Generator<T, void, unknown> {
+  *keys(): Generator<T, void, void> {
+    yield* this.values()
+  }
+
+  *values(): Generator<T, undefined, void> {
     for (const val of this.tree.inOrder()) {
       let count = this.count(val)
       while (count--) yield val
     }
+    return undefined
+  }
+
+  /**
+   * Return a generator for reverse order traversing the multi-set
+   */
+  *rvalues(): Generator<T, undefined, void> {
+    for (const val of this.tree.reverseInOrder()) {
+      let count = this.count(val)
+      while (count--) yield val
+    }
+    return undefined
   }
 
   private decrease(val: T): void {
@@ -575,6 +669,11 @@ if (require.main === module) {
   // keys
   assert.deepStrictEqual([...treeSet.keys()], [1])
 
+  // first last
+  treeSet.add(2)
+  assert.strictEqual(treeSet.first(), 1)
+  assert.strictEqual(treeSet.last(), 2)
+
   // lower higher floor ceiling
   treeSet.add(1)
   treeSet.add(2)
@@ -590,7 +689,53 @@ if (require.main === module) {
   assert.strictEqual(treeSet.ceiling(5), 5)
   assert.strictEqual(treeSet.ceiling(5.1), undefined)
 
+  // shift pop
+  assert.strictEqual(treeSet.shift(), 1)
+  assert.strictEqual(treeSet.pop(), 5)
+  assert.strictEqual(treeSet.size, 3)
+
   const treeMultiSet = new TreeMultiSet<number>([], (a: number, b: number) => a - b)
+
+  // add
+  treeMultiSet.add(1)
+  treeMultiSet.add(1)
+  treeMultiSet.add(1)
+  treeMultiSet.add(2)
+  treeMultiSet.add(2)
+  treeMultiSet.add(3)
+  treeMultiSet.add(3)
+  treeMultiSet.add(4)
+  treeMultiSet.add(4)
+  assert.strictEqual(treeMultiSet.size, 9)
+
+  // delete
+  treeMultiSet.delete(1)
+  treeMultiSet.delete(0)
+  assert.strictEqual(treeMultiSet.size, 8)
+
+  // keys
+  assert.deepStrictEqual([...treeMultiSet.keys()], [1, 1, 2, 2, 3, 3, 4, 4])
+
+  // first last
+  assert.strictEqual(treeMultiSet.first(), 1)
+  assert.strictEqual(treeMultiSet.last(), 4)
+
+  // lower higher floor ceiling
+  assert.strictEqual(treeMultiSet.higher(2), 3)
+  assert.strictEqual(treeMultiSet.higher(5), undefined)
+  assert.strictEqual(treeMultiSet.lower(2), 1)
+  assert.strictEqual(treeMultiSet.lower(1), undefined)
+  assert.strictEqual(treeMultiSet.floor(1), 1)
+  assert.strictEqual(treeMultiSet.floor(0.9), undefined)
+  assert.strictEqual(treeMultiSet.ceiling(4), 4)
+  assert.strictEqual(treeMultiSet.ceiling(4.1), undefined)
+
+  // shift pop`
+  assert.strictEqual(treeMultiSet.shift(), 1)
+  assert.strictEqual(treeMultiSet.pop(), 4)
+  assert.strictEqual(treeMultiSet.pop(), 4)
+  assert.strictEqual(treeMultiSet.pop(), 3)
+  assert.strictEqual(treeMultiSet.size, 4)
 }
 
 export { TreeSet, TreeMultiSet }

@@ -1,4 +1,4 @@
-import { ArrayDeque } from '../Deque'
+import { ArrayDeque } from '../Deque/ArrayDeque'
 
 /**
  * @param {number[]} nums

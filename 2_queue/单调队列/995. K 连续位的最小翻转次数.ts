@@ -3,7 +3,7 @@
 // 滑动窗口
 // 双端队列。比如 1696. 跳跃游戏 VI 和 239. 滑动窗口最大值 就是这种思路。
 
-import { ArrayDeque } from '../Deque'
+import { ArrayDeque } from '../Deque/ArrayDeque'
 
 // 一次 K 位翻转包括选择一个长度为 K 的（连续）子数
 // 返回所需的 K 位翻转的最小次数，以便数组没有值为 0 的元素。如果不可能，返回 -1。

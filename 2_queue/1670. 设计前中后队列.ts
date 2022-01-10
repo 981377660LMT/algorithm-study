@@ -2,7 +2,7 @@
 // 用2个双向队列维护，front维护前一半，back维护后一半
 // 类似于数据流的中位数那题
 
-import { ArrayDeque } from './Deque'
+import { ArrayDeque } from './Deque/ArrayDeque'
 
 class FrontMiddleBackQueue {
   private left: ArrayDeque // left不超过right

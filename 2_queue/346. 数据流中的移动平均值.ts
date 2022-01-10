@@ -1,4 +1,4 @@
-import { ArrayDeque } from './Deque'
+import { ArrayDeque } from './Deque/ArrayDeque'
 
 class MovingAverage {
   private queue: ArrayDeque
@@ -20,3 +20,4 @@ class MovingAverage {
     return this.sum / this.queue.length
   }
 }
+ArrayDeque

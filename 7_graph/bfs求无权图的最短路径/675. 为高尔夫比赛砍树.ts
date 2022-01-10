@@ -1,4 +1,4 @@
-import { ArrayDeque } from '../../2_queue/Deque'
+import { ArrayDeque } from '../../2_queue/Deque/ArrayDeque'
 
 // 把所有的树然后按照高度排序，利用BFS寻找两树之间的最短距离。
 function cutOffTree(forest: number[][]): number {

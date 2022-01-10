@@ -1,6 +1,6 @@
 // 当同时满足如下条件时，你可以从下标 i 移动到下标 j 处：
 
-import { ArrayDeque } from '../../../2_queue/Deque'
+import { ArrayDeque } from '../../../2_queue/Deque/ArrayDeque'
 
 // i + minJump <= j <= min(i + maxJump, s.length - 1) 且
 // s[j] == '0'.

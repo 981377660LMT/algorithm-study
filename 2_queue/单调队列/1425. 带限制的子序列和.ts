@@ -1,6 +1,6 @@
 // 此题与 1696. 跳跃游戏 VI 相同
 
-import { ArrayDeque } from '../../2_queue/Deque'
+import { ArrayDeque } from '../Deque/ArrayDeque'
 
 type Sum = number
 type Index = number
