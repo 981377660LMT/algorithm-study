@@ -1,7 +1,8 @@
 // 海量数据处理以及缓存穿透这两个场景让我认识了 布隆过滤器
 // https://javaguide.cn/cs-basics/data-structure/bloom-filter/
 
-import { BitSet } from './BitSet'
+import assert from 'assert'
+import { BitSet } from './BitSet/BitSet'
 
 class SimpleHasher {
   constructor(private capacity: number, private seed: number) {}
@@ -32,7 +33,7 @@ interface IBloomFilter {
 class BloomFilter implements IBloomFilter {
   private static DEFAULT_SIZE: number = 2 << 24
   private static SEEDS: number[] = [3, 13, 46, 71, 91, 134]
-  private bits: BitSet = new BitSet(BloomFilter.DEFAULT_SIZE)
+  private bitset: BitSet = new BitSet(0, BloomFilter.DEFAULT_SIZE)
   private hasherArray: SimpleHasher[] = []
 
   /**
@@ -46,13 +47,13 @@ class BloomFilter implements IBloomFilter {
 
   add(value: string): void {
     for (const hasher of this.hasherArray) {
-      this.bits.add(hasher.genHash(value))
+      this.bitset.add(hasher.genHash(value))
     }
   }
 
   has(value: string): boolean {
     for (const hasher of this.hasherArray) {
-      if (!this.bits.has(hasher.genHash(value))) return false
+      if (!this.bitset.has(hasher.genHash(value))) return false
     }
 
     return true
@@ -66,7 +67,7 @@ if (require.main === module) {
   const value3 = 'notIn'
   bloomFilter.add(value1)
   bloomFilter.add(value2)
-  console.log(bloomFilter.has(value1))
-  console.log(bloomFilter.has(value2))
-  console.log(bloomFilter.has(value3))
+  assert.strictEqual(bloomFilter.has(value1), true)
+  assert.strictEqual(bloomFilter.has(value2), true)
+  assert.strictEqual(bloomFilter.has(value3), false)
 }

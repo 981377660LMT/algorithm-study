@@ -27,8 +27,8 @@ function countPrimes(n: number): number {
 
 /**
  *
- * @param upper  找出不超过upper的质数
- * @returns
+ * @param upper
+ * @returns  不超过upper的质数
  */
 function getPrimes(upper: number): number[] {
   const visited = Array<boolean>(upper + 1).fill(false)

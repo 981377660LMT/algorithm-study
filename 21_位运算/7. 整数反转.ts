@@ -19,4 +19,6 @@ const reverse = function (x: number): number {
   return res
 }
 
+export {}
+
 console.log(reverse(123))
