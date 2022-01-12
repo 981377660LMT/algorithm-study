@@ -9,17 +9,33 @@ class Solution:
         n = sum(balls) // 2
 
         @lru_cache(None)
-        def dfs(i, b0, b1, c0, c1) -> int:
-            if b0 > n or b1 > n:
+        def dfs(index, ball1, ball2, color1, color2) -> int:
+            """[summary]
+
+            Args:
+                index ([type]): [description]
+                ball1 ([type]): [description]
+                ball2 ([type]): [description]
+                color1 ([type]): [颜色种类数]
+                color2 ([type]): [颜色种类数]
+
+            Returns:
+                int: [description]
+            """
+            if ball1 > n or ball2 > n:
                 return 0
-            if i == len(balls):
-                return int(c0 == c1)
+            if index == len(balls):
+                return int(color1 == color2)
 
             res = 0
-            for b in range(balls[i] + 1):
+            for b in range(balls[index] + 1):
                 res += dfs(
-                    i + 1, b0 + b, b1 + balls[i] - b, c0 + (b > 0), c1 + (b < balls[i])
-                ) * comb(balls[i], b)
+                    index + 1,
+                    ball1 + b,
+                    ball2 + balls[index] - b,
+                    color1 + (b > 0),
+                    color2 + (b < balls[index]),
+                ) * comb(balls[index], b)
 
             return res
 

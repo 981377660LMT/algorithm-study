@@ -9,7 +9,6 @@ class Solution:
         houses.sort()
 
         def calDistance(left: int, right: int) -> int:
-            print(left, right)
             res = 0
             while left < right:
                 res += houses[right] - houses[left]

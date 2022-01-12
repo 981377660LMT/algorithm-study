@@ -24,5 +24,4 @@ class Solution:
         return s[-move:] + s[:-move]
 
 
-print(Solution()._Solution__stringShift("abc", [[0, 1], [1, 2]]))
 print(Solution().stringShift("abc", [[0, 1], [1, 2]]))

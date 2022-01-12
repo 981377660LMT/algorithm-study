@@ -25,6 +25,7 @@ const largestNumber = function (cost: number[], target: number): string {
 
   return dp[target] === '#' ? '0' : dp[target]
 
+  // 子串比较大小
   function compare(str1: string, str2: string) {
     return str1.length === str2.length ? str1 > str2 : str1.length > str2.length
   }

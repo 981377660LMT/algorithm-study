@@ -20,15 +20,15 @@ class CustomStack {
   pop(): number {
     if (this.stack.length === 0) return -1
     const index = this.stack.length - 1
-    const delta = this.diff.get(index) || 0
+    const delta = this.diff.get(index) ?? 0
     this.diff.delete(index)
-    this.diff.set(index - 1, (this.diff.get(index - 1) || 0) + delta)
+    this.diff.set(index - 1, (this.diff.get(index - 1) ?? 0) + delta)
     return this.stack.pop()! + delta
   }
 
   /**
    *
-   * @param k k从1开始算起
+   * @param k 栈底的 k 个元素的值都增加 val
    * @param val
    * 增量操作时只需要把增量存在 k 处那一个元素上
    * 我们只在出栈时才关心元素的值，所以在增量操作的时候，

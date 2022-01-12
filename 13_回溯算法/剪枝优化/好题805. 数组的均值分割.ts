@@ -1,3 +1,4 @@
+const EPS = 1e-6
 function splitArraySameAverage(nums: number[]): boolean {
   if (nums.length <= 1) return false
   const n = nums.length
@@ -5,7 +6,7 @@ function splitArraySameAverage(nums: number[]): boolean {
 
   for (let i = 1; i <= nums.length >> 1; i++) {
     // 剪枝2 和必须是整数 取模检查小数部分
-    if (Math.abs((avg * i) % 1) > 1e-8) continue
+    if (Math.abs((avg * i) % 1) > EPS) continue
     if (checkSum(nums, i, avg * i)) return true
   }
 
@@ -24,8 +25,7 @@ function splitArraySameAverage(nums: number[]): boolean {
       if (pathSum > target) return false
 
       if (remain === 0) {
-        if (Math.abs(pathSum - target) < 1e-6) return true
-        return false
+        return Math.abs(pathSum - target) < EPS
       }
 
       for (let i = index; i < nums.length; i++) {

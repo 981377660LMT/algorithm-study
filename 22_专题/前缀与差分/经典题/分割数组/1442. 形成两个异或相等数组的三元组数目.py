@@ -1,4 +1,6 @@
 from typing import List
+from itertools import accumulate
+from operator import xor
 
 # 请返回能够令 a == b 成立的三元组 (i, j , k) 的数目
 # a = arr[i] ^ arr[i + 1] ^ ... ^ arr[j - 1]
@@ -11,11 +13,12 @@ from typing import List
 
 class Solution:
     def countTriplets(self, arr: List[int]) -> int:
-        preXor = [0]
-        for num in arr:
-            preXor.append(num ^ preXor[-1])
+        preXor = [0] + list(accumulate(arr, xor))
+        # for num in arr:
+        #     preXor.append(num ^ preXor[-1])
 
         res = 0
+
         for i in range(len(preXor)):
             for k in range(i, len(preXor) - 1):
                 if preXor[i] == preXor[k + 1]:

@@ -267,6 +267,7 @@
 
     - Java HashMap
     - 布隆过滤器
+    - BitSet
     - lowbit
     - 快速幂
     - 按位异或

@@ -8,9 +8,7 @@ class Solution:
         for char in s:
             balance += 1 if char == '[' else -1
             if balance == -1:
-                # 换一个'['过来,平衡度直接变成1
-                balance = 1
-                swap += 1
+                balance, swap = 1, swap + 1
         return swap
 
 

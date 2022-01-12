@@ -80,8 +80,34 @@ function primeFactors(n: number): Map<number, number> {
   return factors
 }
 
-if (require.main === module) {
-  console.log(primeFactors(20))
+/**
+ *
+ * @param n
+ * @returns 返回 n 的所有因子
+ */
+function factors(n: number): number[] {
+  if (n <= 0) return []
+
+  const small: number[] = []
+  const big: number[] = []
+
+  const upper = Math.floor(Math.sqrt(n))
+  for (let f = 1; f <= upper; f++) {
+    if (n % f === 0) {
+      small.push(f)
+      big.push(n / f)
+    }
+  }
+
+  if (small[small.length - 1] === big[big.length - 1]) big.pop()
+
+  return [...small, ...big.reverse()]
 }
 
-export { eulersSieve, eratosthenesSieve, prime, primesLeq, isPrime, primeFactors }
+if (require.main === module) {
+  console.log(primeFactors(20))
+  console.log(factors(25))
+  console.log(factors(1))
+}
+
+export { eulersSieve, eratosthenesSieve, prime, primesLeq, isPrime, primeFactors, factors }

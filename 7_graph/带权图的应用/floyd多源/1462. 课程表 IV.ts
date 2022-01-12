@@ -1,3 +1,5 @@
+import { make } from '../../../0_数组/make'
+
 /**
  *
  * @param numCourses  2 <= n <= 100
@@ -13,9 +15,7 @@ function checkIfPrerequisite(
   queries: number[][]
 ): boolean[] {
   // 构建dist矩阵
-  const dist = Array.from<number, number[]>({ length: numCourses }, () =>
-    Array(numCourses).fill(Infinity)
-  )
+  const dist = make(Infinity, numCourses, numCourses)
 
   for (const [i, j] of prerequisites) {
     dist[i][j] = 1 // 有通路 权重为1

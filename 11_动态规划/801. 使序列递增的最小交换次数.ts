@@ -13,25 +13,26 @@ const minSwap = function (nums1: number[], nums2: number[]): number {
   const len = nums1.length
   // dp_swap[i]表示A[0:i+1],B[0:i+1]在交换A[i]与B[i]并保持数组递增的最小交换次数
   // dp_keep[i]表示A[0:i+1],B[0:i+1]在不交换A[i]与B[i]并保持数组递增的最小交换次数
-  const swapDp = Array(len).fill(Infinity)
-  const keepDp = Array(len).fill(Infinity)
-  swapDp[0] = 1
-  keepDp[0] = 0
+  const swap = Array<number>(len).fill(Infinity)
+  const noSwap = Array<number>(len).fill(Infinity)
+  swap[0] = 1
+  noSwap[0] = 0
 
   for (let i = 0; i < len; i++) {
     // 如果交换之前有序，则可以不交换
     if (nums1[i] > nums1[i - 1] && nums2[i] > nums2[i - 1]) {
-      swapDp[i] = swapDp[i - 1] + 1
-      keepDp[i] = keepDp[i - 1]
+      swap[i] = swap[i - 1] + 1
+      noSwap[i] = noSwap[i - 1]
     }
+
     // 否则至少需要交换一次（交换当前项或者前一项）
     if (nums1[i] > nums2[i - 1] && nums2[i] > nums1[i - 1]) {
-      swapDp[i] = Math.min(keepDp[i - 1] + 1, swapDp[i])
-      keepDp[i] = Math.min(keepDp[i], swapDp[i - 1])
+      swap[i] = Math.min(swap[i], noSwap[i - 1] + 1)
+      noSwap[i] = Math.min(noSwap[i], swap[i - 1])
     }
   }
 
-  return Math.min(swapDp[len - 1], keepDp[len - 1])
+  return Math.min(swap[len - 1], noSwap[len - 1])
 }
 
 console.log(minSwap([1, 3, 5, 4], [1, 2, 3, 7]))

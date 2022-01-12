@@ -21,11 +21,12 @@ const minCost = (
             dfs(index + 1, color + 1 === preColor ? remain : remain - 1, color + 1)
         )
       }
+
       return min
     }
   }
-
   dfs = memo(dfs)
+
   const res = dfs(0, target, -1)
   return res === Infinity ? -1 : res
 }

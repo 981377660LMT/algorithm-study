@@ -7,30 +7,36 @@ from itertools import accumulate
 # 请返回满足要求的最小长度和，如果无法找到这样的两个子数组，请返回 -1 。
 
 # 1 <= arr.length <= 10^5
+# 1 <= arr[i] <= 1000  正数 前缀和递增
 
 # 思路：哈希表+前缀和
-# 记录每个位置的子数组最短长度
-INF = 0x7FFFFFFF
+# 先遍历一遍记录前缀和，然后扫一遍对每个位置，找到 curSum-target 与 curSum+target 对应的索引
+INF = 0x3F3F3F3F
 
 
 class Solution:
     def minSumOfLengths(self, arr: List[int], target: int) -> int:
-        lookup = {0: -1}
-        # 之前看的和为target的最短子数组长度；记录，维护看过的最小值
-        shortest_len_record = [INF] * len(arr)
-        res = shortest_len = INF
-        for i, running_sum in enumerate(accumulate(arr)):
-            if running_sum - target in lookup:
-                end = lookup[running_sum - target]
-                if end != -1:
-                    # i - end表示当前候选 best_till[end]示前面一个最短的target子数组
-                    res = min(res, i - end + shortest_len_record[end])
-                shortest_len = min(shortest_len, i - end)
-            shortest_len_record[i] = shortest_len
-            lookup[running_sum] = i
-            print(lookup, shortest_len_record)
-        return -1 if res == INF else res
+        preSum, curSum = dict({0: -1}), 0
+        for i, num in enumerate(arr):
+            curSum += num
+            preSum[curSum] = i
+
+        curSum = 0
+        leftSize = INF
+        res = INF
+        for i, num in enumerate(arr):
+            curSum += num
+            leftSum, rightSum = curSum - target, curSum + target
+            if leftSum in preSum:
+                leftSize = min(leftSize, i - preSum[leftSum])
+            if rightSum in preSum:
+                res = min(res, preSum[rightSum] - i + leftSize)
+
+        return res if res != INF else -1
 
 
 print(Solution().minSumOfLengths([3, 4, 7, 7], 7))
+print(Solution().minSumOfLengths(arr=[3, 2, 2, 4, 3], target=3))
+# 不一定先看就最短
+print(Solution().minSumOfLengths(arr=[2, 1, 3, 3, 2, 3, 1], target=6))
 

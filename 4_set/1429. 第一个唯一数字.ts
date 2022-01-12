@@ -1,9 +1,9 @@
 class FirstUnique {
-  private cur: Set<number> // 现在出现频率为1的元素
+  private only: Set<number> // 现在出现频率为1的元素
   private dead: Set<number> // 永久删除
 
   constructor(nums: number[]) {
-    this.cur = new Set()
+    this.only = new Set()
     this.dead = new Set()
 
     for (const num of nums) {
@@ -13,17 +13,17 @@ class FirstUnique {
 
   // 返回队列中的 第一个唯一 整数的值。如果没有唯一整数，返回 -1
   showFirstUnique(): number {
-    if (!this.cur.size) return -1
-    const first = this.cur.keys().next().value
+    if (!this.only.size) return -1
+    const first = this.only.keys().next().value
     return first
   }
 
   add(value: number): void {
     if (this.dead.has(value)) return
-    if (this.cur.has(value)) {
-      this.cur.delete(value)
+    if (this.only.has(value)) {
+      this.only.delete(value)
       this.dead.add(value)
-    } else this.cur.add(value)
+    } else this.only.add(value)
   }
 }
 

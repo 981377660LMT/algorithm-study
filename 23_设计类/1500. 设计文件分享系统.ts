@@ -6,7 +6,7 @@ class FileSharing {
   private releasedUserId: MinHeap
   private nextUserId: number
 
-  constructor(private m: number) {
+  constructor(m: number) {
     this.chunkToUser = new Map()
     this.userToChunk = new Map()
     this.releasedUserId = new MinHeap()
@@ -19,7 +19,7 @@ class FileSharing {
   // 系统应为其注册一个独有的 ID。这个独有的 ID 应当被相应的用户使用一次，
   join(ownedChunks: number[]): number {
     let userId = this.nextUserId
-    if (this.releasedUserId.size) userId = this.releasedUserId.shift()!
+    if (this.releasedUserId.size > 0) userId = this.releasedUserId.shift()!
     else this.nextUserId++
 
     this.userToChunk.set(userId, new Set(ownedChunks))

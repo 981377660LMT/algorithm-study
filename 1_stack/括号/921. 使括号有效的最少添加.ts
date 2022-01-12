@@ -4,14 +4,15 @@
  * 我们需要添加最少的括号（ '(' 或是 ')'，可以在任何位置），
  * 以使得到的括号字符串有效。
  */
-var minAddToMakeValid1 = function (s: string): number {
+function minAddToMakeValid1(s: string): number {
   const stack: string[] = []
   let res = 0
+
   for (const char of s) {
     if (char === '(') {
       stack.push(char)
     } else {
-      if (char === ')' && stack.length) {
+      if (char === ')' && stack.length > 0) {
         stack.pop()
       } else {
         res++

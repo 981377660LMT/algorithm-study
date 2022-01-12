@@ -23,10 +23,10 @@ const constrainedSubsetSum = function (nums: number[], k: number): number {
   dp[0] = nums[0]
 
   for (let i = 1; i < n; i++) {
-    if (i - queue.front()![1] > k) queue.shift()
+    if (i - queue.at(0)![1] > k) queue.shift()
     // 选货不选
-    dp[i] = Math.max(dp[i], queue.front()![0] + nums[i])
-    while (queue.length && queue.rear()![0] <= dp[i]) queue.pop()
+    dp[i] = Math.max(dp[i], queue.at(0)![0] + nums[i])
+    while (queue.length && queue.at(-1)![0] <= dp[i]) queue.pop()
     queue.push([dp[i], i])
     res = Math.max(res, dp[i])
   }

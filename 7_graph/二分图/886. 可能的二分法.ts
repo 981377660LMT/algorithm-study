@@ -18,20 +18,22 @@ function possibleBipartition(n: number, dislikes: number[][]): boolean {
     adjList[v].push(w)
     adjList[w].push(v)
   }
-  console.log(adjList)
+
   const colors = Array<number>(n + 1).fill(-1) // -1 0 1
 
-  const dfs = (cur: number, curColor: number, colors: number[]): boolean => {
+  const dfs = (cur: number, curColor: number): boolean => {
     colors[cur] = curColor
     for (const next of adjList[cur]) {
       if (colors[next] !== -1 && colors[next] === colors[cur]) return false
-      if (colors[next] === -1 && !dfs(next, curColor ^ 1, colors)) return false
+      if (colors[next] === -1 && !dfs(next, curColor ^ 1)) return false
     }
+
     return true
   }
 
   for (let i = 0; i < n; i++) {
-    if (colors[i] === -1 && !dfs(i, 0, colors)) return false
+    if (colors[i] !== -1) continue
+    if (!dfs(i, 0)) return false
   }
 
   return true

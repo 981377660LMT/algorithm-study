@@ -6,22 +6,23 @@
  * 从新数组的所有四个方向（即顶部，底部，左侧和右侧）观看的“天际线”必须与原始数组的天际线相同
  * 建筑物高度可以增加的最大总和是多少？
  */
-var maxIncreaseKeepingSkyline = function (grid: number[][]): number {
+function maxIncreaseKeepingSkyline(grid: number[][]): number {
   const m = grid.length
   const n = grid[0].length
-  const xMax = Array<number>(m).fill(-Infinity)
-  const yMax = Array<number>(n).fill(-Infinity)
+  const rowMax = Array<number>(m).fill(-Infinity)
+  const colMax = Array<number>(n).fill(-Infinity)
+
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
-      xMax[i] = Math.max(xMax[i], grid[i][j])
-      yMax[j] = Math.max(yMax[j], grid[i][j])
+      rowMax[i] = Math.max(rowMax[i], grid[i][j])
+      colMax[j] = Math.max(colMax[j], grid[i][j])
     }
   }
 
   let res = 0
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
-      res += Math.min(xMax[i], yMax[j]) - grid[i][j]
+      res += Math.min(rowMax[i], colMax[j]) - grid[i][j]
     }
   }
 

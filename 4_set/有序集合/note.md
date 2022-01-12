@@ -1,3 +1,6 @@
+python 有序集合
+http://www.grantjenks.com/docs/sortedcontainers/index.html
+
 **平衡树(set/map)数据结构**
 
 一般指 treeSet(Java)/sortedList(python)/multiset(C++ STL)

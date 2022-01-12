@@ -17,14 +17,14 @@ var soupServings = function (n: number): number {
     const key = `${A}#${B}`
     if (memo.has(key)) return memo.get(key)
 
-    const r =
+    const res =
       0.25 *
       (recur(A - 100, B, memo) +
         recur(A - 75, B - 25, memo) +
         recur(A - 50, B - 50, memo) +
         recur(A - 25, B - 75, memo))
-    memo.set(key, r)
-    return r
+    memo.set(key, res)
+    return res
   }
 
   return recur(n, n)

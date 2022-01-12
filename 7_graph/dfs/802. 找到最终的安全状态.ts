@@ -1,4 +1,4 @@
-const enum State {
+enum State {
   Unvisited,
   Oncycle,
   Safe,
@@ -13,19 +13,20 @@ const enum State {
    若起始节点位于一个环内，或者能到达一个环，则该节点不是安全的。
    否则，该节点是安全的
  */
-var eventualSafeNodes = function (graph: number[][]): number[] {
+function eventualSafeNodes(graph: number[][]): number[] {
   const n = graph.length
-  const color = Array<number>(n).fill(0)
+  const states = Array<number>(n).fill(State.Unvisited)
   const res: number[] = []
+
   // 是否有环经过cur
   const dfs = (cur: number): boolean => {
-    if (color[cur] !== State.Unvisited) return color[cur] === State.Safe
-    color[cur] = State.Oncycle
+    if (states[cur] !== State.Unvisited) return states[cur] === State.Safe
+    states[cur] = State.Oncycle
     for (const next of graph[cur]) {
       if (!dfs(next)) return false
     }
 
-    color[cur] = State.Safe
+    states[cur] = State.Safe
     return true
   }
 

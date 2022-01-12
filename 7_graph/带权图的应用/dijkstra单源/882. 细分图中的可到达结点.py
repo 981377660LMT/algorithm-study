@@ -32,9 +32,7 @@ class Solution:
         # 对每一对大端点，计算可到达的小端点：容斥原理
         for u, v, w in edges:
             w1, w2 = maxMoves - dist[u], maxMoves - dist[v]
-            res += max(w1, 0) + max(w2, 0)
-            if w1 >= 0 and w2 >= 0:
-                res -= max(w1 + w2 - w, 0)
+            res += max(w1, 0) + max(w2, 0) - max(w1 + w2 - w, 0)
 
         return res
 

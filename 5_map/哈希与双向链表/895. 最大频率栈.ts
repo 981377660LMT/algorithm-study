@@ -11,7 +11,7 @@ class FreqStack {
   }
 
   push(val: number): void {
-    this.keyToFreq.set(val, (this.keyToFreq.get(val) || 0) + 1)
+    this.keyToFreq.set(val, (this.keyToFreq.get(val) ?? 0) + 1)
     if (this.keyToFreq.get(val)! > this.maxFreq) {
       this.maxFreq = this.keyToFreq.get(val)!
     }

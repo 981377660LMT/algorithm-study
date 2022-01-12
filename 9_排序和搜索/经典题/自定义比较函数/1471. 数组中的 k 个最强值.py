@@ -1,10 +1,12 @@
 from typing import List
 
 # 1 <= arr.length <= 10^5
+
+# 题目中的中位数与平时的中位数不同，题目中指的就是位于 ((n - 1) / 2) 的元素。
 class Solution:
     def getStrongest(self, arr: List[int], k: int) -> List[int]:
-        m = sorted(arr)[(len(arr) - 1) // 2]
-        return sorted(arr, reverse=True, key=lambda x: (abs(x - m), x))[:k]
+        mid = sorted(arr)[(len(arr) - 1) // 2]
+        return sorted(arr, reverse=True, key=lambda x: (abs(x - mid), x))[:k]
 
 
 print(Solution().getStrongest(arr=[1, 2, 3, 4, 5], k=2))

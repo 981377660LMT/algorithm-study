@@ -33,22 +33,22 @@ class Solution:
         from functools import lru_cache
 
         @lru_cache(len(nums1) * len(nums2))
-        def product(i, j):
+        def dfs(i, j):
             if i >= len(nums1) or j >= len(nums2):
                 return 0
-            # 两个都不选
-            op1 = product(i + 1, j + 1)
-            # 两个都选
-            op2 = product(i + 1, j + 1) + nums1[i] * nums2[j]
-            # 只选第一个
-            op3 = product(i + 1, j)
-            # 只选第二个
-            op4 = product(i, j + 1)
+            # 0,0
+            op1 = dfs(i + 1, j + 1)
+            # 1,1
+            op2 = dfs(i + 1, j + 1) + nums1[i] * nums2[j]
+            # 1,0
+            op3 = dfs(i + 1, j)
+            # 0,1
+            op4 = dfs(i, j + 1)
             return max([op1, op2, op3, op4])
 
-        ans = product(0, 0)
-        if ans > 0:
-            return ans
+        res = dfs(0, 0)
+        if res > 0:
+            return res
         else:
             return max(min(nums1) * max(nums2), max(nums1) * min(nums2))
 

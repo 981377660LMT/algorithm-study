@@ -9,16 +9,16 @@
  */
 const maxSatisfaction = function (satisfaction: number[]): number {
   satisfaction.sort((a, b) => b - a)
-  console.log(satisfaction)
+
   let res = 0
-  let pre = 0
-  for (const dish of satisfaction) {
+  let preSum = 0
+  for (const cur of satisfaction) {
     // 原来每个菜要增加一个单位的等待时间，因此原结果应增加s，而做这个菜也需一个单位时间，因此还应该增加num，也就是总共应该增加s+num
     // 每新加一个数，之前加过的所有数都会多加一遍
-    const delta = pre + dish
-    if (delta > 0) {
-      res += delta
-      pre += dish
+    const curSum = preSum + cur
+    if (curSum > 0) {
+      res += curSum
+      preSum += cur
     } else {
       break
     }

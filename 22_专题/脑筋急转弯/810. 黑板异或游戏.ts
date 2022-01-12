@@ -1,10 +1,10 @@
+// `面对偶数个数的选手必赢；`
+// `面对奇数个数，且两两异或的值为 0 的选手开局即赢`
 function xorGame(nums: number[]): boolean {
   // Alice选时，只要数组长度为偶数他就能赢
   if (nums.length % 2 === 0) return true
   let xor = 0
   nums.forEach(num => (xor ^= num))
-  // 假设此时偶数数组所有数的异或值为0，那么Alice就直接获胜
-  // 如果此时偶数数组所有数的异或值不为0。得到结论：至少有 2 个以上的数使其数组的异或值不为0
   return xor === 0
 }
 

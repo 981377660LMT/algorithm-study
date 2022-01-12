@@ -4,8 +4,11 @@
  * @return {boolean}
  * @summary 这题的visited数组可以用 位运算压缩 优化
  * `473. 火柴拼正方形`
+ *
+ * 注意这题的关键是所有数都是正数
+ * 如果有负数怎么办
  */
-const canPartitionKSubsets = function (nums: number[], k: number): boolean {
+function canPartitionKSubsets(nums: number[], k: number): boolean {
   const sum = nums.reduce((sum, num) => sum + num, 0)
   if (sum % k !== 0) return false
 
@@ -30,4 +33,6 @@ const canPartitionKSubsets = function (nums: number[], k: number): boolean {
   }
 }
 
-console.log(canPartitionKSubsets([4, 3, 2, 3, 5, 2, 1], 4))
+if (require.main === module) {
+  console.log(canPartitionKSubsets([4, 3, 2, 3, 5, 2, 1], 4))
+}

@@ -1,3 +1,5 @@
+import { memo } from '../../../5_map/memo'
+
 /**
  * @param {number[]} stoneValue
  * @return {string}
@@ -6,12 +8,10 @@
  */
 const stoneGameIII = function (stoneValue: number[]): string {
   const len = stoneValue.length
-  const memo = new Map<number, number>()
 
   // 从index拿时先手比对手多的数量
-  const dfs = (index: number): number => {
+  let dfs = (index: number): number => {
     if (index >= len) return 0
-    if (memo.has(index)) return memo.get(index)!
 
     let res = -Infinity
     let myStone = 0
@@ -23,12 +23,11 @@ const stoneGameIII = function (stoneValue: number[]): string {
       res = Math.max(res, myStone - dfs(i + 1))
     }
 
-    memo.set(index, res)
     return res
   }
+  dfs = memo(dfs)
 
   const res = dfs(0)
-  console.log(res)
   if (res > 0) return 'Alice'
   else if (res < 0) return 'Bob'
   else return 'Tie'

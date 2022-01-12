@@ -10,7 +10,7 @@
  * 同时考察了邻接链表的建立，无向图的遍历，树的dfs自顶向下先序和自底向上后序遍历，以及对复杂度的拆分能力
  */
 const sumOfDistancesInTree = (n: number, edges: number[][]): number[] => {
-  const adjArr = Array.from<number, number[]>({ length: n }, () => [])
+  const adjList = Array.from<number, number[]>({ length: n }, () => [])
   // 用于计算根的值
   const depth = Array<number>(n).fill(0)
   // 用于计算每个节点的子节点数(包括自己)
@@ -18,13 +18,13 @@ const sumOfDistancesInTree = (n: number, edges: number[][]): number[] => {
   const res = Array<number>(n).fill(0)
 
   edges.forEach(([from, to]) => {
-    adjArr[from].push(to)
-    adjArr[to].push(from)
+    adjList[from].push(to)
+    adjList[to].push(from)
   })
 
   // 得到了所有点的层数和子节点数量（包含自己）
   const postOrderDFSForDepthAndCount = (cur: number, pre: number) => {
-    for (const next of adjArr[cur]) {
+    for (const next of adjList[cur]) {
       if (next === pre) continue
       depth[next] = depth[cur] + 1
       // 自底向上后序
@@ -37,7 +37,7 @@ const sumOfDistancesInTree = (n: number, edges: number[][]): number[] => {
   // 初始值
   res[0] = depth.reduce((pre, cur) => pre + cur, 0)
   const preDFSForAnswer = (cur: number, pre: number) => {
-    for (const next of adjArr[cur]) {
+    for (const next of adjList[cur]) {
       if (next === pre) continue
       // 自顶向下先序
       // 注意这个递推的含义 减是靠近子节点，加是远离非子节点
@@ -47,7 +47,7 @@ const sumOfDistancesInTree = (n: number, edges: number[][]): number[] => {
   }
   preDFSForAnswer(0, -1)
 
-  console.log(adjArr, depth, count)
+  console.log(adjList, depth, count)
   return res
 }
 
