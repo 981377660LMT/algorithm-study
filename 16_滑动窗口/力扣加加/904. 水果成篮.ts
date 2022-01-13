@@ -6,20 +6,22 @@
  */
 const totalFruit = function (fruits: number[]): number {
   let res = 0
-  let l = 0
-  const map = new Map<number, number>()
+  let left = 0
+  const counter = new Map<number, number>()
 
-  for (let r = 0; r < fruits.length; r++) {
-    const cur = fruits[r]
-    map.set(cur, map.get(cur)! + 1 || 1)
-    while (map.size > 2) {
-      l++
-      const pre = fruits[l - 1]
-      const count = map.get(pre)!
-      if (count === 1) map.delete(pre)
-      else map.set(pre, count - 1)
+  for (let right = 0; right < fruits.length; right++) {
+    const cur = fruits[right]
+    counter.set(cur, (counter.get(cur) ?? 0) + 1)
+
+    while (counter.size > 2) {
+      const pre = fruits[left]
+      const preCount = counter.get(pre)!
+      if (preCount === 1) counter.delete(pre)
+      else counter.set(pre, preCount - 1)
+      left++
     }
-    res = Math.max(res, r - l + 1)
+
+    res = Math.max(res, right - left + 1)
   }
 
   return res

@@ -10,6 +10,7 @@ function minFlipsMonoIncr(s: string): number {
     { length: len + 1 },
     () => [0, 0]
   )
+
   for (let i = 0; i < len; i++) {
     if (s[i] === '0') {
       dp[i + 1][0] = dp[i][0]

@@ -15,7 +15,7 @@ const numSubarraysWithSum = function (nums: number[], goal: number): number {
     sum += nums[i]
     const pre = sum - goal
     if (map.has(pre)) res += map.get(pre)!
-    map.set(sum, map.get(sum)! + 1 || 1)
+    map.set(sum, (map.get(sum) ?? 0) + 1)
   }
 
   return res

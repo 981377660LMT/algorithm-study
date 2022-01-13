@@ -1,13 +1,17 @@
 class StockSpanner {
-  constructor(private prices: [number, number][] = [[Infinity, 0]]) {}
+  constructor(private stack: [price: number, gap: number][] = []) {}
 
-  next(price: number) {
+  /**
+   *
+   * @param price
+   * @returns 股票价格小于或等于今天价格的最大连续日数
+   */
+  next(price: number): number {
     let gap = 1
-    while (this.prices.length && this.prices[this.prices.length - 1][0] <= price) {
-      gap += this.prices[this.prices.length - 1][1]
-      this.prices.pop()
+    while (this.stack.length > 0 && this.stack[this.stack.length - 1][0] <= price) {
+      gap += this.stack.pop()![1]
     }
-    this.prices.push([price, gap])
+    this.stack.push([price, gap])
     return gap
   }
 }

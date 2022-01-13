@@ -1,4 +1,4 @@
-import { useUnionFind } from './推荐使用并查集精简版'
+import { useUnionFindArray } from './推荐使用并查集精简版'
 
 /**
  * @param {number[][]} stones
@@ -6,7 +6,7 @@ import { useUnionFind } from './推荐使用并查集精简版'
  * 可以将石子全部建立并查集的联系，并计算联通子图的个数。答案就是 n - 联通子图的个数
  */
 const removeStones = function (stones: number[][]): number {
-  const uf = useUnionFind(stones.length)
+  const uf = useUnionFindArray(stones.length)
   for (let i = 0; i < stones.length; i++) {
     for (let j = i + 1; j < stones.length; j++) {
       if (stones[i][0] === stones[j][0] || stones[i][1] === stones[j][1]) {

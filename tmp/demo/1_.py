@@ -7,6 +7,7 @@ from functools import lru_cache, reduce
 from itertools import accumulate, groupby, combinations, permutations, product, chain
 from math import gcd, sqrt, ceil, floor, comb
 from string import ascii_lowercase, ascii_uppercase, ascii_letters, digits
+from operator import xor, or_, and_, not_
 
 MOD = int(1e9 + 7)
 INF = 0x3F3F3F3F

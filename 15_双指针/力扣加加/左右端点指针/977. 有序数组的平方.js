@@ -5,7 +5,7 @@
  * 回 每个数字的平方 组成的新数组，要求也按 非递减顺序 排序。
  * 负数平方之后可能成为最大数:从大排到小
  */
-var sortedSquares = function (nums) {
+function sortedSquares(nums) {
   const res = Array(nums.length).fill(0)
   let l = 0
   let r = nums.length - 1

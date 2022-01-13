@@ -8,7 +8,7 @@ function minFallingPathSum(matrix: number[][]): number {
   for (let i = 1; i < len; i++) {
     for (let j = 0; j < len; j++) {
       dp[i][j] =
-        Math.min(dp[i - 1][j], dp[i - 1][j - 1] || Infinity, dp[i - 1][j + 1] || Infinity) +
+        Math.min(dp[i - 1][j], dp[i - 1][j - 1] ?? Infinity, dp[i - 1][j + 1] ?? Infinity) +
         matrix[i][j]
     }
   }

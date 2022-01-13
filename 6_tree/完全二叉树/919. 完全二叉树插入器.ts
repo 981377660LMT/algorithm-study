@@ -10,7 +10,7 @@ class CBTInserter {
     this.root = root
 
     const queue = [root]
-    while (queue.length) {
+    while (queue.length > 0) {
       const head = queue.shift()
       if (head) {
         this.nodes.push(head)

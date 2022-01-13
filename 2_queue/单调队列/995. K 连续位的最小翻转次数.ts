@@ -30,11 +30,11 @@ function minKBitFlips(nums: number[], k: number): number {
 // https://leetcode-cn.com/problems/minimum-number-of-k-consecutive-bit-flips/solution/hua-dong-chuang-kou-shi-ben-ti-zui-rong-z403l/
 function minKBitFlips2(nums: number[], k: number): number {
   let res = 0
-  const queue = new ArrayDeque(30000)
+  const queue = new ArrayDeque(300_000)
 
   for (let i = 0; i < nums.length; i++) {
-    if (queue.length && i - k >= queue.front()!) queue.shift()
-    if (queue.length % 2 === nums[i]) {
+    if (queue.length && i - k >= queue.at(0)!) queue.shift()
+    if (((queue.length & 1) ^ nums[i]) === 0) {
       if (i + k > nums.length) return -1
       queue.push(i)
       res++

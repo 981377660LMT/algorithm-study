@@ -10,16 +10,20 @@
  */
 function beautifulArray(n: number): number[] {
   let res: number[] = [1]
+
   while (res.length < n) {
-    let tmp: number[] = []
+    const tmp: number[] = []
     for (const num of res) {
       if (num * 2 - 1 <= n) tmp.push(num * 2 - 1)
     }
+
     for (const num of res) {
       if (num * 2 <= n) tmp.push(num * 2)
     }
+
     res = tmp
   }
+
   return res
 }
 

@@ -22,7 +22,6 @@ const atMostNGivenDigitSet = function (digits: string[], n: number): number {
     // 在此位能取的数
     const lessThan = nums.filter(v => v < upper).length
     res += lessThan * digits.length ** (len - i - 1)
-    console.log(res, lessThan)
 
     // 如果存在upper 则不必继续看了比n小的已经看完
     if (!nums.includes(upper)) break

@@ -3,7 +3,7 @@
  * @param {number[]} popped
  * @return {boolean}
  */
-var validateStackSequences = function (pushed, popped) {
+function validateStackSequences(pushed, popped) {
   const stack = []
   let count = 0
   for (const num of pushed) {
@@ -13,7 +13,8 @@ var validateStackSequences = function (pushed, popped) {
       count++
     }
   }
-  return !stack.length
+
+  return stack.length === 0
 }
 
 // true

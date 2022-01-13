@@ -3,7 +3,7 @@
  * @return {number}
  * 老鼠从结点 1 开始并率先出发，猫从结点 2 开始且随后出发，在结点 0 处有一个洞。
  */
-var catMouseGame = function (graph: number[][]): 0 | 1 | 2 {
+function catMouseGame(graph: number[][]): 0 | 1 | 2 {
   const memo = new Map<string, 0 | 1 | 2>()
   const len = graph.length
 

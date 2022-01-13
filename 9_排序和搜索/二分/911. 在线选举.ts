@@ -1,9 +1,9 @@
 import { bisectRight } from './7_二分搜索寻找最插右入位置'
 
 class TopVotedCandidate {
-  private persons: number[]
   private times: number[]
   private winner: number[]
+
   /**
    *
    * @param persons
@@ -15,20 +15,19 @@ class TopVotedCandidate {
     let votedPerson = -1
     let curMax = 0
     const counter = new Map<number, number>()
-    const tmp: number[] = []
+    const winner: number[] = []
 
     for (const p of persons) {
-      counter.set(p, (counter.get(p) || 0) + 1)
+      counter.set(p, (counter.get(p) ?? 0) + 1)
       if (counter.get(p)! >= curMax) {
         curMax = counter.get(p)!
         votedPerson = p
       }
-      tmp.push(votedPerson)
+      winner.push(votedPerson)
     }
 
-    this.persons = persons
     this.times = times
-    this.winner = tmp
+    this.winner = winner
   }
 
   /**

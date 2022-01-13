@@ -18,4 +18,4 @@ print(sd.peekitem(higher))
 
 # 删除
 sd.pop(1)
-sd.popitem()
+sd.popitem(index=-1)
