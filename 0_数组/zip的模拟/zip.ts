@@ -22,10 +22,13 @@ function* zip<T>(...arr: ArrayLike<T>[]) {
   }
 }
 
-function* zipLongest(...arr: ArrayLike<any>[]) {
+function* zipLongest<T>(
+  fillValue: any = undefined,
+  ...arr: ArrayLike<T>[]
+): Generator<T[], void, unknown> {
   const length = Math.max(...arr.map(arrlike => arrlike.length))
   for (let i = 0; i < length; i++) {
-    yield arr.map(arrlike => arrlike[i])
+    yield arr.map(arrlike => arrlike[i] ?? fillValue)
   }
 }
 

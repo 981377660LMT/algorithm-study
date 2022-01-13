@@ -1,11 +1,17 @@
-function combinationsWithReplacement(nums: number[], k: number) {
-  const res: number[][] = []
+/**
+ *
+ * @param arr
+ * @param k
+ * @returns 组合可取重复元素
+ */
+function combinationsWithReplacement<T>(arr: T[], k: number): T[][] {
+  const res: T[][] = []
 
-  const bt = (cur: number, path: number[]) => {
+  const bt = (cur: number, path: T[]) => {
     if (path.length === k) return res.push(path.slice())
 
-    for (let i = cur; i < nums.length; i++) {
-      path.push(nums[i])
+    for (let i = cur; i < arr.length; i++) {
+      path.push(arr[i])
       bt(i, path) // 唯一的区别在此：可取重复的元素
       path.pop()
     }

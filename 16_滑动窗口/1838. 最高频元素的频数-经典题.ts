@@ -11,15 +11,15 @@
  */
 function maxFrequency(nums: number[], k: number): number {
   nums.sort((a, b) => a - b)
-  let res = 1
-  let sum = 0
+  let curSum = 0
   let left = 0
+  let res = 1
 
   for (let right = 1; right < nums.length; right++) {
-    sum += (nums[right] - nums[right - 1]) * (right - left)
+    curSum += (nums[right] - nums[right - 1]) * (right - left)
 
-    while (sum > k) {
-      sum -= nums[right] - nums[left]
+    while (curSum > k) {
+      curSum -= nums[right] - nums[left]
       left++
     }
 

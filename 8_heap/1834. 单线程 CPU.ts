@@ -18,24 +18,25 @@ const getOrder = function (tasks: number[][]): number[] {
     .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2])
 
   const pq = new PriorityQueue<[Cost, Index]>((a, b) => a[0] - b[0] || a[1] - b[1])
-  let timeStamp = 0
-  let nextTaskIndex = 0
+  let time = 0
+  let eventId = 0
 
   // 一直循环
   while (res.length < tasks.length) {
     // 1.放入所有合理的任务
-    while (nextTaskIndex < sortedTasks.length && sortedTasks[nextTaskIndex][0] <= timeStamp) {
-      pq.push([sortedTasks[nextTaskIndex][1], sortedTasks[nextTaskIndex][2]])
-      nextTaskIndex++
+    while (eventId < sortedTasks.length && sortedTasks[eventId][0] <= time) {
+      pq.push([sortedTasks[eventId][1], sortedTasks[eventId][2]])
+      eventId++
     }
+
     // 2. 执行一个任务
-    if (pq.length) {
+    if (pq.length > 0) {
       const [cost, index] = pq.shift()!
       res.push(index)
-      timeStamp += cost
+      time += cost
     } else {
       // 3.队列为空 则时间跳到下一个任务开始
-      timeStamp = sortedTasks[nextTaskIndex][0]
+      time = sortedTasks[eventId][0]
     }
   }
 

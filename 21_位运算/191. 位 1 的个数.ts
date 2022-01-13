@@ -1,7 +1,7 @@
 /**
  * @param {number} n - a positive integer
  * @return {number}
- * 也被称为汉明重量
+ * 二进制位1的个数，汉明重量
  */
 const hammingWeight = (n: number): number => {
   let res = 0

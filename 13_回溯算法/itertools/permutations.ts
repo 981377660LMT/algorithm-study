@@ -1,13 +1,13 @@
-function permutations(nums: number[]) {
-  const res: number[][] = []
+function permutations<T>(arrs: T[]): T[][] {
+  const res: T[][] = []
 
-  const bt = (path: number[], visited: boolean[]) => {
-    if (path.length === nums.length) return res.push(path.slice())
+  const bt = (path: T[], visited: boolean[]) => {
+    if (path.length === arrs.length) return res.push(path.slice())
 
-    for (let i = 0; i < nums.length; i++) {
+    for (let i = 0; i < arrs.length; i++) {
       if (visited[i]) continue
       visited[i] = true
-      path.push(nums[i])
+      path.push(arrs[i])
       bt(path, visited)
       path.pop()
       visited[i] = false

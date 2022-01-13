@@ -4,7 +4,7 @@
  * 请你返回使 nums 严格递增 的 最少 操作次数。
  * 限制：只能对某个数进行+1
  * 如果可以加一也可以减一呢?
- * 对每个点不变进行讨论 取偏离最小值
+ * 用 LIS 就可以解答任意调整的情况
  */
 function minOperations(nums) {
   const n = nums.length

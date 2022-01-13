@@ -1,7 +1,7 @@
-function combinations(nums: number[], k: number) {
-  const res: number[][] = []
+function combinations<T>(nums: T[], k: number): T[][] {
+  const res: T[][] = []
 
-  const bt = (cur: number, path: number[]) => {
+  const bt = (cur: number, path: T[]) => {
     if (path.length === k) return res.push(path.slice())
 
     for (let i = cur; i < nums.length; i++) {

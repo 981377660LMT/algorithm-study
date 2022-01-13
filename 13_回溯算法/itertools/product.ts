@@ -1,3 +1,8 @@
+/**
+ *
+ * @param arr
+ * @returns 笛卡尔积
+ */
 function product<T>(arr: T[][]): T[][] {
   const res: T[][] = []
   const target = arr.length

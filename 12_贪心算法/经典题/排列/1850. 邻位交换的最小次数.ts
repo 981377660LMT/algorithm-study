@@ -52,7 +52,11 @@ function getMinSwaps(num: string, k: number): number {
   }
 }
 
-console.log(getMinSwaps('5489355142', 4))
+if (require.main === module) {
+  console.log(getMinSwaps('5489355142', 4))
+}
+
+export {}
 // # 输出：2
 // # 解释：第 4 个最小妙数是 "5489355421" ，要想得到这个数字：
 // # - 交换下标 7 和下标 8 对应的位："5489355142" -> "5489355412"
