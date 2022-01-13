@@ -1,9 +1,14 @@
-function subsets(nums: number[]): number[][] {
+/**
+ *
+ * @param nums
+ * @returns 子集
+ */
+function subsets<T>(nums: T[]): T[][] {
   const n = 1 << nums.length
-  const res: number[][] = []
+  const res: T[][] = []
 
   for (let state = 0; state < n; state++) {
-    const tmp: number[] = []
+    const tmp: T[] = []
     for (let j = 0; j < nums.length; j++) {
       if (state & (1 << j)) tmp.push(nums[j])
     }
@@ -13,4 +18,8 @@ function subsets(nums: number[]): number[][] {
   return res
 }
 
-console.log(subsets([1, 2, 3]))
+export { subsets }
+
+if (require.main === module) {
+  console.log(subsets([1, 2, 3]))
+}

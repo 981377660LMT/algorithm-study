@@ -6,10 +6,10 @@
  * 如果通过以上操作我们可以使得目标 三元组 target 成为 triplets 的一个 元素 ，则返回 true
  * @summary
  * 1.操作与顺序无关 具有交换性
- * 2.每次操作是不减的
+ * 2.每次merge操作是不减的
  * 3.triplets 中一定不能有比 target 对应位大
  */
-const mergeTriplets = function (triplets: number[][], target: number[]): boolean {
+function mergeTriplets(triplets: number[][], target: number[]): boolean {
   const [tx, ty, tz] = target
   let [curX, curY, curZ] = [0, 0, 0]
 

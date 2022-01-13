@@ -2,14 +2,14 @@
 class Solution:
     def maxValue(self, s: str, x: int) -> str:
         if s[0] == '-':
-            idx = 1
-            while idx < len(s) and x >= int(s[idx]):
-                idx += 1
+            cand = 1
+            while cand < len(s) and x >= int(s[cand]):
+                cand += 1
         else:
-            idx = 0
-            while idx < len(s) and x <= int(s[idx]):
-                idx += 1
-        res = s[:idx] + str(x) + s[idx:]
+            cand = 0
+            while cand < len(s) and x <= int(s[cand]):
+                cand += 1
+        res = s[:cand] + str(x) + s[cand:]
         return res
 
 

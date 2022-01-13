@@ -11,8 +11,8 @@ class Solution:
         if n == 1:
             return 0
 
-        presum0 = [0 for _ in range(n + 1)]  # 目标：开头为0,0101模式需要的反转次数
-        presum1 = [0 for _ in range(n + 1)]  # 目标：开头为1,1010模式需要的反转次数
+        presum0 = [0] * (n + 1)  # 目标：开头为0,0101模式需要的反转次数
+        presum1 = [0] * (n + 1)  # 目标：开头为1,1010模式需要的反转次数
         for i in range(n):
             c = s[i]
             if i % 2 == 0:

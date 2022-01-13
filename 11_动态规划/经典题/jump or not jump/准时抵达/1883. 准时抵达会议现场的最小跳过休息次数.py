@@ -17,7 +17,6 @@ inf = 0x7FFFFFFF
 
 class Solution:
     def minSkips(self, dist: List[int], speed: int, hoursBefore: int) -> int:
-
         n = len(dist)
         dp = [[inf] * (n + 1) for _ in range(n + 1)]  # point jumptimes => total time
         dp[0][0] = 0
