@@ -70,7 +70,7 @@ class TreapNode<T = number> {
     return node
   }
 
-  rotateLeft() {
+  rotateLeft(): TreapNode<T> {
     let node: TreapNode<T> = this
     const right = node.right
     node.right = right?.left ?? null
@@ -85,6 +85,8 @@ class TreapNode<T = number> {
 class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
   private root: TreapNode<T>
   private compare: CompareFunction<T, 'number'>
+  private lowerBound: T
+  private upperBound: T
 
   constructor(compare?: CompareFunction<T, 'number'>)
   // constructor(compare?: CompareFunction<T, 'boolean'>)
@@ -102,6 +104,8 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     this.root.pushUp()
 
     this.compare = compare
+    this.lowerBound = left
+    this.upperBound = right
   }
 
   get size(): number {
@@ -301,7 +305,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
 
     // 因为有个-Infinity 所以 + 2
     const res = dfs(this.root, index + 2)
-    return ([Infinity, -Infinity] as any[]).includes(res) ? undefined : res
+    return ([this.lowerBound, this.upperBound] as any[]).includes(res) ? undefined : res
   }
 
   /**
@@ -310,7 +314,6 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
    * @returns 严格小于val的第一个数
    */
   lower(value: T): T | undefined {
-    if (value == null) return undefined
     const compare = this.compare
 
     const dfs = (node: TreapNode<T> | null, value: T): T | undefined => {
@@ -326,7 +329,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     }
 
     const res = dfs(this.root, value) as any
-    return res === -Infinity ? undefined : res
+    return res === this.lowerBound ? undefined : res
   }
 
   /**
@@ -335,8 +338,8 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
    * @returns 严格大于val的第一个数
    */
   higher(value: T): T | undefined {
-    if (value == null) return undefined
     const compare = this.compare
+
     const dfs = (node: TreapNode<T> | null, value: T): T | undefined => {
       if (node == null) return undefined
       if (compare(node.value, value) <= 0) return dfs(node.right, value)
@@ -351,7 +354,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     }
 
     const res = dfs(this.root, value) as any
-    return res === Infinity ? undefined : res
+    return res === this.upperBound ? undefined : res
   }
 
   /**
@@ -360,7 +363,6 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
    * @returns 小于等于val的第一个数
    */
   floor(value: T): T | undefined {
-    if (value == null) return undefined
     const compare = this.compare
 
     const dfs = (node: TreapNode<T> | null, value: T): T | undefined => {
@@ -377,7 +379,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     }
 
     const res = dfs(this.root, value) as any
-    return res === -Infinity ? undefined : res
+    return res === this.lowerBound ? undefined : res
   }
 
   /**
@@ -386,9 +388,9 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
    * @returns 大于等于val的第一个数
    */
   ceil(value: T): T | undefined {
-    if (value == null) return undefined
     const compare = this.compare
-    function dfs(node: TreapNode<T> | null, value: T): T | undefined {
+
+    const dfs = (node: TreapNode<T> | null, value: T): T | undefined => {
       if (node == null) return undefined
       if (compare(node.value, value) === 0) return node.value
       if (compare(node.value, value) <= 0) return dfs(node.right, value)
@@ -403,26 +405,26 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     }
 
     const res = dfs(this.root, value) as any
-    return res === Infinity ? undefined : res
+    return res === this.upperBound ? undefined : res
   }
 
   first(): T | undefined {
     const iter = this.inOrder()
     iter.next()
     const res = iter.next().value
-    return res === Infinity ? undefined : res
+    return res === this.upperBound ? undefined : res
   }
 
   last(): T | undefined {
     const iter = this.reverseInOrder()
     iter.next()
     const res = iter.next().value
-    return res === -Infinity ? undefined : res
+    return res === this.lowerBound ? undefined : res
   }
 
   shift(): T | undefined {
     const first = this.first()
-    if (first === undefined) return undefined
+    if (first == undefined) return undefined
     this.delete(first)
     return first
   }
