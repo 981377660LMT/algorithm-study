@@ -1,8 +1,6 @@
-import { GCD } from '../../19_数学/最大公约数/gcd'
-
 type NodeValue = number
-type Level = number
-type NodeIndex = number
+type NodeLevel = number
+type NodeId = number
 
 /**
  * @param {number[]} nums  nums[i] 表示第 i 个点的值  1 <= nums[i] <= 50
@@ -13,8 +11,8 @@ type NodeIndex = number
  * 并对每个 y 找出离着节点 i 最近的点，最后再在这些点中求出离着当前点最近的点即可。
  * 这样只需检查 50 次即可。而不用对每个节点向上dfs
  */
-const getCoprimes = function (nums: number[], edges: number[][]): number[] {
-  const res: number[] = []
+function getCoprimes(nums: number[], edges: number[][]): number[] {
+  // 建图
   const adjList = Array.from<unknown, number[]>({ length: nums.length }, () => [])
   edges.forEach(([u, v]) => {
     adjList[u].push(v)
@@ -24,35 +22,41 @@ const getCoprimes = function (nums: number[], edges: number[][]): number[] {
   // 对每个数字 1∼50 维护一个栈
   // 向下dfs过程中栈顶就是数字 x 的层数最深的节点
   // dfs 完成后要将之前 push 进去的元素 pop 出来
-  const valueToNodeDetail = Array.from<NodeValue, [Level, NodeIndex][]>({ length: 55 }, () => [])
+  const stacks = Array.from<NodeValue, [NodeLevel, NodeId][]>({ length: 51 }, () => [])
 
-  const dfs = (cur: number, level: number, nodeValues: number[], visited: Set<number>) => {
+  const res: number[] = []
+  dfs(0, 0, new Set())
+  return res
+
+  function dfs(cur: number, level: number, visited: Set<number>): void {
     if (visited.has(cur)) return
     visited.add(cur)
 
-    let preNodeLevel = -1
-    let preNodeIndex = -1
-    for (let value = 1; value <= 50; value++) {
-      if (!valueToNodeDetail[value].length || GCD(nodeValues[cur], value) !== 1) continue
-      const preNodes = valueToNodeDetail[value]
-      const [level, index] = preNodes[preNodes.length - 1]
-      if (level > preNodeLevel) {
-        preNodeLevel = level
-        preNodeIndex = index
+    let parentLevel = -1
+    let parentId = -1
+    for (let n = 1; n <= 50; n++) {
+      if (stacks[n].length === 0 || gcd(nums[cur], n) !== 1) continue
+      const parents = stacks[n]
+      const [level, index] = parents[parents.length - 1]
+      if (level > parentLevel) {
+        parentLevel = level
+        parentId = index
       }
     }
 
-    res[cur] = preNodeIndex
+    res[cur] = parentId
 
     for (const next of adjList[cur]) {
-      valueToNodeDetail[nums[cur]].push([level, cur])
-      dfs(next, level + 1, nums, visited)
-      valueToNodeDetail[nums[cur]].pop()
+      stacks[nums[cur]].push([level, cur])
+      dfs(next, level + 1, visited)
+      stacks[nums[cur]].pop()
     }
   }
+}
 
-  dfs(0, 0, nums, new Set())
-  return res
+function gcd(...nums: number[]): number {
+  const _gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b))
+  return nums.reduce(_gcd)
 }
 
 console.log(

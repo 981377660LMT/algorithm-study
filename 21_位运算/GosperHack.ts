@@ -4,7 +4,6 @@ function GosperHack(n: number, k: number) {
   let x = (1 << k) - 1
   const limit = 1 << n
   while (x < limit) {
-    console.log(x.toString(2).padStart(5, '0'))
     const lowbit = x & -x
     const r = x + lowbit
     // xor
@@ -12,7 +11,11 @@ function GosperHack(n: number, k: number) {
   }
 }
 
-GosperHack(5, 3)
+export { GosperHack }
+
+if (require.main === module) {
+  GosperHack(5, 3)
+}
 // const lowbit = x & -x 标识出 x 最低位的1 e.g. 0b10110 –> 0b00010
 // const r = x + lowbit将 x 右端的连续一段1清零 e.g. 0b10110 –> 0b11000
 // x = r | (((x ^ r) >> 2) / lowbit)  e.g. 0b11000 | 0b00001 = 0b11001

@@ -1,12 +1,12 @@
-const GCD = (...nums: number[]): number => {
+function gcd(...nums: number[]): number {
   // console.log(nums)
-  const _GCD = (a: number, b: number): number => (b === 0 ? a : GCD(b, a % b))
-  return nums.reduce(_GCD)
+  const _gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b))
+  return nums.reduce(_gcd)
 }
 
 if (require.main === module) {
-  console.log(GCD(3, 6, 8))
-  console.log(GCD(1, 1))
+  console.log(gcd(3, 6, 8))
+  console.log(gcd(1, 1))
 }
 
-export { GCD }
+export { gcd }

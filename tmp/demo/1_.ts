@@ -11,7 +11,7 @@ import { product } from '../../13_回溯算法/itertools/product'
 import { useUnionFindArray } from '../../14_并查集/推荐使用并查集精简版'
 import { qpow } from '../../19_数学/数字/快速幂/qpow'
 import { comb } from '../../19_数学/数论/逆元/逆元求comb'
-import { GCD as gcd } from '../../19_数学/最大公约数/gcd'
+import { gcd } from '../../19_数学/最大公约数/gcd'
 import {
   isPrime,
   prime,
@@ -24,6 +24,7 @@ import { subsets } from '../../21_位运算/枚举二进制子集/78. 子集'
 import { ArrayDeque } from '../../2_queue/Deque/ArrayDeque'
 import { LinkedList } from '../../2_queue/Deque/LinkedList'
 import { PriorityQueue } from '../../2_queue/todo优先级队列'
+import { TreapMultiSet } from '../../4_set/有序集合/js/Treap'
 import { TreeSet, TreeMultiSet } from '../../4_set/有序集合/js/TreeSet'
 import { memo } from '../../5_map/memo'
 import { Trie } from '../../6_tree/前缀树trie/实现trie/1_实现trie'
