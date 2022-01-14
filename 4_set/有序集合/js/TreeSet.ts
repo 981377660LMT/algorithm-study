@@ -40,8 +40,8 @@ class RBTree<T = number> {
   constructor(compare: CompareFunction<T, 'number'> = RBTree.defaultCompare) {
     this.root = null
     this.compare = (a: any, b: any) => {
-      const isSmaller = compare(a, b)
-      return isSmaller < 0
+      const diff = compare(a, b)
+      return diff < 0
     }
   }
 

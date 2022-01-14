@@ -46,3 +46,24 @@ class TimeMap {
 const tm = new TimeMap()
 tm.set('foo', 'bar', 1)
 console.log(tm.get('foo', 1))
+
+interface Person {
+  name: string
+  age: number
+}
+
+const lowerBound = {
+  name: 'Alice',
+  age: -Infinity,
+}
+
+const UpperBound = {
+  name: 'Bob',
+  age: Infinity,
+}
+
+const sortedList = new TreapMultiSet<Person>(
+  (a: Person, b: Person) => a.age - b.age,
+  lowerBound,
+  UpperBound
+)
