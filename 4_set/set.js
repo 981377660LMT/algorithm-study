@@ -10,7 +10,8 @@ mySet.add({ a: 1, b: 2 })
 
 const has = mySet.has(o)
 
-mySet.delete(5)
+console.log(mySet.delete(5))
+console.log(mySet.delete(500))
 
 for (let [key, value] of mySet.entries()) console.log(key, value)
 

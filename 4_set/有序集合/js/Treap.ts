@@ -1,15 +1,42 @@
 import assert from 'assert'
 
+type CompareFunction<T, R extends 'number' | 'boolean'> = (
+  a: T,
+  b: T
+) => R extends 'number' ? number : boolean
+
+interface ITreapMultiSet<T> extends Iterable<T> {
+  add: (value: T) => this
+  has: (value: T) => boolean
+  delete: (value: T) => void
+  bisectLeft: (value: T) => number
+  bisectRight: (value: T) => number
+  getRankByValue: (value: T) => number
+  at: (index: number) => T | undefined
+  lower: (value: T) => T | undefined
+  higher: (value: T) => T | undefined
+  floor: (value: T) => T | undefined
+  ceil: (value: T) => T | undefined
+  first: () => T | undefined
+  last: () => T | undefined
+  shift: () => T | undefined
+  pop: () => T | undefined
+  keys: () => Generator<T, void, void>
+  values: () => Generator<T, void, void>
+  rvalues: () => Generator<T, void, void>
+  readonly size: number
+}
+
 class TreapNode<T = number> {
-  val: T
+  value: T
   count: number
   size: number
   fac: number
   left: TreapNode<T> | null
   right: TreapNode<T> | null
 
-  constructor(val: T) {
-    this.val = val
+  constructor(value: T) {
+    this.value = value
     this.count = 1
     this.size = 1
     this.fac = Math.random()
@@ -55,23 +82,22 @@ class TreapNode<T = number> {
   }
 }
 
-type CompareFunction<T, R extends 'number' | 'boolean'> = (
-  a: T,
-  b: T
-) => R extends 'number' ? number : boolean
-
-class TreapMultiSet<T = number> {
+class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
   private root: TreapNode<T>
   private compare: CompareFunction<T, 'number'>
 
+  constructor(compare?: CompareFunction<T, 'number'>)
+  // constructor(compare?: CompareFunction<T, 'boolean'>)
+  constructor(compare: CompareFunction<T, 'number'>, left: T, right: T)
+  // constructor(compare: CompareFunction<T, 'boolean'>, left: T, right: T)
   constructor(
-    compare: CompareFunction<T, 'number'> = (a: any, b: any) => a - b,
-    left = -Infinity,
-    right = Infinity
+    compare: CompareFunction<T, any> = (a: any, b: any) => a - b,
+    left: any = -Infinity,
+    right: any = Infinity
   ) {
-    this.root = new TreapNode<any>(right)
+    this.root = new TreapNode<T>(right)
     this.root.fac = Infinity
-    this.root.left = new TreapNode<any>(left)
+    this.root.left = new TreapNode<T>(left)
     this.root.left!.fac = -Infinity
     this.root.pushUp()
 
@@ -91,48 +117,47 @@ class TreapMultiSet<T = number> {
     return getHeight(this.root)
   }
 
-  has(val: T): boolean {
+  has(value: T): boolean {
     const compare = this.compare
-    const dfs = (node: TreapNode<T> | null, val: T): boolean => {
+    const dfs = (node: TreapNode<T> | null, value: T): boolean => {
       if (node == null) return false
-      if (compare(node.val, val) === 0) return true
-      if (compare(node.val, val) < 0) return dfs(node.right, val)
-      return dfs(node.left, val)
+      if (compare(node.value, value) === 0) return true
+      if (compare(node.value, value) < 0) return dfs(node.right, value)
+      return dfs(node.left, value)
     }
 
-    return dfs(this.root, val)
+    return dfs(this.root, value)
   }
 
-  add(val: T): void {
+  add(value: T): this {
     const compare = this.compare
-
     // js 里没 & 这种引用  所以要带着parent和上次的方向  在c++里直接 Tree &rt 就可以了
     const dfs = (
       node: TreapNode<T> | null,
-      val: T,
+      value: T,
       parent: TreapNode<T>,
       direction: 'left' | 'right'
     ): void => {
       if (node == null) return
-      if (compare(node.val, val) === 0) {
+      if (compare(node.value, value) === 0) {
         node.count++
         node.pushUp()
-      } else if (compare(node.val, val) > 0) {
+      } else if (compare(node.value, value) > 0) {
         if (node.left) {
-          dfs(node.left, val, node, 'left')
+          dfs(node.left, value, node, 'left')
         } else {
-          node.left = new TreapNode(val)
+          node.left = new TreapNode(value)
           node.pushUp()
         }
 
         if (TreapNode.getFac(node.left) > node.fac) {
           parent[direction] = node.rotateRight()
         }
-      } else if (compare(node.val, val) < 0) {
+      } else if (compare(node.value, value) < 0) {
         if (node.right) {
-          dfs(node.right, val, node, 'right')
+          dfs(node.right, value, node, 'right')
         } else {
-          node.right = new TreapNode(val)
+          node.right = new TreapNode(value)
           node.pushUp()
         }
 
@@ -143,21 +168,22 @@ class TreapMultiSet<T = number> {
       parent.pushUp()
     }
 
-    dfs(this.root.left, val, this.root, 'left')
+    dfs(this.root.left, value, this.root, 'left')
+    return this
   }
 
-  delete(val: T): void {
+  delete(value: T): void {
     const compare = this.compare
 
     const dfs = (
       node: TreapNode<T> | null,
-      val: T,
+      value: T,
       parent: TreapNode<T>,
       direction: 'left' | 'right'
     ): void => {
       if (node == null) return
 
-      if (compare(node.val, val) === 0) {
+      if (compare(node.value, value) === 0) {
         if (node.count > 1) {
           node.count--
           node?.pushUp()
@@ -167,90 +193,90 @@ class TreapMultiSet<T = number> {
           // 旋到根节点
           if (node.right == null || TreapNode.getFac(node.left) > TreapNode.getFac(node.right)) {
             parent[direction] = node.rotateRight()
-            dfs(parent[direction]?.right ?? null, val, parent[direction]!, 'right')
+            dfs(parent[direction]?.right ?? null, value, parent[direction]!, 'right')
           } else {
             parent[direction] = node.rotateLeft()
-            dfs(parent[direction]?.left ?? null, val, parent[direction]!, 'left')
+            dfs(parent[direction]?.left ?? null, value, parent[direction]!, 'left')
           }
         }
-      } else if (compare(node.val, val) > 0) {
-        dfs(node.left, val, node, 'left')
-      } else if (compare(node.val, val) < 0) {
-        dfs(node.right, val, node, 'right')
+      } else if (compare(node.value, value) > 0) {
+        dfs(node.left, value, node, 'left')
+      } else if (compare(node.value, value) < 0) {
+        dfs(node.right, value, node, 'right')
       }
 
       parent?.pushUp()
     }
 
-    dfs(this.root.left, val, this.root, 'left')
+    dfs(this.root.left, value, this.root, 'left')
   }
 
   /**
    *
-   * @param val
+   * @param value
    * @returns 当前元素位于第几位，rank从0开始
    */
-  getRankByValue(val: T): number {
+  getRankByValue(value: T): number {
     const compare = this.compare
 
-    const dfs = (node: TreapNode<T> | null, val: T): number => {
+    const dfs = (node: TreapNode<T> | null, value: T): number => {
       if (node == null) return 0
 
-      if (compare(node.val, val) === 0) {
+      if (compare(node.value, value) === 0) {
         return TreapNode.getSize(node.left) + 1
-      } else if (compare(node.val, val) > 0) {
-        return dfs(node.left, val)
-      } else if (compare(node.val, val) < 0) {
-        return dfs(node.right, val) + TreapNode.getSize(node.left) + node.count
+      } else if (compare(node.value, value) > 0) {
+        return dfs(node.left, value)
+      } else if (compare(node.value, value) < 0) {
+        return dfs(node.right, value) + TreapNode.getSize(node.left) + node.count
       }
 
       return 0
     }
 
     // 因为有个-Infinity 所以-1
-    return dfs(this.root, val) - 1
+    return dfs(this.root, value) - 1
   }
 
-  bisectLeft(val: T): number {
+  bisectLeft(value: T): number {
     const compare = this.compare
 
-    const dfs = (node: TreapNode<T> | null, val: T): number => {
+    const dfs = (node: TreapNode<T> | null, value: T): number => {
       if (node == null) return 0
 
-      if (compare(node.val, val) === 0) {
+      if (compare(node.value, value) === 0) {
         return TreapNode.getSize(node.left)
-      } else if (compare(node.val, val) > 0) {
-        return dfs(node.left, val)
-      } else if (compare(node.val, val) < 0) {
-        return dfs(node.right, val) + TreapNode.getSize(node.left) + node.count
+      } else if (compare(node.value, value) > 0) {
+        return dfs(node.left, value)
+      } else if (compare(node.value, value) < 0) {
+        return dfs(node.right, value) + TreapNode.getSize(node.left) + node.count
       }
 
       return 0
     }
 
     // 因为有个-Infinity 所以-1
-    return dfs(this.root, val) - 1
+    return dfs(this.root, value) - 1
   }
 
-  bisectRight(val: T): number {
+  bisectRight(value: T): number {
     const compare = this.compare
 
-    const dfs = (node: TreapNode<T> | null, val: T): number => {
+    const dfs = (node: TreapNode<T> | null, value: T): number => {
       if (node == null) return 0
 
-      if (compare(node.val, val) === 0) {
+      if (compare(node.value, value) === 0) {
         return TreapNode.getSize(node.left) + node.count
-      } else if (compare(node.val, val) > 0) {
-        return dfs(node.left, val)
-      } else if (compare(node.val, val) < 0) {
-        return dfs(node.right, val) + TreapNode.getSize(node.left) + node.count
+      } else if (compare(node.value, value) > 0) {
+        return dfs(node.left, value)
+      } else if (compare(node.value, value) < 0) {
+        return dfs(node.right, value) + TreapNode.getSize(node.left) + node.count
       }
 
       return 0
     }
 
     // 因为有个-Infinity 所以-1
-    return dfs(this.root, val) - 1
+    return dfs(this.root, value) - 1
   }
 
   /**
@@ -267,7 +293,7 @@ class TreapMultiSet<T = number> {
       if (TreapNode.getSize(node.left) >= rank) {
         return dfs(node.left, rank)
       } else if (TreapNode.getSize(node.left) + node.count >= rank) {
-        return node.val
+        return node.value
       } else {
         return dfs(node.right, rank - TreapNode.getSize(node.left) - node.count)
       }
@@ -280,103 +306,103 @@ class TreapMultiSet<T = number> {
 
   /**
    *
-   * @param val
+   * @param value
    * @returns 严格小于val的第一个数
    */
-  lower(val: T): T | undefined {
-    if (val == null) return undefined
+  lower(value: T): T | undefined {
+    if (value == null) return undefined
     const compare = this.compare
 
-    const dfs = (node: TreapNode<T> | null, val: T): T | undefined => {
+    const dfs = (node: TreapNode<T> | null, value: T): T | undefined => {
       if (node == null) return undefined
-      if (compare(node.val, val) >= 0) return dfs(node.left, val)
+      if (compare(node.value, value) >= 0) return dfs(node.left, value)
 
-      const tmp = dfs(node.right, val)
-      if (tmp == null || compare(node.val, tmp) > 0) {
-        return node.val
+      const tmp = dfs(node.right, value)
+      if (tmp == null || compare(node.value, tmp) > 0) {
+        return node.value
       } else {
         return tmp
       }
     }
 
-    const res = dfs(this.root, val) as any
+    const res = dfs(this.root, value) as any
     return res === -Infinity ? undefined : res
   }
 
   /**
    *
-   * @param val
+   * @param value
    * @returns 严格大于val的第一个数
    */
-  upper(val: T): T | undefined {
-    if (val == null) return undefined
+  higher(value: T): T | undefined {
+    if (value == null) return undefined
     const compare = this.compare
-    const dfs = (node: TreapNode<T> | null, val: T): T | undefined => {
+    const dfs = (node: TreapNode<T> | null, value: T): T | undefined => {
       if (node == null) return undefined
-      if (compare(node.val, val) <= 0) return dfs(node.right, val)
+      if (compare(node.value, value) <= 0) return dfs(node.right, value)
 
-      const tmp = dfs(node.left, val)
+      const tmp = dfs(node.left, value)
 
-      if (tmp == null || compare(node.val, tmp) < 0) {
-        return node.val
+      if (tmp == null || compare(node.value, tmp) < 0) {
+        return node.value
       } else {
         return tmp
       }
     }
 
-    const res = dfs(this.root, val) as any
+    const res = dfs(this.root, value) as any
     return res === Infinity ? undefined : res
   }
 
   /**
    *
-   * @param val
+   * @param value
    * @returns 小于等于val的第一个数
    */
-  floor(val: T): T | undefined {
-    if (val == null) return undefined
+  floor(value: T): T | undefined {
+    if (value == null) return undefined
     const compare = this.compare
 
-    const dfs = (node: TreapNode<T> | null, val: T): T | undefined => {
+    const dfs = (node: TreapNode<T> | null, value: T): T | undefined => {
       if (node == null) return undefined
-      if (compare(node.val, val) === 0) return node.val
-      if (compare(node.val, val) >= 0) return dfs(node.left, val)
+      if (compare(node.value, value) === 0) return node.value
+      if (compare(node.value, value) >= 0) return dfs(node.left, value)
 
-      const tmp = dfs(node.right, val)
-      if (tmp == null || compare(node.val, tmp) > 0) {
-        return node.val
+      const tmp = dfs(node.right, value)
+      if (tmp == null || compare(node.value, tmp) > 0) {
+        return node.value
       } else {
         return tmp
       }
     }
 
-    const res = dfs(this.root, val) as any
+    const res = dfs(this.root, value) as any
     return res === -Infinity ? undefined : res
   }
 
   /**
    *
-   * @param val
+   * @param value
    * @returns 大于等于val的第一个数
    */
-  ceil(val: T): T | undefined {
-    if (val == null) return undefined
+  ceil(value: T): T | undefined {
+    if (value == null) return undefined
     const compare = this.compare
-    function dfs(node: TreapNode<T> | null, val: T): T | undefined {
+    function dfs(node: TreapNode<T> | null, value: T): T | undefined {
       if (node == null) return undefined
-      if (compare(node.val, val) === 0) return node.val
-      if (compare(node.val, val) <= 0) return dfs(node.right, val)
+      if (compare(node.value, value) === 0) return node.value
+      if (compare(node.value, value) <= 0) return dfs(node.right, value)
 
-      const tmp = dfs(node.left, val)
+      const tmp = dfs(node.left, value)
 
-      if (tmp == null || compare(node.val, tmp) < 0) {
-        return node.val
+      if (tmp == null || compare(node.value, tmp) < 0) {
+        return node.value
       } else {
         return tmp
       }
     }
 
-    const res = dfs(this.root, val) as any
+    const res = dfs(this.root, value) as any
     return res === Infinity ? undefined : res
   }
 
@@ -442,7 +468,7 @@ class TreapMultiSet<T = number> {
     yield* this.inOrder(root.left)
     const count = root.count
     for (let _ = 0; _ < count; _++) {
-      yield root.val
+      yield root.value
     }
     yield* this.inOrder(root.right)
   }
@@ -452,7 +478,7 @@ class TreapMultiSet<T = number> {
     yield* this.reverseInOrder(root.right)
     const count = root.count
     for (let _ = 0; _ < count; _++) {
-      yield root.val
+      yield root.value
     }
     yield* this.reverseInOrder(root.left)
   }
@@ -475,13 +501,13 @@ if (require.main === module) {
   assert.strictEqual(treap.size, 5)
   treap.delete(3)
   assert.strictEqual(treap.size, 4)
-  console.dir(treap, { depth: null })
+  // console.dir(treap, { depth: null })
 
   // upper lower ceil floor
   treap.add(3)
-  assert.strictEqual(treap.upper(2), 3)
-  assert.strictEqual(treap.upper(1.9), 2)
-  assert.strictEqual(treap.upper(3), undefined)
+  assert.strictEqual(treap.higher(2), 3)
+  assert.strictEqual(treap.higher(1.9), 2)
+  assert.strictEqual(treap.higher(3), undefined)
   assert.strictEqual(treap.ceil(2), 2)
   assert.strictEqual(treap.ceil(1.9), 2)
   assert.strictEqual(treap.ceil(3.1), undefined)
