@@ -6,21 +6,20 @@
  * @summary
  * 统计哪些位置的括号不合法
  */
-var minRemoveToMakeValid = function (s: string): string {
+function minRemoveToMakeValid(s: string): string {
   const chars = s.split('')
-  const invalidIndexStack: number[] = []
+  const invalid: number[] = []
 
-  for (let i = 0; i < chars.length; i++) {
-    const char = chars[i]
+  for (const [index, char] of chars.entries()) {
     if (char === '(') {
-      invalidIndexStack.push(i)
+      invalid.push(index)
     } else if (char === ')') {
-      if (invalidIndexStack.length) invalidIndexStack.pop()
-      else chars[i] = '' // 删不合法的右括号
+      if (invalid.length > 0) invalid.pop()
+      else chars[index] = '' // 删不合法的右括号
     }
   }
 
-  for (const index of invalidIndexStack) {
+  for (const index of invalid) {
     chars[index] = ''
   }
 

@@ -36,6 +36,25 @@ import { bisectInsort } from '../../9_排序和搜索/二分/7_二分搜索插�
 const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz'
 const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const DIGITS = '0123456789'
+const MOD = 1e9 + 7
+const EPS = 1e-8
+const DIRS4 = [
+  [-1, 0],
+  [0, 1],
+  [1, 0],
+  [0, -1],
+]
+const dirs8 = [
+  [-1, 0],
+  [-1, 1],
+  [0, 1],
+  [1, 1],
+  [1, 0],
+  [1, -1],
+  [0, -1],
+  [-1, -1],
+]
+
 const max = Math.max.bind(Math)
 const min = Math.min.bind(Math)
 const pow = Math.pow.bind(Math)
