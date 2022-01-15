@@ -7,9 +7,9 @@
 左括号 '(' 必须在对应的连续两个右括号 '))' 之前。
 
  */
-const minInsertions = function (s: string): number {
-  let res = 0,
-    left = 0
+function minInsertions(s: string): number {
+  let res = 0
+  let left = 0
 
   for (let i = 0; i < s.length; i++) {
     // 左括号入栈

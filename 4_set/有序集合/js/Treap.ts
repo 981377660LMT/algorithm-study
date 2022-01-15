@@ -5,6 +5,7 @@ type CompareFunction<T, R extends 'number' | 'boolean'> = (
   b: T
 ) => R extends 'number' ? number : boolean
 
+// 无法支持islice 因为Treap结点随机旋转
 interface ITreapMultiSet<T> extends Iterable<T> {
   add: (value: T) => this
   has: (value: T) => boolean
@@ -30,12 +31,10 @@ interface ITreapMultiSet<T> extends Iterable<T> {
 
   count(value: T): number
 
-  keys: () => Generator<T, void, void>
-  values: () => Generator<T, void, void>
-  rvalues: () => Generator<T, void, void>
+  keys: () => Generator<T, any, any>
+  values: () => Generator<T, any, any>
+  rvalues: () => Generator<T, any, any>
   entries(): IterableIterator<[number, T]>
-
-  islice(): Generator<T, void, void>
 
   readonly size: number
 }
@@ -44,7 +43,7 @@ class TreapNode<T = number> {
   value: T
   count: number
   size: number
-  fac: number
+  priority: number
   left: TreapNode<T> | null
   right: TreapNode<T> | null
 
@@ -52,7 +51,7 @@ class TreapNode<T = number> {
     this.value = value
     this.count = 1
     this.size = 1
-    this.fac = Math.random()
+    this.priority = Math.random()
     this.left = null
     this.right = null
   }
@@ -62,7 +61,7 @@ class TreapNode<T = number> {
   }
 
   static getFac(node: TreapNode<any> | null): number {
-    return node?.fac ?? 0
+    return node?.priority ?? 0
   }
 
   pushUp(): void {
@@ -98,14 +97,14 @@ class TreapNode<T = number> {
 class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
   private root: TreapNode<T>
   private compareFn: CompareFunction<T, 'number'>
-  private lowerBound: T
-  private upperBound: T
+  private leftBound: T
+  private rightBound: T
 
   /**
    *
    * @param compareFn A compare function which returns boolean or number
-   * @param lowerBound defalut value is `-Infinity`
-   * @param upperBound defalut value is `Infinity`
+   * @param leftBound defalut value is `-Infinity`
+   * @param rightBound defalut value is `Infinity`
    * @description
    * create a `MultiSet`, compare elements using `compareFn`, which is increasing order by default.
    * @example
@@ -115,51 +114,39 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
       age: number
     }
 
-    const lowerBound = {
+    const leftBound = {
       name: 'Alice',
       age: -Infinity,
     }
 
-    const UpperBound = {
+    const rightBound = {
       name: 'Bob',
       age: Infinity,
     }
 
     const sortedList = new TreapMultiSet<Person>(
       (a: Person, b: Person) => a.age - b.age,
-      lowerBound,
-      UpperBound
+      leftBound,
+      rightBound
     )
    * ```
    */
   constructor(compareFn?: CompareFunction<T, 'number'>)
-  // constructor(compareFn?: CompareFunction<T, 'boolean'>)
-  constructor(compareFn: CompareFunction<T, 'number'>, lowerBound: T, upperBound: T)
-  // constructor(compareFn: CompareFunction<T, 'boolean'>, left: T, right: T)
+  constructor(compareFn: CompareFunction<T, 'number'>, leftBound: T, rightBound: T)
   constructor(
     compareFn: CompareFunction<T, any> = (a: any, b: any) => a - b,
-    lowerBound: any = -Infinity,
-    upperBound: any = Infinity
+    leftBound: any = -Infinity,
+    rightBound: any = Infinity
   ) {
-    this.root = new TreapNode<T>(upperBound)
-    this.root.fac = Infinity
-    this.root.left = new TreapNode<T>(lowerBound)
-    this.root.left!.fac = -Infinity
+    this.root = new TreapNode<T>(rightBound)
+    this.root.priority = Infinity
+    this.root.left = new TreapNode<T>(leftBound)
+    this.root.left!.priority = -Infinity
     this.root.pushUp()
 
-    this.lowerBound = lowerBound
-    this.upperBound = upperBound
+    this.leftBound = leftBound
+    this.rightBound = rightBound
     this.compareFn = compareFn
-    // this.compareFn = (a: any, b: any): number => {
-    //   const res = compareFn(a, b)
-    //   if (typeof res === 'boolean') {
-    //     return 1
-    //   } else if (typeof res === 'number') {
-    //     return res
-    //   } else {
-    //     throw new TypeError('return of `compareFn` must be boolean or number')
-    //   }
-    // }
   }
 
   get size(): number {
@@ -217,7 +204,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
           node.pushUp()
         }
 
-        if (TreapNode.getFac(node.left) > node.fac) {
+        if (TreapNode.getFac(node.left) > node.priority) {
           parent[direction] = node.rotateRight()
         }
       } else if (compare(node.value, value) < 0) {
@@ -228,7 +215,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
           node.pushUp()
         }
 
-        if (TreapNode.getFac(node.right) > node.fac) {
+        if (TreapNode.getFac(node.right) > node.priority) {
           parent[direction] = node.rotateLeft()
         }
       }
@@ -401,6 +388,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
    */
   at(index: number): T | undefined {
     if (index < 0) index += this.size
+    if (index < 0 || index >= this.size) return undefined
 
     const dfs = (node: TreapNode<T> | null, rank: number): T | undefined => {
       if (node == null) return undefined
@@ -416,7 +404,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
 
     // 因为有个-Infinity 所以 + 2
     const res = dfs(this.root, index + 2)
-    return ([this.lowerBound, this.upperBound] as any[]).includes(res) ? undefined : res
+    return ([this.leftBound, this.rightBound] as any[]).includes(res) ? undefined : res
   }
 
   /**
@@ -439,7 +427,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     }
 
     const res = dfs(this.root, value) as any
-    return res === this.lowerBound ? undefined : res
+    return res === this.leftBound ? undefined : res
   }
 
   /**
@@ -463,7 +451,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     }
 
     const res = dfs(this.root, value) as any
-    return res === this.upperBound ? undefined : res
+    return res === this.rightBound ? undefined : res
   }
 
   /**
@@ -487,7 +475,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     }
 
     const res = dfs(this.root, value) as any
-    return res === this.lowerBound ? undefined : res
+    return res === this.leftBound ? undefined : res
   }
 
   /**
@@ -512,7 +500,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     }
 
     const res = dfs(this.root, value) as any
-    return res === this.upperBound ? undefined : res
+    return res === this.rightBound ? undefined : res
   }
 
   /**
@@ -525,7 +513,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     const iter = this.inOrder()
     iter.next()
     const res = iter.next().value
-    return res === this.upperBound ? undefined : res
+    return res === this.rightBound ? undefined : res
   }
 
   /**
@@ -538,7 +526,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     const iter = this.reverseInOrder()
     iter.next()
     const res = iter.next().value
-    return res === this.lowerBound ? undefined : res
+    return res === this.leftBound ? undefined : res
   }
 
   /**
@@ -591,25 +579,40 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     return dfs(this.root, value)
   }
 
-  *[Symbol.iterator](): Generator<T, void, void> {
+  *[Symbol.iterator](): Generator<T, any, any> {
     yield* this.values()
   }
 
   /**
+   * @description
    * Returns an iterable of keys in the set.
    */
-  *keys(): Generator<T, void, void> {
+  *keys(): Generator<T, any, any> {
     yield* this.values()
   }
 
   /**
+   * @description
    * Returns an iterable of values in the set.
    */
-  *values(): Generator<T, void, void> {
+  *values(): Generator<T, any, any> {
     const iter = this.inOrder()
     iter.next()
-    let remain = this.size
-    for (let _ = 0; _ < remain; _++) {
+    let steps = this.size
+    for (let _ = 0; _ < steps; _++) {
+      yield iter.next().value
+    }
+  }
+
+  /**
+   * @description
+   * Returns a generator for reversed order traversing the set.
+   */
+  *rvalues(): Generator<T, any, any> {
+    const iter = this.reverseInOrder()
+    iter.next()
+    let steps = this.size
+    for (let _ = 0; _ < steps; _++) {
       yield iter.next().value
     }
   }
@@ -621,38 +624,11 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
   *entries(): IterableIterator<[number, T]> {
     const iter = this.inOrder()
     iter.next()
-    let remain = this.size
-    for (let i = 0; i < remain; i++) {
+    let steps = this.size
+    for (let i = 0; i < steps; i++) {
       yield [i, iter.next().value]
     }
   }
-
-  /**
-   * @description
-   * Returns a generator for reversed order traversing the set.
-   */
-  *rvalues(): Generator<T, void, void> {
-    const iter = this.reverseInOrder()
-    iter.next()
-    let remain = this.size
-    for (let _ = 0; _ < remain; _++) {
-      yield iter.next().value
-    }
-  }
-
-  /**
-   *
-   * @description
-   * Return an iterator that slices sorted list from start to stop.
-   * For both start and end, a negative index can be used to indicate an offset from the end of the set.
-   * @param start The beginning index of the specified portion of the set.
-   * If start is undefined, then the slice begins at index 0.
-   * @param end The end index of the specified portion of the set. This is exclusive of the element at the index 'end'.
-   * If end is undefined, then the slice extends to the end of the set.
-   * @param reverse
-   * When reverse is True the values are yielded from the iterator in reverse order; reverse defaults to False.
-   */
-  *islice(start = 0, end = this.size, reverse = false): Generator<T, void, void> {}
 
   private *inOrder(root: TreapNode<T> | null = this.root): Generator<T, any, any> {
     if (root == null) return
@@ -726,13 +702,6 @@ if (require.main === module) {
   assert.strictEqual(treap.lastIndexOf(4), 5)
   assert.strictEqual(treap.lastIndexOf(5), -1)
   treap.delete(4)
-
-  // islice
-  // [1,2,3,3,3]
-  assert.deepStrictEqual([...treap.islice()], [1, 2, 3, 3, 3])
-  assert.deepStrictEqual([...treap.islice(-2)], [3, 3])
-  assert.deepStrictEqual([...treap.islice(0, -1)], [1, 2, 3, 3])
-  assert.deepStrictEqual([...treap.islice(0, 2, true)], [3, 3])
 
   // keys values rvalues entries
   assert.deepStrictEqual([...treap.keys()], [1, 2, 3, 3, 3])
