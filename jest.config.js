@@ -3,7 +3,7 @@
  */
 module.exports = {
   // preset:'',
-  roots: ['<rootDir>/前端笔记'],
+  // roots: ['<rootDir>/前端笔记'],
   testMatch: ['**/__tests__/*.[jt]s?(x)', '**/*.test.[jt]s?(x)'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
@@ -16,4 +16,5 @@ module.exports = {
   collectCoverage: true,
   coveragePathIgnorePatterns: ['node_modules'],
   testEnvironment: 'node',
+  modulePathIgnorePatterns: ['node_modules'],
 }

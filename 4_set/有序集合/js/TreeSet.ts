@@ -1,5 +1,3 @@
-import assert from 'assert'
-
 class RBTreeNode<T = number> {
   data: T
   color: number
@@ -478,7 +476,7 @@ class TreeSet<T = number> {
    * Return a generator for reverse order traversing the set
    */
   *rvalues(): Generator<T, undefined, void> {
-    yield* this.tree.inOrder()
+    yield* this.tree.reverseInOrder()
     return undefined
   }
 }
@@ -647,95 +645,6 @@ class TreeMultiSet<T = number> {
   private increase(val: T): void {
     this.counts.set(val, this.count(val) + 1)
   }
-}
-
-if (require.main === module) {
-  const treeSet = new TreeSet()
-
-  // add
-  treeSet.add(1)
-  treeSet.add(2)
-  assert.strictEqual(treeSet.size, 2)
-  assert.strictEqual(treeSet.has(1), true)
-  assert.strictEqual(treeSet.has(2), true)
-  assert.strictEqual(treeSet.has(3), false)
-  treeSet.add(2)
-  assert.strictEqual(treeSet.size, 2)
-
-  // delete
-  treeSet.delete(2)
-  assert.strictEqual(treeSet.size, 1)
-
-  // keys
-  assert.deepStrictEqual([...treeSet.keys()], [1])
-
-  // first last
-  treeSet.add(2)
-  assert.strictEqual(treeSet.first(), 1)
-  assert.strictEqual(treeSet.last(), 2)
-
-  // lower higher floor ceiling
-  treeSet.add(1)
-  treeSet.add(2)
-  treeSet.add(3)
-  treeSet.add(4)
-  treeSet.add(5)
-  assert.strictEqual(treeSet.higher(2), 3)
-  assert.strictEqual(treeSet.higher(5), undefined)
-  assert.strictEqual(treeSet.lower(2), 1)
-  assert.strictEqual(treeSet.lower(1), undefined)
-  assert.strictEqual(treeSet.floor(1), 1)
-  assert.strictEqual(treeSet.floor(0.9), undefined)
-  assert.strictEqual(treeSet.ceiling(5), 5)
-  assert.strictEqual(treeSet.ceiling(5.1), undefined)
-
-  // shift pop
-  assert.strictEqual(treeSet.shift(), 1)
-  assert.strictEqual(treeSet.pop(), 5)
-  assert.strictEqual(treeSet.size, 3)
-
-  const treeMultiSet = new TreeMultiSet<number>([], (a: number, b: number) => a - b)
-
-  // add
-  treeMultiSet.add(1)
-  treeMultiSet.add(1)
-  treeMultiSet.add(1)
-  treeMultiSet.add(2)
-  treeMultiSet.add(2)
-  treeMultiSet.add(3)
-  treeMultiSet.add(3)
-  treeMultiSet.add(4)
-  treeMultiSet.add(4)
-  assert.strictEqual(treeMultiSet.size, 9)
-
-  // delete
-  treeMultiSet.delete(1)
-  treeMultiSet.delete(0)
-  assert.strictEqual(treeMultiSet.size, 8)
-
-  // keys
-  assert.deepStrictEqual([...treeMultiSet.keys()], [1, 1, 2, 2, 3, 3, 4, 4])
-
-  // first last
-  assert.strictEqual(treeMultiSet.first(), 1)
-  assert.strictEqual(treeMultiSet.last(), 4)
-
-  // lower higher floor ceiling
-  assert.strictEqual(treeMultiSet.higher(2), 3)
-  assert.strictEqual(treeMultiSet.higher(5), undefined)
-  assert.strictEqual(treeMultiSet.lower(2), 1)
-  assert.strictEqual(treeMultiSet.lower(1), undefined)
-  assert.strictEqual(treeMultiSet.floor(1), 1)
-  assert.strictEqual(treeMultiSet.floor(0.9), undefined)
-  assert.strictEqual(treeMultiSet.ceiling(4), 4)
-  assert.strictEqual(treeMultiSet.ceiling(4.1), undefined)
-
-  // shift pop`
-  assert.strictEqual(treeMultiSet.shift(), 1)
-  assert.strictEqual(treeMultiSet.pop(), 4)
-  assert.strictEqual(treeMultiSet.pop(), 4)
-  assert.strictEqual(treeMultiSet.pop(), 3)
-  assert.strictEqual(treeMultiSet.size, 4)
 }
 
 export { TreeSet, TreeMultiSet }

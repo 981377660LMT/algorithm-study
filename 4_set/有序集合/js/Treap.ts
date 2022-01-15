@@ -1,5 +1,3 @@
-import assert from 'assert'
-
 type CompareFunction<T, R extends 'number' | 'boolean'> = (
   a: T,
   b: T
@@ -7,7 +5,7 @@ type CompareFunction<T, R extends 'number' | 'boolean'> = (
 
 // 无法支持islice 因为Treap结点随机旋转
 interface ITreapMultiSet<T> extends Iterable<T> {
-  add: (value: T) => this
+  add: (...value: T[]) => this
   has: (value: T) => boolean
   delete: (value: T) => void
 
@@ -184,7 +182,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
    * @complexity `O(logn)`
    * @description Add value to sorted set.
    */
-  add(value: T): this {
+  add(...values: T[]): this {
     const compare = this.compareFn
     const dfs = (
       node: TreapNode<T> | null,
@@ -222,7 +220,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
       parent.pushUp()
     }
 
-    dfs(this.root.left, value, this.root, 'left')
+    values.forEach(value => dfs(this.root.left, value, this.root, 'left'))
     return this
   }
 
@@ -544,8 +542,9 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
 
   /**
    * @complexity `O(logn)`
+   * @param index
    * @description
-   * Removes the last element from an set and returns it.
+   * Removes the element at `index` from an set and returns it.
    * If the set is empty, undefined is returned and the set is not modified.
    */
   pop(index?: number): T | undefined {
@@ -559,6 +558,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     const toDelete = this.at(index)
     if (toDelete == null) return
     this.delete(toDelete)
+    return toDelete
   }
 
   /**
@@ -649,108 +649,6 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     }
     yield* this.reverseInOrder(root.left)
   }
-}
-
-if (require.main === module) {
-  const treap = new TreapMultiSet()
-
-  // has add delete
-  treap.add(1)
-  assert.strictEqual(treap.has(1), true)
-  assert.strictEqual(treap.has(2), false)
-  treap.delete(1)
-  assert.strictEqual(treap.size, 0)
-  treap.add(1)
-  treap.add(2)
-  treap.add(3)
-  treap.add(3)
-  treap.add(3)
-  assert.strictEqual(treap.size, 5)
-  treap.delete(3)
-  assert.strictEqual(treap.size, 4)
-  // console.dir(treap, { depth: null })
-
-  // upper lower ceil floor
-  treap.add(3)
-  assert.strictEqual(treap.higher(2), 3)
-  assert.strictEqual(treap.higher(1.9), 2)
-  assert.strictEqual(treap.higher(3), undefined)
-  assert.strictEqual(treap.ceil(2), 2)
-  assert.strictEqual(treap.ceil(1.9), 2)
-  assert.strictEqual(treap.ceil(3.1), undefined)
-  assert.strictEqual(treap.lower(2), 1)
-  assert.strictEqual(treap.lower(0), undefined)
-  assert.strictEqual(treap.lower(3.1), 3)
-  assert.strictEqual(treap.floor(0.9), undefined)
-  assert.strictEqual(treap.floor(1), 1)
-  assert.strictEqual(treap.floor(3), 3)
-
-  // indexOf lastIndexOf
-  // [1,2,3,3,3,4]
-  treap.add(4)
-  assert.strictEqual(treap.indexOf(1), 0)
-  assert.strictEqual(treap.indexOf(1.2), -1)
-  assert.strictEqual(treap.indexOf(2), 1)
-  assert.strictEqual(treap.indexOf(2.2), -1)
-  assert.strictEqual(treap.indexOf(3), 2)
-  assert.strictEqual(treap.indexOf(4), 5)
-  assert.strictEqual(treap.indexOf(5), -1)
-  assert.strictEqual(treap.lastIndexOf(1), 0)
-  assert.strictEqual(treap.lastIndexOf(1.2), -1)
-  assert.strictEqual(treap.lastIndexOf(2), 1)
-  assert.strictEqual(treap.lastIndexOf(3), 4)
-  assert.strictEqual(treap.lastIndexOf(4), 5)
-  assert.strictEqual(treap.lastIndexOf(5), -1)
-  treap.delete(4)
-
-  // keys values rvalues entries
-  assert.deepStrictEqual([...treap.keys()], [1, 2, 3, 3, 3])
-  assert.deepStrictEqual([...treap.values()], [1, 2, 3, 3, 3])
-  assert.deepStrictEqual([...treap.rvalues()], [3, 3, 3, 2, 1])
-  assert.deepStrictEqual(
-    [...treap.entries()],
-    [
-      [0, 1],
-      [1, 2],
-      [2, 3],
-      [3, 3],
-      [4, 3],
-    ]
-  )
-
-  // at
-  assert.strictEqual(treap.at(0), 1)
-  assert.strictEqual(treap.at(1), 2)
-  assert.strictEqual(treap.at(2), 3)
-  assert.strictEqual(treap.at(3), 3)
-  assert.strictEqual(treap.at(4), 3)
-  assert.strictEqual(treap.at(-1), 3)
-  assert.strictEqual(treap.at(-100), undefined)
-
-  // first last shift pop
-  assert.strictEqual(treap.shift(), 1)
-  assert.strictEqual(treap.first(), 2)
-  assert.strictEqual(treap.pop(), 3)
-  assert.strictEqual(treap.last(), 3)
-  assert.strictEqual(treap.size, 3)
-
-  // bisectLeft bisectRight
-  // [2,3,3]
-  assert.strictEqual(treap.bisectLeft(1.9), 0)
-  assert.strictEqual(treap.bisectLeft(2), 0)
-  assert.strictEqual(treap.bisectLeft(2.5), 1)
-  assert.strictEqual(treap.bisectLeft(3), 1)
-  assert.strictEqual(treap.bisectLeft(4), 3)
-  assert.strictEqual(treap.bisectRight(1.9), 0)
-  assert.strictEqual(treap.bisectRight(2), 1)
-  assert.strictEqual(treap.bisectRight(2.5), 1)
-  assert.strictEqual(treap.bisectRight(3), 3)
-  assert.strictEqual(treap.bisectRight(4), 3)
-
-  // count
-  assert.strictEqual(treap.count(1), 0)
-  assert.strictEqual(treap.count(2), 1)
-  assert.strictEqual(treap.count(3), 2)
 }
 
 export { TreapMultiSet }
