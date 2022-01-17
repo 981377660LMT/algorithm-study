@@ -1,14 +1,8 @@
-const fs = require('fs')
+const len = input()
 
-// 获取单个用例的所有行，此时 lines[0] 为第一行数据
-const lines = fs
-  .readFileSync(0)
-  .toString()
-  .trim()
-  .split(/\r\n|\r|\n/)
-
-for (let i = 1; i < lines.length; i++) {
-  console.log(getAns(lines[i]))
+for (let _ = 0; _ < len; _++) {
+  const line = input()
+  console.log(getAns(line))
 }
 
 function getAns(s) {

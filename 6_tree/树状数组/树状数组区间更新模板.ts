@@ -29,11 +29,11 @@ class BIT {
     return this.query(right) - this.query(left - 1)
   }
 
-  private add(x: number, k: number): void {
-    if (x <= 0) throw Error('查询索引应为正整数')
-    for (let i = x; i <= this.size; i += this.lowbit(i)) {
-      this.tree1[i] += k // 此处进行了差分操作，记录差分操作大小
-      this.tree2[i] += (x - 1) * k // 前x-1个数没有进行差分操作，这里把总值记录下来
+  add(index: number, delta: number): void {
+    if (index <= 0) throw Error('查询索引应为正整数')
+    for (let i = index; i <= this.size; i += this.lowbit(i)) {
+      this.tree1[i] += delta // 此处进行了差分操作，记录差分操作大小
+      this.tree2[i] += (index - 1) * delta // 前x-1个数没有进行差分操作，这里把总值记录下来
     }
   }
 
@@ -43,11 +43,11 @@ class BIT {
   // 差分数组 diff[i]，存储的是 res[i] - res[i - 1]；而差分数组 diff[0...i] 的和(树状数组更新/查询就是做求和)，就是 res[i] 的值。
   // 则[1,x]范围的和：a[1] + a[2] + a[3] + ... + a[x] = d[1] + d[1] + d[2] + d[1] + d[2] + d[3] + ... + d[1] + d[2] + d[3] + ... + d[x]
   // =x*(Σd[i]) - ∑(i-1)*d[i] (i从1到x)
-  private query(x: number): number {
+  query(index: number): number {
+    if (index > this.size) index = this.size
     let res = 0
-
-    for (let i = x; i > 0; i -= this.lowbit(i)) {
-      res += x * this.tree1[i] - this.tree2[i]
+    for (let i = index; i > 0; i -= this.lowbit(i)) {
+      res += index * this.tree1[i] - this.tree2[i]
     }
 
     return res

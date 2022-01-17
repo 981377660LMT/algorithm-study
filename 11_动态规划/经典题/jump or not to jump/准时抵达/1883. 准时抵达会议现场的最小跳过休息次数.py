@@ -30,6 +30,7 @@ class Solution:
         for j, time in enumerate(dp[-1]):
             if time <= hoursBefore:
                 return j
+
         return -1
 
 

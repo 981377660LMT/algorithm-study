@@ -1,3 +1,5 @@
+递增的数组，bisect_left 给出的是`首个大于等于` target 的数所在的下标，bisect_right 给出的是`首个严格大于` target 的数所在的下标
+
 `1649. 通过指令创建有序数组`
 
 # 插入不要用 bisect_insort 而是直接切片

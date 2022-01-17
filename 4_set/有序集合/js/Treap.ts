@@ -3,7 +3,6 @@ type CompareFunction<T, R extends 'number' | 'boolean'> = (
   b: T
 ) => R extends 'number' ? number : boolean
 
-// 无法支持islice 因为Treap结点随机旋转
 interface ITreapMultiSet<T> extends Iterable<T> {
   add: (...value: T[]) => this
   has: (value: T) => boolean
@@ -27,12 +26,12 @@ interface ITreapMultiSet<T> extends Iterable<T> {
   shift: () => T | undefined
   pop: (index?: number) => T | undefined
 
-  count(value: T): number
+  count: (value: T) => number
 
-  keys: () => Generator<T, any, any>
-  values: () => Generator<T, any, any>
-  rvalues: () => Generator<T, any, any>
-  entries(): IterableIterator<[number, T]>
+  keys: () => IterableIterator<T>
+  values: () => IterableIterator<T>
+  rvalues: () => IterableIterator<T>
+  entries: () => IterableIterator<[number, T]>
 
   readonly size: number
 }
@@ -70,6 +69,7 @@ class TreapNode<T = number> {
   }
 
   rotateRight(): TreapNode<T> {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: TreapNode<T> = this
     const left = node.left
     node.left = left?.right ?? null
@@ -81,6 +81,7 @@ class TreapNode<T = number> {
   }
 
   rotateLeft(): TreapNode<T> {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: TreapNode<T> = this
     const right = node.right
     node.right = right?.left ?? null
@@ -93,10 +94,10 @@ class TreapNode<T = number> {
 }
 
 class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
-  private root: TreapNode<T>
-  private compareFn: CompareFunction<T, 'number'>
-  private leftBound: T
-  private rightBound: T
+  private readonly root: TreapNode<T>
+  private readonly compareFn: CompareFunction<T, 'number'>
+  private readonly leftBound: T
+  private readonly rightBound: T
 
   /**
    *
@@ -139,7 +140,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     this.root = new TreapNode<T>(rightBound)
     this.root.priority = Infinity
     this.root.left = new TreapNode<T>(leftBound)
-    this.root.left!.priority = -Infinity
+    this.root.left.priority = -Infinity
     this.root.pushUp()
 
     this.leftBound = leftBound
@@ -373,7 +374,6 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
       return 0
     }
 
-    // 因为有个lowerBound 所以-1
     const res = dfs(this.root, value) - 1
     return isExist ? res : -1
   }
@@ -400,7 +400,6 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
       }
     }
 
-    // 因为有个-Infinity 所以 + 2
     const res = dfs(this.root, index + 2)
     return ([this.leftBound, this.rightBound] as any[]).includes(res) ? undefined : res
   }
@@ -535,22 +534,21 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
    */
   shift(): T | undefined {
     const first = this.first()
-    if (first == undefined) return undefined
+    if (first === undefined) return undefined
     this.delete(first)
     return first
   }
 
   /**
    * @complexity `O(logn)`
-   * @param index
    * @description
-   * Removes the element at `index` from an set and returns it.
+   * Removes the last element from an set and returns it.
    * If the set is empty, undefined is returned and the set is not modified.
    */
   pop(index?: number): T | undefined {
     if (index == null) {
       const last = this.last()
-      if (last == undefined) return undefined
+      if (last === undefined) return undefined
       this.delete(last)
       return last
     }
@@ -598,7 +596,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
   *values(): Generator<T, any, any> {
     const iter = this.inOrder()
     iter.next()
-    let steps = this.size
+    const steps = this.size
     for (let _ = 0; _ < steps; _++) {
       yield iter.next().value
     }
@@ -611,7 +609,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
   *rvalues(): Generator<T, any, any> {
     const iter = this.reverseInOrder()
     iter.next()
-    let steps = this.size
+    const steps = this.size
     for (let _ = 0; _ < steps; _++) {
       yield iter.next().value
     }
@@ -624,7 +622,7 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
   *entries(): IterableIterator<[number, T]> {
     const iter = this.inOrder()
     iter.next()
-    let steps = this.size
+    const steps = this.size
     for (let i = 0; i < steps; i++) {
       yield [i, iter.next().value]
     }

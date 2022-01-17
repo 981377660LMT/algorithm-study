@@ -6,8 +6,8 @@
  * @summary 某些位置的括号可以任意转换的问题
  */
 function checkValidString(s: string): boolean {
-  return traverse(s) && traverse(s, true)
-  function traverse(str: string, reversed = false) {
+  return check(s) && check(s, true)
+  function check(str: string, reversed = false): boolean {
     reversed && (str = str.split('').reverse().join(''))
     let count = 0
     let flag = reversed ? -1 : 1
@@ -18,7 +18,7 @@ function checkValidString(s: string): boolean {
           count += flag
           break
         case ')':
-          count += -flag
+          count -= flag
           break
         case '*':
           count++

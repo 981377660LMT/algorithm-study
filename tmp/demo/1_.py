@@ -4,7 +4,7 @@ from heapq import heapify, heappop, heappush
 from sortedcontainers import SortedList, SortedDict, SortedSet
 from bisect import bisect_left, bisect_right
 from functools import lru_cache, reduce
-from itertools import accumulate, groupby, combinations, permutations, product, chain
+from itertools import accumulate, groupby, combinations, permutations, product, chain, islice
 from math import gcd, sqrt, ceil, floor, comb
 from string import ascii_lowercase, ascii_uppercase, ascii_letters, digits
 from operator import xor, or_, and_, not_

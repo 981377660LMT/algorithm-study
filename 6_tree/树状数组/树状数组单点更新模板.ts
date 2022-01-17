@@ -28,27 +28,28 @@ class BIT implements IBIT {
 
   /**
    *
-   * @param x (离散化后)的树状数组索引
-   * @param k 增加的值
+   * @param index (离散化后)的树状数组索引
+   * @param delta 增加的值
    * @description
    * 单点修改：tree数组下标x处的值加k
    */
-  add(x: number, k: number) {
-    if (x <= 0) throw Error('查询索引应为正整数')
-    for (let i = x; i <= this.size; i += this.lowbit(i)) {
-      this.tree[i] += k
+  add(index: number, delta: number) {
+    if (index <= 0) throw Error('index 应为正整数')
+    for (let i = index; i <= this.size; i += this.lowbit(i)) {
+      this.tree[i] += delta
     }
   }
 
   /**
    *
-   * @param x
+   * @param index
    * @description
    * 区间查询：返回前x项的值(包含x)；前缀和
    */
-  query(x: number) {
+  query(index: number) {
+    if (index > this.size) index = this.size
     let res = 0
-    for (let i = x; i > 0; i -= this.lowbit(i)) {
+    for (let i = index; i > 0; i -= this.lowbit(i)) {
       res += this.tree[i]
     }
     return res
