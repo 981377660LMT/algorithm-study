@@ -8,19 +8,18 @@ const longestValidParentheses = function (s: string): number {
   // 例如: "()(()"的mark为[0, 0, 1, 0, 0]
   // 再例如: ")()((())"的mark为[1, 0, 0, 1, 0, 0, 0, 0]
   // 经过这样的处理后, 此题就变成了寻找最长的连续的0的长度
-  const len = s.length
+  const n = s.length
   const stack: number[] = []
-  const mark: number[] = Array(len).fill(0)
-  for (let i = 0; i < len; i++) {
+  const mark = Array<number>(n).fill(0)
+  for (let i = 0; i < n; i++) {
     if (s[i] === '(') {
       stack.push(i)
-      continue
-    }
-
-    if (stack.length === 0) {
-      mark[i] = 1
     } else {
-      stack.pop()
+      if (stack.length === 0) {
+        mark[i] = 1
+      } else {
+        stack.pop()
+      }
     }
   }
 
