@@ -7,7 +7,7 @@ const ladderLength = (beginWord: string, endWord: string, wordList: string[]): n
   if (!wordSet.has(endWord)) return 0
   const queue: [string, number][] = [[beginWord, 1]]
 
-  while (queue.length) {
+  while (queue.length > 0) {
     const [word, dis] = queue.shift()!
     if (word === endWord) return dis
     for (const next of getNextWords(word, wordSet)) {
@@ -18,17 +18,13 @@ const ladderLength = (beginWord: string, endWord: string, wordList: string[]): n
 
   return 0
 
-  function getNextWords(curWord: string, wordSet: Set<string>) {
-    const res: string[] = []
-
+  function* getNextWords(curWord: string, wordSet: Set<string>) {
     for (let i = 0; i < curWord.length; i++) {
       for (let j = 0; j < 26; j++) {
         const next = curWord.slice(0, i) + String.fromCharCode(97 + j) + curWord.slice(i + 1)
-        if (wordSet.has(next) && curWord !== next) res.push(next)
+        if (wordSet.has(next) && curWord !== next) yield next
       }
     }
-
-    return res
   }
 }
 

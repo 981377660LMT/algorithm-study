@@ -20,10 +20,11 @@ class Solution:
             path = queue.popleft()
             cur = path[-1]
             if cur == endWord:
-                res.append(path.copy())
+                res.append(path[:])
             else:
                 for i in range(len(cur)):
                     for next in adjMap[cur[:i] + "*" + cur[i + 1 :]]:
+                        # 因为要找所有的路，所以用等于
                         if dist[cur] + 1 <= dist[next]:
                             queue.append(path + [next])
                             dist[next] = dist[cur] + 1

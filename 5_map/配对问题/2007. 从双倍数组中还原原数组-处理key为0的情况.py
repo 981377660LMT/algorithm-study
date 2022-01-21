@@ -12,6 +12,8 @@ class Solution:
         counter = Counter(changed)
         res = []
         for key in sorted(counter):
+            if not counter[key]:
+                continue
             # 处理0的特殊情况
             if key == 0:
                 if counter[key] & 1:

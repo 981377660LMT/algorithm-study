@@ -1,4 +1,5 @@
 from typing import List
+from collections import defaultdict
 
 # 0 <= rods.length <= 20
 
@@ -13,11 +14,11 @@ from typing import List
 # 那么最后只需要求dp[0]的最大值就ok
 class Solution:
     def tallestBillboard(self, rods: List[int]) -> int:
-        dp = dict({0: 0})
+        dp = defaultdict(int, {0: 0})
         for num in rods:
             for preSum, maxSum in list(dp.items()):
-                dp[preSum + num] = max(dp.get(preSum + num, 0), maxSum + num)
-                dp[preSum - num] = max(dp.get(preSum - num, 0), maxSum)
+                dp[preSum + num] = max(dp[preSum + num], maxSum + num)
+                dp[preSum - num] = max(dp[preSum - num], maxSum)
         return dp[0]
 
 

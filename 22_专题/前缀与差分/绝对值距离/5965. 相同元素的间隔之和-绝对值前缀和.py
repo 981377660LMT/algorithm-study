@@ -15,15 +15,15 @@ class Solution:
             ]
 
         n = len(arr)
-        indexes = defaultdict(list)
-        res = [0] * n
+        adjMap = defaultdict(list)
         for i, num in enumerate(arr):
-            indexes[num].append(i)
+            adjMap[num].append(i)
 
-        for lis in indexes.values():
-            diffSums = getSumAbsoluteDifferences(lis)
-            for index, diff in zip(lis, diffSums):
-                res[index] = diff
+        res = [0] * n
+        for indexes in adjMap.values():
+            diffSums = getSumAbsoluteDifferences(indexes)
+            for index, diffSum in zip(indexes, diffSums):
+                res[index] = diffSum
         return res
 
 

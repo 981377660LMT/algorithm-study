@@ -1,4 +1,5 @@
 from typing import List
+from itertools import accumulate
 
 # 非递减 有序整数数组 nums
 # result[i] 等于 sum(|nums[i]-nums[j]|)
@@ -9,9 +10,7 @@ from typing import List
 class Solution:
     def getSumAbsoluteDifferences(self, nums: List[int]) -> List[int]:
         n = len(nums)
-        preSum = [0]
-        for num in nums:
-            preSum.append(preSum[-1] + num)
+        preSum = [0] + list(accumulate(nums))
         return [
             (num * (i + 1) - preSum[i + 1]) + (preSum[n] - preSum[i] - (n - i) * num)
             for i, num in enumerate(nums)
