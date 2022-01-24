@@ -24,18 +24,21 @@ function radixSort(array: readonly number[]): readonly number[] {
   }
 
   return array
-
-  // 2进制时
-  // offset 变成 << 操作
-  // 模10 变成 &1 操作
-  function getDigitValue(num: number, digit: number) {
-    const offset = 10 ** digit
-    return ~~(num / offset) % 10
-  }
 }
 
-const array = [3, 44, 38, 5, 47, 15, 36, 26, 27, 2, 46, 4, 19, 50, 48]
-console.log('原始array:', array)
-const newArr = radixSort(array)
-console.log('newArr:', newArr)
-export {}
+// 2进制时
+// offset 变成 << 操作
+// 模10 变成 &1 操作
+function getDigitValue(num: number, digit: number) {
+  const offset = 10 ** digit
+  return ~~(num / offset) % 10
+}
+
+if (require.main === module) {
+  const array = [3, 44, 38, 5, 47, 15, 36, 26, 27, 2, 46, 4, 19, 50, 48]
+  console.log('原始array:', array)
+  const newArr = radixSort(array)
+  console.log('newArr:', newArr)
+}
+
+export { getDigitValue }
