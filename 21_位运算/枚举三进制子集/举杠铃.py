@@ -23,18 +23,18 @@ class Solution:
         res = set()
 
         for state in range(3 ** m):
-            left, right = 0, 0
+            leftSum, rightSum = 0, 0
             # 检查state的第i位是0/1/2中的哪个
             for i in range(m):
                 prefix = state // (3 ** i)
                 mod = prefix % 3
                 if mod == 1:
-                    left += plates[i]
+                    leftSum += plates[i]
                 elif mod == 2:
-                    right += plates[i]
+                    rightSum += plates[i]
 
-            if left == right:
-                res |= {barbells[i] + left + right for i in range(n)}
+            if leftSum == rightSum:
+                res |= {barbells[i] + leftSum + rightSum for i in range(n)}
 
         return list(res)
 

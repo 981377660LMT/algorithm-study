@@ -7,7 +7,8 @@ from typing import List
 
 MOD = int(1e9 + 7)
 # 2 <= n <= 105
-# 0 <= nextVisit[i] <= i
+# `0 <= nextVisit[i] <= i` 注意到第一次访问后只会后退，不会前进
+# 由于保证nextVisit[i] <= i，因此出现第三次重复时直接重复第一次走到该位置和目前之间的走法。
 
 #  dp[i] is number of days to reach cell i
 #  `We can only reach cell i from the cell i-1`

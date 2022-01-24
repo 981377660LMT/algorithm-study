@@ -1,3 +1,5 @@
+// 二分图检测最好用dfs
+
 import { useUnionFindArray } from '../../14_并查集/推荐使用并查集精简版'
 
 enum Color {

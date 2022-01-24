@@ -3,7 +3,7 @@ const img = document.querySelector('#img') as HTMLImageElement
 
 // // 方式1：URL.createObjectURL()
 // file.onchange = () => {
-//   const data = URL.createObjectURL(file.files![0])
+// const data = URL.createObjectURL(file.files![0])
 //   // console.log(data)
 //   // blob:http://localhost:1234/12a9d830-a83c-4f23-b5a3-cdd6d344f05a
 

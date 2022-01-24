@@ -4,7 +4,7 @@
 module.exports = {
   // preset:'',
   // roots: ['<rootDir>/前端笔记'],
-  testMatch: ['**/__tests__/*.[jt]s?(x)', '**/*.test.[jt]s?(x)'],
+  testMatch: ['**/__tests__/*.[jt]s?(x)', '**/*.test.[jt]s?(x)', '**/*.spec.[jt]s?(x)'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
