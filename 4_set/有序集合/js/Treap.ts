@@ -109,24 +109,24 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
    * @example
    * ```ts
    * interface Person {
-      name: string
-      age: number
+        name: string
+        age: number
     }
 
     const leftBound = {
-      name: 'Alice',
-      age: -Infinity,
+        name: 'Alice',
+        age: -Infinity,
     }
 
     const rightBound = {
-      name: 'Bob',
-      age: Infinity,
+        name: 'Bob',
+        age: Infinity,
     }
 
     const sortedList = new TreapMultiSet<Person>(
-      (a: Person, b: Person) => a.age - b.age,
-      leftBound,
-      rightBound
+        (a: Person, b: Person) => a.age - b.age,
+        leftBound,
+        rightBound
     )
    * ```
    */

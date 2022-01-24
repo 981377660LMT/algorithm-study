@@ -22,10 +22,10 @@ from heapq import heappush, heappop
 
 class Solution:
     def secondMinimum(self, n: int, edges: List[List[int]], time: int, change: int) -> int:
-        adjMap = defaultdict(list)
+        adjMap = defaultdict(set)
         for x, y in edges:
-            adjMap[x - 1].append(y - 1)
-            adjMap[y - 1].append(x - 1)
+            adjMap[x - 1].add(y - 1)
+            adjMap[y - 1].add(x - 1)
 
         # 每个点保存多个距离而不是只有一个
         dist = [[] for _ in range(n)]

@@ -14,16 +14,18 @@ class Solution:
     def recoverArray(self, nums: List[int]) -> List[int]:
         n = len(nums)
         nums = sorted(nums)
+        keys = sorted(set(nums))
+
         # 枚举间隔k
-        for i in range(n - 2, n // 2 - 2, -1):
+        for i in range(n - 2, -1, -1):
             diff = nums[-1] - nums[i]
             if diff == 0 or diff & 1:
                 continue
 
-            k = diff // 2
+            k = diff >> 1
             counter = Counter(nums)
             res = []
-            for key in sorted(counter):
+            for key in keys:
                 if counter[key + 2 * k] < counter[key]:
                     break
                 res.extend([key + k] * counter[key])

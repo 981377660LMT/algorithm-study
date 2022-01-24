@@ -1,52 +1,37 @@
-import { MinHeap } from '../../../2_queue/minheap'
+import { TreapMultiSet } from '../js/Treap'
 
+type Time = number
 type Price = number
-type Timestamp = number
 
-interface Stock {
-  price: Price
-  timestamp: Timestamp
-}
-
+// 很多数据结构设计题都可以用一个map+一个sortedList解决
+// map维护数据的 id => value 的对应关系，sortedList 维护数据的有序性
 class StockPrice {
-  private minQueue: MinHeap<Stock>
-  private maxQueue: MinHeap<Stock>
-  private record: Map<Timestamp, Price>
-  private curTime: number
+  private curTime: Time
+  private map: Map<Time, Price>
+  private sortedList: TreapMultiSet<Price>
 
   constructor() {
-    this.minQueue = new MinHeap((a, b) => a.price - b.price)
-    this.maxQueue = new MinHeap((a, b) => b.price - a.price)
-    this.record = new Map()
     this.curTime = 0
+    this.map = new Map()
+    this.sortedList = new TreapMultiSet<Price>()
   }
 
   update(timestamp: number, price: number): void {
-    if (timestamp >= this.curTime) this.curTime = timestamp
-    this.record.set(timestamp, price)
-    this.minQueue.push({ price, timestamp })
-    this.maxQueue.push({ price, timestamp })
+    this.curTime = Math.max(timestamp, this.curTime)
+    this.map.has(timestamp) && this.sortedList.delete(this.map.get(timestamp)!)
+    this.sortedList.add(price)
+    this.map.set(timestamp, price)
   }
 
   current(): number {
-    return this.record.get(this.curTime) || -1
+    return this.map.get(this.curTime)!
   }
 
   maximum(): number {
-    let res = this.maxQueue.peek()
-    while (res.price !== this.record.get(res.timestamp)) {
-      this.maxQueue.shift()
-      res = this.maxQueue.peek()
-    }
-    return res.price
+    return this.sortedList.last()!
   }
 
   minimum(): number {
-    let res = this.minQueue.peek()
-    while (res.price !== this.record.get(res.timestamp)) {
-      this.minQueue.shift()
-      res = this.minQueue.peek()
-    }
-    return res.price
+    return this.sortedList.first()!
   }
 }
