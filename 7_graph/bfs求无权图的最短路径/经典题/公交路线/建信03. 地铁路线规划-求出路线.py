@@ -23,7 +23,7 @@ class Solution:
         # 每个公交车抵达的线路
         # stationsByBus = [set(line) for line in lines]
 
-        # 当前车站 => 下一个车站 => 可乘坐的巴士id
+        # 当前车站 => 下一个车站 => 在哪条线上
         adjMap = defaultdict(lambda: defaultdict(set))
         for bus, stops in enumerate(lines):
             for cur, nextStop in zip(stops, stops[1:]):
