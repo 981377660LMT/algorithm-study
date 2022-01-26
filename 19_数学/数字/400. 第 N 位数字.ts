@@ -5,6 +5,7 @@
  * 1 - 9 : 9 digits
    10 - 99 : 90 * 2 digits
    100 - 999: 900 * 3 digits
+   @description 第a位数字
  */
 const findNthDigit = function (n: number): number {
   let count = 9

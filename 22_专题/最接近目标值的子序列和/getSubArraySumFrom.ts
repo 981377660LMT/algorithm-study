@@ -2,7 +2,7 @@
  * @description 计算nums全部子序列和
  * @summary 时间复杂度O(2^n) 小于取所有子集的复杂度O(2^n*n)
  */
-function getSubArraySumFrom(nums: number[]): number[] {
+function getSubArraySum(nums: number[]): number[] {
   const n = nums.length
   const res = Array<number>(1 << n).fill(0)
 
@@ -18,7 +18,7 @@ function getSubArraySumFrom(nums: number[]): number[] {
 }
 
 if (require.main === module) {
-  console.log(getSubArraySumFrom([1, 2]))
+  console.log(getSubArraySum([1, 2]))
 }
 
-export { getSubArraySumFrom }
+export { getSubArraySum }

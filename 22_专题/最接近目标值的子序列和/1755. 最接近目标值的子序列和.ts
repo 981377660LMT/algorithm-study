@@ -1,4 +1,4 @@
-import { getSubArraySumFrom } from './getSubArraySumFrom'
+import { getSubArraySum } from './getSubArraySumFrom'
 import { twoSum } from './twoSum'
 
 // 给你一个整数数组 nums 和一个目标值 goal 。
@@ -8,8 +8,8 @@ import { twoSum } from './twoSum'
 // -109 <= goal <= 109
 function minAbsDifference(nums: number[], goal: number): number {
   const mid = nums.length >> 1
-  const left = getSubArraySumFrom(nums.slice(0, mid)).sort((a, b) => a - b)
-  const right = getSubArraySumFrom(nums.slice(mid)).sort((a, b) => a - b)
+  const left = getSubArraySum(nums.slice(0, mid)).sort((a, b) => a - b)
+  const right = getSubArraySum(nums.slice(mid)).sort((a, b) => a - b)
   return twoSum(left, right, goal)
 }
 

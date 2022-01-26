@@ -5,7 +5,7 @@ from collections import deque
 # 球可以途经空地向 上、下、左、右 四个方向滚动，且在遇到墙壁前不会停止滚动
 # 球可以途经空地向 上、下、左、右 四个方向滚动，且在遇到墙壁前不会停止滚动
 
-
+# 请你判断球能否在目的地停下
 class Solution:
     def hasPath(self, maze: List[List[int]], start: List[int], destination: List[int]) -> bool:
         if not any(maze):

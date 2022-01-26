@@ -12,6 +12,8 @@ from collections import defaultdict, deque
 # 你可以 同时 上 任意门课程 。
 
 # 总结：拓扑排序模板+dp更新数组
+
+
 class Solution:
     def minimumTime(self, n: int, relations: List[List[int]], time: List[int]) -> int:
         indegree = [0] * (n + 1)

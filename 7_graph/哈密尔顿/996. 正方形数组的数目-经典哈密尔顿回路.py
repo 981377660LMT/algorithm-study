@@ -8,6 +8,8 @@ from collections import Counter
 # 1 <= A.length <= 12
 
 # 找到图中的哈密尔顿路径数
+
+
 class Solution:
     def numSquarefulPerms(self, nums: List[int]) -> int:
         def isEdge(x: int, y: int) -> bool:
@@ -17,7 +19,7 @@ class Solution:
         n = len(nums)
         target = (1 << n) - 1
         adjList = [[] for _ in range(n)]
-        for i in range(n - 1):
+        for i in range(n):
             for j in range(i + 1, n):
                 if isEdge(nums[i], nums[j]):
                     adjList[i].append(j)
@@ -39,8 +41,8 @@ class Solution:
         res = sum(dfs(i, 1 << i) for i in range(n))
         counter = Counter(nums)
         # 消除重复排列
-        for val in counter.values():
-            res //= factorial(val)
+        for count in counter.values():
+            res //= factorial(count)
         return res
 
 

@@ -10,6 +10,7 @@ from collections import deque
 
 # 注意:这是带权的bfs(不是所有前进速度一样，不一定先到终点就最短)
 # 带权bfs需要dist数组/单源最短路径dijkstra算法
+# 开一个数组二维记录每个点处的path
 
 
 INF = 0x7FFFFFFF

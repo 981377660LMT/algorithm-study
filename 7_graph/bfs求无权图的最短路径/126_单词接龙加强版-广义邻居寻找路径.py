@@ -14,6 +14,7 @@ class Solution:
         for word in wordList:
             for i in range(len(word)):
                 adjMap[word[:i] + "*" + word[i + 1 :]].append(word)
+        # queue直接存路径
         queue = deque([[beginWord]])
 
         while queue:

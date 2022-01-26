@@ -12,9 +12,9 @@ from functools import lru_cache
 
 class Solution:
     def palindromePartition(self, s: str, k: int) -> int:
-        # 计算修改多少个字符能变成回文
         @lru_cache(None)
         def checkPartition(left: int, right: int) -> int:
+            """计算修改多少个字符能变成回文"""
             if left >= right:
                 return 0
             return checkPartition(left + 1, right - 1) + int(s[left] != s[right])

@@ -596,7 +596,7 @@ s = null;
 ```
 
 54. instanceof 能否判断基本数据类型？
-    能。
+    一般不能。
 
 ```JS
 class PrimitiveNumber {

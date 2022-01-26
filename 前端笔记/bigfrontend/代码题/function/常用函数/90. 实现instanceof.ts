@@ -1,9 +1,10 @@
 // from @angular/core
-interface Class<T = any> extends Function {
-  new (...args: any[]): T
+interface ClassConstructer<T = unknown> extends Function {
+  new (...args: unknown[]): T
+  readonly prototype: T
 }
 
-function myInstanceOf(obj: any, target: Class): boolean {
+function myInstanceOf(obj: any, target: ClassConstructer): boolean {
   if (obj == null || typeof obj !== 'object') return false
   if (typeof target !== 'function') return false
 

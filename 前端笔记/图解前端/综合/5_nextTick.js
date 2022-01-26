@@ -41,7 +41,7 @@ if (typeof Promise !== 'undefined') {
 }
 
 export function nextTick(cb) {
-  // 除了渲染watcher  还有用户自己手动调用的nextTick 一起被收集到数组
+  // 除了渲染watcher  还有用户自己手动调用的nextTick 一起被收集到数组 在视图更新后异步执行cb
   callbacks.push(cb)
   if (!pending) {
     // 如果多次调用nextTick  只会执行一次异步 等异步队列清空之后再把标志变为false

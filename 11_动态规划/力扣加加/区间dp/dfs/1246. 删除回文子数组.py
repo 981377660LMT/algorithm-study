@@ -5,6 +5,8 @@ from functools import lru_cache
 # 请你计算并返回从数组中删除所有数字所需的最少操作次数。
 # 1 <= arr.length <= 100
 
+# 枚举可能的回文分割点
+
 
 class Solution:
     def minimumMoves(self, arr: List[int]) -> int:
@@ -15,8 +17,9 @@ class Solution:
             if right - left <= 2 and arr[left] == arr[right - 1]:
                 return 1
 
-            res = 0x7FFFFFFF
+            res = 0x3F3F3F3F
             for i in range(left, right):
+                # 可能的一段回文
                 if arr[i] == arr[left]:
                     # 注意这个max，左边必须删除一个
                     res = min(res, max(1, dfs(left + 1, i)) + dfs(i + 1, right))

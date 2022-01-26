@@ -11,22 +11,19 @@ from collections import defaultdict, deque
 
 class Solution:
     def largestPathValue(self, colors: str, edges: List[List[int]]) -> int:
-        # edges = list(set([(x, y) for x, y in edges]))  # 先去重
         n = len(colors)
-        indegree = [0] * n
-        adjMap = defaultdict(list)
-        for x, y in edges:
-            indegree[y] += 1
-            adjMap[x].append(y)
+        adjMap, indegree = defaultdict(set), [0] * n
+        for u, v in edges:
+            indegree[v] += 1
+            adjMap[u].add(v)
 
-        # ------------------- 拓扑排序topsort ----------------------#
-        colorCounter = [[0] * 26 for _ in range(n)]
+        colorCounters = [[0] * 26 for _ in range(n)]
         queue = deque([i for i in range(n) if indegree[i] == 0])
         count = 0
         while queue:
             cur = queue.popleft()
             count += 1
-            colorCounter[cur][ord(colors[cur]) - ord('a')] += 1
+            colorCounters[cur][ord(colors[cur]) - ord('a')] += 1
 
             for next in adjMap[cur]:
                 indegree[next] -= 1
@@ -35,16 +32,14 @@ class Solution:
 
                 # 注意这一步
                 for color in range(26):
-                    colorCounter[next][color] = max(
-                        colorCounter[next][color], colorCounter[cur][color]
+                    colorCounters[next][color] = max(
+                        colorCounters[next][color], colorCounters[cur][color]
                     )
+
         if count != n:
             return -1
 
-        res = 0
-        for node in colorCounter:
-            res = max(res, max(node))
-        return res
+        return max((max(counter) for counter in colorCounters), default=0)
 
 
 print(Solution().largestPathValue(colors="abaca", edges=[[0, 1], [0, 2], [2, 3], [3, 4]]))
