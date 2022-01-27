@@ -26,6 +26,8 @@ class Solution:
 
     @staticmethod
     def bestLine(points: List[List[int]]) -> List[Set[int]]:
+        """求出通过点数最多的所有直线"""
+
         def gcd(a, b):
             return a if b == 0 else gcd(b, a % b)
 
