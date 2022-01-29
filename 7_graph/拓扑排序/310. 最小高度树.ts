@@ -10,8 +10,8 @@ function findMinHeightTrees(n: number, edges: number[][]): number[] {
 
   // 加入叶子
   let leaves: number[] = []
-  for (const [index, arr] of adjList.entries()) {
-    if (arr.size === 1) leaves.push(index)
+  for (const [index, nexts] of adjList.entries()) {
+    if (nexts.size === 1) leaves.push(index)
   }
 
   while (n >= 3) {

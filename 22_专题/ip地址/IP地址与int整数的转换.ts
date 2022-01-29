@@ -19,5 +19,9 @@ function intToIP(int: number): string {
   return res.join('')
 }
 
-console.log(IPToInt('10.0.3.193'))
-console.log(intToIP(0b00001010_00000000_00000011_11000001))
+if (require.main === module) {
+  console.log(IPToInt('10.0.3.193'))
+  console.log(intToIP(0b00001010_00000000_00000011_11000001))
+}
+
+export { IPToInt, intToIP }

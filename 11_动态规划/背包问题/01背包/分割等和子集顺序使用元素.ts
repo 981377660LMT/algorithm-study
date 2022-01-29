@@ -1,5 +1,5 @@
 /**
- * @param {number[]} nums
+ * @param {number[]} nums nums[i]>=0
  * @return {boolean}
  * @description 判断是否可以将这个数组分割成两个子集，使得两个子集的元素和相等
  * @summary 01背包问题:在n个物品中选一定物品完全填满sum/2容量的背包

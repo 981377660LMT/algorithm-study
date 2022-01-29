@@ -14,7 +14,7 @@
 
    5. scrollTop：滚动后被隐藏的高度，获取对象相对于由 offsetParent 属性指定的父坐标(css 定位的元素或 body 元素)距离顶端的高度。
 
-3. 图片懒加载三种方式
+3. 图片懒加载/加载更多三种方式
    1. offsetTop < clientHeight + scrollTop
    2. element.getBoundingClientRect().top < clientHeight
    3. IntersectionObserver 方式;intersectionRatio：目标元素的可见比例，即 intersectionRect 占 boundingClientRect 的比例，完全可见时为 1 ，完全不可见时小于等于 0
