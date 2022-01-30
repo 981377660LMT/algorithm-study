@@ -3,13 +3,13 @@
 // # 1 <= k <= 20
 // # 1 <= s.length <= 5 * 105
 
-import { RabinKarpHasher } from '../StringHasher'
+import { BigIntHasher } from '../BigIntHasher'
 
 function hasAllCodes(s: string, k: number): boolean {
-  const leftHasher = new RabinKarpHasher(s)
-  RabinKarpHasher.setBASE(2)
+  const leftHasher = new BigIntHasher(s)
+  BigIntHasher.setBASE(2)
 
-  const visited = new Set<number>()
+  const visited = new Set<bigint>()
   for (let left = 1; left + k - 1 <= s.length; left++) {
     const hash = leftHasher.getHashOfRange(left, left + k - 1)
     visited.add(hash)

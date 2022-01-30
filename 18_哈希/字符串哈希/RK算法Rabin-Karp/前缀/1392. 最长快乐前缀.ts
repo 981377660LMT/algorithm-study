@@ -1,10 +1,10 @@
 // 「快乐前缀」是在原字符串中既是 非空 前缀也是后缀（不包括原字符串自身）的字符串。
 // 给你一个字符串 s，请你返回它的 最长快乐前缀。
 
-import { RabinKarpHasher } from '../../StringHasher'
+import { BigIntHasher } from '../../BigIntHasher'
 
 function longestPrefix(s: string): string {
-  const leftHasher = new RabinKarpHasher(s)
+  const leftHasher = new BigIntHasher(s)
   let res = ''
 
   for (let r = 1; r <= s.length - 1; r++) {

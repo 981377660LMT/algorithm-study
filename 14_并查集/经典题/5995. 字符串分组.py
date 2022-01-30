@@ -10,13 +10,6 @@ from string import ascii_lowercase, ascii_uppercase, ascii_letters, digits
 from operator import le, xor, or_, and_, not_
 
 
-MOD = int(1e9 + 7)
-INF = 0x3F3F3F3F
-EPS = int(1e-8)
-dirs4 = [[-1, 0], [0, 1], [1, 0], [0, -1]]
-dirs8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]]
-
-
 class UnionFind:
     def __init__(self, n: int):
         self.n = n
@@ -45,18 +38,23 @@ class UnionFind:
         return self.find(x) == self.find(y)
 
 
+# 枚举 words 中的字符串 ss，并枚举 ss 通过添加、
+# 删除和替换操作得到的字符串 tt，`如果 tt 也在 words 中，则说明 ss 和 tt 可以分到同一组`
+
+
 class Solution:
     def groupStrings(self, words: List[str]) -> List[int]:
-        words.sort()
         n = len(words)
         uf = UnionFind(n)
-        wordStates = [0] * n
-        adjList = [set() for _ in range(n)]
+        wordId = dict()
+        wordCounter = Counter()
+
         for i, word in enumerate(words):
             state = 0
             for char in word:
                 state |= 1 << (ord(char) - 97)
-            wordStates[i] = state
+            wordId[state] = i
+            wordCounter[state] += 1
 
         # 邻居
         for i, word in enumerate(words):
@@ -64,17 +62,15 @@ class Solution:
             addOne = set()
             removeOne = set()
             replaceOne = set()
+            # 增
             for char in ascii_lowercase:
-                addOne.add(raw | 1 << (ord(char) - 97))
+                addWord = raw | 1 << (ord(char) - 97)
+                if addWord in wordSet:
+                    ...
+            # 删、改
             for char in word:
                 removeOne.add(raw ^ 1 << (ord(char) - 97))
                 replaceOne.add(raw ^ 1 << (ord(char) - 97) | 1 << 28)
-            adjList[i] = addOne | removeOne | replaceOne
-
-        for i in range(n):
-            for j in range(i + 1, n):
-                if wordStates[j] in adjList[i] or wordStates[i] in adjList[j]:
-                    uf.union(i, j)
 
         return [uf.part, max(uf.size)]
 

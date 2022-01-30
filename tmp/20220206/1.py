@@ -18,15 +18,7 @@ dirs8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]]
 
 class Solution:
     def findFinalValue(self, nums: List[int], original: int) -> int:
-        numSet = set(nums)
-        res = original
-        while True:
-            if res in numSet:
-                res *= 2
-            else:
-                break
-
-        return res
+        ...
 
 
 print(Solution().findFinalValue(nums=[5, 3, 6, 1, 12], original=3))

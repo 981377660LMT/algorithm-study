@@ -18,26 +18,7 @@ dirs8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]]
 
 class Solution:
     def maxScoreIndices(self, nums: List[int]) -> List[int]:
-
-        res = []
-        maxCount = -1
-        curCount = 0
-        leftCounter = Counter()
-        rightCounter = Counter(nums)
-        for i in range(len(nums) + 1):
-            leftZero = leftCounter[0]
-            rightOne = rightCounter[1]
-            curCount = leftZero + rightOne
-            if curCount > maxCount:
-                res = [i]
-                maxCount = curCount
-            elif curCount == maxCount:
-                res.append(i)
-            if i < len(nums):
-                leftCounter[nums[i]] += 1
-                rightCounter[nums[i]] -= 1
-
-        return res
+        ...
 
 
 print(Solution().maxScoreIndices(nums=[0, 0, 1, 0]))

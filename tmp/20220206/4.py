@@ -7,7 +7,8 @@ from functools import lru_cache, reduce
 from itertools import accumulate, groupby, combinations, permutations, product, chain, islice
 from math import gcd, sqrt, ceil, floor, comb
 from string import ascii_lowercase, ascii_uppercase, ascii_letters, digits
-from operator import xor, or_, and_, not_
+from operator import le, xor, or_, and_, not_
+
 
 MOD = int(1e9 + 7)
 INF = 0x3F3F3F3F
@@ -17,17 +18,10 @@ dirs8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]]
 
 
 class Solution:
-    def findFinalValue(self, nums: List[int], original: int) -> int:
-        numSet = set(nums)
-        res = original
-        while True:
-            if res in numSet:
-                res *= 2
-            else:
-                break
-
-        return res
+    def groupStrings(self, words: List[str]) -> List[int]:
+        ...
 
 
-print(Solution().findFinalValue(nums=[5, 3, 6, 1, 12], original=3))
-print(Solution().findFinalValue(nums=[2, 7, 9], original=4))
+# 2 1 2 1
+print(Solution().groupStrings(words=["a", "b", "ab", "cde"]))
+print(Solution().groupStrings(words=["a", "ab", "abc"]))

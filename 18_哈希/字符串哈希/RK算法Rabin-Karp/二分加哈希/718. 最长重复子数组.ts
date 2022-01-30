@@ -1,6 +1,6 @@
 // 滚动hash+二分答案
 
-import { BigIntHasher } from './BigintHasher'
+import { BigIntHasher } from '../../BigIntHasher'
 
 /**
  * @param {number[]} nums1
@@ -8,8 +8,8 @@ import { BigIntHasher } from './BigintHasher'
  * @return {number}
  */
 function findLength(nums1: number[], nums2: number[]): number {
-  const hasher1 = new BigIntHasher(nums1)
-  const hasher2 = new BigIntHasher(nums2)
+  const hasher1 = new BigIntHasher(nums1.map(String))
+  const hasher2 = new BigIntHasher(nums2.map(String))
   let left = 0
   let right = Math.min(nums1.length, nums2.length)
 

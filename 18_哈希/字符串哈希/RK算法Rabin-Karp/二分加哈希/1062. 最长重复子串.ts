@@ -1,6 +1,6 @@
 // 滚动hash+二分答案
 
-import { RabinKarpHasher } from '../../StringHasher'
+import { BigIntHasher } from '../../BigIntHasher'
 
 /**
  *
@@ -9,8 +9,8 @@ import { RabinKarpHasher } from '../../StringHasher'
  * 给定字符串 S，找出最长重复子串的长度。如果不存在重复子串就返回 0。
  */
 function longestRepeatingSubstring(s: string): number {
-  const hasher = new RabinKarpHasher(s)
-  RabinKarpHasher.setMOD(1 << 24)
+  const hasher = new BigIntHasher(s)
+  BigIntHasher.setMOD(1 << 24)
 
   let left = 0
   let right = s.length
@@ -24,7 +24,7 @@ function longestRepeatingSubstring(s: string): number {
 
   function isExist(length: number): boolean {
     if (length === 0) return true
-    const visited = new Set<number>()
+    const visited = new Set<bigint>()
 
     for (let i = 1; i + length - 1 <= s.length; i++) {
       const sliceHash = hasher.getHashOfRange(i, i + length - 1)

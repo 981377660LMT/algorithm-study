@@ -1,14 +1,3 @@
-from typing import List, Tuple
-from collections import defaultdict, deque, Counter
-from heapq import heapify, heappop, heappush
-from sortedcontainers import SortedList, SortedDict, SortedSet
-from bisect import bisect_left, bisect_right
-from functools import lru_cache, reduce
-from itertools import accumulate, groupby, combinations, permutations, product, chain, islice
-from math import gcd, sqrt, ceil, floor, comb
-from string import ascii_lowercase, ascii_uppercase, ascii_letters, digits
-from operator import xor, or_, and_, not_
-
 MOD = int(1e9 + 7)
 INF = 0x3F3F3F3F
 EPS = int(1e-8)
@@ -16,11 +5,23 @@ dirs4 = [[-1, 0], [0, 1], [1, 0], [0, -1]]
 dirs8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]]
 
 
+# 注意这题不是rabin-karp哈希模板
+# 这题需要反向滑窗
 class Solution:
-    def findLonely(self, nums: List[int]) -> List[int]:
-        ...
+    def subStrHash(self, s: str, power: int, modulo: int, k: int, hashValue: int) -> str:
+        curSum = sum((ord(s[i]) - 96) * (power ** i) for i in range(k)) % modulo
+        if curSum == hashValue:
+            return s[:k]
+        print(curSum)
+        for right in range(k, len(s)):
+            curSum -= ord(s[right - k]) - 96
+            curSum *= pow(power, -1, modulo)
+            curSum += (ord(s[right]) - 96) * power ** (k - 1)
+            curSum %= modulo
+            if curSum == hashValue:
+                return s[right - k + 1 : right + 1]
 
 
-print(Solution().findLonely(nums=[10, 6, 5, 8]))
-print(Solution().findLonely(nums=[1, 3, 5, 3]))
+print(Solution().subStrHash(s="leetcode", power=7, modulo=20, k=2, hashValue=0))
+# print(Solution().subStrHash(s="fbxzaad", power=31, modulo=100, k=3, hashValue=32))
 
