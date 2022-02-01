@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style type="text/css">
+      * {
+        margin: 0;
+        padding: 0;
+        font-size: 12px;
+        box-sizing: border-box;
+      }
+      nav ul {
+        /* 注意这两处 */
+        display: flex;
+        flex-wrap: wrap;
+
+        padding: 0.5rem;
+        list-style: none;
+      }
+      nav ul li {
+        margin: 0.2rem;
+        /* 注意这个auto */
+        flex: 1 0 auto;
+      }
+
+      nav ul li a {
+        position: relative;
+        display: block;
+        padding: 0.2rem 0.6rem;
+        color: white;
+        line-height: 1rem;
+        background-color: black;
+        border-radius: 0.2rem;
+        text-decoration: none;
+        text-align: center;
+      }
+      nav ul li a:before {
+        position: absolute;
+        content: '';
+        width: 0;
+        height: 0;
+        border: 0.7rem solid transparent;
+        border-right-width: 0.7rem;
+        border-right-color: black;
+        left: -1.2rem;
+        top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><a href="">Fillithar</a></li>
+        <li><a href="">Berzite</a></li>
+        <li><a href="">Galidraan</a></li>
+        <li><a href="">Gravlex Med</a></li>
+        <li><a href="">Cato Neimoidia</a></li>
+        <li><a href="">Coruscant</a></li>
+        <li><a href="">Dantooine</a></li>
+        <li><a href="">Dhandu</a></li>
+        <li><a href="">Iktotchon</a></li>
+        <li><a href="">Hosnian Prime</a></li>
+        <li><a href="">Harkrova I</a></li>
+        <li><a href="">Livno III</a></li>
+        <li><a href="">Karfeddion</a></li>
+        <li><a href="">Eriadu</a></li>
+        <li><a href="">Jestefad</a></li>
+        <li><a href="">Iridonia</a></li>
+        <li><a href="">Malachor</a></li>
+        <li><a href="">Gan Moradir</a></li>
+        <li><a href="">Kethmandi</a></li>
+        <li><a href="">Mirrin Prime</a></li>
+        <li><a href="">Ezaraa</a></li>
+        <li><a href="">Muunilinst</a></li>
+        <li><a href="">Itapi Prime</a></li>
+        <li><a href="">Nam Chorios</a></li>
+      </ul>
+    </nav>
+  </body>
+</html>

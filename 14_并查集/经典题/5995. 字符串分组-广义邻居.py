@@ -1,37 +1,6 @@
-# 元素是0-n-1的并查集写法，不支持动态添加
-from collections import defaultdict
-from typing import  Generic, Iterable, List, TypeVar
+from collections import Counter, defaultdict
+from typing import Generic, Iterable, List, TypeVar
 
-
-class UnionFindArray:
-    def __init__(self, n: int):
-        self.n = n
-        self.count = n
-        self.parent = list(range(n))
-        self.rank = [1] * n
-
-    def find(self, x: int) -> int:
-        if x != self.parent[x]:
-            self.parent[x] = self.find(self.parent[x])
-        return self.parent[x]
-
-    def union(self, x: int, y: int) -> bool:
-        rootX = self.find(x)
-        rootY = self.find(y)
-        if rootX == rootY:
-            return False
-        if self.rank[rootX] > self.rank[rootY]:
-            rootX, rootY = rootY, rootX
-        self.parent[rootX] = rootY
-        self.rank[rootY] += self.rank[rootX]
-        self.count -= 1
-        return True
-
-    def isConnected(self, x: int, y: int) -> bool:
-        return self.find(x) == self.find(y)
-
-
-# 当元素不是数组index时(例如字符串)，更加通用的并查集写法，支持动态添加
 T = TypeVar('T')
 
 
@@ -78,3 +47,38 @@ class UnionFindMap(Generic[T]):
         self.rank[key] = 1
         self.count += 1
         return True
+
+
+class Solution:
+    def groupStrings(self, words: List[str]) -> List[int]:
+        states: List[int] = []
+        for i, word in enumerate(words):
+            state = 0
+            for char in word:
+                state |= 1 << (ord(char) - 97)
+            states.append(state)
+
+        uf = UnionFindMap(states)
+        statesSet = set(states)
+
+        for state in states:
+            for i in range(26):
+                addOrRemove = state ^ (1 << i)
+                if addOrRemove in statesSet:
+                    uf.union(addOrRemove, state)
+
+                if (state >> i) & 1:
+                    replace = state ^ (1 << i) | (1 << 27)
+                    uf.union(replace, state)
+
+        groupCounter = Counter()
+        for state in states:
+            root = uf.find(state)
+            groupCounter[root] += 1
+
+        return [uf.count, max(groupCounter.values())]
+
+
+# 2 1 2 1
+print(Solution().groupStrings(words=["a", "b", "ab", "cde"]))
+print(Solution().groupStrings(words=["a", "ab", "abc"]))

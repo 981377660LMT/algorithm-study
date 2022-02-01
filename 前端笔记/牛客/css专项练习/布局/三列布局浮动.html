@@ -1,0 +1,44 @@
+<!-- 使用浮动实现三列布局的注意点是浮动元素需要写在内容元素之前 -->
+<!-- 注意，HTML文档中两个浮动元素的顺序在内容元素之前。 -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style type="text/css">
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      /* 盒子成为BFC，处理浮动元素父盒子高度塌陷的问题 */
+      .container {
+        overflow: hidden;
+        border: 1px solid black;
+      }
+      /* 左浮动 */
+      .left {
+        float: left;
+        width: 100px;
+        border: 1px solid black;
+      }
+      /* 右浮动 */
+      .right {
+        float: right;
+        width: 100px;
+        border: 1px solid black;
+      }
+      /* 上下外边距为0px，左右外边距为两边浮动元素的宽度100px */
+      .center {
+        margin: 0 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="container">
+      <article class="left"><br /><br /><br /></article>
+      <article class="right"><br /><br /><br /></article>
+      <article class="center"></article>
+    </section>
+  </body>
+</html>

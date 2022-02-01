@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style type="text/css">
+      #rect {
+        width: 120px;
+        height: 100px;
+        background-color: black;
+        /*补全代码*/
+        animation: rect 10s linear infinite;
+      }
+
+      @keyframes rect {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 补全代码 -->
+    <div id="rect"></div>
+    <input id="range" type="range" value="1" min="1" max="10" />
+
+    <script type="text/javascript">
+      // 补全代码
+      const rect = document.querySelector('#rect')
+      const range = document.querySelector('#range')
+      range.onchange = function () {
+        const val = Number(this.value)
+        const period = 11 - val
+        rect.style.animationDuration = period + 's'
+      }
+    </script>
+  </body>
+</html>

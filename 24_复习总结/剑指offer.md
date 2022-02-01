@@ -72,6 +72,7 @@
 
 #剑指 Offer II 064. 神奇的字典
 `广义邻居：word[:i]+'*'+word[i+1:] => word`
+`广义邻居：127. Word Ladder`
 
 #剑指 Offer II 067 最大的异或
 `异或前缀树`

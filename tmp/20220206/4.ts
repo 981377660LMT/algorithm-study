@@ -9,6 +9,7 @@ import { combinationsWithReplacement } from '../../13_回溯算法/itertools/com
 import { permutations } from '../../13_回溯算法/itertools/permutations'
 import { product } from '../../13_回溯算法/itertools/product'
 import { useUnionFindArray } from '../../14_并查集/推荐使用并查集精简版'
+import { BigIntHasher } from '../../18_哈希/字符串哈希/BigIntHasher'
 import { qpow } from '../../19_数学/数字/快速幂/qpow'
 import { comb } from '../../19_数学/数论/逆元/逆元求comb'
 import { gcd } from '../../19_数学/最大公约数/gcd'

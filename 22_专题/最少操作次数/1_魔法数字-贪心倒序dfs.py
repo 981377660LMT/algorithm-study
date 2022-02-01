@@ -8,13 +8,23 @@
 # (1≤n,m≤1000) 数据量可以bfs
 #
 from collections import deque
+from math import floor, sqrt
 
-# 平方是增长最快的方式，所以优先平方操作
+
+# 到达离m最近的平方数
 # https://blog.nowcoder.net/n/78da997ed3aa46629885612e91a53f71?f=comment
 class Solution:
     def solve(self, n, m) -> int:
         # write code here
-        ...
+        if n >= m:
+            return n - m
+        cand1 = floor(sqrt(m))
+        cand2 = cand1 + 1
+        if abs(m - cand1 ** 2) > abs(m - cand2 ** 2):
+            cand = cand2
+        else:
+            cand = cand1
+        return min(m - n, 1 + self.solve(n, cand) + abs(m - cand ** 2))
 
 
 print(Solution().solve(3, 10))

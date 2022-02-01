@@ -1,0 +1,39 @@
+<!-- 核心思路为设置中间内容盒子的"flex: 1"属性，让中间内容区的宽度自适应，独自占据弹性容器的全部剩余空间。 -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style type="text/css">
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .container {
+        display: flex;
+      }
+      .left {
+        width: 100px;
+        border: 1px solid black;
+      }
+
+      .center {
+        flex: 1;
+        border: 1px solid black;
+      }
+
+      .right {
+        width: 100px;
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="container">
+      <article class="left"><br /><br /></article>
+      <article class="center"><br /><br /><br /></article>
+      <article class="right"><br /><br /><br /><br /></article>
+    </section>
+  </body>
+</html>

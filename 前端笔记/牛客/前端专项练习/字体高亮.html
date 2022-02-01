@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <input type="text" />
+    <button style="margin-right: 80px">查询</button>
+    <div class="text" style="margin-top: 70px">
+      牛客网隶属于北京牛客科技有限公司，牛客网成立于 2014 年 9
+      月，是以科技和创新驱动的教育科技公司。牛客网坚持以前沿技术服务于技术、以人工智能和大数据提升学习效率，专注探索在线教育创新模式，致力于为技术求职者提供能力提升解决方案，同时为企业级用户提供更高效的招聘解决方案，并为二者搭建桥梁，构建从学习到职业的良性生态圈。
+      发展至今，牛客网在技术类求职备考、社群交流、企业招聘服务等多个垂直领域影响力均在行业中遥遥领先，产品矩阵包括IT题库、在线编程练习、线上课程、交流社区、竞赛平台、笔面试服务、ATS系统等，用户覆盖全国高校百万IT学习者并在高速增长中，同时也为京东、百度、腾讯、滴滴、今日头条、华为等200多家企业提供校园招聘、编程竞赛等线上服务，并收获良好口碑。
+    </div>
+
+    <script>
+      // 必须使用DOM0级而不是DOM2级标准事件（onclick）
+      const text = document.querySelector('.text')
+      const search = document.querySelector('input')
+      const btn = document.querySelector('button')
+      btn.onclick = () => {
+        // 补全代码
+        const query = search.value.trim()
+
+        if (query !== '') {
+          const newText = text.innerText.replace(
+            new RegExp(query, 'g'),
+            `<b style="background-color:yellow;">${query}</b>`
+          )
+          text.innerHTML = newText
+        }
+      }
+    </script>
+  </body>
+</html>

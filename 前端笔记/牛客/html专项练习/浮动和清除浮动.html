@@ -1,0 +1,39 @@
+<!-- 请将类为"left"的div元素和类为"right"的div元素在同一行上向左浮动，
+且清除类为"wrap"的父级div元素内部的浮动。 -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style type="text/css">
+      /* 触发BFC */
+      /* .wrap {
+        overflow: auto;
+      } */
+
+      .wrap::after {
+        content: '';
+        display: block;
+        clear: both;
+      }
+
+      .left {
+        width: 100px;
+        height: 100px;
+        /*补全代码*/
+        float: left;
+      }
+
+      .right {
+        width: 100px;
+        height: 100px;
+        /*补全代码*/
+        float: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="left"></div>
+      <div class="right"></div>
+    </div>
+  </body>
+</html>
