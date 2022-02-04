@@ -12,12 +12,6 @@ RIGHT = 1
 
 class Solution:
     def rectangleArea(self, rectangles: List[List[int]]) -> int:
-        events = []
-        for x1, y1, x2, y2 in rectangles:
-            events.append((x1, LEFT, y1, y2))
-            events.append((x2, RIGHT, y1, y2))
-        events.sort()
-
         def calHeight(intervals: Sequence[Tuple[int, int]]) -> int:
             """"求合并后的排序的区间长度之和"""
             if not intervals:
@@ -37,6 +31,12 @@ class Solution:
                     preEnd = curEnd
 
             return res
+
+        events = []
+        for x1, y1, x2, y2 in rectangles:
+            events.append((x1, LEFT, y1, y2))
+            events.append((x2, RIGHT, y1, y2))
+        events.sort()
 
         res = 0
         intervals = SortedList()

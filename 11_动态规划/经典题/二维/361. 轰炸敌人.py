@@ -8,7 +8,7 @@ from typing import List
 
 # 请你计算放一个炸弹最多能炸多少敌人。
 # 好像999. 可以被一步捕获的棋子数
-# 暴力:O(n^3) 可以看到暴力时有很多重复的计算 优化:相邻两个格子可以dp
+# 暴力:O(n^3) 可以看到暴力时有很多重复的计算 优化:相邻两个格子可以dpO(n^2)
 class Solution:
     def maxKilledEnemies(self, grid: List[List[str]]) -> int:
         if not any(grid):

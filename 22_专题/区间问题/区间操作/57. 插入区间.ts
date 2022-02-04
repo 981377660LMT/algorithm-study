@@ -37,6 +37,7 @@ const insert = function (intervals: number[][], newInterval: number[]): number[]
         res.push(interval)
       }
     }
+
     return res
   }
 }
