@@ -10,8 +10,28 @@ const numEnclaves = function (grid: number[][]): number {
   const m = grid.length
   const n = grid[0].length
 
+  // 3. 边界开始dfs
+  for (let i = 0; i < m; i++) {
+    if (grid[i][0] === 1) dfs(i, 0)
+    if (grid[i][n - 1] === 1) dfs(i, n - 1)
+  }
+  for (let j = 0; j < n; j++) {
+    if (grid[0][j] === 1) dfs(0, j)
+    if (grid[m - 1][j] === 1) dfs(m - 1, j)
+  }
+
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (grid[i][j] === 1) {
+        res++
+      }
+    }
+  }
+
+  return res
+
   // 2. dfs: 碰到为1的陆地就开始深度遍历并标记为已看过(0)
-  const dfs = (row: number, column: number) => {
+  function dfs(row: number, column: number) {
     grid[row][column] = 0
     ;[
       [row - 1, column],
@@ -32,26 +52,6 @@ const numEnclaves = function (grid: number[][]): number {
       }
     })
   }
-
-  // 3. 边界开始dfs
-  for (let i = 0; i < m; i++) {
-    if (grid[i][0] === 1) dfs(i, 0)
-    if (grid[i][n - 1] === 1) dfs(i, n - 1)
-  }
-  for (let j = 0; j < n; j++) {
-    if (grid[0][j] === 1) dfs(0, j)
-    if (grid[m - 1][j] === 1) dfs(m - 1, j)
-  }
-
-  for (let i = 0; i < m; i++) {
-    for (let j = 0; j < n; j++) {
-      if (grid[i][j] === 1) {
-        res++
-      }
-    }
-  }
-
-  return res
 }
 
 console.log(

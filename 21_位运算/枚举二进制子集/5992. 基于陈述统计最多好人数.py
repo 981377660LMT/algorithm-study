@@ -23,34 +23,24 @@ dirs8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]]
 # 验证好人之间的评价是否自洽
 class Solution:
     def maximumGood(self, statements: List[List[int]]) -> int:
-        res = 0
-        n = len(statements)
-
-        for state in range(1 << n):
-            curGood = set()
-            curBad = set()
+        def check(mask: int) -> bool:
             for i in range(n):
-                isGood = (state >> i & 1) == 1
-                goodCand = set()
-                badCand = set()
-                if not isGood:
-                    curBad.add(i)
-                    continue
-                curGood.add(i)
+                for j in range(n):
+                    if i == j:
+                        continue
+                    if statements[i][j] == 0:
+                        if mask & (1 << i) and mask & (1 << j):
+                            return False
+                    elif statements[i][j] == 1:
+                        if mask & (1 << i) and not mask & (1 << j):
+                            return False
+            return True
 
-                for id, num in enumerate(statements[i]):
-                    if num == 0:
-                        badCand.add(id)
-                    elif num == 1:
-                        goodCand.add(id)
-                if curGood & badCand or curBad & goodCand or curGood & curBad:
-                    break
-                curGood |= goodCand
-                curBad |= badCand
-            else:
-                if not curGood & curBad:
-                    res = max(res, bin(state).count('1'))
-
+        n = len(statements)
+        res = 0
+        for state in range(1, 1 << n):
+            if check(state):
+                res = max(res, state.bit_count())
         return res
 
 

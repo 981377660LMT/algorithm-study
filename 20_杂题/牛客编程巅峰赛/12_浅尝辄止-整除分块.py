@@ -1,4 +1,4 @@
-# 整除分块
+# 整除分块，维护left/right
 class Solution:
     def work(self, n):
         # write code here

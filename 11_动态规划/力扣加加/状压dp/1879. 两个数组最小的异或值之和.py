@@ -11,12 +11,12 @@ class Solution:
         target = (1 << n) - 1
 
         @lru_cache(None)
-        def dfs(cur: int, state: int) -> int:
-            if state == target:
+        def dfs(index: int, state: int) -> int:
+            if index == n:
                 return 0
 
             return min(
-                dfs(cur + 1, state | (1 << next)) + (nums1[cur] ^ nums2[next])
+                dfs(index + 1, state | (1 << next)) + (nums1[index] ^ nums2[next])
                 for next in range(n)
                 if not state & (1 << next)
             )

@@ -79,3 +79,8 @@ class BigIntHasher implements IStringHasher<bigint> {
 }
 
 export { BigIntHasher }
+if (require.main === module) {
+  const stringHasher = new BigIntHasher('abcdefg')
+  console.log(stringHasher.getHashOfRange(1, 1))
+  console.log(stringHasher.getHashOfRange(2, 2))
+}

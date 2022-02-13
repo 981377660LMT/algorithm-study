@@ -1,6 +1,6 @@
 # 元素是0-n-1的并查集写法，不支持动态添加
 from collections import defaultdict
-from typing import  Generic, Iterable, List, TypeVar
+from typing import Dict, Generic, Iterable, List, TypeVar
 
 
 class UnionFindArray:
@@ -70,6 +70,13 @@ class UnionFindMap(Generic[T]):
 
     def getRoots(self) -> List[T]:
         return list(set(self.find(key) for key in self.parent))
+
+    def getGroup(self) -> Dict[T, List[T]]:
+        groups = defaultdict(list)
+        for key in self.parent:
+            root = self.find(key)
+            groups[root].append(key)
+        return groups
 
     def _add(self, key: T) -> bool:
         if key in self.parent:

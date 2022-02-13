@@ -11,17 +11,62 @@ from operator import le, xor, or_, and_, not_
 
 
 MOD = int(1e9 + 7)
-INF = 0x3F3F3F3F
+INF = 2 ** 64
 EPS = int(1e-8)
 dirs4 = [[-1, 0], [0, 1], [1, 0], [0, -1]]
 dirs8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]]
 
 
-class Solution:
-    def subStrHash(self, s: str, power: int, modulo: int, k: int, hashValue: int) -> str:
-        ...
+class Bitset:
+    def __init__(self, size: int):
+        self.size = size
+        self.on = set()
+        self.off = set(range(size))
+
+    def fix(self, idx: int) -> None:
+        self.on.add(idx)
+        self.off.discard(idx)
+
+    def unfix(self, idx: int) -> None:
+        self.on.discard(idx)
+        self.off.add(idx)
+
+    def flip(self) -> None:
+        self.on, self.off = self.off, self.on
+
+    def all(self) -> bool:
+        return len(self.off) == 0
+
+    def one(self) -> bool:
+        return len(self.on) != 0
+
+    def count(self) -> int:
+        return len(self.on)
+
+    def toString(self) -> str:
+        return ''.join('1' if i in self.on else '0' for i in range(self.size))
 
 
-print(Solution().subStrHash(s="leetcode", power=7, modulo=20, k=2, hashValue=0))
-# print(Solution().subStrHash(s="fbxzaad", power=31, modulo=100, k=3, hashValue=32))
+bitset = Bitset(5)
+bitset.fix(3)
+bitset.fix(1)
+print(bitset.toString())
+print(bitset.count())
+bitset.flip()
+print(bitset.one())
+# bitset.unfix(0)
+# print(bitset.count())
+print(bitset.toString())
 
+# bitset = Bitset(2)
+# bitset.flip()
+# print(bitset.toString())
+# bitset.unfix(1)
+# print(bitset.toString())
+
+# bitset.fix(1)
+# print(bitset.count())
+# print(bitset.one())
+# # bitset.unfix(0)
+# # print(bitset.count())
+# print(bitset.toString())

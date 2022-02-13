@@ -10,18 +10,33 @@ from string import ascii_lowercase, ascii_uppercase, ascii_letters, digits
 from operator import xor, or_, and_, not_
 
 MOD = int(1e9 + 7)
-INF = 0x3F3F3F3F
+INF = 2 ** 64
 EPS = int(1e-8)
 dirs4 = [[-1, 0], [0, 1], [1, 0], [0, -1]]
 dirs8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]]
 
 
 class Solution:
-    def maxScoreIndices(self, nums: List[int]) -> List[int]:
-        ...
+    def smallestNumber(self, num: int) -> int:
+        if num == 0:
+            return 0
+        digits = [char for char in str(num)]
+        if all(digit == '0' for digit in digits):
+            return 0
+        if num > 0:
+            digits.sort()
+            first = next(i for i, digit in enumerate(digits) if digit != '0')
+            firstChar = digits[first]
+            digits.pop(first)
+            return int(firstChar + ''.join(digits))
+        else:
+            digits.sort(reverse=True)
+            first = next(i for i, digit in reversed(list(enumerate(digits))) if digit != '0')
+            firstChar = digits[first]
+            digits.pop(first)
+            return int(firstChar + ''.join(digits))
 
 
-print(Solution().maxScoreIndices(nums=[0, 0, 1, 0]))
-print(Solution().maxScoreIndices(nums=[0, 0, 0]))
-print(Solution().maxScoreIndices(nums=[1, 1]))
+print(Solution().smallestNumber(num=310))
+print(Solution().smallestNumber(num=-7605))
 

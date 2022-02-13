@@ -7,32 +7,30 @@ from typing import List
 # 1 <= grid.length, grid[i].length <= 15
 # 最多 25 个单元格中有黄金。
 
-# O(3^k)
-# 总结:
-# 想象二叉树，需要dfs后序遍历
+# 回溯法
 class Solution:
     def getMaximumGold(self, grid: List[List[int]]) -> int:
-        m, n = len(grid), len(grid[0])
+        row, col = len(grid), len(grid[0])
 
-        def dfs(r: int, c: int) -> int:
-            if not (0 <= r < m and 0 <= c < n) or grid[r][c] == 0:
-                return 0
+        def dfs(r: int, c: int, gold: int) -> None:
+            nonlocal res
+            gold += grid[r][c]
+            res = max(res, gold)
+
             tmp = grid[r][c]
             grid[r][c] = 0
 
-            # dfs后序即可
-            next_sum = -0x3FFFFFFF
-            for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
-                next_sum = max(next_sum, dfs(nr, nc))
+            for nextR, nextC in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+                if 0 <= nextR < row and 0 <= nextC < col and grid[nextR][nextC] > 0:
+                    dfs(nextR, nextC, gold)
 
             grid[r][c] = tmp
-            return tmp + next_sum
 
         res = 0
-        for r in range(m):
-            for c in range(n):
+        for r in range(row):
+            for c in range(col):
                 if grid[r][c] != 0:
-                    res = max(res, dfs(r, c))
+                    dfs(r, c, 0)
         return res
 
 

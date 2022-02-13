@@ -2,6 +2,7 @@ from typing import List
 from collections import deque
 
 # TSP problem
+# 1 <= n <= 12
 class Solution:
     def shortestPathLength(self, graph: List[List[int]]) -> int:
         n = len(graph)

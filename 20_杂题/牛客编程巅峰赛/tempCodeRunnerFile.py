@@ -1,2 +1,1 @@
-
-            dist[i][i] = p
+bin(i ^ (i - 1)

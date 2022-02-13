@@ -33,7 +33,7 @@ interface IBloomFilter {
 class BloomFilter implements IBloomFilter {
   private static DEFAULT_SIZE: number = 2 << 24
   private static SEEDS: number[] = [3, 13, 46, 71, 91, 134]
-  private bitset: BitSet = new BitSet(0, BloomFilter.DEFAULT_SIZE)
+  private bitset: BitSet = new BitSet(BloomFilter.DEFAULT_SIZE)
   private hasherArray: SimpleHasher[] = []
 
   /**

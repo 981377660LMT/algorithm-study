@@ -15,9 +15,11 @@ from collections import deque
 
 # 时间复杂度2^n*m*n
 class Solution:
-    def minFlips(self, mat: List[List[int]]) -> int:
+    def minFlips(self, mat: list[list[int]]) -> int:
         m, n = len(mat), len(mat[0])
-        state = sum(cell << (i * n + j) for i, row in enumerate(mat) for j, cell in enumerate(row))
+        state = sum(
+            1 << (i * n + j) for i, row in enumerate(mat) for j, cell in enumerate(row) if cell
+        )
         queue = deque([(state, 0)])
         visited = set([state])
 
