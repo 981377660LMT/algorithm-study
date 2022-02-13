@@ -18,10 +18,11 @@ class UnionFindArray:
         rootY = self.find(y)
         if rootX == rootY:
             return False
-        if self.rank[rootX] > self.rank[rootY]:
-            rootX, rootY = rootY, rootX
-        self.parent[rootX] = rootY
-        self.rank[rootY] += self.rank[rootX]
+
+        rootX, rootY = sorted([rootX, rootY])
+        # 大的总是指向小的
+        self.parent[rootY] = rootX
+        self.rank[rootX] += self.rank[rootY]
         self.count -= 1
         return True
 
@@ -35,10 +36,24 @@ class UnionFindArray:
 # 直到跳到（也可能跳过）当天涂色的左边界为止
 # 每走一步，都会对当天的答案产生1点贡献；
 
+# 不断合并区间右侧的点和它左边相邻的点，直到右端点与左端点位置重合
+# 要求的区间长度即为合并的次数
+# 注意并查集union的过程中，总是使值大的根指向值小的根
+
 
 class Solution:
     def amountPainted(self, paint: List[List[int]]) -> List[int]:
+        uf = UnionFindArray(int(5e4) + 10)
         res = []
+        for start, end in paint:
+            startRoot = uf.find(start)
+            endRoot = uf.find(end)
+            cur = 0
+            while endRoot != startRoot:
+                cur += 1
+                uf.union(endRoot, endRoot - 1)
+                endRoot = uf.find(endRoot - 1)
+            res.append(cur)
 
         return res
 
