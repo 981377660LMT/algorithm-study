@@ -7,15 +7,14 @@
  * mid与mid+1的值相等的话在mid的左边，不相等的话在mid的右边
  * 不断二分查找剩余元素个数为奇数的一边
  */
-const singleNonDuplicate = function (nums: number[]): number {
+function singleNonDuplicate(nums: number[]): number {
   let l = 0
   let r = nums.length - 1
 
-  // 因此当 left <= right 的时候，解空间都不为空，此时我们都需要继续搜索
   while (l <= r) {
-    let mid = (l + r) >> 1
-    if (mid % 2 === 1) mid-- // 仅对偶数索引进行二分搜索
-    if (nums[mid] === nums[mid + 1]) l = mid + 2
+    const mid = (l + r) >> 1
+    // 不需要判断mid 的奇偶性，mid 和 mid⊕1 即为每次需要比较元素的两个下标
+    if (nums[mid] === nums[mid ^ 1]) l = mid + 1
     else r = mid - 1
   }
 
@@ -23,3 +22,4 @@ const singleNonDuplicate = function (nums: number[]): number {
 }
 
 console.log(singleNonDuplicate([1, 1, 2, 3, 3, 4, 4, 8, 8]))
+console.log(singleNonDuplicate([1, 1, 2]))
