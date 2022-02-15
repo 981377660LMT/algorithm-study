@@ -8,18 +8,19 @@ from functools import lru_cache
 class Solution:
     def minimumXORSum(self, nums1: List[int], nums2: List[int]) -> int:
         n = len(nums1)
-        target = (1 << n) - 1
 
         @lru_cache(None)
         def dfs(index: int, state: int) -> int:
             if index == n:
                 return 0
 
-            return min(
-                dfs(index + 1, state | (1 << next)) + (nums1[index] ^ nums2[next])
-                for next in range(n)
-                if not state & (1 << next)
-            )
+            res = int(1e15)
+            for next in range(n):
+                if not state & (1 << next):
+                    res = min(
+                        res, (nums1[index] ^ nums2[next]) + dfs(index + 1, state | (1 << next))
+                    )
+            return res
 
         return dfs(0, 0)
 

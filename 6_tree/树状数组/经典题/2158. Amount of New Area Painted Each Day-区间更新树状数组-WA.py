@@ -43,6 +43,7 @@ class BIT:
         return res
 
 
+# 不可以用树状数组，因为染色是每次最多为1
 class Solution:
     def amountPainted(self, paint: List[List[int]]) -> List[int]:
         res = []

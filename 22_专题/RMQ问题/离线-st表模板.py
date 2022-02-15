@@ -4,7 +4,7 @@ from typing import Any, Generic, List, TypeVar
 T = TypeVar('T', int, float)
 
 # https://www.desgard.com/algo/docs/part2/ch03/1-range-max-query/
-class RMQ(Generic[T]):
+class SparseTable(Generic[T]):
     def __init__(self, nums: List[T]):
         n, upper = len(nums), ceil(log2(len(nums))) + 1
         self._nums = nums
@@ -32,12 +32,12 @@ class RMQ(Generic[T]):
 
 if __name__ == '__main__':
     nums = list(range(100000))
-    rmq = RMQ(nums)
-    print(rmq.query(32, 636))
-    print(rmq.query(32, 65, ismax=False))
-    print(rmq.query(100000 - 1, 100000 - 1))
+    st = SparseTable(nums)
+    print(st.query(32, 636))
+    print(st.query(32, 65, ismax=False))
+    print(st.query(100000 - 1, 100000 - 1))
 # 通过了 O(1)的方式完成了指定区间任意范围的 RMQ。
-# 对于海量数据查询的需求完成了最高度的优化。
+# 对于离线海量数据查询的需求完成了最高度的优化。
 # 但是由于 ST 算法需要一个 2 倍增的预处理，所以整体的复杂度在 O(nlogn)。
 # 如此评估下来，其实如果查询量极少的情况下，
 # 我们用暴力法的时间开销 O(n)是优于 ST 算法的，
