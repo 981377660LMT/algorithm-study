@@ -91,8 +91,9 @@ class SegmentTree:
         if self._lazy[rt]:
             self._lazy[rt << 1] += self._lazy[rt]
             self._lazy[rt << 1 | 1] += self._lazy[rt]
-            self._tree[rt << 1] += self._lazy[rt] * (mid - l + 1)
-            self._tree[rt << 1 | 1] += self._lazy[rt] * (r - mid)
+            # 注意这里是+self._lazy[rt]而不是+self._lazy[rt]*(r-l+1) 因为只表示一个值
+            self._tree[rt << 1] += self._lazy[rt]
+            self._tree[rt << 1 | 1] += self._lazy[rt]
             self._lazy[rt] = 0
 
 
@@ -101,7 +102,7 @@ if __name__ == '__main__':
     st = SegmentTree(nums, merge=lambda x, y: max(x, y))
     print(st.query(1, 6))
     st.update(1, 6, 2)
-    # st.update(1, 6, 2)
+    st.update(1, 6, 2)
     print(st.query(1, 1))
     print(st.query(2, 2))
     print(st.query(3, 3))

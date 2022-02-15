@@ -1,17 +1,25 @@
+# https://www.bilibili.com/video/BV16K4y1X7Ph/?spm_id_from=333.788.recommend_more_video.0
+
+# O(n^3)
+from typing import List
+
+
 class KM:
+    """注意建图时让二分图两半相等"""
+
     INF = int(1e9)
 
-    def __init__(self, graph):
-        ma = max(len(graph), len(graph[0]))
-        self.graph = graph
+    def __init__(self, adjMatrix: List[List[int]]):
+        ma = max(len(adjMatrix), len(adjMatrix[0]))
+        self.graph = adjMatrix
         self.vis_x = set()
         self.vis_y = set()
         self.match = [-1] * ma
-        self.lx = [max(row) for row in graph]
+        self.lx = [max(row) for row in adjMatrix]
         self.ly = [0] * ma
         self.slack = []
 
-        self.nx, self.ny = len(graph), len(graph[0])
+        self.nx, self.ny = len(adjMatrix), len(adjMatrix[0])
 
     def find_path(self, x):
         self.vis_x.add(x)
@@ -60,9 +68,9 @@ class Solution:
         for i in range(len(nums)):
             for j in range(numSlots * 2):
                 g[i][j] = nums[i] & slots[j]
-        ans = 0
+        res = 0
         # print(KM(g).solve())
         for i, j in enumerate(KM(g).solve()):
             if j != -1:
-                ans += g[j][i]
-        return ans
+                res += g[j][i]
+        return res
