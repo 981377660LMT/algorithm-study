@@ -10,7 +10,7 @@ WeightedDirectedGraph = DefaultDict[int, DefaultDict[int, int]]
 
 
 class MaxFlow:
-    """edmond-karp算法求解有向带权图的最大流，时间复杂度"""
+    """edmond-karp算法求解有向带权图的最大流,时间复杂度O(VE^2)"""
 
     def __init__(self, graph: WeightedDirectedGraph, /, *, start: int, target: int):
         assert len(graph) >= 2 and start != target
@@ -21,15 +21,15 @@ class MaxFlow:
         self._rGraph = self._buildRedisualGraph(graph)
 
     def getResult(self) -> int:
-        # 2.bfs在残量图中寻找增广路径
         res = 0
 
+        # 2.不断bfs，在残量图中寻找增广路径
         while True:
             augPath = self._findAugmentingPath(self._rGraph, self._start, self._target)
             if not augPath:
                 break
 
-            # 3.计算增广路径上的最小值
+            # 3.计算增广路径上的最小流量
             minWeight = int(1e20)
             for i in range(0, len(augPath) - 1):
                 cur, next = augPath[i], augPath[i + 1]
