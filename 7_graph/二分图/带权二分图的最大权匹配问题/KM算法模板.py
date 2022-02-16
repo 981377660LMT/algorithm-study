@@ -36,7 +36,7 @@ class KM:
                 self._visitedBoy.clear()
                 self._visitedGirl.clear()
                 # 找到归宿 退出
-                if self._find_path(boy):
+                if self._dfs(boy):
                     break
                 else:
                     # 如果不能找到 就降低期望值
@@ -63,21 +63,21 @@ class KM:
                 res += self._graph[boy][girl]
         return res
 
-    def _find_path(self, boy: int) -> bool:
+    def _dfs(self, boy: int) -> bool:
         self._visitedBoy.add(boy)
         for girl in range(self._col):
             if girl in self._visitedGirl:
                 continue
-            tmp_delta = self._expBoy[boy] + self._expGirl[girl] - self._graph[boy][girl]
+            delta = self._expBoy[boy] + self._expGirl[girl] - self._graph[boy][girl]
             # 符合要求
-            if tmp_delta == 0:
+            if delta == 0:
                 self._visitedGirl.add(girl)
-                if self._match[girl] == -1 or self._find_path(self._match[girl]):
+                if self._match[girl] == -1 or self._dfs(self._match[girl]):
                     self._match[girl] = boy
                     return True
             # 女生要得到男生的倾心 还需多少期望值
-            elif self._slack[girl] > tmp_delta:
-                self._slack[girl] = tmp_delta
+            elif self._slack[girl] > delta:
+                self._slack[girl] = delta
 
         return False
 

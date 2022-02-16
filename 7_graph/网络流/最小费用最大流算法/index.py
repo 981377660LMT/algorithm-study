@@ -1,6 +1,5 @@
 # https://www.cnblogs.com/lfri/p/11267000.html
-class MinCostMaxFlow:
-    """总流量最大的情况下，总费用最小的流。"""
-
-    ...
-
+# https://www.its203.com/article/qq_38232157/108242967
+def mincost_maxflow(graph,start,end):
+    
+    

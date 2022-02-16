@@ -4,7 +4,7 @@
  * @param {number} k
  * @return {number}
  */
-var networkDelayTime = function (times: number[][], n: number, k: number): number {
+function networkDelayTime(times: number[][], n: number, k: number): number {
   const dist = Array<number>(n + 1).fill(Infinity)
   dist[k] = 0
 
