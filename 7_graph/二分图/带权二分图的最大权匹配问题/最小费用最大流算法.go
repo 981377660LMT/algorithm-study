@@ -61,6 +61,7 @@ func maximumANDSum(nums []int, numSlots int) (ans int) {
 		}
 		return dist[end] < inf
 	}
+
 	for spfa() {
 		// 沿 start-end 的最短路尽量增广
 		minFlow := inf
@@ -80,6 +81,7 @@ func maximumANDSum(nums []int, numSlots int) (ans int) {
 		}
 		ans -= dist[end] * minFlow
 	}
+
 	return
 }
 

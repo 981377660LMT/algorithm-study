@@ -21,18 +21,18 @@ function findMaximizedCapital(k: number, w: number, profits: number[], capital: 
   const profQueue = new MinHeap<[prof: number, index: number]>((a, b) => b[0] - a[0])
 
   for (let i = 0; i < capital.length; i++) {
-    capQueue.push([capital[i], i])
+    capQueue.heappush([capital[i], i])
   }
 
   let curCap = w
   for (let i = 0; i < k; i++) {
     // 所有可以启动的项目全部放入大根堆，然后选一个利润最大的
     while (capQueue.size > 0 && capQueue.peek()[0] <= curCap) {
-      const [_, index] = capQueue.shift()!
-      profQueue.push([profits[index], index])
+      const [_, index] = capQueue.heappop()!
+      profQueue.heappush([profits[index], index])
     }
     if (profQueue.size === 0) break
-    curCap += profQueue.shift()![0]
+    curCap += profQueue.heappop()![0]
   }
 
   return curCap

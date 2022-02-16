@@ -19,21 +19,21 @@ function trapRainWater(heightMap: number[][]): number {
   const visited = new Set<number>()
   // 四个边
   for (let r = 0; r < m; r++) {
-    pq.push([heightMap[r][0], r, 0])
+    pq.heappush([heightMap[r][0], r, 0])
     visited.add(r * n)
-    pq.push([heightMap[r][n - 1], r, n - 1])
+    pq.heappush([heightMap[r][n - 1], r, n - 1])
     visited.add(r * n + n - 1)
   }
   for (let c = 1; c < n - 1; c++) {
-    pq.push([heightMap[0][c], 0, c])
+    pq.heappush([heightMap[0][c], 0, c])
     visited.add(c)
-    pq.push([heightMap[m - 1][c], m - 1, c])
+    pq.heappush([heightMap[m - 1][c], m - 1, c])
     visited.add((m - 1) * n + c)
   }
 
   // 优先队列bfs
   while (pq.size) {
-    const [height, row, col] = pq.shift()!
+    const [height, row, col] = pq.heappop()!
     for (const [dr, dc] of [
       [1, 0],
       [-1, 0],
@@ -45,7 +45,7 @@ function trapRainWater(heightMap: number[][]): number {
       if (!visited.has(key) && nextR >= 0 && nextR < m && nextC >= 0 && nextC < n) {
         visited.add(key)
         res += Math.max(0, height - heightMap[nextR][nextC])
-        pq.push([Math.max(height, heightMap[nextR][nextC]), nextR, nextC])
+        pq.heappush([Math.max(height, heightMap[nextR][nextC]), nextR, nextC])
       }
     }
   }

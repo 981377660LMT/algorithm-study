@@ -14,9 +14,9 @@ function scheduleCourse(courses: number[][]): number {
   let day = 0
   for (const course of courses) {
     day += course[0]
-    pq.push(course[0])
+    pq.heappush(course[0])
     if (day > course[1]) {
-      day -= pq.shift()!
+      day -= pq.heappop()!
     }
   }
 

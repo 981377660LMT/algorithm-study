@@ -1,64 +1,65 @@
-// 1.插入 push
-// 2.删除堆顶 shift
-// 3.获取堆顶 peek
-// 4.获取堆大小 size
+// 注意堆的索引从0开始，而线段树的索引从1开始
+// 堆:root (root<<1)+1 (root<<1)+2
+// 线段树: root root<<1 root<<1|1
 
-class MinHeap<Item = number> {
-  protected heap: Item[]
-  protected volumn: number
-  protected compareFunction: (a: Item, b: Item) => number
-  static defaultCompareFunction = (a: any, b: any) => a - b
+import assert from 'assert'
+
+type CompareFunction<T> = (a: T, b: T) => number
+
+class MinHeap<HeapValue = number> {
+  protected readonly heap: HeapValue[]
+  protected readonly capacity: number
+  protected readonly compare: CompareFunction<HeapValue>
+  static readonly defaultCompareFunction = (a: any, b: any) => a - b
 
   constructor(
-    compareFunction: (a: Item, b: Item) => number = MinHeap.defaultCompareFunction,
-    volumn: number = Infinity,
-    heap: Item[] = []
+    compareFunction: CompareFunction<HeapValue> = MinHeap.defaultCompareFunction,
+    capacity: number = Infinity,
+    heap: HeapValue[] = []
   ) {
+    this.compare = compareFunction
+    this.capacity = capacity
     this.heap = heap
-    this.compareFunction = compareFunction
-    this.volumn = volumn
   }
 
   /**
    *
-   * @param val 插入的值
+   * @param value 插入的值
    * @description 将值插入数组(堆)的尾部，然后上移直至父节点不超过它
    * @description 时间复杂度为`O(log(h))`
    */
-  push(val: Item) {
-    if (this.heap.length >= this.volumn) {
-      this.shift()
+  heappush(value: HeapValue): void {
+    if (this.heap.length >= this.capacity) {
+      this.heappop()
     }
 
-    this.heap.push(val)
-    this.shiftUp(this.heap.length - 1)
-
-    return this.size
+    this.heap.push(value)
+    this.pushUp(this.heap.length - 1)
   }
 
   /**
    * @description 用数组尾部元素替换堆顶(直接删除会破坏堆结构),然后下移动直至子节点都大于新堆顶
    * @description 时间复杂度为`O(log(h))`
    */
-  shift() {
-    if (this.size === 0) {
+  heappop(): HeapValue | undefined {
+    if (this.heap.length === 0) {
       return undefined
-    } else if (this.size === 1) {
+    } else if (this.heap.length === 1) {
       return this.heap.pop()!
-    } else {
-      const top = this.peek()
-      const last = this.heap.pop()!
-      this.heap[0] = last
-      this.shiftDown(0)
-      return top
     }
+
+    const top = this.peek()
+    const last = this.heap.pop()!
+    this.heap[0] = last
+    this.pushDown(0)
+    return top
   }
 
-  peek() {
+  peek(): HeapValue | undefined {
     return this.heap[0]
   }
 
-  get size() {
+  get size(): number {
     return this.heap.length
   }
 
@@ -66,10 +67,9 @@ class MinHeap<Item = number> {
    * 取出堆顶元素，替换成val;
    * 一次O(log(h)的操作)
    */
-  // replace(val: Item) {
+  // heapreplace(val: Item) {
   //   this.heap[0] = val
   //   this.shiftDown(0)
-  //   return this
   // }
 
   /**
@@ -77,73 +77,80 @@ class MinHeap<Item = number> {
    * @description 将非叶子节点(2^(h-1)-1个，约n/2) 倒序shiftdown
    * @description 堆化的复杂度是O(n)
    */
-  heapify() {
-    const start = this.getParentIndex(this.size - 1)
-    for (let i = start; i >= 0; i--) {
-      this.shiftDown(i)
+  heapify(): void {
+    if (this.heap.length <= 1) return
+    const last = this.heap.length - 1
+    const lastParent = (last - 1) >> 1
+    for (let i = lastParent; ~i; i--) {
+      this.pushDown(i)
     }
   }
 
   /**
    *
-   * @param index 数组中的index
+   * @param root 数组中的index
    * @returns
    */
-  protected shiftUp(index: number) {
-    if (index <= 0) return
-    const parentIndex = this.getParentIndex(index)
-
-    while (
-      this.heap[parentIndex] !== undefined &&
-      this.heap[index] !== undefined &&
-      this.compareFunction(this.heap[parentIndex], this.heap[index]) > 0
-    ) {
-      this.swap(parentIndex, index)
-      this.shiftUp(parentIndex)
+  protected pushUp(root: number): void {
+    let parent = (root - 1) >> 1
+    while (parent >= 0 && this.compare(this.heap[parent], this.heap[root]) > 0) {
+      this.swap(parent, root)
+      root = parent
+      parent = (parent - 1) >> 1
     }
   }
 
-  // 下移
-  // 注意while/if里都要写索引 因为后面是改变索引
-  protected shiftDown(index: number) {
-    const leftChildIndex = this.getLeftChildIndex(index)
-    const rightChildIndex = this.getRightChildIndex(index)
+  protected pushDown(root: number): void {
+    // 还有孩子，即不是叶子节点
+    while ((root << 1) + 1 < this.heap.length) {
+      const left = (root << 1) + 1
+      const right = (root << 1) + 2
 
-    if (
-      this.heap[leftChildIndex] !== undefined &&
-      this.heap[index] !== undefined &&
-      this.compareFunction(this.heap[leftChildIndex], this.heap[index]) < 0
-    ) {
-      this.swap(leftChildIndex, index)
-      this.shiftDown(leftChildIndex)
-    }
+      let minIndex = root
 
-    if (
-      this.heap[rightChildIndex] !== undefined &&
-      this.heap[index] !== undefined &&
-      this.compareFunction(this.heap[rightChildIndex], this.heap[index]) < 0
-    ) {
-      this.swap(rightChildIndex, index)
-      this.shiftDown(rightChildIndex)
+      if (left < this.heap.length && this.compare(this.heap[left], this.heap[minIndex]) < 0) {
+        minIndex = left
+      }
+
+      if (right < this.heap.length && this.compare(this.heap[right], this.heap[minIndex]) < 0) {
+        minIndex = right
+      }
+
+      if (minIndex === root) return
+
+      this.swap(root, minIndex)
+      root = minIndex
     }
   }
 
-  protected swap(parentIndex: number, index: number) {
-    ;[this.heap[parentIndex], this.heap[index]] = [this.heap[index], this.heap[parentIndex]]
+  protected swap(index1: number, index2: number): void {
+    ;[this.heap[index1], this.heap[index2]] = [this.heap[index2], this.heap[index1]]
   }
 
-  private getParentIndex(index: number) {
-    // 减一后二进制数向右移动一位，相当于Math.floor((index-1)/2)
-    return (index - 1) >> 1
-  }
+  // private getParentIndex(index: number) {
+  //   // 减一后二进制数向右移动一位，相当于Math.floor((index-1)/2)
+  //   return (index - 1) >> 1
+  // }
 
-  private getLeftChildIndex(index: number) {
-    return index * 2 + 1
-  }
+  // private getLeftChildIndex(index: number) {
+  //   return index * 2 + 1
+  // }
 
-  private getRightChildIndex(index: number) {
-    return index * 2 + 2
-  }
+  // private getRightChildIndex(index: number) {
+  //   return index * 2 + 2
+  // }
 }
 
 export { MinHeap }
+
+if (require.main === module) {
+  const heap = new MinHeap()
+  heap.heappush(1)
+  heap.heappush(8)
+  heap.heappush(3)
+  heap.heappush(5)
+  assert.strictEqual(heap.heappop(), 1)
+  assert.strictEqual(heap.heappop(), 3)
+  assert.strictEqual(heap.heappop(), 5)
+  assert.strictEqual(heap.heappop(), 8)
+}

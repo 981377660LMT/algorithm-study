@@ -20,3 +20,4 @@ class Solution:
             time += d
             res.append(j)
         return res
+        

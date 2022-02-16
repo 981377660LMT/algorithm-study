@@ -11,14 +11,14 @@ var nthSuperUglyNumber = function (n: number, primes: number[]): number {
   // val row col
   const pq = new MinHeap<[number, number, number]>((a, b) => a[0] - b[0])
   for (let i = 0; i < primes.length; i++) {
-    pq.push([primes[i], i, 0])
+    pq.heappush([primes[i], i, 0])
   }
 
   while (res.length < n) {
-    const [val, row, col] = pq.shift()!
+    const [val, row, col] = pq.heappop()!
     if (val !== res[res.length - 1]) res.push(val)
     // pq.push([primes[row] + val, row, col + 1])
-    pq.push([primes[row] * res[col + 1], row, col + 1])
+    pq.heappush([primes[row] * res[col + 1], row, col + 1])
   }
   // console.log(res)
   return res[res.length - 1]

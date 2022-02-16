@@ -14,19 +14,19 @@ class HashHeap<Item = number> extends MinHeap<Item> {
     this.hash = useWeakMap ? (new WeakMap() as any) : new Map()
   }
 
-  override push(val: Item) {
-    if (this.heap.length >= this.volumn) {
-      this.shift()
+  override heappush(val: Item) {
+    if (this.heap.length >= this.capacity) {
+      this.heappop()
     }
 
     this.heap.push(val)
     this.hash.set(val, this.size - 1)
-    this.shiftUp(this.size - 1)
+    this.pushUp(this.size - 1)
 
     return this.size
   }
 
-  override shift() {
+  override heappop() {
     const top = this.peek()
     this.remove(top)
     return top
@@ -46,8 +46,8 @@ class HashHeap<Item = number> extends MinHeap<Item> {
     this.heap.pop()
     this.hash.delete(val)
     if (removeIndex < this.size) {
-      this.shiftUp(removeIndex)
-      this.shiftDown(removeIndex)
+      this.pushUp(removeIndex)
+      this.pushDown(removeIndex)
     }
   }
 
@@ -56,13 +56,13 @@ class HashHeap<Item = number> extends MinHeap<Item> {
     const intervalA = [1, 2]
     const intervalB = [3, 8]
     const intervalC = [7, 9]
-    hashHeap.push(intervalA)
-    hashHeap.push(intervalB)
-    hashHeap.push(intervalC)
+    hashHeap.heappush(intervalA)
+    hashHeap.heappush(intervalB)
+    hashHeap.heappush(intervalC)
     hashHeap.remove(intervalB)
     hashHeap.remove(intervalB)
     hashHeap.remove(intervalB)
-    console.log(hashHeap.shift())
+    console.log(hashHeap.heappop())
     console.log(hashHeap)
   }
 }

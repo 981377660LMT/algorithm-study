@@ -9,10 +9,10 @@ function connectSticks(sticks: number[]): number {
   let res = 0
 
   while (queue.size >= 2) {
-    const [a, b] = [queue.shift()!, queue.shift()!]
+    const [a, b] = [queue.heappop()!, queue.heappop()!]
     const sum = a + b
     res += sum
-    queue.push(sum)
+    queue.heappush(sum)
   }
   return res
 }

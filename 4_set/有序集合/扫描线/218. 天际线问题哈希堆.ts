@@ -25,12 +25,12 @@ const getSkyline = function (buildings: number[][]): number[][] {
 
   const heightQueue = new HashHeap((a, b) => b - a)
   // 防止heightQueue为空 即底部点的高度为0（右下角)
-  heightQueue.push(0)
+  heightQueue.heappush(0)
 
   let preMaxHeight = 0
   for (const point of points) {
     // 左边缘 入  右边缘 出
-    if (point[1] < 0) heightQueue.push(-point[1])
+    if (point[1] < 0) heightQueue.heappush(-point[1])
     else heightQueue.remove(point[1])
 
     // 高度发生变化时加入res
