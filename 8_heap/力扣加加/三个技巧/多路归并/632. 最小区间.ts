@@ -1,4 +1,4 @@
-import { MinHeap } from '../../../../2_queue/minheap'
+import { MinHeap } from '../../../MinHeap'
 
 /**
  * @param {number[][]} nums
@@ -21,12 +21,12 @@ const smallestRange = function (nums: number[][]): number[] {
   let max = Math.max(...nums.map(row => row[0]))
 
   while (true) {
-    const [min, row, col] = pq.shift()!
+    const [min, row, col] = pq.heappop()!
     // max - min 是当前的最大最小差值， r - l 为全局的最大最小差值。因为如果当前的更小，我们就更新全局结果
     if (max - min < r - l) [l, r] = [min, max]
     // 走到尽头结束
     if (col === nums[row].length - 1) return [l, r]
-    pq.push([nums[row][col + 1], row, col + 1])
+    pq.heappush([nums[row][col + 1], row, col + 1])
     max = Math.max(max, nums[row][col + 1])
   }
 }

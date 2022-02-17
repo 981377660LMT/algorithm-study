@@ -9,7 +9,7 @@
  * React认为：一个ReactElement的type不同，那么内容基本不会复用，所以直接删除节点，
  * 添加新节点，这是一个非常大的优化，大大减少了对比时间复杂度。
  * @description 你可以对一个单词进行如下三种操作:增删改
- * @summary 萊文斯坦距離
+ * @summary 编辑距离
  */
 const minDistance = function (word1: string, word2: string) {
   const dpRow = word1.length + 1

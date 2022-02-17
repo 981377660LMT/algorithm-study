@@ -1,3 +1,5 @@
+import { getPrimes } from '../../../19_数学/素数筛-枚举因子/埃拉托斯特尼筛法'
+
 /**
  * @param {string} s
  * @param {string} p
@@ -7,7 +9,7 @@
    '*' 匹配零个或多个前面的那一个元素 例子：a* 可以与空字符串匹配
    由于 Python 等很多语言字符串都是不可变的，因此会内存开销可能比较大。优化的方式也很简单，只需要记录 pattern 和 text 的索引即可。
  */
-const isMatch = function (s: string, p: string): boolean {
+function isMatch(s: string, p: string): boolean {
   const m = s.length
   const n = p.length
   const dp = Array.from<boolean, boolean[]>({ length: m + 1 }, () => Array(n + 1).fill(false))
@@ -45,3 +47,4 @@ console.log(isMatch('aab', 'c*a*b'))
 // console.log(a[-1])
 
 export {}
+console.log(getPrimes(500).length)

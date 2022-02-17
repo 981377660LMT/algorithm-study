@@ -47,6 +47,8 @@ dfs(root, -1, 0)
 
 lca = LCA(root1, root2, levelMap, parentMap)
 
+
+# 求树中两点距离以及高度差
 print(
     levelMap[root1] - levelMap[lca] + levelMap[root2] - levelMap[lca],
     levelMap[root2] - levelMap[root1],

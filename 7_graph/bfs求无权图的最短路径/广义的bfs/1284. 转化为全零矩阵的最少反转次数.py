@@ -13,7 +13,7 @@ from collections import deque
 # 1. 状压 起始和结束状态
 # 2. 转移
 
-# 时间复杂度2^n*m*n
+# 时间复杂度2^(n*m)*m*n
 class Solution:
     def minFlips(self, mat: list[list[int]]) -> int:
         m, n = len(mat), len(mat[0])

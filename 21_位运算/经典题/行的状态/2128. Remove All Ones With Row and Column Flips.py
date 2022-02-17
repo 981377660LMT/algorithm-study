@@ -1,6 +1,6 @@
 from typing import List
 
-
+# 1 <= m, n <= 300
 class Solution:
     def removeOnes(self, grid: List[List[int]]) -> bool:
         states = set()

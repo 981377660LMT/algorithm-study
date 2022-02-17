@@ -1,4 +1,4 @@
-from typing import List
+from typing import Counter, List
 from collections import defaultdict, deque
 
 # 给你一个二维整数数组 relations ，其中 relations[j] = [prevCoursej, nextCoursej] ，
