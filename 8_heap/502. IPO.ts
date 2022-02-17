@@ -1,6 +1,6 @@
 // 首次公开募股 (Initial public offering)
 
-import { MinHeap } from './minheap'
+import { MinHeap } from './MinHeap'
 
 /**
  *
@@ -27,7 +27,7 @@ function findMaximizedCapital(k: number, w: number, profits: number[], capital: 
   let curCap = w
   for (let i = 0; i < k; i++) {
     // 所有可以启动的项目全部放入大根堆，然后选一个利润最大的
-    while (capQueue.size > 0 && capQueue.peek()[0] <= curCap) {
+    while (capQueue.size > 0 && capQueue.peek()![0] <= curCap) {
       const [_, index] = capQueue.heappop()!
       profQueue.heappush([profits[index], index])
     }

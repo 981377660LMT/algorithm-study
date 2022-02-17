@@ -1,4 +1,4 @@
-import { MinHeap } from './minheap'
+import { MinHeap } from './MinHeap'
 
 /**
  *

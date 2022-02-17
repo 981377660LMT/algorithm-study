@@ -86,11 +86,6 @@ class MinHeap<HeapValue = number> {
     }
   }
 
-  /**
-   *
-   * @param root 数组中的index
-   * @returns
-   */
   protected pushUp(root: number): void {
     let parent = (root - 1) >> 1
     while (parent >= 0 && this.compare(this.heap[parent], this.heap[root]) > 0) {

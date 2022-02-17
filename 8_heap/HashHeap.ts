@@ -1,4 +1,4 @@
-import { MinHeap } from './minheap'
+import { MinHeap } from './MinHeap'
 
 // 暂不支持重复元素 见381. 有重复元素O(1) 时间插入、删除和获取随机元素.ts
 class HashHeap<Item = number> extends MinHeap<Item> {
@@ -27,7 +27,7 @@ class HashHeap<Item = number> extends MinHeap<Item> {
   }
 
   override heappop() {
-    const top = this.peek()
+    const top = this.peek()!
     this.remove(top)
     return top
   }

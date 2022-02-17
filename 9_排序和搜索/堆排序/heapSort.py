@@ -33,6 +33,7 @@ def heapSort(nums: List[int]) -> None:
             pushDown(i, size=len(nums))
 
     heapify()
+    # 每次都把最小值与最后一个元素交换
     for i in range(len(nums) - 1, 0, -1):
         nums[i], nums[0] = nums[0], nums[i]
         pushDown(0, size=i)

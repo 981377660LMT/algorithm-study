@@ -1,4 +1,3 @@
-import { LinkedList } from '../3_linkedList/LinkedList'
 import { ArrayDeque } from './Deque/ArrayDeque'
 
 /**

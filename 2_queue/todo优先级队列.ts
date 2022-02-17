@@ -1,4 +1,4 @@
-import { MinHeap } from './minheap'
+import { MinHeap } from '../8_heap/MinHeap'
 
 // 内部使用了堆
 class PriorityQueue<Item = number> {
@@ -23,22 +23,22 @@ class PriorityQueue<Item = number> {
     return new PriorityQueue(compareFunction, volumn, heap)
   }
 
-  get length() {
+  get length(): number {
     return this.minHeap.size
   }
 
   // O(log(h))
-  push(...val: Item[]) {
-    val.forEach(v => this.minHeap.push(v))
+  push(...val: Item[]): number {
+    val.forEach(v => this.minHeap.heappush(v))
     return this.length
   }
 
   // O(log(h))
-  shift() {
-    return this.minHeap.shift()
+  shift(): Item | undefined {
+    return this.minHeap.heappop()
   }
 
-  peek() {
+  peek(): Item | undefined {
     return this.minHeap.peek()
   }
 

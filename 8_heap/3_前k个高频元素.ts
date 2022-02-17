@@ -9,6 +9,8 @@
 //   return list.slice(0, k).map(item => item[0])
 // }
 
+import { MinHeap } from './MinHeap'
+
 // console.log(topKFrequent([1, 2, 3, 1, 2, 3, 1, 1, 5, 5, 5, 5], 2))
 
 // 如何让复杂度不超过nlog(n)
@@ -18,7 +20,7 @@ const topKFrequent = (nums: number[], k: number) => {
   nums.forEach(num => {
     map.set(num, map.get(num)! + 1 || 1)
   })
-  const h = new MinHeap([], k)
+  const h = new MinHeap((a, b) => a - b, k)
   map.forEach((value, key) => {
     // h.insert(val) ...
     // 需要改造原来的最小堆

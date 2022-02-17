@@ -1,4 +1,4 @@
-import { MinHeap } from '../../../minheap'
+import { MinHeap } from '../../../MinHeap'
 
 /**
  * @param {number} n 1 <= n <= 106
