@@ -1,4 +1,4 @@
-import { getPrimes } from '../../../19_数学/素数筛-枚举因子/埃拉托斯特尼筛法'
+import { getPrimes } from '../../../19_数学/素数筛-枚举因子/埃拉托斯特尼筛法求质数'
 
 /**
  * @param {string} s

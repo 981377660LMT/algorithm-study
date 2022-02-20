@@ -3,6 +3,8 @@ from collections import defaultdict
 
 # tree直接用dict 省去离散化步骤
 class BIT1:
+    """单点修改"""
+
     def __init__(self, n: int):
         self.size = n
         self.tree = defaultdict(int)
@@ -32,6 +34,8 @@ class BIT1:
 
 
 class BIT2:
+    """范围修改"""
+
     def __init__(self, n: int):
         self.size = n
         self._tree1 = defaultdict(int)

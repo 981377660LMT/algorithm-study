@@ -35,25 +35,25 @@ class Solution:
             if state == target:
                 return cost
 
-            toStudy = []
+            canStudy = []
             # 学不了/学过了
             for i in range(n):
                 if pre[i] & state != pre[i]:
                     continue
-                if (1 << i) & state != 0:
+                if (1 << i) & state:
                     continue
-                toStudy.append(i)
+                canStudy.append(i)
 
-            if len(toStudy) <= k:
-                for course in toStudy:
+            if len(canStudy) <= k:
+                for course in canStudy:
                     state |= 1 << course
                 if dist[state] > cost + 1:
                     dist[state] = cost + 1
                     queue.append((state, cost + 1))
             else:
-                for studyComb in list(combinations(toStudy, k)):
+                for studyComb in combinations(canStudy, k):
                     nextState = state
-                    for course in list(studyComb):
+                    for course in studyComb:
                         nextState |= 1 << course
                     if dist[nextState] > cost + 1:
                         dist[nextState] = cost + 1

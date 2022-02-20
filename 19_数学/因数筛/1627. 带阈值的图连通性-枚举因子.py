@@ -40,9 +40,9 @@ class Solution:
         res = []
 
         # 枚举因子nlogn
-        for fac in range(threshold + 1, n + 1):  # 按照threshold预处理并查集
-            for multi in range(2 * fac, n + 1, fac):
-                uf.union(fac, multi)
+        for factor in range(threshold + 1, n + 1):  # 按照threshold预处理并查集
+            for multi in range(factor, n + 1, factor):
+                uf.union(factor, multi)
         for x, y in queries:  # 判断连通性，在不在一个连通域里
             res.append(uf.isconnected(x, y))
         return res

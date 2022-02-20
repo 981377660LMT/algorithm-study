@@ -10,13 +10,15 @@
  * 因此这时需要跳过下一个。
  * 如果能遍历到最后一个0，就说明成功了
  */
-var isOneBitCharacter = function (bits) {
+function isOneBitCharacter(bits) {
   // return /^(10|11|0)*0$/.test(bits.join(''))
   let i = 0
+
   while (i < bits.length - 1) {
-    if (bits[i] === 1) i++
-    i++
+    if (bits[i] === 1) i += 2
+    else i += 1
   }
+
   return bits[i] === 0
 }
 

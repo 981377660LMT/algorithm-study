@@ -14,21 +14,21 @@ from functools import lru_cache
 
 class Solution:
     def connectTwoGroups(self, cost: List[List[int]]) -> int:
-        m, n = len(cost), len(cost[0])
+        n, m = len(cost), len(cost[0])
         # 右边每个点连接的最小费用
         minCost = [min(c) for c in zip(*cost)]
 
         @lru_cache(None)
         def dfs(cur: int, state: int) -> int:
-            if cur == m:
+            if cur == n:
                 remainCost = 0
-                for j in range(n):
+                for j in range(m):
                     if not state & (1 << j):
                         remainCost += minCost[j]
                 return remainCost
 
             res = 0x7FFFFFFF
-            for next in range(n):
+            for next in range(m):
                 res = min(res, cost[cur][next] + dfs(cur + 1, state | (1 << next)))
 
             return res

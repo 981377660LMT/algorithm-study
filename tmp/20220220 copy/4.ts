@@ -65,3 +65,7 @@ const floor = Math.floor.bind(Math)
 const round = Math.round.bind(Math)
 const ceil = Math.ceil.bind(Math)
 const sum = (...nums: number[]) => nums.reduce((pre, cur) => pre + cur, 0)
+function coutPairs(nums: number[], k: number): number {
+  const primes = primeFactors(k)
+  console.log(primes)
+}

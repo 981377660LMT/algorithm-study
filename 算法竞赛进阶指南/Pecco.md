@@ -19,13 +19,13 @@
 
 merge(x, y); //这是真话，则 x 和 y 是一族
 merge(x + n, y + n); //x 的猎物和 y 的猎物是一族
-merge(x + 2 _ n, y + 2 _ n); //x 的天敌和 y 的天敌是一族
+merge(`x + 2 * n`, `y + 2 * n`); //x 的天敌和 y 的天敌是一族
 
 merge(x, y + n); //这是真话，则 x 吃 y
-merge(x + n, y + 2 \* n); //x 的猎物吃 y 的猎物
-merge(x + 2 \* n, y); //x 的天敌吃 y 的天敌，或者说 y 吃 x 的天敌
+merge(x + n, `y + 2 * n`); //x 的猎物吃 y 的猎物
+merge(`x + 2 * n`, y); //x 的天敌吃 y 的天敌，或者说 y 吃 x 的天敌
 
-2. ST 表
+1. ST 表
    ST 表（Sparse Table，稀疏表）是一种简单的数据结构，主要用来解决 RMQ（Range Maximum/Minimum Query，区间最大/最小值查询）问题。它主要应用倍增的思想，可以实现 nlogn 预处理、 O(1) 查询。
    为了减少时间复杂度，可以用动态规划的方法进行预处理：
    ST 表使用一个二维数组 f，对于范围内的所有 f[a][b]

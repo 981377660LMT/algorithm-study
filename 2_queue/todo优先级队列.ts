@@ -42,7 +42,7 @@ class PriorityQueue<Item = number> {
     return this.minHeap.peek()
   }
 
-  heapify() {
+  heapify(): void {
     this.minHeap.heapify()
   }
 }
