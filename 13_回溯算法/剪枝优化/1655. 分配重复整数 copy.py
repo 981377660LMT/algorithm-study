@@ -10,7 +10,7 @@ from collections import Counter, defaultdict
 # 第 i 位顾客拿到的整数都是 相同的 。
 
 # 回溯
-# 1. 对customers排序
+# 1. 对customers排序剪枝
 
 
 class Solution:

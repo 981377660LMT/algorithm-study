@@ -13,6 +13,7 @@ class Solution:
         endswith = [0] * 2
         for char in binary:
             endswith[int(char)] = sum(endswith) + int(char)
+        # binary 的一个 子序列 如果是 非空 的且没有 前导 0,除非数字是 "0" 本身
         return (sum(endswith) + int('0' in binary)) % MOD
 
 
