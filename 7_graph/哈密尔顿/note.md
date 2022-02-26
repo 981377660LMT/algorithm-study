@@ -3,7 +3,7 @@ https://leetcode-cn.com/problems/shortest-path-visiting-all-nodes/solution/gtalg
 是否存在哈密尔顿回路是一个 NP 难问题
 
 状压+记忆化搜索(memo)解决哈密尔顿/tsp 问题
-旅行商问题（TSP）：给定一系列城市和每对城市之间的距离，求解访问每一座城市一次并回到起始城市的最短回路
+旅行商问题（TSP）：给定一系列城市和每对城市之间的距离，求解访问每一座城市`一次`并回到起始城市的最短回路
 
 ```TS
 declare function dfs(cur:number,visited:number,cost:number):boolean

@@ -17,11 +17,11 @@ import { bisectLeft } from '../../../9_排序和搜索/二分/7_二分搜索寻�
    不管怎么样，公共子序列在target中必然是从左到右的，那么他们的坐标自然是从小到大的
  * 同时最长上升子序列问题（LIS）存在使用「维护单调序列 + 二分」的贪心解法，复杂度为 O(nlogn)
  */
-const minOperations = (target: number[], arr: number[]): number => {
-  const store = new Set<number>(target)
+function minOperations(target: number[], arr: number[]): number {
+  const targetSet = new Set<number>(target)
   // 实际不建议这样写 内存消耗很大
-  const valueToIndex = new Map<number, number>([...target.entries()].map(([i, v]) => [v, i]))
-  const intersection = arr.filter(num => store.has(num)).map(v => valueToIndex.get(v)!)
+  const indexByValue = new Map<number, number>([...target.entries()].map(([i, v]) => [v, i]))
+  const intersection = arr.filter(num => targetSet.has(num)).map(v => indexByValue.get(v)!)
   if (intersection.length <= 1) return target.length - intersection.length
 
   const LIS: number[] = [intersection[0]]
@@ -33,7 +33,6 @@ const minOperations = (target: number[], arr: number[]): number => {
     }
   }
 
-  console.log(valueToIndex, intersection)
   return target.length - LIS.length
 }
 

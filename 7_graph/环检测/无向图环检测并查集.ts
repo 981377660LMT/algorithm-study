@@ -1,4 +1,4 @@
-import { useUnionFindArray } from '../../14_并查集/推荐使用并查集精简版'
+import { useUnionFindArray } from '../../14_并查集/useUnionFind'
 
 const hasCycle = (n: number, edges: [number, number][]) => {
   const uf = useUnionFindArray(n)

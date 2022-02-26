@@ -9,7 +9,7 @@
    第二次买入
    第二次卖出
  */
-var maxProfit = function (prices) {
+function maxProfit(prices) {
   const len = prices.length
 
   const dp = Array.from({ length: len }, () => Array(5).fill(0))
@@ -20,7 +20,7 @@ var maxProfit = function (prices) {
   dp[0][4] = -Infinity
 
   for (let i = 1; i < len; i++) {
-    // dp[i][0] = dp[i - 1][0]
+    dp[i][0] = dp[i - 1][0]
     dp[i][1] = Math.max(dp[i - 1][1], dp[i - 1][0] - prices[i])
     dp[i][2] = Math.max(dp[i - 1][2], dp[i - 1][1] + prices[i])
     dp[i][3] = Math.max(dp[i - 1][3], dp[i - 1][2] - prices[i])

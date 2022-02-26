@@ -1,3 +1,4 @@
+# 有一个长度为的字符串 ，你可以删除其中的 个字符，使剩余字符串的字典序最小，输出这个剩余字符串。
 class Solution(object):
     def removeKdigits(self, num: str, k: int) -> str:
         assert len(num) >= k

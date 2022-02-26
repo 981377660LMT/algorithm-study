@@ -4,7 +4,7 @@ from typing import Counter, List
 # 0 <= i < j <= n - 1 且
 # nums[i] * nums[j] 能被 k 整除。
 
-
+# nums[i]<=10^5
 class Solution:
     def coutPairs(self, nums: List[int], k: int) -> int:
         MAX = max(nums)

@@ -60,3 +60,6 @@ c++--multiset<>----------pytho3--sortedcontainers.SortedList()
 `352. 将数据流变为多个不相交区间`
 `352Number Stream to Intervals`
 `855. 考场就座`
+
+3. python 的 sortedList 本质是只有两层的 B-tree
+   https://grantjenks.com/docs/sortedcontainers/implementation.html

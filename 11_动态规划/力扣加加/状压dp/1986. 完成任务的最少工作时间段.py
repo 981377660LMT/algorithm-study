@@ -18,12 +18,8 @@ INF = 0x7FFFFFFF
 
 class Solution:
     def minSessions(self, tasks: List[int], sessionTime: int) -> int:
-        tasks.sort(reverse=True)
-        n = len(tasks)
-        target = (1 << n) - 1
-
         @lru_cache(None)
-        def dfs(state: int, left: int) -> int:
+        def dfs(state: int, remain: int) -> int:
             if state == target:
                 return 1
 
@@ -34,11 +30,17 @@ class Solution:
 
                 nextState = state | (1 << i)
                 nextCost = tasks[i]
-                nextLeft = left - nextCost if left >= nextCost else sessionTime - nextCost
-                res = min(res, int(nextCost > left) + dfs(nextState, nextLeft))
+                nextRemain = remain - nextCost if remain >= nextCost else sessionTime - nextCost
+                res = min(res, int(nextCost > remain) + dfs(nextState, nextRemain))
             return res
 
-        return dfs(0, sessionTime)
+        tasks.sort(reverse=True)
+        n = len(tasks)
+        target = (1 << n) - 1
+
+        res = dfs(0, sessionTime)
+        dfs.cache_clear()
+        return res
 
 
 print(Solution().minSessions(tasks=[3, 1, 3, 1, 1], sessionTime=8))
@@ -46,5 +48,4 @@ print(Solution().minSessions(tasks=[3, 1, 3, 1, 1], sessionTime=8))
 # 解释：你可以在两个工作时间段内完成所有任务。
 # - 第一个工作时间段：完成除了最后一个任务以外的所有任务，花费 3 + 1 + 3 + 1 = 8 小时。
 # - 第二个工作时间段，完成最后一个任务，花费 1 小时。
-
 

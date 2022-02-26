@@ -6,7 +6,7 @@
  * 2 * k + 1 个状态
  * @summary 类比123题
  */
-var maxProfit = function (k, prices) {
+function maxProfit(k, prices) {
   if (prices == null || prices.length < 2 || k == 0) {
     return 0
   }
