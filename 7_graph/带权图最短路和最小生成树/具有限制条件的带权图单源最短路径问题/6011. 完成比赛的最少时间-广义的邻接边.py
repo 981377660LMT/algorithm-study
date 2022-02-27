@@ -23,7 +23,7 @@ INF = int(1e20)
 
 class Solution:
     def minimumFinishTime(self, tires: List[List[int]], changeTime: int, numLaps: int) -> int:
-        # 不换轮子 连走i轮需要的最短时间
+        # 建边:不换轮子 连走i轮需要的最短时间
         minCost = [INF] * 20
         for a0, q in tires:
             minCost[0], curCost = min(a0, minCost[0]), a0
