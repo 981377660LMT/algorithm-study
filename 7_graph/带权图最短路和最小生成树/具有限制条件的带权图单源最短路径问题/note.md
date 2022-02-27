@@ -43,3 +43,6 @@ pq: List[Tuple[Cost, ID, Time]] = [(passingFees[0], 0, 0)]
 **多一个加油限制**
 两个维度的 dist 数组
 使用两个维度来控制是将状态否继续入队
+
+图的边数为 E，顶点数为 V
+dijktra 时间复杂度 O((V+E)logV)
