@@ -156,4 +156,126 @@ console.log(5);
     希尔排序
     堆排序
     希尔排序、堆排序使用数组存储的话，方便获取指定位置的数据。这两个排序都需取`指定位置`的数据，而使用链表增加了获取指定位置的时间。
-20. FIFO 为先进先出的顺序来完成页面的访问，而如果在采用先进先出页面淘汰算法的系统中，一进程在内存占 3 块（开始为空），页面访问序列为 1、2、3、4、1、2、5、1、2、3、4、5、6。运行时会产生（ ）次缺页中断？
+20. FIFO 为先进先出的顺序来完成页面的访问，而如果在采用先进先出页面淘汰算法的系统中，一进程在`内存占 3 块`（开始为空），页面访问序列为 1、2、3、4、1、2、5、1、2、3、4、5、6。运行时会产生（ ）次缺页中断？
+    先来先服务利用队列来进行页面读取。队列大小为 3，刚开始队列为空：
+    访问 1，`队列中没 1，缺页一次，读入页面 1`
+    访问 2，队列中没 2，缺页两次，读入页面 2，队列为 1,2
+    访问 3，队列中没 3，缺页三次，读入页面 3，队列为 1,2,3
+    访问 4，没 4，缺页 4 次，读入页面 4，队列为 2,3,4
+    访问 1，没 1，缺页 5 次，读入页面 1，队列为 3,4,1
+    访问 2，没 2，缺页 6 次，读入页面 2，队列为 4,1,2
+    访问 5，没 5，缺页 7 次，读入页面 5，队列为 1,2,5
+    访问 1，不存在缺页，队列中为 1,2,5
+    访问 2，不缺页，队列中为 1,2,5
+    访问 3，缺页 8 次……
+    总的次数为 10 次
+
+21. require 题
+
+```JS
+有a.js和b.js两个文件，请选择b文件中代码的输出
+// a.js
+let a = 1
+let b = {}
+setTimeout(() => {
+a = 2
+b.b = 2
+}, 100)
+module.exports = { a, b }
+
+// b.js
+const a = require('./a')
+console.log(a.a)
+console.log(a.b)
+setTimeout(() => {
+console.log(a.a)
+console.log(a.b)
+}, 500)
+```
+
+1 {} 1 {b:2}
+
+`commonjs 导出的是值的拷贝` ，a 所以 a 一直是 1;
+b 是浅拷贝，拷贝的是对象的引用,所以 a.js 的 b 改变时,b.js 的 a.b 也改变
+
+22. vue 的 computed 缓存属性
+
+```JS
+请选择下面代码输出1的次数
+var vm = new Vue({
+el: '#example',
+data: {
+message: 'Hello'
+},
+computed: {
+test: function () {
+console.log(1)
+return this.message
+}
+},
+created: function (){
+this.message = 'World'
+for (var i = 0; i < 5; i++) {
+console.log(this.test)
+}
+}
+})
+```
+
+1 次
+因为 vue 的 computed 具有缓存功能。`message 只更新了一次，所以 test 只触发一次`，执行一次 console.log(1)。
+
+23. 以下这种写法不规范，但是不会报错，其在浏览器中的表现形式是
+
+<p>1<p>2</p></p>
+```HTML
+<p>1</p><p>2</p><p></p>
+```
+
+24. 元素的 border 是由三角形组合而成
+
+```CSS
+div {
+    width: 0;
+    height: 0;
+    border: 40px solid;
+    border-color: orange blue red green;
+}
+```
+
+![](image/note/1646028724276.png)
+
+25. 标签中使用多个 class，不看这些 class 添加的顺序，而是看 style 中定义的顺序。
+    数字 `1` 和 `2` 被浏览器渲染出来的颜色分别是是？
+
+```HTML
+<html>
+  <head>
+    <style>
+      .classA { color: blue; }
+      .classB { color: red; }
+    </style>
+  </head>
+  <body>
+    <p class='classB classA'>1</p>
+    <p class='classA classB'>2</p>
+  </body>
+</html>
+```
+
+26. 当网站对<script>标签进行过滤时，可以通过哪种方式进行绕过且有效攻击
+
+```HTML
+<img src="" onerror=alert(1)>
+```
+
+27. linux 文件权限
+    Linux 的每个文件一般都有三个权限 r--读，w--写，x--执行，其分别对应的数值为 4，2，1。
+    修改/home 下 test 目录以及目录下所有文件，可以支持所有人可读可写的，以下能实现的有?
+    `chmod 666 /home/test -R`
+    `chmod 777 /home/test -R`
+
+28. 下列选项中，可能导致当前 linux`进程阻塞`?
+
+- 进程申请临界资源
+- 进程 从磁盘读数据

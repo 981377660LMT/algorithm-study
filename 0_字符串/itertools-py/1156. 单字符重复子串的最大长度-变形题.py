@@ -5,8 +5,8 @@ from itertools import groupby
 # 给你一个字符串 text，你只能交换其中两个字符一次或者什么都不做，然后得到一些单字符重复的子串。返回其中最长的子串的长度。
 
 
-# [k for k, g in groupby('AAAABBBCCDAABBB')] --> A B C D A B
-# [list(g) for k, g in groupby('AAAABBBCCD')] --> AAAA BBB CC D
+# [key for key, group in groupby('AAAABBBCCDAABBB')] --> A B C D A B
+# [list(group) for key, group in groupby('AAAABBBCCD')] --> AAAA BBB CC D
 
 
 # 考虑两种情况

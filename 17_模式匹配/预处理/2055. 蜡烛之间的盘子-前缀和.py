@@ -19,12 +19,12 @@ class Solution:
 
     # 预处理nextCandle 前缀处理
     def platesBetweenCandles(self, s: str, queries: List[List[int]]) -> List[int]:
-        candelSum = [0] * (len(s) + 1)
-        next = [INF] * (len(s) + 1)
+        preSum = [0] * (len(s) + 1)
         pre = [0] * (len(s) + 1)
+        next = [INF] * (len(s) + 1)
 
         for i, char in enumerate(s):
-            candelSum[i + 1] = candelSum[i] + int(char == '|')
+            preSum[i + 1] = preSum[i] + int(char == '|')
             pre[i + 1] = i if char == '|' else pre[i]
         for i, char in reversed(list(enumerate(s))):
             next[i] = i if char == '|' else next[i + 1]
@@ -33,9 +33,8 @@ class Solution:
         for left, right in queries:
             lower = next[left]
             upper = pre[right + 1]
-            res.append(
-                upper - lower - (candelSum[upper] - candelSum[lower]) if lower < upper else 0
-            )
+            
+            res.append(upper - lower - (preSum[upper] - preSum[lower]) if lower < upper else 0)
 
         return res
 

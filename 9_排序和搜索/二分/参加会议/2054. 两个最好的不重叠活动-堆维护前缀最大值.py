@@ -6,7 +6,7 @@ from heapq import heappop, heappush
 # 如果你参加一个活动，且结束时间为 t ，那么下一个活动必须在 t + 1 或之后的时间开始。
 # 你 最多 可以参加 `两个`时间不重叠 活动，使得它们的价值之和 最大 。
 
-
+# 13_简单游戏-前缀和+pq
 class Solution:
     def maxTwoEvents(self, events: List[List[int]]) -> int:
         events.sort()

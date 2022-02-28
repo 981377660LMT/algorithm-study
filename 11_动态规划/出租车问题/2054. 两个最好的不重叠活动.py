@@ -7,6 +7,7 @@ from heapq import heappop, heappush
 # 你 最多 可以参加 `两个`时间不重叠 活动，使得它们的价值之和 最大 。
 
 
+# 关键思路：用堆维护之前的最大值，每次与当前相加
 class Solution:
     def maxTwoEvents(self, events: List[List[int]]) -> int:
         events.sort()

@@ -21,12 +21,12 @@ class Solution:
     # 一个坑：没有座位时算作没有方案
 
     def numberOfWays(self, corridor: str) -> int:
-        A = [i for i, char in enumerate(corridor) if char == 'S']
-        if not A or len(A) % 2:
+        seats = [i for i, char in enumerate(corridor) if char == 'S']
+        if not seats or len(seats) & 1:
             return 0
         res, mod = 1, 10 ** 9 + 7
-        for i in range(2, len(A), 2):
-            res *= A[i] - A[i - 1]
+        for i in range(2, len(seats), 2):
+            res *= seats[i] - seats[i - 1]
             res %= mod
         return res
 
