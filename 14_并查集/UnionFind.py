@@ -1,6 +1,6 @@
 # 元素是0-n-1的并查集写法，不支持动态添加
 from collections import defaultdict
-from typing import Dict, Generic, Iterable, List, TypeVar
+from typing import Dict, Generic, Iterable, List, Optional, TypeVar
 
 
 class UnionFindArray:
@@ -36,7 +36,7 @@ T = TypeVar('T')
 
 
 class UnionFindMap(Generic[T]):
-    def __init__(self, iterable: Iterable[T] = None):
+    def __init__(self, iterable: Optional[Iterable[T]] = None):
         self.count = 0
         self.parent = dict()
         self.rank = defaultdict(lambda: 1)
