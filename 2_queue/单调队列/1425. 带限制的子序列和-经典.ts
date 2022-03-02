@@ -9,7 +9,7 @@ import { ArrayDeque } from '../Deque/ArrayDeque'
  * 请你返回 非空 子序列元素和的最大值，子序列需要满足：
  * 子序列中每两个 相邻 的整数 nums[i] 和 nums[j] ，它们在原数组中的下标 i 和 j 满足 i < j 且 j - i <= k 。
  * @summary
- * 单调队列，队首表示之前的子序列元素和最大值
+ * 单减的单调队列，队首表示之前的子序列元素和最大值
  */
 const constrainedSubsetSum = function (nums: number[], k: number): number {
   const n = nums.length

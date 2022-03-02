@@ -15,25 +15,25 @@ from collections import deque
 
 class Solution:
     # 不缓存，超时
-    def loudAndRich3(self, richer: List[List[int]], quiet: List[int]) -> List[int]:
-        adjMap = defaultdict(list)
-        indgree = [0] * len(quiet)
-        for u, v in richer:
-            adjMap[u].append(v)
-            indgree[v] += 1
-        res = [i for i in range(len(quiet))]
+    # def loudAndRich3(self, richer: List[List[int]], quiet: List[int]) -> List[int]:
+    #     adjMap = defaultdict(list)
+    #     indgree = [0] * len(quiet)
+    #     for u, v in richer:
+    #         adjMap[u].append(v)
+    #         indgree[v] += 1
+    #     res = [i for i in range(len(quiet))]
 
-        def dfs(cur: int, quietest_parent: int) -> None:
-            if quiet[quietest_parent] < quiet[res[cur]]:
-                res[cur] = quietest_parent
-            for next in adjMap[cur]:
-                dfs(next, res[cur])
+    #     def dfs(cur: int, quietest_parent: int) -> None:
+    #         if quiet[quietest_parent] < quiet[res[cur]]:
+    #             res[cur] = quietest_parent
+    #         for next in adjMap[cur]:
+    #             dfs(next, res[cur])
 
-        for i, v in enumerate(indgree):
-            if v == 0:
-                dfs(i, i)
+    #     for i, v in enumerate(indgree):
+    #         if v == 0:
+    #             dfs(i, i)
 
-        return res
+    #     return res
 
     # 拓扑排序不易错
     # 从上到下 一层一层地更新传递值(dp)

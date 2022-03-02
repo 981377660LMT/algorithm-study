@@ -6,20 +6,24 @@ from bisect import bisect_right
 # 排序+双指针查找+计算贡献
 # 两数之和
 
-M = int(1e9 + 7)
+MOD = int(1e9 + 7)
 
 
 class Solution:
     def numSubseq(self, nums: List[int], target: int) -> int:
+        """
+        子序列：排序
+        双指针查找+计算贡献
+        """
         nums = sorted(nums)
         res, left, right = 0, 0, len(nums) - 1
         while left <= right:
             if nums[left] + nums[right] > target:
                 right -= 1
             else:
-                res += pow(2, right - left, M)
+                res += pow(2, right - left, MOD)
                 left += 1
-        return res % M
+        return res % MOD
 
 
 print(Solution().numSubseq(nums=[3, 5, 6, 7], target=9))

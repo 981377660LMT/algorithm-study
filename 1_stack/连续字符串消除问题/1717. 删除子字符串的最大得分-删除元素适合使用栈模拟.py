@@ -8,24 +8,24 @@ class Solution:
             s = s[::-1]
             x, y = y, x
 
-        # 讨论x>=y的情况 多匹配'ab'
         res = 0
-        inputStack = []
-        outputStack = []
 
+        # 讨论x>=y的情况 多匹配'ab'
+        stack1 = []
         for char in s:
-            if char == 'b' and inputStack and inputStack[-1] == 'a':
-                inputStack.pop()
+            if char == 'b' and stack1 and stack1[-1] == 'a':
+                stack1.pop()
                 res += x
             else:
-                inputStack.append(char)
+                stack1.append(char)
 
-        for char in inputStack:
-            if char == 'a' and outputStack and outputStack[-1] == 'b':
-                outputStack.pop()
+        stack2 = []
+        for char in stack1:
+            if char == 'a' and stack2 and stack2[-1] == 'b':
+                stack2.pop()
                 res += y
             else:
-                outputStack.append(char)
+                stack2.append(char)
 
         return res
 

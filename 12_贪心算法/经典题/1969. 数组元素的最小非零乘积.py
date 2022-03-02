@@ -19,6 +19,9 @@ class Solution:
 
     def minNonZeroProduct2(self, p: int) -> int:
         def qpow(base: int, exp: int, mod: int) -> int:
+            if exp == 0:
+                return 1 % mod
+
             res = 1
 
             while exp:
@@ -44,3 +47,4 @@ print(Solution().minNonZeroProduct2(p=3))
 # - 第二次操作中，我们交换第三个和第四个元素中间的数位。
 #     - 结果数组为 [001, 110, 001, 110, 001, 110, 111] 。
 # 数组乘积 1 * 6 * 1 * 6 * 1 * 6 * 7 = 1512 是最小乘积。
+

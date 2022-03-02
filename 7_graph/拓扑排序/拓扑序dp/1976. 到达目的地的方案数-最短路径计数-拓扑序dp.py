@@ -13,7 +13,7 @@ from heapq import heappop, heappush
 MOD = int(1e9 + 7)
 INF = 2 ** 63 - 1
 
-
+# 单源最短路 + 拓扑序 DP
 class Solution:
     def countPaths(self, n: int, roads: List[List[int]]) -> int:
         adjMap = defaultdict(list)
@@ -24,6 +24,7 @@ class Solution:
         dist = [INF] * n
         dist[0] = 0
         pq = [(0, 0)]
+
         # 1.注意这个count数组表示到id的最短路径数
         count = [0] * n
         count[0] = 1
@@ -32,17 +33,20 @@ class Solution:
             minDist, cur = heappop(pq)
             if cur == n - 1:
                 return count[cur] % MOD
+
             for next, weight in adjMap[cur]:
                 candDist = weight + minDist
 
                 # 2.相等加count
                 if candDist == dist[next]:
                     count[next] += count[cur]
+                    count[next] %= MOD
                 # 3.更优直接覆盖count
                 elif candDist < dist[next]:
                     dist[next] = candDist
                     heappush(pq, (candDist, next))
                     count[next] = count[cur]
+                    count[next] %= MOD
 
 
 print(

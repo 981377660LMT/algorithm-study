@@ -38,6 +38,7 @@ function maxPoints(points: number[][]): number {
 
   return Math.max(...dp[row - 1])
 }
+
 console.log(
   maxPoints([
     [1, 2, 3],

@@ -9,6 +9,7 @@ const rotateMatrix = function (mat: number[][]): number[][] {
       res[j][m - i - 1] = mat[i][j]
     }
   }
+
   return res
 }
 

@@ -20,11 +20,11 @@ intervals.sort((a, b) => a[0] - b[0] || b[1] - a[1])  => 起点相同时，区�
 ```Python
 
         res = []
-        preEnd = intervals[0][1]
-        for curStart, curEnd in intervals:
-            if preEnd < curStart:
+        preEnd = -1
+        for start, end in intervals:
+            if preEnd <= start:
                 res.append(Interval(preEnd, curStart))
-            preEnd = max(preEnd, curEnd)
+            preEnd = max(preEnd, end)
 
         return res
 ```

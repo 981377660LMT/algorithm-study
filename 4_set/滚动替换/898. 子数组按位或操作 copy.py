@@ -1,3 +1,4 @@
+# 本质上是dp
 class Solution(object):
     def subarrayBitwiseORs(self, A):
         res = set()

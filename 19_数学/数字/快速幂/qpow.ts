@@ -7,6 +7,8 @@ const MOD = 1e9 + 7
  * @returns a^n
  */
 function qpow(a: number, n: number, mod: number): number {
+  if (n === 0) return 1 % mod
+
   let [_a, _n, _mod] = [BigInt(a), BigInt(n), BigInt(mod)]
   let res = 1n
 

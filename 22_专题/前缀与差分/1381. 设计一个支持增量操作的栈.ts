@@ -1,10 +1,14 @@
 type Index = number
 type Delta = number
 
+/**
+ * @description 差分数组+懒更新，要用的时候再计算
+ */
 class CustomStack {
   private stack: number[]
   private maxSize: number
   private diff: Map<Index, Delta>
+
   constructor(maxSize: number) {
     this.maxSize = maxSize
     this.stack = []

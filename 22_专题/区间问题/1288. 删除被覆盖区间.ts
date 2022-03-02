@@ -9,20 +9,17 @@ function removeCoveredIntervals(intervals: number[][]): number {
   intervals.sort((a, b) => a[0] - b[0] || b[1] - a[1])
 
   let merge = 0
-  let preLeft = intervals[0][0]
-  let preRight = intervals[0][1]
-  for (let index = 1; index < intervals.length; index++) {
-    const [curLeft, curRight] = intervals[index]
+
+  let preEnd = -1
+  for (let index = 0; index < intervals.length; index++) {
+    const [_, end] = intervals[index]
 
     // 三种关系:包含，相交，相离
     // 判断包含：需要让长的区间排在前面
-    if (curRight <= preRight) {
+    if (end <= preEnd) {
       merge++
-    } else if (curLeft <= preRight && curRight >= preRight) {
-      preRight = curRight
     } else {
-      preLeft = curLeft
-      preRight = curRight
+      preEnd = end
     }
   }
 

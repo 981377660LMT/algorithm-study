@@ -8,6 +8,7 @@
    它可以 往右 跳恰好 b 个位置。
    它不能 连续 往左跳 2 次。
    它不能跳到任何 forbidden 数组中的位置。
+   @description 注意bfs范围剪枝
  */
 function minimumJumps(forbidden: number[], a: number, b: number, x: number): number {
   const visited = new Set(forbidden)

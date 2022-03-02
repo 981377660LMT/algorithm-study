@@ -32,6 +32,12 @@ class Solution:
         """
         from functools import lru_cache
 
+        # 需要考虑一个数组全是负数，和一个全是正数情况
+        if max(nums1) < 0 and min(nums2) > 0:
+            return max(nums1) * min(nums2)
+        if max(nums2) < 0 and min(nums1) > 0:
+            return max(nums2) * min(nums1)
+
         @lru_cache(len(nums1) * len(nums2))
         def dfs(i, j):
             if i >= len(nums1) or j >= len(nums2):
@@ -47,13 +53,12 @@ class Solution:
             return max([op1, op2, op3, op4])
 
         res = dfs(0, 0)
-        if res > 0:
-            return res
-        else:
-            return max(min(nums1) * max(nums2), max(nums1) * min(nums2))
+        dfs.cache_clear()
+        return res
 
 
-print(Solution().maxDotProduct(nums1=[2, 1, -2, 5], nums2=[3, 0, -6]))
+print(Solution().maxDotProduct2(nums1=[2, 1, -2, 5], nums2=[3, 0, -6]))
 # 输出：18
 # 解释：从 nums1 中得到子序列 [2,-2] ，从 nums2 中得到子序列 [3,-6] 。
 # 它们的点积为 (2*3 + (-2)*(-6)) = 18 。
+print(Solution().maxDotProduct2(nums1=[-1, -1], nums2=[1, 1]))

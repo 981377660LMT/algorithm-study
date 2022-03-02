@@ -14,6 +14,7 @@ MOD = int(1e9 + 7)
 
 class Solution:
     def maxSumMinProduct(self, nums: List[int]) -> int:
+        """看每个数作为最小值的影响范围"""
         nums = [0] + nums + [0]
         preSum = [0]
         for num in nums:

@@ -54,29 +54,6 @@ const bisectLeft = (arr: number[], target: number) => {
 }
 ```
 
-重叠区间问题模板(**罗志祥贪心算法**)
-**按照每个区间结尾从小到大进行升序排序**，优先选择结尾最短的区间,留给后面的空间更多
-
-```TS
-// 找到最长的不重叠区间
-var findLongestChain = function (pairs: number[][]) {
-  // sort by the earliest finish time
-  pairs.sort((a, b) => a[1] - b[1])
-  let prev = pairs[0],
-    chain = 1
-
-  for (let i = 1; i < pairs.length; i++) {
-    const [prevS, prevE] = prev
-    const [currS, currE] = pairs[i]
-    if (prevE < currS) {
-      prev = pairs[i]
-      chain++
-    }
-  }
-  return chain
-}
-```
-
 1713. 得到子序列的最少操作次数
       当一个数组元素各不相同，LCS 问题可以转换为 LIS 问题
       当其中一个数组元素各不相同时，这时候每一个“公共子序列”都对应一个不重复元素数组的下标数组“上升子序列”，反之亦然

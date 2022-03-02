@@ -4,7 +4,7 @@
 // 你可以在满足 startDayi <= d <= endDayi 中的任意一天 d 参加会议 i
 // 一天最多参加一个，可以不完整参加会议
 
-import { MinHeap } from '../../../2_queue/minheap'
+import { MinHeap } from '../../8_heap/MinHeap'
 
 /**
  *
@@ -26,17 +26,18 @@ function maxEvents(events: number[][]): number {
   for (let curDay = 1; curDay <= 1e5; curDay++) {
     // 当日开始的会议
     while (eventIndex < n && events[eventIndex][0] === curDay) {
-      pq.push(events[eventIndex++][1])
+      pq.heappush(events[eventIndex][1])
+      eventIndex++
     }
 
     // 删去已经结束的会议
-    while (pq.size > 0 && pq.peek() < curDay) {
-      pq.shift()
+    while (pq.size > 0 && pq.peek()! < curDay) {
+      pq.heappop()
     }
 
     // 加入结束最早的会议
     if (pq.size > 0) {
-      pq.shift()
+      pq.heappop()
       res++
     }
   }

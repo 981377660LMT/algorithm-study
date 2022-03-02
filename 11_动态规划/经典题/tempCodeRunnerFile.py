@@ -1,1 +1,0 @@
-nums1[cur] ^ nums2[next]

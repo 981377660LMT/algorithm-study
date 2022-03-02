@@ -13,6 +13,10 @@
 
 class Solution:
     def wonderfulSubstrings(self, word: str) -> int:
+        """
+          1. 字符种类很少,考虑装压
+          2. 子串计数，使用前缀和
+        """
         preSumState = [0 for _ in range(1 << 10)]
         preSumState[0] = 1
 

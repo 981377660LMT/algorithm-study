@@ -3,11 +3,12 @@
 
 # 1.枚举分割点
 # 2.最小值=左侧最小-右侧最大
+from typing import List
 from heapq import heappop, heappush
 
 
 class Solution:
-    def minimumDifference(self, nums: list[int]) -> int:
+    def minimumDifference(self, nums: List[int]) -> int:
         n = len(nums) // 3
         leftMinSum = [0] * (3 * n + 1)
         rightMaxSum = [0] * (3 * n + 1)

@@ -34,7 +34,8 @@ class Solution:
                 minCost[i] = min(curCost, minCost[i])
                 a0 *= q
 
-        # dijk求最短路
+        # dijk求最短路，
+        # 注意pq可以不用heapify， 因为heappop方法返回数组的第一个元素(堆顶)，而这里的pq第一个元素必定是cost最小的，要不要heapify对第一轮搜索没有影响
         pq = [(minCost[i], i + 1) for i in range(min(len(minCost), numLaps))]
         dist = [INF] * (numLaps + 1)
         while pq:

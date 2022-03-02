@@ -19,6 +19,8 @@ function calInv(a: bigint, mod: bigint) {
 
 // 注意js精度丢失问题 需要用大数
 function qpow(a: bigint, n: bigint) {
+  if (n === 0n) return 1n % MOD
+
   let res = 1n
 
   while (n) {

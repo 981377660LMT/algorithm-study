@@ -1,3 +1,5 @@
+差分数组的用处：`延迟的范围更新`
+
 ```Python
 res = [0] * (length + 1)
 for left, right, delta in updates:
