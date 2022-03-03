@@ -9,18 +9,21 @@ from typing import List
 
 class Solution:
     def minDifference(self, nums: List[int], queries: List[List[int]]) -> List[int]:
-        counters = [[0] * 101]
-        for num in nums:
-            counters.append(list(counters[-1]))
-            counters[-1][num] += 1
+        """AlphaPresum解法"""
+        n = len(nums)
+        preSum = [[0] * 101 for _ in range(n + 1)]
+        for i in range(1, n + 1):
+            preSum[i][nums[i - 1]] += 1
+            for j in range(101):
+                preSum[i][j] += preSum[i - 1][j]
 
         res = []
         for left, right in queries:
             minDiff = 0x3FFFFFFF
             pre = -0x3FFFFFFF
             for cand in range(1, 101):
-                # 我们通过个数前缀和数组求得l到r之间有哪些数存在
-                if counters[right + 1][cand] - counters[left][cand] > 0:
+                # 我们通过`个数前缀和数组求得l到r之间有哪些数存在`
+                if preSum[right + 1][cand] - preSum[left][cand] > 0:
                     minDiff = min(minDiff, cand - pre)
                     pre = cand
             res.append(minDiff if minDiff != 0x3FFFFFFF else -1)

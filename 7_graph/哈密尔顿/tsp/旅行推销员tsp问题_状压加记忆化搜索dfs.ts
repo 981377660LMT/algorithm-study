@@ -1,5 +1,7 @@
 // 给定一组城市和每对城市之间的火车票的价钱，找到每个城市只访问一次并返回起点的最小车费花销。
 // 复杂度O(n*2^n)
+// https://www.acwing.com/problem/content/93/
+// . 最短哈密尔顿路径
 function tsp(n: number, weight: number[][], start = 0): number {
   const target = (1 << n) - 1
   const memo = new Map<string, number>()
