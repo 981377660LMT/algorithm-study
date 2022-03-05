@@ -3,22 +3,22 @@
  * @return {number}
  * 有多少不重叠的区间
  */
-var findMinArrowShots = function (points: number[][]): number {
+function findMinArrowShots(points: number[][]): number {
   // sort by the earliest finish time
   points.sort((a, b) => a[1] - b[1])
-  let prev = points[0],
-    chain = 1
 
-  for (let i = 1; i < points.length; i++) {
-    const [prevS, prevE] = prev
-    const [currS, currE] = points[i]
-    if (prevE < currS) {
-      prev = points[i]
-      chain++
+  let preEnd = -Infinity
+  let res = 1
+
+  for (let i = 0; i < points.length; i++) {
+    const [curStart, curEnd] = points[i]
+    if (preEnd < curStart) {
+      preEnd = curEnd
+      res++
     }
   }
-  console.log(points)
-  return chain
+
+  return res
 }
 
 console.log(

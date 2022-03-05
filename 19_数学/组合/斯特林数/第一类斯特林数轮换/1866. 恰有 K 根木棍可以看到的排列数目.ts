@@ -1,28 +1,24 @@
 // 629. K个逆序对数组
+
+const MOD = 1e9 + 7
+const N = 1e3 + 10
+const stirling1 = Array.from<unknown, number[]>({ length: N }, () => Array(N).fill(0))
+stirling1[0][0] = 1
+for (let i = 1; i < N; i++) {
+  for (let j = 1; j < N; j++) {
+    stirling1[i][j] = (stirling1[i - 1][j - 1] + stirling1[i - 1][j] * (i - 1)) % MOD
+  }
+}
+
 /**
  * @param {number} n  1 <= n <= 1000
- * @param {number} k
+ * @param {number} k k <= n
  * @return {number}
  * 请你将这些木棍排成一排，并满足从左侧 可以看到 恰好 k 根木棍。
- * @description
- * n 根木棍被划分成了 k 个部分，每个部分的第一根木棍即为可以看到的木棍。
- * 即长为 n 的排列划分成 k 个非空圆排列的方案数:第一类斯特林数
- * 假设1能被看到，也就是1必然放在最前面,那我们需要找2,3,4,5中的只能有3-1=2个被看到的解。
- * 假设1不被看到，也就是1放在除了最前面的位置都不会影响解，那我们需要找2,3,4,5中有3个被看到的解。
+ * @description 划分为k个部分，每个部分排列种数为圆排列种树=>第一类斯特林数
  */
 function rearrangeSticks(n: number, k: number): number {
-  const MOD = 10 ** 9 + 7
-  const dp = Array.from<unknown, number[]>({ length: n + 1 }, () => Array(k + 1).fill(0))
-
-  dp[0][0] = 1 // ???
-
-  for (let i = 1; i < n + 1; i++) {
-    for (let j = 1; j < k + 1; j++) {
-      dp[i][j] = (dp[i - 1][j - 1] + dp[i - 1][j] * (i - 1)) % MOD
-    }
-  }
-
-  return dp[n][k]
+  return stirling1[n][k]
 }
 
 console.log(rearrangeSticks(3, 2))

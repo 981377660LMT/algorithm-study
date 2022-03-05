@@ -9,7 +9,7 @@ from typing import List
 # 请你返回完成所有任务的 最少 初始能量。
 
 
-# 老实人与装逼人
+# 老实人与装逼人；滚雪球
 # https://leetcode-cn.com/problems/minimum-initial-energy-to-finish-tasks/solution/chun-li-zi-jiang-jie-bang-zhu-li-jie-lao-9fgq/
 class Solution:
     def minimumEffort(self, tasks: List[List[int]]) -> int:

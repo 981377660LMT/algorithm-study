@@ -9,9 +9,9 @@ function add(num1: string, num2: string): string {
   let carry = 0
   let res = ''
 
-  while (i >= 0 || j >= 0) {
-    const d1 = i < 0 ? 0 : parseInt(num1[i])
-    const d2 = j < 0 ? 0 : parseInt(num2[j])
+  while (carry || i >= 0 || j >= 0) {
+    const d1 = i < 0 ? 0 : Number(num1[i])
+    const d2 = j < 0 ? 0 : Number(num2[j])
     const sum = d1 + d2 + carry
     res = `${sum % 10}${res}`
     carry = ~~(sum / 10)
@@ -19,7 +19,6 @@ function add(num1: string, num2: string): string {
     j--
   }
 
-  carry && (res = `1${res}`)
   return res
 }
 

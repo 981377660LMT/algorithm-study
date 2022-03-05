@@ -4,6 +4,7 @@
 
 class Solution:
     def beautySum(self, s: str) -> int:
+        """枚举子串：固定左端点,dp"""
         res = 0
         for left in range(len(s)):
             counter = [0] * 26

@@ -7,7 +7,6 @@
  * @link https://leetcode-cn.com/problems/yuan-quan-zhong-zui-hou-sheng-xia-de-shu-zi-lcof/solution/yuan-quan-zhong-zui-hou-sheng-xia-de-shu-j30k/
  * @description f(n,m)=(f(n-1,m)+m)%n
    f(n,m)指n个人，报第m个编号出列最终编号
-
    有0 1 2 3 4 5 6 7 8 9十个数字，假设m为3,最后结果可以先记成f(10,3)，即使我们不知道它是多少。
  */
 const lastRemaining = (n: number, m: number): number => {

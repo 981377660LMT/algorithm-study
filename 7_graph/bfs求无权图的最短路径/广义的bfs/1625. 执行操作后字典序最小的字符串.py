@@ -5,16 +5,19 @@
 
 # 在本题的数据范围内，可以枚举所有可能的操作结果
 # Traverse the whole graph via the two operations, and return the minimum string
+from collections import deque
+
+
 class Solution:
     def findLexSmallestString(self, s: str, a: int, b: int) -> str:
         n = len(s)
         res = s
-        ######## 记忆化+bfs
-        visited = set()
-        visited.add(s)
-        queue = [s]
+
+        # bfs搜索
+        visited = set([s])
+        queue = deque([s])
         while queue:
-            cur = queue.pop(0)
+            cur = queue.popleft()
             res = min(res, cur)
 
             #### 方式a
@@ -22,6 +25,7 @@ class Solution:
             for i in range(1, n, 2):
                 nxt[i] = str((int(nxt[i]) + a) % 10)
             nxt_a_str = ''.join(nxt)
+
             if nxt_a_str not in visited:
                 visited.add(nxt_a_str)
                 queue.append(nxt_a_str)

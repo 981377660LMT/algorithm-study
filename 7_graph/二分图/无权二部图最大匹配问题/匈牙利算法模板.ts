@@ -1,3 +1,4 @@
+// 复杂度O(NM)
 function hungarian(adjList: number[][]) {
   let maxMatching = 0
   const matched = Array<number>(adjList.length).fill(-1)

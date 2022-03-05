@@ -13,6 +13,7 @@ class Solution:
             right = [v for v in nums if v > nums[0]]
             return comb(len(left) + len(right), len(left)) * countWays(left) * countWays(right)
 
+        # 最后记得要减1（去掉自身）。
         return (countWays(nums) - 1) % MOD
 
 

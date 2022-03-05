@@ -11,6 +11,7 @@ from typing import List
 
 # 请你返回执行以上操作后，在满足前文所述的条件下，arr 中可能的 最大值 。
 
+# 10^5 考虑贪心/排序/dp/双指针
 # 最后肯定是1,2,3,... 每个数要被限制
 class Solution:
     def maximumElementAfterDecrementingAndRearranging(self, arr: List[int]) -> int:

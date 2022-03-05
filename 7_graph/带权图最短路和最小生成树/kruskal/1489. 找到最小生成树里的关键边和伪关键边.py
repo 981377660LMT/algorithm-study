@@ -63,7 +63,7 @@ class Solution:
 
             # 连接当前边再进行后续最小生成树合成
             uf = UnionFind(n)
-            # 在树中先取这条边
+            # 在树中`先`取这条边
             uf.union(u, v)
             weightWithW = uf.getMSTWeight(tmpEdges) + w
 

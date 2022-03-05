@@ -6,6 +6,7 @@ from sortedcontainers import SortedList
 # 房间的面积 至少 为 minSizej ，且
 # abs(id - preferredj) 的值 最小 ，其中 abs(x) 是 x 的绝对值。
 
+# 将区间和查询分别排序，然后离线处理
 # `将查询从大到小排序`，然后把所有符合条件的房间放到集合里面，在集合里面二分房间号，找到最接近pre的。
 class Solution:
     def closestRoom(self, rooms: List[List[int]], queries: List[List[int]]) -> List[int]:

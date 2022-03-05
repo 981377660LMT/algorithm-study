@@ -18,7 +18,7 @@ class Solution:
             else:
                 dp[i] = min(dp[i - 1] + 1, b)
         # 删这个a或删前面所有的b
-        return dp[n]
+        return dp[-1]
 
 
 print(Solution().minimumDeletions(s="aababbab"))

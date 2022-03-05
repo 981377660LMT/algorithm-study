@@ -17,7 +17,7 @@ const reversePairs = function (nums: number[]): number {
   const mergeTwo = (arr1: number[], arr2: number[]) => {
     const ll = arr1.length
     const rl = arr2.length
-    const res: number[] = Array(ll + rl)
+    const res: number[] = Array(ll + rl).fill(0)
     let l = 0
     let r = 0
     for (let index = 0; index < ll + rl; index++) {

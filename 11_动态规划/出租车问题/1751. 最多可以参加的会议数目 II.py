@@ -22,7 +22,6 @@ class Solution:
 
         events.sort()
         starts = [e[0] for e in events]
-
         return dfs(0, k)
 
 

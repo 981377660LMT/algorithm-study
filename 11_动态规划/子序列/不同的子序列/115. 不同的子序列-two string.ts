@@ -1,5 +1,5 @@
 /**
- * @param {string} s
+ * @param {string} s   0 <= s.length, t.length <= 1000
  * @param {string} t
  * @return {number}
  * 相对于72. 编辑距离,只有删除操作
@@ -16,7 +16,7 @@ const numDistinct = function (s: string, t: string): number {
     for (let j = 1; j < t.length + 1; j++) {
       if (s[i - 1] === t[j - 1]) {
         // 新的状态 选不选s[i-1]去匹配t.slice(0,j)
-        dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j] // 选不选最后一位 选就是dp[i-1][j-1] 不选就是 dp[i-1][j]
+        dp[i][j] = dp[i - 1][j] + dp[i - 1][j - 1] // 选不选最后一位 选就是dp[i-1][j-1] 不选就是 dp[i-1][j]
       } else {
         dp[i][j] = dp[i - 1][j]
       }

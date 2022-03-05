@@ -5,7 +5,7 @@
  * @description 是否可以用 wordDict 中的词组合成 s，完全背包问题
  * @description 考虑排列顺序的完全背包问题 容量是s,length worddict是物体
  */
-var wordBreak = function (s, wordDict) {
+function wordBreak(s, wordDict) {
   if (wordDict.length === 0) return false
   // 背包
   const set = new Set(wordDict)

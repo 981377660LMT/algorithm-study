@@ -5,24 +5,23 @@
  * 但是不太方便 还是贪心好
  * 按照每个区间结尾从小到大进行升序排序，优先选择结尾最短的区间，在它的后面才可能连接更多的区间
  */
-const eraseOverlapIntervals = function (intervals: number[][]): number {
+function eraseOverlapIntervals(intervals: number[][]): number {
   if (intervals.length <= 1) return 0
+  intervals.sort((a, b) => a[1] - b[1] || -(a[0] - b[0]))
 
-  intervals.sort((a, b) => a[1] - b[1])
-  let prev = intervals[0],
-    remove = 0
+  let res = 0
+  let preEnd = -Infinity
 
-  for (let i = 1; i < intervals.length; i++) {
-    const [prevS, prevE] = prev
-    const [currS, currE] = intervals[i]
-    if (prevE > currS) {
-      remove++
-      continue
+  for (let i = 0; i < intervals.length; i++) {
+    const [curStart, curEnd] = intervals[i]
+    if (preEnd > curStart) {
+      res++
+    } else {
+      preEnd = curEnd
     }
-    prev = intervals[i]
   }
-  console.log(intervals)
-  return remove
+
+  return res
 }
 
 console.log(

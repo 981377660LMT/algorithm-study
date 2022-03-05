@@ -11,8 +11,8 @@ function subtract(num1: string, num2: string): string {
   let res = ''
 
   while (i >= 0 || j >= 0) {
-    const d1 = i < 0 ? 0 : parseInt(num1[i])
-    const d2 = j < 0 ? 0 : parseInt(num2[j])
+    const d1 = i < 0 ? 0 : Number(num1[i])
+    const d2 = j < 0 ? 0 : Number(num2[j])
     const diff = d1 - d2 - carry
     res = `${(diff + 10) % 10}${res}`
     carry = diff < 0 ? 1 : 0

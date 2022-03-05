@@ -34,4 +34,8 @@ function generateLangFordSequence(n: number): number[][] {
   }
 }
 
-console.log(generateLangFordSequence(4))
+if (require.main === module) {
+  console.log(generateLangFordSequence(4))
+}
+
+export { generateLangFordSequence }

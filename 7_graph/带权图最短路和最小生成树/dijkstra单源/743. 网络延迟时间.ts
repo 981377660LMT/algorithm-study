@@ -9,6 +9,7 @@ type Edge = [Cur, Weight]
  * @param {number} n  有 n 个网络节点，标记为 1 到 n。
  * @param {number} k
  * @return {number}
+ * @description O((V+E)logV)
  */
 const networkDelayTime = function (times: number[][], n: number, k: number): number {
   const adjList = Array.from<number, [number, number][]>({ length: n + 1 }, () => [])

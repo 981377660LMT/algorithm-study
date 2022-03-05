@@ -6,9 +6,8 @@ from functools import lru_cache
 # 请你返回每栋房子与离它最近的邮筒之间的距离的 最小 总和。
 class Solution:
     def minDistance(self, houses: List[int], k: int) -> int:
-        houses.sort()
-
         def calDistance(left: int, right: int) -> int:
+            """在[left,right]房子间放邮筒，返回最小距离之和。"""
             res = 0
             while left < right:
                 res += houses[right] - houses[left]
@@ -32,6 +31,7 @@ class Solution:
                 res = min(res, calDistance(cur, i - 1) + dfs(i, remain - 1))
             return res
 
+        houses.sort()
         return dfs(0, k)
 
 

@@ -27,3 +27,5 @@ for i in range(n):
     if curSum >= k:
         res += 1
 print(res)
+
+

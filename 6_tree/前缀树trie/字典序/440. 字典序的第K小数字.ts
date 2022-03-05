@@ -29,6 +29,7 @@ const findKthNumber = function (n: number, k: number): number {
   // 剩余移动步数
   let remainSteps = k
   remainSteps--
+
   let curNode = 1
   while (remainSteps) {
     // curNode + 1表示兄弟节点

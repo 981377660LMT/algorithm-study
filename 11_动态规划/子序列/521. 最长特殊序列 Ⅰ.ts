@@ -4,7 +4,7 @@
  * @return {number}
  * 「最长特殊序列」定义如下：该序列为某字符串独有的最长子序列（即不能是其他字符串的子序列）。
  */
-var findLUSlength = function (a: string, b: string): number {
+function findLUSlength(a: string, b: string): number {
   if (a === b) return -1
   else return Math.max(a.length, b.length)
 }

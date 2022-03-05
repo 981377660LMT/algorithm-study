@@ -5,30 +5,25 @@ from collections import Counter
 
 # 1 <= nums1.length, nums2.length <= 1000
 
-# 哈希表两数之和思想:固定目标，枚举小的数
+# 哈希表两数之和思想:用两个map记录平方，然后枚举乘积。
 class Solution:
     def numTriplets(self, nums1: List[int], nums2: List[int]) -> int:
-        def countTriplets(curCounter: Counter, targetCounter: Counter) -> int:
-            res = 0
-            for t1, c1 in targetCounter.items():
-                target = t1 ** 2
-                for t2, c2 in curCounter.items():
-                    if target % t2 != 0:
-                        continue
-                    t3 = target // t2
+        n1, n2 = len(nums1), len(nums2)
+        c1, c2 = Counter(), Counter()
 
-                    if t2 == t3:
-                        res += c1 * c2 * (c2 - 1) // 2
+        for num in nums1:
+            c1[num * num] += 1
+        for num in nums2:
+            c2[num * num] += 1
 
-                    # 注意这里防止重复计算的细节
-                    # 1.两种情况只算一次
-                    elif t2 < t3 and t3 in curCounter:
-                        c3 = curCounter[t3]
-                        res += c1 * c2 * c3
-            return res
-
-        c1, c2 = Counter(nums1), Counter(nums2)
-        return countTriplets(c1, c2) + countTriplets(c2, c1)
+        res = 0
+        for i in range(n1):
+            for j in range(i + 1, n1):
+                res += c2[nums1[i] * nums1[j]]
+        for i in range(n2):
+            for j in range(i + 1, n2):
+                res += c1[nums2[i] * nums2[j]]
+        return res
 
 
 print(Solution().numTriplets(nums1=[1, 1], nums2=[1, 1, 1]))
