@@ -12,13 +12,7 @@ import { useUnionFindArray, useUnionFindMap } from '../../14_并查集/useUnionF
 import { qpow } from '../../19_数学/数字/快速幂/qpow'
 import { comb } from '../../19_数学/数论/逆元/逆元求comb'
 import { gcd } from '../../19_数学/最大公约数/gcd'
-import {
-  isPrime,
-  prime,
-  primeFactors,
-  primesLeq,
-  factors,
-} from '../../19_数学/素数筛-枚举因子/prime'
+import { isPrime, prime, primeFactors, primesLeq, factors } from '../../19_数学/因数筛/prime'
 import { hammingWeight as countOne } from '../../21_位运算/191. 位 1 的个数'
 import { subsets } from '../../21_位运算/枚举二进制子集/78. 子集'
 import { ArrayDeque } from '../../2_queue/Deque/ArrayDeque'
