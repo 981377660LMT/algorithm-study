@@ -12,7 +12,10 @@ function findCentre(n: number, edges: [next: number, weight: number][][]): numbe
   // 树的大小,即向`下面`走可以到多少个结点
   const treeSize = Array<number>(n).fill(Infinity)
 
-  function dfs(cur: number, parent: number) {
+  dfs(0, -1)
+  return res
+
+  function dfs(cur: number, parent: number): void {
     treeSize[cur] = 1
     maxSizeOfSubtree[cur] = 0
 
@@ -20,19 +23,14 @@ function findCentre(n: number, edges: [next: number, weight: number][][]): numbe
       if (next === parent) continue
       dfs(next, cur)
       // 后序,更新cur:此时cur可以拿到各个next的信息
-      maxSizeOfSubtree[cur] = Math.max(maxSizeOfSubtree[cur], treeSize[next])
       treeSize[cur] += treeSize[next]
+      maxSizeOfSubtree[cur] = Math.max(maxSizeOfSubtree[cur], treeSize[next])
     }
 
     // cur准备回退了，检查cur是否合法
     maxSizeOfSubtree[cur] = Math.max(maxSizeOfSubtree[cur], n - treeSize[cur])
     if (maxSizeOfSubtree[cur] <= n / 2) res.push(cur)
   }
-
-  dfs(0, -1)
-
-  console.log(treeSize, maxSizeOfSubtree)
-  return res
 }
 
 export {}
