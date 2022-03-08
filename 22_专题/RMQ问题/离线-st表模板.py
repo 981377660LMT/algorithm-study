@@ -4,6 +4,8 @@ from typing import Any, Generic, List, TypeVar
 T = TypeVar('T', int, float)
 
 # https://www.desgard.com/algo/docs/part2/ch03/1-range-max-query/
+
+
 class SparseTable(Generic[T]):
     def __init__(self, nums: List[T]):
         n, upper = len(nums), ceil(log2(len(nums))) + 1

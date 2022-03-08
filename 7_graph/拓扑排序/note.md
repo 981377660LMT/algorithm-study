@@ -1,3 +1,11 @@
+`注意拓扑排序里加indegree的时候不要重复加!`
+
+```Python
+if (pre, next) not in visited:
+  visited.add((pre, next))
+  indegree[next] += 1
+```
+
 ps:
 
 1. 将后序遍历的结果进行反转，就是拓扑排序的结果。

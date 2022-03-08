@@ -35,6 +35,7 @@ class Solution:
         target = (1 << key_count) - 1  # 终点end == 所有钥匙都到手了
 
         queue: Deque[Tuple[int, int, int, int]] = deque([(sr, sc, 0, 0)])
+        # 多了一维状态
         visited = [[[False for _ in range(1 << key_count)] for _ in range(col)] for _ in range(row)]
 
         while queue:

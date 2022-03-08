@@ -11,7 +11,7 @@
 # 向下更新是为了更新到 sum 数组
 
 
-from typing import Callable
+from typing import Callable, Optional
 
 Merge = Callable[[int, int], int]
 
@@ -19,7 +19,7 @@ Merge = Callable[[int, int], int]
 class SegmentTree:
     """注意根节点从1开始,tree本身为[1,n]"""
 
-    def __init__(self, n: int, merge: Merge = None):
+    def __init__(self, n: int, merge: Optional[Merge] = None):
         self._n = n
         self._tree = [0 for _ in range(n << 2)]
         self._lazy = [0 for _ in range(n << 2)]

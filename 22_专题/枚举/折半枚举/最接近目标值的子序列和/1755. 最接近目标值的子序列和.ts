@@ -1,10 +1,11 @@
-import { getSubArraySum } from './getSubArraySumFrom'
-import { twoSum } from './twoSum'
-
 // 给你一个整数数组 nums 和一个目标值 goal 。
 // 你需要从 nums 中选出一个子序列，使子序列元素总和最接近 goal
 // 1 <= nums.length <= 40
 // -107 <= nums[i] <= 107
+
+import { getSubArraySum } from '../getSubArraySumFrom'
+import { twoSum } from '../twoSum'
+
 // -109 <= goal <= 109
 function minAbsDifference(nums: number[], goal: number): number {
   const mid = nums.length >> 1

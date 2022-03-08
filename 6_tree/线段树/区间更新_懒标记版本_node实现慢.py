@@ -12,7 +12,7 @@
 
 
 # 当你事先知道class的attributes的时候，建议使用slots来节省memory以及获得更快的attribute access
-from typing import Callable
+from typing import Callable, Optional
 
 
 class Node:
@@ -33,7 +33,7 @@ class SegmentTree:
 
     __slots__ = ('_n', '_tree', '_merge')
 
-    def __init__(self, n: int, merge: Merge = None):
+    def __init__(self, n: int, merge: Optional[Merge] = None):
         self._n = n
         self._tree = [Node(0) for _ in range(n << 2)]
         self._merge: Merge = (lambda x, y: x + y) if merge is None else merge

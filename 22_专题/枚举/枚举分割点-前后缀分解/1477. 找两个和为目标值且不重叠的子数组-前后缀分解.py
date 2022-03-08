@@ -33,10 +33,10 @@ class Solution:
 
         res = int(1e20)
         leftMins = getMins(arr)
-        rightMins = getMins(arr[::-1])
-        print(leftMins, rightMins)
+        rightMins = getMins(arr[::-1])[::-1]
+
         for i in range(len(arr) - 1):
-            left, right = leftMins[i], rightMins[~(i + 1)]
+            left, right = leftMins[i], rightMins[i + 1]
             res = min(res, left + right)
         return res if res < int(1e19) else -1
 

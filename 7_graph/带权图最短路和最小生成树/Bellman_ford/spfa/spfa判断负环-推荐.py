@@ -1,12 +1,9 @@
+# 检查是否存在负权环的方法为：记录一个点的入队次数，如果超过V-1次说明存在负权环，
+# 因为最短路径上除自身外至多V-1个点，故一个点不可能被更新超过V-1次
+
+
 from collections import defaultdict, deque
 
-
-# 请你求出 1 号点到 n 号点的最短距离，如果无法从 1 号点走到 n 号点，则输出 impossible。
-# 边权可能为负数。
-
-# spfa可以过很多dijk的题
-# 但是网格的图容易卡spfa
-# 有边数限制也能用spfa，spfa本质就是让bf不去枚举到不可能会拓展的边，bf能做的spfa都能
 
 n, m = map(int, input().split())
 adjMap = defaultdict(list)

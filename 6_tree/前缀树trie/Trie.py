@@ -1,4 +1,6 @@
 class TrieNode:
+    __slots__ = ('count', 'preCount', 'children')
+
     def __init__(self):
         self.count = 0
         self.preCount = 0
@@ -9,27 +11,27 @@ class Trie:
     def __init__(self):
         self.root = TrieNode()
 
-    def insert(self, word):
+    def insert(self, word: str) -> None:
         node = self.root
-        for ch in word:
-            if ch not in node.children:
-                node.children[ch] = TrieNode()
-            node = node.children[ch]
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
             node.preCount += 1
         node.count += 1
 
-    def search(self, word):
+    def search(self, word: str) -> bool:
         node = self.root
-        for ch in word:
-            if ch not in node.children:
+        for char in word:
+            if char not in node.children:
                 return False
-            node = node.children[ch]
+            node = node.children[char]
         return node.count > 0
 
-    def startsWith(self, prefix):
+    def startsWith(self, prefix: str) -> int:
         node = self.root
-        for ch in prefix:
-            if ch not in node.children:
+        for char in prefix:
+            if char not in node.children:
                 return False
-            node = node.children[ch]
+            node = node.children[char]
         return node.preCount > 0

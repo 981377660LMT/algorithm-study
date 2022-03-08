@@ -10,11 +10,12 @@ const rightInf: Spot = { name: 'z', score: -Infinity }
 const compareFn = (a: Spot, b: Spot) => -(a.score - b.score) || a.name.localeCompare(b.name)
 
 class SORTracker {
-  private id: number
   sortedList: TreapMultiSet<Spot>
+  private id: number
+
   constructor() {
-    this.id = 0
     this.sortedList = new TreapMultiSet<Spot>(compareFn, leftInf, rightInf)
+    this.id = 0
   }
 
   add(name: string, score: number): void {

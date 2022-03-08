@@ -10,8 +10,8 @@ class Solution:
         # 枚举起点
         for i in range(m):
             for j in range(n):
-                diff = 0
                 k = 0
+                diff = 0
                 while i + k < m and j + k < n:
                     if s[i + k] != t[j + k]:
                         diff += 1

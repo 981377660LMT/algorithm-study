@@ -49,6 +49,7 @@ function minimumDifference(nums: number[]): number {
     const right = rightSubArraySum[midIndex - leftCount].sort((a, b) => a - b)
     res = Math.min(res, twoSum(left, right, target))
   }
+
   return res
 
   /**

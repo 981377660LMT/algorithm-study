@@ -131,7 +131,7 @@
 
    ```Python
    import sys
-   sys.setrecursionlimit(10000)
+   sys.setrecursionlimit(int(1e9))
    ```
 
 8. 图

@@ -5,6 +5,8 @@ from typing import List
 # 比方说，[2,3,5] 是 [1,2,3,4,5] 的一个子序列而 [1,5,3] 不是。
 
 # 1035. 不相交的线.ts
+
+
 class Solution:
     def maxDotProduct(self, nums1: List[int], nums2: List[int]) -> int:
         n, m = len(nums1), len(nums2)

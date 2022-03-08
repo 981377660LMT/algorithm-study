@@ -1,6 +1,6 @@
 // Gosper's Hack是一种生成 [公式] 元集合所有 [公式] 元子集的算法，它巧妙地利用了位运算
 
-function GosperHack(n: number, k: number) {
+function GosperHack(n: number, k: number): number {
   let x = (1 << k) - 1
   const limit = 1 << n
   while (x < limit) {
@@ -9,12 +9,13 @@ function GosperHack(n: number, k: number) {
     // xor
     x = r | (((x ^ r) >> 2) / lowbit)
   }
+  return x
 }
 
 export { GosperHack }
 
 if (require.main === module) {
-  GosperHack(5, 3)
+  console.log(GosperHack(5, 3))
 }
 // const lowbit = x & -x 标识出 x 最低位的1 e.g. 0b10110 –> 0b00010
 // const r = x + lowbit将 x 右端的连续一段1清零 e.g. 0b10110 –> 0b11000
