@@ -11,7 +11,7 @@
    11111 % 6 = 5
    111111 % 6 = 3
  */
-var smallestRepunitDivByK = function (k: number): number {
+function smallestRepunitDivByK(k: number): number {
   const shouldEnd = new Set([1, 3, 7, 9])
   if (!shouldEnd.has(k % 10)) return -1
 

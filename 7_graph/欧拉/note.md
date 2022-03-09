@@ -1,22 +1,29 @@
 ```JS
-  function getEulerLoop(adjMap: Map<number, number[]>, start: number): number[] {
-    let cur = start
-    const stack: number[] = [cur]
-    const res: number[] = []
+function getEulerPath(
+  adjMap: Map<number, Set<number>>,
+  start: number,
+  isDirected: boolean
+): number[] {
+  let cur = start
+  const stack: number[] = [start]
+  const res: number[] = []
 
-    while (stack.length > 0) {
-      if (adjMap.has(cur) && adjMap.get(cur)!.length > 0) {
-        stack.push(cur)
-        const next = adjMap.get(cur)!.pop()!
-        cur = next
-      } else {
-        res.push(cur)
-        cur = stack.pop()!
-      }
+  while (stack.length > 0) {
+    if (adjMap.has(cur) && adjMap.get(cur)!.size > 0) {
+      stack.push(cur)
+      const next = adjMap.get(cur)!.keys().next().value!
+      // 无向图 要删两条边
+      if (!isDirected) adjMap.get(next)!.delete(cur)
+      cur = next
+    } else {
+      res.push(cur)
+      cur = stack.pop()!
     }
-
-    return res.reverse()
   }
+
+  // 有向图需要反转
+  return res.reverse()
+}
 ```
 
 ```JS
@@ -33,6 +40,7 @@ function getStart(pairs: number[][]): number {
     indegree.set(v, (indegree.get(v) || 0) + 1)
   }
 
+  // 有向图欧拉路径的起点出度比入度多 1
   const oddStartPoint = [...new Set(pairs.flat())].filter(
     key => (outdegree.get(key) || 0) - (indegree.get(key) || 0) === 1
   )

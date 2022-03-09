@@ -4,7 +4,7 @@
     （2）如果当前顶点没有相邻边，则将该顶点从curPath出栈到loop。
     （3）loop中的顶点逆序，就是从起点出发的欧拉回路。(当然顺序也是)
    */
-function eulerLoop(adjList: number[][]): number[] {
+function getEulerPath(adjList: number[][]): number[] {
   const res: number[] = []
   let cur = 0
   const stack: number[] = [cur]
@@ -26,7 +26,7 @@ function eulerLoop(adjList: number[][]): number[] {
 }
 
 console.log(
-  eulerLoop([
+  getEulerPath([
     [1, 2],
     [0, 3],
     [1, 2],

@@ -18,7 +18,7 @@ function findBridge(n: number, adjList: number[][]): [number, number][] {
 
   return res
 
-  function dfs(cur: number, parent: number) {
+  function dfs(cur: number, parent: number): void {
     if (visited[cur]) return
     visited[cur] = true
 

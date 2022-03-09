@@ -1,14 +1,3 @@
-https://leetcode-cn.com/problems/non-negative-integers-without-consecutive-ones/solution/shu-wei-dpmo-ban-ji-jie-fa-by-initness-let3/
-对于「数位 DP」题，都存在「`询问 [a, b]（a 和 b 均为正整数，且 a < b）区间内符合条件的数值个数为多少`」的一般形式，通常我们需要实现一个查询 **[0, x] 有多少**合法数值的函数 int dp(int x)，然后应用前缀和求解出 [a, b] 的个数：dp(b)−dp(a−1)。
-
-这类题的特征是 `N在10^9量级` 要根据数位而不是遍历数值来做
-
-`357. 计算各个位数不同的数字个数`
-`600. 不含连续1的非负整数.ts`
-`902. 最大为 N 的数字组合.ts`
-`1012. 至少有 1 位重复的数字.py`
-`1067. 范围内的数字计数`
-
 https://www.acwing.com/blog/content/7944/
 
 DFS 做法才是数位 DP 的正解

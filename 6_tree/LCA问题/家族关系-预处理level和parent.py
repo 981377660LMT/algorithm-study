@@ -7,17 +7,21 @@
 # 2.从根节点出发dfs或者bfs预处理 parent 和 level
 # 3.根据 parent 和 level 找lca
 
-from collections import defaultdict
+from collections import defaultdict, deque
 from typing import DefaultDict
 
 
-def dfs(cur: int, parent: int, depth: int) -> None:
-    parentMap[cur] = parent
-    levelMap[cur] = depth
-    for next in adjMap[cur]:
-        if next == parent:
-            continue
-        dfs(next, cur, depth + 1)
+def bfs(start) -> None:
+    """dfs 3万左右会爆栈(最坏是一条链),Segmentation Fault，应该用bfs"""
+    queue = deque([(start, -1, 0)])
+    while queue:
+        cur, parent, level = queue.popleft()
+        levelMap[cur] = level
+        parentMap[cur] = parent
+        for next in adjMap[cur]:
+            if next == parent:
+                continue
+            queue.append((next, cur, level + 1))
 
 
 def LCA(root1: int, root2: int, level: DefaultDict[int, int], parent: DefaultDict[int, int]) -> int:
@@ -43,7 +47,7 @@ for i in range(n - 1):
 
 levelMap, parentMap = defaultdict(lambda: -1), defaultdict(lambda: -1)
 root = next(i for i in range(n) if indegree[i] == 0)
-dfs(root, -1, 0)
+bfs(root)
 
 lca = LCA(root1, root2, levelMap, parentMap)
 

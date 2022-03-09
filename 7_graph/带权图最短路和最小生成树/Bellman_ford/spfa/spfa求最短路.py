@@ -38,7 +38,11 @@ def spfa(n: int, adjMap: defaultdict, start: int, target: int) -> int:
                 dist[next] = dist[cur] + weight
                 if not isInqueue[next]:
                     isInqueue[next] = True
-                    queue.append(next)
+                    # 队列不为空，且当前元素距离小于队头，则加入队头，否则加入队尾
+                    if queue and dist[next] < dist[queue[0]]:
+                        queue.appendleft(next)
+                    else:
+                        queue.append(next)
 
     return dist[target]
 

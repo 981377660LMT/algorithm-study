@@ -22,7 +22,7 @@ const constrainedSubsetSum = function (nums: number[], k: number): number {
 
   for (let i = 1; i < n; i++) {
     while (queue.length > 0 && i - queue.at(0)![1] > k) queue.shift()
-    // 选货不选
+    // dp[i]表示选第i个数时的最大值
     dp[i] = Math.max(dp[i], queue.at(0)![0] + nums[i])
     while (queue.length > 0 && queue.at(-1)![0] <= dp[i]) queue.pop()
     queue.push([dp[i], i])

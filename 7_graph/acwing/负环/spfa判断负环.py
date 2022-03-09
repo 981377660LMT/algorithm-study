@@ -8,18 +8,20 @@ from collections import defaultdict, deque
 n, m = map(int, input().split())
 adjMap = defaultdict(list)
 for _ in range(m):
+    # 编号从1开始
     u, v, w = list(map(int, input().split()))
+    u, v = u - 1, v - 1
     adjMap[u].append((v, w))
 
 
 def spfa(n: int, adjMap: defaultdict) -> bool:
-    """判断负环要以所有点为起点，无须初始化dist"""
-    dist = [0] * (n + 1)
+    """判断负环要以所有点为起点"""
+    dist = [0] * (n)
 
     queue = deque()
-    count = [0] * (n + 1)  # 边数
-    isInqueue = [False] * (n + 1)  # 在队列里的点
-    for i in range(1, n + 1):
+    count = [0] * (n)  # 边数
+    isInqueue = [False] * (n)  # 在队列里的点
+    for i in range(n):
         isInqueue[i] = True
         queue.append(i)
 
@@ -36,7 +38,7 @@ def spfa(n: int, adjMap: defaultdict) -> bool:
                 dist[next] = dist[cur] + weight
                 if not isInqueue[next]:
                     isInqueue[next] = True
-                    # 队列不为空，且当前元素距离小于队头，则加入队头，否则加入队尾
+                    # 酸辣粉优化：队列不为空，且当前元素距离小于队头，则加入队头，否则加入队尾
                     if queue and dist[next] < dist[queue[0]]:
                         queue.appendleft(next)
                     else:
