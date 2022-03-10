@@ -1,8 +1,4 @@
-# 给定 n 个正整数 ai，请你输出这些数的乘积的约数个数，答案对 109+7 取模。
-
-
-# 约数个数：(a1+1)(a2+1)...(ak+1)  考虑每个质因子的贡献即可
-
+# 约数之和
 from collections import Counter
 from math import floor
 
@@ -28,9 +24,12 @@ for _ in range(n):
     counter += getPrimeFactors(int(input()))
 
 res = 1
-for count in counter.values():
-    res *= count + 1
+for prime, count in counter.items():
+    cur = 1
+    for _ in range(count):
+        cur = (cur * prime) + 1
+        cur %= int(1e9 + 7)
+    res *= cur
     res %= int(1e9 + 7)
 
 print(res)
-
