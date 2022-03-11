@@ -1,5 +1,7 @@
-# 一共3种情况，0，1，2， 并查集求岛屿数量如果大于2 返回0， 如果岛屿数量为1， tarjan算法求割点，
-# 如果找到割点返回 1，没有割点则返回，2
+# 一共3种情况，0，1，2；用FloodFill或者并查集求连通分量数，
+# 如果连通分量数不为1，返回0；如果连通分量数为1，tarjan算法求割点，
+# 如果找到割点则返回1，没有割点则返回2
+
 from typing import DefaultDict, List, Set, Tuple
 from collections import defaultdict
 from copy import deepcopy

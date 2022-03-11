@@ -4,6 +4,6 @@ MOD = int(1e9 + 7)
 
 
 class Solution:
-    def createBinaryTree(self, descriptions: List[List[int]]) -> Optional['TreeNode']:
+    def minimalKSum(self, nums: List[int], k: int) -> int:
         ...
 
