@@ -1,48 +1,24 @@
-## 定义
+# 1. tarjan缩点成DAG
+# 2. 当一个强连通的出度为0,则该强连通分量中的所有点都被其他强连通分量的牛欢迎
+# 但假如存在两及以上个出度=0的牛(强连通分量) 则必然有一头牛(强连通分量)不被所有牛欢迎
 
-连通分量:对于分量中任意两点 u,v 必然可以从 u 走到 v 且从 v 走到 u
-强连通分量（Strongly Connected Components，SCC）的定义是：极大的强连通子图。
-![强连通分量](image/note/1646978162188.png)
-`强指的是精确，多一个不连通，少一个不是最大的`
 
-```
-   o→o→o→o
-     ↑ ↓
-   o→o→o→o
-中间的环缩成一个点
-o     o
-  ↘ ↗
-   o
-  ↗ ↘
-o     o
-```
+# 现在有 N 头牛，编号从 1 到 N，给你 M 对整数 (A,B)，表示牛 A 认为牛 B 受欢迎。
+# 这种关系是具有传递性的，如果 A 认为 B 受欢迎，B 认为 C 受欢迎，那么牛 A 也认为牛 C 受欢迎。
+# 你的任务是求出有多少头牛被除自己之外的所有牛认为是受欢迎的。
+# 1≤N≤104 ,
+# 1≤M≤5×104
 
-```Python
-缩点
-for i=1;i<=n;i++
- for i的所有邻点j
-   if i和j不在同一scc中:
-    加一条新边id[i]→id[j]
-```
+from typing import DefaultDict, List, Set, Tuple
+from collections import defaultdict
+import sys
 
-## 应用
+sys.setrecursionlimit(1000000)
 
-`作用`：将一张图的每个强连通分量都缩成一个点，**将图转化为 DAG（有向无环)**,可以做拓扑
-缩点举例:
 
-应用:
-求最短/最长路 递推
-求一条路径，可以经过重复结点，要求经过的不同结点数量最多。`缩点+拓扑`
-
-`求有向图强连通分量`：
-
-## 算法
-
-1. tarjan 算法求强连通分量(SCC,Strongly Connected Component)
-   `O(V+E)`
-
-```Python
 class Tarjan:
+    INF = int(1e20)
+
     @staticmethod
     def getSCC(
         n: int, adjMap: DefaultDict[int, Set[int]]
@@ -89,7 +65,7 @@ class Tarjan:
                 SCCId += 1
 
         dfsId = 0
-        order, low = [int(1e20)] * n, [int(1e20)] * n
+        order, low = [Tarjan.INF] * n, [Tarjan.INF] * n
 
         visited = [False] * n
         stack = []  # 用来存当前DFS访问的点
@@ -104,9 +80,35 @@ class Tarjan:
                 dfs(cur)
 
         return SCCId, SCCGroupById, SCCIdByNode
-```
 
-2. kosaraju 算法
-   略
 
-tarjan 缩点技巧类似于`'有向图'的并查集`
+adjMap = defaultdict(set)
+n, m = map(int, input().split())
+for _ in range(m):
+    a, b = map(int, input().split())
+    a, b = a - 1, b - 1
+    adjMap[a].add(b)
+
+# 1. tarjan缩点
+SCCId, SCCGroupById, SCCIdByNode = Tarjan.getSCC(n, adjMap)
+# 存每一个SCC的出度，后面要找出度为0的SCC
+outd = [0] * SCCId
+for cur in range(n):
+    for next in adjMap[cur]:
+        # 不是同一个SCC 就连边
+        if SCCIdByNode[next] != SCCIdByNode[cur]:
+            outd[SCCIdByNode[cur]] += 1
+
+# 2. 找出度为0的SCC个数
+res = 0
+zero = 0
+for id in range(SCCId):
+    if outd[id] == 0:
+        res += len(SCCGroupById[id])
+        zero += 1
+        if zero > 1:
+            res = 0
+            break
+
+print(res)
+

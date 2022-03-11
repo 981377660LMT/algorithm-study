@@ -9,7 +9,7 @@ function findCutvertex(n: number, adjList: number[][]): number[] {
   dfs(0, Infinity)
   return [...res]
 
-  function dfs(cur: number, parent: number) {
+  function dfs(cur: number, parent: number): void {
     if (visited[cur]) return
     visited[cur] = true
 

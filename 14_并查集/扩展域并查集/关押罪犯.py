@@ -39,8 +39,8 @@ class UnionFindArray:
 # 互相不喜欢的人可以用特殊的并查集，每个集分为 2 部分，不喜欢的人一定在同一个集的另一部分里面
 class Solution:
     def 关押罪犯(self, n: int, dislikes: List[List[int]]) -> int:
-        uf = UnionFindArray(n * 2)
-        dislikes.sort(key=lambda x: x[2])
+        uf = UnionFindArray(n * 2 + 10)
+        dislikes.sort(key=lambda x: x[2], reverse=True)
         for cur, next, score in dislikes:
             # 第一个冲突
             if uf.isConnected(cur, next):

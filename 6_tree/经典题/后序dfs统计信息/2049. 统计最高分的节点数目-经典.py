@@ -1,5 +1,5 @@
 from typing import List
-from collections import defaultdict
+from collections import Counter
 
 # 总结：
 # 简单说就是(root - currentNode) * currentNode.left * currentNode.right
@@ -8,16 +8,8 @@ from collections import defaultdict
 
 class Solution:
     def countHighestScoreNodes(self, parents: List[int]) -> int:
-        n = len(parents)
-        adjList = [[] for _ in range(n)]
-        for i, parent in enumerate(parents):
-            if parent != -1:
-                adjList[parent].append(i)
-
-        scoreCounter = defaultdict(int)
-
-        # 这里dfs后序比较特殊
         def dfs(cur: int) -> int:
+            """dfs后序返回子树结点数"""
             left = right = 0
             if len(adjList[cur]) >= 1:
                 left = dfs(adjList[cur][0])
@@ -27,6 +19,14 @@ class Solution:
             score = (left or 1) * (right or 1) * (n - left - right - 1 or 1)
             scoreCounter[score] += 1
             return left + right + 1
+
+        n = len(parents)
+        adjList = [[] for _ in range(n)]
+        for i, parent in enumerate(parents):
+            if parent != -1:
+                adjList[parent].append(i)
+
+        scoreCounter = Counter()
 
         dfs(0)
         return scoreCounter[max(scoreCounter)]

@@ -1,8 +1,9 @@
 # python 默认递归调用栈1000
+import os
 import sys
 
 
-sys.setrecursionlimit(300000)
+sys.setrecursionlimit(int(7e5))
 
 i = 0
 
