@@ -92,7 +92,7 @@ function useUnionFindMap<T = unknown>(iterable?: T[]) {
     while (parent.has(key) && parent.get(key) !== key) {
       let p = parent.get(key)!
       // 进行路径压缩
-      p = parent.get(p)!
+      parent.set(p, parent.get(p)!)
       key = p
     }
     return key

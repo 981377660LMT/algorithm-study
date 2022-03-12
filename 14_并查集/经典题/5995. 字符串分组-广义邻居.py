@@ -1,11 +1,11 @@
 from collections import Counter, defaultdict
-from typing import Generic, Iterable, List, TypeVar
+from typing import Generic, Iterable, List, Optional, TypeVar
 
 T = TypeVar('T')
 
 
 class UnionFindMap(Generic[T]):
-    def __init__(self, iterable: Iterable[T] = None):
+    def __init__(self, iterable: Optional[Iterable[T]] = None):
         self.count = 0
         self.parent = dict()
         self.rank = defaultdict(lambda: 1)

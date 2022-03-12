@@ -12,9 +12,13 @@ class Solution:
         candles = [i for i, char in enumerate(s) if char == '|']
         res = []
         for left, right in queries:
+            # 找到第一个位置 pos1 使得 A[pos1]>=left
             lower = bisect_left(candles, left)
+            # 找到最后一个位置 pos2 使得 A[pos2]<=right
             upper = bisect_right(candles, right) - 1
-            res.append((candles[upper] - candles[lower]) - (upper - lower) if lower < upper else 0)
+            res.append(
+                (candles[upper] - candles[lower] - 1) - (upper - lower - 1) if lower < upper else 0
+            )
         return res
 
     # 预处理nextCandle 前缀处理
@@ -33,7 +37,7 @@ class Solution:
         for left, right in queries:
             lower = next[left]
             upper = pre[right + 1]
-            
+
             res.append(upper - lower - (preSum[upper] - preSum[lower]) if lower < upper else 0)
 
         return res

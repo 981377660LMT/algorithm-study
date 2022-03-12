@@ -5,7 +5,7 @@
  * @description 正负一般使用二维的dp
  *
  */
-var getMaxLen = function (nums: number[]): number {
+function getMaxLen(nums: number[]): number {
   const n = nums.length
   const positive = Array<number>(n).fill(0)
   const negative = Array<number>(n).fill(0)
@@ -34,3 +34,4 @@ var getMaxLen = function (nums: number[]): number {
 
 console.log(getMaxLen([1, -2, -3, 4]))
 console.log(getMaxLen([2, 3, -2, 4]))
+export {}

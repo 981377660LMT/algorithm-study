@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 
-# tree直接用dict 省去离散化步骤
+
 class BIT1:
     """单点修改"""
 

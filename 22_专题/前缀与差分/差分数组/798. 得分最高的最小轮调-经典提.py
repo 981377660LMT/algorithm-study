@@ -1,25 +1,24 @@
 from typing import List
 
-# 旋转数组
-# A[i] 的取值范围是 [0, A.length]。
-# 任何值小于或等于其索引的项都可以记作一分。
-# 返回我们所能得到的最高分数对应的轮调索引 K。
 
-
-# 如果把初始分数看成一个常数S,那么每一次调度都会导致其变化
-# 那么就只考虑调度次数不同情况下的变化即可
-# 那么先记录每个元素调度多少次后开始让分数较少 (什么时候下车)
-# 即从某一步，需要扣一分
-# 所以除了第一个元素移动到最后面会使score+1外，其他的数的左移会使score减小。
-# 那么，最后只需要从标记数组中找到最大的下标即可
 class Solution:
     def bestRotation(self, nums: List[int]) -> int:
-        # score[k]:表示移动K步后，当前分数应该加几分，正数为加，负数为扣
-        diff = [0] * len(nums)
-        for i in range(len(nums)):
-            diff[(i + 1 - nums[i]) % len(nums)] -= 1
+        # diff[k]:表示移动K步后，可以产生贡献 其中k<=len(nums)-1 diff数组要多开1个位置
+        n = len(nums)
+        diff = [0] * (n + 10)
+        for i, num in enumerate(nums):
+            if num > i:
+                # print(i + 1, n + i - num + 1)
+                diff[i + 1] += 1
+                diff[i + 1 + n - num] -= 1
+            else:
+                # print(i - num + 1, i + 1)
+                diff[0] += 1
+                diff[n] -= 1
+                diff[i - num + 1] -= 1
+                diff[i + 1] += 1
         for i in range(1, len(nums)):
-            diff[i] += diff[i - 1] + 1
+            diff[i] += diff[i - 1]
 
         return diff.index(max(diff))
 
