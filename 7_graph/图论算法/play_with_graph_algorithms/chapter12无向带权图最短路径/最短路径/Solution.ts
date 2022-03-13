@@ -37,7 +37,7 @@ class Solution {
    * @description 未优化时复杂度O(V^2)
    * @description pre数组求解路径，更新与dis数组更新同步
    * @description 不能处理负权边
-   * @@description 使用优先队列优化
+   * @description 使用优先队列优化
    */
   dijkstra(start: number): {
     dis: number[]

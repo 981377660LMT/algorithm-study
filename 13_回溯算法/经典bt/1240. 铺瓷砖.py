@@ -10,13 +10,6 @@
 # 4. 模拟填充，回溯
 class Solution:
     def tilingRectangle(self, n: int, m: int) -> int:
-        row, col = n, m
-        if row == col:
-            return 1
-
-        visited = [[False for _ in range(col)] for _ in range(row)]
-        self.res = row * col  # 最多的情况就是，全用1X1的方砖
-
         def bt(steps: int) -> None:
             if steps >= self.res:
                 return
@@ -62,6 +55,13 @@ class Solution:
                     for r in range(cur_row, cur_row + side):
                         for c in range(cur_col, cur_col + side):
                             visited[r][c] = False
+
+        row, col = n, m
+        if row == col:
+            return 1
+
+        visited = [[False for _ in range(col)] for _ in range(row)]
+        self.res = row * col  # 最多的情况就是，全用1X1的方砖
 
         bt(0)
         return self.res

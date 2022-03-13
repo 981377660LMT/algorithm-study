@@ -8,6 +8,8 @@ from typing import List
 # The left side references the right side, the right side references the left side.
 
 #  思路:update length[a - left], length[a + right] to left + right + 1.
+
+
 class Solution:
     def findLatestStep(self, arr: List[int], m: int) -> int:
         if m > len(arr):

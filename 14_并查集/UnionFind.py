@@ -30,6 +30,13 @@ class UnionFindArray:
     def isConnected(self, x: int, y: int) -> bool:
         return self.find(x) == self.find(y)
 
+    def getGroups(self) -> Dict[int, List[int]]:
+        groups = defaultdict(list)
+        for key in range(self.n):
+            root = self.find(key)
+            groups[root].append(key)
+        return groups
+
 
 # 当元素不是数组index时(例如字符串)，更加通用的并查集写法，支持动态添加
 T = TypeVar('T')

@@ -5,6 +5,8 @@ from sortedcontainers import SortedDict
 INF = 0x3F3F3F3F
 
 # 二分查找当前元素最接近的两个元素，取深度的较大值
+
+
 class Solution:
     def maxDepthBST(self, order: List[int]) -> int:
         # 元素=>高度

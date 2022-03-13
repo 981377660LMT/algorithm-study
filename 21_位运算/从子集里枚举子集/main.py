@@ -1,4 +1,5 @@
-from typing import List
+from itertools import chain, combinations
+from typing import Any, Collection, List
 
 
 def main(nums: List[int]):
@@ -12,6 +13,11 @@ def main(nums: List[int]):
             group1 = state & (group1 - 1)
             group2 = state ^ group1
     return res
+
+
+def powerset(collection: Collection[Any]):
+    """求真子集"""
+    return chain.from_iterable(combinations(collection, n) for n in range(len(collection)))
 
 
 if __name__ == '__main__':

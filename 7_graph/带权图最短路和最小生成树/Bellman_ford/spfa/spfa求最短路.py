@@ -6,6 +6,7 @@
 # 有边数限制也能用spfa，spfa本质就是让bf不去枚举到不可能会拓展的边，bf能做的spfa都能
 
 from collections import defaultdict, deque
+from typing import List
 
 
 n, m = map(int, input().split())
@@ -19,7 +20,7 @@ for _ in range(m):
 # 3. 判重数组
 
 
-def spfa(n: int, adjMap: defaultdict, start: int, target: int) -> int:
+def spfa(n: int, adjMap: defaultdict, start: int) -> List[int]:
     """spfa求单源最短路，适用于解决带有负权重的图，是Bellman-ford的常数优化版"""
     dist = [int(1e20)] * (n + 1)
     dist[start] = 0
@@ -44,8 +45,8 @@ def spfa(n: int, adjMap: defaultdict, start: int, target: int) -> int:
                     else:
                         queue.append(next)
 
-    return dist[target]
+    return dist
 
 
-res = spfa(n, adjMap, 1, n)
-print(res if res < int(1e20) else 'impossible')
+dist = spfa(n, adjMap, 1)
+print(dist if dist[0] < int(1e20) else 'impossible')

@@ -18,6 +18,8 @@ MOD = int(1e9 + 7)
 # 对于所有数量 > x 的颜色，其肯定会减小到 x，因此用等差数列求和公式求和即可。
 # 如果执行完第 1 步，仍有剩余的 orders，则这些 orders 一定会以价格 x 卖出。
 
+# 二分最后的同色球数量
+
 
 class Solution:
     def maxProfit(self, inventory: List[int], orders: int) -> int:
@@ -26,22 +28,23 @@ class Solution:
         while left <= right:
             mid = (left + right) >> 1
             count = sum((inv - mid) for inv in inventory if inv > mid)
+            # 超出orders
             if count >= orders:
                 left = mid + 1
             else:
                 right = mid - 1
 
-        min_get_num = left
+        minPrice = left
         res, count = 0, 0
         for inv in inventory:
-            if inv > min_get_num:
-                cur = inv - min_get_num
+            if inv > minPrice:
+                cur = inv - minPrice
                 count += cur
-                res += (inv + min_get_num + 1) * cur // 2
+                res += (inv + minPrice + 1) * cur // 2
                 res %= MOD
 
-        # 缺多少个，就不多少个min_get_sum
-        res += (orders - count) * min_get_num
+        # 缺多少个，就补不多少个min_get_sum
+        res += (orders - count) * minPrice
         res %= MOD
         return res
 
