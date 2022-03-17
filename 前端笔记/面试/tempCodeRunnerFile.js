@@ -1,9 +1,9 @@
-
-//   function foo() {
-//     console.log('BFE')
-//   }
-// ) {
-//   console.log('dev')
-// }
-// // ReferenceError: foo is not defined
-// foo()
+if (
+  function foo() {
+    console.log('BFE')
+  }
+) {
+  console.log('dev')
+}
+// ReferenceError: foo is not defined
+foo()

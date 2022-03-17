@@ -3,13 +3,13 @@
    git checkout master
    git merge feature
    **多了一次合并的历史**
-   ![merge](https://i.loli.net/2020/04/06/S5YmfCK7wW1JxTB.png)
+   ![merge直接连](https://i.loli.net/2020/04/06/S5YmfCK7wW1JxTB.png)
 
    假如你想将分支 feature 合并到分支 master，那么只需执行如下两步即可：
    git checkout master
    git rebase feature
    而 git rebase 会将整个 master 分支移动到 feature 分支的顶端，从而有效地整合了所有 master 分支上的提交。
-   ![rebase](https://i.loli.net/2020/04/06/F1qIGKTNDW6aRul.png)
+   ![rebase寻找LCA](https://i.loli.net/2020/04/06/F1qIGKTNDW6aRul.png)
 
    | 比较 | merge                | rebase         |
    | ---- | -------------------- | -------------- |

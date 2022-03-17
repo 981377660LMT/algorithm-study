@@ -16,15 +16,18 @@
 // 我们的参数是目标节点，我们的目标是冒泡到body，然后记录中间的节点即可。
 function getXPath(node: HTMLElement) {
   const path: string[] = []
-  helper(node, path)
+  dfs(node, path)
   return path.reverse().join('>')
 
-  function helper(node: HTMLElement, path: string[]): string {
-    if (node === document.body) return `body${path}`
+  function dfs(node: HTMLElement, path: string[]): void {
+    if (node === document.body) {
+      path.push('body')
+      return
+    }
 
-    const parentNode = node.parentNode as HTMLElement
-    const index = Array.prototype.findIndex.call(parentNode.children, el => el === node)
+    const parentNode = node.parentElement
+    const index = Array.prototype.findIndex.call(parentNode!.children, el => el === node)
     path.push(`${node.tagName.toLowerCase()}[${index}]`)
-    return helper(parentNode, path)
+    dfs(parentNode!, path)
   }
 }

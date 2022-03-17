@@ -18,9 +18,15 @@ function getName() {
   console.log(5)
 }
 
-Foo.getName() //
-getName() //
-Foo().getName() //
-getName() //
-new Foo.getName() //
-new Foo().getName() //
+Foo.getName() // 2
+getName() // 4
+Foo().getName() // 1
+getName() // 4
+new Foo.getName() // 2
+new Foo().getName() // 1
+// 2
+// 4
+// 1
+// 4
+// 2
+// 1

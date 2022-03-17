@@ -23,7 +23,7 @@ const addTwo = (l1: Node, l2: Node): Node => {
   let overflow = 0
 
   // 遍历链表
-  while (n1 || n2) {
+  while (n1 || n2 || overflow) {
     const n1Value = n1?.value ?? 0
     const n2Value = n2?.value ?? 0
     const sum = n1Value + n2Value + overflow

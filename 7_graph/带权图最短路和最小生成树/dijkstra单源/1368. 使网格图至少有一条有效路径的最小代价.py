@@ -11,29 +11,31 @@ from heapq import heappop, heappush
 # new_cost = cost if grid[i][j] == idx + 1 else cost + 1 (移动的方向与当前箭头方向一致)
 
 
+# 对应右左下上
+DIRS = ((0, 1), (0, -1), (1, 0), (-1, 0))
+
+
 class Solution:
     def minCost(self, grid: List[List[int]]) -> int:
-        m, n = len(grid), len(grid[0])
+        row, col = len(grid), len(grid[0])
 
-        # 对应右左下上
-        dirs = ((0, 1), (0, -1), (1, 0), (-1, 0))
-        dist = [[0x7FFFFFFF] * n for _ in range(m)]
-        pq = []
-        heappush(pq, (0, 0, 0))
+        dist = [[int(1e20)] * col for _ in range(row)]
+        dist[0][0] = 0
+        pq = [(0, 0, 0)]
 
         while pq:
-            cost, i, j = heappop(pq)
-            if (i, j) == (m - 1, n - 1):
+            cost, curR, curC = heappop(pq)
+            if (curR, curC) == (row - 1, col - 1):
                 return cost
 
-            for idx in range(4):
-                next_i, next_j = i + dirs[idx][0], j + dirs[idx][1]
-                if next_i >= 0 and next_i < m and next_j >= 0 and next_j < n:
+            for index in range(4):
+                nextR, nextC = curR + DIRS[index][0], curC + DIRS[index][1]
+                if 0 <= nextR < row and 0 <= nextC < col:
                     # 移动的方向与当前箭头方向一致
-                    new_cost = cost if grid[i][j] == (idx + 1) else cost + 1
-                    if new_cost < dist[next_i][next_j]:
-                        dist[next_i][next_j] = new_cost
-                        heappush(pq, (new_cost, next_i, next_j))
+                    nextCost = cost if grid[curR][curC] == (index + 1) else cost + 1
+                    if nextCost < dist[nextR][nextC]:
+                        dist[nextR][nextC] = nextCost
+                        heappush(pq, (nextCost, nextR, nextC))
         return -1
 
 

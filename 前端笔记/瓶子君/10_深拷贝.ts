@@ -31,6 +31,7 @@ const deepCopy = (obj: any, cache: CacheItem[] = []) => {
     original: obj,
   })
 
+  // 如果要拷贝Symbol的话 这里获取Symbol的键
   Object.keys(obj).forEach(key => {
     copy[key] = deepCopy(obj[key], cache)
   })

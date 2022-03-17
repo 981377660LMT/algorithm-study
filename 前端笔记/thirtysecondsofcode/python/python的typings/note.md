@@ -11,7 +11,7 @@
    Generator|Iterator|`send`， `throw`|`close`，`__iter__`，`__next__`
    `
 4. Sequence 与 Iterable 区别
-   iterable： 至少定义了`__iter__()`或`__getitem__()`方法的对象。
+   iterable： 至少定义了`__iter__()`方法的对象。
    sequence： 至少定义了`__len__()`或者`__getitem__()`方法的对象。
    iterator：至少定义`__iter__()`和`__next__()`方法的对象。
 5. ts 的 never 等价于 py 的 NoReturn （函数无终点）

@@ -13,7 +13,7 @@ Java 集合， 也叫作容器，主要是由两大接口派生而来：
 4. TreeMap： 红黑树（自平衡的排序二叉树
    需要排序时选择 TreeMap,不需要排序时就选择 HashMap,需要保证线程安全就选用 ConcurrentHashMap。
 
-5. RandomAccess 接口
+5. RandomAccess 接口(类似于 py 的 `__getitem__`)
 
 ```JAVA
 public interface RandomAccess {

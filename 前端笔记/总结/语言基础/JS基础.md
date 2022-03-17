@@ -663,3 +663,200 @@ fraction（F）：有效数字，IEEE754 规定，`在计算机内部保存有�
 所以，双精度浮点数可以表示的最大安全整数就是 2∧53-1 了！
 
 61. JavaScript 里 Infinity 怎么算呢
+
+62. encodeURIComponent() 函数会编码所有的字符。如果你想把 URI `当作请求参数传递，那么你可以使用本函数`
+    如果你只是想编码一个带有特殊字符（比如中文）的 URI，这个 URI `用作请求地址，请使用 encodeURI 函数`。
+
+```JS
+// 原URI
+var ftpUri = 'ftp://192.168.0.100/共享文件夹';
+
+// 编码URI
+var encodedFtpUri = encodeURI(ftpUri);
+console.log(encodedFtpUri); // ftp://192.168.0.100/%E5%85%B1%E4%BA%AB%E6%96%87%E4%BB%B6%E5%A4%B9
+
+// 原 URI 组件
+var origin = 'ftp://192.168.0.100/共享文件夹';
+
+// 编码 URI 组件
+var encodedUri = encodeURIComponent(origin);
+document.writeln(encodedUri); // ftp%3A%2F%2F192.168.0.100%2F%E5%85%B1%E4%BA%AB%E6%96%87%E4%BB%B6%E5%A4%B9
+```
+
+如果参数 encodedURIString 无效，将引发 URIError 错误。
+
+63. Symbol.hasInstance 用于判断某对象是否为某构造器的实例。当其他对象使用 instanceof 运算符，判断是否为该对象的实例时，会调用这个方法。
+
+```JS
+class MyArray {
+  static [Symbol.hasInstance]() {
+    return Array.isArray(instance);
+  }
+}
+
+[] instanceof new MyArray(); // true
+```
+
+64. Symbol 值只能通过 Symbol 函数生成
+    注意，Symbol 函数前不能使用 new 命令实例化，
+    这是因为生成的 Symbol 是一个原始类型的值，不是对象。
+    基本上，它是一种类似于字符串的数据类型。
+    使用 instanceof 检测实例与 Symbol 之间的关系没用。
+
+```JS
+const symbol = Symbol('foo');
+
+console.log(symbol instanceof Symbol);
+// false
+```
+
+65. 由于每一个 Symbol 值都是不相等的，这意味着 Symbol 值可以作为 标识符，用于对象的属性名，就能保证不会出现同名的属性。`利用 Symbol 值的唯一特性，作为类库某些对象的属性名，这样可以避免使用者命名冲突导致的覆盖问题`
+
+```JS
+let mySymbol = Symbol();
+// 第二种写法 字面量
+let b = {
+  [mySymbol]: 'Hello!',
+};
+
+```
+
+66. Symbol 值作为对象属性名不能用点运算符，因为会转为字符串
+
+67.
+
+```JS
+String.fromCharCode(65, 66, 67);
+// ABC
+```
+
+68. Promise.allSettled
+    当您有多个彼此不依赖的异步任务成功完成时，或者您总是想知道每个 Promise 的结果时，通常使用它。
+
+    应用场景：
+    `同时上传多张图片，实现异步并发（例如使用阿里云 OSS 同时批量上传多张图片）`
+
+69. Promise.any
+    只要`其中的一个 promise 成功`，就返回那个已经成功的 promise
+    如果可迭代对象中没有一个 promise 成功（即所有的 promises 都失败/拒绝），就返回一个失败的 promise 和 AggregateError 类型的实例，它是  Error  的一个子类，用于把单一的错误集合在一起
+    Promise.any 应用场景
+    从最快的服务器检索资源
+    显示第一张已加载的图片（来自 MDN）
+    `Promise.any vs Promise.race`
+    Promise.any() ：关注于 Promise 是否已经成功
+    Promise.race() ： 主要关注 Promise 是否已经解决，无论它是被解决还是被拒绝
+70. Promise.allSettled() 与 Promise.all() 各自的适用场景
+    Promise.allSettled()  更适合：
+
+    彼此不依赖，其中任何一个被 reject ，对其它都没有影响
+    期望知道每个 promise 的执行结果
+
+    Promise.all()  更适合：
+
+    彼此相互依赖，其中任何一个被 reject ，其它都失去了实际价值
+
+71. `yield惰性求值`
+
+```JS
+function* gen() {
+  yield 123 + 456;
+}
+```
+
+上面代码中，yield 后面的表达式 123 + 456，不会立即求值，只会在 next 方法将指针移到这一句时，才会求值。
+
+72. Generator 原型方法
+    Generator.prototype.next
+    Generator.prototype.return
+    Generator.prototype.throw
+    三者的作用都是让 Generator 函数恢复执行，`并且使用不同的语句替换 yield 表达式。`
+
+```JS
+const generator = function*(x, y) {
+  let result = yield x + y;
+  return result;
+};
+
+const gen = generator(1, 2);
+
+gen.next(); // Object {value: 3, done: false}
+
+next() 是将 yield 表达式替换成一个值。
+gen.next(1); // Object {value: 1, done: true}
+
+// 相当于将 let result = yield x + y
+// 替换成 let result = 1;
+
+throw() 是将 yield 表达式替换成一个 throw 语句。
+gen.throw(new Error('出错了')); // Uncaught Error: 出错了
+// 相当于将 let result = yield x + y
+// 替换成 let result = throw(new Error('出错了'));
+
+return() 是将 yield 表达式替换成一个 return 语句。
+gen.return(2); // Object {value: 2, done: true}
+
+// 相当于将 let result = yield x + y
+// 替换成 let result = return 2;
+```
+
+73. Proxy
+
+- 代理的引用上下文问题
+
+```JS
+const target = {
+  foo: function () {
+    console.log(this === proxy);
+  },
+};
+
+const handler = {};
+
+const proxy = new Proxy(target, handler);
+
+console.log(target.foo());
+// false
+console.log(proxy.foo());
+// true
+```
+
+一旦 proxy 代理 target.foo，后者内部的 this 就是指向 proxy，而不是 target。
+
+- Proxy 与 Object.defineProperty
+  Object.defineProperty 的三个主要问题：
+
+  无法监听数组变化，Vue 通过 Hack 改写八种数组方法实现
+  只能劫持对象的属性，因此对需要双向绑定的属性需要显式地定义
+  必须深层遍历嵌套的对象
+
+  与 Proxy 的区别：
+  Proxy 可以直接监听数组的变化
+  Proxy 可以直接监听对象而非属性
+  Proxy 直接可以劫持整个对象，并返回一个新的对象，不管是操作便利程度还是底层功能上都远强于 Object.defineProperty
+  Proxy 有多达 13 中拦截方法，不限于 apply、ownKeys、deleteProperty、has 等等是 Object.defineProperty 不具备的
+
+```JS
+const pipe = (value) => {
+  const stack = [];
+  const proxy = new Proxy(
+    {},
+    {
+      get(target, prop) {
+        if (prop === 'execute') {
+          return stack.reduce(function (val, fn) {
+            return fn(val);
+          }, value);
+        }
+        stack.push(window[porp]);
+        return proxy;
+      },
+    }
+  );
+  return proxy;
+};
+
+const double = (n) => n * 2;
+const pow = (n) => n * n;
+
+console.log(pipe(3).double.pow.execute);
+```

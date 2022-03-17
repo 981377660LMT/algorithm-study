@@ -8,6 +8,7 @@ outer()
 Array.from({ length: 4 }).forEach(
   () => console.count('items') // Call the counter labelled 'items'
 )
+
 /*
   items: 1
   items: 2

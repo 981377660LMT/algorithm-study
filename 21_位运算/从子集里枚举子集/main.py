@@ -15,6 +15,8 @@ def main(nums: List[int]):
     return res
 
 
+# chain存在的意义是什么?
+# 用于简化yielf from 写法 配合生成式使用
 def powerset(collection: Collection[Any]):
     """求真子集"""
     return chain.from_iterable(combinations(collection, n) for n in range(len(collection)))

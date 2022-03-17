@@ -17,13 +17,13 @@
 // }
 
 // 方法二：
-// 修改 setTimeout 第一个函数参数
+// 闭包
 function print(n: number) {
   setTimeout(
     (() => {
       console.log(n)
       return () => {}
-    }).call(n),
+    }).call(null),
     Math.floor(Math.random() * 1000)
   )
 }

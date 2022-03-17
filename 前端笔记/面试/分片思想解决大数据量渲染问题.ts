@@ -11,11 +11,14 @@ function render(cur: number, remain: number) {
   const pageCount = Math.min(remain, once)
 
   const frameRequestCallback = () => {
+    const fragment = document.createDocumentFragment()
     for (let i = 0; i < pageCount; i++) {
       const li = document.createElement('li')
       li.innerText = cur + i + ' : ' + ~~(Math.random() * total)
-      ul.appendChild(li)
+      fragment.appendChild(li)
     }
+
+    ul.appendChild(fragment)
 
     render(cur + pageCount, remain - pageCount)
   }

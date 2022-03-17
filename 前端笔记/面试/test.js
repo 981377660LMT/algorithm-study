@@ -1,7 +1,7 @@
 // function foo(a, b, undefined, undefined) {
-//   console.log(arguments.length)
+//   console.log(arguments.length) // 3
 // }
-// console.log(foo.length)
+// console.log(foo.length) // 4
 // foo(1, 2, 3)
 ////////////////////////////////////////////////////////////////////
 // if (
@@ -11,6 +11,7 @@
 // ) {
 //   console.log('dev')
 // }
+// // dev
 // // ReferenceError: foo is not defined
 // foo()
 ////////////////////////////////////////////////////////////////////

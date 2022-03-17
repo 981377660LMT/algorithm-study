@@ -6,7 +6,7 @@ declare module window {
 
 // node
 console.log(Buffer.from('123').toString('base64'))
-console.log(Buffer.from('MTIz', 'base64').toString())
+console.log(Buffer.from('MTIz', 'base64').toString('utf-8'))
 
 //  浏览器
 // console.log(window.btoa('123'))

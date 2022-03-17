@@ -11,6 +11,7 @@
 const singleNumber = (nums: number[]) => {
   const XOR = (arr: number[]) => arr.reduce((pre: number, cur: number) => pre ^ cur, 0)
   const twoNumXOR = XOR(nums)
+  // 这里可以直接Lowbit
   const MSB = twoNumXOR.toString(2).length - 1
   const oneNumXOR = XOR(nums.filter(num => ((num >> MSB) & 1) === 0))
   return [oneNumXOR, oneNumXOR ^ twoNumXOR]

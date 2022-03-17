@@ -29,9 +29,11 @@ Function.prototype.myBind = function (thisArg: any, ...argArray: any[]): any {
 const aaaa = {
   name: 'name of a',
 }
+
 function $test(this: any, ...msg: any[]) {
   console.log(this.name)
   console.log(...msg)
 }
-const small = $test.myBind(aaaa, 'hello')
-small('world')
+
+const partical = $test.myBind(aaaa, 'hello')
+partical('world')

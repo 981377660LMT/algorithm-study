@@ -14,15 +14,15 @@ async function sumTwo(a: number, b: number) {
 }
 
 // 多数之和版本1  Promise+reduce串行
-async function sumAll1(...nums: number[]) {
-  return new Promise(resolve =>
-    nums
-      .reduce((pre, cur) => pre.then(total => sumTwo(total, cur)), Promise.resolve(0))
-      .then(resolve)
-  )
-}
+// async function sumAll1(...nums: number[]) {
+//   return new Promise(resolve =>
+//     nums
+//       .reduce((pre, cur) => pre.then(total => sumTwo(total, cur)), Promise.resolve(0))
+//       .then(resolve)
+//   )
+// }
 
-// 多数之和版本2  Promise 两两合并任务 并行任务
+// 多数之和版本2  Promise 两两合并任务 使用Promise.all并行任务
 async function sumAll2(...nums: number[]): Promise<number> {
   console.log(nums)
   // 两两一组分组 不足的拿出来
@@ -34,6 +34,7 @@ async function sumAll2(...nums: number[]): Promise<number> {
   for (let i = 0; i < nums.length - 1; i += 2) {
     tasks.push(sumTwo(nums[i], nums[i + 1]))
   }
+
   if (nums.length % 2) tasks.push(Promise.resolve<number>(nums[nums.length - 1]))
 
   return sumAll2(...(await Promise.all(tasks)))

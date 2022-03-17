@@ -33,7 +33,7 @@ const unique = (arr: ArrayItem[]) => {
   const res: ArrayItem[] = []
   const visited = new Set<string | number>()
   for (const item of arr) {
-    if (typeof item !== 'object' || item === null) {
+    if (typeof item !== 'object' || item == null) {
       if (visited.has(item)) continue
       res.push(item)
       visited.add(item)

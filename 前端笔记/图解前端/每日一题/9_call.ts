@@ -1,16 +1,17 @@
 function foo(this: any) {
   console.log(this.name)
+  console.log(11)
 }
 
-var obj = {
-  name: 'Heternally',
-}
+// var obj = {
+//   name: 'Heternally',
+// }
 
-var obj1 = {
-  name: 'Heternally1',
-}
+// var obj1 = {
+//   name: 'Heternally1',
+// }
 
-var name = 'zl'
+// var name = 'zl'
 
 export default 1
 

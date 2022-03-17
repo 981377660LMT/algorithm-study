@@ -60,7 +60,6 @@ class AllOne {
   }
 
   getMaxKey(): string {
-    console.dir(this.head, { depth: null })
     return this.tail.pre === this.head ? '' : this.tail.pre.keySet.keys().next().value
   }
 

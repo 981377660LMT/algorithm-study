@@ -26,7 +26,7 @@ async1().then(data => {
 
 new Promise<void>(function (resolve) {
   console.log('7')
-  // resolve()
+  // resolve()  // 没resolve改变状态，不执行then
 }).then(function () {
   console.log('8')
 })

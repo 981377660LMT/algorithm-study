@@ -12,3 +12,4 @@ const dv = new DataView(buffer)
 const arrayLike = { length: 2, a: 12, 0: 9 }
 console.log(Array.from(arrayLike))
 export {}
+'as'.trimStart()

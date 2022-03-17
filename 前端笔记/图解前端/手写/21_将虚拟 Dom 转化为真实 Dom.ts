@@ -35,18 +35,16 @@ const vDom = {
 // </div>
 
 // leetcode`克隆图`
-function dfs(vNode: VirtualDom | string) {
+function dfs(vNode: VirtualDom | string): HTMLElement | Text {
   if (typeof vNode === 'string') return document.createTextNode(vNode)
-  const dom = document.createElement(vNode.tag)
+  const res = document.createElement(vNode.tag)
 
-  if (vNode.attrs) {
-    for (const [key, value] of Object.entries(vNode)) {
-      dom.setAttribute(key, value)
-    }
+  for (const [key, value] of Object.entries(vNode.attrs ?? {})) {
+    res.setAttribute(key, value)
   }
 
-  vNode.children && vNode.children.forEach(child => dom.appendChild(dfs(child)))
-  return dom
+  vNode.children?.forEach(child => res.appendChild(dfs(child)))
+  return res
 }
 
 export {}

@@ -26,6 +26,8 @@ flex-start/flex-end/center/space-between/space-around
 **align-items**
 flex-start/flex-end/center
 
----
+项目的属性
+**align-self**
+属性允许单个项目有与其他项目不一样的对齐方式，可覆盖 align-items 属性
 
-sss
+---

@@ -45,6 +45,7 @@ def is_anagram(s1, s2):
 is_anagram('#anagram', 'Nag a ram!')  # True
 
 
+# 注意这个
 def powerset(iterable):
     s = list(iterable)
     return list(chain.from_iterable(combinations(s, r) for r in range(len(s) + 1)))

@@ -1,5 +1,5 @@
 interface Flow {
-  isFlow: boolean
+  FLOW_SYMBOL: symbol
   run: (func?: Func) => unknown
 }
 
@@ -9,21 +9,23 @@ type FlowProps = FuncOrFlow | Array<FuncOrFlow>
 
 // createFlow 以一个数组作为参数，数组参数可有以下几种类型:普通函数/异步函数/嵌套createFlow/数组
 function createFlow(effects: FlowProps[]): Flow {
+  const FLOW_SYMBOL = Symbol.for('flow')
   const queue = effects.flat(Infinity) as FuncOrFlow[]
   const run = async (cb?: Func) => {
     for (const task of queue) {
-      if ('isFlow' in task) {
+      if ('FLOW_SYMBOL' in task) {
         await task.run()
       } else {
         await task()
       }
     }
+
     cb && cb()
   }
 
   return {
     run,
-    isFlow: true,
+    FLOW_SYMBOL,
   }
 }
 

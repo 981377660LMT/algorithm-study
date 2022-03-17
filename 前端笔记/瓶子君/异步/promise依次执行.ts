@@ -19,6 +19,8 @@ const run = async () => {
   // for (const task of tasks) {
   //   await task()
   // }
+
+  // 这种方法便于传参
   tasks.reduce<Promise<unknown>>((pre, cur) => pre.then(cur), Promise.resolve())
 }
 run()

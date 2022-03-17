@@ -17,34 +17,47 @@ MOD = int(1e9 + 7)
 # 最后的答案由两部分组成：
 # 对于所有数量 > x 的颜色，其肯定会减小到 x，因此用等差数列求和公式求和即可。
 # 如果执行完第 1 步，仍有剩余的 orders，则这些 orders 一定会以价格 x 卖出。
+# https://leetcode-cn.com/problems/sell-diminishing-valued-colored-balls/solution/liang-chong-si-lu-you-hua-tan-xin-suan-fa-you-hua-/
 
-# 二分最后的同色球数量
+# 注意这个最左二分需要大于等于orders
 
 
 class Solution:
     def maxProfit(self, inventory: List[int], orders: int) -> int:
+        def check(mid: int) -> bool:
+            """订单数不小于order的最后卖出最小价值"""
+            count = 0
+            for num in inventory:
+                count += max(0, num - mid)
+                if count >= orders:
+                    return True
+            return False
+
         left = 0
-        right = max(inventory)
+        right = int(1e10)
         while left <= right:
             mid = (left + right) >> 1
-            count = sum((inv - mid) for inv in inventory if inv > mid)
             # 超出orders
-            if count >= orders:
+            if check(mid):
                 left = mid + 1
             else:
                 right = mid - 1
 
+        # check边界
+        if sum((i - left + 1) for i in inventory if i >= left) < orders:
+            left -= 1
+
         minPrice = left
         res, count = 0, 0
         for inv in inventory:
-            if inv > minPrice:
-                cur = inv - minPrice
+            if inv >= minPrice:
+                cur = inv - minPrice + 1
                 count += cur
-                res += (inv + minPrice + 1) * cur // 2
+                res += (minPrice + inv) * cur // 2
                 res %= MOD
 
-        # 缺多少个，就补不多少个min_get_sum
-        res += (orders - count) * minPrice
+        # 超出多少个以minPrice卖出的
+        res -= (count - orders) * minPrice
         res %= MOD
         return res
 

@@ -7,6 +7,7 @@ interface Node<V> {
 
 const normalize = (str: string): Node<string> => {
   const keys = str.match(/\w+/g)
+  console.log(keys)
   if (!keys) throw new Error('invald input')
   if (keys.length === 1) return { value: keys[0] }
 

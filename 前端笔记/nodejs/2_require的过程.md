@@ -119,6 +119,6 @@ console.log(555, arguments)
    2. 每个模块里面的 exports, require, module, **filename, **dirname 五个参数都不是全局变量，而是模块加载的时候注入的。
    3. 为了注入这几个变量，我们需要将用户的代码用一个函数包裹起来，拼一个字符串然后调用沙盒模块 vm 来实现。
    4. 初始状态下，模块里面的 this, exports, module.exports 都指向同一个对象，如果你对他们重新赋值，这种连接就断了。
-   5. 对 module.exports 的重新赋值会作为模块的导出内容，但是你对 exports 的重新赋值并不能改变模块导出内容，只是改变了 exports 这个变量而已，因为模块始终是 module，导出内容是 module.exports。
+   5. 对 module.exports 的重新赋值会作为模块的导出内容，但是你`对 exports 的重新赋值并不能改变模块导出内容`，只是改变了 exports 这个变量而已，因为`模块始终是 module，导出内容是 module.exports。`
    6. 为了解决循环引用，模块在加载前就会被加入缓存，下次再加载会直接返回缓存，**如果这时候模块还没加载完，你可能拿到未完成的 exports**。
    7. Node.js 实现的这套加载机制叫 CommonJS。

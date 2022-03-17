@@ -9,6 +9,7 @@
 // console.log(a == 1 && a == 2 && a == 3)
 
 ////////////////////////////////////////////////////////
+
 let tmp = 1
 Object.defineProperty(globalThis, 'a', {
   get() {
@@ -19,3 +20,5 @@ Object.defineProperty(globalThis, 'a', {
 console.log(a === 1 && a === 2 && a === 3)
 
 export {}
+
+// 内部的count和全局的变量
