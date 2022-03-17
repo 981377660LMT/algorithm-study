@@ -17,22 +17,22 @@ from itertools import accumulate
 def maxSame(string: str, k: int) -> int:
     """在至多交换m次之后，字符串中最多有多少个连续的位置上的字母相同"""
 
-    def getSwapPresum(indexes: List[int]) -> List[int]:
-        # 每个字符移动到中间需要的步数，注意左右两边每排好一个位置到中心的距离就要减1，排序，再求前缀和
-        mid = len(indexes) // 2
-        leftDist, rightDist = (
-            [indexes[mid] - indexes[i] for i in range(mid)],
-            [indexes[i] - indexes[mid] for i in range(mid, len(indexes))],
-        )
-        leftDist, rightDist = sorted(leftDist), sorted(rightDist)
-        leftDist, rightDist = (
-            [num - i for i, num in enumerate(leftDist)],
-            [num - i for i, num in enumerate(rightDist)],
-        )
+    def minMoves(indexes: List[int], target: int) -> int:
+        """得到连续 target 个 相同字符 的最少相邻交换次数"""
+        indexes = [num - i for i, num in enumerate(indexes)]
+        preSum = [0] + list(accumulate(indexes))
 
-        dist = sorted(leftDist + rightDist)
-        preSum = list(accumulate(dist))
-        return preSum
+        res = int(1e20)
+        # 把ones里的哪k个数移动到一起  left+k-1<len(ones)
+        for left in range(len(indexes) + 1 - target):
+            right = left + target - 1
+            mid = (left + right) >> 1
+            # mid左右两边的和
+            leftSum = indexes[mid] * (mid - left) - (preSum[mid] - preSum[left])
+            rightSum = preSum[right + 1] - preSum[mid + 1] - indexes[mid] * (right - mid)
+            res = min(res, leftSum + rightSum)
+
+        return res
 
     indexesMap = defaultdict(list)
     for i, char in enumerate(string):
@@ -44,11 +44,16 @@ def maxSame(string: str, k: int) -> int:
         if len(indexes) <= res:
             continue
 
-        preSum = getSwapPresum(indexes)
+        left, right = 1, len(indexes)
+        while left <= right:
+            mid = (left + right) >> 1
+            # 得到连续mid个相同字符的最小交换次数
+            if minMoves(indexes, mid) <= k:
+                left = mid + 1
+            else:
+                right = mid - 1
 
-        # 二分查找小于等于k的最大值
-        target = bisect_right(preSum, k) - 1
-        res = max(res, target + 1)
+        res = max(res, right)
 
     return res
 

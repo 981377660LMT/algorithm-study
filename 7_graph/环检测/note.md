@@ -2,6 +2,7 @@
 
 - dfs:走回了之前走过的非 pre 的节点 `dfs(cur,pre):boolean`
 - 并查集:不断 union union 前检查 isConnected
+- 拓扑排序:度数为 1 的点加入队列，每次碰到一个结点就标记为不在环上
 
 有向图环检测
 
