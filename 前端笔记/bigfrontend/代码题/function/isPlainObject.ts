@@ -24,5 +24,10 @@ export const isPlainObject = (obj: any): obj is object => {
 }
 
 console.log(isPlainObject(Math)) // An intrinsic object ,true
+console.log(isPlainObject({})) // An intrinsic object ,true
 // console.log(typeof Date)  // function ,false
 console.log(isPlainObject(Object.create({ 1: 'l' }))) // false
+
+class AAA {}
+class BBB extends AAA {}
+console.log(isPlainObject(new BBB())) // false

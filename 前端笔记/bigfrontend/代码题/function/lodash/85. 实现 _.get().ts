@@ -14,11 +14,13 @@ function get(
 ): any {
   if (typeof path === 'string') path = normalize(path)
   if (path.length === 0) return defaultValue
+
   let root = source
   for (const key of path) {
     if (!(key in root)) return defaultValue
     root = root[key]
   }
+
   return root
 }
 

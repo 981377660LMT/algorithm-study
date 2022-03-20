@@ -1,3 +1,5 @@
+// 维护两个指针即可
+
 class BrowserHistory {
   /**
    * @param {string} url

@@ -24,4 +24,5 @@ const divide = (y: number) => (x: number) => x / y
 
 console.log(pipe([div(2), plus(3), div(4)])(1)) // 20  // (x * 2 + 3) * 4
 console.log(pipe2([div(2), plus(3), div(4)])(1)) // 20  // (x * 2 + 3) * 4
+
 export {}

@@ -9,6 +9,7 @@ const selectSort = (arr: number[]): void => {
         minIndex = j
       }
     }
+
     ;[arr[minIndex], arr[i]] = [arr[i], arr[minIndex]]
   }
 }

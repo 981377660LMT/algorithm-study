@@ -15,6 +15,7 @@ class MyLocalStorage implements Omit<Storage, 'setItem'> {
     const result = JSON.parse(window.localStorage.getItem(key) || '')
 
     if (result) {
+      // 延迟删除
       if (result.maxAge <= Date.now()) {
         window.localStorage.removeItem(key)
         return null

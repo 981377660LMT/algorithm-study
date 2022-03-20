@@ -9,46 +9,38 @@ from heapq import heappush, heappop
 # 注意:这是带权的bfs(不是所有前进速度一样，不一定先到终点就最短)
 # 带权bfs需要dist数组/单源最短路径dijkstra算法
 
-INF = 0x7FFFFFFF
+INF = int(1e20)
 
 
 class Solution:
     def shortestDistance(
         self, maze: List[List[int]], start: List[int], destination: List[int]
     ) -> int:
-        if not any(maze):
-            return -1
-
-        # 启发函数优化
-        def valuate(x: int, y: int) -> int:
-            tx, ty = destination
-            return abs(x - tx) + abs(y - ty)
-
-        m, n = len(maze), len(maze[0])
-        queue: List[Tuple[int, int, int]] = [(valuate(0, 0), start[0], start[1])]
-        dist = [[INF for _ in range(n)] for _ in range(m)]
+        row, col = len(maze), len(maze[0])
+        pq: List[Tuple[int, int, int]] = [(0, start[0], start[1])]
+        dist = [[INF for _ in range(col)] for _ in range(row)]
         dist[start[0]][start[1]] = 0
 
-        while queue:
-            _, r, c = heappop(queue)
-            # 判断visited
+        while pq:
+            _, r, c = heappop(pq)
 
             for dr, dc in ((0, 1), (1, 0), (0, -1), (-1, 0)):
                 nr = r + dr
                 nc = c + dc
                 steps = 1
                 # 沿着这个方向一直进行
-                while 0 <= nr < m and 0 <= nc < n and maze[nr][nc] == 0:
+                while 0 <= nr < row and 0 <= nc < col and maze[nr][nc] == 0:
                     nr += dr
                     nc += dc
                     steps += 1
+
                 # 碰壁后退
                 nr -= dr
                 nc -= dc
                 steps -= 1
                 if dist[r][c] + steps < dist[nr][nc]:
                     dist[nr][nc] = dist[r][c] + steps
-                    heappush(queue, (dist[nr][nc] + valuate(nr, nc), nr, nc))
+                    heappush(pq, (dist[nr][nc], nr, nc))
 
         res = dist[destination[0]][destination[1]]
         return -1 if res == INF else res

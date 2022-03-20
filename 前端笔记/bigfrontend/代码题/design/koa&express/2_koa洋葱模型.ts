@@ -1,15 +1,13 @@
+// 本质上是dfs前序 后后序回溯
+
 type Function = (...args: any[]) => any
 type Middleware = (context: any, next: Function) => any
 
 class Koa {
-  private middlewares: Middleware[]
-
-  constructor() {
-    this.middlewares = []
-  }
+  private middlewares: Middleware[] = []
 
   use(fn: Middleware) {
-    if (fn && typeof fn !== 'function') throw new Error('入参必须是函数')
+    if (typeof fn !== 'function') throw new Error('入参必须是函数')
     this.middlewares.push(fn)
   }
 
@@ -25,12 +23,13 @@ class Koa {
    */
   private compose(middlwwares: Middleware[]): (context: any) => Promise<void> {
     return (context: any) => {
-      return dispatch(0)
-      async function dispatch(index: number): Promise<void> {
+      return dfs(0)
+
+      async function dfs(index: number): Promise<void> {
+        if (index == middlwwares.length) return
         const middleware = middlwwares[index]
-        if (!middleware) return
         try {
-          await middleware(context, () => dispatch(index + 1))
+          await middleware(context, () => dfs(index + 1))
         } catch (error) {
           throw error
         }

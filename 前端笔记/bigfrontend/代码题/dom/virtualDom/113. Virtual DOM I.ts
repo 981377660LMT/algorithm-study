@@ -1,5 +1,5 @@
 interface VirtualDom {
-  type: keyof HTMLElementTagNameMap | string
+  type: keyof HTMLElementTagNameMap | (string & {})
   props: {
     children?: Children[] | Children
     [attr: string]: any
@@ -32,7 +32,6 @@ function virtualize(element: HTMLElement | Text): VirtualDom | string {
       else children.push(virtualize(node as HTMLElement))
     }
 
-    // @ts-ignore
     res.props.children = children.length === 1 ? children[0] : children
 
     return res

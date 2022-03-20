@@ -1,5 +1,5 @@
 interface VirtualDom {
-  type: keyof HTMLElementTagNameMap | string
+  type: keyof HTMLElementTagNameMap | (string & {})
   props: IProps
 }
 

@@ -1,17 +1,16 @@
-class Node {
-  value: number
-  next: Node | undefined
-  constructor(value: number = 0, next?: Node) {
-    this.value = value
-    this.next = next
+class ListNode {
+  val: number
+  next: ListNode | null
+  constructor(val?: number, next?: ListNode | null) {
+    this.val = val === undefined ? 0 : val
+    this.next = next === undefined ? null : next
   }
 }
-
-const a = new Node(1)
-const b = new Node(2)
-const c = new Node(3)
-const d = new Node(4)
-const e = new Node(5)
+const a = new ListNode(1)
+const b = new ListNode(2)
+const c = new ListNode(3)
+const d = new ListNode(4)
+const e = new ListNode(5)
 a.next = b
 b.next = c
 c.next = d
@@ -22,37 +21,38 @@ d.next = e
 // 1.判断存在
 // 2.reverseTwo
 // 3.递归
-const reverseKGroup = (head: Node, k: number): Node => {
-  const reverse = (head: Node) => {
-    let p1: Node | undefined = undefined
-    let p2: Node | undefined = head
+const reverseKGroup = (head: ListNode | null, k: number): ListNode | null => {
+  // 1.判断连续的k个节点是否存在 否则返回head
+  // 边界条件:例如k=2时需要head和head.next都存在,循环完后headP指向k个数最后一个
+  if (!head) return head
+  let headP = head
+
+  for (let i = 0; i < k - 1; i++) {
+    headP = headP.next!
+    if (!headP) return head
+  }
+
+  // 2. reverseTwo k 这一段 反转后headP在头部
+  const nextHead = headP.next
+  headP.next = null
+  reverse(head)
+
+  // 3.递归
+  head.next = reverseKGroup(nextHead, k)
+
+  return headP
+
+  function reverse(head: ListNode) {
+    let p1: ListNode | null = null
+    let p2: ListNode | null = head
     while (p2) {
-      const tmp: Node | undefined = p2.next
+      const tmp: ListNode | null = p2.next
       p2.next = p1
       p1 = p2
       p2 = tmp
     }
     return p1
   }
-
-  // 1.判断连续的k个节点是否存在 否则返回head
-  // 边界条件:例如k=2时需要head和head.next都存在,循环完后headP指向k个数最后一个
-  if (!head) return head
-  let headP = head
-  for (let i = 1; i < k; i++) {
-    headP = headP.next!
-    if (!headP) return head
-  }
-
-  // 2. reverseTwo k 这一段 反转后headP在头部
-  const tmp = headP.next
-  headP.next = undefined
-  reverse(head)
-
-  // 3.递归
-  head.next = reverseKGroup(tmp!, k)
-
-  return headP
 }
 
 console.dir(reverseKGroup(a, 3), { depth: null })

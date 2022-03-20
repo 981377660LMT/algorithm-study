@@ -1,4 +1,3 @@
-import type { Func } from '../../typings'
 import { Observable } from './57. 实现Observable'
 
 /**
@@ -8,6 +7,7 @@ import { Observable } from './57. 实现Observable'
  */
 function interval(period: number): Observable {
   let count = 0
+
   return new Observable(subscriber => {
     setInterval(() => {
       subscriber.next(count++)

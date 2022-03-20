@@ -3,7 +3,7 @@
  * @return {Generator}
  * 输入的字符串只包括非负整数字符和+、-、 *、 /、 (、 ) 和空格，空格需要忽略。
  */
-function* tokenize(str: string): Generator<string> {
+function* tokenize(str: string): Generator<string, void, void> {
   const tokens = str.match(/(\d+)|[\+\-\*\/\(\)]/g)
   if (tokens) {
     for (const token of tokens) {

@@ -18,13 +18,8 @@ type EventName = string
 type Id = number
 
 class EventEmitter {
-  private cbRecord: Record<EventName, Record<Id, Func>>
-  private uuid: number
-
-  constructor() {
-    this.cbRecord = {}
-    this.uuid = 0
-  }
+  private cbRecord: Record<EventName, Record<Id, Func>> = {}
+  private uuid: number = 0
 
   subscribe(eventName: string, callback: Func) {
     const uuid = this.uuid++

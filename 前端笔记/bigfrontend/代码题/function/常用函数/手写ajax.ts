@@ -2,7 +2,7 @@
 const get = (url: string) => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
-    xhr.open('get', url, false)
+    xhr.open('get', url, true)
     xhr.setRequestHeader('Content-type', 'application/json')
     xhr.onreadystatechange = () => {
       if (xhr.readyState !== 4) return
@@ -12,6 +12,7 @@ const get = (url: string) => {
         reject(new Error(xhr.responseText))
       }
     }
+
     xhr.send()
   })
 }

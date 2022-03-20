@@ -13,6 +13,7 @@ function sort(items: any[], newOrder: number[]): void {
       swap(items, i, j)
     }
   }
+
   function swap(arr: any[], i: number, j: number) {
     ;[arr[i], arr[j]] = [arr[j], arr[i]]
   }

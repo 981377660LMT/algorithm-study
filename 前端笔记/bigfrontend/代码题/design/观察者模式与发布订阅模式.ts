@@ -3,7 +3,7 @@ interface Subscription {
 }
 
 interface IEventEmitter {
-  subscribe: (eventName: string, callback: (...args: any[]) => void) => Subscription
+  on: (eventName: string, callback: (...args: any[]) => void) => Subscription
   emit: (eventName: string, ...args: any[]) => void
 }
 

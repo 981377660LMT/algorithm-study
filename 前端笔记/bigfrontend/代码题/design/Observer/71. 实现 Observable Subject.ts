@@ -6,17 +6,13 @@ import { from } from './70. 实现Observable.from()'
 import type { Id, Observable, Observer, Subscription } from './typings'
 
 class Subject implements Observable, Observer {
-  private id: number
-  private subRecord: Map<Id, Observer>
-
-  constructor() {
-    this.id = 0
-    this.subRecord = new Map()
-  }
+  private id: number = 0
+  private subRecord: Map<Id, Observer> = new Map()
 
   subscribe(subscriber: Observer): Subscription {
     const id = this.id++
     this.subRecord.set(id, subscriber)
+
     return {
       unsubscribe: () => {
         this.subRecord.delete(id)

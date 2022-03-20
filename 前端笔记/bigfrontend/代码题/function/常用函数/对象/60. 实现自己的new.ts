@@ -10,5 +10,5 @@ const myNew = (constructor: Function, ...args: any[]) => {
   const obj = Object.create(constructor.prototype)
   const res = constructor.apply(obj, args)
   if (typeof res === 'object') return res
-  else return obj
+  return obj
 }

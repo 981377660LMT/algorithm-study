@@ -86,7 +86,7 @@ if (require.main === module) {
   // 3.需要支持多个订阅。
 
   // 总结:
-  // 1.两个er是什么? observer和subscriber是同一个东西，即带有几个回调的对象
+  // 1.两个er是什么? observer和subscriber是同一个东西(视角不同名字就不一样)，即带有几个回调的对象
   // 2.observerble是什么？订阅中心;observalble初始化setup，observalble.subscribe时触发setup并返回一个subscription
   // 3.subscription是什么？一个带有unsubscribe的对象
   // 4.observerble如何保存订阅信息？使用一个map记录订阅者id到subscription的对应关系

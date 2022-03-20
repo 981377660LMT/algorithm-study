@@ -65,16 +65,17 @@ https://zhuanlan.zhihu.com/p/358551518
     // react-redux.js
     let dispatch = action => setState(reducer(state, action))
     // 支持异步 action
-    let prevDispatch = dispatch
+    let preDispatch = dispatch
     dispatch = action => {
       if (typeof action === 'function') {
+        // 逐层递归
         return action(dispatch)
       }
-      return prevDispatch(action)
+      return preDispatch(action)
     }
     ```
 
-    注意：这里不能使用 prevDispatch。这是因为我们不知道异步 action 内部是否还嵌套另一个 异步 action，所以采用递归 的方式确保最终拿到的 action 是我们想要的。
+    注意：这里不能使用 preDispatch。这是因为我们不知道异步 action 内部是否还嵌套另一个 异步 action，所以采用递归 的方式确保最终拿到的 action 是我们想要的。
     事实上，上面的代码是 redux-thunk 的简化版。我们来看下 react-thunk 是实现（也就几行代码）：
 
     ```JS

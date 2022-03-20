@@ -10,11 +10,11 @@ import type { AsyncFunc, Callback, PromiseFunc } from './typings'
 function sequence(funcs: AsyncFunc[]): AsyncFunc {
   const promiseFuncs = funcs.map(promisify)
 
-  const merge = (promiseFunc1: PromiseFunc, promiseFunc2: PromiseFunc): PromiseFunc => {
+  const mergeTwo = (promiseFunc1: PromiseFunc, promiseFunc2: PromiseFunc): PromiseFunc => {
     return arg => promiseFunc1(arg).then(promiseFunc2)
   }
 
-  return callbackify(promiseFuncs.reduce(merge))
+  return callbackify(promiseFuncs.reduce(mergeTwo))
 }
 
 if (require.main === module) {

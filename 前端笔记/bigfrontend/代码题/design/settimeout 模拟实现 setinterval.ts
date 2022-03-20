@@ -1,4 +1,5 @@
 export {}
+
 // setinterval 用来实现循环定时调用 可能会存在一定的问题 能用 settimeout 解决吗
 // 扩展：我们能反过来使用 setinterval 模拟实现 settimeout 吗？
 // 扩展思考：为什么要用 settimeout 模拟实现 setinterval？setinterval 的缺陷是什么？

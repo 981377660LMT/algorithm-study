@@ -18,18 +18,19 @@ async function all(promises: any[]): Promise<any[]> {
   return results
 }
 
-function all2(arr: any[]): Promise<any[]> {
-  if (arr.length === 0) return Promise.resolve([])
+// 正解
+function all2<T>(tasks: readonly T[]): Promise<Awaited<T>[]> {
+  if (tasks.length === 0) return Promise.resolve([])
 
   // 1.
-  const promises = arr.map(item => (item instanceof Promise ? item : Promise.resolve(item)))
+  const promises = tasks.map(item => (item instanceof Promise ? item : Promise.resolve(item)))
 
   // 2.
   return new Promise((resolve, reject) => {
     const res: any[] = []
     let fulfilledCount = 0
 
-    // 3.
+    // 3. 通过of遍历 实现并发
     for (const [index, promise] of promises.entries()) {
       promise
         .then(data => {

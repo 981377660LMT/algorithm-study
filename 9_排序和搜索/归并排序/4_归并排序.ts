@@ -34,7 +34,7 @@ const mergeTwo = (arr1: readonly number[], arr2: readonly number[]) => {
 const mergeSort = (arr: readonly number[]): readonly number[] => {
   if (arr.length <= 1) return arr
 
-  const mid = Math.floor(arr.length / 2)
+  const mid = arr.length >> 1
   const left = arr.slice(0, mid)
   const right = arr.slice(mid)
 

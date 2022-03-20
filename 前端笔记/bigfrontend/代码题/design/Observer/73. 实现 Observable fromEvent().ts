@@ -7,7 +7,7 @@ import { Observable } from './57. 实现Observable'
  * @return {Observable}
  * 创建一个Observable，并传递DOM事件。
  */
-function fromEvent(element: HTMLElement, eventName: string, capture: boolean = false): Observable {
+function fromEvent(element: HTMLElement, eventName: string, capture = false): Observable {
   // your code here
   return new Observable(subscriber => {
     element.addEventListener(eventName, e => subscriber.next(e), capture)

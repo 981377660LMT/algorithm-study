@@ -6,19 +6,15 @@ type MiddlewareFunc = (req: Request, res: Response, next: NextFunc) => void
 type ErrorHandler = (error: Error, req: Request, res: Response, next: NextFunc) => void
 
 class Middleware {
-  private callbacks: MiddlewareFunc[]
-  private errorhandlers: ErrorHandler[]
-
-  constructor() {
-    this.callbacks = []
-    this.errorhandlers = []
-  }
+  private callbacks: MiddlewareFunc[] = []
+  private errorhandlers: ErrorHandler[] = []
 
   use(func: MiddlewareFunc | ErrorHandler) {
     if (func.length === 3) this.callbacks.push(func as MiddlewareFunc)
     else if (func.length === 4) this.errorhandlers.push(func as ErrorHandler)
   }
 
+  // 实际上req res 会带很多东西
   listen(req = {}, res = {}) {
     const callback = this.compose(this.callbacks, 'callback')
     const errHandler = this.compose(this.errorhandlers, 'handleError')
@@ -35,6 +31,7 @@ class Middleware {
     if (funcs.length === 0) return (args: any) => args
     if (funcs.length === 1) return funcs[0]
     if (type === 'callback') {
+      // a执行完后把b next出去
       return funcs.reduce((a, b) => (req, res, next) => a(req, res, () => b(req, res, next)))
     } else {
       return funcs.reduce(
