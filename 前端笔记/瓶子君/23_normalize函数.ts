@@ -20,6 +20,7 @@ const normalize = (str: string): Node<string> => {
     root.children = {}
     root = root.children
   }
+
   root.value = keys[keys.length - 1]
 
   return res.root as Node<string>

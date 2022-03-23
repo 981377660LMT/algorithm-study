@@ -158,7 +158,7 @@ nextTick(cb)
 nextTick(cb)
 nextTick(cb)
 
-由于 setTimeout 的原因，pending 变为了 true 之后就不会执行 if 里的代码了，而是等定时器执行了之后才变回来
+由于 setTimeout 的原因，`pending 变为了 true 之后就不会执行 if 里的代码了`，而是等定时器执行了之后才变回来
 
 8. Proxy 只会代理对象的第一层，那么 Vue3 又是怎样处理这个问题的呢
    判断当前 Reflect.get 的返回值是否为 Object，如果是则再通过 reactive 方法做代理， 这样就实现了深度观测。
@@ -209,7 +209,7 @@ nextTick(cb)
     opacity:0|√|√
 19. 为什么 for if 不能连用
     **vue-for 的优先级高于 vue-if**
-    每次渲染都会先循环再进行条件判断(就是我会把所有的代码**先渲染出来**在进行条件判断，这样就造成了性能的浪费)
+    每次渲染都会`先循环再进行条件判断`(就是我会把所有的代码**先渲染出来**在进行条件判断，这样就造成了性能的浪费)
     如果避免出现这种情况，则在外层嵌套 template（页面渲染不生成 dom 节点），在这一层进行 v-if 判断，然后在内部进行 v-for 循环
     ```Vue
     <template v-if="isShow">

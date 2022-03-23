@@ -21,7 +21,7 @@ const combinationSum = (candidates: number[], target: number): number[][] => {
       const next = candidates[i]
       path.push(next)
       // i 数字可以重复使用
-      bt(path, sum + next, i)
+      bt(path, sum + next, i + 1)
       path.pop()
     }
   }

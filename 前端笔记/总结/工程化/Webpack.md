@@ -1,7 +1,7 @@
 ## 笔记
 
 0. 为什么要打包构建
-   - 更块更小(压缩合并 tree-shaking)
+   - 更快更小(压缩合并 tree-shaking)
    - 高级语法支持(tS es6 模块化 scss)
    - 兼容和错误检查(polyfill postcss eslint)
    - 统一环境
@@ -358,3 +358,6 @@ module: {
 sourcemap 可以帮助我们定位打包之前的代码。
 sourcemap 是在开发的时候使用 `cheap-module-eval-source-map`， 而在发布上线的时候使用 `nosource-source-map`。
 这里的 cheap 指的是只能定位到行，不能定位到列，对大多数人来说到行就够了，这样本地开发打包编译也快一点。module 指的是定位到源代码，而不是经过 loader 等处理后的代码。eval 指的是代码会包裹在 eval 函数执行。nosource 指的是仅显示出错的源代码位置，而无法定位到源代码，这对我们的生产环境起到了保护作用，避免被其他人拿到前端完整的源代码。
+
+cheap:只显示行不显示列
+eval:直接 eval 执行 js 代码

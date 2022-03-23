@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 
 
 # 也可以dfs(index,visited,curSum)做，也是2^n时间
@@ -14,5 +14,14 @@ def getSum(nums: List[int]) -> List[int]:
     return sums
 
 
-print(getSum([1, 2, 3]))
+# 求所有子集可能的和
+def getSubsetSum(nums) -> Set[int]:
+    res = set([0])
+    for num in nums:
+        res |= {num + x for x in res} | {num}
+    return res
+
+
+print(getSum([1, 2, 3, 1]))
+print(getSubsetSum([1, 2, 3, 1]))
 

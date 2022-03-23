@@ -11,6 +11,7 @@ const longestValidParentheses = function (s: string): number {
   const n = s.length
   const stack: number[] = []
   const mark = Array<number>(n).fill(0)
+
   for (let i = 0; i < n; i++) {
     if (s[i] === '(') {
       stack.push(i)

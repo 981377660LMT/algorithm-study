@@ -3,3 +3,5 @@
 # 合并左右/左/右/不合并
 
 线段树、区间并查集、区间操纵
+
+统一解法：`map+multiset` 即 `SortedDict+SortedList`

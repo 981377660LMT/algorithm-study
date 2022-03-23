@@ -31,6 +31,7 @@ function Vue (options) {
   ) {
     warn('Vue is a constructor and should be called with the `new` keyword')
   }
+
   this._init(options)
 }
 ```
@@ -75,7 +76,8 @@ init=>$mount=>compile=>render=>vNode=>patch=>Dom
 5. Vue 响应式系统三大件
    Vue 响应系统，其核心有三点：observe、watcher、dep：
    **observe**:遍历 data 中的属性，使用 Object.defineProperty 的 get/set 方法对其进行数据劫持
-   **dep**：每个属性拥有自己的消息订阅器 dep，用于存放所有订阅了该属性的观察者对象
+
+   **dep**：每个`属性`拥有自己的`消息订阅器 dep`，用于存放所有订阅了该属性的观察者对象
    **watcher**：观察者（对象），通过 dep 实现对响应属性的监听，监听到结果后，主动触发自己的回调进行响应
 
    为什么 Vue.js 不能兼容 IE8 及以下浏览器
@@ -189,9 +191,9 @@ Dep 是一个 Class，它定义了一些属性和方法，**这里需要特别�
 
 ## 派发更新(可观察对象 Dep.notify() 触发所有的 观察者 watcher 的 update())：
 
-实际上就是当数据发生变化的时候，触发 setter 逻辑，watcher 对象在进行更新执行 update，内部主要执行了一个 queueWatcher 函数判重操作，相同的 watcher 对象只会被加入到 queue 队列一次。在 **nextTick 传入回调后执行所有 watcher 的 run，进而触发 Dep.notify()**。
+实际上就是当数据发生变化的时候，触发 setter 逻辑，watcher 对象在进行更新执行 update，内部主要执行了一个 `queueWatcher 函数判重操作，相同的 watcher 对象只会被加入到 queue 队列一次`。在 **nextTick 传入回调后执行所有 watcher 的 run，进而触发 Dep.notify()**。
 
-Watcher 和 Dep 就是一个非常经典的观察者设计模式的实现
+Watcher 和 Dep 就是一个非常经典的观察者模式的实现
 
 nextTick 解决的问题:让数据的变化到 DOM 的重新渲染是一个异步过程(不会改变数据就马上触发 watcher 的回调)，而是把这些 watcher 先添加到一个队列里，然后在 nextTick(flushSchedulerQueue)。
 变成什么异步？
@@ -312,10 +314,10 @@ getData(res).then(()=>{
    ```
 
    1. for 循环更新 count 数值，dom 会被更新 100 次吗？
-      不会，因为 queueWatcher 函数做了过滤，相同的 watcher 对象不会被重复添加。
+      不会，因为 `queueWatcher 函数`做了过滤，相同的 watcher 对象不会被重复添加。
 
    2. nextTick 是如何做到监听 dom 更新完毕的？
-      vue 用异步队列的方式来控制 DOM 更新和 nextTick 回调先后执行，保证了能在 dom 更新后在执行回调。
+      vue 用异步队列的方式来控制 DOM 更新和 nextTick 回调先后执行，保证了能在 `dom 更新后在执行回调。`
    3. 数据更新是微任务与宏任务对渲染的影响
       因为根据 HTML 标准，会在宏任务执行结束之后，在下一个宏任务开始执行之前，UI 都会重新渲染。如果在 microtask 中就完成数据更新，当 macro-task 结束就可以得到最新的 UI 了。如果新建一个 macro-task 来做数据更新的话，那么渲染会执行两次
 

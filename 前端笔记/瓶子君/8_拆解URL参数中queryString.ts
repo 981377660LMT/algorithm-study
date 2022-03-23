@@ -6,13 +6,14 @@ const queryString1 = (str: string) => {
   str.replace(/([^?&=]+)=([^&]+)/g, (_, g1, g2) => (obj[g1] = g2))
   return obj
 }
-const queryString2 = (str: string) => {
-  const s = new URL(str).searchParams
-  console.log(s)
-  return Object.fromEntries(s.entries())
+
+// 解析params参数
+const getParamByKey = (url: string, key: string) => {
+  const params = new URL(url).searchParams
+  return Object.fromEntries(params.entries())[key]
 }
 
 console.log(queryString1(url))
-console.log(queryString2(url))
+console.log(getParamByKey('http://sample.com/?a=1&b=2&c=xx&d=2#hash', 'a'))
 
 export {}

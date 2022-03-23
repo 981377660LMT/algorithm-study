@@ -1,15 +1,15 @@
 const plus = () => {
   let count = 0
 
-  const plus = (...nums: number[]) => {
+  const inner = (...nums: number[]) => {
     nums.forEach(num => (count += num))
-    return plus
+    return inner
   }
 
-  plus.toString = () => count
+  inner.toString = () => count
   // plus.valueOf = () => count
 
-  return plus
+  return inner
 }
 
 const add = plus()

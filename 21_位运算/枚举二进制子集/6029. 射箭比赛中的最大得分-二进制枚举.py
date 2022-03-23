@@ -4,36 +4,28 @@ MOD = int(1e9 + 7)
 
 # aliceArrows.length == bobArrows.length == 12
 # 1 <= numArrows <= 105
+
+
 class Solution:
     def maximumBobPoints(self, numArrows: int, aliceArrows: List[int]) -> List[int]:
 
         # 如果 ak < bk ，则 Bob 得 k 分
         resCand = [0] * 12
-        score = 0
+        resScore = 0
         for state in range(1 << 12):
-            cur = [0] * 12
-            curScore = 0
+            score, arrow, bobArrows = 0, 0, [0] * 12
             for i in range(12):
                 if (state >> i) & 1:
-                    cur[i] = 1
-                    curScore += i
-            if curScore < score:
+                    score += i
+                    arrow += aliceArrows[i] + 1
+                    bobArrows[i] = aliceArrows[i] + 1
+            if arrow > numArrows:
                 continue
+            if score > resScore:
+                resScore = score
+                bobArrows[0] += numArrows - arrow
+                resCand = bobArrows
 
-            minCost = 0
-            select = [0] * 12
-            for i, num in enumerate(cur):
-                if num > 0:
-                    minCost += aliceArrows[i] + 1
-                    select[i] = aliceArrows[i] + 1
-            if minCost > numArrows:
-                continue
-
-            if curScore > score:
-                if minCost < numArrows:
-                    select[0] += numArrows - minCost
-                score = curScore
-                resCand = select
         return resCand
 
 

@@ -28,7 +28,8 @@ def dijkstra(
             if dist[next] > dist[cur] + adjMap[cur][next]:
                 dist[next] = dist[cur] + adjMap[cur][next]
                 heappush(pq, (dist[next], next))
-    return dist
+
+    return INF if end is not None else dist
 
 
 def dijkstra2(

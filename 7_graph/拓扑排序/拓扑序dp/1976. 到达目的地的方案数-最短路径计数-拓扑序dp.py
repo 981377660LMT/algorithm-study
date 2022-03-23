@@ -11,15 +11,17 @@ from heapq import heappop, heappush
 # 2.If candidate < dist[neib], it means that we found better candidate, so we update distance and put cnt[neib] = cnt[idx].
 
 MOD = int(1e9 + 7)
-INF = 2 ** 63 - 1
+INF = int(1e20)
 
 # 单源最短路 + 拓扑序 DP
+
+
 class Solution:
     def countPaths(self, n: int, roads: List[List[int]]) -> int:
-        adjMap = defaultdict(list)
+        adjMap = defaultdict(lambda: defaultdict(lambda: INF))
         for u, v, w in roads:
-            adjMap[u].append((v, w))
-            adjMap[v].append((u, w))
+            adjMap[u][v] = w
+            adjMap[v][u] = w
 
         dist = [INF] * n
         dist[0] = 0
@@ -30,12 +32,13 @@ class Solution:
         count[0] = 1
 
         while pq:
-            minDist, cur = heappop(pq)
+            curDist, cur = heappop(pq)
             if cur == n - 1:
                 return count[cur] % MOD
 
-            for next, weight in adjMap[cur]:
-                candDist = weight + minDist
+            for next in adjMap[cur]:
+                weight = adjMap[cur][next]
+                candDist = weight + curDist
 
                 # 2.相等加count
                 if candDist == dist[next]:
@@ -47,6 +50,7 @@ class Solution:
                     heappush(pq, (candDist, next))
                     count[next] = count[cur]
                     count[next] %= MOD
+        return -1
 
 
 print(

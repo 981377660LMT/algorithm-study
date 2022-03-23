@@ -11,6 +11,7 @@ for _ in range(n):
 
 dp = [0] * (cap + 1)  # 最大总价值
 dp[0] = 0
+# 此处也可状压记录
 assign = [[] * n for _ in range(cap + 1)]  # 每个容量下每个物品的选择个数
 
 for i, (cost, score) in enumerate(goods):

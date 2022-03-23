@@ -4,7 +4,7 @@ class UnionFind:
         self.part = n
         self.parent = list(range(n))
         self.size = [1] * n
-        self.partSum = [0] * n
+        self.partSum = [0] * n  # 每个帮派的和
 
     def find(self, x: int) -> int:
         if x != self.parent[x]:
@@ -54,6 +54,7 @@ for i in range(n - 1, 0, -1):
         uf.union(curIndex - 1, curIndex)
     if curIndex + 1 < n and visited[curIndex + 1]:
         uf.union(curIndex + 1, curIndex)
+
     # 反向更新
     res[i - 1] = max(res[i], uf.getPartSum(curIndex))
 

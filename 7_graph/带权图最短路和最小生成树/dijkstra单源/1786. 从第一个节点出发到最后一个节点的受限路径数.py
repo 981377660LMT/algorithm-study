@@ -12,20 +12,21 @@ from functools import lru_cache
 
 
 MOD = int(1e9 + 7)
+INF = int(1e20)
 
 
 class Solution:
     def countRestrictedPaths(self, n: int, edges: List[List[int]]) -> int:
-        adjMap = defaultdict(list)
+        adjMap = defaultdict(lambda: defaultdict(lambda: INF))
         for u, v, w in edges:
-            adjMap[u - 1].append((v - 1, w))
-            adjMap[v - 1].append((u - 1, w))
+            adjMap[u - 1][v - 1] = w
+            adjMap[v - 1][u - 1] = w
 
         pq = [(0, n - 1)]
-        dist = [0x7FFFFFFF] * (n - 1) + [0]
+        dist = [INF] * (n - 1) + [0]
         while pq:
             _, cur = heappop(pq)
-            for next, weight in adjMap[cur]:
+            for next, weight in adjMap[cur].items():
                 if dist[cur] + weight < dist[next]:
                     dist[next] = dist[cur] + weight
                     heappush(pq, (dist[next], next))

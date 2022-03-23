@@ -4,6 +4,7 @@
 MOD = 998244353
 
 
+# 如果有相同形况，最好从后向前算
 class Solution:
     def findOccurrences(self, S):
         # write code here
