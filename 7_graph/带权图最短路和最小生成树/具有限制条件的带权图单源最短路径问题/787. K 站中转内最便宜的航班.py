@@ -1,43 +1,41 @@
-# @param {number} n
-# @param {number[][]} flights
-# @param {number} src
-# @param {number} dst
-# @param {number} k  最多经过 k 站中转的路线
-# @return {number}
-# 找到出一条最多经过 k 站中转的路线，使得从 src 到 dst 的 价格最便宜 ，
-# 并返回该价格。 如果不存在这样的路线，则输出 -1。
-# @summary
-# 带限制的最短路径
-
-
+from collections import defaultdict
 from typing import List
 from heapq import heappop, heappush
 
+INF = int(1e20)
 
-# pq超时 需要用bellman ford
+# pq超时 因为不可dist去重 需要用bellman ford/spfa
 class Solution:
     def findCheapestPrice(
         self, n: int, flights: List[List[int]], src: int, dst: int, k: int
     ) -> int:
-        adjList = [[] for _ in range(n)]
+        adjMap = defaultdict(lambda: defaultdict(lambda: INF))
         for u, v, w in flights:
+            adjMap[u][v] = w
 
-            adjList[u].append((v, w))
+        dist = [INF] * (n)
+        dist[src] = 0
 
         pq = [(0, src, k + 1)]
         while pq:
-            cur_cost, cur_id, cur_k = heappop(pq)
-            if cur_id == dst:
-                return cur_cost
-            if cur_k > 0:
-                for next_id, next_cost in adjList[cur_id]:
-                    heappush(pq, (cur_cost + next_cost, next_id, cur_k - 1))
+            curDist, cur, curK = heappop(pq)
+            if cur == dst:
+                return curDist
+            if curK > 0:
+                for next, weight in adjMap[cur].items():
+                    heappush(pq, (curDist + weight, next, curK - 1))
 
-        return -1
+        return -1 if dist[dst] == INF else dist[dst]
 
 
 print(
     Solution().findCheapestPrice(
         n=3, flights=[[0, 1, 100], [1, 2, 100], [0, 2, 500]], src=0, dst=2, k=1
+    )
+)
+
+print(
+    Solution().findCheapestPrice(
+        5, [[0, 1, 5], [1, 2, 5], [0, 3, 2], [3, 1, 2], [1, 4, 1], [4, 2, 1]], 0, 2, 2,
     )
 )

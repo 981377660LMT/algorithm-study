@@ -28,6 +28,7 @@ const getLPS = (pattern: string): number[] => {
 
   return lps
 }
+
 console.log(getLPS('abcdabgabca'))
 console.log(longestPrefix('ababab'))
 // "abab"

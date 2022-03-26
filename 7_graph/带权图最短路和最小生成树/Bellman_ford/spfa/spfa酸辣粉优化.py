@@ -9,24 +9,22 @@ from collections import defaultdict, deque
 
 def spfa(n: int, adjMap: defaultdict, start: int, target: int) -> int:
     """spfa求单源最短路，适用于解决带有负权重的图，是Bellman-ford的常数优化版"""
-    dist = [int(1e20)] * (n + 1)
+    dist = [int(1e20)] * (n)
     dist[start] = 0
 
     queue = deque([start])
-    isInqueue = [False] * (n + 1)  # 在队列里的点
+    isInqueue = [False] * (n)
     isInqueue[start] = True
 
     while queue:
         cur = queue.popleft()
-        isInqueue[cur] = False  # 点从队列出来了
+        isInqueue[cur] = False
 
-        # 更新过谁，就拿谁去更新别人
         for next, weight in adjMap[cur]:
             if dist[cur] + weight < dist[next]:
                 dist[next] = dist[cur] + weight
                 if not isInqueue[next]:
                     isInqueue[next] = True
-                    # 酸辣粉优化：队列不为空，且当前元素距离小于队头，则加入队头，否则加入队尾
                     if queue and dist[next] < dist[queue[0]]:
                         queue.appendleft(next)
                     else:

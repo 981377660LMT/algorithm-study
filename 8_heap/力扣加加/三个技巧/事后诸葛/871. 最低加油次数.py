@@ -38,3 +38,10 @@ print(Solution().minRefuelStops(100, 10, [[10, 60], [20, 30], [30, 30], [60, 40]
 # 并将汽油从 10 升加到 50 升。然后我们开车抵达目的地。
 # 我们沿途在1两个加油站停靠，所以返回 2 。
 
+
+class Solution:
+    def minimumHealth(self, damage: List[int], armor: int) -> int:
+        max_ = max(damage)
+        sum_ = sum(damage)
+        return (sum_ - max_ + 1) + max(0, max_ - armor)
+

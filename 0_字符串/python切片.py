@@ -16,7 +16,7 @@ for _ in range(24):
     # double size of the string
     size *= 2
 
-# 字符串切片似乎是 O(n/1000) 的复杂度，而字符串比较是O(n)的复杂度
+# 字符串切片似乎是 O(n/1000) 的复杂度，而字符串比较是O(n/200)的复杂度
 
 # Size      1000, time=0.000
 # Size      2000, time=0.000

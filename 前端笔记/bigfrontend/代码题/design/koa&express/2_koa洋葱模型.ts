@@ -29,6 +29,7 @@ class Koa {
         if (index == middlwwares.length) return
         const middleware = middlwwares[index]
         try {
+          // next 相当于 ()=>dfs(index+1)
           await middleware(context, () => dfs(index + 1))
         } catch (error) {
           throw error
@@ -56,6 +57,7 @@ if (require.main === module) {
     await next()
     console.log(6)
   })
+
   app.listen(3000)
   // 1 // 3 // 5 // 6 // 4 // 2
 }

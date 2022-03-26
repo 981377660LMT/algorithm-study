@@ -7,21 +7,23 @@ from heapq import heappop, heappush
 # 现在得到一个新的 细分图 ，请你计算从节点 0 出发，可以到达多少个节点？
 # 节点 是否可以到达的判断条件 为：如果节点间距离是 maxMoves 或更少，则视为可以到达；否则，不可到达。
 
+INF = int(1e20)
+
 
 class Solution:
     def reachableNodes(self, edges: List[List[int]], maxMoves: int, n: int) -> int:
-        adjMap = defaultdict(list)
+        adjMap = defaultdict(lambda: defaultdict(lambda: INF))
         for u, v, w in edges:
-            adjMap[u].append((v, w + 1))
-            adjMap[v].append((u, w + 1))
+            adjMap[u][v] = w + 1
+            adjMap[v][u] = w + 1
 
-        dist = [0x7FFFFFF] * n
+        dist = [INF] * n
         dist[0] = 0
         pq = [(0, 0)]
         while pq:
-            minDist, cur = heappop(pq)
-            for next, weight in adjMap[cur]:
-                candDist = weight + minDist
+            _, cur = heappop(pq)
+            for next, weight in adjMap[cur].items():
+                candDist = weight + dist[cur]
                 if candDist < dist[next]:
                     dist[next] = candDist
                     heappush(pq, (candDist, next))

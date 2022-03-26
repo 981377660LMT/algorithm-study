@@ -13,7 +13,7 @@ const findKthNumber = function (n: number, k: number): number {
    * @returns
    * 到右侧节点需要的步数
    */
-  const countStepToRightNode = (n: number, curNode: number, targetNode: number) => {
+  const countStepToRightNode = (curNode: number, targetNode: number) => {
     let step = 0
     while (curNode <= n) {
       // 比如n是195的情况195到100有96个数
@@ -33,7 +33,7 @@ const findKthNumber = function (n: number, k: number): number {
   let curNode = 1
   while (remainSteps) {
     // curNode + 1表示兄弟节点
-    const step = countStepToRightNode(n, curNode, curNode + 1)
+    const step = countStepToRightNode(curNode, curNode + 1)
 
     if (step <= remainSteps) {
       // 到右边的需要的移动步数还小于等于k 还需要向右移动(从1到2,或者从10到11这种)

@@ -1,4 +1,4 @@
-// 等价于寻找最长的前缀，他是一个回文串
+// 等价于寻找最长的回文前缀
 // 则源字符串s为 s1(回文)+s2  所求即为 s2逆+s1+s2
 
 import { BigIntHasher } from '../../BigIntHasher'

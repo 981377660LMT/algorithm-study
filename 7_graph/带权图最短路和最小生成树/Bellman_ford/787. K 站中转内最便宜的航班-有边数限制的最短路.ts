@@ -22,10 +22,10 @@ const findCheapestPrice = function (
 
   // 最多k个中转点，即更新k+1次
   for (let i = 0; i < k + 1; i++) {
-    const clone = dist.slice()
+    const preDist = dist.slice()
     for (const [u, v, w] of flights) {
-      if (clone[u] + w < dist[v]) {
-        dist[v] = clone[u] + w
+      if (preDist[u] + w < dist[v]) {
+        dist[v] = preDist[u] + w
       }
     }
   }

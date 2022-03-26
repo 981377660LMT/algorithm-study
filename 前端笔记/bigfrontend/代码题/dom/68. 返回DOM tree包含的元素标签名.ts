@@ -36,3 +36,8 @@ function getTags3(tree: HTMLElement): string[] {
 
   return [...res].map(s => s.toLowerCase())
 }
+
+function getTags4(tree: HTMLElement): string[] {
+  const nodeList = document.querySelectorAll('*')
+  return [...new Set(Array.from(nodeList).map(node => node.tagName))]
+}

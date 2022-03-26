@@ -6,6 +6,7 @@
 `异移`
 
 ```Python
+第n个格雷码(n>=0)
 n^(n>>1)
 
 [start ^ i ^ (i >> 1) for i in range(2 ** n)]

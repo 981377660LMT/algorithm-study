@@ -28,7 +28,7 @@ HTTP 是一个在计算机世界里专门在「两点」之间「传输」文字
       通过将多个小图片合并成一个大图片来减少 HTTP 请求的次数，以减少 HTTP 请求的次数，从而减少网络的开销。
 
    3. 减少服务器的 HTTP 响应的数据大小;(压缩)
-      无损压缩：gzip/brotli
+      无损压缩：gzip(用到了哈夫曼编码)/brotli
       有损压缩:`Accept:audio/*;q=0.2,audio/basic `
       q 代表质量因子  
       例如 webP 格式
@@ -73,7 +73,6 @@ HTTP 是一个在计算机世界里专门在「两点」之间「传输」文字
 
    ```JS
       const http = require('http');
-
       const server = http.createServer();
 
       server.on('request', (req, res) => {
@@ -142,7 +141,7 @@ HTTP 是一个在计算机世界里专门在「两点」之间「传输」文字
    2. 消息通信基础
       数据是通过一系列数据帧来进行传输的
 10. WebSocket 与 HTTP 有什么关系
-    WebSocket 是一种与 HTTP 不同的协议。两者都位于 OSI 模型的应用层，并且都依赖于传输层的 TCP 协议。 虽然它们不同，但是 RFC 6455 中规定：WebSocket 被设计为在 HTTP 80 和 443 端口上工作，并支持 HTTP 代理和中介，从而使其与 HTTP 协议兼容。 为了实现兼容性，WebSocket 握手使用 HTTP Upgrade 头，从 HTTP 协议更改为 WebSocket 协议。
+    WebSocket 是一种与 HTTP 不同的协议。两者都位于 OSI 模型的应用层，并且都依赖于传输层的 TCP 协议。 虽然它们不同，但是 RFC 6455 中规定：WebSocket 被设计为在 HTTP 80 和 443 端口上工作，并支持 HTTP 代理和中介，从而使其与 HTTP 协议兼容。 为了实现兼容性，`WebSocket 握手使用 HTTP Upgrade 头，从 HTTP 协议更改为 WebSocket 协议`。
 11. 什么是 WebSocket 心跳
     心跳包就是客户端定时发送简单的信息给服务器端告诉它我还在而已
     在 WebSocket 协议中定义了 心跳 Ping 和 心跳 Pong 的控制帧

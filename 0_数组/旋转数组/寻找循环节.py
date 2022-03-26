@@ -1,10 +1,18 @@
-def findRepetend(word: str) -> str:
-    period = (word * 2).find(word, 1, -1)
-    return word[:period] if period != -1 else ''
+# O(S^(4/3))解法判断是否是repeating string
+from typing import Tuple
 
 
-if __name__ == '__main__':
-    word1 = 'niconico'
-    word2 = 'niconiconi'
-    assert findRepetend(word1) == 'nico'
-    assert findRepetend(word2) == ''
+class Solution:
+    def findRepetend(self, s: str) -> Tuple[bool, str]:
+        """检测循环节"""
+        n = len(s)
+        for len_ in range(1, n // 2 + 1):
+            # 因子大约为n^(1/3)个
+            if n % len_ == 0 and s[:len_] * (n // len_) == s:
+                return True, s[:len]
+        return False, ''
+
+
+def another(s: str) -> bool:
+    period = (s + s).find(s, 1, -1)
+    return period != -1

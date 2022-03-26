@@ -357,7 +357,29 @@ module: {
 
 sourcemap 可以帮助我们定位打包之前的代码。
 sourcemap 是在开发的时候使用 `cheap-module-eval-source-map`， 而在发布上线的时候使用 `nosource-source-map`。
-这里的 cheap 指的是只能定位到行，不能定位到列，对大多数人来说到行就够了，这样本地开发打包编译也快一点。module 指的是定位到源代码，而不是经过 loader 等处理后的代码。eval 指的是代码会包裹在 eval 函数执行。nosource 指的是仅显示出错的源代码位置，而无法定位到源代码，这对我们的生产环境起到了保护作用，避免被其他人拿到前端完整的源代码。
+这里的 cheap 指的是只能定位到行，不能定位到列，对大多数人来说到行就够了，这样本地开发打包编译也快一点。module 指的是定位到源代码，而不是经过 loader 等处理后的代码。eval 指的是代码会包裹在 eval 函数执行。nosource 指的是`仅显示出错的源代码位置`，而无法定位到源代码，这对我们的生产环境起到了保护作用，避免被其他人拿到前端完整的源代码。
 
 cheap:只显示行不显示列
 eval:直接 eval 执行 js 代码
+
+## 异步加载原理
+
+require.ensure 异步加载
+import() 按需加载
+
+```JS
+React.lazy(() => import(/* webpackChunkName: "ModuleA" */ './ModuleA'));
+
+will be converted to following code by webpack,
+
+react__WEBPACK_IMPORTED_MODULE_5___default.a.lazy(function () {
+  return Promise.resolve(__webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! ./ModuleA */ "./src/ModuleA.js")))
+});
+```
+
+webpack.require.ensure 是对 require.ensure 的封装
+异步加载的核心其实是使用`类 jsonp` 的方式，通过动态创建 script 的方式实现异步加载。
+就是利用的 jsonp 的实现原理加载模块，只是在这里并不是从 server 拿数据而是从其他模块中
+使用类 jsonp 的方式异步加载对应 chunk，并缓存到 promise 的 resolve 中，并标记对应 chunk 已经加载
+调用对应 chunk 模块时会在 `window 上注册一个 webpackJsonp` 数组，window['webpackJsonp'] = window['webpackJsonp'] || []。并且执行 push 操作。由于 push 操作是使用 webpackJsonpCallback 进行重写的，所以每当执行 push 的时候就会触发 webpackJsonpCallback. webpackJsonpCallback 标记对应 chunk 已经加载并执行代码。
+![](image/Webpack/1648184616820.png)

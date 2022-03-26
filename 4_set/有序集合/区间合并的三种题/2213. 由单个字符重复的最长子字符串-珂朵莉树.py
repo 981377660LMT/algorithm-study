@@ -28,6 +28,7 @@ class Solution:
             """
             向左断开区间；如果 index 不是某一个区间的起点，则将 index 所在区间分成两段，第二段以 index 为起点
             断开index与左右两边的连接用 `split(index),split(index+1)`
+            如果是对[left,right]操作，则需要先split(left),split(right+1)
             """
             if index < 0 or index >= n:
                 return
@@ -47,6 +48,7 @@ class Solution:
             """
             向左合并区间；如果以 index 为起点的区间和其前一个区间内的字符相同，合并两个区间
             连接index与左右两边的区间用 `union(index),union(index+1)`
+            如果是对[left,right]操作，则需要先union(left),union(right+1)
             """
             if index < 0 or index >= n:
                 return
