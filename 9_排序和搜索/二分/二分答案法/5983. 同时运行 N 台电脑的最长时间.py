@@ -20,6 +20,8 @@ dirs8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]]
 # 优先队列模拟不太好做，因为 1 <= batteries[i] <= 10^9
 
 
+# 换一种问法:五个数，每次选择四个数减4，最多能操作几次
+# 相当于电脑数为4，电池数为5的特殊情况
 class Solution:
     def maxRunTime(self, n: int, batteries: List[int]) -> int:
         batteries = sorted(batteries, reverse=True)

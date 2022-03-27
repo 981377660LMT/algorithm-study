@@ -36,7 +36,7 @@
   const loadFile = function(event) {
     const reader = new FileReader();
     reader.onload = function(){
-      const output = document.querySelector('output');
+      const output = document.querySelector('#output');
       output.src = reader.result;
     };
     reader.readAsDataURL(event.target.files[0]);
