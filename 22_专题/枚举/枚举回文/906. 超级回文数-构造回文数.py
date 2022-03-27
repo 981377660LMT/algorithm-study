@@ -2,35 +2,38 @@
 # 返回包含在范围 [L, R] 中的超级回文数的数目。
 # L 和 R 是表示 [1, 10^18) 范围的整数的字符串。
 
-# https://leetcode.com/problems/super-palindromes/discuss/174835/tell-you-how-to-get-all-super-palindrome(detailed-explanation)
-# 1.获取所有小于1e9的回文数(因为input<10^18)
-# 2.遍历这些回文数 一一检验
+from typing import Generator, Iterable
+from itertools import chain
 
-# 对每个x 我们可以构造出11个回文数  xx,x0x,x1x,..,x9x
 
-palindrome = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-# 构造九位数的回文只需要左右部分最多四位 一共有11*10000+9个回文数
-for side in range(1, 10000):
-    s1 = str(side) + str(side)[::-1]
-    palindrome.append(int(s1))
-    for mid in range(10):
-        s2 = str(side) + str(mid) + str(side)[::-1]
-        palindrome.append(int(s2))
-palindrome.sort()
+def genPalindromeByRange(minLen: int, maxLen: int) -> Iterable[int]:
+    """返回 minLength<=长度<=maxLength 的回文数字"""
+    return chain.from_iterable(genPalindromeByLength(len_) for len_ in range(minLen, maxLen + 1))
+
+
+def genPalindromeByLength(length: int) -> Generator[int, None, None]:
+    """返回长度为length的回文数字"""
+    start = 10 ** ((length - 1) >> 1)
+    end = start * 10 - 1
+    for half in range(start, end + 1):
+        if length & 1:
+            yield (int(str(half)[:-1] + str(half)[::-1]))
+        else:
+            yield (int(str(half) + str(half)[::-1]))
+
+
+# 打表要写在外面
+palindromes = [*genPalindromeByRange(1, 9)]
 
 
 class Solution:
     def superpalindromesInRange(self, left: str, right: str) -> int:
         res = []
-        for p in palindrome:
-            cur = p ** 2
-            if cur < int(left):
-                continue
-            if cur > int(right):
-                break
-            cand = str(p ** 2)
-            if cand == cand[::-1]:
-                res.append(cand)
+        lower, upper = int(left), int(right)
+        for num in palindromes:
+            square = num ** 2
+            if square >= lower and square <= upper and square == int(str(square)[::-1]):
+                res.append(square)
         return len(res)
 
 
