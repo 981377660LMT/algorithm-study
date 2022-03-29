@@ -1,34 +1,10 @@
-// 对于这种连续子数组的题目。一般优化思路就那么几种。我们来枚举一下：
-// 前缀和 & 差分数组
-// 滑动窗口
-// 双端队列。比如 1696. 跳跃游戏 VI 和 239. 滑动窗口最大值 就是这种思路。
-
+// 返回数组中不存在 0 所需的最小 k位翻转 次数。如果不可能，则返回 -1 。
 import { ArrayDeque } from '../Deque/ArrayDeque'
-
-// 一次 K 位翻转包括选择一个长度为 K 的（连续）子数
-// 返回所需的 K 位翻转的最小次数，以便数组没有值为 0 的元素。如果不可能，返回 -1。
-function minKBitFlips(nums: number[], k: number): number {
-  let res = 0
-
-  for (let i = 0; i < nums.length - k + 1; i++) {
-    if (nums[i] === 1) continue
-    for (let j = 0; j < k; j++) {
-      nums[i + j] ^= 1
-    }
-    res++
-  }
-
-  for (let i = nums.length - 1; i >= nums.length - k + 1; i--) {
-    if (nums[i] === 0) return -1
-  }
-
-  return res
-}
 
 // 我们使用队列模拟滑动窗口，该滑动窗口的含义是前面 K - 1 个元素中，以哪些位置起始的 子区间 进行了翻转
 // 如果 len(que) % 2 == A[i] 时，当前元素需要翻转
 // https://leetcode-cn.com/problems/minimum-number-of-k-consecutive-bit-flips/solution/hua-dong-chuang-kou-shi-ben-ti-zui-rong-z403l/
-function minKBitFlips2(nums: number[], k: number): number {
+function minKBitFlips(nums: number[], k: number): number {
   let res = 0
   const queue = new ArrayDeque(300_000)
 

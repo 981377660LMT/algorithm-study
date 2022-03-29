@@ -1,5 +1,7 @@
-1. 折半构造 intLength<=9
-2. 折半找规律 length<=15
+折半构造回文
+
+1. 折半构造 length<=12 1e6 个回文数，可以预处理
+2. 折半找规律 length<=15 1e8 个回文数，不可预处理
 
 ```Python
 def genPalindromeByLength(length: int) -> Generator[int, None, None]:

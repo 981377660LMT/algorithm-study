@@ -40,6 +40,35 @@ class Solution:
         return level
 
 
+def getDiameter(adjList: List[List[int]], start: int) -> int:
+    queue = deque([start])
+    visited = set([start])
+    lastVisited = 0  # 全局变量，好记录第一次BFS最后一个点的ID
+    while queue:
+        curLen = len(queue)
+        for _ in range(curLen):
+            lastVisited = queue.popleft()
+            for next in adjList[lastVisited]:
+                if next not in visited:
+                    visited.add(next)
+                    queue.append(next)
+
+    queue = deque([lastVisited])  # 第一次最后一个点，作为第二次BFS的起点
+    visited = set([lastVisited])
+    level = -1  # 记好距离
+    while queue:
+        curLen = len(queue)
+        for _ in range(curLen):
+            cur = queue.popleft()
+            for next in adjList[cur]:
+                if next not in visited:
+                    visited.add(next)
+                    queue.append(next)
+        level += 1
+
+    return level
+
+
 print(Solution().treeDiameter(edges=[[0, 1], [1, 2], [2, 3], [1, 4], [4, 5]]))
 # 输出：4
 # 解释：

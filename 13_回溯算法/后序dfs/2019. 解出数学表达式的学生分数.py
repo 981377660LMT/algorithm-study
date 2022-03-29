@@ -1,3 +1,4 @@
+import re
 from typing import List
 from functools import lru_cache
 
@@ -5,24 +6,27 @@ from functools import lru_cache
 # 3 <= s.length <= 31
 
 # 枚举分割点
+
+
 class Solution:
     def scoreOfStudents(self, s: str, answers: List[int]) -> int:
         @lru_cache(None)
-        # left right 均表示index
         def dfs(left: int, right: int) -> dict:
-            if left == right:
-                return {int(s[left]): 1}
+            if left + 1 >= right:
+                return {int(arr[left]): 0}
 
             res = {}
-            for optIndex in range(left + 1, right, 2):
-                for leftVal in dfs(left, optIndex - 1):
-                    for rightVal in dfs(optIndex + 1, right):
-                        cur = leftVal * rightVal if s[optIndex] == '*' else leftVal + rightVal
+            for mid in range(left + 1, right, 2):
+                for leftRes in dfs(left, mid):
+                    for rightRes in dfs(mid + 1, right):
+                        cur = leftRes * rightRes if arr[mid] == '*' else leftRes + rightRes
+                        # 注意这里剪枝
                         if cur <= 1000:
                             res[cur] = 2
             return res
 
-        res = {**dfs(0, len(s) - 1), eval(s): 5}
+        arr = list(re.split(r'(\D)', s))
+        res = {**dfs(0, len(arr) - 1), eval(s): 5}
         return sum(res.get(answer, 0) for answer in answers)
 
 
