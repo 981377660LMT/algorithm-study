@@ -13,11 +13,12 @@ class Solution:
         for u, v, w in transactions:
             borrow[u] += w
             borrow[v] -= w
-        accounts = list(borrow.values())
-        print(accounts)
-        res = 0x7FFFFFFF
 
-        def dfs(cur: int, times: int):
+        accounts = sorted(list(borrow.values()), reverse=True)
+
+        res = int(1e20)
+
+        def bt(cur: int, times: int):
             nonlocal res
             if times >= res:
                 return
@@ -34,10 +35,10 @@ class Solution:
                 if accounts[cur] * accounts[next] < 0:
                     # 这里加表示cur 给 next 钱 用 [5,-10,5]来想
                     accounts[next] += accounts[cur]
-                    dfs(cur + 1, times + 1)
+                    bt(cur + 1, times + 1)
                     accounts[next] -= accounts[cur]
 
-        dfs(0, 0)
+        bt(0, 0)
         return res
 
 

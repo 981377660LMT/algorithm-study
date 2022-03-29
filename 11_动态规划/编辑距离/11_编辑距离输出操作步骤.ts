@@ -12,12 +12,14 @@ type Node = [Value, NodeType]
 const minDistance = function (word1: string, word2: string) {
   const m = word1.length
   const n = word2.length
+
   // dp[i][j]表示w1的前i个字母要转换成w2的前j个字母所需的最少操作数
   const dp = Array.from<unknown, Node[]>({ length: m + 1 }, () =>
     Array(n + 1)
       .fill(0)
       .map(_ => [0, 'SILENT'])
   )
+
   for (let j = 1; j <= n; j++) {
     dp[0][j][0] = j
     dp[0][j][1] = 'INSERT'
@@ -79,5 +81,7 @@ const minDistance = function (word1: string, word2: string) {
 }
 
 console.log(minDistance('horse', 'ros'))
+console.log(minDistance('easdfgh', 'ros'))
+
 // 3
 export {}
