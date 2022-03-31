@@ -35,8 +35,10 @@ class Solution:
         uf = UnionFindArray(n * 2)
         for cur, nexts in enumerate(graph):
             for next in nexts:
-                if uf.isConnected(cur, next):
-                    return False
+                # if uf.isConnected(cur, next):
+                #     return False
                 uf.union(cur, next + n)
                 uf.union(cur + n, next)
+                if uf.isConnected(cur, next):
+                    return False
         return True

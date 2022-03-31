@@ -8,10 +8,10 @@ class Solution:
         如果有不止一个最短长度的窗口，返回开始位置最靠左的那个。
         """
         n = len(s1)
-        next: List[Tuple[int, ...]] = [()] * n
+        nexts: List[Tuple[int, ...]] = [()] * n
         last = [-1] * 26
         for i in range(n - 1, -1, -1):
-            next[i] = tuple(last)
+            nexts[i] = tuple(last)
             last[ord(s1[i]) - 97] = i
 
         # 假设窗口的起点为 S[i]，S[i] = T[0]。
@@ -23,7 +23,7 @@ class Solution:
         for start in starts:
             cur = start
             for char in s2[1:]:
-                cur = next[cur][ord(char) - 97]
+                cur = nexts[cur][ord(char) - 97]
                 if cur == -1:
                     break
             else:

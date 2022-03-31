@@ -1,44 +1,7 @@
-# 元素是0-n-1的并查集写法，不支持动态添加
 from collections import defaultdict
-from typing import DefaultDict, Dict, Generic, Iterable, List, Optional, TypeVar
+from typing import DefaultDict, Generic, Iterable, List, Optional, TypeVar
 
 
-class UnionFindArray:
-    def __init__(self, n: int):
-        self.n = n
-        self.count = n
-        self.parent = list(range(n))
-        self.rank = [1] * n
-
-    def find(self, x: int) -> int:
-        if x != self.parent[x]:
-            self.parent[x] = self.find(self.parent[x])
-        return self.parent[x]
-
-    def union(self, x: int, y: int) -> bool:
-        rootX = self.find(x)
-        rootY = self.find(y)
-        if rootX == rootY:
-            return False
-        if self.rank[rootX] > self.rank[rootY]:
-            rootX, rootY = rootY, rootX
-        self.parent[rootX] = rootY
-        self.rank[rootY] += self.rank[rootX]
-        self.count -= 1
-        return True
-
-    def isConnected(self, x: int, y: int) -> bool:
-        return self.find(x) == self.find(y)
-
-    def getGroups(self) -> Dict[int, List[int]]:
-        groups = defaultdict(list)
-        for key in range(self.n):
-            root = self.find(key)
-            groups[root].append(key)
-        return groups
-
-
-# 当元素不是数组index时(例如字符串)，更加通用的并查集写法，支持动态添加
 T = TypeVar('T')
 
 
@@ -92,3 +55,17 @@ class UnionFindMap(Generic[T]):
         self.rank[key] = 1
         self.count += 1
         return True
+
+
+# If strings a and b are the same string except for one character, then a and b are in the same mutation group.
+# If strings a and b are in a group and b and c are in a group, then a and c are in the same group.
+class Solution:
+    def solve(self, genes: List[str]):
+        """求出group数量"""
+        uf = UnionFindMap()
+        for word in genes:
+            for i in range(len(word)):
+                next = word[:i] + '*' + word[i + 1 :]
+                uf.union(word, next)
+        return len(uf.getRoots())
+

@@ -1,7 +1,7 @@
 from math import factorial
 
 
-# 给定 n 和 k，返回第 k 个排列。
+# 给定 n 和 k，返回第k个排列。
 class Solution:
     def getPermutation(self, n: int, k: int) -> str:
         nums = list(range(1, n + 1))

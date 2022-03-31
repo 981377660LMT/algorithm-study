@@ -1,8 +1,17 @@
+from collections import Counter
 from typing import List
 
 # 1 <= m, n <= 300
 class Solution:
     def removeOnes(self, grid: List[List[int]]) -> bool:
+        return (
+            len(
+                Counter(
+                    tuple(row) if row[0] else tuple(1 - x for x in row) for row in grid
+                ).values()
+            )
+            == 1
+        )
         states = set()
         for row in grid:
             cur = []

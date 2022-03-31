@@ -10,7 +10,7 @@ from functools import lru_cache
 # 664. 奇怪的打印机.py
 # https://leetcode.com/problems/remove-boxes/discuss/1402561/C%2B%2BJavaPython-Top-down-DP-Clear-explanation-with-Picture-Clean-and-Concise
 
-
+# 时间复杂度 O(n^4)
 class Solution:
     def removeBoxes(self, boxes: List[int]) -> int:
         # dp(l, r, k) denote the maximum points we can get in boxes[l..r] if we have extra k boxes which is the same color with boxes[l] in the left side.
@@ -21,7 +21,7 @@ class Solution:
             while left + 1 <= right and boxes[left] == boxes[left + 1]:
                 left += 1
                 k += 1
-                
+
             res = (k + 1) ** 2 + dfs(left + 1, right, 0)  # 最原始的方案
             for mid in range(left + 1, right + 1):
                 if boxes[left] == boxes[mid]:

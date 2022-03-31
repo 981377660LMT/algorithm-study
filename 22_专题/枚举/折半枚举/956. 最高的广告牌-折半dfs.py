@@ -1,5 +1,8 @@
 # 对于每一根钢筋 x，我们会写下 +x，-x 或者 0。
 # 0 <= rods.length <= 20
+# sum(rods[i]) <= 5000
+
+
 # 暴力枚举3^20肯定会TLE 需要折半枚举
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Set, Tuple

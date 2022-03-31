@@ -14,15 +14,15 @@ type Index = number
  */
 function maxResult(nums: number[], k: number): number {
   const n = nums.length
-  const queue = new ArrayDeque<[Sum, Index]>(10000)
+  const queue = new ArrayDeque<[Sum, Index]>(1e4)
   queue.push([nums[0], 0])
   let res = nums[0]
 
   for (let i = 1; i < n; i++) {
     // 注意这里是大于k才shift
-    res = queue.front()![0] + nums[i]
-    while (queue.length && queue.rear()![0] <= res) queue.pop()
-    if (i - queue.front()![1] >= k) queue.shift()
+    res = queue.at(0)![0] + nums[i]
+    while (queue.length && queue.at(-1)![0] <= res) queue.pop()
+    if (i - queue.at(0)![1] >= k) queue.shift()
     queue.push([res, i])
   }
 

@@ -54,7 +54,7 @@ class ArrayDeque<T = number> {
   // head后移
   shift(): T | undefined {
     if (this.isEmpty()) return undefined
-    const front = this.front()
+    const front = this.at()
     this.head = (this.head + 1 + this.capacity) % this.capacity
     this.length--
     return front
@@ -79,7 +79,7 @@ class ArrayDeque<T = number> {
   }
 
   // fix:deque 注意所有下标要加容量后取模
-  private front(): T | undefined {
+  private at(): T | undefined {
     return this.isEmpty() ? undefined : this.data[(this.head + this.capacity) % this.capacity]
   }
 

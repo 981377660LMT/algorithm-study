@@ -7,7 +7,7 @@
  * 请输出满足上述要求的最少需要补充的数字个数。
  * 如果当前区间是 [1,x]，我们应该添加数字 x + 1，这样可以覆盖的区间为 [1,2*x+1]
  */
-const minPatches = function (nums: number[], n: number): number {
+function minPatches(nums: number[], n: number): number {
   let furthest = 0
   let i = 0
   let res = 0
@@ -26,3 +26,6 @@ const minPatches = function (nums: number[], n: number): number {
 
 console.log(minPatches([1, 5, 10], 20))
 // 解释: 我们需要添加 [2, 4]。
+
+// Append Numbers to List to Create Range
+// 向数组添加最少的个数

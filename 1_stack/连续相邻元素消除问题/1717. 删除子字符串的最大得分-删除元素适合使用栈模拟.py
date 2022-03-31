@@ -3,7 +3,6 @@
 # 请返回对 s 字符串执行上面操作若干次能得到的最大得分。
 class Solution:
     def maximumGain(self, s: str, x: int, y: int) -> int:
-
         if y > x:
             s = s[::-1]
             x, y = y, x

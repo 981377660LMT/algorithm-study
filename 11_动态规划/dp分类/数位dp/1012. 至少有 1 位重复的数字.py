@@ -30,7 +30,7 @@ def cal(upper: int) -> int:
         div, mod = divmod(upper, 10)
         nums.append(mod)
         upper = div
-    res = dfs(len(nums), 0, False, True, True, '')
+    res = dfs(len(nums), 0, False, True, True)
     dfs.cache_clear()
     return res
 

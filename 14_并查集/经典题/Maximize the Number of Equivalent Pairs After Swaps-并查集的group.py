@@ -1,44 +1,8 @@
-# 元素是0-n-1的并查集写法，不支持动态添加
-from collections import defaultdict
-from typing import DefaultDict, Dict, Generic, Iterable, List, Optional, TypeVar
-
-
-class UnionFindArray:
-    def __init__(self, n: int):
-        self.n = n
-        self.count = n
-        self.parent = list(range(n))
-        self.rank = [1] * n
-
-    def find(self, x: int) -> int:
-        if x != self.parent[x]:
-            self.parent[x] = self.find(self.parent[x])
-        return self.parent[x]
-
-    def union(self, x: int, y: int) -> bool:
-        rootX = self.find(x)
-        rootY = self.find(y)
-        if rootX == rootY:
-            return False
-        if self.rank[rootX] > self.rank[rootY]:
-            rootX, rootY = rootY, rootX
-        self.parent[rootX] = rootY
-        self.rank[rootY] += self.rank[rootX]
-        self.count -= 1
-        return True
-
-    def isConnected(self, x: int, y: int) -> bool:
-        return self.find(x) == self.find(y)
-
-    def getGroups(self) -> Dict[int, List[int]]:
-        groups = defaultdict(list)
-        for key in range(self.n):
-            root = self.find(key)
-            groups[root].append(key)
-        return groups
-
-
 # 当元素不是数组index时(例如字符串)，更加通用的并查集写法，支持动态添加
+from collections import defaultdict
+from typing import Counter, DefaultDict, Generic, Iterable, List, Optional, TypeVar
+
+
 T = TypeVar('T')
 
 
@@ -92,3 +56,28 @@ class UnionFindMap(Generic[T]):
         self.rank[key] = 1
         self.count += 1
         return True
+
+
+class Solution:
+    def solve(self, A, B, C):
+        """求交换后的最大相等对数"""
+        n = len(A)
+        uf = UnionFindMap(range(n))  # 存下标
+        for u, v in C:
+            uf.union(u, v)
+
+        res = 0
+        group = uf.getGroup()
+        for root in group:
+            # 可以互相交换的组
+            indexes = group[root]
+            counter = Counter(A[i] for i in indexes)
+            # A的组里 看对应B的位置哪些可以放
+            for i in indexes:
+                if counter[B[i]]:
+                    counter[B[i]] -= 1
+                    res += 1
+        return res
+
+
+print(Solution().solve(A=[1, 2, 3, 4], B=[2, 1, 4, 3], C=[[0, 1], [2, 3]]))

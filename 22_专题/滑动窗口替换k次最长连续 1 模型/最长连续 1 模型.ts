@@ -5,7 +5,7 @@
  * @param k 可替换k次
  * @returns target最大连续长度
  */
-const fix = (str: string, target: string, k: number): number => {
+function fix(str: string, target: string, k: number): number {
   let l = 0
   let res = 0
 

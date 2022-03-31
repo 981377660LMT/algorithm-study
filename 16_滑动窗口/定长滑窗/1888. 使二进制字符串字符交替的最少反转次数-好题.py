@@ -9,7 +9,7 @@
 INF = int(1e20)
 pattern1 = '01'
 
-
+# 二进制01交替不相邻
 class Solution:
     def minFlips(self, s: str) -> int:
         """删除一个字符添加末尾：所有情况就是两倍s，定长滑窗即可"""

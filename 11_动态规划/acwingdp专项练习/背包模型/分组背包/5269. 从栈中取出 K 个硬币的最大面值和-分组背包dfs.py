@@ -14,25 +14,24 @@ INF = int(1e20)
 class Solution:
     def maxValueOfCoins(self, piles: List[List[int]], k: int) -> int:
         """时间复杂度O(背包容量*物品个数)"""
-        n = len(piles)
-        preSums = []
-        for i in range(n):
-            preSums.append([0] + list(accumulate(piles[i])))
 
         @lru_cache(None)
         def dfs(index: int, remain: int) -> int:
             if remain < 0:
                 return -int(1e20)
-            if index >= n:
-                if remain == 0:
-                    return 0
-                return -int(1e20)
+            if index == n:
+                return 0 if remain == 0 else -int(1e20)
 
             res = 0
-            for select in range(len(piles[index])):
+            for select in range(len(piles[index]) + 1):
                 next = dfs(index + 1, remain - select)
                 res = max(res, next + preSums[index][select])
             return res
+
+        n = len(piles)
+        preSums = []
+        for i in range(n):
+            preSums.append([0] + list(accumulate(piles[i])))
 
         res = dfs(0, k)
         dfs.cache_clear()

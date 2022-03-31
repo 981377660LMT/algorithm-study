@@ -1,11 +1,10 @@
 /**
  * @link https://leetcode-cn.com/problems/find-k-th-smallest-pair-distance/solution/719-zhao-chu-di-k-xiao-de-ju-chi-dui-er-g1i76/
- * @param {number[]} nums
- * @param {number} k
+ * @param {number[]} nums 1e4
+ * @param {number} k k>=1
  * @return {number}
- * @description 数据10000大小不能双循环
  * @description 适应二分法
- * @description 求第 k 小的数比较容易想到的就是堆和二分法。二分的原因在于求第 k 小，本质就是求不大于其本身的有 k - 1 个的那个数。而这个问题很多时候满足单调性，因此就可使用二分来解决。
+ * @description 给定一个整数数组，返回所有数对之间的第 k 个最小距离
  * 786. 第 K 个最小的素数分数.py
  */
 const smallestDistancePair = function (nums: number[], k: number): number {

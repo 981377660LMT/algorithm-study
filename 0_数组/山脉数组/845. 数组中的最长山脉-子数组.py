@@ -6,7 +6,7 @@ from typing import List
 
 # 返回最长 “山脉” 的长度。
 
-# 1-pass 问题
+
 class Solution:
     def longestMountain(self, arr: List[int]) -> int:
         up, down = [0] * len(arr), [0] * len(arr)
@@ -16,7 +16,7 @@ class Solution:
         for i in range(len(arr) - 2, -1, -1):
             if arr[i] > arr[i + 1]:
                 down[i] = down[i + 1] + 1
-        return max([u + d + 1 for u, d in zip(up, down) if u and d] or [0])
+        return max([u + d + 1 for u, d in zip(up, down) if u and d], default=0)
 
 
 print(Solution().longestMountain([2, 1, 4, 7, 3, 2, 5]))

@@ -22,3 +22,4 @@ const longestCommonSubsequence = function (text1: string, text2: string): number
 }
 
 console.log(longestCommonSubsequence('abcde', 'ace'))
+console.log(longestCommonSubsequence('abca', 'acba'))
