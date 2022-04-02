@@ -7,6 +7,7 @@ class Logger {
   constructor() {
     this.record = new Map()
   }
+
   // 每条 不重复 的消息最多只能每 10 秒打印一次
   shouldPrintMessage(timestamp: number, message: string): boolean {
     if (!this.record.has(message)) {

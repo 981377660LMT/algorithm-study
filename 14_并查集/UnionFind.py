@@ -1,8 +1,8 @@
-# 元素是0-n-1的并查集写法，不支持动态添加
 from collections import defaultdict
-from typing import DefaultDict, Dict, Generic, Iterable, List, Optional, TypeVar
+from typing import DefaultDict, Generic, Iterable, List, Optional, TypeVar
 
 
+# 元素是0-n-1的并查集写法，不支持动态添加
 class UnionFindArray:
     def __init__(self, n: int):
         self.n = n
@@ -30,7 +30,7 @@ class UnionFindArray:
     def isConnected(self, x: int, y: int) -> bool:
         return self.find(x) == self.find(y)
 
-    def getGroups(self) -> Dict[int, List[int]]:
+    def getGroups(self) -> DefaultDict[int, List[int]]:
         groups = defaultdict(list)
         for key in range(self.n):
             root = self.find(key)

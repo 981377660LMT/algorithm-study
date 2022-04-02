@@ -50,9 +50,25 @@ distX = getDistByBFS(x)
 distY = getDistByBFS(y)
 distX = getDistByDijk(x)
 distY = getDistByDijk(y)
+
+if distX[y] <= 1:
+    print(1)
+    exit()
+
+
 res = 0
 for d1, d2 in zip(distX, distY):
-    if d1 > d2:
-        res = max(res, d1)
+    if d1 > d2 + 1:
+        res = max(res, 2 * d1)
 
-print(res)
+print(res - 1)
+
+# distX = getDistByBFS(x)
+# distY = getDistByBFS(y)
+# if distX[y] <= 1:
+#     return 1
+# res = 0
+# for d1, d2 in zip(distX, distY):
+#     if d1 > d2+1:
+#         res = max(res, d1*2)
+# return res-1

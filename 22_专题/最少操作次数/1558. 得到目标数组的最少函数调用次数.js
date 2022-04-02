@@ -5,6 +5,7 @@
  * 给你一个与 nums 大小相同且初始值全为 0 的数组 arr ，
  * 每次操作可以单点+1或者所有数x2
  * 请你调用以上函数得到整数数组 nums 。
+ * @summary 对每个数分别考虑
  */
 function minOperations(nums) {
   let add = 0

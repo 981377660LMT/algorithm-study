@@ -1,7 +1,6 @@
 from collections import defaultdict
 
 
-
 class BIT1:
     """单点修改"""
 

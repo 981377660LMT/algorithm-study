@@ -18,18 +18,17 @@ INF = 0x7FFFFFFF
 
 class Solution:
     def makeArrayIncreasing(self, arr1: List[int], arr2: List[int]) -> int:
-        store = sorted(set(arr2))
-
         @lru_cache(None)
         def dfs(i: int, pre: int) -> int:
             if i >= len(arr1):
                 return 0
 
-            j = bisect_right(store, pre)
-            swap = 1 + dfs(i + 1, store[j]) if j < len(store) else INF
+            pos = bisect_right(store, pre)
+            swap = 1 + dfs(i + 1, store[pos]) if pos < len(store) else INF
             noswap = dfs(i + 1, arr1[i]) if arr1[i] > pre else INF
             return min(swap, noswap)
 
+        store = sorted(set(arr2))
         res = dfs(0, -INF)
         return res if res != INF else -1
 

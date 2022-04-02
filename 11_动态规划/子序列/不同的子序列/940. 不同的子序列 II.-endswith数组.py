@@ -12,8 +12,8 @@ class Solution:
         # endswith[i] to count how many sub sequence that ends with ith character.
         endswith = [0] * 26
         for char in s:
-            endswith[ord(char) - ord('a')] = sum(endswith) + 1
-        return sum(endswith) % (int(1e9 + 7))
+            endswith[ord(char) - ord('a')] = (sum(endswith) + 1) % MOD
+        return sum(endswith) % (MOD)
 
 
 print(Solution().distinctSubseqII(s="aba"))

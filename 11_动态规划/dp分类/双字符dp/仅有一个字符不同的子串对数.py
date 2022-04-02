@@ -1,5 +1,6 @@
 # Number of Substrings with Single Character Difference
 # n,m<=100
+# 仅有一个字符不同的子串对数
 class Solution2:
     def solve(self, s, t):
         # 暴力O(mnmin(m,n))

@@ -23,3 +23,31 @@ return True
 总结：
 `如果 x,y 同类，则 uf.union(x,y),uf.union(x+n,y+n)`
 `如果 x,y 异类，则 uf.union(x,y+n),uf.union(x+n,y)`
+
+使用
+
+```Python
+class Solution:
+    def solve(self, lists):
+        n = len(lists)
+        # 开大一点
+        uf = UnionFindArray(4 * n + 10)
+
+        for a, b, type in lists:
+            b = b + 1
+            # 第一个冲突
+            if type == 0:
+                # 相同的不能在一组
+                if uf.isConnected(a, b + 2 * n):
+                    return False
+                uf.union(a, b)
+                uf.union(a + 2 * n, b + 2 * n)
+            else:
+                # 不同的在一组了
+                if uf.isConnected(a, b):
+                    return False
+                uf.union(a, b + 2 * n)
+                uf.union(a + 2 * n, b)
+
+        return True
+```

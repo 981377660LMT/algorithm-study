@@ -1,6 +1,8 @@
 from functools import lru_cache
 from typing import List
 
+# 有向图中的最长路径
+
 
 class Solution:
     def solve(self, adjList: List[List[int]]) -> int:

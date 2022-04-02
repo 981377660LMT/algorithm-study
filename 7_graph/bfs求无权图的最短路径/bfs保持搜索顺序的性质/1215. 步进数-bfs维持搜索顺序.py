@@ -23,13 +23,14 @@ class Solution:
                 return res
             if low <= cur:
                 res.append(cur)
-            last_bit = cur % 10
+
+            mod = cur % 10
 
             # 按照顺序加入队列 整个队列都是有序的
-            if last_bit > 0:
-                queue.append(cur * 10 + (last_bit - 1))
-            if last_bit < 9:
-                queue.append(cur * 10 + (last_bit + 1))
+            if mod > 0:
+                queue.append(cur * 10 + (mod - 1))
+            if mod < 9:
+                queue.append(cur * 10 + (mod + 1))
         return res
 
 

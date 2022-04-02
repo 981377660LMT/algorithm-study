@@ -1,9 +1,12 @@
 from typing import List
 from math import comb
 
+# 二叉搜索树的方案数
 MOD = 10 ** 9 + 7
 # 此题与1916相似
 # 子树1排序数*子树2排序数*组内保持顺序合并数组的方式comb
+
+
 class Solution:
     def numOfWays(self, nums: List[int]) -> int:
         def countWays(nums: List[int]) -> int:

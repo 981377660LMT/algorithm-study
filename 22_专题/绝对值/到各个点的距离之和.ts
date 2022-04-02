@@ -1,7 +1,7 @@
 /**
  *
  * @param nums 单调不减的数组
- * @returns 到各个点距离之和
+ * @returns 到各个点绝对值距离之和
  */
 function getDistances(nums: number[]): number[] {
   const n = nums.length
@@ -22,6 +22,7 @@ function getDistances(nums: number[]): number[] {
 
 if (require.main === module) {
   console.log(getDistances([2, 5, 6]))
+  // [ 7, 4, 5 ]
 }
 
 export { getDistances }

@@ -12,19 +12,6 @@ from collections import Counter
 
 class Solution:
     def numSquarefulPerms(self, nums: List[int]) -> int:
-        def isEdge(x: int, y: int) -> bool:
-            r = sqrt(x + y)
-            return int(r) ** 2 == (x + y)
-
-        n = len(nums)
-        target = (1 << n) - 1
-        adjList = [[] for _ in range(n)]
-        for i in range(n):
-            for j in range(i + 1, n):
-                if isEdge(nums[i], nums[j]):
-                    adjList[i].append(j)
-                    adjList[j].append(i)
-
         @lru_cache(None)
         def dfs(cur: int, state: int) -> int:
             if state == target:
@@ -37,6 +24,19 @@ class Solution:
                 res += dfs(next, state | (1 << next))
 
             return res
+
+        def isEdge(x: int, y: int) -> bool:
+            r = sqrt(x + y)
+            return int(r) ** 2 == (x + y)
+
+        n = len(nums)
+        target = (1 << n) - 1
+        adjList = [[] for _ in range(n)]
+        for i in range(n):
+            for j in range(i + 1, n):
+                if isEdge(nums[i], nums[j]):
+                    adjList[i].append(j)
+                    adjList[j].append(i)
 
         res = sum(dfs(i, 1 << i) for i in range(n))
         counter = Counter(nums)

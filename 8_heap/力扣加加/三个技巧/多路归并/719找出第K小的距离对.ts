@@ -8,7 +8,7 @@
  * @description 求第 k 小的数比较容易想到的就是堆和二分法。二分的原因在于求第 k 小，本质就是求不大于其本身的有 k - 1 个的那个数。而这个问题很多时候满足单调性，因此就可使用二分来解决。
  * 786. 第 K 个最小的素数分数.py
  */
-const smallestDistancePair = function (nums: number[], k: number): number {
+function smallestDistancePair(nums: number[], k: number): number {
   nums = nums.slice().sort((a, b) => a - b)
 
   // 距离最大最小值之差

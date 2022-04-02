@@ -21,7 +21,7 @@ class Solution:
         if a < 0:
             right = right[::-1]
 
-        # 合并两个有序数组
+        # 合并两个有序数组(也可deque实现)
         res = []
         i, j = 0, 0
         while i < len(right) and j < len(left):
