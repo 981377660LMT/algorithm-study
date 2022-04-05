@@ -9,11 +9,15 @@ class MonoQueue:
 
     @property
     def min(self) -> int:
-        return self.minQueue[0][0] if self.minQueue else None
+        if not self.minQueue:
+            raise ValueError('monoQueue is empty')
+        return self.minQueue[0][0]
 
     @property
     def max(self) -> int:
-        return self.maxQueue[0][0] if self.maxQueue else None
+        if not self.maxQueue:
+            raise ValueError('monoQueue is empty')
+        return self.maxQueue[0][0]
 
     def popleft(self) -> int:
         if not self.rawQueue:

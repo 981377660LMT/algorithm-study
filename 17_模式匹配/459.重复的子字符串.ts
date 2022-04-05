@@ -1,4 +1,4 @@
-import { getLPS } from './2_最长公共前后缀lps'
+import { getLPS } from './kmp/2_最长公共前后缀lps'
 
 /**
  * @param {string} s

@@ -14,16 +14,18 @@
 
 # 求解差分约束系统，有m条约束条件,判断该差分约束系统有没有解
 # 如果要求xi/xj<=ck，只需取对数即可
+
 from collections import defaultdict
-from typing import List
+from typing import DefaultDict, List, Tuple, TypeVar
+
+T = TypeVar('T', int, str)
 
 
-Edge = List[int]
+def bellman_ford(
+    n: int, edges: List[Tuple[T, T, int]], start: T
+) -> Tuple[bool, DefaultDict[T, int]]:
+    """bellman_ford判断负权环 并求单源最短路"""
 
-
-def bellman_ford(edges: List[Edge], start: int) -> bool:
-    """bellman_ford判断负权环"""
-    n = len(edges)
     dist = defaultdict(lambda: int(1e20))  # 起点s到各个点的距离
     dist[start] = 0
 
@@ -35,9 +37,9 @@ def bellman_ford(edges: List[Edge], start: int) -> bool:
 
     for u, v, w in edges:
         if dist[u] + w < dist[v]:
-            return False  # 存在负权边
+            return False, dist  # 存在负权边
 
-    return True
+    return True, dist
 
 
 if __name__ == '__main__':
@@ -49,5 +51,5 @@ if __name__ == '__main__':
     edges.append([3, 2, 2])
     edges.append([0, 2, 0])
     edges.append([2, 0, 0])
-    print(bellman_ford(edges, 0))
+    print(bellman_ford(4, edges, 0))
 

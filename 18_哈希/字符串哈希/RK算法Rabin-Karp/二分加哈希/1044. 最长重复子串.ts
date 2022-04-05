@@ -44,7 +44,7 @@ console.log(
 )
 // aeeebaabd
 interface IStringHasher {
-  getHashOfRange(left: number, right: number): bigint
+  getHashOfSlice(left: number, right: number): bigint
 }
 
 /**

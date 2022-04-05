@@ -4,6 +4,7 @@ from bisect import bisect_right
 
 class Solution:
     def isSubsequence(self, s: str, t: str) -> bool:
+        """check if s is a subsequence of t"""
         it = iter(t)
         return all(char in it for char in s)
 

@@ -1,5 +1,5 @@
 interface IStringHasher<R extends number | bigint> {
-  getHashOfRange(left: number, right: number): R
+  getHashOfSlice(left: number, right: number): R
 }
 
 /**
@@ -43,11 +43,11 @@ class BigIntHasher implements IStringHasher<bigint> {
    *
    * @param left
    * @param right
-   * @returns 闭区间 [left,right] 子串的哈希值  left>=1 right<=n
-   * @description
-   * 注意要`模mod加mod再模mod`
+   * @returns 切片 [left:right] 的哈希值
    */
-  getHashOfRange(left: number, right: number): bigint {
+  getHashOfSlice(left: number, right: number): bigint {
+    if (left == right) return 0n
+    left += 1
     this.checkRange(left, right)
     const mod = BigIntHasher.MOD
     const upper = this.prefix[right]
@@ -56,31 +56,14 @@ class BigIntHasher implements IStringHasher<bigint> {
   }
 
   private checkRange(left: number, right: number) {
-    if (right < left) {
-      throw new RangeError('right 不能小于 left')
-    }
-
-    if (left < 1) {
-      throw new RangeError('left 不能小于1')
-    }
-
-    if (right < 1) {
-      throw new RangeError('right 不能小于1')
-    }
-
-    if (left > this.input.length) {
-      throw new RangeError('left 不能 超出边界')
-    }
-
-    if (right > this.input.length) {
-      throw new RangeError('right 不能 超出边界')
-    }
+    if (0 <= left && left <= right && right <= this.input.length) return
+    throw new RangeError('left or right out of range')
   }
 }
 
 export { BigIntHasher }
 if (require.main === module) {
   const stringHasher = new BigIntHasher('abcdefg')
-  console.log(stringHasher.getHashOfRange(1, 1))
-  console.log(stringHasher.getHashOfRange(2, 2))
+  console.log(stringHasher.getHashOfSlice(1, 1))
+  console.log(stringHasher.getHashOfSlice(2, 2))
 }

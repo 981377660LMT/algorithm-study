@@ -2,12 +2,13 @@ from collections import defaultdict, deque
 from typing import DefaultDict, List, Set
 
 
-# 拓扑排序 找环
+# 无向基环树 拓扑排序 找环
 
 
 class Solution:
     def distanceToCycle(self, n: int, edges: List[List[int]]) -> List[int]:
         def findCycle(n: int, adjMap: DefaultDict[int, Set[int]], degrees: List[int]) -> List[int]:
+            #  拓扑排序，剪掉所有树枝
             queue = deque([i for i in range(n) if degrees[i] == 1])
             onCycle = [True] * n
             while queue:
@@ -32,6 +33,7 @@ class Solution:
 
         cycle = findCycle(n, adjMap, degrees)
 
+        # 从基环出发，求所有树枝上的点的深度
         res = [int(1e20)] * n
         for index in cycle:
             res[index] = 0

@@ -17,3 +17,6 @@ class Solution:
                 res += 1
 
         return res
+
+
+print(Solution().countHillValley(nums=[2, 4, 1, 1, 6, 5]))

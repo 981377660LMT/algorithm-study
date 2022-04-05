@@ -11,15 +11,16 @@ class Solution:
     def rotateTheBox(self, box: List[List[str]]) -> List[List[str]]:
         # 思路：遍历每行，把石头搬到movePosition
         for row in box:
-            movePos = len(row) - 1
+            fallTo = len(row) - 1
             for col in range(len(row) - 1, -1, -1):
                 if row[col] == '*':
-                    movePos = col - 1
+                    fallTo = col - 1
                 elif row[col] == '#':
-                    row[col], row[movePos] = row[movePos], row[col]
-                    movePos -= 1
+                    # 交换位置
+                    row[col], row[fallTo] = row[fallTo], row[col]
+                    fallTo -= 1
 
-        return list(zip(*box[::-1]))
+        return [list(col[::-1]) for col in zip(*box)]
 
 
 print(Solution().rotateTheBox(box=[["#", ".", "*", "."], ["#", "#", "*", "."]]))

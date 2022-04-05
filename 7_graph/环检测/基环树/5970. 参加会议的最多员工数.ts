@@ -1,4 +1,4 @@
-// 基环树:树加一条边使之成环
+// 内向基环树:树加一条边使之成环
 // 两种情况:1.所有的二元环连树;2.唯一的最长环
 function maximumInvitations(favorite: number[]): number {
   const n = favorite.length
