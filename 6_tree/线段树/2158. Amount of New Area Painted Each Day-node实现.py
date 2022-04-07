@@ -38,8 +38,8 @@ class SegmentTree:
             return
 
         mid = (left + right) >> 1
-        self.build((rt << 1) | 1, mid + 1, right)
         self.build((rt << 1), left, mid)
+        self.build((rt << 1) | 1, mid + 1, right)
 
     def _update(self, rt: int, left: int, right: int, delta: int) -> None:
         root = self._tree[rt]

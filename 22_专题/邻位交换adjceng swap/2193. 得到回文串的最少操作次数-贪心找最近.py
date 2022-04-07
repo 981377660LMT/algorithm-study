@@ -1,3 +1,4 @@
+from collections import Counter
 from functools import lru_cache
 
 # 贪心算法是：每次固定字符串最左边的字母 aa 不变，
@@ -9,6 +10,8 @@ from functools import lru_cache
 class Solution:
     def minMovesToMakePalindrome1(self, s: str) -> int:
         """递归"""
+        if sum(c & 1 for c in Counter(s).values()) > 1:
+            return -1
 
         def dfs(s: str) -> int:
             n = len(s)

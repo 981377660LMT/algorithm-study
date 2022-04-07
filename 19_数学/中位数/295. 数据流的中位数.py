@@ -17,3 +17,6 @@ class MedianFinder:
             return float(self.large[0] - self.small[0]) / 2
         elif len(self.small) < len(self.large):
             return float(self.large[0])
+
+        raise Exception("Invalid state")
+

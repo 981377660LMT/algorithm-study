@@ -2,7 +2,7 @@ export {}
 const add = (x: number) => (y: number) => (z: number) => x + y + z
 const uncurriedAdd = uncurry(add)
 console.log(uncurriedAdd(1, 2, 3)) // 6
-type Function = (...args: any[]) => any
+type Function = (...args: readonly any[]) => any
 
 /**
  * Uncurries a function up to depth n.

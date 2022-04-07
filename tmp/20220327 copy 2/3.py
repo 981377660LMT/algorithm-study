@@ -6,14 +6,12 @@ INF = int(1e20)
 
 class Solution:
     def maximumCandies(self, candies: List[int], k: int) -> int:
-        def check(mid):
-            """k个孩子 每个小孩都mid"""
-            childCount = 0
+        def check(mid: int) -> bool:
+            res = 0
             for candy in candies:
-                childCount += candy // mid
-            return childCount >= k
+                res += candy // mid
+            return res >= k
 
-        # max_=len(candies)
         left, right = 1, int(1e14)
         while left <= right:
             mid = (left + right) // 2

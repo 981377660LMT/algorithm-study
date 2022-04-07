@@ -4,6 +4,7 @@ from typing import List
 # n ≤ 50
 
 # 时间复杂度2^(n/2)
+# 将11置为00-dp
 
 
 class Solution:

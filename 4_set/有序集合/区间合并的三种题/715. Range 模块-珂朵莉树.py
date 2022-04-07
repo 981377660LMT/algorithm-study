@@ -17,3 +17,5 @@ class RangeModule:
         """ 停止跟踪 半开区间 [left, right)"""
         ...
 
+
+# todo

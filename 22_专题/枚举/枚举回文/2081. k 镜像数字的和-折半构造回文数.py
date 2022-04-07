@@ -20,7 +20,7 @@ def genPalindromeByLength(minLen: int, maxLen: int, isReversed=False) -> Generat
             else:
                 yield (int(str(half) + str(half)[::-1]))
 
-    return chain.from_iterable(
+    yield from chain.from_iterable(
         inner(len_, isReversed)
         for len_ in (
             reversed(range(minLen, maxLen + 1)) if isReversed else range(minLen, maxLen + 1)
@@ -28,22 +28,34 @@ def genPalindromeByLength(minLen: int, maxLen: int, isReversed=False) -> Generat
     )
 
 
-def toString(num: int, radix: int) -> str:
-    """将数字转换为指定进制的字符串"""
+# def toString(num: int, radix: int) -> str:
+#     """将数字转换为指定进制的字符串"""
+#     assert radix >= 2
+
+#     if num < 0:
+#         return '-' + toString(-num, radix)
+
+#     if num == 0:
+#         return '0'
+
+#     res = []
+#     while num:
+#         div, mod = divmod(num, radix)
+#         res.append(str(mod))
+#         num = div
+#     return ''.join(res)[::-1]
+
+
+def check(num: int, radix: int) -> bool:
+    """判断num在radix进制下是否为回文"""
     assert radix >= 2
 
-    if num < 0:
-        return '-' + toString(-num, radix)
-
-    if num == 0:
-        return '0'
-
-    res = []
+    digits = []
     while num:
         div, mod = divmod(num, radix)
-        res.append(str(mod))
+        digits.append(mod)
         num = div
-    return ''.join(res)[::-1]
+    return digits == digits[::-1]
 
 
 class Solution:
@@ -52,8 +64,7 @@ class Solution:
         iter = genPalindromeByLength(1, int(1e20))
         while len(res) < n:
             palindrome = next(iter)
-            cand = toString(palindrome, k)
-            if cand == cand[::-1]:
+            if check(palindrome, k):
                 res.append(palindrome)
         return sum(res)
 

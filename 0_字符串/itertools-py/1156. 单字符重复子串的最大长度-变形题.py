@@ -16,7 +16,6 @@ class Solution:
     def maxRepOpt1(self, text: str) -> int:
         counter = Counter(text)
         groups = [[char, len(list(group))] for char, group in groupby(text)]
-        print(groups)
 
         # 1. extend 1 情形
         res = max(min(count + 1, counter[char]) for char, count in groups)

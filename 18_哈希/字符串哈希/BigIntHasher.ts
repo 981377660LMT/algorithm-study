@@ -11,6 +11,7 @@ interface IStringHasher<R extends number | bigint> {
 class BigIntHasher implements IStringHasher<bigint> {
   private static BASE = 131n
   private static MOD = BigInt(2 ** 64)
+  private static OFFSET = 97n
   private readonly input: ArrayLike<string>
   private readonly prefix: BigUint64Array
   private readonly base: BigUint64Array
@@ -23,6 +24,10 @@ class BigIntHasher implements IStringHasher<bigint> {
     BigIntHasher.MOD = BigInt(mod)
   }
 
+  static setOFFSET(offset: number): void {
+    BigIntHasher.OFFSET = BigInt(offset)
+  }
+
   constructor(input: ArrayLike<string>) {
     this.input = input
     this.prefix = new BigUint64Array(input.length + 1)
@@ -32,7 +37,9 @@ class BigIntHasher implements IStringHasher<bigint> {
 
     for (let i = 1; i <= this.input.length; i++) {
       this.prefix[i] =
-        this.prefix[i - 1] * BigIntHasher.BASE + BigInt(input[i - 1].codePointAt(0)!) - 96n
+        this.prefix[i - 1] * BigIntHasher.BASE +
+        BigInt(input[i - 1].codePointAt(0)!) -
+        BigIntHasher.OFFSET
       this.prefix[i] %= BigIntHasher.MOD
       this.base[i] = this.base[i - 1] * BigIntHasher.BASE
       this.base[i] %= BigIntHasher.MOD
@@ -46,7 +53,7 @@ class BigIntHasher implements IStringHasher<bigint> {
    * @returns 切片 [left:right] 的哈希值
    */
   getHashOfSlice(left: number, right: number): bigint {
-    if (left == right) return 0n
+    if (left === right) return 0n
     left += 1
     this.checkRange(left, right)
     const mod = BigIntHasher.MOD
@@ -55,15 +62,16 @@ class BigIntHasher implements IStringHasher<bigint> {
     return (upper - (lower % mod) + mod) % mod
   }
 
-  private checkRange(left: number, right: number) {
+  private checkRange(left: number, right: number): void {
     if (0 <= left && left <= right && right <= this.input.length) return
     throw new RangeError('left or right out of range')
   }
 }
 
 export { BigIntHasher }
+
 if (require.main === module) {
   const stringHasher = new BigIntHasher('abcdefg')
-  console.log(stringHasher.getHashOfSlice(1, 1))
+  console.log(stringHasher.getHashOfSlice(1, 2))
   console.log(stringHasher.getHashOfSlice(2, 2))
 }

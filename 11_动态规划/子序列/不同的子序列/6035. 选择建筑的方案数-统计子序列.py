@@ -1,18 +1,17 @@
 # 统计数组中子序列'010'的个数和'101'的个数
 class Solution:
     def numberOfWays(self, s: str) -> int:
-        res = 0
-        s0 = s1 = s10 = s01 = 0
+        s0 = s1 = s10 = s01 = s101 = s010 = 0
         for char in s:
             if char == '1':
+                s101 += s10
                 s01 += s0
                 s1 += 1
-                res += s10
             else:
+                s010 += s01
                 s10 += s1
                 s0 += 1
-                res += s01
-        return res
+        return s101 + s010
 
     def numberOfWays2(self, s: str) -> int:
         def numDistinct(s: str, t: str) -> int:
@@ -35,4 +34,5 @@ class Solution:
         return numDistinct(s, '010') + numDistinct(s, '101')
 
 
+print(Solution().numberOfWays(s="001101"))
 print(Solution().numberOfWays2(s="001101"))

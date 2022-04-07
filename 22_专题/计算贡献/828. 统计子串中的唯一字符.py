@@ -1,5 +1,7 @@
 from collections import defaultdict
 
+# Unique Characters of Every Substring
+
 # 0 <= s.length <= 10^4
 # 对每一个字符i，向前找到相同的字符j，向后找到相同的字符k。当前字符对最终结果的贡献是：（i-j）*(k-i)。
 # 枚举start,end 统计贡献

@@ -25,3 +25,6 @@ const countSubstrings = function (s: string): number {
 console.log(countSubstrings('abc'))
 
 export default 1
+
+// Trimmed Palindromes
+// 此题也可换一种问法：可以任意移除前后缀，求回文子串的个数

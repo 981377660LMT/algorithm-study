@@ -18,3 +18,5 @@ def genPalindromeByLength(length: int) -> Generator[int, None, None]:
             yield (int(str(half) + str(half)[::-1]))
 
 ```
+
+1e9 里的十进制回文数有 109998 个

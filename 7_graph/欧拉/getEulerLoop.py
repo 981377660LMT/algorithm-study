@@ -10,6 +10,7 @@ def getEulerPath(
 ) -> Tuple[bool, List[int]]:
     """求欧拉回路，出发点任意"""
     start = next(iter(adjMap.keys()))
+    
     if isDirected:
         indegree, outdegree = [0] * n, [0] * n
         for cur, nexts in adjMap.items():
