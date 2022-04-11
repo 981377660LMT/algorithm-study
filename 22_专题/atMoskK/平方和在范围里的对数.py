@@ -2,6 +2,7 @@
 # atMoskK
 
 # 平方和在范围里的对数 排序首尾指针
+# Bounded Square Sums
 class Solution:
     def solve(self, a, b, lower, upper):
         def atMoskK(threshold):

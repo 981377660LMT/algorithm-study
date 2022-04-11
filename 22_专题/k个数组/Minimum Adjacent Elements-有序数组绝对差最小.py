@@ -38,4 +38,4 @@ class Solution:
         return res
 
 
-print(Solution().solve(nums = [0, -10, 5, -5, 1]))
+print(Solution().solve(nums=[0, -10, 5, -5, 1]))

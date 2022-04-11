@@ -3,7 +3,7 @@ from functools import lru_cache
 
 # O(n^2*k)
 
-
+# 至少有k个奇数的LIS
 class Solution:
     def solve(self, nums, k) -> int:
         """

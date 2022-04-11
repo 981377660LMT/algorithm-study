@@ -1,7 +1,7 @@
 # n ≤ 30 where n is the length of nums
 # 0 ≤ nums[i] ≤ 100
 
-# 是否可以选出两个和相等的子集，使他们的和最大
+# 是否可以选出两个子集和相等，使他们的和最大
 # 注意到nums[i]<=100 表示值域范围最多6000
 
 # jump group1 group2

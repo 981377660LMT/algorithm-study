@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import List
 
-
+# 首尾相同的区间可以相连 求最长的链
 class Solution:
     def solve(self, blocks: List[List[int]]) -> int:
         """

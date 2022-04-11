@@ -2,6 +2,9 @@ from functools import lru_cache
 
 # n * k ≤ 100,000
 
+# Non-Adjacent Combination Sum
+# 不相邻取数恰好等于k
+
 
 class Solution:
     def solve(self, nums, k):

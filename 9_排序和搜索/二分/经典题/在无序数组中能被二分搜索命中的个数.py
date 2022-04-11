@@ -1,5 +1,7 @@
 from typing import List
 
+# 在无序数组中能被二分搜索命中的个数
+
 
 class Solution:
     """ nlogn"""

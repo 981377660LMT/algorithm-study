@@ -10,9 +10,9 @@ interface IStringHasher<R extends number | bigint> {
  */
 class BigIntHasher implements IStringHasher<bigint> {
   private static BASE = 131n
-  private static MOD = BigInt(2 ** 64)
   private static OFFSET = 97n
-  private readonly input: ArrayLike<string>
+  private static MOD = BigInt(2 ** 64)
+  private readonly input: string
   private readonly prefix: BigUint64Array
   private readonly base: BigUint64Array
 
@@ -28,7 +28,7 @@ class BigIntHasher implements IStringHasher<bigint> {
     BigIntHasher.OFFSET = BigInt(offset)
   }
 
-  constructor(input: ArrayLike<string>) {
+  constructor(input: string) {
     this.input = input
     this.prefix = new BigUint64Array(input.length + 1)
     this.base = new BigUint64Array(input.length + 1)
@@ -68,7 +68,7 @@ class BigIntHasher implements IStringHasher<bigint> {
   }
 }
 
-export { BigIntHasher }
+export { BigIntHasher, IStringHasher }
 
 if (require.main === module) {
   const stringHasher = new BigIntHasher('abcdefg')

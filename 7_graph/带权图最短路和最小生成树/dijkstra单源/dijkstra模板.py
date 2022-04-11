@@ -1,3 +1,5 @@
+"""dijkstra模板"""
+
 from heapq import heappop, heappush
 from typing import DefaultDict, List, Optional, Tuple, Union, overload
 
@@ -17,6 +19,7 @@ def dijkstra(n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int
 def dijkstra(
     n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int, end: Optional[int] = None
 ) -> Union[int, List[int]]:
+    """时间复杂度O((V+E)logV)"""
     dist = [INF] * n
     dist[start] = 0
     pq = [(0, start)]

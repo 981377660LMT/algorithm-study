@@ -1,4 +1,7 @@
 # 反转用异或描述
+# 反转到0的最小操作次数
+
+
 class Solution:
     def solve(self, nums):
         res = 0

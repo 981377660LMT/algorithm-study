@@ -16,7 +16,7 @@ from collections import deque
 # summary:
 # 这道题就转换成了，在一个图中，从某个点出发将所有点恰好遍历一遍，使得最后路过的路径长度最长。
 
-
+# 这是真正的旅行商问题 847. 访问所有节点的最短路径 是旅行商问题变种，允许重复
 class Solution:
     def shortestSuperstring(self, words: List[str]) -> str:
         def getWeight(s1: str, s2: str):

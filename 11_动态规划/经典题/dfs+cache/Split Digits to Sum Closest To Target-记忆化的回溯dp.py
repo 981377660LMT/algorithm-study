@@ -37,3 +37,31 @@ print(Solution().solve(s="112", target=10))
 
 
 # 1 ≤ len(s), target ≤ 1,000
+class Solution2:
+    def solve(self, s, target):
+        @lru_cache(None)
+        def dfs(index: int, diff: int) -> int:
+            if index >= n:
+                return abs(diff)
+            if nums[index] == 0:
+                return dfs(nextNoneZero[index], diff)
+
+            res = cand
+            cur = 0
+            for i in range(index, n):
+                cur = cur * 10 + nums[i]
+                res = min(res, dfs(i + 1, diff - cur))
+            return res
+
+        n = len(s)
+        nums = [int(char) for char in s]
+
+        nextNoneZero = [int(1e20)] * n
+        for i in range(n - 1, -1, -1):
+            if nums[i] != 0:
+                nextNoneZero[i] = i
+            elif i + 1 < n:
+                nextNoneZero[i] = nextNoneZero[i + 1]
+
+        cand = abs(target - sum(nums))
+        return dfs(0, target)

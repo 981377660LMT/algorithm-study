@@ -8,7 +8,7 @@ MOD = int(1e9 + 7)
 class Solution:
     def solve(self, nums, k):
         def getDp(nums):
-            """每个结尾有多少个符合的数组"""
+            """每个结尾前有多少个符合的数组(数组的最小值大于等于k)"""
             dp = []
             count = 0
             for num in nums:

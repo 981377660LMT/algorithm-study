@@ -1,7 +1,8 @@
 from typing import List
 
 
-# 你有一些球的库存 inventory ，里面包含着不同颜色的球。一个顾客想要 任意颜色 总数为 orders 的球。
+# 你有一些球的库存 inventory ，里面包含着不同颜色的球。
+# 一个顾客想要 任意颜色 总数为 orders 的球。
 # 每个球的价值是目前剩下的 同色球 的数目。
 # 请你返回卖了 orders 个球以后 最大 总价值之和
 
@@ -25,11 +26,11 @@ MOD = int(1e9 + 7)
 class Solution:
     def maxProfit(self, inventory: List[int], orders: int) -> int:
         def check(mid: int) -> bool:
-            """订单数不小于order的最后卖出最小价值"""
+            """订单数大于order的最后卖出最小价值"""
             count = 0
             for num in inventory:
                 count += max(0, num - mid)
-                if count >= orders:
+                if count > orders:
                     return True
             return False
 
@@ -37,15 +38,15 @@ class Solution:
         right = int(1e10)
         while left <= right:
             mid = (left + right) >> 1
-            # 超出orders
+            # 超出orders才回升
             if check(mid):
                 left = mid + 1
             else:
                 right = mid - 1
 
-        # check边界
-        if sum((i - left + 1) for i in inventory if i >= left) < orders:
-            left -= 1
+        # # check边界
+        # if sum((i - left + 1) for i in inventory if i >= left) < orders:
+        #     left -= 1
 
         minPrice = left
         res, count = 0, 0

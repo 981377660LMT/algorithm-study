@@ -7,13 +7,14 @@
  */
 function longestCommonSubpath(n: number, paths: number[][]): number {
   const N = 10 ** 5
-  const BASE = 131n
-  const MOD = BigInt(2 ** 64)
+  const BASE = 99901n
+  const MOD = BigInt(1713302033171) // 回文素数
   const pre = new BigUint64Array(N + 1)
   const base = new BigUint64Array(N + 1)
   base[0] = 1n
   for (let i = 1; i < N + 1; i++) {
     base[i] = base[i - 1] * BASE
+    base[i] %= MOD
   }
 
   let left = 0
@@ -26,12 +27,6 @@ function longestCommonSubpath(n: number, paths: number[][]): number {
 
   return right
 
-  function getHashOfRange(left: number, right: number) {
-    const upper = pre[right]
-    const lower = pre[left - 1] * base[right - (left - 1)]
-    return (upper - (lower % MOD) + MOD) % MOD
-  }
-
   // 每个数组中都存在长度为len的公共串 => counter记录
   function search(len: number): boolean {
     if (len === 0) return true
@@ -41,23 +36,33 @@ function longestCommonSubpath(n: number, paths: number[][]): number {
     for (const path of paths) {
       for (let i = 0; i < path.length; i++) {
         pre[i + 1] = pre[i] * BASE + BigInt(path[i])
+        pre[i + 1] %= MOD
       }
-
       const visited = new Set<BigInt>()
-
-      for (let left = 1; left + len - 1 <= path.length; left++) {
-        const hash = getHashOfRange(left, left + len - 1)
+      for (let left = 0; left + len <= path.length; left++) {
+        const hash = getHashOfSlice(left, left + len)
         // path中自身的不要重复
         if (!visited.has(hash)) {
           visited.add(hash)
-          counter.set(hash, (counter.get(hash) || 0) + 1)
+          counter.set(hash, (counter.get(hash) ?? 0) + 1)
         }
       }
     }
 
     const maxHashCount = Math.max(...counter.values(), -1)
-
     return maxHashCount === paths.length
+  }
+
+  function getHashOfSlice(left: number, right: number) {
+    if (left === right) return 0n
+    left += 1
+    if (!(0 <= left && left <= right && right <= N + 1)) {
+      throw new RangeError('left or right out of range')
+    }
+
+    const upper = pre[right]
+    const lower = pre[left - 1] * base[right - (left - 1)]
+    return (upper - (lower % MOD) + MOD) % MOD
   }
 }
 

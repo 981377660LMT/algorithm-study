@@ -12,6 +12,7 @@ class Solution:
         """
 
         def dfs(cur: int, parent: int) -> int:
+            """统计子树结点数"""
             counter[cur] += 1
             for next in adjMap[cur]:
                 if next != parent:

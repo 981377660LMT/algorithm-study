@@ -6,31 +6,35 @@ from sortedcontainers import SortedList
 # 请你返回 最多 有多少个任务可以被完成。
 
 # 二分查找完成的任务数 + 固定的任务数下贪心选择厉害的工人+药丸分配给离tasks差最小的人
+
+
 class Solution:
     def maxTaskAssign(self, tasks: List[int], workers: List[int], pills: int, strength: int) -> int:
-        tasks.sort()
-        workers.sort()
-
         def check(mid: int) -> bool:
             remain = pills
             #  工人的有序集合
-            sw = SortedList(workers[-mid:])
+            wls = SortedList(workers[-mid:])
+
             # 从大到小枚举每一个任务
             for t in reversed(tasks[:mid]):
                 # 如果有序集合中最大的元素大于等于最大任务
-                if sw[-1] >= t:
-                    sw.pop()
+                if wls[-1] >= t:
+                    wls.pop()
                 else:
                     if remain == 0:
                         return False
+
                     # 在有序集合中找出`最小的`大于等于 t−strength 的元素并删除
-                    cand = sw.bisect_left(t - strength)
-                    if cand == len(sw):
+                    cand = wls.bisect_left(t - strength)  # 这里不能用bisect_right(t-strength)-1
+                    if cand == len(wls):
                         return False
                     remain -= 1
-                    sw.pop(cand)
+                    wls.pop(cand)
 
             return True
+
+        tasks.sort()
+        workers.sort()
 
         left, right = 0, min(len(tasks), len(workers))
         while left <= right:

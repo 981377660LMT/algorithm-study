@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-
+# 子树结点颜色都不同的结点个数
 class Solution:
     def solve(self, tree: List[List[int]], color: List[int]) -> int:
         """位运算压缩颜色"""

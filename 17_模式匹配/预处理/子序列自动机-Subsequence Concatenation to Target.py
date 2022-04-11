@@ -29,8 +29,8 @@ class Solution:
 
             nextIndex = nexts[searchFrom][ord_]
             if nextIndex == -1:
-                nextIndex = nexts[0][ord_]
                 res += 1
+                nextIndex = nexts[0][ord_]
             searchFrom = nextIndex + 1
 
         return res + 1

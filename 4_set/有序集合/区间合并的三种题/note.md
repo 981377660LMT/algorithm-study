@@ -29,3 +29,5 @@ def pushUp(self, rt: int) -> None:
 def pushDown(self, rt: int) -> None:
 传递懒标记并更新左右结点
 ```
+
+不同的线段树一般是 pushDown 和 pushUp 不同，需要想清楚`怎么用左右区间更新整个区间、整个区间更新左右区间`

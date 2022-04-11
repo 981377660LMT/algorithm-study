@@ -3,7 +3,7 @@ from bisect import bisect_left
 
 MOD = int(1e9 + 7)
 
-
+# 工人付工资
 class Solution:
     def solve(self, coins, salaries):
         """返回发工资的方案数"""

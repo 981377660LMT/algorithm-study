@@ -5,12 +5,18 @@ import { BinaryTree } from '../力扣加加/Tree'
 // 3.树中所有点到某个点的距离和中，到重心的距离和是最小的；如果有两个重心，那么到它们的距离和一样。反过来，距离和最小的点一定是重心。
 
 // 找重心利用性质1，一趟dfs即可。
-function findCentre(n: number, edges: [next: number, weight: number][][]): number[] {
+function findCentre(n: number, edges: [cur: number, next: number][]): number[] {
   const res: number[] = []
   // 最大子树大小,即此节点为割点分割之后两半的最大大小
   const maxSizeOfSubtree = Array<number>(n).fill(Infinity)
   // 树的大小,即向`下面`走可以到多少个结点
   const treeSize = Array<number>(n).fill(Infinity)
+
+  const adjList = Array.from<unknown, number[]>({ length: n }, () => [])
+  for (const [u, v] of edges) {
+    adjList[u].push(v)
+    adjList[v].push(u)
+  }
 
   dfs(0, -1)
   return res
@@ -19,7 +25,7 @@ function findCentre(n: number, edges: [next: number, weight: number][][]): numbe
     treeSize[cur] = 1
     maxSizeOfSubtree[cur] = 0
 
-    for (const [next, _] of edges[cur]) {
+    for (const next of adjList[cur]) {
       if (next === parent) continue
       dfs(next, cur)
       // 后序,更新cur:此时cur可以拿到各个next的信息
@@ -35,20 +41,9 @@ function findCentre(n: number, edges: [next: number, weight: number][][]): numbe
 
 export {}
 console.log(
-  findCentre(6, [
-    [
-      [1, 1],
-      [2, 1],
-      [5, 1],
-    ],
-    [
-      [0, 1],
-      [3, 1],
-      [4, 1],
-    ],
-    [[0, 1]],
-    [[1, 1]],
-    [[1, 1]],
-    [[0, 1]],
+  findCentre(4, [
+    [1, 0],
+    [1, 2],
+    [1, 3],
   ])
 )
