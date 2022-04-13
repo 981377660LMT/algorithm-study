@@ -8,11 +8,11 @@ class Solution:
     def maximumCandies(self, candies: List[int], k: int) -> int:
         def check(mid: int) -> bool:
             res = 0
-            for candy in candies:
-                res += candy // mid
+            for num in candies:
+                res += num // mid
             return res >= k
 
-        left, right = 1, int(1e14)
+        left, right = 1, int(1e19)
         while left <= right:
             mid = (left + right) // 2
             if check(mid):

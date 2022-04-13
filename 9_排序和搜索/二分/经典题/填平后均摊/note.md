@@ -7,3 +7,4 @@ nums = [0] + nums
 ```
 
 `k次加1操作最大化最小值`
+就是 load balancer 问题(amazon last mile)

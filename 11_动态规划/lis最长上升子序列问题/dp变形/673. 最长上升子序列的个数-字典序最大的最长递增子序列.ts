@@ -35,6 +35,7 @@ const findMaxLIS = function (nums: number[]): number[] {
   for (let i = 0; i < history.length - 1; i++) {
     res.push(history[i][0][0])
   }
+
   res.push(...history[history.length - 1][0])
 
   return res

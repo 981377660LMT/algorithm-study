@@ -68,16 +68,15 @@ function bonus(n: number, leadership: number[][], operations: number[][]): numbe
   const adjList = Array.from<number, number[]>({ length: n + 1 }, () => [])
   const start = Array<number>(n + 1).fill(0) // 子树最开始的结点序号
   const end = Array<number>(n + 1).fill(0) // 本身最后映射到几
+  // begin[1] = 1, end[1] = 6，表示编号为 1 的人所管理的团队映射到的区间是 [1, 6]，本身映射到 6
   let id = 1
 
-  for (const [u, v] of leadership) {
-    adjList[u].push(v)
-  }
+  for (const [u, v] of leadership) adjList[u].push(v)
 
   dfs(1)
 
   const res: number[] = []
-  const bit = new BIT(n)
+  const bit = new BIT(n + 10)
   for (const [optType, optId, optValue] of operations) {
     switch (optType) {
       case 1:
@@ -100,9 +99,7 @@ function bonus(n: number, leadership: number[][], operations: number[][]): numbe
   // dfs序
   function dfs(cur: number): void {
     start[cur] = id
-    for (const next of adjList[cur]) {
-      dfs(next)
-    }
+    for (const next of adjList[cur]) dfs(next)
     // id在dfs过程中被改变了
     end[cur] = id
     id++

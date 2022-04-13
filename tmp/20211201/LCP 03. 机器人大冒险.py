@@ -33,6 +33,7 @@ class Solution:
 
         for ox, oy in obstacles:
             if ox <= x and oy <= y:
+                # 必定经过障碍
                 if calDiff((ox, oy), pos) in path:
                     return False
 

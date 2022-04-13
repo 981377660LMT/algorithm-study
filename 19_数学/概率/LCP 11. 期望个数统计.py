@@ -3,7 +3,7 @@
 from typing import List
 from collections import Counter
 
-
+# 对于一个排好序的序列，对相同的数字随机打乱顺序后期望有多少个数字保持原位置不变。
 class Solution:
     def expectNumber(self, scores: List[int]) -> int:
         return len(set(scores))

@@ -27,8 +27,7 @@ const lengthOfLIS = function (nums: number[]): number {
     let r = arr.length - 1
     while (l <= r) {
       const mid = (r + l) >> 1
-      if (arr[mid] === target) r--
-      else if (arr[mid] > target) r = mid - 1
+      if (arr[mid] >= target) r = mid - 1
       else l = mid + 1
     }
 
@@ -36,7 +35,7 @@ const lengthOfLIS = function (nums: number[]): number {
   }
 }
 
-// console.log(lengthOfLIS([7, 7, 7, 7, 7, 7, 7, 8, 9, 4, 1, 2, 3, 7]))
+console.log(lengthOfLIS([7, 7, 7, 7, 7, 7, 7, 8, 9, 4, 1, 2, 3, 7]))
 // 输出：4
 // 解释：最长递增子序列是 [2,3,7,101]，因此长度为 4
 

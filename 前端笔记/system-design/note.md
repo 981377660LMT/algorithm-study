@@ -86,3 +86,37 @@ Power           Exact Value         Approx Value        Bytes
 ## 设计 Pastebin.com (或者 Bit.ly)
 
 https://pastebin.com/
+https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/pastebin/README-zh-Hans.md
+**用户输入一段文本，然后得到一个随机生成的链接**：
+我们可以用一个 `关系型数据库`作为一个大的哈希表，用来把生成的 url 映射到一个包含 paste 文件的文件服务器和路径上。
+为了避免托管一个文件服务器，我们可以用一个托管的对象存储，比如 Amazon 的 S3 或者 NoSQL 文档类型存储。
+作为一个大的哈希表的关系型数据库的替代方案，我们可以用 NoSQL 键值存储。我们需要讨论选择 SQL 或 NoSQL 之间的权衡。
+
+- `客户端` 发送一个创建 paste 的请求到作为一个反向代理启动的 Web 服务器。
+- `Web 服务器` 转发请求给 写接口 服务器
+- `写接口` 服务器执行如下操作：
+  - 生成一个唯一的 url
+    检查这个 url 在 SQL 数据库 里面是否是唯一的
+    如果这个 url 不是唯一的，生成另外一个 url
+    如果我们支持自定义 url，我们可以使用用户提供的 url（也需要检查是否重复）
+  - 把生成的 url 存储到 SQL 数据库 的 pastes 表里面
+  - 存储 paste 的内容数据到 `对象存储` 里面
+  - 返回生成的 url
+
+pastes 表可以有如下结构：
+
+```SQL
+shortlink char(7) NOT NULL
+expiration_length_in_minutes int NOT NULL
+created_at datetime NOT NULL
+paste_path varchar(255) NOT NULL
+PRIMARY KEY(shortlink)
+```
+
+**用户输入一个 paste 的 url 后可以看到它存储的内容**
+
+**服务跟踪分析页面：因为实时分析不是必须的，所以我们可以简单的 MapReduce Web Server 的日志，用来生成点击次数。**
+
+## 设计 Twitter 时间线和搜索 (或者 Facebook feed 和搜索)
+
+## 设计一个网络爬虫

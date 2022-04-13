@@ -2,13 +2,13 @@ from typing import Callable, List
 
 
 class Node:
-    __slots__ = ('value', 'left', 'right', 'lazy')
+    __slots__ = ('value', 'left', 'right', 'isLazy')
 
-    def __init__(self, value: int, left: int = -1, right: int = -1, lazy: int = 0):
+    def __init__(self, value: int, left: int = -1, right: int = -1, isLazy: bool = False):
         self.value = value
         self.left = left
         self.right = right
-        self.lazy = lazy
+        self.isLazy = isLazy
 
 
 Merge = Callable[[int, int], int]
@@ -32,7 +32,7 @@ class SegmentTree:
 
     def build(self, rt: int, left: int, right: int) -> None:
         root = self._tree[rt]
-        root.value, root.left, root.right, root.lazy = 0, left, right, 0
+        root.value, root.left, root.right, root.isLazy = 0, left, right, False
         # 到底部了，底部有n个结点
         if left == right:
             return
@@ -46,7 +46,7 @@ class SegmentTree:
         root = self._tree[rt]
         # 到达了最细粒度的节点
         if left <= root.left and root.right <= right:
-            root.lazy = 1
+            root.isLazy = True
             root.value = root.right - root.left + 1
             return
 
@@ -81,15 +81,15 @@ class SegmentTree:
 
     def _push_down(self, rt: int) -> None:
         root, left, right = self._tree[rt], self._tree[(rt << 1)], self._tree[(rt << 1) | 1]
-        if root.lazy:
+        if root.isLazy:
             # 先向下传递更新
-            left.lazy += root.lazy
-            right.lazy += root.lazy
+            left.isLazy = True
+            right.isLazy = True
             # 左侧总是比右侧长，区间的批量更新
             left.value = left.right - left.left + 1
             right.value = right.right - right.left + 1
             # 传递后清空增量数组的父节点
-            root.lazy = 0
+            root.isLazy = False
 
 
 # 本题线段树update需要做特殊处理，染过的值至多为1
