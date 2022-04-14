@@ -59,14 +59,14 @@ class BIT:
         return self.query(right) - self.query(left - 1)
 
 
-class DisCretizer:
+class Discretizer:
     """离散化"""
 
     def __init__(self, nums: List[int]) -> None:
         allNums = sorted(set(nums))
         self.mapping = {allNums[i]: i + 1 for i in range(len(allNums))}
 
-    def getDisCretizedValue(self, num: int) -> int:
+    def getDiscretizedValue(self, num: int) -> int:
         if num not in self.mapping:
             raise ValueError(f'{num} not in {self.mapping}')
         return self.mapping[num]
@@ -113,11 +113,11 @@ class Solution:
         if n <= 1:
             return n
 
-        disCretizer = DisCretizer(nums)
+        discretizer = Discretizer(nums)
 
         lis = []
         counter = defaultdict(
-            lambda: BIT(len(disCretizer) + 10)
+            lambda: BIT(len(discretizer) + 10)
         )  # 每个长度的LIS对应一个BIT，BIT维护结尾小于等于value的子序列有多少个
 
         for num in nums:
@@ -137,8 +137,8 @@ class Solution:
             # 上一个位置结尾小于当前元素的所有的子序列的个数是多少
             # 遍历可以用树状数组优化
             preBIT = counter[pos - 1]
-            count = preBIT.query(disCretizer.getDisCretizedValue(num) - 1)
-            counter[pos].add(disCretizer.getDisCretizedValue(num), max(1, count))
+            count = preBIT.query(discretizer.getDiscretizedValue(num) - 1)
+            counter[pos].add(discretizer.getDiscretizedValue(num), max(1, count))
 
         lastPos = len(lis) - 1
         return counter[lastPos].query(int(1e20))

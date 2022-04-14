@@ -36,3 +36,4 @@ class Solution:
 # 返回 使 nums1 和 nums2 严格递增 所需操作的最小次数 。
 # 用例保证可以实现操作。
 print(Solution().minSwap(nums1=[1, 3, 5, 4], nums2=[1, 2, 3, 7]))
+

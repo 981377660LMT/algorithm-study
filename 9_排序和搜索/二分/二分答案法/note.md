@@ -20,7 +20,7 @@ check 函数 O(n) =>双指针
              ...
             return res
 
-        left, right = 1, 0x3f3f3f3f
+        left, right = 1, int(1e20) # 注意左边不要0，因为有些地方除以mid会出错
         while left <= right:
             mid = (left + right) >> 1
             # 小于k时，移动left

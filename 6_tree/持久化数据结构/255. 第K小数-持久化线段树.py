@@ -3,9 +3,9 @@
 # 求 即 A 的下标区间 [li,ri]中第 ki 小的数是多少。
 # 静态问题，原数组不变
 
+# 255. 第K小数-持久化线段树
 # 1.离散化
 # 2.建立一颗权值线段树，每个点存储的信息为该值域区间存在的数的个数。
-from typing import List, Optional
 
 
 class Node:
