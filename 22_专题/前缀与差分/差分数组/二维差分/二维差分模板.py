@@ -1,5 +1,7 @@
 from typing import List
 
+from sortedcollections import SortedList
+
 # https://www.nowcoder.com/practice/50e1a93989df42efb0b1dec386fb4ccc?tpId=230&tqId=2024519&ru=/ta/dynamic-programming&qru=/ta/dynamic-programming/question-ranking
 # https://leetcode-cn.com/problems/stamping-the-grid/solution/er-wei-qian-zhui-he-er-wei-chai-fen-bao-gru6t/
 
@@ -49,7 +51,10 @@ class PreSumMatrix:
         self.preSum = preSum
 
     def sumRegion(self, r1: int, c1: int, r2: int, c2: int) -> int:
-        """查询sum(A[r1:r2+1, c1:c2+1])的值"""
+        """查询sum(A[r1:r2+1, c1:c2+1])的值::
+
+        preSumMatrix.sumRegion(0, 0, 2, 2) # 左上角(0, 0)到右下角(2, 2)的值
+        """
         return (
             self.preSum[r2 + 1][c2 + 1]
             - self.preSum[r2 + 1][c1]

@@ -1,4 +1,5 @@
-from typing import Any, Callable, Generic, List, Mapping, TypeVar
+from typing import Any, Callable, Generic, List, Mapping, TypeVar, Union
+from typing_extensions import Protocol
 
 X = TypeVar('X')
 Y = TypeVar('Y')
@@ -38,7 +39,7 @@ stack.push(2)
 stack.pop()
 stack.push('x')  # Type error
 ###########################################################
-# 泛型约束
+# 泛型约束 constraints 表示可以是哪些类型
 StrOrInt = TypeVar('StrOrInt', str, int)
 
 T = TypeVar('T')
@@ -49,7 +50,7 @@ class StrangePair(Generic[T, StrOrInt]):
 
 
 ###########################################################
-# 泛型默认参数 bound
+# 泛型约束 bound  表示需要实现哪些接口
 Func = TypeVar('Func', bound=Callable[..., Any])
 
 
@@ -60,3 +61,16 @@ def bare_decorator(func: Func) -> Func:
 def decorator_args(url: str) -> Callable[[Func], Func]:
     ...
 
+
+# 实例
+class SupportsDunderLT(Protocol):
+    def __lt__(self, __other: Any) -> bool:
+        ...
+
+
+class SupportsDunderGT(Protocol):
+    def __gt__(self, __other: Any) -> bool:
+        ...
+
+
+S = TypeVar('S', bound=Union[SupportsDunderLT, SupportsDunderGT])

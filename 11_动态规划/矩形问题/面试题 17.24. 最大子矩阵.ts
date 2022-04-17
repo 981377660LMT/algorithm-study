@@ -47,8 +47,8 @@ function getMaxMatrix(matrix: number[][]): number[] {
         localMax = numMatrix.sumRegion(top, left, bottom, right)
 
         if (localMax > globalMax) {
-          globalMax = localMax
           res = [top, left, bottom, right]
+          globalMax = localMax
         }
 
         // left直接跳到下一个，不取这个

@@ -18,6 +18,7 @@ function strStr(haystack: string, needle: string): number {
     while (hit > 0 && haystack[i] !== needle[hit]) {
       hit = next[hit - 1]
     }
+
     if (haystack[i] === needle[hit]) hit++
 
     // 找到头了

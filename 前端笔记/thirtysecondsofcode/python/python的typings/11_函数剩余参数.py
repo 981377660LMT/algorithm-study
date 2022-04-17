@@ -1,3 +1,6 @@
+from typing import ParamSpec
+
+
 def stars(*args: int, **kwargs: float) -> None:
     # 'args' has type 'Tuple[int, ...]' (a tuple of ints)
     # 'kwargs' has type 'Dict[str, float]' (a dict of strs to floats)
@@ -5,3 +8,6 @@ def stars(*args: int, **kwargs: float) -> None:
         print(arg)
     for key, value in kwargs:
         print(key, value)
+
+
+# ParamSpec 获取函数参数类型

@@ -8,18 +8,18 @@ from bisect import bisect_left
 # 如果有多种使得和最接近 target 的方案，请你返回这些整数中的最小值。
 class Solution:
     def findBestValue(self, arr: List[int], target: int) -> int:
+        def calSum(mid: int) -> int:
+            index = bisect_left(arr, mid)  # 大于mid的第一个数
+            return preSum[index] + (n - index) * mid
+
         n = len(arr)
         arr = sorted(arr)
         preSum = [0] + list(accumulate(arr))
 
-        def calSum(threshold: int) -> int:
-            index = bisect_left(arr, threshold)
-            return preSum[index] + (n - index) * threshold
-
         left, right = 0, max(arr)
         while left <= right:
             mid = (left + right) >> 1
-            if calSum(mid) > target:
+            if calSum(mid) >= target:
                 right = mid - 1
             else:
                 left = mid + 1

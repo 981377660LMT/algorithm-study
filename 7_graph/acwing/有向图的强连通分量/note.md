@@ -109,4 +109,4 @@ class Tarjan:
 2. kosaraju 算法
    略
 
-tarjan 缩点技巧类似于`'有向图'的并查集`
+有向图 tarjan 缩点技巧类似于`'有向图'的并查集`

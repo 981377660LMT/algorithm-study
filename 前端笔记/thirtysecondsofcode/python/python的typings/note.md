@@ -98,4 +98,5 @@ contravariant:逆变
    在严格空值检查模式下, **值 null 和 undefined 不再属与所有类型并且只能赋值给它们自己对应的类型和 any** (一个例外是 undefined 也可以被复制给 void). 所以, 虽然在普通类型检查模式 T 和 T | undefined 意义相同 (因为 undefined 被认为是任何 T 的子类型), 在严格类型检查模式下它们是不同的, 并且只有 T | undefined 允许 undefined 作为值. T 和 T | null 的关系也是如此.
 
 10. python 中如何实现 **interface**(约束类的公有实例属性)
-    使用类或者抽象类即可
+    实际产生：使用类或者抽象类即可
+    静态检查：`Protocol`

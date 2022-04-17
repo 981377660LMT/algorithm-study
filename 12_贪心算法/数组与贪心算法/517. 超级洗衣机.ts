@@ -8,7 +8,7 @@
  * https://leetcode-cn.com/problems/super-washing-machines/comments/29839
  */
 function findMinMoves(machines: number[]): number {
-  const sum = machines.reduce((pre, cur) => pre + cur)
+  const sum = machines.reduce((pre, cur) => pre + cur, 0)
   const target = sum / machines.length
   if (target % 1) return -1
 

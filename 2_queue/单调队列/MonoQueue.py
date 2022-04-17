@@ -1,11 +1,17 @@
+from typing import Iterable, Optional
 from collections import deque
 
 
 class MonoQueue:
-    def __init__(self):
+    def __init__(self, iterable: Optional[Iterable[int]] = None) -> None:
         self.minQueue = deque()
         self.maxQueue = deque()
         self.rawQueue = deque()
+        self.index = 0
+
+        if iterable is not None:
+            for value in iterable:
+                self.append(value)
 
     @property
     def min(self) -> int:
@@ -31,7 +37,7 @@ class MonoQueue:
         if self.maxQueue[0][1] == 0:
             self.maxQueue.popleft()
 
-        return self.rawQueue.popleft()
+        return self.rawQueue.popleft()[0]
 
     def append(self, value: int) -> None:
         count = 1
@@ -44,10 +50,14 @@ class MonoQueue:
             count += self.maxQueue.pop()[1]
         self.maxQueue.append([value, count])
 
-        self.rawQueue.append(value)
+        self.rawQueue.append((value, self.index))
+        self.index += 1
 
     def __len__(self) -> int:
         return len(self.rawQueue)
+
+    def __getitem__(self, index: int) -> int:
+        return self.rawQueue[index][0]
 
 
 if __name__ == '__main__':
@@ -59,3 +69,6 @@ if __name__ == '__main__':
     monoQueue.popleft()
     assert monoQueue.min == 2
     assert monoQueue.max == 3
+    monoQueue.append(0)
+    assert len(monoQueue) == 3
+

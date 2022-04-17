@@ -8,9 +8,9 @@ import { IStringHasher } from './BigIntHasher'
  */
 class ArrayHasher implements IStringHasher<bigint> {
   private static BASE = 131n
-  private static OFFSET = 97n
-
   private static MOD = BigInt(2 ** 64)
+  private static OFFSET = 0n
+
   private readonly input: number[]
   private readonly prefix: BigUint64Array
   private readonly base: BigUint64Array

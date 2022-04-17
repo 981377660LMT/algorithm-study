@@ -29,3 +29,5 @@ tarjan 求解双连通分量
 
 `注意 Tarjan 的 BCC 和 SCC 写在同一份 paper`
 Tarjan 三大算法： 1)有向图的强连通分量 2) 无向图的双联通分量 3) 最近公共祖先问题
+
+无向图 tarjan 缩点

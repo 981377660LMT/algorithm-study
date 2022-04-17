@@ -68,7 +68,7 @@ class Tarjan:
     @staticmethod
     def getCuttingPointAndCuttingEdge(
         n: int, adjMap: DefaultDict[int, Set[int]]
-    ) -> Tuple[List[int], List[Tuple[int, int]]]:
+    ) -> Tuple[Set[int], List[Tuple[int, int]]]:
         """Tarjan求解无向图的割点和割边(桥)
 
         Args:
@@ -116,5 +116,5 @@ class Tarjan:
             if not visited[i]:
                 dfs(i, -1)
 
-        return list(cuttingPoint), cuttingEdge
+        return cuttingPoint, cuttingEdge
 
