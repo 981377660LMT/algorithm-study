@@ -19,17 +19,18 @@ class Solution:
             counter[state] += 1
 
         res = comb(n, 2)
+        # 枚举子集简便方法是powerset
         for state in counter:
             tmp = 0
             cur = counter[state]
-            g1 = state
-            g1 = state & (g1 - 1)
-            while g1:
-                tmp = cur * counter[g1]
+
+            group = state & (state - 1)
+            while group:
+                tmp = cur * counter[group]
                 tmp %= MOD
-                g1 = state & (g1 - 1)
                 res -= tmp
                 res %= MOD
+                group = state & (group - 1)
 
         # 要求真子集
         res -= sum(comb(c, 2) for c in counter.values())

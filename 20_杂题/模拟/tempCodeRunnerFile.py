@@ -1,2 +1,2 @@
-
-                heappush(queue, (cost + moveCost, path, next, False))
+ = preRow + (1 if preChar == '-' else 0)
+    else:

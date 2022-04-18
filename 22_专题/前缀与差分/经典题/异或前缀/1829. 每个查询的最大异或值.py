@@ -7,6 +7,8 @@ from typing import List
 # 0 <= nums[i] < 2^maximumBit
 
 # 每次贪心即可 让最后异或结果为 111111...
+
+
 class Solution:
     def getMaximumXor(self, nums: List[int], maximumBit: int) -> List[int]:
         maxXor = (1 << maximumBit) - 1

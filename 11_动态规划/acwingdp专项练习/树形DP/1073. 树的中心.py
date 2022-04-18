@@ -2,6 +2,8 @@
 # 请你在树中找到一个点，使得该点到树中其他结点的最远距离最近。
 # 输出一个整数，表示所求点到树中其他结点的最远距离。
 # 310. 最小高度树-换根dp
+
+# 树的中心
 from collections import defaultdict
 
 n = int(input())

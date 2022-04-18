@@ -1,1 +1,0 @@
-i >= 1 ? minPathSumMatrix[i - 1][0] : 0

@@ -4,6 +4,7 @@
  * @description
  * 给定一个整数 n, 返回从 1 到 n 的字典顺序。
  * @description 字典树前序遍历 因为要先把1开头的全部看了
+ * 字典序排数
  */
 const lexicalOrder = function (n: number): number[] {
   const res: number[] = []

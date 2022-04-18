@@ -6,6 +6,8 @@ State = Tuple[int, ...]
 
 # 1 <= m <= 5
 # 1 <= n <= 1000
+
+
 class Solution:
     def colorTheGrid1(self, m: int, n: int) -> int:
         """思路同2184，先状压处理每行的可能状态，再dp处理相邻行间的状态"""

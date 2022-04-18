@@ -36,7 +36,7 @@ for i=1;i<=n;i++
 
 `求有向图强连通分量`：
 
-## 算法
+## Tarjan 有向图的算法
 
 1. tarjan 算法求强连通分量(SCC,Strongly Connected Component)
    `O(V+E)`
@@ -106,7 +106,7 @@ class Tarjan:
         return SCCId, SCCGroupById, SCCIdByNode
 ```
 
+有向图 tarjan 缩点技巧类似于`'有向图'的并查集`
+
 2. kosaraju 算法
    略
-
-有向图 tarjan 缩点技巧类似于`'有向图'的并查集`

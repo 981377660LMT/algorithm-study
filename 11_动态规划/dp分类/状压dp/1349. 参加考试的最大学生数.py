@@ -17,7 +17,17 @@ from functools import lru_cache
 
 class Solution:
     def maxStudents(self, seats: List[List[str]]) -> int:
-        m, n = len(seats), len(seats[0])
+        @lru_cache(None)
+        def dfs(rowIndex: int, preState: int) -> int:
+            if rowIndex >= row:
+                return 0
+
+            res = 0
+            for curState in range(1 << col):
+                if not check(rowIndex, preState, curState):
+                    continue
+                res = max(res, bin(curState).count('1') + dfs(rowIndex + 1, curState))
+            return res
 
         def check(row: int, preState: int, curState: int) -> bool:
             # 不能有相邻的1
@@ -30,28 +40,9 @@ class Solution:
             for i, char in enumerate(seats[row]):
                 if char == '#' and (curState >> i) & 1:
                     return False
-
             return True
 
-        def countOne(num: int) -> int:
-            res = 0
-            while num:
-                num &= num - 1
-                res += 1
-            return res
-
-        @lru_cache(None)
-        def dfs(row: int, preState: int) -> int:
-            if row >= m:
-                return 0
-
-            res = 0
-            for curState in range(1 << n):
-                if not check(row, preState, curState):
-                    continue
-                res = max(res, countOne(curState) + dfs(row + 1, curState))
-            return res
-
+        row, col = len(seats), len(seats[0])
         return dfs(0, 0)
 
 

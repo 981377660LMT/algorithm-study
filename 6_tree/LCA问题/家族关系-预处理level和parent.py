@@ -24,7 +24,9 @@ def bfs(start) -> None:
             queue.append((next, cur, level + 1))
 
 
-def LCA(root1: int, root2: int, level: DefaultDict[int, int], parent: DefaultDict[int, int]) -> int:
+def getLCA(
+    root1: int, root2: int, level: DefaultDict[int, int], parent: DefaultDict[int, int]
+) -> int:
     if level[root1] < level[root2]:
         root1, root2 = root2, root1
     diff = level[root1] - level[root2]
@@ -49,7 +51,7 @@ levelMap, parentMap = defaultdict(lambda: -1), defaultdict(lambda: -1)
 root = next(i for i in range(n) if indegree[i] == 0)
 bfs(root)
 
-lca = LCA(root1, root2, levelMap, parentMap)
+lca = getLCA(root1, root2, levelMap, parentMap)
 
 
 # 求树中两点距离以及高度差

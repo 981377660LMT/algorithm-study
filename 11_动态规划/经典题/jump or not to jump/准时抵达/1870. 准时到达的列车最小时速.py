@@ -2,20 +2,21 @@ from typing import List
 from math import ceil
 
 # 返回能满足你准时到达办公室所要求全部列车的 最小正整数 时速（单位：千米每小时），如果无法准时到达，则返回 -1 。
+
+
 class Solution:
     def minSpeedOnTime(self, dist: List[int], hour: float) -> int:
-        if len(dist) - 1 >= hour:
-            return -1
-
         def check(mid):
             res = 0
             for i in range(len(dist) - 1):
                 res += ceil(dist[i] / mid)
-            # 最后不用等
             res += dist[-1] / mid
             return res <= hour
 
-        left, right = 1, 10 ** 7
+        if len(dist) - 1 >= hour:
+            return -1
+
+        left, right = 1, int(1e20)
         while left <= right:
             mid = (left + right) >> 1
             if check(mid):
@@ -23,8 +24,7 @@ class Solution:
             else:
                 left = mid + 1
 
-        # 双重保险
-        return left if check(left) else -1
+        return left
 
 
 print(Solution().minSpeedOnTime(dist=[1, 3, 2], hour=6))

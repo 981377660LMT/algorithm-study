@@ -1,38 +1,34 @@
-from collections import Counter
-from typing import List, Optional, Tuple
+from typing import List
 
-MOD = int(1e9 + 7)
-INF = int(1e20)
+
+MONEY = [20, 50, 100, 200, 500]
 
 
 class ATM:
     def __init__(self):
-        self.counter = Counter()
+        # 根本不用counter，不存钱而是存index
+        self.counter = [0, 0, 0, 0, 0]
 
     def deposit(self, banknotesCount: List[int]) -> None:
         # 分别存入 $20 ，$50，$100，$200 和 $500 钞票的数目。
-        m20, m50, m100, m200, m500 = banknotesCount
-        self.counter[20] += m20
-        self.counter[50] += m50
-        self.counter[100] += m100
-        self.counter[200] += m200
-        self.counter[500] += m500
+        for i in range(5):
+            self.counter[i] += banknotesCount[i]
 
     def withdraw(self, amount: int) -> List[int]:
         # 如果无法取出指定数额的钱，请返回 [-1] （这种情况下 不 取出任何钞票）。
         res = [0, 0, 0, 0, 0]
-        for i, money in enumerate([500, 200, 100, 50, 20], start=1):
-            count = self.counter[money]
-            div, _ = divmod(amount, money)
+        for i in range(4, -1, -1):
+            count = self.counter[i]
+            div, _ = divmod(amount, MONEY[i])
             ok = min(count, div)
-            res[-i] += ok
-            amount -= ok * money
+            res[i] += ok
+            amount -= ok * MONEY[i]
 
         if amount != 0:
             return [-1]
         else:
-            for i, money in enumerate([500, 200, 100, 50, 20], start=1):
-                self.counter[money] -= res[-i]
+            for i in range(5):
+                self.counter[i] -= res[i]
             return res
 
 
