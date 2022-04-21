@@ -23,11 +23,11 @@ class Tarjan:
         """
 
         def dfs(cur: int) -> None:
+            nonlocal dfsId, SCCId
             if visited[cur]:
                 return
             visited[cur] = True
 
-            nonlocal dfsId, SCCId
             order[cur] = low[cur] = dfsId
             dfsId += 1
             stack.append(cur)
@@ -80,15 +80,15 @@ class Tarjan:
         Returns:
             Tuple[Set[int], Set[Tuple[int, int]]]: 割点、桥
 
-            边对 (u,v) 中 u < v
+        - 边对 (u,v) 中 u < v
         """
 
         def dfs(cur: int, parent: int) -> None:
+            nonlocal dfsId
             if visited[cur]:
                 return
             visited[cur] = True
 
-            nonlocal dfsId
             order[cur] = low[cur] = dfsId
             dfsId += 1
 
@@ -135,22 +135,22 @@ class Tarjan:
         Returns:
             Tuple[int, DefaultDict[int, Set[int]], List[Set[int]]]: VBCC的数量、分组、每个结点对应的VBCC编号
 
-        我们将深搜时遇到的所有边加入到栈里面，
+        - 我们将深搜时遇到的所有边加入到栈里面，
         当找到一个割点的时候，
         就将这个割点往下走到的所有边弹出，
         而这些边所连接的点就是一个点双了
 
-        两个点和一条边构成的图也称为(V)BCC,因为两个点均不为割点
+        - 两个点和一条边构成的图也称为(V)BCC,因为两个点均不为割点
 
-        VBCC编号多余1个的都是割点
+        - VBCC编号多余1个的都是割点
         """
 
         def dfs(cur: int, parent: int) -> None:
+            nonlocal dfsId, VBCCId
             if visited[cur]:
                 return
             visited[cur] = True
 
-            nonlocal dfsId, VBCCId
             order[cur] = low[cur] = dfsId
             dfsId += 1
 
@@ -211,7 +211,7 @@ class Tarjan:
     @staticmethod
     def getEBCC(
         n: int, adjMap: DefaultDict[int, Set[int]]
-    ) -> Tuple[int, List[Set[Tuple[int, int]]], DefaultDict[Tuple[int, int], int]]:
+    ) -> Tuple[int, DefaultDict[int, Set[Tuple[int, int]]], DefaultDict[int, int]]:
         """Tarjan求解无向图的边双联通分量
 
         Args:
@@ -219,64 +219,56 @@ class Tarjan:
             adjMap (DefaultDict[int, Set[int]]): 图
 
         Returns:
-            Tuple[int, List[Set[Tuple[int, int]]], DefaultDict[Tuple[int,int],int]: EBCC的数量、分组、每个结点对应的EBCC编号
+            Tuple[int, DefaultDict[int, Set[Tuple[int, int]]], List[int]]: EBCC的数量、分组、每条边对应的EBCC编号
 
-            边对 (u,v) 中 u < v
+        - 边对 (u,v) 中 u < v
 
-        实现思路：
-        - 将所有的桥删掉剩下的都是边连通分量了(可以用并查集做)
-        - 用栈存储搜到的所有点, 当搜到一个点的order[x] == low[x], 即这个点上面的一条边就为桥, 将栈中所有点标记即可
+        - 实现思路：
+          - 将所有的桥删掉剩下的都是边连通分量了(其实可以用并查集做)
+          - 处理出割边,再对整个无向图进行一次DFS,对于节点cur的出边(cur,next),如果它是割边,则跳过这条边不沿着它往下走
         """
 
-        def dfs(cur: int, parentEdge: int) -> None:
+        def dfs(cur: int, parent: int) -> None:
+            nonlocal EBCCId
             if visited[cur]:
                 return
             visited[cur] = True
 
-            nonlocal dfsId, EBCCId
-            order[cur] = low[cur] = dfsId
-            dfsId += 1
-            stack.append(cur)
-
             for next in adjMap[cur]:
-                if next == parentEdge:
+                if next == parent:
                     continue
-                if not visited[next]:
-                    dfs(next, cur)
-                    low[cur] = min(low[cur], low[next])
-                else:
-                    low[cur] = min(low[cur], order[next])
 
-            # 所有儿子遍历完再求
-            if order[cur] == low[cur]:
-                while stack:
-                    top = stack.pop()
-                    EBCCGroupById[EBCCId].add(top)
-                    EBCCIdByNode[top] = EBCCId
-                    if top == cur:
-                        break
+                edge = tuple(sorted([cur, next]))
+                if edge in cuttingEdges:
+                    continue
 
-                EBCCId += 1
+                EBCCGroupById[EBCCId].add(edge)
+                EBCCIdByNode[cur] = EBCCId
+                dfs(next, cur)
 
-        dfsId = 0
-        order, low = [Tarjan.INF] * n, [Tarjan.INF] * n
+        _, cuttingEdges = Tarjan.getCuttingPointAndCuttingEdge(n, adjMap)
 
         visited = [False] * n
-        stack = []
 
         EBCCId = 0  # 边双个数
         EBCCGroupById = defaultdict(set)  # 每个边双包含哪些边
-        EBCCIdByNode = [-1]  # 每个边属于哪一个边双
+        EBCCIdByNode = defaultdict(int)  # 每条边属于哪一个边双
 
         for cur in range(n):
             if not visited[cur]:
                 dfs(cur, -1)
+                EBCCId += 1
+
+        for edge in cuttingEdges:
+            EBCCGroupById[EBCCId].add(edge)
+            EBCCIdByNode[edge] = EBCCId
+            EBCCId += 1
 
         return EBCCId, EBCCGroupById, EBCCIdByNode
 
 
 if __name__ == '__main__':
-    #  割点和桥
+    # 无向图割点和桥
     adjMap1 = defaultdict(set)
     edges = [[0, 1], [0, 2], [1, 2], [2, 3], [3, 4]]
     for u, v in edges:
@@ -298,7 +290,12 @@ if __name__ == '__main__':
     for u, v in edges:
         adjMap2[v].add(u)
         adjMap2[u].add(v)
-    print('无向图EBCC', Tarjan.getEBCC(6, adjMap2))
+
+    assert list(Tarjan.getEBCC(6, adjMap2)[1].values()) == [
+        {(0, 1), (0, 2), (1, 2)},
+        {(4, 5), (3, 4), (3, 5)},
+        {(2, 3)},
+    ]
 
     # 有向图SCC
     adjMap2 = defaultdict(set)

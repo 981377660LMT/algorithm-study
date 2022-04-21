@@ -60,3 +60,4 @@ LCP 54. 夺回据点-无向图tarjan缩点
   **找点双和边双模板**
   https://www.acwing.com/blog/content/2926/
   https://www.cnblogs.com/DWVictor/p/11348042.html(推荐)
+  https://kirainmoe.com/blog/post/tarjan-algorithm-learning-note/(缩点等应用)
