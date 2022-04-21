@@ -243,7 +243,7 @@ class Tarjan:
                     continue
 
                 EBCCGroupById[EBCCId].add(edge)
-                EBCCIdByNode[cur] = EBCCId
+                EBCCIdByEdge[cur] = EBCCId
                 dfs(next, cur)
 
         _, cuttingEdges = Tarjan.getCuttingPointAndCuttingEdge(n, adjMap)
@@ -252,7 +252,7 @@ class Tarjan:
 
         EBCCId = 0  # 边双个数
         EBCCGroupById = defaultdict(set)  # 每个边双包含哪些边
-        EBCCIdByNode = defaultdict(int)  # 每条边属于哪一个边双
+        EBCCIdByEdge = defaultdict(int)  # 每条边属于哪一个边双
 
         for cur in range(n):
             if not visited[cur]:
@@ -261,10 +261,10 @@ class Tarjan:
 
         for edge in cuttingEdges:
             EBCCGroupById[EBCCId].add(edge)
-            EBCCIdByNode[edge] = EBCCId
+            EBCCIdByEdge[edge] = EBCCId
             EBCCId += 1
 
-        return EBCCId, EBCCGroupById, EBCCIdByNode
+        return EBCCId, EBCCGroupById, EBCCIdByEdge
 
 
 if __name__ == '__main__':
