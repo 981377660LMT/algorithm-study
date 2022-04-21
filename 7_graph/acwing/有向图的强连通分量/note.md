@@ -1,6 +1,6 @@
 ## 定义
 
-连通分量:对于分量中任意两点 u,v 必然可以从 u 走到 v 且从 v 走到 u
+连通分量:对于分量中任意两点 u,v 必然可以从 `u 走到 v 且从 v 走到 u`
 强连通分量（Strongly Connected Components，SCC）的定义是：极大的强连通子图。
 ![强连通分量](image/note/1646978162188.png)
 `强指的是精确，多一个不连通，少一个不是最大的`
@@ -74,7 +74,7 @@ class Tarjan:
                     low[cur] = min(low[cur], low[next])
                 elif inStack[next]:
                     # next被访问过而且也在stack里面，找到了一个环
-                    low[cur] = min(low[cur], low[next])
+                    low[cur] = min(low[cur], order[next])
                 # 访问过但是不在stack里的点，说明是在别的SCC里面被统计过了
 
             # 这个条件说明我们在当前这一轮找到了一个SCC并且cur是SCC的最高点

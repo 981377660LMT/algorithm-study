@@ -44,7 +44,7 @@ function nextPermutation<T>(nums: T[]): [res: T[], ok: boolean] {
  * @param nums digit 数组
  * @description 返回值第二个参数带error 类似go的模式...
  */
-function prevPermutation<T>(nums: T[]): [res: T[], ok: boolean] {
+function prePermutation<T>(nums: T[]): [res: T[], ok: boolean] {
   const copy = nums.slice()
   const n = copy.length
   let isExist = false
@@ -77,8 +77,8 @@ function reverseRange<T>(nums: T[], i: number, j: number) {
 // console.log(nextPalindrome('32123'))
 if (require.main === module) {
   console.log(nextPalindrome('23143034132'))
-  console.log(prevPermutation([1, 3, 2]))
-  console.log(prevPermutation([1, 2, 3]))
+  console.log(prePermutation([1, 3, 2]))
+  console.log(prePermutation([1, 2, 3]))
 }
 
-export { nextPermutation, prevPermutation }
+export { nextPermutation, prePermutation }

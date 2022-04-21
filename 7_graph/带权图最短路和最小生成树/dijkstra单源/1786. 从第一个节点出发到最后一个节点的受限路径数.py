@@ -25,7 +25,9 @@ class Solution:
         pq = [(0, n - 1)]
         dist = [INF] * (n - 1) + [0]
         while pq:
-            _, cur = heappop(pq)
+            curDist, cur = heappop(pq)
+            if dist[cur] < curDist:
+                continue
             for next, weight in adjMap[cur].items():
                 if dist[cur] + weight < dist[next]:
                     dist[next] = dist[cur] + weight

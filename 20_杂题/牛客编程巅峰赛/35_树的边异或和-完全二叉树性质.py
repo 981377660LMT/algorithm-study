@@ -1,15 +1,6 @@
 from collections import defaultdict
 from typing import List
 
-# 完全二叉树
-# 树的边异或和
-# 建立树的异或路径sum,先求左右节点left/right的公共父节点root，
-# （求公共父节点也有原题，用两个变量存是否存在子节点dfs即可）。
-# 答案就是(sum[left] ^ sum[root]) ^ (sum[right] ^ sum[root]) ^ root->val
-
-# (sum[left] ^ sum[root]) ^ (sum[right] ^ sum[root]) ^ root->val
-# 异或路径
-
 
 class Solution:
     def tree5(self, preOrder: List[int]) -> int:

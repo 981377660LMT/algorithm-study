@@ -1,4 +1,4 @@
-from typing import DefaultDict, List, Set, Tuple
+from typing import Counter, DefaultDict, List, Set, Tuple
 from collections import defaultdict
 
 
@@ -100,6 +100,10 @@ class UnionFindArray:
 
 
 # Tarjan缩点
+# 先用 Tarjan 算法找出割点，去掉这些点会剩下若干个连通块。
+# 抛弃掉同时与多个割点相连的连通块。
+# 求出剩余的连通块中的最小权值。
+# 如果仅有一个连通块，答案就是这个最小权值；否则，答案为所有最小权值之和减去它们的最大值。
 class Solution:
     def minimumCost(self, cost: List[int], roads: List[List[int]]) -> int:
         n = len(cost)
@@ -110,29 +114,47 @@ class Solution:
 
         # 割点
         cuttingPoint = getCuttingPointAndCuttingEdge(n, adjMap)[0]
-        # cuttingPoint = {2, 3}
 
-        # 并查集分组
+        # 并查集分组(不可以用并查集，因为并查集是边双连通不是点双连通)
         uf = UnionFindArray(n)
         for u, v in roads:
             if u in cuttingPoint or v in cuttingPoint:
                 continue
             uf.union(u, v)
 
-        print(cuttingPoint)
-        # 各个分量
-        groups = uf.getGroups(cuttingPoint).values()
-        costs = [min(cost[i] for i in group) for group in groups]
-        return sum(costs) - max(costs)
+        counter = defaultdict(set)  # 每个联通分量连了几个割点
+        for cur in cuttingPoint:
+            for next in adjMap[cur]:
+                groupRoot = uf.find(next)
+                counter[groupRoot].add(cur)
+
+        goodGroups = defaultdict(list)
+        for i in range(n):
+            if i in cuttingPoint:
+                continue
+            root = uf.find(i)
+            # print(i, root, 999, counter[root])
+            if len(counter[root]) <= 1:
+                goodGroups[root].append(i)
+
+        print(cuttingPoint, goodGroups)
+        # # 各个分量
+        # groups = uf.getGroups(cuttingPoint).values()
+        costs = [min(cost[i] for i in group) for group in goodGroups.values()]
+
+        if len(costs) == 1:
+            return costs[0]
+        else:
+            return sum(costs) - max(costs)
 
 
-# print(
-#     Solution().minimumCost(
-#         cost=[1, 2, 3, 4, 5, 6], roads=[[0, 1], [0, 2], [1, 3], [2, 3], [1, 2], [2, 4], [2, 5]]
-#     )
-# )
+print(
+    Solution().minimumCost(
+        cost=[1, 2, 3, 4, 5, 6], roads=[[0, 1], [0, 2], [1, 3], [2, 3], [1, 2], [2, 4], [2, 5]]
+    )
+)
 
-# print(Solution().minimumCost(cost=[3, 2, 1, 4], roads=[[0, 2], [2, 3], [3, 1]]))
+print(Solution().minimumCost(cost=[3, 2, 1, 4], roads=[[0, 2], [2, 3], [3, 1]]))
 
 
 # print(Solution().minimumCost(cost=[0, 1, 2, 3], roads=[[0, 1], [1, 2], [2, 3], [0, 3]]))

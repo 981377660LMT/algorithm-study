@@ -5,7 +5,7 @@ from collections import defaultdict
 # 为了防止魔物暴动，勇者在每一次夺回据点后（包括花费资源夺回据点后），
 # 需要保证剩余的所有魔物据点之间是相连通的（不经过「已夺回据点」）。
 
-
+# https://cp-wiki.vercel.app/tutorial/leetcode/2022-spring-solo/#problem-e-%E5%A4%BA%E5%9B%9E%E6%8D%AE%E7%82%B9
 class Solution:
     def minimumCost(self, cost: List[int], roads: List[List[int]]) -> int:
         n = len(cost)

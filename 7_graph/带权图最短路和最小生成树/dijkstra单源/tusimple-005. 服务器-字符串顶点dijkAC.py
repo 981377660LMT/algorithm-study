@@ -14,6 +14,8 @@ def dijkstra(adjMap: DefaultDict[str, DefaultDict[str, int]], start: str, end: s
         dist[start] = 0
         while pq:
             curDist, cur = heappop(pq)
+            if dist[cur] < curDist:
+                continue
             if cur == end:
                 return curDist
             for next in adjMap[cur]:

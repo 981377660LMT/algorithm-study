@@ -51,7 +51,7 @@ function maxGeneticDifference(parents: number[], queries: number[][]): number[] 
       dfs(next)
     }
 
-    xorTrie.delete(root)
+    xorTrie.remove(root)
   }
   dfs(root)
 

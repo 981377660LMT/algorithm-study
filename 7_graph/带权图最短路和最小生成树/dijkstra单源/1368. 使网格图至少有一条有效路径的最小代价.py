@@ -25,6 +25,8 @@ class Solution:
 
         while pq:
             cost, curR, curC = heappop(pq)
+            if dist[curR][curC] < cost:
+                continue
             if (curR, curC) == (row - 1, col - 1):
                 return cost
 

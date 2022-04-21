@@ -12,7 +12,9 @@ def dijkstra(n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int
     dist[start] = 0
     pq = [(0, start)]
     while pq:
-        _, cur = heappop(pq)
+        curDist, cur = heappop(pq)
+        if dist[cur] < curDist:
+            continue
         for next in adjMap[cur]:
             if dist[next] > dist[cur] + adjMap[cur][next]:
                 dist[next] = dist[cur] + adjMap[cur][next]

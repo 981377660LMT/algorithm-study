@@ -4,24 +4,26 @@ from typing import List
 # removable 中的元素 互不相同
 
 # 返回你可以找出的 最大 k ，满足在移除字符后 p 仍然是 s 的一个子序列。
+
+
 class Solution:
     def maximumRemovals(self, s: str, p: str, removable: List[int]) -> int:
-        ns, np = len(s), len(p)
-
-        # 辅助函数，用来判断移除 k 个下标后 p 是否是 s_k 的子序列
+        # 辅助函数，用来判断
         def check(k: int) -> bool:
-            state = [True] * ns  # s 中每个字符的状态
+            """移除 k 个下标后 p 是否是 s_k 的子序列"""
+            ok = [True] * ns  # 标记删除，不是真的删除
             for i in range(k):
-                state[removable[i]] = False
-            # 匹配 s_k 与 p
+                ok[removable[i]] = False
+
             hit = 0
             for i in range(ns):
-                # s[i] 未被删除且与 p[j] 相等时，匹配成功，增加 j
-                if state[i] and s[i] == p[hit]:
+                if ok[i] and s[i] == p[hit]:
                     hit += 1
                     if hit == np:
                         return True
             return False
+
+        ns, np = len(s), len(p)
 
         left, right = 0, len(removable)
         while left <= right:

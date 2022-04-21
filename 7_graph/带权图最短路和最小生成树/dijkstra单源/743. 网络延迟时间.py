@@ -23,6 +23,8 @@ def dijkstra(
     pq = [(0, start)]
     while pq:
         curDist, cur = heappop(pq)
+        if dist[cur] < curDist:
+            continue
         if end is not None and cur == end:
             return curDist
         for next in adjMap[cur]:

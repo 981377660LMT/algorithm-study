@@ -15,6 +15,8 @@ class Solution:
             dists[sx][sy] = matrix[sx][sy]
             while heap:
                 cost, x, y = heapq.heappop(heap)
+                if dists[x][y] < cost:
+                    continue
                 for nx, ny in [(x, y - 1), (x + 1, y), (x - 1, y), (x, y + 1)]:
                     if isValid(nx, ny) and matrix[nx][ny] + cost < dists[nx][ny]:
                         weight = matrix[nx][ny]

@@ -21,7 +21,9 @@ class Solution:
         dist[0] = 0
         pq = [(0, 0)]
         while pq:
-            _, cur = heappop(pq)
+            curDist, cur = heappop(pq)
+            if dist[cur] < curDist:
+                continue
             for next, weight in adjMap[cur].items():
                 candDist = weight + dist[cur]
                 if candDist < dist[next]:

@@ -1,0 +1,1 @@
+(getDigit(cur, i - 1) != 0) or getDigit(cur, i - 1) == 2

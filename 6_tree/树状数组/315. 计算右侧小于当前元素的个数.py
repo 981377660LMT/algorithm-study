@@ -1,10 +1,14 @@
-from collections import defaultdict
 from typing import List
+from collections import defaultdict
+from sortedcontainers import SortedList
 
 # 1 <= nums.length <= 105
 # -104 <= nums[i] <= 104
+
+
 class Solution:
     def countSmaller(self, nums: List[int]) -> List[int]:
+        """求逆序对数量"""
         OFFSET = int(1e4) + 10
         res = []
         bit = BIT(3 * OFFSET)
@@ -13,6 +17,20 @@ class Solution:
             res.append(cur)
             bit.add(nums[i] + OFFSET, nums[i] + OFFSET, 1)
         return list(reversed(res))
+
+
+# 1 <= nums.length <= 105
+# -104 <= nums[i] <= 104
+class Solution2:
+    def countSmaller(self, nums: List[int]):
+        res = []
+        visited = SortedList()
+        for num in reversed(nums):
+            index = visited.bisect_left(num)
+            res.append(index)
+            visited.add(num)
+
+        return res[::-1]
 
 
 class BIT:

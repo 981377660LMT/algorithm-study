@@ -11,7 +11,7 @@ JS,TS 刷题时大数问题可用 BigInt 或者求余解决
 
 如果数组长度不用变化，则可使用 **new TypedArray(分配连续内存的数组，长度固定)**
 防止数组索引越界 grid[row+1]?.[col]
-
+数组赋值 root[bit]![2] = 1
 赋值
 `cur.children[char] ??= new TrieNode()`
 
@@ -248,3 +248,14 @@ longlong 的最大值是 `9e18`
 实现了 `__iter__` **Iterable**
 实现了 `__len__`和`__iter__` **Collection**
 实现了 `__len__`和`__iter__`和`__getitem__` **Sequence**
+
+```py
+# https://stackoverflow.com/questions/1528932/how-to-create-inline-objects-with-properties
+# python中像js一样创建对象
+# 1. type
+res: IXORTrie = type('', (), {'insert': insert, 'search': search, 'discard': discard})
+# 2. SimpleNamespace
+res: IXORTrie = SimpleNamespace(insert=insert, search=search, discard=discard)
+# 3.namedtuple
+namedtuple('Res', ['insert', 'search', 'discard'])(insert, search, discard)
+```

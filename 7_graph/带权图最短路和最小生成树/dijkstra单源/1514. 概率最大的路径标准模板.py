@@ -18,6 +18,8 @@ class Solution:
         while pq:
             curDist, cur = heappop(pq)
             curDist *= -1
+            if dist[cur] > curDist:
+                continue
             if cur == end:
                 return curDist
             for next in adjMap[cur]:

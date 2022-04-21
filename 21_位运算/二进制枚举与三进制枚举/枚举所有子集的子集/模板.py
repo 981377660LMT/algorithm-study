@@ -18,15 +18,17 @@ def genPowerSetFromAllPowerSet(collection: Collection):
 
 
 def genPowerSetFromAllPowerSet2(nums: List[int]) -> List[List[Tuple[int, ...]]]:
-    """举所有子集的`非空`子集，返回pair互补对，时间复杂度O(3^n)"""
+    """举所有子集的子集，返回pair互补对，时间复杂度O(3^n)"""
     n = len(nums)
     res = []
     for state in range(1 << n):
         cur = []
         group1, group2 = state, 0
-        while group1:
+        while True:  # 如果子集规定非空，这里变成while group1 即可
             cur.append((group1, group2))  # 其实append group1就可以了
             # 关键，不断减一+与运算跳数
+            if group1 == 0:
+                break
             group1 = state & (group1 - 1)
             group2 = state ^ group1
         res.append(cur)
@@ -39,8 +41,10 @@ def genPowerSetFromAllPowerSet3(n: int):
     for state in range(1 << n):
         cur = []
         group = state
-        while group:
+        while True:
             cur.append(group)
+            if group == 0:
+                break
             group = state & (group - 1)
         res.append(cur)
     return res
@@ -48,6 +52,6 @@ def genPowerSetFromAllPowerSet3(n: int):
 
 if __name__ == '__main__':
     print(len(list(genPowerSetFromAllPowerSet([1, 2, 3, 4]))))
-    print(genPowerSetFromAllPowerSet2([1, 2, 3, 4]))
+    print(len(sum(genPowerSetFromAllPowerSet2([1, 2, 3, 4]), [])))
     print(len(sum(genPowerSetFromAllPowerSet3(4), [])))
 

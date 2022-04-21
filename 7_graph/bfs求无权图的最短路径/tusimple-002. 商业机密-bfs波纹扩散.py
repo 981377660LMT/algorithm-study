@@ -23,7 +23,7 @@ for _ in range(m):
 for i in joins:
     res[i] = 0
 
-count = q
+count = 0
 day = 1
 queue = deque(joins)
 while count < n:

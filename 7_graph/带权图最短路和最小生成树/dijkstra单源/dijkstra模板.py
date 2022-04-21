@@ -28,8 +28,11 @@ def dijkstra(
     dist = [INF] * n
     dist[start] = 0
     pq = [(0, start)]
+
     while pq:
         curDist, cur = heappop(pq)
+        if dist[cur] < curDist:  # 剪枝，有的题目不加就TLE
+            continue
         if end is not None and cur == end:
             return curDist
         for next in adjMap[cur]:
@@ -50,7 +53,9 @@ def dijkstra2(
     path = [[] for _ in range(n)]
     path[start] = [start]
     while pq:
-        _, cur, curPath = heappop(pq)
+        curDist, cur, curPath = heappop(pq)
+        if dist[cur] < curDist:
+            continue
         for next in adjMap[cur]:
             if dist[next] > dist[cur] + adjMap[cur][next]:
                 dist[next] = dist[cur] + adjMap[cur][next]

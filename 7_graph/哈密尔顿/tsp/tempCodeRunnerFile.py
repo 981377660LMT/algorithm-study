@@ -1,1 +1,1 @@
-print(maxCost, bestPath)
+[0, 1, 0]

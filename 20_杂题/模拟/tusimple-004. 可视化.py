@@ -13,29 +13,24 @@ s = input()
 
 mapping = {'+': '/', '-': '\\', '=': '-'}
 
-
-# 直接一遍遍历，字典存储每个点的高度
-
-
 preChar, preRow = s[0], 0  # 之前的字符，之前的行编号，越往上负的越多
-upRow, BottomRow = 0, 0
+upRow, bottomRow = 0, 0
 for col, char in enumerate(s[1:], start=1):
     curRow = -1
     if char == '+':
         curRow = preRow - (1 if preChar == '+' else 0)
     elif char == '-':
-        curRow = preRow + (1 if preChar == '-' else 0)
+        curRow = preRow + 1 - (1 if preChar == '+' else 0)
     else:
-        curRow = preRow
+        curRow = preRow - (1 if preChar == '+' else 0)
+    # 所以其实根据前一个来转移真的是多此一举啊啊啊啊啊（
 
     upRow = min(upRow, curRow)
-    BottomRow = max(BottomRow, curRow)
+    bottomRow = max(bottomRow, curRow)
     preChar, preRow = char, curRow
 
-
-ROW, COL = BottomRow - upRow + 1, n
+ROW, COL = bottomRow - upRow + 1, n
 matrix = [['.'] * COL for _ in range(ROW)]
-
 
 # row 平移
 preChar, preRow = s[0], -upRow
@@ -45,17 +40,23 @@ for col, char in enumerate(s[1:], start=1):
     if char == '+':
         curRow = preRow - (1 if preChar == '+' else 0)
     elif char == '-':
-        curRow = preRow + (1 if preChar == '-' else 0)
+        curRow = preRow + 1 - (1 if preChar == '+' else 0)
     else:
-        curRow = preRow
+        curRow = preRow - (1 if preChar == '+' else 0)
 
     matrix[curRow][col] = mapping[char]
     preChar, preRow = char, curRow
-
 
 for row in matrix:
     print(''.join(row))
 
 
-# +++ 不对
-# ++- 不对
+# 2
+# +=
+# .-
+# /.
+
+# 2
+# =-
+# -.
+# .\
