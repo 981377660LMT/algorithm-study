@@ -1,5 +1,7 @@
-from typing import List
+from collections import defaultdict
+from typing import DefaultDict, Set
 
+# https://blog.csdn.net/baidu_23955875/article/details/46573537
 # todo
 # 简化版的匈牙利学习 （不判断二分图）
 # 有两台机器 A，B 以及 K 个任务。
@@ -13,20 +15,19 @@ from typing import List
 # (最小覆盖点==最大匹配边-匈牙利算法)
 
 
-def hungarian(adjList: List[List[int]]) -> int:
-    def getColor(adjList: List[List[int]]) -> List[int]:
+def hungarian(adjMap: DefaultDict[int, Set[int]]) -> int:
+    def getColor(adjMap: DefaultDict[int, Set[int]]) -> DefaultDict[int, int]:
         """检测二分图并染色"""
 
         def dfs(cur: int, color: int) -> None:
             colors[cur] = color
-            for next in adjList[cur]:
+            for next in adjMap[cur]:
                 if colors[next] == -1:
                     dfs(next, color ^ 1)
                 elif colors[cur] == colors[next]:
                     raise Exception('不是二分图')
 
-        n = len(adjList)
-        colors = [-1] * n
+        colors = defaultdict(lambda: -1)
         for i in range(n):
             if colors[i] == -1:
                 dfs(i, 0)
@@ -35,24 +36,24 @@ def hungarian(adjList: List[List[int]]) -> int:
     def dfs(boy: int) -> bool:
         """寻找增广路"""
         nonlocal visited
-        if visited[boy]:
+        if boy in visited:
             return False
-        visited[boy] = True
+        visited.add(boy)
 
-        for girl in adjList[boy]:
+        for girl in adjMap[boy]:
             if matching[girl] == -1 or dfs(matching[girl]):
                 matching[boy] = girl
                 matching[girl] = boy
                 return True
         return False
 
-    n = len(adjList)
+    n = len(adjMap)
     maxMatching = 0
-    matching = [-1] * n
-    colors = getColor(adjList)
-    visited = [False] * n
+    matching = defaultdict(lambda: -1)
+    colors = getColor(adjMap)
+    visited = set()
     for i in range(n):
-        visited = [False] * n
+        visited = set()
         if colors[i] == 0 and matching[i] == -1:
             if dfs(i):
                 maxMatching += 1
@@ -61,7 +62,7 @@ def hungarian(adjList: List[List[int]]) -> int:
 
 
 n, m, k = map(int, input().split())
-adjList = [[] for _ in range(n + m + 10)]
+adjMap = defaultdict(set)
 
 for _ in range(k):
     _, a, b = map(int, input().split())
@@ -69,6 +70,6 @@ for _ in range(k):
     # 原来的两个点已经覆盖了
     if a == 0 or b == 0:
         continue
-    adjList[a].append(n + b)
-    adjList[n + b].append(a)
-print(hungarian(adjList))
+    adjMap[a].add(n + b)
+    adjMap[n + b].add(a)
+print(hungarian(adjMap))

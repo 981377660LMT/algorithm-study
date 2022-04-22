@@ -8,7 +8,7 @@ from collections import defaultdict, deque
 
 WeightedDirectedGraph = DefaultDict[int, DefaultDict[int, int]]
 
-
+  
 class MaxFlow:
     """edmond-karp算法求解有向带权图的最大流,时间复杂度O(VE^2)"""
 

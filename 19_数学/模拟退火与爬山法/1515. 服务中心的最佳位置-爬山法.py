@@ -21,6 +21,7 @@ class Solution:
         return dist((x, y))
 
     def getMinDistSum2(self, positions: List[List[int]]) -> float:
+        # https://www.runoob.com/scipy/scipy-optimize.html
         def getSum(target: List[int]):
             return sum(
                 [sqrt((target[0] - x1) ** 2 + (target[1] - y1) ** 2) for x1, y1 in positions]

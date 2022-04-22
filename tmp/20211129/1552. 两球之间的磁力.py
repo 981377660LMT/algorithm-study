@@ -6,29 +6,31 @@ from typing import List
 
 # 2 <= n <= 10^5 暗示nlogn
 # 最左能力二分
+
+
 class Solution:
     def maxDistance(self, position: List[int], m: int) -> int:
+        def check(mid: int) -> int:
+            """最小磁力为mid时是否能放m个球"""
+            res, pre = 1, position[0]
+            for i in range(1, n):
+                if position[i] - pre >= mid:
+                    res += 1
+                    pre = position[i]
+            return res >= m
+
         n = len(position)
         position.sort()
 
-        # 最小磁力不可超过mid，需要多少个球
-        def count(mid: int) -> int:
-            res, cur = 1, position[0]
-            for i in range(1, n):
-                if position[i] - cur > mid:
-                    res += 1
-                    cur = position[i]
-            return res
-
-        l, r = 0, position[-1] - position[0]
-        while l <= r:
-            mid = (l + r) >> 1
-            if count(mid) >= m:
-                l = mid + 1
+        left, right = 1, int(1e10)
+        while left <= right:
+            mid = (left + right) >> 1
+            if check(mid):
+                left = mid + 1
             else:
-                r = mid - 1
+                right = mid - 1
 
-        return l
+        return right
 
 
 print(Solution().maxDistance(position=[1, 2, 3, 4, 7], m=3))

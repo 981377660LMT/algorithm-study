@@ -252,6 +252,7 @@ longlong 的最大值是 `9e18`
 ```py
 # https://stackoverflow.com/questions/1528932/how-to-create-inline-objects-with-properties
 # python中像js一样创建对象
+
 # 1. type
 res: IXORTrie = type('', (), {'insert': insert, 'search': search, 'discard': discard})
 # 2. SimpleNamespace
@@ -259,3 +260,8 @@ res: IXORTrie = SimpleNamespace(insert=insert, search=search, discard=discard)
 # 3.namedtuple
 namedtuple('Res', ['insert', 'search', 'discard'])(insert, search, discard)
 ```
+
+## scipy 库的数学操作
+
+SciPy 是基于 Python 的 NumPy 扩展构建的数学算法和便利函数的集合
+https://zzz5.xyz/2020/05/30/python/scipy/python-scipy-01/

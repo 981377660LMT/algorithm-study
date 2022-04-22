@@ -2,11 +2,12 @@ from collections import defaultdict
 from typing import DefaultDict, List, Set, Tuple
 import sys
 
-sys.setrecursionlimit(int(1e9))
+Edge = Tuple[int, int]
 
 
 class Tarjan:
     INF = int(1e20)
+    sys.setrecursionlimit(int(1e9))
 
     @staticmethod
     def getSCC(
@@ -70,7 +71,7 @@ class Tarjan:
     @staticmethod
     def getCuttingPointAndCuttingEdge(
         n: int, adjMap: DefaultDict[int, Set[int]]
-    ) -> Tuple[Set[int], Set[Tuple[int, int]]]:
+    ) -> Tuple[Set[int], Set[Edge]]:
         """Tarjan求解无向图的割点和割边(桥)
 
         Args:
@@ -78,7 +79,7 @@ class Tarjan:
             adjMap (DefaultDict[int, Set[int]]): 图
 
         Returns:
-            Tuple[Set[int], Set[Tuple[int, int]]]: 割点、桥
+            Tuple[Set[int], Set[Edge]]: 割点、桥
 
         - 边对 (u,v) 中 u < v
         """
@@ -104,7 +105,7 @@ class Tarjan:
                         cuttingEdge.add(tuple(sorted([cur, next])))
                     if parent != -1 and low[next] >= order[cur]:
                         cuttingPoint.add(cur)
-                    elif parent == -1 and dfsChild > 1:  # 出发点没有祖先啊，所以特判一下
+                    elif parent == -1 and dfsChild > 1:  # 出发点没有祖先order肯定小啊，所以特判一下
                         cuttingPoint.add(cur)
                 else:
                     low[cur] = min(low[cur], order[next])  # 注意这里是order
@@ -211,7 +212,7 @@ class Tarjan:
     @staticmethod
     def getEBCC(
         n: int, adjMap: DefaultDict[int, Set[int]]
-    ) -> Tuple[int, DefaultDict[int, Set[Tuple[int, int]]], DefaultDict[int, int]]:
+    ) -> Tuple[int, DefaultDict[int, Set[Edge]], DefaultDict[Edge, int]]:
         """Tarjan求解无向图的边双联通分量
 
         Args:
@@ -219,7 +220,7 @@ class Tarjan:
             adjMap (DefaultDict[int, Set[int]]): 图
 
         Returns:
-            Tuple[int, DefaultDict[int, Set[Tuple[int, int]]], List[int]]: EBCC的数量、分组、每条边对应的EBCC编号
+            Tuple[int, DefaultDict[int, Set[Edge]], DefaultDict[Edge, int]]]: EBCC的数量、分组、每条边对应的EBCC编号
 
         - 边对 (u,v) 中 u < v
 
@@ -243,7 +244,7 @@ class Tarjan:
                     continue
 
                 EBCCGroupById[EBCCId].add(edge)
-                EBCCIdByEdge[cur] = EBCCId
+                EBCCIdByEdge[edge] = EBCCId
                 dfs(next, cur)
 
         _, cuttingEdges = Tarjan.getCuttingPointAndCuttingEdge(n, adjMap)
@@ -270,11 +271,11 @@ class Tarjan:
 if __name__ == '__main__':
     # 无向图割点和桥
     adjMap1 = defaultdict(set)
-    edges = [[0, 1], [0, 2], [1, 2], [2, 3], [3, 4]]
+    edges = [[0, 1], [0, 2], [1, 2], [2, 5], [2, 4], [3, 4], [3, 5], [4, 5]]
     for u, v in edges:
         adjMap1[u].add(v)
         adjMap1[v].add(u)
-    assert Tarjan.getCuttingPointAndCuttingEdge(5, adjMap1) == ({2, 3}, {(2, 3), (3, 4)})
+    assert Tarjan.getCuttingPointAndCuttingEdge(6, adjMap1) == ({2}, set())
 
     # 无向图VBCC
     adjMap2 = defaultdict(set)
@@ -290,7 +291,6 @@ if __name__ == '__main__':
     for u, v in edges:
         adjMap2[v].add(u)
         adjMap2[u].add(v)
-
     assert list(Tarjan.getEBCC(6, adjMap2)[1].values()) == [
         {(0, 1), (0, 2), (1, 2)},
         {(4, 5), (3, 4), (3, 5)},

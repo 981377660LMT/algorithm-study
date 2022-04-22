@@ -61,3 +61,17 @@ LCP 54. 夺回据点-无向图tarjan缩点
   https://www.acwing.com/blog/content/2926/
   https://www.cnblogs.com/DWVictor/p/11348042.html(推荐)
   https://kirainmoe.com/blog/post/tarjan-algorithm-learning-note/(缩点等应用)
+
+**注意求割点更新 low 时，已经看过的 next 使用 order 数组更新**
+
+```Python
+elif visited[next]:
+    low[cur] = min(low[cur], order[next])  # 注意这里是order
+```
+
+用 low 数组更新是错误的，例如这个样例
+
+<!-- [[0,1],[0,2],[1,2],[2,5],[2,4],[3,4],[3,5],[4,5]] -->
+
+割点割边应该是 `({2}, set())`
+low 更新求出来无割点

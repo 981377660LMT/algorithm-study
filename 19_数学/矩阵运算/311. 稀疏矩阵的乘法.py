@@ -10,7 +10,7 @@
 
 from typing import List
 
-
+# 矩阵乘法
 class Solution:
     def multiply(self, mat1: List[List[int]], mat2: List[List[int]]) -> List[List[int]]:
         if len(mat1) == 0 or len(mat2) == 0:
