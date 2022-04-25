@@ -1,4 +1,4 @@
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Tuple
 from collections import deque
 
 # MonoQueue是一个多了 O(1)求min和max 这两个api的 deque
@@ -45,12 +45,12 @@ class MonoQueue:
         count = 1
         while self.minQueue and self.minQueue[-1][0] > value:
             count += self.minQueue.pop()[1]
-        self.minQueue.append([value, count])
+        self.minQueue.append([value, count, self.index])
 
         count = 1
         while self.maxQueue and self.maxQueue[-1][0] < value:
             count += self.maxQueue.pop()[1]
-        self.maxQueue.append([value, count])
+        self.maxQueue.append([value, count, self.index])
 
         self.rawQueue.append((value, self.index))
         self.index += 1
@@ -73,4 +73,5 @@ if __name__ == '__main__':
     assert monoQueue.max == 3
     monoQueue.append(0)
     assert len(monoQueue) == 3
+    assert monoQueue[0] == 2
 
