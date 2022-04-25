@@ -1,11 +1,11 @@
-from typing import List
+from typing import Iterable
 from bisect import bisect_left, bisect_right
 
 
 class Discretizer:
     """离散化"""
 
-    def __init__(self, nums: List[int]) -> None:
+    def __init__(self, nums: Iterable[int]) -> None:
         self.allNums = sorted(set(nums))
         self.mapping = {self.allNums[i]: i + 1 for i in range(len(self.allNums))}
 

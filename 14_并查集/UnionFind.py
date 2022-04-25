@@ -48,7 +48,7 @@ class UnionFindMap(Generic[T]):
         self.parent = dict()
         self.rank = defaultdict(lambda: 1)
         for item in iterable or []:
-            self._add(item)
+            self.add(item)
 
     def union(self, key1: T, key2: T) -> bool:
         root1 = self.find(key1)
@@ -64,7 +64,7 @@ class UnionFindMap(Generic[T]):
 
     def find(self, key: T) -> T:
         if key not in self.parent:
-            self._add(key)
+            self.add(key)
             return key
 
         while self.parent.get(key, key) != key:
@@ -85,7 +85,7 @@ class UnionFindMap(Generic[T]):
             groups[root].append(key)
         return groups
 
-    def _add(self, key: T) -> bool:
+    def add(self, key: T) -> bool:
         if key in self.parent:
             return False
         self.parent[key] = key

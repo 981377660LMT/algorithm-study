@@ -158,7 +158,7 @@
    - 双向 bfs
    - bfs 求最大深度，dfs 求最小深度
    - 记忆化 dfs
-   - KM 二分图最大权匹配算法
+   - KM 二分图最大权匹配算法 (linear_sum_assignment)
    - MCMF 算法
    - 差分约束
    - spfa 算法的栈优化、堆优化、酸辣粉优化

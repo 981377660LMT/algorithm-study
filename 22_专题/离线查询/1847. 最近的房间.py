@@ -13,7 +13,7 @@ class Solution:
         # 存放房间id
         availRooms = SortedList()
         queries = sorted(
-            [[size, prefer, index] for index, (prefer, size) in enumerate(queries)], reverse=True
+            [[size, prefer, i] for i, (prefer, size) in enumerate(queries)], reverse=True
         )
         rooms = sorted([[size, id] for id, size in rooms], reverse=True)
 
@@ -21,24 +21,22 @@ class Solution:
         ri, qi = 0, 0
         res = [-1] * n
 
-        while qi < n:
-            if ri < m and qi < n and rooms[ri][0] >= queries[qi][0]:
+        for qi in range(n):
+            while ri < m and rooms[ri][0] >= queries[qi][0]:
                 availRooms.add(rooms[ri][1])
                 ri += 1
-            else:
-                if availRooms:
-                    _, prefer, index = queries[qi]
-                    i = availRooms.bisect_right(prefer)
 
-                    # 直接调最右二分，然后看i和i-1，减少了思考难度
-                    cands = []
-                    if i > 0:
-                        cands.append(availRooms[i - 1])
-                    if i < len(availRooms):
-                        cands.append(availRooms[i])
-                    res[index] = min(cands, key=lambda x: abs(x - prefer))
+            if availRooms:
+                _, prefer, index = queries[qi]
+                pos = availRooms.bisect_right(prefer)
 
-                qi += 1
+                # 直接调最右二分，然后看i和i-1，减少了思考难度
+                cands = []
+                if pos > 0:
+                    cands.append(availRooms[pos - 1])
+                if pos < len(availRooms):
+                    cands.append(availRooms[pos])
+                res[index] = min(cands, key=lambda x: abs(x - prefer))
 
         return res
 

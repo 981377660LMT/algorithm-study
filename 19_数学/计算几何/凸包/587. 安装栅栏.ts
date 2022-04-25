@@ -25,7 +25,8 @@ const outerTrees = (points: [x: number, y: number][]) => {
   for (let i = 0; i < points.length; i++) {
     while (
       cand.length >= 2 &&
-      crossProduct(cand[cand.length - 2], cand[cand.length - 1], points[i]) > 0
+      // 顺时针出栈
+      crossProduct(cand[cand.length - 2], cand[cand.length - 1], points[i]) < 0
     ) {
       cand.pop()
     }
@@ -37,7 +38,8 @@ const outerTrees = (points: [x: number, y: number][]) => {
   for (let i = points.length - 1; i >= 0; i--) {
     while (
       cand.length >= 2 &&
-      crossProduct(cand[cand.length - 2], cand[cand.length - 1], points[i]) > 0
+      // 顺时针出栈
+      crossProduct(cand[cand.length - 2], cand[cand.length - 1], points[i]) < 0
     ) {
       cand.pop()
     }

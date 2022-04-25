@@ -265,3 +265,10 @@ namedtuple('Res', ['insert', 'search', 'discard'])(insert, search, discard)
 
 SciPy 是基于 Python 的 NumPy 扩展构建的数学算法和便利函数的集合
 https://zzz5.xyz/2020/05/30/python/scipy/python-scipy-01/
+
+- 一个有用的命令是 dir，可用于查看模块或包的命名空间
+- scipy.integrate 积分
+- scipy.optimize
+  - 多元标量函数的约束/无约束最小化 (minimize )
+  - `scipy.optimize.linear_sum_assignment`
+- scipy.interpolate 插值

@@ -1,3 +1,5 @@
+// 注意如果参数全为number 缓存应该换静态数组（typed Array也可以) key就不用字符串了
+
 interface MemoriedFunction<Args extends readonly any[] = any[], Return = any> {
   (...args: Args): Return
   cacheClear(): void

@@ -26,7 +26,7 @@ def dijkstra(
 ) -> Union[int, List[int]]:
     """时间复杂度O((V+E)logV)"""
     dist = [INF] * n
-    dist[start] = 0
+    dist[start] = 0  # 注意这里不要忘记初始化pq里的
     pq = [(0, start)]
 
     while pq:

@@ -14,19 +14,19 @@ function minDays(bloomDay: number[], m: number, k: number): number {
   let left = 1
   let right = Math.max(...bloomDay)
   while (left <= right) {
-    const waitDay = (left + right) >> 1
-    if (canSatisfy(waitDay)) right = waitDay - 1
-    else left = waitDay + 1
+    const mid = (left + right) >> 1
+    if (check(mid)) right = mid - 1
+    else left = mid + 1
   }
 
   return left
 
-  function canSatisfy(waitDay: number): boolean {
+  function check(mid: number): boolean {
     let flowerCount = 0
     let bouquetCount = 0
 
     for (const bloom of bloomDay) {
-      if (bloom > waitDay) {
+      if (bloom > mid) {
         flowerCount = 0
       } else {
         flowerCount++
@@ -36,7 +36,6 @@ function minDays(bloomDay: number[], m: number, k: number): number {
         }
       }
 
-      // 加速
       if (bouquetCount >= m) return true
     }
 

@@ -1,6 +1,8 @@
 from typing import Iterable, Optional
 from collections import deque
 
+# MonoQueue是一个多了 O(1)求min和max 这两个api的 deque
+
 
 class MonoQueue:
     def __init__(self, iterable: Optional[Iterable[int]] = None) -> None:

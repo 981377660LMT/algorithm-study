@@ -8,7 +8,7 @@ from sortedcontainers import SortedList
 # say nums[y]. Then dp[i] = max(dp[x], dp[y]) + 1
 # n ≤ 1e5
 
-
+# 相邻差绝对值不大于k的最长子序列
 class Solution:
     def solve(self, nums: List[int], k: int) -> int:
         """思路是用一个有序数据结构维护之前的位置"""

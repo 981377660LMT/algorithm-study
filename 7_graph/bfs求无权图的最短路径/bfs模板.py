@@ -21,7 +21,7 @@ def bfs(
 ) -> Union[int, DefaultDict[int, int]]:
     """时间复杂度O(V+E)"""
     dist = defaultdict(lambda: INF, {key: INF for key in adjMap.keys()})
-    dist[start] = 0
+    dist[start] = 0  # 记得初始化啊啊
     queue: Deque[Tuple[int, int]] = deque([(0, start)])
 
     while queue:
