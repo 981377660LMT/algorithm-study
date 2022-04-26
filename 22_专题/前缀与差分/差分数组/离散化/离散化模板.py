@@ -9,7 +9,7 @@ class Discretizer:
         self.allNums = sorted(set(nums))
         self.mapping = {self.allNums[i]: i + 1 for i in range(len(self.allNums))}
 
-    def getDiscretizedValue(self, num: int) -> int:
+    def get(self, num: int) -> int:
         if num not in self.mapping:
             raise ValueError(f'{num} not in discretizer')
         return self.mapping[num]
@@ -52,7 +52,7 @@ class Discretizer:
 
 if __name__ == '__main__':
     discretizer = Discretizer([1, 3, 5, 8, 9])
-    assert discretizer.getDiscretizedValue(5) == 3
+    assert discretizer.get(5) == 3
     assert discretizer.bisectLeft(0) == 1
     assert discretizer.bisectLeft(3) == 2
     assert discretizer.bisectLeft(4) == 3

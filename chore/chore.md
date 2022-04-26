@@ -272,3 +272,7 @@ https://zzz5.xyz/2020/05/30/python/scipy/python-scipy-01/
   - 多元标量函数的约束/无约束最小化 (minimize )
   - `scipy.optimize.linear_sum_assignment`
 - scipy.interpolate 插值
+
+python global 与 nonlocal
+`nonlocal`:表示变量不是当前函数作用域的，是`上一级函数中`的局部变量
+`global`：可以用在任何地方，包括最上层函数中和嵌套函数中，找到`全局变量`

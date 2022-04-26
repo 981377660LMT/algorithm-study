@@ -33,3 +33,22 @@
 
 - 找状态(点)
 - 找转移关系(边)
+
+**dp 的滚动数组(queue)优化空间**
+如果状态转移只发生在相邻行，那么可以用滚动数组优化
+想象 bfs 怎么做的，dp 就怎么做
+从上面一个 dp 队列转移到下面一个 ndp 队列即可
+
+```Python
+dp = [int(1e20)] * 1024  # 这一层的queue
+dp[0] = 0
+
+for i in range(k):
+    ndp = [int(1e20)] * 1024  # 下一层的queue
+    for pre in range(1024):
+          for cur in range(1024):
+              ndp[cur] = min(ndp[cur], dp[pre] + counts[i - 1])
+    dp = ndp  # 转移,C++里写 dp = move(ndp)
+
+return dp[0]
+```

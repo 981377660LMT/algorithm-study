@@ -3,9 +3,11 @@
 import math
 
 # 提示logn二分查找
+
+
 class Solution:
     def nthUglyNumber(self, n: int, a: int, b: int, c: int) -> int:
-        def is_enough(mid: int) -> bool:
+        def check(mid: int) -> bool:
             total = mid // a + mid // b + mid // c - mid // ab - mid // ac - mid // bc + mid // abc
             return total >= n
 
@@ -15,10 +17,10 @@ class Solution:
         bc = b * c // math.gcd(b, c)
         abc = a * bc // math.gcd(a, bc)
 
-        left, right = 1, 10 ** 10
+        left, right = 1, int(1e20)
         while left <= right:
             mid = (left + right) >> 1
-            if is_enough(mid):
+            if check(mid):
                 right = mid - 1
             else:
                 left = mid + 1

@@ -1,4 +1,4 @@
-# abc模式串
+# 寻找abc模式串
 
 
 class Solution:
