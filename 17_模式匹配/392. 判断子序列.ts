@@ -1,22 +1,21 @@
 /**
- * @param {string} s
- * @param {string} t
+ * @param {string} pattern
+ * @param {string} needle
  * @return {boolean}
  * 复杂度O(M+N)
  * @description 缺点：如果t很长 那么都要跑一遍
  */
-var isSubsequence1 = function (s: string, t: string): boolean {
-  let i = 0
+function isSubsequence1(pattern: string, needle: string): boolean {
   let j = 0
-  while (i < s.length && j < t.length) {
-    if (s[i] === t[j]) i++
-    j++
+  for (let i = 0; i < pattern.length; i++) {
+    if (pattern[i] === needle[j]) j++
+    if (j === needle.length) return true
   }
 
-  return i === s.length
+  return false
 }
 
-console.log(isSubsequence1('abc', 'ahbgdc'))
+console.log(isSubsequence1('ahbgdc', 'abc'))
 
 // 如果有大量输入的 S，称作 S1, S2, ... , Sk 其中 k >= 10 亿，
 // 你需要依次检查它们是否为 T 的子序列。在这种情况下，你会怎样改变代码？

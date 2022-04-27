@@ -3,10 +3,10 @@ from bisect import bisect_right
 
 
 class Solution:
-    def isSubsequence(self, s: str, t: str) -> bool:
+    def isSubsequence(self, pattern: str, needle: str) -> bool:
         """check if s is a subsequence of t"""
-        it = iter(t)
-        return all(char in it for char in s)
+        it = iter(pattern)
+        return all(char in it for char in needle)
 
     # 如果有大量输入的 S，称作 S1, S2, ... , Sk 其中 k >= 10亿，你需要依次检查它们是否为 T 的子序列。在这种情况下，你会怎样改变代码？
 

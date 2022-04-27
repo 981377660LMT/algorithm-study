@@ -1,23 +1,23 @@
-function combinations<T>(nums: T[], k: number): T[][] {
-  const res: T[][] = []
+function* combinations<T extends ArrayLike<any>>(sequence: T, select?: number): Generator<T[]> {
+  select = select ?? sequence.length
+  yield* bt(0, [])
 
-  const bt = (cur: number, path: T[]) => {
-    if (path.length === k) return res.push(path.slice())
+  function* bt(pos: number, path: T[]): Generator<T[]> {
+    if (path.length === select) {
+      yield path.slice()
+      return
+    }
 
-    for (let i = cur; i < nums.length; i++) {
-      path.push(nums[i])
-      bt(i + 1, path)
+    for (let i = pos; i < sequence.length; i++) {
+      path.push(sequence[i])
+      yield* bt(i + 1, path) // 唯一的区别在此：是否可取重复的元素
       path.pop()
     }
   }
-
-  bt(0, [])
-
-  return res
 }
 
 if (require.main === module) {
-  console.log(combinations([1, 1, 3, 4], 2))
+  console.log(...combinations([1, 1, 3, 4], 2))
 }
 
 export { combinations }

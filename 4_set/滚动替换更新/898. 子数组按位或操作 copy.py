@@ -2,9 +2,10 @@
 class Solution(object):
     def subarrayBitwiseORs(self, A):
         res = set()
-        cur = {0}
+        dp = {0}
         for x in A:
-            cur = {x | y for y in cur} | {x}
-            res |= cur
+            ndp = {x | y for y in dp} | {x}
+            res |= ndp
+            dp = ndp
         return len(res)
 

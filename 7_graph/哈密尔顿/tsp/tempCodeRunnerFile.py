@@ -1,1 +1,1 @@
-[0, 1, 0]
+dfs(words[i], 1 << i) for i in range(n)

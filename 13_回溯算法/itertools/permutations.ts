@@ -1,24 +1,29 @@
-function permutations<T>(arrs: T[]): T[][] {
-  const res: T[][] = []
+/**
+ * @description 返回值是按顺序从小到大的排列
+ */
+function* permutations<T extends ArrayLike<any>>(sequnce: T, select?: number): Generator<T[]> {
+  select = select ?? sequnce.length
+  yield* bt([], Array(sequnce.length).fill(false))
 
-  const bt = (path: T[], visited: boolean[]) => {
-    if (path.length === arrs.length) return res.push(path.slice())
+  function* bt(path: T[], visited: boolean[]): Generator<T[]> {
+    if (path.length === select) {
+      yield path.slice()
+      return
+    }
 
-    for (let i = 0; i < arrs.length; i++) {
+    for (let i = 0; i < sequnce.length; i++) {
       if (visited[i]) continue
       visited[i] = true
-      path.push(arrs[i])
-      bt(path, visited)
+      path.push(sequnce[i])
+      yield* bt(path, visited)
       path.pop()
       visited[i] = false
     }
   }
-  bt([], [])
-
-  return res
 }
 
 if (require.main === module) {
-  console.log(permutations([1, 1, 0]))
+  console.log(...permutations([3, 2, 1], 2))
 }
+
 export { permutations }

@@ -4,9 +4,11 @@
 # 约数个数：(a1+1)(a2+1)...(ak+1)  考虑每个质因子的贡献即可
 
 from collections import Counter
+from functools import lru_cache
 from math import floor
 
 
+@lru_cache(None)
 def getPrimeFactors(n: int) -> Counter:
     """返回 n 的所有质数因子"""
     res = Counter()

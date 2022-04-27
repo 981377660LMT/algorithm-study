@@ -11,7 +11,7 @@ class Solution:
     def closestToTarget(self, arr: List[int], target: int) -> int:
         """一个数组的所有不同的前缀与和的个数，不会超过第一个数中的 1 的个数，因为每次与上一个新的数，要么值不变，要么消掉当前前缀和中的至少一个 1
         
-        set滚动更新解法  按位与之和最多只有 20 种不同的值 值的`变化的次数`不会超过arr[r] 二进制表示中 1的个数
+        set滚动更新解法
         时间复杂度O(nlog(max(arr))) 
         """
         res = abs(arr[0] - target)

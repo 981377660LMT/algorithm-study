@@ -7,20 +7,20 @@ from typing import List
 # 表明最后的和不超过4900 => 对矩阵每一行，求和并更新
 class Solution:
     def minimizeTheDifference(self, mat: List[List[int]], target: int) -> int:
-        sums = set([0])
         for row in mat:
             row.sort()
+        dp = set([0])
 
         for row in mat:
-            tmp = set()
-            for s in sums:
+            ndp = set()
+            for s in dp:
                 for v in row:
-                    tmp.add(s + v)
+                    ndp.add(s + v)
                     if s + v >= target:
                         break
-            sums = tmp
+            dp = ndp
 
-        return min(abs(s - target) for s in sums)
+        return min(abs(s - target) for s in dp)
 
 
 print(Solution().minimizeTheDifference(mat=[[1, 2, 3], [4, 5, 6], [7, 8, 9]], target=13))

@@ -1,8 +1,10 @@
 # 约数之和
 from collections import Counter
+from functools import lru_cache
 from math import floor
 
 
+@lru_cache(None)
 def getPrimeFactors(n: int) -> Counter:
     """返回 n 的所有质数因子"""
     res = Counter()

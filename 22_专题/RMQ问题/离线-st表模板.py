@@ -1,4 +1,4 @@
-from math import ceil, log, log2
+from math import ceil, floor, log2
 from typing import Any, Generic, List, TypeVar
 
 T = TypeVar('T', int, float)
@@ -9,7 +9,7 @@ T = TypeVar('T', int, float)
 class SparseTable(Generic[T]):
     def __init__(self, nums: List[T]):
         n, upper = len(nums), ceil(log2(len(nums))) + 1
-        self._nums = nums
+        self._n = n
         self._dp1: List[List[Any]] = [[0] * upper for _ in range(n)]
         self._dp2: List[List[Any]] = [[0] * upper for _ in range(n)]
         for i, num in enumerate(nums):
@@ -24,8 +24,8 @@ class SparseTable(Generic[T]):
 
     def query(self, left: int, right: int, *, ismax=True) -> T:
         """[left,right]区间的最大值"""
-        assert 0 <= left <= right < len(self._nums)
-        k = int(log(right - left + 1) / log(2))
+        # assert 0 <= left <= right < self._n
+        k = floor(log2(right - left + 1))
         if ismax:
             return max(self._dp1[left][k], self._dp1[right - (1 << k) + 1][k])
         else:

@@ -3,10 +3,11 @@
 class Solution:
     def solve(self, nums):
         res = set()
-        cur = set()
+        dp = set()
         for num in nums:
-            cur = {num | pre for pre in cur} | {num}
-            res |= cur
+            ndp = {num | pre for pre in dp} | {num}
+            res |= ndp
+            dp = ndp
         return len(res)
 
 

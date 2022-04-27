@@ -40,6 +40,7 @@ const calculate = function (s: string): number {
     if (!opt.has(token)) {
       numStack.push(parseInt(token))
     } else {
+      // 左括号和各种运算符
       if (token !== ')') {
         while (
           optStack.length &&
@@ -50,6 +51,7 @@ const calculate = function (s: string): number {
         }
         optStack.push(token)
       } else {
+        // 右括号
         while (optStack.length && optStack[optStack.length - 1] !== '(') {
           const [num2, num1] = [numStack.pop(), numStack.pop()] as [number, number]
           numStack.push(evaluate[optStack.pop()!](num1, num2))

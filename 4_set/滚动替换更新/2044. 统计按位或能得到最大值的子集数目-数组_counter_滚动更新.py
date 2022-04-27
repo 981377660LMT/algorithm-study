@@ -13,11 +13,11 @@ class Solution:
         # return counter[max(counter)]
 
         # counter滚动更新
-        counter = Counter({0: 1})
+        dp = Counter({0: 1})
         for num in nums:
-            for key, count in list(counter.items()):
-                counter[key | num] += count
-        return counter[max(counter)]
+            for key, count in list(dp.items()):
+                dp[key | num] += count
+        return dp[max(dp)]
 
 
 print(Solution().countMaxOrSubsets(nums=[3, 2, 1, 5]))
