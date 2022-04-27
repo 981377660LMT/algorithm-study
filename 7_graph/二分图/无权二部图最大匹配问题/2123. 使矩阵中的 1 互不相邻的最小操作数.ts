@@ -1,7 +1,7 @@
 // 相邻两个1组成一条边，每条边都要去掉一个端点，
 // 其实是找最小点覆盖，即求二分图的最大匹配，跑匈牙利算法
-
 // https://leetcode-cn.com/problems/minimum-operations-to-remove-adjacent-ones-in-matrix/solution/typescript-tle-7489-by-cao-mei-nai-xi-i-kq07/
+// 2123. 使矩阵中的 1 互不相邻的最小操作数
 const DIR4 = [
   [-1, 0],
   [0, 1],
