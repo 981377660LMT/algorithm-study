@@ -1,28 +1,28 @@
 /**
- * @param {string} haystack
+ * @param {string} pattern
  * @param {string} needle
  * @return {number}
- * @description 在 haystack 字符串中找出 needle 字符串出现的第一个位置（下标从 0 开始）。
+ * @description 在 pattern 字符串中找出 needle 字符串出现的第一个位置（下标从 0 开始）。
  * 如果不存在，则返回  -1 。如果needle是空字符串，则返回0。
  * 相当于实现indexOf
  * v8引擎中,indexOf使用了kmp和bm两种算法,在主串长度小于7时使用kmp,大于7的时候使用bm
  * @summary kmp比暴力解法好
  */
-function strStr(haystack: string, needle: string): number {
+function strStr(pattern: string, needle: string): number {
   if (needle.length === 0) return 0
-  if (haystack.length < needle.length) return -1
+  if (pattern.length < needle.length) return -1
 
   const next = getNext(needle)
-  let hit = 0
-  for (let i = 0; i < haystack.length; i++) {
-    while (hit > 0 && haystack[i] !== needle[hit]) {
-      hit = next[hit - 1]
+  let hitJ = 0
+  for (let i = 0; i < pattern.length; i++) {
+    while (hitJ > 0 && pattern[i] !== needle[hitJ]) {
+      hitJ = next[hitJ - 1]
     }
 
-    if (haystack[i] === needle[hit]) hit++
+    if (pattern[i] === needle[hitJ]) hitJ++
 
     // 找到头了
-    if (hit === needle.length) {
+    if (hitJ === needle.length) {
       return i - needle.length + 1
     }
   }
@@ -38,7 +38,7 @@ function getNext(pattern: string): number[] {
 
   for (let i = 1; i < pattern.length; i++) {
     while (j > 0 && pattern[i] !== pattern[j]) {
-      //  回退到最长公共前缀结尾处
+      //  前进到最长公共后缀结尾处
       j = next[j - 1]
     }
 

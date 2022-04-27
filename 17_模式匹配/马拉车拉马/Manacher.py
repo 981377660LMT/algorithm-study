@@ -4,9 +4,7 @@ from typing import List, Optional
 class Manacher:
     '''马拉车算法 O(n)
 
-    计算字符串的所有回文信息
-    适用场景：字符串回文匹配问题
-    https://oi-wiki.org/string/manacher/
+    https://github.com/981377660LMT/algorithm-study/blob/master/17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E9%A9%AC%E6%8B%89%E8%BD%A6%E6%8B%89%E9%A9%AC/Manacher.py
     '''
 
     def __init__(self, s: str):
@@ -30,6 +28,13 @@ class Manacher:
                 length = 2 * radius - 1
                 self._maxOdd1[start] = max(self._maxOdd1[start], length)
                 self._maxOdd2[end] = max(self._maxOdd2[end], length)
+
+            # 根据左右更新端点
+            for i in range(self._n):
+                if i - 1 >= 0:
+                    self._maxOdd1[i] = max(self._maxOdd1[i], self._maxOdd1[i - 1] - 2)
+                if i + 1 < self._n:
+                    self._maxOdd2[i] = max(self._maxOdd2[i], self._maxOdd2[i + 1] - 2)
         return self._maxOdd1[index]
 
     def getLongestOddEndsAt(self, index: int) -> int:
@@ -43,6 +48,13 @@ class Manacher:
                 length = 2 * radius - 1
                 self._maxOdd1[start] = max(self._maxOdd1[start], length)
                 self._maxOdd2[end] = max(self._maxOdd2[end], length)
+
+            # 根据左右更新端点
+            for i in range(self._n):
+                if i - 1 >= 0:
+                    self._maxOdd1[i] = max(self._maxOdd1[i], self._maxOdd1[i - 1] - 2)
+                if i + 1 < self._n:
+                    self._maxOdd2[i] = max(self._maxOdd2[i], self._maxOdd2[i + 1] - 2)
         return self._maxOdd2[index]
 
     def getLongestEvenStartsAt(self, index: int) -> int:
@@ -127,11 +139,61 @@ class Manacher:
                 right = i + k
         return res
 
+    def __len__(self) -> int:
+        return self._n
+
 
 if __name__ == '__main__':
-    manacher = Manacher('aaaab')
-    assert manacher.getLongestEvenStartsAt(0) == 4
-    assert manacher.getLongestEvenEndsAt(3) == 4
-    assert manacher.getLongestOddStartsAt(0) == 3
-    assert manacher.getLongestOddEndsAt(4) == 1
+    m1 = Manacher('aaaab')
+    assert m1.getLongestEvenStartsAt(0) == 4
+    assert m1.getLongestEvenEndsAt(3) == 4
+    assert m1.getLongestOddStartsAt(0) == 3
+    assert m1.getLongestOddEndsAt(4) == 1
+
+    m2 = Manacher("ggbswiymmlevedhkbdhntnhdbkhdevelmmyiwsbgg")
+    res = [m2.getLongestOddStartsAt(i) for i in range(len(m2))]
+    target = [
+        41,
+        39,
+        37,
+        35,
+        33,
+        31,
+        29,
+        27,
+        25,
+        23,
+        21,
+        19,
+        17,
+        15,
+        13,
+        11,
+        9,
+        7,
+        5,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+    ]
+    assert res == target
 

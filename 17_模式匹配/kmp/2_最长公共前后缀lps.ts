@@ -6,30 +6,31 @@
  * 关键是构造出lps数组
  */
 const longestPrefix = function (s: string): string {
-  const lps = getLPS(s)
+  const lps = getNext(s)
   return s.slice(0, lps[s.length - 1])
 }
 
-// 求lps数组
-const getLPS = (pattern: string): number[] => {
+// 求next数组
+const getNext = (needle: string): number[] => {
   // lps[i]表示[0,i]这一段字符串中lps的长度
-  const lps: number[] = []
+  const next = Array<number>(needle.length).fill(0)
   let j = 0
-  lps.push(j)
 
-  for (let i = 1; i < pattern.length; i++) {
-    while (j > 0 && pattern[i] !== pattern[j]) {
-      //  回退到最长公共前缀结尾处
-      j = lps[j - 1]
+  for (let i = 1; i < needle.length; i++) {
+    while (j > 0 && needle[i] !== needle[j]) {
+      //  前进到最长公共前缀结尾处
+      j = next[j - 1]
     }
-    if (pattern[i] === pattern[j]) j++
-    lps.push(j)
+    if (needle[i] === needle[j]) j++
+    next[i] = j
   }
 
-  return lps
+  return next
 }
 
-console.log(getLPS('abcdabgabca'))
-console.log(longestPrefix('ababab'))
-// "abab"
-export { getLPS }
+if (require.main === module) {
+  console.log(getNext('abcdabgabca'))
+  console.log(longestPrefix('ababab'))
+  // "abab"
+}
+export { getNext }

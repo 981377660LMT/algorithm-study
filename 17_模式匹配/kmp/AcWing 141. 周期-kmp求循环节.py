@@ -8,15 +8,15 @@ from typing import List
 # input = lambda: sys.stdin.readline().strip()
 
 
-def getNext(pattren: str) -> List[int]:
-    next = [0] * len(pattren)
+def getNext(needle: str) -> List[int]:
+    next = [0] * len(needle)
     j = 0
 
-    for i in range(1, len(pattren)):
-        while j and pattren[i] != pattren[j]:
+    for i in range(1, len(needle)):
+        while j and needle[i] != needle[j]:
             j = next[j - 1]
 
-        if pattren[i] == pattren[j]:
+        if needle[i] == needle[j]:
             j += 1
 
         next[i] = j

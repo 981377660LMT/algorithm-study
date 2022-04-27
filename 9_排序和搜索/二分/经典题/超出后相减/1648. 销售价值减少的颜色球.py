@@ -26,7 +26,7 @@ MOD = int(1e9 + 7)
 class Solution:
     def maxProfit(self, inventory: List[int], orders: int) -> int:
         def check(mid: int) -> bool:
-            """订单数大于order的最后卖出最小价值"""
+            """订单数`大于`order的最后卖出最小价值"""
             count = 0
             for num in inventory:
                 count += max(0, num - mid)
@@ -34,8 +34,8 @@ class Solution:
                     return True
             return False
 
-        left = 0
-        right = int(1e10)
+        left = 1
+        right = int(1e9)
         while left <= right:
             mid = (left + right) >> 1
             # 超出orders才回升
