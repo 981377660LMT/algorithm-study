@@ -1,6 +1,7 @@
 from typing import List
 from collections import defaultdict
 
+# 2015. 每段建筑物的平均高度
 # 将重叠区间内的所有大楼高度求平均值，返回这些区域可进行分段的大楼跨度及其高度平均值数组
 # 且遇到楼层平均高度相同的相邻区间时要合并
 # 1943. 描述绘画结果-扫描.py
@@ -11,29 +12,30 @@ from collections import defaultdict
 class Solution:
     def averageHeightOfBuildings(self, buildings: List[List[int]]) -> List[List[int]]:
         # 总高度，个数
-        deltaDict = defaultdict(lambda: [0, 0])
+        diff = defaultdict(lambda: [0, 0])
         for start, end, delta in buildings:
-            deltaDict[start][0] += delta
-            deltaDict[end][0] -= delta
-            deltaDict[start][1] += 1
-            deltaDict[end][1] -= 1
+            diff[start][0] += delta
+            diff[end][0] -= delta
+            diff[start][1] += 1
+            diff[end][1] -= 1
 
         res = []
         # 区间起点，高度累加，个数累加
-        pre, preSum, preCount = 0, 0, 0
-        for cur in sorted(deltaDict):
-            delta, deltaCount = deltaDict[cur]
-            if preSum > 0:
-                cand = [pre, cur, preSum // preCount]
+        curPos, curSum, curCount = 0, 0, 0
+        for key in sorted(diff):
+            delta, deltaCount = diff[key]
+            if curSum > 0:
+                cand = [curPos, key, curSum // curCount]
+
                 # 区间合并
-                if res and res[-1][1] == pre and res[-1][2] == cand[2]:
-                    res[-1][1] = cur
+                if res and res[-1][1] == curPos and res[-1][2] == cand[2]:
+                    res[-1][1] = key
                 else:
                     res.append(cand)
 
-            pre = cur
-            preSum += delta
-            preCount += deltaCount
+            curPos = key
+            curSum += delta
+            curCount += deltaCount
 
         return res
 

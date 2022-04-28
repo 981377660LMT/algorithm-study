@@ -2,7 +2,7 @@
 # 换言之，对于每一个从头开始的长度为 i（i>1）的前缀，是否由重复出现的子串 A 组成，即 AAA…A （A 重复出现 K 次,K>1）。
 # 如果存在，请找出最短的循环节对应的 K 值（也就是这个前缀串的所有可能重复节中，最大的 K 值）。
 
-import sys
+
 from typing import List
 
 # input = lambda: sys.stdin.readline().strip()

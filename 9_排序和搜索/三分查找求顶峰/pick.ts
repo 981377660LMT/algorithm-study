@@ -21,3 +21,5 @@ function search(left: number, right: number) {
     else right = mid
   }
 }
+
+export {}

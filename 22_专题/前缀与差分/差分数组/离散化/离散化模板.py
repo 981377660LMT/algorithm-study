@@ -51,12 +51,12 @@ class Discretizer:
 
 
 if __name__ == '__main__':
-    discretizer = Discretizer([1, 3, 5, 8, 9])
-    assert discretizer.get(5) == 3
-    assert discretizer.bisectLeft(0) == 1
-    assert discretizer.bisectLeft(3) == 2
-    assert discretizer.bisectLeft(4) == 3
-    assert discretizer.bisectRight(4) == 2
-    assert discretizer.bisectRight(5) == 3
-    assert discretizer.bisectRight(10) == 5
+    D = Discretizer([1, 3, 5, 8, 9])
+    assert D.get(5) == 3
+    assert D.bisectLeft(0) == 1
+    assert D.bisectLeft(3) == 2
+    assert D.bisectLeft(4) == 3
+    assert D.bisectRight(4) == 2
+    assert D.bisectRight(5) == 3
+    assert D.bisectRight(10) == 5
 

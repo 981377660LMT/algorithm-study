@@ -1,5 +1,4 @@
 from collections import defaultdict
-from re import S
 
 
 class TrieNode:

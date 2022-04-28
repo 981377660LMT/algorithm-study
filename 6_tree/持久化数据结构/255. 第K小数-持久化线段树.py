@@ -57,6 +57,7 @@ sortedNums = sorted(nums)  # sorted(set(nums)) 会超时
 mapping = {sortedNums[i]: i for i in range(len(sortedNums))}
 
 # 默认查[0, N - 1]区间
+# 前缀和
 trees = [Node(0, n - 1).build()]
 for num in nums:
     trees.append(trees[-1].update(mapping[num]))

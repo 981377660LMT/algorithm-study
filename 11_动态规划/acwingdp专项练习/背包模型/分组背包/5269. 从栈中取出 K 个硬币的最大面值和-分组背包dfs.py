@@ -31,7 +31,7 @@ class Solution:
         n = len(piles)
         preSums = []
         for i in range(n):
-            preSums.append([0] + list(accumulate(piles[i])))
+            preSums.append(list(accumulate(piles[i], initial=0)))
 
         res = dfs(0, k)
         dfs.cache_clear()

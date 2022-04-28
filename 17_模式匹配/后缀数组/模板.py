@@ -1,5 +1,3 @@
-
-
 # https://github.dev/boristown/leetcode
 
 '''
@@ -391,12 +389,27 @@ def lmsSubstringsAreEqual(string, typemap, offsetA, offsetB):
         i += 1
 
 
-def makeRKwithSA(SA):
+def makeRKOfSA(SA):
     n = len(SA)
     RK = [0] * n
     for i in range(n):
         RK[SA[i]] = i
     return RK
+
+
+# def makeHeightOfSA(s, SA, RK):
+#     k = 0
+#     n = len(SA)
+#     H = [0] * n
+#     for i in range(1, n + 1):
+#         if RK[i] == 0:
+#             continue
+#         if k:
+#             k -= 1
+#         while s[i + k] == s[SA[RK[i] - 1] + k]:
+#             k += 1
+#         H[RK[i]] = k
+#     return H
 
 
 if __name__ == '__main__':
@@ -405,8 +418,8 @@ if __name__ == '__main__':
     # 其中,sa[i]表示将所有后缀排序后第i小的后缀的编号。rk[i]表示后缀i的排名。
     # https://oi-wiki.org/string/sa/
     s = 'aabaaaab'
+    # s = 'abcd'
     SA = makeSuffixArray(s)
     print("sa:", SA)
-    RK = makeRKwithSA(SA)
+    RK = makeRKOfSA(SA)
     print("rk:", RK)
-

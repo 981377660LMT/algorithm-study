@@ -4,7 +4,7 @@ from typing import List
 def getNext(needle: str) -> List[int]:
     """kmp O(n)求 `needle`串的 `next`数组
 
-    `next[i]`表示`[:i+1]`这一段字符串中最长公共前后缀(不含这一段字符串本身)的长度
+    `next[i]`表示`[:i+1]`这一段字符串中最长公共前后缀(不含这一段字符串本身,即真前后缀)的长度
     https://www.ruanyifeng.com/blog/2013/05/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm.html
     """
     next = [0] * len(needle)

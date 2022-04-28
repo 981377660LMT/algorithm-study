@@ -12,17 +12,17 @@ from collections import defaultdict
 # 扫描线：记录pre,扫描cur
 class Solution:
     def splitPainting(self, segments: List[List[int]]) -> List[List[int]]:
-        dic = defaultdict(int)
+        diff = defaultdict(int)
         for left, right, delta in segments:
-            dic[left] += delta
-            dic[right] -= delta
+            diff[left] += delta
+            diff[right] -= delta
 
         res = []
         pre = -1
-        for cur in sorted(dic):
-            if dic[pre] > 0:
-                res.append([pre, cur, dic[pre]])
-            dic[cur] += dic[pre]
+        for cur in sorted(diff):
+            if diff[pre] > 0:
+                res.append([pre, cur, diff[pre]])
+            diff[cur] += diff[pre]
             pre = cur
         return res
 

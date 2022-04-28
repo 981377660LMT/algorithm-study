@@ -3,16 +3,16 @@
  * @param arr
  * @returns 笛卡尔积
  */
-function* product<T extends Iterable<any>>(...sequence: T[]): Generator<T[]> {
+function* product<T extends Iterable<any>>(...iterables: T[]): Generator<T[]> {
   yield* bt(0, [])
 
   function* bt(i: number, path: T[]): Generator<T[]> {
-    if (path.length === sequence.length) {
+    if (path.length === iterables.length) {
       yield path.slice()
       return
     }
 
-    for (const choose of sequence[i]) {
+    for (const choose of iterables[i]) {
       path.push(choose)
       yield* bt(i + 1, path)
       path.pop()
