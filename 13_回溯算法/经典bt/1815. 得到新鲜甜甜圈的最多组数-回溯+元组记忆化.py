@@ -6,6 +6,8 @@ from typing import List, Tuple
 # 1 <= groups[i] <= 109
 
 # 有点像1655. 分配重复整数
+
+
 class Solution:
     def maxHappyGroups(self, batchSize: int, groups: List[int]) -> int:
         @lru_cache(None)

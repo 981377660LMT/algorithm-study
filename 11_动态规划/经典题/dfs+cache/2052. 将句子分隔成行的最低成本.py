@@ -1,13 +1,14 @@
-import functools
 import sys
 from functools import lru_cache
 
-sys.setrecursionlimit(1000000)
+sys.setrecursionlimit(int(1e9))
 
 # 有点像放📕那道题
 # 1105. 填充书架..py
 
 # 每行最多k个字符
+
+
 class Solution:
     def minimumCost2(self, sentence: str, k: int) -> int:
         # dp[i] 表示以第i个单词为某行最后一个单词的最小代价
@@ -19,7 +20,7 @@ class Solution:
 
         # 为什么记忆化没用了  => 因为 width 不能做状态
         @lru_cache(None)
-        def dfs(index, width) -> int:
+        def dfs(index: int, width: int) -> int:
             if index == n:
                 return 0
             res = dfs(index + 1, word_len[index]) + (k - width) ** 2
@@ -29,12 +30,12 @@ class Solution:
 
         return dfs(1, word_len[0])
 
-    # 改用dfs+剪枝
-
     def minimumCost(self, sentence: str, k: int) -> int:
+        """搜索的时候也可以剪枝"""
         word_lens = list(map(len, sentence.split(' ')))
         res = 0x7FFFFFFF
 
+        @lru_cache(None)
         def dfs(index: int, width: int, pathSum: int) -> None:
             nonlocal res
 

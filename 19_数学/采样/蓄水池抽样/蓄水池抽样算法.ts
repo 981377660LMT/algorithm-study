@@ -1,3 +1,4 @@
+// https://leetcode.cn/problems/linked-list-random-node/solution/gong-shui-san-xie-xu-shui-chi-chou-yang-1lp9d/
 // 给定一个数据流，数据流长度N很大，
 // 且N直到处理完所有数据之前都不可知，
 // 请问如何在只遍历一遍数据（O(N)）的情况下，

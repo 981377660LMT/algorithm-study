@@ -1,10 +1,5 @@
 from typing import List
 
-from sortedcollections import SortedList
-
-# https://www.nowcoder.com/practice/50e1a93989df42efb0b1dec386fb4ccc?tpId=230&tqId=2024519&ru=/ta/dynamic-programming&qru=/ta/dynamic-programming/question-ranking
-# https://leetcode-cn.com/problems/stamping-the-grid/solution/er-wei-qian-zhui-he-er-wei-chai-fen-bao-gru6t/
-
 
 class DiffMatrix:
     """二维差分模板(矩阵可变)"""
