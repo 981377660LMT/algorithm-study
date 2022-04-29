@@ -1,4 +1,5 @@
 from typing import List
+from sortedcontainers import SortedList
 
 
 class PreSumMatrix:
@@ -40,4 +41,18 @@ class Solution:
         把前缀和记录到有序集合里，然后二分寻找 O(m*n*min(m,n)log(min(m,n)))
         如果行数远大于列数，可以先转置矩阵
         """
+        ROW, COL = len(matrix), len(matrix[0])
+        P = PreSumMatrix(matrix)
+        res = -int(1e20)
 
+        for r1 in range(ROW):
+            for r2 in range(r1, ROW):
+                sl, curSum = SortedList([0]), 0
+                for c in range(COL):
+                    curSum += P.sumRegion(r1, c, r2, c)
+                    pos = sl.bisect_left(curSum - k)
+                    if pos != len(sl):
+                        res = max(res, curSum - sl[pos])
+                    sl.add(curSum)
+
+        return res

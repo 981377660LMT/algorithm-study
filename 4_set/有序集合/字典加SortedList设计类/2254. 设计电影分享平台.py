@@ -1,6 +1,6 @@
 # from collections import defaultdict
 from heapq import heappop, heappush
-from typing import Any, List
+from typing import Any, Dict, List, Optional
 
 
 # 1. 因为要动态维护idPool最小值，所以要用堆/有序集合
@@ -11,7 +11,7 @@ from typing import Any, List
 class Video:
     def __init__(self, content: str):
         self.content = content
-        self.platform = None
+        self.platform: Optional['VideoSharingPlatform'] = None
         self.id = -1
         self.view = 0
         self.like = 0
@@ -24,7 +24,7 @@ class Video:
         self.platform.videoById[self.id] = self
         return self.id
 
-    def destroy(self) -> int:
+    def unregister(self) -> int:
         if self.platform is None:
             return -1
         self.platform.idByVideo.pop(self)
@@ -61,8 +61,8 @@ class VideoSharingPlatform:
 
     def __init__(self):
         self.idPool = list(range(int(1e5 + 10)))
-        self.videoById = dict()
-        self.idByVideo = dict()
+        self.videoById: Dict[int, Video] = dict()
+        self.idByVideo: Dict[Video, int] = dict()
 
     def upload(self, video: str) -> int:
         """上传电影,返回电影id"""
@@ -72,7 +72,7 @@ class VideoSharingPlatform:
     def remove(self, videoId: int) -> None:
         """删除电影"""
         if videoId in self.videoById:
-            self.videoById[videoId].destroy()
+            self.videoById[videoId].unregister()
 
     def watch(self, videoId: int, startMinute: int, endMinute: int) -> str:
         """看电影,如果这部电影存在,那么观看数+1并返回看的这一段电影内容(闭区间),否则返回"-1"""

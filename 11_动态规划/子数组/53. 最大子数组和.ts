@@ -21,6 +21,8 @@ function kanade(nums: number[], getMax = true): number {
   return res
 }
 
-// console.log(maxSubArray([-2, 1, -3, 4, -1, 2, 1, -5, 4]))
+if (require.main === module) {
+  console.log(kanade([-2, 1, -3, 4, -1, 2, 1, -5, 4]))
+}
 
 export { kanade }

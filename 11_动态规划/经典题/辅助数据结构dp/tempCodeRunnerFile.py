@@ -1,1 +1,0 @@
-preMin + counts[i - 1]

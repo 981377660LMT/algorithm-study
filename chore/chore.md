@@ -285,3 +285,14 @@ python global 与 nonlocal
 list(accumulate(piles[i], initial=0)
 [0]+list(accumulate(piles[i])
 ```
+
+## js 防止堆溢出(MLE)的方法
+
+- 用 dp 而不是 dfs
+- 用数组而不是对象(XORTrie)
+- 用 TypedArray
+
+```JS
+const dp = Array.from({ length: n + 1 }, () => new Uint32Array(sqrt + 1))
+// const dp = Array.from({ length: n + 1 }, () => Array(sqrt + 1).fill(0))
+```

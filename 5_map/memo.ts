@@ -9,7 +9,7 @@ interface MemoriedFunction<Args extends readonly any[] = any[], Return = any> {
  * @param {Function} wrappedFunc
  * @param { (...args: any[]) => string } resolver cache key generator 决定缓存key的参数
  */
-function memo<Args extends readonly any[] = any[], Return = any>(
+function useMemoMap<Args extends readonly any[] = any[], Return = any>(
   wrappedFunc: (...args: Args) => Return,
   resolver: (...args: readonly any[]) => string = (...args) => args.join('_')
 ): MemoriedFunction<Args, Return> {
@@ -28,4 +28,4 @@ function memo<Args extends readonly any[] = any[], Return = any>(
   return memorizedFunc
 }
 
-export { memo }
+export { useMemoMap }

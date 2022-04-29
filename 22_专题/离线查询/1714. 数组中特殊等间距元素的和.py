@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import List
 
 MOD = int(1e9 + 7)
@@ -6,28 +7,20 @@ MOD = int(1e9 + 7)
 # xi <= j < n 且 (j - xi) 能被 yi 整除。 (即分段点的和)
 
 # 离线查询：先map后排序再处理，优先处理范围小的query，后面再扩大范围时直接去cache里取
-class Solution:
-    # 无缓存，超时
-    def solve1(self, nums: List[int], queries: List[List[int]]) -> List[int]:
-        m, n = len(nums), len(queries)
-        res = [0] * n
-        for i in sorted(range(n), key=lambda id: -queries[id][0]):
-            start, step = queries[i]
-            total = sum(nums[start::step]) % MOD
-            res[i] = total
-        return res
 
+
+class Solution:
     def solve(self, nums: List[int], queries: List[List[int]]) -> List[int]:
         m, n = len(nums), len(queries)
+        queries = sorted(([x, y, i] for i, (x, y) in enumerate(queries)), reverse=True)
         res = [0] * n
         # 保存前一次的start 和 res ,key为start%step 与step
         memo = dict()
-        for i in sorted(range(n), key=lambda id: -queries[id][0]):
-            start, step = queries[i]
+        for start, step, qi in queries:
             preStart, preRes = memo.get((start % step, step), (m, 0))
-            total = (sum(nums[start:preStart:step]) + preRes) % MOD
-            res[i] = total
-            memo[(start % step, step)] = (start, total)
+            curRes = (sum(nums[start:preStart:step]) + preRes) % MOD
+            res[qi] = curRes
+            memo[(start % step, step)] = (start, curRes)
         return res
 
 
