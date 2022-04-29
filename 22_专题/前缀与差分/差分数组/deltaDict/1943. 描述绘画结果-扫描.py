@@ -10,6 +10,8 @@ from collections import defaultdict
 # 会议室问题
 
 # 扫描线：记录pre,扫描cur
+
+
 class Solution:
     def splitPainting(self, segments: List[List[int]]) -> List[List[int]]:
         diff = defaultdict(int)
@@ -18,12 +20,12 @@ class Solution:
             diff[right] -= delta
 
         res = []
-        pre = -1
-        for cur in sorted(diff):
-            if diff[pre] > 0:
-                res.append([pre, cur, diff[pre]])
-            diff[cur] += diff[pre]
-            pre = cur
+        start, curSum = -1, 0
+        for key in sorted(diff):
+            if curSum > 0:
+                res.append([start, key, curSum])
+            start = key
+            curSum += diff[key]
         return res
 
 

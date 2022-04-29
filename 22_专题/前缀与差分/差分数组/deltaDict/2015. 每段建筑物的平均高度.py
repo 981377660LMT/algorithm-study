@@ -13,9 +13,9 @@ class Solution:
     def averageHeightOfBuildings(self, buildings: List[List[int]]) -> List[List[int]]:
         # 总高度，个数
         diff = defaultdict(lambda: [0, 0])
-        for start, end, delta in buildings:
-            diff[start][0] += delta
-            diff[end][0] -= delta
+        for start, end, deltaHeight in buildings:
+            diff[start][0] += deltaHeight
+            diff[end][0] -= deltaHeight
             diff[start][1] += 1
             diff[end][1] -= 1
 
@@ -23,18 +23,18 @@ class Solution:
         # 区间起点，高度累加，个数累加
         curPos, curSum, curCount = 0, 0, 0
         for key in sorted(diff):
-            delta, deltaCount = diff[key]
+            deltaHeight, deltaCount = diff[key]
             if curSum > 0:
                 cand = [curPos, key, curSum // curCount]
 
-                # 区间合并
+                # 楼层平均高度相同的相邻区间时要合并
                 if res and res[-1][1] == curPos and res[-1][2] == cand[2]:
                     res[-1][1] = key
                 else:
                     res.append(cand)
 
             curPos = key
-            curSum += delta
+            curSum += deltaHeight
             curCount += deltaCount
 
         return res

@@ -31,7 +31,9 @@ class Node {
  * 返回一个表示 n * n 二进制矩阵的四叉树，它是 quadTree1 和 quadTree2 所表示的两个二进制矩阵进行 按位逻辑或运算 的结果
  */
 function intersect(quadTree1: Node | null, quadTree2: Node | null): Node | null {
-  const merge = (node1: Node | null, node2: Node | null): Node | null => {
+  return merge(quadTree1, quadTree2)
+
+  function merge(node1: Node | null, node2: Node | null): Node | null {
     // 叶子直接合并
     if (node1?.isLeaf && node2?.isLeaf) {
       return new Node(node1.val || node2.val, true, null, null, null, null)
@@ -56,8 +58,6 @@ function intersect(quadTree1: Node | null, quadTree2: Node | null): Node | null 
 
     return new Node(true, false, topLeft, topRight, bottomLeft, bottomRight)
   }
-
-  return merge(quadTree1, quadTree2)
 }
 
 export {}
