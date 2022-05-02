@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import List
 
 # 一个 连通三元组 指的是 三个 节点组成的集合且这三个点之间 两两 有边。
@@ -12,7 +13,8 @@ INF = 0x7FFFFFFF
 
 
 class Solution:
-    def minTrioDegree(self, n: int, edges: List[List[int]]) -> int:
+    def minTrioDegree1(self, n: int, edges: List[List[int]]) -> int:
+        """时间复杂度O(n^3)"""
         adjList = [[False] * n for _ in range(n)]
         degree = [0] * n
         for u, v in edges:
@@ -27,6 +29,32 @@ class Solution:
                     for k in range(j + 1, n):
                         if adjList[j][k] and adjList[k][i]:
                             res = min(res, degree[i] + degree[j] + degree[k] - 6)
+        return res if res < INF else -1
+
+    # 给无向图定向减少重复枚举次数
+    # 边的方向定为从度数小的点连向度数大的点
+    # https://leetcode-cn.com/problems/minimum-degree-of-a-connected-trio-in-a-graph/solution/gei-wu-xiang-tu-ding-xiang-by-lucifer100-c72d/
+    def minTrioDegree(self, n: int, edges: List[List[int]]) -> int:
+        """时间复杂度O(E^(3/2))"""
+        degree = [0] * n
+        for u, v in edges:
+            degree[u - 1] += 1
+            degree[v - 1] += 1
+
+        adjMap = defaultdict(set)
+        for u, v in edges:
+            u, v = u - 1, v - 1
+            if degree[u] < degree[v] or (degree[u] == degree[v] and u < v):
+                adjMap[u].add(v)
+            else:
+                adjMap[v].add(u)
+
+        res = INF
+        for i in range(n):
+            for j in adjMap[i]:
+                for k in adjMap[j]:
+                    if k in adjMap[i]:
+                        res = min(res, degree[i] + degree[j] + degree[k] - 6)
         return res if res < INF else -1
 
 

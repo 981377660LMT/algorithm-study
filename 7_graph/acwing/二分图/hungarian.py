@@ -3,6 +3,8 @@ from typing import DefaultDict, Set
 
 
 def hungarian(adjMap: DefaultDict[int, Set[int]]) -> int:
+    """时间复杂度O(n * m)"""
+
     def getColor(adjMap: DefaultDict[int, Set[int]]) -> DefaultDict[int, int]:
         """检测二分图并染色"""
 

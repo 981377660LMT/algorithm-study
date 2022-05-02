@@ -3,13 +3,14 @@ from typing import List
 # 2 <= properties.length <= 105
 # 如果存在一个其他角色的攻击和防御等级 都`严格高于` 该角色的攻击和防御等级，则认为该角色为 弱角色
 # 一个降序，一个升序排列即可
+
+
 class Solution:
     def numberOfWeakCharacters(self, properties: List[List[int]]) -> int:
         properties.sort(key=lambda x: (x[0], -x[1]))
-        print(properties)
-        res = 0
-        preMax = -0x7FFFFFFF
 
+        res = 0
+        preMax = -int(1e20)
         # 这里从后往前遍历,因为要获取最大的防御值
         for _, cur in reversed(properties):
             if preMax > cur:

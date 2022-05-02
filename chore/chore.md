@@ -296,3 +296,7 @@ list(accumulate(piles[i], initial=0)
 const dp = Array.from({ length: n + 1 }, () => new Uint32Array(sqrt + 1))
 // const dp = Array.from({ length: n + 1 }, () => Array(sqrt + 1).fill(0))
 ```
+
+## py 里平方根的写法，sqrt 最快
+
+## 为什么迭代器很慢

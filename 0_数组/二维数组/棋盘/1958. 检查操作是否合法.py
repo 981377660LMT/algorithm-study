@@ -6,21 +6,21 @@ from typing import List
 
 # 枚举方向+枚举步数
 
-DIRS = [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]
+DIR8 = [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]
 
 
 class Solution:
     def checkMove(self, board: List[List[str]], rMove: int, cMove: int, color: str) -> bool:
-        for di, dj in DIRS:
-            i, j = rMove + di, cMove + dj
-            step = 0
-            while 0 <= i < 8 and 0 <= j < 8:
-                if board[i][j] == color and step > 0:
+        for dr, dc in DIR8:
+            nr, nc = rMove + dr, cMove + dc
+            midLen = 0
+            while 0 <= nr < 8 and 0 <= nc < 8:
+                if board[nr][nc] == color and midLen > 0:
                     return True
-                if board[i][j] == "." or board[i][j] == color and not step:
+                if board[nr][nc] == "." or board[nr][nc] == color and midLen == 0:
                     break
-                i, j = i + di, j + dj
-                step += 1
+                nr, nc = nr + dr, nc + dc
+                midLen += 1
         return False
 
 

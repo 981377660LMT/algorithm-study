@@ -14,8 +14,8 @@ class Solution:
         rook_row, rook_col = next((i, j) for i in range(8) for j in range(8) if board[i][j] == 'R')
         row_chess = ''.join(board[rook_row][c] for c in range(8) if board[rook_row][c] != '.')
         col_chess = ''.join(board[r][rook_col] for r in range(8) if board[r][rook_col] != '.')
-        print(row_chess, col_chess)
-        print(list(s for s in (row_chess, col_chess)))
+        # print(row_chess, col_chess)
+        # print(list(s for s in (row_chess, col_chess)))
         # 'Rp':右/下 'pR':左/上
         return sum('Rp' in line for line in (row_chess, col_chess)) + sum(
             'pR' in line for line in (row_chess, col_chess)

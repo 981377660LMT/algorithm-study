@@ -26,7 +26,7 @@ class Solution:
 
             for j in range(i, -1, -1):
                 curSum += nums[j]
-                pos = dp[j].bisect_right(curSum) - 1  # 找到第一个大于等于curSum的元素
+                pos = dp[j].bisect_right(curSum) - 1  # 找到第一个小等于curSum的元素
                 if pos < 0:
                     continue
                 okPairs.append((curSum, dp[j].peekitem(pos)[1] + 1))

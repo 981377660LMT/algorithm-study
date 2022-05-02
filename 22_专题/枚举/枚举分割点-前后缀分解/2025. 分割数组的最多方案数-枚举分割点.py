@@ -1,5 +1,5 @@
 from typing import List
-from collections import Counter, defaultdict
+from collections import Counter
 from itertools import accumulate
 
 
@@ -16,29 +16,27 @@ from itertools import accumulate
 # 假设原先元素值为x，那么希望有x + k - nums[i] == (total + k - nums[i]) / 2,
 # 即x = total / 2 - (k - nums[i]) / 2，即统计presum[i,..,n-2]有多少元素值为total / 2 - (k - nums[i]) / 2
 
-# 前缀和+哈希表统计
-# 改变nums[i]   在presum[0,..,i-1] 查询 (total - nums[i] + k) / 2
-#               在presum[i,..,n-2] 查询 total / 2 - (k - nums[i]) / 2
-# 改变nums[i+1] 在presum[0, .., i] 查询 (total - nums[i + 1] + k) / 2
-#               在presum[i + 1,..,n-2] 查询 total / 2 - (k - nums[i + 1]) / 2
-
 
 class Solution:
     def waysToPartition(self, nums: List[int], k: int) -> int:
+        """前缀和+双哈希表+枚举修改元素 O(n)
+        
+        https://leetcode-cn.com/problems/maximum-number-of-ways-to-partition-an-array/solution/qian-zhui-he-ha-xi-biao-mei-ju-xiu-gai-y-l546/
+        """
         n, preSum = len(nums), list(accumulate(nums))
-        left, right, total = defaultdict(int), Counter(preSum[:-1]), preSum[-1]
-        # print(right, total)
+        left, right, sum_ = Counter(), Counter(preSum[:-1]), preSum[-1]
 
         # 不改变
-        res = right[total / 2]
+        res = right[sum_ / 2]
 
         # 改变
         for i in range(n):
             if i > 0:
                 left[preSum[i - 1]] += 1
                 right[preSum[i - 1]] -= 1
-            leftTarget = (total + (k - nums[i])) / 2
-            rightTarget = (total - (k - nums[i])) / 2
+            diff = k - nums[i]
+            leftTarget = (sum_ + diff) / 2
+            rightTarget = (sum_ - diff) / 2
             res = max(res, left[leftTarget] + right[rightTarget])
 
         return res

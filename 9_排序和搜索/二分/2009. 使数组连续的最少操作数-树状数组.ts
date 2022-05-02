@@ -34,12 +34,14 @@ class BIT {
 /**
  * @param {number[]} nums
  * @return {number}
- * 连续数组:排序
+ * @returns 使值域连续的最少操作次数 每个数作为最小值，看需要调整多少个数
+ * @see https://leetcode.cn/problems/minimum-number-of-operations-to-make-array-continuous/solution/hua-chuang-er-fen-shu-zhuang-shu-zu-by-c-35gq/
  */
 const minOperations = function (nums: number[]): number {
   const n = nums.length
   const bit = new BIT(2e9)
-  for (const num of new Set(nums)) bit.add(num, 1)
+  const allNums = new Set(nums)
+  allNums.forEach(num => bit.add(num, 1))
 
   let res = n
   for (const num of nums) {

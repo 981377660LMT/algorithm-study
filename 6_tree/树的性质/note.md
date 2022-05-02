@@ -1,7 +1,5 @@
 ![树的重心](../../images/447bf9065511f5b136989797fc52f50f60c64eaf5b265a87c3fbf12f25c66860.png)
 
-模板：
-
 ```JS
 function findCentre(n: number, edges: [next: number, weight: number][][]): number[] {
   const res: number[] = []
@@ -56,3 +54,45 @@ function dfs(cur: number, parent: number) {
 
 1 那个地方是 cur 用他下面相邻的 next 结点信息更新自己
 2 那个地方是 dfs 准备永远离开 cur 结点 做最后的收尾工作
+
+## 树哈希(树的最小表示法/同构)
+
+子树哈希为 `subtreeHash`
+包含 root 的树哈希为 `${root.val}(${subtreeHash})`
+
+```JS
+function dfs(root: TrieNode): string {
+  const subTree: string[] = []
+  for (const child of root.children.values()) {
+    subTree.push(dfs(child))
+  }
+
+  subTree.sort()
+  root.subtreeHash = subTree.join('')
+  hashCounter.set(root.subtreeHash, (hashCounter.get(root.subtreeHash) || 0) + 1)
+
+  const res = `${root.val}(${root.subtreeHash})`
+  return res
+}
+```
+
+```Python
+    def dfs(s: str, index: int) -> str:
+        subtree = []
+        depthDiff = 0
+        for next in range(index + 1, len(s)):  # 找子树结点
+            depthDiff += 1 if s[next] == '0' else -1
+            if depthDiff == 1 and s[next] == '0':
+                subtree.append(dfs(s, next))
+            if depthDiff < 0:  # 回上面去了
+                break
+
+        # 子树最小表示
+        subtree = deque(sorted(subtree))
+        subtree.appendleft('(')
+        subtree.append(')')
+
+        # 返回整棵树
+        subtree.appendleft('#')  # 当前元素
+        return ''.join(subtree)
+```

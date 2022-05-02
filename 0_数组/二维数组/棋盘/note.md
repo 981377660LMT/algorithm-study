@@ -7,3 +7,14 @@ python 里的 product 函数用于求`各个 iterable 对象的笛卡尔积`，�
 
 1. 描述状态：起点，方向，距离 `(x,y,dx,dy,dist)`
 2. 枚举方向+枚举步数
+
+```Python
+
+for dr, dc in DIR8:
+   nr, nc = r + dr, c + dc
+   while 0 <= nr < row and 0 <= nc < col:
+       ...
+       nr, nc = nr + dr, nc + dc
+
+return res
+```

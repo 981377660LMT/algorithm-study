@@ -20,13 +20,13 @@ class Solution:
         diff = [0] * (max(nums) + 1)
         counter = Counter(nums)
 
-        # 枚举除数divisor(分母)
-        for divisor in counter:
+        # 枚举分母
+        for fenmu in counter:
             # 枚举除数的贡献
-            for dividend in range(divisor, len(diff), divisor):
-                diff[dividend] += counter[divisor]
+            for fenzi in range(fenmu, len(diff), fenmu):
+                diff[fenzi] += counter[fenmu]
         contribution = list(accumulate(diff))
-        # print(preSum)
+
         # 每个数作为分子的贡献
         return sum(contribution[num] for num in nums) % MOD
 

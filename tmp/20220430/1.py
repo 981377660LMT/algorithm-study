@@ -5,6 +5,7 @@ INF = int(1e20)
 
 
 class Solution:
-    def a(self, s: str) -> List[str]:
-        ...
+    def countPrefixes(self, words: List[str], s: str) -> int:
+        return sum(s.startswith(w) for w in words)
+        return sum(1 for w in words if s.startswith(w))
 

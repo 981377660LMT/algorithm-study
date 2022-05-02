@@ -1,4 +1,4 @@
-from types import SimpleNamespace
+# from types import SimpleNamespace
 from collections import namedtuple
 
 
@@ -18,8 +18,7 @@ from collections import namedtuple
 #         ...
 
 
-# 节省空间版
-def useArrayXORTrie(bitLength=31):
+def useXORTrie(bitLength=31):
     trieRoot = [None, None, 0]
 
     def insert(num: int) -> None:
@@ -63,13 +62,15 @@ def useArrayXORTrie(bitLength=31):
     return namedtuple('XORTrie', ['insert', 'search', 'discard'])(insert, search, discard)
 
 
-xorTire = useArrayXORTrie()
-
-xorTire.insert(3)
-xorTire.insert(5)
-xorTire.insert(5)
-print(xorTire.search(4))
-
+if __name__ == '__main__':
+    n = int(input())
+    nums = list(map(int, input().split()))
+    xorTire = useXORTrie()
+    res = 0
+    for num in nums:
+        res = max(res, xorTire.search(num))
+        xorTire.insert(num)
+    print(res)
 
 # https://stackoverflow.com/questions/1528932/how-to-create-inline-objects-with-properties
 # python中像js一样创建对象
