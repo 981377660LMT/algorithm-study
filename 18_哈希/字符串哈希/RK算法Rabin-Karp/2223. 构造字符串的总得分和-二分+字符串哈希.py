@@ -54,7 +54,7 @@ class Solution:
         n = len(s)
         StringHasher.setMOD(151217133020331712151)
         hasher = StringHasher(s)
-
+        # view = memoryview()
         res = 0
         for i in range(1, n + 1):
             if s[-i] != s[0]:

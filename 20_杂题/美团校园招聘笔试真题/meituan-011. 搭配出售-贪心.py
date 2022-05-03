@@ -1,6 +1,3 @@
-from operator import ne
-
-
 a, b, c, d, e, f, g = list(map(int, input().split()))
 
 plans = [(a, e), (b, f), (c, g)]

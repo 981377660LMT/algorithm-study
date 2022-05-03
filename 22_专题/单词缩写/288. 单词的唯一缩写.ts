@@ -1,8 +1,9 @@
 class ValidWordAbbr {
-  private record: Map<string, Set<string>>
+  private readonly record: Map<string, Set<string>>
 
   constructor(dictionary: string[]) {
     this.record = new Map()
+
     for (const word of dictionary) {
       if (word.length <= 2) continue
       const abbr = this.getAbbr(word)
@@ -22,7 +23,7 @@ class ValidWordAbbr {
     return wordSet.has(word) && wordSet.size === 1 // 所有 缩写 与该单词 word 的 缩写 相同的单词都与 word 相同
   }
 
-  private getAbbr(word: string) {
+  private getAbbr(word: string): string {
     if (word.length <= 2) return word
     return `${word[0]}${word.length - 2}${word[word.length - 1]}`
   }

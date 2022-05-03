@@ -1,5 +1,9 @@
+# https://www.acwing.com/problem/content/description/1287/
+
+# 某人读论文，一篇论文是由许多单词组成的。
+# 但他发现一个单词会在论文中出现很多次，现在他想知道每个单词分别在论文中出现多少次。
 import string
-from collections import defaultdict, deque, namedtuple
+from collections import defaultdict, deque, namedtuple, Counter
 from typing import Iterable, List, Tuple
 
 
@@ -9,12 +13,12 @@ from typing import Iterable, List, Tuple
 # 而采用AC自动机,时间复杂度只需O(n+m)。
 
 
-def useAutoMaton(charset: Iterable[str], maxLen: int):
+def useAutoMaton(charset: Iterable[str] = string.ascii_lowercase):
     nodeId = 0
-    trie = [defaultdict(int) for _ in range(maxLen)]
-    nexts = [0] * maxLen  # kmp算法的nexts数组,失配指针
-    count = [0] * maxLen
-    exists = [[] for _ in range(maxLen)]
+    trie = [defaultdict(int)]
+    nexts = [0]  # kmp算法的nexts数组,失配指针
+    count = [0]
+    exists = [[]]
 
     def insert(word: str) -> None:
         nonlocal nodeId
@@ -23,6 +27,10 @@ def useAutoMaton(charset: Iterable[str], maxLen: int):
             if not trie[root][char]:
                 nodeId += 1
                 trie[root][char] = nodeId
+                trie.append(defaultdict(int))
+                nexts.append(0)
+                count.append(0)
+                exists.append([])
             root = trie[root][char]
         count[root] += 1
         exists[root].append(len(word))
@@ -46,33 +54,32 @@ def useAutoMaton(charset: Iterable[str], maxLen: int):
                     nexts[child] = trie[nexts[cur]][char]
                     queue.append(child)
 
-    def search(pattern: str) -> List[Tuple[int, str]]:
+    def search(pattern: str) -> Counter:
         """读入文章开始查询 `pattern` 中包含了AC自动机里的几个单词"""
-        res = []
+        res = Counter()
         root = 0
         for i, char in enumerate(pattern):
             cur = root = trie[root][char]
             while cur and exists[cur]:
                 for len_ in exists[cur]:
-                    res.append((i - len_ + 1, pattern[i - len_ + 1 : i + 1]))
+                    res[pattern[i - len_ + 1 : i + 1]] += 1
                 cur = nexts[cur]
         return res
 
     return namedtuple('AutoMaton', ['insert', 'build', 'search'])(insert, build, search)
 
 
-if __name__ == '__main__':
-    autoMaton = useAutoMaton(string.ascii_lowercase, 10000)
-    autoMaton.insert('he')
-    autoMaton.insert('she')
-    autoMaton.insert('his')
-    autoMaton.insert('hers')
-    autoMaton.build()
-    assert autoMaton.search('ahishershe') == [
-        (1, 'his'),
-        (3, 'she'),
-        (4, 'he'),
-        (4, 'hers'),
-        (7, 'she'),
-        (8, 'he'),
-    ]
+n = int(input())
+ac = useAutoMaton()
+words = [''] * n
+
+for i in range(n):
+    words[i] = input()
+    ac.insert(words[i])
+
+ac.build()
+
+res = ac.search(' '.join(words))
+for word in words:
+    print(res[word])
+

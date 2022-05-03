@@ -12,25 +12,25 @@ from collections import defaultdict
 
 
 # 1. 为了取出端点相同的这一段子数组，我们需要用adjMap保存同种花的index
-# 2. 子数组最大和问题
-# 3. 计算前缀和的时候忽略掉负数，但在最后求和的时候要把两端的负数加上（因为中间的负数花都可以移除，两端不行）
+# 2. 子数组最大和问题=>遇到负数花就变为0
+# 3. 计算前缀和的时候忽略掉负数
 class Solution:
     def maximumBeauty(self, flowers: List[int]) -> int:
-        indexes = defaultdict(list)
-        for i, flower in enumerate(flowers):
-            indexes[flower].append(i)
+        indexMap = defaultdict(list)
+        for i, num in enumerate(flowers):
+            indexMap[num].append(i)
 
         preSum = [0]
-        for flower in flowers:
+        for num in flowers:
             # 处理前缀和的时候忽略负数(剪花)
-            preSum.append(preSum[-1] + max(0, flower))
+            preSum.append(preSum[-1] + max(0, num))
 
-        res = -0x7FFFFFFF
-        for indexes in indexes.values():
-            if len(indexes) <= 1:
+        res = -int(1e20)
+        for num, indexMap in indexMap.items():
+            if len(indexMap) <= 1:
                 continue
-            first, last = indexes[0], indexes[-1]
-            curSum = flowers[first] + flowers[last] + preSum[last] - preSum[first + 1]
+            first, last = indexMap[0], indexMap[-1]
+            curSum = num * 2 + preSum[last] - preSum[first + 1]  # 计算这段区间的非负数最大和
             res = max(res, curSum)
 
         return res

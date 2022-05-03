@@ -7,7 +7,7 @@ class Solution:
     def validWordAbbreviation(self, word: str, abbr: str) -> bool:
         n = len(word)
         count = 0
-        word_idx = 0
+        wordIndex = 0
 
         for char in abbr:
             if char.isdigit():
@@ -16,13 +16,13 @@ class Solution:
                     return False
                 count = count * 10 + int(char)
             else:
-                word_idx += count
-                if word_idx >= n or word[word_idx] != char:
+                wordIndex += count
+                if wordIndex >= n or word[wordIndex] != char:
                     return False
                 count = 0
-                word_idx += 1
+                wordIndex += 1
 
-        return word_idx + count == n
+        return wordIndex + count == n
 
 
 # 输入：word = "internationalization", abbr = "i12iz4n"
