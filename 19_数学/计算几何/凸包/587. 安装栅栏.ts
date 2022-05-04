@@ -21,7 +21,7 @@ const outerTrees = (points: [x: number, y: number][]) => {
   points.sort((a, b) => a[0] - b[0] || a[1] - b[1])
   const cand: [x: number, y: number][] = []
 
-  //寻找凸壳的下半部分
+  // 寻找凸壳的下半部分
   for (let i = 0; i < points.length; i++) {
     while (
       cand.length >= 2 &&

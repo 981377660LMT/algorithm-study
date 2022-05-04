@@ -44,19 +44,19 @@ const bt2: TreeNode = {
 // 这条路径可以经过也可以不经过根节点。
 // 思路:从叶子节点开始遍历(但是找不到父节点)
 
-// 正确解法:没有思路的时候用递归(左子树右子树递归+元信息)
-const longestUnivaluePath = (root: TreeNode) => {
+function longestUnivaluePath(root: TreeNode | null): number {
+  const dfs = (parent: number, root: TreeNode | null): number => {
+    if (!root) return 0
+
+    const left = dfs(root.val, root.left)
+    const right = dfs(root.val, root.right)
+    res = Math.max(res, left + right)
+    return root.val === parent ? Math.max(left, right) + 1 : 0
+  }
+
   if (!root) return 0
   let res = 0
-  const helper = (parentValue: number, root: TreeNode | null): number => {
-    if (!root) return 0
-    // 注意：两个节点之间的路径长度由它们之间的边数表示。
-    const left = helper(root.val, root.left)
-    const right = helper(root.val, root.right)
-    res = Math.max(res, left + right)
-    return root.val === parentValue ? Math.max(left, right) + 1 : 0
-  }
-  helper(root.val, root)
+  dfs(root.val, root)
   return res
 }
 
