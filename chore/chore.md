@@ -300,3 +300,30 @@ const dp = Array.from({ length: n + 1 }, () => new Uint32Array(sqrt + 1))
 ## py 里平方根的写法，sqrt 最快
 
 ## 为什么迭代器很慢
+
+## 严格递增与非严格递增:
+
+严格递增的第 i 个数减 i 就变成了非严格递增
+a[i]-=i
+
+## python 里自定义 object 默认 hashable
+
+到底用 eq 去重，还是 hash 去重
+hashCode 为了性能，equals 保证稳定性？
+查重的时候先比较哈希，如果相同，继续比较对象
+因此要重写 hashCode 保证：如果 equals 判断是相等的，那 hashCode 值也要相等
+
+为什么需要两个呢？
+equals - 保证比较对象`是否是绝对相等的`
+hashCode - `保证在最快的时间`内判断两个对象是否相等，可能有误差值
+
+无论是 Effective Java，还是阿里巴巴 Java 规范手册都是要求重写 equals，必须重写 hashCode。
+两个相等的对象必须具有相等的散列码（Java 关键约定）
+
+## CPU cache 数是 2 的幂，N + 5 是一个奇数，与之互素，这样可以减少 cache 冲突概率，提高速度。
+
+https://stackoverflow.com/questions/11413855/why-is-transposing-a-matrix-of-512x512-much-slower-than-transposing-a-matrix-of/48029152#48029152
+
+## 别用 input() 数据量大点就会超时，用 sys.stdin.readline()或其他输入
+
+## ord 是 unicode ordinal 的缩写，即编号；chr 是 character 的缩写，即缩写

@@ -1,17 +1,40 @@
-import { ArrayDeque } from './Deque/ArrayDeque'
+// 用数组替代stack、queue
+class Queue<T = number> {
+  private readonly data: T[]
+  private head = 0
+  private tail = 0
 
-/**
- * @description 特点
- * @description 应用场景
- * @description 时间复杂度 O(n)
- * @description 空间复杂度 O(n)
- */
+  constructor(size: number) {
+    this.data = Array(size).fill(undefined)
+  }
+
+  get length(): number {
+    return this.tail - this.head
+  }
+
+  push(element: T): Queue<T> {
+    this.data[this.tail++] = element
+    return this
+  }
+
+  shift(): T | undefined {
+    if (this.length === 0) {
+      return undefined
+    }
+    const front = this.data[this.head++]
+    return front
+  }
+
+  at(index: number): T | undefined {
+    return this.data[this.head + index]
+  }
+}
+
 class RecentCounter {
-  constructor(private queue = new ArrayDeque(10000)) {}
+  private readonly queue = new Queue(1e4 + 10)
 
   ping(time: number) {
     this.queue.push(time)
-    // 不满足的queue[0]全部出队列
     while (this.queue.length && this.queue.at(0)! + 3000 < time) {
       this.queue.shift()
     }
@@ -19,19 +42,6 @@ class RecentCounter {
     return this.queue.length
   }
 }
-// class RecentCounter {
-//   constructor(private queue = new LinkedList()) {}
-
-//   ping(time: number) {
-//     this.queue.push(time)
-//     // 不满足的queue[0]全部出队列
-//     while (this.queue.length && this.queue.first! + 3000 < time) {
-//       this.queue.shift()
-//     }
-
-//     return this.queue.length
-//   }
-// }
 
 const counter = new RecentCounter()
 console.log(counter.ping(1))

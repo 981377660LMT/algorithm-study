@@ -5,27 +5,6 @@ import { treeToGraph } from '../../构建类/treeToGraph'
 // 你计算其中 最长连续序列路径 的长度。
 // 路径可以是 子-父-子 顺序，并不一定是 父-子 顺序。
 
-// 因为树节点值有重复 这样不可行
-// function longestConsecutive1(root: BinaryTree | null): number {
-//   if (!root) return 0
-//   const adjMap = treeToGraph(root)
-//   let res = 1
-
-//   const dfs = (cur: number, dis: number): void => {
-//     res = Math.max(res, dis)
-//     for (const next of adjMap.get(cur)!) {
-//       if (Math.abs(next - cur) !== 1) continue
-//       dfs(next, dis + 1)
-//     }
-//   }
-
-//   for (const cur of adjMap.keys()) {
-//     dfs(cur, 1)
-//   }
-
-//   return res
-// }
-
 function longestConsecutive(root: BinaryTree | null): number {
   if (!root) return 0
 

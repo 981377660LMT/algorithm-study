@@ -22,24 +22,29 @@ class MinHeap<HeapValue = number> {
     this.heap = heap
   }
 
+  get size(): number {
+    return this.heap.length
+  }
+
   /**
    *
    * @param value 插入的值
    * @description 将值插入数组(堆)的尾部，然后上移直至父节点不超过它
-   * @description 时间复杂度为`O(log(h))`
+   *
+   * 时间复杂度为`O(log(h))`
    */
   heappush(value: HeapValue): void {
-    if (this.heap.length >= this.capacity) {
-      this.heappop()
-    }
-
     this.heap.push(value)
     this.pushUp(this.heap.length - 1)
+    if (this.heap.length > this.capacity) {
+      this.heappop()
+    }
   }
 
   /**
    * @description 用数组尾部元素替换堆顶(直接删除会破坏堆结构),然后下移动直至子节点都大于新堆顶
-   * @description 时间复杂度为`O(log(h))`
+   *
+   * 时间复杂度为`O(log(h))`
    */
   heappop(): HeapValue | undefined {
     if (this.heap.length === 0) {
@@ -48,34 +53,18 @@ class MinHeap<HeapValue = number> {
       return this.heap.pop()!
     }
 
-    const top = this.peek()
+    const top = this.heap[0]
     const last = this.heap.pop()!
     this.heap[0] = last
     this.pushDown(0)
     return top
   }
 
-  peek(): HeapValue | undefined {
-    return this.heap[0]
-  }
-
-  get size(): number {
-    return this.heap.length
-  }
-
-  /**
-   * 取出堆顶元素，替换成val;
-   * 一次O(log(h)的操作)
-   */
-  // heapreplace(val: Item) {
-  //   this.heap[0] = val
-  //   this.shiftDown(0)
-  // }
-
   /**
    *
    * @description 将非叶子节点(2^(h-1)-1个，约n/2) 倒序shiftdown
-   * @description 堆化的复杂度是O(n)
+   *
+   * 堆化的复杂度是O(n)
    */
   heapify(): void {
     if (this.heap.length <= 1) return
@@ -84,6 +73,32 @@ class MinHeap<HeapValue = number> {
     for (let i = lastParent; ~i; i--) {
       this.pushDown(i)
     }
+  }
+
+  /**
+   * @description `入堆+出堆`的更快的版本
+   */
+  heappushpop(value: HeapValue): HeapValue | undefined {
+    if (this.heap.length > 0 && this.compare(this.heap[0], value) < 0) {
+      ;[value, this.heap[0]] = [this.heap[0], value]
+      this.pushDown(0)
+    }
+
+    return value
+  }
+
+  /**
+   * @description `出堆+入堆`的更快的版本
+   */
+  heapreplace(value: HeapValue): HeapValue | undefined {
+    const returnItem = this.heap[0]
+    this.heap[0] = value
+    this.pushDown(0)
+    return returnItem
+  }
+
+  peek(): HeapValue | undefined {
+    return this.heap[0]
   }
 
   protected pushUp(root: number): void {
@@ -148,4 +163,10 @@ if (require.main === module) {
   assert.strictEqual(heap.heappop(), 3)
   assert.strictEqual(heap.heappop(), 5)
   assert.strictEqual(heap.heappop(), 8)
+  assert.strictEqual(heap.heappop(), undefined)
+  heap.heappush(2)
+  assert.strictEqual(heap.heapreplace(3), 2)
+  assert.strictEqual(heap.peek(), 3)
+  assert.strictEqual(heap.heappushpop(1), 1)
+  assert.strictEqual(heap.peek(), 3)
 }

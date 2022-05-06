@@ -17,3 +17,4 @@ class Solution:
                     heapq.heappush(heap, preSum[right] - preSum[left])
 
         return sorted(heap)
+

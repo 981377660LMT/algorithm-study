@@ -1,5 +1,5 @@
 import { MinHeap } from '../../2_queue/minheap'
-import { PriorityQueue } from '../../2_queue/todo优先级队列'
+import { PriorityQueue } from '../../2_queue/优先级队列'
 
 const mergeK = (...arrs: number[][]): number[] => {
   const res: number[] = []

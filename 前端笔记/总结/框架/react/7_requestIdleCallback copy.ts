@@ -24,3 +24,5 @@ interactionBtn.addEventListener('click', function () {
 window.setInterval(() => console.log(iterationCount), 1000)
 
 // requestIdleCallback利用浏览器空闲时间执行任务
+
+export {}

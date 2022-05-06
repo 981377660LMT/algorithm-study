@@ -2,9 +2,10 @@ from typing import List
 from collections import deque
 
 
+# 判断哪些点在有向图的环上
 class Solution:
     def eventualSafeNodes(self, graph: List[List[int]]) -> List[int]:
-        #  反图
+        #  反图 + 拓扑排序
         n = len(graph)
         indegrees = [0] * n
         reversedGraph = [[] for _ in range(n)]

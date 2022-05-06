@@ -10,9 +10,9 @@ import { deserializeNode } from '../../构建类/297二叉树的序列化与反�
    // dfs的return值是当前节点[若往上, 即作为子节点]的最大贡献值，是不包含情况3的。
    // 但是3可能是最大路径，因此更新ans时是比较1, 2, 3中最大。
  */
-const maxPathSum = (root: BinaryTree | null): number => {
+function maxPathSum(root: BinaryTree | null): number {
   if (!root) return 0
-  let max = -Infinity
+  let res = -Infinity
 
   // 经过root的最大路径长
   const dfs = (root: BinaryTree | null): number => {
@@ -20,13 +20,13 @@ const maxPathSum = (root: BinaryTree | null): number => {
     const leftMax = dfs(root.left)
     const rightMax = dfs(root.right)
     // 和全局变量比较
-    max = Math.max(max, root.val + leftMax + rightMax)
+    res = Math.max(res, root.val + leftMax + rightMax)
     // >0 说明都能使路径变大   类似于求树的高度
     return Math.max(0, Math.max(leftMax, rightMax) + root.val)
   }
   dfs(root)
 
-  return max
+  return res
 }
 
 console.log(maxPathSum(deserializeNode([-10, 9, 20, null, null, 15, 7])!))

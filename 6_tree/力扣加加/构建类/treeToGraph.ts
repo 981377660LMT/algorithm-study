@@ -1,30 +1,51 @@
 import { BinaryTree } from '../Tree'
 
+// todo
+// 思路是先用dfs序活得每个结点的id 再建图
+
 /**
- *
- * @param root 各个节点的值不同
- * @returns
+ *@description 二叉树转无向图
  */
-const treeToGraph = function (root: BinaryTree) {
+function treeToGraph(root: BinaryTree) {
   const adjMap: Map<number, Set<number>> = new Map()
+  const valueById: Map<number, number> = new Map()
+  const idByNode: WeakMap<BinaryTree, number> = new WeakMap()
+  let dfsId = 0
 
-  const dfs = (root: BinaryTree) => {
-    if (root.left) {
-      adjMap.set(root.val, (adjMap.get(root.val) || new Set()).add(root.left.val))
-      adjMap.set(root.left.val, (adjMap.get(root.left.val) || new Set()).add(root.val))
-      dfs(root.left)
-    }
+  dfsForId(root)
+  dfsForGraph(root, null)
 
-    if (root.right) {
-      adjMap.set(root.val, (adjMap.get(root.val) || new Set()).add(root.right.val))
-      adjMap.set(root.right.val, (adjMap.get(root.right.val) || new Set()).add(root.val))
-      dfs(root.right)
-    }
+  return {
+    adjMap,
+    valueById,
+    // idByNode,
   }
 
-  dfs(root)
+  function dfsForId(root: BinaryTree | null): void {
+    if (!root) return
+    dfsForId(root.left)
+    dfsForId(root.right)
+    idByNode.set(root, dfsId)
+    dfsId++
+  }
 
-  return adjMap
+  function dfsForGraph(root: BinaryTree | null, parent: BinaryTree | null) {
+    if (!root) return
+
+    const rootId = idByNode.get(root)!
+    valueById.set(rootId, root.val)
+
+    if (parent) {
+      const parentId = idByNode.get(parent)!
+      !adjMap.has(parentId) && adjMap.set(parentId, new Set())
+      !adjMap.has(rootId) && adjMap.set(rootId, new Set())
+      adjMap.get(parentId)!.add(rootId)
+      adjMap.get(rootId)!.add(parentId)
+    }
+
+    dfsForGraph(root.left, root)
+    dfsForGraph(root.right, root)
+  }
 }
 
 export { treeToGraph }

@@ -35,7 +35,9 @@ class Solution:
     # 边的方向定为从度数小的点连向度数大的点
     # https://leetcode-cn.com/problems/minimum-degree-of-a-connected-trio-in-a-graph/solution/gei-wu-xiang-tu-ding-xiang-by-lucifer100-c72d/
     def minTrioDegree(self, n: int, edges: List[List[int]]) -> int:
-        """时间复杂度O(E^(3/2))"""
+        """三元环计数
+        
+        时间复杂度O(E^(3/2))"""
         degree = [0] * n
         for u, v in edges:
             degree[u - 1] += 1

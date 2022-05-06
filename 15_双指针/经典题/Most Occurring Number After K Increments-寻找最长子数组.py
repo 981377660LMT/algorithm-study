@@ -7,7 +7,8 @@
 # n ≤ 100,000
 # k < 2 ** 31
 
-# 为什么双指针:操作具有单向性
+# 为什么双指针:排序后操作具有单向性
+# 枚举每个数作为最大数
 class Solution:
     def solve(self, nums, k):
         nums = sorted(nums)

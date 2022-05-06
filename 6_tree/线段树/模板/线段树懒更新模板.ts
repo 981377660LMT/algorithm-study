@@ -11,14 +11,17 @@ class SegmentTreeNode {
  * @description 线段树懒更新模板
  */
 class SegmentTree {
-  private tree: SegmentTreeNode[]
+  private readonly tree: SegmentTreeNode[]
+  private readonly size: number
 
   constructor(size: number) {
+    this.size = size
     this.tree = Array.from({ length: size << 2 }, () => new SegmentTreeNode())
     this.build(1, 1, size)
   }
 
   update(root: number, left: number, right: number, delta: number): void {
+    this.checkRange(left, right)
     const node = this.tree[root]
 
     if (left <= node.left && node.right <= right) {
@@ -36,6 +39,7 @@ class SegmentTree {
   }
 
   query(root: number, left: number, right: number): number {
+    this.checkRange(left, right)
     const node = this.tree[root]
     if (left <= node.left && node.right <= right) {
       return node.value
@@ -88,6 +92,11 @@ class SegmentTree {
     const [node, left, right] = [this.tree[root], this.tree[root << 1], this.tree[(root << 1) | 1]]
     node.value = left.value + right.value
   }
+
+  private checkRange(left: number, right: number): void {
+    if (1 <= left && left <= right && right <= this.size) return
+    throw new RangeError(`[SegmentTree] range error: [${left}, ${right}]`)
+  }
 }
 
 export { SegmentTree, SegmentTreeNode }
@@ -96,4 +105,5 @@ if (require.main === module) {
   const sg = new SegmentTree(10)
   sg.update(1, 2, 3, 2)
   console.log(sg.query(1, 1, 8))
+  console.log(sg.query(1, 1, 1))
 }

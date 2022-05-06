@@ -18,7 +18,7 @@ import { hammingWeight as countOne } from '../../21_位运算/191. 位 1 的个�
 import { subsets } from '../../21_位运算/枚举二进制子集/78. 子集'
 import { ArrayDeque } from '../../2_queue/Deque/ArrayDeque'
 import { LinkedList } from '../../2_queue/Deque/LinkedList'
-import { PriorityQueue } from '../../2_queue/todo优先级队列'
+import { PriorityQueue } from '../../2_queue/优先级队列'
 import { TreapMultiSet as SortedList } from '../../4_set/有序集合/js/Treap'
 import { TreeSet, TreeMultiSet } from '../../4_set/有序集合/js/TreeSet'
 import { memo } from '../../5_map/memo'

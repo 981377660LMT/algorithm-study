@@ -27,23 +27,17 @@ class PriorityQueue<Item = number> {
     return this.minHeap.size
   }
 
-  // O(log(h))
   push(...val: Item[]): number {
     val.forEach(v => this.minHeap.heappush(v))
     return this.length
   }
 
-  // O(log(h))
   shift(): Item | undefined {
     return this.minHeap.heappop()
   }
 
   peek(): Item | undefined {
     return this.minHeap.peek()
-  }
-
-  heapify(): void {
-    this.minHeap.heapify()
   }
 }
 

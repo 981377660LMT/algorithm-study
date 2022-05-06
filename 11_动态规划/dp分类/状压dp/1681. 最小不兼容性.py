@@ -25,13 +25,16 @@ class Solution:
 
         @lru_cache(None)
         def dfs(state: int) -> int:
+            # 还没有被选的数
             available = [i for i in range(len(nums)) if not state & (1 << i)]
             if not available:
                 return 0
 
             res = INF
+            # 还没有被选的数里取size-1个，尝试每一种组合
             for group in combinations(available[1:], size - 1):
                 group = (available[0],) + group
+                # 不能有相同的数
                 if len(set([nums[i] for i in group])) < size:
                     continue
                 nextState = state
@@ -42,8 +45,9 @@ class Solution:
             return res
 
         res = dfs(0)
+        # 清除记忆化的缓存
         dfs.cache_clear()
-
+        # 没找到答案就返回-1
         return res if res != INF else -1
 
 
