@@ -1,6 +1,5 @@
 import path from 'path'
 import { DFS } from '../../chapter04深度优先遍历应用/c03dfs/图的深度优先遍历/dfs'
-import { PriorityQueue } from '../../chapter11无向带权图最小生成树/带权图/PriorityQueue'
 import {
   WeightedAdjList,
   WeightedEdge,
@@ -96,8 +95,8 @@ class Solution {
     pre[start] = start
     const visited = new Set<number>()
 
-    const compareFunction = (a: Node, b: Node) => a.dis - b.dis
-    const priorityQueue = new PriorityQueue<Node>(compareFunction)
+    const comparator = (a: Node, b: Node) => a.dis - b.dis
+    const priorityQueue = new PriorityQueue<Node>(comparator)
     priorityQueue.push(new Node(0, 0))
 
     while (priorityQueue.length) {

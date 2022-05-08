@@ -4,20 +4,20 @@
 
 import assert from 'assert'
 
-type CompareFunction<T> = (a: T, b: T) => number
+type Comparator<T> = (a: T, b: T) => number
 
 class MinHeap<HeapValue = number> {
   protected readonly heap: HeapValue[]
   protected readonly capacity: number
-  protected readonly compare: CompareFunction<HeapValue>
-  static readonly defaultCompareFunction = (a: any, b: any) => a - b
+  protected readonly comparator: Comparator<HeapValue>
+  static readonly defaultComparator = (a: any, b: any) => a - b
 
   constructor(
-    compareFunction: CompareFunction<HeapValue> = MinHeap.defaultCompareFunction,
+    comparator: Comparator<HeapValue> = MinHeap.defaultComparator,
     capacity: number = Infinity,
     heap: HeapValue[] = []
   ) {
-    this.compare = compareFunction
+    this.comparator = comparator
     this.capacity = capacity
     this.heap = heap
   }
@@ -79,7 +79,7 @@ class MinHeap<HeapValue = number> {
    * @description `入堆+出堆`的更快的版本
    */
   heappushpop(value: HeapValue): HeapValue | undefined {
-    if (this.heap.length > 0 && this.compare(this.heap[0], value) < 0) {
+    if (this.heap.length > 0 && this.comparator(this.heap[0], value) < 0) {
       ;[value, this.heap[0]] = [this.heap[0], value]
       this.pushDown(0)
     }
@@ -103,7 +103,7 @@ class MinHeap<HeapValue = number> {
 
   protected pushUp(root: number): void {
     let parent = (root - 1) >> 1
-    while (parent >= 0 && this.compare(this.heap[parent], this.heap[root]) > 0) {
+    while (parent >= 0 && this.comparator(this.heap[parent], this.heap[root]) > 0) {
       this.swap(parent, root)
       root = parent
       parent = (parent - 1) >> 1
@@ -118,11 +118,11 @@ class MinHeap<HeapValue = number> {
 
       let minIndex = root
 
-      if (left < this.heap.length && this.compare(this.heap[left], this.heap[minIndex]) < 0) {
+      if (left < this.heap.length && this.comparator(this.heap[left], this.heap[minIndex]) < 0) {
         minIndex = left
       }
 
-      if (right < this.heap.length && this.compare(this.heap[right], this.heap[minIndex]) < 0) {
+      if (right < this.heap.length && this.comparator(this.heap[right], this.heap[minIndex]) < 0) {
         minIndex = right
       }
 

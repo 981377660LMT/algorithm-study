@@ -20,8 +20,8 @@ const networkDelayTime = function (times: number[][], n: number, k: number): num
 
   const visited = new Set<number>()
 
-  const compareFunction = (a: Edge, b: Edge) => a[1] - b[1]
-  const priorityQueue = new PriorityQueue<Edge>(compareFunction)
+  const comparator = (a: Edge, b: Edge) => a[1] - b[1]
+  const priorityQueue = new PriorityQueue<Edge>(comparator)
   priorityQueue.push([k, 0])
 
   while (priorityQueue.length) {

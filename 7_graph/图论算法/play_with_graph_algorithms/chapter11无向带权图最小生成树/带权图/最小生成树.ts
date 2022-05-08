@@ -1,6 +1,6 @@
 import path from 'path'
 import { DFS } from '../../chapter04深度优先遍历应用/c03dfs/图的深度优先遍历/dfs'
-import { PriorityQueue } from './PriorityQueue'
+
 import { UnionFind } from './UnionFind'
 import { WeightedAdjList, WeightedEdge } from './WeighedAdjList'
 
@@ -78,8 +78,8 @@ class MST {
     // }
 
     // 初始化queue
-    const compareFunction = (a: WeightedEdge, b: WeightedEdge) => a.weight - b.weight
-    const priorityQueue = new PriorityQueue<WeightedEdge>(compareFunction)
+    const comparator = (a: WeightedEdge, b: WeightedEdge) => a.weight - b.weight
+    const priorityQueue = new PriorityQueue<WeightedEdge>(comparator)
     for (const w of this.adjList.adj(0)) {
       priorityQueue.push(new WeightedEdge(0, w, this.adjList.getWeight(0, w)))
     }

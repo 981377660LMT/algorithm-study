@@ -4,23 +4,23 @@ import { MinHeap } from '../8_heap/MinHeap'
 class PriorityQueue<Item = number> {
   private minHeap: MinHeap<Item>
   constructor(
-    compareFunction: (a: Item, b: Item) => number = MinHeap.defaultCompareFunction,
+    comparator: (a: Item, b: Item) => number = MinHeap.defaultComparator,
     volumn: number = Infinity,
     heap: Item[] = []
   ) {
-    this.minHeap = new MinHeap<Item>(compareFunction, volumn, heap)
+    this.minHeap = new MinHeap<Item>(comparator, volumn, heap)
   }
 
   static createPriorityQueue<Item = number>({
-    compareFunction = MinHeap.defaultCompareFunction,
+    comparator = MinHeap.defaultComparator,
     volumn = Infinity,
     heap = [],
   }: {
-    compareFunction?: (a: Item, b: Item) => number
+    comparator?: (a: Item, b: Item) => number
     volumn?: number
     heap?: Item[]
   }) {
-    return new PriorityQueue(compareFunction, volumn, heap)
+    return new PriorityQueue(comparator, volumn, heap)
   }
 
   get length(): number {

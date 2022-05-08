@@ -1,5 +1,4 @@
-# 预处理组合数 C(n,k)=C(n-1,k)+C(n-1,k-1)
-# 求组合数/排列数
+# 求组合数
 from functools import lru_cache
 
 MOD = int(1e9 + 7)
@@ -32,6 +31,7 @@ if __name__ == '__main__':
     print(C(n=5, k=3))
 
 #########################################################
+# 预处理组合数 C(n,k)=C(n-1,k)+C(n-1,k-1)
 # 不太快
 comb = [[0] * 36 for _ in range(36)]
 for i in range(36):

@@ -20,8 +20,8 @@ function minimumEffortPath(heights: number[][]): number {
 
   const visited = new Set<number>()
 
-  const compareFunction = (a: Edge, b: Edge) => a[2] - b[2]
-  const priorityQueue = new MinHeap<Edge>(compareFunction)
+  const comparator = (a: Edge, b: Edge) => a[2] - b[2]
+  const priorityQueue = new MinHeap<Edge>(comparator)
   priorityQueue.push([0, 0, 0])
 
   while (priorityQueue.size) {

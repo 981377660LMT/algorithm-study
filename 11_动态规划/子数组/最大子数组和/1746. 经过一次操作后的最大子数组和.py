@@ -11,9 +11,9 @@ from typing import List
 class Solution:
     def maxSumAfterOperation(self, nums: List[int]) -> int:
         res = -int(1e20)
-        dp0 = dp1 = 0
+        dp0 = dp1 = -int(1e20)
         for i in range(len(nums)):
-            dp1 = max(dp1 + nums[i], dp0 + nums[i] ** 2, nums[i] ** 2)  # use at this time
+            dp1 = max(dp1 + nums[i], dp0 + nums[i] * nums[i], nums[i] * nums[i])  # 已经用了
             dp0 = max(dp0 + nums[i], nums[i])  # dont use
             res = max(res, dp0, dp1)
         return res

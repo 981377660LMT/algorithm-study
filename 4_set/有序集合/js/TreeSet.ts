@@ -25,17 +25,17 @@ class RBTreeNode<T = number> {
   }
 }
 
-type CompareFunction<T, R extends 'number' | 'boolean'> = (
+type Comparator<T, R extends 'number' | 'boolean'> = (
   a: T,
   b: T
 ) => R extends 'number' ? number : boolean
 
 class RBTree<T = number> {
   root: RBTreeNode<T> | null
-  private compare: CompareFunction<T, 'boolean'>
+  private compare: Comparator<T, 'boolean'>
   static defaultCompare = (a: any, b: any) => a - b
 
-  constructor(compare: CompareFunction<T, 'number'> = RBTree.defaultCompare) {
+  constructor(compare: Comparator<T, 'number'> = RBTree.defaultCompare) {
     this.root = null
     this.compare = (a: any, b: any) => {
       const diff = compare(a, b)
@@ -329,7 +329,7 @@ class RBTree<T = number> {
 class TreeSet<T = number> {
   private _size: number
   private tree: RBTree<T>
-  private compare: CompareFunction<T, 'boolean'>
+  private compare: Comparator<T, 'boolean'>
 
   constructor(collection: Iterable<T> = [], compare = RBTree.defaultCompare) {
     this._size = 0
@@ -488,11 +488,11 @@ class TreeMultiSet<T = number> {
   private _size: number
   private tree: RBTree<T>
   private counts: Map<T, number>
-  private compare: CompareFunction<T, 'boolean'>
+  private compare: Comparator<T, 'boolean'>
 
   constructor(
     collection: Iterable<T> = [],
-    compare: CompareFunction<T, 'number'> = RBTree.defaultCompare
+    compare: Comparator<T, 'number'> = RBTree.defaultCompare
   ) {
     this._size = 0
     this.tree = new RBTree(compare)

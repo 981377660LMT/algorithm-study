@@ -5,12 +5,12 @@ class HashHeap<Item = number> extends MinHeap<Item> {
   private hash: Item extends object ? WeakMap<Item, number> : Map<Item, number>
 
   constructor(
-    compareFunction: (a: Item, b: Item) => number = MinHeap.defaultCompareFunction,
+    comparator: (a: Item, b: Item) => number = MinHeap.defaultComparator,
     useWeakMap: boolean = false,
     volumn: number = Infinity,
     heap: Item[] = []
   ) {
-    super(compareFunction, volumn, heap)
+    super(comparator, volumn, heap)
     this.hash = useWeakMap ? (new WeakMap() as any) : new Map()
   }
 

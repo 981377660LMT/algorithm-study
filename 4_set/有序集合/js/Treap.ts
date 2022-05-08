@@ -1,4 +1,4 @@
-type CompareFunction<T, R extends 'number' | 'boolean'> = (
+type Comparator<T, R extends 'number' | 'boolean'> = (
   a: T,
   b: T
 ) => R extends 'number' ? number : boolean
@@ -95,7 +95,7 @@ class TreapNode<T = number> {
 
 class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
   private readonly root: TreapNode<T>
-  private readonly compareFn: CompareFunction<T, 'number'>
+  private readonly compareFn: Comparator<T, 'number'>
   private readonly leftBound: T
   private readonly rightBound: T
 
@@ -130,10 +130,10 @@ class TreapMultiSet<T = number> implements ITreapMultiSet<T> {
     )
    * ```
    */
-  constructor(compareFn?: CompareFunction<T, 'number'>)
-  constructor(compareFn: CompareFunction<T, 'number'>, leftBound: T, rightBound: T)
+  constructor(compareFn?: Comparator<T, 'number'>)
+  constructor(compareFn: Comparator<T, 'number'>, leftBound: T, rightBound: T)
   constructor(
-    compareFn: CompareFunction<T, any> = (a: any, b: any) => a - b,
+    compareFn: Comparator<T, any> = (a: any, b: any) => a - b,
     leftBound: any = -Infinity,
     rightBound: any = Infinity
   ) {
