@@ -22,7 +22,7 @@ class BIT {
    * @param x (离散化后)的树状数组索引
    * @param k 增加的值
    * @description
-   * 单点修改：tree数组下标x处的值加k
+   * 单点修改：tree数组下标x处及其各个父节点的值加k
    */
   add(x: number, k: number) {
     if (x <= 0) throw Error('查询索引应为正整数')

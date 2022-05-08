@@ -1,4 +1,5 @@
 from functools import lru_cache
+from heapq import nlargest
 from typing import List
 from collections import defaultdict
 
@@ -86,3 +87,36 @@ class Solution2:
         dfs(0, -1)
         return res
 
+
+class Solution3:
+    def longestPath(self, parent: List[int], s: str) -> int:
+        def dfs(cur: int, pre: int) -> int:
+            """后序dfs求每个root处向下的次长路和最长路"""
+            nonlocal res
+
+            nexts = [0, 0]
+            for next in adjMap[cur]:
+                if next == pre:
+                    continue
+                nextRes = dfs(next, cur)
+                if s[next] != s[cur]:
+                    nexts.append(nextRes)
+
+            max1, max2 = nlargest(2, nexts)
+            # down1[cur], down2[cur] = max1, max2
+            res = max(res, max1 + max2 + 1)
+            return 1 + max1
+
+        n = len(parent)
+        adjMap = defaultdict(set)
+        for i in range(n):
+            pre, cur = parent[i], i
+            if pre == -1:
+                continue
+            adjMap[pre].add(cur)
+            adjMap[cur].add(pre)
+
+        res = 1
+        # down1, down2 = [0] * n, [0] * n
+        dfs(0, -1)
+        return res

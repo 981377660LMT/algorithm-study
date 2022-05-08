@@ -35,7 +35,7 @@ class SparseTable {
   }
 
   /**
-   * @returns [left,right] 闭区间的贡献值
+   * @returns [`left`,`right`] 闭区间的贡献值
    */
   query(left: number, right: number): number {
     this.checkRange(left, right)

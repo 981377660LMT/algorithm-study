@@ -9,7 +9,6 @@ import { useUnionFindMap } from '../useUnionFind'
 // 总结：hard并查集很多都是实际结点通过`虚拟`的广义邻居相连接
 
 // O(26*n)
-
 function groupStrings(words: string[]): number[] {
   const states: number[] = []
   for (const word of words) {
@@ -30,6 +29,7 @@ function groupStrings(words: string[]): number[] {
 
       // 替换：广义邻居；*用1<<27表示
       if ((state >> i) & 1) {
+        // 虚拟节点，不在原始字典里
         const replace = (state ^ (1 << i)) | (1 << 27)
         uf.union(state, replace)
       }

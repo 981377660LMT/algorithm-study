@@ -53,11 +53,11 @@ class MinHeap<HeapValue = number> {
       return this.heap.pop()!
     }
 
-    const top = this.heap[0]
+    const returnItem = this.heap[0]
     const last = this.heap.pop()!
     this.heap[0] = last
     this.pushDown(0)
-    return top
+    return returnItem
   }
 
   /**

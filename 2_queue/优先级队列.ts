@@ -27,8 +27,8 @@ class PriorityQueue<Item = number> {
     return this.minHeap.size
   }
 
-  push(...val: Item[]): number {
-    val.forEach(v => this.minHeap.heappush(v))
+  push(...elements: Item[]): number {
+    elements.forEach(v => this.minHeap.heappush(v))
     return this.length
   }
 

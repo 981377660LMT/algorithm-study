@@ -20,17 +20,23 @@ class Solution:
             return n
 
         def multi(matrix1: Matrix, matrix2: Matrix) -> Matrix:
-            res = [[0, 0], [0, 0]]
-            for i in range(2):
-                for j in range(2):
-                    for k in range(2):
-                        res[i][j] += matrix1[i][k] * matrix2[k][j]
-                        res[i][j] %= MOD
+            """矩阵相乘"""
+            row, col = len(matrix1), len(matrix2[0])
+            res = [[0] * col for _ in range(row)]
+            for r, row in enumerate(matrix1):
+                for c in range(col):
+                    for k, v in enumerate(row):
+                        res[r][c] += v * matrix2[k][c]
+                        res[r][c] %= MOD
             return res
 
         def qpow(a: Matrix, k: int) -> Matrix:
-            res = [[1, 0], [0, 1]]
-            while k > 0:
+            # 单位矩阵 IdentityMatrix
+            res = [[0] * len(a[0]) for _ in range(len(a))]
+            for i in range(len(a)):
+                res[i][i] = 1
+
+            while k:
                 if k & 1:
                     res = multi(res, a)
                 k >>= 1

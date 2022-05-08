@@ -327,3 +327,36 @@ https://stackoverflow.com/questions/11413855/why-is-transposing-a-matrix-of-512x
 ## 别用 input() 数据量大点就会超时，用 sys.stdin.readline()或其他输入
 
 ## ord 是 unicode ordinal 的缩写，即编号；chr 是 character 的缩写，即缩写
+
+# heappop 与 heappush
+
+```Python
+def heappushpop(heap, item):
+    """Fast version of a heappush followed by a heappop."""
+    if heap and heap[0] < item:
+        item, heap[0] = heap[0], item
+        _siftup(heap, 0)
+    return item
+
+
+def heapreplace(heap, item):
+    """Pop and return the current smallest value, and add the new item.
+
+    This is more efficient than heappop() followed by heappush(), and can be
+    more appropriate when using a fixed-size heap.  Note that the value
+    returned may be larger than item!  That constrains reasonable uses of
+    this routine unless written as part of a conditional replacement:
+
+        if item > heap[0]:
+            item = heapreplace(heap, item)
+    """
+    returnitem = heap[0]  # raises appropriate IndexError if heap is empty
+    heap[0] = item
+    _siftup(heap, 0)
+    return returnitem
+
+```
+
+## numpy 处理大数组超级快
+
+https://leetcode.cn/problems/maximum-trailing-zeros-in-a-cornered-path/solution/by-freeyourmind-pqc9/

@@ -1,6 +1,6 @@
 # Make Array Non-decreasing or Non-increasing
 # 每次操作可以使每个数加1或者减1
-
+# 修改序列为非降或非增的最小修改次数
 # 1 <= nums.length <= 1000
 # 0 <= nums[i] <= 1000
 

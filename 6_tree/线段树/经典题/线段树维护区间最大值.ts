@@ -1,4 +1,9 @@
-// 线段树解法
+// 给出一个数组，最多删除一个连续子数组，求剩下数组的严格递增连续子数组的最大长度。
+// n<=1e6
+
+// 对位置为i的元素，最大长度为在它之前的所有比它小的元素的值的pre[j]的最大值 + suf[i] nlogn
+// 用线段树维护小于该元素的最大的pre[j]
+
 class SegmentTreeNode {
   left = -1
   right = -1
@@ -12,34 +17,32 @@ class SegmentTreeNode {
  */
 class SegmentTree {
   private readonly tree: SegmentTreeNode[]
-  private readonly size: number
 
   constructor(size: number) {
-    this.size = size
     this.tree = Array.from({ length: size << 2 }, () => new SegmentTreeNode())
     this.build(1, 1, size)
   }
 
-  update(root: number, left: number, right: number, delta: number): void {
-    this.checkRange(left, right)
+  update(root: number, left: number, right: number, maxCand: number): void {
+    if (left > right) return
     const node = this.tree[root]
 
     if (left <= node.left && node.right <= right) {
       node.isLazy = true
-      node.lazyValue += delta
-      node.value += delta * (node.right - node.left + 1)
+      node.lazyValue = maxCand
+      node.value = Math.max(node.value, maxCand)
       return
     }
 
     this.pushDown(root)
     const mid = (node.left + node.right) >> 1
-    if (left <= mid) this.update(root << 1, left, right, delta)
-    if (mid < right) this.update((root << 1) | 1, left, right, delta)
+    if (left <= mid) this.update(root << 1, left, right, maxCand)
+    if (mid < right) this.update((root << 1) | 1, left, right, maxCand)
     this.pushUp(root)
   }
 
   query(root: number, left: number, right: number): number {
-    this.checkRange(left, right)
+    if (left > right) return 0
     const node = this.tree[root]
     if (left <= node.left && node.right <= right) {
       return node.value
@@ -48,13 +51,9 @@ class SegmentTree {
     this.pushDown(root)
     let res = 0
     const mid = (node.left + node.right) >> 1
-    if (left <= mid) res += this.query(root << 1, left, right)
-    if (mid < right) res += this.query((root << 1) | 1, left, right)
+    if (left <= mid) res = Math.max(res, this.query(root << 1, left, right))
+    if (mid < right) res = Math.max(res, this.query((root << 1) | 1, left, right))
     return res
-  }
-
-  queryAll(): number {
-    return this.tree[1].value
   }
 
   private build(root: number, left: number, right: number): void {
@@ -80,10 +79,10 @@ class SegmentTree {
     if (node.isLazy) {
       left.isLazy = true
       right.isLazy = true
-      left.lazyValue += node.lazyValue
-      right.lazyValue += node.lazyValue
-      left.value += node.lazyValue * (left.right - left.left + 1)
-      right.value += node.lazyValue * (right.right - right.left + 1)
+      left.lazyValue = node.lazyValue
+      right.lazyValue = node.lazyValue
+      left.value = Math.max(left.value, node.lazyValue)
+      right.value = Math.max(right.value, node.lazyValue)
       node.isLazy = false
       node.lazyValue = 0
     }
@@ -94,21 +93,41 @@ class SegmentTree {
    */
   private pushUp(root: number): void {
     const [node, left, right] = [this.tree[root], this.tree[root << 1], this.tree[(root << 1) | 1]]
-    node.value = left.value + right.value
-  }
-
-  private checkRange(left: number, right: number): void {
-    if (1 <= left && left <= right && right <= this.size) return
-    throw new RangeError(`[SegmentTree] range error: [${left}, ${right}]`)
+    node.value = Math.max(left.value, right.value)
   }
 }
 
-export { SegmentTree, SegmentTreeNode }
+// 假设数组都是正整数
+function maxLenAfterRemove(nums: number[]): number {
+  const n = nums.length
+  const pre = Array<number>(n).fill(1)
+  const suf = Array<number>(n).fill(1)
 
-if (require.main === module) {
-  const sg = new SegmentTree(10)
-  sg.update(1, 2, 3, 2)
-  console.log(sg.query(1, 1, 8))
-  console.log(sg.query(1, 1, 1))
-  console.log(sg.queryAll())
+  for (let i = 0; i < n; i++) {
+    if (nums[i] > nums[i - 1]) {
+      pre[i] = pre[i - 1] + 1
+    }
+  }
+
+  for (let i = n - 2; ~i; i--) {
+    if (nums[i] < nums[i + 1]) {
+      suf[i] = suf[i + 1] + 1
+    }
+  }
+
+  let res = 1
+  const max = Math.max(...nums)
+  const tree = new SegmentTree(max + 10)
+  for (let i = 0; i < n; i++) {
+    const leftMax = tree.query(1, 1, nums[i] - 1)
+    const right = suf[i]
+    res = Math.max(res, leftMax + right)
+    tree.update(1, nums[i], max, pre[i])
+  }
+
+  return res
 }
+
+console.log(maxLenAfterRemove([5, 3, 4, 9, 2, 8, 6, 7, 1])) // 4
+
+export {}

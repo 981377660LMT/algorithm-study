@@ -47,7 +47,6 @@ const countSmaller = function (nums: number[]): number[] {
   for (const [key, realValue] of [...set].sort((a, b) => a - b).entries()) {
     map.set(realValue, key + 1)
   }
-  console.log(map)
 
   const res = Array<number>(nums.length).fill(0)
   const bit = new BIT(map.size)

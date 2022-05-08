@@ -1,16 +1,32 @@
 # Make Array Non-decreasing or Non-increasing
 # 每次操作可以使每个数加1或者减1
-
+# 修改序列为非降或非增的最小修改次数
 
 # 1 <= nums.length <= 1e5
 # 0 <= nums[i] <= 1e9
 
-# 显然dp[i][num]
 
 from heapq import heappop, heappush, heappushpop, heapreplace
 from typing import List
 
 # https://codeforces.com/blog/entry/47821  slope trick
+# https://www.luogu.com.cn/problem/solution/P4597
+
+# https://github.dev/EndlessCheng/codeforces-go
+# 修改序列为非降或非增的最小修改次数
+# 单次修改可以把某个数 +1 或 -1
+# https://www.luogu.com.cn/problem/solution/P4597
+# 通过一个例子来解释这个基于堆的算法：1 5 10 4 2 2 2 2
+# 假设当前维护的是非降序列，前三个数直接插入，不需要任何修改
+# 插入 4 的时候，可以修改为 1 5 5 5，或 1 5 6 6，或... 1 5 10 10，修改次数均为 6
+# 但我们也可以把修改后的序列视作 1 5 4 4，虽然序列不为非降序列，但修改的次数仍然为 6
+# 接下来插入 2，基于 1 5 5 5 的话，修改后的序列就是 1 5 5 5 5，总的修改次数为 9
+# 但我们也可以把修改后的序列视作 1 2 4 4 2，总的修改次数仍然为 9
+# 接下来插入 2，如果基于 1 5 5 5 5 变成 1 5 5 5 5 5，会得到错误的修改次数 12
+# 但是实际上有更优的修改 1 4 4 4 4 4，总的修改次数为 11
+# 同上，把这个序列视作 1 2 2 4 2 2，总的修改次数仍然为 11
+
+
 class Solution:
     def convertArray(self, nums: List[int]) -> int:
         def helper(nums: List[int]) -> int:
@@ -20,11 +36,14 @@ class Solution:
             """
             res, pq = 0, []  # 大根堆
             for num in nums:
-                preMax = -pq[0]
-                if preMax > num:  # 之前的最大值是这个值的瓶颈
-                    res += preMax - num
-                    heappushpop(pq, -num)
-                heappush(pq, -num)
+                if not pq:
+                    heappush(pq, -num)
+                else:
+                    preMax = -pq[0]
+                    if preMax > num:
+                        res += preMax - num
+                        heappushpop(pq, -num)
+                    heappush(pq, -num)
             return res
 
         return min(helper(nums), helper(nums[::-1]))
@@ -34,27 +53,3 @@ print(Solution().convertArray(nums=[3, 2, 4, 5, 0]))
 print(Solution().convertArray(nums=[3, 1, 2, 1]))
 print(Solution().convertArray([11, 11, 13, 8, 18, 19, 20, 7, 16, 3]))
 
-
-# def heappushpop(heap, item):
-#     """Fast version of a heappush followed by a heappop."""
-#     if heap and heap[0] < item:
-#         item, heap[0] = heap[0], item
-#         _siftup(heap, 0)
-#     return item
-
-
-# def heapreplace(heap, item):
-#     """Pop and return the current smallest value, and add the new item.
-
-#     This is more efficient than heappop() followed by heappush(), and can be
-#     more appropriate when using a fixed-size heap.  Note that the value
-#     returned may be larger than item!  That constrains reasonable uses of
-#     this routine unless written as part of a conditional replacement:
-
-#         if item > heap[0]:
-#             item = heapreplace(heap, item)
-#     """
-#     returnitem = heap[0]  # raises appropriate IndexError if heap is empty
-#     heap[0] = item
-#     _siftup(heap, 0)
-#     return returnitem

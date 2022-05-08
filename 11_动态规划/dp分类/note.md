@@ -10,3 +10,7 @@
 1. 状态定义:状态的定义都有特点的套路。 比如一个字符串的状态，通常是 dp[i] 表示字符串 s 以 i 结尾的 ....。 比如两个字符串的状态，通常是 dp[i][j] 表示字符串 s1 以 i 结尾，s2 以 j 结尾的 ....。
 2. 初始条件
 3. 状态转移方程:枚举状态时,如果是一维状态，那么我们使用一层循环可以搞定。如果是两维状态，那么我们使用两层循环可以搞定。但是实际操作的过程有很多细节比如:
+
+**dfs 的优势**
+DFS 的写法相比某些递推的写法要快 10 倍以上，这是因为有很多状态是无法访问到的：比如 (x=2,y=3,c=100) 这个状态就是不可达的，此时还没走几步，c 不可能这么大
+https://leetcode-cn.com/problems/check-if-there-is-a-valid-parentheses-string-path/solution/tian-jia-zhuang-tai-hou-dfscpythonjavago-f287/

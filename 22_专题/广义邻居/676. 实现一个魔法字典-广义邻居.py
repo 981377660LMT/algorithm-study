@@ -2,6 +2,8 @@ from collections import defaultdict
 from typing import List
 
 # 将searchWord替换一个字母后，是否存在于dict
+
+
 class MagicDictionary(object):
     def __init__(self):
         self.adjMap = defaultdict(set)

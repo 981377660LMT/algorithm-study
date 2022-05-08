@@ -1,0 +1,1 @@
+1 if grid[nr][nc] == '(' else -1

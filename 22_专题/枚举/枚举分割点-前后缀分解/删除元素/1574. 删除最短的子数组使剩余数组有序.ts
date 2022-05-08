@@ -10,28 +10,27 @@
  */
 function findLengthOfShortestSubarray(arr: number[]): number {
   // 删左边/删右边/删中间
-  const n = arr.length
-  let left = 0
-  let right = n - 1
+  let l = 0
+  let r = arr.length - 1
   let res = Infinity
 
-  while (left + 1 < n && arr[left] <= arr[left + 1]) left++
-  if (left === n - 1) return 0
+  while (l + 1 < arr.length && arr[l] <= arr[l + 1]) l++
+  if (l === arr.length - 1) return 0
 
-  while (right > 0 && arr[right] >= arr[right - 1]) right--
+  while (r > 0 && arr[r] >= arr[r - 1]) r--
 
-  // 删除0到r-1  或者删除l+1到n-1
-  res = Math.min(right, n - left - 1)
+  // 删除0到r-1  或者删除l+1到arr.length-1
+  res = Math.min(r, arr.length - l - 1)
 
-  // 删中间：画平行线，看交点
+  // 删中间：双指针+画平行线
   let i = 0
-  while (i <= left && right <= n - 1) {
-    if (arr[i] <= arr[right]) {
+  while (i <= l && r <= arr.length - 1) {
+    if (arr[i] <= arr[r]) {
       // 删除i+1 到 r-1
-      res = Math.min(res, right - 1 - (i + 1) + 1)
+      res = Math.min(res, r - 1 - i)
       i++
     } else {
-      right++
+      r++
     }
   }
 

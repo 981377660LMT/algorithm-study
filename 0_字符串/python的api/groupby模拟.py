@@ -14,7 +14,7 @@ class Solution:
                 res[-1].append(num)
             else:
                 res.append([num])
-                pre = num
+            pre = num
         return res
 
 

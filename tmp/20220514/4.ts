@@ -2,7 +2,7 @@ import { make } from '../../0_数组/make'
 import { zip, zipLongest } from '../../0_数组/zip的模拟/zip'
 import {
   nextPermutation,
-  prePermutation,
+  prevPermutation,
 } from '../../12_贪心算法/经典题/排列/1842. 下个由相同数字构成的回文串-下一个排列'
 import { combinations } from '../../13_回溯算法/itertools/combinations'
 import { combinationsWithReplacement } from '../../13_回溯算法/itertools/combinationsWithReplacement'
@@ -15,12 +15,13 @@ import { comb } from '../../19_数学/数论/逆元/逆元求comb'
 import { gcd } from '../../19_数学/最大公约数/gcd'
 import { isPrime, prime, primeFactors, primesLeq, factors } from '../../19_数学/因数筛/prime'
 import { hammingWeight as countOne } from '../../21_位运算/191. 位 1 的个数'
+import { subsets } from '../../21_位运算/枚举二进制子集/78. 子集'
 import { ArrayDeque } from '../../2_queue/Deque/ArrayDeque'
 import { LinkedList } from '../../2_queue/Deque/LinkedList'
 import { PriorityQueue } from '../../2_queue/优先级队列'
 import { TreapMultiSet as SortedList } from '../../4_set/有序集合/js/Treap'
 import { TreeSet, TreeMultiSet } from '../../4_set/有序集合/js/TreeSet'
-import { useMemoMap } from '../../5_map/memo'
+import { memo } from '../../5_map/memo'
 import { Trie } from '../../6_tree/前缀树trie/实现trie/1_实现trie'
 import { XORTrie } from '../../6_tree/前缀树trie/最大异或前缀树/XORTrie'
 import { topoSort, topoSortDepth } from '../../7_graph/拓扑排序/topoSortDepth'

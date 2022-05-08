@@ -31,7 +31,7 @@ class BIT implements IBIT {
    * @param index (离散化后)的树状数组索引
    * @param delta 增加的值
    * @description
-   * 单点修改：tree数组下标x处的值加k
+   * 单点修改：tree数组下标x处及其各个父节点的值加k
    */
   add(index: number, delta: number) {
     if (index <= 0) throw Error('index 应为正整数')
@@ -44,7 +44,7 @@ class BIT implements IBIT {
    *
    * @param index
    * @description
-   * 区间查询：返回前x项的值(包含x)；前缀和
+   * 区间查询：返回前x项的值(包含x)的前缀和
    */
   query(index: number) {
     if (index > this.size) index = this.size
