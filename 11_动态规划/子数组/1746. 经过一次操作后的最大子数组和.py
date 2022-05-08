@@ -8,12 +8,9 @@ from typing import List
 # 每个时刻都有 翻倍与不翻倍
 
 
-INF = 0x7FFFFFFF
-
-
 class Solution:
     def maxSumAfterOperation(self, nums: List[int]) -> int:
-        res = -INF
+        res = -int(1e20)
         dp0 = dp1 = 0
         for i in range(len(nums)):
             dp1 = max(dp1 + nums[i], dp0 + nums[i] ** 2, nums[i] ** 2)  # use at this time

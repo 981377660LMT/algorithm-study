@@ -2,6 +2,8 @@ from typing import List
 from functools import lru_cache
 
 # 枚举分割点
+
+
 class Solution:
     def maxSumAfterPartitioning(self, arr: List[int], k: int) -> int:
         @lru_cache(None)

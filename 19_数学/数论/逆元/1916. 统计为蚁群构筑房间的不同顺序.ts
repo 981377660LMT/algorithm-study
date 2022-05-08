@@ -1,5 +1,6 @@
 import { comb } from './逆元求comb'
 
+// 1916. 统计为蚁群构筑房间的不同顺序
 function waysToBuildRooms(prevRoom: number[]): number {
   const n = prevRoom.length
   const MOD = 1e9 + 7

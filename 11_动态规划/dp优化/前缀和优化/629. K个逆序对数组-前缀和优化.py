@@ -1,7 +1,7 @@
 from itertools import accumulate
 
 
-MOD = int(1e9)
+MOD = int(1e9 + 7)
 
 
 class Solution:
@@ -12,7 +12,7 @@ class Solution:
         https://leetcode-cn.com/problems/k-inverse-pairs-array/solution/dong-tai-gui-hua-qian-zhui-he-you-hua-by-28eb/
 
         dp[i][j]=dp[i-1][j]+dp[i-1][j-1]+dp[i-1][j-2]+...+dp[i-1][j-(i-1)]
-        滚动数组dp,后面这一串用 `前缀和` O(1) 求出
+        滚动数组dp,后面这一串用 `前缀和` O(1) 求出 preSum[j+1]-preSum[j-(i-1)-1]
         """
         dp = [0] * (k + 1)
         dp[0] = 1
@@ -21,14 +21,16 @@ class Solution:
             ndp = [0] * (k + 1)
             ndp[0] = 1
 
-            preSum = [0] + list(accumulate(dp))
+            preSum = [0] + list(accumulate(dp))  # 前缀和优化
             for j in range(1, k + 1):
-                ndp[j] = preSum[j] - preSum[max(0, j - (i - 1))]
+                ndp[j] = preSum[j + 1] - preSum[max(0, j - (i - 1) - 1)]  # 注意前缀和的索引含义
                 ndp[j] %= MOD
 
             dp = ndp
-        print(dp)
+
         return dp[k]
 
 
 print(Solution().kInversePairs(n=3, k=1))  # 2
+print(Solution().kInversePairs(n=1000, k=1000))  # 2
+# 663677020

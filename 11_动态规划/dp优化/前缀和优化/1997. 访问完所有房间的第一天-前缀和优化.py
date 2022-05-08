@@ -1,12 +1,12 @@
 from typing import List
 
-
 # 如果算上本次访问，访问 i 号房间的次数为 奇数 ，那么 第二天 需要访问 nextVisit[i] 所指定的房间，
 # 如果算上本次访问，访问 i 号房间的次数为 偶数 ，那么 第二天 需要访问 (i + 1) mod n 号房间。
 # 请返回你访问完所有房间的第一天的日期编号
 
 MOD = int(1e9 + 7)
-# 2 <= n <= 105
+
+# 2 <= n <= 1e5
 # `0 <= nextVisit[i] <= i` 注意到第一次访问后只会后退，不会前进
 # 由于保证nextVisit[i] <= i，因此出现第三次重复时直接重复第一次走到该位置和目前之间的走法。
 
@@ -14,11 +14,16 @@ MOD = int(1e9 + 7)
 #  `We can only reach cell i from the cell i-1`
 # summary:
 # start => i-1 =>nextVisit[i-1] => i-1 => i
+
+# 把DAG画出来可能会好想一点
+
+
 class Solution:
     def firstDayBeenInAllRooms(self, nextVisit: List[int]) -> int:
         n = len(nextVisit)
-        dp = [0] * n
+        dp = [0] * n  # dp[i] 表示第一次走到 i 需要的天数
         for i in range(1, n):
+            # dp[i]=2+dp[j]+dp[j+1]+...+dp[i-1]
             dp[i] = ((dp[i - 1] + 1) + (dp[i - 1] - dp[nextVisit[i - 1]]) + 1) % MOD
         return dp[-1]
 
