@@ -5,22 +5,24 @@ from typing import DefaultDict, List, Set, Tuple
 
 
 def getEulerPath(
-    n: int, adjMap: DefaultDict[int, Set[int]], *, isDirected: bool
+    allVertex: Set[int], adjMap: DefaultDict[int, Set[int]], *, isDirected: bool
 ) -> Tuple[bool, List[int]]:
-    """求欧拉路径，需要寻找出发点"""
+    """求欧拉路径，需要寻找出发点，保证输入的图是连通图"""
     start = next(iter(adjMap.keys()))
 
     if isDirected:
-        indegree, outdegree = [0] * n, [0] * n
+        indegree, outdegree = {v: 0 for v in allVertex}, {v: 0 for v in allVertex}
         minusOne, one = 0, 0
         for cur, nexts in adjMap.items():
             outdegree[cur] += len(nexts)
             for next_ in nexts:
                 indegree[next_] += 1
-        for cur in adjMap.keys():
+
+        for cur in allVertex:
             diff = outdegree[cur] - indegree[cur]
             if diff == 0:
-                continue
+                if outdegree[cur] == 0:
+                    return False, []  # 入度为 0，出度也为 0，不是联通图
             elif diff == 1:
                 start = cur
                 one += 1
@@ -28,12 +30,16 @@ def getEulerPath(
                 minusOne += 1
             else:
                 return False, []
-        if not (minusOne == one == 1) or not (minusOne == one == 0):
+
+        if (minusOne, one) not in ((1, 1), (0, 0)):
             return False, []
     else:
         oddCount = 0
-        for cur in adjMap.keys():
-            if len(adjMap[cur]) & 1:
+        for cur in allVertex:
+            degree = len(adjMap[cur])
+            if degree == 0:
+                return False, []  # 度数为 0，不是联通图
+            elif degree & 1:
                 oddCount += 1
                 start = cur
         if oddCount not in (0, 2):
