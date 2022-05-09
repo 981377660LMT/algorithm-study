@@ -9,24 +9,24 @@ from typing import List
 
 class Solution:
     def minDifference(self, nums: List[int], queries: List[List[int]]) -> List[int]:
-        """AlphaPresum解法"""
+        max_ = max(nums)
         n = len(nums)
-        preSum = [[0] * 101 for _ in range(n + 1)]
+        preSum = [[0] * (max_ + 1) for _ in range(n + 1)]
         for i in range(1, n + 1):
             preSum[i][nums[i - 1]] += 1
-            for j in range(101):
+            for j in range((max_ + 1)):
                 preSum[i][j] += preSum[i - 1][j]
 
         res = []
         for left, right in queries:
-            minDiff = 0x3FFFFFFF
-            pre = -0x3FFFFFFF
-            for cand in range(1, 101):
+            minDiff = int(1e20)
+            pre = -int(1e20)
+            for cur in range(1, (max_ + 1)):
                 # 我们通过`个数前缀和数组求得l到r之间有哪些数存在`
-                if preSum[right + 1][cand] - preSum[left][cand] > 0:
-                    minDiff = min(minDiff, cand - pre)
-                    pre = cand
-            res.append(minDiff if minDiff != 0x3FFFFFFF else -1)
+                if preSum[right + 1][cur] - preSum[left][cur] > 0:
+                    minDiff = min(minDiff, cur - pre)
+                    pre = cur
+            res.append(minDiff if minDiff != int(1e20) else -1)
         return res
 
 
