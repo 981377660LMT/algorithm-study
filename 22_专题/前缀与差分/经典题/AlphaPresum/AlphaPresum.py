@@ -1,12 +1,16 @@
 class AlphaPresum:
     def __init__(self, s: str) -> None:
-        n = len(s)
-        preSum = [[0] * 26 for _ in range(n + 1)]
-
-        for i in range(1, n + 1):
-            preSum[i][ord(s[i - 1]) - ord('a')] += 1
-            for j in range(26):
-                preSum[i][j] += preSum[i - 1][j]
+        # n = len(s)
+        # preSum = [[0] * 26 for _ in range(n + 1)]
+        # for i in range(1, n + 1):
+        #     preSum[i][ord(s[i - 1]) - ord('a')] += 1
+        #     for j in range(26):
+        #         preSum[i][j] += preSum[i - 1][j]
+        preSum = [[0] * 26]
+        for char in s:
+            cur = preSum[-1][:]
+            cur[ord(char) - ord('a')] += 1
+            preSum.append(cur)
 
         self._preSum = preSum
 
@@ -23,5 +27,5 @@ class AlphaPresum:
 
 preSum = AlphaPresum("abcdabcd")
 # s[0:2]间'a'个数为1
-print(preSum.getCountOfSlice('a', 0, 2))
-print(preSum.getCountOfSlice('a', 0, 8))
+assert preSum.getCountOfSlice('a', 0, 2) == 1
+assert preSum.getCountOfSlice('a', 0, 8) == 2

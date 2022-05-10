@@ -45,3 +45,21 @@ class Solution:
 
 print(Solution().countTexts(pressedKeys="22233"))
 
+
+# 预处理
+MOD = int(1e9 + 7)
+dp3 = [1, 1, 2, 4]
+dp4 = [1, 1, 2, 4]
+for _ in range(int(1e5 + 10)):
+    dp3.append((dp3[-1] + dp3[-2] + dp3[-3]) % MOD)
+    dp4.append((dp4[-1] + dp4[-2] + dp4[-3] + dp4[-4]) % MOD)
+
+
+class Solution:
+    def countTexts(self, pressedKeys: str) -> int:
+        groups = [[char, len(list(group))] for char, group in groupby(pressedKeys)]
+        res = 1
+        for char, length in groups:
+            res = res * (dp4[length] if char in "79" else dp3[length]) % MOD
+        return res
+

@@ -15,20 +15,18 @@ const containsNearbyAlmostDuplicate = (nums: number[], k: number, t: number): bo
   if (nums.length <= 1) return false
 
   // 关键点：我们的一个桶内同一时刻只会有一个元素 多了我们会直接返回结果
-  const valueByBucket = new Map<number, number>() // hash值 实际值
+  const bucket = new Map<number, number>() // 桶id 实际值
 
   for (let i = 0; i < nums.length; i++) {
     const num = nums[i]
-    const bucket = Math.floor(num / (t + 1))
-    if (valueByBucket.has(bucket)) return true
-    if (valueByBucket.has(bucket - 1) && Math.abs(num - valueByBucket.get(bucket - 1)!) <= t)
-      return true
-    if (valueByBucket.has(bucket + 1) && Math.abs(num - valueByBucket.get(bucket + 1)!) <= t)
-      return true
-    valueByBucket.set(bucket, num)
-
-    if (i >= k) valueByBucket.delete(Math.floor(nums[i - k] / (t + 1)))
+    const id = Math.floor(num / (t + 1))
+    if (bucket.has(id)) return true
+    if (bucket.has(id - 1) && Math.abs(num - bucket.get(id - 1)!) <= t) return true
+    if (bucket.has(id + 1) && Math.abs(num - bucket.get(id + 1)!) <= t) return true
+    bucket.set(id, num)
+    if (i >= k) bucket.delete(Math.floor(nums[i - k] / (t + 1)))
   }
+
   return false
 }
 
@@ -36,23 +34,3 @@ const containsNearbyAlmostDuplicate = (nums: number[], k: number, t: number): bo
 console.log(containsNearbyAlmostDuplicate([2147483640, 2147483641], 1, 100))
 
 export {}
-function containsNearbyAlmostDuplicate2(nums: number[], k: number, t: number): boolean {
-  if (k === 0) return false
-  if (nums.length <= 1) return false
-  const valueByBucket = new Map<number, number>()
-
-  for (const [index, num] of nums.entries()) {
-    const bucket = Math.floor(num / (t + 1))
-    if (valueByBucket.has(bucket)) return true
-    if (valueByBucket.has(bucket - 1) && Math.abs(num - valueByBucket.get(bucket - 1)!) <= t)
-      return true
-    if (valueByBucket.has(bucket + 1) && Math.abs(num - valueByBucket.get(bucket + 1)!) <= t)
-      return true
-
-    valueByBucket.set(bucket, num)
-    if (index - k >= 0) valueByBucket.delete(Math.floor(nums[index - k] / (t + 1)))
-  }
-
-  return false
-}
-console.log(containsNearbyAlmostDuplicate2([-3, 3, -6], 2, 3))

@@ -34,8 +34,8 @@ const bt: BinaryTree = {
   },
 }
 
-// 时间复杂 O(树的节点数)
 // 空间复杂 O(树的高度)
+// 时间复杂 O(树的节点数)
 const reverseBinaryTree = (bt: BinaryTree) => {
   if (!bt) return
   ;[bt.left, bt.right] = [bt.right, bt.left]

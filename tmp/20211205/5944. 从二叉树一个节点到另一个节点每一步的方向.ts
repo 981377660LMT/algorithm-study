@@ -1,5 +1,5 @@
 import { BinaryTree } from '../../6_tree/力扣加加/Tree'
-import { deserializeNode } from '../../6_tree/力扣加加/构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../../6_tree/力扣加加/构建类/297.二叉树的序列化与反序列化'
 type Direction = 'L' | 'R' | 'U'
 
 // 请找到从节点 s 到节点 t 的 最短路径 ，并以字符串的形式返回每一步的方向。每一步用 大写 字母 'L' ，'R' 和 'U' 分别表示一种方向：

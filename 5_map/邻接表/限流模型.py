@@ -3,12 +3,12 @@
 # DDoS Protection
 
 from collections import defaultdict
-from typing import List, Tuple
+from typing import List
 
 
 class Solution:
     def DDoSProtection(self, requests: List[List[int]], u: int, g: int) -> int:
-        """求成功访问的次数"""
+        """限流模型,求成功访问的次数"""
         if u == 0 or g == 0:
             return 0
         userReq = defaultdict(list)

@@ -1,5 +1,5 @@
 import { BinaryTree } from '../Tree'
-import { deserializeNode } from '../构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../构建类/297.二叉树的序列化与反序列化'
 
 // 假如通过节点 node 的每种可能的 “根-叶” 路径上值的总和全都小于给定的 limit，则该节点被称之为「不足节点」，需要被删除。
 // 请你删除所有不足节点，并返回生成的二叉树的根。

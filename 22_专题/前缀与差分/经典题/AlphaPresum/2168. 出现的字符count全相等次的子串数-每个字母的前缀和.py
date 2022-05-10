@@ -18,13 +18,18 @@ class Solution:
             return True
 
         n = len(s)
-        preSum = [[0] * 10 for _ in range(n + 1)]
 
         # 预处理前缀
-        for i in range(1, n + 1):
-            preSum[i][ord(s[i - 1]) - ord('0')] += 1
-            for j in range(10):
-                preSum[i][j] += preSum[i - 1][j]
+        # preSum = [[0] * 10 for _ in range(n + 1)]
+        # for i in range(1, n + 1):
+        #     preSum[i][ord(s[i - 1]) - ord('0')] += 1
+        #     for j in range(10):
+        #         preSum[i][j] += preSum[i - 1][j]
+        preSum = [[0] * 10]
+        for char in s:
+            cur = preSum[-1][:]
+            cur[ord(char) - ord('0')] += 1
+            preSum.append(cur)
 
         res = set()
         # 枚举所有子串

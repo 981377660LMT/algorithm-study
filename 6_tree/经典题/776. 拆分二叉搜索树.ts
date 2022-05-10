@@ -2,7 +2,7 @@
 //  另一个子树结点的值都必须`大于`目标值 V；树中并非一定要存在值为 V 的结点
 
 import { BinaryTree } from '../力扣加加/Tree'
-import { deserializeNode } from '../力扣加加/构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../力扣加加/构建类/297.二叉树的序列化与反序列化'
 
 //  总结:dfs后序技巧+二叉搜索树性质讨论根节点在哪边
 function splitBST(root: BinaryTree | null, target: number): [BinaryTree | null, BinaryTree | null] {

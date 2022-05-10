@@ -1,5 +1,5 @@
 import { BinaryTree } from '../Tree'
-import { deserializeNode } from '../构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../构建类/297.二叉树的序列化与反序列化'
 
 // 请你删除所有值为 target 的 叶子节点 。
 // 注意，一旦删除值为 target 的叶子节点，它的父节点就可能变成叶子节点；如果新叶子节点的值恰好也是 target ，那么这个节点也应该被删除。

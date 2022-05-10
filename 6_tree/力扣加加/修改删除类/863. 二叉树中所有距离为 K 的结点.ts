@@ -1,5 +1,5 @@
 import { BinaryTree } from '../Tree'
-import { deserializeNode } from '../构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../构建类/297.二叉树的序列化与反序列化'
 import { AddPropRecursively } from './116. 填充每个节点的下一个右侧节点指针常量空间'
 
 type NodeWithParent = AddPropRecursively<BinaryTree, { parent?: BinaryTree | null }>

@@ -12,6 +12,7 @@ const minimumLengthEncoding = function (words: string[]): number {
   let res = 0
   const trie = new Trie()
 
+  // 按长度倒序插入
   words.sort((a, b) => b.length - a.length).map(word => word.split('').reverse().join(''))
 
   words.forEach(word => {

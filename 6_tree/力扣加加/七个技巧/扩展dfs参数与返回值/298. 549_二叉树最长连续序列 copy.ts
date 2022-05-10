@@ -1,5 +1,5 @@
 import { BinaryTree } from '../../Tree'
-import { deserializeNode } from '../../构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../../构建类/297.二叉树的序列化与反序列化'
 import { treeToGraph } from '../../构建类/treeToGraph'
 
 // 你计算其中 最长连续序列路径 的长度。

@@ -9,12 +9,17 @@ from typing import List
 
 class Solution:
     def minDifference(self, nums: List[int], queries: List[List[int]]) -> List[int]:
-        n = len(nums)
-        preSum = [[0] * 101 for _ in range(n + 1)]
-        for i in range(1, n + 1):
-            preSum[i][nums[i - 1]] += 1
-            for j in range(101):
-                preSum[i][j] += preSum[i - 1][j]
+        # n = len(nums)
+        # preSum = [[0] * 101 for _ in range(n + 1)]
+        # for i in range(1, n + 1):
+        #     preSum[i][nums[i - 1]] += 1
+        #     for j in range(101):
+        #         preSum[i][j] += preSum[i - 1][j]
+        preSum = [[0] * 101]
+        for num in nums:
+            cur = preSum[-1][:]
+            cur[num] += 1
+            preSum.append(cur)
 
         res = []
         for left, right in queries:

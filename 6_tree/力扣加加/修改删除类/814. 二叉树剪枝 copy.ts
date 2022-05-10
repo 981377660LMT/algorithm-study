@@ -1,5 +1,5 @@
 import { BinaryTree } from '../Tree'
-import { deserializeNode } from '../构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../构建类/297.二叉树的序列化与反序列化'
 
 // 给你二叉树的根结点 root ，此外树的每个结点的值要么是 0 ，要么是 1 。
 // 返回移除了所有不包含 1 的子树的原二叉树。

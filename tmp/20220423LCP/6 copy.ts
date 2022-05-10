@@ -1,4 +1,4 @@
-import { deserializeNode } from '../../6_tree/力扣加加/构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../../6_tree/力扣加加/构建类/297.二叉树的序列化与反序列化'
 
 class TreeNode {
   val: number

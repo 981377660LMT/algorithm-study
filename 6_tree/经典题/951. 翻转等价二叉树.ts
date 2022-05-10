@@ -1,5 +1,5 @@
 import { BinaryTree } from '../力扣加加/Tree'
-import { deserializeNode } from '../力扣加加/构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../力扣加加/构建类/297.二叉树的序列化与反序列化'
 
 // 一个翻转操作:选择任意节点，然后交换它的左子树和右子树。
 // 编写一个判断两个二叉树是否是翻转等价的函数

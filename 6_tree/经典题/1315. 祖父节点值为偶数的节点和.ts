@@ -1,5 +1,5 @@
 import { BinaryTree } from '../力扣加加/Tree'
-import { deserializeNode } from '../力扣加加/构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../力扣加加/构建类/297.二叉树的序列化与反序列化'
 
 // 此题可推广到第k个祖先节点
 // 只需将祖先们的值使用长为k的deque存储即可

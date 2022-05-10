@@ -1,13 +1,12 @@
-import { BinaryTree } from '../Tree'
+import { BinaryTree } from '../力扣加加/Tree'
 
-// https://leetcode-cn.com/problems/xu-lie-hua-er-cha-shu-lcof/solution/shou-hua-tu-jie-dfshe-bfsliang-chong-jie-fa-er-cha/
 /**
  * Encodes a tree to a single string.
  *
  * @param {TreeNode} root
  * @return {string}
  * @description 容易:层序遍历即可
- * 使用bfs,力扣就是这种输入
+ * 使用bfs,力扣就是这种输入 ['1,2,NULL']
  */
 const serializeBFS = (root: BinaryTree | null): string => {
   if (!root) return 'NULL'
@@ -17,7 +16,7 @@ const serializeBFS = (root: BinaryTree | null): string => {
 
   while (queue.length) {
     const head = queue.shift()
-    if (head) {
+    if (head != undefined) {
       res.push(root.val.toString())
       queue.push(head.left)
       queue.push(head.right)
@@ -31,7 +30,7 @@ const serializeBFS = (root: BinaryTree | null): string => {
 
 const deserializeBFS = (data: string): BinaryTree | null => {
   if (data === 'NULL') return null
-  const arr = data.split(',').map(v => (v === 'NULL' ? null : Number(v)))
+  const arr = data.split(',').map(val => (val === 'NULL' ? null : Number(val)))
 
   const inner = (arr: (number | null)[]): BinaryTree | null => {
     if (!arr.length) return null
@@ -54,38 +53,48 @@ const deserializeBFS = (data: string): BinaryTree | null => {
 
   return inner(arr)
 }
+
 // console.log(serializeBFS(null))
 // console.log(deserializeBFS('NULL'))
 
 ////////////////////////////////////////////////////////////////////////////
 
 // 使用dfs
-// 简洁的做法
 const serializeDFS = (root: BinaryTree | null): string => {
-  if (!root) return '_'
   const res: string[] = []
-  const dfs = (root: BinaryTree | null) => {
-    if (!root) return res.push('_')
+  dfs(root)
+  return res.join(',')
+
+  function dfs(root: BinaryTree | null): void {
+    if (!root) return
     res.push(root.val.toString())
+    res.push(root.left ? '1' : '0')
+    res.push(root.right ? '1' : '0')
     dfs(root.left)
     dfs(root.right)
   }
-  dfs(root)
-  return res.join(',')
 }
 
-const deserializeDFS = (data: string) => {
-  const arr = data.split(',').map(v => (v === '_' ? null : Number(v)))
-  const dfs = (arr: (number | null)[]) => {
-    const val = arr.shift()
-    if (val == null) return null
-    const node = new BinaryTree(val)
-    node.left = dfs(arr)
-    node.right = dfs(arr)
-    return node
+const deserializeDFS = (data: string): BinaryTree | null => {
+  if (data === '') return null
+  const dataGen = gen()
+  return dfs()
+
+  function dfs(): BinaryTree {
+    const root = new BinaryTree(Number(next(dataGen)))
+    const [hasLeft, hashRight] = [next(dataGen) === '1', next(dataGen) === '1']
+    if (hasLeft) root.left = dfs()
+    if (hashRight) root.right = dfs()
+    return root
   }
 
-  return dfs(arr)
+  function* gen(): Generator<string, void, undefined> {
+    yield* data.split(',')
+  }
+
+  function next<T>(iterator: Iterator<T>): T {
+    return iterator.next().value
+  }
 }
 
 // console.log(serializeDFS(deserializeDFS('1,2,NULL')))

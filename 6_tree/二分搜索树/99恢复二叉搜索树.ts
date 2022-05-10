@@ -1,6 +1,6 @@
 import { BinaryTree } from '../力扣加加/Tree'
 
-import { deserializeNode } from '../力扣加加/构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../力扣加加/构建类/297.二叉树的序列化与反序列化'
 
 /**
  * @param {TreeNode} root

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from functools import lru_cache
 
 # 1 <= rows, cols <= 8
@@ -14,15 +14,21 @@ from functools import lru_cache
 # 如果猫先到达食物，那么猫获胜。
 # 如果老鼠先到达食物，那么老鼠获胜。
 # 如果老鼠不能在 1000 次操作以内到达食物，那么猫获胜。
+# https://leetcode.cn/problems/cat-and-mouse-ii/solution/by-ac_oier-gse8/
+
+
+DIR4 = ((0, 1), (0, -1), (1, 0), (-1, 0))
+
+# 极小极大博弈
 
 
 class Solution:
     def canMouseWin(self, grid: List[str], catJump: int, mouseJump: int) -> bool:
-        m, n = len(grid), len(grid[0])  # dimensions
+        ROW, COL = len(grid), len(grid[0])
         walls = set()
-        available = m * n  # available steps for mouse and cat
-        for i in range(m):
-            for j in range(n):
+        cat = mouse = (0, 0)
+        for i in range(ROW):
+            for j in range(COL):
                 if grid[i][j] == "F":
                     food = (i, j)
                 elif grid[i][j] == "C":
@@ -31,40 +37,44 @@ class Solution:
                     mouse = (i, j)
                 elif grid[i][j] == "#":
                     walls.add((i, j))
-                    available -= 1
 
         @lru_cache(None)
-        def fn(cat, mouse, turn):
-            """Return True if mouse wins."""
-            if cat == food or cat == mouse or turn >= available * 2:
+        def dfs(cat: Tuple[int, int], mouse: Tuple[int, int], turn: int) -> bool:
+            """老鼠是否赢"""
+            if (
+                cat == food or cat == mouse or turn >= 150
+            ):  # 2*n 不足以判断平局 2*n*n 才可以 题目很贴心调整了规则为 1000 步以内为猫获胜 但是1000会TLE
                 return False
             if mouse == food:
-                return True  # mouse reaching food
+                return True
 
-            if not turn & 1:  # mouse moving
-                x, y = mouse
-                for dx, dy in (-1, 0), (0, 1), (1, 0), (0, -1):
-                    for jump in range(0, mouseJump + 1):
-                        xx, yy = x + jump * dx, y + jump * dy
-                        if not (0 <= xx < m and 0 <= yy < n) or (xx, yy) in walls:
-                            # Stop extending the jump since we cannot go further
+            # 老鼠动
+            if not turn & 1:
+                r, c = mouse
+                for dr, dc in DIR4:
+                    for jump in range(mouseJump + 1):
+                        nr, nc = r + jump * dr, c + jump * dc
+                        if not (0 <= nr < ROW and 0 <= nc < COL) or ((nr, nc) in walls):
                             break
-                        if fn(cat, (xx, yy), turn + 1):
+                        if dfs(cat, (nr, nc), turn + 1):
                             return True
                 return False
 
-            else:  # cat moving
-                x, y = cat
-                for dx, dy in (-1, 0), (0, 1), (1, 0), (0, -1):
-                    for jump in range(0, catJump + 1):
-                        xx, yy = x + jump * dx, y + jump * dy
-                        if not (0 <= xx < m and 0 <= yy < n) or (xx, yy) in walls:
+            # 猫动
+            else:
+                r, c = cat
+                for dr, dc in DIR4:
+                    for jump in range(catJump + 1):
+                        nr, nc = r + jump * dr, c + jump * dc
+                        if not (0 <= nr < ROW and 0 <= nc < COL) or ((nr, nc) in walls):
                             break
-                        if not fn((xx, yy), mouse, turn + 1):
+                        if not dfs((nr, nc), mouse, turn + 1):
                             return False
                 return True
 
-        return fn(cat, mouse, 0)
+        res = dfs(cat, mouse, 0)
+        dfs.cache_clear()
+        return res
 
 
 print(Solution().canMouseWin(grid=["####F", "#C...", "M...."], catJump=1, mouseJump=2))

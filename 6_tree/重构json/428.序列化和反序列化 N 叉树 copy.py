@@ -1,3 +1,6 @@
+from typing import Optional
+
+
 class Node(object):
     def __init__(self, val=None, children=None):
         self.val = val
@@ -5,41 +8,32 @@ class Node(object):
 
 
 class Codec:
+    # dfs 序列化和反序列化 N 叉树
     def serialize(self, root: 'Node') -> str:
-        """Encodes a tree to a single string.
-        
-        :type root: Node
-        :rtype: str
-        """
-        res = []
+        """节点值,子节点个数,节点值,子节点个数,..."""
 
-        def dfs(root):
+        def dfs(root: Optional['Node']):
             if not root:
                 return
             res.append(str(root.val))
             res.append(str(len(root.children)))
-            for ch in root.children:
-                dfs(ch)
+            for child in root.children:
+                dfs(child)
 
+        res = []
         dfs(root)
-        # print(res)
         return ",".join(res)
 
-    def deserialize(self, data: str) -> 'Node':
-        """Decodes your encoded data to tree.
-        
-        :type data: str
-        :rtype: Node
-        """
-        if not data:
-            return
-        data = iter(data.split(","))
-
-        def dfs():
-            root = Node(int(next(data)), [])
-            num = int(next(data))
-            for _ in range(num):
+    def deserialize(self, data: str) -> Optional['Node']:
+        def dfs() -> Node:
+            root = Node(int(next(it)), [])
+            childCount = int(next(it))
+            for _ in range(childCount):
                 root.children.append(dfs())
             return root
 
+        if not data:
+            return
+
+        it = iter(data.split(","))
         return dfs()

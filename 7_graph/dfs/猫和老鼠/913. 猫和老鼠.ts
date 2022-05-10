@@ -5,10 +5,10 @@
  */
 function catMouseGame(graph: number[][]): 0 | 1 | 2 {
   const memo = new Map<string, 0 | 1 | 2>()
-  const len = graph.length
+  const n = graph.length
 
   const dfs = (steps: number, mouse: number, cat: number): 0 | 1 | 2 => {
-    if (steps === len * 2) return 0 // 猫和老鼠各走了N步 但是还没分出胜负
+    if (steps === n * 2) return 0 // 猫和老鼠各走了N步 但是还没分出胜负
     if (mouse === 0) return 1 // 老鼠进0，老鼠赢
     if (mouse === cat) return 2 // 老鼠和猫在一个位置，猫赢
 

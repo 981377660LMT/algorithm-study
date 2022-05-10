@@ -9,31 +9,31 @@
    使用两个单调双端队列维护最大最小值,队列中只保留当前窗口的最值，如果不在窗口内就移除。
  */
 function longestSubarray(nums: number[], limit: number): number {
-  const upQueue: number[] = [nums[0]] // 最左边保存最小值
-  const downQueue: number[] = [nums[0]] // 最左边保存最大值
-  let l = 0
+  const minQueue: number[] = [nums[0]] // 最左边保存最小值
+  const maxQueue: number[] = [nums[0]] // 最左边保存最大值
+  let left = 0
   let res = 1
 
-  for (let r = 1; r < nums.length; r++) {
-    const cur = nums[r]
+  for (let right = 1; right < nums.length; right++) {
+    const cur = nums[right]
 
-    while (upQueue.length && upQueue[upQueue.length - 1] > cur) {
-      upQueue.pop()
+    while (minQueue.length && minQueue[minQueue.length - 1] > cur) {
+      minQueue.pop()
     }
-    upQueue.push(cur)
+    minQueue.push(cur)
 
-    while (downQueue.length && downQueue[downQueue.length - 1] < cur) {
-      downQueue.pop()
+    while (maxQueue.length && maxQueue[maxQueue.length - 1] < cur) {
+      maxQueue.pop()
     }
-    downQueue.push(cur)
+    maxQueue.push(cur)
 
-    while (downQueue[0] - upQueue[0] > limit) {
-      if (upQueue[0] === nums[l]) upQueue.shift()
-      if (downQueue[0] === nums[l]) downQueue.shift()
-      l++
+    while (maxQueue[0] - minQueue[0] > limit) {
+      if (minQueue[0] === nums[left]) minQueue.shift()
+      if (maxQueue[0] === nums[left]) maxQueue.shift()
+      left++
     }
 
-    res = Math.max(res, r - l + 1)
+    res = Math.max(res, right - left + 1)
   }
 
   return res

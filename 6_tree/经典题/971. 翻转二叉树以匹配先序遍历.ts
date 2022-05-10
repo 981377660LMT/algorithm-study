@@ -1,5 +1,5 @@
 import { BinaryTree } from '../力扣加加/Tree'
-import { deserializeNode } from '../力扣加加/构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../力扣加加/构建类/297.二叉树的序列化与反序列化'
 
 // 请翻转 最少 的树中节点，使二叉树的 先序遍历 与预期的遍历行程 voyage 相匹配 。
 // 如果可以，则返回 翻转的 所有节点的值的列表。你可以按任何顺序返回答案。如果不能，则返回列表 [-1]。

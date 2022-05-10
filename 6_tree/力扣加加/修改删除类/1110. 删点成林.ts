@@ -3,7 +3,7 @@
 // 返回森林中的`每棵树`。
 
 import { BinaryTree } from '../Tree'
-import { deserializeNode } from '../构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../构建类/297.二叉树的序列化与反序列化'
 
 function delNodes(root: BinaryTree | null, to_delete: number[]): BinaryTree[] {
   const delSet = new Set<number>(to_delete)

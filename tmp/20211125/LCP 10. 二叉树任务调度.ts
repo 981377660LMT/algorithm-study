@@ -1,5 +1,5 @@
 import { BinaryTree } from '../../6_tree/力扣加加/Tree'
-import { deserializeNode } from '../../6_tree/力扣加加/构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../../6_tree/力扣加加/构建类/297.二叉树的序列化与反序列化'
 
 // 任务调度优化是计算机性能优化的关键任务之一
 // 任务之间是存在依赖关系的

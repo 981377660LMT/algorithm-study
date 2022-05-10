@@ -20,13 +20,18 @@ class Solution:
 
         n = len(s)
         res = 0
-        preSum = [[0] * 26 for _ in range(n + 1)]
 
         # 预处理前缀
-        for i in range(1, n + 1):
-            preSum[i][ord(s[i - 1]) - ord('a')] += 1
-            for j in range(26):
-                preSum[i][j] += preSum[i - 1][j]
+        # preSum = [[0] * 26 for _ in range(n + 1)]
+        # for i in range(1, n + 1):
+        #     preSum[i][ord(s[i - 1]) - ord('a')] += 1
+        #     for j in range(26):
+        #         preSum[i][j] += preSum[i - 1][j]
+        preSum = [[0] * 26]
+        for char in s:
+            cur = preSum[-1][:]
+            cur[ord(char) - ord('a')] += 1
+            preSum.append(cur)
 
         # 注意所求字符串的长度只能在count-26 * count之间
         for i in range(n):

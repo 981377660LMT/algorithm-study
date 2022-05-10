@@ -1,5 +1,5 @@
 import { BinaryTree } from '../力扣加加/Tree'
-import { deserializeNode } from '../力扣加加/构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../力扣加加/构建类/297.二叉树的序列化与反序列化'
 
 // 找出这棵树的 每一棵 子树的 平均值 中的 最大 值。
 

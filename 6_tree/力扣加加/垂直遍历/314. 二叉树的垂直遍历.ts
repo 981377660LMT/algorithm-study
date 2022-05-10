@@ -2,7 +2,7 @@
 // 如果两个结点在同一行和列，那么顺序则为 从左到右。
 // 这个和987题：二叉树的垂序遍历仅有一字之差，有9.9分相似，一点差别在于，那个题在同一行和列，需要按值的大小升序，这个题是从左到右。
 import { BinaryTree } from '../Tree'
-import { deserializeNode } from '../构建类/297二叉树的序列化与反序列化'
+import { deserializeNode } from '../构建类/297.二叉树的序列化与反序列化'
 
 function verticalOrder(root: BinaryTree | null): number[][] {
   if (!root) return []
