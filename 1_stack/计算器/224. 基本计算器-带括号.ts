@@ -1,4 +1,19 @@
-type Binary = (a: number, b: number) => number
+const CAL: Record<string, (a: number, b: number) => number> = {
+  '+': (a, b) => a + b,
+  '-': (a, b) => a - b,
+  '*': (a, b) => a * b,
+  '/': (a, b) => ~~(a / b),
+}
+
+const WEIGHT: Record<string, number> = Object.fromEntries([
+  ['(', NaN],
+  ['+', 1],
+  ['-', 1],
+  ['*', 2],
+  ['/', 2],
+])
+
+const OPT = new Set(['(', ')', '+', '-', '*', '/'])
 
 /**
  * @param {string} s  s 由数字、'+'、'-'、'('、')'、和 ' ' 组成
@@ -11,48 +26,24 @@ const calculate = function (s: string): number {
   s = s.replace(/\(\-/g, '(0-') // "1 - (-1)" => "1 - (0-1)"
   s = s.replace(/\(\+/g, '(0+') // "1 - (+1)" => "1 - (0+1)"
   const tokens = s.split(/([\(\)\+\-\*\/])/g).filter(v => v.trim())
-  const opt = new Set(['+', '-', '(', ')', '*', '/'])
+
   const numStack: number[] = []
   const optStack: string[] = []
-  const evaluate: Record<string, Binary> = {
-    '+': (a, b) => a + b,
-    '-': (a, b) => a - b,
-    '*': (a, b) => a * b,
-    '/': (a, b) => ~~(a / b),
-  }
-  const getOperatorWeight = (operator: string) => {
-    switch (operator) {
-      case '+':
-      case '-':
-        return 0
-      case '*':
-      case '/':
-        return 1
-      case '(':
-      case ')':
-        return NaN
-      default:
-        throw new Error('Invalid Operator')
-    }
-  }
 
-  for (const token of tokens) {
-    if (!opt.has(token)) {
-      numStack.push(parseInt(token))
+  for (const char of tokens) {
+    if (!OPT.has(char)) {
+      numStack.push(Number(char))
     } else {
-      if (token !== ')') {
-        while (
-          optStack.length &&
-          getOperatorWeight(optStack[optStack.length - 1]) >= getOperatorWeight(token)
-        ) {
+      if (char !== ')') {
+        while (optStack.length && WEIGHT[optStack[optStack.length - 1]] >= WEIGHT[char]) {
           const [num2, num1] = [numStack.pop(), numStack.pop()] as [number, number]
-          numStack.push(evaluate[optStack.pop()!](num1, num2))
+          numStack.push(CAL[optStack.pop()!](num1, num2))
         }
-        optStack.push(token)
+        optStack.push(char)
       } else {
         while (optStack.length && optStack[optStack.length - 1] !== '(') {
           const [num2, num1] = [numStack.pop(), numStack.pop()] as [number, number]
-          numStack.push(evaluate[optStack.pop()!](num1, num2))
+          numStack.push(CAL[optStack.pop()!](num1, num2))
         }
         optStack.pop() // 弹出'('
       }
@@ -62,7 +53,7 @@ const calculate = function (s: string): number {
   return numStack[0]
 }
 
-// console.log(calculate('(1+(4+5+2)-3)+(6+8)'))
+console.log(calculate('(1+(4+5+2)-3)+(6+8)'))
 // console.log(calculate('2-1+2'))
 // console.log(calculate('2147483647'))
 // console.log(calculate('-2+ 1'))

@@ -42,3 +42,4 @@ console.log(diffWaysToCompute('2-1-1'))
 // 解释:
 // ((2-1)-1) = 0
 // (2-(1-1)) = 2
+export {}

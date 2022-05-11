@@ -360,3 +360,7 @@ def heapreplace(heap, item):
 ## numpy 处理大数组超级快
 
 https://leetcode.cn/problems/maximum-trailing-zeros-in-a-cornered-path/solution/by-freeyourmind-pqc9/
+
+## 空间消耗
+
+leetcode 统计内存消耗的时候只会计入被访问过的内存块,所以即使我们开了一个 5·108 那么大的 int 数组(理论值为约 200OMB)，如果只使用其中的少量元素的话也不会超出内存限制。那么在一些情况下可以直接拿数组当哈希表用，让代码跑得更快。

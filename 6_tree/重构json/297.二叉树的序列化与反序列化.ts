@@ -130,3 +130,14 @@ function deserializeNode(data: (number | null)[]): BinaryTree | null {
 // console.log(deserialize([1, 2, 3, null, null, 4, 5]))
 
 export { deserializeNode }
+
+// function serialize(root: TreeNode | null): string {
+//   return JSON.stringify(root)
+// }
+
+// /*
+//  * Decodes your encoded data to tree.
+//  */
+// function deserialize(data: string): TreeNode | null {
+//   return JSON.parse(data)
+// }

@@ -35,6 +35,7 @@ const toTree = (str: string) => {
 
   return root.children
 }
+
 console.dir(toTree(str), { depth: null })
 // console.log(toTree('<div><p><a/></p><p></p></div>'))
 // console.log(toTree('<p><a/></p><p></p>'))

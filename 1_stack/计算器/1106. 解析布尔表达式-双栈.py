@@ -5,50 +5,40 @@
 # 遇到右括号，弹出1个操作符，再弹出操作数直至遇到左括号，
 # 计算操作数与操作符的运算结果，将结果入栈
 class Solution:
+    """这道题很特殊,左括号(哨兵)放在numStack里会容易处理一些"""
+
     def parseBoolExpr(self, expression: str) -> bool:
-        nonOptStack, optStack = [], []
+        numStack, optStack = [], []
 
         for char in expression:
-            if char == '|' or char == '&' or char == '!':
+            if char == '(':  # 注意这里左括号进入numStack，用作一段运算结束的哨兵
+                numStack.append('(')
+            elif char in ('|', '&', '!'):
                 optStack.append(char)
-            elif char == 't':
-                nonOptStack.append(True)
-            elif char == 'f':
-                nonOptStack.append(False)
-            # 注意这里左括号进入nonOptStack，用于间隔t/f
-            elif char == '(':
-                nonOptStack.append('(')
-
+            elif char in ('t', 'f'):
+                numStack.append(True if char == 't' else False)
             elif char == ')':
-
-                # 与和或需要取出t/f,非直接append结果
                 opt = optStack.pop()
                 if opt == '&':
-
-                    tOrF = nonOptStack.pop()
-                    while nonOptStack[-1] != '(':
-                        top = nonOptStack.pop()
+                    tOrF = numStack.pop()
+                    while numStack[-1] != '(':
+                        top = numStack.pop()
                         tOrF = tOrF and top
-                    # 弹出左括号
-                    nonOptStack.pop()
-                    nonOptStack.append(tOrF)
-
+                    numStack.pop()  # 弹出左括号
+                    numStack.append(tOrF)
                 elif opt == '|':
-                    tOrF = nonOptStack.pop()
-                    while nonOptStack[-1] != '(':
-                        top = nonOptStack.pop()
+                    tOrF = numStack.pop()
+                    while numStack[-1] != '(':
+                        top = numStack.pop()
                         tOrF = tOrF or top
-                    # 弹出左括号
-                    nonOptStack.pop()
-                    nonOptStack.append(tOrF)
-
+                    numStack.pop()
+                    numStack.append(tOrF)
                 elif opt == '!':
-                    tOrF = nonOptStack.pop()
-                    # 弹出左括号
-                    nonOptStack.pop()
-                    nonOptStack.append(not tOrF)
+                    tOrF = numStack.pop()
+                    numStack.pop()
+                    numStack.append(not tOrF)
 
-        return nonOptStack[0]
+        return numStack[0]
 
 
 print(Solution().parseBoolExpr("&(t,f)"))

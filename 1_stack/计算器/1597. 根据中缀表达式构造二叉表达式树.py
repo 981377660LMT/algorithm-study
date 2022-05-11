@@ -3,7 +3,7 @@ from re import findall
 
 
 class Node:
-    def __init__(self, val: int = 0, left: Optional['Node'] = None, right: Optional['Node'] = None):
+    def __init__(self, val='0', left: Optional['Node'] = None, right: Optional['Node'] = None):
         self.val = val
         self.left = left
         self.right = right
@@ -14,29 +14,32 @@ class Node:
 
 
 class Solution:
+    """根据中缀表达式构造二叉表达式树"""
+
     def expTree(self, s: str) -> 'Node':
         weight = dict(zip('(+-*/', [0, 1, 1, 2, 2]))
-        nodeStack, optStack = [], []
+        numStack, optStack = [], []
 
         s += ')'
 
-        for left, num, opt, right in findall(r'(\()|(\d+)|([-+*/])|(\))', s):
-            if left:
-                optStack.append(left)
-            elif num:
-                nodeStack.append(Node(num))
-            elif opt:
-                while optStack and weight[optStack[-1]] >= weight[opt]:
-                    node1, node2 = nodeStack.pop(), nodeStack.pop()
-                    nodeStack.append(Node(optStack.pop(), node2, node1))
-                optStack.append(opt)
-            else:
+        for char in s:
+            if char == '(':
+                optStack.append(char)
+            elif char.isdigit():
+                numStack.append(Node(char))
+            elif char in '+-*/':
+                while optStack and weight[optStack[-1]] >= weight[char]:
+                    ndoe2, node1 = numStack.pop(), numStack.pop()
+                    numStack.append(Node(optStack.pop(), node1, ndoe2))
+                optStack.append(char)
+            elif char == ')':
                 while optStack and optStack[-1] != '(':
-                    node1, node2 = nodeStack.pop(), nodeStack.pop()
-                    nodeStack.append(Node(optStack.pop(), node2, node1))
-                optStack and optStack.pop()
+                    ndoe2, node1 = numStack.pop(), numStack.pop()
+                    numStack.append(Node(optStack.pop(), node1, ndoe2))
+                if optStack:
+                    optStack.pop()
 
-        return nodeStack[0]
+        return numStack[0]
 
 
 print(Solution().expTree(s="3*4-2*5"))
