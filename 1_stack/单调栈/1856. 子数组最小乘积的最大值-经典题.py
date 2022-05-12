@@ -1,3 +1,4 @@
+from itertools import accumulate
 from typing import List
 
 
@@ -14,37 +15,36 @@ MOD = int(1e9 + 7)
 
 class Solution:
     def maxSumMinProduct(self, nums: List[int]) -> int:
-        """看每个数作为最小值的影响范围"""
-        nums = [0] + nums + [0]
-        preSum = [0]
-        for num in nums:
-            preSum.append(preSum[-1] + num)
+        """看每个数作为非严格最小值的影响范围"""
+        n = len(nums)
+        preSum = [0] + list(accumulate(nums))
 
         # 右边第一个比它小的元素下标
-        rightFirstSmaller = [-1] * len(nums)
+        rightSmaller = [n] * n
         stack = []
         for i in range(len(nums)):
             while stack and nums[i] < nums[stack[-1]]:
-                rightFirstSmaller[stack.pop()] = i
+                rightSmaller[stack.pop()] = i
             stack.append(i)
 
-        leftFirstSmaller = [-1] * len(nums)
+        leftSmaller = [-1] * n
         stack = []
         for i in range(len(nums) - 1, -1, -1):
             while stack and nums[i] < nums[stack[-1]]:
-                leftFirstSmaller[stack.pop()] = i
+                leftSmaller[stack.pop()] = i
             stack.append(i)
 
-        # print(rightFirstSmaller, leftFirstSmaller)
         res = 0
-        for i in range(1, len(nums) - 1):
-            left = leftFirstSmaller[i]
-            right = rightFirstSmaller[i]
+        for i in range(len(nums)):
+            left = leftSmaller[i]
+            right = rightSmaller[i]
             res = max(res, nums[i] * (preSum[right] - preSum[left + 1]))
         return res % MOD
 
 
 print(Solution().maxSumMinProduct(nums=[1, 2, 3, 2]))
+print(Solution().maxSumMinProduct(nums=[2, 3, 3, 1, 2]))
+print(Solution().maxSumMinProduct(nums=[3, 1, 5, 6, 4, 2]))
 # 输出：14
 # 解释：最小乘积的最大值由子数组 [2,3,2] （最小值是 2）得到。
 # 2 * (2+3+2) = 2 * 7 = 14 。

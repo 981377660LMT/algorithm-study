@@ -20,4 +20,3 @@ class MovingAverage {
     return this.sum / this.queue.length
   }
 }
-ArrayDeque

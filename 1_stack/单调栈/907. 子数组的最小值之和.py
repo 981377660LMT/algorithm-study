@@ -7,9 +7,11 @@ MOD = int(1e9 + 7)
 # https://leetcode-cn.com/problems/sum-of-subarray-minimums/solution/python3-tong-84ti-zui-da-zhi-fang-tu-by-5ersw/
 
 # 思路：考虑每个极小值在多少个子数组里产生贡献
+
+
 class Solution:
     def sumSubarrayMins(self, arr: List[int]) -> int:
-        arr.append(-0x7FFFFFFF)
+        arr.append(-int(1e20))
         stack = [-1]
         res = 0
 

@@ -31,12 +31,13 @@ class Solution:
         return res
 
     def mctFromLeafValues2(self, arr: List[int]) -> int:
+        """每个数作为最小值"""
         res = 0
-        stack = [0x7FFFFFFF]
+        stack = [int(1e20)]
         for num in arr:
             while stack and stack[-1] < num:
-                tmp_min = stack.pop()
-                res += min(stack[-1], num) * tmp_min
+                min_ = stack.pop()
+                res += min(stack[-1], num) * min_
             stack.append(num)
 
         while len(stack) > 2:

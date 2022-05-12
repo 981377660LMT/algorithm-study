@@ -1,4 +1,4 @@
-import json
+from bisect import bisect_left
 from typing import Optional, Tuple
 
 
@@ -16,7 +16,6 @@ class MyNode:
 class Solution:
     def minOperationsToFlip(self, expression: str) -> int:
         """根据中缀表达式构造二叉表达式树然后树上dp
-        
         叶子结点表示操作数,非叶子结点表示运算符
         """
 

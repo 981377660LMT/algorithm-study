@@ -13,3 +13,5 @@ class Solution:
 
 print(Solution().readBinaryWatch(1))
 print(bin(12).count('1'))
+print(int(12).bit_count())
+

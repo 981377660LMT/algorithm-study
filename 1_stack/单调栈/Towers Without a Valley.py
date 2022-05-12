@@ -1,4 +1,4 @@
-# 将数组变为`无谷数组`后的最大和
+# 将数组变为`无山谷数组`后的最大和
 # Consider a list of integers A such that A[i] ≤ nums[i]. Also, there are no j and k such that there exist j < i < k and A[j] > A[i] and A[i] < A[k].
 # Return the maximum possible sum of A.
 
@@ -31,10 +31,10 @@ class Solution:
             return res
 
         # 每个位置作为山脉顶峰
-        left = getSumAsPeek(nums)
-        right = getSumAsPeek(nums[::-1])[::-1]
+        res1 = getSumAsPeek(nums)
+        res2 = getSumAsPeek(nums[::-1])[::-1]
         # print(left, right)
-        return max(l + r - n for l, r, n in zip(left, right, nums))
+        return max(left + right - mid for left, right, mid in zip(res1, res2, nums))
 
 
 print(Solution().solve(nums=[10, 6, 8]))

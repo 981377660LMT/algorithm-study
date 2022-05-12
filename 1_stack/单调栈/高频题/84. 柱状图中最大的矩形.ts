@@ -48,7 +48,6 @@ const largestRectangleArea = function (heights: number[]): number {
     stack.push(i)
   }
 
-  console.log(stack)
   return res
 }
 

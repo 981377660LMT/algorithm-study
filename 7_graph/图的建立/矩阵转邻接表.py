@@ -5,11 +5,8 @@ from collections import defaultdict
 from typing import DefaultDict, List, Set
 
 
-Matrix = List[List[int]]
-
-
-def matrixToAdjMap(matrix: Matrix) -> DefaultDict[int, Set[int]]:
-    """网格矩阵转无向图邻接表"""
+def matrixToAdjMap(matrix: List[List[int]]) -> DefaultDict[int, Set[int]]:
+    """二维矩阵转无向图邻接表"""
     row, col = len(matrix), len(matrix[0])
     adjMap = defaultdict(set)
     for r in range(row):

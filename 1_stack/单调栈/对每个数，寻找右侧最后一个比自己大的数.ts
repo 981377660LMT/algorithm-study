@@ -1,16 +1,18 @@
-// 给出一个数组，最多删除一个连续子数组，求剩下数组的严格递增连续子数组的最大长度。
-// n<=1e6
-
-// 对位置为i的元素，最大长度为在它之前的所有比它小的元素的值的pre[j]的最大值 + suf[i] nlogn
-// 用线段树维护小于该元素的最大的pre[j]
+import assert from 'assert'
 
 class SegmentTreeNode {
   left = -1
   right = -1
   isLazy = false
-  lazyValue = -Infinity
-  value = -Infinity
+  lazyValue = -1
+  value = -1
 }
+
+/**
+ * @description 线段树区间最大值更新
+ * 0 <= A[i] <= 50000
+ * 2 <= A.length <= 50000
+ */
 
 class SegmentTree {
   private readonly tree: SegmentTreeNode[]
@@ -93,38 +95,35 @@ class SegmentTree {
     node.value = Math.max(left.value, right.value)
   }
 }
-
-// 假设数组都是正整数
-function maxLenAfterRemove(nums: number[]): number {
+/**
+ * @description 对每个数，寻找右侧最后一个比自己大的数；注意线段树要偏移
+ * @param nums 0 <= nums[i] <= 50000  2 <= nums.length <= 50000
+ * @returns 每个元素右侧最后一个比自己大的数的索引
+ */
+function findLastLarge(nums: number[]): number[] {
   const n = nums.length
-  const pre = Array<number>(n).fill(1)
-  const suf = Array<number>(n).fill(1)
-
-  for (let i = 0; i < n; i++) {
-    if (nums[i] > nums[i - 1]) {
-      pre[i] = pre[i - 1] + 1
-    }
-  }
-
-  for (let i = n - 2; ~i; i--) {
-    if (nums[i] < nums[i + 1]) {
-      suf[i] = suf[i + 1] + 1
-    }
-  }
-
-  let res = 1
+  const res = Array<number>(n).fill(-1)
   const max = Math.max(...nums)
+
   const tree = new SegmentTree(max + 10)
-  for (let i = 0; i < n; i++) {
-    const leftMax = tree.query(1, 1, nums[i] - 1)
-    const right = suf[i]
-    res = Math.max(res, leftMax + right)
-    tree.update(1, nums[i], max, pre[i])
+  for (let i = n - 1; i >= 0; i--) {
+    res[i] = tree.query(1, nums[i] + 1, nums[i] + 1)
+    tree.update(1, 1, nums[i] + 1, i)
   }
 
   return res
 }
 
-console.log(maxLenAfterRemove([5, 3, 4, 9, 2, 8, 6, 7, 1])) // 4
+if (require.main === module) {
+  assert.deepStrictEqual(
+    findLastLarge([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+    [9, 9, 9, 9, 9, 9, 9, 9, 9, -1]
+  )
 
-export {}
+  assert.deepStrictEqual(
+    findLastLarge([9, 8, 1, 0, 1, 9, 4, 0, 4, 1]),
+    [5, 5, 9, 9, 9, -1, 8, 9, -1, -1]
+  )
+}
+
+export { findLastLarge }

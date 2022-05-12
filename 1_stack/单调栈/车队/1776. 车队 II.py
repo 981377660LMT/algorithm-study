@@ -29,7 +29,7 @@ class Solution:
             ):
                 stack.pop()
             if not stack:
-                stack.append((position, speed, 0x7FFFFFFF))
+                stack.append((position, speed, int(1e20)))
                 res.append(-1)
             else:
                 # 这辆车与右边的车会相撞

@@ -13,7 +13,7 @@ from typing import List
 
 class Solution:
     def validSubarrays(self, nums: List[int]) -> int:
-        nums.append(-0x7FFFFFFF)
+        nums.append(-int(1e20))
         n = len(nums)
         stack = []
         res = 0

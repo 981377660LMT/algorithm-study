@@ -33,14 +33,17 @@ class Robot:
 
     def step(self, num: int) -> None:
         self.isMoved = True
+
         self.idx = (self.idx + num) % len(self.pos)
 
     def getPos(self) -> List[int]:
+
         return list(self.pos[self.idx])
 
     def getDir(self) -> str:
         if not self.isMoved:
             return "East"
+
         return DIR[self.dirs[self.idx]]
 
 
