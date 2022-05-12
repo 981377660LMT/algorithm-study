@@ -6,7 +6,7 @@ const MAPPING: Record<string, (a: number, b: number) => number> = {
 }
 const OPT = new Set(['+', '-', '*', '/'])
 
-// 逆波兰表达式求值
+// 逆波兰表达式(后缀表达式)求值
 function evalRPN(tokens: string[]): number {
   const numStack: number[] = []
 

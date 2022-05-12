@@ -29,13 +29,13 @@ class Solution:
                 numStack.append(Node(char))
             elif char in '+-*/':
                 while optStack and weight[optStack[-1]] >= weight[char]:
-                    ndoe2, node1 = numStack.pop(), numStack.pop()
-                    numStack.append(Node(optStack.pop(), node1, ndoe2))
+                    node2, node1 = numStack.pop(), numStack.pop()
+                    numStack.append(Node(optStack.pop(), node1, node2))
                 optStack.append(char)
             elif char == ')':
                 while optStack and optStack[-1] != '(':
-                    ndoe2, node1 = numStack.pop(), numStack.pop()
-                    numStack.append(Node(optStack.pop(), node1, ndoe2))
+                    node2, node1 = numStack.pop(), numStack.pop()
+                    numStack.append(Node(optStack.pop(), node1, node2))
                 if optStack:
                     optStack.pop()
 
@@ -44,3 +44,4 @@ class Solution:
 
 print(Solution().expTree(s="3*4-2*5"))
 print(findall(r'(\()|(\d+)|([-+*/])|(\))', "3*4-2*5+"))
+

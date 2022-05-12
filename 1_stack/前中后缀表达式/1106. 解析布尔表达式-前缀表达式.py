@@ -5,7 +5,7 @@
 # 遇到右括号，弹出1个操作符，再弹出操作数直至遇到左括号，
 # 计算操作数与操作符的运算结果，将结果入栈
 class Solution:
-    """这道题很特殊,左括号(哨兵)放在numStack里会容易处理一些"""
+    """这道题是前缀表达式,左括号(哨兵)放在numStack里会容易处理一些"""
 
     def parseBoolExpr(self, expression: str) -> bool:
         numStack, optStack = [], []

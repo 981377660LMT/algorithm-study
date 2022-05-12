@@ -6,8 +6,7 @@ const tokens = s.split(/([\(\)\+\-\*\/])/g).filter(Boolean)
 // 包含分隔符
 console.log(tokens)
 
-// 不包含分隔符
+// 不包含分隔符 python 也一样
 console.log(s.split(/\+|\-|\*|\/|\(|\)/g))
 
-// python 也一样
 export {}
