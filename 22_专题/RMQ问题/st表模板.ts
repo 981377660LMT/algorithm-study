@@ -4,13 +4,13 @@ type MergeFunc = (a: number, b: number) => number
 
 /**
  * @summary st表适用于可重复贡献问题/RMQ静态区间最值查询
- * @description
- * 可重复贡献问题是指对于运算`opt`，满足`x opt x = x`，则对应的区间询问就是一个可重复贡献问题。
+ * @description 可重复贡献问题是指对于运算`opt`，满足`x opt x = x`，则对应的区间询问就是一个可重复贡献问题。
  *
  * 例如，最大值有 `max(a,a) = a`，gcd有 `gcd(a,a) = a` ，所以RMQ和区间GCD就是一个可重复贡献问题。
  * 像区间和就不具有这个性质，如果求区间和的时候采用的预处理区间重叠了，则会导致重曼部分被计算两次，这是我们所不愿意看到的。
  * 另外，opt还必须满足结合律才能使用ST表求解。
- * @see https://oi-wiki.org/ds/sparse-table/
+ *
+ * @see {@link https://oi-wiki.org/ds/sparse-table/}
  */
 class SparseTable {
   private readonly size: number

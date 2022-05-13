@@ -66,18 +66,20 @@ class Solution:
         for c, r in zip(time, position):
             matrix[r][c - 1] = 1
 
-        dp = [defaultdict(lambda: int(1e20)) for _ in range(row)]
+        dp = defaultdict(lambda: int(1e20))
         for state in range(3 ** col):
             if all(getDigit(state, c) != 0 for c in range(col) if matrix[0][c] == 1):
-                dp[0][state] = costByState[state]
+                dp[state] = costByState[state]
 
         for r in range(1, row):
-            for preState, preCost in dp[r - 1].items():
+            ndp = defaultdict(lambda: int(1e20))
+            for preState, preCost in dp.items():
                 for curState in range(3 ** col):
                     if check(r, preState, curState):
-                        dp[r][curState] = min(dp[r][curState], preCost + costByState[curState])
+                        ndp[curState] = min(ndp[curState], preCost + costByState[curState])
+            dp = ndp
 
-        return min(dp[-1].values())
+        return min(dp.values())
 
 
 print(Solution().defendSpaceCity(time=[1, 2, 1], position=[6, 3, 3]))

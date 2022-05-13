@@ -1,4 +1,10 @@
 // 思路：找到最右边不为9的节点，加一；之后的所有9全部置为0
+
+/**
+ *
+ * @param head
+ * @returns
+ */
 function plusOne(head: ListNode | null): ListNode | null {
   const dummy = new ListNode(0, head)
   let dummyP: ListNode | null = dummy
