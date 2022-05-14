@@ -1,7 +1,7 @@
-import { bisectLeft } from '../../9_排序和搜索/二分/7_二分搜索寻找最左插入位置'
-import { bisectRight } from '../../9_排序和搜索/二分/7_二分搜索寻找最插右入位置'
-
 // 询问次数q<=1e4
+
+import { bisectLeft, bisectRight } from '../../9_排序和搜索/二分/bisect'
+
 // 数组长度<=2e4
 class MajorityChecker {
   private readonly indexMap: Map<number, number[]> // 每个元素出现的位置

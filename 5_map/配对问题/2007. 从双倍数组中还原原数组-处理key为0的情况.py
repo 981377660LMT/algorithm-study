@@ -10,6 +10,7 @@ class Solution:
             return []
 
         counter = Counter(changed)
+        
         res = []
         for key in sorted(counter):
             if not counter[key]:

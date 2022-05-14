@@ -2,13 +2,20 @@
 
 ```Python
 for key in sorted(counter):
+    # 处理0的特殊情况
+    if key == 0:
+        if counter[key] & 1:
+            return []
+        res.extend([key] * (counter[key] // 2))
+        continue
+
     # 配对元素不足
     if counter[key + 2 * k] < counter[key]:
         break
+
     res.extend([key + k] * counter[key])
     counter[key + 2 * k] -= counter[key]
-else:
-    return res
+
 ```
 
 困难题多了一个枚举 k

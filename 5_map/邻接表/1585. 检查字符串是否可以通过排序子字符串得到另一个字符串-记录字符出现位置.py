@@ -10,6 +10,8 @@ from collections import deque, Counter, defaultdict
 # 我们只需要检查比这个字母小的字母都出现在元字符位置之后
 # 原因是如果是由后面相同数字转换过来，一定跨不过第一个数字，
 # 所以只需要检查 s 中那个数字的前面有没有小于它的(移到左边没有阻拦)，如果有就不能转换！
+
+
 class Solution:
     def isTransformable(self, s: str, t: str) -> bool:
         ls = list([int(ch) for ch in s])

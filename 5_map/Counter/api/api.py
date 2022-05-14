@@ -20,3 +20,4 @@ print(not Counter())
 
 # 5.freq总和
 print(len(list(c.elements())))
+print(sum(c.values()))

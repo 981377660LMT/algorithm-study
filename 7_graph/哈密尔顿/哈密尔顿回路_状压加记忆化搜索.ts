@@ -2,7 +2,6 @@ function hasHamiltonLoop(n: number, adjList: number[][], start = 0): boolean {
   const target = (1 << n) - 1
   const memo = new Map<string, boolean>()
 
-  // 必须是这两个参数
   const dfs = (cur: number, visited: number): boolean => {
     if (visited === target && cur === start) return true
     const key = `${cur}#${visited}`

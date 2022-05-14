@@ -46,4 +46,4 @@ def kruskal(edges: List[List[int]]) -> int:
             uf.union(root1, root2)
             hit += 1
 
-    return res if hit == n - 1 else -1
+    return res if hit == n - 1 else int(1e20)

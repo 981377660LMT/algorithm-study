@@ -6,7 +6,7 @@ const findDuplicate = function (paths: string[]): string[][] {
   const fileNamesByContent = new Map<string, string[]>()
 
   for (const path of paths) {
-    const [root, ...files] = path.split(/\s+/)
+    const [root, ...files] = path.split(/\s+/g)
     for (const file of files) {
       const [fileName, content] = file.split('(')
       !fileNamesByContent.has(content) && fileNamesByContent.set(content, [])

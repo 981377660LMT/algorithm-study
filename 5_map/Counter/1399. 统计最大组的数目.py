@@ -6,10 +6,8 @@ from collections import Counter
 class Solution:
     def countLargestGroup(self, n: int) -> int:
         nums = [sum(int(char) for char in str(num)) for num in range(1, n + 1)]
-        value_counter = Counter(nums)
-        freq_counter = Counter(value_counter.values())
-        # print(max(freq_counter.items()))
-        return max(freq_counter.items())[1]
+        freqCounter = Counter(Counter(nums).values())
+        return max(freqCounter.items())[1]
 
 
 print(Solution().countLargestGroup(13))

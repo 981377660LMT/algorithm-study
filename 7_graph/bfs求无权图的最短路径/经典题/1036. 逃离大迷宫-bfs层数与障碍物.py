@@ -25,9 +25,9 @@ class Solution:
             level = 0
             while queue:
                 level += 1
-                if level > len(blockedSet):
+                if level > len(blockedSet):  # 剪枝
                     return True
-                newq = []
+                nextQueue = []
                 for x, y in queue:
                     if (x, y) == (tx, ty):
                         return True
@@ -39,8 +39,8 @@ class Solution:
                             and (xx, yy) not in visited
                         ):
                             visited.add((xx, yy))
-                            newq.append((xx, yy))
-                queue = newq
+                            nextQueue.append((xx, yy))
+                queue = nextQueue
             return False
 
         return bfs(*source, *target) and bfs(*target, *source)

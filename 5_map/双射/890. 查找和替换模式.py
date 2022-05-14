@@ -3,6 +3,7 @@ from typing import List
 
 class Solution:
     def findAndReplacePattern(self, words: List[str], pattern: str) -> List[str]:
+        # 是否满足双射关系
         def isIsomorphic(s: str, t: str) -> bool:
             if len(s) != len(t):
                 return False

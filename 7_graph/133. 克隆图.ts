@@ -25,13 +25,13 @@ function cloneGraph(node: Node | null): Node | null {
     if (!node) return null
     if (record.has(node)) return record.get(node)!
 
-    const clone = new Node(node.val, [])
-    record.set(node, clone)
+    const res = new Node(node.val, [])
+    record.set(node, res)
     for (const next of node.neighbors) {
-      clone.neighbors.push(dfs(next)!) // 将临边的克隆也加入克隆的临边
+      res.neighbors.push(dfs(next)!) // 将临边的克隆也加入克隆的临边
     }
 
-    return clone
+    return res
   }
 }
 

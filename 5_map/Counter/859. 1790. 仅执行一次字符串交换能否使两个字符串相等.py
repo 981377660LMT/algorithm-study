@@ -2,6 +2,7 @@
 # s1.length == s2.length
 class Solution:
     def areAlmostEqual(self, s1: str, s2: str) -> bool:
+        """仅执行一次交换能否使两个字符串相等"""
         if s1 == s2:
             return True
 

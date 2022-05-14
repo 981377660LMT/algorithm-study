@@ -1,3 +1,4 @@
+from itertools import islice
 from typing import Generator, List
 
 
@@ -5,7 +6,7 @@ from typing import Generator, List
 class Solution:
     def solve(self, n: int, k: int) -> str:
         """
-        返回'0''1''2'组成的长为n的字典序的第k个字符串
+        返回'0''1''2'组成的长为n的字典序的第k个字符串 相邻字符不能相同
         用dfs搜，搜出来直接就是字典序，并且用生成器可以节省空间，加速
         如果用bfs搜，搜出来是实际大小排序
         """
@@ -23,13 +24,15 @@ class Solution:
                 path.pop()
 
         iter = bt(0, -1, [])
-
-        try:
-            for _ in range(k):
-                next(iter)
-            return next(iter)
-        except StopIteration:
-            return ''
+        return next(islice(iter, k, None), '')
 
 
+print(Solution().solve(n=2, k=0))
 print(Solution().solve(n=2, k=1))
+print(Solution().solve(n=2, k=2))
+print(Solution().solve(n=2, k=3))
+print(Solution().solve(n=2, k=4))
+print(Solution().solve(n=2, k=5))
+print(Solution().solve(n=2, k=6))
+print(Solution().solve(n=2, k=7))
+

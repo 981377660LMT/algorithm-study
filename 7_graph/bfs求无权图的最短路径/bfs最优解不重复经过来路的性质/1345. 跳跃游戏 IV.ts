@@ -1,4 +1,4 @@
-import { ArrayDeque } from '../../../2_queue/Deque/ArrayDeque'
+import { SimpleQueue } from '../../../2_queue/Deque/Queue'
 
 /**
  * @param {number[]} arr
@@ -19,8 +19,7 @@ function minJumps(arr: number[]): number {
   })
 
   const visited = new Set<number>()
-  const queue = new ArrayDeque(5 * 10 ** 4)
-  queue.push(0)
+  const queue = new SimpleQueue([0])
   let steps = 0
 
   while (queue.length > 0) {

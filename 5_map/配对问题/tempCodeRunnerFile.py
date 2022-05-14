@@ -1,1 +1,0 @@
-counter[key] // 2
