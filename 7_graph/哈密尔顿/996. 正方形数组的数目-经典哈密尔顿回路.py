@@ -1,6 +1,6 @@
 from typing import List
 from functools import lru_cache
-from math import sqrt, factorial
+from math import isqrt
 from collections import Counter
 
 # 给定一个非负整数数组 A，如果该数组每对相邻元素之和是一个完全平方数，则称这一数组为正方形数组。
@@ -8,6 +8,20 @@ from collections import Counter
 # 1 <= A.length <= 12
 
 # 找到图中的哈密尔顿路径数
+
+
+@lru_cache(None)
+def isEdge(x: int, y: int) -> bool:
+    r = isqrt(x + y)
+    return r * r == (x + y)
+
+
+@lru_cache(None)
+def fac(n: int) -> int:
+    """n的阶乘"""
+    if n == 0:
+        return 1
+    return n * fac(n - 1)
 
 
 class Solution:
@@ -22,12 +36,7 @@ class Solution:
                 if state & (1 << next):
                     continue
                 res += dfs(next, state | (1 << next))
-
             return res
-
-        def isEdge(x: int, y: int) -> bool:
-            r = sqrt(x + y)
-            return int(r) ** 2 == (x + y)
 
         n = len(nums)
         target = (1 << n) - 1
@@ -42,7 +51,7 @@ class Solution:
         counter = Counter(nums)
         # 消除重复排列
         for count in counter.values():
-            res //= factorial(count)
+            res //= fac(count)
         return res
 
 

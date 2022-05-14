@@ -1,4 +1,3 @@
-export {}
 const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz'
 const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const DIGITS = '0123456789'
@@ -21,4 +20,4 @@ const DIRS8 = [
   [-1, -1],
 ]
 
-function foo() {}
+export { LOWERCASE, UPPERCASE, DIGITS, MOD, EPS, DIRS4, DIRS8 }
