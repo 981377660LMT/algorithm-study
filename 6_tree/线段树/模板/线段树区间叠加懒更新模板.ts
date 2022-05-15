@@ -38,6 +38,7 @@ class SegmentTree {
     this.pushUp(root)
   }
 
+  // 对于不在线段树中的点，应按照题意来返回
   query(root: number, left: number, right: number): number {
     this.checkRange(left, right)
     const node = this.tree[root]

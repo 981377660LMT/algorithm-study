@@ -1,14 +1,11 @@
-"""dijkstra模板"""
+"""dijk模板"""
 
 from collections import defaultdict
 from functools import lru_cache
 from heapq import heappop, heappush
-from typing import DefaultDict, Hashable, List, Optional, Tuple, TypeVar, Union, overload
+from typing import DefaultDict, List, Optional, Tuple, Union, overload
 
 INF = int(1e20)
-
-
-# T = TypeVar('T', bound=Hashable)
 
 
 @overload

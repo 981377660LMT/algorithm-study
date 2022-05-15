@@ -5,15 +5,19 @@
 from typing import List
 from itertools import combinations
 
+Point = List[int]
 
+# https://leetcode.cn/problems/largest-triangle-area/comments/
 class Solution:
-    def largestTriangleArea(self, points: List[List[int]]) -> float:
-        def cal_cross_product(A, B, C):
-            AB = [B[0] - A[0], B[1] - A[1]]
-            AC = [C[0] - A[0], C[1] - A[1]]
-            return AB[0] * AC[1] - AB[1] * AC[0]
+    def largestTriangleArea(self, points: List[Point]) -> float:
+        """叉乘计算三角形面积"""
 
-        return max(abs(cal_cross_product(A, B, C)) / 2 for A, B, C in combinations(points, 3))
+        def calCross(pa: Point, pb: Point, pc: Point) -> int:
+            ab = [pb[0] - pa[0], pb[1] - pa[1]]
+            ac = [pc[0] - pa[0], pc[1] - pa[1]]
+            return ab[0] * ac[1] - ab[1] * ac[0]
+
+        return max(abs(calCross(pa, pb, pc)) / 2 for pa, pb, pc in combinations(points, 3))
 
 
 print(Solution().largestTriangleArea([[0, 0], [0, 1], [1, 0], [0, 2], [2, 0]]))

@@ -1,4 +1,4 @@
-# 数组是否连续
+# 数组是否值域连续
 # 2229. Check if an Array Is Consecutive
 from typing import List
 

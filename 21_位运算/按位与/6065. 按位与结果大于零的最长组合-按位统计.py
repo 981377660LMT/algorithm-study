@@ -1,0 +1,77 @@
+from typing import List
+
+
+class Solution:
+    def largestCombination(self, candidates: List[int]) -> int:
+        """
+        返回按位与结果大于 0 的 最长组合(子序列)的长度。
+
+        统计每位是否为1
+        时间复杂度 O(nlogA)
+        """
+        bitCount = [0] * 32
+        for num in candidates:
+            for i in range(32):
+                if num & (1 << i):
+                    bitCount[i] += 1
+
+        return max(bitCount)
+
+    def largestCombination2(self, candidates: List[int]) -> int:
+        """
+        返回按位与结果大于 0 的 最长子数组
+
+        利用与运算的单调性
+        O(n*logA)
+        """
+
+        def add(num: int) -> None:
+            for i in range(32):
+                if not (num >> i) & 1:
+                    counter[i] += 1
+
+        def remove(num: int) -> int:
+            repay = 0
+            for i in range(32):
+                if not (num >> i) & 1:
+                    if counter[i] == 1:
+                        repay |= 1 << i
+                    counter[i] -= 1
+            return repay
+
+        left, res, curAnd = 0, 0, (1 << 32) - 1
+        counter = [0] * 32  # 记录每位上0的个数
+        for right, num in enumerate(candidates):
+            add(num)
+            curAnd &= num
+            while left < right and curAnd == 0:
+                repay = remove(candidates[left])
+                curAnd |= repay
+                left += 1
+            res = max(res, right - left + 1)
+
+        return res
+
+    def largestCombination3(self, candidates: List[int]) -> int:
+        """
+        返回按位与结果大于 0 的 最长子数组
+
+        标记该位上一个是 0 的位置在哪里
+        按位分开处理
+        O(n*32)
+        """
+
+        pre = [-1] * 32
+        n, res = len(candidates), 0
+        for i in range(n):
+            for bit in range(32):
+                if not (candidates[i] >> bit) & 1:
+                    pre[bit] = i
+                else:
+                    res = max(res, i - pre[bit])
+        return res
+
+
+print(Solution().largestCombination2(candidates=[16, 17, 71, 62, 12, 24, 14]))
+print(Solution().largestCombination2(candidates=[8, 8, 8, 8, 1, 8, 8, 8, 8, 8]))
+print(Solution().largestCombination3(candidates=[8, 8, 8, 8, 1, 8, 8, 8, 8, 8]))

@@ -1,37 +1,15 @@
-```Python
-class Solution:
-    def solve(self, coins, quantities):
-        """Return the number of distinct coin sum values you can get by using non-empty group of these coins."""
-        res = set([0])
-        for index, coin in enumerate(coins):
-            cur = set()
-            for pre in res:
-                for count in range(quantities[index] + 1):
-                    cur.add(pre + coin * count)
-            res = cur
-
-        return len(res) - 1
-
-    def solve2(self, coins, quantities):
-        dp = 1
-        for coin, count in zip(coins, quantities):
-            for _ in range(count):
-                # 相当于集合并集操作
-                dp |= dp << coin
-
-        return bin(dp).count('1') - 1
-```
-
-本质上是 dp
+本质上是 子序列 dp
 
 ```Python
-class Solution:
-    def solve(self, nums):
-        res = set()
-        cur = set()
-        for num in nums:
-            cur = {num | y for y in cur} | {num}
-            res |= cur
+# 求子数组按位或操作可能得到的个数
+# 时间复杂度是多少呢?
+class Solution(object):
+    def subarrayBitwiseORs(self, A):
+        res = set()  # 存储所有子集(子序列)，子集按照每个元素结尾来划分
+        dp = {0}
+        for num in A:
+            ndp = {num | y for y in dp} | {num}   # 以 num 结尾的子数组的所有或
+            res |= ndp  # 更新到结果
+            dp = ndp  # 更新到dp
         return len(res)
-
 ```

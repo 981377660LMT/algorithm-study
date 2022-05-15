@@ -9,13 +9,13 @@ const arrayNesting = function (nums: number[]): number {
   let res = 0
   const n = nums.length
   const visited = Array<boolean>(n).fill(false)
-  // const adjList = Array.from<unknown, number[]>({ length: n }, () => [])
-  // for (let i = 0; i < n; i++) {
-  //   adjList[i].push(nums[i])
-  // }
 
-  const dfs = (cur: number, steps: number) => {
-    if (visited[cur]) return (res = Math.max(res, steps))
+  const dfs = (cur: number, steps: number): void => {
+    if (visited[cur]) {
+      res = Math.max(res, steps)
+      return
+    }
+
     visited[cur] = true
     dfs(nums[cur], steps + 1)
   }

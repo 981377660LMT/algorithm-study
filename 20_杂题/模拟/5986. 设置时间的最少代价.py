@@ -1,36 +1,30 @@
-# 请你能返回设置 targetSeconds 秒钟加热时间需要花费的最少代价。
-# bfs暴力
-from heapq import heappop, heappush
-
-# todo
 class Solution:
     def minCostSetTime(self, startAt: int, moveCost: int, pushCost: int, targetSeconds: int) -> int:
-        def cal(path: list[int]) -> int:
-            # print(path)
-            digits = ''.join([str(num) for num in path]).zfill(4)
-            if -1 in path:
-                return -0x3F3F3F3F
-            minute, second = int(digits[:2]), int(digits[2:])
-            return minute * 60 + second
+        """请你能返回设置 targetSeconds 秒钟加热时间需要花费的最少代价。
+        
+        将手指移到 任何其他数字 ，需要花费 moveCost 的单位代价。
+        每 输入你手指所在位置的数字一次，需要花费 pushCost 的单位代价。
+        """
 
-        # cost, path, index, hasPushed
-        queue = [(0, [startAt, -1, -1, -1], 0, False)]
-        while queue:
-            cost, path, index, hasPushed = heappop(queue)
-            if index == 3 and cal(path) == targetSeconds:
-                print(path)
-                return cost
-            if index >= 4:
-                continue
+        def cal(mins: int, secs: int) -> int:
+            if 0 <= secs <= 99 and 0 <= mins <= 99:
+                target = str(mins * 100 + secs)  # 注意这里的转换
+                cur = str(startAt)
 
-            for next in range(index + 1, 4):
-                heappush(queue, (cost + moveCost, path, next, False))
-            if not hasPushed:
-                for select in range(10):
-                    path = path[:]
-                    path[index] = select
-                    heappush(queue, (cost + pushCost, path, index, True))
-        return -1
+                res = 0
+                for char in target:
+                    if cur == char:
+                        res += pushCost
+                    else:
+                        res += pushCost + moveCost
+                        cur = char
+                return res
+
+            return int(1e20)
+
+        mins, secs = divmod(targetSeconds, 60)
+        # 微波炉显示的时间
+        return min(cal(mins, secs), cal(mins - 1, secs + 60))
 
 
 print(Solution().minCostSetTime(startAt=1, moveCost=2, pushCost=1, targetSeconds=600))

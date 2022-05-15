@@ -3,14 +3,14 @@
  * @param {number} capacity 车上最初有 capacity 个空座位可以用来载客
  * 判断你的车是否可以顺利完成接送所有乘客的任务
  */
-const carPooling = function (trips: number[][], capacity: number): boolean {
-  const res = Array<number>(1001).fill(0)
+function carPooling(trips: number[][], capacity: number): boolean {
+  const diff = new Int32Array(1001)
   for (const [count, up, down] of trips) {
-    res[up] += count
-    res[down] -= count
+    diff[up] += count
+    diff[down] -= count
   }
-  res.reduce((pre, _, index, arr) => (arr[index] += pre))
-  return res.every(c => c <= capacity)
+  diff.reduce((pre, _, index, arr) => (arr[index] += pre))
+  return diff.every(num => num <= capacity)
 }
 
 console.log(

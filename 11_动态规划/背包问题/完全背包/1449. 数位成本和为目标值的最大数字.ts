@@ -18,8 +18,8 @@ const largestNumber = function (cost: number[], target: number): string {
     for (let j = cost[i]; j <= target; j++) {
       const pre = dp[j - cost[i]]
       if (pre === '#') continue
-      const next = (i + 1).toString() + pre
-      if (compare(next, dp[j])) dp[j] = next
+      const cand = (i + 1).toString() + pre
+      if (compare(cand, dp[j])) dp[j] = cand
     }
   }
 
@@ -36,9 +36,3 @@ console.log(largestNumber([4, 3, 2, 5, 6, 7, 2, 5, 5], 9))
 // 解释：添加数位 '7' 的成本为 2 ，添加数位 '2' 的成本为 3 。
 // 所以 "7772" 的代价为 2*3+ 3*1 = 9 。 "977" 也是满足要求的数字，
 // 但 "7772" 是较大的数字。
-
-// 没懂
-// 因为最后的答案总要把数字大的放到前面，
-// 比如说在7772和7727之间肯定选7772。
-// 那么贪心地把先数字大的物品塞到背包里，
-// 后面的小数字还能放进去的话就放到数字的最后。

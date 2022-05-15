@@ -5,21 +5,21 @@
  * 子数组具有连续性:考虑使用前缀
  */
 const subarrayBitwiseORs = (arr: number[]): number => {
-  let pre = new Set<number>([0])
+  let dp = new Set<number>([0])
   const res = new Set<number>()
 
   for (const num of arr) {
-    const cur = new Set<number>()
-    for (const p of pre) {
-      cur.add(num | p)
-      cur.add(num)
+    const ndp = new Set<number>()
+    for (const p of dp) {
+      ndp.add(num | p)
+      ndp.add(num)
     }
 
-    for (const c of cur) {
+    for (const c of ndp) {
       res.add(c)
     }
 
-    pre = cur
+    dp = ndp
   }
 
   return res.size

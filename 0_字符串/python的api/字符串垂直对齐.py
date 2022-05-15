@@ -1,5 +1,5 @@
-print('asas'.ljust(20, '*'))  # 左对齐 右边填充*
-print(len('asas'.ljust(20)))  # 左对齐 右边填充空格
+print('asas'.ljust(20, '*'))  # 相当于padRight
+print(len('asas'.ljust(20)))
 print('asass   '.rstrip())  # 去除右边空格
 
 # 字符串垂直对齐
