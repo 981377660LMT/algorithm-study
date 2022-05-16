@@ -1,4 +1,4 @@
-import { BinaryTree } from '../../6_tree/力扣加加/Tree'
+import { BinaryTree } from '../../6_tree/分类/Tree'
 
 /**
  *
@@ -6,7 +6,7 @@ import { BinaryTree } from '../../6_tree/力扣加加/Tree'
  */
 function findMode(root: BinaryTree | null): number[] {
   if (!root) return []
-  let pre: number | null = null
+  let pre = Infinity
   let curCount = 0
   let maxCount = 0
   let res: number[] = []

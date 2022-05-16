@@ -1,10 +1,12 @@
+"""从矩阵的 每一行 中选择一个整数，你的目标是 最小化 所有选中元素之 和 与目标值 target 的 绝对差 。
+# 返回 最小的绝对差 。"""
 from typing import List
 
-# 从矩阵的 每一行 中选择一个整数，你的目标是 最小化 所有选中元素之 和 与目标值 target 的 绝对差 。
-# 返回 最小的绝对差 。
 # 1 <= m, n <= 70
 # mat[i][j] <= 70,
 # 表明最后的和不超过4900 => 对矩阵每一行，求和并更新
+
+
 class Solution:
     def minimizeTheDifference(self, mat: List[List[int]], target: int) -> int:
         for row in mat:
@@ -13,10 +15,10 @@ class Solution:
 
         for row in mat:
             ndp = set()
-            for s in dp:
-                for v in row:
-                    ndp.add(s + v)
-                    if s + v >= target:
+            for pre in dp:
+                for cur in row:
+                    ndp.add(pre + cur)
+                    if pre + cur >= target:
                         break
             dp = ndp
 

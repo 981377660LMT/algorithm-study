@@ -14,7 +14,6 @@ const corpFlightBookings = function (bookings: number[][], n: number): number[] 
     res[up - 1] += count
     res[down] += -count
   }
-  console.log(res)
   res.reduce((pre, _, index, arr) => (arr[index] += pre))
   return res.slice(0, -1)
 }

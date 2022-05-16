@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import List
 
 # 火车票有三种不同的销售方式：
@@ -10,7 +11,7 @@ from typing import List
 # 1 <= days.length <= 365
 # 1 <= days[i] <= 365
 
-# dpdpdpdpdpddp
+
 # O(n)
 
 
@@ -32,8 +33,27 @@ class Solution:
 
         return dp[-1]
 
+    def mincostTickets2(self, days: List[int], costs: List[int]) -> int:
+        @lru_cache(None)
+        def dfs(index: int) -> int:
+            if index > n:
+                return 0
+            if index not in need:
+                return dfs(index + 1)
+
+            return min(
+                dfs(index + 1) + costs[0], dfs(index + 7) + costs[1], dfs(index + 30) + costs[2]
+            )
+
+        need = set(days)
+        n = days[-1]
+        res = dfs(days[0])
+        dfs.cache_clear()
+        return res
+
 
 print(Solution().mincostTickets([1, 4, 6, 7, 8, 20], [2, 7, 15]))
+print(Solution().mincostTickets2([1, 4, 6, 7, 8, 20], [2, 7, 15]))
 # 输入：days = [1,4,6,7,8,20], costs = [2,7,15]
 # 输出：11
 # 解释：

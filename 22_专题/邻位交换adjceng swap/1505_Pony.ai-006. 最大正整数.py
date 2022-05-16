@@ -20,6 +20,8 @@ S = TypeVar('S', bound=Union[SupportsDunderLT, SupportsDunderGT])
 
 
 class SortedList(Generic[S]):
+    """用bisect模拟 插入和删除的时候用切片"""
+
     def __init__(self, iterable: Optional[Iterable[S]] = None) -> None:
         self._list = []
         if iterable is not None:

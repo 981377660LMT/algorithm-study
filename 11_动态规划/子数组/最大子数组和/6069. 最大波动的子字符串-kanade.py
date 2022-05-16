@@ -38,29 +38,21 @@ class Solution:
     def largestVariance2(self, s: str) -> int:
         """时间复杂度O(26*n)"""
 
-        def cal(s1: str, s2: str) -> int:
-            # s1 最多 s2 最少 注意必须包含 s2
-            # 用一个变量记录包含s2时的差值
-            res = 0
-            maxSum, maxSumWithS2 = 0, -int(1e20)  # 一开始没有s2
-            for char in s:
-                if char == s1:
-                    maxSum += 1
-                    maxSumWithS2 += 1
-                elif char == s2:
-                    maxSum -= 1
-                    maxSumWithS2 = maxSum  # 注意这里更新答案
-                    if maxSum < 0:  # 全不要了
-                        maxSum = 0
-
-                res = max(res, maxSumWithS2)
-            return res
-
-        allChar = list(set(s))
         res = 0
-        for (s1, s2) in combinations(allChar, 2):
-            res = max(res, cal(s1, s2), cal(s2, s1))
-
+        sumMax = [[0] * 26 for _ in range(26)]
+        sumMaxWiths2 = [[-int(1e20)] * 26 for _ in range(26)]
+        for char in s:
+            ord_ = ord(char) - ord('a')
+            for i in range(26):
+                if i == ord_:
+                    continue
+                sumMax[ord_][i] += 1
+                sumMaxWiths2[ord_][i] += 1
+                sumMax[i][ord_] -= 1
+                sumMaxWiths2[i][ord_] = sumMax[i][ord_]
+                if sumMax[i][ord_] < 0:
+                    sumMax[i][ord_] = 0
+                res = max(res, sumMaxWiths2[ord_][i], sumMaxWiths2[i][ord_])
         return res
 
 

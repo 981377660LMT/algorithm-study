@@ -3,12 +3,14 @@ from typing import List
 from bisect import bisect_left
 
 # 是指在长度为 N 的数组中出现必须 超过 N/2 次。
+
+
 class Solution:
     def isMajorityElement(self, nums: List[int], target: int) -> bool:
         threshold = len(nums) >> 1
-        start_index = bisect_left(nums, target)
-        end_index = start_index + threshold
-        return end_index < len(nums) and nums[end_index] == target
+        start = bisect_left(nums, target)
+        end = start + threshold
+        return end < len(nums) and nums[end] == target
 
 
 # 输入：nums = [2,4,5,5,5,5,5,6,6], target = 5

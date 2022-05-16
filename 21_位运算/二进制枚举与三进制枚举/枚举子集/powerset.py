@@ -2,12 +2,12 @@ from itertools import chain, combinations
 from typing import Collection
 
 
-def powerset(collection: Collection, isProperSubset=False):
+def powerset(collection: Collection, isAll=True):
     """求(真)子集,时间复杂度O(n*2^n)
 
     默认求所有子集
     """
-    upper = len(collection) if isProperSubset else len(collection) + 1
+    upper = len(collection) + 1 if isAll else len(collection)
     return chain.from_iterable(combinations(collection, n) for n in range(upper))
 
 

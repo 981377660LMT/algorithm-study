@@ -1,16 +1,9 @@
-from operator import or_
-from functools import reduce, lru_cache
 from typing import Counter, List
 
 
 class Solution:
     def countMaxOrSubsets(self, nums: List[int]) -> int:
-        # 数组滚动更新
-        # res = [0]
-        # for num in nums:
-        #     res += [sub | num for sub in res]
-        # counter = Counter(res)
-        # return counter[max(counter)]
+        """统计按位或能得到最大值的子集数目"""
 
         # counter滚动更新
         dp = Counter({0: 1})
@@ -18,6 +11,21 @@ class Solution:
             for key, count in list(dp.items()):
                 dp[key | num] += count
         return dp[max(dp)]
+
+    def countMaxOrSubsets2(self, nums: List[int]) -> int:
+        """统计按位或能得到最大值的子集数目
+        
+        递推求所有子集的按位或
+        """
+
+        dp = [0]
+        for num in nums:
+            ndp = []
+            for pre in dp:
+                ndp.append(pre | num)
+            dp += ndp
+        counter = Counter(dp)
+        return counter[max(counter)]
 
 
 print(Solution().countMaxOrSubsets(nums=[3, 2, 1, 5]))

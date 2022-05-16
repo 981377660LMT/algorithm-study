@@ -3,11 +3,10 @@ from itertools import chain, combinations
 from typing import Tuple
 
 
-@lru_cache(None)
-def powerset(iterable: Tuple[int, ...]) -> Tuple[Tuple[int, ...]]:
+def P(iterable: Tuple[int, ...]):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     "(1,2,3) is excluded in our result"
-    return tuple(chain.from_iterable(combinations(iterable, i) for i in range(len(iterable) + 1)))
+    return chain.from_iterable(combinations(iterable, i) for i in range(len(iterable) + 1))
 
 
 @lru_cache
@@ -16,7 +15,7 @@ def dfs(cur: Tuple[int, ...], remain: int, groupSum: int) -> bool:
         return cur == ()
 
     expected = sum(cur) - groupSum
-    for nextSub in powerset(cur):
+    for nextSub in P(cur):
         if sum(nextSub) == expected:
             if dfs(nextSub, remain - 1, groupSum):
                 return True

@@ -18,12 +18,12 @@ class Solution1:
 
 
 # 2. powerset 顺序枚举
-def powerset(collection: Collection[Any], isProperSubset=False):
+def powerset(collection: Collection, isAll=True):
     """求(真)子集,时间复杂度O(n*2^n)
 
     默认求所有子集
     """
-    upper = len(collection) if isProperSubset else len(collection) + 1
+    upper = len(collection) + 1 if isAll else len(collection)
     return chain.from_iterable(combinations(collection, n) for n in range(upper))
 
 
@@ -43,12 +43,12 @@ class Solution2:
 
 
 # 4. 滚动更新
-class Solution3:
-    def subsets(self, nums: List[int]) -> List[List[int]]:
-        res = [[]]
-        for num in nums:
-            cur = []
-            for pre in res:
-                cur.append(pre + [num])
-            res += cur
-        return res
+# class Solution3:
+#     def subsets(self, nums: List[int]) -> List[List[int]]:
+#         dp = [[]]
+#         for num in nums:
+#             ndp = []
+#             for pre in dp:
+#                 ndp.append(pre + [num])
+#             dp += ndp
+#         return dp
