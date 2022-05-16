@@ -7,7 +7,7 @@
  * 奇数一定比前面那个偶数多一个 1，因为多的就是最低位的 1。
  * 偶数中 1 的个数一定和除以 2 之后的那个数一样多
  */
-var countBits = function (n: number): number[] {
+function countBits(n: number): number[] {
   const res = Array<number>(n + 1).fill(0)
   for (let i = 1; i <= n; i++) {
     res[i] = i % 2 === 0 ? res[i / 2] : res[i - 1] + 1

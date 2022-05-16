@@ -23,7 +23,7 @@ class Solution(object):
     def subarrayBitwiseORs(self, A):
         dp = {0}
         for num in A:
-            ndp = {num | y for y in dp} | {num}   # 以 num 结尾的子集(序列)的所有或
+            ndp = {num | y for y in dp}   # 以 num 结尾的子集(序列)的所有或
             dp |= ndp  # 直接加到dp，形成新的子集
         return len(dp)
 ```

@@ -14,6 +14,7 @@ function numSteps(s: string) {
 
   return step
 }
+
 function numSteps2(s: string) {
   let res = 0
   let carry = 0

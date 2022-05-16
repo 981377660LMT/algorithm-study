@@ -2,8 +2,8 @@
 // 然后，在这个root[R]-root[L-1]版本的线段树上，
 // 查询节点的值大于等于threshold的节点的值。
 class SegmentTreeNode {
-  left = -1
-  right = -1
+  left = 0
+  right = 0
   count = 0
 }
 
@@ -19,8 +19,9 @@ interface StaticSegmentTree {
 
 function usePersistentSegmentTree(nums: number[]): StaticSegmentTree {
   const n = nums.length
-  const tree = Array<SegmentTreeNode>(4 * n + 16 * n) // 整个线段树N * 4 + NlogN，索引代表值域
-  const roots = Array(n + 1).fill(0) // n+1个版本的根节点的treeId
+  // const tree = Array<SegmentTreeNode>(4 * n + 16 * n) // 整个线段树N * 4 + NlogN，索引代表值域
+  const tree = Array<SegmentTreeNode>(4 * n + Math.ceil(Math.log2(n)) * n) // 整个线段树N * 4 + NlogN，索引代表值域
+  const roots = new Uint32Array(n + 1) // n+1个版本的根节点的treeId
   let treeId = 1
 
   // 离散化到0-allNums.length-1
@@ -39,12 +40,12 @@ function usePersistentSegmentTree(nums: number[]): StaticSegmentTree {
    * @description 查询区间[`left`,`right`]里的绝对众数
    */
   function query(left: number, right: number, k: number): number {
-    if (0 <= left && left <= right && right + 1 <= n) {
-      const rank = _query(roots[left], roots[right + 1], 0, allNums.length - 1, k)
-      return rank === -1 ? -1 : allNums[rank]
-    }
+    // if (0 <= left && left <= right && right + 1 <= n) {
+    const rank = _query(roots[left], roots[right + 1], 0, allNums.length - 1, k)
+    return rank === -1 ? -1 : allNums[rank]
+    // }
 
-    throw new RangeError(`[left,right] out of range: [${left},${right}]`)
+    // throw new RangeError(`[left,right] out of range: [${left},${right}]`)
   }
 
   // 递归建树 返回树结点id build是建立好骨架, 每个版本insert改不同数据
@@ -68,7 +69,7 @@ function usePersistentSegmentTree(nums: number[]): StaticSegmentTree {
     tree[curId].right = tree[preRoot].right
     tree[curId].count = tree[preRoot].count
     if (left === right) {
-      tree[curId].count++ // 插在这个叶节点上
+      tree[curId].count++ // value 插在这个叶节点上 频率加1
       return curId
     }
 
@@ -79,7 +80,7 @@ function usePersistentSegmentTree(nums: number[]): StaticSegmentTree {
     return curId
   }
 
-  // 二分值域查询
+  // 二分值域查询 根据需要修改
   function _query(
     preRoot: number,
     curRoot: number,
