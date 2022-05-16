@@ -6,14 +6,15 @@ from collections import defaultdict
 
 
 class BIT1:
-    """单点修改
+    """对每一个值，维护一个树状数组
+
     
     https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py
     """
 
     def __init__(self, n: int):
         self.size = n
-        self.tree = defaultdict(lambda: defaultdict(int))  # 对每一个值，维护一个树状数组
+        self.tree = defaultdict(lambda: defaultdict(int))
 
     @staticmethod
     def _lowbit(index: int) -> int:

@@ -1,15 +1,15 @@
-import { BIT } from './树状数组单点更新模板'
+import { BIT1 } from './经典题/BIT'
 
 /**
  * 动态区间和求解
  */
 class NumArray {
   private nums: number[]
-  private bit: BIT
+  private bit: BIT1
 
   constructor(nums: number[]) {
     this.nums = nums
-    this.bit = new BIT(nums.length)
+    this.bit = new BIT1(nums.length)
     for (let i = 0; i < this.bit.size; i++) {
       this.bit.add(i + 1, nums[i])
     }

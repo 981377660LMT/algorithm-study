@@ -29,12 +29,13 @@ class SortedList(Generic[S]):
                 self.add(item)
 
     def add(self, item: S) -> None:
-        insort_left(self._list, item)
+        pos = self.bisect_left(item)
+        self._list = self._list[:pos] + [item] + self._list[pos:]
 
     def pop(self, index: int) -> S:
-        res = self._list[index]
-        self._list = self._list[:index] + self._list[index + 1 :]
-        return res
+        returnItem = self._list[index]
+        self._list[index : index + 1] = []
+        return returnItem
 
     def bisect_left(self, item: S) -> int:
         return bisect_left(self._list, item)

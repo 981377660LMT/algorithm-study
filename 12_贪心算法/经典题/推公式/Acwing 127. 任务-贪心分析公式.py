@@ -16,6 +16,57 @@ from bisect import bisect_left, insort_left
 from typing import Any, Generic, Iterable, Optional, Protocol, TypeVar, Union
 
 
+class SupportsDunderLT(Protocol):
+    def __lt__(self, __other: Any) -> bool:
+        ...
+
+
+class SupportsDunderGT(Protocol):
+    def __gt__(self, __other: Any) -> bool:
+        ...
+
+
+S = TypeVar('S', bound=Union[SupportsDunderLT, SupportsDunderGT])
+
+
+class SortedList(Generic[S]):
+    """用bisect模拟 插入和删除的时候用切片"""
+
+    def __init__(self, iterable: Optional[Iterable[S]] = None) -> None:
+        self._list = []
+        if iterable is not None:
+            for item in iterable:
+                self.add(item)
+
+    def add(self, item: S) -> None:
+        pos = self.bisect_left(item)
+        self._list = self._list[:pos] + [item] + self._list[pos:]
+
+    def pop(self, index: int) -> S:
+        returnItem = self._list[index]
+        self._list[index : index + 1] = []
+        return returnItem
+
+    def bisect_left(self, item: S) -> int:
+        return bisect_left(self._list, item)
+
+    def __getitem__(self, index: int) -> S:
+        return self._list[index]
+
+    def __len__(self) -> int:
+        return len(self._list)
+
+
+# 输入样例：
+# 1 2
+# 100 3
+# 100 2
+# 100 1
+
+# 输出样例：
+# 1 50004
+
+
 def main() -> None:
     m, t = map(int, input().split())
 
@@ -55,51 +106,3 @@ while True:
         main()
     except EOFError:
         break
-
-
-class SupportsDunderLT(Protocol):
-    def __lt__(self, __other: Any) -> bool:
-        ...
-
-
-class SupportsDunderGT(Protocol):
-    def __gt__(self, __other: Any) -> bool:
-        ...
-
-
-S = TypeVar('S', bound=Union[SupportsDunderLT, SupportsDunderGT])
-
-
-class SortedList(Generic[S]):
-    """用bisect模拟 插入和删除的时候用切片"""
-
-    def __init__(self, iterable: Optional[Iterable[S]] = None) -> None:
-        self._list = []
-        if iterable is not None:
-            for item in iterable:
-                self.add(item)
-
-    def add(self, item: S) -> None:
-        insort_left(self._list, item)
-
-    def pop(self, index: int) -> S:
-        return self._list.pop(index)
-
-    def bisect_left(self, item: S) -> int:
-        return bisect_left(self._list, item)
-
-    def __getitem__(self, index: int) -> S:
-        return self._list[index]
-
-    def __len__(self) -> int:
-        return len(self._list)
-
-
-# 输入样例：
-# 1 2
-# 100 3
-# 100 2
-# 100 1
-
-# 输出样例：
-# 1 50004

@@ -53,7 +53,7 @@ def query(tree1: Node, tree2: Node, k: int) -> int:
 
 n, m = map(int, input().split())
 nums = list(map(int, input().split()))
-sortedNums = sorted(nums)  # sorted(set(nums)) 会超时
+sortedNums = sorted(set(nums))
 mapping = {sortedNums[i]: i for i in range(len(sortedNums))}
 
 # 默认查[0, N - 1]区间

@@ -1,11 +1,11 @@
 // 1 <= ranges.length <= 50
 // 1 <= starti <= endi <= 50
 
-import { BIT } from './树状数组单点更新模板'
+import { BIT1 } from './经典题/BIT'
 
 // 1 <= left <= right <= 50
 function isCovered(ranges: number[][], left: number, right: number): boolean {
-  const bit = new BIT(51)
+  const bit = new BIT1(51)
   const visited = new Set<number>() // 让每个点只添加一次
 
   for (const [l, r] of ranges) {

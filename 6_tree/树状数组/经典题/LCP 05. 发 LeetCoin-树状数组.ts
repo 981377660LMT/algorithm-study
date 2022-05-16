@@ -1,59 +1,6 @@
-class BIT {
-  public size: number
-  private tree1: number[]
-  private tree2: number[]
-
-  constructor(size: number) {
-    this.size = size
-    // 记录∑di
-    this.tree1 = Array(size + 1).fill(0)
-    // 记录∑(i-1)*di
-    this.tree2 = Array(size + 1).fill(0)
-    // a1+a2+...+ar=r*∑di-∑(i-1)*di
-  }
-
-  addRange(left: number, right: number, k: number): void {
-    this.add(left, k)
-    this.add(right + 1, -k)
-  }
-
-  queryRange(left: number, right: number): number {
-    return this.query(right) - this.query(left - 1)
-  }
-
-  private add(x: number, k: number): void {
-    if (x <= 0) throw Error('查询索引应为正整数')
-    for (let i = x; i <= this.size; i += this.lowbit(i)) {
-      this.tree1[i] += k
-      this.tree1[i] %= MOD
-      this.tree2[i] += (x - 1) * k
-      this.tree2[i] %= MOD
-    }
-  }
-
-  // 差分数组(上下车问题):
-  // 假设现在有一个原数组a(假设a[0] = 0)，有一个数组d，d[i] = a[i] - a[i-1]，那么
-  // a[i] = d[1] + d[2] + .... + d[i]
-  // 差分数组 diff[i]，存储的是 res[i] - res[i - 1]；而差分数组 diff[0...i] 的和(树状数组更新/查询就是做求和)，就是 res[i] 的值。
-  // 则[1,x]范围的和：a[1] + a[2] + a[3] + ... + a[x] = d[1] + d[1] + d[2] + d[1] + d[2] + d[3] + ... + d[1] + d[2] + d[3] + ... + d[x]
-  // =x*(Σd[i]) - ∑(i-1)*d[i] (i从1到x)
-  private query(x: number): number {
-    let res = 0
-
-    for (let i = x; i > 0; i -= this.lowbit(i)) {
-      res += ((x * this.tree1[i]) % MOD) - (this.tree2[i] % MOD)
-      res = (res + MOD) % MOD
-    }
-
-    return res
-  }
-
-  private lowbit(x: number) {
-    return x & -x
-  }
-}
-
 // 力扣想进行的操作有以下三种：
+
+import { BIT2 } from './BIT'
 
 // 给团队的一个成员（也可以是负责人）发一定数量的LeetCoin；
 // 给团队的一个成员（也可以是负责人），以及他/她管理的所有人（即他/她的下属、他/她下属的下属，……），发一定数量的LeetCoin；
@@ -76,17 +23,17 @@ function bonus(n: number, leadership: number[][], operations: number[][]): numbe
   dfs(1)
 
   const res: number[] = []
-  const bit = new BIT(n + 10)
+  const bit = new BIT2(n + 10)
   for (const [optType, optId, optValue] of operations) {
     switch (optType) {
       case 1:
-        bit.addRange(end[optId], end[optId], optValue)
+        bit.add(end[optId], end[optId], optValue)
         break
       case 2:
-        bit.addRange(start[optId], end[optId], optValue)
+        bit.add(start[optId], end[optId], optValue)
         break
       case 3:
-        const queryRes = bit.queryRange(start[optId], end[optId])
+        const queryRes = bit.query(start[optId], end[optId])
         res.push(((queryRes % MOD) + MOD) % MOD)
         break
       default:

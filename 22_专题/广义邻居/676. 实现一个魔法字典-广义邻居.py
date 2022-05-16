@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import List
 
 # 将searchWord替换一个字母后，是否存在于dict
+# 广义邻居
 
 
 class MagicDictionary(object):
