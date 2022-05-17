@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import List
 
-
+# 1 <= A.length <= 1000
 class Solution:
     def countTriplets(self, A: List[int]) -> int:
         memo = defaultdict(int)

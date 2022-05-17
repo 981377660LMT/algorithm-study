@@ -10,20 +10,18 @@ class Solution:
     def maxEvents(self, events: List[List[int]]) -> int:
         events.sort()
         res = 0
-        event_index = 0
-        max_end = max([end for _, end in events])
-        pq: List[int] = []
+        eventId = 0
+        max_ = max([end for _, end in events])
+        pq = []
 
-        for day in range(1, max_end + 1):
+        for day in range(1, max_ + 1):
             # 当日开始的会议
-            while event_index < len(events) and events[event_index][0] == day:
-                heappush(pq, events[event_index][1])
-                event_index += 1
-
-            # 已经结束的会议(结束时间小于当前时间)
+            while eventId < len(events) and events[eventId][0] == day:
+                heappush(pq, events[eventId][1])
+                eventId += 1
+            # 已经结束的会议
             while pq and pq[0] < day:
                 heappop(pq)
-
             # 最早结束的会议
             if pq:
                 res += 1

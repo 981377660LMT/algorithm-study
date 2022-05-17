@@ -27,8 +27,8 @@ class MedianFinder {
 
   findMedian(): number {
     return this.left.length === this.right.length
-      ? (this.left.peek() + this.right.peek()) / 2
-      : this.left.peek() //  左侧多1位
+      ? (this.left.peek()! + this.right.peek()!) / 2
+      : this.left.peek()! //  左侧多1位
   }
 }
 

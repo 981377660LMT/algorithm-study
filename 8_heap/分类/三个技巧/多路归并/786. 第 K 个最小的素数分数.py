@@ -10,19 +10,6 @@ from heapq import heappop, heappush
 
 
 class Solution:
-    # 暴力不可取
-    def kthSmallestPrimeFraction1(self, arr: List[int], k: int) -> List[int]:
-        n = len(arr)
-
-        nums = []
-        for i in range(n):
-            for j in range(i + 1, n):
-                nums.append((arr[i] / arr[j], arr[i], arr[j]))
-
-        nums.sort(key=lambda x: x[0])
-
-        _, x, y = nums[k - 1]
-        return [x, y]
 
     # 多路归并(val,row,col) 进出k次即可
     def kthSmallestPrimeFraction(self, arr: List[int], k: int) -> List[int]:

@@ -16,8 +16,8 @@ def mergeTwo(nums1: List[int], nums2: List[int], select: int) -> List[int]:
         return (nums1[index] + num for num in nums2)
 
     allGen = (gen(i) for i in range(len(nums1)))
-    iter = merge(*allGen)  # merge 相当于多路归并
-    return list(islice(iter, select))
+    iterable = merge(*allGen)  # merge 相当于多路归并
+    return list(islice(iterable, select))
 
 
 def main() -> None:

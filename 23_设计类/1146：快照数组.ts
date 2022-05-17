@@ -1,7 +1,7 @@
 // snap 备忘录模式
 // [map,map,map,...,map,map]
 
-import { bisectLeft } from '../9_排序和搜索/二分/7_二分搜索寻找最左插入位置'
+import { bisectLeft } from '../9_排序和搜索/二分/bisect'
 
 // 字典数组 + 二分查找
 type SnapId = number

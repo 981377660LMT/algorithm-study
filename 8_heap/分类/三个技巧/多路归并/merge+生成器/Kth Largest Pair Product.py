@@ -6,17 +6,17 @@ from typing import Generator, List
 
 class Solution:
     def solve(self, a: List[int], b: List[int], k: int):
-        def g1(index: int) -> Generator[int, None, None]:
+        def gen1(index: int) -> Generator[int, None, None]:
             return (a[index] * num for num in b)
 
-        def g2(index: int) -> Generator[int, None, None]:
+        def gen2(index: int) -> Generator[int, None, None]:
             return (a[index] * num for num in reversed(b))
 
         a, b = sorted(a), sorted(b)
         # 生成器的多路
-        gen = (g2(i) if num > 0 else g1(i) for i, num in enumerate(a))
-        iter = merge(*gen, reverse=True)
-        return next(islice(iter, k, None))  # 切片，第k个最大
+        allGen = [gen2(i) if num > 0 else gen1(i) for i, num in enumerate(a)]
+        iterable = merge(*allGen, reverse=True)
+        return next(islice(iterable, k, None))  # 切片，第k个最大
 
 
 print(Solution().solve(a=[-2, 4, 3], b=[5, 7], k=2))

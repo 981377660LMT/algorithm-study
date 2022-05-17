@@ -12,7 +12,7 @@
 # # 类似Acwing 110防晒的思路
 
 
-from bisect import bisect_left, insort_left
+from bisect import bisect_left, bisect_right, insort_left
 from typing import Any, Generic, Iterable, Optional, Protocol, TypeVar, Union
 
 
@@ -30,7 +30,7 @@ S = TypeVar('S', bound=Union[SupportsDunderLT, SupportsDunderGT])
 
 
 class SortedList(Generic[S]):
-    """用bisect模拟 插入和删除的时候用切片"""
+    """用bisect模拟"""
 
     def __init__(self, iterable: Optional[Iterable[S]] = None) -> None:
         self._list = []
@@ -39,16 +39,27 @@ class SortedList(Generic[S]):
                 self.add(item)
 
     def add(self, item: S) -> None:
+        """
+        数组插入时, 要移动的后缀很大的情况下, 
+        cpython中的slice assignment因为直接用memmove, 
+        比手动赋值数组后缀的insert方法快多了
+        """
+
         pos = self.bisect_left(item)
-        self._list = self._list[:pos] + [item] + self._list[pos:]
+        self._list[pos:pos] = [item]
 
     def pop(self, index: int) -> S:
+        if index < 0:
+            index += len(self._list)
         returnItem = self._list[index]
         self._list[index : index + 1] = []
         return returnItem
 
     def bisect_left(self, item: S) -> int:
         return bisect_left(self._list, item)
+
+    def bisect_right(self, item: S) -> int:
+        return bisect_right(self._list, item)
 
     def __getitem__(self, index: int) -> S:
         return self._list[index]
@@ -85,7 +96,7 @@ def main() -> None:
     tasks.sort()
     maxCount, maxMoney = 0, 0
 
-    cur = SortedList()
+    cur = SortedList[int]()
     mi = m - 1
     for ti in range(t - 1, -1, -1):
         while mi >= 0 and machines[mi][0] >= tasks[ti][0]:

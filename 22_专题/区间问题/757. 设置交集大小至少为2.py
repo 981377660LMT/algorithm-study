@@ -10,25 +10,20 @@ from typing import List
 # 优先处理长度小的区间，比较curStart与preEnd
 class Solution:
     def intersectionSizeTwo(self, intervals: List[List[int]]) -> int:
-        # 双重守卫 end1 end2
-        res, end1, end2 = 0, -1, -1
+        # 当前窗口
+        res, left, right = 0, -1, -1
 
-        # Option 1 -  Sorting
-        # intervals.sort(key=lambda x: (x[0], -x[1]))
         # end相同时，越往后走范围就向前覆盖得越大，即更加符合香蕉条件
         intervals = sorted(intervals, key=lambda x: (x[1], -x[0]))
 
-        # option 2 - Sorting twice
-        # intervals = sorted(intervals, key =lambda x:x[0]) #--> Sorting once doesnt work
-        # intervals = sorted(intervals, key =lambda x:x[1]) #--> Sorting once doesnt work
-
         for s, e in intervals:
-            if s > end2:  # <..end1,..end2,..s..e>
-                end1, end2 = e - 1, e
+            if s > right:  # <..end1,..end2,..s..e>
+                left, right = e - 1, e
                 res += 2
-            elif s > end1:  # <..end1,.s..end2..e>
-                end1, end2 = end2, e
+            elif s > left:  # <..end1,.s..end2..e>
+                left, right = right, e
                 res += 1
+
         return res
 
 

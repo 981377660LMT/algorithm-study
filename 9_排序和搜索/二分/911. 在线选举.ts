@@ -1,4 +1,4 @@
-import { bisectRight } from './7_二分搜索寻找最插右入位置'
+import { bisectRight } from './bisect'
 
 class TopVotedCandidate {
   private times: number[]

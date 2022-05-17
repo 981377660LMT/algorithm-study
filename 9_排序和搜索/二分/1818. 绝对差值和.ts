@@ -2,7 +2,7 @@
 // 你可以选用 nums1 中的 任意一个 元素来替换 nums1 中的 至多 一个元素，以 最小化 绝对差值和。
 // 1 <= n <= 105
 
-import { bisectLeft } from './7_二分搜索寻找最左插入位置'
+import { bisectLeft } from './bisect'
 
 // 其实就是找每个nums2中的值，对应在nums1中最接近的值是哪个，替换为那一个以后的绝对值和是多少；统计最终最小的即可。
 function minAbsoluteSumDiff(nums1: number[], nums2: number[]): number {

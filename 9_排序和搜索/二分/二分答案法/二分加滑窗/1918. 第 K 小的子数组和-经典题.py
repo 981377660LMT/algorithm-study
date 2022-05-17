@@ -16,7 +16,7 @@ class Solution:
                 res += right - left + 1
             return res
 
-        left, right = min(nums), sum(nums)
+        left, right = 0, sum(nums)
         while left <= right:
             mid = (left + right) >> 1
             # 找最左，尽量把右边移过来
@@ -27,7 +27,9 @@ class Solution:
         return left
 
 
-print(Solution().kthSmallestSubarraySum(nums=[2, 1, 3], k=4))
+if __name__ == '__main__':
+
+    print(Solution().kthSmallestSubarraySum(nums=[2, 1, 3], k=4))
 # 输出: 3
 # 解释: [2,1,3] 的子数组为：
 # - [2] 和为 2

@@ -16,27 +16,28 @@ from math import log
 class Solution:
     def leastOpsExpressTarget(self, x: int, target: int) -> int:
         @lru_cache(None)
-        def dfs(cur: int) -> int:
-            # 比如 cur = 2, x = 3, 需要判断使用 3/3 + 3/3 和 3 - 3/3,哪个用运算符最少
-            if x > cur:
-                return min(2 * cur - 1, (x - cur) * 2)
-            if cur == 0:
-                return 0
+        def dfs(need: int) -> int:
+            """凑出need的最少需要的符号数"""
+            if need < x:  # cur 个 x/x 或者 (x-cur)个 x/x
+                return min(2 * need - 1, 2 * (x - need))
 
-            # 到cur 需要几个x相乘,
-            p = int(log(cur, x))
-            lower = x ** p
+            # 乘法最快到达need
+            cur, multiCount = x, 0
+            while cur * x < need:
+                cur *= x
+                multiCount += 1
 
-            # 小于target的那个数加一个“加号”，继续递归
-            res = dfs(cur - lower) + p
+            diff1, diff2 = need - cur, cur * x - need  # 正着走，反着走
 
-            # 大的那个数反过来走向target。
-            if lower * x - cur < cur:
-                res = min(res, p + 1 + dfs(lower * x - cur))
+            res = dfs(diff1) + multiCount + 1
+            if diff2 < diff1:
+                res = min(res, dfs(diff2) + multiCount + 1 + 1)
 
             return res
 
-        return dfs(target)
+        res = dfs(target)
+        dfs.cache_clear()
+        return res
 
 
 print(Solution().leastOpsExpressTarget(x=3, target=19))

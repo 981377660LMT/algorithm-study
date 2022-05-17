@@ -34,7 +34,7 @@ S = TypeVar('S', bound=Union[SupportsDunderLT, SupportsDunderGT])
 
 
 class SortedList(Generic[S]):
-    """用bisect模拟 插入和删除的时候用切片"""
+    """用bisect模拟"""
 
     def __init__(self, iterable: Optional[Iterable[S]] = None) -> None:
         self._list = []
@@ -44,9 +44,11 @@ class SortedList(Generic[S]):
 
     def add(self, item: S) -> None:
         pos = self.bisect_left(item)
-        self._list = self._list[:pos] + [item] + self._list[pos:]
+        self._list[pos:pos] = [item]
 
     def pop(self, index: int) -> S:
+        if index < 0:
+            index += len(self._list)
         returnItem = self._list[index]
         self._list[index : index + 1] = []
         return returnItem

@@ -10,9 +10,9 @@ const minDeletionSize = (strs: string[]): number => {
   const dp = Array(n).fill(1)
 
   for (let i = 1; i < dp.length; i++) {
-    nextPosition: for (let j = 0; j < i; j++) {
+    loop: for (let j = 0; j < i; j++) {
       for (const str of strs) {
-        if (str.codePointAt(i)! < str.codePointAt(j)!) continue nextPosition
+        if (str.codePointAt(i)! < str.codePointAt(j)!) continue loop
       }
       dp[i] = Math.max(dp[i], dp[j] + 1)
     }

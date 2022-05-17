@@ -26,13 +26,13 @@ class Solution:
 
         while pq:
             cur = -heappop(pq)
-            other_sum = total - cur
-            if cur == 1 or other_sum == 1:
+            otherSum = total - cur
+            if cur == 1 or otherSum == 1:
                 return True
-            if cur < other_sum or other_sum == 0 or cur % other_sum == 0:
+            if cur < otherSum or otherSum == 0 or cur % otherSum == 0:
                 return False
-            cur %= other_sum  # 细节  [2, 90000002] 这种情况可以加速判断
-            total = other_sum + cur
+            cur %= otherSum  # 细节  [2, 90000002] 这种情况可以加速判断
+            total = otherSum + cur
             heappush(pq, -cur)
 
         return False

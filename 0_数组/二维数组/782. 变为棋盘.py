@@ -1,7 +1,7 @@
 from typing import List
 
 INF = 0x3F3F3F3F
-# 思路：所有行全部参考第一行，所有列全部参考第一列
+# 思路：要么等于第一行 要么和第一行完全相反
 # board 是方阵，且行列数的范围是[2, 30]。
 class Solution:
     def movesToChessboard(self, board: List[List[int]]) -> int:

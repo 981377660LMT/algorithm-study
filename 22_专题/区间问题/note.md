@@ -4,6 +4,7 @@
    `注意排序一般是 sort() 但有时候需要将长的区间排在前面`
 
 ```Python
+   # 计算区间覆盖的总长度
    intervals.sort()
    preEnd = intervals[0][1]
    res = intervals[0][1] - intervals[0][0]

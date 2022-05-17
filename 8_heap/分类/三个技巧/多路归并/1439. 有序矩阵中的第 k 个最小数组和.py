@@ -4,31 +4,36 @@ from heapq import heappop, heappush
 # 给你一个 m * n 的矩阵 mat，以及一个整数 k ，矩阵中的每一行都以非递减的顺序排列。
 # 你可以从每一行中选出 1 个元素形成一个数组。返回所有可能数组中的第 k 个 最小 数组和。
 
-
+# 1 <= m, n <= 40
+# 1 <= k <= min(200, n ^ m)
+# 1 <= mat[i][j] <= 5000
+# mat[i] 是一个非递减数组
 class Solution:
     def kthSmallest(self, mat: List[List[int]], k: int) -> int:
-        m, n = len(mat), len(mat[0])
-        pointers = [0] * m
-        pq = []
+        """时间复杂度O(nmlogk)"""
+        ROW, COL = len(mat), len(mat[0])
+
+        pointers = [0] * ROW
         curSum = sum(row[0] for row in mat)
+        pq = []
         heappush(pq, (curSum, pointers))
-        visited = set()
-        visited.add(tuple(pointers))
+        visited = set([tuple(pointers)])
 
         res = curSum
 
         for _ in range(k):
-            c, p = heappop(pq)
-            res = c
-            for row, col in enumerate(p):
-                if col < n - 1:
-                    nextP = list(p)
-                    nextP[row] = col + 1
-                    nextP = tuple(nextP)
-                    if nextP not in visited:
-                        visited.add(nextP)
-                        nextSum = res + mat[row][col + 1] - mat[row][col]
-                        heappush(pq, (nextSum, nextP))
+            curSum, pointers = heappop(pq)
+            res = curSum
+            for row, col in enumerate(pointers):
+                # 每个指针轮流后移一位，将新的数组和新的指针数组入堆
+                if col + 1 < COL:
+                    nextPointers = list(pointers)
+                    nextPointers[row] = col + 1
+                    nextPointers = tuple(nextPointers)
+                    if nextPointers not in visited:
+                        visited.add(nextPointers)
+                        nextSum = curSum + mat[row][col + 1] - mat[row][col]
+                        heappush(pq, (nextSum, nextPointers))
 
         return res
 

@@ -41,6 +41,11 @@ function isMatch(s: string, p: string): boolean {
   return dp[m][n]
 }
 
+const isMatch2 = (s: string, p: string): boolean => {
+  const regexp = new RegExp(`^${p}$`)
+  return regexp.test(s)
+}
+
 console.log(isMatch('aab', 'c*a*b'))
 // const a = [1, 2]
 // console.log(a[-1])
