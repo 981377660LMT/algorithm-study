@@ -1,9 +1,11 @@
 # Definition for an Interval.
-from typing import List
+from collections import defaultdict
+from typing import List, Optional
+from sortedcontainers import SortedDict
 
 
 class Interval:
-    def __init__(self, start: int = None, end: int = None):
+    def __init__(self, start: Optional[int] = None, end: Optional[int] = None):
         self.start = start
         self.end = end
 
@@ -11,24 +13,24 @@ class Interval:
 # 每个员工都有一个非重叠的时间段  Intervals 列表，这些时间段已经排好序。
 # 返回表示 所有 员工的 共同，正数长度的空闲时间 的有限时间段的列表，同样需要排好序。
 
-# 同`82. 寻找合适开会的时间.ts`
-# 所有区间全部push 然后找不重叠
+
 class Solution:
     def employeeFreeTime(self, schedule: List[List[Interval]]) -> List[Interval]:
-        intervals = []
-        for sche in schedule:
-            for inter in sche:
-                s = inter.start
-                e = inter.end
-                intervals.append([s, e])
-        intervals.sort()
+        events = []
+        for S in schedule:
+            for interval in S:
+                # 先进后出
+                events.append((interval.start, 0))
+                events.append((interval.end, 1))
+        events.sort()
 
         res = []
-        preEnd = intervals[0][1]
-        for curStart, curEnd in intervals:
-            if preEnd < curStart:
-                res.append(Interval(preEnd, curStart))
-            preEnd = max(preEnd, curEnd)
+        pre, preSum = -1, 0
+        for key, flag in events:
+            if preSum == 0 and pre != -1:
+                res.append(Interval(pre, key))
+            preSum += 1 if flag == 0 else -1
+            pre = key
 
         return res
 

@@ -18,18 +18,18 @@ class Solution:
             if not intervals:
                 return 0
 
-            preStart, preEnd = intervals[0]
-            res = preEnd - preStart
+            preEnd = intervals[0][1]
+            res = intervals[0][1] - intervals[0][0]
             for i in range(1, len(intervals)):
                 curStart, curEnd = intervals[i]
                 if curEnd <= preEnd:
                     continue
-                elif curEnd > preEnd and curStart <= preEnd:
+                elif curStart <= preEnd < curEnd:
                     res += curEnd - preEnd
                     preEnd = curEnd
                 else:
                     res += curEnd - curStart
-                    preStart, preEnd = curStart, curEnd
+                preEnd = max(preEnd, curEnd)
 
             return res
 

@@ -1,30 +1,27 @@
 所谓区间问题，就是线段问题，让你合并所有线段、找出线段的交集等等。主要有两个技巧：
 
-1. `排序`区间，`再扫描区间比较 preEnd 与 curStart，更新 preEnd`。常见的排序方法就是按照区间起点排序，或者先按照起点升序排序，若起点相同，则按照终点降序排序。当然，如果你非要按照终点排序，无非对称操作，本质都是一样的。
-2. 画图。就是说不要偷懒，勤动手，两个区间的相对位置到底有几种可能(3 种)，不同的相对位置我们的代码应该怎么去处理。
-   相交 覆盖 相离
-
-3. `sortedDict+上车下车扫描` 会议室系列
-
-```JS
-预处理
-intervals.sort((a, b) => a[0] - b[0] || b[1] - a[1])  => 起点相同时，区间短的排在前面
-记录preEnd
-区间相交只需比较 preEnd 与此区间的start 大小
-更新preEnd=Math.max(preEnd,end)
-`82. 寻找合适开会的时间`
-```
-
-模板
+1. `排序`区间，`再扫描区间比较 preEnd 与 curStart、curEnd，更新 preEnd`，讨论相交 覆盖 相离
+   `注意排序一般是 sort() 但有时候需要将长的区间排在前面`
 
 ```Python
+   intervals.sort()
+   preEnd = intervals[0][1]
+   res = intervals[0][1] - intervals[0][0]
+   for i in range(1, len(intervals)):
+       curStart, curEnd = intervals[i]
+       # 包含
+       if curEnd <= preEnd:
+           continue
+       # 相交
+       elif curStart <= preEnd < curEnd:
+           res += curEnd - preEnd
+       # 相离
+       elif preEnd < curStart:
+           res += curEnd - curStart
+       preEnd = max(preEnd, curEnd)
 
-        res = []
-        preEnd = -1
-        for start, end in intervals:
-            if preEnd <= start:
-                res.append(Interval(preEnd, curStart))
-            preEnd = max(preEnd, end)
-
-        return res
+   return res
 ```
+
+2. 差分+扫描线 会议室系列
+   [1943. 描述绘画结果-差分+扫描线](..%5C%E6%97%A5%E7%A8%8B%E5%AE%89%E6%8E%92-%E6%89%AB%E6%8F%8F%E7%BA%BF+%E5%B7%AE%E5%88%86%5C1943.%20%E6%8F%8F%E8%BF%B0%E7%BB%98%E7%94%BB%E7%BB%93%E6%9E%9C-%E5%B7%AE%E5%88%86+%E6%89%AB%E6%8F%8F%E7%BA%BF.py)

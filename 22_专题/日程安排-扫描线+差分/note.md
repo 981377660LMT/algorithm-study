@@ -7,7 +7,7 @@
 
 1. 一类是使用 sortedDict + 上车下车 解法
    会议室系列+`759. 员工空闲时间.py`
-2. 另一类是 排序遍历 + 比较 preEnd 与 curStart 解法
+2. 另一类是 排序遍历 + 比较 `preEnd` 与 curStart/curEnd 解法
    合并区间系列+`82. 寻找合适开会的时间.ts`
 
 3. 扫描线 delta 问题
