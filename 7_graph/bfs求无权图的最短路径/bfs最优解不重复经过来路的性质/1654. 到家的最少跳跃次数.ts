@@ -1,37 +1,42 @@
+import { ArrayDeque } from '../../../2_queue/Deque/ArrayDeque'
+
 /**
  * 
- * @param forbidden 
- * @param a 
- * @param b 
- * @param x  家
+ * @param bad 
+ * @param rightJump  rightJump <= 2000
+ * @param leftJump  leftJump <= 2000
+ * @param target  家 0 <= target <= 2000
  * 它可以 往左 跳恰好 a 个位置。
    它可以 往右 跳恰好 b 个位置。
    它不能 连续 往左跳 2 次。
    它不能跳到任何 forbidden 数组中的位置。
+   跳蚤可以往前跳 超过 它的家的位置，但是它 不能跳到负整数 的位置。
    @description 注意bfs范围剪枝
  */
-function minimumJumps(forbidden: number[], a: number, b: number, x: number): number {
-  const visited = new Set(forbidden)
-  const limit = 2000 + a + b
-  const queue: [number, number, boolean][] = [[0, 0, true]]
+function minimumJumps(bad: number[], rightJump: number, leftJump: number, target: number): number {
+  const visited = new Set([...bad, 0])
+  const upper = target + leftJump + rightJump // 上界 可以取大一点6000
+  const queue = new ArrayDeque<[cur: number, step: number, canBackJump: boolean]>()
+  queue.push([0, 0, false])
 
   while (queue.length) {
-    const [current, jumps, canBackJump] = queue.shift()!
-    if (current == x) return jumps
+    const [cur, step, canBackJump] = queue.shift()!
+    if (cur === target) return step
 
-    // 剪枝1 :bfs最优解不走回头路
-    if (visited.has(current)) continue
-    visited.add(current)
-
-    let nextJump: number
     if (canBackJump) {
-      nextJump = current - b
-      if (nextJump >= 0) queue.push([nextJump, jumps + 1, false])
+      const next1 = cur - leftJump
+      if (next1 >= 0 && !visited.has(next1)) {
+        queue.push([next1, step + 1, false])
+        visited.add(next1)
+      }
     }
 
-    nextJump = current + a
-    // 剪枝2 :出界后没必要继续走
-    if (nextJump <= limit) queue.push([nextJump, jumps + 1, true])
+    const next2 = cur + rightJump
+    // 剪枝 :出右边界后没必要继续走
+    if (next2 <= upper && !visited.has(next2)) {
+      queue.push([next2, step + 1, true])
+      visited.add(next2)
+    }
   }
 
   return -1

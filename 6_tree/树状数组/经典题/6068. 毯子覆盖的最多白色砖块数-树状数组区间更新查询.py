@@ -10,7 +10,8 @@ INF = int(1e20)
 class Solution:
     def maximumWhiteTiles(self, tiles: List[List[int]], carpetLen: int) -> int:
         """树状数组区间更新查询"""
-        bit = BIT2(int(1e9 + 10))
+        # bit = BIT2(int(1e9 + 10))
+        bit = BIT2(max(max(row) for row in tiles) + 10)
         res = 0
         for left, right in tiles:
             bit.add(left, right, 1)

@@ -10,23 +10,28 @@ check 函数 O(n) =>双指针
 `668. 乘法表中第k小的数-双指针.ts`
 `719找出第K小的距离对-双指针.ts`
 
-**找第 k 小模板=>计数最左二分**
+**找第 k 小=>计数最左二分**
 
 ```Python
-        def count(mid) -> int:
+        def countNGT(mid) -> int:
             """"目标值`小于等于`mid的答案数"""
             res = 0
             for right in range(len(nums)):
              ...
             return res
 
-        left, right = 1, int(1e20) # 注意左边不要0，因为有些地方除以mid会出错
+        left, right = 0, int(1e18)
         while left <= right:
             mid = (left + right) >> 1
-            # 小于k时，移动left
             if count(mid) < k:
                 left = mid + 1
+            # 大于等于k right都左移
             else:
                 right = mid - 1
         return left
+
+        python 3.10以后 等价于
+        bisect_left(range(int(1e18)), k, key=countNGT)
 ```
+
+第 k 小 第 k 大的数 简单中等题很多是优先队列(多路归并)，难题很多是二分答案

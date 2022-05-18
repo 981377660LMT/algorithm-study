@@ -5,10 +5,9 @@ bfs 剪枝
 1.  1345. 跳跃游戏 IV
 2.  127. 单词接龙
 
-- 对每层记录 visitedMaxIndex 下一层左边界不小于 visitedMaxIndex
+- 对每层记录 preMax 下一层左边界不小于 preMax
 
 1.  LCP 09. 最小跳跃次数
-2.  1871. 跳跃游戏 VII
 
 - 根据数据范围剪枝
 

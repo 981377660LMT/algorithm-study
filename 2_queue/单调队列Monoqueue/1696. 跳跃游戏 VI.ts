@@ -16,13 +16,11 @@ function maxResult(nums: number[], k: number): number {
   const n = nums.length
   const queue = new ArrayDeque<[sum: number, index: number]>(n)
   queue.push([nums[0], 0])
-  let res = nums[0]
+  let res = nums[0] // 以当前元素结尾的最大值
 
   for (let i = 1; i < n; i++) {
-    // 注意这里是大于k才shift，因为是i到i+k
-    if (i - queue.at(0)![1] > k) queue.shift()
-    // i这个位置的最佳得分其实是前面[i-k,i-1]区间最大值加nums[i]得到的
-    res = queue.at(0)![0] + nums[i]
+    while (queue.length && i - queue.at(0)![1] > k) queue.shift()
+    if (queue.length) res = queue.at(0)![0] + nums[i]
     while (queue.length && queue.at(-1)![0] <= res) queue.pop()
     queue.push([res, i])
   }

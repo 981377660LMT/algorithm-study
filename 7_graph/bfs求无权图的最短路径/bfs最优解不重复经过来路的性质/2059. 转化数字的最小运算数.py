@@ -1,6 +1,8 @@
+from functools import lru_cache
 from typing import List
 from collections import deque
 
+# goal<=1e9
 # 1 <= nums.length <= 1000
 # 0 <= start <= 1000
 # start != goal
@@ -15,21 +17,19 @@ from collections import deque
 
 class Solution:
     def minimumOperations(self, nums: List[int], start: int, goal: int) -> int:
-        queue = deque([start])
+        """bfs求无权图的最短路径"""
+        queue = deque([(start, 0)])
         visited = [False] * 1001
         visited[start] = True
-        step = 0
 
         while queue:
-            step += 1
-            for _ in range(len(queue)):
-                cur = queue.popleft()
-                for num in nums:
-                    for next in (cur + num, cur - num, cur ^ num):
-                        if next == goal:
-                            return step
-                        if 0 <= next <= 1000 and not visited[next]:
-                            visited[next] = True
-                            queue.append(next)
+            cur, step = queue.popleft()
+            for num in nums:
+                for next in (cur + num, cur - num, cur ^ num):
+                    if next == goal:
+                        return step + 1
+                    if 0 <= next <= 1000 and not visited[next]:
+                        visited[next] = True
+                        queue.append((next, step + 1))
         return -1
 

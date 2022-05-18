@@ -1,7 +1,7 @@
 import assert from 'assert'
 
 /**
- * @description 循环数组
+ * @description 循环数组实现，慢数组动态扩容
  */
 class ArrayDeque<T = number> {
   private readonly capacity: number
@@ -10,9 +10,12 @@ class ArrayDeque<T = number> {
   private tail: number
   public length: number
 
-  constructor(capacity: number) {
-    this.capacity = capacity
-    this.data = []
+  /**
+   * @param capacity 默认值 `1 << 30`
+   */
+  constructor(capacity?: number) {
+    this.capacity = capacity ?? 1 << 30
+    this.data = [] // 慢数组
     this.head = 0 // 从-1开始'向前'存
     this.tail = -1 // 从0开始向后存
     this.length = 0
@@ -54,7 +57,7 @@ class ArrayDeque<T = number> {
   // head后移
   shift(): T | undefined {
     if (this.isEmpty()) return undefined
-    const front = this.at(0)
+    const front = this.front()
     this.head = (this.head + 1 + this.capacity) % this.capacity
     this.length--
     return front
@@ -63,7 +66,7 @@ class ArrayDeque<T = number> {
   // tail前移
   pop(): T | undefined {
     if (this.isEmpty()) return undefined
-    const rear = this.rear()
+    const rear = this.back()
     this.tail = (this.tail - 1 + this.capacity) % this.capacity
     this.length--
     return rear
@@ -78,7 +81,11 @@ class ArrayDeque<T = number> {
     }
   }
 
-  private rear(): T | undefined {
+  private front(): T | undefined {
+    return this.isEmpty() ? undefined : this.data[(this.head + this.capacity) % this.capacity]
+  }
+
+  private back(): T | undefined {
     return this.isEmpty() ? undefined : this.data[(this.tail + this.capacity) % this.capacity]
   }
 
@@ -94,7 +101,7 @@ class ArrayDeque<T = number> {
 export { ArrayDeque }
 
 if (require.main === module) {
-  const deque = new ArrayDeque<number>(4)
+  const deque = new ArrayDeque<number>()
 
   deque.push(1)
   deque.unshift(2)

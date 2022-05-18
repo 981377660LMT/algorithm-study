@@ -13,11 +13,10 @@ import { ArrayDeque } from '../Deque/ArrayDeque'
  */
 const constrainedSubsetSum = function (nums: number[], k: number): number {
   const n = nums.length
-  const queue = new ArrayDeque<[preMaxSum: number, index: number]>(n)
+  const queue = new ArrayDeque<[preMaxSum: number, index: number]>()
   queue.push([nums[0], 0])
 
-  const dp = nums.slice()
-  dp[0] = nums[0]
+  const dp = nums.slice() // dp[i] 表示选择第i个元素且以第i个元素结尾的子序列和最大值
   let res = nums[0]
 
   for (let i = 1; i < n; i++) {

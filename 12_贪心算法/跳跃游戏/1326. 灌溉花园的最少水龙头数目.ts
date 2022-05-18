@@ -7,9 +7,9 @@ import { maxJump } from './maxJump'
 function minTaps(n: number, ranges: number[]): number {
   const jumps = Array<number>(n + 1).fill(0)
   for (const [index, range] of ranges.entries()) {
-    const startIndex = index - range
-    const canJumpIndex = index + range
-    jumps[Math.max(0, startIndex)] = Math.max(jumps[Math.max(0, startIndex)], canJumpIndex)
+    const start = index - range
+    const dist = range * 2
+    jumps[Math.max(0, start)] = Math.max(jumps[Math.max(0, start)], start + dist)
   }
 
   const res = maxJump(jumps, n)

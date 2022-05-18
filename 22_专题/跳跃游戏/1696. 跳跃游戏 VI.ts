@@ -1,6 +1,5 @@
 import { ArrayDeque } from '../../2_queue/Deque/ArrayDeque'
-type Sum = number
-type Index = number
+
 /**
  *
  * @param nums
@@ -14,15 +13,14 @@ type Index = number
  */
 function maxResult(nums: number[], k: number): number {
   const n = nums.length
-  const queue = new ArrayDeque<[Sum, Index]>(1e4)
+  const queue = new ArrayDeque<[sum: number, index: number]>()
   queue.push([nums[0], 0])
-  let res = nums[0]
+  let res = nums[0] // 以当前元素结尾的最大值
 
   for (let i = 1; i < n; i++) {
-    // 注意这里是大于k才shift
-    res = queue.at(0)![0] + nums[i]
+    while (queue.length && i - queue.at(0)![1] > k) queue.shift()
+    if (queue.length) res = queue.at(0)![0] + nums[i]
     while (queue.length && queue.at(-1)![0] <= res) queue.pop()
-    if (i - queue.at(0)![1] >= k) queue.shift()
     queue.push([res, i])
   }
 

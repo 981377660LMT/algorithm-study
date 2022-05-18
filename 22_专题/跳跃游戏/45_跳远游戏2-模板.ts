@@ -4,6 +4,12 @@
 // 假设你总是可以到达数组的最后一个位置。
 
 // 以最小的步数增加覆盖范围，覆盖范围一旦覆盖了终点，得到的就是最小步数！
+
+/**
+ *
+ * @param nums 每个点跳跃的距离
+ * @returns
+ */
 const canJump = (nums: number[]): number => {
   const target = nums.length - 1
   let cur = 0
