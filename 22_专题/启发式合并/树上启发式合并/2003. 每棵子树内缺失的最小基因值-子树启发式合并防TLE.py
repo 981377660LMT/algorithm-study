@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 from sortedcontainers import SortedList
 
 # 启发式合并：在合并数组、集合等时，总是将元素数较少的那个数组/集合中的元素合并到元素数较多的那个数组/集合中
@@ -11,6 +11,33 @@ from sortedcontainers import SortedList
 # 在DFS过程中，将每个子树拥有的数的集合合并，得到当前节点拥有的数
 class Solution:
     def smallestMissingValueSubtree(self, parents: List[int], nums: List[int]) -> List[int]:
+        """nlogn 合并集合"""
+
+        def dfs(cur: int) -> Set[int]:
+            subtree = set([nums[cur]])
+            for next in adjList[cur]:
+                nextRes = dfs(next)
+                subtree, nextRes = sorted((subtree, nextRes), key=len, reverse=True)
+                subtree |= nextRes
+                if res[next] > res[cur]:
+                    res[cur] = res[next]  # 注意这里更新mex
+
+            while res[cur] in subtree:  # 注意这里这样做
+                res[cur] += 1
+            return subtree
+
+        n = len(parents)
+        adjList = [[] for _ in range(n)]
+        for i in range(1, n):
+            adjList[parents[i]].append(i)
+
+        res = [1] * n
+        dfs(0)
+        return res
+
+    def smallestMissingValueSubtree2(self, parents: List[int], nums: List[int]) -> List[int]:
+        """nlog(n)^2 合并有序集合"""
+
         def findMex(tree: SortedList) -> int:
             """二分搜索缺失的第一个正整数,lc1539. 第 k 个缺失的正整数"""
             # MEX:Min Excluded
