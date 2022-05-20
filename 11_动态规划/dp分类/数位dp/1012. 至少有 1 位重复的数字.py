@@ -5,32 +5,28 @@ from functools import lru_cache
 
 def cal(upper: int) -> int:
     @lru_cache(None)
-    def dfs(pos: int, visited: int, isOk: bool, hasLeadingZero: bool, isLimit: bool) -> int:
-        """当前在第pos位，visited表示每个数使用的状态，isOk表示是否有重复数字，hasLeadingZero表示有前导0，isLimit表示是否贴合上界"""
-        if pos == 0:
-            return isOk
+    def dfs(pos: int, hasLeadingZero: bool, isLimit: bool, visited: int, isOk: bool) -> int:
+        """当前在第pos位，hasLeadingZero表示有前导0，isLimit表示是否贴合上界"""
+        if pos == len(nums):
+            return isOk and not hasLeadingZero
 
         res = 0
-        up = nums[pos - 1] if isLimit else 9
+        up = nums[pos] if isLimit else 9
         for cur in range(up + 1):
             if hasLeadingZero and cur == 0:
-                res += dfs(pos - 1, visited, isOk, True, (isLimit and cur == up))
+                res += dfs(pos + 1, True, (isLimit and cur == up), visited, isOk)
             else:
                 res += dfs(
-                    pos - 1,
-                    (visited | (1 << cur)),
-                    not not (isOk or (visited & (1 << cur))),
+                    pos + 1,
                     False,
                     (isLimit and cur == up),
+                    (visited | (1 << cur)),
+                    (isOk or (visited & (1 << cur) != 0)),
                 )
         return res
 
-    nums = []
-    while upper:
-        div, mod = divmod(upper, 10)
-        nums.append(mod)
-        upper = div
-    res = dfs(len(nums), 0, False, True, True)
+    nums = list(map(int, str(upper)))
+    res = dfs(0, True, True, 0, False)
     dfs.cache_clear()
     return res
 

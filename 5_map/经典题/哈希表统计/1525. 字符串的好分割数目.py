@@ -9,7 +9,7 @@ from typing import List
 
 class Solution:
     def numSplits(self, s: str) -> int:
-        """前后缀"""
+        """前后缀分解"""
 
         def countType(string: str) -> List[int]:
             res = [0] * len(string)

@@ -9,33 +9,37 @@
 // 最终i和j中较小的值就是我们最终开始的位置
 // 相反如果是最大表示法的话，我们就要求解字典序最大的字符串，那么我们只需要在执行第二或第三个操作时选择较大的那个位置较好了
 // https://a-wimpy-boy.blog.csdn.net/article/details/80136776?spm=1001.2101.3001.6650.1&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no_search_link&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no_search_link
-function findMinimunIsomorphic(str: string): string {
+
+// 破环成链，双指针
+function findIsomorphic(str: string, isMin = true): string {
   if (str.length <= 1) return str
 
-  const n = str.length
-  let i = 0
-  let j = 1
-  let k = 0
+  const compare: (a: number, b: number) => number = isMin ? (a, b) => a - b : (a, b) => b - a
 
-  while (i < n && j < n && k < n) {
-    const diff = str.codePointAt((i + k) % n)! - str.codePointAt((j + k) % n)!
+  const n = str.length
+  let i1 = 0
+  let i2 = 1
+  let sameLen = 0
+
+  while (i1 < n && i2 < n && sameLen < n) {
+    const diff = compare(str.codePointAt((i1 + sameLen) % n)!, str.codePointAt((i2 + sameLen) % n)!)
 
     if (diff === 0) {
-      k++
+      sameLen++
       continue
     }
 
-    if (diff > 0) i += k + 1
-    else if (diff < 0) j += k + 1
+    if (diff > 0) i1 += sameLen + 1
+    else if (diff < 0) i2 += sameLen + 1
 
-    if (i === j) j++
+    if (i1 === i2) i2++
 
-    k = 0
+    sameLen = 0
   }
 
-  const res = i > j ? j : i
-  console.log(i, j)
-  return str.slice(res) + str.slice(0, res)
+  const res = i1 > i2 ? i2 : i1
+
+  return `${str.slice(res)}${str.slice(0, res)}`
 }
 
-console.log(findMinimunIsomorphic('bcaijab'))
+console.log(findIsomorphic('bcaijab'))

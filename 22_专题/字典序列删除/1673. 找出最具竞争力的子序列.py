@@ -6,13 +6,13 @@ from typing import List
 class Solution:
     def mostCompetitive(self, nums: List[int], k: int) -> List[int]:
         remove = len(nums) - k
-        monotoneStack = []
+        stack = []
         for char in nums:
-            while remove and monotoneStack and monotoneStack[-1] > char:
-                monotoneStack.pop()
+            while remove and stack and stack[-1] > char:
+                stack.pop()
                 remove -= 1
-            monotoneStack.append(char)
-        return monotoneStack[:k]
+            stack.append(char)
+        return stack[:k]
 
 
 print(Solution().mostCompetitive(nums=[3, 5, 2, 6], k=2))

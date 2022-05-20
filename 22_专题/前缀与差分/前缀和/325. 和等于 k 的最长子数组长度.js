@@ -11,6 +11,7 @@ function maxSubArrayLen(nums, k) {
   for (let i = 0; i < nums.length; i++) {
     sum += nums[i]
     if (first.has(sum - k)) res = Math.max(res, i - first.get(sum - k))
+
     !first.has(sum) && first.set(sum, i) // 只存一次，存最早出现的那次
   }
 

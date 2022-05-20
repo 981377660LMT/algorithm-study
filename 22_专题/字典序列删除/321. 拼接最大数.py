@@ -1,6 +1,11 @@
+from collections import deque
+from typing import List
+
+
 class Solution:
     def maxNumber(self, nums1, nums2, k):
-        def pick_max(nums, k):
+        def pickMax(nums: List[int], k: int) -> List[int]:
+            """选k个数拼成最大数  栈顶肯定要最大 单减的单调栈"""
             stack = []
             drop = len(nums) - k
             for num in nums:
@@ -10,16 +15,17 @@ class Solution:
                 stack.append(num)
             return stack[:k]
 
-        def merge(A, B):
-            ans = []
-            while A or B:
-                bigger = A if A > B else B
-                ans.append(bigger[0])
-                bigger.pop(0)
-            return ans
+        def merge(A: List[int], B: List[int]) -> List[int]:
+            """合并两个数组，字典序最大"""
+            res = []
+            nums1, nums2 = deque(A), deque(B)
+            while nums1 or nums2:
+                bigger = nums1 if nums1 > nums2 else nums2
+                res.append(bigger.popleft())
+            return res
 
         return max(
-            merge(pick_max(nums1, i), pick_max(nums2, k - i))
+            merge(pickMax(nums1, i), pickMax(nums2, k - i))
             for i in range(k + 1)
             if i <= len(nums1) and k - i <= len(nums2)
         )

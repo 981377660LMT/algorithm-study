@@ -1,5 +1,5 @@
+const MOD = 1e9 + 7
 function numOfSubarrays(arr: number[]): number {
-  const MOD = 10 ** 9 + 7
   let res = 0
   let sum = 0
   let odd = 0
@@ -19,3 +19,4 @@ function numOfSubarrays(arr: number[]): number {
 }
 
 console.log(numOfSubarrays([1, 3, 5]))
+export {}

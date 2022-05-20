@@ -7,10 +7,10 @@
 // 利用性质1，dfs即可
 function findCentre(n: number, edges: [cur: number, next: number][]): number[] {
   const res: number[] = []
-  // 最大子树大小,即此节点为割点分割之后两半的最大大小
-  const maxSize = Array<number>(n).fill(Infinity)
-  // 树的大小,即向`下面`走可以到多少个结点
-  const subSize = Array<number>(n).fill(Infinity)
+  // 最大连通块大小,即此节点为割点分割之后两半的最大大小
+  const maxSize = Array<number>(n).fill(0)
+  // 子树的大小,即向`下面`走可以到多少个结点
+  const subSize = Array<number>(n).fill(0)
 
   const adjList = Array.from<unknown, number[]>({ length: n }, () => [])
   for (const [u, v] of edges) {
@@ -23,7 +23,6 @@ function findCentre(n: number, edges: [cur: number, next: number][]): number[] {
 
   function dfs(cur: number, parent: number): void {
     subSize[cur] = 1
-    maxSize[cur] = 0
 
     for (const next of adjList[cur]) {
       if (next === parent) continue

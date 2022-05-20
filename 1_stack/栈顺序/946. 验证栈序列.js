@@ -10,6 +10,7 @@ function validateStackSequences(pushed, popped) {
     stack.push(num)
     while (stack.length > 0 && stack[stack.length - 1] === popped[count]) {
       stack.pop()
+
       count++
     }
   }

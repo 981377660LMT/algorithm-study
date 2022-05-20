@@ -3,33 +3,33 @@
 // 1 <= positions[i][0] <= 10^8.
 // 1 <= positions[i][1] <= 10^6.
 
-// 来源：力扣（LeetCode）
-// 链接：https://leetcode.cn/problems/falling-squares
-// 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
 class SegmentTreeNode {
   left!: SegmentTreeNode
   right!: SegmentTreeNode
-  isLazy = false // 因为是单点修改，这里不要
-  lazyValue = 0 // 因为是单点修改，这里不要
-  value = 0
+  isLazy = false
+  lazyValue = -Infinity
+  value = -Infinity
 }
 
-// 动态开点线段树
+/**
+ * @description 维护区间最大值，动态开点
+ */
 class SegmentTree {
   private readonly root = new SegmentTreeNode()
-  private readonly size: number
+  private readonly lower: number
+  private readonly upper: number
 
-  constructor(size: number) {
-    this.size = size
+  constructor(lower = 0, upper = 1e9 + 10) {
+    this.lower = lower
+    this.upper = upper
   }
 
-  // 1 <= t <= 1e9
   update(left: number, right: number, delta: number): void {
-    this._update(left, right, 1, this.size, this.root, delta)
+    this._update(left, right, this.lower, this.upper, this.root, delta)
   }
 
   query(left: number, right: number): number {
-    return this._query(left, right, 1, this.size, this.root)
+    return this._query(left, right, this.lower, this.upper, this.root)
   }
 
   queryAll(): number {
@@ -106,7 +106,7 @@ class SegmentTree {
 
 function fallingSquares(positions: number[][]): number[] {
   const res = Array<number>(positions.length).fill(0)
-  const tree = new SegmentTree(2e8 + 10)
+  const tree = new SegmentTree(0, 2e8 + 10)
   for (const [i, [left, size]] of positions.entries()) {
     const right = left + size - 1
     const preHeihgt = tree.query(left, right)

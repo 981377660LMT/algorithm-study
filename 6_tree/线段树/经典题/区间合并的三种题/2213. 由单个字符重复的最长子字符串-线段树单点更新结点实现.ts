@@ -61,6 +61,10 @@ class SegmentTree implements ISegmentTree<string, number> {
     return res
   }
 
+  queryAll(): number {
+    return this.tree[1].max
+  }
+
   private build(root: number, left: number, right: number, input: ArrayLike<string>): void {
     const node = this.tree[root]
     node.left = left
@@ -104,7 +108,7 @@ function longestRepeating(s: string, queryCharacters: string, queryIndices: numb
   for (let i = 0; i < queryIndices.length; i++) {
     const [qc, qi] = [queryCharacters[i], queryIndices[i]]
     segmentTree.update(1, qi + 1, qi + 1, qc)
-    res[i] = segmentTree.query(1, 1, n)
+    res[i] = segmentTree.queryAll()
   }
 
   return res

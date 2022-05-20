@@ -1,15 +1,16 @@
-import { MinHeap } from '../../2_queue/minheap'
+import { MinHeap } from '../../8_heap/MinHeap'
 
 class KthLargest {
-  private pq: MinHeap
-  constructor(private k: number, private nums: number[]) {
+  private readonly pq: MinHeap
+
+  constructor(private readonly k: number, private readonly nums: number[]) {
     this.pq = new MinHeap((a, b) => a - b, k)
-    nums.forEach(num => this.pq.push(num))
+    nums.forEach(num => this.pq.heappush(num))
   }
 
   add(val: number): number {
-    this.pq.push(val)
-    return this.pq.shift()!
+    this.pq.heappush(val)
+    return this.pq.heappop()!
   }
 
   static main() {
@@ -17,4 +18,5 @@ class KthLargest {
     console.log(k)
   }
 }
+
 KthLargest.main()

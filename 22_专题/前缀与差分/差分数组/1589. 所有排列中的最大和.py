@@ -1,3 +1,4 @@
+from itertools import accumulate
 from typing import Counter, List
 
 MOD = int(1e9 + 7)
@@ -10,18 +11,17 @@ MOD = int(1e9 + 7)
 class Solution:
     def maxSumRangeQuery(self, nums: List[int], requests: List[List[int]]) -> int:
         n = len(nums)
-        counter = [0] * (n + 1)
+        diff = [0] * (n + 1)
         for left, right in requests:
-            counter[left] += 1
-            counter[right + 1] -= 1
-        for i in range(1, n + 1):
-            counter[i] += counter[i - 1]
+            diff[left] += 1
+            diff[right + 1] -= 1
+        diff = list(accumulate(diff))
 
-        # print(counter)
         res = 0
-        for value, count in zip(sorted(counter[:-1]), sorted(nums)):
+        for value, count in zip(sorted(diff[:-1]), sorted(nums)):
             res += value * count
-        return res % MOD
+            res %= MOD
+        return res
 
 
 print(Solution().maxSumRangeQuery(nums=[1, 2, 3, 4, 5], requests=[[1, 3], [0, 1]]))

@@ -1,9 +1,11 @@
 ![树的重心](../../images/447bf9065511f5b136989797fc52f50f60c64eaf5b265a87c3fbf12f25c66860.png)
+![树的中心](..%5C..%5C11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%5Cacwingdp%E4%B8%93%E9%A1%B9%E7%BB%83%E4%B9%A0%5C%E6%A0%91%E5%BD%A2DP%5C1073.%20%E6%A0%91%E7%9A%84%E4%B8%AD%E5%BF%83.py)
+![n 叉树的直径](..%5C..%5C11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%5Cacwingdp%E4%B8%93%E9%A1%B9%E7%BB%83%E4%B9%A0%5C%E6%A0%91%E5%BD%A2DP%5C1072.%20%E6%A0%91%E7%9A%84%E6%9C%80%E9%95%BF%E8%B7%AF%E5%BE%84-n%E5%8F%89%E6%A0%91%E7%9A%84%E7%9B%B4%E5%BE%84.py)
 
 ```JS
 function findCentre(n: number, edges: [next: number, weight: number][][]): number[] {
   const res: number[] = []
-  // 最大子树大小
+  // 最大连通块大小
   const maxSizeOfSubtree = Array<number>(n).fill(Infinity)
   // 树的大小
   const treeSize = Array<number>(n).fill(Infinity)

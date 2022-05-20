@@ -3,4 +3,5 @@
 # 答案就是(sum[left] ^ sum[root]) ^ (sum[right] ^ sum[root]) ^ root->val
 # 时间复杂度O(n^2)
 
+# 树上差分
 # 启示：任意两个点一般找LCA

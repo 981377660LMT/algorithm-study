@@ -28,3 +28,4 @@ class Solution:
 print(Solution().lastSubstring("abab"))
 # 输出："bab"
 # 解释：我们可以找出 7 个子串 ["a", "ab", "aba", "abab", "b", "ba", "bab"]。按字典序排在最后的子串是 "bab"。
+res = 0

@@ -4,7 +4,7 @@
  * @return {number[]}
  *
  */
-var getLeastNumbers = function (arr: number[], k: number): number[] {
+function getLeastNumbers(arr: number[], k: number): number[] {
   if (!arr.length || !k) return []
   const size = Math.max.apply(null, arr)
   const countArray = Array(size + 1).fill(0)

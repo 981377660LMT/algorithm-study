@@ -5,3 +5,4 @@ console.log(Math.ceil(target))
 const eps = 1e-9
 
 console.log(Math.ceil(target - eps))
+export {}

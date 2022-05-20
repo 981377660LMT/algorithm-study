@@ -5,7 +5,7 @@ MOD = int(1e9 + 7)
 
 
 @lru_cache(None)
-def cal(i: int, j: int) -> int:
+def cal2(i: int, j: int) -> int:
     """第二类斯特林数:i个人,j个子集
     
     i,j<=1000
@@ -14,24 +14,20 @@ def cal(i: int, j: int) -> int:
     """
     if i == 0:
         return int(j == 0)
-    return (cal(i - 1, j - 1) + j * cal(i - 1, j)) % MOD
+    return (cal2(i - 1, j - 1) + j * cal2(i - 1, j)) % MOD
 
+
+dp2 = [[0] * 1001 for _ in range(1001)]
+dp2[0][0] = 1
+for i in range(1, 1001):
+    for j in range(1, 1001):
+        dp2[i][j] = (dp2[i - 1][j - 1] + j * dp2[i - 1][j]) % MOD
 
 # dp[i][j]表示i个盒子 j颗糖
 class Solution:
-    def waysToDistribute2(self, n: int, k: int) -> int:
-        dp = [[0] * (n + 1) for _ in range(k + 1)]
-        for i in range(1, k + 1):
-            dp[i][i] = 1
-        for i in range(1, k + 1):
-            for j in range(i + 1, n + 1):
-                # 新的糖独占1盒 dp[i-1][j-1]
-                # 不独占一盒随意放 i*dp[i][j - 1]
-                dp[i][j] = (dp[i - 1][j - 1] + i * dp[i][j - 1]) % int(1e9 + 7)
-        return dp[-1][-1]
-
     def waysToDistribute(self, n: int, k: int) -> int:
-        return cal(n, k)
+        return dp2[n][k]
+        return cal2(n, k)
 
 
 print(Solution().waysToDistribute(n=4, k=2))
