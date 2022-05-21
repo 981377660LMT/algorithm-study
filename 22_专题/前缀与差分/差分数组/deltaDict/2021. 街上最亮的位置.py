@@ -11,13 +11,15 @@ class Solution:
 
         res = -1
         curSum = 0
-        maxSum = -0x7FFFFFFF
+        maxSum = -int(1e20)
         for pos, delta in sorted(diff.items()):
             curSum += delta
             if curSum > maxSum:
                 res = pos
                 maxSum = curSum
         return res
+
+ 
 
 
 print(Solution().brightestPosition(lights=[[-3, 2], [1, 2], [3, 3]]))

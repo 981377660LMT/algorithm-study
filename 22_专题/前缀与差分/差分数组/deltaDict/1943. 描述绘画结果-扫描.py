@@ -1,3 +1,4 @@
+from itertools import pairwise
 from typing import List
 from collections import defaultdict
 
@@ -20,16 +21,30 @@ class Solution:
             diff[right] -= delta
 
         res = []
-        start, curSum = -1, 0
+        pre, preSum = -1, 0
         for key in sorted(diff):
-            if curSum > 0:
-                res.append([start, key, curSum])
-            start = key
-            curSum += diff[key]
+            if preSum > 0:
+                res.append([pre, key, preSum])
+            pre = key
+            preSum += diff[key]
+        return res
+
+    def splitPainting2(self, segments: List[List[int]]) -> List[List[int]]:
+        diff = defaultdict(int)
+        for left, right, delta in segments:
+            diff[left] += delta
+            diff[right] -= delta
+
+        res, cur = [], 0
+        for key1, key2 in pairwise(sorted(diff)):
+            cur += diff[key1]
+            if cur > 0:
+                res.append([key1, key2, cur])
         return res
 
 
 print(Solution().splitPainting(segments=[[1, 4, 5], [4, 7, 7], [1, 7, 9]]))
+print(Solution().splitPainting2(segments=[[1, 4, 5], [4, 7, 7], [1, 7, 9]]))
 # 输出：[[1,4,14],[4,7,16]]
 # 解释：绘画借故偶可以表示为：
 # - [1,4) 颜色为 {5,9} （和为 14），分别来自第一和第二个线段。

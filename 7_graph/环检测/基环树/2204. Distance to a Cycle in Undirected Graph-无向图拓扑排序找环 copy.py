@@ -8,20 +8,22 @@ from typing import DefaultDict, List, Set
 
 class Solution:
     def distanceToCycle(self, n: int, edges: List[List[int]]) -> List[int]:
-        def findCycle(n: int, adjMap: DefaultDict[int, Set[int]], degrees: List[int]) -> List[int]:
-            #  拓扑排序，剪掉所有树枝
+        def findCycle(n: int, adjMap: DefaultDict[int, Set[int]], degrees: List[int]) -> Set[int]:
+            """无向图找环上的点 拓扑排序，剪掉所有树枝"""
             queue = deque([i for i in range(n) if degrees[i] == 1])
-            onCycle = [True] * n
+            visited = [False] * n
             while queue:
                 cur = queue.popleft()
-                onCycle[cur] = False
+                visited[cur] = True
                 for next in adjMap[cur]:
+                    if visited[next]:
+                        continue
                     degrees[next] -= 1
                     if degrees[next] == 1:
                         queue.append(next)
 
-            cycle = [i for i, v in enumerate(onCycle) if v]
-            return cycle
+            onCycle = [i for i in range(n) if not visited[i]]
+            return set(onCycle)
 
         """无向图中恰有一个环"""
         adjMap = defaultdict(set)
@@ -39,15 +41,12 @@ class Solution:
         for index in cycle:
             res[index] = 0
 
-        queue = deque([i for i in cycle])
-        dist = 0
+        queue = deque([(i, 0) for i in cycle])
         while queue:
-            length = len(queue)
-            for _ in range(length):
-                cur = queue.popleft()
-                for next in adjMap[cur]:
-                    if res[next] > dist + 1:
-                        res[next] = dist + 1
-                        queue.append(next)
-            dist += 1
+            cur, dist = queue.popleft()
+            for next in adjMap[cur]:
+                if res[next] > dist + 1:
+                    res[next] = dist + 1
+                    queue.append((next, dist + 1))
+
         return res

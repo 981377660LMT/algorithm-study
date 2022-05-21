@@ -1,0 +1,63 @@
+# 两种情况:1.所有的二元基环树里的最长链之和;2.唯一的最长环的长度
+
+from collections import defaultdict, deque
+from typing import DefaultDict, List, Set, Tuple
+
+
+AdjMap = DefaultDict[int, Set[int]]
+Degrees = List[int]
+
+
+def findCycleAndCalDepth(
+    n: int, adjMap: AdjMap, degrees: Degrees
+) -> Tuple[List[List[int]], List[int]]:
+    """无向基环树找环上的点，并记录每个点在拓扑排序中的最大深度，最外层的点深度为0"""
+    depth = [0] * n
+    queue = deque([(i, 0) for i in range(n) if degrees[i] == 1])
+    visited = [False] * n
+    while queue:
+        cur, dist = queue.popleft()
+        visited[cur] = True
+        for next in adjMap[cur]:
+            depth[next] = max(depth[next], dist + 1)
+            degrees[next] -= 1
+            if degrees[next] == 1:
+                queue.append((next, dist + 1))
+
+    def dfs(cur: int, path: List[int]) -> None:
+        if visited[cur]:
+            return
+        visited[cur] = True
+        path.append(cur)
+        for next in adjMap[cur]:
+            dfs(next, path)
+
+    cycleGroup = []
+    for i in range(n):
+        if visited[i]:
+            continue
+        path = []
+        dfs(i, path)
+        cycleGroup.append(path)
+
+    return cycleGroup, depth
+
+
+class Solution:
+    def maximumInvitations(self, favorite: List[int]) -> int:
+        n = len(favorite)
+        adjMap, degrees = defaultdict(set), [0] * n
+        for u, v in enumerate(favorite):
+            adjMap[u].add(v)
+            adjMap[v].add(u)
+            degrees[u] += 1
+            degrees[v] += 1
+
+        cycleGroup, depth = findCycleAndCalDepth(n, adjMap, degrees)
+        # 两种情况:1.所有的二元基环树里的最长链之和;2.唯一的最长环的长度
+        cand1 = sum((1 + depth[i]) for i in range(n) if favorite[favorite[i]] == i)
+        cand2 = max(len(cycle) for cycle in cycleGroup)
+        return max(cand1, cand2)
+
+
+print(Solution().maximumInvitations([7, 12, 17, 9, 0, 7, 14, 5, 3, 15, 6, 14, 10, 14, 10, 1, 1, 4]))

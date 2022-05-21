@@ -1,7 +1,9 @@
 from typing import DefaultDict, List, Set
 
 
-def findCycle(n: int, adjMap: DefaultDict[int, Set[int]]) -> List[List[int]]:
+def findCycleGroup(n: int, adjMap: DefaultDict[int, Set[int]]) -> List[List[int]]:
+    """无向图找到所有的环，图可能不连通"""
+
     def dfs(cur: int, pre: int) -> bool:
         """环检测，并记录路径"""
         if visited[cur]:
@@ -24,7 +26,7 @@ def findCycle(n: int, adjMap: DefaultDict[int, Set[int]]) -> List[List[int]]:
             curCycle.append(path.pop())
         res.append(curCycle)
 
-    res: List[List[int]] = []
+    res = []
     path = []
     visited = [False] * n
 

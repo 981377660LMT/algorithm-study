@@ -2,7 +2,7 @@ from typing import DefaultDict, List, Set
 from collections import deque
 
 
-# 判断哪些点在有向图的环上
+# 判断哪些点最终会走到有向图的环上
 # https://leetcode-cn.com/problems/find-eventual-safe-states/
 class Solution:
     def onCycle(self, graph: List[List[int]]) -> List[int]:

@@ -8,7 +8,7 @@
 # + 先dfs一遍更新到最远叶节点的距离dis[x]，再循环一遍更新调整其余子节点的距离跟它一样。
 from collections import defaultdict
 
-
+# 构造 时态同步
 def dfs(cur: int, parent: int) -> None:
     global res
     for next, weight in adjMap[cur].items():
