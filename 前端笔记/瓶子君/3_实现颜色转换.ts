@@ -32,3 +32,4 @@ function hexToRgba(hex: string): string {
 
 console.log(hexToRgba('#fff'))
 // 'rgba(255,255,255,1)'
+export {}

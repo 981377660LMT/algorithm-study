@@ -11,3 +11,4 @@ console.log(Number(undefined))
 // @ts-ignore
 
 console.log(Number(null))
+export {}

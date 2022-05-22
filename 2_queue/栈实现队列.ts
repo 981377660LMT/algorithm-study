@@ -46,3 +46,4 @@ console.log(queue.shift())
 console.log(queue.shift())
 console.log(queue.shift())
 console.log(queue.shift())
+export {}
