@@ -11,7 +11,7 @@ class TreeNode:
 
 
 def treeToGraph(root: TreeNode):
-    """二叉树转图，注意节点值需要不同"""
+    """二叉树转图"""
 
     def dfs(root: Optional[TreeNode], parent: Optional[TreeNode]) -> None:
         if not root:

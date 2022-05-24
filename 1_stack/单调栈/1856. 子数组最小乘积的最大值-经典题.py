@@ -1,6 +1,6 @@
 from itertools import accumulate
 from typing import List
-
+from 每个元素作为最值的影响范围 import getRange
 
 MOD = int(1e9 + 7)
 
@@ -15,30 +15,12 @@ MOD = int(1e9 + 7)
 
 class Solution:
     def maxSumMinProduct(self, nums: List[int]) -> int:
-        """看每个数作为非严格最小值的影响范围"""
-        n = len(nums)
-        preSum = [0] + list(accumulate(nums))
-
-        # 右边第一个比它小的元素下标
-        rightSmaller = [n] * n
-        stack = []
-        for i in range(len(nums)):
-            while stack and nums[i] < nums[stack[-1]]:
-                rightSmaller[stack.pop()] = i
-            stack.append(i)
-
-        leftSmaller = [-1] * n
-        stack = []
-        for i in range(len(nums) - 1, -1, -1):
-            while stack and nums[i] < nums[stack[-1]]:
-                leftSmaller[stack.pop()] = i
-            stack.append(i)
-
         res = 0
-        for i in range(len(nums)):
-            left = leftSmaller[i]
-            right = rightSmaller[i]
-            res = max(res, nums[i] * (preSum[right] - preSum[left + 1]))
+        preSum = [0] + list(accumulate(nums))
+        minRange = getRange(nums, isLeftStrict=False, isRightStrict=False, isMax=False)
+        for i, num in enumerate(nums):
+            left, right = minRange[i]
+            res = max((preSum[right + 1] - preSum[left]) * num, res)
         return res % MOD
 
 

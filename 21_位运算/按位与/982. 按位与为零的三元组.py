@@ -7,10 +7,11 @@ from typing import List
 # A[i] & A[j] & A[k] == 0，其中 & 表示按位与（AND）操作符。
 class Solution:
     def countTriplets(self, A: List[int]) -> int:
+        """时间复杂度 n*max(nums[i])"""
         memo = defaultdict(int)
         for n1 in A:
             for n2 in A:
-                memo[n1 & n2] += 1
+                memo[n1 & n2] += 1  # 结果必然小于2^16
 
         res = 0
         for num in A:
@@ -19,16 +20,3 @@ class Solution:
                     res += val
         return res
 
-    def countTriplets2(self, A: List[int]) -> int:
-        counter = defaultdict(int)
-        for n1 in A:
-            for n2 in A:
-                counter[n1 & n2] += 1
-
-        res = 0
-        # 遍历每个数字去找满足条件的数量
-        for num in A:
-            for key, val in counter.items():
-                if num & key == 0:
-                    res += val
-        return res

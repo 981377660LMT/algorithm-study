@@ -11,7 +11,7 @@ class TreeNode:
 
 
 def treeToGraph(root: TreeNode) -> DefaultDict[int, Set[int]]:
-    """二叉树转图"""
+    """二叉树转图，注意节点值需要不同"""
 
     def dfs(root: Optional[TreeNode], parent: int) -> None:
         if not root:

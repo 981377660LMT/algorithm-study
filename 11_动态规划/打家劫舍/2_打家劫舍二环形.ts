@@ -1,13 +1,16 @@
 // 第一个房屋和最后一个房屋是紧挨着的,
 // 分两种情况:偷第一个和不偷第一个
-const maxMoney = (nums: number[]) => {
-  const len = nums.length
-  if (len === 0) return 0
-  if (len === 1) return nums[0]
+function rob(nums: number[]) {
+  const n = nums.length
+  if (n === 1) return nums[0]
+  // 取不取第一块
+  const money1 = maxMoneyRange(0, n - 2)
+  const money2 = maxMoneyRange(1, n - 1)
+  return Math.max(money1, money2)
 
-  const maxMoneyRange = (nums: number[], start: number, end: number): number => {
+  function maxMoneyRange(start: number, end: number): number {
     if (start === end) return nums[start]
-    const dp = Array(nums.length).fill(0)
+    const dp = Array<number>(nums.length).fill(0)
     dp[start] = nums[start]
     dp[start + 1] = Math.max(nums[start], nums[start + 1])
     for (let i = start + 2; i <= end; i++) {
@@ -15,13 +18,8 @@ const maxMoney = (nums: number[]) => {
     }
     return dp[end]
   }
-
-  // 取不取第一块
-  const money1 = maxMoneyRange(nums, 0, len - 2)
-  const money2 = maxMoneyRange(nums, 1, len - 1)
-  return Math.max(money1, money2)
 }
 
-console.log(maxMoney([1, 2, 3, 1]))
+console.log(rob([1, 2, 3, 1]))
 
 export {}

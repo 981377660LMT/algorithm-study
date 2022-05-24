@@ -1,0 +1,1 @@
+preSum[right + 1] - preSum[left]

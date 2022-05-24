@@ -1,15 +1,10 @@
 from typing import List
-from heapq import heappop, heappush
+from heapq import heappop, heappush, nlargest
 
 # 返回 nums 中表示第 k 大整数的字符串。
 class Solution:
     def kthLargestNumber(self, nums: List[str], k: int) -> str:
-        pq = []
-        for char in nums:
-            heappush(pq, int(char))
-            if len(pq) > k:
-                heappop(pq)
-        return str(pq[0])
+        return nlargest(k, nums, key=int)[-1]
 
 
 print(Solution().kthLargestNumber(nums=["3", "6", "7", "10"], k=4))

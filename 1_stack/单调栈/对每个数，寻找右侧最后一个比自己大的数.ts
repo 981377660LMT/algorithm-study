@@ -1,100 +1,88 @@
 import assert from 'assert'
 
-class SegmentTreeNode {
-  left = -1
-  right = -1
-  isLazy = false
-  lazyValue = -1
-  value = -1
-}
-
-/**
- * @description 线段树区间最大值更新
- * 0 <= A[i] <= 50000
- * 2 <= A.length <= 50000
- */
-
 class SegmentTree {
-  private readonly tree: SegmentTreeNode[]
+  private readonly tree: Int32Array
+  private readonly lazyValue: Int32Array
+  private readonly isLazy: Uint8Array
+  private readonly size: number
 
+  /**
+   * @param size 值域间右边界
+   * 2 <= A.length <= 50000
+     0 <= A[i] <= 50000
+   */
   constructor(size: number) {
-    this.tree = Array.from({ length: size << 2 }, () => new SegmentTreeNode())
-    this.build(1, 1, size)
+    this.size = size
+    this.tree = new Int32Array(size << 2).fill(-1) // -1 表示不存在 存储最大索引值
+    this.lazyValue = new Int32Array(size << 2).fill(-1)
+    this.isLazy = new Uint8Array(size << 2)
   }
 
-  update(root: number, left: number, right: number, maxCand: number): void {
-    const node = this.tree[root]
-
-    if (left <= node.left && node.right <= right) {
-      node.isLazy = true
-      node.lazyValue = Math.max(node.lazyValue, maxCand) // 注意这里
-      node.value = Math.max(node.value, maxCand)
-      return
-    }
-
-    this.pushDown(root)
-    const mid = (node.left + node.right) >> 1
-    if (left <= mid) this.update(root << 1, left, right, maxCand)
-    if (mid < right) this.update((root << 1) | 1, left, right, maxCand)
-    this.pushUp(root)
+  query(l: number, r: number): number {
+    this.checkRange(l, r)
+    return this._query(1, l, r, 1, this.size)
   }
 
-  query(root: number, left: number, right: number): number {
-    if (left > right) return -Infinity
+  update(l: number, r: number, maxIndex: number): void {
+    this.checkRange(l, r)
+    this._update(1, l, r, 1, this.size, maxIndex)
+  }
 
-    const node = this.tree[root]
-    if (left <= node.left && node.right <= right) {
-      return node.value
-    }
+  queryAll(): number {
+    return this.tree[1]
+  }
 
-    this.pushDown(root)
-    let res = -Infinity
-    const mid = (node.left + node.right) >> 1
-    if (left <= mid) res = Math.max(res, this.query(root << 1, left, right))
-    if (mid < right) res = Math.max(res, this.query((root << 1) | 1, left, right))
+  private _query(rt: number, L: number, R: number, l: number, r: number): number {
+    if (L <= l && r <= R) return this.tree[rt]
+
+    const mid = Math.floor((l + r) / 2)
+    this._pushDown(rt, l, r, mid)
+    let res = -1
+    if (L <= mid) res = Math.max(res, this._query(rt << 1, L, R, l, mid))
+    if (mid < R) res = Math.max(res, this._query((rt << 1) | 1, L, R, mid + 1, r))
+
     return res
   }
 
-  private build(root: number, left: number, right: number): void {
-    const node = this.tree[root]
-    node.left = left
-    node.right = right
-
-    if (left === right) {
+  private _update(rt: number, L: number, R: number, l: number, r: number, maxIndex: number): void {
+    if (L <= l && r <= R) {
+      this.lazyValue[rt] = Math.max(this.lazyValue[rt], maxIndex)
+      this.tree[rt] = Math.max(this.tree[rt], maxIndex)
+      this.isLazy[rt] = 1
       return
     }
 
-    const mid = (node.left + node.right) >> 1
-    this.build(root << 1, left, mid)
-    this.build((root << 1) | 1, mid + 1, right)
-    this.pushUp(root)
+    const mid = Math.floor((l + r) / 2)
+    this._pushDown(rt, l, r, mid)
+    if (L <= mid) this._update(rt << 1, L, R, l, mid, maxIndex)
+    if (mid < R) this._update((rt << 1) | 1, L, R, mid + 1, r, maxIndex)
+    this._pushUp(rt)
   }
 
-  /**
-   * @param root 向下传递懒标记和懒更新的值 `isLazy`, `lazyValue`，并用 `lazyValue` 更新子区间的值
-   */
-  private pushDown(root: number): void {
-    const [node, left, right] = [this.tree[root], this.tree[root << 1], this.tree[(root << 1) | 1]]
-    if (node.isLazy) {
-      left.isLazy = true
-      right.isLazy = true
-      left.lazyValue = Math.max(left.lazyValue, node.lazyValue) // 注意这里
-      right.lazyValue = Math.max(right.lazyValue, node.lazyValue)
-      left.value = Math.max(left.value, node.lazyValue)
-      right.value = Math.max(right.value, node.lazyValue)
-      node.isLazy = false
-      node.lazyValue = -Infinity
+  private _pushUp(rt: number): void {
+    this.tree[rt] = Math.max(this.tree[rt << 1], this.tree[(rt << 1) | 1])
+  }
+
+  private _pushDown(rt: number, l: number, r: number, mid: number): void {
+    if (this.isLazy[rt]) {
+      const target = this.lazyValue[rt]
+      this.lazyValue[rt << 1] = Math.max(this.lazyValue[rt << 1], target)
+      this.lazyValue[(rt << 1) | 1] = Math.max(this.lazyValue[(rt << 1) | 1], target)
+      this.isLazy[rt << 1] = 1
+      this.tree[rt << 1] = Math.max(this.tree[rt << 1], target)
+      this.tree[(rt << 1) | 1] = Math.max(this.tree[(rt << 1) | 1], target)
+      this.isLazy[(rt << 1) | 1] = 1
+
+      this.lazyValue[rt] = -1
+      this.isLazy[rt] = 0
     }
   }
 
-  /**
-   * @param root 用子节点更新父节点的值
-   */
-  private pushUp(root: number): void {
-    const [node, left, right] = [this.tree[root], this.tree[root << 1], this.tree[(root << 1) | 1]]
-    node.value = Math.max(left.value, right.value)
+  private checkRange(l: number, r: number): void {
+    if (l < 1 || r > this.size) throw new RangeError(`[${l}, ${r}] out of range: [1, ${this.size}]`)
   }
 }
+
 /**
  * @description 对每个数，寻找右侧最后一个比自己大的数；注意线段树要偏移
  * @param nums 0 <= nums[i] <= 50000  2 <= nums.length <= 50000
@@ -107,8 +95,8 @@ function findLastLarge(nums: number[]): number[] {
 
   const tree = new SegmentTree(max + 10)
   for (let i = n - 1; i >= 0; i--) {
-    res[i] = tree.query(1, nums[i] + 1, nums[i] + 1)
-    tree.update(1, 1, nums[i] + 1, i)
+    res[i] = tree.query(nums[i] + 1, nums[i] + 1) // 偏移量为1
+    tree.update(1, nums[i] + 1, i)
   }
 
   return res

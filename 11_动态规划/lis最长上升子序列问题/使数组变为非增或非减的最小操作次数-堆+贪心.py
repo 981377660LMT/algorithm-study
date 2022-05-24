@@ -25,6 +25,7 @@ from typing import List
 # 接下来插入 2，如果基于 1 5 5 5 5 变成 1 5 5 5 5 5，会得到错误的修改次数 12
 # 但是实际上有更优的修改 1 4 4 4 4 4，总的修改次数为 11
 # 同上，把这个序列视作 1 2 2 4 2 2，总的修改次数仍然为 11
+# !https://www.acwing.com/problem/content/description/275/
 
 
 class Solution:

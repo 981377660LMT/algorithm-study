@@ -6,13 +6,13 @@ from typing import DefaultDict, List
 from collections import defaultdict, deque
 
 
-WeightedDirectedGraph = DefaultDict[int, DefaultDict[int, int]]
+AdjMap = DefaultDict[int, DefaultDict[int, int]]
 
-  
+
 class MaxFlow:
     """edmond-karp算法求解有向带权图的最大流,时间复杂度O(VE^2)"""
 
-    def __init__(self, graph: WeightedDirectedGraph, /, *, start: int, target: int):
+    def __init__(self, graph: AdjMap, /, *, start: int, target: int):
         assert len(graph) >= 2 and start != target
         self._graph = graph
         self._start = start
@@ -58,7 +58,7 @@ class MaxFlow:
         """获取某条边上的`容量`"""
         return self._graph[cur][next]
 
-    def _buildRedisualGraph(self, graph: WeightedDirectedGraph) -> WeightedDirectedGraph:
+    def _buildRedisualGraph(self, graph: AdjMap) -> AdjMap:
         """构建残量图"""
         rGraph = defaultdict(lambda: defaultdict(int))
         for cur, mapping in graph.items():
@@ -67,9 +67,7 @@ class MaxFlow:
                 rGraph[next][cur] = 0
         return rGraph
 
-    def _findAugmentingPath(
-        self, graph: WeightedDirectedGraph, start: int, target: int
-    ) -> List[int]:
+    def _findAugmentingPath(self, graph: AdjMap, start: int, target: int) -> List[int]:
         """bfs在残量图中寻找增广路径"""
         queue = deque()
         pre = defaultdict(lambda: -1)

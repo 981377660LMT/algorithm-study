@@ -9,12 +9,11 @@
 class Solution:
     def minNumberOfFrogs(self, croakOfFrogs: str) -> int:
         c = r = o = a = k = 0
-        resMax = curMax = 0
+        res = need = 0
         for char in croakOfFrogs:
             if char == 'c':
                 c += 1
-                # c gives a signal for a frog
-                curMax += 1
+                need += 1
             elif char == 'r':
                 r += 1
             elif char == 'o':
@@ -23,15 +22,14 @@ class Solution:
                 a += 1
             else:
                 k += 1
-                # frog stop croaking
-                curMax -= 1
+                need -= 1
 
             if c < r or r < o or o < a or a < k:
                 return -1
-            resMax = max(resMax, curMax)
+            res = max(res, need)
 
-        if curMax == 0 and c == r == o == a == k:
-            return resMax
+        if need == 0 and c == r == o == a == k:
+            return res
         return -1
 
 

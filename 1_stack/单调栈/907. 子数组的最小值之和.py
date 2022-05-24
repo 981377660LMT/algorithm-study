@@ -1,4 +1,5 @@
 from typing import List
+from 每个元素作为最值的影响范围 import getRange
 
 MOD = int(1e9 + 7)
 
@@ -7,23 +8,19 @@ MOD = int(1e9 + 7)
 # https://leetcode-cn.com/problems/sum-of-subarray-minimums/solution/python3-tong-84ti-zui-da-zhi-fang-tu-by-5ersw/
 
 # 思路：考虑每个极小值在多少个子数组里产生贡献
+# !注意这里不能计算重复元素的影响范围，因此一边开一边闭
 
 
 class Solution:
     def sumSubarrayMins(self, arr: List[int]) -> int:
-        arr.append(-int(1e20))
-        stack = [-1]
+        """求所有子数组的最小值之和"""
+        minRange = getRange(arr, isLeftStrict=True, isRightStrict=False)
         res = 0
-
-        for i in range(len(arr)):
-            while stack and arr[stack[-1]] > arr[i]:
-                j = stack.pop()
-                k = stack[-1]
-                # 在(stack[-2], i)范围内（exclusive）的最小值都是stack[-1]。
-                # i-j j-k 表示开头选择*结尾选择
-                res += arr[j] * (i - j) * (j - k)
-            stack.append(i)
-        return res % MOD
+        for i, num in enumerate(arr):
+            left, right = minRange[i]
+            count = (right - i + 1) * (i - left + 1)  # 出现在了多少个子数组里
+            res = (res + num * count) % MOD
+        return res
 
 
 print(Solution().sumSubarrayMins(arr=[3, 1, 2, 4]))

@@ -1,4 +1,3 @@
-from itertools import accumulate
 from typing import List, Tuple
 from SubArraySumManager import SubArraySumManager
 
@@ -24,7 +23,13 @@ class Solution:
         res = 0
         for mid, value in enumerate(strength):
             left, right = minRange[mid]
-            res += manager.querySubArraySumInclude(left, right, mid) * value
+            # res += manager.querySubArraySumInclude(left, right, mid) * value
+            # 也可以反过来想 [left,right]里所有子数组减去[left,right]里不包含mid的
+            res += (
+                manager.querySubArraySum(left, right)
+                - manager.querySubArraySum(left, mid - 1)
+                - manager.querySubArraySum(mid + 1, right)
+            ) * value
         return res % MOD
 
 

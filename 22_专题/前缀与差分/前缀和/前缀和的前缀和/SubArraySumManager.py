@@ -43,11 +43,6 @@ class SubArraySumManager:
         为记mid为[L,R]中点，可以把[L,R]内的子数组划分为包含mid的和不包含mid的
         包含mid的可以由`querySubArraySumInclude`O(1)求出，
         不包含mid的可以分治到[L,mid-1]和[mid+1,R]两个子区间上递归求解
-
-        #todo 有没有O(1)的方法呢
-        a[i] 被计算 (i-L+1)*(R-i+1) 次
-        [L,R]里所有子数组和为 ∑(L,R) nums[i]*(-i^2+(R+L)*i-LR+R-L+1)
-        预处理出 nums[i]、i*nums[i]、i*i*nums[i] 的前缀和即可
         """
 
         @lru_cache(None)

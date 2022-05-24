@@ -7,7 +7,7 @@ from typing import List
 # 总结：先`倒着排序`再替换
 # 这样的好处是替换后长度变化不会再干扰我们
 
-
+# `倒着排序`再替换
 class Solution:
     def findReplaceString(
         self, str: str, indices: List[int], sources: List[str], targets: List[str]

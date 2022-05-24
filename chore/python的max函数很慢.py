@@ -2,6 +2,7 @@
 from string import ascii_lowercase
 
 # https://leetcode.cn/problems/substring-with-largest-variance/submissions/
+print(3.5 * int(1e7) * 4 // int(1e6))
 
 
 class Solution:
