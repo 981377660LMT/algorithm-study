@@ -1,4 +1,6 @@
 # O(S^(4/3))解法判断是否是repeating string
+
+# 还是要z函数最快
 from typing import Tuple
 
 

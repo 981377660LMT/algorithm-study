@@ -1,6 +1,3 @@
-from typing import List, Optional
-
-
 class TreeNode:
     def __init__(self, x):
         self.val = x
@@ -13,7 +10,7 @@ class TreeNode:
 # k<=10
 class Solution:
     def maxValue(self, root: 'TreeNode', k: int) -> int:
-        def dfs(root: Optional[TreeNode]) -> List[int]:
+        def dfs(root: 'TreeNode' | None) -> list[int]:
             if not root:
                 return [0] * (k + 1)
 

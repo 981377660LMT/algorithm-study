@@ -14,17 +14,18 @@ from typing import List
 # 哈希表记录周期
 class Solution:
     def prisonAfterNDays(self, cells: List[int], n: int) -> List[int]:
-        def getNextState(preState: List[int]):
+        def move(preState: List[int]):
             return [int(i > 0 and i < 7 and preState[i - 1] == preState[i + 1]) for i in range(8)]
 
         visited = dict()
         while n:
             visited[tuple(cells)] = n
-            cells = getNextState(cells)
+            cells = move(cells)
             n -= 1
             # 最后再处理n加速
             if tuple(cells) in visited:
-                n %= visited[tuple(cells)] - n
+                period = visited[tuple(cells)] - n
+                n %= period
 
         return cells
 

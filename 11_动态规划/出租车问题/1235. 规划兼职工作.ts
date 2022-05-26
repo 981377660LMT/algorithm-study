@@ -1,4 +1,4 @@
-import { zip } from '../../0_数组/zip的模拟/zip'
+import { zip } from '../../0_数组/zip'
 
 function jobScheduling(startTime: number[], endTime: number[], profit: number[]): number {
   const rides = [...zip(startTime, endTime, profit)]

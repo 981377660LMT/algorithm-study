@@ -1,7 +1,32 @@
-from typing import MutableSequence, Tuple
+# 下一个排列/上一个排列
+
+from abc import abstractmethod
+from typing import Any, MutableSequence, Protocol, Tuple, TypeVar
 
 
-def nextPermutation(nums: MutableSequence[int], inPlace=False) -> Tuple[bool, MutableSequence[int]]:
+class Comparable(Protocol):
+    @abstractmethod
+    def __eq__(self, other: Any, /) -> bool:
+        pass
+
+    @abstractmethod
+    def __lt__(self, other: Any, /) -> bool:
+        pass
+
+    def __gt__(self, other: Any, /) -> bool:
+        return (not self < other) and self != other
+
+    def __le__(self, other: Any, /) -> bool:
+        return self < other or self == other
+
+    def __ge__(self, other: Any, /) -> bool:
+        return not self < other
+
+
+S = TypeVar('S', bound=Comparable)
+
+
+def nextPermutation(nums: MutableSequence[S], inPlace=False) -> Tuple[bool, MutableSequence[S]]:
     """返回下一个字典序的排列，如果不存在，返回本身;时间复杂度O(n)"""
     if not inPlace:
         nums = nums[:]
@@ -26,7 +51,7 @@ def nextPermutation(nums: MutableSequence[int], inPlace=False) -> Tuple[bool, Mu
     return True, nums
 
 
-def prePermutation(nums: MutableSequence[int], inPlace=False) -> Tuple[bool, MutableSequence[int]]:
+def prePermutation(nums: MutableSequence[S], inPlace=False) -> Tuple[bool, MutableSequence[S]]:
     """返回前一个字典序的排列,如果不存在,返回本身;时间复杂度O(n)"""
     if not inPlace:
         nums = nums[:]

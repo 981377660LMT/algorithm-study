@@ -36,3 +36,5 @@ function findAnagrams(s: string, p: string): number[] {
 }
 
 console.log(findAnagrams('cbaebabacd', 'abc'))
+
+export {}

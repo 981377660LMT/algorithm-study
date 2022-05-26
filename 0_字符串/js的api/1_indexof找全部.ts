@@ -12,4 +12,6 @@ const allIndexOf = function (str: string, searchElement: string) {
 }
 
 // String.prototype.indexOf(searchString)
-console.log('asa'.indexOf('')) // 0
+// console.log('asa'.indexOf('')) // 0
+
+export { allIndexOf }

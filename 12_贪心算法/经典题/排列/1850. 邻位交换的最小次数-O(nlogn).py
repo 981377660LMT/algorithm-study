@@ -1,5 +1,5 @@
 from typing import List, MutableSequence, Tuple
-from sortedcollections import SortedList
+from sortedcontainers import SortedList
 
 
 def nextPermutation(nums: MutableSequence[int], inPlace=False) -> Tuple[bool, MutableSequence[int]]:

@@ -1,3 +1,4 @@
+# 字典序最大的山脉数组
 class Solution:
     def solve(self, n, lower, upper):
         # 所有的数在[lower,upper]之间

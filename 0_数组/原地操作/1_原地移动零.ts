@@ -1,35 +1,6 @@
 // 必须在原数组上操作，不能拷贝额外的数组。
 // 尽量减少操作次数。
 
-// 这是错误的解法，引以为戒
-// 删除数组元素导致index改变了
-// const moveZeroes = (nums: number[]) => {
-//   nums.forEach((num, index) => {
-//     if (num === 0) {
-//       nums.splice(index, 1)
-//       console.log(index)
-//       nums.push(0)
-//     }
-//   })
-
-//   return nums
-// }
-// 删一个push一个
-// const moveZeroes = (nums: number[]) => {
-//   let steps = 0
-//   let point = 0
-//   while (steps <= nums.length - 1) {
-//     steps++
-//     if (nums[point] === 0) {
-//       nums.splice(point, 1)
-//       nums.push(0)
-//     } else {
-//       point++
-//     }
-//   }
-
-//   return nums
-// }
 // 最优解:统一处理0
 const moveZeroes = (nums: number[]) => {
   let nonzeroIndex = 0
@@ -40,12 +11,14 @@ const moveZeroes = (nums: number[]) => {
       nonzeroIndex++
     }
   }
+
   for (let i = nonzeroIndex; i < nums.length; i++) {
     nums[i] = 0
   }
 
   return nums
 }
+
 console.log(moveZeroes([0, 0, 1]))
 console.log(moveZeroes([0, 1, 0, 3, 12]))
 

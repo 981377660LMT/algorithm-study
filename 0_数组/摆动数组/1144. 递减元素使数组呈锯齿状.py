@@ -4,6 +4,8 @@ from typing import List
 # 返回将数组 nums 转换为锯齿数组所需的最小操作次数。
 
 # Two options, either make A[even] smaller or make A[odd] smaller.
+
+
 class Solution:
     def movesToMakeZigzag(self, nums: List[int]) -> int:
         n = len(nums)

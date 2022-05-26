@@ -1,6 +1,3 @@
-// 其实用map更好O(n)
-
-// 时间复杂度O(n^2)
 const intersection = (arr1: number[], arr2: number[]) => {
   let s1 = new Set(arr1)
   let s2 = new Set(arr2)

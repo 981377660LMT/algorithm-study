@@ -1,7 +1,7 @@
 /**
  * @param {number[]} nums
  * @return {number}
- * @summary 实际上这就是双指针中的快慢指针。在这里快指针是读指针， 慢指针是写指针。从读写指针考虑， 我觉得更符合本质。
+ * @summary 快指针是读指针， 慢指针是写指针
  */
 
 var removeDuplicates = function (nums) {
