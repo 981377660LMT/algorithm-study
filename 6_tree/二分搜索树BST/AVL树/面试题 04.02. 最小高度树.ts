@@ -1,4 +1,4 @@
-import { BinaryTree } from '../力扣加加/Tree'
+import { BinaryTree } from '../分类/Tree'
 
 function sortedArrayToBST(nums: number[]): BinaryTree | null {
   if (!nums.length) return null

@@ -1,7 +1,5 @@
-import { BinaryTree } from '../力扣加加/Tree'
-
-import { deserializeNode } from '../力扣加加/构建类/297.二叉树的序列化与反序列化'
-
+import { BinaryTree } from '../分类/Tree'
+import { deserializeNode } from '../重构json/297.二叉树的序列化与反序列化'
 /**
  * @param {TreeNode} root
  * @return {void} Do not return anything, modify root in-place instead.

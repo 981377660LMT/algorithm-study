@@ -8,6 +8,7 @@ class Node:
         self.children = children if children is not None else []
 
 
+# 1522. N 叉树的直径-维护两个最大值
 class Solution:
     def diameter(self, root: 'Node') -> int:
         def dfs(root: Optional['Node']) -> int:

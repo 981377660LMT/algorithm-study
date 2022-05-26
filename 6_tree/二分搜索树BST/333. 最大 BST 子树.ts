@@ -1,5 +1,5 @@
-import { BinaryTree } from '../力扣加加/Tree'
-import { deserializeNode } from '../力扣加加/构建类/297.二叉树的序列化与反序列化'
+import { BinaryTree } from '../分类/Tree'
+import { deserializeNode } from '../重构json/297.二叉树的序列化与反序列化'
 
 // 给定一个二叉树，找到其中结点最多的二叉搜索树（BST）子树，并返回该子树的大小。
 // 时间复杂度为 O(n)

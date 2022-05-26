@@ -1,6 +1,5 @@
-import { BinaryTree } from '../力扣加加/Tree'
-import { deserializeNode } from '../力扣加加/构建类/297.二叉树的序列化与反序列化'
-
+import { BinaryTree } from '../分类/Tree'
+import { deserializeNode } from '../重构json/297.二叉树的序列化与反序列化'
 // 从根节点到任意叶节点的任意路径中的节点值所构成的序列为该二叉树的一个 “有效序列” 。
 // 检查一个给定的序列是否是给定二叉树的一个 “有效序列” 。
 

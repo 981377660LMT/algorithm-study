@@ -1,5 +1,6 @@
-import { BinaryTree } from '../力扣加加/Tree'
 // 思路和心得：
+
+import { BinaryTree } from '../分类/Tree'
 
 // 1.贪心，向target所在的区间走
 

@@ -1,4 +1,4 @@
-import { BinaryTree } from '../力扣加加/Tree'
+import { BinaryTree } from '../分类/Tree'
 
 // 此题类似于树上倍增那题
 class CBTInserter {

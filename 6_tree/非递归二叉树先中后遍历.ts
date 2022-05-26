@@ -1,6 +1,6 @@
 // 堆栈
 
-import { deserializeNode } from './力扣加加/构建类/297.二叉树的序列化与反序列化'
+import { deserializeNode } from './重构json/297.二叉树的序列化与反序列化'
 
 interface BinaryTree {
   val: number
@@ -92,8 +92,6 @@ const inOrder = (root: BinaryTree | null) => {
   return result
 }
 
-// preOrder(bt)
 console.log(inOrder(deserializeNode([1, null, 2, 3])))
-// postOrder(bt)
 
 export {}

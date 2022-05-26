@@ -1,5 +1,5 @@
-import { BinaryTree } from '../力扣加加/Tree'
-import { deserializeNode } from '../力扣加加/构建类/297.二叉树的序列化与反序列化'
+import { BinaryTree } from '../分类/Tree'
+import { deserializeNode } from '../重构json/297.二叉树的序列化与反序列化'
 
 // 请你返回从根到叶子节点的所有路径中 伪回文 路径的数目。
 // 伪回文:路径经过的所有节点值的排列中，存在一个回文序列。(奇数count至多一个)

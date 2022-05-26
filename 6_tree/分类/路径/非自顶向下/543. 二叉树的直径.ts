@@ -1,5 +1,5 @@
+import { deserializeNode } from '../../../重构json/297.二叉树的序列化与反序列化'
 import { BinaryTree } from '../../Tree'
-import { deserializeNode } from '../../构建类/297.二叉树的序列化与反序列化'
 
 /**
  * @param {BinaryTree} root

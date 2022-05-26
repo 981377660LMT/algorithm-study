@@ -1,5 +1,5 @@
-import { BinaryTree } from './力扣加加/Tree'
-import { deserializeNode } from './力扣加加/构建类/297.二叉树的序列化与反序列化'
+import { BinaryTree } from './分类/Tree'
+import { deserializeNode } from './重构json/297.二叉树的序列化与反序列化'
 
 // 如果二叉树的两个节点深度相同，但 '父节点不同' ，则它们是一对堂兄弟节点。
 function isCousins(root: BinaryTree | null, x: number, y: number): boolean {

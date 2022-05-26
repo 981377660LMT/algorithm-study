@@ -1,6 +1,6 @@
 // # 返回包含 N 个结点的所有可能满二叉树的列表。 答案的每个元素都是一个可能树的根结点。
 
-import { BinaryTree } from '../力扣加加/Tree'
+import { BinaryTree } from '../分类/Tree'
 
 // # 答案中每个树的每个结点都必须有 node.val=0。
 function allPossibleFBT(n: number): (BinaryTree | null)[] {

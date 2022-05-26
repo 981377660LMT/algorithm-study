@@ -1,6 +1,7 @@
-import { BinaryTree } from '../../力扣加加/Tree'
-
 // 将一个 二叉搜索树 就地转化为一个 已排序的双向循环链表 。
+
+import { BinaryTree } from '../../分类/Tree'
+
 // 树中节点的左指针需要指向前驱，树中节点的右指针需要指向后继。还需要返回链表中最小元素的指针。
 function treeToDoublyList(root: BinaryTree | null): BinaryTree | null {
   if (!root) return root
