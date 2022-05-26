@@ -1,4 +1,4 @@
-import { useUnionFindArray } from './推荐使用并查集精简版'
+import { useUnionFindArray } from './useUnionFind'
 
 /**
  * @param {number[][]} stones

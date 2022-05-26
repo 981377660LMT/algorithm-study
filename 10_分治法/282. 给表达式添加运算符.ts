@@ -34,3 +34,4 @@ function addOperators(num: string, target: number): string[] {
 console.log(addOperators('123', 6))
 // 输入: num = "123", target = 6
 // 输出: ["1+2+3", "1*2*3"]
+export {}

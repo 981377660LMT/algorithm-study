@@ -1,7 +1,7 @@
 from collections import defaultdict
 from bisect import bisect_right
 
-
+# 392. 判断子序列
 class Solution:
     def isSubsequence(self, pattern: str, needle: str) -> bool:
         """check if s is a subsequence of t"""

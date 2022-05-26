@@ -10,7 +10,6 @@
 const swimInWater = function (grid: number[][]): number {
   const n = grid.length
 
-  // 能力检测
   // 这里使用yield 碰到结果就暂停后面的函数运行(大海捞针,yield可以冲出递归调用栈)
   function* dfs(mid: number, x: number, y: number, visited: Set<string>): Generator<boolean> {
     if (grid[x][y] > mid) yield false
@@ -61,15 +60,6 @@ const swimInWater = function (grid: number[][]): number {
   return l
 }
 
-// console.log(
-//   swimInWater([
-//     [0, 1, 2, 3, 4],
-//     [24, 23, 22, 21, 5],
-//     [12, 13, 14, 15, 16],
-//     [11, 17, 18, 19, 20],
-//     [10, 9, 8, 7, 6],
-//   ])
-// )
 console.log(
   swimInWater([
     [3, 2],

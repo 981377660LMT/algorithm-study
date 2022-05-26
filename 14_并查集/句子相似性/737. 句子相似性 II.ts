@@ -1,7 +1,7 @@
 // 相似关系是 具有 传递性的
 // 相似关系是具有对称性的
 
-import { useUnionFindArray } from '../推荐使用并查集精简版'
+import { useUnionFindArray } from '../useUnionFind'
 
 // 即：无向图并查集
 function areSentencesSimilarTwo(

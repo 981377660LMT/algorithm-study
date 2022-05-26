@@ -1,4 +1,4 @@
-import { BinaryTree } from '../../6_tree/力扣加加/Tree'
+import { BinaryTree } from '../../6_tree/分类/Tree'
 
 //
 class BSTIterator {

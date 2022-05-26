@@ -11,7 +11,7 @@ MAX = int(1e5) + 10
 def check(mid: int) -> bool:
     for num in nums:
         mid += mid - num
-        if mid > MAX:
+        if mid > MAX:  # 注意这里剪枝
             return True
         elif mid < 0:
             return False
