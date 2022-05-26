@@ -8,35 +8,35 @@
 # 我们考虑任意一个数对(a,b)，不妨假设a≤b。假设最终选定的和值为target
 # 令target从数轴最左端开始向右移动 (1+a) (a+b) (a+b+1) (b+limit+1) 四个位置需要更新差分数组
 # 最后，我们遍历（扫描）差分数组，就可以找到令总操作次数最小的target，同时可以得到最少的操作次数。
+from collections import defaultdict
 from typing import List
 
 
 class Solution:
     def minMoves(self, nums: List[int], limit: int) -> int:
-        diff = [0] * (2 * limit + 2)  # 最终互补的数字和为 x，需要的操作数
+        diff = defaultdict(int)  # 最终互补的数字和为 x，需要的操作数
         n = len(nums)
 
         for i in range(n // 2):
             a, b = sorted((nums[i], nums[~i]))
             # 调两个数
-            lower, upper = [2, 2 * limit]
+            lower, upper = 2, 2 * limit
             diff[lower] += 2
             diff[upper + 1] -= 2
             # 调一个数
-            lower, upper = [1 + a, limit + b]
+            lower, upper = 1 + a, limit + b
             diff[lower] += -1
             diff[upper + 1] -= -1
             # 调零个数
-            lower, upper = [a + b, a + b]
+            lower, upper = a + b, a + b
             diff[lower] += -1
             diff[upper + 1] -= -1
 
         res = n
-        curSum = 0
         # [2,2*limit]间的最小值
         for i in range(2, 2 * limit + 1):
-            curSum += diff[i]
-            res = min(res, curSum)
+            diff[i] += diff[i - 1]
+            res = min(res, diff[i])
         return res
 
 

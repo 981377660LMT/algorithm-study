@@ -18,7 +18,7 @@ class Solution(object):
         for start in range(n):
             left, right = start, start
             while left >= 0 and right < n and s[left] == s[right]:
-                adjMap[left].add(right + 1)
+                adjMap[left].add(right + 1)  # 注意right+1
                 left -= 1
                 right += 1
 
@@ -45,36 +45,6 @@ class Solution(object):
             depth += 1
         return n - 1
 
-    def minCut2(self, s: str) -> int:
-        """
-        :给你一个字符串 s，请你将 s 分割成一些子串，使每个子串都是回文。
-        返回符合要求的 最少分割次数 。
-        """
-        n = len(s)
-        adjMap = defaultdict(set)
-
-        # 建图
-        for start in range(n):
-            left, right = start, start
-            while left >= 0 and right < n and s[left] == s[right]:
-                adjMap[left].add(right + 1)
-                left -= 1
-                right += 1
-
-            left, right = start, start + 1
-            while left >= 0 and right < n and s[left] == s[right]:
-                adjMap[left].add(right + 1)
-                left -= 1
-                right += 1
-
-        @lru_cache(None)
-        def dfs(index: int) -> int:
-            if index >= n:
-                return 0
-            return min(1 + dfs(next) for next in adjMap[index])
-
-        return dfs(0) - 1
-
 
 # python切片 不超时 js超时
-print(Solution().minCut2(s="aab"))
+print(Solution().minCut(s="aab"))

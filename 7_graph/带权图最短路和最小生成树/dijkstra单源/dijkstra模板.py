@@ -3,7 +3,7 @@
 from collections import defaultdict
 from functools import lru_cache
 from heapq import heappop, heappush
-from typing import DefaultDict, List, Optional, Tuple, Union, overload
+from typing import DefaultDict, List, Optional, Tuple, overload
 
 INF = int(1e20)
 
@@ -20,7 +20,7 @@ def dijkstra(n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int
 
 def dijkstra(
     n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int, end: Optional[int] = None
-) -> Union[int, List[int]]:
+):
     """时间复杂度O((V+E)logV)"""
     dist = [INF] * n
     dist[start] = 0  # 注意这里不要忘记初始化pq里的

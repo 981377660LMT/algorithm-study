@@ -3,11 +3,11 @@ class Solution:
     def solve(self, nums):
         nums = sorted(nums)
         res = 0
-        depth = 0
+        dp = 0
         for pre, cur in zip(nums, nums[1:]):
             if pre != cur:
-                depth += 1
-            res += depth
+                dp += 1
+            res += dp
         return res
 
 

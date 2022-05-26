@@ -1,3 +1,4 @@
+from itertools import accumulate
 from typing import List
 
 
@@ -8,18 +9,16 @@ class Solution:
         diff = [0] * (n + 10)
         for i, num in enumerate(nums):
             if num > i:
-                # print(i + 1, n + i - num + 1)
                 diff[i + 1] += 1
                 diff[i + 1 + n - num] -= 1
             else:
-                # print(i - num + 1, i + 1)
+                # 整个区间+1 再除去无贡献的区间
                 diff[0] += 1
                 diff[n] -= 1
                 diff[i - num + 1] -= 1
                 diff[i + 1] += 1
-        for i in range(1, len(nums)):
-            diff[i] += diff[i - 1]
 
+        diff = list(accumulate(diff))
         return diff.index(max(diff))
 
 

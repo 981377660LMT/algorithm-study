@@ -5,19 +5,17 @@
 # 给你一个字符串 word ，请你返回键入 word 所表示单词的 最少 秒数 。
 
 
+from itertools import pairwise
+
+
 class Solution:
     def minTimeToType(self, word: str) -> int:
-        typing = len(word)
-        move = 0
-
-        cur_ascii = 97
-        for char in word:
-            next_ascii = ord(char)
-            # 环上两点距离公式
-            move += min((next_ascii - cur_ascii) % 26, (cur_ascii - next_ascii) % 26)
-            cur_ascii = next_ascii
-
-        return typing + move
+        word = 'a' + word
+        nums = list(map(ord, word))
+        res = len(word)
+        for pre, cur in pairwise(nums):
+            res += min(abs(pre - cur), 26 - abs(pre - cur))
+        return res - 1
 
 
 print(Solution().minTimeToType("bza"))

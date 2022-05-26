@@ -5,6 +5,8 @@ from typing import List
 
 INF = 0x7FFFFFFF
 # 总结：遍历，找对角线
+
+
 class Solution:
     def minAreaRect(self, points: List[List[int]]) -> int:
         n = len(points)

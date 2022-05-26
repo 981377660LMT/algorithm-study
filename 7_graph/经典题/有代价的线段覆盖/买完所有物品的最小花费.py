@@ -12,6 +12,8 @@ def dijkstra(n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int
     pq = [(0, start)]
     while pq:
         curDist, cur = heappop(pq)
+        if dist[cur] < curDist:
+            continue
         if cur == end:
             return curDist
         for next in adjMap[cur]:
@@ -32,7 +34,7 @@ class Solution:
         for u, v, w in sets:
             # 题目竟然还有重边
             # 接受一个区间，往前走
-            adjMap[u][v + 1] = min(adjMap[u][v + 1], w)
+            adjMap[u][v + 1] = min(adjMap[u][v + 1], w)  # 注意v+1
         for i, num in enumerate(removals):
             # 删除一个物品，往回走
             adjMap[i + 1][i] = num

@@ -25,7 +25,7 @@ class Solution:
                     continue
                 dfs(next, cur, depth + 1)
 
-        def LCA(
+        def getLCA(
             root1: int, root2: int, level: DefaultDict[int, int], parent: DefaultDict[int, int]
         ) -> int:
             if level[root1] < level[root2]:
@@ -50,6 +50,6 @@ class Solution:
         levelMap, parentMap = defaultdict(lambda: -1), defaultdict(lambda: -1)
         dfs(0, -1, 0)
 
-        lca = LCA(root1, root2, levelMap, parentMap)
+        lca = getLCA(root1, root2, levelMap, parentMap)
         return lca
 

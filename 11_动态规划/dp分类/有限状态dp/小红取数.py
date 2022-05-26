@@ -14,8 +14,9 @@ dp[0] = 0
 
 for num in nums:
     mod = num % k
-    copy = dp[:]
+    ndp = dp[:]
     for i in range(k):
-        dp[i] = max(dp[i], num + copy[(i - mod)])
+        ndp[i] = max(ndp[i], num + dp[(i - mod)])
+    dp = ndp
 
 print(dp[0] if dp[0] != 0 else -1)

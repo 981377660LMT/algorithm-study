@@ -1,11 +1,11 @@
-import { useUnionFindArray } from '../推荐使用并查集精简版'
-
 /**
  * @param {character[][]} board
  * @return {void} Do not return anything, modify board in-place instead.
  * @description 任何不在边界上，或不与边界上的 'O' 相连的 'O' 最终都会被填充为 'X'
  * @summary 将非边界的点填成第三种颜色
  */
+
+import { useUnionFindArray } from '../useUnionFind'
 
 /**
  * @param {character[][]} board

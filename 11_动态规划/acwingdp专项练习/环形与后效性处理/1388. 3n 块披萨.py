@@ -13,23 +13,10 @@ from functools import lru_cache
 
 
 class Solution:
-    def maxSizeSlices2(self, slices: List[int]) -> int:
-        @lru_cache(None)
-        def dfs(start: int, end: int, remain: int) -> int:
-            if remain == 0 or start > end:
-                return 0
-            # 每一轮取不取start
-            return max(dfs(start + 2, end, remain - 1) + slices[start], dfs(start + 1, end, remain))
-
-        count = len(slices) // 3
-        return max(dfs(2, len(slices) - 2, count - 1) + slices[0], dfs(1, len(slices) - 1, count))
-
     def maxSizeSlices(self, slices: List[int]) -> int:
         @lru_cache(None)
         def dfs1(index: int, count: int, hasPre: int) -> int:
             """取最后一个"""
-            if count > target:
-                return -int(1e20)
             if index == n - 1:
                 return slices[index] if (not hasPre and count == target) else -int(1e20)
             res = dfs1(index + 1, count, False)
@@ -40,8 +27,6 @@ class Solution:
         @lru_cache(None)
         def dfs2(index: int, count: int, hasPre: int) -> int:
             """不取最后一个"""
-            if count > target:
-                return -int(1e20)
             if index == n - 1:
                 return 0 if count == target else -int(1e20)
             res = dfs2(index + 1, count, False)

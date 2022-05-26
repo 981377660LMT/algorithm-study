@@ -5,7 +5,7 @@
  * @return {number}
  * 现在当倾倒了非负整数杯香槟后，返回第 i 行 j 个玻璃杯所盛放的香槟占玻璃杯容积的比例（i 和 j都从0开始）。
  */
-var champagneTower = function (poured: number, query_row: number, query_glass: number): number {
+function champagneTower(poured: number, query_row: number, query_glass: number): number {
   // 这种初始化方式有一半空间是浪费的
   const dp = Array.from({ length: 101 }, () => Array(100).fill(0))
   dp[0][0] = poured

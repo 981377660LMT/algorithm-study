@@ -1,5 +1,6 @@
 import { findLastLarge } from '../对每个数，寻找右侧最后一个比自己大的数'
 
+// 最大宽度坡
 function maxWidthRamp(nums: number[]): number {
   const lastLarge = findLastLarge(nums)
   let res = 0
