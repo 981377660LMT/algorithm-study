@@ -29,3 +29,4 @@ console.log(minPatches([1, 5, 10], 20))
 
 // Append Numbers to List to Create Range
 // 向数组添加最少的个数
+// 最远距离

@@ -32,7 +32,7 @@ class Solution:
                 left = mid + 1
             else:
                 right = mid - 1
-        return right
+        return right  # 最右二分
 
 
 print(Solution().maximumRemovals(s="abcacb", p="ab", removable=[3, 1, 0]))

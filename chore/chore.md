@@ -366,3 +366,14 @@ https://leetcode.cn/problems/maximum-trailing-zeros-in-a-cornered-path/solution/
 leetcode 统计内存消耗的时候只会计入被访问过的内存块,所以即使我们开了一个 5·108 那么大的 int 数组(理论值为约 200OMB)，如果只使用其中的少量元素的话也不会超出内存限制。那么在一些情况下可以直接拿数组当哈希表用，让代码跑得更快。
 
 # python 里排序 指定 key 会更快 不指定 key 会默认比较 list
+
+# 注意临时变量占用空间 leetcode 上 JS 内存限制 182MB
+
+```JS
+// 注意js不要直接开1e9 容易MLE
+const tmp = tiles.flat() // !注意这样写会产生临时变量占用额外空间 尽量不要这样写
+const tree = new SegmentTree(Math.min(...tmp), Math.max(...tmp))
+
+const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()))  // 不占用额外空间
+
+```

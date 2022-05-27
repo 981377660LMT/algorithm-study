@@ -43,7 +43,7 @@ class Solution:
                 left = mid + 1
             else:
                 right = mid - 1
-        return right
+        return right  # 最右能力二分
 
 
 print(Solution().maxTaskAssign(tasks=[3, 2, 1], workers=[0, 3, 3], pills=1, strength=1))

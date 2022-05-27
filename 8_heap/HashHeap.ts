@@ -70,4 +70,5 @@ class HashHeap<Item = number> extends MinHeap<Item> {
 if (require.main === module) {
   HashHeap.main()
 }
+
 export { HashHeap }

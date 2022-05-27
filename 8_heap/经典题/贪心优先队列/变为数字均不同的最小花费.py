@@ -32,15 +32,15 @@ res = 0
 # 每次curVal增大,所有等于 cur 的元素的花费入堆，然后出去一个最大的花费，再累加curSum
 curVal = 0
 runningSum = 0
-eventId = 0
+index = 0
 
-while pq or eventId < n:
+while pq or index < n:  # 没看完所有的数
     if not pq:
-        curVal = pairs[eventId][0]
-    while eventId < n and pairs[eventId][0] == curVal:
-        heappush(pq, -pairs[eventId][1])
-        runningSum += pairs[eventId][1]
-        eventId += 1
+        curVal = pairs[index][0]
+    while index < n and pairs[index][0] == curVal:
+        heappush(pq, -pairs[index][1])
+        runningSum += pairs[index][1]
+        index += 1
     runningSum -= -heappop(pq)
     res += runningSum
     curVal += 1

@@ -20,7 +20,7 @@ class Solution:
             else:
                 l = mid + 1
 
-        return l
+        return l # 最左二分
 
 
 print(Solution().minimizedMaximum(n=6, quantities=[11, 6]))

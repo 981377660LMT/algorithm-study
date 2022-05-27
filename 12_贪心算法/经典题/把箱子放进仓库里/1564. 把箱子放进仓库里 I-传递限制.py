@@ -1,23 +1,24 @@
+from itertools import accumulate
 from typing import List
 
 # 你最多可以在仓库中放进多少个箱子？
 # 1 <= boxes.length, warehouse.length <= 10^5
 
 # 箱子只能从左向右推进仓库中。
-
+# 传递限制
 # 总结：从左向右，优先考虑放大的；即仓库从左向右递减
+
+
 class Solution:
     def maxBoxesInWarehouse(self, boxes: List[int], warehouse: List[int]) -> int:
-        boxes = sorted(boxes, reverse=True)
-        res, box_id = 0, 0
-
-        for w in warehouse:
-            while box_id < len(boxes) and w < boxes[box_id]:
-                box_id += 1
-            if box_id == len(boxes):
-                break
-            box_id += 1
-            res += 1
+        warehouse = list(accumulate(warehouse, func=min))
+        boxes.sort(reverse=True)  # 最大的放到外面
+        boxId, houseId, res = 0, 0, 0
+        while boxId < len(boxes) and houseId < len(warehouse):
+            if boxes[boxId] <= warehouse[houseId]:
+                res += 1
+                houseId += 1
+            boxId += 1
 
         return res
 

@@ -20,7 +20,7 @@ class SegmentTree {
     return this._query(1, l, r, 1, this.size)
   }
 
-  update(l: number, r: number, target: number): void {
+  update(l: number, r: number, target: 0 | 1): void {
     this.checkRange(l, r)
     this._update(1, l, r, 1, this.size, target)
   }
@@ -41,7 +41,7 @@ class SegmentTree {
     return res
   }
 
-  private _update(rt: number, L: number, R: number, l: number, r: number, target: number): void {
+  private _update(rt: number, L: number, R: number, l: number, r: number, target: 0 | 1): void {
     if (L <= l && r <= R) {
       this.isLazy[rt] = 1
       this.lazyValue[rt] = target

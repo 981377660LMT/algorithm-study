@@ -22,7 +22,7 @@ class Solution:
                 left = mid + 1
             else:
                 right = mid - 1
-        return right
+        return right  # 最右二分
 
     # 更好的写法
     def maximumBags2(self, capacity: List[int], rocks: List[int], additionalRocks: int) -> int:

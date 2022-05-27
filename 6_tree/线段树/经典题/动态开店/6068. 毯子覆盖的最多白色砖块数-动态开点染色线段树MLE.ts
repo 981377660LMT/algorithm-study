@@ -89,7 +89,10 @@ class SegmentTree {
 
 function maximumWhiteTiles(tiles: number[][], carpetLen: number): number {
   // 注意js不要直接开1e9 容易MLE
-  const tree = new SegmentTree(0, Math.max(...tiles.flat()))
+  // const tmp = tiles.flat() // 注意这样写会产生临时变量占用额外空间 尽量不要这样写
+  // const tree = new SegmentTree(Math.min(...tmp), Math.max(...tmp))
+  const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()))
+
   for (const [left, right] of tiles) tree.update(left, right, 1)
   let res = 0
   for (const [left] of tiles) res = Math.max(res, tree.query(left, left + carpetLen - 1))
