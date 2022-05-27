@@ -1,18 +1,19 @@
 /**
  * @param {number[]} arr
  * @return {number}
+ * 前缀和 O(n^2) 可以计算贡献优化到 O(n)
  */
 const sumOddLengthSubarrays = function (arr: number[]): number {
-  const pre = [0]
+  const preSum = [0]
   for (let i = 1; i <= arr.length; i++) {
-    pre[i] = pre[i - 1] + arr[i - 1]
+    preSum.push(preSum[i - 1] + arr[i - 1])
   }
 
   let res = 0
   for (let len = 1; len <= arr.length; len += 2) {
-    for (let l = 0; l + len <= arr.length; l++) {
-      const r = l + len
-      res += pre[r] - pre[l]
+    for (let start = 0; start + len <= arr.length; start++) {
+      const end = start + len
+      res += preSum[end] - preSum[start]
     }
   }
 

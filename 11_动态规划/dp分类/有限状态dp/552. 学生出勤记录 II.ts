@@ -6,37 +6,35 @@
  * 泰波那契数列  (n+2)∗2**(n−1)
  *
  */
-var checkRecord = function (n: number): number {
+function checkRecord(n: number): number {
   const MOD = 1e9 + 7
-  const dp = Array.from({ length: n + 1 }, () => Array.from({ length: 3 }, () => Array(2).fill(0)))
-  dp[0][0][0] = 1
-  // console.log(dp[1][2])
+  let dp = Array.from({ length: 3 }, () => new Uint32Array(2))
+  dp[0][0] = 1
+
   // 六种状态
   for (let i = 1; i <= n; i++) {
-    dp[i][0][0] += dp[i - 1][0][0] % MOD
-    dp[i][0][0] += dp[i - 1][1][0] % MOD
-    dp[i][0][0] += dp[i - 1][2][0] % MOD
-
-    dp[i][0][1] += dp[i - 1][0][1] % MOD
-    dp[i][0][1] += dp[i - 1][1][1] % MOD
-    dp[i][0][1] += dp[i - 1][2][1] % MOD
-    dp[i][0][1] += dp[i - 1][0][0] % MOD
-    dp[i][0][1] += dp[i - 1][1][0] % MOD
-    dp[i][0][1] += dp[i - 1][2][0] % MOD
-
-    dp[i][1][0] += dp[i - 1][0][0] % MOD
-
-    dp[i][1][1] += dp[i - 1][0][1] % MOD
-
-    dp[i][2][0] += dp[i - 1][1][0] % MOD
-
-    dp[i][2][1] += dp[i - 1][1][1] % MOD
+    const ndp = Array.from({ length: 3 }, () => new Uint32Array(2))
+    ndp[0][0] = (ndp[0][0] + dp[0][0]) % MOD
+    ndp[0][0] = (ndp[0][0] + dp[1][0]) % MOD
+    ndp[0][0] = (ndp[0][0] + dp[2][0]) % MOD
+    ndp[0][1] = (ndp[0][1] + dp[0][1]) % MOD
+    ndp[0][1] = (ndp[0][1] + dp[1][1]) % MOD
+    ndp[0][1] = (ndp[0][1] + dp[2][1]) % MOD
+    ndp[0][1] = (ndp[0][1] + dp[0][0]) % MOD
+    ndp[0][1] = (ndp[0][1] + dp[1][0]) % MOD
+    ndp[0][1] = (ndp[0][1] + dp[2][0]) % MOD
+    ndp[1][0] = (ndp[1][0] + dp[0][0]) % MOD
+    ndp[1][1] = (ndp[1][1] + dp[0][1]) % MOD
+    ndp[2][0] = (ndp[2][0] + dp[1][0]) % MOD
+    ndp[2][1] = (ndp[2][1] + dp[1][1]) % MOD
+    dp = ndp
   }
 
-  return (dp[n][0][0] + dp[n][0][1] + dp[n][1][0] + dp[n][1][1] + dp[n][2][0] + dp[n][2][1]) % MOD
+  return (dp[0][0] + dp[0][1] + dp[1][0] + dp[1][1] + dp[2][0] + dp[2][1]) % MOD
 }
 
 console.log(checkRecord(2))
+console.log(2 ** 32 - 1, 1e9 + 7)
 // 输出：8
 // 解释：
 // 有 8 种长度为 2 的记录将被视为可奖励：

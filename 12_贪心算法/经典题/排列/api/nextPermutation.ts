@@ -3,26 +3,21 @@
  * @param nums digit 数组
  * @description 返回值第二个参数带error 类似go的模式...
  */
-function nextPermutation<T>(nums: T[]): [res: T[], ok: boolean] {
-  const copy = nums.slice()
-  const n = copy.length
-  let isExist = false
+function nextPermutation<T>(nums: T[], inplace = false): [res: T[], ok: boolean] {
+  if (nums.length === 0) return [[], false]
+  if (!inplace) nums = nums.slice()
 
-  loop: for (let left = n - 1; left > -1; left--) {
-    for (let right = n - 1; right > left; right--) {
-      // 找到了第一对后面大于前面
-      if (copy[right] > copy[left]) {
-        // 交换完排序
-        ;[copy[left], copy[right]] = [copy[right], copy[left]]
-        reverseRange(copy, left + 1, n - 1)
-        isExist = true
-        break loop
-      }
-    }
-  }
+  let left = nums.length - 1
+  while (left > 0 && nums[left - 1] >= nums[left]) left--
+  if (left === 0) return [[], false]
+  const last = left - 1 // 最后一个递增位置
 
-  if (isExist) return [copy, true]
-  else return [[], false]
+  let right = nums.length - 1
+  while (nums[right] <= nums[last]) right--
+  ;[nums[last], nums[right]] = [nums[right], nums[last]] // 找到最小的可交换的right，交换这两个数
+
+  reverseRange(nums, last + 1, nums.length - 1)
+  return [nums, true]
 }
 
 /**
@@ -30,26 +25,21 @@ function nextPermutation<T>(nums: T[]): [res: T[], ok: boolean] {
  * @param nums digit 数组
  * @description 返回值第二个参数带error 类似go的模式...
  */
-function prePermutation<T>(nums: T[]): [res: T[], ok: boolean] {
-  const copy = nums.slice()
-  const n = copy.length
-  let isExist = false
+function prePermutation<T>(nums: T[], inplace = false): [res: T[], ok: boolean] {
+  if (nums.length === 0) return [[], false]
+  if (!inplace) nums = nums.slice()
 
-  loop: for (let left = n - 1; left > -1; left--) {
-    for (let right = n - 1; right > left; right--) {
-      // 找到了第一对后面小于前面
-      if (copy[right] < copy[left]) {
-        // 交换完排序
-        ;[copy[left], copy[right]] = [copy[right], copy[left]]
-        reverseRange(copy, left + 1, n - 1)
-        isExist = true
-        break loop
-      }
-    }
-  }
+  let left = nums.length - 1
+  while (left > 0 && nums[left - 1] <= nums[left]) left--
+  if (left === 0) return [[], false]
+  const last = left - 1 // 最后一个递增位置
 
-  if (isExist) return [copy, true]
-  else return [[], false]
+  let right = nums.length - 1
+  while (nums[right] >= nums[last]) right--
+  ;[nums[last], nums[right]] = [nums[right], nums[last]] // 找到最小的可交换的right，交换这两个数
+
+  reverseRange(nums, last + 1, nums.length - 1)
+  return [nums, true]
 }
 
 function reverseRange<T>(nums: T[], i: number, j: number) {
@@ -60,4 +50,4 @@ function reverseRange<T>(nums: T[], i: number, j: number) {
   }
 }
 
-export {}
+export { nextPermutation, prePermutation }

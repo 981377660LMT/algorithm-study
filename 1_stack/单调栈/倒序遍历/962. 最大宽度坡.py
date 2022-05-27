@@ -33,13 +33,7 @@ class Solution:
 
         树状数组/线段树 解法 维护区间最值
         """
-        res = 0
-        ids = sorted(range(len(nums)), key=nums.__getitem__)
-        preMin = int(1e20)
-        for i in ids:
-            res = max(res, i - preMin)
-            preMin = min(preMin, i)
-        return res
+        ...
 
 
 print(Solution().maxWidthRamp([9, 8, 1, 0, 1, 9, 4, 0, 4, 1]))

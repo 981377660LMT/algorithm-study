@@ -1,4 +1,4 @@
-import { useUnionFindArray } from '../useUnionFind'
+import { useUnionFindArray } from '../../useUnionFind'
 
 /**
  * @param {number} n

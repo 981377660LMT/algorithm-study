@@ -14,7 +14,7 @@ class MinHeap<HeapValue = number> {
 
   constructor(
     comparator: Comparator<HeapValue> = MinHeap.defaultComparator,
-    capacity: number = Infinity,
+    capacity: number = 1 << 30,
     heap: HeapValue[] = []
   ) {
     this.comparator = comparator
@@ -31,7 +31,7 @@ class MinHeap<HeapValue = number> {
    * @param value 插入的值
    * @description 将值插入数组(堆)的尾部，然后上移直至父节点不超过它
    *
-   * 时间复杂度为`O(log(h))`
+   * 时间复杂度为`O(log(n))`
    */
   heappush(value: HeapValue): void {
     this.heap.push(value)
@@ -44,7 +44,7 @@ class MinHeap<HeapValue = number> {
   /**
    * @description 用数组尾部元素替换堆顶(直接删除会破坏堆结构),然后下移动直至子节点都大于新堆顶
    *
-   * 时间复杂度为`O(log(h))`
+   * 时间复杂度为`O(log(n))`
    */
   heappop(): HeapValue | undefined {
     if (this.heap.length === 0) {

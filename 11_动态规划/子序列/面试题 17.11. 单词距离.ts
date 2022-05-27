@@ -10,30 +10,30 @@
  * 参考 11_动态规划\子序列\note.md
  * ```
  */
-const findClosest = function (words: string[], word1: string, word2: string): number {
+function findClosest(words: string[], word1: string, word2: string): number {
+  const indexMap = new Map<string, number[]>()
+  for (const [index, word] of words.entries()) {
+    !indexMap.has(word) && indexMap.set(word, [])
+    indexMap.get(word)!.push(index)
+  }
+
+  return minDiff(indexMap.get(word1) ?? [], indexMap.get(word2) ?? [])
+
   // 两个有序数组选数差的绝对值最小
-  const minDiff = (arr1: number[], arr2: number[]): number => {
+  function minDiff(nums1: number[], nums2: number[]): number {
     let res = Infinity
-    let l1 = 0
-    let l2 = 0
-    while (l1 < arr1.length && l2 < arr2.length) {
-      res = Math.min(res, Math.abs(arr1[l1] - arr2[l2]))
+    let i = 0
+    let j = 0
+    while (i < nums1.length && j < nums2.length) {
+      res = Math.min(res, Math.abs(nums1[i] - nums2[j]))
       // 小的向后移
-      arr1[l1] < arr2[l2] ? l1++ : l2++
+      nums1[i] < nums2[j] ? i++ : j++
     }
     return res
   }
-  const record = new Map<string, number[]>()
-  for (let i = 0; i < words.length; i++) {
-    const word = words[i]
-    !record.has(word) && record.set(word, [])
-    record.get(word)!.push(i)
-  }
-
-  return minDiff(record.get(word1)!, record.get(word2)!)
 }
 
-// 如果不需要调用多次，一般的双指针即可
+// 如果不需要调用多次，一般的双指针即可，遇到即更新
 const findClosest2 = function (words: string[], word1: string, word2: string): number {
   let i = -Infinity
   let j = Infinity

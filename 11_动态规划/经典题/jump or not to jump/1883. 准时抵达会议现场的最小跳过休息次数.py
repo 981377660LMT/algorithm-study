@@ -11,21 +11,28 @@ from math import ceil
 # summary
 # jump or not jump at each point
 
-eps = 1e-9
-inf = 0x7FFFFFFF
+EPS = 1e-8
+
+# 在进行「向上取整」运算前，我们将待取整的浮点数减去 eps 再进行取整，
+# 就可以避免浮点数误差导致的ceil大1的问题
+# ceil(8.0 + 1.0 / 3 + 1.0 / 3 + 1.0 / 3) 应当是 9，而计算机会给出 10
+# 这是因为浮点数误差导致8.0 + 1.0 / 3 + 1.0 / 3 + 1.0 / 3
+# 计算出的结果约为：
+# 9.000000000000002
+# 本题speed最大为1e6 因此EPS取1e-8/1e-9都可以
 
 
 class Solution:
     def minSkips(self, dist: List[int], speed: int, hoursBefore: int) -> int:
         n = len(dist)
-        dp = [[inf] * (n + 1) for _ in range(n + 1)]  # point jumptimes => total time
+        dp = [[int(1e20)] * (n + 1) for _ in range(n + 1)]  # 第i个位置跳了j次的时间
         dp[0][0] = 0
         for i, d in enumerate(dist, 1):
             # not jump
-            dp[i][0] = ceil(dp[i - 1][0] + d / speed - eps)
+            dp[i][0] = ceil(dp[i - 1][0] + d / speed - EPS)
             for j in range(1, i + 1):
                 # 跳跃j次是 本次跳跃，上次跳了j-1次 和 本次不跳跃，上次跳了j次 的递推
-                dp[i][j] = min(dp[i - 1][j - 1] + d / speed, ceil(dp[i - 1][j] + d / speed - eps))
+                dp[i][j] = min(dp[i - 1][j - 1] + d / speed, ceil(dp[i - 1][j] + d / speed - EPS))
 
         for j, time in enumerate(dp[-1]):
             if time <= hoursBefore:

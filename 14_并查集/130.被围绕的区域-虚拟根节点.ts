@@ -1,43 +1,37 @@
-/**
- * @param {character[][]} board
- * @return {void} Do not return anything, modify board in-place instead.
- * @description 任何不在边界上，或不与边界上的 'O' 相连的 'O' 最终都会被填充为 'X'
- * @summary 将非边界的点填成第三种颜色
- */
-
 import { useUnionFindArray } from './useUnionFind'
 
+const DIR4 = [
+  [1, 0],
+  [0, 1],
+  [-1, 0],
+  [0, -1],
+]
+
 /**
  * @param {character[][]} board
  * @return {void} Do not return anything, modify board in-place instead.
  * @description 任何不在边界上，或不与边界上的 'O' 相连的 'O' 最终都会被填充为 'X'
  * @summary 将非边界的点填成第三种颜色
  */
-const solve = (board: string[][]): void => {
-  const row = board.length
-  if (row == 0) return
-  const col = board[0].length
-  const dummy = row * col
-  const uf = useUnionFindArray(dummy + 1)
-  const arr = [
-    [1, 0],
-    [0, 1],
-    [-1, 0],
-    [0, -1],
-  ]
 
-  for (let i = 0; i < row; i++) {
-    for (let j = 0; j < col; j++) {
-      if (board[i][j] == 'O') {
+function solve(board: string[][]): void {
+  const row = board.length
+  const col = board[0].length
+
+  const dummy = row * col
+  const uf = useUnionFindArray(dummy + 10)
+
+  for (let r = 0; r < row; r++) {
+    for (let c = 0; c < col; c++) {
+      if (board[r][c] == 'O') {
         // 这种写法很好，减少循环二维数组的次数
-        if (i == 0 || j == 0 || i == row - 1 || j == col - 1) {
-          uf.union(i * col + j, dummy)
+        if (r == 0 || c == 0 || r == row - 1 || c == col - 1) {
+          uf.union(r * col + c, dummy)
         } else {
-          //考察四个方向
-          for (let k = 0; k < 4; k++) {
-            let x = i + arr[k][0]
-            let y = j + arr[k][1]
-            if (board[x][y] == 'O') uf.union(x * col + y, i * col + j)
+          for (const [dr, dc] of DIR4) {
+            const nr = r + dr
+            const nc = c + dc
+            if (board[nr][nc] == 'O') uf.union(nr * col + nc, r * col + c)
           }
         }
       }

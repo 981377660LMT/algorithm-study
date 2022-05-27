@@ -2,7 +2,7 @@
 from typing import List
 from sortedcontainers import SortedDict
 
-INF = 0x3F3F3F3F
+INF = int(1e20)
 
 # 二分查找当前元素最接近的两个元素，取深度的较大值
 
@@ -10,17 +10,22 @@ INF = 0x3F3F3F3F
 class Solution:
     def maxDepthBST(self, order: List[int]) -> int:
         # 元素=>高度
-        sd = SortedDict()
-        # 初始化边界
-        sd[0] = 0
-        sd[INF] = 0
-        sd[order[0]] = 1
+        depthMap = SortedDict()
+
+        # 两个哨兵
+        depthMap[-INF] = 0
+        depthMap[INF] = 0
+
+        depthMap[order[0]] = 1
 
         res = 1
         for num in order[1:]:
-            upper = sd.bisect_right(num)
-            depth = max(sd.peekitem(upper)[1], sd.peekitem(upper - 1)[1]) + 1
-            sd[num] = depth
+            pos = depthMap.bisect_right(num)
+            lower, higher = pos - 1, pos
+            # 新节点的最终父节点，一定是在原树中，与其 绝对值之差最接近 两个元素之一。
+            # 深度较大的结点是插入节点的父节点
+            depth = max(depthMap.peekitem(lower)[1], depthMap.peekitem(higher)[1]) + 1
+            depthMap[num] = depth
             res = max(res, depth)
 
         return res

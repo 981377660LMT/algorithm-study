@@ -3,6 +3,7 @@ import { MinHeap } from '../8_heap/MinHeap'
 // 内部使用了堆
 class PriorityQueue<Item = number> {
   private minHeap: MinHeap<Item>
+
   constructor(
     comparator: (a: Item, b: Item) => number = MinHeap.defaultComparator,
     volumn: number = Infinity,

@@ -1,3 +1,14 @@
+const DIR8 = [
+  [0, 1],
+  [0, -1],
+  [-1, 0],
+  [1, 0],
+  [1, 1],
+  [1, -1],
+  [-1, 1],
+  [-1, -1],
+]
+
 /**
  * @param {number[][]} board
  * @return {void} Do not return anything, modify board in-place instead.
@@ -14,49 +25,37 @@
  *
  *
  */
-const gameOfLife = (board: number[][]): void => {
-  const m = board.length
-  const n = board[0].length
-  const isValidPosition = (x: number, y: number) => x >= 0 && x < m && y >= 0 && y < n
+function gameOfLife(board: number[][]): void {
+  const ROW = board.length
+  const COL = board[0].length
+  const isValidPosition = (x: number, y: number) => x >= 0 && x < ROW && y >= 0 && y < COL
   const countLiveCell = (x: number, y: number): number => {
     let res = 0
-    const directions = [
-      [0, 1],
-      [0, -1],
-      [-1, 0],
-      [1, 0],
-      [1, 1],
-      [1, -1],
-      [-1, 1],
-      [-1, -1],
-    ]
-
-    for (const [dx, dy] of directions) {
+    for (const [dx, dy] of DIR8) {
       // 注意这里要与1
       isValidPosition(x + dx, y + dy) && (res += board[x + dx][y + dy] & 1)
     }
-
     return res
   }
 
-  for (let i = 0; i < m; i++) {
-    for (let j = 0; j < n; j++) {
+  for (let r = 0; r < ROW; r++) {
+    for (let c = 0; c < COL; c++) {
       // 八个方向有几个活细胞
-      const live = countLiveCell(i, j)
+      const live = countLiveCell(r, c)
       // 因为原数据只有0/1 所以可以采用移动一位的方式 如果原数据两位 则需要移动两位
       // 存入左移 读取右移
-      board[i][j] |= live << 1
+      board[r][c] |= live << 1
     }
   }
 
-  for (let i = 0; i < m; i++) {
-    for (let j = 0; j < n; j++) {
+  for (let r = 0; r < ROW; r++) {
+    for (let c = 0; c < COL; c++) {
       // 变化之前当前cell的值
-      const raw = board[i][j] & 1
-      const live = board[i][j] >> 1
-      if (raw == 0 && live == 3) board[i][j] = 1
-      else if (raw === 1 && (live > 3 || live < 2)) board[i][j] = 0
-      else board[i][j] = raw
+      const raw = board[r][c] & 1
+      const live = board[r][c] >> 1
+      if (raw == 0 && live == 3) board[r][c] = 1
+      else if (raw === 1 && (live > 3 || live < 2)) board[r][c] = 0
+      else board[r][c] = raw
     }
   }
 }

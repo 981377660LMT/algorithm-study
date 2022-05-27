@@ -7,11 +7,12 @@ class Solution:
         if n == 1:
             return 0
         length = 1 << (n - 1)
-        if k > length // 2:
-            k -= length // 2
-            return 0 if self.kthGrammar(n - 1, k) == 1 else 1
-        else:
+        mid = length // 2
+        if k <= mid:
             return self.kthGrammar(n - 1, k)
+        else:
+            k -= mid
+            return 1 ^ self.kthGrammar(n - 1, k)
 
 
 print(Solution().kthGrammar(n=2, k=1))

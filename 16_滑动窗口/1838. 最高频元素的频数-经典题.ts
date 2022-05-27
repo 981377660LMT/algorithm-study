@@ -7,7 +7,7 @@
  * 在一步操作中，你可以选择 nums 的一个下标，并将该下标对应元素的值增加 1 。
  * 执行最多 k 次操作后，返回数组中最高频元素的 最大可能频数 。
  * @summary
- * 排序 再滑窗有最优解
+ * 排序 再滑窗看每个元素作为矩形高度，可以取到多少的长度
  */
 function maxFrequency(nums: number[], k: number): number {
   nums.sort((a, b) => a - b)

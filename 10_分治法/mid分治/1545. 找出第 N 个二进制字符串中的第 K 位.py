@@ -2,17 +2,23 @@
 
 # S1 = "0"
 # 当 i > 1 时，Si = Si-1 + "1" + reverse(invert(Si-1))
-
+# 1 <= n <= 20
+# 1 <= k <= 2^n - 1
 
 # 其实就是一张纸对折
-# mid = pow(2, n - 1) = 1 << (n - 1)
+# mid = (left+right)>>1 同线段树
+
+
+from functools import lru_cache
 
 
 class Solution:
+    @lru_cache(None)
     def findKthBit(self, n: int, k: int) -> str:
         if n == 1:
             return '0'
-        mid = 1 << (n - 1)
+        left, right = 1, (1 << n) - 1
+        mid = (left + right) >> 1
         if k == mid:
             return '1'
         elif k < mid:

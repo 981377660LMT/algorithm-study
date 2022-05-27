@@ -1,5 +1,5 @@
 /**
- * @param {number[]} satisfaction
+ * @param {number[]} satisfaction  1 <= n <= 500
  * @return {number}
  * 一个厨师收集了他 n 道菜的满意程度 satisfaction ，这个厨师做出每道菜的时间都是 1 单位时间。
  * 你可以按 任意 顺序安排做菜的顺序，你也可以选择放弃做某些菜来获得更大的总和。

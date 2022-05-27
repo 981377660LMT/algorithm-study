@@ -14,6 +14,7 @@ function connectSticks(sticks: number[]): number {
     res += sum
     queue.heappush(sum)
   }
+
   return res
 }
 

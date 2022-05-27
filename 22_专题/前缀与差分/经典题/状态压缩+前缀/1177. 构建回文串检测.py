@@ -1,3 +1,5 @@
+from itertools import accumulate
+from operator import xor
 from typing import List
 from collections import Counter
 
@@ -12,6 +14,8 @@ from collections import Counter
 # 'aaaac' => 'aacaa'
 # 'abcd' => 'abba' (4 // 2 = 2)
 # 'abcde' => 'abcba' (5 // 2 = 2)
+
+
 class Solution:
     # 超时，因为我们重复统计Counter(str),没做预处理
     def canMakePaliQueries2(self, s: str, queries: List[List[int]]) -> List[bool]:
@@ -28,13 +32,9 @@ class Solution:
 
     # prefix预处理前缀 一个
     def canMakePaliQueries(self, s: str, queries: List[List[int]]) -> List[bool]:
-        hash = [1 << (ord(char) - ord('a')) for char in s]
-        prefix = [0] * (len(s) + 1)
-        for i in range(1, len(prefix)):
-            prefix[i] = prefix[i - 1] ^ hash[i - 1]
-
-        ones = lambda x: bin(x).count('1')
-        return [ones(prefix[l] ^ prefix[r + 1]) >> 1 <= k for l, r, k in queries]
+        states = [1 << (ord(char) - ord('a')) for char in s]
+        preXor = list(accumulate(states, initial=0, func=xor))  # 因为只关心奇偶，所以可以用xor
+        return [((preXor[l] ^ preXor[r + 1]).bit_count() // 2) <= k for l, r, k in queries]
 
 
 print(
