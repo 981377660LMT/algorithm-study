@@ -28,7 +28,8 @@ function normalizeIndex(index: number, length: number) {
 }
 
 function isNumerical(prop: any) {
-  return typeof prop === 'string' && !isNaN(parseFloat(prop)) && isFinite(parseFloat(prop))
+  if (typeof prop !== 'string') return false
+  return typeof prop === 'string' && !isNaN(parseFloat(prop)) && isFinite(Number(prop))
 }
 
 if (require.main === module) {

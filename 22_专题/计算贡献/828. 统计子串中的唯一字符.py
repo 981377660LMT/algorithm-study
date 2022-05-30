@@ -1,4 +1,5 @@
 from collections import defaultdict
+from itertools import pairwise
 
 # Unique Characters of Every Substring
 
@@ -9,15 +10,14 @@ from collections import defaultdict
 
 class Solution:
     def uniqueLetterString(self, s: str) -> int:
-        indexes = defaultdict(list)
+        indexMap = defaultdict(list)
         for i, char in enumerate(s):
-            indexes[char].append(i)
+            indexMap[char].append(i)
 
-        res = 0
-        for lis in indexes.values():
-            idx = [-1] + lis + [len(s)]
-            for i in range(1, len(idx) - 1):
-                res += (idx[i] - idx[i - 1]) * (idx[i + 1] - idx[i])
+        res, n = 0, len(s)
+        for indexes in indexMap.values():
+            indexes = [-1] + indexes + [n]
+            res += sum((b - a) * (c - b) for a, b, c in zip(indexes, indexes[1:], indexes[2:]))
 
         return res % (int(1e9 + 7))
 

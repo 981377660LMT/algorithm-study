@@ -1,3 +1,16 @@
+function amountPainted(paint: number[][]): number[] {
+  const res: number[] = []
+  const tree = new SegmentTree(Math.max(...paint.flat()))
+  for (let [start, end] of paint) {
+    ;[start, end] = [start + 1, end + 1]
+    const cur = tree.query(start, end - 1)
+    res.push(end - start - cur)
+    tree.update(start, end - 1, 1)
+  }
+
+  return res
+}
+
 class SegmentTree {
   private readonly tree: Uint32Array
   private readonly lazyValue: Uint8Array
@@ -78,19 +91,6 @@ class SegmentTree {
   private checkRange(l: number, r: number): void {
     if (l < 1 || r > this.size) throw new RangeError(`[${l}, ${r}] out of range: [1, ${this.size}]`)
   }
-}
-
-function amountPainted(paint: number[][]): number[] {
-  const res: number[] = []
-  const tree = new SegmentTree(Math.max(...paint.flat()))
-  for (let [start, end] of paint) {
-    ;[start, end] = [start + 1, end + 1]
-    const cur = tree.query(start, end - 1)
-    res.push(end - start - cur)
-    tree.update(start, end - 1, 1)
-  }
-
-  return res
 }
 
 if (require.main === module) {

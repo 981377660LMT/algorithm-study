@@ -19,7 +19,6 @@ const findNextLarge = (nums: number[]): number[] => {
 
   return res
 }
-
 console.log(findNextLarge([1, 3, 4, 2, 5]))
 
 export {}

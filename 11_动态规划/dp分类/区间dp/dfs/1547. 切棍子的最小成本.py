@@ -8,22 +8,24 @@ from functools import lru_cache
 # 每次切割的成本都是当前要切割的棍子的长度
 
 # 2 <= n <= 10^6
+# 1 <= cuts.length <= min(n - 1, 100)
 
-# 1000. 合并石头的最低成本.py
+
 class Solution:
     def minCost(self, n: int, cuts: List[int]) -> int:
-        cuts = [0] + cuts + [n]
-
         @lru_cache(None)
         def dfs(left: int, right: int) -> int:
             if left + 1 >= right:
                 return 0
-            res = 0x7FFFFFFF
-            for i in range(left + 1, right):
+
+            res = int(1e20)
+            for mid in range(left + 1, right):
                 # 这一段的长度cuts[right] - cuts[left]
-                res = min(res, cuts[right] - cuts[left] + dfs(left, i) + dfs(i, right))
+                res = min(res, cuts[right] - cuts[left] + dfs(left, mid) + dfs(mid, right))
             return res
 
+        cuts.sort()
+        cuts = [0] + cuts + [n]
         return dfs(0, len(cuts) - 1)
 
 

@@ -2,11 +2,11 @@ from typing import List
 from functools import lru_cache
 
 # 1 <= n <= 500
-# 估计O(n^3)
+# O(n^3)
+
+
 class Solution:
     def maxCoins(self, nums: List[int]) -> int:
-        nums = [1] + nums + [1]
-
         @lru_cache(None)
         def dfs(left: int, right: int) -> int:
             if left + 1 >= right:
@@ -20,7 +20,9 @@ class Solution:
 
             return res
 
-        return dfs(0, len(nums) - 1)
+        nums = [1] + nums + [1]
+        n = len(nums)
+        return dfs(0, n - 1)
 
 
 print(Solution().maxCoins(nums=[3, 1, 5, 8]))

@@ -48,3 +48,4 @@ class Solution(object):
 
 # python切片 不超时 js超时
 print(Solution().minCut(s="aab"))
+

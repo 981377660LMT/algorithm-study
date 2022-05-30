@@ -4,17 +4,22 @@ from functools import lru_cache
 # 返回多边形进行三角剖分后可以得到的最低分。
 # 3 <= A.length <= 50
 # f(0,n-1) = f(0,j) + f(j,n-1) + A[0]*A[k]*A[n-1]
+
+
 class Solution:
     def minScoreTriangulation(self, values: List[int]) -> int:
         @lru_cache(None)
-        def dfs(l, r) -> int:
+        def dfs(left, right) -> int:
             # 注意此处边界为range(l + 1, r)没有值
-            if l + 1 >= r:
+            if left + 1 >= right:
                 return 0
 
-            res = 0x7FFFFFFF
-            for mid in range(l + 1, r):
-                res = min(res, dfs(l, mid) + dfs(mid, r) + values[l] * values[mid] * values[r])
+            res = int(1e20)
+            for mid in range(left + 1, right):
+                res = min(
+                    res,
+                    dfs(left, mid) + dfs(mid, right) + values[left] * values[mid] * values[right],
+                )
             return res
 
         return dfs(0, len(values) - 1)

@@ -9,7 +9,7 @@
 // 内存消耗：
 // 120.5 MB
 
-import { useDfsOrder } from '../树的性质/dfs序/dfs序'
+import { useDfsOrder } from '../树的性质/dfs序/useDfsOrder'
 // 总共有 1e5 个基因值，基因值 互不相同,每个基因值都用 闭区间 [1, 1e5] 中的一个整数表示
 function smallestMissingValueSubtree(parents: number[], nums: number[]): number[] {
   const n = nums.length

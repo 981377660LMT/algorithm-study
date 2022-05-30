@@ -1,1 +1,0 @@
-dfs(person + 1, state), [person] + dfs(person + 1, state | cand[person])

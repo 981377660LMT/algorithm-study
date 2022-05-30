@@ -13,22 +13,25 @@ from functools import lru_cache
 class Solution:
     def palindromePartition(self, s: str, k: int) -> int:
         @lru_cache(None)
-        def checkPartition(left: int, right: int) -> int:
-            """计算修改多少个字符能变成回文"""
+        def cal(left: int, right: int) -> int:
+            """计算[left,right]修改多少个字符能变成回文"""
             if left >= right:
                 return 0
-            return checkPartition(left + 1, right - 1) + int(s[left] != s[right])
+            return cal(left + 1, right - 1) + int(s[left] != s[right])
 
         @lru_cache(None)
-        def dfs(cur: int, parts: int) -> int:
-            if parts == 1:
-                return checkPartition(cur, len(s) - 1)
+        def dfs(index: int, remain: int) -> int:
+            if index >= n:
+                return int(1e20)
+            if remain == 1:
+                return cal(index, n - 1)
 
-            res = len(s)
-            for splitIndex in range(cur, len(s) - parts + 1):
-                res = min(res, checkPartition(cur, splitIndex) + dfs(splitIndex + 1, parts - 1))
+            res = n
+            for mid in range(index, n):
+                res = min(res, cal(index, mid) + dfs(mid + 1, remain - 1))
             return res
 
+        n = len(s)
         return dfs(0, k)
 
 

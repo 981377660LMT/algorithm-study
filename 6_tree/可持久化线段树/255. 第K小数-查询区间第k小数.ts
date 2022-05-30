@@ -86,7 +86,10 @@ function usePersistentSegmentTree(nums: number[]) {
   }
 }
 
-class Solution {
+/**
+ * @description 查询区间[`left`,`right`]里的第k小数是几
+ */
+class KthTree {
   private readonly tree: ReturnType<typeof usePersistentSegmentTree>
 
   constructor(nums: number[]) {
@@ -97,19 +100,19 @@ class Solution {
    * @description 查询区间[`left`,`right`]里的第k小数是几
    */
   query(left: number, right: number, k: number): number {
-    return this.tree.query(left - 1, right - 1, k)
+    return this.tree.query(left, right, k)
   }
 }
 
 if (require.main === module) {
-  const solution = new Solution([1, 5, 2, 6, 3, 7, 4])
-  console.log(solution.query(2, 5, 3))
-  console.log(solution.query(4, 4, 1))
-  console.log(solution.query(1, 7, 3))
+  const solution = new KthTree([1, 5, 2, 6, 3, 7, 4])
+  console.log(solution.query(2 - 1, 5 - 1, 3))
+  console.log(solution.query(4 - 1, 4 - 1, 1))
+  console.log(solution.query(1 - 1, 7 - 1, 3))
   // 输出样例：
   // 5
   // 6
   // 3
 }
 
-export {}
+export { KthTree }

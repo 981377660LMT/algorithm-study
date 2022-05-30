@@ -11,6 +11,8 @@ from functools import lru_cache
 # https://leetcode.com/problems/remove-boxes/discuss/1402561/C%2B%2BJavaPython-Top-down-DP-Clear-explanation-with-Picture-Clean-and-Concise
 
 # 时间复杂度 O(n^4)
+
+
 class Solution:
     def removeBoxes(self, boxes: List[int]) -> int:
         # dp(l, r, k) denote the maximum points we can get in boxes[l..r] if we have extra k boxes which is the same color with boxes[l] in the left side.

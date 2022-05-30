@@ -4,12 +4,13 @@
 // 主席树找mex的思路
 // 利用权值线段树在每个权值上记录`该数最后出现的下标`，再次基础上加上可持续化，便是主席树了
 
+import { useDfsOrder } from '../../6_tree/树的性质/dfs序/useDfsOrder'
+
 // 执行用时：
 // 1448 ms
 // 内存消耗：
 // 120.5 MB
 
-import { useDfsOrder } from '../树的性质/dfs序/dfs序'
 // 总共有 1e5 个基因值，基因值 互不相同,每个基因值都用 闭区间 [1, 1e5] 中的一个整数表示
 function smallestMissingValueSubtree(parents: number[], nums: number[]): number[] {
   const n = nums.length

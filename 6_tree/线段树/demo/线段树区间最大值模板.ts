@@ -1,4 +1,7 @@
-class SegmentTree {
+/**
+ * @description 线段树区间最大值RMQ
+ */
+class RMQSegmentTree {
   private readonly tree: number[]
   private readonly lazyValue: number[]
   private readonly isLazy: Uint8Array
@@ -93,7 +96,7 @@ if (require.main === module) {
     for (const [index, num] of allNums.entries()) mapping.set(num, index + 1)
 
     const res = Array<number>(positions.length).fill(0)
-    const tree = new SegmentTree(mapping.size + 10)
+    const tree = new RMQSegmentTree(mapping.size + 10)
     for (const [i, [left, size]] of positions.entries()) {
       const right = left + size - 1
 
@@ -115,4 +118,4 @@ if (require.main === module) {
   )
 }
 
-export {}
+export { RMQSegmentTree }

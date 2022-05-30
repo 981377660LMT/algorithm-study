@@ -2,26 +2,28 @@ from functools import lru_cache
 
 MOD = int(1e9 + 7)
 
+# 给定一个字符串 s，返回 s 中不同的非空「回文子序列」个数 。
 # 字符串 S 的长度将在[1, 1000]范围内。
 # 每个字符 S[i] 将会是集合 {'a', 'b', 'c', 'd'} 中的某一个。
 
 
 class Solution:
     def countPalindromicSubsequences(self, s: str) -> int:
-        @lru_cache(maxsize=None)
+        @lru_cache(None)
         def dfs(left: int, right: int) -> int:
-            if left >= right:
+            if left > right:
                 return 0
 
             res = 0
             for char in 'abcd':
-                i, j = s.find(char, left, right), s.rfind(char, left, right)
+                i, j = s.find(char, left, right + 1), s.rfind(char, left, right + 1)
                 if i == -1 or j == -1:
                     continue
-                res += 1 if i == j else 2 + dfs(i + 1, j)
+                res += 1 if i == j else 2 + dfs(i + 1, j - 1)  # 边界两个回文+里面的子序列再带上外面这对
             return res % MOD
 
-        return dfs(0, len(s))
+        n = len(s)
+        return dfs(0, n - 1)
 
 
 print(Solution().countPalindromicSubsequences('bccb'))

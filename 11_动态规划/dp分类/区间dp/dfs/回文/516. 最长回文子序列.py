@@ -3,18 +3,17 @@ from functools import lru_cache
 
 class Solution:
     def longestPalindromeSubseq(self, s: str) -> int:
-        n = len(s)
-
         @lru_cache(None)
-        def dfs(l, r) -> int:
-            if l > r:
+        def dfs(left: int, right: int) -> int:
+            if left > right:
                 return 0
-            if l == r:
+            if left == right:
                 return 1
-            if s[l] == s[r]:
-                return dfs(l + 1, r - 1) + 2
-            return max(dfs(l, r - 1), dfs(l + 1, r))
+            if s[left] == s[right]:
+                return dfs(left + 1, right - 1) + 2
+            return max(dfs(left, right - 1), dfs(left + 1, right))
 
+        n = len(s)
         return dfs(0, n - 1)
 
 

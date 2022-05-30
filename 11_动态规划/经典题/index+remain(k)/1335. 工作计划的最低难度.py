@@ -8,28 +8,29 @@ from functools import lru_cache
 # 1 <= jobDifficulty.length <= 300
 # 1 <= d <= 10
 
-INF = 0x7FFFFFFF
+INF = int(1e20)
 
-
+# 1 <= jobDifficulty.length <= 300
+# 1 <= d <= 10
+# 0 <= jobDifficulty[i] <= 1000
 class Solution:
     def minDifficulty(self, jobDifficulty: List[int], d: int) -> int:
-        n = len(jobDifficulty)
-        if n < d:
-            return -1
-
         @lru_cache(None)
-        def dfs(cur: int, remain: int) -> int:
+        def dfs(index: int, remain: int) -> int:
             if remain == 1:
-                return max(jobDifficulty[cur:])
+                return max(jobDifficulty[index:])
 
             res = INF
             dayMax = -INF
-            for i in range(cur, n - 1):
+            for i in range(index, n - 1):
                 dayMax = max(dayMax, jobDifficulty[i])
                 res = min(res, dayMax + dfs(i + 1, remain - 1))
 
             return res
 
+        n = len(jobDifficulty)
+        if n < d:
+            return -1
         return dfs(0, d)
 
 

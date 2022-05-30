@@ -1,4 +1,5 @@
 from collections import defaultdict
+from itertools import pairwise
 
 
 # 枚举贡献
@@ -16,7 +17,7 @@ class Solution:
             res += n * (n + 1) // 2  # 字符串子串数
             # 减去不含该字符的区间
             indexes = [-1] + indexes + [n]
-            for pre, cur in zip(indexes, indexes[1:]):
+            for pre, cur in pairwise(indexes):
                 count = cur - pre
                 res -= count * (count - 1) // 2
 

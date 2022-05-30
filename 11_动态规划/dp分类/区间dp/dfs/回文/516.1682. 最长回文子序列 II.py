@@ -1,4 +1,5 @@
 from functools import lru_cache
+from string import ascii_lowercase
 
 # 长度为偶数。
 # 除中间的两个字符外，其余任意两个连续字符不相等。
@@ -8,28 +9,25 @@ from functools import lru_cache
 
 class Solution:
     def longestPalindromeSubseq(self, s: str) -> int:
-        # dp(i,j,c)代表i到j之间且两端字母为c时的解，两端字母c只有26种选择，穷举就行。
-        # 复杂度(状态数)：O(26n^2)
         @lru_cache(None)
-        def dfs(l: int, r: int, char: int) -> int:
-            if l >= r:
+        def dfs(left: int, right: int, char: str) -> int:
+            """[left,right]这一段里最长的回文子序列的长度，两端字母为char"""
+            if left >= right:
                 return 0
-            if s[l] != char:
-                return dfs(l + 1, r, char)
-            if s[r] != char:
-                return dfs(l, r - 1, char)
-            return (
-                max(
-                    dfs(l + 1, r - 1, chr(ord('a') + i))
-                    for i in range(26)
-                    if chr(ord('a') + i) != char
-                )
-                # 取到两端的
-                + 2
-            )
+            if s[left] != char:
+                return dfs(left + 1, right, char)
+            if s[right] != char:
+                return dfs(left, right - 1, char)
 
-        # 枚举
-        return max(dfs(0, len(s) - 1, chr(ord('a') + i)) for i in range(26))
+            res = 0
+            for newChar in ascii_lowercase:
+                if newChar == char:
+                    continue
+                res = max(res, dfs(left + 1, right - 1, newChar) + 2)
+            return res
+
+        n = len(s)
+        return max(dfs(0, n - 1, char) for char in ascii_lowercase)
 
 
 print(Solution().longestPalindromeSubseq(s="bbabab"))

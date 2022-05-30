@@ -1,7 +1,5 @@
 from functools import lru_cache
 
-INF = 0x3FFFFFFF
-
 
 class Solution:
     def getMoneyAmount(self, n: int) -> int:
@@ -12,7 +10,7 @@ class Solution:
             if right - left == 1:
                 return left
 
-            res = INF
+            res = int(1e20)
             for i in range(left, right + 1):
                 res = min(res, i + max(dfs(left, i - 1), dfs(i + 1, right)))
             return res

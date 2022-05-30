@@ -15,20 +15,20 @@ class TreeNode:
 # 我们可以选择两个相邻的结点，然后将一枚硬币从其中一个结点移动到另一个结点。(移动可以是从父结点到子结点，或者从子结点移动到父结点。)。
 # 返回使每个结点上只有一枚硬币所需的移动次数。
 
-# 不知道就后序dfs
+
 class Solution:
     def distributeCoins(self, root: TreeNode) -> int:
         self.res = 0
 
         # 以root为顶点的子树的需要多少硬币才平衡，正数表示我有多余，负数表示我需要别人给我硬币。
-        def dfs(root: TreeNode) -> int:
+        def dfs(root: TreeNode | None) -> int:
             if not root:
                 return 0
 
             lMoves = dfs(root.left)
             rMoves = dfs(root.right)
-            self.res += abs(lMoves + rMoves + root.val - 1)
-            return lMoves + rMoves + root.val - 1
+            self.res += abs(lMoves) + abs(rMoves)  # root需要向子节点移动的硬币数
+            return lMoves + rMoves + root.val - 1  # root所在子树需要硬币还是多余硬币
 
         dfs(root)
         return self.res

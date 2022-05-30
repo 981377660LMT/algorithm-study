@@ -10,7 +10,6 @@ class Solution:
     def minMovesToMakePalindrome1(self, s: str) -> int:
         """递归"""
 
-        @lru_cache(None)
         def dfs(s: str) -> int:
             n = len(s)
             if n <= 2:

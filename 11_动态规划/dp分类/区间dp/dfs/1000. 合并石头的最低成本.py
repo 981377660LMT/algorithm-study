@@ -4,7 +4,7 @@ from typing import List
 from functools import lru_cache
 from itertools import accumulate
 
-INF = 0x7FFFFFFF
+INF = int(1e20)
 
 # dfs涉及三个维度的状态 每个状态都要遍历一遍 所以时间复杂度O(n^3)
 # dp[i][j][m] means the cost needed to merge stone[i] ~ stones[j] into m piles.
@@ -14,7 +14,7 @@ INF = 0x7FFFFFFF
 # dp[i][j][1] = dp[i][j][k] + stonesNumber[i][j]
 # dp[i][j][m] = min(dp[i][mid][1] + dp[mid + 1][j][m - 1])
 
-
+# todo
 class Solution:
     def mergeStones(self, stones: List[int], k: int) -> int:
         prefix = [0] + list(accumulate(stones))
@@ -28,7 +28,7 @@ class Solution:
             if targetPile == 1:
                 return dfs(left, right, k) + prefix[right + 1] - prefix[left]
 
-            res = 0x7FFFFFFF
+            res = INF
             for mid in range(left, right, k - 1):
                 res = min(res, dfs(left, mid, 1) + dfs(mid + 1, right, targetPile - 1))
             return res
