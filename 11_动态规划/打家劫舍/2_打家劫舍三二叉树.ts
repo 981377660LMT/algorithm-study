@@ -37,7 +37,7 @@ const bt: TreeNode = {
 const rob = (root: TreeNode): number => {
   const dfs = (root: TreeNode | null): [number, number] => {
     // res[0]表示不包括根节点的最大值，res[1]为包含根节点的最大值
-    const res = [0, 0] as [number, number]
+    const res: [drop: number, select: number] = [0, 0]
     if (!root) return res
     const left = dfs(root.left)
     const right = dfs(root.right)

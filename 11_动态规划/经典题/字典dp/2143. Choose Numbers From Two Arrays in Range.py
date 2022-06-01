@@ -7,7 +7,6 @@ class Solution:
     def countSubranges(self, nums1: list[int], nums2: list[int]) -> int:
         n = len(nums1)
         dp = [defaultdict(int) for _ in range(n)]
-
         res = 0
         for i in range(n):
             dp[i][nums1[i]] += 1

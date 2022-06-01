@@ -20,16 +20,16 @@ class Solution:
 
 class Solution2:
     def solve(self, nums):
-        s = set([0])
+        dp = set([0])
         for num in nums:
-            cur = set()
-            for pre in s:
-                cur.add(pre + num)
-                cur.add(pre - num)
-            s = cur
+            ndp = set()
+            for pre in dp:
+                ndp.add(pre + num)
+                ndp.add(pre - num)
+            dp = ndp
 
         res = int(1e20)
-        for num in s:
+        for num in dp:
             if num >= 0:
                 res = min(res, num)
         return res

@@ -16,7 +16,7 @@ class Solution:
             if i1 == len(s):
                 return 0
 
-            # 选不选当前位置配对
+            # 选不选当前位置配对 jump or not
             if s[i1] == t[i2]:
                 return (dfs(i1 + 1, i2 + 1) + dfs(i1 + 1, i2)) % MOD
             return dfs(i1 + 1, i2) % MOD

@@ -1,4 +1,4 @@
-import { bisectLeft } from '../../../9_排序和搜索/二分/7_二分搜索寻找最左插入位置'
+import { bisectLeft } from '../../../9_排序和搜索/二分/bisect'
 
 /**
  * @param {number[]} target 1 <= target.length, arr.length <= 10**5 且 target 数组元素各不相同

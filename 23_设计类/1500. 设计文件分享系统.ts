@@ -1,4 +1,4 @@
-import { MinHeap } from '../2_queue/minheap'
+import { MinHeap } from '../8_heap/MinHeap'
 
 class FileSharing {
   private chunkToUser: Map<number, Set<number>>
@@ -19,7 +19,7 @@ class FileSharing {
   // 系统应为其注册一个独有的 ID。这个独有的 ID 应当被相应的用户使用一次，
   join(ownedChunks: number[]): number {
     let userId = this.nextUserId
-    if (this.releasedUserId.size > 0) userId = this.releasedUserId.shift()!
+    if (this.releasedUserId.size > 0) userId = this.releasedUserId.heappop()!
     else this.nextUserId++
 
     this.userToChunk.set(userId, new Set(ownedChunks))
@@ -32,7 +32,7 @@ class FileSharing {
 
   // 当用户离开系统时，其 ID 应可以被（后续新注册的用户）再次使用
   leave(userID: number): void {
-    this.releasedUserId.push(userID)
+    this.releasedUserId.heappush(userID)
     const chunks = this.userToChunk.get(userID) || []
     chunks.forEach(chunk => {
       this.chunkToUser.get(chunk)?.delete(userID)

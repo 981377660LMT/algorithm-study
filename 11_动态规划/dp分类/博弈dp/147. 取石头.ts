@@ -23,3 +23,4 @@ console.log(canWinStonePicking2(2))
 console.log(canWinStonePicking2(3))
 console.log(canWinStonePicking2(4))
 console.log(canWinStonePicking2(50))
+export {}

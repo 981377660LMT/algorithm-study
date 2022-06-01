@@ -4,7 +4,6 @@ from functools import lru_cache
 # 我们所知道的信息只有：数组中所有整数都在 [1, k] 之间，且数组中的数字都没有前导 0 。
 # 1 <= s.length <= 10^5.
 
-# lru 超时 改用手动memo ？？？
 
 MOD = int(1e9 + 7)
 
@@ -12,23 +11,23 @@ MOD = int(1e9 + 7)
 class Solution:
     def numberOfArrays(self, s: str, k: int) -> int:
         # 以i为字符串起点的方案数
-        @lru_cache(typed=False, maxsize=len(s))
-        def dfs(i):
-            if i == len(s):
+        @lru_cache
+        def dfs(index: int):
+            if index == len(s):
                 return 1
-            if s[i] == '0':
+            if s[index] == '0':
                 return 0
 
             res = 0
-            for j in range(i, len(s)):
-                if int(s[i : j + 1]) > k:
+            for j in range(index, len(s)):
+                if int(s[index : j + 1]) > k:
                     break
-                res += dfs(j + 1) % MOD
+                res += dfs(j + 1)
+                res %= MOD
             return res
 
         res = dfs(0)
         dfs.cache_clear()
-
         return res % MOD
 
 

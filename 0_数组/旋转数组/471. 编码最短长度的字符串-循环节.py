@@ -19,7 +19,7 @@ class Solution:
         if len(s) <= 4:
             return res
 
-        # lc459 寻找是否有循环节
+        # lc459 给定一个非空的字符串 s ，检查是否可以通过由它的一个子串重复多次构成。
         period = (s + s).find(s, 1, -1)
 
         # 有循环节

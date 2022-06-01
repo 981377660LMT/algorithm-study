@@ -1,9 +1,9 @@
 /**
  * @description 返回值是按顺序从小到大的排列
  */
-function* permutations<T extends ArrayLike<any>>(sequnce: T, select?: number): Generator<T[]> {
-  select = select ?? sequnce.length
-  yield* bt([], Array(sequnce.length).fill(false))
+function* permutations<T extends ArrayLike<any>>(sequence: T, select?: number): Generator<T[]> {
+  select = select ?? sequence.length
+  yield* bt([], Array(sequence.length).fill(false))
 
   function* bt(path: T[], visited: boolean[]): Generator<T[]> {
     if (path.length === select) {
@@ -11,10 +11,10 @@ function* permutations<T extends ArrayLike<any>>(sequnce: T, select?: number): G
       return
     }
 
-    for (let i = 0; i < sequnce.length; i++) {
+    for (let i = 0; i < sequence.length; i++) {
       if (visited[i]) continue
       visited[i] = true
-      path.push(sequnce[i])
+      path.push(sequence[i])
       yield* bt(path, visited)
       path.pop()
       visited[i] = false

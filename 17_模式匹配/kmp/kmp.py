@@ -23,6 +23,6 @@ def getNext(needle: str) -> List[int]:
 
 
 if __name__ == '__main__':
-    next = getNext('aabaabaabaab')
+    next = getNext('aabaabaabaab')  # 模式串的next数组
     assert next == [0, 1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 

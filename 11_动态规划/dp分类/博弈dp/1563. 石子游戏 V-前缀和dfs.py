@@ -13,7 +13,7 @@ class Solution:
             if left + 1 >= right:
                 return 0
 
-            res = -0x3FFFFFFF
+            res = -int(1e20)
             for i in range(left + 1, right):
                 leftSum, rightSum = preSum[i] - preSum[left], preSum[right] - preSum[i]
                 if leftSum > rightSum:

@@ -9,9 +9,12 @@
  */
 function soupServings(n: number): number {
   // 先自己写用例递增，去计算哪个数 的结果会大于0.999999
+  // 当 N >= 500 * 25 时，所求概率已经大于 0.999999 了
   if (n >= 5000) return 1
 
-  const dfs = (A: number, B: number, memo = new Map()): number => {
+  return dfs(n, n)
+
+  function dfs(A: number, B: number, memo = new Map()): number {
     if (A <= 0 && B <= 0) return 0.5
     if (A <= 0) return 1
     if (B <= 0) return 0
@@ -25,11 +28,10 @@ function soupServings(n: number): number {
         dfs(A - 75, B - 25, memo) +
         dfs(A - 50, B - 50, memo) +
         dfs(A - 25, B - 75, memo))
+
     memo.set(key, res)
     return res
   }
-
-  return dfs(n, n)
 }
 
 console.log(soupServings(50))

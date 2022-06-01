@@ -9,41 +9,39 @@ for (const r of [0, 1, 2]) {
 // 要优化就要把dfs优化成dp 这样常数会小一些
 function getMaximumNumber(moles: number[][]): number {
   const times = new Set<number>([0])
-  const record = new Map<number, Set<number>>()
+  const indexMap = new Map<number, Set<number>>()
   for (const [t, r, c] of moles) {
     times.add(t)
-    !record.has(t) && record.set(t, new Set())
-    record.get(t)!.add(r * 3 + c)
+    !indexMap.has(t) && indexMap.set(t, new Set())
+    indexMap.get(t)!.add(r * 3 + c)
   }
 
   const allTimes = [...times].sort((a, b) => a - b)
   const n = allTimes.length
 
-  // 也可以Int32Array
-  const dp = Array.from({ length: n }, () => [
-    [-Infinity, -Infinity, -Infinity],
-    [-Infinity, -Infinity, -Infinity],
-    [-Infinity, -Infinity, -Infinity],
-  ])
+  let dp = Array.from({ length: 3 }, () => new Int32Array(3).fill(-(1 << 31)))
 
   // i=0 情况
-  dp[0][1][1] = Number(record.has(allTimes[0]) && record.get(allTimes[0])!.has(4))
+  dp[1][1] = Number(indexMap.has(allTimes[0]) && indexMap.get(allTimes[0])!.has(4))
 
   for (let i = 1; i < n; i++) {
+    const ndp = Array.from({ length: 3 }, () => new Int32Array(3).fill(-(1 << 31)))
     const curTime = allTimes[i]
     const preTime = allTimes[i - 1]
     const diff = curTime - preTime
     for (const [r, c] of POS) {
       for (const [preR, preC] of POS) {
-        const cur = Number(record.has(curTime) && record.get(curTime)!.has(r * 3 + c))
+        const score = Number(indexMap.has(curTime) && indexMap.get(curTime)!.has(r * 3 + c))
         if (Math.abs(r - preR) + Math.abs(c - preC) <= diff) {
-          dp[i][r][c] = Math.max(dp[i][r][c], dp[i - 1][preR][preC] + cur)
+          ndp[r][c] = Math.max(ndp[r][c], dp[preR][preC] + score)
         }
       }
     }
+
+    dp = ndp
   }
 
-  return Math.max(...dp[n - 1].flat())
+  return Math.max(...dp.map(row => Math.max(...row)))
 }
 
 // 1

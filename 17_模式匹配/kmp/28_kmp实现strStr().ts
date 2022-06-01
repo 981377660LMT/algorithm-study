@@ -1,6 +1,6 @@
 /**
- * @param {string} pattern
- * @param {string} needle
+ * @param {string} long
+ * @param {string} short
  * @return {number}
  * @description 在 pattern 字符串中找出 needle 字符串出现的第一个位置（下标从 0 开始）。
  * 如果不存在，则返回  -1 。如果needle是空字符串，则返回0。
@@ -8,22 +8,22 @@
  * v8引擎中,indexOf使用了kmp和bm两种算法,在主串长度小于7时使用kmp,大于7的时候使用bm
  * @summary kmp比暴力解法好
  */
-function strStr(pattern: string, needle: string): number {
-  if (needle.length === 0) return 0
-  if (pattern.length < needle.length) return -1
+function strStr(long: string, short: string): number {
+  if (short.length === 0) return 0
+  if (long.length < short.length) return -1
 
-  const next = getNext(needle)
+  const next = getNext(short)
   let hitJ = 0
-  for (let i = 0; i < pattern.length; i++) {
-    while (hitJ > 0 && pattern[i] !== needle[hitJ]) {
+  for (let i = 0; i < long.length; i++) {
+    while (hitJ > 0 && long[i] !== short[hitJ]) {
       hitJ = next[hitJ - 1]
     }
 
-    if (pattern[i] === needle[hitJ]) hitJ++
+    if (long[i] === short[hitJ]) hitJ++
 
     // 找到头了
-    if (hitJ === needle.length) {
-      return i - needle.length + 1
+    if (hitJ === short.length) {
+      return i - short.length + 1
     }
   }
 

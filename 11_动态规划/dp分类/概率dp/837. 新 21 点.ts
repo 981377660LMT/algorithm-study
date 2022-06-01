@@ -8,16 +8,18 @@
  * @summary dp[x] 为她手上牌面为x时，能获胜的概率，
  * 当x>=K时，爱丽丝会停止抽牌，这个时候游戏已经结束了，她是赢是输也已经确定了，所以此时赢的概率要么1，要么0
  * 当x<K时 dp[x]=1/w * dp[x+1]+ 1/w * dp[x+2] + 1/w * dp[x+3]...+ 1/w * dp[x+w]
+ * @description O(n)
  */
-const new21Game = function (n: number, k: number, maxPts: number): number {
+function new21Game(n: number, k: number, maxPts: number): number {
   // 爱丽丝停止抽牌时，她可能达到的最大牌面是 K+W-1
-  const dp = Array(k + maxPts - 1 + 1).fill(0)
+  const dp = new Float32Array(k + maxPts - 1 + 10)
   let sum = 0
 
   for (let i = k; i < k + maxPts; i++) {
     dp[i] = i <= n ? 1 : 0
     sum += dp[i]
   }
+
   for (let i = k - 1; i >= 0; i--) {
     dp[i] = sum / maxPts
     sum = sum - dp[i + maxPts] + dp[i]
@@ -28,3 +30,5 @@ const new21Game = function (n: number, k: number, maxPts: number): number {
 
 console.log(new21Game(6, 1, 10))
 // 输出：0.60000
+
+export {}

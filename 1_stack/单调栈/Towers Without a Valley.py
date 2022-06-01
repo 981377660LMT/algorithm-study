@@ -3,7 +3,7 @@
 # Return the maximum possible sum of A.
 
 
-# 山脉数组
+# 数组取最大和时 肯定是山脉数组
 
 from typing import List
 
@@ -31,10 +31,10 @@ class Solution:
             return res
 
         # 每个位置作为山脉顶峰
-        res1 = getSumAsPeek(nums)
-        res2 = getSumAsPeek(nums[::-1])[::-1]
+        pre = getSumAsPeek(nums)
+        suf = getSumAsPeek(nums[::-1])[::-1]
         # print(left, right)
-        return max(left + right - mid for left, right, mid in zip(res1, res2, nums))
+        return max(left + right - mid for left, right, mid in zip(pre, suf, nums))
 
 
 print(Solution().solve(nums=[10, 6, 8]))

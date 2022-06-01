@@ -3,10 +3,7 @@ https://github.com/harttle/contest.js
 
 ## todo
 
-- 组件参考 elementUI
-- code up 高频题
-
-JS,TS 刷题时大数问题可用 BigInt 或者求余解决
+JS,TS 大数问题可用 BigInt 或者求余解决
 遇到 1e9+7 的题目最好全部用 BigInt，避免产生溢出问题
 
 如果数组长度不用变化，则可使用 **new TypedArray(分配连续内存的数组，长度固定)**

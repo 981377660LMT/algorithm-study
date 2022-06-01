@@ -1,26 +1,28 @@
+/**
+ *
+ * @param costs 每个房子粉刷成不同颜色的花费是以一个 n x k 的正整数矩阵 costs 来表示的
+ * 每个房子可以被粉刷成红色、蓝色或者绿色这三种颜色中的一种，
+ * 你需要粉刷所有的房子并且使其相邻的两个房子颜色不能相同。
+ *
+ */
 function minCostII(costs: number[][]): number {
-  const n = costs.length
-  const k = costs[0].length
-  const dp = Array.from<number, number[]>({ length: n }, () => Array(k).fill(0))
-  dp[0] = costs[0]
+  const [row, col] = [costs.length, costs[0].length]
+  let dp = new Uint16Array(costs[0])
 
-  for (let i = 1; i < n; i++) {
-    for (let j = 0; j < k; j++) {
-      dp[i][j] =
-        Math.min(
-          Math.min.apply(null, dp[i - 1].slice(0, j)),
-          Math.min.apply(null, dp[i - 1].slice(j + 1))
-        ) + costs[i][j]
+  for (let r = 1; r < row; r++) {
+    const ndp = new Uint16Array(col).fill(-1) // 相当于65535 (1<<16)-1
+
+    for (let preC = 0; preC < col; preC++) {
+      for (let curC = 0; curC < col; curC++) {
+        if (preC === curC) continue
+        ndp[curC] = Math.min(ndp[curC], dp[preC] + costs[r][curC])
+      }
     }
+
+    dp = ndp
   }
 
-  return Math.min.apply(null, dp[n - 1])
+  return Math.min(...dp)
 }
 
 export {}
-console.log(
-  minCostII([
-    [1, 3],
-    [2, 4],
-  ])
-)

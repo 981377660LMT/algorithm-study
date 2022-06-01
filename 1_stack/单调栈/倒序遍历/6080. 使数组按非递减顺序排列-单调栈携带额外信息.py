@@ -34,4 +34,5 @@ class Solution:
 
 
 print(Solution().totalSteps([7, 14, 4, 14, 13, 2, 6, 13]))  # 3
+print(Solution().totalSteps([5, 3, 4, 4, 7, 3, 6, 11, 8, 5, 11]))  # 3
 

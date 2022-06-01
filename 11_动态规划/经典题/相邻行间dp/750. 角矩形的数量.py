@@ -10,16 +10,14 @@ class Solution:
         row, col = len(grid), len(grid[0])
         res = 0
 
-        # 每一行任意2个为1的点位，与上面的行们可以组成矩阵的个数
-        # eg: dp[1][3]=1
-        dp = [[0] * col for _ in range(col)]
+        dp = [[0] * col for _ in range(col)]  # dp[i][j] 表示以 i, j 为左、右下角的角矩形的数量
         for r in range(row):
-            for c in range(col):
-                if grid[r][c] == 1:
-                    for rightC in range(c + 1, col):
+            for leftC in range(col):
+                if grid[r][leftC] == 1:
+                    for rightC in range(leftC + 1, col):
                         if grid[r][rightC] == 1:
-                            res += dp[c][rightC]
-                            dp[c][rightC] += 1
+                            res += dp[leftC][rightC]
+                            dp[leftC][rightC] += 1
 
         return res
 

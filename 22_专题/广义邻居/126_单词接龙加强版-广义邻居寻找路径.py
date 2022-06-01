@@ -1,19 +1,24 @@
 from collections import defaultdict, deque
 from typing import List
 
-INF = 0x7FFFFFFF
+INF = int(1e20)
+
+
+def genNexts(word: str):
+    yield from (word[:i] + '*' + word[i + 1 :] for i in range(len(word)))
 
 
 class Solution:
     def findLadders(self, beginWord: str, endWord: str, wordList: List[str]) -> List[List[str]]:
         dist = defaultdict(lambda: INF)
         dist[beginWord] = 0
-        adjMap = defaultdict(list)
+        adjMap = defaultdict(set)
         res = []
 
         for word in wordList:
-            for i in range(len(word)):
-                adjMap[word[:i] + "*" + word[i + 1 :]].append(word)
+            for mid in genNexts(word):
+                adjMap[mid].add(word)
+
         # queue直接存路径
         queue = deque([[beginWord]])
 
@@ -23,8 +28,8 @@ class Solution:
             if cur == endWord:
                 res.append(path[:])
             else:
-                for i in range(len(cur)):
-                    for next in adjMap[cur[:i] + "*" + cur[i + 1 :]]:
+                for mid in genNexts(cur):
+                    for next in adjMap[mid]:
                         # 因为要找所有的路，所以用等于
                         if dist[cur] + 1 <= dist[next]:
                             queue.append(path + [next])

@@ -16,7 +16,7 @@ class Solution:
         if len(s) <= 4:
             return res
 
-        # lc459 寻找是否有循环节
+        # lc459 寻找是否存在循环节
         loc = (s + s).find(s, 1, -1)
 
         # 有循环节

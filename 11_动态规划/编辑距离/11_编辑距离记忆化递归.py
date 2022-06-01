@@ -14,7 +14,7 @@ class Solution:
             replace = 1 + self.minDistance1(word1[1:], word2[1:])
             return min(inserted, deleted, replace)
 
-    # 由于字符串切片是 O(n)所以改成用了索引号。
+    # 由于字符串切片是 O(n/1000)所以改成用了索引号。
     def minDistance2(self, word1: str, word2: str) -> int:
         if not word1 or not word2:
             return len(word1) + len(word2)

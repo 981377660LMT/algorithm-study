@@ -1,7 +1,7 @@
-class File {
+class FileNode {
   isFile: boolean
   content: string
-  children: Map<string, File>
+  children: Map<string, FileNode>
   constructor(content: string) {
     this.isFile = false
     this.content = content
@@ -10,11 +10,7 @@ class File {
 }
 
 class FileSystem {
-  private root: File
-
-  constructor() {
-    this.root = new File('')
-  }
+  private readonly root = new FileNode('')
 
   // 如果它是一个文件的路径，那么函数返回一个列表，仅包含这个文件的名字。
   // 如果它是一个文件夹的的路径，那么返回该 文件夹内 的所有文件和子文件夹的名字。
@@ -51,7 +47,7 @@ class FileSystem {
     let root = this.root
     const pathList = filePath.split('/').filter(f => f !== '')
     for (const name of pathList) {
-      if (!root.children.has(name)) root.children.set(name, new File(''))
+      if (!root.children.has(name)) root.children.set(name, new FileNode(''))
       root = root.children.get(name)!
     }
     return root

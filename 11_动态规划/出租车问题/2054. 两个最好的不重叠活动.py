@@ -12,13 +12,13 @@ class Solution:
     def maxTwoEvents(self, events: List[List[int]]) -> int:
         events.sort()
         pq: List[Tuple[int, int]] = []
-        res, pre_max = 0, 0
+        res, preMax = 0, 0
         for start, end, val in events:
             heappush(pq, (end, val))
             while pq and pq[0][0] < start:
                 _, pre_val = heappop(pq)
-                pre_max = max(pre_max, pre_val)
-            res = max(res, pre_max + val)
+                preMax = max(preMax, pre_val)
+            res = max(res, preMax + val)
         return res
 
 

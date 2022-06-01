@@ -8,7 +8,7 @@ from functools import lru_cache
 # 1 <= people.length <= 60
 # 你规划了一份需求的技能清单 req_skills，并打算从备选人员名单 people 中选出些人组成一个「必要团队」
 # 请你返回 任一 规模最小的必要团队，团队成员用人员编号表示。
-INF = 0x7FFFFFFF
+INF = int(1e20)
 
 
 class Solution:
@@ -27,18 +27,18 @@ class Solution:
         target = (1 << n) - 1
 
         @lru_cache(None)
-        def dfs(person: int, state: int) -> List:
+        def dfs(index: int, state: int) -> List:
             # 不需要人
             if state == target:
                 return []
 
             # impossible
-            if person >= len(people):
+            if index >= len(people):
                 return [0] * 100
 
             # 要不要当前的人
             return min(
-                dfs(person + 1, state), [person] + dfs(person + 1, state | cand[person]), key=len
+                dfs(index + 1, state), [index] + dfs(index + 1, state | cand[index]), key=len
             )
 
         return dfs(0, 0)

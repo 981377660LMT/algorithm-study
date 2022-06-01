@@ -1,6 +1,6 @@
-import { useUnionFindMap } from '../useUnionFind'
-
 // 怎么合并？讨论每个数的广义邻居是否在原数组中存在即可
+
+import { useUnionFindMap } from '../../14_并查集/useUnionFind'
 
 // 增: state | (1 << i)
 // 删：a & 1 << i 条件下 state ^ (1 << i) ；增和删可以统一为state ^ (1 << i)

@@ -2,27 +2,29 @@ from typing import List, Tuple
 from functools import lru_cache
 
 # 1 <= piles[i] <= 7
+
+
 class Solution:
     def nimGame(self, piles: List[int]) -> bool:
-        n = len(piles)
-
         @lru_cache(None)
         def dfs(nums: Tuple[int]) -> bool:
-            if nums == tuple([0] * n):
+            if nums == END:
                 return False
 
-            lis = list(nums)
-            for i, count in enumerate(lis):
+            counter = list(nums)
+            for i, count in enumerate(counter):
                 if count == 0:
                     continue
                 for remain in range(count):
-                    lis[i] = remain
-                    if not dfs(tuple(lis)):
+                    counter[i] = remain
+                    if not dfs(tuple(counter)):
                         return True
-                    lis[i] = count
+                    counter[i] = count
 
             return False
 
+        n = len(piles)
+        END = tuple([0] * n)
         return dfs(tuple(piles))
 
 

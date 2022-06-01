@@ -2,11 +2,11 @@
 // 每个栅栏柱可以用其中 一种 颜色进行上色。
 // 相邻的栅栏柱 最多连续两个 颜色相同。
 
-//  拆成2种情况
+//  划分子集
 // （1）i和i-1不同，则i有k-1种情况
-// （2）i和i-1相同，则这2根与i-2不同，
+// （2）i和i-1相同，则这2根与i-2不能同，
 function numWays(n: number, k: number): number {
-  const dp = Array<number>(n + 1).fill(0)
+  const dp = new Uint32Array(n + 1)
   dp[1] = k
   dp[2] = k ** 2
 
@@ -14,7 +14,7 @@ function numWays(n: number, k: number): number {
     dp[i] = dp[i - 2] * (k - 1) + dp[i - 1] * (k - 1)
   }
 
-  return dp[n]
+  return dp.at(-1)!
 }
 
 console.log(numWays(3, 2))
