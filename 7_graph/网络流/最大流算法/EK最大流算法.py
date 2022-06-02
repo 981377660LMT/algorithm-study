@@ -64,7 +64,7 @@ class MaxFlow:
         for cur, mapping in graph.items():
             for next, weight in mapping.items():
                 rGraph[cur][next] = weight
-                rGraph[next][cur] = 0
+                rGraph[next].setdefault(cur, 0)  # 注意这里的setdefault 可能存在重边
         return rGraph
 
     def _findAugmentingPath(self, graph: AdjMap, start: int, target: int) -> List[int]:
@@ -119,3 +119,14 @@ if __name__ == '__main__':
 
     maxFlow2 = MaxFlow(adjMap2, start=0, target=5)
     assert maxFlow2.getResult() == 12
+
+    n, m, start, end = map(int, input().split())
+    adjMap = defaultdict(lambda: defaultdict(int))
+
+    # 从点 u 到点 v 存在一条有向边，容量为 c。
+    for _ in range(m):
+        u, v, c = map(int, input().split())
+        adjMap[u][v] += c
+
+    maxFlow = MaxFlow(adjMap, start=start, target=end)
+    print(maxFlow.getResult())
