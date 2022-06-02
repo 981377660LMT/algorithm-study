@@ -11,20 +11,19 @@ from typing import List, Tuple
 class Solution:
     def maxHappyGroups(self, batchSize: int, groups: List[int]) -> int:
         @lru_cache(None)
-        def bt(cur: int, mods: Tuple[int, ...]) -> int:
-            res, counter = 0, list(mods)
-            for m in range(batchSize):
-                if counter[m] == 0:
+        def dfs(remain: int, mods: Tuple[int, ...]) -> int:
+            """上一组剩下的个数 各个类型的组"""
+            res = 0
+            for cur in range(batchSize):
+                if mods[cur] == 0:  # 没有这个类型的组了
                     continue
-                counter[m] -= 1
-                res = max(res, int(cur == 0) + bt((cur - m) % batchSize, tuple(counter)))
-                counter[m] += 1
+                nextMods = mods[:cur] + (mods[cur] - 1,) + mods[cur + 1 :]
+                res = max(res, int(remain == 0) + dfs((remain - cur) % batchSize, tuple(nextMods)))
 
             return res
 
-        mods = [0] * batchSize
+        modGroup = [0] * batchSize
         for g in groups:
-            mods[g % batchSize] += 1
-
-        return bt(0, tuple(mods))
+            modGroup[g % batchSize] += 1
+        return dfs(0, tuple(modGroup))
 

@@ -14,7 +14,7 @@ class Solution:
 
         @lru_cache(None)
         def dfs(row: int, col: int, diff: int) -> bool:
-            if diff < 0:
+            if diff < 0:  # !不合题意
                 return False
             if (row, col) == (ROW - 1, COL - 1):
                 return diff == 0

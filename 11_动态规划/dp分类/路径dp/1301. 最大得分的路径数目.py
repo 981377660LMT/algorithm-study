@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import List
 
 # 你从数组最右下方的字符 'S' 出发。
@@ -9,11 +10,46 @@ from typing import List
 # dp[x][y][0] is the maximum value to this cell,
 # dp[x][y][1] is the number of paths.
 MOD = int(1e9 + 7)
-INF = 0x7FFFFFFF
+INF = int(1e20)
+
+DIR3 = ((-1, 0), (0, -1), (-1, -1))
 
 
 class Solution:
     def pathsWithMaxScore(self, board: List[str]) -> List[int]:
+        @lru_cache(None)
+        def dfs(row: int, col: int) -> List[int]:
+            """第一个整数是 「得分」 的最大值，第二个整数是得到最大得分的方案数"""
+            if board[row][col] == 'X':
+                return [-INF, 0]
+            if (row, col) == (0, 0):
+                return [0, 1]
+
+            max_, count = -int(1e20), 0
+            for dr, dc in DIR3:
+                nr, nc = row + dr, col + dc
+                if 0 <= nr < ROW and 0 <= nc < COL:
+                    nextMax, nextCount = dfs(nr, nc)
+                    maxCand = grid[row][col] + nextMax
+                    if max_ < maxCand:
+                        max_, count = maxCand, nextCount
+                    elif max_ == maxCand:
+                        count += nextCount
+                        count %= MOD
+
+            return [max_, count]
+
+        grid = [[0] * len(board[0]) for _ in range(len(board))]
+        for r in range(len(board)):
+            for c in range(len(board[0])):
+                grid[r][c] = int(board[r][c]) if board[r][c].isdigit() else 0
+
+        ROW, COL = len(board), len(board[0])
+        res = dfs(ROW - 1, COL - 1)
+        dfs.cache_clear()
+        return res if res[0] >= 0 else [0, 0]
+
+    def pathsWithMaxScore2(self, board: List[str]) -> List[int]:
         n = len(board)
         dp = [[[-INF, 0] for _ in range(n + 1)] for _ in range(n + 1)]
         dp[n - 1][n - 1] = [0, 1]

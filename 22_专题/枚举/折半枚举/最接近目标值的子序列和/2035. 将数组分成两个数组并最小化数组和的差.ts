@@ -39,8 +39,8 @@
 function minimumDifference(nums: number[]): number {
   nums = nums.map(num => num * 2)
   const midIndex = nums.length / 2
-  const leftSubArraySum = getSubArraySumFrom(nums.slice(0, midIndex))
-  const rightSubArraySum = getSubArraySumFrom(nums.slice(midIndex))
+  const leftSubArraySum = getSubsetSum(nums.slice(0, midIndex))
+  const rightSubArraySum = getSubsetSum(nums.slice(midIndex))
   const target = nums.reduce((pre, cur) => pre + cur, 0) / 2
 
   let res = Infinity
@@ -56,7 +56,7 @@ function minimumDifference(nums: number[]): number {
    * @description 计算nums的子序列和 下标表示由多少个数组成
    * @summary 时间复杂度O(2^n)
    */
-  function getSubArraySumFrom(nums: number[]): number[][] {
+  function getSubsetSum(nums: number[]): number[][] {
     const n = nums.length
     const res = Array.from<number, number[]>({ length: nums.length + 1 }, () => [])
     for (let i = 0; i < 1 << n; i++) {
@@ -89,7 +89,6 @@ function minimumDifference(nums: number[]): number {
    * 单调不减的数组nums1和nums2分别找到两个数，其和与target的差最小 返回这个最小差值
    */
   function twoSum(nums1: number[], nums2: number[], target: number): number {
-    console.log(nums1, nums2, target)
     let l = 0
     let r = nums2.length - 1
     let res = Infinity
@@ -109,3 +108,4 @@ function minimumDifference(nums: number[]): number {
 // console.log(minimumDifference([3, 9, 7, 3]))
 // console.log(minimumDifference([-36, 36]))
 console.log(minimumDifference([2, -1, 0, 4, -2, -9]))
+export {}

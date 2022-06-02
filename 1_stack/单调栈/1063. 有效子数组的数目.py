@@ -8,7 +8,7 @@ from 每个元素作为最值的影响范围 import getRange
 
 class Solution:
     def validSubarrays(self, nums: List[int]) -> int:
-        ranges = getRange(nums, isMax=False)
+        ranges = getRange(nums, isMax=False, isLeftStrict=False, isRightStrict=False)
         return sum(right - i + 1 for i, (_, right) in enumerate(ranges))
 
 

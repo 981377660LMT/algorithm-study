@@ -3,7 +3,7 @@
  * @summary 时间复杂度O(2^n) 小于取所有子集的复杂度O(2^n*n)
  * 实在看不懂，也可用dfs来做
  */
-function getSubArraySum(nums: number[]): number[] {
+function getSubsetSum(nums: number[]): number[] {
   const n = nums.length
   const res = Array<number>(1 << n).fill(0)
 
@@ -18,7 +18,7 @@ function getSubArraySum(nums: number[]): number[] {
   return res
 }
 
-function getSubArraySum2(nums: number[]): number[] {
+function getSubsetSum2(nums: number[]): number[] {
   const n = nums.length
   const res = Array<number>(1 << n).fill(0)
   dfs(0, 0, 0)
@@ -36,8 +36,8 @@ function getSubArraySum2(nums: number[]): number[] {
 }
 
 if (require.main === module) {
-  console.log(getSubArraySum([1, 2]))
-  console.log(getSubArraySum2([1, 2]))
+  console.log(getSubsetSum([1, 2]))
+  console.log(getSubsetSum2([1, 2]))
 }
 
-export { getSubArraySum }
+export { getSubsetSum }

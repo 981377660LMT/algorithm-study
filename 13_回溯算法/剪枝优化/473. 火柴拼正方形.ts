@@ -12,9 +12,9 @@ var makesquare = function (matchsticks: number[]): boolean {
 
   const target = sum / 4
   const group = [0, 0, 0, 0]
-  matchsticks.reverse() // 降序排序，优先选择权值大的可以减少搜索树的规模。
+  matchsticks.sort((a, b) => b - a) // 降序排序，优先选择权值大的可以减少搜索树的规模。
 
-  const bt = (index: number): boolean => {
+  function bt(index: number): boolean {
     if (index === matchsticks.length) return group.every(v => v === target)
     for (let j = 0; j < 4; j++) {
       if (matchsticks[index] + group[j] <= target) {
@@ -25,6 +25,7 @@ var makesquare = function (matchsticks: number[]): boolean {
     }
     return false
   }
+
   return bt(0)
 }
 

@@ -17,6 +17,7 @@ class Solution:
                 b += 1
             else:
                 dp[i] = min(dp[i - 1] + 1, b)
+
         # 删这个a或删前面所有的b
         return dp[-1]
 

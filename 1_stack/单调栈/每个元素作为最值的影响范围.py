@@ -3,11 +3,11 @@ from typing import List, Tuple
 
 
 def getRange(
-    nums: List[int], *, isMax=False, isLeftStrict=False, isRightStrict=False,
+    nums: List[int], *, isMax=False, isLeftStrict=True, isRightStrict=False,
 ) -> List[Tuple[int, int]]:
     """
     求每个元素作为最值的影响范围(区间)
-    默认为每个数作为非严格最小值的影响区间 [left,right]
+    默认为每个数作为左严格右非严格最小值的影响区间 [left,right]
 
     有时候为了避免重复计算，我们可以考虑左侧`严格小于`当前元素的最近元素位置，
     以及右侧`小于等于`当前元素的最近元素位置。

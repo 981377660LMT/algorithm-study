@@ -4,8 +4,20 @@ from typing import List
 # 请你返回 nums 中任意子数组的 最大交替和
 
 # -105 <= nums[i] <= 105
+
+
 class Solution:
     def maximumAlternatingSubarraySum(self, nums: List[int]) -> int:
+        if len(nums) == 1:
+            return nums[0]
+        res, odd, even = nums[0], nums[0], -int(1e20)
+        for num in nums[1:]:
+            # 前面选或全不选
+            odd, even = max(num, even + num), odd - num
+            res = max(res, odd, even)
+        return res
+
+    def maximumAlternatingSubarraySum2(self, nums: List[int]) -> int:
         n = len(nums)
         if n == 1:
             return nums[0]
@@ -27,4 +39,7 @@ class Solution:
 print(Solution().maximumAlternatingSubarraySum(nums=[4, 2, 5, 3]))
 # 输出：7
 # 解释：最优子序列为 [4,2,5] ，交替和为 (4 + 5) - 2 = 7 。
-print(Solution().maximumAlternatingSubarraySum(nums=[3, -1, 1, 2]))
+print(Solution().maximumAlternatingSubarraySum2(nums=[3, -1, 1, 2]))
+
+# 子序列:选或不选
+# 子数组：选或只选

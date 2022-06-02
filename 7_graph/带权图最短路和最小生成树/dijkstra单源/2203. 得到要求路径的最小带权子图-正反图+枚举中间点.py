@@ -1,30 +1,31 @@
 from collections import defaultdict
 from heapq import heappop, heappush
-from typing import DefaultDict, List, Optional, Union, overload
-
+from typing import DefaultDict, Hashable, List, TypeVar, overload
 
 INF = int(1e20)
+Vertex = TypeVar('Vertex', bound=Hashable)
+Graph = DefaultDict[Vertex, DefaultDict[Vertex, int]]
 
 
 @overload
-def dijkstra(n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int) -> List[int]:
+def dijkstra(adjMap: Graph, start: Vertex) -> DefaultDict[Vertex, int]:
     ...
 
 
 @overload
-def dijkstra(n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int, end: int) -> int:
+def dijkstra(adjMap: Graph, start: Vertex, end: Vertex) -> int:
     ...
 
 
-def dijkstra(
-    n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int, end: Optional[int] = None
-) -> Union[int, List[int]]:
-    dist = [INF] * n
-    dist[start] = 0
+def dijkstra(adjMap: Graph, start: Vertex, end: Vertex | None = None):
+    """时间复杂度O((V+E)logV)"""
+    dist = defaultdict(lambda: INF)
+    dist[start] = 0  # 注意这里不要忘记初始化pq里的
     pq = [(0, start)]
+
     while pq:
         curDist, cur = heappop(pq)
-        if dist[cur] < curDist:
+        if dist[cur] < curDist:  # 剪枝，有的题目不加就TLE
             continue
         if end is not None and cur == end:
             return curDist
@@ -32,7 +33,8 @@ def dijkstra(
             if dist[next] > dist[cur] + adjMap[cur][next]:
                 dist[next] = dist[cur] + adjMap[cur][next]
                 heappush(pq, (dist[next], next))
-    return dist
+
+    return INF if end is not None else dist
 
 
 # 原来是要枚举中间点 想的太少 还去求最短路的公共路径了
@@ -56,9 +58,10 @@ class Solution:
             adjMap[u][v] = min(adjMap[u][v], w)
             rAdjMap[v][u] = min(rAdjMap[v][u], w)
 
-        dist1 = dijkstra(n, adjMap, src1)
-        dist2 = dijkstra(n, adjMap, src2)
-        dist3 = dijkstra(n, rAdjMap, dest)
+        dist1 = dijkstra(adjMap, src1)
+        dist2 = dijkstra(adjMap, src2)
+        dist3 = dijkstra(rAdjMap, dest)
+
         # 这里可以直接int(1e99) int(1e88)
         res = INF
         for mid in range(n):

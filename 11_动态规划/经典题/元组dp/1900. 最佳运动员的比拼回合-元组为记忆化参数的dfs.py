@@ -29,7 +29,7 @@ class Solution:
             for winners in product(*pairs):
                 if firstPlayer not in winners or secondPlayer not in winners:
                     continue
-                nexts = dfs(tuple(sorted(winners)))
+                nexts = dfs(tuple(sorted(winners)))  # !注意这里要排序
                 res = [min(res[0], 1 + nexts[0]), max(res[1], 1 + nexts[1])]
             return res
 

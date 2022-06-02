@@ -15,11 +15,11 @@ class Solution:
         时间复杂度O(nlog(max(arr))) 
         """
         res = abs(arr[0] - target)
-        dp = set([arr[0]])
-        for num in arr[1:]:
-            ndp = {num & x for x in dp} | {num}
-            for x in ndp:
-                res = min(res, abs(x - target))
+        dp = set()
+        for cur in arr:
+            ndp = {cur & pre for pre in dp | {(1 << 31) - 1}}
+            for cand in ndp:
+                res = min(res, abs(cand - target))
             dp = ndp
         return res
 

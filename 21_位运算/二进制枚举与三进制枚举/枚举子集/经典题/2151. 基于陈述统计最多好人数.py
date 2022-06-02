@@ -1,22 +1,5 @@
-from os import stat
-from pickle import FALSE
-from typing import List, Tuple
-from collections import defaultdict, deque, Counter
-from heapq import heapify, heappop, heappush
-from sortedcontainers import SortedList, SortedDict, SortedSet
-from bisect import bisect_left, bisect_right
-from functools import lru_cache, reduce
-from itertools import accumulate, groupby, combinations, permutations, product, chain, islice
-from math import gcd, sqrt, ceil, floor, comb
-from string import ascii_lowercase, ascii_uppercase, ascii_letters, digits
-from operator import xor, or_, and_, not_
+from typing import List
 
-
-MOD = int(1e9 + 7)
-INF = 0x3F3F3F3F
-EPS = int(1e-8)
-dirs4 = [[-1, 0], [0, 1], [1, 0], [0, -1]]
-dirs8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]]
 
 # 2 <= n <= 15
 # 好人不能说假话
@@ -59,3 +42,19 @@ print(
     )
 )
 print(Solution().maximumGood(statements=[[2, 2, 2, 2], [1, 2, 1, 0], [0, 2, 2, 2], [0, 0, 0, 2]]))
+
+
+# 变形
+# https://codeforces.com/problemset/problem/156/B
+
+# 有 n(<=1e5) 个人，编号从 1 到 n。其中恰好有一个人是罪犯。
+# 同时还有 n 条陈述，每条陈述要么是 +x，表示 x 是罪犯；要么是 -x，表示 x 不是罪犯。(1<=x<=n)
+# 已知这 n 条陈述中恰好有 m(<=n) 条是实话，有 n-m 条是假话。
+# 对于每条陈述，如果这条陈述一定是实话，输出 "Truth"；如果一定是假话，输出 "Lie"；如果不确定是真是假，输出 "Not defined"。
+
+
+# https://codeforces.com/problemset/submission/156/159122474
+
+# 枚举。
+# 假设 i 是罪犯，如果 “i 是罪犯” 的陈述数和 “j 不是罪犯”(j≠i) 的陈述数之和等于 m，则 i 可能是罪犯，否则 i 一定不是罪犯。
+# 然后遍历所有陈述，按照上面统计的结果来输出对应的字符串。

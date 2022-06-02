@@ -3,7 +3,7 @@ from functools import lru_cache
 
 # 枚举分割点
 
-
+# 1 <= arr.length <= 500
 class Solution:
     def maxSumAfterPartitioning(self, arr: List[int], k: int) -> int:
         @lru_cache(None)
@@ -11,11 +11,11 @@ class Solution:
             if index >= len(arr):
                 return 0
             res = 0
+            subMax = arr[index]
             for i in range(1, k + 1):
                 if index + i > len(arr):
                     continue
-                sub = arr[index : index + i]
-                subMax = max(sub)
+                subMax = max(subMax, arr[index + i - 1])
                 res = max(res, subMax * i + dfs(index + i))
             return res
 

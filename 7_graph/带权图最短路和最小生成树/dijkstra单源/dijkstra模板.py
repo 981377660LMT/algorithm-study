@@ -3,26 +3,26 @@
 from collections import defaultdict
 from functools import lru_cache
 from heapq import heappop, heappush
-from typing import DefaultDict, List, Optional, Tuple, overload
+from typing import DefaultDict, Hashable, List, Tuple, TypeVar, overload
 
 INF = int(1e20)
+Vertex = TypeVar('Vertex', bound=Hashable)
+Graph = DefaultDict[Vertex, DefaultDict[Vertex, int]]
 
 
 @overload
-def dijkstra(n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int) -> List[int]:
+def dijkstra(adjMap: Graph, start: Vertex) -> DefaultDict[Vertex, int]:
     ...
 
 
 @overload
-def dijkstra(n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int, end: int) -> int:
+def dijkstra(adjMap: Graph, start: Vertex, end: Vertex) -> int:
     ...
 
 
-def dijkstra(
-    n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int, end: Optional[int] = None
-):
+def dijkstra(adjMap: Graph, start: Vertex, end: Vertex | None = None):
     """时间复杂度O((V+E)logV)"""
-    dist = [INF] * n
+    dist = defaultdict(lambda: INF)
     dist[start] = 0  # 注意这里不要忘记初始化pq里的
     pq = [(0, start)]
 
@@ -73,6 +73,8 @@ def dijkstra3(adjMap: DefaultDict[str, DefaultDict[str, int]], start: str, end: 
 
         while pq:
             curDist, cur = heappop(pq)
+            if dist[cur] < curDist:
+                continue
             if cur == end:
                 return curDist
             for next in adjMap[cur]:

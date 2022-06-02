@@ -3,14 +3,14 @@
 // 1 <= nums.length <= 40
 // -107 <= nums[i] <= 107
 
-import { getSubArraySum } from '../getSubArraySumFrom'
+import { getSubsetSum } from '../getSubsetSum'
 import { twoSum } from '../twoSum'
 
 // -109 <= goal <= 109
 function minAbsDifference(nums: number[], goal: number): number {
   const mid = nums.length >> 1
-  const left = getSubArraySum(nums.slice(0, mid)).sort((a, b) => a - b)
-  const right = getSubArraySum(nums.slice(mid)).sort((a, b) => a - b)
+  const left = getSubsetSum(nums.slice(0, mid)).sort((a, b) => a - b)
+  const right = getSubsetSum(nums.slice(mid)).sort((a, b) => a - b)
   return twoSum(left, right, goal)
 }
 

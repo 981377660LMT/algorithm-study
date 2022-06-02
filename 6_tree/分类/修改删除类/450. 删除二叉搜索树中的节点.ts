@@ -5,41 +5,34 @@ import { BinaryTree } from '../Tree'
  * @param {number} key
  * @return {BinaryTree}
  * @description 先找节点再判断左右情况
+ * 450. 删除二叉搜索树中的节点
  */
-const deleteNode = function (root: BinaryTree, key: number): BinaryTree | null {
+function deleteNode(root: BinaryTree, key: number): BinaryTree | null {
   if (!root) return root
+  return dfs(root, key)
 
-  return deleteHelper(root, key)
-
-  function getMin(root: BinaryTree) {
-    while (root.left) {
-      root = root.left
-    }
-
-    return root
-  }
-
-  function deleteHelper(root: BinaryTree | null, val: number): BinaryTree | null {
+  function dfs(root: BinaryTree | null, key: number): BinaryTree | null {
     if (!root) return root
 
-    if (root.val === val) {
+    if (root.val < key) {
+      root.right = dfs(root.right, key)
+      return root
+    } else if (root.val > key) {
+      root.left = dfs(root.left, key)
+      return root
+    } else {
       if (!root.left) return root.right
       if (!root.right) return root.left
-      // 后继节点代替(右子树中最小节点)
-      // 前驱节点代替(左子树中最大节点)
-      // 找到右子树的最小节点
-      const successor = getMin(root.right)
-      // 把 root 改成 successor
-      root.val = successor.val
-      // 转而去删除 successor
-      root.right = deleteHelper(root.right, successor.val)
-    } else if (root.val > val) {
-      root.left = deleteHelper(root.left, val)
-    } else if (root.val < val) {
-      root.right = deleteHelper(root.right, val)
-    }
 
-    return root
+      // root的后继变成自己 需要更新左右子树
+      let successor = root.right
+      while (successor.left) successor = successor.left
+
+      // 注意这里要先更新successor的右子树 再更新successor的左子树
+      successor.right = dfs(root.right, successor.val)
+      successor.left = root.left
+      return successor
+    }
   }
 }
 

@@ -7,9 +7,9 @@
 class Solution(object):
     def subarrayBitwiseORs(self, A):
         res = set()
-        dp = {0}
-        for num in A:
-            ndp = {num | y for y in dp} | {num}   # 以 num 结尾的子数组的所有或
+        dp = set()
+        for cur in A:
+            ndp = {cur | pre for pre in dp|{0}}   # 以 cur 结尾的子数组的所有或
             dp = ndp  # 滚动替换
             res |= ndp
         return len(res)
@@ -21,9 +21,9 @@ class Solution(object):
 # O(2^n)
 class Solution(object):
     def subarrayBitwiseORs(self, A):
-        dp = {0}
-        for num in A:
-            ndp = {num | y for y in dp}   # 以 num 结尾的子集(序列)的所有或
+        dp = set([0]) # 包含空集
+        for cur in A:
+            ndp = {cur | pre for pre in dp|{0}}   # 以 cur 结尾的子集(序列)的所有或
             dp |= ndp  # 直接加到dp，形成新的子集
         return len(dp)
 ```
