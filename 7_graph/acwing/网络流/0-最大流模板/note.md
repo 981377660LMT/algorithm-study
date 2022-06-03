@@ -48,27 +48,48 @@ https://blog.csdn.net/weixin_42638946/article/details/120508463?spm=1001.2014.30
    - dfs 找增广路的三处优化
 
    ```Python
-   def dfsWithCurArc(cur: Vertex, minFlow: int) -> int:
-      if cur == end:
-          return minFlow
+       def dfsWithCurArc(cur: Vertex, minFlow: int) -> int:
+            """dfs增广 采用当前弧优化
 
-      flow = 0  # 往后面流的流量可以是多少
-      for next in list(self._reGraph[cur].keys())[curArc[cur] :]:  # 1.当前弧优化
-          if flow >= minFlow:  # 2.优化：提前跳出，重要的优化
-              break
+            Args:
+                cur (int): 当前点
+                minFlow (int): 当前增广路上最小流量
 
-          curArc[cur] += 1
-          if (depth[next] == depth[cur] + 1) and (self._reGraph[cur][next] > 0):
-              nextFlow = dfsWithCurArc(next, min(minFlow - flow, self._reGraph[cur][next]))
-              # 3.优化：不存在路径 删掉这条边
-              if nextFlow == 0:
-                  depth[next] = -1
-              elif nextFlow > 0:
-                  self._reGraph[cur][next] -= nextFlow
-                  self._reGraph[next][cur] += nextFlow
-                  flow += nextFlow
+            Returns:
+                int: 增广路上的容量
 
-      return flow
+            注意到字典存储的键是插入有序的 因此可以用作记录当前弧
+            每次分配完的边就不再dfs了
+
+            每个点的当前弧初始化为head
+            每次我们找过某条边(弧)时,修改cur数组,改成该边(弧)的编号,
+            下次到达该点时,会直接从cur对应的边开始(也)是说从head到cur中间的那一些边(弧)我们就不走了）。
+            """
+
+            if cur == end:
+                return minFlow
+
+            flow = 0
+            while True:
+                if flow >= minFlow:  # !重要的优化 当前弧优化的基础
+                    break
+                try:
+                    # 当前弧优化
+                    child = next(curArc[cur])
+                    if (depth[child] == depth[cur] + 1) and (self._reGraph[cur][child] > 0):
+                        min_ = minFlow - flow
+                        if self._reGraph[cur][child] < minFlow - flow:
+                            min_ = self._reGraph[cur][child]
+                        nextFlow = dfsWithCurArc(child, min_)
+                        # !优化：不存在路径 删掉这条边
+                        if nextFlow == 0:
+                            depth[child] = -1
+                        self._reGraph[cur][child] -= nextFlow
+                        self._reGraph[child][cur] += nextFlow
+                        flow += nextFlow
+                except StopIteration:
+                    break
+            return flow
    ```
 
 4. S-T Cut

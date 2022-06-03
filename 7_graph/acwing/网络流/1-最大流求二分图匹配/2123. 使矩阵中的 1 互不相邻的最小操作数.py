@@ -1,8 +1,10 @@
-import sys
-from typing import DefaultDict
+from collections import defaultdict
+from typing import DefaultDict, List
 from collections import defaultdict, deque
 
 Graph = DefaultDict[int, DefaultDict[int, int]]  # 有向带权图,权值为容量
+
+# 1 <= m, n <= 300
 
 
 class Dinic:
@@ -75,17 +77,25 @@ class Dinic:
                 self._reGraph[next].setdefault(cur, 0)
 
 
-# endregion
+# 相邻两个1组成一条边，每条边都要去掉一个端点，其实是找最小点覆盖，即求二分图的最大匹配，跑匈牙利算法
+class Solution:
+    def minimumOperations(self, grid: List[List[int]]) -> int:
+        ROW, COL = len(grid), len(grid[0])
+        adjMap = defaultdict(lambda: defaultdict(int))
+        for r in range(ROW):
+            for c in range(COL):
+                if grid[r][c] == 1:
+                    cur = r * COL + c
+                    for dr, dc in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+                        nr, nc = r + dr, c + dc
+                        if 0 <= nr < ROW and 0 <= nc < COL and grid[nr][nc] == 1:
+                            next = nr * COL + nc
+                            if (r + c) % 2 == 0:
+                                v1, v2 = next, cur
+                            else:
+                                v1, v2 = cur, next
+                            adjMap[-1][v1] = 1
+                            adjMap[v1][v2] = 1
+                            adjMap[v2][int(1e9)] = 1
+        return Dinic(adjMap).calMaxFlow(-1, int(1e9))
 
-# 图中可能存在重边和自环
-input = sys.stdin.readline
-n, m, start, end = map(int, input().split())
-adjMap = defaultdict(lambda: defaultdict(int))
-
-# 从点 u 到点 v 存在一条有向边，容量为 c。
-for _ in range(m):
-    u, v, c = map(int, input().split())
-    adjMap[u][v] += c  # 可能存在重边
-
-maxFlow = Dinic(adjMap)
-print(maxFlow.calMaxFlow(start, end))

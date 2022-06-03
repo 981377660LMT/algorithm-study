@@ -4,7 +4,7 @@ from typing import DefaultDict, List, Set, Tuple
 from collections import defaultdict
 from copy import deepcopy
 
-
+# 1568. 使陆地分离的最少天数-割点
 class Tarjan:
     INF = int(1e20)
 

@@ -1,4 +1,4 @@
-import sys
+from collections import defaultdict
 from typing import DefaultDict
 from collections import defaultdict, deque
 
@@ -64,9 +64,6 @@ class Dinic:
                 break
         return res
 
-    def getFlowOfEdge(self, v1: int, v2: int) -> int:
-        return self._graph[v1][v2] - self._reGraph[v1][v2]
-
     def _updateRedisualGraph(self) -> None:
         self._reGraph = defaultdict(lambda: defaultdict(int))
         for cur in self._graph:
@@ -74,18 +71,28 @@ class Dinic:
                 self._reGraph[cur][next] = self._graph[cur][next]
                 self._reGraph[next].setdefault(cur, 0)
 
+    def getFlowOfEdge(self, v1: int, v2: int) -> int:
+        return self._graph[v1][v2] - self._reGraph[v1][v2]
 
-# endregion
 
-# 图中可能存在重边和自环
-input = sys.stdin.readline
-n, m, start, end = map(int, input().split())
+m, n = map(int, input().split())
 adjMap = defaultdict(lambda: defaultdict(int))
+A, B = set(), set()
+while True:
+    u, v = map(int, input().split())
+    if u == -1 and v == -1:
+        break
+    adjMap[u][v] = 1
+    adjMap[0][u] = 1
+    adjMap[v][n + 10] = 1
+    A.add(u)
 
-# 从点 u 到点 v 存在一条有向边，容量为 c。
-for _ in range(m):
-    u, v, c = map(int, input().split())
-    adjMap[u][v] += c  # 可能存在重边
 
 maxFlow = Dinic(adjMap)
-print(maxFlow.calMaxFlow(start, end))
+print(maxFlow.calMaxFlow(0, n + 10))
+res = []
+for v1 in A:
+    for v2 in adjMap[v1]:
+        if maxFlow.getFlowOfEdge(v1, v2) > 0:
+            print(v1, v2)
+

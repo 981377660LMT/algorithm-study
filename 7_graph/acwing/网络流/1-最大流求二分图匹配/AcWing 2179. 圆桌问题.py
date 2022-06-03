@@ -1,4 +1,4 @@
-import sys
+from collections import defaultdict
 from typing import DefaultDict
 from collections import defaultdict, deque
 
@@ -75,17 +75,40 @@ class Dinic:
                 self._reGraph[next].setdefault(cur, 0)
 
 
-# endregion
+# 假设有来自 m 个不同单位的代表参加一次国际会议。
+# 每个单位的代表数分别为 ri(i=1,2,…,m)。
+# 会议餐厅共有 n 张餐桌，每张餐桌可容纳 ci(i=1,2,…,n) 个代表就餐。
+# !为了使代表们充分交流，希望从同一个单位来的代表不在同一个餐桌就餐。
+# 试设计一个算法，给出满足要求的代表就餐方案。
+# 如果问题有解，在第 1 行输出 1，否则输出 0。
+# 接下来的 m 行给出每个单位代表的就餐桌号。
+# 如果有多个满足要求的方案，只要求输出 1 个方案。
 
-# 图中可能存在重边和自环
-input = sys.stdin.readline
-n, m, start, end = map(int, input().split())
+
+m, n = map(int, input().split())  # m: 代表数量, n: 餐桌数量
 adjMap = defaultdict(lambda: defaultdict(int))
+nums = list(map(int, input().split()))
+caps = list(map(int, input().split()))
 
-# 从点 u 到点 v 存在一条有向边，容量为 c。
-for _ in range(m):
-    u, v, c = map(int, input().split())
-    adjMap[u][v] += c  # 可能存在重边
+START, END = -1, int(1e9)
+for i, num in enumerate(nums):
+    adjMap[-1][i] = num
+for i, cap in enumerate(caps):
+    adjMap[i + 1000][END] = cap
+for i in range(len(nums)):
+    for j in range(len(caps)):
+        adjMap[i][j + 1000] = 1
 
 maxFlow = Dinic(adjMap)
-print(maxFlow.calMaxFlow(start, end))
+count = maxFlow.calMaxFlow(START, END)
+if count == sum(nums):
+    print(1)
+else:
+    print(0)
+    exit(0)
+for i in range(len(nums)):
+    res = []
+    for j in range(len(caps)):
+        if maxFlow.getFlowOfEdge(i, j + 1000) > 0:
+            res.append(j + 1)
+    print(*res)

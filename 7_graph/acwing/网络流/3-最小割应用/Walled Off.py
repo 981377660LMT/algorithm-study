@@ -1,5 +1,13 @@
-import sys
-from typing import DefaultDict
+# 0表示空地 1表示墙
+# !现在要阻断左上角到右下角的路 问最少需要加多少墙
+# https://binarysearch.com/problems/Walled-Off
+
+# 最小割问题：
+# you have a graph with two vertices,
+# and you want to remove the minimum number of vertices such that the two original vertices are disconnected
+
+
+from typing import DefaultDict, List
 from collections import defaultdict, deque
 
 Graph = DefaultDict[int, DefaultDict[int, int]]  # 有向带权图,权值为容量
@@ -75,17 +83,32 @@ class Dinic:
                 self._reGraph[next].setdefault(cur, 0)
 
 
-# endregion
+DIR4 = [[1, 0], [-1, 0], [0, 1], [0, -1]]
 
-# 图中可能存在重边和自环
-input = sys.stdin.readline
-n, m, start, end = map(int, input().split())
-adjMap = defaultdict(lambda: defaultdict(int))
+# 2 ≤ n, m ≤ 250
 
-# 从点 u 到点 v 存在一条有向边，容量为 c。
-for _ in range(m):
-    u, v, c = map(int, input().split())
-    adjMap[u][v] += c  # 可能存在重边
 
-maxFlow = Dinic(adjMap)
-print(maxFlow.calMaxFlow(start, end))
+# !把边拆成点 in out
+# https://binarysearch.com/problems/Walled-Off/solutions/2865567
+class Solution:
+    def solve(self, matrix: List[List[int]]):
+        ROW, COL = len(matrix), len(matrix[0])
+        OFFSET = ROW * COL
+        adjMap = defaultdict(lambda: defaultdict(int))
+        maxFlow = Dinic(adjMap)
+        for r in range(ROW):
+            for c in range(COL):
+                if matrix[r][c] == 1:
+                    continue
+                cur = r * COL + c
+                adjMap[cur][cur + OFFSET] = 1
+                for dr, dc in DIR4:
+                    nr, nc = r + dr, c + dc
+                    if (0 <= nr < ROW) and (0 <= nc < COL) and (matrix[nr][nc] == 0):
+                        next = nr * COL + nc
+                        adjMap[cur + OFFSET][next] = 1
+
+        return maxFlow.calMaxFlow(OFFSET, (ROW - 1) * COL + (COL - 1))
+
+
+print(Solution().solve(matrix=[[0, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]]))
