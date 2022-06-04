@@ -1,25 +1,6 @@
 import assert from 'assert'
 
-// class Edge<Vertex extends PropertyKey> {
-//   constructor(
-//     public readonly from: Vertex,
-//     public readonly to: Vertex,
-//     public readonly capacity: number,
-//     public flow: number
-//   ) {}
-// }
-
-// function* makeIter<T>(iterable: Iterable<T>): Generator<T, undefined, undefined> {
-//   yield* iterable
-//   return void 0
-// }
-
-/**
- * @param start (虚拟)源点
- * @param end (虚拟)汇点
- *
- * @description Dinic求最大流 时间复杂度：O(V^2*E)
- */
+// 不含当前弧优化的Dinic(测试)
 function useDinic<Vertex extends PropertyKey = number>(start: Vertex, end: Vertex) {
   const adjMap = new Map<Vertex, Map<Vertex, number>>() // 残量图
 
@@ -35,12 +16,10 @@ function useDinic<Vertex extends PropertyKey = number>(start: Vertex, end: Verte
   function work(): number {
     let res = 0
     let depth!: Map<Vertex, number>
-    let curEdge: Map<Vertex, Iterator<Vertex, undefined, undefined>> // 当前弧优化
 
     while (true) {
       bfs()
       if ((depth.get(end) ?? -1) === -1) break
-      curEdge = makeCurEdge(adjMap)
       while (true) {
         const delta = dfs(start, Infinity)
         if (delta === 0) break
@@ -82,11 +61,8 @@ function useDinic<Vertex extends PropertyKey = number>(start: Vertex, end: Verte
       if (cur === end) return minFlow
       let res = 0 // 从cur开始向后面流的最大的流量
 
-      while (true) {
-        if (res >= minFlow) break
-        const next = curEdge.get(cur)!.next().value
-        if (next == void 0) break
-        const remainFlow = adjMap.get(cur)!.get(next)!
+      if (res >= minFlow) return res
+      for (const [next, remainFlow] of adjMap.get(cur)?.entries() ?? []) {
         if ((depth.get(next) ?? -1) === (depth.get(cur) ?? -1) + 1 && remainFlow > 0) {
           const nextFlow = dfs(next, Math.min(minFlow - res, remainFlow))
           if (nextFlow === 0) depth.set(next, -1)
@@ -102,18 +78,9 @@ function useDinic<Vertex extends PropertyKey = number>(start: Vertex, end: Verte
     }
   }
 
-  function makeCurEdge(
-    reGraph: Map<Vertex, Map<Vertex, number>>
-  ): Map<Vertex, IterableIterator<Vertex>> {
-    const res = new Map<Vertex, IterableIterator<Vertex>>()
-    for (const key of reGraph.keys()) res.set(key, reGraph.get(key)!.keys())
-    return res
-  }
-
   return {
     addEdge,
     work,
-    reGraph: adjMap,
   }
 }
 
@@ -140,4 +107,4 @@ if (require.main === module) {
   assert.strictEqual(dinic.work(), 14)
 }
 
-export { useDinic }
+export {}

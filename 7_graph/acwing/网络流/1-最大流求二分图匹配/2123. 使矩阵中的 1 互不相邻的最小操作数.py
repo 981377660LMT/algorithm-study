@@ -39,6 +39,7 @@ class Dinic:
                         nextFlow = dfsWithCurArc(
                             child, min(minFlow - flow, self._reGraph[cur][child])
                         )
+                        print(nextFlow, cur)
                         if nextFlow == 0:
                             depth[child] = -1
                         self._reGraph[cur][child] -= nextFlow
@@ -86,16 +87,28 @@ class Solution:
             for c in range(COL):
                 if grid[r][c] == 1:
                     cur = r * COL + c
-                    for dr, dc in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+                    for dr, dc in [(0, 1), (1, 0)]:
                         nr, nc = r + dr, c + dc
                         if 0 <= nr < ROW and 0 <= nc < COL and grid[nr][nc] == 1:
                             next = nr * COL + nc
-                            if (r + c) % 2 == 0:
-                                v1, v2 = next, cur
-                            else:
-                                v1, v2 = cur, next
+                            v1, v2 = (next, cur) if (r + c) & 1 else (cur, next)
                             adjMap[-1][v1] = 1
                             adjMap[v1][v2] = 1
                             adjMap[v2][int(1e9)] = 1
         return Dinic(adjMap).calMaxFlow(-1, int(1e9))
 
+
+print(Solution().minimumOperations(grid=[[1, 1, 0], [0, 1, 1], [1, 1, 1]]))
+1 1
+1 0
+1 -1
+0 4
+1 5
+1 4
+1 -1
+0 8
+1 7
+1 8
+1 -1
+0 6
+0 -1

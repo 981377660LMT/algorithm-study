@@ -1,32 +1,34 @@
 import assert from 'assert'
 
-// class Edge<Vertex extends PropertyKey> {
+// class Edge {
 //   constructor(
-//     public readonly from: Vertex,
-//     public readonly to: Vertex,
+//     public readonly from: number,
+//     public readonly to: number,
 //     public readonly capacity: number,
 //     public flow: number
 //   ) {}
 // }
 
-// function* makeIter<T>(iterable: Iterable<T>): Generator<T, undefined, undefined> {
-//   yield* iterable
+// function* makeIter(nums: number[]): Generator<number, undefined, undefined> {
+//   yield* nums
 //   return void 0
 // }
 
 /**
+ * @param N 图的最大顶点编号
  * @param start (虚拟)源点
  * @param end (虚拟)汇点
  *
  * @description Dinic求最大流 时间复杂度：O(V^2*E)
  */
-function useDinic<Vertex extends PropertyKey = number>(start: Vertex, end: Vertex) {
-  const adjMap = new Map<Vertex, Map<Vertex, number>>() // 残量图
+function useDinicArray(N: number, start: number, end: number) {
+  N += 10
+  const adjMap = new Map<number, Map<number, number>>() // 残量图
 
-  function addEdge(from: Vertex, to: Vertex, capacity: number): void {
+  function addEdge(from: number, to: number, capacity: number): void {
     !adjMap.has(from) && adjMap.set(from, new Map())
     let innerMap = adjMap.get(from)!
-    innerMap.set(to, capacity) // 覆盖
+    innerMap.set(to, capacity) // 覆盖平行边
     !adjMap.has(to) && adjMap.set(to, new Map())
     innerMap = adjMap.get(to)!
     if (!innerMap.has(from)) innerMap.set(from, 0) // 防止自环边影响
@@ -34,12 +36,12 @@ function useDinic<Vertex extends PropertyKey = number>(start: Vertex, end: Verte
 
   function work(): number {
     let res = 0
-    let depth!: Map<Vertex, number>
-    let curEdge: Map<Vertex, Iterator<Vertex, undefined, undefined>> // 当前弧优化
+    const depth = new Int32Array(N)
+    let curEdge: Map<number, Iterator<number, undefined, undefined>> // 当前弧优化
 
     while (true) {
       bfs()
-      if ((depth.get(end) ?? -1) === -1) break
+      if (depth[end] === -1) break
       curEdge = makeCurEdge(adjMap)
       while (true) {
         const delta = dfs(start, Infinity)
@@ -51,19 +53,21 @@ function useDinic<Vertex extends PropertyKey = number>(start: Vertex, end: Verte
     return res
 
     function bfs(): void {
-      depth = new Map<Vertex, number>([[start, 0]])
-      const visited = new Set<Vertex>([start])
-      let queue: Vertex[] = [start]
+      depth.fill(-1)
+      depth[start] = 0
+      const visited = new Uint8Array(N).fill(0)
+      visited[start] = 1
+      let queue: number[] = [start]
 
       while (queue.length) {
-        const nextQueue: Vertex[] = []
+        const nextQueue: number[] = []
         const steps = queue.length
         for (let _ = 0; _ < steps; _++) {
           const cur = queue.pop()!
           for (const [next, remainFlow] of adjMap.get(cur) ?? []) {
-            if (!visited.has(next) && remainFlow > 0) {
-              visited.add(next)
-              depth.set(next, depth.get(cur)! + 1)
+            if (!visited[next] && remainFlow > 0) {
+              visited[next] = 1
+              depth[next] = depth[cur] + 1
               nextQueue.push(next)
             }
           }
@@ -78,7 +82,7 @@ function useDinic<Vertex extends PropertyKey = number>(start: Vertex, end: Verte
      * @param minFlow 路径上的最小流量
      * @returns 增广路径上的最小流量
      */
-    function dfs(cur: Vertex, minFlow: number): number {
+    function dfs(cur: number, minFlow: number): number {
       if (cur === end) return minFlow
       let res = 0 // 从cur开始向后面流的最大的流量
 
@@ -87,9 +91,9 @@ function useDinic<Vertex extends PropertyKey = number>(start: Vertex, end: Verte
         const next = curEdge.get(cur)!.next().value
         if (next == void 0) break
         const remainFlow = adjMap.get(cur)!.get(next)!
-        if ((depth.get(next) ?? -1) === (depth.get(cur) ?? -1) + 1 && remainFlow > 0) {
+        if (depth[next] === depth[cur] + 1 && remainFlow > 0) {
           const nextFlow = dfs(next, Math.min(minFlow - res, remainFlow))
-          if (nextFlow === 0) depth.set(next, -1)
+          if (nextFlow === 0) depth[next] = -1
           res += nextFlow
           let innerMap = adjMap.get(cur)!
           innerMap.set(next, innerMap.get(next)! - nextFlow)
@@ -103,9 +107,9 @@ function useDinic<Vertex extends PropertyKey = number>(start: Vertex, end: Verte
   }
 
   function makeCurEdge(
-    reGraph: Map<Vertex, Map<Vertex, number>>
-  ): Map<Vertex, IterableIterator<Vertex>> {
-    const res = new Map<Vertex, IterableIterator<Vertex>>()
+    reGraph: Map<number, Map<number, number>>
+  ): Map<number, IterableIterator<number>> {
+    const res = new Map<number, IterableIterator<number>>()
     for (const key of reGraph.keys()) res.set(key, reGraph.get(key)!.keys())
     return res
   }
@@ -118,7 +122,7 @@ function useDinic<Vertex extends PropertyKey = number>(start: Vertex, end: Verte
 }
 
 if (require.main === module) {
-  const dinic = useDinic<number>(1, 7)
+  const dinic = useDinicArray(7, 1, 7)
   const edges = [
     [1, 2, 5],
     [1, 3, 6],
@@ -140,4 +144,4 @@ if (require.main === module) {
   assert.strictEqual(dinic.work(), 14)
 }
 
-export { useDinic }
+export { useDinicArray }
