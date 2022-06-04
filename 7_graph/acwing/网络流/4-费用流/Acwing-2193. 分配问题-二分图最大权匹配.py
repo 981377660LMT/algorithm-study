@@ -1,11 +1,12 @@
-# 给定一个包含 n 个点 m 条边的有向图，并给定每条边的容量和费用，边的容量非负。
-# 图中可能存在重边和自环，保证费用不会存在负环。
-# !求从 S 到 T 的最大流，以及在流量最大时的最小费用。
-# 2≤n≤5000,
-# 1≤m≤50000,
+# 有 n 件工作要分配给 n 个人做。
+# 第 i 个人做第 j 件工作产生的效益为 cij。
+# 试设计一个将 n 件工作分配给 n 个人做的分配方案。
+# 对于给定的 n 件工作和 n 个人，计算最优分配方案和最差分配方案。
+# 1≤n≤50,
 
-import sys
-from typing import DefaultDict, Tuple
+# !最优解肯定是最大匹配 即取最大流
+
+from typing import DefaultDict, Tuple, List
 from collections import defaultdict, deque
 
 Graph = DefaultDict[int, DefaultDict[int, int]]  # 有向带权图,权值为容量
@@ -14,9 +15,9 @@ Graph = DefaultDict[int, DefaultDict[int, int]]  # 有向带权图,权值为容�
 class EK:
     """EK 求最小费用最大流"""
 
-    def __init__(self, graph: Graph, cost: Graph) -> None:
-        self._graph = graph  # 容量原图
-        self._cost = cost
+    def __init__(self, flowGraph: Graph, costGraph: Graph) -> None:
+        self._graph = flowGraph  # 容量原图
+        self._cost = costGraph
 
     def calMinCostMaxFlow(self, start: int, end: int) -> Tuple[int, int]:
         def spfa() -> int:
@@ -52,7 +53,7 @@ class EK:
             return resDelta
 
         self._updateRedisualGraph()
-        dist = defaultdict(lambda: int(1e20), {start: 0})  # 最短路
+        dist = defaultdict(lambda: int(1e20), {start: 0})
         flow = cost = 0
         while True:
             delta = spfa()
@@ -63,7 +64,6 @@ class EK:
         return flow, cost
 
     def getFlowOfEdge(self, v1: int, v2: int) -> int:
-        """获取某条边上的`流量`"""
         return self._graph[v1][v2] - self._reGraph[v1][v2][0]
 
     def _updateRedisualGraph(self) -> None:
@@ -74,20 +74,30 @@ class EK:
                 self._reGraph[next][cur] = [0, -self._cost[cur][next]]
 
 
-# endregion
-
-# !图中不存在重边和自环
-input = sys.stdin.readline
-n, m, start, end = map(int, input().split())
-adjMap = defaultdict(lambda: defaultdict(int))
-costMap = defaultdict(lambda: defaultdict(int))
-
-# 从点 u 到点 v 存在一条有向边，容量为 c。
-for _ in range(m):
-    u, v, c, cost = map(int, input().split())
-    adjMap[u][v] = c
-    costMap[u][v] = cost
-
-maxFlow = EK(adjMap, costMap)
-flow, cost = maxFlow.calMinCostMaxFlow(start, end)
-print(flow, cost, sep=' ')
+# 最小费用、最大费用
+adjMap1 = defaultdict(lambda: defaultdict(int))  # 容量
+costMap1 = defaultdict(lambda: defaultdict(int))  # 费用
+adjMap2 = defaultdict(lambda: defaultdict(int))  # 容量
+costMap2 = defaultdict(lambda: defaultdict(int))  # 费用
+n = int(input())
+for i in range(n):
+    nums = list(map(int, input().split()))
+    for j, cost in enumerate(nums):
+        adjMap1[i][j + 1000] = 1
+        costMap1[i][j + 1000] = cost
+        adjMap2[i][j + 1000] = 1
+        costMap2[i][j + 1000] = -cost
+for i in range(n):
+    adjMap1[-1][i] = 1
+    costMap1[-1][i] = 0
+    adjMap1[i + 1000][int(1e9)] = 1
+    costMap1[i + 1000][int(1e9)] = 0
+    adjMap2[-1][i] = 1
+    costMap2[-1][i] = 0
+    adjMap2[i + 1000][int(1e9)] = 1
+    costMap2[i + 1000][int(1e9)] = 0
+MCMF1 = EK(adjMap1, costMap1)
+MCMF2 = EK(adjMap2, costMap2)
+_, cost1 = MCMF1.calMinCostMaxFlow(-1, int(1e9))
+_, cost2 = MCMF2.calMinCostMaxFlow(-1, int(1e9))
+print(cost1, -cost2, sep='\n')
