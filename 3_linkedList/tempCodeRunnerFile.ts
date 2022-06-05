@@ -1,2 +1,3 @@
-
-// console.dir(a, { depth: null })
+: string {
+  //   return `${[...this]}`
+  // }

@@ -36,4 +36,5 @@ class Node(Generic[V]):
             self.right.left = self.left
 
     def __repr__(self) -> str:
-        return f'{self.value}'
+        return f'{self.value}->{self.right}'
+

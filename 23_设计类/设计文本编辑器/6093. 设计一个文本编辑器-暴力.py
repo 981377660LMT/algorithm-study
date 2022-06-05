@@ -1,6 +1,6 @@
-from typing import List
-
 #  !python的字符串操作非常快(注意是字符串切片而不是数组切片)
+
+
 class TextEditor:
     def __init__(self):
         self.pos = 0
