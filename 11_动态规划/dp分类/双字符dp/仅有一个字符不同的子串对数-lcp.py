@@ -19,6 +19,7 @@ class Solution2:
 
 
 # 字符串比较大小用LCP
+# !枚举每个字符作为"不同的字符" 看能有多少对
 class Solution:
     def solve(self, s, t):
         # 预处理LCP
@@ -40,6 +41,7 @@ class Solution:
         for i in range(1, m + 1):
             for j in range(1, n + 1):
                 if s[i - 1] != t[j - 1]:
-                    # 如果 s[i] != s[j]，我们找到了 (prefix[i-1][j-1] + 1) * (suffix[i-1][j-1] + 1) 个符合条件的字符组合。也就是前缀+1 和后缀长度+1 的笛卡尔积。
+                    # 如果 s[i] != s[j]，我们找到了 (prefix[i-1][j-1] + 1) * (suffix[i-1][j-1] + 1) 个符合条件的字符组合。
+                    # 也就是前缀+1 和后缀长度+1 的笛卡尔积。
                     res += (lcp1[i - 1][j - 1] + 1) * (lcp2[i][j] + 1)
         return res

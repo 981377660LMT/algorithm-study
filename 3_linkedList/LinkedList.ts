@@ -1,27 +1,33 @@
-class ListNode<T = number> {
+/**
+ * @description 仅用于LinkedList内部的结点
+ */
+class _Node<T = number> {
   value: T
-  prev!: ListNode<T>
-  next!: ListNode<T>
+  prev!: _Node<T>
+  next!: _Node<T>
   constructor(val: T) {
     this.value = val
   }
 }
 
+/**
+ * @description 链表实现的双端队列
+ */
 class LinkedList<T = number> {
-  head: ListNode<T>
-  tail: ListNode<T>
+  private readonly head: _Node<T>
+  private readonly tail: _Node<T>
   length: number
 
   constructor() {
-    this.head = new ListNode(undefined as any)
-    this.tail = new ListNode(undefined as any)
+    this.head = new _Node(undefined as any)
+    this.tail = new _Node(undefined as any)
     this.head.next = this.tail
     this.tail.prev = this.head
     this.length = 0
   }
 
-  unshift(val: T) {
-    const node = new ListNode(val)
+  unshift(val: T): number {
+    const node = new _Node(val)
     const next = this.head.next
     this.head.next = node
     node.prev = this.head
@@ -31,17 +37,17 @@ class LinkedList<T = number> {
     return this.length
   }
 
-  shift() {
+  shift(): T | undefined {
     if (this.length > 0) {
       const first = this.head.next
       this.remove(first)
-      return first
+      return first.value
     }
     return undefined
   }
 
-  push(val: T) {
-    const node = new ListNode(val)
+  push(val: T): number {
+    const node = new _Node(val)
     const prev = this.tail.prev
     this.tail.prev = node
     node.next = this.tail
@@ -51,26 +57,26 @@ class LinkedList<T = number> {
     return this.length
   }
 
-  pop() {
+  pop(): T | undefined {
     if (this.length > 0) {
       const last = this.tail.prev
       this.remove(last)
-      return last
+      return last.value
     }
     return undefined
   }
 
-  first() {
+  first(): T | undefined {
     if (this.length === 0) return undefined
     return this.head.next.value
   }
 
-  last() {
+  last(): T | undefined {
     if (this.length === 0) return undefined
     return this.tail.prev.value
   }
 
-  private remove(node: ListNode<T>) {
+  private remove(node: _Node<T>) {
     const prev = node.prev
     const next = node.next
     prev.next = next

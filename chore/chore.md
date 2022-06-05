@@ -374,3 +374,5 @@ const tree = new SegmentTree(Math.min(...tmp), Math.max(...tmp))
 const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()))  // 不占用额外空间
 
 ```
+
+`pythono位移好慢 导致线段树特别慢 还是用乘法比较好`

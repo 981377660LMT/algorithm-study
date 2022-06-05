@@ -16,6 +16,7 @@ class UnionFindArray:
         return self.parent[x]
 
     def union(self, x: int, y: int) -> bool:
+        """rank一样时 默认key2作为key1的父节点"""
         rootX = self.find(x)
         rootY = self.find(y)
         if rootX == rootY:
@@ -51,6 +52,7 @@ class UnionFindMap(Generic[T]):
             self.add(item)
 
     def union(self, key1: T, key2: T) -> bool:
+        """rank一样时 默认key2作为key1的父节点"""
         root1 = self.find(key1)
         root2 = self.find(key2)
         if root1 == root2:

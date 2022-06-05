@@ -11,7 +11,7 @@ class Solution:
         n = len(nums)
         # 让数组变成一个环，比较容易解决峰和谷的问题
         nums.append(-int(1e20))
-        neighbors = {nums[i - 1]: [nums[i - 2], nums[i]] for i in range(n + 1)}
+        neighbors = {nums[i - 1]: [nums[i - 2], nums[i]] for i in range(n + 1)}  # 模拟的链表
         peaks = [val for val in nums if val > max(neighbors[val])]
         heapify(peaks)
 
