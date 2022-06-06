@@ -118,4 +118,4 @@ if (require.main === module) {
   )
 }
 
-export { RMQSegmentTree }
+export {}

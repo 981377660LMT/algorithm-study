@@ -1,4 +1,4 @@
-// !区间染色不需要用懒标记记录更新状态
+// !两种颜色的区间染色不需要用懒标记记录更新状态 直接用节点值判断
 class SegmentTree {
   private readonly tree: Uint32Array
   private readonly size: number
@@ -70,7 +70,8 @@ class SegmentTree {
   }
 }
 
-// 懒标记 其实不必
+//! ///////////////////////////////////////////////////
+// !如果有多种颜色的话就需要懒标记
 class SegmentTree2 {
   private readonly tree: Uint32Array
   private readonly lazyValue: Uint8Array
