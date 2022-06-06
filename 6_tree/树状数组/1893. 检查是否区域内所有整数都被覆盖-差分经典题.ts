@@ -16,7 +16,7 @@ function isCovered(ranges: number[][], left: number, right: number): boolean {
     }
   }
 
-  return bit.sumRange(left, right) === right - left + 1
+  return bit.queryRange(left, right) === right - left + 1
 }
 
 console.log(

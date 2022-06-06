@@ -9,10 +9,11 @@ class Solution:
         diffMatrix = DiffMatrix(grid)
         for r in range(row):
             for c in range(col):
+
                 if (
                     r + h - 1 < row
                     and c + w - 1 < col
-                    and preSumMatrix.sumRegion(r, c, r + h - 1, c + w - 1) == 0
+                    and preSumMatrix.queryRange(r, c, r + h - 1, c + w - 1) == 0
                 ):
                     diffMatrix.add(r, c, r + h - 1, c + w - 1, 1)
         diffMatrix.update()

@@ -31,7 +31,7 @@ class BIT1:
             index -= self._lowbit(index)
         return res
 
-    def sumRange(self, left: int, right: int) -> int:
+    def queryRange(self, left: int, right: int) -> int:
         return self.query(right) - self.query(left - 1)
 
 
@@ -136,8 +136,8 @@ class BIT4:
         return index & -index
 
     def update(self, row: int, col: int, delta: int) -> None:
-        """[row,col]的值加上delta"""
-        assert row >= 1 and col >= 1, 'row,col必须是正整数'
+        """矩阵中的点 (row,col) 的值加上delta"""
+        row, col = row + 1, col + 1
         curRow = row
         while curRow <= self.row:
             curCol = col
@@ -147,7 +147,12 @@ class BIT4:
             curRow += self._lowbit(curRow)
 
     def query(self, row: int, col: int) -> int:
-        assert row >= 1 and col >= 1, 'row,col必须是正整数'
+        """左上角 (0,0) 到 右下角(row,col) 的矩形里所有数的和"""
+        row, col = row + 1, col + 1
+        if row > self.row:
+            row = self.row
+        if col > self.col:
+            col = self.col
         res = 0
         curRow = row
         while curRow > 0:
@@ -158,56 +163,99 @@ class BIT4:
             curRow -= self._lowbit(curRow)
         return res
 
-    def sumRange(self, row1: int, col1: int, row2: int, col2: int) -> int:
-        """查询左上角[row1,col1]到右下角[row2,col2]的和  注意索引从1开始"""
-        assert row1 >= 1 and row2 >= 1 and col1 >= 1 and col2 >= 1, 'row,col必须是正整数'
+    def queryRange(self, row1: int, col1: int, row2: int, col2: int) -> int:
+        """查询左上角 (row1,col1) 到右下角 (row2,col2) 的和"""
         return (
-            self.query(row2 + 1, col2 + 1)
-            - self.query(row2 + 1, col1)
-            - self.query(row1, col2 + 1)
-            + self.query(row1, col1)
+            self.query(row2, col2)
+            - self.query(row2, col1 - 1)
+            - self.query(row1 - 1, col2)
+            + self.query(row1 - 1, col1 - 1)
         )
 
 
 class BIT5:
-    """二维树状数组 区间修改+区间查询 每个操作都是 log(m*n)"""
+    """二维树状数组 区间修改+区间查询 每个操作都是 log(m*n)
+    
+    https://www.cnblogs.com/hbhszxyb/p/14157271.html
+    """
 
     def __init__(self, row: int, col: int) -> None:
         self.row = row
         self.col = col
         self.tree1 = defaultdict(lambda: defaultdict(int))
         self.tree2 = defaultdict(lambda: defaultdict(int))
+        self.tree3 = defaultdict(lambda: defaultdict(int))
+        self.tree4 = defaultdict(lambda: defaultdict(int))
 
     @staticmethod
     def _lowbit(index: int) -> int:
         return index & -index
 
-    def update(self, row1: int, col1: int, row2: int, col2: int, delta: int) -> None:
-        """[row,col]的值加上delta"""
-        ...
+    def updateRange(self, row1: int, col1: int, row2: int, col2: int, delta: int) -> None:
+        """左上角 (row1,col1) 到右下角 (row2,col2) 的所有数加上delta"""
+        self._update(row1, col1, delta)
+        self._update(row2 + 1, col1, -delta)
+        self._update(row1, col2 + 1, -delta)
+        self._update(row2 + 1, col2 + 1, delta)
 
-    def query(self, row1: int, col1: int, row2: int, col2: int) -> int:
-        ...
+    def queryRange(self, row1: int, col1: int, row2: int, col2: int) -> int:
+        """查询左上角 (row1,col1) 到右下角 (row2,col2) 的和"""
+        return (
+            self._query(row2, col2)
+            - self._query(row2, col1 - 1)
+            - self._query(row1 - 1, col2)
+            + self._query(row1 - 1, col1 - 1)
+        )
 
     def _update(self, row: int, col: int, delta: int) -> None:
         """[row,col]的值加上delta"""
-        assert row >= 1 and col >= 1, 'row,col必须是正整数'
-        ...
+        row, col = row + 1, col + 1
+        preRow, preCol = row, col
+
+        curRow = row
+        while curRow <= self.row:
+            curCol = col
+            while curCol <= self.col:
+                self.tree1[curRow][curCol] += delta
+                self.tree2[curRow][curCol] += (preRow - 1) * delta
+                self.tree3[curRow][curCol] += (preCol - 1) * delta
+                self.tree4[curRow][curCol] += (preRow - 1) * (preCol - 1) * delta
+                curCol += self._lowbit(curCol)
+            curRow += self._lowbit(curRow)
 
     def _query(self, row: int, col: int) -> int:
-        assert row >= 1 and col >= 1, 'row,col必须是正整数'
-        ...
+        row, col = row + 1, col + 1
+        if row > self.row:
+            row = self.row
+        if col > self.col:
+            col = self.col
+
+        preRow, preCol = row, col
+        curRow = row
+        res = 0
+        while curRow > 0:
+            curCol = col
+            while curCol > 0:
+                res += (
+                    preRow * preCol * self.tree1[curRow][curCol]
+                    - preCol * self.tree2[curRow][curCol]
+                    - preRow * self.tree3[curRow][curCol]
+                    + self.tree4[curRow][curCol]
+                )
+                curCol -= self._lowbit(curCol)
+            curRow -= self._lowbit(curRow)
+        return res
 
 
 if __name__ == '__main__':
     bit1 = BIT1(100)
     bit1.add(0 + 1, 2)
     assert bit1.query(1) == 2
-    assert bit1.sumRange(1, 4) == 2
-    assert bit1.sumRange(2, 4) == 0
-    assert bit1.sumRange(0, 102) == 2
-    assert bit1.sumRange(0, 1000) == 2
-    assert bit1.sumRange(-10000, 1000) == 2
+    assert bit1.queryRange(1, 4) == 2
+    assert bit1.queryRange(2, 4) == 0
+    assert bit1.queryRange(0, 102) == 2
+    assert bit1.queryRange(0, 1000) == 2
+    assert bit1.queryRange(-10000, 1000) == 2
 
     bit2 = BIT2(100)
     bit2.add(1, 1, 2)
@@ -219,7 +267,13 @@ if __name__ == '__main__':
     assert bit2.query(-10000, 1000) == 2
 
     bit4 = BIT4(100, 100)
+    bit4.update(0, 0, 2)
+    assert bit4.query(0, 0) == 2
     bit4.update(1, 1, 2)
-    print(bit4.sumRange(1, 1, 1, 1))
-    assert bit4.sumRange(1, 1, 1, 1) == 2
+    assert bit4.query(1, 1) == 4
+
+    bit5 = BIT5(100, 100)
+    bit5.updateRange(0, 0, 3, 3, 1)
+    assert bit5.queryRange(0, 0, 1, 1) == 4
+    assert bit5.queryRange(0, 0, 3, 3) == 16
 
