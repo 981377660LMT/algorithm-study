@@ -376,3 +376,5 @@ const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()
 ```
 
 `pythono位移好慢 导致线段树特别慢 还是用乘法比较好`
+
+**js 的动态数组和对象占用内存差不多 无法用动态数组优化对象的 MLE**

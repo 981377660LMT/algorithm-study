@@ -8,7 +8,7 @@
 // 3. gather 操作需要返回 `[第一个行，第一个列]`，比较方便的做法是在update操作里多传一个引用类型的参数 `resRef`，在递归过程中直接修改返回值
 // 4. 由于每次调用api都需要单点修改线段树叶子值，所以不需要懒标记和 pushDown 操作
 
-// 都是到叶子节点的单点更新 不用加懒标记
+// !都是到叶子节点的单点更新 不用加懒标记
 class SegmentTree {
   private readonly sums: number[] // 每行剩余座位数
   private readonly maxs: Uint32Array // 区间最大值

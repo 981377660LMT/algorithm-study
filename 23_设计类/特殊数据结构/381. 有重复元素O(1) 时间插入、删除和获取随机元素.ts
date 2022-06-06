@@ -1,16 +1,7 @@
-type ArrayIndexSet = Set<number>
-type ArrayValue = number
-
 class RandomizedCollection {
-  private map: Map<ArrayValue, ArrayIndexSet>
-  private arr: number[]
-  private size: number
-
-  constructor() {
-    this.map = new Map()
-    this.arr = []
-    this.size = 0
-  }
+  private readonly indexMap: Map<number, Set<number>> = new Map()
+  private readonly nums: number[] = []
+  private size = 0
 
   /**
    *
@@ -18,12 +9,11 @@ class RandomizedCollection {
    * @returns 返回 true 表示集合不包含 val
    */
   insert(val: number): boolean {
-    // console.log(this.arr, this.map)
-    !this.map.has(val) && this.map.set(val, new Set())
-    this.map.get(val)!.add(this.size)
-    this.arr.push(val)
+    !this.indexMap.has(val) && this.indexMap.set(val, new Set())
+    this.indexMap.get(val)!.add(this.size)
+    this.nums.push(val)
     this.size++
-    return this.map.get(val)!.size === 1
+    return this.indexMap.get(val)!.size === 1
   }
 
   /**
@@ -32,24 +22,24 @@ class RandomizedCollection {
    * 并约定数组末尾的 n 项是被删除过的。（其中 n 为删除次数）
    */
   remove(val: number): boolean {
-    console.log(this.arr, this.map)
-    if (!this.map.has(val) || this.map.get(val)?.size === 0) return false
+    console.log(this.nums, this.indexMap)
+    if (!this.indexMap.has(val) || this.indexMap.get(val)?.size === 0) return false
 
     const lastValIndex = this.size - 1
-    const lastVal = this.arr[lastValIndex]
-    const removeIndex = this.map.get(val)!.keys().next().value
+    const lastVal = this.nums[lastValIndex]
+    const removeIndex = this.indexMap.get(val)!.keys().next().value
 
     // 待删除的元素删除removeIndex
-    this.map.get(val)?.delete(removeIndex)
+    this.indexMap.get(val)?.delete(removeIndex)
     // 先加再删，处理一个元素的情况
     // 最后一个元素值加入removeIndex
     // 最后一个元素值移除之前最后一个元素值的位置
-    this.map.get(lastVal)?.add(removeIndex).delete(lastValIndex)
+    this.indexMap.get(lastVal)?.add(removeIndex).delete(lastValIndex)
 
     // removeIndex处置为最后一个元素值
-    this.arr[removeIndex] = lastVal
+    this.nums[removeIndex] = lastVal
     // pop操作
-    this.arr.pop()
+    this.nums.pop()
     this.size--
 
     return true
@@ -60,7 +50,7 @@ class RandomizedCollection {
    * 数组 + 哈希表
    */
   getRandom(): number {
-    return this.arr[~~(Math.random() * this.size)]
+    return this.nums[~~(Math.random() * this.size)]
   }
 }
 

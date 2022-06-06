@@ -12,20 +12,17 @@ class Solution:
             return ''
 
         # 子串分割
-        sub_sb = []
+        cands = []
         level = 0
-        pre_pos = 0
+        preStart = 0
         for i, char in enumerate(s):
-            if char == '1':
-                level += 1
-            elif char == '0':
-                level -= 1
-            # 这是一截有效的括号字符串
+            level += 1 if char == '1' else -1
+            # !这是一截有效的括号字符串 注意要保证首尾字符是1和0
             if level == 0:
-                sub_sb.append('1' + self.makeLargestSpecial(s[pre_pos + 1 : i]) + '0')
-                pre_pos = i + 1
+                cands.append('1' + self.makeLargestSpecial(s[preStart + 1 : i]) + '0')
+                preStart = i + 1
 
-        return ''.join(sorted(sub_sb, reverse=True))
+        return ''.join(sorted(cands, reverse=True))
 
 
 print(Solution().makeLargestSpecial(s="11011000"))

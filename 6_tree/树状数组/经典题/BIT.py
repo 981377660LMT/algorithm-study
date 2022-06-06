@@ -123,6 +123,82 @@ class BIT3:
         return res
 
 
+class BIT4:
+    """二维树状数组 单点修改+区间查询 每个操作都是 log(m*n)"""
+
+    def __init__(self, row: int, col: int) -> None:
+        self.row = row
+        self.col = col
+        self.tree = defaultdict(lambda: defaultdict(int))
+
+    @staticmethod
+    def _lowbit(index: int) -> int:
+        return index & -index
+
+    def update(self, row: int, col: int, delta: int) -> None:
+        """[row,col]的值加上delta"""
+        assert row >= 1 and col >= 1, 'row,col必须是正整数'
+        curRow = row
+        while curRow <= self.row:
+            curCol = col
+            while curCol <= self.col:
+                self.tree[curRow][curCol] += delta
+                curCol += self._lowbit(curCol)
+            curRow += self._lowbit(curRow)
+
+    def query(self, row: int, col: int) -> int:
+        assert row >= 1 and col >= 1, 'row,col必须是正整数'
+        res = 0
+        curRow = row
+        while curRow > 0:
+            curCol = col
+            while curCol > 0:
+                res += self.tree[curRow][curCol]
+                curCol -= self._lowbit(curCol)
+            curRow -= self._lowbit(curRow)
+        return res
+
+    def sumRange(self, row1: int, col1: int, row2: int, col2: int) -> int:
+        """查询左上角[row1,col1]到右下角[row2,col2]的和  注意索引从1开始"""
+        assert row1 >= 1 and row2 >= 1 and col1 >= 1 and col2 >= 1, 'row,col必须是正整数'
+        return (
+            self.query(row2 + 1, col2 + 1)
+            - self.query(row2 + 1, col1)
+            - self.query(row1, col2 + 1)
+            + self.query(row1, col1)
+        )
+
+
+class BIT5:
+    """二维树状数组 区间修改+区间查询 每个操作都是 log(m*n)"""
+
+    def __init__(self, row: int, col: int) -> None:
+        self.row = row
+        self.col = col
+        self.tree1 = defaultdict(lambda: defaultdict(int))
+        self.tree2 = defaultdict(lambda: defaultdict(int))
+
+    @staticmethod
+    def _lowbit(index: int) -> int:
+        return index & -index
+
+    def update(self, row1: int, col1: int, row2: int, col2: int, delta: int) -> None:
+        """[row,col]的值加上delta"""
+        ...
+
+    def query(self, row1: int, col1: int, row2: int, col2: int) -> int:
+        ...
+
+    def _update(self, row: int, col: int, delta: int) -> None:
+        """[row,col]的值加上delta"""
+        assert row >= 1 and col >= 1, 'row,col必须是正整数'
+        ...
+
+    def _query(self, row: int, col: int) -> int:
+        assert row >= 1 and col >= 1, 'row,col必须是正整数'
+        ...
+
+
 if __name__ == '__main__':
     bit1 = BIT1(100)
     bit1.add(0 + 1, 2)
@@ -142,5 +218,8 @@ if __name__ == '__main__':
     assert bit2.query(0, 1000) == 2
     assert bit2.query(-10000, 1000) == 2
 
-    bit3 = BIT3(100)
+    bit4 = BIT4(100, 100)
+    bit4.update(1, 1, 2)
+    print(bit4.sumRange(1, 1, 1, 1))
+    assert bit4.sumRange(1, 1, 1, 1) == 2
 

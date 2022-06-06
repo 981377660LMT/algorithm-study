@@ -41,6 +41,7 @@ class Solution:
 
         # !反向倒着修改的技巧 这种做法的好处在于，
         # !对于 operations 靠前的那些 x 到 y 的映射，我们是知道 x 最终要映射到哪个数字的。
+        # !最终所有的点的属性只跟对其最后一次更新有关，所以可以选择逆序模拟
         next = dict()
         for a, b in operations[::-1]:
             next[a] = next.get(b, b)

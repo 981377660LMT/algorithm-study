@@ -1,6 +1,6 @@
-from collections import Counter
+from collections import Counter, deque
 from heapq import heappop, heappush, heapify
-from collections import deque
+
 
 # 1.先把频率最大的字母扔进窗口(贪心)
 # 2.借助最大堆和队列(k长度的滑窗)
@@ -8,6 +8,7 @@ from collections import deque
 
 class Solution:
     def rearrangeString(self, s: str, k: int) -> str:
+        """重排后的字符串中相同字母的位置间隔距离 至少 为 k"""
         if k == 0:
             return s
 

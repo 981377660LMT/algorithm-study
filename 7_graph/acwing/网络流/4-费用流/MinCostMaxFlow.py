@@ -33,6 +33,11 @@ class MinCostMaxFlow(Generic[V]):
         self._reGraph[toV].append(len_ - 1)
 
     def work(self) -> Tuple[int, int]:
+        """
+        Returns:
+            Tuple[int, int]: [最大流,最小费用]
+        """
+
         def spfa() -> int:
             """spfa沿着最短路寻找增广路径  有负cost的边不能用dijkstra"""
             nonlocal dist

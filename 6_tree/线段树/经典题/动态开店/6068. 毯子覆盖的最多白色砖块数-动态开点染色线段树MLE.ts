@@ -1,9 +1,7 @@
 class SegmentTreeNode {
-  left!: SegmentTreeNode
-  right!: SegmentTreeNode
-  isLazy = false
-  lazyValue = 0
   value = 0
+  left?: SegmentTreeNode
+  right?: SegmentTreeNode
 }
 
 /**
@@ -20,10 +18,14 @@ class SegmentTree {
   }
 
   update(left: number, right: number, target: 0 | 1): void {
+    if (right > this.upper) right = this.upper
+    if (left < this.lower) left = this.lower
     this._update(left, right, this.lower, this.upper, this.root, target)
   }
 
   query(left: number, right: number): number {
+    if (right > this.upper) right = this.upper
+    if (left < this.lower) left = this.lower
     return this._query(left, right, this.lower, this.upper, this.root)
   }
 
@@ -41,15 +43,13 @@ class SegmentTree {
   ): void {
     if (L <= l && r <= R) {
       root.value = (r - l + 1) * target
-      root.lazyValue = target
-      root.isLazy = true
       return
     }
 
     const mid = Math.floor((l + r) / 2)
     this.pushDown(l, mid, r, root)
-    if (L <= mid) this._update(L, R, l, mid, root.left, target)
-    if (mid < R) this._update(L, R, mid + 1, r, root.right, target)
+    if (L <= mid) this._update(L, R, l, mid, root.left!, target)
+    if (mid < R) this._update(L, R, mid + 1, r, root.right!, target)
     this.pushUp(root)
   }
 
@@ -61,29 +61,30 @@ class SegmentTree {
     const mid = Math.floor((l + r) / 2)
     this.pushDown(l, mid, r, root)
     let res = 0
-    if (L <= mid) res += this._query(L, R, l, mid, root.left)
-    if (mid < R) res += this._query(L, R, mid + 1, r, root.right)
+    if (L <= mid) res += this._query(L, R, l, mid, root.left!)
+    if (mid < R) res += this._query(L, R, mid + 1, r, root.right!)
     return res
   }
 
   private pushDown(left: number, mid: number, right: number, root: SegmentTreeNode): void {
     !root.left && (root.left = new SegmentTreeNode())
     !root.right && (root.right = new SegmentTreeNode())
-    if (root.isLazy) {
-      root.left.isLazy = true
-      root.right.isLazy = true
-      root.left.lazyValue = root.lazyValue
-      root.right.lazyValue = root.lazyValue
-      root.left.value = root.lazyValue * (mid - left + 1)
-      root.right.value = root.lazyValue * (right - mid)
-
-      root.isLazy = false
-      root.lazyValue = 0
+    if (root.value === right - left + 1) {
+      root.left.value = mid - left + 1
+      root.right.value = right - mid
+    } else if (root.value === 0) {
+      root.left.value = 0
+      root.right.value = 0
     }
   }
 
   private pushUp(root: SegmentTreeNode): void {
-    root.value = root.left.value + root.right.value
+    root.value = root.left!.value + root.right!.value
+  }
+
+  private checkRange(l: number, r: number): void {
+    if (l < this.lower || r > this.upper)
+      throw new RangeError(`[${l}, ${r}] out of range: [${this.lower}, ${this.upper}]`)
   }
 }
 

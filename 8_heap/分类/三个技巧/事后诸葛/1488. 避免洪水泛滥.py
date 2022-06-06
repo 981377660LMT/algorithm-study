@@ -18,6 +18,8 @@ from heapq import heappush, heappop
 # 贪心+优先队列, 从前向后遍历, 将`已经满了的湖的下一个下雨日期`加入优先队列中,
 # 遇到0优先抽当前已满的湖中下次下雨日期距离现在最近的湖
 # https://leetcode-cn.com/problems/avoid-flood-in-the-city/solution/tan-xin-you-xian-dui-lie-he-xin-si-lu-yi-ju-hua-by/
+
+
 class Solution:
     def avoidFlood(self, rains: List[int]) -> List[int]:
         n = len(rains)

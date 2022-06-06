@@ -14,10 +14,9 @@ class TreeNode {
   }
 }
 
+// !区间染色不需要用懒标记记录更新状态
 class SegmentTree {
   private readonly tree: Uint32Array
-  private readonly lazyValue: Uint8Array
-  private readonly isLazy: Uint8Array
   private readonly size: number
 
   /**
@@ -27,8 +26,6 @@ class SegmentTree {
   constructor(size: number) {
     this.size = size
     this.tree = new Uint32Array(size << 2)
-    this.lazyValue = new Uint8Array(size << 2)
-    this.isLazy = new Uint8Array(size << 2)
   }
 
   query(l: number, r: number): number {
@@ -59,8 +56,6 @@ class SegmentTree {
 
   private _update(rt: number, L: number, R: number, l: number, r: number, target: 0 | 1): void {
     if (L <= l && r <= R) {
-      this.isLazy[rt] = 1
-      this.lazyValue[rt] = target
       this.tree[rt] = target === 1 ? r - l + 1 : 0
       return
     }
@@ -77,17 +72,12 @@ class SegmentTree {
   }
 
   private pushDown(rt: number, l: number, r: number, mid: number): void {
-    if (this.isLazy[rt]) {
-      const target = this.lazyValue[rt]
-      this.lazyValue[rt << 1] = target
-      this.lazyValue[(rt << 1) | 1] = target
-      this.tree[rt << 1] = target === 1 ? mid - l + 1 : 0
-      this.tree[(rt << 1) | 1] = target === 1 ? r - mid : 0
-      this.isLazy[rt << 1] = 1
-      this.isLazy[(rt << 1) | 1] = 1
-
-      this.lazyValue[rt] = 0
-      this.isLazy[rt] = 0
+    if (this.tree[rt] === r - l + 1) {
+      this.tree[rt << 1] = mid - l + 1
+      this.tree[(rt << 1) | 1] = r - mid
+    } else if (this.tree[rt] === 0) {
+      this.tree[rt << 1] = 0
+      this.tree[(rt << 1) | 1] = 0
     }
   }
 
