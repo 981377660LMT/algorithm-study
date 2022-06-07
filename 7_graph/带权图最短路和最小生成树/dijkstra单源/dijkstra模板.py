@@ -3,7 +3,7 @@
 from collections import defaultdict
 from functools import lru_cache
 from heapq import heappop, heappush
-from typing import DefaultDict, Hashable, List, Tuple, TypeVar, overload
+from typing import DefaultDict, Hashable, List, Optional, Tuple, TypeVar, overload
 
 INF = int(1e20)
 Vertex = TypeVar('Vertex', bound=Hashable)
@@ -20,7 +20,7 @@ def dijkstra(adjMap: Graph, start: Vertex, end: Vertex) -> int:
     ...
 
 
-def dijkstra(adjMap: Graph, start: Vertex, end: Vertex | None = None):
+def dijkstra(adjMap: Graph, start: Vertex, end: Optional[Vertex] = None):
     """时间复杂度O((V+E)logV)"""
     dist = defaultdict(lambda: INF)
     dist[start] = 0  # 注意这里不要忘记初始化pq里的
@@ -40,6 +40,7 @@ def dijkstra(adjMap: Graph, start: Vertex, end: Vertex | None = None):
     return INF if end is not None else dist
 
 
+##########################################################################
 def dijkstra2(
     n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int
 ) -> Tuple[List[int], List[List[int]]]:

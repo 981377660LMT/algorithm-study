@@ -2,7 +2,7 @@ from collections import defaultdict
 from heapq import heappop, heappush
 from typing import List
 
-
+# dijk求最长路
 class Solution:
     def maxProbability(
         self, n: int, edges: List[List[int]], succProb: List[float], start: int, end: int

@@ -1,10 +1,21 @@
+# 1≤N≤500,
+# 1≤M≤5000,
+
+# n个点m条边的网络，给定源点S和汇点T，求如果有这样边：
+# !只给其扩大容量之后整个流网络的最大流能够变大，
+# 对于这样的边我们称之为`关键边`。求这样的边的个数
+# https://www.acwing.com/solution/content/73355/
+
+
+# 1.先对原图跑一次最大流，求出原图的残量网络
+# 2.对于边(u,v)，判断从s->u和从v->t是否都存在流量大于0的路
+# 3.如果某条边上的流量是满的 并且左右端点可以分别到达源点、汇点 就是关键边
+
 from collections import defaultdict
-from typing import DefaultDict, List
+from typing import DefaultDict, List, Set
 from collections import defaultdict, deque
 
 Graph = DefaultDict[int, DefaultDict[int, int]]  # 有向带权图,权值为容量
-
-# 1 <= m, n <= 300
 
 
 class Dinic:
@@ -33,8 +44,9 @@ class Dinic:
             while True:
                 if flow >= minFlow:
                     break
-                try:
-                    child = next(curArc[cur])
+
+                child = next(curArc[cur], None)
+                if child is not None:
                     if (depth[child] == depth[cur] + 1) and (self._reGraph[cur][child] > 0):
                         nextFlow = dfsWithCurArc(
                             child, min(minFlow - flow, self._reGraph[cur][child])
@@ -44,8 +56,9 @@ class Dinic:
                         self._reGraph[cur][child] -= nextFlow
                         self._reGraph[child][cur] += nextFlow
                         flow += nextFlow
-                except StopIteration:
+                else:
                     break
+
             return flow
 
         self._updateRedisualGraph()
@@ -70,6 +83,10 @@ class Dinic:
         assert v1 in self._graph and v2 in self._graph[v1]
         return self._graph[v1][v2] - self._reGraph[v1][v2]
 
+    def getRemainOfEdge(self, v1: int, v2: int) -> int:
+        assert v1 in self._graph and v2 in self._graph[v1]
+        return self._reGraph[v1][v2]
+
     def _updateRedisualGraph(self) -> None:
         self._reGraph = defaultdict(lambda: defaultdict(int))
         for cur in self._graph:
@@ -78,37 +95,43 @@ class Dinic:
                 self._reGraph[next].setdefault(cur, 0)
 
 
-# 相邻两个1组成一条边，每条边都要去掉一个端点，其实是找最小点覆盖，即求二分图的最大匹配，跑匈牙利算法
-class Solution:
-    def minimumOperations(self, grid: List[List[int]]) -> int:
-        ROW, COL = len(grid), len(grid[0])
-        adjMap = defaultdict(lambda: defaultdict(int))
-        for r in range(ROW):
-            for c in range(COL):
-                if grid[r][c] == 1:
-                    cur = r * COL + c
-                    for dr, dc in [(0, 1), (1, 0)]:
-                        nr, nc = r + dr, c + dc
-                        if 0 <= nr < ROW and 0 <= nc < COL and grid[nr][nc] == 1:
-                            next = nr * COL + nc
-                            v1, v2 = (next, cur) if (r + c) & 1 else (cur, next)
-                            adjMap[-1][v1] = 1
-                            adjMap[v1][v2] = 1
-                            adjMap[v2][int(1e9)] = 1
-        return Dinic(adjMap).calMaxFlow(-1, int(1e9))
+# 城市编号从 0 到 N−1。
+# 生产日常商品的城市为 0 号城市，首都为 N−1 号城市。
+def dfs(cur: int, visited: Set[int], graph: Graph, isRevered: bool) -> None:
+    visited.add(cur)
+    for next in graph[cur]:
+        remain = (
+            maxFlow.getRemainOfEdge(cur, next)
+            if not isRevered
+            else maxFlow.getRemainOfEdge(next, cur)
+        )
+        if next not in visited and remain != 0:  # 可以继续走
+            dfs(next, visited, graph, isRevered)
 
 
-print(Solution().minimumOperations(grid=[[1, 1, 0], [0, 1, 1], [1, 1, 1]]))
-1 1
-1 0
-1 -1
-0 4
-1 5
-1 4
-1 -1
-0 8
-1 7
-1 8
-1 -1
-0 6
-0 -1
+n, m = map(int, input().split())
+adjMap = defaultdict(lambda: defaultdict(int))
+rAdjMap = defaultdict(lambda: defaultdict(int))
+for _ in range(m):
+    u, v, w = map(int, input().split())
+    adjMap[u][v] += w
+    rAdjMap[v][u] += w
+
+maxFlow = Dinic(adjMap)
+maxFlow.calMaxFlow(0, n - 1)
+
+# !如果某条边上的流量是满的 就可以作为候选
+visited1, visited2 = set(), set()  # 可以到源点的点 和 可以到汇点的点
+dfs(0, visited1, adjMap, False)
+dfs(n - 1, visited2, rAdjMap, True)
+
+res = 0
+for cur in adjMap:
+    for next in adjMap[cur]:
+        if (
+            (cur in visited1)
+            and (next in visited2)
+            and maxFlow.getRemainOfEdge(cur, next) == 0  # 满流
+        ):
+            res += 1
+print(res)

@@ -3,9 +3,9 @@
 // 长度为这两个格子本身权值的差的绝对值；
 // 需要找到一条从左上角到右下角的「最短路径」，
 
-// 其中路径的长度定义为路径上所有边的权值的最大值。
+import { useUnionFindArray } from '../../../14_并查集/useUnionFind'
 
-import { useUnionFindArray } from '../../../14_并查集/推荐使用并查集精简版'
+// 其中路径的长度定义为路径上所有边的权值的最大值。
 
 // 我们可以将所有边按照长度进行排序并依次添加进并查集，直到左上角和右下角连通为止
 function minimumEffortPath(heights: number[][]): number {

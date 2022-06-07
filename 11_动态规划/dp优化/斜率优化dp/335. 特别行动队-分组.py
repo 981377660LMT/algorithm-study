@@ -48,7 +48,7 @@ dp[0] = 0
 queue = deque([0])
 
 for i in range(1, n + 1):
-    # 1.维护队列最值(斜率单调性)
+    # 1.不是答案的直线出队(斜率单调性)
     while len(queue) >= 2 and calSlope(queue[0], queue[1]) >= 2 * a * preSum[i]:
         queue.popleft()
 

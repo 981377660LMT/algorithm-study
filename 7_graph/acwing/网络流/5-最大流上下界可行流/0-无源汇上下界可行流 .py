@@ -1,10 +1,12 @@
-from collections import defaultdict
-from typing import DefaultDict, List
+# 给定一个包含 n 个点 m 条边的有向图，每条边都有一个流量下界和流量上界。
+# !可行流：求一种`可行方案`使得在所有点满足流量平衡条件的前提下，所有边满足流量限制
+# 1≤n≤200,
+# 1≤m≤10200,
+
+from typing import DefaultDict
 from collections import defaultdict, deque
 
 Graph = DefaultDict[int, DefaultDict[int, int]]  # 有向带权图,权值为容量
-
-# 1 <= m, n <= 300
 
 
 class Dinic:
@@ -33,8 +35,9 @@ class Dinic:
             while True:
                 if flow >= minFlow:
                     break
-                try:
-                    child = next(curArc[cur])
+
+                child = next(curArc[cur], None)
+                if child is not None:
                     if (depth[child] == depth[cur] + 1) and (self._reGraph[cur][child] > 0):
                         nextFlow = dfsWithCurArc(
                             child, min(minFlow - flow, self._reGraph[cur][child])
@@ -44,7 +47,7 @@ class Dinic:
                         self._reGraph[cur][child] -= nextFlow
                         self._reGraph[child][cur] += nextFlow
                         flow += nextFlow
-                except StopIteration:
+                else:
                     break
             return flow
 
@@ -67,10 +70,17 @@ class Dinic:
         return res
 
     def getFlowOfEdge(self, v1: int, v2: int) -> int:
+        """边的流量=容量-残量"""
         assert v1 in self._graph and v2 in self._graph[v1]
         return self._graph[v1][v2] - self._reGraph[v1][v2]
 
+    def getRemainOfEdge(self, v1: int, v2: int) -> int:
+        """边的残量(剩余的容量)"""
+        assert v1 in self._graph and v2 in self._graph[v1]
+        return self._reGraph[v1][v2]
+
     def _updateRedisualGraph(self) -> None:
+        """残量图 存储每条边的剩余流量"""
         self._reGraph = defaultdict(lambda: defaultdict(int))
         for cur in self._graph:
             for next in self._graph[cur]:
@@ -78,37 +88,37 @@ class Dinic:
                 self._reGraph[next].setdefault(cur, 0)
 
 
-# 相邻两个1组成一条边，每条边都要去掉一个端点，其实是找最小点覆盖，即求二分图的最大匹配，跑匈牙利算法
-class Solution:
-    def minimumOperations(self, grid: List[List[int]]) -> int:
-        ROW, COL = len(grid), len(grid[0])
-        adjMap = defaultdict(lambda: defaultdict(int))
-        for r in range(ROW):
-            for c in range(COL):
-                if grid[r][c] == 1:
-                    cur = r * COL + c
-                    for dr, dc in [(0, 1), (1, 0)]:
-                        nr, nc = r + dr, c + dc
-                        if 0 <= nr < ROW and 0 <= nc < COL and grid[nr][nc] == 1:
-                            next = nr * COL + nc
-                            v1, v2 = (next, cur) if (r + c) & 1 else (cur, next)
-                            adjMap[-1][v1] = 1
-                            adjMap[v1][v2] = 1
-                            adjMap[v2][int(1e9)] = 1
-        return Dinic(adjMap).calMaxFlow(-1, int(1e9))
+# 无源汇上下界可行流
+n, m = map(int, input().split())
+edge = defaultdict(lambda: [0, 0])
+diff = defaultdict(int)
+adjMap = defaultdict(lambda: defaultdict(int))
+for _ in range(m):
+    u, v, lower, upper = map(int, input().split())
+    edge[(u, v)][0] = lower
+    edge[(u, v)][1] = upper
+    diff[u] -= lower
+    diff[v] += lower
+    adjMap[u][v] += upper - lower
+
+fullFlow = 0
+START, END, OFFSET = -1, -2, int(1e4)
+for key, delta in diff.items():
+    if delta > 0:
+        fullFlow += delta
+        adjMap[START][key] += delta
+    elif delta < 0:
+        adjMap[key][END] += -delta
+
+# ///////////////////////////////////////////
+maxFlow = Dinic(adjMap)
+res = maxFlow.calMaxFlow(START, END)
+if res != fullFlow:
+    print('NO')
+    exit(0)
+print('YES')
+for (u, v) in edge:
+    print(maxFlow.getFlowOfEdge(u, v) + edge[(u, v)][0])
 
 
-print(Solution().minimumOperations(grid=[[1, 1, 0], [0, 1, 1], [1, 1, 1]]))
-1 1
-1 0
-1 -1
-0 4
-1 5
-1 4
-1 -1
-0 8
-1 7
-1 8
-1 -1
-0 6
-0 -1
+# 有问题

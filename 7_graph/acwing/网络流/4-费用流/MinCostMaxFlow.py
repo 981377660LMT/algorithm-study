@@ -15,6 +15,17 @@ class Edge(Generic[V]):
     flow: int
 
 
+# class Edge(Generic[V]):
+#     __slots__ = ('fromV', 'toV', 'cap', 'cost', 'flow')
+
+#     def __init__(self, fromV: V, toV: V, cap: int, cost: int, flow: int) -> None:
+#         self.fromV = fromV
+#         self.toV = toV
+#         self.cap = cap
+#         self.cost = cost
+#         self.flow = flow
+
+
 class MinCostMaxFlow(Generic[V]):
     """最小费用流的连续最短路算法复杂度为流量*最短路算法复杂度"""
 

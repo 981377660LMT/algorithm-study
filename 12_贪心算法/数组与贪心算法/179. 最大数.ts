@@ -8,11 +8,11 @@
  * @summary
  * 看到要求两个整数 x,y 如何拼接得到结果更大时，就想到先转字符串，然后比较 x+y 和 y+x。这是经验了。
  */
-var largestNumber = function (nums: number[]): string {
-  // @ts-ignore
-  const sorted = nums.sort((a, b) => b.toString() + a.toString() - (a.toString() + b.toString()))
-
-  return sorted.join('').replace(/^0*/, '') || '0'
+function largestNumber(nums: number[]): string {
+  const arr = nums.map(String)
+  arr.sort((a, b) => (a + b > b + a ? -1 : 1))
+  return BigInt(arr.join('')).toString() // 去除前导零
+  return arr.join('').replace(/^0*/, '') || '0'
 }
 
 console.log(largestNumber([3, 30, 34, 5, 9]))

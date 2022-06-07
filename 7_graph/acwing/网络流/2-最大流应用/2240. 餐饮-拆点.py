@@ -1,10 +1,18 @@
+# 约翰共有 N 头奶牛，其中第 i 头奶牛有 Fi 种喜欢的食物以及 Di 种喜欢的饮料。
+# 约翰需要给每头奶牛分配一种食物和一种饮料，并使得有吃有喝的奶牛数量尽可能大。
+# 每种食物或饮料都只有一份，所以只能分配给一头奶牛食用
+# 输出一个整数，表示能够有吃有喝的奶牛的最大数量。
+'''
+把牛拆成两个点，两个点连接容量是1的边，限制每一头牛只能用一次
+'''
+# !边有限制 容量设在边上 点有限制 点拆成in 和 out
+
+
 from collections import defaultdict
-from typing import DefaultDict, List
+from typing import DefaultDict, List, Set
 from collections import defaultdict, deque
 
 Graph = DefaultDict[int, DefaultDict[int, int]]  # 有向带权图,权值为容量
-
-# 1 <= m, n <= 300
 
 
 class Dinic:
@@ -33,8 +41,9 @@ class Dinic:
             while True:
                 if flow >= minFlow:
                     break
-                try:
-                    child = next(curArc[cur])
+
+                child = next(curArc[cur], None)
+                if child is not None:
                     if (depth[child] == depth[cur] + 1) and (self._reGraph[cur][child] > 0):
                         nextFlow = dfsWithCurArc(
                             child, min(minFlow - flow, self._reGraph[cur][child])
@@ -44,8 +53,9 @@ class Dinic:
                         self._reGraph[cur][child] -= nextFlow
                         self._reGraph[child][cur] += nextFlow
                         flow += nextFlow
-                except StopIteration:
+                else:
                     break
+
             return flow
 
         self._updateRedisualGraph()
@@ -70,6 +80,10 @@ class Dinic:
         assert v1 in self._graph and v2 in self._graph[v1]
         return self._graph[v1][v2] - self._reGraph[v1][v2]
 
+    def getRemainOfEdge(self, v1: int, v2: int) -> int:
+        assert v1 in self._graph and v2 in self._graph[v1]
+        return self._reGraph[v1][v2]
+
     def _updateRedisualGraph(self) -> None:
         self._reGraph = defaultdict(lambda: defaultdict(int))
         for cur in self._graph:
@@ -78,37 +92,40 @@ class Dinic:
                 self._reGraph[next].setdefault(cur, 0)
 
 
-# 相邻两个1组成一条边，每条边都要去掉一个端点，其实是找最小点覆盖，即求二分图的最大匹配，跑匈牙利算法
-class Solution:
-    def minimumOperations(self, grid: List[List[int]]) -> int:
-        ROW, COL = len(grid), len(grid[0])
-        adjMap = defaultdict(lambda: defaultdict(int))
-        for r in range(ROW):
-            for c in range(COL):
-                if grid[r][c] == 1:
-                    cur = r * COL + c
-                    for dr, dc in [(0, 1), (1, 0)]:
-                        nr, nc = r + dr, c + dc
-                        if 0 <= nr < ROW and 0 <= nc < COL and grid[nr][nc] == 1:
-                            next = nr * COL + nc
-                            v1, v2 = (next, cur) if (r + c) & 1 else (cur, next)
-                            adjMap[-1][v1] = 1
-                            adjMap[v1][v2] = 1
-                            adjMap[v2][int(1e9)] = 1
-        return Dinic(adjMap).calMaxFlow(-1, int(1e9))
+n, food, drink = map(int, input().split())
+foodLike = defaultdict(set)
+drinkLike = defaultdict(set)
+for cowId in range(n):
+    f, d, *rest = map(int, input().split())
+    for fid in rest[:f]:
+        foodLike[cowId].add(fid)
+    for did in rest[f:]:
+        drinkLike[cowId].add(did)
 
+START, END = -1, -2
+OFFSET1 = int(1e5)
+OFFSET2 = int(2e5)
+OFFSET3 = int(3e5)
+OFFSET4 = int(4e5)
+adjMap = defaultdict(lambda: defaultdict(int))
 
-print(Solution().minimumOperations(grid=[[1, 1, 0], [0, 1, 1], [1, 1, 1]]))
-1 1
-1 0
-1 -1
-0 4
-1 5
-1 4
-1 -1
-0 8
-1 7
-1 8
-1 -1
-0 6
-0 -1
+# 虚拟源点到food
+for fid in range(1, food + 1):
+    adjMap[START][fid + OFFSET1] = 1
+# food到牛的in
+for cowId in foodLike:
+    for fid in foodLike[cowId]:
+        adjMap[fid + OFFSET1][cowId + OFFSET2] = 1
+# 牛的in到牛的out
+for cowId in range(n):
+    adjMap[cowId + OFFSET2][cowId + OFFSET3] = 1
+# 牛的out到drink
+for cowId in drinkLike:
+    for did in drinkLike[cowId]:
+        adjMap[cowId + OFFSET3][did + OFFSET4] = 1
+# drink到虚拟汇点
+for did in range(1, drink + 1):
+    adjMap[did + OFFSET4][END] = 1
+
+maxFlow = Dinic(adjMap)
+print(maxFlow.calMaxFlow(START, END))

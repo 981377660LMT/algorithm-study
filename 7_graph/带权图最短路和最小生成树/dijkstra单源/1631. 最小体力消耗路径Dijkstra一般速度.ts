@@ -1,10 +1,8 @@
-import { MinHeap } from '../../../2_queue/minheap'
+import { MinHeap } from '../../../8_heap/MinHeap'
 
 // 单源最短距离问题：权值已知
-type CurX = number
-type CurY = number
-type Weight = number
-type Edge = [CurX, CurY, Weight]
+type Edge = [x: number, y: number, weight: number]
+
 function minimumEffortPath(heights: number[][]): number {
   const m = heights.length
   const n = heights[0].length
@@ -21,12 +19,12 @@ function minimumEffortPath(heights: number[][]): number {
   const visited = new Set<number>()
 
   const comparator = (a: Edge, b: Edge) => a[2] - b[2]
-  const priorityQueue = new MinHeap<Edge>(comparator)
-  priorityQueue.push([0, 0, 0])
+  const pq = new MinHeap<Edge>(comparator)
+  pq.heappush([0, 0, 0])
 
-  while (priorityQueue.size) {
+  while (pq.size) {
     // 1.每次都从离原点最近的没更新过的点开始更新(性能瓶颈：可使用优先队列优化成ElogE)
-    const [curX, curY, maxWeight] = priorityQueue.shift()!
+    const [curX, curY, maxWeight] = pq.heappop()!
     if (curX === m - 1 && curY === n - 1) return maxWeight
     const key = curX * n + curY
     if (visited.has(key)) continue
@@ -39,7 +37,7 @@ function minimumEffortPath(heights: number[][]): number {
       const nextX = curX + dx
       const nextY = curY + dy
       if (nextX >= 0 && nextY >= 0 && nextX < m && nextY < n && !visited.has(nextX * n + nextY)) {
-        priorityQueue.push([
+        pq.heappush([
           nextX,
           nextY,
           Math.max(maxWeight, Math.abs(heights[nextX][nextY] - heights[curX][curY])),

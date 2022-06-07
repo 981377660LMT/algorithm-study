@@ -115,3 +115,4 @@ function longestRepeating(s: string, queryCharacters: string, queryIndices: numb
 }
 
 console.log(longestRepeating('babacc', 'bcb', [1, 3, 3]))
+export {}

@@ -1,3 +1,5 @@
+# https://www.acwing.com/activity/content/code/content/2053055/
+
 import sys
 from typing import DefaultDict
 from collections import defaultdict, deque
@@ -31,8 +33,9 @@ class Dinic:
             while True:
                 if flow >= minFlow:
                     break
-                try:
-                    child = next(curArc[cur])
+
+                child = next(curArc[cur], None)
+                if child is not None:
                     if (depth[child] == depth[cur] + 1) and (self._reGraph[cur][child] > 0):
                         nextFlow = dfsWithCurArc(
                             child, min(minFlow - flow, self._reGraph[cur][child])
@@ -42,7 +45,7 @@ class Dinic:
                         self._reGraph[cur][child] -= nextFlow
                         self._reGraph[child][cur] += nextFlow
                         flow += nextFlow
-                except StopIteration:
+                else:
                     break
             return flow
 
@@ -65,9 +68,17 @@ class Dinic:
         return res
 
     def getFlowOfEdge(self, v1: int, v2: int) -> int:
+        """边的流量=容量-残量"""
+        assert v1 in self._graph and v2 in self._graph[v1]
         return self._graph[v1][v2] - self._reGraph[v1][v2]
 
+    def getRemainOfEdge(self, v1: int, v2: int) -> int:
+        """边的残量(剩余的容量)"""
+        assert v1 in self._graph and v2 in self._graph[v1]
+        return self._reGraph[v1][v2]
+
     def _updateRedisualGraph(self) -> None:
+        """残量图 存储每条边的剩余流量"""
         self._reGraph = defaultdict(lambda: defaultdict(int))
         for cur in self._graph:
             for next in self._graph[cur]:
