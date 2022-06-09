@@ -18,6 +18,8 @@ class Trie:
         self.root = TrieNode()
 
     def insert(self, word: str) -> None:
+        if not word:
+            return
         node = self.root
         for char in word:
             node = node.children[char]
@@ -26,6 +28,8 @@ class Trie:
 
     def search(self, word: str) -> int:
         """是否存在word，返回个数"""
+        if not word:
+            return 0
         node = self.root
         for char in word:
             if char not in node.children:
@@ -35,6 +39,8 @@ class Trie:
 
     def startsWith(self, prefix: str) -> int:
         """是否存在以prefix为前缀的单词，返回个数"""
+        if not prefix:
+            return 0
         node = self.root
         for char in prefix:
             if char not in node.children:
@@ -43,6 +49,8 @@ class Trie:
         return node.preCount
 
     def delete(self, word: str) -> None:
+        if not word:
+            return
         node = self.root
         for char in word:
             if char not in node.children:

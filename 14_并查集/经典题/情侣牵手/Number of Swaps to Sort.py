@@ -51,7 +51,7 @@ class Solution:
         n = len(nums)
         uf = UnionFindArray(n)
         pairs = [(num, i) for i, num in enumerate(nums)]
-        pairs.sort()
+        pairs.sort(key=lambda x: x[0])
 
         for i in range(n):
             # 混淆的组相连

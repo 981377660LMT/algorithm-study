@@ -16,13 +16,13 @@ from collections import defaultdict, deque
 
 class Solution:
     def minimumTime(self, n: int, relations: List[List[int]], time: List[int]) -> int:
-        indegree = [0] * (n + 1)
-        adjMap = defaultdict(list)
+        deg = [0] * (n + 1)
+        adjMap = defaultdict(set)
 
         # 建图
         for u, v in relations:
-            adjMap[u].append(v)
-            indegree[v] += 1
+            adjMap[u].add(v)
+            deg[v] += 1
 
         # 记录虚拟原点到达每个点处所需要的距离
         dist = [0] * (n + 1)
@@ -30,19 +30,18 @@ class Solution:
         # 将入度为 0 的点加入队列，更新距离
         queue = deque()
         for i in range(1, n + 1):
-            if indegree[i] == 0:
+            if deg[i] == 0:
                 queue.append(i)
                 dist[i] = time[i - 1]
 
         while queue:
             cur = queue.popleft()
-            dis = dist[cur]
             for next in adjMap[cur]:
                 cost = time[next - 1]
-                # 更新到next的距离，取max因为每条路都要走通所以取最大值
-                dist[next] = max(dist[next], dis + cost)
-                indegree[next] -= 1
-                if indegree[next] == 0:
+                # 拓扑序求最长路O(n)
+                dist[next] = max(dist[next], dist[cur] + cost)
+                deg[next] -= 1
+                if deg[next] == 0:
                     queue.append(next)
 
         return max(dist)

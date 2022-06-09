@@ -1,3 +1,7 @@
+// 前缀树是一个树状的数据结构，
+// 用于高效地存储和检索一系列字符串的前缀。
+// 前缀树有许多应用，如自动补全和拼写检查
+
 class TrieNode {
   val: string
   asPrefix: number // 插入word时，每一个结点+1
@@ -50,7 +54,7 @@ class Trie {
   }
 
   // 从前缀树中移除字符串 word
-  erase(word: string): void {
+  discard(word: string): void {
     let root = this.root
     for (const char of word) {
       if (!root.children.has(char)) return

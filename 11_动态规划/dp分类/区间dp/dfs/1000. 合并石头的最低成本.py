@@ -18,6 +18,7 @@ INF = int(1e20)
 class Solution:
     def mergeStones(self, stones: List[int], k: int) -> int:
         prefix = [0] + list(accumulate(stones))
+        
 
         @lru_cache(None)
         def dfs(left: int, right: int, targetPile: int) -> int:

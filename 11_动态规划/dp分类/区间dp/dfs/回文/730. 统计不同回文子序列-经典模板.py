@@ -9,17 +9,19 @@ MOD = int(1e9 + 7)
 
 class Solution:
     def countPalindromicSubsequences(self, s: str) -> int:
+        """回文子序列个数"""
+
         @lru_cache(None)
         def dfs(left: int, right: int) -> int:
             if left > right:
                 return 0
 
             res = 0
-            for char in 'abcd':
-                i, j = s.find(char, left, right + 1), s.rfind(char, left, right + 1)
+            for newChar in 'abcd':
+                i, j = s.find(newChar, left, right + 1), s.rfind(newChar, left, right + 1)
                 if i == -1 or j == -1:
                     continue
-                res += 1 if i == j else 2 + dfs(i + 1, j - 1)  # 边界两个回文+里面的子序列再带上外面这对
+                res += 1 if i == j else 2 + dfs(i + 1, j - 1)  # `边界两个回文`+`里面的子序列再带上外面这对`
             return res % MOD
 
         n = len(s)
@@ -27,6 +29,7 @@ class Solution:
 
 
 print(Solution().countPalindromicSubsequences('bccb'))
+print(Solution().countPalindromicSubsequences('bb'))
 # 输出：6
 # 解释：
 # 6 个不同的非空回文子字符序列分别为：'b', 'c', 'bb', 'cc', 'bcb', 'bccb'。

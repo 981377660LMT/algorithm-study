@@ -15,23 +15,23 @@ from typing import List
 class SegmentTree:
     def __init__(self, s: str) -> None:
         n = len(s)
-        self.tree = [0 for _ in range(n << 2)]  # [left,right]区间内的最大连续数
-        self.pre = [0 for _ in range(n << 2)]  # 区间左端点的连续数
-        self.suf = [0 for _ in range(n << 2)]  # 区间右端点的连续数
+        self.tree = [0 for _ in range(n * 4)]  # [left,right]区间内的最大连续数
+        self.pre = [0 for _ in range(n * 4)]  # 区间左端点为起点的连续数
+        self.suf = [0 for _ in range(n * 4)]  # 区间右端点为终点的连续数
         self.chars = list(s)
-        self.build(1, 1, n, s)
+        self.build(1, 1, n)
 
-    def build(self, rt: int, left: int, right: int, string: str) -> None:
+    def build(self, rt: int, left: int, right: int) -> None:
         if left == right:
             self.tree[rt] = 1
             self.pre[rt] = 1
             self.suf[rt] = 1
             return
 
-        mid = (left + right) >> 1
-        self.build(rt << 1, left, mid, string)
-        self.build(rt << 1 | 1, mid + 1, right, string)
-        self.pushUp(rt, left, right, mid)
+        mid = (left + right) // 2
+        self.build(rt * 2, left, mid)
+        self.build(rt * 2 + 1, mid + 1, right)
+        self._pushUp(rt, left, right, mid)
 
     def update(self, rt: int, L: int, R: int, left: int, right: int, target: str) -> None:
         """区间修改，L,R表示需要update的范围,l,r表示当前节点的范围"""
@@ -43,12 +43,12 @@ class SegmentTree:
             self.chars[left - 1] = target
             return
 
-        mid = (left + right) >> 1
+        mid = (left + right) // 2
         if L <= mid:
-            self.update(rt << 1, L, R, left, mid, target)
+            self.update(rt * 2, L, R, left, mid, target)
         if mid + 1 <= R:
-            self.update(rt << 1 | 1, L, R, mid + 1, right, target)
-        self.pushUp(rt, left, right, mid)
+            self.update(rt * 2 + 1, L, R, mid + 1, right, target)
+        self._pushUp(rt, left, right, mid)
 
     def query(self, rt: int, L: int, R: int, left: int, right: int) -> int:
         """L,R表示需要query的范围,left,right表示当前节点的范围"""
@@ -56,18 +56,21 @@ class SegmentTree:
         if L <= left and right <= R:
             return self.tree[rt]
 
-        mid = (left + right) >> 1
+        mid = (left + right) // 2
         res = 0
         if L <= mid:
-            res = max(res, self.query(rt << 1, L, R, left, mid))
+            res = max(res, self.query(rt * 2, L, R, left, mid))
         if mid + 1 <= R:
-            res = max(res, self.query(rt << 1 | 1, L, R, mid + 1, right))
+            res = max(res, self.query(rt * 2 + 1, L, R, mid + 1, right))
         return res
 
-    def pushUp(self, rt: int, left: int, right: int, mid: int) -> None:
-        leftPre, rightPre = self.pre[rt << 1], self.pre[rt << 1 | 1]
-        leftSuf, rightSuf = self.suf[rt << 1], self.suf[rt << 1 | 1]
-        leftMax, rightMax = self.tree[rt << 1], self.tree[rt << 1 | 1]
+    def queryAll(self) -> int:
+        return self.tree[1]
+
+    def _pushUp(self, rt: int, left: int, right: int, mid: int) -> None:
+        leftPre, rightPre = self.pre[rt * 2], self.pre[rt * 2 + 1]
+        leftSuf, rightSuf = self.suf[rt * 2], self.suf[rt * 2 + 1]
+        leftMax, rightMax = self.tree[rt * 2], self.tree[rt * 2 + 1]
 
         self.pre[rt] = leftPre
         self.suf[rt] = rightSuf
@@ -96,7 +99,7 @@ class Solution:
         for index, (qc, qi) in enumerate(zip(queryCharacters, queryIndices)):
             segmentTree.update(1, qi + 1, qi + 1, 1, n, qc)
             # 因为每次query整个线段树区间，所以不要懒更新
-            res[index] = segmentTree.query(1, 1, n, 1, n)
+            res[index] = segmentTree.queryAll()
         return res
 
 

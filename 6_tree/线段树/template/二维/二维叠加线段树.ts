@@ -1,4 +1,5 @@
 // 308. 二维区域和检索 - 可变
+// 可用BIT代替
 // https://leetcode.cn/problems/range-sum-query-2d-mutable/
 
 class SegmentTreeNode2D {

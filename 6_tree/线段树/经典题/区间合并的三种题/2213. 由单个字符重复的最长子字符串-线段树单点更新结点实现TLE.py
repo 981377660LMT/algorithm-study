@@ -20,7 +20,7 @@ class Node:
 class SegmentTree:
     def __init__(self, s: str) -> None:
         n = len(s)
-        self.tree = [Node() for _ in range(n << 2)]
+        self.tree = [Node() for _ in range(n * 4)]
         self.chars = list(s)
         self.build(1, 1, n)
 
@@ -33,10 +33,10 @@ class SegmentTree:
             root.max = 1
             return
 
-        mid = (root.left + root.right) >> 1
-        self.build(rt << 1, left, mid)
-        self.build(rt << 1 | 1, mid + 1, right)
-        self.pushUp(rt)
+        mid = (root.left + root.right) // 2
+        self.build(rt * 2, left, mid)
+        self.build(rt * 2 + 1, mid + 1, right)
+        self._pushUp(rt)
 
     def update(self, rt: int, left: int, right: int, target: str) -> None:
         """区间修改，L,R表示需要update的范围,l,r表示当前节点的范围"""
@@ -50,12 +50,12 @@ class SegmentTree:
             self.chars[left - 1] = target
             return
 
-        mid = (root.left + root.right) >> 1
+        mid = (root.left + root.right) // 2
         if left <= mid:
-            self.update(rt << 1, left, right, target)
+            self.update(rt * 2, left, right, target)
         if mid < right:
-            self.update(rt << 1 | 1, left, right, target)
-        self.pushUp(rt)
+            self.update(rt * 2 + 1, left, right, target)
+        self._pushUp(rt)
 
     def query(self, rt: int, left: int, right: int) -> int:
         """L,R表示需要query的范围,left,right表示当前节点的范围"""
@@ -65,20 +65,23 @@ class SegmentTree:
         if left <= root.left and root.right <= right:
             return root.max
 
-        mid = (root.left + root.right) >> 1
+        mid = (root.left + root.right) // 2
         res = 0
         if left <= mid:
-            res = max(res, self.query(rt << 1, left, right))
+            res = max(res, self.query(rt * 2, left, right))
         if mid < right:
-            res = max(res, self.query(rt << 1 | 1, left, right))
+            res = max(res, self.query(rt * 2 + 1, left, right))
         return res
 
-    def pushUp(self, rt: int) -> None:
-        root, left, right = self.tree[rt], self.tree[(rt << 1)], self.tree[(rt << 1) | 1]
+    def queryAll(self) -> int:
+        return self.tree[1].max
+
+    def _pushUp(self, rt: int) -> None:
+        root, left, right = self.tree[rt], self.tree[(rt * 2)], self.tree[(rt * 2) + 1]
         root.pre = left.pre
         root.suf = right.suf
 
-        mid = (root.left + root.right) >> 1
+        mid = (root.left + root.right) // 2
         if self.chars[mid - 1] == self.chars[mid]:
             # 合并
             root.max = max(left.max, right.max, left.suf + right.pre)
@@ -101,7 +104,7 @@ class Solution:
         for index, (qc, qi) in enumerate(zip(queryCharacters, queryIndices)):
             segmentTree.update(1, qi + 1, qi + 1, qc)
             # 因为每次query整个线段树区间，所以不要懒更新
-            res[index] = segmentTree.query(1, 1, len(s))
+            res[index] = segmentTree.queryAll()
         return res
 
 

@@ -45,6 +45,7 @@ class BIT1 {
 
 /**
  * @description 区间修改 区间查询
+ * @see {@link https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.ts}
  */
 class BIT2 {
   readonly size: number
@@ -89,6 +90,7 @@ class BIT2 {
 
 /**
  * @description 二维单点修改 区间查询
+ * @see {@link https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.ts}
  */
 class BIT3 {
   private readonly tree: Map<number, Map<number, number>> = new Map()
@@ -164,6 +166,7 @@ class BIT3 {
 
 /**
  * @description 二维区间修改 区间查询
+ * @see {@link https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.ts}
  */
 class BIT4 {
   private readonly ROW: number

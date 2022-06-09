@@ -9,14 +9,14 @@
  */
 function findMinMoves(machines: number[]): number {
   const sum = machines.reduce((pre, cur) => pre + cur, 0)
-  const target = sum / machines.length
-  if (target % 1) return -1
+  const avg = sum / machines.length
+  if (!Number.isInteger(avg)) return -1
 
   let toRight = 0
   let total = 0
   let res = 0
-  machines.forEach(machine => {
-    toRight = machine - target
+  machines.forEach(m => {
+    toRight = m - avg
     total += toRight
     res = Math.max(res, toRight, Math.abs(total))
   })

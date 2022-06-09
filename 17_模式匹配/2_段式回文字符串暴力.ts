@@ -20,7 +20,6 @@ function longestDecomposition(text: string): number {
       l++
     }
   }
-
   return text === '' ? res : res + 1
 }
 

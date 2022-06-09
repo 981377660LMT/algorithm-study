@@ -1,2 +1,2 @@
-            if index >= n:
-                return int(1e20)
+            # if i == -1 or j == -1:
+            #     return 0

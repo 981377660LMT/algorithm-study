@@ -1,19 +1,5 @@
-// #region define types
-interface ISegmentTreeNode {
-  left: number
-  right: number
-  [key: string]: any
-}
-
-interface ISegmentTree<TreeItem = number, QueryReturn = number> {
-  update: (root: number, left: number, right: number, value: TreeItem) => void
-  query: (root: number, left: number, right: number) => QueryReturn
-}
-
-// #endregion
-
 // #region SegmentTree
-class SegmentTreeNode implements ISegmentTreeNode {
+class SegmentTreeNode {
   left = -1
   right = -1
   max = 1 // [left,right]区间内的最大连续数
@@ -21,15 +7,15 @@ class SegmentTreeNode implements ISegmentTreeNode {
   suf = 1 // 区间右端点的连续数
 }
 
-class SegmentTree implements ISegmentTree<string, number> {
+class SegmentTree {
   private readonly tree: SegmentTreeNode[]
-  private readonly chars: string[]
+  readonly chars: string[]
 
-  constructor(input: ArrayLike<string>) {
+  constructor(input: string) {
     const n = input.length
     this.tree = Array.from({ length: n << 2 }, () => new SegmentTreeNode())
-    this.chars = Array.from(input)
-    this.build(1, 1, n, input)
+    this.chars = input.split('')
+    this.build(1, 1, n)
   }
 
   update(root: number, left: number, right: number, value: string): void {
@@ -39,7 +25,7 @@ class SegmentTree implements ISegmentTree<string, number> {
       node.pre = 1
       node.suf = 1
       node.max = 1
-      this.chars[left - 1] = value // 其实是单点修改
+      this.chars[left - 1] = value
       return
     }
 
@@ -56,8 +42,8 @@ class SegmentTree implements ISegmentTree<string, number> {
 
     let res = 0
     const mid = Math.floor((left + right) / 2)
-    if (left <= mid) res = Math.max(res, this.query(root * 2, left, right))
-    if (mid < right) res = Math.max(res, this.query(root * 2 + 1, left, right))
+    if (left <= mid) res = Math.max(res, this.query(root << 1, left, right))
+    if (mid < right) res = Math.max(res, this.query((root << 1) | 1, left, right))
     return res
   }
 
@@ -65,7 +51,7 @@ class SegmentTree implements ISegmentTree<string, number> {
     return this.tree[1].max
   }
 
-  private build(root: number, left: number, right: number, input: ArrayLike<string>): void {
+  private build(root: number, left: number, right: number): void {
     const node = this.tree[root]
     node.left = left
     node.right = right
@@ -78,13 +64,13 @@ class SegmentTree implements ISegmentTree<string, number> {
     }
 
     const mid = Math.floor((left + right) / 2)
-    this.build(root * 2, left, mid, input)
-    this.build(root * 2 + 1, mid + 1, right, input)
+    this.build(root << 1, left, mid)
+    this.build((root << 1) | 1, mid + 1, right)
     this.pushUp(root)
   }
 
   private pushUp(root: number): void {
-    const [node, left, right] = [this.tree[root], this.tree[root * 2], this.tree[root * 2 + 1]]
+    const [node, left, right] = [this.tree[root], this.tree[root << 1], this.tree[(root << 1) | 1]]
     node.pre = left.pre
     node.suf = right.suf
 
@@ -99,15 +85,14 @@ class SegmentTree implements ISegmentTree<string, number> {
   }
 }
 
-// // #endregion
+// #endregion
 function longestRepeating(s: string, queryCharacters: string, queryIndices: number[]): number[] {
-  const n = s.length
   const segmentTree = new SegmentTree(s)
   const res = Array<number>(queryIndices.length).fill(0)
 
   for (let i = 0; i < queryIndices.length; i++) {
     const [qc, qi] = [queryCharacters[i], queryIndices[i]]
-    segmentTree.update(1, qi + 1, qi + 1, qc)
+    if (qc !== segmentTree.chars[qi]) segmentTree.update(1, qi + 1, qi + 1, qc)
     res[i] = segmentTree.queryAll()
   }
 

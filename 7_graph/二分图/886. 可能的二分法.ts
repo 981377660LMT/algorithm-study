@@ -1,3 +1,5 @@
+import { isBipartite } from './二分图检测'
+
 /**
  *
  * @param n
@@ -13,30 +15,15 @@
  */
 function possibleBipartition(n: number, dislikes: number[][]): boolean {
   // 邻接表
-  const adjList = Array.from<number, number[]>({ length: n + 1 }, () => [])
-  for (const [v, w] of dislikes) {
-    adjList[v].push(w)
-    adjList[w].push(v)
+  const adjMap = new Map<number, Set<number>>()
+  for (const [a, b] of dislikes) {
+    !adjMap.has(a) && adjMap.set(a, new Set())
+    !adjMap.has(b) && adjMap.set(b, new Set())
+    adjMap.get(a)!.add(b)
+    adjMap.get(b)!.add(a)
   }
 
-  const colors = Array<number>(n + 1).fill(-1) // -1 0 1
-
-  const dfs = (cur: number, curColor: number): boolean => {
-    colors[cur] = curColor
-    for (const next of adjList[cur]) {
-      if (colors[next] !== -1 && colors[next] === colors[cur]) return false
-      if (colors[next] === -1 && !dfs(next, curColor ^ 1)) return false
-    }
-
-    return true
-  }
-
-  for (let i = 0; i < n; i++) {
-    if (colors[i] !== -1) continue
-    if (!dfs(i, 0)) return false
-  }
-
-  return true
+  return isBipartite(adjMap)
 }
 
 console.log(

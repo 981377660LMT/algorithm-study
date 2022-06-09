@@ -3,3 +3,5 @@ https://oi-wiki.org/dp/opt/quadrangle/
 那么可以利用决策的单调性进行优化
 
 很多区间 DP 都能用四边形不等式优化
+
+**太难了**

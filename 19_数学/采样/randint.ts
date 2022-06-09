@@ -6,8 +6,8 @@
  */
 const randint = (start: number, end: number) => {
   if (start > end) throw new Error('invalid interval')
-  const amplitude = end - start
-  return Math.floor((amplitude + 1) * Math.random()) + start
+  const diff = end - start
+  return Math.floor((diff + 1) * Math.random()) + start
 }
 
 if (require.main === module) {

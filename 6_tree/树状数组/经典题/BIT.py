@@ -3,7 +3,7 @@ from collections import defaultdict
 
 class BIT1:
     """单点修改
-    
+
     https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py
     """
 
@@ -37,7 +37,7 @@ class BIT1:
 
 class BIT2:
     """范围修改
-    
+
     https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py
     """
 
@@ -83,7 +83,7 @@ class BIT2:
 
 class BIT3:
     """单点修改 维护`前缀区间`最大值
-    
+
     TODO: 正确性待讨论
     这么做正确的前提是不会删除或修改已经存进去的值，每次都是加入新的值，这样已经存在的最大值一直有效。
     """
@@ -124,7 +124,10 @@ class BIT3:
 
 
 class BIT4:
-    """二维树状数组 单点修改+区间查询 每个操作都是 log(m*n)"""
+    """二维树状数组 单点修改+区间查询 每个操作都是 log(m*n)
+
+    https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py
+    """
 
     def __init__(self, row: int, col: int) -> None:
         self.row = row
@@ -173,10 +176,11 @@ class BIT4:
         )
 
 
+# https://www.cnblogs.com/hbhszxyb/p/14157271.html
 class BIT5:
     """二维树状数组 区间修改+区间查询 每个操作都是 log(m*n)
-    
-    https://www.cnblogs.com/hbhszxyb/p/14157271.html
+
+    https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py
     """
 
     def __init__(self, row: int, col: int) -> None:
@@ -276,4 +280,3 @@ if __name__ == '__main__':
     bit5.updateRange(0, 0, 3, 3, 1)
     assert bit5.queryRange(0, 0, 1, 1) == 4
     assert bit5.queryRange(0, 0, 3, 3) == 16
-

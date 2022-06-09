@@ -58,6 +58,6 @@ class Solution:
         uf = UnionFindArray(n // 2)
         for i in range(0, n, 2):
             # 这两组连在一起
-            uf.union(nums[i] // 2, nums[i + 1] // 2)
+            uf.union(nums[i] // 2, nums[i + 1] // 2)  # 除以2表示对应的分组
         return n // 2 - uf.count
 

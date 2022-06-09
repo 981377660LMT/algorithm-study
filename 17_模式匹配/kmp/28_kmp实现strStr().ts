@@ -8,10 +8,11 @@
  * v8引擎中,indexOf使用了kmp和bm两种算法,在主串长度小于7时使用kmp,大于7的时候使用bm
  * @summary kmp比暴力解法好
  */
-function strStr(long: string, short: string): number {
-  if (short.length === 0) return 0
-  if (long.length < short.length) return -1
+function indexofAll(long: string, short: string): number[] {
+  if (short.length === 0) return [0]
+  if (long.length < short.length) return []
 
+  const res: number[] = []
   const next = getNext(short)
   let hitJ = 0
   for (let i = 0; i < long.length; i++) {
@@ -23,11 +24,12 @@ function strStr(long: string, short: string): number {
 
     // 找到头了
     if (hitJ === short.length) {
-      return i - short.length + 1
+      res.push(i - short.length + 1)
+      hitJ = next[hitJ - 1] // 不允许重叠时 hitJ = 0
     }
   }
 
-  return -1
+  return res
 }
 
 // 求next数组，kmp的核心
@@ -49,7 +51,8 @@ function getNext(pattern: string): number[] {
   return next
 }
 
-console.log(strStr('abcdaabcdfabcdababcdg', 'abcdab'))
+console.log(indexofAll('abcdaabcdfabcdababcdg', 'abcdab'))
+console.log(indexofAll('abcdaabcdfabcdababcdg', 'ab'))
 
 // 10
 export {}

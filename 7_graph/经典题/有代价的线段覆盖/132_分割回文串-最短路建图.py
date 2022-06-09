@@ -21,7 +21,6 @@ class Solution(object):
                 adjMap[left].add(right + 1)  # 注意right+1
                 left -= 1
                 right += 1
-
             left, right = start, start + 1
             while left >= 0 and right < n and s[left] == s[right]:
                 adjMap[left].add(right + 1)

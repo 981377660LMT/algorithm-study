@@ -1,4 +1,7 @@
 // https://www.acwing.com/solution/content/81783/
+
+// 编辑器是怎么记录光标/删除插入文字的？
+// https://leetcode.cn/problems/design-a-text-editor/solution/lian-biao-mo-ni-pythonjavacgo-by-endless-egw4/
 class Node {
   constructor(v, p) {
     this.v = v
@@ -10,11 +13,11 @@ class Node {
   }
 
   static getSize(node) {
-    return (node && node.size) || 0
+    return (node && node.size) ?? 0
   }
 
   static getFac(node) {
-    return (node && node.fac) || 0
+    return (node && node.fac) ?? 0
   }
 }
 

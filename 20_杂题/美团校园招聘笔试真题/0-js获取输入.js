@@ -1,3 +1,5 @@
+// 美团校园招聘笔试题
+
 const { readFileSync } = require('fs')
 const iter = readlines()
 const input = () => iter.next().value

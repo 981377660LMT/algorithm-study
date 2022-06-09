@@ -27,4 +27,7 @@ s.add(*["orlando", 3])
 print(s.get())
 print(s.get())
 print(s.get())
-print(s.get())
+
+c = count()
+print(next(c))
+

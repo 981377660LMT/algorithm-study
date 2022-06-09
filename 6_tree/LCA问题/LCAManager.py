@@ -42,6 +42,10 @@ class LCAManager:
 
         return self._fa[root1][0]
 
+    def queryDist(self, root1: int, root2: int) -> int:
+        """查询树节点两点间距离"""
+        return self.depth[root1] + self.depth[root2] - 2 * self.depth[self.queryLCA(root1, root2)]
+
     def _dfs(self, cur: int, pre: int, dep: int) -> None:
         """处理高度、父节点信息"""
         self.depth[cur], self.parent[cur] = dep, pre

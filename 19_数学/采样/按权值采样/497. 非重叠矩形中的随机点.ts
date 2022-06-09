@@ -1,8 +1,9 @@
-import { bisectLeft } from '../../../9_排序和搜索/二分api/7_二分搜索寻找最左插入位置'
+import { bisectRight } from '../../../9_排序和搜索/二分/bisect'
 
 class Solution {
-  private rectangels: number[][]
-  private pre: number[]
+  private readonly rectangels: number[][]
+  private readonly preSum: Uint32Array
+
   /**
    *
    * @param rects
@@ -12,11 +13,11 @@ class Solution {
    */
   constructor(rects: number[][]) {
     this.rectangels = rects
-    this.pre = Array(rects.length).fill(0)
+    this.preSum = new Uint32Array(rects.length + 1)
     for (let i = 0; i < rects.length; i++) {
       const [x1, y1, x2, y2] = rects[i]
-      const points = (x2 - x1 + 1) * (y2 - y1 + 1)
-      this.pre[i] = (this.pre[i - 1] || 0) + points
+      const area = (x2 - x1 + 1) * (y2 - y1 + 1)
+      this.preSum[i + 1] = this.preSum[i] + area
     }
   }
 
@@ -24,22 +25,20 @@ class Solution {
    * 写一个函数 pick 随机均匀地选取矩形覆盖的空间中的整数点。
    */
   pick(): number[] {
-    // 第几个点
-    const rand = this.randint(1, this.pre[this.pre.length - 1])
-    const idOfRectangle = bisectLeft(this.pre, rand)
-    const [x1, y1, x2, y2] = this.rectangels[idOfRectangle]
-    const offset = this.pre[idOfRectangle] - rand
-    // console.log(offset, rand, idOfRectangle)
-    // 矩形坐标公式
-    const rowDiff = ~~(offset / (x2 - x1 + 1))
-    const colDifff = offset % (x2 - x1 + 1)
-    return [x1 + colDifff, y2 - rowDiff]
+    const rand = this.randint(0, this.preSum[this.preSum.length - 1] - 1)
+    const pos = bisectRight(this.preSum, rand) - 1
+    const [x1, y1, x2] = this.rectangels[pos]
+    const offset = rand - this.preSum[pos]
+
+    const row = ~~(offset / (x2 - x1 + 1))
+    const col = offset % (x2 - x1 + 1)
+    return [x1 + col, y1 + row]
   }
 
   private randint(start: number, end: number) {
     if (start > end) throw new Error('invalid interval')
-    const amplitude = end - start
-    return Math.floor((amplitude + 1) * Math.random()) + start
+    const diff = end - start
+    return Math.floor((diff + 1) * Math.random()) + start
   }
 }
 
@@ -47,16 +46,20 @@ class Solution {
 //   [-2, -2, -1, -1],
 //   [1, 0, 3, 0],
 // ])
-const solution = new Solution([
-  [-2, -2, 1, 1],
-  [2, 2, 4, 6],
-])
-console.log(solution.pick())
-console.log(solution.pick())
-console.log(solution.pick())
-console.log(solution.pick())
-console.log(solution.pick())
-console.log(solution.pick())
-console.log(solution.pick())
-console.log(solution.pick())
+
+if (require.main === module) {
+  const solution = new Solution([
+    [-2, -2, 1, 1],
+    [2, 2, 4, 6],
+  ])
+  console.log(solution.pick())
+  console.log(solution.pick())
+  console.log(solution.pick())
+  console.log(solution.pick())
+  console.log(solution.pick())
+  console.log(solution.pick())
+  console.log(solution.pick())
+  console.log(solution.pick())
+}
+
 export {}
