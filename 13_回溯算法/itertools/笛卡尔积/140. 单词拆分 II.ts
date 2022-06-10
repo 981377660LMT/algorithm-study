@@ -2,17 +2,22 @@
  * @param {string} s
  * @param {string[]} wordDict
  * @return {string[]}
- * @description 在字符串中增加空格来构建一个句子，使得句子中所有的单词都在词典中。返回所有这些可能的句子。
+ * @description 在字符串中增加空格来构建一个句子，使得句子中所有的单词都在词典中。
+ * !返回所有这些可能的句子。
  * @summary 普通的回溯会超时(s 的长度是 151)
  */
 const wordBreak = function (s: string, wordDict: string[]): string[] {
   const store = new Set(wordDict)
   const res: string[] = []
 
-  const bt = (path: string[], remain: string) => {
+  bt([], s)
+
+  return res
+
+  function bt(path: string[], remain: string) {
     if (remain.length === 0) {
       res.push(path.join(' '))
-      return path.pop()
+      return
     }
 
     for (let i = 0; i < remain.length; i++) {
@@ -20,14 +25,10 @@ const wordBreak = function (s: string, wordDict: string[]): string[] {
       if (store.has(next)) {
         path.push(next)
         bt(path, remain.slice(i + 1))
+        path.pop()
       }
     }
-
-    path.pop()
   }
-  bt([], s)
-
-  return res
 }
 
 console.log(wordBreak('pineapplepenapple', ['apple', 'pen', 'applepen', 'pine', 'pineapple']))

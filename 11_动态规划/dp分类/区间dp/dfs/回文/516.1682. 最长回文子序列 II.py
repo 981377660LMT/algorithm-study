@@ -1,7 +1,7 @@
 from functools import lru_cache
 from string import ascii_lowercase
 
-# 长度为偶数。
+# !长度为偶数。
 # 除中间的两个字符外，其余任意两个连续字符不相等。
 # 返回 s 的最长“好的回文子序列”的长度。
 # 1 <= s.length <= 250
@@ -11,7 +11,10 @@ class Solution:
     def longestPalindromeSubseq(self, s: str) -> int:
         @lru_cache(None)
         def dfs(left: int, right: int, char: str) -> int:
-            """[left,right]这一段里最长的回文子序列的长度，两端字母为char"""
+            """[left,right]这一段里最长的回文子序列的长度，两端字母为char
+            
+            
+            """
             if left >= right:
                 return 0
             if s[left] != char:
@@ -20,10 +23,10 @@ class Solution:
                 return dfs(left, right - 1, char)
 
             res = 0
-            for newChar in ascii_lowercase:
-                if newChar == char:
+            for nextChar in ascii_lowercase:
+                if nextChar == char:
                     continue
-                res = max(res, dfs(left + 1, right - 1, newChar) + 2)
+                res = max(res, dfs(left + 1, right - 1, nextChar) + 2)
             return res
 
         n = len(s)

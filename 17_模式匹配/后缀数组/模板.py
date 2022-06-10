@@ -288,10 +288,13 @@ def SAIS_sa_rk_h(text):
     return sa, rk, h
 
 
-# len(string)<=1e6
-# input = sys.stdin.readline
-string = input()
-sa, rk, h = SAIS_sa_rk_h(string)
+if __name__ == '__main__':
 
-print(' '.join([str(num + 1) for num in sa]))
-print(' '.join(map(str, h)))
+    # len(string)<=1e6
+    # input = sys.stdin.readline
+    string = input()
+    sa, rk, h = SAIS_sa_rk_h(string)
+
+    print(' '.join([str(num + 1) for num in sa]))
+    print(' '.join(map(str, h)))
+

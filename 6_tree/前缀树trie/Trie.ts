@@ -2,67 +2,62 @@
 // 用于高效地存储和检索一系列字符串的前缀。
 // 前缀树有许多应用，如自动补全和拼写检查
 
-class TrieNode {
-  val: string
-  asPrefix: number // 插入word时，每一个结点+1
-  asWord: number // 插入word结束时，统计一下
-  children: Map<string, TrieNode>
-
-  constructor(val: string) {
-    this.val = val
-    this.asPrefix = 0
-    this.asWord = 0
-    this.children = new Map()
-  }
+class TrieNode<V = string> {
+  // value: V // 存储结点值
+  preCount = 0 // 插入word时，每一个结点+1
+  wordCount = 0 // 插入word结束时，统计一下
+  children: Map<string, TrieNode> = new Map()
+  // word = '' // 当前结点的单词
 }
 
 class Trie {
-  private root: TrieNode
-  constructor() {
-    this.root = new TrieNode('')
-  }
+  readonly root: TrieNode = new TrieNode() // 声明为公有 便于改造
 
   // 将字符串 word 插入前缀树中
   insert(word: string): void {
     let root = this.root
     for (const char of word) {
-      if (!root.children.has(char)) root.children.set(char, new TrieNode(char))
-      root.children.get(char)!.asPrefix++
+      if (!root.children.has(char)) root.children.set(char, new TrieNode())
+      root.children.get(char)!.preCount++
       root = root.children.get(char)!
     }
-    root.asWord++
+    root.wordCount++
+    // root.word = word
   }
 
   // 返回前缀树中字符串 word 的实例个数。
-  countWordsEqualTo(word: string): number {
+  // 不过 更快的方法是直接在dfs中获取结点的信息 而不是重新遍历
+  countWord(word: string): number {
     let root = this.root
     for (const char of word) {
       if (!root.children.has(char)) return 0
       root = root.children.get(char)!
     }
-    return root.asWord
+    return root.wordCount
   }
 
   // 返回前缀树中以 prefix 为前缀的字符串个数
-  countWordsStartingWith(prefix: string): number {
+  // 不过 更快的方法是直接在dfs中获取结点的信息 而不是重新遍历
+  countPre(prefix: string): number {
     let root = this.root
     for (const char of prefix) {
       if (!root.children.has(char)) return 0
       root = root.children.get(char)!
     }
-    return root.asPrefix
+    return root.preCount
   }
 
-  // 从前缀树中移除字符串 word
+  // 从前缀树中移除 `1个` 字符串 word
+  // !需要保证word在前缀树中
   discard(word: string): void {
     let root = this.root
     for (const char of word) {
       if (!root.children.has(char)) return
-      root.children.get(char)!.asPrefix--
+      root.children.get(char)!.preCount--
       root = root.children.get(char)!
     }
-    root.asWord--
+    root.wordCount--
   }
 }
 
-export {}
+export { Trie, TrieNode }

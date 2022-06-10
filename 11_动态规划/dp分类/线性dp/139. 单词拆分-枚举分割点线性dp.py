@@ -38,6 +38,8 @@ class Trie:
 
 class Solution:
     def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        # 枚举分割点 线性dp
+        # trie 优化查找子串是否在字典中
         @lru_cache(None)
         def dfs(index: int) -> bool:
             if index >= n:
@@ -45,7 +47,8 @@ class Solution:
 
             res = False
             for next in range(index + 1, n + 1):
-                if trie.search(s[index:next]) > 0:
+                # if trie.search(s[index:next]) > 0:
+                if s[index:next] in ok:
                     res = res or dfs(next)
             return res
 
