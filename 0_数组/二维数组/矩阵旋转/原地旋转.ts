@@ -4,24 +4,23 @@
  NxN的矩阵
  */
 const rotate = (matrix: number[][]): void => {
+  const [ROW, COL] = [matrix.length, matrix[0].length]
+
   // 转置
-  for (let i = 0; i < matrix.length; i++) {
-    for (let j = 0; j < i; j++) {
-      ;[matrix[i][j], matrix[j][i]] = [matrix[j][i], matrix[i][j]]
+  for (let r = 0; r < ROW; r++) {
+    for (let c = 0; c < r; c++) {
+      ;[matrix[r][c], matrix[c][r]] = [matrix[c][r], matrix[r][c]]
     }
   }
 
   // 镜像
-  for (let i = 0; i < matrix.length; i++) {
-    for (let j = 0; j < matrix.length >> 1; j++) {
-      ;[matrix[i][j], matrix[i][matrix.length - j - 1]] = [
-        matrix[i][matrix.length - j - 1],
-        matrix[i][j],
-      ]
+  for (let i = 0; i < ROW; i++) {
+    for (let j = 0; j < ROW >> 1; j++) {
+      ;[matrix[i][j], matrix[i][ROW + ~j]] = [matrix[i][ROW + ~j], matrix[i][j]]
     }
   }
 
-  console.table(matrix)
+  // console.table(matrix)
 }
 
 rotate([

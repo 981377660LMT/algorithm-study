@@ -12,7 +12,7 @@ class LinkedListNode<V = unknown> {
   /**
    * @param node 在当前node之后插入新节点 并返回新节点
    */
-  insertRight(node: LinkedListNode<V>): LinkedListNode<V> {
+  insertNext(node: LinkedListNode<V>): LinkedListNode<V> {
     node.pre = this
     node.next = this.next
     node.pre.next = node
@@ -23,7 +23,7 @@ class LinkedListNode<V = unknown> {
   /**
    * @param node 在当前node之前插入新节点 并返回新节点
    */
-  insertLeft(node: LinkedListNode<V>): LinkedListNode<V> {
+  insertPre(node: LinkedListNode<V>): LinkedListNode<V> {
     node.next = this
     node.pre = this.pre
     node.next.pre = node

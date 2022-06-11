@@ -3,24 +3,23 @@
 // LRU:获取值时将值重新放到最后，设置值时删除原来值(有的话)再放到最后，超出容量则删除集合的头部元素
 // this.cache.delete(this.cache.keys().next().value)
 class LRU {
-  private cache: Map<number, number>
-  private capacity: number
+  private readonly capacity: number
+  private readonly cache: Map<number, number> = new Map()
+
   constructor(capacity: number) {
     this.capacity = capacity
-    this.cache = new Map()
   }
 
   /**
-   *
    * @param key 如果关键字 key 存在于缓存中，则返回关键字的值，否则返回 -1 。
    */
-  get(key: number) {
+  get(key: number): number {
     if (!this.cache.has(key)) return -1
 
-    const v = this.cache.get(key)!
+    const value = this.cache.get(key)!
     // 删除再插入保证顺序
     this.cache.delete(key)
-    this.cache.set(key, v)
+    this.cache.set(key, value)
     return this.cache.get(key)!
   }
 
@@ -29,7 +28,7 @@ class LRU {
    * 则插入该组「关键字-值」。当缓存容量达到上限时，
    * 它应该在写入新数据之前删除最久未使用的数据值，从而为新的数据值留出空间。
    */
-  put(key: number, value: number) {
+  put(key: number, value: number): void {
     if (this.cache.has(key)) {
       this.cache.delete(key)
     }
@@ -42,16 +41,18 @@ class LRU {
   }
 }
 
-const cache = new LRU(2)
+if (require.main === module) {
+  const cache = new LRU(2)
 
-cache.put(1, 1)
-console.log(cache.get(1))
-cache.put(2, 2)
-cache.put(3, 3)
-cache.put(4, 4)
-console.log(cache.get(1))
-console.log(cache.get(3))
-cache.put(2, 2)
-console.log(cache.get(3))
+  cache.put(1, 1)
+  console.log(cache.get(1))
+  cache.put(2, 2)
+  cache.put(3, 3)
+  cache.put(4, 4)
+  console.log(cache.get(1))
+  console.log(cache.get(3))
+  cache.put(2, 2)
+  console.log(cache.get(3))
+}
 
 export {}

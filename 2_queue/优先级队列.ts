@@ -4,14 +4,6 @@ import { MinHeap } from '../8_heap/MinHeap'
 class PriorityQueue<Item = number> {
   private minHeap: MinHeap<Item>
 
-  constructor(
-    comparator: (a: Item, b: Item) => number = MinHeap.defaultComparator,
-    volumn: number = Infinity,
-    heap: Item[] = []
-  ) {
-    this.minHeap = new MinHeap<Item>(comparator, volumn, heap)
-  }
-
   static createPriorityQueue<Item = number>({
     comparator = MinHeap.defaultComparator,
     volumn = Infinity,
@@ -22,6 +14,14 @@ class PriorityQueue<Item = number> {
     heap?: Item[]
   }) {
     return new PriorityQueue(comparator, volumn, heap)
+  }
+
+  constructor(
+    comparator: (a: Item, b: Item) => number = MinHeap.defaultComparator,
+    volumn: number = Infinity,
+    heap: Item[] = []
+  ) {
+    this.minHeap = new MinHeap<Item>(comparator, volumn, heap)
   }
 
   get length(): number {

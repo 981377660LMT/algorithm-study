@@ -5,7 +5,7 @@ type Binary = 0 | 1
  * @param bitLength 位数，即树的最大高度
  * @description 离根节点越近表示位数越高(大)
  */
-const useArrayXORTrie = (bitLength = 31) => {
+function useArrayXORTrie(bitLength = 31) {
   const trieRoot: TrieNode = [undefined, undefined, 0]
 
   const insert = (num: number): void => {

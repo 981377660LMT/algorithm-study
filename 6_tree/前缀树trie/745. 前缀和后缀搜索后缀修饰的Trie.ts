@@ -2,22 +2,17 @@
 
 class TrieNode {
   index: number // 对应单词下标
-  children: Map<string, TrieNode>
+  children: Map<string, TrieNode> = new Map()
 
   constructor(index = 0) {
     this.index = index
-    this.children = new Map()
   }
 }
 
 // Trie:root节点(TrieNode或者Map<string,TriNode>)
 // TrieNode:孩子节点(Map<string,Trie>或者Array<TrieNode>),结束flag,对应的值
 class Trie {
-  protected root: TrieNode
-
-  constructor() {
-    this.root = new TrieNode()
-  }
+  readonly root: TrieNode = new TrieNode()
 
   insert(word: string, index: number) {
     if (!word) return
@@ -49,12 +44,12 @@ class WordFilter {
 
   constructor(words: string[]) {
     this.trie = new Trie()
-    for (let index = 0; index < words.length; index++) {
-      const word = words[index]
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i]
       let suffix = ''
-      for (let i = word.length; i >= 0; i--) {
-        suffix = word.slice(i, word.length)
-        this.trie.insert(suffix + '#' + word, index)
+      for (let j = word.length; j >= 0; j--) {
+        suffix = word.slice(j, word.length)
+        this.trie.insert(suffix + '#' + word, j)
       }
     }
   }
@@ -76,5 +71,5 @@ class WordFilter {
     console.log(wordFilter.f('a', 'e')) // 0
   }
 }
-WordFilter.main()
+
 export {}

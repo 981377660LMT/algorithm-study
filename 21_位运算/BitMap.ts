@@ -2,12 +2,12 @@
 const BYTE_SIZE = 8 // 1byte = 8bit
 
 class Bitset {
-  private bytes: Buffer
-  private size: number
+  private readonly bytes: Buffer
+  private readonly capacity: number
 
   constructor(bytes = 0) {
     this.bytes = Buffer.alloc(bytes) // 申请bytes个字节大小
-    this.size = bytes * BYTE_SIZE
+    this.capacity = bytes * BYTE_SIZE
   }
 
   /**
@@ -18,7 +18,7 @@ class Bitset {
    *   ......
    */
   add(num: number) {
-    if (num > this.size) return
+    if (num > this.capacity) return
     const row = ~~(num / BYTE_SIZE)
     const col = num % BYTE_SIZE
     // 对应的字节的bit位置位0
@@ -26,7 +26,7 @@ class Bitset {
   }
 
   has(num: number) {
-    if (num > this.size) return
+    if (num > this.capacity) return
     const row = ~~(num / BYTE_SIZE)
     const col = num % BYTE_SIZE
     return (this.bytes[row] & (1 << col)) !== 0

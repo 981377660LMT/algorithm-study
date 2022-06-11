@@ -2,22 +2,6 @@
 from collections import namedtuple
 
 
-# class IXORTrie(Protocol):
-#     __slots__ = ()
-
-#     @abstractclassmethod
-#     def insert(num: int) -> None:
-#         ...
-
-#     @abstractclassmethod
-#     def search(num: int) -> int:
-#         ...
-
-#     @abstractclassmethod
-#     def discard(num: int) -> None:
-#         ...
-
-
 def useXORTrie(bitLength=31):
     trieRoot = [None, None, 0]
 

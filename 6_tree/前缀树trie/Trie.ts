@@ -4,14 +4,14 @@
 
 class TrieNode<V = string> {
   // value: V // 存储结点值
-  preCount = 0 // 插入word时，每一个结点+1
-  wordCount = 0 // 插入word结束时，统计一下
-  children: Map<string, TrieNode> = new Map()
   // word = '' // 当前结点的单词
+  preCount = 0
+  wordCount = 0
+  children: Map<string, TrieNode> = new Map()
 }
 
 class Trie {
-  readonly root: TrieNode = new TrieNode() // 声明为公有 便于改造
+  readonly root: TrieNode = new TrieNode()
 
   // 将字符串 word 插入前缀树中
   insert(word: string): void {
@@ -21,6 +21,7 @@ class Trie {
       root.children.get(char)!.preCount++
       root = root.children.get(char)!
     }
+
     root.wordCount++
     // root.word = word
   }
@@ -33,6 +34,7 @@ class Trie {
       if (!root.children.has(char)) return 0
       root = root.children.get(char)!
     }
+
     return root.wordCount
   }
 
@@ -44,6 +46,7 @@ class Trie {
       if (!root.children.has(char)) return 0
       root = root.children.get(char)!
     }
+
     return root.preCount
   }
 
@@ -56,6 +59,7 @@ class Trie {
       root.children.get(char)!.preCount--
       root = root.children.get(char)!
     }
+
     root.wordCount--
   }
 }

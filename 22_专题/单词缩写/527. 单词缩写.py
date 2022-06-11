@@ -7,10 +7,10 @@ from typing import List
 # 3. 若缩写并不比原单词更短，则保留原样。
 
 # 贪心：
-# 首先给每个单词选择最短的缩写。然后我们对于所有重复的单词，我们增加这些重复项的长度。
+# !首先给每个单词选择最短的缩写。然后我们对于所有重复的单词，我们增加这些重复项的长度。
 class Solution:
     def wordsAbbreviation(self, words: List[str]) -> List[str]:
-        def compress(word: str, start: int = 0) -> str:
+        def compress(word: str, start=0) -> str:
             if len(word) - start <= 3:
                 return word
             return word[: start + 1] + str(len(word) - start - 2) + word[-1]

@@ -8,7 +8,7 @@ from typing import Generator, List
 class Solution:
     def lexicalOrder(self, n: int) -> List[int]:
         def dfs(cur: int) -> Generator[int, None, None]:
-            for i in range(0, 10):
+            for i in range(10):
                 next = cur * 10 + i
                 if next > n:
                     return

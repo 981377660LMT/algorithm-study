@@ -1,5 +1,5 @@
 // 双向链表 + map
-// 链表找最大最小
+// !链表找最大最小
 // key到count count到Node 的映射
 
 // node存当前值为count的所有key

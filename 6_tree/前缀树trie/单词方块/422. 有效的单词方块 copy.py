@@ -5,8 +5,8 @@ from itertools import zip_longest
 class Solution:
     def validWordSquare(self, words: List[str]) -> bool:
         #  看每一列的组合
-        for idx, word in enumerate(zip_longest(*words, fillvalue='')):
-            if words[idx] != ''.join(word):
+        for index, col in enumerate(zip_longest(*words, fillvalue='')):
+            if words[index] != ''.join(col):
                 return False
         return True
 

@@ -2,11 +2,9 @@
 // https://javaguide.cn/cs-basics/data-structure/bloom-filter/
 
 import assert from 'assert'
-import { BitSet } from './BitSet/BitSet'
+import { Bitset } from '../21_位运算/BitMap'
 
 class SimpleHasher {
-  constructor(private capacity: number, private seed: number) {}
-
   private static genHashCode(str: string) {
     let hash = 0
 
@@ -18,6 +16,8 @@ class SimpleHasher {
 
     return hash | 0 // Convert to 32bit integer
   }
+
+  constructor(private capacity: number, private seed: number) {}
 
   genHash(value: string): number {
     const hashCode = SimpleHasher.genHashCode(value)
@@ -33,7 +33,7 @@ interface IBloomFilter {
 class BloomFilter implements IBloomFilter {
   private static DEFAULT_SIZE: number = 2 << 24
   private static SEEDS: number[] = [3, 13, 46, 71, 91, 134]
-  private bitset: BitSet = new BitSet(BloomFilter.DEFAULT_SIZE)
+  private bitset: Bitset = new Bitset(BloomFilter.DEFAULT_SIZE)
   private hasherArray: SimpleHasher[] = []
 
   /**

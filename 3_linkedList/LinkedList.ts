@@ -5,8 +5,6 @@ import { LinkedListNode } from './LinkedListNode'
  * @description 链表实现的双端队列
  */
 class LinkedList<V = number> {
-  length = 0
-
   /**
    * @description 哨兵
    */
@@ -24,38 +22,40 @@ class LinkedList<V = number> {
     for (const item of iterable ?? []) this.push(item)
   }
 
-  unshift(val: V): number {
-    this._root.insertRight(new LinkedListNode(val))
-    this.length++
-    return this.length
+  unshift(val: V): void {
+    this._root.insertNext(new LinkedListNode(val))
   }
 
   shift(): V | undefined {
-    if (this.length === 0) return undefined
-    this.length--
+    if (this.isEmpty()) return undefined
     return this._root.next?.remove().value
   }
 
-  push(val: V): number {
-    this._root.insertLeft(new LinkedListNode(val))
-    this.length++
-    return this.length
+  push(val: V): void {
+    this._root.insertPre(new LinkedListNode(val))
   }
 
   pop(): V | undefined {
-    if (this.length === 0) return undefined
-    this.length--
+    if (this.isEmpty()) return undefined
     return this._root.pre?.remove().value
   }
 
   first(): V | undefined {
-    if (this.length === 0) return undefined
+    if (this.isEmpty()) return undefined
     return this._root.next?.value
   }
 
   last(): V | undefined {
-    if (this.length === 0) return undefined
+    if (this.isEmpty()) return undefined
     return this._root.pre?.value
+  }
+
+  isEmpty(): boolean {
+    return this._root.next === this._root
+  }
+
+  toString(): string {
+    return `${[...this]}`
   }
 
   *[Symbol.iterator](): IterableIterator<V> {
@@ -65,17 +65,11 @@ class LinkedList<V = number> {
       node = node.next!
     }
   }
-
-  toString(): string {
-    return `${[...this]}`
-  }
 }
 
 if (require.main === module) {
   const nums = new LinkedList([1, 2, 3, 4, 5])
-  assert.strictEqual(nums.length, 5)
   assert.strictEqual(nums.shift(), 1)
-  assert.strictEqual(nums.length, 4)
   for (const num of nums) console.log(num)
   console.log(nums + '')
 }

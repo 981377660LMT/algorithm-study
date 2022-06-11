@@ -44,6 +44,14 @@ class TreapNode<T = number> {
   left: TreapNode<T> | null
   right: TreapNode<T> | null
 
+  static getSize(node: TreapNode<any> | null): number {
+    return node?.size ?? 0
+  }
+
+  static getFac(node: TreapNode<any> | null): number {
+    return node?.priority ?? 0
+  }
+
   constructor(value: T) {
     this.value = value
     this.count = 1
@@ -51,14 +59,6 @@ class TreapNode<T = number> {
     this.priority = Math.random()
     this.left = null
     this.right = null
-  }
-
-  static getSize(node: TreapNode<any> | null): number {
-    return node?.size ?? 0
-  }
-
-  static getFac(node: TreapNode<any> | null): number {
-    return node?.priority ?? 0
   }
 
   pushUp(): void {

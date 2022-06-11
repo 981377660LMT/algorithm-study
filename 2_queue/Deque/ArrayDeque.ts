@@ -4,11 +4,20 @@ import assert from 'assert'
  * @description 循环数组实现，慢数组动态扩容
  */
 class ArrayDeque<T = number> {
-  private readonly capacity: number
-  private readonly data: T[]
+  length: number
   private head: number
   private tail: number
-  public length: number
+  private readonly capacity: number
+  private readonly data: T[];
+
+  *[Symbol.iterator]() {
+    let head = this.head
+    const times = this.length
+    for (let i = 0; i < times; i++) {
+      yield this.data[head]
+      head = (head + 1 + this.capacity) % this.capacity
+    }
+  }
 
   /**
    * @param capacity 默认值 `1 << 30`
@@ -19,15 +28,6 @@ class ArrayDeque<T = number> {
     this.head = 0 // 从-1开始'向前'存
     this.tail = -1 // 从0开始向后存
     this.length = 0
-  }
-
-  *[Symbol.iterator]() {
-    let head = this.head
-    const times = this.length
-    for (let i = 0; i < times; i++) {
-      yield this.data[head]
-      head = (head + 1 + this.capacity) % this.capacity
-    }
   }
 
   at(index: number): T | undefined {

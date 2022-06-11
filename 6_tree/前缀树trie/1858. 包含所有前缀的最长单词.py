@@ -1,4 +1,39 @@
-from typing import List
+from collections import defaultdict
+from typing import Dict, List
+
+
+class TrieNode:
+    __slots__ = ('wordCount', 'preCount', 'children')
+
+    def __init__(self):
+        self.wordCount = 0
+        self.children: Dict[str, TrieNode] = defaultdict(TrieNode)
+
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word: str) -> None:
+        if not word:
+            return
+        node = self.root
+        for char in word:
+            node = node.children[char]
+        node.wordCount += 1
+
+    def search(self, word: str) -> bool:
+        if not word:
+            return False
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+            if node.wordCount == 0:
+                return False
+        return True
+
 
 # 找出 words 中所有的`前缀`都在 words 中的最长字符串。
 # 1 <= words.length <= 105
@@ -13,30 +48,6 @@ class Solution:
             if trie.search(word):
                 return word
         return ''
-
-
-class Trie:
-    def __init__(self) -> None:
-        self.root = {}
-
-    def insert(self, word):
-        root = self.root
-        for c in word:
-            if c not in root:
-                root[c] = {}
-            root = root[c]
-        root['end'] = True
-
-    def search(self, word):
-        root = self.root
-        for c in word:
-            if c not in root:
-                return False
-            root = root[c]
-            # 关键,要包含所有前缀
-            if 'end' not in root:
-                return False
-        return True
 
 
 print(Solution().longestWord(words=["a", "banana", "app", "appl", "ap", "apply", "apple"]))

@@ -1,8 +1,8 @@
 // 参考LFU的freqToDoubleLinkedList与keyToNode
 // 最大频率栈
 class FreqStack {
-  private keyToFreq: Map<number, number>
-  private freqToStack: Map<number, number[]>
+  private readonly keyToFreq: Map<number, number>
+  private readonly freqToStack: Map<number, number[]>
   private maxFreq: number
 
   constructor() {

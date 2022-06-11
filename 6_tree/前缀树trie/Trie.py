@@ -14,7 +14,7 @@ class TrieNode:
 
 class Trie:
     def __init__(self):
-        self.root = TrieNode()  # 声明为公有 便于改造
+        self.root = TrieNode()
 
     def insert(self, word: str) -> None:
         if not word:

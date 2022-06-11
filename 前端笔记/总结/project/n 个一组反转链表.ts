@@ -40,3 +40,4 @@ function reverseKGroup1(head: ListNode | null, k: number): ListNode | null {
 
   return headP
 }
+export {}
