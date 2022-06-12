@@ -23,7 +23,7 @@ class LinkedList<V = number> {
   }
 
   unshift(val: V): void {
-    this._root.insertNext(new LinkedListNode(val))
+    this._root.insertAfter(new LinkedListNode(val))
   }
 
   shift(): V | undefined {
@@ -32,7 +32,7 @@ class LinkedList<V = number> {
   }
 
   push(val: V): void {
-    this._root.insertPre(new LinkedListNode(val))
+    this._root.insertBefore(new LinkedListNode(val))
   }
 
   pop(): V | undefined {

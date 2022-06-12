@@ -1,3 +1,5 @@
+import { getNext } from '../kmp'
+
 /**
  * @param {string} long
  * @param {string} short
@@ -32,27 +34,10 @@ function indexofAll(long: string, short: string): number[] {
   return res
 }
 
-// 求next数组，kmp的核心
-function getNext(pattern: string): number[] {
-  // next[i]表示[0,i]这一段字符串中最长公共前后缀的长度
-  const next = Array<number>(pattern.length).fill(0)
-  let j = 0
-
-  for (let i = 1; i < pattern.length; i++) {
-    while (j > 0 && pattern[i] !== pattern[j]) {
-      //  前进到最长公共后缀结尾处
-      j = next[j - 1]
-    }
-
-    if (pattern[i] === pattern[j]) j++
-    next[i] = j
-  }
-
-  return next
+if (require.main === module) {
+  console.log(indexofAll('abcdaabcdfabcdababcdg', 'abcdab'))
+  console.log(indexofAll('abcdaabcdfabcdababcdg', 'ab'))
 }
-
-console.log(indexofAll('abcdaabcdfabcdababcdg', 'abcdab'))
-console.log(indexofAll('abcdaabcdfabcdababcdg', 'ab'))
 
 // 10
 export {}

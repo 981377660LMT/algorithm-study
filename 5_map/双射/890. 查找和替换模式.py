@@ -1,6 +1,6 @@
 from typing import List
 
-
+# 变位词 isomorphism = 同构
 class Solution:
     def findAndReplacePattern(self, words: List[str], pattern: str) -> List[str]:
         # 是否满足双射关系

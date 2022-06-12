@@ -7,6 +7,7 @@ from collections import defaultdict
 class Solution:
     def solve(self, s, t):
         def match(hit: int):
+            """判断子序列"""
             prePos = -1
             while hit < len(t):
                 nextPos = bisect_right(indexMap[t[hit]], prePos)

@@ -3,7 +3,6 @@
  * @return {void} Do not return anything, modify board in-place instead.
  */
 const solveSudoku = function (board: string[][]): void {
-  console.log(board.length)
   const isValidPosition = (board: string[][], row: number, col: number, char: string) => {
     // 判断行里是否重复
     for (let j = 0; j < 9; j++) {

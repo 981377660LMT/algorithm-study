@@ -7,34 +7,36 @@ V = TypeVar('V')
 @dataclass(slots=True)
 class Node(Generic[V]):
     value: V
-    left: Optional['Node[V]'] = None
-    right: Optional['Node[V]'] = None
+    pre: Optional['Node[V]'] = None
+    next: Optional['Node[V]'] = None
 
-    def insertRight(self, node: 'Node[V]') -> 'Node[V]':
+    def insertAfter(self, node: 'Node[V]') -> 'Node[V]':
         """在 self 后插入 node,并返回该 node"""
-        node.left = self
-        node.right = self.right
-        node.left.right = node
-        if node.right:
-            node.right.left = node
+        node.pre = self
+        node.next = self.next
+        node.pre.next = node
+        if node.next:
+            node.next.pre = node
         return node
 
-    def insertLeft(self, node: 'Node[V]') -> 'Node[V]':
+    def insertBefore(self, node: 'Node[V]') -> 'Node[V]':
         """在 self 前插入 node,并返回该 node"""
-        node.right = self
-        node.left = self.left
-        node.right.left = node
-        if node.left:
-            node.left.right = node
+        node.next = self
+        node.pre = self.pre
+        node.next.pre = node
+        if node.pre:
+            node.pre.next = node
         return node
 
     def remove(self) -> None:
         """从链表里移除自身"""
-        if self.left:
-            self.left.right = self.right
-        if self.right:
-            self.right.left = self.left
+        if self.pre:
+            self.pre.next = self.next
+        if self.next:
+            self.next.pre = self.pre
+        self.pre = None
+        self.next = None
 
     def __repr__(self) -> str:
-        return f'{self.value}->{self.right}'
+        return f'{self.value}->{self.next}'
 

@@ -81,7 +81,7 @@ class LFUCache<K extends PropertyKey, V = unknown> {
 
     !this._freqMap.has(newFreq) && this._freqMap.set(newFreq, LFUCache._createList())
     const newRoot = this._freqMap.get(newFreq)!
-    newRoot.insertPre(node)
+    newRoot.insertBefore(node)
 
     if (newFreq === 1) {
       this._minFreq = 1

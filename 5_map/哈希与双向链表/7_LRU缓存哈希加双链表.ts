@@ -37,7 +37,7 @@ class LRUCache<K extends PropertyKey, V = unknown> {
     if (this.linkedMap[key] != void 0) {
       const node = this.linkedMap[key]
       node.remove()
-      this.root.insertPre(node)
+      this.root.insertBefore(node)
       return node.value.value
     }
 
@@ -66,7 +66,7 @@ class LRUCache<K extends PropertyKey, V = unknown> {
       this.size++
     }
 
-    this.root.insertPre(newNode)
+    this.root.insertBefore(newNode)
   }
 }
 

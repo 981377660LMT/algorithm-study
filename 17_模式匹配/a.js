@@ -1,2 +1,2 @@
-console.log('ass'.indexOf(''))
-console.log('aba'.slice(1, -1))
+console.log('ass'.indexOf('')) // 0
+console.log('aba'.slice(1, -1)) // 'b

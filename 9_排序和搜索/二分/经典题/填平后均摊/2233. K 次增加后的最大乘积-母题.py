@@ -4,9 +4,6 @@ from itertools import accumulate
 from typing import List
 
 
-MOD = int(1e9 + 7)
-INF = int(1e20)
-
 # 6039. K 次增加后的最大乘积
 # k次加1操作，让最小值最大化
 # 填平+均摊

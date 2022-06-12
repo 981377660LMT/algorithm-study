@@ -1,0 +1,1 @@
+sum(startCounter[w[0]] for w in bad if w != w1[0]) - 1

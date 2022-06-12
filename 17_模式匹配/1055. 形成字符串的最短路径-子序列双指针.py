@@ -13,14 +13,14 @@
 class Solution:
     def shortestWay(self, source: str, target: str) -> int:
         res = 0
-        hit = 0
-        while hit < len(target):
+        j = 0
+        while j < len(target):
             i = 0
-            preHit = hit
+            preHit = j
 
-            while hit < len(target) and i < len(source):
-                if target[hit] == source[i]:
-                    hit += 1
+            while j < len(target) and i < len(source):
+                if target[j] == source[i]:
+                    j += 1
                 i += 1
 
             if i == preHit:

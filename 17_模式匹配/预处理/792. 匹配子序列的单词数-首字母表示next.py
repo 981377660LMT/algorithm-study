@@ -29,7 +29,7 @@ class Solution:
 
     # 指向下一个字母的指针
     # 因为 S 很长，所以寻找一种只需遍历一次 S 的方法，避免暴力解法的多次遍历。
-    # 将所有单词根据首字母不同放入不同的桶中
+    # !将所有单词根据首字母不同放入不同的桶中
     # 每个桶中的单词就是该单词正在等待匹配的下一个字母
     def numMatchingSubseq2(self, S: str, words: List[str]) -> int:
         wordsByHead = defaultdict(list)

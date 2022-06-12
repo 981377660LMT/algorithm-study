@@ -1,14 +1,14 @@
 // 关键在于先排序
 // 定一移二
 // 去除重复
-const threeSum = (nums: number[]) => {
+function threeSum(nums: number[]) {
   if (nums.length < 3) return []
   nums.sort((a, b) => a - b)
   const res: number[][] = []
+
   // 三数之和为0
   const target = 0
 
-  console.log(nums)
   for (let p1 = 0; p1 < nums.length - 2; p1++) {
     // 定一移二(最左边的数要不超过0，否则三数之和必不为0)
     // 加速循环

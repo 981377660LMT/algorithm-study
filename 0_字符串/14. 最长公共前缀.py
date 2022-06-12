@@ -6,6 +6,7 @@ from typing import List
 
 class Solution:
     def longestCommonPrefix(self, strs: List[str]) -> str:
+        """纵向扫描"""
         res = []
         cols = zip(*strs)
         for col in cols:
@@ -26,6 +27,20 @@ class Solution:
                 return s2[:i]
         return s1
 
+    def longestCommonPrefix3(self, strs: str):
+        """二分(通用思想)"""
+        if not strs:
+            return ""
+        s1 = min(strs)
+        s2 = max(strs)
+        for i, x in enumerate(s1):
+            if x != s2[i]:
+                return s2[:i]
+        return s1
+
+
+#
+# zip法
 
 print(Solution().longestCommonPrefix(["flower", "flow", "flight"]))
 

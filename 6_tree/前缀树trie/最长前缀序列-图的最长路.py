@@ -21,5 +21,5 @@ print(Solution().solve(words=["abc", "ab", "x", "xy", "abcd"]))
 # We can form the following sequence: ["ab", "abc", "abcd"].
 
 
-# 1.排序+Trie树
+# 1. 排序+Trie树
 # 2. 图的最长路

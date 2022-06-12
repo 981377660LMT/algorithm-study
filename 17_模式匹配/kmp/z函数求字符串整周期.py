@@ -23,7 +23,10 @@ def getMinPeriod(s: str) -> int:
     """求字符串的最小周期
     """
     z = getZ(s)
-    return next((i for i in range(len(s)) if z[i] == len(s) - i), -1)
+    for i in range(1, len(s)):
+        if len(s) % i == 0 and z[i] == len(s) - i:
+            return i
+    return -1
 
 
 if __name__ == '__main__':

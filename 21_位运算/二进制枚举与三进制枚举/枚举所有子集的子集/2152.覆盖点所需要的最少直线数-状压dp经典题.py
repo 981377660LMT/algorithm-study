@@ -16,11 +16,11 @@ class Solution:
                 dp[state] = 1
                 continue
 
-            group1, group2 = state, 0
-            while group1:
-                dp[state] = min(dp[state], dp[group1] + dp[group2])
-                group1 = state & (group1 - 1)
-                group2 = state ^ group1
+            g1, g2 = state, 0
+            while g1:
+                dp[state] = min(dp[state], dp[g1] + dp[g2])
+                g1 = state & (g1 - 1)
+                g2 = state ^ g1
 
         return dp[-1]
 

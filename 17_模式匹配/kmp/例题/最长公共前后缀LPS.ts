@@ -5,13 +5,13 @@
  * O(n) 求最长公共前缀（LPS）(Longest Proper String) 是KMP的一个步骤
  * 关键是构造出lps数组
  */
-const longestPrefix = function (s: string): string {
+function longestPrefix(s: string): string {
   const lps = getNext(s)
   return s.slice(0, lps[s.length - 1])
 }
 
 // 求next数组
-const getNext = (needle: string): number[] => {
+function getNext(needle: string): number[] {
   // lps[i]表示[0,i]这一段字符串中lps的长度
   const next = Array<number>(needle.length).fill(0)
   let j = 0
@@ -33,4 +33,3 @@ if (require.main === module) {
   console.log(longestPrefix('ababab'))
   // "abab"
 }
-export { getNext }
