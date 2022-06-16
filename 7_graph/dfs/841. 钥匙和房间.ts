@@ -7,15 +7,16 @@
  */
 const canVisitAllRooms = function (rooms: number[][]): boolean {
   const visited = new Set<number>([0])
-  const dfs = (start: number, visited: Set<number>) => {
-    for (const next of rooms[start]) {
+  dfs(0)
+  return visited.size === rooms.length
+
+  function dfs(cur: number) {
+    for (const next of rooms[cur]) {
       if (visited.has(next)) continue
       visited.add(next)
-      dfs(next, visited)
+      dfs(next)
     }
   }
-  dfs(0, visited)
-  return visited.size === rooms.length
 }
 
 console.log(canVisitAllRooms([[1], [2], [3], []]))

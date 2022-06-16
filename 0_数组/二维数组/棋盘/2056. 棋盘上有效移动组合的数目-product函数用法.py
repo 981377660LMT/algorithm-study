@@ -17,6 +17,8 @@ State = Tuple[int, int, int, int, int]
 # 棋盘下标从 1 开始
 # python里的product函数表示笛卡尔积，非常适合**穷举所有对象的状态的组合**
 # 一般product会配合数组解构使用 product(*(iterable for _ in range(n)))
+
+
 class Solution:
     def countCombinations(self, pieces: List[Role], positions: List[List[int]]) -> int:
         def getNextState(role: Role, curX: int, curY: int) -> Generator[State, None, None]:
@@ -26,7 +28,7 @@ class Solution:
                 if 1 <= curX + dx * dist <= 8 and 1 <= curY + dy * dist <= 8:
                     yield curX, curY, dx, dy, dist
 
-        def checkAllStates(allStates: Tuple[State]) -> bool:
+        def checkAllStates(allStates: Tuple[State, ...]) -> bool:
             """所有棋子同时移动，检查是否有冲突"""
             for dist1 in range(8):
                 visited = set()

@@ -19,17 +19,17 @@ class Solution:
         minCost = [min(c) for c in zip(*cost)]
 
         @lru_cache(None)
-        def dfs(cur: int, state: int) -> int:
-            if cur == n:
+        def dfs(index: int, state: int) -> int:
+            if index == n:
                 remainCost = 0
                 for j in range(m):
                     if not state & (1 << j):
                         remainCost += minCost[j]
                 return remainCost
 
-            res = 0x7FFFFFFF
+            res = int(1e9)
             for next in range(m):
-                res = min(res, cost[cur][next] + dfs(cur + 1, state | (1 << next)))
+                res = min(res, cost[index][next] + dfs(index + 1, state | (1 << next)))
 
             return res
 

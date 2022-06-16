@@ -26,7 +26,7 @@ class Solution:
             start, end = s.find(char), s.rfind(char)
             intervalMap[char] = (start, end)
 
-        # 2.对每个字符对应的区间寻找符合题意的边界
+        # 2.对`每个字符`对应的区间寻找符合题意的边界
         validIntervals: List[Interval] = []
         for (start, end) in intervalMap.values():
             startCand, endCand = start, end

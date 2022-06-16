@@ -12,9 +12,9 @@ from math import comb
 class Solution:
     def tupleSameProduct(self, nums: List[int]) -> int:
         res = 0
-        freq = Counter(nums[i] * nums[j] for i in range(len(nums)) for j in range(i + 1, len(nums)))
+        C = Counter(nums[i] * nums[j] for i in range(len(nums)) for j in range(i + 1, len(nums)))
 
-        for count in freq.values():
+        for count in C.values():
             res += comb(count, 2) * 8
         return res
 

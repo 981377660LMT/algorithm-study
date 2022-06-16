@@ -1,40 +1,39 @@
-# 每次移动（move）需要将连续的 K 堆石头合并为一堆，而这个移动的成本为这 K 堆石头的总数。
-# 找出把所有石头合并成一堆的最低成本。如果不可能，返回 -1 。
 from typing import List
 from functools import lru_cache
 from itertools import accumulate
 
+# !每次移动（move）需要将连续的 K 堆石头合并为一堆，而这个移动的成本为这 K 堆石头的总数。
+# 找出把所有石头合并成一堆的最低成本。如果不可能，返回 -1 。
+# 1 <= stones.length <= 30
+# 2 <= K <= 30
+# 1 <= stones[i] <= 100
+
+
 INF = int(1e20)
 
-# dfs涉及三个维度的状态 每个状态都要遍历一遍 所以时间复杂度O(n^3)
-# dp[i][j][m] means the cost needed to merge stone[i] ~ stones[j] into m piles.
 
-# Initial status dp[i][i][1] = 0 and dp[i][i][m] = infinity
-
-# dp[i][j][1] = dp[i][j][k] + stonesNumber[i][j]
-# dp[i][j][m] = min(dp[i][mid][1] + dp[mid + 1][j][m - 1])
-
-# todo
 class Solution:
     def mergeStones(self, stones: List[int], k: int) -> int:
-        prefix = [0] + list(accumulate(stones))
-        
-
         @lru_cache(None)
-        def dfs(left: int, right: int, targetPile: int) -> int:
-            if ((right - left + 1) - targetPile) % (k - 1) != 0:
-                return INF
-            if left == right:
-                return 0 if targetPile == 1 else INF
-            if targetPile == 1:
-                return dfs(left, right, k) + prefix[right + 1] - prefix[left]
+        def dfs(left: int, right: int) -> int:
+            """[left,right] 合并一堆的最低成本"""
+            if right - left + 1 < k:
+                return 0
 
             res = INF
-            for mid in range(left, right, k - 1):
-                res = min(res, dfs(left, mid, 1) + dfs(mid + 1, right, targetPile - 1))
+            for i in range(left, right, k - 1):  # !左边需要保证(i-left) % (k-1) == 0
+                # !最终需要合并成一堆
+                mergeCost = preSum[right + 1] - preSum[left] if (right - left) % (k - 1) == 0 else 0
+                cand = dfs(left, i) + dfs(i + 1, right) + mergeCost
+                if cand < res:
+                    res = cand
             return res
 
-        res = dfs(0, len(stones) - 1, 1)
+        if (len(stones) - k) % (k - 1) != 0:
+            return -1
+        preSum = list(accumulate(stones, initial=0))
+        res = dfs(0, len(stones) - 1)
+        dfs.cache_clear()
         return res if res != INF else -1
 
 

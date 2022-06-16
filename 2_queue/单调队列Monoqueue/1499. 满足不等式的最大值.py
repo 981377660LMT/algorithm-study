@@ -17,7 +17,7 @@ from collections import deque
 class Solution:
     def findMaxValueOfEquation(self, points: List[List[int]], k: int) -> int:
         queue = deque()
-        res = -0x7FFFFFFF
+        res = -int(1e20)
 
         for x, y in points:
             # 1. 过期的数据

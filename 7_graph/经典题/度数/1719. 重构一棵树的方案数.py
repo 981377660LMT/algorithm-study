@@ -9,6 +9,8 @@ from collections import defaultdict
 # 我们可以先考虑`构造好的树有什么性质`，然后再反推解题。
 
 # 时间复杂度 O(N*M)
+
+
 class Solution:
     def checkWays(self, pairs: List[List[int]]) -> int:
         # 每一对pair确定了一条链

@@ -14,20 +14,16 @@ from functools import lru_cache
 # 看到限制里面数字最大也不会超过 30 ，立刻想到暴力。把`组合全部弄出来`，每种组合的次数就是数字出现次数的乘积。
 # 需要小心的是，[1, 1, 1] 这种是不算的，乘起来要大于 1 的才算
 
-# 预处理
-primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
-composites = set([4, 8, 9, 12, 16, 18, 20, 24, 25, 27, 28])
 
+P = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+BAD = set([4, 8, 9, 12, 16, 18, 20, 24, 25, 27, 28])
 # 0-30每个数包含的质数
-factors = [sum(1 << i for i, p in enumerate(primes) if x % p == 0) for x in range(31)]
-MOD = 10 ** 9 + 7
-available = (1 << len(primes)) - 1
+S = [sum(1 << i for i, p in enumerate(P) if x % p == 0) for x in range(31)]
+MOD = int(1e9 + 7)
 
 
 class Solution:
     def numberOfGoodSubsets(self, nums: List[int]) -> int:
-        freq = Counter(nums)
-
         @lru_cache(None)
         def dfs(cur: int, state: int) -> int:
             if cur == 1:
@@ -36,14 +32,15 @@ class Solution:
             # 不取当前
             res = dfs(cur - 1, state)
 
-            # 取当前；交小并大
-            if cur not in composites and state | factors[cur] == state:
-                res += freq[cur] * dfs(cur - 1, state ^ (factors[cur]))
+            # 取当前
+            if cur not in BAD and state | S[cur] == state:
+                res += dfs(cur - 1, state ^ (S[cur])) * counter[cur]
 
             return res
 
         # 减1表示减去空集；答案为可选的数目*1的子集数
-        return (dfs(30, available) - 1) * pow(2, freq[1], MOD) % MOD
+        counter = Counter(nums)
+        return (dfs(30, (1 << len(P)) - 1) - 1) * pow(2, counter[1], MOD) % MOD
 
 
 print(Solution().numberOfGoodSubsets(nums=[1, 2, 3, 4]))

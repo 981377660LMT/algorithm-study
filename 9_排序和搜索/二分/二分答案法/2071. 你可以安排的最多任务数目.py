@@ -16,20 +16,20 @@ class Solution:
             wls = SortedList(workers[-mid:])
 
             # 从大到小枚举每一个任务
-            for t in reversed(tasks[:mid]):
+            for task in reversed(tasks[:mid]):
                 # 如果有序集合中最大的元素大于等于最大任务
-                if wls[-1] >= t:
+                if wls[-1] >= task:
                     wls.pop()
                 else:
                     if remain == 0:
                         return False
 
                     # 在有序集合中找出`最小的`大于等于 t−strength 的元素并删除
-                    cand = wls.bisect_left(t - strength)  # 这里不能用bisect_right(t-strength)-1
-                    if cand == len(wls):
+                    pos = wls.bisect_left(task - strength)
+                    if pos == len(wls):
                         return False
+                    wls.pop(pos)
                     remain -= 1
-                    wls.pop(cand)
 
             return True
 
@@ -38,7 +38,7 @@ class Solution:
 
         left, right = 0, min(len(tasks), len(workers))
         while left <= right:
-            mid = (left + right) >> 1
+            mid = (left + right) // 2
             if check(mid):
                 left = mid + 1
             else:

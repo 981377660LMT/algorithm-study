@@ -22,16 +22,14 @@ class Solution:
         # 计算组合两个数组并保持其原始顺序的方法的数量
         # 假设这两个数组的长度分别是 l 和 r，那么答案是 math.com b (l + r，l)
         def dfs(cur: int) -> Tuple[int, int]:
-            node_count, sort_count = 0, 1
+            nodeCount, res = 0, 1
             for next in adjmap[cur]:
-                next_node_count, next_sort_count = dfs(next)
-                node_count += next_node_count
+                subCount, nextRes = dfs(next)
+                nodeCount += subCount
 
                 # 子树1排序数*子树2排序数*组内保持顺序合并数组的方式
-                sort_count = (
-                    sort_count * next_sort_count * comb(node_count, next_node_count)
-                ) % MOD
-            return (node_count + 1, sort_count)
+                res = (res * nextRes * comb(nodeCount, subCount)) % MOD
+            return (nodeCount + 1, res)
 
         return dfs(0)[1]
 

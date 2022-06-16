@@ -8,9 +8,9 @@ import { MinHeap } from '../../../MinHeap'
  * 最小值用堆来维护，最大值随指针移动而改变，
  * @description 思路与有序矩阵那道题差不多,每次移动shift出的那行的指针
  */
-const smallestRange = function (nums: number[][]): number[] {
-  let l = -Infinity
-  let r = Infinity
+function smallestRange(nums: number[][]): number[] {
+  let gMax = -Infinity
+  let gMin = Infinity
   const pq = new MinHeap<[number, number, number]>(
     (a, b) => a[0] - b[0],
     Infinity,
@@ -23,21 +23,24 @@ const smallestRange = function (nums: number[][]): number[] {
   while (true) {
     const [min, row, col] = pq.heappop()!
     // max - min 是当前的最大最小差值， r - l 为全局的最大最小差值。因为如果当前的更小，我们就更新全局结果
-    if (max - min < r - l) [l, r] = [min, max]
+    if (max - min < gMin - gMax) [gMax, gMin] = [min, max]
     // 走到尽头结束
-    if (col === nums[row].length - 1) return [l, r]
+    if (col === nums[row].length - 1) return [gMax, gMin]
     pq.heappush([nums[row][col + 1], row, col + 1])
     max = Math.max(max, nums[row][col + 1])
   }
 }
 
-console.log(
-  smallestRange([
-    [4, 10, 15, 24, 26],
-    [0, 9, 12, 20],
-    [5, 18, 22, 30],
-  ])
-)
+if (require.main === module) {
+  console.log(
+    smallestRange([
+      [4, 10, 15, 24, 26],
+      [0, 9, 12, 20],
+      [5, 18, 22, 30],
+    ])
+  )
+}
+
 // 输出：[20,24]
 
 export { smallestRange }

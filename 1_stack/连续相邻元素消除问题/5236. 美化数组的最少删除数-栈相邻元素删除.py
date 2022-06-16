@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 
 
 MOD = int(1e9 + 7)

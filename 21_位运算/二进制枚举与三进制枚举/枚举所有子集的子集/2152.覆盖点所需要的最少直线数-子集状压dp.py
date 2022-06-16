@@ -9,13 +9,15 @@ Point = List[int]
 class Solution:
     def minimumLines(self, points: List[List[int]]) -> int:
         n = len(points)
-        dp = [n] * (1 << n)
+        dp = [n] * (1 << n)  # 覆盖点集bitmask需要用到的最小直线数量
 
         for state in range(1 << n):
+            # !1.对于某个点集首先检验其所有点是否在同一直线上
             if self._isOnOneLine([points[i] for i in range(n) if ((state >> i) & 1)]):
                 dp[state] = 1
                 continue
 
+            # !2.若点集不在同一直线上，则考虑将其划分为两部分
             g1, g2 = state, 0
             while g1:
                 dp[state] = min(dp[state], dp[g1] + dp[g2])

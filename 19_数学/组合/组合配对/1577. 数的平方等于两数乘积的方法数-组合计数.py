@@ -6,6 +6,8 @@ from collections import Counter
 # 1 <= nums1.length, nums2.length <= 1000
 
 # 哈希表两数之和思想:用两个map记录平方，然后枚举乘积。
+
+
 class Solution:
     def numTriplets(self, nums1: List[int], nums2: List[int]) -> int:
         n1, n2 = len(nums1), len(nums2)
@@ -23,6 +25,7 @@ class Solution:
         for i in range(n2):
             for j in range(i + 1, n2):
                 res += c1[nums2[i] * nums2[j]]
+
         return res
 
 

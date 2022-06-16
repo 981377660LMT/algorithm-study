@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import List, Tuple
 from heapq import heappush, heappop
 
@@ -9,61 +10,39 @@ from heapq import heappush, heappop
 # 2 <= n <= 1000
 
 # 1928. 规定时间内到达终点的最小花费.py
+
+
 class Solution:
     def minimumCost(self, n: int, highways: List[List[int]], discounts: int) -> int:
-
-        adjList = [[] for _ in range(n)]
+        adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))
         for u, v, w in highways:
-            adjList[u].append((v, w))
-            adjList[v].append((u, w))
+            adjMap[u][v] = min(adjMap[u][v], w)
+            adjMap[v][u] = min(adjMap[v][u], w)
 
         # 花费，id，打折次数
-        pq: List[Tuple[int, int, int]] = [(0, 0, 0)]
+        pq = [(0, 0, 0)]
 
         # 经过每个点的打折次数对应的cost visited[点坐标][打折次数]=cost
-        dist = [[0x7FFFFFFF] * 505 for _ in range(n)]
+        dist = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        dist[0][0] = 0
 
         while pq:
-            cur_cost, cur_id, cur_discount = heappop(pq)
-            if cur_discount > discounts:
+            curCost, cur, curDisCount = heappop(pq)
+            if curDisCount > discounts or curCost > dist[cur][curDisCount]:
                 continue
 
-            if cur_id == n - 1:
-                return cur_cost
+            if cur == n - 1:
+                return curCost
 
-            if cur_cost < dist[cur_id][cur_discount]:
-                dist[cur_id][cur_discount] = cur_cost
-                for next_id, weight in adjList[cur_id]:
-                    heappush(pq, (cur_cost + weight, next_id, cur_discount))
-                    heappush(pq, (cur_cost + weight // 2, next_id, cur_discount + 1))
-        return -1
-
-    def minimumCost2(self, n: int, highways: List[List[int]], discounts: int) -> int:
-
-        adjList = [[] for _ in range(n)]
-        for u, v, w in highways:
-            adjList[u].append((v, w))
-            adjList[v].append((u, w))
-
-        # 花费，id，打折次数
-        pq: List[Tuple[int, int, int]] = [(0, 0, 0)]
-
-        # 每个点的limit
-        dist = [0x7FFFFFFF for _ in range(n)]
-
-        while pq:
-            cur_cost, cur_id, cur_discount = heappop(pq)
-            if cur_discount > discounts:
-                continue
-
-            if cur_id == n - 1:
-                return cur_cost
-
-            if cur_discount < dist[cur_id]:
-                dist[cur_id] = cur_discount
-                for next_id, weight in adjList[cur_id]:
-                    heappush(pq, (cur_cost + weight, next_id, cur_discount))
-                    heappush(pq, (cur_cost + weight // 2, next_id, cur_discount + 1))
+            for next, weight in adjMap[cur].items():
+                cand1 = curCost + weight
+                if cand1 < dist[next][curDisCount]:
+                    dist[next][curDisCount] = cand1
+                    heappush(pq, (cand1, next, curDisCount))
+                cand2 = curCost + weight // 2
+                if cand2 < dist[next][curDisCount + 1]:
+                    dist[next][curDisCount + 1] = cand2
+                    heappush(pq, (cand2, next, curDisCount + 1))
         return -1
 
 

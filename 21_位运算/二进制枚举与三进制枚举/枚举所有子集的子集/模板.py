@@ -23,14 +23,12 @@ def genPowerSetFromAllPowerSet2(nums: List[int]) -> List[List[Tuple[int, ...]]]:
     res = []
     for state in range(1 << n):
         cur = []
-        group1, group2 = state, 0
-        while True:  # 如果子集规定非空，这里变成while group1 即可
-            cur.append((group1, group2))  # 其实append group1就可以了
+        g1, g2 = state, 0
+        while g1:  # 如果子集规定非空，这里变成while group1 即可
+            cur.append((g1, g2))  # 其实append group1就可以了
             # 关键，不断减一+与运算跳数
-            if group1 == 0:
-                break
-            group1 = state & (group1 - 1)
-            group2 = state ^ group1
+            g1 = state & (g1 - 1)
+            g2 = state ^ g1
         res.append(cur)
     return res
 
@@ -40,12 +38,10 @@ def genPowerSetFromAllPowerSet3(n: int):
     res = []
     for state in range(1 << n):
         cur = []
-        group = state
-        while True:
-            cur.append(group)
-            if group == 0:
-                break
-            group = state & (group - 1)
+        g1 = state
+        while g1:
+            cur.append(g1)
+            g1 = state & (g1 - 1)
         res.append(cur)
     return res
 

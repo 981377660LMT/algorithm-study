@@ -1,5 +1,6 @@
 from math import factorial
 
+# 康托展开
 # 给定 n 和 k，返回k他是第几个排列。
 class Solution:
     def getRank(self, n: int, k: int) -> int:

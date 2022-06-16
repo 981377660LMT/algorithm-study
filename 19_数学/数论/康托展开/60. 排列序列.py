@@ -1,6 +1,6 @@
 from math import factorial
 
-
+# 康托展开
 # 给定 n 和 k，返回第k个排列。
 class Solution:
     def getPermutation(self, n: int, k: int) -> str:

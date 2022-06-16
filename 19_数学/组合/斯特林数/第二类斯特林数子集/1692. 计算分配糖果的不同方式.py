@@ -31,6 +31,7 @@ class Solution:
 
 
 print(Solution().waysToDistribute(n=4, k=2))
+print(Solution().waysToDistribute(n=8, k=2))
 # 输出：7
 # 解释：把糖果 4 分配到 2 个手袋中的一个，共有 7 种方式:
 # (1), (2,3,4)s

@@ -18,7 +18,7 @@ class Solution:
         从而大大减少了列间暴力转移的边数
         观察转移式优化dp
         """
-        counters = [defaultdict(int) for _ in range(k)]  # 用counter超时了 改defaultdict
+        counters = [defaultdict(int) for _ in range(k)]  # !用counter超时了 改defaultdict
         counts = [0] * k
         for col in range(k):
             for row in range(col, len(nums), k):

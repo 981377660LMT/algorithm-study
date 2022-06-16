@@ -24,13 +24,13 @@ class Solution:
             tmp = 0
             cur = counter[state]
 
-            group = state & (state - 1)
-            while group:
-                tmp = cur * counter[group]
+            g1 = state & (state - 1)
+            while g1:
+                tmp = cur * counter[g1]
                 tmp %= MOD
                 res -= tmp
                 res %= MOD
-                group = state & (group - 1)
+                g1 = state & (g1 - 1)
 
         # 要求真子集
         res -= sum(comb(c, 2) for c in counter.values())

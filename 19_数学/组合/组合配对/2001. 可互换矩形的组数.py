@@ -11,8 +11,8 @@ class Solution:
             ratios[(x / g, y / g)] += 1
 
         res = 0
-        for val in ratios.values():
-            res += val * (val - 1) // 2
+        for count in ratios.values():
+            res += count * (count - 1) // 2
         return res
 
 

@@ -15,6 +15,8 @@ sl = SortedList()
 queue = deque()
 
 # https://leetcode.cn/problems/finding-mk-average/solution/by-981377660lmt-5hhm/
+
+
 class MKAverage:
     def __init__(self, m: int, k: int):
         """用一个空的数据流和两个整数 m 和 k 初始化 MKAverage 对象

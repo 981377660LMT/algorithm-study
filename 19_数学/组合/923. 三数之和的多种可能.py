@@ -1,27 +1,31 @@
 from typing import List
-from itertools import combinations_with_replacement
+from itertools import combinations, combinations_with_replacement, product
 from collections import Counter
 
 MOD = int(1e9 + 7)
 
 # 返回满足 i < j < k 且 A[i] + A[j] + A[k] == target 的元组 i, j, k 的数量
 
+# 3 <= arr.length <= 3000
+
 
 class Solution:
     def threeSumMulti(self, arr: List[int], target: int) -> int:
-        c = Counter(arr)
-        # combinations_with_replacement 作用 ：返回指定长度的组合，组合内元素可重复
-        # print(*combinations_with_replacement(c, 2))
+        C = Counter(arr)
         res = 0
-        for i, j in combinations_with_replacement(c, 2):
-            k = target - i - j
-            # 三个相等/有两个相等(只取一种情况)/都不想等(只取一种情况)
-            if i == j == k:
-                res += c[i] * (c[i] - 1) * (c[i] - 2) // 6
-            elif i == j != k:
-                res += (c[i] * (c[i] - 1) // 2) * c[k]
-            elif k > i and k > j:
-                res += c[i] * c[j] * c[k]
+        for n1, n2 in product(C, repeat=2):
+            n3 = target - n1 - n2
+            if not n1 <= n2 <= n3:
+                continue
+            # 三个相等/有两个相等/都不等
+            if n1 == n2 == n3:
+                res += C[n1] * (C[n1] - 1) * (C[n1] - 2) // 6
+            elif n1 == n2 != n3:
+                res += (C[n1] * (C[n1] - 1) // 2) * C[n3]
+            elif n1 != n2 == n3:
+                res += (C[n2] * (C[n2] - 1) // 2) * C[n1]
+            else:
+                res += C[n1] * C[n2] * C[n3]
 
         return res % MOD
 

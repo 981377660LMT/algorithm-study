@@ -22,7 +22,7 @@ class Solution:
         self, m: int, n: int, introvertsCount: int, extrovertsCount: int
     ) -> int:
         @lru_cache(None)
-        def dfs(row, col, intro, extro, state: Tuple[int]) -> int:
+        def dfs(row: int, col: int, intro: int, extro: int, state: Tuple[int]) -> int:
             # state:
             # 最近的n个安排，再多不会被当前的影响到
             # 上面的人是state[0]，左边的人是state[-1]

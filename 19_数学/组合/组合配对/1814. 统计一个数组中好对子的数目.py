@@ -1,4 +1,5 @@
-import collections
+from collections import Counter
+from itertools import product
 from typing import List
 
 # A[i] + rev(A[j]) == A[j] + rev(A[i])
@@ -7,18 +8,34 @@ from typing import List
 
 # Then it becomes an easy question that,
 # how many pairs in B with B[i] == B[j]
-def countNicePairs(A: List[int]):
-    res = 0
-    counter = collections.Counter()
-    # 保证i<j
-    for a in A:
-        b = int(str(a)[::-1])
-        res += counter[a - b]
-        counter[a - b] += 1
-    return res % (10 ** 9 + 7)
+
+MOD = int(1e9 + 7)
 
 
-print(countNicePairs(A=[42, 11, 1, 97]))
+class Solution:
+    def countNicePairs(self, A: List[int]) -> int:
+        """一遍遍历 前不看后"""
+        res = 0
+        counter = Counter()
+
+        # 保证i<j
+        for num1 in A:
+            num2 = int(str(num1)[::-1])
+            res += counter[num1 - num2]
+            counter[num1 - num2] += 1
+
+        return res % MOD
+
+    def countNicePairs2(self, A: List[int]) -> int:
+        """先全部存起来再统计"""
+        res = 0
+        C = Counter(num - int(str(num)[::-1]) for num in A)
+        for count in C.values():
+            res += count * (count - 1) // 2
+        return res % MOD
+
+
+print(Solution().countNicePairs(A=[42, 11, 1, 97]))
 # 输出：2
 # 解释：两个坐标对为：
 #  - (0,3)：42 + rev(97) = 42 + 79 = 121, 97 + rev(42) = 97 + 24 = 121 。

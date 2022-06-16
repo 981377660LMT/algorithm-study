@@ -20,25 +20,24 @@ class Solution:
         # 右到左遍历,栈顶保存前面的车的信息(position, speed, collideTime)
         stack = []
 
-        for position, speed in reversed(cars):
+        for pos, speed in cars[::-1]:
             # 车速慢，不会撞到前面一部车，弹出
             # 撞车之前前面车已经撞了，弹出
             while stack and (
                 (speed <= stack[-1][1])
-                or ((stack[-1][0] - position) / (speed - stack[-1][1]) >= stack[-1][2])
+                or ((stack[-1][0] - pos) / (speed - stack[-1][1]) >= stack[-1][2])
             ):
                 stack.pop()
             if not stack:
-                stack.append((position, speed, int(1e20)))
+                stack.append((pos, speed, int(1e20)))
                 res.append(-1)
             else:
                 # 这辆车与右边的车会相撞
-                collideTime = (stack[-1][0] - position) / (speed - stack[-1][1])
-                stack.append((position, speed, collideTime))
+                collideTime = (stack[-1][0] - pos) / (speed - stack[-1][1])
+                stack.append((pos, speed, collideTime))
                 res.append(collideTime)
 
-        res.reverse()
-        return res
+        return res[::-1]
 
 
 print(Solution().getCollisionTimes(cars=[[1, 2], [2, 1], [4, 3], [7, 2]]))

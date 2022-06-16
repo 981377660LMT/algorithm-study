@@ -1,4 +1,4 @@
-from collections import Counter, deque
+from collections import Counter
 from functools import lru_cache
 from itertools import permutations
 
@@ -12,10 +12,10 @@ from itertools import permutations
 
 
 @lru_cache(None)
-def isKRepeatedSubsequence(pattern: str, needle: str, k: int) -> bool:
+def isKRepeatedSubsequence(longer: str, shorter: str, k: int) -> bool:
     """needle是否为pattern的k重复子序列 O(length)"""
-    it = iter(pattern)
-    return all(char in it for char in needle * k)
+    it = iter(longer)
+    return all(char in it for char in shorter * k)
 
 
 class Solution:

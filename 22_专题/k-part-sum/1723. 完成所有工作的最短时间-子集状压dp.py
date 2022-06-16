@@ -3,6 +3,11 @@ from typing import List
 # !前i个孩子 分配的饼干状态为j的情况下，前 i 个孩子的不公平程度的最小值
 # !时间复杂度O(k*3^n)
 
+# 如何用 Python 的状压 DP 写法通过此题
+# https://leetcode.cn/problems/find-minimum-time-to-finish-all-jobs/solution/by-endlesscheng-d2oa/
+# 优化 1：把 min 和 max 拆开，改为手写，避免额外的函数调用开销。
+# 优化 2：预处理每个二进制数的子集。
+
 
 class Solution:
     def distributeCookies(self, cookies: List[int], k: int) -> int:

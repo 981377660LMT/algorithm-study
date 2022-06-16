@@ -1,11 +1,18 @@
 // 1 <= m, n <= 200
 // 1 <= hits.length <= 4 * 104
 
-const enum State {
+enum State {
   Empty = 0,
   BrokenOrLastAlive = 1,
   Stable = 2,
 }
+
+const DIR4 = [
+  [0, 1],
+  [0, -1],
+  [1, 0],
+  [-1, 0],
+]
 
 // 逆推:
 // 整体思路是倒推，看每次打砖块造成了多少砖块本应该是稳定的，变为了不稳定
@@ -13,12 +20,12 @@ const enum State {
 // 2. 倒推打砖块，如果击打位置没有砖块或者不与稳定砖块相连，无事发生
 // 3.如果击打位置的砖块与稳定砖块相连，说明这个砖块是被打下来的,dfs+1并重置那些砖块为稳定砖块
 function hitBricks(grid: number[][], hits: number[][]): number[] {
-  const [row, col] = [grid.length, grid[0].length]
+  const [ROW, COL] = [grid.length, grid[0].length]
   const res = Array<number>(hits.length).fill(0)
 
   // 1. 标记，确定最后哪些存活
   for (const [hitR, hitC] of hits) grid[hitR][hitC]--
-  for (let c = 0; c < col; c++) {
+  for (let c = 0; c < COL; c++) {
     dfs(0, c)
   }
 
@@ -38,9 +45,14 @@ function hitBricks(grid: number[][], hits: number[][]): number[] {
   function dfs(r: number, c: number): number {
     let res = 0
 
-    if (r >= 0 && r < row && c >= 0 && c < col && grid[r][c] === State.BrokenOrLastAlive) {
+    if (r >= 0 && r < ROW && c >= 0 && c < COL && grid[r][c] === State.BrokenOrLastAlive) {
+      res++
       grid[r][c] = State.Stable
-      res += 1 + dfs(r + 1, c) + dfs(r - 1, c) + dfs(r, c + 1) + dfs(r, c - 1)
+      for (const [dr, dc] of DIR4) {
+        const nr = r + dr
+        const nc = c + dc
+        res += dfs(nr, nc)
+      }
     }
 
     return res
@@ -48,10 +60,10 @@ function hitBricks(grid: number[][], hits: number[][]): number[] {
 
   function isConnectToStable(r: number, c: number): boolean {
     if (r === 0) return true
-    if (grid[r + 1]?.[c] === State.Stable) return true
-    if (grid[r - 1]?.[c] === State.Stable) return true
-    if (grid[r]?.[c + 1] === State.Stable) return true
-    if (grid[r]?.[c - 1] === State.Stable) return true
+    for (const [dr, dc] of DIR4) {
+      const [nr, nc] = [r + dr, c + dc]
+      if (grid[nr]?.[nc] === State.Stable) return true
+    }
     return false
   }
 }

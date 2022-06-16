@@ -18,11 +18,11 @@ class Solution:
         for state in range(1 << n):
             dp[0][state] = subSum[state]
 
-        # O(n*3^n) 枚举子集的子集
+        # O(k*3^n) 枚举子集的子集
         for i in range(1, k):
             for state in range(1 << n):
                 g1 = state
-                g2 = state ^ g1
+                g2 = 0
                 while g1:
                     dp[i][state] = min(dp[i][state], max(dp[i - 1][g1], subSum[g2]))
                     g1 = (g1 - 1) & state

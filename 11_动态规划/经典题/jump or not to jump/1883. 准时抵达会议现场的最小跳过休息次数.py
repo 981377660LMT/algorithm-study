@@ -5,7 +5,7 @@ from math import ceil
 # 必须休息并等待，直到 下一个整数小时 才能开始继续通过下一条道路
 # 然而，为了能准时到达，你可以选择 跳过 一些路的休息时间，这意味着你不必等待下一个整数小时。
 # 返回准时抵达会议现场所需要的 最小跳过次数 ，如果 无法准时参会 ，返回 -1 。
-# 1 <= n <= 1000
+# !1 <= n <= 1000
 
 
 # summary
@@ -28,7 +28,6 @@ class Solution:
         dp = [[int(1e20)] * (n + 1) for _ in range(n + 1)]  # 第i个位置跳了j次的时间
         dp[0][0] = 0
         for i, d in enumerate(dist, 1):
-            # not jump
             dp[i][0] = ceil(dp[i - 1][0] + d / speed - EPS)
             for j in range(1, i + 1):
                 # 跳跃j次是 本次跳跃，上次跳了j-1次 和 本次不跳跃，上次跳了j次 的递推

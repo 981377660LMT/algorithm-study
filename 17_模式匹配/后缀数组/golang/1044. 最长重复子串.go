@@ -7,6 +7,7 @@ import (
 )
 
 // !高度数组中的最大值对应的就是可重叠最长重复子串
+// 子串就是后缀的前缀
 func longestDupSubstring(s string) string {
 	sa, _, height := suffixArray([]byte(s))
 	start, max := 0, 0

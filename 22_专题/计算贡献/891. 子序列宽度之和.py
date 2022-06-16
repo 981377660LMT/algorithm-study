@@ -9,11 +9,11 @@ from typing import List
 # 统计具有最小值 A[i] 和最大值 A[j] 的子序列的数量
 class Solution:
     def sumSubseqWidths(self, nums: List[int]) -> int:
-        MOD = 1_000_000_007
+        MOD = int(1e9 + 7)
         res = 0
-        # 对每个数，统计他作为最大/最小值在多少个取他的子集里出现
-        for i, x in enumerate(sorted(nums)):
-            res += x * (pow(2, i, MOD) - pow(2, len(nums) - i - 1, MOD))
+        # 对每个数，统计他作为最大/最小值在多少个`取他`的子集里出现
+        for i, num in enumerate(sorted(nums)):
+            res += num * (pow(2, i, MOD) - pow(2, len(nums) - i - 1, MOD))
         return res % MOD
 
 

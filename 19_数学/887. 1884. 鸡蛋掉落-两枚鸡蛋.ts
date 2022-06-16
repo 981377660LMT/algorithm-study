@@ -1,6 +1,6 @@
 function twoEggDrop(n: number): number {
   let throws = 1
-  // n层建筑 floor有0到n n+1种
+  // n层建筑 floor有0到n n+1种  (这里可以二分优化)
   while (calFloor(2, throws) < n + 1) {
     throws++
   }
@@ -10,7 +10,7 @@ function twoEggDrop(n: number): number {
   // 能确定的楼层数(f在每一层都有可能，所以要全部覆盖)
   function calFloor(eggs: number, throws: number): number {
     if (eggs === 1 || throws === 1) return throws + 1
-    return calFloor(eggs, throws - 1) + calFloor(eggs - 1, throws - 1)
+    return calFloor(eggs, throws - 1) + calFloor(eggs - 1, throws - 1) // 碎还是不碎
   }
 }
 

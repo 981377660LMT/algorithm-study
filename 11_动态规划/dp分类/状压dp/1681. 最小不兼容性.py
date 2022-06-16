@@ -11,18 +11,13 @@ from itertools import combinations
 # 1 <= k <= nums.length <= 16
 # nums.length 能被 k 整除。
 
-# 引入优化：每组的第一个元素必定是剩下元素中最小的那个。
+# !引入优化：每组的第一个元素必定是剩下元素中最小的那个。
 # 有了这个优化后等于每组减少了一个元素，排列组合取4个变成了取3个就能大幅缩短时间。
-INF = 0x7FFFFFFF
+INF = int(1e20)
 
 
 class Solution:
     def minimumIncompatibility(self, nums: List[int], k: int) -> float:
-        size = len(nums) // k
-        if size == 1:
-            return 0
-        nums.sort()
-
         @lru_cache(None)
         def dfs(state: int) -> int:
             # 还没有被选的数
@@ -44,8 +39,11 @@ class Solution:
 
             return res
 
+        size = len(nums) // k
+        if size == 1:
+            return 0
+        nums.sort()
         res = dfs(0)
-        # 清除记忆化的缓存
         dfs.cache_clear()
         # 没找到答案就返回-1
         return res if res != INF else -1

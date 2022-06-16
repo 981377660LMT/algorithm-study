@@ -8,31 +8,32 @@ import { isalpha } from '../../../0_字符串/string'
 // print(Solution().expand("{a,b}c{d,e}f"))
 // # 输出：["acdf","acef","bcdf","bcef"]
 function expand(s: string): string[] {
-  const groups: string[][] = []
-  extractWordGroups()
-
+  const groups = extractWordGroups()
   const res: string[] = []
   bt(0, [])
 
   return res.sort()
 
-  function extractWordGroups(): void {
+  function extractWordGroups(): string[][] {
     let isExpandMode = false
-    let wordBuffer: string[] = []
+    let group: string[] = []
+    const res: string[][] = []
 
     for (const char of s) {
       if (char === '{') {
         isExpandMode = true
       } else if (char === '}') {
-        groups.push(wordBuffer)
-        wordBuffer = []
+        res.push(group)
+        group = []
         isExpandMode = false
       } else if (isExpandMode) {
-        if (isalpha(char)) wordBuffer.push(char)
+        if (isalpha(char)) group.push(char)
       } else {
-        if (isalpha(char)) groups.push([char])
+        if (isalpha(char)) res.push([char])
       }
     }
+
+    return res
   }
 
   function bt(index: number, path: string[]): void {

@@ -4,24 +4,15 @@ from math import comb
 
 # 桌面上有 2n 个颜色不完全相同的球，球上的颜色共有 k 种。
 # 其中 balls[i] 是颜色为 i 的球的数量。
+
+# 1 <= balls.length <= 8
+# 1 <= balls[i] <= 6
+
+
 class Solution:
     def getProbability(self, balls: List[int]) -> float:
-        n = sum(balls) // 2
-
         @lru_cache(None)
-        def dfs(index, ball1, ball2, color1, color2) -> int:
-            """[summary]
-
-            Args:
-                index ([type]): [description]
-                ball1 ([type]): [description]
-                ball2 ([type]): [description]
-                color1 ([type]): [颜色种类数]
-                color2 ([type]): [颜色种类数]
-
-            Returns:
-                int: [description]
-            """
+        def dfs(index: int, ball1: int, ball2: int, color1: int, color2: int) -> int:
             if ball1 > n or ball2 > n:
                 return 0
             if index == len(balls):
@@ -39,7 +30,8 @@ class Solution:
 
             return res
 
-        return dfs(0, 0, 0, 0, 0) / comb(2 * n, n)
+        n = sum(balls) // 2
+        return dfs(0, 0, 0, 0, 0) / comb(2 * n, n)  # !最后统一进行浮点数运算
 
 
 print(Solution().getProbability([2, 1, 1]))

@@ -14,6 +14,8 @@ from math import ceil, floor
 
 class Solution:
     def kthSmallestProduct(self, nums1: List[int], nums2: List[int], k: int) -> int:
+        """2040. 两个有序数组的第 K 小乘积"""
+
         def countNGT(mid: int) -> int:
             """Return count of products <= mid."""
             res = 0
@@ -26,34 +28,6 @@ class Solution:
                 else:
                     res += bisect_right(nums2, floor(mid / x))
             return res
-
-        # def countNGT(mid: int) -> int:
-        #     """注意到-1e5<=nums[i]<=1e5 可以使用前缀和存位置代替二分"""
-        #     nums = [0] * int(2e5 + 10)
-        #     for num in nums2:
-        #         nums[num + int(1e5)] += 1
-        #     preSum = list(accumulate(nums))
-
-        #     def count(x: int) -> int:
-        #         if x < -int(1e5):
-        #             return 0
-        #         if x > int(1e5):
-        #             return preSum[-1]
-        #         return preSum[x + int(1e5)]
-
-        #     def inner(mid: int) -> int:
-        #         res = 0
-        #         for x in nums1:
-        #             if x < 0:
-        #                 res += len(nums) - count(ceil(mid / x))
-        #             elif x == 0:
-        #                 if mid >= 0:
-        #                     res += len(nums2)
-        #             else:
-        #                 res += count(floor(mid / x))
-        #         return res
-
-        #     return inner(mid)
 
         # 遍历小的，二分大的(优化了1000ms)
         if len(nums1) > len(nums2):

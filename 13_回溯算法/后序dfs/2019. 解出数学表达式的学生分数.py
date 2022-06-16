@@ -7,6 +7,10 @@ from functools import lru_cache
 
 # 枚举分割点
 
+# 如果一位学生的答案 等于 表达式的正确结果，这位学生将得到 5 分。
+# 否则，如果答案由 一处或多处错误的运算顺序 计算得到，那么这位学生能得到 2 分。
+# 否则，这位学生将得到 0 分。
+
 
 class Solution:
     def scoreOfStudents(self, s: str, answers: List[int]) -> int:

@@ -6,6 +6,7 @@ from math import comb
 # 将 n 个小球放到 5 个盒子里，盒子可以为空。
 # x1+x2+...+xn=5 => (x1+1)+(x2+1)+..+(xn+1)=n+5
 # 答案是 C(n + 5 - 1, 5 - 1) = C(n + 4, 4)
+# 隔板插空
 
 
 class Solution:

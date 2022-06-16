@@ -1,59 +1,43 @@
+from collections import defaultdict
 from typing import List, Tuple
 from heapq import heappop, heappush
 
 Cost, ID, Time = int, int, int
 #  edges[i] = [xi, yi, timei] 表示城市 xi 和 yi 之间有一条双向道路，耗费时间为 timei 分钟
 # 你在城市 0 ，你想要在 maxTime 分钟以内 （包含 maxTime 分钟）到达城市 n - 1
-# 请你返回完成旅行的 最小费用 ，如果无法在 maxTime 分钟以内完成旅行，请你返回 -1 。
+# 请你返回完成旅行的 `最小费用` ，如果无法在 maxTime 分钟以内完成旅行，请你返回 -1 。
 
 # 带限制的单源最短路径问题
+# 1 <= maxTime <= 1000
+# 2 <= n <= 1000
 
 
 class Solution:
-    def minCost2(self, maxTime: int, edges: List[List[int]], passingFees: List[int]) -> int:
-        n = len(passingFees)
-        adjList = [[] for _ in range(n)]
-        for u, v, t in edges:
-            adjList[u].append((v, t))
-            adjList[v].append((u, t))
-
-        pq: List[Tuple[Cost, ID, Time]] = [(passingFees[0], 0, 0)]
-        visited = [0x7FFFFFFF for _ in range(n)]
-
-        while pq:
-            cur_cost, cur_id, cur_time = heappop(pq)
-            if cur_time > maxTime:
-                continue
-            if cur_id == n - 1:
-                return cur_cost
-            if cur_time < visited[cur_id]:
-                visited[cur_id] = cur_time
-                for next_id, next_time in adjList[cur_id]:
-                    heappush(pq, (cur_cost + passingFees[next_id], next_id, cur_time + next_time))
-        return -1
-
     def minCost(self, maxTime: int, edges: List[List[int]], passingFees: List[int]) -> int:
+        """请你返回完成旅行的 最小费用"""
         n = len(passingFees)
-        adjList = [[] for _ in range(n)]
-        for u, v, t in edges:
-            adjList[u].append((v, t))
-            adjList[v].append((u, t))
+        adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        for u, v, w in edges:
+            adjMap[u][v] = min(adjMap[u][v], w)
+            adjMap[v][u] = min(adjMap[v][u], w)
 
-        pq: List[Tuple[Cost, ID, Time]] = [(passingFees[0], 0, 0)]
-        dist = [[0x7FFFFFFF] * (maxTime + 1) for _ in range(n)]
+        pq = [(passingFees[0], 0, 0)]
+        dist = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        dist[0][0] = passingFees[0]
 
         while pq:
-            cur_cost, cur_id, cur_time = heappop(pq)
-            if cur_time > maxTime:
+            curFee, cur, curTime = heappop(pq)
+            if curFee > dist[cur][curTime] or curTime > maxTime:
                 continue
 
-            if cur_id == n - 1:
-                return cur_cost
+            if cur == n - 1:
+                return curFee
 
-            if cur_cost < dist[cur_id][cur_time]:
-                dist[cur_id][cur_time] = cur_cost
-                for next_id, next_time in adjList[cur_id]:
-                    heappush(pq, (cur_cost + passingFees[next_id], next_id, cur_time + next_time))
+            for next, time in adjMap[cur].items():
+                cand = curFee + passingFees[next]
+                if cand < dist[next][curTime + time]:
+                    dist[next][curTime + time] = cand
+                    heappush(pq, (cand, next, curTime + time))
         return -1
 
 

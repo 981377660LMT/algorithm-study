@@ -30,11 +30,11 @@ class Solution:
                 ones.append(i - len(ones))
         preSum = [0] + list(accumulate(ones))
 
-        res = 0x7FFFFFFF
+        res = int(1e20)
         #    left+k-1<len(ones)
         for left in range(len(ones) + 1 - k):
             right = left + k - 1
-            mid = (left + right) >> 1
+            mid = (left + right) // 2
             # mid左右两边的和
             leftSum = ones[mid] * (mid - left) - (preSum[mid] - preSum[left])
             rightSum = preSum[right + 1] - preSum[mid + 1] - (right - mid) * ones[mid]

@@ -13,7 +13,7 @@ class Solution:
         # 0.返回拓扑排序结果
         def get_top_order(graph, indegree):
             top_order = []
-            stack = [node for node in range(len(graph)) if indegree[node] == 0]
+            stack = [i for i in range(len(graph)) if indegree[i] == 0]
             while stack:
                 cur = stack.pop()
                 top_order.append(cur)

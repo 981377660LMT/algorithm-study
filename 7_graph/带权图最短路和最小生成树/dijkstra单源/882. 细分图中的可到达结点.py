@@ -25,10 +25,10 @@ class Solution:
             if dist[cur] < curDist:
                 continue
             for next, weight in adjMap[cur].items():
-                candDist = weight + dist[cur]
-                if candDist < dist[next]:
-                    dist[next] = candDist
-                    heappush(pq, (candDist, next))
+                cand = weight + dist[cur]
+                if cand < dist[next]:
+                    dist[next] = cand
+                    heappush(pq, (cand, next))
 
         # 可到达的大端点
         res = sum(dist[i] <= maxMoves for i in range(n))

@@ -8,7 +8,7 @@ from collections import deque
 
 # 拓扑排序：
 # 倒着看，可以想象该窗口中的字符全部替换为 '*' ，表示可以匹配任意字符。
-# 入度为窗口内与印章不同的字符数
+# !入度为窗口内与印章不同的字符数
 # 边为字符 => 窗口
 
 # 邻接表:字符index对应窗口
@@ -17,7 +17,7 @@ from collections import deque
 class Solution:
     def movesToStamp(self, stamp: str, target: str) -> List[int]:
         m, n = len(stamp), len(target)
-        indegree = [m] * (n - m + 1)
+        indeg = [m] * (n - m + 1)
         adjList = [[] for _ in range(n)]
         queue = deque()
         visited = [False] * n
@@ -26,8 +26,8 @@ class Solution:
         for i in range(n - m + 1):
             for j in range(m):
                 if target[i + j] == stamp[j]:
-                    indegree[i] -= 1
-                    if indegree[i] == 0:
+                    indeg[i] -= 1
+                    if indeg[i] == 0:
                         queue.append(i)
                 else:
                     adjList[i + j].append(i)
@@ -41,8 +41,8 @@ class Solution:
                     continue
                 visited[cur + i] = True
                 for next in adjList[cur + i]:
-                    indegree[next] -= 1
-                    if indegree[next] == 0:
+                    indeg[next] -= 1
+                    if indeg[next] == 0:
                         queue.append(next)
 
         return res[::-1] if len(res) == n - m + 1 else []

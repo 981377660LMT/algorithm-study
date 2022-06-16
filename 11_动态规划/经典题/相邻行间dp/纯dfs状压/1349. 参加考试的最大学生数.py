@@ -19,14 +19,14 @@ class Solution:
     def maxStudents(self, seats: List[List[str]]) -> int:
         @lru_cache(None)
         def dfs(rowIndex: int, preState: int) -> int:
-            if rowIndex >= row:
+            if rowIndex == ROW:
                 return 0
 
             res = 0
-            for curState in range(1 << col):
+            for curState in range(1 << COL):
                 if not check(rowIndex, preState, curState):
                     continue
-                res = max(res, bin(curState).count('1') + dfs(rowIndex + 1, curState))
+                res = max(res, curState.bit_count() + dfs(rowIndex + 1, curState))
             return res
 
         def check(row: int, preState: int, curState: int) -> bool:
@@ -42,7 +42,7 @@ class Solution:
                     return False
             return True
 
-        row, col = len(seats), len(seats[0])
+        ROW, COL = len(seats), len(seats[0])
         return dfs(0, 0)
 
 

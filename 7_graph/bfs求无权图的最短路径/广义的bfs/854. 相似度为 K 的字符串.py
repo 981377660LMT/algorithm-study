@@ -6,27 +6,28 @@ from typing import Generator
 
 # 1 <= A.length == B.length <= 20
 # A 和 B 只包含集合 {'a', 'b', 'c', 'd', 'e', 'f'} 中的小写字母。
+
+# 1 <= s1.length <= 20
+
+
 class Solution:
     def kSimilarity(self, s1: str, s2: str) -> int:
-        def getNexts(pre: str) -> Generator[str, None, None]:
-            """"Each child node requires one swap to change from x and each child node has one character more similiar to B than x."""
-            swap = 0
-            while pre[swap] == s2[swap]:
-                swap += 1
-            for j in range(swap + 1, len(pre)):
-                # if pre[j] == s2[swap]:
-                if pre[j] == s2[swap] and pre[swap] != s2[swap]:
-                    yield pre[:swap] + pre[j] + pre[swap + 1 : j] + pre[swap] + pre[j + 1 :]
+        def genNexts(pre: str) -> Generator[str, None, None]:
+            """"每次交换至少对齐一个字母，没有对齐字母的操作是没意义的."""
+            first = next((i for i in range(len(pre)) if pre[i] != s2[i]), len(pre))
+            for j in range(first + 1, len(pre)):
+                if pre[j] == s2[first] and pre[first] != s2[first]:
+                    yield pre[:first] + pre[j] + pre[first + 1 : j] + pre[first] + pre[j + 1 :]
 
         queue, visited = deque([(s1, 0)]), set([s1])
         while queue:
             cur, cost = queue.popleft()
             if cur == s2:
                 return cost
-            for next in getNexts(cur):
-                if next not in visited:
-                    visited.add(next)
-                    queue.append((next, cost + 1))
+            for next_ in genNexts(cur):
+                if next_ not in visited:
+                    visited.add(next_)
+                    queue.append((next_, cost + 1))
         return -1
 
 

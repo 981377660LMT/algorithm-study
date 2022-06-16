@@ -15,7 +15,8 @@ from typing import List
 class Solution:
     def distinctNames(self, ideas: List[str]) -> int:
         """直接遍历所有的 otherother 来统计答案显然会是 O(n^2) 会超时
-        从枚举首字母的角度来计算所有组合
+
+        !从枚举首字母的角度来计算所有组合
         """
         adjMap = defaultdict(set)
         for w in ideas:
@@ -29,3 +30,20 @@ class Solution:
             res += (len(adjMap[c1]) - sameSuf) * (len(adjMap[c2]) - sameSuf)
         return res
 
+    def distinctNames2(self, ideas: List[str]) -> int:
+        """
+        如果哈希表存 后缀 => 首字母 也可以做 (比赛就是这么想的 但是没考虑清楚)
+        
+        !按照后缀枚举所有分组
+        """
+        adjMap = defaultdict(set)
+        for w in ideas:
+            adjMap[w[1:]].add(w[0])
+
+        res = 0
+        for c1, c2 in product(adjMap, repeat=2):
+            if c1 == c2:
+                continue
+            sameSuf = len(adjMap[c1] & adjMap[c2])
+            res += (len(adjMap[c1]) - sameSuf) * (len(adjMap[c2]) - sameSuf)
+        return res

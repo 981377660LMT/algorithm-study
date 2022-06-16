@@ -1,11 +1,6 @@
-# 我们希望知道一个 N 位字符串 S 的前缀是否具有循环节。
-# 换言之，对于每一个从头开始的长度为 i（i>1）的前缀，是否由重复出现的子串 A 组成，即 AAA…A （A 重复出现 K 次,K>1）。
-# 如果存在，请找出最短的循环节对应的 K 值（也就是这个前缀串的所有可能重复节中，最大的 K 值）。
+from typing import List, Tuple
 
-
-from typing import List
-
-# input = lambda: sys.stdin.readline().strip()
+# !KMP 求`前缀`循环节
 
 
 def getNext(shorter: str) -> List[int]:
@@ -29,18 +24,27 @@ def getNext(shorter: str) -> List[int]:
     return next
 
 
-def getMinCycle(s: str) -> int:
-    """字符串 S 的前缀是否具有循环节"""
+# 我们希望知道一个 N 位字符串 S 的前缀是否具有循环节。
+# 换言之，对于每一个从头开始的长度为 i（i>1）的前缀，是否由重复出现的子串 A 组成，即 AAA…A （A 重复出现 K 次,K>1）。
+# 如果存在，请找出最短的循环节对应的 K 值（也就是这个前缀串的所有可能重复节中，最大的 K 值）。
+def getMinCycle(s: str) -> List[Tuple[int, int]]:
+    """字符串 S 的前缀 s[:i+1] 是的循环节
+    
+    Returns:
+        List[Tuple[int, int]]: 前缀的长度 循环节的长度
+    """
+    res = []
     n = len(s)
     nexts = getNext(s)
-    for i in range(1, n):
+    for i in range(1, n):  # 所有前缀
         len_ = (i + 1) - nexts[i]
         if len_ and (i + 1) > len_ and (i + 1) % len_ == 0:
-            return i + 1
-    return -1
+            res.append((i + 1, (i + 1) // len_))
+    return res
 
 
 count = 1
+# input = lambda: sys.stdin.readline().strip()
 while True:
     n = int(input())
     if n == 0:
@@ -49,15 +53,9 @@ while True:
     print(f"Test case #{count}")
     count += 1
 
-    # next[i]表示[:i+1]这一段字符串中最长公共前后缀(不是原串)的长度
-    next = getNext(input())
-
-    for i in range(1, n):
-        len_ = (i + 1) - next[i]
-        if len_ and (i + 1) > len_ and (i + 1) % len_ == 0:
-            print((i + 1), (i + 1) // len_)  # 长度与循环次数
+    s = input()
+    res = getMinCycle(s)
+    for preLen, times in res:
+        print(f"{preLen} {times}")
     print()
-
-
-# todo
 

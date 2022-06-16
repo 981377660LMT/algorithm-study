@@ -1,6 +1,6 @@
 from typing import List
 
-# 2 <= n <= 100
+# !2 <= n <= 100
 
 
 class UnionFind:

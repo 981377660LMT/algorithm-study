@@ -1,7 +1,6 @@
-type Time = number
 // 所有车的初始位置各不相同
 function carFleet(target: number, position: number[], speed: number[]): number {
-  const stack: Time[] = [] // 消耗时间单减
+  const stack: number[] = [] // 每辆车的消耗时间需要单减
   const cars = position.map((pos, index) => [pos, speed[index]]).sort((a, b) => a[0] - b[0])
 
   for (const [pos, spd] of cars) {

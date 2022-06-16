@@ -13,9 +13,6 @@ MOD = int(1e9 + 7)
 # https://leetcode.cn/problems/sum-of-total-strength-of-wizards/solution/dan-diao-zhan-qian-zhui-he-de-qian-zhui-d9nki/
 
 
-MOD = int(1e9 + 7)
-
-
 class Solution:
     def totalStrength(self, strength: List[int]) -> int:
         minRange = getRange(strength, isMax=False, isLeftStrict=True, isRightStrict=False)

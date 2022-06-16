@@ -2,8 +2,8 @@ from typing import List
 from collections import defaultdict
 
 # 题目提示:
-# 1 <= nums.length <= 105
-# 1 <= nums[i] <= 2 * 105
+# 1 <= nums.length <= 1e5
+# !1 <= nums[i] <= 2 * 1e5
 
 # enumerate all possibilities
 # https://leetcode-cn.com/problems/number-of-different-subsequences-gcds/solution/pythonjian-dan-si-lu-he-dai-ma-by-semiro-urs1/
@@ -16,19 +16,20 @@ from collections import defaultdict
 # 6 -> [6]
 
 # 考虑每一个数是否可以成为某个子序列的最大公因数即可
-# 然后把所有的列表变成tuple用set去重。得到的长度就是答案(3)。
+# 然后把所有的列表变成tuple用set去重。得到的长度就是答案。
 
 
 # 筛法的复杂度为n/1 + n/2 + n/3 + … + n/n 渐进为O(n * logn)
 class Solution:
     def countDifferentSubsequenceGCDs(self, nums: List[int]) -> int:
+        """计算并返回 nums 的所有 非空 子序列中 不同 最大公约数的 数目 。"""
         numSet = set(nums)
-        MAX = max(numSet)
+        max_ = max(numSet)
         commonFactorOfSub = defaultdict(list)
 
-        # 类似于素数筛
-        for factor in range(1, MAX + 1):
-            for multi in range(factor, MAX + 1, factor):
+        # 枚举因子
+        for factor in range(1, max_ + 1):
+            for multi in range(factor, max_ + 1, factor):
                 if multi in numSet:
                     commonFactorOfSub[factor].append(multi)
 

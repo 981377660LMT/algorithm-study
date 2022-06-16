@@ -1,4 +1,3 @@
-from bisect import bisect_left
 from typing import Optional, Tuple
 
 
@@ -62,7 +61,7 @@ class Solution:
 
         root = numStack[0]
         # print(json.dumps(root, indent=2, default=lambda o: o.__dict__))
-        drawtree(root)
+        # drawtree(root)
         # print(dfs(root))
         return max(dfs(root))
 

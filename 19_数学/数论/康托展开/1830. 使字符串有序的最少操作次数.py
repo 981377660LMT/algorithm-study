@@ -35,16 +35,16 @@ class Solution:
         keys = sorted(counter)
 
         for char in s:
-            # 后面的不重复组合数
-            mult = fac(n - 1)
+            # !后面位置的不重复组合数*当前位置比自己小的数个数
+            mul1 = fac(n - 1)
             for count in counter.values():
-                mult *= ifac(count)
-                mult %= MOD
+                mul1 *= ifac(count)
+                mul1 %= MOD
 
             for smaller in keys:
                 if smaller >= char:
                     break
-                res += counter[smaller] * mult
+                res += counter[smaller] * mul1
                 res %= MOD
 
             counter[char] -= 1
