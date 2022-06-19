@@ -1,3 +1,4 @@
+from itertools import accumulate
 from typing import List
 from bisect import bisect_left, bisect_right
 
@@ -17,31 +18,24 @@ from bisect import bisect_left, bisect_right
 # NlogN 的复杂度：
 # 1.遍历 + 二分
 # 2.排序
+MOD = int(1e9 + 7)
 
 
 class Solution:
     def waysToSplit(self, nums: List[int]) -> int:
-        preSum = [0]
-        for num in nums:
-            preSum.append(preSum[-1] + num)
 
         res = 0
-
+        preSum = list(accumulate(nums, initial=0))
+        # 固定i 找j的范围
         for i in range(1, len(nums) - 1):
             if preSum[i] * 3 > preSum[-1]:
                 break
 
-            # 找左右两个端点 注意lo和hi的取值
             lower = bisect_left(preSum, 2 * preSum[i], lo=i + 1)
-            # if lower <= i:
-            #     lower = i + 1
-            upper = bisect_right(preSum, (preSum[-1] + preSum[i]) / 2, hi=len(preSum) - 1)
-            # if upper == len(preSum):
-            #     upper -= 1
-
+            upper = bisect_right(preSum, (preSum[-1] + preSum[i]) / 2)
             res += upper - lower
 
-        return res % 1_000_000_007
+        return res % MOD
 
 
 print(Solution().waysToSplit(nums=[1, 2, 2, 2, 5, 0]))

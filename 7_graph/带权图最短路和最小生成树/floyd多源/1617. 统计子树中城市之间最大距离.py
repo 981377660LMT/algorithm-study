@@ -1,5 +1,5 @@
 from collections import defaultdict
-from itertools import product
+from itertools import combinations, product
 from typing import List
 
 # 对于 d 从 1 到 n-1 ，请你找到城市间 最大距离 恰好为 d 的所有`子树`数目。
@@ -24,22 +24,10 @@ class Solution:
 
         res = [0] * n
         for state in range(1, 1 << n):
-            points = []
-            for i in range(n):
-                if state & (1 << i):
-                    points.append(i)
-
-            edgeCount = 0
-            vertexCount = len(points)
-            maxDist = 0
-            for i in range(vertexCount):
-                for j in range(i + 1, vertexCount):
-                    curDist = adjMap[points[i]][points[j]]
-                    if curDist == 1:
-                        edgeCount += 1
-                    maxDist = max(maxDist, curDist)
-
-            if vertexCount == edgeCount + 1:
+            nodes = [i for i in range(n) if (state >> i) & 1]
+            edgeCount = sum(adjMap[n1][n2] == 1 for n1, n2 in combinations(nodes, 2))
+            if len(nodes) == edgeCount + 1:
+                maxDist = max((adjMap[n1][n2] for n1, n2 in combinations(nodes, 2)), default=0)
                 res[maxDist] += 1
 
         return res[1:]

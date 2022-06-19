@@ -19,7 +19,6 @@ class Solution:
 
         diff = s1 - s2
         freq = Counter(num - 1 for num in nums1) + Counter(6 - num for num in nums2)
-        # print(freq, diff)
 
         res = 0
         for delta in range(5, 0, -1):

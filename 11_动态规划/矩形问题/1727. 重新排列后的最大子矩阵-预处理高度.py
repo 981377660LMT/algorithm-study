@@ -8,14 +8,13 @@ from typing import List
 # 因为列可以随意变换，这题直接对每行的高排序，然后求最大矩形就好
 class Solution:
     def largestSubmatrix(self, matrix: List[List[int]]) -> int:
-        row, col = len(matrix), len(matrix[0])
-
         def maxSquare(row: List[int]):
             res = 0
             for i, height in enumerate(row):
                 res = max(res, height * (i + 1))
             return res
 
+        row, col = len(matrix), len(matrix[0])
         #  最大矩形,预处理高度
         for r in range(row):
             for c in range(col):

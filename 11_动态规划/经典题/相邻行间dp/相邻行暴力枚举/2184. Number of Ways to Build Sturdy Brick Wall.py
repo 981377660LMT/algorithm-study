@@ -10,15 +10,20 @@ MOD = int(1e9 + 7)
 # 每一排选取某种排列的总答案数为上一排与自己能够相邻的排列的答案总和
 # 返回最后一排的dp答案总和
 # https://leetcode-cn.com/problems/number-of-ways-to-build-sturdy-brick-wall/solution/cdfsgou-zao-dpji-suan-da-an-96ms-by-mono-bfu1/
+
+
 class Solution:
     def buildWall(self, height: int, width: int, bricks: List[int]) -> int:
-        """预处理每行可能的状态后，相邻行间进行dp"""
+        """预处理每行可能的状态后，相邻行间进行dp
+        
+        滚动数组快了很多
+        """
 
         def dfs(curWidth: int, state: int) -> None:
             if curWidth > width:
                 return
             if curWidth == width:
-                availableStates.add(state)
+                allStates.add(state)
                 return
             for choose in bricks:
                 nextWidth = curWidth + choose
@@ -28,21 +33,23 @@ class Solution:
                 dfs(nextWidth, nextState)
 
         bricks = sorted(bricks)
-        availableStates = set()
+        allStates = set()
         dfs(0, 0)
 
-        dp = [defaultdict(int) for _ in range(height)]
-        for state in availableStates:
-            dp[0][state] = 1
-        for i in range(1, height):
-            for state in availableStates:
-                for preState in dp[i - 1].keys():
-                    if not state & preState:
-                        dp[i][state] += dp[i - 1][preState]
-                        dp[i][state] %= MOD
+        dp = defaultdict(int)
+        for cur in allStates:
+            dp[cur] = 1
+        for _ in range(1, height):
+            ndp = defaultdict(int)
+            for cur in allStates:
+                for pre in dp:
+                    if not cur & pre:
+                        ndp[cur] += dp[pre]
+                        ndp[cur] %= MOD
+            dp = ndp
 
         res = 0
-        for state in dp[-1].keys():
-            res += dp[-1][state]
+        for key in dp:
+            res += dp[key]
             res %= MOD
         return res

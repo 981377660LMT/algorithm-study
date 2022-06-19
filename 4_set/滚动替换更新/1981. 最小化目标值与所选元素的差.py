@@ -9,8 +9,6 @@ from typing import List
 
 class Solution:
     def minimizeTheDifference(self, mat: List[List[int]], target: int) -> int:
-        for row in mat:
-            row.sort()
         dp = set([0])
 
         for row in mat:
@@ -18,8 +16,6 @@ class Solution:
             for pre in dp:
                 for cur in row:
                     ndp.add(pre + cur)
-                    if pre + cur >= target:
-                        break
             dp = ndp
 
         return min(abs(s - target) for s in dp)

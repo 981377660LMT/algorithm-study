@@ -11,35 +11,37 @@ from typing import List
 from functools import lru_cache
 from itertools import accumulate
 
-INF = 0x3FFFFFFF
+INF = int(1e20)
 
 
 class Solution:
     def minSpaceWastedKResizing(self, nums: List[int], k: int) -> int:
-        preSum = [0] + list(accumulate(nums))
-
         @lru_cache(None)
-        def dfs(cur: int, remain: int) -> int:
-            if cur == len(nums):
-                return 0
+        def dfs(index: int, remain: int) -> int:
             if remain < 0:
                 return INF
+            if index == n:
+                return 0
 
             res = INF
 
             curMax = 0
-            for next in range(cur, len(nums) - remain):
+            for next in range(index, n):
                 curMax = max(curMax, nums[next])
                 res = min(
                     res,
-                    curMax * (next - cur + 1)
-                    - (preSum[next + 1] - preSum[cur])
+                    curMax * (next - index + 1)
+                    - (preSum[next + 1] - preSum[index])
                     + dfs(next + 1, remain - 1),
                 )
 
             return res
 
-        return dfs(0, k)
+        n = len(nums)
+        preSum = list(accumulate(nums, initial=0))
+        res = dfs(0, k + 1)
+        dfs.cache_clear()
+        return res
 
 
 print(Solution().minSpaceWastedKResizing(nums=[10, 20, 30], k=1))

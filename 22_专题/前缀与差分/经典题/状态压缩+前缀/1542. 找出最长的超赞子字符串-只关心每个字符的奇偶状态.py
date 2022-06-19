@@ -6,24 +6,26 @@
 # s 仅由数字组成 => 状态压缩
 # 1 <= s.length <= 10^5
 
-INF = 0x3F3F3F3F
+from collections import defaultdict
+
+
 # 1915. 最美子字符串的数目
 class Solution:
     def longestAwesome(self, s: str) -> int:
         # 每个状态最早出现的位置
-        preSum = [INF] * 1024
-        preSum[0] = -1
+        first = defaultdict(lambda: int(1e20))
+        first[0] = -1
 
         res = 0
         curState = 0
         for i, char in enumerate(s):
             curState ^= 1 << (ord(char) - ord('0'))
-            res = max(res, i - preSum[curState])
+            res = max(res, i - first[curState])
             for diff in range(10):
-                preState = curState ^ 1 << (diff)
-                res = max(res, i - preSum[preState])
+                pre = curState ^ 1 << (diff)
+                res = max(res, i - first[pre])
 
-            preSum[curState] = min(preSum[curState], i)
+            first[curState] = min(first[curState], i)
 
         return res
 

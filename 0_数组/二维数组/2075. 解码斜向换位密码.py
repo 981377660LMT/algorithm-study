@@ -1,13 +1,15 @@
-# s[i] and s[i+cols+1] are adjacent characters in original text.
 class Solution:
     def decodeCiphertext(self, encodedText: str, rows: int) -> str:
+        # !s[i] and s[i+cols+1] 是同组相邻字符
         cols = len(encodedText) // rows
         res = []
 
-        for start in range(cols):
-            while start < len(encodedText):
-                res.append(encodedText[start])
-                start += cols + 1
+        # 每个分组第一个字符
+        for c in range(cols):
+            cur = c
+            while cur < len(encodedText):
+                res.append(encodedText[cur])
+                cur += cols + 1
 
         return ''.join(res).rstrip()
 

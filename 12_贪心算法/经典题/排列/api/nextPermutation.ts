@@ -1,7 +1,7 @@
 /**
  *
  * @param nums digit 数组
- * @description 返回值第二个参数带error 类似go的模式...
+ * @description 返回值第二个参数ok
  */
 function nextPermutation<T>(nums: T[], inplace = false): [res: T[], ok: boolean] {
   if (nums.length === 0) return [[], false]
@@ -23,7 +23,7 @@ function nextPermutation<T>(nums: T[], inplace = false): [res: T[], ok: boolean]
 /**
  *
  * @param nums digit 数组
- * @description 返回值第二个参数带error 类似go的模式...
+ * @description 返回值第二个参数带ok
  */
 function prePermutation<T>(nums: T[], inplace = false): [res: T[], ok: boolean] {
   if (nums.length === 0) return [[], false]
@@ -32,7 +32,7 @@ function prePermutation<T>(nums: T[], inplace = false): [res: T[], ok: boolean] 
   let left = nums.length - 1
   while (left > 0 && nums[left - 1] <= nums[left]) left--
   if (left === 0) return [[], false]
-  const last = left - 1 // 最后一个递增位置
+  const last = left - 1 // 最后一个递减位置
 
   let right = nums.length - 1
   while (nums[right] >= nums[last]) right--

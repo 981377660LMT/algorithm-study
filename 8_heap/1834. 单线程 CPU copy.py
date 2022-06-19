@@ -1,23 +1,23 @@
-import heapq
+from heapq import heappop, heappush
 from typing import List
 
 
 class Solution:
     def getOrder(self, tasks: List[List[int]]) -> List[int]:
-        sortedTasks = [(task[0], i, task[1]) for i, task in enumerate(tasks)]
-        sortedTasks.sort()
+        res = []
+        events = sorted([(start, cost, i) for i, (start, cost) in enumerate(tasks)])
+
+        ei = 0
         pq = []
         time = 0
-        res = []
-        pos = 0
-        for _ in sortedTasks:
-            if not pq:
-                time = max(time, sortedTasks[pos][0])
-            while pos < len(sortedTasks) and sortedTasks[pos][0] <= time:
-                heapq.heappush(pq, (sortedTasks[pos][2], sortedTasks[pos][1]))
-                pos += 1
-            d, j = heapq.heappop(pq)
-            time += d
-            res.append(j)
+        while len(res) < len(events):
+            while (ei < len(events)) and (events[ei][0] <= time):
+                heappush(pq, (events[ei][1], events[ei][2]))  # (processing_time, original_index)
+                ei += 1
+            if pq:
+                cost, id = heappop(pq)
+                time += cost
+                res.append(id)
+            elif ei < len(events):
+                time = events[ei][0]
         return res
-

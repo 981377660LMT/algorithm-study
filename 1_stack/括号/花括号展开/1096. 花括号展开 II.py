@@ -11,7 +11,7 @@ class Solution:
             print(res, cur, stack)
             # 看到字母就“乘入”第二个list，例如[a]*b变成“ab”，[a,c]*b就变成['ab','cb']
             if char.isalpha():
-                cur = [prefix + char for prefix in cur or ['']]
+                cur = [pre + char for pre in cur or ['']]
             # 看到“{”就把两个list推入stack暂存
             elif char == '{':
                 stack.append(res)

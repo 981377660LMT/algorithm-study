@@ -11,24 +11,20 @@
 # 1 <= word.length <= 105
 
 
+from collections import defaultdict
+
+
 class Solution:
     def wonderfulSubstrings(self, word: str) -> int:
-        preSum = [0 for _ in range(1 << 10)]
-        preSum[0] = 1
-
-        res = 0
-        curState = 0
+        preStates = defaultdict(int, {0: 1})
+        cur, res = 0, 0
         for char in word:
-            curState ^= 1 << (ord(char) - ord('a'))
-            # 全为偶数的情况(异或全部抵消)
-            res += preSum[curState]
-            # 只有一个数出现奇数次的情况(仅一个位异或为1)
+            cur ^= 1 << (ord(char) - ord('a'))
+            res += preStates[cur]
             for i in range(10):
-                preState = curState ^ (1 << i)
-                res += preSum[preState]
-
-            preSum[curState] += 1
-
+                need = cur ^ (1 << i)
+                res += preStates[need]
+            preStates[cur] += 1
         return res
 
 

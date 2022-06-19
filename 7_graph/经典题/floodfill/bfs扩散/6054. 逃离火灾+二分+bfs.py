@@ -17,7 +17,6 @@ class Solution:
 
         def bfs(fireVisited: Set[Tuple[int, int]], fireQueue: Deque[Tuple[int, int]]) -> bool:
             """人先走，是否可以到达"""
-            # print(fireVisited, fireQueue, 22)
             queue = deque([(0, 0)])
             visited = set([(0, 0)])
 
@@ -25,7 +24,7 @@ class Solution:
                 len1 = len(queue)
                 for _ in range(len1):
                     r, c = queue.popleft()
-                    if r == row - 1 and c == col - 1:
+                    if r == ROW - 1 and c == COL - 1:
                         return True
 
                     # 注意这里啊
@@ -35,8 +34,8 @@ class Solution:
                     for dr, dc in DIR4:
                         nr, nc = r + dr, c + dc
                         if (
-                            0 <= nr < row
-                            and 0 <= nc < col
+                            0 <= nr < ROW
+                            and 0 <= nc < COL
                             and grid[nr][nc] == 0
                             and (nr, nc) not in fireVisited
                             and (nr, nc) not in visited
@@ -50,8 +49,8 @@ class Solution:
                     for dr, dc in DIR4:
                         nr, nc = r + dr, c + dc
                         if (
-                            0 <= nr < row
-                            and 0 <= nc < col
+                            0 <= nr < ROW
+                            and 0 <= nc < COL
                             and grid[nr][nc] == 0
                             and (nr, nc) not in fireVisited
                         ):
@@ -71,8 +70,8 @@ class Solution:
                     for dr, dc in DIR4:
                         nr, nc = r + dr, c + dc
                         if (
-                            0 <= nr < row
-                            and 0 <= nc < col
+                            0 <= nr < ROW
+                            and 0 <= nc < COL
                             and grid[nr][nc] != 2
                             and (nr, nc) not in fireVisited
                         ):
@@ -81,13 +80,13 @@ class Solution:
 
             return bfs(fireVisited, fireQueue)
 
-        row, col = len(grid), len(grid[0])
-        fire = set((r, c) for r in range(row) for c in range(col) if grid[r][c] == 1)
+        ROW, COL = len(grid), len(grid[0])
+        fire = set((r, c) for r in range(ROW) for c in range(COL) if grid[r][c] == 1)
 
         if not check(0):
             return -1
 
-        upper = row * col
+        upper = ROW * COL
         left, right = 0, upper
         while left <= right:
             mid = (left + right) // 2

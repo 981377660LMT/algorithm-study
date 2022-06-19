@@ -16,28 +16,28 @@ class Solution:
     def minInterval(self, intervals: List[List[int]], queries: List[int]) -> List[int]:
         # 离线查询预处理
         intervals.sort()
-        que = sorted([(query, index) for index, query in enumerate(queries)])
+        Q = sorted([(query, index) for index, query in enumerate(queries)])
 
-        eventI = 0
+        ei = 0
         res = [-1] * len(queries)
         pq = []
 
         # 遍历intervals左区间的位置
-        for qNum, qI in que:
+        for qv, qi in Q:
             # 将所有起始位置小于等于查询位置的区间intervals[i]添加到优先队列中
-            while eventI < len(intervals) and intervals[eventI][0] <= qNum:
-                start, end = intervals[eventI]
+            while ei < len(intervals) and intervals[ei][0] <= qv:
+                start, end = intervals[ei]
                 heappush(pq, (end - start + 1, end))
-                eventI += 1
+                ei += 1
 
             # 将队列中不能覆盖要查询点的区间移除队列
-            while pq and pq[0][1] < qNum:
+            while pq and pq[0][1] < qv:
                 heappop(pq)
 
             # 如果队列不为空，则代表队首区间是要查询的点的最短区间
             if pq:
                 length, _, = pq[0]
-                res[qI] = length
+                res[qi] = length
 
         return res
 

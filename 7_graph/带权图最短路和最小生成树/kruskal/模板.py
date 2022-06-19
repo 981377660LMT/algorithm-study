@@ -1,43 +1,74 @@
-from typing import List
+from collections import defaultdict
+from typing import DefaultDict, Generic, Hashable, Iterable, List, Optional, Tuple, TypeVar
+
+T = TypeVar('T')
 
 
-class UnionFindArray:
-    def __init__(self, n: int):
-        self.n = n
-        self.count = n
-        self.parent = list(range(n))
-        self.rank = [1] * n
+class UnionFindMap(Generic[T]):
+    def __init__(self, iterable: Optional[Iterable[T]] = None):
+        self.count = 0
+        self.parent = dict()
+        self.rank = defaultdict(lambda: 1)
+        for item in iterable or []:
+            self.add(item)
 
-    def find(self, x: int) -> int:
-        if x != self.parent[x]:
-            self.parent[x] = self.find(self.parent[x])
-        return self.parent[x]
-
-    def union(self, x: int, y: int) -> bool:
-        rootX = self.find(x)
-        rootY = self.find(y)
-        if rootX == rootY:
+    def union(self, key1: T, key2: T) -> bool:
+        """rank一样时 默认key2作为key1的父节点"""
+        root1 = self.find(key1)
+        root2 = self.find(key2)
+        if root1 == root2:
             return False
-        if self.rank[rootX] > self.rank[rootY]:
-            rootX, rootY = rootY, rootX
-        self.parent[rootX] = rootY
-        self.rank[rootY] += self.rank[rootX]
+        if self.rank[root1] > self.rank[root2]:
+            root1, root2 = root2, root1
+        self.parent[root1] = root2
+        self.rank[root2] += self.rank[root1]
         self.count -= 1
         return True
 
-    def isConnected(self, x: int, y: int) -> bool:
-        return self.find(x) == self.find(y)
+    def find(self, key: T) -> T:
+        if key not in self.parent:
+            self.add(key)
+            return key
+
+        while self.parent.get(key, key) != key:
+            self.parent[key] = self.parent[self.parent[key]]
+            key = self.parent[key]
+        return key
+
+    def isConnected(self, key1: T, key2: T) -> bool:
+        return self.find(key1) == self.find(key2)
+
+    def getRoots(self) -> List[T]:
+        return list(set(self.find(key) for key in self.parent))
+
+    def getGroup(self) -> DefaultDict[T, List[T]]:
+        groups = defaultdict(list)
+        for key in self.parent:
+            root = self.find(key)
+            groups[root].append(key)
+        return groups
+
+    def add(self, key: T) -> bool:
+        if key in self.parent:
+            return False
+        self.parent[key] = key
+        self.rank[key] = 1
+        self.count += 1
+        return True
 
 
-# 1. 边权排序
-# 2. 两两连接不连通的点
-def kruskal(edges: List[List[int]]) -> int:
-    """求最小生成树权值"""
-    n = len(edges)
-    uf = UnionFindArray(n + 10)
+P = TypeVar('P', bound=Hashable)
+
+
+def kruskal(n: int, edges: List[Tuple[P, P, int]]) -> int:
+    """求最小生成树权值
+    
+    1. 边权排序
+    2. 两两连接不连通的点
+    """
+    uf = UnionFindMap[P]()
     res, hit = 0, 0
 
-    # u,v,weight
     edges = sorted(edges, key=lambda e: e[2])
     for u, v, w in edges:
         root1, root2 = uf.find(u), uf.find(v)

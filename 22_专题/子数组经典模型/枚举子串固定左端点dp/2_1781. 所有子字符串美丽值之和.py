@@ -1,7 +1,7 @@
 # 这题有点像
 # 2_子数组区间最值.py
 
-
+# 1 <= s.length <= 500
 class Solution:
     def beautySum(self, s: str) -> int:
         """枚举子串：固定左端点,dp"""

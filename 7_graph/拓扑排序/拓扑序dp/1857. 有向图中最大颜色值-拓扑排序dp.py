@@ -12,13 +12,13 @@ from collections import defaultdict, deque
 class Solution:
     def largestPathValue(self, colors: str, edges: List[List[int]]) -> int:
         n = len(colors)
-        adjMap, indegree = defaultdict(set), [0] * n
+        adjMap, indeg = defaultdict(set), [0] * n
         for u, v in edges:
-            indegree[v] += 1
+            indeg[v] += 1
             adjMap[u].add(v)
 
         colorCounters = [[0] * 26 for _ in range(n)]
-        queue = deque([i for i in range(n) if indegree[i] == 0])
+        queue = deque([i for i in range(n) if indeg[i] == 0])
         count = 0
         while queue:
             cur = queue.popleft()
@@ -26,8 +26,8 @@ class Solution:
             colorCounters[cur][ord(colors[cur]) - ord('a')] += 1
 
             for next in adjMap[cur]:
-                indegree[next] -= 1
-                if indegree[next] == 0:
+                indeg[next] -= 1
+                if indeg[next] == 0:
                     queue.append(next)
 
                 # 注意这一步

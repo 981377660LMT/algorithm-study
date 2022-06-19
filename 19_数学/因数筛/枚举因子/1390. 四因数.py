@@ -1,24 +1,27 @@
 # 给你一个整数数组 nums，请你返回该数组中恰有四个因数的这些整数的各因数之和。
-from typing import List
-from math import floor, sqrt
+from math import isqrt
+
+
+def getFactors(n: int) -> List[int]:
+    """返回 n 的所有因数"""
+    upper = isqrt(n) + 1
+    small, big = [], []
+
+    for i in range(1, upper):
+        if n % i == 0:
+            small.append(i)
+            big.append(n // i)
+
+    if small[-1] == big[-1]:
+        small.pop()
+    return small + big[::-1]
 
 
 class Solution:
-    # O(n*根号c)
     def sumFourDivisors(self, nums: List[int]) -> int:
-        res = 0
-        for num in nums:
-            divisor = set()
-            for i in range(1, floor(sqrt(num)) + 1):
-                if num % i == 0:
-                    divisor.add(num // i)
-                    divisor.add(i)
-                if len(divisor) > 4:
-                    break
-
-            if len(divisor) == 4:
-                res += sum(divisor)
-        return res
+        f = [getFactors(num) for num in nums]
+        f = [arr for arr in f if len(arr) == 4]
+        return sum([sum(arr) for arr in f])
 
 
 print(Solution().sumFourDivisors(nums=[21, 4, 7]))

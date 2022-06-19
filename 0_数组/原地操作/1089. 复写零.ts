@@ -1,4 +1,5 @@
 /**
+ 原地将该数组中出现的每个零都复写一遍，并将其余的元素向右平移。
  Do not return anything, modify arr in-place instead.
  @summary
  倒着处理
@@ -23,19 +24,4 @@ function duplicateZeros(arr: number[]): void {
   }
 }
 
-const arr = [1, 0, 2, 3, 0, 4, 5, 0]
-
-duplicateZeros(arr)
-console.log(arr)
-
 export {}
-
-function duplicateZeros2(arr: number[]): void {
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i] === 0) {
-      arr.splice(i, 0, 0)
-      arr.pop()
-      i++
-    }
-  }
-}

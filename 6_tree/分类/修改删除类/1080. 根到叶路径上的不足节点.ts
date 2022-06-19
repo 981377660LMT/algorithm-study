@@ -1,5 +1,5 @@
+import { deserializeNode } from '../../重构json/297.二叉树的序列化与反序列化'
 import { BinaryTree } from '../Tree'
-import { deserializeNode } from '../构建类/297.二叉树的序列化与反序列化'
 
 // 假如通过节点 node 的每种可能的 “根-叶” 路径上值的总和全都小于给定的 limit，则该节点被称之为「不足节点」，需要被删除。
 // 请你删除所有不足节点，并返回生成的二叉树的根。
@@ -8,11 +8,11 @@ function sufficientSubset(root: BinaryTree | null, limit: number): BinaryTree | 
   dfs(dummy, 0)
   return dummy.left
 
-  function dfs(root: BinaryTree | null, preSum: number): number {
+  function dfs(root: BinaryTree | null, curSum: number): number {
     if (!root) return -Infinity
-    if (!root.left && !root.right) return preSum + root.val
-    const left = dfs(root.left, preSum + root.val)
-    const right = dfs(root.right, preSum + root.val)
+    if (!root.left && !root.right) return curSum + root.val
+    const left = dfs(root.left, curSum + root.val)
+    const right = dfs(root.right, curSum + root.val)
     if (left < limit) root.left = null
     if (right < limit) root.right = null
     return Math.max(left, right)

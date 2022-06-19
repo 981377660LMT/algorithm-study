@@ -16,13 +16,12 @@ class Solution:
         left, right = 0, 0
         res = 0
 
-        while right < len(nums):
+        for right in range(len(nums)):
             arr.add(nums[right])
             while arr[-1] - arr[0] > limit:
                 arr.remove(nums[left])
                 left += 1
             res = max(res, right - left + 1)
-            right += 1
 
         return res
 

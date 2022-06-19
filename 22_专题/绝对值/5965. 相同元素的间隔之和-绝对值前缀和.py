@@ -7,6 +7,7 @@ from itertools import accumulate
 class Solution:
     def getDistances(self, arr: List[int]) -> List[int]:
         def getSumAbsoluteDifferences(nums: List[int]) -> List[int]:
+            """到各个点绝对值距离之和"""
             n = len(nums)
             preSum = [0] + list(accumulate(nums))
             return [
@@ -15,15 +16,15 @@ class Solution:
             ]
 
         n = len(arr)
-        adjMap = defaultdict(list)
+        indexMap = defaultdict(list)
         for i, num in enumerate(arr):
-            adjMap[num].append(i)
+            indexMap[num].append(i)
 
         res = [0] * n
-        for indexes in adjMap.values():
-            diffSums = getSumAbsoluteDifferences(indexes)
-            for index, diffSum in zip(indexes, diffSums):
-                res[index] = diffSum
+        for indexes in indexMap.values():
+            dists = getSumAbsoluteDifferences(indexes)
+            for i, v in zip(indexes, dists):
+                res[i] = v
         return res
 
 

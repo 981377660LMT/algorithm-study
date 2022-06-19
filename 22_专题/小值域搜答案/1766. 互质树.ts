@@ -20,7 +20,7 @@ function getCoprimes(nums: number[], edges: number[][]): number[] {
   })
 
   // 对每个数字 1∼50 维护一个栈
-  // 向下dfs过程中栈顶就是数字 x 的层数最深的节点
+  // !向下dfs过程中栈顶就是数字 x 的层数最深的节点
   // dfs 完成后要将之前 push 进去的元素 pop 出来
   const stacks = Array.from<NodeValue, [NodeLevel, NodeId][]>({ length: 51 }, () => [])
 

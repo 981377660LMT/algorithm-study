@@ -7,55 +7,54 @@ from heapq import heappop, heappush
 
 
 Position = Tuple[int, int]
+DIR4 = [[-1, 0], [0, 1], [1, 0], [0, -1]]
 
 
 class Solution:
     def minPushBox(self, grid: List[List[str]]) -> int:
-        row, col = len(grid), len(grid[0])
-        for r in range(row):
-            for c in range(col):
-                if grid[r][c] == "T":
-                    target = (r, c)
-                if grid[r][c] == "B":
-                    start_box = (r, c)
-                if grid[r][c] == "S":
-                    start_person = (r, c)
-
-        # 启发估值函数
-        def heuristic(box: Position):
-            return abs(target[0] - box[0]) + abs(target[1] - box[1])
-
-        def out_bounds(pos: Position):  # return whether the location is in the grid and not a wall
+        def isInvalid(pos: Position):  # return whether the location is in the grid and not a wall
             r, c = pos
-            if r < 0 or r >= row:
+            if r < 0 or r >= ROW:
                 return True
-            if c < 0 or c >= col:
+            if c < 0 or c >= COL:
                 return True
             return grid[r][c] == "#"
 
+        ROW, COL = len(grid), len(grid[0])
+        target, boxPos, personPos = (0, 0), (0, 0), (0, 0)
+        for r in range(ROW):
+            for c in range(COL):
+                if grid[r][c] == "T":
+                    target = (r, c)
+                if grid[r][c] == "B":
+                    boxPos = (r, c)
+                if grid[r][c] == "S":
+                    personPos = (r, c)
+
         # 估值距离，箱子推动次数，人，箱子
-        pq = [(heuristic(start_box) + 0, 0, start_person, start_box)]
+        pq = [(0, personPos, boxPos)]
         visited: Set[Tuple[Position, Position]] = set()
 
         while pq:
-            _, moves, person, box = heappop(pq)
+            moves, person, box = heappop(pq)
             if box == target:
                 return moves
             if (person, box) in visited:  # do not visit same state again
                 continue
             visited.add((person, box))
 
-            for dr, dc in [[0, 1], [1, 0], [-1, 0], [0, -1]]:
-                new_person = (person[0] + dr, person[1] + dc)
-                if out_bounds(new_person):
+            for dr, dc in DIR4:
+                nextP = (person[0] + dr, person[1] + dc)
+                if isInvalid(nextP):
                     continue
-                if new_person == box:
-                    new_box = (box[0] + dr, box[1] + dc)
-                    if out_bounds(new_box):
+                # !人和箱子重合，就表示推了箱子
+                if nextP == box:
+                    nextB = (box[0] + dr, box[1] + dc)
+                    if isInvalid(nextB):
                         continue
-                    heappush(pq, (heuristic(new_box) + moves + 1, moves + 1, new_person, new_box))
+                    heappush(pq, (moves + 1, nextP, nextB))
                 else:
-                    heappush(pq, (heuristic(box) + moves, moves, new_person, box))
+                    heappush(pq, (moves, nextP, box))
         return -1
 
 

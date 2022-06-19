@@ -1,44 +1,42 @@
+from itertools import combinations
 from typing import List
 from collections import deque, defaultdict
 
 # 给你数组 bombs ，请你返回在引爆 一个 炸弹的前提下，最多 能引爆的炸弹数目。
 
 # 有向图
+
+# 1 <= bombs.length <= 100
+
+
 class Solution:
     def maximumDetonation(self, bombs: List[List[int]]) -> int:
         def bfs(cur: int):
             res = 0
-            # ----bfs+记忆化
-            queue = deque()
-            visited = [False] * n
-            queue.append(cur)
-            visited[cur] = True
+            queue = deque([cur])
+            visited = set([cur])
+
             while queue:
-                x = queue.popleft()
+                cur = queue.popleft()
                 res += 1
-                for y in adjMap[x]:
-                    if not visited[y]:
-                        visited[y] = True
-                        queue.append(y)
+                for next in adjMap[cur]:
+                    if next not in visited:
+                        visited.add(next)
+                        queue.append(next)
             return res
 
         n = len(bombs)
-
-        # --------建立有向图
-        adjMap = defaultdict(list)
+        adjMap = defaultdict(set)
         for i in range(n):
-            xi, yi, ri = bombs[i]
+            x1, y1, r1 = bombs[i]
             for j in range(n):
-                if i != j:
-                    xj, yj, _ = bombs[j]
-                    if (xi - xj) ** 2 + (yi - yj) ** 2 <= ri ** 2:
-                        adjMap[i].append(j)
+                if i == j:
+                    continue
+                x2, y2, _ = bombs[j]
+                if (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) <= r1 * r1:
+                    adjMap[i].add(j)
 
-        # --------计算res
-        ans = 0
-        for i in range(n):
-            ans = max(ans, bfs(i))
-        return ans
+        return max((bfs(i) for i in range(n)), default=1)
 
 
 print(Solution().maximumDetonation(bombs=[[2, 1, 3], [6, 1, 4]]))

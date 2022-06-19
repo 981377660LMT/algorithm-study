@@ -7,26 +7,17 @@ class Node {
   }
 }
 
-const a = new Node(1)
-const b = new Node(3)
-const c = new Node(5)
-const d = new Node(7)
-const e = new Node(9)
-a.next = b
-b.next = c
-c.next = d
-d.next = e
-e.next = a
-
 /**
  *
  * @param head
  * @param insertVal
- * 给定循环升序列表中的一个点，写一个函数向这个列表中插入一个新元素 insertVal ，使这个列表仍然是循环非降序的。
+ * 给定循环升序列表中的一个点，写一个函数向这个列表中插入一个新元素 insertVal ，
+ * 使这个列表仍然是循环非降序的。
+ * 
+ * @summary
  * 如果node.val== insertVal，则将node插入node后面
    如果node.val<insertVal, node.next.val>=insertVal，将node插入node后面
    链表完全遍历一次后，如果未找到满足上面条件，说明insertVal超过最大值或小于最小值，这种情况下将insertVal插入到maxNode后面。
-
  */
 function insert(head: Node | null, insertVal: number): Node | null {
   const insertNode = new Node(insertVal)
@@ -35,6 +26,7 @@ function insert(head: Node | null, insertVal: number): Node | null {
     return insertNode
   }
 
+  // !两种情况:两数之间，最大值之后
   let cur = head
   let maxNode = head
   while (true) {
@@ -57,6 +49,19 @@ function insert(head: Node | null, insertVal: number): Node | null {
   }
 }
 
-console.dir(insert(a, 6), { depth: null })
+if (require.main === module) {
+  const a = new Node(1)
+  const b = new Node(3)
+  const c = new Node(5)
+  const d = new Node(7)
+  const e = new Node(9)
+  a.next = b
+  b.next = c
+  c.next = d
+  d.next = e
+  e.next = a
+
+  console.dir(insert(a, 6), { depth: null })
+}
 
 export {}

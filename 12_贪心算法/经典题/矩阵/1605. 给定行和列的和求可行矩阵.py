@@ -4,6 +4,8 @@ from typing import List
 # 请找到大小为 rowSum.length x colSum.length 的任意 非负整数 矩阵，且该矩阵满足 rowSum 和 colSum 的要求。
 
 # 思路:遍历 matrix，每次都填这次能填的最大数, min(rowSum[i], colSum[j])
+
+
 class Solution:
     def restoreMatrix(self, rowSum: List[int], colSum: List[int]) -> List[List[int]]:
         m, n = len(rowSum), len(colSum)

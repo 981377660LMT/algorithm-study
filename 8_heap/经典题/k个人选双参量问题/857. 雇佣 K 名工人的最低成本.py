@@ -17,7 +17,7 @@ from heapq import heappop, heappush
 class Solution:
     def mincostToHireWorkers(self, quality: List[int], wage: List[int], k: int) -> float:
         workers = sorted((float(w) / q, q) for w, q in zip(wage, quality))
-        res = 0x7FFFFFFF
+        res = int(1e20)
         quaSum = 0
         pq = []
         for wa, qua in workers:

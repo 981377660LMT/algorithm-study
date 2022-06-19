@@ -13,14 +13,17 @@ from typing import List
 class Solution:
     def minSubarray(self, nums: List[int], p: int) -> int:
         need = sum(nums) % p
+        if need == 0:
+            return 0
+
         prefix = {0: -1}
         curSum = 0
         res = n = len(nums)
         for i, num in enumerate(nums):
             curSum = (curSum + num) % p
-            prefix[curSum] = i
             if (curSum - need) % p in prefix:
                 res = min(res, i - prefix[(curSum - need) % p])
+            prefix[curSum] = i
         return res if res < n else -1
 
 

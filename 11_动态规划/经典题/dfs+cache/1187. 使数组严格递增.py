@@ -13,7 +13,7 @@ from bisect import bisect_right
 # dfs(i, prev): "i" represents index in arr1. "prev" represents the previous element in arr1 after swap (or maybe not swap).
 # 每遍历一个arr1中的元素，就要看是否需要交换，需要比pre大；并作为pre记录进行下一次dfs
 
-INF = 0x7FFFFFFF
+INF = int(1e20)
 
 
 class Solution:

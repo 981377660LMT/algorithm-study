@@ -1,5 +1,5 @@
 from typing import List
-from itertools import product
+from itertools import pairwise, product
 from collections import defaultdict
 from functools import lru_cache
 
@@ -8,20 +8,19 @@ from functools import lru_cache
 # allowed 的长度范围在[0, 200]。
 class Solution:
     def pyramidTransition(self, bottom: str, allowed: List[str]) -> bool:
-        cand = defaultdict(lambda: defaultdict(set))
-        for left, right, up in allowed:
-            cand[left][right].add(up)
-
         @lru_cache(None)
         def dfs(char: str) -> bool:
             if len(char) <= 1:
                 return True
             # 可取组合的笛卡尔积
-            for nextLevel in product(*(cand[left][right] for left, right in zip(char, char[1:]))):
+            for nextLevel in product(*(adjMap[left][right] for left, right in pairwise(char))):
                 if dfs(nextLevel):
                     return True
             return False
 
+        adjMap = defaultdict(lambda: defaultdict(set))
+        for left, right, up in allowed:
+            adjMap[left][right].add(up)
         return dfs(bottom)
 
 

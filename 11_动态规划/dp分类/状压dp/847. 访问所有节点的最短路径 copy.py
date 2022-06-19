@@ -6,13 +6,12 @@ class Solution:
     def shortestPathLength(self, graph: List[List[int]]) -> int:
         n = len(graph)
         target = (1 << n) - 1
-        visited = [[0x7FFFFFFF] * (1 << n) for _ in range(n)]
+        visited = [[int(1e20)] * (1 << n) for _ in range(n)]
         queue = deque([(i, 1 << i, 0, str(i)) for i in range(n)])
 
         while queue:
             cur, state, cost, path = queue.popleft()
             if state == target:
-                print(list(path))
                 return cost
             for next in graph[cur]:
                 nextState = state | (1 << next)

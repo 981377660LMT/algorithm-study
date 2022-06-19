@@ -7,7 +7,7 @@ INF = 0x7FFFFFFF
 # 向量点乘判断是否是直角，向量叉乘得面积
 # O(n^3)
 
-
+# 1 <= points.length <= 50
 class Solution:
     def minAreaFreeRect(self, points: List[List[int]]) -> float:
         n = len(points)

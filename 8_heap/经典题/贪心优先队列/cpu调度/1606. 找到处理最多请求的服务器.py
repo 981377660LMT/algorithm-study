@@ -15,7 +15,7 @@ class Solution:
     def busiestServers(self, k: int, arrival: List[int], load: List[int]) -> List[int]:
         busy = []
         free = list(range(k))
-        res = [0] * k
+        workTime = [0] * k
         for i, start in enumerate(arrival):
             # 1.busy执行完入队free
             while busy and busy[0][0] <= start:
@@ -25,10 +25,10 @@ class Solution:
             if free:
                 id = heappop(free) % k
                 heappush(busy, (start + load[i], id))
-                res[id] += 1
+                workTime[id] += 1
 
-        m = max(res)
-        return [i for i in range(k) if res[i] == m]
+        max_ = max(workTime)  # 注意这里要先提取出来 不要在生成式里算
+        return [i for i in range(k) if workTime[i] == max_]
 
 
 print(Solution().busiestServers(k=3, arrival=[1, 2, 3, 4, 5], load=[5, 2, 3, 3, 3]))

@@ -18,9 +18,7 @@ class TreeNode:
 
 class Solution:
     def distributeCoins(self, root: TreeNode) -> int:
-        self.res = 0
-
-        # 以root为顶点的子树的需要多少硬币才平衡，正数表示我有多余，负数表示我需要别人给我硬币。
+        # !以root为顶点的子树的需要多少硬币才平衡，正数表示我有多余，负数表示我需要别人给我硬币。
         def dfs(root: TreeNode | None) -> int:
             if not root:
                 return 0
@@ -30,6 +28,7 @@ class Solution:
             self.res += abs(lMoves) + abs(rMoves)  # root需要向子节点移动的硬币数
             return lMoves + rMoves + root.val - 1  # root所在子树需要硬币还是多余硬币
 
+        self.res = 0
         dfs(root)
         return self.res
 

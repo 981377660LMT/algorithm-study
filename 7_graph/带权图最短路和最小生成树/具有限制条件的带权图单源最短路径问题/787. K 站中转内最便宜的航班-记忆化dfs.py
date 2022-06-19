@@ -11,32 +11,30 @@
 
 
 from typing import List
-from collections import defaultdict
 from functools import lru_cache
 
-INF = 0x3F3F3F3F
+INF = int(1e20)
 
 
 class Solution:
     def findCheapestPrice(
         self, n: int, flights: List[List[int]], src: int, dst: int, k: int
     ) -> int:
-        adjList = [[] for _ in range(n)]
-        for u, v, w in flights:
-            adjList[u].append((v, w))
-
         @lru_cache(None)
         def dfs(city: int, remain: int) -> int:
+            if remain < 0:
+                return INF
             if city == dst:
                 return 0
-            if remain == 0:
-                return INF
 
             res = INF
             for next, weight in adjList[city]:
                 res = min(res, dfs(next, remain - 1) + weight)
             return res
 
+        adjList = [[] for _ in range(n)]
+        for u, v, w in flights:
+            adjList[u].append((v, w))
         res = dfs(src, k + 1)
         dfs.cache_clear()
         return res if res != INF else -1

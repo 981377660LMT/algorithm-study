@@ -24,20 +24,20 @@ class Solution:
         prices = [int(1e20)] * 20
         for a0, q in tires:
             curSum, curItem = 0, a0
-            for i in range(len(prices)):
+            for j in range(20):
                 curSum += curItem
                 if curSum > int(1e5):
                     break
-                prices[i] = min(prices[i], curSum)
+                prices[j] = min(prices[j], curSum)
                 curItem *= q
 
-        # dp[i]表示第i圈的最小耗时
+        # dp[i]表示第i圈的最小耗时 (容量)
         dp = [int(1e20)] * (numLaps + 1)
         dp[0] = 0
-        for i in range(1, numLaps + 1):
-            for j in range(len(prices)):
-                if i - (j + 1) >= 0:
-                    dp[i] = min(dp[i], dp[i - (j + 1)] + prices[j] + changeTime)
+        for i in range(len(prices)):
+            for j in range(numLaps + 1):
+                if j - (i + 1) >= 0:
+                    dp[j] = min(dp[j], dp[j - (i + 1)] + prices[i] + changeTime)
 
         # 减去最后一次的换轮胎耗时
         return dp[-1] - changeTime

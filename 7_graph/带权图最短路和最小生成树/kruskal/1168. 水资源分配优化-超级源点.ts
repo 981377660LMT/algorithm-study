@@ -1,6 +1,6 @@
-type U = number
-type V = number
-type Weight = number
+import { kruskal } from './模板'
+
+type Edge<V = unknown> = [u: V, v: V, weight: number]
 
 /**
  *
@@ -13,35 +13,10 @@ type Weight = number
  * 加一个虚拟节点就和1135一样
  */
 function minCostToSupplyWater(n: number, wells: number[], pipes: number[][]): number {
-  const edges: [U, V, Weight][] = []
+  const edges: Edge<number>[] = []
   wells.forEach((weight, index) => edges.push([0, index + 1, weight]))
   pipes.forEach(([u, v, w]) => edges.push([u, v, w]))
-  edges.sort((a, b) => a[2] - b[2])
-  return useUnionFind(n + 1, edges)
-
-  function useUnionFind(size: number, edges: [U, V, Weight][]) {
-    let cost = 0
-    const parent = Array.from<number, number>({ length: size }, (_, i) => i)
-
-    const find = (key: number) => {
-      while (parent[key] !== undefined && parent[key] !== key) {
-        parent[key] = parent[parent[key]]
-        key = parent[key]
-      }
-      return key
-    }
-
-    for (const [u, v, w] of edges) {
-      const root1 = find(u)
-      const root2 = find(v)
-      if (root1 !== root2) {
-        cost += w
-        parent[Math.max(root1, root2)] = Math.min(root1, root2)
-      }
-    }
-
-    return cost
-  }
+  return kruskal(n + 1, edges)
 }
 
 console.log(
@@ -54,3 +29,5 @@ console.log(
     ]
   )
 )
+
+export {}

@@ -1,4 +1,5 @@
 # 抽出最大的
+# 1 <= word1.length, word2.length <= 3000
 class Solution:
     def largestMerge(self, word1: str, word2: str) -> str:
         w1, w2 = list(word1), list(word2)
@@ -6,13 +7,15 @@ class Solution:
         sb = []
 
         while i < len(word1) and j < len(word2):
-            # 直接比后面的字符串
+            # 直接比后面的字符串字典序大小
+            # 优化：用后缀数组的rank数组比较字典序大小
             if w1[i:] > w2[j:]:
                 sb.append(w1[i])
                 i += 1
             else:
                 sb.append(w2[j])
                 j += 1
+
         sb.extend(w1[i:])
         sb.extend(w2[j:])
 

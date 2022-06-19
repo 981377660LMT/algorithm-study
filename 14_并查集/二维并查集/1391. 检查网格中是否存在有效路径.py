@@ -14,7 +14,7 @@ from typing import List
 # 下一个点可以返回上一个点
 # (-di, -dj) in directions[grid[ni][nj]]  # 下一个点可以原路返回
 
-directions = {
+MAPPING = {
     1: [(0, -1), (0, 1)],
     2: [(-1, 0), (1, 0)],
     3: [(0, -1), (1, 0)],
@@ -26,29 +26,25 @@ directions = {
 
 class Solution:
     def hasValidPath(self, grid: List[List[int]]) -> bool:
-        if not any(grid):
-            return True
-
-        m, n = len(grid), len(grid[0])
-        visited = set()
-        goal = (m - 1, n - 1)
-
-        def dfs(i: int, j: int) -> bool:
-            visited.add((i, j))
-            if (i, j) == goal:
+        def dfs(r: int, c: int) -> bool:
+            if (r, c) == target:
                 return True
-            for di, dj in directions[grid[i][j]]:
-                ni, nj = i + di, j + dj
+            for dr, dc in MAPPING[grid[r][c]]:
+                nr, nc = r + dr, c + dc
                 if (
-                    0 <= ni < m
-                    and 0 <= nj < n
-                    and (ni, nj) not in visited
-                    and (-di, -dj) in directions[grid[ni][nj]]  # 下一个点可以原路返回
+                    0 <= nr < ROW
+                    and 0 <= nc < COL
+                    and (nr, nc) not in visited
+                    and (-dr, -dc) in MAPPING[grid[nr][nc]]  # 下一个点可以原路返回
                 ):
-                    if dfs(ni, nj):
+                    visited.add((nr, nc))
+                    if dfs(nr, nc):
                         return True
             return False
 
+        ROW, COL = len(grid), len(grid[0])
+        target = (ROW - 1, COL - 1)
+        visited = set([(0, 0)])
         return dfs(0, 0)
 
 

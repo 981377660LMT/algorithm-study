@@ -1,6 +1,6 @@
 // from typing import List
 
-import { useUnionFindArray } from '../../推荐使用并查集精简版'
+import { useUnionFindArray } from '../../useUnionFind'
 
 // # 只有当 A[i] 和 A[j] 共用一个大于 1 的公因数时，A[i] 和 A[j] 之间才有一条边。
 // # 返回图中最大连通组件的大小。
@@ -27,7 +27,7 @@ function largestComponentSize(nums: number[]): number {
   const counter = new Map<number, number>()
   for (const num of nums) {
     const root = uf.find(num)
-    counter.set(root, (counter.get(root) || 0) + 1)
+    counter.set(root, (counter.get(root) ?? 0) + 1)
   }
 
   return Math.max(...counter.values())
