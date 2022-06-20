@@ -1,5 +1,4 @@
 /**
- *
  * @param a
  * @param b
  * knows API 本质上还是在访问邻接矩阵
@@ -7,9 +6,9 @@
 declare function knows(a: number, b: number): boolean
 
 /**
- * 
  * @param n  给你 n 个人的社交关系（你知道任意两个人之间是否认识），然后请你找出这些人中的「名人」。
- * 最多只有1个名人
+ * !最多只有1个名人
+ * 如果允许调用 API knows 的最大次数为 3 * n ，你可以设计一个不超过最大调用次数的解决方案吗
  * @description
  * 所谓「名人」有两个条件：
    1、所有其他人都认识「名人」。
@@ -17,7 +16,7 @@ declare function knows(a: number, b: number): boolean
    @summary
    名人节点的出度为 0，入度为 n - 1
  */
-const findCelebrity = (n: number) => {
+function findCelebrity(n: number): number {
   // 假设0是名人
   let res = 0
   for (let other = 1; other < n; other++) {

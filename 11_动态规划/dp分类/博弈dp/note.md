@@ -5,15 +5,13 @@
 `自己赢=自己赢+对手不赢`
 
 ```Python
- # 自己赢=自己赢或对手不赢
-if curSum + select >= target or not dfs(curSum + select, visited | (1 << select)):
-    return True
+mem = {}
+def win(A):                     # 判断状态A是否为胜态
+    if A not in mem:
+        if is_final(A):         # 若A为终局态
+            mem[A] = rule(A)    # 根据游戏规则判断A的胜负
+        else:                   # 若A为非终局态，则根据策梅洛定理判断其胜负
+            mem[A] = not all(win(B) for B in next_states(A))
+                                # next_states(A)返回A的所有次态
+    return mem[A]
 ```
-
-```JS
-if (自己赢 || !dp[i - j]) {
-  dp[i] = true
-}
-```
-
-除了**石子游戏 VI**，其他《石子游戏》思路基本都一样
