@@ -13,7 +13,7 @@ from heapq import heappop, heappush
 MOD = int(1e9 + 7)
 INF = int(1e20)
 
-# 单源最短路 + 拓扑序 DP
+# 单源最短路 +  DP
 
 
 class Solution:
@@ -23,31 +23,30 @@ class Solution:
             adjMap[u][v] = w
             adjMap[v][u] = w
 
-        dist = [INF] * n
+        dist = defaultdict(lambda: INF)
         dist[0] = 0
         pq = [(0, 0)]
 
         # 1.注意这个count数组表示到id的最短路径数
-        count = [0] * n
+        count = defaultdict(int)
         count[0] = 1
 
         while pq:
             curDist, cur = heappop(pq)
             if cur == n - 1:
-                return count[cur] % MOD
+                return count[cur]
 
             for next in adjMap[cur]:
-                weight = adjMap[cur][next]
-                candDist = weight + curDist
+                cand = adjMap[cur][next] + curDist
 
                 # 2.相等加count
-                if candDist == dist[next]:
+                if cand == dist[next]:
                     count[next] += count[cur]
                     count[next] %= MOD
                 # 3.更优直接覆盖count
-                elif candDist < dist[next]:
-                    dist[next] = candDist
-                    heappush(pq, (candDist, next))
+                elif cand < dist[next]:
+                    dist[next] = cand
+                    heappush(pq, (cand, next))
                     count[next] = count[cur]
                     count[next] %= MOD
         return -1

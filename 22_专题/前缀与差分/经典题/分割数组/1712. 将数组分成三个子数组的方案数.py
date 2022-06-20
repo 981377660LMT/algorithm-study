@@ -24,16 +24,16 @@ MOD = int(1e9 + 7)
 class Solution:
     def waysToSplit(self, nums: List[int]) -> int:
 
-        res = 0
-        preSum = list(accumulate(nums, initial=0))
-        # 固定i 找j的范围
-        for i in range(1, len(nums) - 1):
-            if preSum[i] * 3 > preSum[-1]:
-                break
+        n = len(nums)
+        preSum = list(accumulate(nums))  # 这里不用initial 因为要和二分范围一致
 
-            lower = bisect_left(preSum, 2 * preSum[i], lo=i + 1)
-            upper = bisect_right(preSum, (preSum[-1] + preSum[i]) / 2)
-            res += upper - lower
+        res = 0
+        # 固定左边界i 二分找右边界的范围
+        for i in range(n - 2):
+            # 二分的lo hi 范围和切片的范围一致
+            lower = bisect_left(preSum, 2 * preSum[i], lo=i + 1, hi=n - 1)
+            upper = bisect_right(preSum, (preSum[-1] + preSum[i]) / 2, lo=lower, hi=n - 1) - 1
+            res += upper - lower + 1
 
         return res % MOD
 

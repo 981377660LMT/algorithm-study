@@ -29,28 +29,27 @@ class Solution:
         dfs(0, [])
 
         dp = [defaultdict(int) for _ in range(m)]
-        for state in availableStates:
-            dp[0][state] = 1
+        for cur in availableStates:
+            dp[0][cur] = 1
         for i in range(1, m):
-            for state in availableStates:
-                for preState in dp[i - 1].keys():
-                    if not any(preState[j] == state[j] for j in range(n)):
-                        dp[i][state] += dp[i - 1][preState]
-                        dp[i][state] %= MOD
+            for cur in availableStates:
+                for pre in dp[i - 1]:
+                    if not any(pre[j] == cur[j] for j in range(n)):
+                        dp[i][cur] += dp[i - 1][pre]
+                        dp[i][cur] %= MOD
 
         res = 0
-        for state in dp[-1].keys():
-            res += dp[-1][state]
+        for cur in dp[-1]:
+            res += dp[-1][cur]
             res %= MOD
         return res
 
     def colorTheGrid2(self, m: int, n: int) -> int:
         """优化：`可以先处理出可能的转移状态邻接表，再进行 dp`"""
-        n, m = m, n
 
         def dfs(index: int, path: List[int]) -> None:
-            if index == n:
-                availableStates.append(tuple(path))
+            if index == COL:
+                allStates.append(tuple(path))
                 return
 
             for next in range(3):
@@ -60,29 +59,32 @@ class Solution:
                 dfs(index + 1, path)
                 path.pop()
 
-        availableStates: List[State] = []
+        ROW, COL = sorted([m, n], reverse=True)
+
+        allStates: List[State] = []
         dfs(0, [])
 
         # 优化 8684 ms => 1512 ms
         adjMap = defaultdict(set)
-        for cur in availableStates:
-            for next in availableStates:
-                if not any(cur[j] == next[j] for j in range(n)):
+        for cur in allStates:
+            for next in allStates:
+                if not any(cur[j] == next[j] for j in range(COL)):
                     adjMap[cur].add(next)
                     adjMap[next].add(cur)
 
-        dp = [defaultdict(int) for _ in range(m)]
-        for state in availableStates:
-            dp[0][state] = 1
-        for i in range(1, m):
-            for preState in dp[i - 1].keys():
-                for curState in adjMap[preState]:
-                    dp[i][curState] += dp[i - 1][preState]
-                    dp[i][curState] %= MOD
+        dp = defaultdict(int, {s: 1 for s in allStates})
+
+        for _ in range(1, ROW):
+            ndp = defaultdict(int)
+            for pre in dp:
+                for cur in adjMap[pre]:
+                    ndp[cur] += dp[pre]
+                    ndp[cur] %= MOD
+            dp = ndp
 
         res = 0
-        for state in dp[-1].keys():
-            res += dp[-1][state]
+        for count in dp.values():
+            res += count
             res %= MOD
         return res
 

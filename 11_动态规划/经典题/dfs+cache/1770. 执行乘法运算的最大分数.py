@@ -14,22 +14,19 @@ from functools import lru_cache
 
 class Solution:
     def maximumScore(self, nums: List[int], multipliers: List[int]) -> int:
-        n, m = len(nums), len(multipliers)
-
         @lru_cache(None)
-        def dfs(l: int, r: int, index: int) -> int:
+        def dfs(left: int, right: int, index: int) -> int:
             if index == m:
                 return 0
 
             return max(
-                nums[l] * multipliers[index] + dfs(l + 1, r, index + 1),
-                nums[r] * multipliers[index] + dfs(l, r - 1, index + 1),
+                nums[left] * multipliers[index] + dfs(left + 1, right, index + 1),
+                nums[right] * multipliers[index] + dfs(left, right - 1, index + 1),
             )
 
+        n, m = len(nums), len(multipliers)
         res = dfs(0, n - 1, 0)
-        # print(dfs.cache_info())
         dfs.cache_clear()
-
         return res
 
 

@@ -4,6 +4,7 @@ from functools import lru_cache
 # 1 <= rows, cols <= 50
 # 1 <= k <= 10
 
+# 切披萨的每一刀，先要选择是向垂直还是水平方向切
 # 你需要切披萨 k-1 次，得到 k 块披萨并送给别人。
 # 请你返回确保每一块披萨包含 至少 一个苹果的切披萨方案数。由于答案可能是个很大的数字，请你返回它对 10^9 + 7 取余的结果。
 
@@ -29,6 +30,8 @@ class PreSumMatrix:
 
         preSumMatrix.sumRegion(0, 0, 2, 2) # 左上角(0, 0)到右下角(2, 2)的值
         """
+        if r1 > r2 or c1 > c2:
+            return 0
         return (
             self.preSum[r2 + 1][c2 + 1]
             - self.preSum[r2 + 1][c1]
@@ -45,20 +48,28 @@ class Solution:
         """
 
         @lru_cache(None)
-        def dfs(x, y, k):
+        def dfs(sr: int, sc: int, k: int) -> int:
             """左上角(x, y)到右下角(row-1, col-1)能否再切k次"""
-            if not k:
-                return prefix[r][c] - prefix[x][c] - prefix[r][y] + prefix[x][y] > 0
+            if k == 0:
+                return int(M.sumRegion(sr, sc, ROW - 1, COL - 1) > 0)
+
             res = 0
-            for i in range(x + 1, r):
-                if prefix[i][c] - prefix[x][c] - prefix[i][y] + prefix[x][y] > 0:
-                    res += dfs(i, y, k - 1)
-            for j in range(y + 1, c):
-                if prefix[r][j] - prefix[x][j] - prefix[r][y] + prefix[x][y] > 0:
-                    res += dfs(x, j, k - 1)
+
+            # !下一块左上角的位置
+            for r in range(sr + 1, ROW):
+                if M.sumRegion(sr, sc, r - 1, COL - 1) > 0:
+                    res += dfs(r, sc, k - 1)
+                    res %= MOD
+
+            for c in range(sc + 1, COL):
+                if M.sumRegion(sr, sc, ROW - 1, c - 1) > 0:
+                    res += dfs(sr, c, k - 1)
+                    res %= MOD
+
             return res
 
         M = PreSumMatrix([list(row) for row in pizza])
+        ROW, COL = len(pizza), len(pizza[0])
         return dfs(0, 0, k - 1)
 
 

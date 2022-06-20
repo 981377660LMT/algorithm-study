@@ -17,13 +17,14 @@ INF = int(1e20)
 
 class Solution:
     def countRestrictedPaths(self, n: int, edges: List[List[int]]) -> int:
+        """返回从节点 1 出发到节点 n 的 受限路径数"""
         adjMap = defaultdict(lambda: defaultdict(lambda: INF))
         for u, v, w in edges:
-            adjMap[u - 1][v - 1] = w
-            adjMap[v - 1][u - 1] = w
+            adjMap[u][v] = w
+            adjMap[v][u] = w
 
-        pq = [(0, n - 1)]
-        dist = [INF] * (n - 1) + [0]
+        dist = defaultdict(lambda: INF, {n: 0})
+        pq = [(0, n)]
         while pq:
             curDist, cur = heappop(pq)
             if dist[cur] < curDist:
@@ -35,15 +36,16 @@ class Solution:
 
         @lru_cache(None)
         def dfs(cur: int) -> int:
-            if cur == n - 1:
+            if cur == n:
                 return 1
             res = 0
-            for next, _ in adjMap[cur]:
+            for next in adjMap[cur]:
                 if dist[cur] > dist[next]:
                     res += dfs(next)
+                    res %= MOD
             return res
 
-        return dfs(0) % MOD
+        return dfs(1)
 
 
 print(

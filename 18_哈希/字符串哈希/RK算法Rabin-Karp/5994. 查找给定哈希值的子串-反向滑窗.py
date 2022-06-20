@@ -1,16 +1,8 @@
-MOD = int(1e9 + 7)
-INF = 0x3F3F3F3F
-EPS = int(1e-8)
-dirs4 = [[-1, 0], [0, 1], [1, 0], [0, -1]]
-dirs8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]]
-
-
-# 注意这题不是rabin-karp模板，是滑窗滚动哈希
 # 1. 因为 pow(power, -1, modulo) 不一定存在(power与mod不一定互质)，所以不能正向滑窗
 # 2. python 里求次方优先使用pow函数
 # 3. 不记录切片，而是记录切片端点，最后再取切片
 class Solution:
-    # 错误解法
+    # !错误解法
     def subStrHash1(self, s: str, power: int, modulo: int, k: int, hashValue: int) -> str:
         curSum = sum((ord(s[i]) - 96) * pow(power, i, modulo) for i in range(k)) % modulo
         if curSum == hashValue:
