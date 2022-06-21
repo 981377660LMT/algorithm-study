@@ -1,4 +1,5 @@
-from itertools import combinations
+from itertools import combinations, product
+from math import dist
 from typing import List
 from collections import deque, defaultdict
 
@@ -38,5 +39,24 @@ class Solution:
 
         return max((bfs(i) for i in range(n)), default=1)
 
+    def maximumDetonation2(self, bombs: List[List[int]]) -> int:
+        n = len(bombs)
+        adjMap = {i: set([i]) for i in range(n)}
+        for i, j in combinations(range(n), 2):
+            p1, p2, r1, r2 = bombs[i][:2], bombs[j][:2], bombs[i][2], bombs[j][2]
+            d = dist(p1, p2)
+            if d <= r1:
+                adjMap[i].add(j)
+            if d <= r2:
+                adjMap[j].add(i)
+
+        for i, j in combinations(range(n), 2):
+            if i in adjMap[j]:
+                adjMap[j] |= adjMap[i]
+            if j in adjMap[i]:
+                adjMap[i] |= adjMap[j]
+        return max((len(adjMap[i]) for i in range(n)), default=1)
+
 
 print(Solution().maximumDetonation(bombs=[[2, 1, 3], [6, 1, 4]]))
+print(Solution().maximumDetonation2(bombs=[[2, 1, 3], [6, 1, 4]]))

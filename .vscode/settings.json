@@ -65,5 +65,8 @@
   "python.linting.flake8Enabled": true,
   "python.linting.pylintEnabled": false,
   "python.linting.enabled": true,
-  "python.formatting.provider": "black"
+  "python.formatting.provider": "black",
+  "code-runner.executorMap": {
+    "typescript": "ts-node-dev --respawn --transpile-only"
+  }
 }

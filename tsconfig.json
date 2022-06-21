@@ -70,6 +70,8 @@
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
     "noImplicitOverride": true,
-    "removeComments": true
+    "removeComments": true,
+    // TS编译器在第一次编译之后会生成一个存储编译信息的文件，第二次编译会在第一次的基础上进行增量编译,
+    "incremental": true
   }
 }

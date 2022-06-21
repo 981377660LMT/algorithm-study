@@ -1,11 +1,15 @@
-const generateParenthesis = (n: number): string[] => {
+function generateParenthesis(n: number): string[] {
   const res: string[] = []
+  bt([], n, n)
+  return res
 
   // 在bt中传递元信息参数加速验证
-  const bt = (stringBuilder: string[], leftRemaining: number, rightRemaining: number) => {
-    if (leftRemaining === 0 && rightRemaining === 0) return res.push(stringBuilder.join(''))
-
+  function bt(stringBuilder: string[], leftRemaining: number, rightRemaining: number): void {
     if (rightRemaining < leftRemaining) return
+    if (leftRemaining === 0 && rightRemaining === 0) {
+      res.push(stringBuilder.join(''))
+      return
+    }
 
     if (leftRemaining > 0) {
       stringBuilder.push('(')
@@ -18,9 +22,6 @@ const generateParenthesis = (n: number): string[] => {
       stringBuilder.pop()
     }
   }
-  bt([], n, n)
-
-  return res
 }
 
 console.log(generateParenthesis(3))

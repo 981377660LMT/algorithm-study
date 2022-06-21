@@ -19,3 +19,6 @@ https://qiita.com/e869120/items/1b2a5f0f07fd927e44e9#5-1-%E8%A7%A3%E6%B3%95%E3%8
 - マス目や座標を回転させることで実装量を減らす（JOI2020 二次予選 A など）
 
 `余事象`:补集，Complementary event
+
+atc 速さ
+cpp > go > javascript > java > python
