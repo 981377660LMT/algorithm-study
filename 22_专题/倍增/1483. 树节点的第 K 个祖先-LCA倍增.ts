@@ -10,6 +10,7 @@
 // 那我们查找的时候，步长 依次是8，4， 1
 // 2.设计一个dp数组
 // dp[j][i]: 结点i 的， 距离为2^j 的祖先结点
+
 class TreeAncestor {
   private readonly _dp: Int32Array[]
   private readonly _MAXJ: number
