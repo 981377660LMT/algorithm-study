@@ -1,4 +1,5 @@
-from typing import List, Optional
+from collections import defaultdict
+from typing import Generator, List, Optional
 
 
 class TreeNode:
@@ -10,16 +11,29 @@ class TreeNode:
         self.right = right
 
 
-# 返回 nodes 中所有节点的最近公共祖先（LCA）
+# !O(n)求二叉树多个结点的最近公共祖先
+# !可以推广到求n叉树k个结点的LCA
 class Solution:
     def lowestCommonAncestor(self, root: 'TreeNode', nodes: 'List[TreeNode]') -> 'TreeNode':
-        if not root or root in nodes:
-            return root
-        l = self.lowestCommonAncestor(root.left, nodes)
-        r = self.lowestCommonAncestor(root.right, nodes)
-        if not l:
-            return r
-        if not r:
-            return l
-        return root
+        def dfs(root: Optional['TreeNode']) -> Generator['TreeNode', None, None]:
+            """后序dfs和从下往上拓扑排序 都是等价的
+            看哪个点最先为k
+            """
+            if not root:
+                return
+
+            subSum[root.val] += int(root in needs)
+
+            for child in [root.left, root.right]:
+                if not child:
+                    continue
+                yield from dfs(child)
+                subSum[root.val] += subSum[child.val]
+
+            if subSum[root.val] == len(nodes):
+                yield root
+
+        needs = set(nodes)
+        subSum = defaultdict(int)
+        return next(dfs(root))
 

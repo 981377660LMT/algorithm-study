@@ -20,6 +20,7 @@ MOD = int(1e9 + 7)
 
 class Solution:
     def maxSum(self, nums1: List[int], nums2: List[int]) -> int:
+        """类似归并排序的merge过程"""
         m, n = len(nums1), len(nums2)
         sum1, sum2 = 0, 0
         i, j = 0, 0
@@ -34,6 +35,7 @@ class Solution:
                 j += 1
             else:
                 # 每遇到岔口，更新两个sum为最大值，同时取余
+                # 注意没相遇前不可取余
                 sum1 = sum2 = (max(sum1, sum2) + nums1[i]) % MOD
                 i += 1
                 j += 1

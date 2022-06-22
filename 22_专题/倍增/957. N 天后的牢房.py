@@ -1,4 +1,6 @@
-from typing import List
+from math import floor, log2
+from operator import xor
+from typing import List, Tuple
 
 # cells.length == 8
 # 1 <= N <= 10^9
@@ -30,8 +32,40 @@ class Solution:
 
         return cells
 
+    def prisonAfterNDays2(self, cells: List[int], k: int) -> List[int]:
+        """倍增dp
 
-print(Solution().prisonAfterNDays(cells=[0, 1, 0, 1, 1, 0, 0, 1], n=7))
+        cells.length == 8
+        1 <= k <= 1e9
+        """
+
+        def move(preState: int) -> int:
+            s1, s2 = preState >> 1, preState << 1
+            nextState = s1 ^ s2 ^ 0b11111111  # 两个相邻的房间都被占用或都是空的，那么该牢房就会被占用
+            nextState &= 0b01111110  # 行中的第一个和最后一个房间无法有两个相邻的房间
+            return nextState
+
+        n = len(cells)
+        maxJ = floor(log2(k)) + 1
+        dp = [[0] * (1 << n) for _ in range(maxJ + 1)]  # dp[j][i] 表示第i天后2^j天的状态
+
+        for i in range(1 << n):
+            dp[0][i] = move(i)
+
+        for j in range(maxJ):
+            for i in range(1 << n):
+                dp[j + 1][i] = dp[j][dp[j][i]]
+
+        res = int("".join(map(str, cells)), 2)
+        for bit in range(maxJ + 1):
+            if (k >> bit) & 1:
+                res = dp[bit][res]
+
+        return [int(res >> i & 1) for i in reversed(range(n))]
+
+
+# print(Solution().prisonAfterNDays(cells=[0, 1, 0, 1, 1, 0, 0, 1], n=7))
+print(Solution().prisonAfterNDays2(cells=[0, 1, 0, 1, 1, 0, 0, 1], k=7))
 # 输出：[0,0,1,1,0,0,0,0]
 # 解释：
 # 下表概述了监狱每天的状况：
@@ -43,3 +77,4 @@ print(Solution().prisonAfterNDays(cells=[0, 1, 0, 1, 1, 0, 0, 1], n=7))
 # Day 5: [0, 1, 1, 1, 0, 1, 0, 0]
 # Day 6: [0, 0, 1, 0, 1, 1, 0, 0]
 # Day 7: [0, 0, 1, 1, 0, 0, 0, 0]
+
