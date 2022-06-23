@@ -25,13 +25,13 @@ class Solution:
         return res
 
     def findSubstring2(self, s: str, words: List[str]) -> List[int]:
-        # O(n) 滑窗 `如果当前单词超出需要 那么左端点回来`
+        # O(26*n) 滑窗 `如果当前单词超出需要 那么左端点回来`
         res = []
         n = len(words)
         wordLen = len(words[0])
         target = Counter(words)
 
-        # 分组滑窗
+        # !枚举滑窗起始点 指针步长为单词长度
         for start in range(wordLen):
             left, count = start, 0
             counter = Counter()

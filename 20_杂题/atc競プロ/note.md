@@ -1,3 +1,6 @@
+**注意 atc 上 python 要用 pypy3 提交 会快很多**
+pypy3 is faster than python3 for input() time through any algorithm problem. Performance differences were almost as much as 12 times.
+
 https://qiita.com/e869120/items/1b2a5f0f07fd927e44e9#5-1-%E8%A7%A3%E6%B3%95%E3%81%8C%E5%88%86%E3%81%8B%E3%81%A3%E3%81%9F%E3%82%89%E5%AE%9F%E8%A3%85%E3%82%82%E3%81%97%E3%82%88%E3%81%86
 
 競プロで問われるのはアルゴリズムだけでなく、考察・実装の典型といったものもあります。AtCoder Beginner Contest (ABC) の D 問題までに出題されそうな範囲の中で、私が 2 分でパッと思いついたものだけでも、これだけあるのです。
@@ -19,6 +22,33 @@ https://qiita.com/e869120/items/1b2a5f0f07fd927e44e9#5-1-%E8%A7%A3%E6%B3%95%E3%8
 - マス目や座標を回転させることで実装量を減らす（JOI2020 二次予選 A など）
 
 `余事象`:补集，Complementary event
+`再帰関数`:递归函数
+`ヒューリスティック探索`:启发式搜索
 
 atc 速さ
 cpp > go > javascript > java > python
+
+## プログラミングコンテストやアルゴリズムの本 3 選、読んでみた感想
+
+難易度
+蟻本(适合中上级选手) > 螺旋本(简单) > チーター本(超级简单)
+
+## 過去問をどこから追うか
+
+問題傾向が固まった（※ただしレベルは固まっていない）ABC40 ～
+色々な記事でよく例問に上がり始める ABC80 ～
+以降全テストケースが公開されている ABC100 ～
+現在の六問制になり始める ABC126 ～
+以上の四つが区切りとして目立ちます。
+
+- atcoder 可以跑 1e8-1e9 的运算
+  https://atcoder.jp/contests/typical90/tasks/typical90_p
+  https://twitter.com/e869120/status/1382889834092457989?s=20&t=xh3o9MmLOrAii8Z5oFv-xQ
+
+- atcoder 的 ABC 前 1-4 题非常简单 ARC 第一题非常简单
+  对于日本的信息学竞赛来说，更为侧重的是你的「思维能力」，而在我国，主要考察的是「算法」和「数据结构」
+
+来自某知乎用户的评价
+
+> > > AtCoder 的题目言简意赅，不去生硬地套背景！（比打某 force 的时候 ABC 题都一大段描述爽多了）。另外 AtCoder 的题目，前面几题都是智商题，即使是后几题代码量一般也不算大。赛后看大佬的代码，可能平均每题只有 50 行（或者更少）。对于这种短时的个人比赛，感觉最有意思了～
+> > > 板刷： 板刷的意思是，一板一板的刷。比如 leetcode 周赛，当你基础算法学完了，想提高就直接定时做周赛题，一次做四道题

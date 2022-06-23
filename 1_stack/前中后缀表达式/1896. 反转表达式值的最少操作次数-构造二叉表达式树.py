@@ -16,6 +16,7 @@ class Solution:
     def minOperationsToFlip(self, expression: str) -> int:
         """根据中缀表达式构造二叉表达式树然后树上dp
         叶子结点表示操作数,非叶子结点表示运算符
+        可以反转任意结点的值
         """
 
         def dfs(root: Optional['MyNode']) -> Tuple[int, int]:

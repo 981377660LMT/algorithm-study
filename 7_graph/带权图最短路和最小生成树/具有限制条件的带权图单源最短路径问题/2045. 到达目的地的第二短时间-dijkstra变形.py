@@ -23,12 +23,14 @@ from heapq import heappush, heappop
 class Solution:
     def secondMinimum(self, n: int, edges: List[List[int]], time: int, change: int) -> int:
         adjMap = defaultdict(set)
-        for x, y in edges:
-            adjMap[x - 1].add(y - 1)
-            adjMap[y - 1].add(x - 1)
+        for u, v in edges:
+            u, v = u - 1, v - 1
+            adjMap[u].add(v)
+            adjMap[v].add(u)
 
         # 每个点保存多个距离而不是只有一个
         dist = [[] for _ in range(n)]
+        dist[0] = [0]
         pq = [(0, 0)]
         minTime = None
 
@@ -51,6 +53,8 @@ class Solution:
                 if not dist[next] or len(dist[next]) == 1 and dist[next][0] < cost:
                     dist[next].append(cost)
                     heappush(pq, (cost, next))
+
+        raise Exception("No path")
 
 
 print(

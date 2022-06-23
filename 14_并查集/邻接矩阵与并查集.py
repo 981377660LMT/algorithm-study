@@ -12,5 +12,5 @@ class Solution:
             for j in range(i + 1, n):
                 if distance[i][j] <= 2:
                     uf.union(i, j)
-        return uf.count <= k
+        return uf.part <= k
 

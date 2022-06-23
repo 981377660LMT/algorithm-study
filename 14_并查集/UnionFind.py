@@ -1,14 +1,15 @@
 from collections import defaultdict
-from typing import DefaultDict, Generic, Iterable, List, Optional, TypeVar
+from typing import DefaultDict, Generic, Hashable, Iterable, List, Optional, TypeVar
 
 
-# 当元素不是数组index时(例如字符串)，更加通用的并查集写法，支持动态添加
-T = TypeVar('T')
+T = TypeVar('T', bound=Hashable)
 
 
 class UnionFindMap(Generic[T]):
+    """当元素不是数组index时(例如字符串)，更加通用的并查集写法，支持动态添加"""
+
     def __init__(self, iterable: Optional[Iterable[T]] = None):
-        self.count = 0
+        self.part = 0
         self.parent = dict()
         self.rank = defaultdict(lambda: 1)
         for item in iterable or []:
@@ -24,7 +25,7 @@ class UnionFindMap(Generic[T]):
             root1, root2 = root2, root1
         self.parent[root1] = root2
         self.rank[root2] += self.rank[root1]
-        self.count -= 1
+        self.part -= 1
         return True
 
     def find(self, key: T) -> T:
@@ -43,7 +44,7 @@ class UnionFindMap(Generic[T]):
     def getRoots(self) -> List[T]:
         return list(set(self.find(key) for key in self.parent))
 
-    def getGroup(self) -> DefaultDict[T, List[T]]:
+    def getGroups(self) -> DefaultDict[T, List[T]]:
         groups = defaultdict(list)
         for key in self.parent:
             root = self.find(key)
@@ -55,8 +56,14 @@ class UnionFindMap(Generic[T]):
             return False
         self.parent[key] = key
         self.rank[key] = 1
-        self.count += 1
+        self.part += 1
         return True
+
+    def __str__(self) -> str:
+        return '\n'.join(f'{root}: {member}' for root, member in self.getGroups().items())
+
+    def __len__(self) -> int:
+        return self.part
 
 
 class UnionFindArray:
@@ -67,7 +74,7 @@ class UnionFindArray:
 
     def __init__(self, n: int):
         self.n = n
-        self.count = n
+        self.part = n
         self.parent = list(range(n))
         self.rank = [1] * n
 
@@ -86,7 +93,7 @@ class UnionFindArray:
             rootX, rootY = rootY, rootX
         self.parent[rootX] = rootY
         self.rank[rootY] += self.rank[rootX]
-        self.count -= 1
+        self.part -= 1
         return True
 
     def isConnected(self, x: int, y: int) -> bool:
@@ -98,4 +105,13 @@ class UnionFindArray:
             root = self.find(key)
             groups[root].append(key)
         return groups
+
+    def getRoots(self) -> List[int]:
+        return list(set(self.find(key) for key in self.parent))
+
+    def __str__(self) -> str:
+        return '\n'.join(f'{root}: {member}' for root, member in self.getGroups().items())
+
+    def __len__(self) -> int:
+        return self.part
 

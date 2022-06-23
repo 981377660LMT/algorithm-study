@@ -1,10 +1,12 @@
-from typing import List, Set, Tuple
-from heapq import heappop, heappush
+from collections import deque
+from typing import Deque, List, Set, Tuple
+
 
 # T:目标 B:箱子 S：起点 #:墙
-# 返回将箱子推到目标位置的最小 推动 次数，如果无法做到，请返回 -1。
-# 我们只需要返回推箱子的次数。
+# !返回将箱子推到目标位置的最小 推动 次数，如果无法做到，请返回 -1。
 
+# 1.怎么保证不重复访问:两个位置作为状态
+# 2.怎么处理推箱子的位置和不推箱子位置的先后顺序：01bfs
 
 Position = Tuple[int, int]
 DIR4 = [[-1, 0], [0, 1], [1, 0], [0, -1]]
@@ -12,7 +14,9 @@ DIR4 = [[-1, 0], [0, 1], [1, 0], [0, -1]]
 
 class Solution:
     def minPushBox(self, grid: List[List[str]]) -> int:
-        def isInvalid(pos: Position):  # return whether the location is in the grid and not a wall
+        """01bfs求两种权值的最短路 时空复杂度O(n^2*m^2)"""
+
+        def isInvalid(pos: Position) -> bool:
             r, c = pos
             if r < 0 or r >= ROW:
                 return True
@@ -31,30 +35,31 @@ class Solution:
                 if grid[r][c] == "S":
                     personPos = (r, c)
 
-        # 估值距离，箱子推动次数，人，箱子
-        pq = [(0, personPos, boxPos)]
+        # (可以加一个估值距离)，箱子推动次数，人，箱子
+        queue: Deque[Tuple[int, Position, Position]] = deque([(0, personPos, boxPos)])
         visited: Set[Tuple[Position, Position]] = set()
 
-        while pq:
-            moves, person, box = heappop(pq)
-            if box == target:
-                return moves
-            if (person, box) in visited:  # do not visit same state again
+        while queue:
+            boxMove, personPos, boxPos = queue.popleft()
+            if boxPos == target:
+                return boxMove
+            if (personPos, boxPos) in visited:
                 continue
-            visited.add((person, box))
+            visited.add((personPos, boxPos))
 
             for dr, dc in DIR4:
-                nextP = (person[0] + dr, person[1] + dc)
-                if isInvalid(nextP):
+                nextPerson = (personPos[0] + dr, personPos[1] + dc)
+                if isInvalid(nextPerson):
                     continue
                 # !人和箱子重合，就表示推了箱子
-                if nextP == box:
-                    nextB = (box[0] + dr, box[1] + dc)
+                if nextPerson == boxPos:
+                    nextB = (boxPos[0] + dr, boxPos[1] + dc)
                     if isInvalid(nextB):
                         continue
-                    heappush(pq, (moves + 1, nextP, nextB))
+                    queue.append((boxMove + 1, nextPerson, nextB))
                 else:
-                    heappush(pq, (moves, nextP, box))
+                    queue.appendleft((boxMove, nextPerson, boxPos))
+
         return -1
 
 
