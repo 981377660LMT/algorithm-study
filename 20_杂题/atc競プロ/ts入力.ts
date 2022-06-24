@@ -72,6 +72,7 @@ if (require.main === module) {
     test
     `
   )
+
   const a = Number(input())
   const [b, c] = input().split(' ').map(Number)
   const s = input()
