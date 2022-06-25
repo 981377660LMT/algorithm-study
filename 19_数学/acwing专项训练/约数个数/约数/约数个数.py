@@ -24,6 +24,7 @@ def getPrimeFactors(n: int) -> Counter:
     return res
 
 
+# 求 1-n 乘积的约数个数
 n = int(input())
 counter = Counter()
 for _ in range(n):

@@ -20,6 +20,7 @@ def getPrimeFactors(n: int) -> Counter:
     return res
 
 
+# 求 1-n 乘积的约数之和
 n = int(input())
 counter = Counter()
 for _ in range(n):

@@ -12,3 +12,5 @@ class Solution:
 
 
 print(Solution().climbStairs(3))
+
+
