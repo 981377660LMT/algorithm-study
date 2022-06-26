@@ -81,7 +81,6 @@ function primeFactors(n: number): Map<number, number> {
 }
 
 /**
- *
  * @param n
  * @returns 返回 n 的所有因子
  */

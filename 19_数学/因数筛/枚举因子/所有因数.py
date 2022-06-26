@@ -20,8 +20,6 @@ def getFactors(n: int) -> List[int]:
 
 
 # !所有质因数
-
-
 @lru_cache(None)
 def getPrimeFactors(n: int) -> Counter:
     """返回 n 的所有质数因子"""

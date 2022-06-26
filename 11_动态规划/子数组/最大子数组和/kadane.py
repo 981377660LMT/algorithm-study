@@ -1,4 +1,4 @@
-import operator
+
 from typing import List
 
 

@@ -35,7 +35,23 @@ function useDfsOrder(n: number, tree: Iterable<number>[], root = 0) {
     return ends[root]
   }
 
-  return { queryRange, queryId }
+  /**
+   * @returns root是否是child的祖先
+   * @description 应用:枚举边时给树的边定向
+   *
+   * ```js
+   *  if (!isAncestor(e[0], e[1])) {
+   *    [e[0], e[1]] = [e[1], e[0]]
+   *  }
+   * ```
+   */
+  function isAncestor(root: number, child: number): boolean {
+    const [left1, right1] = queryRange(root)
+    const [left2, right2] = queryRange(child)
+    return left1 <= left2 && right2 <= right1
+  }
+
+  return { queryRange, queryId, isAncestor }
 }
 
 export { useDfsOrder }

@@ -1,4 +1,4 @@
-import { kanade } from './53. 最大子数组和'
+import { kanade } from './kanade'
 
 /**
  * @description

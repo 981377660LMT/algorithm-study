@@ -4,24 +4,26 @@ from typing import List
 
 class Solution:
     def getTreeInfo(self, n: int, edges: List[List[int]], values: List[int]) -> None:
-        """获取树的信息"""
+        """获取树的信息 模板示例"""
 
-        def dfs(cur: int, parent_: int, depth_: int) -> None:
-            parent[cur] = parent_
-            depth[cur] = depth_
+        def dfs(cur: int, pre: int, dep: int) -> None:
+            parent[cur] = pre
+            depth[cur] = dep
             for next in adjMap[cur]:
-                if next == parent_:
+                if next == pre:
                     continue
-                dfs(next, cur, depth_ + 1)
-                subTreeCount[cur] += subTreeCount[next]
-                subTreeSum[cur] += subTreeSum[next]
+                ancestors[next] |= ancestors[cur] | {cur}  # !先序遍历传递祖先节点
+                dfs(next, cur, dep + 1)
+                subCount[cur] += subCount[next]
+                subSum[cur] += subSum[next]
 
-            print('当前结点已处理完毕，准备向上回溯', subTreeCount[cur], subTreeSum[cur])
+            print('当前结点已处理完毕，准备向上回溯', subCount[cur], subSum[cur])
 
-        depth = [-1] * n
-        parent = [-1] * n
-        subTreeSum = values[:]
-        subTreeCount = [1] * n
+        depth = [-1] * n  # 到根节点的距离/深度
+        parent = [-1] * n  # 直接的父节点
+        ancestors = [set() for _ in range(n)]  # 祖先节点
+        subSum = values[:]
+        subCount = [1] * n
 
         adjMap = defaultdict(set)
         for u, v in edges:
