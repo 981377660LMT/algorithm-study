@@ -6,33 +6,27 @@
  * @summary
  * 暴力解法即可
  */
-var findLUSlength = function (strs: string[]): number {
-  const isSubsequence = (s: string, t: string) => {
+function findLUSlength(strs: string[]): number {
+  strs.sort((a, b) => b.length - a.length)
+  for (const cur of strs) {
+    const count = strs.filter(other => isSubsequence(other, cur)).length
+    if (count === 1) return cur.length
+  }
+
+  return -1
+
+  function isSubsequence(longer: string, shorter: string): boolean {
     let i = 0
     let j = 0
-    while (j < t.length) {
-      if (s[i] === t[j]) i++
-      if (i === s.length) return true
-      j++
-    }
-    return i === s.length
-  }
 
-  // 判断位置为index的字符是否独一无二，且不属于比他长的子序列
-  const unique = (strs: string[], index: number): boolean => {
-    const str = strs[index]
-    const isUnique = strs.indexOf(str) === strs.lastIndexOf(str)
-    for (let i = 0; i < index; i++) {
-      if (isSubsequence(strs[i], str)) return false
+    while (i < longer.length && j < shorter.length) {
+      if (longer[i] === shorter[j]) j++
+      if (j === shorter.length) return true
+      i++
     }
-    return isUnique
-  }
 
-  strs.sort((a, b) => b.length - a.length)
-  for (let i = 0; i < strs.length; i++) {
-    if (unique(strs, i)) return strs[i].length
+    return false
   }
-  return -1
 }
 
 console.log(findLUSlength(['aba', 'cdc', 'eae']))

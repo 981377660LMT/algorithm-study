@@ -1,4 +1,4 @@
-# 判断点是否在多边形上/内
+# 判断点是否在多边形内
 # Ray casting algorithm
 from fractions import Fraction
 from typing import List
@@ -58,6 +58,9 @@ def isInPoly2(p: List[int], polygen: List[List[int]]) -> bool:
                 isInside = not isInside
     return isInside
 
+
+# 另一种思路:
+# 将点和多边形的所有顶点连接，用余弦定理计算每一条边的角度（注意有正负）然后求和。如果点在内部，和为2pi，点在外部，和为0
 
 if __name__ == '__main__':
     import sys

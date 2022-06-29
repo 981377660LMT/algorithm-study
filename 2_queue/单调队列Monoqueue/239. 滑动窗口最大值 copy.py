@@ -1,13 +1,14 @@
-from typing import Iterable, List, Optional
+from typing import Any, Deque, Iterable, List, Optional
 from collections import deque
 
 
 class MonoQueue:
+    """具有 O(1) 求 `min` 和 `max` API的 deque"""
+
     def __init__(self, iterable: Optional[Iterable[int]] = None) -> None:
-        self.minQueue = deque()
-        self.maxQueue = deque()
-        self.rawQueue = deque()
-        self.index = 0
+        self.minQueue: Deque[List[Any]] = deque()
+        self.maxQueue: Deque[List[Any]] = deque()
+        self.rawQueue: Deque[int] = deque()
 
         if iterable is not None:
             for value in iterable:
@@ -29,45 +30,50 @@ class MonoQueue:
         if not self.rawQueue:
             raise IndexError('popleft from empty queue')
 
-        self.minQueue[0][1] -= 1
-        if self.minQueue[0][1] == 0:
+        self.minQueue[0][-1] -= 1
+        if self.minQueue[0][-1] == 0:
             self.minQueue.popleft()
 
-        self.maxQueue[0][1] -= 1
-        if self.maxQueue[0][1] == 0:
+        self.maxQueue[0][-1] -= 1
+        if self.maxQueue[0][-1] == 0:
             self.maxQueue.popleft()
 
-        return self.rawQueue.popleft()[0]
+        return self.rawQueue.popleft()
 
-    def append(self, value: int) -> None:
+    def append(self, value: int, *metaInfo: Any) -> None:
+        """
+        Args:
+            value (int): 元素的值
+            metaInfo: Any 当前元素附加的元信息，不会添加到原始队列
+        """
         count = 1
         while self.minQueue and self.minQueue[-1][0] > value:
-            count += self.minQueue.pop()[1]
-        self.minQueue.append([value, count])
+            count += self.minQueue.pop()[-1]
+        self.minQueue.append([value, *metaInfo, count])
 
         count = 1
         while self.maxQueue and self.maxQueue[-1][0] < value:
-            count += self.maxQueue.pop()[1]
-        self.maxQueue.append([value, count])
+            count += self.maxQueue.pop()[-1]
+        self.maxQueue.append([value, *metaInfo, count])
 
-        self.rawQueue.append((value, self.index))
-        self.index += 1
+        self.rawQueue.append(value)
 
     def __len__(self) -> int:
         return len(self.rawQueue)
 
     def __getitem__(self, index: int) -> int:
-        return self.rawQueue[index][0]
+        return self.rawQueue[index]
 
 
-class Solution:
-    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
-        queue = MonoQueue()
-        res = []
-        for num in nums:
-            queue.append(num)
-            if len(queue) > k:
-                queue.popleft()
-            if len(queue) == k:
-                res.append(queue.max)
-        return res
+def maxSlidingWindow(nums: List[int], k: int) -> List[int]:
+    """滑动窗口最值"""
+    queue = MonoQueue()
+    res = []
+    for num in nums:
+        queue.append(num)
+        if len(queue) > k:
+            queue.popleft()
+        if len(queue) == k:
+            res.append(queue.max)
+    return res
+

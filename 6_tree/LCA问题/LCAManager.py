@@ -21,7 +21,7 @@ class LCAManager:
         self._MAX = n
         self._adjMap = adjMap
         self._dfs(root, -1, 0)
-        self._fa = self._initDp(self.parent)
+        self._fa = self._makeDp(self.parent)
 
     def queryLCA(self, root1: int, root2: int) -> int:
         """ `logn` 查询 """
@@ -54,7 +54,7 @@ class LCAManager:
                 continue
             self._dfs(next, cur, dep + 1)
 
-    def _initDp(self, parent: DefaultDict[int, int]) -> List[List[int]]:
+    def _makeDp(self, parent: DefaultDict[int, int]) -> List[List[int]]:
         """nlogn预处理"""
         dp = [[0] * self._BITLEN for _ in range(self._MAX)]
         for i in range(self._MAX):

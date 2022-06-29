@@ -42,24 +42,32 @@ def dijkstra(adjMap: Graph, start: Vertex, end: Optional[Vertex] = None):
 
 ##########################################################################
 def dijkstra2(
-    n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int
-) -> Tuple[List[int], List[List[int]]]:
-    """记录路径的dijk"""
+    n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int, end: int
+) -> List[int]:
+    """记录路径的dijk 用pre数组记录路径"""
     dist = [INF] * n
     dist[start] = 0
-    pq = [(0, start, [start])]
-    path = [[] for _ in range(n)]
-    path[start] = [start]
+    pq = [(0, start)]
+    pre = [start] * n
     while pq:
-        curDist, cur, curPath = heappop(pq)
+        curDist, cur = heappop(pq)
         if dist[cur] < curDist:
             continue
+        if cur == end:
+            break
         for next in adjMap[cur]:
             if dist[next] > dist[cur] + adjMap[cur][next]:
                 dist[next] = dist[cur] + adjMap[cur][next]
-                path[next] = curPath + [next]
-                heappush(pq, (dist[next], next, path[next]))
-    return dist, path
+                pre[next] = cur
+                heappush(pq, (dist[next], next))
+
+    res = [end]
+    cur = end
+    while cur != start:
+        cur = pre[cur]
+        res.append(cur)
+
+    return res[::-1]
 
 
 # 字符串顶点的dijk

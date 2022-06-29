@@ -10,26 +10,37 @@ from typing import List
 # n<=1000
 
 
+from typing import List
+from bisect import bisect_left, bisect_right
+
+
+def caldp(nums: List[int], isStrict=True) -> List[int]:
+    """求每个位置处的LIS长度(包括自身)"""
+    if not nums:
+        return []
+    res = [1] * len(nums)
+    LIS = [nums[0]]
+    for i in range(1, len(nums)):
+        if nums[i] > LIS[-1]:
+            LIS.append(nums[i])
+            res[i] = len(LIS)
+        else:
+            pos = bisect_left(LIS, nums[i]) if isStrict else bisect_right(LIS, nums[i])
+            LIS[pos] = nums[i]
+            res[i] = pos + 1
+    return res
+
+
 class Solution:
     def longestMountain(self, arr: List[int]) -> int:
         n = len(arr)
-        up = [0] * n
-        down = [0] * n
+        up = caldp(arr)
+        down = caldp(arr[::-1])[::-1]
 
-        # 前后预处理+查表
+        res = []
         for i in range(n):
-            for j in range(i):
-                if arr[i] > arr[j]:
-                    up[i] = max(up[i], up[j] + 1)
-
-        arr = arr[::-1]
-        for i in range(n):
-            for j in range(i):
-                if arr[i] > arr[j]:
-                    down[i] = max(down[i], down[j] + 1)
-        down = down[::-1]
-
-        return max([u + d + 1 for u, d in zip(up, down)], default=1)
+            res.append(down[i] + up[i] - 1)
+        return max(res, default=0)
 
 
 print(Solution().longestMountain([2, 1, 4, 7, 3, 2, 5]))

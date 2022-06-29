@@ -1,4 +1,4 @@
-import { topoSort2 } from '../topoSor'
+import { topoSort2 } from '../topoSort'
 
 /**
  * @param {string[]} words

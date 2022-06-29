@@ -8,19 +8,20 @@ from typing import List
 # 最多 25 个单元格中有黄金。
 
 # 回溯法
+
+
 class Solution:
     def getMaximumGold(self, grid: List[List[int]]) -> int:
         def dfs(r: int, c: int, gold: int) -> None:
             nonlocal res
-            gold += grid[r][c]
             res = max(res, gold)
 
             tmp = grid[r][c]
-            grid[r][c] = 0
+            grid[r][c] = 0  # 当前结点标记访问
 
             for nextR, nextC in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
                 if 0 <= nextR < ROW and 0 <= nextC < COL and grid[nextR][nextC] > 0:
-                    dfs(nextR, nextC, gold)
+                    dfs(nextR, nextC, gold + grid[r][c])
 
             grid[r][c] = tmp
 

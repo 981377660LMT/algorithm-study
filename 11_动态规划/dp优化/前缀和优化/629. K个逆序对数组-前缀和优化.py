@@ -21,9 +21,9 @@ class Solution:
             ndp = [0] * (k + 1)
             ndp[0] = 1
 
-            preSum = [0] + list(accumulate(dp))  # 前缀和优化
+            dpSum = [0] + list(accumulate(dp))  # 前缀和优化
             for j in range(1, k + 1):
-                ndp[j] = preSum[j + 1] - preSum[max(0, j - (i - 1) - 1)]  # 注意前缀和的索引含义
+                ndp[j] = dpSum[j + 1] - dpSum[max(0, j - (i - 1) - 1)]  # 注意前缀和的索引含义
                 ndp[j] %= MOD
 
             dp = ndp

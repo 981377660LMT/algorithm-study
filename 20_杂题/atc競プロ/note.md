@@ -24,6 +24,12 @@ https://qiita.com/e869120/items/1b2a5f0f07fd927e44e9#5-1-%E8%A7%A3%E6%B3%95%E3%8
 `余事象`:补集，Complementary event
 `再帰関数`:递归函数
 `ヒューリスティック探索`:启发式搜索
+`尺取法`:滑动窗口
+`階差`:差分
+`累積和`:前缀和
+`データ構造`:数据结构
+`畳み込み`:卷积 (用 fft 计算)
+`単純グラフ` :简单图，没有重边和自环边
 
 atc 速さ
 cpp > go > javascript > java > python

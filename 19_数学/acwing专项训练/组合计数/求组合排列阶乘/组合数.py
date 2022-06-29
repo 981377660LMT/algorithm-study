@@ -22,7 +22,7 @@ def ifac(n: int) -> int:
 def C(n: int, k: int) -> int:
     if n < k:
         return 0
-    return (fac(n) * ifac(k) * ifac(n - k)) % MOD
+    return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
 
 
 if __name__ == '__main__':

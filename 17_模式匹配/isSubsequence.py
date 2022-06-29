@@ -2,6 +2,8 @@
 
 
 def isSubsequnce(longer: str, shorter: str) -> bool:
+    if len(shorter) > len(longer):
+        return False
     it = iter(longer)
     return all(need in it for need in shorter)
 

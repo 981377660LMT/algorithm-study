@@ -268,6 +268,24 @@ class Tarjan:
         return EBCCId, EBCCGroupById, EBCCIdByEdge
 
 
+def toDAG(n: int, adjMap: DefaultDict[int, Set[int]]):
+    """有向图缩点成DAG"""
+    sccCount, sccGroupById, sccIdByNode = Tarjan.getSCC(n, adjMap)
+    newAdjMap = defaultdict(set)
+    deg = defaultdict(int)
+    visitedPair = set()
+    for cur in range(n):
+        for next in adjMap[cur]:
+            g1, g2 = sccIdByNode[cur], sccIdByNode[next]
+            if g1 == g2 or (g1, g2) in visitedPair:
+                continue
+            visitedPair.add((g1, g2))
+            newAdjMap[g1].add(g2)
+            deg[g2] += 1
+
+    return sccCount, newAdjMap, deg, sccIdByNode, sccGroupById
+
+
 if __name__ == '__main__':
     # 无向图割点和桥
     adjMap1 = defaultdict(set)

@@ -1,4 +1,3 @@
-
 from typing import List
 
 
@@ -6,7 +5,7 @@ def kanade(nums: List[int], getMax=True) -> int:
     """求最大/最小子数组和"""
     n = len(nums)
     if n == 0:
-        raise ValueError("nums is empty")
+        raise Exception("nums is empty")
     if n == 1:
         return nums[0]
 

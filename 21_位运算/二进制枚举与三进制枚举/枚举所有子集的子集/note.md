@@ -7,7 +7,7 @@
 
 ```Python
 
-# 初始化
+# 初始化所有状态
 dp = [False] * (1 << m)
 for state in range(1 << m):
     dp[state] = nums[0] >= subsum[state]

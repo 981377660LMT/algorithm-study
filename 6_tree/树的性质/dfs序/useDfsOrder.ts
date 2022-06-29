@@ -4,18 +4,18 @@
  * @param root 树根节点
  */
 function useDfsOrder(n: number, tree: Iterable<number>[], root = 0) {
-  const starts = new Uint32Array(n + 1) // 子树中最小的结点序号
-  const ends = new Uint32Array(n + 1) // 子树中最大的结点序号，即自己的id
+  const ins = new Uint32Array(n + 1) // 子树中最小的结点序号
+  const outs = new Uint32Array(n + 1) // 子树中最大的结点序号，即自己的id
   let dfsId = 1
   dfs(root, -1)
 
   // 求dfs序
   function dfs(cur: number, pre: number): void {
-    starts[cur] = dfsId
+    ins[cur] = dfsId
     for (const next of tree[cur]) {
       if (next !== pre) dfs(next, cur)
     }
-    ends[cur] = dfsId
+    outs[cur] = dfsId
     dfsId++
   }
 
@@ -24,7 +24,7 @@ function useDfsOrder(n: number, tree: Iterable<number>[], root = 0) {
    * @returns [start, end] 1 <= start <= end <= n
    */
   function queryRange(root: number): [left: number, right: number] {
-    return [starts[root], ends[root]]
+    return [ins[root], outs[root]]
   }
 
   /**
@@ -32,7 +32,7 @@ function useDfsOrder(n: number, tree: Iterable<number>[], root = 0) {
    * @returns dfsId 1 <= dfsId <= n
    */
   function queryId(root: number): number {
-    return ends[root]
+    return outs[root]
   }
 
   /**
@@ -46,8 +46,8 @@ function useDfsOrder(n: number, tree: Iterable<number>[], root = 0) {
    * ```
    */
   function isAncestor(root: number, child: number): boolean {
-    const [left1, right1] = queryRange(root)
-    const [left2, right2] = queryRange(child)
+    const [left1, right1] = [ins[root], outs[root]]
+    const [left2, right2] = [ins[child], outs[child]]
     return left1 <= left2 && right2 <= right1
   }
 

@@ -33,11 +33,11 @@ class Solution:
         """
         n = len(nextVisit)
         dp = [0] * n  # dp[i] 表示从i-1直接走到i需要的天数
-        preSum = [0] * n
+        dpSum = [0] * n
         for i in range(1, n):
-            dp[i] = (preSum[i - 1] - preSum[nextVisit[i - 1]] + 2) % MOD
-            preSum[i] = (preSum[i - 1] + dp[i]) % MOD
-        return preSum[-1]
+            dp[i] = (dpSum[i - 1] - dpSum[nextVisit[i - 1]] + 2) % MOD
+            dpSum[i] = (dpSum[i - 1] + dp[i]) % MOD
+        return dpSum[-1]
 
 
 print(Solution().firstDayBeenInAllRooms2([0, 0]))

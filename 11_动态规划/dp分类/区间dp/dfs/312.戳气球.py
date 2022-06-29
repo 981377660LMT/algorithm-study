@@ -9,6 +9,7 @@ class Solution:
     def maxCoins(self, nums: List[int]) -> int:
         @lru_cache(None)
         def dfs(left: int, right: int) -> int:
+            """两个端点和谁一起取"""
             if left + 1 >= right:
                 return 0
 

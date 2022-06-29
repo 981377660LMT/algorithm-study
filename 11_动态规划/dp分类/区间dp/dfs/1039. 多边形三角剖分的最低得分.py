@@ -9,7 +9,8 @@ from functools import lru_cache
 class Solution:
     def minScoreTriangulation(self, values: List[int]) -> int:
         @lru_cache(None)
-        def dfs(left, right) -> int:
+        def dfs(left: int, right: int) -> int:
+            """两个端点和谁一起取"""
             # 注意此处边界为range(l + 1, r)没有值
             if left + 1 >= right:
                 return 0

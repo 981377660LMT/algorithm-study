@@ -5,15 +5,19 @@ class Solution:
     def distributeCookies(self, cookies: List[int], k: int) -> int:
         """求单个孩子在分发过程中能够获得饼干的最大总数的最小值"""
         n = len(cookies)
+
+        # 1. 预处理
         subsum = [0] * (1 << n)
         for i in range(n):
             for preState in range(1 << i):
                 subsum[preState | (1 << i)] = subsum[preState] + cookies[i]
 
+        # 2. 初始化
         dp = [int(1e20)] * (1 << n)
         for state in range(1 << n):
             dp[state] = subsum[state]
 
+        # 3. 转移
         for i in range(1, k):
             ndp = [int(1e20)] * (1 << n)
             for state in range(1 << n):

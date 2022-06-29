@@ -10,8 +10,8 @@ from string import ascii_lowercase, ascii_uppercase, ascii_letters, digits
 from operator import xor, or_, and_, not_
 
 MOD = int(1e9 + 7)
-INF = 0x3F3F3F3F
-EPS = int(1e-8)
+INF = int(1e20)
+EPS = 1e-8
 dirs4 = [[-1, 0], [0, 1], [1, 0], [0, -1]]
 dirs8 = [[-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1]]
 

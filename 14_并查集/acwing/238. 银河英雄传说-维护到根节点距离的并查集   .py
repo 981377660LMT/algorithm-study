@@ -36,8 +36,6 @@ class UnionFindArray:
 # 并查集+懒更新
 # N≤30000,T≤500000
 
-# python 会 TLE 思路正确
-
 
 def main():
     uf = UnionFindArray(30000 + 10)

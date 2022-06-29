@@ -20,6 +20,24 @@ def LIS(nums: List[int], isStrict=True) -> int:
     return len(res)
 
 
+def caldp(nums: List[int], isStrict=True) -> List[int]:
+    """求每个位置处的LIS长度(包括自身)"""
+    if not nums:
+        return []
+    res = [1] * len(nums)
+    LIS = [nums[0]]
+    for i in range(1, len(nums)):
+        if nums[i] > LIS[-1]:
+            LIS.append(nums[i])
+            res[i] = len(LIS)
+        else:
+            pos = bisect_left(LIS, nums[i]) if isStrict else bisect_right(LIS, nums[i])
+            LIS[pos] = nums[i]
+            res[i] = pos + 1
+    return res
+
+
 if __name__ == '__main__':
     assert LIS([10, 9, 2, 5, 3, 7, 101, 18]) == 4
+    print(caldp([10, 9, 2, 5, 3, 7, 101, 18]))
 
