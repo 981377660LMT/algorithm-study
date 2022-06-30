@@ -2,6 +2,7 @@
 # 1≤L≤R≤1e12
 # R−L≤500000
 # !在范围里筛素数 闭区间内的质数个数
+# 区间内的质数个数
 
 from math import ceil, sqrt
 
@@ -18,4 +19,3 @@ for fac in range(2, last + 1):
         isPrime[start] = False
         start += fac
 print(sum(isPrime))
-
