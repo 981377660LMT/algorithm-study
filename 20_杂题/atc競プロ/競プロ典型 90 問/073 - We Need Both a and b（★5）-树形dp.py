@@ -2,6 +2,7 @@
 # 使得剩下每个联通分量都有'a'和'b'两个值
 # 求删边的方案数 (不删边视作删去0条边)
 
+# 树形dp
 import sys
 from typing import Tuple
 

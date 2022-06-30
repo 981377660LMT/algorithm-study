@@ -9,6 +9,7 @@ class Solution:
     def countPairs(self, n: int, edges: List[List[int]]) -> int:
         """不连通的点对数=点对数-联通的点对数"""
         uf = UnionFindArray(n)
+
         for u, v in edges:
             uf.union(u, v)
         groups = uf.getGroups()

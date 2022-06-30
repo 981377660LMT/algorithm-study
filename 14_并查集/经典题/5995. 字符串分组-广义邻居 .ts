@@ -20,6 +20,12 @@ function groupStrings(words: string[]): number[] {
     states.push(state)
   }
 
+
+
+
+  
+
+  
   const uf = useUnionFindMap<number>(states)
   const statesSet = new Set<number>(states)
 
@@ -41,6 +47,7 @@ function groupStrings(words: string[]): number[] {
     const root = uf.find(state)
     groupCounter.set(root, (groupCounter.get(root) ?? 0) + 1)
   }
+
   return [uf.getCount(), Math.max(...groupCounter.values())]
 }
 

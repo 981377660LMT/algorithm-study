@@ -8,6 +8,9 @@
 // 并查集的典型应用是有关连通分量的问题，
 // 并查集解决单个问题（添加，合并，查找）的时间复杂度都是O(h)(因为都是用的map的set和get方法)。
 
+
+
+
 interface IUnionFind {
   union: (key1: number, key2: number) => boolean
   find: (key: number) => number
