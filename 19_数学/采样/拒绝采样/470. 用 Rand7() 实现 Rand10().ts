@@ -1,10 +1,12 @@
+declare function rand7(): number
+
 /**
  * The rand7() API is already defined for you.
  * var rand7 = function() {}
  * @return {number} a random integer in the range 1 to 7
  */
 const rand10 = function (): number {
-  const rand01 = () => {
+  const rand1 = () => {
     let tmp = 4
     while (tmp === 4) {
       tmp = rand7()
@@ -15,11 +17,9 @@ const rand10 = function (): number {
 
   let tmp = Infinity
   while (tmp > 9) {
-    tmp = (rand01() << 3) + (rand01() << 2) + (rand01() << 1) + rand01()
+    tmp = (rand1() << 3) + (rand1() << 2) + (rand1() << 1) + rand1()
   }
   return tmp + 1
 }
 
-function rand7(): number {
-  throw new Error('Function not implemented.')
-}
+export {}

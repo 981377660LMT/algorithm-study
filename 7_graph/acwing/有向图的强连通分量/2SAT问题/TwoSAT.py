@@ -10,7 +10,7 @@ from typing import List
 class TwoSAT:
     def __init__(self, n: int):
         """n个条件,每个条件的形式都是 "xi 为 true/false 或 xj 为 true/false 至少有一项成立"
-        
+
         2-SAT 问题的目标是给每个变量赋值，使得所有条件成立
         """
         self._n = n
@@ -101,7 +101,7 @@ class TwoSAT:
         return res
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     n, m = map(int, input().split())
     twoSAT = TwoSAT(n)
     for _ in range(m):
@@ -111,10 +111,9 @@ if __name__ == '__main__':
     twoSAT.buildGraph()
 
     if not twoSAT.check():
-        print('IMPOSSIBLE')
+        print("IMPOSSIBLE")
         exit(0)
 
-    print('POSSIBLE')
+    print("POSSIBLE")
     res = twoSAT.work()
     print(*[int(b) for b in res])
-

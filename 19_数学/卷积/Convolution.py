@@ -2,11 +2,11 @@ MOD = 998244353
 
 
 class Convolution:
-    '''fft求卷积
+    """fft求卷积
     https://atcoder.jp/contests/typical90/submissions/24203987
 
     时间复杂度 nlogn
-    '''
+    """
 
     def __init__(self, mod: int):
         # self.mod = mod
@@ -35,7 +35,7 @@ class Convolution:
         while x % 2 == 0:
             x //= 2
         for i in range(3, x + 1, 2):
-            if i ** 2 > x:
+            if i**2 > x:
                 break
             if x % i == 0:
                 divs[cnt] = i
@@ -56,7 +56,7 @@ class Convolution:
                 return g
             g += 1
 
-        print('error')
+        print("error")
         return 0
 
     def butterfly(self, a: list):
@@ -169,7 +169,7 @@ class Convolution:
         return a
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # https://atcoder.jp/contests/typical90/submissions/26046157
     R, G, B, K = map(int, input().split())
     X, Y, Z = map(int, input().split())
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     factorial = [1, 1]
     inverse = [1, 1]
     invere_base = [0, 1]
-    for i in range(2, 2 * 10 ** 5 + 1):
+    for i in range(2, 2 * 10**5 + 1):
         factorial.append((factorial[-1] * i) % MOD)
         invere_base.append((-invere_base[MOD % i] * (MOD // i)) % MOD)  # 逆元
         inverse.append((inverse[-1] * invere_base[-1]) % MOD)  # 階乗逆元
@@ -202,4 +202,3 @@ if __name__ == '__main__':
         res += rgc[i] * bc[K - i] % MOD
         res %= MOD
     print(res)
-

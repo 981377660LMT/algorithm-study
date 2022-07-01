@@ -1,3 +1,4 @@
+from itertools import product
 from typing import List
 
 # https://leetcode-cn.com/problems/brace-expansion-ii/solution/python3-18xing-die-dai-fa-by-yuan-zhi-b/
@@ -11,24 +12,43 @@ class Solution:
             print(res, cur, stack)
             # 看到字母就“乘入”第二个list，例如[a]*b变成“ab”，[a,c]*b就变成['ab','cb']
             if char.isalpha():
-                cur = [pre + char for pre in cur or ['']]
+                cur = [pre + char for pre in cur or [""]]
             # 看到“{”就把两个list推入stack暂存
-            elif char == '{':
+            elif char == "{":
                 stack.append(res)
                 stack.append(cur)
                 res, cur = [], []
             # 看到“}”就把两个list从stack pop出来并把当前结果“乘入”第二个list。
-            elif char == '}':
+            elif char == "}":
                 pre = stack.pop()
                 preRes = stack.pop()
-                cur = [preChar + curChar for curChar in res + cur for preChar in pre or ['']]
+                cur = [
+                    preChar + curChar
+                    for curChar in res + cur
+                    for preChar in pre or [""]
+                ]
                 res = preRes
             # 第二个list已经不可能再继续增长了，把第二个list并入第一个list并清空
-            elif char == ',':
+            elif char == ",":
                 res += cur
                 cur = []
 
         return sorted(set(res + cur))
+
+    def braceExpansionII2(self, expression: str) -> List[str]:  # type: ignore
+        """利用集合的性质重载运算符 逗号相当于加法，相接与相邻相当于乘法
+
+        https://leetcode.cn/problems/brace-expansion-ii/comments/176502
+        """
+
+        class S(set):
+            def __add__(self, other: "S"):
+                return S(self | other)
+
+            def __mul__(self, other: "S"):
+                return S(a + b for a, b in product(self, other))
+
+        ...
 
 
 # print(Solution().braceExpansionII(expression="{a,b}{c,{d,e}}"))

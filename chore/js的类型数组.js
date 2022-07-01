@@ -35,3 +35,5 @@ console.log(0.1 + 0.2) // 0.30000000000000004 python里解决方法为Fraction
 // >>> # Do this instead:
 // >>> math.isclose(0.1 + 0.2, 0.3)
 // True
+
+// !typed array与动态数组的性能比较

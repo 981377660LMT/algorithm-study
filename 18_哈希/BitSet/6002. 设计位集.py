@@ -28,10 +28,10 @@ class Bitset:
         return self.size != 0
 
     def count(self) -> int:
-        return self.size
+        # return self.size
         return self.bit.bit_count()
 
     def toString(self) -> str:
         cur = bin(self.bit)[2:]
+        # padStart
         return cur.zfill(self.capacity)
-

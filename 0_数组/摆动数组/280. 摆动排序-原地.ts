@@ -1,6 +1,6 @@
 /**
  Do not return anything, modify nums in-place instead.
- 给你一个无序的数组 nums, 将该数字 原地 重排后使得 nums[0] <= nums[1] >= nums[2] <= nums[3]...。
+ 给你一个无序的数组 nums, 将该数字 `原地` 重排后使得 nums[0] <= nums[1] >= nums[2] <= nums[3]...。
 
  @summary
  因为是从左往右，左边的肯定都是经过计算和交换的。

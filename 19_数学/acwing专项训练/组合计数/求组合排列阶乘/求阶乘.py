@@ -21,7 +21,15 @@ def ifac(n: int) -> int:
     return pow(fac(n), MOD - 2, MOD)
 
 
-if __name__ == '__main__':
+##########################################
+# 阶乘打表
+F = [1, 1, 2]
+while len(F) < int(1e6):
+    F.append(F[-1] * len(F) % MOD)
+
+
+if __name__ == "__main__":
     print(fac(10))
     # 不要用这个 无法取模容易超时
     print(factorial(10))
+    print(F[20], F[10])
