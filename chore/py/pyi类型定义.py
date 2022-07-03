@@ -11,6 +11,7 @@ from typing import (
     Final,
     NewType,
     NoReturn,
+    Optional,
     ParamSpec,
     Protocol,
     Type,
@@ -18,7 +19,10 @@ from typing import (
     cast,
     final,
     runtime_checkable,
+    TypedDict,
 )
+
+# from typing_extensions import LiteralString
 
 
 # !1.类变量(static)和实例变量定义 用ClassVar来区分
@@ -101,7 +105,22 @@ class SubClass(FinalClass):
         self.abc = 2  # cannot be redeclared because parent class "FinalClass" declares it as Final
 
 
-# !新版:Unpack解构元素类型 todo
+# !8. 类型断言cast函数(类似id函数)
+a: str | int = 1
+a = cast(str, a)
+print(a.capitalize())
+
+
+# !9. 限制字典的key类型 使用 TypedDict
+class SDict(TypedDict):
+    a: int
+    b: str
+    c: Optional[str]
+
+
+sd: SDict = {"a": 1, "c": "3", "b": "2"}
+
+# !新版特性在extension_typings里:Unpack解构元素类型 todo/Self/Never/LiteralString
 
 print(sys.version_info >= (3, 11))
 print(sys.version_info)  # 命名元组

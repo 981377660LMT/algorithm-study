@@ -12,11 +12,13 @@ class ListNode:
 
 # 总结:考虑分界(前面在，后面不在)，分界处加1
 class Solution:
-    def numComponents(self, head: Optional['ListNode'], nums: List[int]) -> int:
+    def numComponents(self, head: Optional["ListNode"], nums: List[int]) -> int:
         numSet = set(nums)
         res = 0
         while head:
-            if head.val in numSet and (head.next == None or head.next.val not in numSet):
+            if head.val in numSet and (
+                head.next is None or head.next.val not in numSet
+            ):
                 res += 1
             head = head.next
 

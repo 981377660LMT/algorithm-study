@@ -10,14 +10,14 @@ from typing import Optional
 
 class Node:
     # __slots__允许我们声明并限定类成员，并拒绝类创建__dict__和__weakref__属性以节约内存空间。
-    __slots__ = ('isTracked', 'lazy', 'left', 'right')
+    __slots__ = ("isTracked", "lazy", "left", "right")
 
     def __init__(
         self,
         isTracked=False,  # 表示当前区间所有元素是否被追踪
         lazy=False,
-        left: Optional['Node'] = None,
-        right: Optional['Node'] = None,
+        left: Optional["Node"] = None,
+        right: Optional["Node"] = None,
     ) -> None:
         self.isTracked = isTracked
         self.lazy = lazy
@@ -91,10 +91,9 @@ class RangeModule:
         self.tree.update(left, right - 1, True)
 
     def queryRange(self, left: int, right: int) -> bool:
-        """ 只有在当前正在跟踪区间 [left, right) 中的每一个实数时，才返回 true"""
+        """只有在当前正在跟踪区间 [left, right) 中的每一个实数时，才返回 true"""
         return self.tree.query(left, right - 1)
 
     def removeRange(self, left: int, right: int) -> None:
-        """ 停止跟踪 半开区间 [left, right)"""
+        """停止跟踪 半开区间 [left, right)"""
         self.tree.update(left, right - 1, False)
-

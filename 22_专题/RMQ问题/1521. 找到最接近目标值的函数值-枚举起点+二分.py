@@ -3,7 +3,7 @@ from operator import and_
 from math import ceil, floor, log2
 from typing import Any, Generic, List, TypeVar
 
-T = TypeVar('T', int, float)
+T = TypeVar("T", int, float)
 
 
 class SparseTable(Generic[T]):
@@ -17,7 +17,9 @@ class SparseTable(Generic[T]):
             for i in range(n):
                 if i + (1 << (j - 1)) >= n:
                     break
-                self._dp[i][j] = and_(self._dp[i][j - 1], self._dp[i + (1 << (j - 1))][j - 1])
+                self._dp[i][j] = and_(
+                    self._dp[i][j - 1], self._dp[i + (1 << (j - 1))][j - 1]
+                )
 
     def query(self, left: int, right: int) -> T:
         """[left,right]区间的最按位与"""

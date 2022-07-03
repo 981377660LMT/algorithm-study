@@ -2,9 +2,11 @@ from typing import Callable, List
 
 
 class Node:
-    __slots__ = ('value', 'left', 'right', 'isLazy')
+    __slots__ = ("value", "left", "right", "isLazy")
 
-    def __init__(self, value: int, left: int = -1, right: int = -1, isLazy: bool = False):
+    def __init__(
+        self, value: int, left: int = -1, right: int = -1, isLazy: bool = False
+    ):
         self.value = value
         self.left = left
         self.right = right
@@ -17,7 +19,7 @@ Merge = Callable[[int, int], int]
 class SegmentTree:
     """注意根节点从1开始,tree本身为[1,n]"""
 
-    __slots__ = '_tree'
+    __slots__ = "_tree"
 
     def __init__(self, n: int):
         self._tree = [Node(0) for _ in range(n << 2)]
@@ -76,11 +78,19 @@ class SegmentTree:
 
     def _push_up(self, rt: int) -> None:
         # 用子节点更新父节点状态
-        root, left, right = self._tree[rt], self._tree[(rt << 1)], self._tree[(rt << 1) | 1]
+        root, left, right = (
+            self._tree[rt],
+            self._tree[(rt << 1)],
+            self._tree[(rt << 1) | 1],
+        )
         root.value = left.value + right.value
 
     def _push_down(self, rt: int) -> None:
-        root, left, right = self._tree[rt], self._tree[(rt << 1)], self._tree[(rt << 1) | 1]
+        root, left, right = (
+            self._tree[rt],
+            self._tree[(rt << 1)],
+            self._tree[(rt << 1) | 1],
+        )
         if root.isLazy:
             # 先向下传递更新
             left.isLazy = True

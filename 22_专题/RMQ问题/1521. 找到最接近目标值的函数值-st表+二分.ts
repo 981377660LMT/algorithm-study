@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { SparseTable } from './st表模板'
+import { SparseTable } from './SparseTable'
 
 function closestToTarget(arr: number[], target: number): number {
   const n = arr.length

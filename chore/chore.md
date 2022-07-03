@@ -380,3 +380,6 @@ const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()
 **js 的动态数组和对象占用内存差不多 无法用动态数组优化对象的 MLE**
 
 `2^53-1 约等于 9e15`
+
+- atcoder 上的 python 解释器
+  cpython / pypy

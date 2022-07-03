@@ -1,3 +1,8 @@
+"""
+有的题目下标从1开始计算方便一些 
+此时在树状数组 add/query 入口处加上偏移量1即可
+"""
+
 from collections import defaultdict
 
 
@@ -17,7 +22,8 @@ class BIT1:
 
     def add(self, index: int, delta: int) -> None:
         if index <= 0:
-            raise ValueError('index 必须是正整数')
+            raise ValueError("index 必须是正整数")
+        index += 1
         while index <= self.size:
             self.tree[index] += delta
             index += self._lowbit(index)
@@ -25,6 +31,7 @@ class BIT1:
     def query(self, index: int) -> int:
         if index > self.size:
             index = self.size
+        index += 1
         res = 0
         while index > 0:
             res += self.tree[index]
@@ -61,7 +68,7 @@ class BIT2:
 
     def _add(self, index: int, delta: int) -> None:
         if index <= 0:
-            raise ValueError('index 必须是正整数')
+            raise ValueError("index 必须是正整数")
 
         rawIndex = index
         while index <= self.size:
@@ -107,7 +114,7 @@ class BIT3:
     def update(self, index: int, target: int) -> None:
         """将后缀区间`[index,size]`的最大值更新为target"""
         if index <= 0:
-            raise ValueError('index 必须是正整数')
+            raise ValueError("index 必须是正整数")
         while index <= self.size:
             self.tree[index] = max(self.tree[index], target)
             index += self._lowbit(index)
@@ -195,7 +202,9 @@ class BIT5:
     def _lowbit(index: int) -> int:
         return index & -index
 
-    def updateRange(self, row1: int, col1: int, row2: int, col2: int, delta: int) -> None:
+    def updateRange(
+        self, row1: int, col1: int, row2: int, col2: int, delta: int
+    ) -> None:
         """左上角 (row1,col1) 到右下角 (row2,col2) 的所有数加上delta"""
         self._update(row1, col1, delta)
         self._update(row2 + 1, col1, -delta)
@@ -251,7 +260,7 @@ class BIT5:
         return res
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     bit1 = BIT1(100)
     bit1.add(0 + 1, 2)
     assert bit1.query(1) == 2

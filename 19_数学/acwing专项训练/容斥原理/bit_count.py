@@ -4,12 +4,11 @@
 import sys
 
 
-PY_VERSION = (sys.version_info.major, sys.version_info.minor)
 LONG_LONG_UPPER = 1 << 63 - 1
 
 
 def bit_count(n: int) -> int:
-    if PY_VERSION >= (3, 10):
+    if sys.version_info >= (3, 10):
         return n.bit_count()  # 非常快
     if n <= LONG_LONG_UPPER:
         return long_long_bit_count(n)  # 快
@@ -17,7 +16,7 @@ def bit_count(n: int) -> int:
 
 
 def long_long_bit_count(n: int) -> int:
-    """334 ms"""
+    """64位数字的bit_count  334 ms"""
     c = (n & 0x5555555555555555) + ((n >> 1) & 0x5555555555555555)
     c = (c & 0x3333333333333333) + ((c >> 2) & 0x3333333333333333)
     c = (c & 0x0F0F0F0F0F0F0F0F) + ((c >> 4) & 0x0F0F0F0F0F0F0F0F)
@@ -38,11 +37,10 @@ def int_bit_count(n: int) -> int:
 
 def bin_str_bit_count(n: int) -> int:
     """1461 ms"""
-    return bin(n).count('1')
+    return bin(n).count("1")
 
 
 num = (1 << 63) - 4
 print(long_long_bit_count(num))
 print(int_bit_count(num))
 print(bin_str_bit_count(num))
-

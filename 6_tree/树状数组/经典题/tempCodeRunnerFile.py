@@ -1,3 +1,2 @@
-
-    assert bit5.query(0, 0, 1, 1) == 4
-    assert bit5.query(0, 0, 3, 3) == 16
+if index <= 0:
+            raise ValueError("index 必须是正整数")

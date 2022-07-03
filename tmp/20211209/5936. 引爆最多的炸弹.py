@@ -1,30 +1,33 @@
 from itertools import combinations, product
 from math import dist
-from typing import List
+from typing import Hashable, List, Set, TypeVar
 from collections import deque, defaultdict
 
 # 给你数组 bombs ，请你返回在引爆 一个 炸弹的前提下，最多 能引爆的炸弹数目。
-
 # 有向图
-
 # 1 <= bombs.length <= 100
+
+
+T = TypeVar("T", bound=Hashable)
 
 
 class Solution:
     def maximumDetonation(self, bombs: List[List[int]]) -> int:
-        def bfs(cur: int):
-            res = 0
-            queue = deque([cur])
-            visited = set([cur])
+        def bfs(start: T, adjMap: defaultdict[T, Set[T]]) -> int:
+            """引爆所有的炸弹"""
+            count = 0
+            queue = deque([start])
+            visited = set([start])
 
             while queue:
-                cur = queue.popleft()
-                res += 1
-                for next in adjMap[cur]:
+                start = queue.popleft()
+                count += 1
+                for next in adjMap[start]:
                     if next not in visited:
                         visited.add(next)
                         queue.append(next)
-            return res
+
+            return count
 
         n = len(bombs)
         adjMap = defaultdict(set)
@@ -37,7 +40,7 @@ class Solution:
                 if (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) <= r1 * r1:
                     adjMap[i].add(j)
 
-        return max((bfs(i) for i in range(n)), default=1)
+        return max((bfs(i, adjMap) for i in range(n)), default=1)
 
     def maximumDetonation2(self, bombs: List[List[int]]) -> int:
         n = len(bombs)

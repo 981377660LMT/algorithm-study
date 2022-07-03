@@ -1,8 +1,8 @@
 from array import array
-import sys
 
-L_TYPE = ord('L')
-S_TYPE = ord('S')
+
+L_TYPE = ord("L")
+S_TYPE = ord("S")
 
 
 def is_lms(i, t):
@@ -12,7 +12,7 @@ def is_lms(i, t):
 
 def print_types(data: bytearray):
     """Simple method to the types of the characters of T"""
-    print(data.decode('ascii'))
+    print(data.decode("ascii"))
     print("".join("^" if is_lms(i, data) else " " for i in range(len(data))))
 
 
@@ -44,7 +44,7 @@ def find_lms_suffixes(t, n):
         t: the type array
         n: the length of text and t
     """
-    pos = array('l')
+    pos = array("l")
     for i in range(n):
         if t[i] == S_TYPE and t[i - 1] == L_TYPE:
             pos.append(i)
@@ -53,19 +53,19 @@ def find_lms_suffixes(t, n):
 
 def print_buckets(bucks):
     """Simple method to print bucket sizes"""
-    res = '[ '
+    res = "[ "
     for b in bucks:
         if b != 0:
             res += str(b)
-            res += ' '
-    res += ']'
+            res += " "
+    res += "]"
     print(res)
 
 
 def buckets(text, sigma):
     """Find the alphabet and the sizes of the bucket for each character in the text"""
     alpha = []
-    bucket_sizes = array('L', [0] * sigma)
+    bucket_sizes = array("L", [0] * sigma)
     for c in text:
         bucket_sizes[c] += 1
     for i in range(sigma):
@@ -78,8 +78,8 @@ def buckets(text, sigma):
 
 def bucket_intervals(alpha, bucket_sizes, sigma):
     """Computes the bucket intervals, i.e heads and tails"""
-    heads = array('l', [0] * sigma)
-    tails = array('l', [0] * sigma)
+    heads = array("l", [0] * sigma)
+    tails = array("l", [0] * sigma)
     j = 0
     for i in range(len(alpha)):
         heads[alpha[i]] = j
@@ -91,7 +91,9 @@ def bucket_intervals(alpha, bucket_sizes, sigma):
     return heads, tails
 
 
-def induced_sorting(lms, tails, heads, SA, type_suffix, text, n, m, alpha, bucket_sizes, sigma):
+def induced_sorting(
+    lms, tails, heads, SA, type_suffix, text, n, m, alpha, bucket_sizes, sigma
+):
     """Inductively creates the suffix array based on LMS
     Args:
         lms: an array indicating the positions of LMS Blocks/Suffixes in text
@@ -103,7 +105,7 @@ def induced_sorting(lms, tails, heads, SA, type_suffix, text, n, m, alpha, bucke
         n: the length of the input 'text'
         alpha: an array of the alphabet of T in sorted order
         bucket_sizes: an array containing the sizes of each bucket: Used in resetting heads, tails
-        """
+    """
     for i in range(m - 1, -1, -1):  # place LMS suffixes at the end of their buckets
         nfs = tails[text[lms[i]]]
         SA[nfs] = lms[i]
@@ -118,7 +120,9 @@ def induced_sorting(lms, tails, heads, SA, type_suffix, text, n, m, alpha, bucke
     # reset bucket counters
     heads, tails = bucket_intervals(alpha, bucket_sizes, sigma)
 
-    for i in range(n - 1, -1, -1):  # place the S-type suffixes at the ends of their buckets
+    for i in range(
+        n - 1, -1, -1
+    ):  # place the S-type suffixes at the ends of their buckets
         if SA[i] > 0 and type_suffix[SA[i] - 1] == S_TYPE:
             nfs = tails[text[SA[i] - 1]]
             SA[nfs] = SA[i] - 1
@@ -148,7 +152,7 @@ def get_reduced_substring(types, SA, lms, ordered_lms, text, n, m):
             j += 1
 
     # number the lms blocks and form the reduced substring
-    pIS = array('l', [0] * m)
+    pIS = array("l", [0] * m)
     k, i = 1, 1
     pIS[0] = 0
     for i in range(1, m):
@@ -162,7 +166,7 @@ def get_reduced_substring(types, SA, lms, ordered_lms, text, n, m):
 
     # form the reduced substring
 
-    inverse_lms = array('l', [0] * n)
+    inverse_lms = array("l", [0] * n)
     for i in range(m):
         inverse_lms[ordered_lms[i]] = pIS[i]
     for i in range(m):
@@ -178,7 +182,7 @@ def construct_suffix_array(T, SA, n, sigma):
         SA: the array to be filled
         n: the length of T and SA
         sigma: the size of the alphabet of T, i.e the largest value in T
-        """
+    """
     if len(T) == 1:  # special case
         SA[0] = 0
         return SA
@@ -191,14 +195,16 @@ def construct_suffix_array(T, SA, n, sigma):
 
     alpha, sizes = buckets(T, sigma)  # finding the bucket sizes and alphabet of T
     heads, tails = bucket_intervals(alpha, sizes, sigma)
-    induced_sorting(lms, tails, heads, SA, t, T, n, m, alpha, sizes, sigma)  # first induced sort
+    induced_sorting(
+        lms, tails, heads, SA, t, T, n, m, alpha, sizes, sigma
+    )  # first induced sort
 
-    ordered_lms = array('L', [0] * len(lms))
+    ordered_lms = array("L", [0] * len(lms))
 
     reduced_text, blocks_unique, sigma_reduced = get_reduced_substring(
         t, SA, lms, ordered_lms, T, n, m
     )
-    reduced_SA = array('l', [-1] * m)  # reduced SA
+    reduced_SA = array("l", [-1] * m)  # reduced SA
     if blocks_unique:  # base case
         # compute suffix array manually
         for i in range(m):
@@ -240,31 +246,31 @@ def fm_index(SA, ISA, LF, n):
 def naive_suffix_array(s, n):
     """Naive suffix array implementation, just as a sanity check"""
     sa_tuple = sorted([(s[i:], i) for i in range(n)])
-    return array('l', map(lambda x: x[1], sa_tuple))
+    return array("l", map(lambda x: x[1], sa_tuple))
 
 
-'''
+"""
 text: str:要处理的字符串
 return: sa 
-'''
+"""
 
 
 def SAIS_sa(text):
-    text += '$'
+    text += "$"
     text = [ord(c) for c in text]
     sigma = max(text) + 1
     n = len(text)
-    SA = array('l', [-1] * n)
+    SA = array("l", [-1] * n)
     construct_suffix_array(text, SA, n, sigma)
     bt = bytearray(n)
     bwt(text, SA, bt, n)
     return SA.tolist()[1:]
 
 
-'''
+"""
 text: str:要处理的字符串
 return: sa,rk,h
-'''
+"""
 
 
 def SAIS_sa_rk_h(text):
@@ -288,13 +294,12 @@ def SAIS_sa_rk_h(text):
     return sa, rk, h
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # len(string)<=1e6
     # input = sys.stdin.readline
     string = input()
     sa, rk, h = SAIS_sa_rk_h(string)
 
-    print(' '.join([str(num + 1) for num in sa]))
-    print(' '.join(map(str, h)))
-
+    print(" ".join([str(num + 1) for num in sa]))
+    print(" ".join(map(str, h)))

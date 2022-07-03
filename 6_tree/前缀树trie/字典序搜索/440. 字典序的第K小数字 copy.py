@@ -1,8 +1,8 @@
 class Solution:
     def findKthNumber(self, n: int, k: int) -> int:
-        """求字典序第k小的数字，前序遍历"""
+        """求字典序第k小的数字,前序遍历"""
 
-        def cal_steps(cur: int, target: int) -> int:
+        def calStep(cur: int, target: int) -> int:
             """cur到target的距离，检查子树数量即可"""
             step = 0
             while cur <= n:
@@ -16,7 +16,7 @@ class Solution:
 
         while k:
             # 向右走需要的步数
-            steps = cal_steps(cur, cur + 1)
+            steps = calStep(cur, cur + 1)
             # 向右走
             if steps <= k:
                 k -= steps
@@ -30,4 +30,3 @@ class Solution:
 
 
 print(Solution().findKthNumber(11, 2))
-

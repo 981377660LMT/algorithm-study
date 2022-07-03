@@ -1,9 +1,10 @@
+"""https://www.desgard.com/algo/docs/part2/ch03/1-range-max-query/"""
+
+
 from math import ceil, floor, log2
 from typing import Any, Generic, List, TypeVar
 
-T = TypeVar('T', int, float)
-
-# https://www.desgard.com/algo/docs/part2/ch03/1-range-max-query/
+T = TypeVar("T", int, float)
 
 
 class SparseTable(Generic[T]):
@@ -19,8 +20,12 @@ class SparseTable(Generic[T]):
             for i in range(n):
                 if i + (1 << (j - 1)) >= n:
                     break
-                self._dp1[i][j] = max(self._dp1[i][j - 1], self._dp1[i + (1 << (j - 1))][j - 1])
-                self._dp2[i][j] = min(self._dp2[i][j - 1], self._dp2[i + (1 << (j - 1))][j - 1])
+                self._dp1[i][j] = max(
+                    self._dp1[i][j - 1], self._dp1[i + (1 << (j - 1))][j - 1]
+                )
+                self._dp2[i][j] = min(
+                    self._dp2[i][j - 1], self._dp2[i + (1 << (j - 1))][j - 1]
+                )
 
     def query(self, left: int, right: int, *, ismax=True) -> T:
         """[left,right]区间的最大值"""
@@ -32,12 +37,12 @@ class SparseTable(Generic[T]):
             return min(self._dp2[left][k], self._dp2[right - (1 << k) + 1][k])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     nums = list(range(100000))
     st = SparseTable(nums)
-    print(st.query(32, 636))
-    print(st.query(32, 65, ismax=False))
-    print(st.query(100000 - 1, 100000 - 1))
+    assert st.query(32, 636, ismax=True) == 636
+    assert st.query(32, 636, ismax=False) == 32
+
 # 通过了 O(1)的方式完成了指定区间任意范围的 RMQ。
 # 对于离线海量数据查询的需求完成了最高度的优化。
 # 但是由于 ST 算法需要一个 2 倍增的预处理，所以整体的复杂度在 O(nlogn)。

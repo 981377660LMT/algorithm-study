@@ -7,7 +7,7 @@ from typing import List
 # 1 <= s.length <= 1e5
 # 1 <= k <= 1e5
 class Node:
-    __slots__ = ('left', 'right', 'pre', 'suf', 'max')
+    __slots__ = ("left", "right", "pre", "suf", "max")
 
     def __init__(self, left=-1, right=-1) -> None:
         self.left = left
@@ -20,7 +20,8 @@ class Node:
 class SegmentTree:
     def __init__(self, s: str) -> None:
         n = len(s)
-        self.tree = [Node() for _ in range(n * 4)]
+        self.size = 1 << (n - 1).bit_length()
+        self.tree = [Node() for _ in range(self.size * 2)]
         self.chars = list(s)
         self.build(1, 1, n)
 
@@ -94,7 +95,9 @@ class SegmentTree:
 
 
 class Solution:
-    def longestRepeating(self, s: str, queryCharacters: str, queryIndices: List[int]) -> List[int]:
+    def longestRepeating(
+        self, s: str, queryCharacters: str, queryIndices: List[int]
+    ) -> List[int]:
         """
         第 i 个查询会将 s 中位于下标 queryIndices[i] 的字符更新为 queryCharacters[i] 。
         返回一个长度为 k 的数组 lengths ，其中 lengths[i] 是在执行第 i 个查询 之后 s 中仅由 单个字符重复 组成的 最长子字符串 的 长度 。
@@ -108,6 +111,9 @@ class Solution:
         return res
 
 
-print(Solution().longestRepeating(s="babacc", queryCharacters="bcb", queryIndices=[1, 3, 3]))
+print(
+    Solution().longestRepeating(
+        s="babacc", queryCharacters="bcb", queryIndices=[1, 3, 3]
+    )
+)
 # [3,3,4]
-

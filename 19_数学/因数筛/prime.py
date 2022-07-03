@@ -19,7 +19,7 @@ def genPrime(n: int) -> List[int]:
 
 
 @lru_cache(None)
-def getPrimeFactors(n: int) -> Counter:
+def getPrimeFactors(n: int) -> Counter[int]:
     """n 的质因数分解"""
     res = Counter()
     upper = floor(n**0.5) + 1

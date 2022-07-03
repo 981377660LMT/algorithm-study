@@ -19,15 +19,13 @@ class BIT:
         return index & -index
 
     def add(self, index: int, delta: int) -> None:
-        if index <= 0:
-            raise ValueError('index 必须是正整数')
+        index += 1
         while index <= self.size:
             self.tree[index] += delta
             index += self._lowbit(index)
 
     def query(self, index: int) -> int:
-        if index > self.size:
-            index = self.size
+        index += 1
         res = 0
         while index > 0:
             res += self.tree[index]
@@ -39,13 +37,14 @@ class BIT:
 
 
 class Solution:
-    def fullBloomFlowers(self, flowers: List[List[int]], persons: List[int]) -> List[int]:
+    def fullBloomFlowers(
+        self, flowers: List[List[int]], persons: List[int]
+    ) -> List[int]:
         res = [0] * len(persons)
         bit = BIT(int(1e9 + 10))
         for l, r in flowers:  # 差分修改
-            bit.add(l, 1)
-            bit.add(r + 1, -1)
+            bit.add(l - 1, 1)
+            bit.add(r, -1)
         for i, p in enumerate(persons):
-            res[i] = bit.query(p)
+            res[i] = bit.query(p - 1)
         return res
-
