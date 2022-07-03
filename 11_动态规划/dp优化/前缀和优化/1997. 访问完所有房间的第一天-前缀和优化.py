@@ -1,4 +1,3 @@
-from functools import lru_cache
 from typing import List
 
 # 如果算上本次访问，访问 i 号房间的次数为 奇数 ，那么 第二天 需要访问 nextVisit[i] 所指定的房间，
@@ -27,9 +26,9 @@ class Solution:
         return dp[-1]
 
     def firstDayBeenInAllRooms2(self, nextVisit: List[int]) -> int:
-        """ dp[i]=2+dp[j]+dp[j+1]+...+dp[i-1] 
-        
-        前缀和优化dp dp的时候顺路求出前缀和，然后求出dp[i]
+        """dp[i]=2+dp[j]+dp[j+1]+...+dp[i-1]
+
+        前缀和优化dp dp的时候顺路求出前缀和,然后求出dp[i]
         """
         n = len(nextVisit)
         dp = [0] * n  # dp[i] 表示从i-1直接走到i需要的天数

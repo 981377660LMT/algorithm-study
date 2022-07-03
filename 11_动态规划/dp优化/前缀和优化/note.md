@@ -10,3 +10,5 @@
 dp[i] = dpSum[i - 1] - dpSum[lefti - 1]
 dpSum[i] = dpSum[i - 1] + dp[i]
 ```
+
+## 前缀和 dp 的题目特点是某个点的增量/总贡献来源于之前的某段区间
