@@ -1,15 +1,33 @@
 # 2077. Paths in Maze That Lead to Same Room
 # https://leetcode-cn.com/problems/paths-in-maze-that-lead-to-same-room/
+# 无向图三元环的数量
+# n<=1000
+# !边数<=5e4
+# 如果不限定边数 应该用枚举两个点 然后bitSet求交集 O(n^3/64)
+
 from collections import defaultdict
-from itertools import combinations
 from typing import List
 
 
 class Solution:
-    def numberOfPaths(self, n: int, corridors: List[List[int]]) -> int:
-        """无向边定向减少枚举次数"""
+    def numberOfPaths(self, n: int, edges: List[List[int]]) -> int:
+        """枚举边+无向图定向 104ms O(E*n/64)"""
+        adjMap = defaultdict(int)
+        for u, v in edges:
+            if u < v:
+                adjMap[u] |= 1 << v
+            else:
+                adjMap[v] |= 1 << u
+
+        res = 0
+        for p1, p2 in edges:
+            res += (adjMap[p1] & adjMap[p2]).bit_count()
+        return res
+
+    def numberOfPaths2(self, n: int, edges: List[List[int]]) -> int:
+        """枚举点+无向边定向 O(E^3/2)"""
         adjMap = defaultdict(set)
-        for u, v in corridors:
+        for u, v in edges:
             if u < v:
                 adjMap[u].add(v)
             else:
@@ -23,23 +41,16 @@ class Solution:
                         res += 1
         return res
 
-    # 求无向图中长度为 3 的不同环的数量
-    # 由于环的长度为 3，因此每个相同的环会重复统计 3 次，答案需除 3。
-    def numberOfPaths2(self, n: int, corridors: List[List[int]]) -> int:
-        adj = defaultdict(set)
-        for u, v in corridors:
-            adj[u].add(v)
-            adj[v].add(u)
 
-        res = 0
-
-        # 对邻居两两判断
-        for p1 in range(1, n + 1):
-            for p2, p3 in combinations(adj[p1], 2):
-                if p2 in adj[p3]:
-                    res += 1
-
-        return res // 3
+print(
+    Solution().numberOfPaths(
+        n=5, edges=[[1, 2], [5, 2], [4, 1], [2, 4], [3, 1], [3, 4]]
+    )
+)
 
 
-print(Solution().numberOfPaths(n=5, corridors=[[1, 2], [5, 2], [4, 1], [2, 4], [3, 1], [3, 4]]))
+print(
+    Solution().numberOfPaths2(
+        n=5, edges=[[1, 2], [5, 2], [4, 1], [2, 4], [3, 1], [3, 4]]
+    )
+)

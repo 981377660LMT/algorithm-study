@@ -39,7 +39,7 @@ print(res)
 
 
 # # def C(n: int, k: int) -> int:
-# #     if n < k:
-# #         return 0
-# #     return (fac(n) * ifac(k) * ifac(n - k)) % MOD
-
+# def C(n: int, k: int) -> int:
+#     if k < 0 or k > n:
+#         return 0
+#     return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD

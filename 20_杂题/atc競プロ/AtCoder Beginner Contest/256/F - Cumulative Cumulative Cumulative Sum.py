@@ -16,9 +16,10 @@
 # 类似`巫师的力量和`
 
 
+from collections import defaultdict
 import os
 import sys
-from collections import defaultdict
+
 
 sys.setrecursionlimit(int(1e9))
 input = sys.stdin.readline
@@ -58,7 +59,7 @@ class BIT1:
 def main() -> None:
     n, q = map(int, input().split())
     nums = list(map(int, input().split()))
-    bit1, bit2, bit3 = BIT1(n + 10), BIT1(n + 10), BIT1(n + 10)
+    bit1, bit2, bit3 = BIT1(n + 5), BIT1(n + 5), BIT1(n + 5)
     for i in range(n):
         bit1.add(i, nums[i])
         bit2.add(i, nums[i] * i)
@@ -67,14 +68,14 @@ def main() -> None:
     for _ in range(q):
         qType, *args = map(int, input().split())
         if qType == 1:
-            index, target = args[0], args[1]
-            delta = nums[index] - target
-            bit1.add(index - 1, delta)
-            bit2.add(index - 1, delta * index)
-            bit3.add(index - 1, delta * index * index)
+            index, target = args[0] - 1, args[1]
+            delta = target - nums[index]
+            bit1.add(index, delta)
+            bit2.add(index, delta * index)
+            bit3.add(index, delta * index * index)
             nums[index] = target
         else:
-            index = args[0]
+            index = args[0] - 1
             res = bit1.query(index) * (index + 1) * (index + 2)
             res -= bit2.query(index) * (2 * index + 3)
             res += bit3.query(index)

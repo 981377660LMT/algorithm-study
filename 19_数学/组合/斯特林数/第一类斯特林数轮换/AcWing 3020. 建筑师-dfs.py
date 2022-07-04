@@ -25,16 +25,17 @@ def ifac(n: int) -> int:
     return pow(fac(n), MOD - 2, MOD)
 
 
+@lru_cache(None)
 def C(n: int, k: int) -> int:
-    if n < k:
+    if k < 0 or k > n:
         return 0
-    return (fac(n) * ifac(k) * ifac(n - k)) % MOD
+    return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
 
 
 @lru_cache(None)
 def cal1(i: int, j: int) -> int:
     """第一类斯特林数:i个人,j个圆排列
-    
+
     i,j<=1000
     - 将该新元素置于一个单独的轮换中 `cal(i - 1, j - 1)
     - 将该元素插入到任何一个现有的轮换中 `(i - 1) * cal(i - 1, j)``
@@ -57,4 +58,3 @@ T = int(input())
 for _ in range(T):
     n, A, B = map(int, input().split())
     print(main(n, A, B))
-

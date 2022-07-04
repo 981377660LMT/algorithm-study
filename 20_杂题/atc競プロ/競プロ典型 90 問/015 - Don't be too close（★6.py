@@ -23,9 +23,9 @@ def ifac(n: int) -> int:
 
 
 def C(n: int, k: int) -> int:
-    if n < k:
+    if k < 0 or k > n:
         return 0
-    return (fac(n) * ifac(k) * ifac(n - k)) % MOD
+    return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
 
 
 # 从n个物品选a个 有(a-1)*(k-1)个位置不能选
@@ -45,4 +45,3 @@ for k in range(1, n + 1):
         res %= MOD
         select += 1
     print(res)
-

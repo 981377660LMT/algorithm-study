@@ -6,12 +6,15 @@ from itertools import accumulate
 # 1685. 母题-有序数组中差绝对值之和 前i+1项 后 n-i项
 class Solution:
     def getDistances(self, arr: List[int]) -> List[int]:
+        """排序+前缀和"""
+
         def getSumAbsoluteDifferences(nums: List[int]) -> List[int]:
             """到各个点绝对值距离之和"""
             n = len(nums)
             preSum = [0] + list(accumulate(nums))
             return [
-                (num * (i + 1) - preSum[i + 1]) + (preSum[n] - preSum[i] - (n - i) * num)
+                (num * (i + 1) - preSum[i + 1])
+                + (preSum[n] - preSum[i] - (n - i) * num)
                 for i, num in enumerate(nums)
             ]
 

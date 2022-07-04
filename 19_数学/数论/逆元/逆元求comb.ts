@@ -9,7 +9,7 @@ for (let i = 2; i <= N; i++) {
 }
 
 function comb(n: number, k: number): number {
-  if (n < k) return 1
+  if (n < k || k < 0) return 0
   return Number((((fac[n] * ifac[k]) % MOD) * ifac[n - k]) % MOD)
 }
 

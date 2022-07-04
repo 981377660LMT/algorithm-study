@@ -40,7 +40,7 @@ def bin_str_bit_count(n: int) -> int:
     return bin(n).count("1")
 
 
-num = (1 << 63) - 4
+num = (1 << 64) - 1  # 最多64位
 print(long_long_bit_count(num))
 print(int_bit_count(num))
 print(bin_str_bit_count(num))

@@ -5,7 +5,26 @@
 # [an  ]     =  [1 1 1]   * [an-1]
 # [an-1]        [1 0 0]     [an-2]
 # [an-2]        [0 1 0]     [an-3]
-from matqpow import matqpow2
+import numpy as np
+
+
+NPArray = np.ndarray
+
+
+def matqpow2(base: NPArray, exp: int, mod: int) -> NPArray:
+    """矩阵快速幂np版"""
+
+    base = base.copy()
+    res = np.eye(*base.shape, dtype=np.uint64)
+
+    while exp:
+        if exp & 1:
+            res = (res @ base) % mod
+        exp >>= 1
+        base = (base @ base) % mod
+    return res
+
+
 import sys
 
 sys.setrecursionlimit(int(1e9))
@@ -18,8 +37,8 @@ if n <= 3:
     print(2 if n == 3 else 1)
     exit(0)
 
-T = [[1, 1, 1], [1, 0, 0], [0, 1, 0]]
+res = np.array([[2], [1], [1]], np.uint64)
+T = np.array([[1, 1, 1], [1, 0, 0], [0, 1, 0]], np.uint64)
 resT = matqpow2(T, n - 3, MOD)
-a3, a2, a1 = 2, 1, 1
-res = (resT[0][0] * a3 + resT[0][1] * a2 + resT[0][2] * a1) % MOD
-print(res)
+res = (resT @ res) % MOD
+print(int(res[0][0]))

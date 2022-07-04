@@ -7,7 +7,7 @@ from typing import List
 class Solution:
     def arrayChange(self, nums: List[int], operations: List[List[int]]) -> List[int]:
         """查找+修改 很自然的思想
-        
+
         注意查找的indexOf 复杂度需要O(1) 不能是O(n)
 
         无法处理重复元素
@@ -19,6 +19,7 @@ class Solution:
         # return nums
 
         # O(1)的查找
+        # !启示:不含重复元素的查找要用哈希表
         indexMap = {v: i for i, v in enumerate(nums)}
         for a, b in operations:
             index = indexMap[a]
@@ -28,8 +29,8 @@ class Solution:
         return nums
 
     def arrayChange2(self, nums: List[int], operations: List[List[int]]) -> List[int]:
-        """ !预处理opt的思想  用pre和next字典记录前驱后继 可以处理重复元素
-        
+        """!预处理opt的思想  用pre和next字典记录前驱后继 可以处理重复元素
+
         注意和并查集的区别
         并查集会不断找根,而next/pre只能连接着传递相邻关系
         """
@@ -54,4 +55,3 @@ print(
         nums=[1, 2, 4, 6, 1], operations=[[1, 100], [4, 7], [6, 1], [1, 0], [100, 2]]
     )
 )
-

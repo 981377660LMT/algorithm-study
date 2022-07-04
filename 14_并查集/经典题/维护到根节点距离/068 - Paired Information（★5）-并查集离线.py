@@ -18,7 +18,7 @@ MOD = int(1e9 + 7)
 
 class UnionFindArray:
     """元素是0-n-1的并查集写法,不支持动态添加
-    
+
     初始化的连通分量个数 为 n
     """
 
@@ -56,15 +56,15 @@ for _ in range(q):
     queries.append((t, i, j, v))
 
 # 预处理查询 クエリ先読み
-pairSum = [0] * (n - 1)  # s[i] = A[i] + A[i+1]
+pairSums = [0] * (n - 1)  # s[i] = A[i] + A[i+1]
 for t, i, j, v in queries:
     if t == 0:
-        pairSum[i] = v
+        pairSums[i] = v
 
 # 处理偏移距离(开头元素基准为0)
 offsets = [0] * n
 for i in range(n - 1):
-    offsets[i + 1] = pairSum[i] - offsets[i]
+    offsets[i + 1] = pairSums[i] - offsets[i]
 
 uf = UnionFindArray(n + 5)
 for t, i, j, v in queries:
@@ -72,7 +72,7 @@ for t, i, j, v in queries:
         uf.union(i, j)
     else:
         if not uf.isConnected(i, j):
-            print('Ambiguous')
+            print("Ambiguous")
         else:
             res = 0
             # !A[i]がx増えると，A[i+1]はx減り，A[i+2]はx増え...というように変化する

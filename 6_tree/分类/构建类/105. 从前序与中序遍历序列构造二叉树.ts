@@ -3,27 +3,36 @@
 import { BinaryTree } from '../Tree'
 
 /**
- * @param {number[]} preorder
+ * @param {number[]} preorder 1 <= preorder.length <= 3000
  * @param {number[]} inorder
  * @return {TreeNode}
- * @description 假设输入的遍历的序列中都不含重复的数字(找根要找对)
+ * @description !假设输入的遍历的序列中都不含重复的数字
  * @description 由前序遍历可知preorder数组中第一个数一定是root并弹出，
  * 根据root值在inorder所在位置可将inorder划分为左子树、右子树两部分。
  * 注意inorder 和 postorder一定是长度相等的
+ * @summary
+ * !优化1: 不用slice 数组 可以直接记录边界的index
+ * !优化2: 不用线性查找rootIndex 因为不含重复数字 可以借助哈希表
+ * 时间复杂度 O(n)
  */
-const buildTree = (preorder: number[], inorder: number[]): BinaryTree | null => {
-  // # 实际上inorder 和 postorder一定是长度相等的
-  if (!preorder.length || !inorder.length) return null
+function buildTree(preorder: number[], inorder: number[]): BinaryTree | null {
+  const n = preorder.length
+  const indexMap = new Map<number, number>()
+  inorder.forEach((value, index) => indexMap.set(value, index))
+  return dfs(0, n - 1, 0, n - 1)
 
-  // 先找根
-  const rootValue = preorder[0]
-  const root = new BinaryTree(rootValue)
-  const rootIndex = inorder.indexOf(rootValue)
-  // 去除根，然后包括进左子树的个数
-  root.left = buildTree(preorder.slice(1, rootIndex + 1), inorder.slice(0, rootIndex))
-  root.right = buildTree(preorder.slice(rootIndex + 1), inorder.slice(rootIndex + 1))
+  function dfs(pLeft: number, pRight: number, iLeft: number, iRight: number): BinaryTree | null {
+    if (pLeft > pRight || iLeft > iRight) return null
 
-  return root
+    const rootValue = preorder[pLeft]
+    const root = new BinaryTree(rootValue)
+    const rootIndex = indexMap.get(rootValue)!
+    const [leftLen, rightLen] = [rootIndex - iLeft, iRight - rootIndex]
+
+    root.left = dfs(pLeft + 1, pLeft + leftLen, iLeft, rootIndex - 1)
+    root.right = dfs(pRight - rightLen + 1, pRight, rootIndex + 1, iRight)
+    return root
+  }
 }
 
 console.log(buildTree([3, 9, 20, 15, 7], [9, 3, 15, 20, 7]))

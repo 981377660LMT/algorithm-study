@@ -33,8 +33,9 @@ def ifac(n: int) -> int:
     return pow(fac(n), MOD - 2, MOD)
 
 
+@lru_cache(None)
 def C(n: int, k: int) -> int:
-    if n < k:
+    if k < 0 or k > n:
         return 0
     return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
 

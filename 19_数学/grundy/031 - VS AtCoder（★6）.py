@@ -1,10 +1,13 @@
 # 有n堆石子 每堆里有蓝色和白色石头Bi和Wi个
+
 # 两人进行取石子博弈
 # 每轮有两种选择:
 # 1. 某一堆加w个蓝石头，移除1个白石头 (w>=1)
 # 2. 移除 1<=k<=b//2 个蓝石头  (b>=2)
 # 无法行动的人输
 
+# n<=1e5
+# w,b<=50
 
 # nim游戏
 # grundy数应用
@@ -48,6 +51,6 @@ for w, b in zip(white, black):
 
 
 if g:
-    print('First')
+    print("First")
 else:
-    print('Second')
+    print("Second")

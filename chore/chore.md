@@ -383,3 +383,17 @@ const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()
 
 - atcoder 上的 python 解释器
   cpython / pypy
+
+- 封装函数时，重要的参数放在前面，有的参数可以加默认值
+
+- 把 1<<63(9223372036854775808) 改小成 1<<63-1(9223372036854775807)
+  快了 700ms
+  **pypy3 碰到超过 2^63-1 的 int 就会变慢**
+
+- ts 类的成员方法书写顺序规则
+
+  1. public => protected => private
+  2. static => instance
+
+大致上是:
+`静态成员 => 示例成员 => 构造函数 => 静态方法 => 实例方法 => 属性访问符/魔法方法`

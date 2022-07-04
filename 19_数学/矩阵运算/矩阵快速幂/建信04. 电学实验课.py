@@ -5,7 +5,9 @@ MOD = int(1e9 + 7)
 
 
 class Solution:
-    def electricityExperiment(self, row: int, col: int, position: List[List[int]]) -> int:
+    def electricityExperiment(
+        self, row: int, col: int, position: List[List[int]]
+    ) -> int:
         # 1 <= row <= 20
         # 3 <= col <= 10^9
         # 1 < position.length <= 1000
@@ -26,4 +28,3 @@ class Solution:
 print(Solution().electricityExperiment(row=5, col=6, position=[[1, 3], [3, 2], [4, 1]]))
 print(Solution().electricityExperiment(row=3, col=4, position=[[0, 3], [2, 0]]))
 print(Solution().electricityExperiment(row=5, col=6, position=[[1, 3], [3, 5], [2, 0]]))
-

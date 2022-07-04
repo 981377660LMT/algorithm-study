@@ -1,20 +1,21 @@
 from typing import List
 from itertools import accumulate
 
-# 非递减 有序整数数组 nums
-# result[i] 等于 sum(|nums[i]-nums[j]|)
 
-
-# 前缀和，以当前数为分割点，左边的数都比当前数小，右边的数都比当前数大。
-# postsum[i] - presum[i] - nums[i] * (n - 2 * i - 1);
 class Solution:
     def getSumAbsoluteDifferences(self, nums: List[int]) -> List[int]:
+        """
+        求每个点到其他所有点的距离之和
+        排序+前缀和
+        """
         n = len(nums)
         preSum = [0] + list(accumulate(nums))
-        return [
-            (num * (i + 1) - preSum[i + 1]) + (preSum[n] - preSum[i] - (n - i) * num)
-            for i, num in enumerate(nums)
-        ]
+        res = []
+        for pos, num in enumerate(nums):
+            leftSum = num * pos - preSum[pos]
+            rightSum = preSum[-1] - preSum[pos] - num * (n - pos)
+            res.append(leftSum + rightSum)
+        return res
 
 
 print(Solution().getSumAbsoluteDifferences(nums=[2, 3, 5]))

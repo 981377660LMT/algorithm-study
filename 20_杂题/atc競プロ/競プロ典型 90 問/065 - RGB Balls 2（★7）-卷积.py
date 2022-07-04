@@ -34,7 +34,7 @@ def ifac(n: int) -> int:
 
 
 def C(n: int, k: int) -> int:
-    if n < k:
+    if k < 0 or k > n:
         return 0
     return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
 

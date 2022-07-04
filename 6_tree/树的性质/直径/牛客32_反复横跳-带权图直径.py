@@ -1,5 +1,4 @@
 from collections import defaultdict, deque
-from decimal import MAX_EMAX
 
 
 class Point:
@@ -59,4 +58,3 @@ class Solution:
         start = bfs1(1)
         diameter = bfs2(start)
         return res - diameter
-

@@ -23,9 +23,9 @@ def ifac(n: int) -> int:
 
 @lru_cache(None)
 def C(n: int, k: int) -> int:
-    if n < k:
+    if k < 0 or k > n:
         return 0
-    return (fac(n) * ifac(k) * ifac(n - k)) % MOD
+    return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
 
 
 sys.setrecursionlimit(int(1e9))
@@ -40,4 +40,3 @@ for i in range(n):
     res += count * nums[i]
     res %= MOD
 print(res)
-

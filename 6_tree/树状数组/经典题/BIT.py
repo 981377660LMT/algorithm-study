@@ -7,18 +7,11 @@ from collections import defaultdict
 
 
 class BIT1:
-    """单点修改
-
-    https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py
-    """
+    """单点修改"""
 
     def __init__(self, n: int):
         self.size = n
         self.tree = defaultdict(int)
-
-    @staticmethod
-    def _lowbit(index: int) -> int:
-        return index & -index
 
     def add(self, index: int, delta: int) -> None:
         if index <= 0:
@@ -26,7 +19,7 @@ class BIT1:
         index += 1
         while index <= self.size:
             self.tree[index] += delta
-            index += self._lowbit(index)
+            index += index & -index
 
     def query(self, index: int) -> int:
         if index > self.size:
@@ -35,7 +28,7 @@ class BIT1:
         res = 0
         while index > 0:
             res += self.tree[index]
-            index -= self._lowbit(index)
+            index -= index & -index
         return res
 
     def queryRange(self, left: int, right: int) -> int:
@@ -43,19 +36,12 @@ class BIT1:
 
 
 class BIT2:
-    """范围修改
-
-    https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py
-    """
+    """范围修改"""
 
     def __init__(self, n: int):
         self.size = n
         self._tree1 = defaultdict(int)
         self._tree2 = defaultdict(int)
-
-    @staticmethod
-    def _lowbit(index: int) -> int:
-        return index & -index
 
     def add(self, left: int, right: int, delta: int) -> None:
         """闭区间[left, right]加delta"""
@@ -74,7 +60,7 @@ class BIT2:
         while index <= self.size:
             self._tree1[index] += delta
             self._tree2[index] += (rawIndex - 1) * delta
-            index += self._lowbit(index)
+            index += index & -index
 
     def _query(self, index: int) -> int:
         if index > self.size:
@@ -84,7 +70,7 @@ class BIT2:
         res = 0
         while index > 0:
             res += rawIndex * self._tree1[index] - self._tree2[index]
-            index -= self._lowbit(index)
+            index -= index & -index
         return res
 
 
@@ -131,10 +117,7 @@ class BIT3:
 
 
 class BIT4:
-    """二维树状数组 单点修改+区间查询 每个操作都是 log(m*n)
-
-    https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py
-    """
+    """二维树状数组 单点修改+区间查询 每个操作都是 log(m*n)"""
 
     def __init__(self, row: int, col: int) -> None:
         self.row = row
@@ -185,10 +168,7 @@ class BIT4:
 
 # https://www.cnblogs.com/hbhszxyb/p/14157271.html
 class BIT5:
-    """二维树状数组 区间修改+区间查询 每个操作都是 log(m*n)
-
-    https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py
-    """
+    """二维树状数组 区间修改+区间查询 每个操作都是 log(m*n)"""
 
     def __init__(self, row: int, col: int) -> None:
         self.row = row
@@ -260,6 +240,33 @@ class BIT5:
         return res
 
 
+class ArrayBIT:
+    """单点修改 维护数组前缀和 下标与数组一致"""
+
+    def __init__(self, n: int):
+        self._length = n
+        self.tree = [0] * n
+
+    def add(self, index: int, delta: int) -> None:
+        assert 0 <= index < self._length
+        index += 1
+        while index <= self._length:
+            self.tree[index - 1] += delta
+            index += index & -index
+
+    def sum(self, left: int, right: int) -> int:
+        """数组切片[left, right]的和"""
+        assert 0 <= left <= right <= self._length
+        return self._query(right) - self._query(left)
+
+    def _query(self, index: int) -> int:
+        res = 0
+        while index > 0:
+            res += self.tree[index - 1]
+            index -= index & -index
+        return res
+
+
 if __name__ == "__main__":
     bit1 = BIT1(100)
     bit1.add(0 + 1, 2)
@@ -289,3 +296,9 @@ if __name__ == "__main__":
     bit5.updateRange(0, 0, 3, 3, 1)
     assert bit5.queryRange(0, 0, 1, 1) == 4
     assert bit5.queryRange(0, 0, 3, 3) == 16
+
+    arrayBIT = ArrayBIT(100)
+    arrayBIT.add(0, 1)
+    assert arrayBIT.sum(0, 1) == 1
+    arrayBIT.add(1, 1)
+    assert arrayBIT.sum(0, 2) == 2

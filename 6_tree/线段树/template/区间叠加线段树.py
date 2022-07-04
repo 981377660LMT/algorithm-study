@@ -1,11 +1,9 @@
-from typing import Callable, List, Optional, Union, overload
-
-Merge = Callable[[int, int], int]
+from typing import List, Optional
 
 
 class SegmentTree:
     """区间叠加线段树
-    
+
     注意根节点从1开始,tree本身为[1,n]
     """
 
@@ -16,28 +14,28 @@ class SegmentTree:
         if nums is not None:
             self._build(1, 1, self._n, nums)
 
-    def query(self, l: int, r: int) -> int:
+    def query(self, left: int, right: int) -> int:
         """[left,right]的和"""
-        if l > r:
+        if left > right:
             return 0
-        assert 1 <= l <= r <= self._n
-        return self._query(1, l, r, 1, self._n)
+        assert 1 <= left <= right <= self._n
+        return self._query(1, left, right, 1, self._n)
 
-    def update(self, l: int, r: int, delta: int) -> None:
+    def update(self, left: int, right: int, delta: int) -> None:
         """[left,right]区间更新delta"""
-        assert 1 <= l <= r <= self._n
-        self._update(1, l, r, 1, self._n, delta)
+        assert 1 <= left <= right <= self._n
+        self._update(1, left, right, 1, self._n, delta)
 
-    def _build(self, rt: int, l: int, r: int, nums: List[int]) -> None:
+    def _build(self, rt: int, left: int, right: int, nums: List[int]) -> None:
         """传了nums时，用于初始化线段树"""
         # 到底部了，底部有n个结点
-        if l == r:
-            self._tree[rt] = nums[l - 1]
+        if left == right:
+            self._tree[rt] = nums[left - 1]
             return
 
-        mid = (l + r) >> 1
-        self._build((rt << 1), l, mid, nums)
-        self._build((rt << 1) | 1, mid + 1, r, nums)
+        mid = (left + right) >> 1
+        self._build((rt << 1), left, mid, nums)
+        self._build((rt << 1) | 1, mid + 1, right, nums)
         self._push_up(rt)
 
     def _update(self, rt: int, L: int, R: int, l: int, r: int, delta: int) -> None:
@@ -84,7 +82,7 @@ class SegmentTree:
             self._lazy[rt] = 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tree1 = SegmentTree(10)
     assert tree1.query(1, 1) == 0
     assert tree1.query(1, 6) == 0

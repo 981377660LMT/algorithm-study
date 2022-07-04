@@ -20,11 +20,11 @@ def ifac(n: int) -> int:
 
 
 def A(n: int, k: int) -> int:
-    if n < k:
+    if k < 0 or k > n:
         return 0
     return (fac(n) * ifac(n - k)) % MOD
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(A(n=4, k=4))
     print(A(n=4, k=5))

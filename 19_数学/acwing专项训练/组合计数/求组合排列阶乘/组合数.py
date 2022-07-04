@@ -20,12 +20,12 @@ def ifac(n: int) -> int:
 
 
 def C(n: int, k: int) -> int:
-    if n < k:
+    if k < 0 or k > n:
         return 0
     return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(C(n=3, k=3))
     print(C(n=4, k=3))
     print(C(n=5, k=3))
@@ -50,4 +50,3 @@ def C1(n: int, k: int) -> int:
     if n == 1 or k == 0:
         return 1
     return (C1(n - 1, k) + C1(n - 1, k - 1)) % MOD
-

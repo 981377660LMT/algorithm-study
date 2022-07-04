@@ -1,4 +1,6 @@
 class Bitset:
+    """int 本身就是一个位集，所以可以直接使用"""
+
     def __init__(self, size: int):
         self.capacity = size
         self.size = 0
@@ -28,7 +30,7 @@ class Bitset:
         return self.size != 0
 
     def count(self) -> int:
-        # return self.size
+        return self.size
         return self.bit.bit_count()
 
     def toString(self) -> str:
