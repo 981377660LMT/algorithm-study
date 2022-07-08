@@ -7,7 +7,7 @@ from bisect import bisect_left, bisect_right
 
 
 class RangeFreqQuery:
-    """离线查询子数组内一个值的出现次数，如果要在线，使用树状数组"""
+    """离线查询子数组内一个值的出现次数，如果要在线，使用树状数组/SortedList"""
 
     def __init__(self, arr: List[int]):
         self.indexMap = defaultdict(list)

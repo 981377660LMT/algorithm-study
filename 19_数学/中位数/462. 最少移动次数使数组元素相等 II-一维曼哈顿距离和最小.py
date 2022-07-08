@@ -6,13 +6,12 @@
 #  * 其中每次移动可将选定的一个元素加1或减1。
 #  * 您可以假设数组的长度最多为10000。
 #  */
-from heapq import nlargest
 from typing import List
 
 
 class Solution:
     def minMoves2(self, nums: List[int]) -> int:
-        # 第(n>>1+1)小的数
-        mid = nlargest((len(nums) >> 1) + 1, nums)[-1]
+        """462. 最少移动次数使数组元素相等 II-一维曼哈顿距离和最小"""
+        nums.sort()
+        mid = nums[len(nums) >> 1]
         return sum(abs(num - mid) for num in nums)
-

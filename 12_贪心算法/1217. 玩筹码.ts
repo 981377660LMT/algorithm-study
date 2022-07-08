@@ -1,10 +1,8 @@
-// 奇偶数量，返回小的那个
-// chips数组里存放的是第i个筹码存放的位置
+// 最后会移动到1/2 比较这两个位置
 function minCostToMoveChips(position: number[]): number {
-  let odd = 0,
-    even = 0
+  let [odd, even] = [0, 0]
   for (let i = 0; i < position.length; i++) {
-    position[i] % 2 ? odd++ : even++
+    position[i] & 1 ? odd++ : even++
   }
 
   return Math.min(odd, even)

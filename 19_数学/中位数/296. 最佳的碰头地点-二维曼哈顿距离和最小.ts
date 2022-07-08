@@ -1,30 +1,24 @@
-// 求解多个绝对值之和最小值:奇尖偶平中间最小
+// 二维的求中位数
 function minTotalDistance(grid: number[][]): number {
-  const xNums: number[] = []
-  const yNums: number[] = []
+  const px: number[] = []
+  const py: number[] = []
   for (let i = 0; i < grid.length; i++) {
     for (let j = 0; j < grid[i].length; j++) {
       if (grid[i][j] === 1) {
-        xNums.push(i)
-        yNums.push(j)
+        px.push(i)
+        py.push(j)
       }
     }
   }
 
-  xNums.sort((a, b) => a - b)
-  yNums.sort((a, b) => a - b)
-  const xMiddle = xNums[xNums.length >> 1]
-  const yMiddle = yNums[yNums.length >> 1]
+  px.sort((a, b) => a - b)
+  py.sort((a, b) => a - b)
+  const midX = px[px.length >> 1]
+  const midY = py[py.length >> 1]
 
   let res = 0
-  for (const x of xNums) {
-    res += Math.abs(x - xMiddle)
-  }
-
-  for (const y of yNums) {
-    res += Math.abs(y - yMiddle)
-  }
-
+  for (const x of px) res += Math.abs(x - midX)
+  for (const y of py) res += Math.abs(y - midY)
   return res
 }
 

@@ -1,20 +1,22 @@
 from collections import defaultdict
-from typing import Dict
+from typing import Dict, Iterable, Optional
 
 
 class TrieNode:
-    __slots__ = ('wordCount', 'preCount', 'children')
+    __slots__ = ("wordCount", "preCount", "children", "word")
 
     def __init__(self):
         self.wordCount = 0
         self.preCount = 0
-        # self.word = ''  # 存储当前的单词
+        self.word = ""  # 存储当前的单词
         self.children: Dict[str, TrieNode] = defaultdict(TrieNode)
 
 
 class Trie:
-    def __init__(self):
+    def __init__(self, iterable: Optional[Iterable[str]] = None):
         self.root = TrieNode()
+        for word in iterable or ():
+            self.insert(word)
 
     def insert(self, word: str) -> None:
         if not word:
@@ -49,7 +51,7 @@ class Trie:
         return node.preCount
 
     def discard(self, word: str) -> None:
-        """从前缀树中移除 `1个`word 需要保证word在前缀树中"""
+        """从前缀树中移除`1个`word 需要保证word在前缀树中"""
         if not word:
             return
         node = self.root

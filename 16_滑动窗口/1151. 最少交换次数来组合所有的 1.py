@@ -7,18 +7,17 @@ from typing import List
 
 
 class Solution:
-    def minSwaps(self, data: List[int]) -> int:
-        n = len(data)
-        windowSize = data.count(1)
-        res, curOnes = 0x7FFFFFFF, 0
+    def minSwaps(self, nums: List[int]) -> int:
+        n = len(nums)
+        k = nums.count(1)  # 定长滑窗长度
+        res, ones = int(1e20), 0
 
         for right in range(n):
-            curOnes += data[right]
-            if right >= windowSize:
-                curOnes -= data[right - windowSize]
-            if right >= windowSize - 1:
-                res = min(res, windowSize - curOnes)
-
+            ones += int(nums[right] == 1)
+            if right >= k:
+                ones -= nums[right - k]
+            if right >= k - 1:
+                res = min(res, k - ones)
         return res
 
 

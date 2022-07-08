@@ -45,12 +45,12 @@ n = int(input())
 white = tuple(map(int, input().split()))
 black = tuple(map(int, input().split()))
 
-g = 0
+sg = 0
 for w, b in zip(white, black):
-    g ^= grundy(w, b)  # 初始的grundy数
+    sg ^= grundy(w, b)  # 初始的grundy数
 
 
-if g:
+if sg:
     print("First")
 else:
     print("Second")

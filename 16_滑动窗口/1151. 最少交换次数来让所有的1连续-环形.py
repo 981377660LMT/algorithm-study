@@ -8,22 +8,17 @@ from typing import List
 
 class Solution:
     def minSwaps(self, nums: List[int]) -> int:
-        winLen = nums.count(1)
-        nums = nums * 2
+        n = len(nums)
+        k = nums.count(1)  # 定长滑窗长度
+        nums += nums
 
-        res = int(1e20)
-        curOne = 0
-        left = 0
-        for right, cur in enumerate(nums):
-            if cur == 1:
-                curOne += 1
-            if right >= winLen:
-                if nums[left] == 1:
-                    curOne -= 1
-                left += 1
-
-            if right >= winLen - 1:
-                res = min(res, winLen - curOne)
+        res, ones = int(1e20), 0
+        for right in range(2 * n):
+            ones += int(nums[right] == 1)
+            if right >= k:
+                ones -= nums[right - k]
+            if right >= k - 1:
+                res = min(res, k - ones)
         return res
 
 

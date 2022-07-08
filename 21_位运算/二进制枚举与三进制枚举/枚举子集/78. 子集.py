@@ -1,5 +1,5 @@
 from itertools import chain, combinations
-from typing import Any, Collection, Generator, List
+from typing import Collection, Generator, List, TypeVar
 
 
 # 1. dfs
@@ -18,7 +18,10 @@ class Solution1:
 
 
 # 2. powerset 顺序枚举
-def powerset(collection: Collection, isAll=True):
+T = TypeVar("T")
+
+
+def powerset(collection: Collection[T], isAll=True):
     """求(真)子集,时间复杂度O(n*2^n)
 
     默认求所有子集

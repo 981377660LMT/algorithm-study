@@ -2,9 +2,11 @@ from typing import List, MutableSequence, Tuple
 from sortedcontainers import SortedList
 
 
-def nextPermutation(nums: MutableSequence[int], inPlace=False) -> Tuple[bool, MutableSequence[int]]:
+def nextPermutation(
+    nums: MutableSequence[int], inPlace=False
+) -> Tuple[bool, MutableSequence[int]]:
     """返回下一个字典序的排列，如果不存在，返回本身
-    
+
     时间复杂度`O(n)`
     """
     if not inPlace:
@@ -78,4 +80,3 @@ class Solution:
 
 
 print(Solution().getMinSwaps("11112", 4))
-

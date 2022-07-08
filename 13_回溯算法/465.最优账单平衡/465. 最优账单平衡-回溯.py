@@ -9,35 +9,30 @@ from collections import defaultdict
 # https://leetcode-cn.com/problems/optimal-account-balancing/comments/336080
 class Solution:
     def minTransfers(self, transactions: List[List[int]]) -> int:
-        borrow = defaultdict(int)
-        for u, v, w in transactions:
-            borrow[u] += w
-            borrow[v] -= w
-
-        accounts = sorted(list(borrow.values()), reverse=True)
-
-        res = int(1e20)
-
-        def bt(cur: int, times: int):
+        def bt(index: int, curSum: int) -> None:
             nonlocal res
-            if times >= res:
+            if curSum >= res:
                 return
 
-            # 账号为0不考虑
-            while cur < len(accounts) and accounts[cur] == 0:
-                cur += 1
+            while index < len(deg) and deg[index] == 0:  # 去掉相等的数值
+                index += 1
 
-            if cur == len(accounts):
-                res = min(res, times)
+            if index == len(deg):
+                res = min(res, curSum)
                 return
 
-            for next in range(cur + 1, len(accounts)):
-                if accounts[cur] * accounts[next] < 0:
-                    # 这里加表示cur 给 next 钱 用 [5,-10,5]来想
-                    accounts[next] += accounts[cur]
-                    bt(cur + 1, times + 1)
-                    accounts[next] -= accounts[cur]
+            for next in range(index + 1, len(deg)):  # 搜索这个人和谁交易 要把钱全部交易完
+                if deg[index] * deg[next] < 0:
+                    deg[next] += deg[index]
+                    bt(index + 1, curSum + 1)
+                    deg[next] -= deg[index]
 
+        deg = defaultdict(int)
+        for u, v, w in transactions:
+            deg[u] += w
+            deg[v] -= w
+        deg = sorted([v for v in deg.values() if v != 0], reverse=True)
+        res = int(1e20)
         bt(0, 0)
         return res
 
@@ -51,4 +46,3 @@ print(Solution().minTransfers([[0, 1, 10], [2, 0, 5]]))
 # 人 #2 给人 #0 共计 5 美元。
 
 # 需要两次交易。一种方式是人 #1 分别给人 #0 和人 #2 各 5 美元。
-

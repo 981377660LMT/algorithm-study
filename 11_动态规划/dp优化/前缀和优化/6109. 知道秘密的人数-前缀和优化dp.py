@@ -25,7 +25,7 @@ class Solution:
         return res
 
     def peopleAwareOfSecret2(self, n: int, delay: int, forget: int) -> int:
-        """前缀和优化dp 思路sum(dp[pre+delay:pre+forget])]) 这一段可以前缀和优化"""
+        """前缀和优化dp 思路sum(dp[pre+delay:pre+forget])]) 这一段dp的sum可以前缀和dpSum优化"""
         dp = defaultdict(int, {1: 1})
         dpSum = defaultdict(int, {1: 1})
         for day in range(2, n + 1):

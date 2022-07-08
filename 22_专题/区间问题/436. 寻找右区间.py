@@ -14,4 +14,3 @@ class Solution:
             if pos < n:
                 res[i] = starts[pos][1]
         return res
-

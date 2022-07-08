@@ -11,11 +11,18 @@ from functools import lru_cache
 # to jump or not to jump
 
 
+def getLRELen(blockLen: int) -> int:
+    """blockLen表示新追加的block的(相同)数字的个数
+
+    注意只有1个时 编码长度为1
+    a => a
+    aa => a2
+    """
+    return blockLen if blockLen <= 1 else len(str(blockLen)) + 1
+
+
 class Solution:
     def getLengthOfOptimalCompression(self, s: str, k: int) -> int:
-        def getLRELen(count: int) -> int:
-            return count if count <= 1 else len(str(count)) + 1
-
         @lru_cache(None)
         def dfs(index: int, count: int) -> int:
             if count > target:
@@ -42,4 +49,3 @@ class Solution:
 print(Solution().getLengthOfOptimalCompression(s="aaabcccd", k=2))
 # 输出：4
 # 解释：在不删除任何内容的情况下，压缩后的字符串是 "a3bc3d" ，长度为 6 。最优的方案是删除 'b' 和 'd'，这样一来，压缩后的字符串为 "a3c3" ，长度是 4 。
-

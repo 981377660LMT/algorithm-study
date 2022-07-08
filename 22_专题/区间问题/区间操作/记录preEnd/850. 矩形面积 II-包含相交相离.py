@@ -14,14 +14,13 @@ class Solution:
         """计算平面中所有 rectangles 所覆盖的 总面积"""
         #  O(N^2LogN)
         def calHeight(intervals: Sequence[Tuple[int, int]]) -> int:
-            """"求有序区间的总覆盖长度"""
+            """ "求有序区间的总覆盖长度"""
             if not intervals:
                 return 0
 
             preEnd = intervals[0][1]
             res = intervals[0][1] - intervals[0][0]
-            for i in range(1, len(intervals)):
-                curStart, curEnd = intervals[i]
+            for curStart, curEnd in intervals[1:]:
                 if curEnd <= preEnd:
                     continue
                 elif curStart <= preEnd < curEnd:

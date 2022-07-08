@@ -26,7 +26,7 @@ class Solution:
 
     @staticmethod
     def bestLine(points: List[List[int]]) -> List[Set[int]]:
-        """求出通过点数最多的所有直线"""
+        """求出通过点数最多的`所有`直线 这里直线用点集表示"""
 
         def gcd(a, b):
             return a if b == 0 else gcd(b, a % b)
@@ -37,24 +37,24 @@ class Solution:
 
         for i in range(n):
             x1, y1 = points[i]
-            groups = defaultdict(set)
+            slopeGroup = defaultdict(set)  # 点i加斜率唯一确定一条直线
 
             for j in range(i + 1, n):
                 x2, y2 = points[j]
                 A, B = y2 - y1, x2 - x1
                 if B == 0:
-                    key = (0, 0)
+                    slope = None
                 else:
                     gcd_ = gcd(A, B)
-                    key = (A / gcd_, B / gcd_)
+                    slope = (A / gcd_, B / gcd_)
 
-                groups[key].add(j)
-                count = len(groups[key])
+                slopeGroup[slope].add(j)
+                count = len(slopeGroup[slope])
                 if count > maxCount:
                     maxCount = count
-                    res = [groups[key] | {i}]
+                    res = [slopeGroup[slope] | {i}]
                 elif count == maxCount:
-                    res.append(groups[key] | {i})
+                    res.append(slopeGroup[slope] | {i})
 
         return res
 

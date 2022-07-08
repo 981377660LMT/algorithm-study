@@ -24,7 +24,7 @@ class Solution:
             if nums[i - 1] == pre:
                 res.append(str(pre))
             else:
-                res.append(f'{pre}->{nums[i - 1]}')
+                res.append(f"{pre}->{nums[i - 1]}")
             pre = nums[i]
         return res
 

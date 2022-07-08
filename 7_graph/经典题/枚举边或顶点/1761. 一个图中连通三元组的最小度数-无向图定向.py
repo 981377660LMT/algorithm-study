@@ -37,6 +37,8 @@ class Solution:
     def minTrioDegree(self, n: int, edges: List[List[int]]) -> int:
         """三元环计数
 
+        度数为第一关键字，点的标号为第二关键字 比大小
+        此时任意点的出度不会超过 (sqrt(2E))
         时间复杂度O(E^(3/2))
         """
         deg = [0] * n
@@ -47,10 +49,8 @@ class Solution:
         adjMap = defaultdict(set)
         for u, v in edges:
             u, v = u - 1, v - 1
-            if u < v:
-                adjMap[u].add(v)
-            else:
-                adjMap[v].add(u)
+            u, v = sorted((u, v), key=lambda x: (deg[x], x))
+            adjMap[u].add(v)
 
         res = INF
         for i in range(n):

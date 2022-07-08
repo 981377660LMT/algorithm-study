@@ -27,11 +27,14 @@ class Solution:
     def numberOfPaths2(self, n: int, edges: List[List[int]]) -> int:
         """枚举点+无向边定向 O(E^3/2)"""
         adjMap = defaultdict(set)
+        deg = defaultdict(int)
         for u, v in edges:
-            if u < v:
-                adjMap[u].add(v)
-            else:
-                adjMap[v].add(u)
+            deg[u] += 1
+            deg[v] += 1
+
+        for u, v in edges:
+            u, v = sorted((u, v), key=lambda x: (deg[x], x))
+            adjMap[u].add(v)
 
         res = 0
         for p1 in range(1, n + 1):

@@ -42,7 +42,7 @@ class BitSet:
 
     @staticmethod
     def _longlong_bit_count(n: int) -> int:
-        """`O(1)` counts bit of int smaller than"""
+        """`O(1)` counts bit of int smaller than `(1 << 63) - 1`"""
         c = (n & 0x5555555555555555) + ((n >> 1) & 0x5555555555555555)
         c = (c & 0x3333333333333333) + ((c >> 2) & 0x3333333333333333)
         c = (c & 0x0F0F0F0F0F0F0F0F) + ((c >> 4) & 0x0F0F0F0F0F0F0F0F)
@@ -100,9 +100,6 @@ class BitSet:
     def __contains__(self, n: int) -> bool:
         row, col = n // 63, n % 63
         return len(self._buckets) > row and not not (self._buckets[row] & (1 << col))
-
-    def __repr__(self) -> str:
-        return f"BitSet({self._bin})"
 
     def __len__(self) -> int:
         return self._len

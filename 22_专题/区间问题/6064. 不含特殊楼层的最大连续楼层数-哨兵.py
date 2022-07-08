@@ -17,7 +17,7 @@ INF = int(1e20)
 class Solution:
     def maxConsecutive2(self, bottom: int, top: int, special: List[int]) -> int:
         """返回不含特殊楼层的 最大 连续楼层数
-        
+
         分割区间
         """
         special = sorted(special + [bottom - 1, top + 1])
@@ -26,7 +26,7 @@ class Solution:
 
     def maxConsecutive(self, bottom: int, top: int, special: List[int]) -> int:
         """返回不含特殊楼层的 最大 连续楼层数
-        
+
         分割区间-记录pre，添加哨兵
         """
         special.append(top + 1)
@@ -38,4 +38,3 @@ class Solution:
             res = max(res, cur)
             pre = bad + 1
         return res
-

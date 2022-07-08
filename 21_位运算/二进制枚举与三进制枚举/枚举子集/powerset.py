@@ -1,8 +1,10 @@
 from itertools import chain, combinations
-from typing import Collection
+from typing import Collection, TypeVar
+
+T = TypeVar("T")
 
 
-def powerset(collection: Collection, isAll=True):
+def powerset(collection: Collection[T], isAll=True):
     """求(真)子集,时间复杂度O(n*2^n)
 
     默认求所有子集
@@ -11,8 +13,9 @@ def powerset(collection: Collection, isAll=True):
     return chain.from_iterable(combinations(collection, n) for n in range(upper))
 
 
-if __name__ == '__main__':
-    print(*powerset([1, 2, 3, 4]))
+if __name__ == "__main__":
+    res = powerset([1, 2, 3, 4])
+    print(*res)
 
 
 # chain存在的意义是什么?
