@@ -7,42 +7,6 @@ INF = int(1e20)
 
 
 class Solution:
-    def latestTimeCatchTheBus2(
-        self, buses: List[int], passengers: List[int], capacity: int
-    ) -> int:
-        """返回你可以搭乘公交车的最晚到达公交站时间。你 不能 跟别的乘客同时刻到达。"""
-        buses.sort()
-        passengers.sort()
-        bad = set(passengers)
-
-        def check(mid: int) -> bool:
-            """在mid能不能上车"""
-            if mid in bad:  #! 这里处理错了 check里面要是重复返回false， 单调性就没了
-                return False
-            p = passengers[:]
-            pos = bisect_left(p, mid)
-            p[pos:pos] = [mid]
-            pid = 0
-            for bt in buses:
-                count = 0
-                while pid < len(p) and p[pid] <= bt and count + 1 <= capacity:
-                    if pid == pos:  # 第pid个乘客上车了
-                        return True
-                    pid += 1
-                    count += 1
-            return False
-
-        res = 1
-        left, right = 1, int(1e10)
-        while left <= right:
-            mid = (left + right) // 2
-            if check(mid):
-                res = max(res, mid)
-                left = mid + 1
-            else:
-                right = mid - 1
-        return res
-
     def latestTimeCatchTheBus(
         self, buses: List[int], passengers: List[int], capacity: int
     ) -> int:
@@ -70,7 +34,7 @@ class Solution:
         passengers.sort()
         bad = set(passengers)
 
-        left, right = 1, int(1e10)
+        left, right = 0, int(1e19)
         while left <= right:
             mid = (left + right) // 2
             if check(mid):
@@ -78,9 +42,45 @@ class Solution:
             else:
                 right = mid - 1
 
-        while right in bad:  # !重叠的处理
+        while right in bad:  # !重叠在最后处理
             right -= 1
         return right
+
+    def latestTimeCatchTheBus2(
+        self, buses: List[int], passengers: List[int], capacity: int
+    ) -> int:
+        """返回你可以搭乘公交车的最晚到达公交站时间。你 不能 跟别的乘客同时刻到达。"""
+        buses.sort()
+        passengers.sort()
+        bad = set(passengers)
+
+        def check(mid: int) -> bool:
+            """在mid能不能上车"""
+            if mid in bad:  # ! 这里处理错了 check里面要是重复返回false， 二分单调性就没了
+                return False
+            p = passengers[:]
+            pos = bisect_left(p, mid)
+            p[pos:pos] = [mid]
+            pid = 0
+            for bt in buses:
+                count = 0
+                while pid < len(p) and p[pid] <= bt and count + 1 <= capacity:
+                    if pid == pos:  # 第pid个乘客上车了
+                        return True
+                    pid += 1
+                    count += 1
+            return False
+
+        res = 1
+        left, right = 1, int(1e10)
+        while left <= right:
+            mid = (left + right) // 2
+            if check(mid):
+                res = max(res, mid)
+                left = mid + 1
+            else:
+                right = mid - 1
+        return res
 
 
 # print(

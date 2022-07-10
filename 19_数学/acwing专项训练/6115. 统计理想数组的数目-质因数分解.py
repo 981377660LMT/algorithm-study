@@ -6,9 +6,9 @@ n,ai<=1e4
 
 长度为n结尾为x的情况怎么计算呢
 对x的每个质因子计算 质因子p的个数为k
-n个物品放到k+1个槽(1,p,p^2,...p^k)里 槽可空 方案数为CWithReplacement(n, k)
+n-1个物品放到k+1个槽(1,p,p^2,...p^k)里 槽可空 
 
-分解质因数+背包(各个质因数背包)放物品
+分解质因数+n个物品放到k个槽的方案数
 """
 
 from collections import Counter
@@ -72,7 +72,6 @@ def C(n: int, k: int) -> int:
 
 def put(n: int, k: int) -> int:
     """
-    可以选取重复元素的组合数
     n个物品放入k个槽(槽可空)的方案数
     """
     return C(n + k - 1, k - 1)
@@ -81,7 +80,3 @@ def put(n: int, k: int) -> int:
 print(Solution().idealArrays(n=2, maxValue=5))  # 10
 print(Solution().idealArrays(n=5, maxValue=3))  # 11
 print(Solution().idealArrays(n=5, maxValue=9))  # 111
-# print(Solution().idealArrays(n=3, maxValue=5))
-# 5878
-# # 2900
-# print(Solution().idealArrays(n=5878, maxValue=2900))

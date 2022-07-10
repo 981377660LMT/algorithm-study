@@ -4,7 +4,7 @@ from typing import List
 class UnionFindArray:
     def __init__(self, n: int):
         self.n = n
-        self.count = n
+        self.part = n
         self.parent = list(range(n))
         self.rank = [1] * n
 
@@ -23,7 +23,7 @@ class UnionFindArray:
         # 大的总是指向小的
         self.parent[rootY] = rootX
         self.rank[rootX] += self.rank[rootY]
-        self.count -= 1
+        self.part -= 1
         return True
 
     def isConnected(self, x: int, y: int) -> bool:

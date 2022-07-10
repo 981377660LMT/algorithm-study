@@ -11,7 +11,9 @@ class Solution:
         ranges = getRange(nums, isMax=False, isLeftStrict=False, isRightStrict=False)
         for i, (left, right) in enumerate(ranges):
             # !这里避免浮点数可以用乘法判断
-            if nums[i] > Fraction(threshold, (right - left + 1)):
+            # if nums[i] > Fraction(threshold, (right - left + 1)):
+            #     return right - left + 1
+            if nums[i] * (right - left + 1) > threshold:
                 return right - left + 1
         return -1
 

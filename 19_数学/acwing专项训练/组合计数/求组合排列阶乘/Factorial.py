@@ -45,10 +45,14 @@ class Factorial:
 
     def CWithReplacement(self, n: int, k: int) -> int:
         """nHk % mod
-        n个物品放入k个槽(槽可空)的方案数
+        可重复选取的组合数 itertools.combinations_with_replacement 的个数
         """
         t = self._fact_inv(n - 1) * self._fact_inv(k) % self._mod
         return self(n + k - 1) * t % self._mod
+
+    def put(self, n: int, k: int) -> int:
+        """n个物品放入k个槽(槽可空)的方案数"""
+        return self.C(n + k - 1, k - 1)
 
     def _fact_inv(self, n: int) -> int:
         """n!^-1 % mod"""
@@ -88,17 +92,22 @@ class Factorial:
 
 
 if __name__ == "__main__":
-    MOD = int(1e9 + 7)
-    f = Factorial(MOD)
-    n = int(input())
-    for k in range(1, n + 1):
-        res = 0
-        select = 1
-        while True:
-            remain = n - (select - 1) * (k - 1)
-            if remain < select:
-                break
-            res += f.C(remain, select)
-            res %= MOD
-            select += 1
-        print(res)
+    # MOD = int(1e9 + 7)
+    # f = Factorial(MOD)
+    # n = int(input())
+    # for k in range(1, n + 1):
+    #     res = 0
+    #     select = 1
+    #     while True:
+    #         remain = n - (select - 1) * (k - 1)
+    #         if remain < select:
+    #             break
+    #         res += f.C(remain, select)
+    #         res %= MOD
+    #         select += 1
+    #     print(res)
+    f = Factorial(int(1e9 + 7))
+    print(f.CWithReplacement(5, 2))
+    print(f.CWithReplacement(4, 2))
+    print(f.put(3, 2))  # 4
+    print(f.put(4, 2))  # 5

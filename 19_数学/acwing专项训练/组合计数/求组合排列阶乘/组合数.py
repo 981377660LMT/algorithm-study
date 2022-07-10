@@ -26,10 +26,21 @@ def C(n: int, k: int) -> int:
     return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
 
 
+def CWithReplacement(n: int, k: int) -> int:
+    """可重复选取的组合数 itertools.combinations_with_replacement 的个数"""
+    return C(n + k - 1, k)
+
+
+def put(n: int, k: int) -> int:
+    """n个物品放入k个槽(槽可空)的方案数"""
+    return C(n + k - 1, k - 1)
+
+
 if __name__ == "__main__":
     print(C(n=3, k=3))
     print(C(n=4, k=3))
     print(C(n=5, k=3))
+
 
 #########################################################
 # 预处理组合数 C(n,k)=C(n-1,k)+C(n-1,k-1)

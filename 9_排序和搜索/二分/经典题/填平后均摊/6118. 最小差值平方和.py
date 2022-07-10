@@ -13,26 +13,24 @@ class Solution:
 
 
 def minimizeMaxValue(nums: List[int], k: int) -> List[int]:
-    """k次-1操作,让最大值最小化,返回操作后的数组
-
-    todo 更多注释
-    """
+    """k次-1操作,让最大值最小化,返回操作后的数组"""
     n = len(nums)
     copy = nums[:]
     nums = sorted(nums)
     preSum = [0] + list(accumulate(nums))
     nums = [0] + nums  # [0]表示哨兵
 
-    # 最左二分求最后能和哪个数齐平(前几个元素)
+    # !最左二分求最后能和哪个数齐平
     left, right = 0, n
     while left <= right:
-        mid = (left + right) >> 1
+        mid = (left + right) // 2
         diff = preSum[n] - preSum[mid] - (n - mid) * nums[mid]
         if k < diff:
             left = mid + 1
         else:
             right = mid - 1
 
+    # 如果最小值可以小到0 那么就直接返回[0]*n
     min_ = nums[left]
     if min_ == 0:
         return [0] * n
@@ -42,7 +40,7 @@ def minimizeMaxValue(nums: List[int], k: int) -> List[int]:
     count = n - left + 1
 
     if count:
-        div, mod = divmod(overflow, count)
+        div, mod = divmod(overflow, count)  # mod个数需要再减1
     min_ -= div
 
     for i in range(n):

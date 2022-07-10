@@ -35,7 +35,6 @@ def C(n: int, k: int) -> int:
 
 def put(n: int, k: int) -> int:
     """
-    可以选取重复元素的组合数
     n个物品放入k个槽(槽可空)的方案数
     """
     return C(n + k - 1, k - 1)
