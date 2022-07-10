@@ -11,14 +11,20 @@ from itertools import combinations
 
 
 class Solution:
-    def minNumberOfSemesters(self, n: int, dependencies: List[List[int]], k: int) -> int:
+    def minNumberOfSemesters(
+        self, n: int, dependencies: List[List[int]], k: int
+    ) -> int:
         @lru_cache(None)
         def dfs(state: int) -> int:
-            if state == target:
+            if state == target:  # !状态作为终点
                 return 0
 
             res = int(1e20)
-            nexts = [i for i in range(n) if not state & (1 << i) and deps[i] & state == deps[i]]
+            nexts = [
+                i
+                for i in range(n)
+                if not state & (1 << i) and deps[i] & state == deps[i]
+            ]
             for sub in combinations(nexts, min(k, len(nexts))):
                 res = min(res, 1 + dfs(state | sum(1 << i for i in sub)))
             return res
@@ -36,4 +42,8 @@ class Solution:
 
 print(Solution().minNumberOfSemesters(n=4, dependencies=[[2, 1], [3, 1], [1, 4]], k=2))
 # 在第一个学期中，我们可以上课程 2 和课程 3 。然后第二个学期上课程 1 ，第三个学期上课程 4 。
-print(Solution().minNumberOfSemesters(n=5, dependencies=[[2, 1], [3, 1], [4, 1], [1, 5]], k=2))
+print(
+    Solution().minNumberOfSemesters(
+        n=5, dependencies=[[2, 1], [3, 1], [4, 1], [1, 5]], k=2
+    )
+)

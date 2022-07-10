@@ -1,6 +1,7 @@
 # 求组合数
 from functools import lru_cache
 
+
 MOD = int(1e9 + 7)
 # 1. 逆元最快
 
@@ -20,7 +21,7 @@ def ifac(n: int) -> int:
 
 
 def C(n: int, k: int) -> int:
-    if k < 0 or k > n:
+    if n < 0 or k < 0 or n < k:
         return 0
     return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
 

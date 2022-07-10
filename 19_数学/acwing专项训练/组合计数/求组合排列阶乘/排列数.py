@@ -20,7 +20,7 @@ def ifac(n: int) -> int:
 
 
 def A(n: int, k: int) -> int:
-    if k < 0 or k > n:
+    if n < 0 or k < 0 or n < k:
         return 0
     return (fac(n) * ifac(n - k)) % MOD
 

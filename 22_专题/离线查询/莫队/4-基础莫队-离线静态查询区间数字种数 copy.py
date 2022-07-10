@@ -10,7 +10,7 @@ input = sys.stdin.readline
 n = int(input())
 nums = list(map(int, input().split()))
 qCount = int(input())
-chunkLen = max(int(n // (qCount ** 0.5)), 1)
+chunkLen = max(int(n // (qCount**0.5)), 1)
 
 queries = []
 for i in range(qCount):
@@ -18,7 +18,7 @@ for i in range(qCount):
     left, right = left - 1, right - 1
     queries.append((i, left, right))
 
-# 左端点按块id排序，右端点按编号排序
+# !以询问左端点所在的分块的序号为第一关键字，右端点的大小为第二关键字进行排序
 queries.sort(key=lambda x: (x[1] // chunkLen, x[2]))
 
 counter = defaultdict(int)
@@ -58,4 +58,3 @@ for qi, qLeft, qRight in queries:
 
 for num in res:
     print(num)
-

@@ -32,14 +32,17 @@ function countPrimes(n: number): number {
  */
 function getPrimes(upper: number): number[] {
   const visited = Array<boolean>(upper + 1).fill(false)
-  const res: number[] = []
 
   for (let i = 2; i <= upper; i++) {
     if (visited[i]) continue
-    res.push(i)
     for (let j = i * i; j <= upper; j += i) {
       visited[j] = true
     }
+  }
+
+  const res: number[] = []
+  for (let i = 2; i <= upper; i++) {
+    if (!visited[i]) res.push(i)
   }
 
   return res

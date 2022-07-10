@@ -3,6 +3,8 @@ from functools import lru_cache
 
 class Solution:
     def longestPalindromeSubseq(self, s: str) -> int:
+        """最长回文子序列"""
+
         @lru_cache(None)
         def dfs(left: int, right: int) -> int:
             if left > right:

@@ -137,7 +137,7 @@ Cookie 中的「同站」判断就比较宽松：只要两个 URL 的 eTLD+1 相
 **eTLD 表示有效顶级域名**
 举几个例子，www.taobao.com 和 www.baidu.com 是跨站，www.a.taobao.com 和 www.b.taobao.com 是同站，a.github.io 和 b.github.io 是跨站(注意是跨站)。
 
-SameSite 属性可以让 Cookie 在跨站请求时不会被发送，从而可以阻止跨站请求伪造攻击（CSRF）。
+SameSite 属性可以让 Cookie 在`跨站`请求时不会被发送，从而可以阻止跨站请求伪造攻击（CSRF）。
 之前默认是 None 的，Chrome80 后默认是 Lax。
 
 SameSite 可以有下面三种值：

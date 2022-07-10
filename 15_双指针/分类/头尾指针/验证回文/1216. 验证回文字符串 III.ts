@@ -1,4 +1,4 @@
-import { longestPalindromeSubseq } from '../../../../22_专题/回文/medium/516. 最长回文子序列'
+import { longestPalindromeSubseq } from '../../../../22_专题/回文/516. 最长回文子序列'
 
 /**
  * @param {string} s

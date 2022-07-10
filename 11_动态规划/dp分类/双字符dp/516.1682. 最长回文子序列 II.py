@@ -11,7 +11,7 @@ class Solution:
         # dp(i,j,c)代表i到j之间且两端字母为c时的解，两端字母c只有26种选择，穷举就行。
         # 复杂度(状态数)：O(26n^2)
         @lru_cache(None)
-        def dfs(l: int, r: int, char: int) -> int:
+        def dfs(l: int, r: int, char: str) -> int:
             if l >= r:
                 return 0
             if s[l] != char:
@@ -20,16 +20,16 @@ class Solution:
                 return dfs(l, r - 1, char)
             return (
                 max(
-                    dfs(l + 1, r - 1, chr(ord('a') + i))
+                    dfs(l + 1, r - 1, chr(ord("a") + i))
                     for i in range(26)
-                    if chr(ord('a') + i) != char
+                    if chr(ord("a") + i) != char
                 )
                 # 取到两端的
                 + 2
             )
 
         # 枚举
-        return max(dfs(0, len(s) - 1, chr(ord('a') + i)) for i in range(26))
+        return max(dfs(0, len(s) - 1, chr(ord("a") + i)) for i in range(26))
 
 
 print(Solution().longestPalindromeSubseq(s="bbabab"))

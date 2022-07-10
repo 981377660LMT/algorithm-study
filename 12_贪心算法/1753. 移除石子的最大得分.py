@@ -2,24 +2,14 @@
 # 当存在 两个或更多 的空堆时，游戏停止。
 # 给你三个整数 a 、b 和 c ，返回可以得到的 最大分数 。
 
-
+# 6112. 装满杯子需要的最短总时长
 class Solution:
-    def maximumScore1(self, a: int, b: int, c: int) -> int:
+    def maximumScore(self, a: int, b: int, c: int) -> int:
+        """1 <= a, b, c <= 1e5"""
         a, b, c = sorted((a, b, c))
         if a + b <= c:
             return a + b
         return (a + b + c) // 2
-
-    # 贪心算法
-    def maximumScore(self, a: int, b: int, c: int) -> int:
-        res = 0
-        a, b, c = sorted((a, b, c))
-        while a > 0 and b > 0 and a + b > c:
-            a -= 1
-            b -= 1
-            res += 1
-        res += a + b
-        return
 
 
 print(Solution().maximumScore(a=2, b=4, c=6))
@@ -32,4 +22,3 @@ print(Solution().maximumScore(a=2, b=4, c=6))
 # - 从第二和第三堆取，石子状态现在是 (0, 1, 1)
 # - 从第二和第三堆取，石子状态现在是 (0, 0, 0)
 # 总分：6 分 。
-

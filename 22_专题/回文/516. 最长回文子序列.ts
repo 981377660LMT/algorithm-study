@@ -6,15 +6,15 @@
  * 如果s[i]与s[j]相同，那么dp[i][j] = dp[i + 1][j - 1] + 2;
  */
 const longestPalindromeSubseq = function (s: string): number {
-  const len = s.length
-  const dp = Array.from<number, number[]>({ length: len }, () => Array(len).fill(0))
-  for (let i = 0; i < len; i++) {
+  const n = s.length
+  const dp = Array.from<number, number[]>({ length: n }, () => Array(n).fill(0))
+  for (let i = 0; i < n; i++) {
     dp[i][i] = 1
   }
 
   // 倒序遍历
-  for (let i = len - 2; i >= 0; i--) {
-    for (let j = i + 1; j < len; j++) {
+  for (let i = n - 2; i >= 0; i--) {
+    for (let j = i + 1; j < n; j++) {
       if (s[i] === s[j]) {
         dp[i][j] = dp[i + 1][j - 1] + 2
       } else {
@@ -23,7 +23,7 @@ const longestPalindromeSubseq = function (s: string): number {
     }
   }
 
-  return dp[0][len - 1]
+  return dp[0][n - 1]
 }
 
 // console.log(longestPalindromeSubseq('bbbab'))

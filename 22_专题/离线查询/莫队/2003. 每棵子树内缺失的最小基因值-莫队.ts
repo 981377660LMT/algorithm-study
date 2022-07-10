@@ -40,7 +40,7 @@ function smallestMissingValueSubtree(parents: number[], nums: number[]): number[
   ): number[] {
     const res = Array<number>(n).fill(1)
     const chunkLen = Math.max(1, Math.floor(Math.sqrt(n)))
-    // 莫队 左端点按块id排序，右端点按编号排序
+    // !以询问左端点所在的分块的序号为第一关键字，右端点的大小为第二关键字进行排序
     queries.sort(
       (q1, q2) => Math.floor(q1[0] / chunkLen) - Math.floor(q2[0] / chunkLen) || q1[1] - q2[1]
     )

@@ -1,3 +1,5 @@
+# 验证回文串
+# 只考虑字母和数字字符，可以忽略字母的大小写
 class Solution:
     def isPalindrome(self, s: str) -> bool:
         left, right = 0, len(s) - 1
@@ -13,4 +15,4 @@ class Solution:
         return True
 
 
-print('a1'.isalnum())  # 数字或字母
+print("a1".isalnum())  # 数字或字母

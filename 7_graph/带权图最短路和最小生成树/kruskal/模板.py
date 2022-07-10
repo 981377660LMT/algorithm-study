@@ -1,7 +1,16 @@
 from collections import defaultdict
-from typing import DefaultDict, Generic, Hashable, Iterable, List, Optional, Tuple, TypeVar
+from typing import (
+    DefaultDict,
+    Generic,
+    Hashable,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+)
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class UnionFindMap(Generic[T]):
@@ -57,12 +66,12 @@ class UnionFindMap(Generic[T]):
         return True
 
 
-P = TypeVar('P', bound=Hashable)
+P = TypeVar("P", bound=Hashable)
 
 
 def kruskal(n: int, edges: List[Tuple[P, P, int]]) -> int:
     """求最小生成树权值
-    
+
     1. 边权排序
     2. 两两连接不连通的点
     """

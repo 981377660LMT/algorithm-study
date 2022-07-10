@@ -1,4 +1,4 @@
-import { useUnionFindArray } from '../../14_并查集/useUnionFind'
+import { useUnionFindArray } from '../../../14_并查集/useUnionFind'
 
 /**
  * @param {number} n
@@ -20,11 +20,11 @@ const distanceLimitedPathsExist = function (
   edgeList.sort((a, b) => a[2] - b[2])
   queries = queries.map((v, i) => [...v, i]).sort((a, b) => a[2] - b[2])
 
-  let edgeIndex = 0
+  let ei = 0
   queries.forEach(([from, to, limit, index]) => {
-    while (edgeIndex < edgeList.length && edgeList[edgeIndex][2] < limit) {
-      uf.union(edgeList[edgeIndex][0], edgeList[edgeIndex][1])
-      edgeIndex++
+    while (ei < edgeList.length && edgeList[ei][2] < limit) {
+      uf.union(edgeList[ei][0], edgeList[ei][1])
+      ei++
     }
     if (uf.isConnected(from, to)) res[index] = true
   })

@@ -16,7 +16,7 @@ console.log(4)
 ```
 
 执行结果是：1243
-promise 构造函数是同步执行的，then 方法是异步执行的
+`promise 构造函数(new Promise)是同步执行的，then 方法是异步执行的`
 
 2. setTimeout、Promise、Async/Await 的区别
 
@@ -30,7 +30,7 @@ promise 构造函数是同步执行的，then 方法是异步执行的
 4. .then 或者 .catch 中 return 一个 error 对象并不会抛出错误，所以不会被后续的 .catch 捕获
 5. requestAnimationFrame 属于宏任务还是微任务
 6. 微任务包括
-   MutationObserver、Promise.then()或 catch()、Promise 为基础开发的其它技术，比如 fetch API、V8 的垃圾回收过程、Node 独有的 process.nextTick。
+   MutationObserver、`Promise.then()或 catch()、Promise 为基础开发的其它技术`，比如 fetch API、V8 的垃圾回收过程、Node 独有的 process.nextTick。(注意 new Promise 中的是同步代码)
    宏任务包括：**script** 、setTimeout、setInterval 、setImmediate 、I/O 、UI rendering。
    注意 ⚠️：在所有任务开始的时候，由于宏任务中包括了 script，所以浏览器会先执行一个宏任务，在这个过程中你看到的延迟任务(例如 setTimeout)将被放到下一轮宏任务中来执行。
 7. promise 例题

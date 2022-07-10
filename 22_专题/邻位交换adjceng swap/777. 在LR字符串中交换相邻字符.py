@@ -6,24 +6,30 @@
 #  \   /   \  |  /
 # X R L X X R R L X
 # """
+
+"""LR字符串"""
+
+# !1.一个串能被拼成的必要条件是两者去除 - 后的字符串是一样的
+# !2.原串的L不能在目标串的左边，R不能在目标串的右边
+
+
 class Solution:
     def canTransform(self, start: str, end: str) -> bool:
-        S = [(v, i) for i, v in enumerate(start) if v != 'X']
-        E = [(v, i) for i, v in enumerate(end) if v != 'X']
-        if len(S) != len(E):
+        S1 = [(v, i) for i, v in enumerate(start) if v != "X"]
+        S2 = [(v, i) for i, v in enumerate(end) if v != "X"]
+        if len(S1) != len(S2):
             return False
-        for s, e in zip(S, E):
-            if s[0] != e[0]:
+        for c1, c2 in zip(S1, S2):
+            if c1[0] != c2[0]:
                 return False
-            if s[0] == 'L':
-                if s[1] < e[1]:
+            if c1[0] == "L":
+                if c1[1] < c2[1]:
                     return False
-            if s[0] == 'R':
-                if s[1] > e[1]:
+            if c1[0] == "R":
+                if c1[1] > c2[1]:
                     return False
 
         return True
 
 
 print(Solution().canTransform("RXXLRXRXL", "XRLXXRRLX"))
-

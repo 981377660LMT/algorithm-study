@@ -9,22 +9,20 @@ from functools import lru_cache
 
 class Solution:
     def assignBikes(self, workers: List[List[int]], bikes: List[List[int]]) -> int:
-        dists = [[abs(x - r) + abs(y - c) for r, c in bikes] for x, y in workers]
-
         @lru_cache(None)
-        def dfs(cur: int, visited_bike: int) -> int:
-            if cur == len(workers):
+        def dfs(index: int, visited: int) -> int:
+            if index == len(workers):
                 return 0
 
-            res = 0x7FFFFFFF
-            for next_bike in range(len(bikes)):
-                if ((visited_bike >> next_bike) & 1) == 1:
+            res = int(1e20)
+            for j in range(len(bikes)):
+                if (visited >> j) & 1:
                     continue
-                next_cost = dfs(cur + 1, visited_bike | (1 << next_bike))
-                res = min(res, dists[cur][next_bike] + next_cost)
+                res = min(res, dists[index][j] + dfs(index + 1, visited | (1 << j)))
 
             return res
 
+        dists = [[abs(x - r) + abs(y - c) for r, c in bikes] for x, y in workers]
         res = dfs(0, 0)
         dfs.cache_clear()
         return res
@@ -32,4 +30,3 @@ class Solution:
 
 print(Solution().assignBikes([[0, 0], [2, 1]], [[1, 2], [3, 3]]))
 print(Solution().assignBikes([[0, 0], [1, 1], [2, 0]], [[1, 0], [2, 2], [2, 1]]))
-

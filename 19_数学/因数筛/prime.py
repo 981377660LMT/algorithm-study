@@ -6,16 +6,14 @@ from math import floor
 from typing import List
 
 
-def genPrime(n: int) -> List[int]:
+def getPrimes(n: int) -> List[int]:
     """筛法求小于等于n的素数"""
     isPrime = [True] * (n + 1)
-    res = []
     for num in range(2, n + 1):
         if isPrime[num]:
-            res.append(num)
             for multi in range(num * num, n + 1, num):
                 isPrime[multi] = False
-    return res
+    return [num for num in range(2, n + 1) if isPrime[num]]
 
 
 @lru_cache(None)
