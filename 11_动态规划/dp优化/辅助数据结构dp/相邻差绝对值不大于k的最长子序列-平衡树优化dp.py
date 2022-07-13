@@ -1,6 +1,8 @@
 from typing import List
 from sortedcontainers import SortedList
 
+# 类似:
+# !11_动态规划\经典题\前i个数最后一个数为j的n^2dp\E - Distance Sequence.py
 
 # To calculate dp[i], only need to check at most two previous elements:
 # 1. the latest element greater than nums[i], say nums[x].

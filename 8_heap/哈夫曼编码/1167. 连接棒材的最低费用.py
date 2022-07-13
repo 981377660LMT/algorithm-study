@@ -1,3 +1,6 @@
+# 哈夫曼编码
+# 将所有木棒连成一根，每次费用为两个木棒长度之和，求最小费用
+
 import heapq
 from typing import List
 
@@ -25,4 +28,3 @@ print(Solution().connectSticks([1, 8, 3, 5]))
 # 2. 连接 4 和 5 ，费用为 4 + 5 = 9 。现在 sticks = [9,8]
 # 3. 连接 9 和 8 ，费用为 9 + 8 = 17 。现在 sticks = [17]
 # 所有棒材已经连成一根，总费用 4 + 9 + 17 = 30
-

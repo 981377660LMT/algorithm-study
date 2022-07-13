@@ -17,7 +17,7 @@ def getPrimes(n: int) -> List[int]:
 
 
 @lru_cache(None)
-def getPrimeFactors(n: int) -> Counter[int]:
+def getPrimeFactors(n: int) -> "Counter[int]":
     """n 的质因数分解"""
     res = Counter()
     upper = floor(n**0.5) + 1
@@ -55,6 +55,40 @@ def isPrime(n: int) -> bool:
         if n % i == 0:
             return False
     return True
+
+
+class EratosthenesSieve:
+    """埃氏筛"""
+
+    __slots__ = "_f"
+
+    def __init__(self, maxN: int):
+        f = list(range(maxN + 1))
+        upper = int(maxN**0.5) + 1
+        for i in range(2, upper):
+            if f[i] < i:
+                continue
+            for j in range(i * i, maxN + 1, i):
+                if f[j] == j:
+                    f[j] = i
+        self._f = f
+
+    def isPrime(self, n: int) -> bool:
+        if n < 2:
+            return False
+        return self._f[n] == n
+
+    def getFactors(self, n: int) -> "Counter[int]":
+        """n的质因数分解"""
+        res, f = Counter(), self._f
+        while n > 1:
+            m = f[n]
+            res[m] += 1
+            n //= m
+        return res
+
+    def getPrimes(self) -> List[int]:
+        return [x for i, x in enumerate(self._f) if i >= 2 and i == x]
 
 
 if __name__ == "__main__":

@@ -8,6 +8,8 @@ Graph = DefaultDict[int, DefaultDict[int, int]]  # 有向带权图,权值为容�
 
 
 class Dinic:
+    INF = int(1e20)
+
     def __init__(self, graph: Graph) -> None:
         self._graph = graph
 
@@ -59,7 +61,7 @@ class Dinic:
             bfs()
             if depth[end] != -1:
                 while True:
-                    delta = dfsWithCurArc(start, int(1e20))
+                    delta = dfsWithCurArc(start, Dinic.INF)
                     if delta == 0:
                         break
                     res += delta

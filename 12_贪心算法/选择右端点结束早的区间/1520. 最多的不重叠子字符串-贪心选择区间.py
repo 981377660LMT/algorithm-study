@@ -14,7 +14,8 @@ Interval = Tuple[int, int]
 class Solution:
     def maxNumOfSubstrings(self, s: str) -> List[str]:
         """
-        https://leetcode.com/problems/maximum-number-of-non-overlapping-substrings/discuss/743402/21-lines-Python-greedy-solution        1.处理相同字母开头结尾的区间(最多26个)
+        https://leetcode.com/problems/maximum-number-of-non-overlapping-substrings/discuss/743402/21-lines-Python-greedy-solution
+        1.处理相同字母开头结尾的区间(最多26个)
         2.用尽可能多的线段去覆盖这个数轴，且线段间互不相交，线段之和最小
         选区间问题：贪心，尽量选结束时间早的区间，这样就剩下更多位置给右边
         处理出区间后判断每个区间是否合法

@@ -26,6 +26,7 @@ class Solution:
             counter = getPrimeFactors(end)
             for _, k in counter.items():
                 # !n-1个物品放到k+1个槽(1,p,p^2,...p^k)里 即选k个隔板 隔板可重复选
+                # cur *= CWithReplacement(n, k)  # 和下面一样的
                 cur *= put(n - 1, k + 1)
                 cur %= MOD
             res += cur
@@ -68,6 +69,11 @@ def C(n: int, k: int) -> int:
     if n < 0 or k < 0 or n < k:
         return 0
     return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
+
+
+def CWithReplacement(n: int, k: int) -> int:
+    """可重复选取的组合数 itertools.combinations_with_replacement 的个数"""
+    return C(n + k - 1, k)
 
 
 def put(n: int, k: int) -> int:

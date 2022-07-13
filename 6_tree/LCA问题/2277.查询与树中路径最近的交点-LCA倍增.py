@@ -1,6 +1,6 @@
 from typing import List
 from collections import defaultdict
-from LCAManager import LCAManager
+from TreeManager import TreeManager
 
 # n<=1000
 
@@ -12,7 +12,7 @@ class Solution:
         for u, v in edges:
             adjMap[u].add(v)
             adjMap[v].add(u)
-        LCA = LCAManager(n, adjMap)
+        LCA = TreeManager(n, adjMap, root=0, useLCA=True)
 
         # 答案是最(靠下)深的LCA
         res = []
@@ -22,13 +22,13 @@ class Solution:
                     LCA.queryLCA(root1, root3),
                     LCA.queryLCA(root2, root3),
                     LCA.queryLCA(root1, root2),
-                    key=lambda lca: LCA.depth[lca],
+                    key=lambda lca: LCA.depth[lca],  # !按照深度排序
                 )
             )
         return res
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # print(
     #     Solution().closestNode(
     #         n=7,
@@ -45,4 +45,3 @@ if __name__ == '__main__':
             query=[[0, 0, 0], [0, 3, 2], [3, 0, 0], [4, 3, 1]],
         )
     )
-

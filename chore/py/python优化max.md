@@ -58,3 +58,31 @@ print(res)
 # 3. 遍历时保存中间计算结果
 
 ```
+
+- 不要乱用 for 循环 能用多条语句就用多条语句
+
+```Python
+ range(n):
+  for c in range(n):
+      # !注意这里不要用 for 循环 `for dr,dc in DIR2:`
+      if r + 1 < n:
+          dp[r + 1][c] += dp[r][c]
+          dp[r + 1][c] %= MOD
+      if c + 1 < n:
+          dp[r][c + 1] += dp[r][c]
+          dp[r][c + 1] %= MOD
+```
+
+- 注意:product/combinations 会比正常循环慢很多
+
+- self 大量查找属性耗时，可以先将属性存为局部变量
+
+```Python
+mod, fac = self._mod, self._fac  # 这里
+if n >= mod:
+    n = mod
+if self._size < n + 1:
+    for i in range(self._size, n + 1):
+        fac.append(fac[i - 1] * i % mod)
+    self._size = n + 1
+```

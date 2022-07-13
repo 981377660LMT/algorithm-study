@@ -3,40 +3,8 @@
  * @return {number}
  * @description 归并排序mergeTwo的时候用两个指针统计逆序对
  */
-const reversePairs = function (nums: number[]): number {
-  let ans = 0
-
-  //
-  /**
-   *
-   * @param arr1 左边的数组
-   * @param arr2 右边的数组
-   * @description 合并两个有序数组
-   * 这两个数组在源数组中元素下标 为i<j的关系
-   */
-  const mergeTwo = (arr1: number[], arr2: number[]) => {
-    const ll = arr1.length
-    const rl = arr2.length
-    const res: number[] = Array(ll + rl).fill(0)
-    let l = 0
-    let r = 0
-    for (let index = 0; index < ll + rl; index++) {
-      // 超出的情况
-      if (l >= ll) {
-        res[index] = arr2[r]
-      } else if (r >= rl) {
-        res[index] = arr1[l++]
-        // 后面的全都大
-      } else if (arr1[l] > arr2[r]) {
-        ans += ll - l
-        res[index] = arr2[r++]
-      } else {
-        res[index] = arr1[l++]
-      }
-    }
-
-    return res
-  }
+function reversePairs(nums: number[]): number {
+  let res = 0
 
   // 分left/right 递归 合
   const mergeSort = (arr: number[]): number[] => {
@@ -51,7 +19,38 @@ const reversePairs = function (nums: number[]): number {
 
   mergeSort(nums)
 
-  return ans
+  /**
+   *
+   * @param arr1 左边的数组
+   * @param arr2 右边的数组
+   * @description 合并两个有序数组
+   * 这两个数组在源数组中元素下标 为i<j的关系
+   */
+  function mergeTwo(arr1: number[], arr2: number[]) {
+    const n1 = arr1.length
+    const n2 = arr2.length
+    const newArr: number[] = Array(n1 + n2).fill(0)
+    let left = 0
+    let right = 0
+    for (let i = 0; i < n1 + n2; i++) {
+      // 超出的情况
+      if (left >= n1) {
+        newArr[i] = arr2[right]
+      } else if (right >= n2) {
+        newArr[i] = arr1[left++]
+        // 后面的全都大
+      } else if (arr1[left] > arr2[right]) {
+        res += n1 - left
+        newArr[i] = arr2[right++]
+      } else {
+        newArr[i] = arr1[left++]
+      }
+    }
+
+    return newArr
+  }
+
+  return res
 }
 
 const foo = [7, 5, 6, 4]

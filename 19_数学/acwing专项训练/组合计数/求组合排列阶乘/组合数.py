@@ -45,11 +45,12 @@ if __name__ == "__main__":
 #########################################################
 # 预处理组合数 C(n,k)=C(n-1,k)+C(n-1,k-1)
 # 不太快
-comb = [[0] * 36 for _ in range(36)]
-for i in range(36):
+MAX = 100
+comb = [[0] * (MAX + 5) for _ in range((MAX + 5))]
+for i in range(MAX + 2):
     comb[i][0] = 1
     for j in range(1, i + 1):
-        comb[i][j] = comb[i - 1][j - 1] + comb[i - 1][j]
+        comb[i][j] = (comb[i - 1][j - 1] + comb[i - 1][j]) % MOD
 
 print(comb[10][2])
 

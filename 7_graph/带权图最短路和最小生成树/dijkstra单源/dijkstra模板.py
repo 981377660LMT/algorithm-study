@@ -3,24 +3,24 @@
 from collections import defaultdict
 from functools import lru_cache
 from heapq import heappop, heappush
-from typing import DefaultDict, Hashable, List, Optional, Tuple, TypeVar, overload
+from typing import DefaultDict, Hashable, List, Optional, TypeVar, overload
 
 INF = int(1e20)
-Vertex = TypeVar('Vertex', bound=Hashable)
+Vertex = TypeVar("Vertex", bound=Hashable)
 Graph = DefaultDict[Vertex, DefaultDict[Vertex, int]]
 
 
-@overload
-def dijkstra(adjMap: Graph, start: Vertex) -> DefaultDict[Vertex, int]:
-    ...
+# @overload
+# def dijkstra(adjMap: Graph[Vertex], start: Vertex) -> DefaultDict[Vertex, int]:
+#     ...
 
 
-@overload
-def dijkstra(adjMap: Graph, start: Vertex, end: Vertex) -> int:
-    ...
+# @overload
+# def dijkstra(adjMap: Graph[Vertex], start: Vertex, end: Vertex) -> int:
+#     ...
 
 
-def dijkstra(adjMap: Graph, start: Vertex, end: Optional[Vertex] = None):
+def dijkstra(adjMap: Graph[Vertex], start: Vertex, end: Optional[Vertex] = None):
     """时间复杂度O((V+E)logV)"""
     dist = defaultdict(lambda: INF)
     dist[start] = 0  # 注意这里不要忘记初始化pq里的
@@ -43,35 +43,33 @@ def dijkstra(adjMap: Graph, start: Vertex, end: Optional[Vertex] = None):
 ##########################################################################
 def dijkstra2(
     n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int, end: int
-) -> List[int]:
-    """记录路径的dijk 用pre数组记录路径"""
+) -> List[List[int]]:
+    """记录路径的dijk 用pre数组记录路径 1976. 到达目的地的方案数-最短路径计数"""
     dist = [INF] * n
     dist[start] = 0
     pq = [(0, start)]
-    pre = [start] * n
+    pre = [[] for _ in range(n)]
+
     while pq:
         curDist, cur = heappop(pq)
         if dist[cur] < curDist:
             continue
-        if cur == end:
-            break
         for next in adjMap[cur]:
-            if dist[next] > dist[cur] + adjMap[cur][next]:
-                dist[next] = dist[cur] + adjMap[cur][next]
-                pre[next] = cur
+            cand = dist[cur] + adjMap[cur][next]
+            if cand == dist[next]:
+                pre[next].append(cur)
+            elif cand < dist[next]:
+                dist[next] = cand
+                pre[next] = [cur]
                 heappush(pq, (dist[next], next))
 
-    res = [end]
-    cur = end
-    while cur != start:
-        cur = pre[cur]
-        res.append(cur)
-
-    return res[::-1]
+    return pre
 
 
 # 字符串顶点的dijk
-def dijkstra3(adjMap: DefaultDict[str, DefaultDict[str, int]], start: str, end: str) -> int:
+def dijkstra3(
+    adjMap: DefaultDict[str, DefaultDict[str, int]], start: str, end: str
+) -> int:
     """时间复杂度O((V+E)logV)"""
 
     @lru_cache(None)

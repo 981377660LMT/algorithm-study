@@ -2,6 +2,8 @@ from collections import defaultdict, deque
 from typing import DefaultDict, List, Set
 
 # LCA求树两点间的路径
+
+
 class Solution:
     def closestNode(self, n: int, edges: List[List[int]], query: List[List[int]]) -> List[int]:
         def dfs(cur: int, pre: int, dep: int) -> None:
@@ -50,4 +52,3 @@ class Solution:
         depth, parent = defaultdict(int), defaultdict(lambda: -1)
         dfs(0, -1, 0)
         return [bfs(root3, getPath(root1, root2, depth, parent)) for root1, root2, root3 in query]
-

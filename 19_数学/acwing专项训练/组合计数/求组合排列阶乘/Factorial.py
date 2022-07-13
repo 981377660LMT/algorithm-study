@@ -70,20 +70,22 @@ class Factorial:
         return x % self._mod
 
     def _make(self, n: int) -> None:
-        if n >= self._mod:
-            n = self._mod
+        mod, fac = self._mod, self._fac
+        if n >= mod:
+            n = mod
         if self._size < n + 1:
             for i in range(self._size, n + 1):
-                self._fac.append(self._fac[i - 1] * i % self._mod)
+                fac.append(fac[i - 1] * i % mod)
             self._size = n + 1
 
     def _make_inv(self, n: int) -> None:
+        iFac, fac = self._iFac, self._fac
         if n >= self._mod:
             n = self._mod
         self._make(n)
         if self._iSize < n + 1:
             for i in range(self._iSize, n + 1):
-                self._iFac.append(self._modinv(self._fac[i]))
+                iFac.append(self._modinv(fac[i]))
             self._iSize = n + 1
 
     def __call__(self, n: int) -> int:

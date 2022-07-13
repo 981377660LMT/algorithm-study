@@ -14,9 +14,11 @@ class DFSOrder:
         """
         self.starts = [0] * n
         self.ends = [0] * n
+
         self._n = n
         self._tree = tree
         self._dfsId = 1
+
         self._dfs(0, -1)
 
     def queryRange(self, root: int) -> Tuple[int, int]:
@@ -52,7 +54,6 @@ class DFSOrder:
             e[0], e[1] = e[1], e[0]
         ```
         """
-        # !这里避免函数嵌套调用方法 self.queryRange 可以快1500ms
         left1, right1 = self.starts[root], self.ends[root]
         left2, right2 = self.starts[child], self.ends[child]
         return left1 <= left2 <= right2 <= right1
@@ -67,7 +68,7 @@ class DFSOrder:
         self._dfsId += 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     N = 4
     edges = [[0, 1], [1, 2], [2, 3]]
     tree = defaultdict(set)

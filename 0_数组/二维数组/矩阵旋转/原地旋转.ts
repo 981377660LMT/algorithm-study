@@ -1,9 +1,24 @@
-// 先转置后镜像对称
+// 矩阵顺时针旋转
+// [r,c] => [c,ROW-r-1]
+function rotateMatrix(mat: number[][]): number[][] {
+  const ROW = mat.length
+  const COL = mat[0].length
+  const res = Array.from<number, number[]>({ length: COL }, () => Array(ROW).fill(0))
+
+  for (let r = 0; r < ROW; r++) {
+    for (let c = 0; c < COL; c++) {
+      res[c][ROW - r - 1] = mat[r][c]
+    }
+  }
+
+  return res
+}
+
 /**
  Do not return anything, modify matrix in-place instead.
- NxN的矩阵
+ 先转置后镜像对称
  */
-const rotate = (matrix: number[][]): void => {
+function rotate(matrix: number[][]): void {
   const [ROW, COL] = [matrix.length, matrix[0].length]
 
   // 转置
@@ -29,4 +44,4 @@ rotate([
   [7, 8, 9],
 ])
 
-export {}
+export { rotateMatrix }

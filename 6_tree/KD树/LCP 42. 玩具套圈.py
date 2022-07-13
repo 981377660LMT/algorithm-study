@@ -15,4 +15,3 @@ class Solution:
 
 
 print(Solution().circleGame(toys=[[3, 3, 1], [3, 2, 1]], circles=[[4, 3]], r=2))
-

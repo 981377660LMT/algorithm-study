@@ -21,22 +21,15 @@
     - [13.请解释一下 CSS3 的 Flex box（弹性盒布局模型），以及适用场景？](#13请解释一下-css3-的-flex-box弹性盒布局模型以及适用场景)
     - [14.用纯 CSS 创建一个三角形的原理是什么？](#14用纯-css-创建一个三角形的原理是什么)
     - [15.一个满屏品字布局如何设计?](#15一个满屏品字布局如何设计)
-    - [16.CSS 多列等高如何实现？](#16css-多列等高如何实现)
     - [17.经常遇到的浏览器的兼容性有哪些？原因，解决方法是什么，常用 hack 的技巧？](#17经常遇到的浏览器的兼容性有哪些原因解决方法是什么常用-hack-的技巧)
     - [18.li 与 li 之间有看不见的空白间隔是什么原因引起的？有什么解决办法？](#18li-与-li-之间有看不见的空白间隔是什么原因引起的有什么解决办法)
-    - [19.为什么要初始化 CSS 样式？](#19为什么要初始化-css-样式)
-    - [20.什么是包含块，对于包含块的理解?](#20什么是包含块对于包含块的理解)
-    - [21.CSS 里的 visibility 属性有个 collapse 属性值是干嘛用的？在不同浏览器下以后什么区别？](#21css-里的-visibility-属性有个-collapse-属性值是干嘛用的在不同浏览器下以后什么区别)
     - [22.width:auto 和 width:100%的区别](#22widthauto-和-width100的区别)
-    - [23.绝对定位元素与非绝对定位元素的百分比计算的区别](#23绝对定位元素与非绝对定位元素的百分比计算的区别)
     - [24.简单介绍使用图片 base64 编码的优点和缺点。](#24简单介绍使用图片-base64-编码的优点和缺点)
     - [25.'display'、'position'和'float'的相互关系？](#25displayposition和float的相互关系)
     - [26.margin 重叠问题的理解。](#26margin-重叠问题的理解)
     - [27.对 BFC 规范（块级格式化上下文：block formatting context）的理解？](#27对-bfc-规范块级格式化上下文block-formatting-context的理解)
-    - [28.IFC 是什么？](#28ifc-是什么)
     - [29.请解释一下为什么需要清除浮动？清除浮动的方式](#29请解释一下为什么需要清除浮动清除浮动的方式)
     - [30.使用 clear 属性清除浮动的原理？](#30使用-clear-属性清除浮动的原理)
-    - [31.zoom:1 的清除浮动原理?](#31zoom1-的清除浮动原理)
     - [32.移动端的布局用过媒体查询吗？](#32移动端的布局用过媒体查询吗)
     - [33.使用 CSS 预处理器吗？喜欢哪个？](#33使用-css-预处理器吗喜欢哪个)
     - [34.CSS 优化、提高性能的方法有哪些？](#34css-优化提高性能的方法有哪些)
@@ -44,24 +37,15 @@
     - [36.在网页中应该使用奇数还是偶数的字体？为什么呢？](#36在网页中应该使用奇数还是偶数的字体为什么呢)
     - [37.margin 和 padding 分别适合什么场景使用？](#37margin-和-padding-分别适合什么场景使用)
     - [38.抽离样式模块怎么写，说出思路，有无实践经验？[阿里航旅的面试题]](#38抽离样式模块怎么写说出思路有无实践经验阿里航旅的面试题)
-    - [39.简单说一下 css3 的 all 属性。](#39简单说一下-css3-的-all-属性)
     - [40.为什么不建议使用统配符初始化 css 样式。](#40为什么不建议使用统配符初始化-css-样式)
-    - [41.absolute 的 containingblock（包含块）计算方式跟正常流有什么不同？](#41absolute-的-containingblock包含块计算方式跟正常流有什么不同)
-    - [42.对于 hasLayout 的理解？](#42对于-haslayout-的理解)
-    - [43.元素竖向的百分比设定是相对于容器的高度吗？](#43元素竖向的百分比设定是相对于容器的高度吗)
     - [44.全屏滚动的原理是什么？用到了 CSS 的哪些属性？（待深入实践;重点）](#44全屏滚动的原理是什么用到了-css-的哪些属性待深入实践重点)
     - [45.什么是响应式设计？响应式设计的基本原理是什么？如何兼容低版本的 IE？（待深入了解）](#45什么是响应式设计响应式设计的基本原理是什么如何兼容低版本的-ie待深入了解)
-    - [46.视差滚动效果，如何给每页做不同的动画？（回到顶部，向下滑动要再次出现，和只出现一次分别怎么做？）](#46视差滚动效果如何给每页做不同的动画回到顶部向下滑动要再次出现和只出现一次分别怎么做)
-    - [47.如何修改 chrome 记住密码后自动填充表单的黄色背景？](#47如何修改-chrome-记住密码后自动填充表单的黄色背景)
     - [48.怎么让 Chrome 支持小于 12px 的文字？](#48怎么让-chrome-支持小于-12px-的文字)
-    - [49.让页面里的字体变清晰，变细用 CSS 怎么做？](#49让页面里的字体变清晰变细用-css-怎么做)
     - [50.font-style 属性中 italic 和 oblique 的区别？](#50font-style-属性中-italic-和-oblique-的区别)
     - [51.设备像素、css 像素、设备独立像素、dpr、ppi 之间的区别？](#51设备像素css-像素设备独立像素dprppi-之间的区别)
     - [52.layout viewport、visual viewport 和 ideal viewport 的区别？](#52layout-viewportvisual-viewport-和-ideal-viewport-的区别)
-    - [53.position:fixed;在 android 下无效怎么处理？](#53positionfixed在-android-下无效怎么处理)
     - [54.如果需要手动写动画，你认为最小时间间隔是多久，为什么？（阿里）](#54如果需要手动写动画你认为最小时间间隔是多久为什么阿里)
     - [55.如何让去除 inline-block 元素间间距？](#55如何让去除-inline-block-元素间间距)
-    - [56.overflow:scroll 时不能平滑滚动的问题怎么处理？](#56overflowscroll-时不能平滑滚动的问题怎么处理)
     - [57.有一个高度自适应的 div，里面有两个 div，一个高度 100px，希望另一个填满剩下的高度。](#57有一个高度自适应的-div里面有两个-div一个高度-100px希望另一个填满剩下的高度)
     - [58.png、jpg、gif 这些图片格式解释一下，分别什么时候用。有没有了解过 webp？](#58pngjpggif-这些图片格式解释一下分别什么时候用有没有了解过-webp)
     - [59.浏览器如何判断是否支持 webp 格式图片](#59浏览器如何判断是否支持-webp-格式图片)
@@ -70,37 +54,22 @@
     - [62.什么是 CSS 预处理器/后处理器？](#62什么是-css-预处理器后处理器)
     - [63.阐述一下 CSSSprites](#63阐述一下-csssprites)
     - [64.使用 rem 布局的优缺点？](#64使用-rem-布局的优缺点)
-    - [65.几种常见的 CSS 布局](#65几种常见的-css-布局)
     - [66.画一条 0.5px 的线](#66画一条-05px-的线)
     - [67.transition 和 animation 的区别](#67transition-和-animation-的区别)
-    - [68.什么是首选最小宽度？](#68什么是首选最小宽度)
     - [69.为什么 height:100%会无效？](#69为什么-height100会无效)
     - [70.min-width/max-width 和 min-height/max-height 属性间的覆盖规则？](#70min-widthmax-width-和-min-heightmax-height-属性间的覆盖规则)
-    - [71.内联盒模型基本概念](#71内联盒模型基本概念)
-    - [72.什么是幽灵空白节点？](#72什么是幽灵空白节点)
-    - [73.什么是替换元素？](#73什么是替换元素)
-    - [74.替换元素的计算规则？](#74替换元素的计算规则)
-    - [75.content 与替换元素的关系？](#75content-与替换元素的关系)
     - [76.margin:auto 的填充规则？](#76marginauto-的填充规则)
-    - [77.margin 无效的情形](#77margin-无效的情形)
     - [78.border 的特殊性？](#78border-的特殊性)
     - [79.什么是基线和 x-height？](#79什么是基线和-x-height)
     - [80.line-height 的特殊性？](#80line-height-的特殊性)
     - [81.vertical-align 的特殊性？](#81vertical-align-的特殊性)
     - [82.overflow 的特殊性？](#82overflow-的特殊性)
     - [83.无依赖绝对定位是什么？](#83无依赖绝对定位是什么)
-    - [84.absolute 与 overflow 的关系？](#84absolute-与-overflow-的关系)
-    - [85.clip 裁剪是什么？](#85clip-裁剪是什么)
     - [86.relative 的特殊性？](#86relative-的特殊性)
     - [87.什么是层叠上下文？](#87什么是层叠上下文)
-    - [88.什么是层叠水平？](#88什么是层叠水平)
-    - [89.元素的层叠顺序？](#89元素的层叠顺序)
     - [90.层叠准则？](#90层叠准则)
     - [91.font-weight 的特殊性？](#91font-weight-的特殊性)
-    - [92.text-indent 的特殊性？](#92text-indent-的特殊性)
-    - [93.letter-spacing 与字符间距？](#93letter-spacing-与字符间距)
     - [94.word-spacing 与单词间距？](#94word-spacing-与单词间距)
-    - [95.white-space 与换行和空格的控制？](#95white-space-与换行和空格的控制)
     - [96.隐藏元素的 background-image 到底加不加载？](#96隐藏元素的-background-image-到底加不加载)
     - [97.如何实现单行／多行文本溢出的省略（...）？](#97如何实现单行多行文本溢出的省略)
     - [98.常见的元素隐藏方式？](#98常见的元素隐藏方式)
@@ -118,7 +87,9 @@
 
 盒模型都是由四个部分组成的，分别是 margin、border、padding 和 content。
 
-标准盒模型和 IE 盒模型的区别在于设置 width 和 height 时，所对应的范围不同。标准盒模型的 width 和 height 属性的范围只包含了 content，而 IE 盒模型的 width 和 height 属性的范围包含了 border、padding 和 content。
+标准盒模型和 IE 盒模型的区别在于设置 width 和 height 时，所对应的范围不同。
+标准盒模型(content-box)的 width 和 height 属性的范围只包含了 content，
+而 IE 盒模型(border-box)的 width 和 height 属性的范围包含了 border、padding 和 content。
 
 一般来说，我们可以通过修改元素的 box-sizing 属性来改变元素的盒模型。
 
@@ -146,10 +117,6 @@
 单冒号（:）用于 CSS3 伪类，双冒号（::）用于 CSS3 伪元素。（伪元素由双冒号和伪元素名称组成）
 双冒号是在当前规范中引入的，用于区分伪类和伪元素。`不过浏览器需要同时支持旧的已经存在的伪元素写法，比如:first-line、:first-letter、:before、:after 等， 而新的在 CSS3 中引入的伪元素则不允许再支持旧的单冒号的写法。`
 
-想让插入的内容出现在其它内容前，使用::before，否者，使用::after；
-在`代码顺序`上，::after 生成的内容也比::before 生成的内容靠后。
-如果按堆栈视角，::after 生成的内容会在::before 生成的内容之上。
-
 回答：
 
 在 css3 中使用单冒号来表示伪类，用双冒号来表示伪元素。但是为了兼容已有的伪元素的写法，在一些浏览器中也可以使用单冒号来表示伪元素。
@@ -158,13 +125,11 @@
 
 #### 4.伪类与伪元素的区别
 
-css 引入伪类和伪元素概念是为了格式化文档树以外的信息。也就是说，伪类和伪元素是用来修饰不在文档树中的部分，比如，一句话中的第一个字母，或者是列表中的第一个元素。
+css 引入伪类和伪元素概念是为了`格式化文档树以外的信息`。也就是说，伪类和伪元素是用来修饰不在文档树中的部分，比如，一句话中的第一个字母，或者是列表中的第一个元素。
 
 伪类用于当已有的元素处于某个状态时，为其添加对应的样式，这个状态是根据用户行为而动态变化的。比如说，当用户悬停在指定的元素时，我们可以通过:hover 来描述这个元素的状态。
 
 伪元素用于创建一些不在文档树中的元素，并为其添加样式。它们允许我们为元素的某些部分设置样式。比如说，我们可以通过::before 来在一个元素前增加一些文本，并为这些文本添加样式。虽然用户可以看到这些文本，但是这些文本实际上`不在文档树中。`
-
-有时你会发现伪元素使用了两个冒号（::）而不是一个冒号（:）。这是 CSS3 的一部分，并尝试区分伪类和伪元素。大多数浏览器都支持这两个值。按照规则应该使用（::）而不是（:），从而区分伪类和伪元素。但是，由于在旧版本的 W3C 规范并未对此进行特别区分，因此目前绝大多数的浏览器都支持使用这两种方式表示伪元素。
 
 详细资料可以参考：
 [《总结伪类与伪元素》](http://www.alloyteam.com/2016/05/summary-of-pseudo-classes-and-pseudo-elements/)
@@ -179,7 +144,7 @@ css 引入伪类和伪元素概念是为了格式化文档树以外的信息。�
 
 当元素的一个`非继承属性`（在 Mozilla code 里有时称之为 reset property）没有指定值时，则取属性的初始值 `initial value`（该值在该属性的概述里被指定）。
 
-有继承性的属性：
+**有继承性的属性**：
 
 （1）`字体系列属性`
 font、font-family、font-weight、font-size、font-style、font-variant、font-stretch、font-size-adjust
@@ -187,10 +152,10 @@ font、font-family、font-weight、font-size、font-style、font-variant、font-
 （2）`文本系列属性`
 text-indent、text-align、text-shadow、line-height、word-spacing、letter-spacing、text-transform、direction、color
 
-（3）表格布局属性
+（3）`表格布局属性`
 caption-side border-collapse empty-cells
 
-（4）列表属性
+（4）`列表属性`
 list-style-type、list-style-image、list-style-position、list-style
 
 （5）`光标属性`
@@ -203,7 +168,7 @@ visibility
 
 注意：`当一个属性不是继承属性时，可以使用 inherit 关键字指定一个属性应从父元素继承它的值`，inherit 关键字用于显式地指定继承性，可用于任何继承性/非继承性属性。
 
-回答：
+**回答**：
 
 每一个属性在定义中都给出了这个属性是否具有继承性，一个具有继承性的属性会在没有指定值的时候，会使用父元素的同属性的值来作为自己的值。
 
@@ -259,15 +224,12 @@ CSS 的优先级是根据样式声明的特殊性值来判断的。
 
 回答：
 
-判断优先级时，首先我们会判断一条属性声明是否有权重，也就是是否在声明后面加上了!important。一条声明如果加上了权重，
-那么它的优先级就是最高的，前提是它之后不再出现相同权重的声明。如果权重相同，我们则需要去比较匹配规则的特殊性。
+判断优先级时，首先我们会判断一条属性声明是否有权重，也就是是否在声明后面加上了`!important`。一条声明如果加上了权重，那么它的优先级就是最高的，前提是它之后不再出现相同权重的声明。如果权重相同，我们则需要去比较匹配规则的特殊性。
 
 一条匹配规则一般由多个选择器组成，一条规则的特殊性由组成它的选择器的特殊性累加而成。选择器的特殊性可以分为四个等级，
-第一个等级是行内样式，为 1000，第二个等级是 id 选择器，为 0100，第三个等级是类选择器、伪类选择器和属性选择器，为 0010，
-第四个等级是元素选择器和伪元素选择器，为 0001。规则中每出现一个选择器，就将它的特殊性进行叠加，这个叠加只限于对应的等
-级的叠加，不会产生进位。选择器特殊性值的比较是从左向右排序的，也就是说以 1 开头的特殊性值比所有以 0 开头的特殊性值要大。
-比如说特殊性值为 1000 的的规则优先级就要比特殊性值为 0999 的规则高。如果两个规则的特殊性值相等的时候，那么就会根据它们引
-入的顺序，后出现的规则的优先级最高。
+第一个等级是`行内样式`，为 1000，第二个等级是 `id 选择器`，为 0100，第三个等级是`类选择器、伪类选择器和属性选择器`，为 0010，
+第四个等级是`元素选择器和伪元素`选择器，为 0001。规则中每出现一个选择器，就将它的特殊性进行叠加，这个叠加只限于对应的等级的叠加，不会产生进位。选择器特殊性值的比较是从左向右排序的，也就是说以 1 开头的特殊性值比所有以 0 开头的特殊性值要大。
+比如说特殊性值为 1000 的的规则优先级就要比特殊性值为 0999 的规则高。如果两个规则的特殊性值相等的时候，那么就会根据它们`引入的顺序`，后出现的规则的优先级最高。
 
 对于组合声明的特殊性值计算可以参考：
 [《CSS 优先级计算及应用》](https://www.jianshu.com/p/1c4e639ff7d5)
@@ -279,12 +241,10 @@ CSS 的优先级是根据样式声明的特殊性值来判断的。
 a 标签有四种状态：链接访问前、链接访问后、鼠标滑过、激活，分别对应四种伪类:link、:visited、:hover、:active；
 
 当链接未访问过时：
-
 （1）当鼠标滑过 a 链接时，满足:link 和:hover 两种状态，要改变 a 标签的颜色，就必须将`:hover 伪类在:link 伪类后面声明`；
 （2）当鼠标点击激活 a 链接时，同时满足:link、:hover、:active 三种状态，要显示 a 标签激活时的样式（:active），`必须将:active 声明放到:link 和:hover 之后`。因此得出 LVHA 这个顺序。
 
 当链接访问过时，情况基本同上，只不过需要将:link 换成:visited。
-
 这个顺序能不能变？可以，但也`只有:link 和:visited 可以交换位置`，因为一个链接要么访问过要么没访问过，不可能同时满足，
 也就不存在覆盖的问题。
 
@@ -327,135 +287,56 @@ a 标签有四种状态：链接访问前、链接访问后、鼠标滑过、激
 
 -水平居中：给 div 设置一个宽度，然后添加 margin:0 auto 属性
 
-css
+```CSS
 div {
-width: 200px;
-margin: 0 auto;
+  width: 200px;
+  margin: 0 auto;
 }
-
--水平居中，利用 text-align:center 实现
-
-css
-.container {
-background: rgba(0, 0, 0, 0.5);
-text-align: `center`;
-font-size: 0;
-}
-
-.box {
-display: `inline-block`;
-width: 500px;
-height: 400px;
-background-color: pink;
-}
-
--让绝对定位的 div 居中
-
-css
-div {
-position: absolute;
-width: 300px;
-height: 300px;
-margin: auto;
-top: 0;
-left: 0;
-bottom: 0;
-right: 0;
-background-color: pink; /_方便看效果_/
-}
-
--水平垂直居中一
-
-css
-/_确定容器的宽高宽 500 高 300 的层设置层的外边距 div{_/
-position: absolute;/_绝对定位_/
-width: 500px;
-height: 300px;
-top: 50%;
-left: 50%;
-margin: -150px00-250px;/_外边距为自身宽高的一半_/
-background-color: pink;/_方便看效果_/
-}
+```
 
 -水平垂直居中二
 
-css
-/_未知容器的宽高，利用`transform`属性_/
+```CSS
+/*未知容器的宽高，利用`transform`属性*/
 div {
-position: absolute; /_相对定位或绝对定位均可_/
-width: 500px;
-height: 300px;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-background-color: pink; /_方便看效果_/
+  position: absolute; /*相对定位或绝对定位均可*/
+  width: 500px;
+  height: 300px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: pink; /*方便看效果*/
 }
+```
 
 -水平垂直居中三
 
-css
-/_利用 flex 布局实际使用时应考虑兼容性_/
+```CSS
+/*利用flex布局实际使用时应考虑兼容性*/
 .container {
-display: flex;
-align-items: center; /_垂直居中_/
-justify-content: center; /_水平居中_/
+  display: flex;
+  align-items: center; /*垂直居中*/
+  justify-content: center; /*水平居中*/
 }
+
 .containerdiv {
-width: 100px;
-height: 100px;
-background-color: pink; /_方便看效果_/
+  width: 100px;
+  height: 100px;
+  background-color: pink; /*方便看效果*/
 }
-
--水平垂直居中四
-
-css
-/_利用 text-align:center 和 vertical-align:middle 属性_/
-.container {
-position: fixed;
-top: 0;
-right: 0;
-bottom: 0;
-left: 0;
-background: rgba(0, 0, 0, 0.5);
-text-align: center;
-font-size: 0;
-white-space: nowrap;
-overflow: auto;
-}
-
-.container::after {
-content: '';
-display: inline-block;
-height: 100%;
-vertical-align: middle;
-}
-
-.box {
-display: inline-block;
-width: 500px;
-height: 400px;
-background-color: pink;
-white-space: normal;
-vertical-align: middle;
-}
+```
 
 回答：
 
-一般常见的几种居中的方法有：
+一般常见的几种居中的方法有 3 种：
 
 对于宽高固定的元素
 
 （1）我们可以利用 margin:0 auto 来实现元素的水平居中。
 
-（2）利用`绝对定位，设置四个方向的值都为 0，并将 margin 设置为 auto`，由于宽高固定，因此对应方向实现平分，可以实现水平和垂直方向上的居中。
+（2）利用绝对定位，先将元素的左上角通过 top:50%和 left:50%定位到页面的中心，然后再通过 translate 来调整元素的中心点到页面的中心。
 
-（3）利用绝对定位，先将元素的左上角通过 top:50%和 left:50%定位到页面的中心，然后再通过 margin 负值来调整元素
-的中心点到页面的中心。
-
-（4）利用绝对定位，先将元素的左上角通过 top:50%和 left:50%定位到页面的中心，然后再通过 translate 来调整元素
-的中心点到页面的中心。
-
-（5）使用 flex 布局，通过 align-items:center 和 justify-content:center 设置容器的垂直和水平方向上为居中对
+（3）使用 flex 布局，通过 align-items:center 和 justify-content:center 设置容器的垂直和水平方向上为居中对
 齐，然后它的子元素也可以实现垂直和水平的居中。
 
 对于宽高不定的元素，上面的后面两种方法，可以实现元素的垂直和水平的居中。
@@ -467,7 +348,6 @@ none 元素不显示，并从文档流中移除。
 inline 行内元素类型。默认宽度为内容宽度，不可设置宽高，同行显示。
 inline-block 默认宽度为内容宽度，可以设置宽高，同行显示。
 list-item 像块类型元素一样显示，并添加样式列表标记。
-table 此元素会作为块级表格来显示。 不推荐用，回流与重绘影响性能
 `inherit 规定应该从父元素继承 display 属性的值。`
 
 详细资料可以参考：
@@ -477,19 +357,19 @@ table 此元素会作为块级表格来显示。 不推荐用，回流与重绘�
 
 相关知识点：
 
-absolute
+**absolute**
 生成绝对定位的元素，相对于值不为 static 的第一个父元素的 padding box 进行定位，也可以理解为离自己这一级元素最近的一级 position 设置为 absolute 或者 relative 的父元素的 padding box 的左上角为原点的。
 
-fixed（老 IE 不支持）
+**fixed**（老 IE 不支持）
 生成绝对定位的元素，相对于浏览器窗口进行定位。
 
-relative
-生成相对定位的元素，相对于其元素本身所在正常位置进行定位。
+**relative**
+生成相对定位的元素，相对于其`元素本身`所在正常位置进行定位。
 
-static
+**static**
 默认值。没有定位，元素出现在正常的流中（忽略 top,bottom,left,right,z-index 声明）。
 
-inherit
+**inherit**
 规定从父元素继承 position 属性的值。
 
 回答：
@@ -501,15 +381,15 @@ absolute 定位的元素，是`相对于它的第一个 position 值不为 stati
 
 #### 12.CSS3 有哪些新特性？（根据项目回答）
 
-新增各种 CSS 选择器 （`:not(.foo)：所有 class 不是“foo”的节点`）
-圆角 （border-radius:8px）
+`新增各种 CSS 选择器` （`:not(.foo)：所有 class 不是“foo”的节点`）
+`圆角` （border-radius:8px）
 多列布局 （multi-column layout）
 阴影和反射 （Shadow\Reflect）
 文字特效 （text-shadow）
 文字渲染 （Text-decoration）
 线性渐变 （gradient）
-旋转 （transform）
-缩放，定位，倾斜，动画，多背景
+`旋转 （transform）`
+缩放，定位，倾斜，`动画`，多背景
 例如：transform:\scale(0.85,0.90)\translate(0px,-30px)\skew(-9deg,0deg)\Animation:
 
 #### 13.请解释一下 CSS3 的 Flex box（弹性盒布局模型），以及适用场景？
@@ -525,37 +405,27 @@ Flex 是 FlexibleBox 的缩写，意为"弹性布局"，用来为盒状模型提
 容器默认存在两根轴：水平的主轴（main axis）和垂直的交叉轴（cross axis），项目默认沿主轴排列。
 
 以下 6 个属性设置在容器上。
-
 flex-direction 属性决定主轴的方向（即项目的排列方向）。
 flex-wrap 属性定义，如果一条轴线排不下，如何换行。
 flex-flow 属性是 flex-direction 属性和 flex-wrap 属性的简写形式，默认值为 row nowrap。
-justify-content 属性定义了项目在主轴上的对齐方式。
-align-items 属性定义项目在交叉轴上如何对齐。
+justify-content 属性定义了`项目在主轴上的对齐方式`。
+align-items 属性定义项目在`交叉轴上如何对齐`。
 align-content 属性定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用。
 
 以下 6 个属性设置在项目上。
-
 order 属性定义项目的排列顺序。数值越小，排列越靠前，默认为 0。
-flex-grow 属性定义项目的放大比例，`默认为 0`，即如果存在剩余空间，也不放大。
-flex-shrink 属性定义了项目的缩小比例，`默认为 1`，即如果空间不足，该项目将缩小。
-flex-basis 属性定义了在分配多余空间之前，项目占据的主轴空间。浏览器根据这个属性，计算主轴是否有多余空间。它的默认值为 `auto`，即项目的本来大小。
+`flex-grow` 属性定义项目的放大比例，`默认为 0`，即如果存在剩余空间，也不放大。
+`flex-shrink` 属性定义了项目的缩小比例，`默认为 1`，即如果空间不足，该项目将缩小。
+`flex-basis` 属性定义了在分配多余空间之前，项目占据的主轴空间。浏览器根据这个属性，计算主轴是否有多余空间。它的默认值为 `auto`，即项目的本来大小。
 
-flex 属性是 flex-grow，flex-shrink 和 flex-basis 的简写，默认值为 0 1 auto。
+btw,flex 属性是 flex-grow，flex-shrink 和 flex-basis 的简写，默认值为 0 1 auto。
 
-align-self 属性允许单个项目有与其他项目不一样的对齐方式，可覆盖 align-items 属性。默认值为 auto，表示继承父
-元素的 align-items 属性，如果没有父元素，则等同于 stretch。
+`align-self` 属性允许单个项目有与其他项目不一样的对齐方式，可覆盖 align-items 属性。默认值为 auto，表示继承父元素的 align-items 属性，如果没有父元素，则等同于 stretch。
 
 回答：
-
-flex 布局是 CSS3 新增的一种布局方式，我们可以通过将一个元素的 display 属性值设置为 flex 从而使它成为一个 flex
-容器，它的所有子元素都会成为它的项目。
-
-一个容器默认有两条轴，一个是水平的主轴，一个是与主轴垂直的交叉轴。我们可以使用 flex-direction 来指定主轴的方向。
-我们可以使用 justify-content 来指定元素在主轴上的排列方式，使用 align-items 来指定元素在交叉轴上的排列方式。还
-可以使用 flex-wrap 来规定当一行排列不下时的换行方式。
-
-对于容器中的项目，我们可以使用 order 属性来指定项目的排列顺序，还可以使用 flex-grow 来指定当排列空间有剩余的时候，
-项目的放大比例。还可以使用 flex-shrink 来指定当排列空间不足时，项目的缩小比例。
+flex 布局是 CSS3 新增的一种布局方式，我们可以通过将一个元素的 display 属性值设置为 flex 从而使它成为一个 flex 容器，它的所有子元素都会成为它的项目。
+一个容器默认有两条轴，一个是水平的主轴，一个是与主轴垂直的交叉轴。我们可以使用 flex-direction 来指定主轴的方向。我们可以使用 justify-content 来指定元素在主轴上的排列方式，使用 align-items 来指定元素在交叉轴上的排列方式。还可以使用 flex-wrap 来规定当一行排列不下时的换行方式。
+对于容器中的项目，我们可以使用 order 属性来指定项目的排列顺序，还可以使用 flex-grow 来指定当排列空间有剩余的时候，项目的放大比例。还可以使用 flex-shrink 来指定当排列空间不足时，项目的缩小比例。
 
 详细资料可以参考：
 [《Flex 布局教程：语法篇》](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html)
@@ -563,16 +433,18 @@ flex 布局是 CSS3 新增的一种布局方式，我们可以通过将一个元
 
 #### 14.用纯 CSS 创建一个三角形的原理是什么？
 
-css
+```css
 采用的是相邻边框连接处的均分原理。
-`将元素的宽高设为 0，只设置border，把任意三条边隐藏掉（颜色设为transparent）`，剩下的就是一个三角形。
-#demo {
-width: 0;
-height: 0;
-border-width: 20px;
-border-style: solid;
-border-color: transparent transparent red transparent;
+  将元素的宽高设为0，只设置
+  border，把任意三条边隐藏掉（颜色设为transparent），剩下的就是一个三角形。
+  #demo {
+  width: 0;
+  height: 0;
+  border-width: 20px;
+  border-style: solid;
+  border-color: transparent transparent red transparent;
 }
+```
 
 #### 15.一个满屏品字布局如何设计?
 
@@ -581,59 +453,13 @@ border-color: transparent transparent red transparent;
 下面的两个 div 分别宽 50%，
 然后用 float 或者 inline 使其不换行即可
 
-#### 16.CSS 多列等高如何实现？
-
-（1）利用 padding-bottom|margin-bottom 正负值相抵，不会影响页面布局的特点。设置父容器设置超出隐藏（overflow:hidden），这样父容器的高度就还是它里面的列没有设定 padding-bottom 时的高度，当它里面的任一列高度增加了，则
-父容器的高度被撑到里面最高那列的高度，其他比这列矮的列会用它们的 padding-bottom 补偿这部分高度差。
-
-（2）利用 table-cell 所有单元格高度都相等的特性，来实现多列等高。
-
-（3）利用 flex 布局中项目 align-items 属性默认为 stretch，如果项目未设置高度或设为 auto，将占满整个容器的高度的特性，来实现多列等高。
-
-详细资料可以参考：
-[《前端应该掌握的 CSS 实现多列等高布局》](https://juejin.im/post/5b0fb34151882515662238fd)
-[《CSS：多列等高布局》](https://codepen.io/yangbo5207/post/equh)
-
 #### 17.经常遇到的浏览器的兼容性有哪些？原因，解决方法是什么，常用 hack 的技巧？
-
-（1）png24 位的图片在 iE6 浏览器上出现背景解决方案：做成 PNG8，也可以引用一段脚本处理。
 
 （2）`浏览器默认的 margin 和 padding 不同`
 解决方案：加一个全局的\*{margin:0;padding:0;}来统一。
 
-（3）IE6 双边距 bug：在 IE6 下，如果对元素设置了浮动，同时又设置了 margin-left 或
-margin-right，margin 值会加倍。
-
-#box{float:left;width:10px;margin:0 0 0 10px;}
-
-这种情况之下 IE 会产生 20px 的距离
-解决方案：在 float 的标签样式控制中加入*display:inline;将其转化为行内属性。(*这个符号只有 ie6 会识别)
-
-（4）渐进识别的方式，从总体中逐渐排除局部。
-首先，巧妙的使用"\9"这一标记，将 IE 游览器从所有情况中分离出来。
-接着，再次使用"+"将 IE8 和 IE7、IE6 分离开来，这样 IE8 已经独立识别。
-.bb{
-background-color:#f1ee18;/_所有识别_/
-.background-color:#00deff\9;/_IE6、7、8 识别_/
-+background-color:#a200ff;/_IE6、7 识别_/
-\_background-color:#1e0bd1;/_IE6 识别_/
-}
-
-（5）IE 下，可以使用获取常规属性的方法来获取自定义属性，也可以使用 getAttribute()获取自定义
-属性；Firefox 下，只能使用 getAttribute()获取自定义属性
-解决方法：统一通过 getAttribute()获取自定义属性。
-
-（6）IE 下，event 对象有 x、y 属性，但是没有 pageX、pageY 属性;Firefox 下，event 对象有
-pageX、pageY 属性，但是没有 x、y 属性。
-解决方法：（条件注释）缺点是在 IE 浏览器下可能会增加额外的 HTTP 请求数。
-
 （7）`Chrome 中文界面下默认会将小于 12px 的文本强制按照 12px 显示`
-解决方法：
-
-1.可通过加入 CSS 属性-webkit-text-size-adjust:none;解决。但是，在 chrome
-更新到 27 版本之后就不可以用了。
-
-2.还可以使用`-webkit-transform:scale(0.5);`注意-webkit-transform:scale(0.75);
+解决方法：可以使用`-webkit-transform:scale(0.5);`注意-webkit-transform:scale(0.75);
 `收缩的是整个 span 的大小，这时候，必须要将 span 转换成块元素，可以使用 display：block/inline-block/...；`
 
 （8）超链接访问过后 hover 样式就不出现了，被点击访问过的超链接样式不再具有 hover 和 active 了
@@ -644,7 +470,7 @@ pageX、pageY 属性，但是没有 x、y 属性。
 
 #### 18.li 与 li 之间有看不见的空白间隔是什么原因引起的？有什么解决办法？
 
-浏览器会把 `inline 元素间的空白字符（空格、换行、Tab 等）渲染成一个空格`。而为了美观。我们通常是一个<li>放在一行，这导致<li>换行后产生换行字符，它变成一个空格，占用了一个字符的宽度。
+浏览器会把 `inline 元素间的空白字符（空格、换行、Tab 等）渲染成一个空格`。而为了美观。我们通常是一个<li>放在一行，这导致<li>`换行后产生换行字符，它变成一个空格`，占用了一个字符的宽度。
 
 解决办法：
 
@@ -660,87 +486,18 @@ pageX、pageY 属性，但是没有 x、y 属性。
 详细资料可以参考：
 [《li 与 li 之间有看不见的空白间隔是什么原因引起的？》](https://blog.csdn.net/sjinsa/article/details/70919546)
 
-#### 19.为什么要初始化 CSS 样式？
-
--因为浏览器的兼容问题，不同浏览器对有些标签的默认值是不同的，如果没对 CSS 初始化往往会出现浏览器之间的页面显示差异。
-
--当然，初始化样式会对 SEO 有一定的影响，但鱼和熊掌不可兼得，但力求影响最小的情况下初始化。
-
-最简单的初始化方法：\*{padding:0;margin:0;}（强烈不建议）
-
-淘宝的样式初始化代码：
-body,h1,h2,h3,h4,h5,h6,hr,p,blockquote,dl,dt,dd,ul,ol,li,pre,form,fieldset,legend
-,button,input,textarea,th,td{margin:0;padding:0;}
-body,button,input,select,textarea{font:12px/1.5tahoma,arial,\5b8b\4f53;}
-h1,h2,h3,h4,h5,h6{font-size:100%;}
-address,cite,dfn,em,var{font-style:normal;}
-code,kbd,pre,samp{font-family:couriernew,courier,monospace;}
-small{font-size:12px;}
-ul,ol{list-style:none;}
-a{text-decoration:none;}
-a:hover{text-decoration:underline;}
-sup{vertical-align:text-top;}
-sub{vertical-align:text-bottom;}
-legend{color:#000;}
-fieldset,img{border:0;}
-button,input,select,textarea{font-size:100%;}
-table{border-collapse:collapse;border-spacing:0;}
-
-#### 20.什么是包含块，对于包含块的理解?
-
-包含块（containing block）就是`元素用来计算和定位的一个框`。
-
-（1）根元素（很多场景下可以看成是<html>）被称为“初始包含块”，其尺寸等同于浏览器可视窗口的大小。
-
-（2）对于其他元素，如果该元素的 position 是 relative 或者 static，则“包含块”由其最近的块容器祖先盒的 content box 边界形成。
-
-（3）如果元素 position:fixed，则“包含块”是“初始包含块”。
-
-（4）如果元素 position:absolute，则“包含块”由最近的 position 不为 static 的祖先元素建立，具体方式如下：
-
-如果该祖先元素是纯 inline 元素，则规则略复杂：
-•假设给内联元素的前后各生成一个宽度为 0 的内联盒子（inline box），则这两个内联盒子的 padding box 外面的包
-围盒就是内联元素的“包含块”；
-•如果该内联元素被跨行分割了，那么“包含块”是未定义的，也就是 CSS2.1 规范并没有明确定义，浏览器自行发挥
-否则，“包含块”由该祖先的 padding box 边界形成。
-
-如果没有符合条件的祖先元素，则“包含块”是“初始包含块”。
-
-#### 21.CSS 里的 visibility 属性有个 collapse 属性值是干嘛用的？在不同浏览器下以后什么区别？
-
-（1）`对于一般的元素，它的表现跟 visibility：hidden;是一样的。元素是不可见的，但此时仍占用页面空间。`
-
-（2）但例外的是，如果这个元素是 table 相关的元素，`例如 table 行，table group，table 列，table column group，它的表现却跟 display:none 一样`，也就是说，它们占用的空间也会释放。
-
-在不同浏览器下的区别：
-
-在谷歌浏览器里，使用 collapse 值和使用 hidden 值没有什么区别。
-
-在火狐浏览器、Opera 和 IE11 里，使用 collapse 值的效果就如它的字面意思：table 的行会消失，它的下面一行会补充它的位
-置。
-
-详细资料可以参考：
-[《CSS 里的 visibility 属性有个鲜为人知的属性值：collapse》](http://www.webhek.com/post/visibility-collapse.html)
-
 #### 22.width:auto 和 width:100%的区别
 
 设置了 padding 和 margin 后:
 
 width:100%会使元素 `box 的宽度等于父元素的 content box 的宽度`。
-会发生内容溢出父节点的情况
+**会发生内容溢出父节点的情况**
 
 width:auto 会使`元素撑满整个父元素`，margin、border、padding、content 区域会自动分配水平空间。浏览器会自己选择一个合适的宽度值,不用担心当元素自身有 margin、padding 、border 时，宽度会超过父节点。
 
-#### 23.绝对定位元素与非绝对定位元素的百分比计算的区别
-
-绝对定位元素的宽高百分比是相对于临近的 position 不为 static 的祖先元素的 padding box 来计算的。
-
-非绝对定位元素的宽高百分比则是相对于父元素的 content box 来计算的。
-
 #### 24.简单介绍使用图片 base64 编码的优点和缺点。
 
-base64 编码是一种图片处理格式，通过特定的算法将图片编码成一长串字符串，在页面上显示的时候，可以用该字符串来代替图片的
-url 属性。
+base64 编码是一种图片处理格式，通过特定的算法将图片编码成一长串字符串，在页面上显示的时候，可以用该字符串来代替图片的 url 属性。
 
 使用 base64 的优点是：
 
@@ -764,14 +521,6 @@ url 属性。
 
 #### 25.'display'、'position'和'float'的相互关系？
 
-（1）首先我们判断 `display 属性是否为 none`，如果为 none，则 position 和 float 属性的值不影响元素最后的表现。
-
-（2）然后判断 `position 的值是否为 absolute 或者 fixed`，如果是，则 float 属性失效，并且 display 的值应该被设置为 table 或者 block，具体转换需要看初始转换值。
-
-（3）如果 position 的值不为 absolute 或者 fixed，则判断 `float 属性的值是否为 none`，如果不是，则 display 的值则按上面的规则转换。注意，如果 position 的值为 relative 并且 float 属性的值存在，则 relative 相对于浮动后的最终位置定位。
-
-（4）如果 float 的值为 none，则判断元素是否为根元素，如果是根元素则 display 属性按照上面的规则转换，如果不是，则保持指定的 `display 属性值不变`。
-
 总的来说，可以把它看作是一个类似优先级的机制，`"position:absolute"和"position:fixed"优先级最高`，有它存在的时候，浮动不起作用，'display'的值也需要调整；其次，`元素的'float'特性的值不是"none"的时候或者它是根元素的时候，调整'display'的值`；最后，非根元素，并且非浮动元素，并且非绝对定位的元素，'display'特性值同设置值。
 
 详细资料可以参考：
@@ -785,25 +534,14 @@ url 属性。
 
 产生折叠的必备条件：`margin 必须是邻接的!`
 
-而根据 w3c 规范，两个 margin 是邻接的必须满足以下条件：
-
-•必须是处于常规文档流（非 float 和绝对定位）的块级盒子，并且处于同一个 BFC 当中。
-•没有线盒，没有空隙，没有 padding 和 border 将他们分隔开
-•都属于垂直方向上相邻的外边距，可以是下面任意一种情况
-•元素的 margin-top 与其第一个常规文档流的子元素的 margin-top
-•元素的 margin-bottom 与其下一个常规文档流的兄弟元素的 margin-top
-•height 为 auto 的元素的 margin-bottom 与其最后一个常规文档流的子元素的 margin-bottom
-•高度为 0 并且最小高度也为 0，不包含常规文档流的子元素，并且自身没有建立新的 BFC 的元素的 margin-top
-和 margin-bottom
-
 margin 合并的 3 种场景：
 
-（1）相邻兄弟元素 margin 合并。
+（1）**相邻兄弟元素 margin 合并**。
 
 解决办法：
 •设置块状格式化上下文元素（BFC）
 
-（2）父级和第一个/最后一个子元素的 margin 合并。
+（2）**父级和第一个/最后一个子元素的 margin 合并**。
 
 解决办法：
 
@@ -820,7 +558,7 @@ margin 合并的 3 种场景：
 •父元素和最后一个子元素之间添加内联元素进行分隔；
 •父元素设置 height、min-height 或 max-height。
 
-（3）空块级元素的 margin 合并。
+（3）**空块级元素的 margin 合并**。
 
 解决办法：
 •设置垂直方向的 border；
@@ -830,12 +568,11 @@ margin 合并的 3 种场景：
 
 回答：
 
-margin 重叠指的是在垂直方向上，两个相邻元素的 margin 发生重叠的情况。
+**margin 重叠指的是在垂直方向上，两个相邻元素的 margin 发生重叠的情况。**
 
 一般来说可以分为四种情形：
 
-第一种是`相邻兄弟元素`的 `marin-bottom 和 margin-top` 的值发生重叠。这种情况下我们可以通过`设置其中一个元素为 BFC`
-来解决。
+第一种是`相邻兄弟元素`的 `marin-bottom 和 margin-top` 的值发生重叠。这种情况下我们可以通过`设置其中一个元素为 BFC`来解决。
 
 第二种是`父元素的 margin-top` 和`子元素的 margin-top` 发生重叠。它们发生重叠是因为它们是相邻的，所以我们可以通过这一点来解决这个问题。我们可以为父元素设置 border-top、padding-top 值来分隔它们，当然我们也可以将`父元素设置为 BFC`来解决。
 
@@ -851,40 +588,26 @@ margin 重叠指的是在垂直方向上，两个相邻元素的 margin 发生�
 
 通俗来讲
 
-•BFC 是一个独立的布局环境，可以理解为一个容器，在这个容器中按照一定规则进行物品摆放，并且不会影响其它环境中的物品。
+•`BFC 是一个独立的布局环境，可以理解为一个容器，在这个容器中按照一定规则进行物品摆放，并且不会影响其它环境中的物品`。
 •如果一个元素符合触发 BFC 的条件，则 BFC 中的元素布局不受外部影响。
 
 创建 BFC
 
 （1）根元素或包含根元素的元素
 （2）浮动元素 float ＝ left|right 或 inherit（≠none）
-（3）绝对定位元素 position ＝ absolute 或 fixed
+（3）`绝对定位元素` position ＝ absolute 或 fixed
 （4）display ＝ inline-block|flex|inline-flex|table-cell 或 table-caption
-（5）overflow ＝ hidden|auto 或 scroll(≠visible)
+（5）`overflow ＝ hidden|auto 或 scroll(≠visible)`
 
 回答：
 
-BFC 指的是块级格式化上下文，一个元素形成了 BFC 之后，那么它内部元素产生的布局不会影响到外部元素，外部元素的布局也
-不会影响到 BFC 中的内部元素。一个 BFC 就像是一个隔离区域，和其他区域互不影响。
+BFC 指的是块级格式化上下文，一个元素形成了 BFC 之后，那么它内部元素产生的布局不会影响到外部元素，外部元素的布局也不会影响到 BFC 中的内部元素。一个 BFC 就像是一个隔离区域，和其他区域互不影响。
 
-一般来说根元素是一个 BFC 区域，浮动和绝对定位的元素也会形成 BFC，display 属性的值为 inline-block、flex 这些
-属性时也会创建 BFC。还有就是元素的 overflow 的值不为 visible 时都会创建 BFC。
+一般来说根元素是一个 BFC 区域，浮动和绝对定位的元素也会形成 BFC，display 属性的值为 inline-block、flex 这些属性时也会创建 BFC。还有就是元素的 overflow 的值不为 visible 时都会创建 BFC。
 
 详细资料可以参考：
 [《深入理解 BFC 和 MarginCollapse》](https://www.w3cplus.com/css/understanding-bfc-and-margin-collapse.html)
 [《前端面试题-BFC（块格式化上下文）》](https://segmentfault.com/a/1190000013647777)
-
-#### 28.IFC 是什么？
-
-`IFC 指的是行级格式化上下文(Inline Formatting Contexts)`，它有这样的一些布局规则：
-
-（1）行级上下文内部的盒子会在水平方向，`一个接一个地放置`。
-（2）当一行不够的时候会`自动切换到下一行`。
-（3）行级上下文的高度由`内部最高的内联盒子`的高度决定。
-
-详细资料可以参考：
-[《[译]:BFC 与 IFC》](https://segmentfault.com/a/1190000004466536#articleHeader5)
-[《BFC 和 IFC 的理解（布局）》](https://blog.csdn.net/paintandraw/article/details/80401741)
 
 #### 29.请解释一下为什么需要清除浮动？清除浮动的方式
 
@@ -916,25 +639,15 @@ clear:none|left|right|both
 
 一般使用伪元素的方式清除浮动
 
+```CSS
 .clear::after{
-content:'';
-display:block;//也可以是'block'，或者是'list-item'
-clear:both;
+  content:'';
+  display:block;//也可以是'block'，或者是'list-item'
+  clear:both;
 }
+```
 
 `clear 属性只有块级元素才有效的，而::after 等伪元素默认都是内联水平`，这就是借助伪元素清除浮动影响时需要设置 display 属性值的原因。
-
-#### 31.zoom:1 的清除浮动原理?
-
-清除浮动，触发 hasLayout；
-zoom 属性是 IE 浏览器的专有属性，它可以设置或检索对象的缩放比例。解决 ie 下比较奇葩的 bug。譬如外边距（margin）的重叠，浮动清除，触发 ie 的 haslayout 属性等。
-
-来龙去脉大概如下：
-`当设置了 zoom 的值之后，所设置的元素就会就会扩大或者缩小，高度宽度就会重新计算了，这里一旦改变 zoom 值时其实也会发生重新渲染`，运用这个原理，也就解决了 ie 下子元素浮动时候父元素不随着自动扩大的题。
-
-zoom 属性是 IE 浏览器的专有属性，火狐和老版本的 webkit 核心的浏览器都不支持这个属性。然而，zoom 现在已经被逐步标准化，出现在 CSS3.0 规范草案中。
-
-目前非 ie 由于不支持这个属性，它们又是通过什么属性来实现元素的缩放呢？可以通过 css3 里面的动画属性 scale 进行缩放。
 
 #### 32.移动端的布局用过媒体查询吗？
 
@@ -1013,9 +726,15 @@ SASS（SASS、LESS 没有本质区别，只因为团队前端都是用的 SASS�
 
 #### 35.浏览器是怎样解析 CSS 选择器的？
 
-样式系统从关键选择器开始匹配，然后左移查找规则选择器的祖先元素。只要选择器的子树一直在工作，样式系统就会持续左移，直到和规则匹配，或者是因为不匹配而放弃该规则。
+**样式系统从关键选择器开始匹配，然后左移查找规则选择器的祖先元素**。只要选择器的子树一直在工作，样式系统就会持续左移，直到和规则匹配，或者是因为不匹配而放弃该规则。
 
 试想一下，`如果采用从左至右的方式读取 CSS 规则，那么大多数规则读到最后（最右）才会发现是不匹配的`，这样做会费时耗能，最后有很多都是无用的；而如果采取从右向左的方式，那么只要发现`最右边选择器不匹配，就可以直接舍弃了，避免了许多无效匹配`。
+
+哈希表维护底层结点,倒过来搜???
+理由:
+
+- CSS 选择器 对应一个 word ,相当于在 Trie 中搜索结点
+- 从父亲到子孙有很多条路,但是从子孙到父亲只有一条向上的路
 
 详细资料可以参考：
 [《探究 CSS 解析原理》](https://juejin.im/entry/5a123c55f265da432240cc90)
@@ -1055,21 +774,6 @@ margin 用于布局分开元素使元素与元素互不相干。
 详细资料可以参考：
 [《CSS 规范-分类方法》](http://nec.netease.com/standard/css-sort.html)
 
-#### 39.简单说一下 css3 的 all 属性。
-
-`all 属性实际上是所有 CSS 属性的缩写`，表示，所有的 CSS 属性都怎样怎样，但是，不包括 unicode-bidi 和 direction
-这两个 CSS 属性。支持三个 CSS 通用属性值，initial,inherit,unset。
-
-initial 是初始值的意思，也就是该元素元素都除了 unicode-bidi 和 direction 以外的 CSS 属性都使用属性的默认初始值。
-
-inherit 是继承的意思，也就是该元素除了 unicode-bidi 和 direction 以外的 CSS 属性都继承父元素的属性值。
-
-unset 是取消设置的意思，也就是当前元素浏览器或用户设置的 CSS 忽略，然后如果是具有继承特性的 CSS，如 color，则
-使用继承值；如果是没有继承特性的 CSS 属性，如 background-color，则使用初始值。
-
-详细资料可以参考：
-[《简单了解 CSS3 的 all 属性》](https://www.zhangxinxu.com/wordpress/2016/03/know-about-css3-all/)
-
 #### 40.为什么不建议使用统配符初始化 css 样式。
 
 采用\*{padding:0;margin:0;}这样的写法好处是写起来很简单，但是是通配符，需要把所有的标签都遍历一遍，当网站较大时，
@@ -1077,28 +781,6 @@ unset 是取消设置的意思，也就是当前元素浏览器或用户设置�
 
 出于性能的考虑，并不是所有标签都会有 padding 和 margin，因此对常见的具有默认 padding 和 margin 的元素初始化即
 可，并不需使用通配符\*来初始化。
-
-#### 41.absolute 的 containingblock（包含块）计算方式跟正常流有什么不同？
-
-（1）内联元素也可以作为“包含块”所在的元素；
-
-（2）“包含块”所在的元素不是父块级元素，而是最近的 position 不为 static 的祖先元素或根元素；
-
-（3）边界是 padding box 而不是 content box。
-
-#### 42.对于 hasLayout 的理解？
-
-hasLayout 是 IE 特有的一个属性。很多的 IE 下的 css bug 都与其息息相关。在 IE 中，一个元素要么自己对自身的内容进行计算大小和组织，要么依赖于父元素来计算尺寸和组织内容。当一个元素的 hasLayout 属性值为 true 时，它负责对自己和可能的子孙元素进行尺寸计算和定位。虽然这意味着这个元素需要花更多的代价来维护自身和里面的内容，而不是依赖于祖先元素来完成这些工作。
-
-详细资料可以参考：
-[《CSS 基础篇--CSS 中 IE 浏览器的 hasLayout，IE 低版本的 bug 根源》](https://segmentfault.com/a/1190000010883974)
-[《CSS 魔法堂：hasLayout 原来是这样的！》](https://segmentfault.com/a/1190000004632071)
-
-#### 43.元素竖向的百分比设定是相对于容器的高度吗？
-
-`如果是 height 的话，是相对于包含块的高度。`
-
-`如果是 padding 或者 margin 竖直方向的属性则是相对于包含块的宽度。`
 
 #### 44.全屏滚动的原理是什么？用到了 CSS 的哪些属性？（待深入实践;重点）
 
@@ -1119,37 +801,6 @@ hasLayout 是 IE 特有的一个属性。很多的 IE 下的 css bug 都与其�
 [《响应式布局原理》](https://blog.csdn.net/dreamerframework/article/details/8994741)
 [《响应式布局的实现方法和原理》](http://www.mahaixiang.cn/wzsj/278.html)
 
-#### 46.视差滚动效果，如何给每页做不同的动画？（回到顶部，向下滑动要再次出现，和只出现一次分别怎么做？）
-
-视差滚动是指多层背景以不同的速度移动，形成立体的运动效果，带来非常出色的视觉体验。
-
-详细资料可以参考：
-[《如何实现视差滚动效果的网页？》](https://www.zhihu.com/question/20990029)
-
-#### 47.如何修改 chrome 记住密码后自动填充表单的黄色背景？
-
-chrome 表单自动填充后，input 文本框的背景会变成黄色的，通过审查元素可以看到这是由于 chrome 会默认给自动填充的 input 表单加上 input:-webkit-autofill 私有属性，然后对其赋予以下样式：
-
-{
-background-color:rgb(250,255,189)!important;
-background-image:none!important;
-color:rgb(0,0,0)!important;
-}
-
-对 chrome 默认定义的 background-color，background-image，color 使用 important 是不能提高其优先级的，但是
-其他属性可使用。
-
-使用足够大的纯色内阴影来覆盖 input 输入框的黄色背景，处理如下
-
-input:-webkit-autofill,textarea:-webkit-autofill,select:-webkit-autofill{
--webkit-box-shadow:000px 1000px white inset;
-border:1px solid #CCC !important;
-}
-
-详细资料可以参考：
-[《去掉 chrome 记住密码后的默认填充样式》](https://blog.csdn.net/zsl_955200/article/details/78276209)
-[《修改谷歌浏览器 chrome 记住密码后自动填充表单的黄色背景》](https://blog.csdn.net/M_agician/article/details/73381706)
-
 #### 48.怎么让 Chrome 支持小于 12px 的文字？
 
 在谷歌下 css 设置字体大小为 12px 及以下时，显示都是一样大小，都是默认 12px。
@@ -1168,16 +819,6 @@ inline-block/...；
 
 详细资料可以参考：
 [《谷歌浏览器不支持 CSS 设置小于 12px 的文字怎么办？》](https://570109268.iteye.com/blog/2406562)
-
-#### 49.让页面里的字体变清晰，变细用 CSS 怎么做？
-
-webkit 内核的私有属性：-webkit-font-smoothing，用于字体抗锯齿，使用后字体看起来会更清晰舒服。
-
-在 MacOS 测试环境下面设置-webkit-font-smoothing:antialiased;但是这个属性仅仅是面向 MacOS，其他操作系统设
-置后无效。
-
-详细资料可以参考：
-[《让字体变的更清晰 CSS 中-webkit-font-smoothing》](https://blog.csdn.net/huo_bao/article/details/50251585)
 
 #### 50.font-style 属性中 italic 和 oblique 的区别？
 
@@ -1204,14 +845,6 @@ ppi 指的是每英寸的物理像素的密度 `Pixels Per Inch`，ppi 越大，
 
 #### 52.layout viewport、visual viewport 和 ideal viewport 的区别？
 
-相关知识点：
-
-如果把移动设备上浏览器的可视区域设为 viewport 的话，某些网站就会因为 viewport 太窄而显示错乱，所以这些浏览器就决定默认情况下把 viewport 设为一个较宽的值，比如 980px，这样的话即使是那些为桌面设计的网站也能在移动浏览器上正常显示了。ppk 把这个浏览器默认的 viewport 叫做 `layout viewport`。
-
-layout viewport 的宽度是大于浏览器可视区域的宽度的，所以我们还需要一个 viewport 来代表浏览器可视区域的大小，ppk 把这个 viewport 叫做 visual viewport。
-
-ideal viewport 是最适合移动设备的 viewport，ideal viewport 的宽度等于移动设备的屏幕宽度，只要在 css 中把某一元素的宽度设为 ideal viewport 的宽度（单位用 px），那么这个元素的宽度就是设备屏幕的宽度了，也就是宽度为 100%的效果。ideal viewport 的意义在于，无论在何种分辨率的屏幕下，那些针对 ideal viewport 而设计的网站，不需要用户手动缩放，也不需要出现横向滚动条，都可以完美的呈现给用户。
-
 回答：
 
 移动端一共需要理解三个 viewport 的概念的理解。
@@ -1227,31 +860,16 @@ ideal viewport 是最适合移动设备的 viewport，ideal viewport 的宽度�
 [《说说移动前端中 viewport（视口）》](https://www.html.cn/archives/5975)
 [《移动端适配知识你到底知多少》](https://juejin.im/post/5b6d21daf265da0f9d1a2ed7#heading-14)
 
-#### 53.position:fixed;在 android 下无效怎么处理？
-
-因为移动端浏览器默认的 viewport 叫做 layout viewport。在移动端显示时，因为 layout viewport 的宽度大于移动端屏幕的宽度，所以页面会出现滚动条左右移动，fixed 的元素是相对 layout viewport 来固定位置的，而不是移动端屏幕来固定位置的，所以会出现感觉 fixed 无效的情况。
-
-如果想实现 fixed 相对于屏幕的固定效果，我们需要改变的是 viewport 的大小为 ideal viewport，可以如下设置：
-
-<metaname="viewport"content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"/>
-
 #### 54.如果需要手动写动画，你认为最小时间间隔是多久，为什么？（阿里）
 
 `多数显示器默认频率是 60Hz`，即 1 秒刷新 60 次，所以理论上最小间隔为 1/60\*1000ms ＝ 16.7ms
 
 #### 55.如何让去除 inline-block 元素间间距？
 
-移除空格、使用 margin 负值、`使用 font-size:0`、letter-spacing、word-spacing
+`移除空格`、使用 margin 负值、`使用 font-size:0`、letter-spacing、word-spacing
 
 详细资料可以参考：
 [《去除 inline-block 元素间间距的 N 种方法》](https://www.zhangxinxu.com/wordpress/2012/04/inline-block-space-remove-%E5%8E%BB%E9%99%A4%E9%97%B4%E8%B7%9D/)
-
-#### 56.overflow:scroll 时不能平滑滚动的问题怎么处理？
-
-以下代码可解决这种卡顿的问题：-webkit-overflow-scrolling:touch;是因为这行代码启用了硬件加速特性，所以滑动很流畅。
-
-详细资料可以参考：
-[《解决页面使用 overflow:scroll 在 iOS 上滑动卡顿的问题》](https://www.jianshu.com/p/1f4693d0ad2d)
 
 #### 57.有一个高度自适应的 div，里面有两个 div，一个高度 100px，希望另一个填满剩下的高度。
 
@@ -1335,7 +953,7 @@ left:0;right:0;
 
 如果静态文件都放在主域名下，那静态文件请求的时候都带有的 cookie 的数据提交给 server 的，非常浪费流量，所以不如隔离开，`静态资源放 CDN。`
 
-`因为 cookie 有域的限制`，因此不能跨域提交请求，`故使用非主要域名的时候，请求头中就不会带有 cookie 数据`，这样可以降低请求头的大小，降低请求时间，从而达到降低整体请求延时的目的。
+`因为 cookie 有站的限制`，因此不能跨站提交请求，`故使用非主要域名的时候，请求头中就不会带有 cookie 数据`，这样可以降低请求头的大小，降低请求时间，从而达到降低整体请求延时的目的。
 
 `同时这种方式不会将 cookie 传入 WebServer`，也减少了 WebServer 对 cookie 的处理分析环节，提高了 webserver 的 http 请求的解析速度。
 
@@ -1351,7 +969,7 @@ left:0;right:0;
 
 CSS 预处理器定义了一种新的语言，其基本思想是，用一种专门的编程语言，为 CSS 增加了一些编程的特性，将 CSS 作为目标生成文件，然后开发者就只要使用这种语言进行编码工作。通俗的说，CSS 预处理器用一种专门的编程语言，进行 Web 页面样式设计，然后再编译成正常的 CSS 文件。
 
-`预处理器例如：LESS、Sass、Stylus`，用来预编译 Sass 或 less csssprite，增强了 css 代码的复用性，还有层级、mixin、变量、循环、函数等，具有很方便的 UI 组件模块化开发能力，极大的提高工作效率。
+`预处理器例如：LESS、Sass、Stylus`，用来`预编译` Sass 或 less csssprite，增强了 css 代码的复用性，还有层级、mixin、变量、循环、函数等，具有很方便的 UI 组件模块化开发能力，极大的提高工作效率。
 
 CSS 后处理器是对 CSS 进行处理，并最终生成 CSS 的预处理器，它属于广义上的 CSS 预处理器。我们很久以前就在用 CSS 后处理器了，最典型的例子是 CSS 压缩工具（如 clean-css），只不过以前没单独拿出来说过。还有最近比较火的 Autoprefixer，以 CanIUse 上的浏览器支持数据为基础，自动处理兼容性问题。
 
@@ -1391,11 +1009,6 @@ CSS 后处理器是对 CSS 进行处理，并最终生成 CSS 的预处理器，
 [《为什么设计稿是 750px》](https://blog.csdn.net/Honeymao/article/details/76795089)
 [《使用 Flexible 实现手淘 H5 页面的终端适配》](https://github.com/amfe/article/issues/17)
 
-#### 65.几种常见的 CSS 布局
-
-详细的资料可以参考：
-[《几种常见的 CSS 布局》](https://juejin.im/post/5bbcd7ff5188255c80668028#heading-12)
-
 #### 66.画一条 0.5px 的线
 
 采用 meta viewport 的方式
@@ -1419,16 +1032,6 @@ CSS 后处理器是对 CSS 进行处理，并最终生成 CSS 的预处理器，
 [《CSS 动画简介》](http://www.ruanyifeng.com/blog/2014/02/css_transition_and_animation.html)
 [《CSS 动画：animation、transition、transform、translate》](https://juejin.im/post/5b137e6e51882513ac201dfb)
 
-#### 68.什么是首选最小宽度？
-
-“首选最小宽度”，指的是`元素最适合的最小宽度`。
-
-东亚文字（如中文）最小宽度为每个汉字的宽度。
-
-西方文字最小宽度由特定的连续的英文字符单元决定。并不是所有的英文字符都会组成连续单元，一般会终止于空格（普通空格）、短横线、问号以及其他非英文字符等。
-
-如果想让英文字符和中文一样，每一个字符都用最小宽度单元，可以试试使用 CSS 中的 word-break:break-all。
-
 #### 69.为什么 height:100%会无效？
 
 对于普通文档流中的元素，`百分比高度值要想起作用，其父级必须有一个可以生效的高度值。`
@@ -1443,97 +1046,12 @@ CSS 后处理器是对 CSS 进行处理，并最终生成 CSS 的预处理器，
 
 （2）`min-width 会覆盖 max-width`，此规则发生在 min-width 和 max-width 冲突的时候。
 
-#### 71.内联盒模型基本概念
-
-（1）内容区域（content area）。内容区域指一种围绕文字看不见的盒子，其大小仅受字符本身特性控制，本质上是一个字符盒子（character box）；但是有些元素，如图片这样的替换元素，其内容显然不是文字，不存在字符盒子之类的，因此，对于这些元素，内容区域可以看成元素自身。
-
-（2）内联盒子（inline box）。“内联盒子”不会让内容成块显示，而是排成一行，这里的“内联盒子”实际指的就是元素的“外在盒子”，用来决定元素是内联还是块级。该盒子又可以细分为“内联盒子”和“匿名内联盒子”两类。
-
-（3）行框盒子（line box），每一行就是一个“行框盒子”（实线框标注），每个“行框盒子”又是由一个一个“内联盒子”组成的。
-
-（4）包含块（containing box），由一行一行的“行框盒子”组成。
-
-#### 72.什么是幽灵空白节点？
-
-“幽灵空白节点”是`内联盒模型`中非常重要的一个概念，具体指的是：在 HTML5 文档声明中，内联元素的所有解析和渲染表现就如同
-每个行框盒子的前面有一个“空白节点”一样。这个“空白节点”永远透明，不占据任何宽度，看不见也无法通过脚本获取，就好像幽灵
-一样，但又确确实实地存在，表现如同文本节点一样，因此，我称之为“幽灵空白节点”。
-
-#### 73.什么是替换元素？
-
-通过修改某个属性值呈现的内容就可以被替换的元素就称为“替换元素”。因此，<img>、<object>、<video>、<iframe>或者表
-单元素<textarea>和<input>和<select>都是典型的替换元素。
-
-替换元素除了内容可替换这一特性以外，还有以下一些特性。
-
-（1）内容的外观不受页面上的 CSS 的影响。用专业的话讲就是在样式表现在 CSS 作用域之外。如何更改替换元素本身的外观需要
-类似 appearance 属性，或者浏览器自身暴露的一些样式接口，
-
-（2）有自己的尺寸。在 Web 中，很多替换元素在没有明确尺寸设定的情况下，其默认的尺寸（不包括边框）是 300 像素 ×150 像
-素，如<video>、<iframe>或者<canvas>等，也有少部分替换元素为 0 像素，如<img>图片，而表单元素的替换元素
-的尺寸则和浏览器有关，没有明显的规律。
-
-（3）在很多 CSS 属性上有自己的一套表现规则。比较具有代表性的就是 vertical-align 属性，对于替换元素和非替换元素，ve
-rtical-align 属性值的解释是不一样的。比方说 vertical-align 的默认值的 baseline，很简单的属性值，基线之意，
-被定义为字符 x 的下边缘，而替换元素的基线却被硬生生定义成了元素的下边缘。
-
-（4）所有的替换元素都是内联水平元素，也就是替换元素和替换元素、替换元素和文字都是可以在一行显示的。但是，替换元素默认
-的 display 值却是不一样的，有的是 inline，有的是 inline-block。
-
-#### 74.替换元素的计算规则？
-
-替换元素的尺寸从内而外分为 3 类：固有尺寸、HTML 尺寸和 CSS 尺寸。
-
-（1）固有尺寸指的是替换内容原本的尺寸。例如，图片、视频作为一个独立文件存在的时候，都是有着自己的宽度和高度的。
-
-（2）HTML 尺寸只能通过 HTML 原生属性改变，这些 HTML 原生属性包括<img>的 width 和 height 属性、<input>的 s
-ize 属性、<textarea>的 cols 和 rows 属性等。
-
-（3）CSS 尺寸特指可以通过 CSS 的 width 和 height 或者 max-width/min-width 和 max-height/min-height 设置的
-尺寸，对应盒尺寸中的 content box。
-
-这 3 层结构的计算规则具体如下
-
-（1）如果没有 CSS 尺寸和 HTML 尺寸，则使用固有尺寸作为最终的宽高。
-
-（2）如果没有 CSS 尺寸，则使用 HTML 尺寸作为最终的宽高。
-
-（3）如果有 CSS 尺寸，则最终尺寸由 CSS 属性决定。
-
-（4）如果“固有尺寸”含有固有的宽高比例，同时仅设置了宽度或仅设置了高度，则元素依然按照固有的宽高比例显示。
-
-（5）如果上面的条件都不符合，则最终宽度表现为 300 像素，高度为 150 像素。
-
-（6）内联替换元素和块级替换元素使用上面同一套尺寸计算规则。
-
-#### 75.content 与替换元素的关系？
-
-content 属性生成的对象称为“匿名替换元素”。
-
-（1）我们使用 content 生成的文本是无法选中、无法复制的，好像设置了 user select:none 声明一般，但是普通元素的文本
-却可以被轻松选中。同时，content 生成的文本无法被屏幕阅读设备读取，也无法被搜索引擎抓取，因此，千万不要自以为是
-地把重要的文本信息使用 content 属性生成，因为这对可访问性和 SEO 都很不友好。
-
-（2）content 生成的内容不能左右:empty 伪类。
-
-（3）content 动态生成值无法获取。
-
 #### 76.margin:auto 的填充规则？
 
-margin 的'auto'可不是摆设，是具有强烈的计算意味的关键字，`用来计算元素对应方向应该获得的剩余间距大小。但是触发 mar`gin:auto 计算有一个前提条件，就是 width 或 height 为 auto 时，元素是具有对应方向的自动填充特性的。
+margin 的'auto'可不是摆设，是具有强烈的计算意味的关键字，`用来计算元素对应方向应该获得的剩余间距大小。`但是触发 margin:auto 计算有一个前提条件，就是 width 或 height 为 auto 时，元素是具有对应方向的自动填充特性的。
 
 （1）`如果一侧定值，一侧 auto，则 auto 为剩余空间大小。`
 （2）`如果两侧均是 auto，则平分剩余空间。`
-
-#### 77.margin 无效的情形
-
-（1）display 计算值 inline 的非替换元素的垂直 margin 是无效的。对于内联替换元素，垂直 margin 有效，并且没有 margin 合并的问题。
-
-（2）表格中的<tr>和<td>元素或者设置 display 计算值是 table-cell 或 table-row 的元素的 margin 都是无效的。
-
-（3）绝对定位元素非定位方位的 margin 值“无效”。
-
-（4）定高容器的子元素的 margin-bottom 或者宽度定死的子元素的 margin-right 的定位“失效”。
 
 #### 78.border 的特殊性？
 
@@ -1557,7 +1075,7 @@ ex 是 CSS 中的一个相对单位，指的是小写字母 x 的高度，没错
 
 #### 80.line-height 的特殊性？
 
-（1）对于非替换元素的纯内联元素，其可视高度完全由 line-height 决定。对于文本这样的纯内联元素，line-height 就是高度计算的基石，用专业说法就是指定了用来计算行框盒子高度的基础高度。
+（1）`对于非替换元素的纯内联元素，其可视高度完全由 line-height 决定`。对于文本这样的纯内联元素，line-height 就是高度计算的基石，用专业说法就是指定了用来计算行框盒子高度的基础高度。
 
 （2）内联元素的高度由固定高度和不固定高度组成，这个不固定的部分就是这里的“行距”。换句话说，line-height 之所以起作用，就是通过改变“行距”来实现的。在 CSS 中，“行距”分散在当前文字的上方和下方，也就是即使是第一行文字，其上方也是有“行距”的，只不过这个“行距”的高度仅仅是完整“行距”高度的一半，因此，也被称为“半行距”。
 
@@ -1609,20 +1127,6 @@ ex 是 CSS 中的一个相对单位，指的是小写字母 x 的高度，没错
 
 无依赖绝对定位其定位的位置和没有设置 position:absolute 时候的位置相关。
 
-#### 84.absolute 与 overflow 的关系？
-
-（1）如果 overflow 不是定位元素，同时绝对定位元素和 overflow 容器之间也没有定位元素，则 overflow 无法对 absolute 元素进行剪裁。
-
-（2）如果 overflow 的属性值不是 hidden 而是 auto 或者 scroll，即使绝对定位元素高宽比 overflow 元素高宽还要大，也都不会出现滚动条。
-
-（3）overflow 元素自身 transform 的时候，Chrome 和 Opera 浏览器下的 overflow 剪裁是无效的。
-
-#### 85.clip 裁剪是什么？
-
-所谓“可访问性隐藏”，指的是虽然内容肉眼看不见，但是其他辅助设备却能够进行识别和访问的隐藏。
-
-clip 剪裁被我称为“最佳可访问性隐藏”的另外一个原因就是，它具有更强的普遍适应性，任何元素、任何场景都可以无障碍使用。
-
 #### 86.relative 的特殊性？
 
 （1）相对定位元素的 left/top/right/bottom 的百分比值是相对于包含块计算的，而不是自身。注意，虽然定位位移是相对自身，但是百分比值的计算值不是。
@@ -1651,18 +1155,6 @@ clip 剪裁被我称为“最佳可访问性隐藏”的另外一个原因就是
 
 （3）其他一些 CSS3 `属性，比如元素的 opacity 值不是 1。`
 
-#### 88.什么是层叠水平？
-
-层叠水平，英文称作 stacking level，决定了同一个层叠上下文中元素在 z 轴上的显示顺序。
-
-显而易见，所有的元素都有层叠水平，包括层叠上下文元素，也包括普通元素。然而，对普通元素的层叠水平探讨只局限在当前层叠上下文元素中。
-
-#### 89.元素的层叠顺序？
-
-层叠顺序，英文称作 stacking order，表示元素发生层叠时有着特定的垂直显示顺序。
-
-![层叠顺序](https://cavszhouyou-1254093697.cos.ap-chongqing.myqcloud.com/note-15.png)
-
 #### 90.层叠准则？
 
 （1）谁大谁上：当具有明显的层叠水平标识的时候，如生效的 z-index 属性值，在同一个层叠上下文领域，层叠水平值大的那一个覆盖小的那一个。
@@ -1673,63 +1165,22 @@ clip 剪裁被我称为“最佳可访问性隐藏”的另外一个原因就是
 
 如果使用数值作为 font-weight 属性值，必须是 100 ～ 900 的整百数。因为这里的数值仅仅是外表长得像数值，实际上是一个具有特定含义的关键字，并且这里的数值关键字和字母关键字之间是有对应关系的。
 
-#### 92.text-indent 的特殊性？
-
-（1）`text-indent 仅对第一行内联盒子内容有效。`
-
-（2）非替换元素以外的 display 计算值为 inline 的内联元素设置 text-indent 值无效，如果计算值 inline-block/inline-table 则会生效。
-
-（3）<input>标签按钮 text-indent 值无效。
-
-（4）<button>标签按钮 text-indent 值有效。
-
-（5）text-indent 的百分比值是相对于当前元素的“包含块”计算的，而不是当前元素。
-
-#### 93.letter-spacing 与字符间距？
-
-letter-spacing 可以用来控制字符之间的间距，这里说的“字符”包括英文字母、汉字以及空格等。
-
-letter-spacing 具有以下一些特性。
-
-（1）`继承性`。
-（2）默认值是 normal 而不是 0。虽然说正常情况下，normal 的计算值就是 0，但两者还是有差别的，在有些场景下，letter-spacing 会调整 normal 的计算值以实现更好的版面布局。
-（3）支持负值，且值足够大的时候，会让字符形成重叠，甚至反向排列。
-（4）和 text-indent 属性一样，无论值多大或多小，第一行一定会保留至少一个字符。
-（5）支持小数值，即使 0.1px 也是支持的。
-（6）暂不支持百分比值。
-
 #### 94.word-spacing 与单词间距？
 
 letter :字符间隙
 word:空格间隙
 `letter-spacing 作用于所有字符，但 word-spacing 仅作用于空格字符`。换句话说，`word-spacing 的作用就是增加空格的间隙宽度。`
 
-#### 95.white-space 与换行和空格的控制？
-
-white-space 属性声明了如何处理元素内的空白字符，这类空白字符包括 Space（空格）键、Enter（回车）键、Tab（制表符）键产生的空白。因此，white-space 可以决定图文内容是否在一行显示（回车空格是否生效），是否显示大段连续空白（空格是否生效）等。
-
-其属性值包括下面这些。
-•normal：合并空白字符和换行符。
-•pre：空白字符不合并，并且内容只在有换行符的地方换行。
-•nowrap：该值和 normal 一样会合并空白字符，但不允许文本环绕。
-•pre-wrap：空白字符不合并，并且内容只在有换行符的地方换行，同时允许文本环绕。
-•pre-line：合并空白字符，但只在有换行符的地方换行，允许文本环绕。
-
 #### 96.隐藏元素的 background-image 到底加不加载？
-
-相关知识点：
-
-根据测试，一个元素如果 display 计算值为 none，在 IE 浏览器下（IE8 ～ IE11，更高版本不确定）依然会发送图片请求，Firefox 浏览器不会，至于 Chrome 和 Safari 浏览器则似乎更加智能一点：如果隐藏元素同时又设置了 background-image，则图片依然会去加载；如果是父元素的 display 计算值为 none，则背景图不会请求，此时浏览器或许放心地认为这个背景图暂时是不会使用的。
-
-如果不是 background-image，而是<img>元素，则设置 display:none 在所有浏览器下依旧都会请求图片资源。
-
-还需要注意的是如果设置的样式没有对应的元素，则 background-image 也不会加载。hover 情况下的 background-image，在触发时加载。
 
 回答：
 
 -（1）元素的背景图片
 
--`元素本身设置 display:none，会请求图片 ` -父级元素设置 display:none，不会请求图片 -样式没有元素使用，不会请求 -`:hover 样式下，触发时请求`
+- `元素本身设置 display:none，会请求图片 `
+- 父级元素设置 display:none，不会请求图片
+- 样式没有元素使用，不会请求
+- `:hover 样式下，触发时请求`
 
 -（2）`img 标签图片任何情况下都会请求图片`
 
@@ -1738,22 +1189,31 @@ white-space 属性声明了如何处理元素内的空白字符，这类空白�
 
 #### 97.如何实现单行／多行文本溢出的省略（...）？
 
-css
-/_单行文本溢出_/
+```css
+/*单行文本溢出*/
 p {
-overflow: hidden;
-text-overflow: ellipsis;
-white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/_多行文本溢出_/
+/*多行文本溢出*/
 p {
-overflow: hidden;
-text-overflow: ellipsis;
-display: -webkit-box;
--webkit-box-orient: vertical;
--webkit-line-clamp: 2;
+  position: relative;
+  line-height: 1.5em;
+  /*高度为需要显示的行数*行高，比如这里我们显示两行，则为3*/
+  height: 3em;
+  overflow: hidden;
 }
+
+p:after {
+  content: '...';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: #fff;
+}
+```
 
 详细资料可以参考：
 [《【CSS/JS】如何实现单行／多行文本溢出的省略》](https://zhuanlan.zhihu.com/p/30707916)
@@ -1780,62 +1240,63 @@ display: -webkit-box;
 
 #### 99.css 实现上下固定中间自适应布局？
 
-css
+```css
 利用绝对定位实现 body {
-padding: 0;
-margin: 0;
+  padding: 0;
+  margin: 0;
 }
 
 .header {
-position: absolute;
-top: 0;
-width: 100%;
-height: 100px;
-background: red;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100px;
+  background: red;
 }
 
 .container {
-position: absolute;
-top: 100px;
-bottom: 100px;
-width: 100%;
-background: green;
+  position: absolute;
+  top: 100px;
+  bottom: 100px;
+  width: 100%;
+  background: green;
 }
 
 .footer {
-position: absolute;
-bottom: 0;
-height: 100px;
-width: 100%;
-background: red;
+  position: absolute;
+  bottom: 0;
+  height: 100px;
+  width: 100%;
+  background: red;
 }
 
-利用 flex 布局实现 html,
+利用flex布局实现 html,
 body {
-height: 100%;
+  height: 100%;
 }
 
 body {
-display: flex;
-padding: 0;
-margin: 0;
-flex-direction: column;
+  display: flex;
+  padding: 0;
+  margin: 0;
+  flex-direction: column;
 }
 
 .header {
-height: 100px;
-background: red;
+  height: 100px;
+  background: red;
 }
 
 .container {
-flex-grow: 1;
-background: green;
+  flex-grow: 1;
+  background: green;
 }
 
 .footer {
-height: 100px;
-background: red;
+  height: 100px;
+  background: red;
 }
+```
 
 详细资料可以参考：
 [《css 实现上下固定中间自适应布局》](https://www.jianshu.com/p/30bc9751e3e8)
@@ -1844,103 +1305,104 @@ background: red;
 
 相关资料：
 
-css
-/_两栏布局一般指的是页面中一共两栏，左边固定，右边自适应的布局，一共有四种实现的方式。_/
-/_以左边宽度固定为 200px 为例_/
+```css
+/*两栏布局一般指的是页面中一共两栏，左边固定，右边自适应的布局，一共有四种实现的方式。*/
+/*以左边宽度固定为200px为例*/
 
-/_（1）利用浮动，将左边元素宽度设置为 200px，并且设置向左浮动。将右边元素的 margin-left 设置为 200px，宽度设置为 auto（默认为 auto，撑满整个父元素）。_/
+/*（1）利用浮动，将左边元素宽度设置为200px，并且设置向左浮动。将右边元素的margin-left设置为200px，宽度设置为auto（默认为auto，撑满整个父元素）。*/
 .outer {
-height: 100px;
+  height: 100px;
 }
 
 .left {
-float: left;
+  float: left;
 
-height: 100px;
-width: 200px;
+  height: 100px;
+  width: 200px;
 
-background: tomato;
+  background: tomato;
 }
 
 .right {
-margin-left: 200px;
+  margin-left: 200px;
 
-width: auto;
-height: 100px;
+  width: auto;
+  height: 100px;
 
-background: gold;
+  background: gold;
 }
 
-/_（2）第二种是利用 flex 布局，将左边元素的放大和缩小比例设置为 0，基础大小设置为 200px。将右边的元素的放大比例设置为 1，缩小比例设置为 1，基础大小设置为 auto。_/
+/*（2）第二种是利用flex布局，将左边元素的放大和缩小比例设置为0，基础大小设置为200px。将右边的元素的放大比例设置为1，缩小比例设置为1，基础大小设置为auto。*/
 .outer {
-display: flex;
+  display: flex;
 
-height: 100px;
+  height: 100px;
 }
 
 .left {
-flex-shrink: 0;
-flex-grow: 0;
-flex-basis: 200px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  flex-basis: 200px;
 
-background: tomato;
+  background: tomato;
 }
 
 .right {
-flex: auto;
-/_11auto_/
+  flex: auto;
+  /*11auto*/
 
-background: gold;
+  background: gold;
 }
 
-/_（3）第三种是利用绝对定位布局的方式，将父级元素设置相对定位。左边元素设置为 absolute 定位，并且宽度设置为
-200px。将右边元素的 margin-left 的值设置为 200px。_/
+/*（3）第三种是利用绝对定位布局的方式，将父级元素设置相对定位。左边元素设置为absolute定位，并且宽度设置为
+200px。将右边元素的margin-left的值设置为200px。*/
 .outer {
-position: relative;
+  position: relative;
 
-height: 100px;
+  height: 100px;
 }
 
 .left {
-position: absolute;
+  position: absolute;
 
-width: 200px;
-height: 100px;
+  width: 200px;
+  height: 100px;
 
-background: tomato;
+  background: tomato;
 }
 
 .right {
-margin-left: 200px;
-height: 100px;
+  margin-left: 200px;
+  height: 100px;
 
-background: gold;
+  background: gold;
 }
 
-/_（4）第四种还是利用绝对定位的方式，将父级元素设置为相对定位。左边元素宽度设置为 200px，右边元素设置为绝对定位，左边定位为 200px，其余方向定位为 0。_/
+/*（4）第四种还是利用绝对定位的方式，将父级元素设置为相对定位。左边元素宽度设置为200px，右边元素设置为绝对定位，左边定位为200px，其余方向定位为0。*/
 .outer {
-position: relative;
+  position: relative;
 
-height: 100px;
+  height: 100px;
 }
 
 .left {
-width: 200px;
-height: 100px;
+  width: 200px;
+  height: 100px;
 
-background: tomato;
+  background: tomato;
 }
 
 .right {
-position: absolute;
+  position: absolute;
 
-top: 0;
-right: 0;
-bottom: 0;
-left: 200px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 200px;
 
-background: gold;
+  background: gold;
 }
+```
 
 [《两栏布局 demo 展示》](http://cavszhouyou.top/Demo-Display/TwoColumnLayout/index.html)
 
@@ -1962,166 +1424,168 @@ background: gold;
 
 相关资料：
 
-css
-/\*三栏布局一般指的是页面中一共有三栏，左右两栏宽度固定，中间自适应的布局，一共有五种实现方式。
+```css
+/*三栏布局一般指的是页面中一共有三栏，左右两栏宽度固定，中间自适应的布局，一共有五种实现方式。
 
-这里以左边宽度固定为 100px，右边宽度固定为 200px 为例。\*/
+这里以左边宽度固定为100px，右边宽度固定为200px为例。*/
 
-/_（1）利用绝对定位的方式，左右两栏设置为绝对定位，中间设置对应方向大小的 margin 的值。_/
+/*（1）利用绝对定位的方式，左右两栏设置为绝对定位，中间设置对应方向大小的margin的值。*/
 .outer {
-position: relative;
-height: 100px;
+  position: relative;
+
+  height: 100px;
 }
 
 .left {
-position: absolute;
+  position: absolute;
 
-width: 100px;
-height: 100px;
-background: tomato;
+  width: 100px;
+  height: 100px;
+  background: tomato;
 }
 
 .right {
-position: absolute;
-top: 0;
-right: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
 
-width: 200px;
-height: 100px;
-background: gold;
+  width: 200px;
+  height: 100px;
+  background: gold;
 }
 
 .center {
-margin-left: 100px;
-margin-right: 200px;
-height: 100px;
-background: lightgreen;
+  margin-left: 100px;
+  margin-right: 200px;
+  height: 100px;
+  background: lightgreen;
 }
 
-/_（2）利用 flex 布局的方式，左右两栏的放大和缩小比例都设置为 0，基础大小设置为固定的大小，中间一栏设置为 auto_/
+/*（2）利用flex布局的方式，左右两栏的放大和缩小比例都设置为0，基础大小设置为固定的大小，中间一栏设置为auto*/
 .outer {
-display: flex;
-height: 100px;
+  display: flex;
+  height: 100px;
 }
 
 .left {
-flex: 00100px;
-background: tomato;
+  flex: 00100px;
+  background: tomato;
 }
 
 .right {
-flex: 00200px;
-background: gold;
+  flex: 00200px;
+  background: gold;
 }
 
 .center {
-flex: auto;
-background: lightgreen;
+  flex: auto;
+  background: lightgreen;
 }
 
-/_（3）利用浮动的方式，左右两栏设置固定大小，并设置对应方向的浮动。中间一栏设置左右两个方向的 margin 值，注意这种方式，中间一栏必须放到最后。_/
+/*（3）利用浮动的方式，左右两栏设置固定大小，并设置对应方向的浮动。中间一栏设置左右两个方向的margin值，注意这种方式，中间一栏必须放到最后。*/
 .outer {
-height: 100px;
+  height: 100px;
 }
 
 .left {
-float: left;
-width: 100px;
-height: 100px;
-background: tomato;
+  float: left;
+  width: 100px;
+  height: 100px;
+  background: tomato;
 }
 
 .right {
-float: right;
-width: 200px;
-height: 100px;
-background: gold;
+  float: right;
+  width: 200px;
+  height: 100px;
+  background: gold;
 }
 
 .center {
-height: 100px;
-margin-left: 100px;
-margin-right: 200px;
-background: lightgreen;
+  height: 100px;
+  margin-left: 100px;
+  margin-right: 200px;
+  background: lightgreen;
 }
 
-/_（4）圣杯布局，利用浮动和负边距来实现。父级元素设置左右的 padding，三列均设置向左浮动，中间一列放在最前面，宽度设置为父级元素的宽度，因此后面两列都被挤到了下一行，通过设置 margin 负值将其移动到上一行，再利用相对定位，定位到两边。_/
+/*（4）圣杯布局，利用浮动和负边距来实现。父级元素设置左右的 padding，三列均设置向左浮动，中间一列放在最前面，宽度设置为父级元素的宽度，因此后面两列都被挤到了下一行，通过设置 margin 负值将其移动到上一行，再利用相对定位，定位到两边。*/
 .outer {
-height: 100px;
-padding-left: 100px;
-padding-right: 200px;
+  height: 100px;
+  padding-left: 100px;
+  padding-right: 200px;
 }
 
 .left {
-position: relative;
-left: -100px;
+  position: relative;
+  left: -100px;
 
-float: left;
-margin-left: -100%;
+  float: left;
+  margin-left: -100%;
 
-width: 100px;
-height: 100px;
-background: tomato;
+  width: 100px;
+  height: 100px;
+  background: tomato;
 }
 
 .right {
-position: relative;
-left: 200px;
+  position: relative;
+  left: 200px;
 
-float: right;
-margin-left: -200px;
+  float: right;
+  margin-left: -200px;
 
-width: 200px;
-height: 100px;
-background: gold;
+  width: 200px;
+  height: 100px;
+  background: gold;
 }
 
 .center {
-float: left;
+  float: left;
 
-width: 100%;
-height: 100px;
-background: lightgreen;
+  width: 100%;
+  height: 100px;
+  background: lightgreen;
 }
 
-/_（5）双飞翼布局，双飞翼布局相对于圣杯布局来说，左右位置的保留是通过中间列的 margin 值来实现的，而不是通过父元
-素的 padding 来实现的。本质上来说，也是通过浮动和外边距负值来实现的。_/
+/*（5）双飞翼布局，双飞翼布局相对于圣杯布局来说，左右位置的保留是通过中间列的 margin 值来实现的，而不是通过父元
+素的 padding 来实现的。本质上来说，也是通过浮动和外边距负值来实现的。*/
 
 .outer {
-height: 100px;
+  height: 100px;
 }
 
 .left {
-float: left;
-margin-left: -100%;
+  float: left;
+  margin-left: -100%;
 
-width: 100px;
-height: 100px;
-background: tomato;
+  width: 100px;
+  height: 100px;
+  background: tomato;
 }
 
 .right {
-float: left;
-margin-left: -200px;
+  float: left;
+  margin-left: -200px;
 
-width: 200px;
-height: 100px;
-background: gold;
+  width: 200px;
+  height: 100px;
+  background: gold;
 }
 
 .wrapper {
-float: left;
+  float: left;
 
-width: 100%;
-height: 100px;
-background: lightgreen;
+  width: 100%;
+  height: 100px;
+  background: lightgreen;
 }
 
 .center {
-margin-left: 100px;
-margin-right: 200px;
-height: 100px;
+  margin-left: 100px;
+  margin-right: 200px;
+  height: 100px;
 }
+```
 
 [《三栏布局 demo 展示》](http://cavszhouyou.top/Demo-Display/ThreeColumnLayout/index.html)
 
@@ -2143,82 +1607,87 @@ height: 100px;
 
 #### 102.实现一个宽高自适应的正方形
 
-css
-/_1.第一种方式是利用 vw 来实现_/
+```css
+/*1.第一种方式是利用vw来实现*/
 .square {
-width: 10%;
-height: 10vw;
-background: tomato;
+  width: 10%;
+  height: 10vw;
+  background: tomato;
 }
 
-/_2.第二种方式是利用元素的 margin/padding 百分比是相对父元素 width 的性质来实现_/
+/*2.第二种方式是利用元素的margin/padding百分比是相对父元素width的性质来实现*/
 .square {
-`width: 20%;`
-height: 0;
-`padding-top: 20%;`
-background: orange;
+  width: 20%;
+  height: 0;
+  padding-top: 20%;
+  background: orange;
 }
 
-/_3.第三种方式是利用子元素的 margin-top 的值来实现的_/
+/*3.第三种方式是利用子元素的margin-top的值来实现的*/
 .square {
-width: 30%;
-overflow: hidden;
-background: yellow;
+  width: 30%;
+  overflow: hidden;
+  background: yellow;
 }
 
 .square::after {
-content: '';
-display: block;
-margin-top: 100%;
+  content: '';
+  display: block;
+  margin-top: 100%;
 }
+```
 
 [《自适应正方形 demo 展示》](http://cavszhouyou.top/Demo-Display/AdaptiveSquare/index.html)
 
 #### 103.实现一个三角形
 
-css
-/_三角形的实现原理是利用了元素边框连接处的等分原理。_/
+```css
+/*三角形的实现原理是利用了元素边框连接处的等分原理。*/
 .triangle {
-width: 0;
-height: 0;
-border-width: 100px;
-border-style: solid;
-border-color: tomatotransparenttransparenttransparent;
+  width: 0;
+  height: 0;
+  border-width: 100px;
+  border-style: solid;
+  border-color: tomato transparent transparent transparent;
 }
+```
 
 [《三角形 demo 展示》](http://cavszhouyou.top/Demo-Display/Triangle/index.html)
 
 #### 104.一个自适应矩形，水平垂直居中，且宽高比为 2:1
 
-css
-/_实现原理参考自适应正方形和水平居中方式_/
+```css
+/*实现原理参考自适应正方形和水平居中方式*/
 .box {
-position: absolute;
-top: 0;
-right: 0;
-left: 0;
-bottom: 0;
-margin: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  margin: auto;
 
-`width: 10%;`
-height: 0;
-`padding-top: 20%;`
-background: tomato;
+  width: 10%;
+  height: 0;
+  padding-top: 20%;
+  background: tomato;
 }
+```
 
 #### 105.你知道 CSS 中不同属性设置为百分比%时对应的计算基准？
 
-公式：当前元素某 CSS 属性值 = 基准 \* 对应的百分比
-元素的 position 为 relative 和 absolute 时，top 和 bottom、left 和 right 基准分别为包含块的 height、width
-元素的 position 为 fixed 时，top 和 bottom、left 和 right 基准分别为初始包含块（也就是视口）的 height、width，移动设备较为复杂，基准为 Layout viewport 的 height、width
+```
+公式：当前元素某CSS属性值 = 基准 * 对应的百分比
+元素的 position 为 relative 和 absolute 时，top和bottom、left和right基准分别为包含块的 height、width
+元素的 position 为 fixed 时，top和bottom、left和right基准分别为初始包含块（也就是视口）的 height、width，移动设备较为复杂，基准为 Layout viewport 的 height、width
 元素的 height 和 width 设置为百分比时，基准分别为包含块的 height 和 width
 元素的 margin 和 padding 设置为百分比时，基准为包含块的 width（易错）
 元素的 border-width，不支持百分比
 元素的 text-indent，基准为包含块的 width
 
-元素的 border-radius，基准为分别为自身的 height、width
-元素的 background-size，基准为分别为自身的 height、width
-元素的 translateX、translateY，基准为分别为自身的 height、width
+元素的 border-radius，基准为分别为自身的height、width
+元素的 background-size，基准为分别为自身的height、width
+元素的 translateX、translateY，基准为分别为自身的height、width
 元素的 line-height，基准为自身的 font-size
 
 元素的 font-size，基准为父元素字体
+```

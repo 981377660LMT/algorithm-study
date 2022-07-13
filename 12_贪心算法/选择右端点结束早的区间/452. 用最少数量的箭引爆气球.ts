@@ -4,7 +4,7 @@
  * 有多少不重叠的区间
  */
 function findMinArrowShots(points: number[][]): number {
-  // sort by the earliest finish time
+  // 区间结束时间/区间右端点排序
   points.sort((a, b) => a[1] - b[1])
 
   let preEnd = -Infinity

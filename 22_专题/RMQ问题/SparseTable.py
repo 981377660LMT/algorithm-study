@@ -2,46 +2,114 @@
 
 
 from math import ceil, floor, log2
-from typing import Any, Generic, List, TypeVar
-
-T = TypeVar("T", int, float)
+from typing import Callable, Generic, List, TypeVar
 
 
-class SparseTable(Generic[T]):
-    def __init__(self, nums: List[T]):
-        n, upper = len(nums), ceil(log2(len(nums))) + 1
+class MaxSparseTable:
+    """求区间最大值的ST表"""
+
+    __slots__ = "_n", "_dp"
+
+    def __init__(self, arr: List[int]):
+        n, upper = len(arr), ceil(log2(len(arr))) + 1
         self._n = n
-        self._dp1: List[List[Any]] = [[0] * upper for _ in range(n)]
-        self._dp2: List[List[Any]] = [[0] * upper for _ in range(n)]
-        for i, num in enumerate(nums):
-            self._dp1[i][0] = num
-            self._dp2[i][0] = num
+
+        dp = [[0] * upper for _ in range(n)]
+        for i in range(n):
+            dp[i][0] = arr[i]
         for j in range(1, upper):
             for i in range(n):
                 if i + (1 << (j - 1)) >= n:
                     break
-                self._dp1[i][j] = max(
-                    self._dp1[i][j - 1], self._dp1[i + (1 << (j - 1))][j - 1]
-                )
-                self._dp2[i][j] = min(
-                    self._dp2[i][j - 1], self._dp2[i + (1 << (j - 1))][j - 1]
-                )
+                cand1, cand2 = dp[i][j - 1], dp[i + (1 << (j - 1))][j - 1]
+                if cand1 > cand2:
+                    dp[i][j] = cand1
+                else:
+                    dp[i][j] = cand2
+        self._dp = dp
 
-    def query(self, left: int, right: int, *, ismax=True) -> T:
+    def query(self, left: int, right: int) -> int:
         """[left,right]区间的最大值"""
-        # assert 0 <= left <= right < self._n
+        assert 0 <= left <= right < self._n, f"{left}, {right}, {self._n}"
         k = floor(log2(right - left + 1))
-        if ismax:
-            return max(self._dp1[left][k], self._dp1[right - (1 << k) + 1][k])
-        else:
-            return min(self._dp2[left][k], self._dp2[right - (1 << k) + 1][k])
+        cand1, cand2 = self._dp[left][k], self._dp[right - (1 << k) + 1][k]
+        if cand1 > cand2:
+            return cand1
+        return cand2
+
+
+class MinSparseTable:
+    """求区间最小值的ST表"""
+
+    __slots__ = "_n", "_dp"
+
+    def __init__(self, arr: List[int]):
+        n, upper = len(arr), ceil(log2(len(arr))) + 1
+        self._n = n
+
+        dp = [[0] * upper for _ in range(n)]
+        for i in range(n):
+            dp[i][0] = arr[i]
+        for j in range(1, upper):
+            for i in range(n):
+                if i + (1 << (j - 1)) >= n:
+                    break
+                cand1, cand2 = dp[i][j - 1], dp[i + (1 << (j - 1))][j - 1]
+                if cand1 < cand2:
+                    dp[i][j] = cand1
+                else:
+                    dp[i][j] = cand2
+        self._dp = dp
+
+    def query(self, left: int, right: int) -> int:
+        """[left,right]区间的最小值"""
+        assert 0 <= left <= right < self._n, f"{left}, {right}, {self._n}"
+        k = floor(log2(right - left + 1))
+        cand1, cand2 = self._dp[left][k], self._dp[right - (1 << k) + 1][k]
+        if cand1 < cand2:
+            return cand1
+        return cand2
+
+
+T = TypeVar("T")
+Merger = Callable[[T, T], T]
+
+
+class SparseTable(Generic[T]):
+    """自定义merger的ST表"""
+
+    __slots__ = "_n", "_dp", "_merger"
+
+    def __init__(self, arr: List[T], merger: Merger[T]):
+        n, upper = len(arr), ceil(log2(len(arr))) + 1
+        self._n = n
+        self._merger = merger
+
+        dp: List[List[T]] = [[0] * upper for _ in range(n)]  # type: ignore
+        for i in range(n):
+            dp[i][0] = arr[i]
+        for j in range(1, upper):
+            for i in range(n):
+                if i + (1 << (j - 1)) >= n:
+                    break
+                dp[i][j] = merger(dp[i][j - 1], dp[i + (1 << (j - 1))][j - 1])
+        self._dp = dp
+
+    def query(self, left: int, right: int) -> T:
+        """[left,right]区间的贡献值"""
+        assert 0 <= left <= right < self._n, f"{left} {right} {self._n}"
+        k = floor(log2(right - left + 1))
+        return self._merger(self._dp[left][k], self._dp[right - (1 << k) + 1][k])
 
 
 if __name__ == "__main__":
-    nums = list(range(100000))
-    st = SparseTable(nums)
-    assert st.query(32, 636, ismax=True) == 636
-    assert st.query(32, 636, ismax=False) == 32
+    nums = list(range(10000))
+    st1 = MinSparseTable(nums)
+    st2 = MaxSparseTable(nums)
+    st3 = SparseTable(nums, min)
+    assert st1.query(32, 636) == 32
+    assert st2.query(32, 636) == 636
+    assert st3.query(32, 636) == 32
 
 # 通过了 O(1)的方式完成了指定区间任意范围的 RMQ。
 # 对于离线海量数据查询的需求完成了最高度的优化。

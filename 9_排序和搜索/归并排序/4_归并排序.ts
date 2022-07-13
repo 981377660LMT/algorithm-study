@@ -2,7 +2,7 @@
 // 当元素数量很少时(16)可以用插入排序代替
 
 // 合并两个有序数组
-const mergeTwo = (arr1: readonly number[], arr2: readonly number[]) => {
+function mergeTwo(arr1: readonly number[], arr2: readonly number[]): number[] {
   const res: number[] = []
   let i = 0
   let j = 0

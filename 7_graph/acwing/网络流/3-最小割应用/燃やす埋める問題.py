@@ -1,3 +1,5 @@
+# https://zenn.dev/kiwamachan/articles/37a2c646f82c7d
+# https://shindannin.hatenadiary.com/entry/2017/11/15/043009
 # 最小カットを使って「燃やす埋める問題」を解く
 # `最小割考虑的是不连接时的花费`
 

@@ -51,10 +51,6 @@ abstract class AbstractSegmentTree<T = number> {
     }
   }
 
-  get length() {
-    return this.upper
-  }
-
   /**
    * @param index 数组下标 0 <= index < n
    * @param value 更新的值 更新方式取决于 {@link updateTreeValue}
@@ -84,6 +80,10 @@ abstract class AbstractSegmentTree<T = number> {
     }
 
     return res
+  }
+
+  get length() {
+    return this.upper
   }
 }
 

@@ -1,17 +1,17 @@
 # 下一个排列/上一个排列
 
-from abc import abstractmethod
+
 from typing import Any, MutableSequence, Protocol, Tuple, TypeVar
 
 
 class Comparable(Protocol):
-    @abstractmethod
-    def __eq__(self, other: Any, /) -> bool:
-        pass
+    __slots__ = ()
 
-    @abstractmethod
+    def __eq__(self, other: Any, /) -> bool:
+        ...
+
     def __lt__(self, other: Any, /) -> bool:
-        pass
+        ...
 
     def __gt__(self, other: Any, /) -> bool:
         return (not self < other) and self != other
@@ -23,10 +23,12 @@ class Comparable(Protocol):
         return not self < other
 
 
-S = TypeVar('S', bound=Comparable)
+S = TypeVar("S", bound=Comparable)
 
 
-def nextPermutation(nums: MutableSequence[S], inPlace=False) -> Tuple[bool, MutableSequence[S]]:
+def nextPermutation(
+    nums: MutableSequence[S], inPlace=False
+) -> Tuple[bool, MutableSequence[S]]:
     """返回下一个字典序的排列，如果不存在，返回本身;时间复杂度O(n)"""
     if not inPlace:
         nums = nums[:]
@@ -51,7 +53,9 @@ def nextPermutation(nums: MutableSequence[S], inPlace=False) -> Tuple[bool, Muta
     return True, nums
 
 
-def prePermutation(nums: MutableSequence[S], inPlace=False) -> Tuple[bool, MutableSequence[S]]:
+def prePermutation(
+    nums: MutableSequence[S], inPlace=False
+) -> Tuple[bool, MutableSequence[S]]:
     """返回前一个字典序的排列,如果不存在,返回本身;时间复杂度O(n)"""
     if not inPlace:
         nums = nums[:]
@@ -76,17 +80,17 @@ def prePermutation(nums: MutableSequence[S], inPlace=False) -> Tuple[bool, Mutab
     return True, nums
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     isOk, nextP = nextPermutation([1, 2, 3])
     if isOk:
         print("nextP:", nextP)
-    isOk, nextP = nextPermutation(list(map(int, '12345')))
+    isOk, nextP = nextPermutation(list(map(int, "12345")))
     if isOk:
         print("nextP:", nextP)
 
     isOk, preP = prePermutation([3, 2, 1])
     if isOk:
         print("preP:", preP)
-    isOk, preP = prePermutation(list(map(int, '12345')))
+    isOk, preP = prePermutation(list(map(int, "12345")))
     if isOk:
         print("preP:", preP)

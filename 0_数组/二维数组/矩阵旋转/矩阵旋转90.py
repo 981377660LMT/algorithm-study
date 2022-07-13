@@ -1,4 +1,16 @@
-from typing import List
+from typing import List, TypeVar
+
+
+T = TypeVar("T")
+
+
+def rotate(matrix: List[List[T]], times=1) -> List[List[T]]:
+    """顺时针旋转矩阵90度`times`次"""
+    assert times >= 1
+    res = [list(col[::-1]) for col in zip(*matrix)]
+    for _ in range(times - 1):
+        res = [list(col[::-1]) for col in zip(*res)]
+    return res
 
 
 # 转置口诀:zip星负一
