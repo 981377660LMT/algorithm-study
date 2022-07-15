@@ -1,4 +1,6 @@
 # 1 <= nums.length <= 105
+# 1比0多的子数组个数
+
 # 统计和为正数的子数组有多少个，使用前缀和转换为计算左侧小于当前元素的个数的问题，可用有序集合或树状数组O(nlogn)解决
 from collections import defaultdict
 from typing import List
@@ -25,7 +27,7 @@ class Solution:
 
     def subarraysWithMoreZerosThanOnes2(self, nums: List[int]) -> int:
         """和为正数的子数组有多少个
-        
+
         O(n) dp解法
         每次需要查询小于当前值的个数，但是查询值每次变化都是+1或者-1,
         所以可以使用一个额外的变量来记录,查询复杂度O(logn)变为O(1)

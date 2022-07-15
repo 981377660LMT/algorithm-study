@@ -1,6 +1,26 @@
+# 数组三个相邻的数可以循环移位
+# 问 A 能否变成 B
+# n<=5000
+
+# !循环移位:偶排列
+# !看两个排列的奇偶性是否一样 (统计逆序数对)
+# 对一个数列，如果总的逆序数为奇数，则此排列为奇排列，否则为偶排列。
+
+# 判断所有数字出现个数相不相同，如果不相同一定不可以
+# 判断是否有两个或者两个以上相同的数，有的话一定可以
+# 判断逆序对数奇偶性是不是相同，相同可以，不相同不可以
+
+
+import sys
+import os
+
+sys.setrecursionlimit(int(1e9))
+input = lambda: sys.stdin.readline().rstrip("\r\n")
+MOD = int(1e9 + 7)
+
 from typing import List
-from collections import defaultdict
-from sortedcontainers import SortedList
+from collections import Counter, defaultdict
+
 
 # 1 <= nums.length <= 105
 # -104 <= nums[i] <= 104
@@ -16,21 +36,6 @@ def countSmaller(nums: List[int]) -> List[int]:
         res.append(cur)
         bit.add(nums[i] + OFFSET, nums[i] + OFFSET, 1)
     return list(reversed(res))
-
-
-# 1 <= nums.length <= 105
-# -104 <= nums[i] <= 104
-
-
-def countSmaller2(self, nums: List[int]):
-    res = []
-    visited = SortedList()
-    for num in reversed(nums):
-        index = visited.bisect_left(num)
-        res.append(index)
-        visited.add(num)
-
-    return res[::-1]
 
 
 class BIT:
@@ -68,3 +73,32 @@ class BIT:
             res += rawIndex * self._tree1[index] - self._tree2[index]
             index -= index & -index
         return res
+
+
+def solve(nums1: List[int], nums2: List[int]) -> bool:
+    """nums1能否rotate成nums2"""
+    if Counter(nums1) != Counter(nums2):
+        return False
+    if len(set(nums1)) != len(nums1):
+        return True
+    inv1, inv2 = sum(countSmaller(nums1)), sum(countSmaller(nums2))
+    return inv1 % 2 == inv2 % 2
+
+
+def main() -> None:
+    n = int(input())
+    nums1 = list(map(int, input().split()))
+    nums2 = list(map(int, input().split()))
+    if solve(nums1, nums2):
+        print("Yes")
+    else:
+        print("No")
+
+
+if __name__ == "__main__":
+
+    if os.environ.get("USERNAME", " ") == "caomeinaixi":
+        while True:
+            main()
+    else:
+        main()

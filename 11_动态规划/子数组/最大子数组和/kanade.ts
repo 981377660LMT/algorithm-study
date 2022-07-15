@@ -7,14 +7,14 @@ function kanade(nums: number[], getMax = true): number {
   if (nums.length === 1) return nums[0]
 
   let res = getMax ? -Infinity : Infinity
-  let sum = 0
+  let dp = 0
   for (const num of nums) {
     if (getMax) {
-      sum = Math.max(sum + num, num)
-      res = Math.max(res, sum)
+      dp = Math.max(dp + num, num)
+      res = Math.max(res, dp)
     } else {
-      sum = Math.min(sum + num, num)
-      res = Math.min(res, sum)
+      dp = Math.min(dp + num, num)
+      res = Math.min(res, dp)
     }
   }
 

@@ -6,17 +6,14 @@ def kanade(nums: List[int], getMax=True) -> int:
     n = len(nums)
     if n == 0:
         raise Exception("nums is empty")
-    if n == 1:
-        return nums[0]
 
     res = -int(1e20) if getMax else int(1e20)
-    cur = 0
+    dp = 0
     for num in nums:
         if getMax:
-            cur = max(cur, 0) + num
-            res = max(res, cur)
+            dp = max(dp, 0) + num
+            res = max(res, dp)
         else:
-            cur = min(cur, 0) + num
-            res = min(res, cur)
+            dp = min(dp, 0) + num
+            res = min(res, dp)
     return res
-
