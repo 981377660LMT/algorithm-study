@@ -5,10 +5,7 @@ function fib(n: number, a = 0, b = 1): number {
 }
 
 console.log(fib(1000))
-const t0 = performance.now()
-console.log(fib(1000))
-const t1 = performance.now()
-console.log(t1 - t0)
+console.log(fib(1001))
 
 // 尾递归为啥能优化？
 // 完全等效于一个无栈的循环

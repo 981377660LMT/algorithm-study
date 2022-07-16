@@ -3,8 +3,8 @@
 // import { createElement } from 'react'
 
 // const a = createElement('a')
-// // 返回DetailedReactHTMLElement
-// // 常用的：
+//  返回DetailedReactHTMLElement
+//  常用的：
 // const element = { type: 'h1', props: { title: 'foo', children: 'Hello' } }
 
 function createElement(type: any, props: any, ...children: any[]) {

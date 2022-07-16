@@ -1,4 +1,4 @@
-js 的基本类 7 个
+js 的基本类型 7 个
 
 ```TS
 type Primitive = string | number | bigint | boolean | symbol | null | undefined

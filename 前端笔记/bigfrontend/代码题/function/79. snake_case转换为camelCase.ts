@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 /**
  * @param {string} str
  * @return {string}
@@ -18,3 +20,5 @@ function snakeToCamel(str: string): string {
 // '_double__underscore_'
 console.log(snakeToCamel('is_IOS_or_Android'))
 // 'isIOSOrAndroid'
+console.log(_.camelCase('is_IOS_or_Android'))
+export { snakeToCamel }

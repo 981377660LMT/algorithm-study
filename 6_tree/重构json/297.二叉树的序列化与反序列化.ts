@@ -1,4 +1,4 @@
-import { BinaryTree } from '../力扣加加/Tree'
+import { BinaryTree } from '../分类/Tree'
 
 /**
  * Encodes a tree to a single string.
@@ -105,7 +105,6 @@ const deserializeDFS = (data: string): BinaryTree | null => {
  * Decodes your encoded data to tree.
  *
  * @param {(number | null)[]} data
- * @return {TreeNode}
  * 使用bfs
  */
 function deserializeNode(data: (number | null)[]): BinaryTree | null {

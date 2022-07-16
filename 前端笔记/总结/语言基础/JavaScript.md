@@ -52,71 +52,42 @@
     - [59. 什么是浏览器的同源政策？](#59-什么是浏览器的同源政策)
     - [60. 如何解决跨域问题？](#60-如何解决跨域问题)
     - [62. 简单谈一下 cookie ？](#62-简单谈一下-cookie-)
-    - [63. 模块化开发怎么做？](#63-模块化开发怎么做)
     - [64. js 的几种模块规范？](#64-js-的几种模块规范)
-    - [65. AMD 和 CMD 规范的区别？](#65-amd-和-cmd-规范的区别)
     - [66. ES6 模块与 CommonJS 模块、AMD、CMD 的差异。](#66-es6-模块与-commonjs-模块amdcmd-的差异)
     - [67. requireJS 的核心原理是什么？（如何动态加载的？如何避免多次加载的？如何 缓存的？）](#67-requirejs-的核心原理是什么如何动态加载的如何避免多次加载的如何-缓存的)
-    - [68. JS 模块加载器的轮子怎么造，也就是如何实现一个模块加载器？](#68-js-模块加载器的轮子怎么造也就是如何实现一个模块加载器)
     - [70. documen.write 和 innerHTML 的区别？](#70-documenwrite-和-innerhtml-的区别)
-    - [71. DOM 操作——怎样添加、移除、移动、复制、创建和查找节点？](#71-dom-操作怎样添加移除移动复制创建和查找节点)
-    - [72. innerHTML 与 outerHTML 的区别？](#72-innerhtml-与-outerhtml-的区别)
     - [74. JavaScript 类数组对象的定义？](#74-javascript-类数组对象的定义)
-    - [75. 数组和对象有哪些原生方法，列举一下？](#75-数组和对象有哪些原生方法列举一下)
-    - [76. 数组的 fill 方法？](#76-数组的-fill-方法)
     - [77. [,,,] 的长度？](#77--的长度)
     - [78. JavaScript 中的作用域与变量声明提升？](#78-javascript-中的作用域与变量声明提升)
-    - [79. 如何编写高性能的 Javascript ？](#79-如何编写高性能的-javascript-)
     - [80. 简单介绍一下 V8 引擎的垃圾回收机制](#80-简单介绍一下-v8-引擎的垃圾回收机制)
     - [81. 哪些操作会造成内存泄漏？](#81-哪些操作会造成内存泄漏)
-    - [82. 需求：实现一个页面操作不会整页刷新的网站，并且能在浏览器前进、后退时正确响应。给出你的技术实现方案？](#82-需求实现一个页面操作不会整页刷新的网站并且能在浏览器前进后退时正确响应给出你的技术实现方案)
     - [83. 如何判断当前脚本运行在浏览器还是 node 环境中？（阿里）](#83-如何判断当前脚本运行在浏览器还是-node-环境中阿里)
-    - [85. 移动端的点击事件的有延迟，时间是多久，为什么会有？ 怎么解决这个延时？](#85-移动端的点击事件的有延迟时间是多久为什么会有-怎么解决这个延时)
     - [86. 什么是“前端路由”？什么时候适合使用“前端路由”？“前端路由”有哪些优点和缺点？](#86-什么是前端路由什么时候适合使用前端路由前端路由有哪些优点和缺点)
     - [88. 检测浏览器版本版本有哪些方式？](#88-检测浏览器版本版本有哪些方式)
     - [89. 什么是 Polyfill ？](#89-什么是-polyfill-)
-    - [90. 使用 JS 实现获取文件扩展名？](#90-使用-js-实现获取文件扩展名)
-    - [93. escape,encodeURI,encodeURIComponent 有什么区别？](#93-escapeencodeuriencodeuricomponent-有什么区别)
-    - [94. Unicode 和 UTF-8 之间的关系？](#94-unicode-和-utf-8-之间的关系)
-    - [96. js 中的深浅拷贝实现？](#96-js-中的深浅拷贝实现)
-    - [99. 为什么 0.1 + 0.2 != 0.3？如何解决这个问题？](#99-为什么-01--02--03如何解决这个问题)
-    - [100. 原码、反码和补码的介绍](#100-原码反码和补码的介绍)
     - [101. toPrecision 和 toFixed 和 Math.round 的区别？](#101-toprecision-和-tofixed-和-mathround-的区别)
     - [102. 什么是 XSS 攻击？如何防范 XSS 攻击？](#102-什么是-xss-攻击如何防范-xss-攻击)
     - [103. 什么是 CSP？](#103-什么是-csp)
-    - [104. 什么是 CSRF 攻击？如何防范 CSRF 攻击？](#104-什么是-csrf-攻击如何防范-csrf-攻击)
     - [105. 什么是 Samesite Cookie 属性？](#105-什么是-samesite-cookie-属性)
-    - [106. 什么是点击劫持？如何防范点击劫持？](#106-什么是点击劫持如何防范点击劫持)
-    - [107. SQL 注入攻击？](#107-sql-注入攻击)
-    - [108. 什么是 MVVM？比之 MVC 有什么区别？什么又是 MVP ？](#108-什么是-mvvm比之-mvc-有什么区别什么又是-mvp-)
     - [110. Object.defineProperty 介绍？](#110-objectdefineproperty-介绍)
     - [111. 使用 Object.defineProperty() 来进行数据劫持有什么缺点？](#111-使用-objectdefineproperty-来进行数据劫持有什么缺点)
     - [112. 什么是 Virtual DOM？为什么 Virtual DOM 比原生 DOM 快？](#112-什么是-virtual-dom为什么-virtual-dom-比原生-dom-快)
     - [113. 如何比较两个 DOM 树的差异？](#113-如何比较两个-dom-树的差异)
-    - [114. 什么是 requestAnimationFrame ？](#114-什么是-requestanimationframe-)
-    - [115. 谈谈你对 webpack 的看法](#115-谈谈你对-webpack-的看法)
     - [116. offsetWidth/offsetHeight,clientWidth/clientHeight 与 scrollWidth/scrollHeight 的区别？](#116-offsetwidthoffsetheightclientwidthclientheight-与-scrollwidthscrollheight-的区别)
     - [117. 谈一谈你理解的函数式编程？](#117-谈一谈你理解的函数式编程)
     - [118. 异步编程的实现方式？](#118-异步编程的实现方式)
-    - [119. Js 动画与 CSS 动画区别及相应实现](#119-js-动画与-css-动画区别及相应实现)
     - [120. get 请求传参长度的误区](#120-get-请求传参长度的误区)
-    - [121. URL 和 URI 的区别？](#121-url-和-uri-的区别)
     - [122. get 和 post 请求在缓存方面的区别](#122-get-和-post-请求在缓存方面的区别)
     - [123. 图片的懒加载和预加载](#123-图片的懒加载和预加载)
     - [124. mouseover 和 mouseenter 的区别？](#124-mouseover-和-mouseenter-的区别)
     - [125. js 拖拽功能的实现](#125-js-拖拽功能的实现)
-    - [126. 为什么使用 setTimeout 实现 setInterval？怎么模拟？](#126-为什么使用-settimeout-实现-setinterval怎么模拟)
     - [127. let 和 const 的注意点？](#127-let-和-const-的注意点)
     - [129. 什么是尾调用，使用尾调用有什么好处？](#129-什么是尾调用使用尾调用有什么好处)
     - [130. Symbol 类型的注意点？](#130-symbol-类型的注意点)
     - [131. Set 和 WeakSet 结构？](#131-set-和-weakset-结构)
-    - [132. Map 和 WeakMap 结构？](#132-map-和-weakmap-结构)
-    - [133. 什么是 Proxy ？](#133-什么是-proxy-)
     - [134. Reflect 对象创建目的？](#134-reflect-对象创建目的)
     - [135. require 模块引入的查找方式？](#135-require-模块引入的查找方式)
-    - [136. 什么是 Promise 对象，什么是 Promises/A+ 规范？](#136-什么是-promise-对象什么是-promisesa-规范)
     - [138. 如何检测浏览器所支持的最小字体大小？](#138-如何检测浏览器所支持的最小字体大小)
-    - [139. 怎么做 JS 代码 Error 统计？](#139-怎么做-js-代码-error-统计)
     - [140. 单例模式模式是什么？](#140-单例模式模式是什么)
     - [141. 策略模式是什么？ 查表](#141-策略模式是什么-查表)
     - [142. 代理模式是什么？](#142-代理模式是什么)
@@ -128,17 +99,12 @@
     - [151. $route 和 $router 的区别？](#151-route-和-router-的区别)
     - [152. vue 常用的修饰符？](#152-vue-常用的修饰符)
     - [157. 开发中常用的几种 Content-Type ？](#157-开发中常用的几种-content-type-)
-    - [158. 如何封装一个 javascript 的类型判断函数？](#158-如何封装一个-javascript-的类型判断函数)
-    - [159. 如何判断一个对象是否为空对象？](#159-如何判断一个对象是否为空对象)
-    - [164. 一道常被人轻视的前端 JS 面试题](#164-一道常被人轻视的前端-js-面试题)
     - [165. 如何确定页面的可用性时间，什么是 Performance API？](#165-如何确定页面的可用性时间什么是-performance-api)
     - [167. js 语句末尾分号是否可以省略？](#167-js-语句末尾分号是否可以省略)
     - [168. Object.assign()](#168-objectassign)
     - [170. js for 循环注意点](#170-js-for-循环注意点)
     - [171. 一个列表，假设有 100000 个数据，这个该怎么办？](#171-一个列表假设有-100000-个数据这个该怎么办)
     - [172. js 中倒计时的纠偏实现？](#172-js-中倒计时的纠偏实现)
-    - [173. 进程间通信的方式？](#173-进程间通信的方式)
-    - [175. ele.getElementsByClassName 和 ele.querySelectorAll 的区别？](#175-elegetelementsbyclassname-和-elequeryselectorall-的区别)
 
 #### 1. 介绍 js 的基本数据类型。
 
@@ -891,29 +857,11 @@ cookie 跨域:
 [《HTTP cookies》 ](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Cookies)
 [《聊一聊 cookie》 ](https://segmentfault.com/a/1190000004556040)
 
-#### 63. 模块化开发怎么做？
-
-我对模块的理解是，一个模块是实现一个特定功能的一组方法。在最开始的时候，js 只实现一些简单的功能，所以并没有模块的概念，但随着程序越来越复杂，代码的模块化开发变得越来越重要。
-
-由于函数具有独立作用域的特点，最原始的写法是使用函数来作为模块，几个函数作为一个模块，但是这种方式容易造成全局变量的污染，并且模块间没有联系。
-
-后面提出了对象写法，通过将函数作为一个对象的方法来实现，这样解决了直接使用函数作为模块的一些缺点，但是这种办法会暴露所有的所有的模块成员，外部代码可以修改内部属性的值。
-
-现在最常用的是立即执行函数的写法，通过利用闭包来实现模块私有作用域的建立，同时不会对全局作用域造成污染。
-
-详细资料可以参考：
-[《浅谈模块化开发》](https://juejin.im/post/5ab378c46fb9a028ce7b824f)
-[《Javascript 模块化编程（一）：模块的写法》](http://www.ruanyifeng.com/blog/2012/10/javascript_module.html)
-[《前端模块化：CommonJS，AMD，CMD，ES6》](https://juejin.im/post/5aaa37c8f265da23945f365c)
-[《Module 的语法》](http://es6.ruanyifeng.com/#docs/module)
-
 #### 64. js 的几种模块规范？
 
 js 中现在比较成熟的有四种模块加载方案。
 
-第一种是 CommonJS 方案，它通过 require 来引入模块，通过 module.exports 定义模块的输出接口。这种模块加载方案是
-服务器端的解决方案，它是以同步的方式来引入模块的，因为在服务端文件都存储在本地磁盘，所以读取非常快，所以以同步的方式
-加载没有问题。但如果是在浏览器端，由于模块的加载是使用网络请求，因此使用异步加载的方式更加合适。
+第一种是 CommonJS 方案，它通过 require 来引入模块，通过 module.exports 定义模块的输出接口。这种模块加载方案是`服务器端的解决方案，它是以同步的方式来引入模块的`，因为在服务端文件都存储在本地磁盘，所以读取非常快，所以以同步的方式加载没有问题。但如果是在浏览器端，由于模块的加载是使用网络请求，因此使用异步加载的方式更加合适。
 
 第二种是 AMD 方案，这种方案采用异步加载的方式来加载模块，模块的加载不影响后面语句的执行，所有依赖这个模块的语句都定
 义在一个回调函数里，等到加载完成后再执行回调函数。require.js 实现了 AMD 规范。
@@ -922,41 +870,6 @@ js 中现在比较成熟的有四种模块加载方案。
 的区别在于模块定义时对依赖的处理不同和对依赖模块的执行时机的处理不同。参考 60
 
 第四种方案是 ES6 提出的方案，使用 import 和 export 的形式来导入导出模块。这种方案和上面三种方案都不同。参考 61。
-
-#### 65. AMD 和 CMD 规范的区别？
-
-它们之间的主要区别有两个方面。
-
-（1）第一个方面是在模块定义时对依赖的处理不同。AMD 推崇依赖前置，在定义模块的时候就要声明其依赖的模块。而 CMD 推崇
-就近依赖，只有在用到某个模块的时候再去 require。
-
-（2）第二个方面是对依赖模块的执行时机处理不同。首先 AMD 和 CMD 对于模块的加载方式都是异步加载，不过它们的区别在于
-模块的执行时机，AMD 在依赖模块加载完成后就直接执行依赖模块，依赖模块的执行顺序和我们书写的顺序不一定一致。而 CMD
-在依赖模块加载完成后并不执行，只是下载而已，等到所有的依赖模块都加载好后，进入回调函数逻辑，遇到 require 语句
-的时候才执行对应的模块，这样模块的执行顺序就和我们书写的顺序保持一致了。
-
-js
-// CMD
-define(function(require, exports, module) {
-var a = require("./a");
-a.doSomething();
-// 此处略去 100 行
-var b = require("./b"); // 依赖可以就近书写
-b.doSomething();
-// ...
-});
-
-// AMD 默认推荐
-define(["./a", "./b"], function(a, b) {
-// 依赖必须一开始就写好
-a.doSomething();
-// 此处略去 100 行
-b.doSomething();
-// ...
-});
-
-详细资料可以参考：
-[《前端模块化，AMD 与 CMD 的区别》](https://juejin.im/post/5a422b036fb9a045211ef789)
 
 #### 66. ES6 模块与 CommonJS 模块、AMD、CMD 的差异。
 
@@ -974,11 +887,6 @@ require.js 的核心原理是通过动态创建 script 脚本来异步引入模�
 [《从 RequireJs 源码剖析脚本加载原理》](https://www.cnblogs.com/dong-xu/p/7160919.html)
 [《requireJS 原理分析》](https://www.jianshu.com/p/5a39535909e4)
 
-#### 68. JS 模块加载器的轮子怎么造，也就是如何实现一个模块加载器？
-
-详细资料可以参考：
-[《JS 模块加载器加载原理是怎么样的？》](https://www.zhihu.com/question/21157540)
-
 #### 70. documen.write 和 innerHTML 的区别？
 
 document.write 的内容会代替整个文档内容，会重写整个页面。
@@ -987,57 +895,6 @@ innerHTML 的内容只是替代指定元素的内容，只会重写页面中的�
 
 详细资料可以参考：
 [《简述 document.write 和 innerHTML 的区别。》](https://www.nowcoder.com/questionTerminal/2c5d8105b2694d85b06eff85e871cf50)
-
-#### 71. DOM 操作——怎样添加、移除、移动、复制、创建和查找节点？
-
-（1）创建新节点
-
-js
-createDocumentFragment(node);
-createElement(node);
-createTextNode(text);
-
-（2）添加、移除、替换、插入
-
-js
-appendChild(node)
-removeChild(node)
-replaceChild(new,old)
-insertBefore(new,old)
-
-（3）查找
-
-js
-getElementById();
-getElementsByName();
-getElementsByTagName();
-getElementsByClassName();
-querySelector();
-querySelectorAll();
-
-（4）属性操作
-
-js
-getAttribute(key);
-setAttribute(key, value);
-hasAttribute(key);
-removeAttribute(key);
-
-详细资料可以参考：
-[《DOM 概述》](https://developer.mozilla.org/zh-CN/docs/Web/API/Document_Object_Model/Introduction#DOM_interfaces)
-[《原生 JavaScript 的 DOM 操作汇总》](https://harttle.land/2015/10/01/javascript-dom-api.html)
-[《原生 JS 中 DOM 节点相关 API 合集》](https://microzz.com/2017/04/06/jsdom/)
-
-#### 72. innerHTML 与 outerHTML 的区别？
-
-包不包括标签本身
-
-对于这样一个 HTML 元素：<div>content<br/></div>。
-
-innerHTML：内部 HTML，content<br/>；
-outerHTML：外部 HTML，<div>content<br/></div>；
-innerText：内部文本，content ；
-outerText：内部文本，content ；
 
 #### 74. JavaScript 类数组对象的定义？
 
@@ -1063,33 +920,6 @@ Array.from(arrayLike);
 [《javascript 类数组》](https://segmentfault.com/a/1190000000415572)
 [《深入理解 JavaScript 类数组》](https://blog.lxxyx.cn/2016/05/07/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JavaScript%E7%B1%BB%E6%95%B0%E7%BB%84/)
 
-#### 75. 数组和对象有哪些原生方法，列举一下？
-
-数组和字符串的转换方法：toString()、toLocalString()、join() 其中 join() 方法可以指定转换为字符串时的分隔符。
-
-数组尾部操作的方法 pop() 和 push()，push 方法可以传入多个参数。
-
-数组首部操作的方法 shift() 和 unshift() 重排序的方法 reverse() 和 sort()，sort() 方法可以传入一个函数来进行比较，传入前后两个值，如果返回值为正数，则交换两个参数的位置。
-
-数组连接的方法 concat() ，返回的是拼接好的数组，不影响原数组。
-
-数组截取办法 slice()，用于截取数组中的一部分返回，不影响原数组。
-
-数组插入方法 splice()，影响原数组查找特定项的索引的方法，indexOf() 和 lastIndexOf() 迭代方法 every()、some()、filter()、map() 和 forEach() 方法
-
-数组归并方法 reduce() 和 reduceRight() 方法
-
-详细资料可以参考：
-[《JavaScript 深入理解之 Array 类型详解》](http://cavszhouyou.top/JavaScript%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E4%B9%8BArray%E8%AF%A6%E8%A7%A3.html)
-
-#### 76. 数组的 fill 方法？
-
-fill() 方法用一个固定值填充一个数组中从起始索引到终止索引内的全部元素。不包括终止索引。
-`fill 方法接受三个参数 value，start 以及 end`，start 和 end 参数是可选的，其默认值分别为 0 和 this 对象的 length 属性值。
-
-详细资料可以参考：
-[《Array.prototype.fill()》](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/fill)
-
 #### 77. [,,,] 的长度？
 
 `尾后逗号` （有时叫做“终止逗号”）在向 JavaScript 代码添加元素、参数、属性时十分有用。如果你想要添加新的属性，并且上一行已经使用了尾后逗号，你可以仅仅添加新的一行，而不需要修改上一行。这使得版本控制更加清晰，以及代码维护麻烦更少。
@@ -1107,20 +937,10 @@ cript 2017），又将其添加到函数参数中。但是 JSON 不支持尾后�
 
 变量提升的表现是，无论我们在函数中何处位置声明的变量，好像都被提升到了函数的首部，我们可以在变量声明前访问到而不会报错。
 
-造成变量声明提升的本质原因是 js 引擎在代码执行前有一个`解析的过程，创建了执行上下文`，初始化了一些代码执行时需要用到的对象。当我们访问一个变量时，我们会到当前执行上下文中的作用域链中去查找，而`作用域链的首端指向的是当前执行上下文的变量对象，这个变量对象是执行上下文的一个属性，它包含了函数的形参、所有的函数和变量声明`，`这个对象的是在代码解析的时候创建的`。这就是会出现变量声明提升的根本原因。
+造成变量声明提升的本质原因是 js 变量作用域 是**静态作用域** 引擎在代码执行前有一个`解析的过程，创建了执行上下文`，初始化了一些代码执行时需要用到的对象。当我们访问一个变量时，我们会到当前执行上下文中的作用域链中去查找，而`作用域链的首端指向的是当前执行上下文的变量对象，这个变量对象是执行上下文的一个属性，它包含了函数的形参、所有的函数和变量声明`，`这个对象的是在代码解析的时候创建的`。这就是会出现变量声明提升的根本原因。
 
 详细资料可以参考：
 [《JavaScript 深入理解之变量对象》](http://cavszhouyou.top/JavaScript%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E4%B9%8B%E5%8F%98%E9%87%8F%E5%AF%B9%E8%B1%A1.html)
-
-#### 79. 如何编写高性能的 Javascript ？
-
-- 1.使用位运算代替一些简单的四则运算。
-- 2.避免使用过深的嵌套循环。
-- 3.不要使用未定义的变量。
-- 4.当需要多次访问数组长度时，可以用变量保存起来，避免每次都会去进行属性查找。
-
-详细资料可以参考：
-[《如何编写高性能的 Javascript？》](https://zhuanlan.zhihu.com/p/34780474)
 
 #### 80. 简单介绍一下 V8 引擎的垃圾回收机制
 
@@ -1161,9 +981,9 @@ v8 的垃圾回收机制基于`分代回收机制`，这个机制又基于世代
 
 回答：
 
-第一种情况是我们由于使用未声明的变量，而意外的创建了一个全局变量，而使这个变量一直留在内存中无法被回收。
+第一种情况是我们由于**使用未声明的变量，而意外的创建了一个全局变量**，而使这个变量一直留在内存中无法被回收。
 
-第二种情况是我们设置了 setInterval 定时器，而忘记取消它，如果循环函数有对外部变量的引用的话，那么这个变量会被一直留在内存中，而无法被回收。
+第二种情况是我们设置了 **setInterval 定时器，而忘记取消它**，如果循环函数有对外部变量的引用的话，那么这个变量会被一直留在内存中，而无法被回收。
 
 第三种情况是我们获取一个 DOM 元素的引用，而后面这个元素被删除，由于我们一直保留了对这个元素的引用，所以它也无法被回收。
 
@@ -1175,56 +995,23 @@ v8 的垃圾回收机制基于`分代回收机制`，这个机制又基于世代
 [《杜绝 js 中四种内存泄漏类型的发生》](https://juejin.im/entry/5a64366c6fb9a01c9332c706)
 [《javascript 典型内存泄漏及 chrome 的排查方法》](https://segmentfault.com/a/1190000008901861)
 
-#### 82. 需求：实现一个页面操作不会整页刷新的网站，并且能在浏览器前进、后退时正确响应。给出你的技术实现方案？
-
-通过使用 pushState + ajax 实现浏览器无刷新前进后退，当一次 ajax 调用成功后我们将一条 state 记录加入到 history
-对象中。一条 state 记录包含了 url、title 和 content 属性，在 popstate 事件中可以获取到这个 state 对象，我们可
-以使用 content 来传递数据。最后我们通过对 window.onpopstate 事件监听来响应浏览器的前进后退操作。
-
-使用 pushState 来实现有两个问题，一个是打开首页时没有记录，我们可以使用 replaceState 来将首页的记录替换，另一个问题是当一个页面刷新的时候，仍然会向服务器端请求数据，因此如果请求的 url 需要后端的配合将其重定向到一个页面。
-
-详细资料可以参考：
-[《pushState + ajax 实现浏览器无刷新前进后退》](http://blog.chenxu.me/post/detail?id=ed4f0732-897f-48e4-9d4f-821e82f17fad)
-[《Manipulating the browser history》](https://developer.mozilla.org/zh-CN/docs/Web/API/History_API)
-
 #### 83. 如何判断当前脚本运行在浏览器还是 node 环境中？（阿里）
 
 `typeof window === 'undefined' ? 'node' : 'browser';`
 
 通过判断当前环境的 window 对象类型是否为 undefined，如果是 undefined，则说明当前脚本运行在 node 环境，否则说明运行在 window 环境。
 
-#### 85. 移动端的点击事件的有延迟，时间是多久，为什么会有？ 怎么解决这个延时？
-
-移动端点击有 300ms 的延迟是因为移动端会有双击缩放的这个操作，因此浏览器在 click 之后要等待 300ms，看用户有没有下一次点击，来判断这次操作是不是双击。
-
-有三种办法来解决这个问题：
-
-- 1.通过 meta 标签禁用网页的缩放。
-- 2.通过 meta 标签将网页的 viewport 设置为 ideal viewport。
-- 3.调用一些 js 库，比如 `FastClick`,取消 click 事件，用 touchend 模拟 快速点击行为
-
-click 延时问题还可能引起`点击穿透`的问题，就是如果我们在一个元素上注册了 touchStart 的监听事件，这个事件会将这个元素隐藏掉，我们发现当`这个元素隐藏后，触发了这个元素下的一个元素的点击事件，这就是点击穿透`。
-这是因为在移动端浏览器，事件执行的顺序是 touchstart > touchend > click。而 click 事件有 300ms 的延迟，当 touchstart 事件把 B 元素隐藏之后，隔了 300ms，浏览器触发了 click 事件
-
-详细资料可以参考：
-[《移动端 300ms 点击延迟和点击穿透》](https://juejin.im/post/5b3cc9836fb9a04f9a5cb0e0)
-
 #### 86. 什么是“前端路由”？什么时候适合使用“前端路由”？“前端路由”有哪些优点和缺点？
 
 （1）什么是前端路由？
-
 前端路由就是把不同路由对应不同的内容或页面的任务交给前端来做，之前是通过服务端根据 url 的不同返回不同的页面实现的。
 
 （2）什么时候使用前端路由？
-
 在单页面应用，大部分页面结构不变，只改变部分内容的使用
 
 （3）前端路由有什么优点和缺点？
-
 优点：用户体验好，不需要每次都从服务器全部获取，快速展现给用户
-
 缺点：单页面无法`记住之前滚动的位置`，无法在前进，后退的时候记住滚动的位置
-
 前端路由一共有两种实现方式，一种是通过 hash 的方式，一种是通过使用 pushState 的方式。
 
 详细资料可以参考：
@@ -1235,9 +1022,7 @@ click 延时问题还可能引起`点击穿透`的问题，就是如果我们在
 #### 88. 检测浏览器版本版本有哪些方式？
 
 检测浏览器版本一共有两种方式：
-
 一种是检测 `window.navigator.userAgent` 的值，但这种方式很不可靠，因为 `userAgent 可以被改写`，并且早期的浏览器如 ie，会通过伪装自己的 userAgent 的值为 Mozilla 来躲过服务器的检测。
-
 第二种方式是功能检测，`根据每个浏览器独有的特性来进行判断`，如 ie 下独有的 ActiveXObject。
 
 详细资料可以参考：
@@ -1254,136 +1039,6 @@ Polyfill 指的是用于`实现浏览器并不支持的原生 API 的代码`。
 详细资料可以参考：
 [《Web 开发中的“黑话”》](https://segmentfault.com/a/1190000002593432)
 [《Polyfill 为何物》](https://juejin.im/post/5a579bc7f265da3e38496ba1)
-
-#### 90. 使用 JS 实现获取文件扩展名？
-
-js
-// String.lastIndexOf() 方法返回指定值（本例中的'.'）在调用该方法的字符串中最后出现的位置，如果没找到则返回 -1。
-
-// 对于 'filename' 和 '.hiddenfile' ，lastIndexOf 的返回值分别为 -1 和 0 无符号右移操作符(>>>) 将 -1 转换为 4294967295 ，将 -2 转换为 4294967294 ，这个方法可以保证边缘情况时文件名不变。
-
-// String.prototype.slice() 从上面计算的索引处提取文件的扩展名。如果索引比文件名的长度大，结果为""。
-function getFileExtension(filename) {
-return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
-}
-
-详细资料可以参考：
-[《如何更有效的获取文件扩展名》](https://segmentfault.com/a/1190000004993946)
-
-#### 93. escape,encodeURI,encodeURIComponent 有什么区别？
-
-相关知识点：
-
-escape 和 encodeURI 都属于 Percent-encoding，基本功能都是把 URI 非法字符转化成合法字符，转化后形式类似「%\*」。
-它们的根本区别在于，escape 在处理 0xff 之外字符的时候，是直接使用字符的 unicode 在前面加上一个「%u」，而 encode URI 则是先进行 UTF-8，再在 UTF-8 的每个字节码前加上一个「%」；在处理 0xff 以内字符时，编码方式是一样的（都是「%XX」，XX 为字符的 16 进制 unicode，同时也是字符的 UTF-8），只是范围（即哪些字符编码哪些字符不编码）不一样。
-
-回答：
-
-encodeURI 是对整个 URI 进行转义，将 URI 中的非法字符转换为合法字符，所以对于一些在 URI 中有特殊意义的字符不会进行转义。
-
-encodeURIComponent 是对 URI 的组成部分进行转义，所以一些特殊字符也会得到转义。
-
-escape 和 encodeURI 的作用相同，不过它们对于 unicode 编码为 0xff 之外字符的时候会有区别，`escape 是直接在字符的 unicode 编码前加上 %u`，而 `encodeURI 首先会将字符转换为 UTF-8 的格式，再在每个字节前加上 %。`
-
-知乎的「知」字，可以知道它的 unicode 为 0x77e5，对它进行 UTF-8 编码，变成了三个字节：0xe7, 0x9f, 0xa5 因此，如果是使用 escape 编码「知」,得到的结果就是 「%u77E5」；encodeURI 得到的结果则是 「%E7%9F%A5」
-
-[《escape,encodeURI,encodeURIComponent 有什么区别?》](https://www.zhihu.com/question/21861899)
-
-#### 94. Unicode 和 UTF-8 之间的关系？
-
-`Unicode 是一种字符集合`，现在可容纳 100 多万个字符。`每个字符对应一个不同的 Unicode 编码`，它只规定了符号的二进制代码，却没有规定这个二进制代码在计算机中如何编码传输。
-
-`UTF-8 是一种对 Unicode 的编码方式`，它是一种变长的编码方式，可以用 1~4 个字节来表示一个字符。
-
-详细资料可以参考：
-[《字符编码详解》](https://blog.51cto.com/polaris/377468)
-[《字符编码笔记：ASCII，Unicode 和 UTF-8》](http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html)
-
-#### 96. js 中的深浅拷贝实现？
-
-相关资料：
-
-js
-// 浅拷贝的实现;
-
-function shallowCopy(object) {
-// 只拷贝对象
-if (!object || typeof object !== "object") return;
-
-// 根据 object 的类型判断是新建一个数组还是对象
-let newObject = Array.isArray(object) ? [] : {};
-
-// 遍历 object，并且判断是 object 的属性才拷贝
-for (let key in object) {
-if (object.hasOwnProperty(key)) {
-newObject[key] = object[key];
-}
-}
-
-return newObject;
-}
-
-// 深拷贝的实现;
-
-function deepCopy(object) {
-if (!object || typeof object !== "object") return object;
-
-let newObject = Array.isArray(object) ? [] : {};
-
-for (let key in object) {
-if (object.hasOwnProperty(key)) {
-newObject[key] = deepCopy(object[key]);
-}
-}
-
-return newObject;
-}
-
-回答：
-
-`浅拷贝指的是将一个对象的属性值复制到另一个对象`，如果有的属性的值为引用类型的话，那么会将这个引用的地址复制给对象，因此两个对象会有同一个引用类型的引用。浅拷贝可以使用 Object.assign 和展开运算符来实现。
-
-深拷贝相对浅拷贝而言，如果遇到属性值为引用类型的时候，它新建一个引用类型并将对应的值复制给它，因此对象获得的一个新的引用类型而不是一个原有类型的引用。深拷贝对于一些对象可以使用 JSON 的两个函数来实现，但是由于 JSON 的对象格式比 js 的对象格式更加严格，所以如果属性值里边出现函数或者 Symbol 类型的值时，会转换失败。
-
-详细资料可以参考：
-[《JavaScript 专题之深浅拷贝》](https://github.com/mqyqingfeng/Blog/issues/32)
-[《前端面试之道》](https://juejin.im/book/5bdc715fe51d454e755f75ef/section/5bed40d951882545f73004f6)
-
-#### 99. 为什么 0.1 + 0.2 != 0.3？如何解决这个问题？
-
-当计算机计算 0.1+0.2 的时候，实际上计算的是这两个数字在计算机里所存储的二进制，0.1 和 0.2 在转换为二进制表示的时候会出现位数无限循环的情况。js 中是以 64 位双精度格式来存储数字的，只有 53 位的有效数字，超过这个长度的位数会被截取掉这样就造成了精度丢失的问题。这是第一个会造成精度丢失的地方。在对两个以 64 位双精度格式的数据进行计算的时候，首先会进行对阶的处理，对阶指的是将阶码对齐，也就是将小数点的位置对齐后，再进行计算，一般是小阶向大阶对齐，因此小阶的数在对齐的过程中，有效数字会向右移动，移动后超过有效位数的位会被截取掉，这是第二个可能会出现精度丢失的地方。当两个数据阶码对齐后，进行相加运算后，得到的结果可能会超过 53 位有效数字，因此超过的位数也会被截取掉，这是可能发生精度丢失的第三个地方。
-
-对于这样的情况，我们可以将其转换为整数后再进行运算，运算后再转换为对应的小数，以这种方式来解决这个问题。
-
-我们还可以将两个数相加的结果和右边相减，如果相减的结果小于一个极小数，那么我们就可以认定结果是相等的，这个极小数可以
-使用 es6 的 Number.EPSILON
-
-详细资料可以参考：
-[《十进制的 0.1 为什么不能用二进制很好的表示？》](https://blog.csdn.net/Lixuanshengchao/article/details/82049191)
-[《十进制浮点数转成二进制》](https://blog.csdn.net/zhengyanan815/article/details/78550073)
-[《浮点数的二进制表示》](http://www.ruanyifeng.com/blog/2010/06/ieee_floating-point_representation.html)
-[《js 浮点数存储精度丢失原理》](https://juejin.im/post/5b372f106fb9a00e6714aa21)
-[《浮点数精度之谜》](https://juejin.im/post/594a31d0a0bb9f006b0b2624)
-[《JavaScript 浮点数陷阱及解法》](https://github.com/camsong/blog/issues/9)
-[《0.1+0.2 !== 0.3？》](https://juejin.im/post/5bd2f10a51882555e072d0c4)
-[《JavaScript 中奇特的~运算符》](https://juejin.im/entry/59cdd7fb6fb9a00a600f8eef)
-
-#### 100. 原码、反码和补码的介绍
-
-原码是计算机中对数字的二进制的定点表示方法，最高位表示符号位，其余位表示数值位。优点是易于分辨，缺点是不能够直接参与运算。
-
-正数的反码和其原码一样；负数的反码，符号位为 1，数值部分按原码取反。
-如 [+7]原 = 00000111，[+7]反 = 00000111； [-7]原 = 10000111，[-7]反 = 11111000。
-
-正数的补码和其原码一样；负数的补码为其反码加 1。
-
-例如 [+7]原 = 00000111，[+7]反 = 00000111，[+7]补 = 00000111；
-[-7]原 = 10000111，[-7]反 = 11111000，[-7]补 = 11111001
-
-之所以在计算机中使用补码来表示负数的原因是，`这样可以将加法运算扩展到所有的数值计算上`，因此在数字电路中我们只需要考虑加法器的设计就行了，`而不用再为减法设置新的数字电路`。
-
-详细资料可以参考：
-[《关于 2 的补码》](http://www.ruanyifeng.com/blog/2009/08/twos_complement.html)
 
 #### 101. toPrecision 和 toFixed 和 Math.round 的区别？
 
@@ -1420,92 +1075,23 @@ XSS 攻击的预防可以从两个方面入手，一个是恶意代码提交的�
 
 #### 103. 什么是 CSP？
 
-CSP 指的是内容安全策略，它的本质是建立一个白名单，告诉浏览器哪些外部资源可以加载和执行。我们只需要配置规则，如何拦截由浏览器自己来实现。
+CSP 指的是**内容安全策略**，它的本质是建立一个白名单，告诉浏览器哪些外部资源可以加载和执行。我们只需要配置规则，如何拦截由浏览器自己来实现。
 
-通常有两种方式来开启 CSP，一种是设置 HTTP 首部中的 Content-Security-Policy，一种是设置 meta 标签的方式 <meta
-http-equiv="Content-Security-Policy">
+通常有两种方式来开启 CSP，一种是设置 **HTTP 首部中的 Content-Security-Policy**，一种是设置 **meta 标签**的方式 <meta http-equiv="Content-Security-Policy">
 
 详细资料可以参考：
 [《内容安全策略（CSP）》](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CSP)
 [《前端面试之道》](https://juejin.im/book/5bdc715fe51d454e755f75ef/section/5bdc721851882516c33430a2)
 
-#### 104. 什么是 CSRF 攻击？如何防范 CSRF 攻击？
-
-CSRF 攻击指的是跨站请求伪造攻击，攻击者诱导用户进入一个第三方网站，然后该网站向被攻击网站发送跨站请求。如果用户在被
-攻击网站中保存了登录状态，那么攻击者就可以利用这个登录状态，绕过后台的用户验证，冒充用户向服务器执行一些操作。
-
-CSRF 攻击的本质是利用了 cookie 会在同源请求中携带发送给服务器的特点，以此来实现用户的冒充。
-
-一般的 CSRF 攻击类型有三种：
-
-第一种是 GET 类型的 CSRF 攻击，比如在网站中的一个 img 标签里构建一个请求，当用户打开这个网站的时候就会自动发起提
-交。
-
-第二种是 POST 类型的 CSRF 攻击，比如说构建一个表单，然后隐藏它，当用户进入页面时，自动提交这个表单。
-
-第三种是链接类型的 CSRF 攻击，比如说在 a 标签的 href 属性里构建一个请求，然后诱导用户去点击。
-
-CSRF 可以用下面几种方法来防护：
-
-第一种是同源检测的方法，服务器根据 http 请求头中 origin 或者 referer 信息来判断请求是否为允许访问的站点，从而对请求进行过滤。当 origin 或者 referer 信息都不存在的时候，直接阻止。这种方式的缺点是有些情况下 referer 可以被伪造。还有就是我们这种方法同时把搜索引擎的链接也给屏蔽了，所以一般网站会允许搜索引擎的页面请求，但是相应的页面请求这种请求方式也可能被攻击者给利用。
-
-第二种方法是使用 CSRF Token 来进行验证，服务器向用户返回一个随机数 Token ，当网站再次发起请求时，在请求参数中加入服务器端返回的 token ，然后服务器对这个 token 进行验证。这种方法解决了使用 cookie 单一验证方式时，可能会被冒用的问题，但是这种方法存在一个缺点就是，我们需要给网站中的所有请求都添加上这个 token，操作比较繁琐。还有一个问题是一般不会只有一台网站服务器，如果我们的请求经过负载平衡转移到了其他的服务器，但是这个服务器的 session 中没有保留这个 token 的话，就没有办法验证了。这种情况我们可以通过改变 token 的构建方式来解决。
-
-第三种方式使用双重 Cookie 验证的办法，服务器在用户访问网站页面时，向请求域名注入一个 Cookie，内容为随机字符串，然后当用户再次向服务器发送请求的时候，从 cookie 中取出这个字符串，添加到 URL 参数中，然后服务器通过对 cookie 中的数据和参数中的数据进行比较，来进行验证。使用这种方式是利用了攻击者只能利用 cookie，但是不能访问获取 cookie 的特点。并且这种方法比 CSRF Token 的方法更加方便，并且不涉及到分布式访问的问题。这种方法的缺点是如果网站存在 XSS 漏洞的，那么这种方式会失效。同时这种方式不能做到子域名的隔离。
-
-第四种方式是使用在设置 cookie 属性的时候设置 Samesite ，限制 cookie 不能作为被第三方使用，从而可以避免被攻击者利用。Samesite 一共有两种模式，一种是严格模式，在严格模式下 cookie 在任何情况下都不可能作为第三方 Cookie 使用，在宽松模式下，cookie 可以被请求是 GET 请求，且会发生页面跳转的请求所使用。
-
-详细资料可以参考：
-[《前端安全系列之二：如何防止 CSRF 攻击？》](https://juejin.im/post/5bc009996fb9a05d0a055192)
-[《[ HTTP 趣谈] origin, referer 和 host 区别》](https://www.jianshu.com/p/1f9c71850299)
-
 #### 105. 什么是 Samesite Cookie 属性？
 
-Samesite Cookie 表示同站 cookie，避免 cookie 被第三方所利用。
+Samesite Cookie 表示**同站 cookie，避免 cookie 被第三方所利用**。
 
 将 Samesite 设为 strict ，这种称为严格模式，表示这个 cookie 在任何情况下都不可能作为第三方 cookie。
 
 将 Samesite 设为 Lax ，这种模式称为宽松模式，如果这个请求是个 GET 请求，并且这个请求改变了当前页面或者打开了新的页面，那么这个 cookie 可以作为第三方 cookie，其余情况下都不能作为第三方 cookie。
 
 使用这种方法的缺点是，因为它不支持子域，所以子域没有办法与主域共享登录信息，每次转入子域的网站，都回重新登录。还有一个问题就是它的兼容性不够好。
-
-#### 106. 什么是点击劫持？如何防范点击劫持？
-
-点击劫持是一种`视觉欺骗`的攻击手段，攻击者将需要攻击的网站通过 iframe 嵌套的方式嵌入自己的网页中，并将 iframe 设置为透明，在页面中透出一个按钮诱导用户点击。
-
-我们可以在 http 相应头中设置 `X-FRAME-OPTIONS` 来防御用 iframe 嵌套的点击劫持攻击。通过不同的值，可以规定页面在特
-定的一些情况才能作为 iframe 来使用。
-
-详细资料可以参考：
-[《web 安全之--点击劫持攻击与防御技术简介》](https://www.jianshu.com/p/251704d8ff18)
-
-#### 107. SQL 注入攻击？
-
-SQL 注入攻击指的是攻击者在 HTTP 请求中注入恶意的 SQL 代码，服务器使用参数构建数据库 SQL 命令时，恶意 SQL 被一起构造，破坏原有 SQL 结构，并在数据库中执行，达到编写程序时意料之外结果的攻击行为。
-
-详细资料可以参考：
-[《Web 安全漏洞之 SQL 注入》](https://juejin.im/post/5bd5b820e51d456f72531fa8)
-[《如何防范常见的 Web 攻击》](http://blog.720ui.com/2016/security_web/#SQL%E6%B3%A8%E5%85%A5%E6%94%BB%E5%87%BB)
-
-#### 108. 什么是 MVVM？比之 MVC 有什么区别？什么又是 MVP ？
-
-MVC、MVP 和 MVVM 是三种常见的`软件架构设计模式`，主要通过`分离关注点`的方式来组织代码结构，优化我们的开发效率。
-
-比如说我们实验室在以前项目开发的时候，使用单页应用时，往往一个路由页面对应了一个脚本文件，所有的页面逻辑都在一个脚本文件里。页面的渲染、数据的获取，对用户事件的响应所有的应用逻辑都混合在一起，这样在开发简单项目时，可能看不出什么问题，当时一旦项目变得复杂，那么整个文件就会变得冗长，混乱，这样对我们的项目开发和后期的项目维护是非常不利的。
-
-MVC 通过分离 Model、View 和 Controller 的方式来组织代码结构。其中 View 负责页面的显示逻辑，Model 负责存储页面的业务数据，以及对相应数据的操作。并且 View 和 Model 应用了观察者模式，当 Model 层发生改变的时候它会通知有关 View 层更新页面。Controller 层是 View 层和 Model 层的纽带，它主要负责用户与应用的响应操作，当用户与页面产生交互的时候，Controller 中的事件触发器就开始工作了，通过调用 Model 层，来完成对 Model 的修改，然后 Model 层再去通知 View 层更新。
-
-MVP 模式与 MVC 唯一不同的在于 Presenter 和 Controller。在 MVC 模式中我们使用观察者模式，来实现当 Model 层数据发生变化的时候，通知 View 层的更新。这样 View 层和 Model 层耦合在一起，当项目逻辑变得复杂的时候，可能会造成代码的混乱，并且可能会对代码的复用性造成一些问题。MVP 的模式通过使用 Presenter 来实现对 View 层和 Model 层的解耦。MVC 中的
-Controller 只知道 Model 的接口，因此它没有办法控制 View 层的更新，MVP 模式中，View 层的接口暴露给了 Presenter 因此我们可以在 Presenter 中将 Model 的变化和 View 的变化绑定在一起，以此来实现 View 和 Model 的同步更新。这样就实现了对 View 和 Model 的解耦，Presenter 还包含了其他的响应逻辑。
-
-MVVM 模式中的 VM，指的是 ViewModel，它和 MVP 的思想其实是相同的，不过它通过双向的数据绑定，将 View 和 Model 的同步更新给自动化了。当 Model 发生变化的时候，ViewModel 就会自动更新；ViewModel 变化了，View 也会更新。这样就将 Presenter 中的工作给自动化了。我了解过一点双向数据绑定的原理，比如 vue 是通过使用数据劫持和发布订阅者模式来实现的这一功
-能。
-
-详细资料可以参考：
-[《浅析前端开发中的 MVC/MVP/MVVM 模式》](https://juejin.im/post/593021272f301e0058273468)
-[《MVC，MVP 和 MVVM 的图示》](http://www.ruanyifeng.com/blog/2015/02/mvcmvp_mvvm.html)
-[《MVVM》](https://juejin.im/book/5bdc715fe51d454e755f75ef/section/5bdc72e6e51d45054f664dbf)
-[《一篇文章了解架构模式：MVC/MVP/MVVM》](https://segmentfault.com/a/1190000015310674)
 
 #### 110. Object.defineProperty 介绍？
 
@@ -1540,41 +1126,11 @@ Object.defineProperty 函数一共有三个参数，第一个参数是需要定�
 
 #### 113. 如何比较两个 DOM 树的差异？
 
-两个树的完全 diff 算法的时间复杂度为 O(n^3) ，但是在前端中，我们很少会跨层级的移动元素，所以我们只需要比较同一层级的元素进行比较，这样就可以将算法的时间复杂度降低为 O(n)。
+两个树的完全 diff 算法的时间复杂度为 O(n^3) ，但是在前端中，我们很少会跨层级的移动元素，所以我们`只需要比较同一层级的元素进行比较`，这样就可以将算法的时间复杂度降低为 O(n)。
 
 算法首先会对新旧两棵树进行一个深度优先的遍历，这样每个节点都会有一个序号。在深度遍历的时候，每遍历到一个节点，我们就将这个节点和新的树中的节点进行比较，如果有差异，则将这个差异记录到一个对象中。
 
 在对列表元素进行对比的时候，由于 TagName 是重复的，所以我们不能使用这个来对比。我们需要给每一个子节点加上一个 key，列表对比的时候使用 key 来进行比较，这样我们才能够复用老的 DOM 树上的节点。
-
-#### 114. 什么是 requestAnimationFrame ？
-
-详细资料可以参考：
-[《你需要知道的 requestAnimationFrame》](https://juejin.im/post/5a82f0626fb9a06358657c9c)
-[《CSS3 动画那么强，requestAnimationFrame 还有毛线用？》](https://www.zhangxinxu.com/wordpress/2013/09/css3-animation-requestanimationframe-tween-%E5%8A%A8%E7%94%BB%E7%AE%97%E6%B3%95/)
-
-#### 115. 谈谈你对 webpack 的看法
-
-我当时使用 webpack 的一个最主要原因是为了简化页面依赖的管理，并且通过将其打包为一个文件来降低页面加载时请求的资源数。
-
-我认为 webpack 的主要原理是，它将所有的资源都看成是一个模块，并且把页面逻辑当作一个整体，通过一个给定的入口文件，webpack 从这个文件开始，找到所有的依赖文件，将各个依赖文件模块通过 loader 和 plugins 处理后，然后打包在一起，最后输出一个浏览器可识别的 JS 文件。
-
-Webpack 具有四个核心的概念，分别是 Entry（入口）、Output（输出）、loader 和 Plugins（插件）。
-
-Entry 是 webpack 的入口起点，它指示 webpack 应该从哪个模块开始着手，来作为其构建内部依赖图的开始。
-
-Output 属性告诉 webpack 在哪里输出它所创建的打包文件，也可指定打包文件的名称，默认位置为 ./dist。
-
-loader 可以理解为 webpack 的编译器，它使得 webpack 可以处理一些非 JavaScript 文件。在对 loader 进行配置的时候，test 属性，标志有哪些后缀的文件应该被处理，是一个正则表达式。use 属性，指定 test 类型的文件应该使用哪个 loader 进行预处理。常用的 loader 有 css-loader、style-loader 等。
-
-插件可以用于执行范围更广的任务，包括打包、优化、压缩、搭建服务器等等，要使用一个插件，一般是先使用 npm 包管理器进行安装，然后在配置文件中引入，最后将其实例化后传递给 plugins 数组属性。
-
-使用 webpack 的确能够提供我们对于项目的管理，但是它的缺点就是调试和配置起来太麻烦了。但现在 webpack4.0 的免配置一定程度上解决了这个问题。但是我感觉就是对我来说，就是一个黑盒，很多时候出现了问题，没有办法很好的定位。
-
-详细资料可以参考：
-[《不聊 webpack 配置，来说说它的原理》](https://juejin.im/post/5b38d27451882574d87aa5d5#heading-0)
-[《前端工程化——构建工具选型：grunt、gulp、webpack》](https://juejin.im/entry/5b5724d05188251aa01647fd)
-[《浅入浅出 webpack》](https://juejin.im/post/5afa9cd0f265da0b981b9af9#heading-0)
-[《前端构建工具发展及其比较》](https://juejin.im/entry/5ae5c8c9f265da0b9f400d8e)
 
 #### 116. offsetWidth/offsetHeight,clientWidth/clientHeight 与 scrollWidth/scrollHeight 的区别？
 
@@ -1642,20 +1198,6 @@ js 中的异步机制可以分为以下几种：
 
 第四种是使用 async 函数的形式，async 函数是 generator 和 promise 实现的一个自动执行的语法糖，它内部自带执行器，当函数内部执行到一个 await 语句的时候，如果语句返回一个 promise 对象，那么函数将会等待 promise 对象的状态变为 resolve 后再继续向下执行。因此我们可以将异步逻辑，转化为同步的顺序来书写，并且这个函数可以自动执行。
 
-#### 119. Js 动画与 CSS 动画区别及相应实现
-
-CSS3 的动画的优点
-
-在性能上会稍微好一些，浏览器会对 CSS3 的动画做一些优化
-代码相对简单
-
-缺点
-
-在动画控制上不够灵活
-兼容性不好
-
-JavaScript 的动画正好弥补了这两个缺点，控制能力很强，可以单帧的控制、变换，同时写得好完全可以兼容 IE6，并且功能强大。对于一些复杂控制的动画，使用 javascript 会比较靠谱。而在实现一些小的交互动效的时候，就多考虑考虑 CSS 吧
-
 #### 120. get 请求传参长度的误区
 
 误区：我们经常说 get 请求参数的大小存在限制，而 post 请求的参数大小是无限制的。
@@ -1665,22 +1207,7 @@ JavaScript 的动画正好弥补了这两个缺点，控制能力很强，可以
 - 1.`HTTP 协议未规定 GET 和 POST 的长度限制`
 - 2.GET 的最大长度显示是因为`浏览器和 web 服务器限制了 URI 的长度`
 - 3.不同的浏览器和 WEB 服务器，限制的最大长度不一样
-- 4.要支持 IE，则最大长度为 2083byte，若只支持 Chrome，则最大长度 `8182byte`
-
-#### 121. URL 和 URI 的区别？
-
-URI: Uniform Resource Identifier 指的是统一资源标识符 (身份证)
-URL: Uniform Resource Location 指的是统一资源定位符 (在哪)
-URN: Universal Resource Name 指的是统一资源名称
-
-URI 指的是统一资源标识符，用唯一的标识来确定一个资源，它是一种抽象的定义，也就是说，不管使用什么方法来定义，只要能唯一的标识一个资源，就可以称为 URI。
-
-URL 指的是统一资源定位符，URN 指的是统一资源名称。URL 和 URN 是 URI 的子集，URL 可以理解为使用地址来标识资源，URN 可以理解为使用名称来标识资源。
-
-详细资料可以参考：
-[《HTTP 协议中 URI 和 URL 有什么区别？》](https://www.zhihu.com/question/21950864)
-[《你知道 URL、URI 和 URN 三者之间的区别吗？》](http://web.jobbole.com/83452/)
-[《URI、URL 和 URN 的区别》](https://segmentfault.com/a/1190000006081973)
+- 4.要支持 IE，则最大长度为 2083byte，若只支持 Chrome，则最大长度 `8182byte(8KB)`
 
 #### 122. get 和 post 请求在缓存方面的区别
 
@@ -1750,34 +1277,6 @@ clientX，clientY 标识的是鼠标的坐标，分别标识横坐标和纵坐�
 详细资料可以参考：
 [《原生 js 实现拖拽功能基本思路》](https://blog.csdn.net/LZGS_4/article/details/43523465)
 
-#### 126. 为什么使用 setTimeout 实现 setInterval？怎么模拟？
-
-相关知识点：
-
-js
-// 思路是使用递归函数，不断地去执行 setTimeout 从而达到 setInterval 的效果
-
-function mySetInterval(fn, timeout) {
-// 控制器，控制定时器是否继续执行
-var timer = {
-flag: true
-};
-
-// 设置递归函数，模拟定时器执行。
-function interval() {
-if (timer.flag) {
-fn();
-setTimeout(interval, timeout);
-}
-}
-
-// 启动定时器
-setTimeout(interval, timeout);
-
-// 返回控制器
-return timer;
-}
-
 回答：
 
 setInterval 的作用是每隔一段指定时间执行一个函数，但是这个执行不是真的到了时间立即执行，它真正的作用是`每隔一段时间将事件加入事件队列中去，只有当当前的执行栈为空的时候，才能去从事件队列中取出事件执行`。所以可能会出现这样的情况，就是当前执行栈执行的时间很长，导致事件队列里边积累多个定时器加入的事件，当执行栈结束的时候，这些事件会依次执行，因此就不能到间隔一段时间执行的效果。
@@ -1812,17 +1311,6 @@ setInterval 的作用是每隔一段指定时间执行一个函数，但是这�
 
 - 1.ES6 提供了新的数据结构 Set。它类似于数组，但是成员的值都是唯一的，没有重复的值。
 - 2.WeakSet 结构与 Set 类似，也是不重复的值的集合。但是 WeakSet 的成员只能是对象，而不能是其他类型的值。WeakSet 中的对象都是弱引用，即`垃圾回收机制不考虑 WeakSet 对该对象的引用`，
-
-#### 132. Map 和 WeakMap 结构？
-
-- 1.Map 数据结构。它类似于对象，也是键值对的集合，但是“键”的范围不限于字符串，各种类型的值（包括对象）都可以当作键。
-- 2.WeakMap 结构与 Map 结构类似，也是用于生成键值对的集合。但是 WeakMap 只接受对象作为键名（ null 除外），不接受其他类型的值作为键名。而且 WeakMap 的键名所指向的对象，不计入垃圾回收机制。
-
-#### 133. 什么是 Proxy ？
-
-Proxy 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种“元编程”，即对编程语言进行编程。
-
-Proxy 可以理解成，在目标对象之前架设一层“拦截”，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。Proxy 这个词的原意是代理，用在这里表示由它来“代理”某些操作，可以译为“代理器”。
 
 #### 134. Reflect 对象创建目的？
 
@@ -1862,24 +1350,9 @@ X/index.node
 详细资料可以参考：
 [《require() 源码解读》](http://www.ruanyifeng.com/blog/2015/05/require.html)
 
-#### 136. 什么是 Promise 对象，什么是 Promises/A+ 规范？
-
-Promise 对象是异步编程的一种解决方案，最早由社区提出。Promises/A+ 规范是 JavaScript Promise 的标准，规定了一个 Promise 所必须具有的特性。
-
-Promise 是一个构造函数，接收一个函数作为参数，返回一个 Promise 实例。一个 Promise 实例有三种状态，分别是 pending、resolved 和 rejected，分别代表了进行中、已成功和已失败。实例的状态只能由 pending 转变 resolved 或者 rejected 状态，并且状态一经改变，就凝固了，无法再被改变了。状态的改变是通过 resolve() 和 reject() 函数来实现的，我们
-可以在异步操作结束后调用这两个函数改变 Promise 实例的状态，它的原型上定义了一个 then 方法，使用这个 then 方法可以为两个状态的改变注册回调函数。这个回调函数属于微任务，会在本轮事件循环的末尾执行。
-
-详细资料可以参考：
-[《Promises/A+ 规范》](http://www.ituring.com.cn/article/66566)
-[《Promise》](http://es6.ruanyifeng.com/#docs/promise#Promise-resolve)
-
 #### 138. 如何检测浏览器所支持的最小字体大小？
 
 用 JS 设置 DOM 的字体为某一个值，然后再取出来，如果值设置成功，就说明支持。
-
-#### 139. 怎么做 JS 代码 Error 统计？
-
-error 统计使用浏览器的 window.error 事件。
 
 #### 140. 单例模式模式是什么？
 
@@ -1892,7 +1365,7 @@ error 统计使用浏览器的 window.error 事件。
 
 #### 142. 代理模式是什么？
 
-代理模式是为一个对象提供一个代用品或占位符，以便控制对它的访问。比如说常见的事件代理。
+代理模式是为一个对象提供一个代用品或占位符，以便控制对它的访问。比如说常见的`事件代理。`
 
 #### 143. 中介者模式是什么？
 
@@ -1962,7 +1435,8 @@ beforeEach 有三个参数，to 代表要进入的路由对象，from 代表离�
 
 #### 151. $route 和 $router 的区别？
 
-$route 是“`路由信息对象`”，包括 path，params，hash，query，fullPath，matched，name 等路由信息参数。而 $router 是“`路由实例`”对象包括了路由的跳转方法，钩子函数等。
+$route 是“`路由信息对象`”，包括 path，params，hash，query，fullPath，matched，name 等路由信息参数。
+而 $router 是“`路由实例`”对象包括了路由的跳转方法，钩子函数等。
 
 #### 152. vue 常用的修饰符？
 
@@ -1972,8 +1446,7 @@ $route 是“`路由信息对象`”，包括 path，params，hash，query，ful
 
 （1）application/x-www-form-urlencoded
 
-浏览器的原生 form 表单，如果不设置 enctype 属性，那么最终就会以 application/x-www-form-urlencoded 方式提交数据。该种方式提交的数据放在 body 里面，数据按照 key1=val1&key2=val2 的方式进行编码，key 和 val 都进行了 URL
-转码。
+浏览器的原生 form 表单，如果不设置 enctype 属性，那么最终就会以 application/x-www-form-urlencoded 方式提交数据。该种方式提交的数据放在 body 里面，数据按照 key1=val1&key2=val2 的方式进行编码，key 和 val 都进行了 URL 转码。
 
 （2）multipart/form-data
 
@@ -1990,84 +1463,11 @@ $route 是“`路由信息对象`”，包括 path，params，hash，query，ful
 详细资料可以参考：
 [《常用的几种 Content-Type》](https://honglu.me/2015/07/13/%E5%B8%B8%E7%94%A8%E7%9A%84%E5%87%A0%E7%A7%8DContent-Type/)
 
-#### 158. 如何封装一个 javascript 的类型判断函数？
-
-js
-function getType(value) {
-// 判断数据是 null 的情况
-if (value === null) {
-return value + "";
-}
-
-// 判断数据是引用类型的情况
-if (typeof value === "object") {
-let valueClass = Object.prototype.toString.call(value),
-type = valueClass.split(" ")[1].split("");
-
-    type.pop();
-
-    return type.join("").toLowerCase();
-
-} else {
-// 判断数据是基本数据类型的情况和函数的情况
-return typeof value;
-}
-}
-
-详细资料可以参考：
-[《JavaScript 专题之类型判断(上)》](https://github.com/mqyqingfeng/Blog/issues/28)
-
-#### 159. 如何判断一个对象是否为空对象？
-
-js
-function checkNullObj(obj) {
-return Object.keys(obj).length === 0 && Object.getOwnPropertySymbols(obj).length === 0;
-}
-
-详细资料可以参考：
-[《js 判断一个 object 对象是否为空》](https://blog.csdn.net/FungLeo/article/details/78113661)
-
-#### 164. 一道常被人轻视的前端 JS 面试题
-
-js
-function Foo() {
-getName = function() {
-alert(1);
-};
-return this;
-}
-Foo.getName = function() {
-alert(2);
-};
-Foo.prototype.getName = function() {
-alert(3);
-};
-var getName = function() {
-alert(4);
-};
-function getName() {
-alert(5);
-}
-
-//请写出以下输出结果：
-Foo.getName(); // 2
-getName(); // 4
-Foo().getName(); // 1
-getName(); // 1
-new Foo.getName(); // 2
-new Foo().getName(); // 3
-new new Foo().getName(); // 3
-
-详细资料可以参考：
-[《前端程序员经常忽视的一个 JavaScript 面试题》](https://github.com/Wscats/Good-text-Share/issues/85)
-[《一道考察运算符优先级的 JavaScript 面试题》](https://segmentfault.com/q/1010000008430170)
-[《一道常被人轻视的前端 JS 面试题》](https://www.cnblogs.com/xxcanghai/p/5189353.html)
-
 #### 165. 如何确定页面的可用性时间，什么是 Performance API？
 
 Performance API 用于精确度量、控制、增强浏览器的性能表现。这个 API 为测量网站性能，提供以前没有办法做到的精度。
 
-使用 getTime 来计算脚本耗时的缺点，首先，getTime 方法（以及 Date 对象的其他方法）都只能精确到毫秒级别（一秒的千分之一），想要得到更小的时间差别就无能为力了。其次，这种写法只能获取代码运行过程中的时间进度，无法知道一些后台事件的时间进度，比如浏览器用了多少时间从服务器加载网页。
+使用 getTime 来计算脚本耗时的缺点，首先，getTime 方法（以及 Date 对象的其他方法）都只能精确到`毫秒级别`（一秒的千分之一），想要得到更小的时间差别就无能为力了。其次，这种写法只能获取代码运行过程中的时间进度，无法知道一些后台事件的时间进度，比如浏览器用了多少时间从服务器加载网页。
 
 为了解决这两个不足之处，ECMAScript 5 引入“高精度时间戳”这个 API，部署在 performance 对象上。它的精度可以达到 `微秒级别`。
 
@@ -2128,46 +1528,3 @@ console.log(i, j);
 
 详细资料可以参考：
 [《JavaScript 前端倒计时纠偏实现》](https://juejin.im/post/5badf8305188255c8e728adc)
-
-#### 173. 进程间通信的方式？
-
-- 1.管道通信
-- 2.消息队列通信
-- 3.信号量通信
-- 4.信号通信
-- 5.共享内存通信
-- 6.套接字通信
-
-详细资料可以参考：
-[《进程间 8 种通信方式详解》](https://blog.csdn.net/violet_echo_0908/article/details/51201278)
-[《进程与线程的一个简单解释》](http://www.ruanyifeng.com/blog/2013/04/processes_and_threads.html)
-
-#### 175. ele.getElementsByClassName 和 ele.querySelectorAll 的区别？
-
-element.getElementsByClassName 返回一个即时更新`（动态的）HTMLCollection`
-element.querySelectorAll 返回一个非即时更新`（静态的） NodeList`
-// 先说什么叫即时更新，（前者是动态的，改变 DOM 结构会同步，后者只会记录调用 api 时的结果，不懂可以看下面的例子）
-
-<div id="parent">
-  <p class="p">1</p>
-  <p class="p">2</p>
-  <p class="p">3</p>
-</div>
-<script>
-let list1 = parent.getElementsByClassName('p');
-let list2 = parent.querySelectorAll('.p');
-console.log(list1.length1); // 3
-console.log(list2.length1); // 3
-let newP = docuemnt.createElement("p")
-newP.classList.add('p');
-parent.appendChild(newP);
-console.log(list1.length1); // 4 (即时更新)
-console.log(list2.length1); // 3（非即时更新）
-</script>
-在说下返回值
-HTMLCollection 和 NodeList `都是类数组形式`
-如下一个 div 可以看成是 HTMLDivElement 的实例，其中 Node 的集合为 NodeList；Element 的集合为 HTMLCollection
-EventTarget - Node - Element - HTMLElement - HTMLDivElement<br>
-EventTarget - Node - Element - SVGElement - SVGPathElement<br>
-
-[MDN 上元素 div 继承关系](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLDivElement)

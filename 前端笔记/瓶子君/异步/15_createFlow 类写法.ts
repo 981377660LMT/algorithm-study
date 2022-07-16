@@ -1,5 +1,5 @@
 class Flow {
-  private queue: (Func | Flow)[]
+  private readonly queue: (Func | Flow)[]
 
   constructor(flows: (Func | Flow)[]) {
     this.queue = flows

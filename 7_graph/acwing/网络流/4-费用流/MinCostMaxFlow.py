@@ -3,27 +3,27 @@ from dataclasses import dataclass
 from collections import defaultdict, deque
 
 
-V = TypeVar('V', bound=Hashable)
+V = TypeVar("V", bound=Hashable)
 
 
-@dataclass(slots=True)
-class Edge(Generic[V]):
-    fromV: V
-    toV: V
-    cap: int
-    cost: int
-    flow: int
-
-
+# @dataclass(slots=True)
 # class Edge(Generic[V]):
-#     __slots__ = ('fromV', 'toV', 'cap', 'cost', 'flow')
+#     fromV: V
+#     toV: V
+#     cap: int
+#     cost: int
+#     flow: int
 
-#     def __init__(self, fromV: V, toV: V, cap: int, cost: int, flow: int) -> None:
-#         self.fromV = fromV
-#         self.toV = toV
-#         self.cap = cap
-#         self.cost = cost
-#         self.flow = flow
+
+class Edge(Generic[V]):
+    __slots__ = ("fromV", "toV", "cap", "cost", "flow")
+
+    def __init__(self, fromV: V, toV: V, cap: int, cost: int, flow: int) -> None:
+        self.fromV = fromV
+        self.toV = toV
+        self.cap = cap
+        self.cost = cost
+        self.flow = flow
 
 
 class MinCostMaxFlow(Generic[V]):
@@ -32,7 +32,7 @@ class MinCostMaxFlow(Generic[V]):
     def __init__(self, start: V, end: V):
         self._start: V = start
         self._end: V = end
-        self._edges: List['Edge'[V]] = []
+        self._edges: List["Edge"[V]] = []
         self._reGraph: DefaultDict[V, List[int]] = defaultdict(list)  # 残量图存储的是边的下标
 
     def addEdge(self, fromV: V, toV: V, cap: int, cost: int) -> None:
@@ -85,7 +85,7 @@ class MinCostMaxFlow(Generic[V]):
         dist = defaultdict(lambda: int(1e20), {self._start: 0})
         flow = cost = 0
         while True:
-            delta = spfa()
+            delta = spfa()  # 一次spfa只会找到一条费用最小的增广流
             if delta == 0:
                 break
             flow += delta

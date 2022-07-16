@@ -1,23 +1,31 @@
-import { BinaryTree } from '../Tree'
+class TreeNode {
+  val: number
+  left: TreeNode | null
+  right: TreeNode | null
+  constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+    this.val = val === undefined ? 0 : val
+    this.left = left === undefined ? null : left
+    this.right = right === undefined ? null : right
+  }
+}
 
-/**
- *
- * @param root
- * @param subRoot
- * 检验 root 中是否包含和 subRoot 具有相同结构和节点值的子树
- */
-function isSubtree(root: BinaryTree | null, subRoot: BinaryTree | null): boolean {
+// 572. 另一棵树的子树
+function isSubtree(root: TreeNode | null, subRoot: TreeNode | null): boolean {
   if (!root && !subRoot) return true
   if (!root || !subRoot) return false
+
   return (
     isSameTree(root, subRoot) || isSubtree(root.left, subRoot) || isSubtree(root.right, subRoot)
   )
 }
 
-// 快速比较两个json
-function isSameTree(t1: BinaryTree | null, t2: BinaryTree | null): boolean {
-  // 递归的终点
-  if (!t1 && !t2) return true
-  if (!t1 || !t2) return false
-  return t1.val === t2.val && isSameTree(t1.left, t2.left) && isSameTree(t1.right, t2.right)
+function isSameTree(root1: TreeNode | null, root2: TreeNode | null): boolean {
+  if (!root1 && !root2) return true
+  if (!root1 || !root2) return false
+
+  return (
+    root1.val === root2.val &&
+    isSameTree(root1.left, root2.left) &&
+    isSameTree(root1.right, root2.right)
+  )
 }

@@ -378,7 +378,7 @@ react__WEBPACK_IMPORTED_MODULE_5___default.a.lazy(function () {
 ```
 
 webpack.require.ensure 是对 require.ensure 的封装
-异步加载的核心其实是使用`类 jsonp` 的方式，通过动态创建 script 的方式实现异步加载。
+异步加载的核心其实是使用`类 jsonp` 的方式，通过`动态创建 script 的方式实现异步加载`。
 就是利用的 jsonp 的实现原理加载模块，只是在这里并不是从 server 拿数据而是从其他模块中
 使用类 jsonp 的方式异步加载对应 chunk，并缓存到 promise 的 resolve 中，并标记对应 chunk 已经加载
 调用对应 chunk 模块时会在 `window 上注册一个 webpackJsonp` 数组，window['webpackJsonp'] = window['webpackJsonp'] || []。并且执行 push 操作。由于 push 操作是使用 webpackJsonpCallback 进行重写的，所以每当执行 push 的时候就会触发 webpackJsonpCallback. webpackJsonpCallback 标记对应 chunk 已经加载并执行代码。

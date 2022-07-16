@@ -38,6 +38,7 @@ class LazyMan {
   }
 
   private async trigger() {
+    // Promise 串行
     this.tasks.reduce<Promise<unknown>>((pre, cur) => pre.then(cur), Promise.resolve())
     // for  (const task of this.tasks) {
     //   await task()

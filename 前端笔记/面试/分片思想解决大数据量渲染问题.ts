@@ -8,22 +8,20 @@ const once = 20
 function render(cur: number, remain: number) {
   if (remain <= 0) return
 
-  const pageCount = Math.min(remain, once)
+  window.requestAnimationFrame(frameRequestCallback)
 
-  const frameRequestCallback = () => {
+  function frameRequestCallback(): void {
+    const page = Math.min(remain, once)
     const fragment = document.createDocumentFragment()
-    for (let i = 0; i < pageCount; i++) {
+    for (let i = 0; i < page; i++) {
       const li = document.createElement('li')
       li.innerText = cur + i + ' : ' + ~~(Math.random() * total)
       fragment.appendChild(li)
     }
 
     ul.appendChild(fragment)
-
-    render(cur + pageCount, remain - pageCount)
+    render(cur + page, remain - page) // 下一帧继续渲染
   }
-
-  window.requestAnimationFrame(frameRequestCallback)
 }
 
 render(0, total)

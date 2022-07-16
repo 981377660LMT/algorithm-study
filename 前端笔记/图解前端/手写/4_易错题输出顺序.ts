@@ -4,7 +4,7 @@ setTimeout(function () {
 
 async function async1() {
   console.log('2')
-  const data = await async2() // 注意await 后会先执行同步  resolve是异步 会在下面同步log(7)之后执行
+  const data = await async2() // !注意await 后会先执行同步  resolve是异步 会在下面同步log(7)之后执行
   console.log('3')
   return data
 }
@@ -26,7 +26,7 @@ async1().then(data => {
 
 new Promise<void>(function (resolve) {
   console.log('7')
-  // resolve()  // 没resolve改变状态，不执行then
+  // resolve()  // !没resolve改变状态，不执行then
 }).then(function () {
   console.log('8')
 })

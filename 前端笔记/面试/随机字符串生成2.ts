@@ -5,7 +5,6 @@ const useGetRandomStr = () => {
   function* genStr(length: number) {
     const nums = Array.from({ length: 10 }, (_, i) => i)
     const lowercases = Array.from({ length: 26 }, (_, i) => String.fromCodePoint(97 + i))
-    // // @ts-ignore
     // console.log({
     //   ...Object.fromEntries(nums.entries()),
     //   ...Object.fromEntries(lowercases.entries()),

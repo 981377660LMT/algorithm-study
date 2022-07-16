@@ -1,10 +1,10 @@
-// JavaScript 采用词法作用域(lexical scoping)，也就是静态作用域。
+// !JavaScript 采用词法作用域(lexical scoping)，也就是静态作用域。
 // 函数的作用域在函数定义的时候就决定了。
 // 而与词法作用域相对的是动态作用域，函数的作用域是在函数调用的时候才决定的。
 var value = 1
 
 function foo() {
-  // 函数的作用域在函数定义的时候就决定了。
+  // !函数的作用域在函数定义的时候就决定了。
   console.log(value)
 }
 
@@ -17,7 +17,7 @@ bar()
 
 // 结果是 ???
 
-// 假设JavaScript采用动态作用域(python)  结果会是2
+// !假设JavaScript采用动态作用域(python)  结果会是2
 // 假设JavaScript采用动态作用域，让我们分析下执行过程：
 
 // 执行 foo 函数，依然是从 foo 函数内部查找是否有局部变量 value。

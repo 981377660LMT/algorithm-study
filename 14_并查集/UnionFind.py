@@ -59,10 +59,8 @@ class UnionFindMap(Generic[T]):
         self.part += 1
         return True
 
-    def __str__(self) -> str:
-        return "\n".join(
-            f"{root}: {member}" for root, member in self.getGroups().items()
-        )
+    def __repr__(self) -> str:
+        return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
 
     def __len__(self) -> int:
         return self.part
@@ -114,10 +112,8 @@ class UnionFindArray:
     def getRoots(self) -> List[int]:
         return list(set(self.find(key) for key in self.parent))
 
-    def __str__(self) -> str:
-        return "\n".join(
-            f"{root}: {member}" for root, member in self.getGroups().items()
-        )
+    def __repr__(self) -> str:
+        return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
 
     def __len__(self) -> int:
         return self.part
@@ -179,10 +175,8 @@ class UnionFindMap2(Generic[T]):
             groups[root].append(key)
         return groups
 
-    def __str__(self) -> str:
-        return "\n".join(
-            f"{root}: {member}" for root, member in self.getGroups().items()
-        )
+    def __repr__(self) -> str:
+        return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
 
     def __len__(self) -> int:
         return self.part
