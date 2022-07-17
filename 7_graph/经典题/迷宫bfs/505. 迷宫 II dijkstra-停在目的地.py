@@ -18,7 +18,7 @@ class Solution:
     ) -> int:
         row, col = len(maze), len(maze[0])
         pq: List[Tuple[int, int, int]] = [(0, start[0], start[1])]
-        dist = [[INF for _ in range(col)] for _ in range(row)]
+        dist = [[INF] * col for _ in range(row)]
         dist[start[0]][start[1]] = 0
 
         while pq:
@@ -53,4 +53,3 @@ print(
         [4, 4],
     )
 )
-

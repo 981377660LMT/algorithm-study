@@ -1,24 +1,16 @@
 /**
- * @param {number[]} nums
+ *
+ * 在置换群中找到最长的环
+ *
+ * @param {number[]} nums 0 - n-1 的 排列
  * @return {number}
  * 找到最大的集合S并返回其大小，其中 S[i] = {A[i], A[A[i]], A[A[A[i]]], ... }
  * @summary
- * 找到最长的环
  */
-const arrayNesting = function (nums: number[]): number {
-  let res = 0
+function arrayNesting(nums: number[]): number {
   const n = nums.length
-  const visited = Array<boolean>(n).fill(false)
-
-  const dfs = (cur: number, steps: number): void => {
-    if (visited[cur]) {
-      res = Math.max(res, steps)
-      return
-    }
-
-    visited[cur] = true
-    dfs(nums[cur], steps + 1)
-  }
+  const visited = new Uint8Array(n)
+  let res = 0
 
   for (const num of nums) {
     if (visited[num]) continue
@@ -26,6 +18,16 @@ const arrayNesting = function (nums: number[]): number {
   }
 
   return res
+
+  function dfs(cur: number, size: number): void {
+    if (visited[cur]) {
+      res = Math.max(res, size)
+      return
+    }
+
+    visited[cur] = 1
+    dfs(nums[cur], size + 1)
+  }
 }
 
 console.log(arrayNesting([5, 4, 0, 3, 1, 6, 2]))

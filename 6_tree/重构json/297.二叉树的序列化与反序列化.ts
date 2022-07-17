@@ -140,3 +140,8 @@ export { deserializeNode }
 // function deserialize(data: string): TreeNode | null {
 //   return JSON.parse(data)
 // }
+
+if (require.main === module) {
+  const tree = [1, 2, 3, null, null, 4, 5]
+  console.dir(deserializeNode(tree), { depth: null })
+}

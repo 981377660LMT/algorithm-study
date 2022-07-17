@@ -9,7 +9,7 @@
 # 最后小明获得的分数就是小明所在点的权值，小明希望获得的分数尽可能得高，小红希望小明获得的分数尽可能的低
 # 假设两人都足够聪明的情况下(即总是做出对当前最有利的操作)，小明可以获得的最大分数是多少。
 
-# !二分答案 + 树形dp
+# !二分答案(离散化数组) + 树形 dp
 from collections import defaultdict
 import sys
 import os
@@ -34,7 +34,7 @@ def main() -> None:
         return dfs(0, -1) >= 1
 
     n = int(input())
-    values = [0] + list(map(int, input().split()))  # !根节点值为0比较方便处理无解的情况
+    values = [-1] + list(map(int, input().split()))
     adjMap = defaultdict(set)
     for _ in range(n - 1):
         u, v = map(int, input().split())

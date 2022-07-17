@@ -1,1 +1,2 @@
-<!-- [](https://www.bilibili.com/video/BV133411W7jW/?spm_id_from=333.788&vd_source=e825037ab0c37711b6120bbbdabda89e) -->
+AtCoder Beginner Contest 245 - Hanasakiii 的文章 - 知乎
+https://zhuanlan.zhihu.com/p/488490116

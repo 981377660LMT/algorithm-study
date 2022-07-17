@@ -28,6 +28,7 @@ class Solution:
             for i4 in range(i3 + 1, n):
                 res += counter[nums[i4] - nums[i3]]
         return res
+        
 
     def countQuadruplets3(self, nums: List[int]) -> int:
         """二维费用背包dfs写法 从i个物品里选3个，组成容量为nums[i]的背包

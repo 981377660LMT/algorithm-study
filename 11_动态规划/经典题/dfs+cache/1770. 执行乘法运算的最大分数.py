@@ -1,6 +1,7 @@
 from typing import List
 from functools import lru_cache
 
+# 给你两个长度分别 n 和 m 的整数数组 nums 和 multipliers ，其中 n >= m ，数组下标 从 1 开始 计数。
 # 在第 i 步操作（从 1 开始 计数）中，需要：
 
 # 选择数组 nums 开头处或者末尾处 的整数 x 。
@@ -9,20 +10,25 @@ from functools import lru_cache
 # 在执行 m 步操作后，返回 最大 分数。
 
 # -1000 <= nums[i], multipliers[i] <= 1000
-# m <= n <= 105
+# !m<=1e3,n<=1e5
+
+# !1. 手写 max 快了 1000ms
+# !2. 不用cache_clear() 超时
 
 
 class Solution:
     def maximumScore(self, nums: List[int], multipliers: List[int]) -> int:
         @lru_cache(None)
         def dfs(left: int, right: int, index: int) -> int:
+            """注意index由left,right唯一决定 因此复杂度仍然是O(m^2)的"""
             if index == m:
                 return 0
 
-            return max(
-                nums[left] * multipliers[index] + dfs(left + 1, right, index + 1),
-                nums[right] * multipliers[index] + dfs(left, right - 1, index + 1),
-            )
+            cand1 = nums[left] * multipliers[index] + dfs(left + 1, right, index + 1)
+            cand2 = nums[right] * multipliers[index] + dfs(left, right - 1, index + 1)
+            if cand1 > cand2:
+                return cand1
+            return cand2
 
         n, m = len(nums), len(multipliers)
         res = dfs(0, n - 1, 0)
@@ -38,4 +44,3 @@ print(Solution().maximumScore(nums=[2, 5, 4, 3, 1], multipliers=[3, 5, 1, 2, 4])
 # - 选择末尾处的整数 2 ，[1,2] ，得 2 * 2 = 4 分，累加到分数中。
 # - 选择末尾处的整数 1 ，[1] ，得 1 * 1 = 1 分，累加到分数中。
 # 总分数为 9 + 4 + 1 = 14 。
-
