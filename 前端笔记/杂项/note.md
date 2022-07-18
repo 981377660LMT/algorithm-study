@@ -1,3 +1,18 @@
+js 的基本类型 7 个
+
+```TS
+type Primitive = string | number | bigint | boolean | symbol | null | undefined
+// sun sb nb
+
+```
+
+typeof 结果 8 个
+
+```TS
+function undefined number bigint boolean object symbol string
+fun bboss
+```
+
 defer 与 async 区别
 不加会阻塞
 defer 会按顺序异步，defer 标签会按照在文档中的声明顺序执行

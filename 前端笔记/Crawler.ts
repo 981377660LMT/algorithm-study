@@ -22,13 +22,7 @@ abstract class Crawler implements ICrawler {
   private dirName?: string
   private extName?: `.${string}`
 
-  /**
-   *
-   * @param url
-   * @param xPathExpression
-   * @param dirName 默认值process.cwd()
-   * @param extName 默认值'.md'
-   */
+
   constructor(options: Options)
   /**
    *

@@ -1,86 +1,3 @@
-## CSS 面试知识点总结
-
-本部分主要是笔者在复习 CSS 相关知识和一些相关面试题时所做的笔记，如果出现错误，希望大家指出！
-
-### 目录
-
-- [CSS 面试知识点总结](#css-面试知识点总结)
-  - [目录](#目录)
-    - [1.介绍一下标准的 CSS 的盒子模型？低版本 IE 的盒子模型有什么不同的？](#1介绍一下标准的-css-的盒子模型低版本-ie-的盒子模型有什么不同的)
-    - [2.CSS 选择符有哪些？](#2css-选择符有哪些)
-    - [3.::before 和:after 中双冒号和单冒号有什么区别？解释一下这 2 个伪元素的作用。](#3before-和after-中双冒号和单冒号有什么区别解释一下这-2-个伪元素的作用)
-    - [4.伪类与伪元素的区别](#4伪类与伪元素的区别)
-    - [5.CSS 中哪些属性可以继承？](#5css-中哪些属性可以继承)
-    - [6.CSS 优先级算法如何计算？](#6css-优先级算法如何计算)
-    - [7.关于伪类 LVHA 的解释?](#7关于伪类-lvha-的解释)
-    - [8.CSS3 新增伪类有那些？](#8css3-新增伪类有那些)
-    - [9.如何居中 div？](#9如何居中-div)
-    - [10.display 有哪些值？说明他们的作用。](#10display-有哪些值说明他们的作用)
-    - [11.position 的值 relative 和 absolute 定位原点是？](#11position-的值-relative-和-absolute-定位原点是)
-    - [12.CSS3 有哪些新特性？（根据项目回答）](#12css3-有哪些新特性根据项目回答)
-    - [13.请解释一下 CSS3 的 Flex box（弹性盒布局模型），以及适用场景？](#13请解释一下-css3-的-flex-box弹性盒布局模型以及适用场景)
-    - [14.用纯 CSS 创建一个三角形的原理是什么？](#14用纯-css-创建一个三角形的原理是什么)
-    - [15.一个满屏品字布局如何设计?](#15一个满屏品字布局如何设计)
-    - [17.经常遇到的浏览器的兼容性有哪些？原因，解决方法是什么，常用 hack 的技巧？](#17经常遇到的浏览器的兼容性有哪些原因解决方法是什么常用-hack-的技巧)
-    - [18.li 与 li 之间有看不见的空白间隔是什么原因引起的？有什么解决办法？](#18li-与-li-之间有看不见的空白间隔是什么原因引起的有什么解决办法)
-    - [22.width:auto 和 width:100%的区别](#22widthauto-和-width100的区别)
-    - [24.简单介绍使用图片 base64 编码的优点和缺点。](#24简单介绍使用图片-base64-编码的优点和缺点)
-    - [25.'display'、'position'和'float'的相互关系？](#25displayposition和float的相互关系)
-    - [26.margin 重叠问题的理解。](#26margin-重叠问题的理解)
-    - [27.对 BFC 规范（块级格式化上下文：block formatting context）的理解？](#27对-bfc-规范块级格式化上下文block-formatting-context的理解)
-    - [29.请解释一下为什么需要清除浮动？清除浮动的方式](#29请解释一下为什么需要清除浮动清除浮动的方式)
-    - [30.使用 clear 属性清除浮动的原理？](#30使用-clear-属性清除浮动的原理)
-    - [32.移动端的布局用过媒体查询吗？](#32移动端的布局用过媒体查询吗)
-    - [33.使用 CSS 预处理器吗？喜欢哪个？](#33使用-css-预处理器吗喜欢哪个)
-    - [34.CSS 优化、提高性能的方法有哪些？](#34css-优化提高性能的方法有哪些)
-    - [35.浏览器是怎样解析 CSS 选择器的？](#35浏览器是怎样解析-css-选择器的)
-    - [36.在网页中应该使用奇数还是偶数的字体？为什么呢？](#36在网页中应该使用奇数还是偶数的字体为什么呢)
-    - [37.margin 和 padding 分别适合什么场景使用？](#37margin-和-padding-分别适合什么场景使用)
-    - [38.抽离样式模块怎么写，说出思路，有无实践经验？[阿里航旅的面试题]](#38抽离样式模块怎么写说出思路有无实践经验阿里航旅的面试题)
-    - [40.为什么不建议使用统配符初始化 css 样式。](#40为什么不建议使用统配符初始化-css-样式)
-    - [44.全屏滚动的原理是什么？用到了 CSS 的哪些属性？（待深入实践;重点）](#44全屏滚动的原理是什么用到了-css-的哪些属性待深入实践重点)
-    - [45.什么是响应式设计？响应式设计的基本原理是什么？如何兼容低版本的 IE？（待深入了解）](#45什么是响应式设计响应式设计的基本原理是什么如何兼容低版本的-ie待深入了解)
-    - [48.怎么让 Chrome 支持小于 12px 的文字？](#48怎么让-chrome-支持小于-12px-的文字)
-    - [50.font-style 属性中 italic 和 oblique 的区别？](#50font-style-属性中-italic-和-oblique-的区别)
-    - [51.设备像素、css 像素、设备独立像素、dpr、ppi 之间的区别？](#51设备像素css-像素设备独立像素dprppi-之间的区别)
-    - [52.layout viewport、visual viewport 和 ideal viewport 的区别？](#52layout-viewportvisual-viewport-和-ideal-viewport-的区别)
-    - [54.如果需要手动写动画，你认为最小时间间隔是多久，为什么？（阿里）](#54如果需要手动写动画你认为最小时间间隔是多久为什么阿里)
-    - [55.如何让去除 inline-block 元素间间距？](#55如何让去除-inline-block-元素间间距)
-    - [57.有一个高度自适应的 div，里面有两个 div，一个高度 100px，希望另一个填满剩下的高度。](#57有一个高度自适应的-div里面有两个-div一个高度-100px希望另一个填满剩下的高度)
-    - [58.png、jpg、gif 这些图片格式解释一下，分别什么时候用。有没有了解过 webp？](#58pngjpggif-这些图片格式解释一下分别什么时候用有没有了解过-webp)
-    - [59.浏览器如何判断是否支持 webp 格式图片](#59浏览器如何判断是否支持-webp-格式图片)
-    - [60.什么是 Cookie 隔离？（或者说：请求资源的时候不要让它带 cookie 怎么做）](#60什么是-cookie-隔离或者说请求资源的时候不要让它带-cookie-怎么做)
-    - [61.style 标签写在 body 后与 body 前有什么区别？](#61style-标签写在-body-后与-body-前有什么区别)
-    - [62.什么是 CSS 预处理器/后处理器？](#62什么是-css-预处理器后处理器)
-    - [63.阐述一下 CSSSprites](#63阐述一下-csssprites)
-    - [64.使用 rem 布局的优缺点？](#64使用-rem-布局的优缺点)
-    - [66.画一条 0.5px 的线](#66画一条-05px-的线)
-    - [67.transition 和 animation 的区别](#67transition-和-animation-的区别)
-    - [69.为什么 height:100%会无效？](#69为什么-height100会无效)
-    - [70.min-width/max-width 和 min-height/max-height 属性间的覆盖规则？](#70min-widthmax-width-和-min-heightmax-height-属性间的覆盖规则)
-    - [76.margin:auto 的填充规则？](#76marginauto-的填充规则)
-    - [78.border 的特殊性？](#78border-的特殊性)
-    - [79.什么是基线和 x-height？](#79什么是基线和-x-height)
-    - [80.line-height 的特殊性？](#80line-height-的特殊性)
-    - [81.vertical-align 的特殊性？](#81vertical-align-的特殊性)
-    - [82.overflow 的特殊性？](#82overflow-的特殊性)
-    - [83.无依赖绝对定位是什么？](#83无依赖绝对定位是什么)
-    - [86.relative 的特殊性？](#86relative-的特殊性)
-    - [87.什么是层叠上下文？](#87什么是层叠上下文)
-    - [90.层叠准则？](#90层叠准则)
-    - [91.font-weight 的特殊性？](#91font-weight-的特殊性)
-    - [94.word-spacing 与单词间距？](#94word-spacing-与单词间距)
-    - [96.隐藏元素的 background-image 到底加不加载？](#96隐藏元素的-background-image-到底加不加载)
-    - [97.如何实现单行／多行文本溢出的省略（...）？](#97如何实现单行多行文本溢出的省略)
-    - [98.常见的元素隐藏方式？](#98常见的元素隐藏方式)
-    - [99.css 实现上下固定中间自适应布局？](#99css-实现上下固定中间自适应布局)
-    - [100.css 两栏布局的实现？](#100css-两栏布局的实现)
-    - [101.css 三栏布局的实现？](#101css-三栏布局的实现)
-    - [102.实现一个宽高自适应的正方形](#102实现一个宽高自适应的正方形)
-    - [103.实现一个三角形](#103实现一个三角形)
-    - [104.一个自适应矩形，水平垂直居中，且宽高比为 2:1](#104一个自适应矩形水平垂直居中且宽高比为-21)
-    - [105.你知道 CSS 中不同属性设置为百分比%时对应的计算基准？](#105你知道-css-中不同属性设置为百分比时对应的计算基准)
-
 #### 1.介绍一下标准的 CSS 的盒子模型？低版本 IE 的盒子模型有什么不同的？
 
 回答：
@@ -133,52 +50,6 @@ css 引入伪类和伪元素概念是为了`格式化文档树以外的信息`�
 
 详细资料可以参考：
 [《总结伪类与伪元素》](http://www.alloyteam.com/2016/05/summary-of-pseudo-classes-and-pseudo-elements/)
-
-#### 5.CSS 中哪些属性可以继承？
-
-相关资料：
-
-每个 CSS 属性定义的概述都指出了这个属性是默认继承的，还是默认不继承的。这决定了当你没有为元素的属性指定值时该如何计算值。
-
-当元素的一个`继承属性`没有指定值时，则取`父元素的同属性的计算值`。只有文档根元素取该属性的概述中给定的初始值（这里的意思应该是在该属性本身的定义中的默认值）。
-
-当元素的一个`非继承属性`（在 Mozilla code 里有时称之为 reset property）没有指定值时，则取属性的初始值 `initial value`（该值在该属性的概述里被指定）。
-
-**有继承性的属性**：
-
-（1）`字体系列属性`
-font、font-family、font-weight、font-size、font-style、font-variant、font-stretch、font-size-adjust
-
-（2）`文本系列属性`
-text-indent、text-align、text-shadow、line-height、word-spacing、letter-spacing、text-transform、direction、color
-
-（3）`表格布局属性`
-caption-side border-collapse empty-cells
-
-（4）`列表属性`
-list-style-type、list-style-image、list-style-position、list-style
-
-（5）`光标属性`
-cursor
-
-（6）`元素可见性`
-visibility
-
-（7）还有一些不常用的；speak，page，设置嵌套引用的引号类型 quotes 等属性
-
-注意：`当一个属性不是继承属性时，可以使用 inherit 关键字指定一个属性应从父元素继承它的值`，inherit 关键字用于显式地指定继承性，可用于任何继承性/非继承性属性。
-
-**回答**：
-
-每一个属性在定义中都给出了这个属性是否具有继承性，一个具有继承性的属性会在没有指定值的时候，会使用父元素的同属性的值来作为自己的值。
-
-一般具有继承性的属性有，字体相关的属性，font-size 和 font-weight 等。文本相关的属性，color 和 text-align 等。表格的一些布局属性、列表属性如 list-style 等。还有光标属性 cursor、元素可见性 visibility。
-
-当一个属性不是继承属性的时候，我们也可以通过将它的值设置为 inherit 来使它从父元素那获取同名的属性值来继承。
-
-详细的资料可以参考：
-[《继承属性》](https://developer.mozilla.org/zh-CN/docs/Web/CSS/inheritance)
-[《CSS 有哪些属性可以继承？》](https://www.jianshu.com/p/34044e3c9317)
 
 #### 6.CSS 优先级算法如何计算？
 
@@ -359,6 +230,7 @@ list-item 像块类型元素一样显示，并添加样式列表标记。
 
 **absolute**
 生成绝对定位的元素，相对于值不为 static 的第一个父元素的 padding box 进行定位，也可以理解为离自己这一级元素最近的一级 position 设置为 absolute 或者 relative 的父元素的 padding box 的左上角为原点的。
+**如果没有父元素设置绝对或相对定位，那么元素相对于根元素也就是 html 元素定位**
 
 **fixed**（老 IE 不支持）
 生成绝对定位的元素，相对于浏览器窗口进行定位。
@@ -446,28 +318,6 @@ flex 布局是 CSS3 新增的一种布局方式，我们可以通过将一个元
 }
 ```
 
-#### 15.一个满屏品字布局如何设计?
-
-简单的方式：
-上面的 div 宽 100%，
-下面的两个 div 分别宽 50%，
-然后用 float 或者 inline 使其不换行即可
-
-#### 17.经常遇到的浏览器的兼容性有哪些？原因，解决方法是什么，常用 hack 的技巧？
-
-（2）`浏览器默认的 margin 和 padding 不同`
-解决方案：加一个全局的\*{margin:0;padding:0;}来统一。
-
-（7）`Chrome 中文界面下默认会将小于 12px 的文本强制按照 12px 显示`
-解决方法：可以使用`-webkit-transform:scale(0.5);`注意-webkit-transform:scale(0.75);
-`收缩的是整个 span 的大小，这时候，必须要将 span 转换成块元素，可以使用 display：block/inline-block/...；`
-
-（8）超链接访问过后 hover 样式就不出现了，被点击访问过的超链接样式不再具有 hover 和 active 了
-解决方法：改变 CSS 属性的排列顺序 L-V-H-A
-
-（9）怪异模式问题：漏写 DTD 声明，Firefox 仍然会按照标准模式来解析网页，但在 IE 中会触发怪异模
-式。为避免怪异模式给我们带来不必要的麻烦，最好养成书写 DTD 声明的好习惯。
-
 #### 18.li 与 li 之间有看不见的空白间隔是什么原因引起的？有什么解决办法？
 
 浏览器会把 `inline 元素间的空白字符（空格、换行、Tab 等）渲染成一个空格`。而为了美观。我们通常是一个<li>放在一行，这导致<li>`换行后产生换行字符，它变成一个空格`，占用了一个字符的宽度。
@@ -494,91 +344,6 @@ width:100%会使元素 `box 的宽度等于父元素的 content box 的宽度`�
 **会发生内容溢出父节点的情况**
 
 width:auto 会使`元素撑满整个父元素`，margin、border、padding、content 区域会自动分配水平空间。浏览器会自己选择一个合适的宽度值,不用担心当元素自身有 margin、padding 、border 时，宽度会超过父节点。
-
-#### 24.简单介绍使用图片 base64 编码的优点和缺点。
-
-base64 编码是一种图片处理格式，通过特定的算法将图片编码成一长串字符串，在页面上显示的时候，可以用该字符串来代替图片的 url 属性。
-
-使用 base64 的优点是：
-
-（1）`减少一个图片的 HTTP 请求`
-
-使用 base64 的缺点是：
-
-（1）根据 base64 的编码原理，编码后的大小会比原文件大小`大 1/3`，如果把大图片编码到 html/css 中，不仅会造成文件体
-积的增加，影响文件的加载速度，还会增加浏览器对 html 或 css 文件解析渲染的时间。
-
-（2）使用 base64 `无法直接缓存`，要缓存只能缓存包含 base64 的文件，比如 HTML 或者 CSS，这相比域直接缓存图片的效果要差很多。
-
-（3）`兼容性的问题`，ie8 以前的浏览器不支持。
-
-一般一些网站的小图标可以使用 base64 图片来引入。
-
-详细资料可以参考：
-[《玩转图片 base64 编码》](https://www.cnblogs.com/coco1s/p/4375774.html)
-[《前端开发中，使用 base64 图片的弊端是什么？》](https://www.zhihu.com/question/31155574)
-[《小 tip:base64:URL 背景图片与 web 页面性能优化》](https://www.zhangxinxu.com/wordpress/2012/04/base64-url-image-%E5%9B%BE%E7%89%87-%E9%A1%B5%E9%9D%A2%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/)
-
-#### 25.'display'、'position'和'float'的相互关系？
-
-总的来说，可以把它看作是一个类似优先级的机制，`"position:absolute"和"position:fixed"优先级最高`，有它存在的时候，浮动不起作用，'display'的值也需要调整；其次，`元素的'float'特性的值不是"none"的时候或者它是根元素的时候，调整'display'的值`；最后，非根元素，并且非浮动元素，并且非绝对定位的元素，'display'特性值同设置值。
-
-详细资料可以参考：
-[《position 跟 display、margincollapse、overflow、float 这些特性相互叠加后会怎么样？》](https://www.cnblogs.com/jackyWHJ/p/3756087.html)
-
-#### 26.margin 重叠问题的理解。
-
-相关知识点：
-
-`块级元素的上外边距（margin-top）与下外边距（margin-bottom）有时会合并为单个外边距`，这样的现象称为“margin 合并”。
-
-产生折叠的必备条件：`margin 必须是邻接的!`
-
-margin 合并的 3 种场景：
-
-（1）**相邻兄弟元素 margin 合并**。
-
-解决办法：
-•设置块状格式化上下文元素（BFC）
-
-（2）**父级和第一个/最后一个子元素的 margin 合并**。
-
-解决办法：
-
-对于 margin-top 合并，可以进行如下操作（满足一个条件即可）：
-•父元素设置为块状格式化上下文元素；
-•父元素设置 border-top 值；
-•父元素设置 padding-top 值；
-•父元素和第一个子元素之间添加内联元素进行分隔。
-
-对于 margin-bottom 合并，可以进行如下操作（满足一个条件即可）：
-•父元素设置为块状格式化上下文元素；
-•父元素设置 border-bottom 值；
-•父元素设置 padding-bottom 值；
-•父元素和最后一个子元素之间添加内联元素进行分隔；
-•父元素设置 height、min-height 或 max-height。
-
-（3）**空块级元素的 margin 合并**。
-
-解决办法：
-•设置垂直方向的 border；
-•设置垂直方向的 padding；
-•里面添加内联元素（直接 Space 键空格是没用的）；
-•设置 height 或者 min-height。
-
-回答：
-
-**margin 重叠指的是在垂直方向上，两个相邻元素的 margin 发生重叠的情况。**
-
-一般来说可以分为四种情形：
-
-第一种是`相邻兄弟元素`的 `marin-bottom 和 margin-top` 的值发生重叠。这种情况下我们可以通过`设置其中一个元素为 BFC`来解决。
-
-第二种是`父元素的 margin-top` 和`子元素的 margin-top` 发生重叠。它们发生重叠是因为它们是相邻的，所以我们可以通过这一点来解决这个问题。我们可以为父元素设置 border-top、padding-top 值来分隔它们，当然我们也可以将`父元素设置为 BFC`来解决。
-
-第三种是高度为 auto 的父元素的 margin-bottom 和子元素的 margin-bottom 发生重叠。它们发生重叠一个是因为它们相邻，一个是因为父元素的高度不固定。因此我们可以为父元素设置 border-bottom、padding-bottom 来分隔它们，也可以为父元素设置一个高度，max-height 和 min-height 也能解决这个问题。当然将`父元素设置为 BFC` 是最简单的方法。
-
-第四种情况，是没有内容的元素，自身的 margin-top 和 margin-bottom 发生的重叠。我们可以通过为其设置 border、padding 或者高度来解决这个问题。
 
 #### 27.对 BFC 规范（块级格式化上下文：block formatting context）的理解？
 
@@ -649,80 +414,9 @@ clear:none|left|right|both
 
 `clear 属性只有块级元素才有效的，而::after 等伪元素默认都是内联水平`，这就是借助伪元素清除浮动影响时需要设置 display 属性值的原因。
 
-#### 32.移动端的布局用过媒体查询吗？
-
-假设你现在正用一台显示设备来阅读这篇文章，同时你也想把它投影到屏幕上，或者打印出来，而显示设备、屏幕投影和打印等这些
-媒介都有自己的特点，CSS 就是为文档提供在不同媒介上展示的适配方法
-
-当媒体查询为真时，相关的样式表或样式规则会按照正常的级联规被应用。当媒体查询返回假，标签上带有媒体查询的样式表仍将被
-下载（只不过不会被应用）。
-
-包含了一个媒体类型和至少一个使用宽度、高度和颜色等媒体属性来限制样式表范围的表达式。CSS3 加入的媒体查询使得无需修改
-内容便可以使样式应用于某些特定的设备范围。
-
-详细资料可以参考：
-[《CSS3@media 查询》](http://www.runoob.com/cssref/css3-pr-mediaquery.html)
-[《响应式布局和自适应布局详解》](http://caibaojian.com/356.html)
-
 #### 33.使用 CSS 预处理器吗？喜欢哪个？
 
 SASS（SASS、LESS 没有本质区别，只因为团队前端都是用的 SASS）
-
-#### 34.CSS 优化、提高性能的方法有哪些？
-
-`加载性能`：
-
-（1）css 压缩：将写好的 css 进行打包压缩，可以减少很多的体积。
-（2）css 单一样式：当需要下边距和左边距的时候，很多时候选择:margin:top 0 bottom 0;但 margin-bottom:bottom;margin-left:left;执行的效率更高。
-（3）`减少使用@import,而建议使用 link，因为后者在页面加载时一起加载，前者是等待页面加载完成之后再进行加载。`
-
-`选择器性能`：
-
-（1）关键选择器（key selector）。选择器的最后面的部分为关键选择器（即用来匹配目标元素的部分）。`CSS 选择符是从右到左进行匹配的。当使用后代选择器的时候，浏览器会遍历所有子元素来确定是否是指定的元素等等；`
-
-（2）如果规则拥有 ID 选择器作为其关键选择器，则不要为规则增加标签。过滤掉无关的规则（这样样式系统就不会浪费时间去匹配它们了）。
-
-（3）避免使用通配规则，如\*{}计算次数惊人！只对需要用到的元素进行选择。
-
-（4）尽量少的去对标签进行选择，`而是用 class`。
-
-（5）尽量少的去使用后代选择器，降低选择器的权重值。`后代选择器的开销是最高的`，尽量将选择器的深度降到最低，最高不要超过三层，更多的使用类来关联每一个标签元素。
-
-（6）了解哪些属性是可以通过继承而来的，然后避免对这些属性重复指定规则。
-
-`渲染性能`：
-
-（1）慎重使用高性能属性：浮动、定位。
-
-（2）尽量减少页面重排、重绘。
-
-（3）去除空规则：｛｝。空规则的产生原因一般来说是为了预留样式。去除这些空规则无疑能减少 css 文档体积。
-
-（4）`属性值为 0 时，不加单位。`
-
-（5）属性值为浮动小数 0.\*\*，可以省略小数点之前的 0。
-
-（6）标准化各种浏览器前缀：带浏览器前缀的在前。标准属性在后。
-
-（7）不使用@import 前缀，它会影响 css 的加载速度。
-
-（8）选择器优化嵌套，尽量避免层级过深。
-
-（9）css 雪碧图，同一页面相近部分的小图标，方便使用，减少页面的请求次数，但是同时图片本身会变大，使用时，优劣考虑清楚，再使用。
-
-（10）正确使用 display 的属性，由于 display 的作用，某些样式组合会无效，徒增样式体积的同时也影响解析性能。
-
-（11）不滥用 web 字体。对于中文网站来说 WebFonts 可能很陌生，国外却很流行。web fonts 通常体积庞大，而且一些浏览器在下载 web fonts 时会阻塞页面渲染损伤性能。
-
-`可维护性、健壮性`：
-
-@include 和 @mixin
-（1）将具有相同属性的样式抽离出来，整合并通过 class 在页面中进行使用，提高 css 的可维护性。
-（2）样式与内容分离：将 css 代码定义到外部 css 中。
-
-详细资料可以参考：
-[《CSS 优化、提高性能的方法有哪些？》](https://www.zhihu.com/question/19886806)
-[《CSS 优化，提高性能的方法》](https://www.jianshu.com/p/4e673bf24a3b)
 
 #### 35.浏览器是怎样解析 CSS 选择器的？
 
@@ -774,59 +468,6 @@ margin 用于布局分开元素使元素与元素互不相干。
 详细资料可以参考：
 [《CSS 规范-分类方法》](http://nec.netease.com/standard/css-sort.html)
 
-#### 40.为什么不建议使用统配符初始化 css 样式。
-
-采用\*{padding:0;margin:0;}这样的写法好处是写起来很简单，但是是通配符，需要把所有的标签都遍历一遍，当网站较大时，
-样式比较多，这样写就大大的加强了网站运行的负载，会使网站加载的时候需要很长一段时间，`因此一般大型的网站都有分层次的一套初始化样式。`
-
-出于性能的考虑，并不是所有标签都会有 padding 和 margin，因此对常见的具有默认 padding 和 margin 的元素初始化即
-可，并不需使用通配符\*来初始化。
-
-#### 44.全屏滚动的原理是什么？用到了 CSS 的哪些属性？（待深入实践;重点）
-
-原理：有点类似于轮播，整体的元素一直排列下去，假设有 5 个需要展示的全屏页面，`那么高度是 500%，只是展示 100%，容器及容器内的页面取当前可视区高度`，同时容器的父级元素 overflow 属性值设为 hidden，通过更改容器可视区的位置来实现全
-屏滚动效果。`主要是响应鼠标事件，页面通过 CSS 的动画效果，进行移动。`
-
-`overflow：hidden；transition：all 1000 ms ease；`
-
-详细资料可以参考：
-[《js 实现网页全屏切换（平滑过渡），鼠标滚动切换》](https://blog.csdn.net/liona_koukou/article/details/52680409)
-[《用 ES6 写全屏滚动插件》](https://juejin.im/post/5aeef41cf265da0ba0630de0)
-
-#### 45.什么是响应式设计？响应式设计的基本原理是什么？如何兼容低版本的 IE？（待深入了解）
-
-响应式网站设计是一个`网站能够兼容多个终端`，而不是为每一个终端做一个特定的版本。基本原理是通过`媒体查询检测不同的设备屏幕尺寸做处理`。页面头部必须有 `meta 声明的 viewport。`
-
-详细资料可以参考：
-[《响应式布局原理》](https://blog.csdn.net/dreamerframework/article/details/8994741)
-[《响应式布局的实现方法和原理》](http://www.mahaixiang.cn/wzsj/278.html)
-
-#### 48.怎么让 Chrome 支持小于 12px 的文字？
-
-在谷歌下 css 设置字体大小为 12px 及以下时，显示都是一样大小，都是默认 12px。
-
-解决办法：
-
-（1）可以使用 Webkit 的内核的-webkit-text-size-adjust 的私有 CSS 属性来解决，只要加了-webkit-text-size
--adjust:none;字体大小就不受限制了。但是 chrome 更新到 27 版本之后就不可以用了。所以高版本 chrome 谷歌浏览器
-已经不再支持-webkit-text-size-adjust 样式，所以要使用时候慎用。
-
-（2）还可以使用 css3 的 transform 缩放属性-webkit-transform:scale(0.5);注意-webkit-transform:scale(0.
-75);收缩的是整个元素的大小，这时候，如果是内联元素，必须要将内联元素转换成块元素，可以使用 display：block/
-inline-block/...；
-
-（3）使用图片：如果是内容固定不变情况下，使用将小于 12px 文字内容切出做图片，这样不影响兼容也不影响美观。
-
-详细资料可以参考：
-[《谷歌浏览器不支持 CSS 设置小于 12px 的文字怎么办？》](https://570109268.iteye.com/blog/2406562)
-
-#### 50.font-style 属性中 italic 和 oblique 的区别？
-
-italic 和 oblique 这两个关键字都表示“斜体”的意思。
-
-它们的区别在于，`italic 是使用当前字体的斜体字体`，而 `oblique 只是单纯地让文字倾斜`。如果当前字体没有对应的斜体字体，
-则退而求其次，解析为 oblique，也就是单纯形状倾斜。
-
 #### 51.设备像素、css 像素、设备独立像素、dpr、ppi 之间的区别？
 
 `设备像素指的是物理像素`，一般手机的分辨率指的就是设备像素，一个设备的设备像素是不可变的。
@@ -842,44 +483,6 @@ ppi 指的是每英寸的物理像素的密度 `Pixels Per Inch`，ppi 越大，
 [《前端工程师需要明白的「像素」》](https://www.jianshu.com/p/af6dad66e49a)
 [《CSS 像素、物理像素、逻辑像素、设备像素比、PPI、Viewport》](https://github.com/jawil/blog/issues/21)
 [《前端开发中像素的概念》](https://github.com/wujunchuan/wujunchuan.github.io/issues/15)
-
-#### 52.layout viewport、visual viewport 和 ideal viewport 的区别？
-
-回答：
-
-移动端一共需要理解三个 viewport 的概念的理解。
-
-第一个视口是`布局视口`，在移动端显示网页时，由于移动端的屏幕尺寸比较小，如果网页使用移动端的屏幕尺寸进行布局的话，那么整个页面的布局都会显示错乱。所以移动端浏览器提供了一个 layout viewport 布局视口的概念，使用这个视口来对页面进行布局展示，`一般 layout viewport 的大小为 980px`，因此页面布局不会有太大的变化，我们可以通过拖动和缩放来查看到这个页面。
-
-第二个视口指的是`视觉视口`，visual viewport 指的是移动设备上我们可见的区域的视口大小，`一般为屏幕的分辨率的大小`。visual viewport 和 layout viewport 的关系，就像是我们通过窗户看外面的风景，`视觉视口就是窗户，而外面的风景就是布局视口中的网页内容。`
-
-第三个视口是`理想视口`，由于 layout viewport 一般比 visual viewport 要大，所以想要看到整个页面必须通过拖动和缩放才能实现。所以又提出了 ideal viewport 的概念，ideal viewport 下用户不用缩放和滚动条就能够查看到整个页面，并且页面在不同分辨率下显示的内容大小相同。ideal viewport 其实就是通过修改 layout viewport 的大小，让它等于设备的宽度，这个宽度可以理解为是设备独立像素，因此根据 ideal viewport 设计的页面，在不同分辨率的屏幕下，显示应该相同。
-
-详细资料可以参考：
-[《移动前端开发之 viewport 的深入理解》](https://www.cnblogs.com/2050/p/3877280.html)
-[《说说移动前端中 viewport（视口）》](https://www.html.cn/archives/5975)
-[《移动端适配知识你到底知多少》](https://juejin.im/post/5b6d21daf265da0f9d1a2ed7#heading-14)
-
-#### 54.如果需要手动写动画，你认为最小时间间隔是多久，为什么？（阿里）
-
-`多数显示器默认频率是 60Hz`，即 1 秒刷新 60 次，所以理论上最小间隔为 1/60\*1000ms ＝ 16.7ms
-
-#### 55.如何让去除 inline-block 元素间间距？
-
-`移除空格`、使用 margin 负值、`使用 font-size:0`、letter-spacing、word-spacing
-
-详细资料可以参考：
-[《去除 inline-block 元素间间距的 N 种方法》](https://www.zhangxinxu.com/wordpress/2012/04/inline-block-space-remove-%E5%8E%BB%E9%99%A4%E9%97%B4%E8%B7%9D/)
-
-#### 57.有一个高度自适应的 div，里面有两个 div，一个高度 100px，希望另一个填满剩下的高度。
-
-（1）外层 div 使用 position：relative；高度要求自适应的 div 使用 position:absolute;top:100px;bottom:0;
-left:0;right:0;
-
-（2）使用 flex 布局，设置主轴为竖轴，第二个 div 的 flex-grow 为 1。
-
-详细资料可以参考：
-[《有一个高度自适应的 div，里面有两个 div，一个高度 100px，希望另一个填满剩下的高度(三种方案)》](https://blog.csdn.net/xutongbao/article/details/79408522)
 
 #### 58.png、jpg、gif 这些图片格式解释一下，分别什么时候用。有没有了解过 webp？
 
@@ -936,30 +539,6 @@ left:0;right:0;
 详细资料可以参考：
 [《图片格式那么多，哪种更适合你？》](https://www.cnblogs.com/xinzhao/p/5130410.html)
 
-#### 59.浏览器如何判断是否支持 webp 格式图片
-
-（1）宽高判断法。通过创建 `image 对象`，将其 `src 属性设置为 webp 格式的图片`，然后在 onload 事件中获取图片的宽高，如果能够获取，则说明浏览器支持 webp 格式图片。`如果不能获取或者触发了 onerror 函数，那么就说明浏览器不支持 webp 格式的图片。`
-类似于判断正确 URL 的方法:try catch 直接判断
-
-（2）canvas 判断方法。我们可以动态的创建一个 canvas 对象，通过 canvas 的 `toDataURL` 将设置为 webp 格式，然后判断`返回值中是否含有 image/webp 字段`，如果包含则说明支持 WebP，反之则不支持。
-
-详细资料可以参考：
-[《判断浏览器是否支持 WebP 图片》](https://blog.csdn.net/jesslu/article/details/82495061)
-[《toDataURL()》](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCanvasElement/toDataURL)
-
-#### 60.什么是 Cookie 隔离？（或者说：请求资源的时候不要让它带 cookie 怎么做）
-
-网站向服务器请求的时候，会自动带上 cookie 这样增加表头信息量，使请求变慢。
-
-如果静态文件都放在主域名下，那静态文件请求的时候都带有的 cookie 的数据提交给 server 的，非常浪费流量，所以不如隔离开，`静态资源放 CDN。`
-
-`因为 cookie 有站的限制`，因此不能跨站提交请求，`故使用非主要域名的时候，请求头中就不会带有 cookie 数据`，这样可以降低请求头的大小，降低请求时间，从而达到降低整体请求延时的目的。
-
-`同时这种方式不会将 cookie 传入 WebServer`，也减少了 WebServer 对 cookie 的处理分析环节，提高了 webserver 的 http 请求的解析速度。
-
-详细资料可以参考：
-[《CDN 是什么？使用 CDN 有什么优势？》](https://www.zhihu.com/question/36514327?rf=37353035)
-
 #### 61.style 标签写在 body 后与 body 前有什么区别？
 
 页面加载自上而下当然是先加载样式。写在 body 标签后由于浏览器以逐行方式对 HTML 文档进行解析，当解析到写在尾部的样式表（外联或写在 style 标签）`会导致浏览器停止之前的渲染，等待加载且解析样式表完成之后重新渲染`，在 windows 的 IE 下可
@@ -977,37 +556,6 @@ CSS 后处理器是对 CSS 进行处理，并最终生成 CSS 的预处理器，
 
 详细资料可以参考：
 [《CSS 预处理器和后处理器》](https://blog.csdn.net/yushuangyushuang/article/details/79209752)
-
-#### 63.阐述一下 CSSSprites
-
-将一个页面涉及到的所有图片都包含到一张大图中去，然后利用 CSS 的 background-image，`background-repeat，background-position` 的组合进行背景定位。利用 CSSSprites 能很好地减少网页的 http 请求，从而很好的提高页面的性能；CSSSprites 能减少图片的字节。
-
-优点：
-
-减少 HTTP 请求数，极大地提高页面加载速度
-增加图片信息重复度，提高压缩比，减少图片大小
-更换风格方便，只需在一张或几张图片上修改颜色或样式即可实现
-
-缺点：
-
-图片合并麻烦
-维护麻烦，修改一个图片可能需要重新布局整个图片，样式
-
-#### 64.使用 rem 布局的优缺点？
-
-优点：
-在屏幕分辨率千差万别的时代，只要将 rem 与屏幕分辨率关联起来就可以实现页面的整体缩放，使得在设备上的展现都统一起来了。而且现在浏览器基本都已经支持 rem 了，兼容性也非常的好。
-
-缺点：
-（1）在奇葩的 dpr 设备上表现效果不太好，比如`一些华为的高端机型用 rem 布局会出现错乱`。
-（2）使用 iframe 引用也会出现问题。
-（3）rem 在多屏幕尺寸适配上与当前两大平台的设计哲学不一致。即大屏的出现到底是为了看得又大又清楚，还是为了看的更多的问题。
-
-详细资料可以参考：
-[《css3 的字体大小单位 rem 到底好在哪？》](https://www.zhihu.com/question/21504656)
-[《VW:是时候放弃 REM 布局了》](https://www.jianshu.com/p/e8ae1c3861dc)
-[《为什么设计稿是 750px》](https://blog.csdn.net/Honeymao/article/details/76795089)
-[《使用 Flexible 实现手淘 H5 页面的终端适配》](https://github.com/amfe/article/issues/17)
 
 #### 66.画一条 0.5px 的线
 
@@ -1039,185 +587,6 @@ CSS 后处理器是对 CSS 进行处理，并最终生成 CSS 的预处理器，
 原因是如果包含块的高度没有显式指定（即高度由内容决定），并且该元素不是绝对定位，则计算值为 auto，因为解释成了 auto，所以无法参与计算。
 
 使用绝对定位的元素会有计算值，即使祖先元素的 height 计算为 auto 也是如此。
-
-#### 70.min-width/max-width 和 min-height/max-height 属性间的覆盖规则？
-
-（1）`max-width 会覆盖 width`，即使 width 是行类样式或者设置了!important。
-
-（2）`min-width 会覆盖 max-width`，此规则发生在 min-width 和 max-width 冲突的时候。
-
-#### 76.margin:auto 的填充规则？
-
-margin 的'auto'可不是摆设，是具有强烈的计算意味的关键字，`用来计算元素对应方向应该获得的剩余间距大小。`但是触发 margin:auto 计算有一个前提条件，就是 width 或 height 为 auto 时，元素是具有对应方向的自动填充特性的。
-
-（1）`如果一侧定值，一侧 auto，则 auto 为剩余空间大小。`
-（2）`如果两侧均是 auto，则平分剩余空间。`
-
-#### 78.border 的特殊性？
-
-（1）border-width 却不支持百分比。
-
-（2）border-style `的默认值是 none`，有一部分人可能会误以为是 solid。这也是单纯设置 border-width 或 border-color 没有边框显示的原因。
-
-（3）border-style:double 的表现规则：双线宽度永远相等，中间间隔 ±1。
-
-（4）border-color 默认颜色就是 color 色值。
-
-（5）默认 background 背景图片是相对于 padding box 定位的。
-
-#### 79.什么是基线和 x-height？
-
-字母 x 的下边缘（线）就是我们的基线。
-
-x-height 指的就是小写字母 x 的高度，术语描述就是基线和等分线（meanline）（也称作中线，midline）之间的距离。在 CSS 世界中，middle 指的是基线往上 1/2x-height 高度。我们可以近似理解为字母 x 交叉点那个位置。
-
-ex 是 CSS 中的一个相对单位，指的是小写字母 x 的高度，没错，就是指 x-height。ex 的价值就在其副业上不受字体和字号影响的内联元素的垂直居中对齐效果。内联元素默认是基线对齐的，而基线就是 x 的底部，而 1ex 就是一个 x 的高度。
-
-#### 80.line-height 的特殊性？
-
-（1）`对于非替换元素的纯内联元素，其可视高度完全由 line-height 决定`。对于文本这样的纯内联元素，line-height 就是高度计算的基石，用专业说法就是指定了用来计算行框盒子高度的基础高度。
-
-（2）内联元素的高度由固定高度和不固定高度组成，这个不固定的部分就是这里的“行距”。换句话说，line-height 之所以起作用，就是通过改变“行距”来实现的。在 CSS 中，“行距”分散在当前文字的上方和下方，也就是即使是第一行文字，其上方也是有“行距”的，只不过这个“行距”的高度仅仅是完整“行距”高度的一半，因此，也被称为“半行距”。
-
-（3）行距=line-height-font-size。
-
-（4）border 以及 line-height 等传统 CSS 属性并没有小数像素的概念。如果标注的是文字上边距，则向下取整；如果是文字下边距，则向上取整。
-
-（5）对于纯文本元素，line-height 直接决定了最终的高度。但是，如果同时有替换元素，则 line-height 只能决定最小高度。
-
-（6）对于块级元素，line-height 对其本身是没有任何作用的，我们平时改变 line-height，块级元素的高度跟着变化实际上是通过改变块级元素里面内联级别元素占据的高度实现的。
-
-（7）line-height 的默认值是 normal，还支持数值、百分比值以及长度值。为数值类型时，其最终的计算值是和当前 font-size 相乘后的值。为百分比值时，其最终的计算值是和当前 font-size 相乘后的值。为长度值时原意不变。
-
-（8）如果使用数值作为 line-height 的属性值，那么所有的子元素继承的都是这个值；但是，如果使用百分比值或者长度值作为属性值，那么所有的子元素继承的是最终的计算值。
-
-（9）无论内联元素 line-height 如何设置，最终父级元素的高度都是由数值大的那个 line-height 决定的。
-
-（10）只要有“内联盒子”在，就一定会有“行框盒子”，就是每一行内联元素外面包裹的一层看不见的盒子。然后，重点来了，在每个“行框盒子”前面有一个宽度为 0 的具有该元素的字体和行高属性的看不见的“幽灵空白节点”。
-
-#### 81.vertical-align 的特殊性？
-
-（1）`vertical-align 的默认值是 baseline，即基线对齐`，而基线的定义是`字母 x 的下边缘`。因此，内联元素默认都是沿着字母 x 的下边缘对齐的。对于图片等替换元素，往往使用元素本身的下边缘作为基线。一个 inline-block 元素，如果里面没有内联元素，或者 overflow 不是 visible，则该元素的基线就是其 margin 底边缘；否则其基线就是元素里面最后一行内联元素的基线。
-
-（2）vertical-align:top 就是垂直上边缘对齐，如果是内联元素，则和这一行位置最高的内联元素的顶部对齐；如果 display 计算值是 table-cell 的元素，我们不妨脑补成<td>元素，则和<tr>元素上边缘对齐。
-
-（3）`vertical-align:middle 是中间对齐，对于内联元素，元素的垂直中心点和行框盒子基线往上 1/2x-height 处对齐`。对于 table-cell 元素，单元格填充盒子相对于外面的表格行居中对齐。
-
-（4）vertical-align 支持数值属性，根据数值的不同，相对于基线往上或往下偏移，如果是负值，往下偏移，如果是正值，往上偏移。
-
-（5）vertical-align 属性的百分比值则是相对于 line-height 的计算值计算的。
-
-（6）vertical-align 起作用是有前提条件的，这个前提条件就是：只能应用于内联元素以及 display 值为 table-cell 的元素。
-
-（7）table-cell 元素设置 vertical-align 垂直对齐的是子元素，但是其作用的并不是子元素，而是 table-cell 元素自身。
-
-#### 82.overflow 的特殊性？
-
-（1）一个设置了 overflow:hidden 声明的元素，假设同时存在 border 属性和 padding 属性，则当子元素内容超出容器宽度高度限制的时候，剪裁的边界是 border box 的内边缘，而非 padding box 的内边缘。
-
-（2）HTML 中有两个标签是默认可以产生滚动条的，一个是根元素<html>，另一个是文本域<textarea>。
-
-（3）滚动条会占用容器的可用宽度或高度。
-
-（4）`元素设置了 overflow:hidden 声明，里面内容高度溢出的时候，滚动依然存在，仅仅滚动条不存在！`
-
-#### 83.无依赖绝对定位是什么？
-
-没有设置 left/top/right/bottom 属性值的绝对定位称为“无依赖绝对定位”。
-
-无依赖绝对定位其定位的位置和没有设置 position:absolute 时候的位置相关。
-
-#### 86.relative 的特殊性？
-
-（1）相对定位元素的 left/top/right/bottom 的百分比值是相对于包含块计算的，而不是自身。注意，虽然定位位移是相对自身，但是百分比值的计算值不是。
-
-（2）top 和 bottom 这两个垂直方向的百分比值计算跟 height 的百分比值是一样的，都是相对高度计算的。同时，如果包含块的高度是 auto，那么计算值是 0，偏移无效，也就是说，如果父元素没有设定高度或者不是“格式化高度”，那么 relative 类似 top:20%的代码等同于 top:0。
-
-（3）当相对定位元素同时应用对立方向定位值的时候，也就是 top/bottom 和 left/right 同时使用的时候，只有一个方向的定位属性会起作用。而谁起作用则是与文档流的顺序有关的，默认的文档流是自上而下、从左往右，因此 top/bottom 同时使用的时候，bottom 失效；left/right 同时使用的时候，right 失效。
-
-#### 87.什么是层叠上下文？
-
-层叠上下文，英文称作 `stacking context`，是 HTML 中的一个三维的概念。`如果一个元素含有层叠上下文，我们可以理解为这个元素在 z 轴上就“高人一等”。`
-
-层叠上下文元素有如下特性：
-
-（1）层叠上下文的层叠水平要比普通元素高（原因后面会说明）。
-（2）层叠上下文可以阻断元素的混合模式。
-（3）层叠上下文可以嵌套，内部层叠上下文及其所有子元素均受制于外部的“层叠上下文”。
-（4）`每个层叠上下文和兄弟元素独立`，也就是说，当进行层叠变化或渲染的时候，只需要考虑后代元素。
-（5）每个层叠上下文是自成体系的，当元素发生层叠的时候，整个元素被认为是在父层叠上下文的层叠顺序中。
-
-层叠上下文的创建：
-
-（1）`页面根元素天生具有层叠上下文，称为根层叠上下文`。根层叠上下文指的是页面根元素，可以看成是<html>元素。因此，页面中所有的元素一定处于至少一个“层叠结界”中。
-
-（2）`对于 position 值为 relative/absolute 以及 Firefox/IE 浏览器（不包括 Chrome 浏览器）下含有 position:fixed 声明的定位元素，当其 z-index 值不是 auto 的时候，会创建层叠上下文`。Chrome 等 WebKit 内核浏览器下，position:fixed 元素天然层叠上下文元素，无须 z-index 为数值。根据我的测试，目前 IE 和 Firefox 仍是老套路。
-
-（3）其他一些 CSS3 `属性，比如元素的 opacity 值不是 1。`
-
-#### 90.层叠准则？
-
-（1）谁大谁上：当具有明显的层叠水平标识的时候，如生效的 z-index 属性值，在同一个层叠上下文领域，层叠水平值大的那一个覆盖小的那一个。
-
-（2）后来居上：当元素的层叠水平一致、层叠顺序相同的时候，在 DOM 流中处于后面的元素会覆盖前面的元素。
-
-#### 91.font-weight 的特殊性？
-
-如果使用数值作为 font-weight 属性值，必须是 100 ～ 900 的整百数。因为这里的数值仅仅是外表长得像数值，实际上是一个具有特定含义的关键字，并且这里的数值关键字和字母关键字之间是有对应关系的。
-
-#### 94.word-spacing 与单词间距？
-
-letter :字符间隙
-word:空格间隙
-`letter-spacing 作用于所有字符，但 word-spacing 仅作用于空格字符`。换句话说，`word-spacing 的作用就是增加空格的间隙宽度。`
-
-#### 96.隐藏元素的 background-image 到底加不加载？
-
-回答：
-
--（1）元素的背景图片
-
-- `元素本身设置 display:none，会请求图片 `
-- 父级元素设置 display:none，不会请求图片
-- 样式没有元素使用，不会请求
-- `:hover 样式下，触发时请求`
-
--（2）`img 标签图片任何情况下都会请求图片`
-
-详细资料可以参考：
-[《CSS 控制前端图片 HTTP 请求的各种情况示例》](https://www.jb51.net/css/469033.html)
-
-#### 97.如何实现单行／多行文本溢出的省略（...）？
-
-```css
-/*单行文本溢出*/
-p {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/*多行文本溢出*/
-p {
-  position: relative;
-  line-height: 1.5em;
-  /*高度为需要显示的行数*行高，比如这里我们显示两行，则为3*/
-  height: 3em;
-  overflow: hidden;
-}
-
-p:after {
-  content: '...';
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background-color: #fff;
-}
-```
-
-详细资料可以参考：
-[《【CSS/JS】如何实现单行／多行文本溢出的省略》](https://zhuanlan.zhihu.com/p/30707916)
-[《CSS 多行文本溢出省略显示》](https://juejin.im/entry/587f453e1b69e60058555a5f)
 
 #### 98.常见的元素隐藏方式？
 
@@ -1638,56 +1007,3 @@ body {
 ```
 
 [《自适应正方形 demo 展示》](http://cavszhouyou.top/Demo-Display/AdaptiveSquare/index.html)
-
-#### 103.实现一个三角形
-
-```css
-/*三角形的实现原理是利用了元素边框连接处的等分原理。*/
-.triangle {
-  width: 0;
-  height: 0;
-  border-width: 100px;
-  border-style: solid;
-  border-color: tomato transparent transparent transparent;
-}
-```
-
-[《三角形 demo 展示》](http://cavszhouyou.top/Demo-Display/Triangle/index.html)
-
-#### 104.一个自适应矩形，水平垂直居中，且宽高比为 2:1
-
-```css
-/*实现原理参考自适应正方形和水平居中方式*/
-.box {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  margin: auto;
-
-  width: 10%;
-  height: 0;
-  padding-top: 20%;
-  background: tomato;
-}
-```
-
-#### 105.你知道 CSS 中不同属性设置为百分比%时对应的计算基准？
-
-```
-公式：当前元素某CSS属性值 = 基准 * 对应的百分比
-元素的 position 为 relative 和 absolute 时，top和bottom、left和right基准分别为包含块的 height、width
-元素的 position 为 fixed 时，top和bottom、left和right基准分别为初始包含块（也就是视口）的 height、width，移动设备较为复杂，基准为 Layout viewport 的 height、width
-元素的 height 和 width 设置为百分比时，基准分别为包含块的 height 和 width
-元素的 margin 和 padding 设置为百分比时，基准为包含块的 width（易错）
-元素的 border-width，不支持百分比
-元素的 text-indent，基准为包含块的 width
-
-元素的 border-radius，基准为分别为自身的height、width
-元素的 background-size，基准为分别为自身的height、width
-元素的 translateX、translateY，基准为分别为自身的height、width
-元素的 line-height，基准为自身的 font-size
-
-元素的 font-size，基准为父元素字体
-```

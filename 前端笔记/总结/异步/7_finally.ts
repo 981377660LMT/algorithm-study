@@ -5,6 +5,7 @@ Promise.resolve('1')
   .finally(() => {
     console.log('finally')
   })
+
 Promise.resolve('2')
   .finally(() => {
     console.log('finally2')

@@ -1,10 +1,12 @@
 setImmediate(function () {
   console.log(1) // 8
 }, 0)
+
 // setTimeout的优先级高于setIImmediate
 setTimeout(function () {
   console.log(2) // 7
 }, 0)
+
 new Promise(function (resolve) {
   console.log(3) // 1
   resolve()
@@ -12,12 +14,16 @@ new Promise(function (resolve) {
 }).then(function () {
   console.log(5) // 6
 })
+
 console.log(6) // 3
 // 优先级process.nextTick 高于 Promise
+
 process.nextTick(function () {
   console.log(7) // 5
 })
+
 console.log(8) // 4
+
 // 3
 // 4
 // 6

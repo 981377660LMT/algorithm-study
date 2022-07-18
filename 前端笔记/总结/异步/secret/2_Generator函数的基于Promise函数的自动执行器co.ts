@@ -1,5 +1,5 @@
-import { readFile } from './utils'
-import type { Callback } from './utils'
+import { readFile } from '../utils'
+import type { Callback } from '../utils'
 
 // 因为剩余参数只能放最后 所以callback不得不写前面
 // 虽然这与nodejs 的 回调形式的 api 不符 (

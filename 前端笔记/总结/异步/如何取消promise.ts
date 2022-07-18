@@ -56,14 +56,14 @@ const cp = makeCancelablePromise2(
 cp.cancel()
 cp.promise.then(console.log).catch(console.error)
 
-// 3.  AbortController 取消fetch
+// !3.  AbortController 取消fetch
 // AbortController接口表示一个控制器对象，允许你根据需要中止一个或多个 Web请求。s
 // AbortController.abort()
 // 中止一个尚未完成的Web(网络)请求。这能够中止fetch 请求，任何响应Body的消费者和流。
 // let controller = new AbortController()
 
 // let task = new Promise((resolve, reject) => {
-//   // some logic ...(请求后的处理)
+//    some logic ...(请求后的处理)
 //   controller.signal.addEventListener('abort', () => reject('oops'))
 // })
 
