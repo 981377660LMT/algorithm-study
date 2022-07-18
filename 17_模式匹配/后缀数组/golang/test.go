@@ -67,4 +67,6 @@ func main() {
 	fmt.Println("rank:", rank)     // "abcdea" => [1 2 3 4 5 0]
 	fmt.Println("height:", height) // "abcdea" => [0 1 0 0 0 0]
 
+	fmt.Println([]byte("1000"))
+
 }

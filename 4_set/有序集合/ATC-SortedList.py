@@ -7,9 +7,7 @@ class SortedList:
             iterable = []
         values = sorted(iterable)
         self._len = _len = len(values)
-        self._lists = _lists = [
-            values[i : i + self._LOAD] for i in range(0, _len, self._LOAD)
-        ]
+        self._lists = _lists = [values[i : i + self._LOAD] for i in range(0, _len, self._LOAD)]
         self._list_lens = [len(_list) for _list in _lists]
         self._mins = [_list[0] for _list in _lists]
         self._fen_tree = []

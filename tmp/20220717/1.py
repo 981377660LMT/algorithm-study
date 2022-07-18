@@ -9,7 +9,5 @@ class Solution:
     def numberOfPairs(self, nums: List[int]) -> List[int]:
         counter = Counter(nums)
         n = len(nums)
-        res = 0
-        for k, v in counter.items():
-            res += v // 2
+        res = sum(v // 2 for v in counter.values())
         return [res, n - res * 2]

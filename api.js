@@ -1,17 +1,18 @@
 // const a = [1, 23]
 // a.splice(0)
+
 // console.log(a)
 console.log(-1 >> 1)
-
 // 这个是八进制的数字，用2的radix会NaN
 console.log(parseInt(0100, 2))
+
 // 二进制字符串转十进制数字 100
 console.log(parseInt('0100', 2))
 // 去除字符串前面的0
 console.log(parseInt('0100', 10).toString())
+
 // 十进制数字转二进制字符串 '010'
 console.log(Number(2).toString(2).padStart(3, 0))
-
 console.log(Array.from([1, 2, 3], (v, k) => [v, k]))
 
 // radix为0，则设置radix为默认值10

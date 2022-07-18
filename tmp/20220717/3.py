@@ -10,11 +10,9 @@ class Solution:
         res = []
         # 裁剪 到剩下 最右边 trimi 个数位
         for k, trim in queries:
-            copy = nums[:]
             sl = []
-            for i in range(len(copy)):
-                copy[i] = copy[i][-trim:]
-                sl.append((int(copy[i]), i))
+            for i, word in enumerate(nums):
+                sl.append((word[-trim:], i))
             sl.sort()
             res.append(sl[k - 1][1])
         return res
