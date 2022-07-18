@@ -1,272 +1,117 @@
-## 数据规模与时间复杂度
+<div align='center'>
+  <img src='./logo.svg' width='300' alt="Algorithm"/>
+  <p>
+  Algorithms Notes and Templates
+  </p>
+</div>
 
-| 数据规模 | 算法可接受时间复杂度 |
-| -------- | -------------------- |
-| <= 10    | O(n!)                |
-| <= 20    | O(2^n)               |
-| <= 100   | O(n^4)               |
-| <= 500   | O(n^3)               |
-| <= 2500  | O(n^2)               |
-| <= 10^6  | O(nlogn)             |
-| <= 10^7  | O(n)                 |
-| <= 10^14 | O(sqrt(n))           |
-| -        | O(logn)              |
+<div align='center'>
+  English | <a href='./README.zh-CN.md'>中文</a>
+</div>
 
-## 关键词
+---
 
-0. 字符串
+## 📖 Templates
 
-   - 大数运算
-   - 子序列匹配
-   - 字符串哈希(Rabin-Karp)
-   - 最小表示法
-   - 循环节
-   - 中心扩展
-   - k 在数字中出现的次数
-   - KMP
-   - z 算法(扩展 KMP)
-   - Manacher
-   - AC 自动机
-   - 后缀数组 SA
+0. **String**
 
-1. 数组
+   - [Subsequence Matching](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/isSubsequence.py)
+   - [Rabin-Karp Algorithm](18_%E5%93%88%E5%B8%8C/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%93%88%E5%B8%8C/StringHasher.py)
+   - [String Minimum Representation](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95.py)
+   - [KMP Algorithm](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/kmp/kmp.py)
+   - [Z-Algorithm](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/kmp/z%E5%87%BD%E6%95%B0-%E6%89%A9%E5%B1%95kmp.py)
+   - [Manacher Algorithm](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E9%A9%AC%E6%8B%89%E8%BD%A6%E6%8B%89%E9%A9%AC/Manacher.py)
+   - [Suffix Array](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E6%95%B0%E7%BB%84/SA.py)
 
-   - 摆动数组(Wiggle)
-   - 螺旋矩阵
-   - 山脉数组
-   - 旋转数组
-   - 延迟删除
+1. **Stack**
 
-2. 栈
+   - [MonoStack](1_stack/%E5%8D%95%E8%B0%83%E6%A0%88/%E6%AF%8F%E4%B8%AA%E5%85%83%E7%B4%A0%E4%BD%9C%E4%B8%BA%E6%9C%80%E5%80%BC%E7%9A%84%E5%BD%B1%E5%93%8D%E8%8C%83%E5%9B%B4.py)
 
-   - 单调栈
-   - 字典序最小的长为 k 的子序列
-   - 括号匹配问题
-   - 计算器
-   - 相邻字符删除问题
-   - 语法解析问题
-   - 前中后缀表达式
-   - 对顶栈(文本编辑器)
+2. **Queue**
 
-3. 队列
+   - [Queue](2_queue/Deque/Queue.ts)
+   - [PriorityQueue](2_queue/PriorityQueue.ts)
+   - Deque
+     - [ArrayDeque](2_queue/Deque/ArrayDeque.ts)
+     - [LinkedList](3_linkedList/LinkedList.ts)
+   - [MonoQueue](2_queue/%E5%8D%95%E8%B0%83%E9%98%9F%E5%88%97Monoqueue/MonoQueue.py)
 
-   - 优先队列(操作系统任务调度)
-   - 双端队列(ArrayDeque、LinkedList)
-   - 单调队列(可查询队列最值的双端队列)
+3. **LinkedList**
 
-4. 链表(直接用 Node 来表示链表)
+   - [LinkedListNode](3_linkedList/LinkedListNode.py)
+   - [LinkedList](3_linkedList/LinkedList.ts)
 
-   - 基本操作：遍历/插入/删除/翻转
-   - dummy 虚拟结点
-   - 快慢指针
-   - 双向链表
+4. **Tree**
 
-5. 集合
+   - [DFS Order](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/dfs%E5%BA%8F/DFSOrder.py)
+   - [Trie](6_tree/%E5%89%8D%E7%BC%80%E6%A0%91trie/Trie.py)
+   - [01 Trie](6_tree/%E5%89%8D%E7%BC%80%E6%A0%91trie/%E6%9C%80%E5%A4%A7%E5%BC%82%E6%88%96%E5%89%8D%E7%BC%80%E6%A0%91/XORTrie.py)
+   - [Fenwick Tree](6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py)
+   - [LCA](6_tree/LCA%E9%97%AE%E9%A2%98/TreeManager.py)
+   - [Segment Tree](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template)
+   - [Persistent Segment Tree](6_tree/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E7%BA%BF%E6%AE%B5%E6%A0%91/255.%20%E7%AC%ACK%E5%B0%8F%E6%95%B0-%E6%9F%A5%E8%AF%A2%E5%8C%BA%E9%97%B4%E7%AC%ACk%E5%B0%8F%E6%95%B0.ts)
+   - [Tree Chain Segmentation](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%A0%91%E9%93%BE%E5%89%96%E5%88%86/2568.%20%E6%A0%91%E9%93%BE%E5%89%96%E5%88%86.py)
+   - [Treap](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/Treap.ts)
+   - [TreeSet](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/TreeSet.ts)
+   - [SortedList (py)](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/ATC-SortedList.py)
+     [SortedList (ts)](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/Treap.ts)
 
-   - 滚动替换
-   - BitSet
-   - 邻接表
-   - 有序集合
+5. **Graph**
 
-6. 字典
+   - [TopoSort](7_graph/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F/toposort.py)
+   - [Dijkstra](7_graph/%E5%B8%A6%E6%9D%83%E5%9B%BE%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%92%8C%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/dijkstra%E5%8D%95%E6%BA%90/dijkstra%E6%A8%A1%E6%9D%BF.py)
+   - [BellmanFord](7_graph/%E5%B8%A6%E6%9D%83%E5%9B%BE%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%92%8C%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/Bellman_ford/bellmanford%E5%88%A4%E6%96%AD%E8%B4%9F%E7%8E%AF.py)
+   - [SPFA](7_graph/%E5%B8%A6%E6%9D%83%E5%9B%BE%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%92%8C%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/Bellman_ford/spfa/spfa%E6%B1%82%E6%9C%80%E7%9F%AD%E8%B7%AF.py)
+   - [Floyd](7_graph/%E5%B8%A6%E6%9D%83%E5%9B%BE%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%92%8C%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/floyd%E5%A4%9A%E6%BA%90/Floyd.py)
+   - [Bipartition Check](7_graph/%E4%BA%8C%E5%88%86%E5%9B%BE/%E4%BA%8C%E5%88%86%E5%9B%BE%E6%A3%80%E6%B5%8B.ts)
+   - [Hungarian Algorithm](7_graph/%E4%BA%8C%E5%88%86%E5%9B%BE/%E6%97%A0%E6%9D%83%E4%BA%8C%E9%83%A8%E5%9B%BE%E6%9C%80%E5%A4%A7%E5%8C%B9%E9%85%8D%E9%97%AE%E9%A2%98/%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95%E6%A8%A1%E6%9D%BF.ts)
+   - [Kuhn-Munkres Algorithm](7_graph/%E4%BA%8C%E5%88%86%E5%9B%BE/%E5%B8%A6%E6%9D%83%E4%BA%8C%E5%88%86%E5%9B%BE%E7%9A%84%E6%9C%80%E5%A4%A7%E6%9D%83%E5%8C%B9%E9%85%8D%E9%97%AE%E9%A2%98/KM%E7%AE%97%E6%B3%95%E6%A8%A1%E6%9D%BF.py)
+   - [EulerLoop](7_graph/%E6%AC%A7%E6%8B%89/getEulerLoop.py)
+   - [EulerPath](7_graph/%E6%AC%A7%E6%8B%89/getEulerPath.py)
+   - [MaxFlow (Dinic)](7_graph/acwing/%E7%BD%91%E7%BB%9C%E6%B5%81/0-%E6%9C%80%E5%A4%A7%E6%B5%81%E6%A8%A1%E6%9D%BF/Dinic%E6%B1%82%E6%9C%80%E5%A4%A7%E6%B5%81.py)
+   - [MinCostMaxFlow](7_graph/acwing/%E7%BD%91%E7%BB%9C%E6%B5%81/4-%E8%B4%B9%E7%94%A8%E6%B5%81/MinCostMaxFlow.py)
+   - [Tarjan](7_graph/acwing/%E6%97%A0%E5%90%91%E5%9B%BE%E7%9A%84%E5%8F%8C%E8%BF%9E%E9%80%9A%E5%88%86%E9%87%8F/Tarjan.py)
 
-   - Counter
-   - 哈希表与双向链表
-   - 邻接表
-   - GeoHash
+6. **Disjoint Set**
 
-7. 树(分层数据抽象模型)
+   - [Disjoint Set](14_%E5%B9%B6%E6%9F%A5%E9%9B%86/UnionFind.py)
+   - [Disjoint Set with Dist to Root](14_%E5%B9%B6%E6%9F%A5%E9%9B%86/%E7%BB%8F%E5%85%B8%E9%A2%98/%E7%BB%B4%E6%8A%A4%E5%88%B0%E6%A0%B9%E8%8A%82%E7%82%B9%E8%B7%9D%E7%A6%BB/UnionFindMapWithDist.py)
 
-   - dfs 序
-   - 前序/后序 dfs
-   - 树上 dp
-   - 序列化与反序列化
-   - Trie
-   - 异或 Trie
-   - 树状数组(离散化、差分数组实现区间更新)
-   - 倍增求 LCA
-   - 树的直径与重心
-   - 树的中心(最小高度树)
-   - 线段树：持久化线段树(主席树)、动态开点线段树
-   - 可持久化线段树：复用结点，immutable
-   - 完全二叉树/满二叉树
-   - 二叉搜索树(BST)
-   - 平衡二叉树(AVL)
-   - kd 树上的 KNN
-   - 树链剖分(把树转化成一个序列，这样树中任意一条路径就可以对应到 `O(logn)` 段的连续区间)
-   - 树套树
-   - Splay(中序遍历保持有序)
+7. **Bit Manipulation**
 
-8. 图
+   - [Bloom Filter](18_%E5%93%88%E5%B8%8C/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8.ts)
+   - [BitSet](18_%E5%93%88%E5%B8%8C/BitSet/BitSet.py)
+   - [Powerset](21_%E4%BD%8D%E8%BF%90%E7%AE%97/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE%E4%B8%8E%E4%B8%89%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%AD%90%E9%9B%86/powerset.py)
 
-   - 邻接表、邻接矩阵
-   - 出度入度
-   - 拓扑排序、拓扑排序最大深度、拓扑排序最短路径
-   - dfs 寻找拓扑排序方案
-   - 带权图最短路问题
-   - 带限制的最短路问题
-   - 第 K 短路问题
-   - 最小生成树
-   - 二分图：最大匹配、最小点覆盖、最大独立集、最大团
-   - 匈牙利算法
-   - 哈密尔顿路径
-   - 无向图/有向图的欧拉回路与欧拉路径
-   - 环检测(有向、无向图)
-   - bfs/dfs 的 floodfill
-   - A 星搜索
-   - EK/Dinic 最大流/最小割算法(燃やす埋める問題)
-   - 最小费用最大流
-   - 01 bfs (deque)
-   - 双向 bfs
-   - bfs 求最大深度，dfs 求最小深度
-   - 记忆化 dfs
-   - KM 二分图最大权匹配算法 (linear_sum_assignment)
-   - 差分约束
-   - spfa 算法的栈优化、堆优化、酸辣粉优化
-   - spfa 检测负环
-   - 最近公共祖先：上升法、倍增法、tarjan
-   - 有向图强连通分量、tarjan 缩点成 DAG (有向图中能互相到达的节点对数)
-   - 无向图的桥和割点、点双和边双、缩点成树
-   - 基环树 dp
-   - 最短路径树 SPT
+8. **Math**
 
-9. 堆(优先队列)
+   - [Convex Hull](19_%E6%95%B0%E5%AD%A6/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95/%E5%87%B8%E5%8C%85/587.%20%E5%AE%89%E8%A3%85%E6%A0%85%E6%A0%8F.py)
+   - [Polygon Area](19_%E6%95%B0%E5%AD%A6/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95/%E5%87%B8%E5%8C%85/%E5%A4%9A%E8%BE%B9%E5%BD%A2%E9%9D%A2%E7%A7%AF%E5%85%AC%E5%BC%8F.py)
+   - [Straight Line Equation](19_%E6%95%B0%E5%AD%A6/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95/%E5%A4%9A%E7%82%B9%E5%85%B1%E7%BA%BF%E9%97%AE%E9%A2%98/%E4%B8%A4%E7%82%B9%E6%B1%82%E7%9B%B4%E7%BA%BF%E6%96%B9%E7%A8%8B.py)
+   - [Stirling Number](19_%E6%95%B0%E5%AD%A6/%E7%BB%84%E5%90%88/%E6%96%AF%E7%89%B9%E6%9E%97%E6%95%B0)
+   - [Cantor Expansion](19_%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80.ts)
+   - [Primes](19_%E6%95%B0%E5%AD%A6/%E5%9B%A0%E6%95%B0%E7%AD%9B/prime.py)
+   - [Combs](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E7%BB%84%E5%90%88%E8%AE%A1%E6%95%B0/%E6%B1%82%E7%BB%84%E5%90%88%E6%8E%92%E5%88%97%E9%98%B6%E4%B9%98)
+   - [Linear basis](21_%E4%BD%8D%E8%BF%90%E7%AE%97/%E6%8C%89%E4%BD%8D%E5%BC%82%E6%88%96/%E7%BA%BF%E6%80%A7%E5%9F%BA/%E7%BA%BF%E6%80%A7%E5%9F%BA.py)
+   - [Convolution](19_%E6%95%B0%E5%AD%A6/%E5%8D%B7%E7%A7%AF/Convolution.py)
+   - [Quick Pow](19_%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/%E5%BF%AB%E9%80%9F%E5%B9%82/qpow.ts)
+   - [Matrix Quick Pow](19_%E6%95%B0%E5%AD%A6/%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/matqpow.py)
 
-   - topK
-   - CPU 调度
-   - 多路归并
+9. **Miscellaneous**
 
-10. 排序
+   - [2D PreSum Matrix](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
+   - [2D Diff Matrix](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
+   - [Sparse Table](22_%E4%B8%93%E9%A2%98/RMQ%E9%97%AE%E9%A2%98/SparseTable.py)
+   - Itertools
 
-    - 比较排序
+     - [product](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/product.ts)
+     - [permutations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/permutations.ts)
+     - [combinations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/combinations.ts)
+     - [combinations_with_replacement](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/combinationsWithReplacement.ts)
 
-      - O(n^2):冒泡/选择/插入/希尔
-      - O(nlogn):归并/堆/快排
+   - [Bisect](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/%E4%BA%8C%E5%88%86/bisect.ts)
+   - [Palindrome Generator](22_%E4%B8%93%E9%A2%98/%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%9B%9E%E6%96%87/%E6%9E%9A%E4%B8%BE%E5%9B%9E%E6%96%87.py)
 
-    - 非比较排序
+## ❤️ Credits
 
-      - 桶排序/基数排序
-
-    - bisectLeft/bisectRight
-    - 排序+双指针
-    - 二分答案
-
-    > 在 V8 引擎中， 7.0 版本之前，数组长度小于 10 时， Array.prototype.sort() 使用的是插入排序，否则用快速排序。
-    > 在 V8 引擎 7.0 版本之后就舍弃了快速排序，因为它不是稳定的排序算法，在最坏情况下，时间复杂度会降级到 O(n2)
-    > 而是采用了一种混合排序的算法：TimSort 。
-    > 这种功能算法最初用于 Python 语言中，严格地说它不属于以上 10 种排序算法中的任何一种，属于一种混合排序算法：
-    > 在数据量小的子数组中使用插入排序，然后再将有序的子数组进行归并排序，时间复杂度为 O(nlogn) 。
-
-11. 动态规划
-
-    - dp 的维度等于 dfs 的状态数
-    - 背包问题：01 背包、有序/无序的完全背包、多维费用背包、多重背包二进制优化、分组背包(从 n 个栈取 k 个硬币的最大价值)、带依赖条件的背包(二叉苹果树)、混合背包
-    - LCS
-    - LIS
-    - 交叉 dp
-    - 路径 dp
-    - 区间 dp
-    - 线性 dp
-    - 状压 dp `dp(index,visited)/枚举子集的子集`
-    - 数位 dfs 两个固定参数+可选参数
-    - 树上 dp
-    - 轮廓线 dp
-    - 子数组与子序列
-    - 前缀和优化 dp (dp 与 dpSum 数组)
-    - 单调队列优化 dp
-    - 斜率优化 dp
-
-12. 贪心算法
-
-    - 排序
-    - 取最值
-    - 分类讨论
-    - 推公式
-
-13. 回溯算法
-
-    - 剪枝(优化搜索顺序、最优性剪枝、可行性剪枝、排除等效冗余、记忆化)
-      - 优化搜索顺序：大的先排前面
-      - 最优性剪枝：超过 res 立即 return
-      - 可行性剪枝：排除不可能的情况
-      - 排除等效冗余：相同分配方式每次只看第一个
-      - 记忆化：memo
-    - product、permutations、combinations
-    - 后序 dfs
-    - 枚举子集
-    - langford 数列
-
-14. 并查集
-
-    - 按秩合并与路径压缩
-    - 反向并查集
-    - 并查集的权重(rank)应用
-    - 公因数并查集
-    - 可持久化并查集：union 过程不能进行路径压缩，且有 limit 限制
-    - 区间并查集
-    - 扩展域并查集
-    - 维护到根节点距离的并查集
-
-15. 双指针
-
-    - 定一移二
-    - 排序+头尾指针
-    - 读写指针
-
-16. 滑动窗口
-
-    - k 重复字符问题
-    - 前缀和与子数组
-    - 变长滑窗
-    - 定长滑窗
-
-17. 位运算
-
-    - 布隆过滤器
-    - BitSet
-    - lowbit
-    - 快速幂
-    - 汉明重量
-    - 格雷码
-    - 枚举子集
-    - SOS 子集 dp
-    - 按位讨论/按位计算贡献
-
-18. 数学
-
-    - 蓄水池抽样
-    - 凸包
-    - 叉乘：三点共线
-    - 卡特兰数
-    - 曼哈顿距离
-    - 逆元
-    - 埃氏筛
-    - 中位数
-    - gcd
-    - divmod
-    - 斯特林数
-    - 约瑟夫环
-    - 康托展开
-    - 约数个数(近似立方根)
-    - 线性基(eg:n 个数异或和最大)
-    - 曼哈顿距离与切比雪夫距离的转换
-    - grundy 数 (下一步各个状态的 mex)
-    - atan2 计算方位角
-    - fft 求卷积
-    - 鸽巢原理(搜索)
-
-19. 杂项
-    - 摩尔投票
-    - 枚举
-    - 折半枚举(最接近目标值的子序列和 值很大/值很小两种类型)
-    - 前缀和
-    - 差分数组
-    - 离线查询(逐步更新/命中缓存)
-    - 区间操作
-    - RMQ
-    - 前后缀分解
-    - 分块 (小范围暴力查询更新，大范围预处理)
-    - 三分法求凸函数最值
-    - 启发式合并（小的数据结构合并到大的上去）
-    - 莫队算法
-    - 扫描线
+[contest.js](https://github.com/harttle/contest.js)

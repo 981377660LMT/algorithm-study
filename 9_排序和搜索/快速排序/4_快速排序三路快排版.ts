@@ -66,9 +66,10 @@ const randint = (start: number, end: number) => {
 
 const swap = (arr: number[], i: number, j: number) => ([[arr[i], arr[j]]] = [[arr[j], arr[i]]])
 
-const arr = [4, 3, 2, 5, 6, 7, 8, 3, 2, 4, 1]
-partition(arr, 0, arr.length - 1)
-console.log(arr)
+if (require.main === module) {
+  const arr = [4, 3, 2, 5, 6, 7, 8, 3, 2, 4, 1]
+  partition(arr, 0, arr.length - 1)
+  console.log(arr)
+}
 
-// console.log(qs([4, 3, 2, 5, 6, 7, 8, 3, 2, 4, 1]))
 export {}

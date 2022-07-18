@@ -1,5 +1,4 @@
 /**
- *
  * @param arr
  * @returns
  * @description
@@ -15,8 +14,9 @@ const qucikSort = (arr: number[], l: number, r: number): void => {
    * @param arr
    * @param l
    * @param r
-   * @description arr[l]是pivot
-   * @description 要分为小于pivot 等于pivot 大于pivot三个部分
+   * @description
+   * arr[l]是pivot
+   * 要分为小于pivot 等于pivot 大于pivot三个部分
    */
   const partition = (arr: number[], l: number, r: number) => {
     let pivotIndex = l

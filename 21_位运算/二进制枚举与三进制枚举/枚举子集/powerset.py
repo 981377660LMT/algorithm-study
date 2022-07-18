@@ -1,10 +1,8 @@
 from itertools import chain, combinations
-from typing import Collection, TypeVar
-
-T = TypeVar("T")
+from typing import Any, Collection
 
 
-def powerset(collection: Collection[T], isAll=True):
+def powerset(collection: Collection[Any], isAll=True):
     """求(真)子集,时间复杂度O(n*2^n)
 
     默认求所有子集

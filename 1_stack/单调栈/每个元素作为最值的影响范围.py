@@ -1,9 +1,17 @@
-# 计算每个元素作为最值的影响范围
+"""
+计算每个元素作为最值的影响范围
+calculate the range of influence for each element as the maximum/minimum value
+"""
+
 from typing import List, Tuple
 
 
 def getRange(
-    nums: List[int], *, isMax=False, isLeftStrict=True, isRightStrict=False,
+    nums: List[int],
+    *,
+    isMax=False,
+    isLeftStrict=True,
+    isRightStrict=False,
 ) -> List[Tuple[int, int]]:
     """
     求每个元素作为最值的影响范围(区间)
@@ -52,6 +60,5 @@ def getRange(
     return list(zip(leftMost, rightMost))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(getRange([0, 10, 20, 20, 50, 10]))
-

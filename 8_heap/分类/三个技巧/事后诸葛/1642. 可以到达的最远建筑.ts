@@ -1,4 +1,4 @@
-import { PriorityQueue } from '../../../../2_queue/优先级队列'
+import { PriorityQueue } from '../../../../2_queue/PriorityQueue'
 
 /**
  * @param {number[]} heights

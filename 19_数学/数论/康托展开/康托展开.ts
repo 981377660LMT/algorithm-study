@@ -1,5 +1,5 @@
-// 可以记忆化dfs处理
-const factorial = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880]
+// 预处理
+const FAC = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880]
 
 // 康托展开
 function calRankByPerm(perm: number | string, n: number): number {
@@ -19,15 +19,12 @@ function calRankByPerm(perm: number | string, n: number): number {
       smaller += counter.get(key) ?? 0
     }
 
-    res += factorial[n - 1 - i] * smaller
+    res += FAC[n - 1 - i] * smaller
     counter.set(str[i], counter.get(str[i])! - 1)
   }
 
   return res
 }
-
-console.log(calRankByPerm(34152, 5))
-console.log(calRankByPerm(1342, 4))
 
 // 逆康托展开
 // 第rank大排列，rank从1开始
@@ -38,7 +35,7 @@ function calPermByRank(rank: number, n: number): string {
   const sb: number[] = []
 
   for (let i = n; i >= 1; i--) {
-    const [div, mod] = [~~(rank / factorial[i - 1]), rank % factorial[i - 1]]
+    const [div, mod] = [~~(rank / FAC[i - 1]), rank % FAC[i - 1]]
     rank = mod
     sb.push(available[div])
     available.splice(div, 1)
@@ -47,5 +44,9 @@ function calPermByRank(rank: number, n: number): string {
   return sb.join('')
 }
 
-console.log(calPermByRank(62, 5))
-console.log(calPermByRank(1, 5))
+if (require.main === module) {
+  console.log(calRankByPerm(34152, 5))
+  console.log(calRankByPerm(1342, 4))
+  console.log(calPermByRank(62, 5))
+  console.log(calPermByRank(1, 5))
+}

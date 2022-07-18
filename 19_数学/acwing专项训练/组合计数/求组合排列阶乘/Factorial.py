@@ -94,20 +94,6 @@ class Factorial:
 
 
 if __name__ == "__main__":
-    # MOD = int(1e9 + 7)
-    # f = Factorial(MOD)
-    # n = int(input())
-    # for k in range(1, n + 1):
-    #     res = 0
-    #     select = 1
-    #     while True:
-    #         remain = n - (select - 1) * (k - 1)
-    #         if remain < select:
-    #             break
-    #         res += f.C(remain, select)
-    #         res %= MOD
-    #         select += 1
-    #     print(res)
     f = Factorial(int(1e9 + 7))
     print(f.CWithReplacement(5, 2))
     print(f.CWithReplacement(4, 2))

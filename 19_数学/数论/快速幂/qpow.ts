@@ -1,10 +1,5 @@
-const MOD = 1e9 + 7
 /**
- *
- * @param a
- * @param n
- * @param mod
- * @returns a^n
+ * @returns a^n % mod
  */
 function qpow(a: number, n: number, mod: number): number {
   if (n === 0) return 1 % mod

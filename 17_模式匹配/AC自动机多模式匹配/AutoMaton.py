@@ -29,7 +29,7 @@ def useAutoMaton(charset: Iterable[str], maxLen: int):
 
     def build() -> None:
         """bfs,字典树的每个结点添加失配指针,结点要跳转到哪里
-        
+
         AC自动机的失配指针指向的节点代表的字符串是当前节点代表的字符串的最长后缀。
         不空,失配指针指；空,自己去指
         """
@@ -58,21 +58,21 @@ def useAutoMaton(charset: Iterable[str], maxLen: int):
                 cur = nexts[cur]
         return res
 
-    return namedtuple('AutoMaton', ['insert', 'build', 'search'])(insert, build, search)
+    return namedtuple("AutoMaton", ["insert", "build", "search"])(insert, build, search)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     autoMaton = useAutoMaton(string.ascii_lowercase, 10000)
-    autoMaton.insert('he')
-    autoMaton.insert('she')
-    autoMaton.insert('his')
-    autoMaton.insert('hers')
+    autoMaton.insert("he")
+    autoMaton.insert("she")
+    autoMaton.insert("his")
+    autoMaton.insert("hers")
     autoMaton.build()
-    assert autoMaton.search('ahishershe') == [
-        (1, 'his'),
-        (3, 'she'),
-        (4, 'he'),
-        (4, 'hers'),
-        (7, 'she'),
-        (8, 'he'),
+    assert autoMaton.search("ahishershe") == [
+        (1, "his"),
+        (3, "she"),
+        (4, "he"),
+        (4, "hers"),
+        (7, "she"),
+        (8, "he"),
     ]

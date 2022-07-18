@@ -3,7 +3,7 @@ from typing import Sequence
 
 class StringHasher:
     _BASE = 131
-    _MOD = 2 ** 64
+    _MOD = 2**64
     _OFFSET = 96
 
     @staticmethod
@@ -48,9 +48,8 @@ def genHash(s: str, base=131, mod=1 << 64, offset=96) -> int:
     return res
 
 
-if __name__ == '__main__':
-    stringHasher = StringHasher(sequence='abcdefg')
+if __name__ == "__main__":
+    stringHasher = StringHasher(sequence="abcdefg")
     print(stringHasher.getHashOfSlice(0, 1))
     print(stringHasher.getHashOfSlice(1, 2))
     print(stringHasher.getHashOfSlice(2, 3))
-

@@ -5,7 +5,7 @@ Point = List[int]
 
 
 def calCross(A: Point, B: Point, C: Point) -> int:
-    """"计算AB与AC的叉乘"""
+    """计算AB与AC的叉乘"""
 
     AB = [B[0] - A[0], B[1] - A[1]]
     AC = [C[0] - A[0], C[1] - A[1]]
@@ -34,6 +34,6 @@ def calConvexHull(points: List[Point]) -> List[Point]:
     return list(set(stack))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     expected = [(2, 4), (1, 1), (2, 0), (4, 2), (3, 3)]
     assert calConvexHull([[1, 1], [2, 2], [2, 0], [2, 4], [3, 3], [4, 2]]) == expected

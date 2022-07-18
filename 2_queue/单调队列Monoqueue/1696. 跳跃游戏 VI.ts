@@ -1,4 +1,5 @@
 import { ArrayDeque } from '../Deque/ArrayDeque'
+import { PriorityQueue } from '../PriorityQueue'
 
 /**
  *

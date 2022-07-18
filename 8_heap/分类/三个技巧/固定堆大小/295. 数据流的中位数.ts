@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { PriorityQueue } from '../../../../2_queue/优先级队列'
+import { PriorityQueue } from '../../../../2_queue/PriorityQueue'
 
 // 我们的可以维护两个固定堆
 // 大顶堆放最小的~~(n+1)/2个数 小顶堆放最大的n-~~(n+1)/2个数

@@ -41,7 +41,9 @@ const mergeSort = (arr: readonly number[]): readonly number[] => {
   return mergeTwo(mergeSort(left), mergeSort(right))
 }
 
-const arr = [4, 2, 100, 99, 10000, -1, 99, 2]
+if (require.main === module) {
+  const arr = [4, 2, 100, 99, 10000, -1, 99, 2]
+  console.log(mergeSort(arr))
+}
 
-console.log(mergeSort(arr))
 export {}

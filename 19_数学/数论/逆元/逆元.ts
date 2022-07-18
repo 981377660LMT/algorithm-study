@@ -1,4 +1,4 @@
-import { qpow } from '../../数字/快速幂/qpow'
+import { qpow } from '../快速幂/qpow'
 import { exgcd } from '../扩展欧几里得/扩展欧几里得'
 
 /**
@@ -16,14 +16,14 @@ function calInv1(num: number, p: number): number {
   else return -1
 }
 
-function calInv2(num: bigint, p: bigint): bigint {
+function calInv2(num: bigint, p: bigint): number {
   // if (GCD(num, p) !== 1 || !isPrime(p)) throw new Error('无法用费马小定理求逆元')
   return qpow(Number(num), Number(p - 2n), 1e9 + 7)
 }
 
 if (require.main === module) {
   console.log((2 * calInv1(2, 1e9 + 7)) % (1e9 + 7))
-  console.log((2n * calInv2(2n, BigInt(1e9 + 7))) % BigInt(1e9 + 7))
+  console.log((2n * BigInt(calInv2(2n, BigInt(1e9 + 7)))) % BigInt(1e9 + 7))
 }
 
 export { calInv1, calInv2 }

@@ -78,19 +78,10 @@ def queryRoot(root: int) -> int:
 
 
 class BIT:
-    """范围修改
-    
-    https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py
-    """
-
     def __init__(self, n: int):
         self.size = n
         self._tree1 = defaultdict(int)
         self._tree2 = defaultdict(int)
-
-    @staticmethod
-    def _lowbit(index: int) -> int:
-        return index & -index
 
     def add(self, left: int, right: int, delta: int) -> None:
         """闭区间[left, right]加delta"""
@@ -103,13 +94,13 @@ class BIT:
 
     def _add(self, index: int, delta: int) -> None:
         if index <= 0:
-            raise ValueError('index 必须是正整数')
+            raise ValueError("index 必须是正整数")
 
         rawIndex = index
         while index <= self.size:
             self._tree1[index] += delta
             self._tree2[index] += (rawIndex - 1) * delta
-            index += self._lowbit(index)
+            index += index & -index
 
     def _query(self, index: int) -> int:
         if index > self.size:
@@ -119,7 +110,7 @@ class BIT:
         res = 0
         while index > 0:
             res += rawIndex * self._tree1[index] - self._tree2[index]
-            index -= self._lowbit(index)
+            index -= index & -index
         return res
 
 
