@@ -102,15 +102,14 @@
    - [二维前缀和](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
    - [二维差分](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
    - [ST 表](22_%E4%B8%93%E9%A2%98/RMQ%E9%97%AE%E9%A2%98/SparseTable.py)
+   - [Bisect](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/%E4%BA%8C%E5%88%86/bisect.ts)
+   - [回文生成器](22_%E4%B8%93%E9%A2%98/%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%9B%9E%E6%96%87/%E6%9E%9A%E4%B8%BE%E5%9B%9E%E6%96%87.py)
+   - [NextPermutation](12_%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95/%E7%BB%8F%E5%85%B8%E9%A2%98/%E6%8E%92%E5%88%97/api/nextPermutation.py)
    - Itertools
-
      - [product](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/product.ts)
      - [permutations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/permutations.ts)
      - [combinations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/combinations.ts)
      - [combinations_with_replacement](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/combinationsWithReplacement.ts)
-
-   - [Bisect](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/%E4%BA%8C%E5%88%86/bisect.ts)
-   - [回文生成器](22_%E4%B8%93%E9%A2%98/%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%9B%9E%E6%96%87/%E6%9E%9A%E4%B8%BE%E5%9B%9E%E6%96%87.py)
 
 ## ❤️ 感谢
 
