@@ -15,9 +15,14 @@ from typing import Generator, List, Tuple
 
 class Solution:
     def containVirus(self, isInfected: List[List[int]]) -> int:
+        """
+        你需要努力使得最后有部分区域不被病毒感染，如果可以成功，那么返回需要使用的防火墙个数;
+        如果无法实现，则返回在世界被病毒全部感染时已安装的防火墙个数。
+        """
+
         def genNexts(r: int, c: int) -> Generator[Tuple[int, int], None, None]:
             for nr, nc in [(r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)]:
-                if 0 <= nr < row and 0 <= nc < col:
+                if 0 <= nr < ROW and 0 <= nc < COL:
                     yield nr, nc
 
         def dfs(sr: int, sc: int) -> None:
@@ -33,7 +38,7 @@ class Solution:
                     border[dfsId].add((nr, nc))
                     premiter[dfsId] += 1
 
-        row, col = len(isInfected), len(isInfected[0])
+        ROW, COL = len(isInfected), len(isInfected[0])
         res = 0
         dfsId = 0
         while True:
@@ -43,8 +48,8 @@ class Solution:
             premiter = defaultdict(int)  # 区域的周长
 
             # 1. 处理各个区域
-            for r in range(row):
-                for c in range(col):
+            for r in range(ROW):
+                for c in range(COL):
                     if isInfected[r][c] == 1 and (r, c) not in visited:
                         dfs(r, c)
                         dfsId += 1
@@ -92,4 +97,3 @@ print(
         ]
     )
 )
-

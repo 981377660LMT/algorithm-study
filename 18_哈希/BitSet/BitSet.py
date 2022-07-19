@@ -13,6 +13,17 @@ class BitSet:
 
     __slots__ = "_bin", "_buckets", "_len"
 
+    @staticmethod
+    def _longlong_bit_count(n: int) -> int:
+        """`O(1)` counts bit of int smaller than `(1 << 63) - 1`"""
+        c = (n & 0x5555555555555555) + ((n >> 1) & 0x5555555555555555)
+        c = (c & 0x3333333333333333) + ((c >> 2) & 0x3333333333333333)
+        c = (c & 0x0F0F0F0F0F0F0F0F) + ((c >> 4) & 0x0F0F0F0F0F0F0F0F)
+        c = (c & 0x00FF00FF00FF00FF) + ((c >> 8) & 0x00FF00FF00FF00FF)
+        c = (c & 0x0000FFFF0000FFFF) + ((c >> 16) & 0x0000FFFF0000FFFF)
+        c = (c & 0x00000000FFFFFFFF) + ((c >> 32) & 0x00000000FFFFFFFF)
+        return c
+
     def __init__(self, str_or_int: Union[str, int] = "") -> None:
         """
         `63` bit per bucket;
@@ -25,17 +36,6 @@ class BitSet:
             group = int(self._bin[i : i + 63], 2)
             self._buckets.append(group)
             self._len += self._longlong_bit_count(group)
-
-    @staticmethod
-    def _longlong_bit_count(n: int) -> int:
-        """`O(1)` counts bit of int smaller than `(1 << 63) - 1`"""
-        c = (n & 0x5555555555555555) + ((n >> 1) & 0x5555555555555555)
-        c = (c & 0x3333333333333333) + ((c >> 2) & 0x3333333333333333)
-        c = (c & 0x0F0F0F0F0F0F0F0F) + ((c >> 4) & 0x0F0F0F0F0F0F0F0F)
-        c = (c & 0x00FF00FF00FF00FF) + ((c >> 8) & 0x00FF00FF00FF00FF)
-        c = (c & 0x0000FFFF0000FFFF) + ((c >> 16) & 0x0000FFFF0000FFFF)
-        c = (c & 0x00000000FFFFFFFF) + ((c >> 32) & 0x00000000FFFFFFFF)
-        return c
 
     def add(self, n: int) -> bool:
         if n in self:
