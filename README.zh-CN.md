@@ -9,6 +9,8 @@
   <a href='./README.md'>English</a> | 中文
 </div>
 
+[![Build Status](https://app.travis-ci.com/981377660LMT/algorithm-study.svg?branch=master)](https://app.travis-ci.com/981377660LMT/algorithm-study)
+
 ---
 
 ## 📖 模板
