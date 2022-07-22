@@ -1,16 +1,16 @@
 // 给你一个 严格升序排列 的正整数数组 arr 和一个整数 k 。
 // 请你找到这个数组里第 k 个缺失的正整数。
-function findKthMex(arr: number[], k: number): number {
-  let l = 0
-  let r = arr.length - 1
-  while (l <= r) {
-    const mid = (l + r) >> 1
-    const missing = arr[mid] - (mid + 1)
-    if (missing >= k) r = mid - 1
-    else l = mid + 1
+function findKthMex(nums: number[], k: number): number {
+  let left = 0
+  let right = nums.length - 1
+  while (left <= right) {
+    const mid = (left + right) >> 1
+    const missing = nums[mid] - (mid + 1)
+    if (missing >= k) right = mid - 1
+    else left = mid + 1
   }
 
-  return k + l
+  return k + left
 }
 
 if (require.main === module) {

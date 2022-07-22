@@ -4,11 +4,12 @@
 // 2.二进制枚举所有状态（子集）
 function countSubgraphsForEachDiameter(n: number, edges: number[][]): number[] {
   // 构建dist矩阵
-  const dist = Array.from<number, number[]>({ length: n }, () => Array(n).fill(Infinity))
+  const dist: Uint32Array[] = Array.from({ length: n }, () => new Uint32Array(n).fill(-1))
+  for (let i = 0; i < n; i++) dist[i][i] = 0 // 注意初始化
 
   for (const [u, v] of edges) {
     dist[u - 1][v - 1] = 1 // 相邻的边权重为1
-    dist[v - 1][u - 1] = 1 // 相邻的边权重为1
+    dist[v - 1][u - 1] = 1
   }
 
   for (let k = 0; k < n; k++) {

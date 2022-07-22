@@ -1,1 +1,35 @@
-# https://blog.csdn.net/qq_62213124/article/details/123767832?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522165754233816780366540675%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fall.%2522%257D&request_id=165754233816780366540675&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_ecpm_v1~pc_rank_34-15-123767832-null-null.142^v32^pc_rank_34,185^v2^control&utm_term=AtCoder%20Beginner%20Contest%20247&spm=1018.2226.3001.4187
+# 两个序列 问能否构造出一个新序列使得 nums[i] 来自 A 或 B
+# 且 abs(nums[i]-nums[i+1])<=k
+
+
+# 滚动数组优化
+
+import sys
+import os
+
+sys.setrecursionlimit(int(1e9))
+input = lambda: sys.stdin.readline().rstrip("\r\n")
+MOD = int(1e9 + 7)
+
+
+def main() -> None:
+    n, k = map(int, input().split())
+    A = list(map(int, input().split()))
+    B = list(map(int, input().split()))
+
+    ok1, ok2 = True, True
+    for i in range(1, n):
+        ok1, ok2 = (
+            (ok1 and abs(A[i] - A[i - 1]) <= k) or (ok2 and abs(A[i] - B[i - 1]) <= k),
+            (ok1 and abs(B[i] - A[i - 1]) <= k) or (ok2 and abs(B[i] - B[i - 1]) <= k),
+        )
+
+    print(("No", "Yes")[ok1 or ok2])
+
+
+if __name__ == "__main__":
+    if os.environ.get("USERNAME", " ") == "caomeinaixi":
+        while True:
+            main()
+    else:
+        main()

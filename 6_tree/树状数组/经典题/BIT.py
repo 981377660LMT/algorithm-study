@@ -85,10 +85,6 @@ class BIT3:
         self.size = n
         self.tree = defaultdict(int)
 
-    @staticmethod
-    def _lowbit(index: int) -> int:
-        return index & -index
-
     # def update(self, left: int, right: int, target: int) -> None:
     #     """更新[left,right]区间的最大值为target"""
     #     ...
@@ -103,7 +99,7 @@ class BIT3:
             raise ValueError("index 必须是正整数")
         while index <= self.size:
             self.tree[index] = max(self.tree[index], target)
-            index += self._lowbit(index)
+            index += index & -index
 
     def query(self, index: int) -> int:
         """查询前缀区间`[1,index]`的最大值"""
@@ -112,7 +108,7 @@ class BIT3:
         res = 0
         while index > 0:
             res = max(res, self.tree[index])
-            index -= self._lowbit(index)
+            index -= index & -index
         return res
 
 
@@ -124,10 +120,6 @@ class BIT4:
         self.col = col
         self.tree = defaultdict(lambda: defaultdict(int))
 
-    @staticmethod
-    def _lowbit(index: int) -> int:
-        return index & -index
-
     def update(self, row: int, col: int, delta: int) -> None:
         """矩阵中的点 (row,col) 的值加上delta"""
         row, col = row + 1, col + 1
@@ -136,8 +128,8 @@ class BIT4:
             curCol = col
             while curCol <= self.col:
                 self.tree[curRow][curCol] += delta
-                curCol += self._lowbit(curCol)
-            curRow += self._lowbit(curRow)
+                curCol += curCol & -curCol
+            curRow += curRow & -curRow
 
     def query(self, row: int, col: int) -> int:
         """左上角 (0,0) 到 右下角(row,col) 的矩形里所有数的和"""
@@ -152,8 +144,8 @@ class BIT4:
             curCol = col
             while curCol > 0:
                 res += self.tree[curRow][curCol]
-                curCol -= self._lowbit(curCol)
-            curRow -= self._lowbit(curRow)
+                curCol -= curCol & -curCol
+            curRow -= curRow & -curRow
         return res
 
     def queryRange(self, row1: int, col1: int, row2: int, col2: int) -> int:
@@ -178,13 +170,7 @@ class BIT5:
         self.tree3 = defaultdict(lambda: defaultdict(int))
         self.tree4 = defaultdict(lambda: defaultdict(int))
 
-    @staticmethod
-    def _lowbit(index: int) -> int:
-        return index & -index
-
-    def updateRange(
-        self, row1: int, col1: int, row2: int, col2: int, delta: int
-    ) -> None:
+    def updateRange(self, row1: int, col1: int, row2: int, col2: int, delta: int) -> None:
         """左上角 (row1,col1) 到右下角 (row2,col2) 的所有数加上delta"""
         self._update(row1, col1, delta)
         self._update(row2 + 1, col1, -delta)
@@ -213,8 +199,8 @@ class BIT5:
                 self.tree2[curRow][curCol] += (preRow - 1) * delta
                 self.tree3[curRow][curCol] += (preCol - 1) * delta
                 self.tree4[curRow][curCol] += (preRow - 1) * (preCol - 1) * delta
-                curCol += self._lowbit(curCol)
-            curRow += self._lowbit(curRow)
+                curCol += curCol & -curCol
+            curRow += curRow & -curRow
 
     def _query(self, row: int, col: int) -> int:
         row, col = row + 1, col + 1
@@ -235,8 +221,8 @@ class BIT5:
                     - preRow * self.tree3[curRow][curCol]
                     + self.tree4[curRow][curCol]
                 )
-                curCol -= self._lowbit(curCol)
-            curRow -= self._lowbit(curRow)
+                curCol -= curCol & -curCol
+            curRow -= curRow & -curRow
         return res
 
 

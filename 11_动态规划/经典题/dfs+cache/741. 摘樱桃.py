@@ -11,35 +11,37 @@ from functools import lru_cache
 # 1 <= N <= 50。
 
 # 等效为两个人一起摘草莓，他们都要到终点；并且都只能向右或向下
+
+DIR2 = [[0, 1], [1, 0]]
+
+
 class Solution:
     def cherryPickup(self, grid: List[List[int]]) -> int:
-        '''
-        Convert problem to two workers picking cherries from (0, 0) to (m-1, n-1)
-        '''
-        m, n = len(grid), len(grid[0])
-        direction = [(0, 1), (1, 0)]
-
         @lru_cache(None)
-        def dfs(x1, y1, x2, y2) -> int:
-            if (x1, y1, x2, y2) == (m - 1, n - 1, m - 1, n - 1):
-                return grid[x1][y1]
+        def dfs(r1: int, c1: int, r2: int, c2: int) -> int:
+            if (r1, c1, r2, c2) == (ROW - 1, COL - 1, ROW - 1, COL - 1):
+                return grid[r1][c1]
 
-            if x1 >= m or x2 >= m or y1 >= n or y2 >= n:
-                return -0x7FFFFFFF
-                
-            if -1 in (grid[x1][y1], grid[x2][y2]):
-                return -0x7FFFFFFF
+            if r1 >= ROW or r2 >= ROW or c1 >= COL or c2 >= COL:
+                return -int(1e20)
 
-            res = -0x7FFFFFFF
-            for dx1, dy1 in direction:
-                for dx2, dy2 in direction:
+            if -1 in (grid[r1][c1], grid[r2][c2]):
+                return -int(1e20)
+
+            res = -int(1e20)
+            for dr1, dc1 in DIR2:
+                for dr2, dc2 in DIR2:
                     # 两个人一起
-                    cur = grid[x1][y1] if (x1, y1) == (x2, y2) else grid[x1][y1] + grid[x2][y2]
-                    next = dfs(x1 + dx1, y1 + dy1, x2 + dx2, y2 + dy2)
-                    res = max(res, cur + next)
+                    cur = grid[r1][c1] if (r1, c1) == (r2, c2) else grid[r1][c1] + grid[r2][c2]
+                    next = dfs(r1 + dr1, c1 + dc1, r2 + dr2, c2 + dc2)
+                    if cur + next > res:
+                        res = cur + next
             return res
 
-        return max(0, dfs(0, 0, 0, 0))
+        ROW, COL = len(grid), len(grid[0])
+        res = dfs(0, 0, 0, 0)
+        dfs.cache_clear()
+        return res if res > 0 else 0
 
 
 print(Solution().cherryPickup(grid=[[0, 1, -1], [1, 0, -1], [1, 1, 1]]))

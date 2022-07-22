@@ -3,34 +3,21 @@
  * @param {number} k
  * @return {number[][]}
  */
-const shiftGrid = function (grid: number[][], k: number): number[][] {
-  // 仔细观察矩阵,摊平后发现是旋转数组
-  const m = grid.length
-  const n = grid[0].length
-  const res = Array.from<number, number[]>({ length: m }, () => Array(n).fill(Infinity))
+function shiftGrid(grid: number[][], k: number): number[][] {
+  const [row, col] = [grid.length, grid[0].length]
+  const n = row * col
+  const res: number[][] = Array.from({ length: row }, () => Array(col).fill(0))
 
-  const flatten = grid.flat()
-  k = k % flatten.length
-
-  reverse(flatten, 0, flatten.length - 1)
-  reverse(flatten, 0, k - 1)
-  reverse(flatten, k, flatten.length - 1)
-
-  for (let i = 0; i < flatten.length; i++) {
-    const row = ~~(i / n)
-    const col = i % n
-    res[row][col] = flatten[i]
+  for (let r = 0; r < row; r++) {
+    for (let c = 0; c < col; c++) {
+      const [index, value] = [r * col + c, grid[r][c]]
+      const nextIndex = (index + k) % n
+      const [nextR, nextC] = [Math.floor(nextIndex / col), nextIndex % col]
+      res[nextR][nextC] = value
+    }
   }
 
   return res
-
-  function reverse(arr: number[], l: number, r: number) {
-    while (l < r) {
-      ;[arr[l], arr[r]] = [arr[r], arr[l]]
-      l++
-      r--
-    }
-  }
 }
 
 console.log(

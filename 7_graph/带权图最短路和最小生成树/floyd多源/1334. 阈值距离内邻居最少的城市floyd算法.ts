@@ -10,37 +10,33 @@
  */
 function findTheCity(n: number, edges: number[][], distanceThreshold: number): number {
   // 构建dist矩阵
-  const dist = Array.from<number, number[]>({ length: n }, () => Array(n).fill(Infinity))
+  const dist = Array.from({ length: n }, () => new Uint32Array(n).fill(-1))
+  for (let i = 0; i < n; i++) dist[i][i] = 0
+
   for (const [i, j, w] of edges) {
     dist[i][j] = w
     dist[j][i] = w
   }
 
-  for (let i = 0; i < n; i++) {
-    dist[i][i] = 0
-  }
-
-  for (let m = 0; m < n; m++) {
+  for (let k = 0; k < n; k++) {
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
-        dist[i][j] = Math.min(dist[i][j], dist[i][m] + dist[m][j])
+        dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j])
       }
     }
   }
 
-  console.table(dist)
-
   let res = 0
-  let minNeighbors = Infinity
+  let minNeighbor = Infinity
   for (let i = 0; i < n; i++) {
     let count = 0
     for (const dis of dist[i]) {
       dis <= distanceThreshold && count++
     }
 
-    if (count <= minNeighbors) {
+    if (count <= minNeighbor) {
       res = i
-      minNeighbors = count
+      minNeighbor = count
     }
   }
 
@@ -59,3 +55,5 @@ console.log(
     4
   )
 )
+
+export {}

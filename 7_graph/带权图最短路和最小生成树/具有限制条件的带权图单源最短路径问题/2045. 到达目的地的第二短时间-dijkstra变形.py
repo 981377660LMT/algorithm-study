@@ -13,7 +13,7 @@ from heapq import heappush, heappop
 # 穿过任意一条边的时间是 time 分钟。
 # 交通信号灯，每 change 分钟改变一次，
 # 在 启程时 ，所有信号灯刚刚变成 绿色 。
-# 第二小的值 是 严格大于 最小值的所有值中最小的值。
+# !第二小的值 是 严格大于 最小值的所有值中最小的值。
 
 
 # bfs求次短路
@@ -29,19 +29,20 @@ class Solution:
             adjMap[v].add(u)
 
         # 每个点保存多个距离而不是只有一个
-        dist = [[] for _ in range(n)]
-        dist[0] = [0]
+        dist = [[int(1e20), int(1e20)] for _ in range(n)]
+        dist[0][0] = 0
         pq = [(0, 0)]
-        minTime = None
+        res = []
 
         while pq:
             cost, cur = heappop(pq)
+            if dist[cur][1] < cost:
+                continue
 
-            if cur == n - 1:
-                if minTime is None:
-                    minTime = cost
-                elif minTime < cost:
-                    return cost
+            # if cur == n - 1:
+            #     res.append(cost)
+            #     if len(res) == 2:
+            #         return res[-1]
 
             if (cost // change) & 1:
                 # 到下一个绿灯开始
@@ -49,12 +50,14 @@ class Solution:
             cost += time
 
             for next in adjMap[cur]:
-                # 入队条件
-                if not dist[next] or len(dist[next]) == 1 and dist[next][0] < cost:
-                    dist[next].append(cost)
+                if cost < dist[next][0]:
+                    dist[next][0] = cost
+                    heappush(pq, (cost, next))
+                elif dist[next][0] < cost < dist[next][1]:  # !注意题目要求第二小的值 是 严格大于 最小值的所有值中最小的值。
+                    dist[next][1] = cost
                     heappush(pq, (cost, next))
 
-        raise Exception("No path")
+        return dist[n - 1][1]
 
 
 print(

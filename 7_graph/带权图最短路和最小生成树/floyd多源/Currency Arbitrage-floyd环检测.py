@@ -1,5 +1,5 @@
-# 货币汇率转换
 # n<=100 应该n^3
+# !货币汇率转换 floyd环检测
 
 
 class Solution:

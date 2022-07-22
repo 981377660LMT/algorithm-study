@@ -9,3 +9,6 @@ S 到 T 的最小割等于求最大流
 **把边拆成两条边，a=>b 变成 a=>mid=>b**
 那么删除点就变成删除两条边 转换为最小割删边
 ![](image/note/1654274224392.png)
+
+最小割讲座
+https://github.com/tdzl2003/leetcode_live/tree/master/flow20220719

@@ -9,13 +9,14 @@ from bisect import bisect_left
 
 class Solution:
     def minimalKSum(self, nums: List[int], k: int) -> int:
-        def findMex(arr: List[int], k: int) -> int:
+        def findMex(nums: List[int], k: int) -> int:
             """二分搜索缺失的第k个正整数,lc1539. 第 k 个缺失的正整数"""
             # MEX:Min Excluded
-            left, right = 0, len(arr) - 1
+            nums = sorted(set(nums))
+            left, right = 0, len(nums) - 1
             while left <= right:
                 mid = (left + right) >> 1
-                diff = arr[mid] - (mid + 1)
+                diff = nums[mid] - (mid + 1)
                 if diff >= k:
                     right = mid - 1
                 else:

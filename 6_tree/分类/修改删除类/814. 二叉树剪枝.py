@@ -10,8 +10,10 @@ class TreeNode:
 
 
 class Solution:
-    def pruneTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
-        def dfs(root: Optional[TreeNode]) -> bool:
+    def pruneTree(self, root: Optional["TreeNode"]) -> Optional["TreeNode"]:
+        """返回移除了所有不包含 1 的子树的原二叉树"""
+
+        def dfs(root: Optional["TreeNode"]) -> bool:
             if not root:
                 return False
             hasLeft = dfs(root.left)

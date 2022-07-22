@@ -1,6 +1,8 @@
 from typing import List
 from sortedcontainers import SortedList
 
+# 扫描线
+
 
 class Solution:
     def getSkyline(self, buildings: List[List[int]]) -> List[List[int]]:
@@ -27,4 +29,3 @@ class Solution:
             preY = top
 
         return res
-

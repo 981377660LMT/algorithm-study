@@ -54,7 +54,8 @@ class Solution:
                         dfs(r, c)
                         dfsId += 1
 
-            if not region or not border:
+            # 无法继续扩散
+            if not border:
                 break
 
             # 2. 找到最大的周长

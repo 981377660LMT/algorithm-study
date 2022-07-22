@@ -15,6 +15,8 @@ class Solution:
         """
 
         adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        for i in range(n):
+            adjMap[i][i] = 0
         for u, v in edges:
             adjMap[u - 1][v - 1] = 1
             adjMap[v - 1][u - 1] = 1
@@ -34,4 +36,3 @@ class Solution:
 
 
 print(Solution().countSubgraphsForEachDiameter(n=4, edges=[[1, 2], [2, 3], [2, 4]]))
-

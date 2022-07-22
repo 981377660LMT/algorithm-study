@@ -4,7 +4,7 @@ from collections import deque
 
 class Solution:
     def eventualSafeNodes(self, graph: List[List[int]]) -> List[int]:
-        #  反图 + 拓扑排序
+        """哪些点不会走到环上 最终会抵达稳定点 从稳定点沿着反图拓扑排序"""
         n = len(graph)
         indeg = [0] * n
         rAdjList = [[] for _ in range(n)]

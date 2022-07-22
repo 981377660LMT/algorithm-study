@@ -38,14 +38,14 @@ class Solution:
     def smallestMissingValueSubtree2(self, parents: List[int], nums: List[int]) -> List[int]:
         """nlog(n)^2 合并有序集合"""
 
-        def findMex(tree: SortedList) -> int:
+        def findMex(tree: SortedList, k=1) -> int:
             """二分搜索缺失的第一个正整数,lc1539. 第 k 个缺失的正整数"""
             # MEX:Min Excluded
             left, right = 0, len(tree) - 1
             while left <= right:
-                mid = (left + right) >> 1
+                mid = (left + right) // 2
                 diff = tree[mid] - (mid + 1)
-                if diff >= 1:
+                if diff >= k:
                     right = mid - 1
                 else:
                     left = mid + 1
@@ -78,4 +78,3 @@ class Solution:
 
 print(Solution().smallestMissingValueSubtree(parents=[-1, 0, 0, 2], nums=[1, 2, 3, 4]))
 print(Solution().smallestMissingValueSubtree(parents=[-1, 0, 1, 0, 3, 3], nums=[5, 4, 6, 2, 1, 3]))
-
