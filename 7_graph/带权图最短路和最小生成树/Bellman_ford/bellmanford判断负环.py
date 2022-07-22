@@ -16,9 +16,9 @@
 # 如果要求xi/xj<=ck，只需取对数即可
 
 from collections import defaultdict
-from typing import DefaultDict, List, Tuple, TypeVar
+from typing import DefaultDict, Hashable, List, Tuple, TypeVar
 
-T = TypeVar('T', int, str)
+T = TypeVar("T", bound=Hashable)
 
 
 def bellman_ford(
@@ -29,7 +29,7 @@ def bellman_ford(
     dist = defaultdict(lambda: int(1e20))  # 起点s到各个点的距离
     dist[start] = 0
 
-    # 松弛i次:其中第i次(i>=1)的内涵为此时至少优化过了过了i-1个`中转点`，最后一次优化了n-1个中转点(即所有点都经过了)
+    # !松弛i次:其中第i次(i>=1)的内涵为此时至少优化过了过了i-1个`中转点`，最后一次优化了n-1个中转点(即所有点都经过了)
     for _ in range(n):
         for u, v, w in edges:
             if dist[u] + w < dist[v]:
@@ -42,7 +42,7 @@ def bellman_ford(
     return True, dist
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     #  x0-x1>=1    x0-1>=x1
     #  x2-x3<=2    x3+2>=x2
     #  x0=x2      x0+0>=x2  x2+0>=x0
@@ -52,4 +52,3 @@ if __name__ == '__main__':
     edges.append([0, 2, 0])
     edges.append([2, 0, 0])
     print(bellman_ford(4, edges, 0))
-

@@ -48,7 +48,7 @@ def main() -> None:
         n = int(input())
         sqrt2 = isqrt(n)
 
-        res, remain, bid = 0, sqrt2, 1  # bid表示区间块索引
+        res, remain, bid = 0, sqrt2, 1  # !bid表示区间块索引
         while remain:
             lower, upper = bid * bid, bid * bid + 2 * bid
             count = min(remain, upper - lower + 1)

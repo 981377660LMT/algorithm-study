@@ -406,3 +406,8 @@ const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()
   /usr/lib/gcc/x86_64-linux-gnu/4.9.1/.cache/trace_safe --binary=/usr/lib/gcc/x86_64-linux-gnu/4.9.1/.cache/prog_joined.py --lang=python3 --data_input=/usr/lib/gcc/x86_64-linux-gnu/4.9.1/.cache/data/data.in --time_limit=10000 --memory_limit=800000000 --stack_limit=500000000 --recursion_limit=550000
 
   `open('/proc/' + str(os.getppid()) + '/cmdline').read()`
+
+- sqrt 计算精度
+  sqrt 因为精度问题会导致开根计算出错
+  `isqrt可以避免精度问题`
+  E:\test\js\算法\js\js-algorithm\20\_杂题\atc 競プロ\AtCoder Beginner Contest\243\G - Sqrt.py
