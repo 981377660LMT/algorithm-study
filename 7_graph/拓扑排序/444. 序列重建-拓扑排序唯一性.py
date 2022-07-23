@@ -8,36 +8,61 @@ from typing import List
 
 class Solution:
     def sequenceReconstruction(self, nums: List[int], sequences: List[List[int]]) -> bool:
+        """
+        注意拓扑排序可以有重边
+        nums 是范围为 [1,n] 的整数的排列
+        """
+        n = len(nums)
+        adjList = [[] for _ in range(n)]
+        indeg = [0] * n
+        for seq in sequences:
+            for u, v in zip(seq, seq[1:]):
+                u, v = u - 1, v - 1
+                adjList[u].append(v)
+                indeg[v] += 1
+
+        queue = deque([i for i in range(n) if indeg[i] == 0])
+        while queue:
+            if len(queue) > 1:
+                return False
+            cur = queue.popleft()
+            for next in adjList[cur]:
+                indeg[next] -= 1
+                if indeg[next] == 0:
+                    queue.append(next)
+
+        return True
+
+    def sequenceReconstruction2(self, nums: List[int], sequences: List[List[int]]) -> bool:
+        """去掉nums 是范围为 [1,n] 的整数的排列的做法 不允许拓扑排序加入重边"""
         adjMap = defaultdict(set)
-        indegree = defaultdict(int)
-        vertex = set()
+        indeg = defaultdict(int)
+        allVertex = set()
         visitedPair = set()
         for seq in sequences:
-            vertex |= set(seq)
+            allVertex |= set(seq)
             for pre, next in zip(seq, seq[1:]):
                 if (pre, next) not in visitedPair:
                     visitedPair.add((pre, next))
                     adjMap[pre].add(next)
-                    indegree[next] += 1
+                    indeg[next] += 1
 
-        if set(nums) != vertex:
+        if set(nums) != allVertex:
             return False
 
-        queue = deque([v for v in vertex if indegree[v] == 0])
-        res = []
+        queue = deque([v for v in allVertex if indeg[v] == 0])
         count = 0
         while queue:
             if len(queue) > 1:
                 return False
             cur = queue.popleft()
-            res.append(cur)
             count += 1
             for next in adjMap[cur]:
-                indegree[next] -= 1
-                if indegree[next] == 0:
+                indeg[next] -= 1
+                if indeg[next] == 0:
                     queue.append(next)
 
-        return count == len(vertex)
+        return count == len(allVertex)
 
 
 print(

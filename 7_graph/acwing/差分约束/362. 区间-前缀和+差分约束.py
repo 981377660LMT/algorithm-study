@@ -25,7 +25,7 @@ for _ in range(n):
     adjMap[a - 1].add((b, c))
     max_ = max(max_, a, b)
 
-# 前缀和满足的约束
+# !前缀和满足的约束
 for i in range(1, max_ + 1):
     adjMap[i - 1].add((i, 0))
     adjMap[i].add((i - 1, -1))

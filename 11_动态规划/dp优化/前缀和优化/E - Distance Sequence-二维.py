@@ -38,7 +38,6 @@ def main() -> None:
                 ndp[val] = dpSum[leftUpper] + dpSum[m] - dpSum[rightLower - 1]
                 ndp[val] %= MOD
 
-        for val in range(1, m + 1):
             ndpSum[val] = ndpSum[val - 1] + ndp[val]
             ndpSum[val] %= MOD
 

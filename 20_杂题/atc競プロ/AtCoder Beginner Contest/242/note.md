@@ -1,1 +1,2 @@
-<!-- [](https://www.bilibili.com/video/BV1Pi4y1C7A5/?spm_id_from=333.788&vd_source=e825037ab0c37711b6120bbbdabda89e) -->
+https://www.zhihu.com/search?type=content&q=AtCoder%20Beginner%20Contest%20242
+[＠ちゃんねる　栗悟飯とカメハメ波](https://cmnx.me)

@@ -1,7 +1,7 @@
 from collections import defaultdict, deque
 from typing import List, Sequence, Tuple
 
-
+# LCP 32. 批量处理任务
 # 2 <= tasks.length <= 10^5
 # 0 <= tasks[i][0] <= tasks[i][1] <= 10^9
 # 某实验室计算机待处理任务以 [start,end,period] 格式记于二维数组 tasks，
@@ -81,4 +81,3 @@ print(Solution().processTasks([[1, 3, 2], [2, 5, 3], [5, 6, 2]]))
 # tasks[1] 选择时间点 2、3、5；
 # tasks[2] 选择时间点 5、6；
 # 因此计算机仅需在时间点 2、3、5、6 四个时刻保持开机即可完成任务。
-

@@ -3,6 +3,7 @@
 
 
 from collections import defaultdict, deque
+from typing import DefaultDict
 
 
 n, m = map(int, input().split())
@@ -14,7 +15,7 @@ for _ in range(m):
     adjMap[u].append((v, w))
 
 
-def spfa(n: int, adjMap: defaultdict) -> bool:
+def spfa(n: int, adjMap: DefaultDict) -> bool:
     """判断负环要以所有点为起点"""
     dist = [0] * (n)
 

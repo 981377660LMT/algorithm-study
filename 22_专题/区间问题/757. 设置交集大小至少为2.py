@@ -1,27 +1,28 @@
 from typing import List
 
 # 一个整数区间 [a, b]  ( a < b ) 代表着从 a 到 b 的所有连续整数，包括 a 和 b。
-# 给你一组整数区间intervals，请找到一个最小的集合 S，
-# 使得 S 里的元素与区间intervals中的每一个整数区间都至少有2个元素相交。
+# !给你一组整数区间intervals，请找到一个最小的集合 S，
+# !使得 S 里的元素与区间intervals中的每一个整数区间都至少有2个元素相交。
 # 输出这个最小集合S的大小。
 
+# !题目要我们求最小点集的数量，并不规定点集 S 是连续段。
+# !强化版：LCP 32. 批量处理任务 每一个整数区间都至少有interi个元素相交。
 
-# 总结:区间相交问题：排序
-# 优先处理长度小的区间，比较curStart与preEnd
+
 class Solution:
     def intersectionSizeTwo(self, intervals: List[List[int]]) -> int:
         # 当前窗口
         res, left, right = 0, -1, -1
 
-        # end相同时，越往后走范围就向前覆盖得越大，即更加符合香蕉条件
+        # end相同时，越往后走范围就向前覆盖得越大，即更加符合相交条件
         intervals = sorted(intervals, key=lambda x: (x[1], -x[0]))
 
         for s, e in intervals:
-            if s > right:  # <..end1,..end2,..s..e>
-                left, right = e - 1, e
+            if s > right:  # <..left,..right,..s..e>
+                left, right = e - 1, e  # !贪心取最大的两个点
                 res += 2
-            elif s > left:  # <..end1,.s..end2..e>
-                left, right = right, e
+            elif s > left:  # <..left,.s..right..e>
+                left, right = right, e  # !贪心取最大的两个点
                 res += 1
 
         return res
