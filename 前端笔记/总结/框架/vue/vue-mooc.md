@@ -424,33 +424,8 @@ created 钩子函数中可以访问到数据，在 mounted 钩子函数中可以
     触发 setter
     重新 render ,patch
     nextTick 异步渲染
-40. 请简述虚拟 DOM 中 Key 的作用和好处。
 
-解析：
-
-​ 作用： **标识节点在当前层级的唯一性**。
-​ 好处： 在执行 updateChildren 对比新旧 Vnode 的子节点差异时，通过设置 key 可以进行更高效的比较，便于复用节点。 降低创建销毁节点成本，从而减少 dom 操作，提升更新 dom 的性能。
-
-40. 如何理解 MVVM(**数据驱动视图**)
-    很久以前就有组件化 **ejs 模板引擎的 include**
-    View:DOM
-    ViewModel:Vue
-    Model:Object
-    **解耦了 V 和 M 层**
-41. Proxy 与 Object.defineProperty 的区别
-
-    1. Object.defineProperty
-       深度监听需要递归到底
-       无法监听新增属性(Vue.set Vue.delete)
-       不能监听数组变化
-
-    2. Proxy
-       lazy 监听
-       可监听新属性
-       可监听数组变化
-       无法兼容所有浏览器，无法 polyfill
-
-42. JS 模拟 DOM 结构
+40. JS 模拟 DOM 结构
 
 ```HTML
     <div id="div1" class="container">
@@ -1268,7 +1243,7 @@ template 和 render, 开发时各有优缺点, 不过在线上尽量不要有 te
      Components 目录存放组件
      Store 存放 vuex 相关文件
      Router 目录存放路由相关文件
-     Untils 目录存放工具 js 文件
+     Utils 目录存放工具 js 文件
      API 目录存放封装好的与后端交互的逻辑
      Assets 存放静态文件
 119. provide 和 inject 原理
