@@ -19,7 +19,7 @@ const DIRS8 = [
   [0, -1],
   [-1, -1],
 ]
- 
+
 function foo() {}
 
 export {}

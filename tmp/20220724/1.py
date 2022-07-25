@@ -7,5 +7,10 @@ INF = int(1e20)
 
 
 class Solution:
-    def a(self, s: str) -> List[str]:
-        ...
+    def repeatedCharacter(self, s: str) -> str:
+        counter = Counter()
+        for char in s:
+            counter[char] += 1
+            if counter[char] > 1:
+                return char
+        return ""
