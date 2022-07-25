@@ -1,17 +1,13 @@
-<<<<<<< HEAD
 interface WindowManager<T, Q> {
   add(value: T, index: number, qLeft: number, qRight: number): void
   remove(value: T, index: number, qLeft: number, qRight: number): void
   query(): Q
 }
 
-=======
->>>>>>> 2d83813011271daf312944be57f849d59f1ccf70
 /**
  * 静态查询区间的莫队算法
  *
  * @param data 原始数据
-<<<<<<< HEAD
  * @param windowManager 区间的维护方式
  */
 function useMoAlgo<T = number, Q = number>(data: T[], windowManager: WindowManager<T, Q>) {
@@ -82,14 +78,3 @@ function useMoAlgo<T = number, Q = number>(data: T[], windowManager: WindowManag
 }
 
 export { useMoAlgo, WindowManager }
-=======
- */
-function useMoAlgo<T = number, Q = number>(data: T[]) {
-  function addQuery(params: type) {}
-  return {
-    addQuery,
-  }
-}
-
-export { useMoAlgo }
->>>>>>> 2d83813011271daf312944be57f849d59f1ccf70
