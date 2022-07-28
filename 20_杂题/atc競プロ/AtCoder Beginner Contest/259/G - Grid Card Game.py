@@ -39,15 +39,15 @@ def main() -> None:
 
     res = 0
     PLAYER_A, PLAYER_B, OFFSET = -1, -2, int(1e4)
-    adjMap = defaultdict(lambda: defaultdict(int))
+    maxFlow = Dinic(PLAYER_A, PLAYER_B)
     for r in range(ROW):
         if rowSum[r] > 0:
-            adjMap[PLAYER_A][r] += rowSum[r]
+            maxFlow.addEdge(PLAYER_A, r, rowSum[r])
             res += rowSum[r]
 
     for c in range(COL):
         if colSum[c] > 0:
-            adjMap[c + OFFSET][PLAYER_B] += colSum[c]
+            maxFlow.addEdge(c + OFFSET, PLAYER_B, colSum[c])
             res += colSum[c]
 
     for r in range(ROW):
@@ -55,28 +55,29 @@ def main() -> None:
             # 每個格子都可以通過割掉行列對應的點連到源點匯點的邊來成為只有行或者列選擇了它的格子。
             # 也可以割掉自己的邊來去掉重複貢獻。
             # !无穷表示这条边割不了
-            adjMap[r][c + OFFSET] += Dinic.INF if matrix[r][c] < 0 else matrix[r][c]
+            if matrix[r][c] < 0:
+                maxFlow.addEdge(r, c + OFFSET, Dinic.INF)
+            else:
+                maxFlow.addEdge(r, c + OFFSET, matrix[r][c])
 
-    maxFlow = Dinic(adjMap)
-    minCut = maxFlow.calMaxFlow(PLAYER_A, PLAYER_B)  # 每个点只能被1个玩家选择
+    minCut = maxFlow.calMaxFlow()  # 每个点只能被1个玩家选择
     print(res - minCut)
 
 
 if __name__ == "__main__":
 
     import sys
-    from typing import DefaultDict
     from collections import defaultdict, deque
-
-    Graph = DefaultDict[int, DefaultDict[int, int]]  # 有向带权图,权值为容量
 
     class Dinic:
         INF = int(1e18)
 
-        def __init__(self, graph: Graph) -> None:
-            self._graph = graph
+        def __init__(self, start: int, end: int) -> None:
+            self._graph = defaultdict(lambda: defaultdict(int))
+            self._start = start
+            self._end = end
 
-        def calMaxFlow(self, start: int, end: int) -> int:
+        def calMaxFlow(self) -> int:
             def bfs() -> None:
                 nonlocal depth, curArc
                 depth = defaultdict(lambda: -1, {start: 0})
@@ -115,7 +116,7 @@ if __name__ == "__main__":
                 return flow
 
             self._updateRedisualGraph()
-
+            start, end = self._start, self._end
             res = 0
             depth = defaultdict(lambda: -1, {start: 0})
             curArc = dict()
@@ -131,6 +132,10 @@ if __name__ == "__main__":
                 else:
                     break
             return res
+
+        def addEdge(self, v1: int, v2: int, w: int) -> None:
+            """添加边 v1->v2, 容量为w"""
+            self._graph[v1][v2] += w
 
         def getFlowOfEdge(self, v1: int, v2: int) -> int:
             """边的流量=容量-残量"""

@@ -10,7 +10,7 @@ from collections import defaultdict
 class BIT:
     """单点修改"""
 
- def __init__(self, n: int):
+    def __init__(self, n: int):
         self.size = n
         self.tree = defaultdict(int)
 
@@ -32,6 +32,7 @@ class BIT:
 
     def queryRange(self, left: int, right: int) -> int:
         return self.query(right) - self.query(left - 1)
+
 
 # 倒序分析：
 # - 69：前面有 2 个人
@@ -67,7 +68,7 @@ def main() -> None:
         res[left - 1] = id
         bit.add(left, -1)
 
-    print(' '.join(map(str, res)))
+    print(" ".join(map(str, res)))
 
 
 while True:
@@ -75,4 +76,3 @@ while True:
         main()
     except EOFError:
         break
-

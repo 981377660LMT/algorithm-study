@@ -11,8 +11,11 @@
 # 判断逆序对数奇偶性是不是相同，相同可以，不相同不可以
 
 
+from bisect import bisect_right
 import sys
 import os
+
+from sortedcontainers import SortedList
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -22,57 +25,57 @@ from typing import List
 from collections import Counter, defaultdict
 
 
-# 1 <= nums.length <= 105
-# -104 <= nums[i] <= 104
+def countSmaller2(nums: List[int]) -> List[int]:
+    """sortedList求每个位置处的逆序对数量"""
+    n = len(nums)
+    res = [0] * n
+    visited = SortedList()
+    for i in range(n - 1, -1, -1):
+        smaller = visited.bisect_left(nums[i])
+        res[i] = smaller
+        visited.add(nums[i])
+
+    return res
 
 
 def countSmaller(nums: List[int]) -> List[int]:
-    """求逆序对数量"""
-    OFFSET = int(1e4) + 10
-    res = []
-    bit = BIT(3 * OFFSET)
+    """求每个位置处的逆序对数量  注意值域很大时需要离散化"""
+    n = len(nums)
+    arr = sorted(nums)
+    res = [0] * n
+    bit = BIT1(n + 10)
     for i in range(len(nums) - 1, -1, -1):
-        cur = bit.query(0, nums[i] - 1 + OFFSET)
-        res.append(cur)
-        bit.add(nums[i] + OFFSET, nums[i] + OFFSET, 1)
-    return list(reversed(res))
+        pos1 = bisect_right(arr, nums[i] - 1) + 1
+        cur = bit.query(pos1)
+        res[i] = cur
+        pos2 = bisect_right(arr, nums[i]) + 1
+        bit.add(pos2, 1)
+    return res
 
 
-class BIT:
+class BIT1:
     def __init__(self, n: int):
         self.size = n
-        self._tree1 = defaultdict(int)
-        self._tree2 = defaultdict(int)
+        self.tree = defaultdict(int)
 
-    def add(self, left: int, right: int, delta: int) -> None:
-        """闭区间[left, right]加delta"""
-        self._add(left, delta)
-        self._add(right + 1, -delta)
-
-    def query(self, left: int, right: int) -> int:
-        """闭区间[left, right]的和"""
-        return self._query(right) - self._query(left - 1)
-
-    def _add(self, index: int, delta: int) -> None:
+    def add(self, index: int, delta: int) -> None:
         if index <= 0:
             raise ValueError("index 必须是正整数")
-
-        rawIndex = index
         while index <= self.size:
-            self._tree1[index] += delta
-            self._tree2[index] += (rawIndex - 1) * delta
+            self.tree[index] += delta
             index += index & -index
 
-    def _query(self, index: int) -> int:
+    def query(self, index: int) -> int:
         if index > self.size:
             index = self.size
-
-        rawIndex = index
         res = 0
         while index > 0:
-            res += rawIndex * self._tree1[index] - self._tree2[index]
+            res += self.tree[index]
             index -= index & -index
         return res
+
+    def queryRange(self, left: int, right: int) -> int:
+        return self.query(right) - self.query(left - 1)
 
 
 def solve(nums1: List[int], nums2: List[int]) -> bool:

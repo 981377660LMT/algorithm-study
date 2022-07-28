@@ -7,7 +7,7 @@ from collections import defaultdict
 class BIT:
     """单点修改"""
 
- def __init__(self, n: int):
+    def __init__(self, n: int):
         self.size = n
         self.tree = defaultdict(int)
 
@@ -29,6 +29,7 @@ class BIT:
 
     def queryRange(self, left: int, right: int) -> int:
         return self.query(right) - self.query(left - 1)
+
 
 class Solution:
     def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:

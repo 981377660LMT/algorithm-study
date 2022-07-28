@@ -21,6 +21,7 @@ from typing import (
     runtime_checkable,
     TypedDict,
 )
+import typing_extensions
 
 # from typing_extensions import LiteralString
 
@@ -32,7 +33,9 @@ class Foo:
 
 
 foo = Foo()
-foo.clsValue = 1  # Member "clsValue" cannot be assigned through a class instance because it is a ClassVar
+foo.clsValue = (
+    1  # Member "clsValue" cannot be assigned through a class instance because it is a ClassVar
+)
 foo.instValue = 1
 
 # !2. NewType来严格区分不同的int类型
@@ -63,10 +66,27 @@ class SupportsBar(Protocol):
 
 
 # !5. 函数的泛型：ParamSpec 保留装饰器函数类型信息  Concatenate
+# https://sobolevn.me/2021/12/paramspec-guide
 # 它们分别采取 Callable[ParamSpecVariable, ReturnType]
 # 和 Callable[Concatenate[Arg1Type, Arg2Type, ..., ParamSpecVariable], ReturnType] 的形式。
 #  Concatenate 目前只在作为 Callable 的第一个参数时有效。Concatenate 的最后一个参数必须是一个 ParamSpec。
 # ParamSpec 里又有 ParamSpecArgs 和 ParamSpecKwargs 分别表示参数的类型和名称。
+
+# !原来的装饰器：
+C = TypeVar("C", bound=Callable[..., Any])
+
+
+def logger(func: C) -> C:
+    def wrapper(*args: object, **kwargs: object):
+        print("logging")
+        return func(*args, **kwargs)
+
+    return wrapper  # type: ignore
+
+
+# !现在的装饰器
+
+
 P = ParamSpec("P")  # 类似ts的ParameterType
 R = TypeVar("R")
 
@@ -84,7 +104,7 @@ def add(x: int, y: int) -> int:
     return x + y
 
 
-# 如果想要连接函数参数，可以使用 Concatenate。
+# !如果想要连接函数参数，可以使用 Concatenate。
 
 # !6. Type获取实例变量类型(类似ts的typeof)
 foo = Foo()

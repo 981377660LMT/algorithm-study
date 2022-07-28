@@ -14,6 +14,8 @@ from typing import List, Tuple
 # n要与状态同时更新
 
 # !哈希表记录周期(鸽巢原理)
+
+
 class Solution:
     def prisonAfterNDays(self, cells: List[int], n: int) -> List[int]:
         def move(preState: List[int]):
@@ -21,11 +23,11 @@ class Solution:
 
         visited = dict()
         while n:
-            visited[tuple(cells)] = n
-            cells = move(cells)
+            visited[tuple(cells)] = n  # !保存当前状态
+            cells = move(cells)  # !线性转移
             n -= 1
-            # 最后再处理n加速
-            if tuple(cells) in visited:
+
+            if tuple(cells) in visited:  # !寻找周期加速
                 period = visited[tuple(cells)] - n
 
                 n %= period
@@ -77,4 +79,3 @@ print(Solution().prisonAfterNDays2(cells=[0, 1, 0, 1, 1, 0, 0, 1], k=7))
 # Day 5: [0, 1, 1, 1, 0, 1, 0, 0]
 # Day 6: [0, 0, 1, 0, 1, 1, 0, 0]
 # Day 7: [0, 0, 1, 1, 0, 0, 0, 0]
-

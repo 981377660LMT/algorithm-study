@@ -24,3 +24,19 @@ class Solution:
 print(Solution().shortestSequence(rolls=[4, 2, 1, 2, 3, 3, 2, 4, 1], k=4))
 print(Solution().shortestSequence(rolls=[1, 1, 2, 2], k=2))
 print(Solution().shortestSequence(rolls=[1, 1, 3, 2, 2, 2, 3, 3], k=4))
+
+# !如果这个题要求构造一个得不到的最短的子序列 那么做法也类似，最后查一下对应ans+1这组的哈希集合缺什么就可以了
+def shortestSequence2(rolls: List[int], k: int) -> List[int]:
+    visited = set()
+    res = []
+    for char in rolls:
+        visited.add(char)
+        if len(visited) == k:  # 多凑齐了一个长度
+            res.append(char)
+            visited.clear()
+
+    for i in range(1, k + 1):
+        if i not in visited:
+            res.append(i)
+            return res
+    return res

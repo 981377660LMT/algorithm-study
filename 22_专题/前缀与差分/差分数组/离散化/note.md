@@ -1,19 +1,22 @@
-离散化：当数字范围很大，但是数字总量不大的时候，将大的数字用小的数字（可以有序也可以无序）来表示，以达到方便存储的目的（就不需要开那么大空间了）
-离散化的本质，是映射，将间隔很大的点，映射到相邻的数组元素中。减少对空间的需求，也减少计算量。
+## 离散化，就是当我们只关心数据的大小关系时，用排名代替原数据进行处理的一种预处理方法
 
 常见方式
 
-1. 使用哈希表将所有数手动建立映射关系离散化
+1. **哈希表映射查询**：使用哈希表将所有数手动建立映射关系离散化。
+   查询时用 `mapping里的关系`
 
 ```Python
-allNums = sorted(set(nums))
-mapping = {allNums[i]: i + 1 for i in range(len(allNums))}
+sl = sorted(set(nums))
+mapping = {sl[i]: i + 1 for i in range(len(sl))}
+newNums = [mapping[num] for num in nums]
 ```
 
-2. 使用 sorted(set(nums)) 加二分查找离散化
-   [](acwing802.%20%E5%8C%BA%E9%97%B4%E5%92%8C.py)
-3. 使用 sorted(set(nums)) 二分答案 看答案是数组中`第几个数`
-   [](G%20-%20Game%20on%20Tree%203.py)
+2. **有序数组二分查询**：查询时用 `bisect_right(allNums, num) + 1`
+
+```Python
+sl = sorted(set(nums))
+newNums = [bisect_right(sl, num) + 1 for num in nums]
+```
 
 注意：离散化适合用于`单点查询`
 `区间查询使用离散化`会很麻烦 一般用线段树/树状数组

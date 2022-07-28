@@ -1,19 +1,19 @@
 # https://www.acwing.com/activity/content/code/content/2053055/
 
 import sys
-from typing import DefaultDict
-from collections import defaultdict, deque
 
-Graph = DefaultDict[int, DefaultDict[int, int]]  # 有向带权图,权值为容量
+from collections import defaultdict, deque
 
 
 class Dinic:
     INF = int(1e20)
 
-    def __init__(self, graph: Graph) -> None:
-        self._graph = graph
+    def __init__(self, start: int, end: int) -> None:
+        self._graph = defaultdict(lambda: defaultdict(int))
+        self._start = start
+        self._end = end
 
-    def calMaxFlow(self, start: int, end: int) -> int:
+    def calMaxFlow(self) -> int:
         def bfs() -> None:
             nonlocal depth, curArc
             depth = defaultdict(lambda: -1, {start: 0})
@@ -52,7 +52,7 @@ class Dinic:
             return flow
 
         self._updateRedisualGraph()
-
+        start, end = self._start, self._end
         res = 0
         depth = defaultdict(lambda: -1, {start: 0})
         curArc = dict()
@@ -68,6 +68,10 @@ class Dinic:
             else:
                 break
         return res
+
+    def addEdge(self, v1: int, v2: int, w: int) -> None:
+        """添加边 v1->v2, 容量为w"""
+        self._graph[v1][v2] += w
 
     def getFlowOfEdge(self, v1: int, v2: int) -> int:
         """边的流量=容量-残量"""
@@ -100,5 +104,5 @@ for _ in range(m):
     u, v, c = map(int, input().split())
     adjMap[u][v] += c  # 可能存在重边
 
-maxFlow = Dinic(adjMap)
-print(maxFlow.calMaxFlow(start, end))
+maxFlow = Dinic(start, end)
+print(maxFlow.calMaxFlow())

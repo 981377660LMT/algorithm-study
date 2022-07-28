@@ -35,9 +35,9 @@ class Solution:
     # 边的方向定为从度数小的点连向度数大的点
     # https://leetcode-cn.com/problems/minimum-degree-of-a-connected-trio-in-a-graph/solution/gei-wu-xiang-tu-ding-xiang-by-lucifer100-c72d/
     def minTrioDegree(self, n: int, edges: List[List[int]]) -> int:
-        """三元环计数
+        """三元环计数 n<=400 稠密图
 
-        度数为第一关键字，点的标号为第二关键字 比大小
+        边定向 度数为第一关键字，点的标号为第二关键字
         此时任意点的出度不会超过 (sqrt(2E))
         时间复杂度O(E^(3/2))
         """
@@ -46,26 +46,24 @@ class Solution:
             deg[u - 1] += 1
             deg[v - 1] += 1
 
-        adjMap = defaultdict(set)
+        adjMap = [set() for _ in range(n)]
         for u, v in edges:
             u, v = u - 1, v - 1
-            u, v = sorted((u, v), key=lambda x: (deg[x], x))
+            # u, v = sorted((u, v), key=lambda x: (deg[x], x))
+            if deg[u] > deg[v] or deg[u] == deg[v] and u > v:
+                u, v = v, u
             adjMap[u].add(v)
 
-        res = INF
+        res = int(1e20)
         for i in range(n):
             for j in adjMap[i]:
                 for k in adjMap[j]:
                     if k in adjMap[i]:
                         res = min(res, deg[i] + deg[j] + deg[k] - 6)
 
-        return res if res < INF else -1
+        return res if res < int(1e20) else -1
 
 
-print(
-    Solution().minTrioDegree(
-        n=6, edges=[[1, 2], [1, 3], [3, 2], [4, 1], [5, 2], [3, 6]]
-    )
-)
+print(Solution().minTrioDegree(n=6, edges=[[1, 2], [1, 3], [3, 2], [4, 1], [5, 2], [3, 6]]))
 # 输出：3
 # 解释：只有一个三元组 [1,2,3] 。构成度数的边在上图中已被加粗。

@@ -1,20 +1,20 @@
 from collections import defaultdict, deque
-from typing import DefaultDict, Hashable, TypeVar
+from typing import DefaultDict, Generic, Hashable, TypeVar
 
-Vertex = TypeVar('Vertex', bound=Hashable)
+Vertex = TypeVar("Vertex", bound=Hashable)
 Graph = DefaultDict[Vertex, DefaultDict[Vertex, int]]  # 有向带权图,权值为容量
 
 
 # region Dinic
-class Dinic:
+class Dinic(Generic[Vertex]):
     """Dinic 求最大流
-    
+
     如果一个流的残量网络里面没有可行流，那么这个流就是最大流
-    
+
     时间复杂度:O(V^2*E)
     """
 
-    def __init__(self, graph: Graph) -> None:
+    def __init__(self, graph: Graph[Vertex]) -> None:
         self._graph = graph
         self._reGraph: Graph = None  # type: ignore
 
@@ -100,7 +100,7 @@ class Dinic:
                 break
         return res
 
-    def getFlowOfEdge(self, v1: int, v2: int) -> int:
+    def getFlowOfEdge(self, v1: Vertex, v2: Vertex) -> int:
         """获取某条边上的`流量`"""
         return self._graph[v1][v2] - self._reGraph[v1][v2]
 
@@ -170,7 +170,7 @@ class Dinic:
 
 
 ###################################################################
-if __name__ == '__main__':
+if __name__ == "__main__":
     # # 图中可能存在重边和自环
     n, m, start, end = [7, 14, 1, 7]
     adjMap = defaultdict(lambda: defaultdict(int))
@@ -197,4 +197,3 @@ if __name__ == '__main__':
 
     maxFlow = Dinic(adjMap)
     assert maxFlow.calMaxFlow(start, end) == 14
-
