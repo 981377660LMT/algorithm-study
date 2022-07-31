@@ -1,4 +1,4 @@
-"""基环树找环"""
+"""基环树找环/基环树森林找环"""
 
 from collections import defaultdict, deque
 from typing import DefaultDict, List, Set, Tuple
@@ -7,7 +7,7 @@ from typing import DefaultDict, List, Set, Tuple
 def findCycleAndCalDepth(
     n: int, adjMap: DefaultDict[int, Set[int]], degrees: List[int], *, isDirected: bool
 ) -> Tuple[List[List[int]], List[int]]:
-    """无/有向基环树找环上的点,并记录每个点在拓扑排序中的最大深度,最外层的点深度为0"""
+    """无/有向基环树森林找环上的点,并记录每个点在拓扑排序中的最大深度,最外层的点深度为0"""
     depth = [0] * n
     queue = deque([(i, 0) for i in range(n) if degrees[i] == (0 if isDirected else 1)])
     visited = [False] * n

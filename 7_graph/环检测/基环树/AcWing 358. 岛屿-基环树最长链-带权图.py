@@ -1,7 +1,7 @@
-# 求基环树的最长链
+"""求基环树的最长链"""
 # 基环树的最长链有两种情况：
-# 第一种是在某棵树里，不经过环，即直径
-# 第二种是经过环，分解成三段，即depth[x]+depth[y]+distOncycle(x,y)
+# !第一种是在某棵树里，不经过环，即直径
+# !第二种是经过环，分解成三段，即depth[x]+depth[y]+distOncycle(x,y)
 # 然后是环上求最值，破环成链，这个表达式最大值可以滑动窗口求最值由单调队列求出，参考AcWing 289. 环路运输
 
 # 我们可以先用一次DFS找出环，在每个环上节点出发处理树上的最长路径，
@@ -73,7 +73,7 @@ def calMax1(root: int, rAdjMap: AdjMap, cycle: Set[int]) -> int:
 
 def calMax2(scores: List[int], dists: List[int]) -> int:
     """环上求depth[x]+depth[y]+preSum[x]-preSum[y]的最大值
-    
+
     环上每个点i求出i前面n−1个点中使得depth[j]-j最大的点(其实求出值即可)
     """
     n = len(scores)
@@ -108,7 +108,7 @@ def calLongestPath(adjMap: AdjMap, degrees: Degrees) -> int:
         cand1 = 0  # 最长链在树里，不经过环
         cand2 = 0  # 最长链经过环上
         for root in group:
-            cand1 = max(cand1, calMax1(root, rAdjMap, onCycle))  # 反图,外向基环树
+            cand1 = max(cand1, calMax1(root, rAdjMap, onCycle))  # !反图外向基环树处理子树
 
         scores, dists = (
             [depth[i] for i in group],
@@ -123,8 +123,8 @@ def calLongestPath(adjMap: AdjMap, degrees: Degrees) -> int:
 
 
 n = int(input())
-adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))  # 内向基环树
-rAdjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))  # 外向基环树
+adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))  # !内向基环树用来求环分组
+rAdjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))  # !外向基环树用来求子树链
 # 岛屿 i 上建了一座通向岛屿 a 的桥，桥的长度为 L。
 degrees = [0] * n
 for u in range(n):
@@ -136,4 +136,3 @@ for u in range(n):
 
 
 print(calLongestPath(adjMap, degrees))
-
