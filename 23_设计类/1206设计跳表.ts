@@ -27,7 +27,7 @@ class SkipList implements ISkipList {
   private head: SkipNode
   private maxLevel: number
 
-  constructor(maxLevel: number = 16) {
+  constructor(maxLevel = 16) {
     const leftWall = Array.from({ length: maxLevel }, () => new SkipNode(-Infinity))
     const rightWall = Array.from({ length: maxLevel }, () => new SkipNode(Infinity))
     for (let i = 0; i < maxLevel - 1; i++) {
@@ -74,7 +74,7 @@ class SkipList implements ISkipList {
         headP = headP.right
       }
     }
-    console.log(preNodes)
+
     let dummy = new SkipNode(0)
     const nodesToInsert = Array.from({ length: this.getRandomLevel() }, () => new SkipNode(num))
     const insertNum = nodesToInsert.length

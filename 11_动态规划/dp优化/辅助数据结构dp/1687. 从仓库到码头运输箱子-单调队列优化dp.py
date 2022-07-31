@@ -10,6 +10,8 @@ from collections import deque
 
 # https://leetcode.cn/problems/delivering-boxes-from-storage-to-ports/solution/python-dan-diao-dui-lie-you-hua-dp-by-98-6elh/
 
+INF = int(1e20)
+
 
 class MonoQueue:
     """具有 O(1) 求 `min` 和 `max` API的 deque"""
@@ -26,18 +28,18 @@ class MonoQueue:
     @property
     def min(self) -> int:
         if not self.minQueue:
-            raise ValueError('monoQueue is empty')
+            raise ValueError("monoQueue is empty")
         return self.minQueue[0][0]
 
     @property
     def max(self) -> int:
         if not self.maxQueue:
-            raise ValueError('monoQueue is empty')
+            raise ValueError("monoQueue is empty")
         return self.maxQueue[0][0]
 
     def popleft(self) -> int:
         if not self.rawQueue:
-            raise IndexError('popleft from empty queue')
+            raise IndexError("popleft from empty queue")
 
         self.minQueue[0][-1] -= 1
         if self.minQueue[0][-1] == 0:
@@ -92,7 +94,7 @@ class Solution:
         for (pre, _), (cur, _) in zip(boxes, boxes[1:]):
             preCost.append(preCost[-1] + int(cur != pre))
 
-        dp = [int(1e20)] * (n + 1)
+        dp = [INF] * (n + 1)
         dp[0] = 0
         for i in range(1, n + 1):
             for j in range(max(0, i - maxBoxes), i):
@@ -109,7 +111,7 @@ class Solution:
         for (pre, _), (cur, _) in zip(boxes, boxes[1:]):
             preCost.append(preCost[-1] + int(cur != pre))
 
-        dp = [int(1e20)] * (n + 1)
+        dp = [INF] * (n + 1)
         dp[0] = 0
         queue = MonoQueue()
         for i in range(n + 1):
@@ -131,4 +133,3 @@ print(Solution().boxDelivering2(boxes=[[1, 1], [2, 1], [1, 1]], _=2, maxBoxes=3,
 # - 卡车将所有箱子装上车，到达码头 1 ，然后去码头 2 ，然后再回到码头 1 ，最后回到仓库，总共需要 4 趟行程。
 # 所以总行程数为 4 。
 # 注意到第一个和第三个箱子不能同时被卸货，因为箱子需要按顺序处理（也就是第二个箱子需要先被送到码头 2 ，然后才能处理第三个箱子）。
-

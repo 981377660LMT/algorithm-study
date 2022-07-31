@@ -25,7 +25,7 @@ class Solution:
             if (row, col) == (0, 0):
                 return [0, 1]
 
-            max_, count = -int(1e20), 0
+            max_, count = -INF, 0
             for dr, dc in DIR3:
                 nr, nc = row + dr, col + dc
                 if 0 <= nr < ROW and 0 <= nc < COL:

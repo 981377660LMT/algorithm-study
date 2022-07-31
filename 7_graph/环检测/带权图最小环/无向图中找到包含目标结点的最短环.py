@@ -3,6 +3,8 @@ from typing import List
 
 # n, m ≤ 250
 # 从目标出发,bfs,回到自己就是最短环
+
+
 class Solution:
     def solve(self, graph: List[List[int]], target: int) -> int:
         queue = deque([(target, 0)])
@@ -24,4 +26,3 @@ class Solution:
 
 
 print(Solution().solve(graph=[[1], [2], [0]], target=0))
-

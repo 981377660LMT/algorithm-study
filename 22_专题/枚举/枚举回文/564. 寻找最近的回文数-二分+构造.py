@@ -3,6 +3,8 @@
 # 11，这个数字比较特殊，返回9
 # https://leetcode-cn.com/problems/find-the-closest-palindrome/comments/467740
 
+INF = int(1e20)
+
 
 class Solution:
     def nearestPalindromic(self, n: str) -> str:
@@ -38,7 +40,7 @@ class Solution:
             return str(int(n) - 1)
 
         target = int(n)
-        minDiff, res = int(1e20), int(1e20)
+        minDiff, res = INF, INF
         bisect(len(n))
         bisect(len(n) + 1)
         bisect(len(n) - 1)
@@ -46,8 +48,7 @@ class Solution:
         return str(res)
 
 
-print(Solution().nearestPalindromic('12422'))
-print(Solution().nearestPalindromic('123'))
-print(Solution().nearestPalindromic('999'))
-print(Solution().nearestPalindromic('9'))
-
+print(Solution().nearestPalindromic("12422"))
+print(Solution().nearestPalindromic("123"))
+print(Solution().nearestPalindromic("999"))
+print(Solution().nearestPalindromic("9"))

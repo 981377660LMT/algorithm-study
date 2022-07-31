@@ -11,7 +11,7 @@ class MajorityChecker {
     for (let i = 0; i < arr.length; i++) {
       const key = arr[i]
       !this.indexMap.has(key) && this.indexMap.set(key, [])
-      this.indexMap.get(key)!.push(i)
+      this.indexMap.get(key)?.push(i)
     }
   }
 

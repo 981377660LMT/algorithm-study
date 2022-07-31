@@ -1,5 +1,7 @@
 from typing import List
 
+INF = int(1e20)
+
 
 def kanade(nums: List[int], getMax=True) -> int:
     """求最大/最小子数组和"""
@@ -7,7 +9,7 @@ def kanade(nums: List[int], getMax=True) -> int:
     if n == 0:
         raise Exception("nums is empty")
 
-    res = -int(1e20) if getMax else int(1e20)
+    res = -INF if getMax else INF
     dp = 0
     for num in nums:
         if getMax:

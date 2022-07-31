@@ -1,10 +1,11 @@
 from typing import List
 
 # 在无序数组中能被二分搜索命中的个数
+INF = int(1e20)
 
 
 class Solution:
-    """ nlogn"""
+    """nlogn"""
 
     def solve(self, nums: List[int]):
         def bisect(left: int, right: int, lower: int, upper: int) -> None:
@@ -23,6 +24,5 @@ class Solution:
             return 1
 
         res = 0
-        bisect(0, len(nums) - 1, -int(1e20), int(1e20))
+        bisect(0, len(nums) - 1, -INF, INF)
         return res
-

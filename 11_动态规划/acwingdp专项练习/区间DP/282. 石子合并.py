@@ -7,6 +7,7 @@ from functools import lru_cache
 from itertools import accumulate
 import sys
 
+INF = int(1e20)
 sys.setrecursionlimit(int(1e9))
 
 n = int(input())
@@ -21,7 +22,7 @@ def dfs(left: int, right: int) -> int:
     if left >= right:
         return 0
 
-    res = int(1e20)
+    res = INF
     for i in range(left, right):
         res = min(res, dfs(left, i) + dfs(i + 1, right) + preSum[right + 1] - preSum[left])
     return res

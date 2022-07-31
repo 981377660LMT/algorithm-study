@@ -13,9 +13,7 @@ class Solution:
     def getMinDistSum1(self, positions: List[List[int]]) -> float:
         # """https://leetcode-cn.com/problems/best-position-for-a-service-centre/solution/5463-fu-wu-zhong-xin-de-zui-jia-wei-zhi-by-tuotuol/"""
         # !每轮按比例缩短步伐 => 爬山法
-        dist = lambda p: sum(
-            sqrt((p[0] - i) ** 2 + (p[1] - j) ** 2) for i, j in positions
-        )
+        dist = lambda p: sum(sqrt((p[0] - i) ** 2 + (p[1] - j) ** 2) for i, j in positions)
         dirs = [(0, 50), (50, 0), (0, -50), (-50, 0)]
         x, y = 50, 50
         for _ in range(90):
@@ -28,16 +26,13 @@ class Solution:
         # https://leetcode.cn/problems/best-position-for-a-service-centre/solution/by-freeyourmind-k558/
         def getSum(target: List[int]):
             return sum(
-                [
-                    sqrt((target[0] - x1) ** 2 + (target[1] - y1) ** 2)
-                    for x1, y1 in positions
-                ]
+                [sqrt((target[0] - x1) ** 2 + (target[1] - y1) ** 2) for x1, y1 in positions]
             )
 
         return minimize(getSum, [50, 50]).fun  # fun is fun
 
     def getMinDistSum(self, positions: List[List[int]]) -> float:
-        """三分求一维凸函数的最值，二维就要对横纵坐标三分两次"""
+        """三分求一维凸函数的极值，二维就要对横纵坐标三分两次"""
 
         def calDistSum(centerX: float, centerY: float) -> float:
             return sum(dist((x, y), (centerX, centerY)) for x, y in positions)

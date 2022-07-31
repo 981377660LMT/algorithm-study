@@ -3,6 +3,7 @@
 from functools import lru_cache
 import sys
 
+INF = int(1e20)
 sys.setrecursionlimit(int(1e9))
 # n<=3000
 
@@ -16,7 +17,7 @@ def dfs1(index: int, count: int, hasPre: bool) -> int:
         if count != need:
             return -int(1e10)
         return scores[index] if hasPre else 0
-    res = -int(1e20)
+    res = -INF
     # 不睡
     res = max(res, dfs1(index + 1, count, False))
     # 睡
@@ -34,7 +35,7 @@ def dfs2(index: int, count: int, hasPre: bool) -> int:
             return -int(1e10)
         return 0
 
-    res = -int(1e20)
+    res = -INF
     # 不睡
     res = max(res, dfs2(index + 1, count, False))
     # 睡

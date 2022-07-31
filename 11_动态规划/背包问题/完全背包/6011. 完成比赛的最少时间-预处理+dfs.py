@@ -16,6 +16,9 @@ from typing import List
 # 1 <= tires.length <= 105
 # 1 <= numLaps <= 1000
 # 2 <= ri <= 105
+INF = int(1e20)
+
+
 class Solution:
     def minimumFinishTime(self, tires: List[List[int]], changeTime: int, numLaps: int) -> int:
         """tires[i] = [fi, ri] 表示第 i 种轮胎如果连续使用，第 x 圈需要耗时 fi * ri(x-1) 秒"""
@@ -28,13 +31,13 @@ class Solution:
             """完全背包"""
             if cur >= numLaps:
                 return 0
-            res = int(1e20)
+            res = INF
             for i, cost in enumerate(prices):
                 score = i + 1
                 res = min(res, dfs(cur + score) + cost + changeTime)
             return res
 
-        prices = [int(1e20)] * 20
+        prices = [INF] * 20
         for a0, q in tires:
             curSum, curItem = 0, a0
             for i in range(len(prices)):
@@ -52,4 +55,3 @@ class Solution:
 # 21 25
 print(Solution().minimumFinishTime(tires=[[2, 3], [3, 4]], changeTime=5, numLaps=4))
 print(Solution().minimumFinishTime(tires=[[1, 10], [2, 2], [3, 4]], changeTime=6, numLaps=5))
-

@@ -1,6 +1,7 @@
 from typing import Deque, List, Tuple
 from collections import deque
 
+INF = int(1e20)
 # 1 <= A.length <= 50000
 # 带限制的子数组/序列问题
 # 1.如果数组中的数据均为非负数的话，那么就对应常规的子数组和问题，可以使用滑动窗口来解决
@@ -15,7 +16,7 @@ class Solution:
         # 存储前缀和，单增；如果加入的前缀和减去队首的前缀和>=k 那么队首就找到了以他开始的最短的子数组，队首就可以退位了
         # 如果加入的前缀和小于队尾的前缀和 直接删除队尾 因为队尾找到符合题意的子数组还得比后面多带个负数 肯定不是最短的
         queue: Deque[Tuple[Index, PreSum]] = deque([(-1, 0)])
-        res = int(1e20)
+        res = INF
         cur = 0
 
         for i, num in enumerate(nums):
@@ -27,5 +28,4 @@ class Solution:
                 queue.pop()
             queue.append((i, cur))
 
-        return res if res != int(1e20) else -1
-
+        return res if res != INF else -1

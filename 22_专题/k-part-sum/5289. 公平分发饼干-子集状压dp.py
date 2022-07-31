@@ -1,5 +1,7 @@
 from typing import List
 
+INF = int(1e20)
+
 
 class Solution:
     def distributeCookies(self, cookies: List[int], k: int) -> int:
@@ -10,12 +12,12 @@ class Solution:
             for preState in range(1 << i):
                 subsum[preState | (1 << i)] = subsum[preState] + cookies[i]
 
-        dp = [int(1e20)] * (1 << n)
+        dp = [INF] * (1 << n)
         for state in range(1 << n):
             dp[state] = subsum[state]
 
         for i in range(1, k):
-            ndp = [int(1e20)] * (1 << n)
+            ndp = [INF] * (1 << n)
             for state in range(1 << n):
                 g1, g2 = state, 0
                 while g1:
@@ -25,4 +27,3 @@ class Solution:
             dp = ndp
 
         return dp[-1]
-

@@ -14,6 +14,8 @@ from bisect import bisect_right
 from typing import List
 from sortedcontainers import SortedList
 
+INF = int(1e20)
+
 
 class Solution:
     def minDifference1(self, nums: List[int]) -> int:
@@ -24,7 +26,7 @@ class Solution:
         nums = [num * 2 for num in nums]
 
         left, curSum = 0, 0
-        res = int(1e20)
+        res = INF
         for right in range(len(nums)):
             curSum += nums[right]
             res = min(res, abs(curSum - target))
@@ -46,7 +48,7 @@ class Solution:
         nums = [num * 2 for num in nums]
 
         preSum = SortedList()
-        res, curSum = int(1e20), 0
+        res, curSum = INF, 0
         for num in nums:
             curSum += num
             pos = bisect_right(preSum, curSum - target)

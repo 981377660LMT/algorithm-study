@@ -5,6 +5,7 @@
 from functools import lru_cache
 from typing import List
 
+INF = int(1e20)
 
 # 时间复杂度O(len(nums)*sum(nums))
 class Solution:
@@ -12,8 +13,8 @@ class Solution:
         @lru_cache(None)
         def dfs(index: int, diff: int) -> int:
             if index == n:
-                return 0 if diff == 0 else -int(1e20)
-            res = -int(1e20)
+                return 0 if diff == 0 else -INF
+            res = -INF
             res = max(res, dfs(index + 1, diff))
             res = max(res, dfs(index + 1, diff - nums[index]))
             res = max(res, dfs(index + 1, diff + nums[index]) + nums[index])

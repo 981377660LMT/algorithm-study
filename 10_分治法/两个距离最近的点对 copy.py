@@ -1,6 +1,8 @@
 # nlogn解法
 # 2 ≤ n ≤ 100,000
 
+INF = int(1e20)
+
 
 class Solution:
     def minDist(self, coordinates):
@@ -8,7 +10,7 @@ class Solution:
             return abs(p1[0] - p2[0]) ** 2 + abs(p1[1] - p2[1]) ** 2
 
         def bruteForce(points):
-            res = int(1e20)
+            res = INF
             for i in range(len(points)):
                 for j in range(i + 1, len(points)):
                     res = min(res, dist(points[i], points[j]))

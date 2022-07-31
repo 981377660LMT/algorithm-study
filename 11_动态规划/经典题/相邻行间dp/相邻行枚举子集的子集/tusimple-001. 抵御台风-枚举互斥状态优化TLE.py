@@ -27,11 +27,12 @@
 # 每一行长度为10，1000行
 from collections import defaultdict
 
+INF = int(1e20)
 n, m = map(int, input().split())
 matrix = [0] * n
 for i in range(n):
-    states = ['1' if char == '#' else '0' for char in input()][::-1]
-    matrix[i] = int(''.join(states), 2)
+    states = ["1" if char == "#" else "0" for char in input()][::-1]
+    matrix[i] = int("".join(states), 2)
 
 
 # 1. 很自然想到的解法是 预先处理每行状态+行间暴力dp：二进制枚举每行每个位置是横着贴/竖着贴，
@@ -73,7 +74,7 @@ dfs1(0, 0, 0, False)
 dfs2(0, 0, 0)
 
 # dp = [defaultdict(lambda: int(1e20)) for _ in range(row)]
-dp = [[int(1e20)] * mask for _ in range(row)]
+dp = [[INF] * mask for _ in range(row)]
 
 for state in range(mask):
     if (state | matrix[0]) == matrix[0]:

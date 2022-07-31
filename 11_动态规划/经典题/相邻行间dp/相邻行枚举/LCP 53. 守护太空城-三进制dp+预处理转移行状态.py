@@ -20,6 +20,8 @@ from functools import lru_cache
 # O(n*3^2m)  n<=100 m<=5
 # 这题数据非常弱 可以预处理行状态+暴力枚举
 
+INF = int(1e20)
+
 
 @lru_cache(None)
 def getDigit(num: int, index: int):
@@ -66,15 +68,15 @@ class Solution:
         for c, r in zip(time, position):
             matrix[r][c - 1] = 1
 
-        dp = defaultdict(lambda: int(1e20))
-        for state in range(3 ** col):
+        dp = defaultdict(lambda: INF)
+        for state in range(3**col):
             if all(getDigit(state, c) != 0 for c in range(col) if matrix[0][c] == 1):
                 dp[state] = costByState[state]
 
         for r in range(1, row):
-            ndp = defaultdict(lambda: int(1e20))
+            ndp = defaultdict(lambda: INF)
             for preState, preCost in dp.items():
-                for curState in range(3 ** col):
+                for curState in range(3**col):
                     if check(r, preState, curState):
                         ndp[curState] = min(ndp[curState], preCost + costByState[curState])
             dp = ndp

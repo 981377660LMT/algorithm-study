@@ -2,6 +2,9 @@
 # 注意到这个乘积是直方图的面积
 
 # 注意到滑动单向性，可以用滑动窗口来解决。
+INF = int(1e20)
+
+
 class Solution:
     def solve(self, nums, pos):
         res = min_ = nums[pos]
@@ -9,8 +12,8 @@ class Solution:
 
         # 从中心向两边扩展
         for _ in range(len(nums) - 1):
-            left = nums[i - 1] if i - 1 >= 0 else -int(1e20)
-            right = nums[j + 1] if j + 1 < len(nums) else -int(1e20)
+            left = nums[i - 1] if i - 1 >= 0 else -INF
+            right = nums[j + 1] if j + 1 < len(nums) else -INF
 
             if left >= right:
                 i -= 1

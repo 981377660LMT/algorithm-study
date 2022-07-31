@@ -7,7 +7,7 @@ from typing import List
 
 
 def getPrimes(n: int) -> List[int]:
-    """筛法求小于等于n的素数 O(nloglogn)"""
+    """埃氏筛求小于等于n的素数 O(nloglogn)"""
     isPrime = [True] * (n + 1)
     for num in range(2, n + 1):
         if isPrime[num]:

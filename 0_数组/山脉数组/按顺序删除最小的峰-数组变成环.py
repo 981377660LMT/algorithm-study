@@ -5,12 +5,14 @@
 from heapq import heapify, heappop, heappush
 from typing import List
 
+INF = int(1e20)
+
 
 class Solution:
     def solve(self, nums: List[int]) -> List[int]:
         n = len(nums)
         # 让数组变成一个环，比较容易解决峰和谷的问题
-        nums.append(-int(1e20))
+        nums.append(-INF)
         neighbors = {nums[i - 1]: [nums[i - 2], nums[i]] for i in range(n + 1)}  # 模拟的链表
         peaks = [val for val in nums if val > max(neighbors[val])]
         heapify(peaks)

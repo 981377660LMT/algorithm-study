@@ -15,7 +15,8 @@ import sys
 from collections import defaultdict
 from typing import DefaultDict, Generic, Hashable, Iterable, List, Optional, Tuple, TypeVar
 
-T = TypeVar('T')
+INF = int(1e20)
+T = TypeVar("T")
 
 
 class UnionFindMap(Generic[T]):
@@ -71,12 +72,12 @@ class UnionFindMap(Generic[T]):
         return True
 
 
-P = TypeVar('P', bound=Hashable)
+P = TypeVar("P", bound=Hashable)
 
 
 def kruskal(n: int, edges: List[Tuple[P, P, int]]) -> int:
     """求最小生成树权值
-    
+
     1. 边权排序
     2. 两两连接不连通的点
     """
@@ -91,7 +92,7 @@ def kruskal(n: int, edges: List[Tuple[P, P, int]]) -> int:
             uf.union(root1, root2)
             hit += 1
 
-    return res if hit == n - 1 else int(1e20)
+    return res if hit == n - 1 else INF
 
 
 sys.setrecursionlimit(int(1e9))
@@ -106,4 +107,4 @@ for _ in range(m):
 
 res = kruskal(n + 1, edges)
 
-print(-1 if res == int(1e20) else res)
+print(-1 if res == INF else res)

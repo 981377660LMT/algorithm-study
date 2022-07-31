@@ -4,7 +4,7 @@ from typing import DefaultDict, Generic, Hashable, TypeVar
 Vertex = TypeVar("Vertex", bound=Hashable)
 Graph = DefaultDict[Vertex, DefaultDict[Vertex, int]]  # 有向带权图,权值为容量
 
-
+INF = int(1e20)
 # region Dinic
 class Dinic(Generic[Vertex]):
     """Dinic 求最大流
@@ -92,7 +92,7 @@ class Dinic(Generic[Vertex]):
             bfs()
             if depth[end] != -1:
                 while True:
-                    delta = dfsWithCurArc(start, int(1e20))  # 多次dfs耗尽流量
+                    delta = dfsWithCurArc(start, INF)  # 多次dfs耗尽流量
                     if delta == 0:
                         break
                     res += delta
@@ -109,7 +109,7 @@ class Dinic(Generic[Vertex]):
         def bfs() -> bool:
             """bfs建立分层处理出每个点的深度并判断是否有增广路"""
             nonlocal depth
-            depth = defaultdict(lambda: int(1e20), {start: 0})
+            depth = defaultdict(lambda: INF, {start: 0})
             visted = set([start])
             queue = deque([start])
             while queue:
@@ -119,7 +119,7 @@ class Dinic(Generic[Vertex]):
                         visted.add(next)
                         depth[next] = depth[cur] + 1
                         queue.append(next)
-            return depth[end] != int(1e20)
+            return depth[end] != INF
 
         def dfs(cur: Vertex, minFlow: int) -> int:
             """dfs增广 不采用当前弧优化
@@ -146,14 +146,14 @@ class Dinic(Generic[Vertex]):
         self._updateRedisualGraph()
 
         res = 0
-        depth = defaultdict(lambda: int(1e20), {start: 0})  # 分层,防止环的影响
+        depth = defaultdict(lambda: INF, {start: 0})  # 分层,防止环的影响
 
         # 只要有增广路 就在分层图里把增广路全部找出来
         while True:
             hasAugmentingPath = bfs()
             if hasAugmentingPath:
                 while True:
-                    delta = dfs(start, int(1e20))  # 多次dfs耗尽流量
+                    delta = dfs(start, INF)  # 多次dfs耗尽流量
                     if delta == 0:
                         break
                     res += delta

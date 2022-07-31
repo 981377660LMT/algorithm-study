@@ -10,11 +10,12 @@ from heapq import heappush, heappop
 # 2 <= n <= 1000
 
 # 1928. 规定时间内到达终点的最小花费.py
+INF = int(1e20)
 
 
 class Solution:
     def minimumCost(self, n: int, highways: List[List[int]], discounts: int) -> int:
-        adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        adjMap = defaultdict(lambda: defaultdict(lambda: INF))
         for u, v, w in highways:
             adjMap[u][v] = min(adjMap[u][v], w)
             adjMap[v][u] = min(adjMap[v][u], w)
@@ -23,7 +24,7 @@ class Solution:
         pq = [(0, 0, 0)]
 
         # 经过每个点的打折次数对应的cost visited[点坐标][打折次数]=cost
-        dist = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        dist = defaultdict(lambda: defaultdict(lambda: INF))
         dist[0][0] = 0
 
         while pq:
@@ -51,4 +52,3 @@ print(
         n=5, highways=[[0, 1, 4], [2, 1, 3], [1, 4, 11], [3, 2, 3], [3, 4, 2]], discounts=1
     )
 )
-

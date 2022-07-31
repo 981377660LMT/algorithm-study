@@ -7,11 +7,13 @@ from typing import List
 # 1 <= arr.length <= 105
 # -104 <= arr[i] <= 104
 
+INF = int(1e20)
+
 
 class Solution:
     def maximumSum(self, arr: List[int]) -> int:
-        res = -int(1e20)
-        remove0, remove1 = -int(1e20), -int(1e20)
+        res = -INF
+        remove0, remove1 = -INF, -INF
         for num in arr:
             # 删0次 删1次
             remove0, remove1 = max(remove0 + num, num), max(remove0, remove1 + num)

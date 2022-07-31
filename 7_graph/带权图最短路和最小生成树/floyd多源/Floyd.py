@@ -10,7 +10,7 @@ if __name__ == "__main__":
     edges = [[0, 1, 2], [1, 0, 3], [2, 1, 1]]  # 无向带权边
 
     # !1.Floyd 求多源最短路
-    dist = [[int(1e20)] * n for _ in range(n)]
+    dist = [[INF] * n for _ in range(n)]
     for i in range(n):
         dist[i][i] = 0
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
 
     # !2.Floyd 最短路计数 (Floyd求两点之间的最短路数)
-    dist = [[int(1e20)] * n for _ in range(n)]
+    dist = [[INF] * n for _ in range(n)]
     for i in range(n):
         dist[i][i] = 0
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
             count[i][j] = count[i][k] * count[k][j]
 
     # !3.Floyd 记录最短路路径
-    dist = [[int(1e20)] * n for _ in range(n)]
+    dist = [[INF] * n for _ in range(n)]
     for i in range(n):
         dist[i][i] = 0
 

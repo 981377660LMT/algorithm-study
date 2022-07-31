@@ -10,6 +10,7 @@ from collections import defaultdict
 import sys
 
 sys.setrecursionlimit(1000000)
+INF = int(1e20)
 
 
 class Tarjan:
@@ -59,7 +60,7 @@ class Tarjan:
                 SCCId += 1
 
         dfsId = 0
-        order, low = [int(1e20)] * n, [int(1e20)] * n
+        order, low = [INF] * n, [INF] * n
 
         visited = [False] * n
         stack = []  # 用来存当前DFS访问的点
@@ -100,4 +101,3 @@ start, end = ind.count(0), outd.count(0)
 print(start)
 # 特判:最后缩成了一个点
 print(0 if SCCId == 1 else max(start, end))
-

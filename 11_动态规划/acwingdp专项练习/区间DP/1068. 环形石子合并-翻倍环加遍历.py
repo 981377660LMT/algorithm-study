@@ -16,7 +16,7 @@ from functools import lru_cache
 from itertools import accumulate
 from typing import Tuple
 
-
+INF = int(1e20)
 n = int(input())
 nums = list(map(int, input().split()))
 
@@ -29,7 +29,7 @@ def dfs(left: int, right: int) -> Tuple[int, int]:
     """[left:right+1]这段区间合并石子的最值"""
     if left >= right:
         return 0, 0
-    max_, min_ = -int(1e20), int(1e20)
+    max_, min_ = -INF, INF
     for i in range(left, right):
         max_ = max(max_, dfs(left, i)[0] + dfs(i + 1, right)[0] + preSum[right + 1] - preSum[left])
         min_ = min(min_, dfs(left, i)[1] + dfs(i + 1, right)[1] + preSum[right + 1] - preSum[left])
@@ -37,11 +37,10 @@ def dfs(left: int, right: int) -> Tuple[int, int]:
 
 
 # 把环形的展开成2*n长度的链！然后遍历每个i到i+n-1的区间
-max_, min_ = -int(1e20), int(1e20)
+max_, min_ = -INF, INF
 for start in range(n):
     curMax, curMin = dfs(start, start + n - 1)
     max_ = max(max_, curMax)
     min_ = min(min_, curMin)
 print(min_)
 print(max_)
-

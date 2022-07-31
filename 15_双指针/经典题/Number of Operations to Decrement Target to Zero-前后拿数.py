@@ -1,5 +1,7 @@
 from typing import List
 
+INF = int(1e20)
+
 
 class Solution:
     def solve(self, nums: List[int], target: int) -> int:
@@ -10,7 +12,7 @@ class Solution:
             return 0
 
         target = sum(nums) - target
-        left, curSum, res = 0, 0, -int(1e20)
+        left, curSum, res = 0, 0, -INF
         if target == 0:
             res = 0
 
@@ -25,7 +27,7 @@ class Solution:
                 if curSum == target:
                     res = max(res, right - left + 1)
 
-        return -1 if res == -int(1e20) else len(nums) - res
+        return -1 if res == -INF else len(nums) - res
 
 
 print(Solution().solve([1], 1))

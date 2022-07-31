@@ -2,12 +2,14 @@ from typing import List
 
 # n ≤ 100,000
 
+INF = int(1e20)
+
 
 class Solution:
     def solve(self, nums: List[int]) -> int:
         """找到nums[i] + nums[j] + (i - j)的最大值(i<j)"""
-        preMax = -int(1e20)
-        res = -int(1e20)
+        preMax = -INF
+        res = -INF
         for i, num in enumerate(nums):
             res = max(res, num - i + preMax)
             preMax = max(preMax, num + i)

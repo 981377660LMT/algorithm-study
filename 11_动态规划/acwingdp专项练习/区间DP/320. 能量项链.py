@@ -6,6 +6,7 @@
 from functools import lru_cache
 import sys
 
+INF = int(1e20)
 sys.setrecursionlimit(int(1e9))
 
 n = int(input())
@@ -22,7 +23,7 @@ def dfs(left: int, right: int) -> int:
     if right - left == 2:
         return nums[left] * nums[left + 1] * nums[left + 2]
 
-    res = -int(1e20)
+    res = -INF
     # 这里是left+1
     for i in range(left + 1, right):
         res = max(res, dfs(left, i) + dfs(i, right) + nums[left] * nums[i] * nums[right])

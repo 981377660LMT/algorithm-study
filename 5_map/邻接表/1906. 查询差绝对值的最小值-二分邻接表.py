@@ -6,6 +6,8 @@ from typing import List
 # 2 <= nums.length <= 1e5
 # 1 <= nums[i] <= 100
 
+INF = int(1e20)
+
 
 class Solution:
     def minDifference(self, nums: List[int], queries: List[List[int]]) -> List[int]:
@@ -16,8 +18,8 @@ class Solution:
         keys = sorted(adjMap.keys())
         res = []
         for left, right in queries:
-            minDiff = int(1e20)
-            pre = -int(1e20)
+            minDiff = INF
+            pre = -INF
 
             for key in keys:
                 indexes = adjMap[key]
@@ -27,10 +29,9 @@ class Solution:
                     minDiff = min(minDiff, key - pre)
                     pre = key
 
-            res.append(minDiff if minDiff != int(1e20) else -1)
+            res.append(minDiff if minDiff != INF else -1)
 
         return res
 
 
 print(Solution().minDifference(nums=[1, 3, 4, 8], queries=[[0, 1], [1, 2], [2, 3], [0, 3]]))
-

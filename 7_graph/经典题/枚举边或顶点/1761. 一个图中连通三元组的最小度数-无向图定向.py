@@ -54,14 +54,14 @@ class Solution:
                 u, v = v, u
             adjMap[u].add(v)
 
-        res = int(1e20)
+        res = INF
         for i in range(n):
             for j in adjMap[i]:
                 for k in adjMap[j]:
                     if k in adjMap[i]:
                         res = min(res, deg[i] + deg[j] + deg[k] - 6)
 
-        return res if res < int(1e20) else -1
+        return res if res < INF else -1
 
 
 print(Solution().minTrioDegree(n=6, edges=[[1, 2], [1, 3], [3, 2], [4, 1], [5, 2], [3, 6]]))

@@ -13,6 +13,7 @@ from functools import lru_cache
 # 等效为两个人一起摘草莓，他们都要到终点；并且都只能向右或向下
 
 DIR2 = [[0, 1], [1, 0]]
+INF = int(1e20)
 
 
 class Solution:
@@ -23,12 +24,12 @@ class Solution:
                 return grid[r1][c1]
 
             if r1 >= ROW or r2 >= ROW or c1 >= COL or c2 >= COL:
-                return -int(1e20)
+                return -INF
 
             if -1 in (grid[r1][c1], grid[r2][c2]):
-                return -int(1e20)
+                return -INF
 
-            res = -int(1e20)
+            res = -INF
             for dr1, dc1 in DIR2:
                 for dr2, dc2 in DIR2:
                     # 两个人一起

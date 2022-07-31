@@ -11,18 +11,20 @@ Cost, ID, Time = int, int, int
 # 1 <= maxTime <= 1000
 # 2 <= n <= 1000
 
+INF = int(1e20)
+
 
 class Solution:
     def minCost(self, maxTime: int, edges: List[List[int]], passingFees: List[int]) -> int:
         """请你返回完成旅行的 最小费用"""
         n = len(passingFees)
-        adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        adjMap = defaultdict(lambda: defaultdict(lambda: INF))
         for u, v, w in edges:
             adjMap[u][v] = min(adjMap[u][v], w)
             adjMap[v][u] = min(adjMap[v][u], w)
 
         pq = [(passingFees[0], 0, 0)]
-        dist = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        dist = defaultdict(lambda: defaultdict(lambda: INF))
         dist[0][0] = passingFees[0]
 
         while pq:

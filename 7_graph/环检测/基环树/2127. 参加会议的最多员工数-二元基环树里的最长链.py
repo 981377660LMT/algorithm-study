@@ -4,16 +4,12 @@ from collections import defaultdict, deque
 from typing import DefaultDict, List, Set, Tuple
 
 
-AdjMap = DefaultDict[int, Set[int]]
-Degrees = List[int]
-
-
 def findCycleAndCalDepth(
-    n: int, adjMap: AdjMap, degrees: Degrees
+    n: int, adjMap: DefaultDict[int, Set[int]], degrees: List[int], *, isDirected: bool
 ) -> Tuple[List[List[int]], List[int]]:
-    """无向基环树找环上的点，并记录每个点在拓扑排序中的最大深度，最外层的点深度为0"""
+    """无/有向基环树找环上的点,并记录每个点在拓扑排序中的最大深度,最外层的点深度为0"""
     depth = [0] * n
-    queue = deque([(i, 0) for i in range(n) if degrees[i] == 1])
+    queue = deque([(i, 0) for i in range(n) if degrees[i] == (0 if isDirected else 1)])
     visited = [False] * n
     while queue:
         cur, dist = queue.popleft()
@@ -21,7 +17,7 @@ def findCycleAndCalDepth(
         for next in adjMap[cur]:
             depth[next] = max(depth[next], dist + 1)
             degrees[next] -= 1
-            if degrees[next] == 1:
+            if degrees[next] == (0 if isDirected else 1):
                 queue.append((next, dist + 1))
 
     def dfs(cur: int, path: List[int]) -> None:
@@ -53,7 +49,7 @@ class Solution:
             degrees[u] += 1
             degrees[v] += 1
 
-        cycleGroup, depth = findCycleAndCalDepth(n, adjMap, degrees)
+        cycleGroup, depth = findCycleAndCalDepth(n, adjMap, degrees, isDirected=False)
         # 两种情况:1.所有的二元基环树里的最长链之和;2.唯一的最长环的长度
         cand1 = sum((1 + depth[i]) for i in range(n) if favorite[favorite[i]] == i)
         cand2 = max(len(cycle) for cycle in cycleGroup)

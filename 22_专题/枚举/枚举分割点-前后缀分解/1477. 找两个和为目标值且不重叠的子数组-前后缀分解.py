@@ -12,13 +12,15 @@ from typing import List
 # 利用前缀和+哈希表可以求出以某一位置为结尾的，和为目标值的子数组的最短长度。
 # 对原数组正序和倒序分别求解一次，就可以枚举找到最终的答案。
 
+INF = int(1e20)
+
 
 class Solution:
     def minSumOfLengths(self, arr: List[int], target: int) -> int:
         def getMins(nums: List[int]) -> List[int]:
             """求出以每个位置为结尾的，和为目标值的子数组的最短长度"""
             n = len(nums)
-            res = [int(1e20)] * n
+            res = [INF] * n
             preSum, curSum = {0: -1}, 0
 
             for i, num in enumerate(nums):
@@ -31,7 +33,7 @@ class Solution:
 
             return res
 
-        res = int(1e20)
+        res = INF
         leftMins = getMins(arr)
         rightMins = getMins(arr[::-1])[::-1]
 
@@ -42,4 +44,3 @@ class Solution:
 
 
 print(Solution().minSumOfLengths(arr=[3, 1, 1, 1, 5, 1, 2, 1], target=3))  # 3
-

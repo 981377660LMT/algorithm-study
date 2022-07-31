@@ -2,11 +2,13 @@
 #   `等价于允许翻转一段子区间的最大子段和`
 from typing import List
 
+INF = int(1e20)
+
 
 def solve(nums: List[int]) -> int:
     def getDp(nums: List[int]) -> List[int]:
         res = [0] * len(nums)
-        curMax, allMax = -int(1e20), -int(1e20)
+        curMax, allMax = -INF, -INF
         for i, num in enumerate(nums):
             if curMax < 0:
                 curMax = 0
@@ -21,4 +23,3 @@ def solve(nums: List[int]) -> int:
 
 
 print(solve([-2, 1, -3, 4, -1, 2, 1, -5, 4]))
-

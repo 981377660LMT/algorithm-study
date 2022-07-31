@@ -1,16 +1,18 @@
 from typing import List
 
+INF = int(1e20)
+
 
 class Node:
-    __slots__ = ('left', 'right', 'sum', 'max', 'lMax', 'rMax')
+    __slots__ = ("left", "right", "sum", "max", "lMax", "rMax")
 
     def __init__(self) -> None:
         self.left = -1
         self.right = -1
         self.sum = 0  # 区间和
-        self.max = -int(1e20)  # 区间最大子数组和
-        self.lMax = -int(1e20)  # 区间左端点的最大子数组和
-        self.rMax = -int(1e20)  # 区间右端点的最大子数组和
+        self.max = -INF  # 区间最大子数组和
+        self.lMax = -INF  # 区间左端点的最大子数组和
+        self.rMax = -INF  # 区间右端点的最大子数组和
 
 
 class SegmentTree:
@@ -43,7 +45,7 @@ class SegmentTree:
         if left <= root.left and root.right <= right:
             return root.max
 
-        res = -int(1e20)
+        res = -INF
         mid = (root.left + root.right) >> 1
         if left <= mid:
             res = max(res, self.query(rt << 1, left, right))
@@ -84,7 +86,7 @@ res = []
 
 for _ in range(m):
     opt, *rest = input().split()
-    if opt == '1':
+    if opt == "1":
         l, r = sorted(map(int, rest))
         # 查询区间 [x,y] 中的最大子数组和
         res.append(str(tree.query(1, l, r)))
@@ -95,4 +97,3 @@ for _ in range(m):
 
 
 print("\n".join(res))
-

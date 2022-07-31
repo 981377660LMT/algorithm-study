@@ -20,7 +20,7 @@
 from functools import lru_cache
 from typing import Tuple
 
-
+INF = int(1e20)
 n = int(input())
 nums = list(map(int, input().split()))
 
@@ -32,7 +32,7 @@ def dfs1(left: int, right: int) -> Tuple[int, int]:
     if left == right:
         return nums[left], left
 
-    res = -int(1e20)
+    res = -INF
     root = -1
     for i in range(left, right + 1):  # !枚举根节点
         # 特殊边界情况

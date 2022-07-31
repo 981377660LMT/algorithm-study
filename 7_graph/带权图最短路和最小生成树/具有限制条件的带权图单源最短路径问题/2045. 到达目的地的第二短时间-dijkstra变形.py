@@ -19,6 +19,8 @@ from heapq import heappush, heappop
 # bfs求次短路
 # 实际上 所有边权都一样可以不用pq 而是普通的deque
 
+INF = int(1e20)
+
 
 class Solution:
     def secondMinimum(self, n: int, edges: List[List[int]], time: int, change: int) -> int:
@@ -29,7 +31,7 @@ class Solution:
             adjMap[v].add(u)
 
         # 每个点保存多个距离而不是只有一个
-        dist = [[int(1e20), int(1e20)] for _ in range(n)]
+        dist = [[INF, INF] for _ in range(n)]
         dist[0][0] = 0
         pq = [(0, 0)]
         res = []

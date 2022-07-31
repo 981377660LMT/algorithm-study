@@ -15,13 +15,16 @@ from typing import List, Tuple
 # 1 <= tires.length <= 105
 # 1 <= numLaps <= 1000
 # 2 <= ri <= 105
+INF = int(1e20)
+
+
 class Solution:
     def minimumFinishTime(self, tires: List[List[int]], changeTime: int, numLaps: int) -> int:
         """tires[i] = [fi, ri] 表示第 i 种轮胎如果连续使用，第 x 圈需要耗时 fi * ri(x-1) 秒"""
         """每一圈后，你可以选择耗费 changeTime 秒 换成 任意一种轮胎（也可以换成当前种类的新轮胎）。"""
         # 预处理出不换轮胎,连续使用同一个轮胎跑 xx 圈的最小耗时 即每个物品的价格
         # 状态转移 每个圈为状态 转移为下一次连续用多少个轮胎
-        prices = [int(1e20)] * 20
+        prices = [INF] * 20
         for a0, q in tires:
             curSum, curItem = 0, a0
             for j in range(20):
@@ -32,7 +35,7 @@ class Solution:
                 curItem *= q
 
         # dp[i]表示第i圈的最小耗时 (容量)
-        dp = [int(1e20)] * (numLaps + 1)
+        dp = [INF] * (numLaps + 1)
         dp[0] = 0
         for i in range(len(prices)):
             for j in range(numLaps + 1):
@@ -46,4 +49,3 @@ class Solution:
 # 21 25
 print(Solution().minimumFinishTime(tires=[[2, 3], [3, 4]], changeTime=5, numLaps=4))
 print(Solution().minimumFinishTime(tires=[[1, 10], [2, 2], [3, 4]], changeTime=6, numLaps=5))
-

@@ -7,11 +7,13 @@ from typing import List
 
 # 每个时刻都有 翻倍与不翻倍
 
+INF = int(1e20)
+
 
 class Solution:
     def maxSumAfterOperation(self, nums: List[int]) -> int:
-        res = -int(1e20)
-        dp0 = dp1 = -int(1e20)
+        res = -INF
+        dp0 = dp1 = -INF
         for i in range(len(nums)):
             dp1 = max(dp1 + nums[i], dp0 + nums[i] * nums[i], nums[i] * nums[i])  # 已经用了
             dp0 = max(dp0 + nums[i], nums[i])  # dont use

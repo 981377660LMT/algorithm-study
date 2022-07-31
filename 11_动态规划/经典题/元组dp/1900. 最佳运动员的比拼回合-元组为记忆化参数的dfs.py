@@ -12,6 +12,7 @@ from typing import List, Tuple
 # 后序dfs
 # product每组取一个的巧妙使用
 # Cartesian product of input iterables. Equivalent to nested for-loops.
+INF = int(1e20)
 
 
 class Solution:
@@ -23,7 +24,7 @@ class Solution:
             if (firstPlayer, secondPlayer) in pairs:
                 return [1, 1]
 
-            res = [int(1e20), -int(1e20)]
+            res = [INF, -INF]
 
             # 每组选1个，笛卡尔积
             for winners in product(*pairs):
@@ -42,8 +43,8 @@ print(Solution().earliestAndLatest(n=11, firstPlayer=2, secondPlayer=4))
 # 匹配足球比赛，给定1.国家和足球队的dict（e.g. {'Italy': [c1, c2]‍‍‌‍‌‍‍‍‍‌‍‍‌‍‍‌‍‍‌‍, 'Spain': [c3], 'France': [c4, c5, c6])
 # 2. 之前踢过比赛的队[c3, c6], [c4, c2], [c5, c1]，要求匹配下一轮的n场比赛（任意一种组合），
 # 要求同一个国家的不能一起比，之前踢过比赛的队也不能一起比。
-mapping = {'C': ['a', 'b'], 'B': ['c', 'd']}
-ok = [['b', 'd']]
+mapping = {"C": ["a", "b"], "B": ["c", "d"]}
+ok = [["b", "d"]]
 visited = set([(a, b) for a, b in ok] + [(b, a) for a, b in ok])
 
 

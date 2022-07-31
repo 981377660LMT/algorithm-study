@@ -7,6 +7,7 @@ from functools import lru_cache
 from typing import Literal
 
 Direction = Literal[-1, 0, 1]
+INF = int(1e20)
 
 
 class Solution:
@@ -20,9 +21,9 @@ class Solution:
             if r == row:
                 return 0
             if matrix[r][c] == 1:
-                return -int(1e20)
+                return -INF
 
-            res = -int(1e20)
+            res = -INF
             if direction == 0:
                 res = max(res, dfs(r, c, 1))
                 res = max(res, dfs(r, c, -1))

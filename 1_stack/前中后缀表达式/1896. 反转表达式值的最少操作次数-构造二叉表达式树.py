@@ -1,8 +1,10 @@
 from typing import Optional, Tuple
 
+INF = int(1e20)
+
 
 class MyNode:
-    def __init__(self, val='0', left: Optional['MyNode'] = None, right: Optional['MyNode'] = None):
+    def __init__(self, val="0", left: Optional["MyNode"] = None, right: Optional["MyNode"] = None):
         self.val = val
         self.left = left
         self.right = right
@@ -19,19 +21,19 @@ class Solution:
         可以反转任意结点的值
         """
 
-        def dfs(root: Optional['MyNode']) -> Tuple[int, int]:
+        def dfs(root: Optional["MyNode"]) -> Tuple[int, int]:
             """返回(变为0的最小操作次数,变为1的最小操作次数)"""
             if not root:
-                return int(1e20), int(1e20)
+                return INF, INF
             if root.val.isdigit():
-                return int(root.val == '1'), int(root.val == '0')
+                return int(root.val == "1"), int(root.val == "0")
 
             left0, left1 = dfs(root.left)
             right0, right1 = dfs(root.right)
-            res0, res1 = int(1e20), int(1e20)
+            res0, res1 = INF, INF
 
-            assert root.val in ('&', '|')
-            if root.val == '&':
+            assert root.val in ("&", "|")
+            if root.val == "&":
                 res0 = min(res0, left0 + right0, left0 + right1, left1 + right0)
                 res1 = min(res1, left1 + right1, left0 + right1 + 1, left1 + right0 + 1)
             else:
@@ -40,21 +42,21 @@ class Solution:
 
             return res0, res1
 
-        weight = dict(zip('(&|', (0, 1, 1)))
+        weight = dict(zip("(&|", (0, 1, 1)))
         numStack, optStack = [], []
-        expression += ')'
+        expression += ")"
         for char in expression:
-            if char == '(':
+            if char == "(":
                 optStack.append(char)
             elif char.isdigit():
                 numStack.append(MyNode(char))
-            elif char in '&|':
+            elif char in "&|":
                 while optStack and weight[optStack[-1]] >= weight[char]:
                     node2, node1 = numStack.pop(), numStack.pop()
                     numStack.append(MyNode(optStack.pop(), node1, node2))
                 optStack.append(char)
-            elif char == ')':
-                while optStack and optStack[-1] != '(':
+            elif char == ")":
+                while optStack and optStack[-1] != "(":
                     ndoe2, node1 = numStack.pop(), numStack.pop()
                     numStack.append(MyNode(optStack.pop(), node1, ndoe2))
                 if optStack:
@@ -67,7 +69,7 @@ class Solution:
         return max(dfs(root))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     def drawtree(root):
         def height(root):
@@ -82,7 +84,7 @@ if __name__ == '__main__':
             if node:
                 t.goto(x, y)
                 jumpto(x, y - 20)
-                t.write(node.val, align='center', font=('Arial', 12, 'normal'))
+                t.write(node.val, align="center", font=("Arial", 12, "normal"))
                 draw(node.left, x - dx, y - 60, dx / 2)
                 jumpto(x, y - 20)
                 draw(node.right, x + dx, y - 60, dx / 2)
@@ -105,4 +107,3 @@ if __name__ == '__main__':
     # print(Solution().minOperationsToFlip(expression="(0&0)&(0&0&0)"))
     print(Solution().minOperationsToFlip(expression="1|1|(0&0)&1"))
     # print(eval("1|1|(0&0)&1"))
-

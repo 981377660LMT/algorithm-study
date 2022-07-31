@@ -3,18 +3,20 @@
 # dp[i][j] = dp[i - 1][k] + (j - k) => (dp[i-1][k]-k)+j  # k<=j
 # dp[i][j]=dp[i-1][k]+(k-j) => (dp[i-1][k]+k)-j # k>=j
 
+INF = int(1e20)
+
 
 class Solution:
     def solve(self, matrix):
         dp = matrix[0]
         for i in range(1, len(matrix)):
-            ndp = [-int(1e20)] * len(matrix[i])
-            left = -int(1e20)
+            ndp = [-INF] * len(matrix[i])
+            left = -INF
             for j in range(len(matrix[i])):
                 left = max(left, dp[j])
                 ndp[j] = max(ndp[j], left + matrix[i][j])
                 left -= 1
-            right = -int(1e20)
+            right = -INF
             for j in range(len(matrix[i]) - 1, -1, -1):
                 right = max(right, dp[j])
                 ndp[j] = max(ndp[j], right + matrix[i][j])

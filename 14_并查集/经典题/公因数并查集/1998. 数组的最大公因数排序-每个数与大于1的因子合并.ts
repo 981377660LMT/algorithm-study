@@ -14,7 +14,7 @@ import { useUnionFindArray } from '../../useUnionFind'
 
 // 最终可交换位置=> 本身相等或他们具有相同的根
 // 如果用两层循环来判断来合并任意两个数，此时必然会超时
-// 因此考虑`将每个数和自己的所有(质)因子进行合并`
+// 因此考虑`将每个数和自己的所有因子进行合并`
 
 function gcdSort(nums: number[]): boolean {
   const n = Math.max(...nums)

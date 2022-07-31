@@ -1,12 +1,13 @@
 from typing import List
 
+INF = int(1e20)
 
 # 给出非负整数数组 A ，返回两个非重叠（连续）子数组中元素的最大和，子数组的长度分别为 L 和 M
 class Solution:
     def maxSumTwoNoOverlap(self, nums: List[int], left: int, right: int):
         def main(nums: List[int], len1: int, len2: int) -> int:
             """len1取前缀,len2取后缀"""
-            preMax = [-int(1e20)] * n
+            preMax = [-INF] * n
             curSum = 0
             for i in range(n):
                 curSum += nums[i]
@@ -15,7 +16,7 @@ class Solution:
                     curSum -= nums[i - (len1 - 1)]
 
             nums = nums[::-1]
-            suffixMax = [-int(1e20)] * n
+            suffixMax = [-INF] * n
             curSum = 0
             for i in range(n):
                 curSum += nums[i]

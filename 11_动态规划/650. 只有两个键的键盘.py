@@ -4,6 +4,8 @@ from collections import Counter
 from functools import lru_cache
 from math import floor
 
+INF = int(1e20)
+
 
 @lru_cache(None)
 def getPrimeFactors(n: int) -> Counter[int]:
@@ -29,10 +31,10 @@ class Solution:
         def dfs(cur: int, paste: int) -> int:
             """记事本上有 cur 个字符，粘贴板上有 paste 个字符"""
             if cur >= n:
-                return 0 if cur == n else int(1e20)
+                return 0 if cur == n else INF
             if paste != 0 and (n - cur) % paste != 0:
-                return int(1e20)
-            res = int(1e20)
+                return INF
+            res = INF
             if paste != 0:
                 res = dfs(cur + paste, paste) + 1
             if paste != cur:

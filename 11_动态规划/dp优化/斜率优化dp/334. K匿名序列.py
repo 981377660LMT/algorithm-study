@@ -15,6 +15,8 @@
 from collections import deque
 from itertools import accumulate
 
+INF = int(1e20)
+
 
 def main():
     def calSlope(j1: int, j2: int) -> float:
@@ -29,13 +31,13 @@ def main():
             return dp[j] - preSum[j] + j * nums[j]
 
         if calX(j1) == calX(j2):
-            return int(1e20)
+            return INF
         return (calY(j2) - calY(j1)) / (calX(j2) - calX(j1))
 
     n, k = map(int, input().split())
     nums = list(map(int, input().split()))
     preSum = [0] + list(accumulate(nums))
-    dp = [int(1e20)] * (n + 1)
+    dp = [INF] * (n + 1)
     dp[0] = 0
     queue = deque([0])
     for i in range(1, n + 1):

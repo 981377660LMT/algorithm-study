@@ -6,6 +6,8 @@
 # 我们需要知道不同区间之间有哪些数，所以前缀统计每个区间不同的数的个数(1-100)
 from typing import List
 
+INF = int(1e20)
+
 
 class Solution:
     def minDifference(self, nums: List[int], queries: List[List[int]]) -> List[int]:
@@ -24,14 +26,14 @@ class Solution:
 
         res = []
         for left, right in queries:
-            minDiff = int(1e20)
-            pre = -int(1e20)
+            minDiff = INF
+            pre = -INF
             for cur in range(1, (max_ + 1)):
                 # 我们通过`个数前缀和数组求得l到r之间有哪些数存在`
                 if preSum[right + 1][cur] - preSum[left][cur] > 0:
                     minDiff = min(minDiff, cur - pre)
                     pre = cur
-            res.append(minDiff if minDiff != int(1e20) else -1)
+            res.append(minDiff if minDiff != INF else -1)
         return res
 
 

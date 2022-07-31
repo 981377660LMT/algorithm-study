@@ -10,6 +10,8 @@ from functools import lru_cache
 # 请你返回你可以获得的披萨大小总和的最大值。
 # !化简为取n/3个不相邻数字的最大和
 
+INF = int(1e20)
+
 
 class Solution:
     def maxSizeSlices(self, slices: List[int]) -> int:
@@ -19,7 +21,7 @@ class Solution:
         def dfs1(index: int, count: int, hasPre: int) -> int:
             """取最后一个"""
             if index == n - 1:
-                return slices[index] if (not hasPre and count == target) else -int(1e20)
+                return slices[index] if (not hasPre and count == target) else -INF
             res = dfs1(index + 1, count, False)
             if not hasPre and count + 1 <= target:
                 res = max(res, dfs1(index + 1, count + 1, True) + slices[index])
@@ -29,7 +31,7 @@ class Solution:
         def dfs2(index: int, count: int, hasPre: int) -> int:
             """不取最后一个"""
             if index == n - 1:
-                return 0 if count == target else -int(1e20)
+                return 0 if count == target else -INF
             res = dfs2(index + 1, count, False)
             if not hasPre and count + 1 <= target:
                 res = max(res, dfs2(index + 1, count + 1, True) + slices[index])

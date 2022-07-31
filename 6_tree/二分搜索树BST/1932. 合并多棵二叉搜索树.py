@@ -1,6 +1,8 @@
 from collections import defaultdict
 from typing import List, Optional
 
+INF = int(1e20)
+
 
 class TreeNode:
     def __init__(self, val=0, left=None, right=None):
@@ -27,12 +29,12 @@ class Solution:
                 val = root.left.val
                 if val in leaves:
                     return None
-                leaves[val] = [root, 'L', False]  # metadata
+                leaves[val] = [root, "L", False]  # metadata
             if root.right:
                 val = root.right.val
                 if val in leaves:
                     return None
-                leaves[val] = [root, 'R', False]
+                leaves[val] = [root, "R", False]
 
         # 遍历根执行合并
         visited, count = [False] * n, 0
@@ -40,7 +42,7 @@ class Solution:
             val = root.val
             if val in leaves:
                 parent, direction, _ = leaves[val]
-                if direction == 'L':
+                if direction == "L":
                     parent.left = root
                 else:
                     parent.right = root
@@ -67,7 +69,7 @@ class Solution:
                 leaves[root.right.val][2] = True
                 dfs(root.right, root.val, upper)
 
-        dfs(root, -int(1e20), int(1e20))
+        dfs(root, -INF, INF)
         if not isValidBST:
             return None
 
@@ -89,4 +91,3 @@ R3.left = R2
 R3.right = R6
 
 print(Solution().canMerge([R5, R3]))
-

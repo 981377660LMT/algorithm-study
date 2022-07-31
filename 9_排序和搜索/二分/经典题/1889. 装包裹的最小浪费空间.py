@@ -6,6 +6,7 @@ from bisect import bisect_right
 # 1 <= n <= 105
 # 模拟，对每个box找能装多少个packages
 MOD = int(1e9 + 7)
+INF = int(1e20)
 
 
 class Solution:
@@ -17,7 +18,7 @@ class Solution:
         请你选择最优箱子供应商，使得总浪费空间最小。如果无法将所有包裹放入箱子中，请你返回 -1
         """
         packages.sort()
-        res = int(1e20)
+        res = INF
 
         for box in boxes:
             box.sort()
@@ -36,7 +37,7 @@ class Solution:
 
             res = min(res, curSum)
 
-        return (res - sum(packages)) % MOD if res < int(1e20) else -1
+        return (res - sum(packages)) % MOD if res < INF else -1
 
 
 print(Solution().minWastedSpace(packages=[2, 3, 5], boxes=[[4, 8], [2, 8]]))

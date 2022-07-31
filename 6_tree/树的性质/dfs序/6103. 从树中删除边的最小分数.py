@@ -12,11 +12,13 @@ from itertools import combinations
 from collections import defaultdict
 from DFSOrder import DFSOrder
 
+INF = int(1e20)
+
 
 class Solution:
     def minimumScore(self, nums: List[int], edges: List[List[int]]) -> int:
         """枚举删除的边的`下`端点
-        
+
         parents写错了 不能只记录一个父节点 而是要记录祖先结点
         优化：判断祖先可以用 dfs 序 而不用dfs先序遍历记录祖先节点
         """
@@ -41,7 +43,7 @@ class Solution:
         dfs(0, -1)
 
         allXor = subXor[0]
-        res = int(1e20)
+        res = INF
 
         # !枚举删除的边的`下`端点 p1 可能是 p2 的祖先节点
         # !注意下端点不能是根节点 不选0
@@ -87,7 +89,7 @@ class Solution:
         dfs(0, -1)
 
         allXor = subXor[0]
-        res = int(1e20)
+        res = INF
         D = DFSOrder(n, adjMap)
 
         for p1, p2 in combinations(range(1, n), 2):

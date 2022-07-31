@@ -6,6 +6,8 @@
 from collections import defaultdict
 from typing import DefaultDict, List, Set
 
+INF = int(1e20)
+
 
 def subsetSum(nums: List[int]) -> DefaultDict[int, Set[int]]:
     """O(2^n)求所有子集的可能和"""
@@ -22,7 +24,7 @@ def subsetSum(nums: List[int]) -> DefaultDict[int, Set[int]]:
 
 def twoSum(nums1: List[int], nums2: List[int], target: int) -> int:
     i, j = 0, len(nums2) - 1
-    res = int(1e20)
+    res = INF
     while i < len(nums1) and j >= 0:
         cand = nums1[i] + nums2[j]
         res = min(res, abs(cand - target))
@@ -46,7 +48,7 @@ class Solution:
             subsetSum(nums[n // 2 :]),
         )
 
-        res = int(1e20)
+        res = INF
         for leftCount in range(n // 2 + 1):
             left, right = sorted(sums1[leftCount]), sorted(sums2[n // 2 - leftCount])
             res = min(res, twoSum(left, right, target))
@@ -55,4 +57,3 @@ class Solution:
 
 print(Solution().minimumDifference([4, 2, 1, 3]))
 print(Solution().minimumDifference([3, 9, 7, 3]))
-

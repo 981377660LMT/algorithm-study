@@ -6,6 +6,8 @@ from typing import List
 # 建图，dijkstra 求 0 到 n-1 的最短路
 # !注意到原图是一个拓扑图(无环)，因此求最短路也可以用 dp O(n)求出 但是不一定比dijkstra快
 
+INF = int(1e20)
+
 
 class Solution:
     def minCost(self, nums: List[int], costs: List[int]) -> int:
@@ -13,11 +15,11 @@ class Solution:
         n = len(nums)
         maxRange = getRange(nums, isMax=True, isRightStrict=True)
         minRange = getRange(nums, isMax=False, isRightStrict=False)
-        adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        adjMap = defaultdict(lambda: defaultdict(lambda: INF))
         for cur, (next1, next2) in enumerate(zip(maxRange, minRange)):
             next1, next2 = next1 + 1, next2 + 1
-            adjMap[cur][next1] = costs[next1] if next1 < n else int(1e20)
-            adjMap[cur][next2] = costs[next2] if next2 < n else int(1e20)
+            adjMap[cur][next1] = costs[next1] if next1 < n else INF
+            adjMap[cur][next2] = costs[next2] if next2 < n else INF
         return dijkstra(adjMap, 0, n - 1)
 
     def minCost2(self, nums: List[int], costs: List[int]) -> int:
@@ -26,17 +28,17 @@ class Solution:
         @lru_cache(None)
         def dfs(cur: int) -> int:
             if cur >= n - 1:
-                return 0 if cur == n - 1 else int(1e20)
-            return min((dfs(next) + adjMap[cur][next] for next in adjMap[cur]), default=int(1e20))
+                return 0 if cur == n - 1 else INF
+            return min((dfs(next) + adjMap[cur][next] for next in adjMap[cur]), default=INF)
 
         n = len(nums)
         maxRange = getRange(nums, isMax=True, isRightStrict=True)
         minRange = getRange(nums, isMax=False, isRightStrict=False)
-        adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        adjMap = defaultdict(lambda: defaultdict(lambda: INF))
         for cur, (next1, next2) in enumerate(zip(maxRange, minRange)):
             next1, next2 = next1 + 1, next2 + 1
-            adjMap[cur][next1] = costs[next1] if next1 < n else int(1e20)
-            adjMap[cur][next2] = costs[next2] if next2 < n else int(1e20)
+            adjMap[cur][next1] = costs[next1] if next1 < n else INF
+            adjMap[cur][next2] = costs[next2] if next2 < n else INF
         return dfs(0)
 
     def minCost3(self, nums: List[int], costs: List[int]) -> int:
@@ -45,17 +47,17 @@ class Solution:
         n = len(nums)
         maxRange = getRange(nums, isMax=True, isRightStrict=True)
         minRange = getRange(nums, isMax=False, isRightStrict=False)
-        adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        adjMap = defaultdict(lambda: defaultdict(lambda: INF))
         deg = defaultdict(int)
         for cur, (next1, next2) in enumerate(zip(maxRange, minRange)):
             next1, next2 = next1 + 1, next2 + 1
-            adjMap[cur][next1] = costs[next1] if next1 < n else int(1e20)
-            adjMap[cur][next2] = costs[next2] if next2 < n else int(1e20)
+            adjMap[cur][next1] = costs[next1] if next1 < n else INF
+            adjMap[cur][next2] = costs[next2] if next2 < n else INF
             deg[next1] += 1
             deg[next2] += 1
 
         queue = deque([0])
-        dist = defaultdict(lambda: int(1e20), {0: 0})
+        dist = defaultdict(lambda: INF, {0: 0})
         while queue:
             cur = queue.popleft()
             for next in adjMap[cur]:
@@ -67,7 +69,12 @@ class Solution:
         return dist[n - 1]
 
 
-def getRange(nums: List[int], *, isMax=False, isRightStrict=False,) -> List[int]:
+def getRange(
+    nums: List[int],
+    *,
+    isMax=False,
+    isRightStrict=False,
+) -> List[int]:
     def compareRight(stackValue: int, curValue: int) -> bool:
         if isRightStrict and isMax:
             return stackValue <= curValue
@@ -92,8 +99,8 @@ from collections import defaultdict
 from heapq import heappop, heappush
 from typing import DefaultDict, Hashable, List, Optional, TypeVar, overload
 
-INF = int(1e20)
-Vertex = TypeVar('Vertex', bound=Hashable)
+INF = INF
+Vertex = TypeVar("Vertex", bound=Hashable)
 Graph = DefaultDict[Vertex, DefaultDict[Vertex, int]]
 
 

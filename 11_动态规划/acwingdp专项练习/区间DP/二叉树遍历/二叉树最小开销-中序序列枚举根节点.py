@@ -15,7 +15,7 @@ from functools import lru_cache
 
 n = int(input())
 nums = [int(i) for i in input().split()]
-
+INF = int(1e20)
 
 # '左中右'
 # 中序遍历的特点：选取其中一个节点，其左边的节点都是其左子树上的节点，其右边的节点都是其右子树上的节点。
@@ -27,7 +27,7 @@ def dfs(left: int, right: int, root: int) -> int:
     if left >= right:
         return 0
 
-    res = int(1e20)
+    res = INF
     for i in range(left, right):
         leftRes = dfs(left, i, nums[i])
         rightRes = dfs(i + 1, right, nums[i])

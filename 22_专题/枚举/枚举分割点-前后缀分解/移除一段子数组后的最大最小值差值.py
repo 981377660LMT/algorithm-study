@@ -6,6 +6,8 @@
 
 from typing import List
 
+INF = int(1e20)
+
 
 def minDiff(nums: List[int], k: int) -> int:
     n = len(nums)
@@ -20,19 +22,19 @@ def minDiff(nums: List[int], k: int) -> int:
         sufMin[~i] = min(sufMin[-i], nums[~i])
         sufMax[~i] = max(sufMax[-i], nums[~i])
 
-    res = int(1e20)
+    res = INF
     left = 0
     for right in range(n):
         if right >= k:
             left += 1
         if right >= k - 1:
             min1, max1 = (
-                preMin[left - 1] if left - 1 >= 0 else int(1e20),
-                preMax[left - 1] if left - 1 >= 0 else -int(1e20),
+                preMin[left - 1] if left - 1 >= 0 else INF,
+                preMax[left - 1] if left - 1 >= 0 else -INF,
             )
             min2, max2 = (
-                sufMin[right + 1] if right + 1 < n else int(1e20),
-                sufMax[right + 1] if right + 1 < n else -int(1e20),
+                sufMin[right + 1] if right + 1 < n else INF,
+                sufMax[right + 1] if right + 1 < n else -INF,
             )
 
             min_ = min(min1, min2)
@@ -43,4 +45,3 @@ def minDiff(nums: List[int], k: int) -> int:
 
 
 print(minDiff([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 0, 0], 3))
-

@@ -5,6 +5,8 @@ from collections import defaultdict
 from itertools import groupby
 from typing import List
 
+INF = int(1e20)
+
 
 class Solution:
     def visibleMountains(self, peaks: List[List[int]]) -> int:
@@ -15,7 +17,7 @@ class Solution:
             adjMap[x].append((x, y))
 
         keys = sorted(adjMap)
-        res, maxY = 0, -int(1e20)
+        res, maxY = 0, -INF
         for key in keys:
             group = adjMap[key]
             cur = 0
@@ -36,7 +38,7 @@ class Solution:
         intervals = [(x - y, x + y) for x, y in peaks]
         intervals.sort(key=lambda x: x[0])
         groups = [list(group) for _, group in groupby(intervals, key=lambda x: x[0])]
-        res, maxRight = 0, -int(1e20)
+        res, maxRight = 0, -INF
         for group in groups:
             cur = 0
             for _, right in group:

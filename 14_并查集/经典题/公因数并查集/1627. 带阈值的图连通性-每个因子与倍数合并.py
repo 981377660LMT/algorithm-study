@@ -36,14 +36,21 @@ class UnionFind:
 # 0 <= threshold <= n
 class Solution:
     def areConnected(self, n: int, threshold: int, queries: List[List[int]]) -> List[bool]:
+        """因子与倍数合并(这样具有传递性)"""
+        ok = set(range(1, n + 1))
         uf = UnionFind(n + 1)
         res = []
 
-        # 枚举因子nlogn
-        for fac in range(threshold + 1, n + 1, 1):  # 按照threshold预处理并查集
-            for multi in range(2 * fac, n + 1, fac):
-                uf.union(fac, multi)
+        # 枚举因子与倍数合并nlogn
+        for i in range(threshold + 1, n + 1):  # 按照threshold预处理并查集
+            for j in range(2 * i, n + 1, i):
+                if j in ok:
+                    uf.union(i, j)
+
         for x, y in queries:  # 判断连通性，在不在一个连通域里
             res.append(uf.isconnected(x, y))
+
         return res
 
+
+print(Solution().areConnected(n=100, threshold=1, queries=[[2, 9]]))

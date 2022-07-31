@@ -13,8 +13,8 @@ def foo(s):
     print(count)
 
 
-foo('as')
+foo("as")
 
 
-# 应该优先使用 nonlocal 而不是 global
+# !global查找比nonlocal查找快
 # 参考1932. 合并多棵二叉搜索树

@@ -23,11 +23,11 @@ class Solution:
         @lru_cache(None)
         def dfs(remain: int) -> int:
             if remain < 0:
-                return int(1e20)
+                return INF
             if remain == 0:
                 return 0
 
-            res = int(1e20)
+            res = INF
             for select in nums:
                 if remain - select < 0:
                     break
@@ -45,7 +45,7 @@ class Solution:
 
     def minimumNumbers2(self, num: int, k: int) -> int:
         """枚举+数学
-        
+
         若多重集里有 n 个整数，那么这些整数之和为 (10*∑ai + n*k)
         只要 (num - nk) 能被 10 整除且大等于 0,就存在一个大小为 n 的集合。返回最小的符合要求的 n 即可
         """

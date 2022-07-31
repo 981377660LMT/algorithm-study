@@ -9,6 +9,7 @@ from functools import lru_cache
 # 也可以决定`选择一段连续的字符`
 
 # to jump or not to jump
+INF = int(1e20)
 
 
 def getLRELen(blockLen: int) -> int:
@@ -26,11 +27,11 @@ class Solution:
         @lru_cache(None)
         def dfs(index: int, count: int) -> int:
             if count > target:
-                return int(1e20)
+                return INF
             if index == len(s):
-                return 0 if count == target else int(1e20)
+                return 0 if count == target else INF
 
-            res = int(1e20)
+            res = INF
             sameCount = 0
             # 我们可以从当前的位置 index 开始向后遍历，只要发现后面有字符和 s[p] 相等，则选取。这样我们可以枚举选取的字符数量，进行状态转移。
             for next in range(index, len(s)):

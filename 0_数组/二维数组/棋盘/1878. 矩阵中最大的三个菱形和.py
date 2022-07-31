@@ -12,6 +12,7 @@ from typing import List, Tuple
 
 DIR4 = [[-1, 0], [0, -1], [1, 0], [0, 1]]
 Point = Tuple[int, int]
+INF = int(1e20)
 
 
 class Solution:
@@ -48,7 +49,7 @@ class Solution:
         for r in range(ROW):
             for c in range(COL):
                 res.add(grid[r][c])
-                for side in range(1, int(1e20)):
+                for side in range(1, INF):
                     up, left, down, right = [(r + side * dr, c + side * dc) for dr, dc in DIR4]
                     if not all(
                         0 <= nr < ROW and 0 <= nc < COL for nr, nc in [up, left, down, right]

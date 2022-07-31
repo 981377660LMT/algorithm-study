@@ -5,19 +5,21 @@
 # 思路：对每个b[j] 找离他最近的元素
 from bisect import bisect_right
 
+INF = int(1e20)
+
 
 class Solution:
     def solve(self, a, b, c):
         def getNearest(nums, target):
             pos = bisect_right(nums, target)
-            left = nums[pos - 1] if pos > 0 else int(1e20)
-            right = nums[pos] if pos < len(nums) else int(1e20)
+            left = nums[pos - 1] if pos > 0 else INF
+            right = nums[pos] if pos < len(nums) else INF
             if abs(target - left) < abs(target - right):
                 return left
             return right
 
         a, b, c = sorted(a), sorted(b), sorted(c)
-        res = int(1e20)
+        res = INF
         for i in range(len(b)):
             cur = b[i]
             n1, n2 = getNearest(a, cur), getNearest(c, cur)

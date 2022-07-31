@@ -3,7 +3,7 @@ from operator import add, mul, sub
 from typing import List, Tuple
 
 # 1 ≤ n ≤ 200
-
+INF = int(1e20)
 OPTIONS = [add, sub, mul]
 
 
@@ -14,7 +14,7 @@ class Solution:
             if left == right:
                 return nums[left], nums[left]
 
-            min_, max_ = int(1e20), -int(1e20)
+            min_, max_ = INF, -INF
             for mid in range(left, right):
                 for leftRes in dfs(left, mid):
                     for rightRes in dfs(mid + 1, right):

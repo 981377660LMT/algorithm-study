@@ -5,6 +5,7 @@
 
 from bisect import bisect_right
 
+INF = int(1e20)
 
 n, m = map(int, input().split())
 tasks = []
@@ -13,12 +14,12 @@ for _ in range(n):
     tasks.append((cost, value))
 
 tasks.sort()
-preMax = [-int(1e20)]  # 动态更新
+preMax = [-INF]  # 动态更新
 
 res = 0
 for i, (cost, value) in enumerate(tasks):
     remainCost = m - cost
-    pos = bisect_right(tasks, (remainCost, int(1e20))) - 1
+    pos = bisect_right(tasks, (remainCost, INF)) - 1
     if pos >= 0:
         res = max(res, value + preMax[min(pos, len(preMax) - 1)])
     preMax.append(max(preMax[-1], value))

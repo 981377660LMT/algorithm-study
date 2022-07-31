@@ -1,6 +1,8 @@
 from functools import lru_cache
 from typing import List
 
+INF = int(1e20)
+
 
 class Solution:
     def maxSumTwoNoOverlap(self, nums: List[int], k: int):
@@ -12,11 +14,11 @@ class Solution:
         @lru_cache(None)
         def dfs(index: int, remain: int, isPreSelected: bool) -> int:
             if remain < 0:
-                return -int(1e20)
+                return -INF
             if index == n:
-                return 0 if remain == 0 else -int(1e20)
+                return 0 if remain == 0 else -INF
 
-            res = -int(1e20)
+            res = -INF
             skip = dfs(index + 1, remain, False)
             choose1 = nums[index] + dfs(index + 1, remain - 1, True)
             if isPreSelected:

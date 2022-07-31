@@ -6,16 +6,20 @@ from typing import List
 # 1 <= m <= 100
 # 1 <= n <= 20
 # 1 <= target <= m
+
+INF = int(1e20)
+
+
 class Solution:
     def minCost(self, houses: List[int], cost: List[List[int]], m: int, n: int, target: int) -> int:
         @lru_cache(None)
         def dfs(index: int, remain: int, pre: int) -> int:
             if remain < 0:
-                return int(1e20)
+                return INF
             if index == m:
-                return 0 if remain == 0 else int(1e20)
+                return 0 if remain == 0 else INF
 
-            res = int(1e20)
+            res = INF
             if houses[index] == 0:
                 for i in range(n):
                     color = i + 1
@@ -29,4 +33,3 @@ class Solution:
         res = dfs(0, target, -1)
         dfs.cache_clear()
         return res if res < int(1e19) else -1
-

@@ -13,16 +13,18 @@ from heapq import heappop, heappush
 # 这两个星球的最短距离是多少。
 #
 
+INF = int(1e20)
+
 
 class Solution:
     def Length(self, serialP, serialQ, path, nn):
-        adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        adjMap = defaultdict(lambda: defaultdict(lambda: INF))
         for u, v, w in path:
             adjMap[u][v] = min(adjMap[u][v], w)
             adjMap[v][u] = min(adjMap[v][u], w)
 
         pq = [(0, num) for num in serialP]
-        dist = defaultdict(lambda: int(1e20))
+        dist = defaultdict(lambda: INF)
         target = set(serialQ)
         while pq:
             curDist, cur = heappop(pq)

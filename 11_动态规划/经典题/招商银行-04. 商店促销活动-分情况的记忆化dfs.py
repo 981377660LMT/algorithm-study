@@ -45,7 +45,7 @@ class Solution:
         def dfs1(index: int, ca: int, cb: int) -> float:
             """A购买三个或三个以上"""
             if index == n:
-                return 0 if ca >= 3 else int(1e20)
+                return 0 if ca >= 3 else INF
 
             costA, costB = goods[index]
             costA *= DISCOUNT  # 用分数类来计算,不能写*0.7/或者打折的乘以7，不打折的乘以10，最后除以10
@@ -59,7 +59,7 @@ class Solution:
         def dfs2(index: int, ca: int, cb: int) -> float:
             """A购买少于三个"""
             if ca > 2:
-                return int(1e20)
+                return INF
             if index == n:
                 return 0
 
@@ -86,4 +86,3 @@ class Solution:
 
 
 print(Solution().goShopping(priceA=[3, 13, 5, 12], priceB=[28, 12, 20, 7]))
-

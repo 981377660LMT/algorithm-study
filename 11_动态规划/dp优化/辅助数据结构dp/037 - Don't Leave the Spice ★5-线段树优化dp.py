@@ -16,10 +16,11 @@ import sys
 sys.setrecursionlimit(int(1e9))
 input = sys.stdin.readline
 MOD = int(1e9 + 7)
+INF = int(1e20)
 
 
 class MaxSegmentTree:
-    _MIN = -int(1e20)  # !注意是0还是-inf
+    _MIN = -INF  # !注意是0还是-inf
 
     """RMQ 最大值(区间和可叠加) 线段树
     
@@ -34,14 +35,12 @@ class MaxSegmentTree:
         self._build(1, 1, n, nums)
 
     def query(self, left: int, right: int) -> int:
-        """闭区间[left,right]的最大值
-        """
+        """闭区间[left,right]的最大值"""
         assert 1 <= left <= right <= self._n, f"{left},{right} out of range [1,{self._n}]"
         return self._query(1, left, right, 1, self._n)
 
     def update(self, left: int, right: int, delta: int) -> None:
-        """闭区间[left,right]区间更新delta
-        """
+        """闭区间[left,right]区间更新delta"""
         assert 1 <= left <= right <= self._n, f"{left},{right} out of range [1,{self._n}]"
         self._update(1, left, right, 1, self._n, delta)
 
@@ -113,7 +112,7 @@ for _ in range(n):
     left, right, score = map(int, input().split())
     goods.append((left, right, score))
 
-dp = [-int(1e20)] * (volumn + 1)
+dp = [-INF] * (volumn + 1)
 dp[0] = 0
 for i in range(goods[0][0], goods[0][1] + 1):
     dp[i] = goods[0][2]

@@ -3,8 +3,8 @@ from heapq import heappop, heappush
 from typing import List
 
 
-mapping = {(-1, 0): '^', (1, 0): 'v', (0, -1): '<', (0, 1): '>'}
-
+mapping = {(-1, 0): "^", (1, 0): "v", (0, -1): "<", (0, 1): ">"}
+INF = int(1e20)
 # LCP 56. 信物传送
 
 
@@ -15,7 +15,7 @@ class Solution:
         sr, sc = start
         pq = [(0, sr, sc)]
 
-        dist = [[int(1e20)] * COL for _ in range(ROW)]
+        dist = [[INF] * COL for _ in range(ROW)]
         dist[sr][sc] = 0
 
         while pq:
@@ -40,7 +40,7 @@ class Solution:
         sr, sc = start
         queue = deque([(0, sr, sc)])
 
-        dist = [[int(1e20)] * COL for _ in range(ROW)]
+        dist = [[INF] * COL for _ in range(ROW)]
         dist[sr][sc] = 0
 
         while queue:

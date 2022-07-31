@@ -6,6 +6,8 @@ from typing import List
 from collections import Counter, defaultdict, deque
 from functools import lru_cache
 
+INF = int(1e20)
+
 
 class Solution:
     def minStickers(self, stickers: List[str], target: str) -> int:
@@ -16,7 +18,7 @@ class Solution:
             if not cur:
                 return 0
 
-            res = int(1e20)
+            res = INF
             for select in counters:
                 # 排列剪枝成组合
                 if cur[0] not in select:
@@ -28,28 +30,28 @@ class Solution:
         # 耗尽Counter删除word里的字符
         def replace(counter: Counter, word: str) -> str:
             for char in counter:
-                word = word.replace(char, '', counter[char])
+                word = word.replace(char, "", counter[char])
             return word
 
         counters = [Counter(s) for s in stickers]
         res = dfs(target)
         dfs.cache_clear()
-        return res if res != int(1e20) else -1
+        return res if res != INF else -1
 
     def minStickers2(self, stickers: List[str], target: str) -> int:
         """bfs求无权图最短路"""
         # 耗尽Counter删除word里的字符
         def replace(counter: Counter, word: str) -> str:
             for char in counter:
-                word = word.replace(char, '', counter[char])
+                word = word.replace(char, "", counter[char])
             return word
 
         counters = [Counter(s) for s in stickers]
-        dist = defaultdict(lambda: int(1e20))
+        dist = defaultdict(lambda: INF)
         queue = deque([(target, 0)])
         while queue:
             cur, curDist = queue.popleft()
-            if cur == '':
+            if cur == "":
                 return curDist
             for select in counters:
                 # 排列剪枝成组合
