@@ -1,10 +1,17 @@
 # 求阶乘
 
-from functools import lru_cache
-from math import factorial
-
+##########################################
+# 1.阶乘打表
 
 MOD = int(1e9 + 7)
+fac = [1, 1, 2]
+for i in range(int(2e5) + 10):
+    fac.append(fac[-1] * len(fac) % MOD)
+
+print(fac[20], fac[10])
+##########################################
+# 2.记忆化
+from functools import lru_cache
 
 
 @lru_cache(None)
@@ -22,14 +29,9 @@ def ifac(n: int) -> int:
 
 
 ##########################################
-# 阶乘打表
-F = [1, 1, 2]
-while len(F) < int(1e6):
-    F.append(F[-1] * len(F) % MOD)
-
+from math import factorial
 
 if __name__ == "__main__":
     print(fac(10))
     # 不要用这个 无法取模容易超时
     print(factorial(10))
-    print(F[20], F[10])

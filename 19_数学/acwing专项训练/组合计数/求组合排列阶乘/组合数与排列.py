@@ -1,9 +1,43 @@
-# 求组合数
-from functools import lru_cache
+# 求组合数/排列数
 
+#########################################################################
+# 1.阶乘打表
 
 MOD = int(1e9 + 7)
-# 1. 逆元最快
+fac = [1]
+ifac = [1]
+for i in range(1, int(2e5) + 10):
+    fac.append((fac[-1] * i) % MOD)
+    ifac.append((ifac[-1] * pow(i, MOD - 2, MOD)) % MOD)
+
+
+def C(n: int, k: int) -> int:
+    if n < 0 or k < 0 or n < k:
+        return 0
+    return ((fac[n] * ifac[k]) % MOD * ifac[n - k]) % MOD
+
+
+def A(n: int, k: int) -> int:
+    if n < 0 or k < 0 or n < k:
+        return 0
+    return (fac[n] * ifac[n - k]) % MOD
+
+
+def CWithReplacement(n: int, k: int) -> int:
+    """可重复选取的组合数 itertools.combinations_with_replacement 的个数"""
+    return C(n + k - 1, k)
+
+
+def put(n: int, k: int) -> int:
+    """n个物品放入k个槽(槽可空)的方案数"""
+    return C(n + k - 1, k - 1)
+
+
+#########################################################################
+# 2.阶乘记忆化(慢些)
+from functools import lru_cache
+
+MOD = int(1e9 + 7)
 
 
 @lru_cache(None)

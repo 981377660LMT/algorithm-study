@@ -82,30 +82,39 @@ function usePersistentSegmentTree(nums: number[]) {
   }
 
   return {
-    query,
+    query
   }
 }
 
 /**
- * @description 查询区间[`left`,`right`]里的第k小数是几
+ * 查询区间第k小数是几
+ * !把数都变成负数就变成区间第k大了
  */
 class KthTree {
-  private readonly tree: ReturnType<typeof usePersistentSegmentTree>
+  private readonly _tree: ReturnType<typeof usePersistentSegmentTree>
+  private readonly _isMin: boolean
 
-  constructor(nums: number[]) {
-    this.tree = usePersistentSegmentTree(nums)
+  constructor(nums: number[], isMin: boolean) {
+    nums = isMin ? nums.slice() : nums.map(num => -num)
+    this._tree = usePersistentSegmentTree(nums)
+    this._isMin = isMin
   }
 
   /**
-   * @description 查询区间[`left`,`right`]里的第k小数是几
+   * 查询区间[`left`,`right`]里的第k小数是几
+   *
+   * @param left left >= 0
+   * @param right right >= 0
+   * @param k k >= 1
    */
   query(left: number, right: number, k: number): number {
-    return this.tree.query(left, right, k)
+    const res = this._tree.query(left, right, k)
+    return this._isMin ? res : -res
   }
 }
 
 if (require.main === module) {
-  const solution = new KthTree([1, 5, 2, 6, 3, 7, 4])
+  const solution = new KthTree([1, 5, 2, 6, 3, 7, 4], false)
   console.log(solution.query(2 - 1, 5 - 1, 3))
   console.log(solution.query(4 - 1, 4 - 1, 1))
   console.log(solution.query(1 - 1, 7 - 1, 3))

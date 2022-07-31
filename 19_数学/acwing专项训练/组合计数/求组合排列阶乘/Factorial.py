@@ -6,13 +6,6 @@ from typing import Tuple
 
 
 class Factorial:
-    def __init__(self, MOD: int):
-        self._mod = MOD
-        self._fac = [1]
-        self._size = 1
-        self._iFac = [1]
-        self._iSize = 1
-
     @staticmethod
     def xgcd(a: int, b: int) -> Tuple[int, int, int]:
         """return (g, x, y) such that a*x + b*y = g = gcd(a, b) ;扩展欧几里得"""
@@ -22,6 +15,13 @@ class Factorial:
             y0, y1 = y1, y0 - q * y1
             x0, x1 = x1, x0 - q * x1
         return b, x0, y0
+
+    def __init__(self, MOD: int):
+        self._mod = MOD
+        self._fac = [1]
+        self._size = 1
+        self._iFac = [1]
+        self._iSize = 1
 
     def F(self, n: int) -> int:
         """n! % mod; factorial"""
@@ -49,6 +49,10 @@ class Factorial:
         """
         t = self._fact_inv(n - 1) * self._fact_inv(k) % self._mod
         return self(n + k - 1) * t % self._mod
+
+    def Catalan(self, n: int) -> int:
+        """卡特兰数"""
+        return self.C(2 * n, n) // (n + 1)
 
     def put(self, n: int, k: int) -> int:
         """n个物品放入k个槽(槽可空)的方案数"""
@@ -99,3 +103,6 @@ if __name__ == "__main__":
     print(f.CWithReplacement(4, 2))
     print(f.put(3, 2))  # 4
     print(f.put(4, 2))  # 5
+
+    for i in range(5):
+        print(f.Catalan(i))
