@@ -33,6 +33,11 @@ def put(n: int, k: int) -> int:
     return C(n + k - 1, k - 1)
 
 
+def catalan(n: int) -> int:
+    """卡特兰数"""
+    return C(2 * n, n) // (n + 1)
+
+
 #########################################################################
 # 2.阶乘记忆化(慢些)
 from functools import lru_cache

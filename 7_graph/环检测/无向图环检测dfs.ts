@@ -1,4 +1,4 @@
-function hasCycle(adjList: number[][]) {
+function hasCycle(adjList: number[][]): boolean {
   const n = adjList.length
   const visited = Array<boolean>(n).fill(false)
 
@@ -27,7 +27,7 @@ console.log(
   hasCycle([
     [1, 2],
     [0, 2],
-    [0, 1],
+    [0, 1]
   ])
 )
 

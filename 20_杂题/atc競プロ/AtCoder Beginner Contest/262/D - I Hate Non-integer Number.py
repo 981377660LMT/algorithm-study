@@ -1,9 +1,11 @@
 # n<=100 ai<=1e9
 # !求平均数为整数的非空子集个数
+
 # 确定选择的元素个数之后dp 因为限定了元素个数才知道mod是否为0(平均数为整数)
 # !dp(index,remain,mod)
 # !O(n^4)
 
+# !启示:dp比记忆化dfs快两倍左右 时间卡的紧最好dp
 import sys
 import os
 
@@ -13,7 +15,6 @@ MOD = 998244353
 INF = int(4e18)
 
 
-# !启示:dp比记忆化dfs快两倍左右 时间卡的紧最好dp
 def main() -> None:
     # !TLE
     # def cal(select: int) -> int:

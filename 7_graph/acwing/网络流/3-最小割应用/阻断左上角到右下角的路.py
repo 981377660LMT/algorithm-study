@@ -88,7 +88,7 @@ DIR4 = [[1, 0], [-1, 0], [0, 1], [0, -1]]
 # 2 ≤ n, m ≤ 250
 
 
-# !把边拆成点 in out
+# !把边拆成点 in out  即把每个点拆成 `i 和 i + OFFSET`
 # https://binarysearch.com/problems/Walled-Off/solutions/2865567
 class Solution:
     def solve(self, matrix: List[List[int]]):
@@ -100,12 +100,12 @@ class Solution:
                 if matrix[r][c] == 1:
                     continue
                 cur = r * COL + c
-                adjMap[cur][cur + OFFSET] = 1
+                adjMap[cur][cur + OFFSET] = 1  # !in 容量为1(割边费用为1)
                 for dr, dc in DIR4:
                     nr, nc = r + dr, c + dc
                     if (0 <= nr < ROW) and (0 <= nc < COL) and (matrix[nr][nc] == 0):
                         next = nr * COL + nc
-                        adjMap[cur + OFFSET][next] = int(1e20)
+                        adjMap[cur + OFFSET][next] = int(1e20)  # !out 容量无限大
 
         return Dinic(adjMap).calMaxFlow(0 + OFFSET, ROW * COL - 1)
 

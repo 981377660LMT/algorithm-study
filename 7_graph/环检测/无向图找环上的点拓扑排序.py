@@ -26,7 +26,7 @@ from typing import DefaultDict, List, Set, Tuple
 #     return cycle
 
 
-def findCycle(n: int, adjMap: DefaultDict[int, Set[int]], degrees: List[int]) -> Set[int]:
+def findCycle(n: int, adjMap: DefaultDict[int, Set[int]], degrees: List[int]) -> List[int]:
     """无向图找环上的点 拓扑排序，剪掉所有树枝"""
     queue = deque([i for i in range(n) if degrees[i] == 1])
     visited = [False] * n
@@ -41,4 +41,4 @@ def findCycle(n: int, adjMap: DefaultDict[int, Set[int]], degrees: List[int]) ->
                 queue.append(next)
 
     onCycle = [i for i in range(n) if not visited[i]]
-    return set(onCycle)
+    return onCycle

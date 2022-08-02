@@ -4,9 +4,9 @@
 # 1.阶乘打表
 
 MOD = int(1e9 + 7)
-fac = [1, 1, 2]
-for i in range(int(2e5) + 10):
-    fac.append(fac[-1] * len(fac) % MOD)
+fac = [1]
+for i in range(1, int(2e5) + 10):
+    fac.append(fac[-1] * i % MOD)
 
 print(fac[20], fac[10])
 ##########################################

@@ -398,8 +398,6 @@ const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()
 大致上是:
 `静态成员 => 示例成员 => 构造函数 => 静态方法 => 实例方法 => 属性访问符/魔法方法`
 
-- atcoder 要写记忆化 dfs 的话 要用 python3.8 提交而不是 pypy3
-
 - lc 的 python 参数
   lc 上 python 的 recursion_limit 是 550000
 
