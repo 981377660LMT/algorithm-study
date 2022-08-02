@@ -1,98 +1,113 @@
 # https://www.acwing.com/activity/content/code/content/2053055/
 
-import sys
 
 from collections import defaultdict, deque
+from typing import DefaultDict, Set
 
 
 class Dinic:
-    INF = int(1e20)
+    """Dinic 求最大流
 
-    def __init__(self, start: int, end: int) -> None:
-        self._graph = defaultdict(lambda: defaultdict(int))
+    如果一个流的残量网络里面没有可行流，那么这个流就是最大流
+
+    时间复杂度:O(V^2*E)
+    """
+
+    INF = int(1e18)
+
+    def __init__(self, n: int, *, start: int, end: int) -> None:
+        """n为节点个数 start为源点 end为汇点"""
+        self._n = n
         self._start = start
         self._end = end
-
-    def calMaxFlow(self) -> int:
-        def bfs() -> None:
-            nonlocal depth, curArc
-            depth = defaultdict(lambda: -1, {start: 0})
-            visted = set([start])
-            queue = deque([start])
-            curArc = {cur: iter(self._reGraph[cur].keys()) for cur in self._reGraph.keys()}
-            while queue:
-                cur = queue.popleft()
-                for child in self._reGraph[cur]:
-                    if (child not in visted) and (self._reGraph[cur][child] > 0):
-                        visted.add(child)
-                        depth[child] = depth[cur] + 1
-                        queue.append(child)
-
-        def dfsWithCurArc(cur: int, minFlow: int) -> int:
-            if cur == end:
-                return minFlow
-            flow = 0
-            while True:
-                if flow >= minFlow:
-                    break
-
-                child = next(curArc[cur], None)
-                if child is not None:
-                    if (depth[child] == depth[cur] + 1) and (self._reGraph[cur][child] > 0):
-                        nextFlow = dfsWithCurArc(
-                            child, min(minFlow - flow, self._reGraph[cur][child])
-                        )
-                        if nextFlow == 0:
-                            depth[child] = -1
-                        self._reGraph[cur][child] -= nextFlow
-                        self._reGraph[child][cur] += nextFlow
-                        flow += nextFlow
-                else:
-                    break
-            return flow
-
-        self._updateRedisualGraph()
-        start, end = self._start, self._end
-        res = 0
-        depth = defaultdict(lambda: -1, {start: 0})
-        curArc = dict()
-
-        while True:
-            bfs()
-            if depth[end] != -1:
-                while True:
-                    delta = dfsWithCurArc(start, Dinic.INF)
-                    if delta == 0:
-                        break
-                    res += delta
-            else:
-                break
-        return res
+        self._graph = [[] for _ in range(n)]  # [next, remain, rEdge][]
 
     def addEdge(self, v1: int, v2: int, w: int) -> None:
         """添加边 v1->v2, 容量为w"""
-        self._graph[v1][v2] += w
+        forward = [v2, w, None]
+        backward = [v1, 0, forward]
+        forward[2] = backward  # type: ignore
+        self._graph[v1].append(forward)
+        self._graph[v2].append(backward)
 
-    def getFlowOfEdge(self, v1: int, v2: int) -> int:
-        """边的流量=容量-残量"""
-        assert v1 in self._graph and v2 in self._graph[v1]
-        return self._graph[v1][v2] - self._reGraph[v1][v2]
+    def addMultiEdge(self, v1: int, v2: int, w1: int, w2: int) -> None:
+        """针对重边的情况 需要将重边处理后一起添加
 
-    def getRemainOfEdge(self, v1: int, v2: int) -> int:
+        添加边 v1->v2, 容量为w1
+        添加边 v2->v1, 容量为w2
+        """
+        edge1 = [v2, w1, None]
+        edge2 = [v1, w2, edge1]
+        edge1[2] = edge2  # type: ignore
+        self._graph[v1].append(edge1)
+        self._graph[v2].append(edge2)
+
+    def calMaxFlow(self) -> int:
+        flow = 0
+        graph, INF, start, end = self._graph, self.INF, self._start, self._end
+        while self._bfs():
+            (*self._it,) = map(iter, graph)  # 当前弧优化 每次分配完的边就不再dfs了
+            delta = self.INF
+            while delta:
+                delta = self._dfs(start, end, INF)
+                flow += delta
+        return flow
+
+    def getEdgeRemain(self) -> DefaultDict[int, DefaultDict[int, int]]:
         """边的残量(剩余的容量)"""
-        assert v1 in self._graph and v2 in self._graph[v1]
-        return self._reGraph[v1][v2]
+        res = defaultdict(lambda: defaultdict(int))
+        for edge in self._graph:
+            pre, next, remain = edge[2][0], edge[0], edge[1]
+            res[pre][next] = remain
+        return res
 
-    def _updateRedisualGraph(self) -> None:
-        """残量图 存储每条边的剩余流量"""
-        self._reGraph = defaultdict(lambda: defaultdict(int))
-        for cur in self._graph:
-            for next in self._graph[cur]:
-                self._reGraph[cur][next] = self._graph[cur][next]
-                self._reGraph[next].setdefault(cur, 0)
+    def getPath(self) -> Set[int]:
+        """最大流经过了哪些点"""
+        visited = set()
+        stack = [self._start]
+        while stack:
+            cur = stack.pop()
+            visited.add(cur)
+            for next, remain, _ in self._graph[cur]:
+                if next not in visited and remain > 0:
+                    visited.add(next)
+                    stack.append(next)
+        return visited
+
+    def _bfs(self) -> bool:
+        """建立分层图"""
+        self._level = level = [None] * self._n
+        start, end = self._start, self._end
+        queue = deque([start])
+        level[start] = 0  # type: ignore
+        graph = self._graph
+        while queue:
+            cur = queue.popleft()
+            dist = level[cur] + 1  # type: ignore
+            for next, remain, _ in graph[cur]:
+                if level[next] is None and remain > 0:
+                    level[next] = dist
+                    queue.append(next)
+        return level[end] is not None
+
+    def _dfs(self, cur: int, target: int, flow: int) -> int:
+        """寻找增广路"""
+        if cur == target:
+            return flow
+        level = self._level
+        for edge in self._it[cur]:  # type: ignore
+            next, remain, rEdge = edge
+            if remain and level[cur] < level[next]:  # type: ignore
+                delta = self._dfs(next, target, min(flow, remain))
+                if delta:
+                    edge[1] -= delta
+                    rEdge[1] += delta
+                    return delta
+        return 0
 
 
 # endregion
+import sys
 
 # 图中可能存在重边和自环
 input = sys.stdin.readline
