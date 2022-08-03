@@ -2,7 +2,16 @@ from typing import List, Sequence, Tuple
 
 
 def useSA(ords: Sequence[int]) -> Tuple[List[int], List[int], List[int]]:
-    """返回 sa, rank, height 数组"""
+    """返回 sa, rank, height 数组
+
+    Args:
+        ords: 可比较的整数序列
+
+    Returns:
+        sa: 每个排名对应的后缀
+        rank: 每个后缀对应的排名
+        height: 第 i 名的后缀与它前一名的后缀的 `最长公共前缀`的长度
+    """
     sa = getSA(ords)
     n, k = len(sa), 0
     rank, height = [0] * n, [0] * n

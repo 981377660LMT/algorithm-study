@@ -1,5 +1,4 @@
-# https://www.acwing.com/activity/content/code/content/2053055/
-
+"""Dinic算法 数组存边"""
 
 from collections import defaultdict, deque
 from typing import DefaultDict, Set
@@ -17,37 +16,25 @@ class Dinic:
 
     def __init__(self, n: int, *, start: int, end: int) -> None:
         """n为节点个数 start为源点 end为汇点"""
-        self._n = n
+        self._n = n + 5
         self._start = start
         self._end = end
-        self._graph = [[] for _ in range(n)]  # [next, remain, rEdge][]
+        self._graph = [[] for _ in range(n + 5)]  # [next, remain, rEdge][]
 
     def addEdge(self, v1: int, v2: int, w: int) -> None:
-        """添加边 v1->v2, 容量为w"""
+        """添加边 v1->v2, 容量为w 注意重边影响"""
         forward = [v2, w, None]
         backward = [v1, 0, forward]
         forward[2] = backward  # type: ignore
         self._graph[v1].append(forward)
         self._graph[v2].append(backward)
 
-    def addMultiEdge(self, v1: int, v2: int, w1: int, w2: int) -> None:
-        """针对重边的情况 需要将重边处理后一起添加
-
-        添加边 v1->v2, 容量为w1
-        添加边 v2->v1, 容量为w2
-        """
-        edge1 = [v2, w1, None]
-        edge2 = [v1, w2, edge1]
-        edge1[2] = edge2  # type: ignore
-        self._graph[v1].append(edge1)
-        self._graph[v2].append(edge2)
-
     def calMaxFlow(self) -> int:
         flow = 0
         graph, INF, start, end = self._graph, self.INF, self._start, self._end
         while self._bfs():
-            (*self._it,) = map(iter, graph)  # 当前弧优化 每次分配完的边就不再dfs了
-            delta = self.INF
+            (*self._it,) = map(iter, graph)  # 当前弧优化
+            delta = INF
             while delta:
                 delta = self._dfs(start, end, INF)
                 flow += delta
@@ -56,9 +43,10 @@ class Dinic:
     def getEdgeRemain(self) -> DefaultDict[int, DefaultDict[int, int]]:
         """边的残量(剩余的容量)"""
         res = defaultdict(lambda: defaultdict(int))
-        for edge in self._graph:
-            pre, next, remain = edge[2][0], edge[0], edge[1]
-            res[pre][next] = remain
+        for edges in self._graph:
+            for edge in edges:
+                pre, next, remain = edge[2][0], edge[0], edge[1]
+                res[pre][next] = remain
         return res
 
     def getPath(self) -> Set[int]:
@@ -94,8 +82,8 @@ class Dinic:
         """寻找增广路"""
         if cur == target:
             return flow
-        level = self._level
-        for edge in self._it[cur]:  # type: ignore
+        level, iters = self._level, self._it
+        for edge in iters[cur]:  # type: ignore
             next, remain, rEdge = edge
             if remain and level[cur] < level[next]:  # type: ignore
                 delta = self._dfs(next, target, min(flow, remain))
@@ -106,18 +94,27 @@ class Dinic:
         return 0
 
 
-# endregion
-import sys
+if __name__ == "__main__":
 
-# 图中可能存在重边和自环
-input = sys.stdin.readline
-n, m, start, end = map(int, input().split())
-adjMap = defaultdict(lambda: defaultdict(int))
+    # 给定一个包含 n 个点 m 条边的有向图，并给定每条边的容量，边的容量非负。
+    # 图中可能存在重边和自环。求从点 S 到点 T 的最大流。
 
-# 从点 u 到点 v 存在一条有向边，容量为 c。
-for _ in range(m):
-    u, v, c = map(int, input().split())
-    adjMap[u][v] += c  # 可能存在重边
+    import sys
 
-maxFlow = Dinic(start, end)
-print(maxFlow.calMaxFlow())
+    sys.setrecursionlimit(int(1e9))
+
+    input = sys.stdin.readline
+    n, m, start, end = map(int, input().split())
+    adjMap = defaultdict(lambda: defaultdict(int))  # 用于去重
+
+    # 从点 u 到点 v 存在一条有向边，容量为 c。
+    for _ in range(m):
+        u, v, w = map(int, input().split())
+        adjMap[u][v] += w  # 可能存在重边
+
+    maxFlow = Dinic(n + 10, start=start, end=end)
+    for cur in adjMap:
+        for next, cap in adjMap[cur].items():
+            maxFlow.addEdge(cur, next, cap)
+
+    print(maxFlow.calMaxFlow())

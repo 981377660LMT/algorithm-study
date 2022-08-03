@@ -4,36 +4,42 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function orderlyQueue(s: string, k: number): string {
   if (k > 1) return s.split('').sort().join('')
-  return findMinimunIsomorphic(s)
+  return findIsomorphic(s)
 }
 
-function findMinimunIsomorphic(str: string): string {
+function findIsomorphic(str: string, isMin = true): string {
   if (str.length <= 1) return str
 
   const n = str.length
-  let i = 0
-  let j = 1
-  let k = 0
+  let i1 = 0
+  let i2 = 1
+  let same = 0
 
-  while (i < n && j < n && k < n) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const diff = str.codePointAt((i + k) % n)! - str.codePointAt((j + k) % n)!
+  while (i1 < n && i2 < n && same < n) {
+    const diff = compare(str[(i1 + same) % n], str[(i2 + same) % n])
 
     if (diff === 0) {
-      k++
+      same++
       continue
     }
 
-    if (diff > 0) i += k + 1
-    else if (diff < 0) j += k + 1
+    if (diff > 0) i1 += same + 1
+    else if (diff < 0) i2 += same + 1
 
-    if (i === j) j++
+    if (i1 === i2) i2++
 
-    k = 0
+    same = 0
   }
 
-  const res = i > j ? j : i
-  return str.slice(res) + str.slice(0, res)
+  const res = Math.min(i1, i2)
+
+  return `${str.slice(res)}${str.slice(0, res)}`
+
+  function compare(a: string, b: string): number {
+    if (a === b) return 0
+    if (isMin) return a > b ? 1 : -1
+    return a < b ? -1 : 1
+  }
 }
 
 export {}

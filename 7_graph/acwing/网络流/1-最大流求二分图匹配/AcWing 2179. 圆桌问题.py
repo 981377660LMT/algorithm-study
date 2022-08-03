@@ -1,78 +1,101 @@
-from collections import defaultdict
-from typing import DefaultDict
 from collections import defaultdict, deque
+from typing import Set
 
-Graph = DefaultDict[int, DefaultDict[int, int]]  # 有向带权图,权值为容量
 
+class MaxFlowMap:
+    INF = int(1e18)
 
-class Dinic:
-    def __init__(self, graph: Graph) -> None:
-        self._graph = graph
+    def __init__(self, start: int, end: int) -> None:
+        self._graph = defaultdict(lambda: defaultdict(int))
+        self._start = start
+        self._end = end
 
-    def calMaxFlow(self, start: int, end: int) -> int:
-        def bfs() -> None:
-            nonlocal depth, curArc
-            depth = defaultdict(lambda: -1, {start: 0})
-            visted = set([start])
-            queue = deque([start])
-            curArc = {cur: iter(self._reGraph[cur].keys()) for cur in self._reGraph.keys()}
-            while queue:
-                cur = queue.popleft()
-                for child in self._reGraph[cur]:
-                    if (child not in visted) and (self._reGraph[cur][child] > 0):
-                        visted.add(child)
-                        depth[child] = depth[cur] + 1
-                        queue.append(child)
-
-        def dfsWithCurArc(cur: int, minFlow: int) -> int:
-            if cur == end:
-                return minFlow
-            flow = 0
-            while True:
-                if flow >= minFlow:
-                    break
-                try:
-                    child = next(curArc[cur])
-                    if (depth[child] == depth[cur] + 1) and (self._reGraph[cur][child] > 0):
-                        nextFlow = dfsWithCurArc(
-                            child, min(minFlow - flow, self._reGraph[cur][child])
-                        )
-                        if nextFlow == 0:
-                            depth[child] = -1
-                        self._reGraph[cur][child] -= nextFlow
-                        self._reGraph[child][cur] += nextFlow
-                        flow += nextFlow
-                except StopIteration:
-                    break
-            return flow
-
+    def calMaxFlow(self) -> int:
         self._updateRedisualGraph()
+        start, end, INF = self._start, self._end, self.INF
+        flow = 0
 
-        res = 0
-        depth = defaultdict(lambda: -1, {start: 0})
-        curArc = dict()
+        while self._bfs():
+            delta = INF
+            while delta:
+                delta = self._dfs(start, end, INF)
+                flow += delta
+        return flow
 
-        while True:
-            bfs()
-            if depth[end] != -1:
-                while True:
-                    delta = dfsWithCurArc(start, int(1e20))
-                    if delta == 0:
-                        break
-                    res += delta
-            else:
-                break
-        return res
+    def addEdge(self, v1: int, v2: int, w: int, *, cover=False) -> None:
+        """添加边 v1->v2, 容量为w
+
+        Args:
+            v1: 边的起点
+            v2: 边的终点
+            w: 边的容量
+            cover: 是否覆盖原有边
+        """
+        if cover:
+            self._graph[v1][v2] = w
+        else:
+            self._graph[v1][v2] += w
 
     def getFlowOfEdge(self, v1: int, v2: int) -> int:
+        """边的流量=容量-残量"""
+        assert v1 in self._graph and v2 in self._graph[v1]
         return self._graph[v1][v2] - self._reGraph[v1][v2]
 
+    def getRemainOfEdge(self, v1: int, v2: int) -> int:
+        """边的残量(剩余的容量)"""
+        assert v1 in self._graph and v2 in self._graph[v1]
+        return self._reGraph[v1][v2]
+
+    def getPath(self) -> Set[int]:
+        """最大流经过了哪些点"""
+        visited = set()
+        stack = [self._start]
+        reGraph = self._reGraph
+        while stack:
+            cur = stack.pop()
+            visited.add(cur)
+            for next, remain in reGraph[cur].items():
+                if next not in visited and remain > 0:
+                    visited.add(next)
+                    stack.append(next)
+        return visited
+
     def _updateRedisualGraph(self) -> None:
+        """残量图 存储每条边的剩余流量"""
         self._reGraph = defaultdict(lambda: defaultdict(int))
         for cur in self._graph:
-            for next in self._graph[cur]:
-                self._reGraph[cur][next] = self._graph[cur][next]
-                self._reGraph[next].setdefault(cur, 0)
+            for next, cap in self._graph[cur].items():
+                self._reGraph[cur][next] = cap
+                self._reGraph[next].setdefault(cur, 0)  # 注意自环边
+
+    def _bfs(self) -> bool:
+        self._depth = depth = defaultdict(lambda: -1, {self._start: 0})
+        reGraph, start, end = self._reGraph, self._start, self._end
+        queue = deque([start])
+        self._iters = {cur: iter(reGraph[cur].keys()) for cur in reGraph.keys()}
+        while queue:
+            cur = queue.popleft()
+            nextDist = depth[cur] + 1
+            for next, remain in reGraph[cur].items():
+                if depth[next] == -1 and remain > 0:
+                    depth[next] = nextDist
+                    queue.append(next)
+
+        return depth[end] != -1
+
+    def _dfs(self, cur: int, end: int, flow: int) -> int:
+        if cur == end:
+            return flow
+        reGraph, depth, iters = self._reGraph, self._depth, self._iters
+        for next in iters[cur]:
+            remain = reGraph[cur][next]
+            if remain and depth[cur] < depth[next]:
+                nextFlow = self._dfs(next, end, min(flow, remain))
+                if nextFlow:
+                    reGraph[cur][next] -= nextFlow
+                    reGraph[next][cur] += nextFlow
+                    return nextFlow
+        return 0
 
 
 # 假设有来自 m 个不同单位的代表参加一次国际会议。
@@ -84,31 +107,34 @@ class Dinic:
 # 接下来的 m 行给出每个单位代表的就餐桌号。
 # 如果有多个满足要求的方案，只要求输出 1 个方案。
 
-
+# m<=150
+# n<=270
+# 最大流建模： 源点 => 人分组 => 餐桌分组 => 汇点
 m, n = map(int, input().split())  # m: 代表数量, n: 餐桌数量
 adjMap = defaultdict(lambda: defaultdict(int))
 nums = list(map(int, input().split()))
 caps = list(map(int, input().split()))
-
-START, END = -1, int(1e9)
+START, END, OFFSET = -1, int(1e9), 1000
+maxFlow = MaxFlowMap(START, END)
 for i, num in enumerate(nums):
-    adjMap[-1][i] = num
+    maxFlow.addEdge(START, i, num)
 for i, cap in enumerate(caps):
-    adjMap[i + 1000][END] = cap
+    maxFlow.addEdge(i + OFFSET, END, cap)
 for i in range(len(nums)):
     for j in range(len(caps)):
-        adjMap[i][j + 1000] = 1
+        maxFlow.addEdge(i, j + OFFSET, 1)
 
-maxFlow = Dinic(adjMap)
-count = maxFlow.calMaxFlow(START, END)
+
+count = maxFlow.calMaxFlow()
 if count == sum(nums):
     print(1)
 else:
     print(0)
     exit(0)
+
 for i in range(len(nums)):
     res = []
     for j in range(len(caps)):
-        if maxFlow.getFlowOfEdge(i, j + 1000) > 0:
+        if maxFlow.getFlowOfEdge(i, j + OFFSET) > 0:
             res.append(j + 1)
     print(*res)
