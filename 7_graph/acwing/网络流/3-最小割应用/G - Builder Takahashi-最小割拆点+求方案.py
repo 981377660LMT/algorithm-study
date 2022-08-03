@@ -57,36 +57,40 @@ if __name__ == "__main__":
     from typing import Set
 
     class MaxFlow:
+        """Dinic算法 字典存残量图 速度一般"""
+
         def __init__(self, start: int, end: int) -> None:
             self.graph = defaultdict(lambda: defaultdict(int))  # 原图
+            self._reGraph = defaultdict(lambda: defaultdict(int))  # 残量图
             self._start = start
             self._end = end
 
         def calMaxFlow(self) -> int:
-            self._updateRedisualGraph()
-            start, end = self._start, self._end
-            flow = 0
+            reGraph, start, end = self._reGraph, self._start, self._end
+            res = 0
 
             while self._bfs():
-                delta = INF
-                while delta:
-                    delta = self._dfs(start, end, INF)
-                    flow += delta
-            return flow
+                self._iters = {cur: iter(reGraph[cur].keys()) for cur in reGraph}
+                res += self._dfs(start, end, INF)
+            return res
 
-        def addEdge(self, v1: int, v2: int, w: int, *, cover=False) -> None:
+        def addEdge(self, v1: int, v2: int, w: int, *, cover=True) -> None:
             """添加边 v1->v2, 容量为w
 
             Args:
                 v1: 边的起点
                 v2: 边的终点
                 w: 边的容量
-                cover: 是否覆盖原有边
+                cover: 是否覆盖原有边 默认为覆盖
             """
             if cover:
                 self.graph[v1][v2] = w
+                self._reGraph[v1][v2] = w
+                self._reGraph[v2].setdefault(v1, 0)  # 注意自环边
             else:
                 self.graph[v1][v2] += w
+                self._reGraph[v1][v2] += w
+                self._reGraph[v2].setdefault(v1, 0)
 
         def getFlowOfEdge(self, v1: int, v2: int) -> int:
             """边的流量=容量-残量"""
@@ -107,47 +111,44 @@ if __name__ == "__main__":
                 cur = stack.pop()
                 visited.add(cur)
                 for next, remain in reGraph[cur].items():
-                    if next not in visited and remain > 0:
+                    if remain > 0 and next not in visited:
                         visited.add(next)
                         stack.append(next)
             return visited
-
-        def _updateRedisualGraph(self) -> None:
-            """残量图 存储每条边的剩余流量"""
-            self._reGraph = defaultdict(lambda: defaultdict(int))
-            for cur in self.graph:
-                for next, cap in self.graph[cur].items():
-                    self._reGraph[cur][next] = cap
-                    self._reGraph[next].setdefault(cur, 0)  # 注意自环边
 
         def _bfs(self) -> bool:
             self._depth = depth = defaultdict(lambda: -1, {self._start: 0})
             reGraph, start, end = self._reGraph, self._start, self._end
             queue = deque([start])
-            self._iters = {cur: iter(reGraph[cur].keys()) for cur in reGraph.keys()}
+
             while queue:
                 cur = queue.popleft()
                 nextDist = depth[cur] + 1
                 for next, remain in reGraph[cur].items():
-                    if depth[next] == -1 and remain > 0:
+                    if remain > 0 and depth[next] == -1:
                         depth[next] = nextDist
+                        if next == end:
+                            return True
                         queue.append(next)
 
-            return depth[end] != -1
+            return False
 
         def _dfs(self, cur: int, end: int, flow: int) -> int:
             if cur == end:
                 return flow
+            res = flow
             reGraph, depth, iters = self._reGraph, self._depth, self._iters
             for next in iters[cur]:
                 remain = reGraph[cur][next]
-                if remain and depth[cur] < depth[next]:
-                    nextFlow = self._dfs(next, end, min(flow, remain))
-                    if nextFlow:
-                        reGraph[cur][next] -= nextFlow
-                        reGraph[next][cur] += nextFlow
-                        return nextFlow
-            return 0
+                if remain > 0 and depth[cur] + 1 == depth[next]:
+                    delta = self._dfs(next, end, min(res, remain))
+                    reGraph[cur][next] -= delta
+                    reGraph[next][cur] += delta
+                    res -= delta
+                    if res == 0:
+                        return flow
+
+            return flow - res
 
     if os.environ.get("USERNAME", " ") == "caomeinaixi":
         while True:

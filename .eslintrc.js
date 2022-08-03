@@ -6,7 +6,7 @@ module.exports = {
   extends: ['plugin:@typescript-eslint/recommended'],
   plugins: ['@typescript-eslint'],
   env: {
-    node: true,
+    node: true
   },
-  rules: {},
+  rules: { '@typescript-eslint/no-non-null-assertion': 0 }
 }

@@ -4,14 +4,14 @@
 enum State {
   Empty = 0,
   BrokenOrLastAlive = 1,
-  Stable = 2,
+  Stable = 2
 }
 
 const DIR4 = [
   [0, 1],
   [0, -1],
   [1, 0],
-  [-1, 0],
+  [-1, 0]
 ]
 
 // 逆推:
@@ -72,7 +72,7 @@ console.log(
   hitBricks(
     [
       [1, 0, 0, 0],
-      [1, 1, 1, 0],
+      [1, 1, 1, 0]
     ],
     [[1, 0]]
   )
@@ -90,3 +90,4 @@ console.log(
 // [[1,0,0,0],
 //  [0,0,0,0]]
 // 因此，结果为 [2] 。
+export {}

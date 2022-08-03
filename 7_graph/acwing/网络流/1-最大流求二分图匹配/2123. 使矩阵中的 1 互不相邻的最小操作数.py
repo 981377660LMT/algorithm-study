@@ -1,102 +1,142 @@
 from collections import defaultdict, deque
 from typing import List, Set
 
-
 INF = int(1e18)
 
 
-class MaxFlow:
-    def __init__(self, start: int, end: int) -> None:
-        self.graph = defaultdict(lambda: defaultdict(int))  # 原图
+class ATCMaxFlow:
+    """Dinic算法 数组+边存图 速度较快"""
+
+    __slots__ = (
+        "_n",
+        "_start",
+        "_end",
+        "_reGraph",
+        "_edges",
+        "_visitedEdge",
+        "_levels",
+        "_curEdges",
+    )
+
+    def __init__(self, n: int, *, start: int, end: int) -> None:
+        if not (0 <= start < n and 0 <= end < n):
+            raise ValueError(f"start: {start}, end: {end} out of range [0,{n}]")
+
+        self._n = n
         self._start = start
         self._end = end
+        self._reGraph = [[] for _ in range(n)]  # 残量图存边的序号
+        self._edges = []  # [next,capacity]
+
+        self._visitedEdge = set()
+
+        self._levels = [0] * n
+        self._curEdges = [0] * n
+
+    def addEdge(self, v1: int, v2: int, capacity: int) -> None:
+        """添加边 v1->v2, 容量为w 注意会添加重边"""
+        self._visitedEdge.add((v1, v2))
+        self._reGraph[v1].append(len(self._edges))
+        self._edges.append([v2, capacity])
+        self._reGraph[v2].append(len(self._edges))
+        self._edges.append([v1, 0])
+
+    def addEdgeIfAbsent(self, v1: int, v2: int, capacity: int) -> None:
+        """如果边不存在则添加边 v1->v2, 容量为w"""
+        if (v1, v2) in self._visitedEdge:
+            return
+        self._visitedEdge.add((v1, v2))
+        self._reGraph[v1].append(len(self._edges))
+        self._edges.append([v2, capacity])
+        self._reGraph[v2].append(len(self._edges))
+        self._edges.append([v1, 0])
 
     def calMaxFlow(self) -> int:
-        self._updateRedisualGraph()
-        start, end = self._start, self._end
-        flow = 0
+        n, start, end = self._n, self._start, self._end
+        res = 0
 
         while self._bfs():
-            delta = INF
-            while delta:
-                delta = self._dfs(start, end, INF)
-                flow += delta
-        return flow
-
-    def addEdge(self, v1: int, v2: int, w: int, *, cover=False) -> None:
-        """添加边 v1->v2, 容量为w
-
-        Args:
-            v1: 边的起点
-            v2: 边的终点
-            w: 边的容量
-            cover: 是否覆盖原有边
-        """
-        if cover:
-            self.graph[v1][v2] = w
-        else:
-            self.graph[v1][v2] += w
-
-    def getFlowOfEdge(self, v1: int, v2: int) -> int:
-        """边的流量=容量-残量"""
-        assert v1 in self.graph and v2 in self.graph[v1]
-        return self.graph[v1][v2] - self._reGraph[v1][v2]
-
-    def getRemainOfEdge(self, v1: int, v2: int) -> int:
-        """边的残量(剩余的容量)"""
-        assert v1 in self.graph and v2 in self.graph[v1]
-        return self._reGraph[v1][v2]
+            self._curEdges = [0] * n
+            res += self._dfs(start, end, INF)
+        return res
 
     def getPath(self) -> Set[int]:
         """最大流经过了哪些点"""
         visited = set()
-        stack = [self._start]
-        reGraph = self._reGraph
-        while stack:
-            cur = stack.pop()
+        queue = [self._start]
+        reGraph, edges = self._reGraph, self._edges
+        while queue:
+            cur = queue.pop()
             visited.add(cur)
-            for next, remain in reGraph[cur].items():
-                if next not in visited and remain > 0:
+            for ei in reGraph[cur]:
+                edge = edges[ei]
+                next, remain = edge
+                if remain > 0 and next not in visited:
                     visited.add(next)
-                    stack.append(next)
+                    queue.append(next)
         return visited
 
-    def _updateRedisualGraph(self) -> None:
-        """残量图 存储每条边的剩余流量"""
-        self._reGraph = defaultdict(lambda: defaultdict(int))
-        for cur in self.graph:
-            for next, cap in self.graph[cur].items():
-                self._reGraph[cur][next] = cap
-                self._reGraph[next].setdefault(cur, 0)  # 注意自环边
+    def useQueryRemainOfEdge(self):
+        """求边的残量(剩余的容量)::
+
+        ```python
+        maxFlow = ATCMaxFlow(n, start, end)
+        query = maxFlow.useQueryRemainOfEdge()
+        edgeRemain = query(v1, v2)
+        ```
+        """
+
+        def query(v1: int, v2: int) -> int:
+            return adjList[v1][v2]
+
+        n, reGraph, edges = self._n, self._reGraph, self._edges
+        adjList = [defaultdict(int) for _ in range(n)]
+        for cur in range(n):
+            for ei in reGraph[cur]:
+                edge = edges[ei]
+                next, remain = edge
+                adjList[cur][next] += remain
+
+        return query
 
     def _bfs(self) -> bool:
-        self._depth = depth = defaultdict(lambda: -1, {self._start: 0})
-        reGraph, start, end = self._reGraph, self._start, self._end
+        n, reGraph, start, end, edges = self._n, self._reGraph, self._start, self._end, self._edges
+        self._levels = level = [-1] * n
         queue = deque([start])
-        self._iters = {cur: iter(reGraph[cur].keys()) for cur in reGraph.keys()}
+
         while queue:
             cur = queue.popleft()
-            nextDist = depth[cur] + 1
-            for next, remain in reGraph[cur].items():
-                if depth[next] == -1 and remain > 0:
-                    depth[next] = nextDist
+            nextDist = level[cur] + 1
+            for ei in reGraph[cur]:
+                next, remain = edges[ei]
+                if remain > 0 and level[next] == -1:
+                    level[next] = nextDist
+                    if next == end:
+                        return True
                     queue.append(next)
 
-        return depth[end] != -1
+        return False
 
     def _dfs(self, cur: int, end: int, flow: int) -> int:
         if cur == end:
             return flow
-        reGraph, depth, iters = self._reGraph, self._depth, self._iters
-        for next in iters[cur]:
-            remain = reGraph[cur][next]
-            if remain and depth[cur] < depth[next]:
-                nextFlow = self._dfs(next, end, min(flow, remain))
-                if nextFlow:
-                    reGraph[cur][next] -= nextFlow
-                    reGraph[next][cur] += nextFlow
-                    return nextFlow
-        return 0
+        res = flow
+        reGraph, level, curEdges, edges = self._reGraph, self._levels, self._curEdges, self._edges
+        ei = curEdges[cur]
+        while ei < len(reGraph[cur]):
+            ej = reGraph[cur][ei]
+            next, remain = edges[ej]
+            if remain > 0 and level[cur] + 1 == level[next]:
+                delta = self._dfs(next, end, min(res, remain))
+                edges[ej][1] -= delta
+                edges[ej ^ 1][1] += delta
+                res -= delta
+                if res == 0:
+                    return flow
+            curEdges[cur] += 1
+            ei = curEdges[cur]
+
+        return flow - res
 
 
 # 相邻两个1组成一条边，每条边都要去掉一个端点，其实是找最小点覆盖，即求二分图的最大匹配，跑匈牙利算法
@@ -107,8 +147,9 @@ DIR2 = [(0, 1), (1, 0)]
 class Solution:
     def minimumOperations(self, grid: List[List[int]]) -> int:
         ROW, COL = len(grid), len(grid[0])
-        START, END = -1, -2
-        maxFlow = MaxFlow(start=START, end=END)
+        n = ROW * COL
+        START, END = n + 4, n + 5
+        maxFlow = ATCMaxFlow(n + 10, start=START, end=END)
 
         for r in range(ROW):
             for c in range(COL):
@@ -119,9 +160,9 @@ class Solution:
                         if 0 <= nr < ROW and 0 <= nc < COL and grid[nr][nc] == 1:
                             next = nr * COL + nc
                             v1, v2 = (next, cur) if (r + c) & 1 else (cur, next)
-                            maxFlow.addEdge(v1, v2, 1, cover=True)
-                            maxFlow.addEdge(START, v1, 1, cover=True)
-                            maxFlow.addEdge(v2, END, 1, cover=True)
+                            maxFlow.addEdgeIfAbsent(v1, v2, 1)
+                            maxFlow.addEdgeIfAbsent(START, v1, 1)
+                            maxFlow.addEdgeIfAbsent(v2, END, 1)
 
         return maxFlow.calMaxFlow()
 

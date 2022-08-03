@@ -23,7 +23,7 @@ class MaxFlow:
                 flow += delta
         return flow
 
-    def addEdge(self, v1: int, v2: int, w: int, *, cover=False) -> None:
+    def addEdge(self, v1: int, v2: int, w: int, *, cover=True) -> None:
         """添加边 v1->v2, 容量为w
 
         Args:

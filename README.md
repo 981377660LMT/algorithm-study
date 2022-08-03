@@ -70,7 +70,7 @@
    - [Kuhn-Munkres Algorithm](7_graph/%E4%BA%8C%E5%88%86%E5%9B%BE/%E5%B8%A6%E6%9D%83%E4%BA%8C%E5%88%86%E5%9B%BE%E7%9A%84%E6%9C%80%E5%A4%A7%E6%9D%83%E5%8C%B9%E9%85%8D%E9%97%AE%E9%A2%98/KM%E7%AE%97%E6%B3%95%E6%A8%A1%E6%9D%BF.py)
    - [EulerLoop](7_graph/%E6%AC%A7%E6%8B%89/getEulerLoop.py)
    - [EulerPath](7_graph/%E6%AC%A7%E6%8B%89/getEulerPath.py)
-   - [MaxFlow (Dinic)](7_graph/acwing/%E7%BD%91%E7%BB%9C%E6%B5%81/0-%E6%9C%80%E5%A4%A7%E6%B5%81%E6%A8%A1%E6%9D%BF/Dinic%E6%B1%82%E6%9C%80%E5%A4%A7%E6%B5%81.py)
+   - [MaxFlow (Dinic)](7_graph/acwing/%E7%BD%91%E7%BB%9C%E6%B5%81/0-%E6%9C%80%E5%A4%A7%E6%B5%81%E6%A8%A1%E6%9D%BF/0-MaxFlow.py)
    - [MinCostMaxFlow](7_graph/acwing/%E7%BD%91%E7%BB%9C%E6%B5%81/4-%E8%B4%B9%E7%94%A8%E6%B5%81/MinCostMaxFlow.py)
    - [Tarjan](7_graph/acwing/%E6%97%A0%E5%90%91%E5%9B%BE%E7%9A%84%E5%8F%8C%E8%BF%9E%E9%80%9A%E5%88%86%E9%87%8F/Tarjan.py)
 

@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { useDinic } from '../0-最大流模板/useDinic'
+import { useDinic } from '../0-最大流模板/0-useDinic'
 
 const DIR2 = [
   [0, 1],
@@ -22,9 +22,9 @@ function minimumOperations(grid: number[][]): number {
         if (0 <= nr && nr < ROW && 0 <= nc && nc < COL && grid[nr][nc] === 1) {
           const next = nr * COL + nc
           const [v1, v2] = (r + c) & 1 ? [cur, next] : [next, cur]
-          maxFlow.addEdge(START, v1, 1, true)
-          maxFlow.addEdge(v1, v2, 1, true)
-          maxFlow.addEdge(v2, END, 1, true)
+          maxFlow.addEdgeIfAbsent(START, v1, 1)
+          maxFlow.addEdgeIfAbsent(v1, v2, 1)
+          maxFlow.addEdgeIfAbsent(v2, END, 1)
         }
       }
     }
