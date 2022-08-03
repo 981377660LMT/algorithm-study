@@ -24,6 +24,7 @@ import os
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+INF = int(1e18)
 
 
 def main() -> None:
@@ -39,15 +40,16 @@ def main() -> None:
 
     res = 0
     PLAYER_A, PLAYER_B, OFFSET = -1, -2, int(1e4)
-    adjMap = defaultdict(lambda: defaultdict(int))
+    maxFlow = MaxFlow(PLAYER_A, PLAYER_B)
+
     for r in range(ROW):
         if rowSum[r] > 0:
-            adjMap[PLAYER_A][r] += rowSum[r]
+            maxFlow.addEdge(PLAYER_A, r, rowSum[r])
             res += rowSum[r]
 
     for c in range(COL):
         if colSum[c] > 0:
-            adjMap[c + OFFSET][PLAYER_B] += colSum[c]
+            maxFlow.addEdge(c + OFFSET, PLAYER_B, colSum[c])
             res += colSum[c]
 
     for r in range(ROW):
@@ -55,100 +57,112 @@ def main() -> None:
             # 每個格子都可以通過割掉行列對應的點連到源點匯點的邊來成為只有行或者列選擇了它的格子。
             # 也可以割掉自己的邊來去掉重複貢獻。
             # !无穷表示这条边割不了
-            adjMap[r][c + OFFSET] += Dinic.INF if matrix[r][c] < 0 else matrix[r][c]
+            if matrix[r][c] < 0:
+                maxFlow.addEdge(r, c + OFFSET, INF)
+            else:
+                maxFlow.addEdge(r, c + OFFSET, matrix[r][c])
 
-    maxFlow = Dinic(adjMap)
-    minCut = maxFlow.calMaxFlow(PLAYER_A, PLAYER_B)  # 每个点只能被1个玩家选择
+    minCut = maxFlow.calMaxFlow()  # 每个点只能被1个玩家选择
     print(res - minCut)
 
 
 if __name__ == "__main__":
 
-    import sys
-    from typing import DefaultDict
     from collections import defaultdict, deque
+    from typing import Set
 
-    Graph = DefaultDict[int, DefaultDict[int, int]]  # 有向带权图,权值为容量
+    class MaxFlow:
+        def __init__(self, start: int, end: int) -> None:
+            self.graph = defaultdict(lambda: defaultdict(int))  # 原图
+            self._start = start
+            self._end = end
 
-    class Dinic:
-        INF = int(1e18)
-
-        def __init__(self, graph: Graph) -> None:
-            self._graph = graph
-
-        def calMaxFlow(self, start: int, end: int) -> int:
-            def bfs() -> None:
-                nonlocal depth, curArc
-                depth = defaultdict(lambda: -1, {start: 0})
-                visted = set([start])
-                queue = deque([start])
-                curArc = {cur: iter(self._reGraph[cur].keys()) for cur in self._reGraph.keys()}
-                while queue:
-                    cur = queue.popleft()
-                    for child in self._reGraph[cur]:
-                        if (child not in visted) and (self._reGraph[cur][child] > 0):
-                            visted.add(child)
-                            depth[child] = depth[cur] + 1
-                            queue.append(child)
-
-            def dfsWithCurArc(cur: int, minFlow: int) -> int:
-                if cur == end:
-                    return minFlow
-                flow = 0
-                while True:
-                    if flow >= minFlow:
-                        break
-
-                    child = next(curArc[cur], None)
-                    if child is not None:
-                        if (depth[child] == depth[cur] + 1) and (self._reGraph[cur][child] > 0):
-                            nextFlow = dfsWithCurArc(
-                                child, min(minFlow - flow, self._reGraph[cur][child])
-                            )
-                            if nextFlow == 0:
-                                depth[child] = -1
-                            self._reGraph[cur][child] -= nextFlow
-                            self._reGraph[child][cur] += nextFlow
-                            flow += nextFlow
-                    else:
-                        break
-                return flow
-
+        def calMaxFlow(self) -> int:
             self._updateRedisualGraph()
+            start, end = self._start, self._end
+            flow = 0
 
-            res = 0
-            depth = defaultdict(lambda: -1, {start: 0})
-            curArc = dict()
+            while self._bfs():
+                delta = INF
+                while delta:
+                    delta = self._dfs(start, end, INF)
+                    flow += delta
+            return flow
 
-            while True:
-                bfs()
-                if depth[end] != -1:
-                    while True:
-                        delta = dfsWithCurArc(start, Dinic.INF)
-                        if delta == 0:
-                            break
-                        res += delta
-                else:
-                    break
-            return res
+        def addEdge(self, v1: int, v2: int, w: int, *, cover=False) -> None:
+            """添加边 v1->v2, 容量为w
+
+            Args:
+                v1: 边的起点
+                v2: 边的终点
+                w: 边的容量
+                cover: 是否覆盖原有边
+            """
+            if cover:
+                self.graph[v1][v2] = w
+            else:
+                self.graph[v1][v2] += w
 
         def getFlowOfEdge(self, v1: int, v2: int) -> int:
             """边的流量=容量-残量"""
-            assert v1 in self._graph and v2 in self._graph[v1]
-            return self._graph[v1][v2] - self._reGraph[v1][v2]
+            assert v1 in self.graph and v2 in self.graph[v1]
+            return self.graph[v1][v2] - self._reGraph[v1][v2]
 
         def getRemainOfEdge(self, v1: int, v2: int) -> int:
             """边的残量(剩余的容量)"""
-            assert v1 in self._graph and v2 in self._graph[v1]
+            assert v1 in self.graph and v2 in self.graph[v1]
             return self._reGraph[v1][v2]
+
+        def getPath(self) -> Set[int]:
+            """最大流经过了哪些点"""
+            visited = set()
+            stack = [self._start]
+            reGraph = self._reGraph
+            while stack:
+                cur = stack.pop()
+                visited.add(cur)
+                for next, remain in reGraph[cur].items():
+                    if next not in visited and remain > 0:
+                        visited.add(next)
+                        stack.append(next)
+            return visited
 
         def _updateRedisualGraph(self) -> None:
             """残量图 存储每条边的剩余流量"""
             self._reGraph = defaultdict(lambda: defaultdict(int))
-            for cur in self._graph:
-                for next in self._graph[cur]:
-                    self._reGraph[cur][next] = self._graph[cur][next]
-                    self._reGraph[next].setdefault(cur, 0)
+            for cur in self.graph:
+                for next, cap in self.graph[cur].items():
+                    self._reGraph[cur][next] = cap
+                    self._reGraph[next].setdefault(cur, 0)  # 注意自环边
+
+        def _bfs(self) -> bool:
+            self._depth = depth = defaultdict(lambda: -1, {self._start: 0})
+            reGraph, start, end = self._reGraph, self._start, self._end
+            queue = deque([start])
+            self._iters = {cur: iter(reGraph[cur].keys()) for cur in reGraph.keys()}
+            while queue:
+                cur = queue.popleft()
+                nextDist = depth[cur] + 1
+                for next, remain in reGraph[cur].items():
+                    if depth[next] == -1 and remain > 0:
+                        depth[next] = nextDist
+                        queue.append(next)
+
+            return depth[end] != -1
+
+        def _dfs(self, cur: int, end: int, flow: int) -> int:
+            if cur == end:
+                return flow
+            reGraph, depth, iters = self._reGraph, self._depth, self._iters
+            for next in iters[cur]:
+                remain = reGraph[cur][next]
+                if remain and depth[cur] < depth[next]:
+                    nextFlow = self._dfs(next, end, min(flow, remain))
+                    if nextFlow:
+                        reGraph[cur][next] -= nextFlow
+                        reGraph[next][cur] += nextFlow
+                        return nextFlow
+            return 0
 
     if os.environ.get("USERNAME", " ") == "caomeinaixi":
         while True:

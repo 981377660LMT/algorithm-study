@@ -2,17 +2,18 @@ from collections import defaultdict, deque
 from typing import Set
 
 
-class MaxFlowMap:
-    INF = int(1e18)
+INF = int(1e18)
 
+
+class MaxFlow:
     def __init__(self, start: int, end: int) -> None:
-        self._graph = defaultdict(lambda: defaultdict(int))
+        self.graph = defaultdict(lambda: defaultdict(int))  # 原图
         self._start = start
         self._end = end
 
     def calMaxFlow(self) -> int:
         self._updateRedisualGraph()
-        start, end, INF = self._start, self._end, self.INF
+        start, end = self._start, self._end
         flow = 0
 
         while self._bfs():
@@ -32,18 +33,18 @@ class MaxFlowMap:
             cover: 是否覆盖原有边
         """
         if cover:
-            self._graph[v1][v2] = w
+            self.graph[v1][v2] = w
         else:
-            self._graph[v1][v2] += w
+            self.graph[v1][v2] += w
 
     def getFlowOfEdge(self, v1: int, v2: int) -> int:
         """边的流量=容量-残量"""
-        assert v1 in self._graph and v2 in self._graph[v1]
-        return self._graph[v1][v2] - self._reGraph[v1][v2]
+        assert v1 in self.graph and v2 in self.graph[v1]
+        return self.graph[v1][v2] - self._reGraph[v1][v2]
 
     def getRemainOfEdge(self, v1: int, v2: int) -> int:
         """边的残量(剩余的容量)"""
-        assert v1 in self._graph and v2 in self._graph[v1]
+        assert v1 in self.graph and v2 in self.graph[v1]
         return self._reGraph[v1][v2]
 
     def getPath(self) -> Set[int]:
@@ -63,8 +64,8 @@ class MaxFlowMap:
     def _updateRedisualGraph(self) -> None:
         """残量图 存储每条边的剩余流量"""
         self._reGraph = defaultdict(lambda: defaultdict(int))
-        for cur in self._graph:
-            for next, cap in self._graph[cur].items():
+        for cur in self.graph:
+            for next, cap in self.graph[cur].items():
                 self._reGraph[cur][next] = cap
                 self._reGraph[next].setdefault(cur, 0)  # 注意自环边
 
@@ -115,7 +116,7 @@ adjMap = defaultdict(lambda: defaultdict(int))
 nums = list(map(int, input().split()))
 caps = list(map(int, input().split()))
 START, END, OFFSET = -1, int(1e9), 1000
-maxFlow = MaxFlowMap(START, END)
+maxFlow = MaxFlow(START, END)
 for i, num in enumerate(nums):
     maxFlow.addEdge(START, i, num)
 for i, cap in enumerate(caps):

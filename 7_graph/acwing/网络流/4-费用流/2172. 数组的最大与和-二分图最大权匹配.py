@@ -4,6 +4,7 @@ from MinCostMaxFlow import MinCostMaxFlow
 
 class Solution:
     def maximumANDSum(self, nums: List[int], numSlots: int) -> int:
+        """最大费用最大流"""
         OFFSET, START, END = int(1e3), -1, int(1e9)
         mcmf = MinCostMaxFlow(START, END)
 
@@ -17,4 +18,3 @@ class Solution:
             mcmf.addEdge(j + OFFSET, END, 2, 0)  # !每个篮子 至多 有 2 个整数
 
         return -mcmf.work()[1]
-

@@ -1,18 +1,9 @@
 from typing import DefaultDict, Generic, Hashable, List, Tuple, TypeVar
-from dataclasses import dataclass
 from collections import defaultdict, deque
 
+INF = int(1e18)
 
 V = TypeVar("V", bound=Hashable)
-
-
-# @dataclass(slots=True)
-# class Edge(Generic[V]):
-#     fromV: V
-#     toV: V
-#     cap: int
-#     cost: int
-#     flow: int
 
 
 class Edge(Generic[V]):
@@ -48,46 +39,46 @@ class MinCostMaxFlow(Generic[V]):
         Returns:
             Tuple[int, int]: [最大流,最小费用]
         """
-
-        def spfa() -> int:
-            """spfa沿着最短路寻找增广路径  有负cost的边不能用dijkstra"""
-            nonlocal dist
-            dist = defaultdict(lambda: int(1e20), {self._start: 0})
-            inQueue = defaultdict(lambda: False)
-            queue = deque([self._start])
-            inFlow = defaultdict(int, {self._start: int(1e20)})  # 到每条边上的流量
-            pre = defaultdict(lambda: -1)
-
-            while queue:
-                cur = queue.popleft()
-                inQueue[cur] = False
-                for edgeIndex in self._reGraph[cur]:
-                    edge = self._edges[edgeIndex]
-                    cost, flow, cap, next = edge.cost, edge.flow, edge.cap, edge.toV
-                    if dist[cur] + cost < dist[next] and (cap - flow) > 0:
-                        dist[next] = dist[cur] + cost
-                        pre[next] = edgeIndex
-                        inFlow[next] = min(inFlow[cur], cap - flow)
-                        if not inQueue[next]:
-                            inQueue[next] = True
-                            queue.append(next)
-
-            resDelta = inFlow[self._end]
-            if resDelta > 0:  # 找到可行流
-                cur = self._end
-                while cur != self._start:
-                    preEdgeIndex = pre[cur]
-                    self._edges[preEdgeIndex].flow += resDelta
-                    self._edges[preEdgeIndex ^ 1].flow -= resDelta
-                    cur = self._edges[preEdgeIndex].fromV
-            return resDelta
-
-        dist = defaultdict(lambda: int(1e20), {self._start: 0})
+        end = self._end
         flow = cost = 0
         while True:
-            delta = spfa()  # 一次spfa只会找到一条费用最小的增广流
+            delta = self._spfa()  # 一次spfa只会找到一条费用最小的增广流
             if delta == 0:
                 break
             flow += delta
-            cost += delta * dist[self._end]
+            cost += delta * self._dist[end]
         return flow, cost
+
+    def _spfa(self) -> int:
+
+        """spfa沿着最短路寻找增广路径  有负cost的边不能用dijkstra"""
+        start, end, edges, reGraph = self._start, self._end, self._edges, self._reGraph
+        self._dist = dist = defaultdict(lambda: INF, {start: 0})
+        inQueue = defaultdict(lambda: False)
+        queue = deque([start])
+        inFlow = defaultdict(int, {start: INF})  # 到每条边上的流量
+        pre = defaultdict(lambda: -1)
+
+        while queue:
+            cur = queue.popleft()
+            inQueue[cur] = False
+            for edgeIndex in reGraph[cur]:
+                edge = edges[edgeIndex]
+                cost, flow, cap, next = edge.cost, edge.flow, edge.cap, edge.toV
+                if dist[cur] + cost < dist[next] and (cap - flow) > 0:
+                    dist[next] = dist[cur] + cost
+                    pre[next] = edgeIndex
+                    inFlow[next] = min(inFlow[cur], cap - flow)
+                    if not inQueue[next]:
+                        inQueue[next] = True
+                        queue.append(next)
+
+        resDelta = inFlow[end]
+        if resDelta > 0:  # 找到可行流
+            cur = end
+            while cur != start:
+                preEdgeIndex = pre[cur]
+                edges[preEdgeIndex].flow += resDelta
+                edges[preEdgeIndex ^ 1].flow -= resDelta
+                cur = edges[preEdgeIndex].fromV
+        return resDelta

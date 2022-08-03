@@ -3,6 +3,8 @@
 from collections import defaultdict, deque
 from typing import DefaultDict, Set
 
+INF = int(1e18)
+
 
 class Dinic:
     """Dinic 求最大流
@@ -11,8 +13,6 @@ class Dinic:
 
     时间复杂度:O(V^2*E)
     """
-
-    INF = int(1e18)
 
     def __init__(self, n: int, *, start: int, end: int) -> None:
         """n为节点个数 start为源点 end为汇点"""
@@ -31,7 +31,7 @@ class Dinic:
 
     def calMaxFlow(self) -> int:
         flow = 0
-        graph, INF, start, end = self._graph, self.INF, self._start, self._end
+        graph, start, end = self._graph, self._start, self._end
         while self._bfs():
             (*self._it,) = map(iter, graph)  # 当前弧优化
             delta = INF

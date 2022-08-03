@@ -1,16 +1,14 @@
-# 约翰共有 N 头奶牛，其中第 i 头奶牛有 Fi 种喜欢的食物以及 Di 种喜欢的饮料。
-# 约翰需要给每头奶牛分配一种食物和一种饮料，并使得有吃有喝的奶牛数量尽可能大。
-# 每种食物或饮料都只有一份，所以只能分配给一头奶牛食用
-# 输出一个整数，表示能够有吃有喝的奶牛的最大数量。
-"""
-把牛拆成两个点，两个点连接容量是1的边，限制每一头牛只能用一次
-"""
-# !边有限制 容量设在边上 点有限制 点拆成in 和 out
+# 0表示空地 1表示墙
+# !现在要阻断左上角到右下角的路 问最少需要加多少墙
+# https://binarysearch.com/problems/Walled-Off
+
+# 最小割问题：
+# you have a graph with two vertices,
+# and you want to remove the minimum number of vertices such that the two original vertices are disconnected
 
 
 from collections import defaultdict, deque
-from typing import Set
-
+from typing import List, Set
 
 INF = int(1e18)
 
@@ -109,39 +107,33 @@ class MaxFlow:
         return 0
 
 
-n, food, drink = map(int, input().split())
-foodLike = defaultdict(set)
-drinkLike = defaultdict(set)
-for cowId in range(n):
-    f, d, *rest = map(int, input().split())
-    for fid in rest[:f]:
-        foodLike[cowId].add(fid)
-    for did in rest[f:]:
-        drinkLike[cowId].add(did)
+DIR4 = [[1, 0], [0, 1]]
 
-START, END = -1, -2
-OFFSET1 = int(1e5)
-OFFSET2 = int(2e5)
-OFFSET3 = int(3e5)
-OFFSET4 = int(4e5)
-maxFlow = MaxFlow(START, END)
+# 2 ≤ n, m ≤ 250
 
-# 虚拟源点到food
-for fid in range(1, food + 1):
-    maxFlow.addEdge(START, fid + OFFSET1, 1, cover=True)
-# food到牛的in
-for cowId in foodLike:
-    for fid in foodLike[cowId]:
-        maxFlow.addEdge(fid + OFFSET1, cowId + OFFSET2, 1, cover=True)
-# 牛的in到牛的out
-for cowId in range(n):
-    maxFlow.addEdge(cowId + OFFSET2, cowId + OFFSET3, 1, cover=True)
-# 牛的out到drink
-for cowId in drinkLike:
-    for did in drinkLike[cowId]:
-        maxFlow.addEdge(cowId + OFFSET3, did + OFFSET4, 1, cover=True)
-# drink到虚拟汇点
-for did in range(1, drink + 1):
-    maxFlow.addEdge(did + OFFSET4, END, 1, cover=True)
 
-print(maxFlow.calMaxFlow())
+# !把边拆成点 in out  即把每个点拆成 `i 和 i + OFFSET`
+# https://binarysearch.com/problems/Walled-Off/solutions/2865567
+class Solution:
+    def solve(self, matrix: List[List[int]]):
+        ROW, COL = len(matrix), len(matrix[0])
+        n = OFFSET = ROW * COL
+
+        maxFlow = MaxFlow(0 + OFFSET, n - 1)
+        for r in range(ROW):
+            for c in range(COL):
+                if matrix[r][c] == 1:
+                    continue
+                cur = r * COL + c
+                maxFlow.addEdge(cur, cur + OFFSET, 1, cover=True)  # !in 容量为1(割边费用为1)
+                for dr, dc in DIR4:
+                    nr, nc = r + dr, c + dc
+                    if (0 <= nr < ROW) and (0 <= nc < COL) and (matrix[nr][nc] == 0):
+                        next = nr * COL + nc
+                        maxFlow.addEdge(cur + OFFSET, next, INF, cover=True)  # !out 容量无限大
+                        maxFlow.addEdge(next + OFFSET, cur, INF, cover=True)  # !out 容量无限大
+
+        return maxFlow.calMaxFlow()
+
+
+print(Solution().solve(matrix=[[0, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]]))

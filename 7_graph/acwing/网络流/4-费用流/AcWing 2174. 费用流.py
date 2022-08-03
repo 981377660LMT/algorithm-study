@@ -6,7 +6,7 @@
 from collections import defaultdict
 from MinCostMaxFlow import MinCostMaxFlow
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
 
     # !图中存在重边和自环
@@ -18,6 +18,6 @@ if __name__ == '__main__':
     for _ in range(m):
         u, v, c, cost = map(int, input().split())
         mcmf.addEdge(u, v, c, cost)
-    flow, cost = mcmf.work()
-    print(flow, cost, sep=' ')
 
+    flow, cost = mcmf.work()
+    print(flow, cost, sep=" ")

@@ -9,14 +9,14 @@ class Edge {
 }
 
 /**
- * @param N 顶点最大编号
+ * @param n 顶点个数
  * @param start (虚拟)源点
  * @param end (虚拟)汇点
  */
-function useMinCostMaxFlow(N: number, start: number, end: number) {
-  N += 10
+function useMinCostMaxFlow(n: number, start: number, end: number) {
+  n += 10
   const edges: Edge[] = []
-  const reGraph: number[][] = Array.from({ length: N }, () => []) // 残量图存储的是边的下标
+  const reGraph: number[][] = Array.from({ length: n }, () => []) // 残量图存储的是边的下标
 
   function addEdge(from: number, to: number, capacity: number, cost: number): void {
     // 原边索引为i 反向边索引为i^1
@@ -28,7 +28,7 @@ function useMinCostMaxFlow(N: number, start: number, end: number) {
   }
 
   function work(): [maxFlow: number, minCost: number] {
-    const dist = Array<number>(N).fill(Infinity)
+    const dist = Array<number>(n).fill(Infinity)
     let [flow, cost] = [0, 0]
     while (true) {
       const delta = spfa()
@@ -43,12 +43,12 @@ function useMinCostMaxFlow(N: number, start: number, end: number) {
     function spfa(): number {
       dist.fill(Infinity)
       dist[start] = 0
-      const inQueue = new Uint8Array(N)
+      const inQueue = new Uint8Array(n)
       let queue = [start]
 
-      const inFlow = Array<number>(N).fill(0)
+      const inFlow = Array<number>(n).fill(0)
       inFlow[start] = Infinity
-      const pre = new Int32Array(N).fill(-1)
+      const pre = new Int32Array(n).fill(-1)
 
       while (queue.length) {
         const nextQueue: number[] = []
@@ -90,7 +90,7 @@ function useMinCostMaxFlow(N: number, start: number, end: number) {
 
   return {
     addEdge,
-    work,
+    work
   }
 }
 

@@ -3,10 +3,10 @@
 from collections import defaultdict, deque
 from typing import Set
 
+INF = int(1e18)
+
 
 class MaxFlow:
-    INF = int(1e18)
-
     def __init__(self, start: int, end: int) -> None:
         self.graph = defaultdict(lambda: defaultdict(int))  # 原图
         self._start = start
@@ -14,7 +14,7 @@ class MaxFlow:
 
     def calMaxFlow(self) -> int:
         self._updateRedisualGraph()
-        start, end, INF = self._start, self._end, self.INF
+        start, end = self._start, self._end
         flow = 0
 
         while self._bfs():

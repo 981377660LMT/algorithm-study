@@ -9,7 +9,7 @@ import sys
 import os
 
 from collections import defaultdict
-from typing import DefaultDict, Set
+from typing import Set
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -20,7 +20,7 @@ INF = int(4e18)
 def main() -> None:
     n, m = map(int, input().split())
     OFFSET = 500
-    maxFlow = Dinic(start=0 + OFFSET, end=n - 1)
+    maxFlow = MaxFlow(start=0 + OFFSET, end=n - 1)
 
     for _ in range(m):
         u, v = map(int, input().split())
@@ -56,17 +56,15 @@ if __name__ == "__main__":
     from collections import defaultdict, deque
     from typing import Set
 
-    class Dinic:
-        INF = int(1e18)
-
+    class MaxFlow:
         def __init__(self, start: int, end: int) -> None:
-            self._graph = defaultdict(lambda: defaultdict(int))
+            self.graph = defaultdict(lambda: defaultdict(int))  # 原图
             self._start = start
             self._end = end
 
         def calMaxFlow(self) -> int:
             self._updateRedisualGraph()
-            start, end, INF = self._start, self._end, self.INF
+            start, end = self._start, self._end
             flow = 0
 
             while self._bfs():
@@ -76,18 +74,28 @@ if __name__ == "__main__":
                     flow += delta
             return flow
 
-        def addEdge(self, v1: int, v2: int, w: int) -> None:
-            """添加边 v1->v2, 容量为w"""
-            self._graph[v1][v2] += w
+        def addEdge(self, v1: int, v2: int, w: int, *, cover=False) -> None:
+            """添加边 v1->v2, 容量为w
+
+            Args:
+                v1: 边的起点
+                v2: 边的终点
+                w: 边的容量
+                cover: 是否覆盖原有边
+            """
+            if cover:
+                self.graph[v1][v2] = w
+            else:
+                self.graph[v1][v2] += w
 
         def getFlowOfEdge(self, v1: int, v2: int) -> int:
             """边的流量=容量-残量"""
-            assert v1 in self._graph and v2 in self._graph[v1]
-            return self._graph[v1][v2] - self._reGraph[v1][v2]
+            assert v1 in self.graph and v2 in self.graph[v1]
+            return self.graph[v1][v2] - self._reGraph[v1][v2]
 
         def getRemainOfEdge(self, v1: int, v2: int) -> int:
             """边的残量(剩余的容量)"""
-            assert v1 in self._graph and v2 in self._graph[v1]
+            assert v1 in self.graph and v2 in self.graph[v1]
             return self._reGraph[v1][v2]
 
         def getPath(self) -> Set[int]:
@@ -107,8 +115,8 @@ if __name__ == "__main__":
         def _updateRedisualGraph(self) -> None:
             """残量图 存储每条边的剩余流量"""
             self._reGraph = defaultdict(lambda: defaultdict(int))
-            for cur in self._graph:
-                for next, cap in self._graph[cur].items():
+            for cur in self.graph:
+                for next, cap in self.graph[cur].items():
                     self._reGraph[cur][next] = cap
                     self._reGraph[next].setdefault(cur, 0)  # 注意自环边
 
