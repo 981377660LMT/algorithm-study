@@ -3,7 +3,7 @@
  * @param tree 无向图邻接表
  * @param root 树根节点
  */
-function useDfsOrder(n: number, tree: Iterable<number>[], root = 0) {
+function useDfsOrder(n: number, tree: number[][], root = 0) {
   const ins = new Uint32Array(n + 1) // 子树中最小的结点序号
   const outs = new Uint32Array(n + 1) // 子树中最大的结点序号，即自己的id
   let dfsId = 1
@@ -12,9 +12,9 @@ function useDfsOrder(n: number, tree: Iterable<number>[], root = 0) {
   // 求dfs序
   function dfs(cur: number, pre: number): void {
     ins[cur] = dfsId
-    for (const next of tree[cur]) {
+    tree[cur].forEach(next => {
       if (next !== pre) dfs(next, cur)
-    }
+    })
     outs[cur] = dfsId
     dfsId++
   }
@@ -46,8 +46,10 @@ function useDfsOrder(n: number, tree: Iterable<number>[], root = 0) {
    * ```
    */
   function isAncestor(root: number, child: number): boolean {
-    const [left1, right1] = [ins[root], outs[root]]
-    const [left2, right2] = [ins[child], outs[child]]
+    const left1 = ins[root]
+    const right1 = outs[root]
+    const left2 = ins[child]
+    const right2 = outs[child]
     return left1 <= left2 && right2 <= right1
   }
 

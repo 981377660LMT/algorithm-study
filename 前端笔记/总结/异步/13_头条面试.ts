@@ -10,16 +10,17 @@ async function async2() {
 
 console.log('script start') // 1
 
-setTimeout(function () {
+setTimeout(() => {
   console.log('setTimeout') // 8
 }, 0)
 
 async1()
 
-new Promise<void>(function (resolve) {
+new Promise<void>(resolve => {
   console.log('promise1') // 4
   resolve()
-}).then(function () {
+}).then(() => {
   console.log('promise2') // 7
 })
+
 console.log('script end') // 5

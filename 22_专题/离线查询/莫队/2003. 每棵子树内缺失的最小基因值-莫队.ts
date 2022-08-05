@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 // todo
 // dfs遍历树，形成dfs数组。子树的dfs序是连续的，该题就变成：
 // !在数组中查询若干区间的正整数mex。
@@ -12,15 +13,15 @@ import { useDfsOrder } from '../../../6_tree/树的性质/dfs序/useDfsOrder'
 // 总共有 1e5 个基因值，基因值 互不相同,每个基因值都用 闭区间 [1, 1e5] 中的一个整数表示
 function smallestMissingValueSubtree(parents: number[], nums: number[]): number[] {
   const n = nums.length
-  const adjList = Array.from<any, number[]>({ length: n }, () => [])
-  for (const [cur, pre] of parents.entries()) {
-    if (pre === -1) continue
+  const adjList = Array.from<unknown, number[]>({ length: n }, () => [])
+  parents.forEach((pre, cur) => {
+    if (pre === -1) return
     adjList[pre].push(cur)
     adjList[cur].push(pre)
-  }
+  })
 
   const { queryRange, queryId } = useDfsOrder(n, adjList)
-  const newNums = new Uint32Array(n).fill(0)
+  const newNums = new Uint32Array(n)
   const queries: [left: number, right: number, root: number][] = []
 
   for (let root = 0; root < n; root++) {
@@ -34,13 +35,13 @@ function smallestMissingValueSubtree(parents: number[], nums: number[]): number[
   return moAlgo(newNums, queries)
 
   function moAlgo(
-    nums: Record<number, number>,
-    queries: [left: number, right: number, qid: number][]
+    arr: Record<number, number>,
+    Q: [left: number, right: number, qid: number][]
   ): number[] {
     const res = Array<number>(n).fill(1)
     const chunkSize = Math.max(1, Math.floor(Math.sqrt(n)))
     // !以询问左端点所在的分块的序号为第一关键字，右端点的大小为第二关键字进行排序
-    queries.sort(
+    Q.sort(
       (q1, q2) => Math.floor(q1[0] / chunkSize) - Math.floor(q2[0] / chunkSize) || q1[1] - q2[1]
     )
 
@@ -48,27 +49,27 @@ function smallestMissingValueSubtree(parents: number[], nums: number[]): number[
     let mex = 1
     const counter = new Map<number, number>()
 
-    for (const [qLeft, qRight, qIndex] of queries) {
+    for (const [qLeft, qRight, qIndex] of Q) {
       // !窗口收缩
       while (right > qRight) {
         right--
-        remove(nums[right])
+        remove(arr[right])
       }
 
       while (left < qLeft) {
-        remove(nums[left])
+        remove(arr[left])
         left++
       }
 
       // !窗口扩张
       while (right < qRight) {
-        add(nums[right])
+        add(arr[right])
         right++
       }
 
       while (left > qLeft) {
         left--
-        add(nums[left])
+        add(arr[left])
       }
 
       res[qIndex] = mex

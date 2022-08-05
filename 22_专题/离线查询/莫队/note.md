@@ -13,3 +13,4 @@ https://zhuanlan.zhihu.com/p/25017840
 如果已知区间[left,right]的答案 并且由此可以推出区间[left±1,right±1]的答案 那么就可以用莫队算法
 
 - 还是不要用 python 写根号算法 太卡常数了
+- `可以考虑 ts(leetcode 上) golang/java(atcoder 上)`

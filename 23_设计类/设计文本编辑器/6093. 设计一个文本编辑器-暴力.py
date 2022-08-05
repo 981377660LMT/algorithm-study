@@ -1,10 +1,11 @@
+# 调用 addText ，deleteText ，cursorLeft 和 cursorRight 的 总 次数不超过 2e4 次。
 #  !python的字符串操作非常快(注意是字符串切片而不是数组切片)
 
 
 class TextEditor:
     def __init__(self):
         self.pos = 0
-        self.text = ''
+        self.text = ""
 
     def addText(self, text: str) -> None:
         self.text = self.text[: self.pos] + text + self.text[self.pos :]
@@ -23,4 +24,3 @@ class TextEditor:
     def cursorRight(self, k: int) -> str:
         self.pos = min(len(self.text), self.pos + k)
         return self.text[max(0, self.pos - 10) : self.pos]
-

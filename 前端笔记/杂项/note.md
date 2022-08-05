@@ -1,7 +1,7 @@
 js 的基本类型 7 个
 
 ```TS
-type Primitive = string | number | bigint | boolean | symbol | null | undefined
+type Primitive = string | number | boolean | bigint | symbol | null | undefined
 // sun sb nb
 
 ```

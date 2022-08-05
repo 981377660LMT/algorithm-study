@@ -6,8 +6,9 @@ function work(num: number) {
   return new Promise<void>(resolve =>
     setTimeout(() => {
       resolve()
-      console.log(num)
     }, 1000)
   )
 }
+
 export {}
+console.log(2 ** 31 - 1)

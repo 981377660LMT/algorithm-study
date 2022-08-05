@@ -7,7 +7,7 @@ console.log(-1 >> 1)
 console.log(parseInt(0100, 2))
 
 // 二进制字符串转十进制数字 100
-console.log(parseInt('0100', 2))
+console.log(0b0100)
 // 去除字符串前面的0
 console.log(parseInt('0100', 10).toString())
 
@@ -22,8 +22,8 @@ parseInt('5/8/2017', 'javascript is such funny')
 console.log([
   ...new Set([
     [1, 2, 3],
-    [3, 2, 1],
-  ]),
+    [3, 2, 1]
+  ])
 ])
 
 let a = 1

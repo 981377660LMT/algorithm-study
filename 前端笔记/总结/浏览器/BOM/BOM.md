@@ -20,12 +20,12 @@ https://tsejx.github.io/javascript-guidebook/browser-object-model/binary-data-an
 4. 二进制数据和文件 API
    历史上，JavaScript 无法处理二进制数据。如果一定要处理的话，只能使用 String.prototype.charCodeAt() 方法，逐个地将字节从文字编码转成二进制数据，还有一种办法是将二进制数据转成 Base64 编码，再进行处理。这两种方法不仅速度慢，而且容易出错。因此 ECMAScript 5 引入了 Blob 对象，允许直接操作二进制数据。
 
-- Blob 对象：二进制数据基本对象，在它的基础上，又衍生出一系列相关的 API，用于操作文件
-- File 对象：负责处理那些以文件形式存在的二进制数据，也就是操作本地文件
-- FileList 对象：File 对象的网页表单接口
-- FileReader 对象：负责将二进制数据读入内存内容
-- URL 对象：用于对二进制数据生成 URL
-- FormData 对象：读取页面表单项文件数据
+   - Blob 对象：二进制数据基本对象，在它的基础上，又衍生出一系列相关的 API，用于操作文件
+   - File 对象：负责处理那些以文件形式存在的二进制数据，也就是操作本地文件
+   - FileList 对象：File 对象的网页表单接口
+   - FileReader 对象：负责将二进制数据读入内存内容
+   - URL 对象：用于对二进制数据生成 URL
+   - FormData 对象：读取页面表单项文件数据
 
 5. 浏览器架构
 6. 实现一个大文件上传和断点续传

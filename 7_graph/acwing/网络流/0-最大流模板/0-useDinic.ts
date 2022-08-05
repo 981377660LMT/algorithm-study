@@ -1,6 +1,6 @@
 // !Dinic算法 数组+边存图 速度快
 
-const INF = 2e15 // 2**53 -1 约为 9e15
+const INF = 2e15 // !2**53 -1 约为 9e15
 
 /**
  * Dinic算法求最大流
@@ -73,9 +73,10 @@ function useDinic(n: number, start: number, end: number) {
         for (let _ = 0; _ < step; _++) {
           const cur = queue.pop()!
 
+          // !不要使用 for of 来遍历迭代器循环 速度会变慢
           for (let i = 0; i < reGraph[cur].length; i++) {
             const ei = reGraph[cur][i]
-            const next = edges[ei][0]
+            const next = edges[ei][0] // !不要使用 const [next,capacity] = edges[ei] 解构 速度会变慢
             const capacity = edges[ei][1]
             if (capacity > 0 && levels[next] === -1) {
               levels[next] = levels[cur] + 1
