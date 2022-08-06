@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+// https://leetcode.cn/problems/design-a-text-editor/solution/vim-by-981377660lmt-3y3i/
 import { Rope } from './rope'
 
 // rope非常适合在很长的字符串上插入和删除的场景

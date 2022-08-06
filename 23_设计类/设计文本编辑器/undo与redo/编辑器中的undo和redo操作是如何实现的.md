@@ -32,3 +32,29 @@ https://www.zhihu.com/question/52997094/answer/133194610
 **脱离 rope 和 piece table 的朴素的数据结构：每行一个 Array 的数据结构**
 所以要视实现而定 - 比如文件的数据结构是一个对应每一行的 immutable array，这样`每次修改一行，就只产生对应行的一个新 copy，其他所有的行都因为 structural sharing 不占用额外空间`。
 有点像可持久化线段树，初始化时每一行的内容存储到底部的叶子结点，修改时按照行号二分查找到底部再修改，把新的版本 push 到历史数组里，所有历史版本共享一个引用。
+
+---
+
+https://leetcode.cn/problems/design-a-text-editor/solution/vim-by-981377660lmt-3y3i/
+[请问编辑器中的 undo 和 redo 操作是如何实现的？](https://www.zhihu.com/question/52997094/answer/133210061)
+
+最近调查了一下编辑器中 undo 和 redo 的实现逻辑，大概有两种思路
+
+1. 一种是**记录每个版本的状态**，这种思路是使用可持久化数据结构，例如
+
+- **rope** (vim 编辑器内部实现)
+- **可持久化线段树** ([每行一个不可变数组的实现](https://www.zhihu.com/question/52997094/answer/133210805)，redux + immutable.js 也有类似实践)
+- **piece table** (vscode 编辑器内部实现)
+
+  优点是容易实现，缺点是空间复杂度高，因为需要存储大量的数据(即使是 structural sharing 的可持久化数据结构)。
+
+2. 还有一种思路是**记录每个版本的变化**，用[对顶栈](https://leetcode.cn/problems/design-a-text-editor/solution/by-freeyourmind-kr12/)保存变化的 action ，对顶栈来回倒实现 undo 和 redo
+   优点是空间复杂度低，缺点是对**每一个 action，必须要是可撤销的**，这就要求必须每次清晰地写出撤销 action 的逻辑，即 Undo 和 Redo 的实际逻辑应该在每种 Command 中实现
+
+> rope 是一种高效的数据结构，用于存储和操作非常长的可变字符串
+> 它减少了应用程序的内存重新分配和数据复制的开销
+> 适合的应用场景:将非常长的字符串上分成多个较小的字符串
+
+以下是一个简单的性能测试，在长为 1e6 的字符串中进行 1e4 次插入操作，结果为 rope 耗时 21.849ms，字符串暴力修改 5.334s，可见 rope 的效率非常高，适合用于编辑器**大量文本中插入/删除字符**的场景
+
+![image.png](https://pic.leetcode-cn.com/1659756407-pebGOU-image.png)

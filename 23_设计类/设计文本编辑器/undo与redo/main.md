@@ -8,14 +8,14 @@ https://stackoverflow.com/questions/54416318/how-to-make-a-undo-redo-function
 
 The `Memento Pattern`, where you capture the whole **current state**. It's easy to implement, but memory-inefficient since you need to store similar copies of the whole state.
 
-这种思路是使用持久化数据结构(immutable data structure)，例如 rope/可持久化线段树，**记录每个版本的状态**
+这种思路是使用持久化数据结构(immutable data structure)，例如 `rope(vim 内部)`/`可持久化线段树(每行一个不可变数组)`/`piece table(vscode 内部,gap buffer 改进版)`，**记录每个版本的状态**
 优点是容易实现，缺点是空间复杂度高，因为需要存储大量的数据(即使是可持久化数据结构)。
 
 ## 命令模式
 
 The `Command Pattern`, where you capture **commands/actions** that affect the state (the current action and it's inverse action). Harder to implement since for for each undoable action in your application you must explicitly code it's inverse action, but it's far more memory-efficient since you only store the actions that affect the state.
 
-这种思路是使用 command/action **记录每个版本的变化**，例如对顶栈/链表/piece table(改进版本的 gap buffer)
+这种思路是使用 command/action **记录每个版本的变化**，例如对顶栈/链表/
 优点是空间复杂度低，缺点是对**每一个 action，必须要是可撤销的**，这就要求必须每次清晰地写出撤销 action 的逻辑，即 Undo 和 Redo 的实际逻辑应该在每种 Command 中实现
 注意这里的 action 一般是 `{type:...,payload:...}`，每一种 type 对应一个对顶栈存放 action，相当于邻接表
 

@@ -39,8 +39,9 @@ module.exports = {
     'operator-linebreak': 0, // 允许操作符结尾
     'lines-between-class-members': 0, // 允许类中间有空行
     'max-classes-per-file': 0, // 允许一个文件中定义多个类
+    'prefer-const': 0, // 关闭自动转换为const
+    'no-restricted-syntax': 0, // 关闭使用迭代器遍历数组的警告(这样很慢/heavyweight)
 
-    'no-restricted-syntax': 1, // 警告使用迭代器遍历数组(这样很慢/heavyweight)
     'no-shadow': 1, // 警告声明变量名与已声明变量名重名
     eqeqeq: 1, // 警告使用 == (在判空的时候兼容undefined和null).
     'no-param-reassign': 1 // 警告不允许修改函数参数

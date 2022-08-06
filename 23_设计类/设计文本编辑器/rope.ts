@@ -242,16 +242,16 @@ if (require.main === module) {
   console.time('Rope')
   const rope = new Rope('Hello World'.repeat(1e5))
   for (let _ = 0; _ < 10000; _++) {
-    rope.insert(5, '!!!!!!!')
+    rope.insert(5, '!')
   }
-  console.timeEnd('Rope')
+  console.timeEnd('Rope') // Rope: 21.849ms
 
   console.time('String')
   let string = 'Hello World'.repeat(1e5)
   for (let _ = 0; _ < 10000; _++) {
-    string = `${string.slice(0, 5)}!!!!!!!!${string.slice(5)}`
+    string = `${string.slice(0, 5)}!${string.slice(5)}`
   }
-  console.timeEnd('String')
+  console.timeEnd('String') // String: 5.334s
 }
 
 export { Rope }

@@ -8,7 +8,7 @@
 // 120.5 MB
 
 import { useDfsOrder } from '../../../6_tree/树的性质/dfs序/useDfsOrder'
-import { useQueryMex } from './useMoAlgoHooks'
+import { useMoAlgo, WindowManager } from './useMoAlgo'
 
 // 总共有 1e5 个基因值，基因值 互不相同,每个基因值都用 闭区间 [1, 1e5] 中的一个整数表示
 function smallestMissingValueSubtree(parents: number[], nums: number[]): number[] {
@@ -28,14 +28,32 @@ function smallestMissingValueSubtree(parents: number[], nums: number[]): number[
     newNums[dfsId - 1] = nums[root]
   }
 
-  const queryMex = useQueryMex(newNums)
+  // !莫队算法求区间mex
+  let mex = 1
+  const counter = new Map<number, number>()
+  const windowManager: WindowManager<number, number> = {
+    add(num) {
+      counter.set(num, (counter.get(num) || 0) + 1)
+      while ((counter.get(mex) || 0) > 0) {
+        mex++
+      }
+    },
+    remove(num) {
+      counter.set(num, (counter.get(num) || 0) - 1)
+      if ((counter.get(num) || 0) === 0) mex = Math.min(mex, num)
+    },
+    query() {
+      return mex
+    }
+  }
+  const queryMex = useMoAlgo(newNums, windowManager)
+
   for (let root = 0; root < n; root++) {
     let [left, right] = queryRange(root)
     left--, right--
-    console.log(left, right)
     queryMex.addQuery(left, right)
   }
-  console.log(newNums)
+
   return queryMex.work()
 }
 

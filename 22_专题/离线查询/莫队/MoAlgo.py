@@ -1,6 +1,6 @@
 from typing import Final, Generic, List, Tuple, TypeVar
 from abc import ABCMeta, abstractmethod
-from math import ceil, sqrt
+from math import sqrt
 
 
 V = TypeVar("V")  # 区间元素类型
