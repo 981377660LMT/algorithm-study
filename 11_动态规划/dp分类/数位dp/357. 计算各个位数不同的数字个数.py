@@ -26,5 +26,4 @@ def cal(upper: int) -> int:
 
 class Solution:
     def countNumbersWithUniqueDigits(self, n: int) -> int:
-        return cal(10 ** n - 1) - cal(0) + 1  # cal(10 ** n - 1) - cal(0) 表示[1,x] 再加上x=0的情况
-
+        return cal(10**n - 1) - cal(0) + 1  # cal(10 ** n - 1) - cal(0) 表示[1,x] 再加上x=0的情况

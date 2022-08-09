@@ -21,7 +21,7 @@ def LIS(nums: List[int], isStrict=True) -> int:
 
 
 def caldp(nums: List[int], isStrict=True) -> List[int]:
-    """求每个位置处的LIS长度(包括自身)"""
+    """求以每个位置为结尾的LIS长度(包括自身)"""
     if not nums:
         return []
     res = [1] * len(nums)
@@ -37,7 +37,6 @@ def caldp(nums: List[int], isStrict=True) -> List[int]:
     return res
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     assert LIS([10, 9, 2, 5, 3, 7, 101, 18]) == 4
     print(caldp([10, 9, 2, 5, 3, 7, 101, 18]))
-

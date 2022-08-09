@@ -15,6 +15,7 @@ module.exports = {
     sourceType: 'module'
   },
   rules: {
+    '@typescript-eslint/no-extra-semi': 0, // 不警告行首分号
     '@typescript-eslint/no-non-null-assertion': 1, // 警告非空断言
 
     semi: 0, // 行尾不需要分号
@@ -44,6 +45,6 @@ module.exports = {
 
     'no-shadow': 1, // 警告声明变量名与已声明变量名重名
     eqeqeq: 1, // 警告使用 == (在判空的时候兼容undefined和null).
-    'no-param-reassign': 1 // 警告不允许修改函数参数
+    'no-param-reassign': 1 // 警告不允许修改函数参数,
   }
 }

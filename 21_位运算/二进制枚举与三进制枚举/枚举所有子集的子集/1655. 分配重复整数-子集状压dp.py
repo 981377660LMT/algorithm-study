@@ -1,5 +1,5 @@
 # dp[i][j] 表示：数组中的前 i 个元素，能否满足顾客的子集合 j的订单需求
-from collections import Counter, defaultdict
+from collections import Counter
 from typing import List
 
 # 1 <= needs.length <= 10
@@ -31,7 +31,7 @@ class Solution:
                     continue
                 g1, g2 = state, 0
                 while g1:  # g1非空
-                    ndp[state] = ndp[state] or (dp[g2] and counts[i] >= subsum[g1])
+                    ndp[state] |= dp[g2] and counts[i] >= subsum[g1]
                     g1 = (g1 - 1) & state
                     g2 = state ^ g1
             dp = ndp

@@ -47,7 +47,7 @@ def matqpow1(base: List[List[int]], exp: int, mod=int(1e9 + 7)) -> List[List[int
     while exp:
         if exp & 1:
             res = mul(res, base)
-        exp >>= 1
+        exp //= 2
         base = mul(base, base)
     return res
 

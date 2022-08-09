@@ -18,7 +18,7 @@ def matqpow2(base: np.ndarray, exp: int, mod: int) -> np.ndarray:
     while exp:
         if exp & 1:
             res = (res @ base) % mod
-        exp >>= 1
+        exp //= 2
         base = (base @ base) % mod
     return res
 

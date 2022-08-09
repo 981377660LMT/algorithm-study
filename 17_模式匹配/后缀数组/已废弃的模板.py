@@ -91,9 +91,7 @@ def bucket_intervals(alpha, bucket_sizes, sigma):
     return heads, tails
 
 
-def induced_sorting(
-    lms, tails, heads, SA, type_suffix, text, n, m, alpha, bucket_sizes, sigma
-):
+def induced_sorting(lms, tails, heads, SA, type_suffix, text, n, m, alpha, bucket_sizes, sigma):
     """Inductively creates the suffix array based on LMS
     Args:
         lms: an array indicating the positions of LMS Blocks/Suffixes in text
@@ -120,9 +118,7 @@ def induced_sorting(
     # reset bucket counters
     heads, tails = bucket_intervals(alpha, bucket_sizes, sigma)
 
-    for i in range(
-        n - 1, -1, -1
-    ):  # place the S-type suffixes at the ends of their buckets
+    for i in range(n - 1, -1, -1):  # place the S-type suffixes at the ends of their buckets
         if SA[i] > 0 and type_suffix[SA[i] - 1] == S_TYPE:
             nfs = tails[text[SA[i] - 1]]
             SA[nfs] = SA[i] - 1
@@ -195,9 +191,7 @@ def construct_suffix_array(T, SA, n, sigma):
 
     alpha, sizes = buckets(T, sigma)  # finding the bucket sizes and alphabet of T
     heads, tails = bucket_intervals(alpha, sizes, sigma)
-    induced_sorting(
-        lms, tails, heads, SA, t, T, n, m, alpha, sizes, sigma
-    )  # first induced sort
+    induced_sorting(lms, tails, heads, SA, t, T, n, m, alpha, sizes, sigma)  # first induced sort
 
     ordered_lms = array("L", [0] * len(lms))
 
@@ -301,5 +295,5 @@ if __name__ == "__main__":
     string = input()
     sa, rk, h = SAIS_sa_rk_h(string)
 
-    print(" ".join([str(num + 1) for num in sa]))
+    print(" ".join([str(num) for num in sa]))
     print(" ".join(map(str, h)))

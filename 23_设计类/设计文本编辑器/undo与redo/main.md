@@ -22,7 +22,31 @@ The `Command Pattern`, where you capture **commands/actions** that affect the st
 # 多人编辑下的 undo 与 redo 逻辑
 
 [对可多人协同编辑的在线编辑器，如何设计其 undo/redo 的逻辑？](https://www.zhihu.com/question/367915946/answer/2240528814)
+[redux 干的事情实质上就是一种 event sourcing](https://martinfowler.com/eaaDev/EventSourcing.html)
 
-多人编辑与单人编辑的区别是 每个 undo redo 不是线性变化的
+多人编辑与单人编辑的区别:多人协作编辑时，任何一个闭麦很久的人都可以随时撤销自己很早之前的上一次改动，`历史记录已经不再是严格的栈了，相当于把压在栈底的任意一个状态抽掉`
 
-需要遵循的设计原则
+核心的设计准则其实只有两条
+
+1. **用户只能撤销自己的改动**，这个对其他人状态的命运有很大的关系。
+2. **用户从状态 A 独立撤销 N 次之后再重做 N 次，要能回到 A**。注意这条规则并不只是一条产品需求，更是—条重要的技术需求。(`「回放可互相抵消的 operation 逆操作」`)
+
+那么怎样才能实现只撤销自己产生的操作呢？
+OT（Operational Transformation）和 CRDT（Conflict-Free Replicated Data Type）算法
+
+## 围绕 operation 设计 ，是以 operation 为抓手，打通对轻量 operation 数据的变换(OT 派)
+
+PT (Operational transformation) 转变算法 ，Google Doc 的协同编辑就是基于该算法的
+所有的数据存储和传输都是 Operation 的形式(oplist)
+
+## 围绕 model 设计，以 model 为抓手，实现出可以任意拥抱变化的 model 数据结构(CRDT 派)
+
+CRDT（Conflict-Free Replicated Data Type）无冲突拷贝数据结构 ，atom 的 teletype 协同编辑就是基于它来的。
+案例:
+[yjs](https://docs.yjs.dev/)
+[automerge](https://github.com/automerge/automerge)
+
+**在 2021 年，这个领域的未来已经明显是属于 CRDT 的了**
+OT 需要一个中心服务器（用于保证正确性），而 CRDT 则可以支持点对点直接传输数据。
+在简单的数据模型下（如项目看板、纯文本编辑），CRDT 可以很好满足协同相关的需求，并且实现起来也相对简单。
+但在富文本编辑的场景下，CRDT 可能有会有一些问题。一是 undo/redo 方面的支持比较弱，二是算法的时间和空间复杂度可能是呈指数上升的，会带来性能上的挑战。

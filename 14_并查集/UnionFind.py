@@ -8,6 +8,8 @@ T = TypeVar("T", bound=Hashable)
 class UnionFindMap(Generic[T]):
     """当元素不是数组index时(例如字符串)，更加通用的并查集写法，支持动态添加"""
 
+    __slots__ = ("part", "parent", "rank")
+
     def __init__(self, iterable: Optional[Iterable[T]] = None):
         self.part = 0
         self.parent = dict()

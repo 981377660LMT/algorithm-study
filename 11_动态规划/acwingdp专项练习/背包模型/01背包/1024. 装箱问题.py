@@ -12,5 +12,5 @@ dp = [False] * (cap + 1)
 dp[0] = True
 for cost in goods:
     for i in range(cap, cost - 1, -1):
-        dp[i] = dp[i] or dp[i - cost]
+        dp[i] |= dp[i - cost]
 print(cap - next(i for i in range(cap, -1, -1) if dp[i]))

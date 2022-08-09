@@ -1,5 +1,4 @@
-type ID = number
-
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /**
  * @param {number} n  有一个 单线程 CPU 正在运行一个含有 n 道函数的程序  1 <= n <= 100
  * @param {string[]} logs
@@ -10,14 +9,13 @@ type ID = number
  * 调用其他函数花费的时间不算该函数的独占时间
  * 两个开始事件不会在同一时间戳发生
    两个结束事件不会在同一时间戳发生
-   @summary 
+   @summary
    执行时间:end_timestamp - start_timestamp + 1
    end必定是栈顶元素的end
-   
  */
 const exclusiveTime = function (n: number, logs: string[]): number[] {
   const res = Array<number>(n).fill(0)
-  const stack: ID[] = []
+  const stack: number[] = []
   let pre = 0
 
   for (const log of logs) {

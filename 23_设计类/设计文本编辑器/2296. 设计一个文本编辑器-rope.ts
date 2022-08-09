@@ -4,7 +4,7 @@ import { Rope } from './rope'
 
 // rope非常适合在很长的字符串上插入和删除的场景
 class TextEditor {
-  pos = 0
+  private pos = 0
   private readonly rope = new Rope('')
 
   // 将 text 添加到光标所在位置。添加完后光标在 text 的右边。

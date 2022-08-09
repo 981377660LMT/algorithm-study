@@ -36,7 +36,7 @@ def matqpow1(base: Matrix, exp: int) -> Matrix:
     while exp:
         if exp & 1:
             res = mul(res, base)
-        exp >>= 1
+        exp //= 2
         base = mul(base, base)
     return res
 

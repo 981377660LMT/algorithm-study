@@ -1,10 +1,9 @@
-# TODO tcp udp http 端口
+# 美团笔试2
 
 # 模拟+枚举候选人
 
 from collections import Counter
 import sys
-import os
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -14,7 +13,7 @@ n = int(input())
 types1 = list(map(int, input().split()))
 types2 = list(map(int, input().split()))
 
-# 注意到数字必须要大于一半 因此候选人数量很少
+# !注意到数字必须要大于一半 因此候选人数量很少
 # 枚举这些可能合法的候选人
 counter1 = Counter(types1)
 counter2 = Counter(types2)

@@ -21,8 +21,7 @@ dp[0] = True
 
 for i in range(n):
     for j in range(V, costs[i] - 1, -1):
-        dp[j] = dp[j] or dp[j - costs[i]]
+        dp[j] |= dp[j - costs[i]]
 
 start = (sum(costs) + 1) // 2
 print(dp.index(True, start))
-
