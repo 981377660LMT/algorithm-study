@@ -4,8 +4,7 @@
 
 # n<=1000
 # k<=50
-# 在树中寻找k条不相交的路径
-# 有多少种方案
+# 在树中寻找k条不相交的路径有多少种方案
 
 # dfs[root][allPath][curPath] O(n*k^2)
 # `root为根的树中 有allPath条路径 从root出发的路径有curPath条` 时的方案数

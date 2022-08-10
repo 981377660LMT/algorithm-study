@@ -77,21 +77,13 @@ class BIT2:
 class BIT3:
     """单点修改 维护`前缀区间`最大值
 
-    TODO: 正确性待讨论
-    这么做正确的前提是不会删除或修改已经存进去的值，每次都是加入新的值，这样已经存在的最大值一直有效。
+    这么做正确的前提是不会删除或修改已经存进去的值
+    每次都是加入新的值，这样已经存在的最大值一直有效。
     """
 
     def __init__(self, n: int):
         self.size = n
         self.tree = defaultdict(int)
-
-    # def update(self, left: int, right: int, target: int) -> None:
-    #     """更新[left,right]区间的最大值为target"""
-    #     ...
-
-    # def query(self, left: int, right: int) -> int:
-    #     """查询[left,right]的最大值"""
-    #     ...
 
     def update(self, index: int, target: int) -> None:
         """将后缀区间`[index,size]`的最大值更新为target"""

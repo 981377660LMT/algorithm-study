@@ -1,4 +1,5 @@
 # 注意如果要js写的话 需要bigint
+# !时间复杂度O(n^3logk)
 
 from typing import List
 
@@ -62,13 +63,13 @@ if __name__ == "__main__":
     MOD = int(1e9 + 7)
 
     res = [[2], [1], [1]]  # 初始状态
-    trans = [[1, 1, 1], [1, 0, 0], [0, 1, 0]]
-    resT = matqpow1(trans, n - 3, MOD)
+    T = [[1, 1, 1], [1, 0, 0], [0, 1, 0]]
+    resT = matqpow1(T, n - 3, MOD)
     res = mul(resT, res, MOD)
     assert res[0][0] == 639479200
 
     res = [[2], [1], [1]]  # 初始状态
-    trans = np.array([[1, 1, 1], [1, 0, 0], [0, 1, 0]], np.uint64)
-    resT = matqpow2(trans, n - 3, MOD)
+    T = np.array([[1, 1, 1], [1, 0, 0], [0, 1, 0]], np.uint64)
+    resT = matqpow2(T, n - 3, MOD)
     res = (resT @ res) % MOD
     assert res[0][0] == 639479200

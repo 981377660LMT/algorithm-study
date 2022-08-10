@@ -1,4 +1,4 @@
-# https://qiita.com/HNJ/items/264c2a95cbd8c3e8bf65#g%E5%88%B6%E7%B4%84
+# https://garnacha.techblog.jp/archives/39854885.html
 # !求s的字典序第k小的子序列 (子序列要去重)
 # 不存在则输出"Eel"
 # len(s)<=1e6
@@ -6,12 +6,11 @@
 
 
 # dp复原
-
+# dp[i][j - 'a'] ：文字列sの先頭からi文字目以降で、jという文字から始まる部分列の数
 
 # ps:
 # !如果是字典序第k小的子串 怎么做
 # !二分出排名为K的子串是哪一个后缀的第几个未被计算过的前缀(每个后缀贡献子串数是这个后缀的长度减去其LCP)
-# https://blog.csdn.net/Elemmir/article/details/50988467
 
 
 import sys

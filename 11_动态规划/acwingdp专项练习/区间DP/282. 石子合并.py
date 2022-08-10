@@ -3,6 +3,10 @@
 # 合并时由于选择的顺序不同，合并的总代价也不相同。
 # 1≤N≤300
 
+# 石子合并
+# 倒着考虑:
+# !分解石头成两个部分 代价为原来石头的重量 求分解成n个部分的最小代价
+
 from functools import lru_cache
 from itertools import accumulate
 import sys

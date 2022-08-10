@@ -23,4 +23,6 @@ dpSum[i] = dpSum[i - 1] + dp[i]
    **E - Distance Sequence-二维**
 
 - 关注边界位置 例如 `取得dp[n]时 preSum[n] 是多少个元素`
+  技巧是下边界用 `max(0,cur-nums[i])` 来防止越界
+  上边界用 `min(n,cur+nums[i])` 来防止越界
 - 关注前缀长度 例如 `preSum[i] - preSum[j] 的 前缀元素个数为 (i - j)`

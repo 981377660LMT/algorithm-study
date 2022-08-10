@@ -3,6 +3,8 @@
 # # 求解将哪些物品装入背包，可使这些物品的总体积不超过背包容量，且总价值最大。
 # # 输出 字典序最小的方案。这里的字典序是指：所选物品的编号所构成的序列。物品的编号范围是 1…N。
 
+# 背包问题记录方案
+
 n, cap = map(int, input().split())
 goods = []
 for _ in range(n):
@@ -35,5 +37,4 @@ for value, curAssign in zip(dp, assign):
         res = curAssign
 
 for i in res:
-    print(i + 1, end=' ')
-
+    print(i + 1, end=" ")

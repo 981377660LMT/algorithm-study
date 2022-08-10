@@ -8,7 +8,7 @@
    只 剩下一块石子 时，游戏结束。Alice 的分数最初为 0 。
    返回 Alice 能够获得的最大分数 。
  */
-const stoneGameV = function (stoneValue: number[]): number {
+const stoneGameV = (stoneValue: number[]): number => {
   const len = stoneValue.length
   const pre = Array<number>(len + 1).fill(0)
   for (let i = 1; i <= len; i++) {

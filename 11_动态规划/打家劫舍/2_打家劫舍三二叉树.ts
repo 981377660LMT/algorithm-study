@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 interface TreeNode {
   val: number
   left: TreeNode | null
@@ -11,13 +12,13 @@ const bt: TreeNode = {
     left: {
       val: 1,
       left: null,
-      right: null,
+      right: null
     },
     right: {
       val: 3,
       left: null,
-      right: null,
-    },
+      right: null
+    }
   },
   right: {
     val: 5,
@@ -25,20 +26,22 @@ const bt: TreeNode = {
     right: {
       val: 1,
       left: null,
-      right: null,
-    },
-  },
+      right: null
+    }
+  }
 }
 
 // 如果抢了的话， 那么我们不能继续抢其左右子节点
 // 如果不抢的话，那么我们可以继续抢左右子节点
 
 // 要求一个节点 偷与不偷的两个状态所得到的金钱
-const rob = (root: TreeNode): number => {
+function rob(root: TreeNode): number {
   const dfs = (root: TreeNode | null): [number, number] => {
     // res[0]表示不包括根节点的最大值，res[1]为包含根节点的最大值
     const res: [drop: number, select: number] = [0, 0]
-    if (!root) return res
+    if (!root) {
+      return res
+    }
     const left = dfs(root.left)
     const right = dfs(root.right)
     // 不包含根节点的最大值为左子树最大值加右子树最大值

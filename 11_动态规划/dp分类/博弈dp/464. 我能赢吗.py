@@ -48,4 +48,3 @@ class Solution:
         res = dfs(0)
         dfs.cache_clear()
         return res
-
