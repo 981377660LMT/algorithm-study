@@ -3,8 +3,6 @@
 # n<=1e5
 
 
-from collections import deque
-from functools import lru_cache
 import sys
 from typing import Any, Callable, List
 
@@ -41,52 +39,62 @@ INF = int(4e18)
 ###############################################################
 # !正解似乎是换根dp
 def rerooting(
-    N: int,
-    T: List[List[int]],
+    n: int,
+    adjList: List[List[int]],
     init: Callable[[], int],
-    node: Callable[[int], int],
+    child: Callable[[int], int],
     merge: Callable[[int, int], int],
 ):
-    """换根dp框架 https://atcoder.jp/contests/dp/submissions/33369486"""
-    N1 = N + 1
-    dq = deque([(1, 0)])
+    """换根dp框架 https://atcoder.jp/contests/dp/submissions/33369486
+
+    以每个结点作为根 求某种性质
+
+    Args:
+        n: 顶点数
+        adjList: 树 编号从1-n 0表示虚拟根节点
+        init: 初始化根节点的值
+        node: 子结点贡献值
+        merge: 子节点与父节点的合并方式
+    """
+
+    stack = [(1, 0)]
     order = []
-    while dq:
-        xp = dq.pop()
-        x, p = xp
-        order.append(xp)
-        for xx in T[x]:
-            if xx == p:
+    while stack:
+        pair = stack.pop()
+        cur, pre = pair
+        order.append(pair)
+        for next in adjList[cur]:
+            if next == pre:
                 continue
-            dq.append((xx, x))
+            stack.append((next, cur))
 
-    dp1 = [0] * N1
-    ls = [0] * N1
-    rs = [0] * N1
+    dp1 = [0] * (n + 1)
+    ls = [0] * (n + 1)
+    rs = [0] * (n + 1)
 
-    for x, p in reversed(order):
-        tx = T[x]
+    for cur, pre in reversed(order):  # dfs序
+        nexts = adjList[cur]
         v = init()
-        for xx in tx:
-            if xx == p:
+        for next in nexts:
+            if next == pre:
                 continue
-            ls[xx] = v
-            v = merge(v, node(dp1[xx]))
+            ls[next] = v
+            v = merge(v, child(dp1[next]))
         v = init()
-        for xx in reversed(tx):
-            if xx == p:
+        for next in reversed(nexts):
+            if next == pre:
                 continue
-            rs[xx] = v
-            v = merge(v, node(dp1[xx]))
-        dp1[x] = v
+            rs[next] = v
+            v = merge(v, child(dp1[next]))
+        dp1[cur] = v
 
-    dpx = [0] * N1
-    res = [0] * N1
+    dp2 = [0] * (n + 1)
+    res = [0] * (n + 1)
     res[1] = dp1[1]
-    for i in range(1, N):
-        x, p = order[i]
-        dpx[x] = v = merge(merge(ls[x], rs[x]), node(dpx[p]))
-        res[x] = merge(node(v), dp1[x])
+    for i in range(1, n):
+        cur, pre = order[i]
+        dp2[cur] = v = merge(merge(ls[cur], rs[cur]), child(dp2[pre]))
+        res[cur] = merge(child(v), dp1[cur])
     return res
 
 
@@ -102,5 +110,7 @@ for _ in range(n - 1):
     adjList[b].append(a)
 
 
-res = rerooting(n, adjList, lambda: 1, lambda x: (x + 1) % MOD, lambda x, y: x * y % MOD)
-print(*res, sep="\n")
+res = rerooting(
+    n, adjList, init=lambda: 1, child=lambda x: (x + 1) % MOD, merge=lambda x, y: x * y % MOD
+)
+print(*res[1:], sep="\n")

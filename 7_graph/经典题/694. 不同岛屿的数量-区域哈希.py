@@ -8,7 +8,7 @@ from typing import List, Set
 
 # 注意此题必须visited数组 不能修改矩阵值来visited  为什么?
 
-
+# 岛屿哈希值
 class Solution:
     def numDistinctIslands(self, grid: List[List[int]]) -> int:
         def getHashOfIslands(grid: List[List[int]]) -> Set[str]:

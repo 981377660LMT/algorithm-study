@@ -1,3 +1,5 @@
+/* eslint-disable class-methods-use-this */
+/* eslint-disable no-inner-declarations */
 class SegmentTreeNodeWithLazy {
   left!: SegmentTreeNodeWithLazy
   right!: SegmentTreeNodeWithLazy
@@ -92,8 +94,9 @@ class MaxSegmentTree {
   }
 
   private checkRange(l: number, r: number): void {
-    if (l < this.lower || r > this.upper)
+    if (l < this.lower || r > this.upper) {
       throw new RangeError(`[${l}, ${r}] out of range: [${this.lower}, ${this.upper}]`)
+    }
   }
 }
 
@@ -116,7 +119,7 @@ if (require.main === module) {
     fallingSquares([
       [1, 5],
       [2, 2],
-      [7, 5],
+      [7, 5]
     ])
   )
 }

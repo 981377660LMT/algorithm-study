@@ -49,7 +49,7 @@ def main():
         if i - maxJ >= k:
             dp[i] = min(dp[i], dp[maxJ] + (preSum[i] - preSum[maxJ]) - (i - maxJ) * nums[maxJ])
 
-        # 2.维护凸包
+        # 2.维护下凸包
         while len(queue) >= 2 and calSlope(queue[-2], queue[-1]) >= calSlope(queue[-1], i):
             queue.pop()
         queue.append(i)

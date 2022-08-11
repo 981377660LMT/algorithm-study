@@ -13,6 +13,7 @@
 
 # 移项得
 # Fi = Fj + xi(p1i - p1j) - (p2i - p2j) +ci
+
 # !Fj+p2j=xi*p1j+(Fi+p2i-ci-xi*p1i)
 # !斜率大于0 要让截距Fi最小 需要单调队列维护下凸包
 
@@ -30,8 +31,8 @@ def calSlope(j1: int, j2: int) -> float:
         """纵坐标"""
         return dp[j] + preSum2[j]
 
-    # if calX(j1) == calX(j2):
-    #     return int(1e20)
+    if calX(j1) == calX(j2):
+        return int(1e18)
     return (calY(j2) - calY(j1)) / (calX(j2) - calX(j1))
 
 

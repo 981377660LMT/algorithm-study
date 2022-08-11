@@ -15,7 +15,7 @@ from typing import List, Tuple
 # 并把所有点的这一维减去这个最小值。形象地来说，就是用一个最小的矩形框住岛屿，
 # 矩形的左上角坐标为 (0, 0)，岛屿上每个点的局部坐标值就是相对于矩形左上角的坐标值。
 
-
+# 岛屿哈希值
 class Solution:
     def _dfs_flood(self, grid: List[List[int]], island: List[Tuple[int, int]], i: int, j: int):
         m, n = len(grid), len(grid[0])

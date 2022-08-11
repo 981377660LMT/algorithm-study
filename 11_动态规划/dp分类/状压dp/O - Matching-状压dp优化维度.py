@@ -1,13 +1,12 @@
-# n男n女配对 各有喜好 求组成n对的方案数
+# 男女配对
+# n男n女配对 各有喜好 询问有多少种方法将男女完全配对。
 # n <= 21
 
 # 校园自行车分配
 # 状压dp 复杂度优化
 # 从 O(2^n*n^2) 优化到 O(2^n*n)
 # !已经遍历过的女性visited中包含了配对的男生信息 因此优化掉index维度
-
-
-from functools import lru_cache
+# !dp[visited] 表示前popcount(visited)个男生与状态为visited的女生配对的方案数
 import sys
 
 
@@ -77,7 +76,7 @@ dp[0] = 1
 
 for state in range(1, 1 << n):
     i = popcount(state)
-    for j in range(n):
+    for j in range(n):  # 枚举女生
         if (state >> j) & 1 and matrix[i - 1][j]:
             dp[state] += dp[state ^ (1 << j)]
             dp[state] %= MOD

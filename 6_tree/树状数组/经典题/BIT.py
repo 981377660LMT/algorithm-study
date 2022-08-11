@@ -75,7 +75,7 @@ class BIT2:
 
 
 class BIT3:
-    """单点修改 维护`前缀区间`最大值
+    """单点修改、前缀最大值查询 维护`前缀区间`最大值
 
     这么做正确的前提是不会删除或修改已经存进去的值
     每次都是加入新的值，这样已经存在的最大值一直有效。
@@ -263,6 +263,14 @@ if __name__ == "__main__":
     assert bit2.query(0, 102) == 2
     assert bit2.query(0, 1000) == 2
     assert bit2.query(-10000, 1000) == 2
+
+    bit3 = BIT3(100)
+    bit3.update(1, 2)
+    bit3.update(2, 3)
+    bit3.update(4, 5)
+    print(bit3.query(4))  # 5
+    bit3.update(4, 1)
+    print(bit3.query(4))  # 5 不可以修改原来的值(变小)
 
     bit4 = BIT4(100, 100)
     bit4.update(0, 0, 2)

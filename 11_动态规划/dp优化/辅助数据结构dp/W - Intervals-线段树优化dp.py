@@ -1,6 +1,24 @@
+"""线段树优化dp"""
+# 给定一个长为n的01序列和m个区间 [lefti,righti,scorei]
+# 如果第i个区间里存在1 那么分数就加上score[i]
+# !求构造出的01序列的最大分数
+# n,m<=2e5
+# 1<=left<=right<=n
+# -1e9<=score<=1e9
+
+# 思路:
+# dp[i] 表示在看第i个字符且第i个字符为1、右边全部为0时的最大分数
+# !1. 所有区间按照右端点分类 因为只要右端点存在1 那么这会获得这一堆区间的分数
+# !2. 线段树维护区间最大值
+
+from collections import defaultdict
+import sys
 from typing import List, Union
 
-INF = int(1e20)
+sys.setrecursionlimit(int(1e9))
+input = lambda: sys.stdin.readline().rstrip("\r\n")
+MOD = int(1e9 + 7)
+INF = int(4e18)
 
 
 class MaxSegmentTree:
@@ -101,29 +119,22 @@ class MaxSegmentTree:
             self._isLazy[rt] = False
 
 
-if __name__ == "__main__":
-    nums = [-INF] * 5001
-    nums[0] = 1
-    nums[1000] = 100
-    nums[5000] = 2
-    st = MaxSegmentTree(nums)
-    assert st.query(1000 + 1, 1000 + 1) == 100
-    assert st.query(0 + 1, 2 + 1) == 1
-    assert st.query(3000 + 1, 5000 + 1) == 2
-    print(st.query(2900, 4000))
+############################################################
+n, m = map(int, input().split())
+intervals = defaultdict(list)  # 区间右端点 => 区间左端点
+for _ in range(m):
+    left, right, score = map(int, input().split())
+    intervals[right].append((left, score))
 
-    # class Solution:
-    #     def fallingSquares(self, positions: List[List[int]]) -> List[int]:
-    #         pos = set()
-    #         for left, length in positions:
-    #             pos.add(left)
-    #             pos.add(left + length - 1)
-    #         mapping = {v: i for i, v in enumerate(sorted(pos), 1)}
-    #         tree = MaxSegmentTree(len(mapping) + 10)
-    #         res = []
-    #         for left, length in positions:
-    #             left, right = mapping[left], mapping[left + length - 1]
-    #             preMax = tree.query(left, right)
-    #             tree.add(left, right, preMax + length)
-    #             res.append(tree.queryAll())
-    #         return res
+tree = MaxSegmentTree(n + 10)
+for right in range(1, n + 1):
+    preMax = tree.queryAll()
+    tree.add(right, right, preMax)  # 初始化dp[i](最大值)
+    for left, score in intervals[right]:
+        tree.add(left, right, score)  # 区间叠加更新最大值
+
+
+print(max(0, tree.queryAll()))
+
+
+# TODO 哪里右问题

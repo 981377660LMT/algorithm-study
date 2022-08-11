@@ -5,11 +5,12 @@ from collections import Counter
 # n<=30
 
 # 直接对偏移量计数
+# 835. 图像重叠-对偏移量计数
 
 
 class Solution:
     def largestOverlap(self, img1: List[List[int]], img2: List[List[int]]) -> int:
-        counter = Counter()
+        diffCounter = Counter()  # 偏移量元组
         for r1, row1 in enumerate(img1):
             for c1, v1 in enumerate(row1):
                 if v1 == 0:
@@ -18,8 +19,8 @@ class Solution:
                     for c2, v2 in enumerate(row2):
                         if v2 == 0:
                             continue
-                        counter[(r1 - r2, c1 - c2)] += 1
-        return max(counter.values(), default=0)
+                        diffCounter[(r1 - r2, c1 - c2)] += 1
+        return max(diffCounter.values(), default=0)
 
 
 print(

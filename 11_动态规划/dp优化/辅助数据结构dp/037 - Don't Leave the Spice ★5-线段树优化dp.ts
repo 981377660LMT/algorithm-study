@@ -24,6 +24,7 @@ for (let i = 0; i < n; i++) {
 let dp = Array(v + 1).fill(-Infinity)
 dp[0] = 0
 for (let i = goods[0][0]; i <= goods[0][1]; i++) {
+  // eslint-disable-next-line prefer-destructuring
   dp[i] = goods[0][2]
 }
 

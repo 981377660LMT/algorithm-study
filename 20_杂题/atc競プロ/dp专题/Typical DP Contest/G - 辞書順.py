@@ -26,6 +26,7 @@ def solve(s: str, k: int, BASE=97) -> Optional[str]:
 
     https://atcoder.jp/contests/tdpc/submissions/20602930
     """
+
     n = len(s)
     ords = [ord(c) - BASE for c in s]
     mins = [0] * n + [1, 0]
@@ -53,6 +54,7 @@ def solve(s: str, k: int, BASE=97) -> Optional[str]:
                 break
             count += tmp
             j += 1
+
         res.append(j)
         nextIndex = nexts1[j]
         for i in range(index, nextIndex):

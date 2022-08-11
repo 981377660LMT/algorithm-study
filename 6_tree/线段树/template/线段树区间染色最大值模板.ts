@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 /**
  * @description 线段树区间最大值RMQ
  */
@@ -101,7 +102,7 @@ if (require.main === module) {
       const right = left + size - 1
 
       const preHeihgt = tree.query(mapping.get(left)!, mapping.get(right)!)
-      console.log(preHeihgt, left, right)
+      // console.log(preHeihgt, left, right)
       tree.update(mapping.get(left)!, mapping.get(right)!, preHeihgt + size)
       res[i] = tree.queryAll()
     }
@@ -113,7 +114,7 @@ if (require.main === module) {
     fallingSquares([
       [1, 5],
       [2, 2],
-      [7, 5],
+      [7, 5]
     ])
   )
 }

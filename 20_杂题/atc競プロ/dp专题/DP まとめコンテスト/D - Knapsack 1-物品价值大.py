@@ -19,9 +19,6 @@ for _ in range(n):
 
 dp = [0] * (w + 1)
 for weight, score in goods:
-    for cap in range(w, -1, -1):
-        if cap - weight < 0:
-            break
+    for cap in range(w, weight - 1, -1):
         dp[cap] = max(dp[cap], dp[cap - weight] + score)
-
 print(max(dp))

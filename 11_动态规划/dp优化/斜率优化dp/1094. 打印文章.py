@@ -4,14 +4,16 @@
 # 0≤N≤5×105,
 
 
-# dp[i]=min(dp[j]+(p[i]-p[j])**2+M)
-# 即 dp[j]+p[j]**2=2*p[i]*p[j]+dp[i]-p[i]*p[i]-M
+# !dp[i]=min(dp[j]+(p[i]-p[j])**2)+M
+# !即 dp[j]+p[j]**2=2*p[i]*p[j]+dp[i]-p[i]*p[i]-M
 
 # 斜率为正，dp[i]越小，截距越小
 # 单调队列维护一个下凸包
 
 from collections import deque
 from itertools import accumulate
+
+INF = int(1e18)
 
 
 def main():
@@ -26,6 +28,8 @@ def main():
             """纵坐标"""
             return dp[j] + preSum[j] * preSum[j]
 
+        if calX(j1) == calX(j2):
+            return INF
         return (calY(j2) - calY(j1)) / (calX(j2) - calX(j1))
 
     n, M = map(int, input().split())
@@ -35,14 +39,14 @@ def main():
     dp[0] = 0
     queue = deque([0])
     for i in range(1, n + 1):
-        # 1.不是答案的直线出队(斜率单调性)
+        # 1.不是答案的直线出队(下凸包斜率不减)
         while len(queue) >= 2 and calSlope(queue[0], queue[1]) <= 2 * preSum[i]:
             queue.popleft()
 
-        maxJ = queue[0]
-        dp[i] = min(dp[i], dp[maxJ] + (preSum[i] - preSum[maxJ]) ** 2 + M)
+        candJ = queue[0]
+        dp[i] = min(dp[i], dp[candJ] + (preSum[i] - preSum[candJ]) ** 2 + M)
 
-        # 2.维护凸包
+        # 2.维护下凸包(下凸包斜率不减)
         while len(queue) >= 2 and calSlope(queue[-2], queue[-1]) >= calSlope(queue[-1], i):
             queue.pop()
         queue.append(i)

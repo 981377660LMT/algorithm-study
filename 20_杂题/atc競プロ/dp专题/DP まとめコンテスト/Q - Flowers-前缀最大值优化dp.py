@@ -56,6 +56,7 @@ n = int(input())
 heights = list(map(int, input().split()))
 scores = list(map(int, input().split()))
 
+
 bit = BIT3(n)
 for i in range(n):
     preMax = bit.query(heights[i])

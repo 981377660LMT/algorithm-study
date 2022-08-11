@@ -3,6 +3,7 @@
 # !容量大但是物品价值不大 需要改变dp状态定义:
 # !dp[i][score] 前 i 个物品取到score时的最小体积
 
+# 超大背包
 import sys
 import os
 
@@ -22,9 +23,7 @@ for _ in range(n):
 dp = [INF] * int(scoreSum + 5)
 dp[0] = 0
 for weight, score in goods:
-    for s in range(scoreSum, -1, -1):
-        if s - score < 0:
-            break
+    for s in range(scoreSum, score - 1, -1):
         dp[s] = min(dp[s], dp[s - score] + weight)
 
 res = INF
