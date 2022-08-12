@@ -1,34 +1,31 @@
 from typing import List, Union
 
-INF = int(1e20)
+INF = int(1e18)
 
 
-class MaxSegmentTree:
-    _MIN = 0  # !注意是0还是-inf
+class MaxSegmentTree1:
+    """RMQ 最大值线段树(区间和叠加)
 
-    """RMQ 最大值(区间和可叠加) 线段树
-    
     一般用于数组求最值
     注意根节点从1开始,tree本身为[1,n]
     """
 
     def __init__(self, nOrNums: Union[int, List[int]]):
         self._n = nOrNums if isinstance(nOrNums, int) else len(nOrNums)
-        self._tree = [self._MIN] * (4 * self._n)
+        self._tree = [0] * (4 * self._n)
         self._lazy = [0] * (4 * self._n)
-        self._isLazy = [False] * (4 * self._n)
         if isinstance(nOrNums, list):
             self._build(1, 1, self._n, nOrNums)
 
-    def query(self, left: int, right: int) -> int:
-        """闭区间[left,right]的最值"""
-        assert 1 <= left <= right <= self._n, f"{left},{right} out of range [1,{self._n}]"
-        return self._query(1, left, right, 1, self._n)
-
     def add(self, left: int, right: int, delta: int) -> None:
         """闭区间[left,right]区间值加上delta"""
-        assert 1 <= left <= right <= self._n, f"{left},{right} out of range [1,{self._n}]"
+        # assert 1 <= left <= right <= self._n, f"{left},{right} out of range [1,{self._n}]"
         self._add(1, left, right, 1, self._n, delta)
+
+    def query(self, left: int, right: int) -> int:
+        """闭区间[left,right]的最值"""
+        # assert 1 <= left <= right <= self._n, f"{left},{right} out of range [1,{self._n}]"
+        return self._query(1, left, right, 1, self._n)
 
     def queryAll(self) -> int:
         return self._tree[1]
@@ -49,7 +46,6 @@ class MaxSegmentTree:
         if L <= l and r <= R:
             self._lazy[rt] += delta
             self._tree[rt] += delta
-            self._isLazy[rt] = True
             return
 
         mid = (l + r) // 2
@@ -62,31 +58,26 @@ class MaxSegmentTree:
 
     def _query(self, rt: int, L: int, R: int, l: int, r: int) -> int:
         """L,R表示需要query的范围,l,r表示当前节点的范围"""
+        # 传递懒标记
         if L <= l and r <= R:
             return self._tree[rt]
 
-        # 传递懒标记
         mid = (l + r) // 2
         self._push_down(rt, l, r, mid)
-        res = self._MIN
+        res = -INF
         if L <= mid:
-            cand = self._query(rt * 2, L, R, l, mid)
-            if cand > res:
-                res = cand
+            res = max(res, self._query(rt * 2, L, R, l, mid))
         if mid < R:
-            cand = self._query(rt * 2 + 1, L, R, mid + 1, r)
-            if cand > res:
-                res = cand
+            res = max(res, self._query(rt * 2 + 1, L, R, mid + 1, r))
         return res
 
     def _push_up(self, rt: int) -> None:
-        if self._tree[rt * 2] > self._tree[rt]:
-            self._tree[rt] = self._tree[rt * 2]
+        self._tree[rt] = self._tree[rt * 2]
         if self._tree[rt * 2 + 1] > self._tree[rt]:
             self._tree[rt] = self._tree[rt * 2 + 1]
 
     def _push_down(self, rt: int, l: int, r: int, mid: int) -> None:
-        if self._isLazy[rt]:
+        if self._lazy[rt]:
             value = self._lazy[rt]
             self._lazy[rt * 2] += value
             self._lazy[rt * 2 + 1] += value
@@ -94,11 +85,7 @@ class MaxSegmentTree:
             self._tree[rt * 2] += value
             self._tree[rt * 2 + 1] += value
 
-            self._isLazy[rt * 2] = True
-            self._isLazy[rt * 2 + 1] = True
-
             self._lazy[rt] = 0
-            self._isLazy[rt] = False
 
 
 if __name__ == "__main__":
@@ -106,11 +93,10 @@ if __name__ == "__main__":
     nums[0] = 1
     nums[1000] = 100
     nums[5000] = 2
-    st = MaxSegmentTree(nums)
+    st = MaxSegmentTree1(nums)
     assert st.query(1000 + 1, 1000 + 1) == 100
     assert st.query(0 + 1, 2 + 1) == 1
     assert st.query(3000 + 1, 5000 + 1) == 2
-    print(st.query(2900, 4000))
 
     # class Solution:
     #     def fallingSquares(self, positions: List[List[int]]) -> List[int]:

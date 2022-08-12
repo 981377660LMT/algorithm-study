@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 // !两种颜色的区间染色不需要用懒标记记录更新状态 直接用节点值判断
 class SegmentTree {
   private readonly tree: Uint32Array
@@ -71,7 +72,7 @@ class SegmentTree {
 }
 
 //! ///////////////////////////////////////////////////
-// !如果有多种颜色的话就需要懒标记
+// !写isLazy的版本
 class SegmentTree2 {
   private readonly tree: Uint32Array
   private readonly lazyValue: Uint8Array
@@ -174,7 +175,7 @@ if (require.main === module) {
       [3, 6],
       [7, 17],
       [16, 20],
-      [2, 20],
+      [2, 20]
     ])
   )
 }

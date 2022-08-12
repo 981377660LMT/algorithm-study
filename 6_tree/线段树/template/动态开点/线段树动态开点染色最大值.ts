@@ -4,8 +4,8 @@ class SegmentTreeNodeWithLazy {
   left!: SegmentTreeNodeWithLazy
   right!: SegmentTreeNodeWithLazy
   isLazy = false
-  lazyValue = -Infinity
-  value = -Infinity // 结点最大值
+  lazyValue = 0
+  value = 0
 }
 
 class MaxSegmentTree {
@@ -67,7 +67,7 @@ class MaxSegmentTree {
 
     const mid = Math.floor((l + r) / 2)
     this.pushDown(l, mid, r, root)
-    let res = 0
+    let res = -Infinity
     if (L <= mid) res = Math.max(res, this._query(L, R, l, mid, root.left))
     if (mid < R) res = Math.max(res, this._query(L, R, mid + 1, r, root.right))
     return res

@@ -1,4 +1,5 @@
 // 请你找出边界全部由 1 组成的最大 正方形 子网格，并返回该子网格中的元素数量。如果不存在，则返回 0。
+// !如果知道每个点右边/下面有多少个连续的1 会好做很多
 function largest1BorderedSquare(matrix: number[][]): number {
   let res = 0
   const ROW = matrix.length

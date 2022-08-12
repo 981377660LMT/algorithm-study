@@ -14,8 +14,8 @@ class RMQSegmentTree {
    */
   constructor(size: number) {
     this.size = size
-    this.tree = Array(size << 2).fill(-Infinity)
-    this.lazyValue = Array(size << 2).fill(-Infinity)
+    this.tree = Array(size << 2).fill(0)
+    this.lazyValue = Array(size << 2).fill(0)
     this.isLazy = new Uint8Array(size << 2)
   }
 
@@ -38,7 +38,7 @@ class RMQSegmentTree {
 
     const mid = Math.floor((l + r) / 2)
     this._pushDown(rt, l, r, mid)
-    let res = 0
+    let res = -Infinity
     if (L <= mid) res = Math.max(res, this._query(rt << 1, L, R, l, mid))
     if (mid < R) res = Math.max(res, this._query((rt << 1) | 1, L, R, mid + 1, r))
 
@@ -74,7 +74,7 @@ class RMQSegmentTree {
       this.tree[(rt << 1) | 1] = Math.max(this.tree[(rt << 1) | 1], target)
       this.isLazy[(rt << 1) | 1] = 1
 
-      this.lazyValue[rt] = -Infinity
+      this.lazyValue[rt] = 0
       this.isLazy[rt] = 0
     }
   }

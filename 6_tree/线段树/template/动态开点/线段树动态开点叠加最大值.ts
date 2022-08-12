@@ -92,8 +92,9 @@ class MaxSegmentTree {
   }
 
   private checkRange(l: number, r: number): void {
-    if (l < this.lower || r > this.upper)
+    if (l < this.lower || r > this.upper) {
       throw new RangeError(`[${l}, ${r}] out of range: [${this.lower}, ${this.upper}]`)
+    }
   }
 }
 

@@ -2,13 +2,13 @@ from typing import List, Literal, Optional
 
 
 class SegmentTreeNode:
-    __slots__ = ('left', 'right', 'value')
+    __slots__ = ("left", "right", "value")
 
     def __init__(
         self,
         value=0,
-        left: Optional['SegmentTreeNode'] = None,
-        right: Optional['SegmentTreeNode'] = None,
+        left: Optional["SegmentTreeNode"] = None,
+        right: Optional["SegmentTreeNode"] = None,
     ):
         self.value = value
         self.left = left
@@ -77,17 +77,17 @@ class SegmentTree:
 
     def _checkRange(self, left: int, right: int):
         if left < self._lower or right > self._upper:
-            raise ValueError('Index out of range')
+            raise ValueError("Index out of range")
 
 
 def main():
     tree = SegmentTree(0, 10)
-    print('Initial tree:')
+    print("Initial tree:")
     print(tree.queryAll())
     print()
 
     tree.update(2, 6, 1)
-    print('Updated tree:')
+    print("Updated tree:")
     print(tree.queryAll())
     print()
 
@@ -95,11 +95,11 @@ def main():
     tree.update(6, 8, 0)
     tree.update(3, 5, 1)
     tree.update(8, 9, 1)
-    print('Updated tree:')
+    print("Updated tree:")
     print(tree.queryAll())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 
     class Solution:
