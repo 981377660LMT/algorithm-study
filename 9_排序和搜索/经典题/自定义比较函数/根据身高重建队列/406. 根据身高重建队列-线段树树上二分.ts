@@ -15,6 +15,7 @@ function reconstructQueue(people: number[][]): number[][] {
   return res
 }
 
+// 01线段树
 class SegmentTree {
   private readonly _tree: number[]
   private readonly _lazyValue: number[]

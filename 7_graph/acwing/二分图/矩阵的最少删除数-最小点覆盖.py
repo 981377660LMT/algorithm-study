@@ -10,33 +10,22 @@
 
 
 from typing import List
-from collections import defaultdict
-from hungarian import hungarian
+from hungarian import Hungarian
 
 
 def minDelete(grid: List[List[int]]) -> int:
+    """求二分图的最小点覆盖"""
     ROW, COL = len(grid), len(grid[0])
-    OFFSET = ROW * COL
-    adjList = [set() for _ in range(2 * ROW * COL)]
-    res = 0
-    remove = set()
-    for i in range(len(grid)):
-        if grid[i][i] == 1:
-            # 必须要删的位置
-            res += 1
-            remove.add(i)
+    H = Hungarian(ROW * COL, ROW * COL)
+    for r in range(ROW):
+        for c in range(COL):
+            if grid[r][c] == 1:
+                H.addEdge(r, c)
 
-    for i in range(len(grid)):
-        if i in remove:
-            continue
-        for j in range(len(grid[0])):
-            if j in remove:
-                continue
-            if grid[i][j] == 1:
-                adjList[i].add(j + OFFSET)
-                adjList[j + OFFSET].add(i)
-
-    return hungarian(adjList)[0] + res
+    return H.work()
 
 
 print(minDelete(grid=[[1, 0, 1, 1], [0, 0, 1, 1], [1, 1, 0, 0], [1, 1, 0, 1]]))
+
+
+# TODO

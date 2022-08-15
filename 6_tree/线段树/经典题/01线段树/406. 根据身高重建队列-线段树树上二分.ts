@@ -1,13 +1,29 @@
-/**
- * 维护01序列的线段树
- */
+// 406. 根据身高重建队列-线段树树上二分 O(nlogn)
+
+function reconstructQueue(people: number[][]): number[][] {
+  const n = people.length
+  people.sort((a, b) => a[0] - b[0] || -(a[1] - b[1]))
+
+  const tree = new SegmentTree(n)
+  const res = Array.from<unknown, [height: number, preCount: number]>({ length: n }, () => [0, 0])
+  people.forEach(([height, preCount]) => {
+    const pos = tree.getPos(preCount + 1)
+    res[pos - 1] = [height, preCount]
+    tree.update(pos, pos, -1)
+  })
+
+  return res
+}
+
+// 01线段树 更新方式为叠加
 class SegmentTree {
   private readonly _tree: number[]
   private readonly _lazyValue: number[]
   private readonly _size: number
 
   /**
-   * @param size 区间右边界 必须等于原数组长度
+   *
+   * @param size 区间右边界
    */
   constructor(size: number) {
     this._size = size
@@ -17,7 +33,7 @@ class SegmentTree {
   }
 
   /**
-   * @param k 树上二分查询第k个1的位置 k>=1
+   * @param k 树上二分查询第k个1的位置  k>=1
    * @complexity O(logn)
    */
   getPos(k: number): number {
@@ -104,6 +120,19 @@ class SegmentTree {
       throw new RangeError(`[${l}, ${r}] out of range: [1, ${this._size}]`)
     }
   }
+}
+
+if (require.main === module) {
+  console.log(
+    reconstructQueue([
+      [7, 0],
+      [4, 4],
+      [7, 1],
+      [5, 0],
+      [6, 1],
+      [5, 2]
+    ])
+  )
 }
 
 export {}

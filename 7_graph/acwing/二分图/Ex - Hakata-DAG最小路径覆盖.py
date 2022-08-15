@@ -16,9 +16,9 @@
 # !求DAG的最小路径覆盖
 
 # !答案为回文子串数量减去二分图最大匹配
+from hungarian import Hungarian
 
 import sys
-from hungarian import Hungarian
 
 
 sys.setrecursionlimit(int(1e9))
