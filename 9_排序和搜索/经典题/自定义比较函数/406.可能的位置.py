@@ -8,4 +8,3 @@ class Solution:
 
 
 print(Solution().solve(10, 3, 4))
-

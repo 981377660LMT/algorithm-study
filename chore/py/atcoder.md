@@ -18,3 +18,6 @@
     https://atcoder.jp/contests/abc238/submissions/33769869 (1131ms 嵌套 main 函数)
     貌似对 dfs 影响很大
 12. python 的 FastIO 快读模板 对执行速度几乎没有影响 所以不使用
+13. defaultdict 比 dict 慢很多
+    `dict:450ms defaultdict:800ms`
+    优先使用 dict

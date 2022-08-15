@@ -29,7 +29,7 @@ function usePersistentSegmentTree(nums: number[]) {
    * @param k  k从1开始
    */
   function query(left: number, right: number, k: number): number {
-    if (0 <= left && left <= right && right + 1 <= n) {
+    if (left >= 0 && left <= right && right + 1 <= n) {
       const rank = _query(roots[left], roots[right + 1], 0, allNums.length - 1, k)
       return allNums[rank]
     }
@@ -66,7 +66,7 @@ function usePersistentSegmentTree(nums: number[]) {
     return curId
   }
 
-  // 二分值域查询
+  // 树上二分值域查询
   function _query(
     preRoot: number,
     curRoot: number,

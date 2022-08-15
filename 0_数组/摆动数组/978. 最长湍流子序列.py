@@ -4,7 +4,7 @@ class Solution:
         up, down = 0, 0
         for num in nums:
             if num > 0:
-                up = down + 1
+                up = max(up, down + 1)
             elif num < 0:
-                down = up + 1
+                down = max(down, up + 1)
         return max(up, down)

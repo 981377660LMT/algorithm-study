@@ -9,14 +9,15 @@
 # 二分图最小点覆盖可以直接转成求解二分图最大匹配来求
 
 
-from pprint import pprint
 from typing import List
 from collections import defaultdict
 from hungarian import hungarian
 
 
 def minDelete(grid: List[List[int]]) -> int:
-    adjMap = defaultdict(set)
+    ROW, COL = len(grid), len(grid[0])
+    OFFSET = ROW * COL
+    adjList = [set() for _ in range(2 * ROW * COL)]
     res = 0
     remove = set()
     for i in range(len(grid)):
@@ -32,12 +33,10 @@ def minDelete(grid: List[List[int]]) -> int:
             if j in remove:
                 continue
             if grid[i][j] == 1:
-                adjMap[i].add(int(1e9) + j)
-                adjMap[int(1e9) + j].add(i)
-    pprint(grid, width=20)
-    print(adjMap)
-    return hungarian(adjMap) + res
+                adjList[i].add(j + OFFSET)
+                adjList[j + OFFSET].add(i)
+
+    return hungarian(adjList)[0] + res
 
 
 print(minDelete(grid=[[1, 0, 1, 1], [0, 0, 1, 1], [1, 1, 0, 0], [1, 1, 0, 1]]))
-

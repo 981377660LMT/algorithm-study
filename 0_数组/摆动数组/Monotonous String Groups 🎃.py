@@ -5,27 +5,10 @@
 from itertools import groupby
 
 
-class Solution:
-    def solve(self, s):
-        if not s:
-            return 0
-
-        res = 1
-        isIncreasing = None
-        for i in range(len(s) - 1):
-            if isIncreasing is None and s[i] != s[i + 1]:
-                isIncreasing = s[i] < s[i + 1]
-            elif (isIncreasing and s[i] > s[i + 1]) or (isIncreasing is False and s[i] < s[i + 1]):
-                res += 1
-                isIncreasing = None
-
-        return res
-
-
 class Solution2:
     def solve(self, s):
         # 连续去重
-        s = ''.join(char for char, _ in groupby(s))
+        s = "".join(char for char, _ in groupby(s))
         n = len(s)
 
         res = i = 0
@@ -41,6 +24,23 @@ class Solution2:
                     i += 1
 
             i += 1
+
+        return res
+
+
+class Solution:
+    def solve(self, s):
+        if not s:
+            return 0
+
+        res = 1
+        isIncreasing = None
+        for i in range(len(s) - 1):
+            if isIncreasing is None and s[i] != s[i + 1]:
+                isIncreasing = s[i] < s[i + 1]
+            elif (isIncreasing and s[i] > s[i + 1]) or (isIncreasing is False and s[i] < s[i + 1]):
+                res += 1
+                isIncreasing = None
 
         return res
 

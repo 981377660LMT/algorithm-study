@@ -1,48 +1,54 @@
-import { hungarian } from './匈牙利算法'
+import { useHungarian } from './匈牙利算法'
+
+const DIR4 = [
+  [-1, 0],
+  [1, 0],
+  [0, -1],
+  [0, 1]
+]
 
 /**
+ * 有无穷块大小为1 * 2的多米诺骨牌,把这些骨牌不重叠地覆盖在完好的格子上，
+ * 请找出你最多能在棋盘上放多少块骨牌
+ *
  * @param {number} n  1 <= n <= 8
  * @param {number} m  1 <= m <= 8
  * @param {number[][]} broken  棋盘上每一个坏掉的格子的位置
- * @return {number}
- * @description 有无穷块大小为1 * 2的多米诺骨牌,把这些骨牌不重叠地覆盖在完好的格子上，请找出你最多能在棋盘上放多少块骨牌
- * @description 棋盘格间隔染色变成二分图，注意1*2的骨牌覆盖两个格子相当于二分图匹配
- * @description 等价于求二分图最大匹配
+ *
+ * 棋盘格间隔染色变成二分图，注意1*2的骨牌覆盖两个格子相当于二分图匹配
+ * 等价于求二分图最大匹配
+ * https://leetcode.cn/problems/broken-board-dominoes/solution/suan-fa-xiao-ai-cong-ling-dao-yi-jiao-hu-8b4k/
  */
-const domino = (n: number, m: number, broken: number[][]): number => {
-  const board = Array.from<unknown, number[]>({ length: n }, () => Array(m).fill(0))
-  for (const [brokenX, brokenY] of broken) {
-    board[brokenX][brokenY] = 1
-  }
+function domino(n: number, m: number, broken: number[][]): number {
+  const board = Array.from({ length: n }, () => new Uint8Array(m))
+  broken.forEach(([r, c]) => {
+    board[r][c] = 1
+  })
 
-  const adjList = Array.from<unknown, number[]>({ length: n * m }, () => [])
-  // 建图 因为是无向图 所以只需下方和右侧相连避免重复看
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < m; j++) {
-      if (board[i][j] === 1) continue
-      const cur = i * m + j
+  const H = useHungarian(n * m, n * m) // 男生:偶数格子, 女生:奇数格子
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < m; c++) {
+      if (board[r][c] === 1 || (r + c) & 1) continue // !从男生连边到女生
 
-      if (j + 1 < m && board[i][j + 1] === 0) {
-        const next = i * m + j + 1
-        adjList[cur].push(next)
-        adjList[next].push(cur)
-      }
-
-      if (i + 1 < n && board[i + 1][j] === 0) {
-        const next = (i + 1) * m + j
-        adjList[cur].push(next)
-        adjList[next].push(cur)
+      const cur = r * m + c
+      for (const [dr, dc] of DIR4) {
+        const nr = r + dr
+        const nc = c + dc
+        if (nr < 0 || nr >= n || nc < 0 || nc >= m) continue
+        if (board[nr][nc] === 0) {
+          H.addEdge(cur, nr * m + nc)
+        }
       }
     }
   }
 
-  return hungarian(adjList)
+  return H.work()
 }
 
 console.log(
   domino(2, 3, [
     [1, 0],
-    [1, 1],
+    [1, 1]
   ])
 )
 // 输出：2
@@ -51,7 +57,7 @@ export {}
 console.log(
   domino(4, 4, [
     [1, 1],
-    [2, 2],
+    [2, 2]
   ])
 )
 // 预期结果：
@@ -59,7 +65,7 @@ console.log(
 console.log(
   domino(2, 3, [
     [1, 1],
-    [1, 2],
+    [1, 2]
   ])
 )
 // 预期结果：

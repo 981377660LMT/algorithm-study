@@ -8,6 +8,7 @@ Circle = Tuple[int, int, int]
 #  r <= 10  半径很小
 
 # 注意到半径很小，我们可以枚举每个玩具，并暴力枚举该玩具周围是否有可以套住该玩具的圈。
+# !O(r^2*n)
 class Solution:
     def circleGame(self, toys: List[List[int]], circles: List[List[int]], r: int) -> int:
         # def isContained(circle1: Circle, circle2: Circle) -> bool:
@@ -50,4 +51,3 @@ class Solution:
             res += int(check(tx, ty, tr))
 
         return res
-

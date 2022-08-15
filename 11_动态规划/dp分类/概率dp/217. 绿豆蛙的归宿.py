@@ -4,6 +4,8 @@
 # 到达每一个顶点时，如果有 K 条离开该点的道路，绿豆蛙可以选择任意一条道路离开该点，并且走向每条路的概率为 1/K。
 # 现在绿豆蛙想知道，从起点走到终点所经过的路径总长度的期望是多少？
 # 输出从起点到终点路径总长度的期望值，结果四舍五入保留两位小数。
+
+# !除以路径分支数
 from collections import defaultdict
 from functools import lru_cache
 import sys
@@ -30,6 +32,6 @@ for _ in range(m):
 
 
 res = dfs(1)
-print('{:.2f}'.format(res))
+print("{:.2f}".format(res))
 
 # 此题也可拓扑序dp

@@ -1,7 +1,7 @@
 # Detecting an Odd Length Cycle
 # return whether the graph has an odd length cycle.
 
-# 无向图检测是否存在奇数长度环:等价于不是二分图
+# !无向图检测是否存在奇数长度环:等价于不是二分图
 from collections import defaultdict
 from typing import List
 
@@ -34,4 +34,3 @@ class Solution:
 
 print(Solution().solve(graph=[[1, 2], [0, 2], [0, 1]]))
 print(Solution().solve(graph=[[2, 3], [2, 3], [0, 1, 3], [0, 1, 2]]))
-

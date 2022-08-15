@@ -8,7 +8,7 @@ def cal(upper: int) -> int:
     def dfs(pos: int, hasLeadingZero: bool, isLimit: bool, visited: int, isOk: bool) -> int:
         """当前在第pos位，hasLeadingZero表示有前导0，isLimit表示是否贴合上界"""
         if pos == len(nums):
-            return isOk and not hasLeadingZero
+            return isOk
 
         res = 0
         up = nums[pos] if isLimit else 9

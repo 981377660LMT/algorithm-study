@@ -1,44 +1,40 @@
 // 删除子数组
 
 /**
- * @param {number[]} arr
- * @return {number}
- * @description
- * 请你删除一个子数组（可以为空），使得 arr 中剩下的元素是 非递减 的。
+ * !请你删除一个子数组（可以为空），使得 arr 中剩下的元素是 非递减 的。
  *
  * 注意是删除最短的子数组而不是子序列
  * 返回满足题目要求删除的最短子数组的长度。
- * 必须连续，那就考虑滑动窗口。
+ * !双指针，一共三种情况 1、开头一段+末尾一段 2、开头一段 3、末尾一段
  */
 function findLengthOfShortestSubarray(arr: number[]): number {
   // 删左边/删右边/删中间
-  let l = 0
-  let r = arr.length - 1
-  let res = Infinity
+  const n = arr.length
+  let left = 0
+  let right = arr.length - 1
+  let res = 2e15
 
-  while (l + 1 < arr.length && arr[l] <= arr[l + 1]) l++
-  if (l === arr.length - 1) return 0
+  while (left + 1 < n && arr[left] <= arr[left + 1]) left++
+  while (right > 0 && arr[right] >= arr[right - 1]) right--
 
-  while (r > 0 && arr[r] >= arr[r - 1]) r--
+  // 删除0到r-1  或者删除l+1到n-1
+  res = Math.min(right, n - left - 1)
+  if (res === 0) return 0
 
-  // 删除0到r-1  或者删除l+1到arr.length-1
-  res = Math.min(r, arr.length - l - 1)
-
-  // 删中间：双指针+画平行线
-  let i = 0
-  while (i <= l && r <= arr.length - 1) {
-    if (arr[i] <= arr[r]) {
-      // 删除i+1 到 r-1
-      res = Math.min(res, r - 1 - i)
-      i++
-    } else {
-      r++
-    }
+  // 删中间：
+  // 只需遍历左边数组的每一个位置，找到右边数组相应的非递减的端点，我们就可以得到答案
+  // 可以用二分解决 注意到滑动的单调性 考虑双指针
+  let j = right
+  for (let i = 0; i <= left; i++) {
+    while (j < n && arr[i] > arr[j]) j++
+    res = Math.min(res, j - i - 1)
   }
 
   return res
 }
 
-console.log(findLengthOfShortestSubarray([1, 2, 3, 10, 4, 2, 3, 5]))
+if (require.main === module) {
+  console.log(findLengthOfShortestSubarray([1, 2, 3, 10, 4, 2, 3, 5]))
+}
 
 export {}

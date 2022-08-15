@@ -10,6 +10,8 @@
 # make every character equal to char;
 # make the left half <= char and the right half > char;
 # make the left half > char and the right half <= char.
+
+# !枚举分界的字母
 from collections import Counter
 import string
 

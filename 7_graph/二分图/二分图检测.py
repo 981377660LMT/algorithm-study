@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import DefaultDict, Generic, Hashable, Iterable, List, Literal, Optional, Set, TypeVar
 
-V = TypeVar('V', bound=Hashable)
+V = TypeVar("V", bound=Hashable)
 
 
 def isBipartite(adjMap: DefaultDict[V, Set[V]]) -> bool:
@@ -13,9 +13,8 @@ def isBipartite(adjMap: DefaultDict[V, Set[V]]) -> bool:
             if colors[next] == -1:
                 if not dfs(next, color ^ 1):  # type: ignore
                     return False
-            else:
-                if colors[next] == color:
-                    return False
+            elif colors[next] == color:
+                return False
         return True
 
     colors = defaultdict(lambda: -1)
@@ -39,7 +38,7 @@ def isBipartite2(adjMap: DefaultDict[int, Set[int]]) -> bool:
     return True
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class UnionFindMap(Generic[T]):

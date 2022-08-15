@@ -1,6 +1,12 @@
+# https://www.acwing.com/problem/content/description/100/
+# 类似分形之城
+
 from typing import List
 
-# 矩阵分治，分成四块
+# 矩阵分治，按照mid分割成四块
+# 希尔伯特曲线
+
+
 def solve(n) -> List[List[int]]:
     if n == 1:
         return [[1]]
@@ -20,10 +26,9 @@ def solve(n) -> List[List[int]]:
 
 
 n = int(input())
-ans = solve(n)
+res = solve(n)
 for i in range(n):
-    print(ans[i][0], end='')
+    print(res[i][0], end="")
     for j in range(1, n):
-        print(' %d' % ans[i][j], end='')
+        print(" %d" % res[i][j], end="")
     print()
-

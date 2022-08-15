@@ -1,82 +1,92 @@
+/* eslint-disable no-shadow */
 // 二分图的最大匹配问题
 // 对左侧每一个尚未匹配的点，不断地寻找可以增广的交替路 (有点像点引线，连环触发)
 // 如果是完美匹配 则匹配对数*2等于顶点数
 // https://blog.csdn.net/kaisa158/article/details/48718403?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522161564099216780266286846%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=161564099216780266286846&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~baidu_landing_v2~default-1-48718403.first_rank_v2_pc_rank_v29&utm_term=%E5%8C%88%E7%89%99%E5%88%A9dfs
 
-function hungarian(adjList: number[][]): number {
-  let maxMatching = 0
-  let visited = Array<boolean>(adjList.length).fill(false)
-  const matching = Array<number>(adjList.length).fill(-1)
+/**
+ * 匈牙利算法求无权二分图最大匹配
+ *
+ * @param row 男孩的个数
+ * @param col 女孩的个数
+ * @complexity O(V*E)
+ */
+function useHungarian(row: number, col: number) {
+  const adjList = Array.from<unknown, number[]>({ length: row }, () => [])
+  const rowMatching = new Int32Array(row).fill(-1)
+  const colMathching = new Int32Array(col).fill(-1)
+  let matchingEdges: [boy: number, girl: number][]
 
-  const colors = bisect(adjList)
-  for (let i = 0; i < adjList.length; i++) {
-    // 从左侧还没有匹配到的男生出发，并重置visited
-    if (colors[i] === 0 && matching[i] === -1) {
-      visited = Array<boolean>(adjList.length).fill(false)
-      if (dfs(i)) maxMatching++
+  function addEdge(boy: number, girl: number): void {
+    if (!(boy >= 0 && boy < row && girl >= 0 && girl < col)) {
+      throw new RangeError(`${boy},${girl} out of range ${row},${col}`)
     }
+    adjList[boy].push(girl)
   }
 
-  return maxMatching
+  function work(): number {
+    // 寻找增广路
+    const dfs = (cur: number): boolean => {
+      if (visited[cur]) return false
 
-  // 匈牙利算法核心:寻找增广路径 找到的话最大匹配加一
-  // dfs(cur) 表示给cur找匹配
-  function dfs(cur: number): boolean {
-    if (visited[cur]) return false
-    visited[cur] = true
-
-    for (const next of adjList[cur]) {
-      // 是增广路径或者dfs找到增广路径
-      if (matching[next] === -1 || dfs(matching[next])) {
-        matching[cur] = next
-        matching[next] = cur
-        return true
-      }
-    }
-
-    return false
-  }
-
-  // 二分图检测、获取colors
-  function bisect(adjList: number[][]) {
-    const colors = Array<number>(adjList.length).fill(-1)
-
-    const dfs = (cur: number, color: number): void => {
-      colors[cur] = color
-      for (const next of adjList[cur]) {
-        if (colors[next] === -1) {
-          dfs(next, color ^ 1)
-        } else {
-          if (colors[next] === colors[cur]) {
-            throw new Error('不是二分图')
-          }
+      visited[cur] = 1
+      for (let i = 0; i < adjList[cur].length; i++) {
+        const next = adjList[cur][i]
+        if (colMathching[next] === -1 || dfs(colMathching[next])) {
+          colMathching[next] = cur
+          rowMatching[cur] = next
+          return true
         }
       }
+
+      return false
     }
 
-    for (let i = 0; i < adjList.length; i++) {
-      if (colors[i] === -1) dfs(i, 0)
+    let res = 0
+    let hasUpdated = true
+    const visited = new Uint8Array(row).fill(0)
+    while (hasUpdated) {
+      hasUpdated = false
+      for (let cur = 0; cur < row; cur++) {
+        if (rowMatching[cur] === -1 && dfs(cur)) {
+          hasUpdated = true
+          res++
+        }
+      }
+
+      if (hasUpdated) visited.fill(0)
     }
 
-    return colors
+    return res
+  }
+
+  function getMathingEdges(): [boy: number, girl: number][] {
+    if (matchingEdges) return matchingEdges
+
+    matchingEdges = []
+    for (let cur = 0; cur < row; cur++) {
+      if (rowMatching[cur] !== -1) {
+        matchingEdges.push([cur, rowMatching[cur]])
+      }
+    }
+
+    return matchingEdges
+  }
+
+  return {
+    /**
+     * 男孩向女孩连边
+     */
+    addEdge,
+    /**
+     * 求二分图最大匹配数
+     */
+    work,
+    /**
+     * 取得最大匹配时的匹配对
+     */
+    getMathingEdges
   }
 }
 
-function isPerfectMatching(adjList: number[][]): boolean {
-  const maxMatching = hungarian(adjList)
-  return maxMatching * 2 === adjList.length
-}
-
-if (require.main === module) {
-  console.log(
-    hungarian([
-      [1, 3],
-      [0, 2],
-      [1, 3],
-      [0, 2],
-    ])
-  ) // 2
-  console.log(hungarian([[1, 3], [0, 2], [1], [0], [], []])) // 2
-}
-
-export { hungarian }
+export { useHungarian }

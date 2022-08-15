@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { isBipartite } from './二分图检测'
 
 /**
@@ -26,12 +27,14 @@ function possibleBipartition(n: number, dislikes: number[][]): boolean {
   return isBipartite(adjMap)
 }
 
-console.log(
-  possibleBipartition(4, [
-    [1, 2],
-    [1, 3],
-    [2, 4],
-  ])
-)
+if (require.main === module) {
+  console.log(
+    possibleBipartition(4, [
+      [1, 2],
+      [1, 3],
+      [2, 4]
+    ])
+  )
+}
 
 export {}

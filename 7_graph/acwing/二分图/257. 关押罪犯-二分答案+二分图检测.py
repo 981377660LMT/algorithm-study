@@ -43,7 +43,7 @@ for i in range(m):
     adjList[a].append([b, w])
     adjList[b].append([a, w])
 
-l, r = 0, 10 ** 9
+l, r = 0, 10**9
 while l <= r:
     mid = (l + r) >> 1
     if check(mid):
@@ -52,4 +52,3 @@ while l <= r:
         l = mid + 1
 
 print(l)
-

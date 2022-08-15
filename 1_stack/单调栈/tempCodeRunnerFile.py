@@ -1,1 +1,2 @@
-preSum[right + 1] - preSum[left]
+
+        ndp[j + 1] = (ndp[j + 1] + dpSum[j] - dpSum[left]) % MOD

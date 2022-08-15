@@ -1,7 +1,10 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /**
  * @param {number[]} nums
  * @return {void} Do not return anything, modify nums in-place instead.
- * 将它原地重新排列成 nums[0] < nums[1] > nums[2] < nums[3]... 的顺序
+ * 将它原地重新排列成
+ * nums[0] < nums[1] > nums[2] < nums[3]... 的顺序
  */
 function wiggleSort(nums: number[]): void {
   const n = nums.length
@@ -21,8 +24,10 @@ function wiggleSort(nums: number[]): void {
   }
 }
 
-const a = [1, 5, 1, 1, 6, 4]
-wiggleSort(a)
-console.log(a)
+if (require.main === module) {
+  const a = [1, 5, 1, 1, 6, 4]
+  wiggleSort(a)
+  console.log(a)
+}
 
 export default 1

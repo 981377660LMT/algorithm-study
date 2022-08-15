@@ -7,7 +7,7 @@ from typing import List
 # 返回青蛙在 t 秒后位于目标顶点 target 上的概率。
 
 # dfs后序遍历 获取到下面传上来的概率
-# 此节点处的概率就是 总概率/下一步的分支数
+# !此节点处的概率就是 当前贡献/分支数
 # 无路可走或者到点时 判断cur是否等于target
 class Solution:
     def frogPosition(self, n: int, edges: List[List[int]], t: int, target: int) -> float:
@@ -32,4 +32,3 @@ class Solution:
 
 
 print(Solution().frogPosition(7, [[1, 2], [1, 3], [1, 7], [2, 4], [2, 6], [3, 5]], 2, 4))
-

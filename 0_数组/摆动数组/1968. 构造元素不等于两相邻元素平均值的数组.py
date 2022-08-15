@@ -2,6 +2,8 @@ from typing import List
 
 # 你打算重新排列数组中的元素以满足：重排后，数组中的每个元素都 不等于 其两侧相邻元素的 平均值 。
 # Wiggle Sort
+
+
 class Solution:
     def rearrangeArray(self, nums: List[int]) -> List[int]:
         nums = sorted(nums)

@@ -21,6 +21,7 @@ const maxTurbulenceSize = function (arr: number[]): number {
       up = 1
       down = 1
     }
+
     res = Math.max(res, up, down)
   }
 

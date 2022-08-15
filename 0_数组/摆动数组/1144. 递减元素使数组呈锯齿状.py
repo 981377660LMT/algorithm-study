@@ -1,9 +1,11 @@
-from typing import List
-
 # 每次 操作 会从中选择一个元素并 将该元素的值减少 1。
 # 返回将数组 nums 转换为锯齿数组所需的最小操作次数。
+# !考察奇数位/偶数位
 
-# Two options, either make A[even] smaller or make A[odd] smaller.
+from typing import List
+
+
+# !Two options, either make A[even] smaller or make A[odd] smaller.
 
 
 class Solution:
