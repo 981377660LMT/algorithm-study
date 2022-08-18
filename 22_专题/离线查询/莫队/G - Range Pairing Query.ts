@@ -1,5 +1,7 @@
 // https://atcoder.jp/contests/abc242/tasks/abc242_g
-// 静态查询区间 `元素频率//2` 的最大值
+// !同じ色の服を着た 2 人からなるペアは最大何組作れるか答えよ。
+// 静态查询区间 `元素的count //2` 的和
+
 import * as fs from 'fs'
 import { useMoAlgo } from './useMoAlgo'
 
@@ -29,23 +31,23 @@ const nums = input().split(' ').map(Number)
 // 维护区间的api
 const manager = {
   pair: 0,
-  counter: new Map<number, number>(),
+  counter: new Uint32Array(1e5 + 10),
   add(num: number) {
-    this.pair -= Math.floor((this.counter.get(num) || 0) / 2)
-    this.counter.set(num, (this.counter.get(num) || 0) + 1)
-    this.pair += Math.floor((this.counter.get(num) || 0) / 2)
+    this.pair -= Math.floor(this.counter[num] / 2)
+    this.counter[num]++
+    this.pair += Math.floor(this.counter[num] / 2)
   },
   remove(num: number) {
-    this.pair -= Math.floor((this.counter.get(num) || 0) / 2)
-    this.counter.set(num, (this.counter.get(num) || 0) - 1)
-    this.pair += Math.floor((this.counter.get(num) || 0) / 2)
+    this.pair -= Math.floor(this.counter[num] / 2)
+    this.counter[num]--
+    this.pair += Math.floor(this.counter[num] / 2)
   },
   query() {
     return this.pair
   }
 }
 
-const moAlgo = useMoAlgo(manager)(nums)
+const moAlgo = useMoAlgo(nums, manager)
 
 const q = Number(input())
 for (let i = 0; i < q; i++) {

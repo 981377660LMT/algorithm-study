@@ -52,7 +52,9 @@ class MinCostMaxFlow:
             Tuple[int, int]: [最大流,最小费用]
         """
         maxFlow, minCost = 0, 0
-        while self._spfa():  # !注意这里一次spfa不止找到一条费用最小的增广流
+        while self._spfa():
+            # !如果流量限定为1，那么一次dfs只会找到一条费用最小的增广流
+            # !如果流量限定为INF，那么一次dfs不只会找到一条费用最小的增广流
             flow = self._dfs(self._start, self._end, INF)
             maxFlow += flow
             minCost += flow * self._dist[self._end]
@@ -84,7 +86,10 @@ class MinCostMaxFlow:
                     dist[next] = dist[cur] + cost
                     if not visited[next]:
                         visited[next] = True
-                        queue.append(next)
+                        if queue and dist[queue[0]] > dist[next]:
+                            queue.appendleft(next)
+                        else:
+                            queue.append(next)
 
         return dist[end] != INF
 
@@ -103,11 +108,11 @@ class MinCostMaxFlow:
         visited[cur] = True
         res = flow
         index = curEdges[cur]
-        while index < len(reGraph[cur]) and res:
+        while res and index < len(reGraph[cur]):
             edgeIndex = reGraph[cur][index]
             next, remain = edges[edgeIndex].toV, edges[edgeIndex].cap - edges[edgeIndex].flow
             if remain > 0 and not visited[next] and dist[next] == dist[cur] + edges[edgeIndex].cost:
-                delta = self._dfs(next, end, min(remain, res))
+                delta = self._dfs(next, end, remain if remain < res else res)
                 res -= delta
                 edges[edgeIndex].flow += delta
                 edges[edgeIndex ^ 1].flow -= delta

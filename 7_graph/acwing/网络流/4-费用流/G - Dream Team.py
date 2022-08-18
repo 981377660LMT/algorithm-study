@@ -15,9 +15,7 @@
 # !能力值对应 流的费用
 # !队伍里每个人学校和学科都不同:学校学科为虚拟源汇点，容量为1，这样就不会取到重复的学生了
 
-from heapq import heappop, heappush
 import sys
-from typing import Optional
 
 
 sys.setrecursionlimit(int(1e9))
@@ -25,68 +23,127 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = int(1e9 + 7)
 INF = int(1e18)
 
+from collections import deque
+from typing import List
 
-# https://atcoder.jp/contests/abc247/submissions/30874572
-class ATCMinCostFlow:
-    def __init__(self, n: int):
+
+class Edge:
+    __slots__ = ("fromV", "toV", "cap", "cost", "flow")
+
+    def __init__(self, fromV: int, toV: int, cap: int, cost: int, flow: int) -> None:
+        self.fromV = fromV
+        self.toV = toV
+        self.cap = cap
+        self.cost = cost
+        self.flow = flow
+
+
+class MinCostMaxFlow:
+    """最小费用流的连续最短路算法复杂度为流量*最短路算法复杂度"""
+
+    __slots__ = ("_n", "_start", "_end", "_edges", "_reGraph", "_dist", "_visited", "_curEdges")
+
+    def __init__(self, n: int, start: int, end: int):
+        """
+        Args:
+            n (int): 包含虚拟点在内的总点数
+            start (int): (虚拟)源点
+            end (int): (虚拟)汇点
+        """
+        assert 0 <= start < n and 0 <= end < n
         self._n = n
-        self.graph = [[] for _ in range(n)]
+        self._start = start
+        self._end = end
+        self._edges: List["Edge"] = []
+        self._reGraph: List[List[int]] = [[] for _ in range(n + 10)]  # 残量图存储的是边的下标
+
+        self._dist = [INF] * (n + 10)
+        self._visited = [False] * (n + 10)
+        self._curEdges = [0] * (n + 10)
 
     def addEdge(self, fromV: int, toV: int, cap: int, cost: int) -> None:
-        forward = [toV, cap, cost, None]
-        backward = forward[3] = [fromV, 0, -cost, forward]  # type: ignore
-        self.graph[fromV].append(forward)
-        self.graph[toV].append(backward)
+        """原边索引为i 反向边索引为i^1"""
+        self._edges.append(Edge(fromV, toV, cap, cost, 0))
+        self._edges.append(Edge(toV, fromV, 0, -cost, 0))
+        len_ = len(self._edges)
+        self._reGraph[fromV].append(len_ - 2)
+        self._reGraph[toV].append(len_ - 1)
 
-    def flow(self, start: int, end: int, flow: int) -> Optional[int]:
-        n = self._n
-        g = self.graph
-
-        res = 0
-        head = [0] * n
-        preV = [0] * n
-        preE = [None] * n
-
-        d0 = [INF] * n
-        dist = [INF] * n
-
-        while flow:
-            dist[:] = d0
-            dist[start] = 0
-            que = [(0, start)]
-
-            while que:
-                c, v = heappop(que)
-                if dist[v] < c:
-                    continue
-                r0 = dist[v] + head[v]
-                for e in g[v]:
-                    w, cap, cost, _ = e
-                    if cap > 0 and r0 + cost - head[w] < dist[w]:
-                        dist[w] = r = r0 + cost - head[w]
-                        preV[w] = v
-                        preE[w] = e
-                        heappush(que, (r, w))
-            if dist[end] == INF:
-                return None
-
-            for i in range(n):
-                head[i] += dist[i]
-
-            d = flow
-            v = end
-            while v != start:
-                d = min(d, preE[v][1])
-                v = preV[v]
-            flow -= d
-            res += d * head[end]
-            v = end
-            while v != start:
-                e = preE[v]
-                e[1] -= d
-                e[3][1] += d
-                v = preV[v]
+    def work(self) -> List[int]:
+        """
+        Returns:
+             List[int]: 每个k限流(匹配了k条边)的最大花费
+        """
+        res = []
+        minCost = 0
+        while self._spfa():
+            # !限定流量为1 每次dfs只找到一条费用最小的增广流
+            flow = self._dfs(self._start, self._end, 1)
+            minCost += flow * self._dist[self._end]
+            res.append(minCost)
         return res
+
+    def _spfa(self) -> bool:
+        """spfa沿着最短路寻找增广路径  有负cost的边不能用dijkstra"""
+        n, start, end, edges, reGraph, visited = (
+            self._n,
+            self._start,
+            self._end,
+            self._edges,
+            self._reGraph,
+            self._visited,
+        )
+
+        self._curEdges = [0] * n
+        self._dist = dist = [INF] * n
+        dist[start] = 0
+        queue = deque([start])
+
+        while queue:
+            cur = queue.popleft()
+            visited[cur] = False
+            for edgeIndex in reGraph[cur]:
+                edge = edges[edgeIndex]
+                cost, remain, next = edge.cost, edge.cap - edge.flow, edge.toV
+                if remain > 0 and dist[cur] + cost < dist[next]:
+                    dist[next] = dist[cur] + cost
+                    if not visited[next]:
+                        visited[next] = True
+                        if queue and dist[queue[0]] > dist[next]:
+                            queue.appendleft(next)
+                        else:
+                            queue.append(next)
+
+        return dist[end] != INF
+
+    def _dfs(self, cur: int, end: int, flow: int) -> int:
+        if cur == end:
+            return flow
+
+        visited, reGraph, curEdges, edges, dist = (
+            self._visited,
+            self._reGraph,
+            self._curEdges,
+            self._edges,
+            self._dist,
+        )
+
+        visited[cur] = True
+        res = flow
+        index = curEdges[cur]
+        while res and index < len(reGraph[cur]):
+            edgeIndex = reGraph[cur][index]
+            next, remain = edges[edgeIndex].toV, edges[edgeIndex].cap - edges[edgeIndex].flow
+            if remain > 0 and not visited[next] and dist[next] == dist[cur] + edges[edgeIndex].cost:
+                delta = self._dfs(next, end, remain if remain < res else res)
+                res -= delta
+                edges[edgeIndex].flow += delta
+                edges[edgeIndex ^ 1].flow -= delta
+            curEdges[cur] += 1
+            index = curEdges[cur]
+
+        visited[cur] = False
+        return flow - res
 
 
 #####################################
@@ -94,42 +151,17 @@ class ATCMinCostFlow:
 n = int(input())
 v = 150
 START, END, OFFSET = 2 * v, 2 * v + 1, v
-mcmf = ATCMinCostFlow(2 * v + 2)
-
+mcmf = MinCostMaxFlow(2 * v + 2, START, END)
 for i in range(v):
-    mcmf.addEdge(START, i, 1, 0)
     mcmf.addEdge(i + OFFSET, END, 1, 0)
+    mcmf.addEdge(START, i, 1, 0)
 
 for _ in range(n):
     u, v, w = map(int, input().split())
     u, v = u - 1, v - 1
-    mcmf.addEdge(u, v + OFFSET, 1, -w)  # !要求最大费用流 所以(BIG-w)费用
+    mcmf.addEdge(u, v + OFFSET, 1, -w)  # !要求最大费用流
 
-
-res = []
-cur = 0
-while True:
-    delta = mcmf.flow(START, END, 1)  # !流量为1
-    if delta is None:
-        break
-    cur += delta
-    res.append(cur)
-
-
+res = mcmf.work()
 print(len(res))
 for i, cost in enumerate(res, 1):
     print(-cost)
-
-# TODO 不一定是k限流
-# 4
-# 1 1 1
-# 1 2 1
-# 2 3 1
-# 3 3 1
-
-
-# 2
-# 1
-# 2
-
-# !输出为 1 2 少了一个匹配的情况
