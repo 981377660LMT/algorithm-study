@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable no-shadow */
 // !Dinic算法 数组+边存图 速度快
 
 const INF = 2e15 // !2**53 -1 约为 9e15

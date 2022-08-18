@@ -4,3 +4,11 @@
 
 `二分图最大权匹配可用 KM 算法和 MCMF`
 `最小费用流的连续最短路算法复杂度为流量*最短路算法复杂度`
+
+## mcmf 初始化
+
+```Python
+V = 150
+START, END, OFFSET = 2 * V, 2 * V + 1, V
+mcmf = MinCostMaxFlow(2 * v + 2, START, END)
+```

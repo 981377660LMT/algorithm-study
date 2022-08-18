@@ -1,9 +1,11 @@
-function useLCAManager(n: number, adjMap: Map<number, Set<number>>, root = 0) {
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-inner-declarations */
+function useLCAManager(n: number, adjList: number[][], root = 0) {
   const depth = new Int32Array(n).fill(-1)
   const parent = new Int32Array(n).fill(-1)
 
   const _BITLEN = Math.floor(Math.log2(n)) + 1
-  const _fa = Array.from<any, Int32Array>({ length: n }, () => new Int32Array(_BITLEN))
+  const _fa = Array.from<unknown, Int32Array>({ length: n }, () => new Int32Array(_BITLEN))
 
   _dfs(root, -1, 0)
   _initDp()
@@ -35,7 +37,8 @@ function useLCAManager(n: number, adjMap: Map<number, Set<number>>, root = 0) {
   function _dfs(cur: number, pre: number, dep: number): void {
     depth[cur] = dep
     parent[cur] = pre
-    for (const next of adjMap.get(cur) ?? []) {
+    for (let i = 0; i < adjList[cur].length; i++) {
+      const next = adjList[cur][i]
       if (next === pre) continue
       _dfs(next, cur, dep + 1)
     }
@@ -57,19 +60,19 @@ function useLCAManager(n: number, adjMap: Map<number, Set<number>>, root = 0) {
   return {
     depth,
     parent,
-    queryLCA,
+    queryLCA
   }
 }
 
 if (require.main === module) {
   function closestNode(n: number, edges: number[][], query: number[][]): number[] {
-    const adjMap = new Map<number, Set<number>>()
-    for (const [u, v] of edges) {
-      adjMap.set(u, (adjMap.get(u) ?? new Set()).add(v))
-      adjMap.set(v, (adjMap.get(v) ?? new Set()).add(u))
-    }
+    const adjList = Array.from<unknown, number[]>({ length: n }, () => [])
+    edges.forEach(([u, v]) => {
+      adjList[u].push(v)
+      adjList[v].push(u)
+    })
 
-    const { depth, queryLCA } = useLCAManager(n, adjMap)
+    const { depth, queryLCA } = useLCAManager(n, adjList)
     const res = []
     for (const [root1, root2, root3] of query) {
       const cands = [queryLCA(root1, root2), queryLCA(root2, root3), queryLCA(root1, root3)].sort(

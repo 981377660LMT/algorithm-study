@@ -1,15 +1,13 @@
-from typing import DefaultDict, Generic, Hashable, List, Tuple, TypeVar
-from collections import defaultdict, deque
+from typing import List, Tuple
+from collections import deque
 
 INF = int(1e18)
 
-V = TypeVar("V", bound=Hashable)
 
-
-class Edge(Generic[V]):
+class Edge:
     __slots__ = ("fromV", "toV", "cap", "cost", "flow")
 
-    def __init__(self, fromV: V, toV: V, cap: int, cost: int, flow: int) -> None:
+    def __init__(self, fromV: int, toV: int, cap: int, cost: int, flow: int) -> None:
         self.fromV = fromV
         self.toV = toV
         self.cap = cap
@@ -17,16 +15,30 @@ class Edge(Generic[V]):
         self.flow = flow
 
 
-class MinCostMaxFlow(Generic[V]):
+class MinCostMaxFlow:
     """最小费用流的连续最短路算法复杂度为流量*最短路算法复杂度"""
 
-    def __init__(self, start: V, end: V):
-        self._start: V = start
-        self._end: V = end
-        self._edges: List["Edge"[V]] = []
-        self._reGraph: DefaultDict[V, List[int]] = defaultdict(list)  # 残量图存储的是边的下标
+    __slots__ = ("_n", "_start", "_end", "_edges", "_reGraph", "_dist", "_visited", "_curEdges")
 
-    def addEdge(self, fromV: V, toV: V, cap: int, cost: int) -> None:
+    def __init__(self, n: int, start: int, end: int):
+        """
+        Args:
+            n (int): 包含虚拟点在内的总点数
+            start (int): (虚拟)源点
+            end (int): (虚拟)汇点
+        """
+        assert 0 <= start < n and 0 <= end < n
+        self._n = n
+        self._start = start
+        self._end = end
+        self._edges: List["Edge"] = []
+        self._reGraph: List[List[int]] = [[] for _ in range(n + 10)]  # 残量图存储的是边的下标
+
+        self._dist = [INF] * (n + 10)
+        self._visited = [False] * (n + 10)
+        self._curEdges = [0] * (n + 10)
+
+    def addEdge(self, fromV: int, toV: int, cap: int, cost: int) -> None:
         """原边索引为i 反向边索引为i^1"""
         self._edges.append(Edge(fromV, toV, cap, cost, 0))
         self._edges.append(Edge(toV, fromV, 0, -cost, 0))
@@ -39,46 +51,68 @@ class MinCostMaxFlow(Generic[V]):
         Returns:
             Tuple[int, int]: [最大流,最小费用]
         """
-        end = self._end
-        flow = cost = 0
-        while True:
-            delta = self._spfa()  # 一次spfa只会找到一条费用最小的增广流
-            if delta == 0:
-                break
-            flow += delta
-            cost += delta * self._dist[end]
-        return flow, cost
+        maxFlow, minCost = 0, 0
+        while self._spfa():  # !注意这里一次spfa不止找到一条费用最小的增广流
+            flow = self._dfs(self._start, self._end, INF)
+            maxFlow += flow
+            minCost += flow * self._dist[self._end]
+        return maxFlow, minCost
 
-    def _spfa(self) -> int:
-
+    def _spfa(self) -> bool:
         """spfa沿着最短路寻找增广路径  有负cost的边不能用dijkstra"""
-        start, end, edges, reGraph = self._start, self._end, self._edges, self._reGraph
-        self._dist = dist = defaultdict(lambda: INF, {start: 0})
-        inQueue = defaultdict(lambda: False)
+        n, start, end, edges, reGraph, visited = (
+            self._n,
+            self._start,
+            self._end,
+            self._edges,
+            self._reGraph,
+            self._visited,
+        )
+
+        self._curEdges = [0] * n
+        self._dist = dist = [INF] * n
+        dist[start] = 0
         queue = deque([start])
-        inFlow = defaultdict(int, {start: INF})  # 到每条边上的流量
-        pre = defaultdict(lambda: -1)
 
         while queue:
             cur = queue.popleft()
-            inQueue[cur] = False
+            visited[cur] = False
             for edgeIndex in reGraph[cur]:
                 edge = edges[edgeIndex]
-                cost, flow, cap, next = edge.cost, edge.flow, edge.cap, edge.toV
-                if dist[cur] + cost < dist[next] and (cap - flow) > 0:
+                cost, remain, next = edge.cost, edge.cap - edge.flow, edge.toV
+                if remain > 0 and dist[cur] + cost < dist[next]:
                     dist[next] = dist[cur] + cost
-                    pre[next] = edgeIndex
-                    inFlow[next] = min(inFlow[cur], cap - flow)
-                    if not inQueue[next]:
-                        inQueue[next] = True
+                    if not visited[next]:
+                        visited[next] = True
                         queue.append(next)
 
-        resDelta = inFlow[end]
-        if resDelta > 0:  # 找到可行流
-            cur = end
-            while cur != start:
-                preEdgeIndex = pre[cur]
-                edges[preEdgeIndex].flow += resDelta
-                edges[preEdgeIndex ^ 1].flow -= resDelta
-                cur = edges[preEdgeIndex].fromV
-        return resDelta
+        return dist[end] != INF
+
+    def _dfs(self, cur: int, end: int, flow: int) -> int:
+        if cur == end:
+            return flow
+
+        visited, reGraph, curEdges, edges, dist = (
+            self._visited,
+            self._reGraph,
+            self._curEdges,
+            self._edges,
+            self._dist,
+        )
+
+        visited[cur] = True
+        res = flow
+        index = curEdges[cur]
+        while index < len(reGraph[cur]) and res:
+            edgeIndex = reGraph[cur][index]
+            next, remain = edges[edgeIndex].toV, edges[edgeIndex].cap - edges[edgeIndex].flow
+            if remain > 0 and not visited[next] and dist[next] == dist[cur] + edges[edgeIndex].cost:
+                delta = self._dfs(next, end, min(remain, res))
+                res -= delta
+                edges[edgeIndex].flow += delta
+                edges[edgeIndex ^ 1].flow -= delta
+            curEdges[cur] += 1
+            index = curEdges[cur]
+
+        visited[cur] = False
+        return flow - res

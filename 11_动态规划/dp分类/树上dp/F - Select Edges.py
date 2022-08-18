@@ -6,7 +6,7 @@
 # !设f[i][0/1]表示节点i及其子树内，是否要选i到父亲的边(0/1)，能得到的最大价值。
 # 如果选到父亲的边:就是最多把d-1个儿子的贡献从 f[son][0]改为f[son][1] + w[u][son] ;特殊的如果d=0 则f[i][1] = -inf
 # 如果不选到父亲的边:就是最多把d;个儿子的贡献从f[son][0]改为f[son][1] + w[u][son]，挑能贡献最多的选（修改后较修改前差值最大的d个)
-# !对贡献的差值排序
+# !对贡献的差值排序 选边
 
 #    parent
 #      !|*
@@ -29,6 +29,7 @@ from typing import Tuple
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = int(1e9 + 7)
+INF = int(1e18)
 
 
 def main() -> None:
@@ -51,7 +52,7 @@ def main() -> None:
 
         limit = limits[cur]
         if limit == 0:  # !选不了特判
-            return -int(1e18), res2
+            return -INF, res2
 
         diff = nlargest(limit, diff)
         for i in range(len(diff)):
@@ -65,7 +66,7 @@ def main() -> None:
 
     n = int(input())
     limits = list(map(int, input().split()))
-    adjMap = defaultdict(lambda: defaultdict(lambda: -int(1e18)))
+    adjMap = defaultdict(lambda: defaultdict(lambda: -INF))
     for _ in range(n - 1):
         u, v, w = map(int, input().split())
         u, v = u - 1, v - 1

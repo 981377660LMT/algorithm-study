@@ -8,6 +8,7 @@
  * that are constantly operating on very large strings by
  * splitting them into multiple smaller strings transparently.
  * Efficient random access is achieved via a binary tree.
+ *
  * @see {@link https://github.com/component/rope}
  * @see {@link https://github.com/component/rope/issues/2}
  */
@@ -241,15 +242,15 @@ class Rope {
 if (require.main === module) {
   console.time('Rope')
   const rope = new Rope('Hello World'.repeat(1e5))
-  for (let _ = 0; _ < 10000; _++) {
+  for (let _ = 0; _ < 1000; _++) {
     rope.insert(5, '!')
     rope.slice(0, 10)
   }
   console.timeEnd('Rope') // Rope: 21.849ms
 
   console.time('String')
-  let string = 'Hello World'.repeat(1e4)
-  for (let _ = 0; _ < 10000; _++) {
+  let string = 'Hello World'.repeat(1e5)
+  for (let _ = 0; _ < 1000; _++) {
     string = `${string.slice(0, 5)}!${string.slice(5)}`
   }
   console.timeEnd('String') // String: 5.334s

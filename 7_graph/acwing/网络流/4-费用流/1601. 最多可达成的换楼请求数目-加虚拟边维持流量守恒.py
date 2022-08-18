@@ -14,7 +14,7 @@ class Solution:
         """请你从原请求列表中选出若干个请求，使得它们是一个可行的请求列表，并返回所有可行列表中最大请求数目。"""
         START, END = n + 1, n + 2
         flowDiff = defaultdict(int)
-        mcmf = MinCostMaxFlow(START, END)
+        mcmf = MinCostMaxFlow(n + 3, START, END)
         for u, v in requests:
             mcmf.addEdge(u, v, 1, 1)
             flowDiff[u] -= 1

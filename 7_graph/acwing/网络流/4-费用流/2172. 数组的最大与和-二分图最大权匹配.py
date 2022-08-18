@@ -5,8 +5,8 @@ from MinCostMaxFlow import MinCostMaxFlow
 class Solution:
     def maximumANDSum(self, nums: List[int], numSlots: int) -> int:
         """最大费用最大流"""
-        OFFSET, START, END = int(1e3), -1, int(1e9)
-        mcmf = MinCostMaxFlow(START, END)
+        OFFSET, START, END = 100, 201, 202
+        mcmf = MinCostMaxFlow(203, START, END)
 
         for i, num in enumerate(nums):
             for j in range(numSlots):

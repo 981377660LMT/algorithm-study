@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-shadow */
 // # 有 1 ~ n 编号的 n 个软件包，除了 1 号软件包，每个软件包有且只有一个它所依赖的软件包，
 
 // # 且软件包之间的依赖关系不存在环。
@@ -90,8 +92,9 @@ class SegmentTree {
   }
 
   private _checkRange(l: number, r: number): void {
-    if (l < 1 || r > this._size)
+    if (l < 1 || r > this._size) {
       throw new RangeError(`[${l}, ${r}] out of range: [1, ${this._size}]`)
+    }
   }
 }
 // #endregion
@@ -132,7 +135,7 @@ function useSoftwareManager(n: number, adjMap: Map<number, Set<number>>) {
     depths[cur] = depth
     parents[cur] = pre
     subsizes[cur] = 1
-    for (const next of adjMap.get(cur) ?? []) {
+    for (const next of adjMap.get(cur) || []) {
       if (next === pre) continue
       dfs1(next, cur, depth + 1)
       subsizes[cur] += subsizes[next]
@@ -147,7 +150,7 @@ function useSoftwareManager(n: number, adjMap: Map<number, Set<number>>) {
     heavyTops[cur] = heavyStart
     if (heavysons[cur] === 0) return
     dfs2(heavysons[cur], heavyStart)
-    for (const next of adjMap.get(cur) ?? []) {
+    for (const next of adjMap.get(cur) || []) {
       if (next === heavysons[cur] || next === parents[cur]) continue
       dfs2(next, next)
     }
@@ -155,7 +158,7 @@ function useSoftwareManager(n: number, adjMap: Map<number, Set<number>>) {
 
   return {
     install,
-    uninstall,
+    uninstall
   }
 }
 

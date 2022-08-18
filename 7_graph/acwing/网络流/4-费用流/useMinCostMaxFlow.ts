@@ -1,3 +1,11 @@
+/* eslint-disable no-shadow */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-constant-condition */
+/* eslint-disable no-useless-constructor */
+
+const INF = 2e15
+
 class Edge {
   constructor(
     public readonly from: number,
@@ -28,7 +36,7 @@ function useMinCostMaxFlow(n: number, start: number, end: number) {
   }
 
   function work(): [maxFlow: number, minCost: number] {
-    const dist = Array<number>(n).fill(Infinity)
+    const dist = Array<number>(n).fill(INF)
     let [flow, cost] = [0, 0]
     while (true) {
       const delta = spfa()
@@ -41,13 +49,13 @@ function useMinCostMaxFlow(n: number, start: number, end: number) {
 
     // spfa沿着最短路寻找增广路径  有负cost的边不能用dijkstra
     function spfa(): number {
-      dist.fill(Infinity)
+      dist.fill(INF)
       dist[start] = 0
       const inQueue = new Uint8Array(n)
       let queue = [start]
 
       const inFlow = Array<number>(n).fill(0)
-      inFlow[start] = Infinity
+      inFlow[start] = INF
       const pre = new Int32Array(n).fill(-1)
 
       while (queue.length) {

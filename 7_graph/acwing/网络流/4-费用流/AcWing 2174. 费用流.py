@@ -3,7 +3,6 @@
 # !求从 S 到 T 的最大流，以及在流量最大时的最小费用。
 # 2≤n≤5000,
 # 1≤m≤50000,
-from collections import defaultdict
 from MinCostMaxFlow import MinCostMaxFlow
 
 if __name__ == "__main__":
@@ -12,7 +11,7 @@ if __name__ == "__main__":
     # !图中存在重边和自环
     input = sys.stdin.readline
     n, m, start, end = map(int, input().split())
-    mcmf = MinCostMaxFlow(start, end)
+    mcmf = MinCostMaxFlow(n + 5, start=start, end=end)
 
     # 从点 u 到点 v 存在一条有向边，容量为 c。
     for _ in range(m):

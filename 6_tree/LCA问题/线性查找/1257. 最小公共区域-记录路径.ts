@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 // 给你一些区域列表 regions ，`每个列表的第一个区域都包含这个列表内所有其他区域。`
 // 如果区域 X 包含区域 Y ，那么区域 X  比区域 Y 大。
 // 给定两个区域 region1 和 region2 ，找到同时包含这两个区域的 最小 区域。

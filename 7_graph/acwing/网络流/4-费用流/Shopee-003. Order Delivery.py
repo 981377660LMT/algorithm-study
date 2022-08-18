@@ -6,9 +6,9 @@
 # 1. 无权图最短路求出各个仓库到各个城市的最短距离，进而处理出运输费用 dist[i][j]
 # 2. 建立虚拟源点和汇点，求解`仓库`=>`城市`网络的最小费用最大流
 
+from MinCostMaxFlow import MinCostMaxFlow
 
 from collections import defaultdict, deque
-from MinCostMaxFlow import MinCostMaxFlow
 
 # 1. 输入
 n, warehouse, m = map(int, input().split())  # 城市 仓库 道路 数量 点数<=20 边数<=200
@@ -49,8 +49,8 @@ for start, *_ in stores:
 
 
 # 3. 建图求最小费用最大流
-START, END, OFFSET = -1, -2, int(1e4)
-mcmf = MinCostMaxFlow(START, END)
+START, END, OFFSET = 200, 201, 100
+mcmf = MinCostMaxFlow(202, START, END)
 for i, remain, _ in stores:
     mcmf.addEdge(START, i, remain, 0)  # 虚拟源点提货物
 for j, need in needs.items():
@@ -59,4 +59,3 @@ for i, remain, fee in stores:
     for j, need in needs.items():
         mcmf.addEdge(i, j + OFFSET, remain, fee * dist[i][j])  # 仓库转移虚拟源点的货物
 print(mcmf.work()[1])
-

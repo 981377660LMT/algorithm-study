@@ -52,7 +52,7 @@ class Factorial:
 
     def Catalan(self, n: int) -> int:
         """卡特兰数"""
-        return self.C(2 * n, n) // (n + 1)
+        return self.C(2 * n, n) * self._modinv(n + 1) % self._mod
 
     def put(self, n: int, k: int) -> int:
         """n个物品放入k个槽(槽可空)的方案数"""

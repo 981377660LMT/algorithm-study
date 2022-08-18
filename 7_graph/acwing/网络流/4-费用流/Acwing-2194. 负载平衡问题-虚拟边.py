@@ -21,6 +21,8 @@
 # 如果不是环形 则为 https://leetcode.cn/problems/super-washing-machines/
 from MinCostMaxFlow import MinCostMaxFlow
 
+INF = int(1e18)
+
 n = int(input())  # n 个仓库 1≤n≤100,
 stores = []  # 仓库的库存量
 while len(stores) < n:
@@ -28,8 +30,8 @@ while len(stores) < n:
 
 avg = sum(stores) // n
 
-START, END, OFFSET = -1, -2, int(1e4)
-mcmf = MinCostMaxFlow(START, END)
+START, END, OFFSET = 2 * n + 2, 2 * n + 3, n
+mcmf = MinCostMaxFlow(2 * n + 4, START, END)
 
 
 for i, value in enumerate(stores):
@@ -39,9 +41,8 @@ for i, value in enumerate(stores):
     elif diff < 0:
         mcmf.addEdge(i, END, -diff, 0)
 
-    mcmf.addEdge(i, (i + 1) % len(stores), int(1e20), 1)  # 相邻边容量为inf，费用为1，表示运输单位货物需要1的费用。
-    mcmf.addEdge(i, (i - 1) % len(stores), int(1e20), 1)
+    mcmf.addEdge(i, (i + 1) % len(stores), INF, 1)  # 相邻边容量为inf，费用为1，表示运输单位货物需要1的费用。
+    mcmf.addEdge(i, (i - 1) % len(stores), INF, 1)
 
 
 print(mcmf.work()[1])
-

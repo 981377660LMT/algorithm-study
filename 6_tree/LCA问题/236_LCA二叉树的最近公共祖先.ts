@@ -12,47 +12,47 @@ const bt: TreeNode = {
     left: {
       val: 3,
       left: null,
-      right: null,
+      right: null
     },
     right: {
       val: 4,
       left: {
         val: 5,
         left: null,
-        right: null,
+        right: null
       },
       right: {
         val: -9,
         left: null,
-        right: null,
-      },
-    },
+        right: null
+      }
+    }
   },
   right: {
     val: 9,
     left: {
       val: 7,
       left: null,
-      right: null,
+      right: null
     },
     right: {
       val: 8,
       left: null,
-      right: null,
-    },
-  },
+      right: null
+    }
+  }
 }
 
 const p: TreeNode = {
   val: -9,
   left: null,
-  right: null,
+  right: null
 }
 
 const q: TreeNode = {
   val: 9,
   left: null,
-  right: null,
+  right: null
 }
 
 /**
@@ -68,7 +68,7 @@ const q: TreeNode = {
  *              如果某一个子节点只包含一个目标节点，则返回该目标节点
  *              否则返回为null
  */
-const lowestCommonAncestor = (root: TreeNode | null, p: TreeNode, q: TreeNode): TreeNode | null => {
+function lowestCommonAncestor(root: TreeNode | null, p: TreeNode, q: TreeNode): TreeNode | null {
   if (root === null || root.val === p.val || root.val === q.val) return root
   // 左子树中存在p或q
   const detectLeft = lowestCommonAncestor(root.left, p, q)

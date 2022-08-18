@@ -6,7 +6,7 @@
 MOD = int(1e9 + 7)
 fac = [1]
 ifac = [1]
-for i in range(1, int(2e5) + 10):
+for i in range(1, int(4e5) + 10):
     fac.append((fac[-1] * i) % MOD)
     ifac.append((ifac[-1] * pow(i, MOD - 2, MOD)) % MOD)
 
@@ -34,8 +34,11 @@ def put(n: int, k: int) -> int:
 
 
 def catalan(n: int) -> int:
-    """卡特兰数"""
-    return C(2 * n, n) // (n + 1)
+    """卡特兰数 catalan(n) = C(2*n, n) // (n+1)
+
+    注意2*n需要开两倍空间
+    """
+    return C(2 * n, n) * pow(n + 1, MOD - 2, MOD) % MOD
 
 
 #########################################################################

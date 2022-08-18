@@ -1,4 +1,4 @@
-// 请你返回 low 和 high 之间（包括二者）奇数的数目。
+// 请你返回 [low , high] 之间奇数的数目。
 // 0 <= low <= high <= 10^9
 
 function cal(upper: number): number {

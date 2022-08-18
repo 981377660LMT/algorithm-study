@@ -1,7 +1,7 @@
 class Node {
   value: number
   next: Node | null
-  constructor(value: number = 0, next: Node | null = null) {
+  constructor(value = 0, next: Node | null = null) {
     this.value = value
     this.next = next
   }
@@ -25,10 +25,9 @@ const mergeTwoList = (head1: Node | null, head2: Node | null): Node | null => {
   if (head1.value < head2.value) {
     head1.next = mergeTwoList(head1.next, head2)
     return head1
-  } else {
-    head2.next = mergeTwoList(head1, head2.next)
-    return head2
   }
+  head2.next = mergeTwoList(head1, head2.next)
+  return head2
 }
 
 // 非递归写法
@@ -54,6 +53,8 @@ const merge = (head1: Node | null, head2: Node | null): Node | null => {
   dummyP.next = head1P || head2P
   return dummy.next
 }
+
+13501766580
 
 // console.dir(mergeTwoList(a1, a2), { depth: null })
 console.dir(merge(a1, a2), { depth: null })

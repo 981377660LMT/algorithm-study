@@ -4,103 +4,6 @@ from typing import Set
 INF = int(1e18)
 
 
-class MaxFlow:
-    """Dinic算法 字典存残量图 比较慢"""
-
-    __slots__ = ("graph", "_reGraph", "_start", "_end", "_levels", "_iters")
-
-    def __init__(self, start: int, end: int) -> None:
-        self.graph = defaultdict(lambda: defaultdict(int))  # 原图
-        self._reGraph = defaultdict(lambda: defaultdict(int))  # 残量图
-        self._start = start
-        self._end = end
-
-    def calMaxFlow(self) -> int:
-        reGraph, start, end = self._reGraph, self._start, self._end
-        res = 0
-
-        while self._bfs():
-            self._iters = {cur: iter(reGraph[cur].keys()) for cur in reGraph}
-            res += self._dfs(start, end, INF)
-        return res
-
-    def addEdge(self, v1: int, v2: int, w: int, *, cover=True) -> None:
-        """添加边 v1->v2, 容量为w
-
-        Args:
-            v1: 边的起点
-            v2: 边的终点
-            w: 边的容量
-            cover: 是否覆盖原有边 默认为覆盖
-        """
-        if cover:
-            self.graph[v1][v2] = w
-            self._reGraph[v1][v2] = w
-            self._reGraph[v2].setdefault(v1, 0)  # 注意自环边
-        else:
-            self.graph[v1][v2] += w
-            self._reGraph[v1][v2] += w
-            self._reGraph[v2].setdefault(v1, 0)
-
-    def getFlowOfEdge(self, v1: int, v2: int) -> int:
-        """边的流量=容量-残量"""
-        assert v1 in self.graph and v2 in self.graph[v1]
-        return self.graph[v1][v2] - self._reGraph[v1][v2]
-
-    def getRemainOfEdge(self, v1: int, v2: int) -> int:
-        """边的残量(剩余的容量)"""
-        assert v1 in self.graph and v2 in self.graph[v1]
-        return self._reGraph[v1][v2]
-
-    def getPath(self) -> Set[int]:
-        """最大流经过了哪些点"""
-        visited = set()
-        stack = [self._start]
-        reGraph = self._reGraph
-        while stack:
-            cur = stack.pop()
-            visited.add(cur)
-            for next, remain in reGraph[cur].items():
-                if remain > 0 and next not in visited:
-                    visited.add(next)
-                    stack.append(next)
-        return visited
-
-    def _bfs(self) -> bool:
-        self._levels = level = defaultdict(lambda: -1, {self._start: 0})
-        reGraph, start, end = self._reGraph, self._start, self._end
-        queue = deque([start])
-
-        while queue:
-            cur = queue.popleft()
-            nextDist = level[cur] + 1
-            for next, remain in reGraph[cur].items():
-                if remain > 0 and level[next] == -1:
-                    level[next] = nextDist
-                    if next == end:
-                        return True
-                    queue.append(next)
-
-        return False
-
-    def _dfs(self, cur: int, end: int, flow: int) -> int:
-        if cur == end:
-            return flow
-        res = flow
-        reGraph, level, iters = self._reGraph, self._levels, self._iters
-        for next in iters[cur]:
-            remain = reGraph[cur][next]
-            if remain > 0 and level[cur] + 1 == level[next]:
-                delta = self._dfs(next, end, min(res, remain))
-                reGraph[cur][next] -= delta
-                reGraph[next][cur] += delta
-                res -= delta
-                if res == 0:
-                    return flow
-
-        return flow - res
-
-
 class ATCMaxFlow:
     """Dinic算法 数组+边存图 速度较快"""
 
@@ -233,6 +136,103 @@ class ATCMaxFlow:
                     return flow
             curEdges[cur] += 1
             ei = curEdges[cur]
+
+        return flow - res
+
+
+class MaxFlow:
+    """Dinic算法 字典存残量图 比较慢"""
+
+    __slots__ = ("graph", "_reGraph", "_start", "_end", "_levels", "_iters")
+
+    def __init__(self, start: int, end: int) -> None:
+        self.graph = defaultdict(lambda: defaultdict(int))  # 原图
+        self._reGraph = defaultdict(lambda: defaultdict(int))  # 残量图
+        self._start = start
+        self._end = end
+
+    def calMaxFlow(self) -> int:
+        reGraph, start, end = self._reGraph, self._start, self._end
+        res = 0
+
+        while self._bfs():
+            self._iters = {cur: iter(reGraph[cur].keys()) for cur in reGraph}
+            res += self._dfs(start, end, INF)
+        return res
+
+    def addEdge(self, v1: int, v2: int, w: int, *, cover=True) -> None:
+        """添加边 v1->v2, 容量为w
+
+        Args:
+            v1: 边的起点
+            v2: 边的终点
+            w: 边的容量
+            cover: 是否覆盖原有边 默认为覆盖
+        """
+        if cover:
+            self.graph[v1][v2] = w
+            self._reGraph[v1][v2] = w
+            self._reGraph[v2].setdefault(v1, 0)  # 注意自环边
+        else:
+            self.graph[v1][v2] += w
+            self._reGraph[v1][v2] += w
+            self._reGraph[v2].setdefault(v1, 0)
+
+    def getFlowOfEdge(self, v1: int, v2: int) -> int:
+        """边的流量=容量-残量"""
+        assert v1 in self.graph and v2 in self.graph[v1]
+        return self.graph[v1][v2] - self._reGraph[v1][v2]
+
+    def getRemainOfEdge(self, v1: int, v2: int) -> int:
+        """边的残量(剩余的容量)"""
+        assert v1 in self.graph and v2 in self.graph[v1]
+        return self._reGraph[v1][v2]
+
+    def getPath(self) -> Set[int]:
+        """最大流经过了哪些点"""
+        visited = set()
+        stack = [self._start]
+        reGraph = self._reGraph
+        while stack:
+            cur = stack.pop()
+            visited.add(cur)
+            for next, remain in reGraph[cur].items():
+                if remain > 0 and next not in visited:
+                    visited.add(next)
+                    stack.append(next)
+        return visited
+
+    def _bfs(self) -> bool:
+        self._levels = level = defaultdict(lambda: -1, {self._start: 0})
+        reGraph, start, end = self._reGraph, self._start, self._end
+        queue = deque([start])
+
+        while queue:
+            cur = queue.popleft()
+            nextDist = level[cur] + 1
+            for next, remain in reGraph[cur].items():
+                if remain > 0 and level[next] == -1:
+                    level[next] = nextDist
+                    if next == end:
+                        return True
+                    queue.append(next)
+
+        return False
+
+    def _dfs(self, cur: int, end: int, flow: int) -> int:
+        if cur == end:
+            return flow
+        res = flow
+        reGraph, level, iters = self._reGraph, self._levels, self._iters
+        for next in iters[cur]:
+            remain = reGraph[cur][next]
+            if remain > 0 and level[cur] + 1 == level[next]:
+                delta = self._dfs(next, end, min(res, remain))
+                reGraph[cur][next] -= delta
+                reGraph[next][cur] += delta
+                res -= delta
+                if res == 0:
+                    return flow
 
         return flow - res
 

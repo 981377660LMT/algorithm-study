@@ -13,6 +13,8 @@ function findMedianSortedArrays(nums1: number[], nums2: number[]): number {
   /**
    * @returns 寻找两个数组中第k小的数 k从0开始
    * @description log(m+n)
+   *
+   * 分治法
    */
   function findK(nums1: number[], nums2: number[], k: number): number {
     if (nums1.length === 0) return nums2[k]
@@ -25,12 +27,12 @@ function findMedianSortedArrays(nums1: number[], nums2: number[]): number {
     if (i1 + i2 < k) {
       // 如果 num1 的一半 大于nums2的一半 那么 nums2 的前半部分不包含第k小的数候选
       if (m1 > m2) return findK(nums1, nums2.slice(i2 + 1), k - (i2 + 1))
-      else return findK(nums1.slice(i1 + 1), nums2, k - (i1 + 1))
-    } else {
-      // 如果 num1 的一半 大于nums2的一半 那么 nums1 的后半部分不包含第k小的数候选
-      if (m1 > m2) return findK(nums1.slice(0, i1), nums2, k)
-      else return findK(nums1, nums2.slice(0, i2), k)
+      return findK(nums1.slice(i1 + 1), nums2, k - (i1 + 1))
     }
+
+    // 如果 num1 的一半 大于nums2的一半 那么 nums1 的后半部分不包含第k小的数候选
+    if (m1 > m2) return findK(nums1.slice(0, i1), nums2, k)
+    return findK(nums1, nums2.slice(0, i2), k)
   }
 }
 
