@@ -24,7 +24,7 @@ INF = 0x7FFFFFFF
 class Solution:
     def processTasks(self, tasks: List[List[int]]) -> int:
         def spfa(n: int, adjMap: Sequence) -> Tuple[bool, List[int]]:
-            """spfa求单源最长路，顺便判断正环"""
+            """spfa求单源最长路顺便判断正环"""
             dist = [0] * (n)
             queue = deque(list(range(n)))  # 这里很重要 每个点从0开始
             count = [0] * n

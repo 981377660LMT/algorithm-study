@@ -10,14 +10,15 @@
 # 3. 判重数组 inQueue
 
 from collections import defaultdict, deque
-from typing import DefaultDict, Hashable, TypeVar
+from typing import DefaultDict, Hashable, Mapping, TypeVar
 
 T = TypeVar("T", bound=Hashable)
+INF = int(1e18)
 
 
-def spfa(adjMap: DefaultDict[T, DefaultDict[T, int]], start: T) -> DefaultDict[T, int]:
+def spfa(adjMap: Mapping[T, Mapping[T, int]], start: T) -> DefaultDict[T, int]:
     """spfa求单源最短路,适用于解决带有负权重的图,是Bellman-ford的常数优化版"""
-    dist = defaultdict(lambda: int(1e18), {start: 0})
+    dist = defaultdict(lambda: INF, {start: 0})
     queue = deque([start])
     inQueue = defaultdict(lambda: False, {start: True})
 
@@ -25,13 +26,14 @@ def spfa(adjMap: DefaultDict[T, DefaultDict[T, int]], start: T) -> DefaultDict[T
         cur = queue.popleft()
         inQueue[cur] = False
 
-        for next, weight in adjMap[cur].items():
-            if dist[cur] + weight < dist[next]:
-                dist[next] = dist[cur] + weight
+        for next in adjMap[cur]:
+            weight = adjMap[cur][next]
+            cand = dist[cur] + weight
+            if cand < dist[next]:
+                dist[next] = cand
                 if not inQueue[next]:
                     inQueue[next] = True
-                    # !酸辣粉优化
-                    if queue and dist[next] < dist[queue[0]]:
+                    if queue and dist[next] < dist[queue[0]]:  # !酸辣粉优化
                         queue.appendleft(next)
                     else:
                         queue.append(next)

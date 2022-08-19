@@ -1,5 +1,5 @@
 interface WindowManager<T, Q> {
-  // 使用 this:unknown 禁止在外部调用this
+  // 使用 `this:unknown` 禁止在外部调用this
   add(this: unknown, value: T, index: number, qLeft: number, qRight: number): void
   remove(this: unknown, value: T, index: number, qLeft: number, qRight: number): void
   query(this: unknown, index: number, qLeft: number, qRight: number): Q

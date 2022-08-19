@@ -1,7 +1,8 @@
+/* eslint-disable no-else-return */
 class Node {
   value: number
   next: Node | null
-  constructor(value: number = 0, next: Node | null = null) {
+  constructor(value = 0, next: Node | null = null) {
     this.value = value
     this.next = next
   }

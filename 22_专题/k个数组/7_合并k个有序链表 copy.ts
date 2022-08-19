@@ -1,7 +1,9 @@
+/* eslint-disable no-shadow */
+/* eslint-disable no-else-return */
 class Node {
   value: number
   next: Node | null
-  constructor(value: number = 0, next: Node | null = null) {
+  constructor(value = 0, next: Node | null = null) {
     this.value = value
     this.next = next
   }
@@ -28,8 +30,9 @@ b3.next = c3
 // 1. 一种是优先队列
 // 2. 一种是分治
 // 这里使用分治
-const mergeKLists = (lists: Node[]): Node | null => {
+function mergeKLists(lists: Node[]): Node | null {
   if (lists.length === 0) return null
+
   // 这里使用递归写法
   const mergeTwo = (head1: Node | null, head2: Node | null): Node | null => {
     if (!head1) return head2

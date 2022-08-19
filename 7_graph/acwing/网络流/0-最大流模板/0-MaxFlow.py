@@ -5,7 +5,7 @@ INF = int(1e18)
 
 
 class ATCMaxFlow:
-    """Dinic算法 数组+边存图 速度较快"""
+    """Dinic算法 数组+边存图"""
 
     __slots__ = (
         "_n",
@@ -18,7 +18,7 @@ class ATCMaxFlow:
         "_curEdges",
     )
 
-    def __init__(self, n: int, *, start: int, end: int) -> None:
+    def __init__(self, n: int, start: int, end: int) -> None:
         if not (0 <= start < n and 0 <= end < n):
             raise ValueError(f"start: {start}, end: {end} out of range [0,{n}]")
 
@@ -140,6 +140,7 @@ class ATCMaxFlow:
         return flow - res
 
 
+#########################################################################
 class MaxFlow:
     """Dinic算法 字典存残量图 比较慢"""
 

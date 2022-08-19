@@ -14,22 +14,20 @@ class TreeNode:
 
 
 class Solution:
-    def deepestLeavesSum(self, root: Optional['TreeNode']) -> int:
-        q = deque([(root, 0)])
-        maxdep, res = -1, 0
-
-        while q:
-            node, dep = q.popleft()
-            if dep > maxdep:
-                maxdep, res = dep, node.val
+    def deepestLeavesSum(self, root: Optional["TreeNode"]) -> int:
+        queue = deque([(root, 0)])
+        maxDepth, res = -1, 0
+        while queue:
+            cur, depth = queue.popleft()
+            if not cur:
+                continue
+            if depth > maxDepth:
+                maxDepth, res = depth, cur.val
             else:
-                res += node.val
-            if node.left:
-                q.append((node.left, dep + 1))
-            if node.right:
-                q.append((node.right, dep + 1))
+                res += cur.val
+            if cur.left:
+                queue.append((cur.left, depth + 1))
+            if cur.right:
+                queue.append((cur.right, depth + 1))
 
         return res
-
-
-print(Solution().deepestLeavesSum())

@@ -1,4 +1,3 @@
-import { MinHeap } from '../../2_queue/minheap'
 import { PriorityQueue } from '../../2_queue/PriorityQueue'
 
 const mergeK = (...arrs: number[][]): number[] => {

@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable no-shadow */
 import { MinHeap } from '../8_heap/MinHeap'
 
 // 内部使用了堆
@@ -7,7 +9,7 @@ class PriorityQueue<Item = number> {
   static createPriorityQueue<Item = number>({
     comparator = MinHeap.defaultComparator,
     volumn = Infinity,
-    heap = [],
+    heap = []
   }: {
     comparator?: (a: Item, b: Item) => number
     volumn?: number
@@ -18,7 +20,7 @@ class PriorityQueue<Item = number> {
 
   constructor(
     comparator: (a: Item, b: Item) => number = MinHeap.defaultComparator,
-    volumn: number = Infinity,
+    volumn = Infinity,
     heap: Item[] = []
   ) {
     this.minHeap = new MinHeap<Item>(comparator, volumn, heap)
