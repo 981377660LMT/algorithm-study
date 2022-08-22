@@ -17,7 +17,7 @@ for i in range(n):
     for j in range(sum_, nums[i] - 1, -1):
         dp[j] |= dp[j - nums[i]]
 
-print(sum(1 for i in range(sum_ + 1) if dp[i]))
+print(sum(dp[i] for i in range(sum_ + 1)))
 
 #####################################################
 n = int(input())

@@ -1,180 +1,52 @@
-# from collections import deque
-# import sys
-# from typing import Counter
-
-# sys.setrecursionlimit(int(1e9))
-# input = lambda: sys.stdin.readline().rstrip("\r\n")
-# MOD = 998244353
-# INF = int(4e18)
-
-# n = int(input())
-
-# bad = set(["q", "w", "k", "h", "j"])
-
-# # owiq jjww 不是
-# def check1(s: str) -> bool:
-#     count = 0
-#     for char in s:
-#         if char in bad:
-#             count += 1
-#             if count >= 5:
-#                 return True
-#         else:
-#             count = 0
-#     return False
+# U，D，L，R 分别表示朝向[上，下，左，右] 的传送带，站在传送带上的人会被强制移动到其指向的下一个位置
+# 如果下一个位置还是传送带，会被继续传下去
+# 如果传送带指向迷宫外，玩家会撞在墙上，昏过去，游戏结束，无法再到达出口
+# O表示迷宫出口
+# !请你找到有多少点按照规则行走不能到达终点。
 
 
-# queue = deque([])
-# counter = Counter()
+# !1.反向思考，把传送带视为一个单向板
+# 从终点反向遍历，假设你处于一个空地上，
+# !你左侧的点只有为R的时候才可以从你这个位置到达R那个位置，然后查找地图上所有O的数量。
 
+# !2.注意:传送带不要一次性while模拟走完 要bfs一个一个看
 
-# def check2(s: str) -> bool:
-#     queue.append(s)
-#     res = False
-#     if len(queue) >= 10:
-#         counter[queue.popleft()] -= 1
-#     if counter[s]:
-#         res = True
-#     counter[s] += 1
-#     return res
-
-
-# for _ in range(n):
-#     s = input()
-#     if check1(s) or check2(s):
-#         print("yes")
-#     else:
-#         print("no")
-# # no
-# # no
-# # no
-# # yes
-# # yes
-# # no
-# # no
-# # no
-# # no
-# # yes
-# # no
-# # no
-# # no
-
-# # no
-# # no
-# # no
-# # yes
-# # yes
-# # no
-# # no
-# # no
-# # yes
-# # yes
-# # no
-# # no
-# # no
-##############################################################
-
-DIR4 = ((-1, 0), (1, 0), (0, 1), (0, -1))
-
-# 反着走
-MAPPING = {"U": (-1, 0), "D": (1, 0), "L": (0, -1), "R": (0, 1)}
-# 迷宫中多少个位置 玩家不能到达出口
-
-from collections import defaultdict, deque
-import sys
-
-
-sys.setrecursionlimit(int(1e9))
-input = lambda: sys.stdin.readline().rstrip("\r\n")
-
+from collections import deque
 
 ROW, COL = map(int, input().split())
-grid = []
-startRow, startCol = -1, -1
-for _ in range(ROW):
-    row = list(input())
-    grid.append(row)
-
-
+grid = [list(input()) for _ in range(ROW)]
+er, ec = -1, -1
 for r in range(ROW):
-    flag = False
     for c in range(COL):
         if grid[r][c] == "O":
-            startRow, startCol = r, c
-            flag = True
+            er, ec = r, c
             break
-    if flag:
+    if er != -1:
         break
 
-
-# 1. 成环 检测哪些传送带在环上(组成环)
-trans = set()  # 所有的传送带
-adjMap = defaultdict(list)
-deg = defaultdict(int)
-for r in range(ROW):
-    for c in range(COL):
-        cur = r * COL + c
-        if grid[r][c] in MAPPING:
-            trans.add(cur)
-            dr, dc = MAPPING[grid[r][c]]
-            nr, nc = r + dr, c + dc
-            if 0 <= nr < ROW and 0 <= nc < COL and grid[nr][nc] in MAPPING:
-                next = nr * COL + nc
-                trans.add(next)
-                adjMap[cur].append(next)
-                deg[next] += 1
-
-queue = deque([p for p in trans if deg[p] == 0])
-
-while queue:
-    cur = queue.popleft()
-    for next in adjMap[cur]:
-        deg[next] -= 1
-        if deg[next] == 0:
-            queue.append(next)
-onCycle = set([(p // COL, p % COL) for p in trans if deg[p] != 0])
-
-# !从起点能走到多少个有效的格子
-ok = set([(startRow, startCol)])
-visited = set([(startRow, startCol)]) | onCycle
-queue = deque([(startRow, startCol)])
-
+queue = deque([(er, ec)])
 while queue:
     curRow, curCol = queue.popleft()
-    if not (0 <= curRow < ROW and 0 <= curCol < COL):
-        continue
+    # 上
+    if curRow - 1 >= 0 and grid[curRow - 1][curCol] in "D.":
+        queue.append((curRow - 1, curCol))
+        grid[curRow - 1][curCol] = "O"
 
-    # 正常格子
-    if grid[curRow][curCol] not in MAPPING:
-        ok.add((curRow, curCol))
-        for dr, dc in DIR4:
-            nr, nc = curRow + dr, curCol + dc
-            if (0 <= nr < ROW and 0 <= nc < COL) and (nr, nc) not in visited:
-                visited.add((nr, nc))
-                queue.append((nr, nc))
+    # 下
+    if curRow + 1 < ROW and grid[curRow + 1][curCol] in "U.":
+        queue.append((curRow + 1, curCol))
+        grid[curRow + 1][curCol] = "O"
 
-    # !传送带能否传送至正常格子
-    else:
-        sRow, sCol = curRow, curCol
-        isOk = False
-        curVisted = set([(sRow, sCol)])
-        while True:
-            if grid[sRow][sCol] not in MAPPING:
-                isOk = True
-                break
-            else:
-                dr, dc = MAPPING[grid[curRow][curCol]]
-                nr, nc = sRow + dr, sCol + dc
-                if (0 <= nr < ROW and 0 <= nc < COL) and (nr, nc) not in curVisted:
-                    sRow, sCol = nr, nc
-                    curVisted.add((nr, nc))
-                else:
-                    isOk = False
-                    break
+    # 左
+    if curCol - 1 >= 0 and grid[curRow][curCol - 1] in "R.":
+        queue.append((curRow, curCol - 1))
+        grid[curRow][curCol - 1] = "O"
 
-        # visited |= curVisted
-        if isOk:
-            ok |= curVisted
+    # 右
+    if curCol + 1 < COL and grid[curRow][curCol + 1] in "L.":
+        queue.append((curRow, curCol + 1))
+        grid[curRow][curCol + 1] = "O"
 
 
-print(ROW * COL - len(ok))
+good = sum(row.count("O") for row in grid[er])
+print(ROW * COL - good)

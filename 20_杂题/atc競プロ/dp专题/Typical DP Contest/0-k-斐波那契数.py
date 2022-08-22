@@ -45,6 +45,9 @@ def kbonacci1(k: int, n: int) -> int:
     return sum_
 
 
+"""https://atcoder.jp/contests/tdpc/submissions/15359686"""
+
+
 def kbonacci2(k: int, n: int) -> int:
     """k-bonacci number 第n项
 
@@ -58,8 +61,6 @@ def kbonacci2(k: int, n: int) -> int:
     assert k >= 1, n >= 0
 
     def linear_recursion_solver(a: List[int], x: List[int], k: int, e0: int, e1: int) -> int:
-        """https://atcoder.jp/contests/tdpc/submissions/15359686"""
-
         def rec(k: int) -> List[int]:
             c = [e0] * m
             if k < m:
