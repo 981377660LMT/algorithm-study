@@ -1,10 +1,24 @@
+"""
+# 1. 反向并查集：正着删除元素变成倒着添加元素
+# 2. 每次添加元素，检查左右邻居是否可以合并
+# 3. 当前的最大值就是 `max(之前所有区域的和中的最大值，当前区域的和)`
+
+如果有负数 需要有序容器维护partSum
+"""
+
+from typing import List
+
+MOD = int(1e9 + 7)
+INF = int(1e20)
+
+
 class UnionFind:
     def __init__(self, n: int):
         self.n = n
         self.part = n
         self.parent = list(range(n))
         self.size = [1] * n
-        self.partSum = [0] * n  # 每个帮派的和
+        self.partSum = [0] * n
 
     def find(self, x: int) -> int:
         if x != self.parent[x]:
@@ -32,34 +46,34 @@ class UnionFind:
         return self.partSum[root]
 
 
-# 反向并查集：删除元素变成添加元素
+class Solution:
+    def maximumSegmentSum(self, nums: List[int], removeQueries: List[int]) -> List[int]:
+        """倒序"""
+
+        uf = UnionFind(n)
+        visited = [False] * n
+        res = [0] * n
+
+        for i in range(n - 1, 0, -1):
+            curIndex = removeQueries[i]
+            visited[curIndex] = True
+            uf.partSum[curIndex] = nums[curIndex]
+
+            # 合并左右邻居
+            if curIndex - 1 >= 0 and visited[curIndex - 1]:
+                uf.union(curIndex - 1, curIndex)
+            if curIndex + 1 < n and visited[curIndex + 1]:
+                uf.union(curIndex + 1, curIndex)
+            # 反向更新
+            res[i - 1] = max(res[i], uf.getPartSum(curIndex))
+
+        return res
+
+
 n = int(input())
-# 读取数组
 nums = [int(v) for v in input().split()]
 queries = [int(v) - 1 for v in input().split()]
 
 
-uf = UnionFind(n)
-visited = [False] * n
-res = [0] * n
-
-
-for i in range(n - 1, 0, -1):
-    curIndex = queries[i]
-    visited[curIndex] = True
-    uf.partSum[curIndex] = nums[curIndex]
-
-    # 合并左右邻居
-    if curIndex - 1 >= 0 and visited[curIndex - 1]:
-        uf.union(curIndex - 1, curIndex)
-    if curIndex + 1 < n and visited[curIndex + 1]:
-        uf.union(curIndex + 1, curIndex)
-
-    # 反向更新
-    res[i - 1] = max(res[i], uf.getPartSum(curIndex))
-
-
 # 输出答案
-for v in res:
-    print(v)
-
+print(*Solution().maximumSegmentSum(nums, queries), sep="\n")

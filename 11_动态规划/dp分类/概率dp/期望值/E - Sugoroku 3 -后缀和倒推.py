@@ -5,9 +5,9 @@
 # !类似于新21点 后缀和倒着推
 
 # dp[i]表示从i走到n的期望步数
-# !dp[i] = dp[i] + dp[i + 1] + dp[i + 2] + ... + dp[i + nums[i]] / (nums[i] + 1)
-# dp[i]全移到左边
-# !dp[i] =  dp[i + 1] + dp[i + 2] + ... + dp[i + nums[i]] / nums[i] + (nums[i]+1)/(nums[i])
+# !dp[i] = 1 + (dp[i] + dp[i + 1] +  ... + dp[i + nums[i]] / (nums[i] + 1))
+# dp[i]合并同项可得
+# !dp[i] =  (dp[i + 1] + dp[i + 2] + ... + dp[i + nums[i]] / nums[i]) + (nums[i]+1)/(nums[i])
 # 后缀优化dp O(n)
 
 

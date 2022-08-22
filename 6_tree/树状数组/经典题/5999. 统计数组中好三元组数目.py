@@ -6,7 +6,7 @@ from collections import defaultdict
 class BIT:
     """单点修改的树状数组"""
 
- def __init__(self, n: int):
+    def __init__(self, n: int):
         self.size = n
         self.tree = defaultdict(int)
 
@@ -29,11 +29,12 @@ class BIT:
     def queryRange(self, left: int, right: int) -> int:
         return self.query(right) - self.query(left - 1)
 
+
 # 三元组一般是`定一移二`的做法
 # 或者枚举贡献
 
 # 1. 将nums2数组的值映射到nums1对应的数的索引
-# 2. 使用树状数组处理nums2每个数左边有多少个比他小，右边有多少个比他大，得到leftSmaller和rightBigger两个数组
+# !2. 使用树状数组处理nums2每个数左边有多少个比他小，右边有多少个比他大，得到leftSmaller和rightBigger两个数组
 # 3. 枚举每个数作为中间数，有leftSmaller[i]*rightBigger[i]种取法，求和即可
 # 时间复杂度为O(nlogn)，空间复杂度为O(n)
 # 其中第一步的映射操作有点像 1713. 得到子序列的最少操作次数
@@ -56,7 +57,7 @@ class Solution:
 
         bit2 = BIT(n + 10)
         for i in range(n - 1, -1, -1):
-            bigger = bit2.sumRange(target[i] + 2, n + 1)
+            bigger = bit2.queryRange(target[i] + 2, n + 1)
             rightBigger[i] = bigger
             bit2.add(target[i] + 1, 1)
 

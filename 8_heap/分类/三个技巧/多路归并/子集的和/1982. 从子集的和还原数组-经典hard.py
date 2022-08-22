@@ -1,3 +1,14 @@
+"""
+简化版
+1. 所有元素均为非负数时
+
+2. 引入负数时
+把负数变为绝对值 
+此时只需要在答案上减去所有负数的绝对值即可
+因为此时选负数等价于不选变化后的正数
+不选负数对应选变化后的正数
+"""
+
 from typing import List
 from sortedcontainers import SortedList
 
@@ -54,3 +65,6 @@ class Solution:
 print(Solution().recoverArray(n=3, sums=[-3, -2, -1, 0, 0, 1, 2, 3]))
 print(Solution().recoverArray(n=2, sums=[0, 0, 0, 0]))
 print(Solution().recoverArray(n=4, sums=[0, 0, 5, 5, 4, -1, 4, 9, 9, -1, 4, 3, 4, 8, 3, 8]))
+
+
+# TODO

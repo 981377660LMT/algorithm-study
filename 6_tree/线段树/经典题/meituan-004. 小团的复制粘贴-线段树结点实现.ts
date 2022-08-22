@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const { readFileSync } = require('fs')
+
 const iter = readlines()
 const input = (): string => iter.next().value
 function* readlines(path = 0) {
@@ -9,7 +11,6 @@ function* readlines(path = 0) {
 
   yield* lines
 }
-/////////////////////////////////////////
 
 class SegmentTreeNode {
   left = -1
@@ -58,7 +59,7 @@ class SegmentTree {
 
     // 单点查询
     if (left <= mid) return this.query(root << 1, left, right)
-    else return this.query((root << 1) | 1, left, right)
+    return this.query((root << 1) | 1, left, right)
   }
 
   private build(root: number, left: number, right: number): void {

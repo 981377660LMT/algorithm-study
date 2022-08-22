@@ -3,8 +3,8 @@ class SegmentTreeNode {
   left = -1
   right = -1
   max = 1 // [left,right]区间内的最大连续数
-  pre = 1 // 区间左端点的连续数
-  suf = 1 // 区间右端点的连续数
+  pre = 1 // 区间前缀的连续数
+  suf = 1 // 区间后缀的连续数
 }
 
 class SegmentTree {

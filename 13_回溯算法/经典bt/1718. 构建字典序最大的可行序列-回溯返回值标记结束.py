@@ -12,8 +12,6 @@ from typing import List
 # 2.回溯带上bool返回值表示找到一个解 此时不必再向下回溯寻找，而是层层返回
 class Solution:
     def constructDistancedSequence(self, n: int) -> List[int]:
-        res = [-1] * (2 * n - 1)
-
         def bt(cur: int) -> bool:
             if cur >= 2 * n - 1:
                 return True
@@ -35,6 +33,7 @@ class Solution:
 
             return False
 
+        res = [-1] * (2 * n - 1)
         bt(0)
         return res
 
