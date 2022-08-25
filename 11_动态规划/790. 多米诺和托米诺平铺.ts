@@ -2,11 +2,11 @@
  * @param {number} n
  * @return {number}
  * @description 不同的瓷砖一共有六种
- * 有两种形状的瓷砖：一种是 2x1 的多米诺形，另一种是形如 "L" 的托米诺形。两种形状都可以旋转。
+ * 有两种形状的瓷砖：一种是 2x1 的多米诺形，另一种是形如 "L" 的托米诺形。两种形状都可以旋转。
  * 给定 N 的值，有多少种方法可以平铺 2 x N 的面板？返回值 mod 10^9 + 7。
  * 一维DP状态转移方程：dp[i] = 2 * dp[i - 1] + dp[i - 3]
  */
-const numTilings = function (n: number): number {
+function numTilings(n: number): number {
   const mod = 10e9 + 7
   const dp = Array(n + 3).fill(0)
   dp[0] = 1
@@ -20,9 +20,11 @@ const numTilings = function (n: number): number {
   return dp[n] % mod
 }
 
-console.log(10 ** 9)
+if (require.main === module) {
+  console.log(10 ** 9)
 
-console.log(numTilings(3))
-console.log(numTilings(4))
+  console.log(numTilings(3))
+  console.log(numTilings(4))
+}
 
 export {}

@@ -56,6 +56,7 @@ class Solution:
                             next = nr * COL + nc
                             if grid[nr][nc] == 1:
                                 uf.union(cur, next)
+
         res = max(uf.rank)
         for r in range(ROW):
             for c in range(COL):
@@ -72,4 +73,3 @@ class Solution:
 
 
 print(Solution().largestIsland(grid=[[1, 0], [0, 1]]))
-

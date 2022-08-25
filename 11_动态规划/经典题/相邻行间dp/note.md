@@ -21,7 +21,6 @@ for mask in range(3**m):
     if any(color[i] == color[i + 1] for i in range(m - 1)):
         continue
     valid[mask] = color
-
 ```
 
 优化 2：`可以先处理出可能的转移状态邻接表，再进行 dp`
