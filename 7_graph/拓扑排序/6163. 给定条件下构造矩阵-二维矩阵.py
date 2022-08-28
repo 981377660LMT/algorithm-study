@@ -1,9 +1,5 @@
-from typing import List, Tuple, Optional
-from collections import defaultdict, Counter, deque
-from sortedcontainers import SortedList
-
-MOD = int(1e9 + 7)
-INF = int(1e20)
+from typing import List
+from collections import deque
 
 
 # !多用数组来存图减小开销
@@ -41,15 +37,16 @@ class Solution:
         rowOrder = topoSort(adjList1, deg1)
         if not rowOrder:
             return []
+
         colOrder = topoSort(adjList2, deg2)
         if not colOrder:
             return []
 
-        mp1 = {i: r for r, i in enumerate(rowOrder)}
-        mp2 = {i: c for c, i in enumerate(colOrder)}
+        mp1 = {num: r for r, num in enumerate(rowOrder)}
+        mp2 = {num: c for c, num in enumerate(colOrder)}
         res = [[0] * k for _ in range(k)]
-        for i in range(1, k + 1):
-            res[mp1[i]][mp2[i]] = i
+        for num in range(1, k + 1):
+            res[mp1[num]][mp2[num]] = num
         return res
 
 

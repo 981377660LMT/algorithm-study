@@ -1,6 +1,7 @@
 /**
  * @param {number[]} nums
  * @return {number}
+ * 三角形的个数
  */
 function triangleNumber(nums) {
   nums.sort((a, b) => a - b)

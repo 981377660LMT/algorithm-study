@@ -1,18 +1,21 @@
+/* eslint-disable semi-style */
+
+const VOWEL = new Set(['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'])
+
 /**
  * @param {string} s
  * @return {string}
  */
-const reverseVowels = function (s) {
+function reverseVowels(s) {
   if (s.length <= 1) return s
 
   const res = s.split('')
-  const vowels = new Set(['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'])
   let i = 0
   let j = s.length - 1
 
   while (i < j) {
-    while (i < j && !vowels.has(res[i])) i++
-    while (i < j && !vowels.has(res[j])) j--
+    while (i < j && !VOWEL.has(res[i])) i++
+    while (i < j && !VOWEL.has(res[j])) j--
     ;[res[i], res[j]] = [res[j], res[i]]
     i++
     j--

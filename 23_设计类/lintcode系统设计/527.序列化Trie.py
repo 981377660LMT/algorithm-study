@@ -11,7 +11,7 @@ class TrieNode:
 
 class Solution:
     def serialize(self, root: "TrieNode") -> str:
-        """序列化Trie"""
+        """序列化trie"""
 
         def dfs(cur: "TrieNode") -> str:
             res = []
@@ -23,7 +23,7 @@ class Solution:
         return dfs(root)
 
     def deserialize(self, data: str) -> "TrieNode":
-        """反序列化Trie"""
+        """反序列化trie"""
 
         def dfs(cur: str) -> "TrieNode":
             res = TrieNode()
@@ -55,4 +55,4 @@ class Solution:
 
 if __name__ == "__main__":
     res = Solution().deserialize("<a<b<e<>>c<>d<f<>>>>")
-    print(Solution().serialize(res))  # <a<b<>>>
+    print(Solution().serialize(res))  # <a<b<e<>>c<>d<f<>>>>
