@@ -1,5 +1,7 @@
 # 线段相交
 # !判断两线段是否相交(是否存在坐标相同的点)
+# 也可参考
+# https://leetcode.cn/circle/discuss/fC4N4x/
 
 
 def cross(x1: int, y1: int, x2: int, y2: int) -> int:

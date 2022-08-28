@@ -1,5 +1,3 @@
-# https://blog.csdn.net/SongBai1997/article/details/86599879
-
 """
 情况一、两点都在圆内。不相交
 情况二、一个点在圆内,一个点在圆外。相交
@@ -19,7 +17,11 @@ Circle = Tuple[int, int, int]
 
 
 def isIntersected(segment: Segment, circle: Circle) -> bool:
-    """线段与圆是否相交"""
+    """
+    线段与圆是否相交
+
+    https://blog.csdn.net/SongBai1997/article/details/86599879
+    """
     sx1, sy1, sx2, sy2 = segment
     cx, cy, r = circle
     flag1 = (sx1 - cx) * (sx1 - cx) + (sy1 - cy) * (sy1 - cy) <= r * r

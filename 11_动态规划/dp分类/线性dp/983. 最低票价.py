@@ -1,23 +1,23 @@
-"""983. 最低票价"""
+"""
+983. 最低票价 
+AutoX-3. 出行的最少购票费用
+https://leetcode.cn/contest/autox2023/problems/BjAFy9/
+"""
 from functools import lru_cache
 from typing import List
 
-# 火车票有三种不同的销售方式：
-
-# 一张为期一天的通行证售价为 costs[0] 美元；
-# 一张为期七天的通行证售价为 costs[1] 美元；
-# 一张为期三十天的通行证售价为 costs[2] 美元。
+# 火车票有k种不同的销售方式：
+# tickets[i] = [duration_i, price_i]，表示第 i 种套票的有效天数和价格
 
 # 返回你想要完成在给定的列表 days 中列出的每一天的旅行所需要的最低消费。
-# 1 <= days.length <= 365
-# 1 <= days[i] <= 365
+# !1 <= days.length <= 10^5
+# !1 <= days[i] < days[i+1] <= 10^9
+# !1 <= tickets.length <= 20
 
-
-# O(n)
-
-
+# !需要将天数离散化吗
 class Solution:
     def mincostTickets(self, days: List[int], costs: List[int]) -> int:
+        """https://leetcode.cn/problems/minimum-cost-for-tickets/"""
         n = days[-1]
         dSet = set(days)
         dp = [0] * (n + 1)
@@ -35,6 +35,8 @@ class Solution:
         return dp[-1]
 
     def mincostTickets2(self, days: List[int], costs: List[int]) -> int:
+        """https://leetcode.cn/problems/minimum-cost-for-tickets/"""
+
         @lru_cache(None)
         def dfs(index: int) -> int:
             if index > n:
