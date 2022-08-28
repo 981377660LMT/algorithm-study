@@ -1,8 +1,11 @@
 from collections import defaultdict
-from typing import DefaultDict, List, Set, Tuple
+from typing import DefaultDict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 import sys
 
 Edge = Tuple[int, int]
+AdjList = Sequence[Iterable[int]]
+AdjMap = Mapping[int, Iterable[int]]
+Graph = Union[AdjList, AdjMap]
 
 
 class Tarjan:
@@ -10,9 +13,7 @@ class Tarjan:
     sys.setrecursionlimit(int(1e9))
 
     @staticmethod
-    def getSCC(
-        n: int, adjMap: DefaultDict[int, Set[int]]
-    ) -> Tuple[int, DefaultDict[int, Set[int]], List[int]]:
+    def getSCC(n: int, graph: Graph) -> Tuple[int, DefaultDict[int, Set[int]], List[int]]:
         """Tarjan求解有向图的强连通分量
 
         Args:
@@ -34,7 +35,7 @@ class Tarjan:
             stack.append(cur)
             inStack[cur] = True
 
-            for next in adjMap[cur]:
+            for next in graph[cur]:
                 if not visited[next]:
                     dfs(next)
                     low[cur] = min(low[cur], low[next])
@@ -69,9 +70,7 @@ class Tarjan:
         return SCCId, SCCGroupById, SCCIdByNode
 
     @staticmethod
-    def getCuttingPointAndCuttingEdge(
-        n: int, adjMap: DefaultDict[int, Set[int]]
-    ) -> Tuple[Set[int], Set[Edge]]:
+    def getCuttingPointAndCuttingEdge(n: int, graph: Graph) -> Tuple[Set[int], Set[Edge]]:
         """Tarjan求解无向图的割点和割边(桥)
 
         Args:
@@ -94,7 +93,7 @@ class Tarjan:
             dfsId += 1
 
             dfsChild = 0
-            for next in adjMap[cur]:
+            for next in graph[cur]:
                 if next == parent:
                     continue
                 if not visited[next]:
@@ -124,9 +123,7 @@ class Tarjan:
         return cuttingPoint, cuttingEdge
 
     @staticmethod
-    def getVBCC(
-        n: int, adjMap: DefaultDict[int, Set[int]]
-    ) -> Tuple[int, DefaultDict[int, Set[int]], List[Set[int]]]:
+    def getVBCC(n: int, graph: Graph) -> Tuple[int, DefaultDict[int, Set[int]], List[Set[int]]]:
         """Tarjan求解无向图的点双联通分量
 
         Args:
@@ -156,7 +153,7 @@ class Tarjan:
             dfsId += 1
 
             dfsChild = 0
-            for next in adjMap[cur]:
+            for next in graph[cur]:
                 if next == parent:
                     continue
 
@@ -211,7 +208,7 @@ class Tarjan:
 
     @staticmethod
     def getEBCC(
-        n: int, adjMap: DefaultDict[int, Set[int]]
+        n: int, graph: Graph
     ) -> Tuple[int, DefaultDict[int, Set[Edge]], DefaultDict[Edge, int]]:
         """Tarjan求解无向图的边双联通分量
 
@@ -235,7 +232,7 @@ class Tarjan:
                 return
             visited[cur] = True
 
-            for next in adjMap[cur]:
+            for next in graph[cur]:
                 if next == parent:
                     continue
 
@@ -247,7 +244,7 @@ class Tarjan:
                 EBCCIdByEdge[edge] = EBCCId
                 dfs(next, cur)
 
-        _, cuttingEdges = Tarjan.getCuttingPointAndCuttingEdge(n, adjMap)
+        _, cuttingEdges = Tarjan.getCuttingPointAndCuttingEdge(n, graph)
 
         visited = [False] * n
 
@@ -268,14 +265,14 @@ class Tarjan:
         return EBCCId, EBCCGroupById, EBCCIdByEdge
 
 
-def toDAG(n: int, adjMap: DefaultDict[int, Set[int]]):
+def toDAG(n: int, graph: Graph):
     """有向图缩点成DAG"""
-    sccCount, sccGroupById, sccIdByNode = Tarjan.getSCC(n, adjMap)
+    sccCount, sccGroupById, sccIdByNode = Tarjan.getSCC(n, graph)
     newAdjMap = defaultdict(set)
     deg = defaultdict(int)
     visitedPair = set()
     for cur in range(n):
-        for next in adjMap[cur]:
+        for next in graph[cur]:
             g1, g2 = sccIdByNode[cur], sccIdByNode[next]
             if g1 == g2 or (g1, g2) in visitedPair:
                 continue
@@ -286,7 +283,7 @@ def toDAG(n: int, adjMap: DefaultDict[int, Set[int]]):
     return sccCount, newAdjMap, deg, sccIdByNode, sccGroupById
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # 无向图割点和桥
     adjMap1 = defaultdict(set)
     edges = [[0, 1], [0, 2], [1, 2], [2, 5], [2, 4], [3, 4], [3, 5], [4, 5]]
@@ -321,4 +318,3 @@ if __name__ == '__main__':
     for u, v in edges:
         adjMap2[u].add(v)
     assert Tarjan.getSCC(5, adjMap2)[2] == [2, 2, 2, 1, 0]
-

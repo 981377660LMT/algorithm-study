@@ -96,6 +96,13 @@ if __name__ == "__main__":
         def _query(self) -> int:
             return self._pair
 
+    import sys
+
+    sys.setrecursionlimit(int(1e9))
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
+    MOD = 998244353
+    INF = int(4e18)
+
     n = int(input())
     nums = list(map(int, input().split()))
     M = Solution(nums)

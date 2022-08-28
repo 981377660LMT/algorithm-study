@@ -1,6 +1,6 @@
 # 每位用户在1分钟内最多访问u次
 # 服务器在1分钟内最多接受g次请求
-# DDoS Protection
+# DDoS Protection 限流模型
 
 from collections import defaultdict
 from typing import List

@@ -4,12 +4,12 @@ from graphlib import TopologicalSorter
 
 adjMap = defaultdict(list)
 
-adjMap['D'].extend(['B', 'C'])
-adjMap['C'].extend(['A'])
-adjMap['B'].extend(['A'])
+adjMap["D"].extend(["B", "C"])
+adjMap["C"].extend(["A"])
+adjMap["B"].extend(["A"])
 
 ts = TopologicalSorter(adjMap)
-ts.add('A', 'B')
+ts.add("A", "B")
 print(*ts.static_order())
 
 

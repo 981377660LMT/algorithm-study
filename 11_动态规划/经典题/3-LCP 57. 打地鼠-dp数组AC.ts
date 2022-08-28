@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+// 打地鼠
 const POS: number[][] = []
 for (const r of [0, 1, 2]) {
   for (const c of [0, 1, 2]) {
@@ -10,11 +12,12 @@ for (const r of [0, 1, 2]) {
 function getMaximumNumber(moles: number[][]): number {
   const times = new Set<number>([0])
   const indexMap = new Map<number, Set<number>>()
-  for (const [t, r, c] of moles) {
+
+  moles.forEach(([t, r, c]) => {
     times.add(t)
     !indexMap.has(t) && indexMap.set(t, new Set())
     indexMap.get(t)!.add(r * 3 + c)
-  }
+  })
 
   const allTimes = [...times].sort((a, b) => a - b)
   const n = allTimes.length
@@ -51,7 +54,7 @@ console.log(
     [1, 1, 0],
     [0, 2, 0],
     [1, 0, 1],
-    [1, 2, 1],
+    [1, 2, 1]
   ])
 )
 

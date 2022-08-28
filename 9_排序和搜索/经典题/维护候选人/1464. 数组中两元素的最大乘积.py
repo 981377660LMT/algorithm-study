@@ -1,3 +1,4 @@
+from heapq import nlargest
 from typing import List
 
 
@@ -5,21 +6,17 @@ from typing import List
 # 1 <= nums[i] <= 10^3
 class Solution:
     def maxProduct(self, nums: List[int]) -> float:
-        if len(nums) == 2:
-            return (nums[0] - 1) * (nums[1] - 1)
+        a, b = nlargest(2, nums)
+        return (a - 1) * (b - 1)
 
-        first, second = float('-inf'), float('-inf')
-
+    def maxProduct2(self, nums: List[int]) -> float:
+        a, b = 0, 0
         for num in nums:
-            if num > first:
-                # 注意这句，先要让位
-                second = first
-                first = num
-            elif num > second:
-                second = num
-
-        return (first - 1) * (second - 1)
+            if num > a:
+                a, b = num, a
+            elif num > b:
+                b = num
+        return (a - 1) * (b - 1)
 
 
 print(Solution().maxProduct([3, 4, 5, 2]))
-

@@ -22,4 +22,3 @@ class RandomizedCollection:
 
     def getRandom(self) -> int:
         return choice(self.nums)
-

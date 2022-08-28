@@ -10,7 +10,7 @@ class ListNode {
   // 记录该cnt(计数)下key包括哪些
   keySet: Set<string>
 
-  constructor(count: number = 1) {
+  constructor(count = 1) {
     this.count = count
     this.keySet = new Set()
   }
@@ -105,7 +105,7 @@ class AllOne {
 
   // 在preNode后面加入node
   private appendNode(node: ListNode, preNode: ListNode) {
-    const next = preNode.next
+    const { next } = preNode
     preNode.next = node
     node.pre = preNode
     node.next = next

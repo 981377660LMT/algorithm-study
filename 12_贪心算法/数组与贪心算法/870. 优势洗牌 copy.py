@@ -1,22 +1,23 @@
-from typing import List
-from sortedcontainers import SortedList
-
 # A 相对于 B 的优势可以用满足 A[i] > B[i] 的索引 i 的数目来描述。
 # 返回 A 的任意排列，使其相对于 B 的优势最大化。
+# !田忌赛马
+# 每次在A中寻找大于B[i]的最小值，若没有，则返回A中的最小值
+
+
+from typing import List
+from sortedcontainers import SortedList
 
 
 class Solution:
     def advantageCount(self, A: List[int], B: List[int]) -> List[int]:
-        num1 = SortedList(A)
+        sl = SortedList(A)
         res = []
         for num in B:
-            index = num1.bisect_right(num)
-            if index < len(num1):
-                choose = num1.pop(index)
+            pos = sl.bisect_right(num)
+            if pos < len(sl):
+                choose = sl.pop(pos)
             else:
-                first = num1[0]
-                num1.discard(first)
-                choose = first
+                choose = sl.pop(0)
             res.append(choose)
         return res
 

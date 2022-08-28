@@ -17,7 +17,7 @@ dp2 = [float("-inf")] * (capacity + 1)
 dp2[0] = 0
 
 for i in range(n):
-    for j in range(1, capacity + 1):
+    for j in range(capacity + 1):
         if j >= size[i]:
             dp1[j] = max(dp1[j], dp1[j - size[i]] + worth[i])
             dp2[j] = max(dp2[j], dp2[j - size[i]] + worth[i])
@@ -25,4 +25,4 @@ for i in range(n):
 # 至多装多大价值
 print(dp1[-1])
 # 恰好装满，至多装多大价值
-print(0 if dp2[-1] == float('-inf') else dp2[-1])
+print(0 if dp2[-1] == float("-inf") else dp2[-1])

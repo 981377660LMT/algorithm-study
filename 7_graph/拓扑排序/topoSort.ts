@@ -73,7 +73,7 @@ function topoSort2<T extends PropertyKey>(adjMap: Map<T, Set<T>>, allVertex: Set
 /**
  * @description 计算每个点在拓扑排序中的最大深度
  *
- **/
+ * */
 function topoSortDepth(n: number, adjMap: Map<number, Set<number>>, deg: number[]): number[] {
   const topoLevels = Array<number>(n).fill(0)
   let level = 0

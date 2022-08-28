@@ -1,7 +1,10 @@
+"""破解保险箱"""
+
+
 class Solution:
     def crackSafe(self, n: int, k: int) -> str:
         """密码是 n 位数, 密码的每一位是 k 位序列 0, 1, ..., k-1 中的一个 。
-        
+
         求出一个最短的字符串，使其包含 0~k^n (k进制)中的所有数字
         将所有的 n-1 位数作为节点。每个节点有 k 条边
 
@@ -22,4 +25,3 @@ class Solution:
 
         dfs(0)
         return "".join(res) + "0" * (n - 1)
-

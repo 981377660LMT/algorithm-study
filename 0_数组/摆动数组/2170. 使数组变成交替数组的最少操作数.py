@@ -1,9 +1,13 @@
+"""长城数组"""
+
 from collections import Counter
-from typing import List, Tuple
+from typing import List
 
 MOD = int(1e9 + 7)
 
-# 返回使数组变成交替数组的 最少操作数 。
+# 返回使数组变成交替数组(摆动数组)的 最少操作数 。
+
+
 class Solution:
     def minimumOperations(self, nums: List[int]) -> int:
         n = len(nums)
@@ -24,7 +28,19 @@ class Solution:
 
 print(Solution().minimumOperations(nums=[3, 1, 3, 2, 4, 3]))
 print(Solution().minimumOperations(nums=[1, 2, 2, 2, 2]))
-print(Solution().minimumOperations(nums=[1, 2,]))
+print(
+    Solution().minimumOperations(
+        nums=[
+            1,
+            2,
+        ]
+    )
+)
 print(Solution().minimumOperations(nums=[1, 2, 3]))
-print(Solution().minimumOperations(nums=[1,]))
-
+print(
+    Solution().minimumOperations(
+        nums=[
+            1,
+        ]
+    )
+)

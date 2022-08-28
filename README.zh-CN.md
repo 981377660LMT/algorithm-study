@@ -110,6 +110,8 @@
    - [回文生成器](22_%E4%B8%93%E9%A2%98/%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%9B%9E%E6%96%87/%E6%9E%9A%E4%B8%BE%E5%9B%9E%E6%96%87.py)
    - [NextPermutation](12_%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95/%E7%BB%8F%E5%85%B8%E9%A2%98/%E6%8E%92%E5%88%97/api/nextPermutation.py)
    - [莫队算法 (静态查询)](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E8%8E%AB%E9%98%9F/MoAlgo.py)
+   - [一致性哈希](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/lintcode%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/520%20.%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%20II.py)
+   - [Geo 哈希](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/lintcode%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/529.Geo%E5%93%88%E5%B8%8C.py)
    - Itertools
      - [product](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/product.ts)
      - [permutations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/permutations.ts)

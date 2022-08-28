@@ -1,10 +1,14 @@
+"""
+最好是根据实际场景写逻辑 而不是复用模板
+"""
+
 from typing import DefaultDict, Hashable, List, Set, Tuple, TypeVar
 from collections import defaultdict, deque
 
 
 def toposort1(n: int, adjMap: DefaultDict[int, Set[int]], deg: List[int]) -> Tuple[int, List[int]]:
-    """"返回有向图拓扑排序方案数和拓扑排序结果
-    
+    """ "返回有向图拓扑排序方案数和拓扑排序结果
+
     注意图里有重边时不能多次计算deg
     """
     queue = deque([v for v in range(n) if deg[v] == 0])
@@ -23,14 +27,14 @@ def toposort1(n: int, adjMap: DefaultDict[int, Set[int]], deg: List[int]) -> Tup
     return topoCount, res
 
 
-T = TypeVar('T', bound=Hashable)
+T = TypeVar("T", bound=Hashable)
 
 
 def toposort2(
     adjMap: DefaultDict[T, Set[T]], deg: DefaultDict[T, int], /, allVertex: Set[T]
 ) -> Tuple[int, List[T]]:
-    """"返回有向图拓扑排序方案数和拓扑排序结果
-    
+    """ "返回有向图拓扑排序方案数和拓扑排序结果
+
     注意图里有重边时不能多次计算deg
     """
     for v in allVertex:  # !初始化所有顶点的入度
@@ -51,8 +55,8 @@ def toposort2(
 
 
 def toposort3(preDeps: List[Tuple[T, T]], allVertex: Set[T]) -> Tuple[int, List[int]]:
-    """"返回有向图拓扑排序方案数和拓扑排序结果
-    
+    """ "返回有向图拓扑排序方案数和拓扑排序结果
+
     注意图里有重边时不能多次计算deg
     """
     adjMap = defaultdict(set)

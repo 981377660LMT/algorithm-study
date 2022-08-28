@@ -45,11 +45,15 @@ class UnionFind:
         root = self.find(x)
         return self.partSum[root]
 
+    def setPartSum(self, x: int, val: int) -> None:
+        root = self.find(x)
+        self.partSum[root] = val
+
 
 class Solution:
     def maximumSegmentSum(self, nums: List[int], removeQueries: List[int]) -> List[int]:
         """倒序"""
-
+        n = len(nums)
         uf = UnionFind(n)
         visited = [False] * n
         res = [0] * n
@@ -57,7 +61,7 @@ class Solution:
         for i in range(n - 1, 0, -1):
             curIndex = removeQueries[i]
             visited[curIndex] = True
-            uf.partSum[curIndex] = nums[curIndex]
+            uf.setPartSum(curIndex, nums[curIndex])
 
             # 合并左右邻居
             if curIndex - 1 >= 0 and visited[curIndex - 1]:

@@ -1,17 +1,19 @@
+import string
 from typing import List
+
+
+BASE36 = string.digits + string.ascii_lowercase
 
 
 class Solution:
     def add(self, arr1: List[str], arr2: List[str]) -> List[str]:
         def toInt(s: str) -> int:
-            if '0' <= s <= '9':
+            if "0" <= s <= "9":
                 return int(s)
-            return ord(s) + 10 - 97
+            return ord(s) - 97 + 10
 
         def toChar(n: int) -> str:
-            if 0 <= n <= 9:
-                return str(n)
-            return chr(n - 10 + 97)
+            return BASE36[n]
 
         res = []
         carry = 0
@@ -31,4 +33,4 @@ class Solution:
 
 
 # '1b'+'2x'
-print(Solution().add(['1', 'b'], ['2', 'x']))
+print(Solution().add(["1", "b"], ["2", "x"]))

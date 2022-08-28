@@ -70,24 +70,69 @@
 # 选x个数 求最小和 每个
 
 
-INF = int(1e18)
+# INF = int(1e18)
 
 
-def solution(A, X, Y):
-    preSum = [[0] for _ in range(Y + 10)]
-    for i, num in enumerate(A):
-        mod_ = i % Y
-        preSum[mod_].append(preSum[mod_][-1] + num)
+# def solution(A, X, Y):
+#     preSum = [[0] for _ in range(Y + 10)]
+#     for i, num in enumerate(A):
+#         mod_ = i % Y
+#         preSum[mod_].append(preSum[mod_][-1] + num)
 
-    res = INF
-    for p in preSum:
-        for start in range(len(p)):
-            end = start + X
-            if end >= len(p):
-                break
-            res = min(res, p[end] - p[start])
+#     res = INF
+#     for p in preSum:
+#         for start in range(len(p)):
+#             end = start + X
+#             if end >= len(p):
+#                 break
+#             res = min(res, p[end] - p[start])
 
-    return res
+#     return res
 
 
 # print(solution([4, 2, 5, 4, 3, 5, 1, 4, 2, 7], 3, 2))
+##############################################################
+# !每个字符包含偶数次的最长字符串
+# def solution(S: str) -> int:
+#     res, state = 0, 0
+#     preState = dict({0: -1})
+#     for i, char in enumerate(S):
+#         state ^= 1 << (ord(char) - 97)
+#         if state not in preState:
+#             preState[state] = i
+#         else:
+#             res = max(res, i - preState[state])
+#     return res
+
+
+# !选择一个子集 使得任意两个元素的差为k的倍数 求最大子集大小
+# !取模
+# from collections import defaultdict
+# from typing import List
+
+
+# def solution(A: List[int], M: int) -> int:
+#     counter = defaultdict(int)
+#     for num in A:
+#         mod = num % M
+#         counter[mod] += 1
+#     return max(counter.values(), default=0)
+
+
+# print(solution([-3, -2, 1, 0, 8, 7, 1], 3))
+# print(solution([], 3))
+
+
+# !从两个数组取数 最小化mex
+# from typing import List
+
+
+# def solution(A: List[int], B: List[int]) -> int:
+#     res = set()  # 必须取到的数
+#     for a, b in zip(A, B):
+#         if a == b:
+#             res.add(a)
+#     mex = 1
+#     while mex in res:
+#         mex += 1
+#     return mex

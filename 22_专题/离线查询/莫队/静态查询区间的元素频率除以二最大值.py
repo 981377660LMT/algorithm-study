@@ -6,7 +6,7 @@ from MoAlgo import AbstractMoAlgo
 
 
 class QueryMaxMoAlgo(AbstractMoAlgo[int, int]):
-    """静态查询区间 `元素频率//2` 的最大值 因为每个变化都是±1 所以可以O(1)维护"""
+    """静态查询区间 `元素频率//2` 的和 因为每个变化都是±1 所以可以O(1)维护"""
 
     def __init__(self, nums: List[int]):
         super().__init__(nums)
