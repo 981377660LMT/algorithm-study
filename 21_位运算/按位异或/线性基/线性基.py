@@ -3,12 +3,12 @@
 # n<=1e5
 # si<=2^63-1
 
-'''
+"""
 思路：
 把每一个数值看作63位的01向量，把所有向量求线性基，原问题里面选择的向量的异或和在线性基里面选向量做异或和是等价的，异或要最大，就需要
 优先保证高位是1，刚好就是线性基里面每一个向量都取1个，就可以构造出一个最优解，这个最优解刚好所有能取1的高位都是1，线性基里面任何一个
 向量取0个或者取多于1个，都不可能构造出更好的解
-'''
+"""
 # https://www.acwing.com/solution/content/47831/
 
 
@@ -77,7 +77,7 @@ def findBase2(matrix: List[List[int]]) -> List[int]:
 def getGaussMatrix(matrix: List[List[Literal[0, 1]]]) -> List[List[Literal[0, 1]]]:
     """求高斯消元后的矩阵(各个线性基)"""
     ROW, COL = len(matrix), len(matrix[0])
-    nums = [int(''.join(map(str, row)), 2) for row in matrix]
+    nums = [int("".join(map(str, row)), 2) for row in matrix]
 
     bases = findBase(nums)
     res = [[0] * COL for _ in range(ROW)]
@@ -94,9 +94,8 @@ def calMaxXor(nums: List[int]) -> int:
     return reduce(lambda x, y: x ^ y, bases)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # 原矩阵
     matrix = [[1, 0, 1, 1, 0], [1, 0, 0, 1, 1], [0, 1, 1, 1, 0], [0, 0, 1, 0, 1]]
     # !高斯消元后的矩阵(线性基)
     print(getGaussMatrix(matrix))  # type: ignore
-

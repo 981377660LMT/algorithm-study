@@ -13,8 +13,9 @@ function judgePoint24(cards: number[]): boolean {
         judgePoint24([cards[j] - cards[i], ...rest]) ||
         judgePoint24([cards[i] / cards[j], ...rest]) ||
         judgePoint24([cards[j] / cards[i], ...rest])
-      )
+      ) {
         return true
+      }
     }
   }
 

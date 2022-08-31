@@ -6,6 +6,8 @@
 from typing import List
 from heapq import heappop, heappush
 
+INF = int(1e20)
+
 
 class Solution:
     def minimumDifference(self, nums: List[int]) -> int:
@@ -16,7 +18,7 @@ class Solution:
         pq = []
         for i in range(2 * n):
             leftMinSum[i + 1] = leftMinSum[i] + nums[i]
-            heappush(pq, (-nums[i]))
+            heappush(pq, -nums[i])
             if len(pq) > n:
                 leftMinSum[i + 1] -= -heappop(pq)
 
@@ -27,7 +29,7 @@ class Solution:
             if len(pq) > n:
                 rightMaxSum[i] -= heappop(pq)
 
-        res = int(1e20)
+        res = INF
         for i in range(n, 2 * n + 1):
             cur = leftMinSum[i] - rightMaxSum[i]
             res = min(res, cur)

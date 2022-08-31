@@ -70,6 +70,7 @@ class RMQSegmentTree {
       this.lazyValue[rt << 1] = Math.max(this.lazyValue[rt << 1], target)
       this.lazyValue[(rt << 1) | 1] = Math.max(this.lazyValue[(rt << 1) | 1], target)
       this.isLazy[rt << 1] = 1
+
       this.tree[rt << 1] = Math.max(this.tree[rt << 1], target)
       this.tree[(rt << 1) | 1] = Math.max(this.tree[(rt << 1) | 1], target)
       this.isLazy[(rt << 1) | 1] = 1

@@ -22,7 +22,11 @@ def 外切(circle1: Circle, circle2: Circle) -> bool:
 def 相交(circle1: Circle, circle2: Circle) -> bool:
     x1, y1, r1 = circle1
     x2, y2, r2 = circle2
-    return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) < (r1 + r2) * (r1 + r2)
+    return (
+        (r1 - r2) * (r1 - r2)
+        < (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
+        < (r1 + r2) * (r1 + r2)
+    )
 
 
 def 内切(circle1: Circle, circle2: Circle) -> bool:
@@ -35,6 +39,21 @@ def 内含(circle1: Circle, circle2: Circle) -> bool:
     x1, y1, r1 = circle1
     x2, y2, r2 = circle2
     return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) < (r1 - r2) * (r1 - r2)
+
+
+def isCircleCross(circle1: Circle, circle2: Circle) -> bool:
+    """圆与圆是否有交点"""
+    x1, y1, r1 = circle1
+    x2, y2, r2 = circle2
+    a = (r1 - r2) * (r1 - r2)
+    b = (r1 + r2) * (r1 + r2)
+    dist = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
+    return a <= dist <= b
+
+
+# def isCircleCross2(circle1: Circle, circle2: Circle) -> bool:
+#     """圆与圆是否有交点"""
+#     return 外切(circle1, circle2) or 相交(circle1, circle2) or 内切(circle1, circle2)
 
 
 if __name__ == "__main__":

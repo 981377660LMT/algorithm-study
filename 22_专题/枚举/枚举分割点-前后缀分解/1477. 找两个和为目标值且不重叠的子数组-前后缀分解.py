@@ -27,8 +27,10 @@ class Solution:
                 curSum += num
                 if curSum - target in preSum:
                     res[i] = min(res[i], i - preSum[curSum - target])
+
                 if i:
                     res[i] = min(res[i - 1], res[i])
+
                 preSum[curSum] = i
 
             return res
@@ -40,7 +42,7 @@ class Solution:
         for i in range(len(arr) - 1):
             left, right = leftMins[i], rightMins[i + 1]
             res = min(res, left + right)
-        return res if res < int(1e19) else -1
+        return res if res != INF else -1
 
 
 print(Solution().minSumOfLengths(arr=[3, 1, 1, 1, 5, 1, 2, 1], target=3))  # 3

@@ -5,7 +5,6 @@
 
 
 from collections import defaultdict
-from functools import lru_cache
 from typing import List, Tuple
 
 INF = int(4e18)
@@ -41,23 +40,6 @@ class Solution:
             adjMap[cur][parent] = weight
 
         return dfs(0, -1)[1]  # 不连接虚拟根节点
-
-    def maxScore2(self, edges: List[List[int]]) -> int:
-        """记忆化搜索写法"""
-
-        @lru_cache(None)
-        def dfs(cur: int, pre: int, isUsed: bool) -> int:
-            """算出不选的+最大的一个值"""
-            ...
-
-        adjMap = defaultdict(lambda: defaultdict(lambda: -INF))
-        for cur, (parent, weight) in enumerate(edges):
-            if parent == -1:
-                continue
-            adjMap[parent][cur] = weight
-            adjMap[cur][parent] = weight
-
-        return max(0, dfs(0, -1, False))
 
 
 # edges[i] = [parenti, weighti]

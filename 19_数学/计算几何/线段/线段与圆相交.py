@@ -16,7 +16,7 @@ Segment = Tuple[int, int, int, int]
 Circle = Tuple[int, int, int]
 
 
-def isIntersected(segment: Segment, circle: Circle) -> bool:
+def isSegCircleCross(segment: Segment, circle: Circle) -> bool:
     """
     线段与圆是否相交
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     segment3 = (-1, 1, 1, 1)  # 两点都在圆内 不相交
     segment4 = (-100, 1, 100, 1)  # 两个点都在圆外 相交
 
-    assert not isIntersected(segment1, circle)
-    assert isIntersected(segment2, circle)
-    assert not isIntersected(segment3, circle)
-    assert isIntersected(segment4, circle)
+    assert not isSegCircleCross(segment1, circle)
+    assert isSegCircleCross(segment2, circle)
+    assert not isSegCircleCross(segment3, circle)
+    assert isSegCircleCross(segment4, circle)

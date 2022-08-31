@@ -3,6 +3,7 @@
 AutoX-3. 出行的最少购票费用
 https://leetcode.cn/contest/autox2023/problems/BjAFy9/
 """
+from bisect import bisect_left
 from functools import lru_cache
 from typing import List
 
@@ -14,22 +15,40 @@ from typing import List
 # !1 <= days[i] < days[i+1] <= 10^9
 # !1 <= tickets.length <= 20
 
-# !需要将天数离散化吗
+# !dp转移时需要二分查找
+
+
+INF = int(1e18)
+
+
 class Solution:
+    def minCostToTravelOnDays(self, days: List[int], tickets: List[List[int]]) -> int:
+        """https://leetcode.cn/contest/autox2023/problems/BjAFy9/"""
+        n = len(days)
+        dp = [INF] * (n + 1)  # !dp[i]表示时间到达前i天时的最少花费
+        dp[0] = 0
+        for i in range(n):
+            cur = days[i]
+            for retain, price in tickets:
+                pre = cur - retain + 1
+                pos = bisect_left(days, pre)
+                dp[i + 1] = min(dp[i + 1], dp[pos] + price)
+        return dp[-1]
+
     def mincostTickets(self, days: List[int], costs: List[int]) -> int:
         """https://leetcode.cn/problems/minimum-cost-for-tickets/"""
         n = days[-1]
         dSet = set(days)
         dp = [0] * (n + 1)
 
-        for i in range(n + 1):
-            if i not in dSet:
-                dp[i] = dp[i - 1]
+        for d in range(n + 1):
+            if d not in dSet:  # 如果不在就继承前一个day的状态
+                dp[d] = dp[d - 1]
             else:
-                dp[i] = min(
-                    dp[max(0, i - 1)] + costs[0],
-                    dp[max(0, i - 7)] + costs[1],
-                    dp[max(0, i - 30)] + costs[2],
+                dp[d] = min(
+                    dp[max(0, d - 1)] + costs[0],
+                    dp[max(0, d - 7)] + costs[1],
+                    dp[max(0, d - 30)] + costs[2],
                 )
 
         return dp[-1]
@@ -42,7 +61,10 @@ class Solution:
             if index > n:
                 return 0
             if index not in need:
-                return dfs(index + 1)
+                pos = bisect_left(days, index)
+                next = days[pos] if pos < n else n + 1
+                return dfs(next)
+                return dfs(index + 1)  # !如果days很大 这里可以二分查找下一个位置
 
             return min(
                 dfs(index + 1) + costs[0], dfs(index + 7) + costs[1], dfs(index + 30) + costs[2]
@@ -55,6 +77,9 @@ class Solution:
         return res
 
 
+assert Solution().minCostToTravelOnDays([1, 2, 3, 4], [[1, 3], [2, 5], [3, 7]]) == 10
+assert Solution().minCostToTravelOnDays([1, 4, 5], [[1, 4], [5, 6], [2, 5]]) == 6
+#######################################################################
 print(Solution().mincostTickets([1, 4, 6, 7, 8, 20], [2, 7, 15]))
 print(Solution().mincostTickets2([1, 4, 6, 7, 8, 20], [2, 7, 15]))
 # 输入：days = [1,4,6,7,8,20], costs = [2,7,15]

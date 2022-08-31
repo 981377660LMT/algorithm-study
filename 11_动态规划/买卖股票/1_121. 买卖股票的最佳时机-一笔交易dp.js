@@ -3,7 +3,7 @@
  * @return {number}
  * 你只能选择 某一天 买入这只股票，并选择在 未来的某一个不同的日子 卖出该股票。
  */
-var maxProfit = function (prices) {
+let maxProfit = function (prices) {
   const len = prices.length
 
   // dp[i][0] 表示第i天持有股票所得最多现金 不持有 持有

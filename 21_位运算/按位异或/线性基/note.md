@@ -28,3 +28,5 @@
 求出 nums 的线性基 base 后
 线性无关 len(base) = len(nums)
 线性相关 len(base) < len(nums)
+
+https://zhuanlan.zhihu.com/p/139074556

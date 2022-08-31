@@ -17,8 +17,9 @@
 # 3.每个点所有满足条件的边中取一个权值最小的累加起来即可。
 
 from collections import defaultdict
-from dijkstra模板 import dijkstra
+from heapq import heappop, heappush
 
+INF = int(4e18)
 n, m = map(int, input().split())
 adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))
 for _ in range(m):
@@ -26,18 +27,27 @@ for _ in range(m):
     adjMap[u][v] = min(adjMap[u][v], w)  # !注意重边
     adjMap[v][u] = min(adjMap[v][u], w)
 
-dist = dijkstra(adjMap, 1)
+dist = defaultdict(lambda: INF, {1: 0})
+pq = [(0, 1)]
+while pq:
+    curDist, cur = heappop(pq)
+    if dist[cur] < curDist:
+        continue
+    for next in adjMap[cur]:
+        if dist[next] > dist[cur] + adjMap[cur][next]:
+            dist[next] = dist[cur] + adjMap[cur][next]
+            heappush(pq, (dist[next], next))
 
 res = 0
 for next in adjMap:
-    cand = int(1e20)
+    cand = INF
     for cur, weight in adjMap[next].items():
         # 如果当前点k到1的距离等于点j到1的距离+点j到k的距离w，说明jk可为高速公路
         # !注意这里要反向推 正向推不对
         if dist[next] == dist[cur] + weight:
             cand = min(cand, weight)
+    res += cand if cand != INF else 0
 
-    res += cand if cand != int(1e20) else 0
 print(res)
 
 # 2 4
