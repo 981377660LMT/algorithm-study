@@ -13,23 +13,23 @@ type MergeFunc = (a: number, b: number) => number
  * @see {@link https://oi-wiki.org/ds/sparse-table/}
  */
 class SparseTable {
-  private readonly size: number
-  private readonly mergeFunc: MergeFunc
-  private readonly dp: number[][]
+  private readonly _size: number
+  private readonly _mergeFunc: MergeFunc
+  private readonly _dp: number[][]
 
   constructor(nums: number[], mergeFunc: MergeFunc) {
     const n = nums.length
     const upper = Math.ceil(Math.log2(n)) + 1
 
-    this.size = n
-    this.mergeFunc = mergeFunc
-    this.dp = Array.from({ length: n }, () => Array(upper).fill(0))
-    for (let i = 0; i < n; i++) this.dp[i][0] = nums[i]
+    this._size = n
+    this._mergeFunc = mergeFunc
+    this._dp = Array.from({ length: n }, () => Array(upper).fill(0))
+    for (let i = 0; i < n; i++) this._dp[i][0] = nums[i]
 
     for (let j = 1; j < upper; j++) {
       for (let i = 0; i < n; i++) {
         if (i + (1 << (j - 1)) >= n) break
-        this.dp[i][j] = this.mergeFunc(this.dp[i][j - 1], this.dp[i + (1 << (j - 1))][j - 1])
+        this._dp[i][j] = this._mergeFunc(this._dp[i][j - 1], this._dp[i + (1 << (j - 1))][j - 1])
       }
     }
   }
@@ -38,13 +38,13 @@ class SparseTable {
    * @returns [`left`,`right`] 闭区间的贡献值
    */
   query(left: number, right: number): number {
-    this.checkRange(left, right)
+    // this.checkRange(left, right)
     const k = Math.floor(Math.log2(right - left + 1))
-    return this.mergeFunc(this.dp[left][k], this.dp[right - (1 << k) + 1][k])
+    return this._mergeFunc(this._dp[left][k], this._dp[right - (1 << k) + 1][k])
   }
 
   private checkRange(left: number, right: number): void {
-    if (0 <= left && left <= right && right < this.size) return
+    if (left >= 0 && left <= right && right < this._size) return
     throw new RangeError(`invalid range [${left}, ${right}]`)
   }
 }

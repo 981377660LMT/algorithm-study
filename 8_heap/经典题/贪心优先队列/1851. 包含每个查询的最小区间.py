@@ -9,34 +9,34 @@ from heapq import heappop, heappush
 # 1353. 最多可以参加的会议数目.py
 # 1 <= intervals.length <= 105
 
-# 总结:
-# 1.开会题模板
-# 2.离线查询先排序
+# 离线查询先排序
+
+
 class Solution:
     def minInterval(self, intervals: List[List[int]], queries: List[int]) -> List[int]:
         intervals.sort()
         # 离线查询预处理
-        que = sorted([(query, query_idx) for query_idx, query in enumerate(queries)])
+        Q = sorted([(qv, qi) for qi, qv in enumerate(queries)])
         res = [-1] * len(queries)
         pq = []
-        event_idx = 0
+        ei = 0
 
         # 遍历intervals左区间的位置
-        for query, query_idx in que:
+        for qv, qi in Q:
             # 将所有起始位置小于等于查询位置的区间intervals[i]添加到优先队列中
-            while event_idx < len(intervals) and intervals[event_idx][0] <= query:
-                start, end = intervals[event_idx]
+            while ei < len(intervals) and intervals[ei][0] <= qv:
+                start, end = intervals[ei]
                 heappush(pq, (end - start + 1, end))
-                event_idx += 1
+                ei += 1
 
             # 将队列中不能覆盖要查询点的区间移除队列
-            while pq and pq[0][1] < query:
+            while pq and pq[0][1] < qv:
                 heappop(pq)
 
             # 如果队列不为空，则代表队首区间是要查询的点的最短区间
             if pq:
-                length, _, = pq[0]
-                res[query_idx] = length
+                length, _ = pq[0]
+                res[qi] = length
 
         return res
 

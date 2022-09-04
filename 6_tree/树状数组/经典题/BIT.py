@@ -3,6 +3,7 @@
 此时在树状数组 add/query 入口处加上偏移量1即可
 """
 
+from bisect import bisect_left, bisect_right
 from collections import defaultdict
 
 
@@ -245,6 +246,43 @@ class ArrayBIT:
         return res
 
 
+# TODO  dict + SortedList 优化
+class BIT2D:
+    """二维矩形计数 更新和查询时间复杂度O(logk)
+
+    https://www.dounaite.com/article/62af78a4b80f116a57952d98.html
+    """
+
+    def __init__(self, row: int):
+        self._row = row
+        self._tree = [[] for _ in range(row)]
+
+    def add(self, row: int, col: int) -> None:
+        """加入点(row,col) 注意加入过程中需要保证col递增 时间复杂度log(k)"""
+        if row <= 0:
+            raise ValueError("row 必须是正整数")
+        while row < self._row:
+            self._tree[row].append(col)
+            row += row & -row
+
+    def query(self, r1: int, c1: int, r2: int, c2: int) -> int:
+        """计算矩形内的点数 时间复杂度log(k)"""
+        if r1 >= self._row:
+            r1 = self._row - 1
+        if r2 >= self._row:
+            r2 = self._row - 1
+        return self._query(r2, c1, c2) - self._query(r1 - 1, c1, c2)
+
+    def _query(self, rowUpper: int, c1: int, c2: int) -> int:
+        """row不超过rowUpper,col在[c1,c2]间的点数"""
+        res = 0
+        index = rowUpper
+        while index > 0:
+            res += bisect_right(self._tree[index], c2) - bisect_left(self._tree[index], c1)
+            index -= index & -index
+        return res
+
+
 if __name__ == "__main__":
     bit1 = BIT1(100)
     bit1.add(0 + 1, 2)
@@ -288,3 +326,11 @@ if __name__ == "__main__":
     assert arrayBIT.sum(0, 1) == 1
     arrayBIT.add(1, 1)
     assert arrayBIT.sum(0, 2) == 2
+
+    points = [(3, 3), (1, 1), (2, 2), (4, 4), (5, 5)]
+    points.sort(key=lambda x: x[1])  # 按照y坐标排序
+    bit2d = BIT2D(row=100)
+    for x, y in points:
+        bit2d.add(x, y)
+    assert bit2d.query(1, 1, 5, 5) == 5
+    assert bit2d.query(1, 1, 5, 4) == 4

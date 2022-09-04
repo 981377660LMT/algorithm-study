@@ -18,7 +18,7 @@ function maxFrequency(nums: number[], k: number): number {
   for (let right = 1; right < nums.length; right++) {
     curSum += (nums[right] - nums[right - 1]) * (right - left)
 
-    while (curSum > k) {
+    while (left <= right && curSum > k) {
       curSum -= nums[right] - nums[left]
       left++
     }

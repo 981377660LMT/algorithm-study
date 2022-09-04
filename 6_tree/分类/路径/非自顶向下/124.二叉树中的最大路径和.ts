@@ -1,11 +1,11 @@
+import { deserializeNode } from '../../../重构json/297.二叉树的序列化与反序列化'
 import { BinaryTree } from '../../Tree'
-import { deserializeNode } from '../../构建类/297.二叉树的序列化与反序列化'
 
 /**
  * @param {BinaryTree} root
  * @return {number}
  * @description 自底向上
- * // cur三种路径情况: 1. left+cur 2. right+cur 3. left+cur+right 
+ * cur三种路径情况: 1. left+cur 2. right+cur 3. left+cur+right
    // 其中1,2是要往上探索的。3不能往上。
    // dfs的return值是当前节点[若往上, 即作为子节点]的最大贡献值，是不包含情况3的。
    // 但是3可能是最大路径，因此更新ans时是比较1, 2, 3中最大。

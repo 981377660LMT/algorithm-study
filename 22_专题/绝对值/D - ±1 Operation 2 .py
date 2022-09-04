@@ -21,7 +21,7 @@ MOD = int(1e9 + 7)
 
 
 def calDistSum(nums: List[int], k: int, preSum: List[int]) -> int:
-    """有序数组所有点到x=k的距离之和
+    """`有序数组`所有点到x=k的绝对值距离之和
 
     排序+二分+前缀和 O(logn)
     """

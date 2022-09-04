@@ -1,5 +1,5 @@
 1. 准备好所有边 [u,v,weight] 按 wweight 升序排列
-2. 加入并查集连
+2. 并查集构造生成树
 
 ```JS
 type U = number

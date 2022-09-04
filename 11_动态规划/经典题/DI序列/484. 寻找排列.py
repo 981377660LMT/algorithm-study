@@ -5,7 +5,6 @@
 # n<=1e5
 
 
-from collections import deque
 from heapq import heappop, heappush
 from itertools import pairwise, permutations
 from typing import List

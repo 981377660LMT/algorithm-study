@@ -6,19 +6,17 @@ from heapq import heappop, heappush
 # 1353. 最多可以参加的会议数目.py
 class Solution:
     def eatenApples(self, apples: List[int], days: List[int]) -> int:
-        res = 0
-        pq = []
-        eventId = 0
-        while pq or eventId < len(apples):  # 直到看完所有的苹果
-            if eventId < len(apples):
-                # 先吃腐烂早的
-                heappush(pq, [eventId + days[eventId], apples[eventId]])
-            while pq and (pq[0][0] <= eventId or pq[0][1] == 0):
+        ei, res, pq = 0, 0, []
+        while pq or ei < len(apples):  # 直到看完所有的苹果
+            if ei < len(apples):
+                # !先吃腐烂早的
+                heappush(pq, [ei + days[ei], apples[ei]])
+            while pq and (pq[0][0] <= ei or pq[0][1] == 0):
                 heappop(pq)
             if pq:
                 res += 1
                 pq[0][1] -= 1
-            eventId += 1
+            ei += 1
         return res
 
 
@@ -29,4 +27,3 @@ print(Solution().eatenApples(apples=[1, 2, 3, 5, 2], days=[3, 2, 1, 4, 2]))
 # - 第二天，你吃掉一个第二天长出来的苹果。
 # - 第三天，你吃掉一个第二天长出来的苹果。过了这一天，第三天长出来的苹果就已经腐烂了。
 # - 第四天到第七天，你吃的都是第四天长出来的苹果。
-

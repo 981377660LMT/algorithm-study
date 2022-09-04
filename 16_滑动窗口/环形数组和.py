@@ -30,7 +30,7 @@ class Solution:
         for right in range(len(nums)):
             curSum += nums[right]
             res = min(res, abs(curSum - target))
-            while curSum > target:
+            while left <= right and curSum > target:
                 curSum -= nums[left]
                 left += 1
                 res = min(res, abs(curSum - target))

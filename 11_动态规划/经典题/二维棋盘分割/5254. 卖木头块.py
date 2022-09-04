@@ -1,3 +1,5 @@
+# 卖木头块
+
 from collections import defaultdict
 from functools import lru_cache
 from typing import List
@@ -19,18 +21,17 @@ class Solution:
         @lru_cache(None)
         def dfs(r: int, c: int) -> int:
             """r行c列的矩形木块可以切出来的最大价值
-            
+
             时间复杂度: O(m*n*m+m*n*n)
             """
             res = mapping[(r, c)]
-            for i in range(1, r // 2 + 1):
-                res = max(res, dfs(i, c) + dfs(r - i, c))  # 垂直切割
-            for j in range(1, c // 2 + 1):
-                res = max(res, dfs(r, j) + dfs(r, c - j))  # 水平切割
+            for r in range(1, r // 2 + 1):
+                res = max(res, dfs(r, c) + dfs(r - r, c))  # 垂直切割
+            for c in range(1, c // 2 + 1):
+                res = max(res, dfs(r, c) + dfs(r, c - c))  # 水平切割
             return res
 
         mapping = defaultdict(int, {(h, w): price for h, w, price in prices})
         res = dfs(m, n)
         dfs.cache_clear()
         return res
-

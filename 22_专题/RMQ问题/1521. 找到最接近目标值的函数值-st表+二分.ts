@@ -13,7 +13,7 @@ function closestToTarget(arr: number[], target: number): number {
       const diff = st.query(start, mid) - target
       res = Math.min(res, Math.abs(diff))
       if (diff === 0) return 0
-      else if (diff > 0) left = mid + 1
+      if (diff > 0) left = mid + 1
       else right = mid - 1
     }
   }

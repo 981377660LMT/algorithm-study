@@ -1,3 +1,6 @@
-第 n 次变换的第 k 个数
-比较 k 和 `2**(n-1)` 的关系
-`f(n,k)递归到 f(n-1,k`)`
+求第 n 次变换的第 k 个数
+**类似线段树**
+`dfs(depth,target)`
+求出 mid 后，比较 target 和 `mid` 的关系
+target <= mid 向左递归
+target > mid 向右递归

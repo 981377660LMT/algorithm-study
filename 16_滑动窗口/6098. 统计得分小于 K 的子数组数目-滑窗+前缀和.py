@@ -8,7 +8,7 @@ class Solution:
         curSum, left, res = 0, 0, 0
         for right, num in enumerate(nums):
             curSum += num
-            while curSum * (right - left + 1) >= k:
+            while left <= right and curSum * (right - left + 1) >= k:
                 curSum -= nums[left]
                 left += 1
             res += right - left + 1

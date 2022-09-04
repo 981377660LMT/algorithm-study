@@ -1,7 +1,7 @@
 from itertools import accumulate
 
 # 给出一个长度为n的01串，现在请你找到两个区间，
-# 使得这两个区间中0和1的个数相同。两个区间可以相交，
+# !使得这两个区间中01个数相同。两个区间可以相交，
 # 但是不可以完全重叠，即两个区间的左右端点不可以完全相同。
 # 现在请你找到两个最长的区间,满足以上要求。
 
@@ -27,18 +27,17 @@ def check(mid: int) -> bool:
 
 
 string = input()
-nums = [1 if char == '1' else 0 for char in string]
+nums = [1 if char == "1" else 0 for char in string]
 preSum = [0] + list(accumulate(nums))
 
 res = [-1, -1, -1, -1]
 resValue = -1
 left, right = 1, len(string) + 5
 while left <= right:
-    mid = (left + right) >> 1
+    mid = (left + right) // 2
     if check(mid):
         left = mid + 1
     else:
         right = mid - 1
 for num in res:
-    print(num, end='')
-
+    print(num, end="")

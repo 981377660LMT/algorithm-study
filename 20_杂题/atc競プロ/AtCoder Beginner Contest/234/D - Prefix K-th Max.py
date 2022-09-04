@@ -19,4 +19,4 @@ if __name__ == "__main__":
         if len(pq) > k:
             heappop(pq)
         res.append(pq[0])
-    print(*res[k:])
+    print(*res[k - 1 :], sep="\n")

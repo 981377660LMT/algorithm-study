@@ -1,65 +1,22 @@
-interface TreeNode {
-  val: number
-  left: TreeNode | null
-  right: TreeNode | null
-}
-
-const bt: TreeNode = {
-  val: 1,
-  left: {
-    val: 1,
-    left: {
-      val: 4,
-      left: null,
-      right: null,
-    },
-    right: {
-      val: 5,
-      left: null,
-      right: null,
-    },
-  },
-  right: {
-    val: 3,
-    left: {
-      val: 6,
-      left: null,
-      right: null,
-    },
-    right: {
-      val: 7,
-      left: null,
-      right: null,
-    },
-  },
-}
-
-const bt2: TreeNode = {
-  val: 1,
-  left: { val: 2, left: null, right: null },
-  right: null,
-}
 // 两个节点之间的路径长度由它们之间的边数表示。
 // 给定一个二叉树，找到最长的路径，这个路径中的每个节点具有相同值。
-// 这条路径可以经过也可以不经过根节点。
+// !这条路径可以经过也可以不经过根节点。
 // 思路:从叶子节点开始遍历(但是找不到父节点)
 
 function longestUnivaluePath(root: TreeNode | null): number {
-  const dfs = (parent: number, root: TreeNode | null): number => {
-    if (!root) return 0
-
-    const left = dfs(root.val, root.left)
-    const right = dfs(root.val, root.right)
-    res = Math.max(res, left + right)
-    return root.val === parent ? Math.max(left, right) + 1 : 0
-  }
-
   if (!root) return 0
   let res = 0
-  dfs(root.val, root)
+  dfs(root, null)
   return res
-}
 
-console.log(longestUnivaluePath(bt))
+  // !非自顶向下的需要在每个位置更新答案
+  function dfs(cur: TreeNode | null, pre: TreeNode | null): number {
+    if (!cur) return 0
+    const left = dfs(cur.left, cur)
+    const right = dfs(cur.right, cur)
+    res = Math.max(res, left + right)
+    return cur.val === pre?.val ? Math.max(left, right) + 1 : 0
+  }
+}
 
 export {}

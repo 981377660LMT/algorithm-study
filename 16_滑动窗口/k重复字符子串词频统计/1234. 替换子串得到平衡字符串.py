@@ -21,7 +21,7 @@ class Solution:
             # !如果窗口外的小，那么可以将窗口内的补成缺少的字符，达到平均值。
             # 如果窗口外的某个字符大于平均值，
             # 那个多出来的字符需要被替换成其他字符，这样仅仅将窗口内的字符替换是达不到要求的
-            while left < n and all(n / 4 >= counter[c] for c in 'QWER'):
+            while left < n and all(n / 4 >= counter[c] for c in "QWER"):
                 res = min(res, right - left + 1)
                 counter[s[left]] += 1
                 left += 1
@@ -30,4 +30,3 @@ class Solution:
 
 
 print(Solution().balancedString("QQWE"))
-

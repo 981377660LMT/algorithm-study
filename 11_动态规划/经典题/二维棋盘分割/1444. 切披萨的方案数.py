@@ -20,7 +20,7 @@ class PreSumMatrix:
         for r in range(m):
             for c in range(n):
                 preSum[r + 1][c + 1] = (
-                    int(A[r][c] == 'A') + preSum[r][c + 1] + preSum[r + 1][c] - preSum[r][c]
+                    int(A[r][c] == "A") + preSum[r][c + 1] + preSum[r + 1][c] - preSum[r][c]
                 )
 
         self.preSum = preSum
@@ -43,7 +43,7 @@ class PreSumMatrix:
 class Solution:
     def ways(self, pizza: List[str], k: int) -> int:
         """你需要切披萨 k-1 次，得到 k 块披萨并送给别人。
-        
+
         请你返回确保每一块披萨包含 至少 一个苹果的切披萨方案数
         """
 

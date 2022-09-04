@@ -10,9 +10,7 @@ function snakeToCamel(str: string): string {
   // s I
   // S o
   // r A
-  return str.replace(snakePattern, (_, g1: string, g2: string) => {
-    return `${g1}${g2.toUpperCase()}`
-  })
+  return str.replace(snakePattern, (_, g1: string, g2: string) => `${g1}${g2.toUpperCase()}`)
 }
 
 // 连续的下划线__，打头的下划线 _a和结尾的下划线a_需要被保留。

@@ -1,4 +1,5 @@
 滑动窗口的滑动需要具**有单向性**:
+如果区间移动`对某个性质的影响是具有单调性的` 那都可以考虑滑窗
 例如移动右使得某个量一直增，移动左使得某个量一直减
 思路都是用 map 记录数字对应的索引/出现次数
 
@@ -21,26 +22,16 @@
         return res
    ```
 
-2. 移动窗口大小
-   `k 重复字符子串词频统计`系列 => 不符合条件就收缩
-
-   ```js
-   while (r < s.length) {
-     if ((counter.get(s[r]) || 0) === 0) type++
-     counter.set(s[r], (counter.get(s[r]) || 0) + 1)
-     r++
-
-     // 不符合条件就收缩
-     while (type > k) {
-       if (counter.get(s[l]) === 1) type--
-       counter.set(s[l], counter.get(s[l]) - 1)
-       l++
-     }
-
-     res = Math.max(max, r - l)
-   }
-   ```
-
-3. 固定端点找边界
+2. 移动窗口大小/固定端点找边界(一般是固定右、找左) => 不符合条件就收缩
    注意到窗口移动的单调性 直到满足某个条件才停止继续寻找边界
    [固定左端点寻找右边界](%E5%9B%BA%E5%AE%9A%E7%AB%AF%E7%82%B9%E6%89%BE%E5%8F%A6%E4%B8%80%E4%B8%AA%E7%AB%AF%E7%82%B9%E8%BE%B9%E7%95%8C/E%20-%20At%20Least%20One.py)
+   ```Python
+    for right in range(n):
+        curSum += nums[right]  # add 逻辑
+        while left <= right and ...:  # 不要忘记 left <= right
+            curSum -= nums[left]  # remove 逻辑
+            left += 1
+            ...
+        res = max(res, right - left + 1)
+    return res
+   ```

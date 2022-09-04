@@ -22,5 +22,5 @@ for start, end in intervals:
 print(res)
 
 # Hanging Banners
-# 固定所有区间的最少点数
-# 贪心思路：尽量在区间末尾钉钉子
+# !固定所有区间的最少点数
+# !贪心思路：尽量在区间末尾钉钉子

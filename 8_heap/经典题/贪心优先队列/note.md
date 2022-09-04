@@ -1,35 +1,39 @@
-<!-- 任务调度 -->
+<!-- 扫描线参加会议 -->
 
 一般会按起始时间排序
+
+模板；
+
+- 入堆，event_index++
+- 出堆，已经结束的
+- pop 一个作为结果，更新 res
+
+```Python
+class Solution:
+    def maxEvents(self, events: List[List[int]]) -> int:
+        events.sort(key=lambda x: x[0])
+        ei, res, pq = 0, 0, []
+
+        for time in range(int(1e5) + 10):
+            # 1.在每一个时间点，我们首先将当前时间点开始的会议加入小根堆，
+            while ei < len(events) and events[ei][0] == time:
+                heappush(pq, events[ei][1])
+                ei += 1
+
+            # 2.再把当前已经结束的会议移除出小根堆（因为已经无法参加了），
+            while pq and pq[0] < time:
+                heappop(pq)
+
+            # 3.然后从剩下的会议中选择一个结束时间最早的去参加。
+            if pq:
+                heappop(pq)
+                res += 1
+
+        return res
+```
 
 经典题
 `1353. 最多可以参加的会议数目.py `
 pq 维护最早结束的会议 heappush(pq, (end))
 `1851. 包含每个查询的最小区间.py `
 pq 维护最短区间 heappush(pq, (end - start + 1, end))
-
-模板；
-
-1. 对 event 和 query 排序(方便`出堆`步骤)
-2. 初始化 event_index
-3. 对每个 query 进行遍历
-   - 入堆，event_index++
-   - 出堆已经结束的
-   - pop 一个作为结果，更新 res
-
-```Python
- # 当日开始的会议
-while event_index < len(events) and events[event_index][0] == day:
-    start, end = events[event_idx]
-    heappush(pq, end)
-    event_index += 1
-
-# 已经结束的会议
-while pq and pq[0] < day:
-    heappop(pq)
-
-# 最早结束的会议
-if pq:
-    res += 1
-    heappop(pq)
-```
