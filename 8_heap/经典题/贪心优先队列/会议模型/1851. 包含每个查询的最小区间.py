@@ -21,19 +21,18 @@ class Solution:
         pq = []
         ei = 0
 
-        # 遍历intervals左区间的位置
         for qv, qi in Q:
-            # 将所有起始位置小于等于查询位置的区间intervals[i]添加到优先队列中
+            # !1.将所有起始位置小于等于查询位置的区间intervals[i]添加到优先队列中
             while ei < len(intervals) and intervals[ei][0] <= qv:
                 start, end = intervals[ei]
                 heappush(pq, (end - start + 1, end))
                 ei += 1
 
-            # 将队列中不能覆盖要查询点的区间移除队列
+            # !2.将队列中不能覆盖要查询点的区间移除队列
             while pq and pq[0][1] < qv:
                 heappop(pq)
 
-            # 如果队列不为空，则代表队首区间是要查询的点的最短区间
+            # !3.如果队列不为空，则代表队首区间是要查询的点的最短区间
             if pq:
                 length, _ = pq[0]
                 res[qi] = length

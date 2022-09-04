@@ -1,7 +1,6 @@
 # CPU调度-多线程
 # !贪心优先队列/cpu调度/1882. 使用服务器处理任务.py
-# !两个PQ维护busy和free的服务器 两个堆来回倒
-# !free维护空闲的服务器编号，busy维护任务的结束时间和服务器编号
+
 
 # 会议将会按以下方式分配给会议室：
 
@@ -9,6 +8,12 @@
 # 2. 如果没有可用的会议室，会议将会`延期`，直到存在空闲的会议室。
 #    延期会议的持续时间和原会议持续时间 `相同` 。
 # 3. 当会议室处于未占用状态时，将会优先提供给`原 开始 时间`更早的会议。
+
+
+# 总结:
+# !两个pq来回倒
+# !free:维护空闲的cpu，存储 (cpu)
+# !busy:维护运行任务的cpu，存储 (endTime,,cpu)，早结束早空闲
 
 from heapq import heappop, heappush
 from typing import List
@@ -24,6 +29,7 @@ class Solution:
         counter = [0] * n
         meetings.sort(key=lambda x: x[0])
         free, busy = list(range(n)), []
+        # heapify(free)
         for start, end in meetings:
             # !1.busy里的任务结束了 归还CPU
             while busy and busy[0][0] <= start:
@@ -35,7 +41,7 @@ class Solution:
                 cpu = heappop(free)
             else:  # !没有空闲的CPU 需要使用最早结束的CPU
                 nextEnd, cpu = heappop(busy)
-                end += nextEnd - start  # !延期执行
+                end = nextEnd + (end - start)  # !延期执行
             counter[cpu] += 1
             heappush(busy, (end, cpu))
 

@@ -1,6 +1,7 @@
-CPU 调度模型:**两个 pq 维护 busy 和 free 的服务器**
+多核 CPU 调度模型:**两个 pq 维护 busy 和 free 的 cpu**
 
-free 维护`空闲的cpu编号`，busy 维护任务的`结束时间和cpu编号`(便于归还 cpu)
+free 维护`空闲的cpu编号`
+busy 维护任务的`结束时间和cpu编号`(便于归还 cpu)
 两个 pq 来回倒
 
 ```Python
