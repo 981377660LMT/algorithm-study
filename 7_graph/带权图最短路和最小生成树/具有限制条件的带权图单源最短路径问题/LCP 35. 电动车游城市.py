@@ -1,15 +1,19 @@
-from typing import List
-from heapq import heappop, heappush
-
 # 小明的电动车电量充满时可行驶距离为 cnt
 # 请返回小明最少需要花费多少单位时间从起点城市 start 抵达终点城市 end
 # 初始状态，电动车电量为 0。每个城市都设有充电桩，charge[i] 表示第 i 个城市每充 1 单位电量需要花费的单位时间
+# !所有数据量 <=100
 
 # 总结:
 # 每个点每次只会有两种操作
-
 # 充一次电 - 新时间 == 已用时间 ++ 当前城市每单位充电需要时间， 新电量 == 剩余电量 + 1
 # 去往下一个城市 - 新时间 == 已用时间 ++ 去往该需要消耗的时间， 新电量 == 剩余电量 -− 去往该城市需要消耗的电量
+# !注意到有环 所以最短路用dijk
+
+from collections import defaultdict
+from typing import List
+from heapq import heappop, heappush
+
+INF = int(1e18)
 
 
 class Solution:
@@ -17,35 +21,33 @@ class Solution:
         self, paths: List[List[int]], cnt: int, start: int, end: int, charge: List[int]
     ) -> int:
         n = len(charge)
-        full_power = cnt
-        adjList = [[] for _ in range(n)]
+        fullpower = cnt
+        adjMap = defaultdict(lambda: defaultdict(lambda: INF))
         for u, v, w in paths:
-            adjList[v].append((u, w))
-            adjList[u].append((v, w))
+            adjMap[u][v] = min(adjMap[u][v], w)
+            adjMap[v][u] = min(adjMap[v][u], w)
 
-        pq = [(0, start, 0)]
-        dist = [[0x7FFFFFFF for _ in range(full_power + 1)] for _ in range(n)]
+        pq = [(0, start, 0)]  # (time, city, power)
+        dist = [[INF] * (fullpower + 1) for _ in range(n)]
 
         while pq:
-            cost, cur, power = heappop(pq)
-
-            if cur == end:
-                return cost
-
-            if cost > dist[cur][power]:
+            curCost, curPos, curPower = heappop(pq)
+            if curPos == end:
+                return curCost
+            if curCost > dist[curPos][curPower]:
                 continue
 
             # 充一个电
-            if power < full_power:
-                if cost + charge[cur] < dist[cur][power + 1]:
-                    dist[cur][power + 1] = cost + charge[cur]
-                    heappush(pq, (cost + charge[cur], cur, power + 1))
+            if curPower < fullpower:
+                if curCost + charge[curPos] < dist[curPos][curPower + 1]:
+                    dist[curPos][curPower + 1] = curCost + charge[curPos]
+                    heappush(pq, (curCost + charge[curPos], curPos, curPower + 1))
 
             # 不充，继续走
-            for next, weight in adjList[cur]:
-                if power - weight >= 0 and cost + weight < dist[next][power - weight]:
-                    dist[next][power - weight] = cost + weight
-                    heappush(pq, (cost + weight, next, power - weight))
+            for next, weight in adjMap[curPos].items():
+                if curPower - weight >= 0 and curCost + weight < dist[next][curPower - weight]:
+                    dist[next][curPower - weight] = curCost + weight
+                    heappush(pq, (curCost + weight, next, curPower - weight))
         return -1
 
 
@@ -58,4 +60,3 @@ print(
         charge=[2, 10, 4, 1],
     )
 )
-

@@ -1,4 +1,4 @@
-import { bisectLeft } from '../../../9_排序和搜索/二分/bisect'
+import { bisectLeft } from '../../9_排序和搜索/二分/bisect'
 
 /**
  * @param {number[]} target 1 <= target.length, arr.length <= 10**5 且 target 数组元素各不相同
@@ -20,8 +20,8 @@ import { bisectLeft } from '../../../9_排序和搜索/二分/bisect'
 function minOperations(target: number[], arr: number[]): number {
   const targetSet = new Set<number>(target)
   // 实际不建议这样写 内存消耗很大
-  const indexByValue = new Map<number, number>([...target.entries()].map(([i, v]) => [v, i]))
-  const intersection = arr.filter(num => targetSet.has(num)).map(v => indexByValue.get(v)!)
+  const indexMap = new Map<number, number>([...target.entries()].map(([i, v]) => [v, i]))
+  const intersection = arr.filter(num => targetSet.has(num)).map(v => indexMap.get(v)!)
   if (intersection.length <= 1) return target.length - intersection.length
 
   const LIS: number[] = [intersection[0]]

@@ -3,7 +3,7 @@
  * @return {number}
  * 给你一个只包含 '(' 和 ')' 的字符串，找出最长有效（格式正确且连续）括号子串的长度。
  */
-const longestValidParentheses = function (s: string): number {
+function longestValidParentheses(s: string): number {
   // 用栈模拟一遍，将所有无法匹配的括号的位置全部置1
   // 例如: "()(()"的mark为[0, 0, 1, 0, 0]
   // 再例如: ")()((())"的mark为[1, 0, 0, 1, 0, 0, 0, 0]
@@ -15,12 +15,10 @@ const longestValidParentheses = function (s: string): number {
   for (let i = 0; i < n; i++) {
     if (s[i] === '(') {
       stack.push(i)
+    } else if (stack.length === 0) {
+      mark[i] = 1
     } else {
-      if (stack.length === 0) {
-        mark[i] = 1
-      } else {
-        stack.pop()
-      }
+      stack.pop()
     }
   }
 
@@ -34,15 +32,6 @@ const longestValidParentheses = function (s: string): number {
     .join('')
     .split('1')
     .reduce((pre, cur) => Math.max(pre, cur.length), 0)
-  // return
-  // console.log(mark)
-  // const markString = mark.join('')
-  // const match = markString.match(/(0)\1*/g)
-  // if (!match) return 0
-  // return Math.max.apply(
-  //   null,
-  //   match.map(zeros => zeros.length)
-  // )
 }
 
 console.log(longestValidParentheses('(()))()())(()'))

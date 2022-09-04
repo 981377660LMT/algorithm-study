@@ -8,9 +8,9 @@ function validateStackSequences(pushed, popped) {
   let count = 0
   for (const num of pushed) {
     stack.push(num)
-    while (stack.length > 0 && stack[stack.length - 1] === popped[count]) {
+    // 栈顶元素相等则出栈
+    while (stack.length && stack[stack.length - 1] === popped[count]) {
       stack.pop()
-
       count++
     }
   }

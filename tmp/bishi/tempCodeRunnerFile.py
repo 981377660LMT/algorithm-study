@@ -1,9 +1,6 @@
 
-# 7
-# rgbrgbg
-# 1 2
-# 2 3
-# 3 4
-# 4 5
-# 5 6
-# 6 7
+ok, dist = spfa(n, graph)
+if not ok:
+    print(-1)
+else:
+    print(-dist[0])

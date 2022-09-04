@@ -19,11 +19,15 @@ Circle = Tuple[int, int, int]
 def isSegCircleCross(segment: Segment, circle: Circle) -> bool:
     """
     线段与圆是否相交
+    线段缩成点视为与圆相交
 
     https://blog.csdn.net/SongBai1997/article/details/86599879
     """
     sx1, sy1, sx2, sy2 = segment
     cx, cy, r = circle
+    if sx1 == sx2 and sy1 == sy2:
+        return ((sx1 - cx) * (sx1 - cx) + (sy1 - cy) * (sy1 - cy)) == r * r
+
     flag1 = (sx1 - cx) * (sx1 - cx) + (sy1 - cy) * (sy1 - cy) <= r * r
     flag2 = (sx2 - cx) * (sx2 - cx) + (sy2 - cy) * (sy2 - cy) <= r * r
     if flag1 and flag2:  # 两点都在圆内 不相交
@@ -54,12 +58,20 @@ def isSegCircleCross(segment: Segment, circle: Circle) -> bool:
 
 if __name__ == "__main__":
     circle = (0, 0, 4)
-    segment1 = (4, 0, 4, 0)  # 线段缩成点视为与圆不相交
+    segment1 = (4, 0, 4, 0)  # !线段缩成点视为与圆相交
     segment2 = (4, 0, 4, 1)  # 一个点在圆内,一个点在圆外 相交
     segment3 = (-1, 1, 1, 1)  # 两点都在圆内 不相交
     segment4 = (-100, 1, 100, 1)  # 两个点都在圆外 相交
 
-    assert not isSegCircleCross(segment1, circle)
+    assert isSegCircleCross(segment1, circle)
     assert isSegCircleCross(segment2, circle)
     assert not isSegCircleCross(segment3, circle)
     assert isSegCircleCross(segment4, circle)
+
+    circle = (0, 0, 5)
+    H = (3, 4, 3, 4)
+    print(isSegCircleCross(H, circle))  # False
+    KL = (-20, 0, -2, 0)
+    print(isSegCircleCross(KL, circle))  # True
+    IJ = (-10, 0, 10, 0)
+    print(isSegCircleCross(IJ, circle))  # True

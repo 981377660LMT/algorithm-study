@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import assert from 'assert'
 
 /**
@@ -11,7 +12,7 @@ class ArrayDeque<T = number> {
   private readonly data: T[];
 
   *[Symbol.iterator]() {
-    let head = this.head
+    let { head } = this
     const times = this.length
     for (let i = 0; i < times; i++) {
       yield this.data[head]
@@ -38,7 +39,7 @@ class ArrayDeque<T = number> {
 
   // head前移
   unshift(value: T): boolean {
-    if (this.isFull()) return false
+    if (this._isFull()) return false
     this.head = (this.head - 1 + this.capacity) % this.capacity
     this.data[this.head] = value
     this.length++
@@ -47,7 +48,7 @@ class ArrayDeque<T = number> {
 
   // tail后移
   push(value: T): boolean {
-    if (this.isFull()) return false
+    if (this._isFull()) return false
     this.tail = (this.tail + 1 + this.capacity) % this.capacity
     this.data[this.tail] = value
     this.length++
@@ -56,8 +57,8 @@ class ArrayDeque<T = number> {
 
   // head后移
   shift(): T | undefined {
-    if (this.isEmpty()) return undefined
-    const front = this.front()
+    if (this._isEmpty()) return undefined
+    const front = this._front()
     this.head = (this.head + 1 + this.capacity) % this.capacity
     this.length--
     return front
@@ -65,15 +66,15 @@ class ArrayDeque<T = number> {
 
   // tail前移
   pop(): T | undefined {
-    if (this.isEmpty()) return undefined
-    const rear = this.back()
+    if (this._isEmpty()) return undefined
+    const rear = this._back()
     this.tail = (this.tail - 1 + this.capacity) % this.capacity
     this.length--
     return rear
   }
 
   forEach(callback: (value: T, index: number, array: T[]) => void): void {
-    let head = this.head
+    let { head } = this
     const times = this.length
     for (let i = 0; i < times; i++) {
       callback(this.data[head], i, this.data)
@@ -81,19 +82,19 @@ class ArrayDeque<T = number> {
     }
   }
 
-  private front(): T | undefined {
-    return this.isEmpty() ? undefined : this.data[(this.head + this.capacity) % this.capacity]
+  private _front(): T | undefined {
+    return this._isEmpty() ? undefined : this.data[(this.head + this.capacity) % this.capacity]
   }
 
-  private back(): T | undefined {
-    return this.isEmpty() ? undefined : this.data[(this.tail + this.capacity) % this.capacity]
+  private _back(): T | undefined {
+    return this._isEmpty() ? undefined : this.data[(this.tail + this.capacity) % this.capacity]
   }
 
-  private isEmpty(): boolean {
+  private _isEmpty(): boolean {
     return this.length === 0
   }
 
-  private isFull(): boolean {
+  private _isFull(): boolean {
     return this.length === this.capacity
   }
 }

@@ -31,10 +31,11 @@ class Solution:
                 if count == 0:
                     res.append(-1)
                 else:
+                    # 求方差 偏差平方的平均数
                     avg = sum_ / count
                     diff = 0
-                    for k in counter:
-                        diff += (k - avg) ** 2 * counter[k]
+                    for key in counter:
+                        diff += (key - avg) * (key - avg) * counter[key]
                     res.append(diff / count)
 
         return res

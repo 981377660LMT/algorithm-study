@@ -1,0 +1,2 @@
+
+    freq = list(counter.values())
