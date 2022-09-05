@@ -1,6 +1,6 @@
 from collections import defaultdict
 from math import floor, log2
-from typing import DefaultDict, Iterable, List, Mapping, Sequence, Tuple, Union
+from typing import Iterable, List, Mapping, Sequence, Union
 
 
 ListTree = Sequence[Iterable[int]]  # Sequence = Iterable + __getitem__
@@ -20,8 +20,8 @@ class LCA:
             tree (Tree): 树
             root (int): 根节点
         """
-        self.depth = defaultdict(lambda: -1)  # 深度 用深度来排序结点 根节点深度为0
-        self.parent = defaultdict(lambda: -1)  # 父节点 用来上跳查找路径 根节点父亲为-1
+        self.depth = [-1] * (n + 1)  # 用深度来排序结点 根节点深度为0 最后一个结点-1表示虚拟结点
+        self.parent = [-1] * (n + 1)  # 父节点用来上跳查找路径 根节点父亲为-1
 
         self._n = n
         self._tree = tree
@@ -116,7 +116,7 @@ class LCA:
                 continue
             self._dfs(next, cur, dep + 1)
 
-    def _makeDp(self, parent: DefaultDict[int, int]) -> List[List[int]]:
+    def _makeDp(self, parent: List[int]) -> List[List[int]]:
         """nlogn预处理"""
         fa = [[-1] * self._BITLEN for _ in range(self._n)]
         for i in range(self._n):

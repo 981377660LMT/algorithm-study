@@ -49,7 +49,7 @@
    - [Trie](6_tree/%E5%89%8D%E7%BC%80%E6%A0%91trie/Trie.py)
    - [01 Trie](6_tree/%E5%89%8D%E7%BC%80%E6%A0%91trie/%E6%9C%80%E5%A4%A7%E5%BC%82%E6%88%96%E5%89%8D%E7%BC%80%E6%A0%91/XORTrie.py)
    - [Fenwick Tree](6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py)
-   - [LCA](6_tree/LCA%E9%97%AE%E9%A2%98/TreeManager.py)
+   - [LCA](6_tree/LCA%E9%97%AE%E9%A2%98/%E5%80%8D%E5%A2%9E/LCA.py)
    - [Segment Tree](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template)
    - [Persistent Segment Tree](6_tree/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E7%BA%BF%E6%AE%B5%E6%A0%91/255.%20%E7%AC%ACK%E5%B0%8F%E6%95%B0-%E6%9F%A5%E8%AF%A2%E5%8C%BA%E9%97%B4%E7%AC%ACk%E5%B0%8F%E6%95%B0.ts)
    - [Tree Chain Segmentation](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%A0%91%E9%93%BE%E5%89%96%E5%88%86/2568.%20%E6%A0%91%E9%93%BE%E5%89%96%E5%88%86.py)
