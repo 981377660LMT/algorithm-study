@@ -5,7 +5,7 @@ import { deserializeNode } from './重构json/297.二叉树的序列化与反序
  * @param {BinaryTree} root
  * @return {BinaryTree}
  */
-var invertTree = function (root: BinaryTree): BinaryTree {
+let invertTree = function (root: BinaryTree): BinaryTree {
   if (!root) return root
   const queue: BinaryTree[] = [root]
   while (queue.length) {

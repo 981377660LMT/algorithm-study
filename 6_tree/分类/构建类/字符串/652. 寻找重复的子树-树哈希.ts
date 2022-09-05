@@ -1,26 +1,30 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable no-shadow */
 import { BinaryTree } from '../../Tree'
 
 // 你需要以列表的形式返回上述重复子树的根结点。
+// 树哈希与树的同构
 function findDuplicateSubtrees(root: BinaryTree | null): Array<BinaryTree | null> {
   // 获取每个节点的唯一识别
   const counter = new Map<string, BinaryTree[]>()
-  const dfs = (root: BinaryTree | null): string => {
+  const res: BinaryTree[] = []
+  dfs(root)
+  for (const nodes of counter.values()) {
+    if (nodes.length > 1) res.push(nodes[0])
+  }
+
+  return res
+
+  function dfs(root: BinaryTree | null): string {
     if (!root) return ''
 
-    const l = dfs(root.left)
-    const r = dfs(root.right)
-    const key = `${root.val}#${l}#${r}`
+    const left = dfs(root.left)
+    const right = dfs(root.right)
+    const key = `${root.val}#${left}#${right}`
     !counter.has(key) && counter.set(key, [])
     counter.get(key)!.push(root)
     return key
   }
-  dfs(root)
-
-  const res: BinaryTree[] = []
-  for (const nodes of counter.values()) {
-    if (nodes.length > 1) res.push(nodes[0])
-  }
-  return res
 }
 
 // 如果是多叉树呢？1948

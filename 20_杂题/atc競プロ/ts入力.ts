@@ -21,11 +21,11 @@ function useInput(debugCase?: string) {
   }
 
   return {
-    input,
+    input
   }
 }
 
-///////////////////////////////////////////
+/// ////////////////////////////////////////
 if (require.main === module) {
   const { input } = useInput(
     `

@@ -13,7 +13,7 @@ class Point:
 
 
 class Solution:
-    def solve(self, n: int, Edge: List[Point], q: int, Query: List[Point]) -> List[int]:
+    def solve(self, n: int, edges: List[Point], q: int, Query: List[Point]) -> List[int]:
         def dfs(cur: int, parent: int) -> None:
             """求dfs序"""
             nonlocal id
@@ -28,7 +28,7 @@ class Solution:
         # 每次操作将root根节点的子树上所有权值加x
         # 求q次操作后1-n每个结点的权值
         adjMap = defaultdict(list)
-        for edge in Edge:
+        for edge in edges:
             u, v = edge.x, edge.y
             adjMap[u].append(v)
             adjMap[v].append(u)

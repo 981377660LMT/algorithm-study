@@ -12,7 +12,7 @@
  * 一个树的 节点的坡度 定义即为，该节点左子树的节点之和和右子树节点之和的 差的绝对值
  * 给定一个二叉树，计算 整个树 的坡度 。
  */
-var findTilt = function (root) {
+let findTilt = function (root) {
   if (!root) return 0
   let tilt = 0
 

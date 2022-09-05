@@ -1,6 +1,6 @@
 from typing import List
 from collections import defaultdict
-from TreeManager import TreeManager
+from LCA import LCA
 
 # n<=1000
 
@@ -12,17 +12,17 @@ class Solution:
         for u, v in edges:
             adjMap[u].add(v)
             adjMap[v].add(u)
-        LCA = TreeManager(n, adjMap, root=0, useLCA=True)
+        lca = LCA(n, adjMap, root=0)
 
         # 答案是最(靠下)深的LCA
         res = []
         for root1, root2, root3 in query:
             res.append(
                 max(
-                    LCA.queryLCA(root1, root3),
-                    LCA.queryLCA(root2, root3),
-                    LCA.queryLCA(root1, root2),
-                    key=lambda lca: LCA.depth[lca],  # !按照深度排序
+                    lca.queryLCA(root1, root3),
+                    lca.queryLCA(root2, root3),
+                    lca.queryLCA(root1, root2),
+                    key=lambda x: lca.depth[x],  # !按照深度排序
                 )
             )
         return res

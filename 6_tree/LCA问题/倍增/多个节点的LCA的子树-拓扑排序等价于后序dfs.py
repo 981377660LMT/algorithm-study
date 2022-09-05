@@ -1,6 +1,6 @@
 from collections import defaultdict
 from typing import DefaultDict, Generator, List, Optional, Set
-from TreeManager import TreeManager
+from LCA import LCA
 
 
 def nLCA(tree: DefaultDict[int, Set[int]], values: List[int]) -> int:
@@ -11,13 +11,13 @@ def nLCA(tree: DefaultDict[int, Set[int]], values: List[int]) -> int:
         if left == right:
             return values[left]
         if left + 1 == right:
-            return treeManager.queryLCA(values[left], values[right])
+            return lca.queryLCA(values[left], values[right])
         mid = (left + right) // 2
         leftLCA = merge(left, mid)
         rightLCA = merge(mid + 1, right)
-        return treeManager.queryLCA(leftLCA, rightLCA)
+        return lca.queryLCA(leftLCA, rightLCA)
 
-    treeManager = TreeManager(len(tree), tree, root=0, useLCA=True)
+    lca = LCA(len(tree), tree, root=0)
     return merge(0, len(values) - 1)
 
 

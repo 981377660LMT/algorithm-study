@@ -1,75 +1,62 @@
-from typing import List
-from collections import defaultdict, deque
+from heapq import nlargest
+from typing import List, Tuple
+from collections import deque
 
 
-class Solution:
-    def treeDiameter(self, edges: List[List[int]]) -> int:
-        n = len(edges)
-        adjMap = defaultdict(list)  # 邻接表
-        for x, y in edges:  # 初始化邻接表，建图
-            adjMap[x].append(y)
-            adjMap[y].append(x)
-
-        queue = deque([0])
-        visited = [False for _ in range(n + 1)]
-        visited[0] = True
-        lastVisited = 0  # 全局变量，好记录第一次BFS最后一个点的ID
-        while queue:
-            curLen = len(queue)
-            for _ in range(curLen):
-                lastVisited = queue.popleft()
-                for next in adjMap[lastVisited]:
-                    if not visited[next]:
-                        visited[next] = True
-                        queue.append(next)
-
-        visited = [False for _ in range(n + 1)]
-        queue = deque([lastVisited])  # 第一次最后一个点，作为第二次BFS的起点
-        visited[lastVisited] = True
-        level = -1  # 记好距离
-        while queue:
-            curLen = len(queue)
-            for _ in range(curLen):
-                cur = queue.popleft()
-                for next in adjMap[cur]:
-                    if not visited[next]:
-                        visited[next] = True
-                        queue.append(next)
-            level += 1
-
-        return level
-
-
-def getDiameter(adjList: List[List[int]], start: int) -> int:
+def calDiameter1(adjList: List[List[int]], start: int) -> Tuple[int, Tuple[int, int]]:
+    """bfs计算树的直径长度和直径两端点"""
     queue = deque([start])
     visited = set([start])
-    lastVisited = 0  # 全局变量，好记录第一次BFS最后一个点的ID
+    last1 = 0  # 第一次BFS最后一个点
     while queue:
-        curLen = len(queue)
-        for _ in range(curLen):
-            lastVisited = queue.popleft()
-            for next in adjList[lastVisited]:
+        len_ = len(queue)
+        for _ in range(len_):
+            last1 = queue.popleft()
+            for next in adjList[last1]:
                 if next not in visited:
                     visited.add(next)
                     queue.append(next)
 
-    queue = deque([lastVisited])  # 第一次最后一个点，作为第二次BFS的起点
-    visited = set([lastVisited])
-    level = -1  # 记好距离
+    queue = deque([last1])  # 第一次最后一个点作为第二次BFS的起点
+    visited = set([last1])
+    last2 = 0  # 第二次BFS最后一个点
+    res = -1
     while queue:
-        curLen = len(queue)
-        for _ in range(curLen):
-            cur = queue.popleft()
-            for next in adjList[cur]:
+        len_ = len(queue)
+        for _ in range(len_):
+            last2 = queue.popleft()
+            for next in adjList[last2]:
                 if next not in visited:
                     visited.add(next)
                     queue.append(next)
-        level += 1
+        res += 1
 
-    return level
+    return res, tuple(sorted([last1, last2]))
 
 
-print(Solution().treeDiameter(edges=[[0, 1], [1, 2], [2, 3], [1, 4], [4, 5]]))
-# 输出：4
-# 解释：
-# 这棵树上最长的路径是 3 - 2 - 1 - 4 - 5，边数为 4。
+def calDiameter2(adjList: List[List[int]], start: int) -> int:
+    """dfs计算树的直径长度"""
+
+    def dfs(cur: int, pre: int) -> int:
+        nonlocal res
+        cands = [0, 0]
+        for next in adjList[cur]:
+            if next != pre:
+                cands.append(dfs(next, cur))
+        max1, max2 = nlargest(2, cands)
+        res = max(res, max1 + max2)
+        return max(max1, max2) + 1
+
+    res = 0
+    dfs(start, -1)
+    return res
+
+
+if __name__ == "__main__":
+    edges = [[0, 1], [1, 2], [2, 3]]
+    adjList = [[] for _ in range(4)]
+    for u, v in edges:
+        adjList[u].append(v)
+        adjList[v].append(u)
+    assert calDiameter1(adjList, 0) == (3, (0, 3))
+    assert calDiameter2(adjList, 0) == 3

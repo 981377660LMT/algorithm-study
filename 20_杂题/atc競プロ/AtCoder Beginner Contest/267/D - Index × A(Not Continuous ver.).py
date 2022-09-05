@@ -27,7 +27,7 @@ nums = list(map(int, input().split()))
 # memo = [-INF] * (n + 1) * (n + 1)
 # print(dfs(0, 0))
 
-# TODO dp有些不熟
+# dp[i][j] 为前i个数中, 选择了j个数的方案数
 dp = [[-INF] * (m + 1) for _ in range(n + 1)]
 dp[0][0] = 0
 for i in range(1, n + 1):
