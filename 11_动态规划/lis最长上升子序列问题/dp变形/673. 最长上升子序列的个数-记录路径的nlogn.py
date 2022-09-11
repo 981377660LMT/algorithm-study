@@ -31,7 +31,7 @@ from collections import defaultdict
 class BIT:
     """单点修改"""
 
- def __init__(self, n: int):
+    def __init__(self, n: int):
         self.size = n
         self.tree = defaultdict(int)
 
@@ -54,6 +54,7 @@ class BIT:
     def queryRange(self, left: int, right: int) -> int:
         return self.query(right) - self.query(left - 1)
 
+
 class Discretizer:
     """离散化"""
 
@@ -63,7 +64,7 @@ class Discretizer:
 
     def getDiscretizedValue(self, num: int) -> int:
         if num not in self.mapping:
-            raise ValueError(f'{num} not in {self.mapping}')
+            raise ValueError(f"{num} not in {self.mapping}")
         return self.mapping[num]
 
     def __len__(self) -> int:

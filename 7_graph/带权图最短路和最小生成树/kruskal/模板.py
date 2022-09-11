@@ -10,7 +10,7 @@ from typing import (
     TypeVar,
 )
 
-T = TypeVar("T")
+T = TypeVar("T", bound=Hashable)
 
 
 class UnionFindMap(Generic[T]):
@@ -69,21 +69,23 @@ class UnionFindMap(Generic[T]):
 P = TypeVar("P", bound=Hashable)
 
 
-def kruskal(n: int, edges: List[Tuple[P, P, int]]) -> int:
-    """求最小生成树权值
+def kruskal(n: int, edges: List[Tuple[P, P, int]]) -> Tuple[int, List[Tuple[P, P, int]]]:
+    """求最小生成树权值与最小生成树的边
 
     1. 边权排序
     2. 两两连接不连通的点
     """
     uf = UnionFindMap[P]()
-    res, hit = 0, 0
+    cost, res = 0, []
 
     edges = sorted(edges, key=lambda e: e[2])
     for u, v, w in edges:
         root1, root2 = uf.find(u), uf.find(v)
         if root1 != root2:
-            res += w
+            cost += w
             uf.union(root1, root2)
-            hit += 1
+            res.append((u, v, w))
 
-    return res if hit == n - 1 else int(1e20)
+    if len(res) != n - 1:
+        return -1, []
+    return cost, res

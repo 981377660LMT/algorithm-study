@@ -2,7 +2,7 @@
  * @param {number[]} nums
  * @return {number}
  */
-var removeDuplicates = function (nums) {
+let removeDuplicates = function (nums) {
   const K = 2
   let slow = 0
   let fast = 0

@@ -84,9 +84,10 @@ class UnionFindArray:
         self.rank = [1] * n
 
     def find(self, x: int) -> int:
-        if x != self.parent[x]:
-            self.parent[x] = self.find(self.parent[x])
-        return self.parent[x]
+        while self.parent[x] != x:
+            self.parent[x] = self.parent[self.parent[x]]
+            x = self.parent[x]
+        return x
 
     def union(self, x: int, y: int) -> bool:
         """rank一样时 默认key2作为key1的父节点"""

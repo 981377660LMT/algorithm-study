@@ -17,7 +17,7 @@ class Solution:
         def getPath(
             root1: int, root2: int, level: DefaultDict[int, int], parent: DefaultDict[int, int]
         ) -> Set[int]:
-            """求两个结点间的路径，不断上跳到LCA并记录经过的结点"""
+            """求两个结点间的路径,不断线性上跳到LCA并记录经过的结点"""
             res = {root1, root2}
             if level[root1] < level[root2]:
                 root1, root2 = root2, root1

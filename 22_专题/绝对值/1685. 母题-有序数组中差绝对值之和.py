@@ -11,9 +11,9 @@ class Solution:
         n = len(nums)
         preSum = [0] + list(accumulate(nums))
         res = []
-        for pos, num in enumerate(nums):
-            leftSum = num * pos - preSum[pos]
-            rightSum = preSum[-1] - preSum[pos] - num * (n - pos)
+        for i, num in enumerate(nums):
+            leftSum = num * i - preSum[i]
+            rightSum = preSum[n] - preSum[i] - num * (n - i)
             res.append(leftSum + rightSum)
         return res
 

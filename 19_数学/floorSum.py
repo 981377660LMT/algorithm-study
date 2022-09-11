@@ -28,4 +28,3 @@ T = int(input())
 for _ in range(T):
     N, M, A, B = map(int, input().split())
     print(floorSum(N, M, A, B))
-

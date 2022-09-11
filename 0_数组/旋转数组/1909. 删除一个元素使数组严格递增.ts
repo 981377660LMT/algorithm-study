@@ -1,8 +1,10 @@
-// 如果 恰好 删除 一个 元素后，数组 严格递增 ，那么请你返回 true
+// 如果 恰好 删除 一个 元素后，数组 严格递增 ，
+// 那么请你返回 true
 
-// 找到第一对不满足单调递增的，必然要删除一个。分别判断删除后是否单调递增即可。
+// !找到第一对不满足单调递增的，必然要删除一个。
+// 分别判断删除后是否单调递增即可。
 function canBeIncreasing(nums: number[]): boolean {
-  let breakPoint = Infinity
+  let breakPoint = -1
 
   for (let i = 0; i < nums.length - 1; i++) {
     if (nums[i] >= nums[i + 1]) {
@@ -11,7 +13,7 @@ function canBeIncreasing(nums: number[]): boolean {
     }
   }
 
-  if (breakPoint === Infinity) return true
+  if (breakPoint === -1) return true
 
   return (
     check(nums.filter((_, i) => i !== breakPoint)) ||

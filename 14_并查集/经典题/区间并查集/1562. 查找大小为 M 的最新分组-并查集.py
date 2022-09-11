@@ -7,27 +7,27 @@ class UnionFind:
     """区间并查集维护各个区域的sum值"""
 
     def __init__(self, n: int):
-        self.n = n
         self.part = n
-        self.parent = list(range(n))
-        self.size = [1] * n
         self.partSum = [0] * n
-        self.partSumCounter = defaultdict(int)
+        self.partSumCounter = defaultdict(int)  # 每种partSum的个数
+        self._n = n
+        self._parent = list(range(n))
+        self._size = [1] * n
 
     def find(self, x: int) -> int:
-        if x != self.parent[x]:
-            self.parent[x] = self.find(self.parent[x])
-        return self.parent[x]
+        if x != self._parent[x]:
+            self._parent[x] = self.find(self._parent[x])
+        return self._parent[x]
 
     def union(self, x: int, y: int) -> bool:
         rootX = self.find(x)
         rootY = self.find(y)
         if rootX == rootY:
             return False
-        if self.size[rootX] > self.size[rootY]:
+        if self._size[rootX] > self._size[rootY]:
             rootX, rootY = rootY, rootX
-        self.parent[rootX] = rootY
-        self.size[rootY] += self.size[rootX]
+        self._parent[rootX] = rootY
+        self._size[rootY] += self._size[rootX]
         preSum1, preSum2 = self.partSum[rootX], self.partSum[rootY]
         self.partSum[rootY] += self.partSum[rootX]
         self.partSumCounter[preSum1] -= 1
@@ -58,10 +58,8 @@ class Solution:
         正向并查集记录每组1的长度
         """
         n = len(arr)
-        if m == n:
-            return n
-        visited = [False] * n
         uf = UnionFind(n)
+        visited = [False] * n
         res = -1
         for i, pos in enumerate(arr, 1):
             pos -= 1

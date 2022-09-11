@@ -1,12 +1,13 @@
-from typing import Deque, List, Tuple
-from collections import deque
-
-INF = int(1e20)
 # 1 <= A.length <= 50000
 # 带限制的子数组/序列问题
 # 1.如果数组中的数据均为非负数的话，那么就对应常规的子数组和问题，可以使用滑动窗口来解决
 # 209. 长度最小的子数组
 # 但是添加了负数之后，窗口的滑动便丢失了单向性，因此无法使用滑动窗口解决。
+
+from typing import Deque, List, Tuple
+from collections import deque
+
+INF = int(1e20)
 Index = int
 PreSum = int
 

@@ -23,7 +23,7 @@ class Solution:
         for max_, num in robots:
             curSum += num
             heappush(pq, -num)
-            while max_ + curSum * len(pq) > budget:
+            while pq and max_ + curSum * len(pq) > budget:
                 curSum += heappop(pq)
             res = max(res, len(pq))
         return res

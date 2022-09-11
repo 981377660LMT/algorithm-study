@@ -1,5 +1,7 @@
-import { BinaryTree, bt } from '../Tree'
-import { deserializeNode } from '../构建类/297.二叉树的序列化与反序列化'
+/* eslint-disable no-param-reassign */
+
+import { deserializeNode } from '../../重构json/297.二叉树的序列化与反序列化'
+import { BinaryTree } from '../Tree'
 
 /**
  * @param {BinaryTree} root
@@ -9,20 +11,22 @@ import { deserializeNode } from '../构建类/297.二叉树的序列化与反序
  * @description 删除不在[low,high区间的节点]
  * @description 自底向上 后序
  */
-const trimBST = function (root: BinaryTree | null, low: number, high: number): BinaryTree | null {
-  if (!root) return null
-  if (root.val > high) {
-    // skip and go left
-    return trimBST(root.left, low, high)
-  } else if (root.val < low) {
-    // skip and go right
-    return trimBST(root.right, low, high)
-  } else {
-    // connect left and right child to the next qualified node
-    root.left = trimBST(root.left, low, high)
-    root.right = trimBST(root.right, low, high)
-    return root
+function trimBST(root: BinaryTree | null, low: number, high: number): BinaryTree | null {
+  if (!root) {
+    return null
   }
+
+  if (root.val > high) {
+    return trimBST(root.left, low, high)
+  }
+
+  if (root.val < low) {
+    return trimBST(root.right, low, high)
+  }
+
+  root.left = trimBST(root.left, low, high)
+  root.right = trimBST(root.right, low, high)
+  return root
 }
 
 console.dir(trimBST(deserializeNode([5, 3, 6, 2, 4, null, 7])!, 2, 4), { depth: null })

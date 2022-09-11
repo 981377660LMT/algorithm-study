@@ -4,9 +4,10 @@ from typing import List
 # 每行和每列元素均按升序排序 => 从左下角开始寻找，二分
 # 每行均按升序排序，列不一定升序排序 => 每行多路归并
 
-
+# 有序矩阵中第k小的元素
 class Solution:
     def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
+        """多路归并"""
         n = len(matrix)
         pq = [(matrix[i][0], i, 0) for i in range(n)]
         heapify(pq)
@@ -16,10 +17,10 @@ class Solution:
             if y != n - 1:
                 heappush(pq, (matrix[x][y + 1], x, y + 1))
 
-        return heappop(pq)[0]
+        return pq[0][0]
 
     def kthSmallest2(self, matrix: List[List[int]], k: int) -> int:
-        n = len(matrix)
+        """二分"""
 
         def countNGT(mid: int) -> int:
             row, col = n - 1, 0
@@ -32,6 +33,7 @@ class Solution:
                     row -= 1
             return res
 
+        n = len(matrix)
         left, right = matrix[0][0], matrix[-1][-1]
         while left <= right:
             mid = (left + right) // 2

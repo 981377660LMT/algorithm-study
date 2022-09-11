@@ -3,14 +3,15 @@ from typing import Optional
 
 class TreeNode:
     def __init__(
-        self, val: int = 0, left: Optional['TreeNode'] = None, right: Optional['TreeNode'] = None
+        self, val: int = 0, left: Optional["TreeNode"] = None, right: Optional["TreeNode"] = None
     ):
         self.val = val
         self.left = left
         self.right = right
 
 
-# 返回给定节点 p 和 q 的最近公共祖先（LCA）节点。如果 p 或 q 之一 不存在 于该二叉树中，返回 null
+# 返回给定节点 p 和 q 的最近公共祖先（LCA）节点。
+# 如果 p 或 q 之一 不存在 于该二叉树中，返回 null
 # 在不检查节点是否存在的情况下，你可以遍历树找出最近公共祖先节点吗？
 
 # 1.先判断pq都在不在树里
@@ -18,7 +19,7 @@ class TreeNode:
 
 
 class Solution:
-    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+    def lowestCommonAncestor(self, root: "TreeNode", p: "TreeNode", q: "TreeNode") -> "TreeNode":
         # 先判断p和q是不是都在树中
         self.flag_p, self.flag_q = False, False
         self.checkExist(root, p, q)
@@ -47,4 +48,3 @@ class Solution:
         if not R:
             return L
         return root
-

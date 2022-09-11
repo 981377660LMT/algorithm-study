@@ -17,7 +17,7 @@ class XORTrie {
   }
 
   insert(num: number) {
-    let root = this.root
+    let { root } = this
     for (let i = this.N; ~i; i--) {
       const bit = (num >> i) & 1
       if (!root.children[bit]) {
@@ -40,7 +40,7 @@ class XORTrie {
    * 同时将字典树偏移到另一个分支。
    */
   search(num: number, high: number) {
-    let root: TrieNode | undefined = this.root
+    let { root } = this
     let res = 0
 
     for (let i = this.N; ~i; i--) {

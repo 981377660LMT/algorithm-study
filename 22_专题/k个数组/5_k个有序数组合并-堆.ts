@@ -8,7 +8,7 @@ const mergeK = (...arrs: number[][]): number[] => {
       tmp.push(num)
     }
   }
-  const pq = PriorityQueue.createPriorityQueue({ heap: tmp })
+  const pq = PriorityQueue.create({ heap: tmp })
   pq.heapify()
 
   while (pq.length) {

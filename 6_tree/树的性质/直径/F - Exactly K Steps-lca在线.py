@@ -5,6 +5,7 @@
 
 q 个查询 询问距离树结点u距离为k的结点是否存在,并输出一个这样的结点
 
+lca在线:
 https://zhuanlan.zhihu.com/p/561041985
 k的最大值来自于u到直径的两个端点
 寻找直径+倍增求树节点的第K个祖先
@@ -163,7 +164,7 @@ if __name__ == "__main__":
             print(-1)
             continue
         if dist1 > dist2:
-            left, right = right, left  # 保证right是离u最近的点
+            left, right = right, left  # 保证right是离u最远的点
             dist1, dist2 = dist2, dist1
         if k <= lca.queryDist(u, lca.queryLCA(u, right)):  # 在u到right的路径左半部分
             print(lca.queryKthAncestor(u, k) + 1)

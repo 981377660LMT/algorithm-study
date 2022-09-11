@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ArrayDeque } from '../../2_queue/Deque/ArrayDeque'
 
 /**
@@ -15,7 +16,7 @@ function maxResult(nums: number[], k: number): number {
   const n = nums.length
   const queue = new ArrayDeque<[sum: number, index: number]>()
   queue.push([nums[0], 0])
-  let res = nums[0] // 以当前元素结尾的最大值
+  let res = nums[0] // !以当前元素结尾的最大值
 
   for (let i = 1; i < n; i++) {
     while (queue.length && i - queue.at(0)![1] > k) queue.shift()

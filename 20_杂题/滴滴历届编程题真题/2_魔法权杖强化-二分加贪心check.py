@@ -3,38 +3,33 @@
 # 权杖可以强化，一次强化可以将`两颗相邻`的法术石融合为一颗，
 # 融合后的能量值为这两颗法术石能量值之和。现在有 m 次强化的机会，
 # 请问权杖能 强化到的最大法术强度是多少？
+# !n,m<=1e5
+
+import sys
+
+sys.setrecursionlimit(int(1e9))
+input = lambda: sys.stdin.readline().rstrip("\r\n")
+MOD = 998244353
+INF = int(4e18)
+
 
 n, m = map(int, input().split())
 nums = list(map(int, input().split()))
 
 
 def check(mid: int) -> bool:
-    """贪心,遇到不行的就向右合并"""
-    chance = m
-    left = 0
-    while left < len(nums):
-        cur = nums[left]
-        right = left + 1
-        while right < len(nums) and cur < mid:
-            if chance <= 0:
-                return False
-            cur += nums[right]
-            right += 1
-            chance -= 1
-        left = right
-    if cur >= mid:
-        return True
-    # 最后一块仍可合并
-    return chance >= 1
+    """强化到的最大法术强度是否能达到 mid"""
+
+    # 相邻元素合并(消除)用栈
+    ...
 
 
-l, r = min(nums), sum(nums)
-
-while l <= r:
-    mid = (l + r) >> 1
+left, right = min(nums), sum(nums)
+while left <= right:
+    mid = (left + right) // 2
     if check(mid):
-        l = mid + 1
+        left = mid + 1
     else:
-        r = mid - 1
+        right = mid - 1
 
-print(r)
+print(right)

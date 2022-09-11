@@ -2,7 +2,7 @@ from typing import List, Tuple
 from collections import defaultdict
 from heapq import heappop, heappush
 
-# 请规划一条可行路线使得他可以以最小的换乘次数到达目的站点。若有多条路线满足要求，请返回字典序最小的路线（要求路线上无重复的站点）。
+# 请规划一条可行的地铁路线使得他可以以最小的换乘次数到达目的站点。若有多条路线满足要求，请返回字典序最小的路线（要求路线上无重复的站点）。
 # 如何建图?
 # 1. 建图:dict套dict
 # 2. bfs:队列记录(路径、转换数、上一个车站)

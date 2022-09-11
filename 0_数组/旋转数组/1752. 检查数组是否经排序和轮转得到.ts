@@ -1,5 +1,3 @@
-import { isFlipedString } from './01.09. 字符串轮转'
-
 // 小技巧，搜索前对字符串变换
 // 1764. 通过连接另一个数组的子数组得到一个数组
 // function check(nums: number[]): boolean {

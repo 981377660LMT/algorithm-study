@@ -17,18 +17,18 @@ class MonoQueue:
     @property
     def min(self) -> int:
         if not self.minQueue:
-            raise ValueError('monoQueue is empty')
+            raise ValueError("monoQueue is empty")
         return self.minQueue[0][0]
 
     @property
     def max(self) -> int:
         if not self.maxQueue:
-            raise ValueError('monoQueue is empty')
+            raise ValueError("monoQueue is empty")
         return self.maxQueue[0][0]
 
     def popleft(self) -> int:
         if not self.rawQueue:
-            raise IndexError('popleft from empty queue')
+            raise IndexError("popleft from empty queue")
 
         self.minQueue[0][-1] -= 1
         if self.minQueue[0][-1] == 0:
@@ -65,7 +65,7 @@ class MonoQueue:
         return self.rawQueue[index]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     monoQueue = MonoQueue()
     monoQueue.append(1)
     monoQueue.append(2)
@@ -77,4 +77,3 @@ if __name__ == '__main__':
     monoQueue.append(0)
     assert len(monoQueue) == 3
     assert monoQueue[0] == 2
-

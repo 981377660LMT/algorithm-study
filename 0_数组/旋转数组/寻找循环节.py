@@ -4,8 +4,6 @@
 from typing import Tuple
 
 # 1.
-
-
 class Solution:
     def findRepetend(self, s: str) -> Tuple[bool, str]:
         """是否存在循环节"""

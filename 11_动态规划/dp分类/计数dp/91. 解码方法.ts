@@ -1,10 +1,13 @@
+/* eslint-disable func-names */
 /**
  * @param {string} s
  * @return {number}
- * @description 请计算并返回 解码 方法的 总数
+ * @description 请计算并返回 解码 方法的 总数 (消息解码)
  */
-const numDecodings = function (s: string): number {
-  if (s.length === 0 || s[0] === '0') return 0
+function numDecodings(s: string): number {
+  if (s.length === 0 || s[0] === '0') {
+    return 0
+  }
 
   const n = s.length
   const dp = new Uint32Array(n + 1)
@@ -27,4 +30,7 @@ const numDecodings = function (s: string): number {
 }
 
 console.log(numDecodings('226'))
+console.log(numDecodings('131113'))
+console.log(numDecodings('111311131113111311131113111311131113111131111311113'))
+
 // 它可以解码为 "BZ" (2 26), "VF" (22 6), 或者 "BBF" (2 2 6) 。

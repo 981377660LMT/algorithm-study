@@ -6,7 +6,7 @@ import { MinHeap } from '../8_heap/MinHeap'
 class PriorityQueue<Item = number> {
   private minHeap: MinHeap<Item>
 
-  static createPriorityQueue<Item = number>({
+  static create<Item = number>({
     comparator = MinHeap.defaultComparator,
     volumn = Infinity,
     heap = []

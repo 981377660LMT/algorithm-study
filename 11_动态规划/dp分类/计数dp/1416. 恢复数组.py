@@ -15,7 +15,7 @@ class Solution:
         def dfs(index: int):
             if index == len(s):
                 return 1
-            if s[index] == '0':
+            if s[index] == "0":
                 return 0
 
             res = 0
@@ -34,4 +34,3 @@ class Solution:
 print(Solution().numberOfArrays(s="1317", k=2000))
 # 输出：8
 # 解释：可行的数组方案为 [1317]，[131,7]，[13,17]，[1,317]，[13,1,7]，[1,31,7]，[1,3,17]，[1,3,1,7]
-

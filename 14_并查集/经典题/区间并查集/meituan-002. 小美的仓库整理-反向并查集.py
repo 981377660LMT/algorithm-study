@@ -52,7 +52,7 @@ class UnionFind:
 
 class Solution:
     def maximumSegmentSum(self, nums: List[int], removeQueries: List[int]) -> List[int]:
-        """倒序"""
+        """倒序添加元素，检查左右邻居是否可以合并"""
         n = len(nums)
         uf = UnionFind(n)
         visited = [False] * n

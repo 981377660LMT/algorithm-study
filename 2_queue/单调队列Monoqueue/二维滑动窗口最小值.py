@@ -90,7 +90,7 @@ print(windowMax2D(matrix=[[1, 2, 3], [5, 3, 2], [1, 0, 9]], k=2, isMin=True))
 
 class Solution2:
     def solve(self, matrix: List[List[int]], k: int) -> List[List[int]]:
-        """有一个 a×b 的整数组成的矩阵，现请你从中找出一个 n×n 的正方形区域，使得该区域所有数中的最大值和最小值的差最小"""
+        """有一个 a×b 的整数组成的矩阵，现请你从中找出一个 k×k 的正方形区域，使得该区域所有数中的最大值和最小值的差最小"""
         row, col = len(matrix), len(matrix[0])
         cols = [MonoQueue() for _ in range(col)]
         for r in range(k):

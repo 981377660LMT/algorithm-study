@@ -1,3 +1,6 @@
+/* eslint-disable eqeqeq */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 type TrieNode = [zero: TrieNode | undefined, one: TrieNode | undefined, count: number]
 type Binary = 0 | 1
 
@@ -8,7 +11,7 @@ type Binary = 0 | 1
 function useArrayXORTrie(bitLength = 31) {
   const trieRoot: TrieNode = [undefined, undefined, 0]
 
-  const insert = (num: number): void => {
+  function insert(num: number): void {
     let root: TrieNode = trieRoot
 
     for (let i = bitLength; ~i; i--) {
@@ -22,7 +25,7 @@ function useArrayXORTrie(bitLength = 31) {
     }
   }
 
-  const search = (num: number): number => {
+  function search(num: number): number {
     let root: TrieNode = trieRoot
     let res = 0
 
@@ -35,7 +38,7 @@ function useArrayXORTrie(bitLength = 31) {
         res = (res << 1) | 1
         root = root[needBit]!
       } else if (root[bit] != undefined && root[bit]![2] > 0) {
-        res = res << 1
+        res <<= 1
         root = root[bit]!
       }
     }
@@ -43,7 +46,7 @@ function useArrayXORTrie(bitLength = 31) {
     return res
   }
 
-  const remove = (num: number): void => {
+  function remove(num: number): void {
     let root = trieRoot
 
     for (let i = bitLength; ~i; i--) {
@@ -56,7 +59,7 @@ function useArrayXORTrie(bitLength = 31) {
   return {
     insert,
     search,
-    remove,
+    remove
   }
 }
 

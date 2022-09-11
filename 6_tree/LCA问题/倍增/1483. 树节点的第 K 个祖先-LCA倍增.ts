@@ -16,7 +16,6 @@ class TreeAncestor {
   private readonly _MAXJ: number
 
   /**
-   *
    * @param n  节点个数
    * @param parent  树以父节点数组的形式给出，其中 parent[i] 是节点 i 的父节点。树的根节点是编号为 0 的节点。
    */
@@ -35,7 +34,6 @@ class TreeAncestor {
   }
 
   /**
-   *
    * @param node
    * @param k 1 <= k <= n <= 5*10^4
    * @returns 函数返回节点 node 的第 k 个祖先节点。如果不存在这样的祖先节点，返回 -1
@@ -46,7 +44,7 @@ class TreeAncestor {
     let bit = 0
     while (k) {
       if (k & 1) node = this._dp[bit][node]
-      if (node === -1) break
+      if (node === -1) return -1
       bit++
       k >>>= 1
     }

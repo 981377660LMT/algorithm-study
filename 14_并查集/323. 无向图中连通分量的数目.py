@@ -9,7 +9,7 @@ from typing import DefaultDict, List
 class UnionFindArray:
     def __init__(self, n: int):
         self.n = n
-        self.count = n
+        self.part = n
         self.parent = list(range(n))
         self.rank = [1] * n
 
@@ -27,7 +27,7 @@ class UnionFindArray:
             rootX, rootY = rootY, rootX
         self.parent[rootX] = rootY
         self.rank[rootY] += self.rank[rootX]
-        self.count -= 1
+        self.part -= 1
         return True
 
     def isConnected(self, x: int, y: int) -> bool:
@@ -40,6 +40,15 @@ class UnionFindArray:
             groups[root].append(key)
         return groups
 
+    def getRoots(self) -> List[int]:
+        return list(set(self.find(key) for key in self.parent))
+
+    def __repr__(self) -> str:
+        return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
+
+    def __len__(self) -> int:
+        return self.part
+
 
 class Solution:
     def countComponents2(self, n: int, edges: List[List[int]]) -> int:
@@ -47,7 +56,7 @@ class Solution:
         uf = UnionFindArray(n)
         for edge in edges:
             uf.union(edge[0], edge[1])
-        return uf.count
+        return uf.part
 
     def countComponents(self, n: int, edges: List[List[int]]) -> int:
         """dfs求无向图连通分量"""

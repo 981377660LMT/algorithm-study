@@ -1,4 +1,3 @@
-# 注意如果要js写的话 需要bigint
 # !时间复杂度O(n^3logk)
 
 from typing import List
@@ -15,27 +14,32 @@ def mul(m1: Matrix, m2: Matrix, mod: int) -> Matrix:
     for r in range(ROW):
         for c in range(COL):
             for i in range(ROW):
-                res[r][c] += m1[r][i] * m2[i][c]
-                res[r][c] %= mod
+                res[r][c] = (res[r][c] + m1[r][i] * m2[i][c]) % mod
 
     return res
 
 
-# 普通的矩阵快速幂
 def matqpow1(base: Matrix, exp: int, mod: int) -> Matrix:
     """矩阵快速幂"""
 
-    ROW, COL = len(base), len(base[0])
-    res = [[0] * COL for _ in range(ROW)]
-    for r in range(ROW):
-        res[r][r] = 1
+    def inner(base: Matrix, exp: int, mod: int) -> Matrix:
+        ROW, COL = len(base), len(base[0])
+        res = [[0] * COL for _ in range(ROW)]
+        for r in range(ROW):
+            res[r][r] = 1
 
-    while exp:
-        if exp & 1:
-            res = mul(res, base, mod)
-        exp //= 2
-        base = mul(base, base, mod)
-    return res
+        bit = 0
+        while exp:
+            if exp & 1:
+                res = mul(res, pow2[bit], mod)
+            exp //= 2
+            bit += 1
+            if bit == len(pow2):
+                pow2.append(mul(pow2[-1], pow2[-1], mod))
+        return res
+
+    pow2 = [base]
+    return inner(base, exp, mod)
 
 
 ######################################################################
@@ -47,15 +51,21 @@ import numpy as np
 def matqpow2(base: np.ndarray, exp: int, mod: int) -> np.ndarray:
     """np矩阵快速幂"""
 
-    base = base.copy()
-    res = np.eye(*base.shape, dtype=np.uint64)
+    def inner(base: np.ndarray, exp: int, mod: int) -> np.ndarray:
+        res = np.eye(*base.shape, dtype=np.uint64)
 
-    while exp:
-        if exp & 1:
-            res = (res @ base) % mod
-        exp //= 2
-        base = (base @ base) % mod
-    return res
+        bit = 0
+        while exp:
+            if exp & 1:
+                res = (res @ pow2[bit]) % mod
+            exp //= 2
+            bit += 1
+            if bit == len(pow2):
+                pow2.append((pow2[-1] @ pow2[-1]) % mod)
+        return res
+
+    pow2 = [base]
+    return inner(base, exp, mod)
 
 
 if __name__ == "__main__":

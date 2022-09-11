@@ -15,53 +15,68 @@
 # !坏的楼梯处
 # !矩阵快速幂中间要打断 每次都直接把dp[i]手动赋值为0 再继续算
 # 总时间复杂度 O(nlogS)
-import gc
+
+
 import sys
-import os
-import numpy as np
 
-gc.disable()
+sys.setrecursionlimit(int(1e9))
+input = lambda: sys.stdin.readline().rstrip("\r\n")
+MOD = 998244353
+INF = int(4e18)
 
-
-input = sys.stdin.readline
-MOD = np.uint64(998244353)
-
-
-NPArray = np.ndarray
+from typing import List
 
 
-def matqpow2(base: NPArray, exp: int, mod: np.uint64) -> NPArray:
-    """矩阵快速幂np版"""
+Matrix = List[List[int]]
 
-    base = base.copy()
-    res = np.eye(*base.shape, dtype=np.uint64)
 
-    while exp:
-        if exp & 1:
-            res = (res @ base) % mod
-        exp //= 2
-        base = (base @ base) % mod
+def mul(m1: Matrix, m2: Matrix, mod: int) -> Matrix:
+    """矩阵相乘"""
+    ROW, COL = len(m1), len(m2[0])
+
+    res = [[0] * COL for _ in range(ROW)]
+    for r in range(ROW):
+        for c in range(COL):
+            for i in range(ROW):
+                res[r][c] = (res[r][c] + m1[r][i] * m2[i][c]) % mod
+
     return res
 
 
-def main() -> None:
-    _, s = map(int, input().split())
-    bad = list(map(int, input().split()))
-    res = np.array([[1], [0], [0]], np.uint64)  # 3 x 1 答案矩阵
-    trans = np.array([[1, 0, 1], [1, 0, 1], [0, 1, 0]], np.uint64)
-    pre = 0
-    for cur in bad:
-        res = (matqpow2(trans, cur - pre, MOD) @ res) % MOD
-        res[0][0] = 0  # 坏的楼梯不能走
-        pre = cur
+def matqpow1(base: Matrix, exp: int, mod: int) -> Matrix:
+    """矩阵快速幂"""
 
-    res = (matqpow2(trans, s - bad[-1], MOD) @ res) % MOD
-    print(int(res[0][0]))
+    def inner(base: Matrix, exp: int, mod: int) -> Matrix:
+        ROW, COL = len(base), len(base[0])
+        res = [[0] * COL for _ in range(ROW)]
+        for r in range(ROW):
+            res[r][r] = 1
+
+        bit = 0
+        while exp:
+            if exp & 1:
+                res = mul(res, pow2[bit], mod)
+            exp //= 2
+            bit += 1
+            if bit == len(pow2):
+                pow2.append(mul(pow2[-1], pow2[-1], mod))
+        return res
+
+    pow2 = [base]
+    return inner(base, exp, mod)
 
 
-if __name__ == "__main__":
-    if os.environ.get("USERNAME", " ") == "caomeinaixi":
-        while True:
-            main()
-    else:
-        main()
+_, s = map(int, input().split())
+bad = list(map(int, input().split()))
+res = [[1], [0], [0]]  # 3 x 1 答案矩阵
+trans = [[1, 0, 1], [1, 0, 1], [0, 1, 0]]
+pre = 0
+for cur in bad:
+    resT = matqpow1(trans, cur - pre, MOD)
+    res = mul(resT, res, MOD)
+    res[0][0] = 0  # 坏的楼梯不能走
+    pre = cur
+
+resT = matqpow1(trans, s - bad[-1], MOD)
+res = mul(resT, res, MOD)
+print(int(res[0][0]))

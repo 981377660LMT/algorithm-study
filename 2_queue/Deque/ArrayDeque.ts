@@ -1,8 +1,10 @@
+/* eslint-disable generator-star-spacing */
 /* eslint-disable no-param-reassign */
+
 import assert from 'assert'
 
 /**
- * @description 循环数组实现，慢数组动态扩容
+ * 循环数组实现，慢数组动态扩容
  */
 class ArrayDeque<T = number> {
   length: number

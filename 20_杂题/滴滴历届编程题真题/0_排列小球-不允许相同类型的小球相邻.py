@@ -19,7 +19,7 @@ def dfs(pre: int, np: int, nq: int, nr: int) -> int:
     return res
 
 
-np, nq, nr = [int(x) for x in input().split()]
+np, nq, nr = map(int, input().split())
 res = 0
 if np > 0:
     res += dfs(0, np - 1, nq, nr)
@@ -28,4 +28,3 @@ if nq > 0:
 if nr > 0:
     res += dfs(2, np, nq, nr - 1)
 print(res)
-

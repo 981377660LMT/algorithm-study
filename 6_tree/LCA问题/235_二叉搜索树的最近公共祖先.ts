@@ -11,47 +11,47 @@ const bt: TreeNode = {
     left: {
       val: 0,
       left: null,
-      right: null,
+      right: null
     },
     right: {
       val: 4,
       left: {
         val: 3,
         left: null,
-        right: null,
+        right: null
       },
       right: {
         val: 5,
         left: null,
-        right: null,
-      },
-    },
+        right: null
+      }
+    }
   },
   right: {
     val: 8,
     left: {
       val: 7,
       left: null,
-      right: null,
+      right: null
     },
     right: {
       val: 9,
       left: null,
-      right: null,
-    },
-  },
+      right: null
+    }
+  }
 }
 
 const p: TreeNode = {
   val: 3,
   left: null,
-  right: null,
+  right: null
 }
 
 const q: TreeNode = {
   val: 7,
   left: null,
-  right: null,
+  right: null
 }
 // 给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先。
 // 注意二叉搜索树的性质

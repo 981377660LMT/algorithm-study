@@ -24,8 +24,7 @@ def getNext(needle: str) -> List[int]:
 
 class Solution:
     def repeatedSubstringPattern(self, s: str) -> bool:
-        """给定一个非空的字符串 s ，检查是否可以通过由它的一个子串重复多次构成。
-        """
+        """给定一个非空的字符串 s ，检查是否可以通过由它的一个子串重复多次构成。"""
         nexts = getNext(s)
         lps = nexts[-1]
         return lps != 0 and len(s) % (len(s) - lps) == 0
@@ -38,4 +37,3 @@ class Solution:
         return False
 
         return (s + s).find(s, 1) != len(s)
-

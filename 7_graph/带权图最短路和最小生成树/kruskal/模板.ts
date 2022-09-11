@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { useUnionFindMap } from '../../../14_并查集/useUnionFind'
 
 type KruskalEdge<V = unknown> = [u: V, v: V, weight: number]

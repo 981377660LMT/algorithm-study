@@ -3,21 +3,21 @@
 from collections import defaultdict
 from functools import lru_cache
 from heapq import heappop, heappush
-from typing import DefaultDict, Hashable, List, Optional, TypeVar, overload
+from typing import DefaultDict, Hashable, List, Mapping, Optional, TypeVar, overload
 
 INF = int(1e20)
 Vertex = TypeVar("Vertex", bound=Hashable)
-Graph = DefaultDict[Vertex, DefaultDict[Vertex, int]]
+Graph = Mapping[Vertex, Mapping[Vertex, int]]
 
 
-# @overload
-# def dijkstra(adjMap: Graph[Vertex], start: Vertex) -> DefaultDict[Vertex, int]:
-#     ...
+@overload
+def dijkstra(adjMap: Graph[Vertex], start: Vertex) -> DefaultDict[Vertex, int]:
+    ...
 
 
-# @overload
-# def dijkstra(adjMap: Graph[Vertex], start: Vertex, end: Vertex) -> int:
-#     ...
+@overload
+def dijkstra(adjMap: Graph[Vertex], start: Vertex, end: Vertex) -> int:
+    ...
 
 
 def dijkstra(adjMap: Graph[Vertex], start: Vertex, end: Optional[Vertex] = None):
@@ -42,7 +42,7 @@ def dijkstra(adjMap: Graph[Vertex], start: Vertex, end: Optional[Vertex] = None)
 
 ##########################################################################
 def dijkstra2(
-    n: int, adjMap: DefaultDict[int, DefaultDict[int, int]], start: int, end: int
+    n: int, adjMap: Mapping[int, Mapping[int, int]], start: int, end: int
 ) -> List[List[int]]:
     """记录路径的dijk 用pre数组记录路径 1976. 到达目的地的方案数-最短路径计数"""
     dist = [INF] * n
@@ -67,9 +67,7 @@ def dijkstra2(
 
 
 # 字符串顶点的dijk
-def dijkstra3(
-    adjMap: DefaultDict[str, DefaultDict[str, int]], start: str, end: str
-) -> int:
+def dijkstra3(adjMap: DefaultDict[str, DefaultDict[str, int]], start: str, end: str) -> int:
     """时间复杂度O((V+E)logV)"""
 
     @lru_cache(None)

@@ -7,6 +7,8 @@ from itertools import pairwise
 # 对每一个字符i，向前找到相同的字符j，向后找到相同的字符k。当前字符对最终结果的贡献是：（i-j）*(k-i)。
 # 枚举start,end 统计贡献
 
+MOD = int(1e9 + 7)
+
 
 class Solution:
     def uniqueLetterString(self, s: str) -> int:
@@ -18,8 +20,9 @@ class Solution:
         for indexes in indexMap.values():
             indexes = [-1] + indexes + [n]
             res += sum((b - a) * (c - b) for a, b, c in zip(indexes, indexes[1:], indexes[2:]))
+            res %= MOD
 
-        return res % (int(1e9 + 7))
+        return res
 
 
 print(Solution().uniqueLetterString(s="ABC"))

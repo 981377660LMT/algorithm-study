@@ -5,18 +5,19 @@
 # x,y<=n
 
 
-# . 1.离线查询(排序)+双指针 莫队的思想
+# 1.离线查询(排序)+双指针 莫队的思想
 # 固定x之后 就可以尺取寻找y的边界
-# !2. 哈希 用随机数产生哈希值 用异或来计算区间所含集合的哈希值
+
+# !2. 异或哈希/异或前缀和 用随机数产生哈希值 用异或来计算区间所含集合的哈希值
 
 
-from collections import defaultdict
-from itertools import accumulate
-from operator import xor
-from random import randint, seed
 import sys
 import os
 from typing import List, Tuple
+from collections import defaultdict
+from itertools import accumulate
+from operator import xor
+from random import randint
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -24,7 +25,7 @@ MOD = int(1e9 + 7)
 
 
 def genHash(nums1: List[int], nums2: List[int]) -> Tuple[List[int], List[int]]:
-    """随机数+异或来产生区间前缀集合的哈希值"""
+    """随机数+异或来生成前缀的集合的哈希值"""
     pool = defaultdict(lambda: randint(1, (1 << 63) - 1))
     res1, visited1 = [0] * len(nums1), set()
     res2, visited2 = [0] * len(nums2), set()
@@ -69,3 +70,10 @@ if __name__ == "__main__":
             main()
     else:
         main()
+
+
+# 同样的应用:
+# ! q次查询子串s[l:r] 能否经过重排形成回文串
+# 至多有一种字符出现奇数次
+# 给每种字符赋互异的随机权值，然后对字符串转化成的权值串进行异或前缀和
+# 只需要判断区间异或和是否为 0 或者某个字符的随机权值即可。

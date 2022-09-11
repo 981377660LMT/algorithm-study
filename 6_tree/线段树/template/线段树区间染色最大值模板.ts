@@ -1,44 +1,63 @@
 /* eslint-disable no-inner-declarations */
+
 /**
  * @description 线段树区间最大值RMQ
+ *
+ * 如果查询超出范围 返回0
  */
 class RMQSegmentTree {
-  private readonly tree: number[]
-  private readonly lazyValue: number[]
-  private readonly isLazy: Uint8Array
-  private readonly size: number
+  private readonly _tree: number[]
+  private readonly _lazyValue: number[]
+  private readonly _isLazy: Uint8Array
+  private readonly _size: number
 
   /**
-   *
    * @param size 区间右边界
    */
-  constructor(size: number) {
-    this.size = size
-    this.tree = Array(size << 2).fill(0)
-    this.lazyValue = Array(size << 2).fill(0)
-    this.isLazy = new Uint8Array(size << 2)
+  constructor(nOrNums: number | number[]) {
+    this._size = Array.isArray(nOrNums) ? nOrNums.length : nOrNums
+    this._tree = Array(this._size << 2).fill(0)
+    this._lazyValue = Array(this._size << 2).fill(0)
+    this._isLazy = new Uint8Array(this._size << 2)
+    if (Array.isArray(nOrNums)) this._build(1, 1, this._size, nOrNums)
   }
 
   query(l: number, r: number): number {
-    this.checkRange(l, r)
-    return this._query(1, l, r, 1, this.size)
+    if (l < 1) l = 1
+    if (r > this._size) r = this._size
+    if (l > r) return 0 // !超出范围返回0
+    return this._query(1, l, r, 1, this._size)
   }
 
   update(l: number, r: number, target: number): void {
-    this.checkRange(l, r)
-    this._update(1, l, r, 1, this.size, target)
+    if (l < 1) l = 1
+    if (r > this._size) r = this._size
+    if (l > r) return
+    this._update(1, l, r, 1, this._size, target)
   }
 
   queryAll(): number {
-    return this.tree[1]
+    return this._tree[1]
+  }
+
+  private _build(rt: number, l: number, r: number, nums: number[]): void {
+    if (l === r) {
+      this._tree[rt] = nums[l - 1]
+      return
+    }
+
+    const mid = Math.floor((l + r) / 2)
+    this._build(rt << 1, l, mid, nums)
+    this._build((rt << 1) | 1, mid + 1, r, nums)
+    this._pushUp(rt)
   }
 
   private _query(rt: number, L: number, R: number, l: number, r: number): number {
-    if (L <= l && r <= R) return this.tree[rt]
+    if (L <= l && r <= R) return this._tree[rt]
 
     const mid = Math.floor((l + r) / 2)
     this._pushDown(rt, l, r, mid)
-    let res = -Infinity
+    let res = 0 // !默认的最小值为0
     if (L <= mid) res = Math.max(res, this._query(rt << 1, L, R, l, mid))
     if (mid < R) res = Math.max(res, this._query((rt << 1) | 1, L, R, mid + 1, r))
 
@@ -47,9 +66,9 @@ class RMQSegmentTree {
 
   private _update(rt: number, L: number, R: number, l: number, r: number, target: number): void {
     if (L <= l && r <= R) {
-      this.lazyValue[rt] = Math.max(this.lazyValue[rt], target)
-      this.tree[rt] = Math.max(this.tree[rt], target)
-      this.isLazy[rt] = 1
+      this._lazyValue[rt] = Math.max(this._lazyValue[rt], target)
+      this._tree[rt] = Math.max(this._tree[rt], target)
+      this._isLazy[rt] = 1
       return
     }
 
@@ -61,27 +80,23 @@ class RMQSegmentTree {
   }
 
   private _pushUp(rt: number): void {
-    this.tree[rt] = Math.max(this.tree[rt << 1], this.tree[(rt << 1) | 1])
+    this._tree[rt] = Math.max(this._tree[rt << 1], this._tree[(rt << 1) | 1])
   }
 
   private _pushDown(rt: number, l: number, r: number, mid: number): void {
-    if (this.isLazy[rt]) {
-      const target = this.lazyValue[rt]
-      this.lazyValue[rt << 1] = Math.max(this.lazyValue[rt << 1], target)
-      this.lazyValue[(rt << 1) | 1] = Math.max(this.lazyValue[(rt << 1) | 1], target)
-      this.isLazy[rt << 1] = 1
+    if (this._isLazy[rt]) {
+      const target = this._lazyValue[rt]
+      this._lazyValue[rt << 1] = Math.max(this._lazyValue[rt << 1], target)
+      this._lazyValue[(rt << 1) | 1] = Math.max(this._lazyValue[(rt << 1) | 1], target)
+      this._isLazy[rt << 1] = 1
 
-      this.tree[rt << 1] = Math.max(this.tree[rt << 1], target)
-      this.tree[(rt << 1) | 1] = Math.max(this.tree[(rt << 1) | 1], target)
-      this.isLazy[(rt << 1) | 1] = 1
+      this._tree[rt << 1] = Math.max(this._tree[rt << 1], target)
+      this._tree[(rt << 1) | 1] = Math.max(this._tree[(rt << 1) | 1], target)
+      this._isLazy[(rt << 1) | 1] = 1
 
-      this.lazyValue[rt] = 0
-      this.isLazy[rt] = 0
+      this._lazyValue[rt] = 0
+      this._isLazy[rt] = 0
     }
-  }
-
-  private checkRange(l: number, r: number): void {
-    if (l < 1 || r > this.size) throw new RangeError(`[${l}, ${r}] out of range: [1, ${this.size}]`)
   }
 }
 
@@ -103,7 +118,6 @@ if (require.main === module) {
       const right = left + size - 1
 
       const preHeihgt = tree.query(mapping.get(left)!, mapping.get(right)!)
-      // console.log(preHeihgt, left, right)
       tree.update(mapping.get(left)!, mapping.get(right)!, preHeihgt + size)
       res[i] = tree.queryAll()
     }

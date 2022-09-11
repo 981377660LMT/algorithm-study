@@ -4,30 +4,30 @@
  * @return {number}
  */
 const kthSmallest = function (matrix: number[][], k: number): number {
-  const [m, n] = [matrix.length, matrix[0].length]
+  const [ROW, COL] = [matrix.length, matrix[0].length]
 
-  let l = matrix[0][0]
-  let r = matrix[matrix.length - 1][matrix[0].length - 1] + 1
+  let left = matrix[0][0]
+  let right = matrix[matrix.length - 1][matrix[0].length - 1] + 1
 
-  while (l <= r) {
-    const mid = ~~((l + r) / 2)
-    if (countNGT(mid) < k) l = mid + 1
-    else r = mid - 1
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2)
+    if (countNGT(mid) < k) left = mid + 1
+    else right = mid - 1
   }
 
-  return l
+  return left
 
-  // 技巧：左下角开始出发
+  // !技巧：左下角开始出发
   function countNGT(mid: number) {
-    let [r, c] = [m - 1, 0]
+    let [row, col] = [ROW - 1, 0]
     let res = 0
 
-    while (r >= 0 && c < n) {
-      if (matrix[r][c] <= mid) {
-        res += r + 1
-        c++
+    while (row >= 0 && col < COL) {
+      if (matrix[row][col] <= mid) {
+        res += row + 1
+        col++
       } else {
-        r--
+        row--
       }
     }
 
@@ -42,7 +42,7 @@ console.log(
     [
       [1, 5, 9],
       [10, 11, 13],
-      [12, 13, 15],
+      [12, 13, 15]
     ],
     8
   )

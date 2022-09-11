@@ -1,54 +1,99 @@
-# 继承deque的MaxQueue
-
-from typing import Any
+from typing import Any, Deque, Iterable, List, Optional
 from collections import deque
 
 
-class MaxQueue(deque):
+class MaxQueue:
+    def __init__(self, iterable: Optional[Iterable[int]] = None) -> None:
+        self.maxQueue: Deque[List[Any]] = deque()
+        self.rawQueue: Deque[int] = deque()
+
+        if iterable is not None:
+            for value in iterable:
+                self.append(value)
+
     @property
     def max(self) -> int:
-        if not self:
-            raise ValueError('maxQueue is empty')
-        return self[0][0]
+        if not self.maxQueue:
+            raise ValueError("monoQueue is empty")
+        return self.maxQueue[0][0]
+
+    def popleft(self) -> int:
+        if not self.rawQueue:
+            raise IndexError("popleft from empty queue")
+
+        self.maxQueue[0][-1] -= 1
+        if self.maxQueue[0][-1] == 0:
+            self.maxQueue.popleft()
+
+        return self.rawQueue.popleft()
 
     def append(self, value: int, *metaInfo: Any) -> None:
+        """
+        Args:
+            value (int): 元素的值
+            metaInfo: Any 当前元素附加的元信息，不会添加到原始队列
+        """
+
         count = 1
-        while self and self[-1][0] < value:
-            count += self.pop()[-1]
-        super().append([value, *metaInfo, count])
+        while self.maxQueue and self.maxQueue[-1][0] < value:
+            count += self.maxQueue.pop()[-1]
+        self.maxQueue.append([value, *metaInfo, count])
 
-    def popleft(self) -> None:
-        if not self:
-            raise IndexError('popleft from empty queue')
+        self.rawQueue.append(value)
 
-        self[0][-1] -= 1
-        if self[0][-1] == 0:
-            super().popleft()
+    def __len__(self) -> int:
+        return len(self.rawQueue)
+
+    def __getitem__(self, index: int) -> int:
+        return self.rawQueue[index]
 
 
-class MinQueue(deque):
+class MinQueue:
+    def __init__(self, iterable: Optional[Iterable[int]] = None) -> None:
+        self.minQueue: Deque[List[Any]] = deque()
+        self.rawQueue: Deque[int] = deque()
+
+        if iterable is not None:
+            for value in iterable:
+                self.append(value)
+
     @property
     def min(self) -> int:
-        if not self:
-            raise ValueError('minQueue is empty')
-        return self[0][0]
+        if not self.minQueue:
+            raise ValueError("monoQueue is empty")
+        return self.minQueue[0][0]
+
+    def popleft(self) -> int:
+        if not self.rawQueue:
+            raise IndexError("popleft from empty queue")
+
+        self.minQueue[0][-1] -= 1
+        if self.minQueue[0][-1] == 0:
+            self.minQueue.popleft()
+
+        return self.rawQueue.popleft()
 
     def append(self, value: int, *metaInfo: Any) -> None:
+        """
+        Args:
+            value (int): 元素的值
+            metaInfo: Any 当前元素附加的元信息，不会添加到原始队列
+        """
         count = 1
-        while self and self[-1][0] > value:
-            count += self.pop()[-1]
-        super().append([value, *metaInfo, count])
+        while self.minQueue and self.minQueue[-1][0] > value:
+            count += self.minQueue.pop()[-1]
+        self.minQueue.append([value, *metaInfo, count])
 
-    def popleft(self) -> None:
-        if not self:
-            raise IndexError('popleft from empty queue')
+        self.rawQueue.append(value)
 
-        self[0][-1] -= 1
-        if self[0][-1] == 0:
-            super().popleft()
+    def __len__(self) -> int:
+        return len(self.rawQueue)
+
+    def __getitem__(self, index: int) -> int:
+        return self.rawQueue[index]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     maxQueue = MaxQueue()
     maxQueue.append(1)
     maxQueue.append(2)
@@ -65,4 +110,3 @@ if __name__ == '__main__':
     assert minQueue.min == 1
     minQueue.popleft()
     assert minQueue.min == 3
-

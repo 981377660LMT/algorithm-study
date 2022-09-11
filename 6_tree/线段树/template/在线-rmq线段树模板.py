@@ -6,11 +6,12 @@ INF = int(4e18)
 class MaxSegmentTree:
     """RMQ 最大值线段树(区间和叠加)
 
-    一般用于数组求最值
     注意根节点从1开始,tree本身为[1,n]
+    如果查询超出范围 返回0
+    因为是叠加 所以不需要isLazy数组
     """
 
-    __slots__ = ["_n", "_tree", "_lazy"]
+    __slots__ = "_n", "_tree", "_lazy"
 
     def __init__(self, nOrNums: Union[int, List[int]]):
         self._n = nOrNums if isinstance(nOrNums, int) else len(nOrNums)
@@ -21,12 +22,22 @@ class MaxSegmentTree:
 
     def add(self, left: int, right: int, delta: int) -> None:
         """闭区间[left,right]区间值加上delta"""
-        # assert 1 <= left <= right <= self._n, f"{left},{right} out of range [1,{self._n}]"
+        if left < 1:
+            left = 1
+        if right > self._n:
+            right = self._n
+        if left > right:
+            return
         self._add(1, left, right, 1, self._n, delta)
 
     def query(self, left: int, right: int) -> int:
         """闭区间[left,right]的最值"""
-        # assert 1 <= left <= right <= self._n, f"{left},{right} out of range [1,{self._n}]"
+        if left < 1:
+            left = 1
+        if right > self._n:
+            right = self._n
+        if left > right:
+            return 0  # !超出范围返回0
         return self._query(1, left, right, 1, self._n)
 
     def queryAll(self) -> int:
@@ -66,11 +77,15 @@ class MaxSegmentTree:
 
         mid = (l + r) // 2
         self._push_down(rt, l, r, mid)
-        res = -INF
+        res = 0  # !默认值为0
         if L <= mid:
-            res = max(res, self._query(rt * 2, L, R, l, mid))
+            cand = self._query(rt * 2, L, R, l, mid)
+            if cand > res:
+                res = cand
         if mid < R:
-            res = max(res, self._query(rt * 2 + 1, L, R, mid + 1, r))
+            cand = self._query(rt * 2 + 1, L, R, mid + 1, r)
+            if cand > res:
+                res = cand
         return res
 
     def _push_up(self, rt: int) -> None:
@@ -93,7 +108,7 @@ class MaxSegmentTree:
 class MinSegmentTree:
     """RMQ 最小值(区间和覆盖) 线段树
 
-    一般用于数组求最值
+    如果查询超出范围 返回INF
     注意根节点从1开始,tree本身为[1,n]
     """
 
@@ -112,12 +127,22 @@ class MinSegmentTree:
 
     def query(self, left: int, right: int) -> int:
         """闭区间[left,right]的最小值"""
-        assert 1 <= left <= right <= self._n, f"{left},{right} out of range [1,{self._n}]"
+        if left < 1:
+            left = 1
+        if right > self._n:
+            right = self._n
+        if left > right:
+            return INF  # !超出范围返回INF
         return self._query(1, left, right, 1, self._n)
 
     def update(self, left: int, right: int, target: int) -> None:
         """闭区间[left,right]区间更新为target"""
-        assert 1 <= left <= right <= self._n, f"{left},{right} out of range [1,{self._n}]"
+        if left < 1:
+            left = 1
+        if right > self._n:
+            right = self._n
+        if left > right:
+            return
         self._update(1, left, right, 1, self._n, target)
 
     def _build(self, rt: int, l: int, r: int, nums: List[int]) -> None:
@@ -155,7 +180,7 @@ class MinSegmentTree:
         # 传递懒标记
         mid = (l + r) // 2
         self._push_down(rt, l, r, mid)
-        res = INF
+        res = INF  # !默认值为INF
         if L <= mid:
             cand = self._query(rt * 2, L, R, l, mid)
             if cand < res:
@@ -167,8 +192,7 @@ class MinSegmentTree:
         return res
 
     def _push_up(self, rt: int) -> None:
-        if self._tree[rt * 2] < self._tree[rt]:
-            self._tree[rt] = self._tree[rt * 2]
+        self._tree[rt] = self._tree[rt * 2]
         if self._tree[rt * 2 + 1] < self._tree[rt]:
             self._tree[rt] = self._tree[rt * 2 + 1]
 
@@ -211,12 +235,14 @@ if __name__ == "__main__":
     minSt.update(3, 7, -1)
     assert minSt.queryAll() == -1
 
+    # !这里是`染色`最大值的例子
     # class Solution:
     #     def fallingSquares(self, positions: List[List[int]]) -> List[int]:
     #         pos = set()
     #         for left, length in positions:
     #             pos.add(left)
     #             pos.add(left + length - 1)
+
     #         mapping = {v: i for i, v in enumerate(sorted(pos), 1)}
     #         tree = MaxSegmentTree(len(mapping) + 10)
     #         res = []

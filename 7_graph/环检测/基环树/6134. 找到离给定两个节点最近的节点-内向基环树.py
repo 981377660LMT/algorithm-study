@@ -54,5 +54,5 @@ class Solution:
         return res
 
 
-print(Solution().closestMeetingNode(edges=[3, 0, 5, -1, 3, 4], node1=2, node2=0))
-print(Solution().closestMeetingNode(edges=[5, 4, 5, 4, 3, 6, -1], node1=0, node2=1))
+print(Solution().closestMeetingNode1(edges=[3, 0, 5, -1, 3, 4], node1=2, node2=0))
+print(Solution().closestMeetingNode1(edges=[5, 4, 5, 4, 3, 6, -1], node1=0, node2=1))
