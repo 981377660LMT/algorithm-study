@@ -87,12 +87,14 @@ abstract class AbstractSegmentTree<T = number> {
   }
 }
 
+const INF = 2e15
+
 /**
  * @description 线段树RMQ最大值(快速版)
  */
 class MaxSegmentTree2 extends AbstractSegmentTree<number> {
   protected initTreeValue(): number {
-    return -Infinity
+    return -INF
   }
 
   protected mergeChildren(a: number, b: number): number {
@@ -110,7 +112,7 @@ class MaxSegmentTree2 extends AbstractSegmentTree<number> {
  */
 class MinSegmentTree2 extends AbstractSegmentTree<number> {
   protected initTreeValue(): number {
-    return Infinity
+    return INF
   }
 
   protected mergeChildren(a: number, b: number): number {

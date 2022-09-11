@@ -1,3 +1,5 @@
+/* eslint-disable no-inner-declarations */
+
 /**
  * 维护01序列的线段树 更新方式为叠加
  */
@@ -25,12 +27,16 @@ class SegmentTree1 {
   }
 
   query(l: number, r: number): number {
-    // this._checkRange(l, r)
+    if (l < 1) l = 1
+    if (r > this._size) r = this._size
+    if (l > r) return 0 // !超出范围返回0
     return this._query(1, l, r, 1, this._size)
   }
 
   update(l: number, r: number, delta: number): void {
-    // this._checkRange(l, r)
+    if (l < 1) l = 1
+    if (r > this._size) r = this._size
+    if (l > r) return
     this._update(1, l, r, 1, this._size, delta)
   }
 
@@ -98,12 +104,6 @@ class SegmentTree1 {
       this._lazyValue[rt] = 0
     }
   }
-
-  private _checkRange(l: number, r: number): void {
-    if (!(l >= 1 && l <= r && r <= this._size)) {
-      throw new RangeError(`[${l}, ${r}] out of range: [1, ${this._size}]`)
-    }
-  }
 }
 
 /**
@@ -135,12 +135,18 @@ class SegmentTree2 {
   }
 
   query(l: number, r: number): number {
-    // this._checkRange(l, r)
+    if (l < 1) l = 1
+    if (r > this._size) r = this._size
+    if (l > r) return 0 // !超出范围返回0
+
     return this._query(1, l, r, 1, this._size)
   }
 
   update(l: number, r: number, target: 0 | 1): void {
-    // this._checkRange(l, r)
+    if (l < 1) l = 1
+    if (r > this._size) r = this._size
+    if (l > r) return
+
     this._update(1, l, r, 1, this._size, target)
   }
 
@@ -213,12 +219,22 @@ class SegmentTree2 {
       this._isLazy[rt] = 0
     }
   }
-
-  private _checkRange(l: number, r: number): void {
-    if (!(l >= 1 && l <= r && r <= this._size)) {
-      throw new RangeError(`[${l}, ${r}] out of range: [1, ${this._size}]`)
-    }
-  }
 }
 
+if (require.main === module) {
+  function reconstructQueue(people: number[][]): number[][] {
+    const n = people.length
+    people.sort((a, b) => a[0] - b[0] || -(a[1] - b[1]))
+
+    const tree = new SegmentTree1(Array(n).fill(1))
+    const res = Array.from<unknown, [height: number, preCount: number]>({ length: n }, () => [0, 0])
+    people.forEach(([height, preCount]) => {
+      const pos = tree.getPos(preCount + 1)
+      res[pos - 1] = [height, preCount]
+      tree.update(pos, pos, -1) // !更新方式为叠加
+    })
+
+    return res
+  }
+}
 export {}

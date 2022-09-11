@@ -6,28 +6,37 @@ class SegmentTreeNodeWithLazy {
   value = 0 // 结点最大值
 }
 
+/**
+ * 线段树区间叠加最大值RMQ
+ *
+ * 超出范围返回0
+ */
 class MaxSegmentTree {
-  private readonly root: SegmentTreeNodeWithLazy = new SegmentTreeNodeWithLazy()
-  private readonly lower: number
-  private readonly upper: number
+  private readonly _root: SegmentTreeNodeWithLazy = new SegmentTreeNodeWithLazy()
+  private readonly _lower: number
+  private readonly _upper: number
 
   constructor(lower = 0, upper = 1e9 + 10) {
-    this.lower = lower
-    this.upper = upper
+    this._lower = lower
+    this._upper = upper
   }
 
   update(left: number, right: number, delta: number): void {
-    this.checkRange(left, right)
-    this._update(left, right, this.lower, this.upper, this.root, delta)
+    if (left < this._lower) left = this._lower
+    if (right > this._upper) right = this._upper
+    if (left > right) return
+    this._update(left, right, this._lower, this._upper, this._root, delta)
   }
 
   query(left: number, right: number): number {
-    this.checkRange(left, right)
-    return this._query(left, right, this.lower, this.upper, this.root)
+    if (left < this._lower) left = this._lower
+    if (right > this._upper) right = this._upper
+    if (left > right) return 0 // !超出范围返回0
+    return this._query(left, right, this._lower, this._upper, this._root)
   }
 
   queryAll(): number {
-    return this.root.value
+    return this._root.value
   }
 
   private _update(
@@ -65,7 +74,7 @@ class MaxSegmentTree {
 
     const mid = Math.floor((l + r) / 2)
     this.pushDown(l, mid, r, root)
-    let res = -Infinity
+    let res = 0 // !默认返回0
     if (L <= mid) res = Math.max(res, this._query(L, R, l, mid, root.left))
     if (mid < R) res = Math.max(res, this._query(L, R, mid + 1, r, root.right))
     return res
@@ -89,12 +98,6 @@ class MaxSegmentTree {
 
   private pushUp(root: SegmentTreeNodeWithLazy): void {
     root.value = Math.max(root.left.value, root.right.value)
-  }
-
-  private checkRange(l: number, r: number): void {
-    if (l < this.lower || r > this.upper) {
-      throw new RangeError(`[${l}, ${r}] out of range: [${this.lower}, ${this.upper}]`)
-    }
   }
 }
 

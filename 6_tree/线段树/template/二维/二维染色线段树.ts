@@ -1,5 +1,7 @@
+/* eslint-disable no-inner-declarations */
+/* eslint-disable no-useless-constructor */
 // https://leetcode.cn/problems/rectangle-area-ii/
-//leetcode.cn/problems/rectangle-area-ii/
+// leetcode.cn/problems/rectangle-area-ii/
 
 // ! 注意题目是否可以这样开空间
 // !是否要扫描x 用线段树维护y

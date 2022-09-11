@@ -1,7 +1,10 @@
+const INF = 2e15
+
 /**
  * 线段树区间叠加最大值RMQ
  *
  * !叠加更新可以省去isLazy数组
+ * !如果查询超出范围 返回-INF
  */
 class MaxSegmentTree {
   private readonly _tree: number[]
@@ -21,12 +24,16 @@ class MaxSegmentTree {
   }
 
   query(l: number, r: number): number {
-    // this._checkRange(l, r)
+    if (l < 1) l = 1
+    if (r > this._size) r = this._size
+    if (l > r) return -INF // !超出范围返回-INF
     return this._query(1, l, r, 1, this._size)
   }
 
   add(l: number, r: number, delta: number): void {
-    // this._checkRange(l, r)
+    if (l < 1) l = 1
+    if (r > this._size) r = this._size
+    if (l > r) return
     this._add(1, l, r, 1, this._size, delta)
   }
 
@@ -51,7 +58,7 @@ class MaxSegmentTree {
 
     const mid = Math.floor((l + r) / 2)
     this._pushDown(rt, l, r, mid)
-    let res = -Infinity
+    let res = -INF // !默认返回-INF
     if (L <= mid) res = Math.max(res, this._query(rt << 1, L, R, l, mid))
     if (mid < R) res = Math.max(res, this._query((rt << 1) | 1, L, R, mid + 1, r))
 
@@ -86,12 +93,6 @@ class MaxSegmentTree {
       this._tree[(rt << 1) | 1] += delta
 
       this._lazyValue[rt] = 0
-    }
-  }
-
-  private _checkRange(l: number, r: number): void {
-    if (l < 1 || r > this._size) {
-      throw new RangeError(`[${l}, ${r}] out of range: [1, ${this._size}]`)
     }
   }
 }

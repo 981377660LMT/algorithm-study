@@ -220,6 +220,7 @@ class MinSegmentTree:
 
 
 if __name__ == "__main__":
+    # TODO 更加严格的测试
     nums = [-INF] * 5001
     nums[0] = 1
     nums[1000] = 100

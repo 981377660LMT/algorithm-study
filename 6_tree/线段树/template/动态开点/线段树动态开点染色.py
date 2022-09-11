@@ -15,18 +15,31 @@ class SegmentTreeNode:
         self.right = right
 
 
+# 线段树动态开点 染色更新
 class SegmentTree:
+    __slots__ = ("_root", "_lower", "_upper")
+
     def __init__(self, lower: int, upper: int):
         self._root = SegmentTreeNode()
         self._lower = lower
         self._upper = upper
 
     def update(self, left: int, right: int, target: Literal[0, 1]) -> None:
-        self._checkRange(left, right)
+        if left < self._lower:
+            left = self._lower
+        if right > self._upper:
+            right = self._upper
+        if left > right:
+            return
         self._update(left, right, self._lower, self._upper, self._root, target)
 
     def query(self, left: int, right: int) -> int:
-        self._checkRange(left, right)
+        if left < self._lower:
+            left = self._lower
+        if right > self._upper:
+            right = self._upper
+        if left > right:
+            return 0  # !超出范围返回0
         return self._query(left, right, self._lower, self._upper, self._root)
 
     def queryAll(self) -> int:
@@ -42,9 +55,9 @@ class SegmentTree:
         mid = (l + r) // 2
         self._pushDown(l, mid, r, root)
         if L <= mid:
-            self._update(L, R, l, mid, root.left, target)
+            self._update(L, R, l, mid, root.left, target)  # type: ignore
         if mid < R:
-            self._update(L, R, mid + 1, r, root.right, target)
+            self._update(L, R, mid + 1, r, root.right, target)  # type: ignore
         self._pushUp(root)
 
     def _query(self, L: int, R: int, l: int, r: int, root: SegmentTreeNode) -> int:
@@ -55,9 +68,9 @@ class SegmentTree:
         self._pushDown(l, mid, r, root)
         res = 0
         if L <= mid:
-            res += self._query(L, R, l, mid, root.left)
+            res += self._query(L, R, l, mid, root.left)  # type: ignore
         if mid < R:
-            res += self._query(L, R, mid + 1, r, root.right)
+            res += self._query(L, R, mid + 1, r, root.right)  # type: ignore
         return res
 
     def _pushDown(self, left: int, mid: int, right: int, root: SegmentTreeNode) -> None:
@@ -74,10 +87,6 @@ class SegmentTree:
 
     def _pushUp(self, root: SegmentTreeNode) -> None:
         root.value = root.left.value + root.right.value
-
-    def _checkRange(self, left: int, right: int):
-        if left < self._lower or right > self._upper:
-            raise ValueError("Index out of range")
 
 
 def main():

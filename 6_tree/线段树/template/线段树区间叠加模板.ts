@@ -1,39 +1,56 @@
 // 如果只是用区间叠加 可以用树状数组代替
 
 class SegmentTree {
-  private readonly tree: number[]
-  private readonly lazyValue: number[]
-  private readonly size: number
+  private readonly _tree: number[]
+  private readonly _lazyValue: number[]
+  private readonly _size: number
 
   /**
    *
    * @param size 区间右边界
    */
-  constructor(size: number) {
-    this.size = size
-    this.tree = Array(size << 2).fill(0)
-    this.lazyValue = Array(size << 2).fill(0)
+  constructor(nOrNums: number | number[]) {
+    this._size = Array.isArray(nOrNums) ? nOrNums.length : nOrNums
+    this._tree = Array(this._size << 2).fill(0)
+    this._lazyValue = Array(this._size << 2).fill(0)
+    if (Array.isArray(nOrNums)) this._build(1, 1, this._size, nOrNums)
   }
 
   query(l: number, r: number): number {
-    this.checkRange(l, r)
-    return this._query(1, l, r, 1, this.size)
+    if (l < 1) l = 1
+    if (r > this._size) r = this._size
+    if (l > r) return 0 // !超出范围返回0
+    return this._query(1, l, r, 1, this._size)
   }
 
   update(l: number, r: number, delta: number): void {
-    this.checkRange(l, r)
-    this._update(1, l, r, 1, this.size, delta)
+    if (l < 1) l = 1
+    if (r > this._size) r = this._size
+    if (l > r) return
+    this._update(1, l, r, 1, this._size, delta)
   }
 
   queryAll(): number {
-    return this.tree[1]
+    return this._tree[1]
+  }
+
+  private _build(rt: number, l: number, r: number, nums: number[]): void {
+    if (l === r) {
+      this._tree[rt] = nums[l - 1]
+      return
+    }
+
+    const mid = Math.floor((l + r) / 2)
+    this._build(rt << 1, l, mid, nums)
+    this._build((rt << 1) | 1, mid + 1, r, nums)
+    this._pushUp(rt)
   }
 
   private _query(rt: number, L: number, R: number, l: number, r: number): number {
-    if (L <= l && r <= R) return this.tree[rt]
+    if (L <= l && r <= R) return this._tree[rt]
 
     const mid = Math.floor((l + r) / 2)
-    this.pushDown(rt, l, r, mid)
+    this._pushDown(rt, l, r, mid)
     let res = 0
     if (L <= mid) res += this._query(rt << 1, L, R, l, mid)
     if (mid < R) res += this._query((rt << 1) | 1, L, R, mid + 1, r)
@@ -43,35 +60,31 @@ class SegmentTree {
 
   private _update(rt: number, L: number, R: number, l: number, r: number, delta: number): void {
     if (L <= l && r <= R) {
-      this.lazyValue[rt] += delta
-      this.tree[rt] += delta * (r - l + 1)
+      this._lazyValue[rt] += delta
+      this._tree[rt] += delta * (r - l + 1)
       return
     }
 
     const mid = Math.floor((l + r) / 2)
-    this.pushDown(rt, l, r, mid)
+    this._pushDown(rt, l, r, mid)
     if (L <= mid) this._update(rt << 1, L, R, l, mid, delta)
     if (mid < R) this._update((rt << 1) | 1, L, R, mid + 1, r, delta)
-    this.pushUp(rt)
+    this._pushUp(rt)
   }
 
-  private pushUp(rt: number): void {
-    this.tree[rt] = this.tree[rt << 1] + this.tree[(rt << 1) | 1]
+  private _pushUp(rt: number): void {
+    this._tree[rt] = this._tree[rt << 1] + this._tree[(rt << 1) | 1]
   }
 
-  private pushDown(rt: number, l: number, r: number, mid: number): void {
-    if (this.lazyValue[rt]) {
-      const delta = this.lazyValue[rt]
-      this.lazyValue[rt << 1] += delta
-      this.lazyValue[(rt << 1) | 1] += delta
-      this.tree[rt << 1] += delta * (mid - l + 1)
-      this.tree[(rt << 1) | 1] += delta * (r - mid)
-      this.lazyValue[rt] = 0
+  private _pushDown(rt: number, l: number, r: number, mid: number): void {
+    if (this._lazyValue[rt]) {
+      const delta = this._lazyValue[rt]
+      this._lazyValue[rt << 1] += delta
+      this._lazyValue[(rt << 1) | 1] += delta
+      this._tree[rt << 1] += delta * (mid - l + 1)
+      this._tree[(rt << 1) | 1] += delta * (r - mid)
+      this._lazyValue[rt] = 0
     }
-  }
-
-  private checkRange(l: number, r: number): void {
-    if (l < 1 || r > this.size) throw new RangeError(`[${l}, ${r}] out of range: [1, ${this.size}]`)
   }
 }
 

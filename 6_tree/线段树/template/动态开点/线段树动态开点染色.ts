@@ -9,27 +9,31 @@ class SegmentTreeNode {
  * @description 区间染色线段树，动态开点
  */
 class SegmentTree {
-  private readonly root: SegmentTreeNode = new SegmentTreeNode()
-  private readonly lower: number
-  private readonly upper: number
+  private readonly _root: SegmentTreeNode = new SegmentTreeNode()
+  private readonly _lower: number
+  private readonly _upper: number
 
   constructor(lower = 0, upper = 1e9 + 10) {
-    this.lower = lower
-    this.upper = upper
+    this._lower = lower
+    this._upper = upper
   }
 
   update(left: number, right: number, target: 0 | 1): void {
-    this.checkRange(left, right)
-    this._update(left, right, this.lower, this.upper, this.root, target)
+    if (left < this._lower) left = this._lower
+    if (right > this._upper) right = this._upper
+    if (left > right) return
+    this._update(left, right, this._lower, this._upper, this._root, target)
   }
 
   query(left: number, right: number): number {
-    this.checkRange(left, right)
-    return this._query(left, right, this.lower, this.upper, this.root)
+    if (left < this._lower) left = this._lower
+    if (right > this._upper) right = this._upper
+    if (left > right) return 0
+    return this._query(left, right, this._lower, this._upper, this._root)
   }
 
   queryAll(): number {
-    return this.root.value
+    return this._root.value
   }
 
   private _update(
@@ -81,12 +85,6 @@ class SegmentTree {
   private static pushUp(root: SegmentTreeNode): void {
     root.value = root.left!.value + root.right!.value
   }
-
-  private checkRange(l: number, r: number): void {
-    if (l < this.lower || r > this.upper) {
-      throw new RangeError(`[${l}, ${r}] out of range: [${this.lower}, ${this.upper}]`)
-    }
-  }
 }
 
 //! /////////////////////////////////////////////////////////////////////////////////////////
@@ -103,25 +101,31 @@ class SegmentTreeNodeWithLazy {
  * @description 区间染色线段树，动态开点
  */
 class SegmentTree2 {
-  private readonly root: SegmentTreeNodeWithLazy = new SegmentTreeNodeWithLazy()
-  private readonly lower: number
-  private readonly upper: number
+  private readonly _root: SegmentTreeNodeWithLazy = new SegmentTreeNodeWithLazy()
+  private readonly _lower: number
+  private readonly _upper: number
 
   constructor(lower = 0, upper = 1e9 + 10) {
-    this.lower = lower
-    this.upper = upper
+    this._lower = lower
+    this._upper = upper
   }
 
   update(left: number, right: number, target: number): void {
-    this._update(left, right, this.lower, this.upper, this.root, target)
+    if (left < this._lower) left = this._lower
+    if (right > this._upper) right = this._upper
+    if (left > right) return
+    this._update(left, right, this._lower, this._upper, this._root, target)
   }
 
   query(left: number, right: number): number {
-    return this._query(left, right, this.lower, this.upper, this.root)
+    if (left < this._lower) left = this._lower
+    if (right > this._upper) right = this._upper
+    if (left > right) return 0
+    return this._query(left, right, this._lower, this._upper, this._root)
   }
 
   queryAll(): number {
-    return this.root.value
+    return this._root.value
   }
 
   private _update(
