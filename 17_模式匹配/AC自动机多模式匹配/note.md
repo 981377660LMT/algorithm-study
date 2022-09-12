@@ -1,4 +1,4 @@
-trie+kmp 多模式匹配
+trie+kmp **多模式匹配(一个文本串加若干模式串)**
 
 [<!-- 很复杂 没看了 -->](https://oi-wiki.org/string/ac-automaton/)
 

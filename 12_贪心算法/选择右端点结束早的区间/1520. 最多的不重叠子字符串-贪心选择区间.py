@@ -8,9 +8,6 @@ from typing import List, Mapping, Tuple
 # 请注意，你可以以任意顺序返回最优解的子字符串。
 
 
-Interval = Tuple[int, int]
-
-
 class Solution:
     def maxNumOfSubstrings(self, s: str) -> List[str]:
         """
@@ -22,13 +19,13 @@ class Solution:
         从前往后遍历线段，每次遇到可以加入答案的线段，就贪心地将其加入答案数组即可
         """
         # 1.预处理区间
-        intervalMap: Mapping[str, Interval] = dict()
+        intervalMap: Mapping[str, Tuple[int, int]] = dict()
         for char in set(s):
             start, end = s.find(char), s.rfind(char)
             intervalMap[char] = (start, end)
 
-        # 2.对`每个字符`对应的区间寻找符合题意的边界
-        validIntervals: List[Interval] = []
+        # 2.对`每个字符`对应的区间寻找符合题意的边界(区间内包含每种字符的所有字符)
+        validIntervals: List[Tuple[int, int]] = []
         for (start, end) in intervalMap.values():
             startCand, endCand = start, end
             while True:

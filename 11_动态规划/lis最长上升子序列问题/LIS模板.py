@@ -1,3 +1,9 @@
+"""
+贪心 + 二分查找
+LIS[i]表示长度为 i+1 的子序列尾部元素的值
+每次遍历到一个新元素,用二分查找法找到第一个大于等于它的元素,然后更新LIS
+"""
+
 from typing import List
 from bisect import bisect_left, bisect_right
 

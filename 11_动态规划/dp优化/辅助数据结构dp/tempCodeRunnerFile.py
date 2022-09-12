@@ -1,1 +1,0 @@
-mid // times[i - 1]

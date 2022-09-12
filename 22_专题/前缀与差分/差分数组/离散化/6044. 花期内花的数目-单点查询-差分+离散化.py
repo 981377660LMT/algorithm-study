@@ -4,10 +4,10 @@ from collections import defaultdict
 from itertools import accumulate
 from functools import reduce
 from operator import iconcat
-from 离散化模板 import Discretizer
+from 紧离散化模板 import Discretizer
 
 
-T = TypeVar('T', Any, str, bytes, int, float, complex, bool, tuple, list, dict, set)
+T = TypeVar("T", Any, str, bytes, int, float, complex, bool, tuple, list, dict, set)
 
 
 def flat(arr: List[List[T]]) -> List[T]:
@@ -23,7 +23,7 @@ def flat(arr: List[List[T]]) -> List[T]:
 
 class Solution:
     def fullBloomFlowers(self, flowers: List[List[int]], persons: List[int]) -> List[int]:
-        """单点查询时：只对flowers离散化,开字典+二分查找query值被映射成啥"""
+        """单点查询时:只对flowers离散化,开字典+二分查找query值被映射成啥"""
         diff = defaultdict(int)
         for left, right in flowers:
             diff[left] += 1
@@ -45,7 +45,7 @@ class Solution:
         return [diff[D.get(p)] for p in persons]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     print(
         Solution().fullBloomFlowers(
@@ -57,4 +57,3 @@ if __name__ == '__main__':
             flowers=[[1, 6], [3, 7], [9, 12], [4, 13]], persons=[2, 3, 7, 11]
         )
     )
-

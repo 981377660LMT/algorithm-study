@@ -4,7 +4,7 @@ function reconstructQueue(people: number[][]): number[][] {
   const n = people.length
   people.sort((a, b) => a[0] - b[0] || -(a[1] - b[1]))
 
-  const tree = new SegmentTree(n)
+  const tree = new SegmentTree(Array(n).fill(1))
   const res = Array.from<unknown, [height: number, preCount: number]>({ length: n }, () => [0, 0])
   people.forEach(([height, preCount]) => {
     const pos = tree.getPos(preCount + 1)
@@ -15,25 +15,26 @@ function reconstructQueue(people: number[][]): number[][] {
   return res
 }
 
-// 01线段树 更新方式为叠加
+/**
+ * 维护01序列的线段树 更新方式为叠加
+ */
 class SegmentTree {
   private readonly _tree: number[]
   private readonly _lazyValue: number[]
   private readonly _size: number
 
   /**
-   *
-   * @param size 区间右边界
+   * @param nums 01数组
    */
-  constructor(size: number) {
-    this._size = size
-    this._tree = Array(size << 2).fill(0)
-    this._lazyValue = Array(size << 2).fill(0)
-    this._build(1, 1, size)
+  constructor(nums: (0 | 1)[]) {
+    this._size = nums.length
+    this._tree = Array(this._size << 2).fill(0)
+    this._lazyValue = Array(this._size << 2).fill(0)
+    this._build(1, 1, this._size, nums)
   }
 
   /**
-   * @param k 树上二分查询第k个1的位置  k>=1
+   * @param k 树上二分查询第k个1的位置 k>=1
    * @complexity O(logn)
    */
   getPos(k: number): number {
@@ -41,12 +42,16 @@ class SegmentTree {
   }
 
   query(l: number, r: number): number {
-    // this.checkRange(l, r)
+    if (l < 1) l = 1
+    if (r > this._size) r = this._size
+    if (l > r) return 0 // !超出范围返回0
     return this._query(1, l, r, 1, this._size)
   }
 
   update(l: number, r: number, delta: number): void {
-    // this.checkRange(l, r)
+    if (l < 1) l = 1
+    if (r > this._size) r = this._size
+    if (l > r) return
     this._update(1, l, r, 1, this._size, delta)
   }
 
@@ -54,14 +59,14 @@ class SegmentTree {
     return this._tree[1]
   }
 
-  private _build(rt: number, l: number, r: number): void {
+  private _build(rt: number, l: number, r: number, nums: (0 | 1)[]): void {
     if (l === r) {
-      this._tree[rt] = 1 // 维护01序列
+      this._tree[rt] = nums[l - 1] // 维护01序列
       return
     }
     const mid = Math.floor((l + r) / 2)
-    this._build(rt << 1, l, mid)
-    this._build((rt << 1) | 1, mid + 1, r)
+    this._build(rt << 1, l, mid, nums)
+    this._build((rt << 1) | 1, mid + 1, r, nums)
     this._pushUp(rt)
   }
 
@@ -112,12 +117,6 @@ class SegmentTree {
       this._tree[rt << 1] += delta * (mid - l + 1)
       this._tree[(rt << 1) | 1] += delta * (r - mid)
       this._lazyValue[rt] = 0
-    }
-  }
-
-  private _checkRange(l: number, r: number): void {
-    if (l < 1 || r > this._size) {
-      throw new RangeError(`[${l}, ${r}] out of range: [1, ${this._size}]`)
     }
   }
 }

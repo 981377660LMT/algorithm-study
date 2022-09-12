@@ -13,14 +13,14 @@ class Solution:
         """
 
         @lru_cache(None)
-        def dfs(index: int, need: int, pre: int) -> int:
+        def dfs(index: int, remain: int, pre: int) -> int:
             if index == len(nums):
-                return 0 if need == 0 else -INF
+                return 0 if remain == 0 else -INF
             if nums[index] > pre:
-                nextNeed = need - 1 if nums[index] & 1 else need
+                nextNeed = remain - 1 if nums[index] & 1 else remain
                 nextNeed = max(nextNeed, 0)
-                return max(dfs(index + 1, nextNeed, nums[index]) + 1, dfs(index + 1, need, pre))
+                return max(dfs(index + 1, nextNeed, nums[index]) + 1, dfs(index + 1, remain, pre))
             else:
-                return dfs(index + 1, need, pre)
+                return dfs(index + 1, remain, pre)
 
         return max(0, dfs(0, k, -INF))

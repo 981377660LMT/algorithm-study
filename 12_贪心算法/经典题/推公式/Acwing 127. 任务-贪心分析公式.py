@@ -7,12 +7,12 @@
 # # 1.贪心
 # # x变动1, 收入变化500
 # # y按照最大变动100, 收入变化才只有200.
-# # 因此, 非常容易想到, 对于任务的优先级, 应该是先基于x, 再基于y
+# # !因此, 非常容易想到, 对于任务的优先级, 应该是先基于x, 再基于y
 # # 2.逆序遍历任务.
 # # 类似Acwing 110防晒的思路
 
 
-from bisect import bisect_left, bisect_right, insort_left
+from bisect import bisect_left, bisect_right
 from typing import Any, Generic, Iterable, Optional, Protocol, TypeVar, Union
 
 
@@ -26,7 +26,7 @@ class SupportsDunderGT(Protocol):
         ...
 
 
-S = TypeVar('S', bound=Union[SupportsDunderLT, SupportsDunderGT])
+S = TypeVar("S", bound=Union[SupportsDunderLT, SupportsDunderGT])
 
 
 class SortedList(Generic[S]):
@@ -40,8 +40,8 @@ class SortedList(Generic[S]):
 
     def add(self, item: S) -> None:
         """
-        数组插入时, 要移动的后缀很大的情况下, 
-        cpython中的slice assignment因为直接用memmove, 
+        数组插入时, 要移动的后缀很大的情况下,
+        cpython中的slice assignment因为直接用memmove,
         比手动赋值数组后缀的insert方法快多了
         """
 

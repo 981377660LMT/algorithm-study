@@ -3,7 +3,7 @@ class Solution:
         """求字典序第k小的数字,前序遍历"""
 
         def calStep(cur: int, target: int) -> int:
-            """cur到target的距离，检查子树数量即可"""
+            """cur到target的距离,检查子树数量即可"""
             step = 0
             while cur <= n:
                 step += min(target, n + 1) - cur

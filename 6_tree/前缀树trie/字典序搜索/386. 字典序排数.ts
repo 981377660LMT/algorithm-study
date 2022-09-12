@@ -6,7 +6,7 @@
  * @description 字典树前序遍历 因为要先把1开头的全部看了
  * 字典序排数
  */
-const lexicalOrder = function (n: number): number[] {
+function lexicalOrder(n: number): number[] {
   const res: number[] = []
   dfs(0, n)
   return res
@@ -15,8 +15,12 @@ const lexicalOrder = function (n: number): number[] {
     for (let i = 0; i <= 9; i++) {
       const next = cur * 10 + i
       // when larger than n, return to the previous level
-      if (next > limit) return
-      if (next === 0) continue
+      if (next > limit) {
+        return
+      }
+      if (next === 0) {
+        continue
+      }
       res.push(next)
       dfs(next, limit)
     }

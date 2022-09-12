@@ -43,7 +43,7 @@ class SparseTable {
     return this._mergeFunc(this._dp[left][k], this._dp[right - (1 << k) + 1][k])
   }
 
-  private checkRange(left: number, right: number): void {
+  private _checkRange(left: number, right: number): void {
     if (left >= 0 && left <= right && right < this._size) return
     throw new RangeError(`invalid range [${left}, ${right}]`)
   }

@@ -12,18 +12,18 @@ class SegmentTree {
     this._tree = new Uint32Array(size << 2)
   }
 
-  query(l: number, r: number): number {
-    if (l < 1) l = 1
-    if (r > this._size) r = this._size
-    if (l > r) return 0
-    return this._query(1, l, r, 1, this._size)
+  query(left: number, right: number): number {
+    if (left < 1) left = 1
+    if (right > this._size) right = this._size
+    if (left > right) return 0
+    return this._query(1, left, right, 1, this._size)
   }
 
-  update(l: number, r: number, target: 0 | 1): void {
-    if (l < 1) l = 1
-    if (r > this._size) r = this._size
-    if (l > r) return
-    this._update(1, l, r, 1, this._size, target)
+  update(left: number, right: number, target: 0 | 1): void {
+    if (left < 1) left = 1
+    if (right > this._size) right = this._size
+    if (left > right) return
+    this._update(1, left, right, 1, this._size, target)
   }
 
   queryAll(): number {
@@ -89,18 +89,18 @@ class SegmentTree2 {
     this._isLazy = new Uint8Array(size << 2)
   }
 
-  query(l: number, r: number): number {
-    if (l < 1) l = 1
-    if (r > this._size) r = this._size
-    if (l > r) return 0
-    return this._query(1, l, r, 1, this._size)
+  query(left: number, right: number): number {
+    if (left < 1) left = 1
+    if (right > this._size) right = this._size
+    if (left > right) return 0
+    return this._query(1, left, right, 1, this._size)
   }
 
-  update(l: number, r: number, target: 0 | 1): void {
-    if (l < 1) l = 1
-    if (r > this._size) r = this._size
-    if (l > r) return
-    this._update(1, l, r, 1, this._size, target)
+  update(left: number, right: number, target: 0 | 1): void {
+    if (left < 1) left = 1
+    if (right > this._size) right = this._size
+    if (left > right) return
+    this._update(1, left, right, 1, this._size, target)
   }
 
   queryAll(): number {

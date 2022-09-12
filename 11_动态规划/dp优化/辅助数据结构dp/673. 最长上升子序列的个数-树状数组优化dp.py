@@ -1,16 +1,16 @@
-# 求最长严格递增子序列的个数
+# 求最长严格递增子序列(LIS)的个数
+# 1 <= nums.length <= 1e5
+# -1e6 <= nums[i] <= 1e6
+
 from typing import List
 from bisect import bisect_left
 from collections import defaultdict
-from sortedcontainers import SortedList
-
-
-# 1 <= nums.length <= 1e5
-# -1e6 <= nums[i] <= 1e6
 
 
 class BIT:
     """单点修改"""
+
+    __slots__ = ("size", "tree")
 
     def __init__(self, n: int):
         self.size = n
@@ -55,6 +55,7 @@ class Discretizer:
 # O(nlogn)
 class Solution:
     def findNumberOfLIS(self, nums: List[int]) -> int:
+        """nlogn求最长严格递增子序列的个数"""
         n = len(nums)
         if n <= 1:
             return n
@@ -62,9 +63,8 @@ class Solution:
         discretizer = Discretizer(nums)
 
         LIS = []
-        counter = defaultdict(
-            lambda: BIT(len(discretizer) + 10)
-        )  # 每个长度的LIS对应一个BIT，BIT维护结尾小于等于value的子序列有多少个
+        # 每个长度的LIS对应一个BIT，BIT维护结尾小于等于value的子序列有多少个
+        dp = defaultdict(lambda: BIT(len(discretizer) + 10))
 
         for num in nums:
             pos = bisect_left(LIS, num)
@@ -72,14 +72,15 @@ class Solution:
                 LIS.append(num)
             else:
                 LIS[pos] = num
-            # 上一个位置结尾小于当前元素的所有的子序列的个数是多少
+
+            # 求前一个位置结尾小于当前元素的子序列的个数
             # 遍历可以用树状数组优化
-            preBIT = counter[pos - 1]
+            preBIT = dp[pos - 1]
             count = preBIT.query(discretizer.get(num) - 1)
-            counter[pos].add(discretizer.get(num), max(1, count))
+            dp[pos].add(discretizer.get(num), max(1, count))
 
         lastPos = len(LIS) - 1
-        return counter[lastPos].query(int(1e20))
+        return dp[lastPos].query(int(1e20))
 
 
 print(Solution().findNumberOfLIS([1, 3, 2, 5, 4, 7]))

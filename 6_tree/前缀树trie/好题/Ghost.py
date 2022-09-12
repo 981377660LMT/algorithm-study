@@ -9,7 +9,7 @@ from typing import List
 class Solution:
     def solve(self, words: List[str]) -> int:
         def dfs(cur) -> bool:
-            if '#' in cur:
+            if "#" in cur:
                 return False
             return not any(dfs(node) for node in cur.values())  # 队手报什么都不能赢
 
@@ -19,7 +19,7 @@ class Solution:
             cur = root
             for c in w:
                 cur = cur[c]
-            cur = cur['#']
+            cur = cur["#"]
 
         return any(dfs(node) for node in root.values())
 

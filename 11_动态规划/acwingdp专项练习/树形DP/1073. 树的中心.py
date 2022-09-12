@@ -41,7 +41,7 @@ def dfs1(cur: int, parent: int) -> int:
 def dfs2(cur: int, parent: int) -> None:
     """前序dfs，利用父结点来更新子结点"""
     """若最远距离 d1[u] 是经过当前子节点 vv 才得到的，那么就只能退而求其次，
-    在 up[u]up[u] 和 d2[u]d2[u] 中取最大值，作为当前子节点 vv 往上走的最远距离 up[v]，反之在 up[u] 和 d1[u]中取最大值"""
+    在 up[u] 和 d2[u] 中取最大值，作为当前子节点 vv 往上走的最远距离 up[v]，反之在 up[u] 和 d1[u]中取最大值"""
     # 每个点处最长和次长
     for next, weight in adjMap[cur]:
         if next == parent:

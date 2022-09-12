@@ -18,10 +18,19 @@ nums = list(map(int, input().split()))
 
 
 def check(mid: int) -> bool:
-    """强化到的最大法术强度是否能达到 mid"""
+    """
+    最大法术强度达到 mid 时所需强化次数是否能不超过m次
+    反向考虑最多能合成多少组
+    """
 
-    # 相邻元素合并(消除)用栈
-    ...
+    res, curSum = 0, 0
+    for num in nums:
+        curSum += num
+        if curSum >= mid:
+            curSum = 0
+            res += 1
+
+    return (n - res) <= m
 
 
 left, right = min(nums), sum(nums)

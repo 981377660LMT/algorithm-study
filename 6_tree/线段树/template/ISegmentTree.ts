@@ -4,10 +4,10 @@ interface ISegmentTreeNode<NodeValue = number> {
   left: number
   right: number
   value: NodeValue
-  [key: string]: any
+  [key: string]: unknown
 }
 
-interface ILazySegmentTreeNode<NodeValue = number> extends ISegmentTreeNode<NodeValue> {
+interface ISegmentTreeNodeWithLazy<NodeValue = number> extends ISegmentTreeNode<NodeValue> {
   isLazy: boolean
   lazyValue: NodeValue
 }
@@ -17,4 +17,4 @@ interface ISegmentTree<TreeItem = number, QueryReturn = number> {
   query: (root: number, left: number, right: number) => QueryReturn
 }
 
-export { ISegmentTree, ISegmentTreeNode, ILazySegmentTreeNode }
+export { ISegmentTree, ISegmentTreeNode, ISegmentTreeNodeWithLazy }

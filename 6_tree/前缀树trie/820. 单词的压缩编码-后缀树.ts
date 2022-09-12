@@ -16,7 +16,7 @@ function minimumLengthEncoding(words: string[]): number {
   words = words.sort((a, b) => b.length - a.length).map(word => word.split('').reverse().join(''))
 
   words.forEach(w => {
-    if (trie.countPre(w) === 0) {
+    if (trie.countWordStartsWith(w) === 0) {
       // console.log(word)
       trie.insert(w)
       // 多了一个分支#和分支的长度

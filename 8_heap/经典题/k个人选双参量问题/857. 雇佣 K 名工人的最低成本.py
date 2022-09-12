@@ -5,7 +5,7 @@ from heapq import heappop, heappush
 # 1 <= K <= N <= 10000
 # 对工资组中的每名工人，应当按其工作质量与同组其他工人的工作质量的比例来支付工资。
 # 工资组中的每名工人至少应当得到他们的最低期望工资。
-# 返回组成一个满足上述条件的工资组至少需要多少钱。
+# !返回组成一个满足上述条件的工资组至少需要多少钱。(用最少成本凑齐人数)
 # https://leetcode-cn.com/problems/minimum-cost-to-hire-k-workers/comments/1031682
 
 
@@ -13,20 +13,21 @@ from heapq import heappop, heappush
 # 总结:乘参量1用排序，加参量2用堆维护,出堆入堆形成抗衡，同时更新res
 # 题目中 对wage/quality升序排列，对quality降序维护:每次入堆wage/quality变大，出堆quality变小,出堆入堆形成抗衡
 
+INF = int(1e18)
+
 
 class Solution:
     def mincostToHireWorkers(self, quality: List[int], wage: List[int], k: int) -> float:
-        workers = sorted((float(w) / q, q) for w, q in zip(wage, quality))
-        res = int(1e20)
-        quaSum = 0
+        workers = sorted((w / q, q) for w, q in zip(wage, quality))
+        res, workSum = INF, 0
         pq = []
-        for wa, qua in workers:
-            heappush(pq, -qua)
-            quaSum += qua
+        for w, q in workers:
+            heappush(pq, -q)
+            workSum += q
             if len(pq) > k:
-                quaSum -= -heappop(pq)
+                workSum -= -heappop(pq)
             if len(pq) == k:
-                res = min(res, quaSum * wa)
+                res = min(res, workSum * w)
         return res
 
 

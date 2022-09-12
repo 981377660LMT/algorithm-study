@@ -12,3 +12,7 @@ V = 150
 START, END, OFFSET = 2 * V, 2 * V + 1, V
 mcmf = MinCostMaxFlow(2 * v + 2, START, END)
 ```
+
+ps:
+匈牙利算法 => 最大流
+KM 算法 => 最小费用最大流

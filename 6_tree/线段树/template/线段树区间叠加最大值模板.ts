@@ -23,18 +23,18 @@ class MaxSegmentTree {
     }
   }
 
-  query(l: number, r: number): number {
-    if (l < 1) l = 1
-    if (r > this._size) r = this._size
-    if (l > r) return -INF // !超出范围返回-INF
-    return this._query(1, l, r, 1, this._size)
+  query(left: number, right: number): number {
+    if (left < 1) left = 1
+    if (right > this._size) right = this._size
+    if (left > right) return -INF // !超出范围返回-INF
+    return this._query(1, left, right, 1, this._size)
   }
 
-  add(l: number, r: number, delta: number): void {
-    if (l < 1) l = 1
-    if (r > this._size) r = this._size
-    if (l > r) return
-    this._add(1, l, r, 1, this._size, delta)
+  add(left: number, right: number, delta: number): void {
+    if (left < 1) left = 1
+    if (right > this._size) right = this._size
+    if (left > right) return
+    this._add(1, left, right, 1, this._size, delta)
   }
 
   queryAll(): number {
