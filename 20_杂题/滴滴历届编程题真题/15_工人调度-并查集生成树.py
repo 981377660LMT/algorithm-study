@@ -29,56 +29,44 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = 998244353
 INF = int(4e18)
 
-from collections import defaultdict
-from typing import DefaultDict, List
 
-
-# union函数很特别的并查集
+# !union函数很特别的并查集
 class UnionFind:
     def __init__(self, n: int):
-        self.n = n
-        self.part = n
         self.parent = list(range(n))
-        self.rank = [1] * n
+        self.rank = [1] * n  # 每个连通块中的机器数
+        self.person = [0] * n  # 每个连通块中的人数
 
     def find(self, x: int) -> int:
-        if x != self.parent[x]:
-            self.parent[x] = self.find(self.parent[x])
-        return self.parent[x]
+        while x != self.parent[x]:
+            self.parent[x] = self.parent[self.parent[x]]
+            x = self.parent[x]
+        return x
 
     def union(self, x: int, y: int) -> bool:
         rootX = self.find(x)
         rootY = self.find(y)
-        if rootX == rootY:
+
+        # !如果两个连通块中的机器数大于人数，那么可以加人
+        if self.rank[rootX] + self.rank[rootY] <= self.person[rootX] + self.person[rootY]:
             return False
-        if self.rank[rootX] > self.rank[rootY]:
-            rootX, rootY = rootY, rootX
-        self.parent[rootX] = rootY
-        self.rank[rootY] += self.rank[rootX]
-        self.part -= 1
+
+        if rootX == rootY:
+            self.person[rootX] += 1
+        else:
+            if self.rank[rootX] < self.rank[rootY]:
+                rootX, rootY = rootY, rootX
+            self.parent[rootY] = rootX
+            self.rank[rootX] += self.rank[rootY]
+            self.person[rootX] += self.person[rootY] + 1
         return True
 
     def isConnected(self, x: int, y: int) -> bool:
         return self.find(x) == self.find(y)
 
-    def getGroups(self) -> DefaultDict[int, List[int]]:
-        groups = defaultdict(list)
-        for key in range(self.n):
-            root = self.find(key)
-            groups[root].append(key)
-        return groups
-
-    def getRoots(self) -> List[int]:
-        return list(set(self.find(key) for key in self.parent))
-
-    def __repr__(self) -> str:
-        return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
-
-    def __len__(self) -> int:
-        return self.part
-
 
 if __name__ == "__main__":
+
     n, m = map(int, input().split())
     uf = UnionFind(m)
     edges = []
@@ -89,4 +77,7 @@ if __name__ == "__main__":
         edges.append((w, u, v))
     edges.sort(key=lambda x: x[0], reverse=True)
     res = 0
+    for w, u, v in edges:
+        if uf.union(u, v):
+            res += w
     print(res)

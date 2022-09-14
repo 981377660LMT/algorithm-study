@@ -1,6 +1,6 @@
-const qucikSort = (arr: readonly number[]): readonly number[] => {
-  if (arr.length <= 1) return arr
-  // 最基础的partition
+// 最基础的partition
+const qucikSort = (arr: readonly number[]): number[] => {
+  if (arr.length <= 1) return arr.slice()
   const start = arr[0]
   const small = qucikSort(arr.slice(1).filter(ele => ele < start))
   const big = qucikSort(arr.slice(1).filter(ele => ele >= start))

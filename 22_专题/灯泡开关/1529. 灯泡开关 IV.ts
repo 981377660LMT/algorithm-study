@@ -12,7 +12,7 @@
 // 只需要在序列前加一个字符0，则反转次数就是01变化的次数
 function minFlips(target: string): number {
   let res = 0
-  target = '0' + target
+  target = `0${target}`
   for (let i = 1; i < target.length; i++) {
     if (target[i] !== target[i - 1]) res++
   }

@@ -4,87 +4,88 @@
 # !而采用AC自动机,时间复杂度只需O(S1+S2)。
 
 
-import string
-from collections import defaultdict, deque, namedtuple
-from typing import Iterable, List, Protocol, Tuple
+from collections import deque
+from typing import List, Tuple
 
 
-class IAutomaton(Protocol):
-    def insert(self, pattern: str) -> None:
-        """插入模式串"""
-        ...
+class AhoCorasick:
+    """https://ikatakos.com/pot/programming_algorithm/string_search"""
 
-    def build(self) -> None:
-        """bfs,字典树的每个结点添加失配指针,结点要跳转到哪里
+    __slots__ = ("_patterns", "_children", "_match", "_fail")
 
-        AC自动机的失配指针指向的节点代表的字符串是当前节点代表的字符串的最长后缀。
-        不空,失配指针指；空,自己去指
-        """
-        ...
+    def __init__(self, patterns: List[str]):
+        self._patterns = patterns
+        self._children = [{}]
+        self._match = [[]]  # match[i] 表示节点i对应的字符串在patterns中的下标
 
-    def search(self, word: str) -> int:
-        """查询各个模式串在主串word中出现的[索引,模式串]"""
-        ...
+        for pi, pattern in enumerate(patterns):
+            if not pattern:
+                continue
+            self._insert(pi, pattern)
 
+        self._fail = [0] * len(self._children)
+        self._buildFail()
 
-def useAutoMaton(charset: Iterable[str], maxLen: int) -> "IAutomaton":
-    nodeId = 0
-    trie = [defaultdict(int) for _ in range(maxLen)]
-    nexts = [0] * maxLen  # kmp算法的nexts数组,失配指针
-    count = [0] * maxLen
-    exists = [[] for _ in range(maxLen)]
+    def search(self, target: str) -> List[Tuple[int, int, int]]:
+        """查询各个模式串在主串`target`中出现的`[起始索引,结束索引,模式串的索引]`"""
+        match, patterns = self._match, self._patterns
 
-    def insert(pattern: str) -> None:
-        nonlocal nodeId
         root = 0
-        for char in pattern:
-            if not trie[root][char]:
-                nodeId += 1
-                trie[root][char] = nodeId
-            root = trie[root][char]
-        count[root] += 1
-        exists[root].append(len(pattern))
-
-    def build() -> None:
-        queue = deque(trie[0].values())
-        while queue:
-            cur = queue.popleft()
-            for char in charset:
-                child = trie[cur][char]
-                # 孩子指向失配指针的孩子 (三角形)
-                if not child:
-                    trie[cur][char] = trie[nexts[cur]][char]
-                else:
-                    # 孩子的失配指针指向父亲的失配指针的孩子 (四边形)
-                    nexts[child] = trie[nexts[cur]][char]
-                    queue.append(child)
-
-    def search(word: str) -> List[Tuple[int, str]]:
         res = []
-        root = 0
-        for i, char in enumerate(word):
-            cur = root = trie[root][char]
-            while cur and exists[cur]:
-                for len_ in exists[cur]:
-                    res.append((i - len_ + 1, word[i - len_ + 1 : i + 1]))
-                cur = nexts[cur]
+        for i, char in enumerate(target):
+            root = self._next(root, char)
+            res.extend((i - len(patterns[m]) + 1, i, m) for m in match[root])
         return res
 
-    return namedtuple("AutoMaton", ["insert", "build", "search"])(insert, build, search)
+    def _insert(self, pi: int, pattern: str) -> None:
+        root = 0
+        for char in pattern:
+            if char in self._children[root]:
+                root = self._children[root][char]
+            else:
+                len_ = len(self._children)
+                self._children[root][char] = len_
+                self._children.append({})
+                self._match.append([])
+                root = len_
+        self._match[root].append(pi)
+
+    def _buildFail(self) -> None:
+        """bfs,字典树的每个结点添加失配指针,结点要跳转到哪里
+
+        AC自动机的失配指针指向的节点所代表的字符串 是 当前节点所代表的字符串的 最长后缀。
+        """
+        children, match, fail = self._children, self._match, self._fail
+
+        queue = deque(children[0].values())
+        while queue:
+            cur = queue.popleft()
+            fafail = fail[cur]
+            for char, child in children[cur].items():
+                fail[child] = self._next(fafail, char)
+                match[child].extend(match[fail[child]])
+                queue.append(child)
+
+    def _next(self, fafil: int, char: str) -> int:
+        """沿着失配链,找到一个节点fafail,具有char的子节点"""
+        while True:
+            if char in self._children[fafil]:
+                return self._children[fafil][char]
+            if fafil == 0:
+                return 0
+            fafil = self._fail[fafil]
 
 
 if __name__ == "__main__":
-    autoMaton = useAutoMaton(string.ascii_lowercase, 10000)
-    autoMaton.insert("he")
-    autoMaton.insert("she")
-    autoMaton.insert("his")
-    autoMaton.insert("hers")
-    autoMaton.build()
-    assert autoMaton.search("ahishershe") == [
-        (1, "his"),
-        (3, "she"),
-        (4, "he"),
-        (4, "hers"),
-        (7, "she"),
-        (8, "he"),
-    ]
+
+    class Solution:
+        def multiSearch(self, big: str, smalls: List[str]) -> List[List[int]]:
+            """多模式匹配indexOfAll"""
+            ac = AhoCorasick(smalls)
+            match = ac.search(big)
+            res = [[] for _ in range(len(smalls))]
+            for start, _, wordId in match:
+                res[wordId].append(start)
+            return res
+
+    print(Solution().multiSearch("mississippi", ["is", "ppi", "hi", "sis", "i", "ssippi"]))

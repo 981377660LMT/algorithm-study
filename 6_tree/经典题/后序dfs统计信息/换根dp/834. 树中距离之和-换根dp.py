@@ -62,9 +62,9 @@ class Solution:
         dfs(0, -1)
 
         def op(fromRes: int, parent: int, cur: int, direction: Literal[0, 1]) -> int:
-            if direction == 0:  # 从子结点向父结点更新
+            if direction == 0:  # !从子结点向父结点更新dp1
                 return fromRes + subTreeCount[cur]
-            return fromRes - subTreeCount[cur] + (n - subTreeCount[cur])  # 从父结点向子结点更新
+            return fromRes + (n - subTreeCount[cur])  # !从父结点向子结点更新dp2
 
         def merge(childRes1: int, childRes2: int) -> int:
             return childRes1 + childRes2

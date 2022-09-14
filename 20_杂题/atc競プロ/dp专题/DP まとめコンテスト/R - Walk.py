@@ -53,7 +53,7 @@ def matqpow1(base: Matrix, exp: int, mod: int) -> Matrix:
 #############################################################
 
 n, k = map(int, input().split())
-adjMatrix = []
+adjMatrix = []  # 从i到j的转移方案数(路径长为1)
 for _ in range(n):
     adjMatrix.append(list(map(int, input().split())))
 

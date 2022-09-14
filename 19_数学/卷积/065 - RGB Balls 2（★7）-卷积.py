@@ -1,7 +1,9 @@
+"""二维卷积"""
+
 # 三种颜色的球 一共选K个
-# R+G <=X
-# G+B<=Y
-# B+R<=Z
+# R+G <= X
+# G+B <= Y
+# B+R <= Z
 # 一共有多少种选法
 
 # !条件转换,考虑反面:
@@ -12,32 +14,21 @@
 # !卷积可以求解 畳み込み (画成二维矩阵 X+Y为定值K时 卷积值为Y=-X+K的对角线的和)
 import sys
 import numpy as np
-from functools import lru_cache
 
 sys.setrecursionlimit(int(1e9))
 input = sys.stdin.readline
-MOD = 998244353
+MOD = int(1e9 + 7)
+fac = [1]
+ifac = [1]
+for i in range(1, int(4e5) + 10):
+    fac.append((fac[-1] * i) % MOD)
+    ifac.append((ifac[-1] * pow(i, MOD - 2, MOD)) % MOD)
 
 
-@lru_cache(None)
-def fac(n: int) -> int:
-    """n的阶乘"""
-    if n == 0:
-        return 1
-    return n * fac(n - 1) % MOD
-
-
-@lru_cache(None)
-def ifac(n: int) -> int:
-    """n的阶乘的逆元"""
-    return pow(fac(n), MOD - 2, MOD)
-
-
-@lru_cache(None)
 def C(n: int, k: int) -> int:
     if n < 0 or k < 0 or n < k:
         return 0
-    return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
+    return ((fac[n] * ifac[k]) % MOD * ifac[n - k]) % MOD
 
 
 def convolve(a: np.ndarray, b: np.ndarray) -> np.ndarray:

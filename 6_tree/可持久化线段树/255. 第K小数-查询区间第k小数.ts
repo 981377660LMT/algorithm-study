@@ -3,9 +3,9 @@
 function usePersistentSegmentTree(nums: number[]) {
   const n = nums.length
   const upper = 4 * n + Math.ceil(Math.log2(n)) * n // 离散化后整个线段树N * 4 + NlogN，索引代表值域
-  const treeCount = new Uint32Array(upper).fill(0)
   const treeLeft = new Uint32Array(upper).fill(0)
   const treeRight = new Uint32Array(upper).fill(0)
+  const treeCount = new Uint32Array(upper).fill(0)
 
   const roots = new Uint32Array(n + 1).fill(0) // n+1个版本的根节点的treeId
   let treeId = 1

@@ -1,7 +1,7 @@
 import { KthTree } from './255. 第K小数-查询区间第k小数'
 
 function medianSlidingWindow(nums: number[], k: number): number[] {
-  const kthTree = new KthTree(nums)
+  const kthTree = new KthTree(nums, true)
   const res: number[] = []
 
   for (let left = 0; left + k - 1 < nums.length; left++) {

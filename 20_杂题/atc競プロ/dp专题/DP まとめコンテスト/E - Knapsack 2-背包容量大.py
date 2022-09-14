@@ -3,7 +3,7 @@
 # !容量大但是物品价值不大 需要改变dp状态定义:
 # !dp[i][score] 前 i 个物品取到score时的最小体积
 
-# 超大背包
+# 超大背包/超大容量的背包
 import sys
 import os
 

@@ -14,7 +14,7 @@ def calMax1(scores: List[int]) -> int:
     """deque写法"""
     n = len(scores)
     res, winLen = 0, n // 2
-    scores = [*scores, *scores]  # 破环成链
+    scores = [*scores, *scores]  # 断环成链
 
     maxQueue = deque()
     for i in range(2 * n):
@@ -53,7 +53,7 @@ class MaxQueue(deque):
     @property
     def max(self) -> int:
         if not self:
-            raise ValueError('maxQueue is empty')
+            raise ValueError("maxQueue is empty")
         return self[0][0]
 
     def append(self, value: int, *metaInfo: Any) -> None:
@@ -64,9 +64,8 @@ class MaxQueue(deque):
 
     def popleft(self) -> None:
         if not self:
-            raise IndexError('popleft from empty queue')
+            raise IndexError("popleft from empty queue")
 
         self[0][-1] -= 1
         if self[0][-1] == 0:
             super().popleft()
-

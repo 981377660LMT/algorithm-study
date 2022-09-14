@@ -1,5 +1,6 @@
 # 请你返回 好字符串 的数目。
-# 好字符串 的定义为：它的长度为 n ，字典序大于等于 s1 ，字典序小于等于 s2 ，且不包含 evil 为子字符串。
+# 好字符串 的定义为：
+# 它的长度为 n ，字典序大于等于 s1 ，字典序小于等于 s2 ，且不包含 evil 为子字符串。
 from functools import lru_cache
 from kmp import getNext
 
@@ -24,7 +25,7 @@ def cal(upper: str, evil: str) -> int:
         if index == n:
             return 1
         res = 0
-        up = upper[index] if isLimit else 'z'
+        up = upper[index] if isLimit else "z"
         for cur in range(97, ord(up) + 1):
             select = chr(cur)
             nextHit = hit

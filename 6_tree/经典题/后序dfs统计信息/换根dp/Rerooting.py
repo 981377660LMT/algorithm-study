@@ -1,7 +1,7 @@
 """
 换根dp框架
 
-op是从cur转移到parent时,childRes如何变化
+op是相邻结点转移时,fromRes如何变化
 merge是如何合并两个子节点的res
 e是每个节点res的初始值
 
@@ -45,7 +45,7 @@ class Rerooting:
         - op: 頂点の値を更新する関数
 
           (fromRes,parent,cur,direction) -> newRes
-          direction: 0表示用cur更新parent,1表示用parent更新cur
+          direction: 0表示用cur更新parent的dp1,1表示用parent更新cur的dp2
 
           dpをmergeする前段階で実行する演算
           例:最も遠い点までの距離を求める場合 return fromRes+1
@@ -94,15 +94,15 @@ class Rerooting:
                 stack.append(next)
 
         # step2
-        dp1 = [e(i) for i in range(self._n)]  # 子树部分的dp值
-        dp2 = [e(i) for i in range(self._n)]  # 非子树部分的dp值
+        dp1 = [e(i) for i in range(self._n)]  # !子树部分的dp值
+        dp2 = [e(i) for i in range(self._n)]  # !非子树部分的dp值
         for cur in self._order[::-1]:  # 从下往上拓扑序dp
             res = e(cur)
             for next in self.adjList[cur]:
                 if self._parent[cur] == next:
                     continue
                 dp2[next] = res
-                res = merge(res, op(dp1[next], cur, next, 0))  # op从下往上更新
+                res = merge(res, op(dp1[next], cur, next, 0))  # op从下往上更新dp1
             res = e(cur)
             for next in self.adjList[cur][::-1]:
                 if self._parent[cur] == next:
@@ -114,7 +114,7 @@ class Rerooting:
         # step3
         for newRoot in self._order[1:]:  # 元の根に関するdp1は既に求まっている
             parent = self._parent[newRoot]
-            dp2[newRoot] = op(merge(dp2[newRoot], dp2[parent]), parent, newRoot, 1)  # op从上往下更新
+            dp2[newRoot] = op(merge(dp2[newRoot], dp2[parent]), parent, newRoot, 1)  # op从上往下更新dp2
             dp1[newRoot] = merge(dp1[newRoot], dp2[newRoot])
         return dp1
 

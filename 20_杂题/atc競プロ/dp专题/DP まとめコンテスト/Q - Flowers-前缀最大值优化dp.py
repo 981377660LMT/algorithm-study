@@ -59,7 +59,7 @@ scores = list(map(int, input().split()))
 
 bit = BIT3(n)
 for i in range(n):
-    preMax = bit.query(heights[i])
+    preMax = bit.query(heights[i] - 1)
     bit.update(heights[i], preMax + scores[i])
 
 print(bit.query(n))

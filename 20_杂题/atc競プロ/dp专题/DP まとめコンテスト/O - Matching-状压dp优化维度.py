@@ -33,6 +33,18 @@ matrix = []
 for _ in range(n):
     matrix.append(list(map(int, input().split())))
 
+# !优化掉一个维度
+dp = [0] * (1 << n)
+dp[0] = 1
+
+for state in range(1, 1 << n):
+    i = popcount(state)  # 当前配对第几个男生
+    # 因为每个人都必须被匹配到，所以我们只需要关心每一层中，1 的个数与当前层相同的位
+    for j in range(n):
+        if (state >> j) & 1 and matrix[i - 1][j]:
+            dp[state] += dp[state ^ (1 << j)]
+            dp[state] %= MOD
+print(dp[-1])
 
 # !TLE
 # @lru_cache(None)
@@ -69,16 +81,3 @@ for _ in range(n):
 
 
 # print(dfs(0))
-
-
-# !优化掉一个维度
-dp = [0] * (1 << n)
-dp[0] = 1
-
-for state in range(1, 1 << n):
-    i = popcount(state)
-    for j in range(n):
-        if (state >> j) & 1 and matrix[i - 1][j]:
-            dp[state] += dp[state ^ (1 << j)]
-            dp[state] %= MOD
-print(dp[-1])
