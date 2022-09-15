@@ -105,4 +105,3 @@ class Solution:
 
 print(Solution().longestRepeating(s="babacc", queryCharacters="bcb", queryIndices=[1, 3, 3]))
 # [3,3,4]
-

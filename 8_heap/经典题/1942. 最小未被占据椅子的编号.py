@@ -1,7 +1,8 @@
 from typing import List
 from heapq import heappush, heappop
 
-# 有 n 个朋友在举办一个派对，这些朋友从 0 到 n - 1 编号。派对里有 无数 张椅子，编号为 0 到 infinity
+# 有 n 个朋友在举办一个派对，这些朋友从 0 到 n - 1 编号。派对里有 无数 张椅子，
+# 编号为 0 到 infinity
 # 当一个朋友到达派对时，他会占据 编号最小 且未被占据的椅子。
 
 
@@ -9,18 +10,18 @@ from heapq import heappush, heappop
 # 保持pq队头是可供使用的编号最小的椅子
 class Solution:
     def smallestChair(self, times: List[List[int]], targetFriend: int) -> int:
-        action = []
-        for i, (arrival, leaving) in enumerate(times):
-            action.append((arrival, True, i))
-            action.append((leaving, False, i))
+        event = []
+        for i, (start, end) in enumerate(times):
+            event.append((start, True, i))
+            event.append((end, False, i))
+        event.sort()
 
-        id = 0
         # 可供使用的椅子
         pq = []
-        seatByPerson = dict()
-        for _, isArrival, person in sorted(action):
-            if isArrival:
-                # 取一个椅子
+        id = 0
+        personId = dict()
+        for _, isStart, person in event:
+            if isStart:  # 取一个椅子
                 if pq:
                     seat = heappop(pq)
                 else:
@@ -28,10 +29,10 @@ class Solution:
                     id += 1
                 if person == targetFriend:
                     return seat
-                seatByPerson[person] = seat
+                personId[person] = seat
             else:
-                # 放回椅子
-                heappush(pq, seatByPerson[person])
+                heappush(pq, personId[person])  # 放回椅子
+                del personId[person]
 
 
 print(Solution().smallestChair(times=[[1, 4], [2, 3], [4, 6]], targetFriend=1))

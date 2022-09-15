@@ -6,7 +6,7 @@ from heapq import heappop, heappush
 # 1 表示这是一批销售订单 sell
 # 由 orders[i] 表示的所有订单提交时间均早于 orders[i+1] 表示的所有订单。
 
-# 总结：每次添加订单时都比较两个队列头部，循环相消
+# !总结：每次添加订单时都比较两个队列头部，循环相消
 class Solution:
     def getNumberOfBacklogOrders(self, orders: List[List[int]]) -> int:
         sell, buy = [], []
@@ -25,7 +25,7 @@ class Solution:
                 if sell[0][1] == 0:
                     heappop(sell)
 
-        return sum(a for _, a in (buy + sell)) % (10 ** 9 + 7)
+        return sum(a for _, a in (buy + sell)) % (10**9 + 7)
 
 
 print(Solution().getNumberOfBacklogOrders(orders=[[10, 5, 0], [15, 2, 1], [25, 1, 1], [30, 4, 0]]))

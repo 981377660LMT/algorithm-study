@@ -21,6 +21,8 @@
     优先使用 dict
 13. all 或者 any 比手动 break 慢很多
     把 **all/any** 换成 **for ... break ... else ...** 后快了 1000 多 ms
+14. 不要用 extend 会比 append 慢很多
+    https://ikatakos.com/pot/programming_algorithm/python_tips/append_extend
 
 **dp 的优化**
 参考 atc 競プロ\AtCoder Beginner Contest\265\E - Warp.py
