@@ -1,5 +1,5 @@
 from typing import List
-from sa import useSA
+from SA import useSA
 
 
 class Solution:

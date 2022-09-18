@@ -3,7 +3,7 @@ from typing import Sequence
 
 class ArrayHasher:
     _BASE = 131
-    _MOD = 2 ** 64
+    _MOD = 2**64
     _OFFSET = 96
 
     @staticmethod
@@ -39,9 +39,8 @@ class ArrayHasher:
         return (upper - lower) % ArrayHasher._MOD
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     stringHasher = ArrayHasher(sequence=[1, 2, 2])
     print(stringHasher.getHashOfSlice(0, 1))
     print(stringHasher.getHashOfSlice(1, 2))
     print(stringHasher.getHashOfSlice(2, 3))
-

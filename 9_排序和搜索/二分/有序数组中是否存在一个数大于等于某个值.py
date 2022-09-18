@@ -7,7 +7,7 @@ def queryExist(nums: List[int], query: int) -> bool:
     if not nums:
         return False
     index = bisect_left(nums, query)
-    return index != len(nums)  # 等于则query比前面都大
+    return index != len(nums)  # 都比query小
 
 
 nums = [1, 2, 3, 4, 5]

@@ -68,4 +68,3 @@ class DiscountSystem:
 
 # [null,null,11,null,19]
 # [null, null, null, 7, null, 11, 11, 10, 21]
-

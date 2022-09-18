@@ -4,7 +4,6 @@
 // 前缀树有许多应用，如自动补全和拼写检查
 
 class TrieNode {
-  // word = '' // 当前结点的单词
   preCount = 0
   wordCount = 0
   children: Map<string, TrieNode> = new Map()
@@ -13,61 +12,56 @@ class TrieNode {
 class Trie {
   readonly root: TrieNode = new TrieNode()
 
-  /**
-   * @param word 将字符串 word 插入前缀树中
-   */
-  insert(word: string): void {
+  insert(s: string): void {
     let { root } = this
-    for (let i = 0; i < word.length; i++) {
-      const char = word[i]
+    for (let i = 0; i < s.length; i++) {
+      const char = s[i]
       if (!root.children.has(char)) root.children.set(char, new TrieNode())
       root.children.get(char)!.preCount++
       root = root.children.get(char)!
     }
 
     root.wordCount++
-    // root.word = word
   }
 
   /**
-   * @param word 树中有多少个单词word
-   *
-   * 更快的方法是直接在dfs中获取结点的信息 而不是重新遍历
+   * @param s 对s的每个非空前缀pre,返回trie中有多少个等于pre的单词
    */
-  countWord(word: string): number {
+  countWord(s: string): number[] {
     let { root } = this
-    for (let i = 0; i < word.length; i++) {
-      const char = word[i]
-      if (!root.children.has(char)) return 0
+    const res = Array<number>(s.length).fill(0)
+    for (let i = 0; i < s.length; i++) {
+      const char = s[i]
+      if (!root.children.has(char)) return []
       root = root.children.get(char)!
     }
 
-    return root.wordCount
+    return res
   }
 
   /**
-   * @param prefix 树中有多少个以prefix为前缀的单词
+   * @param s 对s的每个非空前缀pre,返回trie中有多少个单词以pre为前缀
    */
-  countWordStartsWith(prefix: string): number {
+  countWordStartsWith(s: string): number[] {
     let { root } = this
-    for (let i = 0; i < prefix.length; i++) {
-      const char = prefix[i]
-      if (!root.children.has(char)) return 0
+    const res = Array<number>(s.length).fill(0)
+    for (let i = 0; i < s.length; i++) {
+      const char = s[i]
+      if (!root.children.has(char)) return []
       root = root.children.get(char)!
     }
 
-    return root.preCount
+    return res
   }
 
   /**
-   * @param word 从前缀树中移除 `1个` word
-   *
-   * !需要保证word在前缀树中
+   * @param s 从前缀树中移除 `1个` s
+   * !需要保证s在前缀树中
    */
-  remove(word: string): void {
+  remove(s: string): void {
     let { root } = this
-    for (const char of word) {
-      if (!root.children.has(char)) throw new Error(`word ${word} not in trie`)
+    for (const char of s) {
+      if (!root.children.has(char)) throw new Error(`word ${s} not in trie`)
       root.children.get(char)!.preCount--
       root = root.children.get(char)!
     }

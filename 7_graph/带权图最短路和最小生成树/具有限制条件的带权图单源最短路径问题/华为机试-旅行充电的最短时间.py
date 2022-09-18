@@ -14,9 +14,10 @@
 # !电动车游览城市 每个点转移到下一个点 或者充电
 # !注意到是无环图 没必要dijk 可以直接dp 少一个log (不过懒得改了hh)
 
-from collections import defaultdict, deque
+from collections import defaultdict
 from heapq import heappop, heappush
 
+9
 INF = int(1e18)
 D = int(input())  # 距离D公里远
 N = int(input())  # 沿途有N个休息站

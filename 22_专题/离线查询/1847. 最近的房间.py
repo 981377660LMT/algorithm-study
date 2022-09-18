@@ -1,7 +1,7 @@
 from typing import List
 from sortedcontainers import SortedList
 
-# 第 j 个查询的答案是满足如下条件的房间 id ：
+# 第 j 个查询的答案是满足如下条件的最近的房间 id ：
 
 # 房间的面积 至少 为 minSizej ，且
 # abs(id - preferredj) 的值 最小 ，其中 abs(x) 是 x 的绝对值。
@@ -28,14 +28,14 @@ class Solution:
 
             if availRooms:
                 _, prefer, index = queries[qi]
-                pos = availRooms.bisect_right(prefer)
+                pos = availRooms.bisect_right(prefer) - 1
 
                 # 直接调最右二分，然后看i和i-1，减少了思考难度
                 cands = []
-                if pos > 0:
-                    cands.append(availRooms[pos - 1])
-                if pos < len(availRooms):
+                if pos >= 0:
                     cands.append(availRooms[pos])
+                if pos + 1 < len(availRooms):
+                    cands.append(availRooms[pos + 1])
                 res[index] = min(cands, key=lambda x: abs(x - prefer))
 
         return res
@@ -47,4 +47,3 @@ print(Solution().closestRoom(rooms=[[2, 2], [1, 2], [3, 2]], queries=[[3, 1], [3
 # 查询 [3,1] ：房间 3 的面积为 2 ，大于等于 1 ，且号码是最接近 3 的，为 abs(3 - 3) = 0 ，所以答案为 3 。
 # 查询 [3,3] ：没有房间的面积至少为 3 ，所以答案为 -1 。
 # 查询 [5,2] ：房间 3 的面积为 2 ，大于等于 2 ，且号码是最接近 5 的，为 abs(3 - 5) = 2 ，所以答案为 3 。
-

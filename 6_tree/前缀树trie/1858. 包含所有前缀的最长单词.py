@@ -3,7 +3,7 @@ from typing import Dict, List
 
 
 class TrieNode:
-    __slots__ = ('wordCount', 'preCount', 'children')
+    __slots__ = ("wordCount", "preCount", "children")
 
     def __init__(self):
         self.wordCount = 0
@@ -47,11 +47,10 @@ class Solution:
         for word in words:
             if trie.search(word):
                 return word
-        return ''
+        return ""
 
 
 print(Solution().longestWord(words=["a", "banana", "app", "appl", "ap", "apply", "apple"]))
 # 输出： "apple"
 # 解释： "apple" 和 "apply" 都在 words 中含有各自的所有前缀。
 # 然而，"apple" 在字典序中更小，所以我们返回之。
-

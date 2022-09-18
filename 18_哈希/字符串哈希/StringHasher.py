@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import List, Sequence
 
 
 class StringHasher:
@@ -37,15 +37,6 @@ class StringHasher:
         upper = self._prefix[right]
         lower = self._prefix[left - 1] * self._base[right - (left - 1)]
         return (upper - lower) % StringHasher._MOD
-
-
-def genHash(s: str, base=131, mod=1 << 64, offset=96) -> int:
-    """求字符串哈希值"""
-    res = 0
-    for char in s:
-        res = res * base + ord(char) - offset
-        res %= mod
-    return res
 
 
 if __name__ == "__main__":

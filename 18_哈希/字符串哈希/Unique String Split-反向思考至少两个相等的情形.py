@@ -8,7 +8,7 @@ from typing import Sequence
 
 class StringHasher:
     _BASE = 131
-    _MOD = 2 ** 64
+    _MOD = 2**64
     _OFFSET = 96
 
     @staticmethod

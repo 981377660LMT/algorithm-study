@@ -95,3 +95,4 @@ def getSA(ords: Sequence[int]) -> List[int]:
 
 if __name__ == "__main__":
     print(useSA(list(map(ord, "abcda"))))
+    print(getSA([1, 2, 3, 1]))

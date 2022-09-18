@@ -1,16 +1,19 @@
 # 0 ≤ n < 2 ** 31
 
-# 三个空瓶可换一瓶新酒
-# 现在又n瓶新酒 问最多可喝多少瓶
+# !5个空瓶可换一瓶新酒
+# 现在有n瓶新酒 问最多可喝多少瓶
+# 不可以借空瓶
 class Solution:
     def solve(self, full):
-        empty = 0
-        druken = 0
+        empty = full
+        res = full
 
-        while full:
-            druken += full
-            empty += full
-            full = empty // 3
-            empty = empty % 3
-        return druken
+        while empty >= 5:
+            count = empty // 5
+            empty -= count * 5
+            empty += count
+            res += count
+        return res
 
+
+print(Solution().solve(10))

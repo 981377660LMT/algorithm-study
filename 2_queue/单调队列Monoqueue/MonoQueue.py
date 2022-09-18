@@ -64,6 +64,9 @@ class MonoQueue:
     def __getitem__(self, index: int) -> int:
         return self.rawQueue[index]
 
+    def __repr__(self) -> str:
+        return f"MonoQueue({self.rawQueue})"
+
 
 if __name__ == "__main__":
     monoQueue = MonoQueue()

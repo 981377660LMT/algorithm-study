@@ -139,6 +139,7 @@ def PollardRho(n: int) -> int:
         y = (y * y % n + c) % n
         y = (y * y % n + c) % n
         res = gcd(abs(x - y), n)
+
     return res if MillerRabin(res) else PollardRho(n)  # !这里规定要返回一个素数
 
 
@@ -154,6 +155,9 @@ def getPrimeFactors2(n: int) -> "Counter[int]":
 
 
 if __name__ == "__main__":
+    for i in range(100000):
+        assert getPrimeFactors1(i) == getPrimeFactors2(i)
+
     MOD = int(1e9 + 7)
     fac = [1, 1, 2]  # 阶乘打表
     while len(fac) <= 100:

@@ -1,65 +1,67 @@
 from collections import defaultdict
-from typing import Dict, Iterable, Optional
+from typing import Dict, Iterable, List, Optional
 
 
 class TrieNode:
-    __slots__ = ("wordCount", "preCount", "children", "word")
+    __slots__ = ("wordCount", "preCount", "children")
 
     def __init__(self):
         self.wordCount = 0
         self.preCount = 0
-        # self.word = ""  # 存储当前的单词
         self.children: Dict[str, TrieNode] = defaultdict(TrieNode)
 
 
 class Trie:
-    __slots__ = ("root",)
+    __slots__ = "root"
 
-    def __init__(self, iterable: Optional[Iterable[str]] = None):
+    def __init__(self, words: Optional[Iterable[str]] = None):
         self.root = TrieNode()
-        for word in iterable or ():
+        for word in words or ():
             self.insert(word)
 
-    def insert(self, word: str) -> None:
-        if not word:
+    def insert(self, s: str) -> None:
+        if not s:
             return
         node = self.root
-        for char in word:
+        for char in s:
             node = node.children[char]
             node.preCount += 1
         node.wordCount += 1
-        # node.word = word
 
-    def countWord(self, word: str) -> int:
-        """树中有多少个单词word"""
-        if not word:
-            return 0
+    def countWord(self, s: str) -> List[int]:
+        """对s的每个非空前缀pre,返回trie中有多少个等于pre的单词"""
+        if not s:
+            return []
+        res = []
         node = self.root
-        for char in word:
+        for char in s:
             if char not in node.children:
-                return 0
+                return []
             node = node.children[char]
-        return node.wordCount
+            res.append(node.wordCount)
+        return res
 
-    def countWordStartsWith(self, prefix: str) -> int:
-        """树中有多少个以prefix为前缀的单词"""
-        if not prefix:
-            return 0
+    def countWordStartsWith(self, s: str) -> List[int]:
+        """对s的每个非空前缀pre,返回trie中有多少个单词以pre为前缀"""
+        if not s:
+            return []
+        res = []
         node = self.root
-        for char in prefix:
+        for char in s:
             if char not in node.children:
-                return 0
+                return []
             node = node.children[char]
-        return node.preCount
+            res.append(node.preCount)
+        return res
 
-    def remove(self, word: str) -> None:
-        """从前缀树中移除`1个`word 需要保证word在前缀树中"""
-        if not word:
+    def remove(self, s: str) -> None:
+        """从前缀树中移除`1个`s 需要保证s在前缀树中"""
+        if not s:
             return
         node = self.root
-        for char in word:
+        for char in s:
             if char not in node.children:
-                raise ValueError(f"word {word} not in trie")
+                raise ValueError(f"word {s} not in trie")
             node = node.children[char]
             node.preCount -= 1
         node.wordCount -= 1

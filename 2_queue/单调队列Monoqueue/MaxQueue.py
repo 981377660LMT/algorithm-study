@@ -47,6 +47,9 @@ class MaxQueue:
     def __getitem__(self, index: int) -> int:
         return self.rawQueue[index]
 
+    def __repr__(self) -> str:
+        return f"MaxQueue({self.rawQueue})"
+
 
 class MinQueue:
     def __init__(self, iterable: Optional[Iterable[int]] = None) -> None:
@@ -91,6 +94,9 @@ class MinQueue:
 
     def __getitem__(self, index: int) -> int:
         return self.rawQueue[index]
+
+    def __repr__(self) -> str:
+        return f"MinQueue({self.rawQueue})"
 
 
 if __name__ == "__main__":

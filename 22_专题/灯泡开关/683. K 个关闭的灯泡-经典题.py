@@ -36,20 +36,18 @@ class BitTree:
 # 有序集合找左/右边第一个亮灯泡就可以了
 class Solution:
     def kEmptySlots(self, bulbs: List[int], k: int) -> int:
-        lights = SortedList()
+        sl = SortedList()
         for i, cur in enumerate(bulbs):
-            lights.add(cur)
-            index = lights.bisect_left(cur)
-
-            if index + 1 < len(lights):
-                rightPos = lights[index + 1]
+            pos = sl.bisect_right(cur) - 1
+            if pos >= 0:
+                left = sl[pos]
+                if cur - left == k + 1:
+                    return i + 1
+            if pos + 1 < len(sl):
+                rightPos = sl[pos + 1]
                 if rightPos - cur == k + 1:
                     return i + 1
-
-            if index > 0:
-                leftPos = lights[index - 1]
-                if cur - leftPos == k + 1:
-                    return i + 1
+            sl.add(cur)
 
         return -1
 
@@ -77,7 +75,7 @@ class Solution:
         return -1
 
 
-print(Solution().kEmptySlots2([1, 3, 2], 1))
+print(Solution().kEmptySlots([1, 3, 2], 1))
 print(Solution().kEmptySlots2([6, 5, 8, 9, 7, 1, 10, 2, 3, 4], 2))
 
 # 输出：2
@@ -86,4 +84,3 @@ print(Solution().kEmptySlots2([6, 5, 8, 9, 7, 1, 10, 2, 3, 4], 2))
 # 第二天 bulbs[1] = 3，打开第三个灯泡 [1,0,1]
 # 第三天 bulbs[2] = 2，打开第二个灯泡 [1,1,1]
 # 返回2，因为在第二天，两个打开的灯泡之间恰好有一个关闭的灯泡。
-

@@ -16,7 +16,7 @@ class Trie {
 
   insert(word: string, index: number) {
     if (!word) return
-    let root = this.root
+    let { root } = this
     for (const letter of word) {
       if (!root.children.has(letter)) root.children.set(letter, new TrieNode())
       root = root.children.get(letter)!
@@ -25,8 +25,8 @@ class Trie {
   }
 
   search(prefix: string, suffix: string): number {
-    const target = suffix + '#' + prefix
-    let root = this.root
+    const target = `${suffix}#${prefix}`
+    let { root } = this
     for (const char of target) {
       if (!root.children.has(char)) return -1
       root = root.children.get(char)!
@@ -49,7 +49,7 @@ class WordFilter {
       let suffix = ''
       for (let j = word.length; j >= 0; j--) {
         suffix = word.slice(j, word.length)
-        this.trie.insert(suffix + '#' + word, j)
+        this.trie.insert(`${suffix}#${word}`, j)
       }
     }
   }

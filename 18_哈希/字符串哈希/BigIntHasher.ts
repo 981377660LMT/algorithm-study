@@ -63,7 +63,7 @@ class BigIntHasher implements IStringHasher<bigint> {
   }
 
   private checkRange(left: number, right: number): void {
-    if (0 <= left && left <= right && right <= this.input.length) return
+    if (left >= 0 && left <= right && right <= this.input.length) return
     throw new RangeError('left or right out of range')
   }
 }
