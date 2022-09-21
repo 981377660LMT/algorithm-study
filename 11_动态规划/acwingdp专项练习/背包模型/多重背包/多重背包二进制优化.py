@@ -1,3 +1,5 @@
+"""多重背包单调队列优化 时间复杂度O(n*v*logs)"""
+
 # 有 N 种物品和一个容量是 V 的背包。
 # 第 i 种物品`最多有 si 件`，每件体积是 vi，价值是 wi。
 # 求解将哪些物品装入背包，可使物品体积总和不超过背包容量，且价值总和最大。
@@ -12,7 +14,7 @@
 # 转换后的物品每种有且只有一个，即将问题转换为 0-1 背包
 # 每种新的物品的体积和价值是拆分物品的 1, 2, 4, 8... 倍
 
-# 时间复杂度O(n^2log(count))
+# !时间复杂度O(nlog(count))
 n, cap = map(int, input().split())
 goods = []
 for _ in range(n):
@@ -22,7 +24,7 @@ for _ in range(n):
     while cur <= count:
         goods.append((cost * cur, score * cur))
         count -= cur
-        cur <<= 1
+        cur *= 2
     # 剩下的一组
     if count:
         goods.append((cost * count, score * count))
@@ -36,4 +38,3 @@ for i in range(len(goods)):
             dp[j] = max(dp[j], dp[j - goods[i][0]] + goods[i][1])
 
 print(dp[-1])
-

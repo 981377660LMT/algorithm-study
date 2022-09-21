@@ -9,38 +9,53 @@
 # 并且批萨的数量也增加了 1。这样就完美简化了上面的逻辑。
 # !1388. 3n 块披萨-优先队列+双向链表
 
-from dataclasses import dataclass
+
 from heapq import heapify, heappop, heappush
-from typing import List
+from typing import List, Optional
 
 
-@dataclass(slots=True)
 class MaxCycleNode:
-    value: int
-    left: 'MaxCycleNode'
-    right: 'MaxCycleNode'
-    hasDel: bool = False
+    __slots__ = ("index", "value", "left", "right", "deleted")
 
-    def __eq__(self, other: 'MaxCycleNode') -> bool:
+    def __init__(
+        self,
+        index: int,
+        value: int,
+        left: Optional["MaxCycleNode"] = None,
+        right: Optional["MaxCycleNode"] = None,
+    ) -> None:
+        self.index = index
+        self.value = value
+        self.left = left
+        self.right = right
+        self.deleted = False
+
+    def __eq__(self, other: "MaxCycleNode") -> bool:
         return self.value == other.value
 
-    def __lt__(self, other: 'MaxCycleNode') -> bool:
+    def __lt__(self, other: "MaxCycleNode") -> bool:
         return self.value > other.value
 
     def __repr__(self) -> str:
-        return f'{self.value}'
+        return f"{self.index} {self.value} {self.deleted}"
+
+
+def remove(node: Optional["MaxCycleNode"]) -> None:
+    if node is None:
+        return
+    if node.left:
+        node.left.right = node.right
+    if node.right:
+        node.right.left = node.left
+    node.deleted = True  # 标记删除
 
 
 class Solution:
     def maxSizeSlices(self, slices: List[int]) -> int:
-        def remove(node: 'MaxCycleNode') -> None:
-            node.left.right = node.right
-            node.right.left = node.left
-            node.hasDel = True  # 标记删除
 
         n = len(slices)
-        pq = [MaxCycleNode(value, None, None, False) for value in slices]  # type: ignore
-        for i in range(n):
+        pq = [MaxCycleNode(index, value) for index, value in enumerate(slices)]
+        for i in range(n):  # !双向循环链表
             pq[i].left = pq[(i - 1) % n]
             pq[i].right = pq[(i + 1) % n]
         heapify(pq)
@@ -48,7 +63,7 @@ class Solution:
         res = []
         while len(res) < n // 3:
             maxNode = heappop(pq)
-            if maxNode.hasDel:  # !堆的标记删除
+            if maxNode.deleted:  # !堆的标记删除
                 continue
             res.append(maxNode.value)
             maxNode.value = maxNode.left.value + maxNode.right.value - maxNode.value

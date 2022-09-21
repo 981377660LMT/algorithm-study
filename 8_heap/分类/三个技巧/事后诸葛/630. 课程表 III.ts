@@ -2,7 +2,7 @@
 
 import { MinHeap } from '../../../MinHeap'
 
-// 贪心的关键点就是：根据谁结束的早来选，选结束的早的，自然能学的课程也就越多
+// !贪心的关键点就是：根据谁结束的早来选，选结束的早的，自然能学的课程也就越多
 // 进来的越菜 出去最菜的
 function scheduleCourse(courses: number[][]): number {
   // 按照课程的关闭时间从早到晚排序

@@ -1,5 +1,3 @@
-from bisect import bisect_right
-from itertools import accumulate
 from typing import List
 from BIT import BIT2
 
@@ -19,4 +17,3 @@ class Solution:
         for left, _ in tiles:
             res = max(res, bit.query(left, left + carpetLen - 1))
         return res
-

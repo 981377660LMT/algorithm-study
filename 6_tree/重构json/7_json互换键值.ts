@@ -2,7 +2,7 @@ const userToSkill = {
   robert: ['programming', 'design', 'reactjs'],
   kimia: ['java', 'backend', 'services'],
   patrick: ['reactjs'],
-  chris: ['reactjs', 'programming'],
+  chris: ['reactjs', 'programming']
 } as const
 
 // 转换成
@@ -12,7 +12,7 @@ const skillToUser = {
   java: ['kimia'],
   backend: ['kimia'],
   services: ['kimia'],
-  design: ['robert'],
+  design: ['robert']
 }
 
 type ExtractTuplePropName<U extends Record<string, readonly string[]>> = {
@@ -33,3 +33,4 @@ getObjKeys(userToSkill).forEach(user => {
 })
 
 console.log(Object.fromEntries(res.entries()))
+export {}

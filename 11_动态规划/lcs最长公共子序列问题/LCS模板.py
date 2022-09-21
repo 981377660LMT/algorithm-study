@@ -1,8 +1,10 @@
+"""最长公共子序列"""
+
 from functools import lru_cache
 from typing import Sequence, TypeVar
 
 
-T = TypeVar('T', str, int)
+T = TypeVar("T", str, int)
 
 
 # LCS模板
@@ -37,7 +39,6 @@ def LCS2(seq1: Sequence[T], seq2: Sequence[T]) -> int:
     return dfs(0, 0)
 
 
-if __name__ == '__main__':
-    assert LCS('abc', 'abcd') == 3
-    assert LCS2('abc', 'abcd') == 3
-
+if __name__ == "__main__":
+    assert LCS("abc", "abcd") == 3
+    assert LCS2("abc", "abcd") == 3

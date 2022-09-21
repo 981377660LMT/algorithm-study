@@ -3,17 +3,11 @@ import time
 
 size = 1000
 for _ in range(24):
-    # create string of size "size"
-    s = '*' * size
-
-    # now time reverse slice
+    s = "*" * size
     start = time.time()
     r = s[2:size]
     delta = time.time() - start
-
-    print(f'Size {size:9d}, time={delta:.3f}')
-
-    # double size of the string
+    print(f"Size {size:9d}, time={delta:.3f}")
     size *= 2
 
 # 字符串切片似乎是 O(n/1000) 的复杂度，而字符串比较是O(n/200)的复杂度

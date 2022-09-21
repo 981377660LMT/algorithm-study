@@ -3,7 +3,7 @@
  * @param {string} text2
  * @return {number}
  */
-const longestCommonSubsequence = function (text1: string, text2: string): number {
+function longestCommonSubsequence(text1: string, text2: string): number {
   let res = 0
   const m = text1.length
   const n = text2.length

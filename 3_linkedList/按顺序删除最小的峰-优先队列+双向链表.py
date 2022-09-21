@@ -2,43 +2,56 @@
 # 按顺序删除最小的峰
 
 
-from dataclasses import dataclass
 from heapq import heapify, heappop, heappush
-from typing import List
+from typing import List, Optional
 
 
-@dataclass(slots=True)
 class MinCycleNode:
-    value: int
-    left: 'MinCycleNode'
-    right: 'MinCycleNode'
-    hasDel: bool = False
+    __slots__ = ("index", "value", "left", "right", "deleted")
 
-    def __eq__(self, other: 'MinCycleNode') -> bool:
+    def __init__(
+        self,
+        index: int,
+        value: int,
+        left: Optional["MinCycleNode"] = None,
+        right: Optional["MinCycleNode"] = None,
+    ) -> None:
+        self.index = index
+        self.value = value
+        self.left = left
+        self.right = right
+        self.deleted = False
+
+    def __eq__(self, other: "MinCycleNode") -> bool:
         return self.value == other.value
 
-    def __lt__(self, other: 'MinCycleNode') -> bool:
+    def __lt__(self, other: "MinCycleNode") -> bool:
         return self.value < other.value
 
     def __repr__(self) -> str:
-        return f'{self.value}'
+        return f"{self.index} {self.value} {self.deleted}"
+
+
+def remove(node: Optional["MinCycleNode"]) -> None:
+    if node is None:
+        return
+    if node.left:
+        node.left.right = node.right
+    if node.right:
+        node.right.left = node.left
+    node.deleted = True  # 标记删除
 
 
 # !优先队列+循环双向链表
 class Solution:
     def solve(self, nums: List[int]) -> List[int]:
-        def remove(node: 'MinCycleNode') -> None:
-            node.left.right = node.right
-            node.right.left = node.left
-            node.hasDel = True  # 标记删除
-
         nums.append(-int(1e20))  # 哨兵
         n = len(nums)
-        nodes = [MinCycleNode(value, None, None) for value in nums]  # type: ignore
-        for i in range(n):
+        nodes = [MinCycleNode(index, value) for index, value in enumerate(nums)]
+        for i in range(n):  # !双向循环链表
             nodes[i].left = nodes[(i - 1) % n]
             nodes[i].right = nodes[(i + 1) % n]
-        peaks = [node for node in nodes if node.value > max(node.left.value, node.right.value)]
+        peaks = [node for node in nodes if node.value > max(node.left.value, node.right.value)]  # type: ignore
         heapify(peaks)
 
         res = []

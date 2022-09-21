@@ -12,14 +12,12 @@ class BIT1:
 
     def __init__(self, n: int):
         self.size = n
-        self.tree = defaultdict(int)
+        self.tree = dict()
 
     def add(self, index: int, delta: int) -> None:
-        if index <= 0:
-            raise ValueError("index 必须是正整数")
         index += 1
         while index <= self.size:
-            self.tree[index] += delta
+            self.tree[index] = self.tree.get(index, 0) + delta
             index += index & -index
 
     def query(self, index: int) -> int:
@@ -28,7 +26,7 @@ class BIT1:
         index += 1
         res = 0
         while index > 0:
-            res += self.tree[index]
+            res += self.tree.get(index, 0)
             index -= index & -index
         return res
 
@@ -41,8 +39,8 @@ class BIT2:
 
     def __init__(self, n: int):
         self.size = n
-        self._tree1 = defaultdict(int)
-        self._tree2 = defaultdict(int)
+        self._tree1 = dict()
+        self._tree2 = dict()
 
     def add(self, left: int, right: int, delta: int) -> None:
         """闭区间[left, right]加delta"""
@@ -54,23 +52,23 @@ class BIT2:
         return self._query(right) - self._query(left - 1)
 
     def _add(self, index: int, delta: int) -> None:
-        if index <= 0:
-            raise ValueError("index 必须是正整数")
-
+        # if index <= 0:
+        #     raise ValueError("index 必须是正整数")
+        index += 1
         rawIndex = index
         while index <= self.size:
-            self._tree1[index] += delta
-            self._tree2[index] += (rawIndex - 1) * delta
+            self._tree1[index] = self._tree1.get(index, 0) + delta
+            self._tree2[index] = self._tree2.get(index, 0) + (rawIndex - 1) * delta
             index += index & -index
 
     def _query(self, index: int) -> int:
         if index > self.size:
             index = self.size
-
+        index += 1
         rawIndex = index
         res = 0
         while index > 0:
-            res += rawIndex * self._tree1[index] - self._tree2[index]
+            res += rawIndex * self._tree1.get(index, 0) - self._tree2.get(index, 0)
             index -= index & -index
         return res
 
@@ -84,14 +82,14 @@ class BIT3:
 
     def __init__(self, n: int):
         self.size = n
-        self.tree = defaultdict(int)
+        self.tree = dict()
 
     def update(self, index: int, target: int) -> None:
         """将后缀区间`[index,size]`的最大值更新为target"""
         if index <= 0:
             raise ValueError("index 必须是正整数")
         while index <= self.size:
-            self.tree[index] = max(self.tree[index], target)
+            self.tree[index] = max(self.tree.get(index, 0), target)
             index += index & -index
 
     def query(self, index: int) -> int:
@@ -100,7 +98,7 @@ class BIT3:
             index = self.size
         res = 0
         while index > 0:
-            res = max(res, self.tree[index])
+            res = max(res, self.tree.get(index, 0))
             index -= index & -index
         return res
 

@@ -60,6 +60,20 @@ class MinCostMaxFlow:
             minCost += flow * self._dist[self._end]
         return maxFlow, minCost
 
+    def slope(self) -> List[Tuple[int, int]]:
+        """
+        Returns:
+            List[Tuple[int, int]]: 流量为a时,最小费用是b
+        """
+        res = [(0, 0)]
+        flow, cost = 0, 0
+        while self._spfa():
+            deltaFlow = self._dfs(self._start, self._end, INF)
+            flow += deltaFlow
+            cost += deltaFlow * self._dist[self._end]
+            res.append((flow, cost))  # type: ignore
+        return res
+
     def _spfa(self) -> bool:
         """spfa沿着最短路寻找增广路径  有负cost的边不能用dijkstra"""
         n, start, end, edges, reGraph, visited = (

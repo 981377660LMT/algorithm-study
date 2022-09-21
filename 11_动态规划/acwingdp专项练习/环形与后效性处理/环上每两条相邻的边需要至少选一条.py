@@ -27,7 +27,7 @@ def calCycle(n: int) -> int:
         dp2[i][0] = dp2[i - 1][1]
         dp2[i][1] = (dp2[i - 1][0] + dp2[i - 1][1]) % MOD
 
-    return (dp1[-1][1] + dp2[-1][0] + dp2[-1][1]) % MOD
+    return (dp1[n - 1][1] + dp2[n - 1][0] + dp2[n - 1][1]) % MOD
 
 
 if __name__ == "__main__":

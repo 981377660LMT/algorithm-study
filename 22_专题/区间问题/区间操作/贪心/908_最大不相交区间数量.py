@@ -26,4 +26,3 @@ for start, end in intervals:
         preEnd = end
 
 print(res)
-

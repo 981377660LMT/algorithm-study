@@ -74,3 +74,12 @@ https://twitter.com/e869120/status/1414167845286465539/photo/1
   マス (i,j) に至ったあとの直後の行動で場合分けして、
   dp[(n より大きい数)] = min(dp[(n より大きい数)], dp[n] + 1)
   みたいな書き方をしてみます。図にすると下のような遷移をやっています (ノード 2 にフォーカス)。
+
+- atcoder 里如果要用@lru_cache 写记忆化搜索 **要用 python3.8 交 pypy3 会超时**
+  **n<=2e5 的记忆化搜索可行 但是 4e5 就会被卡了**
+  python3.8
+  https://atcoder.jp/contests/abc251/submissions/35024263
+  https://atcoder.jp/contests/abc229/submissions/35024403
+  pypy3
+  https://atcoder.jp/contests/abc251/submissions/35024229
+  https://atcoder.jp/contests/abc229/submissions/35020011

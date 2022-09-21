@@ -1,5 +1,6 @@
 """卡记忆化搜索"""
 
+from functools import lru_cache
 import sys
 
 sys.setrecursionlimit(int(1e9))
@@ -11,22 +12,20 @@ n, m = map(int, input().split())
 nums = list(map(int, input().split()))
 
 
-# def dfs(index: int, count: int) -> int:
-#     if index == n:
-#         return 0 if count == m else -INF
-#     hash_ = index * n + count
-#     if memo[hash_] != -INF:
-#         return memo[hash_]
-#     res = dfs(index + 1, count)
-#     if count + 1 <= m:
-#         res = max(res, dfs(index + 1, count + 1) + nums[index] * (count + 1))
-#     memo[hash_] = res
-#     return res
+@lru_cache(None)
+def dfs(index: int, count: int) -> int:
+    if index == n:
+        return 0 if count == m else -INF
+    res = dfs(index + 1, count)
+    if count + 1 <= m:
+        res = max(res, dfs(index + 1, count + 1) + nums[index] * (count + 1))
+    return res
 
 
-# memo = [-INF] * (n + 1) * (n + 1)
-# print(dfs(0, 0))
+print(dfs(0, 0))
 
+
+########################################################
 # dp[i][j] 为前i个数中, 选择了j个数的方案数
 dp = [[-INF] * (m + 1) for _ in range(n + 1)]
 dp[0][0] = 0

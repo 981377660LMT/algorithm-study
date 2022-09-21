@@ -1,4 +1,4 @@
-# 三个字符串的LCS
+# 三个字符串的LCS(最长公共子序列)
 from functools import lru_cache
 
 

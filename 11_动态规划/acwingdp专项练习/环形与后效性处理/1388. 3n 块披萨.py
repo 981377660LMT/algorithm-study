@@ -15,31 +15,23 @@ INF = int(1e20)
 
 class Solution:
     def maxSizeSlices(self, slices: List[int]) -> int:
-        """dfs 选不选最后一个"""
+        """dfs 选不选第一个"""
 
         @lru_cache(None)
-        def dfs1(index: int, count: int, hasPre: int) -> int:
-            """取最后一个"""
-            if index == n - 1:
-                return slices[index] if (not hasPre and count == target) else -INF
-            res = dfs1(index + 1, count, False)
+        def dfs(index: int, count: int, hasPre: bool, root: bool) -> int:
+            """当前在index 选择了count 前一个点是否选择 第一个点是否选择"""
+            if index == n:
+                if count != target or (hasPre and root):
+                    return -INF
+                return 0
+            res = dfs(index + 1, count, False, root)
             if not hasPre and count + 1 <= target:
-                res = max(res, dfs1(index + 1, count + 1, True) + slices[index])
-            return res
-
-        @lru_cache(None)
-        def dfs2(index: int, count: int, hasPre: int) -> int:
-            """不取最后一个"""
-            if index == n - 1:
-                return 0 if count == target else -INF
-            res = dfs2(index + 1, count, False)
-            if not hasPre and count + 1 <= target:
-                res = max(res, dfs2(index + 1, count + 1, True) + slices[index])
+                res = max(res, dfs(index + 1, count + 1, True, root) + slices[index])
             return res
 
         n = len(slices)
         target = n // 3
-        return max(dfs1(0, 1, True), dfs2(0, 0, False))
+        return max(dfs(1, 1, True, True) + slices[0], dfs(1, 0, False, False))
 
 
 print(Solution().maxSizeSlices(slices=[1, 2, 3, 4, 5, 6]))

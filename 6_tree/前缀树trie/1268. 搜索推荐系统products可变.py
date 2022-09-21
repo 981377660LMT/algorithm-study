@@ -12,10 +12,10 @@ class WrappedStr(str):
         super().__init__()
         self.string = string
 
-    def __lt__(self, other: 'WrappedStr') -> bool:
+    def __lt__(self, other: "WrappedStr") -> bool:
         return self.string > other.string
 
-    def __eq__(self, other: 'WrappedStr') -> bool:
+    def __eq__(self, other: "WrappedStr") -> bool:
         return self.string == other.string
 
 
@@ -65,5 +65,4 @@ class Solution:
         return trie.search(searchWord)
 
 
-print(Solution().suggestedProducts(['mobile', 'mouse', 'moneypot', 'monitor', 'mousepad'], 'mouse'))
-
+print(Solution().suggestedProducts(["mobile", "mouse", "moneypot", "monitor", "mousepad"], "mouse"))

@@ -5,8 +5,10 @@ from heapq import heappush, heappop
 # 小扣初始血量为 1，且无上限
 
 # 贪心
-# 当不行了时候，把pq的最小的负数扔到最后
+# !当不行了时候，把pq的最小的负数扔到最后
 # 用堆来实现维护当前最小的负数
+
+
 class Solution:
     def magicTower(self, nums: List[int]) -> int:
         if sum(nums) + 1 <= 0:

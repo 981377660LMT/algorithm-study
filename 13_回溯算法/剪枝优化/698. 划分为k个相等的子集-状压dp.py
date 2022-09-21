@@ -1,3 +1,5 @@
+"""分割等和子集/划分为k个相等的子集"""
+
 from functools import lru_cache
 from typing import List
 
@@ -22,4 +24,3 @@ class Solution:
 
         n = len(nums)
         return dfs(0, 0)
-

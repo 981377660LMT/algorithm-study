@@ -3,14 +3,13 @@ from heapq import heappop, heappush
 from typing import List
 
 
-# 为了到达目的地，汽车所必要的最低加油次数是多少？如果无法到达目的地，则返回 -1 。
+# 为了到达目的地，汽车所必要的最低加油次数是多少？
+# 如果无法到达目的地，则返回 -1 。
 # 事后诸葛
 
 
 class Solution:
-    def minRefuelStops(
-        self, target: int, startFuel: int, stations: List[List[int]]
-    ) -> int:
+    def minRefuelStops(self, target: int, startFuel: int, stations: List[List[int]]) -> int:
         stations.append([target, 0])
         remain, curPos, pq = startFuel, 0, []
         res = 0
