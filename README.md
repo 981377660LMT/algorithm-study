@@ -60,6 +60,7 @@
    - [TreeSet](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/TreeSet.ts)
    - [SortedList (py)](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/ATC-SortedList.py)
      [SortedList (ts)](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/Treap.ts)
+   - [SplayArray](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/SplayArray.py)
 
 5. **Graph**
 

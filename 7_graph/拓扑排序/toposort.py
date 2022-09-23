@@ -6,6 +6,33 @@ from typing import DefaultDict, Hashable, List, Set, Tuple, TypeVar
 from collections import defaultdict, deque
 
 
+def topoSort(n: int, adjList: List[List[int]], deg: List[int], directed: bool) -> List[int]:
+    """求图的拓扑排序
+
+    Args:
+        n (int): 顶点0~n-1
+        adjList (List[List[int]]): 邻接表
+        deg (List[int]): 有向图的入度/无向图的度
+        directed (bool): 是否为有向图
+
+    Returns:
+        List[int]: 拓扑排序结果, 若不存在则返回空列表
+    """
+    startDeg = 0 if directed else 1
+    queue = deque([v for v in range(n) if deg[v] == startDeg])
+    res = []
+    while queue:
+        cur = queue.popleft()
+        res.append(cur)
+        for next in adjList[cur]:
+            deg[next] -= 1
+            if deg[next] == startDeg:
+                queue.append(next)
+
+    return [] if any(deg) else res
+    return [] if len(res) < n else res
+
+
 def toposort1(n: int, adjMap: DefaultDict[int, Set[int]], deg: List[int]) -> Tuple[int, List[int]]:
     """ "返回有向图拓扑排序方案数和拓扑排序结果
 

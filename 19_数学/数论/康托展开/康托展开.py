@@ -1,6 +1,8 @@
 """
+康托展开
 求字典序第k小的排列/当前排列在所有排列中的字典序第几小
 """
+
 from collections import Counter
 from typing import List, Sequence, TypeVar
 

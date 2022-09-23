@@ -34,13 +34,13 @@ class Splay {
   }
 
   push_up(x) {
-    const tr = this.tr
+    const { tr } = this
     // tr[x].size = tr[tr[x].s[0]].size + tr[tr[x].s[1]].size + 1;
     tr[x].size = Node.getSize(tr[tr[x].s[0]]) + Node.getSize(tr[tr[x].s[1]]) + 1
   }
 
   push_down(x) {
-    const tr = this.tr
+    const { tr } = this
     if (tr[x].flag) {
       // 调换位置并将标记下传
       ;[tr[x].s[0], tr[x].s[1]] = [tr[x].s[1], tr[x].s[0]]
@@ -56,7 +56,7 @@ class Splay {
 
   // 转谁 谁上去
   rotate(x) {
-    const tr = this.tr
+    const { tr } = this
     let y = tr[x].p
     let z = tr[y].p
 
@@ -85,7 +85,7 @@ class Splay {
   }
 
   splay(x, k) {
-    const tr = this.tr
+    const { tr } = this
     while (tr[x].p != k) {
       let y = tr[x].p
       let z = tr[y].p
@@ -106,7 +106,7 @@ class Splay {
   }
 
   insert(v) {
-    const tr = this.tr
+    const { tr } = this
     let u = this.root
     let p = 0
     while (u) {
@@ -123,7 +123,7 @@ class Splay {
   }
 
   get_k(k) {
-    const tr = this.tr
+    const { tr } = this
     let u = this.root
     while (true) {
       this.push_down(u)
@@ -140,9 +140,9 @@ class Splay {
   }
 
   output(u) {
-    const tr = this.tr
+    const { tr } = this
     const push_down = this.push_down.bind(this)
-    const arr = this.arr
+    const { arr } = this
 
     let ret = []
     function dfs(u) {
@@ -164,18 +164,19 @@ class Splay {
   }
 }
 
-var fs = require('fs')
-var buf = ''
-process.stdin.on('readable', function () {
-  var chunk = process.stdin.read()
+let fs = require('fs')
+
+let buf = ''
+process.stdin.on('readable', () => {
+  let chunk = process.stdin.read()
   if (chunk) buf += chunk.toString()
 })
-process.stdin.on('end', function () {
+process.stdin.on('end', () => {
   let ret = 0
   let m
   let n
   let splay
-  buf.split('\n').forEach(function (line, index) {
+  buf.split('\n').forEach((line, index) => {
     let num = +line
     if (index === 0) {
       tmp = line.split(' ').filter(item => !!item)
