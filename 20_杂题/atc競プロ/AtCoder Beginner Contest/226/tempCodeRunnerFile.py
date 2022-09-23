@@ -1,0 +1,2 @@
+ange(n)]
+    slope = set()

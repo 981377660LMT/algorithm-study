@@ -9,7 +9,7 @@ INF = int(4e18)
 
 
 def solve(grid: List[List[int]]) -> List[int]:
-    """求出全1矩形边界 返回row1,row2,col1,col2"""
+    """求出全1矩形边界(四个顶点) 返回row1,row2,col1,col2"""
     ROW, COL = len(grid), len(grid[0])
     row1, row2, col1, col2 = INF, -INF, INF, -INF
     for r in range(ROW):

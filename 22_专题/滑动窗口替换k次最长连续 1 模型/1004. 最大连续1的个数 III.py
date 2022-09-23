@@ -1,19 +1,19 @@
 # 1004. 最大连续1的个数 III
-# fix模型
+# fix模型/fixK模型
 
 from typing import List, Sequence, TypeVar
 
 T = TypeVar("T")
 
 
-def fix(seq: Sequence[T], need: T, k: int) -> int:
-    """改变最多 k 个 字符,求 nums 中最大连续 need 的个数"""
+def fix(seq: Sequence[T], target: T, k: int) -> int:
+    """改变最多 k 个 字符,求 seq 中最大连续 target 的个数"""
     n, left, res = len(seq), 0, 0
     for right in range(n):
-        if seq[right] != need:
+        if seq[right] != target:
             k -= 1
         while k < 0:
-            if seq[left] != need:
+            if seq[left] != target:
                 k += 1
             left += 1
         res = max(res, right - left + 1)

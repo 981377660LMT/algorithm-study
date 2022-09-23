@@ -19,6 +19,7 @@ function arrayNesting(nums: number[]): number {
 
   return res
 
+  // 寻找最长环
   function dfs(cur: number, size: number): void {
     if (visited[cur]) {
       res = Math.max(res, size)

@@ -3,6 +3,8 @@ from collections import deque
 
 
 class MaxQueue:
+    __slot__ = ("maxQueue", "rawQueue")
+
     def __init__(self, iterable: Optional[Iterable[int]] = None) -> None:
         self.maxQueue: Deque[List[Any]] = deque()
         self.rawQueue: Deque[int] = deque()
@@ -52,6 +54,8 @@ class MaxQueue:
 
 
 class MinQueue:
+    __slots__ = ("minQueue", "rawQueue")
+
     def __init__(self, iterable: Optional[Iterable[int]] = None) -> None:
         self.minQueue: Deque[List[Any]] = deque()
         self.rawQueue: Deque[int] = deque()

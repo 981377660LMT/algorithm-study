@@ -9,7 +9,7 @@ from sortedcontainers import SortedList
 class Solution:
     def helper1(self, arr: List[int]) -> Tuple[List[int], List[int]]:
         """寻找每个元素右侧比自己大的里最小的和右侧比自己小的里最大的
-        
+
         如果有多个符合题意，取右侧第一个
         """
         n = len(arr)
@@ -37,7 +37,7 @@ class Solution:
 
     def helper2(self, nums: List[int]) -> Tuple[List[int], List[int]]:
         """有序集合寻找每个元素右侧比自己大的里最小的和右侧比自己小的里最大的
-        
+
         相同大的,取index小的
         """
         nextSmaller, nextBigger = [-1] * len(nums), [-1] * len(nums)
@@ -64,7 +64,7 @@ class Solution:
         return nextSmaller, nextBigger
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     assert (
         Solution().helper1([10, 13, 12, 14, 15])
         == Solution().helper2([10, 13, 12, 14, 15])

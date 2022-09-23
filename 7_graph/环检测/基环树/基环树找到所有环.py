@@ -5,19 +5,19 @@ from typing import DefaultDict, List, Set, Tuple
 
 
 def findCycleAndCalDepth(
-    n: int, adjMap: DefaultDict[int, Set[int]], degrees: List[int], *, isDirected: bool
+    n: int, adjList: List[List[int]], deg: List[int], *, isDirected: bool
 ) -> Tuple[List[List[int]], List[int]]:
     """无/有向基环树森林找环上的点,并记录每个点在拓扑排序中的最大深度,最外层的点深度为0"""
     depth = [0] * n
-    queue = deque([(i, 0) for i in range(n) if degrees[i] == (0 if isDirected else 1)])
+    queue = deque([(i, 0) for i in range(n) if deg[i] == (0 if isDirected else 1)])
     visited = [False] * n
     while queue:
         cur, dist = queue.popleft()
         visited[cur] = True
-        for next in adjMap[cur]:
+        for next in adjList[cur]:
             depth[next] = max(depth[next], dist + 1)
-            degrees[next] -= 1
-            if degrees[next] == (0 if isDirected else 1):
+            deg[next] -= 1
+            if deg[next] == (0 if isDirected else 1):
                 queue.append((next, dist + 1))
 
     def dfs(cur: int, path: List[int]) -> None:
@@ -25,7 +25,7 @@ def findCycleAndCalDepth(
             return
         visited[cur] = True
         path.append(cur)
-        for next in adjMap[cur]:
+        for next in adjList[cur]:
             dfs(next, path)
 
     cycleGroup = []
@@ -40,8 +40,8 @@ def findCycleAndCalDepth(
 
 
 if __name__ == "__main__":
-    # 6135. 图中的最长环
-    # 求内向基环树(每个点出度最多为1)的最大环
+    # 2360. 图中的最长环
+    # !求内向基环树(每个点出度最多为1)的最大环
     class Solution:
         def longestCycle(self, edges: List[int]) -> int:
             """
@@ -49,17 +49,16 @@ if __name__ == "__main__":
             外向基环树最大环
             """
             n = len(edges)
-            adjMap = defaultdict(set)
+            adjList = [[] for _ in range(n)]
             deg = [0] * n
             for u, v in enumerate(edges):
                 if v == -1:
                     continue
-                adjMap[u].add(v)
+                adjList[u].append(v)
                 deg[v] += 1
-            cycle, _ = findCycleAndCalDepth(n, adjMap, deg, isDirected=True)
-            if not cycle:
-                return -1
-            return max(len(g) for g in cycle)
+
+            cycle, _ = findCycleAndCalDepth(n, adjList, deg, isDirected=True)
+            return max((len(g) for g in cycle), default=-1)
 
         def longestCycle2(self, edges: List[int]) -> int:
 

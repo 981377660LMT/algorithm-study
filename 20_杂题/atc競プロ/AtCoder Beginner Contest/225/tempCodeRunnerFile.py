@@ -1,0 +1,2 @@
+
+    for row in grid:

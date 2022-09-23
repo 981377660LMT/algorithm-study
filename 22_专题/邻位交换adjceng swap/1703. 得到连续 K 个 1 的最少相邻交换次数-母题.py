@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Sequence, TypeVar
 from itertools import accumulate
 
 # 1 <= nums.length <= 105
@@ -20,23 +20,27 @@ from itertools import accumulate
 
 # 需要预处理下前缀和
 
+INF = int(1e20)
+
+T = TypeVar("T")
+
 
 class Solution:
-    def minMoves(self, nums: List[int], k: int) -> int:
-        indexes = []
+    def minMoves(self, nums: Sequence[T], k: int, target: T = 1) -> int:
+        """得到连续 K 个 target 的最少相邻交换次数"""
+        dist = []
         for i in range(len(nums)):
-            if nums[i] == 1:
-                indexes.append(i - len(indexes))
-        preSum = [0] + list(accumulate(indexes))
+            if nums[i] == target:
+                dist.append(i - len(dist))  # 移动到对应1位置的距离
+        preSum = [0] + list(accumulate(dist))
 
-        res = 0x7FFFFFFF
-        # 把ones里的哪k个数移动到一起  left+k-1<len(ones)
-        for left in range(len(indexes) + 1 - k):
+        res = INF
+        # 枚举哪k个数移动到一起
+        for left in range(len(dist) + 1 - k):
             right = left + k - 1
-            mid = (left + right) >> 1
-            # mid左右两边的和
-            leftSum = indexes[mid] * (mid - left) - (preSum[mid] - preSum[left])
-            rightSum = preSum[right + 1] - preSum[mid + 1] - indexes[mid] * (right - mid)
+            mid = (left + right) // 2
+            leftSum = dist[mid] * (mid - left) - (preSum[mid] - preSum[left])
+            rightSum = preSum[right + 1] - preSum[mid] - dist[mid] * (right - mid + 1)
             res = min(res, leftSum + rightSum)
 
         return res
@@ -45,4 +49,3 @@ class Solution:
 print(Solution().minMoves(nums=[1, 0, 0, 1, 0, 1], k=2))
 # 输出：1
 # 解释：在第一次操作时，nums 可以变成 [1,0,0,0,1,1] 得到连续两个 1 。
-

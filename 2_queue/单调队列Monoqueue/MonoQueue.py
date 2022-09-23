@@ -5,6 +5,8 @@ from collections import deque
 class MonoQueue:
     """具有 O(1) 求 `min` 和 `max` API的 deque"""
 
+    __slots__ = ("minQueue", "maxQueue", "rawQueue")
+
     def __init__(self, iterable: Optional[Iterable[int]] = None) -> None:
         self.minQueue: Deque[List[Any]] = deque()
         self.maxQueue: Deque[List[Any]] = deque()

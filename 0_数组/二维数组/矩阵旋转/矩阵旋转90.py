@@ -4,9 +4,10 @@ from typing import List, TypeVar
 T = TypeVar("T")
 
 
-def rotate(matrix: List[List[T]], times=1) -> List[List[T]]:
+def rotate(matrix: List[List[T]], times: int) -> List[List[T]]:
     """顺时针旋转矩阵90度`times`次"""
-    assert times >= 1
+    if times == 0:
+        return [list(row) for row in matrix]
     res = [list(col[::-1]) for col in zip(*matrix)]
     for _ in range(times - 1):
         res = [list(col[::-1]) for col in zip(*res)]

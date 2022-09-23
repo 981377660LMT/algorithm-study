@@ -1,7 +1,7 @@
 from typing import List
 
 
-class UnionFindArray:
+class UnionFind:
     def __init__(self, n: int):
         self.n = n
         self.part = n
@@ -14,15 +14,14 @@ class UnionFindArray:
         return self.parent[x]
 
     def union(self, x: int, y: int) -> bool:
+        """union后x所在的root的parent指向y所在的root"""
         rootX = self.find(x)
         rootY = self.find(y)
         if rootX == rootY:
             return False
 
-        rootX, rootY = sorted([rootX, rootY])
-        # 大的总是指向小的
-        self.parent[rootY] = rootX
-        self.rank[rootX] += self.rank[rootY]
+        self.parent[rootX] = rootY
+        self.rank[rootY] += self.rank[rootY]
         self.part -= 1
         return True
 
@@ -43,7 +42,7 @@ class UnionFindArray:
 
 class Solution:
     def amountPainted(self, paint: List[List[int]]) -> List[int]:
-        uf = UnionFindArray(int(5e4) + 10)
+        uf = UnionFind(int(5e4) + 10)
         res = []
         for start, end in paint:
             startRoot = uf.find(start)

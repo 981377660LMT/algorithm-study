@@ -31,7 +31,7 @@ from collections import deque
 from heapq import heappop, heappush
 from typing import List
 
-
+# 2386. 找出数组的第 K 大和
 def kSum(nums: List[int], k: int) -> int:
     """求数组中第k个最大的子序列和"""
     n = len(nums)

@@ -6,7 +6,7 @@ from sortedcontainers import SortedSet
 
 class SummaryRanges:
     def __init__(self):
-        self.uf = UnionFindArray(int(1e4) + 10)
+        self.uf = UnionFind(int(1e4) + 10)
         self.points = SortedSet()
 
     def addNum(self, val: int) -> None:
@@ -22,7 +22,7 @@ class SummaryRanges:
         return res
 
 
-class UnionFindArray:
+class UnionFind:
     def __init__(self, n: int):
         self.n = n
         self.part = n
@@ -30,20 +30,20 @@ class UnionFindArray:
         self.rank = [1] * n
 
     def find(self, x: int) -> int:
-        if x != self.parent[x]:
-            self.parent[x] = self.find(self.parent[x])
-        return self.parent[x]
+        while x != self.parent[x]:
+            self.parent[x] = self.parent[self.parent[x]]
+            x = self.parent[x]
+        return x
 
     def union(self, x: int, y: int) -> bool:
+        """union后x所在的root的parent指向y所在的root"""
         rootX = self.find(x)
         rootY = self.find(y)
         if rootX == rootY:
             return False
 
-        rootX, rootY = sorted([rootX, rootY], reverse=True)
-        # 小的总是指向大的
-        self.parent[rootY] = rootX
-        self.rank[rootX] += self.rank[rootY]
+        self.parent[rootX] = rootY
+        self.rank[rootY] += self.rank[rootX]
         self.part -= 1
         return True
 
