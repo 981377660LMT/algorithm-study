@@ -8,13 +8,11 @@
 from functools import lru_cache
 
 
-
-
 @lru_cache(None)
 def cal(upper: int, queryDigit: int) -> int:
     @lru_cache(None)
-    def dfs(pos: int, count: int, hasLeadingZero: bool, isLimit: bool) -> int:
-        """当前在第pos位，出现次数为count，hasLeadingZero表示有前导0，isLimit表示是否贴合上界"""
+    def dfs(pos: int, hasLeadingZero: bool, isLimit: bool, count: int) -> int:
+        """当前在第pos位，hasLeadingZero表示有前导0，isLimit表示是否贴合上界,出现次数为count"""
         if pos == len(nums):
             return count
 
@@ -22,13 +20,13 @@ def cal(upper: int, queryDigit: int) -> int:
         up = nums[pos] if isLimit else 9
         for cur in range(up + 1):
             if hasLeadingZero and cur == 0:
-                res += dfs(pos + 1, count, True, (isLimit and cur == up))
+                res += dfs(pos + 1, True, (isLimit and cur == up), count)
             else:
-                res += dfs(pos + 1, count + (cur == queryDigit), False, (isLimit and cur == up))
+                res += dfs(pos + 1, False, (isLimit and cur == up), count + (cur == queryDigit))
         return res
 
     nums = list(map(int, str(upper)))
-    return dfs(0, 0, True, True)
+    return dfs(0, True, True, 0)
 
 
 while True:
@@ -38,7 +36,7 @@ while True:
     res = []
     for i in range(10):
         res.append(str(cal(right, i) - cal(left - 1, i)))
-    print(' '.join(res))
+    print(" ".join(res))
 
 # 6902 6902 6904 6984 7011 7523 16002 11851 5952 6574
 # 1523 1523 1560 1619 2261 2523 7662 2533 2533 1923

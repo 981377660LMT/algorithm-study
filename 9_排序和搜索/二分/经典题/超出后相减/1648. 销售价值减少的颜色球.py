@@ -37,7 +37,7 @@ class Solution:
         left = 1
         right = int(1e9)
         while left <= right:
-            mid = (left + right) >> 1
+            mid = (left + right) // 2
             # 超出orders才回升
             if check(mid):
                 left = mid + 1
@@ -67,4 +67,3 @@ print(Solution().maxProfit(inventory=[2, 5], orders=4))
 # 输出：14
 # 解释：卖 1 个第一种颜色的球（价值为 2 )，卖 3 个第二种颜色的球（价值为 5 + 4 + 3）。
 # 最大总和为 2 + 5 + 4 + 3 = 14 。
-

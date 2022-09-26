@@ -22,7 +22,7 @@ for _ in range(n - 1):
 
 def dfs(cur: int, pre: int) -> Tuple[int, int, int]:
     """后序dfs返回(只有a 只有b ab都有)的删边方案数"""
-    res1, res2, res3 = int(values[cur] == 'a'), int(values[cur] == 'b'), 1
+    res1, res2, res3 = int(values[cur] == "a"), int(values[cur] == "b"), 1
     for next in adjList[cur]:
         if next == pre:
             continue
@@ -35,8 +35,7 @@ def dfs(cur: int, pre: int) -> Tuple[int, int, int]:
         # 不删边 a b c / 删边 c
         res3 *= (a + b + c) + c  # !注意这里多算了一些非法状态 最后再减去
         res3 %= MOD
-    return res1, res2, (res3 - (res2 if values[cur] == 'b' else res1)) % MOD
+    return res1, res2, (res3 - (res2 if values[cur] == "b" else res1)) % MOD
 
 
 print(dfs(0, -1)[2])
-

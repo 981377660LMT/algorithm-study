@@ -26,7 +26,7 @@ class Solution:
             # 最右二分求最后能和哪个数齐平
             left, right = 0, n
             while left <= right:
-                mid = (left + right) >> 1
+                mid = (left + right) // 2
                 diff = mid * nums[mid] - preSum[mid]
                 if diff <= delta:
                     left = mid + 1

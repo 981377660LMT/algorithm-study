@@ -48,7 +48,7 @@ def dijkstra2(
     dist = [INF] * n
     dist[start] = 0
     pq = [(0, start)]
-    pre = [[] for _ in range(n)]
+    pre = [[] for _ in range(n)]  # !记录`所有的`路径
 
     while pq:
         curDist, cur = heappop(pq)

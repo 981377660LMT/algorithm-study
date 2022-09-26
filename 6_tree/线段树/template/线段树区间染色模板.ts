@@ -123,7 +123,7 @@ class SegmentTree2 {
     if (L <= l && r <= R) {
       this._isLazy[rt] = 1
       this._lazyValue[rt] = target
-      this._tree[rt] = target === 1 ? r - l + 1 : 0
+      this._tree[rt] = target * (r - l + 1)
       return
     }
 
@@ -143,8 +143,8 @@ class SegmentTree2 {
       const target = this._lazyValue[rt]
       this._lazyValue[rt << 1] = target
       this._lazyValue[(rt << 1) | 1] = target
-      this._tree[rt << 1] = target === 1 ? mid - l + 1 : 0
-      this._tree[(rt << 1) | 1] = target === 1 ? r - mid : 0
+      this._tree[rt << 1] = target * (mid - l + 1)
+      this._tree[(rt << 1) | 1] = target * (r - mid)
       this._isLazy[rt << 1] = 1
       this._isLazy[(rt << 1) | 1] = 1
 

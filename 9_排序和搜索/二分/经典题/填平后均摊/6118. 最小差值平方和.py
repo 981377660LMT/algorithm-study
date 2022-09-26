@@ -1,11 +1,20 @@
+# `k次加1操作最大化最小值`
+# 就是 load balancer 问题(amazon last mile)
+# 思路是排序后再求前缀和，最右二分求最后能和哪个数齐平
+
+# ```Python
+# nums = sorted(nums)
+# preSum = [0] + list(accumulate(nums))
+# nums = [0] + nums
+# ```
+
+
 from itertools import accumulate
 from typing import List
 
 
 class Solution:
-    def minSumSquareDiff(
-        self, nums1: List[int], nums2: List[int], k1: int, k2: int
-    ) -> int:
+    def minSumSquareDiff(self, nums1: List[int], nums2: List[int], k1: int, k2: int) -> int:
         """请你返回修改数组 nums1 至多 k1 次且修改数组 nums2 至多 k2 次后的最小 差值平方和 。"""
         diff = [abs((a - b)) for a, b in zip(nums1, nums2)]
         res = minimizeMaxValue(diff, k1 + k2)
@@ -51,9 +60,7 @@ def minimizeMaxValue(nums: List[int], k: int) -> List[int]:
     return copy
 
 
-print(
-    Solution().minSumSquareDiff(nums1=[1, 2, 3, 4], nums2=[2, 10, 20, 19], k1=0, k2=0)
-)
+print(Solution().minSumSquareDiff(nums1=[1, 2, 3, 4], nums2=[2, 10, 20, 19], k1=0, k2=0))
 print(Solution().minSumSquareDiff(nums1=[1, 4, 10, 12], nums2=[5, 8, 6, 9], k1=1, k2=1))
 print(Solution().minSumSquareDiff([10, 10, 10, 11, 5], [1, 0, 6, 6, 1], 11, 27))
 # 预期 0

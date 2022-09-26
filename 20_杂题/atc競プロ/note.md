@@ -86,3 +86,5 @@ https://twitter.com/e869120/status/1414167845286465539/photo/1
   pypy3
   https://atcoder.jp/contests/abc251/submissions/35024229
   https://atcoder.jp/contests/abc229/submissions/35020011
+
+  **因为 python3.8 递归比 pypy3 快，所以如果要用递归,用 python3.8 交**

@@ -1,5 +1,5 @@
 // 任意两后缀的 LCP
-// lcp(sa[i], sa[j])=min{height[i＋1..j}
+// !lcp(sa[i], sa[j])=min{height[i＋1..j}
 // 求两子串最长公共前缀就转化为了 RMQ 问题。
 // 注：若允许离线可以用 Trie+Tarjan 做到线性
 

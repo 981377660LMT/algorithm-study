@@ -8,19 +8,23 @@ import { BinaryTree } from '../../Tree'
  */
 const diameterOfBinaryTree = function (root: BinaryTree): number {
   if (!root) return 0
-  let max = 0
 
-  const dfs = (root: BinaryTree | null): number => {
-    if (!root) return 0
+  let max = 0
+  dfs(root)
+  return max
+
+  function dfs(root: BinaryTree | null): number {
+    if (!root) {
+      return 0
+    }
+
     const left = dfs(root.left)
     const right = dfs(root.right)
     max = Math.max(max, left + right)
     return Math.max(left, right) + 1
   }
-  dfs(root)
-
-  return max
 }
+
 console.log(diameterOfBinaryTree(deserializeNode([1, 2, 3, 4, 5, null, null])!))
 
 export {}

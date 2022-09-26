@@ -79,7 +79,7 @@ def isPrime(n: int) -> bool:
 
 @lru_cache(None)
 def getPrimeFactors1(n: int) -> "Counter[int]":
-    """n 的质因数分解 O(sqrt(n))"""
+    """n 的素因子分解 O(sqrt(n))"""
     res = Counter()
     upper = floor(n**0.5) + 1
     for i in range(2, upper):

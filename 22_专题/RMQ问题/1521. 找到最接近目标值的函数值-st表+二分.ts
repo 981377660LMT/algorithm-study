@@ -7,7 +7,8 @@ function closestToTarget(arr: number[], target: number): number {
 
   let res = Math.abs(arr[0] - target)
   for (let start = 0; start < n; start++) {
-    let [left, right] = [start, n - 1]
+    let left = start
+    let right = n - 1
     while (left <= right) {
       const mid = Math.floor((left + right) / 2)
       const diff = st.query(start, mid) - target

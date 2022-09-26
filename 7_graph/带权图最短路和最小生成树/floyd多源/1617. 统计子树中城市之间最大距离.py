@@ -14,22 +14,25 @@ class Solution:
         2.枚举子集看哪些是子树
         """
 
-        adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))
+        dist = defaultdict(lambda: defaultdict(lambda: int(1e20)))
         for i in range(n):
-            adjMap[i][i] = 0
+            dist[i][i] = 0
         for u, v in edges:
-            adjMap[u - 1][v - 1] = 1
-            adjMap[v - 1][u - 1] = 1
+            dist[u - 1][v - 1] = 1
+            dist[v - 1][u - 1] = 1
 
-        for k, i, j in product(range(n), repeat=3):
-            adjMap[i][j] = min(adjMap[i][j], adjMap[i][k] + adjMap[k][j])
+        for k in range(n):
+            for i in range(n):
+                for j in range(n):
+                    cand = dist[i][k] + dist[k][j]
+                    dist[i][j] = cand if dist[i][j] > cand else dist[i][j]
 
         res = [0] * n
         for state in range(1, 1 << n):
             nodes = [i for i in range(n) if (state >> i) & 1]
-            edgeCount = sum(adjMap[n1][n2] == 1 for n1, n2 in combinations(nodes, 2))
+            edgeCount = sum(dist[n1][n2] == 1 for n1, n2 in combinations(nodes, 2))
             if len(nodes) == edgeCount + 1:
-                maxDist = max((adjMap[n1][n2] for n1, n2 in combinations(nodes, 2)), default=0)
+                maxDist = max((dist[n1][n2] for n1, n2 in combinations(nodes, 2)), default=0)
                 res[maxDist] += 1
 
         return res[1:]

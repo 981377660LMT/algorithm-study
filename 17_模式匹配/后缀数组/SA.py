@@ -10,7 +10,7 @@ def useSA(ords: Sequence[int]) -> Tuple[List[int], List[int], List[int]]:
     Returns:
         sa: 每个排名对应的后缀
         rank: 每个后缀对应的排名
-        height: 第 i 名的后缀与它前一名的后缀的 `最长公共前缀`的长度
+        height: 第 i 名的后缀与它前一名的后缀的 `最长公共前缀(LCP)`的长度
     """
     sa = getSA(ords)
     n, k = len(sa), 0

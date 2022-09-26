@@ -16,14 +16,14 @@ class Solution:
     def minInterval(self, intervals: List[List[int]], queries: List[int]) -> List[int]:
         # 离线查询预处理
         intervals.sort()
-        Q = sorted([(query, index) for index, query in enumerate(queries)])
+        queriesWithIndedx = sorted([(query, index) for index, query in enumerate(queries)])
 
         ei = 0
         res = [-1] * len(queries)
         pq = []
 
         # 遍历intervals左区间的位置
-        for qv, qi in Q:
+        for qv, qi in queriesWithIndedx:
             # 将所有起始位置小于等于查询位置的区间intervals[i]添加到优先队列中
             while ei < len(intervals) and intervals[ei][0] <= qv:
                 start, end = intervals[ei]
@@ -36,7 +36,7 @@ class Solution:
 
             # 如果队列不为空，则代表队首区间是要查询的点的最短区间
             if pq:
-                length, _, = pq[0]
+                length, _ = pq[0]
                 res[qi] = length
 
         return res

@@ -12,24 +12,23 @@ from sortedcontainers import SortedList
 class Solution:
     def maximumBeauty(self, items: List[List[int]], queries: List) -> List[int]:
         items = sorted(items)
-        queries = sorted([(price, index) for index, price in enumerate(queries)])
+        queriesWithIndex = sorted([(price, index) for index, price in enumerate(queries)])
         cur = SortedList()
 
-        m, n = len(items), len(queries)
-        ii, qi = 0, 0
+        m, n = len(items), len(queriesWithIndex)
+        ii = 0
         res = [0] * n
 
-        while qi < n:
+        for qi in range(n):
             # 添加阶段
-            if ii < m and qi < n and items[ii][0] <= queries[qi][0]:
+            while ii < m and items[ii][0] <= queriesWithIndex[qi][0]:
                 cur.add(items[ii][1])
                 ii += 1
+
             # 查询阶段
-            else:
-                if cur:
-                    _, index = queries[qi]
-                    res[index] = cur[-1]
-                qi += 1
+            if cur:
+                _, index = queriesWithIndex[qi]
+                res[index] = cur[-1]
 
         return res
 

@@ -28,4 +28,3 @@ class Solution:
                 heappop(pq)
             res[queries[qi][1]] = len(pq)
         return res
-

@@ -12,22 +12,22 @@ class Solution:
     def closestRoom(self, rooms: List[List[int]], queries: List[List[int]]) -> List[int]:
         # 存放房间id
         availRooms = SortedList()
-        queries = sorted(
+        queriesWithIndex = sorted(
             [[size, prefer, i] for i, (prefer, size) in enumerate(queries)], reverse=True
         )
         rooms = sorted([[size, id] for id, size in rooms], reverse=True)
 
         m, n = len(rooms), len(queries)
-        ri, qi = 0, 0
+        ri = 0
         res = [-1] * n
 
         for qi in range(n):
-            while ri < m and rooms[ri][0] >= queries[qi][0]:
+            while ri < m and rooms[ri][0] >= queriesWithIndex[qi][0]:
                 availRooms.add(rooms[ri][1])
                 ri += 1
 
             if availRooms:
-                _, prefer, index = queries[qi]
+                _, prefer, index = queriesWithIndex[qi]
                 pos = availRooms.bisect_right(prefer) - 1
 
                 # 直接调最右二分，然后看i和i-1，减少了思考难度

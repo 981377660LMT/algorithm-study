@@ -1,3 +1,5 @@
+"""最大子矩阵"""
+
 from typing import List, Tuple
 
 
@@ -29,7 +31,7 @@ class PreSumMatrix:
 
 def maxSubArray(nums: List[int]) -> Tuple[int, Tuple[int, int]]:
     """最大子数组和,返回数组
-    
+
     dp,需要记录左端点:只取当前还是取前面
     如果前面的和小于0,那么就舍弃前面的一截,并将左端点移到当前位置
     """
@@ -59,8 +61,7 @@ def maxSubArray(nums: List[int]) -> Tuple[int, Tuple[int, int]]:
 # 1 <= m, n <= 100
 class Solution:
     def getMaxMatrix(self, matrix: List[List[int]]) -> List[int]:
-        """给你一个 m x n 的矩阵 matrix 和一个整数 k ，找出元素总和最大的子矩阵。
-        """
+        """给你一个 m x n 的矩阵 matrix 和一个整数 k ，找出元素总和最大的子矩阵。"""
         ROW, COL = len(matrix), len(matrix[0])
         P = PreSumMatrix(matrix)
         res = [0, 0, 0, 0]
@@ -76,6 +77,6 @@ class Solution:
         return res
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     matrix = [[9, -8, 1, 3, -2], [-3, 7, 6, -2, 4], [6, -4, -4, 8, -7]]
     assert Solution().getMaxMatrix(matrix) == [0, 0, 2, 3]

@@ -233,29 +233,23 @@ class SplayArray(Generic[_V]):
 if __name__ == "__main__":
     import time
 
-    step = int(1e5)
+    step = int(2e5)  # !数据量超过1e5时，splay的效率才能体现出来
     print(f"step = {step}")
 
     print()
-    print("测试SplayArray")
+    print(f"测试SplayArray,初始长度{step}")
     start = time.time()
-    nums = SplayArray(range(int(1e5)))
+    nums = SplayArray(range(step))
     delta = time.time() - start
-    print(f"初始化耗时{(delta*1000):.2f}s")
+    print(f"初始化耗时 {(delta*1000):.2f}ms")
 
-    # 插入step次
+    # 插入删除step次
     start = time.time()
     for i in range(step):
         nums.insert(i, i)
+        nums.pop(i)
     delta = time.time() - start
-    print(f"插入耗时 {(delta*1000):.2f}ms")
-
-    # 删除step次
-    start = time.time()
-    for i in range(step):
-        nums.pop(0)
-    delta = time.time() - start
-    print(f"删除耗时 {(delta*1000):.2f}ms")
+    print(f"插入删除耗时 {(delta*1000):.2f}ms")
 
     # 访问step次
     start = time.time()
@@ -265,25 +259,19 @@ if __name__ == "__main__":
     print(f"随机访问耗时 {(delta*1000):.2f}ms")
     ##################################################
     print()
-    print("测试普通数组")
+    print(f"测试普通数组,初始长度{step}")
     start = time.time()
-    nums = list(range(int(1e5)))
+    nums = list(range(step))
     delta = time.time() - start
-    print(f"初始化耗时{delta:.2f}s")
+    print(f"初始化耗时 {(delta*1000):.2f}ms")
 
-    # 插入step次
+    # 插入删除step次
     start = time.time()
     for i in range(step):
-        nums.insert(i, i)
+        nums[i:i] = [i]
+        nums[i : i + 1] = []
     delta = time.time() - start
-    print(f"插入耗时 {(delta*1000):.2f}ms")
-
-    # 删除step次
-    start = time.time()
-    for _ in range(step):
-        nums.pop(0)
-    delta = time.time() - start
-    print(f"删除耗时 {(delta*1000):.2f}ms")
+    print(f"插入删除耗时 {(delta*1000):.2f}ms")
 
     # 访问step次
     start = time.time()

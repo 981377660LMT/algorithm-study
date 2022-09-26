@@ -1,5 +1,6 @@
 from typing import List
 from SA import useSA
+from atcSA import sa_is, rank_lcp
 
 
 class Solution:
@@ -15,7 +16,9 @@ class Solution:
             res += right - left
             rightMosts[left] = right
             count -= num % p == 0
-        sa, _, lcp = useSA(nums)
+        sa = sa_is(nums, max(nums))
+        _, lcp = rank_lcp(nums, sa)
+        lcp = [0] + lcp
         return res - sum(min(lcp[i], rightMosts[sa[i]] - sa[i]) for i in range(n))
 
 

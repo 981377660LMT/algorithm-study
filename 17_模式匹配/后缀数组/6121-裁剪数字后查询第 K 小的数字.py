@@ -10,7 +10,7 @@
 
 from collections import defaultdict
 from typing import List
-from SA import getSA
+from atcSA import sa_is
 
 
 class Solution:
@@ -20,7 +20,7 @@ class Solution:
             ords.extend(list(map(ord, word)))
             ords.append(i)  # 相当于每个字符串的长度是n+1
 
-        sa = getSA(ords)
+        sa = sa_is(ords, max(ords))
         indexMap = defaultdict(list)  # 每个单词后缀长度 => 从小到大排列的单词序号
         for saIndex in sa:
             wordIndex, suffixLen = divmod(saIndex, n + 1)

@@ -4,7 +4,7 @@ import { deserializeNode } from './重构json/297.二叉树的序列化与反序
 enum State {
   NeedShoot = 0,
   AlreadyShoot = 1,
-  Monitor = 2,
+  Monitor = 2
 }
 
 /**

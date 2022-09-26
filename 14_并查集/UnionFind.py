@@ -13,7 +13,7 @@ class UnionFindMap(Generic[T]):
     def __init__(self, iterable: Optional[Iterable[T]] = None):
         self.part = 0
         self.parent = dict()
-        self.rank = defaultdict(lambda: 1)
+        self.rank = dict()
         for item in iterable or []:
             self.add(item)
 
@@ -23,7 +23,7 @@ class UnionFindMap(Generic[T]):
         root2 = self.find(key2)
         if root1 == root2:
             return False
-        if self.rank[root1] > self.rank[root2]:
+        if self.rank.get(root1, 1) > self.rank[root2]:
             root1, root2 = root2, root1
         self.parent[root1] = root2
         self.rank[root2] += self.rank[root1]

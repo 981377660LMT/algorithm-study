@@ -1,91 +1,81 @@
 from collections import defaultdict
-from typing import (
-    DefaultDict,
-    Generic,
-    Hashable,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
-    TypeVar,
-)
-
-T = TypeVar("T", bound=Hashable)
+from typing import DefaultDict, List, Tuple
 
 
-class UnionFindMap(Generic[T]):
-    def __init__(self, iterable: Optional[Iterable[T]] = None):
-        self.count = 0
-        self.parent = dict()
-        self.rank = defaultdict(lambda: 1)
-        for item in iterable or []:
-            self.add(item)
+class UnionFindArray:
+    """元素是0-n-1的并查集写法,不支持动态添加
 
-    def union(self, key1: T, key2: T) -> bool:
+    初始化的连通分量个数 为 n
+    """
+
+    __slots__ = ("n", "part", "parent", "rank")
+
+    def __init__(self, n: int):
+        self.n = n
+        self.part = n
+        self.parent = list(range(n))
+        self.rank = [1] * n
+
+    def find(self, x: int) -> int:
+        while self.parent[x] != x:
+            self.parent[x] = self.parent[self.parent[x]]
+            x = self.parent[x]
+        return x
+
+    def union(self, x: int, y: int) -> bool:
         """rank一样时 默认key2作为key1的父节点"""
-        root1 = self.find(key1)
-        root2 = self.find(key2)
-        if root1 == root2:
+        rootX = self.find(x)
+        rootY = self.find(y)
+        if rootX == rootY:
             return False
-        if self.rank[root1] > self.rank[root2]:
-            root1, root2 = root2, root1
-        self.parent[root1] = root2
-        self.rank[root2] += self.rank[root1]
-        self.count -= 1
+        if self.rank[rootX] > self.rank[rootY]:
+            rootX, rootY = rootY, rootX
+        self.parent[rootX] = rootY
+        self.rank[rootY] += self.rank[rootX]
+        self.part -= 1
         return True
 
-    def find(self, key: T) -> T:
-        if key not in self.parent:
-            self.add(key)
-            return key
+    def isConnected(self, x: int, y: int) -> bool:
+        return self.find(x) == self.find(y)
 
-        while self.parent.get(key, key) != key:
-            self.parent[key] = self.parent[self.parent[key]]
-            key = self.parent[key]
-        return key
-
-    def isConnected(self, key1: T, key2: T) -> bool:
-        return self.find(key1) == self.find(key2)
-
-    def getRoots(self) -> List[T]:
-        return list(set(self.find(key) for key in self.parent))
-
-    def getGroup(self) -> DefaultDict[T, List[T]]:
+    def getGroups(self) -> DefaultDict[int, List[int]]:
         groups = defaultdict(list)
-        for key in self.parent:
+        for key in range(self.n):
             root = self.find(key)
             groups[root].append(key)
         return groups
 
-    def add(self, key: T) -> bool:
-        if key in self.parent:
-            return False
-        self.parent[key] = key
-        self.rank[key] = 1
-        self.count += 1
-        return True
+    def getRoots(self) -> List[int]:
+        return list(set(self.find(key) for key in self.parent))
+
+    def __repr__(self) -> str:
+        return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
+
+    def __len__(self) -> int:
+        return self.part
 
 
-P = TypeVar("P", bound=Hashable)
+def kruskal(vertex: int, edges: List[Tuple[int, int, int]]) -> Tuple[int, List[int]]:
+    """Kruskal算法求最小生成树
 
+    Args:
+        vertex (int): 节点`个数`,并查集初始化为(0,1,2,...,(vertex-1)+10)
+        edges (List[Tuple[int, int, int]]): 边的列表,每个元素是`(u, v, w)`表示无向边u到v,权重为w
 
-def kruskal(n: int, edges: List[Tuple[P, P, int]]) -> Tuple[int, List[Tuple[P, P, int]]]:
-    """求最小生成树权值与最小生成树的边
-
-    1. 边权排序
-    2. 两两连接不连通的点
+    Returns:
+        Tuple[int, List[Tuple[int, int, int]]]: 最小生成树的边权和,组成最小生成树的边的索引
     """
-    uf = UnionFindMap[P]()
+    uf = UnionFindArray(vertex + 10)
     cost, res = 0, []
 
-    edges = sorted(edges, key=lambda e: e[2])
-    for u, v, w in edges:
+    edgesWithIndex = sorted([(i, *edge) for i, edge in enumerate(edges)], key=lambda e: e[-1])
+    for ei, u, v, w in edgesWithIndex:
         root1, root2 = uf.find(u), uf.find(v)
         if root1 != root2:
             cost += w
             uf.union(root1, root2)
-            res.append((u, v, w))
+            res.append(ei)
 
-    if len(res) != n - 1:
+    if len(res) != vertex - 1:
         return -1, []
     return cost, res

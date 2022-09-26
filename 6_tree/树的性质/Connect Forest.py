@@ -1,6 +1,6 @@
 # 1. 并查集获取各个树
 # 2. 获取各个树的直径 讨论直径数 1 2 >=3
-# 3. 连接直径
+# 3. 连接直径 形成森林
 from collections import defaultdict, deque
 from typing import DefaultDict, List
 

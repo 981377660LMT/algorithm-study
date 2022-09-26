@@ -33,3 +33,5 @@ if (require.main === module) {
   console.log(longestPrefix('ababab'))
   // "abab"
 }
+
+export { getNext }

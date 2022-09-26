@@ -1,3 +1,8 @@
+"""
+看到子数组和 想到前缀和 
+看到子数组长度 想到哈希表存索引
+"""
+
 from itertools import accumulate
 from typing import List
 

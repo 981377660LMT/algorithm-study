@@ -16,9 +16,13 @@ if __name__ == "__main__":
 
     for u, v, w in edges:
         dist[u][v] = dist[v][u] = w
-    for k, i, j in product(range(n), repeat=3):
-        # !松弛：如果一条边可以被松弛了，说明这条边就没有必要留下了
-        dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                # !松弛：如果一条边可以被松弛了，说明这条边就没有必要留下了
+                cand = dist[i][k] + dist[k][j]
+                dist[i][j] = cand if dist[i][j] > cand else dist[i][j]
 
     # !2.Floyd 最短路计数 (Floyd求两点之间的最短路数)
     dist = [[INF] * n for _ in range(n)]

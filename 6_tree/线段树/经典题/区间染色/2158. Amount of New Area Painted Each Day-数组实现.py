@@ -1,6 +1,4 @@
-from typing import Callable, List
-
-Merge = Callable[[int, int], int]
+from typing import List
 
 
 class SegmentTree:
@@ -66,23 +64,3 @@ class SegmentTree:
 
 
 # 本题线段树update需要做特殊处理，染过的值至多为1
-class Solution:
-    def amountPainted(self, paint: List[List[int]]) -> List[int]:
-        min_, max_ = paint[0][0] + 1, paint[0][1] + 1
-        for start, end in paint:
-            min_ = min(min_, start)
-            max_ = max(max_, end)
-
-        tree = SegmentTree(max_ + 1)
-        res = []
-        for start, end in paint:
-            start, end = start + 1, end + 1
-            rangeSum = tree.query(start, end - 1)
-            res.append(end - start - rangeSum)
-            tree.update(start, end - 1, 1)
-
-        return res
-
-
-print(Solution().amountPainted([[1, 2], [2, 3], [3, 4]]))
-

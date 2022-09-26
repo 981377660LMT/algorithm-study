@@ -1,3 +1,8 @@
+"""
+点分治解法
+https://leetcode.cn/problems/number-of-good-paths/solution/dian-fen-zhi-jie-fa-by-vclip-nr5b/
+"""
+
 # # 给定一个有 N 个点（编号 0,1,…,N−1）的树，每条边都有一个权值（不超过 1000）。
 # # 树上两个节点 x 与 y 之间的路径长度就是路径上各条边的权值之和。
 # # 求长度不超过 K 的路径(树上距离小于等于k的对数)有多少条。

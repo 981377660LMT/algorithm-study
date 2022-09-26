@@ -9,9 +9,9 @@ e是每个节点res的初始值
 """
 
 
-from typing import Callable, List, Literal
+from typing import Callable, List
 
-Op = Callable[[int, int, int, Literal[0, 1]], int]
+Op = Callable[[int, int, int, int], int]
 Merge = Callable[[int, int], int]
 E = Callable[[int], int]
 
@@ -122,7 +122,7 @@ class Rerooting:
 if __name__ == "__main__":
     # 310-求树上每个节点到其他节点的最远距离
 
-    def op(fromRes: int, parent: int, cur: int, direction: Literal[0, 1]) -> int:
+    def op(fromRes: int, parent: int, cur: int, direction: int) -> int:
         # dpをmergeする前段階で実行する演算
         # 例:最も遠い点までの距離を求める場合 return res+1
         return fromRes + 1
