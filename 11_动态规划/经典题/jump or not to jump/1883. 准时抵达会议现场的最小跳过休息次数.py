@@ -3,7 +3,8 @@
 # 然而，为了能准时到达，你可以选择 跳过 一些路的休息时间，这意味着你不必等待下一个整数小时。
 # 返回准时抵达会议现场所需要的 最小跳过次数 ，如果 无法准时参会 ，返回 -1 。
 # !1 <= n <= 1000
-
+# dist[i]<=10^5
+# speed[i]<=10^6
 
 # summary
 # jump or not jump at each point
@@ -18,6 +19,7 @@
 # 本题speed最大为1e6 因此EPS取1e-8/1e-9都可以
 
 
+from decimal import Decimal
 from typing import List
 from math import ceil
 
@@ -27,6 +29,24 @@ EPS = 1e-8
 
 class Solution:
     def minSkips(self, dist: List[int], speed: int, hoursBefore: int) -> int:
+        """Decimal替换int避免float运算的浮点数误差"""
+        n = len(dist)
+        dp = [INF] * (n + 1)  # 前i个位置跳了j次时花费的最少时间
+        dp[0] = 0
+        for i in range(1, n + 1):
+            ndp = [INF] * (n + 1)
+            cost = Decimal(dist[i - 1]) / Decimal(speed)  # Decimal处理float误差
+            for pre in range(i):
+                # 不跳
+                ndp[pre] = min(ndp[pre], ceil(dp[pre] + cost))
+                # 跳
+                ndp[pre + 1] = min(ndp[pre + 1], dp[pre] + cost)  # type: ignore
+            dp = ndp
+
+        return next((i for i in range(n + 1) if dp[i] <= hoursBefore), -1)
+
+    def minSkips2(self, dist: List[int], speed: int, hoursBefore: int) -> int:
+        """减去EPS规避浮点数误差"""
         n = len(dist)
         dp = [INF] * (n + 1)  # 前i个位置跳了j次时花费的最少时间
         dp[0] = 0

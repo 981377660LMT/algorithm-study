@@ -122,8 +122,7 @@ if __name__ == "__main__":
     n, q = map(int, input().split())
     s = input()  # 括号序列
     nums = [1 if c == "(" else -1 for c in s]
-    preSum = [0] + list(accumulate(nums))
-    tree = MinSegmentTree2(preSum)  # !线段树维护前缀和
+    preSum = MinSegmentTree2(list(accumulate(nums)))  # !线段树维护前缀和
 
     for _ in range(q):
         kind, left, right = map(int, input().split())  # 1<=left<=right<=n
@@ -132,12 +131,12 @@ if __name__ == "__main__":
             if nums[left - 1] == nums[right - 1]:
                 continue
             if nums[left - 1] == 1 and nums[right - 1] == -1:
-                tree.add(left, right - 1, -2)
+                preSum.add(left, right - 1, -2)
             elif nums[left - 1] == -1 and nums[right - 1] == 1:
-                tree.add(left, right - 1, 2)
+                preSum.add(left, right - 1, 2)
             nums[left - 1], nums[right - 1] = nums[right - 1], nums[left - 1]
         else:  # !检查s[left:right+1]是否为合法的括号序列
-            pre1 = tree.query(left - 1, left - 1) if left > 1 else 0
-            min_ = tree.query(left, right) - pre1
-            last = tree.query(right, right) - pre1
+            pre = preSum.query(left - 1, left - 1) if left > 1 else 0
+            min_ = preSum.query(left, right) - pre
+            last = preSum.query(right, right) - pre
             print("Yes" if (min_ >= 0 and last == 0) else "No")

@@ -27,3 +27,18 @@ class Solution(object):
             dp |= ndp  # 直接加到dp，形成新的子集
         return len(dp)
 ```
+
+**当 num 很小时 set 可以用位运算代替**
+[6000ms 优化到 60ms](LCP%2065.%20%E8%88%92%E9%80%82%E7%9A%84%E6%B9%BF%E5%BA%A6.py)
+
+```Python
+def check(mid: int) -> bool:
+  """
+  给数组元素添加正负号后,max(preSum) - min(preSum) <= mid 是否成立
+  """
+  mask = (1 << (mid + 1)) - 1
+  dp = mask  # 枚举0-mid起点
+  for num in nums:
+      dp = ((dp << num) | (dp >> num)) & mask  # & mask 去除超出边界的非法状态
+  return dp != 0
+```

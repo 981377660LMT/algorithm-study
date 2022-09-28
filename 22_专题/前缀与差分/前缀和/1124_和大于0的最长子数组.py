@@ -1,4 +1,6 @@
 """
+和大于0/和小于0 的最长子数组
+
 看到子数组和 想到前缀和 
 看到子数组长度 想到哈希表存索引
 """
@@ -35,7 +37,7 @@ class Solution:
         n = len(hours)
         nums = [1 if h > 8 else -1 for h in hours]
         preSum = list(accumulate(nums, initial=0))
-        preMin = list(accumulate(preSum[1:], initial=0, func=min))
+        preMin = list(accumulate(preSum[1:], initial=0, func=min))  # 前缀最小值
 
         res = 0
         left, right = 0, n

@@ -14,17 +14,18 @@ class Solution:
         """nlogn 合并集合"""
 
         def dfs(cur: int) -> Set[int]:
-            subtree = set([nums[cur]])
+            curRes = set([nums[cur]])
             for next in adjList[cur]:
                 nextRes = dfs(next)
-                subtree, nextRes = sorted((subtree, nextRes), key=len, reverse=True)
-                subtree |= nextRes
+                if len(nextRes) > len(curRes):  # !启发式合并，小的合并到大的
+                    curRes, nextRes = nextRes, curRes
+                curRes |= nextRes
                 if res[next] > res[cur]:
                     res[cur] = res[next]  # 注意这里更新mex
 
-            while res[cur] in subtree:  # 注意这里这样做
+            while res[cur] in curRes:  # 注意这里这样做
                 res[cur] += 1
-            return subtree
+            return curRes
 
         n = len(parents)
         adjList = [[] for _ in range(n)]

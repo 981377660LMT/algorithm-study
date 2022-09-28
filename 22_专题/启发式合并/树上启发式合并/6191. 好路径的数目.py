@@ -15,31 +15,32 @@ n<=3e4 暗示nlogn
 # !启发式合并
 # !后序dfs统计子树内的每种结点个数,同时删除不合法的点,再统计经过当前结点能产生多少条新路径
 # !合并子树返回值时，小的dict合并到大的dict上去(启发式合并)
+# !复杂度nlognlogn
 
-from typing import Dict, List
+from typing import List
+from sortedcontainers import SortedDict
 
 
 class Solution:
     def numberOfGoodPaths(self, vals: List[int], edges: List[List[int]]) -> int:
-        def dfs(cur: int, pre: int) -> "Dict[int, int]":
+        def dfs(cur: int, pre: int) -> "SortedDict":
             """后序dfs返回子树内的每种结点个数 在当前结点处统计经过当前结点能产生多少条新路径"""
             self.res += 1
-            curRes = {vals[cur]: 1}
+            curRes = SortedDict({vals[cur]: 1})
 
             for next in adjList[cur]:
                 if next == pre:
                     continue
                 nextRes = dfs(next, cur)
-                for key in list(nextRes):
-                    if key < vals[cur]:
-                        del nextRes[key]
+                # 我们枚举到的每个元素都会被删掉，所以总共最多只有 n 次删除，复杂度还是正确的。
+                while nextRes and nextRes.peekitem(0)[0] < vals[cur]:  # type: ignore 启发式合并
+                    nextRes.popitem(0)
 
-                if len(curRes) < len(nextRes):  # !启发式合并
+                if len(curRes) < len(nextRes):
                     curRes, nextRes = nextRes, curRes
                 for key in nextRes:
-                    self.res += curRes.get(key, 0) * nextRes[key]  # !统计经过当前结点能产生多少条新路径
-
-                curRes.update({key: curRes.get(key, 0) + nextRes[key] for key in nextRes})
+                    self.res += curRes.get(key, 0) * nextRes[key]
+                    curRes[key] = curRes.get(key, 0) + nextRes[key]
 
             return curRes
 
@@ -52,3 +53,6 @@ class Solution:
         self.res = 0
         dfs(0, -1)
         return self.res
+
+
+print(Solution().numberOfGoodPaths([1, 3, 3, 5], [[0, 1], [0, 2], [3, 1]]))

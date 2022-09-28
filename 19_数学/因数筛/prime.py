@@ -155,7 +155,7 @@ def getPrimeFactors2(n: int) -> "Counter[int]":
 
 
 if __name__ == "__main__":
-    for i in range(100000):
+    for i in range(1000):
         assert getPrimeFactors1(i) == getPrimeFactors2(i)
 
     MOD = int(1e9 + 7)

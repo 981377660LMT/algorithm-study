@@ -4,7 +4,7 @@
 
 // 这个while循环终止条件值得借鉴
 // 多路归并
-const nthUglyNumber = (n: number) => {
+function nthUglyNumber(n: number) {
   const res = [1]
   let i = 0
   let j = 0
@@ -16,9 +16,17 @@ const nthUglyNumber = (n: number) => {
     const nextK = res[k] * 5
     const nextUglyNumber = Math.min(nextI, nextJ, nextK)
 
-    if (nextUglyNumber === nextI) i++
-    if (nextUglyNumber === nextJ) j++
-    if (nextUglyNumber === nextK) k++
+    if (nextUglyNumber === nextI) {
+      i++
+    }
+
+    if (nextUglyNumber === nextJ) {
+      j++
+    }
+
+    if (nextUglyNumber === nextK) {
+      k++
+    }
 
     res.push(nextUglyNumber)
   }

@@ -16,11 +16,11 @@ n<=3e4
 # !把所有边按两个端点的最大值排序分组，然后按这个最大值从小到大依次合并，
 # 每合并完一组查看当前组对应的点的连通情况并统计答案，最后别忘了加上只有单个点的路径
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from typing import List
 
 
-class UnionFind:
+class UF:
     def __init__(self, n: int):
         self.n = n
         self.part = n
@@ -51,24 +51,19 @@ class UnionFind:
 class Solution:
     def numberOfGoodPaths(self, vals: List[int], edges: List[List[int]]) -> int:
         n = len(vals)
+        edges.sort(key=lambda x: max(vals[x[0]], vals[x[1]]))
         nodeGroup = defaultdict(list)
-        edgeGroup = defaultdict(list)  # 按端点最大值分组
-
-        for i, num in enumerate(vals):
-            nodeGroup[num].append(i)
-        for u, v in edges:
-            max_ = max(vals[u], vals[v])
-            edgeGroup[max_].append((u, v))
+        for i, v in enumerate(vals):
+            nodeGroup[v].append(i)
 
         res = 0
-        uf = UnionFind(n)
-        keys = sorted(edgeGroup)  # 按顺序合并边
-        for curMax in keys:
-            for u, v in edgeGroup[curMax]:
-                uf.union(u, v)
-            groupCounter = defaultdict(int)  # !统计当前最大值在哪些连通分量中 同一个连通分量可以连接路径
-            for node in nodeGroup[curMax]:
-                groupCounter[uf.find(node)] += 1
+        uf = UF(n)
+        ei = 0
+        for curMax in sorted(nodeGroup):  # !遍历当前最大值
+            while ei < len(edges) and vals[edges[ei][0]] <= curMax and vals[edges[ei][1]] <= curMax:
+                uf.union(edges[ei][0], edges[ei][1])
+                ei += 1
+            # !统计当前最大值在哪些连通分量中 同一个连通分量可以连接路径
+            groupCounter = Counter(uf.find(i) for i in nodeGroup[curMax])
             res += sum([v * (v - 1) // 2 for v in groupCounter.values()])  # !comb(v, 2)
-
         return res + n  # 单个点的路径

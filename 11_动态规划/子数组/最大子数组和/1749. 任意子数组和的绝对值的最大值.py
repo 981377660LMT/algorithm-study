@@ -1,5 +1,7 @@
+"""任意子数组和的绝对值的最大值"""
+
 from typing import List
-from itertools import accumulate, pairwise
+from itertools import accumulate
 
 # 1 <= nums.length <= 105
 # 请你找出 nums 中 和的绝对值 最大的任意子数组（可能为空），并返回该 最大值 。
@@ -15,4 +17,3 @@ class Solution:
 print(Solution().maxAbsoluteSum(nums=[1, -3, 2, 3, -4]))
 # 输出：5
 # 解释：子数组 [2,3] 和的绝对值最大，为 abs(2+3) = abs(5) = 5
-

@@ -11,7 +11,7 @@ def randomSplit(people: int, money: float) -> List[int]:
     """
     为了避免浮点数误差,
     使用`分`来表示金额单位,
-    且使用`Fraction(python)`或者`math.BigDecimal(java)`来计算
+    且使用`Decimal(python)`或者`math.BigDecimal(java)`来计算
     """
     money = int(money * 100)
     weights = [randint(5, 15) for _ in range(people)]

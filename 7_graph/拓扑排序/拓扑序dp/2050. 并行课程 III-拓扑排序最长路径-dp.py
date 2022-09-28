@@ -20,24 +20,23 @@ def minimumTime(n: int, relations: List[List[int]], time: List[int]) -> int:
         deg[v] += 1
 
     # !记录虚拟原点0到达每个点处所需要的距离
-    dist = [0] * (n + 1)
-
+    dp = [0] * (n + 1)
     queue = deque()
     for i in range(1, n + 1):
         if deg[i] == 0:
             queue.append(i)
-            dist[i] = time[i - 1]
+            dp[i] = time[i - 1]
 
     while queue:
         cur = queue.popleft()
         for next in adjList[cur]:
-            cost = time[next - 1]
-            dist[next] = max(dist[next], dist[cur] + cost)
+            weight = time[next - 1]
+            dp[next] = max(dp[next], dp[cur] + weight)
             deg[next] -= 1
             if deg[next] == 0:
                 queue.append(next)
 
-    return max(dist)
+    return max(dp)
 
 
 print(minimumTime(n=3, relations=[[1, 3], [2, 3]], time=[3, 2, 5]))

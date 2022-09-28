@@ -22,7 +22,13 @@ class Solution {
     return ans;
   }
 
-  int gcd(int a, int b) {
+  static int gcd(int a, int b) {
     return b == 0 ? a : gcd(b, a % b);
+  }
+
+  public static void main(String[] args) {
+    int[][] ps = { { 1, 1 }, { 3, 2 }, { 5, 3 }, { 4, 1 }, { 2, 3 }, { 1, 4 } };
+    System.out.println(new Solution().maxPoints(ps));
+    System.out.println(gcd(-2, -1));
   }
 }

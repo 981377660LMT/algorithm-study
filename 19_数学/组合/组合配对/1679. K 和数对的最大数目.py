@@ -12,22 +12,22 @@ class Solution:
         n = len(nums)
         nums.sort()
         res = 0
-        L, R = 0, n - 1
-        while L < R:
-            if nums[L] + nums[R] == k:
+        left, right = 0, n - 1
+        while left < right:
+            if nums[left] + nums[right] == k:
                 res += 1
-                L += 1  # 2个数删除
-                R -= 1
-            elif nums[L] + nums[R] < k:
-                L += 1  # 让小的大一些
+                left += 1  # 2个数删除
+                right -= 1
+            elif nums[left] + nums[right] < k:
+                left += 1  # 让小的大一些
             else:
-                R -= 1  # 让大的小一些
+                right -= 1  # 让大的小一些
         return res
 
     def maxOperations2(self, nums: List[int], k: int) -> int:
         freq = Counter(nums)
         res = 0
-        for key in freq.keys():
+        for key in freq:
             if key * 2 == k:
                 res += freq[key] // 2
             # 只算一次，算小的

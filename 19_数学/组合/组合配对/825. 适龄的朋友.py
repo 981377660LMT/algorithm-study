@@ -9,12 +9,11 @@ class Solution:
 
         counter = Counter(ages)
         res = 0
-        for a in counter.keys():
-            for b in counter.keys():
+        for a in counter:
+            for b in counter:
                 if canSend(a, b):
                     if a == b:
                         res += counter[a] * (counter[a] - 1)
                     else:
                         res += counter[a] * counter[b]
         return res
-

@@ -1,3 +1,5 @@
+"""1577. 数的平方等于两数乘积的方法数"""
+
 from typing import List
 from collections import Counter
 

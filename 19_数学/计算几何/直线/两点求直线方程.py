@@ -1,11 +1,11 @@
-from fractions import Fraction
+from decimal import Decimal
 from math import gcd
 from typing import Tuple, Union
 
 
 def calSlopeInterceptForm(
     x1: int, y1: int, x2: int, y2: int
-) -> Union[Tuple[Fraction, Fraction], Tuple[None, int]]:
+) -> Union[Tuple[Decimal, Decimal], Tuple[None, int]]:
     """求出直线方程的斜截式`y=kx+b 或 x=b`的斜率和截距
 
     Returns:
@@ -15,7 +15,7 @@ def calSlopeInterceptForm(
     """
     if x1 == x2:
         return None, x1
-    slope = Fraction(y2 - y1, x2 - x1)
+    slope = Decimal(y2 - y1) / Decimal(x2 - x1)
     intercept = y1 - slope * x1
     return slope, intercept
 

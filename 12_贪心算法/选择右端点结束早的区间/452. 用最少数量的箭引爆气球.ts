@@ -1,19 +1,20 @@
 /**
  * @param {number[][]} points
  * @return {number}
- * 有多少不重叠的区间
+ * 返回引爆所有气球所必须射出的 最小 弓箭数 。
+ * !有多少不重叠的区间
  */
 function findMinArrowShots(points: number[][]): number {
   // 区间结束时间/区间右端点排序
   points.sort((a, b) => a[1] - b[1])
 
-  let preEnd = -Infinity
-  let res = 1
+  let res = 0
+  let preEnd = -2e15
 
   for (let i = 0; i < points.length; i++) {
-    const [curStart, curEnd] = points[i]
-    if (preEnd < curStart) {
-      preEnd = curEnd
+    const [start, end] = points[i]
+    if (start > preEnd) {
+      preEnd = end
       res++
     }
   }
@@ -26,7 +27,7 @@ console.log(
     [10, 16],
     [2, 8],
     [1, 6],
-    [7, 12],
+    [7, 12]
   ])
 )
 // 输出：2

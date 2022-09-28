@@ -19,7 +19,7 @@ class Solution:
 
         left, right = 1, int(1e20)
         while left <= right:
-            mid = (left + right) >> 1
+            mid = (left + right) // 2
             if check(mid):
                 right = mid - 1
             else:
@@ -41,4 +41,3 @@ class Solution:
 # 有x//gcd_ac个数可以同时被a和c整除
 # 有x//gcd_bc个数可以同时被b和c整除
 # 有x//gcd_abc个数可以同时被a、b、c整除
-

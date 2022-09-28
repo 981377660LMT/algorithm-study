@@ -1,4 +1,4 @@
-from fractions import Fraction
+from decimal import Decimal
 from itertools import groupby, pairwise
 from math import gcd
 from typing import List, Tuple
@@ -6,25 +6,38 @@ from typing import List, Tuple
 MOD = int(1e9 + 7)
 INF = int(1e20)
 
-# 计算斜率(x2!=x1)时):
-# 1. Fraction((y2 - y1) / (x2 - x1)))
-# 2. 元组 gcd_ = gcd(x2 - x1, y2 - y1)
-# ((y2 - y1) // gcd_, (x2 - x1) // gcd_)
+# 计算斜率:
+# 1. Decimal
+# 2. 元组
 
 
-def calSlope(x1: int, y1: int, x2: int, y2: int) -> Tuple[int, int]:
+def calSlope1(x1: int, y1: int, x2: int, y2: int) -> Tuple[int, int]:
     """直线斜率"""
     if x2 == x1:
         return (INF, INF)
-    gcd_ = gcd(x2 - x1, y2 - y1)
-    return ((y2 - y1) // gcd_, (x2 - x1) // gcd_)
+    gcd_ = gcd(x2 - x1, y2 - y1)  # !注意math.gcd总返回非负数
+    a, b = (y2 - y1) // gcd_, (x2 - x1) // gcd_
+    if a == 0:
+        return (0, b if b > 0 else -b)
+    elif a < 0:
+        return (-a, -b)
+    else:
+        return (a, b)
+
+
+def calSlope2(x1: int, y1: int, x2: int, y2: int):
+    """直线斜率"""
+    if x2 == x1:
+        return INF
+    return Decimal(y2 - y1) / Decimal(x2 - x1)
 
 
 class Solution:
     def minimumLines(self, stockPrices: List[List[int]]) -> int:
         # 注意原数据没有排序 需要sort一下
         slopes = (
-            Fraction((y2 - y1), (x2 - x1)) for (x1, y1), (x2, y2) in pairwise(sorted(stockPrices))
+            Decimal(y2 - y1) / Decimal(x2 - x1)
+            for (x1, y1), (x2, y2) in pairwise(sorted(stockPrices))
         )
         return len(list(groupby(slopes)))
 
@@ -32,7 +45,7 @@ class Solution:
         stockPrices.sort()
         slopes = []
         for (x1, y1), (x2, y2) in pairwise(stockPrices):
-            slopes.append(calSlope(x1, y1, x2, y2))
+            slopes.append(calSlope1(x1, y1, x2, y2))
         groups = [[char, len(list(group))] for char, group in groupby(slopes)]
         return len(groups)
 

@@ -1,3 +1,5 @@
+"""数组中找出 不同的 k-diff 数对，并返回不同的 k-diff 数对 的数目。"""
+
 from typing import List
 from collections import Counter
 
@@ -15,4 +17,3 @@ class Solution:
                 res += int(counter[num + k] >= 1)
 
         return res
-

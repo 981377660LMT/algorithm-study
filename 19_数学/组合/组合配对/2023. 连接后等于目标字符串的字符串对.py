@@ -7,18 +7,19 @@ from typing import List
 
 class Solution:
     def numOfPairs(self, nums: List[str], target: str) -> int:
-        return sum("".join(pair) == target for pair in permutations(nums, 2))
-        freq = Counter(nums)
+        """哈希表做法：枚举前缀+后缀"""
+        counter = Counter(nums)
         res = 0
-        for pre, _ in freq.items():
-            if target.startswith(pre):
-                suf = target[len(pre) :]
-                if pre != suf:
-                    res += freq[suf] * freq[pre]
-                else:
-                    res += freq[pre] * (freq[pre] - 1)
-
+        for i in range(1, len(target)):  # 枚举非空前后缀
+            prefix = target[:i]
+            suffix = target[i:]
+            if prefix == suffix:
+                res += (counter[prefix] - 1) * counter[prefix]
+            else:
+                res += counter[prefix] * counter[suffix]
         return res
+
+        # return sum("".join(pair) == target for pair in permutations(nums, 2))
 
 
 print(Solution().numOfPairs(nums=["777", "7", "77", "77"], target="7777"))
@@ -28,4 +29,3 @@ print(Solution().numOfPairs(nums=["777", "7", "77", "77"], target="7777"))
 # - (1, 0)："7" + "777"
 # - (2, 3)："77" + "77"
 # - (3, 2)："77" + "77"
-
