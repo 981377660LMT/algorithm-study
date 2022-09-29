@@ -1,7 +1,6 @@
 // 有三种葡萄，每种分别有 a, b, c 颗，现在有三个人，
 // 第一个人只吃第一种和第二种葡萄，第二个人只吃第二种和第三种葡萄，第三个人只吃第一种和第三种葡萄。
 // 现在给你输入 a, b, c 三个值，请你适当安排，让三个人吃完所有的葡萄，算法返回吃的最多的人最少要吃多少颗葡萄。
-// https://labuladong.gitbook.io/algo/mu-lu-ye-4/chi-pu-tao
 const eatGrape = (a: number, b: number, c: number) => {
   const nums = [a, b, c]
   nums.sort((a, b) => a - b)

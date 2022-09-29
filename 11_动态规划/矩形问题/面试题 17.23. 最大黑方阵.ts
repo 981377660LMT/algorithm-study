@@ -13,7 +13,7 @@
  * 注意一个优化操作是循环遍历到当前res size+1为止, 因为如果等于当前res size的话一定不满足要求了
  * // 垂线dp
  */
-var findSquare = function (matrix: number[][]): number[] {
+let findSquare = function (matrix: number[][]): number[] {
   let res: number[] = []
   const m = matrix.length
   const n = matrix[0].length
@@ -58,7 +58,7 @@ console.log(
   findSquare([
     [1, 0, 1],
     [0, 0, 1],
-    [0, 0, 1],
+    [0, 0, 1]
   ])
 )
 // 输出: [1,0,2]

@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 /**
  * @param {number[]} heights
  * @return {number}
@@ -7,7 +8,7 @@
  */
 // 注意我们的目标是:把每一根柱子作为左端点(最小的值)，找到右第一个比当前值小的值 => 单调栈
 // 在 heights 首尾添加了两个哨兵元素，这样我们可以保证所有的柱子都会出栈。
-const largestRectangleArea = function (heights: number[]): number {
+function largestRectangleArea(heights: number[]): number {
   heights.unshift(-1) // 便于计算宽度
   heights.push(-1) // 所有元素出栈
   const n = heights.length

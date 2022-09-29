@@ -1,5 +1,6 @@
 # 给定已经按 升序 排列、由不同整数组成的数组 arr，
 # 返回满足 arr[i] == i 的最小索引 i
+# 寻找最小的不动点
 from typing import List
 
 
@@ -8,7 +9,7 @@ class Solution:
         left, right = 0, len(arr) - 1
         res = -1
         while left <= right:
-            mid = (left + right) >> 1
+            mid = (left + right) // 2
             if arr[mid] == mid:
                 res = mid
                 right = mid - 1

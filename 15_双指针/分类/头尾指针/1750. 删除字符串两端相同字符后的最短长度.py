@@ -4,7 +4,7 @@
 class Solution:
     def minimumLength(self, s: str) -> int:
         left, right = 0, len(s) - 1
-        while left < right and s[left] == s[right]:
+        while left < right and s[left] == s[right]:  # 注意'cbc'的情况
             cur = s[left]
             while left <= right and s[left] == cur:
                 left += 1
@@ -14,6 +14,9 @@ class Solution:
 
 
 print(Solution().minimumLength(s="aabccabba"))
+print(Solution().minimumLength(s="cabaabac"))
+print(Solution().minimumLength(s="bbbbbbbbbbbbbbbbbbbbbbbbbbbabbbbbbbbbbbbbbbccbcbcbccbbabbb"))
+print(Solution().minimumLength(s="cbc"))
 # 输出：3
 # 解释：最优操作序列为：
 # - 选择前缀 "aa" 和后缀 "a" 并删除它们，得到 s = "bccabb" 。

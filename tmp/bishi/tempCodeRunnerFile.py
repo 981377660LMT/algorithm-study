@@ -1,1 +1,1 @@
-12369
+[0] + list(accumulate(nums[::-1]))

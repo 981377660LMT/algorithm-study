@@ -1,12 +1,13 @@
-# 求最长严格递增子序列的个数
-from typing import List
-from bisect import bisect_left
-from collections import defaultdict
-from sortedcontainers import SortedList
-
+# 1求最长严格递增子序列的个数 LIS个数
 
 # 1 <= nums.length <= 1e5
 # -1e6 <= nums[i] <= 1e6
+
+
+from typing import List
+from bisect import bisect_left
+from collections import defaultdict
+
 
 # https://leetcode.com/problems/number-of-longest-increasing-subsequence/discuss/1643753/Python-O(nlogn)-solution-w-detailed-explanation-of-how-to-develop-a-binary-search-solution-from-300
 # 记录lis的同时也记录一个counter数组
@@ -25,7 +26,33 @@ from sortedcontainers import SortedList
 # }
 
 
-from collections import defaultdict
+# O(nlogn)
+class Solution:
+    def findNumberOfLIS(self, nums: List[int]) -> int:
+        n = len(nums)
+        if n <= 1:
+            return n
+
+        LIS = []
+        D = Discretizer(nums)
+        # 每个长度的LIS对应一个BIT，BIT维护结尾小于等于value的子序列有多少个
+        dp = defaultdict(lambda: BIT(len(D) + 10))
+
+        for num in nums:
+            pos = bisect_left(LIS, num)
+            if pos == len(LIS):
+                LIS.append(num)
+            else:
+                LIS[pos] = num
+
+            # 上一个位置结尾小于当前元素的所有的子序列的个数是多少
+            # 遍历可以用树状数组优化
+            preBIT = dp[pos - 1]
+            count = preBIT.query(D.get(num) - 1)
+            dp[pos].add(D.get(num), count if count > 0 else 1)
+
+        lastPos = len(LIS) - 1
+        return dp[lastPos].query(len(D))
 
 
 class BIT:
@@ -62,7 +89,7 @@ class Discretizer:
         allNums = sorted(set(nums))
         self.mapping = {allNums[i]: i + 1 for i in range(len(allNums))}
 
-    def getDiscretizedValue(self, num: int) -> int:
+    def get(self, num: int) -> int:
         if num not in self.mapping:
             raise ValueError(f"{num} not in {self.mapping}")
         return self.mapping[num]
@@ -71,75 +98,6 @@ class Discretizer:
         return len(self.mapping)
 
 
-# O(n^2)
-class Solution1:
-    def findNumberOfLIS(self, nums: List[int]) -> int:
-        n = len(nums)
-        if n <= 1:
-            return n
-
-        lis = []
-        counter = defaultdict(SortedList)
-
-        for num in nums:
-            pos = bisect_left(lis, num)
-            if pos == len(lis):
-                lis.append(num)
-            else:
-                lis[pos] = num
-
-            pre = counter[pos - 1]
-            count = 0
-            for preNum, preCount in pre:
-                if preNum < num:
-                    count += preCount
-                else:
-                    break
-
-            counter[pos].add((num, max(1, count)))
-
-        lastPos = len(lis) - 1
-        return sum(count for _, count in counter[lastPos])
-
-
-# O(nlogn)
-class Solution:
-    def findNumberOfLIS(self, nums: List[int]) -> int:
-        n = len(nums)
-        if n <= 1:
-            return n
-
-        discretizer = Discretizer(nums)
-
-        lis = []
-        counter = defaultdict(
-            lambda: BIT(len(discretizer) + 10)
-        )  # 每个长度的LIS对应一个BIT，BIT维护结尾小于等于value的子序列有多少个
-
-        for num in nums:
-            pos = bisect_left(lis, num)
-            if pos == len(lis):
-                lis.append(num)
-            else:
-                lis[pos] = num
-
-            # count = 0
-            # for preNum, preCount in pre:
-            #     if preNum < num:
-            #         count += preCount
-            #     else:
-            #         break
-
-            # 上一个位置结尾小于当前元素的所有的子序列的个数是多少
-            # 遍历可以用树状数组优化
-            preBIT = counter[pos - 1]
-            count = preBIT.query(discretizer.getDiscretizedValue(num) - 1)
-            counter[pos].add(discretizer.getDiscretizedValue(num), max(1, count))
-
-        lastPos = len(lis) - 1
-        return counter[lastPos].query(int(1e20))
-
-
-print(Solution().findNumberOfLIS([1, 3, 2, 5, 4, 7]))
+print(Solution().findNumberOfLIS([1, 3, 5, 4, 7]))
 # 输出: 2
 # 解释: 有两个最长递增子序列，分别是 [1, 3, 4, 7] 和[1, 3, 5, 7]。

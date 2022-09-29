@@ -2,7 +2,7 @@
 # 思路：不断删除叶子节点，无向图的拓扑排序
 
 # 310. 最小高度树-无向图的拓扑排序
-from collections import defaultdict, deque
+from collections import deque
 from typing import List
 
 
@@ -11,23 +11,23 @@ class Solution:
         if n == 1:
             return [0]
 
-        degree, adjMap = [0] * n, defaultdict(set)
+        adjList = [[] for _ in range(n)]
+        deg = [0] * n
         for u, v in edges:
-            degree[u] += 1
-            degree[v] += 1
-            adjMap[u].add(v)
-            adjMap[v].add(u)
+            adjList[u].append(v)
+            adjList[v].append(u)
+            deg[u] += 1
+            deg[v] += 1
 
-        queue = deque([i for i in range(n) if degree[i] == 1])
-
-        while n >= 3:
+        queue = deque([i for i in range(n) if deg[i] == 1])
+        while n > 2:
             len_ = len(queue)
             n -= len_
             for _ in range(len_):
                 cur = queue.popleft()
-                for next in adjMap[cur]:
-                    degree[next] -= 1
-                    if degree[next] == 1:
+                for next in adjList[cur]:
+                    deg[next] -= 1
+                    if deg[next] == 1:
                         queue.append(next)
 
         return list(queue)

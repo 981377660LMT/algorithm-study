@@ -7,10 +7,37 @@ from bisect import bisect_left
 from collections import defaultdict
 
 
+class Solution:
+    def findNumberOfLIS(self, nums: List[int]) -> int:
+        """nlogn求最长严格递增子序列的个数"""
+        n = len(nums)
+        if n <= 1:
+            return n
+
+        LIS = []
+        D = Discretizer(nums)
+        # 每个长度的LIS对应一个BIT，BIT维护结尾小于等于value的子序列有多少个
+        dp = defaultdict(lambda: BIT(len(D) + 10))
+
+        for num in nums:
+            pos = bisect_left(LIS, num)
+            if pos == len(LIS):
+                LIS.append(num)
+            else:
+                LIS[pos] = num
+
+            # 上一个位置结尾小于当前元素的所有的子序列的个数是多少
+            # 遍历可以用树状数组优化
+            preBIT = dp[pos - 1]
+            count = preBIT.query(D.get(num) - 1)
+            dp[pos].add(D.get(num), count if count > 0 else 1)
+
+        lastPos = len(LIS) - 1
+        return dp[lastPos].query(len(D))
+
+
 class BIT:
     """单点修改"""
-
-    __slots__ = ("size", "tree")
 
     def __init__(self, n: int):
         self.size = n
@@ -50,37 +77,6 @@ class Discretizer:
 
     def __len__(self) -> int:
         return len(self.mapping)
-
-
-# O(nlogn)
-class Solution:
-    def findNumberOfLIS(self, nums: List[int]) -> int:
-        """nlogn求最长严格递增子序列的个数"""
-        n = len(nums)
-        if n <= 1:
-            return n
-
-        discretizer = Discretizer(nums)
-
-        LIS = []
-        # 每个长度的LIS对应一个BIT，BIT维护结尾小于等于value的子序列有多少个
-        dp = defaultdict(lambda: BIT(len(discretizer) + 10))
-
-        for num in nums:
-            pos = bisect_left(LIS, num)
-            if pos == len(LIS):
-                LIS.append(num)
-            else:
-                LIS[pos] = num
-
-            # 求前一个位置结尾小于当前元素的子序列的个数
-            # 遍历可以用树状数组优化
-            preBIT = dp[pos - 1]
-            count = preBIT.query(discretizer.get(num) - 1)
-            dp[pos].add(discretizer.get(num), max(1, count))
-
-        lastPos = len(LIS) - 1
-        return dp[lastPos].query(int(1e20))
 
 
 print(Solution().findNumberOfLIS([1, 3, 2, 5, 4, 7]))

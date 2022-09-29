@@ -22,7 +22,6 @@ abstract class Crawler implements ICrawler {
   private dirName?: string
   private extName?: `.${string}`
 
-
   constructor(options: Options)
   /**
    *
@@ -69,8 +68,8 @@ abstract class Crawler implements ICrawler {
       await axios.get<string>(url, {
         headers: {
           'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36',
-        },
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36'
+        }
       })
     ).data
   }

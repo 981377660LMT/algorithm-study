@@ -10,7 +10,7 @@ def getLower(target: int, A: List[int]) -> int:
         """index表示当前数字的位置,isLimit表示是否被原数字限制"""
         nonlocal res2
         if index == n:
-            cand = int(''.join(map(str, path)))
+            cand = int("".join(map(str, path)))
             if cand < target:
                 res2 = max(res2, cand)
             return
@@ -26,7 +26,7 @@ def getLower(target: int, A: List[int]) -> int:
     digits = list(map(int, str(target)))
     maxA = max(A)
 
-    res1, res2 = int((n - 1) * str(maxA) or -1), -1  # n-1位最大数和n位最大数
+    res1, res2 = int((n - 1) * str(maxA) or -1), -1  # !n-1位最大数和n位最大数
     dfs(0, True, [])
     return max(res1, res2)
 

@@ -9,7 +9,7 @@ const maximalSquare = (matrix: string[][]) => {
     for (let j = 0; j < matrix[0].length; j++) {
       if (matrix[i][j] === '1') {
         if (i >= 1 && j >= 1) {
-          //@ts-ignore
+          // @ts-ignore
           matrix[i][j] = Math.min(matrix[i][j - 1], matrix[i - 1][j], matrix[i - 1][j - 1]) + 1
         }
       }
@@ -28,7 +28,7 @@ console.log(
     ['1', '0', '1', '0', '0'],
     ['1', '0', '1', '1', '1'],
     ['1', '1', '1', '1', '1'],
-    ['1', '0', '0', '1', '0'],
+    ['1', '0', '0', '1', '0']
   ])
 )
 

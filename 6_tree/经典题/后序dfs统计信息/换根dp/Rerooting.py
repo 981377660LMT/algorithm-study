@@ -137,6 +137,9 @@ if __name__ == "__main__":
         # 例:最も遠い点までの距離を求める場合 e=0
         return 0
 
+    # 310. 最小高度树
+    # 在所有可能的树中，具有最小高度的树（即，min(h)）被称为 最小高度树 。
+
     class Solution:
         def findMinHeightTrees(self, n: int, edges: List[List[int]]) -> List[int]:
             R = Rerooting(n)

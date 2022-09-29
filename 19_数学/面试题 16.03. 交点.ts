@@ -33,7 +33,7 @@ function intersection(
     const eta = Up2 / Down
     const isValid = lam >= 0 && lam <= 1 && eta >= 0 && eta <= 1
     if (isValid) return [lam * x1 + (1 - lam) * x2, lam * y1 + (1 - lam) * y2]
-    else return []
+    return []
   }
 
   // 无解 对应直线平行

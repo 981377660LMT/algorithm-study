@@ -2,8 +2,7 @@
  * @param {number[]} nums
  * @return {number}
  */
-const findNumberOfLIS = function (nums: number[]): number {
-  let res = 0
+function findNumberOfLIS(nums: number[]): number {
   // dp[i]：到nums[i]为止的最长递增子序列长度
   const dp = Array(nums.length).fill(1)
   // count[i]：到nums[i]为止的最长递增子序列个数
@@ -24,9 +23,12 @@ const findNumberOfLIS = function (nums: number[]): number {
     }
   }
 
-  const max = Math.max.apply(null, dp)
+  let res = 0
+  const max = Math.max(...dp)
   for (let i = 0; i < nums.length; i++) {
-    if (dp[i] === max) res += count[i]
+    if (dp[i] === max) {
+      res += count[i]
+    }
   }
   return res
 }
