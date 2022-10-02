@@ -32,4 +32,3 @@ for i in range(n - 1, -1, -1):
 
 for num in res:
     print(num)
-

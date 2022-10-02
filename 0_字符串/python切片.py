@@ -5,12 +5,15 @@ size = 1000
 for _ in range(24):
     s = "*" * size
     start = time.time()
-    r = s[2:size]
+    a = s[:-1]
+    # b = s[:-1]
     delta = time.time() - start
     print(f"Size {size:9d}, time={delta:.3f}")
     size *= 2
 
-# 字符串切片似乎是 O(n/1000) 的复杂度，而字符串比较是O(n/200)的复杂度
+# !假设O(n)可以1s跑1e7的数据
+# !字符串切片大约是 O(n/400) 的复杂度，而字符串比较大约是O(n/200)的复杂度
+# !小于1000的长度可以将比较/切片视为常数
 
 # Size      1000, time=0.000
 # Size      2000, time=0.000

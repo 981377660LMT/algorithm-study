@@ -8,13 +8,13 @@ for _ in range(24):
     for _ in range(int(1e7)):
         size += 1
     delta = time.time() - start
-    print(f'time={delta:.3f}')
+    print(f"time={delta:.3f}")
 
     start = time.time()
-    assert 'a' * int(1e7) == 'a' * int(1e7)
+    assert "a" * int(1e7) == "a" * int(1e7)
     delta = time.time() - start
 
-    print(f'time={delta:.3f}')
+    print(f"time={delta:.3f}")
 
 
 # 字符串比较相等切片似乎是 O(n/200) 的复杂度

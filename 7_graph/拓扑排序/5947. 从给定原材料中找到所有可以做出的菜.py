@@ -10,23 +10,22 @@ class Solution:
     def findAllRecipes(
         self, recipes: List[str], ingredients: List[List[str]], supplies: List[str]
     ) -> List[str]:
-        indegree = defaultdict(int)
+        deg = defaultdict(int)
         adjMap = defaultdict(list)
         for cur, deps in zip(recipes, ingredients):
             for dep in deps:
                 adjMap[dep].append(cur)
-                indegree[cur] += 1
+                deg[cur] += 1
 
         queue = deque(supplies)
         while queue:
             cur = queue.popleft()
             for next in adjMap[cur]:
-                indegree[next] -= 1
-                if indegree[next] == 0:
+                deg[next] -= 1
+                if deg[next] == 0:
                     queue.append(next)
 
-        # 巧妙使用入度来判断
-        return [food for food in recipes if indegree[food] == 0]
+        return [food for food in recipes if deg[food] == 0]
 
 
 print(
@@ -36,4 +35,3 @@ print(
         supplies=["yeast", "flour", "meat"],
     )
 )
-

@@ -10,12 +10,15 @@ from collections import defaultdict
 class BIT1:
     """单点修改"""
 
+    __slots__ = "size", "bit", "tree"
+
     def __init__(self, n: int):
         self.size = n
+        self.bit = n.bit_length()
         self.tree = dict()
 
     def add(self, index: int, delta: int) -> None:
-        index += 1
+        # assert index >= 1, 'index must be greater than 0'
         while index <= self.size:
             self.tree[index] = self.tree.get(index, 0) + delta
             index += index & -index
@@ -23,7 +26,6 @@ class BIT1:
     def query(self, index: int) -> int:
         if index > self.size:
             index = self.size
-        index += 1
         res = 0
         while index > 0:
             res += self.tree.get(index, 0)
@@ -33,9 +35,46 @@ class BIT1:
     def queryRange(self, left: int, right: int) -> int:
         return self.query(right) - self.query(left - 1)
 
+    def bisectLeft(self, k: int) -> int:
+        """返回第一个前缀和大于等于k的位置pos
+
+        1 <= pos <= self.size + 1
+        """
+        curSum, pos = 0, 0
+        for i in range(self.bit, -1, -1):
+            nextPos = pos + (1 << i)
+            if nextPos <= self.size and curSum + self.tree.get(nextPos, 0) < k:
+                pos = nextPos
+                curSum += self.tree.get(pos, 0)
+        return pos + 1
+
+    def bisectRight(self, k: int) -> int:
+        """返回第一个前缀和大于k的位置pos
+
+        1 <= pos <= self.size + 1
+        """
+        curSum, pos = 0, 0
+        for i in range(self.bit, -1, -1):
+            nextPos = pos + (1 << i)
+            if nextPos <= self.size and curSum + self.tree.get(nextPos, 0) <= k:
+                pos = nextPos
+                curSum += self.tree.get(pos, 0)
+        return pos + 1
+
+    def __repr__(self) -> str:
+        preSum = []
+        for i in range(self.size):
+            preSum.append(self.query(i))
+        return str(preSum)
+
+    def __len__(self) -> int:
+        return self.size
+
 
 class BIT2:
     """范围修改"""
+
+    __slots__ = "size", "_tree1", "_tree2"
 
     def __init__(self, n: int):
         self.size = n
@@ -52,9 +91,7 @@ class BIT2:
         return self._query(right) - self._query(left - 1)
 
     def _add(self, index: int, delta: int) -> None:
-        # if index <= 0:
-        #     raise ValueError("index 必须是正整数")
-        index += 1
+        # assert index >= 1, 'index must be greater than 0'
         rawIndex = index
         while index <= self.size:
             self._tree1[index] = self._tree1.get(index, 0) + delta
@@ -64,13 +101,21 @@ class BIT2:
     def _query(self, index: int) -> int:
         if index > self.size:
             index = self.size
-        index += 1
         rawIndex = index
         res = 0
         while index > 0:
             res += rawIndex * self._tree1.get(index, 0) - self._tree2.get(index, 0)
             index -= index & -index
         return res
+
+    def __repr__(self):
+        preSum = []
+        for i in range(self.size):
+            preSum.append(self._query(i))
+        return str(preSum)
+
+    def __len__(self):
+        return self.size
 
 
 class BIT3:
@@ -290,6 +335,8 @@ if __name__ == "__main__":
     assert bit1.queryRange(0, 102) == 2
     assert bit1.queryRange(0, 1000) == 2
     assert bit1.queryRange(-10000, 1000) == 2
+    assert bit1.bisectLeft(2) == 1
+    assert bit1.bisectRight(2) == len(bit1) + 1
 
     bit2 = BIT2(100)
     bit2.add(1, 1, 2)

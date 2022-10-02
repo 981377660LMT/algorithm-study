@@ -51,7 +51,7 @@ class ArrayHasher implements IStringHasher<bigint> {
   getHashOfSlice(left: number, right: number): bigint {
     if (left === right) return 0n
     left += 1
-    this.checkRange(left, right)
+    // this.checkRange(left, right)
     const mod = ArrayHasher.MOD
     const upper = this.prefix[right]
     const lower = this.prefix[left - 1] * this.base[right - (left - 1)]

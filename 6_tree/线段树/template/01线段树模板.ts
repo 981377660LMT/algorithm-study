@@ -1,7 +1,7 @@
 /* eslint-disable no-inner-declarations */
 
 /**
- * 维护01序列的线段树 更新方式为叠加
+ * 维护01序列的线段树 更新方式为`叠加`
  */
 class SegmentTree1 {
   private readonly _tree: number[]
@@ -22,8 +22,8 @@ class SegmentTree1 {
    * @param k 树上二分查询第k个1的位置 k>=1
    * @complexity O(logn)
    */
-  getPos(k: number): number {
-    return this._getPos(1, 1, this._size, k)
+  getKthPos(k: number): number {
+    return this._getKthPos(1, 1, this._size, k)
   }
 
   query(left: number, right: number): number {
@@ -55,13 +55,13 @@ class SegmentTree1 {
     this._pushUp(rt)
   }
 
-  private _getPos(rt: number, l: number, r: number, k: number): number {
+  private _getKthPos(rt: number, l: number, r: number, k: number): number {
     if (l === r) return l
     const mid = Math.floor((l + r) / 2)
     this._pushDown(rt, l, r, mid)
     const leftValue = this._tree[rt << 1]
-    if (leftValue >= k) return this._getPos(rt << 1, l, mid, k)
-    return this._getPos((rt << 1) | 1, mid + 1, r, k - leftValue)
+    if (leftValue >= k) return this._getKthPos(rt << 1, l, mid, k)
+    return this._getKthPos((rt << 1) | 1, mid + 1, r, k - leftValue)
   }
 
   private _query(rt: number, L: number, R: number, l: number, r: number): number {
@@ -107,7 +107,7 @@ class SegmentTree1 {
 }
 
 /**
- * 维护01序列的线段树 更新方式为染色 使用isLazy数组
+ * 维护01序列的线段树 更新方式为`染色` 使用isLazy数组
  */
 class SegmentTree2 {
   private readonly _tree: Uint32Array
@@ -130,8 +130,8 @@ class SegmentTree2 {
    * @param k 树上二分查询第k个1的位置 k>=1
    * @complexity O(logn)
    */
-  getPos(k: number): number {
-    return this._getPos(1, 1, this._size, k)
+  getKthPos(k: number): number {
+    return this._getKthPos(1, 1, this._size, k)
   }
 
   query(l: number, r: number): number {
@@ -165,13 +165,13 @@ class SegmentTree2 {
     this._pushUp(rt)
   }
 
-  private _getPos(rt: number, l: number, r: number, k: number): number {
+  private _getKthPos(rt: number, l: number, r: number, k: number): number {
     if (l === r) return l
     const mid = Math.floor((l + r) / 2)
     this._pushDown(rt, l, r, mid)
     const leftValue = this._tree[rt << 1]
-    if (leftValue >= k) return this._getPos(rt << 1, l, mid, k)
-    return this._getPos((rt << 1) | 1, mid + 1, r, k - leftValue)
+    if (leftValue >= k) return this._getKthPos(rt << 1, l, mid, k)
+    return this._getKthPos((rt << 1) | 1, mid + 1, r, k - leftValue)
   }
 
   private _query(rt: number, L: number, R: number, l: number, r: number): number {
@@ -222,6 +222,7 @@ class SegmentTree2 {
 }
 
 if (require.main === module) {
+  // 身高体重重建队列
   function reconstructQueue(people: number[][]): number[][] {
     const n = people.length
     people.sort((a, b) => a[0] - b[0] || -(a[1] - b[1]))
@@ -229,7 +230,7 @@ if (require.main === module) {
     const tree = new SegmentTree1(Array(n).fill(1))
     const res = Array.from<unknown, [height: number, preCount: number]>({ length: n }, () => [0, 0])
     people.forEach(([height, preCount]) => {
-      const pos = tree.getPos(preCount + 1)
+      const pos = tree.getKthPos(preCount + 1)
       res[pos - 1] = [height, preCount]
       tree.update(pos, pos, -1) // !更新方式为叠加
     })

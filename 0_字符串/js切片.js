@@ -4,12 +4,15 @@ for (let i = 0; i < 20; i++) {
   const str = 'a'.repeat(size)
   console.log(size)
   console.time(i)
-  const slice = str.slice(2, size - 1)
+  const a = str.slice(2, size - 1)
+  const b = str.slice(3, size)
+  a === b
   console.timeEnd(i)
   size *= 2
 }
 
-// js 的字符串切片似乎是O(n/333)的复杂度，python切片是js的三倍速度
+// 假设O(n)可以1s跑1e7的数据
+// !js 的字符串切片大约是O(n/200)的复杂度
 // 1000
 // 0: 0.149ms
 // 2000

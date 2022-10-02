@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 /* eslint-disable class-methods-use-this */
 import assert from 'assert'
 

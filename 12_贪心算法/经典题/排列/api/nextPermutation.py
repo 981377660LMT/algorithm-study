@@ -23,12 +23,10 @@ class Comparable(Protocol):
         return not self < other
 
 
-S = TypeVar("S", bound=Comparable)
+E = TypeVar("E", bound=Comparable)
 
 
-def nextPermutation(
-    nums: MutableSequence[S], inPlace=False
-) -> Tuple[bool, MutableSequence[S]]:
+def nextPermutation(nums: MutableSequence[E], inPlace=False) -> Tuple[bool, MutableSequence[E]]:
     """返回下一个字典序的排列，如果不存在，返回本身;时间复杂度O(n)"""
     if not inPlace:
         nums = nums[:]
@@ -53,9 +51,7 @@ def nextPermutation(
     return True, nums
 
 
-def prePermutation(
-    nums: MutableSequence[S], inPlace=False
-) -> Tuple[bool, MutableSequence[S]]:
+def prePermutation(nums: MutableSequence[E], inPlace=False) -> Tuple[bool, MutableSequence[E]]:
     """返回前一个字典序的排列,如果不存在,返回本身;时间复杂度O(n)"""
     if not inPlace:
         nums = nums[:]
