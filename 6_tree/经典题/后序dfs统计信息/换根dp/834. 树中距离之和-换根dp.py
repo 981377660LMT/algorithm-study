@@ -61,7 +61,7 @@ class Solution:
 
         dfs(0, -1)
 
-        def op(fromRes: int, parent: int, cur: int, direction: Literal[0, 1]) -> int:
+        def op(fromRes: int, parent: int, cur: int, direction: int) -> int:
             if direction == 0:  # !从子结点向父结点更新dp1
                 return fromRes + subTreeCount[cur]
             return fromRes + (n - subTreeCount[cur])  # !从父结点向子结点更新dp2

@@ -1,24 +1,28 @@
-from heapq import nlargest
-from typing import List, Tuple
+from typing import List, Set, Tuple, Union
 from collections import deque
 
+Tree = Union[List[List[int]], List[Set[int]]]
 
-def calDiameter1(adjList: List[List[int]], start: int) -> Tuple[int, Tuple[int, int]]:
+
+def calDiameter1(adjList: "Tree") -> Tuple[int, Tuple[int, int]]:
     """bfs计算树的直径长度和直径两端点"""
-    queue = deque([start])
-    visited = set([start])
+    n = len(adjList)
+    queue = deque([0])
+    visited = [False] * n
+    visited[0] = True
     last1 = 0  # 第一次BFS最后一个点
     while queue:
         len_ = len(queue)
         for _ in range(len_):
             last1 = queue.popleft()
             for next in adjList[last1]:
-                if next not in visited:
-                    visited.add(next)
+                if not visited[next]:
+                    visited[next] = True
                     queue.append(next)
 
     queue = deque([last1])  # 第一次最后一个点作为第二次BFS的起点
-    visited = set([last1])
+    visited = [False] * n
+    visited[last1] = True
     last2 = 0  # 第二次BFS最后一个点
     res = -1
     while queue:
@@ -26,37 +30,86 @@ def calDiameter1(adjList: List[List[int]], start: int) -> Tuple[int, Tuple[int, 
         for _ in range(len_):
             last2 = queue.popleft()
             for next in adjList[last2]:
-                if next not in visited:
-                    visited.add(next)
+                if not visited[next]:
+                    visited[next] = True
                     queue.append(next)
         res += 1
 
     return res, tuple(sorted([last1, last2]))
 
 
-def calDiameter2(adjList: List[List[int]], start: int) -> int:
-    """dfs计算树的直径长度"""
+def calDiameter2(adjList: "Tree") -> List[int]:
+    """dfs计算树的直径的`路径`"""
 
-    def dfs(cur: int, pre: int) -> int:
-        nonlocal res
-        cands = [0, 0]
+    def dfs(cur: int, pre: int) -> None:
+        parent[cur] = pre
+        depth[cur] = depth[pre] + 1
         for next in adjList[cur]:
             if next != pre:
-                cands.append(dfs(next, cur))
-        max1, max2 = nlargest(2, cands)
-        res = max(res, max1 + max2)
-        return max(max1, max2) + 1
+                dfs(next, cur)
 
-    res = 0
-    dfs(start, -1)
-    return res
+    n = len(adjList)
+    depth = [0] * n
+    parent = [-1] * n
+
+    dfs(0, -1)
+    v1 = depth.index(max(depth))
+    dfs(v1, -1)
+    v2 = depth.index(max(depth))
+    path = []
+    while v2 != -1:
+        path.append(v2)
+        v2 = parent[v2]
+    return path
+
+
+def calDiameter3(adjList: "Tree") -> List[int]:
+    """bfs计算树的直径的`路径`"""
+
+    n = len(adjList)
+    queue = deque([0])
+    visited = [False] * n
+    visited[0] = True
+    last1 = 0
+    while queue:
+        len_ = len(queue)
+        for _ in range(len_):
+            last1 = queue.popleft()
+            for next in adjList[last1]:
+                if not visited[next]:
+                    visited[next] = True
+                    queue.append(next)
+
+    queue = deque([(last1, -1)])
+    visited = [False] * n
+    visited[last1] = True
+    last2 = 0
+    depth = [0] * n
+    parent = [-1] * n
+    while queue:
+        len_ = len(queue)
+        for _ in range(len_):
+            last2, pre = queue.popleft()
+            parent[last2] = pre
+            depth[last2] = depth[pre] + 1
+            for next in adjList[last2]:
+                if not visited[next]:
+                    visited[next] = True
+                    queue.append((next, last2))  # type: ignore
+
+    path = []
+    while last2 != -1:
+        path.append(last2)
+        last2 = parent[last2]
+    return path
 
 
 if __name__ == "__main__":
     edges = [[0, 1], [1, 2], [2, 3]]
-    adjList = [[] for _ in range(4)]
+    adjList: List[List[int]] = [[] for _ in range(4)]
     for u, v in edges:
         adjList[u].append(v)
         adjList[v].append(u)
-    assert calDiameter1(adjList, 0) == (3, (0, 3))
-    assert calDiameter2(adjList, 0) == 3
+    assert calDiameter1(adjList) == (3, (0, 3))
+    assert len(calDiameter2(adjList)) == 4
+    assert len(calDiameter3(adjList)) == 4

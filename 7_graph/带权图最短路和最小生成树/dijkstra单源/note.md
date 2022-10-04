@@ -33,7 +33,7 @@ int[] dijkstra(int start, List<Integer>[] graph);
 
 1. pq 的建立
 2. dist 数组(dp 的作用)
-3. bfs 的 next 步骤 中如何向 pq 中加入新的点(更新到原点的距离)
+3. bfs 的 next 步骤 中如何向 pq 中加入新的点(更新到原点的距离,松弛边)
    **模板**
 
 ```JS

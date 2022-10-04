@@ -28,6 +28,7 @@ for i in range(1, n1 + 1):
             if dp[i - 1][j] > dp[i][j]:
                 dp[i][j] = dp[i - 1][j]
                 pre[i][j] = (i - 1, j)
+
 res = []
 
 curI, curJ = n1, n2

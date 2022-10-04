@@ -102,6 +102,7 @@
    - [卷积](19_%E6%95%B0%E5%AD%A6/%E5%8D%B7%E7%A7%AF/Convolution.py)
    - [快速幂](19_%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/%E5%BF%AB%E9%80%9F%E5%B9%82/qpow.ts)
    - [矩阵快速幂](19_%E6%95%B0%E5%AD%A6/%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/matqpow.py)
+   - [BSGS/EXBSGS](19_%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/BSGS/bsgs.py)
 
 9. **杂项**
 

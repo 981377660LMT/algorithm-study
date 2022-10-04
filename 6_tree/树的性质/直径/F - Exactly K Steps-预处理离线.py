@@ -22,22 +22,25 @@ from typing import List, Tuple
 from collections import deque
 
 
-def calDiameter1(adjList: List[List[int]], start: int) -> Tuple[int, Tuple[int, int]]:
+def calDiameter1(adjList: List[List[int]]) -> Tuple[int, Tuple[int, int]]:
     """bfs计算树的直径长度和直径两端点"""
-    queue = deque([start])
-    visited = set([start])
+    n = len(adjList)
+    queue = deque([0])
+    visited = [False] * n
+    visited[0] = True
     last1 = 0  # 第一次BFS最后一个点
     while queue:
         len_ = len(queue)
         for _ in range(len_):
             last1 = queue.popleft()
             for next in adjList[last1]:
-                if next not in visited:
-                    visited.add(next)
+                if not visited[next]:
+                    visited[next] = True
                     queue.append(next)
 
     queue = deque([last1])  # 第一次最后一个点作为第二次BFS的起点
-    visited = set([last1])
+    visited = [False] * n
+    visited[last1] = True
     last2 = 0  # 第二次BFS最后一个点
     res = -1
     while queue:
@@ -45,8 +48,8 @@ def calDiameter1(adjList: List[List[int]], start: int) -> Tuple[int, Tuple[int, 
         for _ in range(len_):
             last2 = queue.popleft()
             for next in adjList[last2]:
-                if next not in visited:
-                    visited.add(next)
+                if not visited[next]:
+                    visited[next] = True
                     queue.append(next)
         res += 1
 
@@ -63,7 +66,7 @@ if __name__ == "__main__":
         adjList[u].append(v)
         adjList[v].append(u)
 
-    _, (left, right) = calDiameter1(adjList, start=0)  # 求出直径两端点
+    _, (left, right) = calDiameter1(adjList)  # 求出直径两端点
 
     q = int(input())
     res = [-1] * q

@@ -2,7 +2,7 @@
 // 町 1 から始めた時、最終的にどの町にたどり着くか？
 // N<=2e5 K<=1e18
 
-import { useInput } from '../../20_杂题/atc競プロ/ts入力'
+import { useInput } from '../../../20_杂题/atc競プロ/ts入力'
 
 const { input } = useInput(
   `

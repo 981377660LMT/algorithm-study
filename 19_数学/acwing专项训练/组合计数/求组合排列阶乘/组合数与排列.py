@@ -43,45 +43,45 @@ def catalan(n: int) -> int:
 
 #########################################################################
 # 2.阶乘记忆化(慢些)
-from functools import lru_cache
+# from functools import lru_cache
 
-MOD = int(1e9 + 7)
-
-
-@lru_cache(None)
-def fac(n: int) -> int:
-    """n的阶乘"""
-    if n == 0:
-        return 1
-    return n * fac(n - 1) % MOD
+# MOD = int(1e9 + 7)
 
 
-@lru_cache(None)
-def ifac(n: int) -> int:
-    """n的阶乘的逆元"""
-    return pow(fac(n), MOD - 2, MOD)
+# @lru_cache(None)
+# def fac(n: int) -> int:
+#     """n的阶乘"""
+#     if n == 0:
+#         return 1
+#     return n * fac(n - 1) % MOD
 
 
-def C(n: int, k: int) -> int:
-    if n < 0 or k < 0 or n < k:
-        return 0
-    return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
+# @lru_cache(None)
+# def ifac(n: int) -> int:
+#     """n的阶乘的逆元"""
+#     return pow(fac(n), MOD - 2, MOD)
 
 
-def CWithReplacement(n: int, k: int) -> int:
-    """可重复选取的组合数 itertools.combinations_with_replacement 的个数"""
-    return C(n + k - 1, k)
+# def C(n: int, k: int) -> int:
+#     if n < 0 or k < 0 or n < k:
+#         return 0
+#     return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
 
 
-def put(n: int, k: int) -> int:
-    """n个物品放入k个槽(槽可空)的方案数"""
-    return C(n + k - 1, k - 1)
+# def CWithReplacement(n: int, k: int) -> int:
+#     """可重复选取的组合数 itertools.combinations_with_replacement 的个数"""
+#     return C(n + k - 1, k)
 
 
-if __name__ == "__main__":
-    print(C(n=3, k=3))
-    print(C(n=4, k=3))
-    print(C(n=5, k=3))
+# def put(n: int, k: int) -> int:
+#     """n个物品放入k个槽(槽可空)的方案数"""
+#     return C(n + k - 1, k - 1)
+
+
+# if __name__ == "__main__":
+#     print(C(n=3, k=3))
+#     print(C(n=4, k=3))
+#     print(C(n=5, k=3))
 
 
 #########################################################
@@ -98,10 +98,10 @@ print(comb[10][2])
 
 #########################################################
 # 不太快
-@lru_cache(None)
-def C1(n: int, k: int) -> int:
-    if n < k:
-        return 0
-    if n == 1 or k == 0:
-        return 1
-    return (C1(n - 1, k) + C1(n - 1, k - 1)) % MOD
+# @lru_cache(None)
+# def C1(n: int, k: int) -> int:
+#     if n < k:
+#         return 0
+#     if n == 1 or k == 0:
+#         return 1
+#     return (C1(n - 1, k) + C1(n - 1, k - 1)) % MOD

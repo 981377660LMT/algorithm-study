@@ -9,6 +9,8 @@
 # 将right进行排序.
 # 对于left的每个元素, 用二分搜索找到right中可以配对的最大元素.
 
+# !折半枚举/折半搜索
+
 from bisect import bisect_right
 
 
