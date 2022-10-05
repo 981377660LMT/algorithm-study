@@ -25,5 +25,4 @@ for i in range(n):
 # 至多装多大价值
 print(dp1[-1])
 # 恰好装满，至多装多大价值
-print(0 if dp2[-1] == float('-inf') else dp2[-1])
-
+print(0 if dp2[-1] == float("-inf") else dp2[-1])

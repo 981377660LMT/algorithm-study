@@ -15,7 +15,8 @@
      4. 从根节点自顶向下递归查询
 
    - **树链剖分**，O(n)预处理 O(logn)查询，沿着最多 logn 段链上跳
-   - **dfs 序 + st 表**， O(nlogn)预处理 O(1)查询，区间 depth 最小的节点即为 LCA
+   - **dfs 序(欧拉序) + st 表**， O(nlogn)预处理 O(1)查询，这两点之间的区间中，深度最小点就是 LCA。这可以用 RMQ 解决
+     > https://www.cnblogs.com/pealicx/p/6859901.html
 
 3. 支持在线加点删点
    - **link-cut tree** O(nlogn)预处理 O(logn)查询 ，树链剖分 + splay 维护链的信息

@@ -1,10 +1,10 @@
 """primes"""
 
-from collections import Counter
+from collections import Counter, defaultdict
 from functools import lru_cache
 from math import floor, gcd
 from random import randint
-from typing import List
+from typing import DefaultDict, List
 
 
 class EratosthenesSieve:
@@ -29,9 +29,9 @@ class EratosthenesSieve:
             return False
         return self._minPrime[n] == n
 
-    def getPrimeFactors(self, n: int) -> "Counter[int]":
+    def getPrimeFactors(self, n: int) -> "DefaultDict[int, int]":
         """求n的质因数分解 O(logn)"""
-        res, f = Counter(), self._minPrime
+        res, f = defaultdict(int), self._minPrime
         while n > 1:
             m = f[n]
             res[m] += 1

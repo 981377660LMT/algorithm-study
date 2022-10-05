@@ -25,7 +25,6 @@ class Solution:
             return res
 
         n = len(nums)
-        res = dfs(0, target)
+        res = dfs(target)
         dfs.cache_clear()
         return res
-

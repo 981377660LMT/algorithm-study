@@ -2,6 +2,8 @@ from typing import List
 
 #  判断它们是否能精确地覆盖一个矩形区域。
 # 每个矩形用左下角的点和右上角的点的坐标来表示。例如， 一个单位正方形可以表示为 [1,1,2,2]
+
+
 class Solution:
     def isRectangleCover(self, rectangles: List[List[int]]) -> bool:
         points = set()
@@ -14,10 +16,10 @@ class Solution:
         # 最后要矩形必须是四个点
         if len(points) != 4:
             return False
-        x1 = float('inf')
-        x2 = float('-inf')
-        y1 = float('inf')
-        y2 = float('-inf')
+        x1 = float("inf")
+        x2 = float("-inf")
+        y1 = float("inf")
+        y2 = float("-inf")
         for [x, y] in points:
             x1 = min(x1, x)
             x2 = max(x2, x)

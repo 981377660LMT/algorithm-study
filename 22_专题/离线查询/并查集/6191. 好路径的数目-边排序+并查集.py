@@ -67,3 +67,6 @@ class Solution:
             groupCounter = Counter(uf.find(i) for i in nodeGroup[curMax])
             res += sum([v * (v - 1) // 2 for v in groupCounter.values()])  # !comb(v, 2)
         return res + n  # 单个点的路径
+
+
+print(Solution().numberOfGoodPaths(vals=[1, 2, 3, 3, 3], edges=[[0, 1], [1, 2], [2, 3], [2, 4]]))
