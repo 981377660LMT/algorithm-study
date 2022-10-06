@@ -1,5 +1,8 @@
 # https://leetcode.cn/problems/finding-the-number-of-visible-mountains/
-# !如果一座山峰不在另一座山峰之内(包括其他山峰的边界) ，那么这座山峰就被认为是可见的
+# !如果一座山峰不在另一座山峰之内(包括其他山峰的边界) ，
+# 那么这座山峰就被认为是可见的
+
+# !一维排序+维护另一个维度前缀的最值
 
 from collections import defaultdict
 from itertools import groupby

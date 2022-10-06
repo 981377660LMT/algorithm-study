@@ -1,15 +1,15 @@
-import { BigIntHasher } from '../BigIntHasher'
+import { useStringHasher } from '../StringHasher'
 
 // 编写一个函数来找出所有目标子串，目标子串的长度为 10，且在 DNA 字符串 s 中出现次数超过一次。
 function findRepeatedDnaSequences(s: string): string[] {
-  const stringHasher = new BigIntHasher(s.toLowerCase())
+  const getSliceHash = useStringHasher(s)
   const counter = new Map<bigint, number>()
   const res: string[] = []
 
-  for (let i = 1; i + 9 <= s.length; i++) {
-    const hash = stringHasher.getHashOfRange(i, i + 9)
+  for (let i = 0; i + 10 <= s.length; i++) {
+    const hash = getSliceHash(i, i + 10)
     counter.set(hash, (counter.get(hash) || 0) + 1)
-    if (counter.get(hash) === 2) res.push(s.slice(i - 1, i - 1 + 10))
+    if (counter.get(hash) === 2) res.push(s.slice(i, i + 10))
   }
 
   return res

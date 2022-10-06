@@ -46,4 +46,3 @@ class Solution:
 
 print(Solution().subStrHash(s="leetcode", power=7, modulo=20, k=2, hashValue=0))
 print(Solution().subStrHash(s="fbxzaad", power=31, modulo=100, k=3, hashValue=32))
-

@@ -2,7 +2,7 @@
 // 注意我们的RK算法里计算哈希值的方法是左边字符权重大，题目是右边权重大
 // 所以要把我们的字符串反过来，调api，哈希值相等时返回这一段的reversed
 
-import { BigIntHasher } from '../BigIntHasher'
+import { useStringHasher } from '../StringHasher'
 
 function subStrHash(
   s: string,
@@ -11,16 +11,12 @@ function subStrHash(
   k: number,
   hashValue: number
 ): string {
-  BigIntHasher.setBASE(power)
-  BigIntHasher.setMOD(modulo)
-  BigIntHasher.setOFFSET(96)
-
   s = s.split('').reverse().join('')
-  const hasher = new BigIntHasher(s)
+  const hasher = useStringHasher(s, modulo, power, 96)
 
   let res = 0
   for (let i = 0; i + k <= s.length; i++) {
-    const hash = hasher.getHashOfSlice(i, i + k)
+    const hash = hasher(i, i + k)
     if (Number(hash) === hashValue) res = i
   }
 

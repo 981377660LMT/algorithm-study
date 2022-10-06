@@ -26,4 +26,3 @@ def numDistinct(s: str, t: str) -> int:
     if not t:
         return 0
     return dfs(0, 0) % MOD
-

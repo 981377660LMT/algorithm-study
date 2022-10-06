@@ -21,10 +21,10 @@ INF = int(4e18)
 
 if __name__ == "__main__":
 
-    # def arithmeticSum1(first: int, last: int, diff: int) -> int:
-    #     """等差数列求和 first:首项 last:末项 diff:公差"""
-    #     item = (last - first) // diff + 1
-    #     return item * (first + last) // 2
+    def arithmeticSum1(first: int, last: int, diff: int) -> int:
+        """等差数列求和 first:首项 last:末项 diff:公差"""
+        item = (last - first) // diff + 1
+        return item * (first + last) // 2
 
     def arithmeticSum2(first: int, diff: int, item: int) -> int:
         """等差数列求和 first:首项 diff:公差 item:项数"""

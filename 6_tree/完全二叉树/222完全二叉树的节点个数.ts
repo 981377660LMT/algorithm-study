@@ -1,39 +1,4 @@
-// 二叉树
-interface BinaryTree {
-  val: number
-  left: BinaryTree | null
-  right: BinaryTree | null
-}
-
-const bt: BinaryTree = {
-  val: 1,
-  left: {
-    val: 2,
-    left: {
-      val: 4,
-      left: null,
-      right: null,
-    },
-    right: {
-      val: 5,
-      left: null,
-      right: null,
-    },
-  },
-  right: {
-    val: 3,
-    left: {
-      val: 6,
-      left: null,
-      right: null,
-    },
-    right: {
-      val: 7,
-      left: null,
-      right: null,
-    },
-  },
-}
+import { BinaryTree } from '../分类/Tree'
 
 /**
  * 如果当前节点的左右子树高度相同，那么左子树是一个满二叉树，右子树是一个完全二叉树。
@@ -42,21 +7,9 @@ const bt: BinaryTree = {
  * 时间复杂度：$O(logN * log N)$
  * 空间复杂度：$O(logN)$
  */
-const countNodes = function (root: BinaryTree | null): number {
-  if (root == null) return 0
-
-  // 计算完全二叉树的高度
-  // const getDepth = (root: BinaryTree | null): number => {
-  //   if (!root) return 0
-  //   return getDepth(root.left) + 1
-  // }
-  const getDepth = (root: BinaryTree | null): number => {
-    let res = 0
-    while (root) {
-      res++
-      root = root.left
-    }
-    return res
+function countNodes(root: BinaryTree | null): number {
+  if (root == null) {
+    return 0
   }
 
   const leftDepth = getDepth(root.left)
@@ -64,13 +17,29 @@ const countNodes = function (root: BinaryTree | null): number {
   if (leftDepth === rightDepth) {
     // 左子树一定是满二叉树
     return 2 ** leftDepth + countNodes(root.right)
-  } else {
-    // 此时最后一层不满，但倒数第二层已经满了，可以直接得到右子树的节点个数
-    return 2 ** rightDepth + countNodes(root.left)
+  }
+
+  // 此时最后一层不满，但倒数第二层已经满了，可以直接得到右子树的节点个数
+  return 2 ** rightDepth + countNodes(root.left)
+
+  // !计算完全二叉树的高度
+  // const getDepth = (root: BinaryTree | null): number => {
+  //   if (!root) return 0
+  //   return getDepth(root.left) + 1
+  // }
+  function getDepth(root: BinaryTree | null): number {
+    let res = 0
+    while (root) {
+      res++
+      root = root.left
+    }
+    return res
   }
 }
 
-console.log(countNodes(bt))
 export default 1
-// 由于完全二叉树的性质，其子树一定有一棵是满的，所以一定会触发 leftDepth == rightDepth，只消耗 O(logN) 的复杂度而不会继续递归。
-// 综上，算法的递归深度就是树的高度 O(logN)，每次递归所花费的时间就是 while 循环，需要 O(logN)，所以总体的时间复杂度是 O(logN*logN)。
+
+// 由于完全二叉树的性质，其子树一定有一棵是满的，所以一定会触发 leftDepth == rightDepth，
+// 只消耗 O(logN) 的复杂度而不会继续递归。
+// 综上，算法的递归深度就是树的高度 O(logN)，每次递归所花费的时间就是 while 循环，
+// 需要 O(logN)，所以总体的时间复杂度是 O(logN*logN)。

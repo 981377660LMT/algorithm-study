@@ -11,7 +11,7 @@ function minAddToMakeValid1(s: string): number {
   for (const char of s) {
     if (char === '(') {
       stack.push(char)
-    } else if (char === ')' && stack.length > 0) {
+    } else if (stack.length) {
       stack.pop()
     } else {
       res++

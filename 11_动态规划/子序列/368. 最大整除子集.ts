@@ -6,13 +6,13 @@
 const largestDivisibleSubset = function (nums: number[]): number[] {
   nums.sort((a, b) => a - b)
 
-  // dp表示以nums[i]结尾的数组的最大整除子集
+  // !dp表示以nums[i]结尾的数组的最大整除子集
   const dp = nums.map(num => [num])
   let res: number[] = []
 
   for (let i = 0; i < nums.length; i++) {
     for (let j = 0; j < i; j++) {
-      if (nums[i] % nums[j] === 0 && dp[j].length >= dp[i].length) {
+      if (nums[i] % nums[j] === 0 && dp[j].length + 1 > dp[i].length) {
         //  合并ij
         dp[i] = [...dp[j], nums[i]]
       }

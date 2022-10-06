@@ -42,3 +42,6 @@ def check(mid: int) -> bool:
       dp = ((dp << num) | (dp >> num)) & mask  # & mask 去除超出边界的非法状态
   return dp != 0
 ```
+
+golang 里用 value 为空结构体的 map 来模拟 set
+**当 value 为一个布尔值时,可以用 set 代替 dp 数组**

@@ -1,2 +1,2 @@
 
-    grid2 = [list(input()) for _ in range(n)]
+    uf = UnionFindArray(n + 10)

@@ -4,7 +4,7 @@ from typing import List, Sequence
 
 class StringHasher:
     _BASE = 131
-    _MOD = 2 ** 64
+    _MOD = 2**64
 
     @staticmethod
     def setBASE(base: int) -> None:

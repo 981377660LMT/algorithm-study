@@ -33,5 +33,4 @@ def calDist(src: str, dist: str) -> int:
 
 
 res = sorted(arr, key=lambda x: calDist(x, target))
-print(' '.join(res[:3]))
-
+print(" ".join(res[:3]))

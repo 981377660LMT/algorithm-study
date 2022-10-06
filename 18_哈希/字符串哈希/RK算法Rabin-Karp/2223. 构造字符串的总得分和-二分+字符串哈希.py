@@ -1,42 +1,22 @@
 from typing import Sequence
 
 
-class StringHasher:
-    _BASE = 131
-    _MOD = 2 ** 64
-    _OFFSET = 96
+def useStringHasher(s: Sequence[str], mod=10**11 + 7, base=1313131, offset=0):
+    n = len(s)
+    prePow = [1] * (n + 1)
+    preHash = [0] * (n + 1)
+    for i in range(1, n + 1):
+        prePow[i] = (prePow[i - 1] * base) % mod
+        preHash[i] = (preHash[i - 1] * base + ord(s[i - 1]) - offset) % mod
 
-    @staticmethod
-    def setBASE(base: int) -> None:
-        StringHasher._BASE = base
-
-    @staticmethod
-    def setMOD(mod: int) -> None:
-        StringHasher._MOD = mod
-
-    @staticmethod
-    def setOFFSET(offset: int) -> None:
-        StringHasher._OFFSET = offset
-
-    def __init__(self, sequence: Sequence[str]):
-        self._sequence = sequence
-        self._prefix = [0] * (len(sequence) + 1)
-        self._base = [0] * (len(sequence) + 1)
-        self._prefix[0] = 0
-        self._base[0] = 1
-        for i in range(1, len(sequence) + 1):
-            self._prefix[i] = (
-                self._prefix[i - 1] * StringHasher._BASE + ord(sequence[i - 1]) - self._OFFSET
-            ) % StringHasher._MOD
-            self._base[i] = (self._base[i - 1] * StringHasher._BASE) % StringHasher._MOD
-
-    def getHashOfSlice(self, left: int, right: int) -> int:
-        """s[left:right]的哈希值"""
-        assert 0 <= left <= right <= len(self._sequence)
+    def sliceHash(left: int, right: int):
+        """切片 `s[left:right]` 的哈希值"""
+        if left >= right:
+            return 0
         left += 1
-        upper = self._prefix[right]
-        lower = self._prefix[left - 1] * self._base[right - (left - 1)]
-        return (upper - lower) % StringHasher._MOD
+        return (preHash[right] - preHash[left - 1] * prePow[right - left + 1]) % mod
+
+    return sliceHash
 
 
 class Solution:
@@ -45,16 +25,14 @@ class Solution:
             left, right = 1, curLen
             while left <= right:
                 mid = (left + right) // 2
-                if hasher.getHashOfSlice(start, start + mid) == hasher.getHashOfSlice(0, mid):
+                if hasher(start, start + mid) == hasher(0, mid):
                     left = mid + 1
                 else:
                     right = mid - 1
             return right
 
         n = len(s)
-        StringHasher.setMOD(151217133020331712151)
-        hasher = StringHasher(s)
-        # view = memoryview()
+        hasher = useStringHasher(s)
         res = 0
         for i in range(1, n + 1):
             if s[-i] != s[0]:
@@ -67,4 +45,3 @@ class Solution:
 print(Solution().sumScores("babab"))
 print(Solution().sumScores("bab"))
 print(Solution().sumScores(s="azbazbzaz"))
-
