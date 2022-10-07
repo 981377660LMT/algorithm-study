@@ -1,5 +1,6 @@
-"""https://maspypy.com/slope-trick-1-%e8%a7%a3%e8%aa%ac%e7%b7%a8"""
-
+# 注意
+# !(x-a)+ 指的是 绝对值函数 abs(x-a)的右半部分
+# !(a-x)+ 指的是 绝对值函数 abs(a-x)的左半部分
 
 from heapq import heappop, heappush
 from typing import List, Optional
@@ -8,6 +9,12 @@ INF = int(1e18)
 
 
 class SlopeTrick:
+    """
+    https://maspypy.com/slope-trick-1-%e8%a7%a3%e8%aa%ac%e7%b7%a8
+
+    上記の記事にもとづき、@caomeinaixiさんが実装したテンプレートです。
+    """
+
     __slots__ = "_minY", "_leftTuring", "_rightTuring", "_leftOffset", "_rightOffset"
 
     def __init__(
@@ -46,17 +53,26 @@ class SlopeTrick:
         self._pushRight(a)
         self._pushLeft(self._popRight())
 
-    def addY(self, y: int) -> None:
+    def addY(self, delta: int) -> None:
         """yの加算:O(1) 時間"""
-        self._minY += y
+        self._minY += delta
 
-    def addLeftOffset(self, x: int) -> None:
+    def addOffset(self, delta: int) -> None:
+        """平移:O(1) 時間
+
+        g(x) = f(x - a)
+        fをg に取り換える
+        """
+        self._leftOffset += delta
+        self._rightOffset += delta
+
+    def addLeftOffset(self, delta: int) -> None:
         """左拐点の平移:O(1) 時間"""
-        self._leftOffset += x
+        self._leftOffset += delta
 
-    def addRightOffset(self, x: int) -> None:
+    def addRightOffset(self, delta: int) -> None:
         """右拐点の平移:O(1) 時間"""
-        self._rightOffset += x
+        self._rightOffset += delta
 
     def updateLeftMin(self) -> None:
         """累積 min:O(1) 時間
@@ -78,15 +94,27 @@ class SlopeTrick:
         """
         self._leftTuring = [INF]
 
+    def updateWindowMin(self, leftDiff: int, rightDiff: int) -> None:
+        """累積 min:O(1) 時間
+
+        g(x) = min(f(y) | `x - leftDiff <= y <= x - rightDiff`)
+        fをg に取り替える
+
+        左側集合・右側集合それぞれを平行移動する
+        left0, right0 => left0 + rightDiff, right0 + leftDiff
+        """
+        self._leftOffset += rightDiff
+        self._rightOffset += leftDiff
+
     def getMinY(self) -> int:
         """最小値の取得:O(1) 時間"""
         return self._minY
 
-    def _pushLeft(self, x: int) -> None:
-        heappush(self._leftTuring, -x + self._leftOffset)
+    def _pushLeft(self, a: int) -> None:
+        heappush(self._leftTuring, -a + self._leftOffset)
 
-    def _pushRight(self, x: int) -> None:
-        heappush(self._rightTuring, x - self._rightOffset)
+    def _pushRight(self, a: int) -> None:
+        heappush(self._rightTuring, a - self._rightOffset)
 
     def _popLeft(self) -> int:
         return -heappop(self._leftTuring) + self._leftOffset
