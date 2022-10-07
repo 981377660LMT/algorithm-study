@@ -12,7 +12,6 @@
 # !时间复杂度O(Q*sqrt(2*M))
 # https://atcoder.jp/contests/typical90/submissions/24052294
 
-from collections import defaultdict
 import sys
 
 sys.setrecursionlimit(int(1e9))
@@ -20,60 +19,50 @@ input = sys.stdin.readline
 MOD = int(1e9 + 7)
 
 n, m = map(int, input().split())
-adjMap = defaultdict(set)
+adjList = [[] for _ in range(n)]
 for _ in range(m):
-    x, y = map(int, input().split())
-    x, y = x - 1, y - 1
-    adjMap[x].add(y)
-    adjMap[y].add(x)
-
-# !1.处理大小顶点
-SQRT = int(2 * m ** 0.5)
-big = set()
-for i in range(n):
-    if len(adjMap[i]) >= SQRT:
-        big.add(i)
-small = set(range(n)) - big
+    u, v = map(int, input().split())
+    u, v = u - 1, v - 1
+    adjList[u].append(v)
+    adjList[v].append(u)
 
 
-# !2.每个点连接的大、小顶点
-group = defaultdict(lambda: [set(), set()])
-for i in range(n):
-    for next in adjMap[i]:
-        if next in big:
-            group[i][0].add(next)
-        else:
-            group[i][1].add(next)
+# !1.预处理出所有点的邻接点中度大于SQRT的大顶点
+SQRT = int(2 * m**0.5)
+bigNexts = [[] for _ in range(n)]
+for cur in range(n):
+    for next in adjList[cur]:
+        if len(adjList[next]) >= SQRT:
+            bigNexts[cur].append(next)
 
 
 q = int(input())
-colors = [1] * n
-lasts = [-1] * n  # 每个节点最后的查询位置
-history = []  # 历史颜色更新值
+colors = [1] * n  # !记录每个点的颜色
+lasts = [-1] * n  # 每个节点最后的更新位置
+history = []  # 每次更新的颜色
 for i in range(q):
     node, newColor = map(int, input().split())
     node -= 1
     res = 1
 
     # !大顶点实时查询
-    if node in big:
+    if len(adjList[node]) >= SQRT:
         res = colors[node]
         colors[node] = newColor
     else:
         # !小顶点邻居查询
         preI = lasts[node]
-        for next in adjMap[node]:
+        for next in adjList[node]:
             preI = max(preI, lasts[next])
         if preI == -1:
             res = 1
         else:
             res = history[preI]
 
-    # !大顶点实时暴力更新
-    for nextBig in group[node][0]:
-        colors[nextBig] = newColor
+    # !大顶点实时更新
+    for big in bigNexts[node]:
+        colors[big] = newColor
 
     lasts[node] = i
     history.append(newColor)
     print(res)
-
