@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 import { useUnionFindArray } from '../useUnionFind'
 
 /**
@@ -6,15 +8,12 @@ import { useUnionFindArray } from '../useUnionFind'
  * @description 在由 1 x 1 方格组成的 N x N 网格 grid 中，每个 1 x 1 方块由 /、\ 或空格构成。
  * 返回区域的数目。
  * 并查集
- * @link https://leetcode-cn.com/problems/regions-cut-by-slashes/solution/js-bing-cha-ji-kan-wo-de-wen-zi-tu-jiu-hao-dong-li/
- * @summary
- * 大概把每一个小方块看成如下图
- *      0
-      3   1
-        2
-        
+ * 把每一个小方块看成如下图
+      0
+    3   1
+      2
  */
-const regionsBySlashes = function (grid: string[]): number {
+function regionsBySlashes(grid: string[]): number {
   const N = grid.length
   const uf = useUnionFindArray(4 * N ** 2)
 
@@ -37,6 +36,8 @@ const regionsBySlashes = function (grid: string[]): number {
         case '\\':
           uf.union(pos * 4 + 0, pos * 4 + 1)
           uf.union(pos * 4 + 2, pos * 4 + 3)
+          break
+        default:
           break
       }
 

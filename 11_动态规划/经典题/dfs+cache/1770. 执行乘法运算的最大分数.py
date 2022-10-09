@@ -14,6 +14,7 @@ from functools import lru_cache
 
 # !1. 手写 max 快了 1000ms
 # !2. 不用cache_clear() 超时
+# !可以用gc.collect 内存占用过大拖慢了gc的速度
 
 
 class Solution:

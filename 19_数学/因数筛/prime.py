@@ -57,7 +57,7 @@ def getFactors(n: int) -> List[int]:
     if n <= 0:
         return []
     small, big = [], []
-    upper = floor(n**0.5) + 1
+    upper = int(n**0.5) + 1
     for i in range(1, upper):
         if n % i == 0:
             small.append(i)

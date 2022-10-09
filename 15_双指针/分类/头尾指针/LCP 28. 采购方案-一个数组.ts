@@ -12,14 +12,15 @@ function purchasePlans(nums: number[], target: number): number {
   let res = 0
   let left = 0
   let right = n - 1
+
   while (left < right) {
-    while (left < right && nums[left] + nums[right] > target) {
+    if (nums[left] + nums[right] <= target) {
+      res += right - left
+      res %= MOD
+      left++
+    } else {
       right--
     }
-
-    res += right - left
-    res %= MOD
-    left++
   }
 
   return res

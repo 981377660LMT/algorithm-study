@@ -8,6 +8,8 @@ from typing import List
 # 题目数据 保证 游戏存在赢家。
 
 # 移到末尾是不必须的 模拟题
+
+
 class Solution:
     def getWinner(self, arr: List[int], k: int) -> int:
         cur = arr[0]

@@ -1,12 +1,63 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"index/suffixarray"
 	"math"
 	"math/bits"
+	"os"
 	"reflect"
+	"sort"
 	"unsafe"
 )
+
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	var s, t []byte
+	fmt.Fscan(in, &n, &s, &t)
+
+	s2 := append(s, s[:n-1]...)
+	t2 := append(t, t[:n-1]...)
+	_, rank1, _ := suffixArray(s2)
+	_, rank2, _ := suffixArray(t2)
+	rank1 = rank1[:n]
+	rank2 = rank2[:n]
+	starts1 := make([]int, n)
+	for i := range starts1 {
+		starts1[i] = i
+	}
+	starts2 := make([]int, n)
+	for i := range starts2 {
+		starts2[i] = i
+	}
+
+	sort.Slice(starts1, func(i, j int) bool { return rank1[starts1[i]] < rank1[starts1[j]] })
+	sort.Slice(starts2, func(i, j int) bool { return rank2[starts2[i]] < rank2[starts2[j]] })
+	// # !辞書順で f(S,i) が f(T,j) より小さいか同じであるものの個数を求めてください。
+
+	newS := append(s2, t2...) // !s+s[:-1]+t+t[:-1]
+
+	offset := 2*n - 1
+	i, j := 0, 0
+	res := 0
+	_, newRank, newHeight := suffixArray(newS)
+	compareFunc := useCompareSub(newRank, newHeight)
+	for i < n && j < n {
+		if compareFunc(starts1[i], starts1[i]+n, offset+starts2[j], offset+starts2[j]+n) <= 0 {
+			res += n - j
+			i++
+		} else {
+			j++
+		}
+	}
+
+	fmt.Fprintln(out, res)
+}
 
 // 比较两个子串，返回 strings.Compare(s[l1:r1], s[l2:r2])，注意这里是左闭右开区间
 func useCompareSub(rank, height []int) func(l1, r1, l2, r2 int) int {
@@ -62,10 +113,10 @@ func useCompareSub(rank, height []int) func(l1, r1, l2, r2 int) int {
 }
 
 // https://github.dev/EndlessCheng/codeforces-go/copypasta/strings.go
-func suffixArray(s string) ([]int32, []int, []int) {
+func suffixArray(s []byte) ([]int32, []int, []int) {
 	n := len(s)
 
-	sa := *(*[]int32)(unsafe.Pointer(reflect.ValueOf(suffixarray.New([]byte(s))).Elem().FieldByName("sa").Field(0).UnsafeAddr()))
+	sa := *(*[]int32)(unsafe.Pointer(reflect.ValueOf(suffixarray.New(s)).Elem().FieldByName("sa").Field(0).UnsafeAddr()))
 
 	rank := make([]int, n)
 	for i := range rank {
@@ -93,12 +144,4 @@ func min(a, b int) int {
 		return a
 	}
 	return b
-}
-
-func main() {
-	_, rank, height := suffixArray("banana")
-	compareSub := useCompareSub(rank, height)
-	println(compareSub(0, 4, 0, 4))
-	println(compareSub(0, 1, 0, 4))
-	println(compareSub(2, 5, 0, 4))
 }

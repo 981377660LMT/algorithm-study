@@ -1,4 +1,6 @@
 # 设计一个数据结构，有效地找到给定子数组的 出现 threshold 次数或次数以上的元素 。
+
+
 from typing import List
 import numpy as np
 
@@ -14,4 +16,3 @@ class MajorityChecker:
         counter = np.bincount(self.arr[left : right + 1])
         maxPos = np.argmax(counter)
         return int(maxPos) if counter[maxPos] >= threshold else -1
-

@@ -21,10 +21,10 @@ class SlopeTrick:
         self, leftTuring: Optional[List[int]] = None, rightTuring: Optional[List[int]] = None
     ) -> None:
         self._minY = 0  # dp 最小値
-        self._leftTuring = [INF] if leftTuring is None else leftTuring  # 左拐点
-        self._rightTuring = [INF] if rightTuring is None else rightTuring  # 右拐点
-        self._leftOffset = 0  # 左拐点的平移量
-        self._rightOffset = 0  # 右拐点的平移量
+        self._leftTuring = [INF] if leftTuring is None else leftTuring  # 左侧的所有拐点
+        self._rightTuring = [INF] if rightTuring is None else rightTuring  # 右侧的所有拐点
+        self._leftOffset = 0  # 左侧拐点的平移量
+        self._rightOffset = 0  # 右侧拐点的平移量
 
     def addAbsXMinusA(self, a: int) -> None:
         """|x-a|の加算:O(logn) 時間"""

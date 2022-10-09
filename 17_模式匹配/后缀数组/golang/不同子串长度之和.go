@@ -11,7 +11,7 @@ import (
 // 枚举每个后缀，计算前缀总数，再减掉重复
 func diffSum(s string) int {
 	n := len(s)
-	_, _, height := suffixArray([]byte(s))
+	_, _, height := suffixArray(s)
 	res := n * (n + 1) * (n + 2) / 6 // 所有子串长度 1到n的平方和
 	for _, h := range height {
 		res -= h * (h + 1) / 2
@@ -20,10 +20,10 @@ func diffSum(s string) int {
 }
 
 // https://github.dev/EndlessCheng/codeforces-go/copypasta/strings.go
-func suffixArray(s []byte) ([]int32, []int, []int) {
+func suffixArray(s string) ([]int32, []int, []int) {
 	n := len(s)
 
-	sa := *(*[]int32)(unsafe.Pointer(reflect.ValueOf(suffixarray.New(s)).Elem().FieldByName("sa").Field(0).UnsafeAddr()))
+	sa := *(*[]int32)(unsafe.Pointer(reflect.ValueOf(suffixarray.New([]byte(s))).Elem().FieldByName("sa").Field(0).UnsafeAddr()))
 
 	rank := make([]int, n)
 	for i := range rank {

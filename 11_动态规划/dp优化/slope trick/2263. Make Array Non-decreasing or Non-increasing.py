@@ -2,6 +2,7 @@
 # !每次可以选择一个数，将其增加或减少1，问最少需要多少次操作，使得数组满足非递减或非递增
 # n<=1e5
 
+
 from typing import List
 from SlopeTrick import SlopeTrick
 

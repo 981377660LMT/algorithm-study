@@ -15,6 +15,10 @@ class RangeFreqQuery:
             self.indexMap[value].append(index)
 
     def query(self, left: int, right: int, value: int) -> int:
+        """查询闭区间[left,right]内value的频率
+
+        0 <= left <= right < len(arr)
+        """
         return (
             (bisect_right(self.indexMap[value], right) - 1)
             - bisect_left(self.indexMap[value], left)

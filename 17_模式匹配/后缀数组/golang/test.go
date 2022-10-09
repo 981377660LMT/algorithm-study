@@ -11,13 +11,13 @@ import (
 )
 
 // https://github.dev/EndlessCheng/codeforces-go/copypasta/strings.go
-func suffixArray(s []byte) ([]int32, []int, []int) {
+func suffixArray(s string) ([]int32, []int, []int) {
 	n := len(s)
 
 	// !后缀数组 sa 排第几的是谁
 	// sa[i] 表示n个后缀字典序中的第 i 个字符串在 s 中的位置
 	// 也就是将s的n个后缀从小到大进行排序之后把排好序的后缀的开头位置顺次放入SA中。
-	sa := *(*[]int32)(unsafe.Pointer(reflect.ValueOf(suffixarray.New(s)).Elem().FieldByName("sa").Field(0).UnsafeAddr()))
+	sa := *(*[]int32)(unsafe.Pointer(reflect.ValueOf(suffixarray.New([]byte(s))).Elem().FieldByName("sa").Field(0).UnsafeAddr()))
 
 	// !后缀名次数组 rank 你排第几
 	// 后缀 s[i:] 位于后缀字典序中的第 rank[i] 个
@@ -57,15 +57,15 @@ func indexOfAll(rawString, searchString string) []int {
 func main() {
 	fmt.Println(indexOfAll("bananaaaaa", "a")) // [1 3 5 6 7 8 9]
 
-	sa, rank, height := suffixArray([]byte("abcdea"))
+	sa, rank, height := suffixArray("abcdea")
 	fmt.Println("sa:", sa)         // "abcdea" => [5 0 1 2 3 4]
 	fmt.Println("rank:", rank)     // "abcdea" => [1 2 3 4 5 0]
 	fmt.Println("height:", height) // "abcdea" => [0 1 0 0 0 0]
 
-	sa, rank, height = suffixArray([]byte("你好啊"))
-	fmt.Println("sa:", sa)         // "abcdea" => [5 0 1 2 3 4]
-	fmt.Println("rank:", rank)     // "abcdea" => [1 2 3 4 5 0]
-	fmt.Println("height:", height) // "abcdea" => [0 1 0 0 0 0]
+	sa, rank, height = suffixArray("你好啊")
+	fmt.Println("sa:", sa)         // "abcdea" => [8 7 2 4 1 5 0 6 3]
+	fmt.Println("rank:", rank)     // "abcdea" => [6 4 2 8 3 5 7 1 0]
+	fmt.Println("height:", height) // "abcdea" => [0 0 0 0 0 1 0 0 1]
 
 	fmt.Println([]byte("1000"))
 

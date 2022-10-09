@@ -53,10 +53,10 @@ func queryLCP(rank, height []int) func(int, int) int {
 }
 
 // https://github.dev/EndlessCheng/codeforces-go/copypasta/strings.go
-func suffixArray(s []byte) ([]int32, []int, []int) {
+func suffixArray(s string) ([]int32, []int, []int) {
 	n := len(s)
 
-	sa := *(*[]int32)(unsafe.Pointer(reflect.ValueOf(suffixarray.New(s)).Elem().FieldByName("sa").Field(0).UnsafeAddr()))
+	sa := *(*[]int32)(unsafe.Pointer(reflect.ValueOf(suffixarray.New([]byte(s))).Elem().FieldByName("sa").Field(0).UnsafeAddr()))
 
 	rank := make([]int, n)
 	for i := range rank {

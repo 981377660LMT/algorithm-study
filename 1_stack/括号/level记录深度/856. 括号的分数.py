@@ -5,19 +5,18 @@
 # 总结:处理level 碰到"()"结算
 class Solution:
     def scoreOfParentheses1(self, s: str) -> int:
-        return eval(s.replace(')(', ')+(').replace('()', '1').replace('(', '2*('))
+        return eval(s.replace(")(", ")+(").replace("()", "1").replace("(", "2*("))
 
     def scoreOfParentheses(self, s: str) -> int:
-        res = 0
+        n, res = len(s), 0
         level = 0
-        for i, _ in enumerate(s):
-            level += 1 if s[i] == '(' else -1
-            if s[i] == ')' and i >= 1 and s[i - 1] == '(':
-                res += 1 << level
+        for i in range(n):
+            level += 1 if s[i] == "(" else -1
+            if s[i] == ")" and i >= 1 and s[i - 1] == "(":
+                res += 2**level
 
         return res
 
 
 print(Solution().scoreOfParentheses("(())"))
 print(Solution().scoreOfParentheses("(()(()))"))
-

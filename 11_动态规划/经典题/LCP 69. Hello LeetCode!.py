@@ -23,165 +23,143 @@
 """
 
 from functools import lru_cache
-from collections import Counter
+from collections import deque
 from typing import List, Tuple
 
 
-INF = int(1e18)
-
-
-HELLOLEETCODE = "helloleetcode"
-Good = set(list(HELLOLEETCODE))
+INF = int(1e12)
 
 
 @lru_cache(None)
 def calCost(need: Tuple[bool, ...]) -> int:
-    """计算取出所有字符的代价
+    """计算从两端取出所需字符的代价 双指针"""
+    n = len(need)
+    left, right = 0, n - 1
+    cost = 0
+    leftMoved, rightMoved = 0, 0
+    while left <= right:
+        while left <= right and not need[left]:
+            left += 1
+        while left <= right and not need[right]:
+            right -= 1
+        if left > right:
+            break
+        leftCost = (left - leftMoved) * (n - 1 - left - rightMoved)
+        rightCost = (right - leftMoved) * (n - 1 - right - rightMoved)
+        if leftCost <= rightCost:
+            left += 1
+            cost += leftCost
+            leftMoved += 1
+        else:
+            right -= 1
+            cost += rightCost
+            rightMoved += 1
+    return cost
 
-    贪心推公式+双指针模拟
-    """
-    ...
+
+# @lru_cache(None)
+# def calCost(need: Tuple[bool, ...]) -> int:
+#     """计算从两端取出所需字符的代价 双指针"""
+#     n = len(need)
+#     left, right = 0, n - 1
+#     cost = 0
+#     leftMoved, rightMoved = 0, 0
+#     while left <= right:
+#         while left <= right and not need[left]:
+#             left += 1
+#         while left <= right and not need[right]:
+#             right -= 1
+#         if left > right:
+#             break
+#         leftCost = (left - leftMoved) * (n - 1 - left - rightMoved)
+#         rightCost = (right - leftMoved) * (n - 1 - right - rightMoved)
+#         if leftCost <= rightCost:
+#             left += 1
+#             cost += leftCost
+#             leftMoved += 1
+#         else:
+#             right -= 1
+#             cost += rightCost
+#             rightMoved += 1
+#     return cost
+
+
+CDETOLH = set("cdetolh")
+ORDER = {
+    "c": 0,
+    "d": 1,
+    "e": 2,
+    "t": 3,
+    "o": 4,
+    "l": 5,
+    "h": 6,
+}
 
 
 class Solution:
     def Leetcode(self, words: List[str]) -> int:
-        need = Counter(HELLOLEETCODE)
-        cur = Counter()
-        for word in words:
-            for char in word:
-                cur[char] += 1
-        if cur & need != need:
-            return -1
-
-        # dp[index][H][E][L][O][T][C][D]
         @lru_cache(None)
         def dfs(
-            index: int, H: int, E: int, L: int, O: int, T: int, C: int, D: int, remain: int
+            index: int, C: int, D: int, E: int, T: int, O: int, L: int, H: int, remain: int
         ) -> int:
             if remain == 0:
                 return 0
-
-            # print(index, H, E, L, O, T, C, D, remain)
-
             if index == n:
                 return INF
 
-            # 从一个单词中取一个字母所需要的代币数量,为该字母左边和右边字母数量之积
-            # 取出的所有字母`恰好`可以拼成 helloleetcode
-
-            # 枚举取出的字母 2^8
-            # 先取两头 再取中间
-            # 从左边取
             res = INF
             word = words[index]
-            len_ = len(word)
-            left, right = 0, len_ - 1
-            for state in range(1 << len_):
-                todoLen = 0
-                todo = [False] * len_
-                flag = True  # 检查是否都在Good里面
-                for i in range(len_):
+            for state in states[index]:
+                count = 0
+                counter = [0] * 7
+                select = [False] * len(word)
+                for i in range(len(word)):
                     if state & (1 << i):
-                        if word[i] not in Good:
-                            flag = False
-                            break
-                        todo[i] = True
-                        todoLen += 1
-
-                if not flag:
+                        count += 1
+                        counter[ORDER[word[i]]] += 1
+                        select[i] = True
+                if (
+                    counter[0] > C
+                    or counter[1] > D
+                    or counter[2] > E
+                    or counter[3] > T
+                    or counter[4] > O
+                    or counter[5] > L
+                    or counter[6] > H
+                ):
                     continue
 
-                counter = dict()  # 检查是否不超过代取的
-                for i in range(len_):
-                    if todo[i]:
-                        counter[word[i]] = counter.get(word[i], 0) + 1
-                noMoreThan = True
-                for key, value in counter.items():
-                    if key == "h" and value > H:
-                        noMoreThan = False
-                        break
-                    elif key == "e" and value > E:
-                        noMoreThan = False
-                        break
-                    elif key == "l" and value > L:
-                        noMoreThan = False
-                        break
-                    elif key == "o" and value > O:
-                        noMoreThan = False
-                        break
-                    elif key == "t" and value > T:
-                        noMoreThan = False
-                        break
-                    elif key == "c" and value > C:
-                        noMoreThan = False
-                        break
-                    elif key == "d" and value > D:
-                        noMoreThan = False
-                        break
-                if not noMoreThan:
-                    continue
-
-                # !计算花费 找到左右近的然后删除
-                # !用deque模拟比双指针更好
-                left, right = 0, len_ - 1
-                alive = [1] * len_
-                cost = 0
-                while left <= right:
-                    while left < right and not todo[left]:
-                        left += 1
-                    while left < right and not todo[right]:
-                        right -= 1
-
-                    leftLeft, rightRight = INF, INF
-                    leftRight, rightLeft = 0, 0
-                    if todo[left]:
-                        leftLeft = sum(alive[:left])
-                        leftRight = sum(alive[left + 1 :])
-                    if todo[right]:
-                        rightLeft = sum(alive[:right])
-                        rightRight = sum(alive[right + 1 :])
-
-                    # 哪个离哪端近 就先删谁
-                    if leftLeft < rightRight:
-                        cost += leftLeft * leftRight
-                        alive[left] = 0
-                        left += 1
-                    else:
-                        # print(1, todo, left, right)
-                        cost += rightLeft * rightRight
-                        alive[right] = 0
-                        right -= 1
-
+                cost = calCost(tuple(select))
                 cand = cost + dfs(
                     index + 1,
-                    H - counter.get("h", 0),
-                    E - counter.get("e", 0),
-                    L - counter.get("l", 0),
-                    O - counter.get("o", 0),
-                    T - counter.get("t", 0),
-                    C - counter.get("c", 0),
-                    D - counter.get("d", 0),
-                    remain - todoLen,
+                    C - counter[0],
+                    D - counter[1],
+                    E - counter[2],
+                    T - counter[3],
+                    O - counter[4],
+                    L - counter[5],
+                    H - counter[6],
+                    remain - count,
                 )
-
                 if cand < res:
                     res = cand
+
             return res
 
         n = len(words)
-        res = dfs(
-            0,
-            need["h"],
-            need["e"],
-            need["l"],
-            need["o"],
-            need["t"],
-            need["c"],
-            need["d"],
-            len(HELLOLEETCODE),
-        )
+        states = [[] for _ in range(n)]
+        for i, word in enumerate(words):
+            m = len(word)
+            for state in range(1 << m):
+                for j in range(m):
+                    if (state >> j) & 1 and word[j] not in CDETOLH:
+                        break
+                else:
+                    states[i].append(state)
+
+        res = dfs(0, 1, 1, 4, 1, 2, 3, 1, 13)
         dfs.cache_clear()
-        return res
+        return res if res != INF else -1
 
 
 print(Solution().Leetcode(["hello", "leetcode"]))
