@@ -1,4 +1,5 @@
 /**
+ * 有效的数独
  * @param {character[][]} board
  * 等价于对每个九宫格没看过
  * 已知第i个元素，求在矩阵r行c列中的位置，即为~~(i / c) 行和 i % c 列。
@@ -16,22 +17,19 @@ const isValidSudoku = function (board: string[][]): boolean {
 
       if (rowSet[i].has(num)) {
         return false
-      } else {
-        rowSet[i].add(num)
       }
+      rowSet[i].add(num)
 
       if (colSet[j].has(num)) {
         return false
-      } else {
-        colSet[j].add(num)
       }
+      colSet[j].add(num)
 
       const gridIndex = 3 * ~~(i / 3) + ~~(j / 3)
       if (gridSet[gridIndex].has(num)) {
         return false
-      } else {
-        gridSet[gridIndex].add(num)
       }
+      gridSet[gridIndex].add(num)
     }
   }
 
@@ -47,7 +45,7 @@ const sudoku = [
   ['7', '.', '.', '.', '2', '.', '.', '.', '6'],
   ['.', '6', '.', '.', '.', '.', '2', '8', '.'],
   ['.', '.', '.', '4', '1', '9', '.', '.', '5'],
-  ['.', '.', '.', '.', '8', '.', '.', '7', '9'],
+  ['.', '.', '.', '.', '8', '.', '.', '7', '9']
 ]
 
 console.log(isValidSudoku(sudoku))

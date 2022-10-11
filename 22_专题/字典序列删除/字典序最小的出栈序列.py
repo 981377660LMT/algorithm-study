@@ -29,7 +29,7 @@ class Solution:
 
     def minSequnce2(self, s: str) -> str:
         """预处理后缀的min"""
-        sufMin = ["|"]  # !后缀最大值
+        sufMin = ["|"]  # !后缀最大值 (偷懒的话,也可以用SortedList维护后面的最小值)
         for char in s[::-1]:
             sufMin.append(min(char, sufMin[-1]))
         sufMin = sufMin[::-1][1:]

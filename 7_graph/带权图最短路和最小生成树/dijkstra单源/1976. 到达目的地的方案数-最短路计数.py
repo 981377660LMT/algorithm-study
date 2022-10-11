@@ -2,18 +2,15 @@ from typing import List
 from collections import defaultdict
 from heapq import heappop, heappush
 
+MOD = int(1e9 + 7)
+INF = int(1e20)
+
 # 你想知道花费 最少时间 从路口 0 出发到达路口 n - 1 的方案数。
 # 请返回花费 最少时间 到达目的地的 路径数目 。由于答案可能很大，将结果对 109 + 7 取余 后返回。
 # 1 <= n <= 200
 
-# 总结：
-# 1.If we meet candidate == dist[neib], it means we found one more way to reach node with minimal cost.
-# 2.If candidate < dist[neib], it means that we found better candidate, so we update distance and put cnt[neib] = cnt[idx].
 
-MOD = int(1e9 + 7)
-INF = int(1e20)
-
-# 单源最短路 +  DP
+# !最短路计数
 
 
 class Solution:
@@ -25,12 +22,11 @@ class Solution:
 
         dist = defaultdict(lambda: INF)
         dist[0] = 0
-        pq = [(0, 0)]
-
-        # 1.注意这个count数组表示到id的最短路径数
+        # 注意这个count数组表示到id的最短路径数
         count = defaultdict(int)
         count[0] = 1
 
+        pq = [(0, 0)]
         while pq:
             curDist, cur = heappop(pq)
             if cur == n - 1:
@@ -39,7 +35,7 @@ class Solution:
             for next in adjMap[cur]:
                 cand = adjMap[cur][next] + curDist
 
-                # 2.相等加count
+                # 相等加count
                 if cand == dist[next]:
                     count[next] += count[cur]
                     count[next] %= MOD
@@ -49,6 +45,7 @@ class Solution:
                     heappush(pq, (cand, next))
                     count[next] = count[cur]
                     count[next] %= MOD
+
         return -1
 
 
@@ -77,4 +74,3 @@ print(
 # - 0 ➝ 4 ➝ 6
 # - 0 ➝ 1 ➝ 2 ➝ 5 ➝ 6
 # - 0 ➝ 1 ➝ 3 ➝ 5 ➝ 6
-

@@ -18,11 +18,11 @@ function orchestraLayout(num: number, xPos: number, yPos: number): number {
   // 上
   if (xPos === start) return ((index + yPos - start) % 9) + 1
   // 右
-  else if (yPos === end) return ((index + edge + xPos - start) % 9) + 1
+  if (yPos === end) return ((index + edge + xPos - start) % 9) + 1
   // 下
-  else if (xPos === end) return ((index + edge * 2 + end - yPos) % 9) + 1
+  if (xPos === end) return ((index + edge * 2 + end - yPos) % 9) + 1
   // 左
-  else if (yPos === start) return ((index + edge * 3 + end - xPos) % 9) + 1
+  if (yPos === start) return ((index + edge * 3 + end - xPos) % 9) + 1
 
   throw Error('invalid input')
 }

@@ -16,3 +16,5 @@ https://www.bilibili.com/video/BV1pE41197Qj?spm_id_from=333.337.search-card.all.
 ![查询是从右下往左上](image/note/1651934156730.png)
 
 `注意到更新 x 处最值时更新了所有的父节点，所以查询时大于等于 x 的下标的最值都会被更新`
+
+**树状数组有时候可以用 SortedList 代替**

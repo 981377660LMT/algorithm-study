@@ -3,18 +3,20 @@ from typing import List
 # 每个单元格中的整数就表示这一单元格中的黄金数量
 # 每个单元格中的整数就表示这一单元格中的黄金数量
 # 矿工可以从网格中 任意一个 有黄金的单元格出发或者是停止。
+# !不得开采（进入）黄金数目为 0 的单元格。
 # 求最大收益
 # 1 <= grid.length, grid[i].length <= 15
-# 最多 25 个单元格中有黄金。
+# !最多 25 个单元格中有黄金。
 
-# 回溯法
+# 二维回溯
 
 
 class Solution:
     def getMaximumGold(self, grid: List[List[int]]) -> int:
         def dfs(r: int, c: int, gold: int) -> None:
             nonlocal res
-            res = max(res, gold)
+            gold += grid[r][c]
+            res = gold if gold > res else res
 
             tmp = grid[r][c]
             grid[r][c] = 0  # 当前结点标记访问

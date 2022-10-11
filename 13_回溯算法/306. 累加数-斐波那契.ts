@@ -43,8 +43,8 @@ const isAdditiveNumber = function (num: string): boolean {
     let res = ''
 
     while (i >= 0 || j >= 0 || carry) {
-      const d1 = i < 0 ? 0 : parseInt(num1[i])
-      const d2 = j < 0 ? 0 : parseInt(num2[j])
+      const d1 = i < 0 ? 0 : Number(num1[i])
+      const d2 = j < 0 ? 0 : Number(num2[j])
       const sum = d1 + d2 + carry
       res = `${sum % 10}${res}`
       carry = ~~(sum / 10)

@@ -6,7 +6,7 @@
  * @description 回溯法剪枝
  * 返回范围 [1, n] 中所有可能的 k 个数的组合。
  */
-var combine = function (n: number, k: number) {
+let combine = function (n: number, k: number) {
   const res: number[][] = []
 
   const bt = (path: number[], index: number) => {

@@ -1,9 +1,8 @@
 /**
- * @param {number[]} nums
+ * @param {number[]} nums  1 <= nums.length <= 15
  * @return {number[][]}
  * 递增子序列中 至少有两个元素
  * 找出并返回所有该数组中不同的递增子序列，
- * 由于需要找到所有的递增子序列，因此动态规划就不行了，妥妥回溯就行了
  */
 const findSubsequences = function (nums: number[]): number[][] {
   const res: number[][] = []

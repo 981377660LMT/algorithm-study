@@ -5,7 +5,7 @@ abstract class AbstractSegmentTree<T = number> {
   /**
    * @description {@link tree} 的初始值
    */
-  protected abstract initTreeValue(): T
+  protected abstract initTree(): T
 
   /**
    *@description 左右结点的合并方式
@@ -15,7 +15,7 @@ abstract class AbstractSegmentTree<T = number> {
   /**
    * @description 数组值的更新方式
    */
-  protected abstract updateTreeValue(oldV: T, newV: T): T
+  protected abstract updateTree(oldV: T, newV: T): T
 
   private readonly upper: number
   private readonly tree: T[]
@@ -30,7 +30,7 @@ abstract class AbstractSegmentTree<T = number> {
 
     const bufsize = this.offset * 2
     this.tree = Array(bufsize)
-    this.tree[0] = this.initTreeValue()
+    this.tree[0] = this.initTree()
 
     if (Array.isArray(lenOrArray)) {
       for (let i = 0; i < this.upper; i++) {
@@ -38,7 +38,7 @@ abstract class AbstractSegmentTree<T = number> {
       }
 
       for (let i = this.upper; i < this.offset; i++) {
-        this.tree[this.offset + i] = this.initTreeValue()
+        this.tree[this.offset + i] = this.initTree()
       }
 
       for (let i = this.offset - 1; i >= 1; i--) {
@@ -46,18 +46,18 @@ abstract class AbstractSegmentTree<T = number> {
       }
     } else {
       for (let i = 1; i < bufsize; i++) {
-        this.tree[i] = this.initTreeValue()
+        this.tree[i] = this.initTree()
       }
     }
   }
 
   /**
    * @param index 数组下标 0 <= index < n
-   * @param value 更新的值 更新方式取决于 {@link updateTreeValue}
+   * @param value 更新的值 更新方式取决于 {@link updateTree}
    */
   update(index: number, value: T): void {
     let k = index + this.offset
-    this.tree[k] = this.updateTreeValue(this.tree[k], value)
+    this.tree[k] = this.updateTree(this.tree[k], value)
     while (k > 1) {
       k >>= 1
       this.tree[k] = this.mergeChildren(this.tree[2 * k], this.tree[2 * k + 1])
@@ -68,7 +68,7 @@ abstract class AbstractSegmentTree<T = number> {
    * @returns  切片`[left:right]`内的信息 0 <= left <= right <=n
    */
   query(left: number, right: number): T {
-    let res: T = this.initTreeValue()
+    let res: T = this.initTree()
     for (left += this.offset, right += this.offset; left < right; left >>= 1, right >>= 1) {
       if (left & 1) {
         res = this.mergeChildren(res, this.tree[left++])
@@ -93,7 +93,7 @@ const INF = 2e15
  * @description 线段树RMQ最大值(快速版)
  */
 class MaxSegmentTree2 extends AbstractSegmentTree<number> {
-  protected initTreeValue(): number {
+  protected initTree(): number {
     return -INF
   }
 
@@ -101,7 +101,7 @@ class MaxSegmentTree2 extends AbstractSegmentTree<number> {
     return Math.max(a, b)
   }
 
-  protected updateTreeValue(oldV: number, newV: number): number {
+  protected updateTree(oldV: number, newV: number): number {
     return newV + oldV
     return newV
   }
@@ -111,7 +111,7 @@ class MaxSegmentTree2 extends AbstractSegmentTree<number> {
  * @description 线段树RMQ最小值(快速版)
  */
 class MinSegmentTree2 extends AbstractSegmentTree<number> {
-  protected initTreeValue(): number {
+  protected initTree(): number {
     return INF
   }
 
@@ -119,7 +119,7 @@ class MinSegmentTree2 extends AbstractSegmentTree<number> {
     return Math.min(a, b)
   }
 
-  protected updateTreeValue(oldV: number, newV: number): number {
+  protected updateTree(oldV: number, newV: number): number {
     return newV + oldV
     return newV
   }

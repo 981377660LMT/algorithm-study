@@ -5,12 +5,11 @@ from typing import List
 class Solution:
     def kthSmallestSubarraySum(self, nums: List[int], k: int) -> int:
         def countNGT(mid) -> int:
-            """"和小于等于mid的子数组数"""
-
+            """ "和小于等于mid的子数组数"""
             res, curSum, left = 0, 0, 0
             for right in range(len(nums)):
                 curSum += nums[right]
-                while left < len(nums) and curSum > mid:
+                while left <= right and curSum > mid:
                     curSum -= nums[left]
                     left += 1
                 res += right - left + 1
@@ -18,7 +17,7 @@ class Solution:
 
         left, right = 0, sum(nums)
         while left <= right:
-            mid = (left + right) >> 1
+            mid = (left + right) // 2
             # 找最左，尽量把右边移过来
             if countNGT(mid) < k:
                 left = mid + 1
@@ -27,7 +26,7 @@ class Solution:
         return left
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     print(Solution().kthSmallestSubarraySum(nums=[2, 1, 3], k=4))
 # 输出: 3

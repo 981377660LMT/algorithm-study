@@ -12,7 +12,7 @@ const exist = (board: string[][], word: string): boolean => {
     [-1, 0],
     [0, 1],
     [1, 0],
-    [0, -1],
+    [0, -1]
   ]
 
   const bt = (x: number, y: number, step: number): boolean => {
@@ -55,7 +55,7 @@ console.dir(
     [
       ['A', 'B', 'C', 'E'],
       ['S', 'F', 'C', 'S'],
-      ['A', 'D', 'E', 'E'],
+      ['A', 'D', 'E', 'E']
     ],
     'ABCC'
   ),

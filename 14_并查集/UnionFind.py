@@ -23,7 +23,7 @@ class UnionFindMap(Generic[T]):
         root2 = self.find(key2)
         if root1 == root2:
             return False
-        if self.rank.get(root1, 1) > self.rank[root2]:
+        if self.rank[root1] > self.rank[root2]:
             root1, root2 = root2, root1
         self.parent[root1] = root2
         self.rank[root2] += self.rank[root1]

@@ -25,6 +25,20 @@ class Solution:
 
         return endswith[2]
 
+    def countSpecialSubsequences2(self, nums: List[int]) -> int:
+        s0, s01, s012 = 0, 0, 0
+        for num in nums:
+            if num == 0:
+                s0 += s0 + 1
+                s0 %= MOD
+            elif num == 1:
+                s01 += s01 + s0
+                s01 %= MOD
+            else:
+                s012 += s012 + s01
+                s012 %= MOD
+        return s012
+
 
 print(Solution().countSpecialSubsequences(nums=[0, 1, 2, 2]))
 # 输出：3

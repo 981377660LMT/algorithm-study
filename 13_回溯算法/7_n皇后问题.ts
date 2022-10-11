@@ -10,15 +10,16 @@ const solveNQueens = function (n: number): string[][] {
   // path表示每行把皇后存第几列，记录列数
   const bt = (path: number[], curRow: number) => {
     if (curRow === n) {
-      res.push(path.map(col => '.'.repeat(col) + 'Q' + '.'.repeat(n - col - 1)))
+      res.push(path.map(col => `${'.'.repeat(col)}Q${'.'.repeat(n - col - 1)}`))
       return
     }
 
     for (let i = 0; i < n; i++) {
       if (
         path.some((col, row) => col === i || col + row === i + curRow || col - row === i - curRow)
-      )
+      ) {
         continue
+      }
       path.push(i)
       bt(path, curRow + 1)
       path.pop()

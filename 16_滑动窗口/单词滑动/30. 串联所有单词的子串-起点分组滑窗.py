@@ -1,3 +1,5 @@
+"""串联所有单词的子串"""
+
 from typing import List
 from collections import Counter
 
@@ -5,25 +7,6 @@ from collections import Counter
 # 长度相同 的单词 words
 # 找出 s 中恰好可以由 words 中所有单词串联形成的子串的起始位置。
 class Solution:
-    def findSubstring(self, s: str, words: List[str]) -> List[int]:
-        # O(n^2) 暴力
-        if not s or not words:
-            return []
-
-        res = []
-        n = len(words)
-        wordLen = len(words[0])
-        windowLen = n * wordLen
-        target = Counter(words)
-
-        # 对每个可能的起始位置判断
-        for i in range(len(s) - windowLen + 1):
-            cur = Counter([s[left : left + wordLen] for left in range(i, i + windowLen, wordLen)])
-            if cur == target:
-                res.append(i)
-
-        return res
-
     def findSubstring2(self, s: str, words: List[str]) -> List[int]:
         # O(26*n) 滑窗 `如果当前单词超出需要 那么左端点回来`
         res = []
@@ -44,6 +27,25 @@ class Solution:
                     left += wordLen  # 这个单词不能要了
                 if count == n:
                     res.append(left)
+
+        return res
+
+    def findSubstring(self, s: str, words: List[str]) -> List[int]:
+        # O(n^2) 暴力
+        if not s or not words:
+            return []
+
+        res = []
+        n = len(words)
+        wordLen = len(words[0])
+        windowLen = n * wordLen
+        target = Counter(words)
+
+        # 对每个可能的起始位置判断
+        for i in range(len(s) - windowLen + 1):
+            cur = Counter([s[left : left + wordLen] for left in range(i, i + windowLen, wordLen)])
+            if cur == target:
+                res.append(i)
 
         return res
 

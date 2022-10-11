@@ -7,7 +7,7 @@ class Solution:
     def shortestPathLength(self, graph: List[List[int]]) -> int:
         n = len(graph)
         target = (1 << n) - 1
-        visited = [[0x7FFFFFFF] * (1 << n) for _ in range(n)]
+        dist = [[0x7FFFFFFF] * (1 << n) for _ in range(n)]
         queue = deque([(i, 1 << i, 0, str(i)) for i in range(n)])
 
         while queue:
@@ -17,8 +17,8 @@ class Solution:
                 return cost
             for next in graph[cur]:
                 nextState = state | (1 << next)
-                if visited[next][nextState] > cost + 1:
-                    visited[next][nextState] = cost + 1
+                if dist[next][nextState] > cost + 1:
+                    dist[next][nextState] = cost + 1
                     queue.append((next, nextState, cost + 1, path + str(next)))
 
         return -1

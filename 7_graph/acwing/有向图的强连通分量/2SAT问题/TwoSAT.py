@@ -1,6 +1,8 @@
 # https://atcoder.jp/contests/practice2/submissions/32497027
 # 给定 n 个还未赋值的布尔变量 x1∼xn。
-# 现在有 m 个条件，每个条件的形式为 “xi 为 0/1 或 xj 为 0/1 至少有一项成立”，例如 “x1 为 1 或 x3 为 0”、“x8 为 0 或 x4 为 0” 等。
+# 现在有 m 个条件，每个条件的形式为
+#  !“xi 为 0/1 或 xj 为 0/1 至少有一项成立”，
+# !例如 “x1 为 1 或 x3 为 0”、“x8 为 0 或 x4 为 0” 等。
 # 现在，请你对这 n 个布尔变量进行赋值（0 或 1），使得所有 m 个条件能够成立。
 
 
@@ -96,7 +98,7 @@ class TwoSAT:
         """每个条件结点的正确性"""
         res = [False] * self._n
         for i in range(self._n):
-            if self.group[i] > self.group[i + self._n]:
+            if self.group[i] > self.group[i + self._n]:  # type: ignore
                 res[i] = True
         return res
 
