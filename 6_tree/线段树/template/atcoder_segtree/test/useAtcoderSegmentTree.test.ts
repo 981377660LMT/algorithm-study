@@ -1,8 +1,8 @@
-import { useAtcoderSegmentTree, Operation, AtcoderSegmentTree } from '../AtcoderSegmentTree'
+import { useAtcoderLazySegmentTree, Operation, AtcoderSegmentTree } from '../AtcoderLazySegmentTree'
 
 const INF = 2e15
 
-describe('useAtcoderSegmentTree', () => {
+describe('useAtcoderLazySegmentTree', () => {
   // !叠加更新 区间最大值查询
   describe('MaxSegmentTree', () => {
     const maxOperation: Operation<number, number> = {
@@ -15,7 +15,7 @@ describe('useAtcoderSegmentTree', () => {
 
     let tree: AtcoderSegmentTree<number, number>
     beforeEach(() => {
-      tree = useAtcoderSegmentTree([1, 2, 3, 4, 5], maxOperation)
+      tree = useAtcoderLazySegmentTree([1, 2, 3, 4, 5], maxOperation)
     })
 
     it('should support query', () => {
@@ -73,7 +73,7 @@ describe('useAtcoderSegmentTree', () => {
 
     let tree: AtcoderSegmentTree<[sum: number, length: number], number>
     beforeEach(() => {
-      tree = useAtcoderSegmentTree(
+      tree = useAtcoderLazySegmentTree(
         Array.from({ length: 5 }, (_, i) => [i, 1]),
         sumOperation
       )
@@ -104,7 +104,7 @@ describe('useAtcoderSegmentTree', () => {
   describe('https://www.luogu.com.cn/problem/P3373', () => {
     it('should pass test case', () => {
       const nums = [1, 5, 4, 2, 3]
-      const MOD = 38
+      const MOD = 38n
       const queries = [
         [2, 1, 4, 1],
         [3, 2, 5],
@@ -113,17 +113,21 @@ describe('useAtcoderSegmentTree', () => {
         [3, 1, 4]
       ]
 
-      type Data = [sum: number, length: number]
-      type Lazy = [mul: number, add: number]
+      type Data = [sum: bigint, length: bigint]
+      type Lazy = [mul: bigint, add: bigint]
+
       const operation: Operation<Data, Lazy> = {
-        dataUnit: () => [0, 0],
-        lazyUnit: () => [1, 0],
+        dataUnit: () => [0n, 1n],
+        lazyUnit: () => [1n, 0n],
         mergeChildren(data1, data2) {
           return [(data1[0] + data2[0]) % MOD, data1[1] + data2[1]]
         },
         // 区间和等于原来的区间和乘以mul加上区间的长度乘以add
         updateData(parentLazy, childData) {
-          return [(childData[0] * parentLazy[0] + childData[1] * parentLazy[1]) % MOD, childData[1]]
+          return [
+            (childData[0] * parentLazy[0] + BigInt(childData[1]) * parentLazy[1]) % MOD,
+            childData[1]
+          ]
         },
         updateLazy(parentLazy, childLazy) {
           return [
@@ -133,21 +137,21 @@ describe('useAtcoderSegmentTree', () => {
         }
       }
 
-      const tree = useAtcoderSegmentTree(
-        nums.map<Data>(value => [value, 1]),
+      const tree = useAtcoderLazySegmentTree(
+        nums.map<Data>(value => [BigInt(value), 1n]),
         operation
       )
 
-      const expected = [17, 2]
+      const expected = [17n, 2n]
       let ei = 0
 
       for (const [type, ...args] of queries) {
         if (type === 1) {
           const [left, right, mul] = args
-          tree.update(left - 1, right, [mul, 0])
+          tree.update(left - 1, right, [BigInt(mul), 0n])
         } else if (type === 2) {
           const [left, right, add] = args
-          tree.update(left - 1, right, [1, add])
+          tree.update(left - 1, right, [1n, BigInt(add)])
         } else {
           const [left, right] = args
           expect(tree.query(left - 1, right)[0]).toBe(expected[ei])
@@ -191,7 +195,7 @@ describe('useAtcoderSegmentTree', () => {
         }
       }
 
-      const tree = useAtcoderSegmentTree(
+      const tree = useAtcoderLazySegmentTree(
         s.split('').map<Data>(v => (v === '0' ? [1, 0] : [0, 1])),
         operation
       )

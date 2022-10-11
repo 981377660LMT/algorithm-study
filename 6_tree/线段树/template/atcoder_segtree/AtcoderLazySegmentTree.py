@@ -1,5 +1,8 @@
+# !由于lazy模板通用性 效率不如自己维护数组的线段树
+# !注意如果是单点查询,可以去掉所有pushUp函数逻辑
+
 import sys
-from typing import Callable, Generic, List, TypeVar, Union
+from typing import Callable, Generic, List, TypeVar, Union, overload
 
 S = TypeVar("S")
 """线段树维护的值的类型"""
@@ -7,6 +10,20 @@ S = TypeVar("S")
 F = TypeVar("F")
 """懒标记的类型/更新操作的类型"""
 
+E = Callable[[], S]
+"""线段树的值的幺元"""
+
+Id = Callable[[], F]
+"""更新操作/懒标记的幺元"""
+
+Op = Callable[[S, S], S]
+"""线段树的合并操作"""
+
+Mapping = Callable[[F, S], S]
+"""父结点的懒标记更新子结点的值"""
+
+Composition = Callable[[F, F], F]
+"""父结点的懒标记更新子结点的懒标记"""
 
 # check python version for Protocol
 if sys.version_info >= (3, 8):
@@ -59,19 +76,43 @@ class AtcoderLazySegmentTree(Generic[S, F]):
         "_composition",
     )
 
+    @overload
     def __init__(
         self,
         sizeOrArray: Union[int, List["S"]],
-        operation: "AbstractOperation[S, F]",
-    ):
+        *,
+        e: "E[S]",
+        id: "Id[F]",
+        op: "Op[S]",
+        mapping: "Mapping[S, F]",
+        composition: "Composition[F]",
+    ) -> None:
+
+        ...
+
+    @overload
+    def __init__(self, sizeOrArray: Union[int, List["S"]], *, operation: "AbstractOperation[S, F]"):
+        ...
+
+    def __init__(self, sizeOrArray: Union[int, List["S"]], **kwargs):
         self._n = len(sizeOrArray) if isinstance(sizeOrArray, list) else sizeOrArray
         self._log = (self._n - 1).bit_length()
         self._size = 1 << self._log
-        self._e = operation.e
-        self._id = operation.id
-        self._op = operation.op
-        self._mapping = operation.mapping
-        self._composition = operation.composition
+
+        if "operation" in kwargs:
+            operation = kwargs["operation"]
+            self._e = operation.e
+            self._id = operation.id
+            self._op = operation.op
+            self._mapping = operation.mapping
+            self._composition = operation.composition
+        else:
+            self._e = kwargs["e"]
+            self._id = kwargs["id"]
+            self._op = kwargs["op"]
+            self._mapping = kwargs["mapping"]
+            self._composition = kwargs["composition"]
+
         self._data = [self._e() for _ in range(2 * self._size)]
         self._lazy = [self._id() for _ in range(self._size)]
         if isinstance(sizeOrArray, list):
@@ -236,46 +277,85 @@ if __name__ == "__main__":
 
     # 线段树维护区间的6个值
     # ![0的个数,1的个数,2的个数,10逆序对的个数,20逆序对的个数,21逆序对的个数]
-    class Operation(AbstractOperation[List[int], List[int]]):
-        def e(self) -> List[int]:
-            return [0] * 6
+    # class Operation(AbstractOperation[List[int], List[int]]):
+    #     def e(self) -> List[int]:
+    #         return [0] * 6
 
-        def id(self) -> List[int]:
-            return [0, 1, 2]
+    #     def id(self) -> List[int]:
+    #         return [0, 1, 2]
 
-        def op(self, leftData: List[int], rightData: List[int]) -> List[int]:
-            res = [0] * 6
-            res[0] = leftData[0] + rightData[0]
-            res[1] = leftData[1] + rightData[1]
-            res[2] = leftData[2] + rightData[2]
-            res[3] = leftData[3] + rightData[3] + leftData[1] * rightData[0]
-            res[4] = leftData[4] + rightData[4] + leftData[2] * rightData[0]
-            res[5] = leftData[5] + rightData[5] + leftData[2] * rightData[1]
-            return res
+    #     def op(self, leftData: List[int], rightData: List[int]) -> List[int]:
+    #         res = [0] * 6
+    #         res[0] = leftData[0] + rightData[0]
+    #         res[1] = leftData[1] + rightData[1]
+    #         res[2] = leftData[2] + rightData[2]
+    #         res[3] = leftData[3] + rightData[3] + leftData[1] * rightData[0]
+    #         res[4] = leftData[4] + rightData[4] + leftData[2] * rightData[0]
+    #         res[5] = leftData[5] + rightData[5] + leftData[2] * rightData[1]
+    #         return res
 
-        def mapping(self, parentLazy: List[int], childData: List[int]) -> List[int]:
-            res = [0] * 6
-            res[parentLazy[0]] += childData[0]
-            res[parentLazy[1]] += childData[1]
-            res[parentLazy[2]] += childData[2]
-            counter = [[0] * 3 for _ in range(3)]  # !counter[i][j]表示(i,j)的对数
-            counter[parentLazy[1]][parentLazy[0]] += childData[3]
-            counter[parentLazy[2]][parentLazy[0]] += childData[4]
-            counter[parentLazy[2]][parentLazy[1]] += childData[5]
-            counter[parentLazy[0]][parentLazy[1]] += childData[0] * childData[1] - childData[3]
-            counter[parentLazy[0]][parentLazy[2]] += childData[0] * childData[2] - childData[4]
-            counter[parentLazy[1]][parentLazy[2]] += childData[1] * childData[2] - childData[5]
-            res[3] = counter[1][0]
-            res[4] = counter[2][0]
-            res[5] = counter[2][1]
-            return res
+    #     def mapping(self, parentLazy: List[int], childData: List[int]) -> List[int]:
+    #         res = [0] * 6
+    #         res[parentLazy[0]] += childData[0]
+    #         res[parentLazy[1]] += childData[1]
+    #         res[parentLazy[2]] += childData[2]
+    #         counter = [[0] * 3 for _ in range(3)]  # !counter[i][j]表示(i,j)的对数
+    #         counter[parentLazy[1]][parentLazy[0]] += childData[3]
+    #         counter[parentLazy[2]][parentLazy[0]] += childData[4]
+    #         counter[parentLazy[2]][parentLazy[1]] += childData[5]
+    #         counter[parentLazy[0]][parentLazy[1]] += childData[0] * childData[1] - childData[3]
+    #         counter[parentLazy[0]][parentLazy[2]] += childData[0] * childData[2] - childData[4]
+    #         counter[parentLazy[1]][parentLazy[2]] += childData[1] * childData[2] - childData[5]
+    #         res[3] = counter[1][0]
+    #         res[4] = counter[2][0]
+    #         res[5] = counter[2][1]
+    #         return res
 
-        def composition(self, parentLazy: List[int], childLazy: List[int]) -> List[int]:
-            res = [0] * 3
-            res[0] = parentLazy[childLazy[0]]
-            res[1] = parentLazy[childLazy[1]]
-            res[2] = parentLazy[childLazy[2]]
-            return res
+    #     def composition(self, parentLazy: List[int], childLazy: List[int]) -> List[int]:
+    #         res = [0] * 3
+    #         res[0] = parentLazy[childLazy[0]]
+    #         res[1] = parentLazy[childLazy[1]]
+    #         res[2] = parentLazy[childLazy[2]]
+    #         return res
+    def e() -> List[int]:
+        return [0] * 6
+
+    def id() -> List[int]:
+        return [0, 1, 2]
+
+    def op(leftData: List[int], rightData: List[int]) -> List[int]:
+        res = [0] * 6
+        res[0] = leftData[0] + rightData[0]
+        res[1] = leftData[1] + rightData[1]
+        res[2] = leftData[2] + rightData[2]
+        res[3] = leftData[3] + rightData[3] + leftData[1] * rightData[0]
+        res[4] = leftData[4] + rightData[4] + leftData[2] * rightData[0]
+        res[5] = leftData[5] + rightData[5] + leftData[2] * rightData[1]
+        return res
+
+    def mapping(parentLazy: List[int], childData: List[int]) -> List[int]:
+        res = [0] * 6
+        res[parentLazy[0]] += childData[0]
+        res[parentLazy[1]] += childData[1]
+        res[parentLazy[2]] += childData[2]
+        counter = [[0] * 3 for _ in range(3)]
+        counter[parentLazy[1]][parentLazy[0]] += childData[3]
+        counter[parentLazy[2]][parentLazy[0]] += childData[4]
+        counter[parentLazy[2]][parentLazy[1]] += childData[5]
+        counter[parentLazy[0]][parentLazy[1]] += childData[0] * childData[1] - childData[3]
+        counter[parentLazy[0]][parentLazy[2]] += childData[0] * childData[2] - childData[4]
+        counter[parentLazy[1]][parentLazy[2]] += childData[1] * childData[2] - childData[5]
+        res[3] = counter[1][0]
+        res[4] = counter[2][0]
+        res[5] = counter[2][1]
+        return res
+
+    def composition(parentLazy: List[int], childLazy: List[int]) -> List[int]:
+        res = [0] * 3
+        res[0] = parentLazy[childLazy[0]]
+        res[1] = parentLazy[childLazy[1]]
+        res[2] = parentLazy[childLazy[2]]
+        return res
 
     n, q = map(int, input().split())
     nums = list(map(int, input().split()))
@@ -283,7 +363,11 @@ if __name__ == "__main__":
     for i in range(n):
         init[i][nums[i]] = 1
 
-    tree = AtcoderLazySegmentTree(init, Operation())
+    # !4300ms
+    # tree = AtcoderLazySegmentTree(init, operation=Operation())
+
+    # !4100ms
+    tree = AtcoderLazySegmentTree(init, e=e, id=id, op=op, mapping=mapping, composition=composition)
     for _ in range(q):
         kind, *rest = map(int, input().split())
         if kind == 1:

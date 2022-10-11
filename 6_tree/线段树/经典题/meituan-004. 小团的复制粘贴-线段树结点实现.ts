@@ -114,7 +114,7 @@ class SegmentTree {
   }
 
   /**
-   * @param root 没有区间修改，所以并不需要pushup操作
+   * @param root 没有区间查询，所以并不需要pushup操作
    */
   private pushUp(root: number): void {}
 }

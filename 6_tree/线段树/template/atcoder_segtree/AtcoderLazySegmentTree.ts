@@ -1,3 +1,6 @@
+// !由于lazy模板通用性 效率不如自己维护数组的线段树
+// !注意如果是单点查询,可以去掉所有pushUp函数逻辑(js使用bigint会比较慢)
+
 /* eslint-disable no-constant-condition */
 /* eslint-disable no-param-reassign */
 
@@ -74,7 +77,7 @@ interface AtcoderSegmentTree<S, F> {
 /**
  * @see {@link https://betrue12.hateblo.jp/entry/2020/09/22/194541}
  */
-function useAtcoderSegmentTree<S, F>(
+function useAtcoderLazySegmentTree<S, F>(
   sizeOrArray: number | ArrayLike<S>,
   operation: Operation<S, F>
 ): AtcoderSegmentTree<S, F> {
@@ -270,4 +273,4 @@ function useAtcoderSegmentTree<S, F>(
   }
 }
 
-export { useAtcoderSegmentTree, Operation, AtcoderSegmentTree }
+export { useAtcoderLazySegmentTree, Operation, AtcoderSegmentTree }
