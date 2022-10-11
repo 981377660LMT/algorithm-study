@@ -29,13 +29,13 @@ interface Operation<S, F> {
    * 父结点的懒标记更新子结点的值
    * @alias mapping
    */
-  updateDataByLazy: (childData: S, parentLazy: F) => S
+  updateData: (parentLazy: F, childData: S) => S
 
   /**
    * 父结点的懒标记更新子结点的懒标记
    * @alias composition
    */
-  updateLazyByLazy: (childLazy: F, parentLazy: F) => F
+  updateLazy: (parentLazy: F, childLazy: F) => F
 }
 
 interface AtcoderSegmentTree<S, F> {
@@ -85,10 +85,10 @@ function useAtcoderSegmentTree<S, F>(
   const _data = Array<S>(_size * 2).fill(operation.dataUnit())
   const _lazy = Array<F>(_size * 2).fill(operation.lazyUnit())
   const _e = operation.dataUnit
-  const _identity = operation.lazyUnit
+  const _id = operation.lazyUnit
   const _op = operation.mergeChildren
-  const _mapping = operation.updateDataByLazy
-  const _composition = operation.updateLazyByLazy
+  const _mapping = operation.updateData
+  const _composition = operation.updateLazy
 
   if (Array.isArray(sizeOrArray)) {
     for (let i = 0; i < _n; i++) {
@@ -254,14 +254,14 @@ function useAtcoderSegmentTree<S, F>(
   function _pushDown(root: number): void {
     _allApply(2 * root, _lazy[root])
     _allApply(2 * root + 1, _lazy[root])
-    _lazy[root] = _identity()
+    _lazy[root] = _id()
   }
 
   // pushDown辅助函数 更新子结点的lazy和data
   function _allApply(root: number, parentLazy: F): void {
-    _data[root] = _mapping(_data[root], parentLazy)
+    _data[root] = _mapping(parentLazy, _data[root])
     if (root < _size) {
-      _lazy[root] = _composition(_lazy[root], parentLazy)
+      _lazy[root] = _composition(parentLazy, _lazy[root])
     }
   }
 

@@ -1,5 +1,8 @@
+// !deprecated
+
 /**
  * @see {@link https://atcoder.jp/contests/typical90/submissions/23947318}
+ * @deprecated
  */
 abstract class AbstractSegmentTree<T = number> {
   /**
@@ -133,4 +136,4 @@ if (require.main === module) {
   console.log(tree.query(0, 1))
 }
 
-export { MaxSegmentTree2, MinSegmentTree2 }
+export {}
