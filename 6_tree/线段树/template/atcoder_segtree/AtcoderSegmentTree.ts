@@ -4,7 +4,7 @@
 /**
  * S 线段树维护的值的类型
  *
- * F 操作更新的值的类型/懒标记的值的类型
+ * F 更新操作的值的类型/懒标记的值的类型
  */
 interface Operation<S, F> {
   /**
@@ -14,7 +14,7 @@ interface Operation<S, F> {
   dataUnit: () => S
 
   /**
-   * 懒标记的幺元
+   * 更新操作/懒标记的幺元
    * @alias id
    */
   lazyUnit: () => F
@@ -73,7 +73,6 @@ interface AtcoderSegmentTree<S, F> {
 
 /**
  * @see {@link https://betrue12.hateblo.jp/entry/2020/09/22/194541}
- *      {@link https://github/shakayami/ACL-for-python/lazysegtree}
  */
 function useAtcoderSegmentTree<S, F>(
   sizeOrArray: number | ArrayLike<S>,

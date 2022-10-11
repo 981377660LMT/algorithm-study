@@ -100,13 +100,114 @@ describe('useAtcoderSegmentTree', () => {
   // 如题，已知一个数列，你需要进行下面三种操作：
   // 将某区间每一个数乘上 xx
   // 将某区间每一个数加上 xx
-  // 求出某区间每一个数的和
+  // 求出某区间每一个数的和(奇妙序列)
   describe('https://www.luogu.com.cn/problem/P3373', () => {
     it('should pass test case', () => {
-      const n = 5
+      const nums = [1, 5, 4, 2, 3]
       const MOD = 38
-      const operation: Operation<[sum: number, length: number], [mul: number, add: number]> = {}
-      const tree = useAtcoderSegmentTree(n, operation)
+      const queries = [
+        [2, 1, 4, 1],
+        [3, 2, 5],
+        [1, 2, 4, 2],
+        [2, 3, 5, 5],
+        [3, 1, 4]
+      ]
+
+      type Data = [sum: number, length: number]
+      type Lazy = [mul: number, add: number]
+      const operation: Operation<Data, Lazy> = {
+        dataUnit: () => [0, 0],
+        lazyUnit: () => [1, 0],
+        mergeChildren(data1, data2) {
+          return [(data1[0] + data2[0]) % MOD, data1[1] + data2[1]]
+        },
+        // 区间和等于原来的区间和乘以mul加上区间的长度乘以add
+        updateData(parentLazy, childData) {
+          return [(childData[0] * parentLazy[0] + childData[1] * parentLazy[1]) % MOD, childData[1]]
+        },
+        updateLazy(parentLazy, childLazy) {
+          return [
+            (parentLazy[0] * childLazy[0]) % MOD,
+            (parentLazy[0] * childLazy[1] + parentLazy[1]) % MOD
+          ]
+        }
+      }
+
+      const tree = useAtcoderSegmentTree(
+        nums.map<Data>(value => [value, 1]),
+        operation
+      )
+
+      const expected = [17, 2]
+      let ei = 0
+
+      for (const [type, ...args] of queries) {
+        if (type === 1) {
+          const [left, right, mul] = args
+          tree.update(left - 1, right, [mul, 0])
+        } else if (type === 2) {
+          const [left, right, add] = args
+          tree.update(left - 1, right, [1, add])
+        } else {
+          const [left, right] = args
+          expect(tree.query(left - 1, right)[0]).toBe(expected[ei])
+          ei++
+        }
+      }
+    })
+  })
+
+  // 01串反转(flip)
+  // 若 op=0，则表示将01串的 [l, r] 区间内的 0 变成 1，1 变成 0。
+  // 若 op=1，则表示询问01串的[l, r] 区间内有多少个字符 1。
+  describe('https://www.luogu.com.cn/problem/P2574', () => {
+    it('should pass test case', () => {
+      const s = '1011101001'
+
+      const queries = [
+        [0, 2, 4],
+        [1, 1, 5],
+        [0, 3, 7],
+        [1, 1, 10],
+        [0, 1, 4],
+        [1, 2, 6]
+      ]
+
+      type Data = [count0: number, count1: number]
+      type Lazy = 0 | 1 // 0表示不反转，1表示反转
+
+      const operation: Operation<Data, Lazy> = {
+        dataUnit: () => [0, 0],
+        lazyUnit: () => 0,
+        mergeChildren(data1, data2) {
+          return [data1[0] + data2[0], data1[1] + data2[1]]
+        },
+        updateData(parentLazy, childData) {
+          if (parentLazy === 0) return childData // 不需要翻转
+          return [childData[1], childData[0]] // 翻转
+        },
+        updateLazy(parentLazy, childLazy) {
+          return (parentLazy ^ childLazy) as Lazy
+        }
+      }
+
+      const tree = useAtcoderSegmentTree(
+        s.split('').map<Data>(v => (v === '0' ? [1, 0] : [0, 1])),
+        operation
+      )
+
+      const expected = [3, 6, 1]
+      let ei = 0
+
+      for (let [type, left, right] of queries) {
+        left--
+        if (type === 0) {
+          tree.update(left, right, 1)
+        } else {
+          expect(tree.query(left, right)[1]).toBe(expected[ei])
+          ei++
+        }
+      }
     })
   })
 })

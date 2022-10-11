@@ -1,13 +1,26 @@
-from typing import Callable, Generic, List, Protocol, TypeVar, Union
+import sys
+from typing import Callable, Generic, List, TypeVar, Union
 
 S = TypeVar("S")
 """线段树维护的值的类型"""
 
 F = TypeVar("F")
-"""懒标记的类型/操作的类型"""
+"""懒标记的类型/更新操作的类型"""
 
 
-class IOperation(Generic[S, F], Protocol):
+# check python version for Protocol
+if sys.version_info >= (3, 8):
+    from typing import Protocol
+else:
+
+    class DummyProtocol(Generic[S, F]):
+        __slots__ = ()
+        ...
+
+    Protocol = DummyProtocol
+
+
+class AbstractOperation(Protocol[S, F]):
     """线段树的操作的接口"""
 
     def e(self) -> S:
@@ -15,7 +28,7 @@ class IOperation(Generic[S, F], Protocol):
         ...
 
     def id(self) -> "F":
-        """懒标记的幺元"""
+        """更新操作/懒标记的幺元"""
         ...
 
     def op(self, leftData: "S", rightData: "S") -> "S":
@@ -31,7 +44,7 @@ class IOperation(Generic[S, F], Protocol):
         ...
 
 
-class AtcoderLazySegmentTree(Generic["S", "F"]):
+class AtcoderLazySegmentTree(Generic[S, F]):
 
     __slots__ = (
         "_n",
@@ -49,7 +62,7 @@ class AtcoderLazySegmentTree(Generic["S", "F"]):
     def __init__(
         self,
         sizeOrArray: Union[int, List["S"]],
-        operation: "IOperation[S, F]",
+        operation: "AbstractOperation[S, F]",
     ):
         self._n = len(sizeOrArray) if isinstance(sizeOrArray, list) else sizeOrArray
         self._log = (self._n - 1).bit_length()
@@ -68,6 +81,13 @@ class AtcoderLazySegmentTree(Generic["S", "F"]):
             self._pushUp(i)
 
     def query(self, left: int, right: int) -> "S":
+        """
+        查询切片 `[left:right]` 内的值
+
+        `0 <= left <= right <= n`
+
+        alias: prod
+        """
         assert 0 <= left and left <= right and right <= self._n
         if left == right:
             return self._e()
@@ -94,6 +114,13 @@ class AtcoderLazySegmentTree(Generic["S", "F"]):
         return self._data[1]
 
     def update(self, left: int, right: int, f: "F") -> None:
+        """
+        更新切片 `[left:right]` 内的值
+
+        `0 <= left <= right <= n`
+
+        alias: apply
+        """
         assert 0 <= left and left <= right and right <= self._n
         if left == right:
             return
@@ -122,6 +149,9 @@ class AtcoderLazySegmentTree(Generic["S", "F"]):
                 self._pushUp((right - 1) >> i)
 
     def maxRight(self, left: int, key: Callable[["S"], bool]) -> int:
+        """
+        树上二分查询最大的 `right` 使得切片 `[left:right]` 内的值满足 `key`
+        """
         assert 0 <= left and left <= self._n
         assert key(self._e())
         if left == self._n:
@@ -148,6 +178,9 @@ class AtcoderLazySegmentTree(Generic["S", "F"]):
         return self._n
 
     def minLeft(self, right: int, key: Callable[["S"], bool]) -> int:
+        """
+        树上二分查询最小的 `left` 使得切片 `[left:right]` 内的值满足 `key`
+        """
         assert 0 <= right and right <= self._n
         assert key(self._e())
         if right == 0:
@@ -201,22 +234,63 @@ if __name__ == "__main__":
     MOD = 998244353
     INF = int(4e18)
 
-    class Operation(IOperation[int, int]):
-        def e(self) -> int:
-            return 0
+    # 线段树维护区间的6个值
+    # ![0的个数,1的个数,2的个数,10逆序对的个数,20逆序对的个数,21逆序对的个数]
+    class Operation(AbstractOperation[List[int], List[int]]):
+        def e(self) -> List[int]:
+            return [0] * 6
 
-        def id(self) -> int:
-            return 0
+        def id(self) -> List[int]:
+            return [0, 1, 2]
 
-        def op(self, leftData: int, rightData: int) -> int:
-            return 1
+        def op(self, leftData: List[int], rightData: List[int]) -> List[int]:
+            res = [0] * 6
+            res[0] = leftData[0] + rightData[0]
+            res[1] = leftData[1] + rightData[1]
+            res[2] = leftData[2] + rightData[2]
+            res[3] = leftData[3] + rightData[3] + leftData[1] * rightData[0]
+            res[4] = leftData[4] + rightData[4] + leftData[2] * rightData[0]
+            res[5] = leftData[5] + rightData[5] + leftData[2] * rightData[1]
+            return res
 
-        def mapping(self, parentLazy: int, childData: int) -> int:
-            return parentLazy
+        def mapping(self, parentLazy: List[int], childData: List[int]) -> List[int]:
+            res = [0] * 6
+            res[parentLazy[0]] += childData[0]
+            res[parentLazy[1]] += childData[1]
+            res[parentLazy[2]] += childData[2]
+            counter = [[0] * 3 for _ in range(3)]  # !counter[i][j]表示(i,j)的对数
+            counter[parentLazy[1]][parentLazy[0]] += childData[3]
+            counter[parentLazy[2]][parentLazy[0]] += childData[4]
+            counter[parentLazy[2]][parentLazy[1]] += childData[5]
+            counter[parentLazy[0]][parentLazy[1]] += childData[0] * childData[1] - childData[3]
+            counter[parentLazy[0]][parentLazy[2]] += childData[0] * childData[2] - childData[4]
+            counter[parentLazy[1]][parentLazy[2]] += childData[1] * childData[2] - childData[5]
+            res[3] = counter[1][0]
+            res[4] = counter[2][0]
+            res[5] = counter[2][1]
+            return res
 
-        def composition(self, parentLazy: int, childLazy: int) -> int:
-            return 1
+        def composition(self, parentLazy: List[int], childLazy: List[int]) -> List[int]:
+            res = [0] * 3
+            res[0] = parentLazy[childLazy[0]]
+            res[1] = parentLazy[childLazy[1]]
+            res[2] = parentLazy[childLazy[2]]
+            return res
 
     n, q = map(int, input().split())
     nums = list(map(int, input().split()))
-    tree = AtcoderLazySegmentTree(nums, Operation())
+    init = [[0] * 6 for _ in range(n)]
+    for i in range(n):
+        init[i][nums[i]] = 1
+
+    tree = AtcoderLazySegmentTree(init, Operation())
+    for _ in range(q):
+        kind, *rest = map(int, input().split())
+        if kind == 1:
+            left, right = rest
+            left -= 1
+            print(sum(tree.query(left, right)[3:]))
+        else:
+            left, right, s, t, u = rest
+            left -= 1
+            tree.update(left, right, [s, t, u])  # 0=>s,1=>t,2=>u
