@@ -61,4 +61,3 @@ class LockingTree:
         for child in lockedChildren:
             self.locked.pop(child)
         return True
-

@@ -6,8 +6,8 @@ from typing import List
 class Solution:
     def subsetXORSum0(self, nums: List[int]) -> int:
         """O(n) 统计每位的贡献
-        
-        子集中第i位对结果贡献位count*(1<<i) 
+
+        子集中第i位对结果贡献位count*(1<<i)
         其中count为子集中第i位元素为1的元素个数为奇数的子集数等于偶数个子集数等于 2**(n-1)个
         """
         base = reduce(operator.or_, nums)

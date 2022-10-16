@@ -25,7 +25,7 @@ class Solution:
             nexts = set()
             for i in range(plusLen - 1):
                 remain = plusLen - i - 2
-                nexts.add(grundy(remain) ^ grundy(i))
+                nexts.add(grundy(remain) ^ grundy(i))  # !母状态的 SG 数等于各个子状态的 SG 数的异或
             return mex(nexts)
 
         groups = [len(list(g)) for c, g in groupby(currentState) if c == "+"]

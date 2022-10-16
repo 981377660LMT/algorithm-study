@@ -12,7 +12,7 @@ class Node:
         self.bottomRight = bottomRight
 
 
-class PreSumMatrix:
+class P:
     """二维前缀和模板(矩阵不可变)"""
 
     def __init__(self, A: List[List[int]]):
@@ -28,7 +28,7 @@ class PreSumMatrix:
     def sumRegion(self, r1: int, c1: int, r2: int, c2: int) -> int:
         """查询sum(A[r1:r2+1, c1:c2+1])的值::
 
-        preSumMatrix.sumRegion(0, 0, 2, 2) # 左上角(0, 0)到右下角(2, 2)的值
+        P.sumRegion(0, 0, 2, 2) # 左上角(0, 0)到右下角(2, 2)的值
         """
         return (
             self.preSum[r2 + 1][c2 + 1]
@@ -39,10 +39,10 @@ class PreSumMatrix:
 
 
 class Solution:
-    def construct(self, grid: List[List[int]]) -> 'Node':
+    def construct(self, grid: List[List[int]]) -> "Node":
         def dfs(r1: int, c1: int, r2: int, c2: int) -> Node:
             """类似于克隆图"""
-            val = preSumMatrix.sumRegion(r1, c1, r2 - 1, c2 - 1)
+            val = p.sumRegion(r1, c1, r2 - 1, c2 - 1)
 
             # 叶子结点
             if val == 0:
@@ -59,8 +59,7 @@ class Solution:
             )
             return Node(False, False, node1, node2, node3, node4)
 
-        preSumMatrix = PreSumMatrix(grid)
+        p = P(grid)
 
         # 左闭右开,递归时处理边界坐标会方便一些
         return dfs(0, 0, len(grid), len(grid[0]))
-

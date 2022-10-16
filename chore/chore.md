@@ -271,3 +271,4 @@ const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()
   sqrt 因为精度问题会导致开根计算出错
   `isqrt可以避免精度问题`
   E:\test\js\算法\js\js-algorithm\20\_杂题\atc 競プロ\AtCoder Beginner Contest\243\G - Sqrt.py
+  > double 精度表示不了 int64 范围的，double 范围够大，但是 IEEE 754 double 尾数是 52 位,可以表示 53 个 bit，int64 有 63 个 bit

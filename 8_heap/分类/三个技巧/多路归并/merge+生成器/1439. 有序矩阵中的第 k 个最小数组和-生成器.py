@@ -9,11 +9,11 @@ from typing import Generator, List
 # mat[i] 是一个非递减数组
 
 
-def mergeTwo(nums1: List[int], nums2: List[int], k: int) -> List[int]:
+def mergeTwo(nums1: List[int], nums2: List[int], k: int, isMax=False) -> List[int]:
     """两个有序数组选前k小的和"""
     gen = lambda index: (nums1[index] + num for num in nums2)  # 一路
     allGen = [gen(i) for i in range(len(nums1))]  # 多路
-    iterable = merge(*allGen, reverse=False)  # merge 相当于多路归并
+    iterable = merge(*allGen, reverse=isMax)  # merge 相当于多路归并
     return list(islice(iterable, k))
 
 
@@ -21,7 +21,13 @@ def mergeTwo(nums1: List[int], nums2: List[int], k: int) -> List[int]:
 class Solution:
     def kthSmallest(self, mat: List[List[int]], k: int) -> int:
         """有序矩阵中的第 k 个最小数组和"""
-        return next(reversed(reduce(lambda row1, row2: mergeTwo(row1, row2, k), mat)))
+        return next(reversed(reduce(lambda row1, row2: mergeTwo(row1, row2, k, False), mat)))
 
 
 print(Solution().kthSmallest(mat=[[1, 3, 11], [2, 4, 6]], k=5))
+
+
+# 时间复杂度O(kmlogn)
+def kMax(mat: List[List[int]], k: int) -> List[int]:
+    """有序矩阵中的前 k 个最大数组和 注意mat每行需要递减"""
+    return list(reduce(lambda row1, row2: mergeTwo(row1, row2, k, True), mat))

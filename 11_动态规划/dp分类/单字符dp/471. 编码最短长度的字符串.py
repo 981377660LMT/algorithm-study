@@ -21,7 +21,7 @@ class Solution:
 
         # 有循环节
         if loc < len(s):
-            res = str(len(s) // loc) + '[' + self.encode(s[:loc]) + ']'
+            res = str(len(s) // loc) + "[" + self.encode(s[:loc]) + "]"
 
         # 枚举分割点
         for i in range(1, len(s)):

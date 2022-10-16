@@ -26,3 +26,7 @@ def exgcd(a: int, b: int) -> Tuple[int, int, int]:
 gcd_, x, y = exgcd(a, b)  # ax+by=gcd_
 print(x % b)
 
+
+# 裴蜀定理
+# ! k1*x1+k2*x2+...+kn*xn = m 有整数解(x1,x2,...,xn)的条件为
+# ! m % gcd(k1,k2,...,kn) == 0

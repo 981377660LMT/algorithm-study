@@ -1,8 +1,11 @@
 // !由于lazy模板通用性 效率不如自己维护数组的线段树
 // !注意如果是单点查询,可以去掉所有pushUp函数逻辑(js使用bigint会比较慢)
+// !如果是单点修改,可以去掉所有懒标记逻辑
 
 /* eslint-disable no-constant-condition */
 /* eslint-disable no-param-reassign */
+
+const INF = 2e15
 
 /**
  * S 线段树维护的值的类型
@@ -14,31 +17,31 @@ interface Operation<S, F> {
    * 线段树维护的值的幺元
    * @alias e
    */
-  dataUnit: () => S
+  dataUnit: (this: void) => S
 
   /**
    * 更新操作/懒标记的幺元
    * @alias id
    */
-  lazyUnit: () => F
+  lazyUnit: (this: void) => F
 
   /**
    * 合并左右区间的值
    * @alias op
    */
-  mergeChildren: (data1: S, data2: S) => S
+  mergeChildren: (this: void, data1: S, data2: S) => S
 
   /**
    * 父结点的懒标记更新子结点的值
    * @alias mapping
    */
-  updateData: (parentLazy: F, childData: S) => S
+  updateData: (this: void, parentLazy: F, childData: S) => S
 
   /**
    * 父结点的懒标记更新子结点的懒标记
    * @alias composition
    */
-  updateLazy: (parentLazy: F, childLazy: F) => F
+  updateLazy: (this: void, parentLazy: F, childLazy: F) => F
 }
 
 interface AtcoderSegmentTree<S, F> {
@@ -81,25 +84,27 @@ function useAtcoderLazySegmentTree<S, F>(
   sizeOrArray: number | ArrayLike<S>,
   operation: Operation<S, F>
 ): AtcoderSegmentTree<S, F> {
-  const _n = typeof sizeOrArray === 'number' ? sizeOrArray : sizeOrArray.length
-  const _log = Math.ceil(Math.log2(_n))
-  const _size = 1 << _log
-  const _data = Array<S>(_size * 2).fill(operation.dataUnit())
-  const _lazy = Array<F>(_size * 2).fill(operation.lazyUnit())
+  // !bind会导致性能损失 因此这里统一不使用bind 接口里声明this为void
   const _e = operation.dataUnit
   const _id = operation.lazyUnit
   const _op = operation.mergeChildren
   const _mapping = operation.updateData
   const _composition = operation.updateLazy
 
+  const _n = typeof sizeOrArray === 'number' ? sizeOrArray : sizeOrArray.length
+  const _log = Math.ceil(Math.log2(_n))
+  const _size = 1 << _log
+  const _data = Array<S>(_size * 2).fill(_e())
+  const _lazy = Array<F>(_size * 2).fill(_id())
+
   if (Array.isArray(sizeOrArray)) {
     for (let i = 0; i < _n; i++) {
       _data[_size + i] = sizeOrArray[i]
     }
-  }
 
-  for (let i = _size - 1; i > 0; i--) {
-    _pushUp(i)
+    for (let i = _size - 1; i > 0; i--) {
+      _pushUp(i)
+    }
   }
 
   function query(left: number, right: number): S {
@@ -273,4 +278,4 @@ function useAtcoderLazySegmentTree<S, F>(
   }
 }
 
-export { useAtcoderLazySegmentTree, Operation, AtcoderSegmentTree }
+export { useAtcoderLazySegmentTree, Operation, AtcoderSegmentTree } // base api

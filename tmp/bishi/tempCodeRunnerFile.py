@@ -1,1 +1,1 @@
-[0] + list(accumulate(nums[::-1]))
+21

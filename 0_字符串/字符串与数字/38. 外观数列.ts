@@ -1,15 +1,18 @@
+/* eslint-disable func-names */
 /**
  * @param {number} n
  * @return {string}
  * 从数字 1 开始，序列中的每一项都是对前一项的描述。
+ * 外观数列
  */
-const countAndSay = function (n: number): string {
+function countAndSay(n: number): string {
   let res = '1'
   for (let i = 1; i < n; i++) {
-    res = res.replace(/(\d)\1*/g, (match, g1) => {
+    res = res.replace(
+      /(\d)\1*/g,
       // 几个匹配项
-      return `${match.length}${g1}`
-    })
+      (match, g1) => `${match.length}${g1}`
+    )
   }
   return res
 }

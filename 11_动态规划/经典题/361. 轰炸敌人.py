@@ -24,9 +24,9 @@ class Solution:
         for r in range(row):
             cur = 0
             for c in range(col):
-                if grid[r][c] == 'W':
+                if grid[r][c] == "W":
                     cur = 0
-                elif grid[r][c] == 'E':
+                elif grid[r][c] == "E":
                     cur += 1
                 dp[r][c] += cur
 
@@ -34,9 +34,9 @@ class Solution:
         for r in range(row):
             cur = 0
             for c in range(col - 1, -1, -1):
-                if grid[r][c] == 'W':
+                if grid[r][c] == "W":
                     cur = 0
-                elif grid[r][c] == 'E':
+                elif grid[r][c] == "E":
                     cur += 1
                 dp[r][c] += cur
 
@@ -44,9 +44,9 @@ class Solution:
         for c in range(col):
             cur = 0
             for r in range(row):
-                if grid[r][c] == 'W':
+                if grid[r][c] == "W":
                     cur = 0
-                elif grid[r][c] == 'E':
+                elif grid[r][c] == "E":
                     cur += 1
                 dp[r][c] += cur
 
@@ -54,9 +54,9 @@ class Solution:
         for c in range(col):
             cur = 0
             for r in range(row - 1, -1, -1):
-                if grid[r][c] == 'W':
+                if grid[r][c] == "W":
                     cur = 0
-                elif grid[r][c] == 'E':
+                elif grid[r][c] == "E":
                     cur += 1
                 dp[r][c] += cur
 

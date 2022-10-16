@@ -22,9 +22,8 @@ class ParkingSystem {
     if ((this.state >> mask) & 0x3ff) {
       this.state -= 1 << mask
       return true
-    } else {
-      return false
     }
+    return false
   }
 }
 // 使用哈希表来进行记录。

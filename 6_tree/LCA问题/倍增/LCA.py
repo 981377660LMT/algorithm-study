@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, deque
 from math import floor, log2
 from typing import Iterable, List, Mapping, Sequence, Union
 
@@ -26,7 +26,7 @@ class LCA:
         self._n = n
         self._tree = tree
 
-        self._dfs(root, -1, 0)
+        self._bfs(root, -1, 0)
         self._bitlen = floor(log2(n)) + 1
         self._fa = self._makeDp(self.parent)
 
@@ -108,13 +108,15 @@ class LCA:
     #             return False
     #     return True
 
-    def _dfs(self, cur: int, pre: int, dep: int) -> None:
+    def _bfs(self, start: int, startPre: int, startDep: int) -> None:
         """处理高度、父节点"""
-        self.depth[cur], self.parent[cur] = dep, pre
-        for next in self._tree[cur]:
-            if next == pre:
-                continue
-            self._dfs(next, cur, dep + 1)
+        queue = deque([(start, startPre, startDep)])
+        while queue:
+            cur, pre, dep = queue.popleft()
+            self.depth[cur], self.parent[cur] = dep, pre
+            for next in self._tree[cur]:
+                if next != pre:
+                    queue.append((next, cur, dep + 1))
 
     def _makeDp(self, parent: List[int]) -> List[List[int]]:
         """nlogn预处理"""

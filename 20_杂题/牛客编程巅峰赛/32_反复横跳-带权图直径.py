@@ -13,7 +13,7 @@ class Point:
 # n<=100000
 
 # 最好weight之和，最坏两倍weight之和
-# 最大化只有一遍的路径权重之和=>找`树的一端到另一端最长的路径`
+# !最大化只有一遍的路径权重之和=>找`树的一端到另一端最长的路径`
 class Solution:
     def solve(self, n, Edge, val):
         def bfs1(start: int) -> int:
@@ -59,4 +59,3 @@ class Solution:
         start = bfs1(1)
         diameter = bfs2(start)
         return res - diameter
-

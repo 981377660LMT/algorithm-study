@@ -1,3 +1,4 @@
+from itertools import accumulate
 from typing import List
 
 
@@ -15,6 +16,10 @@ class Solution:
                 invalidIndex.add(i)
 
         return [i for i in range(len(heights)) if i not in invalidIndex]
+
+    def findBuildings2(self, heights: List[int]) -> List[int]:
+        sufMax = ([0] + list(accumulate(heights[::-1], max)))[::-1]
+        return [i for i in range(len(heights)) if heights[i] > sufMax[i + 1]]
 
 
 print(Solution().findBuildings([4, 2, 3, 1]))

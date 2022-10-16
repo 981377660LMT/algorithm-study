@@ -1,5 +1,6 @@
 # !由于lazy模板通用性 效率不如自己维护数组的线段树
 # !注意如果是单点查询,可以去掉所有pushUp函数逻辑
+# !如果是单点修改,可以去掉所有懒标记逻辑
 
 import sys
 from typing import Callable, Generic, List, TypeVar, Union, overload
@@ -37,7 +38,7 @@ else:
     Protocol = DummyProtocol
 
 
-class AbstractOperation(Protocol[S, F]):
+class IOperation(Protocol[S, F]):
     """线段树的操作的接口"""
 
     def e(self) -> S:
@@ -91,7 +92,7 @@ class AtcoderLazySegmentTree(Generic[S, F]):
         ...
 
     @overload
-    def __init__(self, sizeOrArray: Union[int, List["S"]], *, operation: "AbstractOperation[S, F]"):
+    def __init__(self, sizeOrArray: Union[int, List["S"]], *, operation: "IOperation[S, F]"):
         ...
 
     def __init__(self, sizeOrArray: Union[int, List["S"]], **kwargs):
@@ -118,8 +119,8 @@ class AtcoderLazySegmentTree(Generic[S, F]):
         if isinstance(sizeOrArray, list):
             for i in range(self._n):
                 self._data[self._size + i] = sizeOrArray[i]
-        for i in range(self._size - 1, 0, -1):
-            self._pushUp(i)
+            for i in range(self._size - 1, 0, -1):
+                self._pushUp(i)
 
     def query(self, left: int, right: int) -> "S":
         """
@@ -277,7 +278,7 @@ if __name__ == "__main__":
 
     # 线段树维护区间的6个值
     # ![0的个数,1的个数,2的个数,10逆序对的个数,20逆序对的个数,21逆序对的个数]
-    # class Operation(AbstractOperation[List[int], List[int]]):
+    # class Operation(IOperation[List[int], List[int]]):
     #     def e(self) -> List[int]:
     #         return [0] * 6
 

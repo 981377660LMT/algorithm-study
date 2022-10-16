@@ -32,4 +32,3 @@ class Solution:
             if j == len(shorter):
                 return i - len(shorter) + 1
         return -1
-

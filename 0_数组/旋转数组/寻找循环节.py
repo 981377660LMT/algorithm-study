@@ -4,6 +4,8 @@
 from typing import Tuple
 
 # 1.
+
+
 class Solution:
     def findRepetend(self, s: str) -> Tuple[bool, str]:
         """是否存在循环节"""
@@ -21,8 +23,7 @@ def another(s: str) -> bool:
 
     O(n) 可以换kmp
     """
-    period = (s + s).find(s, 1, -1)
-    return period != -1
+    return s in (s + s)[1:-1]
 
 
 # 3. 扩展kmp求字符串的最小周期

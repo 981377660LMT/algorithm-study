@@ -3,6 +3,8 @@
 n<=1e5
 
 多个点 按照dfs序(树的欧拉路径) 求两两间的距离
+
+树的欧拉序
 """
 
 from collections import defaultdict
@@ -75,39 +77,52 @@ class DFSOrder:
         self._dfsId += 1
 
 
-class LCAManager:
-    def __init__(self, n: int, adjMap: DefaultDict[int, Set[int]], root=0) -> None:
-        """查询 LCA
+#######################################################################
+from collections import defaultdict, deque
+from math import floor, log2
+from typing import Iterable, List, Mapping, Sequence, Union
+
+
+ListTree = Sequence[Iterable[int]]  # Sequence = Iterable + __getitem__
+DictTree = Mapping[int, Iterable[int]]
+Tree = Union[ListTree, DictTree]
+
+
+class LCA:
+    def __init__(self, n: int, tree: Tree, root: int) -> None:
+        """倍增查询LCA
 
         `nlogn` 预处理
-        `logn`查询两点的LCA
+        `logn`查询
 
         Args:
             n (int): 树节点编号 默认 0 ~ n-1
-            adjMap (DefaultDict[int, Set[int]]): 树
-            root (int, optional): 根节点 默认 0
+            tree (Tree): 树
+            root (int): 根节点
         """
-        self.depth = defaultdict(lambda: -1)
-        self.parent = defaultdict(lambda: -1)
-        self._BITLEN = floor(log2(n)) + 1
-        self._MAX = n
-        self._adjMap = adjMap
-        self._dfs(root, -1, 0)
+        self.depth = [-1] * (n + 1)  # 用深度来排序结点 根节点深度为0 最后一个结点-1表示虚拟结点
+        self.parent = [-1] * (n + 1)  # 父节点用来上跳查找路径 根节点父亲为-1
+
+        self._n = n
+        self._tree = tree
+
+        self._bfs(root, -1, 0)
+        self._bitlen = floor(log2(n)) + 1
         self._fa = self._makeDp(self.parent)
 
     def queryLCA(self, root1: int, root2: int) -> int:
-        """`logn` 查询"""
+        """查询树节点两点的最近公共祖先"""
         if self.depth[root1] < self.depth[root2]:
             root1, root2 = root2, root1
 
-        for i in range(self._BITLEN - 1, -1, -1):
+        for i in range(self._bitlen - 1, -1, -1):
             if self.depth[self._fa[root1][i]] >= self.depth[root2]:
                 root1 = self._fa[root1][i]
 
         if root1 == root2:
             return root1
 
-        for i in range(self._BITLEN - 1, -1, -1):
+        for i in range(self._bitlen - 1, -1, -1):
             if self._fa[root1][i] != self._fa[root2][i]:
                 root1 = self._fa[root1][i]
                 root2 = self._fa[root2][i]
@@ -118,26 +133,40 @@ class LCAManager:
         """查询树节点两点间距离"""
         return self.depth[root1] + self.depth[root2] - 2 * self.depth[self.queryLCA(root1, root2)]
 
-    def _dfs(self, cur: int, pre: int, dep: int) -> None:
-        """处理高度、父节点信息"""
-        self.depth[cur], self.parent[cur] = dep, pre
-        for next in self._adjMap[cur]:
-            if next == pre:
-                continue
-            self._dfs(next, cur, dep + 1)
+    def queryKthAncestor(self, root: int, k: int) -> int:
+        """查询树节点root的第k个祖先,如果不存在这样的祖先节点,返回 -1"""
+        bit = 0
+        while k:
+            if k & 1:
+                root = self._fa[root][bit]
+                if root == -1:
+                    return -1
+            bit += 1
+            k //= 2
+        return root
 
-    def _makeDp(self, parent: DefaultDict[int, int]) -> List[List[int]]:
+    def _bfs(self, start: int, startPre: int, startDep: int) -> None:
+        """处理高度、父节点"""
+        queue = deque([(start, startPre, startDep)])
+        while queue:
+            cur, pre, dep = queue.popleft()
+            self.depth[cur], self.parent[cur] = dep, pre
+            for next in self._tree[cur]:
+                if next != pre:
+                    queue.append((next, cur, dep + 1))
+
+    def _makeDp(self, parent: List[int]) -> List[List[int]]:
         """nlogn预处理"""
-        dp = [[0] * self._BITLEN for _ in range(self._MAX)]
-        for i in range(self._MAX):
-            dp[i][0] = parent[i]
-        for j in range(self._BITLEN - 1):
-            for i in range(self._MAX):
-                if dp[i][j] == -1:
-                    dp[i][j + 1] = -1
+        fa = [[-1] * self._bitlen for _ in range(self._n)]
+        for i in range(self._n):
+            fa[i][0] = parent[i]
+        for j in range(self._bitlen - 1):
+            for i in range(self._n):
+                if fa[i][j] == -1:
+                    fa[i][j + 1] = -1
                 else:
-                    dp[i][j + 1] = dp[dp[i][j]][j]
-        return dp
+                    fa[i][j + 1] = fa[fa[i][j]][j]
+        return fa
 
 
 sys.setrecursionlimit(int(1e9))
@@ -153,7 +182,7 @@ for _ in range(n - 1):
     adjMap[v].add(u)
 
 D = DFSOrder(n, adjMap)
-L = LCAManager(n, adjMap)
+L = LCA(n, adjMap, 0)
 
 q = int(input())
 for _ in range(q):

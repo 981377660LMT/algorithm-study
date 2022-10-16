@@ -1,14 +1,20 @@
 from collections import defaultdict
-from typing import DefaultDict, Set, Tuple
+from typing import Iterable, Mapping, Sequence, Tuple, Union
+
+AdjList = Sequence[Iterable[int]]
+AdjMap = Mapping[int, Iterable[int]]
+Tree = Union[AdjList, AdjMap]
 
 
 class DFSOrder:
-    def __init__(self, n: int, tree: DefaultDict[int, Set[int]]) -> None:
+    __slots__ = ("starts", "ends", "_n", "_tree", "_dfsId")
+
+    def __init__(self, n: int, tree: Tree) -> None:
         """dfs序
 
         Args:
             n (int): 树节点从0开始,根节点为0
-            tree (DefaultDict[int, Set[int]]): 无向图邻接表
+            tree (Tree): 无向图邻接表
 
         1. 按照dfs序遍历k个结点形成的回路 每条边恰好经过两次
         """

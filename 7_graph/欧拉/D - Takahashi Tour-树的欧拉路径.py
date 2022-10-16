@@ -35,3 +35,9 @@ if __name__ == "__main__":
     res = []
     dfs(0, -1, res)
     print(*[num + 1 for num in res])
+# 4
+# 1 2
+# 4 2
+# 3 1
+
+# 1 2 4 2 1 3 1

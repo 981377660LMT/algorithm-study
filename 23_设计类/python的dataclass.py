@@ -9,14 +9,14 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, List, Optional
 
 
-Callback = Callable[['TreeNode'], None]
+Callback = Callable[["TreeNode"], None]
 
 
 @dataclass(slots=True, unsafe_hash=True, frozen=True)
 class TreeNode:
     val: int = 0
-    left: Optional['TreeNode'] = None
-    right: Optional['TreeNode'] = None
+    left: Optional["TreeNode"] = None
+    right: Optional["TreeNode"] = None
     # metaInfo: List[Any] = field(default_factory=list)
 
     def walk(self, callback: Callback) -> None:
