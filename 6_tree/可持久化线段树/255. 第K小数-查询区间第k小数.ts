@@ -7,8 +7,8 @@ function usePersistentSegmentTree(nums: number[]) {
   const treeRight = new Uint32Array(upper).fill(0)
   const treeCount = new Uint32Array(upper).fill(0)
 
-  const roots = new Uint32Array(n + 1).fill(0) // n+1个版本的根节点的treeId
-  let treeId = 1
+  const roots = new Uint32Array(n + 1).fill(0) // !n+1个版本的根节点
+  let treeId = 1 // !节点的版本号(唯一标识)
 
   // 离散化到0-allNums.length-1
   const allNums = [...new Set(nums)].sort((a, b) => a - b)

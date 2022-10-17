@@ -62,8 +62,8 @@ class BIT2:
 if __name__ == "__main__":
     ROW, COL, q = map(int, input().split())
     colBit = BIT2(int(2e5 + 10))  # 列的前缀和
-    last = [0] * (ROW + 10)  # 记录每行上一次赋值(操作2)是在什么时候
-    update = [[] for _ in range(q + 10)]  # 需要在这个时刻更新的列
+    lastUpdate = [0] * (ROW + 10)  # 记录每行上一次赋值(操作2)是在什么时候
+    toUpdateCol = [[] for _ in range(q + 10)]  # 需要在这个时刻更新的列
     res = [0] * (q + 10)
     queries = []
     queries.append(())  # 占位
@@ -75,22 +75,21 @@ if __name__ == "__main__":
             queries.append((op, left, right, delta))
         elif op == 2:
             row, target = rest
-            last[row] = i
+            lastUpdate[row] = i
             queries.append((op, row, target))
         else:
             row, col = rest
-            update[last[row]].append((i, col))  # 记录需要在这个时刻更新的列
+            toUpdateCol[lastUpdate[row]].append((i, col))  # 记录需要在这个时刻更新的列
             queries.append((op, row, col))
 
     for i in range(1, q + 1):
-        # print("query", queries[i])
         op, *rest = queries[i]
         if op == 1:
             left, right, delta = rest
             colBit.add(left, right, delta)
         elif op == 2:
             row, target = rest
-            for qi, col in update[i]:
+            for qi, col in toUpdateCol[i]:
                 res[qi] -= colBit.query(col, col)
                 res[qi] += target
         else:

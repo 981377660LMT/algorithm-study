@@ -11,16 +11,16 @@ INF = int(4e18)
 # 高橋君がゴールに到達することが可能か判定し、可能であれば移動距離の最小値を求めてください。
 
 if __name__ == "__main__":
-    x, y, z = map(int, input().split())
+    target, wall, hammer = map(int, input().split())
 
     # 不捡锤子
-    if not ((0 <= y <= x) or (x <= y <= 0)):
-        print(abs(x))
+    if not ((0 <= wall <= target) or (target <= wall <= 0)):
+        print(abs(target))
         exit(0)
 
     # 捡锤子
-    if not ((0 <= y <= z) or (z <= y <= 0)):
-        print(abs(x - z) + abs(z))
+    if not ((0 <= wall <= hammer) or (hammer <= wall <= 0)):
+        print(abs(target - hammer) + abs(hammer))
         exit(0)
 
     # 捡不了锤子

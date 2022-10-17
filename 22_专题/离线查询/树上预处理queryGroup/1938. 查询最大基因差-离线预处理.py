@@ -71,7 +71,7 @@ class Solution:
     def maxGeneticDifference(self, parents: List[int], queries: List[List[int]]) -> List[int]:
         def dfs(cur: int) -> None:
             trie.insert(cur)
-            for qi, qv in nodeQueries[cur]:
+            for qi, qv in queryGroup[cur]:
                 res[qi] = trie.search(qv)
             for next in adjList[cur]:
                 dfs(next)
@@ -86,9 +86,9 @@ class Solution:
             else:
                 root = i
 
-        nodeQueries = [[] for _ in range(n)]
-        for i, (node, val) in enumerate(queries):
-            nodeQueries[node].append((i, val))
+        queryGroup = [[] for _ in range(n)]
+        for qi, (node, qv) in enumerate(queries):
+            queryGroup[node].append((qi, qv))
 
         bit = floor(log2(int(2e5))) + 1  # !vi<=2e5
         trie = useXORTrie(bit)

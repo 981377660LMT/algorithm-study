@@ -32,7 +32,11 @@ class Solution:
 
 
 def getRange(
-    nums: List[int], *, isMax=False, isLeftStrict=False, isRightStrict=False,
+    nums: List[int],
+    *,
+    isMax=False,
+    isLeftStrict=False,
+    isRightStrict=False,
 ) -> List[Tuple[int, int]]:
     """
     求每个元素作为最值的影响范围(区间)
@@ -81,6 +85,7 @@ def getRange(
     return list(zip(leftMost, rightMost))
 
 
+# 巫师的力量和
 class SubArraySumManager:
     def __init__(self, nums: List[int]) -> None:
         self.nums = nums
@@ -114,8 +119,7 @@ class SubArraySumManager:
         return sum1 + sum2 + sum3
 
     def querySubArraySumStartsAt(self, left: int, right: int) -> int:
-        """O(1)查询[left,right]闭区间内所有以nums[left]开头的子数组的和
-        """
+        """O(1)查询[left,right]闭区间内所有以nums[left]开头的子数组的和"""
         assert 0 <= left <= right <= len(self.nums) - 1
         sum1 = self.rp1[left] * (right - left + 1)
         sum2 = self.rp2[left + 1] - self.rp2[right + 2]
@@ -123,7 +127,7 @@ class SubArraySumManager:
 
     def querySubArraySumEndsAt(self, left: int, right: int) -> int:
         """O(1)查询[left,right]闭区间内所有以nums[right]结尾的子数组的和
-        
+
         (p1[right+1]-p1[left])+(p1[right+1]-p1[left+1])+...+(p1[right+1]-p1[right]]) 即
         p1[right+1]*(right-left+1)+p2[right+1]-p2[left]
         """
@@ -133,8 +137,7 @@ class SubArraySumManager:
         return sum1 - sum2
 
     def querySubArraySumInclude(self, left: int, right: int, include: int) -> int:
-        """O(1)查询[left,right]闭区间内所有包含include下标的子数组的和
-        """
+        """O(1)查询[left,right]闭区间内所有包含include下标的子数组的和"""
         assert 0 <= left <= include <= right <= len(self.nums) - 1
         sum1 = (self.p2[right + 2] - self.p2[include + 1]) * (include - left + 1)
         sum2 = (self.p2[include + 1] - self.p2[left]) * (right - include + 1)

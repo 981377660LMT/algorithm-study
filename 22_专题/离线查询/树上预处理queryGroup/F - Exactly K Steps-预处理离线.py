@@ -67,17 +67,17 @@ if __name__ == "__main__":
 
     q = int(input())
     res = [-1] * q
-    queries = [[] for _ in range(n)]  # !记录每个结点处的查询(qi,qv)
+    queryGroup = [[] for _ in range(n)]  # !记录每个结点处的查询(qi,qv)
     for i in range(q):
         u, k = map(int, input().split())  # 询问距离树结点u距离为k的结点是否存在,并输出一个这样的结点
         u = u - 1
-        queries[u].append((i, k))
+        queryGroup[u].append((i, k))
 
     # !TLE
     # def dfs(cur: int, pre: int, dep: int, path: List[int]) -> None:
     #     """从直径端点出发处理查询"""
     #     path[dep] = cur
-    #     for i, k in queries[cur]:
+    #     for i, k in queryGroup[cur]:
     #         if dep - k >= 0:
     #             res[i] = path[dep - k]
     #     for next in adjList[cur]:
@@ -95,9 +95,9 @@ if __name__ == "__main__":
         while stack:
             cur, pre, dep = stack.pop()
             path[dep] = cur
-            for i, k in queries[cur]:
-                if dep - k >= 0:
-                    res[i] = path[dep - k]
+            for qi, qv in queryGroup[cur]:
+                if dep - qv >= 0:
+                    res[qi] = path[dep - qv]
 
             for next in adjList[cur]:
                 if next == pre:

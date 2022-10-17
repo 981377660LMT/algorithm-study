@@ -35,8 +35,7 @@ class Fancy {
     if (idx >= this.nums.length) return -1
     // 逆元
     // mul[-1]/mul[i]化为 mul[-1]*inv(mul[i])
-    const 乘的倍数 =
-      (this.mul[this.mul.length - 1] * (Math.pow(this.mul[idx], MOD - 2) % MOD)) % MOD
+    const 乘的倍数 = (this.mul[this.mul.length - 1] * (this.mul[idx] ** (MOD - 2) % MOD)) % MOD
     const 加了多少 = this.add[this.add.length - 1] - this.add[idx] * 乘的倍数
     return (this.nums[idx] * 乘的倍数 + 加了多少) % MOD
   }
