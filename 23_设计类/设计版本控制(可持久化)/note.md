@@ -5,6 +5,7 @@
    - 不能全量保存,需要 `structure sharing` 的可持久化数据结构（Persistent data structure）
    - **每次修改历史版本总会返回一个新的数据结构(immutable ,不可变对象)**
    - 一般使用树型结构实现(包含链表,非线性结构)
+   - 持久化数据结构可以带来许多好处，比如异常安全（Exception Safety）和并发性（Concurrency）。
 
 2. 记录变化(action/operation)
    - mutation/action
@@ -28,12 +29,12 @@ N:数组长度 M:更新次数 Q:查询次数
 
 - 离线:
 
-  - 预处理查询 `O(N+M+Q)`
+  - 预处理查询+dfs(前提是操作可逆) `O(N+M+Q)`
 
 - 在线:
 
   - full backup (Copy on Write 写入时复制,使用复制整个数据结构的方式来记录每次更改) `O(N*M+Q)`
-  - 状态复元 `O(N+M*Q)`
+  - 状态复元(前提是操作可逆) `O(N+M*Q)`
   - 数据结构 `O((Q+M)*logN)`
 
 ### 完全可持久化数组的 api:
@@ -64,7 +65,7 @@ https://www.luogu.com.cn/problem/P3835
 ## 参考
 
 [永続データ構造](https://qiita.com/wotsushi/items/72e7f8cdd674741ffd61#%E5%8F%82%E8%80%83%E8%A8%98%E4%BA%8B)
-[持久化数据结构学习笔记——序列](https://zhuanlan.zhihu.com/p/33859991)
+[持久化数据结构学习笔记——序列](https://zhuanlan.zhihu.com/p/33859991) (主要在说如何优化编码来节省空间)
 [记录历史：持久化数据结构](https://quant67.com/post/algorithms/ads/persistent/persistent.html)
 [可持久化数据结构](https://zh.m.wikipedia.org/zh-hans/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84)
 [陈立杰：可持久化数据结构研究.pdf](https://github.com/Misaka233/algorithm/blob/master/%E9%99%88%E7%AB%8B%E6%9D%B0%EF%BC%9A%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%A0%94%E7%A9%B6.pdf)

@@ -5,7 +5,7 @@
 function usePersistentSegmentTree(nums: number[]) {
   const n = nums.length
   // const tree = Array<SegmentTreeNode>(4 * n + 16 * n)
-  const upper = 4 * n + Math.ceil(Math.log2(n)) * n // 离散化后整个线段树N * 4 + NlogN，索引代表值域
+  const upper = 4 * n + Number(n).toString(2).length * n // 离散化后整个线段树N * 4 + NlogN，索引代表值域
   const treeLeft = new Uint32Array(upper).fill(0)
   const treeRight = new Uint32Array(upper).fill(0)
   const treeCount = new Uint32Array(upper).fill(0)

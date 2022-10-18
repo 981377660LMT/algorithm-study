@@ -35,14 +35,15 @@ class OnlineQuery:
 
 
 if __name__ == "__main__":
-    fullBackup = OnlineQuery([2, 0, 1, 9] * 10000)
-    for _ in range(1000):
+    fullBackup = OnlineQuery([2, 0, 1, 9] * 2500)
+    for _ in range(2000):
         fullBackup.update("a.0", 2, 2, "a.1")
         fullBackup.update("a.1", 0, 1, "a.2")
         fullBackup.update("a.2", 1, 1, "a.3")
         fullBackup.update("a.1", 3, 0, "b.2")
         fullBackup.update("a.3", 3, 3, "a.4")
-    assert fullBackup.query("a.1", 2) == 2
-    assert fullBackup.query("a.4", 1) == 1
-    assert fullBackup.query("a.4", 3) == 3
-    assert fullBackup.query("b.2", 3) == 0
+    for _ in range(2500):
+        assert fullBackup.query("a.1", 2) == 2
+        assert fullBackup.query("a.4", 1) == 1
+        assert fullBackup.query("a.4", 3) == 3
+        assert fullBackup.query("b.2", 3) == 0

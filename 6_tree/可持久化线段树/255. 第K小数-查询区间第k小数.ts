@@ -1,14 +1,16 @@
 // 查询区间[left,right]里的第k小数是几
 
+import assert from 'assert'
+
 function usePersistentSegmentTree(nums: number[]) {
   const n = nums.length
-  const upper = 4 * n + Math.ceil(Math.log2(n)) * n // 离散化后整个线段树N * 4 + NlogN，索引代表值域
+  const upper = 4 * n + Number(n).toString(2).length * n // 离散化后整个线段树N * 4 + NlogN，索引代表值域
   const treeLeft = new Uint32Array(upper).fill(0)
   const treeRight = new Uint32Array(upper).fill(0)
   const treeCount = new Uint32Array(upper).fill(0)
 
   const roots = new Uint32Array(n + 1).fill(0) // !n+1个版本的根节点
-  let treeId = 1 // !节点的版本号(唯一标识)
+  let nodeId = 1 // !节点的版本号(唯一标识)
 
   // 离散化到0-allNums.length-1
   const allNums = [...new Set(nums)].sort((a, b) => a - b)
@@ -39,7 +41,7 @@ function usePersistentSegmentTree(nums: number[]) {
 
   // 递归建树 返回树结点id build是建立好骨架, 每个版本insert改不同数据
   function _build(left: number, right: number): number {
-    const curId = treeId++
+    const curId = nodeId++
     if (left === right) return curId
     const mid = Math.floor((left + right) / 2)
     treeLeft[curId] = _build(left, mid)
@@ -50,7 +52,7 @@ function usePersistentSegmentTree(nums: number[]) {
   // 插入新根节点 返回树结点id
   // 到left===right才插入了新点
   function _update(preRoot: number, left: number, right: number, value: number): number {
-    const curId = treeId++
+    const curId = nodeId++
     treeLeft[curId] = treeLeft[preRoot]
     treeRight[curId] = treeRight[preRoot]
     treeCount[curId] = treeCount[preRoot]
@@ -114,14 +116,13 @@ class KthTree {
 }
 
 if (require.main === module) {
-  const solution = new KthTree([1, 5, 2, 6, 3, 7, 4], false)
-  console.log(solution.query(2 - 1, 5 - 1, 3))
-  console.log(solution.query(4 - 1, 4 - 1, 1))
-  console.log(solution.query(1 - 1, 7 - 1, 3))
-  // 输出样例：
-  // 5
-  // 6
-  // 3
+  let solution = new KthTree([1, 5, 2, 6, 3, 7, 4], false)
+  assert.strictEqual(solution.query(2 - 1, 5 - 1, 3), 3)
+  assert.strictEqual(solution.query(4 - 1, 4 - 1, 1), 6)
+  assert.strictEqual(solution.query(1 - 1, 7 - 1, 3), 5)
+
+  let solution2 = new KthTree([1, 2], true)
+  assert.strictEqual(solution2.query(1 - 1, 2 - 1, 1), 1)
 }
 
 export { KthTree }

@@ -1,7 +1,7 @@
-"""完全可持久化数组"""
+"""完全可持久化数组 动态开点"""
 
 
-from typing import Optional, Sequence, Union
+from typing import List, Optional, Union
 
 
 class _Node:
@@ -34,15 +34,15 @@ class PersistentArray:
     __slots__ = ("_root", "_length")
 
     @staticmethod
-    def create(lengthOrArray: Union[int, Sequence[int]]) -> "PersistentArray":
+    def create(lengthOrArray: Union[int, List[int]]) -> "PersistentArray":
         """Create a PersistentArray from length or array."""
-        n = lengthOrArray if isinstance(lengthOrArray, int) else len(lengthOrArray)
+        isArray = isinstance(lengthOrArray, list)
+        n = len(lengthOrArray) if isArray else lengthOrArray
         assert n > 0, f"length must be positive, but {n} received"
         root = _Node.create(0, n)
         res = PersistentArray(root, n)
-        if not isinstance(lengthOrArray, int):
-            for i, v in enumerate(lengthOrArray):
-                res = res.update(i, v)
+        if isArray:
+            PersistentArray._build(res._root, lengthOrArray)
         return res
 
     @staticmethod
@@ -77,6 +77,15 @@ class PersistentArray:
             PersistentArray._update(node.rightChild, index, value),  # type: ignore
             None,
         )
+
+    @staticmethod
+    def _build(node: "_Node", array: List[int]) -> None:
+        left, right = node.left, node.right
+        if left == right - 1:
+            node.value = array[left]
+            return
+        PersistentArray._build(node.leftChild, array)  # type: ignore
+        PersistentArray._build(node.rightChild, array)  # type: ignore
 
     def __init__(self, root: "_Node", length: int) -> None:
         self._root = root

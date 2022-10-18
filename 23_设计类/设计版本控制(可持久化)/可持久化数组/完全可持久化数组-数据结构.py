@@ -38,14 +38,15 @@ class OnlineQuery:
 
 
 if __name__ == "__main__":
-    persist = OnlineQuery([2, 0, 1, 9] * 10000)
-    for _ in range(1000):
+    persist = OnlineQuery([2, 0, 1, 9] * 2500)
+    for _ in range(2000):
         persist.update("a.0", 2, 2, "a.1")
         persist.update("a.1", 0, 1, "a.2")
         persist.update("a.2", 1, 1, "a.3")
         persist.update("a.1", 3, 0, "b.2")
         persist.update("a.3", 3, 3, "a.4")
-    assert persist.query("a.1", 2) == 2
-    assert persist.query("a.4", 1) == 1
-    assert persist.query("a.4", 3) == 3
-    assert persist.query("b.2", 3) == 0
+    for _ in range(2500):
+        assert persist.query("a.1", 2) == 2
+        assert persist.query("a.4", 1) == 1
+        assert persist.query("a.4", 3) == 3
+        assert persist.query("b.2", 3) == 0

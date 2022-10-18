@@ -43,6 +43,7 @@
 
    - [LinkedListNode](3_linkedList/LinkedListNode.py)
    - [LinkedList](3_linkedList/LinkedList.ts)
+   - [PersistentStack](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%A0%88/PersistentStack.py>)
 
 4. **Tree**
 
@@ -61,6 +62,7 @@
    - [SortedList (py)](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/ATC-SortedList.py)
      [SortedList (ts)](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/Treap.ts)
    - [SplayArray](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/SplayArray.py)
+   - [PersistentArray](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentArray2.py>)
 
 5. **Graph**
 
