@@ -1,3 +1,8 @@
+from collections import Counter
+from typing import List
+
+INF = int(1e18)
+
 # 找到长数组中包含短数组所有的元素的最短子数组，其出现顺序无关紧要。
 # 如有多个满足条件的子数组，返回左端点最小的一个
 # 若不存在，返回空数组。
@@ -5,10 +10,8 @@
 # big.length <= 100000
 # 1 <= small.length <= 100000
 
-from collections import Counter
-from typing import List
 
-INF = int(1e18)
+# 最短超串
 
 
 class Solution:

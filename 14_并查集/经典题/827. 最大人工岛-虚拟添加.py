@@ -63,7 +63,7 @@ class Solution:
                 if grid[r][c] == 1:
                     continue
 
-                roots = set()  # !虚拟添加的技巧
+                roots = set()  # !虚拟添加的技巧 能连接哪些帮派
                 for dr, dc in DIR4:
                     nr, nc = r + dr, c + dc
                     if 0 <= nr < ROW and 0 <= nc < COL and grid[nr][nc] == 1:

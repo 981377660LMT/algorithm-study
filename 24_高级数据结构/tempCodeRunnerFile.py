@@ -1,1 +1,0 @@
-        print(len(nums))

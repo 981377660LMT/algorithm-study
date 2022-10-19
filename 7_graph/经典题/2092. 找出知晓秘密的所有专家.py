@@ -1,5 +1,4 @@
 from typing import List
-from itertools import groupby
 from collections import defaultdict, deque
 
 # meetings[i] = [xi, yi, timei] 表示专家 xi 和专家 yi 在时间 timei 要开一场会
@@ -7,30 +6,34 @@ from collections import defaultdict, deque
 # 每次会议，如果专家 xi 在时间 timei 时知晓这个秘密，那么他将会与专家 yi 分享这个秘密，反之亦然。
 # 在所有会议都结束之后，返回所有知晓这个秘密的专家列表
 
-
 # 总结：
-# 分组bfs/dfs 把开会时间相同的分到一组，按时间顺序bfs/dfs
+# !分组bfs/dfs 把开会时间相同的分到一组，按时间顺序bfs/dfs
+
+
 class Solution:
     def findAllPeople(self, n: int, meetings: List[List[int]], firstPerson: int) -> List[int]:
         res = set([0, firstPerson])
+        group = defaultdict(list)
+        for u, v, time in meetings:
+            group[time].append((u, v))
 
-        for _, group in groupby(sorted(meetings, key=lambda x: x[2]), key=lambda x: x[2]):
-            start = set()
-            adjMap = defaultdict(list)
-            for u, v, _ in group:
-                adjMap[u].append(v)
-                adjMap[v].append(u)
+        for time in sorted(group):
+            edges = group[time]
+            adjMap = defaultdict(set)
+            queue = deque()
+            for u, v in edges:
+                adjMap[u].add(v)
+                adjMap[v].add(u)
                 if u in res:
-                    start.add(u)
+                    queue.append(v)
                 if v in res:
-                    start.add(v)
+                    queue.append(u)
 
-            queue = deque(start)
             while queue:
                 cur = queue.popleft()
+                res.add(cur)
                 for next in adjMap[cur]:
                     if next not in res:
-                        res.add(next)
                         queue.append(next)
 
         return list(res)

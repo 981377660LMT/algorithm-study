@@ -1,7 +1,7 @@
 from bisect import bisect_right
 from collections import defaultdict
 
-
+# 最小窗口子序列
 class Solution:
     def minWindow(self, s1: str, s2: str) -> str:
         """
@@ -15,7 +15,7 @@ class Solution:
             if char in s2Set:
                 indexMap[char].append(i)
 
-        res = ''
+        res = ""
         # 枚举出发点
         for start in indexMap[s2[0]]:
             cur = start
@@ -29,4 +29,3 @@ class Solution:
                     res = s1[start : cur + 1]
 
         return res
-

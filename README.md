@@ -55,7 +55,7 @@
    - [Rerooting Dp](6_tree/%E7%BB%8F%E5%85%B8%E9%A2%98/%E5%90%8E%E5%BA%8Fdfs%E7%BB%9F%E8%AE%A1%E4%BF%A1%E6%81%AF/%E6%8D%A2%E6%A0%B9dp/Rerooting.py)
    - [Segment Tree](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template)
    - [Persistent Segment Tree](6_tree/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E7%BA%BF%E6%AE%B5%E6%A0%91/255.%20%E7%AC%ACK%E5%B0%8F%E6%95%B0-%E6%9F%A5%E8%AF%A2%E5%8C%BA%E9%97%B4%E7%AC%ACk%E5%B0%8F%E6%95%B0.ts)
-   - [Tree Chain Segmentation](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%A0%91%E9%93%BE%E5%89%96%E5%88%86/2568.%20%E6%A0%91%E9%93%BE%E5%89%96%E5%88%86.py)
+   - [Heavy-Light Decomposition](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%A0%91%E9%93%BE%E5%89%96%E5%88%86/2568.%20%E6%A0%91%E9%93%BE%E5%89%96%E5%88%86.py)
    - [Treap](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/Treap.ts)
    - [Rope](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8/rope.ts)
    - [TreeSet](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/TreeSet.ts)

@@ -32,6 +32,6 @@
             curSum -= nums[left]  # remove 逻辑
             left += 1
             ...
-        res = max(res, right - left + 1)
+        res = max(res, right - left + 1)  # !`合法`的时候更新答案
     return res
    ```

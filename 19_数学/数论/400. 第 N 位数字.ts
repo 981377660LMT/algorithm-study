@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /**
  * @param {number} n
  * @return {number}
@@ -5,9 +6,9 @@
  * 1 - 9 : 9 digits
    10 - 99 : 90 * 2 digits
    100 - 999: 900 * 3 digits
-   @description 第a位数字
+   @description 第n位数字
  */
-const findNthDigit = function (n: number): number {
+function findNthDigit(n: number): number {
   let count = 9
   let digit = 1
   while (n > count * digit) {

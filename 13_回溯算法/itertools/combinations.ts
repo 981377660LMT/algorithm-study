@@ -1,15 +1,14 @@
-function* combinations<T extends ArrayLike<any>>(sequence: T, select?: number): Generator<T[]> {
-  select = select ?? sequence.length
+function* combinations<E>(array: ArrayLike<E>, select: number): Generator<E[]> {
   yield* bt(0, [])
 
-  function* bt(pos: number, path: T[]): Generator<T[]> {
+  function* bt(pos: number, path: E[]): Generator<E[]> {
     if (path.length === select) {
       yield path.slice()
       return
     }
 
-    for (let i = pos; i < sequence.length; i++) {
-      path.push(sequence[i])
+    for (let i = pos; i < array.length; i++) {
+      path.push(array[i])
       yield* bt(i + 1, path) // 唯一的区别在此：是否可取重复的元素
       path.pop()
     }

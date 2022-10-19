@@ -43,7 +43,7 @@ class SnapshotArray2:
 
     def __init__(self, length: int):
         """初始化一个与指定长度相等的 类数组 的数据结构。初始时，每个元素都等于 0。"""
-        self.version = 0
+        self.snapId = 0
         self.nums = PA2.create(length)
         self.git = dict({0: self.nums})  # !snap_id: nums
 
@@ -53,9 +53,9 @@ class SnapshotArray2:
 
     def snap(self) -> int:
         """获取该数组的快照，并返回快照的编号 snap_id(快照号是调用 snap() 的总次数减去 1)。"""
-        self.git[self.version] = self.nums
-        self.version += 1
-        return self.version - 1
+        self.git[self.snapId] = self.nums
+        self.snapId += 1
+        return self.snapId - 1
 
     def get(self, index: int, snap_id: int) -> int:
         """根据指定的 snap_id 调用 snap()，获取该数组在该快照下的指定 index 的值"""

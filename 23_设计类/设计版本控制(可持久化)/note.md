@@ -2,7 +2,7 @@
 
 1. 记录状态(state,持久化)
 
-   - 不能全量保存,需要 `structure sharing` 的可持久化数据结构（Persistent data structure）
+   - 不能全量保存,需要 `structual sharing` 的可持久化数据结构（Persistent data structure）
    - **每次修改历史版本总会返回一个新的数据结构(immutable ,不可变对象)**
    - 一般使用树型结构实现(包含链表,非线性结构)
    - 持久化数据结构可以带来许多好处，比如异常安全（Exception Safety）和并发性（Concurrency）。
@@ -71,3 +71,13 @@ https://www.luogu.com.cn/problem/P3835
 [陈立杰：可持久化数据结构研究.pdf](https://github.com/Misaka233/algorithm/blob/master/%E9%99%88%E7%AB%8B%E6%9D%B0%EF%BC%9A%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%A0%94%E7%A9%B6.pdf)
 [Re 永続データ構造が分からない人のためのスライド](https://www.slideshare.net/qnighy/re-15443018)
 [競技プログラミングにおける永続データ構造問題まとめ](https://blog.hamayanhamayan.com/entry/2017/05/21/001252)
+[Persistent Data Structure](https://fuzhe1989.github.io/2017/11/07/persistent-data-structure/)
+
+## 补充
+
+什么地方需要用到持久性数据结构？
+
+1. 函数式编程语言。它的定义就要求了不能有可变数据和可变数据结构。
+2. 并发编程(eg:协同编辑)。
+3. Lazy Evaluation。(如果一个数据结构是可变的，我们肯定不会放心对它使用 Lazy Evaluation。)
+4. 使用 Persistent Map/HashMap 有助于简化 Prototype 的实现。

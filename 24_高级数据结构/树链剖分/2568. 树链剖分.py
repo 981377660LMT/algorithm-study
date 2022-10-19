@@ -167,3 +167,6 @@ for _ in range(m):
 # 5
 # 1 3 4 3
 # 3 5 4
+
+
+# !如果支持断开边 那就需要LCT(link-cut tree)了

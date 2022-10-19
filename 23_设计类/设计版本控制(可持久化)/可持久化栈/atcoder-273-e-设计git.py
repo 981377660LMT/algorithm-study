@@ -9,14 +9,16 @@
 
 # !每个操作结束后,输出A数组的末尾元素(当前状态)
 # !如果A为空,输出-1
+from itertools import combinations
+
 
 from collections import defaultdict
 from PersistentStack import PersistentStack
 
+
 if __name__ == "__main__":
     git = defaultdict(lambda: PersistentStack.init())  # !各个分支上的版本
     curStack = PersistentStack.init()  # !当前版本
-
     q = int(input())
     for _ in range(q):
         kind, *args = input().split()

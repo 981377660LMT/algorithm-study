@@ -8,6 +8,7 @@
 # https://qiita.com/wotsushi/items/72e7f8cdd674741ffd61#%E5%8F%82%E8%80%83%E8%A8%98%E4%BA%8B
 
 # 可持久化数组-离线(バッチ処理)
+# !把版本看成节点，那么根据版本的继承关系这些节点会构成一棵树。
 # !多个版本组成了一棵树,本质上是树上的离线查询
 
 from collections import defaultdict
@@ -17,7 +18,13 @@ from typing import List, Tuple
 def offlineQuery(
     nums: List[int], operations: List[Tuple[str, int, int, str]], queries: List[Tuple[str, int]]
 ) -> List[int]:
-    """预处理出查询组,dfs的过程中输出所有查询结果"""
+    """预处理出查询组,dfs的过程中输出所有查询结果
+
+    Args:
+        nums (List[int]): 初始数组
+        operations (List[Tuple[str, int, int, str]]): 更新操作,也叫action
+        queries (List[Tuple[str, int]]): 查询操作
+    """
 
     def dfs(version: str, curNums: List[int]) -> None:
         for qi, qv in queryGroup[version]:

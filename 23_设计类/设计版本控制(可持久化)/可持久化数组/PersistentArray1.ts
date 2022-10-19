@@ -116,6 +116,7 @@ function usePersistentArray(
     return node
   }
 }
+
 if (require.main === module) {
   const nums = [59, 46, 14, 87, 41]
   const v0 = 0

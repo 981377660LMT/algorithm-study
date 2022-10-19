@@ -6,7 +6,7 @@
 //  你的加密和解密算法如何设计和运作是没有限制的，
 //  你只需要保证一个URL可以被加密成一个TinyURL，
 //  并且这个TinyURL可以用解密方法恢复成原本的URL。
-//////////////////////////////////////////////////////////////////////////////////////////////////
+/// ///////////////////////////////////////////////////////////////////////////////////////////////
 // 短网址原理
 // 当我们在浏览器里输入 http://tinyurl.com/4e9iAk 时
 // DNS首先解析获得 http://tinyurl.com 的 IP 地址
@@ -23,7 +23,7 @@ const codeDB = new Map<string, string>()
 const urlDB = new Map<string, string>()
 const getCode = () => {
   const code = Array.from({ length: 6 }, () => chars.charAt(~~(Math.random() * 62)))
-  return 'http://tinyurl.com/' + code.join('')
+  return `http://tinyurl.com/${code.join('')}`
 }
 
 /**

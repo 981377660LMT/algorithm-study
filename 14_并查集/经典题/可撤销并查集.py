@@ -3,11 +3,83 @@
 撤销相当于弹出栈顶元素
 
 很少用到撤销操作，因为并查集的撤销可以变成倒着合并
+
+应用场景:
+可持久化并查集的离线处理
+在树上(版本之间)dfs 递归时要union结点 回溯时候需要撤销的场合
 """
 
 
 from collections import defaultdict
 from typing import DefaultDict, Generic, Hashable, Iterable, List, Optional, TypeVar
+
+
+class RevocableUnionFindArray:
+    """
+    带撤销操作的并查集
+
+    不能使用路径压缩优化（因为路径压缩会改变结构）；
+    为了不超时必须使用按秩合并优化,复杂度nlogn
+    """
+
+    __slots__ = ("n", "part", "parent", "rank", "optStack")
+
+    def __init__(self, n: int):
+        self.n = n
+        self.part = n
+        self.parent = list(range(n))
+        self.rank = [1] * n
+        self.optStack = []
+
+    def find(self, x: int) -> int:
+        """不能使用路径压缩优化"""
+        while self.parent[x] != x:
+            x = self.parent[x]
+        return x
+
+    def union(self, x: int, y: int) -> bool:
+        """x所在组合并到y所在组"""
+        rootX = self.find(x)
+        rootY = self.find(y)
+        if rootX == rootY:
+            self.optStack.append((-1, -1, -1))
+            return False
+
+        if self.rank[rootX] > self.rank[rootY]:
+            rootX, rootY = rootY, rootX
+
+        self.parent[rootX] = rootY
+        self.rank[rootY] += self.rank[rootX]
+        self.part -= 1
+        self.optStack.append((rootX, rootY, self.rank[rootX]))
+        return True
+
+    def revocate(self) -> None:
+        """
+        用一个栈记录前面的合并操作，
+        撤销时要依次取出栈顶元素做合并操作的逆操作
+        """
+        if not self.optStack:
+            raise IndexError("no union option to revocate")
+
+        rootX, rootY, rankX = self.optStack.pop()
+        if rootX == -1:
+            return
+
+        self.parent[rootX] = rootX
+        self.rank[rootY] -= rankX
+        self.part += 1
+
+    def isConnected(self, x: int, y: int) -> bool:
+        return self.find(x) == self.find(y)
+
+    def getGroups(self) -> DefaultDict[int, List[int]]:
+        groups = defaultdict(list)
+        for key in range(self.n):
+            root = self.find(key)
+            groups[root].append(key)
+        return groups
+
 
 T = TypeVar("T", bound=Hashable)
 
@@ -100,73 +172,6 @@ class RevocableUnionFindMap(Generic[T]):
 
     def __contains__(self, key: T) -> bool:
         return key in self.parent
-
-
-class RevocableUnionFindArray:
-    """
-    带撤销操作的并查集
-
-    不能使用路径压缩优化（因为路径压缩会改变结构）；
-    为了不超时必须使用按秩合并优化,复杂度nlogn
-    """
-
-    __slots__ = ("n", "part", "parent", "rank", "optStack")
-
-    def __init__(self, n: int):
-        self.n = n
-        self.part = n
-        self.parent = list(range(n))
-        self.rank = [1] * n
-        self.optStack = []
-
-    def find(self, x: int) -> int:
-        """不能使用路径压缩优化"""
-        while self.parent[x] != x:
-            x = self.parent[x]
-        return x
-
-    def union(self, x: int, y: int) -> bool:
-        """x所在组合并到y所在组"""
-        rootX = self.find(x)
-        rootY = self.find(y)
-        if rootX == rootY:
-            self.optStack.append((-1, -1, -1))
-            return False
-
-        if self.rank[rootX] > self.rank[rootY]:
-            rootX, rootY = rootY, rootX
-
-        self.parent[rootX] = rootY
-        self.rank[rootY] += self.rank[rootX]
-        self.part -= 1
-        self.optStack.append((rootX, rootY, self.rank[rootX]))
-        return True
-
-    def revocate(self) -> None:
-        """
-        用一个栈记录前面的合并操作，
-        撤销时要依次取出栈顶元素做合并操作的逆操作
-        """
-        if not self.optStack:
-            raise IndexError("no union option to revocate")
-
-        rootX, rootY, rankX = self.optStack.pop()
-        if rootX == -1:
-            return
-
-        self.parent[rootX] = rootX
-        self.rank[rootY] -= rankX
-        self.part += 1
-
-    def isConnected(self, x: int, y: int) -> bool:
-        return self.find(x) == self.find(y)
-
-    def getGroups(self) -> DefaultDict[int, List[int]]:
-        groups = defaultdict(list)
-        for key in range(self.n):
-            root = self.find(key)
-            groups[root].append(key)
-        return groups
 
 
 if __name__ == "__main__":

@@ -16,17 +16,17 @@ class Rope {
   /**
    * The threshold used to split a leaf node into two child nodes.
    */
-  private static readonly SPLIT_LENGTH = 1 << 15
+  private static readonly _SPLIT_LENGTH = 1 << 15
 
   /**
    * The threshold used to join two child nodes into one leaf node.
    */
-  private static readonly JOIN_LENGTH = 1 << 14
+  private static readonly _JOIN_LENGTH = 1 << 14
 
   /**
    * The threshold used to trigger a tree node rebuild when rebalancing the rope.
    */
-  private static readonly REBALANCE_RATIO = 1 << 1
+  private static readonly _REBALANCE_RATIO = 1 << 1
 
   length: number
 
@@ -208,8 +208,8 @@ class Rope {
   private _rebalance(): void {
     if (typeof this._value === 'undefined') {
       if (
-        this._left!.length / this._right!.length > Rope.REBALANCE_RATIO ||
-        this._right!.length / this._left!.length > Rope.REBALANCE_RATIO
+        this._left!.length / this._right!.length > Rope._REBALANCE_RATIO ||
+        this._right!.length / this._left!.length > Rope._REBALANCE_RATIO
       ) {
         this._rebuild()
       } else {
@@ -225,13 +225,13 @@ class Rope {
    */
   private _adjust(): void {
     if (typeof this._value !== 'undefined') {
-      if (this.length > Rope.SPLIT_LENGTH) {
+      if (this.length > Rope._SPLIT_LENGTH) {
         const divide = Math.floor(this.length / 2)
         this._left = new Rope(this._value.slice(0, divide))
         this._right = new Rope(this._value.slice(divide))
         this._value = undefined
       }
-    } else if (this.length < Rope.JOIN_LENGTH) {
+    } else if (this.length < Rope._JOIN_LENGTH) {
       this._value = this._left!.toString() + this._right!.toString()
       this._left = undefined
       this._right = undefined

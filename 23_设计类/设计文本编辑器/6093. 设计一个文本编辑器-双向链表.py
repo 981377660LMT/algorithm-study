@@ -1,16 +1,16 @@
 from dataclasses import dataclass
 from typing import Generic, Optional, TypeVar
 
-V = TypeVar('V')
+V = TypeVar("V")
 
 
 @dataclass(slots=True)
 class Node(Generic[V]):
     value: V
-    left: Optional['Node[V]'] = None
-    right: Optional['Node[V]'] = None
+    left: Optional["Node[V]"] = None
+    right: Optional["Node[V]"] = None
 
-    def insertRight(self, node: 'Node[V]') -> 'Node[V]':
+    def insertRight(self, node: "Node[V]") -> "Node[V]":
         """在 self 后插入 node,并返回该 node"""
         node.left = self
         node.right = self.right
@@ -19,7 +19,7 @@ class Node(Generic[V]):
             node.right.left = node
         return node
 
-    def insertLeft(self, node: 'Node[V]') -> 'Node[V]':
+    def insertLeft(self, node: "Node[V]") -> "Node[V]":
         """在 self 前插入 node,并返回该 node"""
         node.right = self
         node.left = self.left
@@ -36,12 +36,12 @@ class Node(Generic[V]):
             self.right.left = self.left
 
     def __repr__(self) -> str:
-        return f'{self.value}->{self.right}'
+        return f"{self.value}->{self.right}"
 
 
 class TextEditor:
     def __init__(self):
-        self.root = Node('')  # 哨兵以及初始化双向链表
+        self.root = Node("")  # 哨兵以及初始化双向链表
         self.root.left = self.root
         self.root.right = self.root  # !初始化双向链表，下面判断节点的 next 若为 self.root，则表示 next 为空
         self.pos = self.root
@@ -77,4 +77,4 @@ class TextEditor:
             res.append(cur.value)
             cur = cur.left
             remain -= 1
-        return ''.join(res[::-1])
+        return "".join(res[::-1])
