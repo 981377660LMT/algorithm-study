@@ -3,12 +3,12 @@
 # 静态查询区间数字种数
 # 三种做法，莫队，离线树状数组，主席树
 
-from collections import defaultdict
+
 from typing import List
-from MoAlgo import AbstractMoAlgo
+from MoAlgo import MoAlgo
 
 
-class QueryTypeMoAlgo(AbstractMoAlgo[int, int]):
+class QueryTypeMoAlgo(MoAlgo[int, int]):
     """静态查询区间数字种数"""
 
     def __init__(self, data: List[int]):

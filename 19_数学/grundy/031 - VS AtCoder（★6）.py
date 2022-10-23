@@ -47,7 +47,7 @@ black = tuple(map(int, input().split()))
 
 sg = 0
 for w, b in zip(white, black):
-    sg ^= grundy(w, b)  # 初始的grundy数
+    sg ^= grundy(w, b)  # 初始的grundy数 !母状态的 SG 数等于各个子状态的 SG 数的异或
 
 
 if sg:

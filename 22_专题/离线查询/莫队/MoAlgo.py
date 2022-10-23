@@ -1,15 +1,13 @@
-from typing import Generic, List, Tuple, TypeVar
-from abc import ABCMeta, abstractmethod
+from typing import Generic, List, TypeVar
 from math import ceil, sqrt
 
 
 V = TypeVar("V")  # 区间元素类型
 Q = TypeVar("Q")  # 每个查询的返回值类型
-Query = Tuple[int, int, int]
 
 
-class AbstractMoAlgo(Generic[V, Q], metaclass=ABCMeta):
-    """莫队算法基类
+class MoAlgo(Generic[V, Q]):
+    """莫队算法模板
 
     左端点分桶，右端点排序
     """
@@ -57,17 +55,14 @@ class AbstractMoAlgo(Generic[V, Q], metaclass=ABCMeta):
 
         return res
 
-    @abstractmethod
     def _add(self, value: V, index: int, qLeft: int, qRight: int) -> None:
         """将数据添加到窗口"""
         raise NotImplementedError(f"{self.__class__.__name__}._add")
 
-    @abstractmethod
     def _remove(self, value: V, index: int, qLeft: int, qRight: int) -> None:
         """将数据从窗口中移除"""
         raise NotImplementedError(f"{self.__class__.__name__}._remove")
 
-    @abstractmethod
     def _query(self) -> Q:
         """更新当前窗口的查询结果"""
         raise NotImplementedError(f"{self.__class__.__name__}._query")
@@ -75,7 +70,7 @@ class AbstractMoAlgo(Generic[V, Q], metaclass=ABCMeta):
 
 if __name__ == "__main__":
     #  https://atcoder.jp/contests/abc242/tasks/abc242_g
-    class Solution(AbstractMoAlgo[int, int]):
+    class Solution(MoAlgo[int, int]):
         """静态查询区间 `元素的count //2` 的和"""
 
         def __init__(self, data: List[int]):

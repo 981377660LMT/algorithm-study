@@ -12,6 +12,7 @@ import { useAtcoderLazySegmentTree } from '../AtcoderLazySegmentTree'
 
 // !固定子数组的一端，则子数组的最小（最大）值关于另一端点具有单调性，
 // !因此可以使用二分查找、滑动窗口来求出使得最小（最大值）值落在某一范围内的区间
+
 const INF = 2e15
 function countSubarrays(nums: number[], minK: number, maxK: number): number {
   const n = nums.length

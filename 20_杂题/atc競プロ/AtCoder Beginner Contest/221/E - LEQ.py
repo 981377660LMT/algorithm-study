@@ -17,9 +17,9 @@ MOD = 998244353
 INF = int(4e18)
 inv2 = (MOD + 1) // 2
 
-powinv2 = [1]
+pow2inv = [1]
 for _ in range(int(3e5 + 10)):
-    powinv2.append(powinv2[-1] * inv2 % MOD)
+    pow2inv.append(pow2inv[-1] * inv2 % MOD)
 
 
 class BIT1:
@@ -96,6 +96,6 @@ if __name__ == "__main__":
         preSum = bit.query(num)
         if j >= 1:
             res = (res + pow(2, j - 1, MOD) * preSum) % MOD
-        bit.add(num, powinv2[j])
+        bit.add(num, pow2inv[j])
 
     print(res)

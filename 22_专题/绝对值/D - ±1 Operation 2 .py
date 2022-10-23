@@ -20,15 +20,15 @@ input = sys.stdin.readline
 MOD = int(1e9 + 7)
 
 
-def calDistSum(nums: List[int], k: int, preSum: List[int]) -> int:
+def calDistSum(sortedArray: List[int], k: int, preSum: List[int]) -> int:
     """`有序数组`所有点到x=k的绝对值距离之和
 
     排序+二分+前缀和 O(logn)
     """
-    pos = bisect_right(nums, k)
-    leftSum = k * pos - preSum[pos]
-    rightSum = preSum[-1] - preSum[pos] - k * (len(nums) - pos)
-    return leftSum + rightSum
+    pos = bisect_right(sortedArray, k)
+    leftDist = k * pos - preSum[pos]
+    rightDist = preSum[-1] - preSum[pos] - k * (len(sortedArray) - pos)
+    return leftDist + rightDist
 
 
 def main() -> None:

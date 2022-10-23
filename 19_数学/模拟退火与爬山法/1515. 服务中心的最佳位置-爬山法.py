@@ -9,6 +9,8 @@ EPS = 1e-6
 # 与真实值误差在 10-5之内的答案将被视作正确答案。
 
 # 0 <= xi, yi <= 100
+
+
 class Solution:
     def getMinDistSum1(self, positions: List[List[int]]) -> float:
         # """https://leetcode-cn.com/problems/best-position-for-a-service-centre/solution/5463-fu-wu-zhong-xin-de-zui-jia-wei-zhi-by-tuotuol/"""
@@ -22,6 +24,7 @@ class Solution:
         return dist((x, y))
 
     def getMinDistSum2(self, positions: List[List[int]]) -> float:
+        """scipy.optimize.minimize"""
         # https://www.runoob.com/scipy/scipy-optimize.html
         # https://leetcode.cn/problems/best-position-for-a-service-centre/solution/by-freeyourmind-k558/
         def getSum(target: List[int]):

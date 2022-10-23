@@ -1,12 +1,12 @@
 // https://leetcode-cn.com/problems/maximum-number-of-groups-getting-fresh-donuts/solution/mo-ni-tui-huo-by-lianxin-tvq6/
 function maxHappyGroups(batchSize: number, groups: number[]): number {
-  if (batchSize == 1) return groups.length
+  if (batchSize === 1) return groups.length
 
   const tmp = []
   // 万能牌free  这波人必然会带来一波快乐   先踢出来  这样数据量小点
   let res1 = 0
   for (let i = 0; i < groups.length; i++) {
-    if (groups[i] % batchSize == 0) {
+    if (groups[i] % batchSize === 0) {
       res1++
     } else {
       tmp.push(groups[i])
@@ -54,7 +54,7 @@ function maxHappyGroups(batchSize: number, groups: number[]): number {
     let happyNum = 1
     let total = groups[0]
     for (let i = 1; i < groups.length; i++) {
-      if (total % batchSize == 0) {
+      if (total % batchSize === 0) {
         happyNum++
       }
 

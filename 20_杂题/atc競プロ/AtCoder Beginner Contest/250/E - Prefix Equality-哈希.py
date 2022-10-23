@@ -5,22 +5,21 @@
 # x,y<=n
 
 
-# . 1.离线查询(排序)+双指针 莫队的思想
-# 固定x之后 就可以尺取寻找y的边界
-# !2. 哈希 用随机数产生哈希值 用异或来计算区间所含集合的哈希值
+# !1. 哈希 用随机数产生哈希值 用异或来计算区间所含集合的哈希值
 
 
 from collections import defaultdict
 from itertools import accumulate
 from operator import xor
-from random import randint, seed
+from random import randint
 import sys
-import os
 from typing import List, Tuple
+
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
-MOD = int(1e9 + 7)
+MOD = 998244353
+INF = int(4e18)
 
 
 def genHash(nums1: List[int], nums2: List[int]) -> Tuple[List[int], List[int]]:
@@ -38,34 +37,25 @@ def genHash(nums1: List[int], nums2: List[int]) -> Tuple[List[int], List[int]]:
     return ([0] + list(accumulate(res1, xor)), [0] + list(accumulate(res2, xor)))
 
 
-def main() -> None:
-    n = int(input())
-    nums1 = list(map(int, input().split()))
-    nums2 = list(map(int, input().split()))
-    q = int(input())
-    Q = []
-    for _ in range(q):
-        x, y = map(int, input().split())
-        Q.append((x, y))
-    res = [0] * q
+n = int(input())
+nums1 = list(map(int, input().split()))
+nums2 = list(map(int, input().split()))
+q = int(input())
+Q = []
+for _ in range(q):
+    x, y = map(int, input().split())
+    Q.append((x, y))
 
-    # !检验两次 防止哈希冲突
-    for _ in range(2):
-        pre1, pre2 = genHash(nums1, nums2)
-        for i, (x, y) in enumerate(Q):
-            if pre1[x] == pre2[y]:
-                res[i] += 1
+res = [0] * q
+# !防止哈希冲突
+for _ in range(2):
+    preHash1, preHash2 = genHash(nums1, nums2)
+    for i, (x, y) in enumerate(Q):
+        if preHash1[x] == preHash2[y]:
+            res[i] += 1
 
-    for v in res:
-        if v == 2:
-            print("Yes")
-        else:
-            print("No")
-
-
-if __name__ == "__main__":
-    if os.environ.get("USERNAME", " ") == "caomeinaixi":
-        while True:
-            main()
+for v in res:
+    if v == 2:
+        print("Yes")
     else:
-        main()
+        print("No")

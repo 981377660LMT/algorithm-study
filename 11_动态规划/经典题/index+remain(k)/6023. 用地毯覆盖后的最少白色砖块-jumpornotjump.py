@@ -4,8 +4,9 @@ from itertools import accumulate
 MOD = int(1e9 + 7)
 
 # jump or not jump
-
 # 1 <= carpetLen <= floor.length <= 1000
+
+
 class Solution:
     def minimumWhiteTiles(self, floor: str, numCarpets: int, carpetLen: int) -> int:
         @lru_cache(None)
@@ -24,11 +25,11 @@ class Solution:
             return res
 
         n = len(floor)
-        nums = [1 if floor[i] == '1' else 0 for i in range(n)]
+        nums = [1 if floor[i] == "1" else 0 for i in range(n)]
         preSum = [0] + list(accumulate(nums))
         res = dfs(0, numCarpets)
         dfs.cache_clear()
-        return floor.count('1') - res
+        return floor.count("1") - res
 
 
 print(Solution().minimumWhiteTiles(floor="101111010", numCarpets=2, carpetLen=4))

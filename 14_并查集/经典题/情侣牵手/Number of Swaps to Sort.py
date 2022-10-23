@@ -1,13 +1,13 @@
 # 所有数字都不同 求使得数组递增的最小交换次数
 # 此题类似于情侣牵手
-# 把哪些冲突的放在一组，解决这些冲突需要(size-1)次交换
+# !把哪些冲突的放在一组，解决这些冲突需要(size-1)次交换
 
 # 因此最后需要的交换数为 n-count
 
 from typing import List
 
 from collections import defaultdict
-from typing import DefaultDict, Generic, Iterable, List, Optional, TypeVar
+from typing import DefaultDict, List
 
 
 # 元素是0-n-1的并查集写法，不支持动态添加

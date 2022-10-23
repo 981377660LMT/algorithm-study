@@ -1,1 +1,1 @@
-n % count) 
+max(0, (num1 - num2)) for num1, num2 in zip(odd1, odd2)

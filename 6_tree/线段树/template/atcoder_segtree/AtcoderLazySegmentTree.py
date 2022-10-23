@@ -195,7 +195,7 @@ class AtcoderLazySegmentTree(Generic[S, F]):
         树上二分查询最大的 `right` 使得切片 `[left:right]` 内的值满足 `key`
         """
         assert 0 <= left and left <= self._n
-        assert key(self._e())
+        # assert key(self._e())  # FIXME
         if left == self._n:
             return self._n
         left += self._size
@@ -224,7 +224,7 @@ class AtcoderLazySegmentTree(Generic[S, F]):
         树上二分查询最小的 `left` 使得切片 `[left:right]` 内的值满足 `key`
         """
         assert 0 <= right and right <= self._n
-        assert key(self._e())
+        # assert key(self._e())  # FIXME
         if right == 0:
             return 0
         right += self._size

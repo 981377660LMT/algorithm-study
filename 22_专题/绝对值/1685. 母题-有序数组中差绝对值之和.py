@@ -12,9 +12,9 @@ class Solution:
         preSum = [0] + list(accumulate(nums))
         res = []
         for i, num in enumerate(nums):
-            leftSum = num * i - preSum[i]
-            rightSum = preSum[n] - preSum[i] - num * (n - i)
-            res.append(leftSum + rightSum)
+            leftDist = num * i - preSum[i]
+            rightDist = preSum[n] - preSum[i] - num * (n - i)
+            res.append(leftDist + rightDist)
         return res
 
 

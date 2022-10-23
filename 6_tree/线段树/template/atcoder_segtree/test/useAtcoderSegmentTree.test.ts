@@ -43,7 +43,7 @@ describe('useAtcoderLazySegmentTree', () => {
     })
 
     it('should support minLeft', () => {
-      expect(tree.minLeft(5, v => v > 3)).toBe(5)
+      expect(tree.minLeft(5, v => v > 3)).toBe(0)
     })
 
     it('should throw error when range is invalid', () => {

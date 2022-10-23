@@ -27,8 +27,8 @@ class Solution:
             shuffle(w)
             t = 1e6
             while t > 1e-5:
-                a = randint(0, 2 ** 10) % n
-                b = randint(0, 2 ** 10) % n
+                a = randint(0, 2**10) % n
+                b = randint(0, 2**10) % n
                 x = calc()
                 w[a], w[b] = w[b], w[a]
                 y = calc()
@@ -61,4 +61,3 @@ class Solution:
             simulate_anneal()
 
         return self.res + already_ok
-

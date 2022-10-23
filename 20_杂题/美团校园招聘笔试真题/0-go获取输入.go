@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"os"
 )
 
 // https://github.dev/EndlessCheng/codeforces-go
@@ -37,4 +38,8 @@ func bufferIO(reader io.Reader, writer io.Writer) {
 	}
 
 	fmt.Fprintln(out, n)
+}
+
+func main() {
+	bufferIO(os.Stdin, os.Stdout)
 }

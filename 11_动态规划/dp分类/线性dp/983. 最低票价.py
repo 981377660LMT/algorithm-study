@@ -35,6 +35,7 @@ class Solution:
                 dp[i + 1] = min(dp[i + 1], dp[pos] + price)
         return dp[-1]
 
+    #########################################################################################################
     def mincostTickets(self, days: List[int], costs: List[int]) -> int:
         """https://leetcode.cn/problems/minimum-cost-for-tickets/"""
         n = days[-1]

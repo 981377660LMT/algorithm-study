@@ -6,6 +6,8 @@ from math import ceil
 from typing import List
 from KM算法模板 import KM
 
+INF = int(1e18)
+
 
 class Solution:
     def minimumTime(self, power: List[int]) -> int:
@@ -16,3 +18,20 @@ class Solution:
                 adjMatrix[i][j] = -ceil(power[i] / (j + 1))  # !当前击败怪物花费 ceil(power[i] / (j + 1)) 时间
         km = KM(adjMatrix)
         return -km.getResult()
+
+    # 状压的dp写法
+    def minimumTime2(self, power: List[int]) -> int:
+        n = len(power)
+        target = (1 << n) - 1
+        dp = [INF] * (target + 1)
+        dp[0] = 0
+
+        for state in range(target + 1):
+            gain = state.bit_count() + 1
+            for i in range(n):
+                if state & (1 << i):
+                    continue
+                cost = ceil(power[i] / gain)
+                dp[state | (1 << i)] = min(dp[state | (1 << i)], cost + dp[state])
+
+        return dp[target]

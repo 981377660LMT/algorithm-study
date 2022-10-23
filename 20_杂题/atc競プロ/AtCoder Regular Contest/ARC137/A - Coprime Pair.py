@@ -7,3 +7,6 @@
 
 # prime gap 质数间隙
 # 1e9以内，两个相邻素数距离不超过400
+
+# Prime Gap:
+# https://primes.utm.edu/notes/GapsTable.html

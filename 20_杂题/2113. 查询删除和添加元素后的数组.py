@@ -28,4 +28,3 @@ class Solution:
 
 print(Solution().elementInNums(nums=[0, 1, 2], queries=[[0, 2], [2, 0], [3, 2], [5, 0]]))
 print(Solution().elementInNums(nums=[2], queries=[[0, 0], [1, 0], [2, 0], [3, 0]]))
-

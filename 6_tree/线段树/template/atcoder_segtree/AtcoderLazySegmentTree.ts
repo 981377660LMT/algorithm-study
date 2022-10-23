@@ -180,7 +180,6 @@ function useAtcoderLazySegmentTree<S, F>(
 
   function maxRight(left: number, predicate: (value: S) => boolean): number {
     _checkRange(left, left)
-    if (!predicate(_e())) return left
     if (left === _n) return _n
 
     left += _size
@@ -214,7 +213,6 @@ function useAtcoderLazySegmentTree<S, F>(
 
   function minLeft(right: number, predicate: (value: S) => boolean): number {
     _checkRange(right, right)
-    if (!predicate(_e())) return right
     if (right === 0) return 0
 
     right += _size

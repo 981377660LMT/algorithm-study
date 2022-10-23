@@ -1,3 +1,4 @@
+# 1000. 合并石头的最低成本
 from typing import List
 from functools import lru_cache
 from itertools import accumulate

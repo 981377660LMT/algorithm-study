@@ -4,47 +4,49 @@ from typing import Callable
 INF = int(4e18)
 
 
-def minimize(f: Callable[[int], int], lower: int, upper: int) -> int:
-    """三分法求`凸函数f`在`[lower,upper]`间的最小值"""
+def minimize(fun: Callable[[int], int], lower: int, upper: int) -> int:
+    """三分法求`严格凸函数fun`在`[lower,upper]`间的最小值"""
     res = INF
     while (upper - lower) >= 3:
         diff = upper - lower
         mid1 = lower + diff // 3
         mid2 = lower + 2 * diff // 3
-        if f(mid1) > f(mid2):
+        if fun(mid1) > fun(mid2):
             lower = mid1
         else:
             upper = mid2
 
     while lower <= upper:
-        res = min(res, f(lower))
+        cand = fun(lower)
+        res = cand if cand < res else res
         lower += 1
 
     return res
 
 
-def maximize(f: Callable[[int], int], lower: int, upper: int) -> int:
-    """三分法求`凸函数f`在`[lower,upper]`间的最大值"""
+def maximize(fun: Callable[[int], int], lower: int, upper: int) -> int:
+    """三分法求`严格凸函数fun`在`[lower,upper]`间的最大值"""
     res = -INF
     while (upper - lower) >= 3:
         diff = upper - lower
         mid1 = lower + diff // 3
         mid2 = lower + 2 * diff // 3
-        if f(mid1) < f(mid2):
+        if fun(mid1) < fun(mid2):
             lower = mid1
         else:
             upper = mid2
 
     while lower <= upper:
-        res = max(res, f(lower))
+        cand = fun(lower)
+        res = cand if cand > res else res
         lower += 1
 
     return res
 
 
-def optimize(f: Callable[[int], int], lower: int, upper: int, *, needMin: bool) -> int:
-    """三分法求`凸函数f`在`[lower,upper]`间的最值"""
-    return minimize(f, lower, upper) if needMin else maximize(f, lower, upper)
+def optimize(fun: Callable[[int], int], lower: int, upper: int, *, needMin: bool) -> int:
+    """三分法求`严格凸函数fun`在`[lower,upper]`间的最值"""
+    return minimize(fun, lower, upper) if needMin else maximize(fun, lower, upper)
 
 
 if __name__ == "__main__":

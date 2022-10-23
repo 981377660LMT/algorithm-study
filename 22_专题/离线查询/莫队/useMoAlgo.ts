@@ -1,20 +1,19 @@
 interface WindowManager<T, Q> {
-  // 使用 `this:unknown` 禁止在外部调用this
-  add(this: unknown, value: T, index: number, qLeft: number, qRight: number): void
-  remove(this: unknown, value: T, index: number, qLeft: number, qRight: number): void
-  query(this: unknown, index: number, qLeft: number, qRight: number): Q
+  // 使用 `this:void` 禁止在外部调用this
+  add(this: void, value: T, index: number, qLeft: number, qRight: number): void
+  remove(this: void, value: T, index: number, qLeft: number, qRight: number): void
+  query(this: void, index: number, qLeft: number, qRight: number): Q
 }
 
 type Query = [qIndex: number, qLeft: number, qRight: number]
 
 /**
  * 静态查询区间的莫队算法
+ * 左端点分桶，右端点排序
  *
  * @param arrayLike 查询的原数据
  * @param windowManager 区间的维护方式
  * @complexity `O(n*sqrt(q))`
- *
- * 左端点分桶，右端点排序
  */
 function useMoAlgo<T, Q>(arrayLike: Readonly<ArrayLike<T>>, windowManager: WindowManager<T, Q>) {
   const n = arrayLike.length
@@ -44,10 +43,7 @@ function useMoAlgo<T, Q>(arrayLike: Readonly<ArrayLike<T>>, windowManager: Windo
     let left = 0
     let right = 0
 
-    // const { add, remove, query } = windowManager // !注意解构会使this指向不正确
-    const add = windowManager.add.bind(windowManager)
-    const remove = windowManager.remove.bind(windowManager)
-    const query = windowManager.query.bind(windowManager)
+    const { add, remove, query } = windowManager // !不使用bind,减小开销
 
     for (let i = 0; i < buckets.length; i++) {
       const bucket = buckets[i]

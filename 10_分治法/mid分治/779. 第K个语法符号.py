@@ -4,15 +4,15 @@
 
 class Solution:
     def kthGrammar(self, n: int, k: int) -> int:
+        # return (k - 1).bit_count() & 1  # k 表示的二进制数的 1 出现的奇偶次
         if n == 1:
             return 0
         length = 1 << (n - 1)
         mid = length // 2
         if k <= mid:
             return self.kthGrammar(n - 1, k)
-        else:
-            k -= mid
-            return 1 ^ self.kthGrammar(n - 1, k)
+        k -= mid
+        return 1 ^ self.kthGrammar(n - 1, k)
 
 
 print(Solution().kthGrammar(n=2, k=1))

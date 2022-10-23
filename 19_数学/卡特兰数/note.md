@@ -18,16 +18,28 @@
 握手问题:2n 个人均匀坐在一个圆桌边上，某个时刻所有人同时与另一个人握手，要求手之间不能交叉，求共有多少种握手方法。
 
 所有问题可以转化为`不跨越对角线的路径问题`
+`C(2n,n)-C(2n,n+1) = C(2n,n)/(n+1)`
+https://www.cnblogs.com/zyt1253679098/p/9190217.html
+合法的直线:y=x,终点为(n,n)
+不合法的直线:y=x+1,终点为(n-1,n+1)
+则合法路径数为 C(2n,n)-C(2n,n+1)
 
 ```Python
-@lru_cache(None)
-def dp(i, j):
-    if i == 0 and j == 0:
-        return 1
-    if i < 0 or j < 0:
+fac = [1]
+ifac = [1]
+for i in range(1, int(2e5) + 10):
+    fac.append((fac[-1] * i) % MOD)
+    ifac.append((ifac[-1] * pow(i, MOD - 2, MOD)) % MOD)
+
+
+def C(n: int, k: int) -> int:
+    if n < 0 or k < 0 or n < k:
         return 0
-    if i < j:
-        return 0
-    return dp(i - 1, j) + dp(i, j - 1)
+    return ((fac[n] * ifac[k]) % MOD * ifac[n - k]) % MOD
+
+
+def catalan(n: int) -> int:
+    """卡特兰数 catalan(n) = C(2*n, n) // (n+1)"""
+    return C(2 * n, n) * pow(n + 1, MOD - 2, MOD) % MOD
 
 ```

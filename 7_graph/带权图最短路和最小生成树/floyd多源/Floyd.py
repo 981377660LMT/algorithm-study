@@ -17,7 +17,7 @@ if __name__ == "__main__":
     for u, v, w in edges:
         dist[u][v] = dist[v][u] = w
 
-    for k in range(n):
+    for k in range(n):  # !经过的中转点
         for i in range(n):
             for j in range(n):
                 # !松弛：如果一条边可以被松弛了，说明这条边就没有必要留下了

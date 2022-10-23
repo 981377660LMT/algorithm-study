@@ -4,13 +4,13 @@
 
 class Solution:
     def longestSubsequence(self, s: str, k: int) -> int:
-        """s 的 最长 子序列，且该子序列对应的 二进制 数字小于等于 k 
-        
+        """s 的 最长 子序列，且该子序列对应的 二进制 数字小于等于 k
+
         最长子序列 包含 原二进制字符串 中的所有的 0
         倒序判断每个数选不选 优先保留较低位的 1
         """
 
-        res = ''
+        res = ""
         for i in range(len(s) - 1, -1, -1):
             cand = s[i] + res
             if int(cand, 2) <= k:
