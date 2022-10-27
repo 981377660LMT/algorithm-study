@@ -2,7 +2,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-inner-declarations */
 
-function useLCA(n: number, adjList: number[][], root = 0) {
+function useLCA(n: number, tree: number[][], root = 0) {
   const depth = new Int32Array(n).fill(-1)
   const parent = new Int32Array(n).fill(-1)
 
@@ -45,6 +45,8 @@ function useLCA(n: number, adjList: number[][], root = 0) {
 
   /**
    * O(logn) 查询树节点root的第k个祖先,如果不存在返回-1
+   *
+   * @param k k>=1
    */
   function queryKthAncestor(root: number, k: number): number {
     let bit = 0
@@ -61,11 +63,19 @@ function useLCA(n: number, adjList: number[][], root = 0) {
     return root
   }
 
+  return {
+    depth,
+    parent,
+    queryLCA,
+    queryDist,
+    queryKthAncestor
+  }
+
   function _dfs(cur: number, pre: number, dep: number): void {
     depth[cur] = dep
     parent[cur] = pre
-    for (let i = 0; i < adjList[cur].length; i++) {
-      const next = adjList[cur][i]
+    for (let i = 0; i < tree[cur].length; i++) {
+      const next = tree[cur][i]
       if (next === pre) continue
       _dfs(next, cur, dep + 1)
     }
@@ -82,14 +92,6 @@ function useLCA(n: number, adjList: number[][], root = 0) {
         else _fa[i][bit + 1] = _fa[_fa[i][bit]][bit]
       }
     }
-  }
-
-  return {
-    depth,
-    parent,
-    queryLCA,
-    queryDist,
-    queryKthAncestor
   }
 }
 

@@ -21,7 +21,7 @@
   "dependencies": {
     "collections": "^5.1.12",
     "datastructures-js": "^10.2.0",
-    "lodash-es": "^4.17.21",
+    "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "ts-node-dev": "^2.0.0",
@@ -33,7 +33,7 @@
     "@types/collections": "^5.1.2",
     "@types/eslint": "^8.4.5",
     "@types/jest": "^27.0.1",
-    "@types/lodash-es": "^4.17.6",
+    "@types/lodash": "^4.14.186",
     "@types/react": "^17.0.20",
     "@types/react-dom": "^17.0.9",
     "@types/sort-array": "^2.0.0",

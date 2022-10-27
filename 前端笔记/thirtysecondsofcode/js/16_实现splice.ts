@@ -21,3 +21,5 @@ function splice<T>(arr: T[], start: number, deleteCount: number, ...items: T[]):
 
   return arr
 }
+
+export {}

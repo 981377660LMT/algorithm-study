@@ -15,7 +15,7 @@ from collections import defaultdict
 # 5 -> []
 # 6 -> [6]
 
-# 考虑每一个数是否可以成为某个子序列的最大公因数即可
+# !考虑每一个数是否可以成为某个子序列的最大公因数即可
 # 然后把所有的列表变成tuple用set去重。得到的长度就是答案。
 
 
@@ -25,15 +25,15 @@ class Solution:
         """计算并返回 nums 的所有 非空 子序列中 不同 最大公约数的 数目 。"""
         numSet = set(nums)
         max_ = max(numSet)
-        commonFactorOfSub = defaultdict(list)
+        adjMap = defaultdict(list)
 
         # 枚举因子
         for factor in range(1, max_ + 1):
             for multi in range(factor, max_ + 1, factor):
                 if multi in numSet:
-                    commonFactorOfSub[factor].append(multi)
+                    adjMap[factor].append(multi)
 
-        return len(set([tuple(sub) for sub in commonFactorOfSub.values()]))
+        return len(set(tuple(sub) for sub in adjMap.values()))
 
 
 print(Solution().countDifferentSubsequenceGCDs(nums=[6, 10, 3]))

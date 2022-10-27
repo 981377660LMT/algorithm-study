@@ -32,7 +32,7 @@ if (require.main === module) {
     b: { c: 2, d: { e: 3 } },
     f: [4, 5, 6],
     g: Symbol('g'),
-    h: new Set([7, 8, 9]),
+    h: new Set([7, 8, 9])
   }
 
   // 循环引用

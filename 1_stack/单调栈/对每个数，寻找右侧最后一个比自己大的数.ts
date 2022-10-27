@@ -19,12 +19,12 @@ class SegmentTree {
   }
 
   query(l: number, r: number): number {
-    this.checkRange(l, r)
+    this._checkBoundsBeginEnd(l, r)
     return this._query(1, l, r, 1, this.size)
   }
 
   update(l: number, r: number, maxIndex: number): void {
-    this.checkRange(l, r)
+    this._checkBoundsBeginEnd(l, r)
     this._update(1, l, r, 1, this.size, maxIndex)
   }
 
@@ -78,13 +78,17 @@ class SegmentTree {
     }
   }
 
-  private checkRange(l: number, r: number): void {
-    if (l < 1 || r > this.size) throw new RangeError(`[${l}, ${r}] out of range: [1, ${this.size}]`)
+  private _checkBoundsBeginEnd(begin: number, end: number): void {
+    if (begin < 1 || begin > end || end > this.size) {
+      throw new RangeError(`[${begin}, ${end}] out of range: [1, ${this.size}]`)
+    }
   }
 }
 
 /**
- * @description 对每个数，寻找右侧最后一个比自己大的数；注意线段树要偏移
+ * 对每个数，寻找右侧最后一个比自己大的数；注意线段树要偏移
+ * 值域线段树 维护每个数的最大索引
+ *
  * @param nums 0 <= nums[i] <= 50000  2 <= nums.length <= 50000
  * @returns 每个元素右侧最后一个比自己大的数的索引
  */

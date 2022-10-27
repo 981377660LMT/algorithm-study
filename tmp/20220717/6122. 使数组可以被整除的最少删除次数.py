@@ -13,7 +13,7 @@ class Solution:
         min_ = min((num for num in nums if gcd_ % num == 0), default=-1)
         if min_ == -1:
             return -1
-        return sum(1 for num in nums if num < min_)
+        return sum(num < min_ for num in nums)
 
 
 print(Solution().minOperations(nums=[2, 3, 2, 4, 3], numsDivide=[9, 6, 9, 3, 15]))

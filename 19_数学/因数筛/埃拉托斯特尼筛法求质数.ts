@@ -8,14 +8,14 @@
  * @param n  统计所有不超过非负整数 n 的质数的数量。
  */
 function countPrimes(n: number): number {
-  const visited = Array<boolean>(n + 1).fill(false)
+  const isPrime = new Uint8Array(n + 1)
   let res = 0
 
-  for (let i = 2; i <= n; i++) {
-    if (visited[i]) continue
+  for (let f = 2; f <= n; f++) {
+    if (isPrime[f]) continue
     res++
-    for (let j = i * i; j <= n; j += i) {
-      visited[j] = true
+    for (let j = f * f; j <= n; j += f) {
+      isPrime[j] = 1
     }
   }
 

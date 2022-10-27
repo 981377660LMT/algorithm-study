@@ -15,11 +15,11 @@ def bfs(start) -> None:
     """dfs 3万左右会爆栈(最坏是一条链),Segmentation Fault，应该用bfs"""
     queue = deque([(start, -1, 0)])
     while queue:
-        cur, parent, level = queue.popleft()
+        cur, pre, level = queue.popleft()
         levelMap[cur] = level
-        parentMap[cur] = parent
+        parentMap[cur] = pre
         for next in adjMap[cur]:
-            if next == parent:
+            if next == pre:
                 continue
             queue.append((next, cur, level + 1))
 

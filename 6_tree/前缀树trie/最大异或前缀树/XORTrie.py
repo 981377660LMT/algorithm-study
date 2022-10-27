@@ -2,7 +2,7 @@ from typing import List
 
 
 class XORTrieNode:
-    __slots__ = "bit", "count", "children"
+    __slots__ = "bit", "count", "children", "index"
 
     def __init__(self, bit: int):
         self.bit = bit  # 左右子树 bit=0表示左子树,bit=1表示右子树

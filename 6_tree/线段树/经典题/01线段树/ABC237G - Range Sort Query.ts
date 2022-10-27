@@ -135,9 +135,9 @@ class SegmentTree2 {
     }
   }
 
-  private _checkRange(l: number, r: number): void {
-    if (!(l >= 1 && l <= r && r <= this._size)) {
-      throw new RangeError(`[${l}, ${r}] out of range: [1, ${this._size}]`)
+  private _checkBoundsBeginEnd(begin: number, end: number): void {
+    if (!(begin >= 1 && begin <= end && end <= this._size)) {
+      throw new RangeError(`[${begin}, ${end}] out of range: [1, ${this._size}]`)
     }
   }
 }

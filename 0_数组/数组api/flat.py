@@ -2,7 +2,7 @@ from typing import Any, List, TypeVar
 from functools import reduce
 from operator import iconcat
 
-T = TypeVar('T', Any, str, bytes, int, float, complex, bool, tuple, list, dict, set)
+T = TypeVar("T", Any, str, bytes, int, float, complex, bool, tuple, list, dict, set)
 
 
 def flat(arr: List[List[T]]) -> List[T]:
@@ -14,8 +14,7 @@ def flat(arr: List[List[T]]) -> List[T]:
     return [item for pair in arr for item in pair]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     arr = [[1, 2], [3, 4], [5, 6]]
     res = flat(arr)
     print(res)
-

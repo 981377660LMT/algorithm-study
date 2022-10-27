@@ -108,7 +108,7 @@ function useAtcoderLazySegmentTree<S, F>(
   }
 
   function query(left: number, right: number): S {
-    _checkRange(left, right)
+    _checkBoundsBeginEnd(left, right)
     if (left === right) return _e()
 
     left += _size
@@ -143,7 +143,7 @@ function useAtcoderLazySegmentTree<S, F>(
   }
 
   function update(left: number, right: number, value: F): void {
-    _checkRange(left, right)
+    _checkBoundsBeginEnd(left, right)
     if (left === right) return
 
     left += _size
@@ -179,7 +179,7 @@ function useAtcoderLazySegmentTree<S, F>(
   }
 
   function maxRight(left: number, predicate: (value: S) => boolean): number {
-    _checkRange(left, left)
+    _checkBoundsBeginEnd(left, left)
     if (left === _n) return _n
 
     left += _size
@@ -212,7 +212,7 @@ function useAtcoderLazySegmentTree<S, F>(
   }
 
   function minLeft(right: number, predicate: (value: S) => boolean): number {
-    _checkRange(right, right)
+    _checkBoundsBeginEnd(right, right)
     if (right === 0) return 0
 
     right += _size
@@ -270,9 +270,10 @@ function useAtcoderLazySegmentTree<S, F>(
     }
   }
 
-  function _checkRange(left: number, right: number): void {
-    if (left >= 0 && left <= right && right <= _n) return
-    throw new RangeError(`Invalid range: [${left}, ${right}) out of [0, ${_n})`)
+  function _checkBoundsBeginEnd(begin: number, end: number): void {
+    if (begin < 0 || begin > end || end > _n) {
+      throw new RangeError(`Invalid range: [${begin}, ${end}) out of [0, ${_n})`)
+    }
   }
 }
 

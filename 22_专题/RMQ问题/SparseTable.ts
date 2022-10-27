@@ -38,14 +38,14 @@ class SparseTable {
    * @returns [`left`,`right`] 闭区间的贡献值
    */
   query(left: number, right: number): number {
-    // this.checkRange(left, right)
+    // this._checkBoundsBeginEnd(left, right)
     const k = Math.floor(Math.log2(right - left + 1))
     return this._mergeFunc(this._dp[left][k], this._dp[right - (1 << k) + 1][k])
   }
 
-  private _checkRange(left: number, right: number): void {
-    if (left >= 0 && left <= right && right < this._size) return
-    throw new RangeError(`invalid range [${left}, ${right}]`)
+  private _checkBoundsBeginEnd(begin: number, end: number): void {
+    if (begin >= 0 && begin <= end && end < this._size) return
+    throw new RangeError(`invalid range [${begin}, ${end}]`)
   }
 }
 

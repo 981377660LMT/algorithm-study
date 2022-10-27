@@ -5,6 +5,7 @@ type TrieNode = [zero: TrieNode | undefined, one: TrieNode | undefined, count: n
 type Binary = 0 | 1
 
 /**
+ *
  * @param bitLength 位数，即树的最大高度
  * @description 离根节点越近表示位数越高(大)
  */

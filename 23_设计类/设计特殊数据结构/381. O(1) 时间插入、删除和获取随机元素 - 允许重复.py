@@ -17,7 +17,8 @@ class RandomizedCollection:
             return False
         self.nums[(i := self.indexMap[val].pop())] = self.nums[-1]
         self.indexMap[(last := self.nums.pop())].discard(len(self.nums))
-        i < len(self.nums) and self.indexMap[last].add(i)
+        if i < len(self.nums):
+            self.indexMap[last].add(i)
         return True
 
     def getRandom(self) -> int:
