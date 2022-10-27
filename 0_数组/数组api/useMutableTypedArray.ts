@@ -73,6 +73,14 @@ function useMutableTypedArray(dataType: DataType, options?: Options) {
     insert(0, value)
   }
 
+  function slice(start: number, end?: number): InstanceType<typeof ARRAYTYPE_RECORD[DataType]> {
+    return _elementData.slice(start, end)
+  }
+
+  function subarray(start: number, end?: number): InstanceType<typeof ARRAYTYPE_RECORD[DataType]> {
+    return _elementData.subarray(start, end)
+  }
+
   return {
     at,
     set,
@@ -81,6 +89,8 @@ function useMutableTypedArray(dataType: DataType, options?: Options) {
     append,
     popleft,
     appendleft,
+    slice,
+    subarray,
     get length(): number {
       return _length
     },
