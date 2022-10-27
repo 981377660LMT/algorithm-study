@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-param-reassign */
 /* eslint-disable new-cap */
@@ -148,7 +149,6 @@ if (require.main === module) {
   assert.strictEqual(nums.toString(), '2,3,4,5')
   assert.strictEqual(nums.pop(), 5)
   assert.strictEqual(nums.toString(), '2,3,4')
-  console.log(nums.toString(), nums.length)
   nums.append(6)
   nums.appendleft(1)
   assert.strictEqual(nums.toString(), '1,2,3,4,6')
@@ -161,11 +161,11 @@ if (require.main === module) {
 
   console.time('useMutableTypedArray')
   const nums2 = useMutableTypedArray('UINT32', {
-    // initialCapacity: 2e5,
     arrayLike: Array(1e5).map((_, i) => i)
+    // initialCapacity: 2e5,
   })
 
-  for (let i = 0; i < 5e4; i++) {
+  for (let i = 0; i < 4e4; i++) {
     const pos = Math.random() * nums2.length
     nums2.append(i)
     nums2.appendleft(i)
@@ -176,5 +176,5 @@ if (require.main === module) {
     nums2.set(pos, i)
   }
 
-  console.timeEnd('useMutableTypedArray')
+  console.timeEnd('useMutableTypedArray') // useMutableTypedArray: 1.329s
 }
