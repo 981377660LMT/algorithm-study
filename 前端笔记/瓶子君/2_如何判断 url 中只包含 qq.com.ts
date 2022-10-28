@@ -20,6 +20,7 @@ console.log(
     'http://www.qq.com/a/b',
     'http://www.qq.com?a=1',
     'http://www.123qq.com?a=1',
-    'http://www.baidu.com?redirect=http://www.qq.com/a',
+    'http://www.baidu.com?redirect=http://www.qq.com/a'
   ].map(check)
 )
+export {}
