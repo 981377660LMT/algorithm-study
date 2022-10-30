@@ -7,8 +7,8 @@
  * @summary dp[i][j]：以i-1为结尾的s子序列中出现以j-1为结尾的t的个数为dp[i][j]。
  * @link https://leetcode-cn.com/problems/distinct-subsequences/solution/shou-hua-tu-jie-xiang-jie-liang-chong-ji-4r2y/
  */
-function numDistinct (s: string, t: string): number {
-  const dp = Array.from({ length: s.length + 1 }, () => Array(t.length + 1).fill(0))
+function numDistinct(s: string, t: string): number {
+  const dp = Array.from({ length: s.length + 1 }, () => new Uint32Array(t.length + 1))
   for (let i = 0; i < s.length + 1; i++) {
     dp[i][0] = 1
   }

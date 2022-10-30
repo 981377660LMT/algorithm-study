@@ -8,7 +8,7 @@
  * dp[i][j]：以i-1为结尾的字符串word1，和以j-1位结尾的字符串word2，想要达到相等，所需要删除元素的最少次数。
  */
 const minDistance = function (word1: string, word2: string): number {
-  const dp = Array.from({ length: word1.length + 1 }, () => Array(word2.length + 1).fill(0))
+  const dp = Array.from({ length: word1.length + 1 }, () => new Uint32Array(word2.length + 1))
   for (let i = 0; i <= word1.length; i++) {
     dp[i][0] = i
   }

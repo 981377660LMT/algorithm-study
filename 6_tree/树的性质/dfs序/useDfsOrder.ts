@@ -4,8 +4,8 @@
  * @param root 树根节点
  */
 function useDfsOrder(n: number, tree: number[][], root = 0) {
-  const ins = new Uint32Array(n + 1) // 子树中最小的结点序号
-  const outs = new Uint32Array(n + 1) // 子树中最大的结点序号，即自己的id
+  const ins = new Uint32Array(n + 10) // 子树中最小的结点序号
+  const outs = new Uint32Array(n + 10) // 子树中最大的结点序号，即自己的id
   let dfsId = 1
   dfs(root, -1)
 
@@ -20,34 +20,34 @@ function useDfsOrder(n: number, tree: number[][], root = 0) {
   }
 
   /**
-   * @param root 求root所在子树映射到的区间
+   * @param curRoot 求root所在子树映射到的区间
    * @returns [start, end] 1 <= start <= end <= n
    */
-  function queryRange(root: number): [left: number, right: number] {
-    return [ins[root], outs[root]]
+  function queryRange(curRoot: number): [left: number, right: number] {
+    return [ins[curRoot], outs[curRoot]]
   }
 
   /**
-   * @param root 求root自身的dfsId
+   * @param curRoot 求root自身的dfsId
    * @returns dfsId 1 <= dfsId <= n
    */
-  function queryId(root: number): number {
-    return outs[root]
+  function queryId(curRoot: number): number {
+    return outs[curRoot]
   }
 
   /**
-   * @returns root是否是child的祖先
+   * @returns curRoot是否是child的祖先
    * @description 应用:枚举边时给树的边定向
    *
-   * ```js
+   * ```ts
    *  if (!isAncestor(e[0], e[1])) {
    *    [e[0], e[1]] = [e[1], e[0]]
    *  }
    * ```
    */
-  function isAncestor(root: number, child: number): boolean {
-    const left1 = ins[root]
-    const right1 = outs[root]
+  function isAncestor(curRoot: number, child: number): boolean {
+    const left1 = ins[curRoot]
+    const right1 = outs[curRoot]
     const left2 = ins[child]
     const right2 = outs[child]
     return left1 <= left2 && right2 <= right1

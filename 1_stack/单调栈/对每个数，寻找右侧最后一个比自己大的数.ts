@@ -89,7 +89,7 @@ class SegmentTree {
  * 对每个数，寻找右侧最后一个比自己大的数；注意线段树要偏移
  * 值域线段树 维护每个数的最大索引
  *
- * @param nums 0 <= nums[i] <= 50000  2 <= nums.length <= 50000
+ * !@param nums 0 <= nums[i] <= 50000  2 <= nums.length <= 50000
  * @returns 每个元素右侧最后一个比自己大的数的索引
  */
 function findLastLarge(nums: number[]): number[] {

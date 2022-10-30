@@ -14,8 +14,7 @@
 function minDistance(word1: string, word2: string): number {
   const n1 = word1.length
   const n2 = word2.length
-  // dp[i][j]表示w1的前i个字母要转换成w2的前j个字母所需的最少操作数
-  const dp = Array.from({ length: n1 + 2 }, () => Array(n2 + 1).fill(0))
+  const dp = Array.from({ length: n1 + 1 }, () => new Uint32Array(n2 + 1))
 
   for (let i = 0; i < n1 + 1; i++) {
     dp[i][0] = i
@@ -27,7 +26,6 @@ function minDistance(word1: string, word2: string): number {
 
   for (let i = 1; i < n1 + 1; i++) {
     for (let j = 1; j < n2 + 1; j++) {
-      // 注意这个序号
       if (word1[i - 1] === word2[j - 1]) {
         dp[i][j] = dp[i - 1][j - 1]
       } else {
@@ -36,7 +34,6 @@ function minDistance(word1: string, word2: string): number {
     }
   }
 
-  // console.table(dp)
   return dp[n1][n2]
 }
 

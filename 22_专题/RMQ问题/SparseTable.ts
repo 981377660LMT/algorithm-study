@@ -17,7 +17,7 @@ class SparseTable {
   private readonly _mergeFunc: MergeFunc
   private readonly _dp: number[][]
 
-  constructor(nums: number[], mergeFunc: MergeFunc) {
+  constructor(nums: ArrayLike<number>, mergeFunc: MergeFunc) {
     const n = nums.length
     const upper = Math.ceil(Math.log2(n)) + 1
 
@@ -36,6 +36,8 @@ class SparseTable {
 
   /**
    * @returns [`left`,`right`] 闭区间的贡献值
+   * @param left 0 <= left <= right < nums.length
+   * @param right 0 <= left <= right < nums.length
    */
   query(left: number, right: number): number {
     // this._checkBoundsBeginEnd(left, right)
