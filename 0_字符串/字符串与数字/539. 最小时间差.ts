@@ -12,7 +12,7 @@ const findMinDifference = function (timePoints: string[]): number {
   let min = Infinity
   for (let i = 1; i < points.length; i++) {
     min = Math.min(points[i] - points[i - 1], min)
-    if (min == 0) return min
+    if (min === 0) return min
   }
 
   // 注意这里

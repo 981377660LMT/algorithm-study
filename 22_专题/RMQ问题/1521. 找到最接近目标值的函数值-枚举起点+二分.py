@@ -1,31 +1,7 @@
 # 枚举起点 + ST表 + 二分
 from operator import and_
-from math import ceil, floor, log2
-from typing import Any, Generic, List, TypeVar
-
-T = TypeVar("T", int, float)
-
-
-class SparseTable(Generic[T]):
-    def __init__(self, nums: List[T]):
-        n, upper = len(nums), ceil(log2(len(nums))) + 1
-        # self._n = n
-        self._dp: List[List[Any]] = [[0] * upper for _ in range(n)]
-        for i, num in enumerate(nums):
-            self._dp[i][0] = num
-        for j in range(1, upper):
-            for i in range(n):
-                if i + (1 << (j - 1)) >= n:
-                    break
-                self._dp[i][j] = and_(
-                    self._dp[i][j - 1], self._dp[i + (1 << (j - 1))][j - 1]
-                )
-
-    def query(self, left: int, right: int) -> T:
-        """[left,right]区间的最按位与"""
-        # assert 0 <= left <= right < self._n
-        k = floor(log2(right - left + 1))
-        return and_(self._dp[left][k], self._dp[right - (1 << k) + 1][k])
+from typing import List
+from SparseTable import SparseTable
 
 
 class Solution:
@@ -37,7 +13,7 @@ class Solution:
         2. 与运算具有单调性，可以使用二分查找
         """
 
-        st = SparseTable(arr)
+        st = SparseTable(arr, and_)
         res = abs(arr[0] - target)
         for start in range(len(arr)):
             left, right = start, len(arr) - 1

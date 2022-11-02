@@ -6,9 +6,8 @@ from itertools import product
 
 class Solution:
     def letterCasePermutation(self, s: str) -> List[str]:
-        available = [set([char.lower(), char.upper()]) for char in s]
-        # print(*product(*available))
-        return [''.join(t) for t in product(*available)]
+        selects = [set((char.lower(), char.upper())) for char in s]
+        return ["".join(select) for select in product(*selects)]
 
 
 print(Solution().letterCasePermutation(s="a1b2"))

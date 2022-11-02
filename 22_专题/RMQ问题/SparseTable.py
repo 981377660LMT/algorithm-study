@@ -11,28 +11,24 @@ class MaxSparseTable:
     __slots__ = "_n", "_dp"
 
     def __init__(self, arr: List[int]):
-        n, upper = len(arr), ceil(log2(len(arr))) + 1
+        n = len(arr)
+        size = n.bit_length()
         self._n = n
 
-        dp = [[0] * upper for _ in range(n)]
-        for i in range(n):
-            dp[i][0] = arr[i]
-        for j in range(1, upper):
-            for i in range(n):
-                if i + (1 << (j - 1)) >= n:
-                    break
-                cand1, cand2 = dp[i][j - 1], dp[i + (1 << (j - 1))][j - 1]
-                if cand1 > cand2:
-                    dp[i][j] = cand1
-                else:
-                    dp[i][j] = cand2
+        dp = [[0] * n for _ in range(size)]
+        dp[0] = arr[:]
+
+        for i in range(1, size):
+            for j in range(n - (1 << i) + 1):
+                cand1, cand2 = dp[i - 1][j], dp[i - 1][j + (1 << (i - 1))]
+                dp[i][j] = cand1 if cand1 > cand2 else cand2
         self._dp = dp
 
     def query(self, left: int, right: int) -> int:
         """[left,right]区间的最大值"""
         assert 0 <= left <= right < self._n, f"{left}, {right}, {self._n}"
-        k = floor(log2(right - left + 1))
-        cand1, cand2 = self._dp[left][k], self._dp[right - (1 << k) + 1][k]
+        k = (right - left + 1).bit_length() - 1
+        cand1, cand2 = self._dp[k][left], self._dp[k][right - (1 << k) + 1]
         if cand1 > cand2:
             return cand1
         return cand2
@@ -44,28 +40,24 @@ class MinSparseTable:
     __slots__ = "_n", "_dp"
 
     def __init__(self, arr: List[int]):
-        n, upper = len(arr), ceil(log2(len(arr))) + 1
+        n = len(arr)
+        size = n.bit_length()
         self._n = n
 
-        dp = [[0] * upper for _ in range(n)]
-        for i in range(n):
-            dp[i][0] = arr[i]
-        for j in range(1, upper):
-            for i in range(n):
-                if i + (1 << (j - 1)) >= n:
-                    break
-                cand1, cand2 = dp[i][j - 1], dp[i + (1 << (j - 1))][j - 1]
-                if cand1 < cand2:
-                    dp[i][j] = cand1
-                else:
-                    dp[i][j] = cand2
+        dp = [[0] * n for _ in range(size)]
+        dp[0] = arr[:]
+
+        for i in range(1, size):
+            for j in range(n - (1 << i) + 1):
+                cand1, cand2 = dp[i - 1][j], dp[i - 1][j + (1 << (i - 1))]
+                dp[i][j] = cand1 if cand1 < cand2 else cand2
         self._dp = dp
 
     def query(self, left: int, right: int) -> int:
         """[left,right]区间的最小值"""
         assert 0 <= left <= right < self._n, f"{left}, {right}, {self._n}"
-        k = floor(log2(right - left + 1))
-        cand1, cand2 = self._dp[left][k], self._dp[right - (1 << k) + 1][k]
+        k = (right - left + 1).bit_length() - 1
+        cand1, cand2 = self._dp[k][left], self._dp[k][right - (1 << k) + 1]
         if cand1 < cand2:
             return cand1
         return cand2
@@ -81,25 +73,23 @@ class SparseTable(Generic[T]):
     __slots__ = "_n", "_dp", "_merger"
 
     def __init__(self, arr: List[T], merger: Merger[T]):
-        n, upper = len(arr), ceil(log2(len(arr))) + 1
+        n = len(arr)
+        size = n.bit_length()
         self._n = n
         self._merger = merger
 
-        dp: List[List[T]] = [[0] * upper for _ in range(n)]  # type: ignore
-        for i in range(n):
-            dp[i][0] = arr[i]
-        for j in range(1, upper):
-            for i in range(n):
-                if i + (1 << (j - 1)) >= n:
-                    break
-                dp[i][j] = merger(dp[i][j - 1], dp[i + (1 << (j - 1))][j - 1])
+        dp = [[0] * n for _ in range(size)]
+        dp[0] = arr[:]  # type: ignore
+
+        for i in range(1, size):
+            for j in range(n - (1 << i) + 1):
+                dp[i][j] = merger(dp[i - 1][j], dp[i - 1][j + (1 << (i - 1))])  # type: ignore
         self._dp = dp
 
     def query(self, left: int, right: int) -> T:
         """[left,right]区间的贡献值"""
-        assert 0 <= left <= right < self._n, f"{left} {right} {self._n}"
-        k = floor(log2(right - left + 1))
-        return self._merger(self._dp[left][k], self._dp[right - (1 << k) + 1][k])
+        k = (right - left + 1).bit_length() - 1
+        return self._merger(self._dp[k][left], self._dp[k][right - (1 << k) + 1])  # type: ignore
 
 
 if __name__ == "__main__":

@@ -1,17 +1,21 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"index/suffixarray"
+	"os"
 	"reflect"
 	"unsafe"
 )
 
-// 返回 s 的不同子字符串的个数
+// 返回 s 的不同子字符串的个数(本质不同的子串个数)
 // https://oi-wiki.org/string/sa/#_13
 
 // 用所有子串的个数，减去相同子串的个数，就可以得到不同子串的个数。
 // !子串就是后缀的前缀 按后缀排序的顺序枚举后缀，每次新增的子串就是除了与上一个后缀的 LCP 剩下的前缀
 // !计算后缀数组和高度数组。根据高度数组的定义，所有高度之和就是相同子串的个数。(每一对相同子串在高度数组产生1贡献)
+
 func countDistinct(s string) int {
 	n := len(s)
 	res := n * (n + 1) / 2
@@ -47,4 +51,16 @@ func suffixArray(s []byte) ([]int32, []int, []int) {
 	}
 
 	return sa, rank, height
+}
+
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s string
+	fmt.Fscan(in, &s)
+
+	res := countDistinct(s)
+	fmt.Fprintln(out, res)
 }

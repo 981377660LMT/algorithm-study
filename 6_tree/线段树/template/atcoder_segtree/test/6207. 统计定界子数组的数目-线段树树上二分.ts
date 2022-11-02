@@ -26,10 +26,10 @@ function countSubarrays(nums: number[], minK: number, maxK: number): number {
     mergeChildren(data1, data2) {
       return Math.min(data1, data2)
     },
-    updateData(parentLazy, childData) {
+    updateData(_, childData) {
       return childData // 无需更新
     },
-    updateLazy(parentLazy, childLazy) {
+    updateLazy() {
       return 0 // 无需更新
     }
   })
@@ -44,10 +44,10 @@ function countSubarrays(nums: number[], minK: number, maxK: number): number {
     mergeChildren(data1, data2) {
       return Math.max(data1, data2)
     },
-    updateData(parentLazy, childData) {
+    updateData(_, childData) {
       return childData // 无需更新
     },
-    updateLazy(parentLazy, childLazy) {
+    updateLazy() {
       return 0 // 无需更新
     }
   })

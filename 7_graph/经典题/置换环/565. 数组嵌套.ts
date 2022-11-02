@@ -1,6 +1,6 @@
 /**
  *
- * 在置换群中找到最长的环
+ * 在置换群中找到最长环
  *
  * @param {number[]} nums 0 - n-1 的 排列
  * @return {number}

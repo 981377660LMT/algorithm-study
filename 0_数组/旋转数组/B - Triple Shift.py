@@ -25,6 +25,19 @@ from typing import List
 from collections import Counter, defaultdict
 
 
+def countInv(nums: List[int]) -> int:
+    """求逆序对数"""
+    n = len(nums)
+    res = 0
+    visited = SortedList()
+    for i in range(n - 1, -1, -1):
+        smaller = visited.bisect_left(nums[i])
+        res += smaller
+        visited.add(nums[i])
+
+    return res
+
+
 def countSmaller2(nums: List[int]) -> List[int]:
     """sortedList求每个位置处的逆序对数量"""
     n = len(nums)

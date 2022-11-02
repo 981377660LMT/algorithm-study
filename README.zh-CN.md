@@ -91,6 +91,7 @@
    - [布隆过滤器](18_%E5%93%88%E5%B8%8C/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8.ts)
    - [BitSet (位集)](18_%E5%93%88%E5%B8%8C/BitSet/BitSet.py)
    - [子集](21_%E4%BD%8D%E8%BF%90%E7%AE%97/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE%E4%B8%8E%E4%B8%89%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%AD%90%E9%9B%86/powerset.py)
+   - [BitCount/BitLength (ts)](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E5%AE%B9%E6%96%A5%E5%8E%9F%E7%90%86/bitCount.ts)
 
 8. **数学**
 

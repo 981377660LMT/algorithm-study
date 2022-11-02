@@ -2,7 +2,6 @@
 
 from collections import deque
 from functools import lru_cache
-from heapq import heappop, heappush
 from typing import List, Tuple
 
 INF = int(1e18)
@@ -27,7 +26,7 @@ class Solution:
         if coins[-1] == -1:
             return []
 
-        dist, pre = [INF] * n, [-1] * n
+        dist, pre = [INF] * n, [-1] * n  # pre[i]表示i的前驱节点(字典序要最小)
         dist[n - 1] = coins[n - 1]  # !倒序
         queue = deque([(coins[n - 1], n - 1)])
         while queue:

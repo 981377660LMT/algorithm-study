@@ -26,10 +26,10 @@ function subarrayGCD(nums: number[], k: number): number {
     mergeChildren(data1, data2) {
       return gcd(data1, data2)
     },
-    updateData(parentLazy, childData) {
+    updateData(_, childData) {
       return childData // 无需更新
     },
-    updateLazy(parentLazy, childLazy) {
+    updateLazy() {
       return 0 // 无需更新
     }
   })

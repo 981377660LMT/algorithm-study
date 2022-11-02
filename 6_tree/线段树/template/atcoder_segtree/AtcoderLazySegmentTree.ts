@@ -38,7 +38,7 @@ interface Operation<S, F> {
   updateData: (this: void, parentLazy: F, childData: S) => S
 
   /**
-   * 父结点的懒标记更新子结点的懒标记
+   * 父结点的懒标记更新子结点的懒标记(合并)
    * @alias composition
    */
   updateLazy: (this: void, parentLazy: F, childLazy: F) => F

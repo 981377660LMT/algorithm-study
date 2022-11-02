@@ -1,64 +1,159 @@
 package BIT
 
+import "fmt"
+
 // !一维区间查询 区间修改
-type BIT1D struct {
-	size  int
+type BIT interface {
+	// 区间 [left, right] 里的每个数增加 delta
+	Add(left, right, delta int)
+
+	// 查询区间 [left, right] 的和
+	Query(left, right int) int
+}
+
+func CreateBIT(n int) BIT {
+	if n <= int(1e6) {
+		return NewBITSlice(n)
+	}
+
+	return NewBITMap(n)
+}
+
+//  tree: map[int]int or []int
+type BITMap struct {
+	n     int
 	tree1 map[int]int
 	tree2 map[int]int
 }
 
-func NewBIT1D(size int) *BIT1D {
-	return &BIT1D{
-		size:  size,
-		tree1: make(map[int]int, 1<<4),
-		tree2: make(map[int]int, 1<<4),
+type BITSlice struct {
+	n     int
+	tree1 []int
+	tree2 []int
+}
+
+func NewBITMap(n int) *BITMap {
+	return &BITMap{
+		n:     n,
+		tree1: make(map[int]int, 1<<10),
+		tree2: make(map[int]int, 1<<10),
 	}
 }
 
-func (b *BIT1D) Update(left, right, delta int) {
-	b.update(left, delta)
-	b.update(right+1, -delta)
+func NewBITSlice(n int) *BITSlice {
+	return &BITSlice{
+		n:     n,
+		tree1: make([]int, n+10),
+		tree2: make([]int, n+10),
+	}
 }
 
-func (b *BIT1D) Query(left, right int) int {
-	return b.query(right) - b.query(left-1)
+func (bit *BITMap) Add(left, right, delta int) {
+	bit.add(left, delta)
+	bit.add(right+1, -delta)
 }
 
-func (b *BIT1D) update(index, delta int) {
+func (bit *BITSlice) Add(left, right, delta int) {
+	bit.add(left, delta)
+	bit.add(right+1, -delta)
+}
+
+func (bit *BITMap) Query(left, right int) int {
+	return bit.query(right) - bit.query(left-1)
+}
+
+func (bit *BITSlice) Query(left, right int) int {
+	return bit.query(right) - bit.query(left-1)
+}
+
+func (bit *BITMap) add(index, delta int) {
 	if index <= 0 {
-		panic("index 必须是正整数")
+		errorInfo := fmt.Sprintf("index must be greater than 0, but got %d", index)
+		panic(errorInfo)
 	}
 
 	rawIndex := index
-	for ; index <= b.size; index += index & -index {
-		b.tree1[index] += delta
-		b.tree2[index] += (rawIndex - 1) * delta
+	for index <= bit.n {
+		bit.tree1[index] += delta
+		bit.tree2[index] += (rawIndex - 1) * delta
+		index += index & -index
 	}
 }
 
-func (b *BIT1D) query(index int) (res int) {
-	if index > b.size {
-		index = b.size
+func (bit *BITSlice) add(index, delta int) {
+	if index <= 0 {
+		errorInfo := fmt.Sprintf("index must be greater than 0, but got %d", index)
+		panic(errorInfo)
 	}
 
 	rawIndex := index
-	for ; index > 0; index -= index & -index {
-		res += rawIndex*b.tree1[index] - b.tree2[index]
+	for index <= bit.n {
+		bit.tree1[index] += delta
+		bit.tree2[index] += (rawIndex - 1) * delta
+		index += index & -index
 	}
-
-	return
 }
 
-func maximumWhiteTiles(tiles [][]int, carpetLen int) (res int) {
-	bit := NewBIT1D(1e9)
-	for _, tile := range tiles {
-		bit.Update(tile[0], tile[1], 1)
-	}
-	for _, tile := range tiles {
-		res = max(res, bit.Query(tile[0], tile[0]+carpetLen-1))
+func (bit *BITMap) query(index int) int {
+	if index > bit.n {
+		index = bit.n
 	}
 
-	return
+	rawIndex := index
+	res := 0
+	for index > 0 {
+		res += rawIndex*bit.tree1[index] - bit.tree2[index]
+		index -= index & -index
+	}
+	return res
+}
+
+func (bit *BITSlice) query(index int) int {
+	if index > bit.n {
+		index = bit.n
+	}
+
+	rawIndex := index
+	res := 0
+	for index > 0 {
+		res += rawIndex*bit.tree1[index] - bit.tree2[index]
+		index -= index & -index
+	}
+	return res
+}
+
+func (bit *BITMap) String() string {
+	return "not implemented"
+}
+
+func (bit *BITSlice) String() string {
+	nums := make([]int, bit.n+1)
+	for i := 0; i < bit.n; i++ {
+		nums[i+1] = bit.Query(i+1, i+1)
+	}
+	return fmt.Sprint(nums)
+}
+
+func (bit *BITMap) Len() int {
+	return bit.n
+}
+
+func (bit *BITSlice) Len() int {
+	return bit.n
+}
+
+func maximumWhiteTiles(tiles [][]int, carpetLen int) int {
+	bit := CreateBIT(1e9)
+	for _, tile := range tiles {
+		bit.Add(int(tile[0]), int(tile[1]), 1)
+	}
+
+	res := 0
+	for _, tile := range tiles {
+		res = max(res, bit.Query(int(tile[0]), int(tile[0]+carpetLen-1)))
+	}
+
+	return res
 }
 
 // !二维区间查询 区间修改

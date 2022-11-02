@@ -12,7 +12,7 @@
 # 并用那个数取代即可，其他
 # 倍数显然比这两个数更不符合。
 
-from math import ceil
+
 import sys
 
 sys.setrecursionlimit(int(1e9))
@@ -23,7 +23,9 @@ INF = int(4e18)
 if __name__ == "__main__":
     x, k = map(int, input().split())
     for i in range(1, k + 1):
-        lower, upper = (x // 10**i) * 10**i, ceil(x / 10**i) * 10**i
+        base = 10**i
+        div = x // base
+        lower, upper = div * base, (div + 1) * base
         if abs(x - lower) < abs(x - upper):
             x = lower
         else:

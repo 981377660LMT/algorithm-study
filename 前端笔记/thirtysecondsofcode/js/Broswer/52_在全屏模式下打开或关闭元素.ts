@@ -3,3 +3,4 @@ const fullscreen = (mode = true, el = 'body') =>
 
 fullscreen() // Opens `body` in fullscreen mode
 fullscreen(false) // Exits fullscreen mode
+export {}

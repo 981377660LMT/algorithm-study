@@ -1,0 +1,1 @@
+  assert.strictEqual(bitCount53(0), 0)

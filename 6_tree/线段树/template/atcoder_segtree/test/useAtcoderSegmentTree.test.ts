@@ -161,7 +161,7 @@ describe('useAtcoderLazySegmentTree', () => {
     })
   })
 
-  // 01串反转(flip)
+  // 01串反转(flip)求区间1的个数
   // 若 op=0，则表示将01串的 [l, r] 区间内的 0 变成 1，1 变成 0。
   // 若 op=1，则表示询问01串的[l, r] 区间内有多少个字符 1。
   describe('https://www.luogu.com.cn/problem/P2574', () => {
@@ -187,8 +187,11 @@ describe('useAtcoderLazySegmentTree', () => {
           return [data1[0] + data2[0], data1[1] + data2[1]]
         },
         updateData(parentLazy, childData) {
-          if (parentLazy === 0) return childData // 不需要翻转
-          return [childData[1], childData[0]] // 翻转
+          if (parentLazy === 1) {
+            // eslint-disable-next-line no-param-reassign
+            ;[childData[0], childData[1]] = [childData[1], childData[0]]
+          }
+          return childData
         },
         updateLazy(parentLazy, childLazy) {
           return (parentLazy ^ childLazy) as Lazy
@@ -213,5 +216,64 @@ describe('useAtcoderLazySegmentTree', () => {
         }
       }
     })
+  })
+
+  // 01串反转(flip)求区间逆序对个数
+  // 若 op=1，则表示将01串的 [l, r] 区间内的 0 变成 1，1 变成 0。
+  // 若 op=2，则表示询问01串的[l, r] 区间内有多少个逆序对。
+  describe('https://atcoder.jp/contests/practice2/tasks/practice2_l', () => {
+    const nums = [0, 1, 0, 0, 1]
+    const queries = [
+      [2, 1, 5],
+      [1, 3, 4],
+      [2, 2, 5],
+      [1, 1, 3],
+      [2, 1, 2]
+    ]
+
+    type Data = [count0: number, count1: number, inv: number]
+    type Lazy = 0 | 1 // 0表示不反转，1表示反转
+    const operation: Operation<Data, Lazy> = {
+      dataUnit() {
+        return [0, 0, 0]
+      },
+      lazyUnit() {
+        return 0
+      },
+      mergeChildren(data1, data2) {
+        return [data1[0] + data2[0], data1[1] + data2[1], data1[2] + data2[2] + data1[1] * data2[0]]
+      },
+      updateData(parentLazy, childData) {
+        if (parentLazy === 1) {
+          // !4000ms => 2600ms 不创建新数组节省空间、时间
+          // eslint-disable-next-line no-param-reassign
+          ;[childData[0], childData[1], childData[2]] = [
+            childData[1],
+            childData[0],
+            childData[0] * childData[1] - childData[2]
+          ]
+        }
+        return childData
+      },
+      updateLazy(parentLazy, childLazy) {
+        return (parentLazy ^ childLazy) as Lazy
+      }
+    }
+    const tree = useAtcoderLazySegmentTree(
+      nums.map<Data>(v => (v === 0 ? [1, 0, 0] : [0, 1, 0])),
+      operation
+    )
+
+    const expected = [2, 0, 1]
+    let ei = 0
+    for (let [type, left, right] of queries) {
+      left--
+      if (type === 1) {
+        tree.update(left, right, 1)
+      } else {
+        expect(tree.query(left, right)[2]).toBe(expected[ei])
+        ei++
+      }
+    }
   })
 })
