@@ -4,5 +4,11 @@ kd 树是一个二叉树结构，它的每一个节点记载了【特征坐标�
 
 - Python 的 scikit-learn 机器学习包提供了蛮算、kd 树和 ball 树三种 kNN 算法
 - 给定一堆已有的样本数据，和一个被询问的数据点（红色五角星），我们如何找到离五角星最近的 15 个点？
+  https://leetcode-cn.com/problems/vFjcfV/solution/kd-treeban-zi-ti-by-mo-yan-24-63mv/
 
-https://leetcode-cn.com/problems/vFjcfV/solution/kd-treeban-zi-ti-by-mo-yan-24-63mv/
+- golang 2 维 k-d 树实现
+  **KDT 的核心思想就是对矩形的水平分割。**
+  每棵子树都代表的是一个矩形；如果某棵树不平衡，就暴力重构。
+  https://github.dev/EndlessCheng/codeforces-go/blob/master/misc/atcoder/abc274/e
+  https://www.luogu.com.cn/blog/lc-2018-Canton/solution-p4148
+  kd 树维护二维平面上的点集，查询到给定点的最近的距离。

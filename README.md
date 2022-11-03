@@ -33,17 +33,17 @@
 
 2. **Queue**
 
-   - [Queue](2_queue/Deque/Queue.ts)
-   - [PriorityQueue](2_queue/PriorityQueue.ts)
+   - [Queue (ts)](2_queue/Deque/Queue.ts)
+   - [PriorityQueue/Heap (ts)](8_heap/Heap.ts)
    - Deque
-     - [ArrayDeque](2_queue/Deque/ArrayDeque.ts)
-     - [LinkedList](3_linkedList/LinkedList.ts)
+     - [ArrayDeque (ts)](2_queue/Deque/ArrayDeque.ts)
+     - [LinkedList (ts)](3_linkedList/LinkedList.ts)
    - [MonoQueue](2_queue/%E5%8D%95%E8%B0%83%E9%98%9F%E5%88%97Monoqueue/MonoQueue.py)
 
 3. **LinkedList**
 
    - [LinkedListNode](3_linkedList/LinkedListNode.py)
-   - [LinkedList](3_linkedList/LinkedList.ts)
+   - [LinkedList (ts)](3_linkedList/LinkedList.ts)
    - [PersistentStack](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%A0%88/PersistentStack.py>)
 
 4. **Tree**
@@ -55,11 +55,11 @@
    - [LCA](6_tree/LCA%E9%97%AE%E9%A2%98/%E5%80%8D%E5%A2%9E/LCA.py)
    - [Rerooting Dp](6_tree/%E7%BB%8F%E5%85%B8%E9%A2%98/%E5%90%8E%E5%BA%8Fdfs%E7%BB%9F%E8%AE%A1%E4%BF%A1%E6%81%AF/%E6%8D%A2%E6%A0%B9dp/Rerooting.py)
    - [Segment Tree](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template)
-   - [Persistent Segment Tree](6_tree/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E7%BA%BF%E6%AE%B5%E6%A0%91/255.%20%E7%AC%ACK%E5%B0%8F%E6%95%B0-%E6%9F%A5%E8%AF%A2%E5%8C%BA%E9%97%B4%E7%AC%ACk%E5%B0%8F%E6%95%B0.ts)
+   - [Persistent Segment Tree (ts)](6_tree/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E7%BA%BF%E6%AE%B5%E6%A0%91/255.%20%E7%AC%ACK%E5%B0%8F%E6%95%B0-%E6%9F%A5%E8%AF%A2%E5%8C%BA%E9%97%B4%E7%AC%ACk%E5%B0%8F%E6%95%B0.ts)
    - [Heavy-Light Decomposition](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%A0%91%E9%93%BE%E5%89%96%E5%88%86/2568.%20%E6%A0%91%E9%93%BE%E5%89%96%E5%88%86.py)
-   - [Treap](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/Treap.ts)
-   - [Rope](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8/rope.ts)
-   - [TreeSet](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/TreeSet.ts)
+   - [Treap (ts)](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/Treap.ts)
+   - [Rope (ts)](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8/rope.ts)
+   - [TreeSet (ts)](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/TreeSet.ts)
    - [SortedList (py)](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/ATC-SortedList.py)
      [SortedList (ts)](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/Treap.ts)
    - [SplayArray](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/SplayArray.py)
@@ -72,7 +72,7 @@
    - [BellmanFord](7_graph/%E5%B8%A6%E6%9D%83%E5%9B%BE%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%92%8C%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/Bellman_ford/bellmanford%E5%88%A4%E6%96%AD%E8%B4%9F%E7%8E%AF.py)
    - [SPFA](7_graph/%E5%B8%A6%E6%9D%83%E5%9B%BE%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%92%8C%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/Bellman_ford/spfa/spfa%E6%B1%82%E6%9C%80%E7%9F%AD%E8%B7%AF.py)
    - [Floyd](7_graph/%E5%B8%A6%E6%9D%83%E5%9B%BE%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%92%8C%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/floyd%E5%A4%9A%E6%BA%90/Floyd.py)
-   - [Bipartition Check](7_graph/%E4%BA%8C%E5%88%86%E5%9B%BE/%E4%BA%8C%E5%88%86%E5%9B%BE%E6%A3%80%E6%B5%8B.ts)
+   - [Bipartition Check (ts)](7_graph/%E4%BA%8C%E5%88%86%E5%9B%BE/%E4%BA%8C%E5%88%86%E5%9B%BE%E6%A3%80%E6%B5%8B.ts)
    - [Hungarian Algorithm](7_graph/%E4%BA%8C%E5%88%86%E5%9B%BE/%E6%97%A0%E6%9D%83%E4%BA%8C%E9%83%A8%E5%9B%BE%E6%9C%80%E5%A4%A7%E5%8C%B9%E9%85%8D%E9%97%AE%E9%A2%98/%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95.py)
    - [Kuhn-Munkres Algorithm](7_graph/%E4%BA%8C%E5%88%86%E5%9B%BE/%E5%B8%A6%E6%9D%83%E4%BA%8C%E5%88%86%E5%9B%BE%E7%9A%84%E6%9C%80%E5%A4%A7%E6%9D%83%E5%8C%B9%E9%85%8D%E9%97%AE%E9%A2%98/KM%E7%AE%97%E6%B3%95%E6%A8%A1%E6%9D%BF.py)
    - [EulerLoop](7_graph/%E6%AC%A7%E6%8B%89/getEulerLoop.py)
@@ -88,10 +88,10 @@
 
 7. **Bit Manipulation**
 
-   - [Bloom Filter](18_%E5%93%88%E5%B8%8C/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8.ts)
+   - [Bloom Filter (ts)](18_%E5%93%88%E5%B8%8C/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8.ts)
    - [BitSet](18_%E5%93%88%E5%B8%8C/BitSet/BitSet.py)
    - [Powerset](21_%E4%BD%8D%E8%BF%90%E7%AE%97/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE%E4%B8%8E%E4%B8%89%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%AD%90%E9%9B%86/powerset.py)
-   - [BitCount/BitLength (ts)](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E5%AE%B9%E6%96%A5%E5%8E%9F%E7%90%86/bitCount.ts)
+   - [BitCount/BitLength/TrailingZero (ts)](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E5%AE%B9%E6%96%A5%E5%8E%9F%E7%90%86/bitCount.ts)
 
 8. **Math**
 
@@ -104,7 +104,7 @@
    - [Combs](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E7%BB%84%E5%90%88%E8%AE%A1%E6%95%B0/%E6%B1%82%E7%BB%84%E5%90%88%E6%8E%92%E5%88%97%E9%98%B6%E4%B9%98)
    - [Linear Basis](21_%E4%BD%8D%E8%BF%90%E7%AE%97/%E6%8C%89%E4%BD%8D%E5%BC%82%E6%88%96/%E7%BA%BF%E6%80%A7%E5%9F%BA/%E7%BA%BF%E6%80%A7%E5%9F%BA.py)
    - [Convolution](19_%E6%95%B0%E5%AD%A6/%E5%8D%B7%E7%A7%AF/Convolution.py)
-   - [Quick Pow](19_%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/%E5%BF%AB%E9%80%9F%E5%B9%82/qpow.ts)
+   - [Quick Pow (ts)](19_%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/%E5%BF%AB%E9%80%9F%E5%B9%82/qpow.ts)
    - [Matrix Quick Pow](19_%E6%95%B0%E5%AD%A6/%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/matqpow.py)
    - [BSGS/EXBSGS](19_%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/BSGS/bsgs.py)
 
@@ -113,15 +113,16 @@
    - [2D PreSum Matrix](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
    - [2D Diff Matrix](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
    - [Sparse Table](22_%E4%B8%93%E9%A2%98/RMQ%E9%97%AE%E9%A2%98/SparseTable.py)
-   - [Bisect](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/%E4%BA%8C%E5%88%86/bisect.ts)
+   - [Bisect (ts)](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/%E4%BA%8C%E5%88%86/bisect.ts)
    - [Trisect](19_%E6%95%B0%E5%AD%A6/%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB%E4%B8%8E%E7%88%AC%E5%B1%B1%E6%B3%95/%E4%B8%89%E5%88%86%E6%B3%95%E6%B1%82%E5%87%B8%E5%87%BD%E6%95%B0%E6%9E%81%E5%80%BC.py)
    - [Palindrome Generator](22_%E4%B8%93%E9%A2%98/%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%9B%9E%E6%96%87/%E6%9E%9A%E4%B8%BE%E5%9B%9E%E6%96%87.py)
+   - [NthElement (ts)](22_%E4%B8%93%E9%A2%98/topK/nthElement.ts)
    - [NextPermutation](12_%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95/%E7%BB%8F%E5%85%B8%E9%A2%98/%E6%8E%92%E5%88%97/api/nextPermutation.py)
    - [MoAlgo (Without Modification)](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E8%8E%AB%E9%98%9F/MoAlgo.py)
    - [Consistent Hashing](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/lintcode%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/520%20.%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%20II.py)
    - [Geohash](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/lintcode%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/529.Geo%E5%93%88%E5%B8%8C.py)
    - [SlopeTrick](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/slope%20trick/SlopeTrick.py)
-   - Itertools
+   - Itertools (ts)
      - [product](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/product.ts)
      - [permutations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/permutations.ts)
      - [combinations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/combinations.ts)

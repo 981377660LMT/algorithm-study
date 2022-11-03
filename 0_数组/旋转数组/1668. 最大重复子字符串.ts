@@ -1,12 +1,10 @@
 function maxRepeating(sequence: string, word: string): number {
-  if (sequence.length < word.length || !sequence.includes(word)) return 0
-
   let left = 1
-  let right = ~~(sequence.length / word.length)
+  let right = Math.floor(sequence.length / word.length)
 
   // 最右二分
   while (left <= right) {
-    const mid = (left + right) >> 1
+    const mid = Math.floor((left + right) / 2)
     if (!sequence.includes(word.repeat(mid))) {
       right = mid - 1
     } else {
@@ -20,3 +18,12 @@ function maxRepeating(sequence: string, word: string): number {
 console.log(maxRepeating('ababc', 'ab'))
 
 // 2
+
+export {}
+
+// !python:
+// return bisect_right(
+//   range(1, len(sequence)// len(word) +1 ),
+//   False,
+//   key=lambda x: word * x not in sequence,
+// )

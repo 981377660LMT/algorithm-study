@@ -1,4 +1,4 @@
-import { MinHeap } from './MinHeap'
+import { MinHeap } from './Heap'
 
 // 哈夫曼编码的思想
 function connectSticks(sticks: number[]): number {

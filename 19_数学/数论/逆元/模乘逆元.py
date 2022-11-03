@@ -11,3 +11,24 @@ print(x, y)
 
 
 # 写出 7x+13y+29z=n的解
+MOD = int(1e9 + 7)
+fac = [1]
+ifac = [1]
+for i in range(1, int(4e5) + 10):
+    fac.append((fac[-1] * i) % MOD)
+    ifac.append((ifac[-1] * pow(i, MOD - 2, MOD)) % MOD)
+
+
+def C(n: int, k: int) -> int:
+    if n < 0 or k < 0 or n < k:
+        return 0
+    return ((fac[n] * ifac[k]) % MOD * ifac[n - k]) % MOD
+
+
+def A(n: int, k: int) -> int:
+    if n < 0 or k < 0 or n < k:
+        return 0
+    return (fac[n] * ifac[n - k]) % MOD
+
+
+print(C(12345, 123))

@@ -1,5 +1,7 @@
+/* eslint-disable no-param-reassign */
+
 class Bitset {
-  private capacity: number
+  private readonly capacity: number
   private bit: bigint
   private size: number
 

@@ -1,28 +1,29 @@
-/**
- * @returns a^n % mod
- */
-function qpow(a: number, n: number, mod: number): number {
-  if (n === 0) return 1 % mod
+/* eslint-disable no-param-reassign */
 
-  let [_a, _n, _mod] = [BigInt(a), BigInt(n), BigInt(mod)]
+/**
+ * quick pow.
+ *
+ * @returns base**exp%mod
+ * @warning base, exp, mod must be bigint.
+ * Because js number precision is 2^53-1, which is not enough for mod**2.
+ */
+function qpow(base: bigint, exp: bigint, mod: bigint): bigint {
+  if (exp === 0n) return 1n
+
   let res = 1n
 
-  while (_n) {
-    if (_n & 1n) {
-      res *= _a
-      res %= _mod
+  while (exp) {
+    if (exp & 1n) {
+      res *= base
+      res %= mod
     }
 
-    // 此处可能超出2^53-1 需要大数 (1e9-7*(1e9-7已经超出))
-    _a *= _a
-    _a %= _mod
-    _n >>= 1n
+    base *= base
+    base %= mod
+    exp >>= 1n
   }
 
-  return Number(res)
+  return res
 }
 
 export { qpow }
-
-// 如果a*a大于2^53-1则会丢失精度
-// 注意js的快速幂可能需要大数

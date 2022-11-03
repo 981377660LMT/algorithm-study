@@ -28,9 +28,9 @@ assert.notStrictEqual((3 >> MSB) & 1, (5 >> MSB) & 1)
 // 那么 c 和 a 或者 c 和 b 的异或的结构前缀部分一定也是一样的
 
 const foo = 0b110101
-// x & -x ：得到最低位的 1  :代表除最后一位 1 保留，其他位全部为 0 负数：补码加1，只有
-// x & (x-1)：清零最低位的 1  :代表将最后一位 1 变成 0
-// x & ((1 << n) - 1)：将 x 最高位至第 n 位(含)清零
-console.log(foo & -foo)
-console.log(foo & (foo - 1))
-console.log(foo & ((1 << 3) - 1))
+
+console.log(foo & -foo) // lowbit
+console.log(foo & (foo - 1)) // 将最后一位 1 变成 0
+console.log(foo | (foo + 1)) // 将最后一位 0 变成 1
+console.log(foo & ((1 << 3) - 1)) // 将 foo 最高位至第 3 位(含)清零
+console.log(foo & ~(1 << 3)) // 将第 n 位清零

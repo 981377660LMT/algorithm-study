@@ -1,4 +1,4 @@
-import { MinHeap } from '../../../8_heap/MinHeap'
+import { MinHeap } from '../../../8_heap/Heap'
 
 // 单源最短距离问题：权值已知
 type Edge = [x: number, y: number, weight: number]
@@ -10,7 +10,7 @@ function minimumEffortPath(heights: number[][]): number {
     [1, 0],
     [-1, 0],
     [0, 1],
-    [0, -1],
+    [0, -1]
   ]
 
   const dist = Array<number>(m * n).fill(Infinity)
@@ -40,7 +40,7 @@ function minimumEffortPath(heights: number[][]): number {
         pq.heappush([
           nextX,
           nextY,
-          Math.max(maxWeight, Math.abs(heights[nextX][nextY] - heights[curX][curY])),
+          Math.max(maxWeight, Math.abs(heights[nextX][nextY] - heights[curX][curY]))
         ])
       }
     }
@@ -53,6 +53,6 @@ console.log(
   minimumEffortPath([
     [1, 2, 2],
     [3, 8, 2],
-    [5, 3, 5],
+    [5, 3, 5]
   ])
 )

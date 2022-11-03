@@ -1,4 +1,4 @@
-import { MinHeap } from '../8_heap/MinHeap'
+import { MinHeap } from '../8_heap/Heap'
 
 class FileSharing {
   private chunkToUser: Map<number, Set<number>>

@@ -15,6 +15,5 @@ class MedianFinder:
         return (
             self.nums[n // 2]
             if (n := len(self.nums)) % 2
-            else float(self.nums[n // 2] + self.nums[(n - 1) // 2]) / 2
+            else (self.nums[n // 2] + self.nums[(n - 1) // 2]) / 2
         )
-

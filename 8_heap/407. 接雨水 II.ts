@@ -1,4 +1,4 @@
-import { MinHeap } from './MinHeap'
+import { MinHeap } from './Heap'
 
 /**
  *
@@ -38,7 +38,7 @@ function trapRainWater(heightMap: number[][]): number {
       [1, 0],
       [-1, 0],
       [0, 1],
-      [0, -1],
+      [0, -1]
     ]) {
       const [nextR, nextC] = [row + dr, col + dc]
       const key = nextR * n + nextC
@@ -57,7 +57,7 @@ console.log(
   trapRainWater([
     [1, 4, 3, 1, 3, 2],
     [3, 2, 1, 3, 2, 4],
-    [2, 3, 3, 2, 3, 1],
+    [2, 3, 3, 2, 3, 1]
   ])
 )
 // 输出: 4

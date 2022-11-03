@@ -1,29 +1,28 @@
-// from datastructures-js
-// import { Queue } from 'datastructures-js'
+/* eslint-disable no-param-reassign */
 
-class SimpleQueue<T = number> {
-  private readonly _data: T[] = []
+class SimpleQueue<E = number> {
+  private readonly _data: E[] = []
   private _head = 0
   private _tail = 0
 
-  constructor(iterable?: Iterable<T>) {
+  constructor(iterable?: Iterable<E>) {
     for (const item of iterable ?? []) {
       this.push(item)
     }
   }
 
-  push(element: T): SimpleQueue<T> {
+  push(element: E): SimpleQueue<E> {
     this._data[this._tail++] = element
     return this
   }
 
-  shift(): T | undefined {
+  shift(): E | undefined {
     if (this.length === 0) return undefined
     const front = this._data[this._head++]
     return front
   }
 
-  at(index: number): T | undefined {
+  at(index: number): E | undefined {
     if (index < 0) index += this.length
     if (index < 0 || index >= this.length) return undefined
     return this._data[this._head + index]

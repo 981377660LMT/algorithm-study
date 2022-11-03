@@ -15,13 +15,13 @@ const list: ListItem[] = [
         children: [
           {
             id: '111',
-            name: 'test111',
+            name: 'test111'
           },
           {
             id: '112',
-            name: 'test112',
-          },
-        ],
+            name: 'test112'
+          }
+        ]
       },
       {
         id: '12',
@@ -29,16 +29,16 @@ const list: ListItem[] = [
         children: [
           {
             id: '121',
-            name: 'test121',
+            name: 'test121'
           },
           {
             id: '122',
-            name: 'test122',
-          },
-        ],
-      },
-    ],
-  },
+            name: 'test122'
+          }
+        ]
+      }
+    ]
+  }
 ]
 const id = '112'
 
@@ -59,3 +59,5 @@ function fn(id: string, list: ListItem[]) {
   bt(list, 0, path)
   return path
 }
+
+export {}

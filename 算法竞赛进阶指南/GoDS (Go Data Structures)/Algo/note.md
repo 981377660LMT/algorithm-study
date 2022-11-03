@@ -58,7 +58,7 @@ https://qiita.com/ktateish/items/ab2df3e0864d2e931bf2
 6. make 和 new 的区别
    make 用于 chan map slice 的初始化，new 用于类型的属性初始化
    他们都返回的是指针(`注意 chan/map/slice 本身就是指针`)
-7. make 初始化属性是`深层次的初始化`
+7. make 初始化 struct 是`深层次的初始化`
 
    ```go
    package main

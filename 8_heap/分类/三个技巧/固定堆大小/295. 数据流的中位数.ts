@@ -1,34 +1,32 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import assert from 'assert'
-import { PriorityQueue } from '../../../../2_queue/PriorityQueue'
+import { Heap } from '../../../Heap'
 
 // 我们的可以维护两个固定堆
-// 大顶堆放最小的~~(n+1)/2个数 小顶堆放最大的n-~~(n+1)/2个数
+// 大顶堆放最小的(n+1)/2个数 小顶堆放最大的n-(n+1)/2个数
 // 左侧比右侧多1个，或者相同
 class MedianFinder {
-  private left: PriorityQueue<number> // 大顶堆
-  private right: PriorityQueue<number> // 小顶堆
-
-  constructor() {
-    this.left = new PriorityQueue<number>((a, b) => b - a)
-    this.right = new PriorityQueue<number>((a, b) => a - b)
-  }
+  private readonly _left = new Heap<number>((a, b) => b - a) // 大顶堆
+  private readonly _right = new Heap<number>((a, b) => a - b) // 小顶堆
 
   addNum(num: number): void {
     // 往左边加：将右边小的移到左边
-    if (this.left.length === this.right.length) {
-      this.right.push(num)
-      this.left.push(this.right.shift()!)
+    if (this._left.size === this._right.size) {
+      this._right.push(num)
+      this._left.push(this._right.pop()!)
       // 往右边加：将左边大的移到右边
     } else {
-      this.left.push(num)
-      this.right.push(this.left.shift()!)
+      this._left.push(num)
+      this._right.push(this._left.pop()!)
     }
   }
 
   findMedian(): number {
-    return this.left.length === this.right.length
-      ? (this.left.peek()! + this.right.peek()!) / 2
-      : this.left.peek()! //  左侧多1位
+    if (this._left.size === 0) return 0
+    return this._left.size === this._right.size
+      ? (this._left.peek()! + this._right.peek()!) / 2
+      : this._left.peek()! //  左侧多1位
   }
 }
 
@@ -40,10 +38,8 @@ if (require.main === module) {
   medianFiner.addNum(6)
   assert.strictEqual(medianFiner.findMedian(), 6)
   medianFiner.addNum(5)
-  console.dir(medianFiner, { depth: null })
   assert.strictEqual(medianFiner.findMedian(), 6)
   medianFiner.addNum(0)
-  console.dir(medianFiner, { depth: null })
   assert.strictEqual(medianFiner.findMedian(), 5.5)
 }
 

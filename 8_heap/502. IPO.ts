@@ -1,6 +1,6 @@
 // 首次公开募股 (Initial public offering)
 
-import { MinHeap } from './MinHeap'
+import { MinHeap } from './Heap'
 
 /**
  *

@@ -1,51 +1,53 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import assert from 'assert'
+
 import { LinkedListNode } from './LinkedListNode'
 
 /**
- * @description 链表实现的双端队列
+ * 链表实现的双端队列
  */
-class LinkedList<V = number> {
+class LinkedList<E = number> {
   /**
-   * @description 哨兵
+   * 哨兵
    */
-  private readonly _root: LinkedListNode<V>
+  private readonly _root: LinkedListNode<E>
 
   /**
-   * @description 初始化双向链表，判断节点时 next/pre 若为 root，则表示 next/pre 为空
+   * 初始化双向链表，判断节点时 next/pre 若为 root，则表示 next/pre 为空
    */
-  constructor(iterable?: Iterable<V>) {
-    // @ts-ignore
-    this._root = new LinkedListNode<V>(undefined)
+  constructor(iterable?: Iterable<E>) {
+    this._root = new LinkedListNode<E>(undefined as unknown as E)
     this._root.pre = this._root
     this._root.next = this._root
 
     for (const item of iterable ?? []) this.push(item)
   }
 
-  unshift(val: V): void {
+  unshift(val: E): void {
     this._root.insertAfter(new LinkedListNode(val))
   }
 
-  shift(): V | undefined {
+  shift(): E | undefined {
     if (this.isEmpty()) return undefined
     return this._root.next?.remove().value
   }
 
-  push(val: V): void {
+  push(val: E): void {
     this._root.insertBefore(new LinkedListNode(val))
   }
 
-  pop(): V | undefined {
+  pop(): E | undefined {
     if (this.isEmpty()) return undefined
     return this._root.pre?.remove().value
   }
 
-  first(): V | undefined {
+  first(): E | undefined {
     if (this.isEmpty()) return undefined
     return this._root.next?.value
   }
 
-  last(): V | undefined {
+  last(): E | undefined {
     if (this.isEmpty()) return undefined
     return this._root.pre?.value
   }
@@ -58,7 +60,8 @@ class LinkedList<V = number> {
     return `${[...this]}`
   }
 
-  *[Symbol.iterator](): IterableIterator<V> {
+  // eslint-disable-next-line generator-star-spacing
+  *[Symbol.iterator](): IterableIterator<E> {
     let node = this._root.next!
     while (node !== this._root) {
       yield node.value
@@ -78,7 +81,7 @@ export { LinkedList }
 
 // java查找链表元素：起点折半查找 这样最坏情况也只要找一半就可以了。
 // Node<E> node(int index) {
-//   // assert isElementIndex(index);
+//   assert isElementIndex(index);
 
 //   if (index < (size >> 1)) {
 //       Node<E> x = first;

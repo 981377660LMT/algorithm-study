@@ -1,4 +1,4 @@
-import { MinHeap } from '../../8_heap/MinHeap'
+import { MinHeap } from '../../8_heap/Heap'
 
 /**
  * @param {number[][]} nums
@@ -35,7 +35,7 @@ console.log(
   smallestRange([
     [4, 10, 15, 24, 26],
     [0, 9, 12, 20],
-    [5, 18, 22, 30],
+    [5, 18, 22, 30]
   ])
 )
 // 输出：[20,24]

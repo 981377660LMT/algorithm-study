@@ -39,10 +39,12 @@ func main() {
 			fmt.Fprintln(out, bit.Query(left, right))
 		}
 	}
+
 }
 
 type BIT interface {
 	// 区间 [left, right] 里的每个数增加 delta
+	//  1 <= left <= right <= n
 	Add(left, right, delta int)
 
 	// 查询区间 [left, right] 的和
@@ -51,59 +53,59 @@ type BIT interface {
 
 func CreateBIT(n int) BIT {
 	if n <= int(1e6) {
-		return NewBITSlice(n)
+		return NewSliceBIT(n)
 	}
 
-	return NewBITMap(n)
+	return NewMapBIT(n)
 }
 
-type BITMap struct {
+type MapBIT struct {
 	n     int
 	tree1 map[int]int
 	tree2 map[int]int
 }
 
-type BITSlice struct {
+type SliceBIT struct {
 	n     int
 	tree1 []int
 	tree2 []int
 }
 
-func NewBITMap(n int) *BITMap {
-	return &BITMap{
+func NewMapBIT(n int) *MapBIT {
+	return &MapBIT{
 		n:     n,
 		tree1: make(map[int]int, 1<<10),
 		tree2: make(map[int]int, 1<<10),
 	}
 }
 
-func NewBITSlice(n int) *BITSlice {
-	return &BITSlice{
+func NewSliceBIT(n int) *SliceBIT {
+	return &SliceBIT{
 		n:     n,
 		tree1: make([]int, n+10),
 		tree2: make([]int, n+10),
 	}
 }
 
-func (bit *BITMap) Add(left, right, delta int) {
+func (bit *MapBIT) Add(left, right, delta int) {
 	bit.add(left, delta)
 	bit.add(right+1, -delta)
 }
 
-func (bit *BITSlice) Add(left, right, delta int) {
+func (bit *SliceBIT) Add(left, right, delta int) {
 	bit.add(left, delta)
 	bit.add(right+1, -delta)
 }
 
-func (bit *BITMap) Query(left, right int) int {
+func (bit *MapBIT) Query(left, right int) int {
 	return bit.query(right) - bit.query(left-1)
 }
 
-func (bit *BITSlice) Query(left, right int) int {
+func (bit *SliceBIT) Query(left, right int) int {
 	return bit.query(right) - bit.query(left-1)
 }
 
-func (bit *BITMap) add(index, delta int) {
+func (bit *MapBIT) add(index, delta int) {
 	if index <= 0 {
 		errorInfo := fmt.Sprintf("index must be greater than 0, but got %d", index)
 		panic(errorInfo)
@@ -117,7 +119,7 @@ func (bit *BITMap) add(index, delta int) {
 	}
 }
 
-func (bit *BITSlice) add(index, delta int) {
+func (bit *SliceBIT) add(index, delta int) {
 	if index <= 0 {
 		errorInfo := fmt.Sprintf("index must be greater than 0, but got %d", index)
 		panic(errorInfo)
@@ -131,7 +133,7 @@ func (bit *BITSlice) add(index, delta int) {
 	}
 }
 
-func (bit *BITMap) query(index int) int {
+func (bit *MapBIT) query(index int) int {
 	if index > bit.n {
 		index = bit.n
 	}
@@ -145,7 +147,7 @@ func (bit *BITMap) query(index int) int {
 	return res
 }
 
-func (bit *BITSlice) query(index int) int {
+func (bit *SliceBIT) query(index int) int {
 	if index > bit.n {
 		index = bit.n
 	}
@@ -159,11 +161,11 @@ func (bit *BITSlice) query(index int) int {
 	return res
 }
 
-func (bit *BITMap) String() string {
+func (bit *MapBIT) String() string {
 	return "not implemented"
 }
 
-func (bit *BITSlice) String() string {
+func (bit *SliceBIT) String() string {
 	nums := make([]int, bit.n+1)
 	for i := 0; i < bit.n; i++ {
 		nums[i+1] = bit.Query(i+1, i+1)

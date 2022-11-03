@@ -6,90 +6,78 @@ import assert from 'assert'
 /**
  * 循环数组实现，慢数组动态扩容
  */
-class ArrayDeque<T = number> {
+class ArrayDeque<E = number> {
   length: number
-  private head: number
-  private tail: number
-  private readonly capacity: number
-  private readonly data: T[];
+  private _head: number
+  private _tail: number
+  private readonly _capacity: number
+  private readonly _data: E[]
 
-  *[Symbol.iterator]() {
-    let { head } = this
-    const times = this.length
-    for (let i = 0; i < times; i++) {
-      yield this.data[head]
-      head = (head + 1 + this.capacity) % this.capacity
-    }
-  }
-
-  /**
-   * @param capacity 默认值 `1 << 30`
-   */
   constructor(capacity?: number) {
-    this.capacity = capacity ?? 1 << 30
-    this.data = [] // 慢数组
-    this.head = 0 // 从-1开始'向前'存
-    this.tail = -1 // 从0开始向后存
+    this._capacity = capacity ?? 1 << 30
+    this._data = [] // 慢数组
+    this._head = 0 // 从-1开始向前移动
+    this._tail = -1 // 从0开始向后移动
     this.length = 0
   }
 
-  at(index: number): T | undefined {
+  at(index: number): E | undefined {
     if (index < 0) index += this.length
-    const pos = (this.head + index + this.capacity) % this.capacity
-    return this.data[pos]
+    const pos = (this._head + index + this._capacity) % this._capacity
+    return this._data[pos]
   }
 
   // head前移
-  unshift(value: T): boolean {
+  unshift(value: E): boolean {
     if (this._isFull()) return false
-    this.head = (this.head - 1 + this.capacity) % this.capacity
-    this.data[this.head] = value
+    this._head = (this._head - 1 + this._capacity) % this._capacity
+    this._data[this._head] = value
     this.length++
     return true
   }
 
   // tail后移
-  push(value: T): boolean {
+  push(value: E): boolean {
     if (this._isFull()) return false
-    this.tail = (this.tail + 1 + this.capacity) % this.capacity
-    this.data[this.tail] = value
+    this._tail = (this._tail + 1 + this._capacity) % this._capacity
+    this._data[this._tail] = value
     this.length++
     return true
   }
 
   // head后移
-  shift(): T | undefined {
+  shift(): E | undefined {
     if (this._isEmpty()) return undefined
     const front = this._front()
-    this.head = (this.head + 1 + this.capacity) % this.capacity
+    this._head = (this._head + 1 + this._capacity) % this._capacity
     this.length--
     return front
   }
 
   // tail前移
-  pop(): T | undefined {
+  pop(): E | undefined {
     if (this._isEmpty()) return undefined
     const rear = this._back()
-    this.tail = (this.tail - 1 + this.capacity) % this.capacity
+    this._tail = (this._tail - 1 + this._capacity) % this._capacity
     this.length--
     return rear
   }
 
-  forEach(callback: (value: T, index: number, array: T[]) => void): void {
-    let { head } = this
+  forEach(callback: (value: E, index: number, array: E[]) => void): void {
+    let head = this._head
     const times = this.length
     for (let i = 0; i < times; i++) {
-      callback(this.data[head], i, this.data)
-      head = (head + 1 + this.capacity) % this.capacity
+      callback(this._data[head], i, this._data)
+      head = (head + 1 + this._capacity) % this._capacity
     }
   }
 
-  private _front(): T | undefined {
-    return this._isEmpty() ? undefined : this.data[(this.head + this.capacity) % this.capacity]
+  private _front(): E | undefined {
+    return this._isEmpty() ? undefined : this._data[(this._head + this._capacity) % this._capacity]
   }
 
-  private _back(): T | undefined {
-    return this._isEmpty() ? undefined : this.data[(this.tail + this.capacity) % this.capacity]
+  private _back(): E | undefined {
+    return this._isEmpty() ? undefined : this._data[(this._tail + this._capacity) % this._capacity]
   }
 
   private _isEmpty(): boolean {
@@ -97,7 +85,16 @@ class ArrayDeque<T = number> {
   }
 
   private _isFull(): boolean {
-    return this.length === this.capacity
+    return this.length === this._capacity
+  }
+
+  *[Symbol.iterator]() {
+    let { _head: head } = this
+    const times = this.length
+    for (let i = 0; i < times; i++) {
+      yield this._data[head]
+      head = (head + 1 + this._capacity) % this._capacity
+    }
   }
 }
 
@@ -110,6 +107,7 @@ if (require.main === module) {
   deque.unshift(2)
 
   for (const num of deque) {
+    // eslint-disable-next-line no-console
     console.log(num)
   }
 

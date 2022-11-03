@@ -1,9 +1,11 @@
-class LinkedListNode<V = unknown> {
-  value: V
-  pre: LinkedListNode<V> | undefined
-  next: LinkedListNode<V> | undefined
+/* eslint-disable no-param-reassign */
 
-  constructor(value: V, left?: LinkedListNode<V>, right?: LinkedListNode<V>) {
+class LinkedListNode<E> {
+  value: E
+  pre: LinkedListNode<E> | undefined
+  next: LinkedListNode<E> | undefined
+
+  constructor(value: E, left?: LinkedListNode<E>, right?: LinkedListNode<E>) {
     this.value = value
     this.pre = left
     this.next = right
@@ -12,7 +14,7 @@ class LinkedListNode<V = unknown> {
   /**
    * @param node 在当前node之后插入新节点 并返回新节点
    */
-  insertAfter(node: LinkedListNode<V>): LinkedListNode<V> {
+  insertAfter(node: LinkedListNode<E>): LinkedListNode<E> {
     node.pre = this
     node.next = this.next
     node.pre.next = node
@@ -23,7 +25,7 @@ class LinkedListNode<V = unknown> {
   /**
    * @param node 在当前node之前插入新节点 并返回新节点
    */
-  insertBefore(node: LinkedListNode<V>): LinkedListNode<V> {
+  insertBefore(node: LinkedListNode<E>): LinkedListNode<E> {
     node.next = this
     node.pre = this.pre
     node.next.pre = node
@@ -34,7 +36,7 @@ class LinkedListNode<V = unknown> {
   /**
    * @description 从链表里移除自身
    */
-  remove(): LinkedListNode<V> {
+  remove(): LinkedListNode<E> {
     if (this.pre) this.pre.next = this.next
     if (this.next) this.next.pre = this.pre
     this.pre = void 0

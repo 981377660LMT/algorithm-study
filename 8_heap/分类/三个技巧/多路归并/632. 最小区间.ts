@@ -1,4 +1,4 @@
-import { MinHeap } from '../../../MinHeap'
+import { MinHeap } from '../../../Heap'
 
 /**
  * @param {number[][]} nums
@@ -36,7 +36,7 @@ if (require.main === module) {
     smallestRange([
       [4, 10, 15, 24, 26],
       [0, 9, 12, 20],
-      [5, 18, 22, 30],
+      [5, 18, 22, 30]
     ])
   )
 }
