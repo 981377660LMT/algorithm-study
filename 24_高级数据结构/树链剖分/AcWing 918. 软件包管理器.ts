@@ -99,61 +99,79 @@ class SegmentTree {
 }
 // #endregion
 
-// 结点编号 1-n
-function useSoftwareManager(n: number, adjMap: Map<number, Set<number>>) {
+// n个结点
+function useSoftwareManager(n: number, adjList: number[][], root: number) {
   const tree = new SegmentTree(n + 10)
   const depths = new Uint32Array(n + 10)
-  const parents = new Uint32Array(n + 10)
-  const subsizes = new Uint32Array(n + 10)
-  const heavysons = new Uint32Array(n + 10) // 每个点的重儿子
-  const heavyTops = new Uint32Array(n + 10) // 每个点的重链顶点
+  const parents = new Int32Array(n + 10) // 不存在为-1
+  const subSizes = new Uint32Array(n + 10).fill(1)
+  const heavySons = new Int32Array(n + 10) // 每个点的重儿子，不存在时为 -1
+  const tops = new Uint32Array(n + 10) // 所处轻/重链的顶点（深度最小），轻链的顶点为自身
   const dfsIds = new Uint32Array(n + 10)
-  let id = 1
+  const dfsIdToNode = new Uint32Array(n + 10) // dfs序在树中所对应的节点 dfsIdToNode[dfsIds[i]] = i
+  let dfsId = 1
 
-  dfs1(1, 0, 1)
-  dfs2(1, 1)
+  dfs1(root, -1, 0)
+  dfs2(root, root)
 
-  // 把根节点到x路径上的点全部置为1 输出这次操作安装状态被改变的软件包数量。
-  function install(id: number): number {
-    let res = 0
-    while (id) {
-      res += dfsIds[id] - dfsIds[heavyTops[id]] + 1 - tree.query(dfsIds[heavyTops[id]], dfsIds[id])
-      tree.update(dfsIds[heavyTops[id]], dfsIds[id], 1)
-      id = parents[heavyTops[id]]
-    }
-    return res
-  }
-
-  // 把以x为根的子树中的点全部置为0 输出这次操作安装状态被改变的软件包数量。
-  function uninstall(id: number): number {
-    let res = tree.query(dfsIds[id], dfsIds[id] + subsizes[id] - 1)
-    tree.update(dfsIds[id], dfsIds[id] + subsizes[id] - 1, 0)
-    return res
-  }
-
+  // 寻找重儿子，拆分出重链与轻链
   function dfs1(cur: number, pre: number, depth: number): void {
-    depths[cur] = depth
-    parents[cur] = pre
-    subsizes[cur] = 1
-    for (const next of adjMap.get(cur) || []) {
+    let heavySon = -1
+    let heavySonSize = 0
+    for (let i = 0; i < adjList[cur].length; i++) {
+      const next = adjList[cur][i]
       if (next === pre) continue
       dfs1(next, cur, depth + 1)
-      subsizes[cur] += subsizes[next]
-      if (subsizes[next] > subsizes[heavysons[cur]]) {
-        heavysons[cur] = next
+      subSizes[cur] += subSizes[next]
+      if (subSizes[next] > heavySonSize) {
+        heavySon = next
+        heavySonSize = subSizes[next]
+      }
+    }
+    depths[cur] = depth
+    heavySons[cur] = heavySon
+    parents[cur] = pre
+  }
+
+  // 对这些链进行维护，就要确保每个链上的节点都是连续的
+  // 注意在进行重新编号的时候先访问重链，这样可以保证重链内的节点编号连续
+  function dfs2(cur: number, top: number): void {
+    tops[cur] = top
+    dfsId++
+    dfsIds[cur] = dfsId
+    dfsIdToNode[dfsId] = cur
+    if (heavySons[cur] !== -1) {
+      // 优先遍历重儿子，保证在同一条重链上的点的 DFS 序是连续的
+      dfs2(heavySons[cur], top)
+      for (let i = 0; i < adjList[cur].length; i++) {
+        const next = adjList[cur][i]
+        if (next !== parents[cur] && next !== heavySons[cur]) {
+          dfs2(next, next)
+        }
       }
     }
   }
 
-  function dfs2(cur: number, heavyStart: number): void {
-    dfsIds[cur] = id++
-    heavyTops[cur] = heavyStart
-    if (heavysons[cur] === 0) return
-    dfs2(heavysons[cur], heavyStart)
-    for (const next of adjMap.get(cur) || []) {
-      if (next === heavysons[cur] || next === parents[cur]) continue
-      dfs2(next, next)
+  // 把根节点到id路径上的点全部置为1 输出这次操作安装状态被改变的软件包数量。
+  function install(id: number): number {
+    let res = 0
+    while (id !== -1) {
+      const top = tops[id]
+      const heavyLength = dfsIds[id] - dfsIds[top] + 1
+      res += heavyLength - tree.query(dfsIds[top], dfsIds[id])
+      tree.update(dfsIds[top], dfsIds[id], 1)
+      id = parents[top]
     }
+    return res
+  }
+
+  // 把以id为根的子树中的点全部置为0 输出这次操作安装状态被改变的软件包数量。
+  function uninstall(id: number): number {
+    const left = dfsIds[id]
+    const right = dfsIds[id] + subSizes[id] - 1
+    let res = tree.query(left, right)
+    tree.update(left, right, 0)
+    return res
   }
 
   return {
@@ -165,16 +183,15 @@ function useSoftwareManager(n: number, adjMap: Map<number, Set<number>>) {
 if (require.main === module) {
   const n = 7
   const deps = [0, 0, 0, 1, 1, 5]
-  const adjMap = new Map<number, Set<number>>()
+  const adjList: number[][] = Array.from({ length: n + 1 }, () => [])
   for (let [cur, pre] of deps.entries()) {
     ;[cur, pre] = [cur + 2, pre + 1]
-    !adjMap.has(cur) && adjMap.set(cur, new Set())
-    !adjMap.has(pre) && adjMap.set(pre, new Set())
-    adjMap.get(cur)!.add(pre)
-    adjMap.get(pre)!.add(cur)
+    adjList[pre].push(cur)
+    adjList[cur].push(pre)
   }
 
-  const { install, uninstall } = useSoftwareManager(n, adjMap)
+  // 根结点为1
+  const { install, uninstall } = useSoftwareManager(n, adjList, 1)
   console.log(install(6))
   console.log(install(7))
   console.log(uninstall(2))

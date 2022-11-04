@@ -1,4 +1,4 @@
-package main
+package trees
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/emirpasic/gods/trees/avltree"
 )
 
-func main() {
+func d() {
 	tree := avltree.NewWithIntComparator()
 	tree.Put(1, "a")
 	tree.Put(2, "b")

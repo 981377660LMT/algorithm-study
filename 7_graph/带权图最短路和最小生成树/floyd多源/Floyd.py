@@ -17,6 +17,7 @@ if __name__ == "__main__":
     for u, v, w in edges:
         dist[u][v] = dist[v][u] = w
 
+    # !dis[k][i][j] 表示「经过若干个编号不超过 k 的节点」时，从 i 到 j 的最短路长度
     for k in range(n):  # !经过的中转点
         for i in range(n):
             for j in range(n):

@@ -10,16 +10,27 @@ import assert from 'assert'
 
 type Comparator<T> = (a: T, b: T) => number
 
-class Heap<E> {
-  private readonly _heap: E[] = []
+class Heap<E = number> {
+  private readonly _heap: E[]
   private readonly _comparator: Comparator<E>
 
-  constructor(comparator: Comparator<E>, array?: E[]) {
-    this._comparator = comparator
-    if (array) {
-      this._heap = array
-      this._heapify()
+  constructor()
+  constructor(array: E[])
+  constructor(comparator: Comparator<E>)
+  constructor(array: E[], comparator: Comparator<E>)
+  constructor(
+    arrayOrComparator: E[] | Comparator<E> = [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    comparator: Comparator<E> = (a: any, b: any) => a - b
+  ) {
+    if (typeof arrayOrComparator === 'function') {
+      comparator = arrayOrComparator
+      arrayOrComparator = []
     }
+
+    this._comparator = comparator
+    this._heap = arrayOrComparator.slice() // shallow copy
+    this._heapify()
   }
 
   push(value: E): void {
@@ -56,7 +67,7 @@ class Heap<E> {
 
   private _pushUp(root: number): void {
     let parent = (root - 1) >> 1
-    while (parent >= 0 && this._comparator(this._heap[parent], this._heap[root]) > 0) {
+    while (parent >= 0 && this._comparator(this._heap[root], this._heap[parent]) < 0) {
       this._swap(parent, root)
       root = parent
       parent = (parent - 1) >> 1
@@ -65,9 +76,10 @@ class Heap<E> {
 
   private _pushDown(root: number): void {
     // 还有孩子，即不是叶子节点
+    const n = this._heap.length
     while (true) {
       const left = (root << 1) | 1
-      if (left >= this._heap.length) break
+      if (left >= n) break
 
       const right = left + 1
       let minIndex = root
@@ -76,10 +88,7 @@ class Heap<E> {
         minIndex = left
       }
 
-      if (
-        right < this._heap.length &&
-        this._comparator(this._heap[right], this._heap[minIndex]) < 0
-      ) {
+      if (right < n && this._comparator(this._heap[right], this._heap[minIndex]) < 0) {
         minIndex = right
       }
 
@@ -98,7 +107,7 @@ class Heap<E> {
 export { Heap }
 
 if (require.main === module) {
-  const heap = new Heap<number>((a, b) => a - b)
+  const heap = new Heap()
   heap.push(1)
   heap.push(8)
   heap.push(3)

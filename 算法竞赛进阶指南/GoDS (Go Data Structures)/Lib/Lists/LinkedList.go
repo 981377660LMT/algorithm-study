@@ -1,6 +1,6 @@
 // 循环链表
 
-package main
+package lists
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	linkedList "github.com/emirpasic/gods/lists/doublylinkedlist"
 )
 
-func main() {
+func b() {
 	linkedList := linkedList.New()
 	linkedList.Add(1, 2, 3, 4, 5)
 	fmt.Println(linkedList.String())

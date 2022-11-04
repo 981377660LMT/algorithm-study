@@ -1,6 +1,6 @@
-// 不是线程安全的的 ArrayList
+package lists
 
-package main
+// 不是线程安全的的 ArrayList
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/emirpasic/gods/lists/arraylist"
 )
 
-func main() {
+func a() {
 	list := arraylist.New(0)
 	fmt.Println(list.Size())
 

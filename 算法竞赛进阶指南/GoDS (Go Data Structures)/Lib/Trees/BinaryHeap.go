@@ -1,6 +1,6 @@
-// 堆
+package trees
 
-package main
+// 堆
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/emirpasic/gods/utils"
 )
 
-func main() {
+func c() {
 	inverseComparator := func(a, b interface{}) int {
 		return -utils.IntComparator(a, b)
 	}
@@ -18,7 +18,7 @@ func main() {
 	heap := binaryheap.NewWith(inverseComparator)
 	heap.Push(1, 3, 2)
 	fmt.Println(heap.Values()) // [3 2 1]
-	foo()
+
 }
 
 // 自定义比较器
@@ -33,7 +33,7 @@ func comparator(e1, e2 interface{}) int {
 	return -utils.IntComparator(priority1, priority2)
 }
 
-func foo() {
+func main() {
 	// Create a new heap with a custom comparator
 	heap := binaryheap.NewWith(comparator)
 	heap.Push(Element{"a", 1}, Element{"b", 2}, Element{"c", 3})

@@ -5,21 +5,23 @@
 
 // 在 DFS 中计算每个子树的大小，记录“向下”的子树的最大大小，利用总点数 - 当前子树（这里的子树指有根树的子树）的大小得到“向上”的子树的大小
 // 利用性质1，dfs即可
-function findCentre(n: number, edges: [cur: number, next: number][]): number[] {
-  const res: number[] = []
-  // 最大连通块大小,即此节点为割点分割之后两半的最大大小
-  const maxSize = Array<number>(n).fill(0)
-  // 子树的大小,即向`下面`走可以到多少个结点
-  const subSize = Array<number>(n).fill(0)
 
-  const adjList = Array.from<unknown, number[]>({ length: n }, () => [])
-  for (const [u, v] of edges) {
+function findCentroids(
+  n: number,
+  edges: [cur: number, next: number][]
+): [size: number, centroids: number[]] {
+  const res: number[] = []
+  const maxSize = new Uint32Array(n + 5) // 最大连通块大小,即此节点为割点分割之后两半的最大大小
+  const subSize = new Uint32Array(n + 5) // 子树的大小,即向`下面`走可以到多少个结点
+
+  const adjList = Array.from<unknown, number[]>({ length: n + 5 }, () => [])
+  edges.forEach(([u, v]) => {
     adjList[u].push(v)
     adjList[v].push(u)
-  }
+  })
 
   dfs(0, -1)
-  return res
+  return [maxSize[res[0]], res]
 
   function dfs(cur: number, parent: number): void {
     subSize[cur] = 1
@@ -39,10 +41,13 @@ function findCentre(n: number, edges: [cur: number, next: number][]): number[] {
 }
 
 export {}
-console.log(
-  findCentre(4, [
-    [1, 0],
-    [1, 2],
-    [1, 3],
-  ])
-)
+
+if (require.main === module) {
+  console.log(
+    findCentroids(4, [
+      [1, 0],
+      [1, 2],
+      [1, 3]
+    ])
+  )
+}

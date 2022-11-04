@@ -1,10 +1,11 @@
+# 详见算法竞赛进阶指南\GoDS (Go Data Structures)\src\graph\heavylightdecomposition\heavylightdecomposition.go
+# !deprecated
+
 # 给定一棵树，树中包含 n 个节点（编号 1∼n），其中第 i 个节点的权值为 ai。
 # 初始时，1 号节点为树的根节点。
 
 from collections import defaultdict
-import sys
 
-input = sys.stdin.readline
 
 # 1. 预处理所有节点的 重儿子 以及子树内 节点的数量 和 每个节点的 父节点
 def dfs1(cur: int, pre: int, dep: int) -> None:
@@ -144,7 +145,7 @@ for _ in range(m):
     if opt == 1:
         # 修改路径权值
         u, v, delta = args
-        # 将节点 u 和节点 v 之间路径上的所有节点（包括这两个节点）的权值增加 k。
+        #
         updateRange(u, v, delta)
     elif opt == 2:
         root, delta = args

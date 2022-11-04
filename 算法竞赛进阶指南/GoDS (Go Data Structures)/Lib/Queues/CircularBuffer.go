@@ -1,4 +1,4 @@
-package main
+package sets
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/emirpasic/gods/queues/circularbuffer"
 )
 
-func main() {
+func a() {
 	queue := circularbuffer.New(100)
 	queue.Enqueue(1)
 	queue.Enqueue(2)

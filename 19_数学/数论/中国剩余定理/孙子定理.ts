@@ -10,7 +10,8 @@
 // 35w1 同余 1 (mod3)
 // 21w2 同余 1 (mod5)
 // 15w3 同余 1 (mod7)
-import { calInv1 } from '../逆元/逆元'
+
+import { modularInverse } from '../扩展欧几里得/扩展欧几里得'
 
 /**
  *
@@ -24,8 +25,8 @@ function ChineseRemainderTheorem(div: number[], mod: number[], n: number) {
   const p = div.reduce((pre, cur) => pre * cur, 1)
   for (let i = 0; i < n; i++) {
     const tmp = p / div[i]
-    // calInv1(tmp, div[i]) * tmp等于1(模p意义下) 所以 tmp*inv(tmp)*mod[i] 与 mod[i] 模p同余
-    res += (calInv1(tmp, div[i]) * tmp * mod[i]) % p
+    // modularInverse(tmp, div[i]) * tmp等于1(模p意义下) 所以 tmp*inv(tmp)*mod[i] 与 mod[i] 模p同余
+    res += (modularInverse(tmp, div[i]) * tmp * mod[i]) % p
   }
 
   return res % p

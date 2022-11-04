@@ -1,4 +1,4 @@
-package main
+package stacks
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 )
 
-func main() {
+func b() {
 	stack := linkedliststack.New()
 	stack.Push(1)
 	stack.Push(2)

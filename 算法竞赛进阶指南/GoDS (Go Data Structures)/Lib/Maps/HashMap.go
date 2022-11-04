@@ -1,6 +1,6 @@
-// A map based on hash tables. Keys are unordered.
+package maps
 
-package main
+// A map based on hash tables. Keys are unordered.
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/emirpasic/gods/maps/hashmap"
 )
 
-func main() {
+func b() {
 	mp := hashmap.New()
 	mp.Put("a", 1)
 	mp.Put("b", 2)

@@ -2,7 +2,7 @@
 
 import assert from 'assert'
 
-import { trailingZero32 } from '../../19_数学/acwing专项训练/容斥原理/bitCount'
+import { bitCount32, trailingZero32 } from '../../19_数学/acwing专项训练/容斥原理/bitCount'
 
 class BitSet implements Set<number> {
   /** 32 bit per bucket */
@@ -85,6 +85,56 @@ class BitSet implements Set<number> {
     throw new Error(`Method ${this.values.name} not implemented.Use ${this.keys.name} instead.`)
   }
 
+  and(other: BitSet): void {
+    const minLength = Math.min(this._buckets.length, other._buckets.length)
+    let newCount = 0
+    for (let i = 0; i < minLength; i++) {
+      this._buckets[i] &= other._buckets[i]
+      newCount += bitCount32(this._buckets[i])
+    }
+
+    for (let i = minLength; i < this._buckets.length; i++) {
+      this._buckets[i] = 0
+    }
+
+    this._size = newCount
+  }
+
+  or(other: BitSet): void {
+    const maxLength = Math.max(this._buckets.length, other._buckets.length)
+    this._ensureCapacity(maxLength * BitSet._BITS_PER_BUCKET)
+    let newCount = 0
+    for (let i = 0; i < maxLength; i++) {
+      if (i < this._buckets.length && i < other._buckets.length) {
+        this._buckets[i] |= other._buckets[i]
+      } else if (i < this._buckets.length) {
+        continue
+      } else {
+        this._buckets[i] = other._buckets[i]
+      }
+      newCount += bitCount32(this._buckets[i])
+    }
+
+    this._size = newCount
+  }
+
+  isSubset(other: BitSet): boolean {
+    const maxLength = Math.max(this._buckets.length, other._buckets.length)
+    for (let i = 0; i < maxLength; i++) {
+      if (i < this._buckets.length && i < other._buckets.length) {
+        if ((this._buckets[i] & other._buckets[i]) !== this._buckets[i]) {
+          return false
+        }
+      } else if (i < this._buckets.length) {
+        if (this._buckets[i] !== 0) {
+          return false
+        }
+      }
+    }
+
+    return true
+  }
+
   get size(): number {
     return this._size
   }
@@ -130,4 +180,15 @@ if (require.main === module) {
   set.delete(2)
   assert(!set.has(2))
   assert(set.size === 3)
+
+  const other = new BitSet(100)
+  other.add(101).add(102).add(103)
+  set.or(other)
+  assert.strictEqual(set.size, 5)
+
+  assert(other.isSubset(set))
+  set.and(other)
+  assert.strictEqual(set.toString(), other.toString())
+  assert(set.isSubset(other))
+  assert(other.isSubset(set))
 }

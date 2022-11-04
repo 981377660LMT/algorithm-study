@@ -1,4 +1,4 @@
-package main
+package sets
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/emirpasic/gods/sets/treeset"
 )
 
-func main() {
+func b() {
 	set := treeset.NewWithIntComparator()
 	set.Add(1)
 	set.Add(2, 2, 3, 4, -1)

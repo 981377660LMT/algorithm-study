@@ -223,7 +223,7 @@ func (b *BIT2D) query(row, col int) (res int) {
 
 func setDeep(mp map[int]map[int]int, key1, key2, delta int) {
 	if _, ok := mp[key1]; !ok {
-		mp[key1] = make(map[int]int)
+		mp[key1] = make(map[int]int, 1<<4)
 	}
 	mp[key1][key2] += delta
 }

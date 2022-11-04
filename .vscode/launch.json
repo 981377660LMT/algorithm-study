@@ -26,7 +26,7 @@
       "runtimeArgs": ["-r", "ts-node/register"],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
-      "preLaunchTask": ,
+      // "preLaunchTask": ,
       "internalConsoleOptions": "openOnSessionStart"
     }
   ]

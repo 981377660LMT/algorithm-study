@@ -1,4 +1,4 @@
-package main
+package maps
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/emirpasic/gods/maps/treemap"
 )
 
-func main() {
+func e() {
 	treeMap := treemap.NewWithIntComparator()
 	treeMap.Put(10, "a")
 	treeMap.Put(20, "b")

@@ -1,5 +1,7 @@
 <!-- 树链剖分解决路径问题 -->
 
+[HLC](<../../%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/graph/heavylightdecomposition/heavylightdecomposition.go>)
+
 https://www.acwing.com/solution/content/62664/
 思想：
 **把树转化成一个序列，这样树中 任意一条路径 就可以对应到 O(logn) 段的 连续区间**

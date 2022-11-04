@@ -1,4 +1,4 @@
-package main
+package maps
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/emirpasic/gods/utils"
 )
 
-func main() {
+func d() {
 	mp := treebidimap.NewWith(utils.IntComparator, utils.StringComparator)
 	mp.Put(1, "a")
 	mp.Put(2, "b")

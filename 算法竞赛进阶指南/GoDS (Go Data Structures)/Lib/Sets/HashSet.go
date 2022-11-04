@@ -1,4 +1,4 @@
-package main
+package sets
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 )
 
-func main() {
+func a() {
 	set := hashset.New()
 	set.Add("a")
 	set.Add("b")

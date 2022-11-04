@@ -19,3 +19,12 @@
 
 - 注意校验:
   在解决算法题时，我们只要判断两个编码是否相同，就表示它们对应的字符串是否相同。但在实际的应用场景中，`会出现字符串不同但编码相同的情况，因此在实际场景中使用 Rabin-Karp 字符串编码时，推荐在编码相同时再对字符串进行比较，防止出现错误。`
+
+`双哈希，比较快的语言可以使用`
+https://github.com/harttle/contest.js/blob/master/src/rolling-hash.ts
+
+```py
+hash1 = hasher1(2,5)
+hash2 = hasher2(2,5)
+newHash = f'{hash1},{hash2}'
+```

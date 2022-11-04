@@ -107,6 +107,7 @@
    - [Quick Pow (ts)](19_%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/%E5%BF%AB%E9%80%9F%E5%B9%82/qpow.ts)
    - [Matrix Quick Pow](19_%E6%95%B0%E5%AD%A6/%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/matqpow.py)
    - [BSGS/EXBSGS](19_%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/BSGS/bsgs.py)
+   - [Exgcd/ModularInverse (ts)](19_%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/%E6%89%A9%E5%B1%95%E6%AC%A7%E5%87%A0%E9%87%8C%E5%BE%97/%E6%89%A9%E5%B1%95%E6%AC%A7%E5%87%A0%E9%87%8C%E5%BE%97.ts)
 
 9. **Miscellaneous**
 

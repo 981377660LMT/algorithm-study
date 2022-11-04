@@ -1,4 +1,4 @@
-package main
+package sets
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/emirpasic/gods/queues/linkedlistqueue"
 )
 
-func main() {
+func b() {
 	queue := linkedlistqueue.New()
 	queue.Enqueue(1)
 	queue.Enqueue(2)

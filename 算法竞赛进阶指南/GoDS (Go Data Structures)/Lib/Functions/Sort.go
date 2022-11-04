@@ -1,4 +1,4 @@
-package main
+package functions
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/emirpasic/gods/utils"
 )
 
-func main() {
+func b() {
 	strings := []interface{}{}
 	strings = append(strings, "c")
 	strings = append(strings, "a")

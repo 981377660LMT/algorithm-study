@@ -1,4 +1,4 @@
-package main
+package maps
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/emirpasic/gods/maps/linkedhashmap"
 )
 
-func main() {
+func c() {
 	linkedHashMap := linkedhashmap.New()
 	linkedHashMap.Put("a", 1)
 	linkedHashMap.Put("b", 2)

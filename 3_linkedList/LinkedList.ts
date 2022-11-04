@@ -8,9 +8,9 @@ import { LinkedListNode } from './LinkedListNode'
  * 链表实现的双端队列
  */
 class LinkedList<E = number> {
-  /**
-   * 哨兵
-   */
+  private _size = 0
+
+  /** 哨兵 */
   private readonly _root: LinkedListNode<E>
 
   /**
@@ -21,39 +21,42 @@ class LinkedList<E = number> {
     this._root.pre = this._root
     this._root.next = this._root
 
-    for (const item of iterable ?? []) this.push(item)
+    for (const item of iterable ?? []) {
+      this.push(item)
+      this._size++
+    }
   }
 
   unshift(val: E): void {
     this._root.insertAfter(new LinkedListNode(val))
+    this._size++
   }
 
   shift(): E | undefined {
-    if (this.isEmpty()) return undefined
+    if (this._isEmpty()) return undefined
+    this._size--
     return this._root.next?.remove().value
   }
 
   push(val: E): void {
     this._root.insertBefore(new LinkedListNode(val))
+    this._size++
   }
 
   pop(): E | undefined {
-    if (this.isEmpty()) return undefined
+    if (this._isEmpty()) return undefined
+    this._size--
     return this._root.pre?.remove().value
   }
 
   first(): E | undefined {
-    if (this.isEmpty()) return undefined
+    if (this._isEmpty()) return undefined
     return this._root.next?.value
   }
 
   last(): E | undefined {
-    if (this.isEmpty()) return undefined
+    if (this._isEmpty()) return undefined
     return this._root.pre?.value
-  }
-
-  isEmpty(): boolean {
-    return this._root.next === this._root
   }
 
   toString(): string {
@@ -68,13 +71,21 @@ class LinkedList<E = number> {
       node = node.next!
     }
   }
+
+  get size(): number {
+    return this._size
+  }
+
+  private _isEmpty(): boolean {
+    return this._root.next === this._root
+  }
 }
 
 if (require.main === module) {
   const nums = new LinkedList([1, 2, 3, 4, 5])
   assert.strictEqual(nums.shift(), 1)
   for (const num of nums) console.log(num)
-  console.log(nums + '')
+  console.log(`${nums}`)
 }
 
 export { LinkedList }

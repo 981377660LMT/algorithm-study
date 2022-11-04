@@ -1,4 +1,4 @@
-package main
+package trees
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/emirpasic/gods/trees/redblacktree"
 )
 
-func main() {
+func a() {
 	tree := redblacktree.NewWithIntComparator()
 	tree.Put(1, "a")
 	tree.Put(2, "b")

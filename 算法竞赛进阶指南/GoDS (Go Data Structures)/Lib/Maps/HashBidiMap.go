@@ -1,6 +1,6 @@
-// A map based on two hashmaps. Keys are unordered.
+package maps
 
-package main
+// A map based on two hashmaps. Keys are unordered.
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/emirpasic/gods/maps/hashbidimap"
 )
 
-func main() {
+func a() {
 	bidiMap := hashbidimap.New()
 	bidiMap.Put("a", 1)
 	bidiMap.Put("b", 2)

@@ -194,7 +194,12 @@ class BIT4:
         )
 
 
+# !二维单点修改、区间查询
+# https://leetcode.cn/problems/range-sum-query-2d-mutable/solution/er-wei-bitshu-tao-shu-onjian-shu-ologn2c-nxvy/
+# !二维区间修改、区间查询
 # https://www.cnblogs.com/hbhszxyb/p/14157271.html
+
+
 class BIT5:
     """二维树状数组 区间修改+区间查询 每个操作都是 log(m*n)"""
 
