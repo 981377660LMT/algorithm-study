@@ -1,5 +1,8 @@
 # 在线每次查询和修改是O(logn^2)的
 
+# !可持久化并查集golang实现
+# https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/union_find.go#L357
+
 from typing import List, Union
 
 

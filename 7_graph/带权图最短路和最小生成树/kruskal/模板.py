@@ -65,7 +65,7 @@ def kruskal(vertex: int, edges: List[Tuple[int, int, int]]) -> Tuple[int, List[i
     Returns:
         Tuple[int, List[Tuple[int, int, int]]]: 最小生成树的边权和,组成最小生成树的边的索引
     """
-    uf = UnionFindArray(vertex + 10)
+    uf = UnionFindArray(vertex + 1)
     cost, res = 0, []
 
     edgesWithIndex = sorted([(i, *edge) for i, edge in enumerate(edges)], key=lambda e: e[-1])

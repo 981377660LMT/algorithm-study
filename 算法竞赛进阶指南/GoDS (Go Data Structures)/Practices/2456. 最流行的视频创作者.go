@@ -4,6 +4,7 @@ package practices
 type tuple struct {
 	score
 
+
 func mostPopularCreator(creators []string, ids []string, views []int) [][]string {
 	...
 }

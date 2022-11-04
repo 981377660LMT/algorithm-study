@@ -3,11 +3,11 @@
 /* eslint-disable no-inner-declarations */
 
 function useLCA(n: number, tree: number[][], root = 0) {
-  const depth = new Int32Array(n).fill(-1)
-  const parent = new Int32Array(n).fill(-1)
+  const depth = new Int32Array(n)
+  const parent = new Int32Array(n)
 
-  const _bitLen = Math.floor(Math.log2(n)) + 1
-  const _fa = Array.from<unknown, Int32Array>({ length: n }, () => new Int32Array(_bitLen))
+  const _bitLen = 32 - Math.clz32(n)
+  const _dp = Array.from({ length: _bitLen }, () => new Int32Array(n).fill(-1))
 
   _dfs(root, -1, 0)
   _initDp()
@@ -18,22 +18,17 @@ function useLCA(n: number, tree: number[][], root = 0) {
   function queryLCA(root1: number, root2: number): number {
     if (depth[root1] < depth[root2]) [root1, root2] = [root2, root1]
 
-    for (let bit = _bitLen - 1; ~bit; bit--) {
-      if (depth[_fa[root1][bit]] >= depth[root2]) {
-        root1 = _fa[root1][bit]
-      }
-    }
-
+    root1 = _upToDepth(root1, depth[root2])
     if (root1 === root2) return root1
 
     for (let bit = _bitLen - 1; ~bit; bit--) {
-      if (_fa[root1][bit] !== _fa[root2][bit]) {
-        root1 = _fa[root1][bit]
-        root2 = _fa[root2][bit]
+      if (_dp[bit][root1] !== _dp[bit][root2]) {
+        root1 = _dp[bit][root1]
+        root2 = _dp[bit][root2]
       }
     }
 
-    return _fa[root1][0]
+    return _dp[0][root1]
   }
 
   /**
@@ -45,19 +40,17 @@ function useLCA(n: number, tree: number[][], root = 0) {
 
   /**
    * O(logn) 查询树节点root的第k个祖先,如果不存在返回-1
-   *
-   * @param k k>=1
+   * @param k k >= 1
    */
   function queryKthAncestor(root: number, k: number): number {
     let bit = 0
-    while (k) {
+    while (k > 0) {
       if (k & 1) {
-        root = _fa[root][bit]
+        root = _dp[root][bit]
         if (root === -1) return -1
       }
-
-      k >>= 1
       bit++
+      k >>>= 1 // 注意:会被自动转为uint32
     }
 
     return root
@@ -76,22 +69,33 @@ function useLCA(n: number, tree: number[][], root = 0) {
     parent[cur] = pre
     for (let i = 0; i < tree[cur].length; i++) {
       const next = tree[cur][i]
-      if (next === pre) continue
-      _dfs(next, cur, dep + 1)
+      if (next !== pre) {
+        _dfs(next, cur, dep + 1)
+      }
+    }
+  }
+
+  function _initDp(): void {
+    for (let j = 0; j < n; j++) _dp[0][j] = parent[j]
+    for (let i = 0; i + 1 < _bitLen; i++) {
+      for (let j = 0; j < n; j++) {
+        if (_dp[i][j] === -1) _dp[i + 1][j] = -1
+        else _dp[i + 1][j] = _dp[i][_dp[i][j]] // 2^i*2^i === 2^(i+1)
+      }
     }
   }
 
   /**
-   * @description O(nlogn) 初始化dp
+   * 从`root`开始向上跳至指定深度`toDepth`,返回跳至的节点
    */
-  function _initDp(): void {
-    for (let i = 0; i < n; i++) _fa[i][0] = parent[i]
-    for (let bit = 0; bit < _bitLen - 1; bit++) {
-      for (let i = 0; i < n; i++) {
-        if (_fa[i][bit] === -1) _fa[i][bit + 1] = -1
-        else _fa[i][bit + 1] = _fa[_fa[i][bit]][bit]
+  function _upToDepth(root: number, toDepth: number): number {
+    if (toDepth >= depth[root]) return root
+    for (let i = _bitLen; ~i; i--) {
+      if ((depth[root] - toDepth) & (1 << i)) {
+        root = _dp[i][root]
       }
     }
+    return root
   }
 }
 

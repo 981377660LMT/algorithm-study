@@ -1,5 +1,3 @@
-from collections import defaultdict, deque
-from math import floor, log2
 from typing import Iterable, List, Mapping, Sequence, Union
 
 
@@ -20,34 +18,31 @@ class LCA:
             tree (Tree): 树
             root (int): 根节点
         """
-        self.depth = [-1] * (n + 1)  # 用深度来排序结点 根节点深度为0 最后一个结点-1表示虚拟结点
-        self.parent = [-1] * (n + 1)  # 父节点用来上跳查找路径 根节点父亲为-1
+        self.depth = [0] * n  # 根节点深度为0
+        self.parent = [0] * n  # 根节点父亲为-1
 
         self._n = n
         self._tree = tree
 
-        self._bfs(root, -1, 0)
-        self._bitlen = floor(log2(n)) + 1
-        self._fa = self._makeDp(self.parent)
+        self._dfs(root, -1, 0)
+        self._bitlen = n.bit_length()
+        self.dp = self._makeDp()  # !dp[i][j] 表示节点j的第2^i个祖先
 
     def queryLCA(self, root1: int, root2: int) -> int:
         """查询树节点两点的最近公共祖先"""
         if self.depth[root1] < self.depth[root2]:
             root1, root2 = root2, root1
 
-        for i in range(self._bitlen - 1, -1, -1):
-            if self.depth[self._fa[root1][i]] >= self.depth[root2]:
-                root1 = self._fa[root1][i]
-
+        root1 = self._upToDepth(root1, self.depth[root2])
         if root1 == root2:
             return root1
 
         for i in range(self._bitlen - 1, -1, -1):
-            if self._fa[root1][i] != self._fa[root2][i]:
-                root1 = self._fa[root1][i]
-                root2 = self._fa[root2][i]
+            if self.dp[i][root1] != self.dp[i][root2]:
+                root1 = self.dp[i][root1]
+                root2 = self.dp[i][root2]
 
-        return self._fa[root1][0]
+        return self.dp[0][root1]
 
     def queryDist(self, root1: int, root2: int) -> int:
         """查询树节点两点间距离"""
@@ -58,7 +53,7 @@ class LCA:
         bit = 0
         while k:
             if k & 1:
-                root = self._fa[root][bit]
+                root = self.dp[bit][root]
                 if root == -1:
                     return -1
             bit += 1
@@ -108,36 +103,48 @@ class LCA:
     #             return False
     #     return True
 
-    def _bfs(self, start: int, startPre: int, startDep: int) -> None:
+    def _dfs(self, start: int, startPre: int, startDep: int) -> None:
         """处理高度、父节点"""
-        queue = deque([(start, startPre, startDep)])
-        while queue:
-            cur, pre, dep = queue.popleft()
-            self.depth[cur], self.parent[cur] = dep, pre
-            for next in self._tree[cur]:
+        depth, parent, tree = self.depth, self.parent, self._tree
+        stack = [(start, startPre, startDep)]
+        while stack:
+            cur, pre, dep = stack.pop()
+            depth[cur], parent[cur] = dep, pre
+            for next in tree[cur]:
                 if next != pre:
-                    queue.append((next, cur, dep + 1))
+                    stack.append((next, cur, dep + 1))
 
-    def _makeDp(self, parent: List[int]) -> List[List[int]]:
+    def _makeDp(self) -> List[List[int]]:
         """nlogn预处理"""
-        fa = [[-1] * self._bitlen for _ in range(self._n)]
-        for i in range(self._n):
-            fa[i][0] = parent[i]
-        for j in range(self._bitlen - 1):
-            for i in range(self._n):
-                if fa[i][j] == -1:
-                    fa[i][j + 1] = -1
+        n, bitlen, parent = self._n, self._bitlen, self.parent
+        dp = [[-1] * n for _ in range(bitlen)]
+        for j in range(self._n):
+            dp[0][j] = parent[j]
+        for i in range(bitlen - 1):
+            for j in range(n):
+                if dp[i][j] == -1:
+                    dp[i + 1][j] = -1
                 else:
-                    fa[i][j + 1] = fa[fa[i][j]][j]
-        return fa
+                    dp[i + 1][j] = dp[i][dp[i][j]]
+        return dp
+
+    def _upToDepth(self, root: int, toDepth: int) -> int:
+        """从 root 开始向上跳到指定深度 toDepth,toDepth<=dep[v],返回跳到的节点"""
+        if toDepth >= self.depth[root]:
+            return root
+        for i in range(self._bitlen - 1, -1, -1):
+            if (self.depth[root] - toDepth) & (1 << i):
+                root = self.dp[i][root]
+        return root
 
 
 if __name__ == "__main__":
-    adjList1 = [[0, 1], [0, 2], [0, 3], [1, 4], [1, 5]]
-    adjList2 = [set([0, 1]), set([0, 2]), set([0, 3]), set([1, 4]), set([1, 5])]
-    adjMap = defaultdict(set)
-    LCA(
-        6,
-        adjMap,
+    n = 3
+    adjList = [[1], [0, 2], [1]]
+    lca = LCA(
+        n,
+        adjList,
         root=0,
     )
+    # print(lca.queryLCA(1, 2))  # 1
+    print(lca.queryLCA(0, 2))  # 2

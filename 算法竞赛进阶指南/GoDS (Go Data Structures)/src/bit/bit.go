@@ -82,8 +82,8 @@ func newMapBIT(n int) *mapBIT {
 func newSliceBIT(n int) *sliceBIT {
 	return &sliceBIT{
 		n:     n,
-		tree1: make([]int, n+10),
-		tree2: make([]int, n+10),
+		tree1: make([]int, n+1),
+		tree2: make([]int, n+1),
 	}
 }
 

@@ -161,8 +161,6 @@ for i := range a {
 // 3
 ```
 
-所以临时变量在 for 中需要先声明，最后在 post 处再赋值
-
 ```go
 // pushDown 函数
 for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
@@ -170,6 +168,9 @@ for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
     // ...
 }
 ```
+
+`for _,v := range` 循环切片时会拷贝切片里的元素，如果切片里保存的是值类型，例如很大的 struct，遍历的开销就会很大。
+**这种时候需要使用 for i := range slice 的方式遍历，取值时使用 &slice[i]。**
 
 ## interface
 

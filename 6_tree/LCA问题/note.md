@@ -1,5 +1,7 @@
 ## 查询两个树结点的 LCA
 
+[golang 实现](https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/graph_tree.go#L815)
+
 1. 离线查询
 
    - **tarjan** O(n+q) dfs+并查集

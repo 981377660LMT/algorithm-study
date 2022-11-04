@@ -1,4 +1,4 @@
-package segmentTree
+package segmenttree
 
 import (
 	"bufio"

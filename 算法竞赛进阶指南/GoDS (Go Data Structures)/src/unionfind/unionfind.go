@@ -1,5 +1,0 @@
-package cmnx
-
-func main() {
-
-}

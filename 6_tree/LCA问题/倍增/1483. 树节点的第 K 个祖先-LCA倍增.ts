@@ -13,38 +13,37 @@
 
 class TreeAncestor {
   private readonly _dp: Int32Array[]
-  private readonly _MAXJ: number
+  private readonly _size: number
 
   /**
    * @param n  节点个数
    * @param parent  树以父节点数组的形式给出，其中 parent[i] 是节点 i 的父节点。树的根节点是编号为 0 的节点。
    */
   constructor(n: number, parent: number[]) {
-    this._MAXJ = Math.floor(Math.log2(n)) + 1
-    this._dp = Array.from({ length: this._MAXJ + 1 }, () => new Int32Array(n + 1).fill(-1))
+    this._size = 32 - Math.clz32(n) // bitLength
+    this._dp = Array.from({ length: this._size }, () => new Int32Array(n).fill(-1))
 
-    for (let i = 0; i < n; i++) this._dp[0][i] = parent[i]
+    for (let j = 0; j < n; j++) this._dp[0][j] = parent[j]
 
-    for (let j = 0; j + 1 <= this._MAXJ; j++) {
-      for (let i = 0; i < n; i++) {
-        if (this._dp[j][i] === -1) this._dp[j + 1][i] = -1
-        else this._dp[j + 1][i] = this._dp[j][this._dp[j][i]] // 2^i*2^i === 2^(i+1)
+    for (let i = 0; i + 1 < this._size; i++) {
+      for (let j = 0; j < n; j++) {
+        if (this._dp[i][j] === -1) this._dp[i + 1][j] = -1
+        else this._dp[i + 1][j] = this._dp[i][this._dp[i][j]] // 2^i*2^i === 2^(i+1)
       }
     }
   }
 
   /**
-   * @param node
    * @param k 1 <= k <= n <= 5*10^4
    * @returns 函数返回节点 node 的第 k 个祖先节点。如果不存在这样的祖先节点，返回 -1
    */
   getKthAncestor(node: number, k: number): number {
-    if (node <= 0) return -1
-
     let bit = 0
-    while (k) {
-      if (k & 1) node = this._dp[bit][node]
-      if (node === -1) return -1
+    while (k > 0) {
+      if (k & 1) {
+        node = this._dp[bit][node]
+        if (node === -1) return -1
+      }
       bit++
       k >>>= 1
     }
