@@ -14,7 +14,7 @@ function useInput(debugCase?: string) {
   }
 
   return {
-    input,
+    input
   }
 }
 
@@ -48,7 +48,7 @@ function matqpow(base: BigIntMatrix, exp: bigint, mod: bigint): BigIntMatrix {
 
   while (exp) {
     if (exp & 1n) res = mul(res, base, mod)
-    exp = exp >> 1n
+    exp >>= 1n
     base = mul(base, base, mod)
   }
 
@@ -64,14 +64,14 @@ const bad = [
   0n,
   ...input()
     .split(' ')
-    .map(v => BigInt(v)),
+    .map(v => BigInt(v))
 ]
 
 let res = [new BigInt64Array([1n]), new BigInt64Array([0n]), new BigInt64Array([0n])]
 const trans = [
   new BigInt64Array([1n, 0n, 1n]),
   new BigInt64Array([1n, 0n, 1n]),
-  new BigInt64Array([0n, 1n, 0n]),
+  new BigInt64Array([0n, 1n, 0n])
 ]
 
 for (let i = 1; i < bad.length; i++) {

@@ -1,50 +1,49 @@
 // 矩阵快速幂
-package matrixquickpow
-
 // https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/math_matrix.go#L70-L117
 
-type matrix [][]int64
+package matrixquickpow
 
-func newMatrix(n, m int) matrix {
-	a := make(matrix, n)
-	for i := range a {
-		a[i] = make([]int64, m)
+type Matrix [][]int64
+
+func NewMatrix(row, col int) Matrix {
+	res := make(Matrix, row)
+	for i := range res {
+		res[i] = make([]int64, col)
 	}
-	return a
+	return res
 }
 
-func newIdentityMatrix(n int) matrix {
-	a := make(matrix, n)
-	for i := range a {
-		a[i] = make([]int64, n)
-		a[i][i] = 1
+func NewIdentityMatrix(n int) Matrix {
+	res := make(Matrix, n)
+	for i := range res {
+		res[i] = make([]int64, n)
+		res[i][i] = 1
 	}
-	return a
+	return res
 }
 
-func (a matrix) mul(b matrix) matrix {
-	const mod int64 = 1e9 + 7 // 998244353
-	c := newMatrix(len(a), len(b[0]))
-	for i, row := range a {
-		for j := range b[0] {
+func (matrix Matrix) Mul(other Matrix, mod int64) Matrix {
+	res := NewMatrix(len(matrix), len(other[0]))
+	for i, row := range matrix {
+		for j := range other[0] {
 			for k, v := range row {
-				c[i][j] = (c[i][j] + v*b[k][j]) % mod // 注：此处不能化简
+				res[i][j] = (res[i][j] + v*other[k][j]) % mod // 注：此处不能化简
 			}
-			if c[i][j] < 0 {
-				c[i][j] += mod
+			if res[i][j] < 0 {
+				res[i][j] += mod
 			}
 		}
 	}
-	return c
+	return res
 }
 
-func (a matrix) pow(n int64) matrix {
-	res := newIdentityMatrix(len(a))
-	for ; n > 0; n >>= 1 {
-		if n&1 > 0 {
-			res = res.mul(a)
+func (matrix Matrix) Pow(exp int64, mod int64) Matrix {
+	res := NewIdentityMatrix(len(matrix))
+	for ; exp > 0; exp >>= 1 {
+		if exp&1 > 0 {
+			res = res.Mul(matrix, mod)
 		}
-		a = a.mul(a)
+		matrix = matrix.Mul(matrix, mod)
 	}
 	return res
 }

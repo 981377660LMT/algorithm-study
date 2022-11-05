@@ -1,24 +1,22 @@
-// https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/mo.go#L204
+// !https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/mo.go#L204
 
 package moalgo
 
 import (
+	"fmt"
 	"io"
 	"math"
 	"sort"
 )
 
-func main() {
-
-}
-func normalMo(in io.Reader, a []int, q int) []int {
-	n := len(a)
-	blockSize := int(math.Ceil(float64(n) / math.Sqrt(float64(q))))
+func normalMo(in io.Reader, nums []int, queries int) []int {
+	n := len(nums)
+	blockSize := int(math.Ceil(float64(n) / math.Sqrt(float64(queries))))
 	type query struct{ lb, l, r, qid int }
-	qs := make([]query, q)
+	qs := make([]query, queries)
 	for i := range qs {
 		var l, r int
-		Fscan(in, &l, &r) // 从 1 开始，[l,r)
+		fmt.Fscan(in, &l, &r) // 从 1 开始，[l,r)
 		qs[i] = query{l / blockSize, l, r + 1, i}
 	}
 	sort.Slice(qs, func(i, j int) bool {
@@ -52,7 +50,7 @@ func normalMo(in io.Reader, a []int, q int) []int {
 		// ...
 		return cnt
 	}
-	ans := make([]int, q)
+	ans := make([]int, queries)
 	for _, q := range qs {
 		for ; r < q.r; r++ {
 			move(r, 1)

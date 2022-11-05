@@ -20,3 +20,4 @@ function compare(v1: string, v2: string): 0 | 1 | -1 {
 console.log(compare('12.1.0', '12.0.9'))
 console.log(compare('12.1.0', '12.1.2'))
 console.log(compare('5.0.1', '5.0.1'))
+export {}

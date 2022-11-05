@@ -75,6 +75,7 @@ if __name__ == "__main__":
     res = [[2], [1], [1]]  # 初始状态
     T = [[1, 1, 1], [1, 0, 0], [0, 1, 0]]
     resT = matqpow1(T, n - 3, MOD)
+    print(resT)
     res = mul(resT, res, MOD)
     assert res[0][0] == 639479200
 

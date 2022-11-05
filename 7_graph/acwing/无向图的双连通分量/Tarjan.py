@@ -1,3 +1,6 @@
+# golang 实现：
+# !算法竞赛进阶指南/GoDS (Go Data Structures)/src/graph/tarjan/tarjan.go
+
 from collections import defaultdict
 from typing import DefaultDict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 import sys

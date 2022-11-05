@@ -197,11 +197,11 @@ if (require.main === module) {
   console.log(uninstall(2))
   console.log(install(5))
   console.log(uninstall(1))
-  3
-  1
-  3
-  2
-  3
+  // 3
+  // 1
+  // 3
+  // 2
+  // 3
 }
 
 export {}
