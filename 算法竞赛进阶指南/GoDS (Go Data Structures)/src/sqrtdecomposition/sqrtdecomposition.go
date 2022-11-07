@@ -1,4 +1,5 @@
 // !https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/sqrt_decomposition.go#L1-L110
+// !(日语：平方分割/クエリ平方分割)
 
 package copypasta
 
@@ -30,11 +31,15 @@ https://oi-wiki.org/ds/block-array/
 对于整块，我们可以打上一个add标记，这样二分查找就要查 >= k-add 的值。
 对于不完整的块，我们暴力修改，再直接排序整个块。
 */
+
+// http://hzwer.com/8053.html 分块练习
 func SqrtDecompotision() {
 	type block struct {
 		left, right    int
-		origin, sorted []int
-		lazyAdd        int
+		origin, sorted []int // !块内的结构
+
+		// data int 区间信息(sum等)
+		// lazyAdd int 懒标记
 	}
 
 	var blocks []block
@@ -74,14 +79,14 @@ func SqrtDecompotision() {
 
 			if left <= block.left && block.right <= right {
 				// do op on full block
-				// 区间更新，类似线段树的懒标记
+				// !区间更新完整的块，类似线段树的懒标记
 			} else {
 				// do op on part block
-				// 暴力更新
 				bl := max(block.left, left)
 				br := min(block.right, right)
 				for j := bl - block.left; j <= br-block.left; j++ {
 					// do b.origin[j]...
+					// !暴力更新
 				}
 			}
 		}

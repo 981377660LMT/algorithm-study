@@ -51,9 +51,9 @@ func (sl *SortedList) At(index int) interface{} {
 }
 
 func (sl *SortedList) Pop(index int) interface{} {
-	poped := sl.At(index)
-	sl.Discard(poped)
-	return poped
+	popped := sl.At(index)
+	sl.Discard(popped)
+	return popped
 }
 
 func (sl *SortedList) Discard(value interface{}) {
@@ -81,7 +81,7 @@ func (sl *SortedList) BisectRight(value interface{}) int {
 }
 
 func (sl *SortedList) String() string {
-	sb := []string{"FHQTreap{"}
+	sb := []string{"SortedList{"}
 	values := []string{}
 	for i := 0; i < sl.Len(); i++ {
 		values = append(values, fmt.Sprintf("%d", sl.At(i)))

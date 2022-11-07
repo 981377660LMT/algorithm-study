@@ -2,6 +2,8 @@ from functools import lru_cache
 from itertools import accumulate
 from typing import List
 
+from sortedcontainers import SortedList
+
 MOD = int(1e9 + 7)
 INF = int(1e20)
 

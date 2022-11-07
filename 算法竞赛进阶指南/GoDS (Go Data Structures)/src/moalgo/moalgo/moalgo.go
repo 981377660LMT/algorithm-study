@@ -1,11 +1,59 @@
-// !https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/mo.go#L204
-
-package moalgo
+package main
 
 import (
+	"bufio"
+	"fmt"
 	"math"
+	"os"
 	"sort"
 )
+
+// G - Range Pairing Query
+// https://atcoder.jp/contests/abc242/tasks/abc242_g
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const N int = 1e5 + 10
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := range nums {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	pair := 0
+	counter := [N + 1]int{}
+	mo := NewMoAlgo(nums, &op{
+		add: func(v, _, _, _ int) {
+			pair -= counter[v] / 2
+			counter[v]++
+			pair += counter[v] / 2
+		},
+		remove: func(v, _, _, _ int) {
+			pair -= counter[v] / 2
+			counter[v]--
+			pair += counter[v] / 2
+		},
+		query: func() int { return pair },
+	})
+
+	var q int
+	fmt.Fscan(in, &q)
+	for ; q > 0; q-- {
+		var l, r int
+		fmt.Fscan(in, &l, &r)
+		l--
+		r--
+		mo.AddQuery(l, r)
+	}
+
+	res := mo.Work()
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
+}
 
 type MoAlgo struct {
 	n          int
@@ -13,7 +61,7 @@ type MoAlgo struct {
 	chunkSize  int
 	data       []int
 	buckets    [][]query
-	op         op
+	op         *op
 }
 
 type query struct {
@@ -29,7 +77,7 @@ type op struct {
 	query func() int
 }
 
-func NewMoAlgo(data []int, op op) *MoAlgo {
+func NewMoAlgo(data []int, op *op) *MoAlgo {
 	n := len(data)
 	chunkSize := int(math.Ceil(math.Sqrt(float64(n))))
 	buckets := make([][]query, n/chunkSize+1)

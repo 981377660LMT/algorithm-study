@@ -6,7 +6,7 @@ from typing import List
 # -109 <= robot[i], positionj <= 109
 # 0 <= limitj <= robot.length
 # !暗示O(n*m*k)的解法1e6
-# 老鼠进洞模型 / 安排邮筒模型
+# 老鼠进洞模型 / 安排邮筒模型 / 最小移动距离
 
 INF = int(1e18)
 
@@ -66,5 +66,14 @@ class Solution:
         dfs.cache_clear()
         return res
 
+    def minimumTotalDistance3(self, robot: List[int], factory: List[List[int]]) -> int:
+        """堆+反悔 O(nlogn)"""
+        # https://leetcode.cn/problems/minimum-total-distance-traveled/solution/-by-meyi-vbl2/
+        ...
+
 
 print(Solution().minimumTotalDistance([1, 2, 3, 4, 5], [[1, 2], [3, 2], [4, 1]]))
+
+
+# https://leetcode.cn/problems/minimum-total-distance-traveled/solution/-by-meyi-vbl2/
+# !nlogn 解法
