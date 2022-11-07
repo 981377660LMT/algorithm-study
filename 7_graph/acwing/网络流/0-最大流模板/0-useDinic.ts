@@ -18,9 +18,9 @@ function useDinic(n: number, start: number, end: number) {
     throw new RangeError(`start: ${start}, end: ${end} out of range [0, ${n - 1}]`)
   }
 
-  const reGraph = Array.from<unknown, number[]>({ length: n }, () => [])
-  const edges: [next: number, capacity: number][] = []
-  const visitedEdge = new Set<number>()
+  const _reGraph = Array.from<unknown, number[]>({ length: n }, () => [])
+  const _edges: [next: number, capacity: number][] = []
+  const _visitedEdge = new Set<number>()
 
   /**
    * 添加边 {@link from} -> {@link to}, 容量为 {@link capacity}
@@ -28,11 +28,11 @@ function useDinic(n: number, start: number, end: number) {
    */
   function addEdge(from: number, to: number, capacity: number): void {
     const hash = from * n + to
-    visitedEdge.add(hash)
-    reGraph[from].push(edges.length)
-    edges.push([to, capacity])
-    reGraph[to].push(edges.length)
-    edges.push([from, 0])
+    _visitedEdge.add(hash)
+    _reGraph[from].push(_edges.length)
+    _edges.push([to, capacity])
+    _reGraph[to].push(_edges.length)
+    _edges.push([from, 0])
   }
 
   /**
@@ -41,12 +41,12 @@ function useDinic(n: number, start: number, end: number) {
    */
   function addEdgeIfAbsent(from: number, to: number, capacity: number): void {
     const hash = from * n + to
-    if (visitedEdge.has(hash)) return
-    visitedEdge.add(hash)
-    reGraph[from].push(edges.length)
-    edges.push([to, capacity])
-    reGraph[to].push(edges.length)
-    edges.push([from, 0])
+    if (_visitedEdge.has(hash)) return
+    _visitedEdge.add(hash)
+    _reGraph[from].push(_edges.length)
+    _edges.push([to, capacity])
+    _reGraph[to].push(_edges.length)
+    _edges.push([from, 0])
   }
 
   function calMaxFlow(): number {
@@ -76,10 +76,10 @@ function useDinic(n: number, start: number, end: number) {
           const cur = queue.pop()!
 
           // !不要使用 for of 来遍历迭代器循环 速度会变慢
-          for (let i = 0; i < reGraph[cur].length; i++) {
-            const ei = reGraph[cur][i]
-            const next = edges[ei][0] // !不要使用 const [next,capacity] = edges[ei] 解构 速度会变慢
-            const capacity = edges[ei][1]
+          for (let i = 0; i < _reGraph[cur].length; i++) {
+            const ei = _reGraph[cur][i]
+            const next = _edges[ei][0] // !不要使用 const [next,capacity] = edges[ei] 解构 速度会变慢
+            const capacity = _edges[ei][1]
             if (capacity > 0 && levels[next] === -1) {
               levels[next] = levels[cur] + 1
               if (next === end) return true
@@ -104,14 +104,14 @@ function useDinic(n: number, start: number, end: number) {
 
       let res = flow
       // 当前弧优化
-      for (let ei = curEdges[cur]; ei < reGraph[cur].length; ei = ++curEdges[cur]) {
-        const ej = reGraph[cur][ei]
-        const next = edges[ej][0]
-        const remain = edges[ej][1]
+      for (let ei = curEdges[cur]; ei < _reGraph[cur].length; ei = ++curEdges[cur]) {
+        const ej = _reGraph[cur][ei]
+        const next = _edges[ej][0]
+        const remain = _edges[ej][1]
         if (remain > 0 && levels[next] === levels[cur] + 1) {
           const delta = dfs(next, end, Math.min(res, remain))
-          edges[ej][1] -= delta
-          edges[ej ^ 1][1] += delta
+          _edges[ej][1] -= delta
+          _edges[ej ^ 1][1] += delta
           res -= delta
           if (res === 0) return flow
         }
@@ -131,14 +131,14 @@ function useDinic(n: number, start: number, end: number) {
    * ```
    */
   function useQueryRemainOfEdge(): (v1: number, v2: number) => number {
-    const adjList = Array.from<number, Map<number, number>>({ length: n }, () => new Map())
+    const adjMap = Array.from<number, Map<number, number>>({ length: n }, () => new Map())
     for (let cur = 0; cur < n; cur++) {
-      const eis = reGraph[cur]
-      const innerMap = adjList[cur]
+      const eis = _reGraph[cur]
+      const innerMap = adjMap[cur]
 
       for (let i = 0; i < eis.length; i++) {
         const ei = eis[i]
-        const edge = edges[ei]
+        const edge = _edges[ei]
         const next = edge[0]
         const remain = edge[1]
 
@@ -149,7 +149,7 @@ function useDinic(n: number, start: number, end: number) {
     return queryApi
 
     function queryApi(v1: number, v2: number): number {
-      const innerMap = adjList[v1]
+      const innerMap = adjMap[v1]
       return innerMap.get(v2) || 0
     }
   }
@@ -163,9 +163,9 @@ function useDinic(n: number, start: number, end: number) {
     while (queue.length) {
       const cur = queue.pop()!
       visited.add(cur)
-      for (let i = 0; i < reGraph[cur].length; i++) {
-        const ei = reGraph[cur][i]
-        const edge = edges[ei]
+      for (let i = 0; i < _reGraph[cur].length; i++) {
+        const ei = _reGraph[cur][i]
+        const edge = _edges[ei]
         const next = edge[0]
         const remain = edge[1]
         if (remain > 0 && !visited.has(next)) {

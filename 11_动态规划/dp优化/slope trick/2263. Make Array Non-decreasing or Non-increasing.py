@@ -15,8 +15,8 @@ class Solution:
             """
             S = SlopeTrick()
             for num in arr:
-                S.updateLeftMin()
                 S.addAbsXMinusA(num)
+                S.updateLeftMin()
             return S.getMinY()
 
         return min(helper(nums), helper(nums[::-1]))

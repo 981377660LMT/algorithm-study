@@ -3,25 +3,27 @@
 import { useUnionFindMap } from '../../14_并查集/useUnionFind'
 
 /**
- * @description 二分图检测
+ * 二分图检测
  */
-function isBipartite<V = number>(adjMap: Map<V, Set<V>>): boolean {
-  const colorMap = new Map<V, number>()
+function isBipartite(n: number, adjList: number[][]): boolean {
+  const colors = new Int8Array(n).fill(-1)
 
-  for (const cur of adjMap.keys()) {
-    if (colorMap.has(cur)) continue
-    if (!dfs(cur, 0)) return false
+  for (let i = 0; i < n; i++) {
+    if (colors[i] === -1) {
+      if (!dfs(i, 0)) return false
+    }
   }
 
   return true
 
-  function dfs(cur: V, color: number): boolean {
-    colorMap.set(cur, color)
-
-    for (const next of adjMap.get(cur) ?? []) {
-      if (!colorMap.has(next)) {
+  function dfs(cur: number, color: number): boolean {
+    colors[cur] = color
+    for (const next of adjList[cur]) {
+      if (colors[next] === -1) {
         if (!dfs(next, color ^ 1)) return false
-      } else if (colorMap.get(next) === color) return false
+      } else if (colors[next] === color) {
+        return false
+      }
     }
 
     return true

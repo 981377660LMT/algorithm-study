@@ -11,7 +11,7 @@ n<=1e3
 """
 
 import sys
-from MinCostMaxFlow import MinCostMaxFlow
+from MinCostMaxFlow import MinCostMaxFlowDinic
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")

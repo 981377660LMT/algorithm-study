@@ -7,7 +7,7 @@
 # https://www.acwing.com/problem/content/description/2194/
 
 
-from MinCostMaxFlow import MinCostMaxFlow
+from MinCostMaxFlow import MinCostMaxFlowDinic
 
 from collections import defaultdict
 
@@ -33,7 +33,7 @@ for i in range(m):
 START, END, OFFSET = 2 * (n + m + 1), 2 * (n + m + 2), n + m
 
 # 最小费用
-mcmf1 = MinCostMaxFlow(2 * (n + m + 3), START, END)
+mcmf1 = MinCostMaxFlowDinic(2 * (n + m + 3), START, END)
 for i in range(m):
     mcmf1.addEdge(START, i, stores[i], 0)  # 虚拟源点提货物
 for i in range(n):
@@ -44,7 +44,7 @@ for i in dist:
 print(mcmf1.work()[1])
 
 # 最大费用
-mcmf2 = MinCostMaxFlow(2 * (n + m + 3), START, END)
+mcmf2 = MinCostMaxFlowDinic(2 * (n + m + 3), START, END)
 for i in range(m):
     mcmf2.addEdge(START, i, stores[i], 0)
 for i in range(n):

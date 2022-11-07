@@ -19,7 +19,7 @@
 # !加虚拟边平衡流量
 
 # 如果不是环形 则为 https://leetcode.cn/problems/super-washing-machines/
-from MinCostMaxFlow import MinCostMaxFlow
+from MinCostMaxFlow import MinCostMaxFlowDinic
 
 INF = int(1e18)
 
@@ -31,7 +31,7 @@ while len(stores) < n:
 avg = sum(stores) // n
 
 START, END, OFFSET = 2 * n + 2, 2 * n + 3, n
-mcmf = MinCostMaxFlow(2 * n + 4, START, END)
+mcmf = MinCostMaxFlowDinic(2 * n + 4, START, END)
 
 
 for i, value in enumerate(stores):

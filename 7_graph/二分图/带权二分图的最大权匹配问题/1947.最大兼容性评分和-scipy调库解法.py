@@ -1,19 +1,19 @@
 from typing import List
 from scipy.optimize import linear_sum_assignment
 
+
 # scipy调库解法
 class Solution:
     def maxCompatibilitySum(self, students: List[List[int]], mentors: List[List[int]]) -> int:
         n, m = (len(students), len(students[0]))
-        adjMatrix = [[0] * n for _ in range(n)]
+        costMatrix = [[0] * n for _ in range(n)]
         for i in range(n):
             for j in range(n):
                 for k in range(m):
-                    adjMatrix[i][j] += int(students[i][k] == mentors[j][k])
+                    costMatrix[i][j] += int(students[i][k] == mentors[j][k])
 
-        rowIndex, colIndex = linear_sum_assignment(adjMatrix, maximize=True)
-
-        return sum(adjMatrix[row][col] for row, col in zip(rowIndex, colIndex))
+        rowIndex, colIndex = linear_sum_assignment(costMatrix, maximize=True)
+        return sum(costMatrix[row][col] for row, col in zip(rowIndex, colIndex))
 
 
 print(

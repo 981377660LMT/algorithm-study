@@ -1,12 +1,12 @@
 from typing import List
-from MinCostMaxFlow import MinCostMaxFlow
+from MinCostMaxFlow import MinCostMaxFlowDinic
 
 
 class Solution:
     def maximumANDSum(self, nums: List[int], numSlots: int) -> int:
         """最大费用最大流"""
         OFFSET, START, END = 100, 201, 202
-        mcmf = MinCostMaxFlow(203, START, END)
+        mcmf = MinCostMaxFlowDinic(203, START, END)
 
         for i, num in enumerate(nums):
             for j in range(numSlots):

@@ -8,14 +8,14 @@
 # !最小费用最大流 最大费用最大流(边的费用取负)
 
 
-from MinCostMaxFlow import MinCostMaxFlow
+from MinCostMaxFlow import MinCostMaxFlowDinic
 
 
 n = int(input())
 # 最小费用、最大费用
 START, END, OFFSET = 2 * n + 2, 2 * n + 3, n
-mcmf1 = MinCostMaxFlow(2 * n + 5, START, END)
-mcmf2 = MinCostMaxFlow(2 * n + 5, START, END)
+mcmf1 = MinCostMaxFlowDinic(2 * n + 5, START, END)
+mcmf2 = MinCostMaxFlowDinic(2 * n + 5, START, END)
 
 for i in range(n):
     nums = list(map(int, input().split()))

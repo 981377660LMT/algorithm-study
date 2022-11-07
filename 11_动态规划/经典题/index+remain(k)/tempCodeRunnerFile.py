@@ -1,2 +1,1 @@
-ccumulate(nums, initial=0))
-        return dfs(0, k)
+range(min(factory[fi][1] + 1, rLen - ri))

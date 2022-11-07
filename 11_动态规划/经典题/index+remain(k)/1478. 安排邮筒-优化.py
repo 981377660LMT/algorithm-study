@@ -2,6 +2,9 @@
 # 不同村庄的坐标不同，现在要在其中的 P 个村庄上建立邮局。
 
 # 请问如何安排邮局的位置可以使得每个村庄到其最近邮局的距离和最小，输出这个最小值。
+
+# !也可以最小费用最大流
+
 from functools import lru_cache
 from typing import List
 
@@ -13,7 +16,7 @@ class Solution:
         @lru_cache(None)
         def calDistance(left: int, right: int) -> int:
             """在[left,right]房子间放邮筒，返回最小距离之和。
-            
+
             中位数，也可以记忆化处理
             """
             if left >= right:
@@ -22,11 +25,12 @@ class Solution:
 
         @lru_cache(None)
         def dfs(pos: int, remain: int) -> int:
-            if remain == 1:
+            """当前在pos位置，还剩remain个邮筒要放"""
+            if remain == 1:  # !必须要放完了
                 return calDistance(pos, len(houses) - 1)
 
             res = int(1e20)
-            # 枚举分割点
+            # !枚举分割点
             for i in range(pos + 1, len(houses) - remain + 2):
                 res = min(res, calDistance(pos, i - 1) + dfs(i, remain - 1))
             return res
@@ -38,3 +42,4 @@ class Solution:
 # 1 <= n <= 100
 # 1 <= houses[i] <= 10^4
 # 1 <= k <= n
+print(Solution().minDistance([1, 4, 8, 10, 20], 3))

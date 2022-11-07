@@ -19,6 +19,7 @@ import (
 注意：**枚举时要做到不重不漏**
 */
 
+// TODO 分块数据结构模板
 /*
 分块数据结构
 https://oi-wiki.org/ds/decompose/

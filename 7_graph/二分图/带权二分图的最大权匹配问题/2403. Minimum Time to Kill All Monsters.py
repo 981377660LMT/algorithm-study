@@ -12,12 +12,14 @@ INF = int(1e18)
 class Solution:
     def minimumTime(self, power: List[int]) -> int:
         n = len(power)
-        adjMatrix = [[0] * n for _ in range(n)]  # !左边点代表poweri,右边点代表排列里的元素j
+        costMatrix = [[0] * n for _ in range(n)]  # !左边点代表poweri,右边点代表排列里的元素j
         for i in range(n):
             for j in range(n):
-                adjMatrix[i][j] = -ceil(power[i] / (j + 1))  # !当前击败怪物花费 ceil(power[i] / (j + 1)) 时间
-        km = KM(adjMatrix)
-        return -km.getResult()
+                costMatrix[i][j] = -ceil(
+                    power[i] / (j + 1)
+                )  # !当前击败怪物花费 ceil(power[i] / (j + 1)) 时间
+        km = KM(costMatrix)
+        return -km.getResult()[0]
 
     # 状压的dp写法
     def minimumTime2(self, power: List[int]) -> int:

@@ -6,9 +6,51 @@ type AdjList = [next: number, weight: number][][]
 const INF = 2e15
 
 /**
+ * spfa求单源`最短路`
+ * 如果有负环, 返回`null
+ *
+ * 适用于解决带有负权边的图,是Bellman-ford的常数优化版
+ */
+function spfa1(n: number, adjList: AdjList, start: number): number[] | null {
+  const dist = Array<number>(n).fill(INF)
+  dist[start] = 0
+  let queue = [start]
+  const inQueue = new Uint8Array(n)
+  inQueue[start] = 1
+  const count = new Uint32Array(n)
+
+  while (queue.length) {
+    const nextQueue: number[] = []
+    const step = queue.length
+    for (let _ = 0; _ < step; _++) {
+      const cur = queue.pop()!
+      inQueue[cur] = 0
+      for (let i = 0; i < adjList[cur].length; i++) {
+        const next = adjList[cur][i][0]
+        const weight = adjList[cur][i][1]
+        const cand = dist[cur] + weight
+        if (cand < dist[next]) {
+          dist[next] = cand
+          count[next] = count[cur] + 1
+          if (count[next] >= n) return null // 找到从起点出发可达的负环
+          if (!inQueue[next]) {
+            inQueue[next] = 1
+            nextQueue.push(next)
+          }
+        }
+      }
+    }
+
+    queue = nextQueue
+  }
+
+  return dist
+}
+
+/**
  * spfa求以`虚拟节点`为起点的单源`最长路` 并检测正环
  */
-function spfa1(n: number, adjList: AdjList): [ok: boolean, dist: number[]] {
+function spfa2(n: number, adjList: AdjList): [ok: boolean, dist: number[]] {
   const dist = Array<number>(n).fill(0)
   const inQueue = new Uint8Array(n).fill(1)
   const count = new Uint32Array(n)
@@ -44,45 +86,6 @@ function spfa1(n: number, adjList: AdjList): [ok: boolean, dist: number[]] {
   return [true, dist]
 }
 
-/**
- * spfa求单源`最短路`(图中有负边无负环)
- *
- * 适用于解决带有负权重的图,是Bellman-ford的常数优化版
- */
-function spfa2(n: number, adjList: AdjList, start: number): number[] {
-  const dist = Array<number>(n).fill(INF)
-  dist[start] = 0
-  let queue = [start]
-  const inQueue = new Uint8Array(n)
-  inQueue[start] = 1
-
-  while (queue.length) {
-    const nextQueue: number[] = []
-    const step = queue.length
-
-    for (let _ = 0; _ < step; _++) {
-      const cur = queue.pop()!
-      inQueue[cur] = 0
-      for (let i = 0; i < adjList[cur].length; i++) {
-        const next = adjList[cur][i][0]
-        const weight = adjList[cur][i][1]
-        const cand = dist[cur] + weight
-        if (cand < dist[next]) {
-          dist[next] = cand
-          if (!inQueue[next]) {
-            inQueue[next] = 1
-            nextQueue.push(next)
-          }
-        }
-      }
-    }
-
-    queue = nextQueue
-  }
-
-  return dist
-}
-
 if (require.main === module) {
   // LCP 32. 批量处理任务
   // https://leetcode.cn/problems/t3fKg1/
@@ -113,7 +116,7 @@ if (require.main === module) {
       adjList[i].push([i - 1, nums[i - 1] - nums[i]]) // i - (i-1) <= nums[i] - nums[i-1]
     }
 
-    const [ok, dist] = spfa1(n, adjList)
+    const [ok, dist] = spfa2(n, adjList)
     if (!ok) return -1
     return dist[n - 1]
   }

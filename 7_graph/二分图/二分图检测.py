@@ -1,36 +1,40 @@
 from collections import defaultdict
-from typing import DefaultDict, Generic, Hashable, Iterable, List, Literal, Optional, Set, TypeVar
+from typing import (
+    DefaultDict,
+    Generic,
+    Iterable,
+    List,
+    Optional,
+    TypeVar,
+)
 
-V = TypeVar("V", bound=Hashable)
 
-
-def isBipartite(adjMap: DefaultDict[V, Set[V]]) -> bool:
+def isBipartite(n: int, adjList: List[List[int]]) -> bool:
     """二分图检测 dfs染色"""
 
-    def dfs(cur: V, color: Literal[-1, 0, 1]) -> bool:
+    def dfs(cur: int, color: int) -> bool:
         colors[cur] = color
-        for next in adjMap[cur]:
+        for next in adjList[cur]:
             if colors[next] == -1:
-                if not dfs(next, color ^ 1):  # type: ignore
+                if not dfs(next, color ^ 1):
                     return False
             elif colors[next] == color:
                 return False
         return True
 
-    colors = defaultdict(lambda: -1)
-    for cur in adjMap:
-        if colors[cur] == -1:
-            if not dfs(cur, 0):
-                return False
+    colors = [-1] * n
+    for i in range(n):
+        if colors[i] == -1 and not dfs(i, 0):
+            return False
     return True
 
 
-def isBipartite2(adjMap: DefaultDict[int, Set[int]]) -> bool:
+def isBipartite2(n: int, adjList: List[List[int]]) -> bool:
     """二分图检测 扩展域并查集"""
     OFFSET = int(1e9)
-    uf = UnionFindMap()
-    for cur, nexts in adjMap.items():
-        for next in nexts:
+    uf = UnionFind()
+    for cur in range(n):
+        for next in adjList[cur]:
             uf.union(cur, next + OFFSET)
             uf.union(cur + OFFSET, next)
             if uf.isConnected(cur, next):
@@ -41,7 +45,7 @@ def isBipartite2(adjMap: DefaultDict[int, Set[int]]) -> bool:
 T = TypeVar("T")
 
 
-class UnionFindMap(Generic[T]):
+class UnionFind(Generic[T]):
     def __init__(self, iterable: Optional[Iterable[T]] = None):
         self.count = 0
         self.parent = dict()

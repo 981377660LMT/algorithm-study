@@ -12,13 +12,13 @@
 # 3. 判重数组 inQueue
 
 from collections import defaultdict, deque
-from typing import List, Mapping, Tuple
+from typing import List, Mapping, Optional, Tuple
 
 INF = int(1e18)
 
 
-def spfa1(n: int, adjMap: Mapping[int, Mapping[int, int]], start: int) -> List[int]:
-    """spfa求单源最短路(图中有负边无负环)
+def spfa1(n: int, adjMap: Mapping[int, Mapping[int, int]], start: int) -> Optional[List[int]]:
+    """spfa求单源最短路(图中有负边无负环,如果有负环则返回None)
 
     适用于解决带有负权重的图,是Bellman-ford的常数优化版
     """
@@ -27,15 +27,18 @@ def spfa1(n: int, adjMap: Mapping[int, Mapping[int, int]], start: int) -> List[i
     queue = deque([start])
     inQueue = [False] * n
     inQueue[start] = True
+    count = [0] * n
 
     while queue:
         cur = queue.popleft()
         inQueue[cur] = False
         for next in adjMap[cur]:
-            weight = adjMap[cur][next]
-            cand = dist[cur] + weight
+            cand = dist[cur] + adjMap[cur][next]
             if cand < dist[next]:  # 如果要最长路这里需要改成 >
                 dist[next] = cand
+                count[next] = count[cur] + 1
+                if count[next] >= n:  # 找到从起点出发可达的负环
+                    return None
                 if not inQueue[next]:
                     inQueue[next] = True
                     if queue and dist[next] < dist[queue[0]]:  # !酸辣粉优化 如果要最长路这里需要改成 >
@@ -90,4 +93,7 @@ if __name__ == "__main__":
         u, v = u - 1, v - 1
         adjMap[u][v] = min(adjMap[u][v], w)
     dist = spfa1(n, adjMap, 0)
+    if dist is None:
+        print("impossible")
+        exit(0)
     print(dist[n - 1] if dist[n - 1] != INF else "impossible")
