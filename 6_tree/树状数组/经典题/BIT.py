@@ -156,7 +156,7 @@ class BIT4:
         self.col = col
         self.tree = defaultdict(lambda: defaultdict(int))
 
-    def update(self, row: int, col: int, delta: int) -> None:
+    def add(self, row: int, col: int, delta: int) -> None:
         """矩阵中的点 (row,col) 的值加上delta"""
         row, col = row + 1, col + 1
         curRow = row
@@ -361,9 +361,9 @@ if __name__ == "__main__":
     print(bit3.query(4))  # 5 不可以修改原来的值(变小)
 
     bit4 = BIT4(100, 100)
-    bit4.update(0, 0, 2)
+    bit4.add(0, 0, 2)
     assert bit4.query(0, 0) == 2
-    bit4.update(1, 1, 2)
+    bit4.add(1, 1, 2)
     assert bit4.query(1, 1) == 4
 
     bit5 = BIT5(100, 100)
