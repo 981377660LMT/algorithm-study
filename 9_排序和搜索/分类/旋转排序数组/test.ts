@@ -7,3 +7,4 @@ console.log(
 )
 
 // console.log(str.match(/的(\d)+/g))
+export {}

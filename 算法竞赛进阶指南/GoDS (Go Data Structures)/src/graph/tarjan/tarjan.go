@@ -313,7 +313,7 @@ func findVertexBCC(graph [][]int, min func(int, int) int) (groups [][]int, vbccI
 			vbcc++
 			for _, v := range group {
 				if v = cutId[v]; v > 0 {
-					// add(v,w); add(w,v) ...
+					// add(vbcc,v); add(v,vbcc) ...
 				}
 			}
 		}

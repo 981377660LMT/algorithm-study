@@ -2,7 +2,10 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-// 题目要求：如果子树的哈希(结构)相同，则删除
+
+// 题目要求：
+// !1.如果子树的结构相同，则删除
+// !2.path.length <= 2e4 path[i].length <= 500 (限制了树的高度500 长链也不会TLE)
 
 // 0. 用一个多叉树来维护字符串信息
 // 1. dfs，子树哈希值记录到 Node 结点中
@@ -10,12 +13,10 @@
 
 class FileTreeNode {
   value: string
-  subtreeHash: string
-  children: Map<string, FileTreeNode>
+  subtreeHash = ''
+  children: Map<string, FileTreeNode> = new Map()
   constructor(value: string) {
     this.value = value
-    this.subtreeHash = ''
-    this.children = new Map()
   }
 }
 
@@ -51,7 +52,7 @@ function deleteDuplicateFolder(paths: string[][]): string[][] {
       subTree.push(dfs(child))
     }
 
-    subTree.sort()
+    subTree.sort() // !子树顺序不能对结果有影响
     root.subtreeHash = subTree.join('')
 
     // 叶子结点子树哈希值不计入counter

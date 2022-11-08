@@ -65,6 +65,11 @@ func SqrtDecompotision() {
 		}
 	}
 
+	// updateAll := func(l, r, add int) {}
+	// updatePart := func(l, r, add int) {}
+	// queryAll := func(l, r, k int) int { return 0 }
+	// queryPart := func(l, r, k int) int { return 0 }
+
 	// 区间更新或者区间查询
 	sqrtOp := func(left, right int, value int) { // [l,r], starts at 0
 		for i := range blocks {

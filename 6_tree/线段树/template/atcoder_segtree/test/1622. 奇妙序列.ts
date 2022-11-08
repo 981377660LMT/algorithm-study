@@ -65,3 +65,4 @@ class Fancy {
  * obj.multAll(m)
  * var param_4 = obj.getIndex(idx)
  */
+export {}

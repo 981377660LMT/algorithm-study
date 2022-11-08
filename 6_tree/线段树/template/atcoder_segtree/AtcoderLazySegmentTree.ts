@@ -92,7 +92,7 @@ function useAtcoderLazySegmentTree<S, F>(
   const _composition = operation.updateLazy
 
   const _n = typeof sizeOrArray === 'number' ? sizeOrArray : sizeOrArray.length
-  const _log = Math.ceil(Math.log2(_n))
+  const _log = 32 - Math.clz32(_n - 1)
   const _size = 1 << _log
   const _data = Array<S>(_size * 2).fill(_e())
   const _lazy = Array<F>(_size * 2).fill(_id())

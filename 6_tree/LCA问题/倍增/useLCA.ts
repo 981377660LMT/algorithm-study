@@ -50,7 +50,7 @@ function useLCA(n: number, tree: number[][], root = 0) {
         if (root === -1) return -1
       }
       bit++
-      k >>>= 1 // 注意:会被自动转为uint32
+      k >>>= 1 // 注意:会被转为uint32
     }
 
     return root

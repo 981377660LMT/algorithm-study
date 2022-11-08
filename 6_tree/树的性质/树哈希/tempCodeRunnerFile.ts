@@ -1,0 +1,1 @@
+base + hashes[next]

@@ -32,7 +32,7 @@ abstract class AbstractSegmentTree<S, F> {
 
   constructor(sizeOrArray: number | S[]) {
     this._n = typeof sizeOrArray === 'number' ? sizeOrArray : sizeOrArray.length
-    this._log = 1
+    this._log = 32 - Math.clz32(this._n - 1)
     while (this._log < this._n) {
       this._log *= 2
     }

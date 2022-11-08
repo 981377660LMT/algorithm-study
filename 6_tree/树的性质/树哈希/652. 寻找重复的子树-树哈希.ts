@@ -1,11 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-shadow */
 
-// 你需要以列表的形式返回上述重复子树的根结点。
-// 树哈希与树的同构
-function findDuplicateSubtrees(root: TreeNode | null): Array<TreeNode | null> {
+// 如果两棵树具有 相同的结构 和 相同的结点值 ，则认为二者是 重复 的。
+// 对于同一类的重复子树，你只需要返回其中任意 一棵 的根结点即可。
+// !注意题目要求子树对应位置也要一样
+// !n<=5000
+// !-200<=Node.val<=200
+
+// 解法1：n元组字符串表示子树 长链(n为1e5)时会TLE
+function findDuplicateSubtrees(root: TreeNode): Array<TreeNode | null> {
   // 获取每个节点的唯一识别
-  const counter = new Map<string, TreeNode[]>()
+  const counter = new Map<unknown, TreeNode[]>()
   const res: TreeNode[] = []
   dfs(root)
   for (const nodes of counter.values()) {
@@ -16,28 +22,47 @@ function findDuplicateSubtrees(root: TreeNode | null): Array<TreeNode | null> {
 
   function dfs(root: TreeNode | null): string {
     if (!root) return ''
+    const subTree = [String(root.val)] // !子树顺序对结果有影响,需要`#`分隔成n元组
+    subTree.push(dfs(root.left))
+    subTree.push(dfs(root.right))
 
-    const left = dfs(root.left)
-    const right = dfs(root.right)
-    const key = `${root.val}#${left}#${right}`
+    const key = subTree.join('#')
     !counter.has(key) && counter.set(key, [])
     counter.get(key)!.push(root)
     return key
   }
 }
 
-// 如果是多叉树呢？1948
-// function genHash(root: TrieNode, counter: Map<string, number>): void {
-//   // 这句话很关键
-//   if (root.children.size === 0) return
+// 解法2：优化
+// !使用`哈希值的编号`来代替很长的子树哈希 减少哈希值长度
+function findDuplicateSubtrees2(root: TreeNode | null): Array<TreeNode | null> {
+  const visited = new Map<string, [node: TreeNode, hashId: number][]>()
+  const res: TreeNode[] = []
+  let hashId = 0 // !代表不同哈希值的编号
+  dfs(root)
+  for (const nodes of visited.values()) {
+    if (nodes.length > 1) res.push(nodes[0][0])
+  }
 
-//   const sb: string[] = []
-//   for (const [childName, child] of root.children.entries()) {
-//     genHash(child, counter)
-//     sb.push(`${childName}(${child.subtreeHash})`)
-//   }
+  return res
 
-//   sb.sort()
-//   root.subtreeHash = sb.join('')
-//   counter.set(root.subtreeHash, (counter.get(root.subtreeHash) || 0) + 1)
-// }
+  function dfs(root: TreeNode | null): number {
+    if (!root) return 0
+    const subTree = [String(root.val)]
+    subTree.push(String(dfs(root.left)))
+    subTree.push(String(dfs(root.right)))
+
+    const key = subTree.join('#')
+    if (visited.has(key)) {
+      const pairs = visited.get(key)!
+      const curId = pairs[0][1]
+      pairs.push([root, curId])
+      return curId
+    }
+
+    hashId++
+    visited.set(key, [])
+    visited.get(key)!.push([root, hashId])
+    return hashId
+  }
+}

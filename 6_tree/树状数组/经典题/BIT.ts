@@ -13,29 +13,25 @@ import assert from 'assert'
  * 4. 树的高度为logn+1
  */
 class BIT1 {
-  readonly size: number
-  private readonly tree: Map<number, number> = new Map()
-
-  private static lowbit(x: number): number {
-    return x & -x
-  }
+  readonly _size: number
+  private readonly _tree: Map<number, number> = new Map()
 
   constructor(size: number) {
-    this.size = size
+    this._size = size
   }
 
   add(index: number, delta: number): void {
-    if (index <= 0) throw Error('index 应为正整数')
-    for (let i = index; i <= this.size; i += BIT1.lowbit(i)) {
-      this.tree.set(i, (this.tree.get(i) ?? 0) + delta)
+    if (index <= 0) throw RangeError(`add索引 ${index} 应为正整数`)
+    for (let i = index; i <= this._size; i += i & -i) {
+      this._tree.set(i, (this._tree.get(i) || 0) + delta)
     }
   }
 
   query(index: number): number {
-    if (index > this.size) index = this.size
+    if (index > this._size) index = this._size
     let res = 0
-    for (let i = index; i > 0; i -= BIT1.lowbit(i)) {
-      res += this.tree.get(i) ?? 0
+    for (let i = index; i > 0; i -= i & -i) {
+      res += this._tree.get(i) || 0
     }
     return res
   }
@@ -50,16 +46,12 @@ class BIT1 {
  * @see {@link https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.ts}
  */
 class BIT2 {
-  readonly size: number
-  private readonly tree1: Map<number, number> = new Map()
-  private readonly tree2: Map<number, number> = new Map()
-
-  private static lowbit(x: number): number {
-    return x & -x
-  }
+  readonly _size: number
+  private readonly _tree1: Map<number, number> = new Map()
+  private readonly _tree2: Map<number, number> = new Map()
 
   constructor(size: number) {
-    this.size = size
+    this._size = size
   }
 
   add(left: number, right: number, k: number): void {
@@ -72,20 +64,21 @@ class BIT2 {
   }
 
   private _add(index: number, delta: number): void {
-    if (index <= 0) throw Error('查询索引应为正整数')
-    for (let i = index; i <= this.size; i += BIT2.lowbit(i)) {
-      this.tree1.set(i, (this.tree1.get(i) ?? 0) + delta) // 此处进行了差分操作，记录差分操作大小
-      this.tree2.set(i, (this.tree2.get(i) ?? 0) + (index - 1) * delta) // 前x-1个数没有进行差分操作，这里把总值记录下来
+    if (index <= 0) throw RangeError(`add索引 ${index} 应为正整数`)
+    for (let i = index; i <= this._size; i += i & -i) {
+      // 此处进行了差分操作，记录差分操作大小
+      this._tree1.set(i, (this._tree1.get(i) || 0) + delta)
+      // 前x-1个数没有进行差分操作，这里把总值记录下来
+      this._tree2.set(i, (this._tree2.get(i) || 0) + (index - 1) * delta)
     }
   }
 
   private _query(index: number): number {
-    if (index > this.size) index = this.size
+    if (index > this._size) index = this._size
     let res = 0
-    for (let i = index; i > 0; i -= BIT2.lowbit(i)) {
-      res += index * (this.tree1.get(i) ?? 0) - (this.tree2.get(i) ?? 0)
+    for (let i = index; i > 0; i -= i & -i) {
+      res += index * (this._tree1.get(i) || 0) - (this._tree2.get(i) || 0)
     }
-
     return res
   }
 }
@@ -95,17 +88,13 @@ class BIT2 {
  * @see {@link https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.ts}
  */
 class BIT3 {
-  private readonly tree: Map<number, Map<number, number>> = new Map()
-  private readonly ROW: number
-  private readonly COL: number
+  private readonly _tree: Map<number, Map<number, number>> = new Map()
+  private readonly _ROW: number
+  private readonly _COL: number
 
   constructor(row: number, col: number) {
-    this.ROW = row
-    this.COL = col
-  }
-
-  private static lowbit(x: number): number {
-    return x & -x
+    this._ROW = row
+    this._COL = col
   }
 
   /**
@@ -113,9 +102,9 @@ class BIT3 {
    */
   update(row: number, col: number, delta: number): void {
     row++, col++
-    for (let r = row; r <= this.ROW; r += BIT3.lowbit(r)) {
-      for (let c = col; c <= this.COL; c += BIT3.lowbit(c)) {
-        this.addDeep(this.tree, r, c, delta)
+    for (let r = row; r <= this._ROW; r += r & -r) {
+      for (let c = col; c <= this._COL; c += c & -c) {
+        this._addDeep(this._tree, r, c, delta)
       }
     }
   }
@@ -125,12 +114,12 @@ class BIT3 {
    */
   query(row: number, col: number): number {
     row++, col++
-    if (row > this.ROW) row = this.ROW
-    if (col > this.COL) col = this.COL
+    if (row > this._ROW) row = this._ROW
+    if (col > this._COL) col = this._COL
     let res = 0
-    for (let r = row; r > 0; r -= BIT3.lowbit(r)) {
-      for (let c = col; c > 0; c -= BIT3.lowbit(c)) {
-        res += this.getDeep(this.tree, r, c)
+    for (let r = row; r > 0; r -= r & -r) {
+      for (let c = col; c > 0; c -= c & -c) {
+        res += this._getDeep(this._tree, r, c)
       }
     }
     return res
@@ -148,7 +137,7 @@ class BIT3 {
     )
   }
 
-  private addDeep(
+  private _addDeep(
     map: Map<number, Map<number, number>>,
     key1: number,
     key2: number,
@@ -156,13 +145,13 @@ class BIT3 {
   ): void {
     if (!map.has(key1)) map.set(key1, new Map())
     const innerMap = map.get(key1)!
-    innerMap.set(key2, (innerMap.get(key2) ?? 0) + delta)
+    innerMap.set(key2, (innerMap.get(key2) || 0) + delta)
   }
 
-  private getDeep(map: Map<number, Map<number, number>>, key1: number, key2: number): number {
+  private _getDeep(map: Map<number, Map<number, number>>, key1: number, key2: number): number {
     if (!map.has(key1)) return 0
     const innerMap = map.get(key1)!
-    return innerMap.get(key2) ?? 0
+    return innerMap.get(key2) || 0
   }
 }
 
@@ -171,20 +160,16 @@ class BIT3 {
  * @see {@link https://github.com/981377660LMT/algorithm-study/blob/master/6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.ts}
  */
 class BIT4 {
-  private readonly ROW: number
-  private readonly COL: number
-  private readonly tree1: Map<number, Map<number, number>> = new Map()
-  private readonly tree2: Map<number, Map<number, number>> = new Map()
-  private readonly tree3: Map<number, Map<number, number>> = new Map()
-  private readonly tree4: Map<number, Map<number, number>> = new Map()
+  private readonly _ROW: number
+  private readonly _COL: number
+  private readonly _tree1: Map<number, Map<number, number>> = new Map()
+  private readonly _tree2: Map<number, Map<number, number>> = new Map()
+  private readonly _tree3: Map<number, Map<number, number>> = new Map()
+  private readonly _tree4: Map<number, Map<number, number>> = new Map()
 
   constructor(row: number, col: number) {
-    this.ROW = row
-    this.COL = col
-  }
-
-  private static lowbit(x: number): number {
-    return x & -x
+    this._ROW = row
+    this._COL = col
   }
 
   /**
@@ -214,14 +199,14 @@ class BIT4 {
    */
   private update(row: number, col: number, delta: number): void {
     row++, col++
-    const [preRow, preCol] = [row, col]
-
-    for (let r = row; r <= this.ROW; r += BIT4.lowbit(r)) {
-      for (let c = col; c <= this.COL; c += BIT4.lowbit(c)) {
-        this.addDeep(this.tree1, r, c, delta)
-        this.addDeep(this.tree2, r, c, (preRow - 1) * delta)
-        this.addDeep(this.tree3, r, c, (preCol - 1) * delta)
-        this.addDeep(this.tree4, r, c, (preRow - 1) * (preCol - 1) * delta)
+    const preRow = row
+    const preCol = col
+    for (let r = row; r <= this._ROW; r += r & -r) {
+      for (let c = col; c <= this._COL; c += c & -c) {
+        this.addDeep(this._tree1, r, c, delta)
+        this.addDeep(this._tree2, r, c, (preRow - 1) * delta)
+        this.addDeep(this._tree3, r, c, (preCol - 1) * delta)
+        this.addDeep(this._tree4, r, c, (preRow - 1) * (preCol - 1) * delta)
       }
     }
   }
@@ -231,19 +216,20 @@ class BIT4 {
    */
   private query(row: number, col: number): number {
     row++, col++
-    if (row > this.ROW) row = this.ROW
-    if (col > this.COL) col = this.COL
+    if (row > this._ROW) row = this._ROW
+    if (col > this._COL) col = this._COL
 
-    const [preRow, preCol] = [row, col]
+    const preRow = row
+    const preCol = col
 
     let res = 0
-    for (let r = row; r > 0; r -= BIT4.lowbit(r)) {
-      for (let c = col; c > 0; c -= BIT4.lowbit(c)) {
+    for (let r = row; r > 0; r -= r & -r) {
+      for (let c = col; c > 0; c -= c & -c) {
         res +=
-          preRow * preCol * this.getDeep(this.tree1, r, c) -
-          preCol * this.getDeep(this.tree2, r, c) -
-          preRow * this.getDeep(this.tree3, r, c) +
-          this.getDeep(this.tree4, r, c)
+          preRow * preCol * this.getDeep(this._tree1, r, c) -
+          preCol * this.getDeep(this._tree2, r, c) -
+          preRow * this.getDeep(this._tree3, r, c) +
+          this.getDeep(this._tree4, r, c)
       }
     }
 
