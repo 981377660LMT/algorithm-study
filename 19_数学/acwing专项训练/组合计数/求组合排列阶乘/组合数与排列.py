@@ -4,11 +4,12 @@
 # 1.阶乘打表
 
 MOD = int(1e9 + 7)
-fac = [1]
-ifac = [1]
-for i in range(1, int(4e5) + 10):
-    fac.append((fac[-1] * i) % MOD)
-    ifac.append((ifac[-1] * pow(i, MOD - 2, MOD)) % MOD)
+N = int(4e5 + 10)
+fac = [1] * N
+ifac = [1] * N
+for i in range(1, N):
+    fac[i] = (fac[i - 1] * i) % MOD
+    ifac[i] = (ifac[i - 1] * pow(i, MOD - 2, MOD)) % MOD
 
 
 def C(n: int, k: int) -> int:

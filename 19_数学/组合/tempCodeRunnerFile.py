@@ -1,1 +1,0 @@
-combinations_with_replacement(c, 2)

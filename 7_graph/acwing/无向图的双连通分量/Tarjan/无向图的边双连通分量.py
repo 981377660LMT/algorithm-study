@@ -1,65 +1,3 @@
-# // e-BCC：删除无向图中所有的割边后，剩下的每一个 CC 都是 e-BCC
-# // 缩点后形成一颗 bridge tree
-# // 模板题 https://codeforces.com/problemset/problem/1000/E
-# // 较为综合的一道题 http://codeforces.com/problemset/problem/732/F
-# func findEdgeBCC(in io.Reader, n, m int) (groups [][]int, ebccId []int) {
-# 	type neighbor struct{ to, eid int }
-# 	type edge struct{ v, w int }
-# 	graph := make([][]neighbor, n)
-# 	edges := make([]edge, m)
-
-# 	// *copy* 包含读图
-# 	isBridge := findBridges(in, n, m)
-
-# 	// 求原图中每个点的 bccID
-# 	ebccId = make([]int, len(graph))
-# 	idCount := 0
-# 	var group []int
-# 	var dfs2 func(int)
-# 	dfs2 = func(cur int) {
-# 		ebccId[cur] = idCount
-# 		group = append(group, cur)
-# 		for _, e := range graph[cur] {
-# 			if next := e.to; !isBridge[e.eid] && ebccId[next] == 0 {
-# 				dfs2(next)
-# 			}
-# 		}
-# 	}
-
-# 	for i, id := range ebccId {
-# 		if id == 0 {
-# 			idCount++
-# 			group = []int{}
-# 			dfs2(i)
-# 			groups = append(groups, group)
-# 		}
-# 	}
-
-# 	{
-# 		// EXTRA: 缩点成树，复杂度 O(M)
-# 		// !ebcc1 - ebcc2 - ebcc3 - ...
-# 		graph2 := make([][]int, idCount)
-
-# 		// 遍历 edges，若两端点的 bccIDs 不同（割边）则建边
-# 		for _, e := range edges {
-# 			if v, w := ebccId[e.v]-1, ebccId[e.w]-1; v != w {
-# 				graph2[v] = append(graph2[v], w)
-# 				graph2[w] = append(graph2[w], v)
-# 			}
-# 		}
-
-# 		// 也可以遍历 isBridge，割边两端点 bccIDs 一定不同
-# 		for eid, b := range isBridge {
-# 			if b {
-# 				e := edges[eid]
-# 				v, w := ebccId[e.v]-1, ebccId[e.w]-1
-# 				graph2[v] = append(graph2[v], w)
-# 				graph2[w] = append(graph2[w], v)
-# 			}
-# 		}
-# 	}
-
-# 	return
 #  e-BCC：删除无向图中所有的割边后，剩下的每一个 CC 都是 e-BCC
 #  缩点后形成一颗 bridge tree
 #  模板题 https://codeforces.com/problemset/problem/1000/E
@@ -183,4 +121,10 @@ def toTree(n: int, edges: List[Tuple[int, int]]) -> List[List[int]]:
     return tree
 
 
-print(toTree(5, [(0, 1), (1, 2), (2, 3), (3, 4)]))
+if __name__ == "__main__":
+
+    assert toTree(5, [(0, 1), (1, 2), (2, 3), (3, 4)]) == [[1], [0, 2], [1, 3], [2, 4], [3]]
+    assert findEBCC(5, [(0, 1), (1, 2), (2, 3), (3, 4)]) == (
+        [[0], [1], [2], [3], [4]],
+        [0, 1, 2, 3, 4],
+    )

@@ -12,6 +12,11 @@ INF = int(1e18)
 
 
 class Solution:
+    def minimumTotalDistance3(self, robot: List[int], factory: List[List[int]]) -> int:
+        """堆+反悔  O(nlogn)"""
+        # https://leetcode.cn/problems/minimum-total-distance-traveled/solution/-by-meyi-vbl2/
+        ...
+
     def minimumTotalDistance(self, robot: List[int], factory: List[List[int]]) -> int:
         """dp[i][j] 表示前i个工厂处理前j个机器人的最小距离之和
 
@@ -65,11 +70,6 @@ class Solution:
         res = dfs(0, 0, 0)
         dfs.cache_clear()
         return res
-
-    def minimumTotalDistance3(self, robot: List[int], factory: List[List[int]]) -> int:
-        """堆+反悔 O(nlogn)"""
-        # https://leetcode.cn/problems/minimum-total-distance-traveled/solution/-by-meyi-vbl2/
-        ...
 
 
 print(Solution().minimumTotalDistance([1, 2, 3, 4, 5], [[1, 2], [3, 2], [4, 1]]))

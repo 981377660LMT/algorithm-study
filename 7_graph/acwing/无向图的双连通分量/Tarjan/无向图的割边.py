@@ -48,4 +48,13 @@ def findBridges(n: int, edges: List[Tuple[int, int]]) -> List[bool]:
     return isBridge
 
 
-print(findBridges(5, [(0, 1), (1, 2), (2, 3), (3, 4)]))
+if __name__ == "__main__":
+    print(findBridges(5, [(0, 1), (1, 2), (2, 3), (3, 4)]))
+
+    # https://leetcode.cn/problems/critical-connections-in-a-network/submissions/
+    class Solution:
+        def criticalConnections(self, n: int, connections: List[List[int]]) -> List[List[int]]:
+            isBridge = findBridges(n, connections)  # type: ignore
+            return [connections[i] for i, v in enumerate(isBridge) if v]
+
+    assert Solution().criticalConnections(4, [[0, 1], [1, 2], [2, 0], [1, 3]]) == [[1, 3]]

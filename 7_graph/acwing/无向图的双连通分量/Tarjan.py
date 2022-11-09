@@ -1,6 +1,10 @@
 # golang 实现：
 # !算法竞赛进阶指南/GoDS (Go Data Structures)/src/graph/tarjan/tarjan.go
 
+# !deprecated
+# !see:无向图的双连通分量/Tarjan
+
+
 from collections import defaultdict
 from typing import DefaultDict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 import sys

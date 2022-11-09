@@ -1,3 +1,14 @@
+/* eslint-disable no-console */
+
+// https://atcoder.jp/contests/abl/tasks/abl_e
+
+// 输入 n(≤2e5) 和 q(≤2e5)。
+// 初始有一个长为 n 的字符串 s，
+// !所有字符都是 1，s 的下标从 1 开始。
+// 然后输入 q 个替换操作，每个操作输入 L,R (1≤L≤R≤n) 和 d (1≤d≤9)。
+// !你需要把 s 的 [L,R] 内的所有字符替换为 d。
+// !对每个操作，把替换后的 s 看成一个十进制数，输出这个数模 998244353 的结果。
+
 package main
 
 import (
@@ -7,7 +18,42 @@ import (
 	"os"
 )
 
-// https://atcoder.jp/contests/practice2/tasks/practice2_l
+// https://atcoder.jp/contests/abl/tasks/abl_e
+
+const N int = 2e5 + 5
+const MOD int = 998244353
+
+var pow10 [N]int
+var pow10PreSum [N]int
+
+type Operation struct {
+	left, right, target int
+}
+
+func replaceDigits(n int, operations []Operation) []int {
+	// !预处理pow10 和 pow10PreSum
+	pow10[0] = 1
+	pow10PreSum[0] = 1
+	for i := 1; i <= n; i++ {
+		pow10[i] = (pow10[i-1] * 10) % MOD
+		pow10PreSum[i] = (pow10PreSum[i-1] + pow10[i]) % MOD
+	}
+
+	initNums := make([]S, n)
+	for i := range initNums {
+		initNums[i] = S{1, 1}
+	}
+
+	tree := NewLazySegTree(initNums)
+	res := make([]int, len(operations))
+	for i, op := range operations {
+		tree.Update(op.left-1, op.right, F(op.target))
+		res[i] = tree.QueryAll().Sum
+	}
+
+	return res
+}
+
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -15,34 +61,25 @@ func main() {
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	nums := make([]S, n)
-	for i := range nums {
-		var num int
-		fmt.Fscan(in, &num)
-		nums[i] = S{Zero: 1 - num, One: num}
+	// !每个操作 1<=L<=R<=n 1<=d<=9
+	operations := make([]Operation, q)
+	for i := range operations {
+		fmt.Fscan(in, &operations[i].left, &operations[i].right, &operations[i].target)
 	}
 
-	tree := NewLazySegTree(nums)
-	for i := 0; i < q; i++ {
-		var op uint8
-		var left, right int
-		fmt.Fscan(in, &op, &left, &right)
-		left--
-		if op == 1 {
-			tree.Update(left, right, true)
-		} else {
-			fmt.Fprintln(out, tree.Query(left, right).Inversion)
-		}
+	res := replaceDigits(n, operations)
+	for _, v := range res {
+		fmt.Fprintln(out, v)
 	}
 }
 
 // !线段树维护的值的类型
 type S struct {
-	Zero, One, Inversion int
+	Sum, Length int
 }
 
 // !更新操作的值的类型/懒标记的值的类型
-type F bool
+type F int
 
 // !线段树维护的值的幺元.
 //  alias: e
@@ -50,35 +87,35 @@ func (tree *LazySegTree) dataUnit() S { return S{} }
 
 // !更新操作/懒标记的幺元
 //  alias: id
-func (tree *LazySegTree) lazyUnit() F { return false }
+func (tree *LazySegTree) lazyUnit() F { return -1 }
 
 // !合并左右区间的值
 //  alias: op
 func (tree *LazySegTree) mergeChildren(left, right S) S {
 	return S{
-		Zero:      left.Zero + right.Zero,
-		One:       left.One + right.One,
-		Inversion: left.Inversion + right.Inversion + left.One*right.Zero,
+		Sum:    (left.Sum*pow10[right.Length] + right.Sum) % MOD,
+		Length: left.Length + right.Length,
 	}
 }
 
 // !父结点的懒标记更新子结点的值
 //  alias: mapping
 func (tree *LazySegTree) updateData(lazy F, data S) S {
-	if !lazy {
+	if lazy == -1 {
 		return data
 	}
-	return S{
-		Zero:      data.One,
-		One:       data.Zero,
-		Inversion: data.One*data.Zero - data.Inversion,
-	}
+
+	data.Sum = (int(lazy) * pow10PreSum[data.Length-1]) % MOD
+	return data
 }
 
 // !合并父结点的懒标记和子结点的懒标记
 //  alias: composition
 func (tree *LazySegTree) updateLazy(parentLazy, childLazy F) F {
-	return (parentLazy && !childLazy) || (!parentLazy && childLazy)
+	if parentLazy >= 0 {
+		return parentLazy
+	}
+	return childLazy
 }
 
 //

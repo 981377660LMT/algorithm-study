@@ -203,6 +203,7 @@ type node struct {
 	lazy Lazy
 }
 
+// https://nyaannyaan.github.io/library/rbst/treap.hpp
 type FHQTreap struct {
 	seed       uint
 	nodeId     int // 从1开始

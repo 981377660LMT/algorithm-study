@@ -1,0 +1,3 @@
+function useFHQTreap() {}
+
+export { useFHQTreap }

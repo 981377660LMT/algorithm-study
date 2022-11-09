@@ -55,7 +55,7 @@ class Solution:
         3. 除开一个数，其他所有数的出现次数都是 maxFreq, 且只有一个数出现次数是 1
         """
 
-        def check(size: int, maxFreq: int, freqCounter: "Counter") -> bool:
+        def check(size: int, maxFreq: int, freqCounter: "Counter[int]") -> bool:
             """size个元素, counter是元素出现次数, freqCounter是出现次数的频率"""
             if maxFreq == 1:
                 return True

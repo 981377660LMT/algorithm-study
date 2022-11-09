@@ -5,12 +5,14 @@
 # ai<=1e9
 # sum(ai)<=L<=1e15
 
-# 反过来合并操作 a,b 合并为 a+b 代价为 a+b
-# 哈夫曼编码 最后合并为长度为L的面包代价最小是多少
+# https://atcoder.jp/contests/abc252/submissions/36006064
+# 逆向思维，把分割看成合并。这样就转换成经典的 Huffman 问题，用最小堆实现。
+# !如果 sum(a) < L，可以把多余的面包额外当成一个新的小孩需要的。
 
 from heapq import heapify, heappop, heappush
 import sys
 import os
+
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -18,11 +20,11 @@ MOD = int(1e9 + 7)
 
 
 def main() -> None:
-    N, L = map(int, input().split())
+    _, L = map(int, input().split())
     nums = list(map(int, input().split()))
     sum_ = sum(nums)
     if sum_ < L:
-        nums.append(L - sum_)  # 有一段没加进去
+        nums.append(L - sum_)  # 把多余的面包额外当成一个新的小孩需要的。
     pq = nums[:]
     heapify(pq)
 

@@ -126,5 +126,10 @@ def toTree(n: int, graph: List[List[int]]) -> List[List[int]]:
     return tree
 
 
-print(findVBCC(5, [[1, 2], [0, 2], [0, 1, 3, 4], [2], [2]]))
-print(toTree(5, [[1, 2], [0, 2], [0, 1, 3, 4], [2], [2]]))
+if __name__ == "__main__":
+    assert findVBCC(5, [[1, 2], [0, 2], [0, 1, 3, 4], [2], [2]]) == (
+        [[2, 3], [2, 4], [2, 0, 1]],
+        [2, 2, 2, 0, 1],
+        [False, False, True, False, False],
+    )
+    assert toTree(5, [[1, 2], [0, 2], [0, 1, 3, 4], [2], [2]]) == [[3], [3], [3], [0, 1, 2]]

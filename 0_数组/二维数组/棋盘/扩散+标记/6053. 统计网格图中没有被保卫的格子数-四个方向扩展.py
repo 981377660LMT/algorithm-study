@@ -7,7 +7,7 @@ from typing import List
 DIRS4 = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 
 # 从空格出发：前后缀解法，对每个空格，看上下左右离它最近的首卫是不是比墙近(非常繁琐)
-# 从守卫出发：直接四个方向前进，碰到墙壁或者守卫就停下。这样为什么不会超时呢，因为每个点最多被每个行/列的守卫扫到两次，所以时间复杂度是 O(m*n) 的(更好的解法)
+# !从守卫出发：直接四个方向前进，碰到墙壁或者守卫就停下。这样为什么不会超时呢，因为每个点最多被每个行/列的守卫扫到两次，所以时间复杂度是 O(m*n) 的(更好的解法)
 # 这种扩散+染色visited的解法在
 
 
@@ -31,7 +31,7 @@ class Solution:
                         matrix[nr][nc] = 3
                         nr, nc = nr + dr, nc + dc
 
-        return sum(1 for r in range(row) for c in range(col) if matrix[r][c] == 0)
+        return sum(matrix[r][c] == 0 for r in range(row) for c in range(col))
 
     def countUnguarded2(
         self, m: int, n: int, guards: List[List[int]], walls: List[List[int]]
@@ -122,4 +122,3 @@ print(
     )
 )
 # print(Solution().countUnguarded(m=3, n=3, guards=[[1, 1]], walls=[[0, 1], [1, 0], [2, 1], [1, 2]]))
-

@@ -105,5 +105,9 @@ def toTree(n: int, graph: List[List[int]]) -> List[List[int]]:
     return adjList
 
 
-print(findSCC(5, [[1, 2], [2, 3], [3, 1], [4], []]))
-print(toTree(5, [[1, 2], [2, 3], [3, 1], [4], []]))
+if __name__ == "__main__":
+    assert findSCC(5, [[1, 2], [2, 3], [3, 1], [4], []]) == (
+        [[0], [2, 1], [3], [4]],
+        [0, 1, 1, 2, 3],
+    )
+    assert toTree(5, [[1, 2], [2, 3], [3, 1], [4], []]) == [[1, 1], [2, 2], [3], []]

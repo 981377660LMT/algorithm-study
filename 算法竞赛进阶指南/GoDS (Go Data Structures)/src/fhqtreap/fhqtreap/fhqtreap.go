@@ -68,8 +68,8 @@ func NewFHQTreap(nums []interface{}, comparator func(a, b interface{}) int) *FHQ
 //  0 <= left <= right < t.Len()
 func (t *FHQTreap) Reverse(left, right int) {
 	var x, y, z int
-	t.split(t.root, right+1, &x, &z)
-	t.split(x, left, &x, &y)
+	t.splitK(t.root, right+1, &x, &z)
+	t.splitK(x, left, &x, &y)
 	t.nodes[y].lazy ^= 1
 	t.root = t.merge(t.merge(x, y), z)
 }
@@ -95,7 +95,9 @@ func (t *FHQTreap) Len() int {
 }
 
 // 按照k(排名)分裂
-func (t *FHQTreap) split(root, k int, x, y *int) {
+// !有的语言不支持取指针 可以写成splitK函数返回x和y
+// https://nyaannyaan.github.io/library/rbst/treap.hpp.html
+func (t *FHQTreap) splitK(root, k int, x, y *int) {
 	if root == 0 {
 		*x, *y = 0, 0
 		return
@@ -106,10 +108,10 @@ func (t *FHQTreap) split(root, k int, x, y *int) {
 	if leftSize := t.nodes[t.nodes[root].left].size; k > leftSize {
 		k -= leftSize + 1
 		*x = root
-		t.split(t.nodes[root].right, k, &t.nodes[root].right, y)
+		t.splitK(t.nodes[root].right, k, &t.nodes[root].right, y)
 	} else {
 		*y = root
-		t.split(t.nodes[root].left, k, x, &t.nodes[root].left)
+		t.splitK(t.nodes[root].left, k, x, &t.nodes[root].left)
 	}
 
 	t.pushUp(root)

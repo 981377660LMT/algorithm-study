@@ -1,6 +1,7 @@
 const odd = [1, 2, 3, 4, 5]
 const even = [1, 2, 3, 4, 5, 6]
 
+// !求中位数
 function calMid(arr: number[]): number {
   arr = arr.slice().sort((a, b) => a - b)
   const n = arr.length

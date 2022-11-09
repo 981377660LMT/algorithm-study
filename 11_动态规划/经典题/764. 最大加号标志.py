@@ -4,15 +4,34 @@ from typing import List
 # mines 的最大长度为 5000.
 # 除了在 mines 中给出的单元为 0，其他每个单元都是 1。
 # 网格中包含 1 的最大的轴对齐加号标志是多少阶
+
+# 764. 最大加号标志
+# !预处理出每个点上下左右连续1的长度
+# 6053. 统计网格图中没有被保卫/守卫的格子数-四个方向扩展
+
+
 class Solution:
     def orderOfLargestPlusSign(self, n: int, mines: List[List[int]]) -> int:
-        grid = [[min(r, n - 1 - r, c, n - 1 - c) + 1 for c in range(n)] for r in range(n)]
-        for (x, y) in mines:
-            for i in range(n):
-                grid[i][y] = min(grid[i][y], abs(i - x))
-                grid[x][i] = min(grid[x][i], abs(i - y))
+        bad = set(map(tuple, mines))
+        ROW, COL = n, n
+        up = [[0] * COL for _ in range(ROW)]
+        down = [[0] * COL for _ in range(ROW)]
+        left = [[0] * COL for _ in range(ROW)]
+        right = [[0] * COL for _ in range(ROW)]
+        for r in range(ROW):
+            for c in range(COL):
+                if (r, c) not in bad:
+                    up[r][c] = up[r - 1][c] + 1 if r else 1
+                    left[r][c] = left[r][c - 1] + 1 if c else 1
+                if (ROW - 1 - r, COL - 1 - c) not in bad:
+                    down[ROW - 1 - r][COL - 1 - c] = down[ROW - r][COL - 1 - c] + 1 if r else 1
+                    right[ROW - 1 - r][COL - 1 - c] = right[ROW - 1 - r][COL - c] + 1 if c else 1
 
-        return max([max(row) for row in grid])
+        return max(
+            min(up[r][c], down[r][c], left[r][c], right[r][c])
+            for r in range(ROW)
+            for c in range(COL)
+        )
 
 
 print(Solution().orderOfLargestPlusSign(n=5, mines=[[4, 2]]))
@@ -36,13 +55,3 @@ print(Solution().orderOfLargestPlusSign(n=5, mines=[[4, 2]]))
 # 0001000
 # 0001000
 # 0000000
-
-
-# 总结：没有炸弹时只受边缘限制
-# 有炸弹需要考虑和炸弹同行列的情形
-# g[x][y] is the largest plus sign allowed centered at position (x, y). When no mines are presented, it is only limited by the boundary and should be something similar to
-# 1 1 1 1 1
-# 1 2 2 2 1
-# 1 2 3 2 1
-# 1 2 2 2 1
-# 1 1 1 1 1
