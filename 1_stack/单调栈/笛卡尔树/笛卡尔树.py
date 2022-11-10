@@ -100,7 +100,7 @@ if __name__ == "__main__":
         if rightChild2[insertIndex] != -1:
             preOrder2(rightChild2[insertIndex])
 
-    perm = [9, 3, 7, 1, 8, 12, 10, 20, 15, 18, 5]
+    perm = [9, 3, 7, 1, 8, 12, 10, 20, 15, 18, 5]  # !规定插入BST中的每个值都不同
     # !离散化到1-n
     allNums = sorted(set(perm))
     mapping = {num: i for i, num in enumerate(allNums, 1)}
