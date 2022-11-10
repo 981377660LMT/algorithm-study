@@ -2,8 +2,9 @@
 # !求floor(n/1)+floor(n/2)+floor(n/3)+...+floor(n/n)的值 (n<=1e12)
 
 # !数论分块 https://oi-wiki.org/math/number-theory/sqrt-decomposition/
-# 数论分块可以O(sqrt(n))快速计算一些含有除法向下取整的和式
+# 数论分块可以O(sqrt(n))快速计算一些含有`除法向下取整的和式`
 # 即将floor(n/i)相同的数打包同时计算
+# https://www.bilibili.com/video/BV1pP4y127tC/
 
 
 def floorSum(lower: int, upper: int, num: int) -> int:
