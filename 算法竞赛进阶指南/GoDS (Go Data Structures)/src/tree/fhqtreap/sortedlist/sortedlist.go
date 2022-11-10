@@ -12,7 +12,6 @@ func NewSortedList(comparator func(a, b interface{}) int, initCapacity int) *Sor
 		seed:       uint(time.Now().UnixNano()/2 + 1),
 		comparator: comparator,
 		nodes:      make([]node, max(initCapacity, 16)),
-		nodeId:     1,
 	}
 }
 
@@ -95,13 +94,25 @@ func (sl *SortedList) Len() int {
 }
 
 func (sl *SortedList) kthNode(root int, k int) int {
-	if k <= sl.nodes[sl.nodes[root].left].size {
-		return sl.kthNode(sl.nodes[root].left, k)
+	// if k <= sl.nodes[sl.nodes[root].left].size {
+	// 	return sl.kthNode(sl.nodes[root].left, k)
+	// }
+	// if k == sl.nodes[sl.nodes[root].left].size+1 {
+	// 	return root
+	// }
+	// return sl.kthNode(sl.nodes[root].right, k-sl.nodes[sl.nodes[root].left].size-1)
+	cur := root
+	for cur != 0 {
+		if sl.nodes[sl.nodes[cur].left].size+1 == k {
+			break
+		} else if sl.nodes[sl.nodes[cur].left].size >= k {
+			cur = sl.nodes[cur].left
+		} else {
+			k -= sl.nodes[sl.nodes[cur].left].size + 1
+			cur = sl.nodes[cur].right
+		}
 	}
-	if k == sl.nodes[sl.nodes[root].left].size+1 {
-		return root
-	}
-	return sl.kthNode(sl.nodes[root].right, k-sl.nodes[sl.nodes[root].left].size-1)
+	return cur
 }
 
 func (sl *SortedList) split(root int, value interface{}, x, y *int, strictLess bool) {

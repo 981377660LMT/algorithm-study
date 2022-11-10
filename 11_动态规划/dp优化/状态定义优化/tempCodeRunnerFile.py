@@ -1,0 +1,1 @@
+dp[p] for p in E.getPrimeFactors(nums[-1])

@@ -8,7 +8,7 @@ from collections import deque
 
 
 def check(s1: str, s2: str) -> bool:
-    """两棵树是否同构
+    """两棵有根树是否同构(对应子树位置可以不同)
 
     len(s1) == len(s2) <= 3000
 

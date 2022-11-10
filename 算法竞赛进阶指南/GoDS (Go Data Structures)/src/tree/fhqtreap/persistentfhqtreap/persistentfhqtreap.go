@@ -1,3 +1,4 @@
+// https://www.luogu.com.cn/problem/solution/P3835
 // TODO
 // !FIXME
 
@@ -41,7 +42,6 @@ type PersistentFHQTreap struct {
 func NewPersistentFHQTreap(comparator func(a, b interface{}) int, n int) *PersistentFHQTreap {
 	return &PersistentFHQTreap{
 		seed:       uint(time.Now().UnixNano()/2 + 1),
-		nodeId:     1,
 		comparator: comparator,
 		nodes:      make([]node, (50*n + 10)),
 	}

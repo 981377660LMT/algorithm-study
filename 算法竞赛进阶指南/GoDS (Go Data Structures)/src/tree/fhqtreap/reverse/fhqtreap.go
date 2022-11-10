@@ -37,7 +37,7 @@ type node struct {
 	value interface{}
 
 	// 有时候需要维护一些额外的信息(翻转区间等)
-	lazy int
+	isLazy int
 }
 
 type FHQTreap struct {
@@ -54,7 +54,6 @@ func NewFHQTreap(nums []interface{}, comparator func(a, b interface{}) int) *FHQ
 		seed:       uint(time.Now().UnixNano()/2 + 1),
 		comparator: comparator,
 		nodes:      make([]node, n+2),
-		nodeId:     1,
 	}
 
 	// !build
@@ -65,12 +64,14 @@ func NewFHQTreap(nums []interface{}, comparator func(a, b interface{}) int) *FHQ
 }
 
 // !翻转闭区间 [left, right] 的值 (0-indexed)
+// 将树分裂成 [1,left-1],[left,right],[right+1,n] 三个区间
+// 再将 [left,right] 区间翻转，再合并三个区间
 //  0 <= left <= right < t.Len()
 func (t *FHQTreap) Reverse(left, right int) {
 	var x, y, z int
 	t.splitK(t.root, right+1, &x, &z)
 	t.splitK(x, left, &x, &y)
-	t.nodes[y].lazy ^= 1
+	t.nodes[y].isLazy ^= 1
 	t.root = t.merge(t.merge(x, y), z)
 }
 
@@ -138,15 +139,15 @@ func (t *FHQTreap) merge(x, y int) int {
 }
 
 func (t *FHQTreap) pushDown(root int) {
-	if t.nodes[root].lazy == 0 {
+	if t.nodes[root].isLazy == 0 {
 		return
 	}
 
 	// !交换左右子树
 	t.nodes[root].left, t.nodes[root].right = t.nodes[root].right, t.nodes[root].left
-	t.nodes[t.nodes[root].left].lazy ^= 1
-	t.nodes[t.nodes[root].right].lazy ^= 1
-	t.nodes[root].lazy = 0
+	t.nodes[t.nodes[root].left].isLazy ^= 1
+	t.nodes[t.nodes[root].right].isLazy ^= 1
+	t.nodes[root].isLazy = 0
 }
 
 func (t *FHQTreap) pushUp(root int) {

@@ -1,12 +1,12 @@
 from collections import defaultdict
-from typing import Iterable, List, Mapping, Sequence, Tuple, Union
+from typing import Iterable, List, Mapping, Sequence, Union
 
 AdjList = Sequence[Iterable[int]]
 AdjMap = Mapping[int, Iterable[int]]
 Tree = Union[AdjList, AdjMap]
 
 
-def getCenter(n: int, tree: "Tree") -> Tuple[int, List[int]]:
+def getCenter(n: int, tree: "Tree", root=0) -> List[int]:
     """求重心"""
 
     def dfs(cur: int, pre: int) -> None:
@@ -16,16 +16,16 @@ def getCenter(n: int, tree: "Tree") -> Tuple[int, List[int]]:
                 continue
             dfs(next, cur)
             subsize[cur] += subsize[next]
-            maxsize[cur] = max(maxsize[cur], subsize[next])
-        maxsize[cur] = max(maxsize[cur], n - subsize[cur])
-        if maxsize[cur] <= n / 2:
+            weight[cur] = max(weight[cur], subsize[next])
+        weight[cur] = max(weight[cur], n - subsize[cur])
+        if weight[cur] <= n / 2:
             res.append(cur)
 
     res = []
-    maxsize = [0] * n  # 最大连通块大小
+    weight = [0] * n  # 节点的`重量`，即以该节点为根的子树的最大节点数
     subsize = [0] * n  # 子树大小
-    dfs(0, -1)
-    return maxsize[res[0]], res
+    dfs(root, -1)
+    return res
 
 
 if __name__ == "__main__":

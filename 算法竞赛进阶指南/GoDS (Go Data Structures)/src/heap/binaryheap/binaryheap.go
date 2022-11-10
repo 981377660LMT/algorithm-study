@@ -22,8 +22,7 @@ func main() {
 }
 
 func NewBinaryHeap(comparator Comparator, nums []interface{}) *BinaryHeap {
-	numsCopy := make([]interface{}, 0, len(nums))
-	numsCopy = append(numsCopy, nums...)
+	numsCopy := append([]interface{}{}, nums...)
 	heap := &BinaryHeap{comparator: comparator, data: numsCopy}
 	heap.heapify()
 	return heap
