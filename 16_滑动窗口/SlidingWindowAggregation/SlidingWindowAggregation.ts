@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 /**
- * !Slide Window Aggrigation
+ * !Sliding Window Aggregation
+ *
  * Api:
  *   1. append value to tail,O(1).
  *   2. pop value from head,O(1).
@@ -11,17 +12,17 @@
  * @param e unit element
  * @param op merge function
  */
-function slidingWindowAggrigation<E>(e: () => E, op: (a: E, b: E) => E) {
-  const stack0: E[] = []
-  const stack1: E[] = []
-  const stack2: E[] = []
-  const stack3: E[] = []
-  let e0 = e()
-  let e1 = e()
+function slidingWindowAggregation<E>(e: () => E, op: (a: E, b: E) => E) {
+  const _stack0: E[] = []
+  const _stack1: E[] = []
+  const _stack2: E[] = []
+  const _stack3: E[] = []
+  let _e0 = e()
+  let _e1 = e()
   let _size = 0
 
   function append(value: E): void {
-    if (!stack0.length) {
+    if (!_stack0.length) {
       _push0(value)
       _transfer()
     } else {
@@ -33,15 +34,15 @@ function slidingWindowAggrigation<E>(e: () => E, op: (a: E, b: E) => E) {
 
   function popLeft(): void {
     if (!_size) return
-    if (!stack0.length) _transfer()
-    stack0.pop()
-    stack2.pop()
-    e0 = stack2.length ? stack2[stack2.length - 1] : e()
+    if (!_stack0.length) _transfer()
+    _stack0.pop()
+    _stack2.pop()
+    _e0 = _stack2.length ? _stack2[_stack2.length - 1] : e()
     _size--
   }
 
   function query(): E {
-    return op(e0, e1)
+    return op(_e0, _e1)
   }
 
   return {
@@ -54,31 +55,31 @@ function slidingWindowAggrigation<E>(e: () => E, op: (a: E, b: E) => E) {
   }
 
   function _push0(value: E): void {
-    stack0.push(value)
-    e0 = op(value, e0)
-    stack2.push(e0)
+    _stack0.push(value)
+    _e0 = op(value, _e0)
+    _stack2.push(_e0)
   }
 
   function _push1(value: E): void {
-    stack1.push(value)
-    e1 = op(e1, value)
-    stack3.push(e1)
+    _stack1.push(value)
+    _e1 = op(_e1, value)
+    _stack3.push(_e1)
   }
 
   function _transfer(): void {
-    while (stack1.length) {
-      _push0(stack1.pop()!)
+    while (_stack1.length) {
+      _push0(_stack1.pop()!)
     }
-    while (stack3.length) stack3.pop()
-    e1 = e()
+    while (_stack3.length) _stack3.pop()
+    _e1 = e()
   }
 }
 
-export { slidingWindowAggrigation }
+export { slidingWindowAggregation }
 
 if (require.main === module) {
   const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b))
-  const window = slidingWindowAggrigation(() => 0, gcd)
+  const window = slidingWindowAggregation(() => 0, gcd)
   console.log(window.query())
   window.append(1)
   console.log(window.query())
@@ -96,7 +97,7 @@ if (require.main === module) {
 
   // 滑动窗口最大值
   function maxSlidingWindow(nums: number[], k: number): number[] {
-    const maxWindow = slidingWindowAggrigation(() => -2e15, Math.max)
+    const maxWindow = slidingWindowAggregation(() => -2e15, Math.max)
     const res: number[] = []
 
     for (let i = 0; i < nums.length; i++) {

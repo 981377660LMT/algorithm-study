@@ -40,7 +40,7 @@
      - [ArrayDeque (ts)](2_queue/Deque/ArrayDeque.ts)
      - [LinkedList (ts)](3_linkedList/LinkedList.ts)
    - [MonoQueue](2_queue/%E5%8D%95%E8%B0%83%E9%98%9F%E5%88%97Monoqueue/MonoQueue.py)
-   - [SlidingWindowAggrigation](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/SlidingWindowAggrigation/SlidingWindowAggrigation.py)
+   - [SlidingWindowAggregation](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/SlidingWindowAggregation/SlidingWindowAggregation.py)
 
 3. **LinkedList**
 

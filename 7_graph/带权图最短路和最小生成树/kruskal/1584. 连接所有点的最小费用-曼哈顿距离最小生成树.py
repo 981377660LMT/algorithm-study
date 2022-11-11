@@ -2,7 +2,7 @@
 # 1584. 连接所有点的最小费用
 # O(nlogn)曼哈顿距离最小生成树
 # https://leetcode.cn/problems/min-cost-to-connect-all-points/solution/lian-jie-suo-you-dian-de-zui-xiao-fei-yo-kcx7/
-
+# https://github.dev/EndlessCheng/codeforces-go/blob/cca30623b9ac0f3333348ca61b4894cd00b753cc/copypasta/graph.go#L1829
 
 from typing import List
 from 模板 import kruskal

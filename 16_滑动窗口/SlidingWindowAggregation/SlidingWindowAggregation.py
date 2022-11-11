@@ -4,8 +4,8 @@ from typing import Callable, Generic, List, TypeVar
 E = TypeVar("E")
 
 
-class SlidingWindowAggrigation(Generic[E]):
-    """SlidingWindowAggrigation
+class SlidingWindowAggregation(Generic[E]):
+    """SlidingWindowAggregation
 
     Api:
     1. append value to tail,O(1).
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     from math import gcd
 
     # 滑动窗口gcd
-    windowGcd = SlidingWindowAggrigation(lambda: 0, gcd)
+    windowGcd = SlidingWindowAggregation(lambda: 0, gcd)
 
     assert windowGcd.query() == 0
     windowGcd.append(4)
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
             n = len(nums)
             res = []
-            maxWindow = SlidingWindowAggrigation(lambda: -int(1e18), max)
+            maxWindow = SlidingWindowAggregation(lambda: -int(1e18), max)
             for right in range(n):
                 maxWindow.append(nums[right])
                 if right >= k:
