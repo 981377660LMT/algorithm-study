@@ -78,7 +78,7 @@ def findEBCC(n: int, edges: List[Tuple[int, int]]) -> Tuple[List[List[int]], Lis
     isBridge = findBridges(n, edges)
     # 求出原图中每个点的 e-BCC ID
     ebccId = [0] * n
-    idCount = -1
+    idCount = 0
     groups = []
 
     for i, order in enumerate(ebccId):
@@ -88,7 +88,7 @@ def findEBCC(n: int, edges: List[Tuple[int, int]]) -> Tuple[List[List[int]], Lis
             dfs2(i)
             groups.append(group)
 
-    return groups, ebccId
+    return groups, [v - 1 for v in ebccId]
 
 
 def toTree(n: int, edges: List[Tuple[int, int]]) -> List[List[int]]:
@@ -128,3 +128,7 @@ if __name__ == "__main__":
         [[0], [1], [2], [3], [4]],
         [0, 1, 2, 3, 4],
     )
+
+    # https://leetcode.cn/circle/discuss/1AjM9B/
+    edges = [(0, 1), (1, 2), (0, 5), (1, 4), (2, 3), (3, 4), (4, 5)]
+    print(findEBCC(6, edges))

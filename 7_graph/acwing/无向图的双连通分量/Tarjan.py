@@ -325,3 +325,10 @@ if __name__ == "__main__":
     for u, v in edges:
         adjMap2[u].add(v)
     assert Tarjan.getSCC(5, adjMap2)[2] == [2, 2, 2, 1, 0]
+
+    edges = [(0, 1), (1, 2), (0, 5), (1, 4), (2, 3), (3, 4), (4, 5)]
+    adjMap = defaultdict(set)
+    for u, v in edges:
+        adjMap[u].add(v)
+        adjMap[v].add(u)
+    print(Tarjan.getEBCC(6, adjMap)[1])

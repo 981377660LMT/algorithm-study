@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import List, Literal
+from typing import List
 
 # 834. 树中距离之和-换根dp
 
@@ -61,18 +61,18 @@ class Solution:
 
         dfs(0, -1)
 
-        def op(fromRes: int, parent: int, cur: int, direction: int) -> int:
+        def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
             if direction == 0:  # !从子结点向父结点更新dp1
                 return fromRes + subTreeCount[cur]
             return fromRes + (n - subTreeCount[cur])  # !从父结点向子结点更新dp2
 
-        def merge(childRes1: int, childRes2: int) -> int:
+        def op(childRes1: int, childRes2: int) -> int:
             return childRes1 + childRes2
 
         def e(root: int) -> int:
             return 0
 
-        res = R.rerooting(op, merge, e)
+        res = R.rerooting(e=e, op=op, composition=composition)
         return res
 
 

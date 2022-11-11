@@ -133,3 +133,11 @@ if __name__ == "__main__":
         [False, False, True, False, False],
     )
     assert toTree(5, [[1, 2], [0, 2], [0, 1, 3, 4], [2], [2]]) == [[3], [3], [3], [0, 1, 2]]
+
+    # https://leetcode.cn/circle/discuss/1AjM9B/
+    edges = [(0, 1), (1, 2), (0, 5), (1, 4), (2, 3), (3, 4), (4, 5)]
+    graph = [[] for _ in range(6)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+    print(findVBCC(6, graph=graph))

@@ -12,7 +12,6 @@
 # !因此求出每个点距离的特殊点的距离的最大值max，然后统计max<=d的点的数量即可
 
 import sys
-from typing import Literal
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -31,17 +30,17 @@ if __name__ == "__main__":
         pre -= 1
         R.addEdge(pre, cur)
 
-    def op(fromRes: int, parent: int, cur: int, direction: Literal[0, 1]) -> int:
-        return fromRes + 1
-
-    def merge(childRes1: int, childRes2: int) -> int:
-        return max(childRes1, childRes2)
-
     def e(root: int) -> int:
         """如果root不在starts中,返回-INF(因为统计的是距离特殊点的最大距离)"""
         if root in starts:
             return 0
         return -INF
 
-    maxDist = R.rerooting(op=op, merge=merge, e=e, root=0)  # maxDist[i]表示i点距离特殊点的最大距离
+    def op(childRes1: int, childRes2: int) -> int:
+        return max(childRes1, childRes2)
+
+    def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+        return fromRes + 1
+
+    maxDist = R.rerooting(e=e, op=op, composition=composition, root=0)  # maxDist[i]表示i点距离特殊点的最大距离
     print(sum(dist <= d for dist in maxDist))

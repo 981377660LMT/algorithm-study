@@ -1,2 +1,0 @@
-
-                    curCount, subCount = subCount, curCount

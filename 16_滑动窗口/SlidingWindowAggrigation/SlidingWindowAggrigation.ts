@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 /**
@@ -92,4 +93,22 @@ if (require.main === module) {
   console.log(window.query())
   window.popLeft()
   console.log(window.query())
+
+  // 滑动窗口最大值
+  function maxSlidingWindow(nums: number[], k: number): number[] {
+    const maxWindow = slidingWindowAggrigation(() => -2e15, Math.max)
+    const res: number[] = []
+
+    for (let i = 0; i < nums.length; i++) {
+      maxWindow.append(nums[i])
+      if (i >= k) {
+        maxWindow.popLeft()
+      }
+      if (i >= k - 1) {
+        res.push(maxWindow.query())
+      }
+    }
+
+    return res
+  }
 }

@@ -1,5 +1,4 @@
-from math import gcd
-from typing import Callable, Generic, TypeVar
+from typing import Callable, Generic, List, TypeVar
 
 
 E = TypeVar("E")
@@ -76,15 +75,34 @@ class SlidingWindowAggrigation(Generic[E]):
 
 
 if __name__ == "__main__":
+    from math import gcd
+
+    # 滑动窗口gcd
     windowGcd = SlidingWindowAggrigation(lambda: 0, gcd)
-    print(windowGcd.query())
+
+    assert windowGcd.query() == 0
     windowGcd.append(4)
-    print(windowGcd.query())
+    assert windowGcd.query() == 4
     windowGcd.append(6)
-    print(windowGcd.query())
+    assert windowGcd.query() == 2
     windowGcd.popleft()
-    print(windowGcd.query())
+    assert windowGcd.query() == 6
     windowGcd.popleft()
-    print(windowGcd.query())
+    assert windowGcd.query() == 0
     windowGcd.popleft()
-    print(windowGcd.size)
+    assert windowGcd.size == 0
+
+    # 大小为k的滑动窗口最大值
+
+    class Solution2:
+        def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+            n = len(nums)
+            res = []
+            maxWindow = SlidingWindowAggrigation(lambda: -int(1e18), max)
+            for right in range(n):
+                maxWindow.append(nums[right])
+                if right >= k:
+                    maxWindow.popleft()
+                if right >= k - 1:
+                    res.append(maxWindow.query())
+            return res
