@@ -20,11 +20,11 @@ class Solution:
         """矩阵乘法"""
         if n <= 3:
             return n
-        res = np.array([[2], [1]])
+        init = np.array([[2], [1]])
         trans = np.array([[1, 1], [1, 0]])
         tmp = matqpow(trans, n - 2, int(1e9 + 7))
-        res = tmp @ res
-        return int(res[0][0])
+        init = tmp @ init
+        return int(init[0][0])
 
 
 print(Solution().climbStairs(3))

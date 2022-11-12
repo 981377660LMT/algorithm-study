@@ -10,12 +10,12 @@ class SlidingWindowAggregation(Generic[E]):
     Api:
     1. append value to tail,O(1).
     2. pop value from head,O(1).
-    3. query aggrigated value in window,O(1).
+    3. query aggregated value in window,O(1).
     """
 
     __slots__ = ["_stack0", "_stack1", "_stack2", "_stack3", "_e0", "_e1", "_size", "_op", "_e"]
 
-    def __init__(self, e: Callable[[], E], _op: Callable[[E, E], E]):
+    def __init__(self, e: Callable[[], E], op: Callable[[E, E], E]):
         """
         Args:
             e: unit element
@@ -29,7 +29,7 @@ class SlidingWindowAggregation(Generic[E]):
         self._e0 = e()
         self._e1 = e()
         self._size = 0
-        self._op = _op
+        self._op = op
 
     def append(self, value: E) -> None:
         if not self._stack0:

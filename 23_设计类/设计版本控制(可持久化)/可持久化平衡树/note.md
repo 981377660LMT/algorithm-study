@@ -1,3 +1,6 @@
+golang 实现
+**GoDS (Go Data Structures)\src\tree\fhqtreap\persistentfhqtreap**
+
 [[模板] FHQ Treap 与可持久化平衡树](https://www.limstash.com/articles/201902/1231)
 
 Treap 和 Splay 是两种常用的平衡树，它们都通过旋转来保证树的平衡，从而使得每次查询的复杂度为均摊 O(logn)
@@ -10,9 +13,7 @@ Treap 和 Splay 是两种常用的平衡树，它们都通过旋转来保证树�
 因为 FHQ Treap **不需要旋转，因此可以支持可持久化(拓扑结构不发生变化)**，与其他可持久化数据结构一样，我们使用一个 root 数组来表示不同版本对应的根
 FHQ Treap 的持久化只需要**在 Split 过程中，基于原树复制一个一样的节点**，再进行操作
 
-https://github.dev/EndlessCheng/codeforces-go/blob/6d127a66c2a11651e8d11783af687264780e82a8/copypasta/treap.go#L21
-
 https://baobaobear.github.io/post/20191215-fhq-treap/
-// !163 普通平衡树 FHQ Treap https://www.bilibili.com/video/BV1kY4y1j7LC
-// 164 文艺平衡树 FHQ Treap https://www.bilibili.com/video/BV1pd4y1D7Nu
-// 169 可持久化平衡树 https://www.bilibili.com/video/BV1sB4y1L79D
+!163 普通平衡树 FHQ Treap https://www.bilibili.com/video/BV1kY4y1j7LC
+164 文艺平衡树 FHQ Treap https://www.bilibili.com/video/BV1pd4y1D7Nu
+169 可持久化平衡树 https://www.bilibili.com/video/BV1sB4y1L79D

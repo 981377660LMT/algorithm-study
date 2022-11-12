@@ -7,7 +7,7 @@
  * Api:
  *   1. append value to tail,O(1).
  *   2. pop value from head,O(1).
- *   3. query aggrigated value in window,O(1).
+ *   3. query aggregated value in window,O(1).
  *
  * @param e unit element
  * @param op merge function

@@ -31,7 +31,7 @@ class Solution:
             return nextState
 
         n = len(cells)
-        maxJ = floor(log2(k)) + 1
+        maxJ = k.bit_length()
         dp = [[0] * (1 << n) for _ in range(maxJ + 1)]  # dp[j][i] 表示第i天后2^j天的状态
 
         for i in range(1 << n):

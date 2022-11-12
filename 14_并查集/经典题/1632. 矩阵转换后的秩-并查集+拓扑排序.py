@@ -1,7 +1,7 @@
 from collections import defaultdict, deque
 from typing import List
 
-
+# 1632. 矩阵转换后的秩-并查集+拓扑排序
 # 给你一个 m x n 的矩阵 matrix ，请你返回一个新的矩阵 answer ，
 # 其中 answer[row][col] 是 matrix[row][col] 的`秩`。
 
@@ -107,4 +107,3 @@ class UnionFind:
 
 
 print(Solution().matrixRankTransform(matrix=[[1, 2], [3, 4]]))
-

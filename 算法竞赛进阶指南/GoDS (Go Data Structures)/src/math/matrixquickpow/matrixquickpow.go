@@ -1,14 +1,14 @@
 // 矩阵快速幂
-// https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/math_matrix.go#L70-L117
 
 package matrixquickpow
 
-type Matrix [][]int64
+// !https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/math_matrix.go#L70-L117
+type Matrix [][]int
 
 func NewMatrix(row, col int) Matrix {
 	res := make(Matrix, row)
 	for i := range res {
-		res[i] = make([]int64, col)
+		res[i] = make([]int, col)
 	}
 	return res
 }
@@ -16,13 +16,13 @@ func NewMatrix(row, col int) Matrix {
 func NewIdentityMatrix(n int) Matrix {
 	res := make(Matrix, n)
 	for i := range res {
-		res[i] = make([]int64, n)
+		res[i] = make([]int, n)
 		res[i][i] = 1
 	}
 	return res
 }
 
-func (matrix Matrix) Mul(other Matrix, mod int64) Matrix {
+func (matrix Matrix) Mul(other Matrix, mod int) Matrix {
 	res := NewMatrix(len(matrix), len(other[0]))
 	for i, row := range matrix {
 		for j := range other[0] {
@@ -37,7 +37,7 @@ func (matrix Matrix) Mul(other Matrix, mod int64) Matrix {
 	return res
 }
 
-func (matrix Matrix) Pow(exp int64, mod int64) Matrix {
+func (matrix Matrix) Pow(exp int, mod int) Matrix {
 	res := NewIdentityMatrix(len(matrix))
 	for ; exp > 0; exp >>= 1 {
 		if exp&1 > 0 {

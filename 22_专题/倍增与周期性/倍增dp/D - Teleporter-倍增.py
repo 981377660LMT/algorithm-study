@@ -3,7 +3,6 @@
 # N<=2e5 K<=1e18
 
 
-from math import floor, log2
 import sys
 
 input = sys.stdin.readline
@@ -17,7 +16,7 @@ nexts = [int(v) - 1 for v in input().split()]  # 町 i(1≤i≤N) のテレポ�
 
 
 # !解法二 倍增
-maxJ = floor(log2(k)) + 1
+maxJ = k.bit_length()
 # doubling[k][i] : 町 i から 2^k 先の町はどこか
 # 最后计算时将k二进制分解即可
 
@@ -38,4 +37,3 @@ for bit in range(maxJ + 1):
         res = dp[bit][res]
 
 print(res + 1)
-

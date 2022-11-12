@@ -11,8 +11,8 @@ import (
 
 func TestMatrix_Pow(t *testing.T) {
 	type args struct {
-		exp int64
-		mod int64
+		exp int
+		mod int
 	}
 	tests := []struct {
 		name   string

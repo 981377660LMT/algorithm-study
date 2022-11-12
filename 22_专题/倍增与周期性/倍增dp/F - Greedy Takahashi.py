@@ -14,7 +14,6 @@ dp[i][0] 可以用二分查找求出
 """
 
 
-from math import floor, log2
 import sys
 from sortedcontainers import SortedList
 
@@ -33,7 +32,7 @@ if __name__ == "__main__":
         bus.append((city1, city2, startTime, endTime))
         city[city1].add((startTime, i))
 
-    maxJ = floor(log2(m)) + 1
+    maxJ = m.bit_length()
     dp = [[-1] * (maxJ + 1) for _ in range(m + 1)]  # !dp[i][j] 表示乘坐编号为i的车后又换乘2^j辆车后乘坐的车的编号
     for i in range(m):
         city1, city2, startTime, endTime = bus[i]

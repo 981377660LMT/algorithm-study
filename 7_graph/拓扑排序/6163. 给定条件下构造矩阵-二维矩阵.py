@@ -4,6 +4,7 @@ from collections import deque
 
 # !多用数组来存图减小开销
 # !注意到行和列是正交的 因此可以分别处理拓扑序
+# !二维拓扑排序
 class Solution:
     def buildMatrix(
         self, k: int, rowConditions: List[List[int]], colConditions: List[List[int]]

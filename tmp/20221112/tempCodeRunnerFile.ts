@@ -1,0 +1,1 @@
+limit * (group - 1) - len1 - len2
