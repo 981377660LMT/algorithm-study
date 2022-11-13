@@ -26,7 +26,7 @@ func main() {
 
 type Node struct {
 	// !Raw value
-	raw int
+	element int
 
 	// !Data and lazy tag maintained by segment tree
 	sum     int
@@ -43,7 +43,7 @@ type Node struct {
 func (t *FHQTreap) pushUp(root int) {
 	node := t.nodes[root]
 	node.size = t.nodes[node.left].size + t.nodes[node.right].size + 1
-	node.sum = t.nodes[node.left].sum + t.nodes[node.right].sum + node.raw
+	node.sum = t.nodes[node.left].sum + t.nodes[node.right].sum + node.element
 }
 
 // Reverse first and then push down the lazy tag.
@@ -72,7 +72,7 @@ func (t *FHQTreap) pushDown(root int) {
 // !mapping + composition
 func (t *FHQTreap) propagate(root int, delta int) {
 	node := t.nodes[root]
-	node.raw += delta // need to update raw value (differs from segment tree)
+	node.element += delta // need to update raw value (differs from segment tree)
 	node.sum += delta * node.size
 	node.lazyAdd += delta
 }
@@ -111,7 +111,7 @@ func (t *FHQTreap) At(index int) int {
 	var x, y, z int
 	t.splitByRank(t.root, index, &y, &z)
 	t.splitByRank(y, index-1, &x, &y)
-	res := &t.nodes[y].raw
+	res := &t.nodes[y].element
 	t.root = t.merge(t.merge(x, y), z)
 	return *res
 }
@@ -155,7 +155,7 @@ func (t *FHQTreap) Pop(index int) int {
 	var x, y, z int
 	t.splitByRank(t.root, index, &y, &z)
 	t.splitByRank(y, index-1, &x, &y)
-	res := &t.nodes[y].raw
+	res := &t.nodes[y].element
 	t.root = t.merge(x, z)
 	return *res
 }
@@ -216,7 +216,7 @@ func (t *FHQTreap) inOrder(root int, res *[]int) {
 	}
 	t.pushDown(root) // !pushDown lazy tag
 	t.inOrder(t.nodes[root].left, res)
-	*res = append(*res, t.nodes[root].raw)
+	*res = append(*res, t.nodes[root].element)
 	t.inOrder(t.nodes[root].right, res)
 }
 
@@ -271,7 +271,7 @@ func (t *FHQTreap) newNode(data int) int {
 	node := &Node{
 		size:     1,
 		priority: t.fastRand(),
-		raw:      data,
+		element:  data,
 		sum:      data,
 	}
 	t.nodes = append(t.nodes, node)

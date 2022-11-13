@@ -1,5 +1,7 @@
 // An arraylist impleted by FHQTreap.
 //
+// 「強すぎてAtCoderRated出禁になった最強データ構造・平衡二分木のRBSTによる実装。」 —— nyaan
+//
 // Author:
 // https://github.com/981377660LMT/algorithm-study
 //
@@ -16,21 +18,86 @@ import (
 	"time"
 )
 
+const INF int = 1e18
+
 func main() {
+
 	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
-	treap := NewFHQTreap(nums)
+	// 区间更新：加上一个数，区间查询：区间最小值
+	treap := NewFHQTreap(nums, Operations{
+		elementMonoid: func() Element {
+			return INF
+		},
+		dataMonoid: func() Data {
+			return INF
+		},
+		lazyMonoid: func() Lazy {
+			return 0
+		},
+		op: func(a, b Data, e Element) Data {
+			return min(min(a, b), e)
+		},
+		mappingElement: func(lazy Lazy, element Element) Element {
+			return element + lazy
+		},
+		mappingData: func(lazy Lazy, data Data) Data {
+			return data + lazy
+		},
+		composition: func(lazy1 Lazy, lazy2 Lazy) Lazy {
+			return lazy1 + lazy2
+		},
+	})
+
 	fmt.Println(treap.At(0), treap)
 	treap.Reverse(0, 7)
 	fmt.Println(treap.InOrder(), treap)
+	fmt.Println(treap)
+	fmt.Println(treap.QueryAll(), treap.Query(1, 3))
+}
+
+// !Type and functions to be implemented.
+// type Element = interface{}
+// type Data = interface{}
+// type Lazy = interface{}
+type Element = int
+type Data = int
+type Lazy = int
+type Operations struct {
+	elementMonoid  func() Element
+	dataMonoid     func() Data
+	lazyMonoid     func() Lazy
+	op             func(leftData, rightData Data, element Element) Data
+	mappingData    func(lazy Lazy, data Data) Data
+	mappingElement func(lazy Lazy, element Element) Element
+	composition    func(parentLazy Lazy, childLazy Lazy) Lazy
+}
+
+// !Template
+//
+func NewFHQTreap(nums []Element, operations Operations) *FHQTreap {
+	treap := &FHQTreap{
+		seed:       uint(time.Now().UnixNano()/2 + 1),
+		nodes:      make([]*Node, 0, max(len(nums), 16)),
+		Operations: operations,
+	}
+
+	// dummy node 0
+	dummy := &Node{
+		size: 0, priority: treap.fastRand(),
+		element: treap.elementMonoid(), data: treap.dataMonoid(), lazy: treap.lazyMonoid(),
+	}
+	treap.nodes = append(treap.nodes, dummy)
+	treap.root = treap.build(1, len(nums), nums)
+	return treap
 }
 
 type Node struct {
 	// !Raw value
-	raw int
+	element Element
 
 	// !Data and lazy tag maintained by segment tree
-	sum     int
-	lazyAdd int
+	data Data
+	lazy Lazy
 
 	// FHQTreap inner attributes
 	left, right int
@@ -42,11 +109,11 @@ type Node struct {
 // !op
 func (t *FHQTreap) pushUp(root int) {
 	node := t.nodes[root]
+	node.data = t.op(t.nodes[node.left].data, t.nodes[node.right].data, node.element)
 	node.size = t.nodes[node.left].size + t.nodes[node.right].size + 1
-	node.sum = t.nodes[node.left].sum + t.nodes[node.right].sum + node.raw
 }
 
-// Reverse first and then push down the lazy tag.
+// !Reverse first and then push down the lazy tag.
 func (t *FHQTreap) pushDown(root int) {
 	node := t.nodes[root]
 
@@ -56,48 +123,30 @@ func (t *FHQTreap) pushDown(root int) {
 		node.isReversed = 0
 	}
 
-	// func (tree *LazySegTree) pushDown(root int) {
-	// 	tree.allApply(2*root, tree.lazy[root])
-	// 	tree.allApply(2*root+1, tree.lazy[root])
-	// 	tree.lazy[root] = tree.lazyUnit()
-	// }
-	if node.lazyAdd != 0 {
-		delta := node.lazyAdd
-		t.propagate(node.left, delta)
-		t.propagate(node.right, delta)
-		node.lazyAdd = 0
-	}
+	t.propagate(node.left, node.lazy)
+	t.propagate(node.right, node.lazy)
+	node.lazy = t.lazyMonoid()
 }
 
 // !mapping + composition
-func (t *FHQTreap) propagate(root int, delta int) {
+func (t *FHQTreap) propagate(root int, lazy Lazy) {
 	node := t.nodes[root]
-	node.raw += delta // need to update raw value (differs from segment tree)
-	node.sum += delta * node.size
-	node.lazyAdd += delta
+	node.element = t.mappingElement(lazy, node.element)
+	node.data = t.mappingData(lazy, node.data)
+	node.lazy = t.composition(lazy, node.lazy)
 }
 
 type FHQTreap struct {
 	seed  uint
 	root  int
 	nodes []*Node
+
+	// Segment-tree like operations
+	Operations
 }
 
-// Need to be modified according to the actual situation to implement a segment tree.
-func NewFHQTreap(nums []int) *FHQTreap {
-	treap := &FHQTreap{
-		seed:  uint(time.Now().UnixNano()/2 + 1),
-		nodes: make([]*Node, 0, max(len(nums), 16)),
-	}
-
-	dummy := &Node{size: 0, priority: treap.fastRand()} // 0 is dummy
-	treap.nodes = append(treap.nodes, dummy)
-	treap.root = treap.build(1, len(nums), nums)
-	return treap
-}
-
-// Return the value at the k-th position (0-indexed).
-func (t *FHQTreap) At(index int) int {
+// Return the element at the k-th position (0-indexed).
+func (t *FHQTreap) At(index int) Element {
 	n := t.Size()
 	if index < 0 {
 		index += n
@@ -111,7 +160,7 @@ func (t *FHQTreap) At(index int) int {
 	var x, y, z int
 	t.splitByRank(t.root, index, &y, &z)
 	t.splitByRank(y, index-1, &x, &y)
-	res := &t.nodes[y].raw
+	res := &t.nodes[y].element
 	t.root = t.merge(t.merge(x, y), z)
 	return *res
 }
@@ -125,13 +174,13 @@ func (t *FHQTreap) Reverse(start, stop int) {
 	t.root = t.merge(t.merge(x, y), z)
 }
 
-// Append value to the end of the list.
-func (t *FHQTreap) Append(value int) {
-	t.Insert(t.Size(), value)
+// Append element to the end of the list.
+func (t *FHQTreap) Append(element Element) {
+	t.Insert(t.Size(), element)
 }
 
-// Insert value before index.
-func (t *FHQTreap) Insert(index int, value int) {
+// Insert element before index.
+func (t *FHQTreap) Insert(index int, element Element) {
 	n := t.Size()
 	if index < 0 {
 		index += n
@@ -140,12 +189,12 @@ func (t *FHQTreap) Insert(index int, value int) {
 	index += 1 // dummy offset
 	var x, y, z int
 	t.splitByRank(t.root, index-1, &x, &y)
-	z = t.newNode(value)
+	z = t.newNode(element)
 	t.root = t.merge(t.merge(x, z), y)
 }
 
-// Remove and return item at index.
-func (t *FHQTreap) Pop(index int) int {
+// Remove and return element at index.
+func (t *FHQTreap) Pop(index int) Element {
 	n := t.Size()
 	if index < 0 {
 		index += n
@@ -155,7 +204,7 @@ func (t *FHQTreap) Pop(index int) int {
 	var x, y, z int
 	t.splitByRank(t.root, index, &y, &z)
 	t.splitByRank(y, index-1, &x, &y)
-	res := &t.nodes[y].raw
+	res := &t.nodes[y].element
 	t.root = t.merge(x, z)
 	return *res
 }
@@ -169,33 +218,33 @@ func (t *FHQTreap) Erase(start, stop int) {
 	t.root = t.merge(x, z)
 }
 
-// Update [start, stop) with value (defaults to range add).
+// Update [start, stop) with value .
 //  0 <= start <= stop <= n
 //  !alias:Apply
-func (t *FHQTreap) Update(start, stop int, delta int) {
+func (t *FHQTreap) Update(start, stop int, lazy Lazy) {
 	start++
 	var x, y, z int
 	t.splitByRank(t.root, stop, &y, &z)
 	t.splitByRank(y, start-1, &x, &y)
-	t.propagate(y, delta)
+	t.propagate(y, lazy)
 	t.root = t.merge(t.merge(x, y), z)
 }
 
-// Query [start, stop) (defaults to range sum).
+// Query data in [start, stop).
 //  0 <= start <= stop <= n
-func (t *FHQTreap) Query(start, stop int) int {
+func (t *FHQTreap) Query(start, stop int) Data {
 	start++
 	var x, y, z int
 	t.splitByRank(t.root, stop, &y, &z)
 	t.splitByRank(y, start-1, &x, &y)
-	res := t.nodes[y].sum
+	res := t.nodes[y].data
 	t.root = t.merge(t.merge(x, y), z)
 	return res
 }
 
-// Query [0, n) (defaults to range sum).
-func (t *FHQTreap) QueryAll() int {
-	return t.nodes[t.root].sum
+// Query data in [0, n).
+func (t *FHQTreap) QueryAll() Data {
+	return t.nodes[t.root].data
 }
 
 // Return the number of items in the list.
@@ -204,19 +253,19 @@ func (t *FHQTreap) Size() int {
 }
 
 // Return all elements in index order.
-func (t *FHQTreap) InOrder() []int {
-	res := make([]int, 0, t.Size())
+func (t *FHQTreap) InOrder() []Element {
+	res := make([]Element, 0, t.Size())
 	t.inOrder(t.root, &res)
 	return res
 }
 
-func (t *FHQTreap) inOrder(root int, res *[]int) {
+func (t *FHQTreap) inOrder(root int, res *[]Element) {
 	if root == 0 {
 		return
 	}
 	t.pushDown(root) // !pushDown lazy tag
 	t.inOrder(t.nodes[root].left, res)
-	*res = append(*res, t.nodes[root].raw)
+	*res = append(*res, t.nodes[root].element)
 	t.inOrder(t.nodes[root].right, res)
 }
 
@@ -267,19 +316,20 @@ func (t *FHQTreap) merge(x, y int) int {
 }
 
 // Add a new node and return its nodeId.
-func (t *FHQTreap) newNode(data int) int {
+func (t *FHQTreap) newNode(ele Element) int {
 	node := &Node{
 		size:     1,
 		priority: t.fastRand(),
-		raw:      data,
-		sum:      data,
+		element:  ele,
+		data:     t.dataMonoid(),
+		lazy:     t.lazyMonoid(),
 	}
 	t.nodes = append(t.nodes, node)
 	return len(t.nodes) - 1
 }
 
 // Build a treap from a slice and return the root nodeId. O(n).
-func (t *FHQTreap) build(left, right int, nums []int) int {
+func (t *FHQTreap) build(left, right int, nums []Element) int {
 	if left > right {
 		return 0
 	}
@@ -317,6 +367,13 @@ func (t *FHQTreap) fastRand() uint {
 
 func max(a, b int) int {
 	if a > b {
+		return a
+	}
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
 		return a
 	}
 	return b

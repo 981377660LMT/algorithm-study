@@ -8,6 +8,7 @@ import (
 )
 
 // TODO O(n) 笛卡尔建树
+// TODO 修复成 src/tree/fhqtreap/treaparray/TreapArray 的 newNode+dummmy 结点方法
 func NewSortedList(comparator func(a, b interface{}) int, initCapacity int) *SortedList {
 	return &SortedList{
 		seed:       uint(time.Now().UnixNano()/2 + 1),
