@@ -16,6 +16,14 @@ import (
 	"time"
 )
 
+func main() {
+	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
+	treap := NewFHQTreap(nums)
+	fmt.Println(treap.At(0), treap)
+	treap.Reverse(0, 7)
+	fmt.Println(treap.InOrder(), treap)
+}
+
 type Node struct {
 	// !Raw value
 	raw int
@@ -38,31 +46,35 @@ func (t *FHQTreap) pushUp(root int) {
 	node.sum = t.nodes[node.left].sum + t.nodes[node.right].sum + node.raw
 }
 
-// !mapping + composition
-func (t *FHQTreap) propagate(root int, delta int) {
-	node := t.nodes[root]
-	node.raw += delta
-	node.sum += delta * node.size
-	node.lazyAdd += delta
-}
-
+// Reverse first and then push down the lazy tag.
 func (t *FHQTreap) pushDown(root int) {
 	node := t.nodes[root]
 
 	if node.isReversed == 1 {
-		leftChild, rightChild := t.nodes[node.left], t.nodes[node.right]
-		leftChild, rightChild = rightChild, leftChild
-		leftChild.isReversed ^= 1
-		rightChild.isReversed ^= 1
+		t.toggle(node.left)
+		t.toggle(node.right)
 		node.isReversed = 0
 	}
 
-	if node.lazyAdd != 0 { // !lazy != identity()
+	// func (tree *LazySegTree) pushDown(root int) {
+	// 	tree.allApply(2*root, tree.lazy[root])
+	// 	tree.allApply(2*root+1, tree.lazy[root])
+	// 	tree.lazy[root] = tree.lazyUnit()
+	// }
+	if node.lazyAdd != 0 {
 		delta := node.lazyAdd
 		t.propagate(node.left, delta)
 		t.propagate(node.right, delta)
 		node.lazyAdd = 0
 	}
+}
+
+// !mapping + composition
+func (t *FHQTreap) propagate(root int, delta int) {
+	node := t.nodes[root]
+	node.raw += delta // need to update raw value (differs from segment tree)
+	node.sum += delta * node.size
+	node.lazyAdd += delta
 }
 
 type FHQTreap struct {
@@ -84,11 +96,6 @@ func NewFHQTreap(nums []int) *FHQTreap {
 	return treap
 }
 
-// Return the number of items in the list.
-func (t *FHQTreap) Size() int {
-	return t.nodes[t.root].size
-}
-
 // Return the value at the k-th position (0-indexed).
 func (t *FHQTreap) At(index int) int {
 	n := t.Size()
@@ -107,6 +114,15 @@ func (t *FHQTreap) At(index int) int {
 	res := &t.nodes[y].raw
 	t.root = t.merge(t.merge(x, y), z)
 	return *res
+}
+
+// Reverse [start, stop) in place.
+func (t *FHQTreap) Reverse(start, stop int) {
+	var x, y, z int
+	t.splitByRank(t.root, stop, &x, &z)
+	t.splitByRank(x, start, &x, &y)
+	t.toggle(y)
+	t.root = t.merge(t.merge(x, y), z)
 }
 
 // Append value to the end of the list.
@@ -153,20 +169,11 @@ func (t *FHQTreap) Erase(start, stop int) {
 	t.root = t.merge(x, z)
 }
 
-// Reverse [start, stop) in place.
-func (t *FHQTreap) Reverse(start, stop int) {
-	var x, y, z int
-	t.splitByRank(t.root, stop, &x, &z)
-	t.splitByRank(x, start, &x, &y)
-	t.nodes[y].left, t.nodes[y].right = t.nodes[y].right, t.nodes[y].left // !Reverse
-	t.nodes[y].isReversed ^= 1
-	t.root = t.merge(t.merge(x, y), z)
-}
-
 // Update [start, stop) with value (defaults to range add).
 //  0 <= start <= stop <= n
 //  !alias:Apply
 func (t *FHQTreap) Update(start, stop int, delta int) {
+	start++
 	var x, y, z int
 	t.splitByRank(t.root, stop, &y, &z)
 	t.splitByRank(y, start-1, &x, &y)
@@ -177,6 +184,7 @@ func (t *FHQTreap) Update(start, stop int, delta int) {
 // Query [start, stop) (defaults to range sum).
 //  0 <= start <= stop <= n
 func (t *FHQTreap) Query(start, stop int) int {
+	start++
 	var x, y, z int
 	t.splitByRank(t.root, stop, &y, &z)
 	t.splitByRank(y, start-1, &x, &y)
@@ -188,6 +196,28 @@ func (t *FHQTreap) Query(start, stop int) int {
 // Query [0, n) (defaults to range sum).
 func (t *FHQTreap) QueryAll() int {
 	return t.nodes[t.root].sum
+}
+
+// Return the number of items in the list.
+func (t *FHQTreap) Size() int {
+	return t.nodes[t.root].size
+}
+
+// Return all elements in index order.
+func (t *FHQTreap) InOrder() []int {
+	res := make([]int, 0, t.Size())
+	t.inOrder(t.root, &res)
+	return res
+}
+
+func (t *FHQTreap) inOrder(root int, res *[]int) {
+	if root == 0 {
+		return
+	}
+	t.pushDown(root) // !pushDown lazy tag
+	t.inOrder(t.nodes[root].left, res)
+	*res = append(*res, t.nodes[root].raw)
+	t.inOrder(t.nodes[root].right, res)
 }
 
 // Split by rank.
@@ -203,12 +233,12 @@ func (t *FHQTreap) splitByRank(root, k int, x, y *int) {
 	if k <= t.nodes[t.nodes[root].left].size {
 		*y = root
 		t.splitByRank(t.nodes[root].left, k, x, &t.nodes[root].left)
-		t.pushUp(*y)
 	} else {
 		*x = root
 		t.splitByRank(t.nodes[root].right, k-t.nodes[t.nodes[root].left].size-1, &t.nodes[root].right, y)
-		t.pushUp(*x)
 	}
+
+	t.pushUp(root)
 }
 
 // Make sure that the height of the resulting tree is at most O(log n).
@@ -261,6 +291,11 @@ func (t *FHQTreap) build(left, right int, nums []int) int {
 	return newNode
 }
 
+func (t *FHQTreap) toggle(root int) {
+	t.nodes[root].left, t.nodes[root].right = t.nodes[root].right, t.nodes[root].left
+	t.nodes[root].isReversed ^= 1
+}
+
 func (t *FHQTreap) String() string {
 	sb := []string{"TreapArray{"}
 	values := []string{}
@@ -280,12 +315,9 @@ func (t *FHQTreap) fastRand() uint {
 	return t.seed
 }
 
-func max(nums ...int) int {
-	res := nums[0]
-	for _, v := range nums[1:] {
-		if v > res {
-			res = v
-		}
+func max(a, b int) int {
+	if a > b {
+		return a
 	}
-	return res
+	return b
 }

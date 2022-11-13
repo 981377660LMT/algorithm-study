@@ -16,6 +16,14 @@ import (
 	"time"
 )
 
+func main() {
+	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
+	treap := NewFHQTreap(nums)
+	fmt.Println(treap.At(0), treap)
+	treap.Reverse(0, 7)
+	fmt.Println(treap.InOrder(), treap)
+}
+
 type Node struct {
 	// !Raw value
 	raw int
@@ -165,6 +173,7 @@ func (t *FHQTreap) Erase(start, stop int) {
 //  0 <= start <= stop <= n
 //  !alias:Apply
 func (t *FHQTreap) Update(start, stop int, delta int) {
+	start++
 	var x, y, z int
 	t.splitByRank(t.root, stop, &y, &z)
 	t.splitByRank(y, start-1, &x, &y)
@@ -175,6 +184,7 @@ func (t *FHQTreap) Update(start, stop int, delta int) {
 // Query [start, stop) (defaults to range sum).
 //  0 <= start <= stop <= n
 func (t *FHQTreap) Query(start, stop int) int {
+	start++
 	var x, y, z int
 	t.splitByRank(t.root, stop, &y, &z)
 	t.splitByRank(y, start-1, &x, &y)

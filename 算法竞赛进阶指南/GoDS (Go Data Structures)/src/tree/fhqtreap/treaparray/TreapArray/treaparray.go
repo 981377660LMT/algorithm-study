@@ -41,6 +41,12 @@ func main() {
 	fmt.Println(nums)
 	nums.Erase(1, 4)
 	fmt.Println(nums)
+	fmt.Println(nums.Query(2, 2))
+	fmt.Println(nums.QueryAll())
+	fmt.Println(nums.InOrder())
+	fmt.Println(nums.Query(2, 3))
+	nums.Update(2, 2, 100)
+	fmt.Println(nums)
 }
 
 type Node struct {
@@ -66,14 +72,6 @@ func (t *FHQTreap) pushUp(root int) {
 }
 
 // !Segment tree function.Need to be modified according to actual situation.
-func (t *FHQTreap) propagate(root int, delta int) {
-	node := t.nodes[root]
-	node.raw += delta
-	node.sum += delta * node.size
-	node.lazyAdd += delta
-}
-
-// !Segment tree function.Need to be modified according to actual situation.
 func (t *FHQTreap) pushDown(root int) {
 	node := t.nodes[root]
 	if node.lazyAdd != 0 {
@@ -82,6 +80,14 @@ func (t *FHQTreap) pushDown(root int) {
 		t.propagate(node.right, delta)
 		node.lazyAdd = 0
 	}
+}
+
+// !Segment tree function.Need to be modified according to actual situation.
+func (t *FHQTreap) propagate(root int, delta int) {
+	node := t.nodes[root]
+	node.raw += delta
+	node.sum += delta * node.size
+	node.lazyAdd += delta
 }
 
 type FHQTreap struct {
@@ -175,6 +181,7 @@ func (t *FHQTreap) Erase(start, stop int) {
 // Update [start, stop) with value (defaults to range add).
 //  0 <= start <= stop <= n
 func (t *FHQTreap) Update(start, stop int, delta int) {
+	start++
 	var x, y, z int
 	t.splitByRank(t.root, stop, &y, &z)
 	t.splitByRank(y, start-1, &x, &y)
@@ -185,6 +192,7 @@ func (t *FHQTreap) Update(start, stop int, delta int) {
 // Query [start, stop) (defaults to range sum).
 //  0 <= start <= stop <= n
 func (t *FHQTreap) Query(start, stop int) int {
+	start++
 	var x, y, z int
 	t.splitByRank(t.root, stop, &y, &z)
 	t.splitByRank(y, start-1, &x, &y)
@@ -225,15 +233,16 @@ func (t *FHQTreap) splitByRank(root, k int, x, y *int) {
 	}
 
 	t.pushDown(root)
+
 	if k <= t.nodes[t.nodes[root].left].size {
 		*y = root
 		t.splitByRank(t.nodes[root].left, k, x, &t.nodes[root].left)
-		t.pushUp(*y)
 	} else {
 		*x = root
 		t.splitByRank(t.nodes[root].right, k-t.nodes[t.nodes[root].left].size-1, &t.nodes[root].right, y)
-		t.pushUp(*x)
 	}
+
+	t.pushUp(root)
 }
 
 // Make sure that the height of the resulting tree is at most O(log n).

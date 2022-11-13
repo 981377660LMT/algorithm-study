@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func main() {
+func 文艺平衡树() {
 
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
