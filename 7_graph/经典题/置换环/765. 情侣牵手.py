@@ -12,6 +12,7 @@ from typing import DefaultDict, List, Set
 class Solution:
     def minSwapsCouples(self, nums: List[int]) -> int:
         """并查集寻找置换环
+
         如果我们有 k 对情侣形成了错误环，需要交换 k - 1 次才能让情侣牵手。
         问题转化成 n / 2 对情侣中，有多少个这样的环
         """

@@ -1,3 +1,215 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+	"time"
+)
+
+// TODO
+// !FIXME
+// https://nyaannyaan.github.io/library/rbst/treap.hpp
+// https://baobaobear.github.io/post/20191215-fhq-treap/
+
+// TODO
+// template<typename T>
+// struct FHQ_Treap
+// {
+//     struct data
+//     {
+//         T v;
+//         data(int _v = 0) :v(_v) {}
+//         data operator + (const data& d) const
+//         {
+//             data r;
+//             r.v = v + d.v;
+//             return r;
+//         }
+//         data operator * (int t) const
+//         {
+//             data r;
+//             r.v = v * t;
+//             return r;
+//         }
+//         operator bool() const { return v != 0; }
+//         operator T() const { return v; }
+//     };
+//     struct node
+//     {
+//         int ch[2], sz;
+//         unsigned k;
+//         data d, sum, lz_add;
+//         node(int z = 1) :sz(z), k(rnd()) { ch[0] = ch[1] = 0; }
+//         static unsigned rnd()
+//         {
+//             static unsigned r = 0x123;
+//             r = r * 69069 + 1;
+//             return r;
+//         }
+//     };
+//     vector<node> nodes;
+//     int root;
+//     int recyc;
+//     int reserve_size;
+//     void reserve()
+//     {
+//         if (size() >= reserve_size)
+//             nodes.reserve((reserve_size *= 2) + 1);
+//     }
+//     inline int& ch(int tp, int r) { return nodes[tp].ch[r]; }
+//     int new_node(const data& d)
+//     {
+//         int id = (int)nodes.size();
+//         if (recyc)
+//         {
+//             id = recyc;
+//             if (ch(recyc, 0) && ch(recyc, 1))
+//                 recyc = merge(ch(recyc, 0), ch(recyc, 1));
+//             else
+//                 recyc = ch(recyc, 0) ? ch(recyc, 0) : ch(recyc, 1);
+//             nodes[id] = node();
+//         }
+//         else nodes.push_back(node());
+//         nodes[id].d = d;
+//         nodes[id].sum = d;
+//         return id;
+//     }
+//     int update(int tp)
+//     {
+//         node& n = nodes[tp];
+//         n.sz = 1 + nodes[n.ch[0]].sz + nodes[n.ch[1]].sz;
+//         n.sum = n.d + nodes[n.ch[0]].sum + nodes[n.ch[1]].sum;
+//         return tp;
+//     }
+//     void add(int tp, const data& d)
+//     {
+//         node& n = nodes[tp];
+//         n.lz_add = n.lz_add + d;
+//         n.d = n.d + d;
+//         n.sum = n.sum + d * n.sz;
+//     }
+//     void pushdown(int tp)
+//     {
+//         node& n = nodes[tp];
+//         if (n.lz_add)
+//         {
+//             add(n.ch[0], n.lz_add); add(n.ch[1], n.lz_add);
+//             n.lz_add = 0;
+//         }
+//     }
+//     int merge(int tl, int tr)
+//     {
+//         if (!tl) return tr;
+//         else if (!tr) return tl;
+//         if (nodes[tl].k < nodes[tr].k)
+//         {
+//             pushdown(tl);
+//             ch(tl, 1) = merge(ch(tl, 1), tr);
+//             return update(tl);
+//         }
+//         else
+//         {
+//             pushdown(tr);
+//             ch(tr, 0) = merge(tl, ch(tr, 0));
+//             return update(tr);
+//         }
+//     }
+//     void split(int tp, int k, int &x, int &y)
+//     {
+//         if (!tp) { x = y = 0; return; }
+//         pushdown(tp);
+//         if (k <= nodes[ch(tp, 0)].sz)
+//         {
+//             y = tp;
+//             split(ch(tp, 0), k, x, ch(tp, 0));
+//             update(y);
+//         }
+//         else
+//         {
+//             x = tp;
+//             split(ch(tp, 1), k - nodes[ch(tp, 0)].sz - 1, ch(tp, 1), y);
+//             update(x);
+//         }
+//     }
+//     void remove(int& tp)
+//     {
+//         if (recyc == 0) recyc = tp;
+//         else recyc = merge(recyc, tp);
+//         tp = 0;
+//     }
+//     // interface
+//     void init(int size)
+//     {
+//         nodes.clear();
+//         nodes.reserve((size = max(size, 15)) + 1);
+//         nodes.push_back(node(0));
+//         root = 0;
+//         recyc = 0; reserve_size = size + 1;
+//     }
+//     T get(int id) { return nodes[id].d; }
+//     int size() { return nodes[root].sz; }
+//     int kth(int k)
+//     {
+//         int x, y, z;
+//         split(root, k, y, z); split(y, k - 1, x, y);
+//         int id = y;
+//         root = merge(merge(x, y), z);
+//         return id;
+//     }
+//     void insert(int k, data v)
+//     {
+//         int l, r;
+//         split(root, k - 1, l, r);
+//         int tp = new_node(v);
+//         root = merge(merge(l, tp), r);
+//     }
+//     void erase(int l, int r)
+//     {
+//         int x, y, z;
+//         split(root, r, y, z); split(y, l - 1, x, y);
+//         remove(y);
+//         root = merge(x, z);
+//     }
+//     void range_add(int l, int r, data v)
+//     {
+//         int x, y, z;
+//         split(root, r, y, z); split(y, l - 1, x, y);
+//         add(y, v);
+//         root = merge(merge(x, y), z);
+//     }
+//     T getsum(int l, int r)
+//     {
+//         int x, y, z;
+//         split(root, r, y, z); split(y, l - 1, x, y);
+//         T ret = nodes[y].sum;
+//         root = merge(merge(x, y), z);
+//         return ret;
+//     }
+// }
+
+func main() {
+	treapArray := NewFHQTreap(100)
+	nums := []int{}
+	fmt.Println(treapArray.Size())
+	for i := 0; i < 10; i++ {
+		nums = append(nums, i+12)
+	}
+	for i := 0; i < 10; i++ {
+		treapArray.Append(nums[i])
+	}
+	fmt.Println("num:", nums)
+	fmt.Println(treapArray)
+	fmt.Println(treapArray.Size(), treapArray.At(-1))
+	fmt.Println(treapArray.Size(), treapArray.At(treapArray.Size()-1))
+	treapArray.Insert(-1000, 100)
+	fmt.Println(treapArray)
+	fmt.Println(treapArray.Pop(0))
+	fmt.Println(treapArray)
+	treapArray.Erase(0, 1)
+	fmt.Println(treapArray)
+	fmt.Println(treapArray.At(0))
+}
+
 // An arraylist impleted by FHQTreap.
 //
 // Author:
@@ -8,26 +220,9 @@
 // https://nyaannyaan.github.io/library/rbst/treap.hpp
 // https://github.com/EndlessCheng/codeforces-go/blob/f9d97465d8b351af7536b5b6dac30b220ba1b913/copypasta/treap.go
 
-package main
-
-import (
-	"fmt"
-	"strings"
-	"time"
-)
-
-func _demo() {
-	nums := NewFHQTreap(16)
-	nums.Append(1)
-	fmt.Println(nums.At(0))
-	nums.Insert(1, 100)
-	nums.Update(0, 2, 10)
-	nums.Reverse(0, 1)
-	fmt.Println(nums.Query(0, 1), nums.QueryAll())
-	fmt.Println(nums.Pop(-1))
-	fmt.Println(nums.Size())
-	nums.Erase(0, 1)
-}
+type Raw = interface{}
+type Data = interface{}
+type Lazy = interface{}
 
 type Node struct {
 	// !Raw value
