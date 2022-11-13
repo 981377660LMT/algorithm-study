@@ -1,4 +1,4 @@
-// An arraylist impleted by FHQTreap.
+// An effective arraylist impleted by FHQTreap.
 //
 // Author:
 // https://github.com/981377660LMT/algorithm-study

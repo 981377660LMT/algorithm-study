@@ -20,10 +20,12 @@ import (
 	"time"
 )
 
+type int = int64
+
+const INF = int(1e12)
+
 // https://www.acwing.com/problem/content/268/
 func main() {
-	const INF int = 1e18
-
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -32,7 +34,7 @@ func main() {
 	fmt.Fscan(in, &n)
 
 	nums := make([]int, n)
-	for i := 0; i < n; i++ {
+	for i := int(0); i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
 
@@ -63,7 +65,7 @@ func main() {
 
 	var q int
 	fmt.Fscan(in, &q)
-	for i := 0; i < q; i++ {
+	for i := int(0); i < q; i++ {
 		var op string
 		fmt.Fscan(in, &op)
 		if op == "ADD" {
@@ -129,7 +131,7 @@ type Operations struct {
 func NewFHQTreap(nums []Element, operations Operations) *FHQTreap {
 	treap := &FHQTreap{
 		seed:       uint(time.Now().UnixNano()/2 + 1),
-		nodes:      make([]*Node, 0, max(len(nums), 16)),
+		nodes:      make([]*Node, 0, max(int(len(nums)), 16)),
 		Operations: operations,
 	}
 
@@ -139,7 +141,7 @@ func NewFHQTreap(nums []Element, operations Operations) *FHQTreap {
 		element: treap.elementMonoid(), data: treap.dataMonoid(), lazy: treap.lazyMonoid(),
 	}
 	treap.nodes = append(treap.nodes, dummy)
-	treap.root = treap.build(1, len(nums), nums)
+	treap.root = treap.build(1, int(len(nums)), nums)
 	return treap
 }
 
@@ -377,7 +379,7 @@ func (t *FHQTreap) newNode(ele Element) int {
 		lazy:     t.lazyMonoid(),
 	}
 	t.nodes = append(t.nodes, node)
-	return len(t.nodes) - 1
+	return int(len(t.nodes) - 1)
 }
 
 // Build a treap from a slice and return the root nodeId. O(n).
@@ -401,7 +403,7 @@ func (t *FHQTreap) toggle(root int) {
 func (t *FHQTreap) String() string {
 	sb := []string{"TreapArray{"}
 	values := []string{}
-	for i := 0; i < t.Size(); i++ {
+	for i := int(0); i < t.Size(); i++ {
 		values = append(values, fmt.Sprintf("%d", t.At(i)))
 	}
 	sb = append(sb, strings.Join(values, ","), "}")

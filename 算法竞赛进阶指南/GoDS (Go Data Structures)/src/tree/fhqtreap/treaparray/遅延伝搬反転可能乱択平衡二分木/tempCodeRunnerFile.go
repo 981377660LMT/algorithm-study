@@ -20,10 +20,10 @@ import (
 	"time"
 )
 
+const INF int = 1e18
+
 // https://www.acwing.com/problem/content/268/
 func main() {
-	const INF int = 1e18
-
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -61,6 +61,26 @@ func main() {
 		},
 	})
 
+	min := func(nums ...int) int {
+		if len(nums) == 0 {
+			return INF
+		}
+		res := nums[0]
+		for i := 1; i < len(nums); i++ {
+			if nums[i] < res {
+				res = nums[i]
+			}
+		}
+		return res
+	}
+	syncNums := append([]int(nil), nums...)
+	reverseRange := func(nums []int, left, right int) {
+		for left < right {
+			nums[left], nums[right] = nums[right], nums[left]
+			left++
+			right--
+		}
+	}
 	var q int
 	fmt.Fscan(in, &q)
 	for i := 0; i < q; i++ {
@@ -71,38 +91,67 @@ func main() {
 			fmt.Fscan(in, &left, &right, &add)
 			left--
 			treap.Update(left, right, add)
+
+			for j := left; j < right; j++ {
+				syncNums[j] += add
+			}
+			// fmt.Println(treap, "\n", syncNums)
+
 		} else if op == "REVERSE" {
 			var left, right int
 			fmt.Fscan(in, &left, &right)
 			left--
 			treap.Reverse(left, right)
+
+			right--
+			reverseRange(syncNums, left, right)
+			// fmt.Println(treap, "\n", syncNums)
 		} else if op == "REVOLVE" {
 			var left, right, k int
 			fmt.Fscan(in, &left, &right, &k)
 			left--
 			len_ := right - left
 			k %= len_
+			fmt.Println("Start revolve", left, right, k)
+			// fmt.Println(treap, "\n", syncNums)
 
 			// 区间 轮转k次
 			// !反转后k个元素+翻转前n-k个元素+翻转整个数组
 			treap.Reverse(right-k, right)
 			treap.Reverse(left, right-k)
 			treap.Reverse(left, right)
+
+			right--
+			reverseRange(syncNums, right-k+1, right)
+			reverseRange(syncNums, left, right-k)
+			reverseRange(syncNums, left, right)
+			// fmt.Println(treap, "\n", syncNums)
 		} else if op == "INSERT" {
 			var pos, val int
 			fmt.Fscan(in, &pos, &val)
 			pos--
-			treap.Insert(pos+1, val) // 插入到pos`之前`
+			treap.Insert(pos, val)
+
+			// syncNums = append(append([]int(nil), syncNums[:pos]...), append([]int{val}, syncNums[pos:]...)...)
+			// fmt.Println(treap, "\n", syncNums)
 		} else if op == "DELETE" {
 			var pos int
 			fmt.Fscan(in, &pos)
 			pos--
 			treap.Pop(pos)
+
+			// syncNums = append(append([]int(nil), syncNums[:pos]...), syncNums[pos+1:]...)
+			// fmt.Println(treap, "\n", syncNums)
 		} else if op == "MIN" {
 			var left, right int
 			fmt.Fscan(in, &left, &right)
 			left--
 			fmt.Fprintln(out, treap.Query(left, right))
+
+			// fmt.Println("Start query", left, right)
+			// fmt.Println(treap, "\n", syncNums)
+			// fmt.Println("Query result:", treap.Query(left, right))
+			// fmt.Println("Sync result:", min(syncNums[left:right]...))
 		}
 	}
 }
