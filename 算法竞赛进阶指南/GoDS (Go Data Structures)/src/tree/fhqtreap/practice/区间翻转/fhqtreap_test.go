@@ -1,6 +1,4 @@
-// https://baobaobear.github.io/post/20191215-fhq-treap/
-
-package rangeremove
+package main
 
 import "testing"
 

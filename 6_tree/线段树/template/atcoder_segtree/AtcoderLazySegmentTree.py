@@ -256,8 +256,10 @@ class AtcoderLazySegmentTree(Generic[S, F]):
         self._allApply(2 * root + 1, self._lazy[root])
         self._lazy[root] = self._id()
 
+    #  propagate
     def _allApply(self, root: int, parentLazy: "F") -> None:
         self._data[root] = self._mapping(parentLazy, self._data[root])
+        # !叶子结点不需要更新lazy
         if root < self._size:
             self._lazy[root] = self._composition(parentLazy, self._lazy[root])
 

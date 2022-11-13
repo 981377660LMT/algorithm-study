@@ -262,9 +262,10 @@ function useAtcoderLazySegmentTree<S, F>(
     _lazy[root] = _id()
   }
 
-  // pushDown辅助函数 更新子结点的lazy和data
+  // propagate 更新子结点的lazy和data
   function _allApply(root: number, parentLazy: F): void {
     _data[root] = _mapping(parentLazy, _data[root])
+    // !叶子结点不需要更新lazy
     if (root < _size) {
       _lazy[root] = _composition(parentLazy, _lazy[root])
     }

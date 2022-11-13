@@ -286,8 +286,10 @@ func (tree *LazySegTree) pushDown(root int) {
 	tree.lazy[root] = tree.lazyUnit()
 }
 
+// propagate
 func (tree *LazySegTree) allApply(root int, f F) {
 	tree.data[root] = tree.updateData(f, tree.data[root])
+	// !叶子结点不需要更新lazy
 	if root < tree.size {
 		tree.lazy[root] = tree.updateLazy(f, tree.lazy[root])
 	}

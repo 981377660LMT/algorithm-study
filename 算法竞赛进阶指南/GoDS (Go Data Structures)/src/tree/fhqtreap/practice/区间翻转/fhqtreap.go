@@ -10,7 +10,7 @@
 // FHQ Treap依靠分裂与合并两个操作来维护树的平衡,
 // !这种操作方式支持维护序列、区间操作、可持久化等特性。
 
-package fhqtreap
+package main
 
 import (
 	"fmt"
@@ -63,6 +63,20 @@ func NewFHQTreap(nums []interface{}, comparator func(a, b interface{}) int) *FHQ
 	return res
 }
 
+func (t *FHQTreap) pushDown(root int) {
+	if t.nodes[root].isLazy == 1 {
+		// !交换左右子树
+		t.nodes[root].left, t.nodes[root].right = t.nodes[root].right, t.nodes[root].left
+		t.nodes[t.nodes[root].left].isLazy ^= 1
+		t.nodes[t.nodes[root].right].isLazy ^= 1
+		t.nodes[root].isLazy = 0
+	}
+}
+
+func (t *FHQTreap) pushUp(root int) {
+	t.nodes[root].size = t.nodes[t.nodes[root].left].size + t.nodes[t.nodes[root].right].size + 1
+}
+
 // !翻转闭区间 [left, right] 的值 (0-indexed)
 // 将树分裂成 [1,left-1],[left,right],[right+1,n] 三个区间
 // 再将 [left,right] 区间翻转，再合并三个区间
@@ -71,6 +85,7 @@ func (t *FHQTreap) Reverse(left, right int) {
 	var x, y, z int
 	t.splitK(t.root, right+1, &x, &z)
 	t.splitK(x, left, &x, &y)
+	// t.nodes[y].left, t.nodes[y].right = t.nodes[y].right, t.nodes[y].left
 	t.nodes[y].isLazy ^= 1
 	t.root = t.merge(t.merge(x, y), z)
 }
@@ -136,22 +151,6 @@ func (t *FHQTreap) merge(x, y int) int {
 	t.nodes[y].left = t.merge(x, t.nodes[y].left)
 	t.pushUp(y)
 	return y
-}
-
-func (t *FHQTreap) pushDown(root int) {
-	if t.nodes[root].isLazy == 0 {
-		return
-	}
-
-	// !交换左右子树
-	t.nodes[root].left, t.nodes[root].right = t.nodes[root].right, t.nodes[root].left
-	t.nodes[t.nodes[root].left].isLazy ^= 1
-	t.nodes[t.nodes[root].right].isLazy ^= 1
-	t.nodes[root].isLazy = 0
-}
-
-func (t *FHQTreap) pushUp(root int) {
-	t.nodes[root].size = t.nodes[t.nodes[root].left].size + t.nodes[t.nodes[root].right].size + 1
 }
 
 func (t *FHQTreap) newNode(value interface{}) int {

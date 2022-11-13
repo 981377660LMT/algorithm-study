@@ -1,4 +1,6 @@
-package fhqtreap
+// https://www.luogu.com.cn/problem/P3391
+
+package main
 
 import (
 	"bufio"
