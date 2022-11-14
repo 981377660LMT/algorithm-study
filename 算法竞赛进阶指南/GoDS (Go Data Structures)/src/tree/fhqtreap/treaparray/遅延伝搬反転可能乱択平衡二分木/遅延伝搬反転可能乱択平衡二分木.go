@@ -70,9 +70,11 @@ type Element = int
 type Data = int
 type Lazy = int
 type Operations struct {
-	elementMonoid  func() Element
-	dataMonoid     func() Data
-	lazyMonoid     func() Lazy
+	elementMonoid func() Element
+	dataMonoid    func() Data
+	lazyMonoid    func() Lazy
+
+	// all immutable
 	op             func(leftData, rightData Data, element Element) Data
 	mappingData    func(lazy Lazy, data Data) Data
 	mappingElement func(lazy Lazy, element Element) Element

@@ -188,13 +188,13 @@ for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
 ## 禁用 GC
 
 ```go
-用的是指针写法，必要时禁止 GC，能加速不少
+如果用的是指针写法，必要时禁止 GC，能加速不少
 func init() { debug.SetGCPercent(-1) }
 ```
 
 **https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta**
 Golang 卡常技巧（IO 之外的部分）
-对于存在海量小对象的情况（如 trie, treap 等），使用 debug.SetGCPercent(-1) 来禁用 GC，能明显减少耗时
+对于存在`海量小对象`的情况（如 trie, treap 等），使用 debug.SetGCPercent(-1) 来禁用 GC，能明显减少耗时
 对于可以回收的情况（如 append 在超过 cap 时），使用 debug.SetGCPercent(-1) 虽然会减少些许耗时，但若有大量内存没被回收，会有 MLE 的风险
 其他情况下使用 debug.SetGCPercent(-1) 对耗时和内存使用无明显影响
 对于多组数据的情况，若禁用 GC 会 MLE，可在每组数据的开头或末尾调用 runtime.GC() 或 debug.FreeOSMemory() 手动 GC
