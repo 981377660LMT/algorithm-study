@@ -6,9 +6,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"time"
 )
 
@@ -28,39 +26,49 @@ import (
 
 // !哪里有问题
 func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+	// in := bufio.NewReader(os.Stdin)
+	// out := bufio.NewWriter(os.Stdout)
+	// defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
-	t := NewPersistentFHQTreap(func(a, b interface{}) int {
+	// var n int
+	// fmt.Fscan(in, &n)
+	// t := NewPersistentFHQTreap(func(a, b interface{}) int {
+	// 	return a.(int) - b.(int)
+	// }, n)
+
+	// roots := make([]int, n+5) // 保存每个版本的根节点
+	// for i := 0; i < n; i++ {
+	// 	var version, op, x int
+	// 	fmt.Fscan(in, &version, &op, &x)
+	// 	roots[i] = roots[version]
+	// 	switch op {
+	// 	case 1:
+	// 		newVersion := t.Add(&roots[i], x)
+	// 		fmt.Println(newVersion, op, "asa")
+	// 		roots[i] = newVersion
+	// 	case 2:
+	// 		newVersion := t.Discard(&roots[i], x)
+	// 		roots[i] = newVersion
+	// 	case 3:
+	// 		fmt.Fprintln(out, t.At(roots[i], x))
+	// 	case 4:
+	// 		fmt.Fprintln(out, t.BisectLeft(&roots[i], x))
+	// 	case 5:
+	// 		fmt.Fprintln(out, t.lower(&roots[i], x))
+	// 	case 6:
+	// 		fmt.Fprintln(out, t.upper(&roots[i], x))
+	// 	}
+	// }
+	sl := NewPersistentFHQTreap(func(a, b interface{}) int {
 		return a.(int) - b.(int)
-	}, n)
-
-	roots := make([]int, n+5) // 保存每个版本的根节点
-	for i := 0; i < n; i++ {
-		var version, op, x int
-		fmt.Fscan(in, &version, &op, &x)
-		roots[i] = roots[version]
-		switch op {
-		case 1:
-			newVersion := t.Add(&roots[i], x)
-			fmt.Println(newVersion, op, "asa")
-			roots[i] = newVersion
-		case 2:
-			newVersion := t.Discard(&roots[i], x)
-			roots[i] = newVersion
-		case 3:
-			fmt.Fprintln(out, t.At(roots[i], x))
-		case 4:
-			fmt.Fprintln(out, t.BisectLeft(&roots[i], x))
-		case 5:
-			fmt.Fprintln(out, t.lower(&roots[i], x))
-		case 6:
-			fmt.Fprintln(out, t.upper(&roots[i], x))
-		}
-	}
+	}, 1000)
+	roots := make([]int, 1000) // 保存每个版本的根节点
+	roots[0] = sl.Add(&roots[0], 1)
+	roots[0] = sl.Add(&roots[0], 2)
+	roots[0] = sl.Add(&roots[0], 3)
+	roots[1] = sl.Discard(&roots[0], 2)
+	roots[1] = sl.Add(&roots[1], 4)
+	fmt.Println(sl.At(roots[1], 1))
 }
 
 type node struct {
@@ -93,7 +101,7 @@ func NewPersistentFHQTreap(comparator func(a, b interface{}) int, n int) *Persis
 func (t *PersistentFHQTreap) Add(root *int, value interface{}) int {
 	var x, y, z int
 	t.split(*root, value, &x, &y, false)
-	t.newNode(&z, value)
+	z = t.newNode(value)
 	t.root = t.merge(t.merge(x, z), y)
 	return t.nodeId
 }
@@ -228,12 +236,13 @@ func (sl *PersistentFHQTreap) pushUp(root int) {
 	sl.nodes[root].size = sl.nodes[sl.nodes[root].left].size + sl.nodes[sl.nodes[root].right].size + 1
 }
 
-func (t *PersistentFHQTreap) newNode(x *int, value interface{}) {
+func (t *PersistentFHQTreap) newNode(value interface{}) int {
 	t.nodeId++
-	*x = t.nodeId
-	t.nodes[*x].value = value
-	t.nodes[*x].priority = t.fastRand()
-	t.nodes[*x].size = 1
+	id := t.nodeId
+	t.nodes[id].value = value
+	t.nodes[id].priority = t.fastRand()
+	t.nodes[id].size = 1
+	return id
 }
 
 func (t *PersistentFHQTreap) fastRand() uint {

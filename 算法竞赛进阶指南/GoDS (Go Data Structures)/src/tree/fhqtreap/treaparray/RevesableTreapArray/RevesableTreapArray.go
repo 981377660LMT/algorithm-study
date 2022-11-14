@@ -33,7 +33,6 @@ func main() {
 		nums.Reverse(0, i)
 	}
 	fmt.Println(time.Since(time1))
-	fmt.Println(nums.Size())
 }
 
 type Node struct {

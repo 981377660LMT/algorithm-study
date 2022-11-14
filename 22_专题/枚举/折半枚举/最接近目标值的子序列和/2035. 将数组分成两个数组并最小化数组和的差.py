@@ -10,9 +10,13 @@ INF = int(1e20)
 
 
 def subsetSum(nums: List[int]) -> DefaultDict[int, Set[int]]:
-    """O(2^n)求所有子集的可能和"""
+    """O(2^n)求所有非空子集的可能和
+
+    Returns:
+        defaultdict[int, set[int]]: 选取key个元素时的所有可能的子集和
+    """
     n = len(nums)
-    res = defaultdict(set, {0: set([0])})
+    res = defaultdict(set, {0: {0}})
     dp = [0] * (1 << n)
     for i in range(n):
         for pre in range(1 << i):

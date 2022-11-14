@@ -8,7 +8,7 @@ from typing import List, Set
 
 
 def subsetSum(nums: List[int]) -> Set[int]:
-    """O(2^n)求所有子集的可能和"""
+    """O(2^n)求所有`子集`的可能和(包含空集)"""
     dp = set({0})
     for cur in nums:
         dp |= {(cur + pre) for pre in (dp | {0})}
@@ -35,4 +35,3 @@ class Solution:
         n = len(nums)
         sums1, sums2 = sorted(subsetSum(nums[: n // 2])), sorted(subsetSum(nums[n // 2 :]))
         return twoSum(sums1, sums2, goal)
-

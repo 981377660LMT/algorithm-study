@@ -1,25 +1,13 @@
-from functools import lru_cache
+# 1049. 最后一块石头的重量 II
+
+
+from typing import List
+
+INF = int(1e20)
 
 
 class Solution:
-    def solve(self, nums):
-        @lru_cache(None)
-        def dfs(index: int, curSum: int) -> int:
-            if index >= len(nums):
-                return curSum
-
-            cur = nums[index]
-            #  If the sum is not negative we keep going with the reduced sum, otherwise we just skip the number
-            if curSum - 2 * cur < 0:
-                return dfs(index + 1, curSum)
-            return min(dfs(index + 1, curSum - 2 * cur), dfs(index + 1, curSum))
-
-        sum_ = sum(nums)
-        return dfs(0, sum_)
-
-
-class Solution2:
-    def solve(self, nums):
+    def lastStoneWeightII(self, nums: List[int]) -> int:
         dp = set([0])
         for num in nums:
             ndp = set()
@@ -28,12 +16,11 @@ class Solution2:
                 ndp.add(pre - num)
             dp = ndp
 
-        res = int(1e20)
+        res = INF
         for num in dp:
             if num >= 0:
                 res = min(res, num)
         return res
 
 
-print(Solution().solve(nums=[1, 2, 5]))
-
+print(Solution().lastStoneWeightII(nums=[1, 2, 5]))
