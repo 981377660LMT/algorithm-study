@@ -1,99 +1,104 @@
-// An effective arraylist implemented by FHQTreap.
-//
-// Author:
-// https://github.com/981377660LMT/algorithm-study
-//
-// Reference:
-// https://baobaobear.github.io/post/20191215-fhq-treap/
-// https://nyaannyaan.github.io/library/rbst/treap.hpp
-// https://github.com/EndlessCheng/codeforces-go/blob/f9d97465d8b351af7536b5b6dac30b220ba1b913/copypasta/treap.go
-
+// https://leetcode.cn/problems/longest-increasing-subsequence-ii/
 package main
 
 import (
 	"fmt"
-	"strings"
+	"math/rand"
 	"time"
 )
 
+// pushUp pushDown 次数太多了 为什么会有2e8次
+var pushUpCount int
+var pushDownCount int
+var newNodeCount int
+var splitCount int
+var mergeCount int
+
 func main() {
-	nums := NewFHQTreap([]int{})
-	time1 := time.Now()
-	for i := 0; i < 2e5; i++ {
-		nums.Append(i)
-		nums.Append(i)
-		nums.At(0)
-		nums.Insert(i, 100)
-		nums.Update(0, i, 10)
-		nums.Query(0, i)
-		nums.QueryAll()
-		nums.Pop(-1)
-		nums.Size()
-		nums.Erase(0, 1)
-		nums.Reverse(0, i)
+	// 5e4
+	// 5
+	nums := make([]int, 1e5)
+	for i := range nums {
+		if i <= 5e4 {
+			nums[i] = i + 5e4
+		} else {
+			nums[i] = 5e4
+		}
 	}
+
+	time1 := time.Now()
+	fmt.Println(lengthOfLIS(nums, 5e4))
 	fmt.Println(time.Since(time1))
-	fmt.Println(nums.Size())
+	fmt.Println("pushUpCount", pushUpCount)
+	fmt.Println("pushDownCount", pushDownCount)
+	fmt.Println("newNodeCount", newNodeCount)
+	fmt.Println("splitCount", splitCount)
+	fmt.Println("mergeCount", mergeCount)
+}
+
+func lengthOfLIS(nums []int, k int) int {
+	initNums := make([]int, 1e5)
+	// 更新:单点更新,查询:区间最大值
+	treap := NewFHQTreap(initNums)
+	for _, num := range nums {
+		preMax := treap.Query(max(0, num-k), num)
+		treap.Update(num, num+1, preMax+1)
+	}
+	return treap.QueryAll()
 }
 
 type Node struct {
 	// !Raw value
 	element int
 
-	// !Data and lazy tag maintained by segment tree
-	sum     int
-	lazyAdd int
+	// !Data and lazy tag maintained by segment tree (defaults to range sum)
+	max  int
+	lazy int
 
 	// FHQTreap inner attributes
 	left, right int
 	size        int
 	priority    uint
-	isReversed  uint8
 }
 
-// !op
+// !Segment tree function.Need to be modified according to actual situation.
 func (t *FHQTreap) pushUp(root int) {
+	pushUpCount++
 	node := t.nodes[root]
 	// If left or right is 0(dummy), it will update with monoid.
 	node.size = t.nodes[node.left].size + t.nodes[node.right].size + 1
-	node.sum = t.nodes[node.left].sum + t.nodes[node.right].sum + node.element
+	node.max = max(max(t.nodes[node.left].max, t.nodes[node.right].max), node.element)
 }
 
-// Reverse first and then push down the lazy tag.
+// !Segment tree function.Need to be modified according to actual situation.
 func (t *FHQTreap) pushDown(root int) {
+	pushDownCount++
 	node := t.nodes[root]
-
-	if node.isReversed == 1 {
-		t.toggle(node.left)
-		t.toggle(node.right)
-		node.isReversed = 0
-	}
-
-	if node.lazyAdd != 0 {
-		delta := node.lazyAdd
-		// !Not dummy node
+	if node.lazy != 0 {
+		delta := node.lazy
+		// !Not dummy
 		if node.left != 0 {
 			t.propagate(node.left, delta)
 		}
 		if node.right != 0 {
 			t.propagate(node.right, delta)
 		}
-		node.lazyAdd = 0
+		node.lazy = 0
 	}
 }
 
-// !mapping + composition
+// !Segment tree function.Need to be modified according to actual situation.
 func (t *FHQTreap) propagate(root int, delta int) {
 	node := t.nodes[root]
-	node.element += delta // need to update raw value (differs from segment tree)
-	node.sum += delta * node.size
-	node.lazyAdd += delta
+	node.element = max(node.element, delta)
+	node.max = max(node.max, delta)
+	node.lazy = max(node.lazy, delta)
 }
 
 type FHQTreap struct {
 	seed  uint
 	root  int
-	nodes []*Node
+	nodes []*Node // Use pointer to avoid copying
 }
 
 // Need to be modified according to the actual situation to implement a segment tree.
@@ -109,82 +114,13 @@ func NewFHQTreap(nums []int) *FHQTreap {
 	return treap
 }
 
-// Return the value at the k-th position (0-indexed).
-func (t *FHQTreap) At(index int) int {
-	n := t.Size()
-	if index < 0 {
-		index += n
-	}
-
-	if index < 0 || index >= n {
-		panic(fmt.Sprintf("index %d out of range [0,%d]", index, n-1))
-	}
-
-	index += 1 // dummy offset
-	var x, y, z int
-	t.splitByRank(t.root, index, &y, &z)
-	t.splitByRank(y, index-1, &x, &y)
-	res := &t.nodes[y].element
-	t.root = t.merge(t.merge(x, y), z)
-	return *res
-}
-
-// Reverse [start, stop) in place.
-func (t *FHQTreap) Reverse(start, stop int) {
-	var x, y, z int
-	t.splitByRank(t.root, stop, &x, &z)
-	t.splitByRank(x, start, &x, &y)
-	t.toggle(y)
-	t.root = t.merge(t.merge(x, y), z)
-}
-
-// Append value to the end of the list.
-func (t *FHQTreap) Append(value int) {
-	t.Insert(t.Size(), value)
-}
-
-// Insert value before index.
-func (t *FHQTreap) Insert(index int, value int) {
-	n := t.Size()
-	if index < 0 {
-		index += n
-	}
-
-	index += 1 // dummy offset
-	var x, y, z int
-	t.splitByRank(t.root, index-1, &x, &y)
-	z = t.newNode(value)
-	t.root = t.merge(t.merge(x, z), y)
-}
-
-// Remove and return item at index.
-func (t *FHQTreap) Pop(index int) int {
-	n := t.Size()
-	if index < 0 {
-		index += n
-	}
-
-	index += 1 // dummy offset
-	var x, y, z int
-	t.splitByRank(t.root, index, &y, &z)
-	t.splitByRank(y, index-1, &x, &y)
-	res := &t.nodes[y].element
-	t.root = t.merge(x, z)
-	return *res
-}
-
-// Remove [start, stop) from list.
-func (t *FHQTreap) Erase(start, stop int) {
-	var x, y, z int
-	start++ // dummy offset
-	t.splitByRank(t.root, stop, &y, &z)
-	t.splitByRank(y, start-1, &x, &y)
-	t.root = t.merge(x, z)
+// Return the number of items in the list.
+func (t *FHQTreap) Size() int {
+	return t.nodes[t.root].size
 }
 
 // Update [start, stop) with value (defaults to range add).
 //  0 <= start <= stop <= n
-//  !alias:Apply
 func (t *FHQTreap) Update(start, stop int, delta int) {
 	start++
 	var x, y, z int
@@ -201,36 +137,14 @@ func (t *FHQTreap) Query(start, stop int) int {
 	var x, y, z int
 	t.splitByRank(t.root, stop, &y, &z)
 	t.splitByRank(y, start-1, &x, &y)
-	res := t.nodes[y].sum
+	res := t.nodes[y].max
 	t.root = t.merge(t.merge(x, y), z)
 	return res
 }
 
 // Query [0, n) (defaults to range sum).
 func (t *FHQTreap) QueryAll() int {
-	return t.nodes[t.root].sum
-}
-
-// Return the number of items in the list.
-func (t *FHQTreap) Size() int {
-	return t.nodes[t.root].size
-}
-
-// Return all elements in index order.
-func (t *FHQTreap) InOrder() []int {
-	res := make([]int, 0, t.Size())
-	t.inOrder(t.root, &res)
-	return res
-}
-
-func (t *FHQTreap) inOrder(root int, res *[]int) {
-	if root == 0 {
-		return
-	}
-	t.pushDown(root) // !pushDown lazy tag
-	t.inOrder(t.nodes[root].left, res)
-	*res = append(*res, t.nodes[root].element)
-	t.inOrder(t.nodes[root].right, res)
+	return t.nodes[t.root].max
 }
 
 // Split by rank.
@@ -242,8 +156,11 @@ func (t *FHQTreap) splitByRank(root, k int, x, y *int) {
 		return
 	}
 
+	splitCount++
 	t.pushDown(root)
+
 	if k <= t.nodes[t.nodes[root].left].size {
+		// fmt.Println(k, t.nodes[t.nodes[root].left].size)
 		*y = root
 		t.splitByRank(t.nodes[root].left, k, x, &t.nodes[root].left)
 	} else {
@@ -266,6 +183,7 @@ func (t *FHQTreap) merge(x, y int) int {
 		return x
 	}
 
+	mergeCount++
 	if t.nodes[x].priority < t.nodes[y].priority {
 		t.pushDown(x)
 		t.nodes[x].right = t.merge(t.nodes[x].right, y)
@@ -281,11 +199,12 @@ func (t *FHQTreap) merge(x, y int) int {
 
 // Add a new node and return its nodeId.
 func (t *FHQTreap) newNode(data int) int {
+	newNodeCount++
 	node := &Node{
 		size:     1,
-		priority: t.fastRand(),
+		priority: uint(rand.Uint64()),
 		element:  data,
-		sum:      data,
+		max:      data,
 	}
 	t.nodes = append(t.nodes, node)
 	return len(t.nodes) - 1
@@ -304,20 +223,36 @@ func (t *FHQTreap) build(left, right int, nums []int) int {
 	return newNode
 }
 
-func (t *FHQTreap) toggle(root int) {
-	t.nodes[root].left, t.nodes[root].right = t.nodes[root].right, t.nodes[root].left
-	t.nodes[root].isReversed ^= 1
-}
+// // Return the value at the k-th position (0-indexed).
+// func (t *FHQTreap) At(index int) int {
+// 	n := t.Size()
+// 	if index < 0 {
+// 		index += n
+// 	}
 
-func (t *FHQTreap) String() string {
-	sb := []string{"TreapArray{"}
-	values := []string{}
-	for i := 0; i < t.Size(); i++ {
-		values = append(values, fmt.Sprintf("%d", t.At(i)))
-	}
-	sb = append(sb, strings.Join(values, ","), "}")
-	return strings.Join(sb, "")
-}
+// 	if index < 0 || index >= n {
+// 		panic(fmt.Sprintf("index %d out of range [0,%d]", index, n-1))
+// 	}
+
+// 	index += 1 // dummy offset
+// 	var x, y, z int
+// 	t.splitByRank(t.root, index, &y, &z)
+// 	t.splitByRank(y, index-1, &x, &y)
+// 	res := &t.nodes[y].element
+// 	t.root = t.merge(t.merge(x, y), z)
+// 	return *res
+// }
+
+// func (t *FHQTreap) String() string {
+// 	sb := []string{"TreapArray{"}
+// 	values := []string{}
+// 	for i := 0; i < t.Size(); i++ {
+// 		values = append(values, fmt.Sprintf("%d", t.At(i)))
+// 	}
+// 	sb = append(sb, strings.Join(values, ","), "}")
+// 	return strings.Join(sb, "")
+
+// }
 
 // https://github.com/EndlessCheng/codeforces-go/blob/f9d97465d8b351af7536b5b6dac30b220ba1b913/copypasta/treap.go#L31
 func (t *FHQTreap) fastRand() uint {

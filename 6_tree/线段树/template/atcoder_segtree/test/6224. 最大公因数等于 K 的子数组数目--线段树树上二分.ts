@@ -14,11 +14,14 @@ import { useAtcoderLazySegmentTree } from '../AtcoderLazySegmentTree'
 // !因此可以使用二分查找、滑动窗口来求出使得最小（最大值）值落在某一范围内的区间
 
 const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b))
+const lcm = (a: number, b: number): number => (a * b) / gcd(a, b) // !注意js中超过浮点数最大值的数会变成Infinity
+
+// 最大公因数为K的子数组数目
 function subarrayGCD(nums: number[], k: number): number {
   const n = nums.length
   const tree = useAtcoderLazySegmentTree(nums, {
     dataUnit() {
-      return 0
+      return 0 // !gcd的幺元是0,lcm的幺元是1
     },
     lazyUnit() {
       return 0
@@ -38,6 +41,36 @@ function subarrayGCD(nums: number[], k: number): number {
   for (let left = 0; left < n; left++) {
     let rightLower = tree.maxRight(left, gcd => gcd > k)
     let rightUpper = tree.maxRight(left, gcd => gcd >= k)
+    res += rightUpper - rightLower
+  }
+  return res
+}
+
+// 最小公倍数为 K 的子数组数目
+function subarrayLCM(nums: number[], k: number): number {
+  const n = nums.length
+  const tree = useAtcoderLazySegmentTree(nums, {
+    dataUnit() {
+      return 1 // !gcd的幺元是0,lcm的幺元是1
+    },
+    lazyUnit() {
+      return 0
+    },
+    mergeChildren(data1, data2) {
+      return lcm(data1, data2)
+    },
+    updateData(_, childData) {
+      return childData // 无需更新
+    },
+    updateLazy() {
+      return 0 // 无需更新
+    }
+  })
+
+  let res = 0
+  for (let left = 0; left < n; left++) {
+    let rightLower = tree.maxRight(left, lcm => lcm < k)
+    let rightUpper = tree.maxRight(left, lcm => lcm <= k)
     res += rightUpper - rightLower
   }
   return res

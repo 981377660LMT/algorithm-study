@@ -18,7 +18,7 @@ class Solution(object):
         for start in range(n):
             left, right = start, start
             while left >= 0 and right < n and s[left] == s[right]:
-                adjMap[left].add(right + 1)  # 注意right+1
+                adjMap[left].add(right + 1)  # !s[left:right+1]是回文串
                 left -= 1
                 right += 1
             left, right = start, start + 1

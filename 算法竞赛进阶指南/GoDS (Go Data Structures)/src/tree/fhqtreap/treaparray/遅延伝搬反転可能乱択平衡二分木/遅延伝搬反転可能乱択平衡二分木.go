@@ -1,4 +1,4 @@
-// An effective arraylist impleted by FHQTreap.
+// An effective arraylist implemented by FHQTreap.
 //
 // 「強すぎてAtCoderRated出禁になった最強データ構造・平衡二分木のRBSTによる実装。」 —— nyaan
 //
@@ -13,29 +13,17 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 )
 
-// https://www.acwing.com/problem/content/268/
 func main() {
 	const INF int = 1e18
-
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
+	nums := make([]Element, 1e5)
+	for i := range nums {
+		nums[i] = Element(i)
 	}
-
 	// 区间更新：加上一个数，区间查询：区间最小值
 	treap := NewFHQTreap(nums, Operations{
 		elementMonoid: func() Element {
@@ -61,50 +49,17 @@ func main() {
 		},
 	})
 
-	var q int
-	fmt.Fscan(in, &q)
-	for i := 0; i < q; i++ {
-		var op string
-		fmt.Fscan(in, &op)
-		if op == "ADD" {
-			var left, right, add int
-			fmt.Fscan(in, &left, &right, &add)
-			left--
-			treap.Update(left, right, add)
-		} else if op == "REVERSE" {
-			var left, right int
-			fmt.Fscan(in, &left, &right)
-			left--
-			treap.Reverse(left, right)
-		} else if op == "REVOLVE" {
-			var left, right, k int
-			fmt.Fscan(in, &left, &right, &k)
-			left--
-			len_ := right - left
-			k %= len_
-
-			// 区间 轮转k次
-			// !反转后k个元素+翻转前n-k个元素+翻转整个数组
-			treap.Reverse(right-k, right)
-			treap.Reverse(left, right-k)
-			treap.Reverse(left, right)
-		} else if op == "INSERT" {
-			var pos, val int
-			fmt.Fscan(in, &pos, &val)
-			pos--
-			treap.Insert(pos+1, val) // 插入到pos`之前`
-		} else if op == "DELETE" {
-			var pos int
-			fmt.Fscan(in, &pos)
-			pos--
-			treap.Pop(pos)
-		} else if op == "MIN" {
-			var left, right int
-			fmt.Fscan(in, &left, &right)
-			left--
-			fmt.Fprintln(out, treap.Query(left, right))
-		}
+	// 1e5 reverse
+	time1 := time.Now()
+	for i := 0; i < 2e4; i++ {
+		treap.Reverse(30000, 60000)
+		treap.Query(30000, 60000)
+		treap.Insert(30000, 0)
+		// treap.Erase(200, 300)
+		treap.Append(0)
 	}
+	fmt.Println(time.Since(time1))
+
 }
 
 // !Type and functions to be implemented.
@@ -170,6 +125,7 @@ type Node struct {
 // !op
 func (t *FHQTreap) pushUp(root int) {
 	node := t.nodes[root]
+	// If left or right is 0(dummy), it will update with monoid.
 	node.data = t.op(t.nodes[node.left].data, t.nodes[node.right].data, node.element)
 	node.size = t.nodes[node.left].size + t.nodes[node.right].size + 1
 }
@@ -184,8 +140,13 @@ func (t *FHQTreap) pushDown(root int) {
 		node.isReversed = 0
 	}
 
-	t.propagate(node.left, node.lazy)
-	t.propagate(node.right, node.lazy)
+	// !Not dummy node
+	if node.left != 0 {
+		t.propagate(node.left, node.lazy)
+	}
+	if node.right != 0 {
+		t.propagate(node.right, node.lazy)
+	}
 	node.lazy = t.lazyMonoid()
 }
 

@@ -20,12 +20,10 @@ import (
 	"time"
 )
 
-type int = int64
-
-const INF = int(1e12)
-
 // https://www.acwing.com/problem/content/268/
 func main() {
+	const INF int = 1e18
+
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -34,7 +32,7 @@ func main() {
 	fmt.Fscan(in, &n)
 
 	nums := make([]int, n)
-	for i := int(0); i < n; i++ {
+	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
 
@@ -65,7 +63,7 @@ func main() {
 
 	var q int
 	fmt.Fscan(in, &q)
-	for i := int(0); i < q; i++ {
+	for i := 0; i < q; i++ {
 		var op string
 		fmt.Fscan(in, &op)
 		if op == "ADD" {
@@ -131,7 +129,7 @@ type Operations struct {
 func NewFHQTreap(nums []Element, operations Operations) *FHQTreap {
 	treap := &FHQTreap{
 		seed:       uint(time.Now().UnixNano()/2 + 1),
-		nodes:      make([]*Node, 0, max(int(len(nums)), 16)),
+		nodes:      make([]*Node, 0, max(len(nums), 16)),
 		Operations: operations,
 	}
 
@@ -141,7 +139,7 @@ func NewFHQTreap(nums []Element, operations Operations) *FHQTreap {
 		element: treap.elementMonoid(), data: treap.dataMonoid(), lazy: treap.lazyMonoid(),
 	}
 	treap.nodes = append(treap.nodes, dummy)
-	treap.root = treap.build(1, int(len(nums)), nums)
+	treap.root = treap.build(1, len(nums), nums)
 	return treap
 }
 
@@ -172,6 +170,7 @@ type Node struct {
 // !op
 func (t *FHQTreap) pushUp(root int) {
 	node := t.nodes[root]
+	// If left or right is 0(dummy), it will update with monoid.
 	node.data = t.op(t.nodes[node.left].data, t.nodes[node.right].data, node.element)
 	node.size = t.nodes[node.left].size + t.nodes[node.right].size + 1
 }
@@ -186,8 +185,13 @@ func (t *FHQTreap) pushDown(root int) {
 		node.isReversed = 0
 	}
 
-	t.propagate(node.left, node.lazy)
-	t.propagate(node.right, node.lazy)
+	// !Not dummy node
+	if node.left != 0 {
+		t.propagate(node.left, node.lazy)
+	}
+	if node.right != 0 {
+		t.propagate(node.right, node.lazy)
+	}
 	node.lazy = t.lazyMonoid()
 }
 
@@ -379,7 +383,7 @@ func (t *FHQTreap) newNode(ele Element) int {
 		lazy:     t.lazyMonoid(),
 	}
 	t.nodes = append(t.nodes, node)
-	return int(len(t.nodes) - 1)
+	return len(t.nodes) - 1
 }
 
 // Build a treap from a slice and return the root nodeId. O(n).
@@ -403,7 +407,7 @@ func (t *FHQTreap) toggle(root int) {
 func (t *FHQTreap) String() string {
 	sb := []string{"TreapArray{"}
 	values := []string{}
-	for i := int(0); i < t.Size(); i++ {
+	for i := 0; i < t.Size(); i++ {
 		values = append(values, fmt.Sprintf("%d", t.At(i)))
 	}
 	sb = append(sb, strings.Join(values, ","), "}")

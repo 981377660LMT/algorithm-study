@@ -33,18 +33,18 @@ func main() {
 	// }
 	// fmt.Println(time.Since(time1)) // 262.3417ms
 
-	nums := NewFHQTreap([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
-	fmt.Println(nums.Size())
-	nums.Append(11)
-	fmt.Println(nums)
-	nums.Erase(1, 4)
-	fmt.Println(nums)
-	fmt.Println(nums.Query(2, 2))
-	fmt.Println(nums.QueryAll())
-	fmt.Println(nums.InOrder())
-	fmt.Println(nums.Query(2, 3))
-	nums.Update(2, 2, 100)
-	fmt.Println(nums)
+	// nums := NewFHQTreap([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+	// fmt.Println(nums.Size())
+	// nums.Append(11)
+	// fmt.Println(nums)
+	// nums.Erase(1, 4)
+	// fmt.Println(nums)
+	// fmt.Println(nums.Query(2, 2))
+	// fmt.Println(nums.QueryAll())
+	// fmt.Println(nums.InOrder())
+	// fmt.Println(nums.Query(2, 3))
+	// nums.Update(2, 2, 100)
+	// fmt.Println(nums)
 }
 
 type Node struct {
@@ -64,7 +64,7 @@ type Node struct {
 // !Segment tree function.Need to be modified according to actual situation.
 func (t *FHQTreap) pushUp(root int) {
 	node := t.nodes[root]
-	// op twice
+	// If left or right is 0(dummy), it will update with monoid.
 	node.size = t.nodes[node.left].size + t.nodes[node.right].size + 1
 	node.sum = t.nodes[node.left].sum + t.nodes[node.right].sum + node.element
 }
@@ -74,8 +74,13 @@ func (t *FHQTreap) pushDown(root int) {
 	node := t.nodes[root]
 	if node.lazyAdd != 0 {
 		delta := node.lazyAdd
-		t.propagate(node.left, delta)
-		t.propagate(node.right, delta)
+		// !Not dummy
+		if node.left != 0 {
+			t.propagate(node.left, delta)
+		}
+		if node.right != 0 {
+			t.propagate(node.right, delta)
+		}
 		node.lazyAdd = 0
 	}
 }

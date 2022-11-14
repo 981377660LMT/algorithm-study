@@ -1,4 +1,4 @@
-// 从 1 加到 n 的长度之和
+// 预处理 index 从 1 加到 n 的字符串长度之和
 const preSum = [0]
 for (let i = 1; i <= 20000; i++) {
   preSum.push(preSum[i - 1] + String(i).length)

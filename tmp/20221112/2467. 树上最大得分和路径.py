@@ -1,7 +1,4 @@
-from functools import lru_cache
-from typing import List, Tuple, Optional
-from collections import defaultdict, Counter
-from sortedcontainers import SortedList
+from typing import List
 
 MOD = int(1e9 + 7)
 INF = int(1e20)
@@ -21,6 +18,13 @@ INF = int(1e20)
 # 如果 Alice 和 Bob 同时 到达一个节点，他们会共享这个节点的加分或者扣分。换言之，如果打开这扇门扣 c 分，那么 Alice 和 Bob 分别扣 c / 2 分。如果这扇门的加分为 c ，那么他们分别加 c / 2 分。
 # 如果 Alice 到达了一个叶子结点，她会停止移动。类似的，如果 Bob 到达了节点 0 ，他也会停止移动。注意这些事件互相 独立 ，不会影响另一方移动。
 # 请你返回 Alice 朝最优叶子结点移动的 最大 净得分。
+
+# 两次dfs:
+# !1. dfs处理出父结点，找到bob的路径，处理出到每个结点的距离
+# 2. Alice从根开始dfs，记录走过的距离(在这里是深度)，到叶子结点时更新答案
+# !注意叶子节点的条件: len(adjList[cur]) == 1 and adjList[cur][0] == pre
+
+
 class Solution:
     def mostProfitablePath(self, edges: List[List[int]], bob: int, amount: List[int]) -> int:
         def dfs1(cur: int, pre: int) -> None:
@@ -30,6 +34,24 @@ class Solution:
                     continue
                 dfs1(next, cur)
 
+        def dfs2(cur: int, pre: int, dep: int, curSum: int) -> None:
+            nonlocal res
+
+            dist1, dist2 = dep, bobDist[cur]
+            # !关注alice的得分
+            if dist1 < dist2:
+                curSum += amount[cur]
+            elif dist1 == dist2:
+                curSum += amount[cur] // 2
+
+            for next in adjList[cur]:
+                if next == pre:
+                    continue
+                dfs2(next, cur, dep + 1, curSum)
+
+            if len(adjList[cur]) == 1 and adjList[cur][0] == pre:  # !叶子结点
+                res = max(res, curSum)
+
         n = len(edges) + 1
         adjList = [[] for _ in range(n)]
         for u, v in edges:
@@ -38,50 +60,20 @@ class Solution:
 
         parents = [-1] * n
         dfs1(0, -1)
-        bobPath = []  # [3,1,0]
+        bobPath = []  # !上跳找路径
         cur = bob
         while cur != -1:
             bobPath.append(cur)
             cur = parents[cur]
+        bobDist = [INF] * n
+        for i, node in enumerate(bobPath):
+            bobDist[node] = i
 
-        bobDist = defaultdict(
-            lambda: INF, {node: i for i, node in enumerate(bobPath)}
-        )  # {3: 0, 1: 1, 0: 2}
-        bobSet = set(bobPath)
-
-        res = -INF  # 最大净得分
-
-        def dfs2(cur: int, pre: int, dep: int, curSum: int) -> None:
-            nonlocal res
-
-            # 当前节点是否被开过
-            dist1, dist2 = dep, bobDist[cur]
-            # alice 独自开
-            if dist1 < dist2:
-                curSum += amount[cur]
-            elif dist1 == dist2 and cur in bobSet:
-                curSum += amount[cur] // 2
-
-            for next in adjList[cur]:
-                if next == pre:
-                    continue
-                dfs2(next, cur, dep + 1, curSum)
-
-            if len(adjList[cur]) == 1 and adjList[cur][0] == pre:  # 叶子结点
-                res = curSum if curSum > res else res
-
+        res = -INF  # Alice 最大净得分
         dfs2(0, -1, 0, 0)
         return res
 
 
-# print(
-#     Solution().mostProfitablePath(
-#         edges=[[0, 1], [1, 2], [1, 3], [3, 4]], bob=3, amount=[-2, 4, 2, -4, 6]
-#     )
-# )
-# [[0,1],[1,2],[2,3]]
-# 3
-# [-5644,-6018,1188,-8502]
 print(
     Solution().mostProfitablePath(
         edges=[[0, 1], [1, 2], [2, 3]], bob=3, amount=[-5644, -6018, 1188, -8502]

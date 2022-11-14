@@ -5,6 +5,8 @@ from collections import defaultdict, deque
 from functools import lru_cache
 
 # dfs/bfs都可求最短路
+
+
 class Solution(object):
     def minCut(self, s: str) -> int:
         """
