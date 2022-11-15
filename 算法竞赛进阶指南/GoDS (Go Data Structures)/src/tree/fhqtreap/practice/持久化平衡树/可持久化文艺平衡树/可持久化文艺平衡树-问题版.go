@@ -37,24 +37,64 @@ import (
 // func init() { debug.SetGCPercent(-1) }
 
 func main() {
+	// in := bufio.NewReader(os.Stdin)
+	// out := bufio.NewWriter(os.Stdout)
+	// defer out.Flush()
+
+	// var n int
+	// fmt.Fscan(in, &n)
+	// tree := NewPersistentFHQTreap(n * 50) // 没有Build时 根为dummy结点0
+
+	// versions := make([]int, n+1) // 每次操作后的根节点版本号
+	// lastRes := 0
+	// var version, opt, pos, value, left, right int
+	// for i := 1; i <= n; i++ {
+	// 	fmt.Fscan(in, &version, &opt)
+	// 	versions[i] = versions[version]
+	// 	switch opt {
+	// 	case 1:
+	// 		fmt.Fscan(in, &pos, &value)
+	// 		pos ^= lastRes
+	// 		value ^= lastRes
+	// 		newVersion := tree.Insert(versions[i], pos, value) // !新的根节点的版本编号
+	// 		versions[i] = newVersion
+	// 	case 2:
+	// 		fmt.Fscan(in, &pos)
+	// 		pos ^= lastRes
+	// 		newVersion := tree.Pop(versions[i], pos-1)
+	// 		versions[i] = newVersion
+	// 	case 3:
+	// 		fmt.Fscan(in, &left, &right)
+	// 		left ^= lastRes
+	// 		right ^= lastRes
+	// 		newVersion := tree.Reverse(versions[i], left, right)
+	// 		versions[i] = newVersion
+	// 	case 4:
+	// 		fmt.Fscan(in, &left, &right)
+	// 		left ^= lastRes
+	// 		right ^= lastRes
+	// 		lastRes = tree.Query(versions[i], left-1, right)
+	// 		fmt.Fprintln(out, lastRes)
+	// 	}
+	// }
 	tree := NewPersistentFHQTreap(16)
 	id1 := tree.Build([]int{1, 2, 3, 4, 5})
+	fmt.Println(tree.InOrder(id1))
 	id2 := tree.Reverse(id1, 1, 3)
 	fmt.Println(tree.Query(id2, 1, 3))
-
+	fmt.Println(tree.InOrder(id2))
 	fmt.Println(tree.Query(id1, 1, 4))
 	// id2 := tree.Insert(id1, 2, 6)
-
+	fmt.Println(tree.InOrder(id2))
 	fmt.Println(tree.Query(id2, 1, 4))
 
 	// insert有问题？
 	id3 := tree.Insert(id2, 2, 3)
-
+	fmt.Println(tree.InOrder(id3))
 	fmt.Println(tree.Query(id3, 1, 4))
 	id4 := tree.Pop(id3, 2)
-
+	fmt.Println(tree.InOrder(id4))
 	fmt.Println(tree.Query(id4, 1, 4))
-
 }
 
 type Node struct {
@@ -124,15 +164,11 @@ func (pt *PersistentFHQTreap) newNode(value int) int {
 }
 
 func (pt *PersistentFHQTreap) copyNode(node int) int {
-	if node == 0 {
-		return 0
-	}
 	nodeCopy := pt.nodes[node] // !赋值浅拷贝结构体
 	pt.nodes = append(pt.nodes, nodeCopy)
 	return len(pt.nodes) - 1
 }
 
-// OK
 func (pt *PersistentFHQTreap) pushUp(root int) {
 	if root == 0 {
 		return
@@ -150,7 +186,6 @@ func (pt *PersistentFHQTreap) pushUp(root int) {
 	}
 }
 
-// !OK
 func (pt *PersistentFHQTreap) pushDown(root int) {
 	if root == 0 {
 		return
@@ -171,44 +206,49 @@ func (pt *PersistentFHQTreap) pushDown(root int) {
 	}
 }
 
+// !OK
 func (pt *PersistentFHQTreap) splitByRank(root, k int, left, right *int) {
 	if root == 0 {
 		*left, *right = 0, 0
 		return
 	}
-
+	fmt.Println("splitByRank", root, k, left, right)
 	pt.pushDown(root)
 	if k <= pt.nodes[pt.nodes[root].left].size {
 		*right = pt.copyNode(root)
-		pt.splitByRank(pt.nodes[root].left, k, left, &pt.nodes[*right].left)
+		pt.splitByRank(pt.nodes[*right].left, k, left, &pt.nodes[*right].left)
 		pt.pushUp(*right)
 	} else {
 		*left = pt.copyNode(root)
-		pt.splitByRank(pt.nodes[root].right, k-pt.nodes[pt.nodes[root].left].size-1, &pt.nodes[*left].right, right)
+		pt.splitByRank(pt.nodes[*left].right, k-pt.nodes[pt.nodes[root].left].size-1, &pt.nodes[*left].right, right)
 		pt.pushUp(*left)
 	}
 }
 
+// !OK
 // 返回新版本的根节点编号
 // 注意merge中无需再拷贝 因为split总是在merge之前调用
-func (pt *PersistentFHQTreap) merge(x, y int) int {
+func (t *PersistentFHQTreap) merge(x, y int) int {
 	if x == 0 || y == 0 {
-		return x + y
+		return x | y
 	}
 
-	if int(nextRand()*(uint64(pt.nodes[x].size)+uint64(pt.nodes[y].size))>>32) < pt.nodes[x].size {
-		pt.pushDown(x)
-		pt.nodes[x].right = pt.merge(pt.nodes[x].right, y)
-		pt.pushUp(x)
+	// https://nyaannyaan.github.io/library/rbst/rbst-base.hpp
+	// if (int((rng() * (l->cnt + r->cnt)) >> 32) < l->cnt) {
+	if int(nextRand()*(uint64(t.nodes[x].size)+uint64(t.nodes[y].size))>>32) < t.nodes[x].size {
+		t.pushDown(x)
+		t.nodes[x].right = t.merge(t.nodes[x].right, y)
+		t.pushUp(x)
 		return x
 	} else {
-		pt.pushDown(y)
-		pt.nodes[y].left = pt.merge(x, pt.nodes[y].left)
-		pt.pushUp(y)
+		t.pushDown(y)
+		t.nodes[y].left = t.merge(x, t.nodes[y].left)
+		t.pushUp(y)
 		return y
 	}
 }
 
+// !OK
 // 插入元素 返回新版本的根节点编号
 func (pt *PersistentFHQTreap) Insert(rootVersion int, index int, value int) int {
 	var left, right int
@@ -219,7 +259,7 @@ func (pt *PersistentFHQTreap) Insert(rootVersion int, index int, value int) int 
 }
 
 func (pt *PersistentFHQTreap) Pop(rootVersion int, index int) int {
-	index++
+	// index++
 	var a, b, c int
 	pt.splitByRank(rootVersion, index, &b, &c)
 	pt.splitByRank(b, index-1, &a, &b)
@@ -244,7 +284,7 @@ func (pt *PersistentFHQTreap) Reverse(rootVersion int, left, right int) int {
 // Query [start, stop) (defaults to range sum).
 //  0 <= start <= stop <= n
 func (pt *PersistentFHQTreap) Query(root int, left, right int) int {
-	left++
+	// left++
 	var a, b, c int
 	pt.splitByRank(root, right, &a, &c)
 	pt.splitByRank(a, left-1, &a, &b)
@@ -258,6 +298,23 @@ func (pt *PersistentFHQTreap) Query(root int, left, right int) int {
 
 func (pt *PersistentFHQTreap) Size() int {
 	return pt.nodes[pt.root].size
+}
+
+// Return all elements in index order.
+func (pt *PersistentFHQTreap) InOrder(rootVersion int) []int {
+	res := make([]int, 0, pt.nodes[rootVersion].size)
+	pt.inOrder(rootVersion, &res)
+	return res
+}
+
+func (pt *PersistentFHQTreap) inOrder(root int, res *[]int) {
+	if root == 0 {
+		return
+	}
+	pt.pushDown(root)
+	pt.inOrder(pt.nodes[root].left, res)
+	*res = append(*res, pt.nodes[root].element)
+	pt.inOrder(pt.nodes[root].right, res)
 }
 
 // https://github.com/EndlessCheng/codeforces-go/blob/f9d97465d8b351af7536b5b6dac30b220ba1b913/copypasta/treap.go#L31

@@ -8,8 +8,6 @@ const N int = 1e5
 
 var preSum [N + 1]int // !静态数组
 
-
-
 func init() { // !init 里打表
 	res := make([]byte, 0, N+10)
 	res = append(res, 1, 2, 2)
@@ -23,8 +21,6 @@ func init() { // !init 里打表
 		i++
 	}
 
-
-	
 	for i := 1; i <= N; i++ {
 		preSum[i] = preSum[i-1] + int(2-res[i-1])
 	}

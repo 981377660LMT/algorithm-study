@@ -128,14 +128,14 @@ type Operations struct {
 //
 func NewFHQTreap(nums []Element, operations Operations) *FHQTreap {
 	treap := &FHQTreap{
-		seed:       uint(time.Now().UnixNano()/2 + 1),
+		seed:       uint64(time.Now().UnixNano()/2 + 1),
 		nodes:      make([]*Node, 0, max(len(nums), 16)),
 		Operations: operations,
 	}
 
 	// dummy node 0
 	dummy := &Node{
-		size: 0, priority: treap.fastRand(),
+		size:    0,
 		element: treap.elementMonoid(), data: treap.dataMonoid(), lazy: treap.lazyMonoid(),
 	}
 	treap.nodes = append(treap.nodes, dummy)
@@ -144,7 +144,7 @@ func NewFHQTreap(nums []Element, operations Operations) *FHQTreap {
 }
 
 type FHQTreap struct {
-	seed  uint
+	seed  uint64
 	root  int
 	nodes []*Node
 
@@ -163,12 +163,15 @@ type Node struct {
 	// FHQTreap inner attributes
 	left, right int
 	size        int
-	priority    uint
 	isReversed  uint8
 }
 
 // !op
 func (t *FHQTreap) pushUp(root int) {
+	if root == 0 {
+		return
+	}
+
 	node := t.nodes[root]
 	// If left or right is 0(dummy), it will update with monoid.
 	node.data = t.op(t.nodes[node.left].data, t.nodes[node.right].data, node.element)
@@ -177,22 +180,33 @@ func (t *FHQTreap) pushUp(root int) {
 
 // !Reverse first and then push down the lazy tag.
 func (t *FHQTreap) pushDown(root int) {
+	if root == 0 {
+		return
+	}
+
 	node := t.nodes[root]
 
-	if node.isReversed == 1 {
-		t.toggle(node.left)
-		t.toggle(node.right)
+	if node.isReversed != 0 {
+		node.left, node.right = node.right, node.left
+		if node.left != 0 {
+			t.nodes[node.left].isReversed ^= 1
+		}
+		if node.right != 0 {
+			t.nodes[node.right].isReversed ^= 1
+		}
 		node.isReversed = 0
 	}
 
-	// !Not dummy node
-	if node.left != 0 {
-		t.propagate(node.left, node.lazy)
+	if node.lazy != t.lazyMonoid() {
+		// !Not dummy node
+		if node.left != 0 {
+			t.propagate(node.left, node.lazy)
+		}
+		if node.right != 0 {
+			t.propagate(node.right, node.lazy)
+		}
+		node.lazy = t.lazyMonoid()
 	}
-	if node.right != 0 {
-		t.propagate(node.right, node.lazy)
-	}
-	node.lazy = t.lazyMonoid()
 }
 
 // !mapping + composition
@@ -228,7 +242,9 @@ func (t *FHQTreap) Reverse(start, stop int) {
 	var x, y, z int
 	t.splitByRank(t.root, stop, &x, &z)
 	t.splitByRank(x, start, &x, &y)
-	t.toggle(y)
+	if y != 0 {
+		t.nodes[y].isReversed ^= 1
+	}
 	t.root = t.merge(t.merge(x, y), z)
 }
 
@@ -360,7 +376,7 @@ func (t *FHQTreap) merge(x, y int) int {
 		return x
 	}
 
-	if t.nodes[x].priority < t.nodes[y].priority {
+	if int(t.fastRand()*(uint64(t.nodes[x].size)+uint64(t.nodes[y].size))>>32) < t.nodes[x].size {
 		t.pushDown(x)
 		t.nodes[x].right = t.merge(t.nodes[x].right, y)
 		t.pushUp(x)
@@ -376,11 +392,10 @@ func (t *FHQTreap) merge(x, y int) int {
 // Add a new node and return its nodeId.
 func (t *FHQTreap) newNode(ele Element) int {
 	node := &Node{
-		size:     1,
-		priority: t.fastRand(),
-		element:  ele,
-		data:     t.dataMonoid(),
-		lazy:     t.lazyMonoid(),
+		size:    1,
+		element: ele,
+		data:    t.dataMonoid(),
+		lazy:    t.lazyMonoid(),
 	}
 	t.nodes = append(t.nodes, node)
 	return len(t.nodes) - 1
@@ -399,11 +414,6 @@ func (t *FHQTreap) build(left, right int, nums []Element) int {
 	return newNode
 }
 
-func (t *FHQTreap) toggle(root int) {
-	t.nodes[root].left, t.nodes[root].right = t.nodes[root].right, t.nodes[root].left
-	t.nodes[root].isReversed ^= 1
-}
-
 func (t *FHQTreap) String() string {
 	sb := []string{"TreapArray{"}
 	values := []string{}
@@ -416,11 +426,10 @@ func (t *FHQTreap) String() string {
 }
 
 // https://github.com/EndlessCheng/codeforces-go/blob/f9d97465d8b351af7536b5b6dac30b220ba1b913/copypasta/treap.go#L31
-func (t *FHQTreap) fastRand() uint {
-	t.seed ^= t.seed << 13
-	t.seed ^= t.seed >> 17
-	t.seed ^= t.seed << 5
-	return t.seed
+func (t *FHQTreap) fastRand() uint64 {
+	t.seed ^= t.seed << 7
+	t.seed ^= t.seed >> 9
+	return t.seed & 0xFFFFFFFF
 }
 
 func max(a, b int) int {

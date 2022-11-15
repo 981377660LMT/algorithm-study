@@ -85,25 +85,25 @@ type Operations struct {
 //
 func NewFHQTreap(nums []Element, operations Operations) *FHQTreap {
 	treap := &FHQTreap{
-		seed:       uint(time.Now().UnixNano()/2 + 1),
-		nodes:      make([]*Node, 0, max(len(nums), 16)),
+		seed:       uint64(time.Now().UnixNano()/2 + 1),
+		nodes:      make([]Node, 0, max(len(nums), 16)),
 		Operations: operations,
 	}
 
 	// dummy node 0
 	dummy := &Node{
-		size: 0, priority: treap.fastRand(),
+		size:    0,
 		element: treap.elementMonoid(), data: treap.dataMonoid(), lazy: treap.lazyMonoid(),
 	}
-	treap.nodes = append(treap.nodes, dummy)
+	treap.nodes = append(treap.nodes, *dummy)
 	treap.root = treap.build(1, len(nums), nums)
 	return treap
 }
 
 type FHQTreap struct {
-	seed  uint
+	seed  uint64
 	root  int
-	nodes []*Node
+	nodes []Node
 
 	// Segment-tree like operations
 	Operations
@@ -120,44 +120,43 @@ type Node struct {
 	// FHQTreap inner attributes
 	left, right int
 	size        int
-	priority    uint
 	isReversed  uint8
 }
 
 // !op
 func (t *FHQTreap) pushUp(root int) {
-	node := t.nodes[root]
+	rootRef := &t.nodes[root]
 	// If left or right is 0(dummy), it will update with monoid.
-	node.data = t.op(t.nodes[node.left].data, t.nodes[node.right].data, node.element)
-	node.size = t.nodes[node.left].size + t.nodes[node.right].size + 1
+	rootRef.data = t.op(t.nodes[rootRef.left].data, t.nodes[rootRef.right].data, rootRef.element)
+	rootRef.size = t.nodes[rootRef.left].size + t.nodes[rootRef.right].size + 1
 }
 
 // !Reverse first and then push down the lazy tag.
 func (t *FHQTreap) pushDown(root int) {
-	node := t.nodes[root]
+	rootRef := &t.nodes[root]
 
-	if node.isReversed == 1 {
-		t.toggle(node.left)
-		t.toggle(node.right)
-		node.isReversed = 0
+	if rootRef.isReversed == 1 {
+		t.toggle(rootRef.left)
+		t.toggle(rootRef.right)
+		rootRef.isReversed = 0
 	}
 
 	// !Not dummy node
-	if node.left != 0 {
-		t.propagate(node.left, node.lazy)
+	if rootRef.left != 0 {
+		t.propagate(rootRef.left, rootRef.lazy)
 	}
-	if node.right != 0 {
-		t.propagate(node.right, node.lazy)
+	if rootRef.right != 0 {
+		t.propagate(rootRef.right, rootRef.lazy)
 	}
-	node.lazy = t.lazyMonoid()
+	rootRef.lazy = t.lazyMonoid()
 }
 
 // !mapping + composition
 func (t *FHQTreap) propagate(root int, lazy Lazy) {
-	node := t.nodes[root]
-	node.element = t.mappingElement(lazy, node.element)
-	node.data = t.mappingData(lazy, node.data)
-	node.lazy = t.composition(lazy, node.lazy)
+	rootRef := &t.nodes[root]
+	rootRef.element = t.mappingElement(lazy, rootRef.element)
+	rootRef.data = t.mappingData(lazy, rootRef.data)
+	rootRef.lazy = t.composition(lazy, rootRef.lazy)
 }
 
 // Return the element at the k-th position (0-indexed).
@@ -317,7 +316,7 @@ func (t *FHQTreap) merge(x, y int) int {
 		return x
 	}
 
-	if t.nodes[x].priority < t.nodes[y].priority {
+	if int(t.fastRand()*(uint64(t.nodes[x].size)+uint64(t.nodes[y].size))>>32) < t.nodes[x].size {
 		t.pushDown(x)
 		t.nodes[x].right = t.merge(t.nodes[x].right, y)
 		t.pushUp(x)
@@ -333,13 +332,12 @@ func (t *FHQTreap) merge(x, y int) int {
 // Add a new node and return its nodeId.
 func (t *FHQTreap) newNode(ele Element) int {
 	node := &Node{
-		size:     1,
-		priority: t.fastRand(),
-		element:  ele,
-		data:     t.dataMonoid(),
-		lazy:     t.lazyMonoid(),
+		size:    1,
+		element: ele,
+		data:    t.dataMonoid(),
+		lazy:    t.lazyMonoid(),
 	}
-	t.nodes = append(t.nodes, node)
+	t.nodes = append(t.nodes, *node)
 	return len(t.nodes) - 1
 }
 
@@ -372,12 +370,13 @@ func (t *FHQTreap) String() string {
 
 }
 
-// https://github.com/EndlessCheng/codeforces-go/blob/f9d97465d8b351af7536b5b6dac30b220ba1b913/copypasta/treap.go#L31
-func (t *FHQTreap) fastRand() uint {
-	t.seed ^= t.seed << 13
-	t.seed ^= t.seed >> 17
-	t.seed ^= t.seed << 5
-	return t.seed
+// static uint64_t x_ = 88172645463325252ULL;
+// return x_ ^= x_ << 7, x_ ^= x_ >> 9, x_ & 0xFFFFFFFFull;
+// https://nyaannyaan.github.io/library/rbst/rbst-base.hpp
+func (t *FHQTreap) fastRand() uint64 {
+	t.seed ^= t.seed << 7
+	t.seed ^= t.seed >> 9
+	return t.seed & 0xFFFFFFFF
 }
 
 func max(a, b int) int {
