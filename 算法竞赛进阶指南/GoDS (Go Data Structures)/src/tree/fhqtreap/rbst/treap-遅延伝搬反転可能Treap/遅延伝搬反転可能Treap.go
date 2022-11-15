@@ -1,12 +1,5 @@
-// An effective arraylist implemented by FHQTreap.
-//
-// Author:
-// https://github.com/981377660LMT/algorithm-study
-//
-// Reference:
-// https://baobaobear.github.io/post/20191215-fhq-treap/
-// https://nyaannyaan.github.io/library/rbst/treap.hpp
-// https://github.com/EndlessCheng/codeforces-go/blob/f9d97465d8b351af7536b5b6dac30b220ba1b913/copypasta/treap.go
+// !Treap比较priority的写法比较容易被特殊数据卡
+// 用rbst的随机比较size合并更快
 
 package main
 
@@ -17,34 +10,21 @@ import (
 )
 
 func main() {
-	// nums := NewFHQTreap([]int{})
-	// time1 := time.Now()
-	// for i := 0; i < 2e5; i++ {
-	// 	nums.Append(i)
-	// 	nums.Append(i)
-	// 	nums.At(0)
-	// 	nums.Insert(i, 100)
-	// 	nums.Update(0, i, 10)
-	// 	nums.Query(0, i)
-	// 	nums.QueryAll()
-	// 	nums.Pop(-1)
-	// 	nums.Size()
-	// 	nums.Erase(0, 1)
-	// }
-	// fmt.Println(time.Since(time1)) // 262.3417ms
-
-	// nums := NewFHQTreap([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
-	// fmt.Println(nums.Size())
-	// nums.Append(11)
-	// fmt.Println(nums)
-	// nums.Erase(1, 4)
-	// fmt.Println(nums)
-	// fmt.Println(nums.Query(2, 2))
-	// fmt.Println(nums.QueryAll())
-	// fmt.Println(nums.InOrder())
-	// fmt.Println(nums.Query(2, 3))
-	// nums.Update(2, 2, 100)
-	// fmt.Println(nums)
+	tree := NewFHQTreap(100000)
+	fmt.Println(tree.InOrder())
+	tree.Build([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+	fmt.Println(tree.InOrder())
+	// api
+	fmt.Println(tree.Size(), tree.Query(1, 1))
+	tree.Update(1, 2, 1)
+	fmt.Println(tree.Size(), tree.Query(1, 1))
+	tree.Reverse(0, 4)
+	fmt.Println(tree.InOrder(), tree)
+	tree.Erase(1, 3)
+	tree.Pop(-1)
+	tree.Pop(0)
+	fmt.Println(tree.InOrder(), tree)
+	fmt.Println(tree.QueryAll())
 }
 
 type Node struct {
@@ -58,23 +38,39 @@ type Node struct {
 	// FHQTreap inner attributes
 	left, right int
 	size        int
-	priority    uint
+	priority    uint64
+	isReversed  uint8
 }
 
 // !Segment tree function.Need to be modified according to actual situation.
 func (t *FHQTreap) pushUp(root int) {
-	node := t.nodes[root]
-	// If left or right is 0(dummy), it will update with monoid.
-	node.size = t.nodes[node.left].size + t.nodes[node.right].size + 1
-	node.sum = t.nodes[node.left].sum + t.nodes[node.right].sum + node.element
+	rootRef := t.nodes[root]
+	rootRef.size = 1
+	rootRef.sum = rootRef.element
+	if rootRef.left != 0 {
+		rootRef.size += t.nodes[rootRef.left].size
+		rootRef.sum += t.nodes[rootRef.left].sum
+	}
+	if rootRef.right != 0 {
+		rootRef.size += t.nodes[rootRef.right].size
+		rootRef.sum += t.nodes[rootRef.right].sum
+	}
 }
 
 // !Segment tree function.Need to be modified according to actual situation.
 func (t *FHQTreap) pushDown(root int) {
+
 	node := t.nodes[root]
+
+	if node.isReversed == 1 {
+		t.toggle(node.left)
+		t.toggle(node.right)
+		node.isReversed = 0
+	}
+
 	if node.lazyAdd != 0 {
 		delta := node.lazyAdd
-		// !Not dummy
+		// !Not dummy node
 		if node.left != 0 {
 			t.propagate(node.left, delta)
 		}
@@ -87,34 +83,111 @@ func (t *FHQTreap) pushDown(root int) {
 
 // !Segment tree function.Need to be modified according to actual situation.
 func (t *FHQTreap) propagate(root int, delta int) {
-	node := t.nodes[root]
-	node.element += delta
-	node.sum += delta * node.size
-	node.lazyAdd += delta
+	rootRef := t.nodes[root]
+	rootRef.element += delta // need to update raw value (differs from segment tree)
+	rootRef.sum += delta * rootRef.size
+	rootRef.lazyAdd += delta
+}
+
+func (t *FHQTreap) toggle(root int) {
+	t.nodes[root].left, t.nodes[root].right = t.nodes[root].right, t.nodes[root].left
+	t.nodes[root].isReversed ^= 1
 }
 
 type FHQTreap struct {
-	seed  uint
+	seed  uint64
 	root  int
-	nodes []*Node // Use pointer to avoid copying
+	nodes []*Node
 }
 
 // Need to be modified according to the actual situation to implement a segment tree.
-func NewFHQTreap(nums []int) *FHQTreap {
+func NewFHQTreap(initCapacity int) *FHQTreap {
 	treap := &FHQTreap{
-		seed:  uint(time.Now().UnixNano()/2 + 1),
-		nodes: make([]*Node, 0, max(len(nums), 16)),
+		seed:  uint64(time.Now().UnixNano()/2 + 1),
+		nodes: make([]*Node, 0, initCapacity),
 	}
 
-	dummy := &Node{size: 0, priority: treap.fastRand()} // 0 is dummy
+	dummy := &Node{size: 0} // 0 is dummy
 	treap.nodes = append(treap.nodes, dummy)
-	treap.root = treap.build(1, len(nums), nums)
 	return treap
 }
 
-// Return the number of items in the list.
-func (t *FHQTreap) Size() int {
-	return t.nodes[t.root].size
+// 返回build后的根节点版本编号
+func (t *FHQTreap) Build(nums []int) int {
+	n := len(nums)
+	nodes := make([]int, 0, n)
+	for i := 0; i < n; i++ {
+		nodes = append(nodes, t.newNode(nums[i]))
+	}
+
+	stack := []int{}
+	pre := make([]int, n)
+	for i := 0; i < n; i++ {
+		pre[i] = -1
+	}
+
+	for i := 0; i < n; i++ {
+		last := -1
+		for len(stack) > 0 && t.nodes[stack[len(stack)-1]].priority > t.nodes[nodes[i]].priority {
+			last = stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+		}
+
+		if len(stack) > 0 {
+			pre[i] = stack[len(stack)-1]
+		}
+		if last != -1 {
+			pre[last] = i
+		}
+
+		stack = append(stack, i)
+	}
+
+	root := -1
+	for i := 0; i < n; i++ {
+		if pre[i] != -1 {
+			if i < pre[i] {
+				t.nodes[nodes[pre[i]]].left = nodes[i]
+			} else {
+				t.nodes[nodes[pre[i]]].right = nodes[i]
+			}
+		} else {
+			root = i
+		}
+	}
+
+	t.root = nodes[root]
+	t.build(nodes[root])
+	return nodes[root]
+}
+
+func (t *FHQTreap) build(root int) {
+	nodeRef := t.nodes[root]
+	if nodeRef.left != 0 {
+		t.build(nodeRef.left)
+	}
+	if nodeRef.right != 0 {
+		t.build(nodeRef.right)
+	}
+	t.pushUp(root)
+}
+
+// Remove [start, stop) from list.
+func (t *FHQTreap) Erase(start, stop int) {
+	var x, y, z int
+	start++ // dummy offset
+	t.splitByRank(t.root, stop, &y, &z)
+	t.splitByRank(y, start-1, &x, &y)
+	t.root = t.merge(x, z)
+}
+
+// Reverse [start, stop) in place.
+func (t *FHQTreap) Reverse(start, stop int) {
+	var x, y, z int
+	t.splitByRank(t.root, stop, &x, &z)
+	t.splitByRank(x, start, &x, &y)
+	t.toggle(y)
+	t.root = t.merge(t.merge(x, y), z)
 }
 
 // Return the value at the k-th position (0-indexed).
@@ -167,40 +240,42 @@ func (t *FHQTreap) Pop(index int) int {
 	var x, y, z int
 	t.splitByRank(t.root, index, &y, &z)
 	t.splitByRank(y, index-1, &x, &y)
-	res := &t.nodes[y].element
+	res := t.nodes[y].element
 	t.root = t.merge(x, z)
-	return *res
+	return res
 }
 
-// Remove [start, stop) from list.
-func (t *FHQTreap) Erase(start, stop int) {
-	var x, y, z int
-	start++ // dummy offset
-	t.splitByRank(t.root, stop, &y, &z)
-	t.splitByRank(y, start-1, &x, &y)
-	t.root = t.merge(x, z)
+// Return the number of items in the list.
+func (t *FHQTreap) Size() int {
+	return t.nodes[t.root].size
 }
 
 // Update [start, stop) with value (defaults to range add).
 //  0 <= start <= stop <= n
 func (t *FHQTreap) Update(start, stop int, delta int) {
+	if start >= stop {
+		return
+	}
 	start++
 	var x, y, z int
-	t.splitByRank(t.root, stop, &y, &z)
-	t.splitByRank(y, start-1, &x, &y)
+	t.splitByRank(t.root, stop, &x, &z)
+	t.splitByRank(x, start-1, &x, &y)
 	t.propagate(y, delta)
-	t.root = t.merge(t.merge(x, y), z)
+	t.root = t.merge(t.merge(x, y), z) // !顺序影响速度吗 (Update和Query是否需要不同地merge?)
 }
 
 // Query [start, stop) (defaults to range sum).
 //  0 <= start <= stop <= n
 func (t *FHQTreap) Query(start, stop int) int {
+	if start >= stop {
+		return 0
+	}
 	start++
 	var x, y, z int
-	t.splitByRank(t.root, stop, &y, &z)
-	t.splitByRank(y, start-1, &x, &y)
+	t.splitByRank(t.root, stop, &x, &z)
+	t.splitByRank(x, start-1, &x, &y)
 	res := t.nodes[y].sum
-	t.root = t.merge(t.merge(x, y), z)
+	t.root = t.merge(t.merge(x, y), z) // !顺序影响速度吗
 	return res
 }
 
@@ -240,12 +315,12 @@ func (t *FHQTreap) splitByRank(root, k int, x, y *int) {
 	if k <= t.nodes[t.nodes[root].left].size {
 		*y = root
 		t.splitByRank(t.nodes[root].left, k, x, &t.nodes[root].left)
+		t.pushUp(*y)
 	} else {
 		*x = root
 		t.splitByRank(t.nodes[root].right, k-t.nodes[t.nodes[root].left].size-1, &t.nodes[root].right, y)
+		t.pushUp(*x)
 	}
-
-	t.pushUp(root)
 }
 
 // Make sure that the height of the resulting tree is at most O(log n).
@@ -274,28 +349,15 @@ func (t *FHQTreap) merge(x, y int) int {
 }
 
 // Add a new node and return its nodeId.
-func (t *FHQTreap) newNode(data int) int {
+func (t *FHQTreap) newNode(value int) int {
 	node := &Node{
+		element:  value,
+		sum:      value,
 		size:     1,
-		priority: t.fastRand(),
-		element:  data,
-		sum:      data,
+		priority: t.nextRand(),
 	}
 	t.nodes = append(t.nodes, node)
 	return len(t.nodes) - 1
-}
-
-// Build a treap from a slice and return the root nodeId. O(n).
-func (t *FHQTreap) build(left, right int, nums []int) int {
-	if left > right {
-		return 0
-	}
-	mid := (left + right) >> 1
-	newNode := t.newNode(nums[mid-1])
-	t.nodes[newNode].left = t.build(left, mid-1, nums)
-	t.nodes[newNode].right = t.build(mid+1, right, nums)
-	t.pushUp(newNode)
-	return newNode
 }
 
 func (t *FHQTreap) String() string {
@@ -306,14 +368,22 @@ func (t *FHQTreap) String() string {
 	}
 	sb = append(sb, strings.Join(values, ","), "}")
 	return strings.Join(sb, "")
-
 }
 
-// https://github.com/EndlessCheng/codeforces-go/blob/f9d97465d8b351af7536b5b6dac30b220ba1b913/copypasta/treap.go#L31
-func (t *FHQTreap) fastRand() uint {
-	t.seed ^= t.seed << 13
-	t.seed ^= t.seed >> 17
-	t.seed ^= t.seed << 5
+// https://nyaannyaan.github.io/library/misc/rng.hpp
+// // [0, 2^64 - 1)
+// u64 rng() {
+//   static u64 _x =
+//       u64(chrono::duration_cast<chrono::nanoseconds>(
+//               chrono::high_resolution_clock::now().time_since_epoch())
+//               .count()) *
+//       10150724397891781847ULL;
+//   _x ^= _x << 7;
+//   return _x ^= _x >> 9;
+// }
+func (t *FHQTreap) nextRand() uint64 {
+	t.seed ^= t.seed << 7
+	t.seed ^= t.seed >> 9
 	return t.seed
 }
 

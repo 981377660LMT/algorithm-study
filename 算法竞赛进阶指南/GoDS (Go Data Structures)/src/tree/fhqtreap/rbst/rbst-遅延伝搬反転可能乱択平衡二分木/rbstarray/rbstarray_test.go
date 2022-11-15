@@ -1,7 +1,5 @@
 // An effective arraylist implemented by FHQTreap.
-
 //
-
 // Author:
 
 // https://github.com/981377660LMT/algorithm-study
@@ -47,7 +45,6 @@ func Test_Update(t *testing.T) {
 			// 更新:单点更新,查询:区间最大值
 			treap := NewFHQTreap(initNums)
 			time1 := time.Now()
-			// 是不是min写的有问题
 			for _, num := range nums {
 				preMax := treap.Query(max(0, num-k), num)
 				treap.Update(num, num+1, preMax+1)
