@@ -38,7 +38,7 @@ func lengthOfLIS(nums []int, k int) int {
 		composition: func(lazy1 Lazy, lazy2 Lazy) Lazy {
 			return max(lazy1, lazy2)
 		},
-	}, initNums, len(initNums))
+	}, initNums, 1e5+10)
 
 	for _, num := range nums {
 		preMax := rbst.Query(num-k, num)

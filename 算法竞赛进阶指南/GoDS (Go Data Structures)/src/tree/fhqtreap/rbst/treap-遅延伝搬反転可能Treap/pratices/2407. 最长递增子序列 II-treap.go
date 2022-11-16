@@ -86,19 +86,19 @@ type Operations struct {
 func NewFHQTreap(operations Operations, nums []Element, capacity int) *FHQTreap {
 	treap := &FHQTreap{
 		seed:       uint64(time.Now().UnixNano()/2 + 1),
-		nodes:      make([]Node, max(capacity, 16)),
+		nodes:      make([]Node, 0, max(capacity, 16)),
 		Operations: operations,
 	}
 
 	// 0 dummy
-	treap.nodes[0] = Node{
+	dummy := &Node{
 		size:     0,
 		data:     operations.dataMonoid(operations.elementMonoid()),
 		lazy:     operations.lazyMonoid(),
 		element:  operations.elementMonoid(),
 		priority: treap.nextRand(),
 	}
-
+	treap.nodes = append(treap.nodes, *dummy)
 	treap.root = treap.build(nums)
 	return treap
 }

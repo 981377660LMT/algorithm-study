@@ -25,7 +25,7 @@ func main() {
 		nums[i] = Element(i)
 	}
 
-	// 区间更新：加上一个数，区间查询：区间最小值
+	// !区间更新：加上一个数，区间查询：区间最小值
 	treap := NewFHQTreap(Operations{
 		elementMonoid: func() Element {
 			return INF
@@ -60,16 +60,14 @@ func main() {
 		treap.Append(0)
 	}
 	fmt.Println(time.Since(time1))
-
 }
 
-// TODO
 // Add a new node and return its nodeId.
 func (t *FHQTreap) newNode(ele Element) int {
 	node := Node{
 		size:    1,
 		element: ele,
-		data:    t.dataMonoid(ele),
+		data:    t.dataMonoid(ele), // !monoid or element
 		lazy:    t.lazyMonoid(),
 	}
 	t.nodes = append(t.nodes, node)
@@ -190,13 +188,32 @@ func (t *FHQTreap) At(index int) Element {
 		panic(fmt.Sprintf("index %d out of range [0,%d]", index, n-1))
 	}
 
-	index += 1 // dummy offset
+	index++ // dummy offset
 	var x, y, z int
 	t.splitByRank(t.root, index, &y, &z)
 	t.splitByRank(y, index-1, &x, &y)
-	res := &t.nodes[y].element
+	res := t.nodes[y].element
 	t.root = t.merge(t.merge(x, y), z)
-	return *res
+	return res
+}
+
+// Set the k-th position (0-indexed) to the given value.
+func (t *FHQTreap) Set(index int, element Element) {
+	n := t.Size()
+	if index < 0 {
+		index += n
+	}
+
+	if index < 0 || index >= n {
+		panic(fmt.Sprintf("index %d out of range [0,%d]", index, n-1))
+	}
+
+	index++ // dummy offset
+	var x, y, z int
+	t.splitByRank(t.root, index, &y, &z)
+	t.splitByRank(y, index-1, &x, &y)
+	t.nodes[y].element = element
+	t.root = t.merge(t.merge(x, y), z)
 }
 
 // Reverse [start, stop) in place.

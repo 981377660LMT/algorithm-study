@@ -90,19 +90,19 @@ type Operations struct {
 func NewFHQTreap(operations Operations, nums []Element, capacity int) *FHQTreap {
 	treap := &FHQTreap{
 		seed:       uint64(time.Now().UnixNano()/2 + 1),
-		nodes:      make([]Node, max(capacity, 16)),
+		nodes:      make([]Node, 0, max(capacity, 16)),
 		Operations: operations,
 	}
 
 	// 0 dummy
-	treap.nodes[0] = Node{
+	dummy := &Node{
 		size:     0,
 		data:     operations.dataMonoid(operations.elementMonoid()),
 		lazy:     operations.lazyMonoid(),
 		element:  operations.elementMonoid(),
 		priority: treap.nextRand(),
 	}
-
+	treap.nodes = append(treap.nodes, *dummy)
 	treap.root = treap.build(nums)
 	return treap
 }
@@ -191,6 +191,25 @@ func (t *FHQTreap) At(index int) Element {
 	res := &t.nodes[y].element
 	t.root = t.merge(t.merge(x, y), z)
 	return *res
+}
+
+// Set the k-th position (0-indexed) to the given value.
+func (t *FHQTreap) Set(index int, element Element) {
+	n := t.Size()
+	if index < 0 {
+		index += n
+	}
+
+	if index < 0 || index >= n {
+		panic(fmt.Sprintf("index %d out of range [0,%d]", index, n-1))
+	}
+
+	index++ // dummy offset
+	var x, y, z int
+	t.splitByRank(t.root, index, &y, &z)
+	t.splitByRank(y, index-1, &x, &y)
+	t.nodes[y].element = element
+	t.root = t.merge(t.merge(x, y), z)
 }
 
 // Reverse [start, stop) in place.

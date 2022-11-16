@@ -1,4 +1,4 @@
-// An effective arraylist implemented by FHQTreap.
+// An effective arraylist implemented by RBST.
 //
 // Author:
 // https://github.com/981377660LMT/algorithm-study
@@ -33,6 +33,14 @@ func main() {
 		nums.Reverse(0, i)
 	}
 	fmt.Println(time.Since(time1))
+
+	nums2 := NewFHQTreap([]int{})
+	nums2.Append(1)
+	nums2.Append(1)
+	nums2.Append(1)
+	nums2.Append(1)
+	nums2.Set(-1, 2)
+	fmt.Println(nums2)
 }
 
 type Node struct {
@@ -46,12 +54,23 @@ type Node struct {
 	// FHQTreap inner attributes
 	left, right int
 	size        int
-	isReversed  uint8
+	isReversed  bool
+}
+
+// Add a new node and return its nodeId.
+func (t *FHQTreap) newNode(data int) int {
+	node := &Node{
+		size:    1,
+		element: data,
+		sum:     data,
+	}
+	t.nodes = append(t.nodes, *node)
+	return len(t.nodes) - 1
 }
 
 // !op
 func (t *FHQTreap) pushUp(root int) {
-	node := t.nodes[root]
+	node := &t.nodes[root]
 	// If left or right is 0(dummy), it will update with monoid.
 	node.size = t.nodes[node.left].size + t.nodes[node.right].size + 1
 	node.sum = t.nodes[node.left].sum + t.nodes[node.right].sum + node.element
@@ -59,12 +78,16 @@ func (t *FHQTreap) pushUp(root int) {
 
 // Reverse first and then push down the lazy tag.
 func (t *FHQTreap) pushDown(root int) {
-	node := t.nodes[root]
+	node := &t.nodes[root]
 
-	if node.isReversed == 1 {
-		t.toggle(node.left)
-		t.toggle(node.right)
-		node.isReversed = 0
+	if node.isReversed {
+		if node.left != 0 {
+			t.toggle(node.left)
+		}
+		if node.right != 0 {
+			t.toggle(node.right)
+		}
+		node.isReversed = false
 	}
 
 	if node.lazyAdd != 0 {
@@ -82,7 +105,7 @@ func (t *FHQTreap) pushDown(root int) {
 
 // !mapping + composition
 func (t *FHQTreap) propagate(root int, delta int) {
-	node := t.nodes[root]
+	node := &t.nodes[root]
 	node.element += delta // need to update raw value (differs from segment tree)
 	node.sum += delta * node.size
 	node.lazyAdd += delta
@@ -91,18 +114,18 @@ func (t *FHQTreap) propagate(root int, delta int) {
 type FHQTreap struct {
 	seed  uint64
 	root  int
-	nodes []*Node
+	nodes []Node
 }
 
 // Need to be modified according to the actual situation to implement a segment tree.
 func NewFHQTreap(nums []int) *FHQTreap {
 	treap := &FHQTreap{
 		seed:  uint64(time.Now().UnixNano()/2 + 1),
-		nodes: make([]*Node, 0, max(len(nums), 16)),
+		nodes: make([]Node, 0, max(len(nums), 16)),
 	}
 
 	dummy := &Node{size: 0} // 0 is dummy
-	treap.nodes = append(treap.nodes, dummy)
+	treap.nodes = append(treap.nodes, *dummy)
 	treap.root = treap.build(1, len(nums), nums)
 	return treap
 }
@@ -118,13 +141,32 @@ func (t *FHQTreap) At(index int) int {
 		panic(fmt.Sprintf("index %d out of range [0,%d]", index, n-1))
 	}
 
-	index += 1 // dummy offset
+	index++ // dummy offset
 	var x, y, z int
 	t.splitByRank(t.root, index, &y, &z)
 	t.splitByRank(y, index-1, &x, &y)
-	res := &t.nodes[y].element
+	res := t.nodes[y].element
 	t.root = t.merge(t.merge(x, y), z)
-	return *res
+	return res
+}
+
+// Set the k-th position (0-indexed) to the given value.
+func (t *FHQTreap) Set(index int, element int) {
+	n := t.Size()
+	if index < 0 {
+		index += n
+	}
+
+	if index < 0 || index >= n {
+		panic(fmt.Sprintf("index %d out of range [0,%d]", index, n-1))
+	}
+
+	index++ // dummy offset
+	var x, y, z int
+	t.splitByRank(t.root, index, &y, &z)
+	t.splitByRank(y, index-1, &x, &y)
+	t.nodes[y].element = element
+	t.root = t.merge(t.merge(x, y), z)
 }
 
 // Reverse [start, stop) in place.
@@ -134,6 +176,17 @@ func (t *FHQTreap) Reverse(start, stop int) {
 	t.splitByRank(x, start, &x, &y)
 	t.toggle(y)
 	t.root = t.merge(t.merge(x, y), z)
+}
+
+// Rotate [start, stop) to the right step times.
+func (t *FHQTreap) RotateRight(start, stop, step int) {
+	start++
+	n := stop - start + 1 - step%(stop-start+1)
+	var x, y, z, p int
+	t.splitByRank(t.root, start-1, &x, &y)
+	t.splitByRank(y, n, &y, &z)
+	t.splitByRank(z, stop-start+1-n, &z, &p)
+	t.root = t.merge(t.merge(t.merge(x, z), y), p)
 }
 
 // Append value to the end of the list.
@@ -148,11 +201,9 @@ func (t *FHQTreap) Insert(index int, value int) {
 		index += n
 	}
 
-	index += 1 // dummy offset
-	var x, y, z int
-	t.splitByRank(t.root, index-1, &x, &y)
-	z = t.newNode(value)
-	t.root = t.merge(t.merge(x, z), y)
+	var x, y int
+	t.splitByRank(t.root, index, &x, &y)
+	t.root = t.merge(t.merge(x, t.newNode(value)), y)
 }
 
 // Remove and return item at index.
@@ -162,7 +213,7 @@ func (t *FHQTreap) Pop(index int) int {
 		index += n
 	}
 
-	index += 1 // dummy offset
+	index++ // dummy offset
 	var x, y, z int
 	t.splitByRank(t.root, index, &y, &z)
 	t.splitByRank(y, index-1, &x, &y)
@@ -241,15 +292,16 @@ func (t *FHQTreap) splitByRank(root, k int, x, y *int) {
 	}
 
 	t.pushDown(root)
-	if k <= t.nodes[t.nodes[root].left].size {
+	leftSize := t.nodes[t.nodes[root].left].size
+	if leftSize+1 <= k {
+		*x = root
+		t.splitByRank(t.nodes[root].right, k-leftSize-1, &t.nodes[root].right, y)
+		t.pushUp(*x)
+	} else {
 		*y = root
 		t.splitByRank(t.nodes[root].left, k, x, &t.nodes[root].left)
-	} else {
-		*x = root
-		t.splitByRank(t.nodes[root].right, k-t.nodes[t.nodes[root].left].size-1, &t.nodes[root].right, y)
+		t.pushUp(*y)
 	}
-
-	t.pushUp(root)
 }
 
 // Make sure that the height of the resulting tree is at most O(log n).
@@ -257,11 +309,8 @@ func (t *FHQTreap) splitByRank(root, k int, x, y *int) {
 // If left subtree is smaller, merge right subtree with the right child of the left subtree.
 // Otherwise, merge left subtree with the left child of the right subtree.
 func (t *FHQTreap) merge(x, y int) int {
-	if x == 0 {
-		return y
-	}
-	if y == 0 {
-		return x
+	if x == 0 || y == 0 {
+		return x + y
 	}
 
 	if int(t.fastRand()*(uint64(t.nodes[x].size)+uint64(t.nodes[y].size))>>32) < t.nodes[x].size {
@@ -275,17 +324,6 @@ func (t *FHQTreap) merge(x, y int) int {
 		t.pushUp(y)
 		return y
 	}
-}
-
-// Add a new node and return its nodeId.
-func (t *FHQTreap) newNode(data int) int {
-	node := &Node{
-		size:    1,
-		element: data,
-		sum:     data,
-	}
-	t.nodes = append(t.nodes, node)
-	return len(t.nodes) - 1
 }
 
 // Build a treap from a slice and return the root nodeId. O(n).
@@ -303,11 +341,11 @@ func (t *FHQTreap) build(left, right int, nums []int) int {
 
 func (t *FHQTreap) toggle(root int) {
 	t.nodes[root].left, t.nodes[root].right = t.nodes[root].right, t.nodes[root].left
-	t.nodes[root].isReversed ^= 1
+	t.nodes[root].isReversed = !t.nodes[root].isReversed
 }
 
 func (t *FHQTreap) String() string {
-	sb := []string{"TreapArray{"}
+	sb := []string{"rbstarray{"}
 	values := []string{}
 	for i := 0; i < t.Size(); i++ {
 		values = append(values, fmt.Sprintf("%d", t.At(i)))

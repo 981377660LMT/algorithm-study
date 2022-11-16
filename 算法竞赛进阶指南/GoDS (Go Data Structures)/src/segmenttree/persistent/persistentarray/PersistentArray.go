@@ -9,32 +9,49 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"runtime/debug"
 )
 
-func main() {
-	// // time
-	// nums1e5 := make([]E, 1e5)
-	// for i := range nums1e5 {
-	// 	nums1e5[i] = E(i)
-	// }
-	// root3 := Build(0, len(nums1e5)-1, nums1e5)
-	// time1 := time.Now()
-	// for i := 0; i < 1e5; i++ {
-	// 	root4 := root3.Set(0, 10)
-	// 	root4.Get(i)
-	// }
-	// fmt.Println(time.Since(time1))
-
-	array1 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	root1 := Build(0, len(array1)-1, array1)
-	fmt.Println(root1)
-	root2 := root1.Set(0, 10)
-	fmt.Println(root1, root2)
-
+// 存在海量小对象时禁用GC
+func init() {
+	debug.SetGCPercent(-1)
 }
 
-type E = int
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+
+	nums := make([]E, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	root0 := Build(0, n-1, nums) // !初始版本
+
+	versions := make([]*Node, 0, q+1)
+	versions = append(versions, root0)
+	for i := 0; i < q; i++ {
+		var version, op, index, value int
+		fmt.Fscan(in, &version, &op, &index)
+		index--
+		if op == 1 {
+			fmt.Fscan(in, &value)
+			newRoot := versions[version].Set(index, E(value))
+			versions = append(versions, newRoot)
+		} else {
+			fmt.Fprintln(out, versions[version].Get(index))
+			versions = append(versions, versions[version])
+		}
+	}
+}
+
+type E = int32
 
 type Node struct {
 	left, right           int
@@ -57,7 +74,7 @@ func Build(left, right int, nums []E) *Node {
 	return node
 }
 
-func (o *Node) Get(index int) int {
+func (o *Node) Get(index int) E {
 	if o.left == o.right {
 		return o.value
 	}

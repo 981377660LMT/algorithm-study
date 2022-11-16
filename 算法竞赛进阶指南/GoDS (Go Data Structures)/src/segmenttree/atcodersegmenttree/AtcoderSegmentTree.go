@@ -171,12 +171,12 @@ func (tree *LazySegTree) Update(left, right int, f F) {
 	l2, r2 := left, right
 	for left < right {
 		if left&1 != 0 {
-			tree.allApply(left, f)
+			tree.propagate(left, f)
 			left++
 		}
 		if right&1 != 0 {
 			right--
-			tree.allApply(right, f)
+			tree.propagate(right, f)
 		}
 		left >>= 1
 		right >>= 1
@@ -277,12 +277,12 @@ func (tree *LazySegTree) pushUp(root int) {
 }
 
 func (tree *LazySegTree) pushDown(root int) {
-	tree.allApply(2*root, tree.lazy[root])
-	tree.allApply(2*root+1, tree.lazy[root])
+	tree.propagate(2*root, tree.lazy[root])
+	tree.propagate(2*root+1, tree.lazy[root])
 	tree.lazy[root] = tree.lazyUnit()
 }
 
-func (tree *LazySegTree) allApply(root int, f F) {
+func (tree *LazySegTree) propagate(root int, f F) {
 	tree.data[root] = tree.updateData(f, tree.data[root])
 	// !叶子结点不需要更新lazy
 	if root < tree.size {

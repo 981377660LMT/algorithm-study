@@ -1,7 +1,7 @@
 // 基于 fhq-treap 实现
 // !用rbst来merge会超时，需要用treap维护priority权值
 
-package sortedlist
+package main
 
 import (
 	"fmt"
@@ -9,6 +9,17 @@ import (
 	"strings"
 	"time"
 )
+
+func main() {
+	sl := NewSortedList(func(a, b Value) int {
+		return a.(int) - b.(int)
+	}, 0)
+	sl.Build([]Value{1, 2, 3, 4, 5, 6, 7, 8, 9, 1})
+	fmt.Println(sl, sl.BisectLeft(3))
+	sl.Erase(3, 5)
+	sl.Pop(-1)
+	fmt.Println(sl)
+}
 
 // type Value = int
 type Value = interface{}
@@ -46,7 +57,7 @@ func (sl *SortedList) Build(nums []Value) int {
 		keys = append(keys, sl.newNode(nums[i]))
 	}
 
-	// key按照插入顺序有序
+	// 将元素按照键值 key 排序，然后一个一个插入到当前的笛卡尔树中
 	sort.Slice(keys, func(i, j int) bool {
 		return sl.comparator(sl.nodes[keys[i]].value, sl.nodes[keys[j]].value) < 0
 	})
