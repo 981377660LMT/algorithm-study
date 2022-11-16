@@ -1,14 +1,5 @@
-// An effective arraylist implemented by RBST.
-//
-// 「強すぎてAtCoderRated出禁になった最強データ構造・平衡二分木のRBSTによる実装。」 —— nyaan
-//
-// Author:
-// https://github.com/981377660LMT/algorithm-study
-//
-// Reference:
-// https://baobaobear.github.io/post/20191215-fhq-treap/
-// https://nyaannyaan.github.io/library/rbst/treap.hpp
-// https://github.com/EndlessCheng/codeforces-go/blob/f9d97465d8b351af7536b5b6dac30b220ba1b913/copypasta/treap.go
+// !Treap比较priority的写法比较容易被特殊数据卡
+// 用rbst的随机比较size合并更快
 
 package main
 
@@ -24,7 +15,6 @@ const INF int = 1e18
 
 // https://www.acwing.com/problem/content/268/
 func main() {
-
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -42,7 +32,7 @@ func main() {
 		elementMonoid: func() Element {
 			return INF
 		},
-		dataMonoid: func(element Element) Data {
+		dataMonoid: func(element Element) Data { // 每个位置处最小值
 			return element
 		},
 		lazyMonoid: func() Lazy {
@@ -115,10 +105,11 @@ func main() {
 // Add a new node and return its nodeId.
 func (t *FHQTreap) newNode(ele Element) int {
 	node := Node{
-		size:    1,
-		element: ele,
-		data:    t.dataMonoid(ele), // !这里有时为monoid, 有时为ele
-		lazy:    t.lazyMonoid(),
+		size:     1,
+		element:  ele,
+		data:     t.dataMonoid(ele),
+		lazy:     t.lazyMonoid(),
+		priority: t.nextRand(),
 	}
 	t.nodes = append(t.nodes, node)
 	return len(t.nodes) - 1
@@ -152,13 +143,14 @@ func NewFHQTreap(operations Operations, nums []Element, capacity int) *FHQTreap 
 
 	// 0 dummy
 	treap.nodes[0] = Node{
-		size:    0,
-		data:    operations.dataMonoid(operations.elementMonoid()),
-		lazy:    operations.lazyMonoid(),
-		element: operations.elementMonoid(),
+		size:     0,
+		data:     operations.dataMonoid(operations.elementMonoid()),
+		lazy:     operations.lazyMonoid(),
+		element:  operations.elementMonoid(),
+		priority: treap.nextRand(),
 	}
 
-	treap.root = treap.build(1, len(nums), nums)
+	treap.root = treap.build(nums)
 	return treap
 }
 
@@ -182,6 +174,7 @@ type Node struct {
 	// FHQTreap inner attributes
 	left, right int
 	size        int
+	priority    uint64
 	isReversed  bool
 }
 
@@ -391,7 +384,8 @@ func (t *FHQTreap) merge(x, y int) int {
 		return x + y
 	}
 
-	if int(t.fastRand()*(uint64(t.nodes[x].size)+uint64(t.nodes[y].size))>>32) < t.nodes[x].size {
+	// !小根堆
+	if t.nodes[x].priority < t.nodes[y].priority {
 		t.pushDown(x)
 		t.nodes[x].right = t.merge(t.nodes[x].right, y)
 		t.pushUp(x)
@@ -404,17 +398,64 @@ func (t *FHQTreap) merge(x, y int) int {
 	}
 }
 
-// Build a treap from a slice and return the root nodeId. O(n).
-func (t *FHQTreap) build(left, right int, nums []Element) int {
-	if left > right {
-		return 0
+// 返回build后的根节点版本编号
+func (t *FHQTreap) build(nums []int) int {
+	n := len(nums)
+	nodes := make([]int, 0, n)
+	for i := 0; i < n; i++ {
+		nodes = append(nodes, t.newNode(nums[i]))
 	}
-	mid := (left + right) >> 1
-	newNode := t.newNode(nums[mid-1])
-	t.nodes[newNode].left = t.build(left, mid-1, nums)
-	t.nodes[newNode].right = t.build(mid+1, right, nums)
-	t.pushUp(newNode)
-	return newNode
+
+	stack := []int{}
+	pre := make([]int, n)
+	for i := 0; i < n; i++ {
+		pre[i] = -1
+	}
+
+	for i := 0; i < n; i++ {
+		last := -1
+		for len(stack) > 0 && t.nodes[stack[len(stack)-1]].priority > t.nodes[nodes[i]].priority {
+			last = stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+		}
+
+		if len(stack) > 0 {
+			pre[i] = stack[len(stack)-1]
+		}
+		if last != -1 {
+			pre[last] = i
+		}
+
+		stack = append(stack, i)
+	}
+
+	root := -1
+	for i := 0; i < n; i++ {
+		if pre[i] != -1 {
+			if i < pre[i] {
+				t.nodes[nodes[pre[i]]].left = nodes[i]
+			} else {
+				t.nodes[nodes[pre[i]]].right = nodes[i]
+			}
+		} else {
+			root = i
+		}
+	}
+
+	t.root = nodes[root]
+	t.buildHelper(nodes[root])
+	return nodes[root]
+}
+
+func (t *FHQTreap) buildHelper(root int) {
+	nodeRef := t.nodes[root]
+	if nodeRef.left != 0 {
+		t.buildHelper(nodeRef.left)
+	}
+	if nodeRef.right != 0 {
+		t.buildHelper(nodeRef.right)
+	}
+	t.pushUp(root)
 }
 
 func (t *FHQTreap) String() string {
@@ -432,7 +473,7 @@ func (t *FHQTreap) toggle(root int) {
 	t.nodes[root].isReversed = !t.nodes[root].isReversed
 }
 
-func (t *FHQTreap) fastRand() uint64 {
+func (t *FHQTreap) nextRand() uint64 {
 	t.seed ^= t.seed << 7
 	t.seed ^= t.seed >> 9
 	return t.seed & 0xFFFFFFFF

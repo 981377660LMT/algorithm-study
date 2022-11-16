@@ -1,4 +1,4 @@
-// An effective arraylist implemented by FHQTreap.
+// An effective arraylist implemented by RBST.
 //
 // Author:
 // https://github.com/981377660LMT/algorithm-study
@@ -95,18 +95,18 @@ func (t *FHQTreap) propagate(root int, delta int) {
 type FHQTreap struct {
 	seed  uint64
 	root  int
-	nodes []*Node // Use pointer to avoid copying
+	nodes []Node // Use pointer to avoid copying
 }
 
 // Need to be modified according to the actual situation to implement a segment tree.
 func NewFHQTreap(nums []int) *FHQTreap {
 	treap := &FHQTreap{
 		seed:  uint64(time.Now().UnixNano()/2 + 1),
-		nodes: make([]*Node, 0, max(len(nums), 16)),
+		nodes: make([]Node, max(len(nums), 16)),
 	}
 
 	dummy := &Node{size: 0} // 0 is dummy
-	treap.nodes = append(treap.nodes, dummy)
+	treap.nodes = append(treap.nodes, *dummy)
 	treap.root = treap.build(1, len(nums), nums)
 	return treap
 }

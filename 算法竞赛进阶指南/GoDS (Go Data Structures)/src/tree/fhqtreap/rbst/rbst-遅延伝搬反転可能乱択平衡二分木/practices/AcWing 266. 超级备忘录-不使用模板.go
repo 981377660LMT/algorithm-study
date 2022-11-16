@@ -155,17 +155,17 @@ func (t *FHQTreap) propagate(root int, lazy Lazy) {
 func NewFHQTreap(nums []Element, capacity int) *FHQTreap {
 	treap := &FHQTreap{
 		seed:  uint64(time.Now().UnixNano()/2 + 1),
-		nodes: make([]Node, max(capacity, 16)),
+		nodes: make([]Node, 0, max(capacity, 16)),
 	}
 
 	// monoid
-	treap.nodes[0] = Node{
+	dummy := &Node{
 		size:    0,
 		element: INF,
 		data:    INF,
 		lazyAdd: 0,
 	}
-
+	treap.nodes = append(treap.nodes, *dummy)
 	treap.root = treap.build(1, len(nums), nums)
 	return treap
 }
