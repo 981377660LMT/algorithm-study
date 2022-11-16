@@ -13,25 +13,37 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 )
 
+const INF int = 1e18
+
+// https://www.acwing.com/problem/content/268/
 func main() {
-	const INF int = 1e18
-	nums := make([]Element, 1e5)
-	for i := range nums {
-		nums[i] = Element(i)
+
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
 	}
 
 	// 区间更新：加上一个数，区间查询：区间最小值
-	treap := NewFHQTreap(Operations{
+	T := NewFHQTreap(Operations{
 		elementMonoid: func() Element {
 			return INF
 		},
 		dataMonoid: func(element Element) Data {
-			return INF
+			return element
 		},
 		lazyMonoid: func() Lazy {
 			return 0
@@ -48,19 +60,55 @@ func main() {
 		composition: func(lazy1 Lazy, lazy2 Lazy) Lazy {
 			return lazy1 + lazy2
 		},
-	}, nums, len(nums))
+	}, nums, n*2)
 
-	// 1e5 reverse
-	time1 := time.Now()
-	for i := 0; i < 2e4; i++ {
-		treap.Reverse(30000, 60000)
-		treap.Query(30000, 60000)
-		treap.Insert(30000, 0)
-		// treap.Erase(200, 300)
-		treap.Append(0)
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var op string
+		fmt.Fscan(in, &op)
+		if op == "ADD" {
+			var left, right, add int
+			fmt.Fscan(in, &left, &right, &add)
+			left--
+			T.Update(left, right, add)
+		} else if op == "REVERSE" {
+			var left, right int
+			fmt.Fscan(in, &left, &right)
+			left--
+			T.Reverse(left, right)
+		} else if op == "REVOLVE" {
+			// 区间 轮转k次
+			var left, right, k int
+			fmt.Fscan(in, &left, &right, &k)
+			left--
+			T.RotateRight(left, right, k)
+
+			// 也可以:
+			// !反转后k个元素+翻转前n-k个元素+翻转整个数组
+			// len_ := right - left
+			// k %= len_
+			// T.Reverse(right-k, right)
+			// T.Reverse(left, right-k)
+			// T.Reverse(left, right)
+		} else if op == "INSERT" {
+			// 在pos后插入val
+			var pos, val int
+			fmt.Fscan(in, &pos, &val)
+			pos--
+			T.Insert(pos+1, val)
+		} else if op == "DELETE" {
+			var pos int
+			fmt.Fscan(in, &pos)
+			pos--
+			T.Pop(pos)
+		} else if op == "MIN" {
+			var left, right int
+			fmt.Fscan(in, &left, &right)
+			left--
+			fmt.Fprintln(out, T.Query(left, right))
+		}
 	}
-	fmt.Println(time.Since(time1))
-
 }
 
 // TODO
@@ -69,7 +117,7 @@ func (t *FHQTreap) newNode(ele Element) int {
 	node := Node{
 		size:    1,
 		element: ele,
-		data:    t.dataMonoid(ele),
+		data:    t.dataMonoid(ele), // !这里有时为monoid, 有时为ele
 		lazy:    t.lazyMonoid(),
 	}
 	t.nodes = append(t.nodes, node)

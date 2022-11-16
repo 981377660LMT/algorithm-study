@@ -1,4 +1,4 @@
-// An effective arraylist implemented by FHQTreap.
+// An effective arraylist implemented by RBST.
 //
 // Author:
 // https://github.com/981377660LMT/algorithm-study
@@ -8,12 +8,33 @@
 // https://nyaannyaan.github.io/library/rbst/treap.hpp
 // https://github.com/EndlessCheng/codeforces-go/blob/f9d97465d8b351af7536b5b6dac30b220ba1b913/copypasta/treap.go
 
-// !不用指针快很多
 package main
 
 import (
+	"fmt"
 	"time"
 )
+
+func main() {
+	// nums := make([]int, 1e5)
+	// for i := range nums {
+	// 	if i <= 5e4 {
+	// 		nums[i] = i + 5e4
+	// 	} else {
+	// 		nums[i] = 5e4
+	// 	}
+	// }
+	// k := int(5e4)
+	nums := make([]int, 1e5)
+	for i := range nums {
+		nums[i] = i + 1
+	}
+	k := 1
+
+	time1 := time.Now()
+	fmt.Println(lengthOfLIS(nums, k))
+	fmt.Println(time.Since(time1))
+}
 
 func lengthOfLIS(nums []int, k int) int {
 	// 更新:单点更新,查询:区间最大值
@@ -25,17 +46,6 @@ func lengthOfLIS(nums []int, k int) int {
 		treap.Update(num, num+1, preMax+1)
 	}
 	return treap.QueryAll()
-}
-
-// static uint64_t x_ = 88172645463325252ULL;
-// return x_ ^= x_ << 7, x_ ^= x_ >> 9, x_ & 0xFFFFFFFFull;
-// https://nyaannyaan.github.io/library/rbst/rbst-base.hpp
-var seed uint64 = uint64(time.Now().UnixNano()/2 + 1)
-
-func nextRand() uint64 {
-	seed ^= seed << 7
-	seed ^= seed >> 9
-	return seed & 0xFFFFFFFF
 }
 
 type Node struct {
@@ -51,67 +61,66 @@ type Node struct {
 	size        int
 }
 
+// Add a new node and return its nodeId.
+func (t *FHQTreap) newNode(value int) int {
+	node := &Node{
+		element: value,
+		max:     0, // !这里有时候为value
+		lazy:    0,
+		size:    1,
+	}
+	t.nodes = append(t.nodes, *node)
+	return len(t.nodes) - 1 // !返回新节点的编号(当前在nodes中的下标)
+}
+
 // !Segment tree function.Need to be modified according to actual situation.
 func (t *FHQTreap) pushUp(root int) {
 	if root == 0 {
 		return
 	}
-
-	rootRef := t.nodes[root]
-	rootRef.size = 1
-	rootRef.max = rootRef.element
-	if rootRef.left != 0 {
-		rootRef.size += t.nodes[rootRef.left].size
-		rootRef.max = max(rootRef.max, t.nodes[rootRef.left].max)
-	}
-
-	if rootRef.right != 0 {
-		rootRef.size += t.nodes[rootRef.right].size
-		rootRef.max = max(rootRef.max, t.nodes[rootRef.right].max)
-	}
+	rootRef := &t.nodes[root]
+	rootRef.size = 1 + t.nodes[rootRef.right].size + t.nodes[rootRef.left].size
+	rootRef.max = max(rootRef.element, max(t.nodes[rootRef.left].max, t.nodes[rootRef.right].max))
 }
 
 // !Segment tree function.Need to be modified according to actual situation.
 func (t *FHQTreap) pushDown(root int) {
-
-	rootRef := t.nodes[root]
-	if rootRef.lazy != 0 {
+	rootRef := &t.nodes[root]
+	if rootRef.lazy != 0 { // monoid
 		delta := rootRef.lazy
-		// !Not dummy
 		if rootRef.left != 0 {
 			t.propagate(rootRef.left, delta)
 		}
 		if rootRef.right != 0 {
 			t.propagate(rootRef.right, delta)
 		}
-		rootRef.lazy = 0
+		rootRef.lazy = 0 // monoid
 	}
 }
 
-// !Segment tree function.Need to be modified according to actual situation.
 func (t *FHQTreap) propagate(root int, delta int) {
-	rootRef := t.nodes[root]
+	rootRef := &t.nodes[root]
 	rootRef.element = max(rootRef.element, delta)
 	rootRef.max = max(rootRef.max, delta)
 	rootRef.lazy = max(rootRef.lazy, delta)
 }
 
-type FHQTreap struct {
-	seed  uint
-	root  int
-	nodes []*Node
-}
-
 // Need to be modified according to the actual situation to implement a segment tree.
 func NewFHQTreap(initCapacity int) *FHQTreap {
 	treap := &FHQTreap{
-		seed:  uint(time.Now().UnixNano()/2 + 1),
-		nodes: make([]*Node, 0, initCapacity),
+		seed:  uint64(time.Now().UnixNano()/2 + 1),
+		nodes: make([]Node, 0, initCapacity),
 	}
 
-	dummy := &Node{size: 0} // 0 is dummy
-	treap.nodes = append(treap.nodes, dummy)
+	dummy := &Node{size: 0, element: 0, lazy: 0, max: 0} // !monoid
+	treap.nodes = append(treap.nodes, *dummy)
 	return treap
+}
+
+type FHQTreap struct {
+	seed  uint64
+	root  int
+	nodes []Node
 }
 
 // 返回build后的根节点版本编号
@@ -140,23 +149,17 @@ func (t *FHQTreap) Size() int {
 // Update [start, stop) with value (defaults to range add).
 //  0 <= start <= stop <= n
 func (t *FHQTreap) Update(start, stop int, delta int) {
-	if start >= stop {
-		return
-	}
 	start++
 	var x, y, z int
 	t.splitByRank(t.root, stop, &x, &z)
 	t.splitByRank(x, start-1, &x, &y)
 	t.propagate(y, delta)
-	t.root = t.merge(t.merge(x, y), z) // !顺序影响速度吗 (Update和Query是否需要不同地merge?)
+	t.root = t.merge(t.merge(x, y), z)
 }
 
 // Query [start, stop) (defaults to range sum).
 //  0 <= start <= stop <= n
 func (t *FHQTreap) Query(start, stop int) int {
-	if start >= stop {
-		return 0
-	}
 	start++
 	var x, y, z int
 	t.splitByRank(t.root, stop, &x, &z)
@@ -217,7 +220,7 @@ func (t *FHQTreap) merge(x, y int) int {
 
 	// https://nyaannyaan.github.io/library/rbst/rbst-base.hpp
 	// if (int((rng() * (l->cnt + r->cnt)) >> 32) < l->cnt) {
-	if int(nextRand()*(uint64(t.nodes[x].size)+uint64(t.nodes[y].size))>>32) < t.nodes[x].size {
+	if int(t.nextRand()*(uint64(t.nodes[x].size)+uint64(t.nodes[y].size))>>32) < t.nodes[x].size {
 		t.pushDown(x)
 		t.nodes[x].right = t.merge(t.nodes[x].right, y)
 		t.pushUp(x)
@@ -230,15 +233,10 @@ func (t *FHQTreap) merge(x, y int) int {
 	}
 }
 
-// Add a new node and return its nodeId.
-func (t *FHQTreap) newNode(value int) int {
-	node := &Node{
-		element: value,
-		max:     value,
-		size:    1,
-	}
-	t.nodes = append(t.nodes, node)
-	return len(t.nodes) - 1 // !返回新节点的编号(当前在nodes中的下标)
+func (t *FHQTreap) nextRand() uint64 {
+	t.seed ^= t.seed << 7
+	t.seed ^= t.seed >> 9
+	return t.seed & 0xFFFFFFFF
 }
 
 func max(a, b int) int {
