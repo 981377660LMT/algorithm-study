@@ -1,6 +1,6 @@
 // https://leetcode.cn/problems/sequentially-ordinal-rank-tracker/
 
-package main
+package sortedlist
 
 import "strings"
 

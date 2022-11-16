@@ -5,6 +5,10 @@
 import assert from 'assert'
 
 function gcd<T extends number | bigint>(a: T, b: T): T {
+  if (Number.isNaN(a) || Number.isNaN(b)) {
+    return NaN as T
+  }
+
   return b === 0 ? a : gcd(b, (a % b) as T)
 }
 

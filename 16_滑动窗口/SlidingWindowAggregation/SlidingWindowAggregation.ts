@@ -78,7 +78,11 @@ function slidingWindowAggregation<E>(e: () => E, op: (a: E, b: E) => E) {
 export { slidingWindowAggregation }
 
 if (require.main === module) {
-  const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b))
+  const gcd = (a: number, b: number): number => {
+    if (Number.isNaN(a) || Number.isNaN(b)) return NaN
+    return b === 0 ? a : gcd(b, a % b)
+  }
+
   const window = slidingWindowAggregation(() => 0, gcd)
   console.log(window.query())
   window.append(1)

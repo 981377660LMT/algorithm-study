@@ -28,7 +28,8 @@ function maxPoints(points: number[][]): number {
 
 function gcd(...nums: number[]) {
   const twoNumGcd = (a: number, b: number): number => {
-    return b === 0 ? a : twoNumGcd(b, a % b)
+    if (Number.isNaN(a) || Number.isNaN(b)) return NaN
+    return b === 0 ? a : gcd(b, a % b)
   }
   return nums.reduce(twoNumGcd)
 }

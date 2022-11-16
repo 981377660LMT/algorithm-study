@@ -1,4 +1,4 @@
-package main
+package sortedlist
 
 func containsNearbyAlmostDuplicate(nums []int, indexDiff int, valueDiff int) bool {
 	sl := NewSortedList(func(a, b interface{}) int {

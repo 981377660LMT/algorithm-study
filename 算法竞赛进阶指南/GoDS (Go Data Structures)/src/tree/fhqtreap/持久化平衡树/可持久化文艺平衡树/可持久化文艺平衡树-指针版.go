@@ -5,7 +5,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"runtime/debug"
 	"time"
 )
@@ -37,49 +39,46 @@ import (
 func init() { debug.SetGCPercent(-1) }
 
 func main() {
-	// in := bufio.NewReader(os.Stdin)
-	// out := bufio.NewWriter(os.Stdout)
-	// defer out.Flush()
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-	// var n int
-	// fmt.Fscan(in, &n)
-	// roots := make([]*Node, n+1)
+	var n int
+	fmt.Fscan(in, &n)
+	roots := make([]*Node, n+1)
 
-	// lastRes := 0
-	// var version, opt, pos, value, left, right int
-	// for i := 1; i <= n; i++ {
-	// 	fmt.Fscan(in, &version, &opt)
-	// 	roots[i] = roots[version]
-	// 	switch opt {
-	// 	case 1:
-	// 		fmt.Fscan(in, &pos, &value)
-	// 		pos ^= lastRes
-	// 		value ^= lastRes
-	// 		newNode := Insert(roots[i], pos, value)
-	// 		roots[i] = newNode
-	// 	case 2:
-	// 		fmt.Fscan(in, &pos)
-	// 		pos ^= lastRes
-	// 		newNode := Pop(roots[i], pos-1)
-	// 		roots[i] = newNode
-	// 	case 3:
-	// 		fmt.Fscan(in, &left, &right)
-	// 		left ^= lastRes
-	// 		right ^= lastRes
-	// 		newNode := Reverse(roots[i], left, right)
-	// 		roots[i] = newNode
-	// 	case 4:
-	// 		fmt.Fscan(in, &left, &right)
-	// 		left ^= lastRes
-	// 		right ^= lastRes
-	// 		lastRes = Query(roots[i], left-1, right)
-	// 		fmt.Fprintln(out, lastRes)
-	// 	}
-	// }
-	roots := make([]Node, 0, 16)
-	fmt.Println(roots[0].size)
-	roots[0] = *Insert(&roots[0], 0, 1)
-	fmt.Println(roots[0].right)
+	lastRes := 0
+	var version, opt, pos, value, left, right int
+	for i := 1; i <= n; i++ {
+		fmt.Fscan(in, &version, &opt)
+		roots[i] = roots[version]
+		switch opt {
+		case 1:
+			fmt.Fscan(in, &pos, &value)
+			pos ^= lastRes
+			value ^= lastRes
+			newNode := Insert(roots[i], pos, value)
+			roots[i] = newNode
+		case 2:
+			fmt.Fscan(in, &pos)
+			pos ^= lastRes
+			newNode := Pop(roots[i], pos-1)
+			roots[i] = newNode
+		case 3:
+			fmt.Fscan(in, &left, &right)
+			left ^= lastRes
+			right ^= lastRes
+			newNode := Reverse(roots[i], left, right)
+			roots[i] = newNode
+		case 4:
+			fmt.Fscan(in, &left, &right)
+			left ^= lastRes
+			right ^= lastRes
+			lastRes = Query(roots[i], left-1, right)
+			fmt.Fprintln(out, lastRes)
+		}
+	}
+
 }
 
 type Node struct {

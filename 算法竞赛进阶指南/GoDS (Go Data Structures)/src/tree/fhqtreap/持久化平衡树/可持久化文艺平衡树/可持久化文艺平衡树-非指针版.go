@@ -1,3 +1,5 @@
+// TODO 有问题
+
 // https://www.luogu.com.cn/problem/P5055
 // P5055 【模板】可持久化文艺平衡树
 // https://www.luogu.com.cn/problem/solution/P5055
@@ -5,7 +7,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -37,24 +41,46 @@ import (
 // func init() { debug.SetGCPercent(-1) }
 
 func main() {
-	tree := NewPersistentFHQTreap(16)
-	id1 := tree.Build([]int{1, 2, 3, 4, 5})
-	id2 := tree.Reverse(id1, 1, 3)
-	fmt.Println(tree.Query(id2, 1, 3))
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-	fmt.Println(tree.Query(id1, 1, 4))
-	// id2 := tree.Insert(id1, 2, 6)
+	var n int
+	fmt.Fscan(in, &n)
+	tree := NewPersistentFHQTreap(n * 60) // !开60倍空间避免扩容
 
-	fmt.Println(tree.Query(id2, 1, 4))
-
-	// insert有问题？
-	id3 := tree.Insert(id2, 2, 3)
-
-	fmt.Println(tree.Query(id3, 1, 4))
-	id4 := tree.Pop(id3, 2)
-
-	fmt.Println(tree.Query(id4, 1, 4))
-
+	versions := make([]int, n+1) // 每次操作后的根节点版本号
+	lastRes := 0
+	var version, opt, pos, value, left, right int
+	for i := 1; i <= n; i++ {
+		fmt.Fscan(in, &version, &opt)
+		versions[i] = versions[version]
+		switch opt {
+		case 1:
+			fmt.Fscan(in, &pos, &value)
+			pos ^= lastRes
+			value ^= lastRes
+			newVersion := tree.Insert(versions[i], pos, value) // 新的根节点的版本编号
+			versions[i] = newVersion
+		case 2:
+			fmt.Fscan(in, &pos)
+			pos ^= lastRes
+			newVersion := tree.Pop(versions[i], pos-1)
+			versions[i] = newVersion
+		case 3:
+			fmt.Fscan(in, &left, &right)
+			left ^= lastRes
+			right ^= lastRes
+			newVersion := tree.Reverse(versions[i], left-1, right)
+			versions[i] = newVersion
+		case 4:
+			fmt.Fscan(in, &left, &right)
+			left ^= lastRes
+			right ^= lastRes
+			lastRes = tree.Query(versions[i], left-1, right)
+			fmt.Fprintln(out, lastRes)
+		}
+	}
 }
 
 type Node struct {
@@ -71,27 +97,18 @@ type Node struct {
 }
 
 type PersistentFHQTreap struct {
-	root  int // 当前(版本)的根节点编号
-	seed  uint
-	nodes []Node // !不用指针会快很多 优先不用指针 MLE了再换指针
+	root      int // 当前(版本)的根节点编号
+	seed      uint64
+	nodeCount int
+	nodes     []Node // !不用指针会快很多(但是拷贝会内存占用更高)
 }
 
-var seed uint64 = uint64(time.Now().UnixNano()/2 + 1)
-
-func nextRand() uint64 {
-	seed ^= seed << 7
-	seed ^= seed >> 9
-	return seed & 0xFFFFFFFF
-}
-
-// initCapacity 一般是 操作数的50倍
+// initCapacity 一般是 操作数的60倍
 func NewPersistentFHQTreap(initCapacity int) *PersistentFHQTreap {
 	treap := &PersistentFHQTreap{
-		seed:  uint(time.Now().UnixNano()/2 + 1),
-		nodes: make([]Node, 0, initCapacity),
+		seed:  uint64(time.Now().UnixNano()/2 + 1),
+		nodes: make([]Node, max(initCapacity, 128)),
 	}
-	dummy := &Node{size: 0}
-	treap.nodes = append(treap.nodes, *dummy)
 	return treap
 }
 
@@ -114,22 +131,22 @@ func (pt *PersistentFHQTreap) build(left, right int, nums []int) int {
 }
 
 func (pt *PersistentFHQTreap) newNode(value int) int {
-	res := &Node{
-		element: value,
-		sum:     value,
-		size:    1,
-	}
-	pt.nodes = append(pt.nodes, *res)
-	return len(pt.nodes) - 1 // !返回新节点的编号(当前在nodes中的下标)
+	pt.growBy(1)
+	pt.nodeCount++
+	pt.nodes[pt.nodeCount].element = value
+	pt.nodes[pt.nodeCount].sum = value
+	pt.nodes[pt.nodeCount].size = 1
+	return pt.nodeCount
 }
 
 func (pt *PersistentFHQTreap) copyNode(node int) int {
 	if node == 0 {
 		return 0
 	}
-	nodeCopy := pt.nodes[node] // !赋值浅拷贝结构体
-	pt.nodes = append(pt.nodes, nodeCopy)
-	return len(pt.nodes) - 1
+	pt.growBy(1)
+	pt.nodeCount++
+	pt.nodes[pt.nodeCount] = pt.nodes[node]
+	return pt.nodeCount
 }
 
 // OK
@@ -137,16 +154,16 @@ func (pt *PersistentFHQTreap) pushUp(root int) {
 	if root == 0 {
 		return
 	}
-	rootRef := &pt.nodes[root] // !注意如果用非指针,记得加上引用
-	rootRef.size = 1
-	rootRef.sum = rootRef.element
-	if rootRef.left != 0 {
-		rootRef.size += pt.nodes[rootRef.left].size
-		rootRef.sum += pt.nodes[rootRef.left].sum
+
+	pt.nodes[root].size = 1
+	pt.nodes[root].sum = pt.nodes[root].element
+	if pt.nodes[root].left != 0 {
+		pt.nodes[root].size += pt.nodes[pt.nodes[root].left].size
+		pt.nodes[root].sum += pt.nodes[pt.nodes[root].left].sum
 	}
-	if rootRef.right != 0 {
-		rootRef.size += pt.nodes[rootRef.right].size
-		rootRef.sum += pt.nodes[rootRef.right].sum
+	if pt.nodes[root].right != 0 {
+		pt.nodes[root].size += pt.nodes[pt.nodes[root].right].size
+		pt.nodes[root].sum += pt.nodes[pt.nodes[root].right].sum
 	}
 }
 
@@ -156,36 +173,35 @@ func (pt *PersistentFHQTreap) pushDown(root int) {
 		return
 	}
 
-	rootRef := &pt.nodes[root]
-	if rootRef.isReversed != 0 {
-		rootRef.left, rootRef.right = rootRef.right, rootRef.left
-		if rootRef.left != 0 {
-			rootRef.left = pt.copyNode(rootRef.left)
-			pt.nodes[rootRef.left].isReversed ^= 1
+	if pt.nodes[root].isReversed != 0 {
+		pt.nodes[root].left, pt.nodes[root].right = pt.nodes[root].right, pt.nodes[root].left
+		if pt.nodes[root].left != 0 {
+			pt.nodes[root].left = pt.copyNode(pt.nodes[root].left)
+			pt.nodes[pt.nodes[root].left].isReversed ^= 1
 		}
-		if rootRef.right != 0 {
-			rootRef.right = pt.copyNode(rootRef.right)
-			pt.nodes[rootRef.right].isReversed ^= 1
+		if pt.nodes[root].right != 0 {
+			pt.nodes[root].right = pt.copyNode(pt.nodes[root].right)
+			pt.nodes[pt.nodes[root].right].isReversed ^= 1
 		}
-		rootRef.isReversed = 0
+		pt.nodes[root].isReversed = 0
 	}
 }
 
-func (pt *PersistentFHQTreap) splitByRank(root, k int, left, right *int) {
+func (pt *PersistentFHQTreap) splitByRank(root, k int, x, y *int) {
 	if root == 0 {
-		*left, *right = 0, 0
+		*x, *y = 0, 0
 		return
 	}
 
 	pt.pushDown(root)
 	if k <= pt.nodes[pt.nodes[root].left].size {
-		*right = pt.copyNode(root)
-		pt.splitByRank(pt.nodes[root].left, k, left, &pt.nodes[*right].left)
-		pt.pushUp(*right)
+		*y = pt.copyNode(root)
+		pt.splitByRank(pt.nodes[root].left, k, x, &pt.nodes[*y].left)
+		pt.pushUp(*y)
 	} else {
-		*left = pt.copyNode(root)
-		pt.splitByRank(pt.nodes[root].right, k-pt.nodes[pt.nodes[root].left].size-1, &pt.nodes[*left].right, right)
-		pt.pushUp(*left)
+		*x = pt.copyNode(root)
+		pt.splitByRank(pt.nodes[root].right, k-pt.nodes[pt.nodes[root].left].size-1, &pt.nodes[*x].right, y)
+		pt.pushUp(*x)
 	}
 }
 
@@ -196,7 +212,7 @@ func (pt *PersistentFHQTreap) merge(x, y int) int {
 		return x + y
 	}
 
-	if int(nextRand()*(uint64(pt.nodes[x].size)+uint64(pt.nodes[y].size))>>32) < pt.nodes[x].size {
+	if int(pt.nextRand()*(uint64(pt.nodes[x].size)+uint64(pt.nodes[y].size))>>32) < pt.nodes[x].size {
 		pt.pushDown(x)
 		pt.nodes[x].right = pt.merge(pt.nodes[x].right, y)
 		pt.pushUp(x)
@@ -230,6 +246,7 @@ func (pt *PersistentFHQTreap) Pop(rootVersion int, index int) int {
 
 // Reverse [start, stop) in place.
 func (pt *PersistentFHQTreap) Reverse(rootVersion int, left, right int) int {
+	left++
 	var a, b, c int
 	pt.splitByRank(rootVersion, right, &a, &c)
 	pt.splitByRank(a, left-1, &a, &b)
@@ -256,16 +273,45 @@ func (pt *PersistentFHQTreap) Query(root int, left, right int) int {
 	return res
 }
 
-func (pt *PersistentFHQTreap) Size() int {
-	return pt.nodes[pt.root].size
+// Return all elements in index order.
+func (pt *PersistentFHQTreap) InOrder(rootVersion int) []int {
+	res := make([]int, 0, pt.Size(rootVersion))
+	pt.inOrder(rootVersion, &res)
+	return res
 }
 
-// https://github.com/EndlessCheng/codeforces-go/blob/f9d97465d8b351af7536b5b6dac30b220ba1b913/copypasta/treap.go#L31
-func (pt *PersistentFHQTreap) fastRand() uint {
-	pt.seed ^= pt.seed << 13
-	pt.seed ^= pt.seed >> 17
-	pt.seed ^= pt.seed << 5
-	return pt.seed
+func (pt *PersistentFHQTreap) inOrder(root int, res *[]int) {
+	if root == 0 {
+		return
+	}
+	pt.pushDown(root)
+	pt.inOrder(pt.nodes[root].left, res)
+	*res = append(*res, pt.nodes[root].element)
+	pt.inOrder(pt.nodes[root].right, res)
+}
+
+func (pt *PersistentFHQTreap) Size(rootVersion int) int {
+	return pt.nodes[rootVersion].size
+}
+
+func (pt *PersistentFHQTreap) nextRand() uint64 {
+	pt.seed ^= pt.seed << 7
+	pt.seed ^= pt.seed >> 9
+	return pt.seed & 0xFFFFFFFF
+}
+
+func (pt *PersistentFHQTreap) growBy(n int) {
+	currentCapacity := cap(pt.nodes)
+	if pt.nodeCount+n >= currentCapacity {
+		newCapacity := int(2.0 * float32(currentCapacity+n))
+		pt.resize(newCapacity)
+	}
+}
+
+func (pt *PersistentFHQTreap) resize(cap int) {
+	newNodes := make([]Node, cap, cap)
+	copy(newNodes, pt.nodes)
+	pt.nodes = newNodes
 }
 
 func max(a, b int) int {

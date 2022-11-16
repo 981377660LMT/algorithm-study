@@ -2,7 +2,11 @@
 // !Int32Array 静态数组存储结果 不过要注意Int32Array最多存2e9
 
 const MOD = 1e9 + 7
-const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b))
+
+const gcd = (a: number, b: number): number => {
+  if (Number.isNaN(a) || Number.isNaN(b)) return NaN
+  return b === 0 ? a : gcd(b, a % b)
+}
 
 function distinctSequences(n: number): number {
   const dfs = (index: number, pre1: number, pre2: number): number => {

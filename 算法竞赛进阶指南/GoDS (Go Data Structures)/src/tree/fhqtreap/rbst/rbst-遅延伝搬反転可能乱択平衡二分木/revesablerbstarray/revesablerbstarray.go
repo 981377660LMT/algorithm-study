@@ -46,7 +46,6 @@ type Node struct {
 	// FHQTreap inner attributes
 	left, right int
 	size        int
-	priority    uint
 	isReversed  uint8
 }
 
@@ -90,7 +89,7 @@ func (t *FHQTreap) propagate(root int, delta int) {
 }
 
 type FHQTreap struct {
-	seed  uint
+	seed  uint64
 	root  int
 	nodes []*Node
 }
@@ -98,11 +97,11 @@ type FHQTreap struct {
 // Need to be modified according to the actual situation to implement a segment tree.
 func NewFHQTreap(nums []int) *FHQTreap {
 	treap := &FHQTreap{
-		seed:  uint(time.Now().UnixNano()/2 + 1),
+		seed:  uint64(time.Now().UnixNano()/2 + 1),
 		nodes: make([]*Node, 0, max(len(nums), 16)),
 	}
 
-	dummy := &Node{size: 0, priority: treap.fastRand()} // 0 is dummy
+	dummy := &Node{size: 0} // 0 is dummy
 	treap.nodes = append(treap.nodes, dummy)
 	treap.root = treap.build(1, len(nums), nums)
 	return treap
@@ -265,7 +264,7 @@ func (t *FHQTreap) merge(x, y int) int {
 		return x
 	}
 
-	if t.nodes[x].priority < t.nodes[y].priority {
+	if int(t.fastRand()*(uint64(t.nodes[x].size)+uint64(t.nodes[y].size))>>32) < t.nodes[x].size {
 		t.pushDown(x)
 		t.nodes[x].right = t.merge(t.nodes[x].right, y)
 		t.pushUp(x)
@@ -281,10 +280,9 @@ func (t *FHQTreap) merge(x, y int) int {
 // Add a new node and return its nodeId.
 func (t *FHQTreap) newNode(data int) int {
 	node := &Node{
-		size:     1,
-		priority: t.fastRand(),
-		element:  data,
-		sum:      data,
+		size:    1,
+		element: data,
+		sum:     data,
 	}
 	t.nodes = append(t.nodes, node)
 	return len(t.nodes) - 1
@@ -318,12 +316,10 @@ func (t *FHQTreap) String() string {
 	return strings.Join(sb, "")
 }
 
-// https://github.com/EndlessCheng/codeforces-go/blob/f9d97465d8b351af7536b5b6dac30b220ba1b913/copypasta/treap.go#L31
-func (t *FHQTreap) fastRand() uint {
-	t.seed ^= t.seed << 13
-	t.seed ^= t.seed >> 17
-	t.seed ^= t.seed << 5
-	return t.seed
+func (t *FHQTreap) fastRand() uint64 {
+	t.seed ^= t.seed << 7
+	t.seed ^= t.seed >> 9
+	return t.seed & 0xFFFFFFFF
 }
 
 func max(a, b int) int {
