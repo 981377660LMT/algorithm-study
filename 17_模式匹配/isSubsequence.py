@@ -1,4 +1,4 @@
-# O(n^2)子序列匹配
+# O(n*m)子序列匹配
 
 
 def isSubsequnce(longer: str, shorter: str) -> bool:
@@ -19,7 +19,6 @@ def isSubsequnce2(longer: str, shorter: str) -> bool:
     return False
 
 
-if __name__ == '__main__':
-    assert isSubsequnce('aabbccdd', 'abc') == True
-    assert isSubsequnce2('aabbccdd', 'abc') == True
-
+if __name__ == "__main__":
+    assert isSubsequnce("aabbccdd", "abc") == True
+    assert isSubsequnce2("aabbccdd", "abc") == True

@@ -9,7 +9,7 @@ class Solution:
         """
         n = len(s1)
         nexts: List[Tuple[int, ...]] = [()] * n
-        last = [-1] * 26
+        last = [n] * 26
         for i in range(n - 1, -1, -1):
             nexts[i] = tuple(last)
             last[ord(s1[i]) - 97] = i
@@ -24,13 +24,13 @@ class Solution:
             cur = start
             for char in s2[1:]:
                 cur = nexts[cur][ord(char) - 97]
-                if cur == -1:
+                if cur == n:
                     break
             else:
                 if res is None or cur - start + 1 < res[1] - res[0] + 1:
                     res = (start, cur)
 
-        return s1[res[0] : res[1] + 1] if res is not None else ''
+        return s1[res[0] : res[1] + 1] if res is not None else ""
 
 
 print(Solution().minWindow("abcdebdde", "bde"))

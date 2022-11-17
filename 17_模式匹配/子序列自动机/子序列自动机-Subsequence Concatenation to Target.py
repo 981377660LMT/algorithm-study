@@ -6,6 +6,7 @@ from typing import List, Tuple
 
 # 连接子串获得目标串的最小需要量
 # n ≤ 100,000
+# 子序列自动机
 
 
 class Solution:

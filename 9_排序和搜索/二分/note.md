@@ -31,3 +31,7 @@ bisect_right(range(int(1e18)),target,key=count)
 
 
 ```
+
+NOTE: 实数二分/三分中的 step 取多少合适：
+eps 取 1e-8 比较稳妥（一般来说是保留小数位+2）
+由于误差累加的缘故，某些题目误差对答案的影响可以达到 n=2e5 倍

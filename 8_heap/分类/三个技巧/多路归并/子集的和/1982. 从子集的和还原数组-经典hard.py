@@ -21,7 +21,7 @@ from sortedcontainers import SortedList
 # https://leetcode-cn.com/problems/find-array-given-subset-sums/solution/ti-jie-cong-zi-ji-de-he-huan-yuan-shu-zu-q9qw/
 # https://leetcode-cn.com/problems/find-array-given-subset-sums/solution/jian-yi-ti-jie-by-sfiction-9i43/
 
-
+# !从子集和还原数组
 class Solution:
     def recoverArray(self, n: int, sums: List[int]) -> List[int]:
         OFFSET = -min(sums)

@@ -1,6 +1,6 @@
 """
 https://leetcode.cn/problems/find-the-k-sum-of-an-array/solution/by-tsreaper-ps7w/
-多路归并求数组的第k大的子序列和
+!多路归并求数组的第k大的子序列和 (第k大的子集和)
 k,n<=1e5
 O(nlogn + klogk)
 
@@ -33,7 +33,7 @@ from typing import List
 
 # 2386. 找出数组的第 K 大和
 def kSum(nums: List[int], k: int) -> int:
-    """求数组中第k个最大的子序列和"""
+    """求数组中第k个最大的子序列和/子集和第k大"""
     n = len(nums)
     allSum, negSum = 0, 0
     for i in range(n):

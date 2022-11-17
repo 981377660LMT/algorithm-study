@@ -16,3 +16,5 @@ function dfs(cur: number, visited: Set<number>): void {
     }
   }
 ```
+
+# NOTE: 对于 n\*m 的网格图，BFS 最多只占用 O(min(n,m)) 的空间，而 DFS 最多会占用 O(nm) 的空间

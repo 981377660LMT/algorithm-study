@@ -11,9 +11,9 @@ from collections import Counter
 # 1 <= n <= 1000
 # 1 <= nums[i] <= 10^9
 
-
+# !从子集和还原数组
 class Solution:
-    def recoverArray(self, nums: List[int]) -> List[int]:
+    def recoverArrayFromSubsetSum(self, nums: List[int]) -> List[int]:
         n = len(nums)
         nums = sorted(nums)
         keys = sorted(set(nums))
@@ -38,14 +38,18 @@ class Solution:
         return []
 
 
-# print(Solution().recoverArray([2, 10, 6, 4, 8, 12]))
-# print(Solution().recoverArray([1, 1, 3, 3]))
-# print(Solution().recoverArray([11, 6, 3, 4, 8, 7, 8, 7, 9, 8, 9, 10, 10, 2, 1, 9]))
+# print(Solution().recoverArrayFromSubsetSum([2, 10, 6, 4, 8, 12]))
+# print(Solution().recoverArrayFromSubsetSum([1, 1, 3, 3]))
+# print(Solution().recoverArrayFromSubsetSum([11, 6, 3, 4, 8, 7, 8, 7, 9, 8, 9, 10, 10, 2, 1, 9]))
 # # [2,3,4,5,7,8,8,9]
 # # 预期：[2,3,7,8,8,9,9,10]
-# print(Solution().recoverArray([8, 4, 5, 1, 9, 8, 6, 5, 6, 9, 7, 3, 8, 3, 6, 7, 10, 11, 6, 4]))
+# print(Solution().recoverArrayFromSubsetSum([8, 4, 5, 1, 9, 8, 6, 5, 6, 9, 7, 3, 8, 3, 6, 7, 10, 11, 6, 4]))
 # [1, 3, 3, 4, 4, 5, 5, 6, 6, 6, 6, 7, 7, 8, 8, 8, 9, 9, 10, 11]
 # [2,4,5,5,6,7,7,8,9,10]
-print(Solution().recoverArray([8, 4, 5, 1, 9, 8, 6, 5, 6, 9, 7, 3, 8, 3, 6, 7, 10, 11, 6, 4]))
+print(
+    Solution().recoverArrayFromSubsetSum(
+        [8, 4, 5, 1, 9, 8, 6, 5, 6, 9, 7, 3, 8, 3, 6, 7, 10, 11, 6, 4]
+    )
+)
 
 # 养成好习惯：数组必定先求length

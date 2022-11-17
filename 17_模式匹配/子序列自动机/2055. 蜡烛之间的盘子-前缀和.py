@@ -1,7 +1,7 @@
 from typing import List
 from bisect import bisect_left, bisect_right
 
-INF = 2 ** 63 - 1
+INF = 2**63 - 1
 
 # 对于每个查询，你需要找到 子字符串中 在 两支蜡烛之间 的盘子的 数目 。
 # '*' 表示一个 盘子 ，'|' 表示一支 蜡烛 。
@@ -9,7 +9,7 @@ INF = 2 ** 63 - 1
 
 class Solution:
     def platesBetweenCandles1(self, s: str, queries: List[List[int]]) -> List[int]:
-        candles = [i for i, char in enumerate(s) if char == '|']
+        candles = [i for i, char in enumerate(s) if char == "|"]
         res = []
         for left, right in queries:
             # 找到第一个位置 pos1 使得 A[pos1]>=left
@@ -28,10 +28,10 @@ class Solution:
         next = [INF] * (len(s) + 1)
 
         for i, char in enumerate(s):
-            preSum[i + 1] = preSum[i] + int(char == '|')
-            pre[i + 1] = i if char == '|' else pre[i]
+            preSum[i + 1] = preSum[i] + int(char == "|")
+            pre[i + 1] = i if char == "|" else pre[i]
         for i, char in reversed(list(enumerate(s))):
-            next[i] = i if char == '|' else next[i + 1]
+            next[i] = i if char == "|" else next[i + 1]
 
         res = []
         for left, right in queries:

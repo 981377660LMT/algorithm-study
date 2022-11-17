@@ -401,6 +401,11 @@ func (t *FHQTreap) toggle(root int) {
 	t.nodes[root].isReversed = !t.nodes[root].isReversed
 }
 
+//  static uint64_t rng() {
+// 	 static uint64_t x_ = 88172645463325252ULL;
+// 	 return x_ ^= x_ << 7, x_ ^= x_ >> 9, x_ & 0xFFFFFFFFull;
+//  }
+// https://nyaannyaan.github.io/library/rbst/rbst-base.hpp
 func (t *FHQTreap) fastRand() uint64 {
 	t.seed ^= t.seed << 7
 	t.seed ^= t.seed >> 9
