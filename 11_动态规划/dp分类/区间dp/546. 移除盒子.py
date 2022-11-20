@@ -12,7 +12,7 @@ from functools import lru_cache
 
 # 时间复杂度 O(n^4)
 
-
+# !移除盒子
 class Solution:
     def removeBoxes(self, boxes: List[int]) -> int:
         # dp(l, r, k) denote the maximum points we can get in boxes[l..r] if we have extra k boxes which is the same color with boxes[l] in the left side.
@@ -42,6 +42,3 @@ print(Solution().removeBoxes(boxes=[1, 3, 2, 2, 2, 3, 4, 3, 1]))
 # ----> [1, 3, 3, 3, 1] (1*1=1 分)
 # ----> [1, 1] (3*3=9 分)
 # ----> [] (2*2=4 分)
-
-
-# 直接放弃

@@ -34,31 +34,6 @@ class Solution:
                 res = min(res, k - black)
         return res
 
-    def minimumRecolors3(self, blocks: str, k: int) -> int:
-        """拐弯的dp解法"""
-        n = len(blocks)
-
-        @lru_cache(None)
-        def dfs(index: int, remain: int) -> int:
-            if remain <= 0:
-                return 0
-            if index == n:
-                return INF
-
-            res = INF
-            cur = blocks[index]
-            if cur == "B":
-                return dfs(index + 1, remain - 1)
-            if cur == "W":
-                cand1 = dfs(index + 1, k)
-                cand2 = dfs(index + 1, remain - 1) + 1
-                res = min(res, cand1, cand2)
-            return res
-
-        res = dfs(0, k)
-        dfs.cache_clear()
-        return res
-
 
 print(Solution().minimumRecolors(blocks="WBBWWBBWBW", k=7))
 print(Solution().minimumRecolors(blocks="WBWBBBW", k=2))

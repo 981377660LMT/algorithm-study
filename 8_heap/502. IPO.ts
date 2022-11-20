@@ -1,6 +1,6 @@
 // 首次公开募股 (Initial public offering)
 
-import { MinHeap } from './Heap'
+import { Heap } from './Heap'
 
 /**
  *
@@ -17,25 +17,23 @@ import { MinHeap } from './Heap'
  * 即：当前所有可以启动的项目全部放入大根堆，然后选一个利润最大的，重复k轮
  */
 function findMaximizedCapital(k: number, w: number, profits: number[], capital: number[]): number {
-  const capQueue = new MinHeap<[cap: number, index: number]>((a, b) => a[0] - b[0])
-  const profQueue = new MinHeap<[prof: number, index: number]>((a, b) => b[0] - a[0])
+  const pairs = capital.map<[capital: number, index: number]>((c, i) => [c, i])
+  const pq1 = new Heap<[capital: number, index: number]>(pairs, (a, b) => a[0] - b[0])
 
-  for (let i = 0; i < capital.length; i++) {
-    capQueue.heappush([capital[i], i])
-  }
+  const pq2 = new Heap<number>((a, b) => b - a)
 
-  let curCap = w
+  let res = w
   for (let i = 0; i < k; i++) {
-    // 所有可以启动的项目全部放入大根堆，然后选一个利润最大的
-    while (capQueue.size > 0 && capQueue.peek()![0] <= curCap) {
-      const [_, index] = capQueue.heappop()!
-      profQueue.heappush([profits[index], index])
+    // !所有可以启动的项目全部放入大根堆，然后选一个利润最大的
+    while (pq1.size > 0 && pq1.peek()![0] <= res) {
+      const [_, index] = pq1.pop()!
+      pq2.push(profits[index])
     }
-    if (profQueue.size === 0) break
-    curCap += profQueue.heappop()![0]
+    if (pq2.size === 0) break
+    res += pq2.pop()!
   }
 
-  return curCap
+  return res
 }
 
 console.log(findMaximizedCapital(2, 0, [1, 2, 3], [0, 1, 1]))

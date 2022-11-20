@@ -10,8 +10,8 @@ MOD = int(1e9 + 7)
 
 class Solution:
     def numMusicPlaylists(self, N: int, L: int, K: int) -> int:
-        """一共N首歌曲，目标列表长度是L，相同歌曲的最小间隔是k。
-        
+        """一共N首歌曲,目标列表长度是L,相同歌曲的最小间隔是k。
+
         求合法的歌单数
         dfs(index,remain)
         """
@@ -40,4 +40,3 @@ class Solution:
 print(Solution().numMusicPlaylists(3, 3, 1))
 # 输出：6
 # 解释：有 6 种可能的播放列表。[1, 2, 3]，[1, 3, 2]，[2, 1, 3]，[2, 3, 1]，[3, 1, 2]，[3, 2, 1].
-

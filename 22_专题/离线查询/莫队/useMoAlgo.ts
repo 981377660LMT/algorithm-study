@@ -2,7 +2,7 @@ interface WindowManager<T, Q> {
   // 使用 `this:void` 禁止在外部调用this
   add(this: void, value: T, index: number, qLeft: number, qRight: number): void
   remove(this: void, value: T, index: number, qLeft: number, qRight: number): void
-  query(this: void, index: number, qLeft: number, qRight: number): Q
+  query(this: void, qLeft: number, qRight: number): Q
 }
 
 type Query = [qIndex: number, qLeft: number, qRight: number]
@@ -75,7 +75,7 @@ function useMoAlgo<T, Q>(arrayLike: Readonly<ArrayLike<T>>, windowManager: Windo
           add(arrayLike[left], left, qLeft, qRight - 1)
         }
 
-        res[qIndex] = query(left, qLeft, qRight - 1)
+        res[qIndex] = query(qLeft, qRight - 1)
       }
     }
 

@@ -12,3 +12,4 @@ function canMakeArithmeticProgression(arr: number[]): boolean {
 }
 
 console.log(canMakeArithmeticProgression([3, 5, 1]))
+export {}

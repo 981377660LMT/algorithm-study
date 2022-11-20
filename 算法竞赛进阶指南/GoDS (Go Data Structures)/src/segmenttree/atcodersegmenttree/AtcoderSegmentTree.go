@@ -82,11 +82,11 @@ func (tree *LazySegTree) updateLazy(parentLazy, childLazy F) F {
 }
 
 func NewLazySegTree(
-	v []S,
+	leaves []S,
 ) *LazySegTree {
 	tree := &LazySegTree{}
 
-	n := int(len(v))
+	n := int(len(leaves))
 	tree.n = n
 	tree.log = int(bits.Len(uint(n - 1)))
 	tree.size = 1 << tree.log
@@ -99,7 +99,7 @@ func NewLazySegTree(
 		tree.lazy[i] = tree.lazyUnit()
 	}
 	for i := 0; i < n; i++ {
-		tree.data[tree.size+i] = v[i]
+		tree.data[tree.size+i] = leaves[i]
 	}
 	for i := tree.size - 1; i >= 1; i-- {
 		tree.pushUp(i)

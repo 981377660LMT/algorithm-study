@@ -1,4 +1,4 @@
-# https://atcoder.jp/contests/practice2/submissions/32497027
+# https://www.luogu.com.cn/problem/P4782
 # 给定 n 个还未赋值的布尔变量 x1∼xn。
 # 现在有 m 个条件，每个条件的形式为
 #  !“xi 为 0/1 或 xj 为 0/1 至少有一项成立”，
@@ -9,12 +9,8 @@
 from typing import List
 
 
-class TwoSAT:
+class TwoSat:
     def __init__(self, n: int):
-        """n个条件,每个条件的形式都是 "xi 为 true/false 或 xj 为 true/false 至少有一项成立"
-
-        2-SAT 问题的目标是给每个变量赋值，使得所有条件成立
-        """
         self._n = n
         self._adjList = [[] for _ in range(2 * n)]
 
@@ -71,46 +67,59 @@ class TwoSAT:
                 count += 1
         return count, group
 
-    def addEdge(self, i: int, iState: bool, j: int, jState: bool) -> None:
-        """对于 Xi 为真，可以通过连边 <i+n,i> 实现; Xi 为假，可以通过连边 <i,i+n> 来实现"""
-        i0 = i
-        i1 = i + self._n
-        if not iState:
-            i0, i1 = i1, i0
-        j0 = j
-        j1 = j + self._n
-        if not jState:
-            j0, j1 = j1, j0
-        self._adjList[i1].append(j0)
-        self._adjList[j1].append(i0)
+    def addLimit(self, i: int, iState: bool, j: int, jState: bool) -> None:
+        """加边方式1:根据限制条件 '至少满足一个' 添加边.
 
-    def buildGraph(self) -> None:
+        !i为iState 和 j为jState 两个条件至少满足一个(state 表示 真/假)
+        则 `否i => j` 和 `否j => i`
+
+        0 <= i < n, 0 <= j < n
+        """
+        notU, v = i + iState * self._n, j + (jState ^ 1) * self._n
+        self._adjList[notU].append(v)
+        notV, u = j + jState * self._n, i + (iState ^ 1) * self._n
+        self._adjList[notV].append(u)
+
+    def addEdge(self, u: int, v: int) -> None:
+        """加边方式2:根据命题的推导关系添加边.
+
+        如果 u => v (u成立可以推导出v成立)，那么就添加边 u => v 以及 ¬v => ¬u.。
+        注意当 u/v 为真命题时, 0 <= u/v < n
+        当 u/v 为假命题时, n <= u/v < 2*n
+        """
+        self._adjList[u].append(v)
+        notU = (u + self._n) if u < self._n else (u - self._n)
+        notV = (v + self._n) if v < self._n else (v - self._n)
+        self._adjList[notV].append(notU)
+
+    def build(self) -> None:
         _, self.group = self._getSCC(2 * self._n, self._adjList)
 
     def check(self) -> bool:
-        """强连通分量中同时存在 a => a非 及 a非 => a 时，命题无解"""
+        """强连通分量中同时存在 a => 非a 及 非a => a 时，命题无解"""
         for i in range(self._n):
             if self.group[i] == self.group[i + self._n]:
                 return False
         return True
 
     def work(self) -> List[bool]:
-        """每个条件结点的正确性"""
+        """每个命题xi是否为真"""
         res = [False] * self._n
         for i in range(self._n):
-            if self.group[i] > self.group[i + self._n]:  # type: ignore
-                res[i] = True
+            # !DAG上 如果 真命题的拓扑序排在假命题后面，说明可以推导出真命题，即为真
+            res[i] = self.group[i] > self.group[i + self._n]  # type: ignore
         return res
 
 
 if __name__ == "__main__":
     n, m = map(int, input().split())
-    twoSAT = TwoSAT(n)
+    twoSAT = TwoSat(n)
     for _ in range(m):
         i, iState, j, jState = map(int, input().split())
-        twoSAT.addEdge(i - 1, bool(iState), j - 1, bool(jState))
+        twoSAT.addLimit(i - 1, bool(iState), j - 1, bool(jState))
+        # 两个条件至少满足一个
 
-    twoSAT.buildGraph()
+    twoSAT.build()
 
     if not twoSAT.check():
         print("IMPOSSIBLE")

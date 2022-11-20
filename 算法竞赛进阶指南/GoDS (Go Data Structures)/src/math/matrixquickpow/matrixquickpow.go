@@ -47,3 +47,6 @@ func (matrix Matrix) Pow(exp int, mod int) Matrix {
 	}
 	return res
 }
+
+// 矩阵求逆、行列式、高斯消元
+// https://github.dev/EndlessCheng/codeforces-go/blob/3dd70515200872705893d52dc5dad174f2c3b5f3/copypasta/math_matrix.go#L200

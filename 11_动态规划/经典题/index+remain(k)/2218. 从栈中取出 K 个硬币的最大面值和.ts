@@ -10,10 +10,10 @@
 
 function maxValueOfCoins(piles: number[][], limit: number): number {
   const n = piles.length
-  let dp = new Uint32Array(limit + 1).fill(0)
+  let dp = new Uint32Array(limit + 1)
   for (let i = 0; i < n; i++) {
     let preSum = 0
-    const ndp = new Uint32Array(limit + 1).fill(0)
+    const ndp = new Uint32Array(limit + 1)
     for (let j = 0; j < piles[i].length; j++) {
       preSum += piles[i][j]
       for (let k = j + 1; k <= limit; k++) {

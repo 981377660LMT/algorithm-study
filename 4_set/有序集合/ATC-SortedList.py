@@ -22,7 +22,7 @@ from typing import Generic, Iterable, Optional, Tuple, TypeVar
 T = TypeVar("T")
 
 
-class SortedList(Generic[T]):
+class ATCSortedList(Generic[T]):
     DEFAULT_LOAD_FACTOR = 1000
 
     def __init__(self, iterable: Optional[Iterable[T]] = None):
@@ -623,7 +623,7 @@ class SortedList(Generic[T]):
 
 
 if __name__ == "__main__":
-    sl = SortedList([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    sl = ATCSortedList([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     assert sl.bisect_left(5) == 4
     assert sl.bisect_right(5) == 5
     assert sl[4] == 5

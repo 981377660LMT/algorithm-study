@@ -14,7 +14,6 @@ INF = int(1e18)
 class Solution:
     def minimumTotalDistance3(self, robot: List[int], factory: List[List[int]]) -> int:
         """堆+反悔  O(nlogn)"""
-        # https://leetcode.cn/problems/minimum-total-distance-traveled/solution/-by-meyi-vbl2/
         ...
 
     def minimumTotalDistance(self, robot: List[int], factory: List[List[int]]) -> int:

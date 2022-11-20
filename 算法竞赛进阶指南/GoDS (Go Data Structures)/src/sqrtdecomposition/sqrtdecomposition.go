@@ -23,6 +23,7 @@ import (
 // TODO 分块数据结构模板
 /*
 分块数据结构
+https://zhuanlan.zhihu.com/p/114268236
 https://oi-wiki.org/ds/decompose/
 https://oi-wiki.org/ds/block-array/
 【推荐】https://www.luogu.com.cn/blog/220037/Sqrt1
@@ -65,11 +66,6 @@ func SqrtDecompotision() {
 		}
 	}
 
-	// updateAll := func(l, r, add int) {}
-	// updatePart := func(l, r, add int) {}
-	// queryAll := func(l, r, k int) int { return 0 }
-	// queryPart := func(l, r, k int) int { return 0 }
-
 	// 区间更新或者区间查询
 	sqrtOp := func(left, right int, value int) { // [l,r], starts at 0
 		for i := range blocks {
@@ -84,14 +80,16 @@ func SqrtDecompotision() {
 
 			if left <= block.left && block.right <= right {
 				// do op on full block
-				// !区间更新完整的块，类似线段树的懒标记
+				// !区间更新完整的块:类似线段树，只需要打上懒标记
+				// !区间查询完整的块:实际值+懒标记里的值
 			} else {
 				// do op on part block
 				bl := max(block.left, left)
 				br := min(block.right, right)
 				for j := bl - block.left; j <= br-block.left; j++ {
 					// do b.origin[j]...
-					// !暴力更新
+					// !区间修改不完整的块：暴力更新实际值
+					// !区间查询不完整的块：暴力计算 实际值+懒标记里的值
 				}
 			}
 		}

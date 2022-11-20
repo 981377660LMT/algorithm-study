@@ -26,8 +26,8 @@ class Solution:
 
     def countSubstrings2(self, s: str, t: str) -> int:
         """不同字符=相同前缀+不同字符+相同后缀
-        
-        因此需要处理出前后缀的lcp
+
+        因此需要处理出前后缀的lcp(最长公共前缀)
         """
         m, n = len(s), len(t)
         lcp1 = [[0] * (n + 1) for _ in range(m + 1)]  # lcp[i][j] 表示前缀 num[:i+1]与num[:j+1]的最长公共前缀长度
@@ -63,4 +63,3 @@ print(Solution().countSubstrings(s="aba", t="baba"))
 # ("aba", "baba")
 # ("aba", "baba")
 # 加粗部分分别表示 s 和 t 串选出来的子字符串。
-

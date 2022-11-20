@@ -5,7 +5,7 @@
 # 注意：数组最开始时可以为 任意大小 ，且 不计入 调整大小的操作次数。
 # 1 <= nums.length <= 200
 
-# 总结：我们可以变换k次，等价于我们可以`将原数组分成k+1个区间，每个区间必须取区间最大值`
+# !总结：我们可以变换k次，等价于我们可以`将原数组分成k+1个区间，每个区间必须取区间最大值`
 # 每个区间都要求和（区间最大值*区间长度再减去区间和，）
 from typing import List
 from functools import lru_cache
@@ -24,7 +24,6 @@ class Solution:
                 return 0
 
             res = INF
-
             curMax = 0
             for next in range(index, n):
                 curMax = max(curMax, nums[next])
@@ -47,4 +46,3 @@ print(Solution().minSpaceWastedKResizing(nums=[10, 20, 30], k=1))
 # 解释：size = [20,20,30].
 # 我们可以让数组初始大小为 20 ，然后时刻 2 调整大小为 30 。
 # 总浪费空间为 (20 - 10) + (20 - 20) + (30 - 30) = 10 。
-

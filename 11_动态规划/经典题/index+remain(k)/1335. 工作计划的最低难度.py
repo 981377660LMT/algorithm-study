@@ -24,10 +24,8 @@ class Solution:
             res = INF
             curMax = -INF
             for i in range(index, n):
-                curMax = jobDifficulty[i] if jobDifficulty[i] > curMax else curMax
-                cand = dfs(i + 1, remain - 1) + curMax
-                res = cand if cand < res else res
-
+                curMax = max(curMax, jobDifficulty[i])
+                res = min(res, dfs(i + 1, remain - 1) + curMax)
             return res
 
         n = len(jobDifficulty)

@@ -1,53 +1,63 @@
 // #region SegmentTree
 
 class SegmentTree {
-  private readonly tree: Uint32Array
-  private readonly pre: Uint32Array
-  private readonly suf: Uint32Array
+  private readonly _max: Uint32Array
+  private readonly _preMax: Uint32Array
+  private readonly _sufMax: Uint32Array
+  private readonly _n: number
   readonly chars: string[]
 
   constructor(input: string) {
-    const n = input.length
-    this.tree = new Uint32Array(n << 2)
-    this.pre = new Uint32Array(n << 2)
-    this.suf = new Uint32Array(n << 2)
+    this._n = input.length
+    const cap = 1 << (32 - Math.clz32(this._n - 1) + 1)
+    this._max = new Uint32Array(cap)
+    this._preMax = new Uint32Array(cap)
+    this._sufMax = new Uint32Array(cap)
     this.chars = input.split('')
-    this.build(1, 1, n)
+    this.build(1, 1, this._n)
   }
 
-  update(root: number, L: number, R: number, l: number, r: number, target: string): void {
+  query(left: number, right: number): number {
+    return this._query(1, left, right, 1, this._n)
+  }
+
+  update(left: number, right: number, lazy: string): void {
+    this._update(1, left, right, 1, this._n, lazy)
+  }
+
+  queryAll(): number {
+    return this._max[1]
+  }
+
+  private _update(root: number, L: number, R: number, l: number, r: number, target: string): void {
     if (L <= l && r <= R) {
-      this.chars[l - 1] = target
+      this.chars[l - 1] = target // !propagate
       return
     }
 
     const mid = Math.floor((l + r) / 2)
-    if (L <= mid) this.update(root << 1, L, R, l, mid, target)
-    if (mid < R) this.update((root << 1) | 1, L, R, mid + 1, r, target)
+    if (L <= mid) this._update(root << 1, L, R, l, mid, target)
+    if (mid < R) this._update((root << 1) | 1, L, R, mid + 1, r, target)
     this.pushUp(root, l, r, mid)
   }
 
-  query(root: number, L: number, R: number, l: number, r: number): number {
+  private _query(root: number, L: number, R: number, l: number, r: number): number {
     if (L <= l && r <= R) {
-      return this.tree[root]
+      return this._max[root]
     }
 
     let res = 0
     const mid = Math.floor((l + r) / 2)
-    if (L <= mid) res = Math.max(res, this.query(root << 1, L, R, l, mid))
-    if (mid < R) res = Math.max(res, this.query((root << 1) | 1, L, R, mid + 1, r))
+    if (L <= mid) res = Math.max(res, this._query(root << 1, L, R, l, mid))
+    if (mid < R) res = Math.max(res, this._query((root << 1) | 1, L, R, mid + 1, r))
     return res
-  }
-
-  queryAll(): number {
-    return this.tree[1]
   }
 
   private build(root: number, l: number, r: number): void {
     if (l === r) {
-      this.tree[root] = 1
-      this.pre[root] = 1
-      this.suf[root] = 1
+      this._max[root] = 1
+      this._preMax[root] = 1
+      this._sufMax[root] = 1
       return
     }
 
@@ -57,33 +67,35 @@ class SegmentTree {
     this.pushUp(root, l, r, mid)
   }
 
+  // !op
   private pushUp(root: number, l: number, r: number, mid: number): void {
-    const [leftPre, rightPre] = [this.pre[root << 1], this.pre[(root << 1) | 1]]
-    const [leftSuf, rightSuf] = [this.suf[root << 1], this.suf[(root << 1) | 1]]
-    const [leftMax, rightMax] = [this.tree[root << 1], this.tree[(root << 1) | 1]]
+    const [leftPre, rightPre] = [this._preMax[root << 1], this._preMax[(root << 1) | 1]]
+    const [leftSuf, rightSuf] = [this._sufMax[root << 1], this._sufMax[(root << 1) | 1]]
+    const [leftMax, rightMax] = [this._max[root << 1], this._max[(root << 1) | 1]]
 
-    this.pre[root] = leftPre
-    this.suf[root] = rightSuf
+    this._preMax[root] = leftPre
+    this._sufMax[root] = rightSuf
 
     if (this.chars[mid - 1] === this.chars[mid]) {
-      this.tree[root] = Math.max(leftMax, rightMax, leftSuf + rightPre)
-      if (leftPre === mid - l + 1) this.pre[root] += rightPre
-      if (rightSuf === r - mid) this.suf[root] += leftSuf
+      this._max[root] = Math.max(leftMax, rightMax, leftSuf + rightPre)
+      if (leftPre === mid - l + 1) this._preMax[root] += rightPre
+      if (rightSuf === r - mid) this._sufMax[root] += leftSuf
     } else {
-      this.tree[root] = Math.max(leftMax, rightMax)
+      this._max[root] = Math.max(leftMax, rightMax)
     }
   }
 }
 
 // #endregion
 function longestRepeating(s: string, queryCharacters: string, queryIndices: number[]): number[] {
-  const n = s.length
   const segmentTree = new SegmentTree(s)
   const res = Array<number>(queryIndices.length).fill(0)
 
   for (let i = 0; i < queryIndices.length; i++) {
     const [qc, qi] = [queryCharacters[i], queryIndices[i]]
-    if (qc !== segmentTree.chars[qi]) segmentTree.update(1, qi + 1, qi + 1, 1, n, qc)
+    if (qc !== segmentTree.chars[qi]) {
+      segmentTree.update(qi + 1, qi + 1, qc)
+    }
     res[i] = segmentTree.queryAll()
   }
 

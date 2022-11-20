@@ -1,0 +1,3 @@
+# https://nyaannyaan.github.io/library/string/suffix-automaton.hpp
+# TODO
+# 感觉不是必要的 以后再看...

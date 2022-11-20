@@ -51,7 +51,7 @@ class MoAlgo(Generic[V, Q]):
                     left -= 1
                     self._add(data[left], left, qLeft, qRight - 1)
 
-                res[qi] = self._query()
+                res[qi] = self._query(qLeft, qRight - 1)
 
         return res
 
@@ -63,7 +63,7 @@ class MoAlgo(Generic[V, Q]):
         """将数据从窗口中移除"""
         raise NotImplementedError(f"{self.__class__.__name__}._remove")
 
-    def _query(self) -> Q:
+    def _query(self, qLeft: int, qRight: int) -> Q:
         """更新当前窗口的查询结果"""
         raise NotImplementedError(f"{self.__class__.__name__}._query")
 
@@ -88,7 +88,7 @@ if __name__ == "__main__":
             self._counter[value] -= 1
             self._pair += self._counter[value] // 2
 
-        def _query(self) -> int:
+        def _query(self, qLeft: int, qRight: int) -> int:
             return self._pair
 
     import sys

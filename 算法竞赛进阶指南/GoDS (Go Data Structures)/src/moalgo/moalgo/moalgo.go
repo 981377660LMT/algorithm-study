@@ -25,7 +25,7 @@ func main() {
 
 	pair := 0
 	counter := [N + 1]int{}
-	mo := NewMoAlgo(nums, &op{
+	mo := NewMoAlgo(nums, op{
 		add: func(v, _, _, _ int) {
 			pair -= counter[v] / 2
 			counter[v]++
@@ -36,7 +36,7 @@ func main() {
 			counter[v]--
 			pair += counter[v] / 2
 		},
-		query: func() int { return pair },
+		query: func(_, _ int) int { return pair },
 	})
 
 	var q int
@@ -55,13 +55,18 @@ func main() {
 	}
 }
 
+// type V = interface{}
+// type R = interface{}
+type V = int
+type R = int
+
 type MoAlgo struct {
 	n          int
 	queryOrder int
 	chunkSize  int
 	data       []int
 	buckets    [][]query
-	op         *op
+	op         op
 }
 
 type query struct {
@@ -70,14 +75,14 @@ type query struct {
 
 type op struct {
 	// 将数据添加到窗口
-	add func(value, index, qLeft, qRight int)
+	add func(value V, index, qLeft, qRight int)
 	// 将数据从窗口中移除
-	remove func(value, index, qLeft, qRight int)
+	remove func(value V, index, qLeft, qRight int)
 	// 更新当前窗口的查询结果
-	query func() int
+	query func(qLeft, qRight int) R
 }
 
-func NewMoAlgo(data []int, op *op) *MoAlgo {
+func NewMoAlgo(data []int, op op) *MoAlgo {
 	n := len(data)
 	chunkSize := int(math.Ceil(math.Sqrt(float64(n))))
 	buckets := make([][]query, n/chunkSize+1)
@@ -92,9 +97,9 @@ func (mo *MoAlgo) AddQuery(left, right int) {
 }
 
 // 返回每个查询的结果
-func (mo *MoAlgo) Work() []int {
+func (mo *MoAlgo) Work() []R {
 	data, buckets, q := mo.data, mo.buckets, mo.queryOrder
-	res := make([]int, q)
+	res := make([]R, q)
 	left, right := 0, 0
 
 	for i, bucket := range buckets {
@@ -125,7 +130,7 @@ func (mo *MoAlgo) Work() []int {
 				mo.op.add(data[left], left, q.left, q.right-1)
 			}
 
-			res[q.qi] = mo.op.query()
+			res[q.qi] = mo.op.query(q.left, q.right-1)
 		}
 	}
 
