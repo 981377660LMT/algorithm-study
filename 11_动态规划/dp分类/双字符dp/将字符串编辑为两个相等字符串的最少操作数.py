@@ -3,6 +3,7 @@
 class Solution:
     def solve(self, s):
         def countEditDist(s1, s2) -> int:
+            """编辑距离+枚举分割点"""
             n1, n2 = len(s1), len(s2)
             dp = [[0] * (n2 + 1) for _ in range(n1 + 1)]
             for i in range(n1 + 1):

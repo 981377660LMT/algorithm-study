@@ -1,16 +1,12 @@
-# https://leetcode-cn.com/problems/count-ways-to-build-rooms-in-an-ant-colony/solution/python-shu-zhuang-shu-zu-qiu-tuo-bu-fang-5e8f/
-# https://leetcode.com/problems/count-ways-to-build-rooms-in-an-ant-colony/discuss/1299540/PythonC%2B%2B-clean-DFS-solution-with-explanation
-from typing import List, Tuple
-
-
 # 2 <= n <= 105
 # 在完成所有房间的构筑之后，从房间 0 可以访问到每个房间。
 # !prevRoom[i] 表示在构筑房间 i 之前，你必须先构筑房间 prevRoom[i] (即连接过程中边不能断开)
 # 每个房间只能有一个 prevRoom
 
+from typing import List, Tuple
+
+
 MOD = int(1e9 + 7)
-
-
 fac = [1]
 ifac = [1]
 for i in range(1, int(1e5 + 10)):
@@ -27,13 +23,6 @@ def C(n: int, k: int) -> int:
 # 蚂蚁
 class Solution:
     def waysToBuildRooms(self, prevRoom: List[int]) -> int:
-        n = len(prevRoom)
-        adjList = [[] for _ in range(n)]
-        for cur, pre in enumerate(prevRoom):
-            if pre == -1:
-                continue
-            adjList[cur].append(pre)
-            adjList[pre].append(cur)
 
         # !返回:元素个数,排序方案数
         # 计算组合两个数组并保持其原始顺序的方法的数量
@@ -50,6 +39,13 @@ class Solution:
                 res = (res * nextRes * C(nodeCount, subCount)) % MOD
             return (nodeCount + 1, res)
 
+        n = len(prevRoom)
+        adjList = [[] for _ in range(n)]
+        for cur, pre in enumerate(prevRoom):
+            if pre == -1:
+                continue
+            adjList[cur].append(pre)
+            adjList[pre].append(cur)
         return dfs(0, -1)[1]
 
 

@@ -2,9 +2,10 @@ from typing import List
 from math import comb
 
 # 二叉搜索树的方案数
-MOD = 10 ** 9 + 7
 # 此题与1916相似
 # 子树1排序数*子树2排序数*组内保持顺序合并数组的方式comb
+
+MOD = int(1e9 + 7)
 
 
 class Solution:
@@ -21,4 +22,3 @@ class Solution:
 
 
 print(Solution().numOfWays([3, 4, 5, 1, 2]))
-

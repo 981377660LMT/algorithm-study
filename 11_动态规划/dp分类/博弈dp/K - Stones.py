@@ -4,9 +4,11 @@
 
 # k<=1e5 n<=100
 # 博弈dp
+
+
 from functools import lru_cache
 import sys
-import os
+
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -22,11 +24,11 @@ WIN1, WIN2 = "First", "Second"
 def dfs(remain: int) -> bool:
     if remain == 0:
         return False
-    res = False
     for num in nums:
         if remain >= num:
-            res |= not dfs(remain - num)
-    return res
+            if not dfs(remain - num):
+                return True
+    return False
 
 
 res = dfs(k)

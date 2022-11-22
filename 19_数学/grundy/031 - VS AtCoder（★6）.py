@@ -14,7 +14,7 @@
 # 异或不为0 先手胜
 
 from functools import lru_cache
-from typing import List, Set
+from typing import Set
 import sys
 
 sys.setrecursionlimit(int(1e9))
