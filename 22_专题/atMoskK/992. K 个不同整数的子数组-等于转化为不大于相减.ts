@@ -7,7 +7,7 @@
  * @summary 题目转换成求：不超过k种元素的子数组个数 - 不超过k-1种元素的子数组个数(转化为水果成蓝问题)
  */
 const subarraysWithKDistinct = function (nums: number[], k: number): number {
-  const notMoreThan = (threshold: number): number => {
+  const atMostK = (threshold: number): number => {
     let res = 0
     let left = 0
     const counter = new Map<number, number>()
@@ -30,7 +30,7 @@ const subarraysWithKDistinct = function (nums: number[], k: number): number {
     return res
   }
 
-  return notMoreThan(k) - notMoreThan(k - 1)
+  return atMostK(k) - atMostK(k - 1)
 }
 
 console.log(subarraysWithKDistinct([1, 2, 1, 2, 3], 2))

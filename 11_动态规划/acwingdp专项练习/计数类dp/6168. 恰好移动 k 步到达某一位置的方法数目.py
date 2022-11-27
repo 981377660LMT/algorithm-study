@@ -2,7 +2,6 @@ from functools import lru_cache
 from math import comb
 
 MOD = int(1e9 + 7)
-INF = int(1e20)
 
 
 class Solution:

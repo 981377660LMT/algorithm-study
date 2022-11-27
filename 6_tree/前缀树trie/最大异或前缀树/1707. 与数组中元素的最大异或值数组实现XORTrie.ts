@@ -1,4 +1,6 @@
-import { useArrayXORTrie } from './XORTrie-数组节省空间版'
+/* eslint-disable no-param-reassign */
+
+import { useArrayXORTrie } from './XORTrieArray'
 
 /**
  *
@@ -16,7 +18,7 @@ function maximizeXor(nums: number[], queries: number[][]): number[] {
 
   queries.sort((a, b) => a[1] - b[1])
 
-  const trie = useArrayXORTrie()
+  const trie = useArrayXORTrie(1e9)
   const res = Array<number>(queries.length).fill(0)
 
   let ni = 0
@@ -42,7 +44,7 @@ console.log(
     [
       [3, 1],
       [1, 3],
-      [5, 6],
+      [5, 6]
     ]
   )
 )
@@ -57,7 +59,7 @@ console.log(
     [
       [12, 4],
       [8, 1],
-      [6, 3],
+      [6, 3]
     ]
   )
 )

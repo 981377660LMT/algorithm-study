@@ -3,6 +3,8 @@
 
 看到子数组和 想到前缀和 
 看到子数组长度 想到哈希表存索引
+
+1124. 表现良好的最长时间段
 """
 
 from itertools import accumulate

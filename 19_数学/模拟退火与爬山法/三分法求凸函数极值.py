@@ -1,3 +1,5 @@
+"""三分法求凸函数极值"""
+
 from typing import Callable
 
 
@@ -44,14 +46,14 @@ def maximize(fun: Callable[[int], int], lower: int, upper: int) -> int:
     return res
 
 
-def optimize(fun: Callable[[int], int], lower: int, upper: int, *, needMin: bool) -> int:
+def optimize(fun: Callable[[int], int], lower: int, upper: int, *, min: bool) -> int:
     """三分法求`严格凸函数fun`在`[lower,upper]`间的最值"""
-    return minimize(fun, lower, upper) if needMin else maximize(fun, lower, upper)
+    return minimize(fun, lower, upper) if min else maximize(fun, lower, upper)
 
 
 if __name__ == "__main__":
-    assert optimize(lambda x: x**2 + 2 * x, -1, 400, needMin=True) == -1
-    assert optimize(lambda x: 0, -1, 400, needMin=True) == 0
+    assert optimize(lambda x: x**2 + 2 * x, -1, 400, min=True) == -1
+    assert optimize(lambda x: 0, -1, 400, min=True) == 0
 
-    assert optimize(lambda x: x**2, -1, 40, needMin=False) == 1600
-    assert optimize(lambda x: x**2, -50, 40, needMin=False) == 2500
+    assert optimize(lambda x: x**2, -1, 40, min=False) == 1600
+    assert optimize(lambda x: x**2, -50, 40, min=False) == 2500

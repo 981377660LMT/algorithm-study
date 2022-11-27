@@ -1,2 +1,2 @@
-            if right >= k:
-                counter[candies[right - k]] += 1
+max(res, xorTrie.search(subSum))
+                xorTri

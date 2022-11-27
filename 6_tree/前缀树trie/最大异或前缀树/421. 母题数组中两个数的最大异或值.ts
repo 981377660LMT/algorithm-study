@@ -1,4 +1,4 @@
-import { useArrayXORTrie } from './XORTrie-数组节省空间版'
+import { useArrayXORTrie } from './XORTrieArray'
 
 /**
  * @param {number[]} nums  0 <= nums[i] <= 2**31 - 1
@@ -7,11 +7,9 @@ import { useArrayXORTrie } from './XORTrie-数组节省空间版'
  * @summary
  * 每次candidate取贪心 即越大的异或尽量在高位取1
  */
-// 前缀树解法
-// https://leetcode-cn.com/problems/maximum-xor-of-two-numbers-in-an-array/solution/python3-ha-xi-biao-he-er-wei-shu-zu-shi-7nh3b/
-const findMaximumXOR = function (nums: number[]): number {
+function findMaximumXOR(nums: number[]): number {
   let res = 0
-  const trie = useArrayXORTrie()
+  const trie = useArrayXORTrie(2 ** 31 - 1)
 
   for (const num of nums) {
     trie.insert(num)

@@ -1,3 +1,4 @@
+# E - White and Black Balls E - 每个前缀不超过k的序列数
 # n个白球和m和黑球放置在一行
 # 每个前缀中wi<=bi+k 求方案数
 # 0<=n,m<=1e6

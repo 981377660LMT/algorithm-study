@@ -3,6 +3,8 @@
 求字典序第k小的排列/当前排列在所有排列中的字典序第几小
 """
 
+# ! 注意不取模的情况
+
 from collections import Counter
 from typing import List, Sequence, TypeVar
 
@@ -62,10 +64,10 @@ def calPerm(s: Sequence[T], rank: int) -> List[T]:
                 continue
 
             counter[char] -= 1
-            suf = fac[n - i - 1]
+            suf = fac[n - i - 1]  # factorial(n-i-1)
 
             for count in counter.values():
-                suf *= ifac[count]  # !后面位置的组合数
+                suf *= ifac[count]  # ! factorial(count)
                 suf %= MOD
 
             if suf > rank:

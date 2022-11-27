@@ -42,6 +42,7 @@ const exactK = (k: number, nums: number[]) => atMostK(k, nums) - atMostK(k - 1, 
 // 子数组最大值刚好是 介于[k1,k2] 的子数组的个数
 // 其中 k1 < k2
 const betweenK = (k1: number, k2: number, nums: number[]) =>
+  // eslint-disable-next-line implicit-arrow-linebreak
   atMostK(k2, nums) - atMostK(k1 - 1, nums)
 
 if (require.main === module) {

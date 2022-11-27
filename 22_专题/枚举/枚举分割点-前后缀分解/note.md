@@ -19,6 +19,18 @@ class accumulate(Iterator[_T], Generic[_T]):
         def __init__(self, iterable: Iterable[_S], func: Callable[[_T, _S], _T], *, initial: _T | None = ...) -> None: ...
     else:
         def __init__(self, iterable: Iterable[_T], func: Callable[[_T, _T], _T] | None = ...) -> None: ...
-
-
 ```
+
+不容易写错的写法:
+
+1. 定义函数 makeDp 返回前缀 dp 数组
+2. 求出前后缀
+   ```python
+   preDp = makeDp(XXX)
+   sufDp = makeDp(XXX[::-1])[::-1]
+   ```
+3. 枚举分割点计算答案
+   ```python
+   for i in range(n):
+      res+=preDp[i]*sufDp[i+1]
+   ```

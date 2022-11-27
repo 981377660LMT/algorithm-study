@@ -1,24 +1,26 @@
+/* eslint-disable no-shadow */
 import { BinaryTree } from '../分类/Tree'
 import { deserializeNode } from '../重构json/297.二叉树的序列化与反序列化'
 
-type IsValidBST = boolean
-type Min = number
-type Max = number
-type Sum = number
-type DFSReturn = [IsValidBST, Min, Max, Sum]
+type Return = [isValidBST: boolean, min: number, max: number, sum: number]
+
 /**
  * @param {BinaryTree} root
  * @return {number}
  * 给你一棵以 root 为根的 二叉树 ，请你返回 任意 二叉搜索子树的最大键值和。
  */
-const maxSumBST = function (root: BinaryTree): number {
+function maxSumBST(root: BinaryTree): number {
   if (!root) return 0
   let maxSum = 0
-  const dfs = (root: BinaryTree | null): DFSReturn => {
+  dfs(root)
+  return maxSum
+
+  function dfs(root: BinaryTree | null): Return {
     if (!root) return [true, Infinity, -Infinity, 0]
+
+    const res: Return = [true, Infinity, -Infinity, 0]
     const left = dfs(root.left)
     const right = dfs(root.right)
-    const res: DFSReturn = [true, Infinity, -Infinity, 0]
     if (left[0] && right[0] && root.val > left[2] && root.val < right[1]) {
       res[0] = true // 以 root 为根的二叉树是 BST
       res[1] = Math.min(left[1], root.val) // 计算以 root 为根的这棵 BST 的最小值
@@ -28,10 +30,9 @@ const maxSumBST = function (root: BinaryTree): number {
     } else {
       res[0] = false // 其他的值都没必要计算了，因为用不到
     }
+
     return res
   }
-  dfs(root)
-  return maxSum
 }
 
 console.log(

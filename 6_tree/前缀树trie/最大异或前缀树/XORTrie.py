@@ -11,8 +11,8 @@ class XORTrieNode:
 
 
 class XORTrie:
-    def __init__(self, bit=31):
-        self.bit = bit
+    def __init__(self, upper: int):
+        self.bit = upper.bit_length()
         self.root = XORTrieNode(-1)
 
     def insert(self, num: int) -> None:
@@ -31,18 +31,17 @@ class XORTrie:
             bit = (num >> i) & 1
             needBit = bit ^ 1
             if root.children[needBit] is not None and root.children[needBit].count > 0:
-                res = res << 1 | 1
+                res |= 1 << i
                 root = root.children[needBit]
             elif root.children[bit] is not None and root.children[bit].count > 0:
-                res = res << 1
                 root = root.children[bit]
         return res
 
-    def discard(self, num: int) -> None:
+    def remove(self, num: int) -> None:
         root = self.root
         for i in range(self.bit, -1, -1):
             if root is None:
-                return
+                raise ValueError(f"fail to remove: num {num} not in trie")
             bit = (num >> i) & 1
             root.children[bit].count -= 1
             root = root.children[bit]

@@ -6,22 +6,26 @@
 
 # !注意有两个烤箱
 # 因此最佳的策略是将料理分为相近的两半 取两者较大值
-# 问题转换为01背包
+# 问题转换为01背包 dp[i][val] 表示前i个料理需要能否取到时间val
 
-import sys
 
-sys.setrecursionlimit(int(1e9))
-input = sys.stdin.readline
-MOD = int(1e9 + 7)
-n = int(input())
-costs = list(map(int, input().split()))
-V = 100 * 1000
-dp = [False] * (V + 10)
-dp[0] = True
+from typing import List
 
-for i in range(n):
-    for j in range(V, costs[i] - 1, -1):
-        dp[j] |= dp[j - costs[i]]
 
-start = (sum(costs) + 1) // 2
-print(dp.index(True, start))
+def cooking(times: List[int]) -> int:
+    dp = set([0])
+    for num in times:
+        ndp = dp.copy()
+        for pre in dp:
+            ndp.add(pre + num)
+        dp = ndp
+    half = (sum(times) + 1) // 2
+    while half not in dp:
+        half += 1
+    return half
+
+
+if __name__ == "__main__":
+    _ = int(input())
+    costs = list(map(int, input().split()))
+    print(cooking(costs))

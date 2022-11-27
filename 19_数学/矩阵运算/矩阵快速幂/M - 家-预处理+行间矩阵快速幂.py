@@ -75,7 +75,7 @@ def dfs(cur: int, target: int, visited: int) -> int:
 ways = [[1] * COL for _ in range(COL)]  # 同一层 i -> j 的方案数
 for i in range(COL):
     for j in range(i + 1, COL):
-        ways[i][j] = ways[j][i] = dfs(i, j, 1 << i)
+        ways[i][j] = ways[j][i] = dfs(i, j, 1 << i)  # !dfs处理state1=>state2的方案数
 
 
 # 两层时: ∑ (ways[1][j]*ways[j][1])

@@ -4,6 +4,8 @@
 # 209. 长度最小的子数组
 # 但是添加了负数之后，窗口的滑动便丢失了单向性，因此无法使用滑动窗口解决。
 
+# !862. 和大于等于k 的最短子数组
+
 from heapq import heappop, heappush
 from typing import List
 from collections import deque

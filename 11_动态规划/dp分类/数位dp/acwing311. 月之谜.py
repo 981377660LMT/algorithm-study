@@ -12,7 +12,7 @@ from functools import lru_cache
 @lru_cache(None)
 def cal(upper: int) -> int:
     @lru_cache(None)
-    def dfs(pos: int, isLimit: bool, allSum: int, mod: int, curSum) -> int:
+    def dfs(pos: int, isLimit: bool, allSum: int, mod: int, curSum: int) -> int:
         """当前在第pos位，isLimit表示是否贴合上界,sum表示各位数字之和,mod表示原数字模各位数字之和的模数"""
         if pos == 0:
             return mod == 0 and curSum == allSum
@@ -35,4 +35,3 @@ def cal(upper: int) -> int:
 
 left, right = map(int, input().split())
 print(cal(right) - cal(left - 1))
-

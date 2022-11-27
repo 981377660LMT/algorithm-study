@@ -20,4 +20,3 @@ print(Solution().expressiveWords(s="heeellooo", words=["hello", "hi", "helo"]))
 # 解释：
 # 我们能通过扩张 "hello" 的 "e" 和 "o" 来得到 "heeellooo"。
 # 我们不能通过扩张 "helo" 来得到 "heeellooo" 因为 "ll" 的长度小于 3 。
-

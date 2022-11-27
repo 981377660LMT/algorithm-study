@@ -1,4 +1,4 @@
-# https://www.codechef.com/START30A/problems-old/PRESUFOP
+# https://www.codechef.com/START30A/problems-old/PRESUFOP (残酷群)
 # Prefix Suffix Operations
 # 前后缀+1使得两个数组相等
 

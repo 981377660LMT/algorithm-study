@@ -87,13 +87,13 @@ def catalan(n: int) -> int:
 
 #########################################################
 # 预处理组合数 C(n,k)=C(n-1,k)+C(n-1,k-1)
-# 不太快
-MAX = 100
-comb = [[0] * (MAX + 5) for _ in range((MAX + 5))]
-for i in range(MAX + 2):
+# 不太快 不需要取模
+N = 100
+comb = [[0] * (N + 10) for _ in range((N + 10))]
+for i in range(N + 5):
     comb[i][0] = 1
     for j in range(1, i + 1):
-        comb[i][j] = (comb[i - 1][j - 1] + comb[i - 1][j]) % MOD
+        comb[i][j] = comb[i - 1][j - 1] + comb[i - 1][j]
 
 print(comb[10][2])
 

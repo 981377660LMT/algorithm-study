@@ -1,4 +1,5 @@
 /**
+ * 1402. 做菜顺序
  * @param {number[]} satisfaction  1 <= n <= 500
  * @return {number}
  * 一个厨师收集了他 n 道菜的满意程度 satisfaction ，这个厨师做出每道菜的时间都是 1 单位时间。
@@ -7,7 +8,7 @@
  * @summary 正难则反
  * 我们可以考虑从满意度最高的菜开始选择，然后依次选择剩余的菜里满意度最高的，直到添加新菜不能使结果增加为止。
  */
-const maxSatisfaction = function (satisfaction: number[]): number {
+function maxSatisfaction(satisfaction: number[]): number {
   satisfaction.sort((a, b) => b - a)
 
   let res = 0

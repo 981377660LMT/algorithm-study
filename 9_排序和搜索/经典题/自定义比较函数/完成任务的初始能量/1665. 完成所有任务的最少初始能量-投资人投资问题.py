@@ -19,14 +19,14 @@ class Solution:
         bad, good = [], []
         for auctual, cost in tasks:
             cashback = cost - auctual
-            if auctual > 0:
+            if cost > cashback:
                 bad.append((cost, cashback))
             else:
                 good.append((cost, cashback))
 
         bad.sort(key=lambda x: x[1], reverse=True)  # !前面cashback越大就越容易
         good.sort(key=lambda x: x[0])  # !前面cost越小就越容易
-        nums = bad + good
+        nums = good + bad
 
         res, cur = 0, 0
         for cost, cashback in nums:

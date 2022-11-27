@@ -7,7 +7,7 @@
  * 链表有next 数组的next可以看作是nums[i]
  * [1, 3, 4, 2, 2]就相当于1->3->2->4->2这个链表 在2处循环
  */
-const findDuplicate = function (nums: number[]): number {
+function findDuplicate (nums: number[]): number {
   // 先从0开始各走一步
   let fast = nums[nums[0]]
   let slow = nums[0]

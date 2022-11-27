@@ -17,7 +17,7 @@ INF = int(1e20)
 
 class Solution:
     def minSumOfLengths(self, arr: List[int], target: int) -> int:
-        def getMins(nums: List[int]) -> List[int]:
+        def makeDp(nums: List[int]) -> List[int]:
             """求出以每个位置为结尾的，和为目标值的子数组的最短长度"""
             n = len(nums)
             res = [INF] * n
@@ -36,8 +36,8 @@ class Solution:
             return res
 
         res = INF
-        leftMins = getMins(arr)
-        rightMins = getMins(arr[::-1])[::-1]
+        leftMins = makeDp(arr)
+        rightMins = makeDp(arr[::-1])[::-1]
 
         for i in range(len(arr) - 1):
             left, right = leftMins[i], rightMins[i + 1]

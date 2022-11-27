@@ -14,56 +14,13 @@
 
 # https://www.acwing.com/problem/content/description/146/
 from typing import List
-from collections import defaultdict, namedtuple
-
-
-def useXorTrie(bitLength=31):
-    trieRoot = [None, None, 0]
-
-    def insert(num: int) -> None:
-        root = trieRoot
-        for i in range(bitLength, -1, -1):
-            bit = (num >> i) & 1
-            if root[bit] is None:
-                root[bit] = [None, None, 0]
-            root[bit][2] += 1
-            root = root[bit]
-
-    def search(num: int) -> int:
-        root = trieRoot
-        res = 0
-        for i in range(bitLength, -1, -1):
-            if root is None:  # Trie中未插入
-                break
-
-            bit = (num >> i) & 1
-            needBit = bit ^ 1
-            if root[needBit] is not None and root[needBit][2] > 0:
-                res = res << 1 | 1
-                root = root[needBit]
-            else:
-                res = res << 1
-                root = root[bit]
-
-        return res
-
-    def discard(num: int) -> None:
-        root = trieRoot
-        for i in range(bitLength, -1, -1):
-            if root is None:  # Trie中未插入
-                break
-
-            bit = (num >> i) & 1
-            if root[bit] is not None:
-                root[bit][2] -= 1
-            root = root[bit]
-
-    return namedtuple('XorTrie', ['insert', 'search', 'discard'])(insert, search, discard)
+from collections import defaultdict
+from XORTrieArray import useXORTrie
 
 
 def maxXor(nums: List[int]) -> int:
     res = 0
-    xorTrie = useXorTrie()
+    xorTrie = useXORTrie(int(1e9))
     for num in nums:
         res = max(res, xorTrie.search(num))
         xorTrie.insert(num)

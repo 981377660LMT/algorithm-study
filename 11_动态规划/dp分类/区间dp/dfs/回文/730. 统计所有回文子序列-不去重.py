@@ -2,7 +2,7 @@ from functools import lru_cache
 
 
 # 给定一个字符串 s，返回 s 中不同的非空「回文子序列」个数 。
-# 字符串 S 的长度将在[1, 1000]范围内。
+# !字符串 S 的长度将在[1, 1000]范围内。
 # 每个字符 S[i] 将会是集合 {'a', 'b', 'c', 'd'} 中的某一个。
 
 MOD = int(1e9 + 7)
@@ -28,7 +28,6 @@ class Solution:
         return dfs(0, len(s) - 1)
 
 
-print(Solution().countPalindromicSubsequences3('abcd'))  # 4
-print(Solution().countPalindromicSubsequences3('aab'))  # 4
-print(Solution().countPalindromicSubsequences3('aaaa'))  # 15
-
+print(Solution().countPalindromicSubsequences3("abcd"))  # 4
+print(Solution().countPalindromicSubsequences3("aab"))  # 4
+print(Solution().countPalindromicSubsequences3("aaaa"))  # 15
