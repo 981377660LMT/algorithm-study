@@ -3,14 +3,14 @@ const partition = (s: string): string[][] => {
   const res: string[][] = []
   const isPalindrome = (str: string) => str === str.split('').reverse().join('')
 
-  const bt = (start: number, path: string[]) => {
-    if (start === s.length) {
+  const bt = (index: number, path: string[]) => {
+    if (index === s.length) {
       res.push(path.slice())
       return
     }
 
-    for (let i = start; i < s.length; i++) {
-      const sub = s.slice(start, i + 1)
+    for (let i = index; i < s.length; i++) {
+      const sub = s.slice(index, i + 1)
       if (isPalindrome(sub)) {
         path.push(sub)
         bt(i + 1, path)

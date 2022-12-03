@@ -1,7 +1,10 @@
+# 1758. 生成交替二进制字符串的最少操作数
 class Solution:
     def minOperations(self, s: str) -> int:
-        order = s[::2].count('0') + s[1::2].count('1')
-        return min(order, len(s) - order)
+        evenZero = s[::2].count("0")
+        oddOne = s[1::2].count("1")
+        res = evenZero + oddOne
+        return min(res, len(s) - res)
 
 
 # 输入：s = "0100"

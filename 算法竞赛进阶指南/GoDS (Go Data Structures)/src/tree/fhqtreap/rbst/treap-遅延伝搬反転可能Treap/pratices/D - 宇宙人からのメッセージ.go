@@ -1,5 +1,13 @@
-// !Treap比较priority的写法比较容易被特殊数据卡
-// 用rbst的随机比较size合并更快
+// !Treap 的速度不如 RBST
+
+// 暗号文 S が与えられます。この暗号文は、以下の操作で解読することが出来ます。
+
+// T を空文字列とする。
+// i=1,2,…,∣S∣ について、順番に以下を行う。 (∣S∣ は S の長さを表す)
+// S の i 文字目が R のとき、T を反転させる。
+// S の i 文字目が R でないとき、その文字を T の末尾に加える。
+// この操作の後、T の中に同じ文字が 2 つ連続で並んでいたら、その 2 文字を取り除く。この操作を出来る限り続ける。 (最終的に得られる文字列は取り除く順番によらないことが証明できる)
+// この操作で得られる文字列 T を出力してください。
 
 package main
 
@@ -11,22 +19,16 @@ import (
 	"time"
 )
 
-const INF int = 1e18
-
 func main() {
+	const INF int = 1e18
+
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
+	var s string
+	fmt.Fscan(in, &s)
 
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
-	}
-
-	// !区间更新：加上一个数，区间查询：区间最小值
 	treap := NewFHQTreap(Operations{
 		elementMonoid: func() Element {
 			return INF
@@ -49,9 +51,32 @@ func main() {
 		composition: func(lazy1 Lazy, lazy2 Lazy) Lazy {
 			return lazy1 + lazy2
 		},
-	}, nums, n*2)
+	}, []int{}, len(s))
 
-	_ = treap
+	for _, c := range s {
+		if c == 'R' {
+			treap.Reverse(0, treap.Size())
+		} else {
+			treap.Append(int(c))
+		}
+	}
+
+	stack := []int{}
+	for i := 0; i < treap.Size(); i++ {
+		num := treap.At(i)
+		if len(stack) > 0 && stack[len(stack)-1] == num {
+			stack = stack[:len(stack)-1]
+		} else {
+			stack = append(stack, num)
+		}
+	}
+
+	res := make([]byte, len(stack))
+	for i, num := range stack {
+		res[i] = byte(num)
+	}
+
+	fmt.Fprintln(out, string(res))
 }
 
 // TODO
@@ -103,11 +128,9 @@ func NewFHQTreap(operations Operations, nums []Element, capacity int) *FHQTreap 
 		priority: treap.nextRand(),
 	}
 	treap.nodes = append(treap.nodes, *dummy)
-
 	if len(nums) > 0 {
 		treap.root = treap.build(nums)
 	}
-
 	return treap
 }
 

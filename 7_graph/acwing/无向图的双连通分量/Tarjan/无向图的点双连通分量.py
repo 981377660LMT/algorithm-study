@@ -19,7 +19,7 @@ def findVBCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[int]
         graph (List[List[int]]):  邻接表
 
     Returns:
-        Tuple[List[List[int]], List[int],List[bool]]:
+        Tuple[List[List[int]], List[int], List[bool]]:
         每个 v-BCC 组里包含哪些点，每个点所在 v-BCC 的编号(从0开始)，每个顶点是否为割点(便于缩点成树)
 
     Notes:

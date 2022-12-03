@@ -11,11 +11,12 @@ const restoreIpAddress = (s: string): string[] => {
     return true
   }
 
-  const bt = (path: string[], subString: string) => {
+  const bt = (path: string[], subString: string): void => {
     // 1. 终点条件
     if (path.length === 3) {
       if (isValidString(subString)) {
-        return res.push([...path.concat(subString)])
+        res.push([...path.concat(subString)])
+        return
       }
     }
 

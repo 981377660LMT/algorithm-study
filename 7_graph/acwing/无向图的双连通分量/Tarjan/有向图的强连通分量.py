@@ -18,7 +18,7 @@ def findSCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[int]]
         graph (List[List[int]]):  邻接表
 
     Returns:
-        Tuple[List[List[int]], List[int],List[bool]]:
+        Tuple[List[List[int]], List[int]]:
         每个 scc 组里包含哪些点，每个点所在 scc 的编号(从0开始)
     """
 

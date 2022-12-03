@@ -9,41 +9,25 @@
 # 每次只能相邻移动1个球
 # 1 <= n <= 2000
 
+# !前后缀分解 移动总数=前缀移动数+后缀移动数
 from typing import List
 
 
 class Solution:
-    # 暴力O(n^2)
-    def minOperations2(self, boxes: str) -> List[int]:
-        res = []
-        for i in range(len(boxes)):
-            count = 0
-            for j in range(len(boxes)):
-                if boxes[j] == '1':
-                    count += abs(j - i)
-            res.append(count)
-
-        return res
-
     def minOperations(self, boxes: str) -> List[int]:
-        res = [0] * len(boxes)
-        notEmpty, runningSum = 0, 0
+        def makeDp(nums: List[int]) -> List[int]:
+            n = len(nums)
+            dp = [0] * (n + 1)
+            count = 0
+            for i in range(n):
+                count += nums[i]
+                dp[i + 1] = count + dp[i]
+            return dp
 
-        for i, box in enumerate(boxes):
-            res[i] += runningSum
-            if box == '1':
-                notEmpty += 1
-            runningSum += notEmpty
-
-        notEmpty, runningSum = 0, 0
-
-        for i, box in reversed(list(enumerate(boxes))):
-            res[i] += runningSum
-            if box == '1':
-                notEmpty += 1
-            runningSum += notEmpty
-
-        return res
+        nums = list(map(int, boxes))
+        n = len(nums)
+        preDp, sufDp = makeDp(nums), makeDp(nums[::-1])[::-1]
+        return [preDp[i] + sufDp[i + 1] for i in range(n)]
 
 
-print(Solution().minOperations('110'))
+print(Solution().minOperations("110"))

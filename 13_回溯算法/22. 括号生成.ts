@@ -16,6 +16,7 @@ function generateParenthesis(n: number): string[] {
       bt(stringBuilder, leftRemaining - 1, rightRemaining)
       stringBuilder.pop()
     }
+
     if (rightRemaining > 0) {
       stringBuilder.push(')')
       bt(stringBuilder, leftRemaining, rightRemaining - 1)
