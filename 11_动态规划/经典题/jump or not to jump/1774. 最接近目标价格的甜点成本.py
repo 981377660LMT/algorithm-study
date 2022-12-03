@@ -12,6 +12,8 @@ from functools import lru_cache
 
 # 1 <= n, m <= 10
 # Time: O(n * 2^m).
+
+
 class Solution:
     def closestCost(self, baseCosts: List[int], toppingCosts: List[int], target: int) -> int:
         # 可以用两次
@@ -45,4 +47,3 @@ print(Solution().closestCost(baseCosts=[1, 7], toppingCosts=[3, 4], target=10))
 # - 选择 1 份 0 号配料：成本 1 x 3 = 3
 # - 选择 0 份 1 号配料：成本 0 x 4 = 0
 # 总成本：7 + 3 + 0 = 10 。
-

@@ -135,13 +135,13 @@ class BitSet implements Set<number> {
     return true
   }
 
-  get size(): number {
-    return this._size
-  }
-
   toString(): string {
     const keys = [...this.keys()].join(',')
     return `BitSet{${keys}}`
+  }
+
+  get size(): number {
+    return this._size
   }
 
   *[Symbol.iterator](): IterableIterator<number> {

@@ -1,7 +1,3 @@
-/* eslint-disable no-inner-declarations */
-/* eslint-disable no-param-reassign */
-// more details:https://github.dev/EndlessCheng/codeforces-go/tree/master/copypasta
-
 /**
  * 01线段树，支持 flip/indexOf/onesCount/kth，可用于模拟Bitset
  */
@@ -169,62 +165,175 @@ class SegmentTree01 {
     this._ones[root] = right - left + 1 - this._ones[root]
     this._lazyFlip[root] ^= 1
   }
-}
 
-if (require.main === module) {
-  const tree01 = new SegmentTree01([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
-  console.log(tree01.indexOf(0, 2))
-  console.log(tree01.indexOf(1, 1))
-  console.log(tree01.toString())
-  tree01.flip(2, 5)
-  console.log(tree01.toString())
-  console.log(tree01.kth(1, 6))
-  console.log(tree01.kth(0, 5))
-  console.log(tree01.onesCount(1, 10))
+  set(index: number): void {
+    index++
+    if (this.onesCount(index, index) === 1) return
+    this.flip(index, index)
+  }
 
-  // 01线段树模拟位集
-  // https://leetcode.cn/problems/design-bitset/
-  class Bitset {
-    private readonly size: number
-    private readonly tree01: SegmentTree01
-
-    constructor(size: number) {
-      this.size = size
-      this.tree01 = new SegmentTree01(new Uint8Array(size))
-    }
-
-    fix(idx: number): void {
-      idx++
-      if (this.tree01.onesCount(idx, idx) === 1) return
-      this.tree01.flip(idx, idx)
-    }
-
-    unfix(idx: number): void {
-      idx++
-      if (this.tree01.onesCount(idx, idx) === 0) return
-      this.tree01.flip(idx, idx)
-    }
-
-    flip(): void {
-      this.tree01.flip(1, this.size)
-    }
-
-    all(): boolean {
-      return this.tree01.onesCount(1, this.size) === this.size
-    }
-
-    one(): boolean {
-      return this.tree01.onesCount(1, this.size) > 0
-    }
-
-    count(): number {
-      return this.tree01.onesCount(1, this.size)
-    }
-
-    toString(): string {
-      return this.tree01.toString()
-    }
+  unset(index: number): void {
+    index++
+    if (this.onesCount(index, index) === 0) return
+    this.flip(index, index)
   }
 }
 
-export { SegmentTree01 }
+function lowbit(x: number) {
+  return (x & -x) >>> 0
+}
+
+function bitPos(x: number) {
+  let ret = 0
+  for (let bits = 16; bits; bits >>= 1) {
+    if (((x >> ret) >> bits) & ((1 << bits) - 1)) {
+      ret |= bits
+    }
+  }
+  return ret
+}
+
+export class BitSet {
+  private readonly _bitset: Uint32Array
+  private readonly _fenwick: Uint32Array
+  private readonly _bucketCount: number
+
+  constructor(readonly n: number) {
+    const size = (n + 31) >> 5
+    this._bucketCount = size
+    this._bitset = new Uint32Array(size)
+    this._fenwick = new Uint32Array(size)
+  }
+
+  add(index: number): this {
+    const id = index >> 5
+    const mask = index & 31
+    if (!this._bitset[id]) {
+      this.fenwickAdd(id, 1)
+    }
+    this._bitset[id] |= 1 << mask
+    return this
+  }
+
+  delete(index: number): void {
+    const id = index >> 5
+    const mask = index & 31
+    this._bitset[id] &= -1 << mask
+    if (!this._bitset[id]) {
+      this.fenwickAdd(id, -1)
+    }
+  }
+
+  has(index: number): boolean {
+    const id = index >> 5
+    const mask = index & 31
+    return (this._bitset[id] & (1 << mask)) !== 0
+  }
+
+  indexOfOne(start = 0): number {
+    const id = start >> 5
+    const mask = start & 31
+    const rest = this._bitset[id] & (-1 << mask)
+    if (rest) {
+      return (id << 5) | bitPos(lowbit(rest))
+    }
+
+    const pos = this.fenwickFind(id + 1)
+    if (pos < 0) {
+      return -1
+    }
+
+    return (pos << 5) | bitPos(lowbit(this._bitset[pos]))
+  }
+
+  private fenwickAdd(index: number, delta: number): void {
+    while (index) {
+      this._fenwick[index] += delta
+      index &= ~lowbit(index)
+    }
+    this._fenwick[index] += delta
+  }
+
+  private fenwickFind(pos: number): number {
+    // up phase, find first non-zero block
+    const n = this._bucketCount
+    let i = 1
+    if (!this._fenwick[pos]) {
+      for (; pos < n; i <<= 1) {
+        if (!(pos & i)) {
+          pos = (pos & -i) | i
+          if (this._fenwick[pos]) {
+            break
+          }
+        }
+      }
+    }
+    if (pos >= n) {
+      return -1
+    }
+
+    let blockCount = this._fenwick[pos]
+    for (i = lowbit(pos) >> 1; i; i >>= 1) {
+      // if left block is zero, turn to right block.
+      const rcount = this._fenwick[pos | i]
+      if (blockCount === rcount) {
+        pos |= i
+      } else {
+        blockCount -= rcount
+      }
+    }
+    return pos
+  }
+}
+
+if (require.main === module) {
+  const N = 2e5
+  const UPDATE_TIMES = 1e5
+  const QUERY_TIMES = 1e5
+  const bitset = new BitSet(N)
+  const segtree = new SegmentTree01(new Uint8Array(N))
+  const updateIndexes = Array.from({ length: UPDATE_TIMES }, () => Math.floor(Math.random() * N))
+  const queryIndexes = Array.from({ length: QUERY_TIMES }, () => Math.floor(Math.random() * N))
+
+  // for (const i of updateIndexes) {
+  //   bitset.set(i)
+  //   segtree.set(i)
+  // }
+
+  // for (let i = 0; i < QUERY_TIMES; i++) {
+  //   const index = queryIndexes[i]
+  //   const bitsetResult = bitset.query(index)
+  //   const segtreeResult = segtree.indexOf(1, index + 1)
+  //   if (bitsetResult === -1 && segtreeResult === -1) continue
+  //   if (bitsetResult !== segtreeResult - 1) {
+  //     console.log(i)
+  //     console.log('Wrong answer')
+  //     console.log('index', index)
+  //     console.log('bitsetResult', bitsetResult)
+  //     console.log('segtreeResult', segtreeResult)
+  //     break
+  //   }
+  // }
+
+  console.time('bitset')
+  for (let i = 0; i < UPDATE_TIMES; i++) {
+    const x = updateIndexes[i]
+    bitset.add(x)
+  }
+  for (let i = 0; i < QUERY_TIMES; i++) {
+    const x = queryIndexes[i]
+    bitset.indexOfOne(x)
+  }
+  console.timeEnd('bitset')
+
+  console.time('segtree')
+  for (let i = 0; i < UPDATE_TIMES; i++) {
+    const x = updateIndexes[i]
+    segtree.flip(x + 1, x + 1)
+  }
+  for (let i = 0; i < QUERY_TIMES; i++) {
+    const x = queryIndexes[i]
+    segtree.indexOf(1, x + 1)
+  }
+  console.timeEnd('segtree')
+}

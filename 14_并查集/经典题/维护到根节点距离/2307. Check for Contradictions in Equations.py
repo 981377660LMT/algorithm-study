@@ -6,7 +6,7 @@ from collections import defaultdict
 from typing import List
 from UnionFindMapWithDist import UnionFindMapWithDist1
 
-EPS = 1e-5
+EPS = 1e-6
 
 
 class Solution:
@@ -17,9 +17,9 @@ class Solution:
             if key1 not in uf or key2 not in uf:
                 uf.add(key1).add(key2)
             if not uf.isConnected(key1, key2):
-                uf.union(key2, key1, value)
+                uf.union(key1, key2, value)
             else:
-                dist = uf.distToRoot[key2] / uf.distToRoot[key1]
+                dist = uf.getDist(key1, key2)
                 if abs(dist - value) > EPS:
                     return True
 

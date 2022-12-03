@@ -9,7 +9,6 @@ P在N阶乘中出现的次数就是看1-N中所有数字
 出现P因子的次数总和
 根据勒让德定理就是 N//P + N//(P^2) + N//(p^3) + ......
 
-
 """
 from collections import Counter
 from typing import List

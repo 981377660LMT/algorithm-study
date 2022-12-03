@@ -14,15 +14,14 @@ class Solution:
         """
         uf = UnionFindMapWithDist1[str]()
         for (key1, key2), value in zip(equations, values):
-            uf.add(key1).add(key2).union(key2, key1, value)  # !value * key2 = key1
+            uf.add(key1).add(key2).union(key1, key2, value)  # !key1/key2(距离)为 value
 
         res = []
         for u, v in queries:
-            if u not in uf or v not in uf or not uf.isConnected(u, v):
+            if not uf.isConnected(u, v):
                 res.append(-1.0)
             else:
-                res.append(uf.distToRoot[v] / uf.distToRoot[u])
-
+                res.append(uf.getDist(u, v))
         return res
 
 
