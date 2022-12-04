@@ -12,6 +12,7 @@ from typing import List, Tuple
 from UnionFindMapWithDist import UnionFindArrayWithDist
 
 INF = int(1e18)
+NAN = INF + 1
 
 
 def payOrReceive(
@@ -29,13 +30,13 @@ def payOrReceive(
                 cycleGroup |= {root1, root2}
             uf.union(u, v, w)
 
-    res = [0] * len(queries)  # !res[i] => 非正数:最大得分,1:无法到达,2:存在矛盾(正环)
+    res = [0] * len(queries)  # !res[i] => 非正数:最大得分,NAN:无法到达,INF:存在矛盾(正环)
     for i, (u, v) in enumerate(queries):
         if not uf.isConnected(u, v):
-            res[i] = 1
+            res[i] = NAN
             continue
         root = uf.find(u)
-        res[i] = 2 if root in cycleGroup else uf.getDist(u, v)
+        res[i] = INF if root in cycleGroup else uf.getDist(u, v)
     return res
 
 
@@ -59,9 +60,9 @@ if __name__ == "__main__":
 
     res = payOrReceive(n, edges, queries)
     for num in res:
-        if num == 1:
+        if num == NAN:
             print("nan")
-        elif num == 2:
+        elif num == INF:
             print("inf")
         else:
             print(num)
