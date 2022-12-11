@@ -5,9 +5,9 @@ from typing import List, Tuple
 # !是否存在一棵生成树 满足任意边的顶点异或值不存在于badXor中
 # 线性基、格雷码
 
-
+# TODO
 def encounterAndFarewell(n: int, m: int, badXor: List[int]) -> Tuple[List[Tuple[int, int]], bool]:
-    """出会いと別れ  韻を踏んでなくない???"""
+    """出会いと別れ　encounterAndFarewell  韻を踏んでなくない???"""
     ...
 
 

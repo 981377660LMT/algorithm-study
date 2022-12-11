@@ -10,7 +10,7 @@
 # !1. i和i-1颜色相同 则需要删除i-1到i的边
 # !2. i和0颜色相同 则需要删除0到i的边
 
-from functools import lru_cache
+
 import sys
 
 sys.setrecursionlimit(int(1e9))

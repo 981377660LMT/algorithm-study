@@ -58,25 +58,30 @@ class Solution:
             uf.union(edge[0], edge[1])
         return uf.part
 
-    def countComponents(self, n: int, edges: List[List[int]]) -> int:
-        """dfs求无向图连通分量"""
+    def countComponents(self, n: int, edges: List[List[int]]) -> List[List[int]]:
+        """
+        dfs求无向图连通分量
+        注意:这样求出来的group的相邻元素是直接相连的,与并查集求连通分量不同
+        """
 
         def dfs(cur: int) -> None:
-            if cur in visited:
+            if visited[cur]:
                 return
-            visited.add(cur)
-            for next in adjMap[cur]:
+            visited[cur] = True
+            group.append(cur)
+            for next in adjList[cur]:
                 dfs(next)
 
-        adjMap = defaultdict(set)
+        adjList = [[] for _ in range(n)]
         for u, v in edges:
-            adjMap[u].add(v)
-            adjMap[v].add(u)
+            adjList[u].append(v)
+            adjList[v].append(u)
 
-        visited = set()
-        res = 0
+        visited = [False] * n
+        res = []
         for i in range(n):
-            if i not in visited:
+            if not visited[i]:
+                group = []
                 dfs(i)
-                res += 1
+                res.append(group)
         return res

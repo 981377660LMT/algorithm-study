@@ -20,6 +20,27 @@ from collections import Counter, defaultdict
 from typing import List
 
 
+class Solution:
+    def numberOfGoodPaths(self, vals: List[int], edges: List[List[int]]) -> int:
+        n = len(vals)
+        edges.sort(key=lambda x: max(vals[x[0]], vals[x[1]]))
+        nodeGroup = defaultdict(list)
+        for i, v in enumerate(vals):
+            nodeGroup[v].append(i)
+
+        res = 0
+        uf = UF(n)
+        ei = 0
+        for curMax in sorted(nodeGroup):  # !遍历当前最大值
+            while ei < len(edges) and vals[edges[ei][0]] <= curMax and vals[edges[ei][1]] <= curMax:
+                uf.union(edges[ei][0], edges[ei][1])
+                ei += 1
+            # !统计当前最大值在哪些连通分量中 同一个连通分量可以连接路径
+            groupCounter = Counter(uf.find(i) for i in nodeGroup[curMax])
+            res += sum([v * (v - 1) // 2 for v in groupCounter.values()])  # !comb(v, 2)
+        return res + n  # 单个点的路径
+
+
 class UF:
     def __init__(self, n: int):
         self.n = n
@@ -46,27 +67,6 @@ class UF:
 
     def isConnected(self, x: int, y: int) -> bool:
         return self.find(x) == self.find(y)
-
-
-class Solution:
-    def numberOfGoodPaths(self, vals: List[int], edges: List[List[int]]) -> int:
-        n = len(vals)
-        edges.sort(key=lambda x: max(vals[x[0]], vals[x[1]]))
-        nodeGroup = defaultdict(list)
-        for i, v in enumerate(vals):
-            nodeGroup[v].append(i)
-
-        res = 0
-        uf = UF(n)
-        ei = 0
-        for curMax in sorted(nodeGroup):  # !遍历当前最大值
-            while ei < len(edges) and vals[edges[ei][0]] <= curMax and vals[edges[ei][1]] <= curMax:
-                uf.union(edges[ei][0], edges[ei][1])
-                ei += 1
-            # !统计当前最大值在哪些连通分量中 同一个连通分量可以连接路径
-            groupCounter = Counter(uf.find(i) for i in nodeGroup[curMax])
-            res += sum([v * (v - 1) // 2 for v in groupCounter.values()])  # !comb(v, 2)
-        return res + n  # 单个点的路径
 
 
 print(Solution().numberOfGoodPaths(vals=[1, 2, 3, 3, 3], edges=[[0, 1], [1, 2], [2, 3], [2, 4]]))

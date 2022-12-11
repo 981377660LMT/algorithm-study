@@ -14,7 +14,7 @@ class Solution:
     def maxHeight(self, cuboids: List[List[int]]) -> int:
         n = len(cuboids)
         # 前面的箱子放在上面
-        cuboids = sorted(map(sorted, cuboids))
+        cuboids = sorted([sorted(item) for item in cuboids])
         dp = [max(cuboid) for cuboid in cuboids]
         for i in range(n):
             for j in range(i):

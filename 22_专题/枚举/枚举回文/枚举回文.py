@@ -1,3 +1,5 @@
+"""回文生成器"""
+
 from typing import Generator
 from itertools import chain
 
@@ -27,9 +29,8 @@ def genPalindromeByLength(minLen: int, maxLen: int, isReversed=False) -> Generat
 
 ############################################################################################
 def getPalindromeByHalf(half: str, length: int) -> int:
-    """指定回文的一半，返回长为length的回文"""
+    """指定回文的一半,返回长为length的回文"""
     if length & 1:
         return int(str(half)[:-1] + str(half)[::-1])
     else:
         return int(str(half) + str(half)[::-1])
-

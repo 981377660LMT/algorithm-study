@@ -1,6 +1,7 @@
 from typing import List
 from collections import Counter
 
+# 1775. 通过最少操作次数使数组的和相等
 # 两个数组中的所有值都在 1 到 6 之间（包含 1 和 6）。
 # 每次操作中，你可以选择 任意 数组中的任意一个整数，
 # 将它变成 1 到 6 之间 任意 的值（包含 1 和 6）。
@@ -13,23 +14,21 @@ class Solution:
         if 6 * len(nums1) < len(nums2) or 6 * len(nums2) < len(nums1):
             return -1  # impossible
 
-        if sum(nums1) < sum(nums2):
+        sum1, sum2 = sum(nums1), sum(nums2)
+        if sum1 < sum2:
             nums1, nums2 = nums2, nums1
-        s1, s2 = sum(nums1), sum(nums2)  # s1 >= s2
+            sum1, sum2 = sum2, sum1
 
-        diff = s1 - s2
+        diff = sum1 - sum2
         freq = Counter(num - 1 for num in nums1) + Counter(6 - num for num in nums2)
 
         res = 0
         for delta in range(5, 0, -1):
-            if diff <= 0:
-                break
             for _ in range(freq[delta]):
                 if diff <= 0:
                     break
                 res += 1
                 diff -= delta
-
         return res
 
 

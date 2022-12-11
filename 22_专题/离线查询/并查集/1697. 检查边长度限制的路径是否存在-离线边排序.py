@@ -11,6 +11,25 @@ from collections import defaultdict
 from typing import DefaultDict, List
 
 
+class Solution:
+    def distanceLimitedPathsExist(
+        self, n: int, edgeList: List[List[int]], queries: List[List[int]]
+    ) -> List[bool]:
+        edgeList.sort(key=lambda x: x[2])
+        Q = [(i, *q) for i, q in enumerate(queries)]
+        Q.sort(key=lambda x: x[3])
+
+        ei = 0
+        res = [False] * len(queries)
+        uf = UF(n)
+        for qi, qu, qv, qw in Q:
+            while ei < len(edgeList) and edgeList[ei][2] < qw:
+                uf.union(edgeList[ei][0], edgeList[ei][1])
+                ei += 1
+            res[qi] = uf.isConnected(qu, qv)
+        return res
+
+
 class UF:
     def __init__(self, n: int):
         self.n = n
@@ -54,25 +73,6 @@ class UF:
 
     def __len__(self) -> int:
         return self.part
-
-
-class Solution:
-    def distanceLimitedPathsExist(
-        self, n: int, edgeList: List[List[int]], queries: List[List[int]]
-    ) -> List[bool]:
-        edgeList.sort(key=lambda x: x[2])
-        queriesWithIndex = [(i, *q) for i, q in enumerate(queries)]
-        queriesWithIndex.sort(key=lambda x: x[3])
-
-        ei = 0
-        res = [False] * len(queries)
-        uf = UF(n)
-        for qi, qu, qv, qw in queriesWithIndex:
-            while ei < len(edgeList) and edgeList[ei][2] < qw:
-                uf.union(edgeList[ei][0], edgeList[ei][1])
-                ei += 1
-            res[qi] = uf.isConnected(qu, qv)
-        return res
 
 
 print(

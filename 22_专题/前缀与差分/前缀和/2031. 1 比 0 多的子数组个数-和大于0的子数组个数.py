@@ -8,16 +8,20 @@ from sortedcontainers import SortedList
 MOD = int(1e9 + 7)
 
 
+def subarraysWithSumMoreThanZero(nums: List[int]) -> int:
+    """和大于0的子数组个数"""
+    res, curSum, sl = 0, 0, SortedList([0])
+    for num in nums:
+        curSum += num
+        res += sl.bisect_left(curSum)
+        sl.add(curSum)
+    return res
+
+
 class Solution:
     def subarraysWithMoreZerosThanOnes(self, nums: List[int]) -> int:
         nums = [1 if num == 1 else -1 for num in nums]
-        res, curSum, sl = 0, 0, SortedList([0])
-        for num in nums:
-            curSum += num
-            res += sl.bisect_left(curSum)
-            res %= MOD
-            sl.add(curSum)
-        return res
+        return subarraysWithSumMoreThanZero(nums) % MOD
 
     def subarraysWithMoreZerosThanOnes2(self, nums: List[int]) -> int:
         """和为正数的子数组有多少个

@@ -1,9 +1,11 @@
 /**
  * @param {number} n
  * @return {boolean}
- * 给你一个整数 n ，如果你可以将 n 表示成若干个不同的三的幂之和
+ * 给你一个整数 n ，如果你可以将 n 表示成若干个`不同的`三的幂之和
+ *
+ * !三进制表示中不包含 2
  */
-const checkPowersOfThree = function (n: number): boolean {
+function checkPowersOfThree(n: number): boolean {
   return !n.toString(3).includes('2')
 }
 

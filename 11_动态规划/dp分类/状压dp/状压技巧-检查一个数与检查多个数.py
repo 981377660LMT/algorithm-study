@@ -4,7 +4,7 @@ visitedState = 187
 print((visitedState >> 7) & 1)
 
 
-# 2.检查一组数是否存在
+# !2.检查一组数是否存在
 
 # 检查是否都看过(都存在于集合，交小并大)
 visitedState = 187

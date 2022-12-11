@@ -17,3 +17,7 @@
 1. 讨论第一个元素
 2. 一次 dfs/dp: dfs/dp 里增加一个维度`带上 root 参数` **dfs(index,pre,root)**
    两次 dfs/dp: 讨论第一个元素，`不带上 root 参数`，分类讨论进行两次 dp
+
+## 如果存在环，则无法使用 dp，需要使用 bfs
+
+`F - Construct a Palindrome-最短回文路径`

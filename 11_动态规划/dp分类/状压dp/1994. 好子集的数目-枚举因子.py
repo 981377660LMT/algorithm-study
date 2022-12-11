@@ -3,10 +3,10 @@ from collections import Counter
 from functools import lru_cache
 
 
-# 如果 nums 的一个子集中，所有元素的乘积可以用若干个 `互不相同的质数` 相乘得到
-
+# !如果 nums 的一个子集中，所有元素的乘积可以用若干个 `互不相同的质数` 相乘得到
 # 那么我们称它为 好子集 。
-# 1 <= nums.length <= 105
+
+# 1 <= nums.length <= 1e5
 # 1 <= nums[i] <= 30，小于等于30的质数正好是10个，暗示状压
 
 # 每个质数p只能在好子集中出现0或1次，对应着选或不选
@@ -15,32 +15,30 @@ from functools import lru_cache
 # 需要小心的是，[1, 1, 1] 这种是不算的，乘起来要大于 1 的才算
 
 
-P = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+MOD = int(1e9 + 7)
+PRIME = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
 BAD = set([4, 8, 9, 12, 16, 18, 20, 24, 25, 27, 28])
 # 0-30每个数包含的质数
-S = [sum(1 << i for i, p in enumerate(P) if x % p == 0) for x in range(31)]
-MOD = int(1e9 + 7)
+MASK = [sum(1 << i for i, p in enumerate(PRIME) if x % p == 0) for x in range(31)]
 
 
 class Solution:
     def numberOfGoodSubsets(self, nums: List[int]) -> int:
         @lru_cache(None)
-        def dfs(cur: int, state: int) -> int:
-            if cur == 1:
+        def dfs(index: int, state: int) -> int:
+            if index == len(MASK):
                 return 1
 
-            # 不取当前
-            res = dfs(cur - 1, state)
-
-            # 取当前
-            if cur not in BAD and state | S[cur] == state:
-                res += dfs(cur - 1, state ^ (S[cur])) * counter[cur]
-
+            res = dfs(index + 1, state)
+            if index not in BAD and state | MASK[index] == state:
+                res += dfs(index + 1, state ^ (MASK[index])) * counter[index]
             return res
 
-        # 减1表示减去空集；答案为可选的数目*1的子集数
         counter = Counter(nums)
-        return (dfs(30, (1 << len(P)) - 1) - 1) * pow(2, counter[1], MOD) % MOD
+        coPrime = dfs(2, (1 << len(PRIME)) - 1)  # 互素的子集数(包括空集)
+        dfs.cache_clear()
+        # 答案为互素的非空子集数*1的子集数(减1表示减去空集)
+        return (coPrime - 1) * pow(2, counter[1], MOD) % MOD
 
 
 print(Solution().numberOfGoodSubsets(nums=[1, 2, 3, 4]))

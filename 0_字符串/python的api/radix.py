@@ -1,8 +1,13 @@
 import string
 
+allChar = string.digits + string.ascii_lowercase + string.ascii_uppercase
+digitToChar = {i: char for i, char in enumerate(allChar)}
+charToDigit = {char: i for i, char in enumerate(allChar)}
+
 
 def toString(num: int, radix: int) -> str:
     """将数字转换为指定进制的字符串"""
+    assert 2 <= radix <= 36
     if num < 0:
         return "-" + toString(-num, radix)
 
@@ -12,7 +17,7 @@ def toString(num: int, radix: int) -> str:
     res = []
     while num:
         div, mod = divmod(num, radix)
-        res.append(str(mod))
+        res.append(digitToChar[mod])
         num = div
     return "".join(res)[::-1] or "0"
 
@@ -23,9 +28,6 @@ def parseInt(string: str, radix: int) -> int:
 
 
 ####################################################################################
-allChar = string.digits + string.ascii_uppercase + string.ascii_lowercase
-charByDigit = {i: char for i, char in enumerate(allChar)}
-digitByChar = {char: i for i, char in enumerate(allChar)}
 
 
 def convert(num: str, rawRadix: int, targetRadix: int) -> str:
@@ -40,14 +42,14 @@ def convert(num: str, rawRadix: int, targetRadix: int) -> str:
     base = 1
     for i in range(len(num) - 1, -1, -1):
         char = num[i]
-        decimal += base * digitByChar[char]
+        decimal += base * charToDigit[char]
         base *= rawRadix
 
     # 10进制转目标进制
     res = []
     while decimal:
         div, mod = divmod(decimal, targetRadix)
-        res.append(charByDigit[mod])
+        res.append(digitToChar[mod])
         decimal = div
     return "".join(res)[::-1] or "0"
 

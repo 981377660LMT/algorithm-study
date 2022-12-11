@@ -14,23 +14,29 @@ INF = int(1e18)
 
 class Solution:
     def closestCost(self, baseCosts: list[int], toppingCosts: list[int], target: int) -> int:
-        """dfs代替三进制枚举会更快 并且更好剪枝"""
+        """背包 O(V*m)
+        dp[index][value] 表示前index种配料选取的总价值能否达到value
+        最后加上基料进行验证
+        """
 
-        def dfs(index: int, curCost: int) -> None:
-            nonlocal res
-            if index == len(toppingCosts):
-                if abs(curCost - target) < abs(res - target) or (
-                    abs(curCost - target) == abs(res - target) and curCost < res
-                ):
-                    res = curCost
-                return
-            dfs(index + 1, curCost)
-            dfs(index + 1, curCost + toppingCosts[index])
-            dfs(index + 1, curCost + toppingCosts[index] * 2)
+        dp = set([0])
+        for topping in toppingCosts:
+            ndp = set()
+            for pre in dp:
+                ndp |= {pre, pre + topping, pre + topping * 2}
+            dp = ndp
 
         res = INF
-        for baseCost in baseCosts:
-            dfs(0, baseCost)
+        for base in baseCosts:
+            for num in dp:
+                cost = base + num
+                # 找到最接近target的值
+                if (
+                    abs(cost - target) < abs(res - target)
+                    or abs(cost - target) == abs(res - target)
+                    and cost < res
+                ):
+                    res = cost
         return res
 
 

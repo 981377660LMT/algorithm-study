@@ -30,6 +30,9 @@ class Solution:
             return res
 
         ROW, COL = n, m
+        if COL > ROW:
+            ROW, COL = COL, ROW
+            broken = [(c, r) for r, c in broken]
         broken = set((r, c) for r, c in broken)  # type: ignore
         res = dfs(0, 0, tuple([1] * COL))  # 一开始放不了
         dfs.cache_clear()
