@@ -1,6 +1,7 @@
 from typing import List
 from collections import defaultdict
 
+# 子序列的 GCD 的不同个数
 # 题目提示:
 # 1 <= nums.length <= 1e5
 # !1 <= nums[i] <= 2 * 1e5

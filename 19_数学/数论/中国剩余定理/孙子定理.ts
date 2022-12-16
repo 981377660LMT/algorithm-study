@@ -14,22 +14,22 @@
 import { modularInverse } from '../扩展欧几里得/扩展欧几里得'
 
 /**
- *
- * @param div 模数数组
- * @param mod 余数数组
- * @param n 数组长度
+ * x ≡ remains_i (mod mods_i)
+ * @param remains 余数数组
+ * @param mods 模数数组
  */
-function ChineseRemainderTheorem(div: number[], mod: number[], n: number) {
+function ChineseRemainderTheorem(remains: number[], mods: number[]) {
+  const n = mods.length
   let res = 0
 
-  const p = div.reduce((pre, cur) => pre * cur, 1)
+  const p = mods.reduce((pre, cur) => pre * cur, 1)
   for (let i = 0; i < n; i++) {
-    const tmp = p / div[i]
+    const tmp = p / mods[i]
     // modularInverse(tmp, div[i]) * tmp等于1(模p意义下) 所以 tmp*inv(tmp)*mod[i] 与 mod[i] 模p同余
-    res += (modularInverse(tmp, div[i]) * tmp * mod[i]) % p
+    res = (res + modularInverse(tmp, mods[i]) * tmp * remains[i]) % p
   }
 
-  return res % p
+  return (res + p) % p
 }
 
-console.log(ChineseRemainderTheorem([3, 5, 7], [2, 3, 2], 3))
+console.log(ChineseRemainderTheorem([2, 3, 2], [3, 5, 7]))

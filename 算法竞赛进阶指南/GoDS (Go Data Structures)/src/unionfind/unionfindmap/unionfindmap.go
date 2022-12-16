@@ -62,9 +62,9 @@ func (ufm *UnionFindMap) Find(key interface{}) interface{} {
 		return key
 	}
 
-	for p := ufm.parent[key]; key != p; {
-		ufm.parent[key] = ufm.parent[p]
-		key = p
+	for ufm.parent[key] != key {
+		ufm.parent[key] = ufm.parent[ufm.parent[key]]
+		key = ufm.parent[key]
 	}
 	return key
 }

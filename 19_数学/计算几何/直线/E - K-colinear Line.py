@@ -22,7 +22,7 @@ gcd = lru_cache(maxsize=None)(gcd)
 def calSlopeInterceptForm(
     x1: int, y1: int, x2: int, y2: int
 ) -> Union[Tuple[Fraction, Fraction], Tuple[None, int]]:
-    """求出直线方程的斜截式`y=kx+b 或 x=b`的斜率和截距
+    """求出的斜截式`y=kx+b 或 x=b`的斜率和截距
 
     Returns:
         Tuple[Fraction, Fraction] | Tuple[None, int]: 斜率和截距

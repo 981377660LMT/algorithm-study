@@ -1,8 +1,6 @@
-枚举分割点一般与`预处理`一起使用
-适用于 n 在 10^5 左右的算法
+## 枚举分割点+前后缀分解
 
 特征：问题分成**两半**，枚举分割点，求左半(右闭)和右半(左开)的情况
-前后缀分解
 
 处理前后缀，枚举分割点
 `689. 三个无重叠子数组的最大和`
@@ -23,14 +21,18 @@ class accumulate(Iterator[_T], Generic[_T]):
 
 不容易写错的写法:
 
-1. 定义函数 makeDp 返回前缀 dp 数组
-2. 求出前后缀
-   ```python
-   preDp = makeDp(XXX)
-   sufDp = makeDp(XXX[::-1])[::-1]
-   ```
-3. 枚举分割点计算答案
-   ```python
-   for i in range(n):
-      res+=preDp[i]*sufDp[i+1]
-   ```
+1.  定义函数 makeDp 返回前缀 dp 数组
+2.  求出前后缀
+    ```python
+    preDp = makeDp(XXX)
+    sufDp = makeDp(XXX[::-1])[::-1]
+    ```
+3.  枚举分割点计算答案
+    ```python
+    for i in range(n):
+       res+=preDp[i]*sufDp[i+1]
+    ```
+
+补充:
+
+1. 移除每个数/一段子数组 后的最值 => 前缀+后缀的最值

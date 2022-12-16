@@ -11,3 +11,5 @@ function angleClock(hour: number, minutes: number): number {
 }
 
 console.log(angleClock(3, 15))
+
+export {}

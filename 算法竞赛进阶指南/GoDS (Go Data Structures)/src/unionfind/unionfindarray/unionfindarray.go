@@ -53,9 +53,9 @@ func (ufa *UnionFindArray) Union(key1, key2 int) bool {
 }
 
 func (ufa *UnionFindArray) Find(key int) int {
-	for p := ufa.parent[key]; key != p; {
-		ufa.parent[key] = ufa.parent[p]
-		key = p
+	for ufa.parent[key] != key {
+		ufa.parent[key] = ufa.parent[ufa.parent[key]]
+		key = ufa.parent[key]
 	}
 	return key
 }

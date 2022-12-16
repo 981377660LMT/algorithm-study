@@ -1,11 +1,8 @@
 from itertools import chain, combinations
-from typing import Collection, List, Tuple, TypeVar
+from typing import Collection, List, Tuple
 
 
-T = TypeVar("T")
-
-
-def powerset(collection: Collection[T], includeAll=True):
+def powerset(collection: Collection, includeAll=True):
     """求(真)子集,时间复杂度O(n*2^n)
 
     默认求所有子集
@@ -14,7 +11,7 @@ def powerset(collection: Collection[T], includeAll=True):
     return chain.from_iterable(combinations(collection, n) for n in range(upper))
 
 
-def genPowerSetFromAllPowerSet(collection: Collection[T]):
+def genPowerSetFromAllPowerSet(collection: Collection):
     """枚举所有子集的子集，时间复杂度O(3^n)"""
     allPowetSet = powerset(collection)
     return chain.from_iterable(powerset(subset) for subset in allPowetSet)

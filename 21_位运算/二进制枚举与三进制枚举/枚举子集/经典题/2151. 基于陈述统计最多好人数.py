@@ -2,21 +2,21 @@ from typing import List
 
 
 # 2 <= n <= 15
-# 好人不能说假话
+# 好人不能说假话(说好人是坏人，说坏人是好人)
 # 验证好人之间的评价是否自洽
+# !0:坏人 1:好人 2:不知道
 class Solution:
     def maximumGood(self, statements: List[List[int]]) -> int:
-        def check(mask: int) -> bool:
+        def check(goodMask: int) -> bool:
             for i in range(n):
                 for j in range(n):
-                    if i == j:
+                    if i == j or not goodMask & (1 << i):
                         continue
-                    if statements[i][j] == 0:
-                        if mask & (1 << i) and mask & (1 << j):
-                            return False
-                    elif statements[i][j] == 1:
-                        if mask & (1 << i) and not mask & (1 << j):
-                            return False
+                    if statements[i][j] == 0 and goodMask & (1 << j):
+                        return False  # 说好人是坏人
+                    if statements[i][j] == 1 and not goodMask & (1 << j):
+                        if goodMask & (1 << i):
+                            return False  # 说坏人是好人
             return True
 
         n = len(statements)

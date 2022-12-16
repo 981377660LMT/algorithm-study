@@ -24,42 +24,42 @@ INF = int(1e20)
 
 class Solution:
     def secondMinimum(self, n: int, edges: List[List[int]], time: int, change: int) -> int:
-        adjMap = defaultdict(set)
+        adjList = [[] for _ in range(n)]
         for u, v in edges:
             u, v = u - 1, v - 1
-            adjMap[u].add(v)
-            adjMap[v].add(u)
+            adjList[u].append(v)
+            adjList[v].append(u)
 
         # 每个点保存多个距离而不是只有一个
         dist = [[INF, INF] for _ in range(n)]
         dist[0][0] = 0
-        pq = [(0, 0)]
+        pq = [(0, 0, 0)]  # (cost, cur, round)
         res = []
 
         while pq:
-            cost, cur = heappop(pq)
-            if dist[cur][1] < cost:
+            curDist, cur, curRound = heappop(pq)
+            if dist[cur][curRound] < curDist:
                 continue
 
-            # if cur == n - 1:
-            #     res.append(cost)
-            #     if len(res) == 2:
-            #         return res[-1]
+            if cur == n - 1:
+                res.append(curDist)
+                if len(res) == 2:
+                    return res[-1]
 
-            if (cost // change) & 1:
+            if (curDist // change) & 1:
                 # 到下一个绿灯开始
-                cost = (cost // change + 1) * change
-            cost += time
+                curDist = (curDist // change + 1) * change
+            curDist += time
 
-            for next in adjMap[cur]:
-                if cost < dist[next][0]:
-                    dist[next][0] = cost
-                    heappush(pq, (cost, next))
-                elif dist[next][0] < cost < dist[next][1]:  # !注意题目要求第二小的值 是 严格大于 最小值的所有值中最小的值。
-                    dist[next][1] = cost
-                    heappush(pq, (cost, next))
+            for next in adjList[cur]:
+                if curDist < dist[next][0]:
+                    dist[next][0] = curDist
+                    heappush(pq, (curDist, next, 0))
+                elif dist[next][0] < curDist < dist[next][1]:  # !注意题目要求第二小的值 是 严格大于 最小值的所有值中最小的值。
+                    dist[next][1] = curDist
+                    heappush(pq, (curDist, next, 1))
 
-        return dist[n - 1][1]
+        return INF
 
 
 print(

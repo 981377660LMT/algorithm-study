@@ -2,6 +2,34 @@ from collections import defaultdict
 from typing import DefaultDict, List, Tuple
 
 
+def kruskal(n: int, edges: List[Tuple[int, int, int]]) -> Tuple[int, List[int]]:
+    """Kruskal算法求无向图最小生成树
+
+    Args:
+        n (int): 节点`个数`,并查集初始化为(0,1,2,...,n-1)
+        edges (List[Tuple[int, int, int]]): 边的列表,每个元素是`(u, v, w)`表示无向边u到v,权重为w
+
+    Returns:
+        Tuple[int, List[Tuple[int, int, int]]]: 最小生成树的边权和,组成最小生成树的边的索引
+
+    - 如果不存在,则求出的是森林中的多个最小生成树
+    """
+    uf = UnionFindArray(n)
+    cost, res = 0, []
+
+    edgesWithIndex = sorted([(i, *edge) for i, edge in enumerate(edges)], key=lambda e: e[-1])
+    for ei, u, v, w in edgesWithIndex:
+        root1, root2 = uf.find(u), uf.find(v)
+        if root1 != root2:
+            cost += w
+            uf.union(root1, root2)
+            res.append(ei)
+            if len(res) == n - 1:
+                return cost, res
+
+    return -1, res
+
+
 class UnionFindArray:
     """元素是0-n-1的并查集写法,不支持动态添加
 
@@ -53,29 +81,3 @@ class UnionFindArray:
 
     def __len__(self) -> int:
         return self.part
-
-
-def kruskal(vertex: int, edges: List[Tuple[int, int, int]]) -> Tuple[int, List[int]]:
-    """Kruskal算法求最小生成树
-
-    Args:
-        vertex (int): 节点`个数`,并查集初始化为(0,1,2,...,(vertex-1)+10)
-        edges (List[Tuple[int, int, int]]): 边的列表,每个元素是`(u, v, w)`表示无向边u到v,权重为w
-
-    Returns:
-        Tuple[int, List[Tuple[int, int, int]]]: 最小生成树的边权和,组成最小生成树的边的索引
-    """
-    uf = UnionFindArray(vertex + 1)
-    cost, res = 0, []
-
-    edgesWithIndex = sorted([(i, *edge) for i, edge in enumerate(edges)], key=lambda e: e[-1])
-    for ei, u, v, w in edgesWithIndex:
-        root1, root2 = uf.find(u), uf.find(v)
-        if root1 != root2:
-            cost += w
-            uf.union(root1, root2)
-            res.append(ei)
-
-    if len(res) != vertex - 1:
-        return -1, []
-    return cost, res

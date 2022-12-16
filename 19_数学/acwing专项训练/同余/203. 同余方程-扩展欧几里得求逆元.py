@@ -18,9 +18,9 @@ def exgcd(a: int, b: int) -> Tuple[int, int, int]:
     """
     if b == 0:
         return a, 1, 0
-    else:
-        gcd_, x, y = exgcd(b, a % b)
-        return gcd_, y, x - a // b * y
+
+    gcd_, x, y = exgcd(b, a % b)
+    return gcd_, y, x - a // b * y
 
 
 gcd_, x, y = exgcd(a, b)  # ax+by=gcd_

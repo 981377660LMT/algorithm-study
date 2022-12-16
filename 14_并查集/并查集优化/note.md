@@ -4,3 +4,12 @@
 
 **按秩(高度)求并**
 只能减小树高 只用按秩合并的查询时间复杂度 logn
+
+**[借这个问题科普一下并查集各种情况下的时间复杂度](https://leetcode.cn/problems/number-of-provinces/solution/jie-zhe-ge-wen-ti-ke-pu-yi-xia-bing-cha-0unne/)**
+
+| 优化                | 平均时间复杂度 | 最坏时间复杂度 |
+| ------------------- | -------------- | -------------- |
+| 无优化              | O(logn)        | O(n)O(n)       |
+| 路径压缩            | O(α(n))        | O(logn)        |
+| 按秩合并            | O(logn)        | O(logn)        |
+| 路径压缩 + 按秩合并 | O(α(n))        | O(α(n))        |

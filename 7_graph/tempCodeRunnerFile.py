@@ -1,1 +1,0 @@
-queue = deque([0])

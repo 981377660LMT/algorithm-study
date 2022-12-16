@@ -1,49 +1,5 @@
 1. 准备好所有边 [u,v,weight] 按 wweight 升序排列
 2. 并查集构造生成树
 
-```JS
-type U = number
-type V = number
-type Weight = number
-
-function minimumCost(n: number, connections: number[][]): number {
-  const edges: [U, V, Weight][] = [] // 图中两两点间的权值
-  for (let i = 0; i < connections.length; i++) {
-    for (let j = i + 1; j < connections.length; j++) {
-      const [x1, y1] = connections[i]
-      const [x2, y2] = connections[j]
-      const weight = Math.abs(x1 - x2) + Math.abs(y1 - y2)
-      edges.push([i, j, weight])
-    }
-  }
-  edges.sort((a, b) => a[2] - b[2])
-
-  return useUnionFind(n, edges)
-
-  function useUnionFind(size: number, edges: [U, V, Weight][]) {
-    let res = 0
-    const parent = Array.from<number, number>({ length: size }, (_, i) => i)
-
-    const find = (key: number) => {
-      while (parent[key] && parent[key] !== key) {
-        parent[key] = parent[parent[key]]
-        key = parent[key]
-      }
-      return key
-    }
-
-    for (const [u, v, w] of edges) {
-      const root1 = find(u)
-      const root2 = find(v)
-      // 不连通
-      if (root1 !== root2) {
-        res += w
-        parent[Math.max(root1, root2)] = Math.min(root1, root2)
-      }
-    }
-
-    return res
-  }
-}
-
-```
+3. 给定无向图的边，求出一个最小生成树(**如果不存在,则求出的是森林中的多个最小生成树**)
+   [1697. 检查边长度限制的路径是否存在-在线](1697.%20%E6%A3%80%E6%9F%A5%E8%BE%B9%E9%95%BF%E5%BA%A6%E9%99%90%E5%88%B6%E7%9A%84%E8%B7%AF%E5%BE%84%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8-%E5%9C%A8%E7%BA%BF.go)

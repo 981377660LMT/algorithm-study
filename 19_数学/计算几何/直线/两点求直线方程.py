@@ -6,7 +6,7 @@ from typing import Tuple, Union
 def calSlopeInterceptForm(
     x1: int, y1: int, x2: int, y2: int
 ) -> Union[Tuple[Decimal, Decimal], Tuple[None, int]]:
-    """求出直线方程的斜截式`y=kx+b 或 x=b`的斜率和截距
+    """求出的斜截式`y=kx+b 或 x=b`的斜率和截距
 
     Returns:
         Tuple[Fraction, Fraction] | Tuple[None, int]: 斜率和截距
@@ -24,7 +24,7 @@ def calGeneralForm(x1: int, y1: int, x2: int, y2: int) -> Tuple[int, int, int]:
     """求出直线方程的一般式`ax+by+c=0`的系数"""
     if x1 == x2:
         return 1, 0, -x1
-    dy, dx = y2 - y1, x1 - x2
+    dy, dx = y2 - y1, x2 - x1
     gcd_ = gcd(dy, dx)
     dy, dx = dy // gcd_, dx // gcd_
     c = dx * y1 - dy * x1

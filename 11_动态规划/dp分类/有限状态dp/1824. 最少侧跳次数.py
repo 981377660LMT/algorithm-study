@@ -1,37 +1,16 @@
 from functools import lru_cache
-import sys
 from typing import List
 
 
 INF = int(1e20)
-sys.setrecursionlimit(int(1e9))
+
 # 这只青蛙从点 0 处跑道 2 出发，并想到达点 n 处的 任一跑道 ，请你返回 最少侧跳次数 。
 # 注意：点 0 处和点 n 处的任一跑道都不会有障碍。
-# 1 <= n <= 5 * 105
-# dp[i][j]表示第i点第j道最少的侧跳次数
+# 1 <= n <= 1e5
+# dp[i][j]表示第i点第j道最少的侧跳次数(一次侧跳可以跳多个格子)
 
 
 class Solution:
-    def minSideJumps(self, obstacles: List[int]) -> int:
-        """TLE"""
-
-        @lru_cache(None)
-        def dfs(col: int, row: int) -> int:
-            if col == n - 1:
-                return 0
-
-            res = INF
-            for nextRow in range(1, 4):
-                if obstacles[col + 1] == nextRow or obstacles[col] == nextRow:
-                    continue
-                res = min(res, dfs(col + 1, nextRow) + int(nextRow != row))
-            return res
-
-        n = len(obstacles) - 1
-        res = dfs(0, 2)
-        dfs.cache_clear()
-        return res
-
     def minSideJumps2(self, obstacles: List[int]) -> int:
         """AC
 
@@ -49,10 +28,31 @@ class Solution:
                 if obstacles[i] == cur + 1 or obstacles[i - 1] == cur + 1:
                     continue
                 for pre in range(3):
-                    ndp[cur] = min(ndp[cur], dp[pre] + int(cur != pre))
+                    ndp[cur] = min(ndp[cur], dp[pre] + (cur != pre))
             dp = ndp
 
-        return min(dp)
+        res = min(dp)
+        return res if res != INF else -1
+
+    def minSideJumps(self, obstacles: List[int]) -> int:
+        """TLE"""
+
+        @lru_cache(None)
+        def dfs(col: int, row: int) -> int:
+            if col == n - 1:
+                return 0
+
+            res = INF
+            for nextRow in range(1, 4):
+                if obstacles[col + 1] == nextRow or obstacles[col] == nextRow:
+                    continue
+                res = min(res, dfs(col + 1, nextRow) + (nextRow != row))
+            return res
+
+        n = len(obstacles) - 1
+        res = dfs(0, 2)
+        dfs.cache_clear()
+        return res
 
 
 print(Solution().minSideJumps(obstacles=[0, 1, 2, 3, 0]))

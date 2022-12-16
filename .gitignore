@@ -166,6 +166,7 @@ $RECYCLE.BIN/
 
 dist/**/*
 /前端笔记/总结/project
+/typings
 
 *.pdf
 # If you prefer the allow list template instead of the deny list, see community template:
