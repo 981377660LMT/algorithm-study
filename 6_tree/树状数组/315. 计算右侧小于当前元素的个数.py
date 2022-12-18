@@ -17,6 +17,24 @@ def countSmaller2(nums: List[int]) -> List[int]:
     return res
 
 
+def shiftAndInversions(nums: List[int]) -> List[int]:
+    """求出每个轮转数组的逆序对数量"""
+    sl = SortedList()
+    inv = 0
+    for num in nums[::-1]:
+        inv += sl.bisect_left(num)
+        sl.add(num)
+
+    res = []
+    for num in nums:
+        res.append(inv)
+        inv -= sl.bisect_left(num)
+        sl.remove(num)
+        inv += len(sl) - sl.bisect_right(num)
+        sl.add(num)
+    return res
+
+
 def countSmaller(nums: List[int]) -> List[int]:
     """求每个位置处的逆序对数量  注意值域很大时需要离散化"""
     n = len(nums)

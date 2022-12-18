@@ -25,6 +25,7 @@ class SparseTable {
 
     this._size = n
     this._mergeFunc = mergeFunc
+    // !dp[i][j]表示区间[j,j+2**i-1]的最大值
     this._dp = Array.from({ length: size }, () => Array(n).fill(0))
     for (let i = 0; i < n; i++) this._dp[0][i] = nums[i]
 

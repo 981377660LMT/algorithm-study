@@ -1,7 +1,6 @@
 """https://www.desgard.com/algo/docs/part2/ch03/1-range-max-query/"""
 
 
-from math import ceil, floor, log2
 from typing import Callable, Generic, List, TypeVar
 
 
@@ -15,7 +14,7 @@ class MaxSparseTable:
         size = n.bit_length()
         self._n = n
 
-        dp = [[0] * n for _ in range(size)]
+        dp = [[0] * n for _ in range(size)]  # !dp[i][j]表示闭区间[j,j+2**i-1]的最大值
         dp[0] = arr[:]
 
         for i in range(1, size):

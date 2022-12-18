@@ -23,6 +23,9 @@
     把 **all/any** 换成 **for ... break ... else ...** 后快了 1000 多 ms
 14. 不要用 extend 会比 append 慢很多
     https://ikatakos.com/pot/programming_algorithm/python_tips/append_extend
+15. 注意 Decimal 需要 python3.8 提交, pypy3 会 TLE
+    AC:https://atcoder.jp/contests/abc191/submissions/37307289
+    TLE:https://atcoder.jp/contests/abc191/submissions/37307287
 
 **dp 的优化**
 参考 atc 競プロ\AtCoder Beginner Contest\265\E - Warp.py

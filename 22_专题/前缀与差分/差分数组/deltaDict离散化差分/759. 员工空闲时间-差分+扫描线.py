@@ -1,7 +1,6 @@
 # Definition for an Interval.
 from collections import defaultdict
 from typing import List, Optional
-from sortedcontainers import SortedDict
 
 
 class Interval:
@@ -28,8 +27,7 @@ class Solution:
             delta = diff[key]
             if preSum == 0 and pre != -1:
                 res.append(Interval(pre, key))
-            preSum += delta
-            pre = key
+            pre, preSum = key, preSum + delta
         return res
 
 

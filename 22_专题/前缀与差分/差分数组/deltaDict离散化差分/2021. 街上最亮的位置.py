@@ -12,8 +12,8 @@ class Solution:
         res = -1
         curSum = 0
         maxSum = -int(1e20)
-        for pos, delta in sorted(diff.items()):
-            curSum += delta
+        for pos in sorted(diff):
+            curSum += diff[pos]
             if curSum > maxSum:
                 res = pos
                 maxSum = curSum

@@ -12,11 +12,10 @@ class Solution:
             deltaDict[s] -= j
             deltaDict[e + 1] += j
 
-        keys = sorted(deltaDict.keys())
-        curSum = 0
-        for key in keys:
-            curSum += deltaDict[key]
-            if curSum < 0:
+        preSum = 0
+        for key in sorted(deltaDict):
+            preSum += deltaDict[key]
+            if preSum < 0:
                 return False
         return True
 
