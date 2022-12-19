@@ -2,27 +2,29 @@ from typing import List
 
 # 你可以将 matrix 中的 列 按任意顺序重新排列。
 # 请你返回最优方案下将 matrix 重新排列后，全是 1 的子矩阵面积。
+# ROW*COL<=1e5
 
-# `最大矩形可以交换列的版本=>预处理+排序`
+# !`最大矩形可以交换列的版本=>预处理+排序`
 # 存每行的高，然后可以参考leetcode 85的方法求每行最大矩形
 # 因为列可以随意变换，这题直接对每行的高排序，然后求最大矩形就好
+
+
 class Solution:
     def largestSubmatrix(self, matrix: List[List[int]]) -> int:
-        def maxSquare(row: List[int]):
-            res = 0
-            for i, height in enumerate(row):
-                res = max(res, height * (i + 1))
-            return res
+        ROW, COL = len(matrix), len(matrix[0])
+        up = [[0] * COL for _ in range(ROW)]  # 预处理高度
 
-        row, col = len(matrix), len(matrix[0])
-        #  最大矩形,预处理高度
-        for r in range(row):
-            for c in range(col):
-                if matrix[r][c] == 1 and r > 0:
-                    matrix[r][c] = matrix[r - 1][c] + 1
+        for r in range(ROW):
+            for c in range(COL):
+                if matrix[r][c] == 1:
+                    up[r][c] = up[r - 1][c] + 1 if r else 1
 
-        matrix = [sorted(row, reverse=True) for row in matrix]
-        return max(map(maxSquare, matrix))
+        res = 0
+        for row in up:
+            row.sort(reverse=True)
+            cand = max(h * (i + 1) for i, h in enumerate(row))
+            res = max(res, cand)
+        return res
 
 
 print(Solution().largestSubmatrix(matrix=[[0, 0, 1], [1, 1, 1], [1, 0, 1]]))
