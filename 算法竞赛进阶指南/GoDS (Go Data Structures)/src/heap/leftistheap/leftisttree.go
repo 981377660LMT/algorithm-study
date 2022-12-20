@@ -10,7 +10,7 @@ import (
 )
 
 /*
-左偏树 leftist tree / leftist heap
+左偏树(可并堆) leftist tree / leftist heap
 代码参考 https://oi-wiki.org/ds/leftist-tree/
 
 模板题
@@ -52,7 +52,7 @@ func main() {
 			fmt.Fscan(in, &y)
 			y--
 			if !removed[x] && !removed[y] {
-				heapRoots[x].Push(heapRoots[y])
+				heapRoots[x].Push(heapRoots[y]) // !合并
 			}
 		} else {
 			if removed[x] {

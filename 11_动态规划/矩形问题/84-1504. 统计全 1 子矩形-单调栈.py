@@ -42,7 +42,6 @@ class Solution:
         return res
 
 
-print(Solution().numSubmat(mat=[[1, 0, 1], [1, 1, 0], [1, 1, 0]]))
 assert Solution().numSubmat(mat=[[1, 0, 1], [1, 1, 0], [1, 1, 0]]) == 13
 assert Solution().numSubmat(mat=[[0, 1, 1, 0], [0, 1, 1, 1], [1, 1, 1, 0]]) == 24
 # 输出：13
