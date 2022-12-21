@@ -10,6 +10,8 @@ from functools import lru_cache
 
 INF = int(1e18)
 
+# dp[i] = min(dp[j-1]+max(h[j],h[j+1],...,h[i])) 且 sum(w[j],w[j+1],...,w[i]) <= W
+
 
 class Solution:
     def minHeightShelves(self, books: List[List[int]], shelfWidth: int) -> int:

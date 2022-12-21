@@ -5,7 +5,7 @@ import { BinaryTree } from '../Tree'
  * @param {number[]} postorder
  * @return {BinaryTree}
  */
-const buildTree = function (inorder: number[], postorder: number[]): BinaryTree | null {
+function buildTree(inorder: number[], postorder: number[]): BinaryTree | null {
   if (!inorder.length || !postorder.length) return null
 
   const rootValue = postorder[postorder.length - 1]

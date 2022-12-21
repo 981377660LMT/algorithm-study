@@ -1,5 +1,6 @@
 import { BinaryTree } from '../Tree'
 
+// 如果存在多个答案，您可以返回其中 任何 一个。
 function constructFromPrePost(preorder: number[], postorder: number[]): BinaryTree | null {
   if (preorder.length === 0 || postorder.length === 0) return null
   const root = new BinaryTree(preorder[0])

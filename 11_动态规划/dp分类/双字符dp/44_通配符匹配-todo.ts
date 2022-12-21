@@ -11,12 +11,13 @@ const isMatch = function (s: string, p: string): boolean {
   const dp = Array.from<boolean, boolean[]>({ length: s.length + 1 }, () =>
     Array(p.length + 1).fill(false)
   )
+
   dp[0][0] = true
   for (let i = 1; i < s.length + 1; i++) {
     dp[i][0] = false
   }
+
   for (let j = 1; j < p.length + 1; j++) {
-    console.log(p[j - 1], dp[0][0], j)
     dp[0][j] = dp[0][j - 1] && p[j - 1] === '*'
   }
 

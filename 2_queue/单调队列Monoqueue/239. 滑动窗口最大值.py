@@ -6,11 +6,12 @@ def maxSlidingWindow(nums: List[int], k: int) -> List[int]:
     """滑动窗口最大值"""
     queue = MaxQueue()
     res = []
-    for num in nums:
-        queue.append(num)
-        if len(queue) > k:
+    n = len(nums)
+    for right in range(n):
+        queue.append(nums[right])
+        if right >= k:
             queue.popleft()
-        if len(queue) == k:
+        if right >= k - 1:
             res.append(queue.max)
     return res
 

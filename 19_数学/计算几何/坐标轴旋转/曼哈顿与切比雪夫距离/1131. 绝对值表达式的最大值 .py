@@ -8,6 +8,7 @@
 # !因为最后最大的那个肯定是答案
 # 去绝对值+公式变形
 
+from itertools import product
 from typing import List
 
 
@@ -18,12 +19,14 @@ class Solution:
     def maxAbsValExpr(self, arr1: List[int], arr2: List[int]) -> int:
         res = 0
         n = len(arr1)
-        for dr, dc in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
-            min_ = INF
-            max_ = -INF
+        for (d1, d2, d3) in product([-1, 1], repeat=3):
+            min_, max_ = INF, -INF
             for i in range(n):
-                cand = dr * arr1[i] + dc * arr2[i] - i
+                cand = d1 * arr1[i] + d2 * arr2[i] - i * d3
                 min_ = min(min_, cand)
                 max_ = max(max_, cand)
             res = max(res, max_ - min_)
         return res
+
+
+assert Solution().maxAbsValExpr(arr1=[1, 2, 3, 4], arr2=[-1, 4, 5, 6]) == 13

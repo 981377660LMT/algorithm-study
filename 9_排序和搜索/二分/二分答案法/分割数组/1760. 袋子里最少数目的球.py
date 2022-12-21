@@ -1,25 +1,23 @@
 from typing import List
 
 # 你的开销是单个袋子里球数目的 最大值 ，你想要 最小化 开销。
-# 1 <= nums.length <= 105
+# 1 <= nums.length <= 1e5
+
+
 class Solution:
     def minimumSize(self, nums: List[int], maxOperations: int) -> int:
         def check(mid: int) -> bool:
-            """"拆分后每个数字都不超过mid"""
+            """拆分后每个数字都不超过mid"""
             count = 0
             for num in nums:
-                # 拆成div份
-                div, mod = divmod(num, mid)
-                if mod == 0:
-                    count += div - 1
-                else:
-                    count += div
+                # divmod均等拆成div份
+                div, mod = num // mid, num % mid
+                count += div - 1 if mod == 0 else div
                 if count > maxOperations:
                     return False
+            return True
 
-            return count <= maxOperations
-
-        left, right = 1, max(nums)
+        left, right = 1, int(1e16)
         while left <= right:
             mid = (left + right) >> 1
             if check(mid):

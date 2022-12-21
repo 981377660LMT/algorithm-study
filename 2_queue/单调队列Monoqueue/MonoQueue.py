@@ -3,7 +3,7 @@ from collections import deque
 
 
 class MonoQueue:
-    """具有 O(1) 求 `min` 和 `max` API的 deque"""
+    """具有 O(1) 求 `min` 和 `max` API的 queue"""
 
     __slots__ = ("minQueue", "maxQueue", "rawQueue")
 
