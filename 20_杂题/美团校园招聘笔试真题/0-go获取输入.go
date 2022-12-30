@@ -1,4 +1,4 @@
-// golang输入输出
+// golang输入/golang输出
 // 关键词:golangIO golang输入输出
 
 package foo
@@ -38,6 +38,16 @@ func bufferIO(reader io.Reader, writer io.Writer) {
 	}
 
 	fmt.Fprintln(out, n)
+
+	// 换行输出数组
+	for _, v := range nums {
+		fmt.Fprintln(out, v)
+	}
+
+	// 不换行输出数组
+	for _, v := range nums {
+		fmt.Fprint(out, v, " ")
+	}
 }
 
 func main() {

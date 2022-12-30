@@ -13,12 +13,11 @@ def preXor(upper: int) -> int:
     mod = upper % 4
     if mod == 0:
         return upper
-    elif mod == 1:
+    if mod == 1:
         return 1
-    elif mod == 2:
+    if mod == 2:
         return upper + 1
-    else:
-        return 0
+    return 0
 
 
 def rangeXor(lower: int, upper: int) -> int:

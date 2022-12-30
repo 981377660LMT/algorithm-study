@@ -2,6 +2,7 @@
 # 1 <= s.length, t.length <= 100
 
 # O(n^3)
+# 1638. 统计只差一个字符的子串数目
 class Solution:
     def countSubstrings(self, s: str, t: str) -> int:
         """只有一个字符不同的子串对数"""

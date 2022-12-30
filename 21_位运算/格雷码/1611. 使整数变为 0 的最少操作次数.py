@@ -5,6 +5,7 @@
 # 如果第 (i-1) 位为 1 且从第 (i-2) 位到第 0 位都为 0，则翻转 n 的二进制表示中的第 i 位。
 
 # 很像玩九连环的过程。把最高位消掉以后，后面要循环，挨着一个一个慢慢消
+# https://leetcode.cn/problems/minimum-one-bit-operations-to-make-integers-zero/solution/xiang-jie-ge-lei-ma-by-simpleson/
 class Solution:
     def minimumOneBitOperations(self, n: int) -> int:
         res = 0

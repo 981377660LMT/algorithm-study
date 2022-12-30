@@ -17,7 +17,7 @@ INF = int(1e20)
 
 
 class Solution:
-    def minimumIncompatibility(self, nums: List[int], k: int) -> float:
+    def minimumIncompatibility2(self, nums: List[int], k: int) -> float:
         @lru_cache(None)
         def dfs(state: int) -> int:
             # 还没有被选的数
@@ -49,7 +49,7 @@ class Solution:
         return res if res != INF else -1
 
 
-print(Solution().minimumIncompatibility([6, 3, 8, 1, 3, 1, 2, 2], 4))
+print(Solution().minimumIncompatibility2([6, 3, 8, 1, 3, 1, 2, 2], 4))
 # 输出：6
 # 解释：最优的子集分配为 [1,2]，[2,3]，[6,8] 和 [1,3] 。
 # 不兼容性和为 (2-1) + (3-2) + (8-6) + (3-1) = 6 。

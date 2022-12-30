@@ -1,4 +1,7 @@
+/* eslint-disable no-labels */
+
 /**
+ * 960. 删列造序 III
  * @param {string[]} strs
  * @return {number}
  * 执行删除操作之后，最终得到的数组的行中的每个元素都是按字典序排列的。

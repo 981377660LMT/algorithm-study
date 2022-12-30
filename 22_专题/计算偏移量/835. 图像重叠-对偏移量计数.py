@@ -30,3 +30,18 @@ print(
 )
 # 输出：3
 # 解释：将 img1 向右移动 1 个单位，再向下移动 1 个单位。
+
+# 二维fft
+# https://leetcode.cn/problems/image-overlap/solution/ni-ke-neng-wu-fa-xiang-xiang-de-on2lognd-gc5j/
+import numpy as np
+
+
+class Solution:
+    def largestOverlap(self, img1: List[List[int]], img2: List[List[int]]) -> int:
+        N = len(img1)
+        N2 = 1 << (N.bit_length() + 1)
+        img1_fft = np.fft.fft2(np.array(img1), (N2, N2))
+        img2_fft = np.fft.fft2(np.array(img2)[::-1, ::-1], (N2, N2))
+        img1_fft *= img2_fft
+        conv = np.fft.ifft2(img1_fft)
+        return int(np.round(np.max(conv)))

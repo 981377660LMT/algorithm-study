@@ -12,6 +12,8 @@ from itertools import accumulate
 # 2.借助哈希 字典存储和加速查找；
 # 3.前缀和，辅助计算子数组的和。
 
+# 分割数组成三个和相等的子数组
+
 
 class Solution:
     def splitArray(self, nums: List[int]) -> bool:

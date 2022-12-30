@@ -11,7 +11,7 @@
 function largestNumber(nums: number[]): string {
   const arr = nums.map(String)
   arr.sort((a, b) => (a + b > b + a ? -1 : 1))
-  return BigInt(arr.join('')).toString() // 去除前导零
+  return BigInt(arr.join('')).toString() // BigInt去除前导零
   return arr.join('').replace(/^0*/, '') || '0'
 }
 

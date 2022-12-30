@@ -4,8 +4,40 @@
 // leetcode.cn/problems/rectangle-area-ii/
 
 // ! 注意题目是否可以这样开空间
-// !是否要扫描x 用线段树维护y
+class SubrectangleQueries {
+  private readonly _tree: SegmentTree2D
 
+  constructor(rectangle: number[][]) {
+    const [ROW, COL] = [rectangle.length, rectangle[0].length]
+    this._tree = new SegmentTree2D(0, 0, ROW - 1, COL - 1)
+    for (let r = 0; r < ROW; r++) {
+      for (let c = 0; c < COL; c++) {
+        this._tree.update(r, c, r, c, rectangle[r][c])
+      }
+    }
+  }
+
+  updateSubrectangle(
+    row1: number,
+    col1: number,
+    row2: number,
+    col2: number,
+    newValue: number
+  ): void {
+    this._tree.update(row1, col1, row2, col2, newValue)
+  }
+
+  getValue(row: number, col: number): number {
+    return this._tree.query(row, col, row, col)
+  }
+}
+
+/**
+ * Your SubrectangleQueries object will be instantiated and called as such:
+ * var obj = new SubrectangleQueries(rectangle)
+ * obj.updateSubrectangle(row1,col1,row2,col2,newValue)
+ * var param_2 = obj.getValue(row,col)
+ */
 class SegmentTreeNode2D {
   value = 0
 
@@ -21,6 +53,10 @@ class SegmentTreeNode2D {
 class SegmentTree2D {
   private readonly root: SegmentTreeNode2D = new SegmentTreeNode2D()
 
+  /**
+   * 0 <= row1 <= row2 < ROW
+   * 0 <= col1 <= col2 < COL
+   */
   constructor(
     private readonly ROW1: number,
     private readonly COL1: number,
@@ -28,7 +64,7 @@ class SegmentTree2D {
     private readonly COL2: number
   ) {}
 
-  update(row1: number, col1: number, row2: number, col2: number, target: 0 | 1): void {
+  update(row1: number, col1: number, row2: number, col2: number, target: number): void {
     this.checkRange(row1, col1, row2, col2)
     this._update(
       this.root,
@@ -115,10 +151,10 @@ class SegmentTree2D {
     col1: number,
     row2: number,
     col2: number,
-    target: 0 | 1
+    target: number
   ): void {
     if (ROW1 <= row1 && row2 <= ROW2 && COL1 <= col1 && col2 <= COL2) {
-      root.value = target === 0 ? 0 : (row2 - row1 + 1) * (col2 - col1 + 1)
+      root.value = target * (row2 - row1 + 1) * (col2 - col1 + 1)
       root.lazyValue = target
       root.isLazy = true
       return
@@ -187,10 +223,10 @@ class SegmentTree2D {
       root.child3!.lazyValue = target
       root.child4!.lazyValue = target
 
-      root.child1.value = target === 0 ? 0 : (rowMid - row1 + 1) * (colMid - col1 + 1)
-      root.child2.value = target === 0 ? 0 : (rowMid - row1 + 1) * (col2 - colMid)
-      root.child3.value = target === 0 ? 0 : (row2 - rowMid) * (colMid - col1 + 1)
-      root.child4.value = target === 0 ? 0 : (row2 - rowMid) * (col2 - colMid)
+      root.child1.value = target * (rowMid - row1 + 1) * (colMid - col1 + 1)
+      root.child2.value = target * (rowMid - row1 + 1) * (col2 - colMid)
+      root.child3.value = target * (row2 - rowMid) * (colMid - col1 + 1)
+      root.child4.value = target * (row2 - rowMid) * (col2 - colMid)
 
       root.child1.isLazy = true
       root.child2.isLazy = true

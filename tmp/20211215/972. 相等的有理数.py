@@ -1,9 +1,10 @@
+# 972. 相等的有理数
 # 整数、小数、循环节都不大于4位
 # 也就是说，两个小数的循环部分的最大的 公共周期 为 12。
 class Solution:
     def isRationalEqual(self, s: str, t: str) -> bool:
         def f(s):
-            i = s.find('(')
+            i = s.find("(")
             if i >= 0:
                 s = s[:i] + s[i + 1 : -1] * 20
             return float(s[:20])

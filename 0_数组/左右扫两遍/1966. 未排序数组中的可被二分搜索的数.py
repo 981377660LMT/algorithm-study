@@ -1,6 +1,8 @@
 from typing import List
 
 # 只要数字左边的数字都比它小，右边的数字都比它大就能保证这个数字被找到
+
+
 class Solution:
     def binarySearchableNumbers(self, nums: List[int]) -> int:
         """未排序数组中的可被二分搜索的数"""

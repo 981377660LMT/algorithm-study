@@ -1,74 +1,99 @@
-import { BIT } from '../6_tree/树状数组/树状数组单点更新模板'
+/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+// 1172. 餐盘栈
 
 class DinnerPlates {
-  private bit: BIT
-  private capacity: number
-  private size: number
-  private N: number
-  private stack: number[][]
+  private static readonly _N = 2e5
+  private readonly _stack: number[][]
+  private readonly _stackCap: number
+  private readonly _bit: BIT
+  private _size = 0
+
   // 我们把无限数量 ∞ 的栈排成一行，按从左到右的次序从 0 开始编号
   // 每个栈的的最大容量 capacity 都相同。
   constructor(capacity: number) {
-    this.capacity = capacity
-    this.size = 0
-    this.N = 2 * 10 ** 5
-    this.bit = new BIT(this.N)
-    this.stack = Array.from({ length: this.N }, () => [])
+    this._stackCap = capacity
+    this._bit = new BIT(DinnerPlates._N)
+    this._stack = Array.from({ length: DinnerPlates._N }, () => [])
   }
 
   // 将给出的正整数 val 推入 从左往右第一个 没有满的栈。
   push(val: number): void {
-    const index = this.getPushIndex()
-    this.stack[index].push(val)
-    this.size++
-    this.bit.add(index, 1)
+    const index = this._getPushIndex()
+    this._stack[index].push(val)
+    this._size++
+    this._bit.add(index, 1)
   }
 
   // 返回 从右往左第一个 非空栈顶部的值，并将其从栈中删除；如果所有的栈都是空的，请返回 -1
   // 空的栈会占用他的位置
   pop(): number {
-    // if (!this.size) return -1
-    // const index = this.getPopIndex()
-    // const top = this.stack[index].pop()!
-    // this.size--
-    // this.bit.add(index, -1)
-    // return top
-    const index = this.getPopIndex()
+    const index = this._getPopIndex()
     return this.popAtStack(index - 1)
   }
 
   // 返回编号 index 的栈顶部的值，并将其从栈中删除；如果编号 index 的栈是空的，请返回 -1。
   popAtStack(index: number): number {
-    const idx = index + 1
-    if (!this.stack[idx].length) return -1
-    const top = this.stack[idx].pop()!
-    this.size--
-    this.bit.add(idx, -1)
+    index++
+    if (!this._stack[index].length) return -1
+    const top = this._stack[index].pop()!
+    this._size--
+    this._bit.add(index, -1)
     return top
   }
 
-  private getPopIndex(): number {
-    let l = 1
-    let r = this.N
-    while (l <= r) {
-      const mid = (l + r) >> 1
+  private _getPopIndex(): number {
+    let left = 1
+    let right = DinnerPlates._N
+    while (left <= right) {
+      const mid = (left + right) >> 1
       // 等于时 右边都不是 要左移
-      if (this.bit.query(mid) >= this.size) r = mid - 1
-      else l = mid + 1
+      if (this._bit.query(mid) >= this._size) right = mid - 1
+      else left = mid + 1
     }
-    return l
+    return left
   }
 
-  private getPushIndex(): number {
-    let l = 1
-    let r = this.N
-    while (l <= r) {
-      const mid = (l + r) >> 1
+  private _getPushIndex(): number {
+    let left = 1
+    let right = DinnerPlates._N
+    while (left <= right) {
+      const mid = (left + right) >> 1
       // 等于时 左边都不是 要右移
-      if (this.bit.query(mid) < this.capacity * mid) r = mid - 1
-      else l = mid + 1
+      if (this._bit.query(mid) < this._stackCap * mid) right = mid - 1
+      else left = mid + 1
     }
-    return l
+    return left
+  }
+}
+
+class BIT {
+  private readonly _size: number
+  private readonly _tree: Array<number>
+
+  constructor(size: number) {
+    this._size = size
+    this._tree = Array(size + 1).fill(0)
+  }
+
+  add(index: number, delta: number): void {
+    if (index <= 0) throw RangeError(`add索引 ${index} 应为正整数`)
+    for (let i = index; i <= this._size; i += i & -i) {
+      this._tree[i] += delta
+    }
+  }
+
+  query(index: number): number {
+    if (index > this._size) index = this._size
+    let res = 0
+    for (let i = index; i > 0; i -= i & -i) {
+      res += this._tree[i]
+    }
+    return res
+  }
+
+  queryRange(left: number, right: number): number {
+    return this.query(right) - this.query(left - 1)
   }
 }
 

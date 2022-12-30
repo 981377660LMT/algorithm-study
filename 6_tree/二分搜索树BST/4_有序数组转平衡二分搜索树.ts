@@ -1,14 +1,3 @@
-class TreeNode {
-  val: number
-  left: TreeNode | null
-  right: TreeNode | null
-  constructor(val: number = 0) {
-    this.val = val
-    this.left = null
-    this.right = null
-  }
-}
-
 // ps:中序遍历二分搜索树就得到从小到大的有序数组
 // 关键:根节点是中位数,这样分配可以保证左右子树的节点数目差不超过 1
 // 选择中点作为根节点，根节点左侧的作为左子树，右侧的作为右子树即可。原因很简单，这样分配可以保证左右子树的节点数目差不超过 1。因此高度差自然也不会超过 1 了。

@@ -75,7 +75,7 @@ def findSCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[int]]
 # 模板题 点权 https://www.luogu.com.cn/problem/P3387
 #  边权 https://codeforces.com/contest/894/problem/E
 # 检测路径是否可达/唯一/无穷 https://codeforces.com/problemset/problem/1547/G
-def toTree(n: int, graph: List[List[int]]) -> List[List[int]]:
+def toDAG(n: int, graph: List[List[int]]) -> List[List[int]]:
     """
     # !scc 缩点成DAG
 
@@ -110,4 +110,4 @@ if __name__ == "__main__":
         [[0], [2, 1], [3], [4]],
         [0, 1, 1, 2, 3],
     )
-    assert toTree(5, [[1, 2], [2, 3], [3, 1], [4], []]) == [[1, 1], [2, 2], [3], []]
+    assert toDAG(5, [[1, 2], [2, 3], [3, 1], [4], []]) == [[1, 1], [2, 2], [3], []]

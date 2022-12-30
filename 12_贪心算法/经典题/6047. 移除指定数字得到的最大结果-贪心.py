@@ -1,12 +1,14 @@
 MOD = int(1e9 + 7)
 INF = int(1e20)
 
-
+# 2259. 移除指定数字得到的最大结果
 # 直接字符串max即可 不需数字
+
+
 class Solution:
     def removeDigit(self, number: str, digit: str) -> str:
         """从 number 中 恰好 移除 一个 等于 digit 的字符后，找出并返回按 十进制 表示 最大 的结果字符串。
-        
+
         O(n) 贪心
         你需要在人生中找到自己的另一半，在这个过程中你会遇到各种各样的人。
         如果那个人是你所仰慕的对象(number[i + 1]> number[i] )，

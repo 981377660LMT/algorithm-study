@@ -21,3 +21,6 @@ class Solution:
 
 
 print(Solution().largestTriangleArea([[0, 0], [0, 1], [1, 0], [0, 2], [2, 0]]))
+
+
+# 可以用凸包优化

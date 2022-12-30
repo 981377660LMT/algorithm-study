@@ -1,5 +1,6 @@
 from bisect import insort_left
 
+# 考场就座(男生上厕所)
 # 当学生进入考场后，他必须坐在能够使他与离他最近的人之间的距离达到最大化的座位上。
 # https://leetcode-cn.com/problems/exam-room/solution/kao-chang-jiu-zuo-by-leetcode/
 
@@ -8,36 +9,37 @@ from bisect import insort_left
 
 class ExamRoom:
     def __init__(self, n: int):
-        self.cap = n
-        self.seats = []
+        self._n = n
+        self._seats = []
 
-    # 坐在编号最小的座位上,离他最近的人之间的距离达到最大化的座位上
     def seat(self) -> int:
-        if not self.seats:
-            cand = 0
-        else:
-            # 遍历座位找最长间隔
-            resMax, cand = self.seats[0], 0
-            for i, cur in enumerate(self.seats):
-                if i == 0:
-                    continue
-                pre = self.seats[i - 1]
-                curMax = (cur - pre) >> 1  # !离他最近的人之间的距离达到最大化且编号最小
-                if curMax > resMax:
-                    resMax, cand = curMax, pre + curMax
+        """
+        坐在编号最小的座位上,离他最近的人之间的距离达到最大化的座位上
+        遍历座位找最长间隔
+        """
+        if not self._seats:
+            self._seats.append(0)
+            return 0
 
-            # 考虑坐在最后一个位置
-            lastDist = self.cap - 1 - self.seats[-1]
-            if lastDist > resMax:
-                cand = self.cap - 1
+        maxDist, cand = self._seats[0], 0  # !坐在第一个位置
+        for i in range(1, len(self._seats)):
+            cur, pre = self._seats[i], self._seats[i - 1]
+            curDist = (cur - pre) // 2  # !离他最近的人之间的距离达到最大化且编号最小
+            if curDist > maxDist:
+                maxDist, cand = curDist, pre + curDist
+        lastDist = self._n - 1 - self._seats[-1]  # 坐在最后一个位置
+        if lastDist > maxDist:
+            cand = self._n - 1
 
-        insort_left(self.seats, cand)
+        insort_left(self._seats, cand)
         return cand
 
-    # 坐在座位 p 上的学生现在离开了
-    # 每次调用 ExamRoom.leave(p) 时都保证有学生坐在座位 p 上
     def leave(self, p: int) -> None:
-        self.seats.remove(p)
+        """
+        坐在座位 p 上的学生现在离开了
+        每次调用 ExamRoom.leave(p) 时都保证有学生坐在座位 p 上
+        """
+        self._seats.remove(p)
 
 
 # ["ExamRoom","seat","seat","seat","seat","leave","seat"], [[10],[],[],[],[],[4],[]]
@@ -57,4 +59,3 @@ room.seat()
 room.seat()
 room.seat()
 print(room.__dict__)
-

@@ -1,3 +1,4 @@
+# 787. K 站中转内最便宜的航班
 from typing import List
 
 INF = int(1e20)
@@ -29,7 +30,15 @@ print(
     )
 )
 
-print(Solution().findCheapestPrice(4, [[0, 1, 1], [0, 2, 5], [1, 2, 1], [2, 3, 1]], 0, 3, 1,))
+print(
+    Solution().findCheapestPrice(
+        4,
+        [[0, 1, 1], [0, 2, 5], [1, 2, 1], [2, 3, 1]],
+        0,
+        3,
+        1,
+    )
+)
 print(
     Solution().findCheapestPrice(
         10,

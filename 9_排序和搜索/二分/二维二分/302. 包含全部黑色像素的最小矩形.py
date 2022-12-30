@@ -14,14 +14,14 @@ class Solution:
 
         m, n = len(image), len(image[0])
 
-        up = self.__cal_up(image, x, m, n)
-        down = self.__cal_down(image, x, m, n)
-        left = self.__cal_left(image, y, m, n)
-        right = self.__cal_right(image, y, m, n)
+        up = self._cal_up(image, x, m, n)
+        down = self._cal_down(image, x, m, n)
+        left = self._cal_left(image, y, m, n)
+        right = self._cal_right(image, y, m, n)
 
         return (down - up + 1) * (right - left + 1)
 
-    def __cal_up(self, image, bound, m, n):
+    def _cal_up(self, image, bound, m, n):
         l, r = 0, bound
         while l <= r:
             mid = (l + r) >> 1
@@ -32,7 +32,7 @@ class Solution:
         up = l
         return up
 
-    def __cal_down(self, image, bound, m, n):
+    def _cal_down(self, image, bound, m, n):
         l, r = bound, m - 1
         while l <= r:
             mid = (l + r) >> 1
@@ -43,13 +43,13 @@ class Solution:
         down = r
         return down
 
-    def __cal_left(self, image, bound, m, n):
+    def _cal_left(self, image, bound, m, n):
         l, r = 0, bound
         while l <= r:
             mid = (l + r) >> 1
             has_one = False
             for row in range(m):
-                if image[row][mid] == '1':
+                if image[row][mid] == "1":
                     has_one = True
                     break
 
@@ -60,13 +60,13 @@ class Solution:
         left = l
         return left
 
-    def __cal_right(self, image, bound, m, n):
+    def _cal_right(self, image, bound, m, n):
         l, r = bound, n - 1
         while l <= r:
             mid = (l + r) >> 1
             has_one = False
             for row in range(m):
-                if image[row][mid] == '1':
+                if image[row][mid] == "1":
                     has_one = True
                     break
             if has_one:

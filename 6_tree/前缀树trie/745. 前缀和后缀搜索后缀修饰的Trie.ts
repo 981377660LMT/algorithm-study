@@ -1,4 +1,5 @@
 // 745. 前缀和后缀搜索后缀修饰的Trie
+// 745. 前缀和后缀搜索
 
 class TrieNode {
   index: number // 对应单词下标
@@ -58,7 +59,7 @@ class WordFilter {
    *
    * @param prefix
    * @param suffix
-   * 返回词典中具有前缀 prefix 和后缀suffix 的单词的下标。
+   * 返回词典中具有前缀 prefix 和后缀suffix 的单词的下标。
    * 如果存在不止一个满足要求的下标，返回其中 最大的下标 。
    * 如果不存在这样的单词，返回 -1 。
    */

@@ -7,7 +7,7 @@ MOD = int(1e9 + 7)
 @lru_cache(None)
 def cal2(i: int, j: int) -> int:
     """第二类斯特林数:i个人,j个子集
-    
+
     i,j<=1000
     - 将新元素单独放入一个子集 `cal(i - 1, j - 1)`
     - 将新元素放入一个现有的非空子集 `j * cal(i - 1, j)`

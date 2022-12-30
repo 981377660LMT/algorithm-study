@@ -42,6 +42,13 @@ def useArrayHasher(nums: Sequence[int], mod=10**11 + 7, base=1313131, offset=0):
     return sliceHash
 
 
+def genHash(word: str, mod=10**11 + 7, base=1313131, offset=0) -> int:
+    res = 0
+    for i in range(len(word)):
+        res = (res * base + ord(word[i]) - offset) % mod
+    return res
+
+
 if __name__ == "__main__":
     stringHasher = useStringHasher("abc")
     print(stringHasher(1, 2))

@@ -1,29 +1,26 @@
 class FirstUnique {
-  private only: Set<number> // 现在出现频率为1的元素
-  private dead: Set<number> // 永久删除
+  private readonly _one = new Set<number>() // 现在出现频率为1的元素
+  private readonly _removed = new Set<number>() // 永久删除
 
   constructor(nums: number[]) {
-    this.only = new Set()
-    this.dead = new Set()
-
-    for (const num of nums) {
-      this.add(num)
-    }
+    nums.forEach(num => this.add(num))
   }
 
   // 返回队列中的 第一个唯一 整数的值。如果没有唯一整数，返回 -1
   showFirstUnique(): number {
-    if (!this.only.size) return -1
-    const first = this.only.keys().next().value
+    if (!this._one.size) return -1
+    const first = this._one.keys().next().value
     return first
   }
 
   add(value: number): void {
-    if (this.dead.has(value)) return
-    if (this.only.has(value)) {
-      this.only.delete(value)
-      this.dead.add(value)
-    } else this.only.add(value)
+    if (this._removed.has(value)) return
+    if (this._one.has(value)) {
+      this._one.delete(value)
+      this._removed.add(value)
+      return
+    }
+    this._one.add(value)
   }
 }
 

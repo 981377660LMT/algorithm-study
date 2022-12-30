@@ -15,38 +15,10 @@ from typing import List
 from collections import Counter, defaultdict
 
 
-class UnionFind:
-    def __init__(self, n):
-        self.n = n
-        self.part = n
-        self.parent = list(range(n))
-        self.size = [1] * n
-
-    def find(self, x):
-        if x != self.parent[x]:
-            self.parent[x] = self.find(self.parent[x])
-        return self.parent[x]
-
-    def union(self, x, y):
-        root_x = self.find(x)
-        root_y = self.find(y)
-        if root_x == root_y:
-            return False
-        if self.size[root_x] > self.size[root_y]:
-            root_x, root_y = root_y, root_x
-        self.parent[root_x] = root_y
-        self.size[root_y] += self.size[root_x]
-        self.part -= 1
-        return True
-
-    def isconnected(self, p, q):
-        return self.find(p) == self.find(q)
-
-
 class Solution:
     def minMalwareSpread(self, graph: List[List[int]], initial: List[int]) -> int:
         n = len(graph)
-        uf = UnionFind(n)
+        uf = UnionFindArray(n)
         evil = set(initial)
 
         # 1.忽略所有感染节点，只考虑正常节点。
@@ -78,10 +50,62 @@ class Solution:
             for v in infectRange[u]:
                 # v门派只被u感染,有效的感染了多少人
                 if freq[v] == 1:
-                    validCount += uf.size[v]
+                    validCount += uf.rank[v]
             if validCount > best or validCount == best and u < res:
                 res, best = u, validCount
         return res
+
+
+from collections import defaultdict
+from typing import DefaultDict, List
+
+
+class UnionFindArray:
+
+    __slots__ = ("n", "part", "parent", "rank")
+
+    def __init__(self, n: int):
+        self.n = n
+        self.part = n
+        self.parent = list(range(n))
+        self.rank = [1] * n
+
+    def find(self, x: int) -> int:
+        while x != self.parent[x]:
+            self.parent[x] = self.parent[self.parent[x]]
+            x = self.parent[x]
+        return x
+
+    def union(self, x: int, y: int) -> bool:
+        rootX = self.find(x)
+        rootY = self.find(y)
+        if rootX == rootY:
+            return False
+        if self.rank[rootX] > self.rank[rootY]:
+            rootX, rootY = rootY, rootX
+        self.parent[rootX] = rootY
+        self.rank[rootY] += self.rank[rootX]
+        self.part -= 1
+        return True
+
+    def isConnected(self, x: int, y: int) -> bool:
+        return self.find(x) == self.find(y)
+
+    def getGroups(self) -> DefaultDict[int, List[int]]:
+        groups = defaultdict(list)
+        for key in range(self.n):
+            root = self.find(key)
+            groups[root].append(key)
+        return groups
+
+    def getRoots(self) -> List[int]:
+        return list(set(self.find(key) for key in self.parent))
+
+    def __repr__(self) -> str:
+        return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
+
+    def __len__(self) -> int:
+        return self.part
 
 
 print(Solution().minMalwareSpread(graph=[[1, 1, 0], [1, 1, 0], [0, 0, 1]], initial=[0, 1]))

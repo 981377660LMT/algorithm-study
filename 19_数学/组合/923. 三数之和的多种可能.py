@@ -1,12 +1,17 @@
 from typing import List
-from itertools import combinations, combinations_with_replacement, product
+from itertools import product
 from collections import Counter
 
 MOD = int(1e9 + 7)
 
+# 923. 三数之和的多种可能
 # 返回满足 i < j < k 且 A[i] + A[j] + A[k] == target 的元组 i, j, k 的数量
 
 # 3 <= arr.length <= 3000
+# 0 <= arr[i] <= 100
+# 0 <= target <= 300
+
+# 也可以dpIndexRemain
 
 
 class Solution:

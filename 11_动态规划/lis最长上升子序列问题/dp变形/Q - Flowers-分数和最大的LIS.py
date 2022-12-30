@@ -2,7 +2,7 @@
 # !即求分数最大的LIS 维护前缀的最大值
 # n<=1e5
 # 1<=h[i]<=n 且h[i]不重复
-
+# scores[i]<=1e9
 
 # 如果按照dp[index][height]的方式来做 看每个选不选 时间空间都是O(n^2)
 # 需要分析转移式优化
@@ -14,7 +14,7 @@
 
 from collections import defaultdict
 import sys
-import os
+
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -23,11 +23,7 @@ INF = int(4e18)
 
 
 class BIT3:
-    """单点修改 维护`前缀区间`最大值
-
-    这么做正确的前提是不会删除或修改已经存进去的值
-    每次都是加入新的值，这样已经存在的最大值一直有效。
-    """
+    """单点修改 维护`前缀区间`最大值"""
 
     def __init__(self, n: int):
         self.size = n

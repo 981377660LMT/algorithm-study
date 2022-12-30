@@ -1,3 +1,4 @@
+// 291. 单词规律 II
 // pattern 里的每个`字母`和字符串 str 中每个 非空 `单词`之间，
 // 是否存在着 双射 的对应规律
 // https://leetcode-cn.com/problems/word-pattern-ii/comments/711636

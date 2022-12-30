@@ -5,17 +5,12 @@
 MOD = int(1e9 + 7)
 
 
-# 遇到二的整数次幂移位量就加一
 class Solution:
     def concatenatedBinary(self, n: int) -> int:
         res = 0
-        shiftLen = 0
         for num in range(1, n + 1):
-            if num & (num - 1) == 0:
-                shiftLen += 1
-            res = (res << shiftLen) + num
+            res = (res << int(num).bit_length()) | num
             res %= MOD
-
         return res
 
 

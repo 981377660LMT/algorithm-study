@@ -1,6 +1,7 @@
 from typing import List
 from collections import deque
 
+# 936. 戳印序列
 # 如果可以印出序列，那么返回一个数组，该数组由每个回合中被印下的最左边字母的索引组成
 # https://leetcode-cn.com/problems/stamping-the-sequence/solution/tuo-bu-pai-xu-by-kevinchen147-09ad/
 # 这题很像
@@ -51,4 +52,3 @@ class Solution:
 print(Solution().movesToStamp(stamp="abc", target="ababc"))
 # 输出：[0,2]
 # （[1,0,2] 以及其他一些可能的结果也将作为答案被接受）
-

@@ -3,7 +3,7 @@ from itertools import accumulate
 
 MOD = int(1e9 + 7)
 
-
+# 629. K个逆序对数组
 class Solution:
     def kInversePairs(self, n: int, k: int) -> int:
         """

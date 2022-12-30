@@ -77,6 +77,17 @@ function useArrayHasher(
   }
 }
 
+function genHash(s: string, mod = 10 ** 11 + 7, base = 1313131): bigint {
+  const bigMod = BigInt(mod)
+  const bigBase = BigInt(base)
+
+  let res = 0n
+  for (let i = 0; i < s.length; i++) {
+    res = (res * bigBase + BigInt(s[i].charCodeAt(0))) % bigMod
+  }
+  return res
+}
+
 if (require.main === module) {
   const s1 = 'asdasd'
   const hasher = useStringHasher(s1)

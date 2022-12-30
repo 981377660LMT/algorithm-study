@@ -4,3 +4,4 @@ function numberOfDays(year: number, month: number): number {
 }
 
 console.log(numberOfDays(2000, 2))
+export {}

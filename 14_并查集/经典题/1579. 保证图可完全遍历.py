@@ -1,5 +1,3 @@
-from typing import List
-
 # edges[i] = [typei, ui, vi] 表示节点 ui 和 vi 之间存在类型为 typei 的双向边
 # 类型 1：只能由 Alice 遍历。
 # 类型 2：只能由 Bob 遍历。
@@ -10,7 +8,8 @@ from typing import List
 
 # 总结：
 # 我们删除最多数目的边，这等价于保留最少数目的边
-# 换句话说，我们可以从一个仅包含 n 个节点（而没有边）的无向图开始，逐步添加边，使得满足上述的要求。
+# 换句话说，我们可以从一个仅包含 n 个节点（而没有边）的无向图开始，
+# 逐步添加边，使得满足上述的要求。
 
 # 那么我们应该按照什么策略来添加边呢？ 公共边先加
 # 在处理完了所有的「公共边」之后，我们需要处理他们各自的独占边
@@ -22,36 +21,18 @@ from typing import List
 
 # 在使用并查集进行合并的过程中，
 # 我们每遇到一次失败的合并操作（即需要合并的两个点属于同一个连通分量），
-# 那么就说明当前这条边可以被删除，将答案增加 11。
-class UnionFind:
-    def __init__(self, n):
-        self.parent = list(range(n))
-        self.count = n
-
-    def union(self, x, y):
-        rx, ry = self.find(x), self.find(y)
-        if rx == ry:
-            return False
-        low, high = sorted([rx, ry])
-        self.parent[high] = low
-        self.count -= 1
-        return True
-
-    def find(self, i):
-        if i != self.parent[i]:
-            self.parent[i] = self.find(self.parent[i])
-        return self.parent[i]
-
-    def isConnected(self, x, y):
-        rx, ry = self.find(x), self.find(y)
-        return rx == ry
+# 那么就说明当前这条边可以被删除，将答案增加 1。
 
 
 # 总结:
 # 先处理公共边
+
+from typing import List
+
+
 class Solution:
     def maxNumEdgesToRemove(self, n: int, edges: List[List[int]]) -> int:
-        ufa, ufb = UnionFind(n), UnionFind(n)
+        ufa, ufb = UF(n), UF(n)
         # 可以删除的边数(已经联通就可以删除了)
         res = 0
 
@@ -85,6 +66,30 @@ class Solution:
             return -1
 
         return res
+
+
+class UF:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.count = n
+
+    def union(self, x, y):
+        rx, ry = self.find(x), self.find(y)
+        if rx == ry:
+            return False
+        low, high = sorted([rx, ry])
+        self.parent[high] = low
+        self.count -= 1
+        return True
+
+    def find(self, i):
+        if i != self.parent[i]:
+            self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def isConnected(self, x, y):
+        rx, ry = self.find(x), self.find(y)
+        return rx == ry
 
 
 print(

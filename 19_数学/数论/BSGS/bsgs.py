@@ -33,7 +33,7 @@ def bsgs(base: int, target: int, p: int) -> int:
 
     for i in range(t + 1):
         tv = mp.get(val, -1)
-        if tv != -1 and i * t - tv >= 0:
+        if tv != -1 and i * t - tv >= 0:  # !注意这里取等号表示允许最小解为0
             return i * t - tv
         val = val * base % p
 
@@ -67,7 +67,7 @@ def exbsgs(base: int, target: int, p: int) -> int:
     target %= p
 
     # !平凡解
-    if target == 1 or p == 1:
+    if target == 1 or p == 1:  # !注意这里允许最小解为0
         return 0
 
     cnt = 0

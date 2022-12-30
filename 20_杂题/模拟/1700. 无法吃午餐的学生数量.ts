@@ -1,7 +1,7 @@
 // 如果队列最前面的学生 喜欢 栈顶的三明治，那么会 拿走它 并离开队列。
 // 否则，这名学生会 放弃这个三明治 并回到队列的尾部。
 function countStudents(students: number[], sandwiches: number[]): number {
-  const channel = Array<number>(2).fill(0)
+  const channel = [0, 0]
 
   students.forEach(provider => channel[provider]++)
 

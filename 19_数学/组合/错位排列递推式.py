@@ -1,5 +1,12 @@
 from functools import lru_cache
 
+MOD = int(1e9 + 7)
+
+
+res = [0, 0, 1]
+for i in range(3, int(1e6) + 10):
+    res.append(((i - 1) * (res[-1] + res[-2])) % MOD)
+
 
 @lru_cache(None)
 def cal(n: int) -> int:
@@ -9,7 +16,3 @@ def cal(n: int) -> int:
     if n == 2:
         return 1
     return (n - 1) * (cal(n - 1) + cal(n - 2))
-
-
-print(cal(3))
-
