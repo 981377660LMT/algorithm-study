@@ -144,6 +144,21 @@ func (lca *LCA) UpToDepth(root, toDepth int) int {
 	return root
 }
 
+// 从start节点跳到target节点,跳过step个节点(0-indexed)
+// 返回跳到的节点,如果不存在这样的节点,返回-1
+func (lca *LCA) Jump(start, target, step int) int {
+	lca_ := lca.QueryLCA(start, target)
+	dep1, dep2, deplca := lca.depth[start], lca.depth[target], lca.depth[lca_]
+	dist := dep1 + dep2 - 2*deplca
+	if step > dist {
+		return -1
+	}
+	if step <= dep1-deplca {
+		return lca.QueryKthAncestor(start, step)
+	}
+	return lca.QueryKthAncestor(target, dist-step)
+}
+
 func (lca *LCA) dfsAndInitDp(cur, pre, dep int) {
 	lca.depth[cur] = dep
 	lca.dp[0][cur] = pre

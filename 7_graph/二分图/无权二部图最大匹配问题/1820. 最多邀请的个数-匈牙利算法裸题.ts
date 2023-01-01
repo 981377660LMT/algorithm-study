@@ -15,7 +15,7 @@ function maximumInvitations(grid: number[][]): number {
       if (grid[r][c] === 1) H.addEdge(r, c)
     }
   }
-  return H.work()
+  return H.work().length
 }
 
 console.log(

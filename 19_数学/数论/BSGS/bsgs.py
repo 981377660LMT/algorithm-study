@@ -1,4 +1,4 @@
-"""bsgs与exbsgs
+"""bsgs与exbsgs 离散对数(Discrete Logarithm)
 
 https://dianhsu.com/2022/08/27/template-math/#bsgs
 """
@@ -94,9 +94,15 @@ def exbsgs(base: int, target: int, p: int) -> int:
 
 
 if __name__ == "__main__":
+    # https://judge.yosupo.jp/problem/discrete_logarithm_mod
+    T = int(input())
+    for _ in range(T):
+        base, target, mod = map(int, input().split())
+        res = exbsgs(base, target, mod)
+        print(res)
+
     # https://www.luogu.com.cn/problem/P4195
     # !给定a,p,b，求满足a**x ≡ b (mod p)的最小自然数x。
-
     while True:
         base, p, target = map(int, input().split())
         if base == target == p == 0:

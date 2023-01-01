@@ -1,128 +1,86 @@
-from collections import defaultdict
-from typing import Iterable, List, Mapping, Optional, Sequence, Tuple, Union
+# L,R<=1e5 M<=2e5
+# 0<=ai<L 0<=bi<R
+# 不存在重边
+
+from typing import List, Tuple
 
 
 class Hungarian:
+    """
+    軽量化Dinic法
+    ref : https://snuke.hatenablog.com/entry/2019/05/07/013609
+    """
+
     def __init__(self, row: int, col: int):
-        """匈牙利算法求无权二分图最大匹配
-
-        时间复杂度O(V * E)
-
+        """
         Args:
             row (int): 男孩的个数
             col (int): 女孩的个数
         """
         self._row = row
         self._col = col
-        self._graph = [[] for _ in range(row)]
-        self._rowMatching = [-1] * row
-        self._colMatching = [-1] * col
-        self._matchingEdges: Optional[List[Tuple[int, int]]] = None
+        self._to = [[] for _ in range(row)]
 
     def addEdge(self, u: int, v: int) -> None:
         """男孩u和女孩v连边"""
         assert 0 <= u < self._row
         assert 0 <= v < self._col
-        self._graph[u].append(v)
+        self._to[u].append(v)
 
-    def work(self) -> int:
-        """返回最大匹配的个数"""
-
-        def dfs(cur: int) -> bool:
-            """寻找增广路"""
-            if visited[cur]:
-                return False
-            visited[cur] = True
-            for next in self._graph[cur]:
-                if self._colMatching[next] == -1 or dfs(self._colMatching[next]):
-                    self._colMatching[next] = cur
-                    self._rowMatching[cur] = next
-                    return True
-            return False
-
-        res = 0
-        visited = [False] * self._row
-        hasUpdated = True
-        while hasUpdated:
-            hasUpdated = False
-            for cur in range(self._row):
-                if self._rowMatching[cur] == -1 and dfs(cur):
-                    hasUpdated = True
-                    res += 1
-            if hasUpdated:
-                visited = [False] * self._row
-        return res
-
-    @property
-    def matchingEdges(self):
-        """返回匹配的边"""
-        if self._matchingEdges is not None:
-            return self._matchingEdges
-
-        edges = []
-        for cur in range(self._row):
-            if self._rowMatching[cur] != -1:
-                edges.append((cur, self._rowMatching[cur]))
-        self._matchingEdges = edges
-        return edges
-
-
-###################################################################
-# !deprecated
-AdjList = Sequence[Iterable[int]]
-AdjMap = Mapping[int, Iterable[int]]
-Graph = Union[AdjList, AdjMap]  # 无向图
+    def work(self) -> List[Tuple[int, int]]:
+        """返回最大匹配"""
+        n, m, to = self._row, self._col, self._to
+        pre = [-1] * n
+        root = [-1] * n
+        p = [-1] * n
+        q = [-1] * m
+        upd = True
+        while upd:
+            upd = False
+            s = []
+            s_front = 0
+            for i in range(n):
+                if p[i] == -1:
+                    root[i] = i
+                    s.append(i)
+            while s_front < len(s):
+                v = s[s_front]
+                s_front += 1
+                if p[root[v]] != -1:
+                    continue
+                for u in to[v]:
+                    if q[u] == -1:
+                        while u != -1:
+                            q[u] = v
+                            p[v], u = u, p[v]
+                            v = pre[v]
+                        upd = True
+                        break
+                    u = q[u]
+                    if pre[u] != -1:
+                        continue
+                    pre[u] = v
+                    root[u] = root[v]
+                    s.append(u)
+            if upd:
+                for i in range(n):
+                    pre[i] = -1
+                    root[i] = -1
+        return [(v, p[v]) for v in range(n) if p[v] != -1]
 
 
-def hungarian(graph: Graph):
-    """匈牙利算法求无权二分图最大匹配
+import sys
 
-    时间复杂度O(V * E)
+sys.setrecursionlimit(int(1e9))
+input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-    Args:
-        graph (Graph): 无向图邻接表
-    """
-
-    def getColor(graph: Graph) -> Mapping[int, int]:
-        """检测二分图并染色"""
-
-        def dfs(cur: int, color: int) -> None:
-            colors[cur] = color
-            for next in graph[cur]:
-                if colors[next] == -1:
-                    dfs(next, color ^ 1)
-                elif colors[cur] == colors[next]:
-                    raise Exception("不是二分图")
-
-        colors = defaultdict(lambda: -1)
-        for i in range(n):
-            if colors[i] == -1:
-                dfs(i, 0)
-        return colors
-
-    def dfs(boy: int) -> bool:
-        """寻找增广路"""
-        nonlocal visited
-        if boy in visited:
-            return False
-        visited.add(boy)
-
-        for girl in graph[boy]:
-            if matching[girl] == -1 or dfs(matching[girl]):
-                matching[boy] = girl
-                matching[girl] = boy
-                return True
-        return False
-
-    n = len(graph)
-    maxMatching = 0
-    matching = defaultdict(lambda: -1)
-    colors = getColor(graph)
-    visited = set()
-    for i in range(n):
-        visited = set()
-        if colors[i] == 0 and matching[i] == -1:
-            if dfs(i):
-                maxMatching += 1
-
-    return maxMatching, matching, colors
+if __name__ == "__main__":
+    L, R, M = map(int, input().split())  # L个左边的点，R个右边的点，M条边
+    hungarian = Hungarian(L, R)
+    for _ in range(M):
+        u, v = map(int, input().split())
+        hungarian.addEdge(u, v)
+    matching = hungarian.work()
+    print(len(matching))
+    for u, v in matching:
+        print(u, v)

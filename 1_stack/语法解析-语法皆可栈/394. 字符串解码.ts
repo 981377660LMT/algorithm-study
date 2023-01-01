@@ -2,7 +2,7 @@
 //  "aaabcbc"
 // console.log(decodeString('3[a2[c]]'))
 //  "accaccacc"
-const isNumeric = (str: string) => !isNaN(parseFloat(str)) && isFinite(Number(str))
+const isNumeric = (str: string) => !isNaN(parseFloat(str)) && isFinite(parseFloat(str))
 
 /**
  * 这道题和括号匹配一个思路

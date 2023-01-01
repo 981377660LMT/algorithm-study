@@ -23,108 +23,96 @@ type Event struct {
 	kind      uint8 // 0:in 1:out
 }
 
-// rectangle[i] = [xi1, yi1, xi2, yi2]
-func rectangleArea(rectangles [][]int) int {
-	n := len(rectangles)
-	events := make([]Event, 0, n*2)
+// 求矩形的面积并
+//  rectangle[i] = [x1, y1, x2, y2]
+//  0<=x1<x2<=10^9
+//  0<=y1<y2<=10^9
+//  1<=rectangle.length<=1e5
+// https://leetcode.cn/problems/rectangle-area-ii/solution/ju-xing-mian-ji-ii-by-leetcode-solution-ulqz/
+func rectangleArea(rectangles [][]int) (res int) {
+	n := len(rectangles) * 2
+	heights := make([]int, 0, n)
+	for _, r := range rectangles {
+		heights = append(heights, r[1], r[3])
+	}
+
+	// 排序+去重
+	sort.Ints(heights)
+	m := 0
+	for _, h := range heights[1:] {
+		if heights[m] != h {
+			m++
+			heights[m] = h
+		}
+	}
+	heights = heights[:m+1]
+
+	tree := make(data, m*4)
+	tree.build(heights, 1, 1, m)
+
+	type event struct{ x, i, d int }
+	events := make([]event, 0, n)
+	for i, r := range rectangles {
+		events = append(events, event{r[0], i, 1}, event{r[2], i, -1})
+	}
+	sort.Slice(events, func(i, j int) bool { return events[i].x < events[j].x })
+
 	for i := 0; i < n; i++ {
-		x1, y1, x2, y2 := rectangles[i][0], rectangles[i][1], rectangles[i][2], rectangles[i][3]
-		in := Event{x: x1, y1: y1, y2: y2, kind: 0}
-		out := Event{x: x2, y1: y1, y2: y2, kind: 1}
-		events = append(events, in, out)
+		j := i
+		for j+1 < n && events[j+1].x == events[i].x {
+			j++
+		}
+		if j+1 == n {
+			break
+		}
+		// 一次性地处理掉一批横坐标相同的左右边界
+		for k := i; k <= j; k++ {
+			index, diff := events[k].i, events[k].d
+			// 使用二分查找得到完整覆盖的线段的编号范围
+			left := sort.SearchInts(heights, rectangles[index][1]) + 1
+			right := sort.SearchInts(heights, rectangles[index][3])
+			tree.update(1, 1, m, left, right, diff)
+		}
+		res += tree[1].len * (events[j+1].x - events[j].x)
+		i = j
 	}
-
-	// !先进入后退出(此时标记不为负)
-	sort.Slice(events, func(i, j int) bool {
-		if events[i].x != events[j].x {
-			return events[i].x < events[j].x
-		}
-		return events[i].kind < events[j].kind
-	})
-
-	tree := CreateSegmentTree(0, 1e9)
-	res := 0
-	for i, e := range events {
-		if i > 0 {
-			res += (e.x - events[i-1].x) * tree.QueryAll().sum
-			res %= MOD
-
-		}
-
-		if e.kind == 0 {
-			tree.Update(e.y1, e.y2-1, 1) // 注意-1 因为这里是线段表示区间而不是点表示区间
-		} else {
-			tree.Update(e.y1, e.y2-1, -1)
-		}
-	}
-
 	return res
 }
 
-type Data = struct{ size, sum, count int } // !维护区间覆盖次数以及区间和
-type Lazy = int                            // count +1/-1
-func e(left, right int) Data               { return Data{size: right - left + 1} }
+type data []struct{ cover, len, maxLen int }
 
-// !op
-func (o *Node) pushUp() {
-	if o.data.count == 0 {
-		o.data.sum = 0 // !没有标记就从线段树上的两个儿子节点继承
-		if o.leftChild != nil {
-			o.data.sum += o.leftChild.data.sum
-		}
-		if o.rightChild != nil {
-			o.data.sum += o.rightChild.data.sum
-		}
-	} else {
-		o.data.sum = o.data.size // !如果这个点上有标记， 那么就说明被线段覆盖了， 长度就是 r-l+1
-	}
-}
-
-func (o *Node) pushDown() {
-	mid := (o.left + o.right) >> 1
-	if o.leftChild == nil {
-		o.leftChild = newNode(o.left, mid)
-	}
-	if o.rightChild == nil {
-		o.rightChild = newNode(mid+1, o.right)
-	}
-}
-
-// 指定区间上下界建立线段树
-func CreateSegmentTree(lower, upper int) *Node {
-	root := newNode(lower, upper)
-	return root
-}
-
-type Node struct {
-	left, right           int
-	leftChild, rightChild *Node
-
-	data Data
-}
-
-func (o *Node) Update(left, right int, lazy Lazy) {
-	if left <= o.left && o.right <= right {
-		o.data.count += lazy
-		o.pushUp() // !注意叶子结点也要pushUp 因为节点值并不全由子节点决定 还与本身有关
+func (t data) build(heights []int, idx, l, r int) {
+	if l == r {
+		t[idx].maxLen = heights[l] - heights[l-1]
 		return
 	}
-
-	o.pushDown()
-	mid := (o.left + o.right) >> 1
-	if left <= mid {
-		o.leftChild.Update(left, right, lazy)
-	}
-	if right > mid {
-		o.rightChild.Update(left, right, lazy)
-	}
-	o.pushUp()
+	mid := (l + r) / 2
+	t.build(heights, idx*2, l, mid)
+	t.build(heights, idx*2+1, mid+1, r)
+	t[idx].maxLen = t[idx*2].maxLen + t[idx*2+1].maxLen
 }
 
-func (o *Node) QueryAll() Data {
-	return o.data
+func (t data) update(idx, l, r, ul, ur, diff int) {
+	if l > ur || r < ul {
+		return
+	}
+	if ul <= l && r <= ur {
+		t[idx].cover += diff
+		t.pushUp(idx, l, r)
+		return
+	}
+	mid := (l + r) / 2
+	t.update(idx*2, l, mid, ul, ur, diff)
+	t.update(idx*2+1, mid+1, r, ul, ur, diff)
+	t.pushUp(idx, l, r)
 }
 
-func newNode(left, right int) *Node {
-	return &Node{left: left, right: right, data: e(left, right)}
+func (t data) pushUp(idx, l, r int) {
+	if t[idx].cover > 0 {
+		t[idx].len = t[idx].maxLen
+	} else if l == r {
+		t[idx].len = 0
+	} else {
+		t[idx].len = t[idx*2].len + t[idx*2+1].len
+	}
 }

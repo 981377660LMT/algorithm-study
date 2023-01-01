@@ -10,6 +10,7 @@
 
 import sys
 from typing import List
+from LinearBase import LinearBase
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -20,13 +21,11 @@ INF = int(4e18)
 def findMinCostBase(nums: List[int], costs: List[int]) -> List[int]:
     """求1-2^n-1中成本最小的线性基"""
     nums = sorted(nums, key=lambda i: costs[i - 1])
+    lb = LinearBase()
     res = []
-    visited = set([0])
-    for cur in nums:
-        if cur in visited:
-            continue
-        res.append(cur)
-        visited |= {cur ^ pre for pre in visited}
+    for i in nums:
+        if lb.add(i):  # 如果能插入
+            res.append(i)
     return res
 
 

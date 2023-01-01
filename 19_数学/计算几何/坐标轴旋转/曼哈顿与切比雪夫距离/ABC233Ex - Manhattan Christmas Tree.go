@@ -25,10 +25,10 @@ func main() {
 		fmt.Fscan(in, &x, &y)
 		points[i] = Point{x + y + 1, x - y + 1} // 变为切比雪夫距离然后平移1
 	}
+
 	sort.Slice(points, func(i, j int) bool {
 		return points[i].y < points[j].y
 	})
-
 	bit := NewRectangleBIT(2e5 + 10)
 	for _, p := range points {
 		bit.Add(p.x, p.y)

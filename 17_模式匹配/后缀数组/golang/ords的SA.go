@@ -157,7 +157,7 @@ func GetSA(ords []int) (sa []int) {
 //  lcp : 排名相邻的两个后缀的最长公共前缀.
 // 	lcp[0] = 0
 // 	lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
-func UseSA(ords []int) (sa []int, rank []int, lcp []int) {
+func UseSA(ords []int) (sa, rank, lcp []int) {
 	n := len(ords)
 	sa = GetSA(ords)
 

@@ -76,6 +76,29 @@ def buildCartesianTree2(insertNums: List[int]) -> Tuple[int, List[int], List[int
     return stack[0], leftChild, rightChild
 
 
+def buildCartesianTree(nums: List[int]) -> List[int]:
+    """
+    给定一个`不含重复元素`的数组 nums ，按照此数组构建一个 笛卡尔树.
+    笛卡尔树根节点为数组中最小的元素所在下标.
+
+    Returns:
+        List[int]: 每个结点的父结点,根节点的父结点为-1
+    """
+    n = len(nums)
+    parents = [-1] * n
+    stack = []
+    for i in range(n):
+        pre = -1
+        while stack and nums[i] < nums[stack[-1]]:
+            pre = stack.pop()
+        if pre != -1:
+            parents[pre] = i
+        if stack:
+            parents[i] = stack[-1]
+        stack.append(i)
+    return parents
+
+
 if __name__ == "__main__":
     # !如果笛卡尔树的 (key,weight) 键值对确定，且 key 互不相同，weight 互不相同，
     # !那么这个笛卡尔树的结构是唯一的

@@ -1,7 +1,12 @@
-from typing import DefaultDict, List, Set
+from typing import List
+from typing import Iterable, Mapping, Sequence, Union
+
+AdjList = Sequence[Iterable[int]]
+AdjMap = Mapping[int, Iterable[int]]
+Graph = Union[AdjList, AdjMap]
 
 
-def findCycleGroup(n: int, adjMap: DefaultDict[int, Set[int]]) -> List[List[int]]:
+def findCycleGroup(n: int, graph: "Graph") -> List[List[int]]:
     """无向图找到所有的环，图可能不连通"""
 
     def dfs(cur: int, pre: int) -> bool:
@@ -9,7 +14,7 @@ def findCycleGroup(n: int, adjMap: DefaultDict[int, Set[int]]) -> List[List[int]
         if visited[cur]:
             return True
         visited[cur] = True
-        for next in adjMap[cur]:
+        for next in graph[cur]:
             if next == pre:
                 continue
             path.append(next)
@@ -38,4 +43,3 @@ def findCycleGroup(n: int, adjMap: DefaultDict[int, Set[int]]) -> List[List[int]
             addCycleOnPath()
 
     return res
-

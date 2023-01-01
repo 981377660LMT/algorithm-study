@@ -5,6 +5,7 @@ package foo
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -47,6 +48,23 @@ func bufferIO(reader io.Reader, writer io.Writer) {
 	// 不换行输出数组
 	for _, v := range nums {
 		fmt.Fprint(out, v, " ")
+	}
+}
+
+// 按行读入
+func lineIO(reader io.Reader, writer io.Writer) {
+	in := bufio.NewScanner(reader)
+	in.Buffer(nil, 1e9) // 若单个 token 大小超过 65536 则加上这行
+	out := bufio.NewWriter(writer)
+	defer out.Flush()
+
+	for in.Scan() {
+		line := in.Bytes()
+		sp := bytes.Split(line, []byte{' '})
+		// do something
+		for _, v := range sp {
+			fmt.Println(string(v))
+		}
 	}
 }
 

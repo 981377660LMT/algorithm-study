@@ -4,7 +4,7 @@
 // 给定一个n次多项式F(x)，和一个m次多项式G(x)。
 // 请求出 F(x)和G(x)的卷积。
 // n,m<=1e6
-package ntt
+package main
 
 import (
 	"bufio"

@@ -1,4 +1,4 @@
-// 静态二维矩形区域计数 O(logn)
+// 静态二维矩形计数 O(logn)
 
 package main
 

@@ -59,7 +59,7 @@ def findSCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[int]]
         if order == 0:
             dfs(i)
 
-    #  由于每个强连通分量都是在它的所有后继强连通分量被求出之后求得的
+    # 由于每个强连通分量都是在它的所有后继强连通分量被求出之后求得的
     # 上面得到的 scc 是拓扑序的逆序
     groups.reverse()
     sccId = [0] * n
@@ -67,7 +67,7 @@ def findSCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[int]]
         for v in group:
             sccId[v] = i
 
-    return groups, sccId
+    return groups, sccId  # !groups按照拓扑序输出
 
 
 # EXTRA: 缩点: 将边 v-w 转换成 sid[v]-sid[w]

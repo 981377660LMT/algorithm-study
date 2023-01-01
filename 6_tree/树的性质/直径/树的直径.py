@@ -1,6 +1,38 @@
 from typing import List, Set, Tuple, Union
 from collections import deque
 
+
+def calDiameter(adjList: List[List[Tuple[int, int]]]) -> Tuple[int, List[int]]:
+    """求带权树的(直径长度, 直径路径)"""
+
+    def dfs(start: int) -> Tuple[int, List[int]]:
+        dist = [-1] * n
+        dist[start] = 0
+        stack = [start]
+        while stack:
+            cur = stack.pop()
+            for next, weight in adjList[cur]:
+                if dist[next] != -1:
+                    continue
+                dist[next] = dist[cur] + weight
+                stack.append(next)
+        endPoint = dist.index(max(dist))
+        return endPoint, dist
+
+    n = len(adjList)
+    u, _ = dfs(0)
+    v, dist = dfs(u)
+    diameter = dist[v]
+    path = [v]
+    while u != v:
+        for next, weight in adjList[v]:
+            if dist[next] + weight == dist[v]:
+                path.append(next)
+                v = next
+                break
+    return diameter, path
+
+
 Tree = Union[List[List[int]], List[Set[int]]]
 
 

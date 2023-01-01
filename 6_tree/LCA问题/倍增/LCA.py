@@ -33,7 +33,7 @@ class LCA:
         if self.depth[root1] < self.depth[root2]:
             root1, root2 = root2, root1
 
-        root1 = self._upToDepth(root1, self.depth[root2])
+        root1 = self.upToDepth(root1, self.depth[root2])
         if root1 == root2:
             return root1
 
@@ -49,7 +49,10 @@ class LCA:
         return self.depth[root1] + self.depth[root2] - 2 * self.depth[self.queryLCA(root1, root2)]
 
     def queryKthAncestor(self, root: int, k: int) -> int:
-        """查询树节点root的第k个祖先,如果不存在这样的祖先节点,返回 -1"""
+        """
+        查询树节点root的第k个祖先(0-indexed)
+        如果不存在这样的祖先节点,返回 -1
+        """
         bit = 0
         while k:
             if k & 1:
@@ -60,48 +63,28 @@ class LCA:
             k //= 2
         return root
 
-    # def isLink(self, nodes: List[int]) -> bool:
-    #     """判断结点是否组成从根节点出发的链
+    def jump(self, start: int, target: int, step: int) -> int:
+        """
+        从start节点跳到target节点,跳过step个节点(0-indexed)
+        返回跳到的节点,如果不存在这样的节点,返回-1
+        """
+        lca = self.queryLCA(start, target)
+        dep1, dep2, deplca = self.depth[start], self.depth[target], self.depth[lca]
+        dist = dep1 + dep2 - 2 * deplca
+        if step > dist:
+            return -1
+        if step <= dep1 - deplca:
+            return self.queryKthAncestor(start, step)
+        return self.queryKthAncestor(target, dist - step)
 
-    #     https://zhuanlan.zhihu.com/p/540022071
-    #     """
-    #     nodes = sorted(nodes, key=lambda x: self.depth[x])
-    #     for i in range(len(nodes) - 1):
-    #         if not self.isAncestor(root=nodes[i], child=nodes[i + 1]):
-    #             return False
-    #     return True
-
-    # def isSimplePath(self, nodes: List[int]) -> bool:
-    #     """判断结点是否组成一条简单路径(起点+一个拐点+终点)
-
-    #     https://zhuanlan.zhihu.com/p/540022071
-    #     """
-    #     if len(nodes) <= 2:
-    #         return True
-
-    #     nodes = sorted(nodes, key=lambda x: self.depth[x])
-    #     start = nodes[-1]
-    #     anotherBranch = []
-    #     for node in nodes[:-1]:
-    #         if not self.isAncestor(root=node, child=start):
-    #             anotherBranch.append(node)
-
-    #     if not anotherBranch:  # !一条链
-    #         return True
-
-    #     anotherBranch.sort(key=lambda x: self.depth[x])
-    #     end = anotherBranch[-1]
-    #     uTurn = self.queryLCA(start, end)  # 拐点
-
-    #     for node in nodes:
-    #         if not self.isAncestor(root=uTurn, child=node):  # 拐点不是结点的祖先
-    #             return False
-    #         if not (
-    #             self.isAncestor(root=node, child=start)  # 结点是起点的祖先
-    #             or self.isAncestor(root=node, child=end)  # 结点是终点的祖先
-    #         ):
-    #             return False
-    #     return True
+    def upToDepth(self, root: int, toDepth: int) -> int:
+        """从 root 开始向上跳到指定深度 toDepth,toDepth<=dep[v],返回跳到的节点"""
+        if toDepth >= self.depth[root]:
+            return root
+        for i in range(self._bitlen - 1, -1, -1):
+            if (self.depth[root] - toDepth) & (1 << i):
+                root = self.dp[i][root]
+        return root
 
     def _dfs(self, start: int, startPre: int, startDep: int) -> None:
         """处理高度、父节点"""
@@ -127,15 +110,6 @@ class LCA:
                 else:
                     dp[i + 1][j] = dp[i][dp[i][j]]
         return dp
-
-    def _upToDepth(self, root: int, toDepth: int) -> int:
-        """从 root 开始向上跳到指定深度 toDepth,toDepth<=dep[v],返回跳到的节点"""
-        if toDepth >= self.depth[root]:
-            return root
-        for i in range(self._bitlen - 1, -1, -1):
-            if (self.depth[root] - toDepth) & (1 << i):
-                root = self.dp[i][root]
-        return root
 
 
 if __name__ == "__main__":

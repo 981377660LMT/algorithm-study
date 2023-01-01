@@ -19,7 +19,7 @@ const MOD = 998244353
 
 // https://www.luogu.com.cn/problem/P4717
 // 给定长度为2^n的两个序列(n<=17)
-// !记 Ci = ∑Aj*Bk (其中 op(j,k)=i,op可以是or,and,xor)
+// !记 Ck = ∑Ai*Bj (其中 op(i,j)=k,op可以是or,and,xor)
 // 求出C0,C1,...,C2^n-1 模998244353的值
 func main() {
 	in := bufio.NewReader(os.Stdin)

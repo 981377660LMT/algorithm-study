@@ -35,7 +35,6 @@ function usePrime(max: number) {
 
   /**
    * 求小于等于n的所有质因数
-   * @complexity log(n)
    */
   function getPrimes(n = max): readonly number[] {
     const res: number[] = []

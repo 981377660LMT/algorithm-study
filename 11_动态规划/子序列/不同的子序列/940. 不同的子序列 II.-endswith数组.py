@@ -5,6 +5,9 @@ s 仅由小写英文字母组成
 !s的本质不同子序列个数
 """
 
+from typing import Any, Sequence
+
+
 MOD = int(1e9 + 7)
 
 
@@ -28,7 +31,7 @@ class Solution:
             endswith[ord(char) - ord("a")] = (sum(endswith) + 1) % MOD
         return sum(endswith) % (MOD)
 
-    def distinctSubseqII2(self, s: str) -> int:
+    def distinctSubseqII2(self, s: Sequence[Any]) -> int:
         """O(n)"""
         n = len(s)
         dp = [0] * (n + 1)

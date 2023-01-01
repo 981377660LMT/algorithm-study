@@ -20,4 +20,4 @@ class Solution:
                     nr, nc = r + dr, c + dc
                     if 0 <= nr < row and 0 <= nc < col and grid[nr][nc] == 0:
                         H.addEdge(cur, nr * col + nc)
-        return H.work()
+        return len(H.work())

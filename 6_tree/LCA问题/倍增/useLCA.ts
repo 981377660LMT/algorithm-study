@@ -18,7 +18,7 @@ function useLCA(n: number, tree: number[][], root = 0) {
   function queryLCA(root1: number, root2: number): number {
     if (depth[root1] < depth[root2]) [root1, root2] = [root2, root1]
 
-    root1 = _upToDepth(root1, depth[root2])
+    root1 = upToDepth(root1, depth[root2])
     if (root1 === root2) return root1
 
     for (let bit = _bitLen - 1; ~bit; bit--) {
@@ -56,12 +56,42 @@ function useLCA(n: number, tree: number[][], root = 0) {
     return root
   }
 
+  /**
+   * 从`root`开始向上跳至指定深度`toDepth`,返回跳至的节点
+   */
+  function upToDepth(root: number, toDepth: number): number {
+    if (toDepth >= depth[root]) return root
+    for (let i = _bitLen; ~i; i--) {
+      if ((depth[root] - toDepth) & (1 << i)) {
+        root = _dp[i][root]
+      }
+    }
+    return root
+  }
+
+  /**
+   * 从start节点跳到target节点,跳过step个节点(0-indexed)
+   * 返回跳到的节点,如果不存在这样的节点,返回-1
+   */
+  function jump(start: number, target: number, step: number): number {
+    const lca = queryLCA(start, target)
+    const dep1 = depth[start]
+    const dep2 = depth[target]
+    const deplca = depth[lca]
+    const dist = dep1 + dep2 - 2 * deplca
+    if (step > dist) return -1
+    if (step <= dep1 - deplca) return queryKthAncestor(start, step)
+    return queryKthAncestor(target, dist - step)
+  }
+
   return {
     depth,
     parent,
     queryLCA,
     queryDist,
-    queryKthAncestor
+    queryKthAncestor,
+    upToDepth,
+    jump
   }
 
   function _dfs(cur: number, pre: number, dep: number): void {
@@ -83,19 +113,6 @@ function useLCA(n: number, tree: number[][], root = 0) {
         else _dp[i + 1][j] = _dp[i][_dp[i][j]] // 2^i*2^i === 2^(i+1)
       }
     }
-  }
-
-  /**
-   * 从`root`开始向上跳至指定深度`toDepth`,返回跳至的节点
-   */
-  function _upToDepth(root: number, toDepth: number): number {
-    if (toDepth >= depth[root]) return root
-    for (let i = _bitLen; ~i; i--) {
-      if ((depth[root] - toDepth) & (1 << i)) {
-        root = _dp[i][root]
-      }
-    }
-    return root
   }
 }
 

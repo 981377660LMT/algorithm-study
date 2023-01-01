@@ -1,4 +1,4 @@
-// !仿射变换
+// !仿射变换 Range Affine Range Query
 // 区间赋值 区间加 区间和查询
 
 package main

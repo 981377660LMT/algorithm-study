@@ -8,6 +8,7 @@
 package main
 
 import (
+	"fmt"
 	"index/suffixarray"
 	"math"
 	"math/bits"
@@ -86,8 +87,8 @@ func min(a, b int) int {
 	return b
 }
 
-// func main() {
-// 	_, rank, height := suffixArray([]byte("banana"))
-// 	lcp := queryLCP(rank, height)
-// 	println(lcp(2, 4))
-// }
+func main() {
+	_, rank, height := suffixArray("banana")
+	lcp := queryLCP(rank, height)
+	fmt.Println(lcp(2, 4)) // "nana" "na"  2
+}
