@@ -32,12 +32,14 @@ func main() {
 	counter := [100010]int{}
 	pair := 0
 
-	mo := NewMoAlgo(nums, op{
-		add: func(v, _, _, _ int) {
+	mo := NewMoAlgo(n, q, op{
+		add: func(i, _ int) {
+			v := nums[i]
 			pair += counter[v]
 			counter[v]++
 		},
-		remove: func(v, _, _, _ int) {
+		remove: func(i, _ int) {
+			v := nums[i]
 			pair -= counter[v] - 1
 			counter[v]--
 		},
@@ -75,32 +77,27 @@ type V = int
 type R = fraction
 
 type MoAlgo struct {
-	n          int
 	queryOrder int
 	chunkSize  int
-	data       []int
 	buckets    [][]query
 	op         op
 }
 
-type query struct {
-	qi, left, right int
-}
+type query struct{ qi, left, right int }
 
 type op struct {
 	// 将数据添加到窗口
-	add func(value V, index, qLeft, qRight int)
+	add func(index, delta int)
 	// 将数据从窗口中移除
-	remove func(value V, index, qLeft, qRight int)
+	remove func(index, delta int)
 	// 更新当前窗口的查询结果
 	query func(qLeft, qRight int) R
 }
 
-func NewMoAlgo(data []int, op op) *MoAlgo {
-	n := len(data)
-	chunkSize := int(math.Ceil(math.Sqrt(float64(n))))
+func NewMoAlgo(n, q int, op op) *MoAlgo {
+	chunkSize := max(1, n/int(math.Sqrt(float64(q))))
 	buckets := make([][]query, n/chunkSize+1)
-	return &MoAlgo{n: n, data: data, chunkSize: chunkSize, buckets: buckets, op: op}
+	return &MoAlgo{chunkSize: chunkSize, buckets: buckets, op: op}
 }
 
 // 0 <= left <= right < n
@@ -112,7 +109,7 @@ func (mo *MoAlgo) AddQuery(left, right int) {
 
 // 返回每个查询的结果
 func (mo *MoAlgo) Work() []R {
-	data, buckets, q := mo.data, mo.buckets, mo.queryOrder
+	buckets, q := mo.buckets, mo.queryOrder
 	res := make([]R, q)
 	left, right := 0, 0
 
@@ -124,24 +121,24 @@ func (mo *MoAlgo) Work() []R {
 		}
 
 		for _, q := range bucket {
-			// !窗口收缩
-			for right > q.right {
-				right--
-				mo.op.remove(data[right], right, q.left, q.right-1)
-			}
-			for left < q.left {
-				mo.op.remove(data[left], left, q.left, q.right-1)
-				left++
-			}
-
 			// !窗口扩张
-			for right < q.right {
-				mo.op.add(data[right], right, q.left, q.right-1)
-				right++
-			}
 			for left > q.left {
 				left--
-				mo.op.add(data[left], left, q.left, q.right-1)
+				mo.op.add(left, -1)
+			}
+			for right < q.right {
+				mo.op.add(right, 1)
+				right++
+			}
+
+			// !窗口收缩
+			for left < q.left {
+				mo.op.remove(left, 1)
+				left++
+			}
+			for right > q.right {
+				right--
+				mo.op.remove(right, -1)
 			}
 
 			res[q.qi] = mo.op.query(q.left, q.right-1)
@@ -149,4 +146,11 @@ func (mo *MoAlgo) Work() []R {
 	}
 
 	return res
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

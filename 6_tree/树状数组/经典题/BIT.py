@@ -5,6 +5,7 @@
 
 from bisect import bisect_left, bisect_right
 from collections import defaultdict
+from typing import List
 
 
 class BIT1:
@@ -267,31 +268,41 @@ class BIT5:
         return res
 
 
-class ArrayBIT:
-    """单点修改 维护数组前缀和 下标与数组一致"""
+class BITArray:
+    """下标从0开始 单点修改、区间查询 每个操作都是 log(n)"""
 
     def __init__(self, n: int):
-        self._length = n
-        self.tree = [0] * n
+        self.n = n
+        self.data = [0] * n
 
-    def add(self, index: int, delta: int) -> None:
-        assert 0 <= index < self._length
-        index += 1
-        while index <= self._length:
-            self.tree[index - 1] += delta
-            index += index & -index
+    def build(self, arr: List[int]):
+        for i, a in enumerate(arr):
+            self.data[i] = a
+        for i in range(1, self.n + 1):
+            if i + (i & -i) <= self.n:
+                self.data[i + (i & -i) - 1] += self.data[i - 1]
 
-    def sum(self, left: int, right: int) -> int:
-        """数组切片[left, right]的和"""
-        assert 0 <= left <= right <= self._length
-        return self._query(right) - self._query(left)
+    def add(self, i: int, delta: int):
+        """下标i的值加上delta"""
+        assert 0 <= i < self.n
+        i += 1
+        while i <= self.n:
+            self.data[i - 1] += delta
+            i += i & -i
 
-    def _query(self, index: int) -> int:
-        res = 0
-        while index > 0:
-            res += self.tree[index - 1]
-            index -= index & -index
-        return res
+    def query(self, right: int) -> int:
+        """前right个数的和"""
+        assert 0 <= right <= self.n
+        s = 0
+        while right:
+            s += self.data[right - 1]
+            right -= right & -right
+        return s
+
+    def queryRange(self, left: int, right: int) -> int:
+        """切片[left:right]的和"""
+        assert 0 <= left <= right <= self.n
+        return self.query(right) - self.query(left)
 
 
 # TODO  dict + SortedList 优化
@@ -371,11 +382,11 @@ if __name__ == "__main__":
     assert bit5.queryRange(0, 0, 1, 1) == 4
     assert bit5.queryRange(0, 0, 3, 3) == 16
 
-    arrayBIT = ArrayBIT(100)
+    arrayBIT = BITArray(100)
     arrayBIT.add(0, 1)
-    assert arrayBIT.sum(0, 1) == 1
+    assert arrayBIT.queryRange(0, 1) == 1
     arrayBIT.add(1, 1)
-    assert arrayBIT.sum(0, 2) == 2
+    assert arrayBIT.queryRange(0, 2) == 2
 
     points = [(3, 3), (1, 1), (2, 2), (4, 4), (5, 5)]
     points.sort(key=lambda x: x[1])  # 按照y坐标排序

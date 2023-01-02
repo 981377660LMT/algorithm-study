@@ -18,32 +18,33 @@ func main() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q, kind, left, right, mul, add int
+	var n, q int
 	fmt.Fscan(in, &n, &q)
-	nums := make([]S, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i].sum)
-		nums[i].size = 1
-	}
 
-	tree := NewLazySegTree(nums)
+	initNums := make([]S, n)
+	for i := 0; i < n; i++ {
+		var num int
+		fmt.Fscan(in, &num)
+		initNums[i] = S{sum: num, size: 1}
+	}
+	tree := NewLazySegTree(initNums)
+
 	for i := 0; i < q; i++ {
-		fmt.Fscan(in, &kind)
-		if kind == 0 {
+		var op, left, right, mul, add int
+		fmt.Fscan(in, &op)
+		if op == 0 {
 			fmt.Fscan(in, &left, &right, &mul, &add) // 0<=left<right<=n
 			tree.Update(left, right, F{mul: mul, add: add})
 		} else {
 			fmt.Fscan(in, &left, &right) // 0<=left<right<=n
 			fmt.Fprintln(out, tree.Query(left, right).sum)
-			// fmt.Fscan(in, &index)
-			// fmt.Fprintln(out, tree.Query(index, index+1).sum)
 		}
 	}
 
 }
 
-type S struct{ size, sum int }
-type F struct{ mul, add int }
+type S = struct{ size, sum int }
+type F = struct{ mul, add int }
 
 func (tree *LazySegTree) e() S  { return S{size: 1} }
 func (tree *LazySegTree) id() F { return F{mul: 1} }

@@ -7,27 +7,25 @@ from typing import Callable, Generic, List, TypeVar
 class MaxSparseTable:
     """求区间最大值的ST表"""
 
-    __slots__ = "_n", "_dp"
+    __slots__ = "_n", "_h", "_dp"
 
     def __init__(self, arr: List[int]):
-        n = len(arr)
-        size = n.bit_length()
-        self._n = n
-
-        dp = [[0] * n for _ in range(size)]  # !dp[i][j]表示闭区间[j,j+2**i-1]的最大值
-        dp[0] = arr[:]
-
-        for i in range(1, size):
-            for j in range(n - (1 << i) + 1):
-                cand1, cand2 = dp[i - 1][j], dp[i - 1][j + (1 << (i - 1))]
-                dp[i][j] = cand1 if cand1 > cand2 else cand2
-        self._dp = dp
+        self._n = len(arr)
+        self._h = self._n.bit_length()
+        self._dp = [[0] * self._n for _ in range(self._h)]
+        self._dp[0] = [a for a in arr]  # type: ignore
+        for k in range(1, self._h):
+            t, p = self._dp[k], self._dp[k - 1]
+            l = 1 << (k - 1)
+            for i in range(self._n - l * 2 + 1):
+                t[i] = p[i] if p[i] > p[i + l] else p[i + l]
 
     def query(self, left: int, right: int) -> int:
         """[left,right]区间的最大值"""
         assert 0 <= left <= right < self._n, f"{left}, {right}, {self._n}"
-        k = (right - left + 1).bit_length() - 1
-        cand1, cand2 = self._dp[k][left], self._dp[k][right - (1 << k) + 1]
+        right += 1
+        k = (right - left).bit_length() - 1
+        cand1, cand2 = self._dp[k][left], self._dp[k][right - (1 << k)]
         if cand1 > cand2:
             return cand1
         return cand2
@@ -36,27 +34,25 @@ class MaxSparseTable:
 class MinSparseTable:
     """求区间最小值的ST表"""
 
-    __slots__ = "_n", "_dp"
+    __slots__ = "_n", "_h", "_dp"
 
     def __init__(self, arr: List[int]):
-        n = len(arr)
-        size = n.bit_length()
-        self._n = n
-
-        dp = [[0] * n for _ in range(size)]
-        dp[0] = arr[:]
-
-        for i in range(1, size):
-            for j in range(n - (1 << i) + 1):
-                cand1, cand2 = dp[i - 1][j], dp[i - 1][j + (1 << (i - 1))]
-                dp[i][j] = cand1 if cand1 < cand2 else cand2
-        self._dp = dp
+        self._n = len(arr)
+        self._h = self._n.bit_length()
+        self._dp = [[0] * self._n for _ in range(self._h)]
+        self._dp[0] = [a for a in arr]  # type: ignore
+        for k in range(1, self._h):
+            t, p = self._dp[k], self._dp[k - 1]
+            l = 1 << (k - 1)
+            for i in range(self._n - l * 2 + 1):
+                t[i] = p[i] if p[i] < p[i + l] else p[i + l]
 
     def query(self, left: int, right: int) -> int:
         """[left,right]区间的最小值"""
         assert 0 <= left <= right < self._n, f"{left}, {right}, {self._n}"
-        k = (right - left + 1).bit_length() - 1
-        cand1, cand2 = self._dp[k][left], self._dp[k][right - (1 << k) + 1]
+        right += 1
+        k = (right - left).bit_length() - 1
+        cand1, cand2 = self._dp[k][left], self._dp[k][right - (1 << k)]
         if cand1 < cand2:
             return cand1
         return cand2
@@ -69,26 +65,26 @@ Merger = Callable[[T, T], T]
 class SparseTable(Generic[T]):
     """自定义merger的ST表"""
 
-    __slots__ = "_n", "_dp", "_merger"
+    __slots__ = "_n", "_h", "_dp", "_op"
 
-    def __init__(self, arr: List[T], merger: Merger[T]):
-        n = len(arr)
-        size = n.bit_length()
-        self._n = n
-        self._merger = merger
-
-        dp = [[0] * n for _ in range(size)]
-        dp[0] = arr[:]  # type: ignore
-
-        for i in range(1, size):
-            for j in range(n - (1 << i) + 1):
-                dp[i][j] = merger(dp[i - 1][j], dp[i - 1][j + (1 << (i - 1))])  # type: ignore
-        self._dp = dp
+    def __init__(self, arr: List[T], op: Merger[T]):
+        self._op = op
+        self._n = len(arr)
+        self._h = self._n.bit_length()
+        self._dp = [[0] * self._n for _ in range(self._h)]
+        self._dp[0] = [a for a in arr]  # type: ignore
+        for k in range(1, self._h):
+            t, p = self._dp[k], self._dp[k - 1]
+            l = 1 << (k - 1)
+            for i in range(self._n - l * 2 + 1):
+                t[i] = op(p[i], p[i + l])  # type: ignore
 
     def query(self, left: int, right: int) -> T:
         """[left,right]区间的贡献值"""
-        k = (right - left + 1).bit_length() - 1
-        return self._merger(self._dp[k][left], self._dp[k][right - (1 << k) + 1])  # type: ignore
+        assert 0 <= left <= right < self._n, f"{left}, {right}, {self._n}"
+        right += 1
+        k = (right - left).bit_length() - 1
+        return self._op(self._dp[k][left], self._dp[k][right - (1 << k)])  # type: ignore
 
 
 if __name__ == "__main__":

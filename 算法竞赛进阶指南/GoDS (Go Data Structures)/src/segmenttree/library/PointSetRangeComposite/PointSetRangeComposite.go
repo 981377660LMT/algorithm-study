@@ -1,4 +1,9 @@
-package segmenttree
+// https://judge.yosupo.jp/problem/point_set_range_composite
+// 单点更新,区间聚合
+// 0 index a b  => 点index变为 a*x + b
+// 1 left right x  => 求从左到右 f(f(f(x))) mod 998244353的值
+
+package main
 
 import (
 	"bufio"
@@ -7,76 +12,79 @@ import (
 	"os"
 )
 
-// https://atcoder.jp/contests/practice2/tasks/practice2_l
-func demo() {
+const MOD int = 998244353
+
+func main() {
+
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	nums := make([]S, n)
-	for i := range nums {
-		var num int
-		fmt.Fscan(in, &num)
-		nums[i] = S{Zero: 1 - num, One: num}
-	}
 
-	tree := NewLazySegTree(nums)
+	initNums := make([]S, n)
+	for i := range initNums {
+		var a, b int
+		fmt.Fscan(in, &a, &b)
+		initNums[i] = S{mul: a, add: b}
+	}
+	tree := NewLazySegTree(initNums)
+
 	for i := 0; i < q; i++ {
-		var op uint8
-		var left, right int
-		fmt.Fscan(in, &op, &left, &right)
-		left--
-		if op == 1 {
-			tree.Update(left, right, true)
+		var op, index, mul, add, left, right, x int
+		fmt.Fscan(in, &op)
+		if op == 0 {
+			fmt.Fscan(in, &index, &mul, &add)
+			tree.Update(index, index+1, F{mul: mul, add: add})
 		} else {
-			fmt.Fprintln(out, tree.Query(left, right).Inversion)
+			fmt.Fscan(in, &left, &right, &x)
+			res := tree.Query(left, right)
+			fmt.Fprintln(out, (res.mul*x+res.add)%MOD)
 		}
 	}
+
 }
 
 // !线段树维护的值的类型
-type S = struct{ Zero, One, Inversion int }
+type S = struct{ mul, add int }
 
 // !更新操作的值的类型/懒标记的值的类型
-type F = bool
+type F = struct{ mul, add int }
 
-// !线段树维护的值的幺元.
+// !线段树维护的值的幺元
 //  alias: e
-func (tree *LazySegTree) dataUnit() S { return S{} }
+func (tree *LazySegTree) dataUnit() S { return S{mul: 1} }
 
 // !更新操作/懒标记的幺元
 //  alias: id
-func (tree *LazySegTree) lazyUnit() F { return false }
+func (tree *LazySegTree) lazyUnit() F { return F{mul: 1} }
 
 // !合并左右区间的值
 //  alias: op
 func (tree *LazySegTree) mergeChildren(left, right S) S {
 	return S{
-		Zero:      left.Zero + right.Zero,
-		One:       left.One + right.One,
-		Inversion: left.Inversion + right.Inversion + left.One*right.Zero,
+		mul: (left.mul * right.mul) % MOD,
+		add: (left.add*right.mul + right.add) % MOD,
 	}
 }
 
 // !父结点的懒标记更新子结点的值
 //  alias: mapping
 func (tree *LazySegTree) updateData(lazy F, data S) S {
-	if !lazy {
+	if lazy == tree.lazyUnit() {
 		return data
 	}
-	return S{
-		Zero:      data.One,
-		One:       data.Zero,
-		Inversion: data.One*data.Zero - data.Inversion,
-	}
+	return lazy
 }
 
 // !合并父结点的懒标记和子结点的懒标记
 //  alias: composition
 func (tree *LazySegTree) updateLazy(parentLazy, childLazy F) F {
-	return (parentLazy && !childLazy) || (!parentLazy && childLazy)
+	if parentLazy == tree.lazyUnit() {
+		return childLazy
+	}
+	return parentLazy
 }
 
 func NewLazySegTree(
@@ -189,85 +197,6 @@ func (tree *LazySegTree) Update(left, right int, f F) {
 			tree.pushUp((right - 1) >> i)
 		}
 	}
-}
-
-// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (tree *LazySegTree) MinLeft(right int, predicate func(data S) bool) int {
-	if right == 0 {
-		return 0
-	}
-
-	right += tree.size
-	for i := tree.log; i >= 1; i-- {
-		tree.pushDown((right - 1) >> i)
-	}
-
-	res := tree.dataUnit()
-	for {
-		right--
-		for right > 1 && right&1 != 0 {
-			right >>= 1
-		}
-
-		if !predicate(tree.mergeChildren(tree.data[right], res)) {
-			for right < tree.size {
-				tree.pushDown(right)
-				right = right*2 + 1
-				if predicate(tree.mergeChildren(tree.data[right], res)) {
-					res = tree.mergeChildren(tree.data[right], res)
-					right--
-				}
-			}
-
-			return right + 1 - tree.size
-		}
-
-		res = tree.mergeChildren(tree.data[right], res)
-		if (right & -right) == right {
-			break
-		}
-	}
-
-	return 0
-}
-
-// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-func (tree *LazySegTree) MaxRight(left int, predicate func(data S) bool) int {
-	if left == tree.n {
-		return tree.n
-	}
-
-	left += tree.size
-	for i := tree.log; i >= 1; i-- {
-		tree.pushDown(left >> i)
-	}
-
-	res := tree.dataUnit()
-	for {
-		for left%2 == 0 {
-			left >>= 1
-		}
-		if !predicate(tree.mergeChildren(res, tree.data[left])) {
-			for left < tree.size {
-				tree.pushDown(left)
-				left *= 2
-				if predicate(tree.mergeChildren(res, tree.data[left])) {
-					res = tree.mergeChildren(res, tree.data[left])
-					left--
-				}
-			}
-
-			return left - tree.size
-		}
-
-		res = tree.mergeChildren(res, tree.data[left])
-		left++
-		if (left & -left) == left {
-			break
-		}
-	}
-
-	return tree.n
 }
 
 func (tree *LazySegTree) pushUp(root int) {

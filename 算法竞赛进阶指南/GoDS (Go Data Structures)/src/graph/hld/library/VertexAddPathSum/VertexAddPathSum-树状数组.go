@@ -1,20 +1,55 @@
-package hld
+// VertexAddPathSum
+// https://judge.yosupo.jp/problem/vertex_add_path_sum
+// 单点加/路径和查询
+// 0 vertex add => 顶点加
+// 1 root1 root2 => 路径和查询
+package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 )
 
-// 树链剖分/重链剖分 (HLD, Heavy Light Decomposition）
-//  性质：
-//    1.树上每个结点都属于且仅属于一条重链
-//    2.从根结点到任意结点所经过的重链数为 O(logn)，轻边数为 O(logn)
-//    3.如果边(u,v),为轻边,那么Size(v)≤Size(u)/2。
-// 树链剖分详解 https://www.cnblogs.com/zwfymqz/p/8094500.html
-// 树链剖分详解 https://www.luogu.com.cn/blog/communist/shu-lian-pou-fen-yang-xie
+func main() {
+
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+
+	values := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &values[i])
+	}
+
+	tree := make([][]int, n)
+	for i := 0; i < n-1; i++ {
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
+	}
+
+	hld := HeavyLightDecomposition(n, 0, tree, values)
+	for i := 0; i < q; i++ {
+		var op, vertex, add, root1, root2 int
+		fmt.Fscan(in, &op)
+		if op == 0 {
+			fmt.Fscan(in, &vertex, &add)
+			hld.UpdatePath(vertex, vertex, add)
+		} else {
+			fmt.Fscan(in, &root1, &root2)
+			fmt.Fprintln(out, hld.QueryPath(root1, root2))
+		}
+	}
+}
 
 type HLD struct {
-	UpdatePath    func(root1, root2 int, add int)
-	QueryPath     func(root1, root2 int) int
+	UpdatePath    func(root1 int, root2 int, add int)
+	QueryPath     func(root1 int, root2 int) int
 	UpdateSubtree func(root int, add int)
 	QuerySubtree  func(root int) int
 	GetHeavyPath  func(start int) []int

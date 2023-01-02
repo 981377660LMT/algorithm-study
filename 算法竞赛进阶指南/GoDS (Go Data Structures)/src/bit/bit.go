@@ -87,30 +87,30 @@ func newSliceBIT(n int) *sliceBIT {
 	}
 }
 
+// left>=1
 func (bit *mapBIT) Add(left, right, delta int) {
 	bit.add(left, delta)
 	bit.add(right+1, -delta)
 }
 
+// left>=1
 func (bit *sliceBIT) Add(left, right, delta int) {
 	bit.add(left, delta)
 	bit.add(right+1, -delta)
 }
 
+// left>=1
 func (bit *mapBIT) Query(left, right int) int {
 	return bit.query(right) - bit.query(left-1)
 }
 
+// left>=1
 func (bit *sliceBIT) Query(left, right int) int {
 	return bit.query(right) - bit.query(left-1)
 }
 
+// index >= 1
 func (bit *mapBIT) add(index, delta int) {
-	if index <= 0 {
-		errorInfo := fmt.Sprintf("index must be greater than 0, but got %d", index)
-		panic(errorInfo)
-	}
-
 	rawIndex := index
 	for index <= bit.n {
 		bit.tree1[index] += delta
@@ -119,12 +119,8 @@ func (bit *mapBIT) add(index, delta int) {
 	}
 }
 
+// index >= 1
 func (bit *sliceBIT) add(index, delta int) {
-	if index <= 0 {
-		errorInfo := fmt.Sprintf("index must be greater than 0, but got %d", index)
-		panic(errorInfo)
-	}
-
 	rawIndex := index
 	for index <= bit.n {
 		bit.tree1[index] += delta
@@ -137,7 +133,6 @@ func (bit *mapBIT) query(index int) int {
 	if index > bit.n {
 		index = bit.n
 	}
-
 	rawIndex := index
 	res := 0
 	for index > 0 {
@@ -151,7 +146,6 @@ func (bit *sliceBIT) query(index int) int {
 	if index > bit.n {
 		index = bit.n
 	}
-
 	rawIndex := index
 	res := 0
 	for index > 0 {

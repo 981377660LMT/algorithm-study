@@ -33,14 +33,16 @@ const check = (factor: number): void => {
     bad--
   }
 }
-const windowManager: WindowManager<number, boolean> = {
-  add(value) {
+const windowManager: WindowManager<boolean> = {
+  add(index) {
+    const value = nums[index]
     for (const [factor, count] of primeFactors[value]) {
       counts[factor] += count
       check(factor)
     }
   },
-  remove(value) {
+  remove(index) {
+    const value = nums[index]
     for (const [factor, count] of primeFactors[value]) {
       counts[factor] -= count
       check(factor)
@@ -50,7 +52,7 @@ const windowManager: WindowManager<number, boolean> = {
     return bad === 0
   }
 }
-const moAlgo = useMoAlgo(nums, windowManager)
+const moAlgo = useMoAlgo(n, q, windowManager)
 
 for (let _ = 0; _ < q; _++) {
   let [left, right] = input().split(' ').map(Number)

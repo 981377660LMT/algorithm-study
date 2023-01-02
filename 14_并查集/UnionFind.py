@@ -242,3 +242,59 @@ class UnionFindGraph:
 
     def __len__(self) -> int:
         return self.part
+
+
+class ATCRevocableUnionFindArray:
+    """维护分量之和的可撤销并查集"""
+
+    __slots__ = ("n", "parentSize", "sum", "history")
+
+    def __init__(self, n: int):
+        self.n = n
+        self.parentSize = [-1] * n
+        self.sum = [0] * n
+        self.history = []
+
+    def addSum(self, i: int, delta: int):
+        """第i个元素的值加上delta"""
+        x = i
+        while x >= 0:
+            self.sum[x] += delta
+            x = self.parentSize[x]
+
+    def union(self, a: int, b: int) -> bool:
+        x = self.find(a)
+        y = self.find(b)
+        if -self.parentSize[x] < -self.parentSize[y]:
+            x, y = y, x
+        self.history.append((x, self.parentSize[x]))
+        self.history.append((y, self.parentSize[y]))
+        if x == y:
+            return False
+        self.parentSize[x] += self.parentSize[y]
+        self.parentSize[y] = x
+        self.sum[x] += self.sum[y]
+        return True
+
+    def find(self, a: int) -> int:
+        x = a
+        while self.parentSize[x] >= 0:
+            x = self.parentSize[x]
+        return x
+
+    def isConnected(self, a: int, b: int) -> bool:
+        return self.find(a) == self.find(b)
+
+    def revocate(self) -> bool:
+        if not self.history:
+            return False
+        y, py = self.history.pop()
+        x, px = self.history.pop()
+        if self.parentSize[x] != px:
+            self.sum[x] -= self.sum[y]
+        self.parentSize[x] = px
+        self.parentSize[y] = py
+        return True
+
+    def getComponentSum(self, i:int) -> int:
+        return self.sum[self.find(i)]

@@ -27,17 +27,20 @@ const { input } = useInput()
 
 const n = Number(input())
 const nums = input().split(' ').map(Number)
+const q = Number(input())
 
 // 维护区间的api
 const manager = {
   pair: 0,
   counter: new Uint32Array(1e5 + 10),
-  add(num: number) {
+  add(index: number) {
+    const num = nums[index]
     this.pair -= Math.floor(this.counter[num] / 2)
     this.counter[num]++
     this.pair += Math.floor(this.counter[num] / 2)
   },
-  remove(num: number) {
+  remove(index: number) {
+    const num = nums[index]
     this.pair -= Math.floor(this.counter[num] / 2)
     this.counter[num]--
     this.pair += Math.floor(this.counter[num] / 2)
@@ -47,9 +50,8 @@ const manager = {
   }
 }
 
-const moAlgo = useMoAlgo(nums, manager)
+const moAlgo = useMoAlgo(n, q, manager)
 
-const q = Number(input())
 for (let i = 0; i < q; i++) {
   let [left, right] = input().split(' ').map(Number)
   left--, right--

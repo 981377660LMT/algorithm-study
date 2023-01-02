@@ -1,5 +1,8 @@
+// https://judge.yosupo.jp/problem/range_affine_range_sum
 // !仿射变换 Range Affine Range Query
 // 区间赋值 区间加 区间和查询
+// 0 left right mul add => 区间[left,right)的每个元素都乘以mul,加上add
+// 1 left right => 求区间[left,right)的和
 
 package main
 
@@ -10,45 +13,36 @@ import (
 	"os"
 )
 
-const INF int = 1e18
+const MOD int = 998244353
 
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
-	nums := make([]S, n)
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+
+	initNums := make([]S, n)
 	for i := 0; i < n; i++ {
 		var num int
 		fmt.Fscan(in, &num)
-		nums[i] = S{size: 1, sum: num}
+		initNums[i] = S{sum: num, size: 1}
 	}
+	tree := NewLazySegTree(initNums)
 
-	tree := NewLazySegTree(nums)
-
-	var q int
-	fmt.Fscan(in, &q)
 	for i := 0; i < q; i++ {
-		var op int
+		var op, left, right, mul, add int
 		fmt.Fscan(in, &op)
-		if op == 1 {
-			var x int
-			fmt.Fscan(in, &x)
-			tree.Update(0, n, F{mul: 0, add: x}) // 区间赋值
-		} else if op == 2 {
-			var i, x int
-			fmt.Fscan(in, &i, &x)
-			i--
-			tree.Update(i, i+1, F{mul: 1, add: x}) // 单点加
+		if op == 0 {
+			fmt.Fscan(in, &left, &right, &mul, &add) // 0<=left<right<=n
+			tree.Update(left, right, F{mul: mul, add: add})
 		} else {
-			var i int
-			fmt.Fscan(in, &i)
-			i--
-			fmt.Fprintln(out, tree.Query(i, i+1).sum) // 单点查询
+			fmt.Fscan(in, &left, &right) // 0<=left<right<=n
+			fmt.Fprintln(out, tree.Query(left, right).sum)
 		}
 	}
+
 }
 
 type S = struct{ size, sum int }
@@ -59,21 +53,21 @@ func (tree *LazySegTree) id() F { return F{mul: 1} }
 func (tree *LazySegTree) op(left, right S) S {
 	return S{
 		size: left.size + right.size,
-		sum:  left.sum + right.sum,
+		sum:  (left.sum + right.sum) % MOD,
 	}
 }
 
 func (tree *LazySegTree) mapping(lazy F, data S) S {
 	return S{
 		size: data.size,
-		sum:  data.sum*lazy.mul + data.size*lazy.add,
+		sum:  (data.sum*lazy.mul + data.size*lazy.add) % MOD,
 	}
 }
 
 func (tree *LazySegTree) composition(parentLazy, childLazy F) F {
 	return F{
-		mul: parentLazy.mul * childLazy.mul,
-		add: parentLazy.mul*childLazy.add + parentLazy.add,
+		mul: (parentLazy.mul * childLazy.mul) % MOD,
+		add: (parentLazy.mul*childLazy.add + parentLazy.add) % MOD,
 	}
 }
 

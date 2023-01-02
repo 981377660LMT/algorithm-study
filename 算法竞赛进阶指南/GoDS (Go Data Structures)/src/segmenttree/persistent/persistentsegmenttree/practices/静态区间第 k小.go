@@ -1,5 +1,5 @@
 // https://www.luogu.com.cn/problem/P3834
-
+// 可持久化线段树
 package main
 
 import (

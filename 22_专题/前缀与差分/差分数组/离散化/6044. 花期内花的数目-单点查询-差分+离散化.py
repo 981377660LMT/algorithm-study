@@ -1,21 +1,8 @@
-from typing import Any, List, TypeVar
+from typing import List
 from bisect import bisect_right
 from collections import defaultdict
 from itertools import accumulate
-from functools import reduce
-from operator import iconcat
 from 紧离散化模板 import Discretizer
-
-
-T = TypeVar("T", Any, str, bytes, int, float, complex, bool, tuple, list, dict, set)
-
-
-def flat(arr: List[List[T]]) -> List[T]:
-    """二维数组flat
-
-    todo : Nested list type
-    """
-    return reduce(iconcat, arr, [])
 
 
 # 10^9值域 差分数组
@@ -36,7 +23,14 @@ class Solution:
 
     def fullBloomFlowers2(self, flowers: List[List[int]], persons: List[int]) -> List[int]:
         """单点查询时：如果同时也把person添加到离散化,就不用二分查找了/不用开字典了"""
-        D = Discretizer(persons + flat(flowers))
+        D = Discretizer()
+        for left, right in flowers:
+            D.add(left)
+            D.add(right)
+        for p in persons:
+            D.add(p)
+        D.build()
+
         diff = [0] * (len(D) + 10)
         for left, right in flowers:
             diff[D.get(left)] += 1

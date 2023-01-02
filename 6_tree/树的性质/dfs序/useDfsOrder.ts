@@ -36,7 +36,7 @@ function useDfsOrder(n: number, tree: number[][], root = 0) {
   }
 
   /**
-   * @returns curRoot是否是child的祖先
+   * @returns root1是否是root2的祖先
    * @description 应用:枚举边时给树的边定向
    *
    * ```ts
@@ -45,11 +45,11 @@ function useDfsOrder(n: number, tree: number[][], root = 0) {
    *  }
    * ```
    */
-  function isAncestor(curRoot: number, child: number): boolean {
-    const left1 = ins[curRoot]
-    const right1 = outs[curRoot]
-    const left2 = ins[child]
-    const right2 = outs[child]
+  function isAncestor(root1: number, root2: number): boolean {
+    const left1 = ins[root1]
+    const right1 = outs[root1]
+    const left2 = ins[root2]
+    const right2 = outs[root2]
     return left1 <= left2 && right2 <= right1
   }
 

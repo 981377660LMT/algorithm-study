@@ -18,11 +18,13 @@ import (
 	"time"
 )
 
+const INF int = 1e18
+
 func main() {
-	const INF int = 1e18
+
 	nums := make([]Element, 1e5)
 	for i := range nums {
-		nums[i] = Element(i)
+		nums[i] = i
 	}
 
 	// !区间更新：加上一个数，区间查询：区间最小值

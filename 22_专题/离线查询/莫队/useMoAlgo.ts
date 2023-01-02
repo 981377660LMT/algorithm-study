@@ -1,7 +1,7 @@
-interface WindowManager<T, Q> {
+interface WindowManager<Q> {
   // 使用 `this:void` 禁止在外部调用this
-  add(this: void, value: T, index: number, qLeft: number, qRight: number): void
-  remove(this: void, value: T, index: number, qLeft: number, qRight: number): void
+  add(this: void, index: number, delta: -1 | 1): void
+  remove(this: void, index: number, delta: -1 | 1): void
   query(this: void, qLeft: number, qRight: number): Q
 }
 
@@ -11,20 +11,21 @@ type Query = [qIndex: number, qLeft: number, qRight: number]
  * 静态查询区间的莫队算法
  * 左端点分桶，右端点排序
  *
- * @param arrayLike 查询的原数据
- * @param windowManager 区间的维护方式
+ * @param n 数组长度
+ * @param q 查询区间个数
+ * @param windowManager 窗口管理器
  * @complexity `O(n*sqrt(q))`
  */
-function useMoAlgo<T, Q>(arrayLike: Readonly<ArrayLike<T>>, windowManager: WindowManager<T, Q>) {
-  const n = arrayLike.length
-  const chunkSize = Math.ceil(Math.sqrt(n)) // const chunkSize = Math.ceil(n / Math.sqrt(2 * q))
+function useMoAlgo<Q>(n: number, q: number, windowManager: WindowManager<Q>) {
+  const isqrt = Math.floor(Math.sqrt(q))
+  const chunkSize = Math.max(1, Math.floor(n / isqrt))
   const buckets = Array.from<unknown, Query[]>({ length: Math.floor(n / chunkSize) + 1 }, () => [])
   let queryOrder = 0
 
   /**
    * 添加查询区间
    *
-   * 0 <= left <= right < {@link arrayLike}.length
+   * 0 <= left <= right < {@link n}
    */
   function addQuery(left: number, right: number): void {
     const index = Math.floor(left / chunkSize)
@@ -53,26 +54,24 @@ function useMoAlgo<T, Q>(arrayLike: Readonly<ArrayLike<T>>, windowManager: Windo
         const qLeft = bucket[j][1]
         const qRight = bucket[j][2]
 
-        // !窗口收缩
-        while (right > qRight) {
-          right--
-          remove(arrayLike[right], right, qLeft, qRight - 1)
-        }
-
-        while (left < qLeft) {
-          remove(arrayLike[left], left, qLeft, qRight - 1)
-          left++
-        }
-
         // !窗口扩张
+        while (left > qLeft) {
+          left--
+          add(left, -1)
+        }
         while (right < qRight) {
-          add(arrayLike[right], right, qLeft, qRight - 1)
+          add(right, 1)
           right++
         }
 
-        while (left > qLeft) {
-          left--
-          add(arrayLike[left], left, qLeft, qRight - 1)
+        // !窗口收缩
+        while (left < qLeft) {
+          remove(left, 1)
+          left++
+        }
+        while (right > qRight) {
+          right--
+          remove(right, -1)
         }
 
         res[qIndex] = query(qLeft, qRight - 1)

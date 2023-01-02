@@ -158,6 +158,8 @@ def countPrimes(n: int) -> int:
     """
     计算不超过n的素数个数
     1<=n<=1e11
+
+    质数的数目为 π(n) = O(n/logn)
     """
     if n < 2:
         return 0
