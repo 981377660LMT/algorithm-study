@@ -1,3 +1,12 @@
+// https://judge.yosupo.jp/problem/persistent_unionfind
+// 初始版本为-1
+// 给定n个顶点的无向图,初始时都不连通
+// 处理q个操作:
+// 0 versioni u v => 在版本versioni上合并u和v
+// 1 versioni u v => 在版本versioni上询问u和v是否连通 输出1/0
+// n,q<=2e5
+// 0<=version<i
+
 package main
 
 import (
@@ -5,13 +14,6 @@ import (
 	"fmt"
 	"os"
 )
-
-// https://www.luogu.com.cn/problem/P3402
-// 给定n个集合，第i个集合内初始状态下只有一个数,为i。
-// 有q次操作。操作分为3种:
-// 1 a b 合并a,b所在集合;
-// 2 k 回到第k次操作(执行三种操作中的任意一种都记为一次操作）之后的状态;
-// 3 a b 询问a,b是否属于同一集合，如果是则输出1，否则输出0。
 
 func main() {
 	in := bufio.NewReader(os.Stdin)
@@ -22,26 +24,24 @@ func main() {
 	fmt.Fscan(in, &n, &q)
 	git := make([]*Node, q+1)
 	git[0] = Build(1, n)
-	for i := 1; i <= q; i++ {
-		var op, x, y int
-		fmt.Fscan(in, &op, &x)
-		if op == 1 {
-			fmt.Fscan(in, &y)
-			newNode := git[i-1].Union(x, y)
-			git[i] = newNode
-		} else if op == 2 {
-			git[i] = git[x] // 更新版本
+
+	for i := 0; i < q; i++ {
+		var op, version, u, v int
+		fmt.Fscan(in, &op, &version, &u, &v)
+		version++
+		u++
+		v++
+		if op == 0 {
+			newUnionFind := git[version].Union(u, v)
+			git[i+1] = newUnionFind
 		} else {
-			fmt.Fscan(in, &y)
-			if git[i-1].IsConnected(x, y) {
+			if git[version].IsConnected(u, v) {
 				fmt.Fprintln(out, 1)
 			} else {
 				fmt.Fprintln(out, 0)
 			}
-			git[i] = git[i-1] // 更新版本
 		}
 	}
-
 }
 
 type Node struct {
@@ -72,6 +72,7 @@ func Build(left, right int) *Node {
 }
 
 // !启发式合并：把深度小的合并到深度大的。若二者深度一样，则合并后的深度加一
+//  1<=x,y<=n
 func (o *Node) Union(x, y int) *Node {
 	from, to := o.Find(x), o.Find(y)
 	if from.parent == to.parent {
@@ -87,6 +88,7 @@ func (o *Node) Union(x, y int) *Node {
 	return p
 }
 
+//  1<=x<=n
 func (o *Node) Find(x int) *Node {
 	f := o.find(x)
 	if f.parent == x {
@@ -95,6 +97,7 @@ func (o *Node) Find(x int) *Node {
 	return o.Find(f.parent)
 }
 
+//  1<=x,y<=n
 func (o *Node) IsConnected(x, y int) bool {
 	return o.Find(x).parent == o.Find(y).parent
 }

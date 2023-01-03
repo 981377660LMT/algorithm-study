@@ -1,3 +1,5 @@
+"""Xor Trie 最大异或前缀树"""
+
 from typing import List
 
 
@@ -28,6 +30,22 @@ class BinaryTrie:
         allow_multiple_elements=True,
         add_query_limit=10**6,
     ):
+        """
+        Example:
+
+        ```
+        n = len(nums)
+        max_log = max(nums).bit_length()
+        bt = BinaryTrie(add_query_limit=n, max_log=max_log, allow_multiple_elements=True)
+        for num in nums:
+            bt.add(num)
+        res = 0
+        for num in nums:
+            bt.xor_all(num)
+            res += bt.bisect_right(high) - bt.bisect_left(low)
+            bt.xor_all(num)
+        ```
+        """
         self.max_log = max_log
         self.x_end = 1 << max_log
         self.v_list = [0] * (max_log + 1)
