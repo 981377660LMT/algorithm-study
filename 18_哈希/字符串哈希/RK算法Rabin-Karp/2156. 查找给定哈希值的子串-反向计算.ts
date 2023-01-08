@@ -12,12 +12,13 @@ function subStrHash(
   hashValue: number
 ): string {
   s = s.split('').reverse().join('')
-  const hasher = useStringHasher(s, modulo, power, 96)
+  const ords = s.split('').map(c => c.codePointAt(0)!)
+  const hasher = useStringHasher(ords, modulo, power, 96)
 
   let res = 0
   for (let i = 0; i + k <= s.length; i++) {
     const hash = hasher(i, i + k)
-    if (Number(hash) === hashValue) res = i
+    if (Number(hash) === hashValue) res = i // 反过来的第一个就是找到最后一个
   }
 
   return s

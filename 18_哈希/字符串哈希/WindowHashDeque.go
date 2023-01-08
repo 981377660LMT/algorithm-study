@@ -1,32 +1,95 @@
-// !用两个 slice 头对头拼在一起实现(每个slice头部只删除元素，不添加元素，互相弥补劣势)
-// https://github.dev/EndlessCheng/codeforces-go/blob/master/misc/atcoder/abc274/e
+// 滑动窗口哈希值
 
-package arraydeque
+package main
 
 import (
 	"fmt"
 	"strings"
 )
 
-func main() {
-	queue := NewArrayDeque(10)
-	queue.Append(1)
-	queue.Append(2)
-	queue.Pop()
-	queue.Append(4)
+type WindowHash struct {
+	mod, base, hash, inv int
+	deque                *ArrayDeque
+}
 
-	fmt.Println(queue)
-	queue.ForEach(func(value E, index int) {
-		fmt.Println(value, index)
-	})
+func NewWindowHashDeque(ords []int, mod, base int) *WindowHash {
+	w := &WindowHash{
+		mod:   mod,
+		base:  base,
+		inv:   modInv(base, mod),
+		deque: NewArrayDeque(len(ords)),
+	}
+	for _, ord := range ords {
+		w.Append(ord)
+	}
+	return w
+}
 
-	fmt.Println(queue.At(0))
-	fmt.Println(queue.At(-1))
+func (w *WindowHash) Query() int {
+	return w.hash
+}
 
-	fmt.Println(queue.Pop())
-	fmt.Println(queue.Pop())
-	fmt.Println(queue.Pop())
-	fmt.Println(queue.Pop())
+func (w *WindowHash) Append(ord int) {
+	w.hash = (w.hash*w.base + ord) % w.mod
+	w.deque.Append(ord)
+}
+
+func (w *WindowHash) Pop() {
+	w.hash = ((w.hash-w.deque.At(w.deque.Len()-1))%w.mod + w.mod) * w.inv % w.mod
+	w.deque.Pop()
+}
+
+func (w *WindowHash) AppendLeft(ord int) {
+	pow := Pow(w.base, w.deque.Len(), w.mod)
+	w.hash = (w.hash + ord*pow) % w.mod
+	w.deque.AppendLeft(ord)
+}
+
+func (w *WindowHash) PopLeft() {
+	pow := Pow(w.base, w.deque.Len()-1, w.mod)
+	w.hash = ((w.hash-w.deque.At(0)*pow)%w.mod + w.mod) % w.mod
+	w.deque.PopLeft()
+}
+
+func (w *WindowHash) Len() int {
+	return w.deque.Len()
+}
+
+func (w *WindowHash) String() string {
+	return fmt.Sprintf("%v", w.deque)
+}
+
+func Pow(base, exp, mod int) int {
+	if exp == -1 {
+		return modInv(base, mod)
+	}
+
+	base %= mod
+	res := 1
+	for ; exp > 0; exp >>= 1 {
+		if exp&1 == 1 {
+			res = res * base % mod
+		}
+		base = base * base % mod
+	}
+	return res
+}
+
+func exgcd(a, b int) (gcd, x, y int) {
+	if b == 0 {
+		return a, 1, 0
+	}
+	gcd, y, x = exgcd(b, a%b)
+	y -= a / b * x
+	return
+}
+
+func modInv(a, mod int) int {
+	gcd, x, _ := exgcd(a, mod)
+	if gcd != 1 {
+		panic(fmt.Sprintf("no inverse element for %d", a))
+	}
+	return (x%mod + mod) % mod
 }
 
 type E = int
