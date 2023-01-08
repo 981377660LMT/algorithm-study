@@ -13,7 +13,7 @@
 # 总结:
 # !两个pq来回倒
 # !free:维护空闲的cpu，存储 (cpu)
-# !busy:维护运行任务的cpu，存储 (endTime,,cpu)，早结束早空闲
+# !busy:维护运行任务的cpu，存储 (endTime,cpu)，早结束早空闲
 
 from heapq import heappop, heappush
 from typing import List

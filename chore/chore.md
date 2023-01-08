@@ -273,3 +273,82 @@ const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()
   E:\test\js\算法\js\js-algorithm\20\_杂题\atc 競プロ\AtCoder Beginner Contest\243\G - Sqrt.py
   > double 精度表示不了 int64 范围的，double 范围够大，但是 IEEE 754 double 尾数是 52 位,可以表示 53 个 bit，int64 有 63 个 bit
 - 力扣代码长度上限是 100KB
+
+- 排序后再二重循环会快很多(cache,和指令缓存有关,当数组中的元素是随机的，分支预测就无法有效工作，而当数组元素都是是顺序的，分支预测器会动态地根据历史命中数据对未来进行预测，这样命中率就会很高。)
+  https://leetcode.cn/problems/count-pairs-with-xor-in-a-range/
+
+  ```js
+  /**
+   * @param {number[]} nums
+   * @param {number} low
+   * @param {number} high
+   * @return {number}
+   */
+  var countPairs = function (nums, low, high) {
+    let res = 0
+    // nums.sort((a,b)=>a-b);
+    for (let i = 0; i < nums.length - 1; i++) {
+      for (let j = i + 1; j < nums.length; j++) {
+        let sum = nums[i] ^ nums[j]
+        if (sum >= low && sum <= high) {
+          res++
+        }
+      }
+    }
+    return res
+  }
+  ```
+
+  加了排序后,从 7276 ms 变成了 2188 ms
+  https://xiaolincoding.com/os/1_hardware/how_to_make_cpu_run_faster.html#cpu-cache-%E6%9C%89%E5%A4%9A%E5%BF%AB
+
+- 多重循环中 javascript 向上查找局部变量会慢一些(400ms)
+
+  ```JS
+  /**
+   * @param {number[]} nums
+   * @param {number} low
+   * @param {number} high
+   * @return {number}
+   */
+  function countPairs(nums, low, high) {
+    let res = 0
+    nums.sort((a, b) => a - b)
+    for (let i = 0; i < nums.length - 1; i++) {
+      for (let j = i + 1; j < nums.length; j++) {
+        const xor = nums[i] ^ nums[j]
+        if (xor >= low && xor <= high) {
+          res++
+        }
+      }
+    }
+    return res
+  }
+
+
+  /**
+   * @param {number[]} nums
+   * @param {number} low
+   * @param {number} high
+   * @return {number}
+   */
+  function countPairs(nums, low, high) {
+    const n = nums.length
+    let res = 0
+    nums.sort((a, b) => a - b)
+    for (let i = 0; i < n - 1; i++) {
+      const a = nums[i]
+      for (let j = i + 1; j < n; j++) {
+        const xor = a ^ nums[j]
+        if (xor >= low && xor <= high) {
+          res++
+        }
+      }
+    }
+    return res
+  }
+
+  ```
+
+  上面两个函数,第一个函数比第二个函数快 400ms，用 **nums.length 不声明局部变量的写法会快一些**
+  这个似乎只有 js 特有,java 和 golang 查找局部变量更快,可能是 js 查变量比较慢(

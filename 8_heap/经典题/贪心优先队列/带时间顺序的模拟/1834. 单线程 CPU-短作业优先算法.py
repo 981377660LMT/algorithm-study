@@ -34,18 +34,18 @@ class Solution:
 
         ei = 0
         pq = []
-        time = 0  # !因为不是先来先服务，所以要维护一个离散的时间戳
+        curTime = 0  # !因为不是先来先服务，所以要维护一个离散的时间戳
         while len(res) < n:
             # 1.在每一个时间点，我们首先将当前时间点开始的所有任务加入小根堆，
-            while ei < n and events[ei][0] <= time:
-                duration, taskId = events[ei][1], events[ei][2]
-                heappush(pq, (duration, taskId))
+            while ei < n and events[ei][0] <= curTime:
+                duration, id = events[ei][1], events[ei][2]
+                heappush(pq, (duration, id))
                 ei += 1
             # 2.从任务中选择一个最短的的去参加。
             if pq:
-                duration, taskId = heappop(pq)
-                time += duration
-                res.append(taskId)
+                duration, id = heappop(pq)
+                curTime += duration
+                res.append(id)
             elif ei < n:  # 3.如果没有任务，那么就跳到下一个任务开始的时间点
-                time = events[ei][0]
+                curTime = events[ei][0]
         return res

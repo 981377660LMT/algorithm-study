@@ -1,3 +1,5 @@
+// 给你无向 连通 图中一个节点的引用，请你返回该图的 深拷贝（克隆）。
+
 class Node {
   val: number
   neighbors: Node[]
@@ -13,20 +15,19 @@ class Node {
  * 无向图是一个简单图，这意味着图中没有重复的边，也没有自环
  */
 function cloneGraph(node: Node | null): Node | null {
-  const record = new WeakMap<Node, Node>()
+  const visited = new WeakMap<Node, Node>()
   return dfs(node)
 
   /**
-   *
    * @param node 根据实际的node返回克隆的node
    * @returns
    */
   function dfs(node: Node | null): Node | null {
     if (!node) return null
-    if (record.has(node)) return record.get(node)!
+    if (visited.has(node)) return visited.get(node)!
 
     const res = new Node(node.val, [])
-    record.set(node, res)
+    visited.set(node, res)
     for (const next of node.neighbors) {
       res.neighbors.push(dfs(next)!) // 将临边的克隆也加入克隆的临边
     }

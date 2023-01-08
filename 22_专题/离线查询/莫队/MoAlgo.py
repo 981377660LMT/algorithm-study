@@ -2,11 +2,10 @@ from typing import Generic, List, TypeVar
 from math import sqrt
 
 
-V = TypeVar("V")  # 区间元素类型
 Q = TypeVar("Q")  # 每个查询的返回值类型
 
 
-class MoAlgo(Generic[V, Q]):
+class MoAlgo(Generic[Q]):
 
     """
     莫队算法模板

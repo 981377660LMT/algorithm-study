@@ -1,5 +1,5 @@
 // 计算平面中所有 rectangles 所覆盖的 总面积 。任何被两个或多个矩形覆盖的区域应只计算 一次 。
-// 返回 总面积 。因为答案可能太大，返回 1e9 + 7 的 模 。
+// 返回 总面积 。
 // https://www.luogu.com.cn/problem/P5490 850. 矩形面积 II
 // !本题线段树非常特殊
 // !1.叶子结点也要pushUp 因为节点值并不全由子节点决定 还与本身有关
@@ -15,8 +15,6 @@ import (
 func main() {
 	fmt.Println(rectangleArea([][]int{{0, 0, 2, 2}, {1, 0, 2, 3}, {1, 0, 3, 1}}))
 }
-
-const MOD int = 1e9 + 7
 
 type Event struct {
 	x, y1, y2 int

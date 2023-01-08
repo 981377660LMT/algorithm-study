@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	query := CreateSparseTable([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, func(a, b int) int {
+	query := NewSparseTable([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, func(a, b int) int {
 		if a > b {
 			return a
 		}
@@ -22,7 +22,7 @@ func main() {
 // SparseTable 稀疏表: st[j][i] 表示区间 [i, i+2^j-1] 的贡献值
 //   query: 查询 [`left`,`right`] 闭区间的贡献值
 //     0 <= left <= right < len(nums)
-func CreateSparseTable(nums []int, op func(int, int) int) (query func(int, int) int) {
+func NewSparseTable(nums []int, op func(int, int) int) (query func(int, int) int) {
 	n := len(nums)
 	size := bits.Len(uint(n))
 	dp := make([][]int, size)

@@ -3,7 +3,6 @@
 from collections import defaultdict
 from typing import List
 
-
 class Solution:
     def totalFruit(self, fruits: List[int]) -> int:
         res, left, n = 0, 0, len(fruits)

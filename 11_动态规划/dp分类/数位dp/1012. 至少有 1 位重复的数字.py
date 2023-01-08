@@ -31,7 +31,7 @@ def cal(upper: int) -> int:
     return res
 
 
-# 给定正整数 n，返回在 [1, n] 范围内具有 至少 1 位 重复数字的正整数的个数。
+# !给定正整数 n，返回在 [1, n] 范围内具有 至少 1 位 重复数字的正整数的个数。
 class Solution:
     def numDupDigitsAtMostN(self, n: int) -> int:
         """给定正整数 n，返回在 [1, n] 范围内具有 至少 1 位 重复数字的正整数的个数。"""

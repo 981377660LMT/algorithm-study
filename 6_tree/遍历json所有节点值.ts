@@ -5,7 +5,7 @@ interface Dict<V = any> {
 // 深度优先
 const json = {
   a: { b: { c: 1 } },
-  d: [1, 2],
+  d: [1, 2]
 }
 
 const dfs = (n: Dict, memo: string[] = []) => {

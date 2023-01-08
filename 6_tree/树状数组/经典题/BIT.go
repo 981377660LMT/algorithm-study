@@ -1,7 +1,92 @@
-package BIT
+package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
+func main() {
+	bitArray := NewBITArrayWithIntSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+	fmt.Println(bitArray)
+	bitArray.Add(1, 1)
+	fmt.Println(bitArray)
+}
+
+// !Point Add Range Sum, 1-based.
+type BITArray struct {
+	n    int
+	tree []int
+}
+
+func NewBITArrayWithIntSlice(nums []int) *BITArray {
+	bitArray := &BITArray{
+		n:    len(nums),
+		tree: make([]int, len(nums)+1),
+	}
+	bitArray.Build(nums)
+	return bitArray
+}
+
+func NewBITArray(n int) *BITArray {
+	return &BITArray{n: n, tree: make([]int, n+1)}
+}
+
+// 常数优化: dp O(n) 建树
+// https://oi-wiki.org/ds/fenwick/#tricks
+func (b *BITArray) Build(nums []int) {
+	for i := 1; i < len(b.tree); i++ {
+		b.tree[i] += nums[i-1]
+		if j := i + (i & -i); j < len(b.tree) {
+			b.tree[j] += b.tree[i]
+		}
+	}
+}
+
+// 位置 index 增加 delta
+//  1<=i<=n
+func (b *BITArray) Add(index int, delta int) {
+	for ; index < len(b.tree); index += index & -index {
+		b.tree[index] += delta
+	}
+}
+
+// 求前缀和
+//  1<=i<=n
+func (b *BITArray) Query(index int) (res int) {
+	if index > b.n {
+		index = b.n
+	}
+	for ; index > 0; index -= index & -index {
+		res += b.tree[index]
+	}
+	return
+}
+
+// 1<=left<=right<=n
+func (b *BITArray) QueryRange(left, right int) int {
+	return b.Query(right) - b.Query(left-1)
+}
+
+func (b *BITArray) Len() int {
+	return b.n
+}
+
+func (b *BITArray) String() string {
+	sb := strings.Builder{}
+	sb.WriteString("BITArray{")
+	for i := 1; i <= b.n; i++ {
+		sb.WriteString(fmt.Sprintf("%d", b.QueryRange(i, i)))
+		if i != b.n {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteString("}")
+	return sb.String()
+}
+
+//
+//
+//
 // !一维区间查询 区间修改
 type BIT interface {
 	// 区间 [left, right] 里的每个数增加 delta

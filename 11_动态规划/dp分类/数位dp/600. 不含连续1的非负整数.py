@@ -27,5 +27,4 @@ def cal(upper: int) -> int:
 class Solution:
     def findIntegers(self, n: int) -> int:
         """给定一个正整数 n ，返回范围在 [0, n] 都非负整数中，其二进制表示不包含 连续的 1 的个数。"""
-        return cal(n) - cal(0) + 1
-
+        return cal(n) + 1

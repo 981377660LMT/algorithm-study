@@ -5,7 +5,7 @@ interface WindowManager<Q> {
   query(this: void, qLeft: number, qRight: number): Q
 }
 
-type Query = [qIndex: number, qLeft: number, qRight: number]
+type Query = [index: number, left: number, right: number]
 
 /**
  * 静态查询区间的莫队算法

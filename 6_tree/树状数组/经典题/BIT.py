@@ -5,7 +5,60 @@
 
 from bisect import bisect_left, bisect_right
 from collections import defaultdict
-from typing import List
+from typing import List, Sequence, Union
+
+
+class BITArray:
+    """Point Add Range Sum, 1-indexed."""
+
+    @staticmethod
+    def _build(sequence: Sequence[int]) -> List[int]:
+        tree = [0] * (len(sequence) + 1)
+        for i in range(1, len(tree)):
+            tree[i] += sequence[i - 1]
+            parent = i + (i & -i)
+            if parent < len(tree):
+                tree[parent] += tree[i]
+        return tree
+
+    __slots__ = ("_n", "_tree")
+
+    def __init__(self, lenOrSequence: Union[int, Sequence[int]]):
+        if isinstance(lenOrSequence, int):
+            self._n = lenOrSequence
+            self._tree = [0] * (lenOrSequence + 1)
+        else:
+            self._n = len(lenOrSequence)
+            self._tree = self._build(lenOrSequence)
+
+    def add(self, index: int, delta: int) -> None:
+        # assert index >= 1, f'add index must be greater than 0, but got {index}'
+        while index <= self._n:
+            self._tree[index] += delta
+            index += index & -index
+
+    def query(self, right: int) -> int:
+        """Query sum of [1, right]."""
+        if right > self._n:
+            right = self._n
+        res = 0
+        while right > 0:
+            res += self._tree[right]
+            right -= right & -right
+        return res
+
+    def queryRange(self, left: int, right: int) -> int:
+        """Query sum of [left, right]."""
+        return self.query(right) - self.query(left - 1)
+
+    def __len__(self) -> int:
+        return self._n
+
+    def __repr__(self) -> str:
+        nums = []
+        for i in range(1, self._n + 1):
+            nums.append(self.queryRange(i, i))
+        return f"BITArray({nums})"
 
 
 class BIT1:
@@ -268,44 +321,6 @@ class BIT5:
         return res
 
 
-class BITArray:
-    """下标从0开始 单点修改、区间查询 每个操作都是 log(n)"""
-
-    def __init__(self, n: int):
-        self.n = n
-        self.data = [0] * n
-
-    def build(self, arr: List[int]):
-        for i, a in enumerate(arr):
-            self.data[i] = a
-        for i in range(1, self.n + 1):
-            if i + (i & -i) <= self.n:
-                self.data[i + (i & -i) - 1] += self.data[i - 1]
-
-    def add(self, i: int, delta: int):
-        """下标i的值加上delta"""
-        assert 0 <= i < self.n
-        i += 1
-        while i <= self.n:
-            self.data[i - 1] += delta
-            i += i & -i
-
-    def query(self, right: int) -> int:
-        """前right个数的和"""
-        assert 0 <= right <= self.n
-        s = 0
-        while right:
-            s += self.data[right - 1]
-            right -= right & -right
-        return s
-
-    def queryRange(self, left: int, right: int) -> int:
-        """切片[left:right]的和"""
-        assert 0 <= left <= right <= self.n
-        return self.query(right) - self.query(left)
-
-
-# TODO  dict + SortedList 优化
 class BIT2D:
     """二维矩形计数 更新和查询时间复杂度O(logk)
 
@@ -382,11 +397,12 @@ if __name__ == "__main__":
     assert bit5.queryRange(0, 0, 1, 1) == 4
     assert bit5.queryRange(0, 0, 3, 3) == 16
 
-    arrayBIT = BITArray(100)
-    arrayBIT.add(0, 1)
-    assert arrayBIT.queryRange(0, 1) == 1
+    arrayBIT = BITArray([1, 2, 3])
+    assert arrayBIT.queryRange(1, 2) == 3
     arrayBIT.add(1, 1)
-    assert arrayBIT.queryRange(0, 2) == 2
+    assert arrayBIT.queryRange(1, 1) == 2
+    arrayBIT.add(2, 1)
+    assert arrayBIT.queryRange(1, 2) == 5
 
     points = [(3, 3), (1, 1), (2, 2), (4, 4), (5, 5)]
     points.sort(key=lambda x: x[1])  # 按照y坐标排序

@@ -15,7 +15,6 @@ class BinaryTrie:
         "x_end",
         "v_list",
         "multiset",
-        "add_query_count",
         "add_query_limit",
         "edges",
         "size",
@@ -50,7 +49,6 @@ class BinaryTrie:
         self.x_end = 1 << max_log
         self.v_list = [0] * (max_log + 1)
         self.multiset = allow_multiple_elements
-        self.add_query_count = 0
         self.add_query_limit = add_query_limit
         n = max_log * add_query_limit + 1
         self.edges = [-1] * (2 * n)
@@ -75,7 +73,6 @@ class BinaryTrie:
             self.is_end[v] += 1
             for v in self.v_list:
                 self.size[v] += 1
-        self.add_query_count += 1
 
     def discard(self, x: int):
         if not 0 <= x < self.x_end:
@@ -94,7 +91,7 @@ class BinaryTrie:
                 self.size[v] -= 1
 
     def erase(self, x: int, count: int = -1):
-        """删除count个x x=-1表示删除所有x"""
+        """删除count个x count=-1表示删除所有x"""
         # assert -1 <= count
         if not 0 <= x < self.x_end:
             return

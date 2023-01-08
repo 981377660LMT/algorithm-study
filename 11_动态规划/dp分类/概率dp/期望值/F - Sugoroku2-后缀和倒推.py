@@ -1,4 +1,4 @@
-# 双六2
+# 双六2 掷到一些位置会返回起点
 # 从0出发 投掷一个m面骰子1-m 每次走出骰子点数的格子
 # !如果走到bad[i]就会回到0 从0开始 求走到>=n的期望步数
 # n,m<=1e5 len(bads)<10
@@ -6,6 +6,8 @@
 # dp[i]表示从i走到n的期望步数
 # !如果i能走,dp[i] = 1 + (dp[i+1] + dp[i + 2] + ... + dp[i + m] / m
 # !如果不能走,dp[i]=dp[0]
+# https://blog.csdn.net/Fighting_Peter/article/details/113090689
+# 最终每个dp[i]都是一个关于dp[0]的一次函数
 from typing import List
 
 

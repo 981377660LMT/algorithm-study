@@ -5,6 +5,7 @@
 # atc数位dp模板题
 
 
+from functools import lru_cache
 import sys
 
 sys.setrecursionlimit(int(1e9))
@@ -16,28 +17,28 @@ n = input()
 d = int(input())
 
 # !TLE
-# def cal(upper: int) -> int:
-#     def dfs(pos: int, isLimit: bool, sumMod: int) -> int:
+
+
+# def cal(upper: int, mod: int) -> int:
+#     @lru_cache(None)
+#     def dfs(pos: int, isLimit: bool, curMod: int) -> int:
 #         if pos == n:
-#             return sumMod == 0
-#         hash = pos * (d + 1) * 2 + sumMod * 2 + isLimit
-#         if memo[hash] != -1:
-#             return memo[hash]
+#             return curMod == 0
 #         res = 0
 #         up = nums[pos] if isLimit else 9
 #         for cur in range(up + 1):
-#             res += dfs(pos + 1, isLimit and cur == up, (sumMod + cur) % d)
+#             res += dfs(pos + 1, isLimit and cur == up, (curMod + cur) % mod)
 #             res %= MOD
-#         memo[hash] = res
 #         return res
 
 #     nums = list(map(int, str(upper)))
 #     n = len(nums)
-#     memo = [-1] * (d + 1) * (n + 1) * 2
-#     return dfs(0, True, 0)
+#     res = dfs(0, True, 0)
+#     dfs.cache_clear()
+#     return res
 
+# print(cal(n, d) - cal(0, d))
 
-# print(cal(n) - 1)
 
 dp = [[0, 0] for _ in range(d)]  # sumMod isLimit
 dp[0][1] = 1

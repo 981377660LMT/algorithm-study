@@ -41,13 +41,15 @@ function isMatch(s: string, p: string): boolean {
   return dp[m][n]
 }
 
+// https://leetcode.cn/problems/regular-expression-matching/solution/huan-zai-tou-lan-yong-zheng-ze-biao-da-s-oe2a/
+// 个数据团灭各种语言的正则表达式(以及官方标程)。
+// "aaaaaaaaaaaaaaaaaaab"
+// "a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*"
 const isMatch2 = (s: string, p: string): boolean => {
   const regexp = new RegExp(`^${p}$`)
   return regexp.test(s)
 }
 
 console.log(isMatch('aab', 'c*a*b'))
-// const a = [1, 2]
-// console.log(a[-1])
-
+console.log(isMatch2('aaaaaaaaaaaaaaaaaaab', 'a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*'))
 export {}

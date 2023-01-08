@@ -46,7 +46,7 @@ def cal(upper: int) -> int:
 
     nums = []
     while upper:
-        div, mod = divmod(upper, 10)
+        div, mod = upper // 10, upper % 10
         nums.append(mod)
         upper = div
     return dfs(len(nums), 0, True, True)[1]

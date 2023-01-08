@@ -10,7 +10,7 @@ class Matrix:
     __slots__ = "_n", "_m", "_mat"
 
     @staticmethod
-    def from_list(list: List[List[int]]) -> "Matrix":
+    def fromlist(list: List[List[int]]) -> "Matrix":
         return Matrix(len(list), len(list[0]), list)
 
     @staticmethod
@@ -233,7 +233,7 @@ if __name__ == "__main__":
     # 解方程 Ax = b
     n, m = map(int, input().split())
     grid = [list(map(int, input().split())) for _ in range(n)]
-    A = Matrix.from_list(grid)
+    A = Matrix.fromlist(grid)
     b = list(map(int, input().split()))
     dim, sol, vecs = A.linear_equations(b)
     print(dim)

@@ -1,3 +1,5 @@
+const INF = 2e15
+
 /**
  * @param {number[]} nums
  * @param {number} x
@@ -6,19 +8,16 @@
  * 返回 最小操作数
  * @summary 求和为定值sum(nums)-x的最长子数组: 滑动窗口
  */
-const minOperations = function (nums: number[], x: number): number {
+function minOperations(nums: number[], x: number): number {
   const target = nums.reduce((pre, cur) => pre + cur, 0) - x
-  let res = 0
+  let res = -INF
   let curSum = 0
   let left = 0
-
-  // 注意这里
-  if (target === 0) return nums.length
 
   for (let right = 0; right < nums.length; right++) {
     curSum += nums[right]
 
-    while (curSum > target) {
+    while (left <= right && curSum > target) {
       curSum -= nums[left]
       left++
     }
@@ -28,14 +27,14 @@ const minOperations = function (nums: number[], x: number): number {
     }
   }
 
-  return res === 0 ? -1 : nums.length - res
+  return res === -INF ? -1 : nums.length - res
 }
 
 console.log(
   minOperations(
     [
       8828, 9581, 49, 9818, 9974, 9869, 9991, 10000, 10000, 10000, 9999, 9993, 9904, 8819, 1231,
-      6309,
+      6309
     ],
     134365
   )

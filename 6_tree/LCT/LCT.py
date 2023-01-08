@@ -3,6 +3,7 @@
 # 0 root1 root2 root3 root4 => 删除边root1-root2, 添加边root3-root4 (每次保证root1-root2在树中)
 # 1 root add => 将root的权值加上add
 # 2 root1 root2 => 查询root1到root2的路径和
+# n,q<=2e5
 
 # https://oi.men.ci/link-cut-tree-notes/
 

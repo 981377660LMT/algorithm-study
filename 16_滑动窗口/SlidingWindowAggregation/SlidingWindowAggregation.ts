@@ -19,7 +19,7 @@ function slidingWindowAggregation<E>(e: () => E, op: (a: E, b: E) => E) {
   const _stack3: E[] = []
   let _e0 = e()
   let _e1 = e()
-  let _size = 0
+  let _length = 0
 
   function append(value: E): void {
     if (!_stack0.length) {
@@ -29,16 +29,16 @@ function slidingWindowAggregation<E>(e: () => E, op: (a: E, b: E) => E) {
       _push1(value)
     }
 
-    _size++
+    _length++
   }
 
   function popLeft(): void {
-    if (!_size) return
+    if (!_length) return
     if (!_stack0.length) _transfer()
     _stack0.pop()
     _stack2.pop()
     _e0 = _stack2.length ? _stack2[_stack2.length - 1] : e()
-    _size--
+    _length--
   }
 
   function query(): E {
@@ -49,8 +49,8 @@ function slidingWindowAggregation<E>(e: () => E, op: (a: E, b: E) => E) {
     append,
     popLeft,
     query,
-    get size() {
-      return _size
+    get length() {
+      return _length
     }
   }
 
@@ -92,7 +92,7 @@ if (require.main === module) {
   window.append(4)
   console.log(window.query())
   window.popLeft()
-  console.log(window.size, 'size')
+  console.log(window.length, 'length')
   console.log(window.query())
   window.append(8)
   console.log(window.query())

@@ -1,6 +1,6 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-inner-declarations */
 /* eslint-disable class-methods-use-this */
-import assert from 'assert'
 
 /**
  * @summary
@@ -12,6 +12,83 @@ import assert from 'assert'
  * 3. tree[x]节点覆盖的长度等于lowbit(x)
  * 4. 树的高度为logn+1
  */
+
+import assert from 'assert'
+
+/**
+ * Point add range sum, 1-indexed.
+ */
+class BITArray {
+  /**
+   * Build a tree from an array-like object using dp.
+   * O(n) time.
+   */
+  private static _build(arrayLike: ArrayLike<number>): number[] {
+    const tree = Array(arrayLike.length + 1).fill(0)
+    for (let i = 1; i < tree.length; i++) {
+      tree[i] += arrayLike[i - 1]
+      const parent = i + (i & -i)
+      if (parent < tree.length) tree[parent] += tree[i]
+    }
+    return tree
+  }
+
+  readonly length: number
+  private readonly _tree: number[]
+
+  constructor(lengthOrArrayLike: number | ArrayLike<number>) {
+    if (typeof lengthOrArrayLike === 'number') {
+      this.length = lengthOrArrayLike
+      this._tree = Array(lengthOrArrayLike + 1).fill(0)
+    } else {
+      this.length = lengthOrArrayLike.length
+      this._tree = BITArray._build(lengthOrArrayLike)
+    }
+  }
+
+  /**
+   * Add delta to the element at index.
+   * @param index 1 <= index <= {@link length}
+   */
+  add(index: number, delta: number): void {
+    if (index <= 0) throw new RangeError(`add index must be greater than 0, but got ${index}`)
+    for (let i = index; i <= this.length; i += i & -i) {
+      this._tree[i] += delta
+    }
+  }
+
+  /**
+   * Query the sum of [1, right].
+   */
+  query(right: number): number {
+    if (right > this.length) right = this.length
+    let res = 0
+    for (let i = right; i > 0; i -= i & -i) {
+      res += this._tree[i]
+    }
+    return res
+  }
+
+  /**
+   * Query the sum of [left, right].
+   */
+  queryRange(left: number, right: number): number {
+    return this.query(right) - this.query(left - 1)
+  }
+
+  toString(): string {
+    const sb: string[] = []
+    sb.push('BITArray: [')
+    for (let i = 1; i < this._tree.length; i++) {
+      sb.push(String(this.queryRange(i, i)))
+      if (i < this._tree.length - 1) sb.push(', ')
+    }
+    sb.push(']')
+    return sb.join('')
+  }
+}
+
+// Implemented by Map. Slow.
 class BIT1 {
   readonly _size: number
   private readonly _tree: Map<number, number> = new Map()
@@ -288,6 +365,9 @@ if (require.main === module) {
   assert.strictEqual(bit4.queryRange(0, 0, 4, 4), 3)
   bit4.updateRange(0, 0, 0, 0, 3)
   assert.strictEqual(bit4.queryRange(0, 0, 4, 4), 6)
+
+  const bitArray = new BITArray([1, 2, 3])
+  console.log(bitArray.toString())
 }
 
-export { BIT1, BIT2, BIT3, BIT4 }
+export { BIT1, BIT2, BIT3, BIT4, BITArray }

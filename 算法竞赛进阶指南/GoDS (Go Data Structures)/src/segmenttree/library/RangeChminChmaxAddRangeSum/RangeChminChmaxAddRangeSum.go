@@ -4,10 +4,9 @@
 // 1 left right x => 区间[left,right)的每个元素变为max(x,原值)
 // 2 left right x => 区间[left,right)的每个元素都加上x
 // 3 left right => 求区间[left,right)的和
-
+// !0<=left<right<=n
 // 普通的线段树不能用了
 // 需要用 SegmentTreeBeats
-
 
 package main
 
@@ -127,6 +126,8 @@ func (stb *SegmentTreeBeats) Build(arr []int) {
 	}
 }
 
+// RangeAdd updates all elements in [left, right) by x.
+//  0 <= left < right <= n
 func (stb *SegmentTreeBeats) RangeChmax(left, right, x int) {
 	stb.down = append(stb.down, 1)
 	for len(stb.down) > 0 {
@@ -145,6 +146,8 @@ func (stb *SegmentTreeBeats) RangeChmax(left, right, x int) {
 	stb.upMerge()
 }
 
+// RangeChmin updates all elements in [left, right) to min(x, a[i])
+//  0 <= left < right <= n
 func (stb *SegmentTreeBeats) RangeChmin(left, right, x int) {
 	stb.down = append(stb.down, 1)
 	for len(stb.down) > 0 {
@@ -163,6 +166,8 @@ func (stb *SegmentTreeBeats) RangeChmin(left, right, x int) {
 	stb.upMerge()
 }
 
+// RangeAdd adds x to all elements in [left, right)
+//  0 <= left < right <= n
 func (stb *SegmentTreeBeats) RangeAdd(left, right, x int) {
 	stb.down = append(stb.down, 1)
 	for len(stb.down) > 0 {
@@ -181,6 +186,8 @@ func (stb *SegmentTreeBeats) RangeAdd(left, right, x int) {
 	stb.upMerge()
 }
 
+// RangeUpdate updates all elements in [left, right) to x.
+//  0 <= left < right <= n
 func (stb *SegmentTreeBeats) RangeUpdate(left, right, x int) {
 	stb.down = append(stb.down, 1)
 	for len(stb.down) > 0 {
@@ -199,6 +206,7 @@ func (stb *SegmentTreeBeats) RangeUpdate(left, right, x int) {
 	stb.upMerge()
 }
 
+//  0 <= left < right <= n
 func (stb *SegmentTreeBeats) GetMax(left, right int) int {
 	stb.down = append(stb.down, 1)
 	v := -INF
@@ -217,6 +225,7 @@ func (stb *SegmentTreeBeats) GetMax(left, right int) int {
 	return v
 }
 
+//  0 <= left < right <= n
 func (stb *SegmentTreeBeats) GetMin(left, right int) int {
 	stb.down = append(stb.down, 1)
 	v := INF
@@ -235,6 +244,7 @@ func (stb *SegmentTreeBeats) GetMin(left, right int) int {
 	return v
 }
 
+//  0 <= left < right <= n
 func (stb *SegmentTreeBeats) GetSum(left, right int) int {
 	stb.down = append(stb.down, 1)
 	var v int

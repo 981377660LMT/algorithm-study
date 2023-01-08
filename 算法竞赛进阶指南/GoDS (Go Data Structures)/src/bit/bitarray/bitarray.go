@@ -11,7 +11,7 @@ func main() {
 	fmt.Println(bit.QueryRange(2, 9))
 }
 
-// !单点修改,区间查询,数组实现的树状数组
+// !Point Add Range Sum, 1-based.
 type BITArray struct {
 	n    int
 	tree []int
@@ -33,7 +33,7 @@ func (b *BITArray) Build(nums []int) {
 }
 
 // 位置 index 增加 delta
-//  1<=i<=n
+//  i>=1
 func (b *BITArray) Add(index int, delta int) {
 	for ; index < len(b.tree); index += index & -index {
 		b.tree[index] += delta
@@ -41,7 +41,6 @@ func (b *BITArray) Add(index int, delta int) {
 }
 
 // 求前缀和
-//  1<=i<=n
 func (b *BITArray) Query(index int) (res int) {
 	if index > b.n {
 		index = b.n
@@ -52,7 +51,6 @@ func (b *BITArray) Query(index int) (res int) {
 	return
 }
 
-// 1<=left<=right<=n
 func (b *BITArray) QueryRange(left, right int) int {
 	return b.Query(right) - b.Query(left-1)
 }

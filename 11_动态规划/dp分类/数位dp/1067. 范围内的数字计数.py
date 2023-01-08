@@ -22,6 +22,11 @@ def cal(upper: int, queryDigit: int) -> int:
     return dfs(0, True, True, 0)
 
 
+# 给定一个在 0 到 9 之间的整数 d，
+# 和两个正整数 low 和 high 分别作为上下界。
+# !返回 d 在 low 和 high 之间的整数中出现的次数，包括边界 low 和 high。
+
+
 class Solution:
     def digitsCount(self, d: int, low: int, high: int) -> int:
         # 1 <= low <= high <= 2×10^8
