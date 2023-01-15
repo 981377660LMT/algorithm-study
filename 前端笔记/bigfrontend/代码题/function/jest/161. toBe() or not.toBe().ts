@@ -1,28 +1,31 @@
+// 161. toBe() or not.toBe()
+
 interface IMatcher {
-  toBe(data: any): void
+  toBe(data: unknown): void
 }
 
-function myExpect(input: any): IMatcher & { not: IMatcher } {
+function myExpect(input: unknown): IMatcher & { not: IMatcher } {
   return new Matcher(input)
 }
 
 class Matcher implements IMatcher {
-  private input: any
-  private isReversed: boolean
+  private _isReversed = false
+  private readonly _input: unknown
 
-  constructor(input: any) {
-    this.input = input
-    this.isReversed = false
+  constructor(input: unknown) {
+    this._input = input
   }
 
-  toBe(data: any): boolean {
-    const isIdentical = Object.is(this.input, data)
-    if ((isIdentical && !this.isReversed) || (!isIdentical && this.isReversed)) return true
-    throw new Error('foo')
+  toBe(data: unknown): boolean {
+    const isSame = Object.is(this._input, data)
+    if (isSame === this._isReversed) {
+      throw new Error(`expect ${this._input} to be ${data}`)
+    }
+    return true
   }
 
   get not() {
-    this.isReversed = !this.isReversed
+    this._isReversed = !this._isReversed
     return this
   }
 }

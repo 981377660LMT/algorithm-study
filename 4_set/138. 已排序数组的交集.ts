@@ -5,25 +5,23 @@
  * @returns {number[]}
  */
 function intersect(arr1: number[], arr2: number[]): number[] {
-  let p1 = 0
-  let p2 = 0
-  let result: number[] = []
+  let i = 0
+  let j = 0
+  let res: number[] = []
 
-  while (p1 < arr1.length && p2 < arr2.length) {
-    if (arr1[p1] === arr2[p2]) {
-      result.push(arr1[p1])
-      p1++
-      p2++
+  while (i < arr1.length && j < arr2.length) {
+    if (arr1[i] === arr2[j]) {
+      res.push(arr1[i])
+      i++
+      j++
+    } else if (arr1[i] < arr2[j]) {
+      i++
     } else {
-      if (arr1[p1] < arr2[p2]) {
-        p1++
-      } else {
-        p2++
-      }
+      j++
     }
   }
 
-  return result
+  return res
 }
 
 console.log(intersect([1, 2, 2, 3, 4, 4], [2, 2, 4, 5, 5, 6, 2000]))

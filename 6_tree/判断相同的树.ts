@@ -13,15 +13,7 @@ function isSameTree(root1: BinaryTree | null, root2: BinaryTree | null): boolean
   )
 }
 
-if (require.main === module) {
-  console.dir(
-    isSameTree(deserializeNode([1, 2, 2, 3, 4, 4, 3]), deserializeNode([1, 2, 2, 3, 4, 4, 3])),
-    { depth: null }
-  )
-}
-
-export {}
-
+// 相同的对象
 // 同样的逻辑适用于对象的 deepEqual :
 // 当前是值类型,判断相等;当前是引用类型,Object.keys遍历看子代相等(键/值都要等)
 function isSameObject(o1: unknown, o2: unknown): boolean {
@@ -42,6 +34,12 @@ function isSameObject(o1: unknown, o2: unknown): boolean {
   return false
 }
 
-function isObject(o: unknown): o is Record<any, any> {
-  return typeof o === 'object' && o !== null
+if (require.main === module) {
+  console.dir(
+    isSameTree(deserializeNode([1, 2, 2, 3, 4, 4, 3]), deserializeNode([1, 2, 2, 3, 4, 4, 3])),
+    { depth: null }
+  )
+  console.log(isSameObject({ aaa: 1, asasas: 2 }, { asasas: 2, aaa: 1 }))
 }
+
+export {}

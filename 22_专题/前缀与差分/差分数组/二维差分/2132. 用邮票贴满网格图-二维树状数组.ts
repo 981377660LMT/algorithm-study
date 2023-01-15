@@ -10,7 +10,7 @@ function possibleToStamp(grid: number[][], h: number, w: number): boolean {
   for (let r = 0; r + h - 1 < ROW; r++) {
     for (let c = 0; c + w - 1 < COL; c++) {
       if (preSum.queryRange(r, c, r + h - 1, c + w - 1) === 0) {
-        tree.updateRange(r, c, r + h - 1, c + w - 1, 1)
+        tree.addRange(r, c, r + h - 1, c + w - 1, 1)
       }
     }
   }
@@ -57,7 +57,7 @@ if (require.main === module) {
         [1, 0, 0, 0],
         [1, 0, 0, 0],
         [1, 0, 0, 0],
-        [1, 0, 0, 0],
+        [1, 0, 0, 0]
       ],
       4,
       3
@@ -69,7 +69,7 @@ if (require.main === module) {
         [1, 0, 0, 0],
         [0, 1, 0, 0],
         [0, 0, 1, 0],
-        [0, 0, 0, 1],
+        [0, 0, 0, 1]
       ],
       2,
       2

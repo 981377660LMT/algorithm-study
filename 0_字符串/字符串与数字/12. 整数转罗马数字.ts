@@ -1,24 +1,23 @@
+// 整数转罗马数字
+
+const ROMAN = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I']
+const ARAB = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
+
 /**
  * @param {number} num
  * @return {string}
- * @description 类似于n进制转换 不过那个一般是递归做法 这个需要迭代
+ * @description 类似于n进制转换
  * 除 模 除 模 ...
  */
-const intToRoman = function (num: number): string {
-  const roman = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I']
-  const arab = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
-
+function intToRoman(num: number): string {
   const res: string[] = []
-  let index = 0
+  let radixIndex = 0
   while (num) {
-    const [div, mod] = [~~(num / arab[index]), num % arab[index]]
-    for (let i = 0; i < div; i++) {
-      res.push(roman[index])
-    }
+    const [div, mod] = [~~(num / ARAB[radixIndex]), num % ARAB[radixIndex]]
+    res.push(ROMAN[radixIndex].repeat(div))
     num = mod
-    index++
+    radixIndex++
   }
-
   return res.join('')
 }
 

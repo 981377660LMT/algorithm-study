@@ -16,7 +16,7 @@ class WindowHashDeque:
 
         Args:
             ords (Optional[Sequence[int]], optional): ords of string. Must be non-negative. Defaults to None.
-            mod (_type_, optional): must be prime. Defaults to 10**11+7.
+            mod (_type_, optional): should be prime. Defaults to 10**11+7.
             base (int, optional): power of base. Defaults to 1313131.
 
         Note:

@@ -50,10 +50,11 @@ class Solution:
             R.addEdge(u, v)
 
         # 预处理子树结点个数
+        adjList = R.adjList
         subTreeCount = [1] * n
 
         def dfs(cur: int, parent: int) -> None:
-            for next in R.adjList[cur]:
+            for next in adjList[cur]:
                 if next == parent:
                     continue
                 dfs(next, cur)
@@ -61,16 +62,16 @@ class Solution:
 
         dfs(0, -1)
 
-        def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
-            if direction == 0:  # !从子结点向父结点更新dp1
-                return fromRes + subTreeCount[cur]
-            return fromRes + (n - subTreeCount[cur])  # !从父结点向子结点更新dp2
+        def e(root: int) -> int:
+            return 0
 
         def op(childRes1: int, childRes2: int) -> int:
             return childRes1 + childRes2
 
-        def e(root: int) -> int:
-            return 0
+        def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+            if direction == 0:  # !从子结点向父结点更新dp1
+                return fromRes + subTreeCount[cur]
+            return fromRes + (n - subTreeCount[cur])  # !从父结点向子结点更新dp2
 
         res = R.rerooting(e=e, op=op, composition=composition)
         return res

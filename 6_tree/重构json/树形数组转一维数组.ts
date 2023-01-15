@@ -1,20 +1,20 @@
-interface Routes {
+interface Route {
   id: number
   url: string
   path: string
   component: string
   name: string
   icon: string
-  children: Routes[] | null
+  children: Route[] | null
 }
 
-type RoutesArray = (Pick<Routes, 'path' | 'name' | 'children'> & {
+type RoutesArray = (Pick<Route, 'path' | 'name' | 'children'> & {
   component: () => Promise<unknown>
 })[]
 
-const initRoutes = (routes: Routes[]) => {
+const initRoutes = (routes: Route[]): RoutesArray => {
   const newRouter: RoutesArray = []
-  const dfs = (root: Routes) => {
+  const dfs = (root: Route) => {
     const { path, name, children } = root
     const component = loadRoutes(root.component)
     newRouter.push({ path, name, component, children })
@@ -26,7 +26,7 @@ const initRoutes = (routes: Routes[]) => {
 
 const loadRoutes = (component: string) => () => import(`${component}`)
 
-const routes: Routes[] = [
+const routes: Route[] = [
   {
     id: 1,
     url: '/',
@@ -42,10 +42,10 @@ const routes: Routes[] = [
         component: 'Homeson',
         name: '首页子路由',
         icon: 'dsadsa',
-        children: null,
-      },
-    ],
-  },
+        children: null
+      }
+    ]
+  }
 ]
 
 console.dir(initRoutes(routes))

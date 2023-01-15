@@ -4,7 +4,8 @@ import type { AsyncFunc, Callback } from './typings'
 /**
  * @param {AsyncFunc[]} funcs
  * @return {(callback: Callback) => void}
- * 请实现一个async helper - parallel()。parallel() 有点类似Promise.all()
+ * 请实现一个async helper - parallel()。
+ * parallel() 有点类似Promise.all()
  * 能否使用Promise完成题目？能否不使用Promise完成该题目？
  */
 function race(funcs: AsyncFunc[]): AsyncFunc {

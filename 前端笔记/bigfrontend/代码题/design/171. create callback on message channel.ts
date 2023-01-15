@@ -55,7 +55,6 @@ class BetterChannel {
   }
 
   // 调用对方的onmessage,返回自己的postMessage
-  // TODO: 为什么要这么做?
   private _createPostMessage(
     sender: SomePort,
     receiver: SomePort,

@@ -1,19 +1,19 @@
 // 一维数组
-interface ArrayItem {
+interface Data {
   id: number
   name: string
   // pid: number
-  children?: ArrayItem[]
+  children?: Data[]
 }
 
-const arrayToTree = (arr: ArrayItem[]) => {
-  const getParentId = (item: ArrayItem): number => {
+const arrayToTree = (arr: Data[]) => {
+  const getParentId = (item: Data): number => {
     const tmp = item.id.toString()
     // Number('')是0
     return Number(tmp.slice(0, -1))
   }
 
-  const adjMap = new Map<number, ArrayItem[]>()
+  const adjMap = new Map<number, Data[]>()
   for (const item of arr) {
     if (item.id === 0) continue
     const pid = getParentId(item)
@@ -21,7 +21,7 @@ const arrayToTree = (arr: ArrayItem[]) => {
     adjMap.get(pid)!.push(item)
   }
 
-  const dfs = (root: ArrayItem) => {
+  const dfs = (root: Data) => {
     if (adjMap.has(root.id)) {
       root.children = []
       for (const child of adjMap.get(root.id)!) {
@@ -37,7 +37,7 @@ const arrayToTree = (arr: ArrayItem[]) => {
   return res
 }
 
-const jump: ArrayItem[] = [
+const jump: Data[] = [
   { id: 0, name: '总公司' },
   { id: 1, name: '分公司1' },
   { id: 2, name: '分公司2' },
@@ -47,7 +47,8 @@ const jump: ArrayItem[] = [
   { id: 111, name: '分公司1-1-1' },
   { id: 112, name: '分公司1-1-2' },
   { id: 121, name: '分公司1-2-1' },
-  { id: 122, name: '分公司1-2-2' },
+  { id: 122, name: '分公司1-2-2' }
 ]
 
 console.dir(arrayToTree(jump), { depth: null })
+export {}

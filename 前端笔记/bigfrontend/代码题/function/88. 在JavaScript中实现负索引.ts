@@ -15,7 +15,7 @@ function wrap<T>(arr: T[]): T[] {
         assert(prop)
       }
       return Reflect.set(target, prop, value)
-    },
+    }
   })
 }
 
@@ -29,7 +29,8 @@ function normalizeIndex(index: number, length: number) {
 
 function isNumerical(prop: any) {
   if (typeof prop !== 'string') return false
-  return typeof prop === 'string' && !isNaN(parseFloat(prop)) && isFinite(Number(prop))
+  const num = parseFloat(prop)
+  return !Number.isNaN(num) && Number.isFinite(num)
 }
 
 if (require.main === module) {

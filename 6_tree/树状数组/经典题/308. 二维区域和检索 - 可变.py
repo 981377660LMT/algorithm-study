@@ -34,13 +34,13 @@ class NumMatrix2:
         self.bit = BIT5(self.row, self.col)
         for r in range(self.row):
             for c in range(self.col):
-                self.bit.updateRange(r, c, r, c, matrix[r][c])
+                self.bit.addRange(r, c, r, c, matrix[r][c])
 
     def update(self, row: int, col: int, val: int) -> None:
         """更新 matrix[row][col] 的值到 val 。"""
         delta = val - self.matrix[row][col]
         self.matrix[row][col] = val
-        self.bit.updateRange(row, col, row, col, delta)
+        self.bit.addRange(row, col, row, col, delta)
 
     def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:
         """返回矩阵 matrix 中指定矩形区域元素的 和 ，该区域由 左上角 (row1, col1) 和 右下角 (row2, col2) 界定。"""

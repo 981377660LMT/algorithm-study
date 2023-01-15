@@ -5,8 +5,8 @@ import type { Callback } from '../utils'
 // 虽然这与nodejs 的 回调形式的 api 不符 (
 const promisify = <T>(
   func: (callback: Callback, ...args: T[]) => void
-): ((...args: T[]) => Promise<any>) => {
-  return function (this: any, ...args: T[]) {
+): ((...args: T[]) => Promise<any>) =>
+  function (this: any, ...args: T[]) {
     return new Promise((resolve, reject) => {
       func((err, data) => {
         if (err) return reject(err)
@@ -14,7 +14,6 @@ const promisify = <T>(
       }, ...args)
     })
   }
-}
 
 const promisifiedReadFile = promisify(readFile)
 

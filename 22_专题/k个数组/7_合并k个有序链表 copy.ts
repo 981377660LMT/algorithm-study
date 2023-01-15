@@ -49,16 +49,16 @@ function mergeKLists(lists: Node[]): Node | null {
   // return heads.reduce(mergeTwoLists)
 
   // 这样要操作log(n)次 133个用例 平均100ms
-  const mergeSort = (lists: Node[]): Node | null => {
+  const merge = (lists: Node[]): Node | null => {
     if (!lists) return lists
     if (lists.length <= 1) return lists[0]
     const mid = lists.length >> 1
     const left = lists.slice(0, mid)
     const right = lists.slice(mid)
-    return mergeTwo(mergeSort(left), mergeSort(right))
+    return mergeTwo(merge(left), merge(right))
   }
 
-  return mergeSort(lists)
+  return merge(lists)
 }
 
 console.dir(mergeKLists([a1, a3, a2]), { depth: null })

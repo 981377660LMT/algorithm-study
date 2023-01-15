@@ -3,20 +3,15 @@
  * @param {string[][]} knowledge
  * @return {string}
  */
-function evaluate(s: string, knowledge: string[][]) {
+function evaluate(s: string, knowledge: string[][]): string {
   const mapping = Object.fromEntries(knowledge)
-
-  s = s.replace(/\(([a-z]+)\)/g, function (_, group) {
-    return mapping[group] ?? '?'
-  })
-
-  return s
+  return s.replace(/\(([a-z]+)\)/g, (_, group) => mapping[group] ?? '?')
 }
 
 console.log(
   evaluate('(name)is(age)yearsold', [
     ['name', 'bob'],
-    ['age', 'two'],
+    ['age', 'two']
   ])
 )
 

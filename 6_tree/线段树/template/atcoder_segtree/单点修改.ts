@@ -62,7 +62,7 @@ abstract class AbstractSegmentTree<S, F> {
 
   /**
    * @param index 数组下标 0 <= index < n
-   * @param value 更新的值 更新方式取决于 {@link mapping}
+   * @param value 更新的值 更新方式取决于 {@link MAPPING}
    */
   update(index: number, value: F): void {
     let k = index + this._log

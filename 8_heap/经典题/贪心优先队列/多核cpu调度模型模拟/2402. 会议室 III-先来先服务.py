@@ -29,7 +29,6 @@ class Solution:
         counter = [0] * n
         meetings.sort(key=lambda x: x[0])
         free, busy = list(range(n)), []
-        # heapify(free)
         for start, end in meetings:
             # !1.busy里的任务结束了 归还CPU
             while busy and busy[0][0] <= start:

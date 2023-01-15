@@ -17,4 +17,3 @@ for char in string:
         if char != pair:
             res += comb(counter[pair], 2)
 print(res)
-

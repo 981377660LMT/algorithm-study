@@ -1,6 +1,5 @@
 """
-有的题目下标从1开始计算方便一些 
-此时在树状数组 add/query 入口处加上偏移量1即可
+下标从1开始
 """
 
 from bisect import bisect_left, bisect_right
@@ -254,6 +253,7 @@ class BIT4:
 # https://www.cnblogs.com/hbhszxyb/p/14157271.html
 
 
+# 非常慢 不要使用python版本
 class BIT5:
     """二维树状数组 区间修改+区间查询 每个操作都是 log(m*n)"""
 
@@ -265,12 +265,12 @@ class BIT5:
         self.tree3 = defaultdict(lambda: defaultdict(int))
         self.tree4 = defaultdict(lambda: defaultdict(int))
 
-    def updateRange(self, row1: int, col1: int, row2: int, col2: int, delta: int) -> None:
+    def addRange(self, row1: int, col1: int, row2: int, col2: int, delta: int) -> None:
         """左上角 (row1,col1) 到右下角 (row2,col2) 的所有数加上delta"""
-        self._update(row1, col1, delta)
-        self._update(row2 + 1, col1, -delta)
-        self._update(row1, col2 + 1, -delta)
-        self._update(row2 + 1, col2 + 1, delta)
+        self._add(row1, col1, delta)
+        self._add(row2 + 1, col1, -delta)
+        self._add(row1, col2 + 1, -delta)
+        self._add(row2 + 1, col2 + 1, delta)
 
     def queryRange(self, row1: int, col1: int, row2: int, col2: int) -> int:
         """查询左上角 (row1,col1) 到右下角 (row2,col2) 的和"""
@@ -281,7 +281,7 @@ class BIT5:
             + self._query(row1 - 1, col1 - 1)
         )
 
-    def _update(self, row: int, col: int, delta: int) -> None:
+    def _add(self, row: int, col: int, delta: int) -> None:
         """[row,col]的值加上delta"""
         row, col = row + 1, col + 1
         preRow, preCol = row, col
@@ -393,7 +393,7 @@ if __name__ == "__main__":
     assert bit4.query(1, 1) == 4
 
     bit5 = BIT5(100, 100)
-    bit5.updateRange(0, 0, 3, 3, 1)
+    bit5.addRange(0, 0, 3, 3, 1)
     assert bit5.queryRange(0, 0, 1, 1) == 4
     assert bit5.queryRange(0, 0, 3, 3) == 16
 

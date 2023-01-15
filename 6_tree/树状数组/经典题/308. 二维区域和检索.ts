@@ -16,7 +16,7 @@ class NumMatrix {
     this.tree = new BIT3(this.ROW, this.COL)
     for (let r = 0; r < this.ROW; r++) {
       for (let c = 0; c < this.COL; c++) {
-        this.tree.update(r, c, matrix[r][c])
+        this.tree.add(r, c, matrix[r][c])
       }
     }
   }
@@ -24,7 +24,7 @@ class NumMatrix {
   update(row: number, col: number, val: number): void {
     const delta = val - this.matrix[row][col]
     this.matrix[row][col] = val
-    this.tree.update(row, col, delta)
+    this.tree.add(row, col, delta)
   }
 
   sumRegion(row1: number, col1: number, row2: number, col2: number): number {
@@ -45,7 +45,7 @@ class NumMatrix2 {
     this.tree = new BIT4(this.ROW, this.COL)
     for (let r = 0; r < this.ROW; r++) {
       for (let c = 0; c < this.COL; c++) {
-        this.tree.updateRange(r, c, r, c, matrix[r][c])
+        this.tree.addRange(r, c, r, c, matrix[r][c])
       }
     }
   }
@@ -53,7 +53,7 @@ class NumMatrix2 {
   update(row: number, col: number, val: number): void {
     const delta = val - this.matrix[row][col]
     this.matrix[row][col] = val
-    this.tree.updateRange(row, col, row, col, delta)
+    this.tree.addRange(row, col, row, col, delta)
   }
 
   sumRegion(row1: number, col1: number, row2: number, col2: number): number {

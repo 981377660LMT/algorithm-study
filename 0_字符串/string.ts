@@ -9,8 +9,8 @@ function isalpha(str: string): boolean {
 }
 
 function isnumeric(str: string) {
-  if (typeof str !== 'string') return false
-  return !isNaN(parseFloat(str)) && isFinite(parseFloat(str))
+  const num = parseFloat(str)
+  return !Number.isNaN(num) && Number.isFinite(num)
 }
 
 function isdigit(str: string) {
