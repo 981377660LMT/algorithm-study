@@ -1,3 +1,4 @@
+# MK平均值
 # !滑动窗口topK之和 (这里topK是最小值)
 
 from typing import List

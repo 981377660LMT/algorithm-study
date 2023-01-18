@@ -30,6 +30,7 @@ def calDiameter(adjList: List[List[Tuple[int, int]]]) -> Tuple[int, List[int]]:
                 path.append(next)
                 v = next
                 break
+
     return diameter, path
 
 

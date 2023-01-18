@@ -21,4 +21,3 @@ class Solution:
 
 
 print(Solution().areSentencesSimilar("My name is Haley", "My Haley"))
-

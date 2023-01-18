@@ -6,6 +6,7 @@ merge是如何合并两个子节点的res
 e是每个节点res的初始值
 
 框架传入op和merge看似只求根节点0的值,实际上求出了每个点的dp值
+!注意res不包含当前结点点权
 
 https://atcoder.jp/contests/dp/submissions/22766939
 https://nyaannyaan.github.io/library/tree/rerooting.hpp

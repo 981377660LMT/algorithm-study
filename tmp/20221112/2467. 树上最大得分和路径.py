@@ -22,7 +22,7 @@ INF = int(1e20)
 # 两次dfs:
 # !1. dfs处理出父结点，找到bob的路径，处理出到每个结点的距离
 # 2. Alice从根开始dfs，记录走过的距离(在这里是深度)，到叶子结点时更新答案
-# !注意叶子节点的条件: len(adjList[cur]) == 1 and adjList[cur][0] == pre
+# !注意树中叶子节点的条件: len(adjList[cur]) == 1 and adjList[cur][0] == pre
 
 
 class Solution:

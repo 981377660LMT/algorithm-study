@@ -48,8 +48,7 @@ class Solution:
         for i, (leftToRight, pickOld, rightToLeft, putNew) in enumerate(time):
             leftWait.add((leftToRight + rightToLeft, i))
 
-        remain = n
-        curTime = 0
+        remain, curTime = n, 0
         while remain > 0 or rightFinish or rightWait:  # !当旧仓库还有货物或者右边还有人要回来时
             while leftFinish and leftFinish[0][0] <= curTime:
                 _, id = leftFinish.pop(0)

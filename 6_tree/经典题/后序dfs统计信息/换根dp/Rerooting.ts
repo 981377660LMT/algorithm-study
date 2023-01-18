@@ -87,6 +87,7 @@ class Rerooting<DpItem = number> {
           res = op(res, composition(dp1[next], cur, next, 0))
         }
       }
+
       dp1[cur] = res
     }
 
