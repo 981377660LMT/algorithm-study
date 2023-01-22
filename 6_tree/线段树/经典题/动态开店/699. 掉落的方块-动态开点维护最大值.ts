@@ -121,13 +121,13 @@ console.log(
   fallingSquares([
     [1, 2],
     [2, 3],
-    [6, 1],
+    [6, 1]
   ])
 )
 console.log(
   fallingSquares([
     [100, 100],
-    [200, 100],
+    [200, 100]
   ])
 )
 export {}

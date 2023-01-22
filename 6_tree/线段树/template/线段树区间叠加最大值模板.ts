@@ -23,6 +23,9 @@ class MaxSegmentTree {
     }
   }
 
+  /**
+   * 1 <= left <= right <= size
+   */
   query(left: number, right: number): number {
     if (left < 1) left = 1
     if (right > this._size) right = this._size
@@ -30,6 +33,9 @@ class MaxSegmentTree {
     return this._query(1, left, right, 1, this._size)
   }
 
+  /**
+   * 1 <= left <= right <= size
+   */
   add(left: number, right: number, delta: number): void {
     if (left < 1) left = 1
     if (right > this._size) right = this._size
@@ -58,7 +64,7 @@ class MaxSegmentTree {
 
     const mid = Math.floor((l + r) / 2)
     this._pushDown(rt, l, r, mid)
-    let res = -INF // !默认返回-INF
+    let res = -INF // !幺元
     if (L <= mid) res = Math.max(res, this._query(rt << 1, L, R, l, mid))
     if (mid < R) res = Math.max(res, this._query((rt << 1) | 1, L, R, mid + 1, r))
 
@@ -206,4 +212,4 @@ if (require.main === module) {
   console.log(tree.queryAll())
 }
 
-export { MaxSegmentTree }
+export { MaxSegmentTree, MinSegmentTree }

@@ -119,8 +119,8 @@ class AtcoderLazySegmentTree(Generic[S, F]):
         if isinstance(sizeOrArray, list):
             for i in range(self._n):
                 self._data[self._size + i] = sizeOrArray[i]
-            for i in range(self._size - 1, 0, -1):
-                self._pushUp(i)
+        for i in range(self._size - 1, 0, -1):
+            self._pushUp(i)
 
     def query(self, left: int, right: int) -> "S":
         """

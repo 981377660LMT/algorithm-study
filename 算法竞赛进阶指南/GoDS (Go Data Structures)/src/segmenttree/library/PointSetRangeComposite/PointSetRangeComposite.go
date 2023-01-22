@@ -23,11 +23,11 @@ func main() {
 	var n, q int
 	fmt.Fscan(in, &n, &q)
 
-	initNums := make([]S, n)
+	initNums := make([]E, n)
 	for i := range initNums {
 		var a, b int
 		fmt.Fscan(in, &a, &b)
-		initNums[i] = S{mul: a, add: b}
+		initNums[i] = E{mul: a, add: b}
 	}
 	tree := NewLazySegTree(initNums)
 
@@ -36,7 +36,7 @@ func main() {
 		fmt.Fscan(in, &op)
 		if op == 0 {
 			fmt.Fscan(in, &index, &mul, &add)
-			tree.Update(index, index+1, F{mul: mul, add: add})
+			tree.Update(index, index+1, Id{mul: mul, add: add})
 		} else {
 			fmt.Fscan(in, &left, &right, &x)
 			res := tree.Query(left, right)
@@ -47,48 +47,43 @@ func main() {
 }
 
 // !线段树维护的值的类型
-type S = struct{ mul, add int }
+type E = struct{ mul, add int }
 
 // !更新操作的值的类型/懒标记的值的类型
-type F = struct{ mul, add int }
+type Id = struct{ mul, add int }
 
 // !线段树维护的值的幺元
-//  alias: e
-func (tree *LazySegTree) dataUnit() S { return S{mul: 1} }
+func (tree *LazySegTree) e() E { return E{mul: 1} }
 
 // !更新操作/懒标记的幺元
-//  alias: id
-func (tree *LazySegTree) lazyUnit() F { return F{mul: 1} }
+func (tree *LazySegTree) id() Id { return Id{mul: 1} }
 
 // !合并左右区间的值
-//  alias: op
-func (tree *LazySegTree) mergeChildren(left, right S) S {
-	return S{
+func (tree *LazySegTree) op(left, right E) E {
+	return E{
 		mul: (left.mul * right.mul) % MOD,
 		add: (left.add*right.mul + right.add) % MOD,
 	}
 }
 
 // !父结点的懒标记更新子结点的值
-//  alias: mapping
-func (tree *LazySegTree) updateData(lazy F, data S) S {
-	if lazy == tree.lazyUnit() {
+func (tree *LazySegTree) mapping(lazy Id, data E) E {
+	if lazy == tree.id() {
 		return data
 	}
 	return lazy
 }
 
 // !合并父结点的懒标记和子结点的懒标记
-//  alias: composition
-func (tree *LazySegTree) updateLazy(parentLazy, childLazy F) F {
-	if parentLazy == tree.lazyUnit() {
+func (tree *LazySegTree) composition(parentLazy, childLazy Id) Id {
+	if parentLazy == tree.id() {
 		return childLazy
 	}
 	return parentLazy
 }
 
 func NewLazySegTree(
-	leaves []S,
+	leaves []E,
 ) *LazySegTree {
 	tree := &LazySegTree{}
 
@@ -96,13 +91,13 @@ func NewLazySegTree(
 	tree.n = n
 	tree.log = int(bits.Len(uint(n - 1)))
 	tree.size = 1 << tree.log
-	tree.data = make([]S, 2*tree.size)
-	tree.lazy = make([]F, tree.size)
+	tree.data = make([]E, 2*tree.size)
+	tree.lazy = make([]Id, tree.size)
 	for i := range tree.data {
-		tree.data[i] = tree.dataUnit()
+		tree.data[i] = tree.e()
 	}
 	for i := range tree.lazy {
-		tree.lazy[i] = tree.lazyUnit()
+		tree.lazy[i] = tree.id()
 	}
 	for i := 0; i < n; i++ {
 		tree.data[tree.size+i] = leaves[i]
@@ -118,15 +113,15 @@ type LazySegTree struct {
 	n    int
 	log  int
 	size int
-	data []S
-	lazy []F
+	data []E
+	lazy []Id
 }
 
 // 查询切片[left:right]的值
 //   0<=left<=right<=len(tree.data)
-func (tree *LazySegTree) Query(left, right int) S {
+func (tree *LazySegTree) Query(left, right int) E {
 	if left == right {
-		return tree.dataUnit()
+		return tree.e()
 	}
 	left += tree.size
 	right += tree.size
@@ -138,29 +133,29 @@ func (tree *LazySegTree) Query(left, right int) S {
 			tree.pushDown((right - 1) >> i)
 		}
 	}
-	sml, smr := tree.dataUnit(), tree.dataUnit()
+	sml, smr := tree.e(), tree.e()
 	for left < right {
 		if left&1 != 0 {
-			sml = tree.mergeChildren(sml, tree.data[left])
+			sml = tree.op(sml, tree.data[left])
 			left++
 		}
 		if right&1 != 0 {
 			right--
-			smr = tree.mergeChildren(tree.data[right], smr)
+			smr = tree.op(tree.data[right], smr)
 		}
 		left >>= 1
 		right >>= 1
 	}
-	return tree.mergeChildren(sml, smr)
+	return tree.op(sml, smr)
 }
 
-func (tree *LazySegTree) QueryAll() S {
+func (tree *LazySegTree) QueryAll() E {
 	return tree.data[1]
 }
 
 // 更新切片[left:right]的值
 //   0<=left<=right<=len(tree.data)
-func (tree *LazySegTree) Update(left, right int, f F) {
+func (tree *LazySegTree) Update(left, right int, f Id) {
 	if left == right {
 		return
 	}
@@ -200,19 +195,19 @@ func (tree *LazySegTree) Update(left, right int, f F) {
 }
 
 func (tree *LazySegTree) pushUp(root int) {
-	tree.data[root] = tree.mergeChildren(tree.data[2*root], tree.data[2*root+1])
+	tree.data[root] = tree.op(tree.data[2*root], tree.data[2*root+1])
 }
 
 func (tree *LazySegTree) pushDown(root int) {
 	tree.propagate(2*root, tree.lazy[root])
 	tree.propagate(2*root+1, tree.lazy[root])
-	tree.lazy[root] = tree.lazyUnit()
+	tree.lazy[root] = tree.id()
 }
 
-func (tree *LazySegTree) propagate(root int, f F) {
-	tree.data[root] = tree.updateData(f, tree.data[root])
+func (tree *LazySegTree) propagate(root int, f Id) {
+	tree.data[root] = tree.mapping(f, tree.data[root])
 	// !叶子结点不需要更新lazy
 	if root < tree.size {
-		tree.lazy[root] = tree.updateLazy(f, tree.lazy[root])
+		tree.lazy[root] = tree.composition(f, tree.lazy[root])
 	}
 }

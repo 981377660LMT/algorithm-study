@@ -24,19 +24,19 @@ const lcm = (a: number, b: number): number => (a * b) / gcd(a, b) // !注意js�
 function subarrayGCD(nums: number[], k: number): number {
   const n = nums.length
   const tree = useAtcoderLazySegmentTree(nums, {
-    dataUnit() {
+    e() {
       return 0 // !gcd的幺元是0,lcm的幺元是1
     },
-    lazyUnit() {
+    id() {
       return 0
     },
-    mergeChildren(data1, data2) {
+    op(data1, data2) {
       return gcd(data1, data2)
     },
-    updateData(_, childData) {
+    mapping(_, childData) {
       return childData // 无需更新
     },
-    updateLazy() {
+    composition() {
       return 0 // 无需更新
     }
   })
@@ -54,19 +54,19 @@ function subarrayGCD(nums: number[], k: number): number {
 function subarrayLCM(nums: number[], k: number): number {
   const n = nums.length
   const tree = useAtcoderLazySegmentTree(nums, {
-    dataUnit() {
+    e() {
       return 1 // !gcd的幺元是0,lcm的幺元是1
     },
-    lazyUnit() {
+    id() {
       return 0
     },
-    mergeChildren(data1, data2) {
+    op(data1, data2) {
       return lcm(data1, data2)
     },
-    updateData(_, childData) {
+    mapping(_, childData) {
       return childData // 无需更新
     },
-    updateLazy() {
+    composition() {
       return 0 // 无需更新
     }
   })

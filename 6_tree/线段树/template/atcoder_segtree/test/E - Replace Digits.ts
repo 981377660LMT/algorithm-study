@@ -61,20 +61,20 @@ function replaceDigits(n: number, operations: Operation[]): number[] {
     .fill(null)
     .map<Data>(() => [1n, 1])
   const tree = useAtcoderLazySegmentTree<Data, Lazy>(initNums, {
-    dataUnit: () => [0n, 0],
-    lazyUnit: () => -1n,
-    mergeChildren(data1, data2) {
+    e: () => [0n, 0],
+    id: () => -1n,
+    op(data1, data2) {
       const [sum1, length1] = data1
       const [sum2, length2] = data2
       return [(sum1 * pow10[length2] + sum2) % MOD, length1 + length2]
     },
-    updateData(parentLazy, childData) {
+    mapping(parentLazy, childData) {
       if (parentLazy === -1n) return childData
       const length = childData[1]
       childData[0] = (parentLazy * pow10PreSum[length - 1]) % MOD
       return childData
     },
-    updateLazy(parentLazy, childLazy) {
+    composition(parentLazy, childLazy) {
       return parentLazy >= 0n ? parentLazy : childLazy
     }
   })

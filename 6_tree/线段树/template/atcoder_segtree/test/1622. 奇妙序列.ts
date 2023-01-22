@@ -9,19 +9,19 @@ type Lazy = [mul: bigint, add: bigint]
 
 const MOD = BigInt(1e9 + 7)
 const operation: Operation<Data, Lazy> = {
-  dataUnit: () => [0n, 1n],
-  lazyUnit: () => [1n, 0n],
-  mergeChildren(data1, data2) {
+  e: () => [0n, 1n],
+  id: () => [1n, 0n],
+  op(data1, data2) {
     return [(data1[0] + data2[0]) % MOD, data1[1] + data2[1]]
   },
   // 区间和等于原来的区间和乘以mul加上区间的长度乘以add
-  updateData(parentLazy, childData) {
+  mapping(parentLazy, childData) {
     return [
       (childData[0] * parentLazy[0] + BigInt(childData[1]) * parentLazy[1]) % MOD,
       childData[1]
     ]
   },
-  updateLazy(parentLazy, childLazy) {
+  composition(parentLazy, childLazy) {
     return [
       (parentLazy[0] * childLazy[0]) % MOD,
       (parentLazy[0] * childLazy[1] + parentLazy[1]) % MOD

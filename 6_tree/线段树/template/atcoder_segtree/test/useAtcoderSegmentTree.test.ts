@@ -6,11 +6,11 @@ describe('useAtcoderLazySegmentTree', () => {
   // !叠加更新 区间最大值查询
   describe('MaxSegmentTree', () => {
     const maxOperation: Operation<number, number> = {
-      dataUnit: () => -INF,
-      lazyUnit: () => 0,
-      mergeChildren: (a, b) => Math.max(a, b),
-      updateData: (data, lazy) => data + lazy,
-      updateLazy: (lazy1, lazy2) => lazy1 + lazy2
+      e: () => -INF,
+      id: () => 0,
+      op: (a, b) => Math.max(a, b),
+      mapping: (data, lazy) => data + lazy,
+      composition: (lazy1, lazy2) => lazy1 + lazy2
     }
 
     let tree: AtcoderSegmentTree<number, number>
@@ -58,15 +58,15 @@ describe('useAtcoderLazySegmentTree', () => {
   // !叠加更新 区间和查询
   describe('SumSegmentTree', () => {
     const sumOperation: Operation<[sum: number, length: number], number> = {
-      dataUnit: () => [0, 0],
-      lazyUnit: () => 0,
-      mergeChildren(data1, data2) {
+      e: () => [0, 0],
+      id: () => 0,
+      op(data1, data2) {
         return [data1[0] + data2[0], data1[1] + data2[1]]
       },
-      updateData(parentLazy, childData) {
+      mapping(parentLazy, childData) {
         return [childData[0] + parentLazy * childData[1], childData[1]]
       },
-      updateLazy(parentLazy, childLazy) {
+      composition(parentLazy, childLazy) {
         return parentLazy + childLazy
       }
     }
@@ -117,19 +117,19 @@ describe('useAtcoderLazySegmentTree', () => {
       type Lazy = [mul: bigint, add: bigint]
 
       const operation: Operation<Data, Lazy> = {
-        dataUnit: () => [0n, 1n],
-        lazyUnit: () => [1n, 0n],
-        mergeChildren(data1, data2) {
+        e: () => [0n, 1n],
+        id: () => [1n, 0n],
+        op(data1, data2) {
           return [(data1[0] + data2[0]) % MOD, data1[1] + data2[1]]
         },
         // 区间和等于原来的区间和乘以mul加上区间的长度乘以add
-        updateData(parentLazy, childData) {
+        mapping(parentLazy, childData) {
           return [
             (childData[0] * parentLazy[0] + BigInt(childData[1]) * parentLazy[1]) % MOD,
             childData[1]
           ]
         },
-        updateLazy(parentLazy, childLazy) {
+        composition(parentLazy, childLazy) {
           return [
             (parentLazy[0] * childLazy[0]) % MOD,
             (parentLazy[0] * childLazy[1] + parentLazy[1]) % MOD
@@ -181,19 +181,19 @@ describe('useAtcoderLazySegmentTree', () => {
       type Lazy = 0 | 1 // 0表示不反转，1表示反转
 
       const operation: Operation<Data, Lazy> = {
-        dataUnit: () => [0, 0],
-        lazyUnit: () => 0,
-        mergeChildren(data1, data2) {
+        e: () => [0, 0],
+        id: () => 0,
+        op(data1, data2) {
           return [data1[0] + data2[0], data1[1] + data2[1]]
         },
-        updateData(parentLazy, childData) {
+        mapping(parentLazy, childData) {
           if (parentLazy === 1) {
             // eslint-disable-next-line no-param-reassign
             ;[childData[0], childData[1]] = [childData[1], childData[0]]
           }
           return childData
         },
-        updateLazy(parentLazy, childLazy) {
+        composition(parentLazy, childLazy) {
           return (parentLazy ^ childLazy) as Lazy
         }
       }
@@ -234,16 +234,16 @@ describe('useAtcoderLazySegmentTree', () => {
     type Data = [count0: number, count1: number, inv: number]
     type Lazy = 0 | 1 // 0表示不反转，1表示反转
     const operation: Operation<Data, Lazy> = {
-      dataUnit() {
+      e() {
         return [0, 0, 0]
       },
-      lazyUnit() {
+      id() {
         return 0
       },
-      mergeChildren(data1, data2) {
+      op(data1, data2) {
         return [data1[0] + data2[0], data1[1] + data2[1], data1[2] + data2[2] + data1[1] * data2[0]]
       },
-      updateData(parentLazy, childData) {
+      mapping(parentLazy, childData) {
         if (parentLazy === 1) {
           // !4000ms => 2600ms 不创建新数组节省空间、时间
           // eslint-disable-next-line no-param-reassign
@@ -255,7 +255,7 @@ describe('useAtcoderLazySegmentTree', () => {
         }
         return childData
       },
-      updateLazy(parentLazy, childLazy) {
+      composition(parentLazy, childLazy) {
         return (parentLazy ^ childLazy) as Lazy
       }
     }

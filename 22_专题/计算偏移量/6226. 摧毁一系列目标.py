@@ -18,16 +18,16 @@ INF = int(1e20)
 
 class Solution:
     def destroyTargets(self, nums: List[int], space: int) -> int:
-        modGroup = defaultdict(list)
+        group = defaultdict(list)
         for num in nums:
-            modGroup[num % space].append(num)
-        maxLength, res = 0, INF
-        for group in modGroup.values():
-            if len(group) > maxLength:
-                maxLength = len(group)
-                res = min(group)
-            elif len(group) == maxLength:
-                res = min(res, min(group))
+            group[num % space].append(num)
+        max_, res = 0, INF
+        for g in group.values():
+            if len(g) > max_:
+                max_ = len(g)
+                res = min(g)
+            elif len(g) == max_:
+                res = min(res, min(g))
         return res
 
 

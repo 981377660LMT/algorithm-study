@@ -3,6 +3,11 @@ from bisect import bisect_right
 from typing import List, Tuple
 
 # 392. 判断子序列
+def isSubSequence(longer: str, shorter: str) -> bool:
+    if len(shorter) > len(longer):
+        return False
+    it = iter(longer)
+    return all(need in it for need in shorter)
 
 
 class Solution:

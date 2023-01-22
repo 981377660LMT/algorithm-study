@@ -12,6 +12,9 @@ class SegmentTree {
     this._tree = new Uint32Array(size << 2)
   }
 
+  /**
+   * 1 <= left <= right <= size
+   */
   query(left: number, right: number): number {
     if (left < 1) left = 1
     if (right > this._size) right = this._size
@@ -19,6 +22,9 @@ class SegmentTree {
     return this._query(1, left, right, 1, this._size)
   }
 
+  /**
+   * 1 <= left <= right <= size
+   */
   update(left: number, right: number, target: 0 | 1): void {
     if (left < 1) left = 1
     if (right > this._size) right = this._size

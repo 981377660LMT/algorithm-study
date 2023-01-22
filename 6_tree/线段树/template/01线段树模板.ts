@@ -26,6 +26,9 @@ class SegmentTree1 {
     return this._getKthPos(1, 1, this._size, k)
   }
 
+  /**
+   * 1 <= left <= right <= size
+   */
   query(left: number, right: number): number {
     if (left < 1) left = 1
     if (right > this._size) right = this._size
@@ -33,6 +36,9 @@ class SegmentTree1 {
     return this._query(1, left, right, 1, this._size)
   }
 
+  /**
+   * 1 <= left <= right <= size
+   */
   update(left: number, right: number, delta: number): void {
     if (left < 1) left = 1
     if (right > this._size) right = this._size

@@ -21,11 +21,11 @@ func main() {
 	var n, q int
 	fmt.Fscan(in, &n, &q)
 
-	initNums := make([]S, n)
+	initNums := make([]E, n)
 	for i := 0; i < n; i++ {
 		var num int
 		fmt.Fscan(in, &num)
-		initNums[i] = S{sum: num, size: 1}
+		initNums[i] = E{sum: num, size: 1}
 	}
 	tree := NewLazySegTree(initNums)
 
@@ -34,7 +34,7 @@ func main() {
 		fmt.Fscan(in, &op)
 		if op == 0 {
 			fmt.Fscan(in, &left, &right, &mul, &add) // 0<=left<right<=n
-			tree.Update(left, right, F{mul: mul, add: add})
+			tree.Update(left, right, Id{mul: mul, add: add})
 		} else {
 			fmt.Fscan(in, &left, &right) // 0<=left<right<=n
 			fmt.Fprintln(out, tree.Query(left, right).sum)
@@ -43,34 +43,34 @@ func main() {
 
 }
 
-type S = struct{ size, sum int }
-type F = struct{ mul, add int }
+type E = struct{ size, sum int }
+type Id = struct{ mul, add int }
 
-func (tree *LazySegTree) e() S  { return S{size: 1} }
-func (tree *LazySegTree) id() F { return F{mul: 1} }
-func (tree *LazySegTree) op(left, right S) S {
-	return S{
+func (tree *LazySegTree) e() E   { return E{size: 1} }
+func (tree *LazySegTree) id() Id { return Id{mul: 1} }
+func (tree *LazySegTree) op(left, right E) E {
+	return E{
 		size: left.size + right.size,
 		sum:  (left.sum + right.sum) % MOD,
 	}
 }
 
-func (tree *LazySegTree) mapping(lazy F, data S) S {
-	return S{
+func (tree *LazySegTree) mapping(lazy Id, data E) E {
+	return E{
 		size: data.size,
 		sum:  (data.sum*lazy.mul + data.size*lazy.add) % MOD,
 	}
 }
 
-func (tree *LazySegTree) composition(parentLazy, childLazy F) F {
-	return F{
+func (tree *LazySegTree) composition(parentLazy, childLazy Id) Id {
+	return Id{
 		mul: (parentLazy.mul * childLazy.mul) % MOD,
 		add: (parentLazy.mul*childLazy.add + parentLazy.add) % MOD,
 	}
 }
 
 func NewLazySegTree(
-	leaves []S,
+	leaves []E,
 ) *LazySegTree {
 	tree := &LazySegTree{}
 
@@ -78,8 +78,8 @@ func NewLazySegTree(
 	tree.n = n
 	tree.log = int(bits.Len(uint(n - 1)))
 	tree.size = 1 << tree.log
-	tree.data = make([]S, 2*tree.size)
-	tree.lazy = make([]F, tree.size)
+	tree.data = make([]E, 2*tree.size)
+	tree.lazy = make([]Id, tree.size)
 	for i := range tree.data {
 		tree.data[i] = tree.e()
 	}
@@ -100,13 +100,13 @@ type LazySegTree struct {
 	n    int
 	log  int
 	size int
-	data []S
-	lazy []F
+	data []E
+	lazy []Id
 }
 
 // 查询切片[left:right]的值
 //   0<=left<=right<=len(tree.data)
-func (tree *LazySegTree) Query(left, right int) S {
+func (tree *LazySegTree) Query(left, right int) E {
 	if left == right {
 		return tree.e()
 	}
@@ -136,13 +136,13 @@ func (tree *LazySegTree) Query(left, right int) S {
 	return tree.op(sml, smr)
 }
 
-func (tree *LazySegTree) QueryAll() S {
+func (tree *LazySegTree) QueryAll() E {
 	return tree.data[1]
 }
 
 // 更新切片[left:right]的值
 //   0<=left<=right<=len(tree.data)
-func (tree *LazySegTree) Update(left, right int, f F) {
+func (tree *LazySegTree) Update(left, right int, f Id) {
 	if left == right {
 		return
 	}
@@ -182,7 +182,7 @@ func (tree *LazySegTree) Update(left, right int, f F) {
 }
 
 // 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (tree *LazySegTree) MinLeft(right int, predicate func(data S) bool) int {
+func (tree *LazySegTree) MinLeft(right int, predicate func(data E) bool) int {
 	if right == 0 {
 		return 0
 	}
@@ -222,7 +222,7 @@ func (tree *LazySegTree) MinLeft(right int, predicate func(data S) bool) int {
 }
 
 // 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-func (tree *LazySegTree) MaxRight(left int, predicate func(data S) bool) int {
+func (tree *LazySegTree) MaxRight(left int, predicate func(data E) bool) int {
 	if left == tree.n {
 		return tree.n
 	}
@@ -270,7 +270,7 @@ func (tree *LazySegTree) pushDown(root int) {
 	tree.lazy[root] = tree.id()
 }
 
-func (tree *LazySegTree) propagate(root int, f F) {
+func (tree *LazySegTree) propagate(root int, f Id) {
 	tree.data[root] = tree.mapping(f, tree.data[root])
 	// !叶子结点不需要更新lazy
 	if root < tree.size {

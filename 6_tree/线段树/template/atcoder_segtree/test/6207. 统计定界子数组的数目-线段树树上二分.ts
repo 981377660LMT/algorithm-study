@@ -17,37 +17,37 @@ const INF = 2e15
 function countSubarrays(nums: number[], minK: number, maxK: number): number {
   const n = nums.length
   const minTree = useAtcoderLazySegmentTree(nums, {
-    dataUnit() {
+    e() {
       return INF
     },
-    lazyUnit() {
+    id() {
       return 0
     },
-    mergeChildren(data1, data2) {
+    op(data1, data2) {
       return Math.min(data1, data2)
     },
-    updateData(_, childData) {
+    mapping(_, childData) {
       return childData // 无需更新
     },
-    updateLazy() {
+    composition() {
       return 0 // 无需更新
     }
   })
 
   const maxTree = useAtcoderLazySegmentTree(nums, {
-    dataUnit() {
+    e() {
       return 0
     },
-    lazyUnit() {
+    id() {
       return 0
     },
-    mergeChildren(data1, data2) {
+    op(data1, data2) {
       return Math.max(data1, data2)
     },
-    updateData(_, childData) {
+    mapping(_, childData) {
       return childData // 无需更新
     },
-    updateLazy() {
+    composition() {
       return 0 // 无需更新
     }
   })
