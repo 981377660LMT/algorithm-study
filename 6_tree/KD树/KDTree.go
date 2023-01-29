@@ -34,8 +34,8 @@ func main() {
 	})
 
 	for i := 0; i < n; i++ {
-		minDist, pid := kdtree.FindNearest(points[i], float64(2*n))
-		fmt.Fprint(out, minDist, pid, " ")
+		minDist, _ := kdtree.FindNearest(points[i], float64(2*n))
+		fmt.Fprint(out, minDist, " ")
 	}
 }
 
@@ -77,10 +77,11 @@ func NewKDTree(points []Point, calDist func(p1, p2 Point) float64) *KDTree {
 	return res
 }
 
-// 查找距离point最近的点(不包含与point重合的点), 返回距离和id
+// !查找距离point最近的点(`不包含与point重合的点`), 返回距离和id
 //  upperBound: 从上面传过来的已知最近点，或者看做裁剪范围
+//  如果不存在距离小于upperBound的点，返回upperBound和-1
 func (kdtree *KDTree) FindNearest(point Point, upperBound float64) (float64, int) {
-	return kdtree.findNearest(kdtree.root, point, 0, -1, upperBound)
+	return kdtree.findNearest(kdtree.root, point, 0, upperBound)
 }
 
 func (kdtree *KDTree) build(pointsWithID []PointWithID, depth int) *KDTreeNode {
@@ -102,18 +103,16 @@ func (kdtree *KDTree) build(pointsWithID []PointWithID, depth int) *KDTreeNode {
 	return res
 }
 
-func (kdtree *KDTree) findNearest(node *KDTreeNode, target Point, depth, parentId int, upperBound float64) (float64, int) {
-	if node == nil {
-		return upperBound, parentId
-	}
-
+func (kdtree *KDTree) findNearest(node *KDTreeNode, target Point, depth int, upperBound float64) (float64, int) {
 	dist := kdtree.calDist(node.pointWithId.Point, target)
 	if dist == 0 { // !移除自己(重合时)
 		dist = upperBound
 	}
 
+	resId := -1
 	if dist < upperBound {
 		upperBound = dist
+		resId = node.pointWithId.id
 	}
 
 	axis := depth % kdtree.dim
@@ -122,13 +121,20 @@ func (kdtree *KDTree) findNearest(node *KDTreeNode, target Point, depth, parentI
 		near, far = far, near
 	}
 
-	resId := -1
-	upperBound, resId = kdtree.findNearest(near, target, depth+1, node.pointWithId.id, upperBound)
-	if upperBound > math.Abs(float64(node.pointWithId.Point[axis]-target[axis])) {
-		tmpDist, tmpId := kdtree.findNearest(far, target, depth+1, node.pointWithId.id, upperBound)
-		if tmpDist < upperBound {
-			upperBound = tmpDist
-			resId = tmpId
+	if near != nil {
+		distCand1, idCand1 := kdtree.findNearest(near, target, depth+1, upperBound)
+		if distCand1 < upperBound {
+			upperBound = distCand1
+			resId = idCand1
+		}
+	}
+
+	// !复杂度全靠这个剪枝
+	if far != nil && upperBound > math.Abs(float64(node.pointWithId.Point[axis]-target[axis])) {
+		distCand2, idCand2 := kdtree.findNearest(far, target, depth+1, upperBound)
+		if distCand2 < upperBound {
+			upperBound = distCand2
+			resId = idCand2
 		}
 	}
 
