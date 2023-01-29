@@ -542,6 +542,17 @@ def convolution(a, b):
     return res
 
 
+def multiConvolution(arr):
+    if not arr:
+        return []
+    if len(arr) == 1:
+        return arr[0]
+    if len(arr) == 2:
+        return convolution(arr[0], arr[1])
+    m = len(arr) >> 1
+    return convolution(multiConvolution(arr[:m]), multiConvolution(arr[m:]))
+
+
 def autocorrelation(a):
     n = len(a)
     a1 = autocorrelation1(a.copy())[: 2 * n - 1]

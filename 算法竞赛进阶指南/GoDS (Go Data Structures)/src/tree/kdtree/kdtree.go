@@ -177,16 +177,6 @@ func (o *kdNode) add(p [2]int, val, dim int) *kdNode {
 	return o
 }
 
-// 矩形 X-Y 在矩形 x-y 内
-func inRect(x1, y1, x2, y2, X1, Y1, X2, Y2 int) bool {
-	return x1 <= X1 && X2 <= x2 && y1 <= Y1 && Y2 <= y2
-}
-
-// 矩形 X-Y 在矩形 x-y 外
-func outRect(x1, y1, x2, y2, X1, Y1, X2, Y2 int) bool {
-	return X2 < x1 || X1 > x2 || Y2 < y1 || Y1 > y2
-}
-
 func (o *kdNode) query(x1, y1, x2, y2 int) (res int) {
 	if o == nil || outRect(x1, y1, x2, y2, o.mi[0], o.mi[1], o.mx[0], o.mx[1]) {
 		return
@@ -199,4 +189,14 @@ func (o *kdNode) query(x1, y1, x2, y2 int) (res int) {
 	}
 	res += o.lr[0].query(x1, y1, x2, y2) + o.lr[1].query(x1, y1, x2, y2)
 	return
+}
+
+// 矩形 X-Y 在矩形 x-y 内
+func inRect(x1, y1, x2, y2, X1, Y1, X2, Y2 int) bool {
+	return x1 <= X1 && X2 <= x2 && y1 <= Y1 && Y2 <= y2
+}
+
+// 矩形 X-Y 在矩形 x-y 外
+func outRect(x1, y1, x2, y2, X1, Y1, X2, Y2 int) bool {
+	return X2 < x1 || X1 > x2 || Y2 < y1 || Y1 > y2
 }

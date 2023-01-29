@@ -23,7 +23,7 @@ class BITArray {
    * Build a tree from an array-like object using dp.
    * O(n) time.
    */
-  private static _build(arrayLike: ArrayLike<number>): number[] {
+  private static _buildTree(arrayLike: ArrayLike<number>): number[] {
     const tree = Array(arrayLike.length + 1).fill(0)
     for (let i = 1; i < tree.length; i++) {
       tree[i] += arrayLike[i - 1]
@@ -36,13 +36,19 @@ class BITArray {
   readonly length: number
   private readonly _tree: number[]
 
+  /**
+   * 指定长度或者从类数组建立树状数组.
+   *
+   * @warning
+   * !如果需要使用`值域树状数组`，需要在构造函数中传入`长度n(值域1-n)`而不是类数组.
+   */
   constructor(lengthOrArrayLike: number | ArrayLike<number>) {
     if (typeof lengthOrArrayLike === 'number') {
       this.length = lengthOrArrayLike
       this._tree = Array(lengthOrArrayLike + 1).fill(0)
     } else {
       this.length = lengthOrArrayLike.length
-      this._tree = BITArray._build(lengthOrArrayLike)
+      this._tree = BITArray._buildTree(lengthOrArrayLike)
     }
   }
 

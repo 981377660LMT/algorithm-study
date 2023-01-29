@@ -12,3 +12,8 @@ kd 树是一个二叉树结构，它的每一个节点记载了【特征坐标�
   https://github.dev/EndlessCheng/codeforces-go/blob/master/misc/atcoder/abc274/e
   https://www.luogu.com.cn/blog/lc-2018-Canton/solution-p4148
   kd 树维护二维平面上的点集，查询到给定点的最近的距离。
+
+- 博客
+  https://www.luogu.com.cn/blog/lc-2018-Canton/solution-p4148
+  https://oi-wiki.org/ds/kdt/
+  https://github.dev/EndlessCheng/codeforces-go/tree/master/copypasta

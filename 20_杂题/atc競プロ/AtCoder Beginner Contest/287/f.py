@@ -1,14 +1,33 @@
-"""
-Reference
-https://github.com/atcoder/ac-library/blob/master/atcoder/convolution.hpp
-https://github.com/atcoder/ac-library/blob/master/atcoder/internal_math.hpp
-https://github.com/atcoder/ac-library/blob/master/document_en/convolution.md
-https://github.com/atcoder/ac-library/blob/master/document_ja/convolution.md
+import sys
+from typing import List
 
-注意此模板只能用于pypy3 
-python3.8会超时,需要numpy的fft
-"""
+sys.setrecursionlimit(int(1e9))
+input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = 998244353
+INF = int(4e18)
+# N 頂点の木があります。頂点には
+# 1 から
+# N までの番号が付いており、
+# i 番目の辺は頂点
+# a
+# i
+# ​
+#   と頂点
+# b
+# i
+# ​
+#   を結んでいます。
+
+# x=1,2,…,N に対して次の問題を解いてください。
+
+# 木の頂点の部分集合
+# V であって空でないものは
+# 2
+# N
+#  −1 通り存在するが、そのうち
+# V による誘導部分グラフの連結成分数が
+# x であるようなものは何通りあるかを
+# 998244353 で割った余りを求めよ。
 
 
 def primitive_root(m):
@@ -219,6 +238,7 @@ def convolution(a, b):
         a[i] %= MOD
     return a
 
+
 def multiConvolution(arr):
     if not arr:
         return []
@@ -229,15 +249,27 @@ def multiConvolution(arr):
     m = len(arr) >> 1
     return convolution(multiConvolution(arr[:m]), multiConvolution(arr[m:]))
 
-import sys
 
-sys.setrecursionlimit(int(1e9))
-input = lambda: sys.stdin.readline().rstrip("\r\n")
-MOD = int(1e9 + 7)
-INF = int(4e18)
-
+# dp[i][v]表示以 i 为根的子树中，连通块数为 v 的方案数
+# oiwiki树上背包O(n^2)/fft
 if __name__ == "__main__":
-    n, m = map(int, input().split())
-    a = list(map(int, input().split()))
-    b = list(map(int, input().split()))
-    print(*convolution(a, b))
+    n = int(input())
+    adjList = [[] for _ in range(n)]
+    for _ in range(n - 1):
+        a, b = map(int, input().split())
+        adjList[a - 1].append(b - 1)
+        adjList[b - 1].append(a - 1)
+
+    def dfs(cur: int, pre: int) -> List[int]:
+        """每个点选还是不选儿子"""
+        res = [1, 1] + [0] * (n - 1)
+        for next in adjList[cur]:
+            if next == pre:
+                continue
+            nextRes = dfs(next, cur)
+            res = convolution(res, nextRes)[: n + 1]
+            print(res, cur, pre)
+        return res
+
+    res = dfs(0, -1)[1:]
+    print(*res, sep="\n")

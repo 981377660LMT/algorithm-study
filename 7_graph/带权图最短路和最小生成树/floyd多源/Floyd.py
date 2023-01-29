@@ -1,3 +1,7 @@
+"""
+有些场合可以搭配bitset(状态压缩)达到64倍高速化效果
+"""
+
 from itertools import product
 from typing import List
 

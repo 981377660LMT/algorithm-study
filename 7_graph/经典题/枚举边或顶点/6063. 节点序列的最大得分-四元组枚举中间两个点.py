@@ -3,7 +3,9 @@ from heapq import heappush
 from collections import defaultdict
 
 
-# 4 <= n <= 5 * 104
+# 4 <= n <= 5e4
+# 请你返回一个长度为 4 的合法节点序列的最大分数。如果不存在这样的序列，请你返回 -1 。
+# !四元组枚举中间两个点
 
 
 class Solution:
@@ -13,23 +15,24 @@ class Solution:
         # 请你返回一个长度为 4 的合法节点序列的最大分数。如果不存在这样的序列，请你返回 -1 。
 
         # dfs不可能 只需要枚举边即可
-        adjMap = defaultdict(list)
+
+        n = len(scores)
+        adjList = [[] for _ in range(n)]
         for v1, v2 in edges:
-            heappush(adjMap[v1], (-scores[v2], v2))
-            heappush(adjMap[v2], (-scores[v1], v1))
+            heappush(adjList[v1], (-scores[v2], v2))
+            heappush(adjList[v2], (-scores[v1], v1))
 
         res = -1
         for v1, v2 in edges:
             score1, score2 = scores[v1], scores[v2]
-            nei1 = adjMap[v1][:5]
-            nei2 = adjMap[v2][:5]
+            nei1 = adjList[v1][:5]
+            nei2 = adjList[v2][:5]
             for score3, v3 in nei1:
                 score3 = -score3
                 for score4, v4 in nei2:
                     score4 = -score4
                     if len(set([v1, v2, v3, v4])) == 4:
                         res = max(res, score1 + score2 + score3 + score4)
-
         return res
 
 
@@ -172,4 +175,3 @@ print(
 # 286632
 # 预期：
 # 292097
-
