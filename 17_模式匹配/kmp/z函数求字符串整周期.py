@@ -3,7 +3,7 @@ from typing import List
 
 def getZ(string: str) -> List[int]:
     """z算法求字符串公共前后缀的长度
-    
+
     z[0]=0
     z[i]是s[i:]与s的最长公共前缀(LCP)的长度 (i>=1)
     """
@@ -20,8 +20,7 @@ def getZ(string: str) -> List[int]:
 
 
 def getMinPeriod(s: str) -> int:
-    """求字符串的最小周期
-    """
+    """求字符串的最小周期"""
     z = getZ(s)
     for i in range(1, len(s)):
         if len(s) % i == 0 and z[i] == len(s) - i:
@@ -29,8 +28,7 @@ def getMinPeriod(s: str) -> int:
     return -1
 
 
-if __name__ == '__main__':
-    assert getMinPeriod('aabaabaabaab') == 3
-    assert getMinPeriod('aaaaa') == 1
-    assert getMinPeriod('abcde') == -1
-
+if __name__ == "__main__":
+    assert getMinPeriod("aabaabaabaab") == 3
+    assert getMinPeriod("aaaaa") == 1
+    assert getMinPeriod("abcde") == -1

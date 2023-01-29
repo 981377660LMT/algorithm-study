@@ -1,42 +1,32 @@
-// 静态KD树查询每个点的最近点(不包含自己)
-// !注意查找最近点kdtree复杂度最坏会退化到O(n)
-// KDTree查找最近点的原理，就是在搜索过程中先近后远，
-// 然后搜索较远分支时，用已经搜索到的最近距离直接成片的剪枝
-// 从上面传过来的已知最近点，或者看做裁剪范围
-// https://baike.baidu.com/item/%E9%82%BB%E8%BF%91%E7%AE%97%E6%B3%95/1151153?fromtitle=knn&fromid=3479559&fr=aladdin
+// 将全部环存在KD-Tree上，然后遍历玩具，找到距离当前玩具最近的点(环)，判断一下
 
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"math"
-	"os"
 	"sort"
 )
 
-func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	points := make([]Point, n)
-	for i := 0; i < n; i++ {
-		var x int
-		fmt.Fscan(in, &x)
-		points[i] = Point{x, i}
+func circleGame(toys [][]int, circles [][]int, r int) int {
+	points := make([]Point, len(circles))
+	for i, circle := range circles {
+		points[i] = Point{circle[0], circle[1]}
 	}
 
-	kdtree := NewKDTree(points, func(p1, p2 Point) float64 {
-		return math.Abs(float64(p1[0]-p2[0])) + math.Abs(float64(p1[1]-p2[1]))
+	kdTree := NewKDTree(points, func(p1, p2 Point) float64 {
+		dx, dy := float64(p1[0]-p2[0]), float64(p1[1]-p2[1])
+		return math.Sqrt(dx*dx + dy*dy)
 	})
 
-	for i := 0; i < n; i++ {
-		minDist, _ := kdtree.FindNearest(points[i], float64(2*n), false)
-		fmt.Fprint(out, minDist, " ")
+	res := 0
+	for _, toy := range toys {
+		minDist, _ := kdTree.FindNearest(Point{toy[0], toy[1]}, float64(r), true)
+		if minDist+float64(toy[2]) <= float64(r) {
+			res++
+		}
 	}
+
+	return res
 }
 
 type Point []int

@@ -11,6 +11,7 @@ class Solution:
         for toy in toys:
             nearest: float = kdtree.query(toy[:-1], k=1, workers=-1)[0]
             res += nearest + toy[-1] <= r
+            print(nearest, toy[-1], r, res)
         return res
 
 

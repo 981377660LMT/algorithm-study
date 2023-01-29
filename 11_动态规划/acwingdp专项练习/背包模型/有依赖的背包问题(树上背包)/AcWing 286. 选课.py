@@ -3,6 +3,7 @@
 # 为自己确定一个选课方案，选m门课，使得你能得到的学分最多，并且必须满足先修条件。
 # 课程编号1-n
 # 时间复杂度 O(n3)
+
 from collections import defaultdict
 from functools import lru_cache
 
@@ -35,4 +36,3 @@ def dfs(root: int, select: int) -> int:
 
 
 print(dfs(0, m))
-
