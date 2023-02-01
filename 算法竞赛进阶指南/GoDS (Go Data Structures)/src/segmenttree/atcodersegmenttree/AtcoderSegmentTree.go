@@ -1,4 +1,12 @@
-package segmenttree
+// E:线段树维护的值的类型
+// Id:更新操作的值的类型/懒标记的值的类型
+// e:线段树维护的值的幺元
+// id:更新操作/懒标记的幺元
+// op:合并左右区间的值
+// mapping:父结点的懒标记更新子结点的值
+// composition:合并父结点的懒标记和子结点的懒标记(单点修改时不需要)
+
+package main
 
 import (
 	"bufio"
@@ -8,7 +16,7 @@ import (
 )
 
 // https://atcoder.jp/contests/practice2/tasks/practice2_l
-func demo() {
+func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -19,7 +27,7 @@ func demo() {
 	for i := range nums {
 		var num int
 		fmt.Fscan(in, &num)
-		nums[i] = E{Zero: 1 - num, One: num}
+		nums[i] = E{zero: 1 - num, one: num}
 	}
 
 	tree := NewLazySegTree(nums)
@@ -31,47 +39,33 @@ func demo() {
 		if op == 1 {
 			tree.Update(left, right, true)
 		} else {
-			fmt.Fprintln(out, tree.Query(left, right).Inversion)
+			fmt.Fprintln(out, tree.Query(left, right).inv)
 		}
 	}
 }
 
-// !线段树维护的值的类型
-type E = struct {
-	Zero, One, Inversion int
-}
-
-// !更新操作的值的类型/懒标记的值的类型
+type E = struct{ zero, one, inv int }
 type Id = bool
 
-// !线段树维护的值的幺元.
-func (tree *LazySegTree) e() E { return E{} }
-
-// !更新操作/懒标记的幺元
+func (tree *LazySegTree) e() E   { return E{} }
 func (tree *LazySegTree) id() Id { return false }
-
-// !合并左右区间的值
 func (tree *LazySegTree) op(left, right E) E {
 	return E{
-		Zero:      left.Zero + right.Zero,
-		One:       left.One + right.One,
-		Inversion: left.Inversion + right.Inversion + left.One*right.Zero,
+		zero: left.zero + right.zero,
+		one:  left.one + right.one,
+		inv:  left.inv + right.inv + left.one*right.zero,
 	}
 }
-
-// !父结点的懒标记更新子结点的值
 func (tree *LazySegTree) mapping(lazy Id, data E) E {
 	if !lazy {
 		return data
 	}
 	return E{
-		Zero:      data.One,
-		One:       data.Zero,
-		Inversion: data.One*data.Zero - data.Inversion,
+		zero: data.one,
+		one:  data.zero,
+		inv:  data.one*data.zero - data.inv,
 	}
 }
-
-// !合并父结点的懒标记和子结点的懒标记
 func (tree *LazySegTree) composition(parentLazy, childLazy Id) Id {
 	return (parentLazy && !childLazy) || (!parentLazy && childLazy)
 }
@@ -90,11 +84,11 @@ type LazySegTree struct {
 }
 
 func NewLazySegTree(
-	v []E,
+	leaves []E,
 ) *LazySegTree {
 	tree := &LazySegTree{}
 
-	n := int(len(v))
+	n := int(len(leaves))
 	tree.n = n
 	tree.log = int(bits.Len(uint(n - 1)))
 	tree.size = int(1) << tree.log
@@ -106,8 +100,8 @@ func NewLazySegTree(
 	for i := range tree.lazy {
 		tree.lazy[i] = tree.id()
 	}
-	for i := int(0); i < n; i++ {
-		tree.data[tree.size+i] = v[i]
+	for i := 0; i < n; i++ {
+		tree.data[tree.size+i] = leaves[i]
 	}
 	for i := tree.size - 1; i >= 1; i-- {
 		tree.pushUp(i)
@@ -196,7 +190,7 @@ func (tree *LazySegTree) Update(left, right int, f Id) {
 	}
 	left = l2
 	right = r2
-	for i := int(1); i <= tree.log; i++ {
+	for i := 1; i <= tree.log; i++ {
 		if ((left >> i) << i) != left {
 			tree.pushUp(left >> i)
 		}
@@ -268,7 +262,7 @@ func (tree *LazySegTree) MaxRight(left int, predicate func(data E) bool) int {
 				left *= 2
 				if predicate(tree.op(res, tree.data[left])) {
 					res = tree.op(res, tree.data[left])
-					left--
+					left++
 				}
 			}
 
@@ -283,6 +277,15 @@ func (tree *LazySegTree) MaxRight(left int, predicate func(data E) bool) int {
 	}
 
 	return tree.n
+}
+
+// 单点查询(不需要 pushUp/op 操作时使用)
+func (tree *LazySegTree) Get(index int) E {
+	index += tree.size
+	for i := tree.log; i >= 1; i-- {
+		tree.pushDown(index >> i)
+	}
+	return tree.data[index]
 }
 
 func (tree *LazySegTree) pushUp(root int) {

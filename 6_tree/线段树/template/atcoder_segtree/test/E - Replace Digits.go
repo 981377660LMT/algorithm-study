@@ -296,7 +296,7 @@ func (tree *LazySegTree) MaxRight(left int, predicate func(data S) bool) int {
 				left *= 2
 				if predicate(tree.mergeChildren(res, tree.data[left])) {
 					res = tree.mergeChildren(res, tree.data[left])
-					left--
+					left++
 				}
 			}
 

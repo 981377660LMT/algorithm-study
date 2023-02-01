@@ -6,7 +6,7 @@ class LinearBase:
     __slots__ = ("bases", "_rows", "_bit")
 
     @staticmethod
-    def create(nums: List[int]) -> "LinearBase":
+    def fromlist(nums: List[int]) -> "LinearBase":
         res = LinearBase()
         for x in nums:
             res.add(x)
@@ -19,6 +19,7 @@ class LinearBase:
         self._bit = bit  # 最大数的位数
 
     def add(self, x: int) -> bool:
+        """插入一个向量,如果插入成功返回True,否则返回False"""
         x = self._normalize(x)
         if x == 0:
             return False
@@ -36,8 +37,8 @@ class LinearBase:
                 res.append(v)
         self.bases = res
 
-    def kth(self, k: int) -> int:
-        """子序列第k小的异或 1<=k<=2**len(self._e)"""
+    def kthXor(self, k: int) -> int:
+        """子序列(子集)第k小的异或 1<=k<=2**len(self.bases)"""
         assert 1 <= k <= 2 ** len(self.bases)
         k -= 1
         res = 0
@@ -58,6 +59,6 @@ class LinearBase:
 
 if __name__ == "__main__":
     nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 999]
-    lb = LinearBase.create(nums)
-    print(lb.kth(2))
-    print(lb.kth(17), lb.bases)
+    lb = LinearBase.fromlist(nums)
+    print(lb.kthXor(2))
+    print(lb.kthXor(17), lb.bases)

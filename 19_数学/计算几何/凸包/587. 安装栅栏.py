@@ -31,6 +31,7 @@ def calConvexHull(points: List[Point]) -> List[Point]:
         while len(stack) >= 2 and calCross(stack[-2], stack[-1], points[i]) < 0:
             stack.pop()
         stack.append(tuple(points[i]))
+
     return list(set(stack))
 
 

@@ -1,5 +1,10 @@
-// !仿射变换 Range Affine Range Query
-// 区间赋值 区间加 区间和查询
+// meituan-004. 小团的复制粘贴 (美团笔试)
+
+// 然后输入 m 个操作：
+// 操作 1 形如 1 x y k，表示把 a 的区间 [x,x+k-1] 的元素拷贝到 b 的区间 [y,y+k-1] 上（输入保证下标不越界）。
+// 操作 2 形如 2 x，输出 b[x]。
+// 区间赋值 单点查询
+// !把每次操作1想象成一次区间染色操作，操作2想象成询问颜色+根据对应颜色（操作1）确定数值
 
 package main
 
@@ -11,62 +16,86 @@ import (
 )
 
 const INF int = 1e18
-const MOD int = 998244353
 
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-
-	initNums := make([]E, n)
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
 	for i := 0; i < n; i++ {
-		var num int
-		fmt.Fscan(in, &num)
-		initNums[i] = E{sum: num, size: 1}
+		fmt.Fscan(in, &nums[i])
 	}
-	tree := NewLazySegTree(initNums)
 
+	leaves := make([]E, n)
+	for i := 0; i < n; i++ {
+		leaves[i] = INF
+	}
+	tree := NewLazySegTree(leaves)
+
+	var q int
+	fmt.Fscan(in, &q)
 	for i := 0; i < q; i++ {
-		var op, left, right, mul, add int
+		var op uint8
 		fmt.Fscan(in, &op)
-		if op == 0 {
-			fmt.Fscan(in, &left, &right, &mul, &add) // 0<=left<right<=n
-			tree.Update(left, right, Id{mul: mul, add: add})
+		if op == 1 {
+			var xLen, xi, yi int
+			fmt.Fscan(in, &xLen, &xi, &yi)
+			xi--
+			yi--
+			tree.Update(yi, yi+xLen, xi-yi)
 		} else {
-			fmt.Fscan(in, &left, &right) // 0<=left<right<=n
-			fmt.Fprintln(out, tree.Query(left, right).sum)
+			var i int
+			fmt.Fscan(in, &i)
+			i--
+			// res := tree.Get(i)
+			res := tree.Query(i, i+1)
+			if res == INF {
+				fmt.Fprintln(out, -1)
+			} else {
+				fmt.Fprintln(out, nums[i+res]) // !根据偏移量输出答案
+			}
 		}
 	}
-
 }
 
-type E = struct{ size, sum int }
-type Id = struct{ mul, add int }
+type E = int  // 维护最近一次更新时 (xStart-yStart) 的值
+type Id = int // (xStart-yStart) 染色
 
-func (tree *LazySegTree) e() E   { return E{size: 1} }
-func (tree *LazySegTree) id() Id { return Id{mul: 1} }
-func (tree *LazySegTree) op(left, right E) E {
-	return E{
-		size: left.size + right.size,
-		sum:  (left.sum + right.sum) % MOD,
+func (tree *LazySegTree) e() E   { return INF }
+func (tree *LazySegTree) id() Id { return INF }
+func (tree *LazySegTree) op(left, right E) E { // !不需要pushUp 但是query合并左右答案时会用到op
+	if left == INF {
+		return right
 	}
+	return left
 }
-
 func (tree *LazySegTree) mapping(lazy Id, data E) E {
-	return E{
-		size: data.size,
-		sum:  (data.sum*lazy.mul + data.size*lazy.add) % MOD,
+	if lazy == INF {
+		return data
 	}
+	return lazy
+}
+func (tree *LazySegTree) composition(parentLazy, childLazy Id) Id {
+	if parentLazy == INF {
+		return childLazy
+	}
+	return parentLazy
 }
 
-func (tree *LazySegTree) composition(parentLazy, childLazy Id) Id {
-	return Id{
-		mul: (parentLazy.mul * childLazy.mul) % MOD,
-		add: (parentLazy.mul*childLazy.add + parentLazy.add) % MOD,
-	}
+//
+//
+//
+//
+// !template
+type LazySegTree struct {
+	n    int
+	log  int
+	size int
+	data []E
+	lazy []Id
 }
 
 func NewLazySegTree(
@@ -77,7 +106,7 @@ func NewLazySegTree(
 	n := int(len(leaves))
 	tree.n = n
 	tree.log = int(bits.Len(uint(n - 1)))
-	tree.size = 1 << tree.log
+	tree.size = int(1) << tree.log
 	tree.data = make([]E, 2*tree.size)
 	tree.lazy = make([]Id, tree.size)
 	for i := range tree.data {
@@ -95,21 +124,19 @@ func NewLazySegTree(
 	return tree
 }
 
-// !template
-type LazySegTree struct {
-	n    int
-	log  int
-	size int
-	data []E
-	lazy []Id
-}
-
-// 查询切片[left:right]的值
+// 区间查询切片[left:right]的值
 //   0<=left<=right<=len(tree.data)
 func (tree *LazySegTree) Query(left, right int) E {
-	if left == right {
+	if left < 0 {
+		left = 0
+	}
+	if right > tree.n {
+		right = tree.n
+	}
+	if left >= right {
 		return tree.e()
 	}
+
 	left += tree.size
 	right += tree.size
 	for i := tree.log; i >= 1; i-- {
@@ -140,12 +167,19 @@ func (tree *LazySegTree) QueryAll() E {
 	return tree.data[1]
 }
 
-// 更新切片[left:right]的值
+// 区间更新切片[left:right]的值
 //   0<=left<=right<=len(tree.data)
 func (tree *LazySegTree) Update(left, right int, f Id) {
-	if left == right {
+	if left < 0 {
+		left = 0
+	}
+	if right > tree.n {
+		right = tree.n
+	}
+	if left >= right {
 		return
 	}
+
 	left += tree.size
 	right += tree.size
 	for i := tree.log; i >= 1; i-- {
@@ -171,7 +205,7 @@ func (tree *LazySegTree) Update(left, right int, f Id) {
 	}
 	left = l2
 	right = r2
-	for i := 1; i <= tree.log; i++ {
+	for i := int(1); i <= tree.log; i++ {
 		if ((left >> i) << i) != left {
 			tree.pushUp(left >> i)
 		}
@@ -258,6 +292,15 @@ func (tree *LazySegTree) MaxRight(left int, predicate func(data E) bool) int {
 	}
 
 	return tree.n
+}
+
+// 单点查询
+func (tree *LazySegTree) Get(index int) E {
+	index += tree.size
+	for i := tree.log; i >= 1; i-- {
+		tree.pushDown(index >> i)
+	}
+	return tree.data[index]
 }
 
 func (tree *LazySegTree) pushUp(root int) {

@@ -1,5 +1,7 @@
 """
-有些场合可以搭配bitset(状态压缩)达到64倍高速化效果
+1. 有些场合可以搭配bitset(状态压缩)达到64倍高速化效果
+   floyd算法中的第一层循环的含义就是仅考虑1..k号点时,各个点之间的距离,
+   这个距离可以换成连通性,这样可以用 bitset优化运算
 """
 
 from itertools import product
@@ -67,3 +69,14 @@ if __name__ == "__main__":
             cur = pre[start][cur]
             res.append(cur)
         return res[::-1]
+
+    # !4.Floyd + bitset 维护有向图连通性 (第k轮连通时距离就为k)
+    dp = [1 << i for i in range(n)]
+    for u, v in edges:
+        dp[u] |= 1 << v
+    for k in range(n):
+        for i in range(n):
+            if dp[i] & (1 << k):
+                dp[i] |= dp[k]
+        for i in range(q):  # 查询距离
+            ...

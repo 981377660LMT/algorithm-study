@@ -5,6 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "go",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${file}" // 单个文件debug
+    },
+    {
       "name": "Python: 当前文件",
       "type": "python",
       "request": "launch",

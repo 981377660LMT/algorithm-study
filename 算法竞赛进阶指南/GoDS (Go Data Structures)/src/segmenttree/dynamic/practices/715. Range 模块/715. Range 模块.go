@@ -35,25 +35,28 @@ type Lazy = int
 
 func e(left, right int) Data { return Data{size: right - left + 1} }
 func id() Lazy               { return -1 } // !-1表示monoid 0表示需要染成0 1表示需要染成1
-func op(leftData, rightData Data) Data {
-	return Data{leftData.size + rightData.size, leftData.sum + rightData.sum}
+func op(left, right Data) Data {
+	return Data{left.size + right.size, left.sum + right.sum}
 }
-func mapping(parentLazy Lazy, childData Data) Data {
-	if parentLazy == -1 {
-		return childData
+func mapping(parent Lazy, child Data) Data {
+	if parent == -1 {
+		return child
 	}
-	if parentLazy == 0 {
-		return Data{childData.size, 0}
+	if parent == 0 {
+		return Data{child.size, 0}
 	}
-	return Data{childData.size, childData.size}
+	return Data{child.size, child.size}
 }
-func composition(parentLazy, childLazy Lazy) Lazy {
-	if parentLazy == -1 {
-		return childLazy
+func composition(parent, child Lazy) Lazy {
+	if parent == -1 {
+		return child
 	}
-	return parentLazy
+	return parent
 }
 
+//
+//
+//
 // 指定区间上下界建立线段树
 func CreateSegmentTree(lower, upper int) *Node {
 	root := newNode(lower, upper)

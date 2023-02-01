@@ -3,7 +3,15 @@
 
 package dynamicsegmenttree
 
-import "fmt"
+import (
+	"fmt"
+	"runtime/debug"
+)
+
+// atcoder等使用单组样例测试的oj上,禁用gc会快很多
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 func main() {
 	segmentTree1 := CreateSegmentTree(1, 1e9)
@@ -21,21 +29,18 @@ func main() {
 }
 
 // !线段树维护的数据类型 示例: 区间和
-type Data = struct{ size, sum int }
-type Lazy = int
+type E = struct{ size, sum int }
+type Id = int
 
-func e(left, right int) Data { return Data{size: right - left + 1} }
-func id() Lazy               { return 0 }
-func op(leftData, rightData Data) Data {
-	return Data{leftData.size + rightData.size, leftData.sum + rightData.sum}
-}
-func mapping(parentLazy Lazy, childData Data) Data {
-	return Data{childData.size, childData.sum + parentLazy*childData.size}
-}
-func composition(parentLazy, childLazy Lazy) Lazy {
-	return parentLazy + childLazy
-}
+func e(left, right int) E             { return E{size: right - left + 1} }
+func id() Id                          { return 0 }
+func op(left, right E) E              { return E{left.size + right.size, left.sum + right.sum} }
+func mapping(parent Id, child E) E    { return E{child.size, child.sum + parent*child.size} }
+func composition(parent, child Id) Id { return parent + child }
 
+//
+//
+//
 // 指定区间上下界建立线段树
 func CreateSegmentTree(lower, upper int) *Node {
 	root := newNode(lower, upper)
@@ -46,11 +51,11 @@ type Node struct {
 	left, right           int
 	leftChild, rightChild *Node
 
-	data Data
-	lazy Lazy
+	data E
+	lazy Id
 }
 
-func (o *Node) Update(left, right int, lazy Lazy) {
+func (o *Node) Update(left, right int, lazy Id) {
 	if left <= o.left && o.right <= right {
 		o.propagate(lazy)
 		return
@@ -67,7 +72,7 @@ func (o *Node) Update(left, right int, lazy Lazy) {
 	o.pushUp()
 }
 
-func (o *Node) Query(left, right int) Data {
+func (o *Node) Query(left, right int) E {
 	if left <= o.left && o.right <= right {
 		return o.data
 	}
@@ -85,7 +90,7 @@ func (o *Node) Query(left, right int) Data {
 	return res
 }
 
-func (o *Node) QueryAll() Data {
+func (o *Node) QueryAll() E {
 	return o.data
 }
 
@@ -132,7 +137,7 @@ func (this *Node) Split(other *Node, left, right int) (*Node, *Node) {
 }
 
 func (o *Node) checkNilAndPushUp() {
-	var leftData, rightData Data
+	var leftData, rightData E
 	if o.leftChild != nil {
 		leftData = o.leftChild.data
 	} else {
@@ -172,7 +177,7 @@ func (o *Node) pushDown() {
 }
 
 // mapping + composition
-func (o *Node) propagate(lazy Lazy) {
+func (o *Node) propagate(lazy Id) {
 	o.data = mapping(lazy, o.data)
 	o.lazy = composition(lazy, o.lazy)
 }

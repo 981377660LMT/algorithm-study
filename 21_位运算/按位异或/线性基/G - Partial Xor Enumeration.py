@@ -9,10 +9,10 @@ from LinearBase import LinearBase
 
 
 def partialXorEnumeration(nums: List[int], left: int, right: int) -> List[int]:
-    lb = LinearBase.create(nums)
+    lb = LinearBase.fromlist(nums)
     res = []
     for i in range(left, right + 1):
-        res.append(lb.kth(i))
+        res.append(lb.kthXor(i))
     return res
 
 

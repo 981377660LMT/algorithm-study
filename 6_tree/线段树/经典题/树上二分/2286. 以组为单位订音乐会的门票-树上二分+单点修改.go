@@ -1,100 +1,103 @@
-// !仿射变换 Range Affine Range Query
-// 区间赋值 区间加 区间和查询
-
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"math/bits"
-	"os"
 )
 
-const INF int = 1e18
-const MOD int = 998244353
-
-func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-
-	initNums := make([]E, n)
-	for i := 0; i < n; i++ {
-		var num int
-		fmt.Fscan(in, &num)
-		initNums[i] = E{sum: num, size: 1}
-	}
-	tree := NewLazySegTree(initNums)
-
-	for i := 0; i < q; i++ {
-		var op, left, right, mul, add int
-		fmt.Fscan(in, &op)
-		if op == 0 {
-			fmt.Fscan(in, &left, &right, &mul, &add) // 0<=left<right<=n
-			tree.Update(left, right, Id{mul: mul, add: add})
-		} else {
-			fmt.Fscan(in, &left, &right) // 0<=left<right<=n
-			fmt.Fprintln(out, tree.Query(left, right).sum)
-		}
-	}
-
+type BookMyShow struct {
+	row, col int
+	tree     *LazySegTree
 }
 
-type E = struct{ size, sum int }
-type Id = struct{ mul, add int }
+func Constructor(n int, m int) BookMyShow {
+	nums := make([]E, n)
+	for i := range nums {
+		nums[i] = E{sum: m, max: m}
+	}
+	tree := NewLazySegTree(nums)
+	return BookMyShow{row: n, col: m, tree: tree}
+}
 
-func (tree *LazySegTree) e() E   { return E{size: 1} }
-func (tree *LazySegTree) id() Id { return Id{mul: 1} }
+// !同一组的 k 位观众坐在 同一排座位，且座位连续 。
+//  返回最小可能的 r 和 c 满足第 r 排中 [c, c + k - 1] 的座位都是空的，且 r <= maxRow.
+//  如果 无法 安排座位，返回 [].
+func (this *BookMyShow) Gather(k int, maxRow int) []int {
+	first := this.tree.MaxRight(0, func(e E) bool { return e.max < k }) // !找到第一个空座位>=k的行
+	if first > maxRow {
+		return nil
+	}
+	used := this.col - this.tree.Query(first, first+1).sum
+	this.tree.Update(first, first+1, -k)
+	return []int{first, used}
+}
+
+// !k 位观众中 每一位 都有座位坐，但他们 不一定 坐在一起。
+//  如果组里所有 k 个成员 不一定 要坐在一起的前提下，都能在第 0 排到第 maxRow 排之间找到座位，那么请返回 true.
+//  这种情况下，每个成员都优先找排数 最小 ，然后是座位编号最小的座位。如果不能安排所有 k 个成员的座位，请返回 false 。
+func (this *BookMyShow) Scatter(k int, maxRow int) bool {
+	remain := this.tree.Query(0, maxRow+1).sum
+	if remain < k {
+		return false
+	}
+
+	first := this.tree.MaxRight(0, func(e E) bool { return e.sum == 0 }) // !找到第一个未坐满的行
+	for k > 0 {
+		remain := this.tree.Query(first, first+1).sum
+		min_ := min(k, remain)
+		this.tree.Update(first, first+1, -min_)
+		k -= min_
+		first++
+	}
+
+	return true
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+/**
+ * Your BookMyShow object will be instantiated and called as such:
+ * obj := Constructor(n, m);
+ * param_1 := obj.Gather(k,maxRow);
+ * param_2 := obj.Scatter(k,maxRow);
+ */
+
+type E = struct{ max, sum int } // 维护每行的剩余座位数和最大剩余座位数
+type Id = int                   // delta
+
+func (tree *LazySegTree) e() E   { return E{} }
+func (tree *LazySegTree) id() Id { return 0 }
 func (tree *LazySegTree) op(left, right E) E {
 	return E{
-		size: left.size + right.size,
-		sum:  (left.sum + right.sum) % MOD,
+		max: max(left.max, right.max),
+		sum: left.sum + right.sum,
 	}
 }
-
-func (tree *LazySegTree) mapping(lazy Id, data E) E {
+func (tree *LazySegTree) mapping(lazy Id, data E) E { // !单点修改
 	return E{
-		size: data.size,
-		sum:  (data.sum*lazy.mul + data.size*lazy.add) % MOD,
+		max: data.max + lazy,
+		sum: data.sum + lazy,
 	}
 }
-
 func (tree *LazySegTree) composition(parentLazy, childLazy Id) Id {
-	return Id{
-		mul: (parentLazy.mul * childLazy.mul) % MOD,
-		add: (parentLazy.mul*childLazy.add + parentLazy.add) % MOD,
-	}
+	return parentLazy + childLazy
 }
 
-func NewLazySegTree(
-	leaves []E,
-) *LazySegTree {
-	tree := &LazySegTree{}
-
-	n := int(len(leaves))
-	tree.n = n
-	tree.log = int(bits.Len(uint(n - 1)))
-	tree.size = 1 << tree.log
-	tree.data = make([]E, 2*tree.size)
-	tree.lazy = make([]Id, tree.size)
-	for i := range tree.data {
-		tree.data[i] = tree.e()
-	}
-	for i := range tree.lazy {
-		tree.lazy[i] = tree.id()
-	}
-	for i := 0; i < n; i++ {
-		tree.data[tree.size+i] = leaves[i]
-	}
-	for i := tree.size - 1; i >= 1; i-- {
-		tree.pushUp(i)
-	}
-	return tree
-}
-
+//
+//
+//
+//
 // !template
 type LazySegTree struct {
 	n    int
@@ -104,12 +107,45 @@ type LazySegTree struct {
 	lazy []Id
 }
 
+func NewLazySegTree(
+	v []E,
+) *LazySegTree {
+	tree := &LazySegTree{}
+
+	n := int(len(v))
+	tree.n = n
+	tree.log = int(bits.Len(uint(n - 1)))
+	tree.size = int(1) << tree.log
+	tree.data = make([]E, 2*tree.size)
+	tree.lazy = make([]Id, tree.size)
+	for i := range tree.data {
+		tree.data[i] = tree.e()
+	}
+	for i := range tree.lazy {
+		tree.lazy[i] = tree.id()
+	}
+	for i := int(0); i < n; i++ {
+		tree.data[tree.size+i] = v[i]
+	}
+	for i := tree.size - 1; i >= 1; i-- {
+		tree.pushUp(i)
+	}
+	return tree
+}
+
 // 查询切片[left:right]的值
 //   0<=left<=right<=len(tree.data)
 func (tree *LazySegTree) Query(left, right int) E {
-	if left == right {
+	if left < 0 {
+		left = 0
+	}
+	if right > tree.n {
+		right = tree.n
+	}
+	if left >= right {
 		return tree.e()
 	}
+
 	left += tree.size
 	right += tree.size
 	for i := tree.log; i >= 1; i-- {
@@ -143,9 +179,16 @@ func (tree *LazySegTree) QueryAll() E {
 // 更新切片[left:right]的值
 //   0<=left<=right<=len(tree.data)
 func (tree *LazySegTree) Update(left, right int, f Id) {
-	if left == right {
+	if left < 0 {
+		left = 0
+	}
+	if right > tree.n {
+		right = tree.n
+	}
+	if left >= right {
 		return
 	}
+
 	left += tree.size
 	right += tree.size
 	for i := tree.log; i >= 1; i-- {
@@ -171,7 +214,7 @@ func (tree *LazySegTree) Update(left, right int, f Id) {
 	}
 	left = l2
 	right = r2
-	for i := 1; i <= tree.log; i++ {
+	for i := int(1); i <= tree.log; i++ {
 		if ((left >> i) << i) != left {
 			tree.pushUp(left >> i)
 		}
@@ -182,6 +225,7 @@ func (tree *LazySegTree) Update(left, right int, f Id) {
 }
 
 // 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
+//  E维护的值需要有序
 func (tree *LazySegTree) MinLeft(right int, predicate func(data E) bool) int {
 	if right == 0 {
 		return 0
@@ -222,16 +266,15 @@ func (tree *LazySegTree) MinLeft(right int, predicate func(data E) bool) int {
 }
 
 // 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
+//  E维护的值需要有序
 func (tree *LazySegTree) MaxRight(left int, predicate func(data E) bool) int {
 	if left == tree.n {
 		return tree.n
 	}
-
 	left += tree.size
 	for i := tree.log; i >= 1; i-- {
 		tree.pushDown(left >> i)
 	}
-
 	res := tree.e()
 	for {
 		for left%2 == 0 {
@@ -255,6 +298,7 @@ func (tree *LazySegTree) MaxRight(left int, predicate func(data E) bool) int {
 		if (left & -left) == left {
 			break
 		}
+
 	}
 
 	return tree.n
@@ -277,3 +321,14 @@ func (tree *LazySegTree) propagate(root int, f Id) {
 		tree.lazy[root] = tree.composition(f, tree.lazy[root])
 	}
 }
+
+// func main() {
+// 	// 	["BookMyShow","gather","gather","scatter","scatter"]
+// 	// [[2,5],[4,0],[2,0],[5,1],[5,1]]
+// 	bookShow := Constructor(2, 5)
+// 	fmt.Println(bookShow.Gather(4, 0))
+// 	fmt.Println(bookShow.Gather(2, 0))
+// 	fmt.Println(bookShow.tree.Query(0, 1), bookShow.tree.Query(1, 2))
+// 	fmt.Println(bookShow.Scatter(5, 1))
+// 	fmt.Println(bookShow.Scatter(5, 1))
+// }

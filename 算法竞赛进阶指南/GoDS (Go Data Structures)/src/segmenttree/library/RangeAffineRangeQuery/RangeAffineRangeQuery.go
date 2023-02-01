@@ -245,7 +245,7 @@ func (tree *LazySegTree) MaxRight(left int, predicate func(data E) bool) int {
 				left *= 2
 				if predicate(tree.op(res, tree.data[left])) {
 					res = tree.op(res, tree.data[left])
-					left--
+					left++
 				}
 			}
 

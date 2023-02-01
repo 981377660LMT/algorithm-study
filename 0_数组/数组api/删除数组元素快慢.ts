@@ -19,3 +19,5 @@ console.timeEnd('copyWithin')
 
 // !静态数组时 copyWithin/subarray删除最快(但是不支持插入)
 // !注意静态数组subarray比slice快
+
+export {}

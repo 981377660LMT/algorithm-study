@@ -3,7 +3,7 @@ from typing import List
 
 
 def getLCP(s: str) -> List[List[int]]:
-    """O(n^2) dp 求解 LCP
+    """O(n^2) dp 求解 两个后缀的 LCP
 
     Args:
         s (str): 输入字符串

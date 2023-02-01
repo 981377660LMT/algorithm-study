@@ -70,6 +70,15 @@ if (require.main === module) {
     mapping: (f, x) => (f === INF ? x : f),
     composition: (f, g) => (f === INF ? g : f)
   })
+
+  // Range Assign Point Get
+  const rangeAssignPointGet = useAtcoderLazySegmentTree(Array(n + 10).fill(0), {
+    e: () => INF,
+    id: () => INF,
+    op: (a, b) => (a === INF ? b : a),
+    mapping: (f, x) => (f === INF ? x : f),
+    composition: (f, g) => (f === INF ? g : f)
+  })
 }
 
 /**

@@ -8,7 +8,6 @@ import sys
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
-MOD = 998244353
 INF = int(4e18)
 
 if __name__ == "__main__":
@@ -19,13 +18,16 @@ if __name__ == "__main__":
     for _ in range(m):
         u, v, w = map(int, input().split())
         u, v = u - 1, v - 1
-        dist[u][v] = min(dist[u][v], w)
+        if w < dist[u][v]:
+            dist[u][v] = w
 
     res = 0
     for k in range(n):
         for i in range(n):
             for j in range(n):
-                dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+                cand = dist[i][k] + dist[k][j]
+                if dist[i][j] > cand:
+                    dist[i][j] = cand
         for i in range(n):
             for j in range(n):
                 if dist[i][j] != INF:
