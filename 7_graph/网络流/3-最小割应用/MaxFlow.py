@@ -61,7 +61,7 @@ class ATCMaxFlow:
         return res
 
     def getPath(self) -> Set[int]:
-        """最大流经过了哪些点"""
+        """最大流经过了(残量网络上的)哪些点"""
         visited = set()
         queue = [self._start]
         reGraph, edges = self._reGraph, self._edges

@@ -6,7 +6,7 @@
 class TrieNode {
   preCount = 0
   wordCount = 0
-  children: Map<string, TrieNode> = new Map()
+  children = new Map<string, TrieNode>()
 }
 
 class Trie {
@@ -25,7 +25,7 @@ class Trie {
   }
 
   /**
-   * @param s 对s的每个非空前缀pre,返回trie中有多少个等于pre的单词
+   * @param s 对s的`每个`非空前缀pre,返回trie中有多少个等于pre的单词
    */
   countWord(s: string): number[] {
     let { root } = this
@@ -35,12 +35,11 @@ class Trie {
       if (!root.children.has(char)) return []
       root = root.children.get(char)!
     }
-
     return res
   }
 
   /**
-   * @param s 对s的每个非空前缀pre,返回trie中有多少个单词以pre为前缀
+   * @param s 对s的`每个`非空前缀pre,返回trie中有多少个单词以pre为前缀
    */
   countWordStartsWith(s: string): number[] {
     let { root } = this
@@ -50,7 +49,6 @@ class Trie {
       if (!root.children.has(char)) return []
       root = root.children.get(char)!
     }
-
     return res
   }
 
@@ -62,10 +60,13 @@ class Trie {
     let { root } = this
     for (const char of s) {
       if (!root.children.has(char)) throw new Error(`word ${s} not in trie`)
+      if (root.children.get(char)!.preCount === 1) {
+        root.children.delete(char)
+        return
+      }
       root.children.get(char)!.preCount--
       root = root.children.get(char)!
     }
-
     root.wordCount--
   }
 }

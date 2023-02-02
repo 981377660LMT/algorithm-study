@@ -225,7 +225,6 @@ func (tree *LazySegTree) Update(left, right int, f Id) {
 }
 
 // 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-//  E维护的值需要有序
 func (tree *LazySegTree) MinLeft(right int, predicate func(data E) bool) int {
 	if right == 0 {
 		return 0
@@ -266,7 +265,6 @@ func (tree *LazySegTree) MinLeft(right int, predicate func(data E) bool) int {
 }
 
 // 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-//  E维护的值需要有序
 func (tree *LazySegTree) MaxRight(left int, predicate func(data E) bool) int {
 	if left == tree.n {
 		return tree.n

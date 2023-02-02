@@ -1,9 +1,9 @@
 # 最小割拆点+求最小割的方案
 # n<=100 稠密图
-# 割每个`点`的成本为ci
+# 割每个`点`的成本为ci(使与i相连的边全部消失)
 # 求`阻断0 - (n-1)路径所需的最小代价`、 `需要割的点数` 以及 `需要割哪些点`
 # 注意不能割0或n-1(即代价无穷大)
-
+# https://yuuko.moe/index.php/archives/175/
 # !把边拆成点 in out  即把每个点拆成 `i 和 i + OFFSET`
 import sys
 import os
@@ -13,7 +13,6 @@ from typing import Set
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
-MOD = int(1e9 + 7)
 INF = int(4e18)
 
 
@@ -44,6 +43,7 @@ def main() -> None:
     points = []
     visited = maxFlow.getPath()
     for i in range(1, n - 1):
+        # 残量网络上出点和入点是否连通，如果不连通才能说明选择了
         if (i in visited) ^ (i + OFFSET in visited):
             points.append(i + 1)
 
@@ -103,7 +103,7 @@ if __name__ == "__main__":
             return self._reGraph[v1][v2]
 
         def getPath(self) -> Set[int]:
-            """最大流经过了哪些点"""
+            """最大流经过了(残量网络上的)哪些点"""
             visited = set()
             stack = [self._start]
             reGraph = self._reGraph

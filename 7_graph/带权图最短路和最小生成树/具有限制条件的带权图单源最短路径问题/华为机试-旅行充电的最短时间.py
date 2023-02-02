@@ -17,7 +17,7 @@
 from collections import defaultdict
 from heapq import heappop, heappush
 
-9
+
 INF = int(1e18)
 D = int(input())  # 距离D公里远
 N = int(input())  # 沿途有N个休息站

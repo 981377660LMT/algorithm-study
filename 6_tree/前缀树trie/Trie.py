@@ -28,6 +28,21 @@ class Trie:
             node.preCount += 1
         node.wordCount += 1
 
+    def remove(self, s: str) -> None:
+        """从前缀树中移除`1个`s 需要保证s在前缀树中"""
+        if not s:
+            return
+        node = self.root
+        for char in s:
+            if char not in node.children:
+                raise ValueError(f"word {s} not in trie")
+            if node.children[char].preCount == 1:
+                del node.children[char]
+                return
+            node = node.children[char]
+            node.preCount -= 1
+        node.wordCount -= 1
+
     def countWord(self, s: str) -> List[int]:
         """对s的每个非空前缀pre,返回trie中有多少个等于pre的单词"""
         if not s:
@@ -53,15 +68,3 @@ class Trie:
             node = node.children[char]
             res.append(node.preCount)
         return res
-
-    def remove(self, s: str) -> None:
-        """从前缀树中移除`1个`s 需要保证s在前缀树中"""
-        if not s:
-            return
-        node = self.root
-        for char in s:
-            if char not in node.children:
-                raise ValueError(f"word {s} not in trie")
-            node = node.children[char]
-            node.preCount -= 1
-        node.wordCount -= 1

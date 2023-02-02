@@ -80,6 +80,9 @@ class TrieWithParent:
         for char in s:
             if char not in node.children:
                 raise ValueError(f"word {s} not in trie")
+            if node.children[char].preCount == 1:
+                del node.children[char]
+                return
             node = node.children[char]
             node.preCount -= 1
         node.wordCount -= 1
