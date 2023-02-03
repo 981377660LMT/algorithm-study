@@ -40,4 +40,4 @@ class Solution:
         dfs(root)
         all_ = subCounter[root.val]
         left, right, parent = leftCounter[x], rightCounter[x], all_ - subCounter[x]
-        return any(num > all_ - num for num in (left, right, parent))
+        return any(x > all_ - x for x in (left, right, parent))

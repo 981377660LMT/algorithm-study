@@ -47,16 +47,16 @@ func main() {
 type E = struct{ zero, one, inv int }
 type Id = bool
 
-func (tree *LazySegTree) e() E   { return E{} }
-func (tree *LazySegTree) id() Id { return false }
-func (tree *LazySegTree) op(left, right E) E {
+func (*LazySegTree) e() E   { return E{} }
+func (*LazySegTree) id() Id { return false }
+func (*LazySegTree) op(left, right E) E {
 	return E{
 		zero: left.zero + right.zero,
 		one:  left.one + right.one,
 		inv:  left.inv + right.inv + left.one*right.zero,
 	}
 }
-func (tree *LazySegTree) mapping(lazy Id, data E) E {
+func (*LazySegTree) mapping(lazy Id, data E) E {
 	if !lazy {
 		return data
 	}
@@ -66,7 +66,7 @@ func (tree *LazySegTree) mapping(lazy Id, data E) E {
 		inv:  data.one*data.zero - data.inv,
 	}
 }
-func (tree *LazySegTree) composition(parentLazy, childLazy Id) Id {
+func (*LazySegTree) composition(parentLazy, childLazy Id) Id {
 	return (parentLazy && !childLazy) || (!parentLazy && childLazy)
 }
 
@@ -87,11 +87,10 @@ func NewLazySegTree(
 	leaves []E,
 ) *LazySegTree {
 	tree := &LazySegTree{}
-
 	n := int(len(leaves))
 	tree.n = n
 	tree.log = int(bits.Len(uint(n - 1)))
-	tree.size = int(1) << tree.log
+	tree.size = 1 << tree.log
 	tree.data = make([]E, 2*tree.size)
 	tree.lazy = make([]Id, tree.size)
 	for i := range tree.data {
@@ -288,14 +287,28 @@ func (tree *LazySegTree) Get(index int) E {
 	return tree.data[index]
 }
 
+// 单点赋值
+func (tree *LazySegTree) Set(index int, e E) {
+	index += tree.size
+	for i := tree.log; i >= 1; i-- {
+		tree.pushDown(index >> i)
+	}
+	tree.data[index] = e
+	for i := 1; i <= tree.log; i++ {
+		tree.pushUp(index >> i)
+	}
+}
+
 func (tree *LazySegTree) pushUp(root int) {
 	tree.data[root] = tree.op(tree.data[2*root], tree.data[2*root+1])
 }
 
 func (tree *LazySegTree) pushDown(root int) {
-	tree.propagate(2*root, tree.lazy[root])
-	tree.propagate(2*root+1, tree.lazy[root])
-	tree.lazy[root] = tree.id()
+	if tree.lazy[root] != tree.id() {
+		tree.propagate(2*root, tree.lazy[root])
+		tree.propagate(2*root+1, tree.lazy[root])
+		tree.lazy[root] = tree.id()
+	}
 }
 
 func (tree *LazySegTree) propagate(root int, f Id) {

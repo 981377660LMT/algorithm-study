@@ -15,9 +15,10 @@ class SegmentTree01 {
    */
   constructor(bits: ArrayLike<number>) {
     this._n = bits.length
-    const cap = 1 << (32 - Math.clz32(this._n - 1) + 1)
-    this._ones = new Uint32Array(cap)
-    this._lazyFlip = new Uint8Array(cap)
+    const log = 32 - Math.clz32(this._n - 1)
+    const size = 1 << log
+    this._ones = new Uint32Array(size << 1)
+    this._lazyFlip = new Uint8Array(size) // 叶子结点不需要更新lazy (composition)
     this._build(1, 1, this._n, bits)
   }
 
@@ -167,7 +168,9 @@ class SegmentTree01 {
 
   private _propagateFlip(root: number, left: number, right: number): void {
     this._ones[root] = right - left + 1 - this._ones[root]
-    this._lazyFlip[root] ^= 1
+    if (root < this._lazyFlip.length) {
+      this._lazyFlip[root] ^= 1
+    }
   }
 }
 

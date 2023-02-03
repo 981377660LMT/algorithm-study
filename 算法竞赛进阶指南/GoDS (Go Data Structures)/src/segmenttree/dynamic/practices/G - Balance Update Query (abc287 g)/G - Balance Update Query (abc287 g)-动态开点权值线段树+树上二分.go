@@ -1,3 +1,4 @@
+// https://atcoder.jp/contests/abc287/tasks/abc287_g
 // 有N种类型的卡，每种卡有10^100张。每种卡有分数和数量限制属性 (ai,bi)。
 // 维护以下三种操作：
 // 1 x y，将第x种卡的分数修改为y。

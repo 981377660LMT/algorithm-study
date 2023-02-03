@@ -7,16 +7,17 @@ import "math/bits"
 type E = struct{ zero, one, inv int }
 type Id = bool
 
-func (tree *LazySegmentTree) e() E   { return E{} }
-func (tree *LazySegmentTree) id() Id { return false }
-func (tree *LazySegmentTree) op(left, right E) E {
+func (*LazySegmentTree) e() E   { return E{} }
+func (*LazySegmentTree) id() Id { return false }
+func (*LazySegmentTree) op(left, right E) E {
 	return E{
 		zero: left.zero + right.zero,
 		one:  left.one + right.one,
 		inv:  left.inv + right.inv + left.one*right.zero,
 	}
 }
-func (tree *LazySegmentTree) mapping(lazy Id, data E) E {
+
+func (*LazySegmentTree) mapping(lazy Id, data E) E {
 	if !lazy {
 		return data
 	}
@@ -26,14 +27,12 @@ func (tree *LazySegmentTree) mapping(lazy Id, data E) E {
 		inv:  data.one*data.zero - data.inv,
 	}
 }
-func (tree *LazySegmentTree) composition(parentLazy, childLazy Id) Id {
+func (*LazySegmentTree) composition(parentLazy, childLazy Id) Id {
 	return (parentLazy && !childLazy) || (!parentLazy && childLazy)
 }
 
 type LazySegmentTree struct {
 	n    int
-	log  int
-	size int
 	data []E
 	lazy []Id
 }
@@ -42,10 +41,10 @@ func NewLazySegmentTree(leaves []E) *LazySegmentTree {
 	tree := &LazySegmentTree{}
 	n := int(len(leaves))
 	tree.n = n
-	tree.log = int(bits.Len(uint(n - 1)))
-	tree.size = 1 << (tree.log + 1)
-	tree.data = make([]E, 2*tree.size)
-	tree.lazy = make([]Id, tree.size)
+	log := int(bits.Len(uint(n - 1)))
+	size := 1 << log
+	tree.data = make([]E, 2*size)
+	tree.lazy = make([]Id, size) // !叶子结点不需要更新lazy (composition)
 	for i := range tree.data {
 		tree.data[i] = tree.e()
 	}
@@ -53,7 +52,7 @@ func NewLazySegmentTree(leaves []E) *LazySegmentTree {
 		tree.lazy[i] = tree.id()
 	}
 	// !初始化data和lazy数组 然后建树
-	tree.build(1, 1, tree.n, leaves)
+	tree.build(1, 1, n, leaves)
 	return tree
 }
 
@@ -66,23 +65,26 @@ func (t *LazySegmentTree) build(root, left, right int, leaves []E) {
 	mid := (left + right) >> 1
 	t.build(root<<1, left, mid, leaves)
 	t.build(root<<1|1, mid+1, right, leaves)
-	t.pushUp(root, left, right)
+	t.pushUp(root)
 }
 
-func (t *LazySegmentTree) pushUp(root, left, right int) {
+func (t *LazySegmentTree) pushUp(root int) {
 	t.data[root] = t.op(t.data[root<<1], t.data[root<<1|1])
 }
 
-func (t *LazySegmentTree) pushDown(root, left, right int) {
-	mid := (left + right) >> 1
-	t.propagate(root<<1, left, mid, t.lazy[root])
-	t.propagate(root<<1|1, mid+1, right, t.lazy[root])
-	t.lazy[root] = t.id()
+func (t *LazySegmentTree) pushDown(root int) {
+	if t.lazy[root] != t.id() {
+		t.propagate(root<<1, t.lazy[root])
+		t.propagate(root<<1|1, t.lazy[root])
+		t.lazy[root] = t.id()
+	}
 }
 
-func (t *LazySegmentTree) propagate(root, left, right int, lazy Id) {
+func (t *LazySegmentTree) propagate(root int, lazy Id) {
 	t.data[root] = t.mapping(lazy, t.data[root])
-	t.lazy[root] = t.composition(lazy, t.lazy[root])
+	if root < len(t.lazy) { // !叶子结点不需要更新lazy (composition)
+		t.lazy[root] = t.composition(lazy, t.lazy[root])
+	}
 }
 
 func (t *LazySegmentTree) query(root, L, R, l, r int) E {
@@ -90,7 +92,7 @@ func (t *LazySegmentTree) query(root, L, R, l, r int) E {
 		return t.data[root]
 	}
 
-	t.pushDown(root, l, r)
+	t.pushDown(root)
 	mid := (l + r) >> 1
 	res := t.e()
 	if L <= mid {
@@ -104,11 +106,11 @@ func (t *LazySegmentTree) query(root, L, R, l, r int) E {
 
 func (t *LazySegmentTree) update(root, L, R, l, r int, val Id) {
 	if L <= l && r <= R {
-		t.propagate(root, l, r, val)
+		t.propagate(root, val)
 		return
 	}
 
-	t.pushDown(root, l, r)
+	t.pushDown(root)
 	mid := (l + r) >> 1
 	if L <= mid {
 		t.update(root<<1, L, R, l, mid, val)
@@ -116,7 +118,7 @@ func (t *LazySegmentTree) update(root, L, R, l, r int, val Id) {
 	if R > mid {
 		t.update(root<<1|1, L, R, mid+1, r, val)
 	}
-	t.pushUp(root, l, r)
+	t.pushUp(root)
 }
 
 // 查询闭区间[left,right]的值

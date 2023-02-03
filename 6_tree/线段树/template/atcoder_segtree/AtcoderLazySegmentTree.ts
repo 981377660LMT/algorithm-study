@@ -138,6 +138,9 @@ interface AtcoderSegmentTree<E, Id> {
    * 树上二分查询最小的 `left` 使得切片 `[left:right]` 内的值满足 `predicate`
    */
   minLeft: (right: number, predicate: (value: E) => boolean) => number
+
+  set: (index: number, value: E) => void
+  get: (index: number) => E
 }
 
 /**
@@ -309,12 +312,34 @@ function useAtcoderLazySegmentTree<E = number, Id = number>(
     return 0
   }
 
+  function set(index: number, value: E): void {
+    index += _size
+    for (let i = _log; i > 0; i--) {
+      _pushDown(index >> i)
+    }
+
+    _data[index] = value
+    for (let i = 1; i < _log + 1; i++) {
+      _pushUp(index >> i)
+    }
+  }
+
+  function get(index: number): E {
+    index += _size
+    for (let i = _log; i > 0; i--) {
+      _pushDown(index >> i)
+    }
+    return _data[index]
+  }
+
   return {
     query,
     queryAll,
     update,
     maxRight,
-    minLeft
+    minLeft,
+    set,
+    get
   }
 
   function _pushUp(root: number): void {

@@ -17,10 +17,11 @@ class LazySegmentTree {
 
   constructor(leaves: ArrayLike<unknown>) {
     this._n = leaves.length
-    const cap = 1 << (32 - Math.clz32(this._n - 1) + 1)
+    const log = 32 - Math.clz32(this._n - 1)
+    const size = 1 << log
     // !初始化data和lazy数组(可用TypedArray优化) 然后建树
-    this._data = Array(cap).fill(e()) // monoid
-    this._lazy = Array(cap).fill(id()) // monoid
+    this._data = Array(2 * size).fill(e()) // monoid
+    this._lazy = Array(size).fill(id()) // monoid
     this._build(1, 1, this._n, leaves)
   }
 
@@ -93,7 +94,10 @@ class LazySegmentTree {
   private _propagate(root: number, left: number, right: number, lazy: Lazy) {
     // !mapping + composition 来更新子节点data和lazy信息
     this._data[root] = mapping(this._data[root], lazy)
-    this._lazy[root] = composition(this._lazy[root], lazy)
+    // !判断是否为叶子结点
+    if (root < this._lazy.length) {
+      this._lazy[root] = composition(this._lazy[root], lazy)
+    }
   }
 }
 
