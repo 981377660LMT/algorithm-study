@@ -22,8 +22,8 @@ def dfs(left: int, right: int) -> int:
         return 0
 
     res = int(1e20)
-    for i in range(left, right):
-        res = min(res, dfs(left, i) + dfs(i + 1, right) + preSum[right + 1] - preSum[left])
+    for k in range(left, right):
+        res = min(res, dfs(left, k) + dfs(k + 1, right) + preSum[right + 1] - preSum[left])
     return res
 
 

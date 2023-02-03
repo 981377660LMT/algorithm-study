@@ -1,3 +1,14 @@
+//  https://leetcode.cn/problems/VdG6tT/solution/si-bian-xing-bu-deng-shi-you-hua-dp-by-k-bp1t/
+
+//  N个工程师分成 K 个组(N<=1e4,K<=1e2) 组内噪声
+//  noise(l, r) = sum(A[l], A[l + 1], ..., A[r]) * (r - l + 1)
+//  最小化总噪声
+
+//  记dp[i][k]为前i个人分k组的最小噪声值，
+//  则dp[i][k] = min(dp[j][k-1]+(preSum[i]-preSum[j])*(i-j+1))
+//  直接猜测可以用四边形不等式
+
+// !这里需要optimalbinarytree
 package main
 
 import (

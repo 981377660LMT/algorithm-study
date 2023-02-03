@@ -63,8 +63,10 @@ export { bitCount32, bitCount53, bitLength32, bitLength53, trailingZero32, trail
 
 // 结论:
 // !当n为32位整数时
-// !32 - Math.clz32(n) == n 的二进制表示的长度
-// !                   == Math.ceil(Math.log2(n + 1)) == 1 + Math.floor(Math.log2(n))
+// !32 - Math.clz32(n) <=> n 的二进制表示的长度
+// !                   <=> Math.ceil(Math.log2(n + 1)) <=> 1 + Math.floor(Math.log2(n))
+// bit_len(n-1) <=> log(n)
+// bit_len(n) <=> 1+log(n)
 
 if (require.main === module) {
   assert.strictEqual(bitCount53(0), 0)

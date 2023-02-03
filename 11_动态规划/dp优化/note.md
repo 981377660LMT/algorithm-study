@@ -17,3 +17,6 @@
 ## 为什么 dp 优化这类题要用 dp 数组貰う dp 而不是记忆化 dfs
 
 因为 dp 优化往往需要获取某个前缀的信息 记忆化 dfs 无法做到这一点
+
+TODO
+https://beet-aizu.github.io/library/ 里 algorithm 的 dp 优化方法
