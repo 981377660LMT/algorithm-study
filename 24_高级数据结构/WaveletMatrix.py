@@ -24,12 +24,12 @@ class BitVector:
         x = x + (x >> 16)
         return x & 0x0000007F
 
-    def rank1(self, r: int) -> int:
+    def count1(self, r: int) -> int:
         msk = (1 << (r & 31)) - 1
         return self.cnt[r >> 5] + self.popcount(self.bit[r >> 5] & msk)
 
     def rank0(self, r: int) -> int:
-        return r - self.rank1(r)
+        return r - self.count1(r)
 
 
 class WaveletMatrix:

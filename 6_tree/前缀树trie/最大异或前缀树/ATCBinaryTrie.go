@@ -8,7 +8,7 @@ import (
 
 func findMaximumXOR(nums []int) int {
 	n := len(nums)
-	maxLog := bits.Len(uint(max(nums...)))
+	maxLog := bits.Len(uint(max(nums...))) // 1+int(log2(x))
 	bt := NewATCBinaryTrie(n, maxLog, true)
 	for _, v := range nums {
 		bt.Add(v)
