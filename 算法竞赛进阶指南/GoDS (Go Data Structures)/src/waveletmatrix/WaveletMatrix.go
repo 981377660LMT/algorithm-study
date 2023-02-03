@@ -1,13 +1,15 @@
-// https://blog.hamayanhamayan.com/entry/2017/06/13/103352
-// https://beet-aizu.github.io/library/datastructure/waveletmatrix.cpp
+// Usage:
+// Count(value, end) – [0,end) に含まれる value の個数を求める.
+// CountRange(start, end, lower, upper) – [start, end) に含まれる [value, upper) の個数を求める.
+// Index(value, k) – k(0-indexed) 番目の value の位置を求める.
+// KthMin(start, end, k) – [start, end) に含まれる k(0-indexed) 番目に小さい値を求める.
+// KthMax(start, end, k) – [start, end) に含まれる k(0-indexed) 番目に大きい値を求める.
+// Lower(start, end, value) – [start, end) に含まれる要素の中で value の次に小さいものを求める.存在しない場合は -INF を返す.
+// Upper(start, end, value) – [start, end) に含まれる要素の中で value の次に大きいものを求める.存在しない場合は INF を返す.
 
-// rank(v,k) –  [ 0 , k )  に含まれる  v  の個数を求める
-// select(v,k) –  k  番目の  v  の位置を求める
-// quantile(l,r,k) – [ l , r ) に含まれる要素の中で k 番目に大きいものを求める
-// rquantile(l,r,k) – [ l , r ) に含まれる要素の中で k 番目に小さいものを求める
-// rangefreq(l,r,d,u) – | { i ∣ i ∈ [ l , r ) , x i ∈ [ d , u ) } | を求める
-// succ(l,r,v) – [ l , r ) に含まれる要素の中で v の次に大きいものを求める
-// pred(l,r,v) – [ l , r ) に含まれる要素の中で v の次に小さいものを求める
+// Referece:
+// https://beet-aizu.github.io/library/datastructure/waveletmatrix.cpp
+// https://blog.hamayanhamayan.com/entry/2017/06/13/103352
 
 package main
 
@@ -18,18 +20,7 @@ import (
 
 const INF int = 1e18
 
-//
-//
-//
-type WaveletMatrix struct {
-	n            int
-	maxLog       int
-	mat          []*FullyIndexableDictionary
-	zs           []int
-	buff1, buff2 []int
-}
-
-// 指定された配列を WaveletMatrix に変換する.
+// 指定された配列から WaveletMatrix を構築する.
 //  data:変換する配列
 //  maxLog:queryの最大値のbit数(普通は32)
 func NewWaveletMatrix(data []int, maxLog int) *WaveletMatrix {
@@ -71,6 +62,14 @@ func NewWaveletMatrix(data []int, maxLog int) *WaveletMatrix {
 		buff1:  buff1,
 		buff2:  buff2,
 	}
+}
+
+type WaveletMatrix struct {
+	n            int
+	maxLog       int
+	mat          []*FullyIndexableDictionary
+	zs           []int
+	buff1, buff2 []int
 }
 
 // [0,end) に含まれる value の個数を求める.
