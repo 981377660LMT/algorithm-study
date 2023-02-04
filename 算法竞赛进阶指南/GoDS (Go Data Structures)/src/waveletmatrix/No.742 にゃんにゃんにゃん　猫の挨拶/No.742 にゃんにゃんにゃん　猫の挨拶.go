@@ -1,24 +1,42 @@
-// Usage:
-// Count(start, end, value) – [start, end) に含まれる value の個数を求める.
-// CountRange(start, end, lower, upper) – [start, end) に含まれる [lower, upper) の個数を求める.
-// Index(value, k) – k(0-indexed) 番目の value の位置を求める.
-// KthMin(start, end, k) – [start, end) に含まれる k(0-indexed) 番目に小さい値を求める.
-// KthMax(start, end, k) – [start, end) に含まれる k(0-indexed) 番目に大きい値を求める.
-// Lower(start, end, value) – [start, end) に含まれる要素の中で value の次に小さいものを求める.存在しない場合は -INF を返す.
-// Upper(start, end, value) – [start, end) に含まれる要素の中で value の次に大きいものを求める.存在しない場合は INF を返す.
+// 1-n上有n只猫,分别在1,2,...,n的位置
+// 给定每只猫的移动方向,问一共有多少对猫中途会相遇(所有的移动方向不同)
+// n<=3e4
 
-// Referece:
-// https://beet-aizu.github.io/library/datastructure/waveletmatrix.cpp
-// https://blog.hamayanhamayan.com/entry/2017/06/13/103352
+// !对每只猫,计算左边不相撞的+右边不相撞的,然后相加/2即可
 
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 )
 
 const INF int = 1e18
+
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	xs := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &xs[i])
+		xs[i]--
+	}
+
+	wm := NewWaveletMatrix(xs, 32)
+	res := n * (n - 1)
+	for i := 0; i < n; i++ {
+		res -= wm.CountRange(0, i, 0, xs[i])       // 左侧不相撞的
+		res -= wm.CountRange(i+1, n, xs[i]+1, 2*n) // 右侧不相撞的
+	}
+
+	fmt.Fprintln(out, res/2)
+}
 
 // 指定された配列から WaveletMatrix を構築する.
 //  data:変換する配列
@@ -98,10 +116,6 @@ func (w *WaveletMatrix) Index(value, k int) int {
 		k -= w.buff1[dep]
 	}
 	return k
-}
-
-func (w *WaveletMatrix) IndexWithStart(value, k, start int) int {
-	return w.Index(value, k+w.count(value, start))
 }
 
 // [start, end) に含まれる要素の中で k(0-indexed) 番目に大きいものを求める.
@@ -187,7 +201,6 @@ func (w *WaveletMatrix) freqDfs(d, left, right, val, a, b int) int {
 		return 0
 	}
 
-	// TODO
 	nv := (1 << uint(w.maxLog-d-1)) | val
 	nnv := ((1 << uint(w.maxLog-d-1)) - 1) | nv
 	if nnv < a || b <= val {
@@ -287,17 +300,4 @@ func (f *BitVector) IndexWithStart(value, k, start int) int {
 func (f *BitVector) count1(k int) int {
 	mask := (1 << uint(k&63)) - 1
 	return f.sum[k>>6] + bits.OnesCount(uint(f.block[k>>6]&mask))
-}
-
-func main() {
-	nums := []int{1, 2, 3, 1, 5, 6, 7, 8, 9, 10}
-	M := NewWaveletMatrix(nums, 32)
-	fmt.Println(M.Count(0, 1, 1))
-	fmt.Println(M.CountRange(0, 10, 1, 5))
-	fmt.Println(M.Index(1, 2))
-	fmt.Println(M.IndexWithStart(1, 0, 2))
-	fmt.Println(M.KthMax(0, 10, 2))
-	fmt.Println(M.KthMin(0, 10, 2))
-	fmt.Println(M.Lower(0, 10, 100))
-	fmt.Println(M.Higher(0, 10, 0))
 }

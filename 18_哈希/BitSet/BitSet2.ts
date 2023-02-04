@@ -1,3 +1,8 @@
+// 一个list，长度固定为n，两种操作：
+// 1. set i, v 设置某个下标为0或1
+// 2. query i 查找从i下标开始的第一个1的位置
+
+
 /**
  * 01线段树，支持 flip/indexOf/onesCount/kth，可用于模拟Bitset
  */

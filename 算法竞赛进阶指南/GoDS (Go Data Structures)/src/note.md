@@ -20,6 +20,8 @@ https://qiita.com/ktateish/items/ab2df3e0864d2e931bf2
    func main() {
    	slice1 := []int{1, 2, 3, 4, 5}
    	sliceCopy := append([]int{}, slice1...)
+    // 不需要写类型拷贝
+    // sliceCopy := append(slice1[:0:0], slice1...)
    	sliceCopy[0] = 100
    	fmt.Println(slice1, sliceCopy) // [1 2 3 4 5] [100 2 3 4 5]
    }
