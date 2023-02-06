@@ -25,26 +25,19 @@ class Solution:
 
     def rob2(self, nums: List[int]) -> int:
         """dp 考虑第一个选还是不选"""
-        n = len(nums)
-        if n == 1:
-            return nums[0]
+        if not nums:
+            return 0
 
-        dp = [[[0, 0] for _ in range(2)] for _ in range(n)]  # (index,pre,root) [不选 选]
-        dp[0][1][1] = nums[0]
-        for i in range(1, n):
-            for pre in range(2):
-                for cur in range(2):
-                    if pre == cur == 1:
-                        continue
-                    for root in range(2):
-                        dp[i][cur][root] = max(
-                            dp[i][cur][root], dp[i - 1][pre][root] + (cur and nums[i])
-                        )
+        def cal0() -> int:  # 不偷第一个(i的范围是[1, n-1])
+            dp0, dp1 = 0, 0
+            for i in range(1, len(nums)):
+                dp0, dp1 = max(dp0, dp1), max(dp0 + nums[i], dp1)
+            return max(dp0, dp1)
 
-        res = -INF
-        for pre in range(2):
-            for root in range(2):
-                if pre == root == 1:
-                    continue
-                res = max(res, dp[n - 1][pre][root])
-        return res
+        def cal1() -> int:  # 偷第一个(i的范围是[2, n-2])
+            dp0, dp1 = 0, 0
+            for i in range(2, len(nums) - 1):
+                dp0, dp1 = max(dp0, dp1), max(dp0 + nums[i], dp1)
+            return max(dp0, dp1)
+
+        return max(cal0(), cal1() + nums[0])

@@ -14,7 +14,7 @@ INF = int(4e18)
 def solve(
     ROW: int, COL: int, windowRow: int, windowCol: int, grid: List[List[int]]
 ) -> List[List[int]]:
-    """返回每个window*winowCol窗口之外的格子里的颜色种类数
+    """返回每个windowRow*winowCol窗口之外的格子里的颜色种类数
     ROW,COL <= 300
     """
 

@@ -4,9 +4,6 @@
 
 from typing import List, Tuple
 
-INF = int(1e18)
-
-
 # 平面上已存在直线lines
 # 0 a b 增加一条直线 y=ax+b
 # 1 x 查询横坐标为x时的最小值
@@ -27,6 +24,21 @@ def lineAddGetMin(lines: List[Tuple[int, int]], queries: List[List[int]]) -> Lis
         else:
             res.append(tree.get_min(*args))
     return res
+
+
+INF = int(1e18)
+
+
+def max(x, y):
+    if x > y:
+        return x
+    return y
+
+
+def min(x, y):
+    if x < y:
+        return x
+    return y
 
 
 class LiChaoTree:

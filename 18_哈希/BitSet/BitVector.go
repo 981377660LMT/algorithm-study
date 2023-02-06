@@ -1,4 +1,6 @@
 // WaveletMatrix 里用到的BitVector
+// reference: https://tiramister.net/blog/posts/bitvector/
+// 简洁数据结构
 
 package main
 

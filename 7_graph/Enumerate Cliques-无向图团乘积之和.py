@@ -1,6 +1,6 @@
 # Enumerate Cliques (clique:团)
 # 求所有团乘积之和（团就是一个两两之间有边的顶点集合）
-# n,m<=100
+# n,m<=100 O(2^sqrt(2*m)*n)
 from typing import List
 
 

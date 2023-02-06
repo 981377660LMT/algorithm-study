@@ -1,4 +1,4 @@
-# 无向图三角形顶点乘积之和
+# 无向图三角形(三元环)顶点乘积之和
 # n,m<=1e5
 # Enumerate Triangles
 from typing import List

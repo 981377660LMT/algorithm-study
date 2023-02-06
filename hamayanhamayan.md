@@ -50,7 +50,7 @@ https://blog.hamayanhamayan.com/entry/2100/01/01/000000
   - [ ] 持久化数据结构
   - [ ] 平衡树
   - [ ] ST 表
-  - [ ] WaveletMatrix
+  - [x] WaveletMatrix
 
 - dp
 

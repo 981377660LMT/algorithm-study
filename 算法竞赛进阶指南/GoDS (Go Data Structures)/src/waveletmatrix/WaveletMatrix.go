@@ -21,7 +21,7 @@ import (
 const INF int = 1e18
 
 // 指定された配列から WaveletMatrix を構築する.
-//  data:変換する配列
+//  data:変換する配列(data[i]は0以上、2^maxLog未満)
 //  maxLog:queryの最大値のbit数(普通は32)
 func NewWaveletMatrix(data []int, maxLog int) *WaveletMatrix {
 	dataCopy := append(data[:0:0], data...)

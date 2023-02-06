@@ -1,4 +1,5 @@
 # RectangleSum
+# https://judge.yosupo.jp/problem/point_add_rectangle_sum
 
 from bisect import bisect_left
 from typing import List, Tuple

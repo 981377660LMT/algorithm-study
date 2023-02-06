@@ -151,6 +151,7 @@ res = []
 query = []
 dc = OfflineDynamicConnectivity(n, q)
 
+# 开始时每个点的权值
 for i, a in enumerate(map(int, input().split())):
     dc.uf.addSum(i, a)
 
@@ -167,10 +168,10 @@ for i in range(q):
 
 def func(k: int):
     cur = query[k]
-    if cur[0] == 2:
+    if cur[0] == 2:  # 增加权值
         _, v, x = cur
         dc.uf.addSum(v, x)
-    if cur[0] == 3:
+    if cur[0] == 3:  # 查询权值和
         _, v = cur
         res.append(dc.uf.getComponentSum(v))
 

@@ -5,6 +5,7 @@
 
 from typing import List, Tuple
 
+
 # https://judge.yosupo.jp/submission/57831
 def chromatic_number(n: int, edges: List[Tuple[int, int]]) -> int:
     adjList = [0] * n

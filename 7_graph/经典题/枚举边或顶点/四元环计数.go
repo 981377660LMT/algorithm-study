@@ -6,7 +6,7 @@ package main
 // !时间复杂度O(E*3/2)
 // !四元环唯一表示两条无向边+两条有向边 u-v->w u-x->w 且 rank(u)最小rank(w)最大
 // !这样才能保证一个四元环不被反复计算。
-func countCycle4(n int, edges [][2]int) (res int64) {
+func countCycle4(n int, edges [][2]int) (res int) {
 	adjList1 := make([][]int, n)
 	deg := make([]int, n)
 	less := func(u, v int) bool { return deg[u] < deg[v] || (deg[u] == deg[v] && u < v) }
@@ -34,7 +34,7 @@ func countCycle4(n int, edges [][2]int) (res int64) {
 			for _, next2 := range adjList2[next1] {
 				if less(cur, next2) {
 					count[cur]++
-					res += int64(count[cur])
+					res += int(count[cur])
 				}
 
 			}
@@ -52,6 +52,36 @@ func countCycle4(n int, edges [][2]int) (res int64) {
 	return
 }
 
+// !无向图是否存在四元环 O(n^2)
+func hasCycle4(n int, edges [][2]int) bool {
+	adjList := make([][]int, n)
+	for _, e := range edges {
+		u, v := e[0], e[1]
+		adjList[u] = append(adjList[u], v)
+		adjList[v] = append(adjList[v], u)
+	}
+
+	check := make([][]bool, n)
+	for i := range check {
+		check[i] = make([]bool, n)
+	}
+
+	for i := 0; i < n; i++ {
+		for j := 0; j < len(adjList[i])-1; j++ {
+			for k := j + 1; k < len(adjList[i]); k++ {
+				if check[adjList[i][j]][adjList[i][k]] {
+					return true
+				}
+				check[adjList[i][j]][adjList[i][k]] = true
+				check[adjList[i][k]][adjList[i][j]] = true
+			}
+		}
+	}
+
+	return false
+}
+
 func main() {
 	// https://atcoder.jp/contests/abc260/tasks/abc260_f
+
 }

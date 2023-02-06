@@ -2,23 +2,22 @@
 # 求最大的分
 
 # 二维打家劫舍
+
+
+def max(x, y):
+    if x > y:
+        return x
+    return y
+
+
 class Solution:
     def solve(self, matrix):
         def solve1D(row):
             """一维打家劫舍"""
-            if len(row) == 1:
-                return row[0]
-
-            dp = [0] * len(row)
-            dp[0] = row[0]
-            dp[1] = max(row[0], row[1])
-            for i in range(2, len(row)):
-                dp[i] = max(dp[i - 1], dp[i - 2] + row[i])
-
-            return dp[-1]
-
-        if not any(matrix):
-            return 0
+            dp0, dp1 = 0, row[0]
+            for i in range(1, len(row)):
+                dp0, dp1 = max(dp0, dp1), max(dp0 + row[i], dp1)
+            return max(dp0, dp1)
 
         return solve1D([solve1D(row) for row in matrix])
 

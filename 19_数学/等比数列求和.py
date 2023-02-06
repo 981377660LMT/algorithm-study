@@ -1,6 +1,7 @@
 # 求前n项和
 from typing import List
 
+
 # 等比数列求和
 def getSum(n: int, a0: int, q: int) -> List[int]:
     """等比数列前n项和"""
@@ -14,4 +15,3 @@ def getSum(n: int, a0: int, q: int) -> List[int]:
 
 
 print(getSum(5, 2, 2))
-

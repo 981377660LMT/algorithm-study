@@ -23,7 +23,6 @@ def matrixToAdjMap(matrix: List[List[int]]) -> DefaultDict[int, Set[int]]:
     return adjMap
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
     print(matrixToAdjMap(matrix))
-

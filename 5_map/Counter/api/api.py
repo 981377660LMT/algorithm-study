@@ -1,18 +1,18 @@
 from collections import Counter
 
-c = Counter('aabbbccdddddeefggggg')
+c = Counter("aabbbccdddddeefggggg")
 
 # 1. 子集关系用交/并集表示 (交小并大)
-sub_c = Counter('a')
+sub_c = Counter("a")
 print(sub_c & c == sub_c)
 print(sub_c | c == c)
 
 # 2. 合并取最大频率 相交取最小频率
-or_a = Counter('abbbbb') | c
+or_a = Counter("abbbbb") | c
 print(or_a)
 
-# 3.加减 小于等于0直接消除
-diff_b = Counter('aa')
+# 3.减(差集/补集) 小于等于0直接消除
+diff_b = Counter("aa")
 print(c - diff_b)
 
 # 4. 空counter
