@@ -18,5 +18,16 @@
 
 因为 dp 优化往往需要获取某个前缀的信息 记忆化 dfs 无法做到这一点
 
-TODO
-https://beet-aizu.github.io/library/ 里 algorithm 的 dp 优化方法
+- https://blog.hamayanhamayan.com/entry/2017/03/20/234711
+- https://codeforces.com/blog/entry/8219
+- https://codeforces.com/blog/entry/47932
+
+## 优化方案
+
+- 前缀和
+- 线段树等数据结构
+- 矩阵快速幂(dp 在相邻行间转移,且每行状态数不超过 100) `O(n^3logk)`
+- CHT
+- 分治
+- 四边形不等式
+- offlineInlineDp

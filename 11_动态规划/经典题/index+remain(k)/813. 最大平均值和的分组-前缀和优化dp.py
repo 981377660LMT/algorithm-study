@@ -11,7 +11,7 @@ from itertools import accumulate
 
 class Solution:
     def largestSumOfAverages2(self, nums: List[int], k: int) -> float:
-        """dp[k][i]表示前i个数分成k组的最大平均值和 O(n*k)
+        """dp[k][i]表示前i个数分成k组的最大平均值和 O(n^2*k)
 
         dp[c][i] = max(dp[c][i], dp[c-1][j] + (preSum[i+1] - preSum[j+1]) / (i - j))
         """

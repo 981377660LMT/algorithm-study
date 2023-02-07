@@ -15,3 +15,25 @@
 
 关键：
 `left+right+枚举分割点`
+
+**注意**
+如果左右两端区间的代价不能共用中间点 k
+就是 `dfs(left, k) + dfs(k + 1, right) + cost(left,k,right)`
+否则为 `dfs(left, k) + dfs(k, right) + cost(left,k,right)`
+
+```Python
+@lru_cache(maxsize=None)
+def dfs(left: int, right: int) -> int:
+    """[left,right]这一段合并的代价最小"""
+    # if right-left <= ...
+    #     return 0
+    if left >= right:
+        return 0
+    res = INF
+    for i in range(left, right):
+        res = min(res, dfs(left, i) + dfs(i + 1, right) + preSum[right + 1] - preSum[left])
+    return res
+
+
+print(dfs(0, n - 1))
+```

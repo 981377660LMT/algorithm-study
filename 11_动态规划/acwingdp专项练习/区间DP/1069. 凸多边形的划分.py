@@ -11,16 +11,16 @@ nums = list(map(int, input().split()))
 
 @lru_cache(maxsize=None)
 def dfs(left: int, right: int) -> int:
-    """[left:right+1]这一段合并的代价最小"""
+    """[left,right]这一段合并的代价最小"""
     """i-j连起来的这条边`不动`，枚举根这条边配对的点的位置，枚举切割位置"""
-    if right - left < 2:
+    if right - left <= 1:
         return 0
     if right - left == 2:
         return nums[left] * nums[left + 1] * nums[right]
 
     res = int(1e100)
-    for i in range(left + 1, right):
-        res = min(res, dfs(left, i) + dfs(i, right) + nums[left] * nums[i] * nums[right])
+    for k in range(left + 1, right):
+        res = min(res, dfs(left, k) + dfs(k, right) + nums[left] * nums[k] * nums[right])
     return res
 
 

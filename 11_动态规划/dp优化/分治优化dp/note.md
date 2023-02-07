@@ -1,7 +1,7 @@
 offlineDp -> onlineDp (オフライン・オンライン変換)
 
-- offlineDp 可以理解为区间分 k 组的这种 dp
-  dp[k][j]=min(dp[k-1][j]+f(i,j)) (i<j)
+- offlineDp 可以理解为将区间[0,n)分成 k 组的最小代价
+  dp[k][j]=min(dp[k-1][i]+f(i,j)) (i<j)
 
   - 如果代价函数 f(i,j) 是决策单调(Monotone)的，那么可以用分治 dp 优化，时间复杂度从 `O(n^2*k)` 降到 `O(n*logn*k)`
     > 备注: Monge ⇒ Totally Monotone(TM) ⇒ Monotones，即满足四边形不等式的函数一定满足决策单调性

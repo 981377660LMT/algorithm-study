@@ -1,4 +1,5 @@
 // !用两个 slice 头对头拼在一起实现(每个slice头部只删除元素，不添加元素，互相弥补劣势)
+// 在知道数据量的情况下，也可以直接创建一个两倍数据量大小的 slice，然后用两个下标表示头尾，初始化在 slice 正中
 // https://github.dev/EndlessCheng/codeforces-go/blob/master/misc/atcoder/abc274/e
 
 package arraydeque

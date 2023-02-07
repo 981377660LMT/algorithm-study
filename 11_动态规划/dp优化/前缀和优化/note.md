@@ -1,4 +1,9 @@
-# 前缀和优化 dp dp[i]=dp[left]...+dp[i-1]
+# 前缀和优化 dp
+
+这样的区间和/区间最大最小需要记录前缀更新 dp 数组
+dp[i][j] = dp[i-1][0] + dp[i-1][1] + ... + dp[i-1][j]
+dp[i][j] = min(dp[i-1][0], dp[i-1][1], ..., dp[i-1][j])
+dp[i][j] = max(dp[i-1][0], dp[i-1][1], ..., dp[i-1][j])
 
 - 一般会用到 dp 和 dpSum 数组
 - 求出 dp[i]后再更新 dpSum[i]

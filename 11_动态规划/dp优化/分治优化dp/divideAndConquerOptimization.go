@@ -1,6 +1,6 @@
 // 単調最小値DP (aka. 分割統治DP) 优化 offlineDp
 // https://ei1333.github.io/library/dp/divide-and-conquer-optimization.hpp
-// !用于高速化 dp[k][j]=min(dp[k-1][j]+f(i,j)) (0<=i<j) 一般是dp[remain][index]
+// !用于高速化 dp[k][j]=min(dp[k-1][i]+f(i,j)) (0<=i<j<=n) => !将区间[0,n)分成k组的最小代价
 //  如果f满足决策单调性 那么对转移的每一行，可以采用 monotoneminima 寻找最值点
 //  O(kn^2)优化到O(knlogn)
 

@@ -30,7 +30,7 @@ import (
 
 const INF int = 1e18
 
-// !dp[i][j]=min{dp[i][k]+dp[k+1][j]+cost(i,j,k)} (i<=k<j)
+// !dp[i][j]=min{dp[i][k]+dp[k+1][j]+cost(i,j,k)} (0<=i<=k<j<n)
 func KnuthYao1(n int, cost func(i, k, j int) int) int {
 	dp := make([][]int, n)
 	ar := make([][]int, n)
@@ -61,7 +61,7 @@ func KnuthYao1(n int, cost func(i, k, j int) int) int {
 	return dp[0][n-1]
 }
 
-// !dp[i][j]=min(dp[i][k-1]+dp[k+1][j]+cost(i,k,j)) (i<=k<j)
+// !dp[i][j]=min(dp[i][k-1]+dp[k+1][j]+cost(i,k,j)) (0<=i<=k<j<=n)
 func KnuthYao2(n int, cost func(i, k, j int) int) int {
 	dp := make([][]int, n+2)
 	pos := make([][]int, n+2)

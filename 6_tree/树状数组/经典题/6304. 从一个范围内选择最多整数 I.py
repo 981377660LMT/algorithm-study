@@ -8,7 +8,28 @@
 # 请你返回按照上述规则 最多 可以选择的整数数目。
 # n<=1e9
 
+from bisect import bisect_right
+from itertools import accumulate
 from typing import List
+
+
+def maxCount2(banned: List[int], n: int, maxSum: int) -> int:
+    def check(mid: int) -> bool:
+        # 选取[1,mid]内的合法整数，使得和不超过maxSum
+        pos = bisect_right(bad, mid)
+        return (1 + mid) * mid // 2 - preSum[pos] <= maxSum
+
+    bad = sorted(set(banned))
+    preSum = [0] + list(accumulate(bad))
+    left, right = 1, n
+    while left <= right:
+        mid = (left + right) // 2
+        if check(mid):
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return right - bisect_right(bad, right)
 
 
 class Solution:
