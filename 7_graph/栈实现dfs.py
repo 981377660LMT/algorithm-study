@@ -2,7 +2,8 @@
 栈实现dfs
 适用于atcoder
 """
-
+# dfs递归改成栈实现
+# https://tjkendev.github.io/procon-library/python/graph/dfs.html
 from typing import List
 
 

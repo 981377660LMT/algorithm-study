@@ -13,7 +13,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"runtime/debug"
 )
+
+// 单组测试时禁用gc
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 func main() {
 	in := bufio.NewReader(os.Stdin)
@@ -22,26 +28,57 @@ func main() {
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	git := make([]*Node, q+1)
-	git[0] = Build(1, n)
 
+	uf := NewPersistentUnionfind(n)
 	for i := 0; i < q; i++ {
 		var op, version, u, v int
 		fmt.Fscan(in, &op, &version, &u, &v)
 		version++
-		u++
-		v++
 		if op == 0 {
-			newUnionFind := git[version].Union(u, v)
-			git[i+1] = newUnionFind
+			uf.Union(version, u, v)
 		} else {
-			if git[version].IsConnected(u, v) {
+			uf.Union(version, 0, 0)
+			if uf.IsConnected(version, u, v) {
 				fmt.Fprintln(out, 1)
 			} else {
 				fmt.Fprintln(out, 0)
 			}
 		}
 	}
+}
+
+type PersistentUnionfind struct {
+	CurVersion int
+	roots      []*Node
+}
+
+// 0-n-1
+func NewPersistentUnionfind(n int) *PersistentUnionfind {
+	return &PersistentUnionfind{roots: []*Node{Build(1, n)}}
+}
+
+// 合并x和y所在的集合,返回当前版本号
+//  0<=version<=curVersion
+//  0<=x,y<n
+func (p *PersistentUnionfind) Union(version, x, y int) int {
+	x, y = x+1, y+1
+	p.roots = append(p.roots, p.roots[version].Union(x, y))
+	p.CurVersion++
+	return p.CurVersion
+}
+
+//  0<=version<=curVersion
+//  0<=x<n
+func (p *PersistentUnionfind) Find(version, x int) int {
+	x++
+	return p.roots[version].Find(x).left - 1
+}
+
+//  0<=version<=curVersion
+//  0<=x,y<n
+func (p *PersistentUnionfind) IsConnected(version, x, y int) bool {
+	x, y = x+1, y+1
+	return p.roots[version].IsConnected(x, y)
 }
 
 type Node struct {

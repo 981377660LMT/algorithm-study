@@ -34,7 +34,8 @@ def directedMST(n: int, edges: List[Tuple[int, int, int]], root=0) -> Tuple[int,
             proc.append(v)
             if from_heap[v].root is None:
                 return -1, [-1] * n
-            from_cost[v], ind = divmod(from_heap[v].heappop(), m)
+            tmp = from_heap[v].heappop()
+            from_cost[v], ind = tmp // m, tmp % m
             froms[v] = UF.find(edges[ind][0])
             if stem[v] == -1:
                 stem[v] = ind

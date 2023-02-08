@@ -43,8 +43,8 @@ def cal(deltaX: int, deltaY: int) -> int:
 
 def solve(row: int, col: int, bad: List[Tuple[int, int]]) -> int:
     """左上角移动到右下角的方案数 bad是所有的障碍"""
-    # if (row - 1, col - 1) in bad or (0, 0) in bad:
-    #     return 0
+    if (row - 1, col - 1) in bad or (0, 0) in bad:
+        return 0
     n = len(bad)
     bad.append((row - 1, col - 1))
     bad.sort()

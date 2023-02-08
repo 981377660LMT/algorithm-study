@@ -10,25 +10,24 @@ from typing import List
 # 如果AB*AC<0,则三角形ABC是顺时针的
 
 
-class Solution:
-    def isConvex(self, points: List[List[int]]) -> bool:
-        def cal_cross_product(A, B, C):
-            AB = [B[0] - A[0], B[1] - A[1]]
-            AC = [C[0] - A[0], C[1] - A[1]]
-            return AB[0] * AC[1] - AB[1] * AC[0]
+def isConvex(points: List[List[int]]) -> bool:
+    def cross(A, B, C):
+        AB = [B[0] - A[0], B[1] - A[1]]
+        AC = [C[0] - A[0], C[1] - A[1]]
+        return AB[0] * AC[1] - AB[1] * AC[0]
 
-        flag = 0
-        n = len(points)
-        for i in range(n):
-            # cur > 0 表示points是按逆时针输出的;cur < 0,顺时针
-            cur = cal_cross_product(points[i], points[(i + 1) % n], points[(i + 2) % n])
-            if cur != 0:
-                # 说明异号, 说明有个角大于180度
-                if cur * flag < 0:
-                    return False
-                else:
-                    flag = cur
-        return True
+    flag = 0
+    n = len(points)
+    for i in range(n):
+        # cur > 0 表示points是按逆时针输出的;cur < 0,顺时针
+        cur = cross(points[i], points[(i + 1) % n], points[(i + 2) % n])
+        if cur != 0:
+            # 说明异号, 说明有个角大于180度
+            if cur * flag < 0:
+                return False
+            else:
+                flag = cur
+    return True
 
 
 # 两条线段：利用点相减的形式表示，则AC = C - A =（0, 2），AB = B - A =（1, 1）

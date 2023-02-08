@@ -1,6 +1,7 @@
 ## hamayanhamayan 的题集整理
 
 https://blog.hamayanhamayan.com/entry/2100/01/01/000000
+每章下面有很多例题，最好只做标有`解说`的例题
 
 - 数学
 

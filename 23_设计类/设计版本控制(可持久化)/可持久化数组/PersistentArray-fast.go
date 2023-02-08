@@ -10,35 +10,55 @@ package main
 
 import (
 	"fmt"
+	"runtime/debug"
 )
 
+// 单组测试时禁用gc
+func init() {
+	debug.SetGCPercent(-1)
+}
+
 func main() {
-	// // time
-	// nums1e5 := make([]E, 1e5)
-	// for i := range nums1e5 {
-	// 	nums1e5[i] = E(i)
-	// }
-	// root3 := Build(0, len(nums1e5)-1, nums1e5)
-	// time1 := time.Now()
-	// for i := 0; i < 1e5; i++ {
-	// 	root4 := root3.Set(0, 10)
-	// 	root4.Get(i)
-	// }
-	// fmt.Println(time.Since(time1))
-
-	array1 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	root1 := Build(0, len(array1)-1, array1)
-	fmt.Println(root1)
-	root2 := root1.Set(0, 10)
-	fmt.Println(root1, root2)
-
+	nums := NewPersistentArray([]E{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+	v1 := nums.Set(0, 0, 100) // 初始版本号为0
+	v2 := nums.Set(v1, 1, 200)
+	nums.Set(v2, 2, 300)
+	fmt.Println(nums.Get(0, 0), nums.Get(v1, 1), nums.Get(v2, 2))
 }
 
 type E = int
 
+type PersistentArray struct {
+	CurVersion int // 当前版本号从0开始
+	versions   []*Node
+}
+
+func NewPersistentArray(nums []E) *PersistentArray {
+	root := Build(0, len(nums)-1, nums)
+	return &PersistentArray{versions: []*Node{root}}
+}
+
+// 将版本version上的index位置的值修改为value, 返回新版本号
+//  0 <= version <= curVersion
+//  0 <= index < len(nums)
+func (o *PersistentArray) Set(version, index int, value E) int {
+	preRoot := o.versions[version]
+	newRoot := preRoot.Set(index, value)
+	o.versions = append(o.versions, newRoot)
+	o.CurVersion++
+	return o.CurVersion
+}
+
+// 返回版本version上的index位置的值
+//  0 <= version <= curVersion
+//  0 <= index < len(nums)
+func (o *PersistentArray) Get(version, index int) E {
+	root := o.versions[version]
+	return root.Get(index)
+}
+
 type Node struct {
 	left, right           int
-	size                  int
 	value                 E
 	leftChild, rightChild *Node
 }
@@ -47,13 +67,11 @@ func Build(left, right int, nums []E) *Node {
 	node := &Node{left: left, right: right}
 	if left == right {
 		node.value = nums[left]
-		node.size = 1
 		return node
 	}
 	mid := (left + right) >> 1
 	node.leftChild = Build(left, mid, nums)
 	node.rightChild = Build(mid+1, right, nums)
-	node.pushUp()
 	return node
 }
 
@@ -85,17 +103,13 @@ func (o Node) Set(index int, value E) *Node {
 	return &o
 }
 
-func (o *Node) pushUp() {
-	o.size = o.leftChild.size + o.rightChild.size
-}
-
 func (o *Node) String() string {
 	res := o.dfs()
 	return fmt.Sprintf("PersistentArray %v", res)
 }
 
 func (o *Node) dfs() []E {
-	res := make([]E, 0, o.size)
+	res := []E{}
 	if o.left == o.right {
 		res = append(res, o.value)
 		return res

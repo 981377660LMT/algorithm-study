@@ -1,7 +1,6 @@
 # 线段相交/线段交点
 # !判断两线段是否相交(是否存在坐标相同的点)
-# 也可参考
-# https://leetcode.cn/circle/discuss/fC4N4x/
+
 
 from typing import Tuple, Union
 
@@ -9,7 +8,6 @@ Segment = Tuple[int, int, int, int]
 
 
 def cross(x1: int, y1: int, x2: int, y2: int) -> int:
-    """内积"""
     return x1 * y2 - y1 * x2
 
 
@@ -69,11 +67,9 @@ def intersection(
 
 
 if __name__ == "__main__":
-    x1, y1 = map(int, input().split())
-    x2, y2 = map(int, input().split())
-    x3, y3 = map(int, input().split())
-    x4, y4 = map(int, input().split())
-    if isSegCross(x1, y1, x2, y2, x3, y3, x4, y4):
-        print("Yes")
-    else:
-        print("No")
+    # https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_2_B&lang=ja
+    q = int(input())
+    for _ in range(q):
+        args = list(map(int, input().split()))
+        seg1, seg2 = tuple(args[:4]), tuple(args[4:])
+        print(1 if isSegCross(seg1, seg2) else 0)

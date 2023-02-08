@@ -17,7 +17,7 @@ Point = Tuple[int, int]
 
 def dontSwim(convexPoly: List[Point], start: Point, target: Point) -> float:
     convexPoly += [start, target]
-    hull = calConvexHull(convexPoly)
+    hull = convexHull(convexPoly)
     sid, tid = -1, -1
     for i, p in enumerate(hull):
         if p == start:
@@ -50,7 +50,7 @@ def calCross(A: Point, B: Point, C: Point) -> int:
     return AB[0] * AC[1] - AB[1] * AC[0]
 
 
-def calConvexHull(points: List[Point]) -> List[Point]:
+def convexHull(points: List[Point]) -> List[Point]:
     """Andrew 算法 nlogn 求凸包"""
     if len(points) <= 3:
         return points

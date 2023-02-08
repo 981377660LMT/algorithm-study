@@ -9,3 +9,4 @@ class Solution:
 
 
 print(Solution().longestNiceSubstring(s="YazaAay"))
+print(bin(-1 & 0b00000010100)[2:])

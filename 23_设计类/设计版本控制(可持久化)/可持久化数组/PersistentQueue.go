@@ -12,8 +12,14 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"runtime/debug"
 	"strings"
 )
+
+// 单组测试数据时禁用GC
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 func main() {
 
@@ -53,16 +59,16 @@ func main() {
 type E = int
 
 type PersistentQueue struct {
-	MaxVersion int      // !初始版本号为0
-	roots      []*Node  // !记录每个版本的数组
-	bounds     [][2]int // !记录每个版本的数组的左右边界(左闭右开)
+	CurVersion int     // !初始版本号为0
+	roots      []*Node // !记录每个版本的数组
+	bounds     [][]int // !记录每个版本的数组的左右边界(左闭右开)
 }
 
 func NewPersistentQueue(maxQuery int) *PersistentQueue {
 	res := &PersistentQueue{
 		roots:      make([]*Node, 0, maxQuery+1),
-		bounds:     make([][2]int, 0, maxQuery+1),
-		MaxVersion: -1,
+		bounds:     make([][]int, 0, maxQuery+1),
+		CurVersion: -1,
 	}
 
 	initNums := make([]E, maxQuery)
@@ -114,7 +120,7 @@ func (q *PersistentQueue) Len(version int) int {
 func (q *PersistentQueue) String() string {
 	sb := strings.Builder{} // PersistentQueue
 	sb.WriteString("PersistentQueue:\n")
-	for i := 0; i <= q.MaxVersion; i++ {
+	for i := 0; i <= q.CurVersion; i++ {
 		sb.WriteString(fmt.Sprintf("version %d: ", i))
 		sb.WriteString("[")
 		elements := make([]string, 0, q.bounds[i][1]-q.bounds[i][0])
@@ -130,14 +136,13 @@ func (q *PersistentQueue) String() string {
 
 func (q *PersistentQueue) addVersion(root *Node, left, right int) int {
 	q.roots = append(q.roots, root)
-	q.bounds = append(q.bounds, [2]int{left, right})
-	q.MaxVersion++
-	return q.MaxVersion
+	q.bounds = append(q.bounds, []int{left, right})
+	q.CurVersion++
+	return q.CurVersion
 }
 
 type Node struct {
 	left, right           int
-	size                  int
 	value                 E
 	leftChild, rightChild *Node
 }
@@ -146,13 +151,11 @@ func Build(left, right int, nums []E) *Node {
 	node := &Node{left: left, right: right}
 	if left == right {
 		node.value = nums[left]
-		node.size = 1
 		return node
 	}
 	mid := (left + right) >> 1
 	node.leftChild = Build(left, mid, nums)
 	node.rightChild = Build(mid+1, right, nums)
-	node.pushUp()
 	return node
 }
 
@@ -184,17 +187,13 @@ func (o Node) Set(index int, value E) *Node {
 	return &o
 }
 
-func (o *Node) pushUp() {
-	o.size = o.leftChild.size + o.rightChild.size
-}
-
 func (o *Node) String() string {
 	res := o.dfs()
 	return fmt.Sprintf("PersistentArray %v", res)
 }
 
 func (o *Node) dfs() []E {
-	res := make([]E, 0, o.size)
+	res := []E{}
 	if o.left == o.right {
 		res = append(res, o.value)
 		return res

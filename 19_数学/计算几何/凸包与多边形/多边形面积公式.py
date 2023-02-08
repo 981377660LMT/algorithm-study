@@ -1,10 +1,18 @@
 from fractions import Fraction
-from typing import List
+from typing import List, Tuple
 
 
-Point = List[int]
+Point = Tuple[int, int]
 
 
+def polygon_area(n: int, poly: List[Point]) -> float:
+    """多边形面积公式"""
+    return (
+        abs(sum(poly[i][0] * poly[i - 1][1] - poly[i][1] * poly[i - 1][0] for i in range(n))) / 2.0
+    )
+
+
+###############################################################
 def calCross(p1: Point, p2: Point, p3: Point) -> int:
     ab = [p2[0] - p1[0], p2[1] - p1[1]]
     ac = [p3[0] - p1[0], p3[1] - p1[1]]
@@ -37,3 +45,7 @@ def calPolygenArea2(points: List[Point]) -> int:
     for (x1, y1), (x2, y2) in zip(points, points[1:] + [points[0]]):
         res += x1 * y2 - x2 * y1
     return abs(res)
+
+
+print(polygon_area(3, [(0, 0), (3, 1), (2, 5)]))
+print(calPolygenArea2([(0, 0), (3, 1), (2, 5)]))

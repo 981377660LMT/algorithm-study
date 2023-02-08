@@ -31,7 +31,7 @@ func monotoneminima(H, W int, dist func(i, j int) int) [][2]int {
 		res := 0
 		for i := left; i <= right; i++ {
 			tmp := dist(mid, i)
-			if index == -1 || tmp < res { // less
+			if index == -1 || tmp < res {
 				index = i
 				res = tmp
 			}

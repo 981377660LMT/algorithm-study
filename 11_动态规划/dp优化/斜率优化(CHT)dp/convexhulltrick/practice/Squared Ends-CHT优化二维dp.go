@@ -1,9 +1,15 @@
-// ConvexHullTrickLichao
-// 动态开点的李超线段树维护凸包
+// https://csacademy.com/contest/round-70/task/squared-ends/
+// 给定一个数组,分成k个子数组,
+// 子数组[A[l],...,A[r]]的代价为(A[l]-A[r])^2
+// 最小化所有子数组的代价和
+// !n<=1e4 k<=100 1<=A[i]<=1e9
+// CHT或者分治优化dp都可以解决这个问题
 
-// https://ei1333.github.io/library/structure/convex-hull-trick/dynamic-li-chao-tree.hpp
-// 追加直线/线段,查询k*x+b的最小值
-// 如果要查询最大值,需要在插入直线时取反即(-k,-b),查询时返回-query(x)
+// dp[k][j]表示将[0,j]区间分成k个子数组的最小代价和
+// dp[k][j]=min(dp[k-1][i]+(A[i+1]-A[j])^2) (0<=i<j<n)
+// 即 ndp[j] = min(dp[i]+(A[i+1]-A[j])^2) (0<=i<j<n)
+// !变形得到 dp[j] = min(-2*A[i+1]*A[j] + (A[i+1]^2+dp[i]) + A[j]^2) (0<=i<j<n)
+// 可以用CHT优化dp
 
 package main
 
@@ -14,32 +20,34 @@ import (
 )
 
 func main() {
-	// https://atcoder.jp/contests/colopl2018-final-open/tasks/colopl2018_final_c
-	// 对每个i 求 f(i,j)=a[j]+(j-i)^2 的最小值
-	// 化简得 f(i,j)=(a[j]+j^2-2ij)+i^2
-	// 其中j变化的函数是关于i的一次函数(直线)
-	// !将这n条直线加入到CHT中,然后对每个i求最小值即可
-
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
+	var n, k int
+	fmt.Fscan(in, &n, &k)
 	A := make([]int, n)
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &A[i])
 	}
 
-	cht := NewConvexHullTrickLichao(true, 0, n-1) // 查询自变量0<=x<n
+	dp := make([]int, n) // 1组
 	for i := 0; i < n; i++ {
-		cht.AddLine(-2*i, i*i+A[i], i)
+		dp[i] = (A[i] - A[0]) * (A[i] - A[0])
 	}
 
-	for i := 0; i < n; i++ {
-		res, _ := cht.Query(i)
-		fmt.Fprintln(out, res+i*i)
+	for k_ := 1; k_ < k; k_++ {
+		ndp := make([]int, n)
+		cht := NewConvexHullTrickLichao(true, 1, 1e9) // query自变量A[j]范围[1,1e9]
+		for j := k_; j < n; j++ {
+			cht.AddLine(-2*A[j], A[j]*A[j]+dp[j-1], j) // 注意这里是dp[j-1]
+			best, _ := cht.Query(A[j])
+			ndp[j] = best + A[j]*A[j]
+		}
+		dp = ndp
 	}
+
+	fmt.Fprintln(out, dp[n-1])
 }
 
 const INF int = 1e18
@@ -184,4 +192,38 @@ func (cht *ConvexHullTrickLichao) query(t *LichaoNode, l, r, x int) (res, id int
 
 func (cht *ConvexHullTrickLichao) getY(line Line, x int) int {
 	return line.k*x + line.b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func mins(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num < res {
+			res = num
+		}
+	}
+	return res
+}
+
+func maxs(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num > res {
+			res = num
+		}
+	}
+	return res
 }

@@ -1,21 +1,45 @@
-// 単調最小値DP (aka. 分割統治DP) 优化 offlineDp
-// https://ei1333.github.io/library/dp/divide-and-conquer-optimization.hpp
-// !用于高速化 dp[k][j]=min(dp[k-1][i]+f(i,j)) (0<=i<j<=n) => !将区间[0,n)分成k组的最小代价
-//  如果f满足决策单调性 那么对转移的每一行，可以采用 monotoneminima 寻找最值点
-//  O(kn^2)优化到O(knlogn)
+// https://csacademy.com/contest/round-70/task/squared-ends/
+// 给定一个数组,分成k个子数组,
+// 子数组[A[l],...,A[r]]的代价为(A[l]-A[r])^2
+// 最小化所有子数组的代价和
+// n<=1e4 k<=100
+// CHT或者分治优化dp都可以解决这个问题
 
 package main
 
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
+
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, k int
+	fmt.Fscan(in, &n, &k)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	dp := divideAndConquerOptimization(k, n, func(i, j int) int {
+		return (nums[j-1] - nums[i]) * (nums[j-1] - nums[i])
+	})
+	fmt.Fprintln(out, dp[k][n])
+}
+
 const INF int = 1e18
 
-//  !dist(i,j,step): 左闭右开区间[i,j)的代价(0<=i<j<=n)
-//   可选:step表示当前在第几组(1<=step<=k)
-func divideAndConquerOptimization(k, n int, dist func(i, j, step int) int) [][]int {
+//  !dist(i,j): 左闭右开区间[i,j)的代价(0<=i<j<=n)
+func divideAndConquerOptimization(k, n int, dist func(i, j int) int) [][]int {
 	dp := make([][]int, k+1)
 	for i := range dp {
 		dp[i] = make([]int, n+1)
 		for j := range dp[i] {
-			dp[i][j] = INF
+			dp[i][j] = INF // !INF if get min
 		}
 	}
 	dp[0][0] = 0
@@ -25,7 +49,7 @@ func divideAndConquerOptimization(k, n int, dist func(i, j, step int) int) [][]i
 			if x >= y {
 				return INF
 			}
-			return dp[k_-1][x] + dist(x, y, k_)
+			return dp[k_-1][x] + dist(x, y)
 		}
 		res := monotoneminima(n+1, n+1, getCost)
 		for j := 0; j <= n; j++ {

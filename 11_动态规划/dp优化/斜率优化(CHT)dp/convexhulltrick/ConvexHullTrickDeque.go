@@ -13,7 +13,7 @@ func main() {
 	// https://atcoder.jp/contests/colopl2018-final-open/tasks/colopl2018_final_c
 	// 对每个i 求 f(i,j)=a[j]+(j-i)^2 的最小值
 	// 化简得 f(i,j)=(a[j]+j^2-2ij)+i^2
-	// 其中j变化的函数是关于i的一次函数(直线)
+	// 其中j变化的函数是关于i的一次函数(直线) -2j*i+j^2+a[j]
 	// !将这n条直线加入到CHT中,然后对每个i求最小值即可
 
 	in := bufio.NewReader(os.Stdin)

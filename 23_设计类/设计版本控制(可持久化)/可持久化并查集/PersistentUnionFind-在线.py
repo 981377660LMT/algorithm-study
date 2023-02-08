@@ -23,9 +23,10 @@ class PersistentUnionFind:
         self._rank = PersistentArray.create([1] * (n + 10), updateTimes)
 
     def union(self, version: int, u: int, v: int) -> int:
-        """如果u和v已经连通,则版本号不变,否则返回新版本号"""
+        """返回新版本号"""
         root1, root2 = self.find(version, u), self.find(version, v)
         if root1 == root2:
+            self.curVersion += 1
             return self.curVersion
         rank1, rank2 = self._rank.query(version, root1), self._rank.query(version, root2)
         if rank1 > rank2:

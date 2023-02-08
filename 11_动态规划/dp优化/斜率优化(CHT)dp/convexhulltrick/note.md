@@ -1,16 +1,25 @@
-- `dp[j] = min{dp[i] + b[i]*a[j]}`
-  如果 b[j]>=b[j+1](单调),那么可以用 CHT 优化 dp, `O(n^2) => O(n)`
+- 将区间[0,n)分成任意组的最小代价
+  `dp[j] = min{dp[i] + f(i,j)`
+  如果 f(i,j)可以拆成关于 f2(j) 的一次函数,即
+  `dp[j] = min{dp[i] + f1(i)*f2(j) + f3(i) + f4(j)`
+  那么可以用 CHT 优化 dp, `O(n^2) => O(n)/O(nlogn)`
 
-- `dp[k][j] = min{dp[k-1][i] + b[k]*a[j]}`
-  如果 b[j]>=b[j+1](单调),那么可以用 CHT 优化 dp, `O(n^2*k) => O(n*k)`
+- 将区间[0,n)分成 k 组的最小代价
+  `dp[k][j] = min{dp[k-1][i] + f(i,j)`
+  如果 f(i,j)可以拆成关于 f2(j) 的一次函数,即
+  `dp[j] = min{dp[i] + f1(i)*f2(j) + f3(i) + f4(j)`
+  那么可以用 CHT 优化 dp, `O(k*n^2) => O(k*n)/O(k*nlogn)`
 
 ## 实现 CHT 的几种方法:
 
 1. deque
    https://tjkendev.github.io/procon-library/python/convex_hull_trick/deque.html
-   使用条件:
-   - 追加的直线斜率单增/单减
-   - 查询的最小值/最大值的 x 坐标单增/单减
+   使用条件:追加的直线斜率单增/单减。
 2. 李超线段树
    https://tjkendev.github.io/procon-library/python/convex_hull_trick/li_chao_tree.html
-   无法使用 deque 的时候,可以使用李超线段树，动态开点不需要预先知道查询，非常方便
+   追加的直线斜率不满足单增/单减的时候,可以使用李超线段树。
+   且动态开点不需要预先知道查询，非常方便。
+
+## 实现
+
+拆成 dp[j] = min(ij 交叉项+只含 i 的项+只含 j 的项和常数项)

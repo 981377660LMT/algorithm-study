@@ -19,7 +19,7 @@ Circle = Tuple[int, int, int]
 def isSegCircleCross(segment: Segment, circle: Circle) -> bool:
     """
     线段与圆是否相交
-    线段缩成点视为与圆相交
+    !线段缩成点视为与圆相交
 
     https://blog.csdn.net/SongBai1997/article/details/86599879
     """

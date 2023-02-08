@@ -6,37 +6,80 @@
 
 package main
 
+import (
+	"sort"
+)
+
+//
+//
+//
+// 给你一个房屋数组houses 和一个整数 k ，
+// 其中 houses[i] 是第 i 栋房子在一条街上的位置，
+// 现需要在这条街上安排 k 个邮筒。
+// 请你返回每栋房子与离它最近的邮筒之间的距离的 最小 总和。
+// !dp[k][n] 表示将[1,n]分成k段时的最优解
+// !dp[k][j]=min(dp[k-1][i]+f(i,j)) (i<j) f是一个Monotone函数
+func minDistance(houses []int, k int) int {
+	sort.Ints(houses)
+
+	// 求距离的函数
+	n := len(houses)
+	memo := make([][]int, n+1)
+	for i := range memo {
+		memo[i] = make([]int, n+1)
+		for j := range memo[i] {
+			memo[i][j] = -1
+		}
+	}
+	var dist func(i, j int) int
+	dist = func(i, j int) int {
+		if i >= j {
+			return 0
+		}
+		if memo[i][j] != -1 {
+			return memo[i][j]
+		}
+		res := houses[j] - houses[i] + dist(i+1, j-1)
+		memo[i][j] = res
+		return res
+	}
+
+	dist2 := func(i, j int) int {
+		return dist(i, j-1)
+	}
+	dp := divideAndConquerOptimization(k, n, dist2)
+	return dp[k][n]
+}
+
 const INF int = 1e18
 
-//  !dist(i,j,step): 左闭右开区间[i,j)的代价(0<=i<j<=n)
-//   可选:step表示当前在第几组(1<=step<=k)
-func divideAndConquerOptimization(k, n int, dist func(i, j, step int) int) [][]int {
+//  !dist(i,j): 左闭右开区间[i,j)的代价(0<=i<j<=n)
+func divideAndConquerOptimization(k, n int, dist func(i, j int) int) [][]int {
 	dp := make([][]int, k+1)
 	for i := range dp {
 		dp[i] = make([]int, n+1)
 		for j := range dp[i] {
-			dp[i][j] = INF
+			dp[i][j] = INF // !INF if get min
 		}
 	}
 	dp[0][0] = 0
 
-	for k_ := 1; k_ <= k; k_++ {
+	for i := 1; i <= k; i++ {
 		getCost := func(y, x int) int {
 			if x >= y {
 				return INF
 			}
-			return dp[k_-1][x] + dist(x, y, k_)
+			return dp[i-1][x] + dist(x, y)
 		}
 		res := monotoneminima(n+1, n+1, getCost)
 		for j := 0; j <= n; j++ {
-			dp[k_][j] = res[j][1]
+			dp[i][j] = res[j][1]
 		}
 	}
 
 	return dp
 }
 
-// 对每个 0<=i<H 求出 dist(i,j) 取得最小值的 (j, dist(i,j)) (0<=j<W)
 func monotoneminima(H, W int, dist func(i, j int) int) [][2]int {
 	dp := make([][2]int, H) // dp[i] 表示第i行取到`最小值`的(索引,值)
 
