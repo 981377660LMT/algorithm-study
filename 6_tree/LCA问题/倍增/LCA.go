@@ -1,5 +1,4 @@
 // https://github.dev/EndlessCheng/codeforces-go/blob/39cf48ce938640075a7b4885326f3d77929be143/copypasta/graph_tree.go#L668
-
 // 倍增法求LCA
 
 package main
@@ -14,41 +13,47 @@ func main() {
 	// edges = [[0,1],[0,2],[0,3],[1,4],[2,5],[2,6]]
 	n := 7
 	edges := [][]int{{0, 1, 1}, {0, 2, 2}, {0, 3, 3}, {1, 4, 4}, {2, 5, 1}, {2, 6, 6}}
-	tree := make([][]AdjListEdge, n)
+	tree := make([][]WeightedEdge, n)
 	for _, e := range edges {
-		tree[e[0]] = append(tree[e[0]], AdjListEdge{e[1], e[2]})
-		tree[e[1]] = append(tree[e[1]], AdjListEdge{e[0], e[2]})
+		tree[e[0]] = append(tree[e[0]], WeightedEdge{e[1], e[2]})
+		tree[e[1]] = append(tree[e[1]], WeightedEdge{e[0], e[2]})
 	}
 
 	lca := NewLCA(n, tree, 0)
-	fmt.Println(lca.QueryMaxWeight(5, 6) == 6)
-	fmt.Println(lca.QueryMaxWeight(4, 3) == 4)
+	fmt.Println(lca.QueryMaxWeight(5, 6, true) == 6)
+	fmt.Println(lca.QueryMaxWeight(4, 3, true) == 4)
 
 }
 
 const INF int = 1e18
 
-type AdjListEdge struct{ to, weight int }
+type WeightedEdge struct{ to, weight int }
 
 type LCA struct {
-	n      int
-	bitLen int
-	tree   [][]AdjListEdge
-	depth  []int
-	// dp[i][j] 表示节点j向上跳2^i步的父节点,dpWeight[i][j] 表示节点j向上跳2^i步经过的最大边权
-	dp, dpWeight [][]int
+	n          int
+	bitLen     int
+	tree       [][]WeightedEdge
+	depth      []int
+	distToRoot []int
+	// 节点j向上跳2^i步的父节点
+	dp [][]int
+	// 节点j向上跳2^i步经过的最大边权
+	dpWeight1 [][]int
+	// 节点j向上跳2^i步经过的最小边权
+	dpWeight2 [][]int
 }
 
-func NewLCA(n int, tree [][]AdjListEdge, root int) *LCA {
+func NewLCA(n int, tree [][]WeightedEdge, root int) *LCA {
 	lca := &LCA{
-		n:      n,
-		bitLen: bits.Len(uint(n)),
-		tree:   tree,
-		depth:  make([]int, n),
+		n:          n,
+		bitLen:     bits.Len(uint(n)),
+		tree:       tree,
+		depth:      make([]int, n),
+		distToRoot: make([]int, n),
 	}
 
-	lca.dp, lca.dpWeight = makeDp(lca)
-	lca.dfsAndInitDp(root, -1, 0) // !如果传入的是森林,需要visited遍历各个连通分量 (1697. 检查边长度限制的路径是否存在-在线)
+	lca.dp, lca.dpWeight1, lca.dpWeight2 = makeDp(lca)
+	lca.dfsAndInitDp(root, -1, 0, 0) // !如果传入的是森林,需要visited遍历各个连通分量 (1697. 检查边长度限制的路径是否存在-在线)
 	lca.fillDp()
 	return lca
 }
@@ -75,12 +80,17 @@ func (lca *LCA) QueryLCA(root1, root2 int) int {
 }
 
 // 查询树节点两点间距离
-func (lca *LCA) QueryDist(root1, root2 int) int {
+//  weighted: 是否将边权计入距离
+func (lca *LCA) QueryDist(root1, root2 int, weighted bool) int {
+	if weighted {
+		return lca.distToRoot[root1] + lca.distToRoot[root2] - 2*lca.distToRoot[lca.QueryLCA(root1, root2)]
+	}
 	return lca.depth[root1] + lca.depth[root2] - 2*lca.depth[lca.QueryLCA(root1, root2)]
 }
 
 // 查询树节点两点路径上最大边权(倍增的时候维护其他属性)
-func (lca *LCA) QueryMaxWeight(root1, root2 int) int {
+//  isEdge 为true表示查询路径上边权,为false表示查询路径上点权
+func (lca *LCA) QueryMaxWeight(root1, root2 int, isEdge bool) int {
 	res := -INF
 	if lca.depth[root1] < lca.depth[root2] {
 		root1, root2 = root2, root1
@@ -89,7 +99,7 @@ func (lca *LCA) QueryMaxWeight(root1, root2 int) int {
 	toDepth := lca.depth[root2]
 	for i := lca.bitLen - 1; i >= 0; i-- { // upToDepth
 		if (lca.depth[root1]-toDepth)&(1<<i) > 0 {
-			res = max(res, lca.dpWeight[i][root1])
+			res = max(res, lca.dpWeight1[i][root1])
 			root1 = lca.dp[i][root1]
 		}
 	}
@@ -100,17 +110,56 @@ func (lca *LCA) QueryMaxWeight(root1, root2 int) int {
 
 	for i := lca.bitLen - 1; i >= 0; i-- {
 		if lca.dp[i][root1] != lca.dp[i][root2] {
-			res = max(res, max(lca.dpWeight[i][root1], lca.dpWeight[i][root2]))
+			res = max(res, max(lca.dpWeight1[i][root1], lca.dpWeight1[i][root2]))
 			root1 = lca.dp[i][root1]
 			root2 = lca.dp[i][root2]
 		}
 	}
 
-	res = max(res, max(lca.dpWeight[0][root1], lca.dpWeight[0][root2]))
+	res = max(res, max(lca.dpWeight1[0][root1], lca.dpWeight1[0][root2]))
 
-	// !如果是点权的话这里加上
-	// lca_ := lca.dp[0][root1]
-	// res = max(res, lca.dpWeight[0][lca_])
+	if !isEdge {
+		lca_ := lca.dp[0][root1]
+		res = max(res, lca.dpWeight1[0][lca_])
+	}
+
+	return res
+}
+
+// 查询树节点两点路径上最小边权(倍增的时候维护其他属性)
+//  isEdge 为true表示查询路径上边权,为false表示查询路径上点权
+func (lca *LCA) QueryMinWeight(root1, root2 int, isEdge bool) int {
+	res := INF
+	if lca.depth[root1] < lca.depth[root2] {
+		root1, root2 = root2, root1
+	}
+
+	toDepth := lca.depth[root2]
+	for i := lca.bitLen - 1; i >= 0; i-- { // upToDepth
+		if (lca.depth[root1]-toDepth)&(1<<i) > 0 {
+			res = min(res, lca.dpWeight2[i][root1])
+			root1 = lca.dp[i][root1]
+		}
+	}
+
+	if root1 == root2 {
+		return res
+	}
+
+	for i := lca.bitLen - 1; i >= 0; i-- {
+		if lca.dp[i][root1] != lca.dp[i][root2] {
+			res = min(res, min(lca.dpWeight2[i][root1], lca.dpWeight2[i][root2]))
+			root1 = lca.dp[i][root1]
+			root2 = lca.dp[i][root2]
+		}
+	}
+
+	res = min(res, min(lca.dpWeight2[0][root1], lca.dpWeight2[0][root2]))
+
+	if !isEdge {
+		lca_ := lca.dp[0][root1]
+		res = min(res, lca.dpWeight2[0][lca_])
+	}
 
 	return res
 }
@@ -144,7 +193,7 @@ func (lca *LCA) UpToDepth(root, toDepth int) int {
 	return root
 }
 
-// 从start节点跳到target节点,跳过step个节点(0-indexed)
+// 从start节点跳向target节点,跳过step个节点(0-indexed)
 // 返回跳到的节点,如果不存在这样的节点,返回-1
 func (lca *LCA) Jump(start, target, step int) int {
 	lca_ := lca.QueryLCA(start, target)
@@ -159,24 +208,27 @@ func (lca *LCA) Jump(start, target, step int) int {
 	return lca.QueryKthAncestor(target, dist-step)
 }
 
-func (lca *LCA) dfsAndInitDp(cur, pre, dep int) {
+func (lca *LCA) dfsAndInitDp(cur, pre, dep, dist int) {
 	lca.depth[cur] = dep
 	lca.dp[0][cur] = pre
+	lca.distToRoot[cur] = dist
 	for _, e := range lca.tree[cur] {
 		if next := e.to; next != pre {
-			lca.dpWeight[0][next] = e.weight
-			lca.dfsAndInitDp(next, cur, dep+1)
+			lca.dpWeight1[0][next] = e.weight
+			lca.dpWeight2[0][next] = e.weight
+			lca.dfsAndInitDp(next, cur, dep+1, dist+e.weight)
 		}
 	}
 }
 
-func makeDp(lca *LCA) (dp, dpWeight [][]int) {
-	dp, dpWeight = make([][]int, lca.bitLen), make([][]int, lca.bitLen)
+func makeDp(lca *LCA) (dp, dpWeight1, dpWeight2 [][]int) {
+	dp, dpWeight1, dpWeight2 = make([][]int, lca.bitLen), make([][]int, lca.bitLen), make([][]int, lca.bitLen)
 	for i := 0; i < lca.bitLen; i++ {
-		dp[i], dpWeight[i] = make([]int, lca.n), make([]int, lca.n)
+		dp[i], dpWeight1[i], dpWeight2[i] = make([]int, lca.n), make([]int, lca.n), make([]int, lca.n)
 		for j := 0; j < lca.n; j++ {
 			dp[i][j] = -1
-			dpWeight[i][j] = -INF
+			dpWeight1[i][j] = -INF
+			dpWeight2[i][j] = INF
 		}
 	}
 	return
@@ -189,7 +241,8 @@ func (lca *LCA) fillDp() {
 				lca.dp[i+1][j] = -1
 			} else {
 				lca.dp[i+1][j] = lca.dp[i][lca.dp[i][j]]
-				lca.dpWeight[i+1][j] = max(lca.dpWeight[i][j], lca.dpWeight[i][lca.dp[i][j]])
+				lca.dpWeight1[i+1][j] = max(lca.dpWeight1[i][j], lca.dpWeight1[i][lca.dp[i][j]])
+				lca.dpWeight2[i+1][j] = min(lca.dpWeight2[i][j], lca.dpWeight2[i][lca.dp[i][j]])
 			}
 		}
 	}
@@ -199,6 +252,13 @@ func (lca *LCA) fillDp() {
 
 func max(a, b int) int {
 	if a > b {
+		return a
+	}
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
 		return a
 	}
 	return b

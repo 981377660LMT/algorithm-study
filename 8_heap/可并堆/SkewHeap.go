@@ -5,18 +5,19 @@ package main
 import "fmt"
 
 func main() {
-	heap := NewSkewHeap(true)
-	nodes := make([]*SkewHeapNode, 10) // 这些堆
-	for i := range nodes {
-		nodes[i] = heap.Push(nodes[i], E(i), i)
+	manager := NewSkewHeap(true)
+	heaps := make([]*SkewHeapNode, 10) // 这些堆
+	for i := range heaps {
+		newHeap := manager.Push(nil, E(i), i)
+		heaps[i] = newHeap
 	}
-	fmt.Println(nodes[1].value)
-	heap.Add(nodes[1], 10)
-	fmt.Println(nodes[1].value)
-	heap.Meld(nodes[2], nodes[1])
-	fmt.Println(heap.Pop(nodes[2]).value)
-	// fmt.Println(heap.Pop(nodes[1]).value)
-	// fmt.Println(nodes[2].value)
+
+	fmt.Println(heaps[1].value)
+	manager.Add(heaps[1], 10)
+	fmt.Println(heaps[1].value)
+	newRoot := manager.Meld(heaps[2], heaps[1])
+	fmt.Println(newRoot.value)
+
 }
 
 type E = int
@@ -35,10 +36,12 @@ func NewSkewHeap(isMin bool) *SkewHeap {
 	return &SkewHeap{isMin: isMin}
 }
 
+// 将(key,index)插入堆中，返回插入后的堆
 func (sk *SkewHeap) Push(t *SkewHeapNode, key E, index int) *SkewHeapNode {
 	return sk.Meld(t, newNode(key, index))
 }
 
+// 删除堆顶元素,返回删除后的堆
 func (sk *SkewHeap) Pop(t *SkewHeapNode) *SkewHeapNode {
 	return sk.Meld(t.left, t.right)
 }
@@ -47,7 +50,7 @@ func (sk *SkewHeap) Top(t *SkewHeapNode) E {
 	return t.value
 }
 
-// 将y合并到x中
+// 将x与y合并，返回合并后的堆
 func (sk *SkewHeap) Meld(x, y *SkewHeapNode) *SkewHeapNode {
 	sk.propagate(x)
 	sk.propagate(y)

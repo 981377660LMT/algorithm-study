@@ -1,1 +1,0 @@
-C(counter[char], same) + 1

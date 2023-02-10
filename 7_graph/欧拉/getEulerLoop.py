@@ -9,6 +9,8 @@ def getEulerPath(
     allVertex: Set[int], adjMap: DefaultDict[int, Set[int]], *, isDirected: bool
 ) -> Tuple[bool, List[int]]:
     """求欧拉回路，出发点任意，保证输入的图是连通图"""
+    if not adjMap:
+        return False, []
 
     if isDirected:
         indegree, outdegree = {v: 0 for v in allVertex}, {v: 0 for v in allVertex}

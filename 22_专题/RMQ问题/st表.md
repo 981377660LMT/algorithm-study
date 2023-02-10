@@ -18,3 +18,10 @@ https://zhuanlan.zhihu.com/p/105439034
     k = (R-L+1).bit_length()-1
     [L,L+(1<<k)-1] 与 [R-(1<<k)+1,R] 对应 st表的dp[k][L]与dp[k][R-(1<<k)+1]
 ```
+
+- st 表的 op 需要满足的条件 (SparseTable)
+  1. 幂等 a+a=a
+  2. 交换律 a+b=b+a
+  3. 结合律 a+(b+c)=(a+b)+c
+- 半群的 op 需要满足的条件 (DisjointSparseTable)
+  1. 结合律 a+(b+c)=(a+b)+c

@@ -11,20 +11,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 )
-
-func main() {
-	matrix := [][]int{
-		{1, 2, 3, 4, 5},
-		{6, 7, 8, 9, 10},
-		{11, 12, 13, 14, 15},
-	}
-
-	query := NewSparseTable2D(matrix, max)
-	fmt.Println(query(1, 1, 2, 2))
-}
 
 //  query: 查询 [row1,col1,row2,col2] 闭区间的贡献值
 //     0 <= row1 <= row2 < len(matrix)
@@ -88,4 +79,35 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func main() {
+	// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1068&lang=ja
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	for {
+		var ROW, COL, q int
+		fmt.Fscan(in, &ROW, &COL, &q)
+		if ROW == 0 && COL == 0 && q == 0 {
+			break
+		}
+
+		matrix := make([][]int, ROW)
+		for i := range matrix {
+			matrix[i] = make([]int, COL)
+			for j := range matrix[i] {
+				fmt.Fscan(in, &matrix[i][j])
+			}
+		}
+
+		st := NewSparseTable2D(matrix, min)
+		for ; q > 0; q-- {
+			var r1, c1, r2, c2 int
+			fmt.Fscan(in, &r1, &c1, &r2, &c2)
+			fmt.Fprintln(out, st(r1, c1, r2, c2))
+		}
+
+	}
 }

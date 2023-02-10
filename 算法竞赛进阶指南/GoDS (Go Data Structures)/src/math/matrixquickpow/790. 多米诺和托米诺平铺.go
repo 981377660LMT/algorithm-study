@@ -12,13 +12,13 @@ package matrixquickpow
 // # n>3 时，转移n-3次
 
 func numTilings(n int) int {
-	init := Matrix([][]int{{5}, {2}, {1}, {0}})
+	init := [][]int{{5}, {2}, {1}, {0}}
 	if n <= 3 {
 		return init[len(init)-1-n][0]
 	}
 
-	trans := Matrix([][]int{{2, 0, 1, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}})
-	resTrans := trans.Pow(n-3, 1e9+7)
-	res := resTrans.Mul(init, 1e9+7)
+	trans := [][]int{{2, 0, 1, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}
+	resTrans := Pow(trans, n-3, 1e9+7)
+	res := Mul(resTrans, init, 1e9+7)
 	return res[0][0]
 }

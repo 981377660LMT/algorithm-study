@@ -1,6 +1,6 @@
 import assert from 'assert'
 
-type MergeFunc = (a: number, b: number) => number
+type MergeFunc<S> = (a: S, b: S) => S
 
 /**
  * st表适用于可重复贡献问题/RMQ静态区间最值查询。
@@ -14,12 +14,12 @@ type MergeFunc = (a: number, b: number) => number
  * @see {@link https://oi-wiki.org/ds/sparse-table/}
  * @important cpu-cache optimized dp[bit][n]
  */
-class SparseTable {
+class SparseTable<S = number> {
   private readonly _size: number
-  private readonly _mergeFunc: MergeFunc
-  private readonly _dp: number[][]
+  private readonly _mergeFunc: MergeFunc<S>
+  private readonly _dp: S[][]
 
-  constructor(nums: ArrayLike<number>, mergeFunc: MergeFunc) {
+  constructor(nums: ArrayLike<S>, mergeFunc: MergeFunc<S>) {
     const n = nums.length
     const size = 32 - Math.clz32(n)
 
@@ -41,7 +41,7 @@ class SparseTable {
    * @param left 0 <= left <= right < nums.length
    * @param right 0 <= left <= right < nums.length
    */
-  query(left: number, right: number): number {
+  query(left: number, right: number): S {
     // this._checkBoundsBeginEnd(left, right)
     const k = 32 - Math.clz32(right - left + 1) - 1
     return this._mergeFunc(this._dp[k][left], this._dp[k][right - (1 << k) + 1])

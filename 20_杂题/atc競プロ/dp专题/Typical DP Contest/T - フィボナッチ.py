@@ -15,7 +15,7 @@ INF = int(4e18)
 def kbonacci2(k: int, n: int) -> int:
     """k-bonacci number 第n项
 
-    时间复杂度: O(k*logk*logn)
+    时间复杂度: O(k^2k*logn)
 
     >>> a1=a2=...=aK=1
     >>> ai=sum(aj for j in range(i-k,i))

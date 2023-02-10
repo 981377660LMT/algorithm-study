@@ -2,7 +2,7 @@
 // HL分解将树上的路径分成logn条,分割之后只需要op操作logn条链即可
 // 如果原问题可以在数组上O(X)时间解决,那么在树上就可以在O(Xlogn)时间解决
 // forEach 处理顶点查询
-// forEachEdge 处理边查询
+// forEachEdge 处理边查询(边权转移到顶点上)
 // 如果op运算不满足交换律,需要使用w=lca(u,v)过渡,合成forEach(w,u)和forEach(w,v)的结果
 
 package main
@@ -90,6 +90,12 @@ func (hld *HeavyLightDecomposition) ForEachEdge(u, v int, cb func(start, end int
 			break
 		}
 	}
+}
+
+// 处理以 root 为根的子树上的所有顶点.
+//   0<=start<=end<=n
+func (hld *HeavyLightDecomposition) ForSubTree(root int) (start, end int) {
+	return hld.dfn[root], hld.dfn[root] + hld.subSize[root]
 }
 
 func (hld *HeavyLightDecomposition) LCA(u, v int) int {

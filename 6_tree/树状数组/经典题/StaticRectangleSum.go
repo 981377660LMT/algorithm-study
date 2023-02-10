@@ -63,7 +63,7 @@ func (s *StaticRectangleSum) Build() {
 	}
 	s.xs = xs
 
-	set := make(map[int]struct{})
+	set := make(map[int]struct{}, len(ys))
 	for _, y := range ys {
 		set[y] = struct{}{}
 	}
@@ -98,6 +98,19 @@ func (s *StaticRectangleSum) rectSum(left, right, upper int) int {
 	right = sort.SearchInts(s.xs, right)
 	upper = sort.SearchInts(s.ys, upper)
 	return s.wm.RectSum(left, right, upper)
+}
+
+func sortedSet(nums []int) []int {
+	set := make(map[int]struct{}, len(nums))
+	for _, num := range nums {
+		set[num] = struct{}{}
+	}
+	res := make([]int, 0, len(set))
+	for num := range set {
+		res = append(res, num)
+	}
+	sort.Ints(res)
+	return res
 }
 
 func newWaveletMatrix(ys, ws []int, maxLog int) *waveletMatrix {

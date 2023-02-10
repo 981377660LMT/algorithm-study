@@ -34,7 +34,7 @@ function findDuplicateSubtrees(root: TreeNode): Array<TreeNode | null> {
 }
 
 // 解法2：优化
-// !使用`哈希值的编号`来代替很长的子树哈希 减少哈希值长度
+// !使用`哈希值的编号`来代替很长的哈希字符串 减少哈希值长度
 function findDuplicateSubtrees2(root: TreeNode | null): Array<TreeNode | null> {
   const visited = new Map<string, [node: TreeNode, hashId: number][]>()
   const res: TreeNode[] = []

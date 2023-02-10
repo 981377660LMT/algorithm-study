@@ -1,6 +1,7 @@
 # 无向图存在欧拉路径<=> 度数为奇数的点只能有 0 或 2 个，不存在出度入度之说
 # 有向图存在欧拉路径<=> 出度减入度不为 0 的点只能有 0 或 2 个，且 2 个时`起点出度比入度多 1，终点入度比出度多 1`
 
+from collections import defaultdict
 from typing import DefaultDict, List, Set, Tuple
 
 
@@ -8,8 +9,10 @@ def getEulerPath(
     allVertex: Set[int], adjMap: DefaultDict[int, Set[int]], *, isDirected: bool
 ) -> Tuple[bool, List[int]]:
     """求欧拉路径，需要寻找出发点，保证输入的图是连通图"""
-    start = next(iter(adjMap.keys()))
+    if not adjMap:
+        return False, []
 
+    start = next(iter(adjMap))
     if isDirected:
         indegree, outdegree = {v: 0 for v in allVertex}, {v: 0 for v in allVertex}
         minusOne, one = 0, 0
@@ -61,3 +64,20 @@ def getEulerPath(
 
     return True, res[::-1]
 
+
+if __name__ == "__main__":
+    E = [
+        (2, 0),
+        (0, 3),
+        (0, 1),
+        (3, 2),
+        (1, 2),
+    ]
+
+    allVertex = {0, 1, 2, 3}
+    adjMap = defaultdict(set)
+    for a, b in E:
+        adjMap[a].add(b)
+        adjMap[b].add(a)
+
+    print(getEulerPath(allVertex, adjMap, isDirected=False))
