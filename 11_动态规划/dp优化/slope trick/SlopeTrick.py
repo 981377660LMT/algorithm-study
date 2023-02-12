@@ -1,133 +1,195 @@
-# 注意
-# !(x-a)+ 指的是 绝对值函数 abs(x-a)的右半部分
-# !(a-x)+ 指的是 绝对值函数 abs(a-x)的左半部分
+# https://ei1333.github.io/library/structure/others/slope-trick.hpp
+# !维护上凸一次函数集合(\_/)的数据结构
+# !如果函数斜率变化为+-1，那么可以用这个数据结构来维护最小值(最大值)
+# 如果不为+-1，那么需要用平衡树维护
+# 一般用于高速化dp
+
+# API:
+# 初始时 f(x) = 0
+
+# query() -> (最小值, 最小值时的x的最小值, 最小值时的x的最大值)
+
+# add_all(a) -> f(x) += a
+# add_a_minus_x(a) -> f(x) += max(a - x, 0)
+# add_x_minus_a(a) -> f(x) += max(x - a, 0)
+# add_abs(a) -> f(x) += abs(x - a)
+
+# clear_right() -> f(x) = min f(y) (y <= x)
+# clear_left() -> f(x) = min f(y) (y >= x)
+
+# shift_range(a, b) -> f(x) = min f(y) (x-b <= y <= x-a) (a <= b)
+# translate(a) -> f(x) = f(x - a) 向右平移a.
+
+# get(x) -> 返回f在x处的值. 会破坏f的数据结构.
+# merge(g) -> f(x) = f(x) + g(x). 会破坏g的数据结构.
 
 from heapq import heappop, heappush
-from typing import List, Optional
+from typing import Tuple
+
 
 INF = int(1e18)
 
 
 class SlopeTrick:
-    """
-    https://maspypy.com/slope-trick-1-%e8%a7%a3%e8%aa%ac%e7%b7%a8
+    __slots__ = ("_min_f", "_pq_l", "_pq_r", "add_l", "add_r")
 
-    上記の記事にもとづき、@caomeinaixiさんが実装したテンプレートです。
-    """
+    def __init__(self):
+        self.add_l = 0  # 左侧第一个拐点的位置 -> \_/
+        self.add_r = 0  # 右侧第一个拐点的位置 \_/ <-
+        self._pq_l = []  # 大根堆
+        self._pq_r = []  # 小根堆
+        self._min_f = 0
 
-    __slots__ = "_minY", "_leftTuring", "_rightTuring", "_leftOffset", "_rightOffset"
+    def query(self) -> Tuple[int, int, int]:
+        """返回 `f(x)的最小值, f(x)取得最小值时x的最小值和x的最大值`"""
+        return self._min_f, self._top_l(), self._top_r()
 
-    def __init__(
-        self, leftTuring: Optional[List[int]] = None, rightTuring: Optional[List[int]] = None
-    ) -> None:
-        self._minY = 0  # dp 最小値
-        self._leftTuring = [INF] if leftTuring is None else leftTuring  # 左侧的所有拐点
-        self._rightTuring = [INF] if rightTuring is None else rightTuring  # 右侧的所有拐点
-        self._leftOffset = 0  # 左侧拐点的平移量
-        self._rightOffset = 0  # 右侧拐点的平移量
+    def add_all(self, a: int) -> None:
+        """f(x) += a"""
+        self._min_f += a
 
-    def addAbsXMinusA(self, a: int) -> None:
-        """|x-a|の加算:O(logn) 時間"""
-        self.addXMinusA(a)
-        self.addAMinusX(a)
-
-    def addXMinusA(self, a: int) -> None:
-        """(x-a)+の加算:O(logn) 時間
-
-        傾きの変化点に a が追加されます
-        minYの変化はf(left0)に等しい
+    def add_a_minus_x(self, a: int) -> None:
         """
-        if len(self._leftTuring) != 0:
-            self._minY += max(0, self.leftTop - a)
-        self._pushLeft(a)
-        self._pushRight(self._popLeft())
-
-    def addAMinusX(self, a: int) -> None:
-        """(a-x)+の加算:O(logn) 時間
-
-        傾きの変化点に a が追加されます
-        minYの変化はf(right0)に等しい
+        ```
+        add \\__
+        f(x) += max(a - x, 0)
+        ```
         """
-        if len(self._rightTuring) != 0:
-            self._minY += max(0, a - self.rightTop)
-        self._pushRight(a)
-        self._pushLeft(self._popRight())
+        tmp = a - self._top_r()
+        if tmp > 0:
+            self._min_f += tmp
+        self._push_r(a)
+        self._push_l(self._pop_r())
 
-    def addY(self, delta: int) -> None:
-        """yの加算:O(1) 時間"""
-        self._minY += delta
-
-    def addOffset(self, delta: int) -> None:
-        """平移:O(1) 時間
-
-        g(x) = f(x - a)
-        fをg に取り換える
+    def add_x_minus_a(self, a: int) -> None:
         """
-        self._leftOffset += delta
-        self._rightOffset += delta
-
-    def addLeftOffset(self, delta: int) -> None:
-        """左拐点の平移:O(1) 時間"""
-        self._leftOffset += delta
-
-    def addRightOffset(self, delta: int) -> None:
-        """右拐点の平移:O(1) 時間"""
-        self._rightOffset += delta
-
-    def updateLeftMin(self) -> None:
-        """累積 min:O(1) 時間
-
-        g(x) = min(f(y) | y <= x)
-        fをg に取り換える
-
-        rightTuringを空集合に取り換える
+        ```
+        add __/
+        f(x) += max(x - a, 0)
+        ```
         """
-        self._rightTuring = [INF]
+        tmp = self._top_l() - a
+        if tmp > 0:
+            self._min_f += tmp
+        self._push_l(a)
+        self._push_r(self._pop_l())
 
-    def updateRightMin(self) -> None:
-        """累積 min:O(1) 時間
-
-        g(x) = min(f(y) | y >= x)
-        fをg に取り替える
-
-        leftTuringを空集合に取り換える
+    def add_abs(self, a: int) -> None:
         """
-        self._leftTuring = [INF]
-
-    def updateWindowMin(self, leftDiff: int, rightDiff: int) -> None:
-        """累積 min:O(1) 時間
-
-        g(x) = min(f(y) | `x - leftDiff <= y <= x - rightDiff`)
-        fをg に取り替える
-
-        左側集合・右側集合それぞれを平行移動する
-        left0, right0 => left0 + rightDiff, right0 + leftDiff
+        ```
+        add \\/
+        f(x) += abs(x - a)
+        ```
         """
-        self._leftOffset += rightDiff
-        self._rightOffset += leftDiff
+        self.add_a_minus_x(a)
+        self.add_x_minus_a(a)
 
-    def getMinY(self) -> int:
-        """最小値の取得:O(1) 時間"""
-        return self._minY
+    def clear_right(self) -> None:
+        """
+        取前缀最小值.
+        ```
+        \\/ -> \\_
+        f_{new} (x) = min f(y) (y <= x)
+        ```
+        """
+        while self._pq_r:
+            self._pq_r.pop()
 
-    def _pushLeft(self, a: int) -> None:
-        heappush(self._leftTuring, -a + self._leftOffset)
+    def clear_left(self) -> None:
+        """
+        取后缀最小值.
+        ```
+        \\/ -> _/
+        f_{new} (x) = min f(y) (y >= x)
+        ```
+        """
+        while self._pq_l:
+            self._pq_l.pop()
 
-    def _pushRight(self, a: int) -> None:
-        heappush(self._rightTuring, a - self._rightOffset)
+    def shift(self, a: int, b: int) -> None:
+        """
+        ```
+        \\/ -> \\_/
+        f_{new} (x) = min f(y) (x-b <= y <= x-a)
+        ```
+        """
+        assert a <= b
+        self.add_l += a
+        self.add_r += b
 
-    def _popLeft(self) -> int:
-        return -heappop(self._leftTuring) + self._leftOffset
+    def translate(self, a: int) -> None:
+        """
+        函数向右平移a
+        ```
+        \\/. -> .\\/
+        f_{new} (x) = f(x - a)
+        ```
+        """
+        self.shift(a, a)
 
-    def _popRight(self) -> int:
-        return heappop(self._rightTuring) + self._rightOffset
+    def get_destructive(self, x: int) -> int:
+        """
+        y = f(x), f(x) broken
+        会破坏f内部左右两边的堆.
+        """
+        res = self._min_f
+        while self._pq_l:
+            tmp = self._pop_l() - x
+            if tmp > 0:
+                res += tmp
+        while self._pq_r:
+            tmp = x - self._pop_r()
+            if tmp > 0:
+                res += tmp
+        return res
 
-    @property
-    def leftTop(self) -> int:
-        """左側の傾きの変化点の最大値left0の取得:O(1)時間"""
-        return -self._leftTuring[0] + self._leftOffset
+    def merge_destructive(self, st: "SlopeTrick"):
+        """
+        f(x) += g(x), g(x) broken
+        会破坏g(x)的左右两边的堆.
+        """
+        if len(st) > len(self):
+            st._pq_l, self._pq_l = self._pq_l, st._pq_l
+            st._pq_r, self._pq_r = self._pq_r, st._pq_r
+            st.add_l, self.add_l = self.add_l, st.add_l
+            st.add_r, self.add_r = self.add_r, st.add_r
+            st._min_f, self._min_f = self._min_f, st._min_f
+        while st._pq_r:
+            self.add_x_minus_a(st._pop_r())
+        while st._pq_l:
+            self.add_a_minus_x(st._pop_l())
+        self._min_f += st._min_f
 
-    @property
-    def rightTop(self) -> int:
-        """右側の傾きの変化点の最小値right0の取得:O(1)時間"""
-        return self._rightTuring[0] + self._rightOffset
+    def _push_r(self, a: int) -> None:
+        heappush(self._pq_r, a - self.add_r)
+
+    def _top_r(self) -> int:
+        if not self._pq_r:
+            return INF
+        return self._pq_r[0] + self.add_r
+
+    def _pop_r(self) -> int:
+        val = self._top_r()
+        if self._pq_r:
+            heappop(self._pq_r)
+        return val
+
+    def _push_l(self, a: int) -> None:
+        heappush(self._pq_l, -a + self.add_l)
+
+    def _top_l(self) -> int:
+        if not self._pq_l:
+            return -INF
+        return -self._pq_l[0] + self.add_l
+
+    def _pop_l(self) -> int:
+        val = self._top_l()
+        if self._pq_l:
+            heappop(self._pq_l)
+        return val
+
+    def _size(self) -> int:
+        return len(self._pq_l) + len(self._pq_r)
+
+    def __len__(self) -> int:
+        return self._size()

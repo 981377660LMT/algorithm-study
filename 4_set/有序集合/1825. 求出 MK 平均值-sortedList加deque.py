@@ -1,6 +1,3 @@
-from collections import deque
-from sortedcontainers import SortedList
-
 # MK平均值 按照如下步骤计算：
 
 # 1.如果数据流中的整数少于 m 个，MK 平均值 为 -1 ，
@@ -10,6 +7,9 @@ from sortedcontainers import SortedList
 # !m<=1e5 k*2<m
 # !滑动窗口topK之和
 # https://leetcode.cn/problems/finding-mk-average/solution/by-981377660lmt-5hhm/
+
+from collections import deque
+from sortedcontainers import SortedList
 
 
 class MKAverage:

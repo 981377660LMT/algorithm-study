@@ -1,50 +1,63 @@
 package binaryheap
 
 import (
-	"cmnx/src/heap"
+	"bufio"
 	"fmt"
+	"os"
 )
 
-// Assert Heap implementation
-var _ heap.Heap = (*BinaryHeap)(nil)
-
 func main() {
-	heap := NewBinaryHeap(func(a, b interface{}) int {
-		return a.(int) - b.(int)
-	}, []interface{}{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+	// https://www.luogu.com.cn/problem/P3378
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-	heap.Push(0)
-	heap.Push(-1)
-	heap.Push(-2)
-	fmt.Println(heap.Pop())
-	fmt.Println(heap.Pop())
-	fmt.Println(heap.Pop())
+	var q int
+	fmt.Fscan(in, &q)
+	pq := NewHeap(func(a, b H) int {
+		return a - b
+	}, nil)
+	for i := 0; i < q; i++ {
+		var op int
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var x int
+			fmt.Fscan(in, &x)
+			pq.Push(x)
+		} else if op == 2 {
+			fmt.Fprintln(out, pq.Peek())
+		} else if op == 3 {
+			pq.Pop()
+		}
+	}
 }
 
-func NewBinaryHeap(comparator Comparator, nums []interface{}) *BinaryHeap {
-	numsCopy := append([]interface{}{}, nums...)
-	heap := &BinaryHeap{comparator: comparator, data: numsCopy}
-	heap.heapify()
-	return heap
-}
+type H = int
 
 // Should return a number:
 //    negative , if a < b
 //    zero     , if a == b
 //    positive , if a > b
-type Comparator func(a, b interface{}) int
+type Comparator func(a, b H) int
 
-type BinaryHeap struct {
-	data       []interface{}
+func NewHeap(comparator Comparator, nums []H) *Heap {
+	nums = append(nums[:0:0], nums...)
+	heap := &Heap{comparator: comparator, data: nums}
+	heap.heapify()
+	return heap
+}
+
+type Heap struct {
+	data       []H
 	comparator Comparator
 }
 
-func (h *BinaryHeap) Push(value interface{}) {
+func (h *Heap) Push(value H) {
 	h.data = append(h.data, value)
 	h.pushUp(h.Len() - 1)
 }
 
-func (h *BinaryHeap) Pop() (value interface{}) {
+func (h *Heap) Pop() (value H) {
 	if h.Len() == 0 {
 		return
 	}
@@ -56,31 +69,31 @@ func (h *BinaryHeap) Pop() (value interface{}) {
 	return
 }
 
-func (h *BinaryHeap) Peek() (value interface{}) {
+func (h *Heap) Peek() (value H) {
 	if h.Len() == 0 {
 		return
 	}
-
 	value = h.data[0]
 	return
 }
 
-func (h *BinaryHeap) Len() int { return len(h.data) }
+func (h *Heap) Len() int { return len(h.data) }
 
-func (h *BinaryHeap) heapify() {
-	for i := (h.Len() >> 1) - 1; i >= 0; i-- {
+func (h *Heap) heapify() {
+	n := h.Len()
+	for i := (n >> 1) - 1; i > -1; i-- {
 		h.pushDown(i)
 	}
 }
 
-func (h *BinaryHeap) pushUp(root int) {
+func (h *Heap) pushUp(root int) {
 	for parent := (root - 1) >> 1; parent >= 0 && h.comparator(h.data[root], h.data[parent]) < 0; parent = (root - 1) >> 1 {
 		h.data[root], h.data[parent] = h.data[parent], h.data[root]
 		root = parent
 	}
 }
 
-func (h *BinaryHeap) pushDown(root int) {
+func (h *Heap) pushDown(root int) {
 	n := h.Len()
 	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
 		right := left + 1

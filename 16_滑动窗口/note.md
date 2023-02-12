@@ -24,7 +24,10 @@
 
 2. 移动窗口大小/固定端点找边界(一般是固定右、找左) => 不符合条件就收缩
    注意到窗口移动的单调性 直到满足某个条件才停止继续寻找边界
-   [固定左端点寻找右边界](%E5%9B%BA%E5%AE%9A%E7%AB%AF%E7%82%B9%E6%89%BE%E5%8F%A6%E4%B8%80%E4%B8%AA%E7%AB%AF%E7%82%B9%E8%BE%B9%E7%95%8C/E%20-%20At%20Least%20One.py)
+
+   - 内部窗口,枚举右端点 right,找到满足条件的左端点 left
+     [固定左端点寻找右边界](%E5%9B%BA%E5%AE%9A%E7%AB%AF%E7%82%B9%E6%89%BE%E5%8F%A6%E4%B8%80%E4%B8%AA%E7%AB%AF%E7%82%B9%E8%BE%B9%E7%95%8C/E%20-%20At%20Least%20One.py)
+
    ```Python
     for right in range(n):
         curSum += nums[right]  # add 逻辑
@@ -35,3 +38,8 @@
         res = max(res, right - left + 1)  # !`合法`的时候更新答案
     return res
    ```
+
+   - 外部窗口(前缀+后缀)，对每一个可能的起点 left，求出第一个符合题意的右边界 right
+     这种情形也可以用二分写，更加简洁
+
+- 双指针包括同向/反向，滑窗是双指针的一种(同向双指针)

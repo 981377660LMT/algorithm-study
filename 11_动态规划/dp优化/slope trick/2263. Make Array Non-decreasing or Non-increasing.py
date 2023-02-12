@@ -13,11 +13,11 @@ class Solution:
             """将数组变为非递减的+1-1最少操作数
             dp[i][x] = min(dp[i-1][y] + abs(x-arr[i])) , y<=x
             """
-            S = SlopeTrick()
+            st = SlopeTrick()
             for num in arr:
-                S.addAbsXMinusA(num)
-                S.updateLeftMin()
-            return S.getMinY()
+                st.add_abs(num)
+                st.clear_right()
+            return st.query()[0]
 
         return min(helper(nums), helper(nums[::-1]))
 

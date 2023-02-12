@@ -12,27 +12,4 @@ https://atcoder.jp/contests/abc217/editorial/2581
 """
 
 
-import sys
-from SlopeTrick import SlopeTrick
-
-sys.setrecursionlimit(int(1e9))
-input = lambda: sys.stdin.readline().rstrip("\r\n")
-MOD = 998244353
-INF = int(4e18)
-
-if __name__ == "__main__":
-    n = int(input())
-    S = SlopeTrick(leftTuring=[0] * (n + 10), rightTuring=[0] * (n + 10))
-
-    time = 0
-    for _ in range(n):
-        curTime, D, a = map(int, input().split())
-        S.addLeftOffset(-(curTime - time))  # !将正负斜率部分往相离方向平移
-        S.addRightOffset(curTime - time)  # !将正负斜率部分往相离方向平移
-        if D == 0:
-            S.addAMinusX(a)
-        else:
-            S.addXMinusA(a)
-        time = curTime
-
-    print(S.getMinY())
+# TODO

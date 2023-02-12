@@ -1,5 +1,7 @@
+# https://judge.yosupo.jp/problem/sum_of_floor_of_linear
 # 求∑floor((A*i+B)/M) 的值 (i=0-N-1)
 # N,M<=1e9
+# O(logn+m+a+b)
 
 # !floor sum
 # floor_sumは格子点の数え上げ問題に帰着出来る 数格子问题

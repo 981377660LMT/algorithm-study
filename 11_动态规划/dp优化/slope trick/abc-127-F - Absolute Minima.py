@@ -14,12 +14,13 @@ INF = int(4e18)
 
 if __name__ == "__main__":
     q = int(input())
-    S = SlopeTrick()
+    st = SlopeTrick()
     for _ in range(q):
         t, *rest = map(int, input().split())
         if t == 1:
             a, b = rest
-            S.addAbsXMinusA(a)
-            S.addY(b)
+            st.add_abs(a)
+            st.add_all(b)
         else:
-            print(S.leftTop, S.getMinY())
+            min_, leftTop, _ = st.query()
+            print(leftTop, min_)

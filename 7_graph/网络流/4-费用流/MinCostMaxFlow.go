@@ -16,12 +16,33 @@ import (
 
 const INF int = 1e18
 
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m, s, t int
+	fmt.Fscan(in, &n, &m, &s, &t)
+	s--
+	t--
+	mcf := NewMinCostFlow(n, s, t)
+	for i := 0; i < m; i++ {
+		var u, v, c, w int
+		fmt.Fscan(in, &u, &v, &c, &w)
+		u--
+		v--
+		mcf.AddEdge(u, v, c, w)
+	}
+	maxFlow, minCost := mcf.Work()
+	fmt.Fprintln(out, maxFlow, minCost)
+}
+
 type MinCostFlow struct {
 	AddEdge func(from, to, cap, cost int)
 	Work    func() (maxFlow int, minCost int)
 }
 
-func MinCostFlowSPFA(n, start, end int) *MinCostFlow {
+func NewMinCostFlow(n, start, end int) *MinCostFlow {
 	type neighbor struct {
 		to   int
 		rid  int // rid 为反向边在邻接表中的下标
@@ -103,26 +124,4 @@ func MinCostFlowSPFA(n, start, end int) *MinCostFlow {
 		AddEdge: AddEdge,
 		Work:    ek,
 	}
-}
-
-func main() {
-
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, m, s, t int
-	fmt.Fscan(in, &n, &m, &s, &t)
-	s--
-	t--
-	mcf := MinCostFlowSPFA(n, s, t)
-	for i := 0; i < m; i++ {
-		var u, v, c, w int
-		fmt.Fscan(in, &u, &v, &c, &w)
-		u--
-		v--
-		mcf.AddEdge(u, v, c, w)
-	}
-	maxFlow, minCost := mcf.Work()
-	fmt.Fprintln(out, maxFlow, minCost)
 }

@@ -20,12 +20,12 @@ https://blog.hamayanhamayan.com/entry/2100/01/01/000000
 
 - 木構造
 
-  - [ ] LCA
+  - [x] LCA
   - [ ] HL 分解
   - [ ] 欧拉路径
   - [ ] 树的同型判定
   - [ ] 重心分解
-  - [ ] LCT
+  - [x] LCT
 
 - 图论
 

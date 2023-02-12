@@ -1,8 +1,8 @@
 # E - NarrowRectangles
 # https://atcoder.jp/contests/arc070/tasks/arc070_c
-
 # !dp[i][x] 表示第i个长方形的左端点为x时的最小移动花费
 # !dp[i][x]=min(dp[i-1][y]) + abs(x-lefti) , x-(lengthi-1)<=y<=x+(lengthi) 其中lengthi为第i个长方形的长度
+
 from typing import List
 from SlopeTrick import SlopeTrick
 
@@ -21,14 +21,14 @@ class Solution:
         - len(wood) <= 1e5
         - wood[i][0] <= wood[i][1] <= 1e9
         """
-        S = SlopeTrick()
+        st = SlopeTrick()
         length = [b - a for a, b in wood]
         for i, (left, _) in enumerate(wood):
-            S.addLeftOffset(-length[i])
+            st.add_l -= length[i]
             if i > 0:
-                S.addRightOffset(length[i - 1])
-            S.addAbsXMinusA(left)
-        return S.getMinY()
+                st.add_r += length[i - 1]
+            st.add_abs(left)
+        return st.query()[0]
 
 
 print(Solution().buildBridge(_num=10, wood=[[1, 2], [4, 7], [8, 9]]))

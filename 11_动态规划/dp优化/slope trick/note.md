@@ -1,5 +1,4 @@
-slope trick
-用于优化`转移代价为绝对值函数`的 dp
+## slope trick
 
 https://codeforces.com/blog/entry/47821
 https://leetcode.cn/problems/make-array-non-decreasing-or-non-increasing/solution/xie-lu-you-hua-by-kkxbb-ufrf/
@@ -16,3 +15,7 @@ slope trick 的思想就是用一个数据结构管理这些`斜率的转折点`
 
 朴素的 dp 是`O(nk)`的
 slope trick 是`O(nlogn)`的
+
+- 斜率变化+-1 时用堆维护，不为+-1 时用平衡树维护
+  Generalized-Slope-Trick
+  https://ei1333.github.io/library/structure/others/generalized-slope-trick.hpp

@@ -1,3 +1,4 @@
+# https://atcoder.jp/contests/dwango2016-prelims/tasks/dwango2016qual_e
 # 公司位于0 家位于L
 # 一个人从公司走回家,不能回头、不能停下来
 # 途中正好在放烟花
@@ -24,9 +25,9 @@ def solve(home: int, fireworks: List[Tuple[int, int]]) -> int:
     fireworks.sort(key=lambda x: (x[0], -x[1]))  # !按时间排序,时间相同时按照位置降序
     S = SlopeTrick()
     for _, pos in fireworks:
-        S.updateLeftMin()
-        S.addAbsXMinusA(pos)
-    return S.getMinY()
+        S.clear_right()
+        S.add_abs(pos)
+    return S.query()[0]
 
 
 if __name__ == "__main__":

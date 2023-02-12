@@ -1,6 +1,8 @@
 # 二分图边着色(Edge Coloring of Bipartite Graph)
 # L,R<=1e5 M<=1e5
 # ai<L bi<R
+# O(msqrt(n)logd)
+# N: 頂点数, M: 辺の本数, D: 頂点の最大次数
 
 from heapq import heapify, heappop, heappush
 from collections import deque

@@ -3,7 +3,7 @@ from typing import List, Tuple
 
 INF = int(1e18)
 
-# !正确、严格的O(n^3) 点数多的时候会超时
+# !O(n^3)
 def KuhnMunkres(costMatrix: List[List[int]]) -> Tuple[int, Tuple[List[int], List[int]]]:
     """KM算法求带权二分图的最大权匹配
 
@@ -104,7 +104,6 @@ def KuhnMunkres(costMatrix: List[List[int]]) -> Tuple[int, Tuple[List[int], List
     return res, (rows, cols)
 
 
-# !可能会死循环或者出错 复杂度比O(n^3)小
 def KM(costMatrix: List[List[int]]) -> Tuple[int, Tuple[List[int], List[int]]]:
     """KM算法求带权二分图的最大`完美`匹配
 
