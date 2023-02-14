@@ -1,6 +1,6 @@
 # https://nyaannyaan.github.io/library/data-structure/segment-set.hpp
 # 管理区间的数据结构
-
+# 注意:所有区间都是闭区间 例如 [1,1] 表示 长为1的区间,起点为1
 
 from typing import Tuple, Union
 from sortedcontainers import SortedList
@@ -16,6 +16,8 @@ class SegmentSet:
 
     def insert(self, left: int, right: int) -> None:
         """插入闭区间[left, right]."""
+        if left > right:
+            return
         it1 = self._st.bisect_right((left, INF))
         it2 = self._st.bisect_right((right, INF))
         if it1 != 0 and left <= self._st[it1 - 1][1]:
@@ -32,7 +34,9 @@ class SegmentSet:
 
     def erase(self, left: int, right: int) -> None:
         """删除闭区间[left, right]."""
-        it1 = self._st.bisect_right((left, INF))
+        if left > right:
+            return
+        it1 = self._st.bisect_left((left, -INF))
         it2 = self._st.bisect_right((right, INF))
         if it1 != 0 and left <= self._st[it1 - 1][1]:
             it1 -= 1
@@ -64,7 +68,8 @@ class SegmentSet:
             it = self._st.bisect_right((arg, INF))
             return it != 0 and self._st[it - 1][1] >= arg
         left, right = arg
-        assert left <= right, "left must be less than or equal to right"
+        if left > right:
+            return True
         it1 = self._st.bisect_right((left, INF))
         if it1 == 0:
             return False
@@ -76,26 +81,25 @@ class SegmentSet:
     def __getitem__(self, index: int) -> Tuple[int, int]:
         return self._st[index]
 
+    def __iter__(self):
+        return iter(self._st)
+
     def __repr__(self) -> str:
-        return repr(self._st)
+        sb = []
+        for left, right in self._st:
+            sb.append(f"({left}, {right})")
+        return f"SegmentSet([{', '.join(sb)}])"
 
     def __len__(self) -> int:
         return len(self._st)
 
 
 if __name__ == "__main__":
-    s = SegmentSet()
-    s.insert(1, 3)
-    s.insert(2, 4)
-    s.insert(5, 6)
-    s.insert(7, 8)
-    s.insert(6, 7)
-    s.insert(0, 9)
-    s.insert(0, 10)
-    s.erase(0, 2)
-    s.erase(0, 9)
-    s.insert(1, 3)
-    s.insert(2, 4)
 
-    print(s)
-    print((9, 11) in s)
+    ss = SegmentSet()
+    ss.insert(1, 3)
+    ss.insert(2, 4)
+    ss.insert(5, 6)
+    assert ss.next(1) == 1
+    assert (1, 4) in ss
+    assert 7 not in ss

@@ -1,3 +1,5 @@
+// 区间覆盖
+
 /**
  *
  * @param intervals 删除列表中被其他区间所覆盖的区间。
@@ -30,6 +32,6 @@ console.log(
   removeCoveredIntervals([
     [1, 4],
     [3, 6],
-    [2, 8],
+    [2, 8]
   ])
 )
