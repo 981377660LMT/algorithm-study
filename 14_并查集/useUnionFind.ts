@@ -7,7 +7,7 @@
 function useUnionFindMap<T = unknown>(iterable?: T[]) {
   let count = 0 // 连通分量个数
   const parent = new Map<T, T>()
-  const rank = new Map<T, number>() // 各个帮派的大小
+  const rank = new Map<T, number>()
   for (const key of iterable ?? []) {
     add(key)
   }
@@ -43,7 +43,6 @@ function useUnionFindMap<T = unknown>(iterable?: T[]) {
     if (rank.get(root1)! > rank.get(root2)!) {
       ;[root1, root2] = [root2, root1]
     }
-    // rank优化:总是让大的根指向小的根
     parent.set(root1, root2)
     rank.set(root2, rank.get(root1)! + rank.get(root2)!)
     count--
@@ -58,14 +57,6 @@ function useUnionFindMap<T = unknown>(iterable?: T[]) {
     return count
   }
 
-  function getParent(): Map<T, T> {
-    return parent
-  }
-
-  function getRank(): Map<T, number> {
-    return rank
-  }
-
   function getRoots(): T[] {
     const res = new Set<T>()
     for (const key of parent.keys()) {
@@ -75,7 +66,7 @@ function useUnionFindMap<T = unknown>(iterable?: T[]) {
     return [...res]
   }
 
-  return { add, union, find, isConnected, getCount, getRank, getRoots, getParent }
+  return { add, union, find, isConnected, getCount, getRoots }
 }
 
 /**
@@ -91,7 +82,6 @@ function useUnionFindArray(size: number) {
 
   function find(key: number) {
     while (parents[key] != undefined && parents[key] !== key) {
-      // 进行路径压缩
       parents[key] = parents[parents[key]]
       key = parents[key]
     }
@@ -105,7 +95,6 @@ function useUnionFindArray(size: number) {
     if (ranks[root1] > ranks[root2]) {
       ;[root1, root2] = [root2, root1]
     }
-    // rank优化:总是让小的根指向大的根
     parents[root1] = root2
     ranks[root2] += ranks[root1]
     count--
@@ -120,14 +109,6 @@ function useUnionFindArray(size: number) {
     return count
   }
 
-  function getParents(): number[] {
-    return parents
-  }
-
-  function getRanks(): number[] {
-    return ranks
-  }
-
   function getRoots(): number[] {
     const res = new Set<number>()
     for (let i = 0; i < size; i++) {
@@ -137,7 +118,7 @@ function useUnionFindArray(size: number) {
     return [...res]
   }
 
-  return { union, find, isConnected, getCount, getRanks, getRoots, getParents }
+  return { union, find, isConnected, getCount, getRoots }
 }
 
 if (require.main === module) {

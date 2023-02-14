@@ -1,75 +1,47 @@
-// 求所有连通分量的欧拉回路/欧拉路径
-// Usage
-//  NewEulerianTrail(n int, directed bool) *EulerianTrail
-//  AddEdge(a, b int)
+// 给你一个下标从 0 开始的二维整数数组 pairs ，其中 pairs[i] = [starti, endi] 。
+// 如果 pairs 的一个重新排列，满足对每一个下标 i （ 1 <= i < pairs.length ）
+// 都有 endi-1 == starti ，那么我们就认为这个重新排列是 pairs 的一个 合法重新排列 。
+// 请你返回 任意一个 pairs 的合法重新排列。
 
-//  EnumerateEulerianTrail(minLex) [][]int
-//  EnumerateSemiEulerianTrail(minLex) [][]int
-
-//  GetEulerianTrail(minLex) []int
-//  GetEulerianTrailStartsWith(start, minLex) []int
-//  GetSemiEulerianTrail(minLex) []int
-//  GetSemiEulerianTrailStartsWith(start, minLex) []int
-//  GetPathFromEdgeIds(edgeIds []int) []int
+// 注意：数据保证至少存在一个 pairs 的合法重新排列。
 
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"os"
-	"sort"
-)
+import "sort"
 
-func yukicoder() {
-	// https://yukicoder.me/problems/no/583
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, m int
-	fmt.Fscan(in, &n, &m)
-	et := NewEulerianTrail(n, false)
-	for i := 0; i < m; i++ {
-		var a, b int
-		fmt.Fscan(in, &a, &b)
-		et.AddEdge(a, b)
+// 有向图欧拉路径
+func validArrangement(pairs [][]int) [][]int {
+	set := make(map[int]struct{})
+	for _, e := range pairs {
+		set[e[0]] = struct{}{}
+		set[e[1]] = struct{}{}
 	}
-	res := et.EnumerateSemiEulerianTrail(false)
-	if len(res) == 1 && len(res[0]) == m {
-		fmt.Fprintln(out, "YES")
-	} else {
-		fmt.Fprintln(out, "NO")
+	allVertex := make([]int, 0, len(set))
+	for k := range set {
+		allVertex = append(allVertex, k)
 	}
-}
-
-func main() {
-	// https: //www.luogu.com.cn/problem/P7771
-	// 有向图字典序最小的欧拉路径
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, m int
-	fmt.Fscan(in, &n, &m)
-	edges := make([][]int, 0, m)
-	et := NewEulerianTrail(n+1, true)
-	for i := 0; i < m; i++ {
-		var a, b int
-		fmt.Fscan(in, &a, &b)
-		et.AddEdge(a, b)
-		edges = append(edges, []int{a, b})
+	sort.Ints(allVertex)
+	mp := make(map[int]int)  // raw -> cur
+	rmp := make(map[int]int) // cur -> raw
+	for i, v := range allVertex {
+		mp[v] = i
+		rmp[i] = v
 	}
 
-	res := et.GetSemiEulerianTrail(true)
-	if len(res) == 0 {
-		fmt.Fprintln(out, "No")
-	} else {
-		path := et.GetPathFromEdgeIds(res)
-		for _, v := range path {
-			fmt.Fprint(out, v, " ")
-		}
+	et := NewEulerianTrail(len(mp), true) // 构建有向图
+	for _, e := range pairs {
+		et.AddEdge(mp[e[0]], mp[e[1]])
 	}
+	eids := et.GetSemiEulerianTrail(false)
+	if len(eids) == 0 {
+		return nil
+	}
+
+	res := make([][]int, 0, len(eids))
+	for _, eid := range eids {
+		res = append(res, []int{rmp[et.es[eid][0]], rmp[et.es[eid][1]]})
+	}
+	return res
 }
 
 type EulerianTrail struct {

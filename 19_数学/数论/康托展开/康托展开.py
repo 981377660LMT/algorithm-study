@@ -9,10 +9,10 @@ from collections import Counter
 from typing import List, Sequence, TypeVar
 
 
-MOD = int(1e9 + 7)
+MOD = 998244353  # ! 取模的情况
 fac = [1]
 ifac = [1]
-for i in range(1, int(2e5) + 10):
+for i in range(1, int(1e6) + 10):
     fac.append((fac[-1] * i) % MOD)
     ifac.append((ifac[-1] * pow(i, MOD - 2, MOD)) % MOD)
 

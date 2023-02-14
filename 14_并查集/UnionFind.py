@@ -8,12 +8,12 @@ T = TypeVar("T", bound=Hashable)
 class UnionFindMap(Generic[T]):
     """当元素不是数组index时(例如字符串)，更加通用的并查集写法，支持动态添加"""
 
-    __slots__ = ("part", "parent", "rank")
+    __slots__ = ("part", "_parent", "_rank")
 
     def __init__(self, iterable: Optional[Iterable[T]] = None):
         self.part = 0
-        self.parent = dict()
-        self.rank = dict()
+        self._parent = dict()
+        self._rank = dict()
         for item in iterable or []:
             self.add(item)
 
@@ -23,41 +23,44 @@ class UnionFindMap(Generic[T]):
         root2 = self.find(key2)
         if root1 == root2:
             return False
-        if self.rank[root1] > self.rank[root2]:
+        if self._rank[root1] > self._rank[root2]:
             root1, root2 = root2, root1
-        self.parent[root1] = root2
-        self.rank[root2] += self.rank[root1]
+        self._parent[root1] = root2
+        self._rank[root2] += self._rank[root1]
         self.part -= 1
         return True
 
     def find(self, key: T) -> T:
-        if key not in self.parent:
+        if key not in self._parent:
             self.add(key)
             return key
 
-        while self.parent.get(key, key) != key:
-            self.parent[key] = self.parent[self.parent[key]]
-            key = self.parent[key]
+        while self._parent.get(key, key) != key:
+            self._parent[key] = self._parent[self._parent[key]]
+            key = self._parent[key]
         return key
 
     def isConnected(self, key1: T, key2: T) -> bool:
         return self.find(key1) == self.find(key2)
 
     def getRoots(self) -> List[T]:
-        return list(set(self.find(key) for key in self.parent))
+        return list(set(self.find(key) for key in self._parent))
 
     def getGroups(self) -> DefaultDict[T, List[T]]:
         groups = defaultdict(list)
-        for key in self.parent:
+        for key in self._parent:
             root = self.find(key)
             groups[root].append(key)
         return groups
 
+    def getSize(self, key: T) -> int:
+        return self._rank[self.find(key)]
+
     def add(self, key: T) -> bool:
-        if key in self.parent:
+        if key in self._parent:
             return False
-        self.parent[key] = key
-        self.rank[key] = 1
+        self._parent[key] = key
+        self._rank[key] = 1
         self.part += 1
         return True
 
@@ -68,7 +71,7 @@ class UnionFindMap(Generic[T]):
         return self.part
 
     def __contains__(self, key: T) -> bool:
-        return key in self.parent
+        return key in self._parent
 
 
 class UnionFindArray:
@@ -77,18 +80,18 @@ class UnionFindArray:
     初始化的连通分量个数 为 n
     """
 
-    __slots__ = ("n", "part", "parent", "rank")
+    __slots__ = ("n", "part", "_parent", "_rank")
 
     def __init__(self, n: int):
         self.n = n
         self.part = n
-        self.parent = list(range(n))
-        self.rank = [1] * n
+        self._parent = list(range(n))
+        self._rank = [1] * n
 
     def find(self, x: int) -> int:
-        while self.parent[x] != x:
-            self.parent[x] = self.parent[self.parent[x]]
-            x = self.parent[x]
+        while self._parent[x] != x:
+            self._parent[x] = self._parent[self._parent[x]]
+            x = self._parent[x]
         return x
 
     def union(self, x: int, y: int) -> bool:
@@ -97,10 +100,10 @@ class UnionFindArray:
         rootY = self.find(y)
         if rootX == rootY:
             return False
-        if self.rank[rootX] > self.rank[rootY]:
+        if self._rank[rootX] > self._rank[rootY]:
             rootX, rootY = rootY, rootX
-        self.parent[rootX] = rootY
-        self.rank[rootY] += self.rank[rootX]
+        self._parent[rootX] = rootY
+        self._rank[rootY] += self._rank[rootX]
         self.part -= 1
         return True
 
@@ -115,7 +118,10 @@ class UnionFindArray:
         return groups
 
     def getRoots(self) -> List[int]:
-        return list(set(self.find(key) for key in self.parent))
+        return list(set(self.find(key) for key in self._parent))
+
+    def getSize(self, x: int) -> int:
+        return self._rank[self.find(x)]
 
     def __repr__(self) -> str:
         return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
@@ -127,20 +133,20 @@ class UnionFindArray:
 class UnionFindMap2(Generic[T]):
     """不自动合并 需要手动add添加元素"""
 
-    __slots__ = ("part", "parent", "rank")
+    __slots__ = ("part", "_parent", "_rank")
 
     def __init__(self, iterable: Optional[Iterable[T]] = None):
         self.part = 0
-        self.parent = dict()
-        self.rank = defaultdict(lambda: 1)
+        self._parent = dict()
+        self._rank = defaultdict(lambda: 1)
         for item in iterable or []:
             self.add(item)
 
     def add(self, key: T) -> "UnionFindMap2[T]":
-        if key in self.parent:
+        if key in self._parent:
             return self
-        self.parent[key] = key
-        self.rank[key] = 1
+        self._parent[key] = key
+        self._rank[key] = 1
         self.part += 1
         return self
 
@@ -148,39 +154,42 @@ class UnionFindMap2(Generic[T]):
         """rank一样时 默认key2作为key1的父节点"""
         root1 = self.find(key1)
         root2 = self.find(key2)
-        if root1 == root2 or root1 not in self.parent or root2 not in self.parent:
+        if root1 == root2 or root1 not in self._parent or root2 not in self._parent:
             return False
-        if self.rank[root1] > self.rank[root2]:
+        if self._rank[root1] > self._rank[root2]:
             root1, root2 = root2, root1
-        self.parent[root1] = root2
-        self.rank[root2] += self.rank[root1]
+        self._parent[root1] = root2
+        self._rank[root2] += self._rank[root1]
         self.part -= 1
         return True
 
     def find(self, key: T) -> T:
         """此处不自动add"""
-        if key not in self.parent:
+        if key not in self._parent:
             return key
 
-        if key != self.parent[key]:
-            root = self.find(self.parent[key])
-            self.parent[key] = root
-        return self.parent[key]
+        if key != self._parent[key]:
+            root = self.find(self._parent[key])
+            self._parent[key] = root
+        return self._parent[key]
 
     def isConnected(self, key1: T, key2: T) -> bool:
-        if key1 not in self.parent or key2 not in self.parent:
+        if key1 not in self._parent or key2 not in self._parent:
             return False
         return self.find(key1) == self.find(key2)
 
     def getRoots(self) -> List[T]:
-        return list(set(self.find(key) for key in self.parent))
+        return list(set(self.find(key) for key in self._parent))
 
     def getGroups(self) -> DefaultDict[T, List[T]]:
         groups = defaultdict(list)
-        for key in self.parent:
+        for key in self._parent:
             root = self.find(key)
             groups[root].append(key)
         return groups
+
+    def getSize(self, key: T) -> int:
+        return self._rank[self.find(key)]
 
     def __repr__(self) -> str:
         return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
@@ -189,25 +198,25 @@ class UnionFindMap2(Generic[T]):
         return self.part
 
     def __contains__(self, key: T) -> bool:
-        return key in self.parent
+        return key in self._parent
 
 
 class UnionFindGraph:
     """并查集维护无向图每个连通块的边数和顶点数"""
 
-    __slots__ = ("n", "part", "parent", "vertex", "edge")
+    __slots__ = ("n", "part", "_parent", "vertex", "edge")
 
     def __init__(self, n: int):
         self.n = n
         self.part = n
-        self.parent = list(range(n))
+        self._parent = list(range(n))
         self.vertex = [1] * n  # 每个联通块的顶点数
         self.edge = [0] * n  # 每个联通块的边数
 
     def find(self, x: int) -> int:
-        while x != self.parent[x]:
-            self.parent[x] = self.parent[self.parent[x]]
-            x = self.parent[x]
+        while x != self._parent[x]:
+            self._parent[x] = self._parent[self._parent[x]]
+            x = self._parent[x]
         return x
 
     def union(self, x: int, y: int) -> bool:
@@ -218,7 +227,7 @@ class UnionFindGraph:
             return False
         if self.vertex[rootX] > self.vertex[rootY]:
             rootX, rootY = rootY, rootX
-        self.parent[rootX] = rootY
+        self._parent[rootX] = rootY
         self.vertex[rootY] += self.vertex[rootX]
         self.edge[rootY] += self.edge[rootX] + 1
         self.part -= 1
@@ -296,5 +305,5 @@ class ATCRevocableUnionFindArray:
         self.parentSize[y] = py
         return True
 
-    def getComponentSum(self, i:int) -> int:
+    def getComponentSum(self, i: int) -> int:
         return self.sum[self.find(i)]

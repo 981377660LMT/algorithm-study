@@ -27,7 +27,7 @@ func main() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	lct := NewLinkCutTreeSubTree(&ei1333Listener{})
+	lct := NewLinkCutTreeSubTree()
 	vs := lct.Build(nums)
 
 	for i := 0; i < n-1; i++ { // 连接树边
@@ -47,60 +47,34 @@ func main() {
 		} else if op == 1 {
 			var root, delta int
 			fmt.Fscan(in, &root, &delta)
-			lct.Set(vs[root], vs[root].key+delta)
+			lct.Set(vs[root], lct.Get(vs[root])+delta)
 		} else {
 			var root, parent int
 			fmt.Fscan(in, &root, &parent)
 			lct.Evert(vs[parent])
-			fmt.Fprintln(out, lct.QuerySubTree(vs[root]).csum)
+			fmt.Fprintln(out, lct.QuerySubTree(vs[root]))
 		}
 	}
 }
 
-type E = int
+type E = int // 子树和
 
-type Metadata struct {
-	csum int // 子树和
-	sum  int // 整棵树的和
-	psum int // 父亲子树和
-	lsum int // 左儿子子树和
-}
-
-type ei1333Listener struct{}
-
-func (*ei1333Listener) OnToggle(cur *Metadata) { cur.psum, cur.csum = cur.csum, cur.psum }
-
-func (*ei1333Listener) OnMerge(cost E, cur, parent, child *Metadata) {
-	cur.sum = parent.sum + child.sum + cost + cur.lsum
-	cur.psum = parent.psum + cost + cur.lsum
-	cur.csum = child.csum + cost + cur.lsum
-}
-
-func (*ei1333Listener) OnAdd(cur, child *Metadata) { cur.lsum += child.sum }
-
-func (*ei1333Listener) OnErase(cur, child *Metadata) { cur.lsum -= child.sum }
-
-type nodeListener interface {
-	OnToggle(cur *Metadata)
-	OnMerge(cost E, cur, parent, child *Metadata)
-	OnAdd(cur, child *Metadata)
-	OnErase(cur, child *Metadata)
-}
+func (*TreeNode) e() E         { return 0 }
+func (*TreeNode) op(a, b E) E  { return a + b }
+func (*TreeNode) inv(a, b E) E { return a - b }
 
 type LinkCutTreeSubTree struct {
-	sm       Metadata // !ident
-	listener nodeListener
-	nodeId   int
-	edges    map[struct{ u, v int }]struct{}
+	nodeId int
+	edges  map[struct{ u, v int }]struct{}
 }
 
-func NewLinkCutTreeSubTree(listener nodeListener) *LinkCutTreeSubTree {
-	return &LinkCutTreeSubTree{listener: listener, edges: make(map[struct{ u, v int }]struct{})}
+func NewLinkCutTreeSubTree() *LinkCutTreeSubTree {
+	return &LinkCutTreeSubTree{edges: make(map[struct{ u, v int }]struct{})}
 }
 
 // 各要素の値を vs[i] としたノードを生成し, その配列を返す.
-func (lct *LinkCutTreeSubTree) Build(vs []E) []*treeNode {
-	nodes := make([]*treeNode, len(vs))
+func (lct *LinkCutTreeSubTree) Build(vs []E) []*TreeNode {
+	nodes := make([]*TreeNode, len(vs))
 	for i, v := range vs {
 		nodes[i] = lct.Alloc(v)
 	}
@@ -108,21 +82,21 @@ func (lct *LinkCutTreeSubTree) Build(vs []E) []*treeNode {
 }
 
 // 要素の値を v としたノードを生成する.
-func (lct *LinkCutTreeSubTree) Alloc(key E) *treeNode {
-	res := newTreeNode(key, lct.sm, lct.nodeId)
+func (lct *LinkCutTreeSubTree) Alloc(key E) *TreeNode {
+	res := newTreeNode(key, lct.nodeId)
 	lct.nodeId++
 	lct.update(res)
 	return res
 }
 
 // t を根に変更する.
-func (lct *LinkCutTreeSubTree) Evert(t *treeNode) {
+func (lct *LinkCutTreeSubTree) Evert(t *TreeNode) {
 	lct.expose(t)
 	lct.toggle(t)
 	lct.push(t)
 }
 
-func (lct *LinkCutTreeSubTree) LinkEdge(child, parent *treeNode) (ok bool) {
+func (lct *LinkCutTreeSubTree) LinkEdge(child, parent *TreeNode) (ok bool) {
 	if lct.IsConnected(child, parent) {
 		return
 	}
@@ -140,7 +114,7 @@ func (lct *LinkCutTreeSubTree) LinkEdge(child, parent *treeNode) (ok bool) {
 	return true
 }
 
-func (lct *LinkCutTreeSubTree) CutEdge(u, v *treeNode) (ok bool) {
+func (lct *LinkCutTreeSubTree) CutEdge(u, v *TreeNode) (ok bool) {
 	id1, id2 := u.id, v.id
 	if id1 > id2 {
 		id1, id2 = id2, id1
@@ -162,7 +136,7 @@ func (lct *LinkCutTreeSubTree) CutEdge(u, v *treeNode) (ok bool) {
 // u と v の lca を返す.
 //  u と v が異なる連結成分なら nullptr を返す.
 //  !上記の操作は根を勝手に変えるため, 事前に Evert する必要があるかも.
-func (lct *LinkCutTreeSubTree) QueryLCA(u, v *treeNode) *treeNode {
+func (lct *LinkCutTreeSubTree) QueryLCA(u, v *TreeNode) *TreeNode {
 	if !lct.IsConnected(u, v) {
 		return nil
 	}
@@ -170,15 +144,15 @@ func (lct *LinkCutTreeSubTree) QueryLCA(u, v *treeNode) *treeNode {
 	return lct.expose(v)
 }
 
-func (lct *LinkCutTreeSubTree) QueryKthAncestor(x *treeNode, k int) *treeNode {
+func (lct *LinkCutTreeSubTree) QueryKthAncestor(x *TreeNode, k int) *TreeNode {
 	lct.expose(x)
 	for x != nil {
 		lct.push(x)
-		if x.r != nil && x.r.sz > k {
+		if x.r != nil && x.r.cnt > k {
 			x = x.r
 		} else {
 			if x.r != nil {
-				k -= x.r.sz
+				k -= x.r.cnt
 			}
 			if k == 0 {
 				return x
@@ -190,39 +164,39 @@ func (lct *LinkCutTreeSubTree) QueryKthAncestor(x *treeNode, k int) *treeNode {
 	return nil
 }
 
-func (lct *LinkCutTreeSubTree) QuerySubTree(t *treeNode) Metadata {
+func (lct *LinkCutTreeSubTree) QuerySubTree(t *TreeNode) E {
 	lct.expose(t)
-	return t.md
+	return t.op(t.key, t.sub)
 }
 
 // t の値を v に変更する.
-func (lct *LinkCutTreeSubTree) Set(t *treeNode, v E) *treeNode {
+func (lct *LinkCutTreeSubTree) Set(t *TreeNode, key E) *TreeNode {
 	lct.expose(t)
-	t.key = v
+	t.key = key
 	lct.update(t)
 	return t
 }
 
 // t の値を返す.
-func (lct *LinkCutTreeSubTree) Get(t *treeNode) E {
+func (lct *LinkCutTreeSubTree) Get(t *TreeNode) E {
 	return t.key
 }
 
 // u と v が同じ連結成分に属する場合は true, そうでなければ false を返す.
-func (lct *LinkCutTreeSubTree) IsConnected(u, v *treeNode) bool {
+func (lct *LinkCutTreeSubTree) IsConnected(u, v *TreeNode) bool {
 	return u == v || lct.GetRoot(u) == lct.GetRoot(v)
 }
 
-func (lct *LinkCutTreeSubTree) expose(t *treeNode) *treeNode {
-	rp := (*treeNode)(nil)
+func (lct *LinkCutTreeSubTree) expose(t *TreeNode) *TreeNode {
+	rp := (*TreeNode)(nil)
 	for cur := t; cur != nil; cur = cur.p {
 		lct.splay(cur)
 		if cur.r != nil {
-			lct.listener.OnAdd(&cur.md, &cur.r.md)
+			cur.Add(cur.r)
 		}
 		cur.r = rp
 		if cur.r != nil {
-			lct.listener.OnErase(&cur.md, &cur.r.md)
+			cur.Erase(cur.r)
 		}
 		lct.update(cur)
 		rp = cur
@@ -231,27 +205,19 @@ func (lct *LinkCutTreeSubTree) expose(t *treeNode) *treeNode {
 	return rp
 }
 
-func (lct *LinkCutTreeSubTree) update(t *treeNode) {
-	t.sz = 1
+func (lct *LinkCutTreeSubTree) update(t *TreeNode) {
+	t.cnt = 1
 	if t.l != nil {
-		t.sz += t.l.sz
+		t.cnt += t.l.cnt
 	}
 	if t.r != nil {
-		t.sz += t.r.sz
+		t.cnt += t.r.cnt
 	}
 
-	tmp1, tmp2 := &lct.sm, &lct.sm
-	if t.l != nil {
-		tmp1 = &t.l.md
-	}
-	if t.r != nil {
-		tmp2 = &t.r.md
-	}
-
-	lct.listener.OnMerge(t.key, &t.md, tmp1, tmp2)
+	t.Merge(t.l, t.r)
 }
 
-func (lct *LinkCutTreeSubTree) rotr(t *treeNode) {
+func (lct *LinkCutTreeSubTree) rotr(t *TreeNode) {
 	x := t.p
 	y := x.p
 	x.l = t.r
@@ -274,7 +240,7 @@ func (lct *LinkCutTreeSubTree) rotr(t *treeNode) {
 	}
 }
 
-func (lct *LinkCutTreeSubTree) rotl(t *treeNode) {
+func (lct *LinkCutTreeSubTree) rotl(t *TreeNode) {
 	x := t.p
 	y := x.p
 	x.r = t.l
@@ -297,13 +263,12 @@ func (lct *LinkCutTreeSubTree) rotl(t *treeNode) {
 	}
 }
 
-func (lct *LinkCutTreeSubTree) toggle(t *treeNode) {
+func (lct *LinkCutTreeSubTree) toggle(t *TreeNode) {
 	t.l, t.r = t.r, t.l
-	lct.listener.OnToggle(&t.md)
 	t.rev = !t.rev
 }
 
-func (lct *LinkCutTreeSubTree) push(t *treeNode) {
+func (lct *LinkCutTreeSubTree) push(t *TreeNode) {
 	if t.rev {
 		if t.l != nil {
 			lct.toggle(t.l)
@@ -315,7 +280,7 @@ func (lct *LinkCutTreeSubTree) push(t *treeNode) {
 	}
 }
 
-func (lct *LinkCutTreeSubTree) splay(t *treeNode) {
+func (lct *LinkCutTreeSubTree) splay(t *TreeNode) {
 	lct.push(t)
 	for !t.IsRoot() {
 		q := t.p
@@ -353,7 +318,7 @@ func (lct *LinkCutTreeSubTree) splay(t *treeNode) {
 	}
 }
 
-func (lct *LinkCutTreeSubTree) GetRoot(t *treeNode) *treeNode {
+func (lct *LinkCutTreeSubTree) GetRoot(t *TreeNode) *TreeNode {
 	lct.expose(t)
 	for t.l != nil {
 		lct.push(t)
@@ -362,23 +327,39 @@ func (lct *LinkCutTreeSubTree) GetRoot(t *treeNode) *treeNode {
 	return t
 }
 
-type treeNode struct {
-	key     E
-	md      Metadata
-	l, r, p *treeNode
-	rev     bool
-	sz      int
-	id      int
+type TreeNode struct {
+	key, sum, sub E
+	rev           bool
+	cnt           int
+	id            int
+	l, r, p       *TreeNode
 }
 
-func newTreeNode(key E, md Metadata, id int) *treeNode {
-	return &treeNode{key: key, md: md, sz: 1, id: id}
+func newTreeNode(key E, id int) *TreeNode {
+	res := &TreeNode{key: key, sum: key, cnt: 1, id: id}
+	res.sub = res.e()
+	return res
 }
 
-func (n *treeNode) IsRoot() bool {
+func (n *TreeNode) IsRoot() bool {
 	return n.p == nil || (n.p.l != n && n.p.r != n)
 }
 
-func (n *treeNode) String() string {
-	return fmt.Sprintf("key: %v, sum: %v, sz: %v, rev: %v", n.key, n.md, n.sz, n.rev)
+func (n *TreeNode) Add(other *TreeNode)   { n.sub = n.op(n.sub, other.sum) }
+func (n *TreeNode) Erase(other *TreeNode) { n.sub = n.inv(n.sub, other.sum) }
+func (n *TreeNode) Merge(n1, n2 *TreeNode) {
+	var tmp1, tmp2 E
+	if n1 != nil {
+		tmp1 = n1.sum
+	} else {
+		tmp1 = n.e()
+	}
+
+	if n2 != nil {
+		tmp2 = n2.sum
+	} else {
+		tmp2 = n.e()
+	}
+
+	n.sum = n.op(n.op(tmp1, n.key), n.op(n.sub, tmp2))
 }

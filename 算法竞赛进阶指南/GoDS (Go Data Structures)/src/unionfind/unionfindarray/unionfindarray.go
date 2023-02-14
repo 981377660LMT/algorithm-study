@@ -21,8 +21,8 @@ func NewUnionFindArray(n int) *UnionFindArray {
 
 	return &UnionFindArray{
 		Part:   n,
-		Rank:   rank,
-		size:   n,
+		rank:   rank,
+		n:      n,
 		parent: parent,
 	}
 }
@@ -30,10 +30,9 @@ func NewUnionFindArray(n int) *UnionFindArray {
 type UnionFindArray struct {
 	// 连通分量的个数
 	Part int
-	// 每个连通分量的大小
-	Rank []int
 
-	size   int
+	rank   []int
+	n      int
 	parent []int
 }
 
@@ -43,11 +42,11 @@ func (ufa *UnionFindArray) Union(key1, key2 int) bool {
 		return false
 	}
 
-	if ufa.Rank[root1] > ufa.Rank[root2] {
+	if ufa.rank[root1] > ufa.rank[root2] {
 		root1, root2 = root2, root1
 	}
 	ufa.parent[root1] = root2
-	ufa.Rank[root2] += ufa.Rank[root1]
+	ufa.rank[root2] += ufa.rank[root1]
 	ufa.Part--
 	return true
 }
@@ -66,11 +65,15 @@ func (ufa *UnionFindArray) IsConnected(key1, key2 int) bool {
 
 func (ufa *UnionFindArray) GetGroups() map[int][]int {
 	groups := make(map[int][]int)
-	for i := 0; i < ufa.size; i++ {
+	for i := 0; i < ufa.n; i++ {
 		root := ufa.Find(i)
 		groups[root] = append(groups[root], i)
 	}
 	return groups
+}
+
+func (ufa *UnionFindArray) Size(key int) int {
+	return ufa.rank[ufa.Find(key)]
 }
 
 func (ufa *UnionFindArray) String() string {

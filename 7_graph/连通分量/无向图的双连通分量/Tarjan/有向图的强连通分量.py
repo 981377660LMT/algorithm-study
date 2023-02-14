@@ -1,3 +1,4 @@
+from collections import deque
 from typing import List, Tuple
 
 
@@ -75,7 +76,7 @@ def findSCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[int]]
 # 模板题 点权 https://www.luogu.com.cn/problem/P3387
 #  边权 https://codeforces.com/contest/894/problem/E
 # 检测路径是否可达/唯一/无穷 https://codeforces.com/problemset/problem/1547/G
-def toDAG(n: int, graph: List[List[int]]) -> List[List[int]]:
+def toDAG(graph: List[List[int]], groups: List[List[int]], sccId: List[int]) -> List[List[int]]:
     """
     # !scc 缩点成DAG
 
@@ -87,7 +88,6 @@ def toDAG(n: int, graph: List[List[int]]) -> List[List[int]]:
         List[List[int]]: 缩点成DAG后的邻接表
     """
 
-    groups, sccId = findSCC(n, graph)
     m = len(groups)
     adjList = [[] for _ in range(m)]  # !注意这样可能会产生重边，不能有重边时可以用 adjMap 去重
     deg = [0] * m
@@ -106,8 +106,49 @@ def toDAG(n: int, graph: List[List[int]]) -> List[List[int]]:
 
 
 if __name__ == "__main__":
-    assert findSCC(5, [[1, 2], [2, 3], [3, 1], [4], []]) == (
-        [[0], [2, 1], [3], [4]],
-        [0, 1, 1, 2, 3],
-    )
-    assert toDAG(5, [[1, 2], [2, 3], [3, 1], [4], []]) == [[1, 1], [2, 2], [3], []]
+    # assert findSCC(5, [[1, 2], [2, 3], [3, 1], [4], []]) == (
+    #     [[0], [2, 1], [3], [4]],
+    #     [0, 1, 1, 2, 3],
+    # )
+
+    # https://www.luogu.com.cn/problem/P3387
+    #   给定一个 n 个点 m 条边有向图，每个点有一个权值
+    #   求一条路径，使路径经过的点权值之和最大
+    import sys
+
+    sys.setrecursionlimit(int(1e9))
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
+
+    n, m = map(int, input().split())
+    values = list(map(int, input().split()))
+    adjList = [[] for _ in range(n)]
+    for _ in range(m):
+        u, v = map(int, input().split())
+        adjList[u - 1].append(v - 1)
+
+    groups, sccId = findSCC(n, adjList)
+    dag = toDAG(adjList, groups, sccId)
+    weights = [0] * len(groups)
+    for i, group in enumerate(groups):
+        weights[i] = sum(values[v] for v in group)
+
+    deg = [0] * len(groups)
+    dp = [0] * len(groups)
+    queue = deque()
+    for i, nexts in enumerate(dag):
+        for next in nexts:
+            deg[next] += 1
+    for i, d in enumerate(deg):
+        if d == 0:
+            queue.append(i)
+            dp[i] = weights[i]
+
+    while queue:
+        cur = queue.popleft()
+        for next in dag[cur]:
+            dp[next] = max(dp[next], dp[cur] + weights[next])
+            deg[next] -= 1
+            if deg[next] == 0:
+                queue.append(next)
+
+    print(max(dp))

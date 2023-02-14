@@ -93,7 +93,7 @@ def findVBCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[int]
     return groups, [v - 1 for v in vbccId], isCut
 
 
-def toTree(n: int, graph: List[List[int]]) -> List[List[int]]:
+def toTree(graph: List[List[int]], groups: List[List[int]], isCut: List[bool]) -> List[List[int]]:
     """
     # !v-BCC 缩点成树
 
@@ -107,7 +107,7 @@ def toTree(n: int, graph: List[List[int]]) -> List[List[int]]:
     ## !BCC 和割点作为新图中的节点，并在每个割点与包含它的所有 BCC 之间连边
     ## !bcc1 - 割点1 - bcc2 - 割点2 - ...
     """
-    groups, _, isCut = findVBCC(n, graph)
+    n = len(graph)
     idCount = len(groups)
     cutId = [0] * n
     for i, v in enumerate(isCut):
@@ -132,7 +132,6 @@ if __name__ == "__main__":
         [2, 2, 2, 0, 1],
         [False, False, True, False, False],
     )
-    assert toTree(5, [[1, 2], [0, 2], [0, 1, 3, 4], [2], [2]]) == [[3], [3], [3], [0, 1, 2]]
 
     # https://leetcode.cn/circle/discuss/1AjM9B/
     edges = [(0, 1), (1, 2), (0, 5), (1, 4), (2, 3), (3, 4), (4, 5)]

@@ -91,7 +91,9 @@ def findEBCC(n: int, edges: List[Tuple[int, int]]) -> Tuple[List[List[int]], Lis
     return groups, [v - 1 for v in ebccId]
 
 
-def toTree(n: int, edges: List[Tuple[int, int]]) -> List[List[int]]:
+def toTree(
+    edges: List[Tuple[int, int]], groups: List[List[int]], ebccId: List[int]
+) -> List[List[int]]:
     """
     # !e-BCC 缩点成树
 
@@ -106,7 +108,6 @@ def toTree(n: int, edges: List[Tuple[int, int]]) -> List[List[int]]:
     ## !ebcc1 - ebcc2 - ebcc3 - ...
     """
 
-    groups, ebccId = findEBCC(n, edges)
     idCount = len(groups)
     tree = [[] for _ in range(idCount)]
 
@@ -123,7 +124,6 @@ def toTree(n: int, edges: List[Tuple[int, int]]) -> List[List[int]]:
 
 if __name__ == "__main__":
 
-    assert toTree(5, [(0, 1), (1, 2), (2, 3), (3, 4)]) == [[1], [0, 2], [1, 3], [2, 4], [3]]
     assert findEBCC(5, [(0, 1), (1, 2), (2, 3), (3, 4)]) == (
         [[0], [1], [2], [3], [4]],
         [0, 1, 2, 3, 4],

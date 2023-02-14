@@ -1,75 +1,44 @@
-// 求所有连通分量的欧拉回路/欧拉路径
-// Usage
-//  NewEulerianTrail(n int, directed bool) *EulerianTrail
-//  AddEdge(a, b int)
-
-//  EnumerateEulerianTrail(minLex) [][]int
-//  EnumerateSemiEulerianTrail(minLex) [][]int
-
-//  GetEulerianTrail(minLex) []int
-//  GetEulerianTrailStartsWith(start, minLex) []int
-//  GetSemiEulerianTrail(minLex) []int
-//  GetSemiEulerianTrailStartsWith(start, minLex) []int
-//  GetPathFromEdgeIds(edgeIds []int) []int
-
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
 	"sort"
 )
 
-func yukicoder() {
-	// https://yukicoder.me/problems/no/583
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, m int
-	fmt.Fscan(in, &n, &m)
-	et := NewEulerianTrail(n, false)
-	for i := 0; i < m; i++ {
-		var a, b int
-		fmt.Fscan(in, &a, &b)
-		et.AddEdge(a, b)
+func findItinerary(tickets [][]string) []string {
+	// !1. 将字符串转换为数字并按照字典序分配id
+	set := make(map[string]struct{})
+	for _, e := range tickets {
+		set[e[0]] = struct{}{}
+		set[e[1]] = struct{}{}
 	}
-	res := et.EnumerateSemiEulerianTrail(false)
-	if len(res) == 1 && len(res[0]) == m {
-		fmt.Fprintln(out, "YES")
-	} else {
-		fmt.Fprintln(out, "NO")
+	allVertex := make([]string, 0, len(set))
+	for k := range set {
+		allVertex = append(allVertex, k)
 	}
-}
-
-func main() {
-	// https: //www.luogu.com.cn/problem/P7771
-	// 有向图字典序最小的欧拉路径
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, m int
-	fmt.Fscan(in, &n, &m)
-	edges := make([][]int, 0, m)
-	et := NewEulerianTrail(n+1, true)
-	for i := 0; i < m; i++ {
-		var a, b int
-		fmt.Fscan(in, &a, &b)
-		et.AddEdge(a, b)
-		edges = append(edges, []int{a, b})
+	sort.Strings(allVertex)
+	mp := make(map[string]int)  // raw -> cur
+	rmp := make(map[int]string) // cur -> raw
+	for i, v := range allVertex {
+		mp[v] = i
+		rmp[i] = v
 	}
 
-	res := et.GetSemiEulerianTrail(true)
-	if len(res) == 0 {
-		fmt.Fprintln(out, "No")
-	} else {
-		path := et.GetPathFromEdgeIds(res)
-		for _, v := range path {
-			fmt.Fprint(out, v, " ")
-		}
+	// 2. 求出字典序最小的欧拉路径
+	et := NewEulerianTrail(len(mp), true) // 构建有向图
+	for _, e := range tickets {
+		et.AddEdge(mp[e[0]], mp[e[1]])
 	}
+	eids := et.GetSemiEulerianTrailStartsWith(mp["JFK"], true)
+	if len(eids) == 0 {
+		return nil
+	}
+
+	path := et.GetPathFromEdgeIds(eids)
+	res := make([]string, 0, len(path))
+	for _, v := range path {
+		res = append(res, rmp[v])
+	}
+	return res
 }
 
 type EulerianTrail struct {

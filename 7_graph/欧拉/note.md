@@ -1,51 +1,16 @@
-```JS
-function getEulerPath(
-  adjMap: Map<number, Set<number>>,
-  start: number,
-  isDirected: boolean
-): number[] {
-  let cur = start
-  const stack: number[] = [start]
-  const res: number[] = []
+欧拉回路：通过图中每条边恰好一次的回路
+欧拉通路：通过图中每条边恰好一次的通路
+欧拉图：具有欧拉回路的图
+半欧拉图：具有欧拉通路但不具有欧拉回路的图
 
-  while (stack.length > 0) {
-    if (adjMap.has(cur) && adjMap.get(cur)!.size > 0) {
-      stack.push(cur)
-      const next = adjMap.get(cur)!.keys().next().value!
-      // 无向图 要删两条边
-      if (!isDirected) adjMap.get(next)!.delete(cur)
-      cur = next
-    } else {
-      res.push(cur)
-      cur = stack.pop()!
-    }
-  }
+欧拉图（欧拉回路） 半欧拉图（欧拉路径）
+半欧拉图：具有欧拉路径而无欧拉回路的图
+判别法如下 https://oi-wiki.org/graph/euler/#_3
 
-  // 有向图需要反转
-  return res.reverse()
-}
-```
+- 无向图-欧拉回路：连通且没有奇度数点
+- 无向图-欧拉路径：连通且恰有 0 或 2 个奇度数点（若有则选择其中一奇度数点为起点）
+- 有向图-欧拉回路：SCC 只有一个且每个点的入度和出度相同
+- 有向图-欧拉路径：1. 对应的无向图是连通的；2. 若每个点的入度和出度相同则起点任意；否则起点的出度比入度多一，终点的入度比出度多一，且其余点的入度和出度相同
 
-```JS
-
-// 题目给定的图一定满足以下二者之一：
-// 所有点入度等于出度；
-// 恰有一个点出度 = 入度 + 1（欧拉路径的起点），且恰有一个点入度 = 出度 + 1（欧拉路径的终点），其他点入度等于出度。
-function getStart(pairs: number[][]): number {
-  const outdegree = new Map<number, number>()
-  const indegree = new Map<number, number>()
-
-  for (const [u, v] of pairs) {
-    outdegree.set(u, (outdegree.get(u) || 0) + 1)
-    indegree.set(v, (indegree.get(v) || 0) + 1)
-  }
-
-  // 有向图欧拉路径的起点出度比入度多 1
-  const oddStartPoint = [...new Set(pairs.flat())].filter(
-    key => (outdegree.get(key) || 0) - (indegree.get(key) || 0) === 1
-  )
-
-  if (oddStartPoint.length > 0) return oddStartPoint[0]
-  else return pairs[0][0]
-}
-```
+- 对边排序可保证输出的是字典序最小的路径
+- 输出路径的顶点个数是边数+1

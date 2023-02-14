@@ -209,11 +209,10 @@ func NewUndoDSUWithWeights(weights []S) *UndoDSU {
 		ws[i] = weights[i]
 	}
 	history := [][]int{}
-	return &UndoDSU{Part: n, parentSize: ps, weights: ws, history: history}
+	return &UndoDSU{parentSize: ps, weights: ws, history: history}
 }
 
 type UndoDSU struct {
-	Part       int // 集合的个数
 	parentSize []int
 	weights    []S
 	history    [][]int

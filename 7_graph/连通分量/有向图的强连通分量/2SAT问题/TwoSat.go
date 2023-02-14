@@ -75,6 +75,7 @@ func main() {
 // 定义 Ai 表示「选 Xi」，这样若两个旗子 i j 满足 |Xi-Xj|<D 时，就相当于 Ai,Aj 至少一个为假。其他情况类似 https://atcoder.jp/contests/practice2/tasks/practice2_h
 // !github.com/EndlessCheng/codeforces-go
 
+// https://ei1333.github.io/library/graph/others/two-satisfiability.hpp
 type TwoSat struct {
 	n      int
 	graph  [][]int

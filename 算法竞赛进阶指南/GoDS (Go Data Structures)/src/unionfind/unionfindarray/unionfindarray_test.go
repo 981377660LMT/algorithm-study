@@ -22,8 +22,8 @@ func TestNewUnionFindArray(t *testing.T) {
 			},
 			want: &UnionFindArray{
 				Part:   10,
-				Rank:   []int{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-				size:   10,
+				rank:   []int{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+				n:      10,
 				parent: []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
 			},
 		},

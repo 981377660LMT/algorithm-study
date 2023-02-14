@@ -80,7 +80,8 @@ func main() {
 type S = int
 
 type OfflineDynamicConnectivity struct {
-	Uf         *UndoDSU // todo:interface
+	Uf         *UndoDSU
+	Part       int // 连通分量数
 	n, q, size int
 	seg        [][]int
 	edges      [][]int // (edgeId,time,edge)
@@ -98,6 +99,7 @@ func NewOfflineDynamicConnectivity(n, q int) *OfflineDynamicConnectivity {
 	uf := NewUndoDSU(n)
 	return &OfflineDynamicConnectivity{
 		Uf:     uf,
+		Part:   n,
 		n:      n,
 		q:      q,
 		size:   size,
@@ -141,29 +143,34 @@ func (o *OfflineDynamicConnectivity) Build() {
 // 执行所有查询
 //  cb: func(k int): 当前处于第k个查询(0-based)
 func (o *OfflineDynamicConnectivity) Run(cb func(k int)) {
-	stack := []int{1}
-	for len(stack) > 0 {
-		k := stack[len(stack)-1]
-		stack = stack[:len(stack)-1]
-		if k >= 0 {
-			if o.size+o.q <= k {
-				continue
-			}
-			stack = append(stack, ^k)
-			for _, e := range o.seg[k] {
-				o.Uf.Union(e/o.n, e%o.n)
-			}
-			if o.size <= k {
-				cb(k - o.size)
-			} else {
-				stack = append(stack, k<<1|1, k<<1)
-			}
-		} else {
-			for i := 0; i < len(o.seg[^k]); i++ {
-				o.Uf.Undo()
+	var dfs func(cur int)
+	dfs = func(cur int) {
+		if o.size+o.q <= cur {
+			return
+		}
+
+		add := 0
+		for _, e := range o.seg[cur] {
+			ok := o.Uf.Union(e/o.n, e%o.n) // AddEdge
+			if ok {
+				add++
 			}
 		}
+		o.Part -= add
+
+		if cur >= o.size {
+			cb(cur - o.size)
+		} else {
+			dfs(cur << 1)
+			dfs(cur<<1 | 1)
+		}
+
+		for i := 0; i < len(o.seg[cur]); i++ {
+			o.Uf.Undo() // RemoveEdge
+		}
+		o.Part += add
 	}
+	dfs(1)
 }
 
 func (o *OfflineDynamicConnectivity) add(l, r, e int) {
@@ -189,14 +196,13 @@ func NewUndoDSUWithWeights(weights []S) *UndoDSU {
 	ps, ws := make([]int, n), make([]S, n)
 	for i := 0; i < n; i++ {
 		ps[i] = -1
-		ws[i] = weights[i]
+		ws[i] = weights[i] // e()
 	}
 	history := [][]int{}
-	return &UndoDSU{Part: n, parentSize: ps, weights: ws, history: history}
+	return &UndoDSU{parentSize: ps, weights: ws, history: history}
 }
 
 type UndoDSU struct {
-	Part       int // 集合的个数
 	parentSize []int
 	weights    []S
 	history    [][]int
@@ -205,7 +211,7 @@ type UndoDSU struct {
 func (uf *UndoDSU) Add(index int, delta S) {
 	x := index
 	for x >= 0 {
-		uf.weights[x] += delta
+		uf.weights[x] += delta // op()
 		x = uf.parentSize[x]
 	}
 }
@@ -223,7 +229,7 @@ func (uf *UndoDSU) Undo() bool {
 	y, py := lastY[0], lastY[1]
 	x, px := lastX[0], lastX[1]
 	if uf.parentSize[x] != px {
-		uf.weights[x] -= uf.weights[y]
+		uf.weights[x] -= uf.weights[y] // inv()
 	}
 	uf.parentSize[x] = px
 	uf.parentSize[y] = py
