@@ -17,4 +17,5 @@ https://www.bilibili.com/video/BV1pE41197Qj?spm_id_from=333.337.search-card.all.
 
 `注意到更新 x 处最值时更新了所有的父节点，所以查询时大于等于 x 的下标的最值都会被更新`
 
-**树状数组有时候可以用 SortedList 代替**
+- 区间计数时，树状数组可以用 SortedList(名次树) 代替
+- 树状数组如果只查询前缀，可以只用 op，但是如果要查询区间，就需要用到 inv(逆元)

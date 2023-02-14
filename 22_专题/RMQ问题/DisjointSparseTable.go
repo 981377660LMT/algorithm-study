@@ -67,13 +67,6 @@ func min(a, b int) int {
 	return b
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 func main() {
 	const INF int = int(1e18)
 	const MOD int = 998244353

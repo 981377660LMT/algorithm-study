@@ -19,3 +19,6 @@ slope trick 是`O(nlogn)`的
 - 斜率变化+-1 时用堆维护，不为+-1 时用平衡树维护
   Generalized-Slope-Trick
   https://ei1333.github.io/library/structure/others/generalized-slope-trick.hpp
+
+- 可以花费 1 成本给任意一个点加一或者减 1，求使得每个结点的值比他的子树的值都大时，最少需要的花费
+  https://atcoder.jp/contests/utpc2012/tasks/utpc2012_12
