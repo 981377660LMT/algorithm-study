@@ -1,7 +1,14 @@
+// pos可以理解为当前节点的位置，pos=0表示根节点
+
 package main
 
 func main() {
 	trie := NewTrie(26, 'a')
+	words := []string{"abc", "ab", "bc", "c"}
+	for i, word := range words {
+		trie.Add(word, i)
+	}
+	pos := (trie.Find("abc"))
 }
 
 type Trie struct {
@@ -11,10 +18,10 @@ type Trie struct {
 }
 
 type trieNode struct {
-	index   int
+	index   int // 最后一次被更新的字符串的索引
 	key     byte
-	next    []int
 	indexes []int // 存储了哪些字符串的索引
+	next    []int // children position
 }
 
 // size: 字符集大小
@@ -76,8 +83,6 @@ func (t *Trie) IndexAll(pos int) []int {
 	}
 	return t.stack[pos].indexes
 }
-
-func (t *Trie) Size() int { return len(t.stack) }
 
 func (t *Trie) next(i, j int) *int {
 	return &t.stack[i].next[j]

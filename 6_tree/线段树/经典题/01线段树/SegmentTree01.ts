@@ -3,7 +3,7 @@
 // more details:https://github.dev/EndlessCheng/codeforces-go/tree/master/copypasta
 
 /**
- * 01线段树，支持 flip/indexOf/onesCount/kth，可用于模拟Bitset
+ * 01线段树，支持 flip/indexOf/lastIndexOf/onesCount/kth，可用于模拟Bitset
  */
 class SegmentTree01 {
   private readonly _n: number
@@ -38,6 +38,12 @@ class SegmentTree01 {
     return this._indexofOne(1, position, 1, this._n)
   }
 
+  lastIndexOf(searchDigit: 0 | 1, position = this._n): number {
+    if (position < 1) return -1
+    if (searchDigit === 0) return this._lastIndexOfZero(1, position, 1, this._n)
+    return this._lastIndexOfOne(1, position, 1, this._n)
+  }
+
   /**
    * 1 <= left <= right <= n
    */
@@ -46,7 +52,7 @@ class SegmentTree01 {
   }
 
   /**
-   * 树上二分查询第k个0/1的位置
+   * 树上二分查询第k个0/1的位置.如果不存在第k个0/1，返回-1.
    * k >= 1
    */
   kth(searchDigit: 0 | 1, k: number): number {
@@ -102,6 +108,34 @@ class SegmentTree01 {
       if (leftPos > 0) return leftPos
     }
     return this._indexofZero((root << 1) | 1, position, mid + 1, right)
+  }
+
+  private _lastIndexOfOne(root: number, position: number, left: number, right: number): number {
+    if (left === right) {
+      if (this._ones[root] > 0) return left
+      return -1
+    }
+    this._pushDown(root, left, right)
+    const mid = (left + right) >>> 1
+    if (position > mid && this._ones[(root << 1) | 1] > 0) {
+      const rightPos = this._lastIndexOfOne((root << 1) | 1, position, mid + 1, right)
+      if (rightPos > 0) return rightPos
+    }
+    return this._lastIndexOfOne(root << 1, position, left, mid)
+  }
+
+  private _lastIndexOfZero(root: number, position: number, left: number, right: number): number {
+    if (left === right) {
+      if (this._ones[root] === 0) return left
+      return -1
+    }
+    this._pushDown(root, left, right)
+    const mid = (left + right) >>> 1
+    if (position > mid && this._ones[(root << 1) | 1] < right - mid) {
+      const rightPos = this._lastIndexOfZero((root << 1) | 1, position, mid + 1, right)
+      if (rightPos > 0) return rightPos
+    }
+    return this._lastIndexOfZero(root << 1, position, left, mid)
   }
 
   private _onesCount(root: number, L: number, R: number, l: number, r: number): number {
@@ -175,16 +209,6 @@ class SegmentTree01 {
 }
 
 if (require.main === module) {
-  const tree01 = new SegmentTree01([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
-  console.log(tree01.indexOf(0, 2))
-  console.log(tree01.indexOf(1, 1))
-  console.log(tree01.toString())
-  tree01.flip(2, 5)
-  console.log(tree01.toString())
-  console.log(tree01.kth(1, 6))
-  console.log(tree01.kth(0, 5))
-  console.log(tree01.onesCount(1, 10))
-
   // 01线段树模拟位集
   // https://leetcode.cn/problems/design-bitset/
   class Bitset {
@@ -228,6 +252,8 @@ if (require.main === module) {
       return this.tree01.toString()
     }
   }
+
+  // test
 }
 
 export { SegmentTree01 }
