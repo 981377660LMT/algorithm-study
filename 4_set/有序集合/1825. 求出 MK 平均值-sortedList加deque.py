@@ -63,10 +63,10 @@ class MKAverage:
         self._sum = sum(self._sl[self._k : -self._k])
 
 
-class TopkSum:
+class TopKSum:
     __slots__ = ("_sl", "_k", "_topKSum")
 
-    def __init__(self, k: int, isMin: bool) -> None:
+    def __init__(self, k: int, isMin=True) -> None:
         self._sl = SortedList() if isMin else SortedList(key=lambda x: -x)
         self._k = k
         self._topKSum = 0
@@ -79,13 +79,13 @@ class TopkSum:
                 self._topKSum -= self._sl[self._k - 1]  # type: ignore
         self._sl.add(x)
 
-    def remove(self, x: int) -> None:
+    def discard(self, x: int) -> None:
         pos = self._sl.bisect_left(x)
         if pos < self._k:
             self._topKSum -= x
             if self._k < len(self._sl):
                 self._topKSum += self._sl[self._k]  # type: ignore
-        self._sl.remove(x)
+        self._sl.discard(x)
 
     def query(self) -> int:
         return self._topKSum

@@ -13,27 +13,23 @@ func main() {
 	// edges = [[0,1],[0,2],[0,3],[1,4],[2,5],[2,6]]
 	n := 7
 	edges := [][]int{{0, 1, 1}, {0, 2, 2}, {0, 3, 3}, {1, 4, 4}, {2, 5, 1}, {2, 6, 6}}
-	tree := make([][]WeightedEdge, n)
+	lca := NewLCA(n, 0)
 	for _, e := range edges {
-		tree[e[0]] = append(tree[e[0]], WeightedEdge{e[1], e[2]})
-		tree[e[1]] = append(tree[e[1]], WeightedEdge{e[0], e[2]})
+		lca.AddEdge(e[0], e[1], e[2])
 	}
-
-	lca := NewLCA(n, tree, 0)
+	lca.Build()
 	fmt.Println(lca.QueryMaxWeight(5, 6, true) == 6)
 	fmt.Println(lca.QueryMaxWeight(4, 3, true) == 4)
-
 }
 
 const INF int = 1e18
 
-type WeightedEdge struct{ to, weight int }
-
 type LCA struct {
+	Depth      []int
+	Tree       [][]edge
 	n          int
+	root       int
 	bitLen     int
-	tree       [][]WeightedEdge
-	depth      []int
 	distToRoot []int
 	// 节点j向上跳2^i步的父节点
 	dp [][]int
@@ -43,28 +39,41 @@ type LCA struct {
 	dpWeight2 [][]int
 }
 
-func NewLCA(n int, tree [][]WeightedEdge, root int) *LCA {
+type edge struct{ to, weight int }
+
+// 注意AddEdge后要调用Build.
+func NewLCA(n int, root int) *LCA {
 	lca := &LCA{
+		Tree:       make([][]edge, n),
+		Depth:      make([]int, n),
 		n:          n,
+		root:       root,
 		bitLen:     bits.Len(uint(n)),
-		tree:       tree,
-		depth:      make([]int, n),
 		distToRoot: make([]int, n),
 	}
 
-	lca.dp, lca.dpWeight1, lca.dpWeight2 = makeDp(lca)
-	lca.dfsAndInitDp(root, -1, 0, 0) // !如果传入的是森林,需要visited遍历各个连通分量 (1697. 检查边长度限制的路径是否存在-在线)
-	lca.fillDp()
 	return lca
+}
+
+// 添加权值为w的无向边(u, v).
+func (lca *LCA) AddEdge(u, v, w int) {
+	lca.Tree[u] = append(lca.Tree[u], edge{v, w})
+	lca.Tree[v] = append(lca.Tree[v], edge{u, w})
+}
+
+func (lca *LCA) Build() {
+	lca.dp, lca.dpWeight1, lca.dpWeight2 = makeDp(lca)
+	lca.dfsAndInitDp(lca.root, -1, 0, 0)
+	lca.fillDp()
 }
 
 // 查询树节点两点的最近公共祖先
 func (lca *LCA) QueryLCA(root1, root2 int) int {
-	if lca.depth[root1] < lca.depth[root2] {
+	if lca.Depth[root1] < lca.Depth[root2] {
 		root1, root2 = root2, root1
 	}
 
-	root1 = lca.UpToDepth(root1, lca.depth[root2])
+	root1 = lca.UpToDepth(root1, lca.Depth[root2])
 	if root1 == root2 {
 		return root1
 	}
@@ -85,20 +94,20 @@ func (lca *LCA) QueryDist(root1, root2 int, weighted bool) int {
 	if weighted {
 		return lca.distToRoot[root1] + lca.distToRoot[root2] - 2*lca.distToRoot[lca.QueryLCA(root1, root2)]
 	}
-	return lca.depth[root1] + lca.depth[root2] - 2*lca.depth[lca.QueryLCA(root1, root2)]
+	return lca.Depth[root1] + lca.Depth[root2] - 2*lca.Depth[lca.QueryLCA(root1, root2)]
 }
 
 // 查询树节点两点路径上最大边权(倍增的时候维护其他属性)
 //  isEdge 为true表示查询路径上边权,为false表示查询路径上点权
 func (lca *LCA) QueryMaxWeight(root1, root2 int, isEdge bool) int {
 	res := -INF
-	if lca.depth[root1] < lca.depth[root2] {
+	if lca.Depth[root1] < lca.Depth[root2] {
 		root1, root2 = root2, root1
 	}
 
-	toDepth := lca.depth[root2]
+	toDepth := lca.Depth[root2]
 	for i := lca.bitLen - 1; i >= 0; i-- { // upToDepth
-		if (lca.depth[root1]-toDepth)&(1<<i) > 0 {
+		if (lca.Depth[root1]-toDepth)&(1<<i) > 0 {
 			res = max(res, lca.dpWeight1[i][root1])
 			root1 = lca.dp[i][root1]
 		}
@@ -130,13 +139,13 @@ func (lca *LCA) QueryMaxWeight(root1, root2 int, isEdge bool) int {
 //  isEdge 为true表示查询路径上边权,为false表示查询路径上点权
 func (lca *LCA) QueryMinWeight(root1, root2 int, isEdge bool) int {
 	res := INF
-	if lca.depth[root1] < lca.depth[root2] {
+	if lca.Depth[root1] < lca.Depth[root2] {
 		root1, root2 = root2, root1
 	}
 
-	toDepth := lca.depth[root2]
+	toDepth := lca.Depth[root2]
 	for i := lca.bitLen - 1; i >= 0; i-- { // upToDepth
-		if (lca.depth[root1]-toDepth)&(1<<i) > 0 {
+		if (lca.Depth[root1]-toDepth)&(1<<i) > 0 {
 			res = min(res, lca.dpWeight2[i][root1])
 			root1 = lca.dp[i][root1]
 		}
@@ -182,11 +191,11 @@ func (lca *LCA) QueryKthAncestor(root, k int) int {
 
 // 从 root 开始向上跳到指定深度 toDepth,toDepth<=dep[v],返回跳到的节点
 func (lca *LCA) UpToDepth(root, toDepth int) int {
-	if toDepth >= lca.depth[root] {
+	if toDepth >= lca.Depth[root] {
 		return root
 	}
 	for i := lca.bitLen - 1; i >= 0; i-- {
-		if (lca.depth[root]-toDepth)&(1<<i) > 0 {
+		if (lca.Depth[root]-toDepth)&(1<<i) > 0 {
 			root = lca.dp[i][root]
 		}
 	}
@@ -197,7 +206,7 @@ func (lca *LCA) UpToDepth(root, toDepth int) int {
 // 返回跳到的节点,如果不存在这样的节点,返回-1
 func (lca *LCA) Jump(start, target, step int) int {
 	lca_ := lca.QueryLCA(start, target)
-	dep1, dep2, deplca := lca.depth[start], lca.depth[target], lca.depth[lca_]
+	dep1, dep2, deplca := lca.Depth[start], lca.Depth[target], lca.Depth[lca_]
 	dist := dep1 + dep2 - 2*deplca
 	if step > dist {
 		return -1
@@ -209,10 +218,10 @@ func (lca *LCA) Jump(start, target, step int) int {
 }
 
 func (lca *LCA) dfsAndInitDp(cur, pre, dep, dist int) {
-	lca.depth[cur] = dep
+	lca.Depth[cur] = dep
 	lca.dp[0][cur] = pre
 	lca.distToRoot[cur] = dist
-	for _, e := range lca.tree[cur] {
+	for _, e := range lca.Tree[cur] {
 		if next := e.to; next != pre {
 			lca.dpWeight1[0][next] = e.weight
 			lca.dpWeight2[0][next] = e.weight

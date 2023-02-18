@@ -14,3 +14,5 @@ https://zhuanlan.zhihu.com/p/25017840
 
 - 还是不要用 python 写根号算法 太卡常数了
 - `可以考虑 ts(leetcode 上) golang/java(atcoder 上)`
+
+https://ei1333.hateblo.jp/entry/2017/09/11/211011

@@ -10,7 +10,7 @@
 第n个格雷码(n>=0)
 n^(n>>1)
 
-[start ^ i ^ (i >> 1) for i in range(2 ** n)]
+[start ^ i ^ (i >> 1) for i in range(2 ** n)]  # 指定起点为start
 ```
 
 格雷码转二进制(格雷码的解码即为转换为 0 需要的最小的次数。):

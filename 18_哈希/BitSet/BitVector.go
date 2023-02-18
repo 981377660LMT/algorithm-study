@@ -2,6 +2,8 @@
 // reference: https://tiramister.net/blog/posts/bitvector/
 // 简洁数据结构
 
+// 静态的bitset,添加元素需要build构建
+
 package main
 
 import "math/bits"

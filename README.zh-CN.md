@@ -24,7 +24,7 @@
    - [Z 算法 (扩展 KMP) ](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/kmp/z%E5%87%BD%E6%95%B0-%E6%89%A9%E5%B1%95kmp.py)
    - [马拉车 (Manacher) 算法](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E9%A9%AC%E6%8B%89%E8%BD%A6%E6%8B%89%E9%A9%AC/Manacher.py)
    - [后缀数组](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E6%95%B0%E7%BB%84/SA.py)
-   - [AC 自动机](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/AC%E8%87%AA%E5%8A%A8%E6%9C%BA%E5%A4%9A%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/AutoMaton.py)
+   - [AC 自动机](<17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/AC%E8%87%AA%E5%8A%A8%E6%9C%BA(%E5%A4%9A%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D)/AutoMaton.py>)
 
 1. **栈**
 
@@ -139,3 +139,5 @@
 - [contest.js](https://github.com/harttle/contest.js)
 - [codeforces-go](https://github.com/EndlessCheng/codeforces-go)
 - [Nyaan's Library](https://github.com/NyaanNyaan/library)
+- [maspypy's Library](https://maspypy.github.io/library/)
+- [Luzhiled's Library](https://ei1333.github.io/library/)

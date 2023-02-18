@@ -9,8 +9,9 @@
 
 def floorSum(lower: int, upper: int, num: int) -> int:
     """
-    快速计算
-    sum(floor(`num`/i) for i in range(`lower`,`upper`+1))
+    ```
+    sum(num//i for i in range(lower,upper+1)
+    ```
     """
     res = 0
     upper = min(upper, num)

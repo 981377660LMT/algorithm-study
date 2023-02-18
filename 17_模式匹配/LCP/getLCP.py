@@ -1,4 +1,4 @@
-"""LCP"""
+"""s的任意`两个`后缀的LCP"""
 from typing import List
 
 
@@ -17,3 +17,21 @@ def getLCP(s: str) -> List[List[int]]:
             if s[i] == s[j]:
                 lcp[i][j] = lcp[i + 1][j + 1] + 1
     return lcp
+
+
+if __name__ == "__main__":
+    # 求s的两个最长的不重合的子串(后缀)的长度 len(s)<=5e3
+    # 枚举两个子串的起点
+    # https://atcoder.jp/contests/abc141/tasks/abc141_e
+    n = int(input())
+    s = input()
+    dp = getLCP(s)
+    res = 0
+    left1, left2 = -1, -1
+    for i in range(n):
+        for j in range(i + 1, n):
+            cand = min(dp[i][j], j - i)
+            if cand > res:
+                res = cand
+                left1, left2 = i, j
+    print(res, s[left1 : left1 + res], s[left2 : left2 + res])

@@ -2,6 +2,7 @@
 # 管理区间的数据结构
 # 注意:所有区间都是闭区间 例如 [1,1] 表示 长为1的区间,起点为1
 
+
 from typing import Tuple, Union
 from sortedcontainers import SortedList
 
@@ -9,9 +10,10 @@ INF = int(1e18)
 
 
 class SegmentSet:
-    __slots__ = ("_st",)
+    __slots__ = ("_st", "count")
 
     def __init__(self):
+        self.count = 0  # 区间元素的个数
         self._st = SortedList()
 
     def insert(self, left: int, right: int) -> None:
@@ -29,8 +31,11 @@ class SegmentSet:
             tmp2 = self._st[it2 - 1][1]
             if tmp2 > right:
                 right = tmp2
+            removed = sum(right - left + 1 for left, right in self._st[it1:it2])
             del self._st[it1:it2]
+            self.count -= removed
         self._st.add((left, right))
+        self.count += right - left + 1
 
     def erase(self, left: int, right: int) -> None:
         """删除闭区间[left, right]."""
@@ -47,11 +52,15 @@ class SegmentSet:
             nl = left
         if right > nr:
             nr = right
+        removed = sum(right - left + 1 for left, right in self._st[it1:it2])
         del self._st[it1:it2]
+        self.count -= removed
         if nl < left:
             self._st.add((nl, left))
+            self.count += left - nl + 1
         if right < nr:
             self._st.add((right, nr))
+            self.count += nr - right + 1
 
     def next(self, x: int) -> int:
         """返回第一个大于等于x的区间起点.如果不存在,返回INF."""
@@ -95,7 +104,6 @@ class SegmentSet:
 
 
 if __name__ == "__main__":
-
     ss = SegmentSet()
     ss.insert(1, 3)
     ss.insert(2, 4)
@@ -103,3 +111,6 @@ if __name__ == "__main__":
     assert ss.next(1) == 1
     assert (1, 4) in ss
     assert 7 not in ss
+    assert ss.count == sum(right - left + 1 for left, right in ss)
+    ss.erase(2, 3)
+    assert len(ss) == 3

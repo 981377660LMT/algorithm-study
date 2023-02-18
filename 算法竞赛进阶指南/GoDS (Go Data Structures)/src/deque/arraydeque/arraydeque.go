@@ -117,7 +117,7 @@ func (queue *ArrayDeque) Len() int {
 func (queue *ArrayDeque) String() string {
 	res := []string{"ArrayDeque{"}
 	values := []string{}
-	queue.ForEach(func(value E, index int) {
+	queue.ForEach(func(value E, _ int) {
 		values = append(values, fmt.Sprintf("%v", value))
 	})
 

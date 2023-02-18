@@ -4,33 +4,42 @@
 from collections import defaultdict
 from heapq import heappop, heappush
 from random import randint
+from typing import List
+from sortedcontainers import SortedList
 
 
 class TopKSum:
-    """默认是`最小`的k个数之和,如果要`最大`的k个数之和,需要手动添加负号"""
+    """
+    默认是`最小`的k个数之和.
+    """
 
     # in d_in 是大根堆，out d_out 是小根堆
-    __slots__ = ("_sum", "_k", "_in", "_out", "_d_in", "_d_out", "_c")
+    __slots__ = ("_sum", "_k", "_in", "_out", "_d_in", "_d_out", "_c", "_min")
 
-    def __init__(self, k: int) -> None:
+    def __init__(self, k: int, min=True) -> None:
         self._k = k
         self._sum = 0
         self._in = []
         self._out = []
         self._d_in = []
         self._d_out = []
+        self._min = min
         self._c = defaultdict(int)
 
     def query(self) -> int:
-        return self._sum
+        return self._sum if self._min else -self._sum
 
     def add(self, x: int) -> None:
+        if not self._min:
+            x = -x
         self._c[x] += 1
         heappush(self._in, -x)
         self._sum += x
         self._modify()
 
     def discard(self, x: int) -> None:
+        if not self._min:
+            x = -x
         if self._c[x] == 0:
             return
         self._c[x] -= 1
@@ -75,20 +84,18 @@ class TopKSum:
         return len(self._in) + len(self._out) - len(self._d_in) - len(self._d_out)
 
     def __contains__(self, x: int) -> bool:
+        if not self._min:
+            x = -x
         return self._c[x] > 0
 
 
-
-
 if __name__ == "__main__":
-    from sortedcontainers import SortedList
 
     #  brute force
     k = 5
-    ts = TopKSum(k)
-    sl = SortedList()
+    ts = TopKSum(k, min=False)
+    sl = SortedList(key=lambda x: -x)
     for _ in range(1000):
-
         # add
         x = randint(0, 100)
         ts.add(x)
@@ -107,3 +114,24 @@ if __name__ == "__main__":
         ts.discard(x)
         sl.discard(x)
         assert ts.query() == sum(sl[:k])
+
+        assert len(ts) == len(sl)
+        assert (x in ts) == (x in sl)
+
+    # 2163. 删除元素后和的最小差值
+
+    class Solution:
+        def minimumDifference(self, nums: List[int]) -> int:
+            # 前面最小n个和后面大n个
+            n = len(nums) // 3
+            minK, maxK = TopKSum(n, min=True), TopKSum(n, min=False)
+            for i in range(n):
+                minK.add(nums[i])
+            for i in range(n, 3 * n):
+                maxK.add(nums[i])
+            res = minK.query() + maxK.query()
+            for i in range(n, 2 * n):
+                minK.add(nums[i])
+                maxK.discard(nums[i])
+                res = min(res, minK.query() + maxK.query())
+            return res

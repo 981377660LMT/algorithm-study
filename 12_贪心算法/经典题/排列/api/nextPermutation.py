@@ -1,32 +1,10 @@
 # 下一个排列/上一个排列
 
 
-from typing import Any, MutableSequence, Protocol, Tuple, TypeVar
+from typing import Any, MutableSequence, Tuple
 
 
-class Comparable(Protocol):
-    __slots__ = ()
-
-    def __eq__(self, other: Any, /) -> bool:
-        ...
-
-    def __lt__(self, other: Any, /) -> bool:
-        ...
-
-    def __gt__(self, other: Any, /) -> bool:
-        return (not self < other) and self != other
-
-    def __le__(self, other: Any, /) -> bool:
-        return self < other or self == other
-
-    def __ge__(self, other: Any, /) -> bool:
-        return not self < other
-
-
-E = TypeVar("E", bound=Comparable)
-
-
-def nextPermutation(nums: MutableSequence[E], inPlace=False) -> Tuple[bool, MutableSequence[E]]:
+def nextPermutation(nums: MutableSequence[Any], inPlace=False) -> Tuple[bool, MutableSequence[Any]]:
     """返回下一个字典序的排列，如果不存在，返回本身;时间复杂度O(n)"""
     if not inPlace:
         nums = nums[:]
@@ -51,7 +29,7 @@ def nextPermutation(nums: MutableSequence[E], inPlace=False) -> Tuple[bool, Muta
     return True, nums
 
 
-def prePermutation(nums: MutableSequence[E], inPlace=False) -> Tuple[bool, MutableSequence[E]]:
+def prePermutation(nums: MutableSequence[Any], inPlace=False) -> Tuple[bool, MutableSequence[Any]]:
     """返回前一个字典序的排列,如果不存在,返回本身;时间复杂度O(n)"""
     if not inPlace:
         nums = nums[:]
@@ -74,6 +52,51 @@ def prePermutation(nums: MutableSequence[E], inPlace=False) -> Tuple[bool, Mutab
         left += 1
         right -= 1
     return True, nums
+
+
+from sortedcontainers import SortedSet
+
+
+# https://maspypy.github.io/library/seq/kth_next_permutation.hpp
+def kthNextPermutation(
+    unique: MutableSequence[Any], k: int, inPlace=False
+) -> Tuple[bool, MutableSequence[Any], int]:
+    """下k个字典序的排列
+
+    Args:
+        unique (MutableSequence[Any]): 无重复元素的数组
+        k (int): 后续第k个(`本身算第0个`)
+        inPlace (bool, optional): 是否原地修改. 默认为False
+
+    Returns:
+        Tuple[bool, MutableSequence[Any], int]: `是否存在, 下k个排列, 需要移动的元素个数`
+    """
+    if not inPlace:
+        unique = unique[:]
+    rank, q = [], []
+    ss = SortedSet()
+    while k and unique:
+        n = len(rank) + 1
+        p = unique[-1]
+        now = ss.bisect_left(p)
+        k += now
+        r = k % n
+        k //= n
+        rank.append(r)
+        q.append(unique[-1])
+        ss.add(unique[-1])
+        unique.pop()
+
+    if k:
+        return False, unique, len(rank)
+
+    move = len(rank)
+    while len(rank):
+        r = rank.pop()
+        it = ss[r]
+        unique.append(it)
+        ss.remove(it)
+    return True, unique, move
 
 
 if __name__ == "__main__":

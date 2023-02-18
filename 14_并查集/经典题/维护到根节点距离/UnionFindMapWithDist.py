@@ -193,3 +193,25 @@ class UnionFindArrayWithDist:
 
     def isConnected(self, key1: int, key2: int) -> bool:
         return self.find(key1) == self.find(key2)
+
+
+# https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_1_B&lang=ja
+if __name__ == "__main__":
+    import sys
+
+    sys.setrecursionlimit(int(1e9))
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
+
+    n, q = map(int, input().split())
+    uf = UnionFindArrayWithDist(n)
+    for _ in range(q):
+        op, *rest = map(int, input().split())
+        if op == 0:
+            x, y, w = rest
+            uf.union(x, y, w)
+        else:
+            x, y = rest
+            if not uf.isConnected(x, y):
+                print("?")
+            else:
+                print(uf.getDist(x, y))

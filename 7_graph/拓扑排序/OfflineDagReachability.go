@@ -8,7 +8,7 @@ package main
 
 // 在有向无环图graph上,对每个查询(u,v)判断从u是否能到达v.
 //  O((E+V)*Q/64)
-func offlineDagReachability(dag [][]int, queries [][]int) []bool {
+func offlineDagReachability(dag [][]int, queries [][2]int) []bool {
 	n, q := len(dag), len(queries)
 	order := topoSort(dag)
 	res := make([]bool, q)
@@ -16,7 +16,7 @@ func offlineDagReachability(dag [][]int, queries [][]int) []bool {
 		upper := min(q, i+64)
 		dp := make([]uint64, n)
 		for k := i; k < upper; k++ {
-			dp[queries[k][0]] |= 1 << (k - i)
+			dp[queries[k][0]] |= 1 << uint(k-i)
 		}
 
 		for _, cur := range order {
@@ -26,7 +26,7 @@ func offlineDagReachability(dag [][]int, queries [][]int) []bool {
 		}
 
 		for k := i; k < upper; k++ {
-			res[k] = dp[queries[k][1]]&(1<<(k-i)) > 0
+			res[k] = dp[queries[k][1]]&(1<<uint(k-i)) > 0
 		}
 	}
 
@@ -40,6 +40,7 @@ func min(a, b int) int {
 	return b
 }
 
+// 有向图拓扑排序
 func topoSort(dag [][]int) []int {
 	n := len(dag)
 	deg := make([]int, n)

@@ -12,96 +12,37 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math/bits"
-	"os"
+	"strings"
 )
 
+// test LowerBound and UpperBound
 func main() {
-
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-	bit := NewBinaryIndexedTree(n)
-	for i := 0; i < q; i++ {
-		var op, x, y int
-		fmt.Fscan(in, &op, &x, &y)
-		if op == 0 {
-			bit.Apply(x-1, y)
-		} else {
-			fmt.Fprintln(out, bit.ProdRange(x-1, y))
-		}
-	}
+	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	bit := NewBitArrayFrom(nums)
+	fmt.Println(bit.UpperBound(10), bit.Prod(4))
 }
 
-type BinaryIndexedTree struct {
+type BitArray struct {
 	n    int
 	log  int
 	data []int
 }
 
 // 長さ n の 0で初期化された配列で構築する.
-func NewBinaryIndexedTree(n int) *BinaryIndexedTree {
-	return &BinaryIndexedTree{n: n, log: bits.Len(uint(n)), data: make([]int, n+1)}
+func NewBitArray(n int) *BitArray {
+	return &BitArray{n: n, log: bits.Len(uint(n)), data: make([]int, n+1)}
 }
 
 // 配列で構築する.
-func NewBinaryIndexedTreeFrom(arr []int) *BinaryIndexedTree {
-	res := NewBinaryIndexedTree(len(arr))
-	res.build(arr)
+func NewBitArrayFrom(arr []int) *BitArray {
+	res := NewBitArray(len(arr))
+	res.Build(arr)
 	return res
 }
 
-// 要素 i に値 v を加える.
-func (b *BinaryIndexedTree) Apply(i int, v int) {
-	for i++; i <= b.n; i += i & -i {
-		b.data[i] += v
-	}
-}
-
-// [0, r) の要素の総和を求める.
-func (b *BinaryIndexedTree) Prod(r int) int {
-	res := int(0)
-	for ; r > 0; r -= r & -r {
-		res += b.data[r]
-	}
-	return res
-}
-
-// [l, r) の要素の総和を求める.
-func (b *BinaryIndexedTree) ProdRange(l, r int) int {
-	return b.Prod(r) - b.Prod(l)
-}
-
-// 区間[0,k]の総和がx以上となる最小のkを求める.数列が単調増加であることを要求する.
-func (b *BinaryIndexedTree) LowerBound(x int) int {
-	i := 0
-	for k := 1 << b.log; k > 0; k >>= 1 {
-		if i+k <= b.n && b.data[i+k] < x {
-			x -= b.data[i+k]
-			i += k
-		}
-	}
-	return i
-}
-
-// 区間[0,k]の総和がxを上回る最小のkを求める.数列が単調増加であることを要求する.
-func (b *BinaryIndexedTree) UpperBound(x int) int {
-	i := 0
-	for k := 1 << b.log; k > 0; k >>= 1 {
-		if i+k <= b.n && b.data[i+k] <= x {
-			x -= b.data[i+k]
-			i += k
-		}
-	}
-	return i
-}
-
-func (b *BinaryIndexedTree) build(arr []int) {
+func (b *BitArray) Build(arr []int) {
 	if b.n != len(arr) {
 		panic("len of arr is not equal to n")
 	}
@@ -114,4 +55,57 @@ func (b *BinaryIndexedTree) build(arr []int) {
 			b.data[j] += b.data[i]
 		}
 	}
+}
+
+// 要素 i に値 v を加える.
+func (b *BitArray) Apply(i int, v int) {
+	for i++; i <= b.n; i += i & -i {
+		b.data[i] += v
+	}
+}
+
+// [0, r) の要素の総和を求める.
+func (b *BitArray) Prod(r int) int {
+	res := int(0)
+	for ; r > 0; r -= r & -r {
+		res += b.data[r]
+	}
+	return res
+}
+
+// [l, r) の要素の総和を求める.
+func (b *BitArray) ProdRange(l, r int) int {
+	return b.Prod(r) - b.Prod(l)
+}
+
+// 区間[0,k]の総和がx以上となる最小のkを求める.数列が単調増加であることを要求する.
+func (b *BitArray) LowerBound(x int) int {
+	i := 0
+	for k := 1 << b.log; k > 0; k >>= 1 {
+		if i+k <= b.n && b.data[i+k] < x {
+			x -= b.data[i+k]
+			i += k
+		}
+	}
+	return i
+}
+
+// 区間[0,k]の総和がxを上回る最小のkを求める.数列が単調増加であることを要求する.
+func (b *BitArray) UpperBound(x int) int {
+	i := 0
+	for k := 1 << b.log; k > 0; k >>= 1 {
+		if i+k <= b.n && b.data[i+k] <= x {
+			x -= b.data[i+k]
+			i += k
+		}
+	}
+	return i
+}
+
+func (b *BitArray) String() string {
+	sb := []string{}
+	for i := 0; i < b.n; i++ {
+		sb = append(sb, fmt.Sprintf("%d", b.ProdRange(i, i+1)))
+	}
+	return fmt.Sprintf("BitArray: [%v]", strings.Join(sb, ", "))
 }

@@ -39,7 +39,7 @@ func main() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	sl := NewSortedList(func(a, b Value) int {
+	sl := NewSortedList(func(a, b V) int {
 		return a - b
 	}, n)
 
@@ -96,7 +96,7 @@ func main() {
 	}
 }
 
-type Value = int
+type V = int
 
 // type Value = interface{}
 
@@ -104,17 +104,17 @@ type node struct {
 	left, right int
 	size        int
 	priority    uint64
-	value       Value
+	value       V
 }
 
 type SortedList struct {
 	seed       uint64
 	root       int
-	comparator func(a, b Value) int
+	comparator func(a, b V) int
 	nodes      []node
 }
 
-func NewSortedList(comparator func(a, b Value) int, initCapacity int) *SortedList {
+func NewSortedList(comparator func(a, b V) int, initCapacity int) *SortedList {
 	sl := &SortedList{
 		seed:       uint64(time.Now().UnixNano()/2 + 1),
 		comparator: comparator,
@@ -126,7 +126,7 @@ func NewSortedList(comparator func(a, b Value) int, initCapacity int) *SortedLis
 	return sl
 }
 
-func (sl *SortedList) Build(nums []Value) int {
+func (sl *SortedList) Build(nums []V) int {
 	n := len(nums)
 	keys := make([]int, 0, n)
 	for i := 0; i < n; i++ {
@@ -194,14 +194,14 @@ func (sl *SortedList) pushUp(root int) {
 	sl.nodes[root].size = sl.nodes[sl.nodes[root].left].size + sl.nodes[sl.nodes[root].right].size + 1
 }
 
-func (sl *SortedList) Add(value Value) {
+func (sl *SortedList) Add(value V) {
 	var x, y, z int
 	sl.splitByValue(sl.root, value, &x, &y, false)
 	z = sl.newNode(value)
 	sl.root = sl.merge(sl.merge(x, z), y)
 }
 
-func (sl *SortedList) At(index int) Value {
+func (sl *SortedList) At(index int) V {
 	n := sl.Len()
 	if index < 0 {
 		index += n
@@ -212,7 +212,7 @@ func (sl *SortedList) At(index int) Value {
 	return sl.nodes[sl.kthNode(sl.root, index+1)].value
 }
 
-func (sl *SortedList) Pop(index int) Value {
+func (sl *SortedList) Pop(index int) V {
 	n := sl.Len()
 	if index < 0 {
 		index += n
@@ -227,7 +227,7 @@ func (sl *SortedList) Pop(index int) Value {
 	return res
 }
 
-func (sl *SortedList) Discard(value Value) {
+func (sl *SortedList) Discard(value V) {
 	var x, y, z int
 	sl.splitByValue(sl.root, value, &x, &z, false)
 	sl.splitByValue(x, value, &x, &y, true)
@@ -244,7 +244,7 @@ func (sl *SortedList) Erase(start, stop int) {
 	sl.root = sl.merge(x, z)
 }
 
-func (sl *SortedList) BisectLeft(value Value) int {
+func (sl *SortedList) BisectLeft(value V) int {
 	var x, y int
 	sl.splitByValue(sl.root, value, &x, &y, true)
 	res := sl.nodes[x].size
@@ -252,7 +252,7 @@ func (sl *SortedList) BisectLeft(value Value) int {
 	return res
 }
 
-func (sl *SortedList) BisectRight(value Value) int {
+func (sl *SortedList) BisectRight(value V) int {
 	var x, y int
 	sl.splitByValue(sl.root, value, &x, &y, false)
 	res := sl.nodes[x].size
@@ -289,7 +289,7 @@ func (sl *SortedList) kthNode(root int, k int) int {
 	return cur
 }
 
-func (sl *SortedList) splitByValue(root int, value Value, x, y *int, strictLess bool) {
+func (sl *SortedList) splitByValue(root int, value V, x, y *int, strictLess bool) {
 	if root == 0 {
 		*x, *y = 0, 0
 		return
@@ -352,13 +352,13 @@ func (sl *SortedList) merge(x, y int) int {
 }
 
 // Return all elements in index order.
-func (sl *SortedList) InOrder() []Value {
-	res := make([]Value, 0, sl.Len())
+func (sl *SortedList) InOrder() []V {
+	res := make([]V, 0, sl.Len())
 	sl.inOrder(sl.root, &res)
 	return res
 }
 
-func (sl *SortedList) inOrder(root int, res *[]Value) {
+func (sl *SortedList) inOrder(root int, res *[]V) {
 	if root == 0 {
 		return
 	}
@@ -367,7 +367,7 @@ func (sl *SortedList) inOrder(root int, res *[]Value) {
 	sl.inOrder(sl.nodes[root].right, res)
 }
 
-func (sl *SortedList) newNode(value Value) int {
+func (sl *SortedList) newNode(value V) int {
 	node := &node{
 		value:    value,
 		size:     1,

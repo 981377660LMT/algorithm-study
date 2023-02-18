@@ -9,7 +9,11 @@
 
 
 def floorSum(N: int, M: int, A: int, B: int) -> int:
-    """求∑floor((A*i+B)/M) 的值 (i=0-N-1)"""
+    """
+    ```
+    sum((A*i+B)//M for i in range(N)
+    ```
+    """
     res = 0
     while True:
         if A >= M or A < 0:
@@ -24,6 +28,12 @@ def floorSum(N: int, M: int, A: int, B: int) -> int:
             break
         N, B, M, A = yMax // M, yMax % M, A, M
     return res
+
+
+# verify www.codechef.com/viewsolution/36222026
+# count x : ax + b mod m 0<= yr<=m, 0 <= x < xr
+def range_count(a: int, b: int, m: int, xr: int, yr: int) -> int:
+    return floorSum(xr, m, a, b + m) - floorSum(xr, m, a, b + m - yr)
 
 
 T = int(input())

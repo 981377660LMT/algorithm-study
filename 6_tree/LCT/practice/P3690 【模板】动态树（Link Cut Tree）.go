@@ -27,7 +27,7 @@ func main() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	lct := NewLinkCutTree()
+	lct := NewLinkCutTree(true)
 	vs := lct.Build(nums)
 
 	for i := 0; i < q; i++ {
@@ -54,10 +54,11 @@ func (*LinkCutTree) op(a, b E) E { return a ^ b }
 type LinkCutTree struct {
 	nodeId int
 	edges  map[struct{ u, v int }]struct{}
+	check  bool
 }
 
-func NewLinkCutTree() *LinkCutTree {
-	return &LinkCutTree{edges: make(map[struct{ u, v int }]struct{})}
+func NewLinkCutTree(check bool) *LinkCutTree {
+	return &LinkCutTree{edges: make(map[struct{ u, v int }]struct{}), check: check}
 }
 
 // 各要素の値を vs[i] としたノードを生成し, その配列を返す.
@@ -86,15 +87,18 @@ func (lct *LinkCutTree) Evert(t *treeNode) {
 // 存在していない辺 uv を新たに張る.
 //  すでに存在している辺 uv に対しては何もしない.
 func (lct *LinkCutTree) LinkEdge(child, parent *treeNode) (ok bool) {
-	if lct.IsConnected(child, parent) {
-		return
+	if lct.check {
+		if lct.IsConnected(child, parent) {
+			return
+		}
+		id1, id2 := child.id, parent.id
+		if id1 > id2 {
+			id1, id2 = id2, id1
+		}
+		tuple := struct{ u, v int }{id1, id2}
+		lct.edges[tuple] = struct{}{}
 	}
-	id1, id2 := child.id, parent.id
-	if id1 > id2 {
-		id1, id2 = id2, id1
-	}
-	tuple := struct{ u, v int }{id1, id2}
-	lct.edges[tuple] = struct{}{}
+
 	lct.Evert(child)
 	lct.expose(parent)
 	child.p = parent
@@ -106,15 +110,18 @@ func (lct *LinkCutTree) LinkEdge(child, parent *treeNode) (ok bool) {
 // 存在している辺を切り離す.
 //  存在していない辺に対しては何もしない.
 func (lct *LinkCutTree) CutEdge(u, v *treeNode) (ok bool) {
-	id1, id2 := u.id, v.id
-	if id1 > id2 {
-		id1, id2 = id2, id1
+	if lct.check {
+		id1, id2 := u.id, v.id
+		if id1 > id2 {
+			id1, id2 = id2, id1
+		}
+		tuple := struct{ u, v int }{id1, id2}
+		if _, has := lct.edges[tuple]; !has {
+			return
+		}
+		delete(lct.edges, tuple)
 	}
-	tuple := struct{ u, v int }{id1, id2}
-	if _, has := lct.edges[tuple]; !has {
-		return
-	}
-	delete(lct.edges, tuple)
+
 	lct.Evert(u)
 	lct.expose(v)
 	parent := v.l

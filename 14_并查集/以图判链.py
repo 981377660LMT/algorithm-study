@@ -7,7 +7,7 @@ from typing import List
 from UnionFind import UnionFindArray
 
 
-def validChain(n: int, edges: List[List[int]]) -> bool:
+def isChain(n: int, edges: List[List[int]]) -> bool:
     if n != len(edges) + 1:
         return False
 
@@ -32,5 +32,5 @@ if __name__ == "__main__":
         u, v = u - 1, v - 1
         edges.append([u, v])
 
-    isChain = validChain(n, edges)
+    isChain = isChain(n, edges)
     print("Yes" if isChain else "No")

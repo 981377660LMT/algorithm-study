@@ -1,6 +1,6 @@
 // 动态子树和查询
 // n,q=2e5
-// 事件监听:
+
 package main
 
 import (
@@ -26,7 +26,7 @@ func main() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	lct := NewLinkCutTreeSubTree()
+	lct := NewLinkCutTreeSubTree(true)
 	vs := lct.Build(nums)
 
 	for i := 0; i < n-1; i++ { // 连接树边
@@ -50,7 +50,7 @@ func main() {
 		} else {
 			var root, parent int
 			fmt.Fscan(in, &root, &parent)
-			lct.Evert(vs[parent]) // 注意查询子树前要先把父节点旋转到根节点
+			lct.Evert(vs[parent]) // !注意查询子树前要先把父节点旋转到根节点
 			fmt.Fprintln(out, lct.QuerySubTree(vs[root]))
 		}
 	}
@@ -65,10 +65,12 @@ func (*TreeNode) inv(this, other E) E { return this - other }
 type LinkCutTreeSubTree struct {
 	nodeId int
 	edges  map[struct{ u, v int }]struct{}
+	check  bool
 }
 
-func NewLinkCutTreeSubTree() *LinkCutTreeSubTree {
-	return &LinkCutTreeSubTree{edges: make(map[struct{ u, v int }]struct{})}
+// check: AddEdge/RemoveEdge で辺の存在チェックを行うかどうか.
+func NewLinkCutTreeSubTree(check bool) *LinkCutTreeSubTree {
+	return &LinkCutTreeSubTree{edges: make(map[struct{ u, v int }]struct{}), check: check}
 }
 
 // 各要素の値を vs[i] としたノードを生成し, その配列を返す.
@@ -96,15 +98,18 @@ func (lct *LinkCutTreeSubTree) Evert(t *TreeNode) {
 }
 
 func (lct *LinkCutTreeSubTree) LinkEdge(child, parent *TreeNode) (ok bool) {
-	if lct.IsConnected(child, parent) {
-		return
+	if lct.check {
+		if lct.IsConnected(child, parent) {
+			return
+		}
+		id1, id2 := child.id, parent.id
+		if id1 > id2 {
+			id1, id2 = id2, id1
+		}
+		tuple := struct{ u, v int }{id1, id2}
+		lct.edges[tuple] = struct{}{}
 	}
-	id1, id2 := child.id, parent.id
-	if id1 > id2 {
-		id1, id2 = id2, id1
-	}
-	tuple := struct{ u, v int }{id1, id2}
-	lct.edges[tuple] = struct{}{}
+
 	lct.Evert(child)
 	lct.expose(parent)
 	child.p = parent
@@ -114,15 +119,18 @@ func (lct *LinkCutTreeSubTree) LinkEdge(child, parent *TreeNode) (ok bool) {
 }
 
 func (lct *LinkCutTreeSubTree) CutEdge(u, v *TreeNode) (ok bool) {
-	id1, id2 := u.id, v.id
-	if id1 > id2 {
-		id1, id2 = id2, id1
+	if lct.check {
+		id1, id2 := u.id, v.id
+		if id1 > id2 {
+			id1, id2 = id2, id1
+		}
+		tuple := struct{ u, v int }{id1, id2}
+		if _, has := lct.edges[tuple]; !has {
+			return
+		}
+		delete(lct.edges, tuple)
 	}
-	tuple := struct{ u, v int }{id1, id2}
-	if _, has := lct.edges[tuple]; !has {
-		return
-	}
-	delete(lct.edges, tuple)
+
 	lct.Evert(u)
 	lct.expose(v)
 	parent := v.l
@@ -163,6 +171,8 @@ func (lct *LinkCutTreeSubTree) QueryKthAncestor(x *TreeNode, k int) *TreeNode {
 	return nil
 }
 
+// t を根とする部分木の要素の値の和を返す.
+//  !Evert を忘れない！
 func (lct *LinkCutTreeSubTree) QuerySubTree(t *TreeNode) E {
 	lct.expose(t)
 	return t.op(t.key, t.sub)

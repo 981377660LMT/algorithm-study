@@ -53,7 +53,7 @@ func NewLCA(n int, tree [][]AdjListEdge) *LCA {
 	lca.dp, lca.dpWeight = makeDp(lca)
 	for i := 0; i < n; i++ {
 		if !lca.visited[i] {
-			lca.dfsAndInitDp(i, -1, 0)
+			lca.dfsAndInitDp(i, -1, 0) // !这里是森林，所以要遍历所有节点
 		}
 	}
 	lca.fillDp()

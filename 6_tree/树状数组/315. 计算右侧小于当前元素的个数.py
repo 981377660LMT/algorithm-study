@@ -1,7 +1,7 @@
 from bisect import bisect_right
 from random import randint
 from typing import List, Sequence
-from collections import defaultdict, deque
+from collections import deque
 from sortedcontainers import SortedList
 
 
@@ -89,14 +89,27 @@ class WindowInv:
         return f"InvManager({self._queue}, {self._inv})"
 
 
+# 区间逆序对的个数
+# dp[i][j]表示左闭右开区间A[i:j)的逆序对个数
+def rangeInv(nums: List[int]) -> List[List[int]]:
+    n = len(nums)
+    dp = [[0] * (n + 1) for _ in range(n + 1)]
+    for left in range(n, -1, -1):
+        for right in range(left + 2, n + 1):
+            dp[left][right] = dp[left][right - 1] + dp[left + 1][right] - dp[left + 1][right - 1]
+            if nums[left] > nums[right - 1]:
+                dp[left][right] += 1
+    return dp
+
+
 def countSmallerBIT(nums: List[int]) -> List[int]:
-    """求每个位置处的逆序对数量  注意值域很大时需要离散化"""
+    """树状数组求每个位置处的逆序对数量"""
     n = len(nums)
     arr = sorted(nums)
     res = [0] * n
-    bit = BIT1(n + 10)
+    bit = BITArray(n + 5)
     for i in range(len(nums) - 1, -1, -1):
-        pos1 = bisect_right(arr, nums[i] - 1) + 1
+        pos1 = bisect_right(arr, nums[i] - 1) + 1  # 离散化
         cur = bit.query(pos1)
         res[i] = cur
         pos2 = bisect_right(arr, nums[i]) + 1
@@ -104,28 +117,50 @@ def countSmallerBIT(nums: List[int]) -> List[int]:
     return res
 
 
-class BIT1:
-    def __init__(self, n: int):
-        self.size = n
-        self.tree = defaultdict(int)
+from typing import List, Sequence, Union
+
+
+class BITArray:
+    """Point Add Range Sum, 1-indexed."""
+
+    @staticmethod
+    def _build(sequence: Sequence[int]) -> List[int]:
+        tree = [0] * (len(sequence) + 1)
+        for i in range(1, len(tree)):
+            tree[i] += sequence[i - 1]
+            parent = i + (i & -i)
+            if parent < len(tree):
+                tree[parent] += tree[i]
+        return tree
+
+    __slots__ = ("_n", "_tree")
+
+    def __init__(self, lenOrSequence: Union[int, Sequence[int]]):
+        if isinstance(lenOrSequence, int):
+            self._n = lenOrSequence
+            self._tree = [0] * (lenOrSequence + 1)
+        else:
+            self._n = len(lenOrSequence)
+            self._tree = self._build(lenOrSequence)
 
     def add(self, index: int, delta: int) -> None:
-        if index <= 0:
-            raise ValueError("index 必须是正整数")
-        while index <= self.size:
-            self.tree[index] += delta
+        # assert index >= 1, f'add index must be greater than 0, but got {index}'
+        while index <= self._n:
+            self._tree[index] += delta
             index += index & -index
 
-    def query(self, index: int) -> int:
-        if index > self.size:
-            index = self.size
+    def query(self, right: int) -> int:
+        """Query sum of [1, right]."""
+        if right > self._n:
+            right = self._n
         res = 0
-        while index > 0:
-            res += self.tree[index]
-            index -= index & -index
+        while right > 0:
+            res += self._tree[right]
+            right -= right & -right
         return res
 
     def queryRange(self, left: int, right: int) -> int:
+        """Query sum of [left, right]."""
         return self.query(right) - self.query(left - 1)
 
 
@@ -137,7 +172,7 @@ if __name__ == "__main__":
 
     # use bruteforce to test windowInv
     nums1, nums2 = deque(), WindowInv()
-    for _ in range(10000):
+    for _ in range(1000):
         op = randint(0, 3)
         if op == 0:
             num = randint(0, 100)
@@ -155,5 +190,5 @@ if __name__ == "__main__":
             if nums1:
                 nums1.popleft()
                 nums2.popleft()
-        assert nums2.query() == countInv(nums1)
+        assert nums2.query() == countInv(nums1) == rangeInv(nums1)[0][-1]
     print("test windowInv passed")

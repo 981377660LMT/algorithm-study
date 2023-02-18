@@ -1,7 +1,7 @@
-// https://www.luogu.com.cn/problem/P1429
-// nlogn解法
-// 2 ≤ n ≤ 100,000
-// 平面最近点对
+/*
+URL:
+https://onlinejudge.u-aizu.ac.jp/courses/library/4/CGL/5/CGL_5_A
+*/
 
 package main
 
@@ -13,7 +13,17 @@ import (
 	"sort"
 )
 
-const INF float64 = 1e18
+const (
+	G_EPS         = 1e-10
+	INF   float64 = 1 << 60
+)
+
+var (
+	gabs  = math.Abs
+	gmin  = math.Min
+	gmax  = math.Max
+	gsqrt = math.Sqrt
+)
 
 func main() {
 	in := bufio.NewReader(os.Stdin)
@@ -22,83 +32,110 @@ func main() {
 
 	var n int
 	fmt.Fscan(in, &n)
-	points := make([]Point2, n)
+	points := make([]Point, n)
 	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &points[i].x, &points[i].y)
+		var x, y float64
+		fmt.Fscan(in, &x, &y)
+		points[i] = NewPoint(x, y)
 	}
 
-	calDist := func(p1, p2 Point2) float64 {
-		return math.Sqrt(float64((p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y)))
-	}
-	minDist, _, _ := minDistPair(points, calDist)
-
-	fmt.Fprintf(out, "%.4f", minDist)
+	res := ClosestPair(points)
+	fmt.Fprintf(out, "%.4f", res)
 }
 
-type Point2 struct {
-	x, y int
+type Point struct {
+	x, y float64
 }
 
-type Point2WithID struct {
-	Point2
-	id int
+func NewPoint(x, y float64) Point {
+	return Point{x: x, y: y}
 }
 
-func minDistPair(points []Point2, calDist func(p1, p2 Point2) float64) (minDist float64, pid1, pid2 int) {
-	if len(points) == 2 {
-		return calDist(points[0], points[1]), 0, 1
-	}
+func fEq(v, w float64) bool {
+	return gabs(v-w) < G_EPS
+}
 
-	point2WithID := make([]Point2WithID, len(points))
-	for i, p := range points {
-		point2WithID[i] = Point2WithID{p, i}
-	}
+func pEq(p, q Point) bool {
+	dx, dy := p.x-q.x, p.y-q.y
+	return fEq(dx, 0.0) && fEq(dy, 0.0)
+}
 
-	sort.Slice(point2WithID, func(i, j int) bool {
-		if point2WithID[i].x == point2WithID[j].x {
-			return point2WithID[i].y < point2WithID[j].y
+func pLess(a, b Point) bool {
+	if !fEq(a.x, b.x) {
+		return a.x < b.x
+	}
+	return a.y < b.y
+}
+
+// http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_5_A
+// 最近点対
+func ClosestPair(P []Point) float64 {
+	var _rec func(P []Point, l, r int) float64
+	_rec = func(P []Point, l, r int) float64 {
+		if r-l <= 1 {
+			return INF
 		}
-		return point2WithID[i].x < point2WithID[j].x
+
+		mid := (l + r) / 2
+		x := P[mid].x
+		d := gmin(_rec(P, l, mid), _rec(P, mid, r))
+
+		// merge by order of y Pointinate.
+		L, R := []Point{}, []Point{}
+		for i := l; i < r; i++ {
+			if i < mid {
+				L = append(L, P[i])
+			} else {
+				R = append(R, P[i])
+			}
+		}
+		cur, j := l, 0
+		for i := 0; i < len(L); i++ {
+			for j < len(R) && L[i].y > R[j].y {
+				P[cur] = R[j]
+				cur, j = cur+1, j+1
+			}
+
+			P[cur] = L[i]
+			cur++
+		}
+		for ; j < len(R); j++ {
+			P[cur] = R[j]
+			cur++
+		}
+
+		nearLine := []Point{}
+		for i := l; i < r; i++ {
+			if gabs(P[i].x-x) >= d {
+				continue
+			}
+
+			sz := len(nearLine)
+			for j := sz - 1; j >= 0; j-- {
+				dx := P[i].x - nearLine[j].x
+				dy := P[i].y - nearLine[j].y
+				if dy >= d {
+					break
+				}
+				d = gmin(d, gsqrt(dx*dx+dy*dy))
+			}
+			nearLine = append(nearLine, P[i])
+		}
+
+		return d
+	}
+
+	sort.Slice(P, func(i, j int) bool {
+		return pLess(P[i], P[j])
 	})
 
-	var merge func(left, right int) (minDist float64, pid1, pid2 int)
-	merge = func(left, right int) (minDist float64, pid1, pid2 int) {
-		if left == right {
-			return INF, point2WithID[left].id, point2WithID[left].id
-		} else if left+1 == right {
-			return calDist(point2WithID[left].Point2, point2WithID[right].Point2), point2WithID[left].id, point2WithID[right].id
-		}
+	return _rec(P, 0, len(P))
+}
 
-		mid := (left + right) >> 1
-		leftMin, leftPid1, leftPid2 := merge(left, mid)
-		rightMin, rightPid1, rightPid2 := merge(mid+1, right)
-
-		// 获得两边区间最小的距离的点对距离后，用于求中间衔接长方形内是否有更小值
-		minDist, pid1, pid2 = leftMin, leftPid1, leftPid2
-		if rightMin < minDist {
-			minDist, pid1, pid2 = rightMin, rightPid1, rightPid2
-		}
-
-		// !将有可能成为更小值的点加入,只要x轴小于等于当前求出的最小值，就有可能
-		cands := make([]Point2WithID, 0)
-		for i := left; i <= right; i++ {
-			if math.Abs(float64(point2WithID[i].x-point2WithID[mid].x)) <= minDist {
-				cands = append(cands, point2WithID[i])
-			}
-		}
-
-		// 在中间点集里面两两计算两点距离
-		for i := 0; i < len(cands); i++ {
-			for j := i + 1; j < len(cands); j++ {
-				dist := calDist(cands[i].Point2, cands[j].Point2)
-				if dist < minDist {
-					minDist, pid1, pid2 = dist, cands[i].id, cands[j].id
-				}
-			}
-		}
-
-		return
+// abs is integer version of math.Abs
+func abs(a int) int {
+	if a < 0 {
+		return -a
 	}
-
-	return merge(0, len(points)-1)
+	return a
 }

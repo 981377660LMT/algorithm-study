@@ -52,7 +52,7 @@ func main() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	lct := NewLinkCutTreeLazy()
+	lct := NewLinkCutTreeLazy(true)
 	vs := lct.Build(nums)
 	for i := 0; i < n-1; i++ { // 连接树边
 		var v1, v2 int
@@ -101,10 +101,12 @@ func (*LinkCutTreeLazy) composition(parentLazy, childLazy Id) Id { return parent
 type LinkCutTreeLazy struct {
 	nodeId int
 	edges  map[struct{ u, v int }]struct{}
+	check  bool
 }
 
-func NewLinkCutTreeLazy() *LinkCutTreeLazy {
-	return &LinkCutTreeLazy{edges: make(map[struct{ u, v int }]struct{})}
+// check: AddEdge/RemoveEdge で辺の存在チェックを行うかどうか.
+func NewLinkCutTreeLazy(check bool) *LinkCutTreeLazy {
+	return &LinkCutTreeLazy{edges: make(map[struct{ u, v int }]struct{}), check: check}
 }
 
 // 各要素の値を vs[i] としたノードを生成し, その配列を返す.
@@ -133,15 +135,18 @@ func (lct *LinkCutTreeLazy) Evert(t *treeNode) {
 // 存在していない辺 uv を新たに張る.
 //  すでに存在している辺 uv に対しては何もしない.
 func (lct *LinkCutTreeLazy) LinkEdge(child, parent *treeNode) (ok bool) {
-	if lct.IsConnected(child, parent) {
-		return
+	if lct.check {
+		if lct.IsConnected(child, parent) {
+			return
+		}
+		id1, id2 := child.id, parent.id
+		if id1 > id2 {
+			id1, id2 = id2, id1
+		}
+		tuple := struct{ u, v int }{id1, id2}
+		lct.edges[tuple] = struct{}{}
 	}
-	id1, id2 := child.id, parent.id
-	if id1 > id2 {
-		id1, id2 = id2, id1
-	}
-	tuple := struct{ u, v int }{id1, id2}
-	lct.edges[tuple] = struct{}{}
+
 	lct.Evert(child)
 	lct.expose(parent)
 	child.p = parent
@@ -153,15 +158,18 @@ func (lct *LinkCutTreeLazy) LinkEdge(child, parent *treeNode) (ok bool) {
 // 存在している辺を切り離す.
 //  存在していない辺に対しては何もしない.
 func (lct *LinkCutTreeLazy) CutEdge(u, v *treeNode) (ok bool) {
-	id1, id2 := u.id, v.id
-	if id1 > id2 {
-		id1, id2 = id2, id1
+	if lct.check {
+		id1, id2 := u.id, v.id
+		if id1 > id2 {
+			id1, id2 = id2, id1
+		}
+		tuple := struct{ u, v int }{id1, id2}
+		if _, has := lct.edges[tuple]; !has {
+			return
+		}
+		delete(lct.edges, tuple)
 	}
-	tuple := struct{ u, v int }{id1, id2}
-	if _, has := lct.edges[tuple]; !has {
-		return
-	}
-	delete(lct.edges, tuple)
+
 	lct.Evert(u)
 	lct.expose(v)
 	parent := v.l

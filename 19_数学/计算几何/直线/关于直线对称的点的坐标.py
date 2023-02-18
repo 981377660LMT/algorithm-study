@@ -34,6 +34,20 @@ def reflection(
     return xp + 2 * (xm - xp), yp + 2 * (ym - yp)
 
 
-# example
-print(reflection(((0, 2), (2, 1)), (0, 0)))
-# => (1.6, 3.2)
+# # example
+# print(reflection(((0, 2), (2, 1)), (0, 0)))
+# # => (1.6, 3.2)
+
+if __name__ == "__main__":
+
+    import sys
+
+    sys.setrecursionlimit(int(1e9))
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
+    x1, y1, x2, y2 = map(int, input().split())
+    line = ((x1, y1), (x2, y2))
+    q = int(input())
+    for _ in range(q):
+        x, y = map(int, input().split())
+        point = (x, y)
+        print(*reflection(line, point))
