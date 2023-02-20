@@ -60,6 +60,7 @@ describe('SegmentTree01', () => {
       }
       return -1
     }
+
     for (let i = 0; i < 10; i++) {
       const digit = randint(0, 1) as 0 | 1
       const k = randint(1, n)

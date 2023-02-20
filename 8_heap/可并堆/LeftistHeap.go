@@ -20,10 +20,10 @@ https://www.luogu.com.cn/problem/P2713
 !非常像并查集
 */
 
-type LeftistTreeNode struct {
-	size, value, index  int
+type Heap struct {
+	Size, Value, Index  int
 	isMin               bool // 是否为小根堆
-	left, right, parent *LeftistTreeNode
+	left, right, parent *Heap
 }
 
 // 一开始有 n 个小根堆，每个堆包含且仅包含一个数。接下来需要支持两种操作：
@@ -36,11 +36,11 @@ func main() {
 
 	var n, m int
 	fmt.Fscan(in, &n, &m)
-	heapRoots := make([]*LeftistTreeNode, 0, n)
+	heaps := make([]*Heap, 0, n)
 	for i := 0; i < n; i++ {
 		var v int
 		fmt.Fscan(in, &v)
-		heapRoots = append(heapRoots, NewLeftistTreeNode(i, v, true))
+		heaps = append(heaps, NewHeap(i, v, true))
 	}
 
 	removed := make([]bool, n)
@@ -52,30 +52,30 @@ func main() {
 			fmt.Fscan(in, &y)
 			y--
 			if !removed[x] && !removed[y] {
-				heapRoots[x].Push(heapRoots[y])
+				heaps[x].Meld(heaps[y])
 			}
 		} else {
 			if removed[x] {
 				fmt.Fprintln(out, -1)
 				continue
 			}
-			top, _ := heapRoots[x].Pop()
-			fmt.Fprintln(out, int(top.value))
-			removed[top.index] = true
+			top, _ := heaps[x].Pop()
+			fmt.Fprintln(out, int(top.Value))
+			removed[top.Index] = true
 		}
 	}
 
 }
 
 // !EndlessCheng/codeforces-go/copypasta/leftist_tree.go
-func NewLeftistTreeNode(index, value int, isMin bool) *LeftistTreeNode {
-	o := &LeftistTreeNode{size: 1, value: value, index: index, isMin: isMin}
+func NewHeap(index, value int, isMin bool) *Heap {
+	o := &Heap{Size: 1, Value: value, Index: index, isMin: isMin}
 	o.parent = o
 	return o
 }
 
-// 注：push 一个节点就相当于 merge 这个节点(所在的组)
-func (o *LeftistTreeNode) Push(p *LeftistTreeNode) {
+// 注：Meld 一个节点就相当于 merge 这个节点(所在的组)
+func (o *Heap) Meld(p *Heap) {
 	if o == nil || p == nil {
 		return
 	}
@@ -90,7 +90,7 @@ func (o *LeftistTreeNode) Push(p *LeftistTreeNode) {
 }
 
 // 注：若要复用 top，需要将该节点的 left 和 right 置为 nil，parent 置为自身
-func (o *LeftistTreeNode) Pop() (top, newRoot *LeftistTreeNode) {
+func (o *Heap) Pop() (top, newRoot *Heap) {
 	o = o.findRoot()
 	p := o.left.merge(o.right)
 	o.parent = p // 注意这可能会让 parent 指向 nil
@@ -103,14 +103,14 @@ func (o *LeftistTreeNode) Pop() (top, newRoot *LeftistTreeNode) {
 	return o, p
 }
 
-func (o *LeftistTreeNode) findRoot() *LeftistTreeNode {
+func (o *Heap) findRoot() *Heap {
 	if o.parent != o {
 		o.parent = o.parent.findRoot() // 路径压缩
 	}
 	return o.parent
 }
 
-func (o *LeftistTreeNode) merge(p *LeftistTreeNode) *LeftistTreeNode {
+func (o *Heap) merge(p *Heap) *Heap {
 	if p == nil {
 		return o
 	}
@@ -119,11 +119,11 @@ func (o *LeftistTreeNode) merge(p *LeftistTreeNode) *LeftistTreeNode {
 	}
 
 	if o.isMin {
-		if o.value > p.value || o.value == p.value && o.index > p.index { // 大根堆改成 <
+		if o.Value > p.Value || o.Value == p.Value && o.Index > p.Index {
 			o, p = p, o
 		}
 	} else {
-		if o.value < p.value || o.value == p.value && o.index > p.index {
+		if o.Value < p.Value || o.Value == p.Value && o.Index > p.Index {
 			o, p = p, o
 		}
 	}
@@ -132,13 +132,13 @@ func (o *LeftistTreeNode) merge(p *LeftistTreeNode) *LeftistTreeNode {
 	if o.left.sizeOrDefault(0) < o.right.sizeOrDefault(0) {
 		o.left, o.right = o.right, o.left
 	}
-	o.size = o.right.sizeOrDefault(0) + 1
+	o.Size = o.right.sizeOrDefault(0) + 1
 	return o
 }
 
-func (o *LeftistTreeNode) sizeOrDefault(value int) int {
+func (o *Heap) sizeOrDefault(value int) int {
 	if o != nil {
-		return o.size
+		return o.Size
 	}
 	return value
 }

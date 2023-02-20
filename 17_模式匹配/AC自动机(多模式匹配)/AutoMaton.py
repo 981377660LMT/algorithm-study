@@ -33,9 +33,18 @@ class AhoCorasick:
         root = 0
         res = []
         for i, char in enumerate(target):
-            root = self._next(root, char)
+            root = self.move(root, char)
             res.extend((i - len(patterns[m]) + 1, i, m) for m in match[root])
         return res
+
+    def move(self, pos: int, char: str) -> int:
+        """沿着失配链,找到一个节点fafail,具有char的子节点"""
+        while True:
+            if char in self._children[pos]:
+                return self._children[pos][char]
+            if pos == 0:
+                return 0
+            pos = self._fail[pos]
 
     def _insert(self, pi: int, pattern: str) -> None:
         root = 0
@@ -62,18 +71,9 @@ class AhoCorasick:
             cur = queue.popleft()
             fafail = fail[cur]
             for char, child in children[cur].items():
-                fail[child] = self._next(fafail, char)
+                fail[child] = self.move(fafail, char)
                 match[child].extend(match[fail[child]])
                 queue.append(child)
-
-    def _next(self, fafil: int, char: str) -> int:
-        """沿着失配链,找到一个节点fafail,具有char的子节点"""
-        while True:
-            if char in self._children[fafil]:
-                return self._children[fafil][char]
-            if fafil == 0:
-                return 0
-            fafil = self._fail[fafil]
 
 
 if __name__ == "__main__":

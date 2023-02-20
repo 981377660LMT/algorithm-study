@@ -24,6 +24,11 @@ func main() {
 	fmt.Println(heaps[1].value)
 	newRoot := sk.Meld(heaps[2], heaps[1])
 	fmt.Println(newRoot.value)
+
+	for i := 0; i < 10; i++ {
+		newRoot = sk.Push(newRoot, E(i), i)
+	}
+	fmt.Println(newRoot.value)
 }
 
 type E = int

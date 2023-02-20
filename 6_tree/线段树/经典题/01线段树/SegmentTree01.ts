@@ -38,6 +38,9 @@ class SegmentTree01 {
     return this._indexofOne(1, position, 1, this._n)
   }
 
+  /**
+   * 1 <= position <= n
+   */
   lastIndexOf(searchDigit: 0 | 1, position = this._n): number {
     if (position < 1) return -1
     if (searchDigit === 0) return this._lastIndexOfZero(1, position, 1, this._n)
@@ -252,8 +255,6 @@ if (require.main === module) {
       return this.tree01.toString()
     }
   }
-
-  // test
 }
 
 export { SegmentTree01 }

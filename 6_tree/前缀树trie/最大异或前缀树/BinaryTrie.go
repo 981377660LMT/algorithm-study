@@ -3,23 +3,27 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"math/bits"
 )
 
-func findMaximumXOR(nums []int) int {
-	n := len(nums)
-	maxLog := bits.Len(uint(max(nums...))) // 1+int(log2(x))
-	bt := NewATCBinaryTrie(n, maxLog, true)
-	for _, v := range nums {
-		bt.Add(v)
-	}
-	res := 0
-	for _, v := range nums {
-		bt.XorAll(v)
-		res = max(res, bt.Max())
-		bt.XorAll(v)
-	}
-	return res
+// func findMaximumXOR(nums []int) int {
+// 	n := len(nums)
+// 	maxLog := bits.Len(uint(max(nums...))) // 1+int(log2(x))
+// 	bt := NewATCBinaryTrie(n, maxLog, true)
+// 	for _, v := range nums {
+// 		bt.Add(v)
+// 	}
+// 	res := 0
+// 	for _, v := range nums {
+// 		bt.XorAll(v)
+// 		res = max(res, bt.Max())
+// 		bt.XorAll(v)
+// 	}
+// 	return res
+// }
+
+func main() {
+	sl := NewATCBinaryTrie(30, 30, true)
+	sl.Add(1)
 }
 
 // Reference:

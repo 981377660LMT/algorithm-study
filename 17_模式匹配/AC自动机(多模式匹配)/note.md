@@ -29,3 +29,4 @@ update
 
 https://naoya-2.hatenadiary.org/entry/20090405/aho_corasick
 Trie 是很多个字符串组成的树,AC 自动机是 Trie 的子类，用于匹配
+![非常形象的图](image/note/1676744072418.png)

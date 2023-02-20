@@ -1,5 +1,6 @@
 // https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/bits.go
 // https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/search.go
+// https://baobaobear.github.io/post/page/4/
 
 package main
 
@@ -9,9 +10,19 @@ func _(x int) {
 
 	// 最低位的 1 变 0
 	x &= x - 1
+	// 最低位连续的所有 1 变 0
+	x &= x + 1
 
 	// 最低位的 0 变 1
 	x |= x + 1
+	// 最低位连续的所有 0 变 1
+	x |= x - 1
+
+	// 取右边连续的 1
+	x ^= x + 1
+
+	// 有符号整数计算绝对值	( n ^ (n >> 31) ) - (n >> 31)
+	abs := func(n int) int { return (n ^ (n >> 31)) - (n >> 31) }
 
 	// x 是 y 的子集
 	isSubset := func(x, y int) bool { return x|y == y } // x 和 y 的并集是 y
@@ -35,5 +46,6 @@ func _(x int) {
 		isPow2,
 		hasAdjacentOnes,
 		hasAdjacentZeros,
+		abs,
 	}
 }

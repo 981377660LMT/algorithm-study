@@ -1,15 +1,4 @@
-// https://nyaannyaan.github.io/library/string/aho-corasick.hpp
-
-// API
-// Add(s, id)
-// Build(matchAll)
-// Match(s, matchAll): 返回每个模式串在s中出现的次数.
-// MatchFrom(pos, s, matchAll)：返回每个模式串在s中从pos开始出现的次数.
-// Move(pos, char): 从当前状态pos沿着char移动到下一个状态, 如果不存在则移动到fail指针指向的状态.
-// Next(pos, j): 类似Move函数，返回pos状态的第j个子节点指向的状态.
-// Count(pos): 当前状态所匹配的完整的模式串的个数.
-// IndexAll(pos): 当前状态所匹配的完整的模式串的索引.
-// Size(): 前缀树节点/状态数(包含根节点).
+// https://atcoder.jp/contests/jag2017autumn/tasks/jag2017autumn_h
 
 package main
 
@@ -17,53 +6,53 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"runtime/debug"
 	"sort"
 )
 
-// 单组测试数据时可以禁用GC.
-func init() { debug.SetGCPercent(-1) }
+const MOD int = 1e9 + 7
+
+// 有一个包含若干个单词的集合patterns.
+// !给定一个字符串s,将s分割成若干个单词,使得每个部分都在patterns中.
+// !求分割方案数.(mod 1e9+7)
+// ∑patterns[i].length≤2e5
+//
+// dp[i]+快速判断子串是否在模式串中 => AC自动机
+func SeparateString(s string, patterns []string) int {
+	aho := NewAhoCorasick(26, 'a')
+	for i, s := range patterns {
+		aho.Add(s, i)
+	}
+	aho.Build(true)
+
+	n := len(s)
+	dp := make([]int, n+1)
+	dp[0] = 1
+	pos := 0
+	for i := 0; i < n; i++ {
+		pos = aho.Move(pos, s[i])
+		indexes := aho.IndexAll(pos)
+		for _, j := range indexes {
+			dp[i+1] = (dp[i+1] + dp[i-len(patterns[j])+1]) % MOD
+		}
+	}
+
+	return dp[n]
+}
 
 func main() {
-	// words := []string{"he", "she", "his", "hers", "his"}
-	// ac := NewAhoCorasick(26, 'a')
-	// for i, word := range words {
-	// 	ac.Add(word, i)
-	// }
-	// ac.Build(true)
-
-	// s := "ahishershis"
-	// res := ac.Match(s, true)
-	// fmt.Println(res)
-	// tmp := ac.Move(0, 'h')
-	// tmp = ac.Move(tmp, 'i')
-	// tmp = ac.Move(tmp, 's')
-	// for pos := 0; pos < ac.Size(); pos++ {
-	// 	fmt.Println(ac.Count(pos))
-	// }
-	const INF int = int(1e18)
-	const MOD int = 998244353
-
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
 	var n int
 	fmt.Fscan(in, &n)
-	aho := NewAhoCorasick(26, 'a')
+	words := make([]string, n)
 	for i := 0; i < n; i++ {
-		var s string
-		fmt.Fscan(in, &s)
-		aho.Add(s, i)
+		fmt.Fscan(in, &words[i])
 	}
-	aho.Build(true)
-
 	var s string
 	fmt.Fscan(in, &s)
-	res := aho.Match(s, true)
-	for i := 0; i < n; i++ {
-		fmt.Fprintln(out, res[i])
-	}
+	fmt.Fprintln(out, SeparateString(s, words))
 }
 
 type AhoCorasick struct {
@@ -279,10 +268,9 @@ func (t *Trie) Index(pos int) int {
 	return t.stack[pos].index
 }
 
-// 返回结点pos对应的模式串的索引.
 func (t *Trie) IndexAll(pos int) []int {
 	if pos < 0 {
-		return []int{}
+		return nil
 	}
 	return t.stack[pos].Indexes
 }

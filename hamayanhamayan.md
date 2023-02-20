@@ -79,7 +79,7 @@ https://blog.hamayanhamayan.com/entry/2100/01/01/000000
   - [ ] LIS
   - [x] 莫队
   - [x] 根号分解
-  - [ ] 字符串
+  - [x] 字符串
   - [ ] game
   - [ ] 2-sat
   - [ ] merge 技巧

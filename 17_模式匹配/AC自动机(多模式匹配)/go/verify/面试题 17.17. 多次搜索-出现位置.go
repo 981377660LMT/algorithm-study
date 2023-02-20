@@ -1,69 +1,45 @@
 // https://nyaannyaan.github.io/library/string/aho-corasick.hpp
 
-// API
-// Add(s, id)
-// Build(matchAll)
-// Match(s, matchAll): 返回每个模式串在s中出现的次数.
-// MatchFrom(pos, s, matchAll)：返回每个模式串在s中从pos开始出现的次数.
-// Move(pos, char): 从当前状态pos沿着char移动到下一个状态, 如果不存在则移动到fail指针指向的状态.
-// Next(pos, j): 类似Move函数，返回pos状态的第j个子节点指向的状态.
-// Count(pos): 当前状态所匹配的完整的模式串的个数.
-// IndexAll(pos): 当前状态所匹配的完整的模式串的索引.
-// Size(): 前缀树节点/状态数(包含根节点).
+// https://leetcode.cn/problems/multi-search-lcci/
+// 给定一个较长字符串big和一个包含较短字符串的数组smalls，
+// 设计一个方法，根据smalls中的每一个较短字符串，对big进行搜索。
+// !输出smalls中的字符串在big里出现的所有位置positions，
+// 其中positions[i]为smalls[i]出现的所有位置。
+
+// 结论: 当前看到big中第i个字符,匹配到的模式串下标为j时,
+// !模式串在big中的起始索引 为 i-len(smalls[j])+1
 
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"runtime/debug"
 	"sort"
 )
 
-// 单组测试数据时可以禁用GC.
-func init() { debug.SetGCPercent(-1) }
-
 func main() {
-	// words := []string{"he", "she", "his", "hers", "his"}
-	// ac := NewAhoCorasick(26, 'a')
-	// for i, word := range words {
-	// 	ac.Add(word, i)
-	// }
-	// ac.Build(true)
+	big := "mississippi"
+	smalls := []string{"is", "ppi", "hi", "sis", "i", "ssippi"}
+	res := multiSearch(big, smalls)
+	fmt.Println(res)
+}
 
-	// s := "ahishershis"
-	// res := ac.Match(s, true)
-	// fmt.Println(res)
-	// tmp := ac.Move(0, 'h')
-	// tmp = ac.Move(tmp, 'i')
-	// tmp = ac.Move(tmp, 's')
-	// for pos := 0; pos < ac.Size(); pos++ {
-	// 	fmt.Println(ac.Count(pos))
-	// }
-	const INF int = int(1e18)
-	const MOD int = 998244353
-
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
+func multiSearch(big string, smalls []string) [][]int {
 	aho := NewAhoCorasick(26, 'a')
-	for i := 0; i < n; i++ {
-		var s string
-		fmt.Fscan(in, &s)
+	for i, s := range smalls {
 		aho.Add(s, i)
 	}
 	aho.Build(true)
 
-	var s string
-	fmt.Fscan(in, &s)
-	res := aho.Match(s, true)
-	for i := 0; i < n; i++ {
-		fmt.Fprintln(out, res[i])
+	pos := 0
+	res := make([][]int, len(smalls))
+	for i := 0; i < len(big); i++ {
+		pos = aho.Move(pos, big[i])
+		indexes := aho.IndexAll(pos)
+		for _, j := range indexes {
+			res[j] = append(res[j], i-len(smalls[j])+1) // !i-len(smalls[j])+1: 模式串在big中的起始位置
+		}
 	}
+	return res
 }
 
 type AhoCorasick struct {
@@ -85,9 +61,9 @@ func (ac *AhoCorasick) Build(matchAll bool) {
 	ac.count = make([]int, n)
 	for i := 0; i < n; i++ {
 		if matchAll {
-			sort.Ints(ac.stack[i].Indexes)
+			sort.Ints(ac.stack[i].indexes)
 		}
-		ac.count[i] = len(ac.stack[i].Indexes)
+		ac.count[i] = len(ac.stack[i].indexes)
 	}
 
 	var que []int
@@ -116,8 +92,8 @@ func (ac *AhoCorasick) Build(matchAll bool) {
 			*ac.Next(*nx, ac.size-1) = *ac.Next(fail, i)
 
 			if matchAll {
-				idx := ac.stack[*nx].Indexes
-				idy := ac.stack[*ac.Next(fail, i)].Indexes
+				idx := ac.stack[*nx].indexes
+				idy := ac.stack[*ac.Next(fail, i)].indexes
 				idz := make([]int, 0, len(idx)+len(idy))
 
 				// set union
@@ -144,7 +120,7 @@ func (ac *AhoCorasick) Build(matchAll bool) {
 					j++
 				}
 
-				ac.stack[*nx].Indexes = idz
+				ac.stack[*nx].indexes = idz
 			}
 		}
 
@@ -164,7 +140,7 @@ func (ac *AhoCorasick) Match(s string, matchAll bool) []int {
 	for i := 0; i < len(s); i++ {
 		pos = *ac.Next(pos, int(s[i]-ac.margin))
 		if matchAll {
-			for _, x := range ac.stack[pos].Indexes {
+			for _, x := range ac.stack[pos].indexes {
 				res[x]++
 			}
 		} else {
@@ -175,8 +151,6 @@ func (ac *AhoCorasick) Match(s string, matchAll bool) []int {
 }
 
 // 从结点pos开始匹配字符串s.
-//  返回值: 如果 matchAll 为 false, 则返回值只有一个元素, 为所有模式串的匹配次数之和.
-//  如果 matchAll 为 true, 则返回值有 len(模式串集合) 个元素, 第 i 个元素为第 i 个模式串的匹配次数.
 func (ac *AhoCorasick) MatchFrom(pos int, s string, matchAll bool) []int {
 	size := 1
 	if matchAll {
@@ -186,7 +160,7 @@ func (ac *AhoCorasick) MatchFrom(pos int, s string, matchAll bool) []int {
 	for i := 0; i < len(s); i++ {
 		pos = *ac.Next(pos, int(s[i]-ac.margin))
 		if matchAll {
-			for _, x := range ac.stack[pos].Indexes {
+			for _, x := range ac.stack[pos].indexes {
 				res[x]++
 			}
 		} else {
@@ -196,7 +170,7 @@ func (ac *AhoCorasick) MatchFrom(pos int, s string, matchAll bool) []int {
 	return res
 }
 
-// 当前节点匹配的完整的模式串的个数.
+// 每个节点的前缀匹配次数.
 func (ac *AhoCorasick) Count(pos int) int {
 	return ac.count[pos]
 }
@@ -212,9 +186,9 @@ type Trie struct {
 }
 
 type trieNode struct {
-	Indexes []int // 存储了哪些模式串的索引
-	Key     byte
-	index   int   // 最后一次被更新的模式串的索引
+	index   int // 最后一次被更新的字符串的索引
+	key     byte
+	indexes []int // 存储了哪些字符串的索引
 	next    []int // children position
 }
 
@@ -246,13 +220,10 @@ func (t *Trie) Add(s string, index int) {
 		pos = nextPos
 	}
 	t.stack[pos].index = index
-	t.stack[pos].Indexes = append(t.stack[pos].Indexes, index)
+	t.stack[pos].indexes = append(t.stack[pos].indexes, index)
 }
 
 func (t *Trie) Find(s string) int {
-	if len(s) == 0 {
-		return 0
-	}
 	pos := 0
 	for i := 0; i < len(s); i++ {
 		k := int(s[i] - t.margin)
@@ -264,7 +235,6 @@ func (t *Trie) Find(s string) int {
 	return pos
 }
 
-// 从结点pos移动到c指向的下一个结点.
 func (t *Trie) Move(pos int, c byte) int {
 	if pos < 0 || pos >= len(t.stack) {
 		return -1
@@ -279,12 +249,11 @@ func (t *Trie) Index(pos int) int {
 	return t.stack[pos].index
 }
 
-// 返回结点pos对应的模式串的索引.
 func (t *Trie) IndexAll(pos int) []int {
 	if pos < 0 {
 		return []int{}
 	}
-	return t.stack[pos].Indexes
+	return t.stack[pos].indexes
 }
 
 // Trie 中的节点数(包含根节点).
@@ -301,7 +270,7 @@ func (t *Trie) newNode(c byte) *trieNode {
 	}
 	return &trieNode{
 		index: -1,
-		Key:   c,
+		key:   c,
 		next:  next,
 	}
 }

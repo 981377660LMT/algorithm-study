@@ -1,6 +1,10 @@
-from typing import List, Tuple
+# !KMP 求字符串循环节
+# aabaabaab
+# ******
+#    ******
+# 如果存在周期，那么 i-kmp[i] = 3 为最小周期 (i=9,kmp[i]=6)
 
-# !KMP 求前缀循环节
+from typing import List, Tuple
 
 
 def getNext(shorter: str) -> List[int]:
