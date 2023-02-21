@@ -92,6 +92,7 @@
    - [Tree Hash](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/%E6%A0%91%E5%93%88%E5%B8%8C/%E6%9C%89%E6%A0%B9%E6%A0%91%E7%9A%84%E5%90%8C%E6%9E%84.py)
    - [Rerooting Dp](6_tree/%E7%BB%8F%E5%85%B8%E9%A2%98/%E5%90%8E%E5%BA%8Fdfs%E7%BB%9F%E8%AE%A1%E4%BF%A1%E6%81%AF/%E6%8D%A2%E6%A0%B9dp/Rerooting.py)
    - [Tree Centroid](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/%E6%A0%91%E7%9A%84%E9%87%8D%E5%BF%83.py)
+   - [AuxiliaryTree](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E5%88%86%E7%B1%BB/%E6%A0%91%E4%B8%8Adp/%E8%99%9A%E6%A0%91/AuxiliaryTree.go)
    - [LCA](6_tree/LCA%E9%97%AE%E9%A2%98/%E5%80%8D%E5%A2%9E/LCA.py)
    - [DFS Order](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/dfs%E5%BA%8F/DFSOrder.py)
    - [TopoSort](7_graph/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F/toposort.py)
@@ -147,6 +148,8 @@
    - [ConvexHullTrickDeque](<11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E6%96%9C%E7%8E%87%E4%BC%98%E5%8C%96(CHT)dp/convexhulltrick/ConvexHullTrickDeque.go>)
    - [ConvexHullTrickLichao](<11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E6%96%9C%E7%8E%87%E4%BC%98%E5%8C%96(CHT)dp/convexhulltrick/ConvexHullTrickLichao.go>)
    - [Kitamasa](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/kitamasa%E6%B3%95.py)
+   - [LCS](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/lcs%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97%E9%97%AE%E9%A2%98/LCS%E6%A8%A1%E6%9D%BF.py)
+   - [LIS](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/lis%E6%9C%80%E9%95%BF%E4%B8%8A%E5%8D%87%E5%AD%90%E5%BA%8F%E5%88%97%E9%97%AE%E9%A2%98/LIS%E6%A8%A1%E6%9D%BF.py)
 
 10. **Math**
 
@@ -194,6 +197,9 @@
     - [StringHash2D](18_%E5%93%88%E5%B8%8C/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%93%88%E5%B8%8C/StringHasher2D.go)
     - [BitVector](18_%E5%93%88%E5%B8%8C/BitSet/BitVector.go)
     - [ClosestPair](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E5%B9%B3%E9%9D%A2%E6%9C%80%E8%BF%91%E7%82%B9%E5%AF%B9.go)
+    - [TopKSum](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/%E5%AE%9A%E9%95%BF%E6%BB%91%E7%AA%97/TopKSum-%E4%B8%A4%E4%B8%AA%E5%A0%86.py)
+    - [MajorSum](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/%E5%87%BA%E7%8E%B0%E6%AC%A1%E6%95%B0%E6%9C%80%E5%A4%9A%E7%9A%84%E5%85%83%E7%B4%A0%E7%9A%84%E5%92%8C.py)
+    - [SegmentSet](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/SegmentSet.py)
     - Itertools
       - [product](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/product.ts)
       - [permutations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/permutations.ts)
