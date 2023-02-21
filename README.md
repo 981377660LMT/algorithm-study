@@ -5,10 +5,6 @@
   </p>
 </div>
 
-<div align='center'>
-  English | <a href='./README.zh-CN.md'>中文</a>
-</div>
-
 [![Build Status](https://app.travis-ci.com/981377660LMT/algorithm-study.svg?branch=master)](https://app.travis-ci.com/981377660LMT/algorithm-study)
 
 ---
@@ -65,7 +61,6 @@
    - [Fenwick Tree](6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py)
    - [PointAddRectangleSum](6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/PointAddRectangleSum-fast.go)
    - [RectangleSum](6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/RectangleSum-fast.go)
-   - [BfsNumbering](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/dfs%E5%BA%8F/BfsNumbering.go)
    - [SegmentTree](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template)
    - [Treap](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/Treap.ts)
    - [Rope](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8/rope.ts)
@@ -91,6 +86,7 @@
    - [Tree Diameter](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/%E7%9B%B4%E5%BE%84/%E6%A0%91%E7%9A%84%E7%9B%B4%E5%BE%84.py)
    - [Tree Hash](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/%E6%A0%91%E5%93%88%E5%B8%8C/%E6%9C%89%E6%A0%B9%E6%A0%91%E7%9A%84%E5%90%8C%E6%9E%84.py)
    - [Rerooting Dp](6_tree/%E7%BB%8F%E5%85%B8%E9%A2%98/%E5%90%8E%E5%BA%8Fdfs%E7%BB%9F%E8%AE%A1%E4%BF%A1%E6%81%AF/%E6%8D%A2%E6%A0%B9dp/Rerooting.py)
+   - [BfsNumbering](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/dfs%E5%BA%8F/BfsNumbering.go)
    - [Tree Centroid](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/%E6%A0%91%E7%9A%84%E9%87%8D%E5%BF%83.py)
    - [AuxiliaryTree](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E5%88%86%E7%B1%BB/%E6%A0%91%E4%B8%8Adp/%E8%99%9A%E6%A0%91/AuxiliaryTree.go)
    - [LCA](6_tree/LCA%E9%97%AE%E9%A2%98/%E5%80%8D%E5%A2%9E/LCA.py)
@@ -120,6 +116,7 @@
    - [EnumerateCliques](7_graph/EnumerateCliques.go)
    - [EnumerateTriangles](7_graph/EnumerateTriangles.go)
    - [MaxIndependentSet](7_graph/MaxIndependentSet.go)
+   - [DirectedMST](7_graph/%E5%B8%A6%E6%9D%83%E5%9B%BE%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%92%8C%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/kruskal/%E6%9C%89%E5%90%91%E5%9B%BE%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91.go)
 
 7. **UnionFind**
 
