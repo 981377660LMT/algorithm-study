@@ -95,11 +95,11 @@ func main() {
 
 type TwoSat struct {
 	sz  int
-	scc *StronglyConnectedComponents
+	scc *scc
 }
 
 func NewTwoSat(n int) *TwoSat {
-	return &TwoSat{sz: n, scc: NewStronglyConnectedComponents(n + n)}
+	return &TwoSat{sz: n, scc: newScc(n + n)}
 }
 
 // u -> v <=> !v -> !u
@@ -162,30 +162,27 @@ func max(a, b int) int {
 	return b
 }
 
-type WeightedEdge struct{ from, to, cost int }
-type StronglyConnectedComponents struct {
-	G     [][]WeightedEdge // 原图
-	Dag   [][]WeightedEdge // 强连通分量缩点后的顶点和边组成的DAG
-	Comp  []int            //每个顶点所属的强连通分量的编号
-	Group [][]int          // 每个强连通分量所包含的顶点
-	rg    [][]WeightedEdge
+type scc struct {
+	G     [][]int // 原图
+	Comp  []int   //每个顶点所属的强连通分量的编号
+	rg    [][]int
 	order []int
 	used  []bool
 }
 
-func NewStronglyConnectedComponents(n int) *StronglyConnectedComponents {
-	return &StronglyConnectedComponents{G: make([][]WeightedEdge, n)}
+func newScc(n int) *scc {
+	return &scc{G: make([][]int, n)}
 }
 
-func (scc *StronglyConnectedComponents) AddEdge(from, to, cost int) {
-	scc.G[from] = append(scc.G[from], WeightedEdge{from, to, cost})
+func (scc *scc) AddEdge(from, to, cost int) {
+	scc.G[from] = append(scc.G[from], to)
 }
 
-func (scc *StronglyConnectedComponents) Build() {
-	scc.rg = make([][]WeightedEdge, len(scc.G))
+func (scc *scc) Build() {
+	scc.rg = make([][]int, len(scc.G))
 	for i := range scc.G {
 		for _, e := range scc.G[i] {
-			scc.rg[e.to] = append(scc.rg[e.to], WeightedEdge{e.to, e.from, e.cost})
+			scc.rg[e] = append(scc.rg[e], i)
 		}
 	}
 
@@ -209,47 +206,31 @@ func (scc *StronglyConnectedComponents) Build() {
 		}
 	}
 
-	dag := make([][]WeightedEdge, ptr)
-	for i := range scc.G {
-		for _, e := range scc.G[i] {
-			x, y := scc.Comp[e.from], scc.Comp[e.to]
-			if x == y {
-				continue
-			}
-			dag[x] = append(dag[x], WeightedEdge{x, y, e.cost})
-		}
-	}
-	scc.Dag = dag
-
-	scc.Group = make([][]int, ptr)
-	for i := range scc.G {
-		scc.Group[scc.Comp[i]] = append(scc.Group[scc.Comp[i]], i)
-	}
 }
 
 // 获取顶点k所属的强连通分量的编号
-func (scc *StronglyConnectedComponents) Get(k int) int {
+func (scc *scc) Get(k int) int {
 	return scc.Comp[k]
 }
 
-func (scc *StronglyConnectedComponents) dfs(idx int) {
+func (scc *scc) dfs(idx int) {
 	tmp := scc.used[idx]
 	scc.used[idx] = true
 	if tmp {
 		return
 	}
 	for _, e := range scc.G[idx] {
-		scc.dfs(e.to)
+		scc.dfs(e)
 	}
 	scc.order = append(scc.order, idx)
 }
 
-func (scc *StronglyConnectedComponents) rdfs(idx int, cnt int) {
+func (scc *scc) rdfs(idx int, cnt int) {
 	if scc.Comp[idx] != -1 {
 		return
 	}
 	scc.Comp[idx] = cnt
 	for _, e := range scc.rg[idx] {
-		scc.rdfs(e.to, cnt)
+		scc.rdfs(e, cnt)
 	}
 }

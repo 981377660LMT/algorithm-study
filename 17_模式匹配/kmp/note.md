@@ -25,3 +25,10 @@ kmp 的 next 数组的使用
 https://leetcode.cn/problems/find-the-index-of-the-first-occurrence-in-a-string/solution/shua-chuan-lc-shuang-bai-po-su-jie-fa-km-tb86/
 暴力的匹配每次失败时,longer 串的指针都要回到起点后再+1,
 而 `kmp 算法不需要移动原串的指针`,且利用 `shorter 串已经匹配部分的相同前后缀加速匹配`
+
+---
+
+update
+
+https://baobaobear.github.io/post/20200210-ac/
+用 AC 自动机理解 KMP

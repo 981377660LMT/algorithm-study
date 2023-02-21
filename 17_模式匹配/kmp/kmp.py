@@ -22,7 +22,60 @@ def getNext(needle: str) -> List[int]:
     return next
 
 
-if __name__ == '__main__':
-    next = getNext('aabaabaabaab')  # 模式串的next数组
+# 使用方式类似于AC自动机:
+# KMP(pattern)：构造函数, pattern为模式串.
+# Match(s,start): 返回模式串在s中出现的所有位置.
+# Move(pos, char): 从当前状态pos沿着char移动到下一个状态, 如果不存在则移动到fail指针指向的状态.
+# IsMatched(pos): 判断当前状态pos是否为匹配状态.
+
+
+class KMP:
+    """单模式串匹配"""
+
+    @staticmethod
+    def getNext(pattern: str) -> List[int]:
+        next = [0] * len(pattern)
+        j = 0
+        for i in range(1, len(pattern)):
+            while j and pattern[i] != pattern[j]:
+                j = next[j - 1]
+            if pattern[i] == pattern[j]:
+                j += 1
+            next[i] = j
+        return next
+
+    __slots__ = ("next", "_pattern")
+
+    def __init__(self, pattern: str):
+        self._pattern = pattern
+        self.next = self.getNext(pattern)
+
+    def match(self, s: str, start=0) -> List[int]:
+        res = []
+        pos = 0
+        for i in range(start, len(s)):
+            pos = self.move(pos, s[i])
+            if self.isMatched(pos):
+                res.append(i - len(self._pattern) + 1)
+                pos = 0
+        return res
+
+    def move(self, pos: int, char: str) -> int:
+        assert 0 <= pos < len(self._pattern)
+        while pos and char != self._pattern[pos]:
+            pos = self.next[pos - 1]
+        if char == self._pattern[pos]:
+            pos += 1
+        return pos
+
+    def isMatched(self, pos: int) -> bool:
+        return pos == len(self._pattern)
+
+
+if __name__ == "__main__":
+    next = getNext("aabaabaabaab")  # 模式串的next数组
     assert next == [0, 1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
+    kmp = KMP("aab")
+    assert kmp.match("aabaabaabaab") == [0, 3, 6, 9]
+    assert kmp.match("aabaabaabaab", 1) == [3, 6, 9]

@@ -7,7 +7,8 @@
  * @returns
  * 一维线段求交集长度
  */
-const getIntersectedLength = (a: number, b: number, c: number, d: number) => {
+function getIntersectedLength(a: number, b: number, c: number, d: number) {
+  // 线段相交长度
   return Math.max(0, Math.min(b, d) - Math.max(a, c))
 }
 

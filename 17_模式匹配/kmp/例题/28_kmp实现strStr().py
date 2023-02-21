@@ -23,12 +23,14 @@ def getNext(shorter: str) -> List[int]:
 class Solution:
     def strStr(self, longer: str, shorter: str) -> int:
         nexts = getNext(shorter)
-        j = 0
+        pos = 0
         for i in range(len(longer)):
-            while j and longer[i] != shorter[j]:
-                j = nexts[j - 1]
-            if longer[i] == shorter[j]:
-                j += 1
-            if j == len(shorter):
+            # move
+            while pos and longer[i] != shorter[pos]:
+                pos = nexts[pos - 1]
+            if longer[i] == shorter[pos]:
+                pos += 1
+
+            if pos == len(shorter):
                 return i - len(shorter) + 1
         return -1

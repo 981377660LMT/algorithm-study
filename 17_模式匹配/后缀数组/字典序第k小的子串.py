@@ -31,6 +31,27 @@ def solve(s: str, k: int) -> str:
 
 if __name__ == "__main__":
     # 求字符串"EXCITING"的所有不相同子串中字典序排名为20 的子串
-    print(solve("EXCITING", 20))
-    print(solve("EXCITING", 1))
-    print(solve("EXCITING", 35))  # 35个不同子串
+    # print(solve("EXCITING", 20))
+    # print(solve("EXCITING", 1))
+    # print(solve("EXCITING", 35))  # 35个不同子串
+    # check with brute force
+    from random import randint
+
+    def bruteForce(s: str, k: int) -> str:
+        n = len(s)
+        subs = set()
+        for i in range(n):
+            for j in range(i + 1, n + 1):
+                subs.add(s[i:j])
+        subs = sorted(subs)
+        return subs[k - 1]
+
+    while True:
+        n = randint(10, 100)
+        s = "".join([chr(randint(97, 122)) for _ in range(3 * n)])
+        k = randint(1, n * (n + 1) // 2)
+        if bruteForce(s, k) != solve(s, k):
+            print(s, k)
+            break
+        else:
+            print("ok")
