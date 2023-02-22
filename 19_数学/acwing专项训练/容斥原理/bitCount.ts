@@ -9,7 +9,7 @@ import assert from 'assert'
  * @returns num 的二进制表示中1的个数
  */
 function bitCount53(num: number): number {
-  return bitCount32(num >>> 0) + bitCount32(Math.floor(num / 0x100000000))
+  return bitCount32(num >>> 0) + bitCount32(~~(num / 0x100000000))
 }
 
 function bitCount32(uint32: number): number {
@@ -23,7 +23,7 @@ function bitCount32(uint32: number): number {
  * @returns num 的二进制表示的长度
  */
 function bitLength53(num: number): number {
-  return bitLength32(num >>> 0) + bitLength32(Math.floor(num / 0x100000000))
+  return bitLength32(num >>> 0) + bitLength32(~~(num / 0x100000000))
 }
 
 function bitLength32(uint32: number): number {
@@ -39,24 +39,19 @@ function bitLength32(uint32: number): number {
 function trailingZero53(num: number): number {
   if (num === 0) return 53
   const low32 = trailingZero32(num >>> 0)
-  return low32 !== 1 << 5 ? low32 : (1 << 5) + trailingZero32(Math.floor(num / 0x100000000))
+  return low32 !== 1 << 5 ? low32 : (1 << 5) + trailingZero32(~~(num / 0x100000000))
 }
 
-const deBruijn32 = 0x077cb531
-const deBruijn32tab = [
-  0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31, 27, 13, 23, 21, 19, 16, 7, 26, 12,
-  18, 6, 11, 5, 10, 9
-]
-
+//
 /**
  * @returns `32位无符号整形数字` 的二进制表示中尾随零的个数
  *
  * !注意：如果 num === 0，返回 32
- * @see {@link https://cs.opensource.google/go/go/+/refs/tags/go1.19.2:src/math/bits/bits.go;l=75}
+ * lowbit + bitLength
  */
 function trailingZero32(uint32: number): number {
   if (uint32 === 0) return 32
-  return deBruijn32tab[((uint32 & -uint32) * deBruijn32) >>> 27]
+  return 31 - Math.clz32(uint32 & -uint32)
 }
 
 export { bitCount32, bitCount53, bitLength32, bitLength53, trailingZero32, trailingZero53 }
@@ -82,21 +77,39 @@ if (require.main === module) {
 
   console.time('bitCount53')
   for (let i = 0; i < 1e8; i++) {
-    bitCount53(2 ** 53 - 1)
+    bitCount53(i)
   }
-  console.timeEnd('bitCount53') // bitCount53: 53.431ms
+  console.timeEnd('bitCount53') // 260.361ms
+
+  console.time('bitCount32')
+  for (let i = 0; i < 1e8; i++) {
+    bitCount32(i)
+  }
+  console.timeEnd('bitCount32') // 53.436ms
 
   console.time('bitLength53')
   for (let i = 0; i < 1e8; i++) {
-    bitLength53(2 ** 53 - 1)
+    bitLength53(i)
   }
-  console.timeEnd('bitLength53') // bitLength53: 54.321ms
+  console.timeEnd('bitLength53') // 131.062ms
+
+  console.time('bitLength32')
+  for (let i = 0; i < 1e8; i++) {
+    bitLength32(i)
+  }
+  console.timeEnd('bitLength32') // 55.096ms
 
   console.time('trailingZero53')
   for (let i = 0; i < 1e8; i++) {
-    trailingZero53(2 ** 53 - 1)
+    trailingZero53(i)
   }
-  console.timeEnd('trailingZero53') // trailingZero53: 56.278ms
+  console.timeEnd('trailingZero53') // 234.997ms
+
+  console.time('trailingZero32')
+  for (let i = 0; i < 1e8; i++) {
+    trailingZero32(i)
+  }
+  console.timeEnd('trailingZero32') // 129.897ms
 
   // 使用 DataView 读取 2**53 - 1 的比特位
   const float64View = new DataView(new ArrayBuffer(8))

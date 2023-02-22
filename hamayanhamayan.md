@@ -80,7 +80,7 @@ https://blog.hamayanhamayan.com/entry/2100/01/01/000000
   - [x] 莫队
   - [x] 根号分解
   - [x] 字符串
-  - [ ] game
+  - [x] game
     - Grundy 数
     - A と B の差の偶奇によって勝敗が決まる。
   - [ ] **2-sat** (todo)

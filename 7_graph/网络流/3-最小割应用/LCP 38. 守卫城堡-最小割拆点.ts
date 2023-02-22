@@ -53,9 +53,9 @@ function guardCastle(grid: string[]): number {
     for (const [dr, dc] of DIR2) {
       const [nextRow, nextCol] = [curRow + dr, curCol + dc]
       if (
-        0 <= nextRow &&
+        nextRow >= 0 &&
         nextRow < ROW &&
-        0 <= nextCol &&
+        nextCol >= 0 &&
         nextCol < COL &&
         grid[nextRow][nextCol] !== '#'
       ) {

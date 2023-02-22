@@ -1,194 +1,367 @@
-/* eslint-disable generator-star-spacing */
+// 位运算:
+// ~~ 或者 | => Math.floor (int)
+// ~~ 或者 | + >>>0 => Math.floor (uint)
+// & (-1 << k) => 清除最低k位的 1
 
-import assert from 'assert'
-
-import { bitCount32, trailingZero32 } from '../../19_数学/acwing专项训练/容斥原理/bitCount'
-
-class BitSet implements Set<number> {
-  /** 32 bit per bucket */
-  private static readonly _BITS_PER_BUCKET = 1 << 5
-
-  /** bit count of 1 */
-  private _size = 0
-
-  /** states */
-  private _buckets: Uint32Array
-
-  constructor(nbits: number) {
-    this._buckets = new Uint32Array(Math.ceil(nbits / BitSet._BITS_PER_BUCKET))
+/**
+ * @see {@link https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/bits.go}
+ */
+class BitSet {
+  static from(arrayLike: ArrayLike<number | string>): BitSet {
+    const bitSet = new BitSet(arrayLike.length)
+    for (let i = 0; i < arrayLike.length; i++) {
+      if (Number(arrayLike[i]) === 1) {
+        bitSet.add(i)
+      }
+    }
+    return bitSet
   }
 
-  add(index: number): this {
-    this._ensureCapacity(index + 1)
-    const row = Math.floor(index / BitSet._BITS_PER_BUCKET)
-    const col = index % BitSet._BITS_PER_BUCKET
-    if ((this._buckets[row] & (1 << col)) === 0) {
-      this._buckets[row] |= 1 << col
-      this._size++
+  private static _trailingZeros32(uint32: number): number {
+    if (uint32 === 0) return 32
+    return 31 - Math.clz32(uint32 & -uint32)
+  }
+  private static _onesCount32(uint32: number): number {
+    uint32 -= (uint32 >>> 1) & 0x55555555
+    uint32 = (uint32 & 0x33333333) + ((uint32 >>> 2) & 0x33333333)
+    return (((uint32 + (uint32 >>> 4)) & 0x0f0f0f0f) * 0x01010101) >>> 24
+  }
+  private static _bitLength32(uint32: number): number {
+    return 32 - Math.clz32(uint32)
+  }
+  private static readonly _W = 32
+
+  private readonly _bits: Uint32Array
+  private readonly _n: number
+
+  constructor(n: number) {
+    this._bits = new Uint32Array(~~(n / BitSet._W) + 1)
+    this._n = n
+  }
+
+  add(i: number): void {
+    this._bits[~~(i / BitSet._W)] |= 1 << i % BitSet._W
+  }
+
+  /**
+   * [start, end) 范围内的位置为 1
+   */
+  addRange(start: number, end: number): void {
+    const maskL = ~0 << start % BitSet._W
+    const maskR = ~0 << end % BitSet._W
+    let i = ~~(start / BitSet._W)
+    if (i === ~~(end / BitSet._W)) {
+      this._bits[i] |= maskL ^ maskR
+      return
     }
-    return this
+    this._bits[i] |= maskL
+    for (i++; i < ~~(end / BitSet._W); i++) {
+      this._bits[i] = ~0
+    }
+    this._bits[i] |= ~maskR
+  }
+
+  has(i: number): boolean {
+    return !!(this._bits[~~(i / BitSet._W)] & (1 << i % BitSet._W))
+  }
+
+  discard(i: number): void {
+    this._bits[~~(i / BitSet._W)] &= ~(1 << i % BitSet._W)
+  }
+
+  /**
+   * [start, end) 范围内的位置为 0
+   */
+  discardRange(start: number, end: number): void {
+    const maskL = ~0 << start % BitSet._W
+    const maskR = ~0 << end % BitSet._W
+    let i = ~~(start / BitSet._W)
+    if (i === ~~(end / BitSet._W)) {
+      this._bits[i] &= ~maskL | maskR
+      return
+    }
+    this._bits[i] &= ~maskL
+    for (i++; i < ~~(end / BitSet._W); i++) {
+      this._bits[i] = 0
+    }
+    this._bits[i] &= maskR
+  }
+
+  flip(i: number): void {
+    this._bits[~~(i / BitSet._W)] ^= 1 << i % BitSet._W
+  }
+
+  /**
+   * [start, end) 范围内的位取反
+   */
+  flipRange(start: number, end: number): void {
+    const maskL = ~0 << start % BitSet._W
+    const maskR = ~0 << end % BitSet._W
+    let i = ~~(start / BitSet._W)
+    if (i === ~~(end / BitSet._W)) {
+      this._bits[i] ^= maskL ^ maskR
+      return
+    }
+    this._bits[i] ^= maskL
+    for (i++; i < ~~(end / BitSet._W); i++) {
+      this._bits[i] = ~this._bits[i]
+    }
+    this._bits[i] ^= ~maskR
   }
 
   clear(): void {
-    this._buckets.fill(0)
-    this._size = 0
+    this._bits.fill(0)
   }
 
-  delete(index: number): boolean {
-    this._ensureCapacity(index + 1)
-    const row = Math.floor(index / BitSet._BITS_PER_BUCKET)
-    const col = index % BitSet._BITS_PER_BUCKET
-    if ((this._buckets[row] & (1 << col)) !== 0) {
-      this._buckets[row] &= ~(1 << col)
-      this._size--
-      return true
+  /**
+   * [start, end) 范围内是否全为 1
+   */
+  allOne(start: number, end: number): boolean {
+    let i = ~~(start / BitSet._W)
+    if (i === ~~(end / BitSet._W)) {
+      const mask = (~0 << start % BitSet._W) ^ (~0 << end % BitSet._W)
+      return (this._bits[i] & mask) === mask
     }
-    return false
-  }
-
-  /**
-   * @deprecated
-   */
-  forEach(): void {
-    throw new Error(`Method ${this.forEach.name} not implemented.Use ${this.keys.name} instead.`)
-  }
-
-  has(index: number): boolean {
-    this._ensureCapacity(index + 1)
-    const row = Math.floor(index / BitSet._BITS_PER_BUCKET)
-    const col = index % BitSet._BITS_PER_BUCKET
-    return (this._buckets[row] & (1 << col)) !== 0
-  }
-
-  /**
-   * @deprecated
-   */
-  entries(): IterableIterator<[number, number]> {
-    throw new Error(`Method ${this.entries.name} not implemented.Use ${this.keys.name} instead.`)
-  }
-
-  *keys(): IterableIterator<number> {
-    for (let i = 0; i < this._buckets.length; i++) {
-      let state = this._buckets[i]
-      const offset = i * BitSet._BITS_PER_BUCKET
-      while (state > 0) {
-        yield offset + trailingZero32(state)
-        state &= state - 1
+    let mask = ~0 << start % BitSet._W
+    if ((this._bits[i] & mask) !== mask) {
+      return false
+    }
+    for (i++; i < ~~(end / BitSet._W); i++) {
+      if (~this._bits[i] !== 0) {
+        return false
       }
     }
+    mask = ~0 << end % BitSet._W
+    return ~(this._bits[~~(end / BitSet._W)] | mask) === 0
   }
 
   /**
-   * @deprecated
+   * [start, end) 范围内是否全为 0
    */
-  values(): IterableIterator<number> {
-    throw new Error(`Method ${this.values.name} not implemented.Use ${this.keys.name} instead.`)
-  }
-
-  and(other: BitSet): void {
-    const minLength = Math.min(this._buckets.length, other._buckets.length)
-    let newCount = 0
-    for (let i = 0; i < minLength; i++) {
-      this._buckets[i] &= other._buckets[i]
-      newCount += bitCount32(this._buckets[i])
+  allZero(start: number, end: number): boolean {
+    let i = ~~(start / BitSet._W)
+    if (i === ~~(end / BitSet._W)) {
+      const mask = (~0 << start % BitSet._W) ^ (~0 << end % BitSet._W)
+      return (this._bits[i] & mask) === 0
     }
-
-    for (let i = minLength; i < this._buckets.length; i++) {
-      this._buckets[i] = 0
+    if (this._bits[i] >> start % BitSet._W !== 0) {
+      return false
     }
-
-    this._size = newCount
-  }
-
-  or(other: BitSet): void {
-    const maxLength = Math.max(this._buckets.length, other._buckets.length)
-    this._ensureCapacity(maxLength * BitSet._BITS_PER_BUCKET)
-    let newCount = 0
-    for (let i = 0; i < maxLength; i++) {
-      if (i < this._buckets.length && i < other._buckets.length) {
-        this._buckets[i] |= other._buckets[i]
-      } else if (i < this._buckets.length) {
-        continue
-      } else {
-        this._buckets[i] = other._buckets[i]
+    for (i++; i < ~~(end / BitSet._W); i++) {
+      if (this._bits[i] !== 0) {
+        return false
       }
-      newCount += bitCount32(this._buckets[i])
     }
-
-    this._size = newCount
+    const mask = ~0 << end % BitSet._W
+    return (this._bits[~~(end / BitSet._W)] & ~mask) === 0
   }
 
-  isSubset(other: BitSet): boolean {
-    const maxLength = Math.max(this._buckets.length, other._buckets.length)
-    for (let i = 0; i < maxLength; i++) {
-      if (i < this._buckets.length && i < other._buckets.length) {
-        if ((this._buckets[i] & other._buckets[i]) !== this._buckets[i]) {
-          return false
-        }
-      } else if (i < this._buckets.length) {
-        if (this._buckets[i] !== 0) {
-          return false
+  /**
+   * 返回第一个 0 的下标，若不存在则返回-1
+   * @param position 从哪个位置开始查找
+   */
+  indexOfZero(position = 0): number {
+    if (position === 0) {
+      return this._indexOfZero()
+    }
+
+    let i = ~~(position / BitSet._W)
+    if (i < this._bits.length) {
+      let v = this._bits[i]
+      if (position % BitSet._W > 0) {
+        v |= ~(~0 << position % BitSet._W)
+      }
+      if (~v !== 0) {
+        const res = (i * BitSet._W) | BitSet._trailingZeros32(~v)
+        return res < this._n ? res : -1
+      }
+      for (i++; i < this._bits.length; i++) {
+        if (~this._bits[i] !== 0) {
+          const res = (i * BitSet._W) | BitSet._trailingZeros32(~this._bits[i])
+          return res < this._n ? res : -1
         }
       }
     }
 
+    return -1
+  }
+
+  /**
+   * 返回第一个 1 的下标，若不存在则返回-1
+   * @param position 从哪个位置开始查找
+   */
+  indexOfOne(position = 0): number {
+    if (position === 0) {
+      return this._indexOfOne()
+    }
+
+    // eslint-disable-next-line space-in-parens
+    for (let i = ~~(position / BitSet._W); i < this._bits.length; ) {
+      const v = this._bits[i] & (~0 << position % BitSet._W)
+      if (v !== 0) {
+        return (i * BitSet._W) | BitSet._trailingZeros32(v)
+      }
+      for (i++; i < this._bits.length; i++) {
+        if (this._bits[i] !== 0) {
+          return (i * BitSet._W) | BitSet._trailingZeros32(this._bits[i])
+        }
+      }
+    }
+
+    return -1
+  }
+
+  /**
+   * 返回 [start, end) 范围内 1 的个数
+   */
+  onesCount(start = 0, end = this._n): number {
+    if (start === 0 && end === this._n) {
+      return this._onesCount()
+    }
+
+    let pos1 = ~~(start / BitSet._W)
+    const pos2 = ~~(end / BitSet._W)
+    if (pos1 === pos2) {
+      return BitSet._onesCount32(
+        this._bits[pos1] & (~0 << start % BitSet._W) & ((1 << end % BitSet._W) - 1)
+      )
+    }
+
+    let count = 0
+    if (start % BitSet._W > 0) {
+      count += BitSet._onesCount32(this._bits[pos1] & (~0 << start % BitSet._W))
+    }
+    for (let i = pos1 + 1; i < pos2; i++) {
+      count += BitSet._onesCount32(this._bits[i])
+    }
+    if (end % BitSet._W > 0) {
+      count += BitSet._onesCount32(this._bits[pos2] & ((1 << end % BitSet._W) - 1))
+    }
+    return count
+  }
+
+  equals(other: BitSet): boolean {
+    if (this._bits.length !== other._bits.length) {
+      return false
+    }
+    for (let i = 0; i < this._bits.length; i++) {
+      if (this._bits[i] !== other._bits[i]) {
+        return false
+      }
+    }
     return true
   }
 
+  isSubset(other: BitSet): boolean {
+    if (this._bits.length > other._bits.length) {
+      return false
+    }
+    for (let i = 0; i < this._bits.length; i++) {
+      if ((this._bits[i] & other._bits[i]) >>> 0 !== this._bits[i]) {
+        return false
+      }
+    }
+    return true
+  }
+
+  isSuperset(other: BitSet): boolean {
+    if (this._bits.length < other._bits.length) {
+      return false
+    }
+    for (let i = 0; i < other._bits.length; i++) {
+      if ((this._bits[i] & other._bits[i]) >>> 0 !== other._bits[i]) {
+        return false
+      }
+    }
+    return true
+  }
+
+  ior(other: BitSet): void {
+    for (let i = 0; i < this._bits.length; i++) {
+      this._bits[i] |= other._bits[i]
+    }
+  }
+
+  or(other: BitSet): BitSet {
+    const res = new BitSet(this._bits.length)
+    for (let i = 0; i < this._bits.length; i++) {
+      res._bits[i] = this._bits[i] | other._bits[i]
+    }
+    return res
+  }
+
+  iand(other: BitSet): void {
+    for (let i = 0; i < this._bits.length; i++) {
+      this._bits[i] &= other._bits[i]
+    }
+  }
+
+  and(other: BitSet): BitSet {
+    const res = new BitSet(this._bits.length)
+    for (let i = 0; i < this._bits.length; i++) {
+      res._bits[i] = this._bits[i] & other._bits[i]
+    }
+    return res
+  }
+
+  copy(): BitSet {
+    const res = new BitSet(this._n)
+    res._bits.set(this._bits)
+    return res
+  }
+
   toString(): string {
-    const keys = [...this.keys()].join(',')
-    return `BitSet{${keys}}`
-  }
-
-  get size(): number {
-    return this._size
-  }
-
-  *[Symbol.iterator](): IterableIterator<number> {
-    yield* this.keys()
-  }
-
-  [Symbol.toStringTag] = 'BitSet'
-
-  private _ensureCapacity(nbits: number): void {
-    if (nbits > this._buckets.length * BitSet._BITS_PER_BUCKET) {
-      this._resize(nbits)
+    const sb: string[] = []
+    for (let i = 0; i < this._bits.length; i++) {
+      // eslint-disable-next-line newline-per-chained-call
+      let bits = this._bits[i].toString(2).padStart(BitSet._W, '0').split('').reverse().join('')
+      if (i === this._bits.length - 1) {
+        bits = bits.slice(0, this._n % BitSet._W)
+      }
+      sb.push(bits)
     }
+    return sb.join('')
   }
 
-  private _resize(nbits: number): void {
-    let newLength = this._buckets.length << 1
-    if (nbits > newLength * BitSet._BITS_PER_BUCKET) {
-      newLength = Math.ceil(nbits / BitSet._BITS_PER_BUCKET)
+  _indexOfZero(): number {
+    for (let i = 0; i < this._bits.length; i++) {
+      const x = this._bits[i]
+      if (~x !== 0) {
+        return (i * BitSet._W) | BitSet._trailingZeros32(~x)
+      }
     }
+    return -1
+  }
 
-    const newBuckets = new Uint32Array(newLength)
-    newBuckets.set(this._buckets)
-    this._buckets = newBuckets
+  _indexOfOne(): number {
+    for (let i = 0; i < this._bits.length; i++) {
+      const x = this._bits[i]
+      if (x !== 0) {
+        return (i * BitSet._W) | BitSet._trailingZeros32(x)
+      }
+    }
+    return -1
+  }
+
+  _lastIndexOfOne(): number {
+    for (let i = this._bits.length - 1; i >= 0; i--) {
+      const x = this._bits[i]
+      if (x !== 0) {
+        return (i * BitSet._W) | (BitSet._bitLength32(x) - 1)
+      }
+    }
+    return -1
+  }
+
+  _onesCount(): number {
+    let count = 0
+    for (let i = 0; i < this._bits.length; i++) {
+      count += BitSet._onesCount32(this._bits[i])
+    }
+    return count
   }
 }
 
 export { BitSet }
 
-if (require.main === module) {
-  const set = new BitSet(100)
-  set.add(1).add(2).add(3).add(101)
-  // eslint-disable-next-line no-console
-  console.log(set.toString())
-  assert(set.has(1))
-  assert(set.has(2))
-  set.delete(2)
-  assert(!set.has(2))
-  assert(set.size === 3)
-
-  const other = new BitSet(100)
-  other.add(101).add(102).add(103)
-  set.or(other)
-  assert.strictEqual(set.size, 5)
-
-  assert(other.isSubset(set))
-  set.and(other)
-  assert.strictEqual(set.toString(), other.toString())
-  assert(set.isSubset(other))
-  assert(other.isSubset(set))
-}
+// trailingZero32 test

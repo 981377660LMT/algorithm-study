@@ -7,6 +7,8 @@
 const INF = 2e15
 const n = 10
 
+// 一些monoid (如果难以设计半群,就使用分块解决吧)
+// https://maspypy.github.io/library/alg/acted_monoid/summax_assign.hpp
 if (require.main === module) {
   // Range Add Range Max
   const rangeAddRangeMax = useAtcoderLazySegmentTree(Array(n + 10).fill(0), {
@@ -79,38 +81,47 @@ if (require.main === module) {
     mapping: (f, x) => (f === INF ? x : f),
     composition: (f, g) => (f === INF ? g : f)
   })
+
+  // Range Flip Range Sum
+  const rangeXorRangeSum = useAtcoderLazySegmentTree(n + 10, {
+    e: () => [0, 1],
+    id: () => 0,
+    op: ([sum1, size1], [sum2, size2]) => [sum1 + sum2, size1 + size2],
+    mapping: (f, [sum, size]) => (f === 0 ? [sum, size] : [size - sum, size]),
+    composition: (f, g) => f ^ g
+  })
 }
 
 /**
  * E 线段树维护的值的类型
  * Id 更新操作的值的类型/懒标记的值的类型
  */
-interface Operation<E, Id> {
+type Operation<E, Id> = {
   /**
    * 线段树维护的值的幺元
    */
-  e: (this: void) => E
+  e: () => E
 
   /**
    * 更新操作/懒标记的幺元
    */
-  id: (this: void) => Id
+  id: () => Id
 
   /**
    * 合并左右区间的值
    */
-  op: (this: void, data1: E, data2: E) => E
+  op: (data1: E, data2: E) => E
 
   /**
    * 父结点的懒标记更新子结点的值
    */
-  mapping: (this: void, parentLazy: Id, childData: E) => E
+  mapping: (parentLazy: Id, childData: E) => E
 
   /**
    * 父结点的懒标记更新子结点的懒标记(合并)
    */
-  composition: (this: void, parentLazy: Id, childLazy: Id) => Id
-}
+  composition: (parentLazy: Id, childLazy: Id) => Id
+} & ThisType<void>
 
 interface AtcoderSegmentTree<E, Id> {
   /**

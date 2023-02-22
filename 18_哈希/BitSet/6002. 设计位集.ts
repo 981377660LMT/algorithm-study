@@ -1,51 +1,43 @@
 /* eslint-disable no-param-reassign */
 
-class Bitset {
-  private readonly capacity: number
-  private bit: bigint
-  private size: number
+import { BitSet } from './BitSet'
 
+class Bitset {
+  private readonly _cap: number
+  private readonly _bitSet: BitSet
+
+  // little-endian
   constructor(capacity: number) {
-    this.capacity = capacity
-    this.bit = 0n
-    this.size = 0
+    this._cap = capacity
+    this._bitSet = new BitSet(capacity)
   }
 
   fix(index: number): void {
-    index = this.capacity - index - 1
-    if (!(this.bit & (1n << BigInt(index)))) {
-      this.size++
-      this.bit |= 1n << BigInt(index)
-    }
+    this._bitSet.add(index)
   }
 
   unfix(index: number): void {
-    index = this.capacity - index - 1
-    if (this.bit & (1n << BigInt(index))) {
-      this.size--
-      this.bit &= ~(1n << BigInt(index))
-    }
+    this._bitSet.discard(index)
   }
 
   flip(): void {
-    this.bit ^= (1n << BigInt(this.capacity)) - 1n
-    this.size = this.capacity - this.size
+    this._bitSet.flipRange(0, this._cap)
   }
 
   all(): boolean {
-    return this.size === this.capacity
+    return this._bitSet.allOne(0, this._cap)
   }
 
   one(): boolean {
-    return this.size !== 0
+    return !this._bitSet.allZero(0, this._cap)
   }
 
   count(): number {
-    return this.size
+    return this._bitSet.onesCount(0, this._cap)
   }
 
   toString(): string {
-    return this.bit.toString(2).padStart(this.capacity, '0')
+    return this._bitSet.toString()
   }
 }
 

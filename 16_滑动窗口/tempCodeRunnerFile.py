@@ -1,2 +1,4 @@
-max(res, xorTrie.search(subSum))
-                xorTri
+
+                    sum(x for x, freq in counter.items() if freq == maxFreq),
+                    maxFreq,
+                

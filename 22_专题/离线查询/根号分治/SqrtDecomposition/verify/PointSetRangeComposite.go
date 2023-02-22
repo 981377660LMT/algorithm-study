@@ -6,14 +6,12 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"os"
 )
 
 const MOD int = 998244353
 
 func main() {
-	// https://judge.yosupo.jp/problem/point_set_range_composite
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -26,18 +24,22 @@ func main() {
 		fmt.Fscan(in, &nums[i].mul, &nums[i].add)
 	}
 
-	sqrt := NewSqrtDecomposition(nums, int(math.Sqrt(float64(n))))
+	sqrt := NewSqrtDecomposition(nums, 300)
 	for i := 0; i < q; i++ {
-		var op int
-		fmt.Fscan(in, &op)
-		if op == 0 {
+		var kind int
+		fmt.Fscan(in, &kind)
+		if kind == 0 {
 			var i, mul, add int
 			fmt.Fscan(in, &i, &mul, &add)
-			sqrt.Update(i, i+1, E{mul, add})
+			sqrt.Update(i, i, E{mul, add})
 		} else {
 			var start, end, x int
 			fmt.Fscan(in, &start, &end, &x)
-			affine := sqrt.Query(start, end)
+			end--
+			affine := e()
+			sqrt.Query(start, end, func(cur E) {
+				affine = op(affine, cur)
+			})
 			fmt.Fprintln(out, (affine.mul*x+affine.add)%MOD)
 		}
 	}
@@ -52,8 +54,8 @@ func op(a, b E) E { return E{a.mul * b.mul % MOD, (a.add*b.mul + b.add) % MOD} }
 
 type Block struct {
 	// dont modify
-	id, start, end int // block id => nums[start:end]
-	nums           []E // block内的原序列
+	id, left, right int
+	nums            []E // block内的原序列
 
 	// !to do
 	sum E
@@ -74,7 +76,7 @@ func (b *Block) Build() {
 }
 func (b *Block) UpdateAll(lazy Id) {}
 func (b *Block) UpdatePart(start, end int, lazy Id) {
-	for i := start; i < end; i++ {
+	for i := start; i <= end; i++ {
 		b.nums[i] = lazy
 	}
 	b.Build() // !注意重构
@@ -82,7 +84,7 @@ func (b *Block) UpdatePart(start, end int, lazy Id) {
 func (b *Block) QueryAll() E { return b.sum }
 func (b *Block) QueryPart(start, end int) E {
 	res := e()
-	for i := start; i < end; i++ {
+	for i := start; i <= end; i++ {
 		res = op(res, b.nums[i])
 	}
 	return res
@@ -105,45 +107,69 @@ type SqrtDecomposition struct {
 // 指定维护的序列和分块大小初始化.
 //  blockSize:分块大小,一般取根号n(300)
 func NewSqrtDecomposition(nums []E, blockSize int) *SqrtDecomposition {
-	nums = append(nums[:0:0], nums...)
-	res := &SqrtDecomposition{n: len(nums), bs: blockSize, bls: make([]Block, len(nums)/blockSize+1)}
-	for i := range res.bls {
-		res.bls[i].id = i
-		res.bls[i].start = i * blockSize
-		res.bls[i].end = min((i+1)*blockSize, len(nums))
-		res.bls[i].nums = nums[res.bls[i].start:res.bls[i].end]
-		res.bls[i].Init()
-	}
-	return res
-}
-
-// 更新左闭右开区间[start,end)的值.
-//  0<=start<=end<=n
-func (s *SqrtDecomposition) Update(start, end int, lazy Id) {
-	if start/s.bs == end/s.bs {
-		s.bls[start/s.bs].UpdatePart(start%s.bs, end%s.bs, lazy)
-	} else {
-		s.bls[start/s.bs].UpdatePart(start%s.bs, s.bs, lazy)
-		for i := start/s.bs + 1; i < end/s.bs; i++ {
-			s.bls[i].UpdateAll(lazy)
+	n := len(nums)
+	res := &SqrtDecomposition{n: len(nums), bs: blockSize, bls: make([]Block, (n-1)/blockSize+1)}
+	for i, v := range nums {
+		pos := i / blockSize
+		if i%blockSize == 0 {
+			res.bls[pos] = Block{left: i, id: pos, nums: make([]E, 0, blockSize)}
 		}
-		s.bls[end/s.bs].UpdatePart(0, end%s.bs, lazy)
+		res.bls[pos].nums = append(res.bls[pos].nums, v)
+	}
+	for i := range res.bls {
+		block := &res.bls[i]
+		block.right = block.left + len(block.nums) - 1
+		block.Init()
+	}
+	return res
+}
+
+// 更新闭区间[left,right]的值.
+//  0<=left<=right<n
+func (s *SqrtDecomposition) Update(left, right int, lazy Id) {
+	for i := range s.bls {
+		block := &s.bls[i]
+		if block.right < left {
+			continue
+		}
+		if block.left > right {
+			break
+		}
+
+		if left <= block.left && block.right <= right {
+			// !区间更新完整的块:类似线段树，只需要打上懒标记
+			block.UpdateAll(lazy)
+		} else {
+			bl := max(block.left, left)
+			br := min(block.right, right)
+			// !区间修改不完整的块：暴力更新实际值
+			block.UpdatePart(bl-block.left, br-block.left, lazy)
+		}
 	}
 }
 
-// 查询左闭右开区间[start,end)的值.
-//  0<=start<=end<=n
-func (s *SqrtDecomposition) Query(start, end int) E {
-	if start/s.bs == end/s.bs {
-		return s.bls[start/s.bs].QueryPart(start%s.bs, end%s.bs)
+// 查询闭区间[left,right]的值.
+//  0<=left<=right<n
+func (s *SqrtDecomposition) Query(left, right int, forEach func(blockRes E)) {
+	for i := range s.bls {
+		block := &s.bls[i]
+		if block.right < left {
+			continue
+		}
+		if block.left > right {
+			break
+		}
+
+		if left <= block.left && block.right <= right {
+			// !区间查询完整的块:实际值+懒标记里的值
+			forEach(block.QueryAll())
+		} else {
+			bl := max(block.left, left)
+			br := min(block.right, right)
+			// !区间查询不完整的块：暴力计算 实际值+懒标记里的值
+			forEach(block.QueryPart(bl-block.left, br-block.left))
+		}
 	}
-	res := e()
-	res = op(res, s.bls[start/s.bs].QueryPart(start%s.bs, s.bs))
-	for i := start/s.bs + 1; i < end/s.bs; i++ {
-		res = op(res, s.bls[i].QueryAll())
-	}
-	res = op(res, s.bls[end/s.bs].QueryPart(0, end%s.bs))
-	return res
 }
 
 func min(a, b int) int {

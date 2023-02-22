@@ -35,7 +35,12 @@ describe('SegmentTree01', () => {
     for (let i = 0; i < 10; i++) {
       const digit = randint(0, 1) as 0 | 1
       const searchPos = randint(1, n)
-      expect(seg.lastIndexOf(digit, searchPos)).toBe(nums.lastIndexOf(digit, searchPos - 1) + 1)
+      const res = seg.lastIndexOf(digit, searchPos)
+      if (res === -1) {
+        expect(nums.lastIndexOf(digit, searchPos - 1)).toBe(-1)
+      } else {
+        expect(res).toBe(nums.lastIndexOf(digit, searchPos - 1) + 1)
+      }
     }
   })
 
@@ -43,7 +48,12 @@ describe('SegmentTree01', () => {
     for (let i = 0; i < 10; i++) {
       const digit = randint(0, 1) as 0 | 1
       const searchPos = randint(1, n)
-      expect(seg.indexOf(digit, searchPos)).toBe(nums.indexOf(digit, searchPos - 1) + 1)
+      const res = seg.indexOf(digit, searchPos)
+      if (res === -1) {
+        expect(nums.indexOf(digit, searchPos - 1)).toBe(-1)
+      } else {
+        expect(res).toBe(nums.indexOf(digit, searchPos - 1) + 1)
+      }
     }
   })
 
@@ -64,7 +74,9 @@ describe('SegmentTree01', () => {
     for (let i = 0; i < 10; i++) {
       const digit = randint(0, 1) as 0 | 1
       const k = randint(1, n)
-      expect(seg.kth(digit, k)).toBe(countKth(nums, digit, k))
+      const res1 = seg.kth(digit, k)
+      const res2 = countKth(nums, digit, k)
+      expect(res1).toBe(res2)
     }
   })
 })

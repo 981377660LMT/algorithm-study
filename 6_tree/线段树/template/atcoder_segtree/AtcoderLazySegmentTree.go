@@ -44,6 +44,7 @@ func main() {
 	}
 }
 
+// 区间反转+区间逆序对
 type E = struct{ zero, one, inv int }
 type Id = bool
 

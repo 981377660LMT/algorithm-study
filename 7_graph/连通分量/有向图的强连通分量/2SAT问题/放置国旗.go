@@ -1,11 +1,12 @@
-// https://yukicoder.me/problems/no/470/editorial
-// 给定n个长度为3的字符串,由小写字母和大写字母组成
-// 求2n个非空串Si和Ti，使得 S[i] + T[i] = U[i],且这2n个串都不相同
-// n<=1e5
+// https://atcoder.jp/contests/practice2/tasks/practice2_h
+// 1-N号旗设置位置(放置国旗)
+// 第i号旗可以设置在xi位置或者yi位置
+// !任意两面旗距离需要大于D
+// 是否可以设置旗子
+// 1≤N≤1000
+// D,Xi,Yi<=1e9
 
-// 长度为3的字符串划分成两个非空部分,要么是1/2,要么是2/1 => 2SAT
-// n很大的时候一定有重复串,可以排除
-// !n不大的时候用2SAT解决 :命题i代表S[i]用1个字符
+// 命题i:第i个棋子放在xi位置,检查是否满足条件
 
 package main
 
@@ -20,49 +21,33 @@ func main() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
-
-	words := make([]string, n)
+	var n, d int
+	fmt.Fscan(in, &n, &d)
+	x, y := make([]int, n), make([]int, n)
 	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &words[i])
-	}
-
-	// 只使用a-z和A-Z的字符,一个字符一定有重复的
-	if n > 26*2 {
-		fmt.Fprintln(out, "Impossible")
-		return
+		fmt.Fscan(in, &x[i], &y[i])
 	}
 
 	ts := NewTwoSat(n)
-	// 枚举所有的对,看哪些s[i]不能同时用一个字符划分
-	// かぶさる可能性のあるものを反転させたものをグラフに追加する  ??
 	for i := 0; i < n; i++ {
-		w1 := words[i]
 		for j := i + 1; j < n; j++ {
-			w2 := words[j]
-
-			// 1 1
-			s1, t1, s2, t2 := w1[0:1], w1[1:], w2[0:1], w2[1:]
-			if s1 == s2 || t1 == t2 {
+			// 00
+			if abs(x[i]-x[j]) < d {
 				ts.AddNand(i, j)
 			}
 
-			// 1 2
-			s1, t1, s2, t2 = w1[0:1], w1[1:], w2[0:2], w2[2:]
-			if s1 == t2 || t1 == s2 {
+			// 01
+			if abs(x[i]-y[j]) < d {
 				ts.AddNand(i, ts.Rev(j))
 			}
 
-			// 2 1
-			s1, t1, s2, t2 = w1[0:2], w1[2:], w2[0:1], w2[1:]
-			if s1 == t2 || t1 == s2 {
+			// 10
+			if abs(y[i]-x[j]) < d {
 				ts.AddNand(ts.Rev(i), j)
 			}
 
-			// 2 2
-			s1, t1, s2, t2 = w1[0:2], w1[2:], w2[0:2], w2[2:]
-			if s1 == s2 || t1 == t2 {
+			// 11
+			if abs(y[i]-y[j]) < d {
 				ts.AddNand(ts.Rev(i), ts.Rev(j))
 			}
 		}
@@ -70,21 +55,24 @@ func main() {
 
 	res, ok := ts.Solve()
 	if !ok {
-		fmt.Fprintln(out, "Impossible")
+		fmt.Fprintln(out, "No")
 		return
 	}
-
+	fmt.Fprintln(out, "Yes")
 	for i := 0; i < n; i++ {
 		if res[i] {
-			s, t := words[i][0:1], words[i][1:]
-			fmt.Fprint(out, s, " ", t)
+			fmt.Fprintln(out, x[i])
 		} else {
-			s, t := words[i][0:2], words[i][2:]
-			fmt.Fprint(out, s, " ", t)
+			fmt.Fprintln(out, y[i])
 		}
-		fmt.Fprintln(out)
 	}
+}
 
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
 
 type TwoSat struct {

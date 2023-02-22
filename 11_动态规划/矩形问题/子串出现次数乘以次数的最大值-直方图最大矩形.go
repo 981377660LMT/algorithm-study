@@ -5,7 +5,7 @@
 // n <= 1e6
 
 // 直方图最大矩形
-// 子串长度看成高,lcp范围看成宽
+// lcp范围看成宽,lcp看成高
 // https://www.acwing.com/solution/content/25201/
 
 package main

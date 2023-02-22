@@ -272,6 +272,23 @@ func (b Bitset) OnesCount() (c int) {
 	}
 	return
 }
+func (b Bitset) OnesCountRange(start, end int) int {
+	pos1, pos2 := start/_w, end/_w
+	if pos1 == pos2 {
+		return bits.OnesCount(b[pos1] & (^uint(0) << (start % _w)) & ((1 << (end % _w)) - 1))
+	}
+	c := 0
+	if start%_w > 0 {
+		c += bits.OnesCount(b[pos1] & (^uint(0) << (start % _w)))
+	}
+	for i := pos1 + 1; i < pos2; i++ {
+		c += bits.OnesCount(b[i])
+	}
+	if end%_w > 0 {
+		c += bits.OnesCount(b[pos2] & ((1 << (end % _w)) - 1))
+	}
+	return c
+}
 func (b Bitset) TrailingZeros() int { return b.Index1() }
 func (b Bitset) Len() int           { return b.LastIndex1() + 1 }
 

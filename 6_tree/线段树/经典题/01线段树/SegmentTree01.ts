@@ -14,6 +14,7 @@ class SegmentTree01 {
    * little-endian
    */
   constructor(bits: ArrayLike<number>) {
+    if (bits.length === 0) throw new Error('empty bits')
     this._n = bits.length
     const log = 32 - Math.clz32(this._n - 1)
     const size = 1 << log
@@ -214,6 +215,7 @@ class SegmentTree01 {
 if (require.main === module) {
   // 01线段树模拟位集
   // https://leetcode.cn/problems/design-bitset/
+
   class Bitset {
     private readonly size: number
     private readonly tree01: SegmentTree01
