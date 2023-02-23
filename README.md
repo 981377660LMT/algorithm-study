@@ -190,7 +190,7 @@
     - [RectangleUnion](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/%E6%89%AB%E6%8F%8F%E7%BA%BF/850.%20%E7%9F%A9%E5%BD%A2%E9%9D%A2%E7%A7%AF%20II.go)
     - [ParallelBinarySearch](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%95%B4%E4%BD%93%E4%BA%8C%E5%88%86/%E6%95%B4%E4%BD%93%E4%BA%8C%E5%88%86.go)
     - [OfflineDynamicConnectivity](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E5%B9%B6%E6%9F%A5%E9%9B%86/OfflineDynamicConnectivity-nyann.go)
-    - [SqrtDecomposition](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SqrtDecomposition/SqrtDecomposition.go)
+    - [SqrtDecomposition](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SqrtDecomposition/SqrtDecomposition.ts)
     - [Doubling](22_%E4%B8%93%E9%A2%98/%E5%80%8D%E5%A2%9E%E4%B8%8E%E5%91%A8%E6%9C%9F%E6%80%A7/%E5%80%8D%E5%A2%9Edp/Doubling.go)
     - [Inversions](6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/315.%20%E8%AE%A1%E7%AE%97%E5%8F%B3%E4%BE%A7%E5%B0%8F%E4%BA%8E%E5%BD%93%E5%89%8D%E5%85%83%E7%B4%A0%E7%9A%84%E4%B8%AA%E6%95%B0.py)
     - [DsuOnTree](22_%E4%B8%93%E9%A2%98/%E5%90%AF%E5%8F%91%E5%BC%8F%E5%90%88%E5%B9%B6/%E6%A0%91%E4%B8%8A%E5%90%AF%E5%8F%91%E5%BC%8F%E5%90%88%E5%B9%B6/dsuOnTree/DsuOnTree.go)
