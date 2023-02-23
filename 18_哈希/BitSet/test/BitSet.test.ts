@@ -156,10 +156,11 @@ describe('BitSet', () => {
     expect(bitSet.onesCount()).toBe(nums.reduce((a, b) => a + b, 0))
 
     // random start and end
-    const start = Math.floor(Math.random() * n)
-    const end = Math.floor(Math.random() * (n - start)) + start
-
-    expect(bitSet.onesCount(start, end)).toBe(nums.slice(start, end).reduce((a, b) => a + b, 0))
+    for (let i = 0; i < 1; i++) {
+      const start = Math.floor(Math.random() * n)
+      const end = Math.floor(Math.random() * (n - start)) + start
+      expect(bitSet.onesCount(start, end)).toBe(nums.slice(start, end).reduce((a, b) => a + b, 0))
+    }
   })
 
   // equals and copy

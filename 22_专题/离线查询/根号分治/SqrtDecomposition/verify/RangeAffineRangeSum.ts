@@ -9,7 +9,7 @@ class NumArray {
 
   constructor(nums: number[]) {
     this._sqrt = new SqrtDecomposition<number, number>(nums.length, (_, left, right) => {
-      const curNums = nums.slice(left, right + 1)
+      const curNums = nums.slice(left, right)
       let sum = 0
       let color = INF
 
@@ -21,7 +21,7 @@ class NumArray {
           sum = curNums.reduce((a, b) => a + b, 0)
         },
         updatePart(left, right, lazy) {
-          for (let i = left; i <= right; i++) {
+          for (let i = left; i < right; i++) {
             curNums[i] = lazy
           }
         },
@@ -33,7 +33,7 @@ class NumArray {
         },
         queryPart(left, right) {
           let res = 0
-          for (let i = left; i <= right; i++) {
+          for (let i = left; i < right; i++) {
             res += color === INF ? curNums[i] : color
           }
           return res
@@ -43,12 +43,12 @@ class NumArray {
   }
 
   update(index: number, val: number): void {
-    this._sqrt.update(index, index, val)
+    this._sqrt.update(index, index + 1, val)
   }
 
   sumRange(left: number, right: number): number {
     let res = 0
-    this._sqrt.query(left, right, blockRes => {
+    this._sqrt.query(left, right + 1, blockRes => {
       res += blockRes
     })
     return res

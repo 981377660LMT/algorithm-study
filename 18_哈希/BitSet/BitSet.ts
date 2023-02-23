@@ -1,3 +1,4 @@
+/* eslint-disable no-labels */
 // 位运算:
 // ~~ 或者 | => Math.floor (int)
 // ~~ 或者 | + >>>0 => Math.floor (uint)
@@ -215,6 +216,12 @@ class BitSet {
    * 返回 [start, end) 范围内 1 的个数
    */
   onesCount(start = 0, end = this._n): number {
+    if (start < 0) {
+      start = 0
+    }
+    if (end > this._n) {
+      end = this._n
+    }
     if (start === 0 && end === this._n) {
       return this._onesCount()
     }
@@ -230,8 +237,9 @@ class BitSet {
     let count = 0
     if (start % BitSet._W > 0) {
       count += BitSet._onesCount32(this._bits[pos1] & (~0 << start % BitSet._W))
+      pos1++
     }
-    for (let i = pos1 + 1; i < pos2; i++) {
+    for (let i = pos1; i < pos2; i++) {
       count += BitSet._onesCount32(this._bits[i])
     }
     if (end % BitSet._W > 0) {
@@ -310,6 +318,10 @@ class BitSet {
     return res
   }
 
+  bitLength(): number {
+    return this._lastIndexOfOne() + 1
+  }
+
   toString(): string {
     const sb: string[] = []
     for (let i = 0; i < this._bits.length; i++) {
@@ -364,4 +376,28 @@ class BitSet {
 
 export { BitSet }
 
-// trailingZero32 test
+if (require.main === module) {
+  // // onesCountRange test
+  // const n = 330
+  // const bs = new BitSet(n)
+  // const nums = new Uint8Array(n)
+  // for (let i = 0; i < 10; i++) {
+  //   if (Math.random() > 0.5) {
+  //     bs.add(i)
+  //     nums[i] = 1
+  //   }
+  // }
+  // // onesCountRange test
+  // loop: for (let i = 0; i < n; i++) {
+  //   for (let j = i; j < n; j++) {
+  //     const count = bs.onesCount(i, j)
+  //     const expected = nums.slice(i, j).reduce((a, b) => a + b, 0)
+  //     if (count !== expected) {
+  //       console.log(i, j, count, expected)
+  //       console.log(nums, bs.toString())
+  //       break loop
+  //     }
+  //   }
+  // }
+  // console.log('ok')
+}

@@ -197,7 +197,7 @@ function bitPos(x: number) {
   return ret
 }
 
-export class BitSet {
+class BitSet {
   private readonly _bitset: Uint32Array
   private readonly _fenwick: Uint32Array
   private readonly _bucketCount: number
@@ -341,3 +341,5 @@ if (require.main === module) {
   }
   console.timeEnd('segtree')
 }
+
+export {}

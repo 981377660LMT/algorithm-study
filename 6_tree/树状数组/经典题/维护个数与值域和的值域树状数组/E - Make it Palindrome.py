@@ -1,31 +1,43 @@
-from collections import defaultdict, deque
-import sys
+# https://atcoder.jp/contests/abc290/tasks/abc290_e
+# 给定一个长为n(n<=2e5)的数组nums
+# 记f(sub)为将sub变为回文串所需的最小替换次数
+# 对于每个子串sub,求f(sub)的和
 
-sys.setrecursionlimit(int(1e9))
-input = lambda: sys.stdin.readline().rstrip("\r\n")
-MOD = 998244353
-INF = int(4e18)
-# 数列
-# X に対し、
-# f(X)= (
-# X を回文にするために変更する必要のある要素の個数の最小値 ) とします。
+# !计算相同的数中每对pair的贡献
+# 每一对的贡献为min(距离左侧的距离,距离右侧的距离)
+# 遍历每个组,值域树状数组维护到右侧的距离之和和个数
 
-# 与えられた長さ
-# N の数列
-# A の全ての 連続 部分列
-# X に対する
-# f(X) の総和を求めてください。
 
-# 但し、長さ
-# m の数列
-# X が回文であるとは、全ての
-# 1≤i≤m を満たす整数
-# i について、
-# X の
-# i 項目と
-# m+1−i 項目が等しいことを指します。
+from collections import defaultdict
+from typing import List
 
-from typing import List, Sequence, Union
+
+def makeItPalindrome(nums: List[int]) -> int:
+    n = len(nums)
+    mp = defaultdict(list)
+    for i, char in enumerate(nums):
+        mp[char].append(i)
+
+    res = 0
+    for len_ in range(1, n + 1):
+        res += (len_ // 2) * (n - len_ + 1)
+
+    for group in mp.values():
+        if len(group) == 1:
+            continue
+        dist1 = [num + 1 for num in group]
+        dist2 = [n - num for num in group]
+        bitSum, bitCount = BIT1(n + 10), BIT1(n + 10)
+        for i, v in enumerate(dist2):
+            bitSum.add(v, v)
+            bitCount.add(v, 1)
+        for i in range(len(group)):
+            bitSum.add(dist2[i], -dist2[i])
+            bitCount.add(dist2[i], -1)
+            rigthBigger = bitCount.queryRange(dist1[i], n + 1)
+            rightSmallSum = bitSum.queryRange(0, dist1[i] - 1)
+            res -= rigthBigger * dist1[i] + rightSmallSum  # 右侧比自己距离左侧小的距离之和 + 右侧距离大于等于自己的位置个数*左侧距离
+    return res
 
 
 class BIT1:
@@ -96,36 +108,4 @@ class BIT1:
 if __name__ == "__main__":
     n = int(input())
     nums = list(map(int, input().split()))
-
-    # 子串:关注开头和结尾
-    mp = defaultdict(list)
-    for i, char in enumerate(nums):
-        mp[char].append(i)
-    # print(mp)
-    # defaultdict(<class 'list'>, {5: [0], 2: [1, 3, 4], 1: [2]})
-
-    # 所有字符都不想等时需要的操作数
-    res = 0
-    for len_ in range(1, n + 1):
-        res += (len_ // 2) * (n - len_ + 1)
-    for group in mp.values():
-        if len(group) == 1:
-            continue
-
-        # 右侧比自己距离左侧小的距离之和 + 右侧距离大于等于自己的位置个数*左侧距离
-        bit1, bit2 = BIT1(n + 10), BIT1(n + 10)  # 计数/距离
-        distToLeft = [num + 1 for num in group]
-        distToRight = [n - num for num in group]
-        for i, v in enumerate(distToRight):
-            bit1.add(v, 1)
-            bit2.add(v, v)
-
-        k = len(group)
-        for i in range(k):
-            bit1.add(distToRight[i], -1)
-            bit2.add(distToRight[i], -distToRight[i])
-            lDist = distToLeft[i]
-            rightBigger = bit1.queryRange(lDist, n + 1)
-            rightSmallSum = bit2.queryRange(0, lDist - 1)
-            res -= rightBigger * lDist + rightSmallSum
-    print(res)
+    print(makeItPalindrome(nums))

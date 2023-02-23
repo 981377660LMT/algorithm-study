@@ -6,13 +6,13 @@ import { SqrtDecomposition } from '../SqrtDecomposition'
 // 操作类型 2 为 queries[i] = [2, p, 0] 。对于 0 <= i < n 中的所有下标，令 nums2[i] = nums2[i] + nums1[i] * p 。
 // 操作类型 3 为 queries[i] = [3, 0, 0] 。求 nums2 中所有元素的和。
 // 请你返回一个数组，包含所有第三种操作类型的答案。
-
-// 区间flip+查询区间1的个数
+// 区间反转+查询区间1的个数
 function handleQuery(nums1: number[], nums2: number[], queries: number[][]): number[] {
   const n = nums1.length
-  const sqrt = new SqrtDecomposition<number, 0 | 1>(n, (_, leftBound, rightBound) => {
-    const len = rightBound - leftBound + 1
-    const bits = nums1.slice(leftBound, rightBound + 1)
+
+  const sqrt = new SqrtDecomposition<number, 0 | 1>(n, (_, start, end) => {
+    const len = end - start
+    const bits = nums1.slice(start, end)
     let ones = 0
     let lazyFlip = 0
 
@@ -25,14 +25,14 @@ function handleQuery(nums1: number[], nums2: number[], queries: number[][]): num
       },
       queryPart(start, end) {
         let res = 0
-        for (let i = start; i <= end; i++) {
+        for (let i = start; i < end; i++) {
           bits[i] ^= lazyFlip
-          res += bits[i]
+          res += bits[i] ? 1 : 0
         }
         return res
       },
       updatePart(start, end, flip) {
-        for (let i = start; i <= end; i++) {
+        for (let i = start; i < end; i++) {
           bits[i] ^= flip
         }
       },
@@ -46,18 +46,18 @@ function handleQuery(nums1: number[], nums2: number[], queries: number[][]): num
   })
 
   const res: number[] = []
-  let sum = nums2.reduce((a, b) => a + b, 0)
+  let allSum = nums2.reduce((a, b) => a + b, 0)
   queries.forEach(([op, a, b]) => {
     if (op === 1) {
-      sqrt.update(a, b, 1)
+      sqrt.update(a, b + 1, 1)
     } else if (op === 2) {
       let ones = 0
-      sqrt.query(0, n - 1, blockRes => {
+      sqrt.query(0, n, blockRes => {
         ones += blockRes
       })
-      sum += ones * a
+      allSum += ones * a
     } else {
-      res.push(sum)
+      res.push(allSum)
     }
   })
   return res

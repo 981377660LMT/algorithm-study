@@ -5,6 +5,10 @@
   </p>
 </div>
 
+<div align='center'>
+  English | <a href='./README.zh-CN.md'>中文</a>
+</div>
+
 [![Build Status](https://app.travis-ci.com/981377660LMT/algorithm-study.svg?branch=master)](https://app.travis-ci.com/981377660LMT/algorithm-study)
 
 ---
@@ -14,6 +18,7 @@
 0. **String**
 
    - [Subsequence Matching](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/isSubsequence.py)
+   - [SubsequenceAutomaton](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%AD%90%E5%BA%8F%E5%88%97%E8%87%AA%E5%8A%A8%E6%9C%BA/%E5%AD%90%E5%BA%8F%E5%88%97%E8%87%AA%E5%8A%A8%E6%9C%BA.py)
    - [Rabin-Karp Algorithm](18_%E5%93%88%E5%B8%8C/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%93%88%E5%B8%8C/StringHasher.py)
    - [String Minimum Representation](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95.py)
    - [KMP Algorithm](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/kmp/kmp.py)
@@ -67,7 +72,6 @@
    - [TreeSet](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/TreeSet.ts)
    - [SortedList](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/ATC-SortedList.py)
      [SortedList](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/Treap.ts)
-   - [SplayArray](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/SplayArray.py)
    - [DynamicSequence](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/DynamicSequence.go)
    - [PersistentArray](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentArray2.py>)
    - [PersistentQueue](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue-fast.go>)
@@ -131,7 +135,7 @@
 8. **Bit Manipulation**
 
    - [Bloom Filter](18_%E5%93%88%E5%B8%8C/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8.ts)
-   - [BitSet](18_%E5%93%88%E5%B8%8C/BitSet/BitSet.py)
+   - [BitSet](18_%E5%93%88%E5%B8%8C/BitSet/BitSet.ts)
    - [Powerset](21_%E4%BD%8D%E8%BF%90%E7%AE%97/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE%E4%B8%8E%E4%B8%89%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%AD%90%E9%9B%86/powerset.py)
    - [BitCount/BitLength/TrailingZero](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E5%AE%B9%E6%96%A5%E5%8E%9F%E7%90%86/bitCount.ts)
 
@@ -168,7 +172,6 @@
 
 11. **Miscellaneous**
 
-    - [Area of Union of Rectangles](4_set/有序集合/扫描线/850.%20矩形面积%20II.go)
     - [2D PreSum Matrix](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
     - [2D Diff Matrix](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
     - [Sparse Table](22_%E4%B8%93%E9%A2%98/RMQ%E9%97%AE%E9%A2%98/SparseTable.py)

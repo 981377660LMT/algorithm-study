@@ -1,34 +1,34 @@
-// bitset 位集
-// https://github.dev/EndlessCheng/codeforces-go/blob/master/misc/atcoder/abc274/e
-
-// API:
-// NewBitset(n) 创建一个长度为 n 的位集
-
-// Set(p) 置 1
-// Reset(p) 置 0
-// Has(p) 判断 p 位是否为 1
-// Flip(p) 翻转 p 位
-
-// Foreach(f) 遍历所有 1 的位置
-
-// Index0() 返回第一个 0 的下标，若不存在则返回一个不小于 n 的位置
-// Index1() 返回第一个 1 的下标，若不存在则返回一个不小于 n 的位置（同 C++ 中的 _Find_first）
-// Next1(p) 返回下标 >= p 的第一个 1 的下标，若不存在则返回一个不小于 n 的位置（类似 C++ 中的 _Find_next，这里是 >=）
-// Prev1(p) 返回下标 <= p 的第一个 1 的下标，若不存在则返回一个不大于 -1 的位置（类似 C++ 中的 _Find_prev，这里是 <=）
-// Next0(p) 返回下标 >= p 的第一个 0 的下标，若不存在则返回一个不小于 n 的位置（类似 C++ 中的 _Find_next，这里是 >=）
-// Prev0(p) 返回下标 <= p 的第一个 0 的下标，若不存在则返回一个不大于 -1 的位置（类似 C++ 中的 _Find_prev，这里是 <=）
-
-// Count1() 返回 1 的个数
-// Count0() 返回 0 的个数
-
-// And() 位与
-// IAnd() 位与，修改自身
-// Or() 位或
-// IOr() 位或，修改自身
-
 package main
 
 import "math/bits"
+
+// https://leetcode.cn/problems/handling-sum-queries-after-update/
+func handleQuery(nums1 []int, nums2 []int, queries [][]int) []int64 {
+	n := len(nums1)
+	sum := 0
+	for _, num := range nums2 {
+		sum += num
+	}
+	bs := NewBitset(n)
+	for i, num := range nums1 {
+		if num == 1 {
+			bs.Set(i)
+		}
+	}
+
+	var res []int64
+	for _, q := range queries {
+		if q[0] == 1 {
+			left, right := q[1], q[2]
+			bs.FlipRange(left, right+1)
+		} else if q[0] == 2 {
+			sum += q[1] * bs.OnesCount()
+		} else {
+			res = append(res, int64(sum))
+		}
+	}
+	return res
+}
 
 const _w = bits.UintSize     // 一个 uint 的位数
 func NewBitset(n int) Bitset { return make(Bitset, n/_w+1) } // (n+_w-1)/_w
@@ -280,9 +280,8 @@ func (b Bitset) OnesCountRange(start, end int) int {
 	c := 0
 	if start%_w > 0 {
 		c += bits.OnesCount(b[pos1] & (^uint(0) << (start % _w)))
-		pos1++
 	}
-	for i := pos1; i < pos2; i++ {
+	for i := pos1 + 1; i < pos2; i++ {
 		c += bits.OnesCount(b[i])
 	}
 	if end%_w > 0 {

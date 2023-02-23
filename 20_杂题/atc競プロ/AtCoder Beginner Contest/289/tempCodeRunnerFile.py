@@ -1,2 +1,0 @@
-
-        cur = queue.popleft()

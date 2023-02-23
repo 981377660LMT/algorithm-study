@@ -18,9 +18,5 @@ INF = int(1e20)
 # 返回结果数组。返回的数组需要按 id 以递增顺序排列。
 class Solution:
     def mergeArrays(self, nums1: List[List[int]], nums2: List[List[int]]) -> List[List[int]]:
-        mp1 = {x[0]: x[1] for x in nums1}
-        mp2 = {x[0]: x[1] for x in nums2}
-        res = []
-        for k in sorted(set(mp1.keys()) | set(mp2.keys())):
-            res.append([k, mp1.get(k, 0) + mp2.get(k, 0)])
-        return res
+        C1, C2 = Counter(dict(nums1)), Counter(dict(nums2))
+        return sorted((C1 + C2).items())

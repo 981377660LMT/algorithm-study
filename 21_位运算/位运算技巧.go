@@ -5,8 +5,10 @@
 package main
 
 func _(x int) {
-	// 利用 -v = ^v+1
-	lowbit := func(v int64) int64 { return v & -v }
+	// !利用 -v = ^v+1  负数等于反码加1
+	lowbit := func(v int64) int64 { return v & -v } // (如果要找最低位的0,先将v取反)
+	x = 0b10100                                     // 取反 => ^x == 0b01011
+	x = ^x + 1                                      // 补码 => comp == 0b01100
 
 	// 最低位的 1 变 0
 	x &= x - 1
