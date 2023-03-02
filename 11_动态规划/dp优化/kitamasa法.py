@@ -1,3 +1,4 @@
+# 常系数线性递推
 # https://tjkendev.github.io/procon-library/python/series/kitamasa.html
 # !O(k^2logn) 求线性递推式的第n项 (比矩阵快速幂快一个k)
 # 線形漸化式 dp[i+k] = c0*dp[i] + c1*dp[i+1] + ... + ci+k-1*dp[i+k-1] (i>=0) の第n項を求める
@@ -58,6 +59,7 @@ def kitamasa(C: List[int], A: List[int], n: int) -> int:
 
 # 斐波那契
 def fib(n: int) -> int:
+    """0 1 1 2 3 5 8 13 21 34 55"""
     return kitamasa([1, 1], [0, 1], n)
 
 

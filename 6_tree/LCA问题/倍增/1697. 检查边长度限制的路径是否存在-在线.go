@@ -181,15 +181,15 @@ func NewUnionFindArray(n int) *UnionFindArray {
 	return &UnionFindArray{
 		Part:   n,
 		size:   n,
-		Rank:   rank,
+		rank:   rank,
 		parent: parent,
 	}
 }
 
 type UnionFindArray struct {
-	size   int
 	Part   int
-	Rank   []int
+	size   int
+	rank   []int
 	parent []int
 }
 
@@ -198,12 +198,27 @@ func (ufa *UnionFindArray) Union(key1, key2 int) bool {
 	if root1 == root2 {
 		return false
 	}
-	if ufa.Rank[root1] > ufa.Rank[root2] {
+	if ufa.rank[root1] > ufa.rank[root2] {
 		root1, root2 = root2, root1
 	}
 	ufa.parent[root1] = root2
-	ufa.Rank[root2] += ufa.Rank[root1]
+	ufa.rank[root2] += ufa.rank[root1]
 	ufa.Part--
+	return true
+}
+
+func (ufa *UnionFindArray) UnionWithCallback(key1, key2 int, cb func(big, small int)) bool {
+	root1, root2 := ufa.Find(key1), ufa.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+	if ufa.rank[root1] > ufa.rank[root2] {
+		root1, root2 = root2, root1
+	}
+	ufa.parent[root1] = root2
+	ufa.rank[root2] += ufa.rank[root1]
+	ufa.Part--
+	cb(root2, root1)
 	return true
 }
 

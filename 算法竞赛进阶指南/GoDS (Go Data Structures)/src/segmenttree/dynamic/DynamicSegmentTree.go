@@ -1,17 +1,21 @@
 // !动态开点线段树(支持线段树的合并与分裂)
 // https://github.dev/EndlessCheng/codeforces-go/blob/551e365da1be6ff2875955a8ededc6479e336528/copypasta/segment_tree.go#L459
+// https://www.luogu.com.cn/blog/styx-ferryman/xian-duan-shu-ge-bing-zong-ru-men-dao-fang-qi
+// https://www.luogu.com.cn/problem/P4556
+// https://www.luogu.com.cn/problem/P5494
 
-package dynamicsegmenttree
+// 动态开点线段树
+// Update
+// Query/QueryAll
+// Set/Get
+// Merge
+// Split
+
+package main
 
 import (
 	"fmt"
-	"runtime/debug"
 )
-
-// atcoder等使用单组样例测试的oj上,禁用gc会快很多
-func init() {
-	debug.SetGCPercent(-1)
-}
 
 func main() {
 	segmentTree1 := CreateSegmentTree(1, 1e9)
@@ -24,7 +28,9 @@ func main() {
 	segmentTree1.Merge(segmentTree2)
 	fmt.Println(segmentTree1.Query(1, 3).sum)
 
-	root1, root2 := segmentTree1.Split(segmentTree2, 1, 3) // !将 [1,3] 从 segmentTree1 分离成 root1 和 root2
+	root1, root2 := segmentTree1.Split(1, 3) // !将 [1,3] 从 segmentTree1 分离成 root1 和 root2
+	fmt.Println(root1.QueryAll(), root2.QueryAll())
+	root1.Set(1, E{1, 1})
 	fmt.Println(root1.QueryAll(), root2.QueryAll())
 }
 
@@ -34,8 +40,8 @@ type Id = int
 
 func e(left, right int) E             { return E{size: right - left + 1} }
 func id() Id                          { return 0 }
-func op(left, right E) E              { return E{left.size + right.size, left.sum + right.sum} }
-func mapping(parent Id, child E) E    { return E{child.size, child.sum + parent*child.size} }
+func op(e1, e2 E) E                   { return E{e1.size + e2.size, e1.sum + e2.sum} }
+func mapping(f Id, g E) E             { return E{g.size, g.sum + f*g.size} }
 func composition(parent, child Id) Id { return parent + child }
 
 //
@@ -76,7 +82,6 @@ func (o *Node) Query(left, right int) E {
 	if left <= o.left && o.right <= right {
 		return o.data
 	}
-
 	o.pushDown()
 	mid := (o.left + o.right) >> 1
 	res := e(left, right)
@@ -86,12 +91,60 @@ func (o *Node) Query(left, right int) E {
 	if right > mid {
 		res = op(res, o.rightChild.Query(left, right))
 	}
-
 	return res
 }
 
 func (o *Node) QueryAll() E {
+	if o == nil {
+		return e(0, -1)
+	}
 	return o.data
+}
+
+func (o *Node) Set(pos int, val E) {
+	if o.left == o.right {
+		o.data = val
+		return
+	}
+	o.pushDown()
+	mid := (o.left + o.right) >> 1
+	if pos <= mid {
+		o.leftChild.Set(pos, val)
+	} else {
+		o.rightChild.Set(pos, val)
+	}
+	o.pushUp()
+}
+
+func (o *Node) Get(pos int) E {
+	if o.left == o.right {
+		return o.data
+	}
+	o.pushDown()
+	mid := (o.left + o.right) >> 1
+	if pos <= mid {
+		return o.leftChild.Get(pos)
+	}
+	return o.rightChild.Get(pos)
+}
+
+// Build from array. [1,len(nums))]
+func (o *Node) Build(nums []E) {
+	o.build(nums, 1, len(nums))
+}
+
+func (o *Node) build(nums []E, left, right int) {
+	o.left, o.right = left, right
+	if left == right {
+		o.data = nums[left-1]
+		return
+	}
+	m := (left + right) >> 1
+	o.leftChild = newNode(left, m)
+	o.leftChild.build(nums, left, m)
+	o.rightChild = newNode(m+1, right)
+	o.rightChild.build(nums, m+1, right)
+	o.pushUp()
 }
 
 // 线段树合并
@@ -103,12 +156,10 @@ func (this *Node) Merge(other *Node) *Node {
 	if other == nil {
 		return this
 	}
-
 	if this.left == this.right {
 		this.data = op(this.data, other.data)
 		return this
 	}
-
 	this.leftChild = this.leftChild.Merge(other.leftChild)
 	this.rightChild = this.rightChild.Merge(other.rightChild)
 	this.pushUp()
@@ -116,9 +167,14 @@ func (this *Node) Merge(other *Node) *Node {
 }
 
 // 线段树分裂
-// 将区间 [left,right] 从 this 分离到 other 中
-//  root1, root2 := segmentTree1.Split(segmentTree2, 1, 3) // 将 segmentTree1 的 [1,3] 区间 分离成 root1 和 root2
-func (this *Node) Split(other *Node, left, right int) (*Node, *Node) {
+// 将区间 [left,right] 从原树分离到 other 上, this 为原树的剩余部分
+//  root1, root2 := segmentTree1.Split(1, 3)
+func (o *Node) Split(left, right int) (this, other *Node) {
+	this, other = o.split(nil, left, right)
+	return
+}
+
+func (this *Node) split(other *Node, left, right int) (*Node, *Node) {
 	if this == nil || left > this.right || right < this.left {
 		return this, nil
 	}
@@ -128,27 +184,24 @@ func (this *Node) Split(other *Node, left, right int) (*Node, *Node) {
 	if other == nil {
 		other = newNode(this.left, this.right)
 	}
-
-	this.leftChild, other.leftChild = this.leftChild.Split(other.leftChild, left, right)
-	this.rightChild, other.rightChild = this.rightChild.Split(other.rightChild, left, right)
-	this.checkNilAndPushUp()
-	other.checkNilAndPushUp()
+	this.leftChild, other.leftChild = this.leftChild.split(other.leftChild, left, right)
+	this.rightChild, other.rightChild = this.rightChild.split(other.rightChild, left, right)
+	this.pushUp()
+	other.pushUp()
 	return this, other
 }
 
-func (o *Node) checkNilAndPushUp() {
-	var leftData, rightData E
-	if o.leftChild != nil {
-		leftData = o.leftChild.data
-	} else {
-		leftData = e(o.left, o.left)
+// 权值线段树求第 k 小
+// 调用前需保证 1 <= k <= root.QueryAll()
+func (o *Node) kth(k int) int {
+	if o.left == o.right {
+		return o.left
 	}
-	if o.rightChild != nil {
-		rightData = o.rightChild.data
+	if lc := o.leftChild.QueryAll().sum; k <= lc {
+		return o.leftChild.kth(k)
 	} else {
-		rightData = e(o.right, o.right)
+		return o.rightChild.kth(k - lc)
 	}
-	o.data = op(leftData, rightData)
 }
 
 func newNode(left, right int) *Node {
@@ -157,7 +210,7 @@ func newNode(left, right int) *Node {
 
 // op
 func (o *Node) pushUp() {
-	o.data = op(o.leftChild.data, o.rightChild.data)
+	o.data = op(o.leftChild.QueryAll(), o.rightChild.QueryAll())
 }
 
 func (o *Node) pushDown() {
@@ -168,7 +221,6 @@ func (o *Node) pushDown() {
 	if o.rightChild == nil {
 		o.rightChild = newNode(mid+1, o.right)
 	}
-
 	if o.lazy != id() {
 		o.leftChild.propagate(o.lazy)
 		o.rightChild.propagate(o.lazy)

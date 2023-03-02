@@ -6,6 +6,9 @@
 // 可以先求出该数组的频率数组与频率数组的 FWT，即得到两个元素的所有异或和（及组成该异或和的元素对数），
 // 然后枚举两元素异或和，在原数组的异或字典树上查询最大异或和
 // 具体到名称，OR 上的 FWT 也叫 fast zeta transform，AND 上的 FWT 也叫 fast mobius transform
+// fast Zeta transformation又名子集和dp(SOS DP, sum over subset)
+// TODO
+// (set function) => 最好是模板化,参考ei1333和nyaan的实装
 
 package main
 
@@ -15,7 +18,7 @@ import (
 	"os"
 )
 
-const MOD = 998244353
+const MOD int = 998244353
 
 // https://www.luogu.com.cn/problem/P4717
 // 给定长度为2^n的两个序列(n<=17)

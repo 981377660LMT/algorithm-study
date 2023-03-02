@@ -32,8 +32,8 @@ const INF int = 1e18
 
 type DinicEdge struct {
 	to    int
-	cap   int
-	rev   int
+	cap   int // 剩余容量
+	rev   int // 逆向边在 G[to] 中的序号
 	isRev bool
 	index int
 }

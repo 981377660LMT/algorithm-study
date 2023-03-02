@@ -1,9 +1,18 @@
+# 算法学习笔记(40): 原根 - Pecco的文章 - 知乎
+# https://zhuanlan.zhihu.com/p/166043237
+
+# a在模m下的阶是同余方程 a**x = 1 (mod m) 的最小正整数解,记为ord(m,a)
+# ord(m,a)一定是phi(m)的因子 ,特别地,当 ord(m,a) = phi(m)时,称a为模m的原根
+
+# 原根的应用:NTT
+
 # 原根
 # 任何质数都有原根
 from random import randrange
 from math import gcd
 
-
+# 求出一个原根
+# https://judge.yosupo.jp/problem/primitive_root
 def primitive_root_prime(p: int) -> int:
     if p == 2:
         return 1

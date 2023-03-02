@@ -58,6 +58,29 @@ def dijkstra2(
     return dist[end], path[::-1]
 
 
+# !dijkstra求出路径上每个点的前驱点和前驱边
+# 其中邻接表的每个元素是一个三元组，分别是邻接点，边权，边的编号
+def dijkstra3(
+    n: int, adjList: Sequence[Sequence[Tuple[int, int, int]]], start: int
+) -> Tuple[List[int], List[int], List[int]]:
+    dist = [INF] * n
+    preV, preE = [-1] * n, [-1] * n
+    dist[start] = 0
+    pq = [(0, start)]
+    while pq:
+        curDist, cur = heappop(pq)
+        if dist[cur] < curDist:
+            continue
+        for next, weight, eid in adjList[cur]:
+            cand = dist[cur] + weight
+            if cand < dist[next]:
+                dist[next] = cand
+                preV[next] = cur
+                preE[next] = eid
+                heappush(pq, (dist[next], next))
+    return dist, preV, preE
+
+
 import sys
 
 sys.setrecursionlimit(int(1e9))

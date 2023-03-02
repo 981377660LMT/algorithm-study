@@ -1,4 +1,4 @@
-"""三分法求凸函数极值"""
+"""三分法求单峰函数的极值点"""
 
 from typing import Callable
 

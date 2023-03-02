@@ -94,7 +94,7 @@ func NewSortedList(comparator func(a, b Value) int, initCapacity int) *SortedLis
 	sl := &SortedList{
 		seed:       uint64(time.Now().UnixNano()/2 + 1),
 		comparator: comparator,
-		nodes:      make([]node, max(initCapacity, 128)), // !定长开
+		nodes:      make([]node, max(initCapacity, 128)),
 	}
 	return sl
 }
@@ -232,7 +232,6 @@ func (sl *SortedList) Upper(rootVersion, val int) int {
 	} else {
 		res = sl.nodes[sl.kthNode(y, 1)].value
 	}
-	// sl.root = sl.merge(x, y) // 赋值rt其实灭有必要
 	return res
 }
 

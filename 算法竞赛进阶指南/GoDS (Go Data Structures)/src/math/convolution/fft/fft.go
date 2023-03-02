@@ -1,3 +1,6 @@
+// fft 快速傅里叶变换求卷积
+// 浮点数运算产生的误差会比较大 一般用ntt
+
 package main
 
 import (
@@ -8,6 +11,35 @@ import (
 	"os"
 )
 
+// https://atcoder.jp/contests/practice2/tasks/practice2_f
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	n++
+	m++
+
+	poly1 := make([]int, n) // 从低到高表示F(x)的系数
+	poly2 := make([]int, m) // 从低到高表示G(x)的系数
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &poly1[i])
+	}
+	for i := 0; i < m; i++ {
+		fmt.Fscan(in, &poly2[i])
+	}
+
+	conv := Convolution(poly1, poly2)
+	for i := 0; i < n+m-1; i++ {
+		fmt.Fprint(out, conv[i], " ")
+	}
+}
+
+// 计算 A(x) 和 B(x) 的卷积
+//  c[i] = ∑a[k]*b[i-k], k=0..i
+//  入参出参都是次项从低到高的系数
 func Convolution(a, b []int) []int {
 	n, m := len(a), len(b)
 	limit := 1 << uint(bits.Len(uint(n+m-1)))
@@ -28,9 +60,20 @@ func Convolution(a, b []int) []int {
 	f.idft(cmplxA)
 	conv := make([]int, n+m-1)
 	for i := range conv {
-		conv[i] = int(math.Round(real(cmplxA[i]))) // !% mod  决定是否取模
+		conv[i] = int(math.Round(real(cmplxA[i])))
 	}
 	return conv
+}
+
+// 计算多个多项式的卷积
+// 入参出参都是次项从低到高的系数
+func PolyConvolution(coefs [][]int) []int {
+	n := len(coefs)
+	if n == 1 {
+		return coefs[0]
+	}
+	return Convolution(PolyConvolution(coefs[:n/2]), PolyConvolution(coefs[n/2:]))
+
 }
 
 // https://github.dev/EndlessCheng/codeforces-go/tree/master/copypasta
@@ -83,29 +126,5 @@ func (f *fft) idft(a []complex128) {
 	f.transform(a, f.omegaInv)
 	for i := range a {
 		a[i] /= complex(float64(f.n), 0)
-	}
-}
-
-func main() {
-
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, m int
-	fmt.Fscan(in, &n, &m)
-
-	poly1 := make([]int, n+1) // 从低到高表示F(x)的系数
-	poly2 := make([]int, m+1) // 从低到高表示G(x)的系数
-	for i := 0; i < n+1; i++ {
-		fmt.Fscan(in, &poly1[i])
-	}
-	for i := 0; i < m+1; i++ {
-		fmt.Fscan(in, &poly2[i])
-	}
-
-	conv := Convolution(poly1, poly2)
-	for i := 0; i < n+m+1; i++ {
-		fmt.Fprint(out, conv[i], " ")
 	}
 }

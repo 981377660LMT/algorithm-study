@@ -56,18 +56,18 @@ func (*LazySegTree) op(left, right E) E {
 		inv:  left.inv + right.inv + left.one*right.zero,
 	}
 }
-func (*LazySegTree) mapping(lazy Id, data E) E {
-	if !lazy {
-		return data
+func (*LazySegTree) mapping(f Id, s E) E {
+	if !f {
+		return s
 	}
 	return E{
-		zero: data.one,
-		one:  data.zero,
-		inv:  data.one*data.zero - data.inv,
+		zero: s.one,
+		one:  s.zero,
+		inv:  s.one*s.zero - s.inv,
 	}
 }
-func (*LazySegTree) composition(parentLazy, childLazy Id) Id {
-	return (parentLazy && !childLazy) || (!parentLazy && childLazy)
+func (*LazySegTree) composition(new, old Id) Id {
+	return (new && !old) || (!new && old)
 }
 
 //

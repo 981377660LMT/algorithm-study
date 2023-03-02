@@ -1,9 +1,8 @@
-# https://nyaannyaan.github.io/library/data-structure/segment-set.hpp
 # 管理区间的数据结构
 # 注意:所有区间都是闭区间 例如 [1,1] 表示 长为1的区间,起点为1
 
 
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 from sortedcontainers import SortedList
 
 INF = int(1e18)
@@ -62,15 +61,39 @@ class SegmentSet:
             self._st.add((right, nr))
             self.count += nr - right + 1
 
-    def next(self, x: int) -> int:
-        """返回第一个大于等于x的区间起点.如果不存在,返回INF."""
+    def next(self, x: int) -> Optional[int]:
+        """返回第一个大于等于x的`区间起点`.如果不存在,返回None."""
         it = self._st.bisect_left((x, -INF))
         if it == len(self._st):
-            return INF
+            return
         res = self._st[it][0]
         if x > res:
             return x
         return res
+
+    def ceil(self, x: int) -> Optional[int]:
+        """返回区间内第一个大于等于x的元素.如果不存在,返回None."""
+        pos = self._st.bisect_right((x, INF))
+        if pos != 0 and self._st[pos - 1][1] >= x:
+            return x
+        if pos != len(self._st):
+            return self._st[pos][0]
+
+    def floor(self, x: int) -> Optional[int]:
+        """返回区间内最后一个小于等于x的元素.如果不存在,返回None."""
+        pos = self._st.bisect_right((x, INF))
+        if pos == 0:
+            return None
+        if self._st[pos - 1][1] >= x:
+            return x
+        return self._st[pos - 1][1]
+
+    def get(self, x: int) -> Optional[Tuple[int, int]]:
+        """返回包含x的区间.如果不存在,返回None."""
+        pos = self._st.bisect_right((x, INF))
+        if pos == 0 or self._st[pos - 1][1] < x:
+            return None
+        return self._st[pos - 1]
 
     def __contains__(self, arg: Union[int, Tuple[int, int]]) -> bool:
         if isinstance(arg, int):
@@ -114,3 +137,4 @@ if __name__ == "__main__":
     assert ss.count == sum(right - left + 1 for left, right in ss)
     ss.erase(2, 3)
     assert len(ss) == 3
+    assert ss.get(5) == (5, 6)

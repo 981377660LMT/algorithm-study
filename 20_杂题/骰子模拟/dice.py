@@ -13,10 +13,8 @@ Faces = Tuple[T, T, T, T, T, T]
 
 class Dice(Generic[T]):
     """
-    https://maspypy.github.io/library/other/dice.hpp を参考にした.
-
-    - 次の番号付けるに従う:UFRLBD.
-    - i, 5-i が反対の面になっている (i=0,1,2,3,4,5).
+    - 0-5号索引分别对应的面:UFRLBD.
+    - i, 5-i 是相反的面 (i=0,1,2,3,4,5).
     """
 
     __slots__ = ("_f", "_all_faces", "_hash")
@@ -27,7 +25,7 @@ class Dice(Generic[T]):
         self._hash = None
 
     def rotate_up_to(self, direction: Literal["F", "R", "L", "B"]) -> None:
-        """U のうつる先となる FRLB を指定する."""
+        """将U面旋转到指定的面."""
         if direction == "F":
             self._f = (self._f[4], self._f[0], self._f[2], self._f[3], self._f[5], self._f[1])
         elif direction == "R":
@@ -38,7 +36,7 @@ class Dice(Generic[T]):
             self._f = (self._f[1], self._f[5], self._f[2], self._f[3], self._f[0], self._f[4])
 
     def get_all_faces(self) -> List["Faces[T]"]:
-        """24種の面の組み合わせを返す."""
+        """返回24种可能的面."""
         if self._all_faces is not None:
             return self._all_faces  # type: ignore
         res = [None] * 24

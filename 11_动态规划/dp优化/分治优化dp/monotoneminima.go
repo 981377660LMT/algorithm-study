@@ -1,12 +1,13 @@
-// 决策单调性(Monotone)
+// 决策单调性(Monotone)函数f(i,j)的最小值
 // Monge(四边形不等式) ⇒ Totally Monotone(TM) ⇒ Monotone なので、Monotone は弱い条件である。
 // https://ei1333.github.io/luzhiled/snippets/dp/monotone-minima.html
 // https://beet-aizu.github.io/library/algorithm/monotoneminima.cpp
 
 // 对于一个二元函数f(i,j) (0<=i<H, 0<=j<W),
 // !如果对任意 p<q 满足 argmin(f(p,*))<=argmin(f(q,*)),
-// !即f(i,j)取到最小值时,j如果变大,i也变大,则称f(i,j)是关于i Monotone 的.
+// !即f(i,j)取到最小值时,i如果变大,决策点j也随之变大,则称f(i,j)是关于i Monotone 的.
 // !例如 f(i,j)=nums[j]+(j-i)^2 是关于i的Monotone函数(一次函数)
+// 绝大多数的斜率优化也满足决策单调性（维护的下凸包，斜率也满足单调不减）
 
 package main
 
@@ -16,9 +17,10 @@ import (
 	"os"
 )
 
-// !dist(i,j): 闭区间[i,j]的代价(0<=i<=j<=W-1)
-func monotoneminima(H, W int, dist func(i, j int) int) [][2]int {
-	dp := make([][2]int, H) // dp[i] 表示第i行取到`最小值`的(索引,值)
+// 对每个查询 0<=qi<q 求出 f(i,j) 取得最小值时的 (j, f(i,j)) (0<=j<W)
+//  !f(i,j): 0<=i<=Q-1, 0<=j<=W-1
+func monotoneminima(Q, W int, f func(i, j int) int, isMin bool) [][2]int {
+	dp := make([][2]int, Q) // dp[i] 表示第i行取到`最小值`的(索引,值)
 
 	var dfs func(top, bottom, left, right int)
 	dfs = func(top, bottom, left, right int) {
@@ -30,10 +32,17 @@ func monotoneminima(H, W int, dist func(i, j int) int) [][2]int {
 		index := -1
 		res := 0
 		for i := left; i <= right; i++ {
-			tmp := dist(mid, i)
-			if index == -1 || tmp < res {
-				index = i
-				res = tmp
+			tmp := f(mid, i)
+			if isMin {
+				if index == -1 || tmp < res {
+					index = i
+					res = tmp
+				}
+			} else {
+				if index == -1 || tmp > res {
+					index = i
+					res = tmp
+				}
 			}
 		}
 		dp[mid] = [2]int{index, res}
@@ -41,7 +50,7 @@ func monotoneminima(H, W int, dist func(i, j int) int) [][2]int {
 		dfs(mid+1, bottom, index, right)
 	}
 
-	dfs(0, H-1, 0, W-1)
+	dfs(0, Q-1, 0, W-1)
 	return dp
 }
 
@@ -66,7 +75,7 @@ func main() {
 	dist := func(i, j int) int {
 		return nums[j] + (j-i)*(j-i)
 	}
-	res := monotoneminima(n, n, dist)
+	res := monotoneminima(n, n, dist, true)
 	for i := 0; i < n; i++ {
 		fmt.Fprintln(out, res[i][1])
 	}

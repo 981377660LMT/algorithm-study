@@ -27,20 +27,22 @@ func main() {
 	fmt.Println(query(1, 1, 2, 2))
 }
 
+type S = int
+
 //  query: 查询 [row1,col1,row2,col2] 闭区间的贡献值
 //     0 <= row1 <= row2 < len(matrix)
 //     0 <= col1 <= col2 < len(matrix[0])
-func NewSparseTable2D(matrix [][]int, op func(int, int) int) (query func(row1, col1, row2, col2 int) int) {
+func NewSparseTable2D(matrix [][]S, op func(S, S) S) (query func(row1, col1, row2, col2 int) int) {
 	n, m := len(matrix), len(matrix[0])
-	rowSize := bits.Len(uint(n))     // 1+logn
-	colSize := bits.Len(uint(m))     // 1+logm
-	dp := make([][][][]int, rowSize) // (rowSize * row * colSize * col)
+	rowSize := bits.Len(uint(n))   // 1+logn
+	colSize := bits.Len(uint(m))   // 1+logm
+	dp := make([][][][]S, rowSize) // (rowSize * row * colSize * col)
 	for i := 0; i < rowSize; i++ {
-		dp[i] = make([][][]int, n)
+		dp[i] = make([][][]S, n)
 		for j := 0; j < n; j++ {
-			dp[i][j] = make([][]int, colSize)
+			dp[i][j] = make([][]S, colSize)
 			for k := 0; k < colSize; k++ {
-				dp[i][j][k] = make([]int, m)
+				dp[i][j][k] = make([]S, m)
 			}
 		}
 	}

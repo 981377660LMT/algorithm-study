@@ -8,9 +8,9 @@ package main
 
 const INF int = 1e18
 
-//  !dist(i,j,step): 左闭右开区间[i,j)的代价(0<=i<j<=n)
+//  !f(i,j,step): 左闭右开区间[i,j)的代价(0<=i<j<=n)
 //   可选:step表示当前在第几组(1<=step<=k)
-func divideAndConquerOptimization(k, n int, dist func(i, j, step int) int) [][]int {
+func divideAndConquerOptimization(k, n int, f func(i, j, step int) int) [][]int {
 	dp := make([][]int, k+1)
 	for i := range dp {
 		dp[i] = make([]int, n+1)
@@ -25,7 +25,7 @@ func divideAndConquerOptimization(k, n int, dist func(i, j, step int) int) [][]i
 			if x >= y {
 				return INF
 			}
-			return dp[k_-1][x] + dist(x, y, k_)
+			return dp[k_-1][x] + f(x, y, k_)
 		}
 		res := monotoneminima(n+1, n+1, getCost)
 		for j := 0; j <= n; j++ {
@@ -36,8 +36,8 @@ func divideAndConquerOptimization(k, n int, dist func(i, j, step int) int) [][]i
 	return dp
 }
 
-// 对每个 0<=i<H 求出 dist(i,j) 取得最小值的 (j, dist(i,j)) (0<=j<W)
-func monotoneminima(H, W int, dist func(i, j int) int) [][2]int {
+// 对每个 0<=i<H 求出 f(i,j) 取得最小值的 (j, f(i,j)) (0<=j<W)
+func monotoneminima(H, W int, f func(i, j int) int) [][2]int {
 	dp := make([][2]int, H) // dp[i] 表示第i行取到`最小值`的(索引,值)
 
 	var dfs func(top, bottom, left, right int)
@@ -50,7 +50,7 @@ func monotoneminima(H, W int, dist func(i, j int) int) [][2]int {
 		index := -1
 		res := 0
 		for i := left; i <= right; i++ {
-			tmp := dist(mid, i)
+			tmp := f(mid, i)
 			if index == -1 || tmp < res { // !less if get min
 				index = i
 				res = tmp

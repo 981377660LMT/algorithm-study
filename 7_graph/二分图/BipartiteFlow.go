@@ -23,12 +23,21 @@
 // lex_min_vertex_cover(ord):= 辞書順(優先度順)最小頂点被覆を返す.
 //  (按照ord里的点的优先顺序排序的最小点覆盖)
 //  ord里表示左侧顶点[0,n)和右侧顶点[n,n+m)的优先顺序
-// build_residual_graph() 残余グラフを構築する.
+// BuildRisidualGraph() 残余グラフを構築する.
 //  左侧顶点为[0,n)，右侧顶点为[n,n+m), 起点为n+m, 终点为n+m+1.
-//  对残量网络进行强连通分量分解，对每条边 (u,v):
-//  1. 如果u,v在同一个强连通分量中:不一定在最大匹配中
-//  2. 如果边(u,v)在最大匹配中:在最大匹配中一定用到
-//  3. 否则,u和v属于不同的强连通分量:一定不在最大匹配中
+// !残量网络的性质
+//!   - 判断每条边是否`一定`存在于最大匹配中
+//      对残量网络进行强连通分量分解，对每条边 (u,v),按以下顺序判断 (一定在最大匹配中/一定不在最大匹配中/不确定):
+//      1. u,v在同一个强连通分量中 => 不确定
+//      2. 边(u,v)存在于最大匹配中 => 一定在最大匹配中
+//      3. 否则u和v属于不同的强连通分量 => 一定不在最大匹配中
+//      删边的情况参考 二分图中每条边是否存在于最大匹配中
+//!   - 判断`每个点`是否`一定`存在于最大匹配中 => 二分图博弈问题:
+//      朴素的想法:去除这个顶点之后,如果最大流发生变化,则这个顶点一定在最大匹配中
+//!     进一步的方法:在残量网络中,对二分图左边的点,从虚拟源点出发bfs,路径上的左侧的点`一定不在`最大匹配中(去除这些点之后,最大流不变)
+//      反之则一定在最大匹配中
+//!     对二分图右边的点,在残量图的反图上，从虚拟汇点出发bfs,路径上的右侧的点`一定不在`最大匹配中
+//      删点的情况参考 G - Vertex Deletion-二分图最大匹配中一定包含的点的个数
 
 // 加边是O(1)的 删边是O(V)的
 // 其余操作都是O(Esqrt(V))的
@@ -141,13 +150,14 @@ func MatchingOnBipartiteGraph() {
 }
 
 type BipartiteFlow struct {
-	n, m, timeStamp int
-	g, rg           [][]int
-	matchL, matchR  []int
-	dist            []int
-	used            []int
-	alive           []bool
-	matched         bool
+	N, M           int
+	MatchL, MatchR []int
+	timeStamp      int
+	g, rg          [][]int
+	dist           []int
+	used           []int
+	alive          []bool
+	matched        bool
 }
 
 // 指定左侧点数n，右侧点数m，初始化二分图最大流.
@@ -164,18 +174,19 @@ func NewBipartiteFlow(n, m int) *BipartiteFlow {
 	}
 
 	return &BipartiteFlow{
-		n:      n,
-		m:      m,
+		N:      n,
+		M:      m,
 		g:      g,
 		rg:     rg,
-		matchL: matchL,
-		matchR: matchR,
+		MatchL: matchL,
+		MatchR: matchR,
 		used:   used,
 		alive:  alive,
 	}
 }
 
 // 增加一条边u-v.u属于左侧点集，v属于右侧点集.
+//  !0<=u<n,0<=v<m.
 func (bf *BipartiteFlow) AddEdge(u, v int) {
 	bf.g[u] = append(bf.g[u], v)
 	bf.rg[v] = append(bf.rg[v], u)
@@ -183,9 +194,9 @@ func (bf *BipartiteFlow) AddEdge(u, v int) {
 
 // /* http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=3198 */
 func (bt *BipartiteFlow) EraseEdge(u, v int) {
-	if bt.matchL[u] == v {
-		bt.matchL[u] = -1
-		bt.matchR[v] = -1
+	if bt.MatchL[u] == v {
+		bt.MatchL[u] = -1
+		bt.MatchR[v] = -1
 	}
 	// remove v in bt.g[u]
 	// remove u in bt.rg[v]
@@ -204,14 +215,16 @@ func (bt *BipartiteFlow) EraseEdge(u, v int) {
 }
 
 // 求最大匹配.
+//  返回(左侧点,右侧点)的匹配对.
+//  !0<=左侧点<n,0<=右侧点<m.
 func (bf *BipartiteFlow) MaxMatching() [][2]int {
 	bf.matched = true
 	for {
 		bf.buildAugmentPath()
 		bf.timeStamp++
 		flow := 0
-		for i := 0; i < bf.n; i++ {
-			if bf.matchL[i] == -1 {
+		for i := 0; i < bf.N; i++ {
+			if bf.MatchL[i] == -1 {
 				tmp := bf.findMinDistAugmentPath(i)
 				if tmp {
 					flow++
@@ -225,9 +238,9 @@ func (bf *BipartiteFlow) MaxMatching() [][2]int {
 	}
 
 	res := [][2]int{}
-	for i := 0; i < bf.n; i++ {
-		if bf.matchL[i] >= 0 {
-			res = append(res, [2]int{i, bf.matchL[i]})
+	for i := 0; i < bf.N; i++ {
+		if bf.MatchL[i] >= 0 {
+			res = append(res, [2]int{i, bf.MatchL[i]})
 		}
 	}
 	return res
@@ -243,16 +256,16 @@ func (bt *BipartiteFlow) LexMaxMatching() [][2]int {
 		sort.Ints(vs) // 字典序最小
 	}
 	es := [][2]int{}
-	for i := 0; i < bt.n; i++ {
-		if bt.matchL[i] == -1 || !bt.alive[i] {
+	for i := 0; i < bt.N; i++ {
+		if bt.MatchL[i] == -1 || !bt.alive[i] {
 			continue
 		}
-		bt.matchR[bt.matchL[i]] = -1
-		bt.matchL[i] = -1
+		bt.MatchR[bt.MatchL[i]] = -1
+		bt.MatchL[i] = -1
 		bt.timeStamp++
 		bt.findAugmentPath(i)
 		bt.alive[i] = false
-		es = append(es, [2]int{i, bt.matchL[i]})
+		es = append(es, [2]int{i, bt.MatchL[i]})
 	}
 	return es
 }
@@ -261,8 +274,8 @@ func (bt *BipartiteFlow) LexMaxMatching() [][2]int {
 func (bt *BipartiteFlow) MinVertexCover() []int {
 	visited := bt.findResidualPath()
 	res := []int{}
-	for i := 0; i < (bt.n + bt.m); i++ {
-		if visited[i] != (i < bt.n) {
+	for i := 0; i < (bt.N + bt.M); i++ {
+		if visited[i] != (i < bt.N) {
 			res = append(res, i)
 		}
 	}
@@ -272,19 +285,19 @@ func (bt *BipartiteFlow) MinVertexCover() []int {
 // 字典序(ord优先度顺序)最小点覆盖.
 //  /* https://atcoder.jp/contests/utpc2013/tasks/utpc2013_11 */
 func (bt *BipartiteFlow) LexMinVertexCover(ord []int) []int {
-	if len(ord) != bt.n+bt.m {
+	if len(ord) != bt.N+bt.M {
 		panic("len(ord) != bt.n+bt.m")
 	}
 	res := bt.BuildRisidualGraph()
-	rRes := make([][]int, bt.n+bt.m+2)
-	for i := 0; i < bt.n+bt.m+2; i++ {
+	rRes := make([][]int, bt.N+bt.M+2)
+	for i := 0; i < bt.N+bt.M+2; i++ {
 		for _, to := range res[i] {
 			rRes[to] = append(rRes[to], i)
 		}
 	}
 
 	que := []int{}
-	visited := make([]int8, bt.n+bt.m+2)
+	visited := make([]int8, bt.N+bt.M+2)
 	for i := range visited {
 		visited[i] = -1
 	}
@@ -326,11 +339,11 @@ func (bt *BipartiteFlow) LexMinVertexCover(ord []int) []int {
 		}
 	}
 
-	expandRight(bt.n + bt.m)
-	expandLeft(bt.n + bt.m + 1)
+	expandRight(bt.N + bt.M)
+	expandLeft(bt.N + bt.M + 1)
 	ret := []int{}
 	for _, v := range ord {
-		if v < bt.n {
+		if v < bt.N {
 			expandLeft(v)
 			if visited[v]&1 != 0 { // visited[v] != 0
 				ret = append(ret, v)
@@ -349,8 +362,8 @@ func (bt *BipartiteFlow) LexMinVertexCover(ord []int) []int {
 func (bt *BipartiteFlow) MaxIndependentSet() []int {
 	visited := bt.findResidualPath()
 	res := []int{}
-	for i := 0; i < (bt.n + bt.m); i++ {
-		if visited[i] != (i >= bt.n) {
+	for i := 0; i < (bt.N + bt.M); i++ {
+		if visited[i] != (i >= bt.N) {
 			res = append(res, i)
 		}
 	}
@@ -360,8 +373,8 @@ func (bt *BipartiteFlow) MaxIndependentSet() []int {
 // 最小边覆盖.
 func (bt *BipartiteFlow) MinEdgeCover() [][2]int {
 	es := bt.MaxMatching()
-	for i := 0; i < bt.n; i++ {
-		if bt.matchL[i] >= 0 {
+	for i := 0; i < bt.N; i++ {
+		if bt.MatchL[i] >= 0 {
 			continue
 		}
 		if len(bt.g[i]) == 0 {
@@ -369,8 +382,8 @@ func (bt *BipartiteFlow) MinEdgeCover() [][2]int {
 		}
 		es = append(es, [2]int{i, bt.g[i][0]})
 	}
-	for i := 0; i < bt.m; i++ {
-		if bt.matchR[i] >= 0 {
+	for i := 0; i < bt.M; i++ {
+		if bt.MatchR[i] >= 0 {
 			continue
 		}
 		if len(bt.rg[i]) == 0 {
@@ -388,31 +401,31 @@ func (bf *BipartiteFlow) BuildRisidualGraph() [][]int {
 		bf.MaxMatching()
 	}
 
-	S := bf.n + bf.m
-	T := bf.n + bf.m + 1
-	ris := make([][]int, bf.n+bf.m+2)
-	for i := 0; i < bf.n; i++ {
-		if bf.matchL[i] == -1 {
+	S := bf.N + bf.M
+	T := bf.N + bf.M + 1
+	ris := make([][]int, bf.N+bf.M+2)
+	for i := 0; i < bf.N; i++ {
+		if bf.MatchL[i] == -1 {
 			ris[S] = append(ris[S], i)
 		} else {
 			ris[i] = append(ris[i], S)
 		}
 	}
 
-	for i := 0; i < bf.m; i++ {
-		if bf.matchR[i] == -1 {
-			ris[i+bf.n] = append(ris[i+bf.n], T)
+	for i := 0; i < bf.M; i++ {
+		if bf.MatchR[i] == -1 {
+			ris[i+bf.N] = append(ris[i+bf.N], T)
 		} else {
-			ris[T] = append(ris[T], i+bf.n)
+			ris[T] = append(ris[T], i+bf.N)
 		}
 	}
 
-	for i := 0; i < bf.n; i++ {
+	for i := 0; i < bf.N; i++ {
 		for _, j := range bf.g[i] {
-			if bf.matchL[i] == j {
-				ris[j+bf.n] = append(ris[j+bf.n], i)
+			if bf.MatchL[i] == j {
+				ris[j+bf.N] = append(ris[j+bf.N], i)
 			} else {
-				ris[i] = append(ris[i], j+bf.n)
+				ris[i] = append(ris[i], j+bf.N)
 			}
 		}
 	}
@@ -423,9 +436,9 @@ func (bf *BipartiteFlow) BuildRisidualGraph() [][]int {
 func (bf *BipartiteFlow) findResidualPath() []bool {
 	res := bf.BuildRisidualGraph()
 	que := []int{}
-	visited := make([]bool, bf.n+bf.m+2)
-	que = append(que, bf.n+bf.m)
-	visited[bf.n+bf.m] = true
+	visited := make([]bool, bf.N+bf.M+2)
+	que = append(que, bf.N+bf.M)
+	visited[bf.N+bf.M] = true
 	for len(que) > 0 {
 		idx := que[0]
 		que = que[1:]
@@ -446,8 +459,8 @@ func (bf *BipartiteFlow) buildAugmentPath() {
 	for i := 0; i < len(bf.g); i++ {
 		bf.dist[i] = -1
 	}
-	for i := 0; i < bf.n; i++ {
-		if bf.matchL[i] == -1 {
+	for i := 0; i < bf.N; i++ {
+		if bf.MatchL[i] == -1 {
 			que = append(que, i)
 			bf.dist[i] = 0
 		}
@@ -456,7 +469,7 @@ func (bf *BipartiteFlow) buildAugmentPath() {
 		a := que[0]
 		que = que[1:]
 		for _, b := range bf.g[a] {
-			c := bf.matchR[b]
+			c := bf.MatchR[b]
 			if c >= 0 && bf.dist[c] == -1 {
 				bf.dist[c] = bf.dist[a] + 1
 				que = append(que, c)
@@ -468,10 +481,10 @@ func (bf *BipartiteFlow) buildAugmentPath() {
 func (bf *BipartiteFlow) findMinDistAugmentPath(a int) bool {
 	bf.used[a] = bf.timeStamp
 	for _, b := range bf.g[a] {
-		c := bf.matchR[b]
+		c := bf.MatchR[b]
 		if c < 0 || (bf.used[c] != bf.timeStamp && bf.dist[c] == bf.dist[a]+1 && bf.findMinDistAugmentPath(c)) {
-			bf.matchR[b] = a
-			bf.matchL[a] = b
+			bf.MatchR[b] = a
+			bf.MatchL[a] = b
 			return true
 		}
 	}
@@ -481,10 +494,10 @@ func (bf *BipartiteFlow) findMinDistAugmentPath(a int) bool {
 func (bf *BipartiteFlow) findAugmentPath(a int) bool {
 	bf.used[a] = bf.timeStamp
 	for _, b := range bf.g[a] {
-		c := bf.matchR[b]
+		c := bf.MatchR[b]
 		if c < 0 || (bf.alive[c] && bf.used[c] != bf.timeStamp && bf.findAugmentPath(c)) {
-			bf.matchR[b] = a
-			bf.matchL[a] = b
+			bf.MatchR[b] = a
+			bf.MatchL[a] = b
 			return true
 		}
 	}

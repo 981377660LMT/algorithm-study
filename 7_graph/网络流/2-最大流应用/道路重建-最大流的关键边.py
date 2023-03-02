@@ -19,6 +19,14 @@ from typing import DefaultDict, Set
 INF = int(1e18)
 
 
+def min(a, b):
+    return a if a < b else b
+
+
+def max(a, b):
+    return a if a > b else b
+
+
 class MaxFlow:
     def __init__(self, start: int, end: int) -> None:
         self.graph = defaultdict(lambda: defaultdict(int))  # 原图

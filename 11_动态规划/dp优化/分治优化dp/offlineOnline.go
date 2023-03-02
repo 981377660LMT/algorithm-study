@@ -5,7 +5,7 @@
 // https://beet-aizu.github.io/library/algorithm/offlineonline.cpp
 // https://ei1333.github.io/library/dp/online-offline-dp.hpp
 
-// オフライン・オンライン変換：
+// オフライン・オンライン変換(cdq分治)：
 // !如果offline问题存在复杂度O(M(n))的解,那么online问题存在复杂度O(M(n)logn)的解
 // dp[j]=min(dp[i]+f(i,j)) (0<=i<j)
 // O(n^2)优化到O(nlogn^2)
@@ -20,8 +20,8 @@ import (
 	"os"
 )
 
-// !dist(i,j): 左闭右开区间[i,j)的代价(0<=i<j<=n)
-func offlineOnlineDp(n int, dist func(i, j int) int) int {
+// !f(i,j): 左闭右开区间[i,j)的代价(0<=i<j<=n)
+func offlineOnlineDp(n int, f func(i, j int) int) int {
 	dp := make([]int, n+1)
 	used := make([]bool, n+1)
 	used[n] = true
@@ -41,9 +41,9 @@ func offlineOnlineDp(n int, dist func(i, j int) int) int {
 		}
 		mid := (top + bottom) / 2
 		index := left
-		res := dist(mid, index) + dp[index]
+		res := f(mid, index) + dp[index]
 		for i := left; i <= right; i++ {
-			tmp := dist(mid, i) + dp[i]
+			tmp := f(mid, i) + dp[i]
 			if tmp < res { // !less if get min
 				res = tmp
 				index = i
@@ -58,7 +58,7 @@ func offlineOnlineDp(n int, dist func(i, j int) int) int {
 	var solve func(left, right int)
 	solve = func(left, right int) {
 		if left+1 == right {
-			update(left, dist(left, right)+dp[right])
+			update(left, f(left, right)+dp[right])
 			return
 		}
 		mid := (left + right) / 2
@@ -109,13 +109,13 @@ func main() {
 		fmt.Fscan(in, &ys[i])
 	}
 
-	dist := func(i, j int) int {
+	f := func(i, j int) int {
 		// 0<=i<j<=n
 		a := abs(starts[j-1] - xs[i])
 		b := abs(ys[i])
 		return a + b
 	}
-	res := offlineOnlineDp(n, dist)
+	res := offlineOnlineDp(n, f)
 	fmt.Fprintln(out, res)
 }
 

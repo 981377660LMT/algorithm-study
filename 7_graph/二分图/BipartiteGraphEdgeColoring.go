@@ -761,7 +761,7 @@ func newUnionFindArray(n int) *unionFindArray {
 	return &unionFindArray{
 		Part:   n,
 		size:   n,
-		Rank:   rank,
+		rank:   rank,
 		parent: parent,
 	}
 }
@@ -769,7 +769,7 @@ func newUnionFindArray(n int) *unionFindArray {
 type unionFindArray struct {
 	size   int
 	Part   int
-	Rank   []int
+	rank   []int
 	parent []int
 }
 
@@ -778,15 +778,29 @@ func (ufa *unionFindArray) Union(key1, key2 int) bool {
 	if root1 == root2 {
 		return false
 	}
-	if ufa.Rank[root1] > ufa.Rank[root2] {
+	if ufa.rank[root1] > ufa.rank[root2] {
 		root1, root2 = root2, root1
 	}
 	ufa.parent[root1] = root2
-	ufa.Rank[root2] += ufa.Rank[root1]
+	ufa.rank[root2] += ufa.rank[root1]
 	ufa.Part--
 	return true
 }
 
+func (ufa *unionFindArray) UnionWithCallback(key1, key2 int, cb func(big, small int)) bool {
+	root1, root2 := ufa.Find(key1), ufa.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+	if ufa.rank[root1] > ufa.rank[root2] {
+		root1, root2 = root2, root1
+	}
+	ufa.parent[root1] = root2
+	ufa.rank[root2] += ufa.rank[root1]
+	ufa.Part--
+	cb(root2, root1)
+	return true
+}
 func (ufa *unionFindArray) Find(key int) int {
 	for ufa.parent[key] != key {
 		ufa.parent[key] = ufa.parent[ufa.parent[key]]
@@ -800,7 +814,7 @@ func (ufa *unionFindArray) IsConnected(key1, key2 int) bool {
 }
 
 func (ufa *unionFindArray) Size(key int) int {
-	return ufa.Rank[ufa.Find(key)]
+	return ufa.rank[ufa.Find(key)]
 }
 
 type H = []int

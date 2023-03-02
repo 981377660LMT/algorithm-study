@@ -1,4 +1,6 @@
 # 区间异或和
+# !a>=0时 4*a, 4*a+1, 4*a+2, 4*a+3的异或和为0
+
 
 import sys
 
@@ -9,7 +11,7 @@ INF = int(4e18)
 
 
 def preXor(upper: int) -> int:
-    """[0, upper]内所有数的异或 0<=upper<=1e12"""
+    """[0, upper]内所有数的异或 upper>=0"""
     mod = upper % 4
     if mod == 0:
         return upper
@@ -22,7 +24,7 @@ def preXor(upper: int) -> int:
 
 
 def rangeXor(lower: int, upper: int) -> int:
-    """[lower, upper]内所有数的异或 0<=lower<=upper<=1e12"""
+    """[lower, upper]内所有数的异或 0<=lower<=upper"""
     return preXor(upper) ^ preXor(lower - 1)
 
 

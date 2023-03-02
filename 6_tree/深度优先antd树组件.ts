@@ -13,25 +13,24 @@ const json: Node[] = [
         children: [
           {
             id: 5,
-            children: [],
-          },
-        ],
+            children: []
+          }
+        ]
       },
       {
         id: 4,
-        children: [],
-      },
-    ],
+        children: []
+      }
+    ]
   },
   {
     id: 2,
-    children: [],
-  },
+    children: []
+  }
 ]
 
 // 为每个node增加key属性
-const bfs = (n: Node) => {
-  console.log(n)
+function bfs(n: Node) {
   n.key = n.id
   n.children.map(node => {
     bfs(node)

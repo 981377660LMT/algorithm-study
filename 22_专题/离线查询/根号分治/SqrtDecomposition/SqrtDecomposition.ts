@@ -110,4 +110,4 @@ class SqrtDecomposition<E, Id> {
   }
 }
 
-export { SqrtDecomposition }
+export { SqrtDecomposition, Block }

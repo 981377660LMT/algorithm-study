@@ -1,7 +1,18 @@
 // https://ei1333.github.io/library/graph/mst/boruvka.hpp
 // Boruvka(最小全域木) 在线最小生成树
-// 不预先给出图，
+// 算法流程：对于每一个连通块，枚举其出边。取其最小出边，合并两个连通块。
+// 这样每一次连通块的个数减少一半，所以复杂度为 O(nlogn)。
+
+// !不预先给出图(有时候边数太大无法建图)，
 // 而是给定一个函数 findUnused 来找到未使用过的点中与u权值最小的点。
+
+// 理解:
+// prim算法/kruskal算法/boruvka算法
+// https://luckyglass.github.io/2019/19Oct31stArt1/
+// !从当前所有的连通块向其他连通块扩展出最小边，直到只剩一个连通块
+// 1 从最小边开始加边的 Kruskal
+// 2 从当前构造出的树向外扩展的 Prim
+// 3 从当前所有的连通块向其他连通块扩展出最小边，直到只剩一个连通块的 Boruvka
 
 package main
 
@@ -11,32 +22,34 @@ import (
 )
 
 // Brouvka
-// 陽にグラフを作らず、何らかのデータ構造で未訪問の行き先を探す想定。
-//  !find_unused(u)：unused なうちで、u と最小コストで結べる点を探す。
+//  不预先给出图，而是指定一个函数 findUnused 来找到未使用过的点中与u权值最小的点。
+//  findUnused(u)：返回 unused 中与 u 权值最小的点 v 和边权 cost
+//                如果不存在，返回 (-1,*)
 func OnlineMST(
 	n int,
 	setUsed func(u int), setUnused func(u int), findUnused func(u int) (v int, cost int),
 ) (res [][3]int, ok bool) {
 	uf := NewUnionFindArray(n)
 	for {
-		upd := false
-		comp := make([][]int, n)
-		cand := make([][3]int, n)
+		updated := false
+		groups := make([][]int, n)
+		cand := make([][3]int, n) // [u, v, cost]
 		for v := 0; v < n; v++ {
 			cand[v] = [3]int{-1, -1, -1}
 		}
+
 		for v := 0; v < n; v++ {
-			comp[uf.Find(v)] = append(comp[uf.Find(v)], v)
+			groups[uf.Find(v)] = append(groups[uf.Find(v)], v)
 		}
+
 		for v := 0; v < n; v++ {
 			if uf.Find(v) != v {
 				continue
 			}
-			for i := range comp[v] {
-				setUsed(comp[v][i])
+			for _, x := range groups[v] {
+				setUsed(x)
 			}
-			for i := range comp[v] {
-				x := comp[v][i]
+			for _, x := range groups[v] {
 				y, cost := findUnused(x)
 				if y == -1 {
 					continue
@@ -45,11 +58,12 @@ func OnlineMST(
 				if a == -1 || cost < c {
 					cand[v] = [3]int{x, y, cost}
 				}
-				for i := range comp[v] {
-					setUnused(comp[v][i])
-				}
+			}
+			for _, x := range groups[v] {
+				setUnused(x)
 			}
 		}
+
 		for v := 0; v < n; v++ {
 			if uf.Find(v) != v {
 				continue
@@ -58,19 +72,21 @@ func OnlineMST(
 			if a == -1 {
 				continue
 			}
-			upd = true
+			updated = true
 			if uf.Union(a, b) {
 				res = append(res, [3]int{a, b, c})
 			}
 		}
 
-		if !upd {
+		if !updated {
 			break
 		}
 	}
 
-	ok = true
-	return
+	if len(res) != n-1 {
+		return nil, false
+	}
+	return res, true
 }
 
 func NewUnionFindArray(n int) *UnionFindArray {

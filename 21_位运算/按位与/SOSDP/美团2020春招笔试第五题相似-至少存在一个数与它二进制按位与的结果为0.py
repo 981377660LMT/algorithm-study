@@ -28,7 +28,7 @@ UPPER = 1 << N
 
 def queryPairwiseAnd1(nums: List[int]) -> bool:
     """判断是否数组里的每个数都至少存在一个数与它二进制按位与的结果为0
-    
+
     n<=1e5,nums[i]<=1e5
     sosdp 计算每个状态的高维前缀和即可
     """
@@ -37,14 +37,14 @@ def queryPairwiseAnd1(nums: List[int]) -> bool:
     for num in nums:
         sosdp[num] += 1
 
-    for i in range(N):
+    for i in range(N):  # 每个二进制位
         for state in range(UPPER):
             if (state >> i) & 1:
                 sosdp[state] += sosdp[state ^ (1 << i)]
 
     for num in nums:
         comp = (UPPER - 1) ^ num
-        if sosdp[comp] == 0:
+        if sosdp[comp] == 0:  # 不存在
             return False
     return True
 
@@ -56,8 +56,7 @@ def bruteForce(nums: List[int]) -> bool:
     return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cands = [[1, 2, 3, 4], [23, 9, 12], [123, 77, 2], [223, 99]]
     for nums in cands:
         assert queryPairwiseAnd1(nums) == bruteForce(nums)
-

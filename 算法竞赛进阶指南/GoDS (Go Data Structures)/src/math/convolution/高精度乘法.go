@@ -166,6 +166,7 @@ func (t ntt) idft(p poly) {
 }
 
 func qpow(base int, exp int, mod int) (res int) {
+	base %= mod
 	res = 1
 	for ; exp > 0; exp >>= 1 {
 		if exp&1 == 1 {

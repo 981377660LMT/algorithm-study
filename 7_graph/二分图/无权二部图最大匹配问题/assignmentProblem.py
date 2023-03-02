@@ -5,14 +5,22 @@
 # 将一项任务分配给一个人是需要支付报酬，如何分配任务，保证支付的报酬总数最小。
 # 简单的说：就是n*n矩阵中，选取n个元素，每行每列各有一个元素，使得和最小。
 # 1<=n<=500 -1e9<=Aij<=1e9
+# https://judge.yosupo.jp/problem/assignment
 
 from typing import List, Tuple
 
 INF = int(1e18)
 
-# https://judge.yosupo.jp/problem/assignment
+
 def hungarian(A: List[List[int]]) -> Tuple[int, List[int]]:
-    """返回(最小和,每一行选取第几列的元素)"""
+    """任务分配问题
+
+    Args:
+        A (List[List[int]]): A[i][j] 表示第i个人分配第j项任务的报酬
+    Returns:
+        Tuple[int, List[int]]: 最小报酬和,每一行选取第几列的元素
+    """
+
     n = len(A) + 1
     m = len(A[0]) + 1
     P = [0] * m
@@ -55,11 +63,11 @@ def hungarian(A: List[List[int]]) -> Tuple[int, List[int]]:
             P[j0] = P[way[j0]]
             j0 = way[j0]
 
-    ret = [-1] * (n - 1)
+    res = [-1] * (n - 1)
     for i in range(1, m):
         if P[i] != 0:
-            ret[P[i] - 1] = i - 1
-    return -V[0], ret
+            res[P[i] - 1] = i - 1
+    return -V[0], res
 
 
 n = int(input())

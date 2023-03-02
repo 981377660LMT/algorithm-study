@@ -2,7 +2,7 @@
 # 2≤K≤1e5
 
 # 答案不超过k各位数之和
-# 对于某个位数和 是否存在一个数是k的倍数 即modk为0
+# 反向思考:对于某个位数和 `是否存在一个数是k的倍数` 即modk为0
 # !即求到modk=0的最短路径 按照字典序搜索 边权就是新增的digit
 from collections import defaultdict
 from heapq import heapify, heappop, heappush

@@ -85,6 +85,7 @@ func max(a, b int) int {
 	return b
 }
 
+// NewUnionFindWithCallback ...
 func NewUnionFindArray(n int) *UnionFindArray {
 	parent, rank := make([]int, n), make([]int, n)
 	for i := 0; i < n; i++ {

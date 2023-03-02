@@ -29,14 +29,14 @@ func main() {
 		fmt.Fscan(in, &nums2[i])
 	}
 
-	res := gcdConvolution(nums1, nums2)
+	res := GcdConvolution(nums1, nums2)
 	for _, v := range res {
 		fmt.Fprint(out, v, " ")
 	}
 }
 
 // c[k] = ∑a[i]*b[j] mod MOD, gcd(i,j)=k
-func gcdConvolution(nums1, nums2 []int) []int {
+func GcdConvolution(nums1, nums2 []int) []int {
 	n := len(nums1)
 	pf := make([]int, n+1)
 	copy1, copy2 := append([]int{0}, nums1...), append([]int{0}, nums2...)

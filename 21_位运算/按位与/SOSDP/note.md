@@ -1,5 +1,16 @@
 `如果要查询某个状态的所有子集的贡献，就要用 sosdp(高维前缀和)查询`
 
+```python
+zeta变换(高维前缀和)
+for i in range(d):
+    for j in range(1<<d):  # 不同维度的组合
+      if (j&(1<<i)): f[j] += f[j^(1<<i)]  # f里保存了每个子集的信息
+
+f代表着2^d个子集的前缀和,这里的子集一般用于描述值域(二进制每个位取还是不取)
+f[0b110011] 记录着 0b010011/0b100011/0b110001/0b110010 这四个子集的贡献和
+
+```
+
 - https://blog.csdn.net/weixin_38686780/article/details/100109753
 - https://issue-is-vegetable.blog.csdn.net/article/details/112488108?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1.pc_relevant_antiscanv2&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1.pc_relevant_antiscanv2&utm_relevant_index=1
 - https://blog.csdn.net/weixin_30249203/article/details/97527552?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1.pc_relevant_paycolumn_v3&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1.pc_relevant_paycolumn_v3&utm_relevant_index=1

@@ -4,6 +4,7 @@
 
 // 用两个栈模拟一个双端队列
 // 当某个栈空的时候将另一个栈分一半给这个已经空的栈（即暴力重构）
+// 同时,这个deque也具有了O(1)反转的能力
 
 class StackDeque<E> {
   static from<T>(iterable: Iterable<T>): StackDeque<T> {

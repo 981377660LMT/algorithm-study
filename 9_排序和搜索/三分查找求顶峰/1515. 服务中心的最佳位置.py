@@ -1,4 +1,4 @@
-# 三分法求凸函数的最大（小）值
+# 三分法求单峰函数的极值点
 # https://oi-wiki.org/basic/binary/#_10
 from math import dist
 from typing import List
@@ -8,8 +8,7 @@ EPS = 1e-6
 
 class Solution:
     def getMinDistSum(self, positions: List[List[int]]) -> float:
-        """三分求一维凸函数的最值，二维就要对横纵坐标三分两次
-        """
+        """三分求一维凸函数的最值，二维就要对横纵坐标三分两次"""
 
         def calDistSum(centerX: float, centerY: float) -> float:
             return sum(dist((x, y), (centerX, centerY)) for x, y in positions)
@@ -36,4 +35,3 @@ class Solution:
             else:
                 leftY = mid1 + EPS
         return trisectX(leftY)
-

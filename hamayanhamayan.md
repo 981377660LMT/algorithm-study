@@ -3,6 +3,22 @@
 https://blog.hamayanhamayan.com/entry/2100/01/01/000000
 每章下面有很多例题，最好只做标有`解说`的例题
 
+- 计数问题(atcoder 最难的类型)
+
+https://drive.google.com/file/d/1WC7Y2Ni-8elttUgorfbix9tO1fvYN3g3/view
+
+- TODO:/ntt 卷积/母函数(fps 知识)/数论积性函数(multiplicative-function)/矩阵知识
+  https://hitonanode.github.io/cplib-cpp/formal_power_series/coeff_of_rational_function.hpp
+  https://hitonanode.github.io/cplib-cpp/formal_power_series/sum_of_exponential_times_polynomial_limit.hpp
+  https://hitonanode.github.io/cplib-cpp/formal_power_series/sum_of_exponential_times_polynomial.hpp
+
+多项式全家桶
+https://www.luogu.com.cn/training/3015
+https://hackmd.io/@tatyam-prime/ryU4Ujup9#xKfracPxQx-%E3%82%92%E6%B1%82%E3%82%81%E3%82%8B
+math/convolution/polynomial/matrix (先从卷积开始写库)
+https://maspypy.com/category/algorithm_math
+https://judge.yosupo.jp/
+
 - **数学** (todo，感觉自己的数学很弱)
 
   - [ ] 总览
@@ -12,6 +28,9 @@ https://blog.hamayanhamayan.com/entry/2100/01/01/000000
   - [ ] 半环
   - [ ] 概率与期望
   - [ ] 卷积(畳み込み)
+    1. 什么东西可以用卷积加速计算?(什么样的情形)
+       - 01 序列卷积,计算配对个数时可以用卷积加速
+         但是要化成`卷积形式`,可能要翻转序列
   - [ ] xor 问题
   - [ ] 中国剩余定理
   - [ ] 线性规划
@@ -21,10 +40,10 @@ https://blog.hamayanhamayan.com/entry/2100/01/01/000000
 - 木構造
 
   - [x] LCA
-  - [ ] HL 分解
-  - [ ] 欧拉路径
-  - [ ] 树的同型判定
-  - [ ] 重心分解
+  - [x] HL 分解
+  - [x] 欧拉路径
+  - [x] 树的同型判定
+  - [x] 重心分解
   - [x] LCT
 
 - 图论
@@ -32,8 +51,10 @@ https://blog.hamayanhamayan.com/entry/2100/01/01/000000
   - [ ] 网络流
     1. 最大流
     2. 最小费用最大流
+       コストを損失と考えて最大化問題を解く
     3. 最大匹配
   - [ ] 无向图上的计数问题
+        https://blog.hamayanhamayan.com/entry/2100/01/01/000000
   - [ ] 无向图相关问题
   - [ ] 最短路
   - [ ] 欧拉

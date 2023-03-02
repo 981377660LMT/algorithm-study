@@ -144,13 +144,13 @@ func newUnionFindArray(n int) *unionFindArray {
 		rank[i] = 1
 	}
 	return &unionFindArray{
-		Rank:   rank,
+		rank:   rank,
 		parent: parent,
 	}
 }
 
 type unionFindArray struct {
-	Rank   []int
+	rank   []int
 	parent []int
 }
 
@@ -159,11 +159,11 @@ func (ufa *unionFindArray) union(key1, key2 int) bool {
 	if root1 == root2 {
 		return false
 	}
-	if ufa.Rank[root1] > ufa.Rank[root2] {
+	if ufa.rank[root1] > ufa.rank[root2] {
 		root1, root2 = root2, root1
 	}
 	ufa.parent[root1] = root2
-	ufa.Rank[root2] += ufa.Rank[root1]
+	ufa.rank[root2] += ufa.rank[root1]
 	return true
 }
 

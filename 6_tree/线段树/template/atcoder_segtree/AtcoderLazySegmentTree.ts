@@ -10,7 +10,7 @@ const n = 10
 // 一些monoid (如果难以设计半群,就使用分块解决吧)
 // https://maspypy.github.io/library/alg/acted_monoid/summax_assign.hpp
 if (require.main === module) {
-  // Range Add Range Max
+  // RangeAddRangeMax
   const rangeAddRangeMax = useAtcoderLazySegmentTree(Array(n + 10).fill(0), {
     e: () => 0,
     id: () => 0,
@@ -19,7 +19,7 @@ if (require.main === module) {
     composition: (f, g) => f + g
   })
 
-  // Range Add Range Min
+  // RangeAddRangeMin
   const rangeAddRangeMin = useAtcoderLazySegmentTree(Array(n + 10).fill(0), {
     e: () => INF,
     id: () => 0,
@@ -28,7 +28,7 @@ if (require.main === module) {
     composition: (f, g) => f + g
   })
 
-  // Range Chmax Range Max
+  // RangeChmaxRangeMax
   const rangeChmaxRangeMax = useAtcoderLazySegmentTree(Array(n + 10).fill(0), {
     e: () => 0,
     id: () => -INF,
@@ -37,7 +37,7 @@ if (require.main === module) {
     composition: (f, g) => (f === -INF ? g : Math.max(f, g))
   })
 
-  // Range Chmin Range Min
+  // RangeChminRangeMin
   const rangeChminRangeMin = useAtcoderLazySegmentTree(Array(n + 10).fill(0), {
     e: () => INF,
     id: () => INF,
@@ -46,7 +46,7 @@ if (require.main === module) {
     composition: (f, g) => (f === INF ? g : Math.min(f, g))
   })
 
-  // Range Assign (0/1) Range Sum
+  // RangeAssign (0/1) RangeSum
   const rangeAssignRangeSum = useAtcoderLazySegmentTree<[sum: number, size: number], number>(10, {
     e: () => [0, 1],
     id: () => -1,
@@ -55,7 +55,7 @@ if (require.main === module) {
     composition: (f, g) => (f === -1 ? g : f)
   })
 
-  // Range Assign Range Max
+  // RangeAssignRangeMax
   const rangeAssignRangeMax = useAtcoderLazySegmentTree(Array(n + 10).fill(0), {
     e: () => 0,
     id: () => -INF,
@@ -64,7 +64,7 @@ if (require.main === module) {
     composition: (f, g) => (f === -INF ? g : f)
   })
 
-  // Range Assign Range Min
+  // RangeAssignRangeMin
   const rangeAssignRangeMin = useAtcoderLazySegmentTree(Array(n + 10).fill(0), {
     e: () => INF,
     id: () => INF,
@@ -73,7 +73,7 @@ if (require.main === module) {
     composition: (f, g) => (f === INF ? g : f)
   })
 
-  // Range Assign Point Get
+  // RangeAssignPointGet
   const rangeAssignPointGet = useAtcoderLazySegmentTree(Array(n + 10).fill(0), {
     e: () => INF,
     id: () => INF,
@@ -82,7 +82,7 @@ if (require.main === module) {
     composition: (f, g) => (f === INF ? g : f)
   })
 
-  // Range Flip Range Sum
+  // RangeFlipRangeSum
   const rangeXorRangeSum = useAtcoderLazySegmentTree(n + 10, {
     e: () => [0, 1],
     id: () => 0,

@@ -54,6 +54,14 @@ function trailingZero32(uint32: number): number {
   return 31 - Math.clz32(uint32 & -uint32)
 }
 
+// uin32 > 0
+function floorLog2(uint32: number): number {
+  return 31 - Math.clz32(uint32)
+}
+function ceilLog2(uint32: number): number {
+  return floorLog2(uint32) + ((uint32 & -uint32) !== uint32 ? 1 : 0)
+}
+
 export { bitCount32, bitCount53, bitLength32, bitLength53, trailingZero32, trailingZero53 }
 
 // 结论:
@@ -110,6 +118,13 @@ if (require.main === module) {
     trailingZero32(i)
   }
   console.timeEnd('trailingZero32') // 129.897ms
+
+  console.time('floorLog2/ceilLog2')
+  for (let i = 1; i < 1e6; i++) {
+    assert.strictEqual(floorLog2(i), Math.floor(Math.log2(i)))
+    assert.strictEqual(ceilLog2(i), Math.ceil(Math.log2(i)))
+  }
+  console.timeEnd('floorLog2/ceilLog2')
 
   // 使用 DataView 读取 2**53 - 1 的比特位
   const float64View = new DataView(new ArrayBuffer(8))

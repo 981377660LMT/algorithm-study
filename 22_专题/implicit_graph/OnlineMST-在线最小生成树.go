@@ -11,32 +11,34 @@ import (
 )
 
 // Brouvka
-// 陽にグラフを作らず、何らかのデータ構造で未訪問の行き先を探す想定。
-//  !find_unused(u)：unused なうちで、u と最小コストで結べる点を探す。
+//  不预先给出图，而是指定一个函数 findUnused 来找到未使用过的点中与u权值最小的点。
+//  findUnused(u)：返回 unused 中与 u 权值最小的点 v 和边权 cost
+//                如果不存在，返回 (-1,*)
 func OnlineMST(
 	n int,
 	setUsed func(u int), setUnused func(u int), findUnused func(u int) (v int, cost int),
 ) (res [][3]int, ok bool) {
 	uf := NewUnionFindArray(n)
 	for {
-		upd := false
-		comp := make([][]int, n)
-		cand := make([][3]int, n)
+		updated := false
+		groups := make([][]int, n)
+		cand := make([][3]int, n) // [u, v, cost]
 		for v := 0; v < n; v++ {
 			cand[v] = [3]int{-1, -1, -1}
 		}
+
 		for v := 0; v < n; v++ {
-			comp[uf.Find(v)] = append(comp[uf.Find(v)], v)
+			groups[uf.Find(v)] = append(groups[uf.Find(v)], v)
 		}
+
 		for v := 0; v < n; v++ {
 			if uf.Find(v) != v {
 				continue
 			}
-			for i := range comp[v] {
-				setUsed(comp[v][i])
+			for _, x := range groups[v] {
+				setUsed(x)
 			}
-			for i := range comp[v] {
-				x := comp[v][i]
+			for _, x := range groups[v] {
 				y, cost := findUnused(x)
 				if y == -1 {
 					continue
@@ -45,11 +47,12 @@ func OnlineMST(
 				if a == -1 || cost < c {
 					cand[v] = [3]int{x, y, cost}
 				}
-				for i := range comp[v] {
-					setUnused(comp[v][i])
-				}
+			}
+			for _, x := range groups[v] {
+				setUnused(x)
 			}
 		}
+
 		for v := 0; v < n; v++ {
 			if uf.Find(v) != v {
 				continue
@@ -58,19 +61,21 @@ func OnlineMST(
 			if a == -1 {
 				continue
 			}
-			upd = true
+			updated = true
 			if uf.Union(a, b) {
 				res = append(res, [3]int{a, b, c})
 			}
 		}
 
-		if !upd {
+		if !updated {
 			break
 		}
 	}
 
-	ok = true
-	return
+	if len(res) != n-1 {
+		return nil, false
+	}
+	return res, true
 }
 
 func NewUnionFindArray(n int) *UnionFindArray {
