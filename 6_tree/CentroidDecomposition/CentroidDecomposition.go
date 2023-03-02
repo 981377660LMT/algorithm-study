@@ -1,5 +1,4 @@
 // https://ei1333.github.io/library/graph/tree/centroid-decomposition.hpp
-
 // https://ei1333.github.io/library/test/verify/aoj-3139.test.cpp
 // https://ei1333.github.io/library/test/verify/yosupo-frequency-table-of-tree-distance.test.cpp
 // https://ei1333.github.io/library/test/verify/yukicoder-1002.test.cpp

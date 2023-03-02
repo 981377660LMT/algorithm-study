@@ -1,34 +1,66 @@
+// 可删除堆/懒删除堆
+
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"os"
-)
+import "fmt"
 
 func main() {
-	// https://www.luogu.com.cn/problem/P3378
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+	ehp := NewErasableHeap(func(a, b H) bool { return a < b }, []H{1, 2, 3, 4, 5})
+	ehp.Erase(1)
+	ehp.Erase(4)
+	fmt.Println(ehp.Pop())
+	fmt.Println(ehp.Len())
+	fmt.Println(ehp.Pop())
+	fmt.Println(ehp.Pop())
+}
 
-	var q int
-	fmt.Fscan(in, &q)
-	pq := NewHeap(func(a, b H) bool {
-		return a < b
-	}, nil)
-	for i := 0; i < q; i++ {
-		var op int
-		fmt.Fscan(in, &op)
-		if op == 1 {
-			var x int
-			fmt.Fscan(in, &x)
-			pq.Push(x)
-		} else if op == 2 {
-			fmt.Fprintln(out, pq.Peek())
-		} else if op == 3 {
-			pq.Pop()
+type ErasableHeap struct {
+	base   *Heap
+	erased *Heap
+}
+
+func NewErasableHeap(less func(a, b H) bool, nums []H) *ErasableHeap {
+	return &ErasableHeap{NewHeap(less, nums), NewHeap(less, nil)}
+}
+
+func (h *ErasableHeap) Erase(value H) {
+	h.erased.Push(value)
+	h.normalize()
+}
+
+func (h *ErasableHeap) Push(value H) {
+	h.base.Push(value)
+	h.normalize()
+}
+
+func (h *ErasableHeap) Pop() (value H) {
+	value = h.base.Pop()
+	h.normalize()
+	return
+}
+
+func (h *ErasableHeap) Peek() (value H) {
+	value = h.base.Peek()
+	return
+}
+
+func (h *ErasableHeap) Len() int {
+	return h.base.Len()
+}
+
+func (h *ErasableHeap) normalize() {
+	for {
+		if h.base.Len() == 0 {
+			break
 		}
+		if h.erased.Len() == 0 {
+			break
+		}
+		if h.base.Peek() != h.erased.Peek() {
+			break
+		}
+		h.base.Pop()
+		h.erased.Pop()
 	}
 }
 

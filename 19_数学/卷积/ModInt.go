@@ -105,6 +105,7 @@ func (m *ModInt) IDiv(x ModInt) {
 	*m = m.Div(x)
 }
 func (m ModInt) Pow(n ModInt) ModInt {
+	m = m.mod()
 	p := ModInt(1)
 	for n > 0 {
 		if n&1 == 1 {

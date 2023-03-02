@@ -1,6 +1,6 @@
 // 堆(优先队列)
 
-package binaryheap
+package main
 
 import "testing"
 
