@@ -755,19 +755,15 @@ def linear_recurrence(arr, coeff, k):  # a(n) * c(0) + a(n - 1) * c(1) + ... + a
 # 多项式平移 (Taylor Shift) 求出多项式在 x + offset 处的值
 
 
-import sys
-
-sys.setrecursionlimit(int(1e9))
-input = lambda: sys.stdin.readline().rstrip("\r\n")
-
-
 if __name__ == "__main__":
-    n, m = map(int, input().split())
-    nums1 = list(map(int, input().split()))
-    nums2 = list(map(int, input().split()))
-    A = FormalPowerSeries(nums1)
-    B = FormalPowerSeries(nums2)
-    div, mod = A.divmod(B)
-    print(len(div), len(mod))
-    print(div)
-    print(mod)
+    # n, m = map(int, input().split())
+    # nums1 = list(map(int, input().split()))
+    # nums2 = list(map(int, input().split()))
+    # A = FormalPowerSeries(nums1)
+    # B = FormalPowerSeries(nums2)
+    # div, mod = A.divmod(B)
+    # print(len(div), len(mod))
+    # print(div)
+    # print(mod)
+
+ 

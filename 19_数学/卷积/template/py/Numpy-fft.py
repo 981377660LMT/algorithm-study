@@ -4,7 +4,7 @@ from typing import Any
 import numpy as np
 
 
-def convolve(nums1: Any, nums2: Any) -> "np.ndarray":
+def convolution(nums1: Any, nums2: Any) -> "np.ndarray":
     """fft求卷积"""
     n, m = len(nums1), len(nums2)
     ph = 1 << (n + m - 2).bit_length()
@@ -16,9 +16,9 @@ def convolve(nums1: Any, nums2: Any) -> "np.ndarray":
 if __name__ == "__main__":
     nums1 = [1, 2]
     nums2 = [1, 2, 1]
-    print(convolve(nums1, nums2))
+    print(convolution(nums1, nums2))
 
     n, m = map(int, input().split())
     a = list(map(int, input().split()))
     b = list(map(int, input().split()))
-    print(*convolve(a, b))
+    print(*convolution(a, b))

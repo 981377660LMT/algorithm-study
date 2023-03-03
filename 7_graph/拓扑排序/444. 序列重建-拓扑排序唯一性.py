@@ -2,7 +2,7 @@
 # 拓扑排序后点不足n个 => 有环
 # 拓扑排序中队列中的点不恒为1 => 多种拓扑序
 # 拓扑排序中队列中的点恒为1 => 唯一确定拓扑序
-from collections import defaultdict, deque
+from collections import deque
 from typing import List
 
 
@@ -32,37 +32,6 @@ class Solution:
                     queue.append(next)
 
         return True
-
-    def sequenceReconstruction2(self, nums: List[int], sequences: List[List[int]]) -> bool:
-        """去掉nums 是范围为 [1,n] 的整数的排列的做法 不允许拓扑排序加入重边"""
-        adjMap = defaultdict(set)
-        indeg = defaultdict(int)
-        allVertex = set()
-        visitedPair = set()
-        for seq in sequences:
-            allVertex |= set(seq)
-            for pre, next in zip(seq, seq[1:]):
-                if (pre, next) not in visitedPair:
-                    visitedPair.add((pre, next))
-                    adjMap[pre].add(next)
-                    indeg[next] += 1
-
-        if set(nums) != allVertex:
-            return False
-
-        queue = deque([v for v in allVertex if indeg[v] == 0])
-        count = 0
-        while queue:
-            if len(queue) > 1:
-                return False
-            cur = queue.popleft()
-            count += 1
-            for next in adjMap[cur]:
-                indeg[next] -= 1
-                if indeg[next] == 0:
-                    queue.append(next)
-
-        return count == len(allVertex)
 
 
 print(

@@ -1,6 +1,10 @@
-"""numpy fft 任意模数"""
+"""
+numpy fft 任意模数
+https://judge.yosupo.jp/submission/128316
+"""
 
 
+from typing import List
 import numpy as np
 
 
@@ -12,12 +16,13 @@ def _convolution(A, B):
     return np.rint(res).astype(np.int64)
 
 
-def convolution(A: "np.ndarray", B: "np.ndarray", mod: int, s=10) -> "np.ndarray":
+def convolution(A: List[int], B: List[int], mod: int, s=10) -> List[int]:
+    A_, B_ = np.array(A, dtype=np.int64), np.array(B, dtype=np.int64)
     s2 = s << 1
     mask = (1 << s) - 1
 
-    m0, m1, m2 = A & mask, (A >> s) & mask, A >> s2
-    n0, n1, n2 = B & mask, (B >> s) & mask, B >> s2
+    m0, m1, m2 = A_ & mask, (A_ >> s) & mask, A_ >> s2
+    n0, n1, n2 = B_ & mask, (B_ >> s) & mask, B_ >> s2
 
     p_0 = m0 + m2
     p0 = m0
@@ -49,13 +54,14 @@ def convolution(A: "np.ndarray", B: "np.ndarray", mod: int, s=10) -> "np.ndarray
     r_1 -= r_3
 
     res = ((r_4 << s2) + (r_3 << s) + r_2) % mod
-    return ((res << s2) + (r_1 << s) + r_0) % mod
+    res = ((res << s2) + (r_1 << s) + r_0) % mod
+    return list(res)
 
 
 if __name__ == "__main__":
     MOD = int(1e9 + 7)
     n, m = map(int, input().split())
-    A = np.array(list(map(int, input().split())), dtype=np.int64)
-    B = np.array(list(map(int, input().split())), dtype=np.int64)
+    A = list(map(int, input().split()))
+    B = list(map(int, input().split()))
     C = convolution(A, B, MOD)
     print(*C)

@@ -3,7 +3,7 @@
 // n<=2e5 xi,yi,wi<=1e9
 // AddPoint(x,y,w) 向(x,y)点上添加w权重
 // AddQuery(x1,x2,y1,y2) 添加查询为区间 [x1, x2) * [y1, y2) 的权重和
-// CalculateQueries() 返回所有查询结果
+// Work() 按照添加顺序返回所有查询结果.
 
 package main
 
@@ -23,7 +23,7 @@ func main() {
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	spars := NewStaticPointAddRectangleSum(n, q)
+	spars := NewRectangleSum(n, q)
 	for i := 0; i < n; i++ {
 		var x, y, w int
 		fmt.Fscan(in, &x, &y, &w)
@@ -36,7 +36,7 @@ func main() {
 		spars.AddQuery(l, r, d, u)
 	}
 
-	res := spars.CalculateQueries()
+	res := spars.Work()
 	for _, v := range res {
 		fmt.Fprintln(out, v)
 	}
@@ -50,7 +50,7 @@ type StaticPointAddRectangleSum struct {
 }
 
 // 指定点集和查询个数初始化容量.
-func NewStaticPointAddRectangleSum(n, q int) *StaticPointAddRectangleSum {
+func NewRectangleSum(n, q int) *StaticPointAddRectangleSum {
 	return &StaticPointAddRectangleSum{
 		points:  make([]Point, 0, n),
 		queries: make([]Query, 0, q),
@@ -67,8 +67,8 @@ func (sp *StaticPointAddRectangleSum) AddQuery(x1, x2, y1, y2 int) {
 	sp.queries = append(sp.queries, Query{l: x1, r: x2, d: y1, u: y2})
 }
 
-// 返回所有查询结果.
-func (sp *StaticPointAddRectangleSum) CalculateQueries() []int {
+// 按照添加顺序返回所有查询结果..
+func (sp *StaticPointAddRectangleSum) Work() []int {
 	n := len(sp.points)
 	q := len(sp.queries)
 	res := make([]int, q)

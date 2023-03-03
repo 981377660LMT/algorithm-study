@@ -51,18 +51,13 @@ class Solution:
 import numpy as np
 
 
-def convolve(nums1: Any, nums2: Any) -> np.ndarray:
+def convolve(nums1: Any, nums2: Any) -> "np.ndarray":
     """fft求卷积"""
-    fftLen = 1
-    while 2 * fftLen < len(nums1) + len(nums2) - 1:
-        fftLen *= 2
-    fftLen *= 2
-    Fa = np.fft.rfft(nums1, fftLen)
-    Fb = np.fft.rfft(nums2, fftLen)
-    Fc = Fa * Fb
-    res = np.fft.irfft(Fc, fftLen)
-    res = np.rint(res).astype(np.int64)
-    return res[: len(nums1) + len(nums2) - 1]
+    n, m = len(nums1), len(nums2)
+    ph = 1 << (n + m - 2).bit_length()
+    T = np.fft.rfft(nums1, ph) * np.fft.rfft(nums2, ph)
+    res = np.fft.irfft(T, ph)[: n + m - 1]
+    return np.rint(res).astype(np.int64)
 
 
 print(

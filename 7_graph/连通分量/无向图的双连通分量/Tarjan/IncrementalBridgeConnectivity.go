@@ -37,19 +37,19 @@ func main() {
 		id[i] = -1
 	}
 	k := 0
-	ans := make([][]int, n)
+	res := make([][]int, n)
 	for i := 0; i < n; i++ {
 		r := ibc.Find(i)
 		if id[r] == -1 {
 			id[r] = k
 			k++
 		}
-		ans[id[r]] = append(ans[id[r]], i)
+		res[id[r]] = append(res[id[r]], i)
 	}
 	fmt.Fprintln(out, k)
 	for i := 0; i < k; i++ {
-		fmt.Fprint(out, len(ans[i]))
-		for _, v := range ans[i] {
+		fmt.Fprint(out, len(res[i]))
+		for _, v := range res[i] {
 			fmt.Fprint(out, " ", v)
 		}
 		fmt.Fprintln(out)

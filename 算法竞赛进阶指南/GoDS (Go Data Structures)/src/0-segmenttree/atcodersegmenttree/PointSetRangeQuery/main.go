@@ -43,25 +43,12 @@ func main() {
 	}
 }
 
-const INF int = 1e18
-
-// PointSetRangeMin
 type E = int
+
+const INF int = 1e18
 
 func (*SegmentTree) e() E        { return INF }
 func (*SegmentTree) op(a, b E) E { return min(a, b) }
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
 
 type SegmentTree struct {
 	n, size int
@@ -75,24 +62,26 @@ func NewSegmentTree(leaves []E) *SegmentTree {
 	for size < n {
 		size <<= 1
 	}
-	seg := make([]E, size<<1)
+	seg := make([]E, 2*size)
 	for i := 0; i < n; i++ {
 		seg[i+size] = leaves[i]
 	}
 	for i := size - 1; i > 0; i-- {
-		seg[i] = res.op(seg[i<<1], seg[i<<1|1])
+		seg[i] = res.op(seg[2*i], seg[2*i+1])
 	}
 	res.n = n
 	res.size = size
 	res.seg = seg
 	return res
 }
+
 func (st *SegmentTree) Get(index int) E {
 	if index < 0 || index >= st.n {
 		return st.e()
 	}
 	return st.seg[index+st.size]
 }
+
 func (st *SegmentTree) Set(index int, value E) {
 	if index < 0 || index >= st.n {
 		return
@@ -100,7 +89,7 @@ func (st *SegmentTree) Set(index int, value E) {
 	index += st.size
 	st.seg[index] = value
 	for index >>= 1; index > 0; index >>= 1 {
-		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+		st.seg[index] = st.op(st.seg[2*index], st.seg[2*index+1])
 	}
 }
 
@@ -132,64 +121,81 @@ func (st *SegmentTree) Query(start, end int) E {
 	}
 	return st.op(leftRes, rightRes)
 }
+
 func (st *SegmentTree) QueryAll() E { return st.seg[1] }
 
-// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-func (st *SegmentTree) MaxRight(left int, predicate func(E) bool) int {
-	if left == st.n {
+// maxRight returns the maximum r such that [start, r) satisfies the predicate.
+func (st *SegmentTree) MaxRight(start int, predicate func(E) bool) int {
+	if start == st.n {
 		return st.n
 	}
-	left += st.size
+
+	start += st.size
 	res := st.e()
 	for {
-		for left&1 == 0 {
-			left >>= 1
+		for start&1 == 0 {
+			start >>= 1
 		}
-		if !predicate(st.op(res, st.seg[left])) {
-			for left < st.size {
-				left <<= 1
-				if predicate(st.op(res, st.seg[left])) {
-					res = st.op(res, st.seg[left])
-					left++
+		if !predicate(st.op(res, st.seg[start])) {
+			for start < st.size {
+				start = 2 * start
+				if predicate(st.op(res, st.seg[start])) {
+					res = st.op(res, st.seg[start])
+					start++
 				}
 			}
-			return left - st.size
+
+			return start - st.size
 		}
-		res = st.op(res, st.seg[left])
-		left++
-		if (left & -left) == left {
+		res = st.op(res, st.seg[start])
+		start++
+		if (start & -start) == start {
 			break
 		}
 	}
 	return st.n
 }
 
-// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (st *SegmentTree) MinLeft(right int, predicate func(E) bool) int {
-	if right == 0 {
+// minLeft returns the minimum l such that [l, end) satisfies the predicate.
+func (st *SegmentTree) MinLeft(end int, predicate func(E) bool) int {
+	if end == 0 {
 		return 0
 	}
-	right += st.size
-	res := st.e()
+	end += st.size
+	sm := st.e()
 	for {
-		right--
-		for right > 1 && right&1 == 1 {
-			right >>= 1
+		end--
+		for end > 1 && end&1 == 1 {
+			end >>= 1
 		}
-		if !predicate(st.op(st.seg[right], res)) {
-			for right < st.size {
-				right = right<<1 | 1
-				if predicate(st.op(st.seg[right], res)) {
-					res = st.op(st.seg[right], res)
-					right--
+		if !predicate(st.op(st.seg[end], sm)) {
+			for end < st.size {
+				end = 2*end + 1
+				if predicate(st.op(st.seg[end], sm)) {
+					sm = st.op(st.seg[end], sm)
+					end--
 				}
 			}
-			return right + 1 - st.size
+			return end + 1 - st.size
 		}
-		res = st.op(st.seg[right], res)
-		if right&-right == right {
+		sm = st.op(st.seg[end], sm)
+		if end&-end == end {
 			break
 		}
 	}
 	return 0
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

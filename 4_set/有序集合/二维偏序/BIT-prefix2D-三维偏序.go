@@ -1,54 +1,126 @@
-// https://ei1333.github.io/library/other/dynamic-point-add-rectangle-sum.hpp
-// Point Add Rectangle Sum
-// 二维矩形区间计数,支持单点添加
-// n<=2e5 xi,yi,wi<=1e9
-// AddPoint(x,y,w) 向(x,y)点上添加w权重
-// AddQuery(x1,x2,y1,y2) 添加查询为区间 [x1, x2) * [y1, y2) 的权重和
-// Work() 按照添加顺序返回所有查询结果.
+// 三维偏序
+// https://www.luogu.com.cn/problem/P3810
+// 有n个元素,每个元素有三个属性xi,yi,zi
+// !对每个元素i,求出有多少个j满足xj<=xi,yj<=yi,zj<=zi且i!=j.
 
 package main
 
 import (
 	"bufio"
 	"fmt"
+	stdio "io"
 	"math/bits"
 	"os"
+	"runtime/debug"
 	"sort"
+	"strconv"
 )
 
+// from https://atcoder.jp/users/ccppjsrb
+var io *Iost
+
+type Iost struct {
+	Scanner *bufio.Scanner
+	Writer  *bufio.Writer
+}
+
+func NewIost(fp stdio.Reader, wfp stdio.Writer) *Iost {
+	const BufSize = 2000005
+	scanner := bufio.NewScanner(fp)
+	scanner.Split(bufio.ScanWords)
+	scanner.Buffer(make([]byte, BufSize), BufSize)
+	return &Iost{Scanner: scanner, Writer: bufio.NewWriter(wfp)}
+}
+func (io *Iost) Text() string {
+	if !io.Scanner.Scan() {
+		panic("scan failed")
+	}
+	return io.Scanner.Text()
+}
+func (io *Iost) Atoi(s string) int                 { x, _ := strconv.Atoi(s); return x }
+func (io *Iost) Atoi64(s string) int64             { x, _ := strconv.ParseInt(s, 10, 64); return x }
+func (io *Iost) Atof64(s string) float64           { x, _ := strconv.ParseFloat(s, 64); return x }
+func (io *Iost) NextInt() int                      { return io.Atoi(io.Text()) }
+func (io *Iost) NextInt64() int64                  { return io.Atoi64(io.Text()) }
+func (io *Iost) NextFloat64() float64              { return io.Atof64(io.Text()) }
+func (io *Iost) Print(x ...interface{})            { fmt.Fprint(io.Writer, x...) }
+func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x...) }
+func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
+
+func init() {
+	debug.SetGCPercent(-1)
+}
+
 func main() {
-	// https://judge.yosupo.jp/problem/point_add_rectangle_sum
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
 
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-	dpars := NewPointAddRectangleSum(n + q)
+	n, _ := io.NextInt(), io.NextInt()
+	items := make([][3]int, n)
 	for i := 0; i < n; i++ {
-		var x, y, w int
-		fmt.Fscan(in, &x, &y, &w)
-		dpars.AddPoint(x, y, w)
+		items[i] = [3]int{io.NextInt(), io.NextInt(), io.NextInt()}
 	}
+	res := solve(items)
 
-	for i := 0; i < q; i++ {
-		var op int
-		fmt.Fscan(in, &op)
-		if op == 0 {
-			var x, y, w int
-			fmt.Fscan(in, &x, &y, &w)
-			dpars.AddPoint(x, y, w)
-		} else {
-			var l, d, r, u int
-			fmt.Fscan(in, &l, &d, &r, &u)
-			dpars.AddQuery(l, r, d, u)
-		}
-	}
+	counter := make([]int, n)
 
-	res := dpars.Work()
 	for _, v := range res {
-		fmt.Fprintln(out, v)
+		counter[v]++
 	}
+	for i := 0; i < n; i++ {
+		fmt.Fprintln(out, counter[i])
+	}
+}
+
+// !对每个元素i,求出有多少个j满足xj<=xi,yj<=yi,zj<=zi且i!=j.
+func solve(items [][3]int) []int {
+	n := len(items)
+	A, B, C := make([]int, n), make([]int, n), make([]int, n)
+	events := make([][4]int, 0, n)
+	for i := 0; i < n; i++ {
+		A[i], B[i], C[i] = items[i][0], items[i][1], items[i][2]
+		events = append(events, [4]int{A[i], B[i], C[i], i})
+	}
+
+	sort.Slice(events, func(i, j int) bool {
+		if events[i][0] == events[j][0] {
+			if events[i][1] == events[j][1] {
+				return events[i][2] < events[j][2]
+			}
+			return events[i][1] < events[j][1]
+		}
+		return events[i][0] < events[j][0]
+	})
+
+	S := NewPointAddRectangleSum(n)
+
+	round := 0
+	roundId := make([]int, n)
+	for i := 0; i < n; i++ {
+		group := []int{events[i][3]} // 把第二、三个维度一样的一起拿出来(因为是小于等于)
+		b, c := events[i][1], events[i][2]
+		for i+1 < n && events[i+1][1] == b && events[i+1][2] == c {
+			i++
+			group = append(group, events[i][3])
+		}
+		S.AddPoint(b, c, len(group))
+		S.AddQuery(-1e10, b+1, -1e10, c+1)
+		for _, v := range group {
+			roundId[v] = round
+		}
+		round++
+	}
+	tmp := S.Work()
+	res := make([]int, n)
+	for i := 0; i < n; i++ {
+		res[i] = tmp[roundId[i]] - 1 // 减去自己
+	}
+
+	return res
 }
 
 type Point struct{ x, y, w int }
@@ -72,7 +144,7 @@ func (dpars *DynamicPointAddRectangleSum) AddQuery(x1, x2, y1, y2 int) {
 	dpars.queries = append(dpars.queries, Query{x1, y1, x2, y2})
 }
 
-// 按照添加顺序返回所有查询结果..
+// 返回所有查询结果.
 func (dpars *DynamicPointAddRectangleSum) Work() []int {
 	q := len(dpars.queries)
 	rev := make([]int, q)
@@ -145,7 +217,7 @@ func (sp *staticPointAddRectangleSum) AddQuery(x1, x2, y1, y2 int) {
 	sp.queries = append(sp.queries, Query{l: x1, r: x2, d: y1, u: y2})
 }
 
-// 按照添加顺序返回所有查询结果..
+// 按照添加顺序返回所有查询结果.
 func (sp *staticPointAddRectangleSum) Work() []int {
 	n := len(sp.points)
 	q := len(sp.queries)

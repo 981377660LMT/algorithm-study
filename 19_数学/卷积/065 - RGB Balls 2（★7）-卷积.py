@@ -31,34 +31,52 @@ def C(n: int, k: int) -> int:
     return ((fac[n] * ifac[k]) % MOD * ifac[n - k]) % MOD
 
 
-def convolve(a: np.ndarray, b: np.ndarray) -> np.ndarray:
-    """fft求卷积"""
-    fftLen = 1
-    while 2 * fftLen < len(a) + len(b) - 1:
-        fftLen *= 2
-    fftLen *= 2
-    Fa = np.fft.rfft(a, fftLen)
-    Fb = np.fft.rfft(b, fftLen)
-    Fc = Fa * Fb
-    res = np.fft.irfft(Fc, fftLen)
-    res = np.rint(res).astype(np.int64)
-    return res[: len(a) + len(b) - 1]
+def _convolution(A, B):
+    n, m = len(A), len(B)
+    ph = 1 << (n + m - 2).bit_length()
+    T = np.fft.rfft(A, ph) * np.fft.rfft(B, ph)
+    res = np.fft.irfft(T, ph)[: n + m - 1]
+    return np.rint(res).astype(np.int64)
 
 
-def convoleWithMod(a: object, b: object, mod: int) -> np.ndarray:
-    """fft求卷积 取模"""
-    npa = np.array(a, np.int64)
-    npb = np.array(b, np.int64)
+def convolution(A: "np.ndarray", B: "np.ndarray", mod: int, s=10) -> "np.ndarray":
+    s2 = s << 1
+    mask = (1 << s) - 1
 
-    a1, a2 = np.divmod(npa, 1 << 15)
-    b1, b2 = np.divmod(npb, 1 << 15)
+    m0, m1, m2 = A & mask, (A >> s) & mask, A >> s2
+    n0, n1, n2 = B & mask, (B >> s) & mask, B >> s2
 
-    x = convolve(a1, b1) % mod
-    z = convolve(a2, b2) % mod
-    y = (convolve(a1 + a2, b1 + b2) - (x + z)) % mod
+    p_0 = m0 + m2
+    p0 = m0
+    p1 = p_0 + m1
+    pm1 = p_0 - m1
+    pm2 = ((pm1 + m2) << 1) - m0
+    pinf = m2
 
-    c = (x << 30) + (y << 15) + z
-    return c % mod
+    q_0 = n0 + n2
+    q0 = n0
+    q1 = q_0 + n1
+    qm1 = q_0 - n1
+    qm2 = ((qm1 + n2) << 1) - n0
+    qinf = n2
+
+    r0 = _convolution(p0, q0)
+    r1 = _convolution(p1, q1)
+    rm1 = _convolution(pm1, qm1)
+    rm2 = _convolution(pm2, qm2)
+    rinf = _convolution(pinf, qinf)
+
+    r_0 = r0
+    r_4 = rinf
+    r_3 = (rm2 - r1) // 3
+    r_1 = (r1 - rm1) >> 1
+    r_2 = rm1 - r0
+    r_3 = ((r_2 - r_3) >> 1) + (rinf << 1)
+    r_2 += r_1 - r_4
+    r_1 -= r_3
+
+    res = ((r_4 << s2) + (r_3 << s) + r_2) % mod
+    return ((res << s2) + (r_1 << s) + r_0) % mod
 
 
 R, G, B, K = map(int, input().split())
@@ -74,4 +92,10 @@ nums3 = [0] * (G + 1)
 for i in range(K - Z, G + 1):
     nums3[i] = C(G, i)
 
-print(convoleWithMod(nums1, convoleWithMod(nums2, nums3, MOD), MOD)[K])
+nums1, nums2, nums3 = (
+    np.array(nums1, dtype=np.int64),
+    np.array(nums2, dtype=np.int64),
+    np.array(nums3, dtype=np.int64),
+)
+
+print(convolution(nums1, convolution(nums2, nums3, MOD), MOD)[K])

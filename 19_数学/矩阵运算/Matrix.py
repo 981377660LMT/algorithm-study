@@ -5,12 +5,14 @@ MOD = 998244353
 
 
 class Matrix:
-    """https://github.com/strangerxxxx/kyopro"""
+    """https://atcoder.jp/users/toyuzuko"""
 
     __slots__ = "_n", "_m", "_mat"
 
     @staticmethod
     def fromlist(list: List[List[int]]) -> "Matrix":
+        if not list or not list[0]:
+            return Matrix(0, 0)
         return Matrix(len(list), len(list[0]), list)
 
     @staticmethod
@@ -25,7 +27,6 @@ class Matrix:
         self._m = col
         self._mat = [[0] * self._m for _ in range(self._n)]
         if mat:
-            # assert len(mat) == n and len(mat[0]) == m
             for i in range(self._n):
                 self._mat[i] = mat[i].copy()
 
@@ -141,6 +142,51 @@ class Matrix:
                 vecs_i[p[j]] = -aug[j][q[i]] % MOD
         return dim, sol, vecs
 
+    def characteristic_polynomial(self):
+        assert self.is_square()
+        tmp = Matrix(self._n, self._n, self._mat)
+        for j in range(self._n - 2):
+            for i in range(j + 1, self._n):
+                if tmp[i][j]:
+                    break
+            else:
+                continue
+            tmp._mat[j + 1], tmp._mat[i] = tmp._mat[i], tmp._mat[j + 1]
+            for k in range(self._n):
+                tmp._mat[k][j + 1], tmp._mat[k][i] = tmp._mat[k][i], tmp._mat[k][j + 1]
+            if tmp[j + 1][j]:
+                inv = pow(tmp[j + 1][j], MOD - 2, MOD)
+                for i in range(j + 2, self._n):
+                    c = inv * tmp[i][j] % MOD
+                    for k in range(j, self._n):
+                        tmp[i][k] -= c * tmp[j + 1][k]
+                        tmp[i][k] %= MOD
+                    for k in range(self._n):
+                        tmp[k][j + 1] += c * tmp[k][i]
+                        tmp[k][j + 1] %= MOD
+        dp = [[0] * (i + 1) for i in range(self._n + 1)]
+        dp[0][0] = 1
+        for i in range(self._n):
+            for k in range(i + 1):
+                dp[i + 1][k + 1] = dp[i][k]
+            for k in range(i + 1):
+                dp[i + 1][k] += tmp[i][i] * dp[i][k]
+                dp[i + 1][k] %= MOD
+            p = 1
+            for j in range(i)[::-1]:
+                p *= -tmp[j + 1][j]
+                p %= MOD
+                c = p * tmp[j][i] % MOD
+                for k in range(j + 1):
+                    dp[i + 1][k] += c * dp[j][k]
+                    dp[i + 1][k] %= MOD
+        res = dp[-1]
+        for i in range(self._n + 1):
+            if i & 1:
+                res[~i] *= -1
+                res[~i] %= MOD
+        return res
+
     def times(self, k):
         res = [[0] * self._m for _ in range(self._n)]
         for i in range(self._n):
@@ -231,12 +277,19 @@ if __name__ == "__main__":
 
     # System of Linear Equations
     # 解方程 Ax = b
-    n, m = map(int, input().split())
-    grid = [list(map(int, input().split())) for _ in range(n)]
-    A = Matrix.fromlist(grid)
-    b = list(map(int, input().split()))
-    dim, sol, vecs = A.linear_equations(b)
-    print(dim)
-    print(*sol)
-    for v in vecs:
-        print(*v)
+    # n, m = map(int, input().split())
+    # grid = [list(map(int, input().split())) for _ in range(n)]
+    # A = Matrix.fromlist(grid)
+    # b = list(map(int, input().split()))
+    # dim, sol, vecs = A.linear_equations(b)
+    # print(dim)
+    # print(*sol)
+    # for v in vecs:
+    #     print(*v)
+
+    # 特征多项式
+    N = int(input())
+    mat = [list(map(int, input().split())) for _ in range(N)]
+    A = Matrix.fromlist(mat)
+    P = A.characteristic_polynomial()
+    print(*P)

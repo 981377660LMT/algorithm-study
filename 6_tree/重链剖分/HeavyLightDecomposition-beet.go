@@ -59,15 +59,14 @@ func main() {
 
 	// 查询边权
 	hld.QueryPath(3, 6, false, func(start, end int) {
-		fmt.Println("path", start, end)
-		// path 2 3
-		// path 1 2
-		// path 4 5
-		// path 6 7
+		fmt.Println("path1", start, end)
+		// path1 6 7
+		// path1 4 5
+		// path1 1 3
 	})
 	hld.QueryPath(2, 5, false, func(start, end int) {
-		fmt.Println("path", start, end)
-		// path 1 2
+		fmt.Println("path2", start, end)
+		// path2 5 6
 	})
 }
 

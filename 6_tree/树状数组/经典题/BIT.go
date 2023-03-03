@@ -422,11 +422,16 @@ func (this *NumMatrix) SumRegion(row1, col1, row2, col2 int) int {
 // Fenwick Tree Prefix
 // https://suisen-cp.github.io/cp-library-cpp/library/datastructure/fenwick_tree/fenwick_tree_prefix.hpp
 // 如果每次都是查询前缀，那么可以使用Fenwick Tree Prefix 维护 monoid.
-
 type S = int
 
 func (*FenwickTreePrefix) e() S        { return 0 }
 func (*FenwickTreePrefix) op(a, b S) S { return max(a, b) }
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
 
 type FenwickTreePrefix struct {
 	n    int
@@ -444,10 +449,12 @@ func NewFenwickTreePrefix(n int) *FenwickTreePrefix {
 func NewFenwickTreePrefixWithSlice(nums []S) *FenwickTreePrefix {
 	n := len(nums)
 	res := &FenwickTreePrefix{n, make([]S, n+1)}
-	for i := n; i > 0; i-- {
-		res.data[i] = res.op(res.data[i], nums[i-1])
-		if p := i + (i & -i); p <= n {
-			res.data[p] = res.op(res.data[p], res.data[i])
+	for i := 1; i < n+1; i++ {
+		res.data[i] = nums[i-1]
+	}
+	for i := 1; i < n+1; i++ {
+		if j := i + (i & -i); j <= n {
+			res.data[j] = res.op(res.data[j], res.data[i])
 		}
 	}
 	return res
@@ -461,9 +468,9 @@ func (f *FenwickTreePrefix) Update(index int, value S) {
 	}
 }
 
-// 查询前缀区间的值.
+// 查询前缀区间 [0,right) 的值.
 // 0 <= right <= n
-func (f *FenwickTreePrefix) QueryPrefix(right int) S {
+func (f *FenwickTreePrefix) Query(right int) S {
 	res := f.e()
 	if right > f.n {
 		right = f.n
@@ -475,10 +482,10 @@ func (f *FenwickTreePrefix) QueryPrefix(right int) S {
 }
 
 func main() {
-	pf := NewFenwickTreePrefix(10)
+	pf := NewFenwickTreePrefixWithSlice([]S{1, 2, 3, 4, 14, 1, 2, 3})
 	pf.Update(9, 1)
 	pf.Update(1, 2)
-	fmt.Println(pf.QueryPrefix(100))
+	fmt.Println(pf.Query(100))
 	pf.Update(9, 10)
-	fmt.Println(pf.QueryPrefix(100))
+	fmt.Println(pf.Query(100))
 }

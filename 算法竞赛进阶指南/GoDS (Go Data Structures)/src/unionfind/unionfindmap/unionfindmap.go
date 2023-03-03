@@ -13,27 +13,27 @@ func demo() {
 	fmt.Println(uf)
 }
 
+type U = int
 type UnionFindMap struct {
 	// 连通分量的个数
 	Part int
-	// 每个连通分量的大小
-	Rank map[interface{}]int
 
+	rank map[U]int
 	// 当key不存在于并查集中时，是否自动添加
 	autoAdd bool
-	parent  map[interface{}]interface{}
+	parent  map[U]U
 }
 
 func NewUnionFindMap(autoAdd bool) *UnionFindMap {
 	return &UnionFindMap{
 		Part:    0,
-		Rank:    make(map[interface{}]int),
+		rank:    make(map[U]int),
 		autoAdd: autoAdd,
-		parent:  make(map[interface{}]interface{}),
+		parent:  make(map[U]U),
 	}
 }
 
-func (ufm *UnionFindMap) Union(key1, key2 interface{}) bool {
+func (ufm *UnionFindMap) Union(key1, key2 U) bool {
 	root1, root2 := ufm.Find(key1), ufm.Find(key2)
 	if root1 == root2 {
 		return false
@@ -44,17 +44,17 @@ func (ufm *UnionFindMap) Union(key1, key2 interface{}) bool {
 		return false
 	}
 
-	if ufm.Rank[root1] > ufm.Rank[root2] {
+	if ufm.rank[root1] > ufm.rank[root2] {
 		root1, root2 = root2, root1
 	}
 
 	ufm.parent[root1] = root2
-	ufm.Rank[root2] += ufm.Rank[root1]
+	ufm.rank[root2] += ufm.rank[root1]
 	ufm.Part--
 	return true
 }
 
-func (ufm *UnionFindMap) Find(key interface{}) interface{} {
+func (ufm *UnionFindMap) Find(key U) U {
 	if !ufm.contains(key) {
 		if ufm.autoAdd {
 			ufm.Add(key)
@@ -69,18 +69,18 @@ func (ufm *UnionFindMap) Find(key interface{}) interface{} {
 	return key
 }
 
-func (ufm *UnionFindMap) Add(key interface{}) bool {
+func (ufm *UnionFindMap) Add(key U) bool {
 	if ufm.contains(key) {
 		return false
 	}
 
 	ufm.parent[key] = key
-	ufm.Rank[key] = 1
+	ufm.rank[key] = 1
 	ufm.Part++
 	return true
 }
 
-func (ufm *UnionFindMap) IsConnected(key1, key2 interface{}) bool {
+func (ufm *UnionFindMap) IsConnected(key1, key2 U) bool {
 	absent := !ufm.contains(key1) || !ufm.contains(key2)
 	if absent && !ufm.autoAdd {
 		return false
@@ -89,8 +89,8 @@ func (ufm *UnionFindMap) IsConnected(key1, key2 interface{}) bool {
 	return ufm.Find(key1) == ufm.Find(key2)
 }
 
-func (ufm *UnionFindMap) GetGroups() map[interface{}][]interface{} {
-	groups := make(map[interface{}][]interface{})
+func (ufm *UnionFindMap) GetGroups() map[U][]U {
+	groups := make(map[U][]U)
 	for k := range ufm.parent {
 		root := ufm.Find(k)
 		groups[root] = append(groups[root], k)
@@ -108,7 +108,7 @@ func (ufm *UnionFindMap) String() string {
 	return strings.Join(sb, "\n")
 }
 
-func (ufm *UnionFindMap) contains(key interface{}) bool {
+func (ufm *UnionFindMap) contains(key U) bool {
 	_, ok := ufm.parent[key]
 	return ok
 }

@@ -24,6 +24,7 @@
 
    - 子树 subtreeHash 表示成 n 元组(可以用'#'分隔)时，遇到单链会 TLE (`n*n的字符串拼接`)
    - 优化是使用唯一的哈希 id 来代替哈希值，减少长度
+     pool = deafaulitdict(itertools.count(1))
 
 3. 树哈希+dp
 

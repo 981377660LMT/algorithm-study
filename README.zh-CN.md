@@ -174,8 +174,6 @@
     - [Grundy 数](19_%E6%95%B0%E5%AD%A6/grundy/GrundyNumber.go)
     - [ModInt](19_%E6%95%B0%E5%AD%A6%E5%8D%B7%E7%A7%AF/ModInt.go)
     - [多项式] TODO
-    - [积性函数] TODO
-    - [矩阵] TODO
 
 11. **Miscellaneous**
 
