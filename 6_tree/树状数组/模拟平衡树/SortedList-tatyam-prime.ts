@@ -226,6 +226,7 @@ class SortedList<T = number> {
         left = mid + 1
       }
     }
+
     return left
   }
 

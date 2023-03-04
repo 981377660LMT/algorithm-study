@@ -59,3 +59,4 @@ sortedStack.push(7)
 console.log(sortedStack)
 console.log(sortedStack.peek())
 console.log(sortedStack)
+export {}
