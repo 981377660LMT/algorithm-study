@@ -11,9 +11,9 @@
  * @_see {@link https://speakerdeck.com/tatyam_prime/python-dezui-qiang-falseping-heng-er-fen-tan-suo-mu-wozuo-ru}
  */
 class SortedList<T = number> {
-  /** Optimized for 1e5 elements in javascript. */
-  private static readonly _BLOCK_RATIO = 500
-  private static readonly _REBUILD_RATIO = 1700
+  /** Optimized for 1e5 elements in javascript. Do not change it. */
+  private static readonly _BLOCK_RATIO = 50
+  private static readonly _REBUILD_RATIO = 170
 
   private readonly _compareFn: (a: T, b: T) => number
   private _size: number
@@ -205,31 +205,34 @@ class SortedList<T = number> {
   }
 
   private _rebuild(): void {
-    const count = ~~((this._size + SortedList._BLOCK_RATIO - 1) / SortedList._BLOCK_RATIO)
-    const newBlocks: T[][] = Array.from({ length: count }, () => [])
+    if (this._size === 0) {
+      return
+    }
+    const bCount = Math.ceil(Math.sqrt(this._size / SortedList._BLOCK_RATIO))
+    const bSize = ~~((this._size + bCount - 1) / bCount) // ceil
+    const newB: T[][] = Array.from({ length: bCount }, () => [])
     let ptr = 0
     for (let i = 0; i < this._blocks.length; i++) {
-      const block = this._blocks[i]
-      for (let j = 0; j < block.length; j++) {
-        newBlocks[~~(ptr / SortedList._BLOCK_RATIO)].push(block[j])
+      const b = this._blocks[i]
+      for (let j = 0; j < b.length; j++) {
+        newB[~~(ptr / bSize)].push(b[j])
         ptr++
       }
     }
-    this._blocks = newBlocks
+    this._blocks = newB
   }
 
   // eslint-disable-next-line class-methods-use-this
   private _initBlocks(sorted: T[]): T[][] {
-    const count = ~~((sorted.length + SortedList._BLOCK_RATIO - 1) / SortedList._BLOCK_RATIO)
-    const newBlocks: T[][] = Array.from({ length: count }, () => [])
-    for (let i = 0; i < count; i++) {
-      const start = ~~((i * sorted.length) / count)
-      const end = ~~(((i + 1) * sorted.length) / count)
-      for (let j = start; j < end; j++) {
-        newBlocks[i].push(sorted[j])
+    const bCount = Math.ceil(Math.sqrt(sorted.length / SortedList._BLOCK_RATIO))
+    const bSize = ~~((sorted.length + bCount - 1) / bCount) // ceil
+    const newB: T[][] = Array.from({ length: bCount }, () => [])
+    for (let i = 0; i < bCount; i++) {
+      for (let j = i * bSize; j < Math.min((i + 1) * bSize, sorted.length); j++) {
+        newB[i].push(sorted[j])
       }
     }
-    return newBlocks
+    return newB
   }
 
   private _bisectLeft(nums: T[], value: T): number {
@@ -257,7 +260,6 @@ class SortedList<T = number> {
         left = mid + 1
       }
     }
-
     return left
   }
 
@@ -279,7 +281,7 @@ if (require.main === module) {
     })
     return res
   }
-
+  // https://leetcode.cn/problems/maximum-number-of-tasks-you-can-assign/
   function maxTaskAssign(
     tasks: number[],
     workers: number[],
