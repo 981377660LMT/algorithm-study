@@ -1,12 +1,14 @@
-// 内部使用分块的SortedList 无须离散化
-
 /* eslint-disable no-inner-declarations */
 /* eslint-disable no-param-reassign */
 /* eslint-disable generator-star-spacing */
 
 /**
  * A fast SortedList with O(sqrt(n)) insertion and deletion.
- * @_see https://github.com/tatyam-prime/SortedSet/blob/main/SortedMultiset.py
+ *
+ * @_see {@link https://github.com/981377660LMT/algorithm-study/blob/master/22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SortedList/SortedList.ts}
+ * @_see {@link https://github.com/tatyam-prime/SortedSet/blob/main/SortedMultiset.py}
+ * @_see {@link https://qiita.com/tatyam/items/492c70ac4c955c055602}
+ * @_see {@link https://speakerdeck.com/tatyam_prime/python-dezui-qiang-falseping-heng-er-fen-tan-suo-mu-wozuo-ru}
  */
 class SortedList<T = number> {
   /** Optimized for 1e5 elements in javascript. */
@@ -162,6 +164,35 @@ class SortedList<T = number> {
     return `SortedList[${[...this].join(', ')}]`
   }
 
+  forEach(callbackfn: (value: T, index: number, array: this) => void): void {
+    let pos = 0
+    for (let i = 0; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
+      for (let j = 0; j < block.length; j++) {
+        callbackfn(block[j], pos++, this)
+      }
+    }
+  }
+
+  *entries(): IterableIterator<[number, T]> {
+    let pos = 0
+    for (let i = 0; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
+      for (let j = 0; j < block.length; j++) {
+        yield [pos++, block[j]]
+      }
+    }
+  }
+
+  *[Symbol.iterator](): Iterator<T> {
+    for (let i = 0; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
+      for (let j = 0; j < block.length; j++) {
+        yield block[j]
+      }
+    }
+  }
+
   // Find the block which should contain x. Block must not be empty.
   private _findBlock(x: T): T[] {
     for (let i = 0; i < this._blocks.length; i++) {
@@ -228,25 +259,6 @@ class SortedList<T = number> {
     }
 
     return left
-  }
-
-  *entries(): IterableIterator<[number, T]> {
-    let pos = 0
-    for (let i = 0; i < this._blocks.length; i++) {
-      const block = this._blocks[i]
-      for (let j = 0; j < block.length; j++) {
-        yield [pos++, block[j]]
-      }
-    }
-  }
-
-  *[Symbol.iterator](): Iterator<T> {
-    for (let i = 0; i < this._blocks.length; i++) {
-      const block = this._blocks[i]
-      for (let j = 0; j < block.length; j++) {
-        yield block[j]
-      }
-    }
   }
 
   get length(): number {
