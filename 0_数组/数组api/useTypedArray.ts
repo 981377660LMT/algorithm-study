@@ -374,42 +374,13 @@ function useSortedList<E>(
 export { useMutableTypedArray, useSortedTypedArray, useSortedList }
 
 if (require.main === module) {
-  const nums = useMutableTypedArray('INT32', { arrayLike: [1, 2, 3, 4, 5] })
-  assert.strictEqual(nums.length, 5)
-  assert.strictEqual(nums.at(0), 1)
-  assert.strictEqual(nums.at(1), 2)
-  assert.strictEqual(nums.popleft(), 1)
-  assert.strictEqual(nums.toString(), '2,3,4,5')
-  assert.strictEqual(nums.pop(), 5)
-  assert.strictEqual(nums.toString(), '2,3,4')
-  nums.append(6)
-  nums.appendleft(1)
-  assert.strictEqual(nums.toString(), '1,2,3,4,6')
-  nums.insert(2, 3)
-  assert.strictEqual(nums.toString(), '1,2,3,3,4,6')
-  nums.set(2, 2)
-  assert.strictEqual(nums.toString(), '1,2,2,3,4,6')
-  nums.append(7)
-  assert.strictEqual(nums.toString(), '1,2,2,3,4,6,7')
-
-  console.time('useMutableTypedArray')
-  const nums2 = useMutableTypedArray('UINT32', {
-    arrayLike: Array(1e5).map((_, i) => i)
-    // initialCapacity: 2e5,
-  })
-
-  for (let i = 0; i < 4e4; i++) {
-    const pos = Math.random() * nums2.length
-    nums2.append(i)
-    nums2.appendleft(i)
-    nums2.pop(pos)
-    nums2.pop(pos)
-    nums2.at(pos)
-    nums2.insert(pos, i)
-    nums2.set(pos, i)
+  const arr = Array.from({ length: 2e5 }, () => ~~(Math.random() * 100000))
+  const sl2 = useSortedTypedArray('UINT32')
+  console.time('add')
+  for (const x of arr) {
+    sl2.add(x)
   }
-
-  console.timeEnd('useMutableTypedArray') // useMutableTypedArray: 1.329s
+  console.timeEnd('add')
 }
 
 if (require.main === module) {

@@ -1,7 +1,6 @@
 /* eslint-disable no-inner-declarations */
 /* eslint-disable no-useless-constructor */
-// https://leetcode.cn/problems/rectangle-area-ii/
-// leetcode.cn/problems/rectangle-area-ii/
+// https://leetcode.cn/problems/subrectangle-queries/
 
 // ! 注意题目是否可以这样开空间
 class SubrectangleQueries {

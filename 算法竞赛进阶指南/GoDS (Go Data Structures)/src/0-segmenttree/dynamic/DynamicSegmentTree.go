@@ -61,6 +61,7 @@ type Node struct {
 	lazy Id
 }
 
+// lower<=left<=right<=upper
 func (o *Node) Update(left, right int, lazy Id) {
 	if left <= o.left && o.right <= right {
 		o.propagate(lazy)
@@ -78,6 +79,7 @@ func (o *Node) Update(left, right int, lazy Id) {
 	o.pushUp()
 }
 
+// lower<=left<=right<=upper
 func (o *Node) Query(left, right int) E {
 	if left <= o.left && o.right <= right {
 		return o.data
@@ -101,6 +103,7 @@ func (o *Node) QueryAll() E {
 	return o.data
 }
 
+// lower<=pos<=upper
 func (o *Node) Set(pos int, val E) {
 	if o.left == o.right {
 		o.data = val
@@ -116,6 +119,7 @@ func (o *Node) Set(pos int, val E) {
 	o.pushUp()
 }
 
+// lower<=pos<=upper
 func (o *Node) Get(pos int) E {
 	if o.left == o.right {
 		return o.data

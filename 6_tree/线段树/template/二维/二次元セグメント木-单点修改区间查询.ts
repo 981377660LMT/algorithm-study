@@ -3,6 +3,7 @@
 
 // https://nyaannyaan.github.io/library/data-structure-2d/2d-segment-tree.hpp
 // !二维线段树:单点修改/区间查询 (更新方式为覆盖)
+// 需要预先离散化
 
 type SegmentTree2D<E> = {
   /**
@@ -10,10 +11,10 @@ type SegmentTree2D<E> = {
    *
    * 0 <= row < ROW, 0 <= col < COL.
    */
-  set: (row: number, col: number, value: E) => void
+  addPoint: (row: number, col: number, value: E) => void
 
   /**
-   * 如果调用了 {@link SegmentTree2D.set} 初始化，则需要调用此方法构建树.
+   * 如果调用了 {@link SegmentTree2D.addPoint} 初始化，则需要调用此方法构建树.
    */
   build: () => void
 
@@ -21,7 +22,7 @@ type SegmentTree2D<E> = {
   get: (row: number, col: number) => E
 
   /** 0 <= row < ROW, 0 <= col < COL. */
-  update: (row: number, col: number, target: E) => void
+  set: (row: number, col: number, target: E) => void
 
   /**
    * 查询闭区间 [row1, row2] x [col1, col2] 的区间值.
@@ -43,7 +44,7 @@ function useSegmentTree2D<E = number>(
   const _tree = Array.from({ length: (_row * _col) << 2 }, () => e())
   const _id = (r: number, c: number) => ((r * _col) << 1) + c
 
-  function set(row: number, col: number, value: E): void {
+  function addPoint(row: number, col: number, value: E): void {
     _tree[_id(row + _row, col + _col)] = value
   }
 
@@ -64,7 +65,7 @@ function useSegmentTree2D<E = number>(
     return _tree[_id(row + _row, col + _col)]
   }
 
-  function update(row: number, col: number, target: E): void {
+  function set(row: number, col: number, target: E): void {
     let r = row + _row
     let c = col + _col
     _tree[_id(r, c)] = target
@@ -101,10 +102,10 @@ function useSegmentTree2D<E = number>(
   }
 
   return {
-    set,
+    addPoint,
     build,
     get,
-    update,
+    set,
     query
   }
 
@@ -145,7 +146,7 @@ if (require.main === module) {
 
       for (let r = 0; r < this._ROW; r++) {
         for (let c = 0; c < this._COL; c++) {
-          this._tree.set(r, c, matrix[r][c])
+          this._tree.addPoint(r, c, matrix[r][c])
         }
       }
 
@@ -153,7 +154,7 @@ if (require.main === module) {
     }
 
     update(row: number, col: number, val: number): void {
-      this._tree.update(row, col, val)
+      this._tree.set(row, col, val)
     }
 
     sumRegion(row1: number, col1: number, row2: number, col2: number): number {

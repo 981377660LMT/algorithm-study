@@ -1,5 +1,5 @@
 // 二维线段树-区间修改区间查询
-
+// Get/Set/Update/Query/QeuryAll
 package main
 
 import (
@@ -256,15 +256,3 @@ func (t *SegmentTree2D) Get(row, col int) E {
 func (t *SegmentTree2D) Set(row, col int, e E) {
 	t.set(1, row+1, col+1, 1, 1, t.row, t.col, e)
 }
-
-// func main() {
-// 	// ["SubrectangleQueries","getValue","updateSubrectangle","getValue","getValue","updateSubrectangle","getValue"]
-// 	// [[[[1,1,1],[2,2,2],[3,3,3]]],[0,0],[0,0,2,2,100],[0,0],[2,2],[1,1,2,2,20],[2,2]]
-// 	sub := Constructor([][]int{{1, 1, 1}, {2, 2, 2}, {3, 3, 3}})
-// 	fmt.Println(sub.GetValue(0, 0))
-// 	sub.UpdateSubrectangle(0, 0, 2, 2, 100)
-// 	fmt.Println(sub.GetValue(0, 0))
-// 	fmt.Println(sub.GetValue(2, 2))
-// 	sub.UpdateSubrectangle(1, 1, 2, 2, 20)
-// 	fmt.Println(sub.GetValue(2, 2))
-// }

@@ -25,7 +25,6 @@ class StaticRectangleSum:
 
 
 class BitVector:
-    __slots__ = "cnum", "bit", "chunk", "blocks", "built"
     # reference: https://tiramister.net/blog/posts/bitvector/
     TABLE = bytes(
         [
@@ -309,13 +308,13 @@ class BitVector:
     def build(self):
         for i in range(self.cnum):
             k = i << 5
-            for _ in range(31):
+            for j in range(31):
                 self.blocks[k + 1] = self.blocks[k] + self.popcount(self.bit[k])
                 k += 1
             self.chunk[i + 1] = self.chunk[i] + self.blocks[k] + self.popcount(self.bit[k])
         self.built = True
 
-    def rank1(self, pos):
+    def rank(self, pos):
         assert self.built
         cpos, tmp = pos >> 8, pos & 255
         bpos, offset = tmp >> 3, tmp & 7
@@ -329,14 +328,14 @@ class BitVector:
         assert self.built
         if num == 0:
             return 0
-        if self.rank1(self.N) < num:
+        if self.rank(self.N) < num:
             return -1
 
         l = -1
         r = self.N
         while r - l > 1:
             c = (l + r) >> 1
-            if self.rank1(c) >= num:
+            if self.rank(c) >= num:
                 r = c
             else:
                 l = c
@@ -344,7 +343,6 @@ class BitVector:
 
 
 class WaveletMatrix:
-    __slots__ = "nums", "idx", "A", "digit", "B", "offset", "weight", "S"
     # reference: https://miti-7.hatenablog.com/entry/2018/04/28/152259
     def __init__(self, A: List[int], weight: List[int] = None):
         self.nums = sorted(set(A))
