@@ -1,45 +1,26 @@
 // 树套树(线段树套动态开点线段树) 二维区间修改单点查询
+// !每次修改/查询 O(lognlogn)
 
 package main
 
 import (
-	"fmt"
 	"sort"
 )
 
-// https://leetcode.cn/problems/subrectangle-queries/
-type SubrectangleQueries struct {
-	seg *SegmentTree2D
-}
-
-func Constructor(rectangle [][]int) SubrectangleQueries {
-	seg := NewSegmentTree2D(len(rectangle), len(rectangle[0]))
-	for i, row := range rectangle {
-		for j, v := range row {
-			seg.Update(i, i, j, j, v)
+// https://leetcode.cn/problems/increment-submatrices-by-one/
+func rangeAddQueries(n int, queries [][]int) [][]int {
+	seg := NewSegmentTree2D(n, n)
+	for _, q := range queries {
+		seg.Update(q[0], q[1], q[2], q[3], 1)
+	}
+	res := make([][]int, n)
+	for i := range res {
+		res[i] = make([]int, n)
+		for j := range res[i] {
+			res[i][j] = seg.Get(i, j).sum
 		}
 	}
-	return SubrectangleQueries{seg: seg}
-}
-
-func (this *SubrectangleQueries) UpdateSubrectangle(row1 int, col1 int, row2 int, col2 int, newValue int) {
-	this.seg.Update(row1, col1, row2, col2, newValue)
-}
-
-func (this *SubrectangleQueries) GetValue(row int, col int) int {
-	return this.seg.Get(row, col)
-}
-
-func main() {
-	obj := Constructor([][]int{{1, 2, 1}, {4, 3, 4}, {3, 2, 1}, {1, 1, 1}})
-	fmt.Println(obj.GetValue(0, 2))
-	obj.UpdateSubrectangle(0, 0, 3, 2, 5)
-	fmt.Println(obj.GetValue(0, 2))
-	fmt.Println(obj.GetValue(3, 1))
-	obj.UpdateSubrectangle(3, 0, 3, 2, 10)
-	fmt.Println(obj.GetValue(3, 1))
-	fmt.Println(obj.GetValue(0, 2))
-
+	return res
 }
 
 /**
@@ -52,14 +33,17 @@ func main() {
 // RangeAssignPointGet
 const INF int = 1e18
 
+// !线段树维护的数据类型 示例: 区间和
+type E = struct{ size, sum int }
 type Id = int
 
-func id() Id { return INF }
+// !合并两行的答案
+func merge(e1, e2 E) E    { return E{sum: e1.sum + e2.sum} }
+func e(left, right int) E { return E{size: right - left + 1} }
+func id() Id              { return 0 }
+func mapping(f Id, g E) E { return E{g.size, g.sum + f*g.size} }
 func composition(parent, child Id) Id {
-	if parent == INF {
-		return child
-	}
-	return parent
+	return parent + child
 }
 
 func sortedSet(xs []int) (getRank func(int) int) {
@@ -103,12 +87,12 @@ func (sg *SegmentTree2D) Update(row1, col1, row2, col2 int, val Id) {
 	sg.update(row1, row2, col1, col2, val, 0, 0, sg.sz)
 }
 
-func (sg *SegmentTree2D) Get(row, col int) Id {
+func (sg *SegmentTree2D) Get(row, col int) E {
 	row += sg.sz - 1
 	res := sg.seg[row].Get(col)
 	for row > 0 {
 		row = (row - 1) >> 1
-		res = composition(res, sg.seg[row].Get(col))
+		res = merge(res, sg.seg[row].Get(col))
 	}
 	return res
 }
@@ -136,12 +120,15 @@ func CreateSegmentTree(lower, upper int) *Node {
 type Node struct {
 	left, right           int
 	leftChild, rightChild *Node
-	lazy                  Id
+
+	data E
+	lazy Id
 }
 
+// lower<=left<=right<=upper
 func (o *Node) Update(left, right int, lazy Id) {
 	if left <= o.left && o.right <= right {
-		o.lazy = composition(lazy, o.lazy)
+		o.propagate(lazy)
 		return
 	}
 
@@ -153,11 +140,35 @@ func (o *Node) Update(left, right int, lazy Id) {
 	if right > mid {
 		o.rightChild.Update(left, right, lazy)
 	}
+
 }
 
-func (o *Node) Get(pos int) Id {
+func (o *Node) QueryAll() E {
+	if o == nil {
+		return e(0, -1)
+	}
+	return o.data
+}
+
+// lower<=pos<=upper
+func (o *Node) Set(pos int, val E) {
 	if o.left == o.right {
-		return o.lazy
+		o.data = val
+		return
+	}
+	o.pushDown()
+	mid := (o.left + o.right) >> 1
+	if pos <= mid {
+		o.leftChild.Set(pos, val)
+	} else {
+		o.rightChild.Set(pos, val)
+	}
+}
+
+// lower<=pos<=upper
+func (o *Node) Get(pos int) E {
+	if o.left == o.right {
+		return o.data
 	}
 	o.pushDown()
 	mid := (o.left + o.right) >> 1
@@ -168,7 +179,7 @@ func (o *Node) Get(pos int) Id {
 }
 
 func newNode(left, right int) *Node {
-	return &Node{left: left, right: right, lazy: id()}
+	return &Node{left: left, right: right, lazy: id(), data: e(left, right)}
 }
 
 func (o *Node) pushDown() {
@@ -180,8 +191,14 @@ func (o *Node) pushDown() {
 		o.rightChild = newNode(mid+1, o.right)
 	}
 	if o.lazy != id() {
-		o.leftChild.lazy = composition(o.lazy, o.leftChild.lazy)
-		o.rightChild.lazy = composition(o.lazy, o.rightChild.lazy)
+		o.leftChild.propagate(o.lazy)
+		o.rightChild.propagate(o.lazy)
 		o.lazy = id()
 	}
+}
+
+// mapping + composition
+func (o *Node) propagate(lazy Id) {
+	o.data = mapping(lazy, o.data)
+	o.lazy = composition(lazy, o.lazy)
 }

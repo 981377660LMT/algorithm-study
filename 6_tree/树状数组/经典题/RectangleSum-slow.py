@@ -546,17 +546,17 @@ class WaveletMatrix:
         return ret
 
 
-# 平面上有n个点,第i个点的坐标为(xi,yi),权值为wi,现在要进行q次询问
-# left down right up => 求矩形 left<=x<right, down<=y<up 的权值和
+if __name__ == "__main__":
+    # 平面上有n个点,第i个点的坐标为(xi,yi),权值为wi,现在要进行q次询问
+    # left down right up => 求矩形 left<=x<right, down<=y<up 的权值和
 
-n, q = map(int, input().split())
-points = [tuple(map(int, input().split())) for _ in range(n)]
-queries = [list(map(int, input().split())) for _ in range(q)]
+    n, q = map(int, input().split())
+    points = [tuple(map(int, input().split())) for _ in range(n)]
+    queries = [list(map(int, input().split())) for _ in range(q)]
 
+    res = []
+    rectangleSum = StaticRectangleSum(points)
+    for left, down, right, up in queries:
+        res.append(rectangleSum.query(left, right, down, up))
 
-res = []
-rectangleSum = StaticRectangleSum(points)
-for left, down, right, up in queries:
-    res.append(rectangleSum.query(left, right, down, up))
-
-print(*res, sep="\n")
+    print(*res, sep="\n")

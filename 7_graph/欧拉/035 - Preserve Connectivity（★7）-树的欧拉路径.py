@@ -15,7 +15,7 @@ from collections import defaultdict
 from typing import DefaultDict, Set, Tuple
 
 
-class DFSOrder:
+class _DFSOrder:
     def __init__(self, n: int, tree: DefaultDict[int, Set[int]]) -> None:
         """dfs序
 
@@ -88,7 +88,7 @@ DictTree = Mapping[int, Iterable[int]]
 Tree = Union[ListTree, DictTree]
 
 
-class LCA:
+class _LCA:
     def __init__(self, n: int, tree: Tree, root: int) -> None:
         """倍增查询LCA
 
@@ -181,8 +181,8 @@ for _ in range(n - 1):
     adjMap[u].add(v)
     adjMap[v].add(u)
 
-D = DFSOrder(n, adjMap)
-L = LCA(n, adjMap)
+D = _DFSOrder(n, adjMap)
+L = _LCA(n, adjMap)
 
 q = int(input())
 for _ in range(q):

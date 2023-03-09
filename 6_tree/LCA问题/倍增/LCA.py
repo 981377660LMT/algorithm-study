@@ -1,13 +1,8 @@
-from typing import Iterable, List, Mapping, Sequence, Union
-
-
-ListTree = Sequence[Iterable[int]]  # Sequence = Iterable + __getitem__
-DictTree = Mapping[int, Iterable[int]]
-Tree = Union[ListTree, DictTree]
+from typing import List
 
 
 class LCA:
-    def __init__(self, n: int, tree: Tree, root: int) -> None:
+    def __init__(self, n: int, tree: List[List[int]], root: int) -> None:
         """倍增查询LCA
 
         `nlogn` 预处理
@@ -32,16 +27,13 @@ class LCA:
         """查询树节点两点的最近公共祖先"""
         if self.depth[root1] < self.depth[root2]:
             root1, root2 = root2, root1
-
         root1 = self.upToDepth(root1, self.depth[root2])
         if root1 == root2:
             return root1
-
         for i in range(self._bitlen - 1, -1, -1):
             if self.dp[i][root1] != self.dp[i][root2]:
                 root1 = self.dp[i][root1]
                 root2 = self.dp[i][root2]
-
         return self.dp[0][root1]
 
     def queryDist(self, root1: int, root2: int) -> int:

@@ -1,4 +1,6 @@
+# https://www.luogu.com.cn/problem/CF337D
 # https://leetcode.cn/problems/XiqZWx/
+
 # 多源d点
 # 给出一棵 n 个结点的树，树上每条边的边权都是 1，
 # 这 n 个结点中有 m 个特殊点，
@@ -22,19 +24,9 @@ INF = int(4e18)
 if __name__ == "__main__":
     from Rerooting import Rerooting
 
-    n, m, d = map(int, input().split())
-    R = Rerooting(n)
-    starts = set([int(x) - 1 for x in input().split()])
-    parents = list(map(int, input().split()))
-    for cur, pre in enumerate(parents, 1):
-        pre -= 1
-        R.addEdge(pre, cur)
-
     def e(root: int) -> int:
         """如果root不在starts中,返回-INF(因为统计的是距离特殊点的最大距离)"""
-        if root in starts:
-            return 0
-        return -INF
+        return 0 if root in monsters else -INF
 
     def op(childRes1: int, childRes2: int) -> int:
         return max(childRes1, childRes2)
@@ -42,5 +34,12 @@ if __name__ == "__main__":
     def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
         return fromRes + 1
 
+    n, m, d = map(int, input().split())
+    monsters = [int(x) - 1 for x in input().split()]
+    monsters = set(monsters)
+    R = Rerooting(n)
+    for _ in range(n - 1):
+        u, v = map(int, input().split())
+        R.addEdge(u - 1, v - 1)
     maxDist = R.rerooting(e=e, op=op, composition=composition, root=0)  # maxDist[i]表示i点距离特殊点的最大距离
     print(sum(dist <= d for dist in maxDist))

@@ -1,6 +1,6 @@
 # https://atcoder.jp/contests/abc290/tasks/abc290_e
 # 给定一个长为n(n<=2e5)的数组nums
-# 记f(sub)为将sub变为回文串所需的最小替换次数
+# 记f(sub)为将sub变为回文串所需的最小`替换`次数
 # 对于每个子串sub,求f(sub)的和
 
 # !计算相同的数中每对pair的贡献

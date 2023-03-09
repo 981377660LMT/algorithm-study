@@ -1,7 +1,7 @@
 // Offline Dag Reachability(DAGの到達可能性クエリ)
 // https://ei1333.github.io/library/graph/others/offline-dag-reachability.hpp
 
-// 如果图上有环,先SCC分解成DAG
+// !如果图上有环,先SCC分解成DAG
 // 然后64个查询一组批处理
 
 package main

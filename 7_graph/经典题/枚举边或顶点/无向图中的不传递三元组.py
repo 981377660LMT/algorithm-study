@@ -1,5 +1,6 @@
 # 无向图中的不传递三元组
 # find_nontransitive_triple
+# https://maspypy.github.io/library/graph/find_nontransitive_triple.hpp
 # https://codeforces.com/contest/967/problem/F
 # ab, bc 辺はあるが ac 辺はないような 3 つ組 (a,b,c) を探す。
 # なければ None を返す。
@@ -9,6 +10,7 @@ from typing import List, Optional, Tuple
 
 def findNontransitiveTriple(n: int, adjList: List[List[int]]) -> Optional[Tuple[int, int, int]]:
     done = [0] * n
+    que = []
     for root in range(n):
         if done[root]:
             continue
@@ -42,3 +44,5 @@ def findNontransitiveTriple(n: int, adjList: List[List[int]]) -> Optional[Tuple[
             # assert a != -1
             # assert b != -1
             return a, b, c
+
+    return (-1, -1, -1)

@@ -141,7 +141,7 @@ func (f *CompressedPointAddRectangleSum) rectangleSum(l, r, upper int) int {
 type bitVector struct {
 	n     int
 	block []int
-	sum   []int // block ごとに立っている 1 の数の累積和
+	sum   []int
 }
 
 func newBitVector(n int) *bitVector {

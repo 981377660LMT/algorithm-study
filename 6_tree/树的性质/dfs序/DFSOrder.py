@@ -1,15 +1,16 @@
-from collections import defaultdict
-from typing import Iterable, Mapping, Sequence, Tuple, Union
+from typing import List, Tuple
 
-AdjList = Sequence[Iterable[int]]
-AdjMap = Mapping[int, Iterable[int]]
-Tree = Union[AdjList, AdjMap]
+#           0 (1,6)
+#         /      \
+#        1 (1,2)   3 (3,5)
+#       /        /      \
+#      2 (1,1)   4 (3,3) 5 (4,4)
 
 
 class DFSOrder:
     __slots__ = ("starts", "ends", "_n", "_tree", "_dfsId")
 
-    def __init__(self, n: int, tree: Tree) -> None:
+    def __init__(self, n: int, tree: List[List[int]], root=0) -> None:
         """dfs序
 
         Args:
@@ -20,14 +21,12 @@ class DFSOrder:
         """
         self.starts = [0] * n
         self.ends = [0] * n
-
         self._n = n
         self._tree = tree
         self._dfsId = 1
+        self._dfs(root, -1)
 
-        self._dfs(0, -1)
-
-    def queryRange(self, root: int) -> Tuple[int, int]:
+    def querySub(self, root: int) -> Tuple[int, int]:
         """求子树映射到的区间
 
         Args:
@@ -77,14 +76,14 @@ class DFSOrder:
 if __name__ == "__main__":
     N = 4
     edges = [[0, 1], [1, 2], [2, 3]]
-    tree = defaultdict(set)
+    tree = [[] for _ in range(N)]
     for u, v in edges:
-        tree[u].add(v)
-        tree[v].add(u)
+        tree[u].append(v)
+        tree[v].append(u)
     dfsOrder = DFSOrder(N, tree)
-    print(dfsOrder.queryRange(1))
-    print(dfsOrder.queryRange(2))
-    print(dfsOrder.queryRange(3))
+    print(dfsOrder.querySub(1))
+    print(dfsOrder.querySub(2))
+    print(dfsOrder.querySub(3))
     print(dfsOrder.queryId(1))
     print(dfsOrder.queryId(2))
     print(dfsOrder.queryId(3))

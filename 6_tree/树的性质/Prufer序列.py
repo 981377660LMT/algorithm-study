@@ -28,10 +28,11 @@
 # 5.在构造完 Prüfer 序列后原树中会剩下两个结点，其中一个一定是编号最大的点 n
 
 
+from random import randint
 from typing import List
 
 
-# parents[i-1] 是以 n 为根时节点 i 的父节点 (1<=i<=n-1)
+# !parents[i-1]是 `以 n 为根`时 节点i的父节点 (1<=i<=n-1)
 # n=6 parents=[3,6,4,6,1] 返回 [6, 1, 3, 4]
 def parentsToPrufer(n: int, parents: List[int]) -> List[int]:
     parents = [-1] + parents
@@ -57,6 +58,7 @@ def parentsToPrufer(n: int, parents: List[int]) -> List[int]:
 
 
 # n=6 prufer=[4,6,5,2] 返回 [4,6,6,5,2,0] 表示结点i的父节点为parents[i-1] (1<=i<=n-1)
+# !其中结点n是根节点
 def pruferToParents(n: int, prufer: List[int]) -> List[int]:
     deg = [0] * (n + 1)
     for p in prufer:
@@ -78,6 +80,43 @@ def pruferToParents(n: int, prufer: List[int]) -> List[int]:
         i += 1
         j += 1
     return parents[1:]
+
+
+# 产生一个随机的无根树(0-n-1)
+def randomTree(n: int) -> List[List[int]]:
+    if n <= 2:
+        g = [[] for _ in range(n)]
+        if n == 2:
+            g[0].append(1)
+            g[1].append(0)
+        return g
+    prufer = [randint(1, n) for _ in range(n - 2)]
+    deg = [0] * (n + 1)
+    for p in prufer:
+        deg[p] += 1
+    prufer = prufer + [n]
+    parents = [0] * (n + 1)
+    i, j = 0, 1
+    while i < n - 1:
+        while deg[j] > 0:
+            j += 1
+        parents[j] = prufer[i]
+        while i < n - 2:
+            p = prufer[i]
+            deg[p] -= 1
+            if p > j or deg[p] > 0:
+                break
+            parents[p] = prufer[i + 1]
+            i += 1
+        i += 1
+        j += 1
+    parents = parents[1:]
+    tree = [[] for _ in range(n)]
+    for i in range(1, n):
+        p = parents[i - 1]
+        tree[i - 1].append(p - 1)
+        tree[p - 1].append(i - 1)
+    return tree
 
 
 # https://www.luogu.com.cn/problem/solution/P2290

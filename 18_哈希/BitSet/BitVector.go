@@ -11,7 +11,7 @@ import "math/bits"
 type BitVector struct {
 	n     int
 	block []int
-	sum   []int // block ごとに立っている 1 の数の累積和
+	sum   []int
 }
 
 func NewBitVector(n int) *BitVector {

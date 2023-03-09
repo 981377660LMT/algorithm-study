@@ -65,7 +65,7 @@ DictTree = Mapping[int, Iterable[int]]
 Tree = Union[ListTree, DictTree]
 
 
-class LCA:
+class _LCA:
     def __init__(self, n: int, tree: Tree, root: int) -> None:
         """倍增查询LCA
 
@@ -156,7 +156,7 @@ if __name__ == "__main__":
         adjList[u].append(v)
         adjList[v].append(u)
 
-    lca = LCA(n, adjList, root=0)
+    lca = _LCA(n, adjList, root=0)
     _, (left, right) = calDiameter1(adjList, start=0)  # 求出直径两端点
 
     q = int(input())

@@ -4,7 +4,7 @@
 
 # !二维偏序问题
 # !一个维度排序，有序容器维护另一个维度
-from typing import List
+from typing import List, Tuple
 from bisect import bisect_left
 from collections import defaultdict
 from sortedcontainers import SortedList

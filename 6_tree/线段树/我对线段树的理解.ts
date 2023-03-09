@@ -1,18 +1,18 @@
 /* eslint-disable no-shadow */
 
 // 我对线段树的理解(递归版)
-type Data = unknown
-type Lazy = unknown
-declare const e: <Data>() => Data
-declare const id: <Lazy>() => Lazy
-declare const op: <Data>(data1: Data, data2: Data) => Data
-declare const mapping: <Data, Lazy>(data: Data, lazy: Lazy) => Data
-declare const composition: <Lazy>(lazy1: Lazy, lazy2: Lazy) => Lazy
+type E = unknown
+type Id = unknown
+declare const e: <E>() => E
+declare const id: <Id>() => Id
+declare const op: <E>(data1: E, data2: E) => E
+declare const mapping: <E, Id>(data: E, lazy: Id) => E
+declare const composition: <Id>(lazy1: Id, lazy2: Id) => Id
 
 class LazySegmentTree {
   private readonly _n: number
-  private readonly _data: Data[]
-  private readonly _lazy: Lazy[]
+  private readonly _data: E[]
+  private readonly _lazy: Id[]
   // !别的一些信息 。。。
 
   constructor(leaves: ArrayLike<unknown>) {
@@ -25,15 +25,15 @@ class LazySegmentTree {
     this._build(1, 1, this._n, leaves)
   }
 
-  query(left: number, right: number): Data {
+  query(left: number, right: number): E {
     return this._query(1, left, right, 1, this._n)
   }
 
-  update(left: number, right: number, lazy: Lazy): void {
+  update(left: number, right: number, lazy: Id): void {
     this._update(1, left, right, 1, this._n, lazy)
   }
 
-  queryAll(): Data {
+  queryAll(): E {
     return this._data[1]
   }
 
@@ -50,7 +50,7 @@ class LazySegmentTree {
     this._pushUp(root, left, right)
   }
 
-  private _query(root: number, L: number, R: number, l: number, r: number): Data {
+  private _query(root: number, L: number, R: number, l: number, r: number): E {
     if (L <= l && r <= R) {
       return this._data[root]
     }
@@ -63,7 +63,7 @@ class LazySegmentTree {
     return res
   }
 
-  private _update(root: number, L: number, R: number, l: number, r: number, lazy: Lazy): void {
+  private _update(root: number, L: number, R: number, l: number, r: number, lazy: Id): void {
     if (L <= l && r <= R) {
       this._propagate(root, l, r, lazy)
       return
@@ -91,7 +91,7 @@ class LazySegmentTree {
     }
   }
 
-  private _propagate(root: number, left: number, right: number, lazy: Lazy) {
+  private _propagate(root: number, left: number, right: number, lazy: Id) {
     // !mapping + composition 来更新子节点data和lazy信息
     this._data[root] = mapping(this._data[root], lazy)
     // !判断是否为叶子结点

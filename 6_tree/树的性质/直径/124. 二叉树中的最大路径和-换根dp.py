@@ -27,7 +27,7 @@ class Solution:
 
         _, edges, values = treeToGraph1(root)
         n = len(values)
-        R = Rerooting(n)
+        R = _Rerooting(n)
         for u, v in edges:
             R.addEdge(u, v)
         res = R.rerooting(e, op, composition)
@@ -37,7 +37,7 @@ class Solution:
 T = TypeVar("T")
 
 
-class Rerooting(Generic[T]):
+class _Rerooting(Generic[T]):
 
     __slots__ = ("adjList", "_n", "_decrement")
 
