@@ -82,6 +82,26 @@ def pruferToParents(n: int, prufer: List[int]) -> List[int]:
     return parents[1:]
 
 
+# https://www.luogu.com.cn/problem/solution/P2290
+# 给定每个点的度数，让你求有多少种符合条件的无根树。1<=n<=150
+# (n-2)!/Π(di-1)!
+def countTree(deg: "List[int]") -> int:
+    n = len(deg)
+    if n == 1:
+        return 1 if deg[0] == 0 else 0
+    fac = [1]
+    for i in range(1, n + 5):
+        fac.append(fac[-1] * i)
+    res = fac[n - 2]
+    degSum = 0
+    for d in deg:
+        if d == 0:  # 不连通
+            return 0
+        degSum += d - 1
+        res //= fac[d - 1]
+    return res if degSum == n - 2 else 0
+
+
 # 产生一个随机的无根树(0-n-1)
 def randomTree(n: int) -> List[List[int]]:
     if n <= 2:
@@ -117,26 +137,6 @@ def randomTree(n: int) -> List[List[int]]:
         tree[i - 1].append(p - 1)
         tree[p - 1].append(i - 1)
     return tree
-
-
-# https://www.luogu.com.cn/problem/solution/P2290
-# 给定每个点的度数，让你求有多少种符合条件的无根树。1<=n<=150
-# (n-2)!/Π(di-1)!
-def countTree(deg: "List[int]") -> int:
-    n = len(deg)
-    if n == 1:
-        return 1 if deg[0] == 0 else 0
-    fac = [1]
-    for i in range(1, n + 5):
-        fac.append(fac[-1] * i)
-    res = fac[n - 2]
-    degSum = 0
-    for d in deg:
-        if d == 0:  # 不连通
-            return 0
-        degSum += d - 1
-        res //= fac[d - 1]
-    return res if degSum == n - 2 else 0
 
 
 if __name__ == "__main__":

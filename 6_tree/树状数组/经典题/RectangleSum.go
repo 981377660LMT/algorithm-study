@@ -32,7 +32,6 @@ func main() {
 		fmt.Fscan(in, &left, &down, &right, &up)
 		fmt.Fprintln(out, SC.Query(left, right, down, up))
 	}
-
 }
 
 type StaticRectangleSum struct {
