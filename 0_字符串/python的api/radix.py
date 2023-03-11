@@ -7,13 +7,11 @@ charToDigit = {char: i for i, char in enumerate(allChar)}
 
 def toString(num: int, radix: int) -> str:
     """将数字转换为指定进制的字符串"""
-    assert 2 <= radix <= 36
+    assert 2 <= radix <= 62
     if num < 0:
         return "-" + toString(-num, radix)
-
     if num == 0:
         return "0"
-
     res = []
     while num:
         div, mod = divmod(num, radix)
@@ -33,10 +31,8 @@ def parseInt(string: str, radix: int) -> int:
 def convert(num: str, rawRadix: int, targetRadix: int) -> str:
     """先将原始进制的字符串转换为10进制大数,然后再将这个数转换为目标进制的字符串"""
     assert 2 <= rawRadix, targetRadix <= 62
-
     if num == "0":
         return "0"
-
     # 原始进制转10进制
     decimal = 0
     base = 1
@@ -44,7 +40,6 @@ def convert(num: str, rawRadix: int, targetRadix: int) -> str:
         char = num[i]
         decimal += base * charToDigit[char]
         base *= rawRadix
-
     # 10进制转目标进制
     res = []
     while decimal:

@@ -2,7 +2,7 @@ from functools import lru_cache
 from typing import List
 
 
-class PreSumMatrix:
+class M:
     """二维前缀和矩阵"""
 
     def __init__(self, A: List[List[int]]):
@@ -49,8 +49,8 @@ class Solution:
         row, col = len(grid), len(grid[0])
         grid2 = [[getFactorCount(num, 2) for num in row] for row in grid]
         grid5 = [[getFactorCount(num, 5) for num in row] for row in grid]
-        preSumMatrix2 = PreSumMatrix(grid2)
-        preSumMatrix5 = PreSumMatrix(grid5)
+        preSumMatrix2 = M(grid2)
+        preSumMatrix5 = M(grid5)
 
         res = 0
         for r in range(row):

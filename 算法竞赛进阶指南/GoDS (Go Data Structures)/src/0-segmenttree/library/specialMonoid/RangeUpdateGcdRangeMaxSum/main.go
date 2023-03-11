@@ -1,7 +1,8 @@
-// 更新:区间染色/区间取gcd(ai,x)
+// 更新:区间染色/区间gcd(ai,x)
 // 查询:区间最大值、区间和
-// TODO  有问题
+
 // https://hitonanode.github.io/cplib-cpp/segmenttree/trees/acl_range-update-gcd-range-max-sum.hpp
+// https://rsm9.hatenablog.com/entry/2021/02/01/220408
 
 package main
 
@@ -24,9 +25,10 @@ func main() {
 	for i := 0; i < n; i++ {
 		var tmp int
 		fmt.Fscan(in, &tmp)
-		nums[i] = NewE(tmp, 1)
+		nums[i] = NewE(tmp)
 	}
-	tree := NewLazySegTree(nums)
+
+	seg := NewSegmentTreeBeats(nums)
 	for i := 0; i < q; i++ {
 		var t, l, r, x int
 		fmt.Fscan(in, &t, &l, &r)
@@ -34,81 +36,84 @@ func main() {
 		if t <= 2 {
 			fmt.Fscan(in, &x)
 			if t == 1 {
-				tree.Update(l, r, Id{reset: x})
+				seg.Update(l, r, Id{updVal: x}) // RangeAssign
 			} else {
-				tree.Update(l, r, Id{doGcd: x})
+				seg.Update(l, r, Id{gcdVal: x}) // RangeUpdateGcd
 			}
 		} else {
-			res := tree.Query(l, r)
+			res := seg.Query(l, r)
 			if t == 3 {
-				fmt.Fprintln(out, res.max)
+				fmt.Fprintln(out, res.max) // RangeMax
 			} else {
-				fmt.Fprintln(out, res.sum)
+				fmt.Fprintln(out, res.sum) // RangeSum
 			}
 		}
 	}
 
 }
 
-const INF int = 1 << 30
+const INF int = 2e9
 
 type E struct {
-	max, lcm, size, sum int
-	fail, allSame       bool
+	sum, max, lcm, size int
+	fail                bool
 }
 
-func NewE(x, size int) E {
-	return E{max: x, lcm: x, size: size, sum: x * size, allSame: true}
+func NewE(v int) E {
+	return E{
+		sum:  v,
+		max:  v,
+		lcm:  v,
+		size: 1,
+	}
 }
 
-type Id struct{ doGcd, reset int }
+type Id struct{ updVal, gcdVal int }
 
-func (*LazySegTree) e() E   { return E{lcm: 1, size: 1} }
-func (*LazySegTree) id() Id { return Id{} }
-func (*LazySegTree) op(l, r E) E {
-	if r.size == 0 {
-		return l
+func (*SegmentTreeBeats) e() E   { return E{lcm: 1} }
+func (*SegmentTreeBeats) id() Id { return Id{} }
+func (*SegmentTreeBeats) op(x, y E) E {
+	return E{
+		sum:  x.sum + y.sum,
+		max:  max(x.max, y.max),
+		lcm:  min(lcm(x.lcm, y.lcm), INF),
+		size: x.size + y.size,
 	}
-	if l.size == 0 {
-		return r
-	}
-	res := E{}
-	res.max = max(l.max, r.max)
-	res.sum = l.sum + r.sum
-	if l.lcm >= INF || r.lcm >= INF {
-		res.lcm = INF
-	} else {
-		res.lcm = min(INF, l.lcm*r.lcm/gcd(l.lcm, r.lcm))
-	}
-	res.size = l.size + r.size
-	if l.allSame && r.allSame && l.max == r.max {
-		res.allSame = true
-	}
-	return res
 }
 
-func (*LazySegTree) mapping(f Id, x E) E {
-	if x.fail {
-		return x
+func (*SegmentTreeBeats) mapping(f Id, x E) E {
+	if f.updVal != 0 {
+		return E{
+			sum:  f.updVal * x.size,
+			max:  f.updVal,
+			lcm:  f.updVal,
+			size: x.size,
+		}
 	}
-	if f.reset != 0 {
-		x = NewE(f.reset, x.size)
-	}
-	if f.doGcd != 0 {
-		if x.allSame {
-			x = NewE(gcd(f.doGcd, x.max), x.size)
-		} else if f.doGcd != 0 && (x.lcm == INF || f.doGcd%x.lcm != 0) {
-			x.fail = true
+	if f.gcdVal != 0 {
+		if x.size == 1 {
+			v := gcd(x.max, f.gcdVal)
+			return E{
+				sum:  v,
+				max:  v,
+				lcm:  v,
+				size: 1,
+			}
+		} else if f.gcdVal%x.lcm != 0 {
+			x.fail = true // !Special
 		}
 	}
 	return x
 }
 
-func (*LazySegTree) composition(new, old Id) Id {
-	if new.reset != 0 {
-		return new
+func (*SegmentTreeBeats) composition(f, g Id) Id {
+	if f.updVal != 0 {
+		return f
 	}
-	return Id{doGcd: gcd(new.doGcd, old.doGcd), reset: old.reset}
+	if g.updVal != 0 {
+		return Id{updVal: gcd(g.updVal, f.gcdVal)}
+	}
+	return Id{gcdVal: gcd(f.gcdVal, g.gcdVal)}
 }
 
 func max(a, b int) int {
@@ -126,10 +131,14 @@ func min(a, b int) int {
 }
 
 func gcd(a, b int) int {
-	if b == 0 {
-		return a
+	for b != 0 {
+		a, b = b, a%b
 	}
-	return gcd(b, a%b)
+	return a
+}
+
+func lcm(a, b int) int {
+	return a * b / gcd(a, b)
 }
 
 //
@@ -137,7 +146,7 @@ func gcd(a, b int) int {
 //
 //
 // !template
-type LazySegTree struct {
+type SegmentTreeBeats struct {
 	n    int
 	log  int
 	size int
@@ -145,10 +154,10 @@ type LazySegTree struct {
 	lazy []Id
 }
 
-func NewLazySegTree(
+func NewSegmentTreeBeats(
 	leaves []E,
-) *LazySegTree {
-	tree := &LazySegTree{}
+) *SegmentTreeBeats {
+	tree := &SegmentTreeBeats{}
 	n := int(len(leaves))
 	tree.n = n
 	tree.log = int(bits.Len(uint(n - 1)))
@@ -172,7 +181,7 @@ func NewLazySegTree(
 
 // 查询切片[left:right]的值
 //   0<=left<=right<=len(tree.data)
-func (tree *LazySegTree) Query(left, right int) E {
+func (tree *SegmentTreeBeats) Query(left, right int) E {
 	if left < 0 {
 		left = 0
 	}
@@ -209,13 +218,13 @@ func (tree *LazySegTree) Query(left, right int) E {
 	return tree.op(sml, smr)
 }
 
-func (tree *LazySegTree) QueryAll() E {
+func (tree *SegmentTreeBeats) QueryAll() E {
 	return tree.data[1]
 }
 
 // 更新切片[left:right]的值
 //   0<=left<=right<=len(tree.data)
-func (tree *LazySegTree) Update(left, right int, f Id) {
+func (tree *SegmentTreeBeats) Update(left, right int, f Id) {
 	if left < 0 {
 		left = 0
 	}
@@ -262,7 +271,7 @@ func (tree *LazySegTree) Update(left, right int, f Id) {
 }
 
 // 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (tree *LazySegTree) MinLeft(right int, predicate func(data E) bool) int {
+func (tree *SegmentTreeBeats) MinLeft(right int, predicate func(data E) bool) int {
 	if right == 0 {
 		return 0
 	}
@@ -302,7 +311,7 @@ func (tree *LazySegTree) MinLeft(right int, predicate func(data E) bool) int {
 }
 
 // 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-func (tree *LazySegTree) MaxRight(left int, predicate func(data E) bool) int {
+func (tree *SegmentTreeBeats) MaxRight(left int, predicate func(data E) bool) int {
 	if left == tree.n {
 		return tree.n
 	}
@@ -341,7 +350,7 @@ func (tree *LazySegTree) MaxRight(left int, predicate func(data E) bool) int {
 }
 
 // 单点查询(不需要 pushUp/op 操作时使用)
-func (tree *LazySegTree) Get(index int) E {
+func (tree *SegmentTreeBeats) Get(index int) E {
 	index += tree.size
 	for i := tree.log; i >= 1; i-- {
 		tree.pushDown(index >> i)
@@ -350,7 +359,7 @@ func (tree *LazySegTree) Get(index int) E {
 }
 
 // 单点赋值
-func (tree *LazySegTree) Set(index int, e E) {
+func (tree *SegmentTreeBeats) Set(index int, e E) {
 	index += tree.size
 	for i := tree.log; i >= 1; i-- {
 		tree.pushDown(index >> i)
@@ -361,11 +370,11 @@ func (tree *LazySegTree) Set(index int, e E) {
 	}
 }
 
-func (tree *LazySegTree) pushUp(root int) {
+func (tree *SegmentTreeBeats) pushUp(root int) {
 	tree.data[root] = tree.op(tree.data[2*root], tree.data[2*root+1])
 }
 
-func (tree *LazySegTree) pushDown(root int) {
+func (tree *SegmentTreeBeats) pushDown(root int) {
 	if tree.lazy[root] != tree.id() {
 		tree.propagate(2*root, tree.lazy[root])
 		tree.propagate(2*root+1, tree.lazy[root])
@@ -373,10 +382,14 @@ func (tree *LazySegTree) pushDown(root int) {
 	}
 }
 
-func (tree *LazySegTree) propagate(root int, f Id) {
+func (tree *SegmentTreeBeats) propagate(root int, f Id) {
 	tree.data[root] = tree.mapping(f, tree.data[root])
-	// !叶子结点不需要更新lazy
 	if root < tree.size {
 		tree.lazy[root] = tree.composition(f, tree.lazy[root])
+		// !Special
+		if tree.data[root].fail {
+			tree.pushDown(root)
+			tree.pushUp(root)
+		}
 	}
 }

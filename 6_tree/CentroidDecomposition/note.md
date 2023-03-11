@@ -56,3 +56,8 @@ https://twitter.com/tatyam_prime/status/1629903556856643585?s=20
 - 点分树最高 logn 层
   点分树的题一般是给定一个范围[l,r]，统计与某个结点距离[l,r]内的结点某个量的和
   https://judge.yosupo.jp/problem/vertex_add_range_contour_sum_on_tree
+
+---
+
+No.1002 Twotone-两种颜色的路径数
+https://yukicoder.me/submissions/449141

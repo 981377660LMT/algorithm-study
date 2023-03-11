@@ -31,8 +31,7 @@ def windowMex(nums: List[int], k: int) -> List[int]:
     n = len(nums)
     res = []
     counter = [0] * (n + 10)
-    # 维护mex候选人0-n
-    sl = SortedList(list(range(n + 1)))
+    sl = SortedList(list(range(n + 1)))  # 维护mex候选人0-n
     for right in range(n):
         add(nums[right])
         if right >= k:

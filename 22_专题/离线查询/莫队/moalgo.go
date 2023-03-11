@@ -56,7 +56,7 @@ func main() {
 	}
 }
 
-type MoAlgoRollback struct {
+type MoAlgo struct {
 	queryOrder int
 	chunkSize  int
 	buckets    [][]query
@@ -64,15 +64,15 @@ type MoAlgoRollback struct {
 
 type query struct{ qi, left, right int }
 
-func NewMoAlgo(n, q int) *MoAlgoRollback {
+func NewMoAlgo(n, q int) *MoAlgo {
 	chunkSize := max(1, n/max(1, int(math.Sqrt(float64(q*2/3)))))
 	buckets := make([][]query, n/chunkSize+1)
-	return &MoAlgoRollback{chunkSize: chunkSize, buckets: buckets}
+	return &MoAlgo{chunkSize: chunkSize, buckets: buckets}
 }
 
 // 添加一个查询，查询范围为`左闭右开区间` [left, right).
 //  0 <= left <= right <= n
-func (mo *MoAlgoRollback) AddQuery(left, right int) {
+func (mo *MoAlgo) AddQuery(left, right int) {
 	index := left / mo.chunkSize
 	mo.buckets[index] = append(mo.buckets[index], query{mo.queryOrder, left, right})
 	mo.queryOrder++
@@ -82,7 +82,7 @@ func (mo *MoAlgoRollback) AddQuery(left, right int) {
 //  add: 将数据添加到窗口. delta: 1 表示向右移动，-1 表示向左移动.
 //  remove: 将数据从窗口移除. delta: 1 表示向右移动，-1 表示向左移动.
 //  query: 查询窗口内的数据.
-func (mo *MoAlgoRollback) Run(
+func (mo *MoAlgo) Run(
 	add func(index, delta int),
 	remove func(index, delta int),
 	query func(qid int),

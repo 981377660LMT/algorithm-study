@@ -1,7 +1,7 @@
 from typing import List
 
 
-class PreSumMatrix:
+class M:
     """二维前缀和矩阵"""
 
     def __init__(self, A: List[List[int]]):
@@ -29,12 +29,12 @@ class Solution:
             for r in range(row):
                 for c in range(col):
                     if r + mid - 1 < row and c + mid - 1 < col:
-                        if preSumMatrix.sumRegion(r, c, r + mid - 1, c + mid - 1) <= threshold:
+                        if p.sumRegion(r, c, r + mid - 1, c + mid - 1) <= threshold:
                             return True
             return False
 
         row, col = len(mat), len(mat[0])
-        preSumMatrix = PreSumMatrix(mat)
+        p = M(mat)
         left, right = 0, min(row, col)
         while left <= right:
             mid = (left + right) >> 1

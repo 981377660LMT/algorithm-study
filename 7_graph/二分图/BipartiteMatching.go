@@ -1,4 +1,4 @@
-// https://ei1333.github.io/librMaxMatchingry/[][2]int/flow/bipartite-matching.hpp
+// https://ei1333.github.io/library/graph/flow/bipartite-matching.hpp
 
 // O(V*E)
 // BipartiteMatching(n):= 全体のグラフの頂点数を n で初期化する.
@@ -54,6 +54,7 @@ func NewBipartiteMatching(n int) *BipartiteMatching {
 	return &BipartiteMatching{graph: graph, alive: alive, used: used, match: match}
 }
 
+// left <-> right
 func (bm *BipartiteMatching) AddEdge(u, v int) {
 	bm.graph[u] = append(bm.graph[u], v)
 	bm.graph[v] = append(bm.graph[v], u)

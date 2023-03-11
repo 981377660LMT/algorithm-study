@@ -108,7 +108,7 @@ func (f *bit1D) Query(right int) int {
 	if right > f.n {
 		right = f.n
 	}
-	for ; right > 0; right -= right & -right {
+	for ; right > 0; right &= right - 1 {
 		res = op(res, f.data[right-1])
 	}
 	return res

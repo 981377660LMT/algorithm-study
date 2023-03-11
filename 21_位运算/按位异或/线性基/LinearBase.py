@@ -7,7 +7,7 @@ class LinearBase:
 
     @staticmethod
     def fromlist(nums: List[int]) -> "LinearBase":
-        res = LinearBase()
+        res = LinearBase(bit=max(nums, default=0).bit_length())
         for x in nums:
             res.add(x)
         res.build()
@@ -38,7 +38,7 @@ class LinearBase:
         self.bases = res
 
     def kthXor(self, k: int) -> int:
-        """子序列(子集)第k小的异或 1<=k<=2**len(self.bases)"""
+        """子序列(子集,包含空集)第k小的异或 1<=k<=2**len(self.bases)"""
         assert 1 <= k <= 2 ** len(self.bases)
         k -= 1
         res = 0
@@ -47,18 +47,53 @@ class LinearBase:
                 res ^= self.bases[i]
         return res
 
+    def maxXor(self) -> int:
+        return self.kthXor(2 ** len(self.bases))
+
     def _normalize(self, x: int) -> int:
         for i in range(x.bit_length() - 1, -1, -1):
             if (x >> i) & 1:
                 x ^= self._rows[i]
         return x
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.bases)
+
+    def __contains__(self, x: int) -> bool:
+        """x是否能由线性基表出"""
+        if x == 0:
+            return True
+        bases = []
+        for k in range(self._bit - 1, -1, -1):
+            curX = x
+            if self._rows[k] != 0:
+                bases.append(self._rows[k])
+                for b in bases:
+                    curX = min(curX, curX ^ b)
+                if curX == 0:
+                    return True
+        return False
 
 
 if __name__ == "__main__":
     nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 999]
     lb = LinearBase.fromlist(nums)
+    print(lb.bases, len(lb))
+    print(lb.maxXor())
     print(lb.kthXor(2))
-    print(lb.kthXor(17), lb.bases)
+    print(lb.kthXor(17))
+
+    # test __contains__
+    res = set()
+    for i in range(1 << len(lb)):
+        bases = []
+        for j in range(len(lb)):
+            if (i >> j) & 1:
+                bases.append(lb.bases[j])
+        cur = 0
+        for b in bases:
+            cur ^= b
+        res.add(cur)
+    res = sorted(res)
+    ok = [i for i in range(lb.maxXor() + 1) if i in lb]
+    assert res == ok

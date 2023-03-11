@@ -69,8 +69,7 @@ class SlidingWindowAggregation(Generic[E]):
             self._stack3.pop()
         self._e1 = self._e()
 
-    @property
-    def size(self):
+    def __len__(self):
         return self._size
 
 
@@ -90,7 +89,7 @@ if __name__ == "__main__":
     windowGcd.popleft()
     assert windowGcd.query() == 0
     windowGcd.popleft()
-    assert windowGcd.size == 0
+    assert not windowGcd
 
     # 大小为k的滑动窗口最大值
 

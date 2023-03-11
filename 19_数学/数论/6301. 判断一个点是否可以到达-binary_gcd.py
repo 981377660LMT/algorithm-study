@@ -12,7 +12,7 @@ from typing import List, Tuple
 # !如果你可以从 (1, 1) 出发到达这个点，请你返回true ，否则返回 false 。
 
 
-# Binary_Gcd
+# Binary Gcd(二进制gcd)
 # 解:
 # 两个正向操作是 更相减损术 的步骤，出现在高中数学必修三里，由这个可以往 gcd 联想
 # 反过来思考，操作变为(x,x+y),(x+y,y),(x/2,y),(x,y/2)。

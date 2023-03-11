@@ -62,7 +62,7 @@ func (f *FenwickTreePrefix) Query(right int) S {
 	if right > f.n {
 		right = f.n
 	}
-	for ; right > 0; right -= right & -right {
+	for ; right > 0; right &= right - 1 {
 		res = f.op(res, f.data[right])
 	}
 	return res

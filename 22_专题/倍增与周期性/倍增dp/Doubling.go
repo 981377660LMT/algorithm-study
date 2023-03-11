@@ -113,7 +113,7 @@ func (d *Doubling) Build() {
 	}
 }
 
-// 从 `from` 状态开始，执行 `step` 次操作，返回最终状态和操作的结果.
+// 从 `from` 状态开始，执行 `step` 次操作，返回最终状态的编号和操作的结果。
 //  0 <= from < n
 //  如果最终状态不存在，返回 -1, e()
 func (d *Doubling) Jump(from, step int) (to int, res E) {

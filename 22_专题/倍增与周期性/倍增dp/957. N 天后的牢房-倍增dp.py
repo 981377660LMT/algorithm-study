@@ -31,18 +31,18 @@ class Solution:
             return nextState
 
         n = len(cells)
-        maxJ = k.bit_length()
-        dp = [[0] * (1 << n) for _ in range(maxJ + 1)]  # dp[j][i] 表示第i天后2^j天的状态
+        log = k.bit_length()
+        dp = [[0] * (1 << n) for _ in range(log + 1)]  # dp[j][i] 表示第i天后2^j天的状态
 
         for i in range(1 << n):
             dp[0][i] = move(i)
 
-        for j in range(maxJ):
+        for j in range(log):
             for i in range(1 << n):
                 dp[j + 1][i] = dp[j][dp[j][i]]
 
         res = int("".join(map(str, cells)), 2)
-        for bit in range(maxJ + 1):
+        for bit in range(log + 1):
             if (k >> bit) & 1:
                 res = dp[bit][res]
 

@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import List
 
 # 给你一个正整数数组 nums，请你移除 最短 子数组（可以为 空），使得剩余元素的 和 能被 p 整除。 不允许 将整个数组都移除。
@@ -13,17 +14,16 @@ from typing import List
 class Solution:
     def minSubarray(self, nums: List[int], p: int) -> int:
         need = sum(nums) % p
-        if need == 0:
+        if need == 0:  # !可以为空
             return 0
-
-        prefix = {0: -1}
-        curSum = 0
-        res = n = len(nums)
+        n = len(nums)
+        preSum = defaultdict(int, {0: -1})
+        res, curSum = n, 0
         for i, num in enumerate(nums):
             curSum = (curSum + num) % p
-            if (curSum - need) % p in prefix:
-                res = min(res, i - prefix[(curSum - need) % p])
-            prefix[curSum] = i
+            if (curSum - need) % p in preSum:
+                res = min(res, i - preSum[(curSum - need) % p])
+            preSum[curSum] = i
         return res if res < n else -1
 
 

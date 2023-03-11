@@ -11,7 +11,7 @@
 from typing import List
 
 
-class PreSumMatrix:
+class P:
     """二维前缀和模板(矩阵不可变)"""
 
     def __init__(self, A: List[List[int]]):
@@ -27,7 +27,7 @@ class PreSumMatrix:
     def sumRegion(self, r1: int, c1: int, r2: int, c2: int) -> int:
         """查询sum(A[r1:r2+1, c1:c2+1])的值::
 
-        preSumMatrix.sumRegion(0, 0, 2, 2) # 左上角(0, 0)到右下角(2, 2)的值
+        M.sumRegion(0, 0, 2, 2) # 左上角(0, 0)到右下角(2, 2)的值
         """
         return (
             self.preSum[r2 + 1][c2 + 1]
@@ -125,7 +125,7 @@ def windowMax2D(
 if __name__ == "__main__":
     ROW, COL, row1, col1, row2, col2 = map(int, input().split())
     grid = [list(map(int, input().split())) for _ in range(ROW)]
-    P = PreSumMatrix(grid)
+    P = P(grid)
 
     rowMin, colMin = min(row1, row2), min(col1, col2)
     if row1 == rowMin and col1 == colMin:

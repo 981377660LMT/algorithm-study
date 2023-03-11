@@ -1,5 +1,5 @@
 # https://maspypy.github.io/library/enumerate/xor_range.hpp
-# 枚举异或范围
+# 枚举异或范围(enumerateXorRange)
 # lo <= (x ^ a) < hi となる x の区間 [L, R) の列挙
 
 # 枚举所有的区间[L,R)使得在这个区间里的x满足

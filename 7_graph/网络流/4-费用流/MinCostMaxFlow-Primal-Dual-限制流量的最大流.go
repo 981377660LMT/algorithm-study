@@ -1,7 +1,7 @@
 // https://ei1333.github.io/luzhiled/snippets/graph/primal-dual.html
 
 // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_B&lang=jp
-// Primal-Dual O(f*ElogV)
+// !Primal-Dual O(f*ElogV)
 // 限制流量为f时的最小费用,如果不能满足流量等于f,则返回-1
 
 package main

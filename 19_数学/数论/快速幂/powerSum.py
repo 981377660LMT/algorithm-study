@@ -4,11 +4,15 @@
 from math import log2
 from typing import Tuple
 
-MOD = int(1e9 + 7)
 
+def powerSum(x: int, n: int, mod: int) -> Tuple[int, int]:
+    """
+    O(logn) 求 (x^n, x^0 + ... + x^(n - 1)) 模 mod
 
-def powerSum(x: int, n: int) -> Tuple[int, int]:
-    """O(logn) 求 (x^n, x^0 + ... + x^(n - 1))  n >= 1"""
+    x,n,mod >= 1
+    """
+    if mod == 1:
+        return 0, 0
     sum_, p = 1, x  # res = x^0 + ... + x^(len - 1), p = x^len
     start = int(log2(n)) - 1
     for d in range(start, -1, -1):
@@ -17,9 +21,13 @@ def powerSum(x: int, n: int) -> Tuple[int, int]:
         if (n >> d) & 1:
             sum_ += p
             p *= x
-        sum_ %= MOD
-        p %= MOD
+        sum_ %= mod
+        p %= mod
     return p, sum_
 
 
-print(powerSum(3, 100000))  # (1024, 2047)
+if __name__ == "__main__":
+    # # https://atcoder.jp/contests/abc293/editorial/5955
+    # print(powerSum(3, 100000, MOD))  # (1024, 2047)
+    A, X, M = map(int, input().split())
+    print(powerSum(A, X, M)[1])

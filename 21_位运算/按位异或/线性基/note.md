@@ -30,3 +30,8 @@
 线性相关 len(base) < len(nums)
 
 https://zhuanlan.zhihu.com/p/139074556
+
+---
+
+- 给定一些数 nums 和一个目标 need , 问从 nums 里选出一些数的异或是否能得到 need
+  把高斯消元的那个矩阵求出来,然后从上往下看,把当前的数和当前的基异或取 min ,等于 0 就可以

@@ -93,8 +93,8 @@ func fwtAND(a []int, op int) []int {
 
 func fwtXOR(a []int, op int) []int {
 	n := len(a)
-	for l, k := 2, 1; l <= n; l, k = l<<1, k<<1 {
-		for i := 0; i < n; i += l {
+	for l_, k := 2, 1; l_ <= n; l_, k = l_<<1, k<<1 {
+		for i := 0; i < n; i += l_ {
 			for j := 0; j < k; j++ {
 				a[i+j], a[i+j+k] = (a[i+j]+a[i+j+k])*op%MOD, (a[i+j]+MOD-a[i+j+k])*op%MOD
 			}

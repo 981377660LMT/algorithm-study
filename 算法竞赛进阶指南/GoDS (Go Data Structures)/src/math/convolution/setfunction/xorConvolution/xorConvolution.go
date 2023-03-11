@@ -8,6 +8,8 @@ import (
 
 const MOD int = 998244353
 
+var INV int = Pow(2, MOD-2, MOD)
+
 func main() {
 	// https://judge.yosupo.jp/problem/bitwise_xor_convolution
 	in := bufio.NewReader(os.Stdin)
@@ -38,7 +40,7 @@ func XorConvolution(a, b []int) []int {
 	for i := range a {
 		a[i] = a[i] * b[i] % MOD
 	}
-	res := walshHadamardTransform(a, (MOD+1)/2)
+	res := walshHadamardTransform(a, INV)
 	return res
 }
 
@@ -52,4 +54,16 @@ func walshHadamardTransform(f []int, op int) []int {
 		}
 	}
 	return f
+}
+
+func Pow(base, exp, mod int) int {
+	base %= mod
+	res := 1
+	for ; exp > 0; exp >>= 1 {
+		if exp&1 == 1 {
+			res = res * base % mod
+		}
+		base = base * base % mod
+	}
+	return res
 }

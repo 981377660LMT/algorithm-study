@@ -40,6 +40,7 @@ func main() {
 type MinCostFlow struct {
 	AddEdge func(from, to, cap, cost int)
 	Work    func() (maxFlow int, minCost int)
+	Slope   func() [][2]int // (flow, cost)
 }
 
 func NewMinCostFlow(n, start, end int) *MinCostFlow {
@@ -91,7 +92,8 @@ func NewMinCostFlow(n, start, end int) *MinCostFlow {
 		return dist[end] < INF
 	}
 
-	ek := func() (maxFlow int, minCost int) {
+	// ek
+	Work := func() (maxFlow int, minCost int) {
 		for spfa() {
 			// 沿 st-end 的最短路尽量增广
 			flow := INF
@@ -115,6 +117,32 @@ func NewMinCostFlow(n, start, end int) *MinCostFlow {
 		return
 	}
 
+	Slope := func() (slope [][2]int) {
+		maxFlow, minCost := 0, 0
+		for spfa() {
+			// 沿 st-end 的最短路尽量增广
+			flow := INF
+			for cur := end; cur != start; {
+				p := pre[cur]
+				if c := graph[p.v][p.i].cap; c < flow {
+					flow = c
+				}
+				cur = p.v
+			}
+			for cur := end; cur != start; {
+				p := pre[cur]
+				edge := &graph[p.v][p.i]
+				edge.cap -= flow
+				graph[cur][edge.rid].cap += flow
+				cur = p.v
+			}
+			maxFlow += flow
+			minCost += dist[end] * flow
+			slope = append(slope, [2]int{maxFlow, minCost})
+		}
+		return
+	}
+
 	AddEdge := func(from, to, cap, cost int) {
 		addEdge(from, to, cap, cost, ei)
 		ei++
@@ -122,6 +150,7 @@ func NewMinCostFlow(n, start, end int) *MinCostFlow {
 
 	return &MinCostFlow{
 		AddEdge: AddEdge,
-		Work:    ek,
+		Work:    Work,
+		Slope:   Slope,
 	}
 }

@@ -22,3 +22,5 @@ console.log(baseNeg2(2))
 console.log(baseNeg22(2))
 // 输出："110"
 // 解释：(-2) ^ 2 + (-2) ^ 1 = 2
+
+export {}

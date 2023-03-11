@@ -1,9 +1,8 @@
-interface WindowManager<Q> {
-  // 使用 `this:void` 禁止在外部调用this
-  add(this: void, index: number, delta: -1 | 1): void
-  remove(this: void, index: number, delta: -1 | 1): void
-  query(this: void, qLeft: number, qRight: number): Q
-}
+type WindowManager<Q> = {
+  add(index: number, delta: -1 | 1): void
+  remove(index: number, delta: -1 | 1): void
+  query(qLeft: number, qRight: number): Q
+} & ThisType<void>
 
 type Query = [index: number, left: number, right: number]
 
@@ -17,9 +16,9 @@ type Query = [index: number, left: number, right: number]
  * @complexity `O(n*sqrt(q))`
  */
 function useMoAlgo<Q>(n: number, q: number, windowManager: WindowManager<Q>) {
-  const isqrt = Math.floor(Math.sqrt(q))
-  const chunkSize = Math.max(1, Math.floor(n / isqrt))
-  const buckets = Array.from<unknown, Query[]>({ length: Math.floor(n / chunkSize) + 1 }, () => [])
+  const isqrt = ~~Math.sqrt(q)
+  const chunkSize = Math.max(1, ~~(n / isqrt))
+  const buckets = Array.from<unknown, Query[]>({ length: ~~(n / chunkSize) + 1 }, () => [])
   let queryOrder = 0
 
   /**
@@ -28,14 +27,14 @@ function useMoAlgo<Q>(n: number, q: number, windowManager: WindowManager<Q>) {
    * 0 <= left <= right < {@link n}
    */
   function addQuery(left: number, right: number): void {
-    const index = Math.floor(left / chunkSize)
-    buckets[index].push([queryOrder++, left, right + 1]) // 注意这里的 right + 1
+    const index = ~~(left / chunkSize)
+    buckets[index].push([queryOrder++, left, right + 1])
   }
 
   /**
    * 返回每个查询的结果
    */
-  function work(): Q[] {
+  function Run(): Q[] {
     for (let i = 0; i < buckets.length; i++) {
       buckets[i].sort((a, b) => (i & 1 ? -(a[2] - b[2]) : a[2] - b[2])) // 块内按区间右端点排序
     }
@@ -83,7 +82,7 @@ function useMoAlgo<Q>(n: number, q: number, windowManager: WindowManager<Q>) {
 
   return {
     addQuery,
-    work
+    work: Run
   }
 }
 

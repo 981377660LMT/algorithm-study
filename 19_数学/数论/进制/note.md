@@ -47,3 +47,7 @@ for i in range(len(string) - 1, -1, -1):
    base *= RADIX
 return res
 ```
+
+---
+
+结论

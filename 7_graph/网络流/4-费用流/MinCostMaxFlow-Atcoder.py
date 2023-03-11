@@ -22,6 +22,8 @@ class MinCostFlow:
         return len(self._edges) - 1
 
     class edge:
+        __slots__ = ("fr", "to", "cap", "flow", "cost")
+
         def __init__(self, fr, to, cap, cost):
             self.fr = fr
             self.to = to
@@ -53,6 +55,8 @@ class MinCostFlow:
             counter[fr] += 1
 
     class _edge:
+        __slots__ = ("to", "rev", "cap", "cost")
+
         def __init__(self, to, rev, cap, cost):
             self.to = to
             self.rev = rev

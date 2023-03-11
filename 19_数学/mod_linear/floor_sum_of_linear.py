@@ -1,16 +1,15 @@
 # https://maspypy.github.io/library/mod/floor_sum_of_linear.hpp
 # !sum((x * a + b) // mod for x in range(L, R))
 
-
 from math import ceil
 
 MOD = int(1e9 + 7)
 
 
-def floor_sum_of_linear(L: int, R: int, a: int, b: int, mod: int) -> int:
+def floor_sum_of_linear(L: int, R: int, a: int, b: int, div: int) -> int:
     """
     ```
-    sum((x * a + b) // mod for x in range(L, R))
+    sum((x * a + b) // div for x in range(L, R))
     ```
     """
     if L >= R:
@@ -20,20 +19,20 @@ def floor_sum_of_linear(L: int, R: int, a: int, b: int, mod: int) -> int:
     n = R - L
 
     if b < 0:
-        k = ceil(-b / mod)
-        b += k * mod
+        k = ceil(-b / div)
+        b += k * div
         res -= n * k
 
     while n:
-        q, a = a // mod, a % mod
+        q, a = a // div, a % div
         res += n * (n - 1) // 2 * q
         # res %= MOD
-        if b >= mod:
-            q, b = b // mod, b % mod
+        if b >= div:
+            q, b = b // div, b % div
             res += n * q
             # res %= MOD
-        n, b = (a * n + b) // mod, (a * n + b) % mod
-        a, mod = mod, a
+        n, b = (a * n + b) // div, (a * n + b) % div
+        a, div = div, a
 
     return res
 
