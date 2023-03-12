@@ -1,5 +1,5 @@
 from collections import deque
-from typing import List, Tuple
+from typing import List, Set, Tuple
 
 
 #  !SCC Tarjan (Tarjan 求有向图的强联通分量，缩点成拓扑图)
@@ -76,7 +76,7 @@ def findSCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[int]]
 # 模板题 点权 https://www.luogu.com.cn/problem/P3387
 #  边权 https://codeforces.com/contest/894/problem/E
 # 检测路径是否可达/唯一/无穷 https://codeforces.com/problemset/problem/1547/G
-def toDAG(graph: List[List[int]], groups: List[List[int]], sccId: List[int]) -> List[List[int]]:
+def toDAG(graph: List[List[int]], groups: List[List[int]], sccId: List[int]) -> List[Set[int]]:
     """
     # !scc 缩点成DAG
 
@@ -89,14 +89,14 @@ def toDAG(graph: List[List[int]], groups: List[List[int]], sccId: List[int]) -> 
     """
 
     m = len(groups)
-    adjList = [[] for _ in range(m)]  # !注意这样可能会产生重边，不能有重边时可以用 adjMap 去重
+    adjList = [set() for _ in range(m)]  # !set去重
     deg = [0] * m
     for i, nexts in enumerate(graph):
         u = sccId[i]
         for next in nexts:
             v = sccId[next]
             if u != v:
-                adjList[u].append(v)
+                adjList[u].add(v)
                 deg[v] += 1
             else:
                 # 这里可以记录自环（指 len(scc) == 1 但是有自环）、汇合同一个 SCC 的权值等 ...

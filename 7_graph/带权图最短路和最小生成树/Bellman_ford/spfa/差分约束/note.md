@@ -1,4 +1,4 @@
-https://ac-mikoto.top/2021/11/12/%E5%B7%AE%E5%88%86%E7%BA%A6%E6%9D%9F/
+https://ac-mikoto.top/2022/03/21/SPFA%E7%AE%97%E6%B3%95%E4%B9%8BSLF%E4%BC%98%E5%8C%96/
 
 1. 求不等式组**可行解**
    三步：
@@ -13,6 +13,7 @@ https://ac-mikoto.top/2021/11/12/%E5%B7%AE%E5%88%86%E7%BA%A6%E6%9D%9F/
    #  x0 - x1 >= 1    x0 - x1 >= 1
    #  x2 - x3 <= 2    x3 - x2 >= -2
    #  x0 = x2         x2 - x0 >= 0  x0 - x2 >= 0
+   #  xi >= 1         引入超级源点 xn+1，xi - xn+1 >= 1
    ```
 
 2. 求不等式组每个变量的**最优解**

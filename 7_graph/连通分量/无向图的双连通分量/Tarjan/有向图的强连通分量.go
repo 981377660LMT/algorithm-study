@@ -51,7 +51,7 @@ type WeightedEdge struct{ from, to, cost, index int }
 type StronglyConnectedComponents struct {
 	G      [][]WeightedEdge // 原图
 	Dag    [][]WeightedEdge // 强连通分量缩点后的顶点和边组成的DAG
-	CompId []int            //每个顶点所属的强连通分量的编号
+	CompId []int            // 每个顶点所属的强连通分量的编号
 	Group  [][]int          // 每个强连通分量所包含的顶点
 	rg     [][]WeightedEdge
 	order  []int
@@ -97,13 +97,18 @@ func (scc *StronglyConnectedComponents) Build() {
 	}
 
 	dag := make([][]WeightedEdge, ptr)
+	visited := make(map[int]struct{}) // 去重
 	for i := range scc.G {
 		for _, e := range scc.G[i] {
 			x, y := scc.CompId[e.from], scc.CompId[e.to]
 			if x == y {
 				continue
 			}
-			dag[x] = append(dag[x], WeightedEdge{x, y, e.cost, e.index})
+			hash := x*len(scc.G) + y
+			if _, ok := visited[hash]; !ok {
+				dag[x] = append(dag[x], WeightedEdge{x, y, e.cost, e.index})
+				visited[hash] = struct{}{}
+			}
 		}
 	}
 	scc.Dag = dag

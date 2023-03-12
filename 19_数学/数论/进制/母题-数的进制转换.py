@@ -1,4 +1,4 @@
-# 进制转换
+# python进制转换
 # 任意进制字符串相互转换的通用解法，注意特判0
 # 124. 数的进制转换
 # 编写一个程序，可以实现将一个数字由一个进制转换为另一个进制。
@@ -21,7 +21,7 @@ def toString(num: int, radix: int) -> str:
         return "0"
     res = []
     while num:
-        div, mod = divmod(num, radix)
+        div, mod = num // radix, num % radix
         res.append(digitToChar[mod])
         num = div
     return "".join(res)[::-1] or "0"

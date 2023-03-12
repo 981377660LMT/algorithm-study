@@ -32,3 +32,12 @@ SPFA 的核心原理和 Bellman-ford 算法是一样的，也是对点的松弛�
 1. 没有负权：dijk
 2. 有负权 卡 spfa：写 spfa 最坏也是一个 bellman-ford
 3. 随机图：spfa 飞快
+
+---
+
+- !酸辣粉优化
+  https://blog.csdn.net/zhouchangyu1221/article/details/90549195
+  SLF(Small Label First) 优化
+  将原队列改成双端队列，对要加入队列的点 p，如果 dist[p] 小于队头元素 u 的 dist[u]，将其插入到队头，否则插入到队尾。
+  SLF(Small Label First) 双端队列优化，也被戏称为“酸辣粉优化”
+  SLF 优化（酸辣粉优化），可以一定程度上（约 20%）改善 spfa 的运行速度

@@ -9,13 +9,13 @@ import (
 	"os"
 )
 
-type WeightedEdge struct{ to, weighgt int }
+type Edge struct{ to, weight int }
 
 const INF int = 1e18
 
 // spfa 求带有负权边的最短路，时间复杂度 O(V*E)，有负环时返回 nil
 //   !只是找负环的话，初始时将所有点入队即可
-func spfa(n int, graph [][]WeightedEdge, start int) (dist []int) {
+func spfa(n int, graph [][]Edge, start int) (dist []int) {
 	dist = make([]int, n)
 	queue := []int{}
 	relaxedConut := make([]int, n)
@@ -33,7 +33,7 @@ func spfa(n int, graph [][]WeightedEdge, start int) (dist []int) {
 		queue = queue[1:]
 		inQueue[cur] = false
 		for _, e := range graph[cur] {
-			next, weight := e.to, e.weighgt
+			next, weight := e.to, e.weight
 			cand := dist[cur] + weight
 			if cand >= dist[next] {
 				continue
@@ -63,11 +63,11 @@ func main() {
 
 	var n, m, s int
 	fmt.Fscan(in, &n, &m, &s)
-	graph := make([][]WeightedEdge, n)
+	graph := make([][]Edge, n)
 	for i := 0; i < m; i++ {
 		var u, v, w int
 		fmt.Fscan(in, &u, &v, &w)
-		graph[u] = append(graph[u], WeightedEdge{v, w})
+		graph[u] = append(graph[u], Edge{v, w})
 	}
 
 	dist := spfa(n, graph, s)
