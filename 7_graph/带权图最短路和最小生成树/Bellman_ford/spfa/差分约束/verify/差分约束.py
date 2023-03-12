@@ -1,5 +1,3 @@
-"""如果所有边权非负,可以把spfa换成dijkstra"""
-
 from collections import deque
 from heapq import heappop, heappush
 from typing import List, Tuple

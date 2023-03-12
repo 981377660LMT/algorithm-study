@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	queue := NewArrayDeque(10)
+	queue := NewDeque(10)
 	queue.Append(1)
 	queue.Append(2)
 	queue.Pop()
@@ -32,8 +32,8 @@ func main() {
 
 type E = int
 
-func NewArrayDeque(numElements int) *ArrayDeque {
-	half := numElements / 2
+func NewDeque(cap int) *ArrayDeque {
+	half := cap / 2
 	return &ArrayDeque{
 		left:  make([]E, 0, half+1),
 		right: make([]E, 0, half+1),

@@ -8,6 +8,8 @@ package arraydeque
 type D = int
 type Deque struct{ l, r []D }
 
+func NewDeque2(cap int) *Deque { return &Deque{make([]D, 0, 1+cap/2), make([]D, 0, 1+cap/2)} }
+
 func (q Deque) Empty() bool {
 	return len(q.l) == 0 && len(q.r) == 0
 }
