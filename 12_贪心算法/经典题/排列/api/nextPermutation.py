@@ -1,10 +1,10 @@
 # 下一个排列/上一个排列
 
 
-from typing import Any, MutableSequence, Tuple
+from typing import Any, List, Tuple
 
 
-def nextPermutation(nums: MutableSequence[Any], inPlace=False) -> Tuple[bool, MutableSequence[Any]]:
+def nextPermutation(nums: List[Any], inPlace=False) -> Tuple[bool, List[Any]]:
     """返回下一个字典序的排列，如果不存在，返回本身;时间复杂度O(n)"""
     if not inPlace:
         nums = nums[:]
@@ -29,7 +29,7 @@ def nextPermutation(nums: MutableSequence[Any], inPlace=False) -> Tuple[bool, Mu
     return True, nums
 
 
-def prePermutation(nums: MutableSequence[Any], inPlace=False) -> Tuple[bool, MutableSequence[Any]]:
+def prePermutation(nums: List[Any], inPlace=False) -> Tuple[bool, List[Any]]:
     """返回前一个字典序的排列,如果不存在,返回本身;时间复杂度O(n)"""
     if not inPlace:
         nums = nums[:]
@@ -58,18 +58,16 @@ from sortedcontainers import SortedSet
 
 
 # https://maspypy.github.io/library/seq/kth_next_permutation.hpp
-def kthNextPermutation(
-    unique: MutableSequence[Any], k: int, inPlace=False
-) -> Tuple[bool, MutableSequence[Any], int]:
+def kthNextPermutation(unique: List[Any], k: int, inPlace=False) -> Tuple[bool, List[Any], int]:
     """下k个字典序的排列
 
     Args:
-        unique (MutableSequence[Any]): 无重复元素的数组
+        unique (List[Any]): 无重复元素的数组
         k (int): 后续第k个(`本身算第0个`)
         inPlace (bool, optional): 是否原地修改. 默认为False
 
     Returns:
-        Tuple[bool, MutableSequence[Any], int]: `是否存在, 下k个排列, 需要移动的元素个数`
+        Tuple[bool, List[Any], int]: `是否存在, 下k个排列, 需要移动的元素个数`
     """
     if not inPlace:
         unique = unique[:]
@@ -113,3 +111,7 @@ if __name__ == "__main__":
     isOk, preP = prePermutation(list(map(int, "12345")))
     if isOk:
         print("preP:", preP)
+
+    isOk, kthP, move = kthNextPermutation(list(map(int, "12345")), 5)
+    if isOk:
+        print("kthP:", kthP, "move:", move)

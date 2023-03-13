@@ -98,7 +98,7 @@ func kShortestWalk(n int, edges []Edge, start, target, k int) (res []int) {
 		first  int
 		second *heap
 	}
-	pq := NewHeap(func(v1, v2 H) int { return v1.(pair).first - v2.(pair).first }, nil)
+	pq := nhp(func(v1, v2 H) int { return v1.(pair).first - v2.(pair).first }, nil)
 	var root *heap
 	root = pHeap.Push(root, dist[start], start)
 	pq.Push(pair{dist[start], root})
@@ -224,7 +224,7 @@ func Dijkstra(n int, adjList [][]Edge, start int) (dist, preV []int) {
 		preV[i] = -1
 	}
 
-	pq := NewHeap(func(a, b H) int {
+	pq := nhp(func(a, b H) int {
 		return a.(pqItem).dist - b.(pqItem).dist
 	}, nil)
 	pq.Push(pqItem{start, 0})
@@ -257,7 +257,7 @@ type H = interface{}
 //    positive , if a > b
 type Comparator func(a, b H) int
 
-func NewHeap(comparator Comparator, nums []H) *Heap {
+func nhp(comparator Comparator, nums []H) *Heap {
 	nums = append(nums[:0:0], nums...)
 	heap := &Heap{comparator: comparator, data: nums}
 	heap.heapify()

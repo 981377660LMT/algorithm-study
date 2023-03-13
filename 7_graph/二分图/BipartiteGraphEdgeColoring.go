@@ -81,7 +81,7 @@ func (bgec *BipartiteGraphEdgeColoring) Build() [][]int {
 }
 
 func conctract(deg []int, k int) *unionFindArray {
-	que := NewHeap(func(a, b H) int {
+	que := nhp(func(a, b H) int {
 		return a[0] - b[0] // TODO
 	}, nil)
 	for i, d := range deg {
@@ -825,7 +825,7 @@ type H = []int
 //    positive , if a > b
 type Comparator func(a, b H) int
 
-func NewHeap(comparator Comparator, nums []H) *Heap {
+func nhp(comparator Comparator, nums []H) *Heap {
 	nums = append(nums[:0:0], nums...)
 	heap := &Heap{comparator: comparator, data: nums}
 	heap.heapify()

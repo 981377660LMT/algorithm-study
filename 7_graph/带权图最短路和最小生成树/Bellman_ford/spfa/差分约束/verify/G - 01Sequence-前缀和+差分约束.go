@@ -109,7 +109,7 @@ func (d *DualShortestPath) Run() (dist []int, ok bool) {
 
 func (d *DualShortestPath) spfaMin() (dist []int, ok bool) {
 	dist = make([]int, d.n)
-	queue := NewDeque2(d.n)
+	queue := NewDeque(d.n)
 	count := make([]int, d.n)
 	inQueue := make([]bool, d.n)
 	for i := 0; i < d.n; i++ {
@@ -184,7 +184,7 @@ func (d *DualShortestPath) spfaMax() (dist []int, ok bool) {
 type D = int
 type Deque struct{ l, r []D }
 
-func NewDeque2(cap int) *Deque { return &Deque{make([]D, 0, 1+cap/2), make([]D, 0, 1+cap/2)} }
+func NewDeque(cap int) *Deque { return &Deque{make([]D, 0, 1+cap/2), make([]D, 0, 1+cap/2)} }
 
 func (q Deque) Empty() bool {
 	return len(q.l) == 0 && len(q.r) == 0

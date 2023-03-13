@@ -1,30 +1,78 @@
-// Usage:
-// Count(start, end, value) – [start, end) に含まれる value の個数を求める.
-// CountRange(start, end, lower, upper) – [start, end) に含まれる [lower, upper) の個数を求める.
-// Index(value, k) – k(0-indexed) 番目の value の位置を求める.
-// KthMin(start, end, k) – [start, end) に含まれる k(0-indexed) 番目に小さい値を求める.
-// KthMax(start, end, k) – [start, end) に含まれる k(0-indexed) 番目に大きい値を求める.
-// Lower(start, end, value) – [start, end) に含まれる要素の中で value の次に小さいものを求める.存在しない場合は -INF を返す.
-// Upper(start, end, value) – [start, end) に含まれる要素の中で value の次に大きいものを求める.存在しない場合は INF を返す.
-
-// Referece:
-// https://beet-aizu.github.io/library/datastructure/waveletmatrix.cpp
-// https://blog.hamayanhamayan.com/entry/2017/06/13/103352
+// https://yukicoder.me/problems/no/1332
+// 区间最近值(无序数组区间前驱后继)查询
+// !对每个查询[left,right,x],输出左闭右开区间内的数到给定数x的最小距离
+// n<=3e5 q<=1e5 nums[i]<=1e9
 
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 )
+
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	M := NewWaveletMatrix(nums)
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var left, right, x int
+		fmt.Fscan(in, &left, &right, &x)
+		left--
+		res := INF
+		lower := M.Floor(left, right, x) // 小于等于x的最大值
+		if lower != -INF {
+			res = min(res, abs(lower-x))
+		}
+		higher := M.Ceil(left, right, x) // 大于等于x的最小值
+		if higher != INF {
+			res = min(res, abs(higher-x))
+		}
+
+		fmt.Fprintln(out, res)
+	}
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
 
 const INF int = 1e18
 
 // 指定された配列から WaveletMatrix を構築する.
-//  data:変換する配列(data[i]は0以上、2^maxLog未満)
-//  maxLog:queryの最大値のbit数(普通は32)
-func NewWaveletMatrix(data []int, maxLog int) *WaveletMatrix {
-	dataCopy := append(data[:0:0], data...)
+//  data:変換する配列(data[i]は0以上)
+func NewWaveletMatrix(data []int) *WaveletMatrix {
+	dataCopy := make([]int, len(data))
+	max_ := 0
+	for i, v := range data {
+		if v > max_ {
+			max_ = v
+		}
+		dataCopy[i] = v
+	}
+	maxLog := bits.Len(uint(max_)) + 1
 	n := len(dataCopy)
 	mat := make([]*BitVector, maxLog)
 	zs := make([]int, maxLog)
@@ -154,6 +202,24 @@ func (w *WaveletMatrix) Higher(start, end, value int) int {
 	return w.KthMin(start, end, k)
 }
 
+// [start, end) に含まれる要素の中で value 以下のものを求める.存在しない場合は -INF を返す.
+func (w *WaveletMatrix) Floor(start, end, value int) int {
+	count := w.Count(start, end, value)
+	if count > 0 {
+		return value
+	}
+	return w.Lower(start, end, value)
+}
+
+// [start, end) に含まれる要素の中で value 以上のものを求める.存在しない場合は INF を返す.
+func (w *WaveletMatrix) Ceil(start, end, value int) int {
+	count := w.Count(start, end, value)
+	if count > 0 {
+		return value
+	}
+	return w.Higher(start, end, value)
+}
+
 func (w *WaveletMatrix) access(k int) int {
 	res := 0
 	for dep := 0; dep < w.maxLog; dep++ {
@@ -187,7 +253,6 @@ func (w *WaveletMatrix) freqDfs(d, left, right, val, a, b int) int {
 		return 0
 	}
 
-	// TODO
 	nv := (1 << uint(w.maxLog-d-1)) | val
 	nnv := ((1 << uint(w.maxLog-d-1)) - 1) | nv
 	if nnv < a || b <= val {
@@ -254,7 +319,7 @@ func (f *BitVector) Get(i int) int {
 	return (f.block[i>>6] >> uint(i&63)) & 1
 }
 
-// 统计 [0,end) 中 value 的个数
+// [0,end) に含まれる 1 の個数.
 func (f *BitVector) Count(value, end int) int {
 	if value == 1 {
 		return f.count1(end)
@@ -262,7 +327,8 @@ func (f *BitVector) Count(value, end int) int {
 	return end - f.count1(end)
 }
 
-// 统计 [0,end) 中第 k(0-indexed) 个 value 的位置
+// [0,end) に k(0-indexed) 番目の value の位置を求める.
+// 存在しない場合は -1 を返す.
 func (f *BitVector) Index(value, k int) int {
 	if k < 0 || f.Count(value, f.n) <= k {
 		return -1
@@ -287,17 +353,4 @@ func (f *BitVector) IndexWithStart(value, k, start int) int {
 func (f *BitVector) count1(k int) int {
 	mask := (1 << uint(k&63)) - 1
 	return f.sum[k>>6] + bits.OnesCount(uint(f.block[k>>6]&mask))
-}
-
-func main() {
-	nums := []int{1, 2, 3, 1, 5, 6, 7, 8, 9, 10}
-	M := NewWaveletMatrix(nums, 32)
-	fmt.Println(M.Count(0, 1, 1))
-	fmt.Println(M.CountRange(0, 10, 1, 5))
-	fmt.Println(M.Index(1, 2))
-	fmt.Println(M.IndexWithStart(1, 0, 2))
-	fmt.Println(M.KthMax(0, 10, 2))
-	fmt.Println(M.KthMin(0, 10, 2))
-	fmt.Println(M.Lower(0, 10, 100))
-	fmt.Println(M.Higher(0, 10, 0))
 }

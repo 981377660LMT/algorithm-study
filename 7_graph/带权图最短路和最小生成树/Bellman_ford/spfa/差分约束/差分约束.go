@@ -125,7 +125,7 @@ func (dsp *DualShortestPath) dijkMax() (dist []int, ok bool) {
 	for i := 0; i < dsp.n; i++ {
 		dist[i] = INF
 	}
-	pq := NewHeap(func(a, b H) bool { return a[0] < b[0] }, nil)
+	pq := nhp(func(a, b H) bool { return a[0] < b[0] }, nil)
 	pq.Push([2]int{0, 0})
 	dist[0] = 0
 	for pq.Len() > 0 {
@@ -210,7 +210,7 @@ func (q Deque) At(i int) D {
 
 type H = [2]int // (dist,node)
 
-func NewHeap(less func(a, b H) bool, nums []H) *Heap {
+func nhp(less func(a, b H) bool, nums []H) *Heap {
 	nums = append(nums[:0:0], nums...)
 	heap := &Heap{less: less, data: nums}
 	heap.heapify()

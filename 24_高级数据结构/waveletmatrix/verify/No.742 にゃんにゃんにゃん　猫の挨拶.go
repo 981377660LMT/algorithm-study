@@ -1,3 +1,4 @@
+// https://yukicoder.me/problems/no/742
 // 1-n上有n只猫,分别在1,2,...,n的位置
 // 给定每只猫的移动方向,问一共有多少对猫中途会相遇(所有的移动方向不同)
 // n<=3e4
@@ -28,7 +29,7 @@ func main() {
 		xs[i]--
 	}
 
-	wm := NewWaveletMatrix(xs, 32)
+	wm := NewWaveletMatrix(xs)
 	res := n * (n - 1)
 	for i := 0; i < n; i++ {
 		res -= wm.CountRange(0, i, 0, xs[i])       // 左侧不相撞的
@@ -39,10 +40,17 @@ func main() {
 }
 
 // 指定された配列から WaveletMatrix を構築する.
-//  data:変換する配列
-//  maxLog:queryの最大値のbit数(普通は32)
-func NewWaveletMatrix(data []int, maxLog int) *WaveletMatrix {
-	dataCopy := append(data[:0:0], data...)
+//  data:変換する配列(data[i]は0以上)
+func NewWaveletMatrix(data []int) *WaveletMatrix {
+	dataCopy := make([]int, len(data))
+	max_ := 0
+	for i, v := range data {
+		if v > max_ {
+			max_ = v
+		}
+		dataCopy[i] = v
+	}
+	maxLog := bits.Len(uint(max_)) + 1
 	n := len(dataCopy)
 	mat := make([]*BitVector, maxLog)
 	zs := make([]int, maxLog)
@@ -118,6 +126,10 @@ func (w *WaveletMatrix) Index(value, k int) int {
 	return k
 }
 
+func (w *WaveletMatrix) IndexWithStart(value, k, start int) int {
+	return w.Index(value, k+w.count(value, start))
+}
+
 // [start, end) に含まれる要素の中で k(0-indexed) 番目に大きいものを求める.
 //  alias: Quantile
 func (w *WaveletMatrix) KthMax(start, end, k int) int {
@@ -166,6 +178,24 @@ func (w *WaveletMatrix) Higher(start, end, value int) int {
 		return INF
 	}
 	return w.KthMin(start, end, k)
+}
+
+// [start, end) に含まれる要素の中で value 以下のものを求める.存在しない場合は -INF を返す.
+func (w *WaveletMatrix) Floor(start, end, value int) int {
+	count := w.Count(start, end, value)
+	if count > 0 {
+		return value
+	}
+	return w.Lower(start, end, value)
+}
+
+// [start, end) に含まれる要素の中で value 以上のものを求める.存在しない場合は INF を返す.
+func (w *WaveletMatrix) Ceil(start, end, value int) int {
+	count := w.Count(start, end, value)
+	if count > 0 {
+		return value
+	}
+	return w.Higher(start, end, value)
 }
 
 func (w *WaveletMatrix) access(k int) int {
@@ -267,7 +297,7 @@ func (f *BitVector) Get(i int) int {
 	return (f.block[i>>6] >> uint(i&63)) & 1
 }
 
-// 统计 [0,end) 中 value 的个数
+// [0,end) に含まれる 1 の個数.
 func (f *BitVector) Count(value, end int) int {
 	if value == 1 {
 		return f.count1(end)
@@ -275,7 +305,8 @@ func (f *BitVector) Count(value, end int) int {
 	return end - f.count1(end)
 }
 
-// 统计 [0,end) 中第 k(0-indexed) 个 value 的位置
+// [0,end) に k(0-indexed) 番目の value の位置を求める.
+// 存在しない場合は -1 を返す.
 func (f *BitVector) Index(value, k int) int {
 	if k < 0 || f.Count(value, f.n) <= k {
 		return -1

@@ -1,4 +1,4 @@
-from 康托展开 import calPerm
+from 康托展开_取模 import calPerm
 
 
 # 给定 n 和 k，返回第k个排列。

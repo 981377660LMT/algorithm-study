@@ -163,7 +163,7 @@
     - [多边形面积](19_%E6%95%B0%E5%AD%A6/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95/%E5%87%B8%E5%8C%85/%E5%A4%9A%E8%BE%B9%E5%BD%A2%E9%9D%A2%E7%A7%AF%E5%85%AC%E5%BC%8F.py)
     - [直线方程](19_%E6%95%B0%E5%AD%A6/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95/%E5%A4%9A%E7%82%B9%E5%85%B1%E7%BA%BF%E9%97%AE%E9%A2%98/%E4%B8%A4%E7%82%B9%E6%B1%82%E7%9B%B4%E7%BA%BF%E6%96%B9%E7%A8%8B.py)
     - [斯特林数](19_%E6%95%B0%E5%AD%A6/%E7%BB%84%E5%90%88/%E6%96%AF%E7%89%B9%E6%9E%97%E6%95%B0)
-    - [康托展开](19_%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80.py)
+    - [康托展开](19_%E6%95%B0%E5%AD%A6/%E6%95%B0%E8%AE%BA/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80/%E5%BA%B7%E6%89%98%E5%B1%95%E5%BC%80_%E4%B8%8D%E5%8F%96%E6%A8%A1.py)
     - [Primes](19_%E6%95%B0%E5%AD%A6/%E5%9B%A0%E6%95%B0%E7%AD%9B/prime.py)
     - [Combs](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E7%BB%84%E5%90%88%E8%AE%A1%E6%95%B0/%E6%B1%82%E7%BB%84%E5%90%88%E6%8E%92%E5%88%97%E9%98%B6%E4%B9%98)
     - [线性基](21_%E4%BD%8D%E8%BF%90%E7%AE%97/%E6%8C%89%E4%BD%8D%E5%BC%82%E6%88%96/%E7%BA%BF%E6%80%A7%E5%9F%BA/LinearBase.py)
@@ -208,6 +208,10 @@
     - [MajorSum](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/%E5%87%BA%E7%8E%B0%E6%AC%A1%E6%95%B0%E6%9C%80%E5%A4%9A%E7%9A%84%E5%85%83%E7%B4%A0%E7%9A%84%E5%92%8C.py)
     - [RandomTree](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/Prufer%E5%BA%8F%E5%88%97.py)
     - [SegmentSet](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/SegmentSet.py)
+    - WaveletMatrix
+      - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)
+      - [WaveletMatrixXor](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrixXor.go)
+      - [WaveletMatrixSum](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrixSum.go)
     - Itertools
       - [product](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/product.ts)
       - [permutations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/permutations.ts)

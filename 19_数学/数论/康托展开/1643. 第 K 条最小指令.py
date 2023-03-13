@@ -1,5 +1,5 @@
 from typing import List
-from 康托展开 import calPerm
+from 康托展开_取模 import calPerm
 
 # 他只能向 右 或向 下 走。你可以为 Bob 提供导航 指令 来帮助他到达目的地 destination 。
 # 指令 用字符串表示，其中每个字符：

@@ -1,43 +1,51 @@
-// Usage:
-// Count(start, end, value) – [start, end) に含まれる value の個数を求める.
-// CountRange(start, end, lower, upper) – [start, end) に含まれる [lower, upper) の個数を求める.
-// Index(value, k) – k(0-indexed) 番目の value の位置を求める.
-// KthMin(start, end, k) – [start, end) に含まれる k(0-indexed) 番目に小さい値を求める.
-// KthMax(start, end, k) – [start, end) に含まれる k(0-indexed) 番目に大きい値を求める.
-// Lower(start, end, value) – [start, end) に含まれる要素の中で value の次に小さいものを求める.存在しない場合は -INF を返す.
-// Upper(start, end, value) – [start, end) に含まれる要素の中で value の次に大きいものを求める.存在しない場合は INF を返す.
-
-// Referece:
-// https://beet-aizu.github.io/library/datastructure/waveletmatrix.cpp
-// https://blog.hamayanhamayan.com/entry/2017/06/13/103352
+// 由于众数是绝对众数，即严格大于区间长度的一半。
+// 因此区间内的中位数(偶数的话取左)一定是众数。
+// 转换为求kth后求频率，即操作1操作2。
 
 package main
 
 import (
-	"fmt"
 	"math/bits"
 )
 
-func main() {
-	nums := []int{1, 2, 3, 1, 5, 6, 7, 8, 9, 10}
-	M := NewWaveletMatrix(nums, 32)
-	fmt.Println(M.Count(0, 1, 1))
-	fmt.Println(M.CountRange(0, 10, 1, 5))
-	fmt.Println(M.Index(1, 2))
-	fmt.Println(M.IndexWithStart(1, 0, 2))
-	fmt.Println(M.KthMax(0, 10, 2))
-	fmt.Println(M.KthMin(0, 10, 2))
-	fmt.Println(M.Lower(0, 10, 100))
-	fmt.Println(M.Higher(0, 10, 0))
+type MajorityChecker struct {
+	wm *WaveletMatrix
 }
+
+func Constructor(arr []int) MajorityChecker {
+	return MajorityChecker{NewWaveletMatrix(arr)}
+}
+
+func (this *MajorityChecker) Query(left int, right int, threshold int) int {
+	k := (right - left) / 2
+	kthMax := this.wm.KthMax(left, right+1, k)
+	freq := this.wm.Count(left, right+1, kthMax)
+	if freq >= threshold {
+		return kthMax
+	}
+	return -1
+}
+
+/**
+ * Your MajorityChecker object will be instantiated and called as such:
+ * obj := Constructor(arr);
+ * param_1 := obj.Query(left,right,threshold);
+ */
 
 const INF int = 1e18
 
 // 指定された配列から WaveletMatrix を構築する.
-//  data:変換する配列(data[i]は0以上、2^maxLog未満)
-//  maxLog:queryの最大値のbit数(普通は32)
-func NewWaveletMatrix(data []int, maxLog int) *WaveletMatrix {
-	dataCopy := append(data[:0:0], data...)
+//  data:変換する配列(data[i]は0以上)
+func NewWaveletMatrix(data []int) *WaveletMatrix {
+	dataCopy := make([]int, len(data))
+	max_ := 0
+	for i, v := range data {
+		if v > max_ {
+			max_ = v
+		}
+		dataCopy[i] = v
+	}
+	maxLog := bits.Len(uint(max_)) + 1
 	n := len(dataCopy)
 	mat := make([]*BitVector, maxLog)
 	zs := make([]int, maxLog)
@@ -167,6 +175,24 @@ func (w *WaveletMatrix) Higher(start, end, value int) int {
 	return w.KthMin(start, end, k)
 }
 
+// [start, end) に含まれる要素の中で value 以下のものを求める.存在しない場合は -INF を返す.
+func (w *WaveletMatrix) Floor(start, end, value int) int {
+	count := w.Count(start, end, value)
+	if count > 0 {
+		return value
+	}
+	return w.Lower(start, end, value)
+}
+
+// [start, end) に含まれる要素の中で value 以上のものを求める.存在しない場合は INF を返す.
+func (w *WaveletMatrix) Ceil(start, end, value int) int {
+	count := w.Count(start, end, value)
+	if count > 0 {
+		return value
+	}
+	return w.Higher(start, end, value)
+}
+
 func (w *WaveletMatrix) access(k int) int {
 	res := 0
 	for dep := 0; dep < w.maxLog; dep++ {
@@ -266,7 +292,7 @@ func (f *BitVector) Get(i int) int {
 	return (f.block[i>>6] >> uint(i&63)) & 1
 }
 
-// 统计 [0,end) 中 value 的个数
+// [0,end) に含まれる 1 の個数.
 func (f *BitVector) Count(value, end int) int {
 	if value == 1 {
 		return f.count1(end)
@@ -274,7 +300,8 @@ func (f *BitVector) Count(value, end int) int {
 	return end - f.count1(end)
 }
 
-// 统计 [0,end) 中第 k(0-indexed) 个 value 的位置
+// [0,end) に k(0-indexed) 番目の value の位置を求める.
+// 存在しない場合は -1 を返す.
 func (f *BitVector) Index(value, k int) int {
 	if k < 0 || f.Count(value, f.n) <= k {
 		return -1

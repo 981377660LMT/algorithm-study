@@ -5,7 +5,7 @@
 # 有点类似康托展开的思想
 # 1 <= s.length <= 3000
 
-from 康托展开 import calRank
+from 康托展开_取模 import calRank
 
 
 class Solution:

@@ -14,8 +14,6 @@ import (
 	"os"
 )
 
-const INF int = 1e18
-
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -36,6 +34,8 @@ func main() {
 	maxFlow, minCost := mcf.Work()
 	fmt.Fprintln(out, maxFlow, minCost)
 }
+
+const INF int = 1e18
 
 type MinCostFlow struct {
 	AddEdge func(from, to, cap, cost int)

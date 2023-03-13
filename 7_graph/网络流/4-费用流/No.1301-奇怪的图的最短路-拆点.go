@@ -1,9 +1,16 @@
-// https://ei1333.github.io/luzhiled/snippets/graph/primal-dual.html
+// https://yukicoder.me/problems/no/1301
+// No.1301-奇怪图的最短路-拆点
+// 每条无向边有一个边权
+// 第一次经过这条边的时候，边权为w1
+// 第二次经过这条边的时候，边权为w2 (w1<=w2)
+// 每条边最多经过两次
+// !求1到n再回到1的最短路(折返)
+// O(f*ElogV)
 
-// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_B&lang=jp
-// !Primal-Dual O(f*ElogV)
-// 限制流量为f时的最小费用,如果不能满足流量等于f,则返回-1
-
+// !只能走两次:流量限定为2
+// 去的时候: a->ein->eout->b
+// 回来的时候: b->ein->eout->a
+// 注意ein->eout有两条边,一条边的边权为w1,一条边的边权为w2,容量都为1
 package main
 
 import (
@@ -17,17 +24,24 @@ func main() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, m, f int
-	fmt.Fscan(in, &n, &m, &f)
-	pd := NewPrimalDual(n)
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	mcmf := NewPrimalDual(n + m + m)
 	for i := 0; i < m; i++ {
-		var from, to, cap, cost int
-		fmt.Fscan(in, &from, &to, &cap, &cost)
-		pd.AddEdge(from, to, cap, cost)
+		var u, v, w1, w2 int
+		fmt.Fscan(in, &u, &v, &w1, &w2)
+		u, v = u-1, v-1
+		ein := n + 2*i
+		eout := ein + 1
+		mcmf.AddEdge(u, ein, 2, 0)
+		mcmf.AddEdge(eout, u, 2, 0)
+		mcmf.AddEdge(v, ein, 2, 0)
+		mcmf.AddEdge(eout, v, 2, 0)
+		mcmf.AddEdge(ein, eout, 1, w1)
+		mcmf.AddEdge(ein, eout, 1, w2)
 	}
-	minCost := pd.MinCostFlow(0, n-1, f)
-	fmt.Fprintln(out, minCost)
-	fmt.Fprintln(out, pd.GetEdges())
+
+	fmt.Fprintln(out, mcmf.MinCostFlow(0, n-1, 2))
 }
 
 const INF int = 1e18
@@ -64,8 +78,8 @@ func (p *PrimalDual) AddEdge(from, to, cap, cost int) {
 func (pd *PrimalDual) MinCostFlow(start, target, f int) int {
 	v := len(pd.graph)
 	res := 0
-	que := nhp(func(a, b H) int {
-		return a[0] - b[0]
+	que := NewHeap(func(a, b H) bool {
+		return a[0] < b[0]
 	}, nil)
 	pd.potential = make([]int, v)
 	pd.prevv = make([]int, v)
@@ -149,22 +163,16 @@ func min(a, b int) int {
 
 type H = [2]int
 
-// Should return a number:
-//    negative , if a < b
-//    zero     , if a == b
-//    positive , if a > b
-type Comparator func(a, b H) int
-
-func nhp(comparator Comparator, nums []H) *Heap {
+func NewHeap(less func(a, b H) bool, nums []H) *Heap {
 	nums = append(nums[:0:0], nums...)
-	heap := &Heap{comparator: comparator, data: nums}
+	heap := &Heap{less: less, data: nums}
 	heap.heapify()
 	return heap
 }
 
 type Heap struct {
-	data       []H
-	comparator Comparator
+	data []H
+	less func(a, b H) bool
 }
 
 func (h *Heap) Push(value H) {
@@ -174,7 +182,7 @@ func (h *Heap) Push(value H) {
 
 func (h *Heap) Pop() (value H) {
 	if h.Len() == 0 {
-		return
+		panic("heap is empty")
 	}
 
 	value = h.data[0]
@@ -186,7 +194,7 @@ func (h *Heap) Pop() (value H) {
 
 func (h *Heap) Peek() (value H) {
 	if h.Len() == 0 {
-		return
+		panic("heap is empty")
 	}
 	value = h.data[0]
 	return
@@ -195,13 +203,14 @@ func (h *Heap) Peek() (value H) {
 func (h *Heap) Len() int { return len(h.data) }
 
 func (h *Heap) heapify() {
-	for i := (h.Len() >> 1) - 1; i >= 0; i-- {
+	n := h.Len()
+	for i := (n >> 1) - 1; i > -1; i-- {
 		h.pushDown(i)
 	}
 }
 
 func (h *Heap) pushUp(root int) {
-	for parent := (root - 1) >> 1; parent >= 0 && h.comparator(h.data[root], h.data[parent]) < 0; parent = (root - 1) >> 1 {
+	for parent := (root - 1) >> 1; parent >= 0 && h.less(h.data[root], h.data[parent]); parent = (root - 1) >> 1 {
 		h.data[root], h.data[parent] = h.data[parent], h.data[root]
 		root = parent
 	}
@@ -213,11 +222,11 @@ func (h *Heap) pushDown(root int) {
 		right := left + 1
 		minIndex := root
 
-		if h.comparator(h.data[left], h.data[minIndex]) < 0 {
+		if h.less(h.data[left], h.data[minIndex]) {
 			minIndex = left
 		}
 
-		if right < n && h.comparator(h.data[right], h.data[minIndex]) < 0 {
+		if right < n && h.less(h.data[right], h.data[minIndex]) {
 			minIndex = right
 		}
 

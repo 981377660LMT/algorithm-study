@@ -98,7 +98,7 @@ func (snp *ShortestNonzeroPath) Build(start int) (dist []int) {
 	}
 
 	type tuple = [3]int
-	pq := NewHeap(func(a, b H) int {
+	pq := nhp(func(a, b H) int {
 		return a.(tuple)[0] - b.(tuple)[0]
 	}, nil)
 	for u := 0; u < n; u++ {
@@ -170,7 +170,7 @@ func (snp *ShortestNonzeroPath) dijkstra(s int) *SP {
 		label[i] = snp.e()
 	}
 
-	pq := NewHeap(func(a, b H) int {
+	pq := nhp(func(a, b H) int {
 		return a.([2]int)[0] - b.([2]int)[0]
 	}, nil)
 	pq.Push(pair{0, s})
@@ -218,7 +218,7 @@ type H = interface{}
 //    positive , if a > b
 type Comparator func(a, b H) int
 
-func NewHeap(comparator Comparator, nums []H) *Heap {
+func nhp(comparator Comparator, nums []H) *Heap {
 	nums = append(nums[:0:0], nums...)
 	heap := &Heap{comparator: comparator, data: nums}
 	heap.heapify()
