@@ -14,6 +14,7 @@ class Solution:
             return max(childRes1, childRes2)
 
         def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+            """direction: 0: cur -> parent, 1: parent -> cur"""
             return fromRes + 1 if s[cur] != s[parent] else -INF
 
         n = len(parent)

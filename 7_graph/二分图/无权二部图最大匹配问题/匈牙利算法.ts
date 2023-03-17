@@ -1,7 +1,31 @@
-function useHungarian(row: number, col: number) {
-  const to: number[][] = Array.from({ length: row }, () => [])
+function useHungarian(graph?: number[][]) {
+  const to: number[][] = []
+  let row = 0
+  let col = 0
+
+  if (graph) {
+    const n = graph.length
+    const [colors, ok] = isBipartite(n, graph)
+    if (!ok) {
+      throw new Error('not bipartite')
+    }
+    for (let i = 0; i < n; i++) {
+      if (colors[i] === 0) {
+        graph[i].forEach(j => {
+          if (colors[j] === 1) {
+            addEdge(i, j)
+          }
+        })
+      }
+    }
+  }
 
   function addEdge(boy: number, girl: number): void {
+    row = Math.max(row, boy + 1)
+    col = Math.max(col, girl + 1)
+    while (to.length <= boy) {
+      to.push([])
+    }
     to[boy].push(girl)
   }
 
@@ -34,6 +58,7 @@ function useHungarian(row: number, col: number) {
           if (queue[u] === -1) {
             while (u !== -1) {
               queue[u] = v
+              // eslint-disable-next-line semi-style
               ;[p[v], u] = [u, p[v]]
               v = pre[v]
             }
@@ -72,6 +97,31 @@ function useHungarian(row: number, col: number) {
   return {
     addEdge,
     work
+  }
+}
+
+function isBipartite(n: number, adjList: number[][]): [colors: Int8Array, ok: boolean] {
+  const colors = new Int8Array(n).fill(-1)
+  for (let i = 0; i < n; i++) {
+    if (colors[i] === -1 && !dfs(i, 0)) {
+      return [colors, false]
+    }
+  }
+  return [colors, true]
+
+  function dfs(cur: number, color: number): boolean {
+    colors[cur] = color
+    for (let i = 0; i < adjList[cur].length; i++) {
+      const next = adjList[cur][i]
+      if (colors[next] === -1) {
+        if (!dfs(next, color ^ 1)) {
+          return false
+        }
+      } else if (colors[next] === color) {
+        return false
+      }
+    }
+    return true
   }
 }
 

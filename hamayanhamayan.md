@@ -13,6 +13,7 @@ https://drive.google.com/file/d/1WC7Y2Ni-8elttUgorfbix9tO1fvYN3g3/view
   https://hitonanode.github.io/cplib-cpp/formal_power_series/sum_of_exponential_times_polynomial.hpp
 
 多项式全家桶
+https://maspypy.github.io/library/ (跟着 verify 的题做)
 https://www.luogu.com.cn/training/3015
 https://hackmd.io/@tatyam-prime/ryU4Ujup9#xKfracPxQx-%E3%82%92%E6%B1%82%E3%82%81%E3%82%8B
 math/convolution/polynomial/matrix (先从卷积开始写库)

@@ -11,7 +11,7 @@ DIR4 = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 class Solution:
     def minimumOperations(self, grid: List[List[int]]) -> int:
         ROW, COL = len(grid), len(grid[0])
-        H = Hungarian(ROW * COL, ROW * COL)
+        H = Hungarian()
         for r in range(ROW):
             for c in range(COL):
                 if grid[r][c] == 0 or (r + c) & 1:

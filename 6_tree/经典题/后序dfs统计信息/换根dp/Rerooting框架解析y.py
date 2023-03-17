@@ -139,6 +139,7 @@ if __name__ == "__main__":
         return max(childRes1, childRes2)
 
     def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+        """direction: 0: cur -> parent, 1: parent -> cur"""
         # dpをmergeする前段階で実行する演算
         # 例:最も遠い点までの距離を求める場合 return res+1
         if direction == 0:  # cur -> parent

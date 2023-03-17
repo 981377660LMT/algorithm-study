@@ -10,7 +10,7 @@ from typing import DefaultDict, List
 class EratosthenesSieve:
     """埃氏筛"""
 
-    __slots__ = "_minPrime"  # 每个数的最小质因数
+    __slots__ = "minPrime"  # 每个数的最小质因数
 
     def __init__(self, maxN: int):
         """预处理 O(nloglogn)"""
@@ -22,16 +22,16 @@ class EratosthenesSieve:
             for j in range(i * i, maxN + 1, i):
                 if minPrime[j] == j:
                     minPrime[j] = i
-        self._minPrime = minPrime
+        self.minPrime = minPrime
 
     def isPrime(self, n: int) -> bool:
         if n < 2:
             return False
-        return self._minPrime[n] == n
+        return self.minPrime[n] == n
 
     def getPrimeFactors(self, n: int) -> "DefaultDict[int, int]":
         """求n的质因数分解 O(logn)"""
-        res, f = defaultdict(int), self._minPrime
+        res, f = defaultdict(int), self.minPrime
         while n > 1:
             m = f[n]
             res[m] += 1
@@ -39,7 +39,7 @@ class EratosthenesSieve:
         return res
 
     def getPrimes(self) -> List[int]:
-        return [x for i, x in enumerate(self._minPrime) if i >= 2 and i == x]
+        return [x for i, x in enumerate(self.minPrime) if i >= 2 and i == x]
 
 
 def getPrimes(n: int) -> List[int]:

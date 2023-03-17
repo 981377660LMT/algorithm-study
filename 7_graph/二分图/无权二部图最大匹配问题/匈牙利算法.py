@@ -1,8 +1,10 @@
 # L,R<=1e5 M<=2e5
 # 0<=ai<L 0<=bi<R
-# 不存在重边
+# 可能存在重边
+# 匈牙利算法
 
-from typing import List, Tuple
+from collections import deque
+from typing import List, Optional, Tuple
 
 
 class Hungarian:
@@ -11,20 +13,30 @@ class Hungarian:
     ref : https://snuke.hatenablog.com/entry/2019/05/07/013609
     """
 
-    def __init__(self, row: int, col: int):
-        """
-        Args:
-            row (int): 男孩的个数
-            col (int): 女孩的个数
-        """
-        self._row = row
-        self._col = col
-        self._to = [[] for _ in range(row)]
+    __slots__ = ("_row", "_col", "_to")
+
+    def __init__(self, graph: Optional[List[List[int]]] = None):
+        self._row = 0
+        self._col = 0
+        self._to = [[]]
+        if graph is not None:
+            colors, ok = isBipartite(len(graph), graph)
+            if not ok:
+                raise ValueError("graph is not bipartite")
+            for u, vs in enumerate(graph):
+                if colors[u] == 0:
+                    for v in vs:
+                        if colors[v] == 1:
+                            self.addEdge(u, v)
 
     def addEdge(self, u: int, v: int) -> None:
         """男孩u和女孩v连边"""
-        assert 0 <= u < self._row
-        assert 0 <= v < self._col
+        if self._col <= v:
+            self._col = v + 1
+        if self._row <= u:
+            self._row = u + 1
+            while len(self._to) <= u:
+                self._to.append([])
         self._to[u].append(v)
 
     def work(self) -> List[Tuple[int, int]]:
@@ -69,14 +81,32 @@ class Hungarian:
         return [(v, p[v]) for v in range(n) if p[v] != -1]
 
 
-import sys
+def isBipartite(n: int, adjList: List[List[int]]) -> Tuple[List[int], bool]:
+    """二分图检测 bfs染色"""
 
-sys.setrecursionlimit(int(1e9))
-input = lambda: sys.stdin.readline().rstrip("\r\n")
+    def bfs(start: int) -> bool:
+        colors[start] = 0
+        queue = deque([start])
+        while queue:
+            cur = queue.popleft()
+            for next in adjList[cur]:
+                if colors[next] == -1:
+                    colors[next] = colors[cur] ^ 1
+                    queue.append(next)
+                elif colors[next] == colors[cur]:
+                    return False
+        return True
+
+    colors = [-1] * n
+    for i in range(n):
+        if colors[i] == -1 and not bfs(i):
+            return [], False
+    return colors, True
+
 
 if __name__ == "__main__":
-    L, R, M = map(int, input().split())  # L个左边的点，R个右边的点，M条边
-    hungarian = Hungarian(L, R)
+    L, R, M = map(int, input().split())
+    hungarian = Hungarian()
     for _ in range(M):
         u, v = map(int, input().split())
         hungarian.addEdge(u, v)

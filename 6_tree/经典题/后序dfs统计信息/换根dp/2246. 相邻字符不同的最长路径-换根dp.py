@@ -14,7 +14,10 @@ class Solution:
             return max(childRes1, childRes2)
 
         def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
-            return fromRes + 1 if s[cur] != s[parent] else -INF
+            """direction: 0: cur -> parent, 1: parent -> cur"""
+            if direction == 0:  # cur -> parent
+                return fromRes + 1 if s[cur] != s[parent] else -INF
+            return fromRes + 1 if s[cur] != s[parent] else -INF  # parent -> cur
 
         n = len(parent)
         R = _Rerooting(n)
@@ -22,8 +25,8 @@ class Solution:
             if pre == -1:
                 continue
             R.addEdge(pre, cur)
-        res = R.rerooting(e, op, composition)
-        return max(res) + 1  # 由于是路径上的点的个数，所以要加1
+        dp = R.rerooting(e, op, composition)
+        return max(dp) + 1  # 由于是路径上的点的个数，所以要加1
 
 
 T = TypeVar("T")

@@ -15,35 +15,52 @@ import (
 )
 
 func main() {
+	// https://www.acwing.com/problem/content/description/2195/
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, m, s, t int
-	fmt.Fscan(in, &n, &m, &s, &t)
-	s--
-	t--
-	mcf := NewMinCostFlow(n, s, t)
-	for i := 0; i < m; i++ {
-		var u, v, c, w int
-		fmt.Fscan(in, &u, &v, &c, &w)
-		u--
-		v--
-		mcf.AddEdge(u, v, c, w)
+	var n int
+	fmt.Fscan(in, &n)
+	START, END, OFFSET := 2*n+2, 2*n+3, n
+	mcmf1 := NewMinCostMaxFlow(2*n+5, START, END)
+	mcmf2 := NewMinCostMaxFlow(2*n+5, START, END)
+
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			var cost int
+			fmt.Fscan(in, &cost)
+			mcmf1.AddEdge(i, j+OFFSET, 1, cost)
+			mcmf2.AddEdge(i, j+OFFSET, 1, -cost)
+		}
 	}
-	maxFlow, minCost := mcf.Work()
-	fmt.Fprintln(out, maxFlow, minCost)
+
+	for i := 0; i < n; i++ {
+		mcmf1.AddEdge(START, i, 1, 0)
+		mcmf2.AddEdge(START, i, 1, 0)
+		mcmf1.AddEdge(i+OFFSET, END, 1, 0)
+		mcmf2.AddEdge(i+OFFSET, END, 1, 0)
+	}
+
+	_, cost1 := mcmf1.Flow()
+	_, cost2 := mcmf2.Flow()
+	fmt.Fprintln(out, cost1)
+	fmt.Fprintln(out, -cost2)
 }
 
 const INF int = 1e18
 
-type MinCostFlow struct {
-	AddEdge func(from, to, cap, cost int)
-	Work    func() (maxFlow int, minCost int)
-	Slope   func() [][2]int // (flow, cost)
+type Edge struct{ from, to, cap, flow, cost, id int }
+type MinCostMaxFlow struct {
+	AddEdge        func(from, to, cap, cost int)
+	Flow           func() (maxFlow int, minCost int)
+	FlowWithLimit  func(flowLimit int) (maxFlow int, minCost int)
+	Slope          func() [][2]int // (flow, cost) 的每个转折点
+	SlopeWithLimit func(flowLimit int) [][2]int
+	Edges          func() []Edge // 注意根据from,to排除虚拟源点汇点; `flow>0` 才是流经的边
 }
 
-func NewMinCostFlow(n, start, end int) *MinCostFlow {
+func NewMinCostMaxFlow(n, start, end int) *MinCostMaxFlow {
 	type neighbor struct {
 		to   int
 		rid  int // rid 为反向边在邻接表中的下标
@@ -93,8 +110,12 @@ func NewMinCostFlow(n, start, end int) *MinCostFlow {
 	}
 
 	// ek
-	Work := func() (maxFlow int, minCost int) {
-		for spfa() {
+	FlowWithLimit := func(flowLimit int) (maxFlow int, minCost int) {
+		for maxFlow < flowLimit {
+			if !spfa() {
+				break
+			}
+
 			// 沿 st-end 的最短路尽量增广
 			flow := INF
 			for cur := end; cur != start; {
@@ -117,9 +138,12 @@ func NewMinCostFlow(n, start, end int) *MinCostFlow {
 		return
 	}
 
-	Slope := func() (slope [][2]int) {
+	SlopeWithLimit := func(flowLimit int) (slope [][2]int) {
 		maxFlow, minCost := 0, 0
-		for spfa() {
+		for maxFlow < flowLimit {
+			if !spfa() {
+				break
+			}
 			// 沿 st-end 的最短路尽量增广
 			flow := INF
 			for cur := end; cur != start; {
@@ -148,9 +172,24 @@ func NewMinCostFlow(n, start, end int) *MinCostFlow {
 		ei++
 	}
 
-	return &MinCostFlow{
-		AddEdge: AddEdge,
-		Work:    Work,
-		Slope:   Slope,
+	GetEdges := func() (res []Edge) {
+		for from, edges := range graph {
+			for _, e := range edges {
+				if e.eid == -1 {
+					continue
+				}
+				res = append(res, Edge{from, e.to, e.cap + graph[e.to][e.rid].cap, graph[e.to][e.rid].cap, e.cost, e.eid})
+			}
+		}
+		return
+	}
+
+	return &MinCostMaxFlow{
+		AddEdge:        AddEdge,
+		Flow:           func() (maxFlow int, minCost int) { return FlowWithLimit(INF) },
+		FlowWithLimit:  FlowWithLimit,
+		Slope:          func() [][2]int { return SlopeWithLimit(INF) },
+		SlopeWithLimit: SlopeWithLimit,
+		Edges:          GetEdges,
 	}
 }

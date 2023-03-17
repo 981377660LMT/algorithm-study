@@ -253,22 +253,22 @@ class UnionFindGraph:
         return self.part
 
 
-class ATCRevocableUnionFindArray:
-    """维护分量之和的可撤销并查集"""
+class RevocableUnionFindArray:
+    """维护分量之和的可撤销并查集(单点加,区间查询)"""
 
     __slots__ = ("n", "parentSize", "sum", "history")
 
     def __init__(self, n: int):
         self.n = n
         self.parentSize = [-1] * n
-        self.sum = [0] * n
+        self.sum = [0] * n  # !e
         self.history = []
 
-    def addSum(self, i: int, delta: int):
+    def add(self, i: int, delta: int):
         """第i个元素的值加上delta"""
         x = i
         while x >= 0:
-            self.sum[x] += delta
+            self.sum[x] += delta  # !op
             x = self.parentSize[x]
 
     def union(self, a: int, b: int) -> bool:
@@ -282,7 +282,7 @@ class ATCRevocableUnionFindArray:
             return False
         self.parentSize[x] += self.parentSize[y]
         self.parentSize[y] = x
-        self.sum[x] += self.sum[y]
+        self.sum[x] += self.sum[y]  # !op
         return True
 
     def find(self, a: int) -> int:
@@ -300,10 +300,74 @@ class ATCRevocableUnionFindArray:
         y, py = self.history.pop()
         x, px = self.history.pop()
         if self.parentSize[x] != px:
-            self.sum[x] -= self.sum[y]
+            self.sum[x] -= self.sum[y]  # !inv
         self.parentSize[x] = px
         self.parentSize[y] = py
         return True
 
     def getComponentSum(self, i: int) -> int:
         return self.sum[self.find(i)]
+
+
+class UnionFindWithGroupAdd:
+    """维护分量之和并查集(区间加,单点查询)"""
+
+    __slots__ = ("_parent", "_rank", "_lazy")
+
+    def __init__(self, n: int):
+        self._parent = list(range(n))
+        self._rank = [1] * n
+        self._lazy = [0] * n  # !e()
+
+    def find(self, x: int) -> int:
+        while self._parent[x] != x:
+            x = self._parent[x]
+        return x
+
+    def union(self, x: int, y: int) -> bool:
+        x, y = self.find(x), self.find(y)
+        if x == y:
+            return False
+        if self._rank[x] < self._rank[y]:
+            x, y = y, x
+        self._rank[x] += self._rank[y]
+        self._parent[y] = x
+        self._lazy[y] -= self._lazy[x]  # !inv()
+        return True
+
+    def isConnected(self, x: int, y: int) -> bool:
+        return self.find(x) == self.find(y)
+
+    def getSize(self, x: int) -> int:
+        return self._rank[self.find(x)]
+
+    def add(self, group: int, delta: int) -> None:
+        self._lazy[self.find(group)] += delta
+
+    def get(self, x: int) -> int:
+        res = 0
+        while self._parent[x] != x:
+            res += self._lazy[x]  # !op()
+            x = self._parent[x]
+        return res + self._lazy[x]  # !op()
+
+
+if __name__ == "__main__":
+    # https://yukicoder.me/problems/no/1054
+    import sys
+
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
+
+    n, q = map(int, input().split())
+    uf = UnionFindWithGroupAdd(n)
+    for _ in range(q):
+        op, a, b = map(int, input().split())
+        if op == 1:
+            a, b = a - 1, b - 1
+            uf.union(a, b)
+        elif op == 2:
+            a -= 1
+            uf.add(a, b)
+        else:
+            a -= 1
+            print(uf.get(a))

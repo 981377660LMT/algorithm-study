@@ -34,12 +34,64 @@ func main() {
 	fmt.Fprintln(out, len(bm.MaxMatching()))
 }
 
+func isBipartite(n int, graph [][]int) (colors []int, ok bool) {
+	colors = make([]int, n)
+	for i := range colors {
+		colors[i] = -1
+	}
+	bfs := func(start int) bool {
+		colors[start] = 0
+		queue := []int{start}
+		for len(queue) > 0 {
+			cur := queue[0]
+			queue = queue[1:]
+			for _, next := range graph[cur] {
+				if colors[next] == -1 {
+					colors[next] = colors[cur] ^ 1
+					queue = append(queue, next)
+				} else if colors[next] == colors[cur] {
+					return false
+				}
+			}
+		}
+		return true
+	}
+
+	for i := range colors {
+		if colors[i] == -1 && !bfs(i) {
+			return nil, false
+		}
+	}
+	return colors, true
+}
+
 type BipartiteMatching struct {
 	timestamp int
 	graph     [][]int
 	alive     []bool
 	used      []int
 	match     []int
+}
+
+func NewBipartiteMatchingWithEdges(n int, edges [][2]int) *BipartiteMatching {
+	g := make([][]int, n)
+	for _, e := range edges {
+		g[e[0]] = append(g[e[0]], e[1])
+		g[e[1]] = append(g[e[1]], e[0])
+	}
+	colors, ok := isBipartite(n, g)
+	if !ok {
+		panic("not bipartite")
+	}
+	bm := NewBipartiteMatching(n)
+	for _, e := range edges {
+		u, v := e[0], e[1]
+		if colors[u] == 1 {
+			u, v = v, u
+		}
+		bm.AddEdge(u, v)
+	}
+	return bm
 }
 
 func NewBipartiteMatching(n int) *BipartiteMatching {

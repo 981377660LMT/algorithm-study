@@ -13,11 +13,11 @@ func main() {
 	// edges = [[0,1],[0,2],[0,3],[1,4],[2,5],[2,6]]
 	n := 7
 	edges := [][]int{{0, 1, 1}, {0, 2, 2}, {0, 3, 3}, {1, 4, 4}, {2, 5, 1}, {2, 6, 6}}
-	lca := NewLCA(n, 0)
+	lca := NewLCA(n)
 	for _, e := range edges {
 		lca.AddEdge(e[0], e[1], e[2])
 	}
-	lca.Build()
+	lca.Build(0)
 	fmt.Println(lca.QueryMaxWeight(5, 6, true) == 6)
 	fmt.Println(lca.QueryMaxWeight(4, 3, true) == 4)
 }
@@ -25,33 +25,30 @@ func main() {
 const INF int = 1e18
 
 type LCA struct {
-	Depth      []int
-	Tree       [][]edge
-	n          int
-	root       int
-	bitLen     int
-	distToRoot []int
-	// 节点j向上跳2^i步的父节点
-	dp [][]int
-	// 节点j向上跳2^i步经过的最大边权
-	dpWeight1 [][]int
-	// 节点j向上跳2^i步经过的最小边权
-	dpWeight2 [][]int
+	Tree          [][]edge
+	Depth         []int
+	DepthWeighted []int
+	n             int
+	bitLen        int
+	dp            [][]int // 节点j向上跳2^i步的父节点
+	dpWeight1     [][]int // 节点j向上跳2^i步经过的最大边权
+	dpWeight2     [][]int // 节点j向上跳2^i步经过的最小边权
 }
 
 type edge struct{ to, weight int }
 
-// 注意AddEdge后要调用Build.
-func NewLCA(n int, root int) *LCA {
-	lca := &LCA{
-		Tree:       make([][]edge, n),
-		Depth:      make([]int, n),
-		n:          n,
-		root:       root,
-		bitLen:     bits.Len(uint(n)),
-		distToRoot: make([]int, n),
+func NewLCA(n int) *LCA {
+	depth := make([]int, n)
+	for i := range depth {
+		depth[i] = -1
 	}
-
+	lca := &LCA{
+		Tree:          make([][]edge, n),
+		Depth:         depth,
+		DepthWeighted: make([]int, n),
+		n:             n,
+		bitLen:        bits.Len(uint(n)),
+	}
 	return lca
 }
 
@@ -61,9 +58,25 @@ func (lca *LCA) AddEdge(u, v, w int) {
 	lca.Tree[v] = append(lca.Tree[v], edge{u, w})
 }
 
-func (lca *LCA) Build() {
+// 添加权值为w的有向边(u, v).
+func (lca *LCA) AddDirectedEdge(u, v, w int) {
+	lca.Tree[u] = append(lca.Tree[u], edge{v, w})
+}
+
+// root:0-based
+//  当root设为-1时，会从0开始遍历未访问过的连通分量
+func (lca *LCA) Build(root int) {
 	lca.dp, lca.dpWeight1, lca.dpWeight2 = makeDp(lca)
-	lca.dfsAndInitDp(lca.root, -1, 0, 0)
+	if root != -1 {
+		lca.dfsAndInitDp(root, -1, 0, 0)
+	} else {
+		for i := 0; i < lca.n; i++ {
+			if lca.Depth[i] == -1 {
+				lca.dfsAndInitDp(i, -1, 0, 0)
+			}
+		}
+	}
+
 	lca.fillDp()
 }
 
@@ -72,19 +85,16 @@ func (lca *LCA) QueryLCA(root1, root2 int) int {
 	if lca.Depth[root1] < lca.Depth[root2] {
 		root1, root2 = root2, root1
 	}
-
 	root1 = lca.UpToDepth(root1, lca.Depth[root2])
 	if root1 == root2 {
 		return root1
 	}
-
 	for i := lca.bitLen - 1; i >= 0; i-- {
 		if lca.dp[i][root1] != lca.dp[i][root2] {
 			root1 = lca.dp[i][root1]
 			root2 = lca.dp[i][root2]
 		}
 	}
-
 	return lca.dp[0][root1]
 }
 
@@ -92,7 +102,7 @@ func (lca *LCA) QueryLCA(root1, root2 int) int {
 //  weighted: 是否将边权计入距离
 func (lca *LCA) QueryDist(root1, root2 int, weighted bool) int {
 	if weighted {
-		return lca.distToRoot[root1] + lca.distToRoot[root2] - 2*lca.distToRoot[lca.QueryLCA(root1, root2)]
+		return lca.DepthWeighted[root1] + lca.DepthWeighted[root2] - 2*lca.DepthWeighted[lca.QueryLCA(root1, root2)]
 	}
 	return lca.Depth[root1] + lca.Depth[root2] - 2*lca.Depth[lca.QueryLCA(root1, root2)]
 }
@@ -104,7 +114,6 @@ func (lca *LCA) QueryMaxWeight(root1, root2 int, isEdge bool) int {
 	if lca.Depth[root1] < lca.Depth[root2] {
 		root1, root2 = root2, root1
 	}
-
 	toDepth := lca.Depth[root2]
 	for i := lca.bitLen - 1; i >= 0; i-- { // upToDepth
 		if (lca.Depth[root1]-toDepth)&(1<<i) > 0 {
@@ -112,11 +121,9 @@ func (lca *LCA) QueryMaxWeight(root1, root2 int, isEdge bool) int {
 			root1 = lca.dp[i][root1]
 		}
 	}
-
 	if root1 == root2 {
 		return res
 	}
-
 	for i := lca.bitLen - 1; i >= 0; i-- {
 		if lca.dp[i][root1] != lca.dp[i][root2] {
 			res = max(res, max(lca.dpWeight1[i][root1], lca.dpWeight1[i][root2]))
@@ -124,14 +131,11 @@ func (lca *LCA) QueryMaxWeight(root1, root2 int, isEdge bool) int {
 			root2 = lca.dp[i][root2]
 		}
 	}
-
 	res = max(res, max(lca.dpWeight1[0][root1], lca.dpWeight1[0][root2]))
-
 	if !isEdge {
 		lca_ := lca.dp[0][root1]
 		res = max(res, lca.dpWeight1[0][lca_])
 	}
-
 	return res
 }
 
@@ -142,7 +146,6 @@ func (lca *LCA) QueryMinWeight(root1, root2 int, isEdge bool) int {
 	if lca.Depth[root1] < lca.Depth[root2] {
 		root1, root2 = root2, root1
 	}
-
 	toDepth := lca.Depth[root2]
 	for i := lca.bitLen - 1; i >= 0; i-- { // upToDepth
 		if (lca.Depth[root1]-toDepth)&(1<<i) > 0 {
@@ -150,11 +153,9 @@ func (lca *LCA) QueryMinWeight(root1, root2 int, isEdge bool) int {
 			root1 = lca.dp[i][root1]
 		}
 	}
-
 	if root1 == root2 {
 		return res
 	}
-
 	for i := lca.bitLen - 1; i >= 0; i-- {
 		if lca.dp[i][root1] != lca.dp[i][root2] {
 			res = min(res, min(lca.dpWeight2[i][root1], lca.dpWeight2[i][root2]))
@@ -162,14 +163,11 @@ func (lca *LCA) QueryMinWeight(root1, root2 int, isEdge bool) int {
 			root2 = lca.dp[i][root2]
 		}
 	}
-
 	res = min(res, min(lca.dpWeight2[0][root1], lca.dpWeight2[0][root2]))
-
 	if !isEdge {
 		lca_ := lca.dp[0][root1]
 		res = min(res, lca.dpWeight2[0][lca_])
 	}
-
 	return res
 }
 
@@ -220,7 +218,7 @@ func (lca *LCA) Jump(start, target, step int) int {
 func (lca *LCA) dfsAndInitDp(cur, pre, dep, dist int) {
 	lca.Depth[cur] = dep
 	lca.dp[0][cur] = pre
-	lca.distToRoot[cur] = dist
+	lca.DepthWeighted[cur] = dist
 	for _, e := range lca.Tree[cur] {
 		if next := e.to; next != pre {
 			lca.dpWeight1[0][next] = e.weight
@@ -271,14 +269,4 @@ func min(a, b int) int {
 		return a
 	}
 	return b
-}
-
-func maxWithKey(key func(x int) int, args ...int) int {
-	max := args[0]
-	for _, v := range args[1:] {
-		if key(max) < key(v) {
-			max = v
-		}
-	}
-	return max
 }

@@ -12,23 +12,21 @@ import (
 )
 
 func main() {
-	// https://www.luogu.com.cn/problem/P4722
+	// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, m, s, t int
-	fmt.Fscan(in, &n, &m, &s, &t)
-	s, t = s-1, t-1
+	var n, m int
+	fmt.Fscan(in, &n, &m)
 	mf := NewPushRelabel(n)
 	for i := 0; i < m; i++ {
 		var u, v, c int
 		fmt.Fscan(in, &u, &v, &c)
-		u, v = u-1, v-1
 		mf.AddEdge(u, v, c)
 	}
 
-	fmt.Fprintln(out, mf.MaxFlow(s, t))
+	fmt.Fprintln(out, mf.MaxFlow(0, n-1))
 }
 
 const INF int = 1e18
@@ -107,14 +105,18 @@ func (pr *PushRelabel) MaxFlow(s, t int) int {
 					}
 				}
 			}
+
 			dv := dist[v]
-			if cd[dv]--; cd[dv] == 0 {
-				for i, h := range dist {
-					if i != s && i != t && dv < h && h <= n {
-						dist[i] = n + 1
+			if dv != -1 {
+				if cd[dv]--; cd[dv] == 0 {
+					for i, h := range dist {
+						if i != s && i != t && dv < h && h <= n {
+							dist[i] = n + 1
+						}
 					}
 				}
 			}
+
 			minD := INF
 			for _, e := range pr.graph[v] {
 				if w := e.to; e.cap > 0 && dist[w] < minD {

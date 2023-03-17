@@ -55,7 +55,7 @@ def convolution(A: List[int], B: List[int], mod: int, s=10) -> List[int]:
 
     res = ((r_4 << s2) + (r_3 << s) + r_2) % mod
     res = ((res << s2) + (r_1 << s) + r_0) % mod
-    return list(res)
+    return res.tolist()
 
 
 if __name__ == "__main__":

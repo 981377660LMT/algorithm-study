@@ -34,6 +34,7 @@ if __name__ == "__main__":
         return childRes1 * childRes2 % MOD
 
     def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+        """direction: 0: cur -> parent, 1: parent -> cur"""
         # 子树的染色方案就是他所有子树染色方案 +1 的积
         # +1表示子树可以不染色
         return fromRes + 1

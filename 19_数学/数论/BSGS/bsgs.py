@@ -8,24 +8,24 @@ from math import ceil, gcd, sqrt
 from typing import Tuple
 
 
-def bsgs(base: int, target: int, p: int) -> int:
+def bsgs(base: int, target: int, mod: int) -> int:
     """Baby-step Giant-step
 
-    在base和p互质的情况下,求解 base^x ≡ target (mod p) 的最小解x,
+    在base和mod互质的情况下,求解 base^x ≡ target (mod mod) 的最小解x,
     若不存在解则返回-1
 
-    时间复杂度: O(sqrt(p)))
+    时间复杂度: O(sqrt(mod)))
 
     https://dianhsu.com/2022/08/27/template-math/#bsgs
     """
     mp = dict()
-    t = ceil(sqrt(p))
-    target %= p
+    t = ceil(sqrt(mod))
+    target %= mod
     val = 1
     for i in range(t):
-        tv = target * val % p
+        tv = target * val % mod
         mp[tv] = i
-        val = val * base % p
+        val = val * base % mod
 
     base, val = val, 1
     if base == 0:
@@ -35,7 +35,7 @@ def bsgs(base: int, target: int, p: int) -> int:
         tv = mp.get(val, -1)
         if tv != -1 and i * t - tv >= 0:  # !注意这里取等号表示允许最小解为0
             return i * t - tv
-        val = val * base % p
+        val = val * base % mod
 
     return -1
 
@@ -85,7 +85,7 @@ def exbsgs(base: int, target: int, p: int) -> int:
         if ad == target:
             return cnt
 
-    gcd_, x, _y = exgcd(ad, p)
+    _, x, _ = exgcd(ad, p)
     inv = x % p
     res = bsgs(base, target * inv % p, p)
     if res != -1:

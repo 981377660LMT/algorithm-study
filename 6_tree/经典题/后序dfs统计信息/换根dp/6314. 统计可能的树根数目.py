@@ -23,9 +23,10 @@ class Solution:
             return childRes1 + childRes2
 
         def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+            """direction: 0: cur -> parent, 1: parent -> cur"""
             if direction == 0:  # cur -> parent
                 return fromRes + counter[(parent, cur)]
-            return fromRes + counter[(cur, parent)]
+            return fromRes + counter[(cur, parent)]  # parent -> cur
 
         counter = defaultdict(int)
         for a, b in guesses:
@@ -34,8 +35,8 @@ class Solution:
         R = Rerooting(n)
         for u, v in edges:
             R.addEdge(u, v)
-        res = R.rerooting(e, op, composition)
-        return sum(x >= k for x in res)
+        dp = R.rerooting(e, op, composition)
+        return sum(x >= k for x in dp)
 
     def rootCount2(self, edges: List[List[int]], guesses: List[List[int]], k: int) -> List[int]:
         """`猜测父结点`改成`猜测祖先结点`的做法"""
@@ -47,6 +48,7 @@ class Solution:
             return childRes1 + childRes2
 
         def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+            """direction: 0: cur -> parent, 1: parent -> cur"""
             if direction == 0:  # cur -> parent
                 return fromRes + counter[parent][cur]  # !有多少个查询 (parent-?) 存在于 (parent-cur) 所在链的子树中
             return fromRes + counter[cur][parent]  # !有多少个查询(cur - ?) 存在于 (cur->parent) 的子树中
@@ -60,8 +62,8 @@ class Solution:
         for a, b in guesses:
             next = lca.jump(a, b, 1)
             counter[a][next] += 1
-        res = R.rerooting(e, op, composition)
-        return res
+        dp = R.rerooting(e, op, composition)
+        return dp
 
 
 if __name__ == "__main__":

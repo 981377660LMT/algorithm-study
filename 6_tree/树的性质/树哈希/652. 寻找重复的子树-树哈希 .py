@@ -8,7 +8,6 @@
 # !使用`哈希值的编号`来代替很长的哈希字符串 减少哈希值长度
 # Definition for a binary tree node.
 from collections import defaultdict
-import itertools
 from typing import List, Optional
 
 
@@ -29,12 +28,12 @@ class Solution:
             if node is None:
                 return
             hash_ = (node.val, dfs(node.left), dfs(node.right))
+            pool.setdefault(hash_, len(pool))
             hashId = pool[hash_]
             counter[hashId].append(node)
             return hashId
 
-        gen = itertools.count()
-        pool = defaultdict(lambda: next(gen))  # 全局自增id
+        pool = defaultdict(int)  # 全局自增id(len(pool)作为id)
         counter = defaultdict(list)
         dfs(root)
         return [nodes[0] for nodes in counter.values() if len(nodes) > 1]

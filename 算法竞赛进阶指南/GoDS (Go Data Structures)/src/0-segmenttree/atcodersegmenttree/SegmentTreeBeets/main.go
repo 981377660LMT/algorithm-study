@@ -10,3 +10,6 @@ package main
 func main() {
 
 }
+
+// 子数组mex之和
+// https://yukicoder.me/submissions/652366

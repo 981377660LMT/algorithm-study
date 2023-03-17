@@ -61,18 +61,7 @@ class LinearBase:
 
     def __contains__(self, x: int) -> bool:
         """x是否能由线性基表出"""
-        if x == 0:
-            return True
-        bases = []
-        for k in range(self._bit - 1, -1, -1):
-            curX = x
-            if self._rows[k] != 0:
-                bases.append(self._rows[k])
-                for b in bases:
-                    curX = min(curX, curX ^ b)
-                if curX == 0:
-                    return True
-        return False
+        return self._normalize(x) == 0
 
 
 if __name__ == "__main__":

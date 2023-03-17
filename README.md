@@ -73,6 +73,7 @@
    - [TreeSet](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/TreeSet.ts)
    - [SortedList](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/ATC-SortedList.py)
      [SortedList](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SortedList/SortedList.ts)
+   - [SortedDict](<%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/tree/fhqtreap/sortedlist/SortedDict/SortedDict.go>)
    - [DynamicSequence](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/DynamicSequence.go)
    - [PersistentArray](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentArray2.py>)
    - [PersistentQueue](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue-fast.go>)
@@ -206,6 +207,7 @@
     - [TopKSum](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/%E5%AE%9A%E9%95%BF%E6%BB%91%E7%AA%97/TopKSum-%E4%B8%A4%E4%B8%AA%E5%A0%86.py)
     - [MajorSum](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/%E5%87%BA%E7%8E%B0%E6%AC%A1%E6%95%B0%E6%9C%80%E5%A4%9A%E7%9A%84%E5%85%83%E7%B4%A0%E7%9A%84%E5%92%8C.py)
     - [RandomTree](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/Prufer%E5%BA%8F%E5%88%97.py)
+    - [MergeAll](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E5%88%86%E6%B2%BB%E7%9A%84%E8%BF%AD%E4%BB%A3%E5%86%99%E6%B3%95.ts)
     - [SegmentSet](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/SegmentSet.py)
     - WaveletMatrix
       - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)

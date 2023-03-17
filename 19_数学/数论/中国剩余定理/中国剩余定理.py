@@ -20,7 +20,7 @@ def crt(remains: List[int], mods: List[int]) -> Optional[int]:
         other = modMul // mod
         inv = modInv(other, mod)
         if inv is None:
-            return None
+            return
         res = (res + remain * other * inv) % modMul
     return res
 
@@ -31,9 +31,7 @@ def excrt(A: List[int], remains: List[int], mods: List[int]) -> Optional[Tuple[i
     A_i * x ≡ remains_i (mod mods_i), Πmods_i <= 1e18
 
     Returns:
-      Optional[Tuple[int, int]]:
-        解为 x ≡ b (mod m)
-        有解时返回 (b, m),无解时返回None
+      最小非负整数解 x, 以及模数的最小公倍数
     """
     modMul = 1
     res = 0
@@ -41,10 +39,10 @@ def excrt(A: List[int], remains: List[int], mods: List[int]) -> Optional[Tuple[i
         a, b = A[i] * modMul, remains[i] - A[i] * res
         d = gcd(a, mod)
         if b % d != 0:
-            return None
+            return
         t = rationalMod(b // d, a // d, mod // d)
         if t is None:
-            return None
+            return
         res += modMul * t
         modMul *= mod // d
     return res % modMul, modMul
@@ -81,9 +79,25 @@ def rationalMod(a: int, b: int, mod: int) -> Optional[int]:
     """
     inv = modInv(b, mod)
     if inv is None:
-        return None
+        return
     return a * inv % mod
 
 
-assert crt([2, 3, 2], [3, 5, 7]) == 23
-assert excrt([1, 1, 1], [2, 3, 2], [3, 5, 7]) == (23, 105)
+if __name__ == "__main__":
+    assert excrt([1, 1, 1], [2, 3, 2], [3, 5, 7]) == (23, 105)
+
+    # https://yukicoder.me/problems/no/187
+    n = int(input())
+    remains = [0] * n
+    mods = [0] * n
+    for i in range(n):
+        remains[i], mods[i] = map(int, input().split())
+
+    res = excrt([1] * n, remains, mods)
+    if res is None:
+        print(-1)
+        exit(0)
+
+    MOD = int(1e9 + 7)
+    r, m = res
+    print(r % MOD if r else m % MOD)  # !返回最小正整数解

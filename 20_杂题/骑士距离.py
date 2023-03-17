@@ -21,3 +21,17 @@ def knight_distance(tx: int, ty: int) -> int:
 
 print(knight_distance(11, 9))
 print(knight_distance(100, 100))
+
+
+def superKnight(n: int) -> int:
+    """超级马经过n步后能抵达的格子数
+
+    https://yukicoder.me/problems/no/1500
+    二次多项式? => 待定系数法
+    """
+    if n <= 2:
+        return [1, 12, 65][n]
+    return (17 * n * n + 6 * n + 1) % 1000000007
+
+
+print(superKnight(int(input())))

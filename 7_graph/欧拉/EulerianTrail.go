@@ -43,7 +43,7 @@ func yukicoder() {
 	}
 }
 
-func main() {
+func 有向图字典序最小的欧拉路径() {
 	// https: //www.luogu.com.cn/problem/P7771
 	// 有向图字典序最小的欧拉路径
 	in := bufio.NewReader(os.Stdin)
@@ -62,7 +62,7 @@ func main() {
 	}
 
 	res := et.GetSemiEulerianTrail(true)
-	if len(res) == 0 {
+	if len(res) != m {
 		fmt.Fprintln(out, "No")
 	} else {
 		path := et.GetPathFromEdgeIds(res)
@@ -70,6 +70,43 @@ func main() {
 			fmt.Fprint(out, v, " ")
 		}
 	}
+}
+
+func XXYYX() {
+	// https://atcoder.jp/contests/arc157/tasks/arc157_a
+	// 给定长为n的字符串,判断(n-1)个相邻的字符是否满足:
+	// 恰好有A个XX,B个XY,C个YX,D个YY
+	// A+B+C+D=n-1 n<=2e5
+
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, A, B, C, D int
+	fmt.Fscan(in, &n, &A, &B, &C, &D)
+	et := NewEulerianTrail(2, true)
+	for i := 0; i < A; i++ {
+		et.AddEdge(0, 0)
+	}
+	for i := 0; i < B; i++ {
+		et.AddEdge(0, 1)
+	}
+	for i := 0; i < C; i++ {
+		et.AddEdge(1, 0)
+	}
+	for i := 0; i < D; i++ {
+		et.AddEdge(1, 1)
+	}
+	res := et.GetSemiEulerianTrail(false)
+	if len(res) == n-1 {
+		fmt.Fprintln(out, "Yes")
+	} else {
+		fmt.Fprintln(out, "No")
+	}
+}
+
+func main() {
+	有向图字典序最小的欧拉路径()
 }
 
 type EulerianTrail struct {

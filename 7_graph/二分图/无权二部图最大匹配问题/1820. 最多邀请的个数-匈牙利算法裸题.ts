@@ -9,7 +9,7 @@ import { useHungarian } from './匈牙利算法'
 
 function maximumInvitations(grid: number[][]): number {
   const [ROW, COL] = [grid.length, grid[0].length]
-  const H = useHungarian(ROW, COL) // 男生:行, 女生:列
+  const H = useHungarian() // 男生:行, 女生:列
   for (let r = 0; r < ROW; r++) {
     for (let c = 0; c < COL; c++) {
       if (grid[r][c] === 1) H.addEdge(r, c)

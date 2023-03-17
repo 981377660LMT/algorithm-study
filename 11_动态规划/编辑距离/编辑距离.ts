@@ -9,34 +9,45 @@
  * React认为：一个ReactElement的type不同，那么内容基本不会复用，所以直接删除节点，
  * 添加新节点，这是一个非常大的优化，大大减少了对比时间复杂度。
  * @description 你可以对一个单词进行如下三种操作:增删改
- * @summary 编辑距离
+ * @summary 编辑距离 O(n*m)
  */
-function minDistance(word1: string, word2: string): number {
+function editDistance<T>(word1: ArrayLike<T>, word2: ArrayLike<T>): number {
   const n1 = word1.length
   const n2 = word2.length
-  const dp = Array.from({ length: n1 + 1 }, () => new Uint32Array(n2 + 1))
+  const dp = new Uint32Array((n1 + 1) * (n2 + 1))
 
   for (let i = 0; i < n1 + 1; i++) {
-    dp[i][0] = i
+    dp[i * (n2 + 1)] = i
   }
 
   for (let j = 0; j < n2 + 1; j++) {
-    dp[0][j] = j
+    dp[j] = j
   }
 
   for (let i = 1; i < n1 + 1; i++) {
     for (let j = 1; j < n2 + 1; j++) {
       if (word1[i - 1] === word2[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1]
+        dp[i * (n2 + 1) + j] = dp[(i - 1) * (n2 + 1) + j - 1]
       } else {
-        dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]) + 1
+        dp[i * (n2 + 1) + j] =
+          Math.min(
+            dp[(i - 1) * (n2 + 1) + j],
+            dp[i * (n2 + 1) + j - 1],
+            dp[(i - 1) * (n2 + 1) + j - 1]
+          ) + 1
       }
     }
   }
 
-  return dp[n1][n2]
+  return dp[n1 * (n2 + 1) + n2]
 }
 
-console.log(minDistance('horse', 'ros'))
-// 3
-export {}
+if (require.main === module) {
+  const s1 = 'horse'.repeat(2000)
+  const s2 = 'rosse'.repeat(2000)
+  console.time('editDistance')
+  console.log(editDistance(s1, s2), s1.length * s2.length)
+  console.timeEnd('editDistance')
+}
+
+export { editDistance }

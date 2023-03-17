@@ -48,8 +48,8 @@ func main() {
 		dp[scc.CompId[2*i]]++
 	}
 	for i := 0; i < v; i++ {
-		for _, e := range scc.Dag[i] {
-			dp[e.to] += dp[e.from]
+		for _, to := range scc.Dag[i] {
+			dp[to] += dp[i]
 		}
 	}
 
@@ -63,7 +63,7 @@ func main() {
 type WeightedEdge struct{ from, to, cost, index int }
 type StronglyConnectedComponents struct {
 	G      [][]WeightedEdge // 原图
-	Dag    [][]WeightedEdge // 强连通分量缩点后的顶点和边组成的DAG
+	Dag    [][]int          // 强连通分量缩点后的DAG(有向图邻接表)
 	CompId []int            // 每个顶点所属的强连通分量的编号
 	Group  [][]int          // 每个强连通分量所包含的顶点
 	rg     [][]WeightedEdge
@@ -109,17 +109,17 @@ func (scc *StronglyConnectedComponents) Build() {
 		}
 	}
 
-	dag := make([][]WeightedEdge, ptr)
-	visited := make(map[int]struct{}) // !去重
+	dag := make([][]int, ptr)
+	visited := make(map[int]struct{}) // 边去重
 	for i := range scc.G {
 		for _, e := range scc.G[i] {
 			x, y := scc.CompId[e.from], scc.CompId[e.to]
 			if x == y {
-				continue
+				continue // 原来的边 x->y 的顶点在同一个强连通分量内,可以汇合同一个 SCC 的权值
 			}
 			hash := x*len(scc.G) + y
 			if _, ok := visited[hash]; !ok {
-				dag[x] = append(dag[x], WeightedEdge{x, y, e.cost, e.index})
+				dag[x] = append(dag[x], y)
 				visited[hash] = struct{}{}
 			}
 		}

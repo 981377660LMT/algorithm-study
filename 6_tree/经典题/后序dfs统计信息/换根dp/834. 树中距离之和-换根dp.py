@@ -5,9 +5,40 @@ from typing import List
 
 
 class Solution:
+    def sumOfDistancesInTree2(self, n: int, edges: List[List[int]]) -> List[int]:
+        """换根dp求每个节点到其他节点的距离之和"""
+        from Rerooting import Rerooting
+
+        def e(root: int) -> int:
+            return 0
+
+        def op(childRes1: int, childRes2: int) -> int:
+            return childRes1 + childRes2
+
+        def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+            """direction: 0: cur -> parent, 1: parent -> cur"""
+            if direction == 0:  # cur -> parent
+                return fromRes + subSize[cur]
+            return fromRes + (n - subSize[cur])  # parent -> cur
+
+        def dfsForSubSize(cur: int, parent: int) -> None:
+            for next in R.adjList[cur]:
+                if next != parent:
+                    dfsForSubSize(next, cur)
+                    subSize[cur] += subSize[next]
+
+        R = Rerooting(n)
+        for u, v in edges:
+            R.addEdge(u, v)
+        subSize = [1] * n
+        dfsForSubSize(0, -1)
+        dp = R.rerooting(e=e, op=op, composition=composition)
+        return dp
+
     def sumOfDistancesInTree(self, n: int, edges: List[List[int]]) -> List[int]:
         # !子结点更新父结点向下的距离 求出根0的答案
         def dfs1(cur: int, parent_: int, depth_: int) -> None:
+
             parent[cur] = parent_
             depth[cur] = depth_
             for next in adjMap[cur]:
@@ -39,41 +70,6 @@ class Solution:
         res = [0] * n
         res[0] = sum(depth)
         dfs2(0, -1)
-        return res
-
-    def sumOfDistancesInTree2(self, n: int, edges: List[List[int]]) -> List[int]:
-        """换根dp求每个节点到其他节点的距离之和"""
-        from Rerooting import Rerooting
-
-        R = Rerooting(n)
-        for u, v in edges:
-            R.addEdge(u, v)
-
-        # 预处理子树结点个数
-        adjList = R.adjList
-        subTreeCount = [1] * n
-
-        def dfs(cur: int, parent: int) -> None:
-            for next in adjList[cur]:
-                if next == parent:
-                    continue
-                dfs(next, cur)
-                subTreeCount[cur] += subTreeCount[next]
-
-        dfs(0, -1)
-
-        def e(root: int) -> int:
-            return 0
-
-        def op(childRes1: int, childRes2: int) -> int:
-            return childRes1 + childRes2
-
-        def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
-            if direction == 0:  # !从子结点向父结点更新dp1
-                return fromRes + subTreeCount[cur]
-            return fromRes + (n - subTreeCount[cur])  # !从父结点向子结点更新dp2
-
-        res = R.rerooting(e=e, op=op, composition=composition)
         return res
 
 

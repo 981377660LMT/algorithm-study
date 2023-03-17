@@ -32,7 +32,10 @@ if __name__ == "__main__":
         return max(childRes1, childRes2)
 
     def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
-        return fromRes + 1
+        """direction: 0: cur -> parent, 1: parent -> cur"""
+        if direction == 0:  # cur -> parent
+            return fromRes + 1
+        return fromRes + 1  # parent -> cur
 
     n, m, d = map(int, input().split())
     monsters = [int(x) - 1 for x in input().split()]

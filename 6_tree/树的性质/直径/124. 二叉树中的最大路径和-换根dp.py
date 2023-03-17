@@ -21,6 +21,7 @@ class Solution:
             return max(childRes1, childRes2)
 
         def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+            """direction: 0: cur -> parent, 1: parent -> cur"""
             if direction == 0:  # cur -> parent
                 return fromRes + values[cur]
             return fromRes + values[parent]  # parent -> cur

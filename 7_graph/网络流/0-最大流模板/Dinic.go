@@ -76,6 +76,7 @@ func (d *Dinic) MaxFlow(s, t int) int {
 }
 
 // (from,to,流量,容量)
+//  flow = revEdge.cap; cap = e.cap + revEdge.cap
 func (d *Dinic) GetEdges() [][4]int {
 	res := make([][4]int, 0)
 	for i, edges := range d.graph {

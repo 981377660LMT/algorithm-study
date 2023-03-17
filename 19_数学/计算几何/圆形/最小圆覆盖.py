@@ -9,7 +9,7 @@ import random
 from typing import List, Tuple, Union
 
 
-EPS = 1e-6
+EPS = 1e-8
 
 
 def calCircle2(
@@ -32,58 +32,44 @@ def isCover(x1: int, y1: int, rx: float, ry: float, r: float) -> bool:
     return dist <= r or abs(dist - r) < EPS
 
 
-class Solution:
-    def outerTrees(self, trees: List[List[int]]) -> List[float]:
-        """请用一个长度为 3 的数组 [x,y,r] 来返回最小圆的圆心坐标和半径
+def minimumEnclosingCircle(points: List[Tuple[int, int]]) -> List[float]:
+    """请用一个长度为 3 的数组 [x,y,r] 来返回最小圆的圆心坐标和半径
 
-        如果答案与正确答案的误差不超过 1e-5,则该答案将被视为正确答案通过
-        """
-        random.shuffle(trees)
+    答案与正确答案的误差不超过 1e-5
+    """
+    random.shuffle(points)
 
-        n = len(trees)
-        x0, y0 = trees[0]
-        r = 0
-        for i in range(1, n):
-            x1, y1 = trees[i]
-            if isCover(x1, y1, x0, y0, r):
+    n = len(points)
+    x0, y0 = points[0]
+    r = 0
+    for i in range(1, n):
+        x1, y1 = points[i]
+        if isCover(x1, y1, x0, y0, r):
+            continue
+        x0, y0, r = x1, y1, 0
+        for j in range(i):
+            x2, y2 = points[j]
+            if isCover(x2, y2, x0, y0, r):
                 continue
-            x0, y0, r = x1, y1, 0
-            for j in range(i):
-                x2, y2 = trees[j]
-                if isCover(x2, y2, x0, y0, r):
+            x0, y0, r = (
+                (x1 + x2) / 2,
+                (y1 + y2) / 2,
+                (((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) ** 0.5) / 2,
+            )
+            for k in range(j):
+                x3, y3 = points[k]
+                if isCover(x3, y3, x0, y0, r):
                     continue
-                x0, y0, r = (
-                    (x1 + x2) / 2,
-                    (y1 + y2) / 2,
-                    (((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) ** 0.5) / 2,
-                )
-                for k in range(j):
-                    x3, y3 = trees[k]
-                    if isCover(x3, y3, x0, y0, r):
-                        continue
-                    candX, candY, candR = calCircle2(x1, y1, x2, y2, x3, y3)
-                    if candX is not None and candY is not None and candR is not None:
-                        x0, y0, r = candX, candY, candR
+                candX, candY, candR = calCircle2(x1, y1, x2, y2, x3, y3)
+                if candX is not None and candY is not None and candR is not None:
+                    x0, y0, r = candX, candY, candR
 
-        return [x0, y0, r]
+    return [x0, y0, r]
 
 
 if __name__ == "__main__":
-    print(Solution().outerTrees([[1, 1], [2, 2], [2, 0], [2, 4], [3, 3], [4, 2]]))
-    print(
-        Solution().outerTrees(
-            [
-                [55, 7],
-                [36, 30],
-                [1, 64],
-                [83, 97],
-                [8, 90],
-                [16, 7],
-                [18, 23],
-                [98, 77],
-                [57, 33],
-                [98, 54],
-                [73, 7],
-            ]
-        )
-    )
+    # https://atcoder.jp/contests/abc151/tasks/abc151_f
+    n = int(input())
+    points = [tuple(map(int, input().split())) for _ in range(n)]
+    x, y, r = minimumEnclosingCircle(points)
+    print(r)

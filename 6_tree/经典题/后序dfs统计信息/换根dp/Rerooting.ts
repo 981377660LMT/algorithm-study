@@ -111,16 +111,28 @@ if (require.main === module) {
       R.addEdge(u, v)
     }
 
-    const res = R.reRooting({
+    const subSize = new Uint32Array(n).fill(1)
+    // dfsForSubSize(0, -1)
+
+    const dp = R.reRooting({
       e: () => 0,
       op: (childRes1, childRes2) => Math.max(childRes1, childRes2),
       composition: (fromRes, parent, cur, direction) => {
-        if (direction === 0) return fromRes + price[cur]
-        return fromRes + price[parent]
+        if (direction === 0) return fromRes + price[cur] // cur => parent
+        return fromRes + price[parent] // parent => cur
       }
     })
 
-    return Math.max(...res)
+    return Math.max(...dp)
+
+    function dfsForSubSize(cur: number, parent: number): void {
+      R.adjList[cur].forEach(next => {
+        if (next !== parent) {
+          dfsForSubSize(next, cur)
+          subSize[cur] += subSize[next]
+        }
+      })
+    }
   }
 }
 

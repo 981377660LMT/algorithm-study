@@ -23,3 +23,8 @@
 ## 实现
 
 拆成 dp[j] = min(ij 交叉项+只含 i 的项+只含 j 的项和常数项)
+
+---
+
+原点为顶点的最大三角形面积
+https://yukicoder.me/submissions/665173

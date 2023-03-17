@@ -8,16 +8,16 @@ function maxOutput(n: number, edges: number[][], price: number[]): number {
     R.addEdge(u, v)
   }
 
-  const res = R.reRooting({
+  const dp = R.reRooting({
     e: () => 0,
     op: (childRes1, childRes2) => Math.max(childRes1, childRes2),
     composition: (fromRes, parent, cur, direction) => {
-      if (direction === 0) return fromRes + price[cur]
-      return fromRes + price[parent]
+      if (direction === 0) return fromRes + price[cur] // 从子节点到父节点
+      return fromRes + price[parent] // 从父节点到子节点
     }
   })
 
-  return Math.max(...res)
+  return Math.max(...dp)
 }
 
 if (require.main === module) {

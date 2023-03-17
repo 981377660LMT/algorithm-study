@@ -22,7 +22,8 @@ import (
 
 // !下标从1开始,区间[left,right]为闭区间
 func main() {
-	odt := newODT([]int64{12, 3, 5, 2, 7, 8, 9, 1, 4, 6})
+	odt := NewODT([]Value{12, 3, 5, 2, 7, 8, 9, 1, 4, 6})
+
 	begin, end := odt.Prepare(2, 3)
 	fmt.Println(odt.powSum(begin, end, 2, 1e9+7))
 
@@ -33,15 +34,17 @@ func main() {
 	fmt.Println(odt.kth(begin, end, 1))
 }
 
+type Value = int
+
 // 链表/数组能更简洁地维护分裂与合并操作
 type ODTBlock struct {
 	left, right int
-	value       int64
+	value       Value
 }
 
 type ODT []ODTBlock
 
-func newODT(nums []int64) ODT {
+func NewODT(nums []Value) ODT {
 	n := len(nums)
 	res := make(ODT, n)
 	for i := range res {
@@ -59,13 +62,44 @@ func (t *ODT) Prepare(left, right int) (begin, end int) {
 
 // !区间[left,right]赋值操作
 //  这里传入right是为了将begin块的右端点更新为right
-func (t *ODT) Assign(begin, end, right int, value int64) {
+func (t *ODT) Assign(begin, end, right int, value Value) {
 	ot := *t
 	ot[begin].right = right
 	ot[begin].value = value
 	if begin+1 < end {
 		*t = append(ot[:begin+1], ot[end:]...)
 	}
+}
+
+// 区间加
+func (t ODT) add(begin, end int, val Value) {
+	for i := begin; i < end; i++ {
+		t[i].value += val
+	}
+}
+
+// 区间第k小(1-based)
+func (t ODT) kth(begin, end, k int) Value {
+	blocks := append(t[:0:0], t[begin:end]...)
+	sort.Slice(blocks, func(i, j int) bool { return blocks[i].value < blocks[j].value })
+	k--
+	for _, b := range blocks {
+		if cnt := b.right - b.left + 1; k >= cnt {
+			k -= cnt
+		} else {
+			return b.value
+		}
+	}
+	panic(k)
+}
+
+// 区间幂和取模
+func (t ODT) powSum(begin, end int, exp int, mod int) (res int) {
+	for _, b := range t[begin:end] {
+		res += (b.right - b.left + 1) * pow(b.value, exp, mod)
+		res %= mod
+	}
+	return res % mod
 }
 
 // [l, r] => [l, mid-1] [mid, r]
@@ -86,40 +120,9 @@ func (t *ODT) split(mid int) int {
 	return len(odt)
 }
 
-// 区间加
-func (t ODT) add(begin, end int, val int64) {
-	for i := begin; i < end; i++ {
-		t[i].value += val
-	}
-}
-
-// 区间第k小
-func (t ODT) kth(begin, end, k int) int64 {
-	blocks := append(ODT(nil), t[begin:end]...)
-	sort.Slice(blocks, func(i, j int) bool { return blocks[i].value < blocks[j].value })
-	k--
-	for _, b := range blocks {
-		if cnt := b.right - b.left + 1; k >= cnt {
-			k -= cnt
-		} else {
-			return b.value
-		}
-	}
-	panic(k)
-}
-
-// 区间幂和
-func (t ODT) powSum(begin, end int, exp int, mod int64) (res int64) {
-	for _, b := range t[begin:end] {
-		// 总和能溢出的话这里要额外取模
-		res += int64(b.right-b.left+1) * pow(b.value, exp, mod)
-	}
-	return res % mod
-}
-
-func pow(base int64, exp int, mod int64) int64 {
+func pow(base int, exp int, mod int) int {
 	base %= mod
-	res := int64(1) % mod
+	res := int(1) % mod
 	for ; exp > 0; exp >>= 1 {
 		if exp&1 == 1 {
 			res = res * base % mod

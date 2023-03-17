@@ -21,8 +21,10 @@ import (
 )
 
 func main() {
-	const INF int = int(1e18)
-	const MOD int = 998244353
+	// https://yukicoder.me/problems/no/1813
+	// 不等关系:有向边; 全部相等:强连通(环)
+	// 给定一个DAG 求将DAG变为一个环(强连通分量)的最少需要添加的边数
+	// !答案为 `max(入度为0的点的个数, 出度为0的点的个数)`
 
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -30,27 +32,53 @@ func main() {
 
 	var n, m int
 	fmt.Fscan(in, &n, &m)
+
 	scc := NewStronglyConnectedComponents(n)
 	for i := 0; i < m; i++ {
-		var a, b int
-		fmt.Fscan(in, &a, &b)
-		scc.AddEdge(a, b, 1)
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		scc.AddEdge(u-1, v-1, 1)
 	}
 	scc.Build()
-	fmt.Fprintln(out, len(scc.Group))
-	for i := 0; i < len(scc.Group); i++ {
-		fmt.Fprint(out, len(scc.Group[i]))
-		for j := 0; j < len(scc.Group[i]); j++ {
-			fmt.Fprint(out, " ", scc.Group[i][j])
-		}
-		fmt.Fprintln(out)
+
+	if len(scc.Group) == 1 { // 缩成一个点了,说明是强连通的
+		fmt.Fprintln(out, 0)
+		return
 	}
+
+	g := len(scc.Group)
+	indeg, outDeg := make([]int, g), make([]int, g)
+	for i := 0; i < g; i++ {
+		for _, next := range scc.Dag[i] {
+			indeg[next]++
+			outDeg[i]++
+		}
+	}
+
+	in0, out0 := 0, 0
+	for i := 0; i < g; i++ {
+		if indeg[i] == 0 {
+			in0++
+		}
+		if outDeg[i] == 0 {
+			out0++
+		}
+	}
+
+	fmt.Fprintln(out, max(in0, out0))
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 type WeightedEdge struct{ from, to, cost, index int }
 type StronglyConnectedComponents struct {
 	G      [][]WeightedEdge // 原图
-	Dag    [][]WeightedEdge // 强连通分量缩点后的顶点和边组成的DAG
+	Dag    [][]int          // 强连通分量缩点后的DAG(有向图邻接表)
 	CompId []int            // 每个顶点所属的强连通分量的编号
 	Group  [][]int          // 每个强连通分量所包含的顶点
 	rg     [][]WeightedEdge
@@ -96,17 +124,17 @@ func (scc *StronglyConnectedComponents) Build() {
 		}
 	}
 
-	dag := make([][]WeightedEdge, ptr)
-	visited := make(map[int]struct{}) // 去重
+	dag := make([][]int, ptr)
+	visited := make(map[int]struct{}) // 边去重
 	for i := range scc.G {
 		for _, e := range scc.G[i] {
 			x, y := scc.CompId[e.from], scc.CompId[e.to]
 			if x == y {
-				continue
+				continue // 原来的边 x->y 的顶点在同一个强连通分量内,可以汇合同一个 SCC 的权值
 			}
 			hash := x*len(scc.G) + y
 			if _, ok := visited[hash]; !ok {
-				dag[x] = append(dag[x], WeightedEdge{x, y, e.cost, e.index})
+				dag[x] = append(dag[x], y)
 				visited[hash] = struct{}{}
 			}
 		}

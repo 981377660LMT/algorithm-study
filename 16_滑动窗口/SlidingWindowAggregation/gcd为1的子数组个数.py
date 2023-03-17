@@ -1,3 +1,4 @@
+# gcd为1的子数组个数
 from math import gcd
 
 from SlidingWindowAggregation import SlidingWindowAggregation

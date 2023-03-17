@@ -55,9 +55,10 @@ func main() {
 
 }
 
+type Edge struct{ to, weight int }
 type BFSNumbering struct {
 	Depth  []int // 每个点的绝对深度(0-based)
-	Id     []int // 每个点的新编号(0-based)
+	Id     []int // 每个点的欧拉序起点编号(0-based)
 	Parent []int // 不存在时为-1
 
 	count           int
@@ -67,8 +68,6 @@ type BFSNumbering struct {
 	lidSeq          []int
 	graph           [][]Edge
 }
-
-type Edge struct{ to, weight int }
 
 func NewBFSNumbering(graph [][]Edge, root int) *BFSNumbering {
 	res := &BFSNumbering{graph: graph, root: root}

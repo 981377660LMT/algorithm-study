@@ -14,6 +14,7 @@ class Solution:
             return max(childRes1, childRes2)
 
         def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+            """direction: 0: cur -> parent, 1: parent -> cur"""
             if direction == 0:  # cur -> parent
                 return fromRes + price[cur]
             return fromRes + price[parent]  # parent -> cur
@@ -21,5 +22,5 @@ class Solution:
         R = Rerooting(n)
         for u, v in edges:
             R.addEdge(u, v)
-        res = R.rerooting(e, op, composition)
-        return max(res)
+        dp = R.rerooting(e, op, composition)
+        return max(dp)

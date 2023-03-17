@@ -5,7 +5,6 @@
 # 2. 释放 给定 id mID 对应的所有内存单元。
 
 
-# !1. 优化:珂朵莉树(SortedList模拟区间)
 # https://leetcode.cn/problems/design-memory-allocator/solution/by-freeyourmind-sc6b/
 
 

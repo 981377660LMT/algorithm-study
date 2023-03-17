@@ -81,22 +81,33 @@ class Rerooting(Generic[T]):
 # 310-求树上每个节点到其他节点的最远距离
 # 310. 最小高度树
 # 在所有可能的树中，具有最小高度的树（即，min(h)）被称为 最小高度树 。
-class Solution:
-    def findMinHeightTrees(self, n: int, edges: List[List[int]]) -> List[int]:
-        def e(root: int) -> int:
-            return 0
+def findMinHeightTrees(n: int, edges: List[List[int]]) -> List[int]:
+    def e(root: int) -> int:
+        return 0
 
-        def op(childRes1: int, childRes2: int) -> int:
-            return max(childRes1, childRes2)
+    def op(childRes1: int, childRes2: int) -> int:
+        return max(childRes1, childRes2)
 
-        def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
-            if direction == 0:  # cur -> parent
-                return fromRes + 1
-            return fromRes + 1  # parent -> cur
+    def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+        """direction: 0: cur -> parent, 1: parent -> cur"""
+        if direction == 0:  # cur -> parent
+            return fromRes + 1
+        return fromRes + 1  # parent -> cur
 
-        R = Rerooting(n)
-        for u, v in edges:
-            R.addEdge(u, v)
-        maxDists = R.rerooting(e=e, op=op, composition=composition, root=0)
-        min_ = min(maxDists)
-        return [i for i in range(n) if maxDists[i] == min_]
+    def dfsForSubSize(cur: int, parent: int) -> int:
+        res = 1
+        for next in R.adjList[cur]:
+            if next != parent:
+                res += dfsForSubSize(next, cur)
+        subSize[cur] = res
+        return res
+
+    R = Rerooting(n)
+    for u, v in edges:
+        R.addEdge(u, v)
+
+    subSize = [0] * n
+    # dfsForSubSize(0, -1)
+    dp = R.rerooting(e=e, op=op, composition=composition, root=0)
+    min_ = min(dp)
+    return [i for i in range(n) if dp[i] == min_]

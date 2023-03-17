@@ -44,9 +44,7 @@ func NewSortedList(comparator func(a, b Value) int, initCapacity int) *SortedLis
 		comparator: comparator,
 		nodes:      make([]node, 0, max(initCapacity, 16)),
 	}
-
-	dummy := &node{size: 0, priority: sl.nextRand()} // dummy node 0
-	sl.nodes = append(sl.nodes, *dummy)
+	sl.nodes = append(sl.nodes, node{size: 0, priority: sl.nextRand()}) // dummy node 0
 	return sl
 }
 

@@ -117,7 +117,6 @@ def mul(mat1: M, mat2: M, mod: int) -> M:
 
 
 def matpow(base: M, exp: int, mod: int) -> M:
-    n = len(base)
     e = [[0] * n for _ in range(n)]
     for i in range(n):
         e[i][i] = 1

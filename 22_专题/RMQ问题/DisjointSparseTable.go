@@ -3,15 +3,12 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"math/bits"
-	"os"
 )
 
 type S = int
 
-// DisjointSparseTable 维护不包含更新操作的半群的演算
+// DisjointSparseTable 支持半群的区间静态查询
 //  op:只需要满足结合律 op(op(a,b),c) = op(a,op(b,c))
 //  例如:乘积取模
 func NewDisjointSparseTable(nums []S, op func(S, S) S) (query func(int, int) S) {
@@ -67,26 +64,9 @@ func min(a, b int) int {
 	return b
 }
 
-func main() {
-	const INF int = int(1e18)
-	const MOD int = 998244353
-
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
+func max(a, b int) int {
+	if a > b {
+		return a
 	}
-
-	query := NewDisjointSparseTable(nums, min)
-	for i := 0; i < q; i++ {
-		var l, r int
-		fmt.Fscan(in, &l, &r)
-		r--
-		fmt.Fprintln(out, query(l, r))
-	}
+	return b
 }

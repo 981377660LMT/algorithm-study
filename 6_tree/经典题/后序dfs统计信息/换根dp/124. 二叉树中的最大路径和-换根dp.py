@@ -49,6 +49,8 @@ class Solution:
             return max(childRes1, childRes2)
 
         def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+            """direction: 0: cur -> parent, 1: parent -> cur"""
+
             if direction == 0:  # cur -> parent
                 return fromRes + values[cur]
             return fromRes + values[parent]  # parent -> cur
@@ -57,8 +59,8 @@ class Solution:
         R = Rerooting(n)
         for u, v in edges:
             R.addEdge(u, v)
-        res = R.rerooting(e, op, composition)
-        return max([a + b for a, b in zip(values, res)])  # !加上自己的值
+        dp = R.rerooting(e, op, composition)
+        return max([a + b for a, b in zip(values, dp)])  # !加上自己的值
 
 
 T = TypeVar("T")

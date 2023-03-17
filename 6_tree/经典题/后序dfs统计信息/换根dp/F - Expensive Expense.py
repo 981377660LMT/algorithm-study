@@ -22,6 +22,7 @@ if __name__ == "__main__":
         return max(childRes1, childRes2)
 
     def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+        """direction: 0: cur -> parent, 1: parent -> cur"""
         """要不要游览当前城市"""
         weight = adjMap[parent][cur]
         if direction == 0:  # cur -> parent

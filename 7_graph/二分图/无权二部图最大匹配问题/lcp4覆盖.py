@@ -6,7 +6,7 @@ DIR4 = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
 class Solution:
     def domino(self, row: int, col: int, broken: List[List[int]]) -> int:
-        H = Hungarian(row * col, row * col)
+        H = Hungarian()
         grid = [[0] * col for _ in range(row)]
         for r, c in broken:
             grid[r][c] = 1

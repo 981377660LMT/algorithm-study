@@ -18,12 +18,30 @@ func maxOutput(n int, edges [][]int, price []int) int64 {
 		return fromRes + price[parent] // parent -> child
 	}
 
-	R := NewRerooting(n, e, op, composition)
+	getSubSize := func() []int {
+		subSize := make([]int, n)
+		var dfs func(cur, parent int) int
+		dfs = func(cur, parent int) int {
+			res := 1
+			for _, next := range edges[cur] {
+				if next != parent {
+					res += dfs(next, cur)
+				}
+			}
+			subSize[cur] = res
+			return res
+		}
+		dfs(0, -1)
+		return subSize
+	}
+
+	R := NewRerooting(n)
 	for _, edge := range edges {
 		R.AddEdge(edge[0], edge[1])
 	}
 
-	dp := R.ReRooting()
+	_ = getSubSize
+	dp := R.ReRooting(e, op, composition)
 	return int64(maxs(dp...))
 }
 
@@ -44,21 +62,16 @@ func maxs(nums ...int) int {
 	return res
 }
 
+//
+//
 type E = int
 type Rerooting struct {
 	Tree [][]int
 	n    int
-	// dp值的幺元.
-	e func(root int) E
-	// 合并两个dp值.
-	op func(child1, child2 E) E
-	// 更新dp值.
-	//  direction 0: child -> parent, direction 1: parent -> child
-	composition func(fromRes E, parent, cur int, direction uint8) E
 }
 
-func NewRerooting(n int, e func(root int) E, op func(child1, child2 E) E, composition func(fromRes E, parent, cur int, direction uint8) E) *Rerooting {
-	return &Rerooting{Tree: make([][]int, n), n: n, e: e, op: op, composition: composition}
+func NewRerooting(n int) *Rerooting {
+	return &Rerooting{Tree: make([][]int, n), n: n}
 }
 
 // 添加一条无向边.
@@ -67,7 +80,7 @@ func (r *Rerooting) AddEdge(u, v int) {
 	r.Tree[v] = append(r.Tree[v], u)
 }
 
-func (r *Rerooting) ReRooting() []E {
+func (r *Rerooting) ReRooting(e func(root int) E, op func(child1, child2 E) E, composition func(fromRes E, parent, cur int, direction uint8) E) []E {
 	parents := make([]int, r.n)
 	for i := range parents {
 		parents[i] = -1
@@ -88,25 +101,25 @@ func (r *Rerooting) ReRooting() []E {
 
 	dp1, dp2 := make([]E, r.n), make([]E, r.n)
 	for i := range dp1 {
-		dp1[i] = r.e(i)
-		dp2[i] = r.e(i)
+		dp1[i] = e(i)
+		dp2[i] = e(i)
 	}
 	for i := r.n - 1; i >= 0; i-- {
 		cur := order[i]
-		res := r.e(cur)
+		res := e(cur)
 		for _, next := range r.Tree[cur] {
 			if next != parents[cur] {
 				dp2[next] = res
-				res = r.op(res, r.composition(dp1[next], cur, next, 0))
+				res = op(res, composition(dp1[next], cur, next, 0))
 			}
 		}
 
-		res = r.e(cur)
+		res = e(cur)
 		for j := len(r.Tree[cur]) - 1; j >= 0; j-- {
 			next := r.Tree[cur][j]
 			if next != parents[cur] {
-				dp2[next] = r.op(res, dp2[next])
-				res = r.op(res, r.composition(dp1[next], cur, next, 0))
+				dp2[next] = op(res, dp2[next])
+				res = op(res, composition(dp1[next], cur, next, 0))
 			}
 		}
 
@@ -116,8 +129,8 @@ func (r *Rerooting) ReRooting() []E {
 	for i := 1; i < r.n; i++ {
 		newRoot := order[i]
 		parent := parents[newRoot]
-		dp2[newRoot] = r.composition(r.op(dp2[newRoot], dp2[parent]), parent, newRoot, 1)
-		dp1[newRoot] = r.op(dp1[newRoot], dp2[newRoot])
+		dp2[newRoot] = composition(op(dp2[newRoot], dp2[parent]), parent, newRoot, 1)
+		dp1[newRoot] = op(dp1[newRoot], dp2[newRoot])
 	}
 
 	return dp1

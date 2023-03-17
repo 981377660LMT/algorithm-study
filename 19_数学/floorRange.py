@@ -31,6 +31,23 @@ def floorRange(n: int) -> List[Tuple[int, int, int]]:
 
 
 if __name__ == "__main__":
-    n = int(input())
-    print(floorRange(n))
+    # n = int(input())
+    # print(floorRange(n))
     # [(1, 2, 9), (2, 3, 4), (3, 4, 3), (5, 10, 1)]
+
+    # https://yukicoder.me/problems/no/1573
+    # 约数总和
+    MOD = 998244353
+    n, m = map(int, input().split())
+    res = 0
+    for left, right, div in floorRange(n):
+        right += 1
+        lower = left
+        higher = min(right - 1, m)
+        if lower > higher:
+            break
+        x = div * (div + 1) // 2 + div
+        y = (lower + higher) * (higher - lower + 1) // 2
+        res += x * y
+        res %= MOD
+    print(res)

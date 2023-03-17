@@ -2,9 +2,48 @@
 # n,m<=500
 # 数据保证矩阵中 1 的数量不超过 5000。 (稀疏矩阵)
 # https://www.acwing.com/problem/content/1069/
-row, col = map(int, input().split())
-matrix = []
-for _ in range(row):
-    matrix.append(list(map(int, input().split())))
 
-# todo
+
+class Dancinglink:
+    def __init__(self, n, debug=False):
+        self.n = n
+        self.exist = [True] * n
+        self._left = [i - 1 for i in range(n)]
+        self._right = [i + 1 for i in range(n)]
+        self._debug = debug
+
+    def pop(self, k):
+        if self._debug:
+            assert self.exist[k]
+        L = self._left[k]
+        R = self._right[k]
+        if L != -1:
+            if R != self.n:
+                self._right[L], self._left[R] = R, L
+            else:
+                self._right[L] = self.n
+        elif R != self.n:
+            self._left[R] = -1
+        self.exist[k] = False
+
+    def left(self, idx, k=1):
+        if self._debug:
+            assert self.exist[idx]
+        res = idx
+        while k:
+            res = self._left[res]
+            if res == -1:
+                break
+            k -= 1
+        return res
+
+    def right(self, idx, k=1):
+        if self._debug:
+            assert self.exist[idx]
+        res = idx
+        while k:
+            res = self._right[res]
+            if res == self.n:
+                break
+            k -= 1
+        return res

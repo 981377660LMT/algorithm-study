@@ -44,6 +44,7 @@ func removeYuki(s string, scores []int) int {
 		}
 	}
 
+	// 流量最大时费用不一定最大,所以要根据slope判断
 	slope := mcmf.Slope()
 	res := 0
 	for _, s := range slope {
@@ -61,7 +62,7 @@ func max(a, b int) int {
 
 type MinCostFlow struct {
 	AddEdge func(from, to, cap, cost int)
-	Work    func() (maxFlow int, minCost int)
+	Flow    func() (maxFlow int, minCost int)
 	Slope   func() [][2]int // (flow, cost)
 }
 
@@ -172,7 +173,7 @@ func NewMinCostFlow(n, start, end int) *MinCostFlow {
 
 	return &MinCostFlow{
 		AddEdge: AddEdge,
-		Work:    Work,
+		Flow:    Work,
 		Slope:   Slope,
 	}
 }
