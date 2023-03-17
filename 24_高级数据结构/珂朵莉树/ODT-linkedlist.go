@@ -23,8 +23,13 @@ package main
 
 import (
 	"fmt"
+	"runtime/debug"
 	"sort"
 )
+
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 // !下标从0开始,闭区间[0,n-1]
 func demo() {

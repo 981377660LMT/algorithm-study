@@ -28,11 +28,21 @@ func UnionOfInterval() {
 
 	var n int
 	fmt.Fscan(in, &n)
-	// odt:=
+	odt := NewODT(2e5+10, -INF)
+	for i := 0; i < n; i++ {
+		var l, r int
+		fmt.Fscan(in, &l, &r)
+		odt.Set(l, r, 1)
+	}
+	odt.EnumerateAll(func(l, r int, x int) {
+		if x == 1 {
+			fmt.Fprintln(out, l, r)
+		}
+	})
 }
 
 func main() {
-	demo()
+	UnionOfInterval()
 }
 
 type Item = int

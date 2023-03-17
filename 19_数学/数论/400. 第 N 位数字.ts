@@ -6,7 +6,7 @@
  * 1 - 9 : 9 digits
    10 - 99 : 90 * 2 digits
    100 - 999: 900 * 3 digits
-   @description 第n位数字
+   @description 第n位数字/第n个数字
  */
 function findNthDigit(n: number): number {
   let count = 9
@@ -26,3 +26,4 @@ function findNthDigit(n: number): number {
 console.log(findNthDigit(11))
 // 输出：0
 // 解释：第 11 位数字在序列 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, ... 里是 0 ，它是 10 的一部分。
+export {}

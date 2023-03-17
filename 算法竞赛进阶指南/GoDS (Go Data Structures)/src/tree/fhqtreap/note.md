@@ -22,3 +22,9 @@ https://zhuanlan.zhihu.com/p/400448696
    https://nyaannyaan.github.io/library/rbst/lazy-reversible-rbst.hpp
    https://www.acwing.com/solution/content/51762/
    https://www.acwing.com/activity/content/code/content/2479443/
+
+---
+
+SortedList 做不到 O(1)寻找前驱后继, TreeSet 可以
+
+迭代器的 api 设计

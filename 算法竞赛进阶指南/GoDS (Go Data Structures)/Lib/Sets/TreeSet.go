@@ -14,4 +14,6 @@ func b() {
 	set.Each(func(index int, value interface{}) {
 		fmt.Println(index, value)
 	})
+	iter := set.Iterator()
+	iter.Begin()
 }

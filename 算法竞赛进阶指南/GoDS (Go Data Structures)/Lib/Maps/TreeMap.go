@@ -7,21 +7,22 @@ import (
 )
 
 func e() {
-	treeMap := treemap.NewWithIntComparator()
-	treeMap.Put(10, "a")
-	treeMap.Put(20, "b")
-	treeMap.Put(0, "c")
-	fmt.Println(treeMap.Get(1)) // a true
+	mp := treemap.NewWithIntComparator()
+	mp.Put(10, "a")
+	mp.Put(20, "b")
+	mp.Put(0, "c")
+	mp.Iterator()
+	fmt.Println(mp.Get(1)) // a true
 
 	// floor ceiling
-	fmt.Println(treeMap.Floor(0))    // 0 c
-	fmt.Println(treeMap.Floor(15))   // 10 a
-	fmt.Println(treeMap.Floor(20))   // 20 b
-	fmt.Println(treeMap.Ceiling(15)) // 20 b
-	fmt.Println(treeMap.Ceiling(20)) // 20 b
-	fmt.Println(treeMap.Ceiling(21)) // <nil> <nil>
+	fmt.Println(mp.Floor(0))    // 0 c
+	fmt.Println(mp.Floor(15))   // 10 a
+	fmt.Println(mp.Floor(20))   // 20 b
+	fmt.Println(mp.Ceiling(15)) // 20 b
+	fmt.Println(mp.Ceiling(20)) // 20 b
+	fmt.Println(mp.Ceiling(21)) // <nil> <nil>
 
 	// min max
-	fmt.Println(treeMap.Min())
-	fmt.Println(treeMap.Max())
+	fmt.Println(mp.Min())
+	fmt.Println(mp.Max())
 }
