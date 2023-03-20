@@ -1,9 +1,3 @@
-// # https://atcoder.jp/contests/code-thanks-festival-2017-open/tasks/code_thanks_festival_2017_h
-// # 给定n个集合,初始时第i个集合只有一个元素i (i=1,2,...,n)
-// # 之后进行m次合并操作,每次合并ai和bi所在的集合
-// # 如果ai和bi在同一个集合,则无事发生
-// # 给定q个询问,问ai和bi是在第几次操作后第一次连通的,如果不连通则输出-1
-
 package main
 
 import (
@@ -17,7 +11,45 @@ func init() {
 	debug.SetGCPercent(-1)
 }
 
-func main() {
+func yosupo() {
+	// https://judge.yosupo.jp/submission/130167
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+
+	uf := NewPersistentUnionfind()
+	versions := make([]*AryNode, 0, q+10)
+	versions = append(versions, uf.Alloc())
+
+	for i := 0; i < q; i++ {
+		var op, version, u, v int
+		fmt.Fscan(in, &op, &version, &u, &v)
+		version++
+		root := versions[version]
+		if op == 0 {
+			newRoot, _ := uf.Union(root, u, v)
+			root = newRoot
+		} else {
+			if uf.IsConnected(root, u, v) {
+				fmt.Fprintln(out, 1)
+			} else {
+				fmt.Fprintln(out, 0)
+			}
+		}
+		versions = append(versions, root)
+	}
+}
+
+func UnionSets() {
+	// # https://atcoder.jp/contests/code-thanks-festival-2017-open/tasks/code_thanks_festival_2017_h
+	// # 给定n个集合,初始时第i个集合只有一个元素i (i=1,2,...,n)
+	// # 之后进行m次合并操作,每次合并ai和bi所在的集合
+	// # 如果ai和bi在同一个集合,则无事发生
+	// # 给定q个询问,问ai和bi是在第几次操作后第一次连通的,如果不连通则输出-1
+
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -25,11 +57,14 @@ func main() {
 	var n, m int
 	fmt.Fscan(in, &n, &m)
 	uf := NewPersistentUnionfind()
+	version := make([]*AryNode, 0, m+1)
+	version = append(version, uf.Alloc())
 	for i := 0; i < m; i++ {
 		var a, b int
 		fmt.Fscan(in, &a, &b)
 		a, b = a-1, b-1
-		uf.Union(uf.CurVersion, a, b)
+		newRoot, _ := uf.Union(version[i], a, b)
+		version = append(version, newRoot)
 	}
 
 	var q int
@@ -38,15 +73,15 @@ func main() {
 		var a, b int
 		fmt.Fscan(in, &a, &b)
 		a, b = a-1, b-1
-		if !uf.IsConnected(uf.CurVersion, a, b) {
+		if !uf.IsConnected(version[m], a, b) {
 			fmt.Fprintln(out, -1)
 			continue
 		}
 
-		left, right := 0, uf.CurVersion
+		left, right := 0, m
 		for left <= right {
 			mid := (left + right) / 2
-			if uf.IsConnected(mid, a, b) {
+			if uf.IsConnected(version[mid], a, b) {
 				right = mid - 1
 			} else {
 				left = mid + 1
@@ -56,116 +91,118 @@ func main() {
 	}
 }
 
-type PersistentUnionfind struct {
-	CurVersion int
-	par        *PersistentArray
-	savePoints []*AryNode
-}
-
-func NewPersistentUnionfind() *PersistentUnionfind {
-	savePoints := []*AryNode{nil}
-	return &PersistentUnionfind{
-		par:        NewPersistentArray(4, -1), // 3或者4
-		savePoints: savePoints,
-	}
-}
-
-// 合并x和y所在的集合,返回当前版本号。
-//  0<=version<=curVersion
-//  每进行一次合并操作,版本号+1;
-//  Union(curVersion,0,0)表示不进行任何操作,但是会在savePoints中增加一个版本号。
-func (p *PersistentUnionfind) Union(version, x, y int) int {
-	x, y = p.Find(version, x), p.Find(version, y)
-	ptr := p.savePoints[version]
-	if x != y {
-		sizeX := -p.par.Get(p.savePoints[version], x)
-		sizeY := -p.par.Get(p.savePoints[version], y)
-		if sizeX > sizeY {
-			p.par.ch(&ptr, x, -sizeX-sizeY)
-			p.par.ch(&ptr, y, x)
-		} else {
-			p.par.ch(&ptr, y, -sizeX-sizeY)
-			p.par.ch(&ptr, x, y)
-		}
-	}
-
-	p.savePoints = append(p.savePoints, ptr)
-	p.CurVersion++
-	return p.CurVersion
-}
-
-//  0<=version<=curVersion
-func (p *PersistentUnionfind) Find(version, x int) int {
-	y := p.par.Get(p.savePoints[version], x)
-	if y < 0 {
-		return x
-	}
-	return p.Find(version, y)
-}
-
-//  0<=version<=curVersion
-func (p *PersistentUnionfind) IsConnected(version, x, y int) bool {
-	return p.Find(version, x) == p.Find(version, y)
-}
-
-//  0<=version<=curVersion
-func (p *PersistentUnionfind) GetSize(version, x int) int {
-	return -p.par.Get(p.savePoints[version], p.Find(version, x))
+func main() {
+	// yosupo()
+	UnionSets()
 }
 
 type E = int
-
 type AryNode struct {
 	data     E
-	children []*AryNode
+	children [16]*AryNode // !
+}
+
+// 完全可持久化并查集,不使用路径压缩.
+type PersistentUnionfind struct {
+	parents *PersistentArray
+}
+
+func NewPersistentUnionfind() *PersistentUnionfind {
+	return &PersistentUnionfind{parents: NewPersistentArray(-1)}
+}
+
+func (p *PersistentUnionfind) Alloc() *AryNode {
+	return p.parents.Alloc()
+}
+
+func (p *PersistentUnionfind) Union(root *AryNode, x, y int) (newRoot *AryNode, ok bool) {
+	x, y = p.Find(root, x), p.Find(root, y)
+	if x == y {
+		return root, false
+	}
+	if -p.parents.Get(root, x) < -p.parents.Get(root, y) {
+		x, y = y, x
+	}
+	newSize := p.parents.Get(root, x) + p.parents.Get(root, y)
+	root = p.parents.Set(root, x, newSize)
+	root = p.parents.Set(root, y, x)
+	newRoot, ok = root, true
+	return
+}
+
+func (p *PersistentUnionfind) Find(root *AryNode, x int) int {
+	for {
+		p := p.parents.Get(root, x)
+		if p < 0 {
+			break
+		}
+		x = p
+	}
+	return x
+}
+
+func (p *PersistentUnionfind) IsConnected(root *AryNode, x, y int) bool {
+	return p.Find(root, x) == p.Find(root, y)
+}
+
+func (p *PersistentUnionfind) GetSize(root *AryNode, x int) int {
+	return -p.parents.Get(root, p.Find(root, x))
 }
 
 type PersistentArray struct {
-	log  int
-	null E
-	Root *AryNode // 初始版本
+	null E // 当index越界/不存在时返回的值
 }
 
-// aryLog 一般取3或4
-func NewPersistentArray(aryLog int, null E) *PersistentArray {
-	res := &PersistentArray{log: aryLog, null: null}
-	return res
+func NewPersistentArray(null E) *PersistentArray {
+	return &PersistentArray{null: null}
 }
 
-func (p *PersistentArray) Build(nums []E) *AryNode {
+func (o *PersistentArray) Alloc() *AryNode {
+	return &AryNode{data: o.null}
+}
+
+func (o *PersistentArray) Build(nums []E) *AryNode {
+	root := o.Alloc()
 	for i := 0; i < len(nums); i++ {
-		p.Root = p.Set(p.Root, i, nums[i])
+		root = o.setWithoutCopy(root, i, nums[i])
 	}
-	return p.Root
+	return root
 }
 
-func (p *PersistentArray) Get(version *AryNode, index int) E {
-	if version == nil {
-		return p.null
+func (o *PersistentArray) Get(root *AryNode, index int) E {
+	if root == nil {
+		return o.null
 	}
 	if index == 0 {
-		return version.data
+		return root.data
 	}
-	return p.Get(version.children[index&((1<<p.log)-1)], index>>p.log)
+	return o.Get(root.children[index&15], (index-1)>>4)
 }
 
-func (p *PersistentArray) Set(version *AryNode, index int, data E) *AryNode {
-	newNode := AryNode{data: p.null, children: make([]*AryNode, 1<<p.log)}
-	if version != nil {
-		copy(newNode.children, version.children)
-		newNode.data = version.data
+func (o *PersistentArray) Set(root *AryNode, index int, data E) *AryNode {
+	newNode := o.Alloc()
+	if root != nil { // copyNode
+		newNode.data = root.data
+		for i := 0; i < 16; i++ {
+			newNode.children[i] = root.children[i]
+		}
 	}
-
-	version = &newNode
 	if index == 0 {
-		version.data = data
-	} else {
-		ptr := p.Set(version.children[index&((1<<p.log)-1)], index>>p.log, data)
-		version.children[index&((1<<p.log)-1)] = ptr
+		newNode.data = data
+		return newNode
 	}
-	return version
+	newNode.children[index&15] = o.Set(newNode.children[index&15], (index-1)>>4, data)
+	return newNode
 }
 
-func (p *PersistentArray) ch(version **AryNode, index int, data E) {
-	*version = p.Set(*version, index, data)
+func (o *PersistentArray) setWithoutCopy(root *AryNode, index int, data E) *AryNode {
+	if root == nil {
+		root = o.Alloc()
+	}
+	if index == 0 {
+		root.data = data
+		return root
+	}
+	root.children[index&15] = o.setWithoutCopy(root.children[index&15], (index-1)>>4, data)
+	return root
 }

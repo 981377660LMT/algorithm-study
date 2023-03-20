@@ -4,13 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"runtime/debug"
 	"strings"
 )
 
-func init() {
-	debug.SetGCPercent(-1)
-}
+// func init() {
+// 	debug.SetGCPercent(-1)
+// }
 
 func UnionOfInterval() {
 	// https://atcoder.jp/contests/abc256/tasks/abc256_d

@@ -54,12 +54,6 @@ describe('SortedList', () => {
     expect(sortedNums).toStrictEqual([...sl])
   })
 
-  it('should support count', () => {
-    const target = Math.floor(Math.random() * 1000)
-    const count = sl.count(target)
-    expect(count).toBe(sortedNums.filter(num => num === target).length)
-  })
-
   it('should support clear', () => {
     sl.clear()
     expect(sl.length).toBe(0)

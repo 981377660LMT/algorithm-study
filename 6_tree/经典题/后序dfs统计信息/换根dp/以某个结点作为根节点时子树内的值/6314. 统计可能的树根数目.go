@@ -11,6 +11,7 @@ func rootCount(edges [][]int, guesses [][]int, k int) int {
 	n := len(edges) + 1
 	R := NewRerootingSubTree(n)
 	for _, e := range edges {
+		// !如果边的方向对结果有影响，那么需要使用AddEdge2
 		R.AddEdge2(e[0], e[1], Edge{from: e[0], to: e[1]}, Edge{from: e[1], to: e[0]})
 	}
 	set := make(map[[2]int]struct{})

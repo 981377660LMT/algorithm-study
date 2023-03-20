@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-inner-declarations */
 /* eslint-disable no-param-reassign */
 /* eslint-disable generator-star-spacing */
@@ -23,21 +24,26 @@ class SortedList<T = number> {
   constructor(iterable: Iterable<T>)
   constructor(compareFn: (a: T, b: T) => number)
   constructor(iterable: Iterable<T>, compareFn: (a: T, b: T) => number)
+  constructor(compareFn: (a: T, b: T) => number, iterable: Iterable<T>)
   constructor(
-    iterableOrCompareFn?: Iterable<T> | ((a: T, b: T) => number),
-    compareFn?: (a: T, b: T) => number
+    arg1?: Iterable<T> | ((a: T, b: T) => number),
+    arg2?: Iterable<T> | ((a: T, b: T) => number)
   ) {
     let defaultCompareFn = (a: T, b: T) => (a as unknown as number) - (b as unknown as number)
     let defaultData: T[] = []
-    if (iterableOrCompareFn !== void 0) {
-      if (typeof iterableOrCompareFn === 'function') {
-        defaultCompareFn = iterableOrCompareFn
+    if (arg1 !== void 0) {
+      if (typeof arg1 === 'function') {
+        defaultCompareFn = arg1
       } else {
-        defaultData = [...iterableOrCompareFn]
+        defaultData = [...arg1]
       }
     }
-    if (compareFn !== void 0) {
-      defaultCompareFn = compareFn
+    if (arg2 !== void 0) {
+      if (typeof arg2 === 'function') {
+        defaultCompareFn = arg2
+      } else {
+        defaultData = [...arg2]
+      }
     }
 
     this._compareFn = defaultCompareFn
@@ -52,7 +58,21 @@ class SortedList<T = number> {
       this._size = 1
       return
     }
-    const block = this._findBlock(value)
+
+    const blockIndex = this._findBlockIndex(value)
+    if (blockIndex === -1) {
+      this._blocks[this._blocks.length - 1].push(value)
+      this._size++
+      if (
+        this._blocks[this._blocks.length - 1].length >
+        this._blocks.length * SortedList._REBUILD_RATIO
+      ) {
+        this._rebuild()
+      }
+      return
+    }
+
+    const block = this._blocks[blockIndex]
     const pos = this._bisectRight(block, value)
     block.splice(pos, 0, value)
     this._size += 1
@@ -61,24 +81,30 @@ class SortedList<T = number> {
     }
   }
 
+  /** 注意内部使用 `===` 来比较两个对象是否相等 */
   has(value: T): boolean {
     if (this._size === 0) return false
-    const block = this._findBlock(value)
+    const blockIndex = this._findBlockIndex(value)
+    if (blockIndex === void 0) return false
+    const block = this._blocks[blockIndex]
     const pos = this._bisectLeft(block, value)
-    return pos < block.length && this._compareFn(block[pos], value) === 0
+    return pos < block.length && value === block[pos]
   }
 
+  /** 注意内部使用 `===` 来比较两个对象是否相等 */
   discard(value: T): boolean {
     if (this._size === 0) return false
-    const block = this._findBlock(value)
+    const blockIndex = this._findBlockIndex(value)
+    if (blockIndex === -1) return false
+    const block = this._blocks[blockIndex]
     const pos = this._bisectLeft(block, value)
-    if (pos === block.length || this._compareFn(block[pos], value) !== 0) {
+    if (pos === block.length || block[pos] !== value) {
       return false
     }
     block.splice(pos, 1)
     this._size -= 1
     if (block.length === 0) {
-      this._rebuild()
+      this._blocks.splice(blockIndex, 1) // !Splice When Empty, Do Not Rebuild
     }
     return true
   }
@@ -95,17 +121,13 @@ class SortedList<T = number> {
         block.splice(index, 1)
         this._size -= 1
         if (block.length === 0) {
-          this._rebuild()
+          this._blocks.splice(i, 1) // !Splice When Empty, Do Not Rebuild
         }
         return res
       }
       index -= block.length
     }
     return void 0
-  }
-
-  count(value: T): number {
-    return this.bisectRight(value) - this.bisectLeft(value)
   }
 
   at(index: number): T | undefined {
@@ -119,6 +141,50 @@ class SortedList<T = number> {
         return block[index]
       }
       index -= block.length
+    }
+    return void 0
+  }
+
+  lower(value: T): T | undefined {
+    for (let i = this._blocks.length - 1; ~i; i--) {
+      const block = this._blocks[i]
+      if (this._compareFn(block[0], value) < 0) {
+        const pos = this._bisectLeft(block, value)
+        return block[pos - 1]
+      }
+    }
+    return void 0
+  }
+
+  higher(value: T): T | undefined {
+    for (let i = 0; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
+      if (this._compareFn(block[block.length - 1], value) > 0) {
+        const pos = this._bisectRight(block, value)
+        return block[pos]
+      }
+    }
+    return void 0
+  }
+
+  floor(value: T): T | undefined {
+    for (let i = this._blocks.length - 1; ~i; i--) {
+      const block = this._blocks[i]
+      if (this._compareFn(block[0], value) <= 0) {
+        const pos = this._bisectRight(block, value)
+        return block[pos - 1]
+      }
+    }
+    return void 0
+  }
+
+  ceiling(value: T): T | undefined {
+    for (let i = 0; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
+      if (this._compareFn(block[block.length - 1], value) >= 0) {
+        const pos = this._bisectLeft(block, value)
+        return block[pos]
+      }
     }
     return void 0
   }
@@ -164,12 +230,12 @@ class SortedList<T = number> {
     return `SortedList[${[...this].join(', ')}]`
   }
 
-  forEach(callbackfn: (value: T, index: number, array: this) => void): void {
+  forEach(callbackfn: (value: T, index: number) => void): void {
     let pos = 0
     for (let i = 0; i < this._blocks.length; i++) {
       const block = this._blocks[i]
       for (let j = 0; j < block.length; j++) {
-        callbackfn(block[j], pos++, this)
+        callbackfn(block[j], pos++)
       }
     }
   }
@@ -194,14 +260,14 @@ class SortedList<T = number> {
   }
 
   // Find the block which should contain x. Block must not be empty.
-  private _findBlock(x: T): T[] {
+  private _findBlockIndex(x: T): number {
     for (let i = 0; i < this._blocks.length; i++) {
       const block = this._blocks[i]
       if (this._compareFn(x, block[block.length - 1]) <= 0) {
-        return block
+        return i
       }
     }
-    return this._blocks[this._blocks.length - 1]
+    return -1
   }
 
   private _rebuild(): void {
@@ -329,13 +395,26 @@ if (require.main === module) {
     }
   }
 
+  // https://leetcode.cn/problems/find-score-of-an-array-after-marking-all-elements/
+  function findScore(nums: number[]): number {
+    const objects: [number, number][] = nums.map((v, i) => [v, i])
+    const sl = new SortedList<[number, number]>((a, b) => a[0] - b[0] || a[1] - b[1], objects)
+
+    let res = 0
+    while (sl.length > 0) {
+      const [v, i] = sl.pop(0)!
+      res += v
+      if (i - 1 >= 0) sl.discard(objects[i - 1])
+      if (i + 1 < nums.length) sl.discard(objects[i + 1])
+    }
+    return res
+  }
+
   const sl = new SortedList<number>([1, 4, 2, 14, 611, 3])
   console.log(sl.length)
   console.log(sl.toString())
   console.log(sl.length)
   console.log(sl.at(0))
-  console.log(sl.at(1))
-  console.log(sl.at(3))
   console.log(sl.at(-1))
-  console.log(sl.at(-2))
+  console.log(sl.toString(), sl.ceiling(-1), sl.has(4))
 }

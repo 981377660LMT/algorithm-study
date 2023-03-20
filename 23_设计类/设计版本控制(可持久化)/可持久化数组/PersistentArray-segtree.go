@@ -20,7 +20,8 @@ func init() {
 
 func main() {
 	nums := NewPersistentArray([]E{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
-	v1 := nums.Set(0, 0, 100) // 初始版本号为0
+	v0 := 0
+	v1 := nums.Set(v0, 0, 100) // 初始版本号为0
 	v2 := nums.Set(v1, 1, 200)
 	nums.Set(v2, 2, 300)
 	fmt.Println(nums.Get(0, 0), nums.Get(v1, 1), nums.Get(v2, 2))

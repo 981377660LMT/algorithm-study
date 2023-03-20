@@ -30,12 +30,10 @@ type BitArray struct {
 	data []int
 }
 
-// 長さ n の 0で初期化された配列で構築する.
 func NewBitArray(n int) *BitArray {
 	return &BitArray{n: n, log: bits.Len(uint(n)), data: make([]int, n+1)}
 }
 
-// 配列で構築する.
 func NewBitArrayFrom(arr []int) *BitArray {
 	res := NewBitArray(len(arr))
 	res.Build(arr)
@@ -57,14 +55,13 @@ func (b *BitArray) Build(arr []int) {
 	}
 }
 
-// 要素 i に値 v を加える.
 func (b *BitArray) Apply(i int, v int) {
 	for i++; i <= b.n; i += i & -i {
 		b.data[i] += v
 	}
 }
 
-// [0, r) の要素の総和を求める.
+// [0, r)
 func (b *BitArray) Prod(r int) int {
 	res := int(0)
 	for ; r > 0; r -= r & -r {

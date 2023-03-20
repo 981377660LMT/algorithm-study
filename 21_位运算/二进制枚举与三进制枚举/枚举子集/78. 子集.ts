@@ -53,7 +53,7 @@ function GosperHack(n: number, k: number) {
   }
 }
 
-export { subsets }
+export {}
 
 if (require.main === module) {
   console.log(subsets([1, 2, 3]))

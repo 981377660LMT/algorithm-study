@@ -5,6 +5,8 @@ from math import ceil, floor
 
 # 1 <= nums1.length, nums2.length <= 5 * 104
 # -105 <= nums1[i], nums2[j] <= 105
+# !1 <= k <= nums1.length * nums2.length
+
 #  k很大最多 25 * 10^8
 # 第k=>二分找答案
 # 在类似题目 668. 乘法表中第k小的数 和 719. 找出第 k 小的距离对 中，经典的解法是双指针，将单次 check 的时间复杂度降低到了 O(n)O(n)

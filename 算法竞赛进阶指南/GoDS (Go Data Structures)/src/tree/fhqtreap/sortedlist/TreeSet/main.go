@@ -77,22 +77,22 @@ func (set *TreeSet) Erase(it Iterator) Iterator {
 
 // 返回一个迭代器，指向键值>= key的第一个元素。
 func (set *TreeSet) LowerBound(key Key) (Iterator, bool) {
-	lower, ok := set.tree.Ceiling(key)
+	ceiling, ok := set.tree.Ceiling(key)
 	if !ok {
 		return set.tree.Iterator(), false
 	}
-	return set.tree.IteratorAt(lower), true
+	return set.tree.IteratorAt(ceiling), true
 }
 
 // 返回一个迭代器，指向键值> key的第一个元素。
 func (set *TreeSet) UpperBound(key Key) (Iterator, bool) {
-	upper, ok := set.tree.Higher(key)
+	higher, ok := set.tree.Higher(key)
 	if !ok {
 		it := set.tree.Iterator()
 		it.End()
 		return it, false
 	}
-	return set.tree.IteratorAt(upper), true
+	return set.tree.IteratorAt(higher), true
 }
 
 func (set *TreeSet) Add(key Key) {

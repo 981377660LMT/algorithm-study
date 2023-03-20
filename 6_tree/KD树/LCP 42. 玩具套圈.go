@@ -4,8 +4,13 @@ package main
 
 import (
 	"math"
+	"runtime/debug"
 	"sort"
 )
+
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 func circleGame(toys [][]int, circles [][]int, r int) int {
 	points := make([]Point, len(circles))

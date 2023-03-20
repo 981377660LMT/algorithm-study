@@ -1,7 +1,7 @@
 /* eslint-disable generator-star-spacing */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable prefer-destructuring */
-// !有选treap
+// !有旋treap
 
 type Comparator<T, R extends 'number' | 'boolean'> = (
   a: T,

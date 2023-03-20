@@ -45,26 +45,26 @@ func main() {
 	UnionOfInterval()
 }
 
-type Item = int
+type Value = int
 
 type ODT struct {
 	Len        int // 区间数
 	Count      int // 区间元素个数之和
 	llim, rlim int
-	noneValue  Item
-	data       []Item
-	ss         *fastSet
+	noneValue  Value
+	data       []Value
+	ss         *_fastSet
 }
 
 // 指定区间长度 n 和哨兵 noneValue 建立一个 ODT.
 //  区间为[0,n).
-func NewODT(n int, noneValue Item) *ODT {
+func NewODT(n int, noneValue Value) *ODT {
 	res := &ODT{}
-	dat := make([]Item, n)
+	dat := make([]Value, n)
 	for i := 0; i < n; i++ {
 		dat[i] = noneValue
 	}
-	ss := newFastSet(n)
+	ss := _newFastSet(n)
 	ss.Insert(0)
 
 	res.rlim = n
@@ -75,7 +75,7 @@ func NewODT(n int, noneValue Item) *ODT {
 }
 
 // 返回包含 x 的区间的信息.
-func (odt *ODT) Get(x int, erase bool) (start, end int, value Item) {
+func (odt *ODT) Get(x int, erase bool) (start, end int, value Value) {
 	start, end = odt.ss.Prev(x), odt.ss.Next(x+1)
 	value = odt.data[start]
 	if erase && value != odt.noneValue {
@@ -88,8 +88,8 @@ func (odt *ODT) Get(x int, erase bool) (start, end int, value Item) {
 	return
 }
 
-func (odt *ODT) Set(start, end int, value Item) {
-	odt.EnumerateRange(start, end, func(l, r int, x Item) {}, true)
+func (odt *ODT) Set(start, end int, value Value) {
+	odt.EnumerateRange(start, end, func(l, r int, x Value) {}, true)
 	odt.ss.Insert(start)
 	odt.data[start] = value
 	if value != odt.noneValue {
@@ -100,12 +100,12 @@ func (odt *ODT) Set(start, end int, value Item) {
 	odt.mergeAt(end)
 }
 
-func (odt *ODT) EnumerateAll(f func(start, end int, value Item)) {
+func (odt *ODT) EnumerateAll(f func(start, end int, value Value)) {
 	odt.EnumerateRange(0, odt.rlim, f, false)
 }
 
 // 遍历范围 [L, R) 内的所有数据.
-func (odt *ODT) EnumerateRange(start, end int, f func(start, end int, value Item), erase bool) {
+func (odt *ODT) EnumerateRange(start, end int, f func(start, end int, value Value), erase bool) {
 	if !(odt.llim <= start && start <= end && end <= odt.rlim) {
 		panic(fmt.Sprintf("invalid range [%d, %d)", start, end))
 	}
@@ -156,7 +156,7 @@ func (odt *ODT) EnumerateRange(start, end int, f func(start, end int, value Item
 
 func (odt *ODT) String() string {
 	sb := []string{}
-	odt.EnumerateAll(func(start, end int, value Item) {
+	odt.EnumerateAll(func(start, end int, value Value) {
 		var v interface{} = value
 		if value == odt.noneValue {
 			v = "nil"
@@ -193,13 +193,13 @@ func max(a, b int) int {
 	return b
 }
 
-type fastSet struct {
+type _fastSet struct {
 	n, lg int
 	seg   [][]int
 }
 
-func newFastSet(n int) *fastSet {
-	res := &fastSet{n: n}
+func _newFastSet(n int) *_fastSet {
+	res := &_fastSet{n: n}
 	seg := [][]int{}
 	n_ := n
 	for {
@@ -214,18 +214,18 @@ func newFastSet(n int) *fastSet {
 	return res
 }
 
-func (fs *fastSet) Has(i int) bool {
+func (fs *_fastSet) Has(i int) bool {
 	return (fs.seg[0][i/64]>>(i%64))&1 != 0
 }
 
-func (fs *fastSet) Insert(i int) {
+func (fs *_fastSet) Insert(i int) {
 	for h := 0; h < fs.lg; h++ {
 		fs.seg[h][i/64] |= 1 << (i % 64)
 		i /= 64
 	}
 }
 
-func (fs *fastSet) Erase(i int) {
+func (fs *_fastSet) Erase(i int) {
 	for h := 0; h < fs.lg; h++ {
 		fs.seg[h][i/64] &= ^(1 << (i % 64))
 		if fs.seg[h][i/64] != 0 {
@@ -236,7 +236,7 @@ func (fs *fastSet) Erase(i int) {
 }
 
 // 返回大于等于i的最小元素.如果不存在,返回n.
-func (fs *fastSet) Next(i int) int {
+func (fs *_fastSet) Next(i int) int {
 	if i < 0 {
 		i = 0
 	}
@@ -267,7 +267,7 @@ func (fs *fastSet) Next(i int) int {
 }
 
 // 返回小于等于i的最大元素.如果不存在,返回-1.
-func (fs *fastSet) Prev(i int) int {
+func (fs *_fastSet) Prev(i int) int {
 	if i < 0 {
 		return -1
 	}
@@ -298,7 +298,7 @@ func (fs *fastSet) Prev(i int) int {
 }
 
 // 遍历[start,end)区间内的元素.
-func (fs *fastSet) Enumerate(start, end int, f func(i int)) {
+func (fs *_fastSet) Enumerate(start, end int, f func(i int)) {
 	x := start - 1
 	for {
 		x = fs.Next(x + 1)
@@ -309,7 +309,7 @@ func (fs *fastSet) Enumerate(start, end int, f func(i int)) {
 	}
 }
 
-func (fs *fastSet) String() string {
+func (fs *_fastSet) String() string {
 	res := []string{}
 	for i := 0; i < fs.n; i++ {
 		if fs.Has(i) {
@@ -319,10 +319,10 @@ func (fs *fastSet) String() string {
 	return fmt.Sprintf("FastSet{%v}", strings.Join(res, ", "))
 }
 
-func (*fastSet) bsr(x int) int {
+func (*_fastSet) bsr(x int) int {
 	return 63 - bits.LeadingZeros(uint(x))
 }
 
-func (*fastSet) bsf(x int) int {
+func (*_fastSet) bsf(x int) int {
 	return bits.TrailingZeros(uint(x))
 }

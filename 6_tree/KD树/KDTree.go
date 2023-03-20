@@ -1,145 +1,333 @@
-// 静态KD树查询每个点的最近点(不包含自己)
-// !注意查找最近点kdtree复杂度最坏会退化到O(n)
-// KDTree查找最近点的原理，就是在搜索过程中先近后远，
-// 然后搜索较远分支时，用已经搜索到的最近距离直接成片的剪枝
-// 从上面传过来的已知最近点，或者看做裁剪范围
-// https://baike.baidu.com/item/%E9%82%BB%E8%BF%91%E7%AE%97%E6%B3%95/1151153?fromtitle=knn&fromid=3479559&fr=aladdin
-
 package main
 
 import (
 	"bufio"
 	"fmt"
+	stdio "io"
 	"math"
 	"os"
 	"sort"
+	"strconv"
 )
 
-func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+// from https://atcoder.jp/users/ccppjsrb
+var io *Iost
 
-	var n int
-	fmt.Fscan(in, &n)
-	points := make([]Point, n)
-	for i := 0; i < n; i++ {
-		var x int
-		fmt.Fscan(in, &x)
-		points[i] = Point{x, i}
+type Iost struct {
+	Scanner *bufio.Scanner
+	Writer  *bufio.Writer
+}
+
+func NewIost(fp stdio.Reader, wfp stdio.Writer) *Iost {
+	const BufSize = 2000005
+	scanner := bufio.NewScanner(fp)
+	scanner.Split(bufio.ScanWords)
+	scanner.Buffer(make([]byte, BufSize), BufSize)
+	return &Iost{Scanner: scanner, Writer: bufio.NewWriter(wfp)}
+}
+func (io *Iost) Text() string {
+	if !io.Scanner.Scan() {
+		panic("scan failed")
+	}
+	return io.Scanner.Text()
+}
+func (io *Iost) Atoi(s string) int                 { x, _ := strconv.Atoi(s); return x }
+func (io *Iost) Atoi64(s string) int64             { x, _ := strconv.ParseInt(s, 10, 64); return x }
+func (io *Iost) Atof64(s string) float64           { x, _ := strconv.ParseFloat(s, 64); return x }
+func (io *Iost) NextInt() int                      { return io.Atoi(io.Text()) }
+func (io *Iost) NextInt64() int64                  { return io.Atoi64(io.Text()) }
+func (io *Iost) NextFloat64() float64              { return io.Atof64(io.Text()) }
+func (io *Iost) Print(x ...interface{})            { fmt.Fprint(io.Writer, x...) }
+func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x...) }
+func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
+
+func main() {
+	// https://atcoder.jp/contests/abc234/tasks/abc234_h
+	// 给定二维平面上的N个点(i, gt)和一个正整数K。
+	// 请列出所有`欧几里得距离`小于等于K的点对。
+	// 1<N<2e5，1<K<1.5×1e9。
+	// 保证最多4×1e5对点对将被枚举。
+
+	// !KDTree 先找出k*k矩形内的点, 再逐个检查是否成立
+
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	n, k := io.NextInt(), io.NextInt()
+	xs, ys := make([]int, n), make([]int, n)
+	for i := range xs {
+		xs[i], ys[i] = io.NextInt(), io.NextInt()
 	}
 
-	kdtree := NewKDTree(points, func(p1, p2 Point) float64 {
-		return math.Abs(float64(p1[0]-p2[0])) + math.Abs(float64(p1[1]-p2[1]))
+	calDist := func(x1, y1, x2, y2 int) int { return abs(x1-x2) + abs(y1-y2) }
+	kdt := NewKDTree(xs, ys, calDist)
+	xMin, xMax, yMin, yMax := INF, -INF, INF, -INF
+	for i := 0; i < n; i++ {
+		if xs[i] < xMin {
+			xMin = xs[i]
+		}
+		if xs[i] > xMax {
+			xMax = xs[i]
+		}
+		if ys[i] < yMin {
+			yMin = ys[i]
+		}
+		if ys[i] > yMax {
+			yMax = ys[i]
+		}
+	}
+
+	res := make([][2]int, 0)
+	for i := 0; i < n; i++ {
+		a, b, c, d := xs[i]-k, xs[i]+k+1, ys[i]-k, ys[i]+k+1
+		a, b, c, d = max(a, xMin), min(b, xMax+1), max(c, yMin), min(d, yMax+1)
+		cand := kdt.CollectInRectangle(a, b, c, d, -1)
+		sort.Ints(cand)
+		for _, j := range cand {
+			if i >= j {
+				continue
+			}
+			dx, dy := xs[i]-xs[j], ys[i]-ys[j]
+			if dx*dx+dy*dy <= k*k {
+				res = append(res, [2]int{i, j})
+			}
+		}
+	}
+
+	io.Println(len(res))
+	for _, p := range res {
+		io.Println(p[0]+1, p[1]+1)
+	}
+
+}
+
+func circleGame(toys [][]int, circles [][]int, r int) int {
+	points := make([]Point, len(circles))
+	for i, circle := range circles {
+		points[i] = Point{circle[0], circle[1]}
+	}
+
+	kdTree := NewKDTree(points, func(p1, p2 Point) float64 {
+		dx, dy := float64(p1[0]-p2[0]), float64(p1[1]-p2[1])
+		return math.Sqrt(dx*dx + dy*dy)
 	})
 
-	for i := 0; i < n; i++ {
-		minDist, _ := kdtree.FindNearest(points[i], float64(2*n), false)
-		fmt.Fprint(out, minDist, " ")
+	res := 0
+	for _, toy := range toys {
+		minDist, _ := kdTree.FindNearest(Point{toy[0], toy[1]}, float64(r), true)
+		if minDist+float64(toy[2]) <= float64(r) {
+			res++
+		}
 	}
+
+	return res
 }
 
-type Point []int
-
-type PointWithID struct {
-	Point
-	id int
-}
+const INF int = 1e18
 
 type KDTree struct {
-	dim     int
-	calDist func(p1, p2 Point) float64
-	root    *KDTreeNode
+	n           int
+	closedRange [][4]int
+	data        []int
+	calDist     func(x1, y1, x2, y2 int) int
 }
 
-type KDTreeNode struct {
-	pointWithId PointWithID
-	left        *KDTreeNode
-	right       *KDTreeNode
-}
-
-// 指定点集与距离计算函数，构造KDTree
-func NewKDTree(points []Point, calDist func(p1, p2 Point) float64) *KDTree {
-	if len(points) == 0 {
-		return nil
+func NewKDTree(xs, ys []int, calDist func(x1, y1, x2, y2 int) int) *KDTree {
+	n := len(xs)
+	log := 0
+	for 1<<log < n {
+		log++
 	}
-
+	data := make([]int, 1<<(log+1))
+	for i := range data {
+		data[i] = -1
+	}
+	closedRange := make([][4]int, 1<<(log+1))
+	vs := make([]int, n)
+	for i := range vs {
+		vs[i] = i
+	}
 	res := &KDTree{
-		dim:     len(points[0]),
-		calDist: calDist,
+		n:           n,
+		closedRange: closedRange,
+		data:        data,
+		calDist:     calDist,
 	}
-
-	pointsWithID := make([]PointWithID, len(points))
-	for i, point := range points {
-		pointsWithID[i] = PointWithID{point, i}
+	if n > 0 {
+		res.build(1, xs, ys, vs, true)
 	}
-	res.root = res.build(pointsWithID, 0)
 	return res
 }
 
-// !查找距离point最近的点, 返回距离和id
-//  upperBound: 从上面传过来的已知最近点，或者看做裁剪范围
-//    如果不存在距离小于upperBound的点，返回upperBound和-1
-//  allowOverlap: 是否统计距离为0的点(重合)
-//    如果allowOverlap为false，则不会统计距离为0的点
-func (kdtree *KDTree) FindNearest(point Point, upperBound float64, allowOverlap bool) (float64, int) {
-	return kdtree.findNearest(kdtree.root, point, 0, upperBound, allowOverlap)
-}
-
-func (kdtree *KDTree) build(pointsWithID []PointWithID, depth int) *KDTreeNode {
-	if len(pointsWithID) == 0 {
-		return nil
+// 返回 矩形 [x1, x2) * [y1, y2) 中的点的编号, 最多 maxSize 个.
+//  当 maxSize 为 -1 时, 返回所有点.
+func (kd *KDTree) CollectInRectangle(x1, x2, y1, y2, maxSize int) []int {
+	if x1 > x2 || y1 > y2 || kd.n == 0 {
+		return []int{}
 	}
-
-	axis := depth % kdtree.dim
-	sort.Slice(pointsWithID, func(i, j int) bool {
-		return pointsWithID[i].Point[axis] < pointsWithID[j].Point[axis]
-	})
-	mid := len(pointsWithID) / 2 // !中位数,可以用nth_element优化到O(nlogn)建树
-
-	res := &KDTreeNode{pointWithId: pointsWithID[mid]}
-	leftPoints := pointsWithID[:mid]
-	rightPoints := pointsWithID[mid+1:]
-	res.left = kdtree.build(leftPoints, depth+1)
-	res.right = kdtree.build(rightPoints, depth+1)
+	if maxSize == -1 {
+		maxSize = kd.n
+	}
+	res := []int{}
+	kd.rectRec(1, x1, x2, y1, y2, &res, maxSize)
 	return res
 }
 
-func (kdtree *KDTree) findNearest(node *KDTreeNode, target Point, depth int, upperBound float64, allowOverlap bool) (float64, int) {
-	dist := kdtree.calDist(node.pointWithId.Point, target)
-
-	if !allowOverlap && dist == 0 { // !移除自己(重合时)
-		dist = upperBound
+// 返回最近邻点的编号, -1 表示不存在最近邻点.
+// 不保证计算量的O(logn), 要求点群随机分布.
+//  n,q = 1e5 => 1s
+//  ban: 禁止的点的编号, -1 表示不禁止.
+func (kd *KDTree) SearchNearestNeighbor(x, y int, ban int) int {
+	if kd.n == 0 {
+		return -1
 	}
+	res := [2]int{-1, INF}
+	kd.nnsRec(1, x, y, &res, ban)
+	return res[0]
+}
 
-	resId := -1
-	if dist < upperBound {
-		upperBound = dist
-		resId = node.pointWithId.id
-	}
-
-	axis := depth % kdtree.dim
-	near, far := node.left, node.right
-	if target[axis] > node.pointWithId.Point[axis] {
-		near, far = far, near
-	}
-
-	if near != nil {
-		distCand1, idCand1 := kdtree.findNearest(near, target, depth+1, upperBound, allowOverlap)
-		if distCand1 < upperBound {
-			upperBound = distCand1
-			resId = idCand1
+func (kd *KDTree) build(idx int, xs, ys, vs []int, divx bool) {
+	n := len(xs)
+	xmin, xmax, ymin, ymax := &kd.closedRange[idx][0], &kd.closedRange[idx][1], &kd.closedRange[idx][2], &kd.closedRange[idx][3]
+	*xmin, *ymin = INF, INF
+	*xmax, *ymax = -INF, -INF
+	for i := 0; i < n; i++ {
+		x, y := xs[i], ys[i]
+		if x < *xmin {
+			*xmin = x
+		}
+		if x > *xmax {
+			*xmax = x
+		}
+		if y < *ymin {
+			*ymin = y
+		}
+		if y > *ymax {
+			*ymax = y
 		}
 	}
-
-	// !复杂度靠这个剪枝
-	if far != nil && upperBound > math.Abs(float64(node.pointWithId.Point[axis]-target[axis])) {
-		distCand2, idCand2 := kdtree.findNearest(far, target, depth+1, upperBound, allowOverlap)
-		if distCand2 < upperBound {
-			upperBound = distCand2
-			resId = idCand2
-		}
+	if n == 1 {
+		kd.data[idx] = vs[0]
+		return
+	}
+	m := n / 2
+	order := make([]int, n)
+	for i := 0; i < n; i++ {
+		order[i] = i
 	}
 
-	return upperBound, resId
+	if divx {
+		// nthElement(order, m, func(i, j int) bool {
+		// 	return xs[i] < xs[j]
+		// })
+		sort.Slice(order, func(i, j int) bool {
+			return xs[order[i]] < xs[order[j]]
+		})
+	} else {
+		// nthElement(order, m, func(i, j int) bool {
+		// 	return ys[i] < ys[j]
+		// })
+		sort.Slice(order, func(i, j int) bool {
+			return ys[order[i]] < ys[order[j]]
+		})
+	}
+
+	xs, ys, vs = reArrage(xs, order), reArrage(ys, order), reArrage(vs, order)
+	kd.build(2*idx, xs[:m], ys[:m], vs[:m], !divx)
+	kd.build(2*idx+1, xs[m:], ys[m:], vs[m:], !divx)
+}
+
+func (kd *KDTree) rectRec(i, x1, x2, y1, y2 int, res *[]int, ms int) {
+	if len(*res) == ms {
+		return
+	}
+	xmin, xmax, ymin, ymax := kd.closedRange[i][0], kd.closedRange[i][1], kd.closedRange[i][2], kd.closedRange[i][3]
+	if x2 <= xmin || xmax < x1 {
+		return
+	}
+	if y2 <= ymin || ymax < y1 {
+		return
+	}
+	if kd.data[i] != -1 {
+		*res = append(*res, kd.data[i])
+		return
+	}
+	kd.rectRec(2*i, x1, x2, y1, y2, res, ms)
+	kd.rectRec(2*i+1, x1, x2, y1, y2, res, ms)
+}
+
+func (kd *KDTree) bestDistSquared(i, x, y int) int {
+	if i >= len(kd.closedRange) {
+		return INF
+	}
+	xmin, xmax, ymin, ymax := kd.closedRange[i][0], kd.closedRange[i][1], kd.closedRange[i][2], kd.closedRange[i][3]
+	// clamp
+	clampedX := x
+	if clampedX < xmin {
+		clampedX = xmin
+	} else if clampedX > xmax {
+		clampedX = xmax
+	}
+	dx := x - clampedX
+	clampedY := y
+	if clampedY < ymin {
+		clampedY = ymin
+	} else if clampedY > ymax {
+		clampedY = ymax
+	}
+	dy := y - clampedY
+	return kd.calDist(0, 0, dx, dy)
+}
+
+func (kd *KDTree) nnsRec(i, x, y int, res *[2]int, ban int) {
+	d := kd.bestDistSquared(i, x, y)
+	if d >= res[1] {
+		return
+	}
+	if kd.data[i] != -1 && kd.data[i] != ban {
+		res[0], res[1] = kd.data[i], d
+		return
+	}
+	d0 := kd.bestDistSquared(2*i, x, y)
+	d1 := kd.bestDistSquared(2*i+1, x, y)
+	if d0 < d1 {
+		kd.nnsRec(2*i, x, y, res, ban)
+		kd.nnsRec(2*i+1, x, y, res, ban)
+	} else {
+		kd.nnsRec(2*i+1, x, y, res, ban)
+		kd.nnsRec(2*i, x, y, res, ban)
+	}
+}
+
+func reArrage(nums []int, order []int) []int {
+	res := make([]int, len(order))
+	for i := range order {
+		res[i] = nums[order[i]]
+	}
+	return res
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }

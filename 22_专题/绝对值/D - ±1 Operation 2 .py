@@ -12,7 +12,7 @@ Xi<=1e9
 from bisect import bisect_right
 from itertools import accumulate
 import sys
-import os
+
 from typing import List
 
 sys.setrecursionlimit(int(1e9))
@@ -20,7 +20,7 @@ input = sys.stdin.readline
 MOD = int(1e9 + 7)
 
 
-def calDistSum(sortedArray: List[int], k: int, preSum: List[int]) -> int:
+def distanceSum(sortedArray: List[int], k: int, preSum: List[int]) -> int:
     """`有序数组`所有点到x=k的绝对值距离之和
 
     排序+二分+前缀和 O(logn)
@@ -38,14 +38,4 @@ def main() -> None:
     preSum = [0] + list(accumulate(nums))
     for _ in range(q):
         x = int(input())
-        print(calDistSum(nums, x, preSum))
-
-
-if os.environ.get("USERNAME", "") == "caomeinaixi":
-    while True:
-        try:
-            main()
-        except (EOFError, ValueError):
-            break
-else:
-    main()
+        print(distanceSum(nums, x, preSum))

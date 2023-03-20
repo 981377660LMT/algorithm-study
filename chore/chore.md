@@ -352,3 +352,5 @@ const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()
 
   上面两个函数,第一个函数比第二个函数快 400ms，用 **nums.length 不声明局部变量的写法会快一些**
   这个似乎只有 js 特有,java 和 golang 查找局部变量更快,可能是 js 查变量比较慢(
+
+- golang 浅拷贝数组 append 比 copy 快

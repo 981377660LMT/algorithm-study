@@ -88,7 +88,6 @@
    - 珂朵莉树
      - [ODT64ary](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/ODT-fastset.go)
      - [ODTTreeMap](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/ODT-treemap.go)
-     - [ODTLinkedList](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/ODT-linkedlist.go)
 
 6. **Graph**
 
@@ -214,6 +213,7 @@
     - [MajorSum](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/%E5%87%BA%E7%8E%B0%E6%AC%A1%E6%95%B0%E6%9C%80%E5%A4%9A%E7%9A%84%E5%85%83%E7%B4%A0%E7%9A%84%E5%92%8C.py)
     - [RandomTree](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/Prufer%E5%BA%8F%E5%88%97.py)
     - [分治的迭代写法](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E5%88%86%E6%B2%BB%E7%9A%84%E8%BF%AD%E4%BB%A3%E5%86%99%E6%B3%95.ts)
+    - [PowerQuery](19_%E6%95%B0%E5%AD%A6/%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/PowerQuery.go)
     - [SegmentSet](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/SegmentSet.py)
     - WaveletMatrix
       - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)

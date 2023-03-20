@@ -152,7 +152,7 @@ function useMutableTypedArray(dataType: DataType, options?: Options) {
  * @param dataType {@link DataType}
  * @param options {@link Options}
  */
-function useSortedTypedArray(dataType: DataType, options?: Options) {
+function useSortedList(dataType: DataType, options?: Options) {
   const { initialCapacity = 1 << 4, arrayLike = [] } = options || {}
 
   const arrayType = ARRAYTYPE_RECORD[dataType]
@@ -274,108 +274,11 @@ function useSortedTypedArray(dataType: DataType, options?: Options) {
   }
 }
 
-/**
- * 数组实现的SortedList
- *
- * @param iterable {@link Iterable}
- * @param compareFn SortedList的比较函数
- */
-function useSortedList<E>(
-  iterable: Iterable<E> = [],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  compareFn: (a: E, b: E) => number = (a: any, b: any) => a - b
-) {
-  const _elementData: E[] = []
-  for (const item of iterable) {
-    add(item)
-  }
-
-  function at(index: number): E {
-    const newIndex = _normalizeIndex(index)
-    _rangeCheck(newIndex)
-    return _elementData[newIndex]
-  }
-
-  function pop(index = -1): E {
-    const newIndex = _normalizeIndex(index)
-    _rangeCheck(newIndex)
-    const popped = _elementData[newIndex]
-    _elementData.splice(newIndex, 1)
-    return popped
-  }
-
-  function add(value: E): void {
-    const pos = bisectLeft(value)
-    _elementData.splice(pos, 0, value)
-    _elementData[pos] = value
-  }
-
-  function bisectLeft(value: E): number {
-    let left = 0
-    let right = _elementData.length - 1
-    while (left <= right) {
-      const mid = Math.floor((left + right) / 2)
-      const midElement = _elementData[mid]
-      if (compareFn(midElement, value) < 0) {
-        left = mid + 1
-      } else {
-        right = mid - 1
-      }
-    }
-
-    return left
-  }
-
-  function bisectRight(value: E): number {
-    let left = 0
-    let right = _elementData.length - 1
-    while (left <= right) {
-      const mid = Math.floor((left + right) / 2)
-      const midElement = _elementData[mid]
-      if (compareFn(midElement, value) <= 0) {
-        left = mid + 1
-      } else {
-        right = mid - 1
-      }
-    }
-
-    return left
-  }
-
-  return {
-    at,
-    add,
-    pop,
-    bisectLeft,
-    bisectRight,
-    get length(): number {
-      return _elementData.length
-    },
-    toString(): string {
-      return _elementData.toString()
-    }
-  }
-
-  function _normalizeIndex(index: number): number {
-    if (index < 0) {
-      index += _elementData.length
-    }
-
-    return index
-  }
-
-  function _rangeCheck(index: number): void {
-    if (index < 0 || index >= _elementData.length) {
-      throw new RangeError(`index ${index} is out of range ${[0, _elementData.length - 1]}`)
-    }
-  }
-}
-
-export { useMutableTypedArray, useSortedTypedArray, useSortedList }
+export { useMutableTypedArray, useSortedList }
 
 if (require.main === module) {
   const arr = Array.from({ length: 2e5 }, () => ~~(Math.random() * 100000))
-  const sl2 = useSortedTypedArray('UINT32')
+  const sl2 = useSortedList('UINT32')
   console.time('add')
   for (const x of arr) {
     sl2.add(x)
@@ -408,7 +311,7 @@ if (require.main === module) {
 
     function check(mid: number): boolean {
       let remain = pills
-      const sl = useSortedTypedArray('INT32', { arrayLike: workers.slice(-mid) })
+      const sl = useSortedList('INT32', { arrayLike: workers.slice(-mid) })
       // const wls = useSortedList(workers.slice(-mid))
       for (let i = mid - 1; i >= 0; i--) {
         const t = tasks[i]

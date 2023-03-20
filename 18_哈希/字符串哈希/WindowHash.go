@@ -75,6 +75,7 @@ func exgcd(a, b int) (gcd, x, y int) {
 	return
 }
 
+// 模逆元,注意模为1时不存在逆元
 func modInv(a, mod int) int {
 	gcd, x, _ := exgcd(a, mod)
 	if gcd != 1 {

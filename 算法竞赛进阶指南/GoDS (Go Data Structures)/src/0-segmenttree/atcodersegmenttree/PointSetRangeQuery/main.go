@@ -51,17 +51,18 @@ func (*SegmentTree) e() E        { return INF }
 func (*SegmentTree) op(a, b E) E { return min(a, b) }
 
 type SegmentTree struct {
-	n, size int
-	seg     []E
+	n, log, size int
+	seg          []E
 }
 
 func NewSegmentTree(leaves []E) *SegmentTree {
 	res := &SegmentTree{}
 	n := len(leaves)
-	size := 1
-	for size < n {
-		size <<= 1
+	log := 1
+	for 1<<log < n {
+		log++
 	}
+	size := 1 << log
 	seg := make([]E, 2*size)
 	for i := 0; i < n; i++ {
 		seg[i+size] = leaves[i]
@@ -70,6 +71,7 @@ func NewSegmentTree(leaves []E) *SegmentTree {
 		seg[i] = res.op(seg[2*i], seg[2*i+1])
 	}
 	res.n = n
+	res.log = log
 	res.size = size
 	res.seg = seg
 	return res
@@ -184,6 +186,27 @@ func (st *SegmentTree) MinLeft(end int, predicate func(E) bool) int {
 		}
 	}
 	return 0
+}
+
+// !如果 Monoid 满足交换律(commute), 可以求出 op(nums[i xor x]...) (l<=i<r) 的值
+//  下标异或上xor的区间查询.
+func (st *SegmentTree) XorQuery(start, end, indexXor int) E {
+	x := st.e()
+	for k := 0; k < st.log+1; k++ {
+		if start >= end {
+			break
+		}
+		if start&1 == 1 {
+			x = st.op(x, st.seg[(st.size>>k)+((start)^indexXor)])
+			start++
+		}
+		if end&1 == 1 {
+			end--
+			x = st.op(x, st.seg[(st.size>>k)+((end)^indexXor)])
+		}
+		start, end, indexXor = start/2, end/2, indexXor/2
+	}
+	return x
 }
 
 func min(a, b int) int {

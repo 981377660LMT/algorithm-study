@@ -13,7 +13,7 @@ def powerset(collection: Collection[Any], isAll=True):
 
 if __name__ == "__main__":
     res = powerset([1, 2, 3, 4])
-    print(*res)
+    print(list(res))
 
 
 # chain存在的意义是什么?

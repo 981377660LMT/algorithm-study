@@ -31,23 +31,23 @@ func main() {
 	R.ReRooting(
 		func(root int) E { return E{0, 0} },
 		func(dp1, dp2 E) E {
-			return E{max(max(dp1.dia, dp2.dia), dp1.dist+dp2.dist), max(dp1.dist, dp2.dist)}
+			return E{max(max(dp1.diam, dp2.diam), dp1.dist+dp2.dist), max(dp1.dist, dp2.dist)}
 		},
 		func(dp E, edge Edge) E {
-			return E{dp.dia, dp.dist + 1}
+			return E{dp.diam, dp.dist + 1}
 		},
 	)
 
 	res := n
 	for _, e := range edges {
 		u, v := e[0], e[1]
-		dia1, dia2 := R.SubTree(u, v).dia, R.SubTree(v, u).dia
+		dia1, dia2 := R.SubTree(u, v).diam, R.SubTree(v, u).diam
 		res = min(res, max(max(dia1, dia2), (dia1+1)/2+(dia2+1)/2+1))
 	}
 	fmt.Fprintln(out, res)
 }
 
-type E = struct{ dia, dist int }
+type E = struct{ diam, dist int }
 type Edge = struct{ from, to, cost int }
 
 type ReRootingSubTree struct {
@@ -58,6 +58,7 @@ type ReRootingSubTree struct {
 	op          func(dp1, dp2 E) E
 	composition func(dp E, e Edge) E
 }
+
 type Node struct {
 	to, rev int
 	data    Edge
