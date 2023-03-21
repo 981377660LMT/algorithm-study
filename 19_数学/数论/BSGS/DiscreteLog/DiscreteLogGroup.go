@@ -1,4 +1,5 @@
-// 离散对数-群G作用 discrete_log
+// 离散对数-群G作用：
+// DiscreteLogGroup/ModLog
 // !时间复杂度 O(sqrt(mod))
 
 package main
@@ -11,6 +12,22 @@ import (
 )
 
 func main() {
+	// https://www.luogu.com.cn/problem/P4195
+	// https://judge.yosupo.jp/problem/discrete_logarithm_mod
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var T int
+	fmt.Fscan(in, &T)
+	for t := 0; t < T; t++ {
+		var x, y, m int
+		fmt.Fscan(in, &x, &y, &m)
+		fmt.Fprintln(out, ModLog(x, y, m))
+	}
+}
+
+func yuki() {
 	// https://yukicoder.me/problems/no/1339
 	// 求有理数1/n的循环节长度
 
@@ -114,26 +131,7 @@ func DiscreteLogGroup(
 	return -1
 }
 
-func exgcd(a, b int) (gcd, x, y int) {
-	if b == 0 {
-		return a, 1, 0
-	}
-	gcd, y, x = exgcd(b, a%b)
-	y -= a / b * x
-	return
-}
-
-// 模逆元，注意模为1时不存在逆元
-func modInv(a, mod int) int {
-	gcd, x, _ := exgcd(a, mod)
-	if gcd != 1 {
-		panic(fmt.Sprintf("no inverse element for %d", a))
-	}
-	return (x%mod + mod) % mod
-}
-
 // 求离散对数 a^n = b (mod m) 的最小非负整数解 n.
-// 其中模数为质数.
 //  如果不存在则返回-1.
 func ModLog(a, b, mod int) int {
 	a %= mod
@@ -178,23 +176,20 @@ func ModLog(a, b, mod int) int {
 	)
 }
 
-func testModLog() {
-	// https://www.luogu.com.cn/problem/P4195
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	for {
-		var base, p, target int
-		_, _ = fmt.Fscan(in, &base, &p, &target)
-		if base == target && target == p && p == 0 {
-			break
-		}
-		res := ModLog(base, target, p)
-		if res == -1 {
-			fmt.Fprintln(out, "No Solution")
-		} else {
-			fmt.Fprintln(out, res)
-		}
+func exgcd(a, b int) (gcd, x, y int) {
+	if b == 0 {
+		return a, 1, 0
 	}
+	gcd, y, x = exgcd(b, a%b)
+	y -= a / b * x
+	return
+}
+
+// 模逆元，注意模为1时不存在逆元
+func modInv(a, mod int) int {
+	gcd, x, _ := exgcd(a, mod)
+	if gcd != 1 {
+		panic(fmt.Sprintf("no inverse element for %d", a))
+	}
+	return (x%mod + mod) % mod
 }

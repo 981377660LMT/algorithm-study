@@ -131,12 +131,11 @@ func (sl *SortedList) merge(x, y int) int {
 }
 
 func (sl *SortedList) newNode(value Value) int {
-	newNode := &node{
+	sl.nodes = append(sl.nodes, node{
+		value:    value,
 		size:     1,
 		priority: sl.nextRand(),
-		value:    value,
-	}
-	sl.nodes = append(sl.nodes, *newNode)
+	})
 	return len(sl.nodes) - 1
 }
 

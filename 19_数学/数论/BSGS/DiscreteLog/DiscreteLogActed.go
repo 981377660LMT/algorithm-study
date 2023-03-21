@@ -1,4 +1,5 @@
-// 离散对数-群G与集合S作用 discrete_log
+// 离散对数-群G与集合S作用
+// DiscreteLogActed
 // !时间复杂度 O(sqrt(mod))
 
 // 注意几个边界:

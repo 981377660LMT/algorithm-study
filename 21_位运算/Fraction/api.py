@@ -1,4 +1,4 @@
-# python分数类Fraction
+# python分数类Fraction (没有Decimal快)
 
 
 # 获取最简化分数形式后的分子和分母

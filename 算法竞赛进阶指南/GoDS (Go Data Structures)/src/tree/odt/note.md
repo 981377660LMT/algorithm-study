@@ -1,2 +1,0 @@
-- https://www.luogu.com.cn/blog/endlesscheng/solution-cf896c
-- https://github.dev/EndlessCheng/codeforces-go/blob/3dd70515200872705893d52dc5dad174f2c3b5f3/copypasta/odt.go#L39

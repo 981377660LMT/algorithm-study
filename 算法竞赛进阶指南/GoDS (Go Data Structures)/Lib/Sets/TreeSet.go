@@ -1,19 +1,16 @@
 package sets
 
 import (
-	"fmt"
-
 	"github.com/emirpasic/gods/sets/treeset"
 )
 
-func b() {
+func ts() {
 	set := treeset.NewWithIntComparator()
-	set.Add(1)
-	set.Add(2, 2, 3, 4, -1)
-	set.Remove(1, 10)
-	set.Each(func(index int, value interface{}) {
-		fmt.Println(index, value)
-	})
-	iter := set.Iterator()
-	iter.Begin()
+	set.Add(1, 2, 3)
+	it1 := set.Iterator()
+	it2 := set.Iterator()
+	it1.Next()
+	it2.Next()
+	it2.Next()
+
 }

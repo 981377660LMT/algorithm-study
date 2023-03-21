@@ -24,7 +24,7 @@
 //  Next() Iterator
 //  Prev() Iterator
 //  ...
-
+// !和cpp不同，这里删除元素会使得所有迭代器失效
 package main
 
 import (
@@ -41,7 +41,7 @@ func main() {
 	mp.Set(Key{2, 3}, Value{4})
 	mp.Set(Key{1, 3}, Value{4})
 	mp.Set(Key{2, 4}, Value{5})
-	it, _ := mp.LowerBound(Key{2, 0})
+	it := mp.LowerBound(Key{2, 0})
 	fmt.Println(it.Key(), it.Value())
 	nit := mp.Erase(it)
 	fmt.Println(nit.Key(), nit.Value())
@@ -158,23 +158,25 @@ func (m *TreeMap) Erase(it Iterator) Iterator {
 }
 
 // 返回一个迭代器，指向键值>= key的第一个元素。
-func (m *TreeMap) LowerBound(key Key) (Iterator, bool) {
+func (m *TreeMap) LowerBound(key Key) Iterator {
 	lower, ok := m.tree.Ceiling(key)
 	if !ok {
-		return m.tree.Iterator(), false
+		it := m.tree.Iterator()
+		it.End()
+		return it
 	}
-	return m.tree.IteratorAt(lower), true
+	return m.tree.IteratorAt(lower)
 }
 
 // 返回一个迭代器，指向键值> key的第一个元素。
-func (m *TreeMap) UpperBound(key Key) (Iterator, bool) {
+func (m *TreeMap) UpperBound(key Key) Iterator {
 	upper, ok := m.tree.Higher(key)
 	if !ok {
 		it := m.tree.Iterator()
 		it.End()
-		return it, false
+		return it
 	}
-	return m.tree.IteratorAt(upper), true
+	return m.tree.IteratorAt(upper)
 }
 
 func (m *TreeMap) String() string {

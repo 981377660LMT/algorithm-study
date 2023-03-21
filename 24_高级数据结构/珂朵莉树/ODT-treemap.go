@@ -59,8 +59,8 @@ func NewIntervals(noneValue Value) *Intervals {
 
 // 返回包含 x 的区间的信息.
 func (odt *Intervals) Get(x int, erase bool) (start, end int, value Value) {
-	iter, _ := odt.mp.UpperBound(x)
-	end, _ = iter.Key(), iter.Value()
+	iter := odt.mp.UpperBound(x)
+	end = iter.Value()
 	iter.Prev()
 	start, value = iter.Key(), iter.Value()
 	if erase && value != odt.noneValue {
@@ -98,7 +98,7 @@ func (odt *Intervals) EnumerateRange(start, end int, f func(start, end int, valu
 	NONE := odt.noneValue
 
 	if !erase {
-		it1, _ := odt.mp.UpperBound(start)
+		it1 := odt.mp.UpperBound(start)
 		it1.Prev()
 		for {
 			key1, val1 := it1.Key(), it1.Value()
@@ -112,7 +112,7 @@ func (odt *Intervals) EnumerateRange(start, end int, f func(start, end int, valu
 		return
 	}
 
-	iter1, _ := odt.mp.UpperBound(start)
+	iter1 := odt.mp.UpperBound(start)
 	iter1.Prev()
 	if key1, val1 := iter1.Key(), iter1.Value(); key1 < start {
 		odt.mp.Set(start, val1)
@@ -122,7 +122,7 @@ func (odt *Intervals) EnumerateRange(start, end int, f func(start, end int, valu
 	}
 
 	// 分割区间
-	iter1, _ = odt.mp.LowerBound(end)
+	iter1 = odt.mp.LowerBound(end)
 	if key1 := iter1.Key(); key1 > end {
 		iter1.Prev()
 		val2 := iter1.Value()
@@ -132,7 +132,7 @@ func (odt *Intervals) EnumerateRange(start, end int, f func(start, end int, valu
 		}
 	}
 
-	iter1, _ = odt.mp.LowerBound(start)
+	iter1 = odt.mp.LowerBound(start)
 	for {
 		key1, val1 := iter1.Key(), iter1.Value()
 		if key1 >= end {
@@ -166,7 +166,7 @@ func (odt *Intervals) mergeAt(p int) {
 	if p == -INF || p == INF {
 		return
 	}
-	iter1, _ := odt.mp.LowerBound(p)
+	iter1 := odt.mp.LowerBound(p)
 	val1 := iter1.Value()
 	iter1.Prev()
 	val2 := iter1.Value()
@@ -266,23 +266,25 @@ func (m *TreeMap) Erase(it Iterator) Iterator {
 }
 
 // 返回一个迭代器，指向键值>= key的第一个元素。
-func (m *TreeMap) LowerBound(key int) (Iterator, bool) {
+func (m *TreeMap) LowerBound(key int) Iterator {
 	lower, ok := m.tree.Ceiling(key)
 	if !ok {
-		return m.tree.Iterator(), false
+		it := m.tree.Iterator()
+		it.End()
+		return it
 	}
-	return m.tree.IteratorAt(lower), true
+	return m.tree.IteratorAt(lower)
 }
 
 // 返回一个迭代器，指向键值> key的第一个元素。
-func (m *TreeMap) UpperBound(key int) (Iterator, bool) {
+func (m *TreeMap) UpperBound(key int) Iterator {
 	upper, ok := m.tree.Higher(key)
 	if !ok {
 		it := m.tree.Iterator()
 		it.End()
-		return it, false
+		return it
 	}
-	return m.tree.IteratorAt(upper), true
+	return m.tree.IteratorAt(upper)
 }
 
 func (m *TreeMap) String() string {
@@ -369,10 +371,6 @@ func (tree *_Tree) Get(key int) (value Value, found bool) {
 	return
 }
 
-func (tree *_Tree) GetNode(key int) *_RBNode {
-	return tree.lookup(key)
-}
-
 func (tree *_Tree) Discard(key int) bool {
 	node := tree.lookup(key)
 	return tree.DiscardNode(node)
@@ -429,24 +427,6 @@ func (node *_RBNode) Size() int {
 		size += node.Right.Size()
 	}
 	return size
-}
-
-func (tree *_Tree) Keys() []int {
-	keys := make([]int, tree.size)
-	it := tree.Iterator()
-	for i := 0; it.Next(); i++ {
-		keys[i] = it.Key()
-	}
-	return keys
-}
-
-func (tree *_Tree) Values() []Value {
-	values := make([]Value, tree.size)
-	it := tree.Iterator()
-	for i := 0; it.Next(); i++ {
-		values[i] = it.Value()
-	}
-	return values
 }
 
 // Left returns the left-most (min) node or nil if tree is empty.
@@ -944,24 +924,4 @@ func (iterator *Iterator) First() bool {
 func (iterator *Iterator) Last() bool {
 	iterator.End()
 	return iterator.Prev()
-}
-
-func (iterator *Iterator) NextTo(f func(key int, value Value) bool) bool {
-	for iterator.Next() {
-		key, value := iterator.Key(), iterator.Value()
-		if f(key, value) {
-			return true
-		}
-	}
-	return false
-}
-
-func (iterator *Iterator) PrevTo(f func(key int, value Value) bool) bool {
-	for iterator.Prev() {
-		key, value := iterator.Key(), iterator.Value()
-		if f(key, value) {
-			return true
-		}
-	}
-	return false
 }

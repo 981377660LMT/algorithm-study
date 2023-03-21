@@ -1,67 +1,31 @@
 // manhattanmst
-// F - Permutation Distance-曼哈顿最小生成树
-// 曼哈顿距离最小生成树
-// 给定 对1-n的排列perm n<=2e5
-// !对每个i 求出 abs(perm[i]-perm[j])+abs(i-j) (i!=j) 的最小值
+// 曼哈顿距离最小生成树/曼哈顿最小生成树
 
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"math"
-	"os"
 	"sort"
 )
 
-const INF int = 1e18
-
-type Point struct{ x, y int }
-
-func permutationDistance(perm []int) []int {
-	n := len(perm)
-	res := make([]int, n)
-	for i := 0; i < n; i++ {
-		res[i] = INF
+// https://leetcode.cn/problems/min-cost-to-connect-all-points/
+func minCostConnectPoints(points [][]int) int {
+	myPoints := make([]Point, len(points))
+	for i, p := range points {
+		myPoints[i] = Point{p[0], p[1]}
 	}
-	points := make([]Point, n)
-	for i := range perm {
-		points[i] = Point{perm[i], i + 1}
-	}
-	_, mstEdges := manhattanMST(points)
-	for _, e := range mstEdges {
-		v, w := e.v, e.w
-		cost := abs(points[v].x-points[w].x) + abs(points[v].y-points[w].y)
-		res[v] = min(res[v], cost)
-		res[w] = min(res[w], cost)
-	}
+	res, _ := manhattanMST(myPoints)
 	return res
 }
 
-func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	perm := make([]int, n)
-	for i := range perm {
-		fmt.Fscan(in, &perm[i])
-	}
-
-	res := permutationDistance(perm)
-	for _, v := range res {
-		fmt.Fprint(out, v, " ")
-	}
-}
+type Point [2]int
 
 // https://github.dev/EndlessCheng/codeforces-go/blob/a0733fa7a046673ff42a058b0dca7852646fbf3b/copypasta/graph.go#L1835
-func manhattanMST(points []Point) (mst int, mstEdges []struct{ v, w int }) {
+func manhattanMST(points []Point) (mst int, mstEdges [][2]int) {
 	n := len(points)
 	pointsCopy := make([]struct{ x, y, i int }, n)
 	for i, p := range points {
-		pointsCopy[i] = struct{ x, y, i int }{p.x, p.y, i}
+		pointsCopy[i] = struct{ x, y, i int }{p[0], p[1], i}
 	}
 
 	type edge struct{ v, w, dis int }
@@ -120,7 +84,7 @@ func manhattanMST(points []Point) (mst int, mstEdges []struct{ v, w int }) {
 	for _, e := range edges {
 		if uf.union(e.v, e.w) {
 			mst += e.dis
-			mstEdges = append(mstEdges, struct{ v, w int }{e.v, e.w})
+			mstEdges = append(mstEdges, [2]int{e.v, e.w})
 			left--
 			if left == 0 {
 				break
@@ -144,13 +108,13 @@ func newUnionFindArray(n int) *unionFindArray {
 		rank[i] = 1
 	}
 	return &unionFindArray{
-		rank:   rank,
+		Rank:   rank,
 		parent: parent,
 	}
 }
 
 type unionFindArray struct {
-	rank   []int
+	Rank   []int
 	parent []int
 }
 
@@ -159,11 +123,11 @@ func (ufa *unionFindArray) union(key1, key2 int) bool {
 	if root1 == root2 {
 		return false
 	}
-	if ufa.rank[root1] > ufa.rank[root2] {
+	if ufa.Rank[root1] > ufa.Rank[root2] {
 		root1, root2 = root2, root1
 	}
 	ufa.parent[root1] = root2
-	ufa.rank[root2] += ufa.rank[root1]
+	ufa.Rank[root2] += ufa.Rank[root1]
 	return true
 }
 

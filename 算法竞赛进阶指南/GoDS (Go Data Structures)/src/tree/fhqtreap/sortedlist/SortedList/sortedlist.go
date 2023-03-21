@@ -290,12 +290,11 @@ func (sl *SortedList) inOrder(root int, res *[]Value) {
 }
 
 func (sl *SortedList) newNode(value Value) int {
-	node := &node{
+	sl.nodes = append(sl.nodes, node{
 		value:    value,
 		size:     1,
 		priority: sl.nextRand(),
-	}
-	sl.nodes = append(sl.nodes, *node)
+	})
 	return len(sl.nodes) - 1
 }
 

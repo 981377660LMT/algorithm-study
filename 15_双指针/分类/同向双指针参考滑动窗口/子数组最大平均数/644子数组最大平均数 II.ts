@@ -7,9 +7,9 @@
  * 答案误差不超过1e-5是使用二分搜索的提示
  * 二分 nlog(max-min)
  * @description 二分答案法
- * @summary 二分 子数组 前缀和
+ * @summary 二分 子数组 前缀和 644. 子数组最大平均数 II
  */
-const findMaxAverage = function (nums: number[], k: number): number {
+function findMaxAverage(nums: number[], k: number): number {
   let l = Math.min(...nums)
   let r = Math.max(...nums)
 
@@ -40,3 +40,4 @@ const findMaxAverage = function (nums: number[], k: number): number {
 }
 
 console.log(findMaxAverage([1, 12, -5, -6, 50, 3], 4))
+export {}

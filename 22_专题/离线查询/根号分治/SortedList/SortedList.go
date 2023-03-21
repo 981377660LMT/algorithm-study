@@ -40,15 +40,7 @@ func main() {
 	sl := NewSortedList(func(a, b S) bool { return a[0] < b[0] }, nil)
 	sl.Add([2]int{2, 3})
 	sl.Add([2]int{1, 2})
-	it := sl.Insert([2]int{3, 4})
-	fmt.Println(sl.Has([2]int{1, 2}), it.Value())
-	fmt.Println(it.Value())
-	it.First()
-	fmt.Println(it.Value())
-	it = sl.Erase(it)
-	fmt.Println(it.Value(), sl)
-	it = sl.Erase(it)
-	fmt.Println(it.Value(), sl)
+	fmt.Println(sl.Pop(0))
 }
 
 type S = [2]int
@@ -76,12 +68,6 @@ func NewSortedList(less func(a, b S) bool, items []S) *SortedList {
 const (
 	_BLOCK_RATIO   = 25
 	_REBUILD_RATIO = 70
-)
-
-type _positon byte
-
-const (
-	_begin, _between, _end = 0, 1, 2
 )
 
 func (sl *SortedList) Add(value S) {
@@ -328,179 +314,6 @@ func (sl *SortedList) _findBlockIndex(x S) int {
 		}
 	}
 	return -1
-}
-
-type Iterator struct {
-	blocks   [][]S
-	bid      int
-	pos      int
-	position _positon
-}
-
-func (sl *SortedList) Iterator() Iterator {
-	return Iterator{blocks: sl.blocks, bid: 0, pos: -1, position: _begin}
-}
-
-func (sl *SortedList) IteratorAt(bid, pos int) Iterator {
-	return Iterator{blocks: sl.blocks, bid: bid, pos: pos, position: _between}
-}
-
-func (iterator *Iterator) Next() bool {
-	if iterator.position == _end {
-		goto end
-	}
-
-	if nextPos := iterator.pos + 1; nextPos >= len(iterator.blocks[iterator.bid]) {
-		nextBid := iterator.bid + 1
-		if nextBid >= len(iterator.blocks) {
-			goto end
-		}
-		iterator.bid = nextBid
-		iterator.pos = 0
-		goto between
-	} else {
-		iterator.pos = nextPos
-		goto between
-	}
-
-end:
-	iterator.bid = len(iterator.blocks)
-	iterator.pos = 0
-	iterator.position = _end
-	return false
-between:
-	iterator.position = _between
-	return true
-
-}
-
-func (iterator *Iterator) Prev() bool {
-	if iterator.position == _begin {
-		goto begin
-	}
-
-	if prevPos := iterator.pos - 1; prevPos < 0 {
-		prevBid := iterator.bid - 1
-		if prevBid < 0 {
-			goto begin
-		}
-		iterator.bid = prevBid
-		iterator.pos = len(iterator.blocks[iterator.bid]) - 1
-		goto between
-	} else {
-		iterator.pos = prevPos
-		goto between
-	}
-
-begin:
-	iterator.bid = 0
-	iterator.pos = -1
-	iterator.position = _begin
-	return false
-between:
-	iterator.position = _between
-	return true
-}
-
-func (iterator *Iterator) Value() S {
-	return iterator.blocks[iterator.bid][iterator.pos]
-}
-
-func (iterator *Iterator) Begin() {
-	iterator.bid = 0
-	iterator.pos = -1
-	iterator.position = _begin
-}
-
-func (iterator *Iterator) End() {
-	iterator.bid = len(iterator.blocks)
-	iterator.pos = 0
-	iterator.position = _end
-}
-
-func (iterator *Iterator) First() bool {
-	iterator.Begin()
-	return iterator.Next()
-}
-
-func (iterator *Iterator) Last() bool {
-	iterator.End()
-	return iterator.Prev()
-}
-
-func (it *Iterator) IsBegin() bool {
-	return it.position == _begin
-}
-
-func (it *Iterator) IsEnd() bool {
-	return it.position == _end
-}
-
-func (it *Iterator) IsFirst() bool {
-	return it.bid == 0 && it.pos == 0
-}
-
-func (it *Iterator) IsLast() bool {
-	return it.bid == len(it.blocks)-1 && it.pos == len(it.blocks[it.bid])-1
-}
-
-// 返回删除元素的后继元素的迭代器，如果删除的是最后一个元素，则返回end()迭代器。
-func (sl *SortedList) Erase(it Iterator) Iterator {
-	if it.position != _between {
-		return it
-	}
-	value := it.Value()
-	sl.Discard(value)
-	return it
-}
-
-func (sl *SortedList) Insert(value S) Iterator {
-	if sl.size == 0 {
-		sl.blocks = append(sl.blocks[:0], []S{value})
-		sl.size = 1
-		return sl.IteratorAt(0, 0)
-	}
-
-	hitIndex := sl._findBlockIndex(value)
-	if hitIndex == -1 {
-		sl.blocks[len(sl.blocks)-1] = append(sl.blocks[len(sl.blocks)-1], value)
-		sl.size++
-		if len(sl.blocks[len(sl.blocks)-1]) > _REBUILD_RATIO*len(sl.blocks) {
-			sl.rebuild()
-		}
-		return sl.IteratorAt(len(sl.blocks)-1, len(sl.blocks[len(sl.blocks)-1])-1)
-	}
-
-	hitted := sl.blocks[hitIndex]
-	pos := sl._bisectRight(hitted, value)
-	sl.blocks[hitIndex] = append(hitted[:pos], append([]S{value}, hitted[pos:]...)...)
-	sl.size++
-	if len(hitted) > _REBUILD_RATIO*len(sl.blocks) {
-		sl.rebuild()
-	}
-	return sl.IteratorAt(hitIndex, pos)
-}
-
-// 返回一个迭代器，指向键值>= value的第一个元素。
-func (sl *SortedList) LowerBound(value S) (Iterator, bool) {
-	for i, block := range sl.blocks {
-		if !sl.less(block[len(block)-1], value) {
-			pos := sl._bisectLeft(block, value)
-			return sl.IteratorAt(i, pos), true
-		}
-	}
-	return sl.Iterator(), false
-}
-
-// 返回一个迭代器，指向键值> value的第一个元素。
-func (sl *SortedList) UpperBound(value S) (Iterator, bool) {
-	for i, block := range sl.blocks {
-		if sl.less(value, block[len(block)-1]) {
-			pos := sl._bisectRight(block, value)
-			return sl.IteratorAt(i, pos), true
-		}
-	}
-	return sl.Iterator(), false
 }
 
 func min(a, b int) int {

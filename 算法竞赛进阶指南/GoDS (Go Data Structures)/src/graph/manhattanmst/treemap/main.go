@@ -1,102 +1,101 @@
-// 注意cpp里的迭代器:
-// !Begin指向第一个元素,
-// !End指向最后一个元素的下一个位置,
-// 这里的迭代器设计为:
-// !Begin指向第一个元素的前一个位置,First指向第一个元素
-// !Last指向最后一个元素,End指向最后一个元素的下一个位置
-
-// !和cpp不同，这里删除元素会使得所有迭代器失效
+// 比树状数组快一些
 
 package main
 
 import (
-	"fmt"
-	"strings"
+	"sort"
 )
 
-func main() {
-	// set := NewTreeSet(func(a, b Key) int {
-	// 	return a[0] - b[0]
-	// })
-	// for i := 10; i > 0; i-- {
-	// 	set.Add(Key{i, i})
-	// }
-	// fmt.Println(set)
-
-	// it := set.Iterator()
-	// it.Next()
-	// it.Next()
-
-	// // it := set.LowerBound(Key{5, 0})
-	// fmt.Println(it.Key())
-	// set.Discard(Key{5, 0}) // 迭代器失效
-	// fmt.Println(set, it.Key())
-	// // it = set.UpperBound(Key{15, 0})
-
-	// if it.Next() { // 不等于end,并向后移动
-	// 	fmt.Println(it.Key())
-	// }
-	// if it.Prev() { // 不等于begin,并向前移动
-	// 	fmt.Println(it.Key())
-	// }
-	// fmt.Println(it.Key(), set)
-	// set.Erase(it)
-	// fmt.Println(it.Key(), set)
-
-	// it2, ok := set.LowerBound(Key{3, 0})
-	// fmt.Println(it2.Key(), ok) // 3 true
-	// it2, ok = set.UpperBound(Key{3, 0})
-	// fmt.Println(it2.Key(), ok) // 4 true
-
-	// fmt.Println(it2.Key(), set)
-	// it2 = set.Erase(it2)
-	// fmt.Println(it2.Key(), set)
-	s := NewTreeSet(func(a, b Key) int {
-		return a[0] - b[0]
-	})
-	s.Add(Key{1, 1})
-	s.Add(Key{2, 2})
-	s.Add(Key{3, 3})
-	it1 := s.Iterator()
-	it2 := s.Iterator()
-	it1.Next()
-	it2.Next()
-	it2.Next()
-	it2 = s.Erase(it2)
-	fmt.Println(it1.Key(), it2.Key())
-	it1.Next()
-	fmt.Println(it1.Key())
-
+// https://leetcode.cn/problems/min-cost-to-connect-all-points/
+func minCostConnectPoints(points [][]int) int {
+	myPoints := make([][2]int, len(points))
+	for i, p := range points {
+		myPoints[i] = [2]int{p[0], p[1]}
+	}
+	res, _ := ManhattanMST(myPoints)
+	return res
 }
 
-type Key = [2]int
-type Value = struct{}
+// 曼哈顿最小生成树
+func ManhattanMST(points [][2]int) (mst int, mstEdges [][2]int) {
+	points = append(points[:0:0], points...)
+	n := len(points)
+	data := make([][3]int, 0, 4*n)
+	idx := make([]int, n)
+	for i := range idx {
+		idx[i] = i
+	}
 
-type TreeSet struct {
+	for a := 0; a < 2; a++ {
+		for i := range points {
+			points[i][0] = -points[i][0]
+		}
+		for b := 0; b < 2; b++ {
+			for i := range points {
+				points[i][0], points[i][1] = points[i][1], points[i][0]
+			}
+			sort.Slice(idx, func(i, j int) bool {
+				return points[idx[i]][0]+points[idx[i]][1] < points[idx[j]][0]+points[idx[j]][1]
+			})
+
+			mp := NTM(func(a, b int) int { return a - b })
+			for _, i := range idx {
+				x, y := points[i][0], points[i][1]
+				for it := mp.LowerBound(-y); !it.IsEnd(); it = mp.Erase(it) {
+					j := it.Value()
+					xj, yj := points[j][0], points[j][1]
+					dx, dy := x-xj, y-yj
+					if dy > dx {
+						break
+					}
+					data = append(data, [3]int{dx + dy, i, j})
+				}
+				mp.Set(-y, i)
+			}
+		}
+	}
+
+	sort.Slice(data, func(i, j int) bool { return data[i][0] < data[j][0] })
+	uf := _nuf(n)
+	for _, e := range data {
+		cost, i, j := e[0], e[1], e[2]
+		if uf.Union(i, j) {
+			mst += cost
+			mstEdges = append(mstEdges, [2]int{i, j})
+		}
+	}
+	return
+}
+
+type Key = int
+type Value = int
+
+type TM struct {
 	tree *_Tree
 }
 
-var _itemExists = struct{}{}
-
-func NewTreeSet(comparator func(a, b Key) int) *TreeSet {
-	set := &TreeSet{tree: _NewRedBlackTree(comparator)}
-	return set
+func NTM(comparator func(a, b Key) int) *TM {
+	return &TM{tree: _NewRedBlackTree(comparator)}
 }
 
-func (set *TreeSet) Iterator() Iterator {
-	return set.tree.Iterator()
+func (m *TM) Set(key Key, value Value) {
+	m.tree.Put(key, value)
+}
+
+func (m *TM) Iterator() Iterator {
+	return m.tree.Iterator()
 }
 
 // 返回删除元素的后继元素的迭代器，如果删除的是最后一个元素，则返回end()迭代器。
-func (set *TreeSet) Erase(it Iterator) Iterator {
+func (m *TM) Erase(it Iterator) Iterator {
 	node := it.node
 	it.Next()
-	set.tree.DiscardNode(node)
+	m.tree.DiscardNode(node)
 	return it
 }
 
 // 返回一个迭代器，指向键值>= key的第一个元素。
-func (m *TreeSet) LowerBound(key Key) Iterator {
+func (m *TM) LowerBound(key Key) Iterator {
 	lower, ok := m.tree.Ceiling(key)
 	if !ok {
 		it := m.tree.Iterator()
@@ -104,106 +103,6 @@ func (m *TreeSet) LowerBound(key Key) Iterator {
 		return it
 	}
 	return m.tree.IteratorAt(lower)
-}
-
-// 返回一个迭代器，指向键值> key的第一个元素。
-func (m *TreeSet) UpperBound(key Key) Iterator {
-	upper, ok := m.tree.Higher(key)
-	if !ok {
-		it := m.tree.Iterator()
-		it.End()
-		return it
-	}
-	return m.tree.IteratorAt(upper)
-}
-
-func (set *TreeSet) Add(key Key) {
-	set.tree.Put(key, _itemExists)
-}
-
-func (set *TreeSet) Discard(key Key) bool {
-	return set.tree.Discard(key)
-}
-
-func (set *TreeSet) Has(key Key) bool {
-	if _, contains := set.tree.Get(key); !contains {
-		return false
-	}
-	return true
-}
-
-func (set *TreeSet) Min() (key Key, ok bool) {
-	if node := set.tree.Left(); node != nil {
-		return node.Key, true
-	}
-	return
-}
-
-func (set *TreeSet) Max() (key Key, ok bool) {
-	if node := set.tree.Right(); node != nil {
-		return node.Key, true
-	}
-	return
-}
-
-func (set *TreeSet) Ceiling(key Key) (ceiling Key, ok bool) {
-	if node, contains := set.tree.Ceiling(key); contains {
-		return node.Key, true
-	}
-	return
-}
-
-func (set *TreeSet) Floor(key Key) (floor Key, ok bool) {
-	if node, contains := set.tree.Floor(key); contains {
-		return node.Key, true
-	}
-	return
-}
-
-func (set *TreeSet) Higher(key Key) (higher Key, ok bool) {
-	if node, contains := set.tree.Higher(key); contains {
-		return node.Key, true
-	}
-	return
-}
-
-func (set *TreeSet) Lower(key Key) (lower Key, ok bool) {
-	if node, contains := set.tree.Lower(key); contains {
-		return node.Key, true
-	}
-	return
-}
-
-func (set *TreeSet) ForEach(f func(key Key)) {
-	iterator := set.Iterator()
-	for iterator.Next() {
-		f(iterator.Key())
-	}
-}
-
-func (set *TreeSet) Empty() bool {
-	return set.tree.Size() == 0
-}
-
-func (set *TreeSet) Size() int {
-	return set.tree.Size()
-}
-
-func (set *TreeSet) Clear() {
-	set.tree.Clear()
-}
-
-func (set *TreeSet) Keys() []Key {
-	return set.tree.Keys()
-}
-
-// String returns a string representation of container
-func (set *TreeSet) String() string {
-	items := []string{}
-	for _, v := range set.tree.Keys() {
-		items = append(items, fmt.Sprintf("%v", v))
-	}
-	return fmt.Sprintf("TreeSet{%s}", strings.Join(items, ", "))
 }
 
 // !region RedBlackTree
@@ -278,23 +177,6 @@ func (tree *_Tree) Put(key Key, value Value) {
 	tree.size++
 }
 
-func (tree *_Tree) Get(key Key) (value Value, found bool) {
-	node := tree.lookup(key)
-	if node != nil {
-		return node.Value, true
-	}
-	return
-}
-
-func (tree *_Tree) GetNode(key Key) *_RBNode {
-	return tree.lookup(key)
-}
-
-func (tree *_Tree) Discard(key Key) bool {
-	node := tree.lookup(key)
-	return tree.DiscardNode(node)
-}
-
 func (tree *_Tree) DiscardNode(node *_RBNode) bool {
 	if node == nil {
 		return false
@@ -326,46 +208,6 @@ func (tree *_Tree) DiscardNode(node *_RBNode) bool {
 	return true
 }
 
-func (tree *_Tree) Empty() bool {
-	return tree.size == 0
-}
-
-func (tree *_Tree) Size() int {
-	return tree.size
-}
-
-func (node *_RBNode) Size() int {
-	if node == nil {
-		return 0
-	}
-	size := 1
-	if node.Left != nil {
-		size += node.Left.Size()
-	}
-	if node.Right != nil {
-		size += node.Right.Size()
-	}
-	return size
-}
-
-func (tree *_Tree) Keys() []Key {
-	keys := make([]Key, tree.size)
-	it := tree.Iterator()
-	for i := 0; it.Next(); i++ {
-		keys[i] = it.Key()
-	}
-	return keys
-}
-
-func (tree *_Tree) Values() []Value {
-	values := make([]Value, tree.size)
-	it := tree.Iterator()
-	for i := 0; it.Next(); i++ {
-		values[i] = it.Value()
-	}
-	return values
-}
-
 // Left returns the left-most (min) node or nil if tree is empty.
 func (tree *_Tree) Left() *_RBNode {
 	var parent *_RBNode
@@ -375,57 +217,6 @@ func (tree *_Tree) Left() *_RBNode {
 		current = current.Left
 	}
 	return parent
-}
-
-// Right returns the right-most (max) node or nil if tree is empty.
-func (tree *_Tree) Right() *_RBNode {
-	var parent *_RBNode
-	current := tree.Root
-	for current != nil {
-		parent = current
-		current = current.Right
-	}
-	return parent
-}
-
-func (tree *_Tree) Floor(key Key) (floor *_RBNode, found bool) {
-	found = false
-	node := tree.Root
-	for node != nil {
-		compare := tree.Comparator(key, node.Key)
-		switch {
-		case compare == 0:
-			return node, true
-		case compare < 0:
-			node = node.Left
-		case compare > 0:
-			floor, found = node, true
-			node = node.Right
-		}
-	}
-	if found {
-		return floor, true
-	}
-	return nil, false
-}
-
-func (tree *_Tree) Lower(key Key) (lower *_RBNode, found bool) {
-	found = false
-	node := tree.Root
-	for node != nil {
-		compare := tree.Comparator(key, node.Key)
-		switch {
-		case compare <= 0:
-			node = node.Left
-		case compare > 0:
-			lower, found = node, true
-			node = node.Right
-		}
-	}
-	if found {
-		return lower, true
-	}
-	return nil, false
 }
 
 func (tree *_Tree) Ceiling(key Key) (ceiling *_RBNode, found bool) {
@@ -466,51 +257,6 @@ func (tree *_Tree) Higher(key Key) (higher *_RBNode, found bool) {
 		return higher, true
 	}
 	return nil, false
-}
-
-func (tree *_Tree) Clear() {
-	tree.Root = nil
-	tree.size = 0
-}
-
-func (tree *_Tree) String() string {
-	str := "RedBlackTree\n"
-	if !tree.Empty() {
-		output(tree.Root, "", true, &str)
-	}
-	return str
-}
-
-func (node *_RBNode) String() string {
-	return fmt.Sprintf("%v", node.Key)
-}
-
-func output(node *_RBNode, prefix string, isTail bool, str *string) {
-	if node.Right != nil {
-		newPrefix := prefix
-		if isTail {
-			newPrefix += "│   "
-		} else {
-			newPrefix += "    "
-		}
-		output(node.Right, newPrefix, false, str)
-	}
-	*str += prefix
-	if isTail {
-		*str += "└── "
-	} else {
-		*str += "┌── "
-	}
-	*str += node.String() + "\n"
-	if node.Left != nil {
-		newPrefix := prefix
-		if isTail {
-			newPrefix += "    "
-		} else {
-			newPrefix += "│   "
-		}
-		output(node.Left, newPrefix, true, str)
-	}
 }
 
 func (tree *_Tree) lookup(key Key) *_RBNode {
@@ -794,58 +540,8 @@ between:
 	return true
 }
 
-func (iterator *Iterator) Prev() bool {
-	if iterator.position == begin {
-		goto begin
-	}
-	if iterator.position == end {
-		right := iterator.tree.Right()
-		if right == nil {
-			goto begin
-		}
-		iterator.node = right
-		goto between
-	}
-	if iterator.node.Left != nil {
-		iterator.node = iterator.node.Left
-		for iterator.node.Right != nil {
-			iterator.node = iterator.node.Right
-		}
-		goto between
-	}
-	for iterator.node.Parent != nil {
-		node := iterator.node
-		iterator.node = iterator.node.Parent
-		if node == iterator.node.Right {
-			goto between
-		}
-	}
-
-begin:
-	iterator.node = nil
-	iterator.position = begin
-	return false
-
-between:
-	iterator.position = between
-	return true
-}
-
 func (iterator *Iterator) Value() Value {
 	return iterator.node.Value
-}
-
-func (iterator *Iterator) Key() Key {
-	return iterator.node.Key
-}
-
-func (iterator *Iterator) Node() *_RBNode {
-	return iterator.node
-}
-
-func (iterator *Iterator) Begin() {
-	iterator.node = nil
-	iterator.position = begin
 }
 
 func (iterator *Iterator) End() {
@@ -853,12 +549,50 @@ func (iterator *Iterator) End() {
 	iterator.position = end
 }
 
-func (iterator *Iterator) First() bool {
-	iterator.Begin()
-	return iterator.Next()
+func (iterator *Iterator) IsEnd() bool {
+	return iterator.position == end
 }
 
-func (iterator *Iterator) Last() bool {
-	iterator.End()
-	return iterator.Prev()
+func _nuf(n int) *_uf {
+	parent, rank := make([]int, n), make([]int, n)
+	for i := 0; i < n; i++ {
+		parent[i] = i
+		rank[i] = 1
+	}
+
+	return &_uf{
+		Part:   n,
+		size:   n,
+		rank:   rank,
+		parent: parent,
+	}
+}
+
+type _uf struct {
+	Part   int
+	size   int
+	rank   []int
+	parent []int
+}
+
+func (ufa *_uf) Union(key1, key2 int) bool {
+	root1, root2 := ufa.Find(key1), ufa.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+	if ufa.rank[root1] > ufa.rank[root2] {
+		root1, root2 = root2, root1
+	}
+	ufa.parent[root1] = root2
+	ufa.rank[root2] += ufa.rank[root1]
+	ufa.Part--
+	return true
+}
+
+func (ufa *_uf) Find(key int) int {
+	for ufa.parent[key] != key {
+		ufa.parent[key] = ufa.parent[ufa.parent[key]]
+		key = ufa.parent[key]
+	}
+	return key
 }

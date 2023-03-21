@@ -1,31 +1,43 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 )
 
 func main() {
 
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+	// in := bufio.NewReader(os.Stdin)
+	// out := bufio.NewWriter(os.Stdout)
+	// defer out.Flush()
 
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-	tree := NewTree(n)
-	for i := 1; i < n; i++ {
-		var a, b int
-		fmt.Fscan(in, &a, &b)
-		tree.AddEdge(a, b, 1)
-	}
+	// var n, q int
+	// fmt.Fscan(in, &n, &q)
+	// tree := NewTree(n)
+	// for i := 1; i < n; i++ {
+	// 	var a, b int
+	// 	fmt.Fscan(in, &a, &b)
+	// 	tree.AddEdge(a, b, 1)
+	// }
+	// tree.Build(0)
+	// for i := 0; i < q; i++ {
+	// 	var from, to, step int
+	// 	fmt.Fscan(in, &from, &to, &step)
+	// 	fmt.Fprintln(out, tree.Jump(from, to, step))
+	// }
+	tree := NewTree(5)
+	tree.AddEdge(0, 1, 1)
+	tree.AddEdge(0, 2, 1)
+	tree.AddEdge(1, 3, 1)
+	tree.AddEdge(1, 4, 1)
 	tree.Build(0)
-	for i := 0; i < q; i++ {
-		var from, to, step int
-		fmt.Fscan(in, &from, &to, &step)
-		fmt.Fprintln(out, tree.Jump(from, to, step))
-	}
+
+	// ![[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序
+	fmt.Println(tree.GetPathDecomposition(3, 2, false))
+	tree.EnumeratePathDecomposition(3, 2, true, func(start, end int) {
+		fmt.Println(start, end)
+	})
+	fmt.Println(tree.GetPath(3, 2))
+	fmt.Println(tree.KthAncestor(4, 0))
 
 }
 
@@ -91,6 +103,19 @@ func (tree *Tree) Build(root int) {
 			}
 		}
 	}
+}
+
+// 返回 root 的欧拉序区间, 左闭右开, 0-indexed.
+func (tree *Tree) Id(root int) (int, int) {
+	return tree.LID[root], tree.RID[root]
+}
+
+// 返回边 u-v 对应的 欧拉序起点编号, 0-indexed.
+func (tree *Tree) Eid(u, v int) int {
+	if tree.LID[u] > tree.LID[v] {
+		return tree.LID[u]
+	}
+	return tree.LID[v]
 }
 
 func (tree *Tree) LCA(u, v int) int {
@@ -163,8 +188,9 @@ func (tree *Tree) CollectChild(root int) []int {
 	return res
 }
 
-// 返回 [起点,终点] 的 欧拉序 `闭区间` 数组.
-func (tree *Tree) GetPathDecomposition(u, v int, edge bool) [][2]int {
+// 返回沿着`路径顺序`的 [起点,终点] 的 欧拉序 `左闭右闭` 数组.
+//  !eg:[[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序.
+func (tree *Tree) GetPathDecomposition(u, v int, vertex bool) [][2]int {
 	up, down := [][2]int{}, [][2]int{}
 	for {
 		if tree.top[u] == tree.top[v] {
@@ -178,9 +204,9 @@ func (tree *Tree) GetPathDecomposition(u, v int, edge bool) [][2]int {
 			u = tree.Parent[tree.top[u]]
 		}
 	}
-	edgeInt := 0
-	if edge {
-		edgeInt = 1
+	edgeInt := 1
+	if vertex {
+		edgeInt = 0
 	}
 	if tree.LID[u] < tree.LID[v] {
 		down = append(down, [2]int{tree.LID[u] + edgeInt, tree.LID[v]})
@@ -193,9 +219,52 @@ func (tree *Tree) GetPathDecomposition(u, v int, edge bool) [][2]int {
 	return append(up, down...)
 }
 
+// 遍历路径上的 `[起点,终点)` 欧拉序 `左闭右开` 区间.
+func (tree *Tree) EnumeratePathDecomposition(u, v int, vertex bool, f func(start, end int)) {
+	for {
+		if tree.top[u] == tree.top[v] {
+			break
+		}
+		if tree.LID[u] < tree.LID[v] {
+			a, b := tree.LID[tree.top[v]], tree.LID[v]
+			if a > b {
+				a, b = b, a
+			}
+			f(a, b+1)
+			v = tree.Parent[tree.top[v]]
+		} else {
+			a, b := tree.LID[u], tree.LID[tree.top[u]]
+			if a > b {
+				a, b = b, a
+			}
+			f(a, b+1)
+			u = tree.Parent[tree.top[u]]
+		}
+	}
+
+	edgeInt := 1
+	if vertex {
+		edgeInt = 0
+	}
+
+	if tree.LID[u] < tree.LID[v] {
+		a, b := tree.LID[u]+edgeInt, tree.LID[v]
+		if a > b {
+			a, b = b, a
+		}
+		f(a, b+1)
+	} else if tree.LID[v]+edgeInt <= tree.LID[u] {
+		a, b := tree.LID[u], tree.LID[v]+edgeInt
+		if a > b {
+			a, b = b, a
+		}
+		f(a, b+1)
+	}
+}
+
 func (tree *Tree) GetPath(u, v int) []int {
 	res := []int{}
-	composition := tree.GetPathDecomposition(u, v, false)
+	composition := tree.GetPathDecomposition(u, v, true)
 	for _, e := range composition {
 		a, b := e[0], e[1]
 		if a <= b {
@@ -287,4 +356,57 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// !Range Add Range Sum, 0-based.
+type BITArray struct {
+	n     int
+	tree1 []int
+	tree2 []int
+}
+
+func NewBITArray(n int) *BITArray {
+	return &BITArray{
+		n:     n,
+		tree1: make([]int, n+1),
+		tree2: make([]int, n+1),
+	}
+}
+
+// 切片内[start, end)的每个元素加上delta.
+//  0<=start<=end<=n
+func (b *BITArray) Add(start, end, delta int) {
+	end--
+	b.add(start, delta)
+	b.add(end+1, -delta)
+}
+
+// 求切片内[start, end)的和.
+//  0<=start<=end<=n
+func (b *BITArray) Query(start, end int) int {
+	end--
+	return b.query(end) - b.query(start-1)
+}
+
+func (b *BITArray) add(index, delta int) {
+	index++
+	rawIndex := index
+	for index <= b.n {
+		b.tree1[index] += delta
+		b.tree2[index] += (rawIndex - 1) * delta
+		index += index & -index
+	}
+}
+
+func (b *BITArray) query(index int) (res int) {
+	index++
+	if index > b.n {
+		index = b.n
+	}
+	rawIndex := index
+	for index > 0 {
+		res += rawIndex*b.tree1[index] - b.tree2[index]
+		index -= index & -index
+	}
+	return
 }
