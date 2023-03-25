@@ -444,6 +444,14 @@ func (st *SegmentTree) Set(index int, value E) {
 	}
 }
 
+func (st *SegmentTree) Update(index int, value E) {
+	index += st.size
+	st.seg[index] = op(st.seg[index], value)
+	for index >>= 1; index > 0; index >>= 1 {
+		st.seg[index] = op(st.seg[index<<1], st.seg[index<<1|1])
+	}
+}
+
 // [start, end)
 func (st *SegmentTree) Query(start, end int) E {
 	leftRes, rightRes := st.unit, st.unit

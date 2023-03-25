@@ -11,7 +11,7 @@ def getChunkId(index: int) -> int:
 
 def update(left: int, right: int, delta: int) -> None:
     """
-    完整段：chunkAdd chunkSum 
+    完整段：chunkAdd chunkSum
     不完整段：nums[i] chunkSum
     """
     lChunk, rChunk = getChunkId(left), getChunkId(right)
@@ -38,7 +38,7 @@ def update(left: int, right: int, delta: int) -> None:
 
 def query(left: int, right: int) -> int:
     """
-    完整段：chunkSum 
+    完整段：chunkSum
     不完整段：nums[i]+chunkAdd
     """
     lChunk, rChunk = getChunkId(left), getChunkId(right)
@@ -74,7 +74,7 @@ for i in range(n):
 
 for _ in range(m):
     opt = input().split()
-    if opt[0] == 'C':
+    if opt[0] == "C":
         left, right, delta = map(int, opt[1:])
         left, right = left - 1, right - 1
         update(left, right, delta)

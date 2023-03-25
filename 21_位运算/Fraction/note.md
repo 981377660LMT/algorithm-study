@@ -1,6 +1,6 @@
 在 Python 中，Decimal 和 Fraction 是两种用于表示非整数数值的数据类型，它们都可以提供比浮点数更高的精度。然而，它们的表示方式和适用场景有所不同。
 
-## Decimal
+## Decimal (小数)
 
 Decimal 类来自 decimal 模块，它用于表示十进制浮点数。Decimal 类在精度和范围方面提供了更好的控制，并遵循 IEEE 754 标准。Decimal 适用于需要精确计算的场景，例如金融和货币计算。
 
@@ -16,7 +16,7 @@ print(c)  # 输出：0.3
 
 ```
 
-## Fraction
+## Fraction (分数)
 
 Fraction 类来自 fractions 模块，它用于表示有理数，即分数。Fraction 类通过两个整数（分子和分母）表示一个有理数。Fraction 在需要进行精确数学运算的场景中很有用，尤其是在涉及分数计算的场景中。
 

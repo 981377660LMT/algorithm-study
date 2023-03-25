@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	stdio "io"
-	"math"
 	"os"
 	"sort"
 	"strconv"
@@ -103,28 +102,6 @@ func main() {
 		io.Println(p[0]+1, p[1]+1)
 	}
 
-}
-
-func circleGame(toys [][]int, circles [][]int, r int) int {
-	points := make([]Point, len(circles))
-	for i, circle := range circles {
-		points[i] = Point{circle[0], circle[1]}
-	}
-
-	kdTree := NewKDTree(points, func(p1, p2 Point) float64 {
-		dx, dy := float64(p1[0]-p2[0]), float64(p1[1]-p2[1])
-		return math.Sqrt(dx*dx + dy*dy)
-	})
-
-	res := 0
-	for _, toy := range toys {
-		minDist, _ := kdTree.FindNearest(Point{toy[0], toy[1]}, float64(r), true)
-		if minDist+float64(toy[2]) <= float64(r) {
-			res++
-		}
-	}
-
-	return res
 }
 
 const INF int = 1e18

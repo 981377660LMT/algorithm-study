@@ -76,4 +76,4 @@ if (require.main === module) {
   console.log('ok')
 }
 
-export {}
+export { BITArray2 }

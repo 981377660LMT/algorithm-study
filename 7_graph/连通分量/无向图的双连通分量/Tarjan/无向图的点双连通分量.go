@@ -8,7 +8,9 @@
 // build():
 //  二重頂点連結成分分解する. bc には各二重頂点連結成分に属する辺が格納される.
 //  注意不考虑节点数为 1 的图
-//  !如果原图中某个连通分量只有一个点，则需要具体情况具体分析，我们在后续讨论中不考虑孤立点。
+
+//  !如果原图中某个连通分量只有一个点，则需要具体情况具体分析，
+//  !这里不将孤立点当成点双.
 
 package main
 
@@ -20,6 +22,7 @@ import (
 
 func main() {
 	// https://judge.yosupo.jp/problem/biconnected_components
+	// !这道题把孤立点也当作点双
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()

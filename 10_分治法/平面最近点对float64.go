@@ -3,6 +3,9 @@ URL:
 https://onlinejudge.u-aizu.ac.jp/courses/library/4/CGL/5/CGL_5_A
 */
 
+// 指定区间的平面最近点对
+// https://maspypy.github.io/library/geo/range_closest_pair_query.hpp
+
 package main
 
 import (

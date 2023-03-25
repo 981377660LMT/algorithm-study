@@ -1,4 +1,4 @@
-# 负k次方根(kthRoot/floorRoot)
+# 负k次方根(kthRoot/floorRoot)/单位根
 # 求floor(a^(1/k))的值
 # a<=2**64 k<=64
 

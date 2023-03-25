@@ -45,7 +45,7 @@ func (f *BitVector) Count(value, end int) int {
 	return end - f.count1(end)
 }
 
-// 统计 [0,end) 中第 k(0-indexed) 个 value 的位置
+// 第 k(0-indexed) 个 value 的位置
 func (f *BitVector) Index(value, k int) int {
 	if k < 0 || f.Count(value, f.n) <= k {
 		return -1

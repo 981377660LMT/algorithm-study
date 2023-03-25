@@ -12,16 +12,17 @@ func main() {
 	fmt.Println(e3) // {3 10
 }
 
+// 仿射变换群
+type MonoidAffine struct{}
+
 const MOD int = 1e9 + 7
 
 type E = struct{ mul, add int }
 
-// 仿射变换群
-type MonoidAffine struct{}
-
+const IS_COMMUTATIVE = false        // 仿射变换群不满足交换律
 func (*MonoidAffine) e() E          { return E{1, 0} }
 func (*MonoidAffine) op(e1, e2 E) E { return E{e1.mul * e2.mul % MOD, (e1.add*e2.mul + e2.add) % MOD} }
-func (*MonoidAffine) inv(e E) E {
+func (*MonoidAffine) inv(e E) E { // 仿射变换逆元
 	mul, add := e.mul, e.add
 	mul = pow(mul, MOD-2, MOD) // modInv of mul
 	return E{mul, mul * (MOD - add) % MOD}

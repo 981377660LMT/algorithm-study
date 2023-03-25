@@ -241,15 +241,13 @@ class Tree implements ITree {
         up.push([this._lid[u], this._lid[this._top[u]]])
         u = this.parent[this._top[u]]
       }
-
-      const offset = vertex ? 0 : 1
-      if (this._lid[u] < this._lid[v]) {
-        down.push([this._lid[u] + offset, this._lid[v]])
-      } else if (this._lid[v] + offset <= this._lid[u]) {
-        up.push([this._lid[u], this._lid[v] + offset])
-      }
     }
-
+    const offset = vertex ? 0 : 1
+    if (this._lid[u] < this._lid[v]) {
+      down.push([this._lid[u] + offset, this._lid[v]])
+    } else if (this._lid[v] + offset <= this._lid[u]) {
+      up.push([this._lid[u], this._lid[v] + offset])
+    }
     up.push(...down.reverse())
     return up
   }
@@ -276,17 +274,17 @@ class Tree implements ITree {
         a < b ? callback(a, b + 1) : callback(b, a + 1)
         u = this.parent[this._top[u]]
       }
+    }
 
-      const offset = vertex ? 0 : 1
-      if (this._lid[u] < this._lid[v]) {
-        const a = this._lid[u] + offset
-        const b = this._lid[v]
-        a < b ? callback(a, b + 1) : callback(b, a + 1)
-      } else if (this._lid[v] + offset <= this._lid[u]) {
-        const a = this._lid[u]
-        const b = this._lid[v] + offset
-        a < b ? callback(a, b + 1) : callback(b, a + 1)
-      }
+    const offset = vertex ? 0 : 1
+    if (this._lid[u] < this._lid[v]) {
+      const a = this._lid[u] + offset
+      const b = this._lid[v]
+      a < b ? callback(a, b + 1) : callback(b, a + 1)
+    } else if (this._lid[v] + offset <= this._lid[u]) {
+      const a = this._lid[u]
+      const b = this._lid[v] + offset
+      a < b ? callback(a, b + 1) : callback(b, a + 1)
     }
   }
 

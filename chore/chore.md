@@ -354,3 +354,23 @@ const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()
   这个似乎只有 js 特有,java 和 golang 查找局部变量更快,可能是 js 查变量比较慢(
 
 - golang 浅拷贝数组 append 比 copy 快
+- `> 0 比!==0 快` (因为前者只需要比较符号)
+
+```ts
+function enumerateBits(int32: number, callback: (bit: number) => void): void {
+  // !这里不用 int32 > 0会快0.5s
+  while (int32) {
+    const i = 31 - Math.clz32(int32 & -int32)
+    callback(i)
+    int32 ^= 1 << i
+  }
+}
+
+if (require.main === module) {
+  console.time('enumerateBits')
+  for (let i = 0; i < 1e8; i++) {
+    enumerateBits(i, bit => {})
+  }
+  console.timeEnd('enumerateBits')
+}
+```

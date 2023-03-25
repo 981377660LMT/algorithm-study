@@ -40,6 +40,17 @@ func (b Bitset) Flip(p int)     { b[p/_w] ^= 1 << (p % _w) }
 func (b Bitset) Set(p int)      { b[p/_w] |= 1 << (p % _w) }  // 置 1
 func (b Bitset) Reset(p int)    { b[p/_w] &^= 1 << (p % _w) } // 置 0
 
+// 遍历区间内1的位置
+func (b Bitset) EnumerateOne(start, end int, f func(pos int)) {
+	if start >= end {
+		return
+	}
+	p := b.Next1(start)
+	for ; p < end; p = b.Next1(p + 1) {
+		f(p)
+	}
+}
+
 // 遍历所有 1 的位置
 // 如果对范围有要求，可在 f 中 return p < n
 func (b Bitset) Foreach(f func(p int) (Break bool)) {
@@ -340,3 +351,5 @@ func (b Bitset) And(c Bitset) Bitset {
 	}
 	return res
 }
+
+// https://nyaannyaan.github.io/library/misc/bitset-find-prev.hpp

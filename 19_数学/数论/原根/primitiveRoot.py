@@ -1,4 +1,5 @@
 # 算法学习笔记(40): 原根 - Pecco的文章 - 知乎
+# 算法学习笔记(40): 原根 - Pecco的文章 - 知乎
 # https://zhuanlan.zhihu.com/p/166043237
 
 # a在模m下的阶是同余方程 a**x = 1 (mod m) 的最小正整数解,记为ord(m,a)
@@ -13,6 +14,7 @@ from math import gcd
 
 # 求出一个原根
 # https://judge.yosupo.jp/problem/primitive_root
+# p<=1e18
 def primitive_root_prime(p: int) -> int:
     if p == 2:
         return 1

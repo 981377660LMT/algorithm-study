@@ -1,2 +1,0 @@
-Reachable(targetX, targetY):
-        #     return []

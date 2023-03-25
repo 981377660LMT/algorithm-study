@@ -8,7 +8,8 @@ from typing import List, Tuple
 def sortPointsByArgument(points: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     """
     按照atan2(x,y) 排序
-    即以半直线 x<=0,y=0 为基准，逆时针排序
+    从-pi开始,逆时针到pi
+    eg: (-10,-1) -> (0, -1) -> (1, 0) -> (0, 1) -> (-1, 0)
 
     atan2(x<0,y=0) = pi
     atan2(0,0) = 0
@@ -98,6 +99,7 @@ if __name__ == "__main__":
 # 1 1
 # 2 2
 # -10 -1
+
 # 输出
 # -10 -1
 # 0 -1

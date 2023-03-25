@@ -6,7 +6,9 @@ class Solution:
     def fractionToDecimal(self, numerator: int, denominator: int) -> str:
         sb = []
         a, b = numerator, denominator
-        if a < 0 and b > 0 or a > 0 and b < 0:
+        if a == 0:
+            return "0"
+        if a > 0 ^ b > 0:
             sb.append("-")
 
         a, b = abs(a), abs(b)

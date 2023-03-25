@@ -9,6 +9,7 @@ class Node {
     this.p = p
 
     this.size = 1
+
     this.flag = 0
   }
 

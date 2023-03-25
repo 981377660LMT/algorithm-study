@@ -1,13 +1,13 @@
 // 维护区间贡献的 Wavelet Matrix
 // !注意查询区间贡献时, 异或无效
 
-// Count(start, end, a, b, xor) - 区间 [start, end) 中值在 [a, b) 之间的数的个数和这些数的和.
+// CountRange(start, end, a, b, xor) - 区间 [start, end) 中值在 [a, b) 之间的数的个数和这些数的和.
 // CountPrefix(start, end, x, xor) - 区间 [start, end) 中值在 [0, x) 之间的数的个数和这些数的和.
 
 // Kth(start, end, k, xor) - 区间 [start, end) 中第 k 小的数(0-indexed) 和前 k 小的数的和(不包括这个数).
 
 // Floor(start, end, x, xor) - 区间 [start, end) 中值小于等于 x 的最大值
-// Ceil(start, end, x, xor) - 区间 [start, end) 中值大于等于 x 的最小值
+// Ceiling(start, end, x, xor) - 区间 [start, end) 中值大于等于 x 的最小值
 
 // MaxRightValue(start, end, xor, check) - 返回使得 check(prefixSum) 为 true 的最大value, 其中prefixSum为[0,val)内的数的和.
 // MaxRightCount(start, end, xor, check) - 返回使得 check(prefixSum) 为 true 的区间前缀个数的最大值.
@@ -46,7 +46,7 @@ func 区间最短距离和() {
 		preSum[i+1] = preSum[i] + nums[i]
 	}
 
-	wm := NewWaveletMatrixSum(nums, 32+2)
+	wm := NewWaveletMatrixSum(nums, -1)
 	for i := 0; i < q; i++ {
 		var left, right int
 		fmt.Fscan(in, &left, &right)
@@ -66,12 +66,32 @@ func 区间最短距离和() {
 	}
 }
 
-func main() {
+func abc281_e() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+	var n, m, k int
+	fmt.Fscan(in, &n, &m, &k)
+	nums := make([]int, n)
+	for i := range nums {
+		fmt.Fscan(in, &nums[i])
+	}
+	wm := NewWaveletMatrixSum(nums, -1)
+	for i := 0; i < n-m+1; i++ {
+		_, res := wm.Kth(i, i+m, k, 0)
+		fmt.Fprintln(out, res)
+	}
+}
+
+func maina() {
 	nums := []int{3, 1, 2, 4, 5, 6, 7, 8, 9, 10}
-	wm := NewWaveletMatrixSum(nums, 32)
+	wm := NewWaveletMatrixSum(nums, -1)
+	fmt.Println(wm.CountRange(0, 10, 3, 7, 0))
+	fmt.Println(wm.Kth(0, 10, 3, 0))                                                    // 3
 	fmt.Println(wm.MaxRightValue(0, 10, 0, func(preSum E) bool { return preSum < 11 })) // 5 即值域在 [0,5) 中的数的和小于 11
 	fmt.Println(wm.MaxRightCount(0, 10, 0, func(preSum E) bool { return preSum < 11 })) // 4 即排序后前 4 个数的和小于 11
-	fmt.Println(wm.Ceil(0, 10, 3, 0))
+	fmt.Println(wm.Ceiling(0, 10, 3, 0))
+	fmt.Println(wm.Floor(0, 10, 3, 0))
 }
 
 const INF int = 1e18
@@ -89,10 +109,22 @@ type WaveletMatrixSum struct {
 	preSum [][]int
 }
 
+// log:如果要支持异或,则需要按照异或的值来决定值域
+//  设为-1时表示不使用异或
 func NewWaveletMatrixSum(nums []int, log int) *WaveletMatrixSum {
-	nums = append(nums[:0:0], nums...)
+	numsCopy := make([]int, len(nums))
+	max_ := 0
+	for i, v := range nums {
+		numsCopy[i] = v
+		if v > max_ {
+			max_ = v
+		}
+	}
+	if log == -1 {
+		log = bits.Len(uint(max_))
+	}
 	res := &WaveletMatrixSum{}
-	n := len(nums)
+	n := len(numsCopy)
 	mid := make([]int, log)
 	bv := make([]*BitVector, log)
 	for i := 0; i < log; i++ {
@@ -110,27 +142,27 @@ func NewWaveletMatrixSum(nums []int, log int) *WaveletMatrixSum {
 	for d := log - 1; d >= -1; d-- {
 		p0, p1 := 0, 0
 		for i := 0; i < n; i++ {
-			preSum[d+1][i+1] = res.op(preSum[d+1][i], nums[i])
+			preSum[d+1][i+1] = res.op(preSum[d+1][i], numsCopy[i])
 		}
 		if d == -1 {
 			break
 		}
 		for i := 0; i < n; i++ {
-			f := (nums[i] >> d) & 1
+			f := (numsCopy[i] >> d) & 1
 			if f == 0 {
-				a0[p0] = nums[i]
+				a0[p0] = numsCopy[i]
 				p0++
 			} else {
 				bv[d].Set(i)
-				a1[p1] = nums[i]
+				a1[p1] = numsCopy[i]
 				p1++
 			}
 		}
 		mid[d] = p0
 		bv[d].Build()
-		nums, a0 = a0, nums
+		numsCopy, a0 = a0, numsCopy
 		for i := 0; i < p1; i++ {
-			nums[p0+i] = a1[i]
+			numsCopy[p0+i] = a1[i]
 		}
 	}
 
@@ -140,7 +172,7 @@ func NewWaveletMatrixSum(nums []int, log int) *WaveletMatrixSum {
 }
 
 // 返回区间 [left, right) 中 范围在 [a, b) 中的 (元素的个数, op 的结果)
-func (wm *WaveletMatrixSum) Count(left, right, a, b, xor int) (int, E) {
+func (wm *WaveletMatrixSum) CountRange(left, right, a, b, xor int) (int, E) {
 	c1, s1 := wm.CountPrefix(left, right, a, xor)
 	c2, s2 := wm.CountPrefix(left, right, b, xor)
 	return c2 - c1, wm.op(wm.inv(s1), s2)
@@ -157,12 +189,7 @@ func (wm *WaveletMatrixSum) CountPrefix(left, right, x, xor int) (int, E) {
 		add := (x >> d) & 1
 		f := (xor >> d) & 1
 		l0, r0 := wm.bv[d].Rank(left, 0), wm.bv[d].Rank(right, 0)
-		var kf int
-		if f == 0 {
-			kf = r0 - l0
-		} else {
-			kf = (right - left) - (r0 - l0)
-		}
+		kf := f*(right-left-r0+l0) + (f^1)*(r0-l0)
 		if add == 1 {
 			count += kf
 			if f == 1 {
@@ -172,12 +199,10 @@ func (wm *WaveletMatrixSum) CountPrefix(left, right, x, xor int) (int, E) {
 				sum = wm.op(sum, wm.get(d, l0, r0))
 				left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
 			}
+		} else if f == 0 {
+			left, right = l0, r0
 		} else {
-			if f == 0 {
-				left, right = l0, r0
-			} else {
-				left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
-			}
+			left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
 		}
 	}
 
@@ -197,12 +222,7 @@ func (wm *WaveletMatrixSum) Kth(left, right, k, xor int) (int, E) {
 	for d := wm.log - 1; d >= 0; d-- {
 		f := (xor >> d) & 1
 		l0, r0 := wm.bv[d].Rank(left, 0), wm.bv[d].Rank(right, 0)
-		var kf int
-		if f == 0 {
-			kf = r0 - l0
-		} else {
-			kf = (right - left) - (r0 - l0)
-		}
+		kf := f*(right-left-r0+l0) + (f^1)*(r0-l0)
 		if k < kf {
 			if f == 0 {
 				left, right = l0, r0
@@ -255,12 +275,10 @@ func (wm *WaveletMatrixSum) MaxRightValue(left, right, xor int, check func(preSu
 			} else {
 				left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
 			}
+		} else if f == 0 {
+			left, right = l0, r0
 		} else {
-			if f == 0 {
-				left, right = l0, r0
-			} else {
-				left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
-			}
+			left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
 		}
 	}
 
@@ -273,6 +291,7 @@ func (wm *WaveletMatrixSum) MaxRightCount(left, right, xor int, check func(preSu
 	if check(wm.get(wm.log, left, right)) {
 		return right - left
 	}
+
 	res := 0
 	sum := wm.e()
 	for d := wm.log - 1; d >= 0; d-- {
@@ -296,12 +315,10 @@ func (wm *WaveletMatrixSum) MaxRightCount(left, right, xor int, check func(preSu
 			} else {
 				left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
 			}
+		} else if f == 0 {
+			left, right = l0, r0
 		} else {
-			if f == 0 {
-				left, right = l0, r0
-			} else {
-				left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
-			}
+			left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
 		}
 	}
 
@@ -325,7 +342,7 @@ func (w *WaveletMatrixSum) Floor(start, end, value, xor int) int {
 
 // [left, right) 中大于等于 x 的数中最小的数
 //  如果不存在则返回INF
-func (w *WaveletMatrixSum) Ceil(start, end, value, xor int) int {
+func (w *WaveletMatrixSum) Ceiling(start, end, value, xor int) int {
 	less, _ := w.CountPrefix(start, end, value, xor)
 	if less == end-start {
 		return INF

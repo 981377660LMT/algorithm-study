@@ -20,7 +20,7 @@ class BitSet {
 
   private static _trailingZeros32(uint32: number): number {
     if (uint32 === 0) return 32
-    return 31 - Math.clz32(uint32 & -uint32)
+    return 31 - Math.clz32(uint32 & -uint32) // bitLength32(uint32 & -uint32) - 1
   }
   private static _onesCount32(uint32: number): number {
     uint32 -= (uint32 >>> 1) & 0x55555555

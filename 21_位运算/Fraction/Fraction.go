@@ -1,88 +1,226 @@
+// Rational/Fraction
+// https://nyaannyaan.github.io/library/math/rational.hpp
+
 package main
 
-import "fmt"
-
-func main() {
-
-}
-
-const INF int = 1e18
-
-type sign int8
-
-const (
-	neg  sign = -1
-	zero sign = 0
-	pos  sign = 1
+import (
+	"fmt"
+	"math/bits"
+	"strings"
 )
 
-type Fraction struct {
-	a, b  int  // a/b
-	pos   sign // -1, 0, 1
-	isInf bool
+func main() {
+	a, b := Fraction(4, 3), Fraction(2, 3)
+	assert := func(value interface{}, expected interface{}) {
+		if value != expected {
+			panic(fmt.Sprintf("assert failed: %v != %v", value, expected))
+		}
+	}
+
+	assert(a.Add(b), Fraction(2, 1))
+	assert(a.Sub(b), Fraction(2, 3))
+	assert(b.Sub(a), Fraction(-2, 3))
+	assert(a.Mul(b), Fraction(8, 9))
+	assert(a.Div(b), Fraction(2, 1))
+	assert(a.Inv(), Fraction(3, 4))
+	assert(a.Pow(3), Fraction(64, 27))
+	assert(a.Gt(b), true)
+	assert(a.Ge(b), true)
+	assert(a.Lt(b), false)
+	assert(a.Le(b), false)
 }
 
-// Namespace
-type FractionModule struct{}
+// !中途所有数不超过 2e9
 
-func (*FractionModule) New(a, b int) Fraction {
+type F struct {
+	a int // 分子, numerator
+	b int // 分母, denominator，在内部恒为正数
+}
+
+func Fraction(a, b int) F {
 	if b == 0 {
-		panic(fmt.Sprintf("ZeroDivisionError: Fraction(%d, %d)", a, b))
+		panic(fmt.Sprintf("ZeroDivisionError: Fraction(%d, 0)", a))
 	}
-
-	if a == 0 {
-		return Fraction{0, 1, zero, false}
-	}
-
-	isMinus := (a > 0) != (b > 0)
-	if a == -INF || a == INF {
-		if isMinus {
-			return Fraction{INF, 1, neg, true}
-		} else {
-			return Fraction{INF, 1, pos, true}
+	if b != 1 {
+		gcd_ := gcd(a, b)
+		if gcd_ != 1 {
+			a /= gcd_
+			b /= gcd_
+		}
+		if b < 0 {
+			a = -a
+			b = -b
 		}
 	}
-
-	if isMinus {
-		return Fraction{abs(a), abs(b), neg, false}
-	}
-	return Fraction{abs(a), abs(b), pos, false}
+	return F{a, b}
 }
 
-func (*FractionModule) Add(f1, f2 Fraction) Fraction {
-	if f1.isInf || f2.isInf {
-		if f1.pos != f2.pos {
-			panic("nan")
+func (this *F) Add(other F) F {
+	return Fraction(this.a*other.b+this.b*other.a, this.b*other.b)
+}
+
+func (this *F) IAdd(other F) *F {
+	*this = this.Add(other)
+	return this
+}
+
+func (this *F) Sub(other F) F {
+	return Fraction(this.a*other.b-this.b*other.a, this.b*other.b)
+}
+
+func (this *F) ISub(other F) *F {
+	*this = this.Sub(other)
+	return this
+}
+
+func (this *F) Mul(other F) F {
+	return Fraction(this.a*other.a, this.b*other.b)
+}
+
+func (this *F) IMul(other F) *F {
+	*this = this.Mul(other)
+	return this
+}
+
+func (this *F) Div(other F) F {
+	return Fraction(this.a*other.b, this.b*other.a)
+}
+
+func (this *F) IDiv(other F) *F {
+	*this = this.Div(other)
+	return this
+}
+
+// 负数
+func (this *F) Neg() F { return F{-this.a, this.b} }
+
+// 倒数
+func (this *F) Inv() F {
+	if this.a == 0 {
+		panic("Not invertible")
+	}
+	res := F{this.b, this.a}
+	if res.b < 0 {
+		res.a = -res.a
+		res.b = -res.b
+	}
+	return res
+}
+
+func (this *F) Pow(exp int) F {
+	res := F{1, 1}
+	base := *this
+	for exp > 0 {
+		if exp&1 == 1 {
+			res.IMul(base)
 		}
-		return f1
+		base.IMul(base)
+		exp >>= 1
 	}
-	sum := f1.a*f2.b + f2.a*f1.b
-	mul := f1.b * f2.b
+	return res
 }
 
+// this == other
+func (this *F) Eq(other F) bool { return this.a == other.a && this.b == other.b }
+
+// this != other
+func (this *F) Neq(other F) bool { return this.a != other.a || this.b != other.b }
+
+// this < other
+func (this *F) Lt(other F) bool { return this.a*other.b < other.a*this.b }
+
+// this <= other
+func (this *F) Le(other F) bool { return this.a*other.b <= other.a*this.b }
+
+// this > other
+func (this *F) Gt(other F) bool { return this.a*other.b > other.a*this.b }
+
+// this >= other
+func (this *F) Ge(other F) bool { return this.a*other.b >= other.a*this.b }
+
+func (this *F) String() string {
+	sb := []string{}
+	sb = append(sb, fmt.Sprintf("%d", this.a))
+	if this.a != 0 && this.b != 1 {
+		sb = append(sb, fmt.Sprintf("/%d", this.b))
+	}
+	return strings.Join(sb, "")
+}
+
+// binary gcd
 func gcd(a, b int) int {
-	for b != 0 {
-		a, b = b, a%b
+	x, y := a, b
+	if x < 0 {
+		x = -x
+	}
+	if y < 0 {
+		y = -y
+	}
+
+	if x == 0 || y == 0 {
+		return x + y
+	}
+	n := bits.TrailingZeros(uint(x))
+	m := bits.TrailingZeros(uint(y))
+	x >>= n
+	y >>= m
+	for x != y {
+		d := bits.TrailingZeros(uint(x - y))
+		f := x > y
+		var c int
+		if f {
+			c = x
+		} else {
+			c = y
+		}
+		if !f {
+			y = x
+		}
+		x = (c - y) >> d
+	}
+	return x << min(n, m)
+}
+
+func abs(a int) int {
+	if a < 0 {
+		return -a
 	}
 	return a
 }
 
-func abs(x int) int {
-	if x < 0 {
-		return -x
+func min(a, b int) int {
+	if a < b {
+		return a
 	}
-	return x
+	return b
 }
 
-// 有时也可以用这个简化分数大小比较 (不超过1e9时)
 //
-// 分母不为0的分数比较大小
-//  a1/b1 < a2/b2
-func less(a1, b1, a2, b2 int) bool {
-	if a1 == INF || a1 == -INF || a2 == INF || a2 == -INF { // 有一个是+-INF
-		return a1/b1 < a2/b2
-	}
+//
+// 一般的分数比较大小
+// !分母不为0且所有数绝对值不超过1e9
+
+// a1/b1 == a2/b2
+func eq(a1, b1, a2, b2 int) bool {
+	return a1*b2 == a2*b1
+}
+
+// a1/b1 < a2/b2
+func lt(a1, b1, a2, b2 int) bool {
 	diff := a1*b2 - a2*b1
 	mul := b1 * b2
-	return diff^mul < 0
+	if diff == 0 {
+		return false
+	}
+	return (diff > 0) != (mul > 0)
+}
+
+// a1/b1 <= a2/b2
+func le(a1, b1, a2, b2 int) bool {
+	diff := a1*b2 - a2*b1
+	mul := b1 * b2
+	if diff == 0 {
+		return true
+	}
+	return (diff > 0) != (mul > 0)
 }

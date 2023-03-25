@@ -53,11 +53,11 @@ def exgcdFarey(a: int, b: int) -> Tuple[int, int, int]:
     return g, x2, y2
 
 
-# Farey 数列 中 a/b 第一次出现的位置的前驱和后继
+# 法里级数 中 a/b 第一次出现的位置的前驱和后继(正有理数)
 # a/b = 19/12 → (x1/y1, x2/y2) = (11/7, 8/5) → 返回 (11,7,8,5)
 def farey(a: int, b: int) -> Tuple[int, int, int, int]:
     """
-    求法雷数列中某一项的的前驱和后继
+    求法雷级数中某一项的的前驱和后继(分母小于等于b)
     https://zhuanlan.zhihu.com/p/323538981
     """
     assert a > 0 and b > 0
@@ -69,6 +69,7 @@ def farey(a: int, b: int) -> Tuple[int, int, int, int]:
 
 
 if __name__ == "__main__":
+    print(farey(1, 3))
     assert exgcd(2, 3) == (1, -1, 1)
     assert modInv(2, 998244353) == (998244353 + 1) // 2
 

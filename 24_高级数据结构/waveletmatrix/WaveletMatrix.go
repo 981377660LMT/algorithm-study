@@ -1,19 +1,16 @@
 // Usage:
 // !Attention: nums[i] >= 0
 
-// Count(start, end, value) – [start, end) に含まれる value の個数を求める.
-// CountRange(start, end, lower, upper) – [start, end) に含まれる [lower, upper) の個数を求める.
+// Count(start, end, value) – [start, end) 中值为 value 的数的个数.
+// CountRange(start, end, lower, upper) – [start, end) 中值在 [lower, upper) 内的数的个数.
 
-// Index(value, k) – k(0-indexed) 番目の value の位置を求める.
-// IndexWithStart(value, k, start) – k(0-indexed) 番目の value の位置を求める.ただし、start からの相対位置として扱う.
+// Kth(start, end, k) – [start, end) 中第 k(0-indexed) 小的数.
+// KthMax(start, end, k) – [start, end) 中第 k(0-indexed) 大的数.
 
-// KthMin(start, end, k) – [start, end) に含まれる k(0-indexed) 番目に小さい値を求める.
-// KthMax(start, end, k) – [start, end) に含まれる k(0-indexed) 番目に大きい値を求める.
-
-// Lower(start, end, value) – [start, end) に含まれる要素の中で value の次に小さいものを求める.存在しない場合は -INF を返す.
-// Higher(start, end, value) – [start, end) に含まれる要素の中で value の次に大きいものを求める.存在しない場合は INF を返す.
-// Floor(start, end, value) – [start, end) に含まれる要素の中で value 以下の最大の値を求める.存在しない場合は -INF を返す.
-// Ceil(start, end, value) – [start, end) に含まれる要素の中で value 以上の最小の値を求める.存在しない場合は INF を返す.
+// Lower(start, end, value) – [start, end) 中值小于 value 的最大值.不存在的话返回 -INF.
+// Higher(start, end, value) – [start, end) 中值大于 value 的最小值.不存在的话返回 INF.
+// Floor(start, end, value) – [start, end) 中值不超过 value 的最大值.不存在的话返回 -INF.
+// Ceiling(start, end, value) – [start, end) 中值不小于 value 的最小值.不存在的话返回 INF.
 
 // Referece:
 // https://beet-aizu.github.io/library/datastructure/waveletmatrix.cpp
@@ -29,22 +26,45 @@ import (
 func main() {
 	nums := []int{1, 2, 3, 1, 5, 6, 7, 8, 9, 10}
 	M := NewWaveletMatrix(nums)
+
 	fmt.Println(M.Count(0, 1, 1))
 	fmt.Println(M.CountRange(0, 10, 1, 5))
 	fmt.Println(M.Index(1, 1))
 	fmt.Println(M.IndexWithStart(1, 0, 2))
+	fmt.Println(M.Kth(0, 10, 2))
 	fmt.Println(M.KthMax(0, 10, 2))
-	fmt.Println(M.KthMin(0, 10, 2))
 	fmt.Println(M.Lower(0, 3, 2))
 	fmt.Println(M.Floor(0, 3, 2))
 	fmt.Println(M.Higher(0, 10, 1))
-	fmt.Println(M.Ceil(0, 10, 1))
+	fmt.Println(M.Ceiling(0, 10, 1))
 }
 
 const INF int = 1e18
 
-// 指定された配列から WaveletMatrix を構築する.
-//  data:変換する配列(data[i]は0以上)
+// 给你一个长度为 n 下标从 0 开始的整数数组 nums ，它包含 1 到 n 的所有数字，请你返回上升四元组的数目。
+// 如果一个四元组 (i, j, k, l) 满足以下条件，我们称它是上升的：
+// 0 <= i < j < k < l < n 且
+// nums[i] < nums[k] < nums[j] < nums[l] 。
+// 4 <= nums.length <= 4000, nums 中所有数字 互不相同 ，nums 是一个排列。
+
+// https://leetcode.cn/problems/count-increasing-quadruplets/
+func countQuadruplets(nums []int) int64 {
+	W := NewWaveletMatrix(nums)
+	res := 0
+	for j := 1; j < len(nums)-2; j++ {
+		for k := j + 1; k < len(nums)-1; k++ {
+			if !(nums[k] < nums[j]) {
+				continue
+			}
+			left := W.CountRange(0, j, 0, nums[k])
+			right := W.CountRange(k+1, len(nums), nums[j]+1, INF)
+			res += (left * right)
+		}
+	}
+	return int64(res)
+}
+
+// 给定非负整数数组 nums 构建一个 WaveletMatrix.
 func NewWaveletMatrix(data []int) *WaveletMatrix {
 	dataCopy := make([]int, len(data))
 	max_ := 0
@@ -103,20 +123,17 @@ type WaveletMatrix struct {
 	buff1, buff2 []int
 }
 
-// [start, end) に含まれる value の個数を求める.
-//  alias: Rank
+// [start, end) 内的 value 的個数.
 func (w *WaveletMatrix) Count(start, end, value int) int {
 	return w.count(value, end) - w.count(value, start)
 }
 
-// [start, end) に含まれる [value, upper) の個数を求める.
-// alias: RangeFreq
+// [start, end) 内 [lower, upper) 的个数.
 func (w *WaveletMatrix) CountRange(start, end, lower, upper int) int {
 	return w.freqDfs(0, start, end, 0, lower, upper)
 }
 
-// k(0-indexed) 番目の value の位置を求める.
-//  alias: Select
+// 第k(0-indexed)个value的位置.
 func (w *WaveletMatrix) Index(value, k int) int {
 	w.count(value, w.n)
 	for dep := w.maxLog - 1; dep >= 0; dep-- {
@@ -134,8 +151,12 @@ func (w *WaveletMatrix) IndexWithStart(value, k, start int) int {
 	return w.Index(value, k+w.count(value, start))
 }
 
-// [start, end) に含まれる要素の中で k(0-indexed) 番目に大きいものを求める.
-//  alias: Quantile
+// [start, end) 内第k(0-indexed)小的数(kth).
+func (w *WaveletMatrix) Kth(start, end, k int) int {
+	return w.KthMax(start, end, end-start-k-1)
+}
+
+// [start, end) 内第k(0-indexed)大的数.
 func (w *WaveletMatrix) KthMax(start, end, k int) int {
 	if k < 0 || k >= end-start {
 		return -1
@@ -156,15 +177,12 @@ func (w *WaveletMatrix) KthMax(start, end, k int) int {
 	return res
 }
 
-// [start, end) に含まれる要素の中で k(0-indexed) 番目に小さいものを求める.
-//  alias: Rquantile
+// [start, end) 内第k(0-indexed)小的数(kth).
 func (w *WaveletMatrix) KthMin(start, end, k int) int {
 	return w.KthMax(start, end, end-start-k-1)
 }
 
-// [start, end) に含まれる要素の中で value の次に小さいものを求める.存在しない場合は -INF を返す.
-//  value >= 0
-//  alias: Pred
+// [start, end) 中比 value 严格小的数, 不存在返回 -INF.
 func (w *WaveletMatrix) Lower(start, end, value int) int {
 	k := w.lt(start, end, value)
 	if k != 0 {
@@ -173,9 +191,7 @@ func (w *WaveletMatrix) Lower(start, end, value int) int {
 	return -INF
 }
 
-// [start, end) に含まれる要素の中で value より大きいものを求める.存在しない場合は INF を返す.
-//  value >= 0
-//  alias: Succ
+// [start, end) 中比 value 严格大的数, 不存在返回 INF.
 func (w *WaveletMatrix) Higher(start, end, value int) int {
 	k := w.le(start, end, value)
 	if k == end-start {
@@ -184,7 +200,7 @@ func (w *WaveletMatrix) Higher(start, end, value int) int {
 	return w.KthMin(start, end, k)
 }
 
-// [start, end) に含まれる要素の中で value 以下のものを求める.存在しない場合は -INF を返す.
+// [start, end) 中不超过 value 的最大值, 不存在返回 -INF.
 func (w *WaveletMatrix) Floor(start, end, value int) int {
 	count := w.Count(start, end, value)
 	if count > 0 {
@@ -193,8 +209,8 @@ func (w *WaveletMatrix) Floor(start, end, value int) int {
 	return w.Lower(start, end, value)
 }
 
-// [start, end) に含まれる要素の中で value 以上のものを求める.存在しない場合は INF を返す.
-func (w *WaveletMatrix) Ceil(start, end, value int) int {
+// [start, end) 中不小于 value 的最小值, 不存在返回 INF.
+func (w *WaveletMatrix) Ceiling(start, end, value int) int {
 	count := w.Count(start, end, value)
 	if count > 0 {
 		return value
@@ -301,16 +317,15 @@ func (f *BitVector) Get(i int) int {
 	return (f.block[i>>6] >> uint(i&63)) & 1
 }
 
-// [0,end) に含まれる 1 の個数.
 func (f *BitVector) Count(value, end int) int {
+	mask := (1 << uint(end&63)) - 1
+	res := f.sum[end>>6] + bits.OnesCount(uint(f.block[end>>6]&mask))
 	if value == 1 {
-		return f.count1(end)
+		return res
 	}
-	return end - f.count1(end)
+	return end - res
 }
 
-// [0,end) に k(0-indexed) 番目の value の位置を求める.
-// 存在しない場合は -1 を返す.
 func (f *BitVector) Index(value, k int) int {
 	if k < 0 || f.Count(value, f.n) <= k {
 		return -1
@@ -330,9 +345,4 @@ func (f *BitVector) Index(value, k int) int {
 
 func (f *BitVector) IndexWithStart(value, k, start int) int {
 	return f.Index(value, k+f.Count(value, start))
-}
-
-func (f *BitVector) count1(k int) int {
-	mask := (1 << uint(k&63)) - 1
-	return f.sum[k>>6] + bits.OnesCount(uint(f.block[k>>6]&mask))
 }

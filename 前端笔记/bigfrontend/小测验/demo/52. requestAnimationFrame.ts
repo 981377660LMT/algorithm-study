@@ -20,3 +20,4 @@ while (Date.now() < end) {}
 
 console.log(6)
 // 1 6 3 4 2 5
+export {}

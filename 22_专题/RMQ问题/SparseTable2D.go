@@ -32,7 +32,7 @@ type S = int
 //  query: 查询 [row1,col1,row2,col2] 闭区间的贡献值
 //     0 <= row1 <= row2 < len(matrix)
 //     0 <= col1 <= col2 < len(matrix[0])
-func NewSparseTable2D(matrix [][]S, op func(S, S) S) (query func(row1, col1, row2, col2 int) int) {
+func NewSparseTable2D(matrix [][]S, op func(S, S) S) (query func(row1, col1, row2, col2 int) S) {
 	n, m := len(matrix), len(matrix[0])
 	rowSize := bits.Len(uint(n))   // 1+logn
 	colSize := bits.Len(uint(m))   // 1+logm
@@ -68,7 +68,7 @@ func NewSparseTable2D(matrix [][]S, op func(S, S) S) (query func(row1, col1, row
 		}
 	}
 
-	query = func(row1, col1, row2, col2 int) int {
+	query = func(row1, col1, row2, col2 int) S {
 		rowk := bits.Len(uint(row2-row1+1)) - 1
 		colK := bits.Len(uint(col2-col1+1)) - 1
 		res1 := op(dp[rowk][row1][colK][col1], dp[rowk][row1][colK][col2-(1<<colK)+1])

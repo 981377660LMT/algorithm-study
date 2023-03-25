@@ -2,18 +2,27 @@
 # 分数比较大小 compareFraction
 
 
+def eq(a1: int, b1: int, a2: int, b2: int) -> bool:
+    """a1/b1 == a2/b2"""
+    return a1 * b2 == a2 * b1
+
+
 def lt(a1: int, b1: int, a2: int, b2: int) -> bool:
     """a1/b1 < a2/b2"""
     diff = a1 * b2 - a2 * b1
     mul = b1 * b2
-    return diff > 0 and mul < 0 or diff < 0 and mul > 0
+    if diff == 0:
+        return False
+    return (diff > 0) ^ (mul > 0)
 
 
 def le(a1: int, b1: int, a2: int, b2: int) -> bool:
     """a1/b1 <= a2/b2"""
     diff = a1 * b2 - a2 * b1
     mul = b1 * b2
-    return diff >= 0 and mul < 0 or diff <= 0 and mul > 0
+    if diff == 0:
+        return True
+    return (diff > 0) ^ (mul > 0)
 
 
 if __name__ == "__main__":

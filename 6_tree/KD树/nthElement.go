@@ -35,8 +35,7 @@ type N = []int
 //  1 <= nth <= len(nums)
 func NthElement(nums []N, nth int, less func(i, j int) bool) {
 	nth--
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(nums), func(i, j int) { nums[i], nums[j] = nums[j], nums[i] })
+	FastShuffle(nums)
 	for l, r := 0, len(nums)-1; l < r; {
 		v := nums[l]
 		i, j := l, r+1
@@ -58,6 +57,17 @@ func NthElement(nums []N, nth int, less func(i, j int) bool) {
 		} else {
 			r = j - 1
 		}
+	}
+}
+
+var _SEED = uint64(time.Now().UnixNano()/2 + 1)
+
+func FastShuffle(nums []N) {
+	for i := range nums {
+		_SEED ^= _SEED << 7
+		_SEED ^= _SEED >> 9
+		rand := _SEED % uint64(i+1)
+		nums[i], nums[rand] = nums[rand], nums[i]
 	}
 }
 

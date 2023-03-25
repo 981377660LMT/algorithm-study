@@ -2,7 +2,9 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func exgcd(a, b int) (gcd, x, y int) {
 	if b == 0 {
@@ -20,6 +22,10 @@ func modInv(a, mod int) (inv int, err error) {
 	}
 	return (x%mod + mod) % mod, nil
 }
+
+//
+// 基于二进制gcd的模逆元求法
+// https://nyaannyaan.github.io/library/trial/fast-inv.hpp
 
 func main() {
 	inv, err := modInv(3, 7)

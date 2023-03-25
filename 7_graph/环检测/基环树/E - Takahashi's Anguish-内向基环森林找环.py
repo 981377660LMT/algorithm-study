@@ -5,7 +5,7 @@
 # n<=2e5
 
 # !https://atcoder.jp/contests/abc256/editorial/4135
-# ! n个顶点n条边 Functional Graph(基环树森林)
+# ! n个顶点n条边 Namori Graph(基环树森林)
 # ! 内向基环树森林找环 每个环中必定有一个点作为起点 怒气值最小
 # ! 只有在环里才能产生怒气 如果没环直接按照拓扑序发饼干 怒气值为0
 import sys

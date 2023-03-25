@@ -95,6 +95,17 @@ func (st *SegmentTree) Set(index int, value E) {
 	}
 }
 
+func (st *SegmentTree) Update(index int, value E) {
+	if index < 0 || index >= st.n {
+		return
+	}
+	index += st.size
+	st.seg[index] = st.op(st.seg[index], value)
+	for index >>= 1; index > 0; index >>= 1 {
+		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+	}
+}
+
 // [start, end)
 func (st *SegmentTree) Query(start, end int) E {
 	if start < 0 {
