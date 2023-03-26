@@ -1,4 +1,4 @@
-// !注意速度不如一般的 RectangleSum, 谨慎使用 (2e5, 2200ms; 1e5, 1000ms)
+// !谨慎使用 (2e5, 1700ms; 1e5, 800ms)
 // Add : 单点加
 // Query : 区间和
 // QueryPrefix : 前缀和
@@ -54,7 +54,7 @@ func main() {
 	}
 }
 
-func rectangle_sum() {
+func main2() {
 	// https://judge.yosupo.jp/problem/rectangle_sum
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -161,7 +161,7 @@ func (t *FenwickTree2D) QueryPrefix(rx, ry int) Able {
 func (t *FenwickTree2D) _add(i int, y int, val Able) {
 	lid := t.indptr[i]
 	n := t.indptr[i+1] - t.indptr[i]
-	j := sort.SearchInts(t.keyY[lid:lid+n], y)
+	j := bisectLeft(t.keyY, y, lid, lid+n-1) - lid
 	for j < n {
 		t.data[lid+j] = op(t.data[lid+j], val)
 		j += ((j + 1) & -(j + 1))
@@ -172,9 +172,8 @@ func (t *FenwickTree2D) _prodI(i int, ly, ry int) Able {
 	pos, neg := t.unit, t.unit
 	lid := t.indptr[i]
 	n := t.indptr[i+1] - t.indptr[i]
-	it := t.keyY[lid : lid+n]
-	left := sort.SearchInts(it, ly) - 1
-	right := sort.SearchInts(it, ry) - 1
+	left := bisectLeft(t.keyY, ly, lid, lid+n-1) - lid - 1
+	right := bisectLeft(t.keyY, ry, lid, lid+n-1) - lid - 1
 	for left < right {
 		pos = op(pos, t.data[lid+right])
 		right -= ((right + 1) & -(right + 1))
@@ -190,8 +189,7 @@ func (t *FenwickTree2D) _prefixProdI(i int, ry int) Able {
 	pos := t.unit
 	lid := t.indptr[i]
 	n := t.indptr[i+1] - t.indptr[i]
-	it := t.keyY[lid : lid+n]
-	R := sort.SearchInts(it, ry) - 1
+	R := bisectLeft(t.keyY, ry, lid, lid+n-1) - lid - 1
 	for R >= 0 {
 		pos = op(pos, t.data[lid+R])
 		R -= ((R + 1) & -(R + 1))
@@ -274,7 +272,7 @@ func (ft *FenwickTree2D) _build(X, Y []int, wt []Able) {
 
 func (ft *FenwickTree2D) _xtoi(x int) int {
 	if ft.discretize {
-		return sort.SearchInts(ft.keyX, x)
+		return bisectLeft(ft.keyX, x, 0, len(ft.keyX)-1)
 	}
 	tmp := x - ft.minX
 	if tmp < 0 {
@@ -283,6 +281,18 @@ func (ft *FenwickTree2D) _xtoi(x int) int {
 		tmp = ft.n
 	}
 	return tmp
+}
+
+func bisectLeft(nums []int, x int, left, right int) int {
+	for left <= right {
+		mid := (left + right) >> 1
+		if nums[mid] < x {
+			left = mid + 1
+		} else {
+			right = mid - 1
+		}
+	}
+	return left
 }
 
 func unique(nums []int) (sorted []int) {
@@ -310,26 +320,6 @@ func max(a, b int) int {
 		return a
 	}
 	return b
-}
-
-func mins(nums ...int) int {
-	res := nums[0]
-	for _, num := range nums {
-		if num < res {
-			res = num
-		}
-	}
-	return res
-}
-
-func maxs(nums ...int) int {
-	res := nums[0]
-	for _, num := range nums {
-		if num > res {
-			res = num
-		}
-	}
-	return res
 }
 
 func argSort(nums []int) []int {

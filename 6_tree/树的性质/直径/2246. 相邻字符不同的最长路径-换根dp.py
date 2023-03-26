@@ -18,7 +18,7 @@ class Solution:
             return fromRes + 1 if s[cur] != s[parent] else -INF
 
         n = len(parent)
-        R = Rerooting(n)
+        R = _R(n)
         for cur, pre in enumerate(parent):
             if pre == -1:
                 continue
@@ -30,7 +30,7 @@ class Solution:
 T = TypeVar("T")
 
 
-class Rerooting(Generic[T]):
+class _R(Generic[T]):
 
     __slots__ = ("adjList", "_n", "_decrement")
 

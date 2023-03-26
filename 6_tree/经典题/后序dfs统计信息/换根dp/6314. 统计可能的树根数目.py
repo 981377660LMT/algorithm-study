@@ -2,7 +2,7 @@ from collections import defaultdict
 from random import randint, randrange
 from typing import List
 from Rerooting import Rerooting
-from LCA import LCA
+from LCA import LCA_HLD
 
 # Alice 有一棵 n 个节点的树，节点编号为 0 到 n - 1 。
 # 树用一个长度为 n - 1 的二维整数数组 edges 表示，其中 edges[i] = [ai, bi] ，表示树中节点 ai 和 bi 之间有一条边。
@@ -16,13 +16,15 @@ from LCA import LCA
 
 class Solution:
     def rootCount(self, edges: List[List[int]], guesses: List[List[int]], k: int) -> int:
-        def e(root: int) -> int:
+        E = int
+
+        def e(root: int) -> E:
             return 0
 
-        def op(childRes1: int, childRes2: int) -> int:
+        def op(childRes1: E, childRes2: E) -> E:
             return childRes1 + childRes2
 
-        def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+        def composition(fromRes: E, parent: int, cur: int, direction: int) -> E:
             """direction: 0: cur -> parent, 1: parent -> cur"""
             if direction == 0:  # cur -> parent
                 return fromRes + counter[(parent, cur)]
@@ -40,14 +42,15 @@ class Solution:
 
     def rootCount2(self, edges: List[List[int]], guesses: List[List[int]], k: int) -> List[int]:
         """`猜测父结点`改成`猜测祖先结点`的做法"""
+        E = int
 
-        def e(root: int) -> int:
+        def e(root: int) -> E:
             return 0
 
-        def op(childRes1: int, childRes2: int) -> int:
+        def op(childRes1: E, childRes2: E) -> E:
             return childRes1 + childRes2
 
-        def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+        def composition(fromRes: E, parent: int, cur: int, direction: int) -> E:
             """direction: 0: cur -> parent, 1: parent -> cur"""
             if direction == 0:  # cur -> parent
                 return fromRes + counter[parent][cur]  # !有多少个查询 (parent-?) 存在于 (parent-cur) 所在链的子树中
@@ -57,7 +60,10 @@ class Solution:
         R = Rerooting(n)
         for u, v in edges:
             R.addEdge(u, v)
-        lca = LCA(n, R.adjList, root=0)
+        lca = LCA_HLD(n)
+        for u, v in edges:
+            lca.addEdge(u, v, 1)
+        lca.build(0)
         counter = [defaultdict(int) for _ in range(n)]  # 有多少个查询存在于链 (i -> key) 的子树中
         for a, b in guesses:
             next = lca.jump(a, b, 1)
@@ -194,8 +200,7 @@ if __name__ == "__main__":
             tree[p - 1].append(i - 1)
         return tree
 
-    while True:
-        print(1)
+    for _ in range(10):
         n = randrange(2, 500)
         tree = randomTree(n)
         edges = []
@@ -209,8 +214,8 @@ if __name__ == "__main__":
             if a != b:
                 guess.append([a, b])
         k = randrange(n)
-
         if not rootCount2BruteForce(edges, guess, k) == Solution().rootCount2(edges, guess, k):
             print(n, tree, guess, k, "aasas")
             print(rootCount2BruteForce(edges, guess, k), Solution().rootCount2(edges, guess, k))
             exit(0)
+    print("ok")

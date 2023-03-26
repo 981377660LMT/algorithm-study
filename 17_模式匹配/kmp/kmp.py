@@ -41,7 +41,7 @@ class KMP:
     def move(self, pos: int, char: str) -> int:
         assert 0 <= pos < len(self._pattern)
         while pos and char != self._pattern[pos]:
-            pos = self.next[pos - 1]
+            pos = self.next[pos - 1]  # rollback
         if char == self._pattern[pos]:
             pos += 1
         return pos
@@ -78,3 +78,14 @@ if __name__ == "__main__":
     kmp = KMP("aab")
     assert kmp.matchAll("aabaabaabaab") == [0, 3, 6, 9]
     assert kmp.matchAll("aabaabaabaab", 1) == [3, 6, 9]
+
+    pos = 0
+    nextPos = kmp.move(pos, "a")
+    assert nextPos == 1
+    nextPos = kmp.move(nextPos, "a")
+    assert nextPos == 2
+    nextPos = kmp.move(nextPos, "b")
+    assert kmp.isMatched(nextPos)
+    prePos = kmp.back(nextPos)
+    print(prePos)
+    print(kmp.next)

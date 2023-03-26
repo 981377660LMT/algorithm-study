@@ -78,15 +78,16 @@ func max(a, b int) int {
 type SegmentTree2D struct {
 	row, col int
 	tree     []E
+	unit     E
 }
 
 func NewSegmentTree2D(row, col int) *SegmentTree2D {
 	res := &SegmentTree2D{}
+	res.unit = res.e()
 	row_, col_ := 1<<uint(bits.Len(uint(row-1))), 1<<uint(bits.Len(uint(col-1)))
-
 	tree := make([]E, (row_*col_)<<2)
 	for i := range tree {
-		tree[i] = res.e()
+		tree[i] = res.unit
 	}
 	res.row, res.col, res.tree = row_, col_, tree
 	return res
@@ -133,9 +134,9 @@ func (st *SegmentTree2D) Query(row1, col1, row2, col2 int) E {
 	row2++
 	col2++
 	if row1 >= row2 || col1 >= col2 {
-		return st.e()
+		return st.unit
 	}
-	res := st.e()
+	res := st.unit
 	row1 += st.row
 	row2 += st.row
 	col1 += st.col
@@ -156,7 +157,7 @@ func (st *SegmentTree2D) Query(row1, col1, row2, col2 int) E {
 }
 
 func (st *SegmentTree2D) query(r, c1, c2 int) E {
-	res := st.e()
+	res := st.unit
 	for c1 < c2 {
 		if c1&1 == 1 {
 			res = st.op(res, st.tree[st.id(r, c1)])

@@ -1,6 +1,8 @@
+# (访问所有顶点的最短路径)
 # https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1595
-# 访问所有顶点的最短路径
-# !等于两倍边权之和减去每个点到最远点的距离
+# 给定一棵树,求从每个点出发访问所有顶点的最短路径.
+# !不需要返回到出发点.
+# !等于两倍边权之和减去每个点到最远点的距离,其中最好的出发点就是直径的两个端点。
 
 from collections import defaultdict
 from typing import List, Tuple
@@ -8,13 +10,15 @@ from Rerooting import Rerooting
 
 
 def solve(n: int, edges: List[Tuple[int, int, int]]) -> List[int]:
-    def e(root: int) -> int:
+    E = int
+
+    def e(root: int) -> E:
         return 0
 
-    def op(childRes1: int, childRes2: int) -> int:
+    def op(childRes1: E, childRes2: E) -> E:
         return max(childRes1, childRes2)
 
-    def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+    def composition(fromRes: E, parent: int, cur: int, direction: int) -> E:
         """direction: 0: cur -> parent, 1: parent -> cur"""
         return fromRes + weight[cur][parent]
 
@@ -27,6 +31,7 @@ def solve(n: int, edges: List[Tuple[int, int, int]]) -> List[int]:
         weight[v][u] = w
         wSum += w
     dp = R.rerooting(e, op, composition)
+    print(dp)
     return [2 * wSum - x for x in dp]
 
 

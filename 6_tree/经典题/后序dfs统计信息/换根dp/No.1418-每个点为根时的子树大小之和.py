@@ -9,13 +9,15 @@ sys.setrecursionlimit(int(1e9))
 if __name__ == "__main__":
     from Rerooting import Rerooting
 
-    def e(root: int) -> int:
+    E = int
+
+    def e(root: int) -> E:
         return 0
 
-    def op(childRes1: int, childRes2: int) -> int:
+    def op(childRes1: E, childRes2: E) -> E:
         return childRes1 + childRes2
 
-    def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+    def composition(fromRes: E, parent: int, cur: int, direction: int) -> E:
         """direction: 0: cur -> parent, 1: parent -> cur"""
         if direction == 0:  # cur -> parent
             return fromRes + subSize[cur]

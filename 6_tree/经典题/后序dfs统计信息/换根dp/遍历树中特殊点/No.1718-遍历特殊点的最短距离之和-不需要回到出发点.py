@@ -4,6 +4,7 @@
 # TODO
 
 from typing import List, Tuple
+from Rerooting import Rerooting
 
 
 def randomSquirrel(n: int, edges: List[Tuple[int, int]], sweets: List[int]) -> List[int]:

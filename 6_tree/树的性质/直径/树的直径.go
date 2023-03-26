@@ -45,8 +45,8 @@ func (td *TreeDiameter) AddEdge(u, v, w int) {
 }
 
 // 求带权树的(直径长度, 直径路径).
-func (td *TreeDiameter) GetDiameter() (diameter int, path []int) {
-	u, _ := td.dfs(0)
+func (td *TreeDiameter) GetDiameter(start int) (diameter int, path []int) {
+	u, _ := td.dfs(start)
 	v, dist := td.dfs(u)
 	diameter = dist[v]
 	path = []int{v}

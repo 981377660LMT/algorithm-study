@@ -1,4 +1,4 @@
-// !- NewTreeMonoid(tree *Tree, data []E, isVertex bool) *TreeMonoid:
+// !- NewLazyTreeMonoid(tree *Tree, data []E, isVertex bool) *LazyTreeMonoid:
 //   需要传入树、节点（或边）的初始值，以及一个布尔值表示给定的值是否是节点的值。
 
 // !- QueryPath(start, target int) E:
@@ -29,43 +29,75 @@ import (
 )
 
 func main() {
+	// https://yukicoder.me/problems/no/1197
+	// No.1197 モンスターショー
+	// 树上移动距离之和
+
+	// 给定一个有 n 个节点的树，每个节点与一条边相连，边长为 1。
+	// 一开始，有 k 只史莱姆分别位于不同的节点上。现在，你需要支持以下操作：
+	// 1 i d: 将第 i 只史莱姆从其所在节点移到节点 d。
+	// 2 e :查询将所有史莱姆移到节点 e 时，史莱姆移动距离之和。
+	// 其中，史莱姆从一个节点到另一个节点的移动距离为其走过的边长之和。
+
+	// !固定0号根节点,统计每个史莱姆的深度之和,然后统计从根节点移动到各个点的距离之和.
+
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
+	var n, k, q int
+	fmt.Fscan(in, &n, &k, &q)
+	pos := make([]int, k) // 史莱姆的初始位置
+	for i := range pos {
+		fmt.Fscan(in, &pos[i])
+		pos[i]--
+	}
 
 	tree := NewTree(n)
-	for v := 0; v < n; v++ {
-		var k int
-		fmt.Fscan(in, &k)
-		for i := 0; i < k; i++ {
-			var to int
-			fmt.Fscan(in, &to)
-			tree.AddDirectedEdge(v, to, 1)
-		}
+	for i := 0; i < n-1; i++ {
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		u--
+		v--
+		tree.AddEdge(u, v, 1)
 	}
 	tree.Build(0)
 
-	data := make([]E, n-1)
-	for i := range data {
-		data[i] = E{size: 1}
+	leaves := make([]E, n)
+	for i := 0; i < n; i++ {
+		leaves[i] = E{size: 1}
 	}
-	L := NewTreeMonoid(tree, data, false)
-	var q int
-	fmt.Fscan(in, &q)
+	LM := NewLazyTreeMonoid(tree, leaves, true)
+	for _, v := range pos {
+		LM.UpdatePath(0, v, 1)
+	}
+
+	depth := tree.Depth
+	depSum := 0
+	for _, v := range pos {
+		depSum += depth[v]
+	}
+
 	for i := 0; i < q; i++ {
-		var t int
-		fmt.Fscan(in, &t)
-		if t == 0 {
-			var v, x int
-			fmt.Fscan(in, &v, &x)
-			L.UpdatePath(0, v, x)
+		var op int
+		fmt.Fscan(in, &op)
+		if op == 1 { // 维护史莱姆的深度之和、根节点到各个结点的移动距离之和
+			var slime, moveTo int
+			fmt.Fscan(in, &slime, &moveTo)
+			slime, moveTo = slime-1, moveTo-1
+			depSum -= depth[pos[slime]]
+			LM.UpdatePath(0, pos[slime], -1)
+			pos[slime] = moveTo
+			depSum += depth[pos[slime]]
+			LM.UpdatePath(0, pos[slime], 1)
 		} else {
-			var v int
-			fmt.Fscan(in, &v)
-			fmt.Fprintln(out, L.QueryPath(0, v).sum)
+			var to int
+			fmt.Fscan(in, &to)
+			to--
+			res := depth[to]*k + depSum        // 所有史莱姆先走到根节点,再走到to的距离之和
+			res -= 2 * LM.QueryPath(0, to).sum // 多算的距离
+			res += 2 * k                       // 线段树里把0-0的移动距离统计为1,所以要减去2k
+			fmt.Fprintln(out, res)
 		}
 	}
 }
@@ -92,7 +124,7 @@ type LazyTreeMonoid struct {
 // !树的路径查询 + 区间修改, 维护的量需要满足幺半群的性质，且必须要满足交换律.
 //  data: 顶点的值, 或者边的值.(边的编号为两个定点中较深的那个点的编号)
 //  isVertex: data是否为顶点的值以及查询的时候是否是顶点权值.
-func NewTreeMonoid(tree *Tree, data []E, isVertex bool) *LazyTreeMonoid {
+func NewLazyTreeMonoid(tree *Tree, data []E, isVertex bool) *LazyTreeMonoid {
 	n := len(tree.Tree)
 	res := &LazyTreeMonoid{tree: tree, n: n, unit: e(), isVertex: isVertex}
 	leaves := make([]E, n)

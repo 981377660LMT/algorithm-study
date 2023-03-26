@@ -41,14 +41,15 @@ class Solution:
         edges = []
         values = []
         build(root)
+        E = int
 
-        def e(root: int) -> int:
+        def e(root: int) -> E:
             return 0
 
-        def op(childRes1: int, childRes2: int) -> int:
+        def op(childRes1: E, childRes2: E) -> E:
             return max(childRes1, childRes2)
 
-        def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+        def composition(fromRes: E, parent: int, cur: int, direction: int) -> E:
             """direction: 0: cur -> parent, 1: parent -> cur"""
 
             if direction == 0:  # cur -> parent
@@ -56,7 +57,7 @@ class Solution:
             return fromRes + values[parent]  # parent -> cur
 
         n = len(values)
-        R = Rerooting(n)
+        R = _R(n)
         for u, v in edges:
             R.addEdge(u, v)
         dp = R.rerooting(e, op, composition)
@@ -66,7 +67,7 @@ class Solution:
 T = TypeVar("T")
 
 
-class Rerooting(Generic[T]):
+class _R(Generic[T]):
 
     __slots__ = ("adjList", "_n", "_decrement")
 

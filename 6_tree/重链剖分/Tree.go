@@ -139,6 +139,7 @@ func (tree *Tree) Dist(u, v int, weighted bool) int {
 
 // k: 0-based
 //  如果不存在第k个祖先，返回-1
+//  kthAncestor(root,0) == root
 func (tree *Tree) KthAncestor(root, k int) int {
 	if k > tree.Depth[root] {
 		return -1

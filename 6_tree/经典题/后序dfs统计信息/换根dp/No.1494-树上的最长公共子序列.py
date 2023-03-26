@@ -11,17 +11,19 @@ from Rerooting import Rerooting
 
 
 def lcsOnTree(n: int, edges: List[Tuple[int, int, str]], target: str) -> int:
-    def e(root: int) -> List[int]:
+    E = List[int]
+
+    def e(root: int) -> E:
         return [0] * (len(target) + 1)
 
-    def op(childRes1: List[int], childRes2: List[int]) -> List[int]:
+    def op(childRes1: E, childRes2: E) -> E:
         res = childRes1[:]
         for i in range(len(res)):
             if res[i] < childRes2[i]:
                 res[i] = childRes2[i]
         return res
 
-    def composition(fromRes: List[int], parent: int, cur: int, direction: int) -> List[int]:
+    def composition(fromRes: E, parent: int, cur: int, direction: int) -> E:
         """direction: 0: cur -> parent, 1: parent -> cur"""
         from_, to = (cur, parent) if direction == 0 else (parent, cur)
         c = weights[from_][to]

@@ -35,7 +35,7 @@ class Solution:
             adjList[v - 1].append(u - 1)
 
         dist = [[0] * n for _ in range(n)]
-        lca = LCA(n, adjList, 0)
+        lca = _LC(n, adjList, 0)
         for u in range(n):
             for v in range(u + 1, n):
                 d = lca.queryDist(u, v)
@@ -80,7 +80,7 @@ class Solution:
         return res[1:]
 
 
-class LCA:
+class _LC:
     def __init__(self, n: int, tree: List[List[int]], root: int) -> None:
         """倍增查询LCA
 

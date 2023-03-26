@@ -8,6 +8,8 @@
 # 包含特殊点本身。
 # 1 <= n, m, d <= 50000
 
+
+# 求树中每个点到特殊点的最远距离
 # !树形dp，O(n)的复杂度
 # 维护距离特殊点的`最大`距离
 # !点X距离所有的特殊点都在d以内 等价表述：距离点X最远的一个特殊点的距离 <= d
@@ -24,14 +26,16 @@ INF = int(4e18)
 if __name__ == "__main__":
     from Rerooting import Rerooting
 
-    def e(root: int) -> int:
+    E = int
+
+    def e(root: int) -> E:
         """如果root不在starts中,返回-INF(因为统计的是距离特殊点的最大距离)"""
         return 0 if root in monsters else -INF
 
-    def op(childRes1: int, childRes2: int) -> int:
+    def op(childRes1: E, childRes2: E) -> E:
         return max(childRes1, childRes2)
 
-    def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+    def composition(fromRes: E, parent: int, cur: int, direction: int) -> E:
         """direction: 0: cur -> parent, 1: parent -> cur"""
         if direction == 0:  # cur -> parent
             return fromRes + 1

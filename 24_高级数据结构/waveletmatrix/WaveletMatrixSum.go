@@ -107,6 +107,7 @@ type WaveletMatrixSum struct {
 	mid    []int
 	bv     []*BitVector
 	preSum [][]int
+	unit   E
 }
 
 // log:如果要支持异或,则需要按照异或的值来决定值域
@@ -124,6 +125,7 @@ func NewWaveletMatrixSum(nums []int, log int) *WaveletMatrixSum {
 		log = bits.Len(uint(max_))
 	}
 	res := &WaveletMatrixSum{}
+	res.unit = res.e()
 	n := len(numsCopy)
 	mid := make([]int, log)
 	bv := make([]*BitVector, log)
@@ -134,7 +136,7 @@ func NewWaveletMatrixSum(nums []int, log int) *WaveletMatrixSum {
 	for i := range preSum {
 		preSum[i] = make([]int, n+1)
 		for j := range preSum[i] {
-			preSum[i][j] = res.e()
+			preSum[i][j] = res.unit
 		}
 	}
 
@@ -184,7 +186,7 @@ func (wm *WaveletMatrixSum) CountPrefix(left, right, x, xor int) (int, E) {
 		return right - left, wm.get(wm.log, left, right)
 	}
 	count := 0
-	sum := wm.e()
+	sum := wm.unit
 	for d := wm.log - 1; d >= 0; d-- {
 		add := (x >> d) & 1
 		f := (xor >> d) & 1
@@ -218,7 +220,7 @@ func (wm *WaveletMatrixSum) Kth(left, right, k, xor int) (int, E) {
 	if right-left <= k {
 		return -1, wm.get(wm.log, left, right)
 	}
-	res, sum := 0, wm.e()
+	res, sum := 0, wm.unit
 	for d := wm.log - 1; d >= 0; d-- {
 		f := (xor >> d) & 1
 		l0, r0 := wm.bv[d].Rank(left, 0), wm.bv[d].Rank(right, 0)
@@ -257,7 +259,7 @@ func (wm *WaveletMatrixSum) MaxRightValue(left, right, xor int, check func(preSu
 		return INF
 	}
 	res := 0
-	sum := wm.e()
+	sum := wm.unit
 	for d := wm.log - 1; d >= 0; d-- {
 		f := (xor >> d) & 1
 		l0, r0 := wm.bv[d].Rank(left, 0), wm.bv[d].Rank(right, 0)
@@ -293,7 +295,7 @@ func (wm *WaveletMatrixSum) MaxRightCount(left, right, xor int, check func(preSu
 	}
 
 	res := 0
-	sum := wm.e()
+	sum := wm.unit
 	for d := wm.log - 1; d >= 0; d-- {
 		f := (xor >> d) & 1
 		l0, r0 := wm.bv[d].Rank(left, 0), wm.bv[d].Rank(right, 0)

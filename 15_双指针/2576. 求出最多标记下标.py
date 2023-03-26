@@ -5,7 +5,7 @@
 # n<=1e5 nums[i]<=1e9
 
 # 1. 贪心+双指针 => 右指针从中间开始移动
-# 2. 二分答案 => 判断头部尾部是否满足条件
+# !2. 二分答案 => 判断头部尾部(最小的mid个和最大的mid个)是否满足条件
 
 from typing import List
 
@@ -49,3 +49,25 @@ class Solution:
 
 assert Solution().maxNumOfMarkedIndices([9, 2, 5, 4]) == 4
 assert Solution().maxNumOfMarkedIndices2([9, 2, 5, 4]) == 4
+
+#######################################################################
+# https://leetcode.cn/problems/maximize-greatness-of-an-array/
+# 2592. 最大化数组的伟大值
+# 给定A的任意排列,使得A[i]>B[i]的数目最多,求出个数.
+
+
+def maximizeGreatness(nums: List[int]) -> int:
+    def check(mid: int) -> bool:
+        pre, suf = nums[:mid], nums[-mid:]
+        return all(pre[i] < suf[i] for i in range(mid))
+
+    nums.sort()
+    n = len(nums)
+    left, right = 1, n
+    while left <= right:
+        mid = (left + right) // 2
+        if check(mid):
+            left = mid + 1
+        else:
+            right = mid - 1
+    return right

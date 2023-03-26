@@ -56,6 +56,8 @@ func main() {
 	}
 }
 
+const INF int = 1e18
+
 type E = int
 
 func (*WaveletMatrixSum) e() E        { return 0 }
@@ -67,12 +69,26 @@ type WaveletMatrixSum struct {
 	mid    []int
 	bv     []*BitVector
 	preSum [][]int
+	unit   E
 }
 
+// log:如果要支持异或,则需要按照异或的值来决定值域
+//  设为-1时表示不使用异或
 func NewWaveletMatrixSum(nums []int, log int) *WaveletMatrixSum {
-	nums = append(nums[:0:0], nums...)
+	numsCopy := make([]int, len(nums))
+	max_ := 0
+	for i, v := range nums {
+		numsCopy[i] = v
+		if v > max_ {
+			max_ = v
+		}
+	}
+	if log == -1 {
+		log = bits.Len(uint(max_))
+	}
 	res := &WaveletMatrixSum{}
-	n := len(nums)
+	res.unit = res.e()
+	n := len(numsCopy)
 	mid := make([]int, log)
 	bv := make([]*BitVector, log)
 	for i := 0; i < log; i++ {
@@ -82,7 +98,7 @@ func NewWaveletMatrixSum(nums []int, log int) *WaveletMatrixSum {
 	for i := range preSum {
 		preSum[i] = make([]int, n+1)
 		for j := range preSum[i] {
-			preSum[i][j] = res.e()
+			preSum[i][j] = res.unit
 		}
 	}
 
@@ -90,27 +106,27 @@ func NewWaveletMatrixSum(nums []int, log int) *WaveletMatrixSum {
 	for d := log - 1; d >= -1; d-- {
 		p0, p1 := 0, 0
 		for i := 0; i < n; i++ {
-			preSum[d+1][i+1] = res.op(preSum[d+1][i], nums[i])
+			preSum[d+1][i+1] = res.op(preSum[d+1][i], numsCopy[i])
 		}
 		if d == -1 {
 			break
 		}
 		for i := 0; i < n; i++ {
-			f := (nums[i] >> d) & 1
+			f := (numsCopy[i] >> d) & 1
 			if f == 0 {
-				a0[p0] = nums[i]
+				a0[p0] = numsCopy[i]
 				p0++
 			} else {
 				bv[d].Set(i)
-				a1[p1] = nums[i]
+				a1[p1] = numsCopy[i]
 				p1++
 			}
 		}
 		mid[d] = p0
 		bv[d].Build()
-		nums, a0 = a0, nums
+		numsCopy, a0 = a0, numsCopy
 		for i := 0; i < p1; i++ {
-			nums[p0+i] = a1[i]
+			numsCopy[p0+i] = a1[i]
 		}
 	}
 
@@ -120,7 +136,7 @@ func NewWaveletMatrixSum(nums []int, log int) *WaveletMatrixSum {
 }
 
 // 返回区间 [left, right) 中 范围在 [a, b) 中的 (元素的个数, op 的结果)
-func (wm *WaveletMatrixSum) Count(left, right, a, b, xor int) (int, E) {
+func (wm *WaveletMatrixSum) CountRange(left, right, a, b, xor int) (int, E) {
 	c1, s1 := wm.CountPrefix(left, right, a, xor)
 	c2, s2 := wm.CountPrefix(left, right, b, xor)
 	return c2 - c1, wm.op(wm.inv(s1), s2)
@@ -132,17 +148,12 @@ func (wm *WaveletMatrixSum) CountPrefix(left, right, x, xor int) (int, E) {
 		return right - left, wm.get(wm.log, left, right)
 	}
 	count := 0
-	sum := wm.e()
+	sum := wm.unit
 	for d := wm.log - 1; d >= 0; d-- {
 		add := (x >> d) & 1
 		f := (xor >> d) & 1
 		l0, r0 := wm.bv[d].Rank(left, 0), wm.bv[d].Rank(right, 0)
-		var kf int
-		if f == 0 {
-			kf = r0 - l0
-		} else {
-			kf = (right - left) - (r0 - l0)
-		}
+		kf := f*(right-left-r0+l0) + (f^1)*(r0-l0)
 		if add == 1 {
 			count += kf
 			if f == 1 {
@@ -152,12 +163,10 @@ func (wm *WaveletMatrixSum) CountPrefix(left, right, x, xor int) (int, E) {
 				sum = wm.op(sum, wm.get(d, l0, r0))
 				left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
 			}
+		} else if f == 0 {
+			left, right = l0, r0
 		} else {
-			if f == 0 {
-				left, right = l0, r0
-			} else {
-				left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
-			}
+			left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
 		}
 	}
 
@@ -173,16 +182,11 @@ func (wm *WaveletMatrixSum) Kth(left, right, k, xor int) (int, E) {
 	if right-left <= k {
 		return -1, wm.get(wm.log, left, right)
 	}
-	res, sum := 0, wm.e()
+	res, sum := 0, wm.unit
 	for d := wm.log - 1; d >= 0; d-- {
 		f := (xor >> d) & 1
 		l0, r0 := wm.bv[d].Rank(left, 0), wm.bv[d].Rank(right, 0)
-		var kf int
-		if f == 0 {
-			kf = r0 - l0
-		} else {
-			kf = (right - left) - (r0 - l0)
-		}
+		kf := f*(right-left-r0+l0) + (f^1)*(r0-l0)
 		if k < kf {
 			if f == 0 {
 				left, right = l0, r0
@@ -208,13 +212,52 @@ func (wm *WaveletMatrixSum) Kth(left, right, k, xor int) (int, E) {
 	return res, sum
 }
 
-// 返回使得 check(prefixSum) 为 true 的最大时 区间前缀的个数.
-func (wm *WaveletMatrixSum) MaxRightCount(left, right, xor int, check func(E) bool) int {
+// 返回使得 check(prefixSum) 为 true 的最大值 val.
+//  !(即区间内小于 val 的数的和 prefixSum 满足 check函数, 找到这样的最大的 val)
+//  如果整个区间都满足, 返回 INF.
+//  eg: val = 5 => 即区间内值域在 [0,5) 中的数的和满足 check 函数.
+func (wm *WaveletMatrixSum) MaxRightValue(left, right, xor int, check func(preSum E) bool) E {
+	if check(wm.get(wm.log, left, right)) {
+		return INF
+	}
+	res := 0
+	sum := wm.unit
+	for d := wm.log - 1; d >= 0; d-- {
+		f := (xor >> d) & 1
+		l0, r0 := wm.bv[d].Rank(left, 0), wm.bv[d].Rank(right, 0)
+		var loSum E
+		if f == 0 {
+			loSum = wm.get(d, l0, r0)
+		} else {
+			loSum = wm.get(d, left+wm.mid[d]-l0, right+wm.mid[d]-r0)
+		}
+		if check(wm.op(sum, loSum)) {
+			sum = wm.op(sum, loSum)
+			res |= 1 << d
+			if f == 1 {
+				left, right = l0, r0
+			} else {
+				left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
+			}
+		} else if f == 0 {
+			left, right = l0, r0
+		} else {
+			left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
+		}
+	}
+
+	return res
+}
+
+// 返回使得 check(prefixSum) 为 true 的区间前缀个数的最大值.
+//  eg: count = 4 => 即区间内的数排序后, 前4个数的和满足 check 函数.
+func (wm *WaveletMatrixSum) MaxRightCount(left, right, xor int, check func(preSum E) bool) int {
 	if check(wm.get(wm.log, left, right)) {
 		return right - left
 	}
+
 	res := 0
-	sum := wm.e()
+	sum := wm.unit
 	for d := wm.log - 1; d >= 0; d-- {
 		f := (xor >> d) & 1
 		l0, r0 := wm.bv[d].Rank(left, 0), wm.bv[d].Rank(right, 0)
@@ -236,12 +279,10 @@ func (wm *WaveletMatrixSum) MaxRightCount(left, right, xor int, check func(E) bo
 			} else {
 				left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
 			}
+		} else if f == 0 {
+			left, right = l0, r0
 		} else {
-			if f == 0 {
-				left, right = l0, r0
-			} else {
-				left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
-			}
+			left, right = left+wm.mid[d]-l0, right+wm.mid[d]-r0
 		}
 	}
 
@@ -249,6 +290,28 @@ func (wm *WaveletMatrixSum) MaxRightCount(left, right, xor int, check func(E) bo
 		return check(wm.op(sum, wm.get(0, left, left+k)))
 	}, 0, right-left)
 
+	return res
+}
+
+// [left, right) 中小于等于 x 的数中最大的数
+//  如果不存在则返回-INF
+func (w *WaveletMatrixSum) Floor(start, end, value, xor int) int {
+	less, _ := w.CountPrefix(start, end, value, xor)
+	if less == 0 {
+		return -INF
+	}
+	res, _ := w.Kth(start, end, less-1, xor)
+	return res
+}
+
+// [left, right) 中大于等于 x 的数中最小的数
+//  如果不存在则返回INF
+func (w *WaveletMatrixSum) Ceiling(start, end, value, xor int) int {
+	less, _ := w.CountPrefix(start, end, value, xor)
+	if less == end-start {
+		return INF
+	}
+	res, _ := w.Kth(start, end, less, xor)
 	return res
 }
 

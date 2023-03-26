@@ -1,6 +1,12 @@
 // https://ei1333.github.io/library/structure/heap/skew-heap.hpp
 // https://nyaannyaan.github.io/library/data-structure/skew-heap.hpp
 
+// !用于有向图最小生成树
+// https://judge.yosupo.jp/problem/directedmst
+// 特点:
+// !1. 任意两个堆可以合并成一个堆 (meld)
+// !2. 对堆中所有元素加上一个值 (add)
+
 // Build(nums []E) []*SkewHeapNode
 // Alloc(key E, index int) *SkewHeapNode
 
@@ -19,24 +25,29 @@ import "fmt"
 func main() {
 	sk := NewSkewHeap(true)
 	heaps := sk.Build([]E{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
-	fmt.Println(heaps[1].value)
+	fmt.Println(heaps[1].Value)
 	sk.Add(heaps[1], 10)
-	fmt.Println(heaps[1].value)
+	fmt.Println(heaps[1].Value)
 	newRoot := sk.Meld(heaps[2], heaps[1])
-	fmt.Println(newRoot.value)
+	fmt.Println(newRoot.Value)
 
 	for i := 0; i < 10; i++ {
 		newRoot = sk.Push(newRoot, E(i), i)
 	}
-	fmt.Println(newRoot.value)
+	fmt.Println(newRoot.Value)
+	for i := 0; i < 10; i++ {
+		newRoot = sk.Pop(newRoot)
+		fmt.Println(newRoot.Value)
+	}
 }
 
 type E = int
 
 type SkewHeapNode struct {
-	value, lazy E
+	Value       E
+	Id          int
+	lazy        E
 	left, right *SkewHeapNode
-	index       int
 }
 
 type SkewHeap struct {
@@ -55,13 +66,13 @@ func (sk *SkewHeap) Build(nums []E) []*SkewHeapNode {
 	return res
 }
 
-func (sk *SkewHeap) Alloc(key E, index int) *SkewHeapNode {
-	return &SkewHeapNode{value: key, index: index}
+func (sk *SkewHeap) Alloc(key E, id int) *SkewHeapNode {
+	return &SkewHeapNode{Value: key, Id: id}
 }
 
 // 将(key,index)插入堆中，返回插入后的堆
-func (sk *SkewHeap) Push(t *SkewHeapNode, key E, index int) *SkewHeapNode {
-	return sk.Meld(t, sk.Alloc(key, index))
+func (sk *SkewHeap) Push(t *SkewHeapNode, key E, id int) *SkewHeapNode {
+	return sk.Meld(t, sk.Alloc(key, id))
 }
 
 // 删除堆顶元素,返回删除后的堆
@@ -70,10 +81,10 @@ func (sk *SkewHeap) Pop(t *SkewHeapNode) *SkewHeapNode {
 }
 
 func (sk *SkewHeap) Top(t *SkewHeapNode) E {
-	return t.value
+	return t.Value
 }
 
-// 将x与y合并，返回合并后的堆
+// 将x与y合并，返回`融合`后的堆(会破坏原来的x,y)
 func (sk *SkewHeap) Meld(x, y *SkewHeapNode) *SkewHeapNode {
 	sk.propagate(x)
 	sk.propagate(y)
@@ -83,7 +94,7 @@ func (sk *SkewHeap) Meld(x, y *SkewHeapNode) *SkewHeapNode {
 	if y == nil {
 		return x
 	}
-	if (x.value < y.value) != sk.isMin {
+	if (x.Value < y.Value) != sk.isMin {
 		x, y = y, x
 	}
 	x.right = sk.Meld(y, x.right)
@@ -108,7 +119,7 @@ func (sk *SkewHeap) propagate(t *SkewHeapNode) *SkewHeapNode {
 		if t.right != nil {
 			t.right.lazy += t.lazy
 		}
-		t.value += t.lazy
+		t.Value += t.lazy
 		t.lazy = 0
 	}
 	return t

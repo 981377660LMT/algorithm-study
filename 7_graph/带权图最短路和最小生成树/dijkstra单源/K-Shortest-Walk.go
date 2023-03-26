@@ -3,11 +3,6 @@
 // O((V+E)*LogV+K*LogK)
 // n,m,k<=3e5
 
-// !还有一个求从s到t的k条最短路的长度,不经过重复点 的版本
-// https://ei1333.github.io/library/test/verify/yukicoder-1069.test.cpp
-// O(K*V*E*LogV)
-// n<=2e3 m<=2e3 k<=10
-
 package main
 
 import (

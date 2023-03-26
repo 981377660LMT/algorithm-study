@@ -4,13 +4,17 @@
 class Combination:
     __slots__ = ("_mod", "_fac", "_ifac")
 
-    def __init__(self, n: int, mod=int(1e9 + 7)) -> None:
+    def __init__(self, size: int, mod=int(1e9 + 7)) -> None:
         self._mod = mod
-        self._buildFac(n)
+        self._buildFac(size)
 
-    def F(self, n: int) -> int:
+    def fac(self, n: int) -> int:
         """阶乘"""
         return self._fac[n]
+
+    def ifac(self, n: int) -> int:
+        """阶乘逆元"""
+        return self._ifac[n]
 
     def C(self, n: int, k: int) -> int:
         """组合数"""

@@ -271,7 +271,11 @@ const tree = new SegmentTree(Math.min(...tiles.flat()), Math.max(...tiles.flat()
   sqrt 因为精度问题会导致开根计算出错
   `isqrt可以避免精度问题`
   E:\test\js\算法\js\js-algorithm\20\_杂题\atc 競プロ\AtCoder Beginner Contest\243\G - Sqrt.py
+
   > double 精度表示不了 int64 范围的，double 范围够大，但是 IEEE 754 double 尾数是 52 位,可以表示 53 个 bit，int64 有 63 个 bit
+
+  https://atcoder.jp/contests/panasonic2020/tasks/panasonic2020_c
+
 - 力扣代码长度上限是 100KB
 
 - 排序后再二重循环会快很多(cache,和指令缓存有关,当数组中的元素是随机的，分支预测就无法有效工作，而当数组元素都是是顺序的，分支预测器会动态地根据历史命中数据对未来进行预测，这样命中率就会很高。)

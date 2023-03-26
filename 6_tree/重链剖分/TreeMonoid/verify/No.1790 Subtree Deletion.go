@@ -1,16 +1,4 @@
-// !- NewTreeMonoid(tree *Tree, data []E, isVertex bool) *TreeMonoid:
-//   需要传入树、节点（或边）的初始值，以及一个布尔值表示给定的值是否是节点的值。
-// !- Set(i int, x E):
-//   将顶点i或者边i的值修改为x。
-// !- Update(i int, x E):
-//   将顶点i或者边i的值修改为原值与x的和。
-// !- QueryPath(start, target int) E:
-//   用于查询两个节点之间路径的值。(取决于isVertex)
-// !- MaxPath(check func(E) bool, start, target int) int:
-//   在树上查找最后一个满足条件的节点，使得从 start 到该节点的路径上的值满足某个条件。
-//   若不存在这样的节点则返回 -1。
-// !- QuerySubtree(root int) E:
-//   用于查询以给定节点为根的子树上的所有节点值的代数和。
+// 子树异或和/子树删除
 
 package main
 
@@ -22,6 +10,9 @@ import (
 )
 
 func main() {
+	// https: //yukicoder.me/problems/no/1790
+	// 查询子树边权异或和/子树删除
+	// !1. 子树删除可以用 removed 标记, 包括和父亲的那条边(如果有的话)
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -30,61 +21,66 @@ func main() {
 	fmt.Fscan(in, &n)
 
 	tree := NewTree(n)
-	for v := 0; v < n; v++ {
-		var k int
-		fmt.Fscan(in, &k)
-		for i := 0; i < k; i++ {
-			var to int
-			fmt.Fscan(in, &to)
-			tree.AddDirectedEdge(v, to, 1)
-		}
+	data := make([]E, n-1)
+	for i := 0; i < n-1; i++ {
+		var u, v, xor int
+		fmt.Fscan(in, &u, &v, &xor)
+		u--
+		v--
+		tree.AddEdge(u, v, xor)
+		data[i] = E{xor: xor}
 	}
 	tree.Build(0)
 
-	data := make([]int, n-1)
-	L := NewTreeMonoid(tree, data, false)
+	LM := NewLazyTreeMonoid(tree, data, false)
 	var q int
 	fmt.Fscan(in, &q)
 	for i := 0; i < q; i++ {
-		var t int
-		fmt.Fscan(in, &t)
-		if t == 0 {
-			var v, x int
-			fmt.Fscan(in, &v, &x)
-			L.UpdatePath(0, v, x)
-		} else {
-			var v int
-			fmt.Fscan(in, &v)
-			fmt.Fprintln(out, L.QueryPath(0, v))
+		var op, root int
+		fmt.Fscan(in, &op, &root)
+		root--
+		if op == 1 { // !删除以root为根的子树(打标记)
+			LM.UpdateSubtree(root, E{removed: true})
+			if root != 0 {
+				LM.UpdatePath(root, tree.Parent[root], E{removed: true}) // 注意这里,包括和父亲的边
+			}
+		} else { // 查询以root为根的子树的异或和
+			fmt.Fprintln(out, LM.QuerySubtree(root).xor)
 		}
 	}
-}
-
-func main3() {
-	tree := NewTree(5)
-	tree.AddEdge(0, 1, 1)
-	tree.AddEdge(0, 2, 1)
-	tree.AddEdge(1, 3, 1)
-	tree.AddEdge(1, 4, 1)
-	tree.Build(0)
-
-	S := NewTreeMonoid(tree, []int{1, 2, 3, 4, 5}, false)
-	fmt.Println(S.QueryPath(3, 4))
-	fmt.Println(S.QueryPath(3, 1))
-	fmt.Println(S.QuerySubtree(1))
-	fmt.Println(S.MaxPath(func(x int) bool { return x <= 4 }, 3, 2))
 }
 
 const INF = 1e18
 
-type E = int
-type Id = int
+type E = struct {
+	xor     int
+	removed bool
+}
+type Id = E
 
-func e() E                   { return 0 }
-func id() Id                 { return 0 }
-func op(e1, e2 E) E          { return e1 + e2 }
-func mapping(f Id, g E) E    { return f + g }
-func composition(f, g Id) Id { return f + g }
+func e() E   { return E{} }
+func id() Id { return E{} }
+func op(e1, e2 E) E {
+	if e1.removed {
+		return e2
+	}
+	if e2.removed {
+		return e1
+	}
+	return E{xor: e1.xor ^ e2.xor}
+}
+func mapping(f Id, g E) E {
+	if f.removed || g.removed {
+		return E{removed: true}
+	}
+	return E{xor: f.xor ^ g.xor}
+}
+func composition(f, g Id) Id {
+	if f.removed || g.removed {
+		return E{removed: true}
+	}
+	return E{xor: f.xor ^ g.xor}
+}
 
 type LazyTreeMonoid struct {
 	tree     *Tree
@@ -97,7 +93,7 @@ type LazyTreeMonoid struct {
 // !树的路径查询 + 区间修改, 维护的量需要满足幺半群的性质，且必须要满足交换律.
 //  data: 顶点的值, 或者边的值.(边的编号为两个定点中较深的那个点的编号)
 //  isVertex: data是否为顶点的值以及查询的时候是否是顶点权值.
-func NewTreeMonoid(tree *Tree, data []E, isVertex bool) *LazyTreeMonoid {
+func NewLazyTreeMonoid(tree *Tree, data []E, isVertex bool) *LazyTreeMonoid {
 	n := len(tree.Tree)
 	res := &LazyTreeMonoid{tree: tree, n: n, unit: e(), isVertex: isVertex}
 	leaves := make([]E, n)
@@ -560,8 +556,8 @@ func _NewLST(
 	n := len(leaves)
 	tree.n = n
 	tree.log = int(bits.Len(uint(n - 1)))
-	tree.size = 1 << uint(tree.log)
-	tree.data = make([]E, tree.size<<uint(1))
+	tree.size = 1 << tree.log
+	tree.data = make([]E, tree.size<<1)
 	tree.lazy = make([]Id, tree.size)
 	for i := range tree.data {
 		tree.data[i] = tree.dataUint
@@ -593,11 +589,11 @@ func (tree *_LST) Query(left, right int) E {
 	left += tree.size
 	right += tree.size
 	for i := tree.log; i >= 1; i-- {
-		if ((left >> uint(i)) << uint(i)) != left {
-			tree.pushDown(left >> uint(i))
+		if ((left >> i) << i) != left {
+			tree.pushDown(left >> i)
 		}
-		if ((right >> uint(i)) << uint(i)) != right {
-			tree.pushDown((right - 1) >> uint(i))
+		if ((right >> i) << i) != right {
+			tree.pushDown((right - 1) >> i)
 		}
 	}
 	sml, smr := tree.dataUint, tree.dataUint
@@ -634,11 +630,11 @@ func (tree *_LST) Update(left, right int, f Id) {
 	left += tree.size
 	right += tree.size
 	for i := tree.log; i >= 1; i-- {
-		if ((left >> uint(i)) << uint(i)) != left {
-			tree.pushDown(left >> uint(i))
+		if ((left >> i) << i) != left {
+			tree.pushDown(left >> i)
 		}
-		if ((right >> uint(i)) << uint(i)) != right {
-			tree.pushDown((right - 1) >> uint(i))
+		if ((right >> i) << i) != right {
+			tree.pushDown((right - 1) >> i)
 		}
 	}
 	l2, r2 := left, right
@@ -657,11 +653,11 @@ func (tree *_LST) Update(left, right int, f Id) {
 	left = l2
 	right = r2
 	for i := 1; i <= tree.log; i++ {
-		if ((left >> uint(i)) << uint(i)) != left {
-			tree.pushUp(left >> uint(i))
+		if ((left >> i) << i) != left {
+			tree.pushUp(left >> i)
 		}
-		if ((right >> uint(i)) << uint(i)) != right {
-			tree.pushUp((right - 1) >> uint(i))
+		if ((right >> i) << i) != right {
+			tree.pushUp((right - 1) >> i)
 		}
 	}
 }
@@ -673,7 +669,7 @@ func (tree *_LST) MinLeft(right int, predicate func(data E) bool) int {
 	}
 	right += tree.size
 	for i := tree.log; i >= 1; i-- {
-		tree.pushDown((right - 1) >> uint(i))
+		tree.pushDown((right - 1) >> i)
 	}
 	res := tree.dataUint
 	for {
@@ -707,7 +703,7 @@ func (tree *_LST) MaxRight(left int, predicate func(data E) bool) int {
 	}
 	left += tree.size
 	for i := tree.log; i >= 1; i-- {
-		tree.pushDown(left >> uint(i))
+		tree.pushDown(left >> i)
 	}
 	res := tree.dataUint
 	for {
@@ -738,7 +734,7 @@ func (tree *_LST) MaxRight(left int, predicate func(data E) bool) int {
 func (tree *_LST) Get(index int) E {
 	index += tree.size
 	for i := tree.log; i >= 1; i-- {
-		tree.pushDown(index >> uint(i))
+		tree.pushDown(index >> i)
 	}
 	return tree.data[index]
 }
@@ -747,11 +743,11 @@ func (tree *_LST) Get(index int) E {
 func (tree *_LST) Set(index int, e E) {
 	index += tree.size
 	for i := tree.log; i >= 1; i-- {
-		tree.pushDown(index >> uint(i))
+		tree.pushDown(index >> i)
 	}
 	tree.data[index] = e
 	for i := 1; i <= tree.log; i++ {
-		tree.pushUp(index >> uint(i))
+		tree.pushUp(index >> i)
 	}
 }
 

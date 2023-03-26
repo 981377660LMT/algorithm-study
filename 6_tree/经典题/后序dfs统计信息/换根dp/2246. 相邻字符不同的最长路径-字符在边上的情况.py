@@ -7,13 +7,15 @@ INF = int(1e18)
 
 class Solution:
     def longestPath(self, parent: List[int], s: str) -> int:
-        def e(root: int) -> int:
+        E = int
+
+        def e(root: int) -> E:
             return 0
 
-        def op(childRes1: int, childRes2: int) -> int:
+        def op(childRes1: E, childRes2: E) -> E:
             return max(childRes1, childRes2)
 
-        def composition(fromRes: int, parent: int, cur: int, direction: int) -> int:
+        def composition(fromRes: E, parent: int, cur: int, direction: int) -> E:
             """direction: 0: cur -> parent, 1: parent -> cur"""
             if direction == 0:  # cur -> parent
                 return fromRes + 1 if s[cur] != s[parent] else -INF

@@ -2,7 +2,7 @@ from typing import List, Set, Tuple, Union
 from collections import deque
 
 
-def calDiameter(adjList: List[List[Tuple[int, int]]]) -> Tuple[int, List[int]]:
+def calDiameter(adjList: List[List[Tuple[int, int]]], start=0) -> Tuple[int, List[int]]:
     """求带权树的(直径长度, 直径路径)"""
 
     def dfs(start: int) -> Tuple[int, List[int]]:
@@ -20,7 +20,7 @@ def calDiameter(adjList: List[List[Tuple[int, int]]]) -> Tuple[int, List[int]]:
         return endPoint, dist
 
     n = len(adjList)
-    u, _ = dfs(0)
+    u, _ = dfs(start)
     v, dist = dfs(u)
     diameter = dist[v]
     path = [v]
@@ -34,16 +34,47 @@ def calDiameter(adjList: List[List[Tuple[int, int]]]) -> Tuple[int, List[int]]:
     return diameter, path
 
 
+def getTreeDiameter(n: int, tree: List[List[int]], start=0) -> Tuple[int, List[int]]:
+    """求无权树的(直径长度,直径路径)."""
+
+    def dfs(start: int) -> Tuple[int, List[int]]:
+        dist = [-1] * n
+        dist[start] = 0
+        stack = [start]
+        while stack:
+            cur = stack.pop()
+            for next in tree[cur]:
+                if dist[next] != -1:
+                    continue
+                dist[next] = dist[cur] + 1
+                stack.append(next)
+        endPoint = dist.index(max(dist))
+        return endPoint, dist
+
+    u, _ = dfs(start)
+    v, dist = dfs(u)
+    diameter = dist[v]
+    path = [v]
+    while u != v:
+        for next in tree[v]:
+            if dist[next] + 1 == dist[v]:
+                path.append(next)
+                v = next
+                break
+
+    return diameter, path
+
+
 Tree = Union[List[List[int]], List[Set[int]]]
 
 
-def calDiameter1(adjList: "Tree") -> Tuple[int, Tuple[int, int]]:
+def calDiameter1(adjList: "Tree", start=0) -> Tuple[int, Tuple[int, int]]:
     """bfs计算树的直径长度和直径两端点"""
     n = len(adjList)
-    queue = deque([0])
+    queue = deque([start])
     visited = [False] * n
-    visited[0] = True
-    last1 = 0  # 第一次BFS最后一个点
+    visited[start] = True
+    last1 = start  # 第一次BFS最后一个点
     while queue:
         len_ = len(queue)
         for _ in range(len_):
@@ -71,7 +102,7 @@ def calDiameter1(adjList: "Tree") -> Tuple[int, Tuple[int, int]]:
     return res, tuple(sorted([last1, last2]))
 
 
-def calDiameter2(adjList: "Tree") -> List[int]:
+def calDiameter2(adjList: "Tree", start=0) -> List[int]:
     """dfs计算树的直径的`路径`"""
 
     def dfs(cur: int, pre: int) -> None:
@@ -85,7 +116,7 @@ def calDiameter2(adjList: "Tree") -> List[int]:
     depth = [0] * n
     parent = [-1] * n
 
-    dfs(0, -1)
+    dfs(start, -1)
     v1 = depth.index(max(depth))
     dfs(v1, -1)
     v2 = depth.index(max(depth))
@@ -96,14 +127,14 @@ def calDiameter2(adjList: "Tree") -> List[int]:
     return path
 
 
-def calDiameter3(adjList: "Tree") -> List[int]:
+def calDiameter3(adjList: "Tree", start=0) -> List[int]:
     """bfs计算树的直径的`路径`"""
 
     n = len(adjList)
-    queue = deque([0])
+    queue = deque([start])
     visited = [False] * n
-    visited[0] = True
-    last1 = 0
+    visited[start] = True
+    last1 = start
     while queue:
         len_ = len(queue)
         for _ in range(len_):
