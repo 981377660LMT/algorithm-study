@@ -20,6 +20,10 @@ math/convolution/polynomial/matrix (先从卷积开始写库)
 https://maspypy.com/category/algorithm_math
 https://judge.yosupo.jp/
 
+- ？？？
+
+二元有理数(Dyadic Number) => 非公平博弈里使用
+
 - **数学** (todo，感觉自己的数学很弱)
 
   - [ ] 总览

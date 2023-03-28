@@ -53,9 +53,10 @@ type ReRootingSubTree struct {
 	op          func(dp1, dp2 E) E
 	composition func(dp E, e Edge) E
 }
+
 type Node struct {
 	to, rev int
-	data    Edge
+	edge    Edge
 }
 
 func NewRerootingSubTree(n int) *ReRootingSubTree {
@@ -74,8 +75,8 @@ func (rr *ReRootingSubTree) AddEdge(u, v int, e Edge) {
 }
 
 func (rr *ReRootingSubTree) AddEdge2(u, v int, e, revE Edge) {
-	rr.G[u] = append(rr.G[u], Node{to: v, data: e})
-	rr.G[v] = append(rr.G[v], Node{to: u, data: revE})
+	rr.G[u] = append(rr.G[u], Node{to: v, edge: e})
+	rr.G[v] = append(rr.G[v], Node{to: u, edge: revE})
 }
 
 func (rr *ReRootingSubTree) ReRooting(
@@ -117,18 +118,18 @@ func (rr *ReRootingSubTree) ReRooting(
 // !root 作为根节点时, 子树 v 的 dp 值
 func (rr *ReRootingSubTree) SubTree(root, v int) E {
 	k := rr.search(rr.G[root], v)
-	return rr.composition(rr.dfs(v, rr.G[root][k].rev), rr.G[root][k].data)
+	return rr.composition(rr.dfs(v, rr.G[root][k].rev), rr.G[root][k].edge)
 }
 
 func (rr *ReRootingSubTree) dfs(root, eid int) E {
 	for rr.lp[root] != eid && rr.lp[root] < len(rr.G[root]) {
 		e := rr.G[root][rr.lp[root]]
-		rr.ld[root][rr.lp[root]+1] = rr.op(rr.ld[root][rr.lp[root]], rr.composition(rr.dfs(e.to, e.rev), e.data))
+		rr.ld[root][rr.lp[root]+1] = rr.op(rr.ld[root][rr.lp[root]], rr.composition(rr.dfs(e.to, e.rev), e.edge))
 		rr.lp[root]++
 	}
 	for rr.rp[root] != eid && rr.rp[root] >= 0 {
 		e := rr.G[root][rr.rp[root]]
-		rr.rd[root][rr.rp[root]] = rr.op(rr.rd[root][rr.rp[root]+1], rr.composition(rr.dfs(e.to, e.rev), e.data))
+		rr.rd[root][rr.rp[root]] = rr.op(rr.rd[root][rr.rp[root]+1], rr.composition(rr.dfs(e.to, e.rev), e.edge))
 		rr.rp[root]--
 	}
 	if eid < 0 {

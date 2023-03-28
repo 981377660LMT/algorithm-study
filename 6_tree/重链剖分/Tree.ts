@@ -104,11 +104,11 @@ class Tree implements ITree {
   readonly tree: [next: number, weight: number][][]
   readonly depth: Uint32Array
   readonly parent: Int32Array
+  readonly depthWeighted: number[]
   private readonly _lid: Uint32Array
   private readonly _rid: Uint32Array
   private readonly _idToNode: Uint32Array
   private readonly _top: Uint32Array
-  private readonly _depthWeighted: number[]
   private readonly _heavySon: Int32Array
   private _timer = 0
 
@@ -120,7 +120,7 @@ class Tree implements ITree {
     this._rid = new Uint32Array(n)
     this._idToNode = new Uint32Array(n)
     this._top = new Uint32Array(n)
-    this._depthWeighted = Array(n).fill(0)
+    this.depthWeighted = Array(n).fill(0)
     this._heavySon = new Int32Array(n)
   }
 
@@ -172,9 +172,7 @@ class Tree implements ITree {
 
   dist(u: number, v: number, weighted: boolean): number {
     if (weighted) {
-      return (
-        this._depthWeighted[u] + this._depthWeighted[v] - 2 * this._depthWeighted[this.lca(u, v)]
-      )
+      return this.depthWeighted[u] + this.depthWeighted[v] - 2 * this.depthWeighted[this.lca(u, v)]
     }
     return this.depth[u] + this.depth[v] - 2 * this.depth[this.lca(u, v)]
   }
@@ -339,7 +337,7 @@ class Tree implements ITree {
     })
     this.depth[cur] = dep
     this.parent[cur] = pre
-    this._depthWeighted[cur] = dist
+    this.depthWeighted[cur] = dist
     this._heavySon[cur] = heavySon
     return subSize
   }

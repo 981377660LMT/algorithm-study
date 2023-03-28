@@ -34,7 +34,7 @@ def rob2(positions: List[int], scores: List[int]) -> int:
         return 0
 
     n = len(positions)
-    dp0, dp1 = 0, scores[0]
+    dp0, dp1 = 0, scores[0]  # 不偷当前/偷当前 的方案数
     for i in range(1, n):
         dist = positions[i] - positions[i - 1]
         if dist <= 1:

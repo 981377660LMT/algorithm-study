@@ -44,7 +44,7 @@ function enumeratePartition(
     partition.pop()
   }
 
-  dfs([], 0) // 最多n个1
+  dfs([], 0)
 }
 
 if (require.main === module) {

@@ -20,6 +20,7 @@
 // CycleEdges []Edge : !基环树中在环上的边,边i连接着树的 root i和i+1 (i>=0)
 // HLDs []*HeavyLightDecomposition : !各个树的HLD
 
+// !如果原图不连通，需要并查集找到连通块后，对每个连通块建图
 package main
 
 import (
@@ -27,10 +28,11 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 )
 
 func main() {
-	namoriCut()
+	yuki1254()
 }
 
 func yuki1254() {
@@ -143,6 +145,42 @@ func namoriCut() {
 	}
 }
 
+func BuildNamoriForest(n int, edges []Edge, needHLD bool) (forest []*NamoriGraph, groupId, idInGroup []int) {
+	uf := NewUnionFindArray(n)
+	for _, e := range edges {
+		uf.Union(e.from, e.to)
+	}
+	groups := uf.GetGroups()
+	idInGroup = make([]int, n)          // 每个点在连通块中的编号
+	groupId = make([]int, n)            // 每个点所在的连通块编号
+	gs := make([]Graph, 0, len(groups)) // !每个连通块的图
+	gid := 0
+	for _, g := range groups {
+		id := 0
+		for _, v := range g {
+			groupId[v] = gid
+			idInGroup[v] = id
+			id++
+		}
+		gs = append(gs, make(Graph, len(g)))
+		gid++
+	}
+	for _, e := range edges {
+		u, v := e.from, e.to
+		gid := groupId[u]
+		id1, id2 := idInGroup[u], idInGroup[v]
+		gs[gid][id1] = append(gs[gid][id1], Edge{from: id1, to: id2, cost: e.cost, id: e.id})
+		gs[gid][id2] = append(gs[gid][id2], Edge{from: id2, to: id1, cost: e.cost, id: e.id})
+	}
+
+	forest = make([]*NamoriGraph, len(gs))
+	for i, g := range gs {
+		forest[i] = NewNamoriGraph(g)
+		forest[i].Build(needHLD)
+	}
+	return
+}
+
 type NamoriGraph struct {
 	// !以环上各个顶点i为根的无向树
 	Trees []Graph
@@ -223,7 +261,9 @@ func (ng *NamoriGraph) Build(needHLD bool) {
 		break
 	}
 
-	loop = loop[:len(loop)-1]
+	if len(loop) > 0 {
+		loop = loop[:len(loop)-1]
+	}
 	ng.markId = make([]int, n)
 	ng.id = make([]int, n)
 	for i := 0; i < len(loop); i++ {
@@ -466,4 +506,79 @@ func (hld *_HLD) markTop(cur, top int) {
 			}
 		}
 	}
+}
+
+// NewUnionFindWithCallback ...
+func NewUnionFindArray(n int) *UnionFindArray {
+	parent, rank := make([]int, n), make([]int, n)
+	for i := 0; i < n; i++ {
+		parent[i] = i
+		rank[i] = 1
+	}
+
+	return &UnionFindArray{
+		Part:   n,
+		rank:   rank,
+		n:      n,
+		parent: parent,
+	}
+}
+
+type UnionFindArray struct {
+	// 连通分量的个数
+	Part int
+
+	rank   []int
+	n      int
+	parent []int
+}
+
+func (ufa *UnionFindArray) Union(key1, key2 int) bool {
+	root1, root2 := ufa.Find(key1), ufa.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+
+	if ufa.rank[root1] > ufa.rank[root2] {
+		root1, root2 = root2, root1
+	}
+	ufa.parent[root1] = root2
+	ufa.rank[root2] += ufa.rank[root1]
+	ufa.Part--
+	return true
+}
+
+func (ufa *UnionFindArray) Find(key int) int {
+	for ufa.parent[key] != key {
+		ufa.parent[key] = ufa.parent[ufa.parent[key]]
+		key = ufa.parent[key]
+	}
+	return key
+}
+
+func (ufa *UnionFindArray) IsConnected(key1, key2 int) bool {
+	return ufa.Find(key1) == ufa.Find(key2)
+}
+
+func (ufa *UnionFindArray) GetGroups() map[int][]int {
+	groups := make(map[int][]int)
+	for i := 0; i < ufa.n; i++ {
+		root := ufa.Find(i)
+		groups[root] = append(groups[root], i)
+	}
+	return groups
+}
+
+func (ufa *UnionFindArray) Size(key int) int {
+	return ufa.rank[ufa.Find(key)]
+}
+
+func (ufa *UnionFindArray) String() string {
+	sb := []string{"UnionFindArray:"}
+	for root, member := range ufa.GetGroups() {
+		cur := fmt.Sprintf("%d: %v", root, member)
+		sb = append(sb, cur)
+	}
+	sb = append(sb, fmt.Sprintf("Part: %d", ufa.Part))
+	return strings.Join(sb, "\n")
 }

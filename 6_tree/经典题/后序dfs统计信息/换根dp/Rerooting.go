@@ -18,29 +18,11 @@ func maxOutput(n int, edges [][]int, price []int) int64 {
 		return fromRes + price[parent] // parent -> child
 	}
 
-	getSubSize := func() []int {
-		subSize := make([]int, n)
-		var dfs func(cur, parent int) int
-		dfs = func(cur, parent int) int {
-			res := 1
-			for _, next := range edges[cur] {
-				if next != parent {
-					res += dfs(next, cur)
-				}
-			}
-			subSize[cur] = res
-			return res
-		}
-		dfs(0, -1)
-		return subSize
-	}
-
 	R := NewRerooting(n)
 	for _, edge := range edges {
 		R.AddEdge(edge[0], edge[1])
 	}
 
-	_ = getSubSize
 	dp := R.ReRooting(e, op, composition)
 	return int64(maxs(dp...))
 }

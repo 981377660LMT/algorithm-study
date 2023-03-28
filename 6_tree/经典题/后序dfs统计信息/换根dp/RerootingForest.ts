@@ -28,14 +28,13 @@ interface Operation<DpItem> {
   ) => DpItem
 }
 
-class Rerooting<DpItem = number> {
+// 适用于森林的换根dp,从每个联通分量的根节点开始dp.
+class RerootingForest<DpItem = number> {
   readonly adjList: number[][] = []
-  private readonly _n: number
   private readonly _decrement: number
 
   constructor(n: number, decrement = 0) {
     this.adjList = Array.from({ length: n }, () => [])
-    this._n = n
     this._decrement = decrement
   }
 
@@ -49,54 +48,60 @@ class Rerooting<DpItem = number> {
     this.adjList[v].push(u)
   }
 
-  reRooting(operation: Operation<DpItem>, root = 0): DpItem[] {
+  /**
+   * @param groupRoot 从每个联通分量的根节点开始dp.
+   */
+  reRooting(operation: Operation<DpItem>, groupRoot: number): Map<number, DpItem> {
     const { e, op, composition } = operation
-    root -= this._decrement
+    groupRoot -= this._decrement
 
-    const parents = new Int32Array(this._n).fill(-1)
-    const order = [root]
-    const stack = [root]
+    const parents = new Map<number, number>()
+    const order = [groupRoot]
+    const stack = [groupRoot]
     while (stack.length) {
       const cur = stack.pop()!
       for (const next of this.adjList[cur]) {
-        if (next !== parents[cur]) {
-          parents[next] = cur
+        if (next !== parents.get(cur)) {
+          parents.set(next, cur)
           order.push(next)
           stack.push(next)
         }
       }
     }
 
-    const dp1 = Array.from({ length: this._n }, (_, i) => e(i))
-    const dp2 = Array.from({ length: this._n }, (_, i) => e(i))
-
-    for (let i = this._n - 1; i > -1; i--) {
+    const dp1 = new Map<number, DpItem>()
+    const dp2 = new Map<number, DpItem>()
+    order.forEach(v => {
+      dp1.set(v, e(v))
+      dp2.set(v, e(v))
+    })
+    for (let i = order.length - 1; i > -1; i--) {
       const cur = order[i]
       let res = e(cur)
       for (const next of this.adjList[cur]) {
-        if (next !== parents[cur]) {
-          dp2[next] = res
-          res = op(res, composition(dp1[next], cur, next, 0))
+        if (next !== parents.get(cur)) {
+          dp2.set(next, res)
+          res = op(res, composition(dp1.get(next)!, cur, next, 0))
         }
       }
 
       res = e(cur)
       for (let j = this.adjList[cur].length - 1; j > -1; j--) {
         const next = this.adjList[cur][j]
-        if (next !== parents[cur]) {
-          dp2[next] = op(res, dp2[next])
-          res = op(res, composition(dp1[next], cur, next, 0))
+        if (next !== parents.get(cur)) {
+          dp2.set(next, op(res, dp2.get(next)!))
+          res = op(res, composition(dp1.get(next)!, cur, next, 0))
         }
       }
 
-      dp1[cur] = res
+      dp1.set(cur, res)
     }
 
-    for (let i = 1; i < this._n; i++) {
+    for (let i = 1; i < order.length; i++) {
       const newRoot = order[i]
-      const parent = parents[newRoot]
-      dp2[newRoot] = composition(op(dp2[newRoot], dp2[parent]), parent, newRoot, 1)
-      dp1[newRoot] = op(dp1[newRoot], dp2[newRoot])
+      const parent = parents.get(newRoot)!
+      dp2.set(newRoot, composition(op(dp2.get(newRoot)!, dp2.get(parent)!), parent, newRoot, 1))
+      dp1.set(newRoot, op(dp1.get(newRoot)!, dp2.get(newRoot)!))
     }
 
     return dp1
@@ -107,23 +112,29 @@ class Rerooting<DpItem = number> {
 // 求每个点作为根节点时，到叶子节点的最大点权和(不包括自身)
 if (require.main === module) {
   function maxOutput(n: number, edges: number[][], price: number[]): number {
-    const R = new Rerooting(n)
+    const R = new RerootingForest(n)
     for (const [u, v] of edges) {
       R.addEdge(u, v)
     }
 
-    const dp = R.reRooting({
-      e: () => 0,
-      op: (childRes1, childRes2) => Math.max(childRes1, childRes2),
-      composition: (fromRes, parent, cur, direction) => {
-        if (direction === 0) return fromRes + price[cur] // cur => parent
-        return fromRes + price[parent] // parent => cur
-      }
-    })
+    const dp = R.reRooting(
+      {
+        e: () => 0,
+        op: (childRes1, childRes2) => Math.max(childRes1, childRes2),
+        composition: (fromRes, parent, cur, direction) => {
+          if (direction === 0) return fromRes + price[cur] // cur => parent
+          return fromRes + price[parent] // parent => cur
+        }
+      },
+      0
+    )
 
-    return Math.max(...dp)
+    return Math.max(...dp.values())
   }
 
+  //   6
+  // [[0,1],[1,2],[1,3],[3,4],[3,5]]
+  // [9,8,7,6,10,5]
   console.log(
     maxOutput(
       6,
@@ -136,7 +147,7 @@ if (require.main === module) {
       ],
       [9, 8, 7, 6, 10, 5]
     )
-  ) // 24
+  )
 }
 
-export { Rerooting }
+export { RerootingForest }

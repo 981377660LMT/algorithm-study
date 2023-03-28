@@ -9,11 +9,11 @@
  * @param seed 随机种子
  * @returns 每个结点的子树哈希值(子树包括自己).
  */
-function treeHash(n: number, tree: number[][], root: number, seed: number): BigUint64Array {
+function treeHash(n: number, tree: number[][], root: number, seed: number): Uint32Array {
   const random = useRandom(seed)
-  const bases = new BigUint64Array(n).map(() => BigInt(random.next()))
+  const bases = new Uint32Array(n).fill(random.next())
   const depths = new Uint32Array(n)
-  const hashes = new BigUint64Array(n).fill(1n)
+  const hashes = new Uint32Array(n).fill(1)
   dfs(root, -1)
   return hashes
 

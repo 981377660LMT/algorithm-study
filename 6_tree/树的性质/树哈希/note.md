@@ -20,13 +20,33 @@
      }
    ```
 
-2. 如果是二叉树，那么结构相同时对应位置也要相同(**子树顺序有影响**) => n 元组
+2. 树哈希 + dp (**子树顺序无影响**)
+
+方案 1:
+按照深度取随机数
+
+```js
+const base = bases[dep]
+for (const next of tree[cur]) {
+  if (next === pre) continue
+  hashes[cur] *= base + hashes[next]
+}
+```
+
+方案 2:
+按照子树 size 加权
+
+```py
+hashes[cur] = subSize[cur]*sum(hashes[child]) + subSize[cur]^2
+```
+
+还可以双哈希防止卡哈希
+
+3. 如果是`二叉树`，那么结构相同时对应位置也要相同(**子树顺序有影响**) => n 元组
 
    - 子树 subtreeHash 表示成 n 元组(可以用'#'分隔)时，遇到单链会 TLE (`n*n的字符串拼接`)
    - 优化是使用唯一的哈希 id 来代替哈希值，减少长度
      pool = deafaulitdict(itertools.count(1))
-
-3. 树哈希+dp
 
 ## 无根树的同构
 

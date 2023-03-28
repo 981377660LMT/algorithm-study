@@ -1,6 +1,7 @@
-// Functional-函数图(每个顶点出度为1的有向图)
+// Functional-函数图(每个顶点出度为1的有向图,有向的NamoriGraph)
 // 定义：Directed graphs in which every vertex has exactly one outgoing edge.
-// 每个点的入度为1，出度为1，且只有一个环
+// 每个点的入度为1，出度为1
+// 连通分量个数=环的个数
 
 package main
 

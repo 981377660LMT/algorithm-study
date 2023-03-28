@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import List
+from typing import List, Tuple
 
 # 834. 树中距离之和-换根dp
 
@@ -9,33 +9,27 @@ class Solution:
         """换根dp求每个节点到其他节点的距离之和"""
         from Rerooting import Rerooting
 
-        E = int
+        E = Tuple[int, int]  # (distSum,subSize)
 
         def e(root: int) -> E:
-            return 0
+            return (0, 0)
 
         def op(childRes1: E, childRes2: E) -> E:
-            return childRes1 + childRes2
+            dist1, size1 = childRes1
+            dist2, size2 = childRes2
+            return (dist1 + dist2, size1 + size2)
 
         def composition(fromRes: E, parent: int, cur: int, direction: int) -> E:
             """direction: 0: cur -> parent, 1: parent -> cur"""
-            if direction == 0:  # cur -> parent
-                return fromRes + subSize[cur]
-            return fromRes + (n - subSize[cur])  # parent -> cur
-
-        def dfsForSubSize(cur: int, parent: int) -> None:
-            for next in R.adjList[cur]:
-                if next != parent:
-                    dfsForSubSize(next, cur)
-                    subSize[cur] += subSize[next]
+            dist, size = fromRes
+            return (dist + size + 1, size + 1)
 
         R = Rerooting(n)
         for u, v in edges:
             R.addEdge(u, v)
-        subSize = [1] * n
-        dfsForSubSize(0, -1)
+
         dp = R.rerooting(e=e, op=op, composition=composition)
-        return dp
+        return [dp[i][0] for i in range(n)]
 
     def sumOfDistancesInTree(self, n: int, edges: List[List[int]]) -> List[int]:
         # !子结点更新父结点向下的距离 求出根0的答案

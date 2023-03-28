@@ -1,6 +1,3 @@
-# !更快的LCA查询，基于重链剖分
-
-
 from typing import List, Tuple
 
 
@@ -171,27 +168,3 @@ class LCA_HLD:
                 if next != self._heavySon[cur] and next != self.parent[cur]:
                     self._markTop(next, next)
         self.rid[cur] = self._dfn
-
-
-if __name__ == "__main__":
-
-    # n = 10
-    # LCA = LCA_HLD(n)
-    # for i in range(n - 1):
-    #     LCA.addEdge(i, i + 1, 1)
-    # LCA.build(0)
-    # print(LCA.getPath(0, 9))
-
-    class TreeAncestor:
-        def __init__(self, n: int, parent: List[int]):
-            self.lca = LCA_HLD(n)
-            for i in range(1, n):
-                self.lca.addEdge(parent[i], i, 1)
-            self.lca.build(0)
-
-        def getKthAncestor(self, node: int, k: int) -> int:
-            return self.lca.kthAncestor(node, k)
-
-    # Your TreeAncestor object will be instantiated and called as such:
-    # obj = TreeAncestor(n, parent)
-    # param_1 = obj.getKthAncestor(node,k)

@@ -1,5 +1,3 @@
-// O(nlogn)
-
 package main
 
 import (
@@ -10,6 +8,19 @@ import (
 )
 
 func main() {
+	// https://yukicoder.me/problems/no/1976
+	// No.1976 Cut then Connect-连边后树的最小直径
+
+	// 给定一棵树, 你可以做以下操作:
+	// 从树的无向边中删除一条边, 使得图的连通分量数变为2
+	// 对于图的每个连通分量, 选择一个点, 用无向边将这两个点连接起来
+	// !问: 操作后的树的直径的最小值是多少?
+
+	// 解:
+	// 1. 固定每条删除的边时,求出每个连通分量的直径后可以求出新直径的最小值
+	//  !此时答案为 max(x,y,ceil(x/2)+ceil(y/2)+1) 其中x,y为连通分量的直径
+	// 2. 对不同的边,考虑换根dp即可
+
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -31,23 +42,23 @@ func main() {
 	R.ReRooting(
 		func(root int) E { return E{0, 0} },
 		func(dp1, dp2 E) E {
-			return E{max(max(dp1.diam, dp2.diam), dp1.dist+dp2.dist), max(dp1.dist, dp2.dist)}
+			return E{max(max(dp1.dia, dp2.dia), dp1.dist+dp2.dist), max(dp1.dist, dp2.dist)}
 		},
 		func(dp E, edge Edge) E {
-			return E{dp.diam, dp.dist + 1}
+			return E{dp.dia, dp.dist + 1}
 		},
 	)
 
 	res := n
 	for _, e := range edges {
 		u, v := e[0], e[1]
-		dia1, dia2 := R.SubTree(u, v).diam, R.SubTree(v, u).diam
+		dia1, dia2 := R.SubTree(u, v).dia, R.SubTree(v, u).dia
 		res = min(res, max(max(dia1, dia2), (dia1+1)/2+(dia2+1)/2+1))
 	}
 	fmt.Fprintln(out, res)
 }
 
-type E = struct{ diam, dist int }
+type E = struct{ dia, dist int }
 type Edge = struct{ from, to, cost int }
 
 type ReRootingSubTree struct {
@@ -58,7 +69,6 @@ type ReRootingSubTree struct {
 	op          func(dp1, dp2 E) E
 	composition func(dp E, e Edge) E
 }
-
 type Node struct {
 	to, rev int
 	edge    Edge
@@ -85,6 +95,7 @@ func (rr *ReRootingSubTree) AddEdge2(u, v int, e, revE Edge) {
 	rr.G[u] = append(rr.G[u], Node{to: v, edge: e})
 	rr.G[v] = append(rr.G[v], Node{to: u, edge: revE})
 }
+
 func (rr *ReRootingSubTree) ReRooting(
 	e func(root int) E,
 	op func(dp1, dp2 E) E,
@@ -144,8 +155,8 @@ func (rr *ReRootingSubTree) dfs(root, eid int) E {
 	return rr.op(rr.ld[root][eid], rr.rd[root][eid+1])
 }
 
-func (rr *ReRootingSubTree) search(vs []Node, vid int) int {
-	return sort.Search(len(vs), func(i int) bool { return vs[i].to >= vid })
+func (rr *ReRootingSubTree) search(vs []Node, idx int) int {
+	return sort.Search(len(vs), func(i int) bool { return vs[i].to >= idx })
 }
 
 func min(a, b int) int {

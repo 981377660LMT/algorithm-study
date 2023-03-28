@@ -1,9 +1,9 @@
-from typing import List
-
+# 1605. 给定行和列的和求矩阵
 # 其中 rowSum[i] 是二维矩阵中第 i 行元素的和， colSum[j] 是第 j 列元素的和
 # 请找到大小为 rowSum.length x colSum.length 的任意 非负整数 矩阵，且该矩阵满足 rowSum 和 colSum 的要求。
 
-# 思路:遍历 matrix，每次都填这次能填的最大数, min(rowSum[i], colSum[j])
+# !思路:遍历 matrix，每次都填这次能填的最大数, min(rowSum[i], colSum[j])
+from typing import List
 
 
 class Solution:
