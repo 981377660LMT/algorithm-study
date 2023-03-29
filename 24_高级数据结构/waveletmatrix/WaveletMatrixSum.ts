@@ -39,8 +39,12 @@ class WaveletMatrixSum {
 
     const n = nums.length
     const mid = new Uint32Array(log)
-    const bv = Array.from({ length: log }, () => new _BV(n))
-    const preSum = Array.from({ length: log + 1 }, () => Array(n + 1).fill(0))
+    const bv = Array(log)
+      .fill(0)
+      .map(() => new _BV(n))
+    const preSum = Array(log + 1)
+      .fill(0)
+      .map(() => Array(n + 1).fill(0))
     let a0 = new Uint32Array(n)
     const a1 = new Uint32Array(n)
     for (let d = log - 1; d >= -1; d--) {
@@ -310,7 +314,9 @@ class _BV {
   private readonly _data: [count: number, sum: number][] = []
 
   constructor(n: number) {
-    this._data = Array.from({ length: (n + 63) >> 5 }, () => [0, 0])
+    this._data = Array((n + 63) >> 5)
+      .fill(0)
+      .map(() => [0, 0])
   }
 
   add(i: number): void {
@@ -351,6 +357,7 @@ if (require.main === module) {
   ) // 4 即排序后前 4 个数的和小于 11
   assert.deepStrictEqual(wm.ceiling(0, 10, 3, 0), 3)
   assert.deepStrictEqual(wm.floor(0, 10, 3, 0), 2)
+  console.log('pass')
 }
 
 export { WaveletMatrixSum }

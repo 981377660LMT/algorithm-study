@@ -1,2 +1,0 @@
-
-        for node in group:

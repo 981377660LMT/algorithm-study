@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import DefaultDict, Generic, Hashable, Iterable, List, Optional, TypeVar
+from typing import Callable, DefaultDict, Generic, Hashable, Iterable, List, Optional, TypeVar
 
 
 T = TypeVar("T", bound=Hashable)
@@ -105,6 +105,22 @@ class UnionFindArray:
         self._parent[rootX] = rootY
         self._rank[rootY] += self._rank[rootX]
         self.part -= 1
+        return True
+
+    def unionWithCallback(self, x: int, y: int, f: Callable[[int, int], None]) -> bool:
+        """
+        f: 合并后的回调函数, 入参为 (big, small)
+        """
+        rootX = self.find(x)
+        rootY = self.find(y)
+        if rootX == rootY:
+            return False
+        if self._rank[rootX] > self._rank[rootY]:
+            rootX, rootY = rootY, rootX
+        self._parent[rootX] = rootY
+        self._rank[rootY] += self._rank[rootX]
+        self.part -= 1
+        f(rootY, rootX)
         return True
 
     def isConnected(self, x: int, y: int) -> bool:

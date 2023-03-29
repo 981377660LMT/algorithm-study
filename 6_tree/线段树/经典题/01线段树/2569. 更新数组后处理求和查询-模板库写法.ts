@@ -6,7 +6,7 @@ import { useAtcoderLazySegmentTree } from '../../template/atcoder_segtree/Atcode
 // 操作类型 3 为 queries[i] = [3, 0, 0] 。求 nums2 中所有元素的和。
 // 请你返回一个数组，包含所有第三种操作类型的答案。
 function handleQuery(nums1: number[], nums2: number[], queries: number[][]): number[] {
-  const leaves = Array.from({ length: nums1.length }, (_, i) => [nums1[i], 1])
+  const leaves = nums1.map(num => [num, 1])
   const seg01 = useAtcoderLazySegmentTree(leaves, {
     e: () => [0, 1],
     id: () => 0,

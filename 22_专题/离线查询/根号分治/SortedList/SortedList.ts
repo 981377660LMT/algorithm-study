@@ -276,7 +276,10 @@ class SortedList<T = number> {
     }
     const bCount = Math.ceil(Math.sqrt(this._size / SortedList._BLOCK_RATIO))
     const bSize = ~~((this._size + bCount - 1) / bCount) // ceil
-    const newB: T[][] = Array.from({ length: bCount }, () => [])
+    const newB: T[][] = Array(bCount).fill(0)
+    for (let i = 0; i < bCount; i++) {
+      newB[i] = []
+    }
     let ptr = 0
     for (let i = 0; i < this._blocks.length; i++) {
       const b = this._blocks[i]
@@ -292,7 +295,10 @@ class SortedList<T = number> {
   private _initBlocks(sorted: T[]): T[][] {
     const bCount = Math.ceil(Math.sqrt(sorted.length / SortedList._BLOCK_RATIO))
     const bSize = ~~((sorted.length + bCount - 1) / bCount) // ceil
-    const newB: T[][] = Array.from({ length: bCount }, () => [])
+    const newB: T[][] = Array(bCount).fill(0)
+    for (let i = 0; i < bCount; i++) {
+      newB[i] = []
+    }
     for (let i = 0; i < bCount; i++) {
       for (let j = i * bSize; j < Math.min((i + 1) * bSize, sorted.length); j++) {
         newB[i].push(sorted[j])

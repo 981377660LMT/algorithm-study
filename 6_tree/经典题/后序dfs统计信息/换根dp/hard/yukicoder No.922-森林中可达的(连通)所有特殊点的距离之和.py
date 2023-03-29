@@ -1,6 +1,6 @@
 # https://yukicoder.me/problems/no/922
 
-# yukicoder No.922-森林修建机场
+# yukicoder No.922-森林中可达的(连通)所有特殊点的距离之和
 # 给定一颗树,切断一些边，保留其中的m条边.
 # 有q个移动,每次移动从ai到bi
 # 为了完成移动,决定在每个连通分量设置一个飞机场

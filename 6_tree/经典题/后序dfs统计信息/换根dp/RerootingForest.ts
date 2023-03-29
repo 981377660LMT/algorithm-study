@@ -34,7 +34,9 @@ class RerootingForest<DpItem = number> {
   private readonly _decrement: number
 
   constructor(n: number, decrement = 0) {
-    this.adjList = Array.from({ length: n }, () => [])
+    this.adjList = Array(n)
+      .fill(0)
+      .map(() => [])
     this._decrement = decrement
   }
 

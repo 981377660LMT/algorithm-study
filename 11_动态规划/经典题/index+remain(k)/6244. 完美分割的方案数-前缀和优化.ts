@@ -21,7 +21,10 @@ const MOD = 1e9 + 7
 function beautifulPartitions(s: string, k: number, minLength: number): number {
   const n = s.length
   // !dp[count][index]表示前index个字符分成count段的方案数 (因为要用前缀和优化index维度 所以把index维度作为第二维度更加方便)
-  const dp = Array.from({ length: k + 1 }, () => new Uint32Array(n + 1))
+  const dp = Array(k + 1).fill(0)
+  for (let i = 0; i <= k; i++) {
+    dp[i] = new Uint32Array(n + 1)
+  }
   const nums = s.split('').map(Number)
   dp[0][0] = 1
 
@@ -45,7 +48,10 @@ function beautifulPartitions(s: string, k: number, minLength: number): number {
 function beautifulPartitions2(s: string, k: number, minLength: number): number {
   const n = s.length
   // !dp[count][index]表示前index个字符分成count段的方案数 (因为要用前缀和优化index维度 所以把index维度作为第二维度更加方便)
-  const dp = Array.from({ length: k + 1 }, () => new Uint32Array(n + 1))
+  const dp = Array(k + 1).fill(0)
+  for (let i = 0; i <= k; i++) {
+    dp[i] = new Uint32Array(n + 1)
+  }
   const nums = s.split('').map(Number)
   dp[0][0] = 1
 

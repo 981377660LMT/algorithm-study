@@ -106,7 +106,7 @@ class LCA_HLD:
             if a <= b:
                 res += self._idToNode[a : b + 1]
             else:
-                res += self._idToNode[a : b - 1 : -1]
+                res += self._idToNode[b : a + 1][::-1]
         return res
 
     def getPathDecomposition(self, from_: int, to: int, vertex: bool) -> List[Tuple[int, int]]:

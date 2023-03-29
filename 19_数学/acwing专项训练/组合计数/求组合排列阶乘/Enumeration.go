@@ -1,18 +1,11 @@
 package main
 
-import "fmt"
-
 var E *Enumeration
 
 func init() {
 	const SIZE int = 1e6 + 10
 	const MOD int = 1e9 + 7
-	E = NewEnumeration(9, MOD)
-	fmt.Println(E.C(10, 3))
-}
-
-func main() {
-
+	E = NewEnumeration(SIZE, MOD)
 }
 
 type Enumeration struct {

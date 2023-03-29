@@ -8,7 +8,7 @@ from math import ceil, floor
 
 #  k很大最多 25 * 10^8
 # 第k=>二分找答案
-# 在类似题目 668. 乘法表中第k小的数 和 719. 找出第 k 小的距离对 中，经典的解法是双指针，将单次 check 的时间复杂度降低到了 O(n)O(n)
+# 在类似题目 668. 乘法表中第k小的数 和 719. 找出第 k 小的距离对 中，经典的解法是双指针，将单次 check 的时间复杂度降低到了 O(n)
 # https://leetcode-cn.com/problems/kth-smallest-product-of-two-sorted-arrays/solution/leetcode-668-cheng-fa-biao-bian-xing-by-8axdy/
 # 注意 python 除法的取整问题。python 中的 // 是向下取整(>>也是向下取整)，但是向上取整，为了方便，直接浮点除法 + math.ceil 调用实现。
 

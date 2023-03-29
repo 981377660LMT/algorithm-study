@@ -77,7 +77,10 @@ function useUnionFindMap<T = unknown>(iterable?: T[]) {
  */
 function useUnionFindArray(size: number) {
   let count = size
-  const parents = Array.from<number, number>({ length: size }, (_, i) => i)
+  const parents = Array(size).fill(0)
+  for (let i = 0; i < size; i++) {
+    parents[i] = i
+  }
   const ranks = Array<number>(size).fill(1)
 
   function find(key: number) {

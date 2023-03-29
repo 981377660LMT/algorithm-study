@@ -3,7 +3,9 @@
 function rotateMatrix(mat: number[][]): number[][] {
   const ROW = mat.length
   const COL = mat[0].length
-  const res = Array.from<number, number[]>({ length: COL }, () => Array(ROW).fill(0))
+  const res: number[][] = Array(COL)
+    .fill(0)
+    .map(() => Array(ROW).fill(0))
 
   for (let r = 0; r < ROW; r++) {
     for (let c = 0; c < COL; c++) {
@@ -41,7 +43,7 @@ function rotate(matrix: number[][]): void {
 rotate([
   [1, 2, 3],
   [4, 5, 6],
-  [7, 8, 9],
+  [7, 8, 9]
 ])
 
 export { rotateMatrix }

@@ -34,7 +34,9 @@ class Rerooting<DpItem = number> {
   private readonly _decrement: number
 
   constructor(n: number, decrement = 0) {
-    this.adjList = Array.from({ length: n }, () => [])
+    this.adjList = Array(n)
+      .fill(0)
+      .map(() => [])
     this._n = n
     this._decrement = decrement
   }
@@ -67,8 +69,12 @@ class Rerooting<DpItem = number> {
       }
     }
 
-    const dp1 = Array.from({ length: this._n }, (_, i) => e(i))
-    const dp2 = Array.from({ length: this._n }, (_, i) => e(i))
+    const dp1 = Array(this._n).fill(0)
+    const dp2 = Array(this._n).fill(0)
+    for (let i = 0; i < this._n; i++) {
+      dp1[i] = e(i)
+      dp2[i] = e(i)
+    }
 
     for (let i = this._n - 1; i > -1; i--) {
       const cur = order[i]

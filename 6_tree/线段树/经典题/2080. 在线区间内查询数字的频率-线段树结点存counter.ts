@@ -11,7 +11,7 @@ class SegmentTree {
 
   constructor(nums: number[]) {
     const size = nums.length
-    this.tree = Array.from({ length: size << 2 })
+    this.tree = Array(4 * size).fill(0)
     this.build(1, 1, size, nums)
   }
 
@@ -36,7 +36,6 @@ class SegmentTree {
     node.right = right
 
     if (left === right) {
-      
       node.counter.set(nums[left - 1], (node.counter.get(nums[left - 1]) ?? 0) + 1)
       return
     }

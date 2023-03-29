@@ -113,7 +113,10 @@ class Tree implements ITree {
   private _timer = 0
 
   constructor(n: number) {
-    this.tree = Array.from({ length: n }, () => [])
+    this.tree = Array(n).fill(0)
+    for (let i = 0; i < n; i++) {
+      this.tree[i] = []
+    }
     this.depth = new Uint32Array(n)
     this.parent = new Int32Array(n).fill(-1)
     this._lid = new Uint32Array(n)

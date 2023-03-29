@@ -4,7 +4,9 @@
 import assert from 'assert'
 
 function usePrime(max: number) {
-  const minPrime = Array.from({ length: max + 1 }, (_, i) => i) // 每个数的最小质因数
+  const minPrime = new Uint32Array(max + 1)
+  for (let i = 0; i <= max; i++) minPrime[i] = i
+
   const upper = Math.floor(Math.sqrt(max))
   for (let i = 2; i <= upper; i++) {
     if (minPrime[i] < i) continue

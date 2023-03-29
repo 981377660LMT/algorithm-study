@@ -4,7 +4,9 @@ class PreSumMatrix {
   constructor(matrix: number[][]) {
     const row = matrix.length
     const col = matrix[0].length
-    const preSum = Array.from({ length: row + 1 }, () => Array(col + 1).fill(0))
+    const preSum = Array(row + 1)
+      .fill(0)
+      .map(() => Array(col + 1).fill(0))
     for (let i = 1; i < row + 1; i++) {
       for (let j = 1; j < col + 1; j++) {
         // 注意这里的减1
@@ -43,7 +45,9 @@ class DiffMatrix {
   constructor(M: number[][]) {
     this.ROW = M.length
     this.COL = M[0].length
-    this.matrix = Array.from({ length: this.ROW }, () => Array(this.COL).fill(0))
+    this.matrix = Array(this.ROW)
+      .fill(0)
+      .map(() => Array(this.COL).fill(0))
     for (let i = 0; i < this.ROW; i++) {
       for (let j = 0; j < this.COL; j++) {
         this.matrix[i][j] = M[i][j]
@@ -51,7 +55,9 @@ class DiffMatrix {
     }
 
     // 需要额外大小为(m+2)∗(n+2)的差分数组，第一行第一列不用(始终为0)
-    this.diff = Array.from({ length: this.ROW + 2 }, () => Array(this.COL + 2).fill(0))
+    this.diff = Array(this.ROW + 2)
+      .fill(0)
+      .map(() => Array(this.COL + 2).fill(0))
     // this.preSum = new PreSumMatrix(this.matrix)
   }
 
@@ -78,7 +84,9 @@ class DiffMatrix {
       }
     }
 
-    this.diff = Array.from({ length: this.ROW + 2 }, () => Array(this.COL + 2).fill(0))
+    this.diff = Array(this.ROW + 2)
+      .fill(0)
+      .map(() => Array(this.COL + 2).fill(0))
     // this.preSum = new PreSumMatrix(this.matrix)
   }
 
@@ -103,7 +111,7 @@ if (require.main === module) {
   const nm = new PreSumMatrix([
     [1, 2, 3],
     [4, 5, 6],
-    [7, 8, 9],
+    [7, 8, 9]
   ])
 
   console.log(nm.queryRange(1, 1, 2, 2))

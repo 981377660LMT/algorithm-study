@@ -23,7 +23,10 @@ class Edge {
  */
 function useMinCostMaxFlow(n: number, start: number, end: number) {
   const _edges: Edge[] = []
-  const _reGraph: number[][] = Array.from({ length: n }, () => []) // 残量图存储的是边的下标
+  const _reGraph = Array(n).fill(0)
+  for (let i = 0; i < n; i++) {
+    _reGraph[i] = []
+  }
 
   const _dist = Array<number>(n).fill(INF)
   const _flow = Array<number>(n).fill(0)

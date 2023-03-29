@@ -10,39 +10,29 @@
 const smallestDistancePair = function (nums: number[], k: number): number {
   nums.sort((a, b) => a - b)
 
-  // 距离最大最小值之差
+  // !如果不大于距离k的点对数正好是k个，并不代表第K小的距离对的距离就是K，因为有可能比K小
   let left = 0
-  let right = nums[nums.length - 1] - nums[0]
-
+  let right = 4e15
   while (left <= right) {
     const mid = (left + right) >> 1
-    // 如果不大于距离k的点对数正好是k个，并不代表第K小的距离对的距离就是K，因为有可能比K小
     if (countNGT(mid) < k) {
       left = mid + 1
     } else {
       right = mid - 1
     }
   }
-
   return left
 
-  /**
-   *
-   * @param n 距离不大于n的点对数
-   * @description 复杂度O(n) 是一个滑动窗口
-   */
-  function countNGT(n: number): number {
+  // 不超过mid的答案个数
+  function countNGT(mid: number): number {
     let count = 0
     let left = 0
-
     for (let right = 0; right < nums.length; right++) {
-      while (nums[right] - nums[left] > n) {
+      while (right < nums.length && nums[right] - nums[left] > mid) {
         left++
       }
-
       count += right - left
     }
-
     return count
   }
 }

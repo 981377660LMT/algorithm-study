@@ -1,6 +1,7 @@
 // 1 <= val, inc, m <= 100
 // 0 <= idx <= 1e5
 // 总共最多会有 1e5 次对 append，addAll，multAll 和 getIndex 的调用。
+// !TLE js的大数运算太慢了
 
 import { AtcoderSegmentTree, Operation, useAtcoderLazySegmentTree } from '../AtcoderLazySegmentTree'
 

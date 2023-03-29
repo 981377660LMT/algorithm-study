@@ -18,7 +18,9 @@ class WaveletMatrix {
     const max_ = Math.max(...nums, 0)
     const n = nums.length
     const maxLog = 32 - Math.clz32(max_) + 1 // bit_len + 1
-    const mat = Array.from({ length: maxLog }, () => new _BV(n + 1))
+    const mat = Array(maxLog)
+      .fill(0)
+      .map(() => new _BV(n + 1))
     const zs = new Uint32Array(maxLog)
     const buff1 = new Uint32Array(maxLog)
     const buff2 = new Uint32Array(maxLog)

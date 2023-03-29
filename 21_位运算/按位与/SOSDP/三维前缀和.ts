@@ -33,9 +33,13 @@ class MatrixPreSum3D {
     const zSize = matrix[0][0].length
 
     const arrayType = dataType ? ARRAYTYPE_RECORD[dataType] : Array
-    const preSum = Array.from({ length: xSize + 1 }, () =>
-      Array.from({ length: ySize + 1 }, () => new arrayType(zSize + 1).fill(0))
-    )
+    const preSum = Array(xSize + 1).fill(0)
+    for (let i = 0; i < xSize + 1; i++) {
+      preSum[i] = Array(ySize + 1).fill(0)
+      for (let j = 0; j < ySize + 1; j++) {
+        preSum[i][j] = new arrayType(zSize + 1).fill(0)
+      }
+    }
 
     for (let x = 1; x < xSize + 1; x++) {
       for (let y = 1; y < ySize + 1; y++) {

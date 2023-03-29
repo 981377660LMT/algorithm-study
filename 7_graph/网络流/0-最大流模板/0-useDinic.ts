@@ -18,7 +18,10 @@ function useDinic(n: number, start: number, end: number) {
     throw new RangeError(`start: ${start}, end: ${end} out of range [0, ${n - 1}]`)
   }
 
-  const _reGraph = Array.from<unknown, number[]>({ length: n }, () => [])
+  const _reGraph: number[][] = Array(n)
+    .fill(0)
+    .map(() => [])
+
   const _edges: [next: number, capacity: number][] = []
   const _visitedEdge = new Set<number>()
 
@@ -131,7 +134,9 @@ function useDinic(n: number, start: number, end: number) {
    * ```
    */
   function useQueryRemainOfEdge(): (v1: number, v2: number) => number {
-    const adjMap = Array.from<number, Map<number, number>>({ length: n }, () => new Map())
+    const adjMap: Map<number, number>[] = Array(n)
+      .fill(0)
+      .map(() => new Map())
     for (let cur = 0; cur < n; cur++) {
       const eis = _reGraph[cur]
       const innerMap = adjMap[cur]

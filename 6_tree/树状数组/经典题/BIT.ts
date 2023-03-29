@@ -176,7 +176,10 @@ class BIT3 {
   constructor(row: number, col: number) {
     this._ROW = row
     this._COL = col
-    this._tree = Array.from({ length: row + 1 }, () => Array(col + 1).fill(0))
+    this._tree = Array(row + 1).fill(0)
+    for (let i = 0; i <= row; i++) {
+      this._tree[i] = Array(col + 1).fill(0)
+    }
   }
 
   /**
@@ -235,10 +238,16 @@ class BIT4 {
   constructor(row: number, col: number) {
     this._ROW = row
     this._COL = col
-    this._tree1 = Array.from({ length: row + 1 }, () => Array(col + 1).fill(0))
-    this._tree2 = Array.from({ length: row + 1 }, () => Array(col + 1).fill(0))
-    this._tree3 = Array.from({ length: row + 1 }, () => Array(col + 1).fill(0))
-    this._tree4 = Array.from({ length: row + 1 }, () => Array(col + 1).fill(0))
+    this._tree1 = Array(row + 1).fill(0)
+    this._tree2 = Array(row + 1).fill(0)
+    this._tree3 = Array(row + 1).fill(0)
+    this._tree4 = Array(row + 1).fill(0)
+    for (let i = 0; i <= row; i++) {
+      this._tree1[i] = Array(col + 1).fill(0)
+      this._tree2[i] = Array(col + 1).fill(0)
+      this._tree3[i] = Array(col + 1).fill(0)
+      this._tree4[i] = Array(col + 1).fill(0)
+    }
   }
 
   /**

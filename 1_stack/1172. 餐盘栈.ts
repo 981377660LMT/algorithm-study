@@ -14,7 +14,9 @@ class DinnerPlates {
   constructor(capacity: number) {
     this._stackCap = capacity
     this._bit = new BIT(DinnerPlates._N)
-    this._stack = Array.from({ length: DinnerPlates._N }, () => [])
+    this._stack = Array(DinnerPlates._N)
+      .fill(0)
+      .map(() => [])
   }
 
   // 将给出的正整数 val 推入 从左往右第一个 没有满的栈。

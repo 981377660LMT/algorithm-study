@@ -41,7 +41,8 @@ function useSegmentTree2D<E = number>(
 ): SegmentTree2D<E> {
   const _row = 1 << (32 - Math.clz32(row - 1))
   const _col = 1 << (32 - Math.clz32(col - 1))
-  const _tree = Array.from({ length: (_row * _col) << 2 }, () => e())
+  const _tree = Array((_row * _col) << 2).fill(0)
+  for (let i = 0; i < _tree.length; i++) _tree[i] = e()
   const _id = (r: number, c: number) => ((r * _col) << 1) + c
 
   function addPoint(row: number, col: number, value: E): void {

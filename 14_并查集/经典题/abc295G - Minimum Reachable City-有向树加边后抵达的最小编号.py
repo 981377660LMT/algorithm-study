@@ -1,4 +1,77 @@
-from typing import List, Tuple
+# 区间并查集+重链剖分合并路径上的所有点
+# G - Minimum Reachable City-有向树加边后抵达的最小编号
+# 给定一颗特殊的有向树,第i条边连接p和i+1且p<i+1.(沿着树边走,编号递增)
+# 现在给定q个操作
+# !1 u v: 在u和v之间加一条边,保证连边之前可以在最开始的树上从v到达u
+# !2 u: 询问从u出发,能到达的最小编号的点是多少.
+
+# 解:
+# !操作1可以等价于连接v到u之间的所有`反向边` => 无向图，可以并查集维护连通块内最小编号
+# 操作1可以等价于连接v到u之间的所有反向边，然后就构成了一个无向图，
+# 需要把这些结点用并查集全部合并，自然可以用支持区间合并的并查集；
+# !但问题是这些点在区间上不连续，可以用重链剖分把路径分割成在欧拉序上连续的几段，
+# 然后用区间并查集把每一段合并，段和段之间的端点合并，合并后回调更新每个组的最小值
+
+from collections import defaultdict
+from typing import DefaultDict, List, Tuple, Union, Callable, Optional
+
+
+class UnionFindRange:
+    __slots__ = "part", "_n", "_parent", "_rank"
+
+    def __init__(self, n: int):
+        self.part = n
+        self._n = n
+        self._parent = list(range(n))
+        self._rank = [1] * n
+
+    def find(self, x: int) -> int:
+        while x != self._parent[x]:
+            self._parent[x] = self._parent[self._parent[x]]
+            x = self._parent[x]
+        return x
+
+    def union(self, x: int, y: int, f: Optional[Callable[[int, int], None]] = None) -> bool:
+        """union后, 大的编号所在的组的指向小的编号所在的组."""
+        if x < y:
+            x, y = y, x
+        rootX = self.find(x)
+        rootY = self.find(y)
+        if rootX == rootY:
+            return False
+        self._parent[rootX] = rootY
+        self._rank[rootY] += self._rank[rootX]
+        self.part -= 1
+        if f is not None:
+            f(rootY, rootX)
+        return True
+
+    def unionRange(
+        self, left: int, right: int, f: Optional[Callable[[int, int], None]] = None
+    ) -> int:
+        """合并[left,right]区间, 返回合并次数."""
+        if left > right:
+            left, right = right, left
+        leftRoot = self.find(left)
+        rightRoot = self.find(right)
+        unionCount = 0
+        while rightRoot != leftRoot:
+            unionCount += 1
+            self.union(rightRoot, rightRoot - 1, f)
+            rightRoot = self.find(rightRoot - 1)
+        return unionCount
+
+    def isConnected(self, x: int, y: int) -> bool:
+        return self.find(x) == self.find(y)
+
+    def getSize(self, x: int) -> int:
+        return self._rank[self.find(x)]
+
+    def getGroups(self) -> DefaultDict[int, List[int]]:
+        group = defaultdict(list)
+        for i in range(self._n):
+            group[self.find(i)].append(i)
+        return group
 
 
 # class Tree
@@ -168,3 +241,64 @@ class LCA_HLD:
                 if next != self._heavySon[cur] and next != self.parent[cur]:
                     self._markTop(next, next)
         self.rid[cur] = self._dfn
+
+
+def minimumRechableCity(
+    n: int,
+    edges: List[Tuple[int, int]],
+    queries: List[Union[Tuple[int, int, int], Tuple[int, int]]],
+) -> List[int]:
+    def callback(big: int, small: int) -> None:
+        min_ = min(eulerMin[big], eulerMin[small])
+        eulerMin[big] = min_
+
+    tree = LCA_HLD(n)
+    for u, v in edges:
+        tree.addDirectedEdge(u, v, 1)
+    tree.build(0)
+
+    lid = tree.lid
+    eulerMin = [0] * n  # 欧拉序为i的点所在组里的最小编号
+    for i in range(n):
+        eulerMin[lid[i]] = i
+
+    res = []
+    uf = UnionFindRange(n)
+    for op, *args in queries:
+        if op == 1:
+            u, v = args
+            path = tree.getPathDecomposition(u, v, True)
+            for a, b in path:  # [a,b]欧拉序区间
+                if a > b:
+                    a, b = b, a
+                uf.unionRange(a, b, callback)
+            for (_, pre), (cur, _) in zip(path, path[1:]):
+                uf.union(pre, cur, callback)
+        else:
+            v = args[0]
+            euler = lid[v]
+            res.append(eulerMin[uf.find(euler)])
+    return res
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.setrecursionlimit(int(1e9))
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
+    n = int(input())
+    parents = list(map(int, input().split()))
+    edges = []
+    for i, p in enumerate(parents):
+        edges.append((p - 1, i + 1))
+    q = int(input())
+    queries = []
+    for _ in range(q):
+        op, *args = map(int, input().split())
+        if op == 1:
+            queries.append((op, args[0] - 1, args[1] - 1))
+        else:
+            queries.append((op, args[0] - 1))
+    res = minimumRechableCity(n, edges, queries)
+    for r in res:
+        print(r + 1)
