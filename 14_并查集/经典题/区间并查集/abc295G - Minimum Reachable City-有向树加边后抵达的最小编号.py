@@ -12,66 +12,11 @@
 # !但问题是这些点在区间上不连续，可以用重链剖分把路径分割成在欧拉序上连续的几段，
 # 然后用区间并查集把每一段合并，段和段之间的端点合并，合并后回调更新每个组的最小值
 
-from collections import defaultdict
-from typing import DefaultDict, List, Tuple, Union, Callable, Optional
+
+from RangeUnionFind import UnionFindRange
 
 
-class UnionFindRange:
-    __slots__ = "part", "_n", "_parent", "_rank"
-
-    def __init__(self, n: int):
-        self.part = n
-        self._n = n
-        self._parent = list(range(n))
-        self._rank = [1] * n
-
-    def find(self, x: int) -> int:
-        while x != self._parent[x]:
-            self._parent[x] = self._parent[self._parent[x]]
-            x = self._parent[x]
-        return x
-
-    def union(self, x: int, y: int, f: Optional[Callable[[int, int], None]] = None) -> bool:
-        """union后, 大的编号所在的组的指向小的编号所在的组."""
-        if x < y:
-            x, y = y, x
-        rootX = self.find(x)
-        rootY = self.find(y)
-        if rootX == rootY:
-            return False
-        self._parent[rootX] = rootY
-        self._rank[rootY] += self._rank[rootX]
-        self.part -= 1
-        if f is not None:
-            f(rootY, rootX)
-        return True
-
-    def unionRange(
-        self, left: int, right: int, f: Optional[Callable[[int, int], None]] = None
-    ) -> int:
-        """合并[left,right]区间, 返回合并次数."""
-        if left > right:
-            left, right = right, left
-        leftRoot = self.find(left)
-        rightRoot = self.find(right)
-        unionCount = 0
-        while rightRoot != leftRoot:
-            unionCount += 1
-            self.union(rightRoot, rightRoot - 1, f)
-            rightRoot = self.find(rightRoot - 1)
-        return unionCount
-
-    def isConnected(self, x: int, y: int) -> bool:
-        return self.find(x) == self.find(y)
-
-    def getSize(self, x: int) -> int:
-        return self._rank[self.find(x)]
-
-    def getGroups(self) -> DefaultDict[int, List[int]]:
-        group = defaultdict(list)
-        for i in range(self._n):
-            group[self.find(i)].append(i)
-        return group
+from typing import List, Tuple, Union
 
 
 # class Tree

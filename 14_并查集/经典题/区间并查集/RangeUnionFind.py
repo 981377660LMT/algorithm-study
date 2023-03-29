@@ -1,4 +1,3 @@
-# https://nyaannyaan.github.io/library/data-structure/range-union-find.hpp
 # 区间并查集 RangeUnionFind/UnionFindRange
 # !只使用了路径压缩,每次操作O(logn)
 
