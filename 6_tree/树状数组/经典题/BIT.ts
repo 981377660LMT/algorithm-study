@@ -16,7 +16,7 @@
 import assert from 'assert'
 
 /**
- * Point add range sum, 1-indexed.
+ * Point add range sum, 0-indexed.
  */
 class BITArray {
   /**
@@ -54,39 +54,39 @@ class BITArray {
 
   /**
    * Add delta to the element at index.
-   * @param index 1 <= index <= {@link length}
+   * @param index 0 <= index < {@link length}
    */
   add(index: number, delta: number): void {
-    if (index <= 0) throw new RangeError(`add index must be greater than 0, but got ${index}`)
+    index++
     for (let i = index; i <= this.length; i += i & -i) {
       this._tree[i] += delta
     }
   }
 
   /**
-   * Query the sum of [1, right].
+   * Query the sum of [0, right).
    */
   query(right: number): number {
     if (right > this.length) right = this.length
     let res = 0
-    for (let i = right; i > 0; i -= i & -i) {
+    for (let i = right; i > 0; i &= i - 1) {
       res += this._tree[i]
     }
     return res
   }
 
   /**
-   * Query the sum of [left, right].
+   * Query the sum of [left, right).
    */
   queryRange(left: number, right: number): number {
-    return this.query(right) - this.query(left - 1)
+    return this.query(right) - this.query(left)
   }
 
   toString(): string {
     const sb: string[] = []
     sb.push('BITArray: [')
     for (let i = 1; i < this._tree.length; i++) {
-      sb.push(String(this.queryRange(i, i)))
+      sb.push(String(this.queryRange(i, i + 1)))
       if (i < this._tree.length - 1) sb.push(', ')
     }
     sb.push(']')
@@ -94,7 +94,10 @@ class BITArray {
   }
 }
 
-// Implemented by Map. Slow.
+/**
+ * Point add range sum, 0-indexed.
+ * Implemented by Map. Slow.
+ */
 class BIT1 {
   readonly _size: number
   private readonly _tree: Map<number, number> = new Map()
@@ -104,28 +107,34 @@ class BIT1 {
   }
 
   add(index: number, delta: number): void {
-    if (index <= 0) throw RangeError(`add索引 ${index} 应为正整数`)
+    index++
     for (let i = index; i <= this._size; i += i & -i) {
       this._tree.set(i, (this._tree.get(i) || 0) + delta)
     }
   }
 
+  /**
+   * [0,index).
+   */
   query(index: number): number {
     if (index > this._size) index = this._size
     let res = 0
-    for (let i = index; i > 0; i -= i & -i) {
+    for (let i = index; i > 0; i &= i - 1) {
       res += this._tree.get(i) || 0
     }
     return res
   }
 
+  /**
+   * [left,right).
+   */
   queryRange(left: number, right: number): number {
-    return this.query(right) - this.query(left - 1)
+    return this.query(right) - this.query(left)
   }
 }
 
 /**
- * 区间修改 区间查询
+ * 区间修改 区间查询, 0-indexed.
  */
 class BIT2 {
   readonly _size: number
@@ -139,16 +148,18 @@ class BIT2 {
   }
 
   addRange(left: number, right: number, k: number): void {
+    right--
     this._add(left, k)
     this._add(right + 1, -k)
   }
 
   queryRange(left: number, right: number): number {
+    right--
     return this._query(right) - this._query(left - 1)
   }
 
   private _add(index: number, delta: number): void {
-    if (index <= 0) throw RangeError(`add索引 ${index} 应为正整数`)
+    index++
     for (let i = index; i <= this._size; i += i & -i) {
       this._tree1[i] += delta
       this._tree2[i] += (index - 1) * delta
@@ -156,9 +167,10 @@ class BIT2 {
   }
 
   private _query(index: number): number {
+    index++
     if (index > this._size) index = this._size
     let res = 0
-    for (let i = index; i > 0; i -= i & -i) {
+    for (let i = index; i > 0; i &= i - 1) {
       res += index * this._tree1[i] - this._tree2[i]
     }
     return res
@@ -314,14 +326,14 @@ class BIT4 {
 if (require.main === module) {
   const bit1 = new BIT1(5)
   assert.strictEqual(bit1.query(1), 0)
-  bit1.add(1, 3)
+  bit1.add(0, 3)
   assert.strictEqual(bit1.query(1), 3)
 
   const bit2 = new BIT2(10)
-  bit2.addRange(2, 4, 1) // 区间更新
-  bit2.addRange(2, 2, 1) // 单点更新
+  bit2.addRange(2, 5, 1) // 区间更新
+  bit2.addRange(2, 5, 1) // 单点更新
   assert.strictEqual(bit2.queryRange(2, 4), 4)
-  assert.strictEqual(bit2.queryRange(2, 2), 2)
+  assert.strictEqual(bit2.queryRange(2, 3), 2)
 
   const bit3 = new BIT3(3, 3)
   bit3.add(1, 1, 1)

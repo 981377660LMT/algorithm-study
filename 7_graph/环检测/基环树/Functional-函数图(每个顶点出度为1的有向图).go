@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	yuki1242()
+	transitionGame()
 }
 
 func demo() {
@@ -72,6 +72,34 @@ func yuki1242() {
 	} else {
 		fmt.Fprintln(out, "No")
 	}
+}
+
+func transitionGame() {
+	// https://atcoder.jp/contests/abc296/tasks/abc296_e
+	// 给定一个竞赛图,求多少个点在环中
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	F := NewFunctionalGraph(n)
+	for i := 0; i < n; i++ {
+		F.AddDirectedEdge(i, nums[i]-1, 1)
+	}
+	F.Build()
+	res := 0
+	for i := 0; i < n; i++ {
+		if F.IsInCycle(i) {
+			res++
+		}
+	}
+	fmt.Fprintln(out, res)
+
 }
 
 type FunctionalGraph struct {
@@ -200,7 +228,7 @@ func (fg *FunctionalGraph) JumpAll(step int) []int {
 	return res
 }
 
-// 判断节 v 点是否在 FunctionalGraph 对应的无向图中的环中.
+// 判断节 v 点是否在 FunctionalGraph 对应的有向图中的环中.
 func (fg *FunctionalGraph) IsInCycle(v int) bool {
 	return fg.Tree.IsInSubtree(fg.to[fg.root[v]], v)
 }

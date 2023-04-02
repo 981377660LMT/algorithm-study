@@ -1,7 +1,7 @@
-// https://maspypy.github.io/library/graph/mincostcycle.hpp
 // https://yukicoder.me/problems/no/1320
 // n,m<=2000,wi<=1e9
-// `O(V*(V+E)*logV)` 找最小环,不存在返回INF
+
+// !枚举每条边删除：`O(E*(V+E)*logV)` 找最小环,不存在返回INF
 
 package main
 
@@ -38,38 +38,34 @@ const INF int = 1e18
 type Edge struct{ from, to, weight int }
 
 // 返回最小环的权值和. 不存在时返回INF.
+//  !把每条边断开,然后求从断开的边的to到from的最短路.
 func MincostCycle(n int, edges []Edge, directed bool) int {
-	m := len(edges)
-	max_ := 0
-	res := INF
-
-	for i := 0; i < m; i++ {
-		e := edges[i]
-		cost := e.weight
-		from, to := e.to, e.from
-		gi := make([][]Edge, n)
-		for j := 0; j < m; j++ {
-			if i != j {
-				e := edges[j]
-				gi[e.from] = append(gi[e.from], e)
-				if !directed {
-					gi[e.to] = append(gi[e.to], Edge{e.to, e.from, e.weight})
-				}
-			}
+	adjList := make([][][2]int, n)
+	maxWeight := 0
+	for _, e := range edges {
+		u, v, w := e.from, e.to, e.weight
+		if w > maxWeight {
+			maxWeight = w
 		}
-
-		var x int
-		if max_ <= 1 {
-			x = bfs01Point(n, gi, from, to)
-		} else {
-			x = dijkstraPoint(n, gi, from, to)
+		adjList[u] = append(adjList[u], [2]int{v, w})
+		if !directed {
+			adjList[v] = append(adjList[v], [2]int{u, w})
 		}
-		if x == -1 {
-			x = INF
-		}
-		res = min(res, cost+x)
 	}
-
+	res := INF
+	for _, e := range edges {
+		from_, to, weight := e.from, e.to, e.weight
+		var dist int
+		if maxWeight <= 1 {
+			dist = bfs01Point(n, adjList, to, from_)
+		} else {
+			dist = dijkstraPoint(n, adjList, to, from_)
+		}
+		cand := weight + dist
+		if cand < res {
+			res = cand
+		}
+	}
 	return res
 }
 
@@ -80,7 +76,7 @@ func min(a, b int) int {
 	return b
 }
 
-func bfs01Point(n int, adjList [][]Edge, start, target int) int {
+func bfs01Point(n int, adjList [][][2]int, start, target int) int {
 	dist := make([]int, n)
 	for i := range dist {
 		dist[i] = INF
@@ -95,9 +91,12 @@ func bfs01Point(n int, adjList [][]Edge, start, target int) int {
 			return dist[cur]
 		}
 		for _, e := range adjList[cur] {
-			next, cost := e.to, e.weight
-			if dist[next] > dist[cur]+cost {
-				dist[next] = dist[cur] + cost
+			next, cost := e[0], e[1]
+			if (next == start && cur == target) || (next == target && cur == start) {
+				continue
+			}
+			if cand := dist[cur] + cost; dist[next] > cand {
+				dist[next] = cand
 				if cost == 0 {
 					queue.AppendLeft(next)
 				} else {
@@ -169,7 +168,7 @@ func (q Deque) At(i int) D {
 	return q.r[i-len(q.l)]
 }
 
-func dijkstraPoint(n int, adjList [][]Edge, start, target int) int {
+func dijkstraPoint(n int, adjList [][][2]int, start, target int) int {
 	dist := make([]int, n)
 	for i := range dist {
 		dist[i] = INF
@@ -191,7 +190,10 @@ func dijkstraPoint(n int, adjList [][]Edge, start, target int) int {
 		}
 
 		for _, edge := range adjList[cur] {
-			next, weight := edge.to, edge.weight
+			next, weight := edge[0], edge[1]
+			if (next == start && cur == target) || (next == target && cur == start) {
+				continue
+			}
 			if cand := curDist + weight; cand < dist[next] {
 				dist[next] = cand
 				pq.Push(H{next, cand})

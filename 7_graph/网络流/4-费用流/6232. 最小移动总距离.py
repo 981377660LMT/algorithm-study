@@ -30,7 +30,7 @@ class Solution:
     def minimumTotalDistance2(self, robot: List[int], factory: List[List[int]]) -> int:
         """利用排序优化建图 边数从O(nm)降到O(n+m)
 
-        将工厂和机器人按照坐标排序,只连接X轴上相邻的两点,
+        !将工厂和机器人按照坐标排序,只连接X轴上相邻的两点,
         费用为两点间距离,容量为n(或者大于n的任意数值),总边数O(n+m)
         """
         n, m = len(robot), len(factory)

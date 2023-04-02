@@ -32,7 +32,7 @@ def H(n: int, k: int) -> int:
 
 
 def put(n: int, k: int) -> int:
-    """n个物品放入k个槽(槽可空)的方案数"""
+    """n个不同的物品放入k个不同的槽(槽可空)的方案数"""
     return C(n + k - 1, k - 1)
 
 

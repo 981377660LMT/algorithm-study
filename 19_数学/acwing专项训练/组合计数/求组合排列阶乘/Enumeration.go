@@ -1,3 +1,5 @@
+//  求组合数
+
 package main
 
 var E *Enumeration
@@ -66,13 +68,17 @@ func (e *Enumeration) P(n, k int) int {
 
 // 可重复选取元素的组合数.
 func (e *Enumeration) H(n, k int) int {
-	if n < 0 || k < 0 || n < k {
-		return 0
-	}
-	if k == 0 {
-		return 1
-	}
 	return e.C(n+k-1, k)
+}
+
+// n个相同的球放入k个不同的盒子(盒子可放任意个球)的方法数.
+func (e *Enumeration) Put(n, k int) int {
+	return e.C(n+k-1, n)
+}
+
+// 卡特兰数.
+func (e *Enumeration) Catalan(n int) int {
+	return e.C(2*n, n) * e.Inv(n+1) % e.mod
 }
 
 func (e *Enumeration) expand(size int) {
@@ -107,3 +113,23 @@ func Pow(base, exp, mod int) int {
 	}
 	return res
 }
+
+// if __name__ == "__main__":
+//     # https://yukicoder.me/problems/no/117
+//     import sys
+
+//     sys.setrecursionlimit(int(1e9))
+//     input = lambda: sys.stdin.readline().rstrip("\r\n")
+//     T = int(input())
+//     C = Combination(2 * 10**6 + 10)
+//     for _ in range(T):
+//         s = input()
+//         op = s[0]
+//         inner = s[2:-1]
+//         n, k = map(int, inner.split(","))
+//         if op == "C":
+//             print(C(n, k))
+//         elif op == "P":
+//             print(C.P(n, k))
+//         elif op == "H":
+//             print(C.H(n, k))

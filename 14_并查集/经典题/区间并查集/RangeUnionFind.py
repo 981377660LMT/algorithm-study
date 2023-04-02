@@ -96,7 +96,4 @@ if __name__ == "__main__":
     class Solution:
         def amountPainted(self, paint: List[List[int]]) -> List[int]:
             uf = UnionFindRange(int(5e4) + 10)
-            res = [0] * len(paint)
-            for i, (start, end) in enumerate(paint):
-                res[i] = uf.unionRange(start, end)
-            return res
+            return [uf.unionRange(start, end) for start, end in paint]

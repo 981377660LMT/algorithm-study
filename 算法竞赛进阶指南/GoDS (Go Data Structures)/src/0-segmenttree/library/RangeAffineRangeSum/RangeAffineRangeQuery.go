@@ -48,23 +48,23 @@ func main() {
 type E = struct{ size, sum int }
 type Id = struct{ mul, add int }
 
-func (tree *LazySegTree) e() E   { return E{size: 1} }
-func (tree *LazySegTree) id() Id { return Id{mul: 1} }
-func (tree *LazySegTree) op(left, right E) E {
+func (*LazySegTree) e() E   { return E{size: 1} }
+func (*LazySegTree) id() Id { return Id{mul: 1} }
+func (*LazySegTree) op(left, right E) E {
 	return E{
 		size: left.size + right.size,
 		sum:  (left.sum + right.sum) % MOD,
 	}
 }
 
-func (tree *LazySegTree) mapping(lazy Id, data E) E {
+func (*LazySegTree) mapping(lazy Id, data E) E {
 	return E{
 		size: data.size,
 		sum:  (data.sum*lazy.mul + data.size*lazy.add) % MOD,
 	}
 }
 
-func (tree *LazySegTree) composition(parentLazy, childLazy Id) Id {
+func (*LazySegTree) composition(parentLazy, childLazy Id) Id {
 	return Id{
 		mul: (parentLazy.mul * childLazy.mul) % MOD,
 		add: (parentLazy.mul*childLazy.add + parentLazy.add) % MOD,

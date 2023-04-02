@@ -68,6 +68,61 @@ func main() {
 	fmt.Fprintln(out, max(in0, out0))
 }
 
+func yuki1293() {
+	// https://yukicoder.me/problems/no/1293
+	// No.1293 2種類の道路-SCC
+	// 无向图中有两种路径,各有road1,road2条
+	// 求有多少个二元组(a,b),满足从a到b经过 '若干条第一种路径+若干条第二种路径'
+
+	// !每个点i拆成点2*i和点2*i+1,2*i->2*i+1
+	// !第一种路径: 2*i<->2*j
+	// !第二种路径: 2*i+1<->2*j+1
+	// 然后对每个顶点求出有多少个可以到达自己
+
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, road1, road2 int
+	fmt.Fscan(in, &n, &road1, &road2)
+	scc := NewStronglyConnectedComponents(2 * n)
+	for i := 0; i < road1; i++ {
+		var a, b int
+		fmt.Fscan(in, &a, &b)
+		a, b = a-1, b-1
+		scc.AddEdge(2*a, 2*b, 1)
+		scc.AddEdge(2*b, 2*a, 1)
+	}
+	for i := 0; i < road2; i++ {
+		var a, b int
+		fmt.Fscan(in, &a, &b)
+		a, b = a-1, b-1
+		scc.AddEdge(2*a+1, 2*b+1, 1)
+		scc.AddEdge(2*b+1, 2*a+1, 1)
+	}
+	for i := 0; i < n; i++ {
+		scc.AddEdge(2*i, 2*i+1, 1)
+	}
+	scc.Build()
+
+	v := len(scc.Group)
+	dp := make([]int, v)
+	for i := 0; i < n; i++ {
+		dp[scc.CompId[2*i]]++
+	}
+	for i := 0; i < v; i++ {
+		for _, to := range scc.Dag[i] {
+			dp[to] += dp[i]
+		}
+	}
+
+	res := 0
+	for i := 0; i < n; i++ {
+		res += dp[scc.CompId[2*i+1]] - 1 // !减去自己到自己的路径1
+	}
+	fmt.Fprintln(out, res)
+}
+
 func max(a, b int) int {
 	if a > b {
 		return a

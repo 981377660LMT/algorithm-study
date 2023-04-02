@@ -2,6 +2,12 @@
 // DiscreteLogGroup/ModLog
 // !时间复杂度 O(sqrt(mod))
 
+// 注意几个边界:
+// 1.invGcd需要模和a互质
+// 2.仿射变换群的mul为0时不存在逆元(注意,数列的线性递推式可以写成仿射变换群)
+//   !X[i] = (MUL * X[i-1] + ADD) % P if i > 0 else START
+// 3.模为1时不存在模逆元
+
 package main
 
 import (
@@ -10,22 +16,6 @@ import (
 	"math"
 	"os"
 )
-
-func main() {
-	// https://www.luogu.com.cn/problem/P4195
-	// https://judge.yosupo.jp/problem/discrete_logarithm_mod
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var T int
-	fmt.Fscan(in, &T)
-	for t := 0; t < T; t++ {
-		var x, y, m int
-		fmt.Fscan(in, &x, &y, &m)
-		fmt.Fprintln(out, ModLog(x, y, m))
-	}
-}
 
 func yuki() {
 	// https://yukicoder.me/problems/no/1339
@@ -129,51 +119,6 @@ func DiscreteLogGroup(
 	}
 
 	return -1
-}
-
-// 求离散对数 a^n = b (mod m) 的最小非负整数解 n.
-//  如果不存在则返回-1.
-func ModLog(a, b, mod int) int {
-	a %= mod
-	b %= mod
-	p := 1 % mod
-	for k := 0; k < 32; k++ {
-		if p == b {
-			return k
-		}
-		p = p * a % mod
-	}
-	if a == 0 || b == 0 {
-		return -1
-	}
-
-	gcd := func(a, b int) int {
-		for b != 0 {
-			a, b = b, a%b
-		}
-		return a
-	}
-
-	g := gcd(mod, p)
-	if b%g != 0 {
-		return -1
-	}
-	mod /= g
-	a %= mod
-	b %= mod
-	if gcd(b, mod) > 1 {
-		return -1
-	}
-
-	return DiscreteLogGroup(
-		func() G { return 1 % mod },
-		func(g1, g2 G) G { return (g1 * g2) % mod },
-		func(g G) G { return modInv(g, mod) },
-		a,
-		b,
-		32,
-		mod,
-	)
 }
 
 func exgcd(a, b int) (gcd, x, y int) {

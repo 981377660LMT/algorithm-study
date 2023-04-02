@@ -1,11 +1,11 @@
+# 10^9值域 差分数组
+
+# 6044. 花期内花的数目-单点查询-差分+离散化
 from typing import List
 from bisect import bisect_right
 from collections import defaultdict
 from itertools import accumulate
 from 紧离散化模板 import Discretizer
-
-
-# 10^9值域 差分数组
 
 
 class Solution:

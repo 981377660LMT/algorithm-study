@@ -39,12 +39,14 @@ class WaveletMatrixSum {
 
     const n = nums.length
     const mid = new Uint32Array(log)
-    const bv = Array(log)
-      .fill(0)
-      .map(() => new _BV(n))
-    const preSum = Array(log + 1)
-      .fill(0)
-      .map(() => Array(n + 1).fill(0))
+    const bv = Array(log).fill(0)
+    for (let i = 0; i < log; i++) {
+      bv[i] = new _BV(n) // 1-based
+    }
+    const preSum = Array(log + 1).fill(0)
+    for (let i = 0; i <= log; i++) {
+      preSum[i] = Array(n + 1).fill(0)
+    }
     let a0 = new Uint32Array(n)
     const a1 = new Uint32Array(n)
     for (let d = log - 1; d >= -1; d--) {
@@ -59,13 +61,13 @@ class WaveletMatrixSum {
 
       for (let i = 0; i < n; i++) {
         const f = (nums[i] >> d) & 1
-        if (f === 0) {
-          a0[p0] = nums[i]
-          p0++
-        } else {
+        if (f) {
           bv[d].add(i)
           a1[p1] = nums[i]
           p1++
+        } else {
+          a0[p0] = nums[i]
+          p0++
         }
       }
 
@@ -114,9 +116,9 @@ class WaveletMatrixSum {
       const r0 = this._bv[d].rank(end, 0)
       const kf = f * (end - start - (r0 - l0)) + (f ^ 1) * (r0 - l0)
 
-      if (add === 1) {
+      if (add) {
         count += kf
-        if (f === 1) {
+        if (f) {
           sum += this._get(d, start + this._mid[d] - l0, end + this._mid[d] - r0)
           start = l0
           end = r0
@@ -125,12 +127,12 @@ class WaveletMatrixSum {
           start += this._mid[d] - l0
           end += this._mid[d] - r0
         }
-      } else if (f === 0) {
-        start = l0
-        end = r0
-      } else {
+      } else if (f) {
         start += this._mid[d] - l0
         end += this._mid[d] - r0
+      } else {
+        start = l0
+        end = r0
       }
     }
 
@@ -158,17 +160,17 @@ class WaveletMatrixSum {
       const r0 = this._bv[d].rank(end, 0)
       const kf = f * (end - start - (r0 - l0)) + (f ^ 1) * (r0 - l0)
       if (k < kf) {
-        if (f === 0) {
-          start = l0
-          end = r0
-        } else {
+        if (f) {
           start += this._mid[d] - l0
           end += this._mid[d] - r0
+        } else {
+          start = l0
+          end = r0
         }
       } else {
         k -= kf
         res |= 1 << d
-        if (f === 1) {
+        if (f) {
           sum += this._get(d, start + this._mid[d] - l0, end + this._mid[d] - r0)
           start = l0
           end = r0
@@ -180,7 +182,7 @@ class WaveletMatrixSum {
       }
     }
 
-    if (k !== 0) {
+    if (k) {
       sum += this._get(0, start, start + k)
     }
     return [res, sum]
@@ -213,19 +215,19 @@ class WaveletMatrixSum {
       if (predicate(sum + loSum)) {
         sum += loSum
         res |= 1 << d
-        if (f === 1) {
+        if (f) {
           start = l0
           end = r0
         } else {
           start += this._mid[d] - l0
           end += this._mid[d] - r0
         }
-      } else if (f === 0) {
-        start = l0
-        end = r0
-      } else {
+      } else if (f) {
         start += this._mid[d] - l0
         end += this._mid[d] - r0
+      } else {
+        start = l0
+        end = r0
       }
     }
 
@@ -259,19 +261,19 @@ class WaveletMatrixSum {
       if (predicate(sum + loSum)) {
         sum += loSum
         res += kf
-        if (f === 1) {
+        if (f) {
           start = l0
           end = r0
         } else {
           start += this._mid[d] - l0
           end += this._mid[d] - r0
         }
-      } else if (f === 0) {
-        start = l0
-        end = r0
-      } else {
+      } else if (f) {
         start += this._mid[d] - l0
         end += this._mid[d] - r0
+      } else {
+        start = l0
+        end = r0
       }
     }
 
@@ -285,7 +287,7 @@ class WaveletMatrixSum {
 
   floor(start: number, end: number, value: number, xor = 0): number | null {
     const less = this.countPrefix(start, end, value, xor)[0]
-    return less === 0 ? null : this.kth(start, end, less - 1, xor)[0]
+    return less ? this.kth(start, end, less - 1, xor)[0] : null
   }
 
   ceiling(start: number, end: number, value: number, xor = 0): number | null {
@@ -314,9 +316,10 @@ class _BV {
   private readonly _data: [count: number, sum: number][] = []
 
   constructor(n: number) {
-    this._data = Array((n + 63) >> 5)
-      .fill(0)
-      .map(() => [0, 0])
+    this._data = Array((n + 63) >> 5).fill(0)
+    for (let i = 0; i < this._data.length; i++) {
+      this._data[i] = [0, 0]
+    }
   }
 
   add(i: number): void {

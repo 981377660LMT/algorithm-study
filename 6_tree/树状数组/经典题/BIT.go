@@ -12,7 +12,7 @@ func demo() {
 	fmt.Println(bitArray)
 }
 
-// !Point Add Range Sum, 1-based.
+// !Point Add Range Sum, 0-based.
 type BITArray struct {
 	n    int
 	tree []int
@@ -56,7 +56,7 @@ func (b *BITArray) Query(index int) (res int) {
 	if index > b.n {
 		index = b.n
 	}
-	for ; index > 0; index -= index & -index {
+	for ; index > 0; index &= (index - 1) {
 		res += b.tree[index]
 	}
 	return
@@ -135,7 +135,7 @@ func (b *BITArray2) query(index int) (res int) {
 	rawIndex := index
 	for index > 0 {
 		res += rawIndex*b.tree1[index] - b.tree2[index]
-		index -= index & -index
+		index &= (index - 1)
 	}
 	return
 }
@@ -143,12 +143,12 @@ func (b *BITArray2) query(index int) (res int) {
 //
 //
 //
-// !一维区间查询 区间修改
+// !一维区间查询 区间修改, 0-based.
 type BIT interface {
-	// 区间 [left, right] 里的每个数增加 delta
+	// 区间 [left, right) 里的每个数增加 delta
 	Add(left, right, delta int)
 
-	// 查询区间 [left, right] 的和
+	// 查询区间 [left, right) 的和
 	Query(left, right int) int
 }
 
@@ -184,35 +184,35 @@ func NewBITMap(n int) *BITMap {
 func NewBITSlice(n int) *BITSlice {
 	return &BITSlice{
 		n:     n,
-		tree1: make([]int, n+10),
-		tree2: make([]int, n+10),
+		tree1: make([]int, n+1),
+		tree2: make([]int, n+1),
 	}
 }
 
 func (bit *BITMap) Add(left, right, delta int) {
+	right--
 	bit.add(left, delta)
 	bit.add(right+1, -delta)
 }
 
 func (bit *BITSlice) Add(left, right, delta int) {
+	right--
 	bit.add(left, delta)
 	bit.add(right+1, -delta)
 }
 
 func (bit *BITMap) Query(left, right int) int {
+	right--
 	return bit.query(right) - bit.query(left-1)
 }
 
 func (bit *BITSlice) Query(left, right int) int {
+	right--
 	return bit.query(right) - bit.query(left-1)
 }
 
 func (bit *BITMap) add(index, delta int) {
-	if index <= 0 {
-		errorInfo := fmt.Sprintf("index must be greater than 0, but got %d", index)
-		panic(errorInfo)
-	}
-
+	index++
 	rawIndex := index
 	for index <= bit.n {
 		bit.tree1[index] += delta
@@ -222,10 +222,7 @@ func (bit *BITMap) add(index, delta int) {
 }
 
 func (bit *BITSlice) add(index, delta int) {
-	if index <= 0 {
-		errorInfo := fmt.Sprintf("index must be greater than 0, but got %d", index)
-		panic(errorInfo)
-	}
+	index++
 
 	rawIndex := index
 	for index <= bit.n {
@@ -236,29 +233,29 @@ func (bit *BITSlice) add(index, delta int) {
 }
 
 func (bit *BITMap) query(index int) int {
+	index++
 	if index > bit.n {
 		index = bit.n
 	}
-
 	rawIndex := index
 	res := 0
 	for index > 0 {
 		res += rawIndex*bit.tree1[index] - bit.tree2[index]
-		index -= index & -index
+		index &= (index - 1)
 	}
 	return res
 }
 
 func (bit *BITSlice) query(index int) int {
+	index++
 	if index > bit.n {
 		index = bit.n
 	}
-
 	rawIndex := index
 	res := 0
 	for index > 0 {
 		res += rawIndex*bit.tree1[index] - bit.tree2[index]
-		index -= index & -index
+		index &= (index - 1)
 	}
 	return res
 }

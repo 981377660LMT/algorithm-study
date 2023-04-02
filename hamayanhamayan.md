@@ -5,7 +5,23 @@ https://blog.hamayanhamayan.com/entry/2100/01/01/000000
 
 - 计数问题(atcoder 最难的类型)
 
+https://compro.tsutaj.com//archive/181015_incexc.pdf (容斥原理)
 https://drive.google.com/file/d/1WC7Y2Ni-8elttUgorfbix9tO1fvYN3g3/view
+
+1. 设计状态 (根据复杂度猜，有时非常难想)
+2. 改变搜索的顺序
+   - 求序列数=>插入 dp, 只与元素大小有关, 先排序，再从大到小填
+   - 排序+贪心
+     https://drken1215.hatenablog.com/entry/2020/10/16/150700
+   - 区间问题按照结束点排序
+3. 改变条件的说法
+   ad-hoc (特殊案例特殊分析)
+   - k 进制变换
+4. 贪心
+5. 分类讨论
+6. 所有 xxx 的所有 xxx 的值之和
+   - 计算贡献
+   - 分解成一次和
 
 - TODO:/ntt 卷积/母函数(fps 知识)/数论积性函数(multiplicative-function)/矩阵知识
   https://hitonanode.github.io/cplib-cpp/formal_power_series/coeff_of_rational_function.hpp
@@ -24,7 +40,7 @@ https://judge.yosupo.jp/
 
 二元有理数(Dyadic Number) => 非公平博弈里使用
 
-- **数学** (todo，感觉自己的数学很弱)
+- **数学**
 
   - [ ] 总览
   - [ ] 多项式

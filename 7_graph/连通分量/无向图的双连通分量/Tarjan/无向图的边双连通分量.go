@@ -9,6 +9,9 @@
 //  group には各二重辺連結成分について, それに属する頂点が格納される.
 
 // !注意这里把孤立的点也当作一个点双
+// 桥的两个端点所在的连通分量不同
+
+// 问题特点:边`只能经过一次`(不能走桥)、a到b的路径是否`存在且唯一`
 
 package main
 
@@ -19,6 +22,9 @@ import (
 )
 
 func main() {
+	缩点成树()
+}
+func yosupu() {
 	// https://judge.yosupo.jp/submission/125538
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -43,6 +49,31 @@ func main() {
 		}
 		fmt.Fprintln(out)
 	}
+}
+
+// 新树的边为原图的桥
+func 缩点成树() {
+	n := 5
+	edges := [][2]int{{0, 1}, {1, 2}, {2, 0}, {1, 3}, {1, 4}}
+	graph := make([][]Edge, n)
+	for i := 0; i < len(edges); i++ {
+		u, v := edges[i][0], edges[i][1]
+		graph[u] = append(graph[u], Edge{u, v, 1, i})
+		graph[v] = append(graph[v], Edge{v, u, 1, i})
+	}
+	EBCC := NewTwoEdgeConnectedComponents(graph)
+	EBCC.Build()
+
+	tree := make([][]int, len(EBCC.Group))
+	for _, e := range edges {
+		u, v := e[0], e[1]
+		id1, id2 := EBCC.CompId[u], EBCC.CompId[v]
+		if id1 != id2 { // 桥
+			tree[id1] = append(tree[id1], id2)
+			tree[id2] = append(tree[id2], id1)
+		}
+	}
+	fmt.Println(tree)
 }
 
 type Edge = struct{ from, to, cost, index int }
@@ -84,6 +115,7 @@ func (tec *TwoEdgeConnectedComponents) Build() {
 	}
 }
 
+// 每个点所属的边双连通分量的编号.
 func (tec *TwoEdgeConnectedComponents) Get(k int) int { return tec.CompId[k] }
 
 func (tec *TwoEdgeConnectedComponents) dfs(idx, par int) {

@@ -1,9 +1,8 @@
 // https://maspypy.github.io/library/graph/ds/bfs_numbering.hpp
 // !求每个root的子树中,绝对深度为dep的顶点的欧拉序/括号序的范围
 
-// !ID[v]：頂点の新しい番号 (0-indexed)
-// !FindRange(v, dep)：v の部分木で、深さ dep のものたちの範囲
-//  深さは絶対的なものであることに注意せよ
+// !ID[v]：每个顶点的欧拉序编号 (0-indexed)
+// !FindRange(v, dep)：以v为顶点的子树中, `绝对深度`为dep的顶点的欧拉序的范围(左闭右开)
 
 package main
 
@@ -170,16 +169,6 @@ func max(a, b int) int {
 		return a
 	}
 	return b
-}
-
-func mins(nums ...int) int {
-	res := nums[0]
-	for _, num := range nums {
-		if num < res {
-			res = num
-		}
-	}
-	return res
 }
 
 func maxs(nums ...int) int {

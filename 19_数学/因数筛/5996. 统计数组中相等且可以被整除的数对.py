@@ -1,10 +1,12 @@
+# 返回满足 0 <= i < j < n ，nums[i] == nums[j] 且 (i * j) 能被 k 整除的数对 (i, j) 的 数目 。
+# 如果1 <= nums.length <= 100 暴力
+# 如果1 <= nums.length <= 10^5 筛法
+
 from collections import defaultdict
 from math import gcd
 from typing import Counter, List
 
-# 返回满足 0 <= i < j < n ，nums[i] == nums[j] 且 (i * j) 能被 k 整除的数对 (i, j) 的 数目 。
-# 如果1 <= nums.length <= 100 暴力
-# 如果1 <= nums.length <= 10^5 筛法
+
 class Solution:
     def countPairs(self, nums: List[int], k: int) -> int:
         n = len(nums)
@@ -21,7 +23,7 @@ class Solution:
             else:
                 need = k // gcd(index, k)
                 res2 += multiCounter[need][value]
-                if index ** 2 % k == 0:
+                if index**2 % k == 0:
                     res2 -= 1
 
         return res1 + res2 // 2

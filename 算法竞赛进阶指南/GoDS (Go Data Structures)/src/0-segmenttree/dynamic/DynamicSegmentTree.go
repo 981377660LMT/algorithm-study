@@ -132,6 +132,40 @@ func (o *Node) Get(pos int) E {
 	return o.rightChild.Get(pos)
 }
 
+func newNode(left, right int) *Node {
+	return &Node{left: left, right: right, lazy: id(), data: e(left, right)}
+}
+
+// op
+func (o *Node) pushUp() {
+	o.data = op(o.leftChild.QueryAll(), o.rightChild.QueryAll())
+}
+
+func (o *Node) pushDown() {
+	mid := (o.left + o.right) >> 1
+	if o.leftChild == nil {
+		o.leftChild = newNode(o.left, mid)
+	}
+	if o.rightChild == nil {
+		o.rightChild = newNode(mid+1, o.right)
+	}
+	if o.lazy != id() {
+		o.leftChild.propagate(o.lazy)
+		o.rightChild.propagate(o.lazy)
+		o.lazy = id()
+	}
+}
+
+// mapping + composition
+func (o *Node) propagate(lazy Id) {
+	o.data = mapping(lazy, o.data)
+	o.lazy = composition(lazy, o.lazy)
+}
+
+//
+//
+//
+//
 // Build from array. [1,len(nums))]
 func (o *Node) Build(nums []E) {
 	o.build(nums, 1, len(nums))
@@ -206,34 +240,4 @@ func (o *Node) kth(k int) int {
 	} else {
 		return o.rightChild.kth(k - lc)
 	}
-}
-
-func newNode(left, right int) *Node {
-	return &Node{left: left, right: right, lazy: id(), data: e(left, right)}
-}
-
-// op
-func (o *Node) pushUp() {
-	o.data = op(o.leftChild.QueryAll(), o.rightChild.QueryAll())
-}
-
-func (o *Node) pushDown() {
-	mid := (o.left + o.right) >> 1
-	if o.leftChild == nil {
-		o.leftChild = newNode(o.left, mid)
-	}
-	if o.rightChild == nil {
-		o.rightChild = newNode(mid+1, o.right)
-	}
-	if o.lazy != id() {
-		o.leftChild.propagate(o.lazy)
-		o.rightChild.propagate(o.lazy)
-		o.lazy = id()
-	}
-}
-
-// mapping + composition
-func (o *Node) propagate(lazy Id) {
-	o.data = mapping(lazy, o.data)
-	o.lazy = composition(lazy, o.lazy)
 }

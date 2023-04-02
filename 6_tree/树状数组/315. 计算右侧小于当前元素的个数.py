@@ -35,7 +35,7 @@ def shiftAndInversions(nums: List[int]) -> List[int]:
     return res
 
 
-def countInv(nums: Sequence[int]) -> int:
+def countInv(nums: List[int]) -> int:
     """求数组逆序对数量之和"""
     n = len(nums)
     res = 0

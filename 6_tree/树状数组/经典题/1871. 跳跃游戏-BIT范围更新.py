@@ -10,6 +10,6 @@ class Solution:
         bit = BIT2(n + 10)
         for i, char in enumerate(s):
             if char == "0":
-                if i == 0 or bit.query(i, i) != 0:
-                    bit.add(i + minJump, i + maxJump, 1)
-        return bit.query(n - 1, n - 1) != 0
+                if i == 0 or bit.query(i, i + 1) != 0:
+                    bit.add(i + minJump, i + maxJump + 1, 1)
+        return bit.query(n - 1, n) != 0

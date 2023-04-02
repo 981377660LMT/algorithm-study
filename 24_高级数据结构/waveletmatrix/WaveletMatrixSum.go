@@ -106,15 +106,15 @@ type WaveletMatrixSum struct {
 	n, log int
 	mid    []int
 	bv     []*BitVector
-	preSum [][]int
+	preSum [][]E
 	unit   E
 }
 
 // log:如果要支持异或,则需要按照异或的值来决定值域
 //  设为-1时表示不使用异或
-func NewWaveletMatrixSum(nums []int, log int) *WaveletMatrixSum {
-	numsCopy := make([]int, len(nums))
-	max_ := 0
+func NewWaveletMatrixSum(nums []E, log int) *WaveletMatrixSum {
+	numsCopy := make([]E, len(nums))
+	max_ := 1
 	for i, v := range nums {
 		numsCopy[i] = v
 		if v > max_ {
@@ -132,15 +132,15 @@ func NewWaveletMatrixSum(nums []int, log int) *WaveletMatrixSum {
 	for i := 0; i < log; i++ {
 		bv[i] = NewBitVector(n)
 	}
-	preSum := make([][]int, log+1)
+	preSum := make([][]E, log+1)
 	for i := range preSum {
-		preSum[i] = make([]int, n+1)
+		preSum[i] = make([]E, n+1)
 		for j := range preSum[i] {
 			preSum[i][j] = res.unit
 		}
 	}
 
-	a0, a1 := make([]int, n), make([]int, n)
+	a0, a1 := make([]E, n), make([]E, n)
 	for d := log - 1; d >= -1; d-- {
 		p0, p1 := 0, 0
 		for i := 0; i < n; i++ {

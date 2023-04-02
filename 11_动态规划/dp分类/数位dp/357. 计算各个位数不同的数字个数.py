@@ -1,7 +1,6 @@
 from functools import lru_cache
 
 
-@lru_cache(None)
 def cal(upper: int) -> int:
     @lru_cache(None)
     def dfs(pos: int, hasLeadingZero: bool, isLimit: bool, visited: int) -> int:

@@ -1,3 +1,4 @@
+# 求组合数
 class Enumeration:
     __slots__ = ("_fac", "_ifac", "_inv", "_mod")
 
@@ -34,10 +35,16 @@ class Enumeration:
         return self.fac(n) * self.ifac(n - k) % mod
 
     def H(self, n: int, k: int) -> int:
-        """可重复选取元素的组合数"""
-        if n < 0 or k < 0 or n < k:
-            return 0
-        return 1 if k == 0 else self.C(n + k - 1, k)
+        """可重复选取元素的组合数."""
+        return self.C(n + k - 1, k)
+
+    def put(self, n: int, k: int) -> int:
+        """n个相同的球放入k个不同的盒子(盒子可放任意个球)的方法数."""
+        return self.C(n + k - 1, n)
+
+    def catalan(self, n: int) -> int:
+        """卡特兰数."""
+        return self.C(2 * n, n) * self.inv(n + 1) % self._mod
 
     def _expand(self, size: int) -> None:
         if len(self._fac) < size + 1:
@@ -57,7 +64,21 @@ class Enumeration:
 
 
 if __name__ == "__main__":
-    enum = Enumeration(12, 10**9 + 7)
-    print(enum.C(10, 2))
-    print(enum.P(10, 2))
-    print(enum.H(10, 2))
+    # https://yukicoder.me/problems/no/117
+    import sys
+
+    sys.setrecursionlimit(int(1e9))
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
+    T = int(input())
+    C = Combination(2 * 10**6 + 10)
+    for _ in range(T):
+        s = input()
+        op = s[0]
+        inner = s[2:-1]
+        n, k = map(int, inner.split(","))
+        if op == "C":
+            print(C(n, k))
+        elif op == "P":
+            print(C.P(n, k))
+        elif op == "H":
+            print(C.H(n, k))

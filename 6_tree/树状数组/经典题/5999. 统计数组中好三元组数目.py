@@ -1,35 +1,3 @@
-from typing import List, Tuple
-from collections import defaultdict
-
-
-# tree直接用dict 省去离散化步骤
-class BIT:
-    """单点修改的树状数组"""
-
-    def __init__(self, n: int):
-        self.size = n
-        self.tree = defaultdict(int)
-
-    def add(self, index: int, delta: int) -> None:
-        if index <= 0:
-            raise ValueError("index 必须是正整数")
-        while index <= self.size:
-            self.tree[index] += delta
-            index += index & -index
-
-    def query(self, index: int) -> int:
-        if index > self.size:
-            index = self.size
-        res = 0
-        while index > 0:
-            res += self.tree[index]
-            index -= index & -index
-        return res
-
-    def queryRange(self, left: int, right: int) -> int:
-        return self.query(right) - self.query(left - 1)
-
-
 # 三元组一般是`定一移二`的做法
 # 或者枚举贡献
 
@@ -38,6 +6,13 @@ class BIT:
 # 3. 枚举每个数作为中间数，有leftSmaller[i]*rightBigger[i]种取法，求和即可
 # 时间复杂度为O(nlogn)，空间复杂度为O(n)
 # 其中第一步的映射操作有点像 1713. 得到子序列的最少操作次数
+
+
+from typing import List
+from collections import defaultdict
+from BIT import BIT1
+
+
 class Solution:
     def goodTriplets(self, nums1: List[int], nums2: List[int]) -> int:
         n = len(nums1)
@@ -49,17 +24,17 @@ class Solution:
         leftSmaller = [0] * n
         rightBigger = [0] * n
 
-        bit1 = BIT(n + 10)
+        bit1 = BIT1(n + 10)
         for i, num in enumerate(target):
             smaller = bit1.query(num + 1)
             leftSmaller[i] = smaller
-            bit1.add(num + 1, 1)
+            bit1.add(num, 1)
 
-        bit2 = BIT(n + 10)
+        bit2 = BIT1(n + 10)
         for i in range(n - 1, -1, -1):
-            bigger = bit2.queryRange(target[i] + 2, n + 1)
+            bigger = bit2.queryRange(target[i] + 1, n + 1)
             rightBigger[i] = bigger
-            bit2.add(target[i] + 1, 1)
+            bit2.add(target[i], 1)
 
         res = 0
         for left, right in zip(leftSmaller, rightBigger):

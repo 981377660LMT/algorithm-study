@@ -1,4 +1,6 @@
-// 无向图找环(返回最小的一个环)
+// 无向图找环(返回任意一个极小的环(即环里不存在弦))
+// https://github.com/maspypy/library/issues/3
+
 package main
 
 import (
@@ -7,7 +9,7 @@ import (
 	"os"
 )
 
-func main() {
+func yosupo() {
 	// https://judge.yosupo.jp/problem/cycle_detection
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -34,7 +36,13 @@ func main() {
 	}
 }
 
-// 无向图找环(返回最小的一个环).如果不存在环，返回空切片.
+func main() {
+	// [[1,3],[3,5],[5,1],[0,2],[2,4],[4,6],[6,0]]
+	fmt.Println(FindCycleUndirected(7, [][2]int{{1, 3}, {3, 5}, {5, 1}, {0, 2}, {2, 4}, {4, 6}, {6, 0}}))
+
+}
+
+// 无向图找环(返回任意的一个极小的环).如果不存在环，返回空切片.
 func FindCycleUndirected(n int, edges [][2]int) (vs []int, es []int) {
 	type edge struct{ to, id int }
 	graph := make([][]edge, n)

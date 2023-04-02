@@ -10,8 +10,9 @@ import (
 	"strings"
 )
 
-// 頂点を削除しながら、適当なデータ構造により次の辺を探す。
-// 中身はただの bfs しているので、01 最短路にも流用可能
+// 在线并查集, 通过函数来寻找下一个可以合并(到达)的点.
+//  setUsed(u) : 删除数据结构中的u, 用于标记u已经被使用了.
+//  findUnused(u) : 返回u可以到达的下一个点, 如果没有返回-1.
 func OnlineUnionFind(
 	n int,
 	setUsed func(u int), findUnused func(u int) (v int),
