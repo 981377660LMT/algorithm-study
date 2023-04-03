@@ -99,7 +99,6 @@ func transitionGame() {
 		}
 	}
 	fmt.Fprintln(out, res)
-
 }
 
 type FunctionalGraph struct {

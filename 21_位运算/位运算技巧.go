@@ -4,6 +4,8 @@
 
 package main
 
+import "math/bits"
+
 func _(x int) {
 	// !利用 -v = ^v+1  负数等于反码加1
 	lowbit := func(v int64) int64 { return v & -v } // (如果要找最低位的0,先将v取反)
@@ -48,6 +50,13 @@ func _(x int) {
 		return v&(v+1) > 0
 	}
 
+	// 快速计算尾随0 trialingZeros: lowbit+bit_length
+	tz := func(v int64) int64 { return int64(bits.Len(uint(v&-v)) - 1) }
+
+	// !32位时, clz32 + bit_length = 32
+
+	// !python里用int模仿uint64的行为:	x &((1<<64)-1) 即可
+
 	_ = []interface{}{
 		lowbit,
 		isSubset,
@@ -55,5 +64,6 @@ func _(x int) {
 		hasAdjacentOnes,
 		hasAdjacentZeros,
 		abs,
+		tz,
 	}
 }

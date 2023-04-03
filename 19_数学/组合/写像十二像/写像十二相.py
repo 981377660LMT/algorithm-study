@@ -231,3 +231,5 @@ if __name__ == "__main__":
     assert (X.partition(10, 5)) == 30
     assert (X.stirling2(8, 2)) == 127
     assert (X.bell(5, 5)) == 52
+    n, k = map(int, input().split())
+    print(X.bell(n, k))

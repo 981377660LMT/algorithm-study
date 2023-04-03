@@ -59,7 +59,7 @@ class UnionFindRange {
    */
   unionRange(left: number, right: number, f?: (big: number, small: number) => void): number {
     if (left > right) {
-      ;[left, right] = [right, left]
+      return 0
     }
     const leftRoot = this.find(left)
     let rightRoot = this.find(right)

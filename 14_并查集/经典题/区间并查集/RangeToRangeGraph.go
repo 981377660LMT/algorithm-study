@@ -1,5 +1,6 @@
 // RangeToRangeGraph (区间图)
 // !原图的连通分量/最短路在新图上仍然等价
+// 线段树优化建图
 
 package main
 
@@ -11,7 +12,7 @@ import (
 
 const INF int = 1e18
 
-func main() {
+func yuki1868() {
 	// https://yukicoder.me/problems/no/1868
 	// !给定一张有向图,每个点i可以向右达到i+1,i+2,...,targets[i]。求从0到n-1的最短路。
 	// 解法1：每个点i连接targets[i],边权为1,所有i到i-1连边,边权为0。然后跑最短路。
@@ -57,6 +58,49 @@ func main() {
 	}
 
 	fmt.Fprintln(out, dist[n-1])
+}
+
+func jump(nums []int) int {
+	// 45. 跳跃游戏 II
+	// https://leetcode.cn/problems/jump-game-ii/
+	n := len(nums)
+	G := NewRangeToRangeGraph(n)
+	for i := 0; i < n; i++ {
+		G.AddToRange(i, i+1, min(i+nums[i]+1, n), 1)
+	}
+	adjList, _ := G.Build()
+	bfs := func(start int, adjList [][][2]int) []int {
+		n := len(adjList)
+		dist := make([]int, n)
+		for i := 0; i < n; i++ {
+			dist[i] = INF
+		}
+		dist[start] = 0
+		queue := []int{start}
+		for len(queue) > 0 {
+			cur := queue[0]
+			queue = queue[1:]
+			for _, e := range adjList[cur] {
+				next, weight := e[0], e[1]
+				cand := dist[cur] + weight
+				if cand < dist[next] {
+					dist[next] = cand
+					queue = append(queue, next)
+				}
+			}
+		}
+
+		return dist
+	}
+	dist := bfs(0, adjList)
+	return dist[n-1]
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 type RangeToRangeGraph struct {

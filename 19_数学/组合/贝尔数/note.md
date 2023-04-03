@@ -1,6 +1,6 @@
 贝尔数
-bell(n,k) - 大小为 n 的集合的划分为 <= k 个子集的数目
-bell(n,n)是将集合划分为任意个子集的方法数目
+bell(n,k) - 大小为 n 的集合的划分为 <= k 个子集的数目 (有区别的球放入无区别的盒子(每个盒子可以放任意个球).)
+bell(n,n) 是将集合划分为任意个子集的方法数目
 
 https://oi-wiki.org/math/combinatorics/bell/
 https://oeis.org/A000110

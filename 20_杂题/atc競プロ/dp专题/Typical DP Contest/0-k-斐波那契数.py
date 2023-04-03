@@ -6,7 +6,7 @@ N=3の場合はhttps://oeis.org/A000073
 
 # !01序列中1不能连续出现k次 -> k-bonacci number
 # 特别的，k==2时 斐波那契数列
-# k-斐波那契数
+# k斐波那契数
 
 # !dp[index][count] 表示前index个数连续1有count个的方案数
 # 这里不能存index*count个状态

@@ -1,10 +1,8 @@
-# 有区别的n个球放入k个无区别的盒子(每个盒子至少放一个球)
-
 MOD = int(1e9 + 7)
 
 
-class Stirling2Table:
-    """第二类斯特林数表."""
+class BellTable1:
+    """贝尔数表.计算Bell(n, k)."""
 
     __slots__ = ("_n", "_k", "_table")
 
@@ -17,12 +15,14 @@ class Stirling2Table:
             for j in range(1, k + 1):
                 table[i][j] = table[i - 1][j - 1] + table[i - 1][j] * j
                 table[i][j] %= MOD
-        self._table = table
+        self._table = table  # 第二类斯特林数
 
     def get(self, n: int, k: int) -> int:
-        if n < 0 or k < 0 or n < k:
-            return 0
-        return self._table[n][k]
+        res = 0
+        for i in range(k + 1):
+            res += self._table[n][i]
+            res %= MOD
+        return res
 
     def __getitem__(self, index: tuple[int, int]) -> int:
         return self.get(*index)
@@ -30,6 +30,5 @@ class Stirling2Table:
 
 if __name__ == "__main__":
     n, k = map(int, input().split())
-    table = Stirling2Table(n, k)
+    table = BellTable1(n, k)
     print(table.get(n, k))
-    print(table[n, k])

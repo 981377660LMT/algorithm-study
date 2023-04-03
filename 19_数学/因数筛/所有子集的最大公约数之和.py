@@ -9,12 +9,14 @@
 # 1. 按照从大到小的顺序枚举答案(gcd_)
 # 2. 减去那些不合法的gcd_的倍数
 
-# 各整数 x に対し、最大公約数が x の倍数となるような集合を数え上げるのは簡単です。しかし、このまま
-# 足し合わせると、例えば最大公約数が 6 の場合は x = 1, 2, 3, 6 で重複して数えられてしまうことになります。
-# ここで包除原理を用います。このとき、このタイプの問題では、x を大きい順に見ていき、順次「最大公約
-# 数がちょうど x であるような場合の数」を求めていくのが簡単でしょう。x について見るとき、x の (2x 以
-# 上の) 倍数についてはその「ちょうどの値」が計算されているので、単純な引き算で x についての「ちょうど
-# の値」を求めることができます。
+# 对于每个整数x，计算最大公约数为x的倍数的集合是很容易的。
+# 但是，如果直接相加，例如当最大公约数为6时，将重复计算x = 1, 2, 3, 6的情况。
+# 这时可以使用容斥原理。在这种类型的问题中，按照从大到小的顺序逐个考虑x，
+# 并逐步计算“最大公约数恰好为x的情况”的数量将是简单的。
+# 在考虑x时，对于x的(大于等于2x的)倍数，其“恰好的值”已经被计算出来，
+# 因此可以通过简单的减法来计算关于x的“恰好的值”。
+
+# !最大公约数i 的每一个因子 都计算一遍贡献，总和恰好为i，这样就不会重复计算了
 
 
 from collections import Counter
@@ -23,46 +25,29 @@ from typing import List
 
 MOD = int(1e9 + 7)
 
-# counter = [0] * (k + 1)  # gcd为i的数组的个数
-# for gcd_ in range(k, 0, -1):
-#     select = k // gcd_
-#     count = pow(select, n, MOD)
-#     bad = 0  # 重复计算
-#     for multi in range(gcd_ * 2, k + 1, gcd_):
-#         bad += counter[multi]
-#         bad %= MOD
-#     counter[gcd_] = (count - bad) % MOD
-# res = 0
-# for gcd_ in range(1, k + 1):
-#     res += counter[gcd_] * gcd_
-#     res %= MOD
-# return res
-
 
 def sumOfGcd(nums: List[int]) -> int:
-    """计算并返回 nums 的所有 非空 子序列的 最大公约数的 和 。"""
+    """计算并返回 nums 的所有 非空 子序列的 最大公约数的 和 。
+    => 计算每个(约)数作为gcd的贡献.
+    """
     if len(nums) == 0:
         return 0
 
     counter = Counter(nums)
     max_ = max(counter)
-    multiSum = [0] * (max_ + 1)  # 数组中i的倍数的数的和
+    multiCounter = [0] * (max_ + 1)  # !每个约数的倍数数量
     for fac in range(1, max_ + 1):
         for mul in range(fac, max_ + 1, fac):
-            multiSum[fac] += counter[mul] * mul
-            multiSum[fac] %= MOD
-
-    # gcd为i的倍数的子集的个数
-    for gcd_ in range(max_, 0, -1):
-        bad = 0
-        for multi in range(gcd_ * 2, max_ + 1, gcd_):
-            bad += multiSum[multi]
-            bad %= MOD
-        multiSum[gcd_] = (multiSum[gcd_] - bad) % MOD
-
+            multiCounter[fac] += counter[mul]
+            multiCounter[fac] %= MOD
+    subCounter = [(pow(2, c, MOD) - 1) % MOD for c in multiCounter]  # !每个约数的非空子集数量
+    for gcd_ in range(max_, 0, -1):  # 从大到小遍历，减去倍数的子集数
+        for mul in range(gcd_ * 2, max_ + 1, gcd_):
+            subCounter[gcd_] -= subCounter[mul]
+            subCounter[gcd_] %= MOD
     res = 0
     for gcd_ in range(1, max_ + 1):
-        res += multiSum[gcd_]
+        res += gcd_ * subCounter[gcd_]
         res %= MOD
     return res
 
@@ -79,7 +64,11 @@ def bruteForce(nums: List[int]) -> int:
     return res
 
 
-print(bruteForce(nums=[6, 10, 3]))
-print(bruteForce(nums=[6]))
-print(sumOfGcd(nums=[6, 6]))
-print(sumOfGcd(nums=[6, 10, 3]))
+if __name__ == "__main__":
+    import random
+
+    for _ in range(100):
+        n = 1 + random.randint(0, 10)
+        nums = [random.randint(1, 100) for _ in range(n)]
+        assert sumOfGcd(nums) == bruteForce(nums)
+    print("Done!")

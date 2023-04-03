@@ -63,7 +63,7 @@ class SegmentSet:
             self._st.add((right, nr))
             self.count += nr - right + 1
 
-    def next(self, x: int) -> Optional[int]:
+    def nextStart(self, x: int) -> Optional[int]:
         """返回第一个大于等于x的`区间起点`.如果不存在,返回None."""
         it = self._st.bisect_left((x, -INF))
         if it == len(self._st):
@@ -73,7 +73,7 @@ class SegmentSet:
             return x
         return res
 
-    def ceil(self, x: int) -> Optional[int]:
+    def ceiling(self, x: int) -> Optional[int]:
         """返回区间内第一个大于等于x的元素.如果不存在,返回None."""
         pos = self._st.bisect_right((x, INF))
         if pos != 0 and self._st[pos - 1][1] >= x:
@@ -133,10 +133,38 @@ if __name__ == "__main__":
     ss.insert(1, 3)
     ss.insert(2, 4)
     ss.insert(5, 6)
-    assert ss.next(1) == 1
+    assert ss.nextStart(1) == 1
     assert (1, 4) in ss
     assert 7 not in ss
     assert ss.count == sum(right - left + 1 for left, right in ss)
     ss.erase(2, 3)
     assert len(ss) == 3
     assert ss.get(5) == (5, 6)
+
+    # 前驱后继
+    def pre(pos: int):
+        return next((i for i in range(pos, -1, -1) if ok[i]), None)
+
+    def nxt(pos: int):
+        return next((i for i in range(pos, n) if ok[i]), None)
+
+    def erase(left: int, right: int):
+        for i in range(left, right):
+            ok[i] = False
+
+    from random import randint
+
+    for _ in range(100):
+        n = randint(1, 100)
+        F = SegmentSet()
+        for i in range(n):
+            F.insert(i, i)
+        ok = [True] * n
+        for _ in range(100):
+            left, right = randint(0, n), randint(0, n)
+            F.erase(left, right - 1)
+            erase(left, right)
+            for i in range(n):
+                assert F.floor(i) == pre(i), (i, F.floor(i), pre(i))
+                assert F.ceiling(i) == nxt(i), (i, F.ceiling(i), nxt(i))
+    print("Done!")

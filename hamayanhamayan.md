@@ -28,7 +28,7 @@ https://drive.google.com/file/d/1WC7Y2Ni-8elttUgorfbix9tO1fvYN3g3/view
   https://hitonanode.github.io/cplib-cpp/formal_power_series/sum_of_exponential_times_polynomial_limit.hpp
   https://hitonanode.github.io/cplib-cpp/formal_power_series/sum_of_exponential_times_polynomial.hpp
 
-多项式全家桶
+多项式全家桶(准备放弃)
 https://maspypy.github.io/library/ (跟着 verify 的题做)
 https://www.luogu.com.cn/training/3015
 https://hackmd.io/@tatyam-prime/ryU4Ujup9#xKfracPxQx-%E3%82%92%E6%B1%82%E3%82%81%E3%82%8B
@@ -189,3 +189,8 @@ https://judge.yosupo.jp/
     12. 右手法という方針がある
     13. クエリ先読み(离线查询)
     14. 网格图(grid) 是二分图
+
+---
+
+https://qiita.com/e869120
+https://qiita.com/drken

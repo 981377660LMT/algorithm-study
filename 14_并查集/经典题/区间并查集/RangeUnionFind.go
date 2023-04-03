@@ -62,7 +62,7 @@ func (uf *UnionFindRange) Union(x, y int, f func(big, small int)) bool {
 // UnionRange 合并区间 [left, right] 的所有元素, 返回合并次数.
 func (uf *UnionFindRange) UnionRange(left, right int, f func(big, small int)) int {
 	if left > right {
-		left, right = right, left
+		return 0
 	}
 	leftRoot := uf.Find(left)
 	rightRoot := uf.Find(right)

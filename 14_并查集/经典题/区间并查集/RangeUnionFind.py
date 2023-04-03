@@ -22,7 +22,7 @@ class UnionFindRange:
         return x
 
     def union(self, x: int, y: int, f: Optional[Callable[[int, int], None]] = None) -> bool:
-        """union后, 大的编号所在的组的指向小的编号所在的组."""
+        """union后, 大的编号所在的组的指向小的编号所在的组(向左合并)."""
         if x < y:
             x, y = y, x
         rootX = self.find(x)
@@ -41,7 +41,7 @@ class UnionFindRange:
     ) -> int:
         """合并[left,right]区间, 返回合并次数."""
         if left > right:
-            left, right = right, left
+            return 0
         leftRoot = self.find(left)
         rightRoot = self.find(right)
         unionCount = 0
@@ -62,6 +62,61 @@ class UnionFindRange:
         for i in range(self._n):
             group[self.find(i)].append(i)
         return group
+
+
+class UnionFindWithDirected:
+    """带有合并方向的并查集(向左/右合并)"""
+
+    __slots__ = "part", "_n", "_parent", "_rank", "_direction"
+
+    def __init__(self, n: int, direction: int):
+        """direction: 合并方向, 1: 向右合并, -1: 向左合并"""
+        assert direction in (1, -1), "direction must be 1 or -1"
+        self.part = n
+        self._n = n
+        self._parent = list(range(n))
+        self._rank = [1] * n
+        self._direction = direction
+
+    def find(self, x: int) -> int:
+        while x != self._parent[x]:
+            self._parent[x] = self._parent[self._parent[x]]
+            x = self._parent[x]
+        return x
+
+    def union(self, x: int, y: int) -> bool:
+        if x < y and self._direction == -1:
+            x, y = y, x
+        rootX = self.find(x)
+        rootY = self.find(y)
+        if rootX == rootY:
+            return False
+        self._parent[rootX] = rootY
+        self._rank[rootY] += self._rank[rootX]
+        self.part -= 1
+        return True
+
+    def unionRange(self, left: int, right: int) -> int:
+        """合并[left,right]区间, 返回合并次数."""
+        if left > right:
+            return 0
+        leftRoot = self.find(left)
+        rightRoot = self.find(right)
+        unionCount = 0
+        if self._direction == 1:
+            while leftRoot != rightRoot:
+                unionCount += 1
+                self.union(leftRoot, leftRoot + 1)
+                leftRoot = self.find(leftRoot + 1)
+        else:
+            while leftRoot != rightRoot:
+                unionCount += 1
+                self.union(rightRoot, rightRoot - 1)
+                rightRoot = self.find(rightRoot - 1)
+        return unionCount
+
+    def isConnected(self, x: int, y: int) -> bool:
+        return self.find(x) == self.find(y)
 
 
 if __name__ == "__main__":
