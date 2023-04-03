@@ -18,6 +18,7 @@ class BitSet {
     return bitSet
   }
 
+  // lowbit.bit_length() - 1
   private static _trailingZeros32(uint32: number): number {
     if (uint32 === 0) return 32
     return 31 - Math.clz32(uint32 & -uint32) // bitLength32(uint32 & -uint32) - 1

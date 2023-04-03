@@ -23,7 +23,7 @@ func main() {
 	// !保存每个版本的根节点 初始为0
 	// !每一次的任何操作都是基于某一个历史版本，同时生成一个新的版本。（操作3, 4, 5, 6即保持原版本无变化）
 	sl := NewSortedList(func(a, b Value) int {
-		return a - b
+		return a.(int) - b.(int)
 	}, q*60) // !开50-60倍空间
 
 	for i := 1; i <= q; i++ {
@@ -55,8 +55,7 @@ func main() {
 	}
 }
 
-// type Value = interface{}
-type Value = int
+type Value = interface{}
 
 type node struct {
 	left, right int
@@ -149,6 +148,30 @@ func (sl *SortedList) pushUp(x int) {
 	sl.nodes[x].size = sl.nodes[sl.nodes[x].left].size + sl.nodes[sl.nodes[x].right].size + 1
 }
 
+// 求小于等于 value 的最大值.不存在则返回 nil
+func (sl *SortedList) Prev(value Value) Value {
+	var x, y int
+	sl.splitByValue(sl.root, value, &x, &y, false)
+	if x == 0 {
+		return nil
+	}
+	res := sl.nodes[sl.kthNode(x, sl.nodes[x].size)].value
+	sl.root = sl.merge(x, y)
+	return res
+}
+
+// 求大于等于 value 的最小值.不存在则返回 nil
+func (sl *SortedList) Next(value Value) Value {
+	var x, y int
+	sl.splitByValue(sl.root, value, &x, &y, true)
+	if y == 0 {
+		return nil
+	}
+	res := sl.nodes[sl.kthNode(y, 1)].value
+	sl.root = sl.merge(x, y)
+	return res
+}
+
 func (sl *SortedList) Add(rootVersion int, value Value) int {
 	var x, y int
 	sl.splitByValue(rootVersion, value, &x, &y, false)
@@ -185,7 +208,7 @@ func (sl *SortedList) Len(rootVersion int) int {
 	return sl.nodes[rootVersion].size
 }
 
-func (sl *SortedList) At(rootVersion int, index int) int {
+func (sl *SortedList) At(rootVersion int, index int) Value {
 	n := sl.Len(rootVersion)
 	if index < 0 {
 		index += n
@@ -197,11 +220,12 @@ func (sl *SortedList) At(rootVersion int, index int) int {
 	return sl.nodes[sl.kthNode(rootVersion, index)].value
 }
 
-func (sl *SortedList) Lower(rootVersion, val int) int {
-	var x, y, res int
+func (sl *SortedList) Lower(rootVersion, val int) Value {
+	var x, y int
+	var res Value
 	sl.splitByValue(rootVersion, val, &x, &y, true)
 	if x == 0 {
-		res = -math.MaxInt32
+		res = nil
 	} else {
 		res = sl.nodes[sl.kthNode(x, sl.nodes[x].size)].value
 	}
@@ -209,8 +233,9 @@ func (sl *SortedList) Lower(rootVersion, val int) int {
 	return res
 }
 
-func (sl *SortedList) Upper(rootVersion, val int) int {
-	var x, y, res int
+func (sl *SortedList) Upper(rootVersion, val int) Value {
+	var x, y int
+	var res Value
 	sl.splitByValue(rootVersion, val, &x, &y, false)
 	if y == 0 {
 		res = math.MaxInt32

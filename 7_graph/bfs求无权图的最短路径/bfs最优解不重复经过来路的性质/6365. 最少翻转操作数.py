@@ -15,10 +15,11 @@
 # !求从p位置出发到其他顶点的最短路
 # !很多条边的最短路=>线段树优化建图/在线bfs(和求完全图的最小生成树算法类似)
 # !这里线段树建图分奇偶比较麻烦,所以采用在线bfs
-
+# python 在线bfs 解决边数很多的最短路问题
+# https://leetcode.cn/problems/minimum-reverse-operations/solution/python-zai-xian-bfs-jie-jue-bian-shu-hen-y58m/
 
 from collections import deque
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 INF = int(1e18)
 
@@ -48,22 +49,39 @@ class Solution:
             finder[i & 1].insert(i)
         for i in banned:
             finder[i & 1].erase(i)
-        finder[p & 1].erase(p)
 
-        ########################################################
-        dist = [INF] * n
-        dist[p] = 0
-        queue = deque([p])
-        while queue:
-            cur = queue.popleft()
-            while True:
-                next_ = findUnused(cur)
-                if next_ is None:
-                    break
-                dist[next_] = dist[cur] + 1
-                queue.append(next_)
-                setUsed(next_)
+        dist = onlineBfs(n, p, setUsed, findUnused)
         return [d if d != INF else -1 for d in dist]
+
+
+def onlineBfs(
+    n: int, start: int, setUsed: Callable[[int], None], findUnused: Callable[[int], Optional[int]]
+) -> List[int]:
+    """在线bfs。不预先给出图, 而是通过两个函数 setUsed 和 findUnused 来在线寻找边。
+
+    Args:
+        n (int): 顶点数。
+        start (int): 起点。
+        setUsed (Callable[[int], None]): 将 u 标记为已访问。
+        findUnused (Callable[[int], int]): 找到和 u 邻接的一个未访问过的点。如果不存在, 返回 `None`。
+
+    Returns:
+        List[int]: 从起点到各个点的距离。
+    """
+    dist = [INF] * n
+    dist[start] = 0
+    queue = deque([start])
+    setUsed(start)
+    while queue:
+        cur = queue.popleft()
+        while True:
+            next_ = findUnused(cur)
+            if next_ is None:
+                break
+            dist[next_] = dist[cur] + 1
+            queue.append(next_)
+            setUsed(next_)
+    return dist
 
 
 from typing import Optional
@@ -166,6 +184,3 @@ class Finder:
 
     def __repr__(self):
         return f"FastSet({list(self)})"
-
-
-print(Solution().minReverseOperations(4, 0, [], 4))

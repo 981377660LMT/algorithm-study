@@ -8,7 +8,7 @@ class Finder:
     初始时,所有位置都未被访问过.
     """
 
-    __slots__ = "_n", "_lParent", "_rParent", "_removed"
+    __slots__ = "_n", "_lParent", "_rParent"
 
     def __init__(self, n: int):
         self._n = n

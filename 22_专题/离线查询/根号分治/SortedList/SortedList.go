@@ -15,7 +15,7 @@ func findScore(nums []int) int64 {
 	for i, v := range nums {
 		pairs[i] = [2]int{v, i}
 	}
-	sl := NewSortedList(func(a, b S) bool {
+	sl := _NSL(func(a, b S) bool {
 		if a[0] != b[0] {
 			return a[0] < b[0]
 		}
@@ -37,7 +37,7 @@ func findScore(nums []int) int64 {
 }
 
 func main() {
-	sl := NewSortedList(func(a, b S) bool { return a[0] < b[0] }, nil)
+	sl := _NSL(func(a, b S) bool { return a[0] < b[0] }, nil)
 	sl.Add([2]int{2, 3})
 	sl.Add([2]int{1, 2})
 	fmt.Println(sl.Pop(0))
@@ -46,14 +46,14 @@ func main() {
 type S = [2]int
 
 // SortedListSQRT
-type SortedList struct {
+type _SL struct {
 	less   func(a, b S) bool
 	size   int
 	blocks [][]S
 }
 
-func NewSortedList(less func(a, b S) bool, items []S) *SortedList {
-	res := &SortedList{less: less}
+func _NSL(less func(a, b S) bool, items []S) *_SL {
+	res := &_SL{less: less}
 	if len(items) > 0 {
 		items = append(items[:0:0], items...)
 		sort.Slice(items, func(i, j int) bool {
@@ -70,7 +70,7 @@ const (
 	_REBUILD_RATIO = 70
 )
 
-func (sl *SortedList) Add(value S) {
+func (sl *_SL) Add(value S) {
 	if sl.size == 0 {
 		sl.blocks = append(sl.blocks[:0], []S{value})
 		sl.size = 1
@@ -96,7 +96,7 @@ func (sl *SortedList) Add(value S) {
 	}
 }
 
-func (sl *SortedList) Has(value S) bool {
+func (sl *_SL) Has(value S) bool {
 	if sl.size == 0 {
 		return false
 	}
@@ -109,7 +109,7 @@ func (sl *SortedList) Has(value S) bool {
 	return pos < len(hitted) && hitted[pos] == value
 }
 
-func (sl *SortedList) Discard(value S) bool {
+func (sl *_SL) Discard(value S) bool {
 	if sl.size == 0 {
 		return false
 	}
@@ -131,7 +131,7 @@ func (sl *SortedList) Discard(value S) bool {
 	return true
 }
 
-func (sl *SortedList) Pop(index int) S {
+func (sl *_SL) Pop(index int) S {
 	if index < 0 {
 		index += sl.size
 	}
@@ -154,7 +154,7 @@ func (sl *SortedList) Pop(index int) S {
 	panic("impossible")
 }
 
-func (sl *SortedList) At(index int) S {
+func (sl *_SL) At(index int) S {
 	if index < 0 {
 		index += sl.size
 	}
@@ -172,7 +172,7 @@ func (sl *SortedList) At(index int) S {
 
 // Count the number of elements < value or
 // returns the index of the first element >= value.
-func (sl *SortedList) BisectLeft(value S) int {
+func (sl *_SL) BisectLeft(value S) int {
 	res := 0
 	for _, block := range sl.blocks {
 		if !sl.less(block[len(block)-1], value) {
@@ -185,7 +185,7 @@ func (sl *SortedList) BisectLeft(value S) int {
 
 // Count the number of elements <= value or
 // returns the index of the first element > value.
-func (sl *SortedList) BisectRight(value S) int {
+func (sl *_SL) BisectRight(value S) int {
 	res := 0
 	for _, block := range sl.blocks {
 		if sl.less(value, block[len(block)-1]) {
@@ -196,12 +196,12 @@ func (sl *SortedList) BisectRight(value S) int {
 	return res
 }
 
-func (sl *SortedList) Clear() {
+func (sl *_SL) Clear() {
 	sl.blocks = sl.blocks[:0]
 	sl.size = 0
 }
 
-func (sl *SortedList) Lower(value S) (res S, ok bool) {
+func (sl *_SL) Lower(value S) (res S, ok bool) {
 	for i := len(sl.blocks) - 1; i >= 0; i-- {
 		block := sl.blocks[i]
 		if sl.less(block[0], value) {
@@ -212,7 +212,7 @@ func (sl *SortedList) Lower(value S) (res S, ok bool) {
 	return
 }
 
-func (sl *SortedList) Higher(value S) (res S, ok bool) {
+func (sl *_SL) Higher(value S) (res S, ok bool) {
 	for _, block := range sl.blocks {
 		if sl.less(value, block[len(block)-1]) {
 			pos := sl._bisectRight(block, value)
@@ -222,7 +222,7 @@ func (sl *SortedList) Higher(value S) (res S, ok bool) {
 	return
 }
 
-func (sl *SortedList) Floor(value S) (res S, ok bool) {
+func (sl *_SL) Floor(value S) (res S, ok bool) {
 	for i := len(sl.blocks) - 1; i >= 0; i-- {
 		block := sl.blocks[i]
 		if !sl.less(value, block[0]) {
@@ -233,7 +233,7 @@ func (sl *SortedList) Floor(value S) (res S, ok bool) {
 	return
 }
 
-func (sl *SortedList) Ceiling(value S) (res S, ok bool) {
+func (sl *_SL) Ceiling(value S) (res S, ok bool) {
 	for _, block := range sl.blocks {
 		if !sl.less(block[len(block)-1], value) {
 			pos := sl._bisectLeft(block, value)
@@ -243,7 +243,7 @@ func (sl *SortedList) Ceiling(value S) (res S, ok bool) {
 	return
 }
 
-func (sl *SortedList) ForEach(f func(value S, index int)) {
+func (sl *_SL) ForEach(f func(value S, index int)) {
 	pos := 0
 	for _, block := range sl.blocks {
 		for _, value := range block {
@@ -253,11 +253,11 @@ func (sl *SortedList) ForEach(f func(value S, index int)) {
 	}
 }
 
-func (sl *SortedList) Len() int {
+func (sl *_SL) Len() int {
 	return sl.size
 }
 
-func (sl *SortedList) String() string {
+func (sl *_SL) String() string {
 	res := make([]string, 0)
 	sl.ForEach(func(value S, _ int) {
 		res = append(res, fmt.Sprintf("%v", value))
@@ -265,7 +265,7 @@ func (sl *SortedList) String() string {
 	return fmt.Sprintf("SortedList{%v}", strings.Join(res, ", "))
 }
 
-func (sl *SortedList) rebuild() {
+func (sl *_SL) rebuild() {
 	if sl.size == 0 {
 		return
 	}
@@ -284,7 +284,7 @@ func (sl *SortedList) rebuild() {
 	sl.blocks = newB
 }
 
-func (sl *SortedList) _initBlocks(sorted []S) [][]S {
+func (sl *_SL) _initBlocks(sorted []S) [][]S {
 	bc := int(math.Ceil(math.Sqrt(float64(len(sorted)) / _BLOCK_RATIO)))
 	bs := (len(sorted) + bc - 1) / bc
 	res := make([][]S, bc)
@@ -294,20 +294,20 @@ func (sl *SortedList) _initBlocks(sorted []S) [][]S {
 	return res
 }
 
-func (sl *SortedList) _bisectLeft(nums []S, value S) int {
+func (sl *_SL) _bisectLeft(nums []S, value S) int {
 	return sort.Search(len(nums), func(i int) bool {
 		return !sl.less(nums[i], value)
 	})
 }
 
-func (sl *SortedList) _bisectRight(nums []S, value S) int {
+func (sl *_SL) _bisectRight(nums []S, value S) int {
 	return sort.Search(len(nums), func(i int) bool {
 		return sl.less(value, nums[i])
 	})
 }
 
 // 如果没有找到,返回-1
-func (sl *SortedList) _findBlockIndex(x S) int {
+func (sl *_SL) _findBlockIndex(x S) int {
 	for i, block := range sl.blocks {
 		if !sl.less(block[len(block)-1], x) {
 			return i

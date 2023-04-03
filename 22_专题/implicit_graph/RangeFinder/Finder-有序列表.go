@@ -1,6 +1,4 @@
-// 基于 fhq-treap 实现
-// !用rbst来merge会超时，需要用treap维护priority权值
-
+// 寻找前驱后继/区间删除
 package main
 
 import (
@@ -10,21 +8,56 @@ import (
 	"time"
 )
 
-func main() {
-	sl := NewSortedList(func(a, b Value) int {
-		return a.(int) - b.(int)
-	}, 0)
-	sl.Build([]Value{1, 2, 3, 4, 5, 6, 7, 8, 9, 1})
-	fmt.Println(sl, sl.BisectLeft(3))
-	sl.Erase(3, 5)
-	sl.Pop(-1)
-	fmt.Println(sl)
-	fmt.Println(sl.Prev(5))
-	fmt.Println(sl.Next(5))
+const INF int = 1e18
+
+// 2612. 最少翻转操作数
+// https://leetcode.cn/problems/minimum-reverse-operations/
+func minReverseOperations(n int, p int, banned []int, k int) []int {
+	finder := [2]*Finder{
+		NewFinder(func(a, b int) int { return a - b }, n/2),
+		NewFinder(func(a, b int) int { return a - b }, n/2),
+	}
+
+	for i := 0; i < n; i++ {
+		finder[i&1].Insert(i)
+	}
+	for _, i := range banned {
+		finder[i&1].Erase(i)
+	}
+
+	getRange := func(i int) (int, int) {
+		return max(i-k+1, k-i-1), min(i+k-1, 2*n-k-i-1)
+	}
+	setUsed := func(u int) {
+		finder[u&1].Erase(u)
+	}
+
+	findUnused := func(u int) int {
+		left, right := getRange(u)
+		pre, ok := finder[(u+k+1)&1].Prev(right)
+		if ok && left <= pre && pre <= right {
+			return pre
+		}
+		next, ok := finder[(u+k+1)&1].Next(left)
+		if ok && left <= next && next <= right {
+			return next
+		}
+		return -1
+	}
+
+	dist := OnlineBfs(n, p, setUsed, findUnused)
+	res := make([]int, n)
+	for i, d := range dist {
+		if d == INF {
+			res[i] = -1
+		} else {
+			res[i] = d
+		}
+	}
+	return res
 }
 
-// type Value = int
-type Value = interface{}
+type Value = int
 
 type node struct {
 	left, right int
@@ -33,15 +66,15 @@ type node struct {
 	value       Value
 }
 
-type SortedList struct {
+type Finder struct {
 	seed       uint64
 	root       int
 	comparator func(a, b Value) int
 	nodes      []node
 }
 
-func NewSortedList(comparator func(a, b Value) int, initCapacity int) *SortedList {
-	sl := &SortedList{
+func NewFinder(comparator func(a, b Value) int, initCapacity int) *Finder {
+	sl := &Finder{
 		seed:       uint64(time.Now().UnixNano()/2 + 1),
 		comparator: comparator,
 		nodes:      make([]node, 0, max(initCapacity, 16)),
@@ -50,7 +83,7 @@ func NewSortedList(comparator func(a, b Value) int, initCapacity int) *SortedLis
 	return sl
 }
 
-func (sl *SortedList) Build(nums []Value) int {
+func (sl *Finder) Build(nums []Value) int {
 	n := len(nums)
 	keys := make([]int, 0, n)
 	for i := 0; i < n; i++ {
@@ -103,7 +136,7 @@ func (sl *SortedList) Build(nums []Value) int {
 	return sl.root
 }
 
-func (sl *SortedList) build(root int) {
+func (sl *Finder) build(root int) {
 	nodeRef := &sl.nodes[root]
 	if nodeRef.left != 0 {
 		sl.build(nodeRef.left)
@@ -114,18 +147,68 @@ func (sl *SortedList) build(root int) {
 	sl.pushUp(root)
 }
 
-func (sl *SortedList) pushUp(root int) {
+func (sl *Finder) pushUp(root int) {
 	sl.nodes[root].size = sl.nodes[sl.nodes[root].left].size + sl.nodes[sl.nodes[root].right].size + 1
 }
 
-func (sl *SortedList) Add(value Value) {
+func (sl *Finder) Insert(value Value) {
 	var x, y, z int
 	sl.splitByValue(sl.root, value, &x, &y, false)
 	z = sl.newNode(value)
 	sl.root = sl.merge(sl.merge(x, z), y)
 }
 
-func (sl *SortedList) At(index int) Value {
+func (sl *Finder) Erase(value Value) {
+	var x, y, z int
+	sl.splitByValue(sl.root, value, &x, &z, false)
+	sl.splitByValue(x, value, &x, &y, true)
+	y = sl.merge(sl.nodes[y].left, sl.nodes[y].right)
+	sl.root = sl.merge(sl.merge(x, y), z)
+}
+
+// 求小于等于 value 的最大值.不存在则第二个返回值为 false.
+func (sl *Finder) Prev(value Value) (res Value, ok bool) {
+	var x, y int
+	sl.splitByValue(sl.root, value, &x, &y, false)
+	if x == 0 {
+		ok = false
+		return
+	}
+	res = sl.nodes[sl.kthNode(x, sl.nodes[x].size)].value
+	sl.root = sl.merge(x, y)
+	ok = true
+	return
+}
+
+// 求大于等于 value 的最小值.不存在则第二个返回值为 false.
+func (sl *Finder) Next(value Value) (res Value, ok bool) {
+	var x, y int
+	sl.splitByValue(sl.root, value, &x, &y, true)
+	if y == 0 {
+		ok = false
+		return
+	}
+	res = sl.nodes[sl.kthNode(y, 1)].value
+	sl.root = sl.merge(x, y)
+	ok = true
+	return
+}
+
+func (sl *Finder) String() string {
+	sb := []string{"SortedList{"}
+	values := []string{}
+	for i := 0; i < sl.Len(); i++ {
+		values = append(values, fmt.Sprintf("%v", sl.at(i)))
+	}
+	sb = append(sb, strings.Join(values, ","), "}")
+	return strings.Join(sb, "")
+}
+
+func (sl *Finder) Len() int {
+	return sl.nodes[sl.root].size
+}
+
+func (sl *Finder) at(index int) Value {
 	n := sl.Len()
 	if index < 0 {
 		index += n
@@ -136,93 +219,7 @@ func (sl *SortedList) At(index int) Value {
 	return sl.nodes[sl.kthNode(sl.root, index+1)].value
 }
 
-func (sl *SortedList) Pop(index int) Value {
-	n := sl.Len()
-	if index < 0 {
-		index += n
-	}
-
-	index += 1 // dummy offset
-	var x, y, z int
-	sl.splitByRank(sl.root, index, &y, &z)
-	sl.splitByRank(y, index-1, &x, &y)
-	res := sl.nodes[y].value
-	sl.root = sl.merge(x, z)
-	return res
-}
-
-func (sl *SortedList) Discard(value Value) {
-	var x, y, z int
-	sl.splitByValue(sl.root, value, &x, &z, false)
-	sl.splitByValue(x, value, &x, &y, true)
-	y = sl.merge(sl.nodes[y].left, sl.nodes[y].right)
-	sl.root = sl.merge(sl.merge(x, y), z)
-}
-
-// Remove [start, stop) from list.
-func (sl *SortedList) Erase(start, stop int) {
-	var x, y, z int
-	start++ // dummy offset
-	sl.splitByRank(sl.root, stop, &y, &z)
-	sl.splitByRank(y, start-1, &x, &y)
-	sl.root = sl.merge(x, z)
-}
-
-func (sl *SortedList) BisectLeft(value Value) int {
-	var x, y int
-	sl.splitByValue(sl.root, value, &x, &y, true)
-	res := sl.nodes[x].size
-	sl.root = sl.merge(x, y)
-	return res
-}
-
-func (sl *SortedList) BisectRight(value Value) int {
-	var x, y int
-	sl.splitByValue(sl.root, value, &x, &y, false)
-	res := sl.nodes[x].size
-	sl.root = sl.merge(x, y)
-	return res
-}
-
-// 求小于等于 value 的最大值.不存在则返回 nil
-func (sl *SortedList) Prev(value Value) Value {
-	var x, y int
-	sl.splitByValue(sl.root, value, &x, &y, false)
-	if x == 0 {
-		return nil
-	}
-	res := sl.nodes[sl.kthNode(x, sl.nodes[x].size)].value
-	sl.root = sl.merge(x, y)
-	return res
-}
-
-// 求大于等于 value 的最小值.不存在则返回 nil
-func (sl *SortedList) Next(value Value) Value {
-	var x, y int
-	sl.splitByValue(sl.root, value, &x, &y, true)
-	if y == 0 {
-		return nil
-	}
-	res := sl.nodes[sl.kthNode(y, 1)].value
-	sl.root = sl.merge(x, y)
-	return res
-}
-
-func (sl *SortedList) String() string {
-	sb := []string{"SortedList{"}
-	values := []string{}
-	for i := 0; i < sl.Len(); i++ {
-		values = append(values, fmt.Sprintf("%v", sl.At(i)))
-	}
-	sb = append(sb, strings.Join(values, ","), "}")
-	return strings.Join(sb, "")
-}
-
-func (sl *SortedList) Len() int {
-	return sl.nodes[sl.root].size
-}
-
-func (sl *SortedList) kthNode(root int, k int) int {
+func (sl *Finder) kthNode(root int, k int) int {
 	cur := root
 	for cur != 0 {
 		if sl.nodes[sl.nodes[cur].left].size+1 == k {
@@ -237,7 +234,7 @@ func (sl *SortedList) kthNode(root int, k int) int {
 	return cur
 }
 
-func (sl *SortedList) splitByValue(root int, value Value, x, y *int, strictLess bool) {
+func (sl *Finder) splitByValue(root int, value Value, x, y *int, strictLess bool) {
 	if root == 0 {
 		*x, *y = 0, 0
 		return
@@ -267,7 +264,7 @@ func (sl *SortedList) splitByValue(root int, value Value, x, y *int, strictLess 
 // Split by rank.
 // Split the tree rooted at root into two trees, x and y, such that the size of x is k.
 // x is the left subtree, y is the right subtree.
-func (sl *SortedList) splitByRank(root, k int, x, y *int) {
+func (sl *Finder) splitByRank(root, k int, x, y *int) {
 	if root == 0 {
 		*x, *y = 0, 0
 		return
@@ -284,7 +281,7 @@ func (sl *SortedList) splitByRank(root, k int, x, y *int) {
 	}
 }
 
-func (sl *SortedList) merge(x, y int) int {
+func (sl *Finder) merge(x, y int) int {
 	if x == 0 || y == 0 {
 		return x + y
 	}
@@ -300,13 +297,13 @@ func (sl *SortedList) merge(x, y int) int {
 }
 
 // Return all elements in index order.
-func (sl *SortedList) InOrder() []Value {
+func (sl *Finder) InOrder() []Value {
 	res := make([]Value, 0, sl.Len())
 	sl.inOrder(sl.root, &res)
 	return res
 }
 
-func (sl *SortedList) inOrder(root int, res *[]Value) {
+func (sl *Finder) inOrder(root int, res *[]Value) {
 	if root == 0 {
 		return
 	}
@@ -315,7 +312,7 @@ func (sl *SortedList) inOrder(root int, res *[]Value) {
 	sl.inOrder(sl.nodes[root].right, res)
 }
 
-func (sl *SortedList) newNode(value Value) int {
+func (sl *Finder) newNode(value Value) int {
 	sl.nodes = append(sl.nodes, node{
 		value:    value,
 		size:     1,
@@ -325,7 +322,7 @@ func (sl *SortedList) newNode(value Value) int {
 }
 
 // https://nyaannyaan.github.io/library/misc/rng.hpp
-func (sl *SortedList) nextRand() uint64 {
+func (sl *Finder) nextRand() uint64 {
 	sl.seed ^= sl.seed << 7
 	sl.seed ^= sl.seed >> 9
 	return sl.seed
@@ -336,4 +333,45 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// 在线bfs.
+//   不预先给出图，而是通过两个函数 setUsed 和 findUnused 来在线寻找边.
+//   setUsed(u)：将 u 标记为已访问。
+//   findUnused(u)：找到和 u 邻接的一个未访问过的点。如果不存在, 返回 `-1`。
+
+func OnlineBfs(
+	n int, start int,
+	setUsed func(u int), findUnused func(cur int) (next int),
+) (dist []int) {
+	dist = make([]int, n)
+	for i := range dist {
+		dist[i] = INF
+	}
+	dist[start] = 0
+	queue := []int{start}
+	setUsed(start)
+
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		for {
+			next := findUnused(cur)
+			if next == -1 {
+				break
+			}
+			dist[next] = dist[cur] + 1 // weight
+			queue = append(queue, next)
+			setUsed(next)
+		}
+	}
+
+	return
 }
