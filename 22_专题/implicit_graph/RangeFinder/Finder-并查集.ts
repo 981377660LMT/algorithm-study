@@ -66,9 +66,6 @@ class Finder {
   }
 
   private _lUnion(x: number, y: number): void {
-    if (x < y) {
-      ;[x, y] = [y, x]
-    }
     const rootX = this._lFind(x)
     const rootY = this._lFind(y)
     if (rootX === rootY) {
@@ -78,9 +75,6 @@ class Finder {
   }
 
   private _rUnion(x: number, y: number): void {
-    if (x > y) {
-      ;[x, y] = [y, x]
-    }
     const rootX = this._rFind(x)
     const rootY = this._rFind(y)
     if (rootX === rootY) {
@@ -129,6 +123,10 @@ if (require.main === module) {
 
     const findUnused = (u: number): number | null => {
       const [left, right] = getRange(u)
+      const pre = finder[(u + k + 1) & 1].prev(right)
+      if (pre !== null && left <= pre && pre <= right) {
+        return pre
+      }
       const next = finder[(u + k + 1) & 1].next(left)
       if (next !== null && left <= next && next <= right) {
         return next

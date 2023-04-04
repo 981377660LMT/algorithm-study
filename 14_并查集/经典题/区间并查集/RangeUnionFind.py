@@ -119,6 +119,68 @@ class UnionFindWithDirected:
         return self.find(x) == self.find(y)
 
 
+class Finder:
+    """利用并查集寻找区间的某个位置左侧/右侧第一个未被访问过的位置.
+    初始时,所有位置都未被访问过.
+    """
+
+    ___slots___ = ("left", "right", "_n", "_data")
+
+    def __init__(self, n: int):
+        self._n = n
+        n += 2
+        self._data = [-1] * n  # 0 和 n + 1 为哨兵, 实际使用[1,n]
+        self.left = list(range(n))  # 每个组的左边界
+        self.right = [i + 1 for i in range(n)]  # 每个组的右边界
+
+    def prev(self, x: int) -> Optional[int]:
+        """找到x左侧第一个未被访问过的位置(包含x).
+        如果不存在,返回None.
+        """
+        root = self.left[self._find(x + 1)]
+        return root - 1 if root > 0 else None
+
+    def next(self, x: int) -> Optional[int]:
+        """x右侧第一个未被访问过的位置(包含x).
+        如果不存在,返回None.
+        """
+        root = self.right[self._find(x)]
+        return root - 1 if root < self._n + 1 else None
+
+    def erase(self, start: int, end: int) -> None:
+        """删除[left, right)区间内的元素.
+        0<=left<=right<=n.
+        """
+        if start >= end:
+            return
+        while True:
+            m = self.right[self._find(start)]
+            if m > end:
+                break
+            self._union(start, m)
+
+    def _find(self, x: int) -> int:
+        if self._data[x] < 0:
+            return x
+        self._data[x] = self._find(self._data[x])
+        return self._data[x]
+
+    def _union(self, x: int, y: int) -> bool:
+        rootX = self._find(x)
+        rootY = self._find(y)
+        if rootX == rootY:
+            return False
+        if self._data[rootX] > self._data[rootY]:
+            rootX, rootY = rootY, rootX
+        self._data[rootX] += self._data[rootY]
+        self._data[rootY] = rootX
+        if self.left[rootY] < self.left[rootX]:
+            self.left[rootX] = self.left[rootY]
+        if self.right[rootY] > self.right[rootX]:
+            self.right[rootX] = self.right[rootY]
+        return True
+
+
 if __name__ == "__main__":
 
     # No.1170 Never Want to Walk

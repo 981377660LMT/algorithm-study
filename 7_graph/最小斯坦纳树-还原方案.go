@@ -43,65 +43,60 @@ const INF int = 1e18
 
 // 一个联通的无向带权图上有k个关键点 criticals，求联通所有点最小的代价(边权之和)。
 //  vWeights: 每个顶点的附加权重(一般为make([]int, n))。
-func MinimumSteinerTree(n int, edges [][]int, criticals, vWeights []int) (cost int, es, vs []int) {
-	graph := make([][][3]int, n) // (to,w,ei)
+func MinimumSteinerTree(N int, edges [][]int, criticals, vWeights []int) (cost int, es, vs []int) {
+	graph := make([][][3]int, N) // (to,w,ei)
 	for i, e := range edges {
 		u, v, w := e[0], e[1], e[2]
 		graph[u] = append(graph[u], [3]int{v, w, i})
 		graph[v] = append(graph[v], [3]int{u, w, i})
 	}
 	if vWeights == nil {
-		vWeights = make([]int, n)
+		vWeights = make([]int, N)
 	}
 
-	m := len(edges)
-	k := len(criticals)
+	M := len(edges)
+	K := len(criticals)
 
-	dp := make([][]int, 1<<k)
+	dp := make([][]int, 1<<K)
 	for i := range dp {
-		dp[i] = make([]int, n)
+		dp[i] = make([]int, N)
 		for j := range dp[i] {
 			dp[i][j] = INF
 		}
 	}
-	for i := 0; i < n; i++ {
+	for i := 0; i < N; i++ {
 		dp[0][i] = vWeights[i]
 	}
 
-	par := make([][]int, 1<<k)
+	par := make([][]int, 1<<K)
 	for i := range par {
-		par[i] = make([]int, n)
+		par[i] = make([]int, N)
 		for j := range par[i] {
 			par[i][j] = -1
 		}
 	}
 
-	for s := 1; s < 1<<k; s++ {
+	for s := 1; s < 1<<K; s++ {
 		curDp := dp[s]
-		curS := s
-		for curS != 0 {
-			i := bits.TrailingZeros(uint(curS))
-			v := criticals[i]
-			curDp[v] = min(curDp[v], dp[curS^(1<<i)][v])
-			curS ^= 1 << i
+		curS := uint(s)
+		for curS > 0 {
+			bit := bits.TrailingZeros(curS)
+			v := criticals[bit]
+			curDp[v] = min(curDp[v], dp[s^(1<<bit)][v])
+			curS ^= 1 << bit
 		}
-		for t := s; t >= 0; {
-			if t == 0 || t == s {
-				t--
-				continue
-			}
-			for v := 0; v < n; v++ {
+		for t := (s - 1) & s; t > 0; t = (t - 1) & s {
+			for v := 0; v < N; v++ {
 				cand := dp[t][v] + dp[s^t][v] - vWeights[v]
 				if cand < curDp[v] {
 					curDp[v] = cand
 					par[s][v] = 2 * t
 				}
 			}
-			t = (t - 1) & s
 		}
 
-		inits := make([]H, n)
-		for i := 0; i < n; i++ {
+		inits := make([]H, N)
+		for i := 0; i < N; i++ {
 			inits[i] = H{curDp[i], i}
 		}
 		pq := NewHeap(func(a, b H) bool {
@@ -123,16 +118,15 @@ func MinimumSteinerTree(n int, edges [][]int, criticals, vWeights []int) (cost i
 				}
 			}
 		}
-
 	}
 
 	// 复元
-	usedV, usedE := make([]bool, n), make([]bool, m)
-	vToK := make([]int, n)
+	usedV, usedE := make([]bool, N), make([]bool, M)
+	vToK := make([]int, N)
 	for i := range vToK {
 		vToK[i] = -1
 	}
-	for i := 0; i < k; i++ {
+	for i := 0; i < K; i++ {
 		vToK[criticals[i]] = i
 	}
 
@@ -142,7 +136,7 @@ func MinimumSteinerTree(n int, edges [][]int, criticals, vWeights []int) (cost i
 			root, min_ = i, v
 		}
 	}
-	queue := [][2]int{{(1 << k) - 1, root}}
+	queue := [][2]int{{(1 << K) - 1, root}}
 	usedV[root] = true
 
 	for len(queue) > 0 {
@@ -171,12 +165,12 @@ func MinimumSteinerTree(n int, edges [][]int, criticals, vWeights []int) (cost i
 
 	}
 
-	for i := 0; i < n; i++ {
+	for i := 0; i < N; i++ {
 		if usedV[i] {
 			vs = append(vs, i)
 		}
 	}
-	for i := 0; i < m; i++ {
+	for i := 0; i < M; i++ {
 		if usedE[i] {
 			es = append(es, i)
 		}
@@ -187,6 +181,7 @@ func MinimumSteinerTree(n int, edges [][]int, criticals, vWeights []int) (cost i
 	for _, e := range es {
 		cost += edges[e][2]
 	}
+
 	return
 }
 

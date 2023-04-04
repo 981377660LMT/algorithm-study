@@ -62,7 +62,7 @@ func MininumHamiltonianCycle(graph [][][2]int) (res int, cycle []int) {
 	for s := 0; s < 1<<n; s++ {
 		for from := 0; from < n; from++ {
 			if dp[s][from] < INF {
-				enumerateBits(FULL-s, func(to int) {
+				enumerateBits(uint(FULL-s), func(to int) {
 					t := s | 1<<to
 					cost := dist[from][to]
 					if cost < INF {
@@ -111,9 +111,9 @@ func MininumHamiltonianCycle(graph [][][2]int) (res int, cycle []int) {
 }
 
 // 遍历每个为1的比特位
-func enumerateBits(s int, f func(bit int)) {
+func enumerateBits(s uint, f func(bit int)) {
 	for s != 0 {
-		i := bits.TrailingZeros(uint(s))
+		i := bits.TrailingZeros(s)
 		f(i)
 		s ^= 1 << i
 	}

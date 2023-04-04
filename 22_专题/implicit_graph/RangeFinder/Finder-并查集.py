@@ -8,74 +8,61 @@ class Finder:
     初始时,所有位置都未被访问过.
     """
 
-    __slots__ = "_n", "_lParent", "_rParent"
+    ___slots___ = ("left", "right", "_n", "_data")
 
     def __init__(self, n: int):
         self._n = n
-        self._lParent = list(range(n + 2))  # 0 和 n + 1 为哨兵, 实际使用[1,n]
-        self._rParent = list(range(n + 2))
+        n += 2
+        self._data = [-1] * n  # 0 和 n + 1 为哨兵, 实际使用[1,n]
+        self.left = list(range(n))  # 每个组的左边界
+        self.right = [i + 1 for i in range(n)]  # 每个组的右边界
 
     def prev(self, x: int) -> Optional[int]:
         """找到x左侧第一个未被访问过的位置(包含x).
         如果不存在,返回None.
         """
-        res = self._lFind(x + 1)
-        return res - 1 if res != 0 else None
+        root = self.left[self._find(x + 1)]
+        return root - 1 if root > 0 else None
 
     def next(self, x: int) -> Optional[int]:
         """x右侧第一个未被访问过的位置(包含x).
         如果不存在,返回None.
         """
-        res = self._rFind(x + 1)
-        return res - 1 if res != self._n + 1 else None
+        root = self.right[self._find(x)]
+        return root - 1 if root < self._n + 1 else None
 
-    def erase(self, left: int, right: int) -> None:
+    def erase(self, start: int, end: int) -> None:
         """删除[left, right)区间内的元素.
         0<=left<=right<=n.
         """
-        if left >= right:
+        if start >= end:
             return
-        left, right = left + 1, right + 1
+        while True:
+            m = self.right[self._find(start)]
+            if m > end:
+                break
+            self._union(start, m)
 
-        leftRoot, rightRoot = self._rFind(left), self._rFind(right)
-        while rightRoot != leftRoot:
-            self._rUnion(leftRoot, leftRoot + 1)
-            leftRoot = self._rFind(leftRoot + 1)
+    def _find(self, x: int) -> int:
+        if self._data[x] < 0:
+            return x
+        self._data[x] = self._find(self._data[x])
+        return self._data[x]
 
-        leftRoot, rightRoot = self._lFind(left - 1), self._lFind(right - 1)
-        while rightRoot != leftRoot:
-            self._lUnion(rightRoot, rightRoot - 1)
-            rightRoot = self._lFind(rightRoot - 1)
-
-    def _lUnion(self, x: int, y: int) -> None:
-        if x < y:
-            x, y = y, x
-        rootX = self._lFind(x)
-        rootY = self._lFind(y)
+    def _union(self, x: int, y: int) -> bool:
+        rootX = self._find(x)
+        rootY = self._find(y)
         if rootX == rootY:
-            return
-        self._lParent[rootX] = rootY
-
-    def _rUnion(self, x: int, y: int) -> None:
-        if x > y:
-            x, y = y, x
-        rootX = self._rFind(x)
-        rootY = self._rFind(y)
-        if rootX == rootY:
-            return
-        self._rParent[rootX] = rootY
-
-    def _lFind(self, x: int) -> int:
-        while x != self._lParent[x]:
-            self._lParent[x] = self._lParent[self._lParent[x]]
-            x = self._lParent[x]
-        return x
-
-    def _rFind(self, x: int) -> int:
-        while x != self._rParent[x]:
-            self._rParent[x] = self._rParent[self._rParent[x]]
-            x = self._rParent[x]
-        return x
+            return False
+        if self._data[rootX] > self._data[rootY]:
+            rootX, rootY = rootY, rootX
+        self._data[rootX] += self._data[rootY]
+        self._data[rootY] = rootX
+        if self.left[rootY] < self.left[rootX]:
+            self.left[rootX] = self.left[rootY]
+        if self.right[rootY] > self.right[rootX]:
+            self.right[rootX] = self.right[rootY]
+        return True
 
 
 if __name__ == "__main__":

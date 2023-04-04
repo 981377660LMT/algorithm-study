@@ -114,9 +114,6 @@ func (f *Finder) Erase(left, right int) {
 }
 
 func (f *Finder) lUnion(x, y int) {
-	if x < y {
-		x, y = y, x
-	}
 	rootX := f.lFind(x)
 	rootY := f.lFind(y)
 	if rootX == rootY {
@@ -126,9 +123,6 @@ func (f *Finder) lUnion(x, y int) {
 }
 
 func (f *Finder) rUnion(x, y int) {
-	if x > y {
-		x, y = y, x
-	}
 	rootX := f.rFind(x)
 	rootY := f.rFind(y)
 	if rootX == rootY {
