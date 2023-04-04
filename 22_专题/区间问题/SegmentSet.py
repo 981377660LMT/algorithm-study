@@ -3,6 +3,7 @@
 # 1.所有区间都是闭区间 例如 [1,1] 表示 长为1的区间,起点为1
 # !2.有交集的区间会被合并,例如 [1,2]和[2,3]会被合并为[1,3]
 
+# !注意:比较慢,有时可以用Intervals-珂朵莉树代替
 
 from typing import Optional, Tuple, Union
 from sortedcontainers import SortedList
@@ -103,7 +104,7 @@ class SegmentSet:
             return it != 0 and self._st[it - 1][1] >= arg
         left, right = arg
         if left > right:
-            return True
+            return False
         it1 = self._st.bisect_right((left, INF))
         if it1 == 0:
             return False

@@ -4,8 +4,6 @@
 
 // O(n*3^k+mlogm*2^k)
 
-// TODO:最小斯坦纳树求方案
-
 package main
 
 import (

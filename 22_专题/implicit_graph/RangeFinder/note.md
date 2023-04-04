@@ -12,3 +12,8 @@
   在线算法中:
   `setUsed`中调用 erase 函数
   `findUnUsed`中调用 next/prev 函数
+- 可用的数据结构
+  并查集
+  有序集合/set
+  fastset
+  链表

@@ -107,6 +107,8 @@ class Finder {
 }
 
 if (require.main === module) {
+  // https://leetcode.cn/problems/minimum-reverse-operations/submissions/
+
   function minReverseOperations(n: number, p: number, banned: number[], k: number): number[] {
     const finder = [new Finder(n), new Finder(n)]
     for (let i = 0; i < n; i++) {

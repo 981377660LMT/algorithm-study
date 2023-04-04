@@ -1,5 +1,4 @@
-// !注意:比较慢,有时可以用Intervals-珂朵莉树代替
-
+// 寻找前驱后继/区间删除
 package main
 
 import (
@@ -10,20 +9,101 @@ import (
 
 const INF int = 1e18
 
-type CountIntervals struct {
-	seg *SegmentSet
+// 2612. 最少翻转操作数
+// https://leetcode.cn/problems/minimum-reverse-operations/
+func minReverseOperations(n int, p int, banned []int, k int) []int {
+	finder := [2]*SegmentSet{
+		NewSegmentSet(n/2 + 1),
+		NewSegmentSet(n/2 + 1),
+	}
+
+	for i := 0; i < n; i++ {
+		finder[i&1].Insert(i, i)
+	}
+	for _, i := range banned {
+		finder[i&1].Erase(i, i)
+	}
+
+	getRange := func(i int) (int, int) {
+		return max(i-k+1, k-i-1), min(i+k-1, 2*n-k-i-1)
+	}
+	setUsed := func(u int) {
+		finder[u&1].Erase(u, u)
+	}
+
+	findUnused := func(u int) int {
+		left, right := getRange(u)
+		pre, ok := finder[(u+k+1)&1].Floor(right)
+		if ok && left <= pre && pre <= right {
+			return pre
+		}
+		next, ok := finder[(u+k+1)&1].Ceiling(left)
+		if ok && left <= next && next <= right {
+			return next
+		}
+		return -1
+	}
+
+	dist := OnlineBfs(n, p, setUsed, findUnused)
+	res := make([]int, n)
+	for i, d := range dist {
+		if d == INF {
+			res[i] = -1
+		} else {
+			res[i] = d
+		}
+	}
+	return res
 }
 
-func Constructor() CountIntervals {
-	return CountIntervals{seg: NewSegmentSet(1e5)}
+type Value = [2]int
+
+type node struct {
+	left, right int
+	size        int
+	priority    uint64
+	value       Value
 }
 
-func (this *CountIntervals) Add(left int, right int) {
-	this.seg.Insert(left, right)
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
-func (this *CountIntervals) Count() int {
-	return this.seg.Count
+// 在线bfs.
+//   不预先给出图，而是通过两个函数 setUsed 和 findUnused 来在线寻找边.
+//   setUsed(u)：将 u 标记为已访问。
+//   findUnused(u)：找到和 u 邻接的一个未访问过的点。如果不存在, 返回 `-1`。
+
+func OnlineBfs(
+	n int, start int,
+	setUsed func(u int), findUnused func(cur int) (next int),
+) (dist []int) {
+	dist = make([]int, n)
+	for i := range dist {
+		dist[i] = INF
+	}
+	dist[start] = 0
+	queue := []int{start}
+	setUsed(start)
+
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		for {
+			next := findUnused(cur)
+			if next == -1 {
+				break
+			}
+			dist[next] = dist[cur] + 1 // weight
+			queue = append(queue, next)
+			setUsed(next)
+		}
+	}
+
+	return
 }
 
 // 管理区间的数据结构.
@@ -207,15 +287,6 @@ func (ss *SegmentSet) String() string {
 
 func (ss *SegmentSet) Len() int {
 	return ss.sl.Len()
-}
-
-type Value = [2]int // [start,end]
-
-type node struct {
-	left, right int
-	size        int
-	priority    uint64
-	value       Value
 }
 
 type _SL struct {

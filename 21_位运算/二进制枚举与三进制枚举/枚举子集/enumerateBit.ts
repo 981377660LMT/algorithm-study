@@ -9,7 +9,7 @@
  */
 function enumerateBits(int32: number, callback: (bit: number) => void): void {
   while (int32 > 0) {
-    const i = 31 - Math.clz32(int32 & -int32)
+    const i = 31 - Math.clz32(int32 & -int32) // lowbit.bit_length() - 1
     callback(i)
     int32 ^= 1 << i
   }
