@@ -34,10 +34,6 @@ func minReverseOperations(n int, p int, banned []int, k int) []int {
 
 	findUnused := func(u int) int {
 		left, right := getRange(u)
-		pre, ok := finder[(u+k+1)&1].Prev(right)
-		if ok && left <= pre && pre <= right {
-			return pre
-		}
 		next, ok := finder[(u+k+1)&1].Next(left)
 		if ok && left <= next && next <= right {
 			return next

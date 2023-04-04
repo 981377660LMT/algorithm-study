@@ -53,7 +53,7 @@ class SortedList<T = number> {
   }
 
   add(value: T): void {
-    if (this._size === 0) {
+    if (!this._size) {
       this._blocks = [[value]]
       this._size = 1
       return
@@ -83,7 +83,7 @@ class SortedList<T = number> {
 
   /** 注意内部使用 `===` 来比较两个对象是否相等 */
   has(value: T): boolean {
-    if (this._size === 0) return false
+    if (!this._size) return false
     const blockIndex = this._findBlockIndex(value)
     if (blockIndex === void 0) return false
     const block = this._blocks[blockIndex]
@@ -93,7 +93,7 @@ class SortedList<T = number> {
 
   /** 注意内部使用 `===` 来比较两个对象是否相等 */
   discard(value: T): boolean {
-    if (this._size === 0) return false
+    if (!this._size) return false
     const blockIndex = this._findBlockIndex(value)
     if (blockIndex === -1) return false
     const block = this._blocks[blockIndex]
@@ -103,7 +103,7 @@ class SortedList<T = number> {
     }
     block.splice(pos, 1)
     this._size -= 1
-    if (block.length === 0) {
+    if (!block.length) {
       this._blocks.splice(blockIndex, 1) // !Splice When Empty, Do Not Rebuild
     }
     return true
@@ -120,7 +120,7 @@ class SortedList<T = number> {
         const res = block[index]
         block.splice(index, 1)
         this._size -= 1
-        if (block.length === 0) {
+        if (!block.length) {
           this._blocks.splice(i, 1) // !Splice When Empty, Do Not Rebuild
         }
         return res
@@ -271,7 +271,7 @@ class SortedList<T = number> {
   }
 
   private _rebuild(): void {
-    if (this._size === 0) {
+    if (!this._size) {
       return
     }
     const bCount = Math.ceil(Math.sqrt(this._size / SortedList._BLOCK_RATIO))

@@ -37,9 +37,9 @@ class Solution:
         def findUnused(u: int) -> Optional[int]:
             """找到一个未使用的位置.如果不存在,返回None."""
             left, right = getRange(u)
-            pre = finder[(u + k + 1) & 1].prev(right)
-            if pre is not None and left <= pre <= right:
-                return pre
+            # pre = finder[(u + k + 1) & 1].prev(right)
+            # if pre is not None and left <= pre <= right:
+            #     return pre
             next_ = finder[(u + k + 1) & 1].next(left)
             if next_ is not None and left <= next_ <= right:
                 return next_
@@ -97,15 +97,15 @@ class Finder:
     @staticmethod
     def _trailingZeros1024(x: int) -> int:
         if x == 0:
-            return 1 << 10
+            return 1024
         return (x & -x).bit_length() - 1
 
     def __init__(self, n: int) -> None:
         self._n = n
         seg = []
         while True:
-            seg.append([0] * ((n + (1 << 10) - 1) >> 10))
-            n = (n + (1 << 10) - 1) >> 10
+            seg.append([0] * ((n + 1023) >> 10))
+            n = (n + 1023) >> 10
             if n <= 1:
                 break
         self._seg = seg
@@ -113,12 +113,12 @@ class Finder:
 
     def insert(self, i: int) -> None:
         for h in range(self._lg):
-            self._seg[h][i >> 10] |= 1 << (i % (1 << 10))
+            self._seg[h][i >> 10] |= 1 << (i % 1024)
             i >>= 10
 
     def erase(self, i: int) -> None:
         for h in range(self._lg):
-            self._seg[h][i >> 10] &= ~(1 << (i % (1 << 10)))
+            self._seg[h][i >> 10] &= ~(1 << i % 1024)
             if self._seg[h][i >> 10]:
                 break
             i >>= 10
@@ -135,13 +135,13 @@ class Finder:
         for h in range(self._lg):
             if i >> 10 == len(seg[h]):
                 break
-            d = seg[h][i >> 10] >> (i % (1 << 10))
+            d = seg[h][i >> 10] >> (i % 1024)
             if d == 0:
-                i = i >> 10 + 1
+                i = (i >> 10) + 1
                 continue
             i += self._trailingZeros1024(d)
             for g in range(h - 1, -1, -1):
-                i *= 1 << 10
+                i <<= 10
                 i += self._trailingZeros1024(seg[g][i >> 10])
             return i
 
@@ -157,13 +157,13 @@ class Finder:
         for h in range(self._lg):
             if i == -1:
                 break
-            d = seg[h][i >> 10] << ((1 << 10) - 1 - i % (1 << 10)) & ((1 << (1 << 10)) - 1)
+            d = seg[h][i >> 10] << (1023 - i % 1024) & ((1 << 1024) - 1)
             if d == 0:
                 i = (i >> 10) - 1
                 continue
-            i += d.bit_length() - (1 << 10)
+            i += d.bit_length() - 1024
             for g in range(h - 1, -1, -1):
-                i *= 1 << 10
+                i <<= 10
                 i += (seg[g][i >> 10]).bit_length() - 1
             return i
 
@@ -177,7 +177,7 @@ class Finder:
             yield x
 
     def __contains__(self, i: int) -> bool:
-        return self._seg[0][i >> 10] & (1 << (i % (1 << 10))) != 0
+        return self._seg[0][i >> 10] & (1 << (i % 1024)) != 0
 
     def __iter__(self):
         yield from self.islice(0, self._n)

@@ -30,10 +30,6 @@ function minReverseOperations(n: number, p: number, banned: number[], k: number)
 
   const findUnused = (u: number): number | null => {
     const [left, right] = getRange(u)
-    const pre = finder[(u + k + 1) & 1].floor(right)
-    if (pre != null && left <= pre && pre <= right) {
-      return pre
-    }
     const next = finder[(u + k + 1) & 1].ceiling(left)
     if (next != null && left <= next && next <= right) {
       return next

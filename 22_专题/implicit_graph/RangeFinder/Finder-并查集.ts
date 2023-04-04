@@ -129,10 +129,6 @@ if (require.main === module) {
 
     const findUnused = (u: number): number | null => {
       const [left, right] = getRange(u)
-      const pre = finder[(u + k + 1) & 1].prev(right)
-      if (pre !== null && left <= pre && pre <= right) {
-        return pre
-      }
       const next = finder[(u + k + 1) & 1].next(left)
       if (next !== null && left <= next && next <= right) {
         return next
