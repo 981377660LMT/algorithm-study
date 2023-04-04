@@ -72,4 +72,36 @@ describe('SortedList', () => {
       expect(item).toBe(sortedNums[pos++])
     }
   })
+
+  it('should support erase', () => {
+    for (let i = 0; i < 10000; i++) {
+      let start = Math.floor(Math.random() * sl.length)
+      let end = Math.floor(Math.random() * sl.length)
+      sl.erase(start, end)
+      sortedNums.splice(start, end - start)
+      expect(sl.length).toBe(sortedNums.length)
+      expect(sortedNums).toStrictEqual([...sl])
+    }
+  })
+
+  it('should support slice and islce', () => {
+    for (let i = 0; i < 1000; i++) {
+      let start = Math.floor(Math.random() * sl.length)
+      let end = Math.floor(Math.random() * sl.length)
+      const slice = sl.slice(start, end)
+      const islce = [...sl.islice(start, end)]
+      expect(slice).toStrictEqual(sortedNums.slice(start, end))
+      expect(islce).toStrictEqual(sortedNums.slice(start, end))
+    }
+  })
+
+  it('should support irange', () => {
+    for (let i = 0; i < 1000; i++) {
+      let min = Math.floor(Math.random() * sl.length)
+      let max = Math.floor(Math.random() * sl.length)
+      const irange = [...sl.irange(min, max)]
+      const target = sortedNums.filter(num => num >= min && num < max).sort((a, b) => a - b)
+      expect(irange).toStrictEqual(target)
+    }
+  })
 })

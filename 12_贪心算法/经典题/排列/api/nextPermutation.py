@@ -58,11 +58,12 @@ from sortedcontainers import SortedSet
 
 
 # https://maspypy.github.io/library/seq/kth_next_permutation.hpp
+# 有重复的情况：先把重复的元素贴上不同标签,最后换回来.
 def kthNextPermutation(unique: List[Any], k: int, inPlace=False) -> Tuple[bool, List[Any], int]:
     """下k个字典序的排列
 
     Args:
-        unique (List[Any]): 无重复元素的数组
+        unique (List[Any]): `无重复元素`的数组
         k (int): 后续第k个(`本身算第0个`)
         inPlace (bool, optional): 是否原地修改. 默认为False
 
@@ -115,3 +116,13 @@ if __name__ == "__main__":
     isOk, kthP, move = kthNextPermutation(list(map(int, "12345")), 5)
     if isOk:
         print("kthP:", kthP, "move:", move)
+
+    a1 = [1, 2, 3, 4, 5, 6, 7, 9, 23, 14, 56, 99, 876, 222, 444, 555]
+    a2 = [1, 2, 3, 4, 5, 6, 7, 9, 23, 14, 56, 99, 876, 222, 444, 555]
+
+    k = 1000000
+    for _ in range(k):
+        isOk, a1 = nextPermutation(a1, inPlace=True)
+        if not isOk:
+            break
+    assert a1 == kthNextPermutation(a2, k)[1]

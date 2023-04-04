@@ -4,9 +4,16 @@
 
 package main
 
-import "math/bits"
+import (
+	"fmt"
+	"math/bits"
+)
 
-func _(x int) {
+func main() {
+	foo(0)
+}
+
+func foo(x int) {
 	// !利用 -v = ^v+1  负数等于反码加1
 	lowbit := func(v int64) int64 { return v & -v } // (如果要找最低位的0,先将v取反)
 	x = 0b10100                                     // 取反 => ^x == 0b01011
@@ -56,6 +63,10 @@ func _(x int) {
 	// !32位时, clz32 + bit_length = 32
 
 	// !python里用int模仿uint64的行为:	x &((1<<64)-1) 即可
+
+	// 对二的整数幂取模可以换成与运算
+	a := 1200
+	fmt.Println(a%32 == a&31)
 
 	_ = []interface{}{
 		lowbit,

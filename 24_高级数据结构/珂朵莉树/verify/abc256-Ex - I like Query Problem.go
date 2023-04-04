@@ -360,7 +360,7 @@ type ODT struct {
 	llim, rlim int
 	noneValue  Value
 	data       []Value
-	ss         *fastSet
+	ss         *_fastSet
 }
 
 // 指定区间长度 n 和哨兵 noneValue 建立一个 ODT.
@@ -371,7 +371,7 @@ func NewODT(n int, noneValue Value) *ODT {
 	for i := 0; i < n; i++ {
 		dat[i] = noneValue
 	}
-	ss := newFastSet(n)
+	ss := _newFastSet(n)
 	ss.Insert(0)
 
 	res.rlim = n
@@ -500,18 +500,18 @@ func max(a, b int) int {
 	return b
 }
 
-type fastSet struct {
+type _fastSet struct {
 	n, lg int
 	seg   [][]int
 }
 
-func newFastSet(n int) *fastSet {
-	res := &fastSet{n: n}
+func _newFastSet(n int) *_fastSet {
+	res := &_fastSet{n: n}
 	seg := [][]int{}
 	n_ := n
 	for {
-		seg = append(seg, make([]int, (n_+63)/64))
-		n_ = (n_ + 63) / 64
+		seg = append(seg, make([]int, (n_+63)>>6))
+		n_ = (n_ + 63) >> 6
 		if n_ <= 1 {
 			break
 		}
@@ -521,29 +521,29 @@ func newFastSet(n int) *fastSet {
 	return res
 }
 
-func (fs *fastSet) Has(i int) bool {
-	return (fs.seg[0][i/64]>>(i%64))&1 != 0
+func (fs *_fastSet) Has(i int) bool {
+	return (fs.seg[0][i>>6]>>(i&63))&1 != 0
 }
 
-func (fs *fastSet) Insert(i int) {
+func (fs *_fastSet) Insert(i int) {
 	for h := 0; h < fs.lg; h++ {
-		fs.seg[h][i/64] |= 1 << (i % 64)
-		i /= 64
+		fs.seg[h][i>>6] |= 1 << (i & 63)
+		i >>= 6
 	}
 }
 
-func (fs *fastSet) Erase(i int) {
+func (fs *_fastSet) Erase(i int) {
 	for h := 0; h < fs.lg; h++ {
-		fs.seg[h][i/64] &= ^(1 << (i % 64))
-		if fs.seg[h][i/64] != 0 {
+		fs.seg[h][i>>6] &= ^(1 << (i & 63))
+		if fs.seg[h][i>>6] != 0 {
 			break
 		}
-		i /= 64
+		i >>= 6
 	}
 }
 
 // 返回大于等于i的最小元素.如果不存在,返回n.
-func (fs *fastSet) Next(i int) int {
+func (fs *_fastSet) Next(i int) int {
 	if i < 0 {
 		i = 0
 	}
@@ -552,19 +552,19 @@ func (fs *fastSet) Next(i int) int {
 	}
 
 	for h := 0; h < fs.lg; h++ {
-		if i/64 == len(fs.seg[h]) {
+		if i>>6 == len(fs.seg[h]) {
 			break
 		}
-		d := fs.seg[h][i/64] >> (i % 64)
+		d := fs.seg[h][i>>6] >> (i & 63)
 		if d == 0 {
-			i = i/64 + 1
+			i = i>>6 + 1
 			continue
 		}
 		// find
 		i += fs.bsf(d)
 		for g := h - 1; g >= 0; g-- {
-			i *= 64
-			i += fs.bsf(fs.seg[g][i/64])
+			i <<= 6
+			i += fs.bsf(fs.seg[g][i>>6])
 		}
 
 		return i
@@ -574,7 +574,7 @@ func (fs *fastSet) Next(i int) int {
 }
 
 // 返回小于等于i的最大元素.如果不存在,返回-1.
-func (fs *fastSet) Prev(i int) int {
+func (fs *_fastSet) Prev(i int) int {
 	if i < 0 {
 		return -1
 	}
@@ -586,16 +586,16 @@ func (fs *fastSet) Prev(i int) int {
 		if i == -1 {
 			break
 		}
-		d := fs.seg[h][i/64] << (63 - i%64)
+		d := fs.seg[h][i>>6] << (63 - i&63)
 		if d == 0 {
-			i = i/64 - 1
+			i = i>>6 - 1
 			continue
 		}
 		// find
-		i += fs.bsr(d) - (64 - 1)
+		i += fs.bsr(d) - 63
 		for g := h - 1; g >= 0; g-- {
-			i *= 64
-			i += fs.bsr(fs.seg[g][i/64])
+			i <<= 6
+			i += fs.bsr(fs.seg[g][i>>6])
 		}
 
 		return i
@@ -605,7 +605,7 @@ func (fs *fastSet) Prev(i int) int {
 }
 
 // 遍历[start,end)区间内的元素.
-func (fs *fastSet) Enumerate(start, end int, f func(i int)) {
+func (fs *_fastSet) Enumerate(start, end int, f func(i int)) {
 	x := start - 1
 	for {
 		x = fs.Next(x + 1)
@@ -616,20 +616,20 @@ func (fs *fastSet) Enumerate(start, end int, f func(i int)) {
 	}
 }
 
-func (fs *fastSet) String() string {
+func (fs *_fastSet) String() string {
 	res := []string{}
 	for i := 0; i < fs.n; i++ {
 		if fs.Has(i) {
 			res = append(res, strconv.Itoa(i))
 		}
 	}
-	return fmt.Sprintf("FastSet{%v}", strings.Join(res, ", "))
+	return fmt.Sprintf("_fastSet{%v}", strings.Join(res, ", "))
 }
 
-func (*fastSet) bsr(x int) int {
+func (*_fastSet) bsr(x int) int {
 	return 63 - bits.LeadingZeros(uint(x))
 }
 
-func (*fastSet) bsf(x int) int {
+func (*_fastSet) bsf(x int) int {
 	return bits.TrailingZeros(uint(x))
 }

@@ -73,3 +73,4 @@ if __name__ == "__main__":
 
     assert calPerm("cba", 1) == ["a", "c", "b"]
     assert calPerm("aab", 1) == ["a", "b", "a"]
+

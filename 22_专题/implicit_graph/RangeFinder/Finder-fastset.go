@@ -30,8 +30,8 @@ func NewFinder(n int) *Finder {
 	seg := [][]int{}
 	n_ := n
 	for {
-		seg = append(seg, make([]int, (n_+63)/64))
-		n_ = (n_ + 63) / 64
+		seg = append(seg, make([]int, (n_+63)>>6))
+		n_ = (n_ + 63) >> 6
 		if n_ <= 1 {
 			break
 		}
@@ -42,23 +42,23 @@ func NewFinder(n int) *Finder {
 }
 
 func (fs *Finder) Has(i int) bool {
-	return (fs.seg[0][i/64]>>(i%64))&1 != 0
+	return (fs.seg[0][i>>6]>>(i&63))&1 != 0
 }
 
 func (fs *Finder) Insert(i int) {
 	for h := 0; h < fs.lg; h++ {
-		fs.seg[h][i/64] |= 1 << (i % 64)
-		i /= 64
+		fs.seg[h][i>>6] |= 1 << (i & 63)
+		i >>= 6
 	}
 }
 
 func (fs *Finder) Erase(i int) {
 	for h := 0; h < fs.lg; h++ {
-		fs.seg[h][i/64] &= ^(1 << (i % 64))
-		if fs.seg[h][i/64] != 0 {
+		fs.seg[h][i>>6] &= ^(1 << (i & 63))
+		if fs.seg[h][i>>6] != 0 {
 			break
 		}
-		i /= 64
+		i >>= 6
 	}
 }
 
@@ -72,19 +72,19 @@ func (fs *Finder) Next(i int) int {
 	}
 
 	for h := 0; h < fs.lg; h++ {
-		if i/64 == len(fs.seg[h]) {
+		if i>>6 == len(fs.seg[h]) {
 			break
 		}
-		d := fs.seg[h][i/64] >> (i % 64)
+		d := fs.seg[h][i>>6] >> (i & 63)
 		if d == 0 {
-			i = i/64 + 1
+			i = i>>6 + 1
 			continue
 		}
 		// find
 		i += fs.bsf(d)
 		for g := h - 1; g >= 0; g-- {
-			i *= 64
-			i += fs.bsf(fs.seg[g][i/64])
+			i <<= 6
+			i += fs.bsf(fs.seg[g][i>>6])
 		}
 
 		return i
@@ -106,16 +106,16 @@ func (fs *Finder) Prev(i int) int {
 		if i == -1 {
 			break
 		}
-		d := fs.seg[h][i/64] << (63 - i%64)
+		d := fs.seg[h][i>>6] << (63 - i&63)
 		if d == 0 {
-			i = i/64 - 1
+			i = i>>6 - 1
 			continue
 		}
 		// find
 		i += fs.bsr(d) - 63
 		for g := h - 1; g >= 0; g-- {
-			i *= 64
-			i += fs.bsr(fs.seg[g][i/64])
+			i <<= 6
+			i += fs.bsr(fs.seg[g][i>>6])
 		}
 
 		return i

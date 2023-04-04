@@ -13,12 +13,12 @@
  */
 class SortedList<T = number> {
   /** Optimized for 1e5 elements in javascript. Do not change it. */
-  private static readonly _BLOCK_RATIO = 50
-  private static readonly _REBUILD_RATIO = 170
+  protected static readonly _BLOCK_RATIO = 50
+  protected static readonly _REBUILD_RATIO = 170
 
-  private readonly _compareFn: (a: T, b: T) => number
-  private _size: number
-  private _blocks: T[][]
+  protected readonly _compareFn: (a: T, b: T) => number
+  protected _size: number
+  protected _blocks: T[][]
 
   constructor()
   constructor(iterable: Iterable<T>)
@@ -130,6 +130,32 @@ class SortedList<T = number> {
     return void 0
   }
 
+  /**
+   * 删除区间 [start, end) 内的元素.
+   */
+  erase(start: number, end: number): void {
+    if (start < 0) start = 0
+    if (end > this._size) end = this._size
+    if (start >= end) return
+
+    let [bid, startPos] = this._moveTo(start)
+    let deleteCount = end - start
+    for (; bid < this._blocks.length && deleteCount > 0; bid++) {
+      const block = this._blocks[bid]
+      const endPos = Math.min(block.length, startPos + deleteCount)
+      const curDeleteCount = endPos - startPos
+      if (curDeleteCount === block.length) {
+        this._blocks.splice(bid, 1)
+        bid--
+      } else {
+        block.splice(startPos, curDeleteCount)
+      }
+      deleteCount -= curDeleteCount
+      this._size -= curDeleteCount
+      startPos = 0
+    }
+  }
+
   at(index: number): T | undefined {
     if (index < 0) index += this._size
     if (index < 0 || index >= this._size) {
@@ -219,6 +245,67 @@ class SortedList<T = number> {
       res += block.length
     }
     return res
+  }
+
+  slice(start: number, end: number): T[] {
+    if (start < 0) start = 0
+    if (end > this._size) end = this._size
+    if (start >= end) return []
+    let count = end - start
+    const res: T[] = Array(count).fill(0)
+    let [bid, startPos] = this._moveTo(start)
+    let ptr = 0
+    for (; bid < this._blocks.length && count > 0; bid++) {
+      const block = this._blocks[bid]
+      const endPos = Math.min(block.length, startPos + count)
+      const curCount = endPos - startPos
+      for (let j = startPos; j < endPos; j++) {
+        res[ptr++] = block[j]
+      }
+      count -= curCount
+      startPos = 0
+    }
+    return res
+  }
+
+  /**
+   * 返回一个迭代器，用于遍历区间 [start, end) 内的元素.
+   */
+  *islice(start: number, end: number): IterableIterator<T> {
+    if (start < 0) start = 0
+    if (end > this._size) end = this._size
+    if (start >= end) return
+    let count = end - start
+    let [bid, startPos] = this._moveTo(start)
+    for (; bid < this._blocks.length && count > 0; bid++) {
+      const block = this._blocks[bid]
+      const endPos = Math.min(block.length, startPos + count)
+      const curCount = endPos - startPos
+      for (let j = startPos; j < endPos; j++) {
+        yield block[j]
+      }
+      count -= curCount
+      startPos = 0
+    }
+  }
+
+  /**
+   * 返回一个迭代器，用于遍历范围在 `[min, max] 闭区间`内的元素.
+   */
+  *irange(min: T, max: T): IterableIterator<T> {
+    const bi = this._findBlockIndex(min)
+    for (let i = bi; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
+      for (let j = 0; j < block.length; j++) {
+        const x = block[j]
+        if (this._compareFn(x, max) > 0) {
+          return
+        }
+        if (this._compareFn(x, min) >= 0) {
+          yield x
+        }
+      }
+    }
   }
 
   clear(): void {
@@ -333,6 +420,17 @@ class SortedList<T = number> {
       }
     }
     return left
+  }
+
+  private _moveTo(index: number): [bid: number, pos: number] {
+    for (let i = 0; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
+      if (index < block.length) {
+        return [i, index]
+      }
+      index -= block.length
+    }
+    return [this._blocks.length, 0]
   }
 
   get length(): number {

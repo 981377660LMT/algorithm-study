@@ -31,12 +31,12 @@ class Finder:
 
     def insert(self, i: int) -> None:
         for h in range(self._lg):
-            self._seg[h][i >> 10] |= 1 << (i % 1024)
+            self._seg[h][i >> 10] |= 1 << (i & 1023)
             i >>= 10
 
     def erase(self, i: int) -> None:
         for h in range(self._lg):
-            self._seg[h][i >> 10] &= ~(1 << i % 1024)
+            self._seg[h][i >> 10] &= ~(1 << (i & 1023))
             if self._seg[h][i >> 10]:
                 break
             i >>= 10
@@ -53,7 +53,7 @@ class Finder:
         for h in range(self._lg):
             if i >> 10 == len(seg[h]):
                 break
-            d = seg[h][i >> 10] >> (i % 1024)
+            d = seg[h][i >> 10] >> (i & 1023)
             if d == 0:
                 i = (i >> 10) + 1
                 continue
@@ -75,7 +75,7 @@ class Finder:
         for h in range(self._lg):
             if i == -1:
                 break
-            d = seg[h][i >> 10] << (1023 - i % 1024) & ((1 << 1024) - 1)
+            d = seg[h][i >> 10] << (1023 - (i & 1023)) & ((1 << 1024) - 1)
             if d == 0:
                 i = (i >> 10) - 1
                 continue
@@ -95,7 +95,7 @@ class Finder:
             yield x
 
     def __contains__(self, i: int) -> bool:
-        return self._seg[0][i >> 10] & (1 << (i % 1024)) != 0
+        return self._seg[0][i >> 10] & (1 << (i & 1023)) != 0
 
     def __iter__(self):
         yield from self.islice(0, self._n)
@@ -118,9 +118,8 @@ if __name__ == "__main__":
         for i in range(left, right):
             ok[i] = False
 
-    from random import randint, seed
+    from random import randint
 
-    seed(0)
     for _ in range(100):
         n = randint(1, 100)
         F = Finder(n)
