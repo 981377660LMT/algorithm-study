@@ -1,5 +1,5 @@
 # 寻找前驱后继/区间删除
-# 注意:速度很慢
+# 注意:速度比较慢
 
 
 from typing import Optional

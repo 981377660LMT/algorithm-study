@@ -9,19 +9,11 @@
 # !带合并方向的并查集
 
 
-class UnionFindWithDirected:
-    """带有合并方向的并查集(向右合并)"""
-
-    __slots__ = "part", "_n", "_parent", "_rank", "_direction"
-
-    def __init__(self, n: int, direction: int):
-        """direction: 合并方向, 1: 向右合并, -1: 向左合并"""
-        assert direction in (1, -1), "direction must be 1 or -1"
+class UnionFindArray:
+    def __init__(self, n: int):
         self.part = n
         self._n = n
         self._parent = list(range(n))
-        self._rank = [1] * n
-        self._direction = direction
 
     def find(self, x: int) -> int:
         while x != self._parent[x]:
@@ -31,35 +23,13 @@ class UnionFindWithDirected:
 
     def union(self, x: int, y: int) -> bool:
         """union后x所在的root的parent指向y所在的root"""
-        if x < y and self._direction == -1:
-            x, y = y, x
         rootX = self.find(x)
         rootY = self.find(y)
         if rootX == rootY:
             return False
         self._parent[rootX] = rootY
-        self._rank[rootY] += self._rank[rootX]
         self.part -= 1
         return True
-
-    def unionRange(self, left: int, right: int) -> int:
-        """合并[left,right]区间, 返回合并次数."""
-        if left > right:
-            left, right = right, left
-        leftRoot = self.find(left)
-        rightRoot = self.find(right)
-        unionCount = 0
-        if self._direction == 1:
-            while leftRoot != rightRoot:
-                unionCount += 1
-                self.union(leftRoot, leftRoot + 1)
-                leftRoot = self.find(leftRoot + 1)
-        else:
-            while leftRoot != rightRoot:
-                unionCount += 1
-                self.union(rightRoot, rightRoot - 1)
-                rightRoot = self.find(rightRoot - 1)
-        return unionCount
 
     def isConnected(self, x: int, y: int) -> bool:
         return self.find(x) == self.find(y)
@@ -67,7 +37,7 @@ class UnionFindWithDirected:
 
 if __name__ == "__main__":
     n = 2**20
-    uf = UnionFindWithDirected(n, direction=1)
+    uf = UnionFindArray(n)
     nums = [-1] * n
 
     q = int(input())

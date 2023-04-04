@@ -1,7 +1,7 @@
 # 区间并查集 RangeUnionFind/UnionFindRange
 # !只使用了路径压缩,每次操作O(logn)
 
-from typing import Callable, DefaultDict, Optional, List
+from typing import Callable, DefaultDict, Optional, List, Tuple
 from bisect import bisect_left, bisect_right
 from collections import defaultdict
 
@@ -40,7 +40,7 @@ class UnionFindRange:
         self, left: int, right: int, f: Optional[Callable[[int, int], None]] = None
     ) -> int:
         """合并[left,right]区间, 返回合并次数."""
-        if left > right:
+        if left >= right:
             return 0
         leftRoot = self.find(left)
         rightRoot = self.find(right)
@@ -64,110 +64,45 @@ class UnionFindRange:
         return group
 
 
-class UnionFindWithDirected:
-    """带有合并方向的并查集(向左/右合并)"""
-
-    __slots__ = "part", "_n", "_parent", "_rank", "_direction"
-
-    def __init__(self, n: int, direction: int):
-        """direction: 合并方向, 1: 向右合并, -1: 向左合并"""
-        assert direction in (1, -1), "direction must be 1 or -1"
-        self.part = n
-        self._n = n
-        self._parent = list(range(n))
-        self._rank = [1] * n
-        self._direction = direction
-
-    def find(self, x: int) -> int:
-        while x != self._parent[x]:
-            self._parent[x] = self._parent[self._parent[x]]
-            x = self._parent[x]
-        return x
-
-    def union(self, x: int, y: int) -> bool:
-        if x < y and self._direction == -1:
-            x, y = y, x
-        rootX = self.find(x)
-        rootY = self.find(y)
-        if rootX == rootY:
-            return False
-        self._parent[rootX] = rootY
-        self._rank[rootY] += self._rank[rootX]
-        self.part -= 1
-        return True
-
-    def unionRange(self, left: int, right: int) -> int:
-        """合并[left,right]区间, 返回合并次数."""
-        if left > right:
-            return 0
-        leftRoot = self.find(left)
-        rightRoot = self.find(right)
-        unionCount = 0
-        if self._direction == 1:
-            while leftRoot != rightRoot:
-                unionCount += 1
-                self.union(leftRoot, leftRoot + 1)
-                leftRoot = self.find(leftRoot + 1)
-        else:
-            while leftRoot != rightRoot:
-                unionCount += 1
-                self.union(rightRoot, rightRoot - 1)
-                rightRoot = self.find(rightRoot - 1)
-        return unionCount
-
-    def isConnected(self, x: int, y: int) -> bool:
-        return self.find(x) == self.find(y)
-
-
-class Finder:
-    """利用并查集寻找区间的某个位置左侧/右侧第一个未被访问过的位置.
-    初始时,所有位置都未被访问过.
+class UnionFindRange2:
+    """
+    维护每个分组左右边界的区间并查集.
+    按秩合并.
     """
 
-    ___slots___ = ("left", "right", "_n", "_data")
+    ___slots___ = ("left", "right", "part", "_n", "_data")
 
     def __init__(self, n: int):
         self._n = n
-        n += 2
-        self._data = [-1] * n  # 0 和 n + 1 为哨兵, 实际使用[1,n]
-        self.left = list(range(n))  # 每个组的左边界
-        self.right = [i + 1 for i in range(n)]  # 每个组的右边界
+        self._data = [-1] * n
+        self.left = list(range(n))  # 每个组的左边界,包含端点
+        self.right = [i + 1 for i in range(n)]  # 每个组的右边界,不包含端点
+        self.part = n
 
-    def prev(self, x: int) -> Optional[int]:
-        """找到x左侧第一个未被访问过的位置(包含x).
-        如果不存在,返回None.
+    def unionRange(self, left: int, right: int) -> int:
+        """合并[left,right]闭区间, 返回合并次数.
+        0<=left<=right<n.
         """
-        root = self.left[self._find(x + 1)]
-        return root - 1 if root > 0 else None
-
-    def next(self, x: int) -> Optional[int]:
-        """x右侧第一个未被访问过的位置(包含x).
-        如果不存在,返回None.
-        """
-        root = self.right[self._find(x)]
-        return root - 1 if root < self._n + 1 else None
-
-    def erase(self, start: int, end: int) -> None:
-        """删除[left, right)区间内的元素.
-        0<=left<=right<=n.
-        """
-        if start >= end:
-            return
+        if left >= right:
+            return 0
+        count = 0
         while True:
-            m = self.right[self._find(start)]
-            if m > end:
+            m = self.right[self.find(left)]
+            if m > right:
                 break
-            self._union(start, m)
+            self.union(left, m)
+            count += 1
+        return count
 
-    def _find(self, x: int) -> int:
+    def find(self, x: int) -> int:
         if self._data[x] < 0:
             return x
-        self._data[x] = self._find(self._data[x])
+        self._data[x] = self.find(self._data[x])
         return self._data[x]
 
-    def _union(self, x: int, y: int) -> bool:
-        rootX = self._find(x)
-        rootY = self._find(y)
+    def union(self, x: int, y: int) -> bool:
+        rootX = self.find(x)
+        rootY = self.find(y)
         if rootX == rootY:
             return False
         if self._data[rootX] > self._data[rootY]:
@@ -179,6 +114,23 @@ class Finder:
         if self.right[rootY] > self.right[rootX]:
             self.right[rootX] = self.right[rootY]
         return True
+
+    def isConnected(self, x: int, y: int) -> bool:
+        return self.find(x) == self.find(y)
+
+    def getSize(self, x: int) -> int:
+        return -self._data[self.find(x)]
+
+    def getRange(self, x: int) -> Tuple[int, int]:
+        """每个点所在的组的左右边界[左边界,右边界)."""
+        root = self.find(x)
+        return self.left[root], self.right[root]
+
+    def getGroups(self) -> "DefaultDict[int, List[int]]":
+        group = defaultdict(list)
+        for i in range(self._n):
+            group[self.find(i)].append(i)
+        return group
 
 
 if __name__ == "__main__":
