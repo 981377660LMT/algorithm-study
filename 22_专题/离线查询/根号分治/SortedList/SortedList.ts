@@ -3,6 +3,9 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable generator-star-spacing */
 
+// 如果需要支持set那样的 lowerBound/upperBound/erase 迭代器功能,
+// !需要使用分块链表(块之间有前驱后继,便于迭代器移动,且删除非迭代器所在元素后迭代器不会失效)
+
 /**
  * A fast SortedList with O(sqrt(n)) insertion and deletion.
  *
@@ -268,6 +271,15 @@ class SortedList<T = number> {
     return res
   }
 
+  clear(): void {
+    this._blocks = []
+    this._size = 0
+  }
+
+  toString(): string {
+    return `SortedList[${[...this].join(', ')}]`
+  }
+
   /**
    * 返回一个迭代器，用于遍历区间 [start, end) 内的元素.
    */
@@ -308,13 +320,31 @@ class SortedList<T = number> {
     }
   }
 
-  clear(): void {
-    this._blocks = []
-    this._size = 0
-  }
+  enumerate(start: number, end: number, f: (value: T) => void, erase = false): void {
+    let [bid, startPos] = this._moveTo(start)
+    let count = end - start
 
-  toString(): string {
-    return `SortedList[${[...this].join(', ')}]`
+    for (; bid < this._blocks.length && count > 0; bid++) {
+      const block = this._blocks[bid]
+      const endPos = Math.min(block.length, startPos + count)
+      const curDeleteCount = endPos - startPos
+      for (let j = startPos; j < endPos; j++) {
+        f(block[j])
+      }
+
+      if (erase) {
+        if (curDeleteCount === block.length) {
+          this._blocks.splice(bid, 1)
+          bid--
+        } else {
+          block.splice(startPos, curDeleteCount)
+        }
+        this._size -= curDeleteCount
+      }
+
+      count -= curDeleteCount
+      startPos = 0
+    }
   }
 
   forEach(callbackfn: (value: T, index: number) => void): void {
@@ -422,7 +452,7 @@ class SortedList<T = number> {
     return left
   }
 
-  private _moveTo(index: number): [bid: number, pos: number] {
+  private _moveTo(index: number): [blockId: number, startPos: number] {
     for (let i = 0; i < this._blocks.length; i++) {
       const block = this._blocks[i]
       if (index < block.length) {

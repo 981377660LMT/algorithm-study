@@ -104,4 +104,18 @@ describe('SortedList', () => {
       expect(irange).toStrictEqual(target)
     }
   })
+
+  // enumerate
+  it('should support enumerate', () => {
+    for (let i = 0; i < 1000; i++) {
+      let start = Math.floor(Math.random() * sl.length)
+      let end = Math.floor(Math.random() * sl.length)
+      const enumerated: [number][] = []
+      sl.enumerate(start, end, v => {
+        enumerated.push([v])
+      })
+      const target = sortedNums.slice(start, end).map((v, i) => [v])
+      expect(enumerated).toStrictEqual(target)
+    }
+  })
 })

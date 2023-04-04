@@ -69,10 +69,14 @@ class SegmentSet:
         it = self._st.bisect_left((x, -INF))
         if it == len(self._st):
             return
-        res = self._st[it][0]
-        if x > res:
-            return x
-        return res
+        return self._st[it][0]
+
+    def prevStart(self, x: int) -> Optional[int]:
+        """返回最后一个小于x的`区间起点`.如果不存在,返回None."""
+        it = self._st.bisect_right((x, INF))
+        if it == 0:
+            return
+        return self._st[it - 1][0]
 
     def ceiling(self, x: int) -> Optional[int]:
         """返回区间内第一个大于等于x的元素.如果不存在,返回None."""
@@ -91,7 +95,7 @@ class SegmentSet:
             return x
         return self._st[pos - 1][1]
 
-    def get(self, x: int) -> Optional[Tuple[int, int]]:
+    def getInterval(self, x: int) -> Optional[Tuple[int, int]]:
         """返回包含x的区间.如果不存在,返回None."""
         pos = self._st.bisect_right((x, INF))
         if pos == 0 or self._st[pos - 1][1] < x:
@@ -140,7 +144,7 @@ if __name__ == "__main__":
     assert ss.count == sum(right - left + 1 for left, right in ss)
     ss.erase(2, 3)
     assert len(ss) == 3
-    assert ss.get(5) == (5, 6)
+    assert ss.getInterval(5) == (5, 6)
 
     # 前驱后继
     def pre(pos: int):

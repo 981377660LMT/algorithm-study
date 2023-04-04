@@ -119,9 +119,17 @@ func (ss *SegmentSet) NextStart(x int) (res int, ok bool) {
 		return
 	}
 	res = ss.sl.At(it)[0]
-	if x > res {
-		res = x
+	ok = true
+	return
+}
+
+// 返回最后一个小于等于x的区间起点.
+func (ss *SegmentSet) PrevStart(x int) (res int, ok bool) {
+	it := ss.sl.BisectRight(Value{x, INF})
+	if it == 0 {
+		return
 	}
+	res = ss.sl.At(it - 1)[0]
 	ok = true
 	return
 }
@@ -158,7 +166,7 @@ func (ss *SegmentSet) Floor(x int) (res int, ok bool) {
 }
 
 // 返回包含x的区间.
-func (ss *SegmentSet) Get(x int) (res [2]int, ok bool) {
+func (ss *SegmentSet) GetInterval(x int) (res [2]int, ok bool) {
 	it := ss.sl.BisectRight(Value{x, INF})
 	if it == 0 || ss.sl.At(it - 1)[1] < x {
 		return
@@ -173,7 +181,7 @@ func (ss *SegmentSet) Has(i int) bool {
 	return it != 0 && ss.sl.At(it - 1)[1] >= i
 }
 
-func (ss *SegmentSet) HasRange(left, right int) bool {
+func (ss *SegmentSet) HasInterval(left, right int) bool {
 	if left > right {
 		return false
 	}
@@ -188,6 +196,7 @@ func (ss *SegmentSet) HasRange(left, right int) bool {
 	return ss.sl.At(it1 - 1)[1] >= right
 }
 
+// 返回第index个区间.
 func (ss *SegmentSet) At(index int) [2]int {
 	return ss.sl.At(index)
 }
