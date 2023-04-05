@@ -1,6 +1,10 @@
 """
 康托展开 - 有重复元素
 求字典序第k小的排列/当前排列在所有排列中的字典序第几小
+
+注意:
+如果问比当前排列大/小 k的排列, 有时并不能先展开然后再放回.
+!因为可能会导致rank很大很大.
 """
 
 # ! 不取模的情况, len(s)很小
@@ -64,7 +68,7 @@ def calPerm(s: Sequence[T], rank: int) -> List[T]:
 if __name__ == "__main__":
 
     # https://yukicoder.me/problems/no/1311
-    # !求出1-n的排列中,字典序第k小的排列的`逆置换`的名次
+    # !求出1-n的排列中,字典序第k小的排列的`逆置换`的名次 (n<=20)
     k, n = map(int, input().split())
     s = calPerm(list(range(1, n + 1)), k)
     rs = [s.index(i) + 1 for i in range(1, n + 1)]
