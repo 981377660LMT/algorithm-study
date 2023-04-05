@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import Counter, defaultdict, deque
 from typing import List, Optional
 from sortedcontainers import SortedList
 
@@ -58,10 +58,6 @@ def kthNextPermutation(nums: List[int], k: int, inplace=False, prev=False) -> Op
             if cand <= target:
                 permCount = cand
                 continue
-            if cand == target:
-                permCount = target
-                i += 1
-                pre = sl[i]
             facPtr -= 1
             fac //= facPtr
             overlap //= counter[pre]
@@ -79,8 +75,49 @@ def kthNextPermutation(nums: List[int], k: int, inplace=False, prev=False) -> Op
     return nums[: len(nums) - len(res)] + res
 
 
+def minAdjacentSwap(nums1: List[int], nums2: List[int]) -> int:
+    """求使两个数组相等的最少邻位交换次数
+
+    映射+求逆序对
+
+    时间复杂度`O(nlogn)`
+    """
+
+    def countInversionPair(nums: List[int]) -> int:
+        """计算逆序对的个数
+
+        sortedList解法
+
+        时间复杂度`O(nlogn)`
+        """
+        res = 0
+        sl = SortedList()
+        for num in reversed(nums):
+            pos = sl.bisect_left(num)
+            res += pos
+            sl.add(num)
+        return res
+
+    # 含有重复元素的映射 例如nums [1,3,2,1,4] 表示已经排序的数组  [0,1,2,3,4]
+    # 那么nums1 [1,1,3,4,2] 就 映射到 [0,3,1,4,2]
+    mapping = defaultdict(deque)
+    for index, num in enumerate(nums2):
+        mapping[num].append(index)
+
+    for index, num in enumerate(nums1):
+        mapped = mapping[num].popleft()
+        nums1[index] = mapped
+
+    res = countInversionPair(nums1)
+
+    return res
+
+
 if __name__ == "__main__":
     # https://leetcode.cn/problems/minimum-adjacent-swaps-to-reach-the-kth-smallest-number/
-    # num = "11112", k = 4
-    nums = [1, 1, 1, 1, 2]
-    print(kthNextPermutation(nums, 2, prev=False, inplace=False))
+    # 测试用例是按存在第 k 个最小妙数而生成的。
+    class Solution:
+        def getMinSwaps(self, num: str, k: int) -> int:
+            nums = [int(x) for x in num]
+            res = kthNextPermutation(nums, k, inplace=False)
+            return minAdjacentSwap(nums, res)

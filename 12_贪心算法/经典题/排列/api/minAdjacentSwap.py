@@ -1,11 +1,14 @@
+# 邻位交换的最小次数
+# https://leetcode.cn/problems/minimum-adjacent-swaps-to-reach-the-kth-smallest-number/
+
 from collections import defaultdict, deque
-from typing import List, MutableSequence
+from typing import List
 from sortedcontainers import SortedList
 
 
-def minAdjacentSwap1(nums1: MutableSequence[int], nums2: MutableSequence[int]) -> int:
+def minAdjacentSwap1(nums1: List[int], nums2: List[int]) -> int:
     """求使两个数组相等的最少邻位交换次数
-    
+
     对每个数，贪心找到对应的最近位置交换
 
     时间复杂度`O(n^2)`
@@ -20,7 +23,7 @@ def minAdjacentSwap1(nums1: MutableSequence[int], nums2: MutableSequence[int]) -
     return res
 
 
-def minAdjacentSwap2(nums1: MutableSequence[int], nums2: MutableSequence[int]) -> int:
+def minAdjacentSwap2(nums1: List[int], nums2: List[int]) -> int:
     """求使两个数组相等的最少邻位交换次数
 
     映射+求逆序对
@@ -28,7 +31,7 @@ def minAdjacentSwap2(nums1: MutableSequence[int], nums2: MutableSequence[int]) -
     时间复杂度`O(nlogn)`
     """
 
-    def countInversionPair(nums: MutableSequence[int]) -> int:
+    def countInversionPair(nums: List[int]) -> int:
         """计算逆序对的个数
 
         sortedList解法
@@ -56,4 +59,3 @@ def minAdjacentSwap2(nums1: MutableSequence[int], nums2: MutableSequence[int]) -
     res = countInversionPair(nums1)
 
     return res
-

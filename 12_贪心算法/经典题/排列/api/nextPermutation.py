@@ -160,10 +160,6 @@ def kthNextPermutation(nums: List[int], k: int, inplace=False, prev=False) -> Op
             if cand <= target:
                 permCount = cand
                 continue
-            if cand == target:
-                permCount = target
-                i += 1
-                pre = sl[i]
             facPtr -= 1
             fac //= facPtr
             overlap //= counter[pre]
