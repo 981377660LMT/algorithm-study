@@ -24,6 +24,6 @@ for i in range(q):
     if op == "?":
         print(history.get(curHash, -1))
     else:
-        left, rigth, add = map(int, args)
-        curHash += (pool[rigth] - pool[left]) * add
+        left, right, add = map(int, args)
+        curHash += (pool[right] - pool[left]) * add  # 区间加
         history.setdefault(curHash, i + 1)

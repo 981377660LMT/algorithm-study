@@ -15,13 +15,13 @@
  */
 function floydCycleFind<T>(
   s0: T,
-  next: (cur: T) => T | null
+  next: (cur: T) => T | null | undefined
 ): [start: number, period: number] | [start: null, period: null] {
   let p1 = 0
   let p2 = 1
-  let slow: T | null = s0
+  let slow: T | null | undefined = s0
   if (slow == null) return [null, null]
-  let fast: T | null = next(s0)
+  let fast: T | null | undefined = next(s0)
   if (fast == null) return [null, null]
 
   while (slow !== fast) {

@@ -5,77 +5,56 @@
 # x,y<=n
 
 
-# 1.离线查询(排序)+双指针 莫队的思想
-# 固定x之后 就可以尺取寻找y的边界
-
-# !2. 异或哈希/异或前缀和 用随机数产生哈希值 用异或来计算区间所含集合的哈希值
+# !异或哈希/异或前缀和 用随机数产生哈希值 用异或来计算区间所含集合的哈希值
 # Zobrist Hash
 # !xorではなく和を使うと個数に対応したハッシュが作れる
 
 
-import sys
-import os
-from typing import List, Tuple
 from collections import defaultdict
-from itertools import accumulate
-from operator import xor
 from random import randint
 
-sys.setrecursionlimit(int(1e9))
-input = lambda: sys.stdin.readline().rstrip("\r\n")
-MOD = int(1e9 + 7)
 
+class FastHashSet:
+    """快速计算哈希值的集合."""
 
-def genHash(nums1: List[int], nums2: List[int]) -> Tuple[List[int], List[int]]:
-    """随机数+异或来生成前缀的集合的哈希值"""
-    pool = defaultdict(lambda: randint(1, (1 << 61) - 1))
-    res1, visited1 = [0] * len(nums1), set()
-    res2, visited2 = [0] * len(nums2), set()
-    for i, (a, b) in enumerate(zip(nums1, nums2)):
-        if a not in visited1:  # !はじめて出るときだけxorをとる
-            visited1.add(a)
-            res1[i] = pool[a]
-        if b not in visited2:
-            visited2.add(b)
-            res2[i] = pool[b]
-    return ([0] + list(accumulate(res1, xor)), [0] + list(accumulate(res2, xor)))
+    _poolSingleton = defaultdict(lambda: randint(1, (1 << 61) - 1))
 
+    __slots__ = ("_set", "_hash")
 
-def main() -> None:
-    n = int(input())
-    nums1 = list(map(int, input().split()))
-    nums2 = list(map(int, input().split()))
-    q = int(input())
-    Q = []
-    for _ in range(q):
-        x, y = map(int, input().split())
-        Q.append((x, y))
-    res = [0] * q
+    def __init__(self) -> None:
+        self._set = set()
+        self._hash = 0
 
-    # !检验两次 防止哈希冲突
-    for _ in range(2):
-        pre1, pre2 = genHash(nums1, nums2)
-        for i, (x, y) in enumerate(Q):
-            if pre1[x] == pre2[y]:
-                res[i] += 1
+    def add(self, x: int) -> None:
+        if x not in self._set:
+            self._set.add(x)
+            self._hash ^= self._poolSingleton[x]
 
-    for v in res:
-        if v == 2:
-            print("Yes")
-        else:
-            print("No")
+    def discard(self, x: int) -> None:
+        if x in self._set:
+            self._set.discard(x)
+            self._hash ^= self._poolSingleton[x]
+
+    def getHash(self) -> int:
+        return self._hash
+
+    def __hash__(self) -> int:
+        return self._hash
 
 
 if __name__ == "__main__":
-    if os.environ.get("USERNAME", " ") == "caomeinaixi":
-        while True:
-            main()
-    else:
-        main()
+    n = int(input())
+    nums1 = list(map(int, input().split()))
+    nums2 = list(map(int, input().split()))
+    H1, H2 = FastHashSet(), FastHashSet()
+    preHash1, preHash2 = [0], [0]
+    for i in range(n):
+        H1.add(nums1[i])
+        preHash1.append(H1.getHash())
+        H2.add(nums2[i])
+        preHash2.append(H2.getHash())
 
-
-# 同样的应用:
-# ! q次查询子串s[l:r] 能否经过重排形成回文串
-# 至多有一种字符出现奇数次
-# 给每种字符赋互异的随机权值，然后对字符串转化成的权值串进行异或前缀和
-# 只需要判断区间异或和是否为 0 或者某个字符的随机权值即可。
+    q = int(input())
+    for _ in range(q):
+        x, y = map(int, input().split())
+        print("Yes" if preHash1[x] == preHash2[y] else "No")

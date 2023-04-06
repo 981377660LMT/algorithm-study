@@ -39,6 +39,8 @@ https://judge.yosupo.jp/
 - ？？？
 
 二元有理数(Dyadic Number) => 非公平博弈里使用
+dual Problem
+https://emthrm.github.io/cp-library/dual_problem.html
 
 - **数学**
 

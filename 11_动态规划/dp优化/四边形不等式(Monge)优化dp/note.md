@@ -7,3 +7,10 @@ https://oi-wiki.org/dp/opt/quadrangle/
 - https://beet-aizu.github.io/library/algorithm/knuthyao.cpp
 - https://www.luogu.com.cn/blog/command-block/dp-di-jue-ce-dan-diao-xing-you-hua-zong-jie
 - https://blog.csdn.net/weixin_43914593/article/details/105150937
+
+---
+
+Monge 性(四边形不等式)
+https://hackmd.io/@tatyam-prime/monge1
+
+- 如果 `n*m` 的矩阵是 Monge 性的,那么每行的最小值可以在 O(n+m)内求出来
