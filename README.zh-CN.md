@@ -216,6 +216,7 @@
     - [RandomTree](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/Prufer%E5%BA%8F%E5%88%97.py)
     - [分治的迭代写法](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E5%88%86%E6%B2%BB%E7%9A%84%E8%BF%AD%E4%BB%A3%E5%86%99%E6%B3%95.ts)
     - [PowerQuery](19_%E6%95%B0%E5%AD%A6/%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/PowerQuery.go)
+    - [FastHashContainer](18_%E5%93%88%E5%B8%8C/ZobristHashing/fastHash.py)
     - [SegmentSet](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/SegmentSet.ts)
     - WaveletMatrix
       - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)
