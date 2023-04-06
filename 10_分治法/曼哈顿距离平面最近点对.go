@@ -1,40 +1,54 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"math"
-	"os"
 	"sort"
 )
 
-func main() {
-	// 平面最近点对
-	// 返回最近点对距离的平方
-	// https://algs4.cs.princeton.edu/code/edu/princeton/cs/algs4/ClosestPair.java.html
-	// 模板题 https://www.luogu.com.cn/problem/P1429 https://codeforces.com/problemset/problem/429/D
-	// bichromatic closest pair 有两种类型的点，只需要额外判断类型是否不同即可 https://www.acwing.com/problem/content/121/ http://poj.org/problem?id=3714
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	points := make([][2]int, n)
-	for i := 0; i < n; i++ {
-		var x, y int
-		fmt.Fscan(in, &x, &y)
-		points[i] = [2]int{x, y}
+// !曼哈顿距离平面最近点对(如果存在距离相等的,返回字典序最小的点对)
+// n>=2
+func beautifulPair(xs []int, ys []int) []int {
+	points := make([][2]int, len(xs))
+	mp := make(map[[2]int][]int)
+	for i := range points {
+		points[i] = [2]int{xs[i], ys[i]}
+		mp[points[i]] = append(mp[points[i]], i)
 	}
+
+	samePair := [][]int{}
+	for _, ps := range mp {
+		if len(ps) > 1 {
+			samePair = append(samePair, []int{ps[0], ps[1]})
+		}
+	}
+
+	if len(samePair) > 0 {
+		// 字典序最小的点对
+		sort.Slice(samePair, func(i, j int) bool {
+			if samePair[i][0] != samePair[j][0] {
+				return samePair[i][0] < samePair[j][0]
+			}
+			return samePair[i][1] < samePair[j][1]
+		})
+		return samePair[0]
+	}
+
 	_, id1, id2 := ClosestPair(points)
-	fmt.Fprintf(out, "%.4f", math.Sqrt(float64(calDist2(points[id1][0], points[id1][1], points[id2][0], points[id2][1]))))
+	return []int{id1, id2}
 }
 
 const INF int = 1e18
 
-// 距离的平方的公式.
+// 计算距离的平方的公式.
 func calDist2(x1, y1, x2, y2 int) int {
-	return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)
+	res := (abs(x1-x2) + abs(y1-y2))
+	return res * res
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
 
 // 平面最近点对.返回(最近点对距离的平方, 点1的id, 点2的id).

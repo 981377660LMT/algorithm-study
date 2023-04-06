@@ -120,4 +120,8 @@ if __name__ == "__main__":
         def getMinSwaps(self, num: str, k: int) -> int:
             nums = [int(x) for x in num]
             res = kthNextPermutation(nums, k, inplace=False)
+            if res is None:
+                raise ValueError("不存在第k个最小妙数")
             return minAdjacentSwap(nums, res)
+
+    assert Solution().getMinSwaps("5489355142", 4) == 2

@@ -16,3 +16,10 @@ RMQ (Range Minimum/Maximum Query)：
 注意:`RMQ 问题可与 LCA 转化` 建立笛卡尔树 只需要 O(n)复杂度离线处理
 
 **注意:当数组长度足够长时，此时使用 Uint32Array 才会比普通数组快(结论来源于 st 表的性能测试)**
+
+---
+
+O(n)构建 O(1)查询的 RMQ
+https://hotman78.github.io/cpplib/data_structure/RMQ.hpp
+https://noshi91.hatenablog.com/entry/2018/08/16/125415
+https://hotman78.github.io/cpplib/data_structure/arg_rmq.hpp

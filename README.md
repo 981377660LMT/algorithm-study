@@ -52,6 +52,7 @@
    - [LinkedListNode](3_linkedList/LinkedListNode.py)
    - [LinkedList](3_linkedList/LinkedList.ts)
    - [PersistentStack](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%A0%88/PersistentStack.py>)
+   - [FloydCycleFind](7_graph/%E7%8E%AF%E6%A3%80%E6%B5%8B/%E5%BC%97%E6%B4%9B%E4%BC%8A%E5%BE%B7%E6%8E%A2%E7%8E%AF%E6%B3%95.ts)
 
 4. **Heap**
 

@@ -199,9 +199,18 @@ if __name__ == "__main__":
     a1 = [1, 2, 3, 4, 5, 6, 7, 9, 23, 14, 56, 99, 876, 222, 444, 555]
     a2 = [1, 2, 3, 4, 5, 6, 7, 9, 23, 14, 56, 99, 876, 222, 444, 555]
 
-    k = 1000000
+    k = 999
     for _ in range(k):
         isOk, a1 = nextPermutation(a1, inPlace=True)
         if not isOk:
             break
     assert a1 == kthNextPermutationDistinct(a2, k)[1] == kthNextPermutation(a2, k)
+
+    nums1 = [5, 4, 3, 2, 1, 10, 9, 8, 7, 6, 11, 12, 13, 14, 15, 16, 16]
+    nums2 = nums1[:]
+    k = 200
+    for i in range(k):
+        isOk, nums1 = prePermutation(nums1)
+        if not isOk:
+            break
+        assert nums1 == kthNextPermutation(nums2, i + 1, prev=True)

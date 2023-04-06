@@ -1,0 +1,1 @@
+	fmt.Fprintln(out, math.Sqrt(float64(res)))

@@ -15,6 +15,7 @@ import (
 	"math/bits"
 	"os"
 	"runtime/debug"
+	"strconv"
 	"strings"
 )
 
@@ -72,7 +73,7 @@ type SortableSegmentTree struct {
 	unit      E
 	rev       []bool
 	unitNode  SNode
-	ss        *fs
+	ss        *_fastSet
 	seg       *SegmentTree
 	root      []*SNode
 }
@@ -90,7 +91,7 @@ func NewSortableSegmentTree(maxKey int, keys []int, values []E) *SortableSegment
 		maxKey:   maxKey,
 		rev:      make([]bool, n),
 		unitNode: SNode{size: 1, x: e(), revX: e()},
-		ss:       nfs(n),
+		ss:       _newFastSet(n),
 		unit:     e(),
 		seg:      NewSegmentTree(values),
 		root:     make([]*SNode, 0, n),
@@ -295,18 +296,18 @@ func (sg *SortableSegmentTree) setRec(node *SNode, l, r, k int, x E) {
 	sg.update(node)
 }
 
-type fs struct {
+type _fastSet struct {
 	n, lg int
 	seg   [][]int
 }
 
-func nfs(n int) *fs {
-	res := &fs{n: n}
+func _newFastSet(n int) *_fastSet {
+	res := &_fastSet{n: n}
 	seg := [][]int{}
 	n_ := n
 	for {
-		seg = append(seg, make([]int, (n_+63)/64))
-		n_ = (n_ + 63) / 64
+		seg = append(seg, make([]int, (n_+63)>>6))
+		n_ = (n_ + 63) >> 6
 		if n_ <= 1 {
 			break
 		}
@@ -316,29 +317,29 @@ func nfs(n int) *fs {
 	return res
 }
 
-func (fs *fs) Has(i int) bool {
-	return (fs.seg[0][i/64]>>(i%64))&1 != 0
+func (fs *_fastSet) Has(i int) bool {
+	return (fs.seg[0][i>>6]>>(i&63))&1 != 0
 }
 
-func (fs *fs) Insert(i int) {
+func (fs *_fastSet) Insert(i int) {
 	for h := 0; h < fs.lg; h++ {
-		fs.seg[h][i/64] |= 1 << (i % 64)
-		i /= 64
+		fs.seg[h][i>>6] |= 1 << (i & 63)
+		i >>= 6
 	}
 }
 
-func (fs *fs) Erase(i int) {
+func (fs *_fastSet) Erase(i int) {
 	for h := 0; h < fs.lg; h++ {
-		fs.seg[h][i/64] &= ^(1 << (i % 64))
-		if fs.seg[h][i/64] != 0 {
+		fs.seg[h][i>>6] &= ^(1 << (i & 63))
+		if fs.seg[h][i>>6] != 0 {
 			break
 		}
-		i /= 64
+		i >>= 6
 	}
 }
 
 // 返回大于等于i的最小元素.如果不存在,返回n.
-func (fs *fs) Next(i int) int {
+func (fs *_fastSet) Next(i int) int {
 	if i < 0 {
 		i = 0
 	}
@@ -347,19 +348,19 @@ func (fs *fs) Next(i int) int {
 	}
 
 	for h := 0; h < fs.lg; h++ {
-		if i/64 == len(fs.seg[h]) {
+		if i>>6 == len(fs.seg[h]) {
 			break
 		}
-		d := fs.seg[h][i/64] >> (i % 64)
+		d := fs.seg[h][i>>6] >> (i & 63)
 		if d == 0 {
-			i = i/64 + 1
+			i = i>>6 + 1
 			continue
 		}
 		// find
 		i += fs.bsf(d)
 		for g := h - 1; g >= 0; g-- {
-			i *= 64
-			i += fs.bsf(fs.seg[g][i/64])
+			i <<= 6
+			i += fs.bsf(fs.seg[g][i>>6])
 		}
 
 		return i
@@ -369,7 +370,7 @@ func (fs *fs) Next(i int) int {
 }
 
 // 返回小于等于i的最大元素.如果不存在,返回-1.
-func (fs *fs) Prev(i int) int {
+func (fs *_fastSet) Prev(i int) int {
 	if i < 0 {
 		return -1
 	}
@@ -381,16 +382,16 @@ func (fs *fs) Prev(i int) int {
 		if i == -1 {
 			break
 		}
-		d := fs.seg[h][i/64] << (63 - i%64)
+		d := fs.seg[h][i>>6] << (63 - i&63)
 		if d == 0 {
-			i = i/64 - 1
+			i = i>>6 - 1
 			continue
 		}
 		// find
-		i += fs.bsr(d) - (64 - 1)
+		i += fs.bsr(d) - 63
 		for g := h - 1; g >= 0; g-- {
-			i *= 64
-			i += fs.bsr(fs.seg[g][i/64])
+			i <<= 6
+			i += fs.bsr(fs.seg[g][i>>6])
 		}
 
 		return i
@@ -399,11 +400,33 @@ func (fs *fs) Prev(i int) int {
 	return -1
 }
 
-func (*fs) bsr(x int) int {
+// 遍历[start,end)区间内的元素.
+func (fs *_fastSet) Enumerate(start, end int, f func(i int)) {
+	x := start - 1
+	for {
+		x = fs.Next(x + 1)
+		if x >= end {
+			break
+		}
+		f(x)
+	}
+}
+
+func (fs *_fastSet) String() string {
+	res := []string{}
+	for i := 0; i < fs.n; i++ {
+		if fs.Has(i) {
+			res = append(res, strconv.Itoa(i))
+		}
+	}
+	return fmt.Sprintf("_fastSet{%v}", strings.Join(res, ", "))
+}
+
+func (*_fastSet) bsr(x int) int {
 	return 63 - bits.LeadingZeros(uint(x))
 }
 
-func (*fs) bsf(x int) int {
+func (*_fastSet) bsf(x int) int {
 	return bits.TrailingZeros(uint(x))
 }
 

@@ -12,6 +12,11 @@ from typing import List, Tuple
 Point = Tuple[int, int]
 
 
+OUT = 0
+ON = 1
+IN = 2
+
+
 def inside_polygon2(p0: Point, poly: List[Point]) -> int:
     """O(n) 判断点是否在多边形内,其中多边形的顶点按逆时针方向给出.
 
@@ -35,7 +40,7 @@ def inside_polygon2(p0: Point, poly: List[Point]) -> int:
         sv = x0 * y1 - x1 * y0
         if sv == 0 and cv <= 0:
             # a point is on a segment
-            return 1
+            return ON
 
         if not y0 < y1:
             x0, x1 = x1, x0
@@ -43,7 +48,7 @@ def inside_polygon2(p0: Point, poly: List[Point]) -> int:
 
         if y0 <= 0 < y1 and x0 * (y1 - y0) > y0 * (x1 - x0):
             cnt += 1
-    return 2 if cnt % 2 else 0
+    return IN if cnt % 2 else OUT
 
 
 if __name__ == "__main__":
