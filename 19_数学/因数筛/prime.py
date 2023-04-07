@@ -81,7 +81,7 @@ def isPrime(n: int) -> bool:
 def getPrimeFactors1(n: int) -> "Counter[int]":
     """n 的素因子分解 O(sqrt(n))"""
     res = Counter()
-    upper = floor(n**0.5) + 1
+    upper = int(n**0.5) + 1  # isqrt(n) + 1
     for i in range(2, upper):
         while n % i == 0:
             res[i] += 1
