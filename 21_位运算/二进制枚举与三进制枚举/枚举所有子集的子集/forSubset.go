@@ -2,7 +2,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/bits"
+)
 
 func main() {
 	state := 0b1101
@@ -18,5 +21,68 @@ func main() {
 		} else {
 			g1 = (g1 - 1) & state
 		}
+	}
+
+	EnumerateSubsetOfState1(0b1101, func(y int) {
+		fmt.Println(y)
+	})
+
+	EnumerateSubsetOfState2(0b1101, func(y int) {
+		fmt.Println(y)
+	})
+
+	EnumerateSupersetOfState(4, 0b1101, func(y int) {
+		fmt.Println(y)
+	})
+
+	EnumerateSubsetOfSizeK(4, 2, func(x uint) {
+		fmt.Println(x, "see")
+	})
+}
+
+// 升序枚举state所有子集的子集.
+//  0b1101 -> 0,1,4,5,8,9,12,13.
+func EnumerateSubsetOfState1(state int, f func(subset int)) {
+	for y := 0; ; y = (y - state) & state {
+		f(y)
+		if y == state {
+			break
+		}
+	}
+}
+
+// 降序枚举state所有子集的子集.
+//  0b1101 -> 13,12,9,8,5,4,1,0.
+func EnumerateSubsetOfState2(state int, f func(subset int)) {
+	for y := state; ; y = (y - 1) & state {
+		f(y)
+		if y == 0 {
+			break
+		}
+	}
+}
+
+// 升序枚举state的所有超集.
+//  0b1101 -> 13,15.
+func EnumerateSupersetOfState(n int, state int, f func(superset int)) {
+	upper := 1 << n
+	for y := state; y < upper; y = (y + 1) | state {
+		f(y)
+	}
+}
+
+// 遍历n个元素的集合中大小为k的子集(combinations)
+//  一共有C(n,k)个子集.
+//  C(4,2) -> 3,5,6,9,10,12.
+func EnumerateSubsetOfSizeK(n int, k int, f func(subset uint)) {
+	if k <= 0 || k > n {
+		return
+	}
+	upper := uint(1 << n)
+	for x := uint((1 << k) - 1); x < upper; {
+		f(x)
+		t := x | (x - 1)
+		// nextCombination (gosper hack)
+		x = (t + 1) | (((^t & -^t) - 1) >> (bits.TrailingZeros(x) + 1))
 	}
 }

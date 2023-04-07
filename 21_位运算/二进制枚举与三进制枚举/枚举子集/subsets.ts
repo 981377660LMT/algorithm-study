@@ -12,4 +12,10 @@ function enumerateSubset<T>(nums: ArrayLike<T>, callback: (subset: T[]) => void)
   }
 }
 
+if (require.main === module) {
+  enumerateSubset([1, 2, 3, 4], subset => {
+    console.log(subset)
+  })
+}
+
 export { enumerateSubset }

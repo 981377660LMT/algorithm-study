@@ -150,6 +150,7 @@
    - [BitSet](18_%E5%93%88%E5%B8%8C/BitSet/BitSet.ts)
    - [枚举子集](21_%E4%BD%8D%E8%BF%90%E7%AE%97/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE%E4%B8%8E%E4%B8%89%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%AD%90%E9%9B%86/powerset.py)
    - [BitCount/BitLength/TrailingZero](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E5%AE%B9%E6%96%A5%E5%8E%9F%E7%90%86/bitCount.ts)
+   - [枚举状态的子集/超集](21_%E4%BD%8D%E8%BF%90%E7%AE%97/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE%E4%B8%8E%E4%B8%89%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E6%89%80%E6%9C%89%E5%AD%90%E9%9B%86%E7%9A%84%E5%AD%90%E9%9B%86/forSubset.ts)
 
 9. **Dynamic Programming**
 

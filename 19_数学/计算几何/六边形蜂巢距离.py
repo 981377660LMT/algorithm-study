@@ -9,3 +9,7 @@ def hexagon_distance(x1: int, y1: int, x2: int, y2: int) -> int:
 
 assert hexagon_distance(0, 0, 1, 1) == 1
 assert hexagon_distance(1, 1, 2, 0) == 2
+
+
+# ハニカム
+DIR6 = ((0, 1), (1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1))

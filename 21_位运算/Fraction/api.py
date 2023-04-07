@@ -33,3 +33,6 @@ print(float(f1))  # -0.02
 
 # !注意要在函数外初始化Fraction 因为Fraction本身初始化计算量比较大
 # 把 DISCOUNT = fractions.Fraction(7, 10) 放到外面初始化，里面直接用 a*DISCOUNT 会快上很多
+
+
+# limit_denominator:分母不超过指定值的最接近的分数
