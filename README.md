@@ -19,7 +19,7 @@
 
    - [Subsequence Matching](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/isSubsequence.py)
    - [SubsequenceAutomaton](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%AD%90%E5%BA%8F%E5%88%97%E8%87%AA%E5%8A%A8%E6%9C%BA/%E5%AD%90%E5%BA%8F%E5%88%97%E8%87%AA%E5%8A%A8%E6%9C%BA.py)
-   - [Rabin-Karp Algorithm](18_%E5%93%88%E5%B8%8C/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%93%88%E5%B8%8C/StringHasher.py)
+   - [Rabin-Karp Algorithm](18_%E5%93%88%E5%B8%8C/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%93%88%E5%B8%8C/StringHasher-new.ts)
    - [String Minimum Representation](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95.py)
    - [KMP Algorithm](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/kmp/kmp.py)
    - [Z-Algorithm](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/kmp/z%E5%87%BD%E6%95%B0-%E6%89%A9%E5%B1%95kmp.py)
@@ -165,7 +165,7 @@
    - [Kitamasa](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/kitamasa%E6%B3%95.py)
    - [LCS](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/lcs%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97%E9%97%AE%E9%A2%98/LCS%E6%A8%A1%E6%9D%BF.py)
    - [LIS](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/lis%E6%9C%80%E9%95%BF%E4%B8%8A%E5%8D%87%E5%AD%90%E5%BA%8F%E5%88%97%E9%97%AE%E9%A2%98/LIS%E6%A8%A1%E6%9D%BF.py)
-   - [AliensDp](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/AlienDp(wqs%E4%BA%8C%E5%88%86)/AliensDp.go)
+   - [AliensDp](<11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/AlienDp(wqs%E4%BA%8C%E5%88%86)/AliensDp.go>)
 
 10. **Math**
 
