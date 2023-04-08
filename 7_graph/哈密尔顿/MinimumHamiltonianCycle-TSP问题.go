@@ -48,7 +48,7 @@ func MininumHamiltonianCycle(graph [][][2]int) (res int, cycle []int) {
 		}
 	}
 	n -= 1
-	FULL := (1 << n) - 1
+	FULL := uint((1 << n) - 1)
 	dp := make([][]int, 1<<n)
 	for i := range dp {
 		dp[i] = make([]int, n)
@@ -59,10 +59,10 @@ func MininumHamiltonianCycle(graph [][][2]int) (res int, cycle []int) {
 	for v := 0; v < n; v++ {
 		dp[1<<v][v] = dist[n][v]
 	}
-	for s := 0; s < 1<<n; s++ {
+	for s := uint(0); s < 1<<n; s++ {
 		for from := 0; from < n; from++ {
 			if dp[s][from] < INF {
-				enumerateBits(uint(FULL-s), func(to int) {
+				enumerateBits(FULL-s, func(to int) {
 					t := s | 1<<to
 					cost := dist[from][to]
 					if cost < INF {

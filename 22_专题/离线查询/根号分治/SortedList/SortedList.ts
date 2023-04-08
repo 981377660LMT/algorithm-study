@@ -283,38 +283,76 @@ class SortedList<T = number> {
   /**
    * 返回一个迭代器，用于遍历区间 [start, end) 内的元素.
    */
-  *islice(start: number, end: number): IterableIterator<T> {
+  *islice(start: number, end: number, reverse = false): IterableIterator<T> {
     if (start < 0) start = 0
     if (end > this._size) end = this._size
     if (start >= end) return
     let count = end - start
-    let [bid, startPos] = this._moveTo(start)
-    for (; bid < this._blocks.length && count > 0; bid++) {
-      const block = this._blocks[bid]
-      const endPos = Math.min(block.length, startPos + count)
-      const curCount = endPos - startPos
-      for (let j = startPos; j < endPos; j++) {
-        yield block[j]
+
+    if (reverse) {
+      let [bid, endPos] = this._moveTo(end - 1)
+      for (; ~bid && count > 0; bid--, ~bid && (endPos = this._blocks[bid].length)) {
+        const block = this._blocks[bid]
+        const startPos = Math.max(0, endPos - count)
+        const curCount = endPos - startPos
+        for (let j = endPos - 1; j >= startPos; j--) {
+          yield block[j]
+        }
+        count -= curCount
+        console.log(endPos)
       }
-      count -= curCount
-      startPos = 0
+    } else {
+      let [bid, startPos] = this._moveTo(start)
+      for (; bid < this._blocks.length && count > 0; bid++) {
+        const block = this._blocks[bid]
+        const endPos = Math.min(block.length, startPos + count)
+        const curCount = endPos - startPos
+        for (let j = startPos; j < endPos; j++) {
+          yield block[j]
+        }
+        count -= curCount
+        startPos = 0
+      }
     }
   }
 
   /**
    * 返回一个迭代器，用于遍历范围在 `[min, max] 闭区间`内的元素.
    */
-  *irange(min: T, max: T): IterableIterator<T> {
-    const bi = this._findBlockIndex(min)
-    for (let i = bi; i < this._blocks.length; i++) {
-      const block = this._blocks[i]
-      for (let j = 0; j < block.length; j++) {
-        const x = block[j]
-        if (this._compareFn(x, max) > 0) {
-          return
+  *irange(min: T, max: T, reverse = false): IterableIterator<T> {
+    if (this._compareFn(min, max) > 0) {
+      return
+    }
+
+    if (reverse) {
+      let bi = this._findBlockIndex(max)
+      if (bi === -1) {
+        bi = this._blocks.length - 1
+      }
+      for (let i = bi; ~i; i--) {
+        const block = this._blocks[i]
+        for (let j = block.length - 1; ~j; j--) {
+          const x = block[j]
+          if (this._compareFn(x, min) < 0) {
+            return
+          }
+          if (this._compareFn(x, max) <= 0) {
+            yield x
+          }
         }
-        if (this._compareFn(x, min) >= 0) {
-          yield x
+      }
+    } else {
+      const bi = this._findBlockIndex(min)
+      for (let i = bi; i < this._blocks.length; i++) {
+        const block = this._blocks[i]
+        for (let j = 0; j < block.length; j++) {
+          const x = block[j]
+          if (this._compareFn(x, max) > 0) {
+            return
+          }
+          if (this._compareFn(x, min) >= 0) {
+            yield x
+          }
         }
       }
     }
@@ -327,11 +365,11 @@ class SortedList<T = number> {
     for (; bid < this._blocks.length && count > 0; bid++) {
       const block = this._blocks[bid]
       const endPos = Math.min(block.length, startPos + count)
-      const curDeleteCount = endPos - startPos
       for (let j = startPos; j < endPos; j++) {
         f(block[j])
       }
 
+      const curDeleteCount = endPos - startPos
       if (erase) {
         if (curDeleteCount === block.length) {
           this._blocks.splice(bid, 1)
@@ -551,4 +589,6 @@ if (require.main === module) {
   console.log(sl.at(0))
   console.log(sl.at(-1))
   console.log(sl.toString(), sl.ceiling(-1), sl.has(4))
+  console.log(...sl.islice(0, 3, true))
+  console.log(...sl.irange(0, 300, true))
 }

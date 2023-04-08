@@ -73,11 +73,14 @@ function getFactors(n: number): readonly number[] {
 
 // O(n^0.5)
 function isPrime(n: number): boolean {
-  if (n < 2) return false
-  const primes = getPrimes(Math.floor(Math.sqrt(n)))
-  for (let index = 0; index < primes.length; index++) {
-    const p = primes[index]
-    if (n % p === 0) return false
+  if (n < 2) {
+    return false
+  }
+  const upper = ~~Math.sqrt(n)
+  for (let i = 2; i <= upper; i++) {
+    if (n % i === 0) {
+      return false
+    }
   }
   return true
 }

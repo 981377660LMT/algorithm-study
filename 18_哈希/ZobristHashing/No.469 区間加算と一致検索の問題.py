@@ -1,3 +1,4 @@
+# https://yukicoder.me/problems/no/469
 # 区间加,区间一致查询
 
 # 初始时序列为全 0, 有 q 个操作, 操作有两种类型:

@@ -1,4 +1,4 @@
-import { useStringHasher } from '../StringHasher'
+import { useStringHasher } from '../StringHasher-old'
 
 // 编写一个函数来找出所有目标子串，目标子串的长度为 10，且在 DNA 字符串 s 中出现次数超过一次。
 function findRepeatedDnaSequences(s: string): string[] {

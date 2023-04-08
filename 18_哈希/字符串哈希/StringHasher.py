@@ -6,6 +6,9 @@
 from typing import Sequence
 
 
+# 哈希值计算方法：
+# hash(s, p, m) = (val(s[0]) * pk-1 + val(s[1]) * pk-2 + ... + val(s[k-1]) * p0) mod m.
+# 越靠左字符权重越大
 def useStringHasher(ords: Sequence[int], mod=10**11 + 7, base=1313131, offset=0):
     n = len(ords)
     prePow = [1] * (n + 1)

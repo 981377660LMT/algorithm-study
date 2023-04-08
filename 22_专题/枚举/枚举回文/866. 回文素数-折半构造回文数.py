@@ -26,7 +26,7 @@ def genPalindromeByLength(minLen: int, maxLen: int, isReversed=False) -> Iterabl
 
 
 def isPrime(n: int) -> bool:
-    return n >= 2 and all(n % i for i in range(2, int(n ** 0.5) + 1))
+    return n >= 2 and all(n % i for i in range(2, int(n**0.5) + 1))
 
 
 class Solution:
@@ -45,5 +45,16 @@ class Solution:
         return -1
 
 
-print(Solution().primePalindrome(13))
-# 输出：101
+if __name__ == "__main__":
+    for cand in genPalindromeByLength(7, 8):  # 生成回文素数
+        if isPrime(cand):
+            print(cand)
+# 10301
+# 10501
+# 10601
+# 11311
+# 11411
+# 12421
+# 12721
+# 12821
+# 13331

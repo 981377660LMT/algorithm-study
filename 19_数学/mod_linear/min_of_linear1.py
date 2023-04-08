@@ -14,6 +14,7 @@ def min_of_linear(L: int, R: int, a: int, b: int, mod: int) -> Tuple[int, int]:
     min((ax + b) % mod for x in range(L,R))
     ```
     """
+    a %= mod
     n = R - L
     b = (b + a * L) % mod
     X, DX = _min_of_linear_segments(a, b, mod)

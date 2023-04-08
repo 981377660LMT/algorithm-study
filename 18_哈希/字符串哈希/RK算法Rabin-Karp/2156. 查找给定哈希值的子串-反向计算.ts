@@ -2,7 +2,7 @@
 // 注意我们的RK算法里计算哈希值的方法是左边字符权重大，题目是右边权重大
 // 所以要把我们的字符串反过来，调api，哈希值相等时返回这一段的reversed
 
-import { useStringHasher } from '../StringHasher'
+import { useStringHasher } from '../StringHasher-old'
 
 function subStrHash(
   s: string,

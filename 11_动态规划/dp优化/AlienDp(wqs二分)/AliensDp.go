@@ -1,5 +1,8 @@
 package main
 
+// 给定一个整数数组 prices ，
+// 它的第 i 个元素 prices[i] 是一支给定的股票在第 i 天的价格。
+// 设计一个算法来计算你所能获取的最大利润。你最多可以完成 k 笔交易。
 // https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-iv/solution/yi-chong-ji-yu-wqs-er-fen-de-you-xiu-zuo-x36r/
 func maxProfit(k int, prices []int) int {
 	n := len(prices)
@@ -22,7 +25,7 @@ func maxProfit(k int, prices []int) int {
 		return dp0
 	}
 
-	return AliensDp(n, k, getDp)
+	return AliensDp(k, getDp)
 }
 
 // 需要高速化 dp[pos][使用次数] 的 dp 时,
@@ -31,10 +34,7 @@ func maxProfit(k int, prices []int) int {
 // 对penalty 二分搜索，转化为 dp[pos]一个维度的dp.
 //  !dp: func(penalty int) [2]int: 每使用一次操作罚款 penalty 元, 返回 [子问题dp的`最大值`, `最大的`操作使用次数]
 // https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-iv/solution/yi-chong-ji-yu-wqs-er-fen-de-you-xiu-zuo-x36r/
-func AliensDp(n, k int, getDp func(penalty int) [2]int) int {
-	if n == 0 {
-		return 0
-	}
+func AliensDp(k int, getDp func(penalty int) [2]int) int {
 
 	left, right := 1, int(1e18)
 	penalty := 0
