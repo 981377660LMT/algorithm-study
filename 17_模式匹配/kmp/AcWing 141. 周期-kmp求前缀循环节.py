@@ -3,6 +3,8 @@
 # ******
 #    ******
 # 如果存在周期，那么 i-kmp[i] = 3 为最小周期 (i=9,kmp[i]=6)
+# !当区间[l+d,r]的哈希值与[l,r-d]的哈希值相等时，那么该区间[l,r]是以 d 为循环节的**
+
 
 from typing import List, Tuple
 

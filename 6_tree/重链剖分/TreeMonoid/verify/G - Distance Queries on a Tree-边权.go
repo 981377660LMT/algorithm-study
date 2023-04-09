@@ -11,6 +11,20 @@ import (
 )
 
 func main() {
+	tree := NewTree(5)
+	tree.AddEdge(0, 1, 1)
+	tree.AddEdge(0, 2, 2)
+	tree.AddEdge(1, 3, 3)
+	tree.AddEdge(1, 4, 4)
+	tree.Build(0)
+	fmt.Println(tree.SubtreeSize(0, 0))
+	fmt.Println(tree.SubtreeSize(0, 1))
+	fmt.Println(tree.SubtreeSize(0, 2))
+	fmt.Println(tree.SubtreeSize(0, 3))
+	fmt.Println(tree.SubtreeSize(0, 4))
+}
+
+func foo() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -370,8 +384,19 @@ func (tree *Tree) GetPath(u, v int) []int {
 	return res
 }
 
-func (tree *Tree) SubtreeSize(u int) int {
-	return tree.RID[u] - tree.LID[u]
+// 以root为根时,结点v的子树大小.
+func (tree *Tree) SubtreeSize(v, root int) int {
+	if root == -1 {
+		return tree.RID[v] - tree.LID[v]
+	}
+	if v == root {
+		return len(tree.Tree)
+	}
+	x := tree.Jump(v, root, 1)
+	if tree.IsInSubtree(v, x) {
+		return tree.RID[v] - tree.LID[v]
+	}
+	return len(tree.Tree) - tree.RID[x] + tree.LID[x]
 }
 
 // child 是否在 root 的子树中 (child和root不能相等)

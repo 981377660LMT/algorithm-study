@@ -52,40 +52,68 @@ func NewSegmentTree01(nums []int) *SegmentTree01 {
 	return res
 }
 
-// 1 <= left <= right <= n
-func (tree *SegmentTree01) Flip(left, right int) {
-	tree.flip(1, left, right, 1, tree.n)
+//  0 <= start <= end <= n
+//  翻转[start,end)区间的bit.
+func (tree *SegmentTree01) Flip(start, end int) {
+	if start >= end {
+		return
+	}
+	start++
+	tree.flip(1, start, end, 1, tree.n)
 }
 
-// 1 <= left <= right <= n
+// 0 <= left <= right <= n
+// 返回[left,right)区间内1的个数.
 func (tree *SegmentTree01) OnesCount(left, right int) int {
+	if left >= right {
+		return 0
+	}
+	left++
 	return tree.onesCount(1, left, right, 1, tree.n)
 }
 
-// 1 <= left <= right <= n
+// 0 <= position <= n-1.
 //  digit: 0 or 1
-//  position: 搜索的起点, 1 <= position <= n
+//  position: 搜索的起点, 0 <= position < n
 func (tree *SegmentTree01) IndexOf(digit, position int) int {
+	position++
 	if position > tree.n {
 		return -1
 	}
 	if digit == 0 {
-		return tree.indexOfZero(1, position, 1, tree.n)
+		cand := tree.indexOfZero(1, position, 1, tree.n)
+		if cand == -1 {
+			return -1
+		}
+		return cand - 1
 	}
-	return tree.indexOfOne(1, position, 1, tree.n)
+	cand := tree.indexOfOne(1, position, 1, tree.n)
+	if cand == -1 {
+		return -1
+	}
+	return cand - 1
 }
 
-// 1 <= left <= right <= n
+// 0 <= position <= n-1.
 //  digit: 0 or 1
-//  position: 搜索的起点, 1 <= position <= n
+//  position: 搜索的起点, 0 <= position < n.
 func (tree *SegmentTree01) LastIndexOf(digit, position int) int {
+	position++
 	if position < 1 {
 		return -1
 	}
 	if digit == 0 {
-		return tree.lastIndexOfZero(1, position, 1, tree.n)
+		cand := tree.lastIndexOfZero(1, position, 1, tree.n)
+		if cand == -1 {
+			return -1
+		}
+		return cand - 1
 	}
-	return tree.lastIndexOfOne(1, position, 1, tree.n)
+	cand := tree.lastIndexOfOne(1, position, 1, tree.n)
+	if cand == -1 {
+		return -1
+	}
+	return cand - 1
 }
 
 // 树上二分查询第k个0/1的位置.如果不存在第k个0/1，返回-1.
@@ -95,12 +123,12 @@ func (tree *SegmentTree01) Kth(digit, k int) int {
 		if k > tree.n-tree.ones[1] {
 			return -1
 		}
-		return tree.kthZero(1, k, 1, tree.n)
+		return tree.kthZero(1, k, 1, tree.n) - 1
 	}
 	if k > tree.ones[1] {
 		return -1
 	}
-	return tree.kthOne(1, k, 1, tree.n)
+	return tree.kthOne(1, k, 1, tree.n) - 1
 }
 
 func (tree *SegmentTree01) String() string {
@@ -300,23 +328,23 @@ func main() {
 				left, right = right, left
 			}
 			seg01.Flip(left, right)
-			for j := left - 1; j < right; j++ {
+			for j := left; j < right; j++ {
 				nums01[j] ^= 1
 			}
 			for j := 0; j < n; j++ {
-				if nums01[j] != seg01.OnesCount(j+1, j+1) {
+				if nums01[j] != seg01.OnesCount(j, j+1) {
 					panic("checkSame failed at flip")
 				}
 			}
 
 			// onesCount
-			left = rand.Intn(n) + 1
-			right = rand.Intn(n) + 1
+			left = rand.Intn(n)
+			right = rand.Intn(n)
 			if left > right {
 				left, right = right, left
 			}
 			arrOnesCount := 0
-			for j := left - 1; j < right; j++ {
+			for j := left; j < right; j++ {
 				arrOnesCount += nums01[j]
 			}
 			if arrOnesCount != seg01.OnesCount(left, right) {
@@ -325,9 +353,9 @@ func main() {
 
 			// lastIndexOf
 			digit := rand.Intn(2)
-			position := rand.Intn(n) + 1
+			position := rand.Intn(n)
 			arrLastIndexOf := -1
-			for j := position - 1; j >= 0; j-- {
+			for j := position; j >= 0; j-- {
 				if nums01[j] == digit {
 					arrLastIndexOf = j
 					break
@@ -336,9 +364,10 @@ func main() {
 			segLast := seg01.LastIndexOf(digit, position)
 			if arrLastIndexOf == -1 {
 				if segLast != -1 {
+					fmt.Println(nums01, seg01, segLast, arrLastIndexOf)
 					panic("checkSame failed at lastIndexOf")
 				}
-			} else if arrLastIndexOf+1 != segLast {
+			} else if arrLastIndexOf != segLast {
 				panic("checkSame failed at lastIndexOf")
 			}
 
@@ -361,15 +390,15 @@ func main() {
 				if segKth != -1 {
 					panic("checkSame failed at kth")
 				}
-			} else if arrKth+1 != segKth {
+			} else if arrKth != segKth {
 				panic(fmt.Sprintf("checkSame failed at kth,  arrKth: %d, segKth: %d, digit: %d, k: %d", arrKth, segKth, digit, k))
 			}
 
 			// indexOf
 			digit = rand.Intn(2)
-			position = rand.Intn(n) + 1
+			position = rand.Intn(n)
 			arrIndexOf := -1
-			for j := position - 1; j < n; j++ {
+			for j := position; j < n; j++ {
 				if nums01[j] == digit {
 					arrIndexOf = j
 					break
@@ -380,7 +409,7 @@ func main() {
 				if segIndex != -1 {
 					panic("checkSame failed at indexOf")
 				}
-			} else if arrIndexOf+1 != segIndex {
+			} else if arrIndexOf != segIndex {
 				panic("checkSame failed at indexOf")
 			}
 		}

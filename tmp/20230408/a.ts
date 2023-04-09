@@ -1,7 +1,3 @@
-import { RangeToRangeGraph } from '../../14_并查集/经典题/区间并查集/RangeToRangeGraph'
-import { onlineBfs } from '../../22_专题/implicit_graph/OnlineBfs-在线bfs'
-import { Finder } from '../../22_专题/implicit_graph/RangeFinder/Finder-并查集'
-
 const INF = 2e15
 
 /**
@@ -227,19 +223,3 @@ class Finder {
     return `FastSet(${sb.join(', ')})`
   }
 }
-
-if (require.main === module) {
-  //   [[3,4,2,1],[4,2,3,1],[2,1,0,0],[2,4,0,0]]
-  // [[3,4,2,1],[4,2,1,1],[2,1,1,0],[3,4,1,0]]
-  // [[2,1,0],[1,0,0]]
-  console.log(
-    minimumVisitedCells([
-      [3, 4, 2, 1],
-      [4, 2, 3, 1],
-      [2, 1, 0, 0],
-      [2, 4, 0, 0]
-    ])
-  )
-}
-
-export {}

@@ -134,8 +134,16 @@ class LCA_HLD:
         """child是否在root的子树中(child和root不能相等)"""
         return self.lid[root] <= self.lid[child] < self.rid[root]
 
-    def subtreeSize(self, root: int) -> int:
-        return self.rid[root] - self.lid[root]
+    def subtreeSize(self, v: int, root=-1) -> int:
+        """以root为根时,结点v的子树大小"""
+        if root == -1:
+            return self.rid[v] - self.lid[v]
+        if v == root:
+            return len(self.tree)
+        x = self.jump(v, root, 1)
+        if self.isInSubtree(v, x):
+            return self.rid[v] - self.lid[v]
+        return len(self.tree) - self.rid[x] + self.lid[x]
 
     def id(self, root) -> Tuple[int, int]:
         """返回 root 的欧拉序区间, 左闭右开, 0-indexed."""
@@ -174,7 +182,6 @@ class LCA_HLD:
 
 
 if __name__ == "__main__":
-
     # n = 10
     # LCA = LCA_HLD(n)
     # for i in range(n - 1):

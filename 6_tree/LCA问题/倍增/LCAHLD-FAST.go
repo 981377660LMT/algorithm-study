@@ -272,8 +272,19 @@ func (tree *LCAHLD) GetPath(u, v int) []int {
 	return res
 }
 
-func (tree *LCAHLD) SubtreeSize(u int) int {
-	return tree.RID[u] - tree.LID[u]
+// 以root为根时,结点v的子树大小.
+func (tree *LCAHLD) SubtreeSize(v, root int) int {
+	if root == -1 {
+		return tree.RID[v] - tree.LID[v]
+	}
+	if v == root {
+		return len(tree.Tree)
+	}
+	x := tree.Jump(v, root, 1)
+	if tree.IsInSubtree(v, x) {
+		return tree.RID[v] - tree.LID[v]
+	}
+	return len(tree.Tree) - tree.RID[x] + tree.LID[x]
 }
 
 // child 是否在 root 的子树中 (child和root不能相等)

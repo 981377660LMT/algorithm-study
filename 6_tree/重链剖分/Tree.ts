@@ -89,7 +89,10 @@ declare class ITree {
     callback: (start: number, end: number) => void
   ): void
   getPath(u: number, v: number): number[]
-  subtreeSize(root: number): number
+  /**
+   * 以root为根时,结点v的子树大小.
+   */
+  subtreeSize(v: number, root?: number): number
   /**
    * child 是否在 root 的子树中 (child和root不能相等).
    */
@@ -306,8 +309,18 @@ class Tree implements ITree {
     return res
   }
 
-  subtreeSize(root: number): number {
-    return this._rid[root] - this._lid[root]
+  subtreeSize(v: number, root = -1): number {
+    if (root === -1) {
+      return this._rid[v] - this._lid[v]
+    }
+    if (v === root) {
+      return this.tree.length
+    }
+    const x = this.jump(v, root, 1)
+    if (this.isInSubtree(v, x)) {
+      return this._rid[v] - this._lid[v]
+    }
+    return this.tree.length - this._rid[x] + this._lid[x]
   }
 
   isInSubtree(child: number, root: number): boolean {
@@ -392,7 +405,7 @@ if (require.main === module) {
     console.log(start, end, 999)
   })
   console.log(tree.isInSubtree(4, 1))
-  console.log(tree.subtreeSize(4))
+  console.log(tree.subtreeSize(1, 3))
 }
 
 export { Tree }

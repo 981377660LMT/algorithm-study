@@ -3,7 +3,7 @@
 // more details:https://github.dev/EndlessCheng/codeforces-go/tree/master/copypasta
 
 /**
- * 01线段树，支持 flip/indexOf/lastIndexOf/onesCount/kth，可用于模拟Bitset
+ * 01线段树，支持 flip/indexOf/lastIndexOf/onesCount/kth，可用于模拟Bitset.
  */
 class SegmentTree01 {
   private readonly _n: number
@@ -12,60 +12,90 @@ class SegmentTree01 {
 
   /**
    * little-endian
+   * @param bitsOrLength 0/1数组或者是长度.注意必须要是正整数.
+   * @example
+   * ```ts
+   * const seg01 = new SegmentTree01([1, 0, 1, 1, 0, 1])
+   * seg01.toString() // 101101
+   * ```
    */
-  constructor(bits: ArrayLike<number>) {
-    if (bits.length === 0) throw new Error('empty bits')
-    this._n = bits.length
+  constructor(bitsOrLength: ArrayLike<number> | number) {
+    if (typeof bitsOrLength === 'number') bitsOrLength = Array(bitsOrLength).fill(0)
+    if (bitsOrLength.length === 0) throw new Error('empty bits')
+    this._n = bitsOrLength.length
     const log = 32 - Math.clz32(this._n - 1)
     const size = 1 << log
     this._ones = new Uint32Array(size << 1)
     this._lazyFlip = new Uint8Array(size) // 叶子结点不需要更新lazy (composition)
-    this._build(1, 1, this._n, bits)
+    this._build(1, 1, this._n, bitsOrLength)
   }
 
   /**
-   * 1 <= left <= right <= n
+   * 0 <= start <= end <= n
+   * 翻转[start,end)区间的bit.
    */
-  flip(left: number, right: number): void {
-    this._flip(1, left, right, 1, this._n)
+  flip(start: number, end: number): void {
+    if (start >= end) {
+      return
+    }
+    start++
+    this._flip(1, start, end, 1, this._n)
   }
 
   /**
-   * 1 <= position <= n
+   * 0 <= position <= n-1.
+   * @param searchDigit 0/1
+   * @param position 查找的起始位置, 0 <= position < n.
    */
-  indexOf(searchDigit: 0 | 1, position = 1): number {
+  indexOf(searchDigit: 0 | 1, position = 0): number {
+    position++
     if (position > this._n) return -1
-    if (searchDigit === 0) return this._indexofZero(1, position, 1, this._n)
-    return this._indexofOne(1, position, 1, this._n)
+    if (searchDigit === 0) {
+      const cand = this._indexofZero(1, position, 1, this._n)
+      return cand === -1 ? cand : cand - 1
+    }
+    const cand = this._indexofOne(1, position, 1, this._n)
+    return cand === -1 ? cand : cand - 1
   }
 
   /**
-   * 1 <= position <= n
+   * 0 <= position <= n-1.
+   * @param searchDigit 0/1
+   * @param position 查找的起始位置, 0 <= position < n.
    */
-  lastIndexOf(searchDigit: 0 | 1, position = this._n): number {
+  lastIndexOf(searchDigit: 0 | 1, position = this._n - 1): number {
+    position++
     if (position < 1) return -1
-    if (searchDigit === 0) return this._lastIndexOfZero(1, position, 1, this._n)
-    return this._lastIndexOfOne(1, position, 1, this._n)
+    if (searchDigit === 0) {
+      const cand = this._lastIndexOfZero(1, position, 1, this._n)
+      return cand === -1 ? cand : cand - 1
+    }
+    const cand = this._lastIndexOfOne(1, position, 1, this._n)
+    return cand === -1 ? cand : cand - 1
   }
 
   /**
-   * 1 <= left <= right <= n
+   * 0 <= left <= right <= n
+   * 返回[left,right)区间内1的个数.
    */
-  onesCount(left: number, right: number): number {
-    return this._onesCount(1, left, right, 1, this._n)
+  onesCount(start: number, end: number): number {
+    if (start >= end) return 0
+    start++
+    return this._onesCount(1, start, end, 1, this._n)
   }
 
   /**
    * 树上二分查询第k个0/1的位置.如果不存在第k个0/1，返回-1.
-   * k >= 1
+   * !k >= 1
+   * @returns -1<=pos<n.
    */
   kth(searchDigit: 0 | 1, k: number): number {
     if (searchDigit === 0) {
       if (k > this._n - this._ones[1]) return -1
-      return this._kthZero(1, k, 1, this._n)
+      return this._kthZero(1, k, 1, this._n) - 1
     }
     if (k > this._ones[1]) return -1
-    return this._kthOne(1, k, 1, this._n)
+    return this._kthOne(1, k, 1, this._n) - 1
   }
 
   toString(): string {
@@ -226,31 +256,29 @@ if (require.main === module) {
     }
 
     fix(idx: number): void {
-      idx++
-      if (this.tree01.onesCount(idx, idx) === 1) return
-      this.tree01.flip(idx, idx)
+      if (this.tree01.onesCount(idx, idx + 1) === 1) return
+      this.tree01.flip(idx, idx + 1)
     }
 
     unfix(idx: number): void {
-      idx++
-      if (this.tree01.onesCount(idx, idx) === 0) return
-      this.tree01.flip(idx, idx)
+      if (this.tree01.onesCount(idx, idx + 1) === 0) return
+      this.tree01.flip(idx, idx + 1)
     }
 
     flip(): void {
-      this.tree01.flip(1, this.size)
+      this.tree01.flip(0, this.size)
     }
 
     all(): boolean {
-      return this.tree01.onesCount(1, this.size) === this.size
+      return this.tree01.onesCount(0, this.size) === this.size
     }
 
     one(): boolean {
-      return this.tree01.onesCount(1, this.size) > 0
+      return this.tree01.onesCount(0, this.size) > 0
     }
 
     count(): number {
-      return this.tree01.onesCount(1, this.size)
+      return this.tree01.onesCount(0, this.size)
     }
 
     toString(): string {

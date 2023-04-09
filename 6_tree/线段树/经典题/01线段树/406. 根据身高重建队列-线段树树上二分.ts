@@ -12,8 +12,8 @@ function reconstructQueue(people: number[][]): number[][] {
   const res = Array.from<unknown, [height: number, preCount: number]>({ length: n }, () => [0, 0])
   people.forEach(([height, preCount]) => {
     const pos = tree.kth(1, preCount + 1)
-    res[pos - 1] = [height, preCount]
-    tree.flip(pos, pos)
+    res[pos] = [height, preCount]
+    tree.flip(pos, pos + 1)
   })
 
   return res

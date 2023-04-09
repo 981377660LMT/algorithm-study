@@ -406,8 +406,18 @@ class Tree {
     return res
   }
 
-  subtreeSize(root: number): number {
-    return this.rid[root] - this.lid[root]
+  subtreeSize(v: number, root = -1): number {
+    if (root === -1) {
+      return this.rid[v] - this.lid[v]
+    }
+    if (v === root) {
+      return this.tree.length
+    }
+    const x = this.jump(v, root, 1)
+    if (this.isInSubtree(v, x)) {
+      return this.rid[v] - this.lid[v]
+    }
+    return this.tree.length - this.rid[x] + this.lid[x]
   }
 
   isInSubtree(child: number, root: number): boolean {

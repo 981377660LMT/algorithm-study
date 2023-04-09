@@ -1,4 +1,4 @@
-// https://maspypy.github.io/library/graph/online_unionfind.hpp
+// https://maspypy.github.io/library/graph/implicit_graph/unionfind.hpp
 
 // https://maspypy.github.io/library/test/yukicoder/1170_2.test.cpp
 // 不预先给出图,而是通过函数来寻找下一个可以合并(到达)的点.

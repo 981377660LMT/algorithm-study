@@ -2,16 +2,14 @@
 
 
 from collections import deque
+from time import time
 from typing import Optional, Sequence, Tuple
 
 
 class WindowHashDeque:
+    __slots__ = ("_mod", "_base", "_hash", "_deque", "_inv", "_power")
 
-    __slots__ = ("_mod", "_base", "_hash", "_deque", "_inv")
-
-    def __init__(
-        self, ords: Optional[Sequence[int]] = None, mod=10**11 + 7, base=1313131
-    ) -> None:
+    def __init__(self, ords: Optional[Sequence[int]] = None, mod=10**9 + 7, base=13331) -> None:
         """Hash of sliding window.
 
         Args:
@@ -31,8 +29,9 @@ class WindowHashDeque:
         self._mod = mod
         self._base = base
         self._hash = 0
-        self._inv = self._modInv(base, mod)  # pow(base, -1, mod)
+        self._inv = self._modInv(base, mod)
         self._deque = deque()
+        self._power = [1]
         for ord in ords or []:
             self.append(ord)
 
@@ -44,7 +43,8 @@ class WindowHashDeque:
         self._deque.append(ord)
 
     def appendleft(self, ord: int) -> None:
-        pow_ = pow(self._base, len(self._deque), self._mod)
+        self._expand(len(self._deque))
+        pow_ = self._power[len(self._deque)]
         self._hash = (self._hash + ord * pow_) % self._mod
         self._deque.appendleft(ord)
 
@@ -54,8 +54,17 @@ class WindowHashDeque:
 
     def popleft(self) -> None:
         popped = self._deque.popleft()
-        pow_ = pow(self._base, len(self._deque), self._mod)
+        self._expand(len(self._deque))
+        pow_ = self._power[len(self._deque)]
         self._hash = (self._hash - popped * pow_) % self._mod
+
+    def _expand(self, size: int) -> None:
+        if len(self._power) < size + 1:
+            preSz = len(self._power)
+            power, base, mod = self._power, self._base, self._mod
+            power += [0] * (size + 1 - preSz)
+            for i in range(preSz - 1, size):
+                power[i + 1] = power[i] * base % mod
 
     def _modInv(self, a: int, mod: int) -> int:
         """Calculate pow(a, -1, mod) using exgcd."""
@@ -87,3 +96,13 @@ if __name__ == "__main__":
     print(windowHash.query(), windowHash)
     windowHash.popleft()
     print(windowHash.query(), windowHash)
+
+    time1 = time()
+    for i in range(int(1e5)):
+        windowHash.append(ord("b"))
+        windowHash.popleft()
+        windowHash.appendleft(ord("a"))
+        windowHash.pop()
+        windowHash.append(ord("b"))
+    time2 = time()
+    print(time2 - time1)
