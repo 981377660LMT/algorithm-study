@@ -23,7 +23,7 @@ class Finder:
         mod = x & 63
         mask = self._data[div] >> mod
         if mask:
-            # !trailingZeros32(mask)
+            # !trailingZeros(mask)
             res = ((div << 6) | mod) + (mask & -mask).bit_length() - 1
             return res if res < self._n else None
         div = self._findNext(div + 1)
@@ -42,15 +42,15 @@ class Finder:
     def has(self, x: int) -> bool:
         return not not ((self._data[x >> 6] >> (x & 63)) & 1)
 
+    def _findNext(self, x: int) -> int:
+        while self.right[x] != x:
+            self.right[x] = self.right[self.right[x]]
+            x = self.right[x]
+        return x
+
     def __str__(self):
         res = [i for i in range(self._n) if self.has(i)]
         return f"Finder({list(res)})"
-
-    def _findNext(self, x: int) -> int:
-        if self.right[x] == x:
-            return x
-        self.right[x] = self._findNext(self.right[x])
-        return self.right[x]
 
 
 if __name__ == "__main__":

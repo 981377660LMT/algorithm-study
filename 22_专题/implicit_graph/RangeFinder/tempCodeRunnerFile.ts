@@ -1,18 +1,16 @@
-// https://www.cnblogs.com/bzy-blog/p/14353073.html
-
 /**
  * 线性序列并查集(NextFinder).
  */
 class LinearSequenceUnionFind {
   private readonly _n: number
-  private readonly _right: Uint32Array
-  private readonly _data: Uint32Array
+  private readonly _right: Uint16Array
+  private readonly _data: Uint16Array
 
   constructor(n: number) {
     this._n = n
     const len = (n >> 5) + 1
-    const right = new Uint32Array(len)
-    const data = new Uint32Array(len)
+    const right = new Uint16Array(len)
+    const data = new Uint16Array(len)
     for (let i = 0; i < len; i++) {
       right[i] = i
       data[i] = -1
@@ -78,22 +76,3 @@ class LinearSequenceUnionFind {
     return x
   }
 }
-
-if (require.main === module) {
-  const uf = new LinearSequenceUnionFind(10)
-  uf.erase(0)
-
-  console.log(uf.next(0))
-  console.log(uf.next(2))
-  console.log(uf.has(0))
-  uf.erase(2)
-
-  console.log(uf.next(2))
-  console.log(uf.next(9))
-  uf.erase(9)
-  console.log(uf.next(9))
-
-  console.log(uf.toString())
-}
-
-export { LinearSequenceUnionFind, LinearSequenceUnionFind as Finder }
