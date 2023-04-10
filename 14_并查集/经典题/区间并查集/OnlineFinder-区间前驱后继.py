@@ -29,10 +29,12 @@ class OnlineFinder:
         res = self._rFind(x + 1)
         return res - 1 if res != self._n + 1 else None
 
-    def erase(self, left: int, right: int) -> None:
+    def erase(self, left: int, right=-1) -> None:
         """删除[left, right)区间内的元素.
         0<=left<=right<=n.
         """
+        if right == -1:
+            right = left + 1
         if left >= right:
             return
         left, right = left + 1, right + 1

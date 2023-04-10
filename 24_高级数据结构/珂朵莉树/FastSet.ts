@@ -32,7 +32,7 @@ class FastSet {
   }
 
   has(i: number): boolean {
-    return (this._seg[0][i >>> 5] & (1 << (i & 31))) > 0
+    return !!(this._seg[0][i >>> 5] & (1 << (i & 31)))
   }
 
   erase(i: number): void {

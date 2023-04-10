@@ -1,7 +1,7 @@
 from collections import defaultdict, deque
 from typing import List
 
-INF = 0x7FFFFFFF
+INF = int(1e18)
 
 
 class Solution:
@@ -37,4 +37,3 @@ print(
         beginWord="hit", endWord="cog", wordList=["hot", "dot", "dog", "lot", "log", "cog"]
     )
 )
-

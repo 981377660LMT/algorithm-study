@@ -1,4 +1,3 @@
-from functools import lru_cache
 from typing import List
 from collections import deque
 
@@ -6,7 +5,7 @@ from collections import deque
 # 1 <= nums.length <= 1000
 # 0 <= start <= 1000
 # start != goal
-# 使 x 越过 0 <= x <= 1000 范围的运算同样可以生效，但该运算执行后将不能执行其他运算。
+# !使 x 越过 0 <= x <= 1000 范围的运算同样可以生效，但该运算执行后将不能执行其他运算。
 
 
 # bfs 时间复杂度：O(mn)
@@ -32,4 +31,3 @@ class Solution:
                         visited[next] = True
                         queue.append((next, step + 1))
         return -1
-

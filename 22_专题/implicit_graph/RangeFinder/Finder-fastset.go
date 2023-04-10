@@ -38,6 +38,9 @@ func NewFinder(n int) *Finder {
 	}
 	res.seg = seg
 	res.lg = len(seg)
+	for i := 0; i < res.n; i++ {
+		res.Insert(i)
+	}
 	return res
 }
 
@@ -158,8 +161,9 @@ func (*Finder) bsf(x int) int {
 // https://leetcode.cn/problems/minimum-reverse-operations/
 func minReverseOperations(n int, p int, banned []int, k int) []int {
 	finder := [2]*Finder{NewFinder(n), NewFinder(n)}
+
 	for i := 0; i < n; i++ {
-		finder[i&1].Insert(i)
+		finder[(i&1)^1].Erase(i)
 	}
 	for _, i := range banned {
 		finder[i&1].Erase(i)
@@ -168,7 +172,6 @@ func minReverseOperations(n int, p int, banned []int, k int) []int {
 	getRange := func(i int) (int, int) {
 		return max(i-k+1, k-i-1), min(i+k-1, 2*n-k-i-1)
 	}
-
 	setUsed := func(u int) {
 		finder[u&1].Erase(u)
 	}
@@ -176,7 +179,7 @@ func minReverseOperations(n int, p int, banned []int, k int) []int {
 	findUnused := func(u int) int {
 		left, right := getRange(u)
 		next := finder[(u+k+1)&1].Next(left)
-		if next != n && left <= next && next <= right {
+		if left <= next && next <= right {
 			return next
 		}
 		return -1

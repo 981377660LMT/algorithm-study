@@ -17,3 +17,7 @@
   有序集合/set
   fastset `(最快)`
   链表
+
+---
+
+**推荐使用 fastset 实现的 Finder**, 最快

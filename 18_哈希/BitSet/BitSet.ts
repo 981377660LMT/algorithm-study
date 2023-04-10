@@ -31,81 +31,80 @@ class BitSet {
   private static _bitLength32(uint32: number): number {
     return 32 - Math.clz32(uint32)
   }
-  private static readonly _W = 32
 
   private readonly _bits: Uint32Array
   private readonly _n: number
 
   constructor(n: number) {
-    this._bits = new Uint32Array(~~(n / BitSet._W) + 1)
+    this._bits = new Uint32Array((n >> 5) + 1)
     this._n = n
   }
 
   add(i: number): void {
-    this._bits[~~(i / BitSet._W)] |= 1 << i % BitSet._W
+    this._bits[i >> 5] |= 1 << (i & 31)
   }
 
   /**
    * [start, end) 范围内的位置为 1
    */
   addRange(start: number, end: number): void {
-    const maskL = ~0 << start % BitSet._W
-    const maskR = ~0 << end % BitSet._W
-    let i = ~~(start / BitSet._W)
-    if (i === ~~(end / BitSet._W)) {
+    const maskL = ~0 << (start & 31)
+    const maskR = ~0 << (end & 31)
+    let i = start >> 5
+    if (i === end >> 5) {
       this._bits[i] |= maskL ^ maskR
       return
     }
     this._bits[i] |= maskL
-    for (i++; i < ~~(end / BitSet._W); i++) {
+    for (i++; i < end >> 5; i++) {
       this._bits[i] = ~0
     }
     this._bits[i] |= ~maskR
   }
 
   has(i: number): boolean {
-    return !!(this._bits[~~(i / BitSet._W)] & (1 << i % BitSet._W))
+    return !!(this._bits[i >> 5] & (1 << (i & 31)))
   }
 
   discard(i: number): void {
-    this._bits[~~(i / BitSet._W)] &= ~(1 << i % BitSet._W)
+    this._bits[i >> 5] &= ~(1 << (i & 31))
   }
 
   /**
    * [start, end) 范围内的位置为 0
    */
   discardRange(start: number, end: number): void {
-    const maskL = ~0 << start % BitSet._W
-    const maskR = ~0 << end % BitSet._W
-    let i = ~~(start / BitSet._W)
-    if (i === ~~(end / BitSet._W)) {
+    const maskL = ~0 << (start & 31)
+    const maskR = ~0 << (end & 31)
+    let i = start >> 5
+    if (i === end >> 5) {
       this._bits[i] &= ~maskL | maskR
       return
     }
     this._bits[i] &= ~maskL
-    for (i++; i < ~~(end / BitSet._W); i++) {
+    for (i++; i < end >> 5; i++) {
       this._bits[i] = 0
     }
     this._bits[i] &= maskR
   }
 
   flip(i: number): void {
-    this._bits[~~(i / BitSet._W)] ^= 1 << i % BitSet._W
+    this._bits[i >> 5] ^= 1 << (i & 31)
   }
 
   /**
    * [start, end) 范围内的位取反
    */
   flipRange(start: number, end: number): void {
-    const maskL = ~0 << start % BitSet._W
-    const maskR = ~0 << end % BitSet._W
-    let i = ~~(start / BitSet._W)
-    if (i === ~~(end / BitSet._W)) {
+    const maskL = ~0 << (start & 31)
+    const maskR = ~0 << (end & 31)
+    let i = start >> 5
+    if (i === end >> 5) {
       this._bits[i] ^= maskL ^ maskR
       return
     }
     this._bits[i] ^= maskL
-    for (i++; i < ~~(end / BitSet._W); i++) {
+    for (i++; i < end >> 5; i++) {
       this._bits[i] = ~this._bits[i]
     }
     this._bits[i] ^= ~maskR
@@ -119,43 +118,43 @@ class BitSet {
    * [start, end) 范围内是否全为 1
    */
   allOne(start: number, end: number): boolean {
-    let i = ~~(start / BitSet._W)
-    if (i === ~~(end / BitSet._W)) {
-      const mask = (~0 << start % BitSet._W) ^ (~0 << end % BitSet._W)
+    let i = start >> 5
+    if (i === end >> 5) {
+      const mask = (~0 << (start & 31)) ^ (~0 << (end & 31))
       return (this._bits[i] & mask) === mask
     }
-    let mask = ~0 << start % BitSet._W
+    let mask = ~0 << (start & 31)
     if ((this._bits[i] & mask) !== mask) {
       return false
     }
-    for (i++; i < ~~(end / BitSet._W); i++) {
-      if (~this._bits[i] !== 0) {
+    for (i++; i < end >> 5; i++) {
+      if (~this._bits[i]) {
         return false
       }
     }
-    mask = ~0 << end % BitSet._W
-    return ~(this._bits[~~(end / BitSet._W)] | mask) === 0
+    mask = ~0 << (end & 31)
+    return !~(this._bits[end >> 5] | mask)
   }
 
   /**
    * [start, end) 范围内是否全为 0
    */
   allZero(start: number, end: number): boolean {
-    let i = ~~(start / BitSet._W)
-    if (i === ~~(end / BitSet._W)) {
-      const mask = (~0 << start % BitSet._W) ^ (~0 << end % BitSet._W)
-      return (this._bits[i] & mask) === 0
+    let i = start >> 5
+    if (i === end >> 5) {
+      const mask = (~0 << (start & 31)) ^ (~0 << (end & 31))
+      return !(this._bits[i] & mask)
     }
-    if (this._bits[i] >> start % BitSet._W !== 0) {
+    if (this._bits[i] >> (start & 31)) {
       return false
     }
-    for (i++; i < ~~(end / BitSet._W); i++) {
-      if (this._bits[i] !== 0) {
+    for (i++; i < end >> 5; i++) {
+      if (this._bits[i]) {
         return false
       }
     }
-    const mask = ~0 << end % BitSet._W
-    return (this._bits[~~(end / BitSet._W)] & ~mask) === 0
+    const mask = ~0 << (end & 31)
+    return !(this._bits[end >> 5] & ~mask)
   }
 
   /**
@@ -167,19 +166,19 @@ class BitSet {
       return this._indexOfZero()
     }
 
-    let i = ~~(position / BitSet._W)
+    let i = position >> 5
     if (i < this._bits.length) {
       let v = this._bits[i]
-      if (position % BitSet._W > 0) {
-        v |= ~(~0 << position % BitSet._W)
+      if (position & 31) {
+        v |= ~(~0 << (position & 31))
       }
-      if (~v !== 0) {
-        const res = (i * BitSet._W) | BitSet._trailingZeros32(~v)
+      if (~v) {
+        const res = (i << 5) | BitSet._trailingZeros32(~v)
         return res < this._n ? res : -1
       }
       for (i++; i < this._bits.length; i++) {
-        if (~this._bits[i] !== 0) {
-          const res = (i * BitSet._W) | BitSet._trailingZeros32(~this._bits[i])
+        if (~this._bits[i]) {
+          const res = (i << 5) | BitSet._trailingZeros32(~this._bits[i])
           return res < this._n ? res : -1
         }
       }
@@ -193,19 +192,19 @@ class BitSet {
    * @param position 从哪个位置开始查找
    */
   indexOfOne(position = 0): number {
-    if (position === 0) {
+    if (!position) {
       return this._indexOfOne()
     }
 
     // eslint-disable-next-line space-in-parens
-    for (let i = ~~(position / BitSet._W); i < this._bits.length; ) {
-      const v = this._bits[i] & (~0 << position % BitSet._W)
-      if (v !== 0) {
-        return (i * BitSet._W) | BitSet._trailingZeros32(v)
+    for (let i = position >> 5; i < this._bits.length; ) {
+      const v = this._bits[i] & (~0 << (position & 31))
+      if (v) {
+        return (i << 5) | BitSet._trailingZeros32(v)
       }
       for (i++; i < this._bits.length; i++) {
-        if (this._bits[i] !== 0) {
-          return (i * BitSet._W) | BitSet._trailingZeros32(this._bits[i])
+        if (this._bits[i]) {
+          return (i << 5) | BitSet._trailingZeros32(this._bits[i])
         }
       }
     }
@@ -223,28 +222,26 @@ class BitSet {
     if (end > this._n) {
       end = this._n
     }
-    if (start === 0 && end === this._n) {
+    if (!start && end === this._n) {
       return this._onesCount()
     }
 
-    let pos1 = ~~(start / BitSet._W)
-    const pos2 = ~~(end / BitSet._W)
+    let pos1 = start >> 5
+    const pos2 = end >> 5
     if (pos1 === pos2) {
-      return BitSet._onesCount32(
-        this._bits[pos1] & (~0 << start % BitSet._W) & ((1 << end % BitSet._W) - 1)
-      )
+      return BitSet._onesCount32(this._bits[pos1] & (~0 << (start & 31)) & ((1 << (end & 31)) - 1))
     }
 
     let count = 0
-    if (start % BitSet._W > 0) {
-      count += BitSet._onesCount32(this._bits[pos1] & (~0 << start % BitSet._W))
+    if ((start & 31) > 0) {
+      count += BitSet._onesCount32(this._bits[pos1] & (~0 << (start & 31)))
       pos1++
     }
     for (let i = pos1; i < pos2; i++) {
       count += BitSet._onesCount32(this._bits[i])
     }
-    if (end % BitSet._W > 0) {
-      count += BitSet._onesCount32(this._bits[pos2] & ((1 << end % BitSet._W) - 1))
+    if ((end & 31) > 0) {
+      count += BitSet._onesCount32(this._bits[pos2] & ((1 << (end & 31)) - 1))
     }
     return count
   }
@@ -327,9 +324,9 @@ class BitSet {
     const sb: string[] = []
     for (let i = 0; i < this._bits.length; i++) {
       // eslint-disable-next-line newline-per-chained-call
-      let bits = this._bits[i].toString(2).padStart(BitSet._W, '0').split('').reverse().join('')
+      let bits = this._bits[i].toString(2).padStart(32, '0').split('').reverse().join('')
       if (i === this._bits.length - 1) {
-        bits = bits.slice(0, this._n % BitSet._W)
+        bits = bits.slice(0, this._n & 31)
       }
       sb.push(bits)
     }
@@ -339,8 +336,8 @@ class BitSet {
   _indexOfZero(): number {
     for (let i = 0; i < this._bits.length; i++) {
       const x = this._bits[i]
-      if (~x !== 0) {
-        return (i * BitSet._W) | BitSet._trailingZeros32(~x)
+      if (~x) {
+        return (i << 5) | BitSet._trailingZeros32(~x)
       }
     }
     return -1
@@ -349,8 +346,8 @@ class BitSet {
   _indexOfOne(): number {
     for (let i = 0; i < this._bits.length; i++) {
       const x = this._bits[i]
-      if (x !== 0) {
-        return (i * BitSet._W) | BitSet._trailingZeros32(x)
+      if (x) {
+        return (i << 5) | BitSet._trailingZeros32(x)
       }
     }
     return -1
@@ -359,8 +356,8 @@ class BitSet {
   _lastIndexOfOne(): number {
     for (let i = this._bits.length - 1; i >= 0; i--) {
       const x = this._bits[i]
-      if (x !== 0) {
-        return (i * BitSet._W) | (BitSet._bitLength32(x) - 1)
+      if (x) {
+        return (i << 5) | (BitSet._bitLength32(x) - 1)
       }
     }
     return -1

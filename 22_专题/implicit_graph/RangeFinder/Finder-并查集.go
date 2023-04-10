@@ -10,17 +10,17 @@ func minReverseOperations(n int, p int, banned []int, k int) []int {
 	finder := [2]*Finder{NewFinder(n), NewFinder(n)}
 
 	for i := 0; i < n; i++ {
-		finder[(i&1)^1].Erase(i, i+1)
+		finder[(i&1)^1].Erase(i)
 	}
 	for _, i := range banned {
-		finder[i&1].Erase(i, i+1)
+		finder[i&1].Erase(i)
 	}
 
 	getRange := func(i int) (int, int) {
 		return max(i-k+1, k-i-1), min(i+k-1, 2*n-k-i-1)
 	}
 	setUsed := func(u int) {
-		finder[u&1].Erase(u, u+1)
+		finder[u&1].Erase(u)
 	}
 
 	findUnused := func(u int) int {
@@ -94,9 +94,15 @@ func (f *Finder) Next(x int) (res int, ok bool) {
 	return
 }
 
+// 删除x位置的元素.
+//  0<=x<n.
+func (f *Finder) Erase(x int) {
+	f.EraseRange(x, x+1)
+}
+
 // 删除[left, right)区间内的元素.
 //   0<=left<=right<=n.
-func (f *Finder) Erase(left, right int) {
+func (f *Finder) EraseRange(left, right int) {
 	if left >= right {
 		return
 	}
@@ -111,6 +117,10 @@ func (f *Finder) Erase(left, right int) {
 		f.lUnion(rightRoot, rightRoot-1)
 		rightRoot = f.lFind(rightRoot - 1)
 	}
+}
+
+func (f *Finder) Has(x int) bool {
+	return f.lFind(x+1) == x+1
 }
 
 func (f *Finder) lUnion(x, y int) {

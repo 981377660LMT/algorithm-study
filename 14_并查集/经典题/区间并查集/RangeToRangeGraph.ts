@@ -113,17 +113,20 @@ class RangeToRangeGraph {
 }
 
 if (require.main === module) {
-  // https://leetcode.cn/problems/jump-game-ii/
-  // 45. 跳跃游戏 II
-  function jump(nums: number[]): number {
-    const n = nums.length
-    const G = new RangeToRangeGraph(n)
+  // https://leetcode.cn/problems/zui-xiao-tiao-yue-ci-shu/
+  // LCP 09. 最小跳跃次数 (MLE)
+  function minJump(jump: number[]): number {
+    const n = jump.length
+    const G = new RangeToRangeGraph(n + 1)
     for (let i = 0; i < n; i++) {
-      G.addToRange(i, i + 1, Math.min(i + nums[i] + 1, n), 1)
+      // i => [0,i)
+      // i => Math.min(i + jump[i], n)
+      G.addToRange(i, 0, i, 1)
+      G.add(i, Math.min(i + jump[i], n), 1)
     }
     const [adjList] = G.build()
     const dist = bfs(adjList, 0)
-    return dist[n - 1]
+    return dist[n]
   }
 
   function bfs(adjList: [next: number, weight: number][][], start: number) {

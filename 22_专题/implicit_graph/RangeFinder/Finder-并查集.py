@@ -31,10 +31,12 @@ class Finder:
         root = self.right[self._find(x)]
         return root - 1 if root < self._n + 1 else None
 
-    def erase(self, start: int, end: int) -> None:
+    def erase(self, start: int, end=-1) -> None:
         """删除[left, right)区间内的元素.
         0<=left<=right<=n.
         """
+        if end == -1:
+            end = start + 1
         if start >= end:
             return
         while True:
@@ -42,6 +44,9 @@ class Finder:
             if m > end:
                 break
             self._union(start, m)
+
+    def has(self, x: int) -> bool:
+        return self._find(x + 1) == x + 1
 
     def _find(self, x: int) -> int:
         if self._data[x] < 0:
@@ -63,6 +68,13 @@ class Finder:
         if self.right[rootY] > self.right[rootX]:
             self.right[rootX] = self.right[rootY]
         return True
+
+    def __contains__(self, x: int) -> bool:
+        return self.has(x)
+
+    def __repr__(self) -> str:
+        res = [i for i in range(self._n) if self.has(i)]
+        return f"Finder{res}"
 
 
 if __name__ == "__main__":

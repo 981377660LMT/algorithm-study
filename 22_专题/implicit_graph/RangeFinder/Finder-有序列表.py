@@ -38,6 +38,9 @@ class Finder:
         pos = self._st.bisect_left(x)
         return self._st[pos] if pos < len(self._st) else None
 
+    def __contains__(self, x: int) -> bool:
+        return x in self._st
+
     def __repr__(self) -> str:
         return repr(self._st)
 
@@ -46,7 +49,6 @@ class Finder:
 
 
 if __name__ == "__main__":
-
     # 前驱后继
     def pre(pos: int):
         return next((i for i in range(pos, -1, -1) if ok[i]), None)

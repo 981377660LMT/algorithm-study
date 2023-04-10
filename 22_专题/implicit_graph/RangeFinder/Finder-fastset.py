@@ -1,5 +1,4 @@
 # 寻找前驱后继/区间删除
-# 非常快
 
 
 from typing import Optional
@@ -28,6 +27,8 @@ class Finder:
                 break
         self._seg = seg
         self._lg = len(seg)
+        for i in range(self._n):
+            self.insert(i)
 
     def insert(self, i: int) -> None:
         for h in range(self._lg):
@@ -95,7 +96,7 @@ class Finder:
             yield x
 
     def __contains__(self, i: int) -> bool:
-        return self._seg[0][i >> 10] & (1 << (i & 1023)) != 0
+        return not not self._seg[0][i >> 10] & (1 << (i & 1023))
 
     def __iter__(self):
         yield from self.islice(0, self._n)
@@ -105,8 +106,8 @@ class Finder:
 
 
 if __name__ == "__main__":
-
     ...
+
     # 前驱后继
     def pre(pos: int):
         return next((i for i in range(pos, -1, -1) if ok[i]), None)

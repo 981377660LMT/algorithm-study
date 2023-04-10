@@ -20,6 +20,15 @@ RMQ (Range Minimum/Maximum Query)：
 ---
 
 O(n)构建 O(1)查询的 RMQ
+
 https://hotman78.github.io/cpplib/data_structure/RMQ.hpp
 https://noshi91.hatenablog.com/entry/2018/08/16/125415
 https://hotman78.github.io/cpplib/data_structure/arg_rmq.hpp
+
+`+-1 RMQ (Plus-Minus-One-RMQ)`
+https://ei1333.github.io/library/structure/others/plus-minus-one-rmq.hpp
+`用欧拉序和+-1RMQ O(n)构建 O(1)求 LCA`
+https://ei1333.github.io/library/graph/tree/pmormq-lowest-common-ancestor.hpp
+
+https://ljt12138.blog.uoj.ac/blog/4874
+https://www.cnblogs.com/bzy-blog/p/14353073.html

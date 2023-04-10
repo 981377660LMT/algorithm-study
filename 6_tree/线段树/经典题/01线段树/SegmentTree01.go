@@ -11,6 +11,7 @@ import (
 
 // https://leetcode.cn/problems/handling-sum-queries-after-update/
 func handleQuery(nums1 []int, nums2 []int, queries [][]int) []int64 {
+	n := len(nums1)
 	sum := 0
 	for _, num := range nums2 {
 		sum += num
@@ -20,9 +21,9 @@ func handleQuery(nums1 []int, nums2 []int, queries [][]int) []int64 {
 	for _, query := range queries {
 		op, a, b := query[0], query[1], query[2]
 		if op == 1 {
-			seg01.Flip(a+1, b+1)
+			seg01.Flip(a, b+1)
 		} else if op == 2 {
-			ones := seg01.OnesCount(a+1, b+1)
+			ones := seg01.OnesCount(0, n)
 			sum += ones * a
 		} else {
 			res = append(res, int64(sum))

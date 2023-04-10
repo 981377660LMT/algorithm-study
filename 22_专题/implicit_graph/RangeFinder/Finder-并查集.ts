@@ -2,8 +2,6 @@
 /* eslint-disable no-param-reassign */
 // 寻找前驱后继/区间删除
 
-import { onlineBfs } from '../OnlineBfs-在线bfs'
-
 /**
  * 利用并查集寻找区间的某个位置左侧/右侧第一个未被访问过的位置.
  * 初始时,所有位置都未被访问过.
@@ -47,7 +45,7 @@ class Finder {
    * 删除[start, end)区间内的元素.
    * 0<=start<=end<=n.
    */
-  erase(start: number, end: number): void {
+  erase(start: number, end = start + 1): void {
     if (start >= end) {
       return
     }
@@ -63,6 +61,20 @@ class Finder {
       this._lUnion(rightRoot, rightRoot - 1)
       rightRoot = this._lFind(rightRoot - 1)
     }
+  }
+
+  has(x: number): boolean {
+    return this._lFind(x + 1) === x + 1
+  }
+
+  toString(): string {
+    const res = []
+    for (let i = 0; i < this._n; i++) {
+      if (this.has(i)) {
+        res.push(i)
+      }
+    }
+    return `Finder{${res}}`
   }
 
   private _lUnion(x: number, y: number): void {
@@ -103,40 +115,13 @@ class Finder {
 if (require.main === module) {
   // https://leetcode.cn/problems/minimum-reverse-operations/submissions/
 
-  function minReverseOperations(n: number, p: number, banned: number[], k: number): number[] {
-    const finder = [new Finder(n), new Finder(n)]
-    for (let i = 0; i < n; i++) {
-      finder[(i & 1) ^ 1].erase(i, i + 1)
-    }
-    banned.forEach(i => {
-      finder[i & 1].erase(i, i + 1)
-    })
-
-    const getRange = (i: number): [number, number] => [
-      Math.max(i - k + 1, k - i - 1),
-      Math.min(i + k - 1, 2 * n - k - i - 1)
-    ]
-
-    const setUsed = (u: number): void => {
-      finder[u & 1].erase(u, u + 1)
-    }
-
-    const findUnused = (u: number): number | null => {
-      const [left, right] = getRange(u)
-      const pre = finder[(u + k + 1) & 1].prev(right)
-      if (pre !== null && left <= pre && pre <= right) {
-        return pre
-      }
-      const next = finder[(u + k + 1) & 1].next(left)
-      if (next !== null && left <= next && next <= right) {
-        return next
-      }
-      return null
-    }
-
-    const dist = onlineBfs(n, p, setUsed, findUnused)
-    return dist.map(d => (d === INF ? -1 : d))
-  }
+  const finder = new Finder(5)
+  finder.erase(1, 3)
+  console.log(finder.has(0))
+  console.log(finder.has(1))
+  console.log(finder.has(2))
+  console.log(finder.has(3))
+  console.log(finder.toString())
 }
 
 export { Finder }

@@ -102,6 +102,7 @@ class FastSet:
 
 if __name__ == "__main__":
     ...
+
     # 前驱后继
     def pre(pos: int):
         return next((i for i in range(pos, -1, -1) if ok[i]), None)

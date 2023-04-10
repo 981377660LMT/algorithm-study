@@ -37,19 +37,16 @@ class Solution:
         def findUnused(u: int) -> Optional[int]:
             """找到一个未使用的位置.如果不存在,返回None."""
             left, right = getRange(u)
-            # pre = finder[(u + k + 1) & 1].prev(right)
-            # if pre is not None and left <= pre <= right:
-            #     return pre
             next_ = finder[(u + k + 1) & 1].next(left)
             if next_ is not None and left <= next_ <= right:
                 return next_
 
         finder = [Finder(n) for _ in range(2)]
+
         for i in range(n):
-            finder[i & 1].insert(i)
+            finder[(i & 1) ^ 1].erase(i)
         for i in banned:
             finder[i & 1].erase(i)
-
         dist = onlineBfs(n, p, setUsed, findUnused)
         return [d if d != INF else -1 for d in dist]
 
@@ -84,9 +81,6 @@ def onlineBfs(
     return dist
 
 
-from typing import Optional
-
-
 class Finder:
     """利用位运算寻找区间的某个位置左侧/右侧第一个未被访问过的位置.
     初始时,所有位置都未被访问过.
@@ -110,6 +104,8 @@ class Finder:
                 break
         self._seg = seg
         self._lg = len(seg)
+        for i in range(self._n):
+            self.insert(i)
 
     def insert(self, i: int) -> None:
         for h in range(self._lg):
