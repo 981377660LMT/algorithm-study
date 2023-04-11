@@ -42,6 +42,9 @@ https://judge.yosupo.jp/
 dual Problem
 https://emthrm.github.io/cp-library/dual_problem.html
 
+- noshi 的分享
+  算法:https://noshi91.github.io/algorithm-encyclopedia/#boruvka
+  数据结构:https://scrapbox.io/data-structures/
 - **数学**
 
   - [ ] 总览

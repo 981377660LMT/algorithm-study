@@ -19,6 +19,9 @@ import assert from 'assert'
 // MaxRightCount(start, end, xor, check) -
 //   返回使得 check(prefixSum) 为 true 的区间前缀个数的最大值.
 
+/**
+ * 常数大约是线段树的级别.
+ */
 class WaveletMatrixSum {
   private readonly _log: number
   private readonly _mid: Uint32Array

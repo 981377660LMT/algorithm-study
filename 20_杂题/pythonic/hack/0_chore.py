@@ -16,6 +16,5 @@ str = "abcba"
 print(all(str[i] == str[~i] for i in range(len(str))))
 
 # Chained boolean comparisons
-if 'a' < 'c' > 'b':
+if "a" < "c" > "b":
     print(1)
-

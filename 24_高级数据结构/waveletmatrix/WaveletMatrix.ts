@@ -1,4 +1,6 @@
 /* eslint-disable no-param-reassign */
+// !这个版本比较快
+
 import { strictEqual } from 'assert'
 
 class WaveletMatrix {

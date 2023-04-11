@@ -20,6 +20,9 @@
 
 import assert from 'assert'
 
+/**
+ * 常数大约是线段树的级别.
+ */
 class WaveletMatrixSegments {
   private readonly _log: number
   private readonly _mid: Uint32Array

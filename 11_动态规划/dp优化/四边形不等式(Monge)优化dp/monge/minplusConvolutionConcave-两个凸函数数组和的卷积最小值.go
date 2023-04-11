@@ -1,10 +1,4 @@
 // TODO 有问题
-
-// maxplusConvolutionConcave-两个凸函数数组和的卷积最大值
-
-// https://maspypy.github.io/library/convex/maxplus_convolution_concave.hpp
-// https://noshi91.github.io/Library/algorithm/concave_max_plus_convolution.cpp
-
 package main
 
 import (
@@ -12,6 +6,20 @@ import (
 	"math/rand"
 	"sort"
 )
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
 
 func main() {
 	rand.Seed(0)
@@ -26,19 +34,14 @@ func main() {
 			preSum[i+1] = preSum[i] + A[i]
 		}
 		for i := 0; i < L; i++ {
-			A = append([]int{-INF}, A...)
+			A = append([]int{INF}, A...)
 		}
 		for i := 0; i < R; i++ {
-			A = append(A, -INF)
+			A = append(A, INF)
 		}
 		return A
 	}
-	max := func(a, b int) int {
-		if a > b {
-			return a
-		}
-		return b
-	}
+
 	equal := func(A, B []int) bool {
 		if len(A) != len(B) {
 			return false
@@ -59,20 +62,20 @@ func main() {
 		}
 		C := make([]int, N+M-1)
 		for i := range C {
-			C[i] = -INF
+			C[i] = INF
 		}
 		for i := 0; i < N; i++ {
 			for j := 0; j < M; j++ {
-				if A[i] == -INF || B[j] == -INF {
+				if A[i] == INF || B[j] == INF {
 					continue
 				}
-				C[i+j] = max(C[i+j], A[i]+B[j])
+				C[i+j] = min(C[i+j], A[i]+B[j])
 			}
 		}
 		return C
 	}
 	// [93 52] [69 -38 -74 -1000000000000000000 -1000000000000000000 -1000000000000000000 -1000000000000000000]
-	fmt.Println(MaxPlusConvolutionConcave([]int{93, 52}, []int{69, -38, -74, -INF, -INF, -INF, -INF}, true, true))
+	fmt.Println(MinPlusConvolutionConvex([]int{93, 52}, []int{69, -38, -74, -INF, -INF, -INF, -INF}, true, true))
 	for a1 := 0; a1 < 5; a1++ {
 		for b1 := 0; b1 < 10; b1++ {
 			for c1 := 0; c1 < 5; c1++ {
@@ -81,7 +84,7 @@ func main() {
 					for b2 := 0; b2 < 10; b2++ {
 						for c2 := 0; c2 < 5; c2++ {
 							B := gen(a2, b2, c2)
-							C := MaxPlusConvolutionConcave(A, B, true, true)
+							C := MinPlusConvolutionConvex(A, B, true, true)
 							if !equal(naive(A, B), C) {
 								fmt.Println(A, B, C, naive(A, B))
 								panic("error")
@@ -96,14 +99,14 @@ func main() {
 
 const INF int = 1e18
 
-func MaxPlusConvolutionConcave(A, B []int, concaveA, concaveB bool) []int {
+func MinPlusConvolutionConvex(A, B []int, convexA, convexB bool) (C []int) {
 	if len(A) == 0 || len(B) == 0 {
-		return []int{}
+		return
 	}
-	if !concaveA && !concaveB {
-		panic("at least one of A and B must be concave")
+	if !convexA && !convexB {
+		panic("at least one of A and B must be convex")
 	}
-	if !concaveB {
+	if !convexB {
 		A, B = B, A
 	}
 	NA := len(A)
@@ -111,17 +114,17 @@ func MaxPlusConvolutionConcave(A, B []int, concaveA, concaveB bool) []int {
 	N := NA + NB - 1
 	L := 0
 	R := NB
-	for L < R && B[L] == -INF {
+	for L < R && B[L] == INF {
 		L++
 	}
 	if L == R {
-		res := make([]int, N)
-		for i := range res {
-			res[i] = -INF
+		C = make([]int, N)
+		for i := range C {
+			C[i] = INF
 		}
-		return res
+		return
 	}
-	for B[R-1] == -INF {
+	for B[R-1] == INF {
 		R--
 	}
 	B = B[L:R]
@@ -135,34 +138,35 @@ func MaxPlusConvolutionConcave(A, B []int, concaveA, concaveB bool) []int {
 		if i-j >= nB {
 			return k
 		}
-		if A[j]+B[i-j] < A[k]+B[i-k] {
+		if A[j]+B[i-j] > A[k]+B[i-k] {
 			return k
 		}
 		return j
 	}
 
 	J := _SMAWK(n, NA, choose)
-	C := make([]int, N)
+	C = make([]int, N)
 	for i := range C {
-		C[i] = -INF
+		C[i] = INF
 	}
 	for i := 0; i < n; i++ {
-		C[L+i] = A[J[i]]
-		if A[J[i]] != -INF {
-			C[L+i] += B[i-J[i]]
+		if A[J[i]] == INF {
+			C[L+i] = INF
+		} else {
+			C[L+i] = A[J[i]] + B[i-J[i]]
 		}
 	}
-	return C
+	return
 }
 
 // choose: func(i, j, k int) int 选择(i,j)和(i,k)中的哪一个(j or k)
-//  返回值: minArg[i] 表示第i行的最小值的列号
-func _SMAWK(H, W int, choose func(i, j, k int) int) (minArg []int) {
+//  返回值: argMin[i] 表示第i行的最小值的列号
+func _SMAWK(H, W int, choose func(i, j, k int) int) (argMin []int) {
 	var dfs func(X, Y []int) []int
 	dfs = func(X, Y []int) []int {
 		N := len(X)
 		if N == 0 {
-			return []int{}
+			return nil
 		}
 		YY := []int{}
 		for _, y := range Y {
@@ -178,6 +182,7 @@ func _SMAWK(H, W int, choose func(i, j, k int) int) (minArg []int) {
 				YY = append(YY, y)
 			}
 		}
+
 		XX := []int{}
 		for i := 1; i < len(X); i += 2 {
 			XX = append(XX, X[i])
@@ -188,9 +193,12 @@ func _SMAWK(H, W int, choose func(i, j, k int) int) (minArg []int) {
 			I[i+i+1] = II[i]
 		}
 		p := 0
+
 		for i := 0; i < N; i += 2 {
-			LIM := Y[len(Y)-1]
-			if i+1 < N {
+			var LIM int
+			if i+1 == N {
+				LIM = Y[len(Y)-1]
+			} else {
 				LIM = I[i+1]
 			}
 			best := Y[p]

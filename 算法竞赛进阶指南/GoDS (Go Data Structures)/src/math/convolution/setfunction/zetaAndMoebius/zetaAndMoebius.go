@@ -2,10 +2,11 @@
 // Zeta变换 与 Mobius变换 互为逆变换
 
 // !这种技巧 用 一个状态就可以表示自己(每个mask)的所有子集(超集)的状态了
-// SubsetZetaTransform: 求出每个mask的所有子集的贡献 (SoS-DP)
+// SubsetZetaTransform: 求出每个mask的所有子集的贡献 (SoS-DP的上位替换)
 // SupersetZetaTransform: 求出每个mask的所有超集的贡献
 // SubsetMoebiusTransform: 从每个mask的所有子集的贡献还原出原数组
 // SupersetMoebiusTransform: 从每个mask的所有超集的贡献还原出原数组
+// https://naoyat.hatenablog.jp/entry/zeta-moebius
 
 package main
 
@@ -19,6 +20,11 @@ func main() {
 	nums = []int{0, 1, 2, 3, 4, 5, 6, 7}
 	SupersetZetaTransform(nums)
 	fmt.Println(nums)
+	// vector<int> a { 0, 50, 33, 16, 20, 10, 6, 3 };
+	nums = []int{0, 50, 33, 16, 20, 10, 6, 3}
+	SubsetMoebiusTransform(nums)
+	fmt.Println(nums)
+
 }
 
 // f是长度为2^d的数组

@@ -2,6 +2,7 @@
 // Monge(四边形不等式) ⇒ Totally Monotone(TM) ⇒ Monotone なので、Monotone は弱い条件である。
 // https://ei1333.github.io/luzhiled/snippets/dp/monotone-minima.html
 // https://beet-aizu.github.io/library/algorithm/monotoneminima.cpp
+// https://noshi91.github.io/algorithm-encyclopedia/monotone-minima
 
 // 对于一个二元函数f(i,j) (0<=i<H, 0<=j<W),
 // !如果对任意 p<q 满足 argmin(f(p,*))<=argmin(f(q,*)),
@@ -9,6 +10,7 @@
 // !例如 f(i,j)=nums[j]+(j-i)^2 是关于i的Monotone函数(一次函数)
 // 绝大多数的斜率优化也满足决策单调性（维护的下凸包，斜率也满足单调不减）
 
+// 如果矩阵满足totally monotone,则可以用SMAWK算法O(H+W)求出每一行的最小值.
 package main
 
 import (
