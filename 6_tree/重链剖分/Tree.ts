@@ -117,11 +117,12 @@ class Tree implements ITree {
 
   constructor(n: number) {
     this.tree = Array(n).fill(0)
+    this.parent = new Int32Array(n)
     for (let i = 0; i < n; i++) {
       this.tree[i] = []
+      this.parent[i] = -1
     }
     this.depth = new Uint32Array(n)
-    this.parent = new Int32Array(n).fill(-1)
     this._lid = new Uint32Array(n)
     this._rid = new Uint32Array(n)
     this._idToNode = new Uint32Array(n)
@@ -167,7 +168,9 @@ class Tree implements ITree {
   lca(u: number, v: number): number {
     while (true) {
       if (this._lid[u] > this._lid[v]) {
-        ;[u, v] = [v, u]
+        u ^= v
+        v ^= u
+        u ^= v
       }
       if (this._top[u] === this._top[v]) {
         return u
@@ -335,6 +338,10 @@ class Tree implements ITree {
       res.push(cur)
     }
     return res
+  }
+
+  toString(): string {
+    return `Tree(${this.tree.map((e, i) => `${i}: ${e}`).join(', ')})`
   }
 
   private _build(cur: number, pre: number, dep: number, dist: number): number {

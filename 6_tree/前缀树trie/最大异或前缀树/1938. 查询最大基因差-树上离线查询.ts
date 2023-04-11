@@ -26,9 +26,8 @@ function maxGeneticDifference(parents: number[], queries: number[][]): number[] 
 
   // 建树
   let root = -1
-  const adjList: number[][] = Array(n)
-    .fill(0)
-    .map(() => [])
+  const adjList: number[][] = Array(n).fill(0)
+  for (let i = 0; i < n; i++) adjList[i] = []
   for (const [cur, pre] of parents.entries()) {
     if (pre === -1) {
       root = cur

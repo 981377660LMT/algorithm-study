@@ -11,9 +11,8 @@ function findCentroids(n: number, edges: [cur: number, next: number][], root = 0
   const weight = new Uint32Array(n + 1) // 最大连通块大小,即此节点为割点分割之后两半的最大大小
   const subSize = new Uint32Array(n + 1) // 子树的大小,即向`下面`走可以到多少个结点
 
-  const adjList: number[][] = Array(n + 1)
-    .fill(0)
-    .map(() => [])
+  const adjList: number[][] = Array(n).fill(0)
+  for (let i = 0; i < n; i++) adjList[i] = []
   edges.forEach(([u, v]) => {
     adjList[u].push(v)
     adjList[v].push(u)

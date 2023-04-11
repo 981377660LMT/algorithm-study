@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	uf := NewFinder(10)
+	uf := NewNextFinder(10)
 	fmt.Println(uf)
 	uf.Erase(2)
 	uf.Erase(3)
@@ -17,16 +17,15 @@ func main() {
 }
 
 // LinearSequenceUnionFind 线性序列并查集(NextFinder).
-type Finder struct {
+type NextFinder struct {
 	n     int
 	right []int
 	data  []uint64
 }
 
-// NewFinder 构造函数
-func NewFinder(n int) *Finder {
+func NewNextFinder(n int) *NextFinder {
 	len := (n >> 6) + 1
-	f := &Finder{
+	f := &NextFinder{
 		n:     n,
 		right: make([]int, len),
 		data:  make([]uint64, len),
@@ -41,7 +40,7 @@ func NewFinder(n int) *Finder {
 
 // Next 下一个
 //  如果不存在，返回n.
-func (f *Finder) Next(x int) int {
+func (f *NextFinder) Next(x int) int {
 	if x < 0 {
 		x = 0
 	}
@@ -60,7 +59,7 @@ func (f *Finder) Next(x int) int {
 }
 
 // Erase 删除
-func (f *Finder) Erase(x int) {
+func (f *NextFinder) Erase(x int) {
 	div := x >> 6
 	mod := x & 63
 	if (f.data[div]>>mod)&1 != 0 { // flip
@@ -71,11 +70,14 @@ func (f *Finder) Erase(x int) {
 	}
 }
 
-func (f *Finder) Has(x int) bool {
+func (f *NextFinder) Has(x int) bool {
+	if x < 0 || x >= f.n {
+		return false
+	}
 	return (f.data[x>>6]>>(x&63))&1 != 0
 }
 
-func (f *Finder) String() string {
+func (f *NextFinder) String() string {
 	sb := []string{}
 	for i := 0; i < f.n; i++ {
 		if f.Has(i) {
@@ -85,7 +87,7 @@ func (f *Finder) String() string {
 	return "Finder(" + strings.Join(sb, ",") + ")"
 }
 
-func (f *Finder) findNext(x int) int {
+func (f *NextFinder) findNext(x int) int {
 	if f.right[x] == x {
 		return x
 	}

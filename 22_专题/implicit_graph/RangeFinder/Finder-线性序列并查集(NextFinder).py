@@ -4,7 +4,7 @@
 from typing import Optional
 
 
-class Finder:
+class NextFinder:
     """线性序列并查集LinearSequenceUnionFind (NextFinder)."""
 
     def __init__(self, n: int):
@@ -40,6 +40,8 @@ class Finder:
             self.right[div] = div + 1  # union to right
 
     def has(self, x: int) -> bool:
+        if x < 0 or x >= self._n:
+            return False
         return not not ((self._data[x >> 6] >> (x & 63)) & 1)
 
     def _findNext(self, x: int) -> int:
@@ -48,13 +50,16 @@ class Finder:
             x = self.right[x]
         return x
 
-    def __str__(self):
+    def __repr__(self):
         res = [i for i in range(self._n) if self.has(i)]
         return f"Finder({list(res)})"
 
+    def __contains__(self, x):
+        return self.has(x)
+
 
 if __name__ == "__main__":
-    uf = Finder(10)
+    uf = NextFinder(10)
     uf.erase(0)
     print(uf)
 

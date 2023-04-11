@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { useUnionFindArray } from '../../../14_并查集/useUnionFind'
+import { UnionFindArray } from '../../../14_并查集/UnionFind'
 
 /**
  * @param {number} n
@@ -17,7 +17,7 @@ function distanceLimitedPathsExist(
   queries: number[][]
 ): boolean[] {
   const res = Array<boolean>(queries.length).fill(false)
-  const uf = useUnionFindArray(n)
+  const uf = new UnionFindArray(n)
   edgeList.sort((a, b) => a[2] - b[2])
   queries = queries.map((v, i) => [...v, i]).sort((a, b) => a[2] - b[2])
 

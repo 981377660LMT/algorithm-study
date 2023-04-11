@@ -25,8 +25,8 @@ Monge 性等价条件:`对任意一个2*2的子矩阵,左上角+右下角<=右�
 - 优化区间 dp
 - Monge 是 totally monotone 的
 
-  > monotone: 每一行取得最小值的列数是单调的
-  > totally monotone: 任意的子矩阵具有 monotone 性
+  > monotone: `每一行取得最小值的列数是单调的`
+  > totally monotone: 任意的子矩阵具有 monotone 性 （完全单调矩阵）
 
 - Monge 矩阵的例子
 

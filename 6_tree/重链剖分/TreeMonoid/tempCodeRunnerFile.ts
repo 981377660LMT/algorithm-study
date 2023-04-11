@@ -1,1 +1,0 @@
-        console.log(cur, next, weight)

@@ -25,7 +25,7 @@ class Solution:
 
     @classmethod
     def _isOnOneLine(cls, points: List[Point]) -> bool:
-        """"判断k点共线"""
+        """ "判断k点共线"""
 
         if len(points) <= 2:
             return True
@@ -35,7 +35,7 @@ class Solution:
 
     @staticmethod
     def _calCrossProduct(A: Point, B: Point, C: Point) -> int:
-        """"计算三点叉乘"""
+        """ "计算三点叉乘"""
 
         AB = [B[0] - A[0], B[1] - A[1]]
         AC = [C[0] - A[0], C[1] - A[1]]

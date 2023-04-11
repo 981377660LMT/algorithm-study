@@ -1,4 +1,4 @@
-import { useUnionFindArray } from '../../useUnionFind'
+import { UnionFindArray } from '../../UnionFind'
 
 /**
  * @param {number} n
@@ -10,13 +10,13 @@ import { useUnionFindArray } from '../../useUnionFind'
  * @summary
  * 离线排序
  */
-const distanceLimitedPathsExist = function (
+const distanceLimitedPathsExist = (
   n: number,
   edgeList: number[][],
   queries: number[][]
-): boolean[] {
+): boolean[] => {
   const res = Array<boolean>(queries.length).fill(false)
-  const uf = useUnionFindArray(n)
+  const uf = new UnionFindArray(n)
   edgeList.sort((a, b) => a[2] - b[2])
   queries = queries.map((v, i) => [...v, i]).sort((a, b) => a[2] - b[2])
 
@@ -39,11 +39,11 @@ console.log(
       [0, 1, 2],
       [1, 2, 4],
       [2, 0, 8],
-      [1, 0, 16],
+      [1, 0, 16]
     ],
     [
       [0, 1, 2],
-      [0, 2, 5],
+      [0, 2, 5]
     ]
   )
 )

@@ -32,6 +32,17 @@ func foo(x int) {
 	// 取右边连续的 1
 	x ^= x + 1
 
+	// 最低的len位取反
+	flipLow := func(x, len int) int {
+		return x ^ ((1 << len) - 1)
+	}
+
+	// 差集(A\B),从A中去掉B中的元素
+	sub := func(A, B int) int { return A &^ B }
+
+	// 全集 (0-n-1)
+	all_ := func(n int) int { return (1 << n) - 1 }
+
 	// -1 表示为 -1 = 0b1111...1111
 	x &= (^0 << 3)    // 清除从第三位开始右边的所有1 (截断下界)
 	x |= (^0 << 3)    // 清除从第三位开始右边的所有0 (截断下界)
@@ -64,7 +75,7 @@ func foo(x int) {
 
 	// !python里用int模仿uint64的行为:	x &((1<<64)-1) 即可
 
-	// 对二的整数幂取模可以换成与运算
+	// !对二的整数幂取模可以换成与运算
 	a := 1200
 	fmt.Println(a%32 == a&31)
 
@@ -76,5 +87,8 @@ func foo(x int) {
 		hasAdjacentZeros,
 		abs,
 		tz,
+		flipLow,
+		all_,
+		sub,
 	}
 }

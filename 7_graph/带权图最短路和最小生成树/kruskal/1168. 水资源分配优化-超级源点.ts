@@ -1,4 +1,4 @@
-import { kruskal } from './模板'
+import { kruskal1 } from './模板'
 
 type Edge<V = unknown> = [u: V, v: V, weight: number]
 
@@ -16,7 +16,7 @@ function minCostToSupplyWater(n: number, wells: number[], pipes: number[][]): nu
   const edges: Edge<number>[] = []
   wells.forEach((weight, index) => edges.push([0, index + 1, weight]))
   pipes.forEach(([u, v, w]) => edges.push([u, v, w]))
-  return kruskal(n + 1, edges)
+  return kruskal1(n + 1, edges)
 }
 
 console.log(
@@ -25,7 +25,7 @@ console.log(
     [1, 2, 2],
     [
       [1, 2, 1],
-      [2, 3, 1],
+      [2, 3, 1]
     ]
   )
 )

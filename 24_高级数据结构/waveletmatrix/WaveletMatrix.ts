@@ -18,9 +18,10 @@ class WaveletMatrix {
     const max_ = Math.max(...nums, 0)
     const n = nums.length
     const maxLog = 32 - Math.clz32(max_) + 1 // bit_len + 1
-    const mat = Array(maxLog)
-      .fill(0)
-      .map(() => new _BV(n + 1))
+    const mat = Array(maxLog).fill(0)
+    for (let i = 0; i < maxLog; i++) {
+      mat[i] = new _BV(n + 1)
+    }
     const zs = new Uint32Array(maxLog)
     const buff1 = new Uint32Array(maxLog)
     const buff2 = new Uint32Array(maxLog)
@@ -31,7 +32,7 @@ class WaveletMatrix {
       let q = 0
       for (let i = 0; i < n; i++) {
         const k = (nums[i] >>> (maxLog - dep - 1)) & 1
-        if (k === 1) {
+        if (k) {
           rs[q] = nums[i]
           mat[dep].add(i)
           q++
@@ -105,7 +106,7 @@ class WaveletMatrix {
    */
   lower(start: number, end: number, value: number): number | null {
     const k = this._lt(start, end, value)
-    return k === 0 ? null : this.kth(start, end, k - 1)
+    return k ? this.kth(start, end, k - 1) : null
   }
 
   /**
@@ -120,14 +121,14 @@ class WaveletMatrix {
    * [start, end) 中值不超过 value 的最大值.
    */
   floor(start: number, end: number, value: number): number | null {
-    return this.count(start, end, value) !== 0 ? value : this.lower(start, end, value)
+    return this.count(start, end, value) ? value : this.lower(start, end, value)
   }
 
   /**
    * [start, end) 中值不小于 value 的最小值.
    */
   ceiling(start: number, end: number, value: number): number | null {
-    return this.count(start, end, value) !== 0 ? value : this.higher(start, end, value)
+    return this.count(start, end, value) ? value : this.higher(start, end, value)
   }
 
   /**
@@ -203,7 +204,7 @@ class WaveletMatrix {
       this._buff1[dep] = left
       this._buff2[dep] = right
       const bit = ((val >>> (this._maxLog - dep - 1)) & 1) as 0 | 1
-      if (bit === 1) {
+      if (bit) {
         res +=
           right - left + this._mat[dep].countPrefix(1, left) - this._mat[dep].countPrefix(1, right)
       }

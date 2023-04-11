@@ -1,7 +1,7 @@
 // 相似关系是 具有 传递性的
 // 相似关系是具有对称性的
 
-import { useUnionFindArray } from '../useUnionFind'
+import { UnionFindArray } from '../UnionFind'
 
 // 即：无向图并查集
 function areSentencesSimilarTwo(
@@ -10,7 +10,7 @@ function areSentencesSimilarTwo(
   similarPairs: string[][]
 ): boolean {
   if (sentence1.length !== sentence2.length) return false
-  const uf = useUnionFindArray(similarPairs.length * 2)
+  const uf = new UnionFindArray(similarPairs.length * 2)
   const words = [...new Set<string>(similarPairs.flat())]
   const wordId = new Map<string, number>([...words.entries()].map(([i, v]) => [v, i]))
   for (const [u, v] of similarPairs) {
@@ -46,7 +46,7 @@ console.log(
       ['manga', 'onepiece'],
       ['platform', 'anime'],
       ['leetcode', 'platform'],
-      ['anime', 'manga'],
+      ['anime', 'manga']
     ]
   )
 )

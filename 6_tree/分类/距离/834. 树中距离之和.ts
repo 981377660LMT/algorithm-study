@@ -10,9 +10,9 @@
  * 同时考察了邻接链表的建立，无向图的遍历，树的dfs自顶向下先序和自底向上后序遍历，以及对复杂度的拆分能力
  */
 const sumOfDistancesInTree = (n: number, edges: number[][]): number[] => {
-  const adjList: number[][] = Array(n)
-    .fill(0)
-    .map(() => [])
+  const adjList: number[][] = Array(n).fill(0)
+  for (let i = 0; i < n; i++) adjList[i] = []
+
   // 用于计算根的值
   const depth = Array<number>(n).fill(0)
   // 用于计算每个节点的子节点数(包括自己)

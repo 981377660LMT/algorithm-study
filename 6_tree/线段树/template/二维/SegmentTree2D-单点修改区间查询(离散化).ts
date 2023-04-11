@@ -44,14 +44,14 @@ class SegmentTree2DCompress<E> {
     const { xs, ys, e, op, ws } = options
     this._e = e
     this._op = op
-    this._build(
-      xs,
-      ys,
-      ws ??
-        Array(xs.length)
-          .fill(0)
-          .map(() => e())
-    )
+    let leaves = ws
+    if (!leaves) {
+      leaves = Array(xs.length)
+      for (let i = 0; i < leaves.length; i++) {
+        leaves[i] = e()
+      }
+    }
+    this._build(xs, ys, leaves)
   }
 
   private _build(xs: number[], ys: number[], ws: E[]): void {

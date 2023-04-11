@@ -27,9 +27,8 @@ class SparseTable<S = number> {
     this._size = n
     this._mergeFunc = mergeFunc
     // !dp[i][j]表示区间[j,j+2**i-1]的最大值
-    this._dp = Array(size)
-      .fill(0)
-      .map(() => Array(n).fill(0))
+    this._dp = Array(size).fill(0)
+    for (let i = 0; i < size; i++) this._dp[i] = Array(n).fill(0)
     for (let i = 0; i < n; i++) this._dp[0][i] = nums[i]
 
     for (let i = 1; i < size; i++) {
@@ -46,8 +45,12 @@ class SparseTable<S = number> {
    */
   query(left: number, right: number): S {
     // this._checkBoundsBeginEnd(left, right)
-    const k = 32 - Math.clz32(right - left + 1) - 1
+    const k = 31 - Math.clz32(right - left + 1)
     return this._mergeFunc(this._dp[k][left], this._dp[k][right - (1 << k) + 1])
+  }
+
+  toString(): string {
+    return `SparseTable{${this._dp[0]}}`
   }
 
   private _checkBoundsBeginEnd(begin: number, end: number): void {
@@ -61,6 +64,7 @@ if (require.main === module) {
   assert.strictEqual(st.query(0, 0), 9)
   assert.strictEqual(st.query(0, 2), 12)
   assert.strictEqual(st.query(0, 4), 15)
+  console.log(st.toString())
 }
 
 export { SparseTable }

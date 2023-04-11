@@ -41,9 +41,14 @@ class DualShortestPath {
 
   private _spfaMin(): [dist: number[], ok: boolean] {
     const dist = Array(this._n).fill(0)
-    const count = new Uint32Array(this._n).fill(1)
-    const inStack = new Uint8Array(this._n).fill(1)
-    const stack = new Uint32Array(this._n).map((_, i) => i)
+    const count = new Uint32Array(this._n)
+    const inStack = new Uint8Array(this._n)
+    const stack = new Uint32Array(this._n)
+    for (let i = 0; i < this._n; i++) {
+      count[i] = 1
+      inStack[i] = 1
+      stack[i] = i
+    }
     let ptr = 0
     let len = this._n
 

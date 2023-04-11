@@ -18,9 +18,10 @@ function useDinic(n: number, start: number, end: number) {
     throw new RangeError(`start: ${start}, end: ${end} out of range [0, ${n - 1}]`)
   }
 
-  const _reGraph: number[][] = Array(n)
-    .fill(0)
-    .map(() => [])
+  const _reGraph: number[][] = Array(n).fill(0)
+  for (let i = 0; i < n; i++) {
+    _reGraph[i] = []
+  }
 
   const _edges: [next: number, capacity: number][] = []
   const _visitedEdge = new Set<number>()

@@ -1,6 +1,6 @@
 // 怎么合并？讨论每个数的广义邻居是否在原数组中存在即可
 
-import { useUnionFindMap } from '../../14_并查集/useUnionFind'
+import { UnionFindMap } from '../../14_并查集/UnionFind'
 
 // 增: state | (1 << i)
 // 删：a & 1 << i 条件下 state ^ (1 << i) ；增和删可以统一为state ^ (1 << i)
@@ -19,7 +19,7 @@ function groupStrings(words: string[]): number[] {
     states.push(state)
   }
 
-  const uf = useUnionFindMap<number>(states)
+  const uf = new UnionFindMap(states)
   const statesSet = new Set<number>(states)
 
   for (const state of states) {
@@ -41,7 +41,7 @@ function groupStrings(words: string[]): number[] {
     const root = uf.find(state)
     groupCounter.set(root, (groupCounter.get(root) ?? 0) + 1)
   }
-  return [uf.getCount(), Math.max(...groupCounter.values())]
+  return [uf.getPart(), Math.max(...groupCounter.values())]
 }
 
 console.log(groupStrings(['a', 'b', 'ab', 'cde']))

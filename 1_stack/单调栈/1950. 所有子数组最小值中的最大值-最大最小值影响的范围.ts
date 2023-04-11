@@ -21,7 +21,11 @@ function getMinRange(nums: number[]): [left: number, right: number][] {
     stack.push(i)
   }
 
-  return leftMost.map((left, index) => [left, rightMost[index]])
+  const res: [left: number, right: number][] = []
+  for (let i = 0; i < n; i++) {
+    res.push([leftMost[i], rightMost[i]])
+  }
+  return res
 }
 
 // 0 <= nums[i] <= 109

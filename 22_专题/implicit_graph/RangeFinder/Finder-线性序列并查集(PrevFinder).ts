@@ -1,9 +1,9 @@
 // https://www.cnblogs.com/bzy-blog/p/14353073.html
 
 /**
- * 线性序列并查集(NextFinder).
+ * 线性序列并查集(PrevFinder).
  */
-class NextFinder {
+class PrevFinder {
   private readonly _n: number
   private readonly _right: Uint32Array
   private readonly _data: Uint32Array
@@ -22,24 +22,25 @@ class NextFinder {
   }
 
   /**
-   * 找到x右侧第一个未被访问过的位置(包含x).
+   * 找到x左侧第一个未被访问过的位置(包含x).
    * 如果不存在, 返回 null.
+   * prev = n-1-next(n-1-x)
    */
-  next(x: number): number | null {
-    if (x >= this._n) return null
-    if (x < 0) x = 0
+  prev(x: number): number | null {
+    if (x < 0) return null
+    if (x >= this._n) x = this._n - 1
+    x = this._n - 1 - x
     let div = x >> 5
     let mod = x & 31
     let mask = this._data[div] >> mod
     if (mask) {
-      // !trailingZeros32(x): 31 - Math.clz32(x & -x)
       const res = ((div << 5) | mod) + 31 - Math.clz32(mask & -mask)
-      return res < this._n ? res : null
+      return res < this._n ? this._n - 1 - res : null
     }
     div = this._findNext(div + 1)
     const tmp = this._data[div]
     const res = (div << 5) + 31 - Math.clz32(tmp & -tmp)
-    return res < this._n ? res : null
+    return res < this._n ? this._n - 1 - res : null
   }
 
   /**
@@ -47,6 +48,7 @@ class NextFinder {
    * 0<=x<n.
    */
   erase(x: number): void {
+    x = this._n - 1 - x
     let div = x >> 5
     let mod = x & 31
     // flip
@@ -60,6 +62,7 @@ class NextFinder {
 
   has(x: number): boolean {
     if (x < 0 || x >= this._n) return false
+    x = this._n - 1 - x
     return !!((this._data[x >> 5] >> (x & 31)) & 1)
   }
 
@@ -81,20 +84,20 @@ class NextFinder {
 }
 
 if (require.main === module) {
-  const uf = new NextFinder(10)
+  const uf = new PrevFinder(10)
   uf.erase(0)
 
-  console.log(uf.next(0))
-  console.log(uf.next(2))
+  console.log(uf.prev(0))
+  console.log(uf.prev(2))
   console.log(uf.has(0))
   uf.erase(2)
 
-  console.log(uf.next(2))
-  console.log(uf.next(9))
+  console.log(uf.prev(2))
+  console.log(uf.prev(9))
   uf.erase(9)
-  console.log(uf.next(9))
+  console.log(uf.prev(9))
 
   console.log(uf.toString())
 }
 
-export { NextFinder }
+export { PrevFinder }

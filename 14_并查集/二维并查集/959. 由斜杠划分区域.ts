@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import { useUnionFindArray } from '../useUnionFind'
+import { UnionFindArray } from '../UnionFind'
 
 /**
  * @param {string[]} grid
@@ -15,7 +15,7 @@ import { useUnionFindArray } from '../useUnionFind'
  */
 function regionsBySlashes(grid: string[]): number {
   const N = grid.length
-  const uf = useUnionFindArray(4 * N ** 2)
+  const uf = new UnionFindArray(4 * N ** 2)
 
   for (let i = 0; i < N; i++) {
     for (let j = 0; j < N; j++) {
@@ -58,7 +58,7 @@ function regionsBySlashes(grid: string[]): number {
     }
   }
 
-  return uf.getCount()
+  return uf.getPart()
 }
 
 console.log(regionsBySlashes(['/\\', '\\/']))

@@ -1,7 +1,7 @@
 // 如果两个数gcd>1 那么这两个数可交换位置(连通)
 // 如果能使用上述交换方式将 nums 按 非递减顺序 排列，返回 true
 
-import { useUnionFindArray } from '../../useUnionFind'
+import { UnionFindArray } from '../../UnionFind'
 
 //  1 <= nums.length <= 3 * 104
 //  2 <= nums[i] <= 105
@@ -18,7 +18,7 @@ import { useUnionFindArray } from '../../useUnionFind'
 
 function gcdSort(nums: number[]): boolean {
   const n = Math.max(...nums)
-  const uf = useUnionFindArray(n + 1)
+  const uf = new UnionFindArray(n + 1)
   for (const num of nums) {
     for (let factor = 2; factor <= ~~Math.sqrt(num); factor++) {
       if (num % factor === 0) {

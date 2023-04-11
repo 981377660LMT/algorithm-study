@@ -61,18 +61,23 @@ func Kruskal1(n int, sortedEdges []KruskalEdge) int {
 	return res
 }
 
-// !给定无向图的边，求出一个最小生成树(如果不存在,则求出的是森林中多个最小生成树)
-func Kruskal2(n int, edges [][]int) (tree [][]AdjListEdge, ok bool) {
-	sortedEdges := make([]KruskalEdge, len(edges))
+// !给定无向图的边，求出一个最小生成树(如果不存在,则求出的是森林中的多个最小生成树)
+//  这个树也叫Kruskal重构树.
+func Kruskal(n int, edges [][]int) (treeEdges [][3]int, ok bool) {
+	type edge struct {
+		u, v   int
+		weight int
+	}
+
+	sortedEdges := make([]edge, len(edges))
 	for i := range edges {
 		e := edges[i]
-		sortedEdges[i] = KruskalEdge{u: e[0], v: e[1], weight: e[2]}
+		sortedEdges[i] = edge{u: e[0], v: e[1], weight: e[2]}
 	}
 	sort.Slice(sortedEdges, func(i, j int) bool {
 		return sortedEdges[i].weight < sortedEdges[j].weight
 	})
 
-	tree = make([][]AdjListEdge, n)
 	uf := NewUnionFindArray(n)
 	count := 0
 	for i := range sortedEdges {
@@ -80,16 +85,15 @@ func Kruskal2(n int, edges [][]int) (tree [][]AdjListEdge, ok bool) {
 		root1, root2 := uf.Find(edge.u), uf.Find(edge.v)
 		if root1 != root2 {
 			uf.Union(edge.u, edge.v)
-			tree[edge.u] = append(tree[edge.u], AdjListEdge{to: edge.v, weight: edge.weight})
-			tree[edge.v] = append(tree[edge.v], AdjListEdge{to: edge.u, weight: edge.weight})
+			treeEdges = append(treeEdges, [3]int{edge.u, edge.v, edge.weight})
 			count++
 			if count == n-1 {
-				return tree, true
+				ok = true
+				return
 			}
 		}
 	}
-
-	return tree, false
+	return
 }
 
 func NewUnionFindArray(n int) *UnionFindArray {

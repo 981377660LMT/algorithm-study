@@ -1,5 +1,5 @@
 import { onlineBfs } from '../../../22_专题/implicit_graph/OnlineBfs-在线bfs'
-import { Finder } from '../../../22_专题/implicit_graph/RangeFinder/Finder-fastset'
+import { NextFinder } from '../../../22_专题/implicit_graph/RangeFinder/Finder-线性序列并查集(NextFinder).'
 
 // 给你一个下标从 0 开始的 m x n 整数矩阵 grid 。
 // 你一开始的位置在 左上角 格子 (0, 0) 。
@@ -17,13 +17,13 @@ const INF = 2e15
 function minimumVisitedCells(grid: number[][]): number {
   const ROW = grid.length
   const COL = grid[0].length
-  const rowVisited: Finder[] = Array(ROW).fill(0)
-  const colVisited: Finder[] = Array(COL).fill(0)
+  const rowVisited: NextFinder[] = Array(ROW).fill(0)
+  const colVisited: NextFinder[] = Array(COL).fill(0)
   for (let i = 0; i < ROW; i++) {
-    rowVisited[i] = new Finder(COL)
+    rowVisited[i] = new NextFinder(COL)
   }
   for (let j = 0; j < COL; j++) {
-    colVisited[j] = new Finder(ROW)
+    colVisited[j] = new NextFinder(ROW)
   }
 
   const dist = onlineBfs(
