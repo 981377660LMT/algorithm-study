@@ -2,7 +2,7 @@ const debounce =
   (delay: number): MethodDecorator =>
   (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
     const method = descriptor.value
-    let timer: NodeJS.Timer | null = null
+    let timer: ReturnType<typeof setTimeout> | null
     descriptor.value = (...args: any[]) => {
       if (timer) {
         clearTimeout(timer)
@@ -28,7 +28,7 @@ test.sayHi()
 export {}
 
 function funcDebounce(fn: (...args: any[]) => any, delay: number) {
-  let timer: NodeJS.Timer | null = null
+  let timer: ReturnType<typeof setTimeout> | null
 
   // this的指向要跟原来函数一样
   return function (this: any, ...args: any[]) {

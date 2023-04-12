@@ -3,7 +3,7 @@
  * @param {number} wait
  */
 function throttle(func: Function, wait: number) {
-  let timer: NodeJS.Timer | null = null
+  let timer: ReturnType<typeof setTimeout> | null = null
   let lastArgs: any = null
 
   // 此处是取最后传入的参数执行

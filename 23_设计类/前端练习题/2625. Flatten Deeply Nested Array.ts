@@ -1,5 +1,15 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable no-console */
+// 扁平化数组
+
+// !伪代码
+// private flatten(nestedList: NestedInteger[]) {
+//   for (const nestedInteger of nestedList) {
+//     if (nestedInteger.isInteger()) {
+//       this.list.push(nestedInteger)
+//     } else {
+//       this.flatten(nestedInteger.getList())
+//     }
+//   }
+// }
 
 type MultiDimensionalArray<T> = (T | MultiDimensionalArray<T>)[]
 
@@ -24,10 +34,8 @@ function flat<T>(arr: MultiDimensionalArray<T>, n: number): MultiDimensionalArra
 
 export {}
 
-// !注意只能dfs实现,不能用bfs实现
-
 if (require.main === module) {
-  const nestedArray = ['a', ['v', 'g'], [['a', ['f'], 'v']]]
-  console.log(flat(nestedArray, 2)) // [ 'a', 'v', 'g', 'a', [ 'f' ], 'v' ]
-  console.log(flat(nestedArray, Infinity)) // [ 'a', 'v', 'g', 'a', 'f', 'v' ]
+  // arr = [1, 2, 3, [4, 5, 6], [7, 8, [9, 10, 11], 12], [13, 14, 15]]
+  // [1, 2, 3, 4, 5, 6, 7, 8, [9, 10, 11], 12, 13, 14, 15]
+  console.log(flat([1, 2, 3, [4, 5, 6], [7, 8, [9, 10, 11], 12], [13, 14, 15]], 1))
 }

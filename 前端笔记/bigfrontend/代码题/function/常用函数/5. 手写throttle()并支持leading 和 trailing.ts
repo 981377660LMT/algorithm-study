@@ -16,7 +16,7 @@ function throttle(
   option: ThrottleOption = { leading: true, trailing: true }
 ) {
   // your code here
-  let timer: NodeJS.Timer | null = null
+  let timer: ReturnType<typeof setTimeout> | null = null
   let lastArgs: any = null
   const { leading, trailing } = option
 

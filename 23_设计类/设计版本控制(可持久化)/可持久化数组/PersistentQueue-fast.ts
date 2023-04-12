@@ -86,7 +86,7 @@ class PersistentQueue<E = number> {
 export { PersistentQueue }
 
 if (require.main === module) {
-  const queue = new PersistentQueue(50)
+  const queue = new PersistentQueue(6)
   let curV = 0
   curV = queue.push(curV, 10)
   curV = queue.push(curV, 100)

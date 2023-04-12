@@ -10,7 +10,7 @@ import { Func } from '../../typings'
  * trailing:如果之前没有被调用(!isCalled) 则结束时触发一次
  */
 function debounce(func: Function, wait: number, option = { leading: false, trailing: true }): Func {
-  let timer: NodeJS.Timer | null = null
+  let timer: ReturnType<typeof setTimeout> | null = null
   const { leading, trailing } = option
 
   return function (this: unknown, ...args) {

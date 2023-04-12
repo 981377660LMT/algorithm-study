@@ -9,6 +9,7 @@ import { PromiseFunc } from './typings'
  * 请 节流API请求，使得任何时刻最多只有5个请求正在进行中。
    @description
    使用iter的精妙解法
+   限制promise并发数
  */
 function throttlePromises(funcs: PromiseFunc[], max: number): Promise<unknown> {
   const results: unknown[] = []

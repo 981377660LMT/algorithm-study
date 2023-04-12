@@ -1,6 +1,6 @@
 // 堆的删除思路有两种:
 // !1. 一种是懒删除，即查询时再实际删除元素；
-// https://github.com/harttle/contest.js/blob/master/src/heap.ts
+// 8_heap/ErasableHeap.py
 // !2. 另一种是实时删除 index 处的元素
 // 调用 heappush 会返回一个 *viPair 指针，记作 p
 // 将 p 存于他处（如 slice 或 map），可直接在外部修改 p.v 后调用 fix(p.index)，从而做到修改堆中指定元素

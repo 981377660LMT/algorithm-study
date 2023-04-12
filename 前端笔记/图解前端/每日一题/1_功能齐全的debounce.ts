@@ -1,5 +1,5 @@
 function superDebounce(fn: (...args: any[]) => any, delay: number) {
-  let timer: NodeJS.Timer | null = null
+  let timer: ReturnType<typeof setTimeout> | null
 
   // this的指向要跟原来函数一样
   function run(this: any, ...args: any[]) {

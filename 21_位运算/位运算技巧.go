@@ -79,6 +79,15 @@ func foo(x int) {
 	a := 1200
 	fmt.Println(a%32 == a&31)
 
+	// https://noshi91.github.io/Library/other/popcount.cpp
+	popCount64 := func(x uint64) int {
+		x -= x >> 1 & 0x5555555555555555
+		x = (x & 0x3333333333333333) + (x >> 2 & 0x3333333333333333)
+		x = x + (x>>4)&0x0F0F0F0F0F0F0F0F
+		return int(x * 0x0101010101010101 >> 56 & 0x7f)
+	}
+	fmt.Println(popCount64(13) == bits.OnesCount64(13))
+
 	_ = []interface{}{
 		lowbit,
 		isSubset,

@@ -49,7 +49,7 @@ all2([
   Promise.resolve('no'),
   1,
   Promise.resolve(2),
-  null,
+  null
 ])
   .then(console.log)
   .catch(console.error)

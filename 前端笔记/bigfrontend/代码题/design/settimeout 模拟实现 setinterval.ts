@@ -4,7 +4,7 @@ export {}
 // 扩展：我们能反过来使用 setinterval 模拟实现 settimeout 吗？
 // 扩展思考：为什么要用 settimeout 模拟实现 setinterval？setinterval 的缺陷是什么？
 function mySetInterval(cb: (...args: any[]) => void, time: number) {
-  let timer: NodeJS.Timer
+  let timer: ReturnType<typeof setTimeout>
 
   const interval = () => {
     cb()
@@ -13,7 +13,7 @@ function mySetInterval(cb: (...args: any[]) => void, time: number) {
   interval()
 
   return {
-    cancel: () => clearTimeout(timer),
+    cancel: () => clearTimeout(timer)
   }
 }
 

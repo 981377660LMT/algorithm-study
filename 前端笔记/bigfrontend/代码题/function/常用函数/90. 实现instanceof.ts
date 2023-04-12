@@ -25,6 +25,7 @@ const b = new B()
 myInstanceOf(b, B) // true
 myInstanceOf(b, A) // true
 myInstanceOf(b, Object) // true
+console.log(myInstanceOf(1, Number)) // false
 
 // function C() {}
 // myInstanceOf(b, C) // false

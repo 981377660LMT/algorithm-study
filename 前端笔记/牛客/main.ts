@@ -55,7 +55,7 @@ function formatDate(t: Date, str: string) {
     mm: t.getMinutes().toString().padStart(2, '0'),
     s: t.getSeconds(),
     ss: t.getSeconds().toString().padStart(2, '0'),
-    w: ['日', '一', '二', '三', '四', '五', '六'][t.getDay()],
+    w: ['日', '一', '二', '三', '四', '五', '六'][t.getDay()]
   } as Record<string, any>
 
   return str.replace(/(\w+)/gi, (_, group) => {
@@ -115,7 +115,7 @@ function count(start: number, end: number) {
 
 // 通过setTimeout()方法
 function count2(start: number, end: number) {
-  let timer: NodeJS.Timer
+  let timer: ReturnType<typeof setTimeout> | null
 
   if (start <= end) {
     console.log(start++)

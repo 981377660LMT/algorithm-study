@@ -2,7 +2,7 @@ const throttle =
   (interval: number): MethodDecorator =>
   (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
     const method = descriptor.value
-    let timer: NodeJS.Timer | null = null
+    let timer: ReturnType<typeof setTimeout> | null
 
     descriptor.value = (...args: any[]) => {
       if (!timer) {
@@ -31,7 +31,7 @@ test.sayHi()
 export {}
 
 function funcThrottle(fn: (...args: any[]) => any, interval: number) {
-  let timer: NodeJS.Timer | null = null
+  let timer: ReturnType<typeof setTimeout> | null
 
   return function (this: any, ...args: any[]) {
     if (!timer)
