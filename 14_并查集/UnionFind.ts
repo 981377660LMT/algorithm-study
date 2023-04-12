@@ -52,7 +52,7 @@ class UnionFindArray {
   }
 
   getRoots(): number[] {
-    const res = Array(this._n).fill(0)
+    const res = Array(this._n)
     for (let i = 0; i < this._n; i++) {
       res[i] = this.find(i)
     }

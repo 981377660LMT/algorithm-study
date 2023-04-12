@@ -39,7 +39,7 @@ class RangeModeQuery {
     const [sorted, value] = RangeModeQuery._compress(arr)
     const t = Math.max(1, Math.ceil(Math.sqrt(n)))
     const rank = new Uint32Array(n)
-    const qs: number[][] = Array(n).fill(0)
+    const qs: number[][] = Array(n)
     for (let i = 0; i < n; i++) {
       qs[i] = []
     }
@@ -50,8 +50,8 @@ class RangeModeQuery {
     }
 
     const bc = ~~(n / t) + 1
-    const mode: Uint32Array[] = Array(bc).fill(0)
-    const freq: Uint32Array[] = Array(bc).fill(0)
+    const mode: Uint32Array[] = Array(bc)
+    const freq: Uint32Array[] = Array(bc)
     for (let i = 0; i < bc; i++) {
       mode[i] = new Uint32Array(bc)
       freq[i] = new Uint32Array(bc)

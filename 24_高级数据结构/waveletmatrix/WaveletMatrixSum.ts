@@ -42,7 +42,7 @@ class WaveletMatrixSum {
 
     const n = nums.length
     const mid = new Uint32Array(log)
-    const bv = Array(log).fill(0)
+    const bv = Array(log)
     for (let i = 0; i < log; i++) {
       bv[i] = new _BV(n) // 1-based
     }
@@ -321,7 +321,7 @@ class _BV {
   private readonly _data: [count: number, sum: number][] = []
 
   constructor(n: number) {
-    this._data = Array((n + 63) >> 5).fill(0)
+    this._data = Array((n + 63) >> 5)
     for (let i = 0; i < this._data.length; i++) {
       this._data[i] = [0, 0]
     }

@@ -195,7 +195,7 @@ class SegmentSet {
   }
 
   getAll(): [left: number, right: number][] {
-    const res: [left: number, right: number][] = Array(this._sl.length).fill(0)
+    const res: [left: number, right: number][] = Array(this._sl.length)
     this._sl.forEach((v, i) => {
       res[i] = v
     })

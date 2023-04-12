@@ -116,7 +116,7 @@ class Tree implements ITree {
   private _timer = 0
 
   constructor(n: number) {
-    this.tree = Array(n).fill(0)
+    this.tree = Array(n)
     this.parent = new Int32Array(n)
     for (let i = 0; i < n; i++) {
       this.tree[i] = []
@@ -127,7 +127,7 @@ class Tree implements ITree {
     this._rid = new Uint32Array(n)
     this._idToNode = new Uint32Array(n)
     this._top = new Uint32Array(n)
-    this.depthWeighted = Array(n).fill(0)
+    this.depthWeighted = Array(n)
     this._heavySon = new Int32Array(n)
   }
 
@@ -413,6 +413,7 @@ if (require.main === module) {
   })
   console.log(tree.isInSubtree(4, 1))
   console.log(tree.subtreeSize(1, 3))
+  console.log(tree.dist(2, 3, true))
 }
 
 export { Tree }

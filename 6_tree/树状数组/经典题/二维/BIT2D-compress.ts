@@ -48,7 +48,7 @@ class BIT2DCompress<E> {
     this._op = op
     this._inv = inv
     if (!ws) {
-      ws = Array(xs.length).fill(0)
+      ws = Array(xs.length)
       for (let i = 0; i < xs.length; i++) {
         ws[i] = e()
       }
@@ -64,13 +64,13 @@ class BIT2DCompress<E> {
     this._keyX = [...new Set(xs)].sort((a, b) => a - b)
     this._n = this._keyX.length
     const n = this._n
-    const keyYRaw: number[][] = Array(n).fill(0)
-    const datRaw: E[][] = Array(n).fill(0)
+    const keyYRaw: number[][] = Array(n)
+    const datRaw: E[][] = Array(n)
     for (let i = 0; i < n; i++) {
       keyYRaw[i] = []
       datRaw[i] = []
     }
-    const indices = Array(ys.length).fill(0)
+    const indices = Array(ys.length)
     for (let i = 0; i < ys.length; i++) {
       indices[i] = i
     }
@@ -97,7 +97,7 @@ class BIT2DCompress<E> {
       this._indptr[i + 1] = this._indptr[i] + keyYRaw[i].length
     }
     this._keyY = Array(this._indptr[n]).fill(0)
-    this._data = Array(this._indptr[n]).fill(0)
+    this._data = Array(this._indptr[n])
     for (let i = 0; i < this._data.length; i++) {
       this._data[i] = this._e()
     }
@@ -221,9 +221,9 @@ if (require.main === module) {
       this.matrix = matrix
       this.ROW = matrix.length
       this.COL = matrix[0].length
-      const xs = Array(this.ROW * this.COL).fill(0)
-      const ys = Array(this.ROW * this.COL).fill(0)
-      const ws = Array(this.ROW * this.COL).fill(0)
+      const xs = Array(this.ROW * this.COL)
+      const ys = Array(this.ROW * this.COL)
+      const ws = Array(this.ROW * this.COL)
       for (let r = 0; r < this.ROW; r++) {
         for (let c = 0; c < this.COL; c++) {
           xs[r * this.COL + c] = r

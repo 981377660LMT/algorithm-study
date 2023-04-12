@@ -33,9 +33,9 @@ class MatrixPreSum3D {
     const zSize = matrix[0][0].length
 
     const arrayType = dataType ? ARRAYTYPE_RECORD[dataType] : Array
-    const preSum = Array(xSize + 1).fill(0)
+    const preSum = Array(xSize + 1)
     for (let i = 0; i < xSize + 1; i++) {
-      preSum[i] = Array(ySize + 1).fill(0)
+      preSum[i] = Array(ySize + 1)
       for (let j = 0; j < ySize + 1; j++) {
         preSum[i][j] = new arrayType(zSize + 1).fill(0)
       }
@@ -138,6 +138,7 @@ if (require.main === module) {
       0
     )
   )
+  console.log('test ok')
 
   // 512*512*512
   // const matrix3d2 = Array.from({ length: 512 }, () =>

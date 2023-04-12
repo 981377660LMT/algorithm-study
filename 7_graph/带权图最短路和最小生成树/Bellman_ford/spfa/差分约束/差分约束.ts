@@ -15,7 +15,7 @@ class DualShortestPath {
 
   constructor(n: number, min: boolean) {
     this._n = n
-    this._g = Array(n).fill(0)
+    this._g = Array(n)
     for (let i = 0; i < n; i++) {
       this._g[i] = []
     }

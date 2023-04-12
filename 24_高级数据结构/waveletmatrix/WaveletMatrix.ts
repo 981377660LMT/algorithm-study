@@ -20,7 +20,7 @@ class WaveletMatrix {
     const max_ = Math.max(...nums, 0)
     const n = nums.length
     const maxLog = 32 - Math.clz32(max_) + 1 // bit_len + 1
-    const mat = Array(maxLog).fill(0)
+    const mat = Array(maxLog)
     for (let i = 0; i < maxLog; i++) {
       mat[i] = new _BV(n + 1)
     }

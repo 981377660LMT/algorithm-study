@@ -1,6 +1,7 @@
 // https://chinese.freecodecamp.org/forum/t/topic/633
 // !1.不要用Array.from (es6新增语法都比较慢)
 // !2.Array(n).fill(0) 比 Array.fill(undefined) 等别的填充物快
+// !只要初始化时,甚至不需要fill,直接用Array(n)就可以了
 // 在工作中不要为了新语法而ES6/7新语法，灵活使用，前端也是要注意性能和算法，
 // 老的api在这方面应该是有明显的长处的
 

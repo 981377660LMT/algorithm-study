@@ -18,7 +18,7 @@ type Query = [index: number, left: number, right: number]
 function useMoAlgo<Q>(n: number, q: number, windowManager: WindowManager<Q>) {
   const isqrt = ~~Math.sqrt(q)
   const chunkSize = Math.max(1, ~~(n / isqrt))
-  const buckets: Query[][] = Array(~~(n / chunkSize) + 1).fill(0)
+  const buckets: Query[][] = Array(~~(n / chunkSize) + 1)
   for (let i = 0; i < buckets.length; i++) {
     buckets[i] = []
   }
@@ -42,7 +42,7 @@ function useMoAlgo<Q>(n: number, q: number, windowManager: WindowManager<Q>) {
       buckets[i].sort((a, b) => (i & 1 ? -(a[2] - b[2]) : a[2] - b[2])) // 块内按区间右端点排序
     }
 
-    const res: Q[] = Array(queryOrder).fill(0)
+    const res: Q[] = Array(queryOrder)
     let left = 0
     let right = 0
 

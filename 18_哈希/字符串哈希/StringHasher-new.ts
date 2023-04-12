@@ -51,7 +51,7 @@ class StringHasher2 {
 
   build(s: ArrayLike<number> | string): Hash[] {
     const n = s.length
-    const hashTable: Hash[] = Array(n + 1).fill(0)
+    const hashTable: Hash[] = Array(n + 1)
     for (let i = 0; i < hashTable.length; i++) {
       hashTable[i] = [0, 0]
     }

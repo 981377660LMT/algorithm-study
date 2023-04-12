@@ -166,3 +166,27 @@ JDK1.7 与 JDK1.8 中 ConcurrentHashMap 的区别？
 - 锁的粒度：JDK1.7 是对需要进行数据操作的 Segment 加锁，JDK1.8 调整为对每个数组元素加锁（Node）。
 - 链表转化为红黑树：定位节点的 hash 算法简化会带来弊端，hash 冲突加剧，因此在链表节点数量大于 8（且数据总量大于等于 64）时，会将链表转化为红黑树进行存储。
 - 查询时间复杂度：从 JDK1.7 的遍历链表 O(n)， JDK1.8 变成遍历红黑树 O(logN)。
+
+---
+
+https://www.youtube.com/watch?v=T0yzrZL1py0
+types of temporal DSs (persistent, retroactive), 4 levels of persistence
+四种持久化等级:
+
+1. partial persistence
+   各个版本形成线性表
+   O(1) 修改 :
+   - store back pointer (每个版本存储反向指针)
+   - store modify (version,field,value)
+2. full persistence
+   各个版本形成一棵树
+   怎么维护有根树的括号序?
+   - order-maintaining DS (第 8 课出现)
+     O(1)插入
+     O(1)查询两个结点的相对顺序大小
+     O(1)查询祖先关系
+3. confluenct persistence
+   可以融合(combine)两个版本的数据,各个版本形成 DAG
+   - copy and paste words, split and concat
+4. functional
+   不能修改结点,只能创建新结点

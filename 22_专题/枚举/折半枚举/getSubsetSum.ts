@@ -20,7 +20,7 @@ function getSubsetSum(nums: number[]): number[] {
 
 function getSubsetSum2(nums: number[]): number[] {
   const n = nums.length
-  const res = Array<number>(1 << n).fill(0)
+  const res = Array<number>(1 << n)
   dfs(0, 0, 0)
   return res
 

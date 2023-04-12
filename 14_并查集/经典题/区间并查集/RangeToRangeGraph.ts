@@ -30,7 +30,7 @@ class RangeToRangeGraph {
    */
   build(): [newGraph: [next: number, weight: number][][], vertex: number] {
     const vertex = this._nodeCount
-    const adjList = Array(vertex).fill(0)
+    const adjList = Array(vertex)
     for (let i = 0; i < adjList.length; i++) {
       adjList[i] = []
     }

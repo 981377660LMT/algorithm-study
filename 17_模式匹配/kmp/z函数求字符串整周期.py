@@ -20,7 +20,9 @@ def getZ(string: str) -> List[int]:
 
 
 def getMinPeriod(s: str) -> int:
-    """求字符串的最小周期"""
+    """求字符串的最小周期
+    当区间[l+d,r]的哈希值与[l,r-d]的哈希值相等时，那么该区间[l,r]是以 d 为循环节的**
+    """
     z = getZ(s)
     for i in range(1, len(s)):
         if len(s) % i == 0 and z[i] == len(s) - i:

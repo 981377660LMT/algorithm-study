@@ -15,7 +15,7 @@ type Item = {
 
 function minHeightShelves(books: number[][], shelfWidth: number): number {
   const n = books.length
-  const heights = Array<number>(n + 1).fill(0)
+  const heights = Array<number>(n + 1)
   for (let i = 1; i <= n; i++) heights[i] = books[i - 1][1]
   const preSum = Array<number>(n + 1).fill(0)
   const dp = Array<number>(n + 1).fill(0)

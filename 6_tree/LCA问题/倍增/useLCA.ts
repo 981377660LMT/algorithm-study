@@ -7,7 +7,7 @@ function useLCA(n: number, tree: number[][], root = 0) {
   const parent = new Int32Array(n)
 
   const _bitLen = 32 - Math.clz32(n)
-  const _dp = Array(_bitLen).fill(0)
+  const _dp = Array(_bitLen)
   for (let i = 0; i < _bitLen; i++) {
     _dp[i] = new Int32Array(n).fill(-1)
   }

@@ -23,7 +23,7 @@ class Edge {
  */
 function useMinCostMaxFlow(n: number, start: number, end: number) {
   const _edges: Edge[] = []
-  const _reGraph = Array(n).fill(0)
+  const _reGraph = Array(n)
   for (let i = 0; i < n; i++) {
     _reGraph[i] = []
   }
