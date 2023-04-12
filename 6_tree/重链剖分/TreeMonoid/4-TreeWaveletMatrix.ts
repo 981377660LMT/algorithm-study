@@ -182,7 +182,10 @@ class TreeWaveletMatrix {
     for (let i = 0; i < segments.length; i++) {
       const seg = segments[i]
       if (seg[0] > seg[1]) {
-        ;[seg[0], seg[1]] = [seg[1], seg[0]]
+        const tmp = seg[0]
+        // eslint-disable-next-line prefer-destructuring
+        seg[0] = seg[1]
+        seg[1] = tmp
       }
       seg[1]++
     }
@@ -264,7 +267,9 @@ class Tree {
   lca(u: number, v: number): number {
     while (true) {
       if (this.lid[u] > this.lid[v]) {
-        ;[u, v] = [v, u]
+        u ^= v
+        v ^= u
+        u ^= v
       }
       if (this._top[u] === this._top[v]) {
         return u

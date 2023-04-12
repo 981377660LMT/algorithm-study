@@ -23,7 +23,9 @@ function bibfs<State = string>(
 
   while (queue1.size && queue2.size) {
     if (queue1.size > queue2.size) {
-      ;[queue1, queue2] = [queue2, queue1]
+      const tmp = queue1
+      queue1 = queue2
+      queue2 = tmp
     }
 
     // 本层搜出来的结果
@@ -41,7 +43,8 @@ function bibfs<State = string>(
     }
 
     steps++
-    ;[queue1, queue2] = [queue2, nextQueue]
+    queue1 = queue2
+    queue2 = nextQueue
   }
 
   return -1

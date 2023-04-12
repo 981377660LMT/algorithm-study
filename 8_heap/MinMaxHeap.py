@@ -1,9 +1,10 @@
+# https://judge.yosupo.jp/submission/109819
+# 懒删除的堆 维护最大最小值
+
+
 import sys
 from heapq import heapify, heappop, heappush
 from typing import List, Optional
-
-# https://judge.yosupo.jp/submission/109819
-# 懒删除的堆 维护最大最小值
 
 
 class MinMaxHeap:

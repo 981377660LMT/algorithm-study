@@ -40,7 +40,9 @@ function onlineBfs(
         setUsed(next)
       }
     }
-    ;[curQueue, nextQueue] = [nextQueue, curQueue]
+    const tmp = curQueue
+    curQueue = nextQueue
+    nextQueue = tmp
     curPtr = nextPtr
     nextPtr = 0
   }

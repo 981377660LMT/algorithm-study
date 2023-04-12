@@ -59,6 +59,7 @@
    - [SkewHeap](8_heap/%E5%8F%AF%E5%B9%B6%E5%A0%86/SkewHeap.go)
    - [PersistentLeftistHeap](8_heap/%E5%8F%AF%E5%B9%B6%E5%A0%86/LeftistHeapPersistent.go)
    - [可删除堆](8_heap/ErasableHeap.py)
+   - [维护最大值与最小值的堆](8_heap/IntervalHeap.ts)
 
 5. **Tree**
 

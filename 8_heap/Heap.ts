@@ -18,19 +18,30 @@ class Heap<E = number> {
   constructor(array: E[])
   constructor(comparator: Comparator<E>)
   constructor(array: E[], comparator: Comparator<E>)
-  constructor(
-    arrayOrComparator: E[] | Comparator<E> = [],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    comparator: Comparator<E> = (a: any, b: any) => a - b
-  ) {
-    if (typeof arrayOrComparator === 'function') {
-      comparator = arrayOrComparator
-      arrayOrComparator = []
+  constructor(comparator: Comparator<E>, array: E[])
+  constructor(arrayOrComparator1?: E[] | Comparator<E>, arrayOrComparator2?: E[] | Comparator<E>) {
+    let defaultArray: E[] = []
+    let defaultComparator = (a: E, b: E) => (a as unknown as number) - (b as unknown as number)
+
+    if (arrayOrComparator1) {
+      if (Array.isArray(arrayOrComparator1)) {
+        defaultArray = arrayOrComparator1
+      } else {
+        defaultComparator = arrayOrComparator1
+      }
     }
 
-    this._comparator = comparator
-    this._heap = arrayOrComparator.slice() // shallow copy
-    this._heapify()
+    if (arrayOrComparator2) {
+      if (Array.isArray(arrayOrComparator2)) {
+        defaultArray = arrayOrComparator2
+      } else {
+        defaultComparator = arrayOrComparator2
+      }
+    }
+
+    this._comparator = defaultComparator
+    this._heap = defaultArray
+    if (this._heap.length) this._heapify()
   }
 
   push(value: E): void {
@@ -68,7 +79,9 @@ class Heap<E = number> {
   private _pushUp(root: number): void {
     let parent = (root - 1) >> 1
     while (parent >= 0 && this._comparator(this._heap[root], this._heap[parent]) < 0) {
-      this._swap(parent, root)
+      const tmp = this._heap[root]
+      this._heap[root] = this._heap[parent]
+      this._heap[parent] = tmp
       root = parent
       parent = (parent - 1) >> 1
     }
@@ -94,13 +107,12 @@ class Heap<E = number> {
 
       if (minIndex === root) return
 
-      this._swap(root, minIndex)
+      const tmp = this._heap[root]
+      this._heap[root] = this._heap[minIndex]
+      this._heap[minIndex] = tmp
+
       root = minIndex
     }
-  }
-
-  private _swap(i1: number, i2: number): void {
-    ;[this._heap[i1], this._heap[i2]] = [this._heap[i2], this._heap[i1]]
   }
 }
 

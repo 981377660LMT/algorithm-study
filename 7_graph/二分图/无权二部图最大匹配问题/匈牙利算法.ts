@@ -58,8 +58,9 @@ function useHungarian(graph?: number[][]) {
           if (queue[u] === -1) {
             while (u !== -1) {
               queue[u] = v
-              // eslint-disable-next-line semi-style
-              ;[p[v], u] = [u, p[v]]
+              const tmp = p[v]
+              p[v] = u
+              u = tmp
               v = pre[v]
             }
             updated = true

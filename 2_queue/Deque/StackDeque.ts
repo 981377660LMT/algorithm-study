@@ -80,7 +80,9 @@ class StackDeque<E> {
   }
 
   reverse(): void {
-    ;[this._left, this._right] = [this._right, this._left]
+    const tmp = this._left
+    this._left = this._right
+    this._right = tmp
   }
 
   toString(): string {

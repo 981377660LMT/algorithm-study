@@ -21,7 +21,9 @@ function exgcd(a: number, b: number): [x: number, y: number, gcd: number] {
 
   // 根据(b，a%b)的解推出(a,b)的解
   // 辗转相除法反向推导每层a、b的因子使得gcd(a,b)=ax+by成立
-  ;[x, y] = [y, x - Math.floor(a / b) * y]
+  const tmp = x - y * Math.floor(a / b)
+  x = y
+  y = tmp
   return [x, y, gcd]
 }
 

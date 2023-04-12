@@ -76,7 +76,9 @@ class WaveletMatrixSum {
 
       mid[d] = p0
       bv[d].build()
-      ;[nums, a0] = [a0, nums]
+      const tmp = nums
+      nums = a0
+      a0 = tmp
       for (let i = 0; i < p1; i++) {
         nums[p0 + i] = a1[i]
       }

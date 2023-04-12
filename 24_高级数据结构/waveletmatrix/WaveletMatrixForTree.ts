@@ -95,8 +95,12 @@ class WaveletMatrixSegments {
 
       mid[d] = p0
       bv[d].build()
-      ;[nums, a0] = [a0, nums]
-      ;[sumData, s0] = [s0, sumData]
+      const tmp1 = nums
+      nums = a0
+      a0 = tmp1
+      const tmp2 = sumData
+      sumData = s0
+      s0 = tmp2
       for (let i = 0; i < p1; i++) {
         nums[p0 + i] = a1[i]
         if (needMakeSum) {
