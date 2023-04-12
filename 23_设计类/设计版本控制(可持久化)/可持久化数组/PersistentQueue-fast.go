@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-
+	// https://judge.yosupo.jp/problem/persistent_queue
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -38,12 +38,28 @@ func main() {
 			fmt.Fprintln(out, x)
 		}
 	}
+
+}
+
+func demo() {
+	queue := NewPersistentQueue(50)
+	curV := 0
+	curV = queue.Append(curV, 10)
+	curV = queue.Append(curV, 100)
+	curV = queue.Append(curV, 200)
+	curV = queue.Append(curV, 300)
+	fmt.Println(queue.Front(curV), queue.Back(curV))
+
+	curV, _ = queue.PopLeft(curV)
+	fmt.Println(queue.Front(curV), queue.Back(curV))
+	curV, _ = queue.PopLeft(curV)
+	fmt.Println(queue.Front(curV), queue.Back(curV))
 }
 
 type E = int
 
 type PersistentQueue struct {
-	CurVersion int // 初始版本为0
+	CurVersion int // !初始版本为0
 	log        int
 	data       []E     // Elements on each node of tree
 	par        [][]int // binary-lifted parents
@@ -51,12 +67,13 @@ type PersistentQueue struct {
 	size       []int   // size[t] = size of the queue at time t
 }
 
-func NewPersistentQueue(maxQuery int) *PersistentQueue {
-	log := bits.Len(uint(maxQuery))
-	data := make([]E, 0, maxQuery)
-	par := make([][]int, 0, maxQuery)
-	backId := make([]int, 1, maxQuery)
-	size := make([]int, 1, maxQuery)
+func NewPersistentQueue(maxMutation int) *PersistentQueue {
+	maxMutation++
+	log := bits.Len(uint(maxMutation))
+	data := make([]E, 0, maxMutation)
+	par := make([][]int, 0, maxMutation)
+	backId := make([]int, 1, maxMutation)
+	size := make([]int, 1, maxMutation)
 	return &PersistentQueue{
 		log:    log,
 		data:   data,
@@ -96,4 +113,19 @@ func (q *PersistentQueue) PopLeft(version int) (newVersion int, popped E) {
 	newVersion = q.CurVersion
 	popped = q.data[r]
 	return
+}
+
+func (q *PersistentQueue) Front(version int) E {
+	r := q.backId[version]
+	len_ := q.size[version] - 1
+	for d := 0; d < q.log; d++ {
+		if len_>>d&1 == 1 {
+			r = q.par[r][d]
+		}
+	}
+	return q.data[r]
+}
+
+func (q *PersistentQueue) Back(version int) E {
+	return q.data[q.backId[version]]
 }
