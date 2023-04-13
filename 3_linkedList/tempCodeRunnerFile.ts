@@ -1,3 +1,1 @@
-: string {
-  //   return `${[...this]}`
-  // }
+appendLeft(i)

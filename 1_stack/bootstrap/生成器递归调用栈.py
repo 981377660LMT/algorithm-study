@@ -1,8 +1,8 @@
+# https://blog.csdn.net/weixin_40986490/article/details/126960478
+
 import sys
 from types import GeneratorType
 from typing import Any, Callable, Generator, TypeVar
-
-sys.setrecursionlimit(int(1e6))
 
 
 def fib1(n: int, a=0, b=1):
@@ -12,14 +12,13 @@ def fib1(n: int, a=0, b=1):
     yield from fib1(n - 1, b, a + b)
 
 
-# print(*fib1(1000))  # !RecursionError: maximum recursion depth exceeded in comparison
+print(*fib1(1000))  # !RecursionError: maximum recursion depth exceeded in comparison
 ##############################################################################################
 # https://atcoder.jp/contests/abc261/submissions/33481104
 C = TypeVar("C", bound=Callable[..., Generator[Any, Any, Any]])
 
 
 def bootstrap(func: C) -> C:
-
     stack = []
 
     def wrapper(*args, **kwargs) -> Generator[Any, Any, Any]:
@@ -45,5 +44,5 @@ def bootstrap(func: C) -> C:
 fib2 = bootstrap(fib1)
 
 
-res = fib2(100)
+res = fib2(1000)
 print(res)

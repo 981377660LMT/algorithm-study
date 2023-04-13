@@ -2,6 +2,7 @@
 // 由于比std::priority_queue更轻，因此可用于Dijkstra算法以实现常数倍的加速。
 
 // https://nyaannyaan.github.io/library/data-structure/radix-heap.hpp
+// https://yosupo.hatenablog.com/entry/2015/04/03/224649
 // RadixHeap<Key, Val>(): コンストラクタ。Keyは整数型のみを取る。
 // push(Key, Val): ヒープにpushする。
 // pop(): ヒープの要素のうち最小のものをpopして返す。
@@ -10,6 +11,7 @@
 // !key 必须是整数类型, 这里用int(实际应该用uint)
 
 // !验证: 没有加速效果，反而变慢了
+// !https://noshi91.github.io/Library/data_structure/radix_heap.cpp 可能快一些???
 
 package main
 
