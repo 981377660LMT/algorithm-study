@@ -210,6 +210,16 @@ class BIT2DCompress<E> {
 }
 
 if (require.main === module) {
+  const tree = new BIT2DCompress({
+    xs: [0, 0, 0, 1, 1, 1, 2, 2, 2],
+    ys: [0, 1, 2, 0, 1, 2, 0, 1, 2],
+    ws: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    op: (a, b) => a + b,
+    e: () => 0,
+    inv: a => -a
+  })
+  console.log(tree.query(0, 3, 0, 3))
+
   // https://leetcode.cn/problems/range-sum-query-2d-mutable/submissions/
   class NumMatrix {
     private readonly matrix: number[][]

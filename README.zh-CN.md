@@ -62,6 +62,7 @@
    - [PersistentLeftistHeap](8_heap/%E5%8F%AF%E5%B9%B6%E5%A0%86/LeftistHeapPersistent.go)
    - [可删除堆](8_heap/ErasableHeap.py)
    - [维护最大值与最小值的堆](8_heap/IntervalHeap.ts)
+   - [配对堆](8_heap/%E5%8F%AF%E5%B9%B6%E5%A0%86/PairingHeap-%E9%85%8D%E5%AF%B9%E5%A0%86.ts)
 
 5. **Tree**
 

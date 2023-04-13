@@ -27,6 +27,7 @@ class Solution:
             """
             一排房屋升序排列,相邻差为k的房屋不能同时偷.
             每种房屋counter[i]个,每种房屋可以打劫任意多个,求打劫的方案数.
+            结果对MOD取模.
             """
             n = len(houses)
             if n == 0:
@@ -53,3 +54,4 @@ class Solution:
 
 
 print(Solution().beautifulSubsets(nums=[2, 4, 6], k=2))
+print(Solution().beautifulSubsets(nums=[2, 3, 5, 8], k=5))
