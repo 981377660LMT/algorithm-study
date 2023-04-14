@@ -8,17 +8,22 @@ def findCycleAndCalDepth(
     n: int, adjMap: DefaultDict[int, Set[int]], degrees: List[int], *, isDirected: bool
 ) -> Tuple[List[List[int]], List[int]]:
     """无/有向基环树找环上的点,并记录每个点在拓扑排序中的最大深度,最外层的点深度为0"""
+
+    def max(a: int, b: int) -> int:
+        return a if a > b else b
+
     depth = [0] * n
-    queue = deque([(i, 0) for i in range(n) if degrees[i] == (0 if isDirected else 1)])
+    startDeg = 0 if isDirected else 1
+    queue = deque([i for i in range(n) if degrees[i] == startDeg])
     visited = [False] * n
     while queue:
-        cur, dist = queue.popleft()
+        cur = queue.popleft()
         visited[cur] = True
         for next in adjMap[cur]:
-            depth[next] = max(depth[next], dist + 1)
+            depth[next] = max(depth[next], depth[cur] + 1)
             degrees[next] -= 1
-            if degrees[next] == (0 if isDirected else 1):
-                queue.append((next, dist + 1))
+            if degrees[next] == startDeg:
+                queue.append(next)
 
     def dfs(cur: int, path: List[int]) -> None:
         if visited[cur]:

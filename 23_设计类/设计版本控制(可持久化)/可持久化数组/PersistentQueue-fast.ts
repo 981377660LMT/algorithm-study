@@ -15,6 +15,7 @@ class PersistentQueue<E = number> {
   private _parPtr = 0
   private _backIdPtr = 1
   private _sizePtr = 1
+  private _length = 0
 
   constructor(maxMutation: number) {
     maxMutation++
@@ -37,6 +38,7 @@ class PersistentQueue<E = number> {
     for (let d = 1; d < this._log; d++) {
       this._par[newId][d] = this._par[this._par[newId][d - 1]][d - 1]
     }
+    this._length++
     return this._curVersion
   }
 
@@ -51,6 +53,7 @@ class PersistentQueue<E = number> {
         r = this._par[r][d]
       }
     }
+    if (this._length) this._length--
     return [this._curVersion, this._data[r]]
   }
 
@@ -81,12 +84,16 @@ class PersistentQueue<E = number> {
   get curVersion(): number {
     return this._curVersion
   }
+
+  get length(): number {
+    return this._length
+  }
 }
 
 export { PersistentQueue }
 
 if (require.main === module) {
-  const queue = new PersistentQueue(6)
+  let queue = new PersistentQueue(6)
   let curV = 0
   curV = queue.push(curV, 10)
   curV = queue.push(curV, 100)
@@ -98,4 +105,15 @@ if (require.main === module) {
   console.log(queue.front(curV2), queue.back(curV2))
   const [curV3] = queue.shift(curV2)
   console.log(queue.front(curV3), queue.back(curV3))
+
+  queue = new PersistentQueue<number>(2e5 + 10)
+  curV = 0
+  console.time('push')
+  for (let i = 0; i < 1e5; i++) {
+    curV = queue.push(curV, i)
+    // eslint-disable-next-line prefer-destructuring
+    curV = queue.shift(curV)[0]
+    queue.front(curV)
+  }
+  console.timeEnd('push')
 }

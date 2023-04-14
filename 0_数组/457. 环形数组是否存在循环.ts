@@ -5,22 +5,28 @@
  * 所有 nums[seq[j]] 应当不是 全正 就是 全负
  * k > 1
  */
-var circularArrayLoop = function (nums: number[]): boolean {
+function circularArrayLoop(nums: number[]): boolean {
   const n = nums.length
   // 注意这里索引模n的处理
-  const getNextPos = (index: number) => (((index + nums[index]) % n) + n) % n
+  const next = (index: number) => (((index + nums[index]) % n) + n) % n
 
+  const visited = new Uint8Array(n)
   for (let i = 0; i < n; i++) {
+    if (visited[i]) continue
     let slow = i
-    let fast = getNextPos(slow)
-    while (nums[fast] * nums[i] > 0 && nums[getNextPos(fast)] * nums[i] > 0) {
+    let fast = next(slow)
+    visited[slow] = 1
+    visited[fast] = 1
+    while (nums[fast] * nums[i] > 0 && nums[next(fast)] * nums[i] > 0) {
       if (fast === slow) {
         // 只有一个点的情况
-        if (slow === getNextPos(slow)) break
+        if (slow === next(slow)) break
         else return true
       }
-      slow = getNextPos(slow)
-      fast = getNextPos(getNextPos(fast))
+      slow = next(slow)
+      fast = next(next(fast))
+      visited[slow] = 1
+      visited[fast] = 1
     }
   }
 

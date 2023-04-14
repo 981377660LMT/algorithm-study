@@ -1,6 +1,6 @@
 // Functional-函数图(每个顶点出度为1的有向图,有向的NamoriGraph)
 // 定义：Directed graphs in which every vertex has exactly one outgoing edge.
-// 每个点的入度为1，出度为1
+// !每个点的出度为1(如果顶点没有出边，那么它的出边指向自己)
 // 连通分量个数=环的个数
 
 package main
@@ -12,7 +12,9 @@ import (
 )
 
 func main() {
-	transitionGame()
+	// edges = [2,-1,3,1]
+	edges := []int{2, -1, 3, 1}
+	fmt.Println(longestCycle(edges))
 }
 
 func demo() {
@@ -28,7 +30,6 @@ func demo() {
 }
 
 func yuki1242() {
-
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -101,6 +102,30 @@ func transitionGame() {
 	fmt.Fprintln(out, res)
 }
 
+// 给定一个竞赛图,求最长的环的长度,如果没有环,返回-1.
+func longestCycle(edges []int) int {
+	n := len(edges)
+	F := NewFunctionalGraph(n)
+	for i := 0; i < n; i++ {
+		if edges[i] != -1 {
+			F.AddDirectedEdge(i, edges[i], 1)
+		} else {
+			F.AddDirectedEdge(i, i, 1) // !如果顶点没有出边,那么它的出边指向自己.
+		}
+	}
+	F.Build()
+
+	res := -1
+	cycles := F.CollectAllCycles()
+	for _, cycle := range cycles {
+		if len(cycle) > 1 {
+			res = max(res, len(cycle))
+		}
+	}
+	return res
+}
+
+// !每个点的出度为1(如果顶点没有出边，那么它的出边指向自己).
 type FunctionalGraph struct {
 	G      [][][2]int // (next, weight) 有向图
 	Tree   *Tree
@@ -234,11 +259,30 @@ func (fg *FunctionalGraph) IsInCycle(v int) bool {
 
 // 给定环的根节点，返回该环上所有节点的编号.
 func (fg *FunctionalGraph) CollectCycle(root int) []int {
+	if !fg.IsInCycle(root) {
+		return nil
+	}
 	cycle := []int{fg.to[root]}
 	for cycle[len(cycle)-1] != root {
 		cycle = append(cycle, fg.to[cycle[len(cycle)-1]])
 	}
 	return cycle
+}
+
+// 返回所有环.
+func (fg *FunctionalGraph) CollectAllCycles() [][]int {
+	res := make([][]int, 0)
+	visited := make([]bool, fg.n)
+	for i := 0; i < fg.n; i++ {
+		if !visited[i] {
+			cycle := fg.CollectCycle(i)
+			for _, v := range cycle {
+				visited[v] = true
+			}
+			res = append(res, cycle)
+		}
+	}
+	return res
 }
 
 func min(a, b int) int {
