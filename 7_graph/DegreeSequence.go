@@ -3,6 +3,7 @@
 // 什么叫合法的度数序列？就是存在一个无重边无自环（简单）的无向图，使得图中每个点的度数构成的序列为给定的序列。
 // http://kanari.logdown.com/posts/2014/03/09/erdos-gallai-theorem-conditions-for-a-sequence-to-be-graphical
 // https://maspypy.github.io/library/graph/degree_sequence.hpp
+// https://github.com/spaghetti-source/algorithm/blob/4fdac8202e26def25c1baf9127aaaed6a2c9f7c7/graph/is_graphic.cc#L6
 
 package main
 

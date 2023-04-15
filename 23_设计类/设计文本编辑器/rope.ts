@@ -88,7 +88,7 @@ class Rope {
    * @param  end - Final position (not-inclusive)
    * @complexity O(k)
    */
-  remove(start: number, end: number): void {
+  erase(start: number, end: number): void {
     if (start < 0 || start > this.length) throw new RangeError('Start is not within rope bounds.')
     if (end < 0 || end > this.length) throw new RangeError('End is not within rope bounds.')
     if (start > end) throw new RangeError('Start is greater than end.')
@@ -104,10 +104,10 @@ class Rope {
       const rightStart = Math.max(0, Math.min(start - leftLength, rightLength))
       const rightEnd = Math.max(0, Math.min(end - leftLength, rightLength))
       if (leftStart < leftLength) {
-        this._left!.remove(leftStart, leftEnd)
+        this._left!.erase(leftStart, leftEnd)
       }
       if (rightEnd > 0) {
-        this._right!.remove(rightStart, rightEnd)
+        this._right!.erase(rightStart, rightEnd)
       }
       this.length = this._left!.length + this._right!.length
     }

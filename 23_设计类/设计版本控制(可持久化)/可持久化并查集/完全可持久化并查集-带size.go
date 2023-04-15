@@ -120,10 +120,11 @@ func (p *PersistentUnionfind) Union(root *AryNode, x, y int) (newRoot *AryNode, 
 	if x == y {
 		return root, false
 	}
-	if -p.parents.Get(root, x) < -p.parents.Get(root, y) {
+	p1, p2 := p.parents.Get(root, x), p.parents.Get(root, y)
+	if -p1 < -p2 {
 		x, y = y, x
 	}
-	newSize := p.parents.Get(root, x) + p.parents.Get(root, y)
+	newSize := p1 + p2
 	root = p.parents.Set(root, x, newSize)
 	root = p.parents.Set(root, y, x)
 	newRoot, ok = root, true

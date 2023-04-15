@@ -1,0 +1,1 @@
+MOD - res * invQ) 

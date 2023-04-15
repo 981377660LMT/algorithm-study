@@ -26,3 +26,7 @@ class Solution:
     def kthSmallest(self, mat: List[List[int]], k: int) -> int:
         return next(reversed(reduce(lambda row1, row2: mergeTwo(row1, row2, k), mat)))
 ```
+
+---
+
+不要这样写·!!!!

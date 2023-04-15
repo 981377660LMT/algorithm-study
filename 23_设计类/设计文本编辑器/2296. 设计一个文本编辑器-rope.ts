@@ -16,7 +16,7 @@ class TextEditor {
   // 删除光标左边 k 个字符。返回实际删除的字符数目。
   deleteText(k: number): number {
     const res = Math.min(k, this.pos)
-    this.rope.remove(this.pos - res, this.pos)
+    this.rope.erase(this.pos - res, this.pos)
     this.pos -= res
     return res
   }

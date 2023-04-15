@@ -1,337 +1,234 @@
-// https://kopricky.github.io/code/Academic/fully_retroactive_deque.html
-// 完全永続のように聞こえるが,
-// !完全永続は過去のバージョンを更新した際にその更新を行わなかった世界と更新を行う世界を同時に保持するが,
-// fully retroactive の方は更新を行った場合の 1つの世界のみを保持するという違いがある(更新は不可逆操作となる).
-// 完全永続において更新は枝の分岐で表されるのに対して, fully retroactive において更新は過去の時刻での枝の挿入で表され,
-// 常にバージョンは 1本のパスをなす.
-
-// 每个操作都是均摊O(logn)的
-// https://codeforces.com/gym/100451/problem/H
+//
+// Fully Retroactive Queue
+//
+// Description:
+//   It maintains a list of actions ("push" and "pop").
+//   We can insert/erase the actions and ask status ("front") in
+//   any position of the list.
+//
+//   To implement this structure, we maintain the list by a BST
+//   and keep track the number of pushs/pops in each position
+//   by using the range addition and range minimum.
+//
+// Complexity:
+//   O(n log n).
+//
+// References:
+//   E. Demaine, J. Iacono, and S. Langerman (2007):
+//   "Retroactive data structures". ACM Transactions of Algorithms,
+//   vol.3, no.2, pp.1--21.
+//
 
 package main
 
 import (
 	"fmt"
+	"time"
 )
 
 func main() {
-	qeue := NewRetroactiveDeque()
+	queue := NewRetroactiveQueue()
+	time1 := queue.InsertPush(queue.Head, 10)
+	time2 := queue.InsertPush(time1, 20)
+	time3 := queue.InsertPush(time2, 30)
+	time4 := queue.InsertPop(time3)
+	fmt.Println(queue.Front(time1)) // [10]
+	fmt.Println(queue.Front(time2)) // [10, 20]
+	fmt.Println(queue.Front(time3)) // [10, 20, 30]
+	fmt.Println(queue.Front(time4)) // [20]
+	queue.Erase(time1)              // time1之后, InsertPush10这个操作被删除
+	fmt.Println(queue.Front(time1)) // [10]
+	fmt.Println(queue.Front(time2)) // [20]
+	fmt.Println(queue.Front(time3)) // [20, 30]
+	fmt.Println(queue.Front(time4)) // [30]
 
-	qeue.PushBack(1, 0)
-	fmt.Println(qeue.Size(0))
-	qeue.PushBack(2, 1)
-	fmt.Println(qeue.Size(1))
-	qeue.PushBack(3, 2)
-	fmt.Println(qeue.Query(0, 2))
-	fmt.Println(qeue.Size(3))
-	qeue.PopBack(1)
-	fmt.Println(qeue.Size(3))
-}
-
-type T = int
-
-// 完全可追溯化双端队列.
-//  time: 0, 1, 2, 3, ...
-type RetroactiveDeque struct {
-	lroot, rroot *_Node
-}
-
-func NewRetroactiveDeque() *RetroactiveDeque {
-	return &RetroactiveDeque{}
-}
-
-// 查询time时刻的双端队列的大小.
-func (rd *RetroactiveDeque) Size(time int) int {
-	return rd._leftPos(time) + rd._rightPos(time)
-}
-
-// 查询time时刻的双端队列的左端元素.
-func (rd *RetroactiveDeque) Front(time int) T {
-	return rd._queryImpl(0, time, false)
-}
-
-// 查询time时刻的双端队列的右端元素.
-func (rd *RetroactiveDeque) Back(time int) T {
-	return rd._queryImpl(0, time, true)
-}
-
-func (rd *RetroactiveDeque) PushFront(data T, time int) {
-	rd._pushFrontImpl(data, time)
-}
-
-func (rd *RetroactiveDeque) PopFront(time int) {
-	rd._popFrontImpl(time)
-}
-
-func (rd *RetroactiveDeque) PushBack(data T, time int) {
-	rd._pushBackImpl(data, time)
-}
-
-func (rd *RetroactiveDeque) PopBack(time int) {
-	rd._popBackImpl(time)
-}
-
-// 查询time时刻的双端队列的第index个元素.
-func (rd *RetroactiveDeque) Query(index int, time int) T {
-	return rd._queryImpl(index, time, false)
-}
-
-type _Node struct {
-	key                  int
-	val, sum, pmin, pmax int
-	data                 T
-	left, right, par     *_Node
-}
-
-func _NewNode(key int, data T, val int) *_Node {
-	return &_Node{
-		key:  key,
-		val:  val,
-		sum:  val,
-		pmin: min(val, 0),
-		pmax: max(val, 0),
-		data: data,
+	t := time.Now()
+	// 1e5
+	for i := 0; i < 100000; i++ {
+		queue.InsertPush(queue.Head, 10)
 	}
+	fmt.Println(time.Since(t))
 }
 
-func (o *_Node) isRoot() bool {
-	return o.par == nil
+type T int
+
+// 完全可追溯队列.
+type RetroactiveQueue struct {
+	Head *Time
 }
 
-func (o *_Node) eval() {
-	o.sum = 0
-	o.pmin = 0
-	o.pmax = 0
-	if o.left != nil {
-		o.sum += o.left.sum
-		o.pmin = min(o.pmin, o.left.pmin)
-		o.pmax = max(o.pmax, o.left.pmax)
+type Time struct {
+	kind                                int // 0:nil, 1:push, 2:pop
+	value                               T
+	child                               [2]*Time
+	parent                              *Time
+	aPush, dPush, aPop, dPop, minRemain int
+}
+
+func NewRetroactiveQueue() *RetroactiveQueue {
+	return &RetroactiveQueue{Head: &Time{}}
+}
+
+func (rq *RetroactiveQueue) InsertPush(x *Time, value T) *Time {
+	return rq._insert(x, &Time{kind: 1, value: value})
+}
+
+func (rq *RetroactiveQueue) InsertPop(x *Time) *Time {
+	return rq._insert(x, &Time{kind: 2})
+}
+
+func (rq *RetroactiveQueue) Erase(x *Time) *Time {
+	rq._splay(x)
+	y := x.child[1]
+	if y == nil {
+		x = x.child[0]
+		x.parent = nil
+		return x
 	}
-	o.sum += o.val
-	o.pmin = min(o.pmin, o.sum)
-	o.pmax = max(o.pmax, o.sum)
-	if o.right != nil {
-		o.pmin = min(o.pmin, o.sum+o.right.pmin)
-		o.pmax = max(o.pmax, o.sum+o.right.pmax)
-		o.sum += o.right.sum
+	if x.kind == 1 {
+		y.dPush--
+	} else if x.kind == 2 {
+		y.dPop--
 	}
+	y.parent = nil
+	rq._update(y)
+	for y.child[0] != nil {
+		y = y.child[0]
+	}
+	rq._splay(y)
+	y.child[0] = x.child[0]
+	if y.child[0] != nil {
+		y.child[0].parent = y
+	}
+	rq._update(y.child[0])
+	rq._update(y)
+	return y
 }
 
-func (o *_Node) rotate(right bool) {
-	p := o.par
-	g := p.par
-	if right {
-		if p.left = o.right; p.left != nil {
-			p.left.par = p
+func (rq *RetroactiveQueue) Front(x *Time) T {
+	rq._splay(x)
+	k := x.aPop + x.dPop
+	for y := x; y != nil; {
+		rq._pushDown(y)
+		if y.aPush > k {
+			x = y
+			y = y.child[0]
+		} else {
+			y = y.child[1]
 		}
-		o.right = p
-		p.par = o
-	} else {
-		if p.right = o.left; p.right != nil {
-			p.right.par = p
-		}
-		o.left = p
-		p.par = o
 	}
-	p.eval()
-	o.eval()
-	o.par = g
-	if g == nil {
+	return x.value
+}
+
+func (rq *RetroactiveQueue) _remain(x *Time) int {
+	if x == nil {
+		return 0
+	}
+	return x.aPush + x.dPush - x.aPop - x.dPop
+}
+
+func (rq *RetroactiveQueue) _update(x *Time) *Time {
+	if x == nil {
+		return x
+	}
+	x.minRemain = rq._remain(x)
+	for i := 0; i < 2; i++ {
+		if x.child[i] != nil {
+			x.minRemain = min(x.minRemain, x.child[i].minRemain)
+		}
+	}
+	return x
+}
+
+func (rq *RetroactiveQueue) _pushDown(x *Time) *Time {
+	if x == nil {
+		return x
+	}
+	for i := 0; i < 2; i++ {
+		if x.child[i] != nil {
+			x.child[i].dPush += x.dPush
+			x.child[i].dPop += x.dPop
+		}
+	}
+	x.aPush += x.dPush
+	x.aPop += x.dPop
+	x.dPush = 0
+	x.dPop = 0
+	return x
+}
+
+func (rq *RetroactiveQueue) _dir(x *Time) int {
+	if x.parent != nil && x.parent.child[1] == x {
+		return 1
+	}
+	return 0
+}
+
+func (rq *RetroactiveQueue) _rot(x *Time) {
+	d := rq._dir(x)
+	p := x.parent
+	rq._pushDown(p.parent)
+	rq._pushDown(p)
+	rq._pushDown(x)
+	rq._link(p.parent, x, rq._dir(p))
+	rq._link(p, x.child[1^d], d)
+	rq._link(x, p, 1^d)
+	rq._update(p)
+	rq._update(x)
+}
+
+func (rq *RetroactiveQueue) _link(x, y *Time, d int) {
+	if x != nil {
+		x.child[d] = y
+	}
+	if y != nil {
+		y.parent = x
+	}
+}
+
+func (rq *RetroactiveQueue) _splay(x *Time) {
+	if x == nil {
 		return
 	}
-	if g.left == p {
-		g.left = o
-	}
-	if g.right == p {
-		g.right = o
-	}
-	g.eval()
-}
-
-func _splay(u *_Node) *_Node {
-	if u == nil {
-		return nil
-	}
-	for !u.isRoot() {
-		p := u.par
-		gp := p.par
-		if p.isRoot() {
-			u.rotate(u == p.left)
-		} else {
-			flag := u == p.left
-			if flag == (p == gp.left) {
-				p.rotate(flag)
-				u.rotate(flag)
+	for x.parent != nil {
+		if x.parent.parent != nil {
+			if rq._dir(x) == rq._dir(x.parent) {
+				rq._rot(x.parent)
 			} else {
-				u.rotate(flag)
-				u.rotate(!flag)
+				rq._rot(x)
 			}
 		}
+
+		rq._rot(x)
 	}
-	return u
+	rq._pushDown(x)
 }
 
-func _get(key int, root *_Node) (*_Node, bool) {
-	var cur, res *_Node
-	nx := root
-	for nx != nil {
-		cur = nx
-		if cur.key <= key {
-			nx = cur.right
-			res = cur
-		} else {
-			nx = cur.left
+func (rq *RetroactiveQueue) _insert(x *Time, y *Time) *Time {
+	rq._splay(x)
+	y.child[0] = x
+	x.parent = y
+	y.child[1] = x.child[1]
+	x.child[1] = nil
+	if y.child[1] != nil {
+		y.child[1].parent = y
+		if y.kind == 1 {
+			y.child[1].dPush += 1
+		} else if y.kind == 2 {
+			y.child[1].dPop += 1
 		}
 	}
-	tmp := _splay(cur)
-	if res != nil {
-		return _splay(res), true
-	}
-	return tmp, false
+	y.aPush = x.aPush + x.dPush + (y.kind & 1)
+	y.aPop = x.aPop + x.dPop + (y.kind >> 1)
+	rq._update(y.child[0])
+	rq._update(y.child[1])
+	rq._update(y)
+	return y
 }
 
-func _insert(ver *_Node, root *_Node) *_Node {
-	if root == nil {
-		return ver
-	}
-	var cur *_Node
-	nx := root
-	for nx != nil {
-		cur = nx
-		if cur.key > ver.key {
-			nx = cur.left
-		} else {
-			nx = cur.right
-		}
-	}
-	if cur.key > ver.key {
-		cur.left = ver
-		ver.par = cur
-	} else {
-		cur.right = ver
-		ver.par = cur
-	}
-	cur.eval()
-	return _splay(ver)
-}
-
-func (rd *RetroactiveDeque) _leftPos(_time int) int {
-	first, second := _get(_time, rd.lroot)
-	rd.lroot = first
-	l := 0
-	if second {
-		if rd.lroot.left != nil {
-			l = rd.lroot.left.sum
-		}
-		l += rd.lroot.val
-	}
-	return l
-}
-
-func (rd *RetroactiveDeque) _rightPos(_time int) int {
-	first, second := _get(_time, rd.rroot)
-	rd.rroot = first
-	r := 0
-	if second {
-		if rd.rroot.left != nil {
-			r = rd.rroot.left.sum
-		}
-		r += rd.rroot.val
-	}
-	return r
-}
-
-func (rd *RetroactiveDeque) _pushFrontImpl(data T, _time int) {
-	newNode := _NewNode(_time, data, 1)
-	rd.lroot = _insert(newNode, rd.lroot)
-}
-
-func (rd *RetroactiveDeque) _popFrontImpl(_time int) {
-	var e T
-	newNode := _NewNode(_time, e, -1)
-	rd.lroot = _insert(newNode, rd.lroot)
-}
-
-func (rd *RetroactiveDeque) _pushBackImpl(data T, _time int) {
-	newNode := _NewNode(_time, data, 1)
-	rd.rroot = _insert(newNode, rd.rroot)
-}
-
-func (rd *RetroactiveDeque) _popBackImpl(_time int) {
-	var e T
-	newNode := _NewNode(_time, e, -1)
-	rd.rroot = _insert(newNode, rd.rroot)
-}
-
-func (rd *RetroactiveDeque) _find(index int, root *_Node) (*_Node, bool) {
-	if root == nil {
-		return nil, false
-	}
-	cur, nx := root, root.left
-	var res *_Node
-	if nx == nil && index == 0 {
-		return root, true
-	}
-	if nx == nil || index < nx.pmin || nx.pmax < index {
-		return root, false
-	}
-	for nx != nil {
-		cur = nx
-		curSum := 0
-		if cur.left != nil {
-			curSum += cur.left.sum
-		}
-		curSum += cur.val
-		if cur.right != nil {
-			if curSum+cur.right.pmin <= index && index <= curSum+cur.right.pmax {
-				nx = cur.right
-				index -= curSum
-				continue
-			}
-		}
-		if curSum == index {
-			res = cur
-			break
-		} else {
-			nx = cur.left
-		}
-	}
-
-	tmp := _splay(cur)
-	if res == nil {
-		return tmp, true
-	}
-	cur = _splay(res)
-	nx = cur.right
-	for nx != nil {
-		cur = nx
-		nx = cur.left
-	}
-	return _splay(cur), true
-}
-
-func (rd *RetroactiveDeque) _queryImpl(index int, _time int, back bool) T {
-	lpos := rd._leftPos(_time)
-	rpos := rd._rightPos(_time)
-	if back {
-		index = lpos + rpos - 1
-	}
-	lid := lpos - index
-	rid := index + 1 - lpos
-	lFirst, lSecond := rd._find(lid-1, rd.lroot)
-	rFirst, rSecond := rd._find(rid-1, rd.rroot)
-	rd.lroot = lFirst
-	rd.rroot = rFirst
-	if lSecond {
-		if rSecond {
-			if rd.lroot.key < rd.rroot.key {
-				return rd.rroot.data
-			}
-			return rd.lroot.data
-		}
-		return rd.lroot.data
-	}
-	return rd.rroot.data
+func (rq *RetroactiveQueue) _valid(x *Time) bool {
+	rq._splay(x)
+	return x.minRemain >= 0
 }
 
 func min(a, b int) int {

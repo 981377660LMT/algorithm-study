@@ -80,15 +80,15 @@ class PersistentArraySqrt<T> {
   }
 }
 
-class PersistentArraySqrtUint32 {
-  private _arr: Uint32Array
+class PersistentArraySqrtInt32 {
+  private _arr: Int32Array
   private _opIndex: number[] = []
   private _opValue: number[] = []
   private _opVersion = 0
 
-  constructor(nOrNums: number | Uint32Array) {
+  constructor(nOrNums: number | Int32Array) {
     if (typeof nOrNums === 'number') {
-      nOrNums = new Uint32Array(nOrNums)
+      nOrNums = new Int32Array(nOrNums)
     }
     this._arr = nOrNums
   }
@@ -102,7 +102,7 @@ class PersistentArraySqrtUint32 {
     return this._arr[i]
   }
 
-  set(i: number, v: number): PersistentArraySqrtUint32 {
+  set(i: number, v: number): PersistentArraySqrtInt32 {
     this._opIndex.push(i)
     this._opValue.push(v)
     const n = this._arr.length
@@ -110,18 +110,18 @@ class PersistentArraySqrtUint32 {
       return this._update()
     }
 
-    const newArr = new Uint32Array(n)
+    const newArr = new Int32Array(n)
     for (let j = 0; j < n; j++) {
       newArr[j] = this._arr[j]
     }
     this._opIndex.forEach((v, i) => {
       newArr[v] = this._opValue[i]
     })
-    return new PersistentArraySqrtUint32(newArr)
+    return new PersistentArraySqrtInt32(newArr)
   }
 
-  private _update(): PersistentArraySqrtUint32 {
-    const copy = new PersistentArraySqrtUint32(this._arr)
+  private _update(): PersistentArraySqrtInt32 {
+    const copy = new PersistentArraySqrtInt32(this._arr)
     copy._opIndex = this._opIndex
     copy._opValue = this._opValue
     copy._opVersion = this._opVersion + 1
@@ -129,15 +129,15 @@ class PersistentArraySqrtUint32 {
   }
 }
 
-export { PersistentArraySqrt, PersistentArraySqrtUint32 }
+export { PersistentArraySqrt, PersistentArraySqrtInt32 }
 
 if (require.main === module) {
   // https://leetcode.cn/problems/snapshot-array/
   class SnapshotArray {
-    private readonly _gits: PersistentArraySqrtUint32[] = []
-    private _root: PersistentArraySqrtUint32
+    private readonly _gits: PersistentArraySqrtInt32[] = []
+    private _root: PersistentArraySqrtInt32
     constructor(length: number) {
-      this._root = new PersistentArraySqrtUint32(length)
+      this._root = new PersistentArraySqrtInt32(length)
     }
 
     set(index: number, val: number): void {

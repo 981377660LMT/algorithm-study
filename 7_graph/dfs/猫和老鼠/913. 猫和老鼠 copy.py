@@ -1,3 +1,6 @@
+# 猫和老鼠
+
+
 from typing import List
 from functools import lru_cache
 
@@ -39,4 +42,3 @@ class Solution:
 
         n = len(graph)
         return dfs(0, 1, 2)
-
