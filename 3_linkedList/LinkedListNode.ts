@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
 
 class LinkedListNode<E> {
-  value: E
+  value: E | undefined
   pre: LinkedListNode<E> | undefined
   next: LinkedListNode<E> | undefined
 
-  constructor(value: E, left?: LinkedListNode<E>, right?: LinkedListNode<E>) {
+  constructor(value?: E, left?: LinkedListNode<E>, right?: LinkedListNode<E>) {
     this.value = value
     this.pre = left
     this.next = right

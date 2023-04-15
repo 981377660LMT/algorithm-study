@@ -6,7 +6,7 @@ V = TypeVar("V")
 
 @dataclass(slots=True)
 class Node(Generic[V]):
-    value: V
+    value: Optional["V"] = None
     pre: Optional["Node[V]"] = None
     next: Optional["Node[V]"] = None
 

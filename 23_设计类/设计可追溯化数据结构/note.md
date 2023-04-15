@@ -1,15 +1,16 @@
 # Retroactive_Data_Structures(可追溯化数据结构)
 
 Time Travel
+与只允许在当前执行操作的普通数据结构不同，追溯数据结构允许在过去的任何时间点插入或删除操作。
 
 https://wavwing.site/2019/01/26/2019.1.25%20trainingWeek/Retroactive_Data_Structures.pdf
-
 https://noshi91.github.io/Library/data_structure/partially_retroactive_queue.cpp
+https://erikdemaine.org/papers/Retroactive_TALG/paper.pdf
+https://python-retroactive-data-structures.readthedocs.io/en/latest/specifics/
 
 ---
 
 https://www.youtube.com/watch?v=WqCWghETNDc
-
 回到过去,对现在的`干预`(side effects)
 ![1681303899223](image/note/1681303899223.png)
 
@@ -23,7 +24,9 @@ Query(time，query)
 三种可追溯化等级
 
 1. partial retroactive
+   partial retroactive : 可以更新过去所有版本，但是只能查询最新版本的变化
 2. full retroactive
+   fully retroactive : 可以更新过去所有版本，也可以查询过去所有版本的变化
 
    - 线段树解决历史区间最值问题 将修改放到 logn 个结点中???
    - 优先队列的 insert 和 deleteMin 操作
@@ -53,3 +56,22 @@ RDS 和持久化的区别
   在持久化并查集中，每次合并两个集合时，我们将两个根节点连接起来，然后对新的根节点进行复制，得到一个新的版本，并将原始版本中所有与被修改的部分相关的节点都进行复制，得到新的版本，最终更新所有相关的节点，使它们指向新的版本。
   而在 RDS 并查集中，我们将每次操作转化为一系列差分操作，其中每个差分操作都是对应一个版本的修改，这些版本构成了一棵时间线。当我们需要查询某个时间点的数据时，只需要在这个时间点对应的版本上执行查询操作即可。而当我们需要更新某个时间点之后的数据时，只需要对这个时间点之后的所有版本进行更新操作。
   因此，持久化并查集在更新操作时需要复制大量的节点，并生成大量的新版本，而 RDS 并查集只需要进行少量的差分操作，并生成少量的新版本。这使得 RDS 并查集在更新操作时更加高效，并且可以在常数时间内执行查询操作。
+
+---
+
+部分可追溯化队列
+![1681479266854](image/note/1681479266854.png)
+![1681479272247](image/note/1681479272247.png)
+![1681479280173](image/note/1681479280173.png)
+![1681479328034](image/note/1681479328034.png)
+![1681479334711](image/note/1681479334711.png)
+![1681479344937](image/note/1681479344937.png)
+![1681479351635](image/note/1681479351635.png)
+
+部分可追溯化优先队列
+引入桥的概念
+完全可追溯化优先队列
+`有一个通用的方法`可以将 full 的复杂度做到 partial 的复杂度乘上 O(√m) 。
+
+`General transformation from partial to full retroactivity`
+https://python-retroactive-data-structures.readthedocs.io/en/latest/general/

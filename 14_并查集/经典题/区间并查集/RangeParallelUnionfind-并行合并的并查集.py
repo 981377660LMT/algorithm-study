@@ -1,7 +1,7 @@
 # RangeParallelUnionfind-并行合并的并查集
 
 from collections import defaultdict
-from typing import DefaultDict, List, Callable
+from typing import DefaultDict, List, Callable, Optional
 
 
 class UnionFindRangeParallel:
@@ -20,7 +20,10 @@ class UnionFindRangeParallel:
         min_ = len if len < self._n else self._n
         self._queues[min_].append((a, b))
 
-    def build(self) -> "UnionFindArray":
+    def build(self, f: Optional[Callable[[int, int], None]] = None) -> "UnionFindArray":
+        """
+        f: 合并后的回调函数, 入参为 (big, small)
+        """
         res = UnionFindArray(self._n)
         queue, nextQueue = [], []
         for di in range(self._n, 0, -1):
@@ -29,7 +32,7 @@ class UnionFindRangeParallel:
             for p in queue:
                 if res.isConnected(p[0], p[1]):
                     continue
-                res.union(p[0], p[1])
+                res.unionWithCallback(p[0], p[1], f)
                 nextQueue.append((p[0] + 1, p[1] + 1))
             queue, nextQueue = nextQueue, queue
         return res
@@ -62,7 +65,9 @@ class UnionFindArray:
         self.part -= 1
         return True
 
-    def unionWithCallback(self, x: int, y: int, f: Callable[[int, int], None]) -> bool:
+    def unionWithCallback(
+        self, x: int, y: int, f: Optional[Callable[[int, int], None]] = None
+    ) -> bool:
         """
         f: 合并后的回调函数, 入参为 (big, small)
         """
@@ -75,7 +80,8 @@ class UnionFindArray:
         self._parent[rootX] = rootY
         self._rank[rootY] += self._rank[rootX]
         self.part -= 1
-        f(rootY, rootX)
+        if f is not None:
+            f(rootY, rootX)
         return True
 
     def isConnected(self, x: int, y: int) -> bool:

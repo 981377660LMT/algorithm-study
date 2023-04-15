@@ -24,6 +24,7 @@ type CartesianTree struct {
 	//  左侧为严格扩展, 右侧为非严格扩展.
 	//  例如: [2, 1, 1, 5] => [[0 1] [0 4] [2 4] [3 4]]
 	Range                         [][2]int
+	Root                          int
 	n                             int
 	nums                          []int
 	leftChild, rigthChild, parent []int
@@ -37,6 +38,7 @@ func NewCartesianTree(nums []int, isMin bool) *CartesianTree {
 	lch := make([]int, n)
 	rch := make([]int, n)
 	par := make([]int, n)
+
 	for i := 0; i < n; i++ {
 		Range[i] = [2]int{-1, -1}
 		lch[i] = -1
@@ -96,6 +98,9 @@ func NewCartesianTree(nums []int, isMin bool) *CartesianTree {
 		}
 		if res.rigthChild[i] != -1 {
 			res.parent[res.rigthChild[i]] = i
+		}
+		if res.parent[i] == -1 {
+			res.Root = i
 		}
 	}
 

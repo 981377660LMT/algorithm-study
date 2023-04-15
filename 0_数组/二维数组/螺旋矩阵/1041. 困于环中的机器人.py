@@ -1,7 +1,10 @@
+# 1041. 困于环中的机器人
+# https://leetcode.cn/problems/robot-bounded-in-circle/
+
+
 # 只有在平面中存在环使得机器人永远无法离开时，返回 true。否则，返回 false。
 # !1. 走到原点
 # !2. 不在原点但是方向变化了：四次迭代就能变回初始方向
-
 # up/right/down/left
 DIR4 = ((-1, 0), (0, 1), (1, 0), (0, -1))
 

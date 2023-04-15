@@ -12,6 +12,14 @@ import (
 )
 
 func main() {
+	uf := NewUnionFindRangeParallel(10)
+	uf.UnionParallelly(0, 5, 5)
+	uf.Build(func(big, small int) {
+		fmt.Printf("big=%d small=%d\n", big, small)
+	})
+}
+
+func main2() {
 	// https://atcoder.jp/contests/yahoo-procon2018-final/tasks/yahoo_procon2018_final_d
 	// !前缀和后缀的LCP为lens[i]的字符串
 	// !LCP => 并查集
@@ -35,7 +43,7 @@ func main() {
 		ufrp.UnionParallelly(0, n-(i+1), lens[i]) // 各个位置的字符相同
 	}
 
-	uf := ufrp.Build()
+	uf := ufrp.Build(func(big, small int) {})
 	for i := 0; i < n; i++ {
 		if lens[i] == i+1 {
 			continue
@@ -67,7 +75,7 @@ func (uf *UnionFindRangeParallel) UnionParallelly(a, b, len int) {
 	uf.ques[min_] = append(uf.ques[min_], [2]int{a, b})
 }
 
-func (uf *UnionFindRangeParallel) Build() *_unionFindRange {
+func (uf *UnionFindRangeParallel) Build(f func(big, small int)) *_unionFindRange {
 	res := _newUnionFindRange(uf.n)
 	queue, nextQueue := [][2]int{}, [][2]int{}
 	for di := uf.n; di >= 1; di-- {
@@ -77,7 +85,7 @@ func (uf *UnionFindRangeParallel) Build() *_unionFindRange {
 			if res.IsConnected(p[0], p[1]) {
 				continue
 			}
-			res.Union(p[0], p[1], func(big, small int) {})
+			res.Union(p[0], p[1], f)
 			nextQueue = append(nextQueue, [2]int{p[0] + 1, p[1] + 1})
 		}
 		queue, nextQueue = nextQueue, queue

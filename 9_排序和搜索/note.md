@@ -41,3 +41,22 @@ JS sort 目前都是稳定的排序
    最坏情况 O(n log n)
    最好情况 O(n)
    空间复杂度：O(n)
+
+---
+
+https://github.com/spaghetti-source/algorithm/blob/4fdac8202e26def25c1baf9127aaaed6a2c9f7c7/_note/heuristic_search.md#L1-L17
+
+# Heuristic Search Algorithms
+
+## Overview
+
+Basically, there are three choices:
+
+- A\*
+- IDA* (iterative deepening A*)
+- RBFS (recursive best first search)
+
+If the state space is `sufficiently small`, use A*.
+Otherwise, use IDA* or RBFS.
+If good solutions are spreaded among search pathes, use IDA\*.
+Otherwise, i.e., good solutions are condensed, use RBFS.

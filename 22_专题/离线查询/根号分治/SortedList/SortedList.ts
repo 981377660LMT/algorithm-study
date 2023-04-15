@@ -299,7 +299,6 @@ class SortedList<T = number> {
           yield block[j]
         }
         count -= curCount
-        console.log(endPos)
       }
     } else {
       let [bid, startPos] = this._moveTo(start)

@@ -94,3 +94,17 @@ low 更新求出来无割点
   你需要输出每个点是多少**给定点对的必经点**（即如果点对为 (u,v)，
   那么如果 u 到 v 无论如何都要经过 x ，那么 x 是该点对的必经点）
   直接建出圆方树，**发现(u,v) 在圆方树路径上的圆点都是必经点，lca 树上差分**一下就可以了。
+
+---
+
+https://github.com/spaghetti-source/algorithm/blob/4fdac8202e26def25c1baf9127aaaed6a2c9f7c7/_note/scc_comparison.cc#L6
+
+//
+// Strongly Connected Component Comparison
+//
+// Gabow = Tarjan < Kosaraju.
+// This difference can be ignorable in most cases.
+//
+// Conclusion:
+// `Use Gabow (fast and memory efficient) or Kosaraju (short).`
+//

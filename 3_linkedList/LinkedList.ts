@@ -8,76 +8,93 @@ import { LinkedListNode } from './LinkedListNode'
  * 链表实现的双端队列
  */
 class LinkedList<E = number> {
-  private _size = 0
-
   /** 哨兵 */
-  private readonly _root: LinkedListNode<E>
+  readonly root: LinkedListNode<E>
+  private _size = 0
 
   /**
    * 初始化双向链表，判断节点时 next/pre 若为 root，则表示 next/pre 为空
    */
   constructor(iterable?: Iterable<E>) {
-    this._root = new LinkedListNode<E>(undefined as unknown as E)
-    this._root.pre = this._root
-    this._root.next = this._root
+    this.root = new LinkedListNode<E>(undefined)
+    this.root.pre = this.root
+    this.root.next = this.root
 
-    for (const item of iterable ?? []) {
+    for (const item of iterable || []) {
       this.push(item)
       this._size++
     }
   }
 
   unshift(val: E): void {
-    this._root.insertAfter(new LinkedListNode(val))
+    this.root.insertAfter(new LinkedListNode(val))
     this._size++
   }
 
   shift(): E | undefined {
     if (this._isEmpty()) return undefined
     this._size--
-    return this._root.next?.remove().value
+    // eslint-disable-next-line prefer-destructuring
+    const next = this.root.next
+    return next ? next.remove().value : undefined
   }
 
   push(val: E): void {
-    this._root.insertBefore(new LinkedListNode(val))
+    this.root.insertBefore(new LinkedListNode(val))
     this._size++
   }
 
   pop(): E | undefined {
     if (this._isEmpty()) return undefined
     this._size--
-    return this._root.pre?.remove().value
+    // eslint-disable-next-line prefer-destructuring
+    const pre = this.root.pre
+    return pre ? pre.remove().value : undefined
   }
 
   first(): E | undefined {
-    if (this._isEmpty()) return undefined
-    return this._root.next?.value
+    // eslint-disable-next-line prefer-destructuring
+    const next = this.root.next
+    return next ? next.value : undefined
   }
 
   last(): E | undefined {
-    if (this._isEmpty()) return undefined
-    return this._root.pre?.value
+    // eslint-disable-next-line prefer-destructuring
+    const pre = this.root.pre
+    return pre ? pre.value : undefined
   }
 
   toString(): string {
     return `${[...this]}`
   }
 
+  insert(node: LinkedListNode<E>, cur: E): LinkedListNode<E> {
+    const newNode = new LinkedListNode(cur)
+    node.insertBefore(newNode)
+    this._size++
+    return newNode
+  }
+
+  erase(node: LinkedListNode<E>): void {
+    node.remove()
+    this._size--
+  }
+
   // eslint-disable-next-line generator-star-spacing
   *[Symbol.iterator](): IterableIterator<E> {
-    let node = this._root.next!
-    while (node !== this._root) {
-      yield node.value
+    let node = this.root.next!
+    while (node !== this.root) {
+      yield node.value!
       node = node.next!
     }
   }
 
-  get size(): number {
+  get length(): number {
     return this._size
   }
 
   private _isEmpty(): boolean {
-    return this._root.next === this._root
+    return this.root.next === this.root
   }
 }
 

@@ -24,3 +24,16 @@
 3. 支持在线加点删点
    - **link-cut tree** O(nlogn)预处理 O(logn)查询 ，树链剖分 + splay 维护链的信息
    - **toptree** O(nlogn)预处理 O(logn)查询
+
+---
+
+https://github.com/spaghetti-source/algorithm/blob/4fdac8202e26def25c1baf9127aaaed6a2c9f7c7/_note/lca_compare.cc#L10
+//
+// Least Common Ancestor (Heavy-light decomposition)
+//
+// 1) Heavy-Light decomposition
+// 2) Doubling
+// 3) Euler-tour + RMQ
+//
+// `Use 1 or 3.`
+//
