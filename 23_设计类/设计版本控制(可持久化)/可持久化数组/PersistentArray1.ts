@@ -139,4 +139,4 @@ if (require.main === module) {
   }
 }
 
-export { usePersistentArray, PersistentArray }
+export {}

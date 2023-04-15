@@ -16,10 +16,6 @@
 //   O(sqrt(n)); however, due to the cheap constant factor,
 //   it is comparable with binary search trees.
 //   If only deletion is required, it is better choice.
-//
-// Verified:
-//   erase: SPOJ16016
-//
 
 /**
  * 分块数组.
