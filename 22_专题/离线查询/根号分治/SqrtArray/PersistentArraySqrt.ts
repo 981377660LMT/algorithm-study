@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+
 //
 // Persistent Array (sqrt decomposition)
 //
@@ -18,6 +20,12 @@
 //   This implementation is much faster than the implementation
 //   based on a complete binary tree representation,
 //   which runs in O(log n) time / extra space per operation.
+
+// 非常通用的实现:
+// 1. 记录每个版本的修改:[index,value,version]
+// 2. 查询时,从最新版本开始,找到最近的修改,返回修改后的值.
+// 3. 更新时，如果修改的数量超过了2*sqrt(n),就更新基础数组并清空操作序列，保证修改的记录不会太长.
+// !整体的时间复杂度是O(sqrt(n)).
 
 /**
  * 基于分块的持久化数组.
