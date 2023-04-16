@@ -44,7 +44,7 @@ type PersistentArraySqrt struct {
 }
 
 func NewPersistentArraySqrt(arr []T) *PersistentArraySqrt {
-	sqrt := int(math.Sqrt(float64(len(arr)))) + 1
+	sqrt := 2 * (int(math.Sqrt(float64(len(arr)))) + 1)
 	return &PersistentArraySqrt{arr: arr, opIndex: make([]int, 0, sqrt), opValue: make([]T, 0, sqrt)}
 }
 
@@ -61,7 +61,7 @@ func (sa *PersistentArraySqrt) Set(i int, v T) *PersistentArraySqrt {
 	sa.opIndex = append(sa.opIndex, i)
 	sa.opValue = append(sa.opValue, v)
 	n := len(sa.arr)
-	if tmp := sa.opLen + 1; tmp*tmp <= n {
+	if tmp := sa.opLen + 1; tmp*tmp <= 4*n {
 		return &PersistentArraySqrt{arr: sa.arr, opIndex: sa.opIndex, opValue: sa.opValue, opLen: tmp}
 	}
 	newArr := make([]T, n)

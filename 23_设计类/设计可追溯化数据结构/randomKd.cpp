@@ -28,13 +28,6 @@ using namespace std;
 #define snd second
 #define all(c) ((c).begin()), ((c).end())
 
-double tick() {
-  static clock_t oldtick;
-  clock_t newtick = clock();
-  double diff = 1.0*(newtick - oldtick) / CLOCKS_PER_SEC;
-  oldtick = newtick;
-  return diff;
-}
 
 typedef complex<double> point;
 struct randomized_kd_tree {
@@ -132,7 +125,7 @@ struct randomized_kd_tree {
   }
   void closest(node *t, point p, pair<double, node*> &ub) {
     if (!t) return;
-    double r = norm(t->p - p);
+    double r = norm(t->p - p);  // 欧几里得范数
     if (r < ub.fst) ub = {r, t};
     node *fst = t->r, *snd = t->l;
     double w = t->d ? real(p - t->p) : imag(p - t->p);

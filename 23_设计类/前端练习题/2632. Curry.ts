@@ -1,7 +1,11 @@
 // 柯里化,收集参数的过程.
-function curry(fn: Function): Function {
+
+type F = (...p: any[]) => any
+
+function curry(fn: F): F {
   const n = fn.length
   const args: unknown[] = []
+
   return function curried(...newArgs: unknown[]) {
     args.push(...newArgs)
     if (args.length < n) {

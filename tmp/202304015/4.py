@@ -8,6 +8,9 @@ INF = int(1e20)
 from typing import List, Sequence, Tuple
 from heapq import heappop, heappush
 
+# TODO
+# Floyd离线更新点对
+
 
 def dijkstra(n: int, adjList: Sequence[Sequence[Tuple[int, int]]], start: int, end: int) -> int:
     dist = [INF] * n

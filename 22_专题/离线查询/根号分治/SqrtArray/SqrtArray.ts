@@ -147,7 +147,11 @@ class SqrtArray<T = number> {
    * 0<= i <= {@link length}
    */
   insert(i: number, v: T): void {
-    if (!this._n) this._x.push([])
+    if (!this._n) {
+      this._x.push([v])
+      this._n++
+      return
+    }
 
     let bi = 0
     if (i >= this._n) {
@@ -159,10 +163,10 @@ class SqrtArray<T = number> {
     }
     this._n++
 
-    // rebuild
-    const sqrtn = ~~Math.sqrt(this._n)
-    if (this._x[bi].length > 2 * sqrtn) {
-      const y = this._x[bi].splice(sqrtn)
+    const sqrtn2 = ~~Math.sqrt(this._n) * 3
+    // !rebuild when block size > 6 * sqrt(n)
+    if (this._x[bi].length > 2 * sqrtn2) {
+      const y = this._x[bi].splice(sqrtn2)
       this._x.splice(bi + 1, 0, y)
     }
   }
@@ -311,14 +315,17 @@ export { SqrtArray }
 
 if (require.main === module) {
   const arr = new SqrtArray()
-  const rands = Array(2e5)
+  const rands = Array(4e5)
     .fill(0)
     .map((_, i) => ~~(Math.random() * i))
   console.time('insert')
-  for (let i = 0; i < 2e5; i++) {
+  for (let i = 0; i < 4e5; i++) {
     arr.insert(rands[i], i)
     arr.get(rands[i])
     arr.set(rands[i], i)
+  }
+  for (let i = 0; i < 4e5; i++) {
+    arr.shift()
   }
   console.timeEnd('insert')
   console.log(rands.slice(0, 10))

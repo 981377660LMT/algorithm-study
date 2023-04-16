@@ -1,122 +1,131 @@
-package main
-
-import (
-	"bufio"
-	"fmt"
-	"os"
-	"sort"
-)
-
-func main() {
-	const INF int = int(1e18)
-	const MOD int = 998244353
-
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	rectangles := make([][]int, n)
-	for i := 0; i < n; i++ {
-		var x1, y1, x2, y2 int
-		fmt.Fscan(in, &x1, &y1, &x2, &y2)
-		rectangles[i] = []int{x1, y1, x2, y2}
-	}
-
-	fmt.Fprintln(out, rectangleArea(rectangles))
-}
-
 // 求矩形的面积并
 //  rectangle[i] = [x1, y1, x2, y2]
 //  0<=x1<x2<=10^9
 //  0<=y1<y2<=10^9
 //  1<=rectangle.length<=1e5
 // https://leetcode.cn/problems/rectangle-area-ii/solution/ju-xing-mian-ji-ii-by-leetcode-solution-ulqz/
-func rectangleArea(rectangles [][]int) (res int) {
-	n := len(rectangles) * 2
-	heights := make([]int, 0, n)
+
+//
+// Area of Union of Rectangles (Bentley)
+//
+// Description:
+//   For a given set of rectangles, it gives the area of the union.
+//   This problem is sometines called the Klee's measure problem [Klee'77].
+//
+// Algorithm:
+//   Bentley's plane-sweep algorithm [Bentley'77].
+//   We first apply the coordinate compression technique.
+//   Then the y-structure, which is called measure tree, is simply implemented
+//   by using segment tree data structure.
+//
+// Complexity:
+//   O(n log n) time and O(n) space.
+//
+// Verify:
+//   LightOJ 1120: Rectangle Union
+//
+// References:
+//
+//   V. Klee (1977):
+//   Can the measure of \cup[a_i, b_i] be computed in less than O(n \log n) steps?
+//   American Mathematical Monthly, vol.84, pp. 284--285.
+//
+//   J. L. Bentley (1977):
+//   Algorithms for Klee's rectangle problems.
+//   Unpublished notes, Computer Science Department, Carnegie Mellon University.
+//
+
+package main
+
+import "sort"
+
+func rectangleArea(rectangles [][]int) int {
+	rs := make([]Rectangle, 0, len(rectangles))
 	for _, r := range rectangles {
-		heights = append(heights, r[1], r[3])
+		rs = append(rs, Rectangle{r[0], r[1], r[2], r[3]})
 	}
-
-	// 排序+去重
-	sort.Ints(heights)
-	m := 0
-	for _, h := range heights[1:] {
-		if heights[m] != h {
-			m++
-			heights[m] = h
-		}
-	}
-	heights = heights[:m+1]
-
-	tree := make(data, m*4)
-	tree.build(heights, 1, 1, m)
-
-	type event struct{ x, i, d int }
-	events := make([]event, 0, n)
-	for i, r := range rectangles {
-		events = append(events, event{r[0], i, 1}, event{r[2], i, -1})
-	}
-	sort.Slice(events, func(i, j int) bool { return events[i].x < events[j].x })
-
-	for i := 0; i < n; i++ {
-		j := i
-		for j+1 < n && events[j+1].x == events[i].x {
-			j++
-		}
-		if j+1 == n {
-			break
-		}
-		// 一次性地处理掉一批横坐标相同的左右边界
-		for k := i; k <= j; k++ {
-			index, diff := events[k].i, events[k].d
-			// 使用二分查找得到完整覆盖的线段的编号范围
-			left := sort.SearchInts(heights, rectangles[index][1]) + 1
-			right := sort.SearchInts(heights, rectangles[index][3])
-			tree.update(1, 1, m, left, right, diff)
-		}
-		res += tree[1].len * (events[j+1].x - events[j].x)
-		i = j
-	}
-	return res
+	return RectangleUnion(rs)
 }
 
-type data []struct{ cover, len, maxLen int }
+const MOD int = 1e9 + 7
 
-func (t data) build(heights []int, idx, l, r int) {
-	if l == r {
-		t[idx].maxLen = heights[l] - heights[l-1]
-		return
-	}
-	mid := (l + r) / 2
-	t.build(heights, idx*2, l, mid)
-	t.build(heights, idx*2+1, mid+1, r)
-	t[idx].maxLen = t[idx*2].maxLen + t[idx*2+1].maxLen
+type Rectangle struct {
+	x1, y1, x2, y2 int // (x1,y1): 左下角坐标, (x2,y2): 右上角坐标.
 }
 
-func (t data) update(idx, l, r, ul, ur, diff int) {
-	if l > ur || r < ul {
-		return
+// 矩形面积并.
+func RectangleUnion(rectangles []Rectangle) int {
+	ys := make([]int, 0, len(rectangles)*2)
+	for _, r := range rectangles {
+		ys = append(ys, r.y1, r.y2)
 	}
-	if ul <= l && r <= ur {
-		t[idx].cover += diff
-		t.pushUp(idx, l, r)
-		return
+	ys = sortedSet(ys)
+	n := len(ys)
+	C, A := make([]int, 8*n), make([]int, 8*n)
+	var aux func(a, b, c, l, r, k int)
+	aux = func(a, b, c, l, r, k int) {
+		a, b = max(a, l), min(b, r)
+		if a >= b {
+			return
+		}
+		if a == l && b == r {
+			C[k] += c
+		} else {
+			aux(a, b, c, l, (l+r)/2, 2*k+1)
+			aux(a, b, c, (l+r)/2, r, 2*k+2)
+		}
+		if C[k] != 0 {
+			A[k] = ys[r] - ys[l]
+		} else {
+			A[k] = A[2*k+1] + A[2*k+2]
+		}
 	}
-	mid := (l + r) / 2
-	t.update(idx*2, l, mid, ul, ur, diff)
-	t.update(idx*2+1, mid+1, r, ul, ur, diff)
-	t.pushUp(idx, l, r)
+
+	type event struct{ x, l, h, c int }
+	es := make([]event, 0, len(rectangles)*2)
+	for _, r := range rectangles {
+		l, h := sort.SearchInts(ys, r.y1), sort.SearchInts(ys, r.y2)
+		es = append(es, event{r.x1, l, h, +1}, event{r.x2, l, h, -1})
+	}
+	sort.Slice(es, func(i, j int) bool {
+		if es[i].x != es[j].x {
+			return es[i].x < es[j].x
+		}
+		return es[i].c > es[j].c
+	})
+	area, prev := 0, 0
+	for _, e := range es {
+		area += (e.x - prev) * A[0]
+		area %= MOD
+		prev = e.x
+		aux(e.l, e.h, e.c, 0, n, 0)
+	}
+	return area % MOD
 }
 
-func (t data) pushUp(idx, l, r int) {
-	if t[idx].cover > 0 {
-		t[idx].len = t[idx].maxLen
-	} else if l == r {
-		t[idx].len = 0
-	} else {
-		t[idx].len = t[idx*2].len + t[idx*2+1].len
+func sortedSet(xs []int) (sorted []int) {
+	set := make(map[int]struct{}, len(xs))
+	for _, v := range xs {
+		set[v] = struct{}{}
 	}
+	sorted = make([]int, 0, len(set))
+	for k := range set {
+		sorted = append(sorted, k)
+	}
+	sort.Ints(sorted)
+	return
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

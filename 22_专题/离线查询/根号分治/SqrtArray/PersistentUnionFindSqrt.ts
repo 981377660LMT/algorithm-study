@@ -94,4 +94,23 @@ if (require.main === module) {
     }
     return groups
   }
+
+  // uf0 := NewPersistentUnionFindSqrt(3)
+  // uf1 := uf0.Union(0, 1)
+  // uf2 := uf0.Union(1, 2)
+  // fmt.Println(uf1.IsConnected(0, 1), uf1.Find(0), uf1.Find(1))
+  // fmt.Println(uf1.IsConnected(0, 2), uf1.Find(0), uf1.Find(2))
+  // fmt.Println(uf1.IsConnected(1, 2), uf1.Find(1), uf1.Find(2))
+  // fmt.Println(uf2.IsConnected(0, 1), uf2.Find(0), uf2.Find(1))
+  // fmt.Println(uf2.IsConnected(0, 2), uf2.Find(0), uf2.Find(2))
+  // fmt.Println(uf2.IsConnected(1, 2), uf2.Find(1), uf2.Find(2))
+  uf0 = new PersistentUnionFindSqrt(3)
+  uf1 = uf0.union(0, 1)
+  uf2 = uf0.union(1, 2)
+  console.log(uf1.isConnected(0, 1), uf1.find(0), uf1.find(1))
+  console.log(uf1.isConnected(0, 2), uf1.find(0), uf1.find(2))
+  console.log(uf1.isConnected(1, 2), uf1.find(1), uf1.find(2))
+  console.log(uf2.isConnected(0, 1), uf2.find(0), uf2.find(1))
+  console.log(uf2.isConnected(0, 2), uf2.find(0), uf2.find(2))
+  console.log(uf2.isConnected(1, 2), uf2.find(1), uf2.find(2))
 }

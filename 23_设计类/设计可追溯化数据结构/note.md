@@ -75,3 +75,4 @@ RDS 和持久化的区别
 
 `General transformation from partial to full retroactivity`
 https://python-retroactive-data-structures.readthedocs.io/en/latest/general/
+可以参考 SqrtArray 的实现, 记录操作+分块复制版本
