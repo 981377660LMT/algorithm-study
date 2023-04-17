@@ -1,4 +1,4 @@
-const arr = Array(2000)
+const arr = Array(1500)
   .fill(0)
   .map((item, index) => index)
 

@@ -1,11 +1,12 @@
-// TextEditor() 用空文本初始化对象。
-// void addText(string text) 将 text 添加到光标所在位置。添加完后光标在 text 的右边。
-// int deleteText(int k) 删除光标左边 k 个字符。返回实际删除的字符数目。
-// string cursorLeft(int k) 将光标向左移动 k 次。返回移动后光标左边 min(10, len) 个字符，其中 len 是光标左边的字符数目。
-// string cursorRight(int k) 将光标向右移动 k 次。返回移动后光标左边 min(10, len) 个字符，其中 len 是光标左边的字符数目。
+// TextEditor() 用空文本初始化对象。
+// void addText(string text) 将 text 添加到光标所在位置。添加完后光标在 text 的右边。
+// int deleteText(int k) 删除光标左边 k 个字符。返回实际删除的字符数目。
+// string cursorLeft(int k) 将光标向左移动 k 次。返回移动后光标左边 min(10, len) 个字符，其中 len 是光标左边的字符数目。
+// string cursorRight(int k) 将光标向右移动 k 次。返回移动后光标左边 min(10, len) 个字符，其中 len 是光标左边的字符数目。
 
 import { SqrtArray } from '../SqrtArray'
 
+// https://leetcode.cn/problems/design-a-text-editor/
 class TextEditor {
   readonly _sqrt: SqrtArray<string> = new SqrtArray()
   _pos = 0

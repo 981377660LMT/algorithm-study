@@ -164,7 +164,7 @@ class SqrtArray<T = number> {
     this._n++
 
     const sqrtn2 = ~~Math.sqrt(this._n) * 3
-    // !rebuild when block size > 6 * sqrt(n)
+    // !rebuild when block size > 6 * sqrt(n), about 2000 when n = 1e5
     if (this._x[bi].length > 2 * sqrtn2) {
       const y = this._x[bi].splice(sqrtn2)
       this._x.splice(bi + 1, 0, y)
