@@ -20,6 +20,7 @@ func init() {
 	debug.SetGCPercent(-1)
 }
 
+// https://atcoder.jp/contests/abc283/tasks/abc283_f
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
