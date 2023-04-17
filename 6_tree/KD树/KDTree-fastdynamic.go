@@ -15,6 +15,14 @@
 //   O(log n) insertion and deletion.
 //   O(log n) search for a random points.
 //
+// !非常快
+
+// API:
+//   NewRandomKdTree(calDist func(p1, p2 Point2D) V) *RandomKdTree
+//   Insert(p Point2D)
+//   Remove(p Point2D)
+//   Nearest(p Point2D, allowOverlap bool) (Point2D, V)
+//   Size() int
 
 package main
 
@@ -42,6 +50,7 @@ func demo() {
 }
 
 // https://atcoder.jp/contests/abc283/tasks/abc283_f
+// 569 ms
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)

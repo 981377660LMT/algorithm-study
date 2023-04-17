@@ -90,6 +90,7 @@
    - [RBST](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/RBST.go)
    - [SegmentTree01](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/%E7%BB%8F%E5%85%B8%E9%A2%98/01%E7%BA%BF%E6%AE%B5%E6%A0%91/SegmentTree01.ts)
    - [KDTree](6_tree/KD%E6%A0%91/KDTree.go)
+   - [KDTree-Dynamic](6_tree/KD%E6%A0%91/KDTree-fastdynamic.go)
    - [LinkCutTree](6_tree/LCT/LinkCutTree.go)
    - [LinkCutTreeLazy](6_tree/LCT/LinkCutTreeLazy.go)
    - [LinkCutTreeSubtree](6_tree/LCT/LinkCutTreeSubtree.go)
