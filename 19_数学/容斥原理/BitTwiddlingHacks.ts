@@ -212,6 +212,7 @@ const B = [0x55555555, 0x33333333, 0x0f0f0f0f, 0x00ff00ff]
 const S = [1, 2, 4, 8]
 // 两个二进制数的交错位合并(Interleave)
 // 分治法,类似反转比特位
+// console.log(zipBitInt16(0b111, 0b000).toString(2)) // 0b101010
 // https://hackmd.io/@0xff07/BTS/https%3A%2F%2Fhackmd.io%2F%400xff07%2FWRYYYYYYYYYY
 function zipBitInt16(a: number, b: number): number {
   a = (a | (a << S[3])) & B[3]
@@ -224,7 +225,5 @@ function zipBitInt16(a: number, b: number): number {
   b = (b | (b << S[0])) & B[0]
   return (a << 1) | b
 }
-
-console.log(zipBitInt16(0b111, 0b000).toString(2)) // 0b101010
 
 export { nextPow2Int32, prevPow2Int32 }

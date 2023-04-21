@@ -11,6 +11,7 @@
 //   }
 // }
 
+// NestedArray
 type MultiDimensionalArray<T> = (T | MultiDimensionalArray<T>)[]
 
 function flat<T>(arr: MultiDimensionalArray<T>, n: number): MultiDimensionalArray<T> {
