@@ -56,6 +56,7 @@ function cancellable<T>(generator: Generator<Promise<any>, T, unknown>): [() => 
  */
 
 export {}
+
 // function*() { return 42; }
 // {"cancelledAt":100}
 if (require.main === module) {
@@ -71,7 +72,7 @@ if (require.main === module) {
 // 提示1：
 // This question tests understanding of two-way communication between generator functions
 // and the code that evaluates the generator.
-// It is a powerful technique which is used in libraries such as redux-saga.
+// !It is a powerful technique which is used in libraries such as `redux-saga`.
 // 提示2：
 // You can pass a value value to a generator function X by calling generator.next(X).
 // Then in the generator function,
