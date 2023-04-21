@@ -1,17 +1,18 @@
-type Fn = (...params: any[]) => Promise<any>
-
-function timeLimit(fn: Fn, t: number): Fn {
-  return async function (...args) {
-    return Promise.race([
-      fn(...args),
-      new Promise((_, reject) => setTimeout(() => reject('Time Limit Exceeded'), t))
-    ])
+function* fibGenerator(): Generator<number, any, number> {
+  // 0, 1, 1, 2, 3, 5, 8, 13 。
+  let a = 0
+  let b = 1
+  while (true) {
+    yield a
+    const c = a + b
+    a = b
+    b = c
   }
 }
 
 /**
- * const limited = timeLimit((t) => new Promise(res => setTimeout(res, t)), 100);
- * limited(150).catch(console.log) // "Time Limit Exceeded" at t=100ms
+ * const gen = fibGenerator();
+ * gen.next().value; // 0
+ * gen.next().value; // 1
  */
-
 export {}
