@@ -52,18 +52,6 @@ function longestCommonSubpath(n: number, paths: number[][]): number {
     const maxHashCount = Math.max(...counter.values(), -1)
     return maxHashCount === paths.length
   }
-
-  function getHashOfSlice(left: number, right: number) {
-    if (left === right) return 0n
-    left += 1
-    if (!(0 <= left && left <= right && right <= N + 1)) {
-      throw new RangeError('left or right out of range')
-    }
-
-    const upper = pre[right]
-    const lower = pre[left - 1] * base[right - (left - 1)]
-    return (upper - (lower % MOD) + MOD) % MOD
-  }
 }
 
 // console.log(
@@ -76,6 +64,6 @@ function longestCommonSubpath(n: number, paths: number[][]): number {
 console.log(
   longestCommonSubpath(5, [
     [0, 1, 0, 1, 0, 1, 0, 1, 0],
-    [0, 1, 3, 0, 1, 4, 0, 1, 0],
+    [0, 1, 3, 0, 1, 4, 0, 1, 0]
   ])
 )

@@ -3,8 +3,9 @@
 # Match(s,start): 返回模式串在s中出现的所有位置.
 # Move(pos, char): 从当前状态pos沿着char移动到下一个状态, 如果不存在则移动到fail指针指向的状态.
 # IsMatched(pos): 判断当前状态pos是否为匹配状态.
+# Period(i): 求字符串 s 的前缀 s[:i+1] 的最短周期(0<=i<n). 如果不存在周期, 返回0.
 
-from typing import List
+from typing import List, Optional
 
 
 class KMP:
@@ -25,10 +26,10 @@ class KMP:
     __slots__ = ("next", "_pattern")
 
     def __init__(self, pattern: str):
-        self.next = self.getNext(pattern)
         self._pattern = pattern
+        self.next = self.getNext(pattern)
 
-    def matchAll(self, s: str, start=0) -> List[int]:
+    def match(self, s: str, start=0) -> List[int]:
         res = []
         pos = 0
         for i in range(start, len(s)):
@@ -48,6 +49,19 @@ class KMP:
 
     def isMatched(self, pos: int) -> bool:
         return pos == len(self._pattern)
+
+    def period(self, i: Optional[int] = None) -> int:
+        """
+        求字符串 s 的前缀 s[:i+1] 的最短周期(0<=i<n)
+        如果不存在周期, 返回0.
+        """
+        if i is None:
+            i = len(self._pattern) - 1
+        assert 0 <= i < len(self._pattern)
+        res = (i + 1) - self.next[i]
+        if res and (i + 1) > res and (i + 1) % res == 0:
+            return res
+        return 0
 
 
 def getNext(needle: str) -> List[int]:
@@ -76,8 +90,8 @@ if __name__ == "__main__":
     assert next == [0, 1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     kmp = KMP("aab")
-    assert kmp.matchAll("aabaabaabaab") == [0, 3, 6, 9]
-    assert kmp.matchAll("aabaabaabaab", 1) == [3, 6, 9]
+    assert kmp.match("aabaabaabaab") == [0, 3, 6, 9]
+    assert kmp.match("aabaabaabaab", 1) == [3, 6, 9]
 
     pos = 0
     nextPos = kmp.move(pos, "a")
@@ -86,6 +100,3 @@ if __name__ == "__main__":
     assert nextPos == 2
     nextPos = kmp.move(nextPos, "b")
     assert kmp.isMatched(nextPos)
-    prePos = kmp.back(nextPos)
-    print(prePos)
-    print(kmp.next)

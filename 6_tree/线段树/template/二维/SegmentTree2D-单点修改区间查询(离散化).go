@@ -1,9 +1,11 @@
 // 二维线段树区间修改单点查询
 // Query(lx, rx, ly, ry) 查询区间[lx, rx) * [ly, ry)的值.
 // Update(x, y, val) 将点(x, y)的值加上(op) val.
-// !每次修改/查询 O(lognlogn)
+// !每次修改/查询 O(logn*logn)
 
 // 1e5:1200ms; 2e5:2200ms
+// https://kopricky.github.io/code/SegmentTrees/rangetree_pointupdate.html
+// RangeTree
 
 package main
 

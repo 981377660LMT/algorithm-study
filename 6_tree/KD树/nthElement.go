@@ -1,3 +1,5 @@
+// https://cp-algorithms.com/sequences/k-th.html#practice-problems
+
 // !在 KD 树中不如 Sort 快, 谨慎使用
 
 // cpp nthElement

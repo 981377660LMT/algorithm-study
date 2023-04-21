@@ -12,6 +12,7 @@ function bitCount53(num: number): number {
   return bitCount32(num >>> 0) + bitCount32(~~(num / 0x100000000))
 }
 
+// popCount32
 function bitCount32(uint32: number): number {
   uint32 -= (uint32 >>> 1) & 0x55555555
   uint32 = (uint32 & 0x33333333) + ((uint32 >>> 2) & 0x33333333)
@@ -60,6 +61,30 @@ function floorLog2(uint32: number): number {
 }
 function ceilLog2(uint32: number): number {
   return floorLog2(uint32) + ((uint32 & -uint32) !== uint32 ? 1 : 0)
+}
+
+/**
+ * 第k个1的位置(k>=0).
+ * @link http://graphics.stanford.edu/~seander/bithacks.html#SelectPosFromMSBRank
+ *       https://github.com/pranjalssh/CP_codes/blob/984d3a7155e9f474855114d8aa96936458eb2397/anta/!DepthDescendantsQuery.cpp#L12
+ */
+function select32(uint32: number, k: number): number {
+  // u32 a, b, c; int t, s;
+  // a = (x & 0x55555555) + ((x >> 1) & 0x55555555);
+  // b = (a & 0x33333333) + ((a >> 2) & 0x33333333);
+  // c = (b & 0x0f0f0f0f) + ((b >> 4) & 0x0f0f0f0f);
+  // t = (c & 0xff) + ((c >> 8) & 0xff);
+  // s = 0;
+  // s += ((t - k - 1) & 128) >> 3; k -= t & ((t - k - 1) >> 8); //if(k >= t) s += 16, k -= t;
+  // t = (c >> s) & 0xf;
+  // s += ((t - k - 1) & 128) >> 4; k -= t & ((t - k - 1) >> 8); //if(k >= t) s += 8, k -= t;
+  // t = (b >> s) & 0x7;
+  // s += ((t - k - 1) & 128) >> 5; k -= t & ((t - k - 1) >> 8); //if(k >= t) s += 4, k -= t;
+  // t = (a >> s) & 0x3;
+  // s += ((t - k - 1) & 128) >> 6; k -= t & ((t - k - 1) >> 8); //if(k >= t) s += 2, k -= t;
+  // t = (x >> s) & 0x1;
+  // s += ((t - k - 1) & 128) >> 7; //if(k >= t) s += 1;
+  // return s;
 }
 
 export { bitCount32, bitCount53, bitLength32, bitLength53, trailingZero32, trailingZero53 }

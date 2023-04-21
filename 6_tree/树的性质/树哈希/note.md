@@ -1,5 +1,7 @@
 ## 有根树的同构类问题处理方法
 
+https://kopricky.github.io/code/Graph/tree_isomorphism.html 换根 dp O(nlogn)
+
 1. 子树结构相同(**子树顺序无影响**) => 树的括号表示法(最小表示法)
    这种做法将子树表示为 **root.value + '(' + subtreeHash +')'**
    注意树的深度不能太大，否则遇到单链会 TLE
@@ -42,7 +44,7 @@ hashes[cur] = subSize[cur]*sum(hashes[child]) + subSize[cur]^2
 
 还可以双哈希防止卡哈希
 
-3. 如果是`二叉树`，那么结构相同时对应位置也要相同(**子树顺序有影响**) => n 元组
+1. 如果是`二叉树`，那么结构相同时对应位置也要相同(**子树顺序有影响**) => n 元组
 
    - 子树 subtreeHash 表示成 n 元组(可以用'#'分隔)时，遇到单链会 TLE (`n*n的字符串拼接`)
    - 优化是使用唯一的哈希 id 来代替哈希值，减少长度

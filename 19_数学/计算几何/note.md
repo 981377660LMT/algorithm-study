@@ -16,6 +16,10 @@ Geometry DS
   https://riteme.site/blog/2016-4-6/scapegoat.html
 - fractional cascading (分数级级联)
   https://ei1333.github.io/library/structure/segment-tree/segment-tree-fractional-cascading.hpp
+
+  > 实际上分数级联没那么快(常数大)
+  > https://kopricky.github.io/code/SegmentTrees/orthogonal_range_report.html > https://kopricky.github.io/code/SegmentTrees/merge_segtree.html
+
   ![promoted, 有点像跳表](image/note/1681309649252.png)
   `O(logn+k)`
   Fractional Cascading 的核心概念是将多个已排序的数组分层，其中第 $i$ 层包含了所有已排序数组的前 $2^i$ 个元素。例如，对于三个已排序的数组 ${2,4,7}$，${1,3,4}$，${1,4,8}$，第 0 层是它们的头元素 ${1,1,2}$，第一层是头两个元素 ${1,1,2,2,3,4}$，第二层是头四个元素 ${1,1,1,1,2,2,3,3,4,4,7,8}$。

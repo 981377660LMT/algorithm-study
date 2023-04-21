@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 
 def exgcd(a: int, b: int) -> Tuple[int, int, int]:
@@ -24,6 +24,29 @@ def modInv(a: int, mod: int) -> Optional[int]:
     if gcd_ != 1:
         return None
     return x % mod
+
+
+def modInvNums(nums: List[int], mod: int) -> List[int]:
+    """计算数组中每个数的逆元.通过前缀积和后缀积求解.
+    https://cp-algorithms.com/algebra/module-inverse.html#finding-the-modular-inverse-for-array-of-numbers-modulo-m
+
+    inv[i]=preMul[i-1]*sufMul[i+1]*(x1*x2*...*xn)^-1
+    """
+    n = len(nums)
+    if n == 0:
+        return []
+    preMul = [1] * n
+    mul = 1
+    for i in range(n):
+        preMul[i] = mul
+        mul = mul * nums[i] % mod
+    inv = modInv(mul, mod)
+    if inv is None:
+        raise ValueError("modInvNums: mul is not invertible")
+    for i in range(n - 1, -1, -1):
+        preMul[i] = preMul[i] * inv % mod
+        inv = inv * nums[i] % mod
+    return preMul
 
 
 def rationalMod(a: int, b: int, mod: int) -> Optional[int]:
@@ -72,6 +95,9 @@ if __name__ == "__main__":
     print(farey(1, 3))
     assert exgcd(2, 3) == (1, -1, 1)
     assert modInv(2, 998244353) == (998244353 + 1) // 2
+
+    nums = [1, 2, 3, 4, 5]
+    assert modInvNums(nums, 998244353) == [modInv(v, 998244353) for v in nums]
 
     # Rational Approximation
     # https://yukicoder.me/problems/no/1936

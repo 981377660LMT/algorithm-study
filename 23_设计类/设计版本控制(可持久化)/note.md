@@ -178,6 +178,11 @@ types of temporal DSs (persistent, retroactive), 4 levels of persistence
    O(1) 修改 :
    - store back pointer (每个版本存储反向指针)
    - store modify (version,field,value)
+     **将 pointer machine(Linked Data Structure) 改造成部分可持久化数据结构的一般方法**
+     <!-- TODO ts version -->
+     https://kopricky.github.io/code/Academic/partial_persistent_linked_data_structure.html
+     更新/查找的均摊时间复杂度 O(1)
+     还可以 O(logn) 改造成完全可持久化数据 "Making Data Structures Persistent" [Driscoll, Sarnak, Sleator, Tarjan 1986]
 2. full persistence
    各个版本形成一棵树
    怎么维护有根树的括号序?
@@ -190,3 +195,8 @@ types of temporal DSs (persistent, retroactive), 4 levels of persistence
    - copy and paste words, split and concat
 4. functional
    不能修改结点,只能创建新结点
+
+---
+
+好的中文笔记
+https://www.jianshu.com/p/4dbdf07c1501

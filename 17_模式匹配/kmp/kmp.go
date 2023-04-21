@@ -58,6 +58,16 @@ func (k *KMP) IsMatched(pos int) bool {
 	return pos == len(k.pattern)
 }
 
+// 求s的前缀[0:i+1)的最小周期.如果不存在,则返回0.
+//  0<=i<len(s).
+func (k *KMP) Period(i int) int {
+	res := i + 1 - k.next[i]
+	if res > 0 && (i+1) > res && (i+1)%res == 0 {
+		return res
+	}
+	return 0
+}
+
 func getNext(pattern string) []int {
 	next := make([]int, len(pattern))
 	j := 0

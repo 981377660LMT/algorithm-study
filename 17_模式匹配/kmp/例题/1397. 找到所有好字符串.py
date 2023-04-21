@@ -8,9 +8,10 @@
 
 
 from functools import lru_cache
-from typing import List
+from typing import List, Optional
 
 MOD = int(1e9 + 7)
+
 
 
 class KMP:
@@ -55,6 +56,18 @@ class KMP:
     def isMatched(self, pos: int) -> bool:
         return pos == len(self._pattern)
 
+    def period(self, i: Optional[int] = None) -> int:
+        """
+        求字符串 S 的前缀 s[:i+1] 的最短周期(0<=i<n)
+        如果不存在周期, 返回0.
+        """
+        if i is None:
+            i = len(self._pattern) - 1
+        assert 0 <= i < len(self._pattern)
+        res = (i + 1) - self.next[i]
+        if res and (i + 1) > res and (i + 1) % res == 0:
+            return res
+        return 0
 
 def cal(upper: str, evil: str) -> int:
     """字典序小于等于upper且不含evil的字符串个数"""

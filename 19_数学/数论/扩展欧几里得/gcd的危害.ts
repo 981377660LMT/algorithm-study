@@ -8,7 +8,7 @@ const gcd = (a: number, b: number): number => {
 }
 
 // !注意js中超过浮点数最大值的数会变成Infinity
-const lcm = (a: number, b: number): number => (a * b) / gcd(a, b)
+const lcm = (a: number, b: number): number => (a / gcd(a, b)) * b
 
 function subarrayLCM(nums: number[], k: number): number {
   let res = 0

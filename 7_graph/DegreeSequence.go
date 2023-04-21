@@ -1,5 +1,5 @@
 // 从度数构建图
-// 判断度数序列是否合法的 Erdős–Gallai定理
+// 判断度数序列是否合法的 Erdős–Gallai定理 (度数合法)
 // 什么叫合法的度数序列？就是存在一个无重边无自环（简单）的无向图，使得图中每个点的度数构成的序列为给定的序列。
 // http://kanari.logdown.com/posts/2014/03/09/erdos-gallai-theorem-conditions-for-a-sequence-to-be-graphical
 // https://maspypy.github.io/library/graph/degree_sequence.hpp

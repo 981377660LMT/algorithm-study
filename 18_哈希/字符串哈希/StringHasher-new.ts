@@ -1,3 +1,99 @@
+/**
+ * 使用了双哈希的字符串哈希.
+ * @important 比 {@link StringHasher2} 慢.
+ */
+class SafeStringHasher {
+  private readonly _n: number
+  private readonly _base1: number
+  private readonly _base2: number
+  private readonly _mod1: number
+  private readonly _mod2: number
+  private readonly _power1: Uint32Array
+  private readonly _power2: Uint32Array
+  private readonly _hash1: Uint32Array
+  private readonly _hash2: Uint32Array
+
+  /**
+   * @param base
+   * 131/13331/1333331/12821/12721/12421
+   * @param mod
+   * 1e7+19/1e7+79/1e7+103/1e7+121/1e7+139/1e7+141/1e7+169
+   */
+  constructor(
+    s: ArrayLike<number> | string,
+    base1 = 131,
+    base2 = 13331,
+    mod1 = 1e7 + 19,
+    mod2 = 1e7 + 79
+  ) {
+    const n = s.length
+    this._n = n
+    this._base1 = base1
+    this._base2 = base2
+    this._mod1 = mod1
+    this._mod2 = mod2
+    const hash1 = new Uint32Array(n + 1)
+    const hash2 = new Uint32Array(n + 1)
+    const power1 = new Uint32Array(n + 1)
+    const power2 = new Uint32Array(n + 1)
+    power1[0] = 1
+    power2[0] = 1
+    if (typeof s === 'string') {
+      for (let i = 0; i < n; i++) {
+        const v = s.charCodeAt(i)
+        hash1[i + 1] = (hash1[i] * base1 + v) % mod1
+        hash2[i + 1] = (hash2[i] * base2 + v) % mod2
+        power1[i + 1] = (power1[i] * base1) % mod1
+        power2[i + 1] = (power2[i] * base2) % mod2
+      }
+    } else {
+      for (let i = 0; i < n; i++) {
+        hash1[i + 1] = (hash1[i] * base1 + s[i]) % mod1
+        hash2[i + 1] = (hash2[i] * base2 + s[i]) % mod2
+        power1[i + 1] = (power1[i] * base1) % mod1
+        power2[i + 1] = (power2[i] * base2) % mod2
+      }
+    }
+    this._hash1 = hash1
+    this._hash2 = hash2
+    this._power1 = power1
+    this._power2 = power2
+  }
+
+  /**
+   * 返回[start, end)的哈希值.
+   */
+  query(start = 0, end = this._n): number {
+    if (start >= end) return 0
+    const diff = end - start
+    let res1 = this._hash1[end] - ((this._hash1[start] * this._power1[diff]) % this._mod1)
+    let res2 = this._hash2[end] - ((this._hash2[start] * this._power2[diff]) % this._mod2)
+    if (res1 < 0) res1 += this._mod1
+    if (res2 < 0) res2 += this._mod2
+    return res1 * this._mod2 + res2
+  }
+
+  /**
+   * 哈希值h1和h2的拼接, h2的长度为h2len.
+   */
+  combine(h1: number, h2: number, h2len: number): number {
+    const res1 = (h1 * this._power1[h2len] + h2) % this._mod1
+    const res2 = (h1 * this._power2[h2len] + h2) % this._mod2
+    return res1 * this._mod2 + res2
+  }
+
+  /**
+   * 哈希值h和字符c拼接形成的哈希值.
+   */
+  addChar(h: number, c: number | string): number {
+    const v = typeof c === 'string' ? c.charCodeAt(0) : c
+    const res1 = (h * this._base1 + v) % this._mod1
+    const res2 = (h * this._base2 + v) % this._mod2
+    return res1 * this._mod2 + res2
+  }
+}
+
+// --------------------------------------------
 // API:
 //  new StringHasher(base,mod)
 //  build(s) : O(n)返回s的哈希值表.
@@ -25,6 +121,9 @@ type Hash = readonly [h1: number, h2: number]
  * 哈希值计算方法：
  * hash(s, p, m) = (val(s[0]) * p^k-1 + val(s[1]) * p^k-2 + ... + val(s[k-1]) * p^0) mod m.
  * 越靠左字符权重越大.
+ *
+ * @todo 更快的方法是不使用tuple, 而是将哈希表示为 `hash1*mod2+hahs2`.
+ * @link https://github.com/drken1215/algorithm/blob/83d8e9bae9c46fb3b69ed8058d5a8a6db01f8300/String/rolling_hash.cpp#L18
  */
 class StringHasher2 {
   private readonly _base0: number
@@ -261,4 +360,4 @@ class StringHasher1 {
   }
 }
 
-export { StringHasher2, StringHasher1 }
+export { StringHasher2, StringHasher1, SafeStringHasher }

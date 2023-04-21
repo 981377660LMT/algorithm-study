@@ -1,6 +1,8 @@
 // 又叫做 64-ary tree / Van Emde Boas Tree
 // !时间复杂度:O(log64n)
+// https://kopricky.github.io/code/Academic/van_emde_boas_tree.html
 // https://zhuanlan.zhihu.com/p/107238627
+
 // 使用场景:
 // 1. 在存储IP地址的时候， 需要快速查找某个IP地址（2 ^32大小)是否在访问的列表中，
 //    或者需要找到比这个IP地址大一点或者小一点的IP作为重新分配的IP。

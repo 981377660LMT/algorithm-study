@@ -138,7 +138,7 @@ func gcd(a, b int) int {
 }
 
 func lcm(a, b int) int {
-	return a * b / gcd(a, b)
+	return (a / gcd(a, b)) * b
 }
 
 //

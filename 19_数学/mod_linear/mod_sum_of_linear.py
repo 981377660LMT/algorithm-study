@@ -1,3 +1,5 @@
+## mod sum of linear
+
 from math import ceil
 
 

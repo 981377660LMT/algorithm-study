@@ -2,7 +2,7 @@
 
 from collections import Counter, defaultdict
 from functools import lru_cache
-from math import floor, gcd
+from math import ceil, floor, gcd, sqrt
 from random import randint
 from typing import DefaultDict, List
 
@@ -211,6 +211,21 @@ def countPrimes(n: int) -> int:
         larges[0] -= s
 
     return larges[0]
+
+
+def countPrime(lower: int, upper: int) -> int:
+    """[lower, upper]内的质数个数,1<=lower<=upper<=1e12,upper-lower<=500000"""
+    isPrime = [True] * (upper - lower + 1)  # P[i] := i+L是否为质数
+    if lower == 1:
+        isPrime[0] = False
+
+    last = int(sqrt(upper))
+    for fac in range(2, last + 1):
+        start = fac * max(ceil(lower / fac), 2) - lower  # !>=lower的最小fac的倍数
+        while start < len(isPrime):
+            isPrime[start] = False
+            start += fac
+    return sum(isPrime)
 
 
 if __name__ == "__main__":

@@ -10,3 +10,6 @@ js 的特点是
 3. 空间占用不能太大
 
 这种特点，使得 js 非常适合根号分块的数据结构(相比较平衡树等数据结构而言)
+
+类似的思想
+https://leetcode.cn/problems/subrectangle-queries/solution/bu-bao-li-geng-xin-ju-zhen-yuan-su-de-jie-fa-by-li/

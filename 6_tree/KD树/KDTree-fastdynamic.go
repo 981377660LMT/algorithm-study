@@ -74,8 +74,10 @@ func main() {
 	}
 
 	for i := 0; i < n; i++ {
-		p, _ := kdtree.Nearest(points[i], false)
+		kdtree.Remove(points[i])
+		p, _ := kdtree.Nearest(points[i], true)
 		dist := abs(p.x-points[i].x) + abs(p.y-points[i].y)
+		kdtree.Insert(points[i])
 		fmt.Fprintln(out, dist)
 	}
 }
@@ -112,7 +114,7 @@ func (t *TNode) IsLeftOf(x *TNode) bool {
 
 type Point2D struct{ x, y V }
 
-// 计算两点距离的平方.
+// 计算两点距离的平方(norm in cpp).
 func NewRandomKdTree(calDist2 func(p1, p2 Point2D) V) *RandomKdTree {
 	return &RandomKdTree{calDist2: calDist2}
 }

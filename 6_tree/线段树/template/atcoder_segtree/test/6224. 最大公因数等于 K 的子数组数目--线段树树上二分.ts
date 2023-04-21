@@ -18,7 +18,8 @@ const gcd = (a: number, b: number): number => {
   return b === 0 ? a : gcd(b, a % b)
 }
 
-const lcm = (a: number, b: number): number => (a * b) / gcd(a, b) // !注意js中超过浮点数最大值的数会变成Infinity
+// 先除以巧妙地避免整数溢出
+const lcm = (a: number, b: number): number => (a / gcd(a, b)) * b // !注意js中超过浮点数最大值的数会变成Infinity
 
 // 最大公因数为K的子数组数目
 function subarrayGCD(nums: number[], k: number): number {

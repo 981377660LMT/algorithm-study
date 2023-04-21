@@ -1,9 +1,8 @@
-import { StringHasher2 } from '../StringHasher-new'
+import { SafeStringHasher } from '../StringHasher-new'
 
 function sumScores(s: string): number {
   const n = s.length
-  const H = new StringHasher2()
-  const table = H.build(s)
+  const H = new SafeStringHasher(s)
 
   let res = 0
   for (let i = 1; i <= n; i++) {
@@ -19,9 +18,9 @@ function sumScores(s: string): number {
     let right = curLen
     while (left <= right) {
       const mid = (left + right) >> 1
-      const h1 = H.query(table, start, start + mid)
-      const h2 = H.query(table, 0, mid)
-      if (h1[0] === h2[0] && h1[1] === h2[1]) {
+      const h1 = H.query(start, start + mid)
+      const h2 = H.query(0, mid)
+      if (h1 === h2) {
         left = mid + 1
       } else {
         right = mid - 1
@@ -33,6 +32,8 @@ function sumScores(s: string): number {
 
 if (require.main === module) {
   console.log(sumScores('babab'))
+  const h = new SafeStringHasher('babab')
+  console.log(h.query(0, 1) === h.query(2, 3))
 }
 
 export {}

@@ -324,8 +324,9 @@ if (require.main === module) {
     arr.get(rands[i])
     arr.set(rands[i], i)
   }
+
   for (let i = 0; i < 4e5; i++) {
-    arr.shift()
+    arr.get(rands[i])
   }
   console.timeEnd('insert')
   console.log(rands.slice(0, 10))
