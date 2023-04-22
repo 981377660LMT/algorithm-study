@@ -1,5 +1,3 @@
-type NestedArray = Array<number | NestedArray>
-
 /**
  * 任意维度的树状数组.
  * 支持单点修改, 区间查询.

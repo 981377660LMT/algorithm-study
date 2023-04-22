@@ -20,6 +20,7 @@
    - **重链剖分**，O(n)预处理 O(logn)查询，沿着最多 logn 段链上跳 `(最快,常数小,甚至比st表快)`
    - **dfs 序(欧拉序) + st 表**， O(nlogn)预处理 O(1)查询，这两点之间的区间中，深度最小点就是 LCA。这可以用 RMQ 解决
      > https://www.cnblogs.com/pealicx/p/6859901.html
+   - https://github.com/pranjalssh/CP_codes/blob/master/anta/!LCA.cpp 更快的 LCA
 
 3. 支持在线加点删点
    - **link-cut tree** O(nlogn)预处理 O(logn)查询 ，树链剖分 + splay 维护链的信息

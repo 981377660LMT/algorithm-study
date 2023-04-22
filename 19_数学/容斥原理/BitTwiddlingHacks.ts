@@ -1,5 +1,6 @@
 export {}
 
+// bit hacks
 // https://zhuanlan.zhihu.com/p/37014715
 // https://hackmd.io/@0xff07/BTS
 // http://graphics.stanford.edu/~seander/bithacks.html#SelectPosFromMSBRank

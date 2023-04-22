@@ -9,3 +9,8 @@
 - 注意
   `WaveletMatrix` 很快
   但是 `WaveletMatrixSum` 很慢
+
+---
+
+可以 insert 的 wavelet matrix
+https://github.com/pranjalssh/CP_codes/blob/984d3a7155e9f474855114d8aa96936458eb2397/anta/%23WaveletMatrix.cpp

@@ -13,3 +13,5 @@ assert hexagon_distance(1, 1, 2, 0) == 2
 
 # ハニカム
 DIR6 = ((0, 1), (1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1))
+
+# https://github.com/pranjalssh/CP_codes/blob/master/anta/!HexMap.cpp
