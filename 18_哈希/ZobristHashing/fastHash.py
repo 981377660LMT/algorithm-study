@@ -6,7 +6,7 @@ from typing import List
 
 
 class FastHashSet:
-    """快速计算哈希值的集合."""
+    """可以快速计算哈希值的集合."""
 
     _poolSingleton = defaultdict(lambda: randint(1, (1 << 61) - 1))
 
@@ -37,7 +37,7 @@ class FastHashSet:
 
 
 class FastHashCounter:
-    """快速计算哈希值的Counter."""
+    """可以快速计算哈希值的Counter."""
 
     _poolSingleton = defaultdict(lambda: randint(1, (1 << 61) - 1))
 
@@ -70,7 +70,7 @@ class FastHashCounter:
 
 class FastHashChessBoard:
     """
-    快速计算哈希值的棋盘.
+    可以快速计算哈希值的棋盘.
     棋子的(id,位置)唯一确定一个`棋盘上的`棋子.
     所有棋子的哈希值唯一确定棋盘的哈希值.
     """
@@ -112,7 +112,7 @@ class FastHashChessBoard:
 
 
 class FastHashRange:
-    """快速计算哈希值的区间."""
+    """可以快速计算哈希值的区间."""
 
     _poolSingleton = defaultdict(lambda: randint(1, (1 << 61) - 1))
 
