@@ -40,7 +40,7 @@ func main() {
 	})
 }
 
-type P [2]int // [x,y]
+type P = [2]int // [x,y]
 
 type BKTree struct {
 	root    *BNode

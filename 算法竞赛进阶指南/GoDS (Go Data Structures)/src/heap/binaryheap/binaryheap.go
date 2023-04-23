@@ -25,7 +25,7 @@ func main() {
 			fmt.Fscan(in, &x)
 			pq.Push(x)
 		} else if op == 2 {
-			fmt.Fprintln(out, pq.Peek())
+			fmt.Fprintln(out, pq.Top())
 		} else if op == 3 {
 			pq.Pop()
 		}
@@ -63,7 +63,7 @@ func (h *Heap) Pop() (value H) {
 	return
 }
 
-func (h *Heap) Peek() (value H) {
+func (h *Heap) Top() (value H) {
 	if h.Len() == 0 {
 		panic("heap is empty")
 	}

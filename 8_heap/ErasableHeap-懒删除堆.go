@@ -43,7 +43,7 @@ func (h *ErasableHeap) Pop() (value H) {
 }
 
 func (h *ErasableHeap) Peek() (value H) {
-	value = h.base.Peek()
+	value = h.base.Top()
 	return
 }
 
@@ -52,7 +52,7 @@ func (h *ErasableHeap) Len() int {
 }
 
 func (h *ErasableHeap) normalize() {
-	for h.base.Len() > 0 && h.erased.Len() > 0 && h.base.Peek() == h.erased.Peek() {
+	for h.base.Len() > 0 && h.erased.Len() > 0 && h.base.Top() == h.erased.Top() {
 		h.base.Pop()
 		h.erased.Pop()
 	}
@@ -87,7 +87,7 @@ func (h *Heap) Pop() (value H) {
 	return
 }
 
-func (h *Heap) Peek() (value H) {
+func (h *Heap) Top() (value H) {
 	if h.Len() == 0 {
 		panic("heap is empty")
 	}

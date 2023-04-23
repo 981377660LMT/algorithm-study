@@ -62,22 +62,22 @@ vector<ll> primes(ll n) { // primes in [0,n)
 }
 vector<ll> divisor_sigma(ll lo, ll hi) { // sigma(n) for all n in [lo, hi)
   vector<ll> ps = primes(sqrt(hi)+1);
-  vector<ll> res(hi-lo), sigma(hi-lo, 1);
-  iota(all(res), lo);
+  vector<ll> tmp(hi-lo), sigma(hi-lo, 1);
+  iota(all(tmp), lo);
 
   for (ll p: ps) {
     for (ll k = ((lo+(p-1))/p)*p; k < hi; k += p) {
       ll b = 1;
-      while (res[k-lo] > 1 && res[k-lo] % p == 0) {
-        res[k-lo] /= p; 
+      while (tmp[k-lo] > 1 && tmp[k-lo] % p == 0) {
+        tmp[k-lo] /= p; 
         b = 1 + b * p;
       }
       sigma[k-lo] *= b;
     }
   }
   for (ll k = lo; k < hi; ++k) 
-    if (res[k-lo] > 1) 
-      sigma[k-lo] *= (1 + res[k-lo]);
+    if (tmp[k-lo] > 1) 
+      sigma[k-lo] *= (1 + tmp[k-lo]);
   return sigma; // sigma[k-lo] = sigma(k)
 }
 

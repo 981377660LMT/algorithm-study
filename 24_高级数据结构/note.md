@@ -50,3 +50,7 @@
 
 8. 点分治 点分治适合处理大规模的树上路径信息问题
 9. CDQ 分治 解决三维偏序问题
+10. 替罪羊树的暴力重构
+    https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/scapegoat_tree.go
+    https://tjkendev.github.io/procon-library/python/binary_search_tree/scapegoat-tree.html
+    !替罪羊树会在插入、删除操作时，检测途经的节点，若发现失衡，则将以该节点为根的子树重构。

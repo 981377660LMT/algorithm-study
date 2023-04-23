@@ -240,7 +240,7 @@ func (h *Heap) Pop() (value H) {
 	return
 }
 
-func (h *Heap) Peek() (value H) {
+func (h *Heap) Top() (value H) {
 	if h.Len() == 0 {
 		panic("heap is empty")
 	}

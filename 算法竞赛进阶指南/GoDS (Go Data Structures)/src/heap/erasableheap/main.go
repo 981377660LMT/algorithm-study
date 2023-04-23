@@ -39,7 +39,7 @@ func (h *ErasableHeap) Pop() (value H) {
 	return
 }
 
-func (h *ErasableHeap) Peek() (value H) {
+func (h *ErasableHeap) Top() (value H) {
 	value = h.base.Peek()
 	return
 }
