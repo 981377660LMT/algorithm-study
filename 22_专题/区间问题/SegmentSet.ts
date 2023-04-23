@@ -4,21 +4,21 @@
 /* eslint-disable class-methods-use-this */
 
 // API:
-//  insert(left, right)      向区间集合中插入一个区间.
-//  erase(left, right)       从区间集合中删除一个区间.
-//  nextStart(x)             返回第一个大于等于x的区间起点.
-//  prevStart(x)             返回最后一个小于等于x的区间起点.
-//  ceiling(x)               返回区间内第一个大于等于x的元素.
-//  floor(x)                 返回区间内第一个小于等于x的元素.
-//  getRange(x)              返回包含x的区间.
-//  has(x)                   判断x是否在区间集合中.
-//  hasRange(left, right)    判断[left, right]是否在区间集合中.
-//  at(i)                    返回第i个区间.
-//  getAll()                 返回所有区间.
-//  islice(min,max)          返回区间集合中包含在[min,max]区间内的所有区间的迭代器.
-//  enumerate(min,max,f)     遍历SegmentSet中包含在[min,max]区间内的所有区间范围.
-//  length                   SegmentSet中区间的个数.
-//  count                    SegmentSet中区间的元素数量.
+//  insert(left, right)              向区间集合中插入一个区间.
+//  erase(left, right)               从区间集合中删除一个区间.
+//  nextStart(x)                     返回第一个大于等于x的区间起点.
+//  prevStart(x)                     返回最后一个小于等于x的区间起点.
+//  ceiling(x)                       返回区间内第一个大于等于x的元素.
+//  floor(x)                         返回区间内第一个小于等于x的元素.
+//  getRange(x)                      返回包含x的区间.
+//  includes(x)                      判断x是否在区间集合中.
+//  includesInterval(left, right)    判断[left, right]是否在区间集合中.
+//  at(i)                            返回第i个区间.
+//  getAll()                         返回所有区间.
+//  islice(min,max)                  返回区间集合中包含在[min,max]区间内的所有区间的迭代器.
+//  enumerate(min,max,f)             遍历SegmentSet中包含在[min,max]区间内的所有区间范围.
+//  length                           SegmentSet中区间的个数.
+//  count                            SegmentSet中区间的元素数量.
 
 import { SortedList } from '../离线查询/根号分治/SortedList/SortedList'
 
