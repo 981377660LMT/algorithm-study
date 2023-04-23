@@ -1,12 +1,14 @@
 # gcd为1的子数组个数
-from math import gcd
+
 
 from SlidingWindowAggregation import SlidingWindowAggregation
 
+from typing import List
+from math import gcd
 
-if __name__ == "__main__":
-    n = int(input())
-    nums = list(map(int, input().split()))
+
+def solve(nums: List[int]) -> int:
+    n = len(nums)
     S = SlidingWindowAggregation(lambda: 0, gcd)
     res = 0
     right = 0
@@ -17,4 +19,15 @@ if __name__ == "__main__":
             right += 1
         res += n - right
         S.popleft()
-    print(res)
+    return res
+
+
+if __name__ == "__main__":
+    from random import randint
+    import time
+
+    n = int(1e5)
+    nums = [randint(1, int(1e6)) for _ in range(n)]
+    time1 = time.time()
+    print(solve(nums))
+    print(time.time() - time1)

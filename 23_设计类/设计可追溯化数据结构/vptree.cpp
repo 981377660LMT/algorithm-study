@@ -30,6 +30,10 @@
 //   in Proceedings of the 4th Annual ACM-SIAM Symposium on Discrete algorithms,
 //   Society for Industrial and Applied Mathematics Philadelphia, PA, USA. pp. 311--321. 
 //
+
+
+
+
 #include <iostream>
 #include <vector>
 #include <queue>
@@ -64,12 +68,14 @@ struct vantage_point_tree {
     double th;
     node *l, *r; 
   } *root;
+  
   vector<pair<double, point>> aux;
   vantage_point_tree(vector<point> ps) {
     for (int i = 0; i < ps.size(); ++i)
       aux.push_back({0, ps[i]});
     root = build(0, ps.size());
   }
+
   node *build(int l, int r) {
     if (l == r) return 0;
     swap(aux[l], aux[l + rand() % (r - l)]);
@@ -81,6 +87,7 @@ struct vantage_point_tree {
     nth_element(aux.begin()+l, aux.begin()+m, aux.begin()+r);
     return new node({p, sqrt(aux[m].fst), build(l, m), build(m, r)});
   }
+
   priority_queue<pair<double, node*>> que;
   void k_nn(node *t, point p, int k) {
     if (!t) return;
@@ -99,6 +106,7 @@ struct vantage_point_tree {
       if (d - t->th <= que.top().fst) k_nn(t->l, p, k);
     }
   }
+
   vector<point> k_nn(point p, int k) {
     k_nn(root, p, k);
     vector<point> ans;

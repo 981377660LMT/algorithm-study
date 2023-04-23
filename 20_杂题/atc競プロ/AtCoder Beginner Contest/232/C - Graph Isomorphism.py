@@ -1,4 +1,4 @@
-# !判断图是否同构
+# !判断无向图是否同构(无向图的同构)
 # 枚举排列判断是否能建立映射即可
 
 from collections import defaultdict

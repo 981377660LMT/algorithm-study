@@ -12,7 +12,7 @@ class QueueAggregation<T> {
   }
 
   append(x: T): void {
-    if (this.size === 0) {
+    if (!this.length) {
       this._front.push(x)
     } else {
       this._back.push(x)
@@ -21,8 +21,8 @@ class QueueAggregation<T> {
 
   popleft(): void {
     this._front.pop()
-    if (this._front.size === 0) {
-      while (this._back.size > 0) {
+    if (!this._front.length) {
+      while (this._back.length > 0) {
         this._front.push(this._back.top()!)
         this._back.pop()
       }
@@ -33,8 +33,8 @@ class QueueAggregation<T> {
     return this._op(this._front.query(), this._back.query())
   }
 
-  get size(): number {
-    return this._front.size + this._back.size
+  get length(): number {
+    return this._front.length + this._back.length
   }
 }
 
@@ -72,7 +72,7 @@ class _StackAggregation<T> {
     return this._values[this._values.length - 1]
   }
 
-  get size(): number {
+  get length(): number {
     return this._values.length
   }
 }

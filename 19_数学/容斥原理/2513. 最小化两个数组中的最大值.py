@@ -34,11 +34,6 @@ class Solution:
         return left
 
 
-# print(Solution().minimizeSet(divisor1=2, divisor2=7, uniqueCnt1=1, uniqueCnt2=3))
-# 9
-# 4
-# 8
-# 3
 print(Solution().minimizeSet(divisor1=9, divisor2=4, uniqueCnt1=8, uniqueCnt2=3))
 # 11
 print(Solution().minimizeSet(divisor1=5, divisor2=5, uniqueCnt1=9, uniqueCnt2=3))

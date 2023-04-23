@@ -1,3 +1,6 @@
+# https://leetcode.cn/problems/smallest-k-length-subsequence-with-occurrences-of-a-letter/
+
+
 # 返回 s 中长度为 k 且 字典序最小 的子序列，
 # !该子序列同时应满足字母 letter 出现 至少 repetition 次。
 # 生成的测试用例满足 letter 在 s 中出现 至少 repetition 次。

@@ -26,3 +26,5 @@ func main() {
 
 // 子数组mex之和
 // https://yukicoder.me/submissions/652366
+// 区间最值操作与历史最值问题
+// https://github.com/tjkendev/segment-tree-beats

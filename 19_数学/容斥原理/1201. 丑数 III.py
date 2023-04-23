@@ -1,4 +1,7 @@
 #  给你四个整数：n 、a 、b 、c ，请你设计一个算法来找出第 n 个丑数。
+# !丑数是可以被 a 或 b 或 c 整除的 正整数 。
+
+
 #  1 <= n, a, b, c <= 10^9
 import math
 
@@ -8,6 +11,7 @@ import math
 class Solution:
     def nthUglyNumber(self, n: int, a: int, b: int, c: int) -> int:
         def check(mid: int) -> bool:
+            """[1,mid]内丑数的个数是否大于等于n"""
             total = mid // a + mid // b + mid // c - mid // ab - mid // ac - mid // bc + mid // abc
             return total >= n
 

@@ -581,6 +581,24 @@ if (require.main === module) {
     return res
   }
 
+  // https://leetcode.cn/problems/sliding-subarray-beauty/ 2200ms
+  function getSubarrayBeauty(nums: number[], k: number, x: number): number[] {
+    const res: number[] = []
+    const sl = new SortedList()
+    const n = nums.length
+    for (let right = 0; right < n; right++) {
+      sl.add(nums[right])
+      if (right >= k) {
+        sl.discard(nums[right - k])
+      }
+      if (right >= k - 1) {
+        const xth = sl.at(x - 1)!
+        res.push(xth < 0 ? xth : 0)
+      }
+    }
+    return res
+  }
+
   const sl = new SortedList<number>([1, 4, 2, 14, 611, 3])
   console.log(sl.length)
   console.log(sl.toString())

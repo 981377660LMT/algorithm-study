@@ -28,8 +28,8 @@ class Solution:
 
         for num in order:
             # !能不能把这个数字入栈
+            remain[num] -= 1
             if visited[num] == need[num]:
-                remain[num] -= 1
                 continue
 
             # !能不能删除栈顶元素
@@ -38,12 +38,9 @@ class Solution:
                 and stack[-1] > num
                 and remain[stack[-1]] > need[stack[-1]] - visited[stack[-1]]
             ):
-                top = stack.pop()
-                visited[top] -= 1
-
+                visited[stack.pop()] -= 1
             stack.append(num)
             visited[num] += 1
-            remain[num] -= 1
 
         return stack
 
