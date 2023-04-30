@@ -43,6 +43,8 @@ func main() {
 	nums2.Append(1)
 	nums2.Set(-1, 2)
 	fmt.Println(nums2)
+	nums2.RotateLeft(0, 4, 1)
+	fmt.Println(nums2)
 }
 
 type Node struct {
@@ -189,6 +191,17 @@ func (t *FHQTreap) RotateRight(start, stop, step int) {
 	t.splitByRank(y, n, &y, &z)
 	t.splitByRank(z, stop-start+1-n, &z, &p)
 	t.root = t.merge(t.merge(t.merge(x, z), y), p)
+}
+
+// Rotate [start, stop) to the left `k` times.
+func (rb *FHQTreap) RotateLeft(start, stop, k int) {
+	start++
+	k %= (stop - start + 1)
+	var x, y, z, p int
+	rb.splitByRank(rb.root, start-1, &x, &y)
+	rb.splitByRank(y, k, &y, &z)
+	rb.splitByRank(z, stop-start+1-k, &z, &p)
+	rb.root = rb.merge(rb.merge(rb.merge(x, z), y), p)
 }
 
 // Append value to the end of the list.

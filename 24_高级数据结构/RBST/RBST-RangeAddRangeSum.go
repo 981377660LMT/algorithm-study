@@ -10,6 +10,7 @@
 //  func (rb *RBST) Insert(i int, e E)
 //  func (rb *RBST) Erase(start, end int)
 //	func (rb *RBST) RotateRight(start, end, k int)
+//  func (rb *RBST) RotateLeft(start, end, k int)
 //  func (rb *RBST) Reverse(start, end int)
 //  func (rb *RBST) ReverseAll()
 //  func (rb *RBST) Get(i int) E
@@ -25,88 +26,42 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math/rand"
-	"os"
 )
 
 const MOD int = 998244353
 
 func main() {
-	// https://judge.yosupo.jp/problem/dynamic_sequence_range_affine_range_sum
-	// 插入/删除/翻转/区间仿射变换/区间求和
-
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-	nums := make([]E, n)
-	for i := range nums {
-		fmt.Fscan(in, &nums[i].sum)
-		nums[i].size = 1
+	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	leaves := make([]E, len(nums))
+	for i := 0; i < len(nums); i++ {
+		leaves[i] = E{nums[i], 1}
 	}
-
-	rbst := NewRBST(nums)
-	for i := 0; i < q; i++ {
-		var op int
-		fmt.Fscan(in, &op)
-		if op == 0 {
-			var i, x int
-			fmt.Fscan(in, &i, &x)
-			rbst.Insert(i, E{sum: x, size: 1})
-		} else if op == 1 {
-			var i int
-			fmt.Fscan(in, &i)
-			rbst.Pop(i)
-		} else if op == 2 {
-			var start, end int
-			fmt.Fscan(in, &start, &end)
-			rbst.Reverse(start, end)
-		} else if op == 3 {
-			var start, end, mul, add int
-			fmt.Fscan(in, &start, &end, &mul, &add)
-			rbst.Update(start, end, Id{flip: true, mul: mul, add: add})
-		} else if op == 4 {
-			var start, end int
-			fmt.Fscan(in, &start, &end)
-			fmt.Fprintln(out, rbst.Query(start, end).sum%MOD)
-		}
-	}
-
+	rb := NewRBST(leaves)
+	fmt.Println(rb)
+	// rotate right
+	rb.RotateRight(1, 4, 2)
+	fmt.Println(rb)
+	rb.Erase(1, 3)
+	fmt.Println(rb)
+	fmt.Println(rb.QueryAll())
 }
 
 type E = struct{ sum, size int }
-type Id = struct {
-	flip     bool
-	mul, add int
-}
+type Id = int
 
 // toggle时翻转左右的行为
 func (*RBST) rev(e E) E     { return e }
-func (*RBST) id() Id        { return Id{flip: false, mul: 1, add: 0} }
-func (*RBST) op(e1, e2 E) E { return E{(e1.sum + e2.sum) % MOD, e1.size + e2.size} }
+func (*RBST) id() Id        { return 0 }
+func (*RBST) op(e1, e2 E) E { return E{e1.sum + e2.sum, e1.size + e2.size} }
 
 func (*RBST) mapping(f Id, e E) E {
-	if !f.flip {
-		return e
-	}
-	mul, add := f.mul, f.add
-	return E{(mul*e.sum%MOD + add*e.size%MOD) % MOD, e.size}
+	return E{e.sum + e.size*f, e.size}
 }
 
 func (*RBST) composition(f, g Id) Id {
-	if !f.flip {
-		return g
-	}
-	if !g.flip {
-		return f
-	}
-	newMul, newAdd := f.mul, f.add
-	oldMul, oldAdd := g.mul, g.add
-	return Id{flip: true, mul: newMul * oldMul % MOD, add: (newMul*oldAdd%MOD + newAdd) % MOD}
+	return f + g
 }
 
 type RNode struct {
@@ -199,6 +154,17 @@ func (rb *RBST) RotateRight(start, stop, k int) {
 	x, y = rb.split(rb.root, start-1)
 	y, z = rb.split(y, n)
 	z, p = rb.split(z, stop-start+1-n)
+	rb.root = rb.merge(rb.merge(rb.merge(x, z), y), p)
+}
+
+// Rotate [start, stop) to the left `k` times.
+func (rb *RBST) RotateLeft(start, stop, k int) {
+	start++
+	k %= (stop - start + 1)
+	var x, y, z, p *RNode
+	x, y = rb.split(rb.root, start-1)
+	y, z = rb.split(y, k)
+	z, p = rb.split(z, stop-start+1-k)
 	rb.root = rb.merge(rb.merge(rb.merge(x, z), y), p)
 }
 
@@ -461,7 +427,6 @@ func (rb *RBST) size(node *RNode) int {
 	return node.sz
 }
 
-// XORShift
 func (rb *RBST) nextRand() uint32 {
 	t := rb.x ^ (rb.x << 11)
 	rb.x, rb.y, rb.z = rb.y, rb.z, rb.w

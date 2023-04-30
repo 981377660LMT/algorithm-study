@@ -10,6 +10,7 @@
 //  func (rb *RBST) Insert(i int, e E)
 //  func (rb *RBST) Erase(start, end int)
 //	func (rb *RBST) RotateRight(start, end, k int)
+//  func (rb *RBST) RotateLeft(start, end, k int)
 //  func (rb *RBST) Reverse(start, end int)
 //  func (rb *RBST) ReverseAll()
 //  func (rb *RBST) Get(i int) E
@@ -25,74 +26,89 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
 )
 
-// 1622. 奇妙序列
-// https://leetcode.cn/problems/fancy-sequence/
-const MOD int = 1e9 + 7
+const INF int = 1e18
 
-type Fancy struct {
-	rbst *RBST
-}
+func main() {
+	// https://www.acwing.com/problem/content/268/
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-func Constructor() Fancy {
-	return Fancy{NewRBST(nil)}
-}
-
-func (this *Fancy) Append(val int) {
-	this.rbst.Append(E{val, 1})
-}
-
-func (this *Fancy) AddAll(inc int) {
-	this.rbst.Update(0, this.rbst.Size(), Id{1, inc})
-}
-
-func (this *Fancy) MultAll(m int) {
-	this.rbst.Update(0, this.rbst.Size(), Id{m, 0})
-}
-
-func (this *Fancy) GetIndex(idx int) int {
-	if idx >= this.rbst.Size() {
-		return -1
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]E, n) // (sum, size, min)
+	for i := 0; i < n; i++ {
+		var x int
+		fmt.Fscan(in, &x)
+		nums[i] = E{sum: x, size: 1, min: x}
 	}
-	return this.rbst.Get(idx).sum
+
+	// !区间更新：加上一个数，区间查询：区间最小值
+	T := NewRBST(nums)
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var op string
+		fmt.Fscan(in, &op)
+		if op == "ADD" {
+			var left, right, add int
+			fmt.Fscan(in, &left, &right, &add)
+			left--
+			T.Update(left, right, add)
+		} else if op == "REVERSE" {
+			var left, right int
+			fmt.Fscan(in, &left, &right)
+			left--
+			T.Reverse(left, right)
+		} else if op == "REVOLVE" {
+			// 区间 轮转k次
+			var left, right, k int
+			fmt.Fscan(in, &left, &right, &k)
+			left--
+			T.RotateRight(left, right, k)
+		} else if op == "INSERT" {
+			// 在pos后插入val
+			var pos, val int
+			fmt.Fscan(in, &pos, &val)
+			pos--
+			T.Insert(pos+1, E{sum: val, size: 1, min: val})
+		} else if op == "DELETE" {
+			var pos int
+			fmt.Fscan(in, &pos)
+			pos--
+			T.Pop(pos)
+		} else if op == "MIN" {
+			var left, right int
+			fmt.Fscan(in, &left, &right)
+			left--
+			fmt.Fprintln(out, T.Query(left, right).min)
+		}
+	}
 }
 
-/**
- * Your Fancy object will be instantiated and called as such:
- * obj := Constructor();
- * obj.Append(val);
- * obj.AddAll(inc);
- * obj.MultAll(m);
- * param_4 := obj.GetIndex(idx);
- */
-
-type E = struct{ sum, size int }
-type Id = struct{ mul, add int }
+type E = struct{ sum, size, min int }
+type Id = int
 
 // toggle时翻转左右的行为
-func (*RBST) rev(e E) E { return e }
-func (*RBST) id() Id    { return Id{mul: 1} }
-func (*RBST) op(e1, e2 E) E {
-	return E{
-		sum:  (e1.sum + e2.sum) % MOD,
-		size: e1.size + e2.size}
-}
-
+func (*RBST) rev(e E) E     { return e }
+func (*RBST) id() Id        { return 0 }
+func (*RBST) op(e1, e2 E) E { return E{e1.sum + e2.sum, e1.size + e2.size, min(e1.min, e2.min)} }
 func (*RBST) mapping(f Id, e E) E {
-	return E{
-		sum:  (e.sum*f.mul + e.size*f.add) % MOD,
-		size: e.size,
-	}
+	return E{e.sum + f*e.size, e.size, e.min + f}
 }
+func (*RBST) composition(f, g Id) Id { return f + g }
 
-func (*RBST) composition(f, g Id) Id {
-	return Id{
-		mul: (f.mul * g.mul) % MOD,
-		add: (f.mul*g.add + f.add) % MOD,
+func min(a, b int) int {
+	if a < b {
+		return a
 	}
+	return b
 }
 
 type RNode struct {
@@ -185,6 +201,17 @@ func (rb *RBST) RotateRight(start, stop, k int) {
 	x, y = rb.split(rb.root, start-1)
 	y, z = rb.split(y, n)
 	z, p = rb.split(z, stop-start+1-n)
+	rb.root = rb.merge(rb.merge(rb.merge(x, z), y), p)
+}
+
+// Rotate [start, stop) to the left `k` times.
+func (rb *RBST) RotateLeft(start, stop, k int) {
+	start++
+	k %= (stop - start + 1)
+	var x, y, z, p *RNode
+	x, y = rb.split(rb.root, start-1)
+	y, z = rb.split(y, k)
+	z, p = rb.split(z, stop-start+1-k)
 	rb.root = rb.merge(rb.merge(rb.merge(x, z), y), p)
 }
 
