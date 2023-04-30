@@ -7,5 +7,5 @@ INF = int(1e20)
 
 
 class Solution:
-    def findThePrefixCommonArray(self, A: List[int], B: List[int]) -> List[int]:
+    def a(self, s: str) -> List[str]:
         ...

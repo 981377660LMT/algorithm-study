@@ -5,11 +5,13 @@ import (
 	"math/rand"
 )
 
+// [-4,-13,-12]
 func main() {
+	fmt.Println(countOperationsToEmptyArray([]int{1, 2, 4, 3}))
+	fmt.Println(countOperationsToEmptyArray([]int{-4, -13, -12})) // 4
 	// [-15,17,-8,7,-7,-14]
-	// nums := []int{3, 4, -1}
-	nums := []int{-15, 17, -8, 7, -7, -14}
-	fmt.Println(countOperationsToEmptyArray(nums))
+	fmt.Println(countOperationsToEmptyArray([]int{-15, 17, -8, 7, -7, -14})) // 13
+
 }
 
 // # 给你一个包含若干 互不相同 整数的数组 nums ，你需要执行以下操作 直到数组为空 ：
@@ -21,21 +23,22 @@ func countOperationsToEmptyArray(nums []int) int64 {
 	curLen = len(nums)
 	leaves := make([]E, len(nums))
 	for i := 0; i < len(nums); i++ {
-		leaves[i] = E{min: nums[i], minIndex: i}
+		leaves[i] = E{nums[i], i}
 	}
-	R := NewRBST(leaves)
+	S := NewRBST(leaves)
 	res := 0
 	for curLen > 0 {
-		minInfo := R.Query(0, curLen)
+		minInfo := S.QueryAll()
 		minIndex := minInfo.minIndex
 		res += minIndex
-		R.Update(0, curLen, -minIndex)
-		R.Reverse(0, minIndex)
-		R.Reverse(minIndex, curLen)
-		R.ReverseAll()
-		R.PopLeft()
+		S.Update(0, curLen, -minIndex)
+		S.Reverse(0, minIndex)
+		S.Reverse(minIndex, curLen)
+		S.ReverseAll()
+		S.PopLeft()
 		curLen--
-		R.Update(0, curLen, -1)
+		fmt.Println(S)
+		S.Update(0, curLen, -1)
 	}
 	return int64(res + len(nums))
 }
@@ -50,7 +53,6 @@ func (*RBST) rev(e E) E { return e }
 func (*RBST) id() Id    { return 0 }
 func (*RBST) op(e1, e2 E) E {
 	res := E{}
-
 	if e1.min < e2.min {
 		res.min = e1.min
 		res.minIndex = e1.minIndex
@@ -146,10 +148,10 @@ func (rb *RBST) Reverse(start, end int) {
 	if start >= end {
 		return
 	}
-	x1, y1 := rb.split(rb.root, start)
-	x2, y2 := rb.split(y1, end-start)
-	rb.toggle(x2)
-	rb.root = rb.merge(x1, rb.merge(x2, y2))
+	f1, s1 := rb.split(rb.root, end)
+	f2, s2 := rb.split(f1, start)
+	rb.toggle(s2)
+	rb.root = rb.merge(rb.merge(f2, s2), s1)
 }
 
 func (rb *RBST) ReverseAll() { rb.toggle(rb.root) }
@@ -382,7 +384,6 @@ func (rb *RBST) push(t *RNode) {
 		}
 		t.lazy = rb.id()
 	}
-
 	if t.isReversed {
 		if t.left != nil {
 			rb.toggle(t.left)
@@ -425,7 +426,6 @@ func (rb *RBST) size(node *RNode) int {
 	return node.sz
 }
 
-// XORShift
 func (rb *RBST) nextRand() uint32 {
 	t := rb.x ^ (rb.x << 11)
 	rb.x, rb.y, rb.z = rb.y, rb.z, rb.w

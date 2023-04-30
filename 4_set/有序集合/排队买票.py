@@ -42,4 +42,4 @@ class Solution:
         return res
 
 
-print(Solution().solve(tickets=[2, 1, 2]))
+print(Solution().solve(tickets=[2, 1, 3]))

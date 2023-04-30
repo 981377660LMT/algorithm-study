@@ -142,7 +142,6 @@ if __name__ == "__main__":
     assert (1, 4) in ss
     assert 7 not in ss
     assert ss.count == sum(right - left + 1 for left, right in ss)
-    ss.erase(2, 3)
     assert len(ss) == 3
     assert ss.getInterval(5) == (5, 6)
 

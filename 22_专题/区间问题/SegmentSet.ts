@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 /* eslint-disable no-param-reassign */
 /* eslint-disable generator-star-spacing */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
@@ -69,7 +70,7 @@ class SegmentSet {
   /**
    * 从区间集合中删除一个闭区间.
    */
-  erase(left: number, right: number): void {
+  remove(left: number, right: number): void {
     if (left > right) {
       return
     }
@@ -194,6 +195,14 @@ class SegmentSet {
     return this._sl.at(index)
   }
 
+  /**
+   * 有时需要输出闭区间, insert/remove 时右端点需要加一，getAll 时右端点需要减一.
+   * ```ts
+   * seg.insert(left, right + 1)
+   * seg.remove(left, right + 1)
+   * seg.getAll().map(v => [v[0], v[1] - 1])
+   * ```
+   */
   getAll(): [left: number, right: number][] {
     const res: [left: number, right: number][] = Array(this._sl.length)
     this._sl.forEach((v, i) => {
@@ -293,17 +302,31 @@ if (require.main === module) {
     }
 
     queryRange(left: number, right: number): boolean {
-      const intervals: any[] = []
-      this._ss.enumerateRange(left, right, v => {
-        intervals.push(v)
-      })
-      return intervals.length === 1 && intervals[0][0] === left && intervals[0][1] === right
+      return this._ss.includesInterval(left, right)
     }
 
     removeRange(left: number, right: number): void {
-      this._ss.erase(left, right)
+      this._ss.remove(left, right)
     }
   }
+
+  // https://leetcode.cn/problems/find-maximal-uncovered-ranges/
+  function findMaximalUncoveredRanges(n: number, ranges: number[][]): number[][] {
+    const seg = new SegmentSet()
+    seg.insert(0, n) // 右边界+1
+    ranges.forEach(v => {
+      seg.remove(v[0], v[1] + 1) // 右边界+1
+    })
+    return seg.getAll().map(v => [v[0], v[1] - 1]) // 右边界-1
+  }
+
+  // n = 10, ranges = [[3,5],[7,8]]
+  console.log(
+    findMaximalUncoveredRanges(10, [
+      [3, 5],
+      [7, 8]
+    ])
+  )
 
   const ss = new SegmentSet()
   ss.insert(1, 3)

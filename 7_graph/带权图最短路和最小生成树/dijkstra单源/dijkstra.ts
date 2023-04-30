@@ -2,19 +2,20 @@ import { Heap } from '../../../8_heap/Heap'
 
 const INF = 2e15
 function dijkstra(n: number, graph: [v: number, w: number][][], start: number): number[] {
-  const dist = Array(n).fill(INF)
-  const queue = new Heap<[cur: number, curDist: number]>((a, b) => a[1] - b[1])
+  const dist = Array(n)
+  for (let i = 0; i < n; ++i) dist[i] = INF
+  const queue = new Heap<[cur: number, curDist: number]>((a, b) => a[0] - b[0])
   dist[start] = 0
-  queue.push([start, 0])
+  queue.push([0, start])
 
   while (queue.size) {
-    const [cur, curDist] = queue.pop()!
+    const [curDist, cur] = queue.pop()!
     if (curDist > dist[cur]) continue
     graph[cur].forEach(([v, w]) => {
       const nextDist = curDist + w
       if (dist[v] > nextDist) {
         dist[v] = nextDist
-        queue.push([v, dist[v]])
+        queue.push([dist[v], v])
       }
     })
   }
