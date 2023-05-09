@@ -124,6 +124,9 @@ func (sg *SortableSegmentTree) Query(start, end int) E {
 func (sg *SortableSegmentTree) QueryAll() E { return sg.seg.QueryAll() }
 
 func (sg *SortableSegmentTree) SortRange(start, end int, reverse bool) {
+	if start >= end {
+		return
+	}
 	if reverse {
 		sg.SortDec(start, end)
 	} else {
@@ -132,6 +135,9 @@ func (sg *SortableSegmentTree) SortRange(start, end int, reverse bool) {
 }
 
 func (sg *SortableSegmentTree) SortInc(start, end int) {
+	if start >= end {
+		return
+	}
 	sg.splitAt(start)
 	sg.splitAt(end)
 	for {
@@ -149,6 +155,9 @@ func (sg *SortableSegmentTree) SortInc(start, end int) {
 }
 
 func (sg *SortableSegmentTree) SortDec(start, end int) {
+	if start >= end {
+		return
+	}
 	sg.SortInc(start, end)
 	sg.rev[start] = true
 	sg.seg.Set(start, sg.root[start].revX)

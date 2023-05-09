@@ -235,6 +235,7 @@
     - [FastHashContainer](18_%E5%93%88%E5%B8%8C/ZobristHashing/fastHash.py)
     - [AllCountKChecker](18_%E5%93%88%E5%B8%8C/ZobristHashing/AllCountKChecker/AllCountKChecker.py)
     - [SortableArray](<%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/0-segmenttree/library/SortableArray/SortableArray.go>)
+    - [SortableDeque](2_queue/SortableDeque.py)
     - [SegmentSet](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/SegmentSet.ts)
     - 可追溯化数据结构
       - [完全可追溯化队列](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveQueue.go)

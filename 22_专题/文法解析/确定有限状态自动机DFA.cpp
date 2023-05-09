@@ -26,12 +26,14 @@ struct Automaton {
   bool accept(int state) { return is_accept[state]; }
   int size() { return trans.size(); }
 };
+
 template <class AM>
 Automaton minimizeAutomaton(AM A) {
   // remove unreachables
   vector<int> seen(A.size());
   seen[A.init] = 1;
   vector<int> partition = {A.init}, pos, label;
+
   for (int i = 0; i < partition.size(); ++i) {
     pos.push_back(i);
     label.push_back(0);
@@ -44,6 +46,7 @@ Automaton minimizeAutomaton(AM A) {
       }
     }
   }
+
   // make inverse mapping
   vector<int> inverse[partition.size()][10];
   for (int i = 0; i < partition.size(); ++i) {
@@ -52,6 +55,7 @@ Automaton minimizeAutomaton(AM A) {
       inverse[A.next(state, a)][a].push_back(state);
     }
   }
+
   // Hopcroft minimization
   vector<int> begin = {0}, mid = {0}, end = {partition.size()};
   auto mark = [&](int state) {
@@ -61,6 +65,7 @@ Automaton minimizeAutomaton(AM A) {
     swap(pos[state], pos[state_]);
     swap(partition[pos[state]], partition[pos[state_]]);
   };
+
   auto refine = [&](int x) {
     if (mid[x] == begin[x]) return -1;
     if (mid[x] == end[x]) { mid[x] = begin[x]; return -1; }
@@ -81,6 +86,7 @@ Automaton minimizeAutomaton(AM A) {
       label[partition[i]] = y;
     return y;
   };
+
   for (int state: partition) 
     if (A.accept(state)) mark(state);
 
@@ -125,6 +131,7 @@ Automaton minimizeAutomaton(AM A) {
       }
     }
   }
+
   Automaton M; // completion
   M.trans.assign(begin.size(), vector<int>(10));
   M.is_accept.resize(begin.size());
@@ -137,6 +144,7 @@ Automaton minimizeAutomaton(AM A) {
     }
   }
   M.init = label[A.init];
+
   return M;
 }
 

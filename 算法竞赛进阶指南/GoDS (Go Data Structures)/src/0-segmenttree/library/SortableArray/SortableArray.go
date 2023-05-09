@@ -5,6 +5,7 @@
 // GetAll() []int
 // SortInc(start, end int)
 // SortDec(start, end int)
+// !每次操作O(loglogmaxValue)
 
 package main
 
@@ -37,11 +38,48 @@ func demo() {
 }
 
 func main() {
+	abc217e()
+	// abc237g()
 	// demo()
-	abc237g()
 }
 
-func abc217e() {}
+func abc217e() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var q int
+	fmt.Fscan(in, &q)
+
+	sa := NewSortableArray(1e9, make([]int, q))
+	left, right := 0, 0
+	append := func(x int) {
+		sa.Set(right, x)
+		right++
+	}
+	popleft := func() (res int) {
+		res = sa.Get(left)
+		left++
+		return
+	}
+	sort := func() {
+		sa.SortInc(left, right)
+	}
+
+	for i := 0; i < q; i++ {
+		var op int
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var x int
+			fmt.Fscan(in, &x)
+			append(x)
+		} else if op == 2 {
+			fmt.Fprintln(out, popleft())
+		} else {
+			sort()
+		}
+	}
+}
 
 func abc237g() {
 	in := bufio.NewReader(os.Stdin)
@@ -125,7 +163,7 @@ func (sa *SortableArray) GetAll() []int {
 }
 
 func (sa *SortableArray) SortInc(start, end int) {
-	if start == end {
+	if start >= end {
 		return
 	}
 	sa.splitAt(start)
@@ -143,7 +181,7 @@ func (sa *SortableArray) SortInc(start, end int) {
 }
 
 func (sa *SortableArray) SortDec(start, end int) {
-	if start == end {
+	if start >= end {
 		return
 	}
 	sa.SortInc(start, end)
