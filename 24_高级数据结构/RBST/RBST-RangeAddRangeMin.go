@@ -125,14 +125,12 @@ func (n *RNode) String() string {
 
 type RBST struct {
 	x, y, z, w uint32
-	data       []*RNode
-	dptr       int
 	root       *RNode
 }
 
 // Lazy randomized binary search tree
 func NewRBST(nums []E) *RBST {
-	res := &RBST{x: 123456789, y: 362436069, z: 521288629, w: 88675123, data: make([]*RNode, len(nums))}
+	res := &RBST{x: 123456789, y: 362436069, z: 521288629, w: 88675123}
 	if len(nums) > 0 {
 		res.root = res.build(0, len(nums), nums)
 	}
@@ -185,10 +183,10 @@ func (rb *RBST) Reverse(start, end int) {
 	if start >= end {
 		return
 	}
-	f1, s1 := rb.split(rb.root, end)
-	f2, s2 := rb.split(f1, start)
-	rb.toggle(s2)
-	rb.root = rb.merge(rb.merge(f2, s2), s1)
+	p21, p22 := rb.split(rb.root, end)
+	p11, p12 := rb.split(p21, start)
+	rb.toggle(p12)
+	rb.root = rb.merge(rb.merge(p11, p12), p22)
 }
 
 func (rb *RBST) ReverseAll() { rb.toggle(rb.root) }
@@ -220,7 +218,7 @@ func (rb *RBST) RotateLeft(start, stop, k int) {
 func (rb *RBST) Query(start, end int) E {
 	f1, s1 := rb.split(rb.root, start)
 	f2, s2 := rb.split(s1, end-start)
-	rb.push(f2)
+	// rb.push(f2)  // TODO
 	res := f2.sum
 	rb.root = rb.merge(f1, rb.merge(f2, s2))
 	return res
@@ -239,16 +237,10 @@ func (rb *RBST) Update(start, end int, lazy Id) {
 }
 
 func (rb *RBST) Get(pos int) E {
-	if pos < 0 {
-		pos += rb.Size()
-	}
 	return rb.Query(pos, pos+1)
 }
 
 func (rb *RBST) Set(pos int, e E) {
-	if pos < 0 {
-		pos += rb.Size()
-	}
 	f1, s1 := rb.split(rb.root, pos)
 	f2, s2 := rb.split(s1, 1)
 	*f2 = *rb.alloc(e)
@@ -358,10 +350,10 @@ func (rb *RBST) String() string {
 
 // merge l and r, return new root
 func (rb *RBST) merge(l, r *RNode) *RNode {
-	if l == nil {
-		return r
-	}
-	if r == nil {
+	if l == nil || r == nil {
+		if l == nil {
+			return r
+		}
 		return l
 	}
 
@@ -369,11 +361,10 @@ func (rb *RBST) merge(l, r *RNode) *RNode {
 		rb.push(l)
 		l.right = rb.merge(l.right, r)
 		return rb.update(l)
-	} else {
-		rb.push(r)
-		r.left = rb.merge(l, r.left)
-		return rb.update(r)
 	}
+	rb.push(r)
+	r.left = rb.merge(l, r.left)
+	return rb.update(r)
 }
 
 // split root to [0,k) and [k,n)
@@ -386,11 +377,10 @@ func (rb *RBST) split(root *RNode, k int) (*RNode, *RNode) {
 		first, second := rb.split(root.left, k)
 		root.left = second
 		return first, rb.update(root)
-	} else {
-		first, second := rb.split(root.right, k-rb.size(root.left)-1)
-		root.right = first
-		return rb.update(root), second
 	}
+	first, second := rb.split(root.right, k-rb.size(root.left)-1)
+	root.right = first
+	return rb.update(root), second
 }
 
 func (rb *RBST) update(t *RNode) *RNode {
@@ -444,27 +434,23 @@ func (rb *RBST) push(t *RNode) {
 }
 
 func (rb *RBST) alloc(v E) *RNode {
-	if rb.dptr >= len(rb.data) {
-		rb.resize(1 + len(rb.data)*2)
-	}
 	res := &RNode{val: v, sum: v, sz: 1, lazy: rb.id()}
-	rb.data[rb.dptr] = res
-	rb.dptr++
 	return res
-}
-
-func (rb *RBST) resize(n int) {
-	newData := make([]*RNode, n)
-	copy(newData, rb.data)
-	rb.data = newData
 }
 
 func (rb *RBST) build(l, r int, nums []E) *RNode {
 	if r-l == 1 {
-		t := rb.alloc(nums[l])
-		return rb.update(t)
+		return rb.alloc(nums[l])
 	}
-	return rb.update(rb.merge(rb.build(l, (l+r)/2, nums), rb.build((l+r)/2, r, nums)))
+	mid := (l + r) >> 1
+	root := rb.alloc(nums[mid])
+	if l < mid {
+		root.left = rb.build(l, mid, nums)
+	}
+	if mid+1 < r {
+		root.right = rb.build(mid+1, r, nums)
+	}
+	return rb.update(root)
 }
 
 func (rb *RBST) size(node *RNode) int {
@@ -474,6 +460,7 @@ func (rb *RBST) size(node *RNode) int {
 	return node.sz
 }
 
+// XORShift
 func (rb *RBST) nextRand() uint32 {
 	t := rb.x ^ (rb.x << 11)
 	rb.x, rb.y, rb.z = rb.y, rb.z, rb.w

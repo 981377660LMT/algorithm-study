@@ -140,7 +140,7 @@ func (sg *SortableSegmentTree) SortInc(start, end int) {
 		if i == end {
 			break
 		}
-		sg.root[start] = sg.merge(c, sg.root[i])
+		sg.root[start] = sg.merge(0, sg.maxKey, c, sg.root[i])
 		sg.ss.Erase(i)
 		sg.seg.Set(start, sg.unit)
 	}
@@ -166,7 +166,7 @@ func (sg *SortableSegmentTree) GetEntries() (keys []int, values []E) {
 			values = append(values, np.x)
 			return
 		}
-		m := (l + r) / 2
+		m := (l + r) >> 1
 		if !rev {
 			dfs(np.l, l, m, rev)
 			dfs(np.r, m, r, rev)
@@ -200,13 +200,13 @@ func (sg *SortableSegmentTree) splitAt(x int) {
 	b := sg.ss.Next(a + 1)
 	sg.ss.Insert(x)
 	if !sg.rev[a] {
-		nl, nr := sg.split(sg.root[a], x-a)
+		nl, nr := sg.split(sg.root[a], 0, sg.maxKey, x-a)
 		sg.root[a], sg.root[x] = nl, nr
 		sg.rev[a], sg.rev[x] = false, false
 		sg.seg.Set(a, sg.root[a].x)
 		sg.seg.Set(x, sg.root[x].x)
 	} else {
-		nl, nr := sg.split(sg.root[a], b-x)
+		nl, nr := sg.split(sg.root[a], 0, sg.maxKey, b-x)
 		sg.root[a], sg.root[x] = nr, nl
 		sg.rev[a], sg.rev[x] = true, true
 		sg.seg.Set(a, sg.root[a].revX)
@@ -214,7 +214,7 @@ func (sg *SortableSegmentTree) splitAt(x int) {
 	}
 }
 
-func (sg *SortableSegmentTree) split(node *SNode, k int) (*SNode, *SNode) {
+func (sg *SortableSegmentTree) split(node *SNode, l, r, k int) (*SNode, *SNode) {
 	if k == 0 {
 		return nil, node
 	}
@@ -227,11 +227,12 @@ func (sg *SortableSegmentTree) split(node *SNode, k int) (*SNode, *SNode) {
 	}
 	newNode := sg.unitNode
 	b := &newNode
+	m := (l + r) >> 1
 	if k <= s {
-		nl, nr := sg.split(node.l, k)
+		nl, nr := sg.split(node.l, l, m, k)
 		b.l, b.r, node.l, node.r = nr, node.r, nl, nil
 	} else {
-		nl, nr := sg.split(node.r, k-s)
+		nl, nr := sg.split(node.r, m, r, k-s)
 		node.r, b.l, b.r = nl, nil, nr
 	}
 	sg.update(node)
@@ -239,15 +240,20 @@ func (sg *SortableSegmentTree) split(node *SNode, k int) (*SNode, *SNode) {
 	return node, b
 }
 
-func (sg *SortableSegmentTree) merge(a, b *SNode) *SNode {
-	if a == nil {
-		return b
-	}
-	if b == nil {
+func (sg *SortableSegmentTree) merge(l, r int, a, b *SNode) *SNode {
+	if a == nil || b == nil {
+		if a == nil {
+			return b
+		}
 		return a
 	}
-	a.l = sg.merge(a.l, b.l)
-	a.r = sg.merge(a.r, b.r)
+	if r == l+1 {
+		a.size += b.size
+		return a
+	}
+	m := (l + r) >> 1
+	a.l = sg.merge(l, m, a.l, b.l)
+	a.r = sg.merge(m, r, a.r, b.r)
 	sg.update(a)
 	return a
 }
@@ -279,7 +285,7 @@ func (sg *SortableSegmentTree) setRec(node *SNode, l, r, k int, x E) {
 		node.revX = x
 		return
 	}
-	m := (l + r) / 2
+	m := (l + r) >> 1
 	if k < m {
 		if node.l == nil {
 			newNode := sg.unitNode

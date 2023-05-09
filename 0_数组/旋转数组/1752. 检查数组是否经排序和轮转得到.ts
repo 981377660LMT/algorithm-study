@@ -12,7 +12,7 @@
 // }
 
 // 至多存在一个下降点
-function check2(nums: number[]): boolean {
+function sum2(nums: number[]): boolean {
   let down = 0
 
   for (let i = 0; i < nums.length; i++) {
@@ -22,4 +22,4 @@ function check2(nums: number[]): boolean {
   return down <= 1
 }
 
-console.log(check2([3, 4, 5, 1, 2]))
+console.log(sum2([3, 4, 5, 1, 2]))

@@ -1,4 +1,5 @@
-// https://hitonanode.github.io/cplib-cpp/data_structure/lazy_rbst.hpp
+// https://hitonanode.github.io/cplib-cpp/data_structure/lazy_rbst.hpp (有一些问题)
+// https://nyaannyaan.github.io/library/rbst/rbst-base.hpp  (没问题)
 
 // Api:
 //  func NewRBST(n int) *RBST
@@ -26,96 +27,52 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"math/rand"
-	"os"
+	"time"
 )
 
-const MOD int = 998244353
-
-// 动态数组仿射变换
-func DynamicRangeAffineRangeSum() {
-	// https://judge.yosupo.jp/problem/dynamic_sequence_range_affine_range_sum
-	// 插入/删除/翻转/区间仿射变换/区间求和
-
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-	nums := make([]E, n)
-	for i := range nums {
-		fmt.Fscan(in, &nums[i].sum)
-		nums[i].size = 1
+// RangeChmaxRangeMax
+func lengthOfLIS(nums []int, k int) int {
+	initNums := make([]E, 1e5+1)
+	rbst := NewRBST(initNums)
+	for _, num := range nums {
+		preMax := rbst.Query(max(0, num-k), num)
+		rbst.Update(num, num+1, preMax+1)
 	}
-
-	rbst := NewRBST(nums)
-	for i := 0; i < q; i++ {
-		var op int
-		fmt.Fscan(in, &op)
-		if op == 0 {
-			var i, x int
-			fmt.Fscan(in, &i, &x)
-			rbst.Insert(i, E{sum: x, size: 1})
-		} else if op == 1 {
-			var i int
-			fmt.Fscan(in, &i)
-			rbst.Pop(i)
-		} else if op == 2 {
-			var start, end int
-			fmt.Fscan(in, &start, &end)
-			rbst.Reverse(start, end)
-		} else if op == 3 {
-			var start, end, mul, add int
-			fmt.Fscan(in, &start, &end, &mul, &add)
-			rbst.Update(start, end, Id{flip: true, mul: mul, add: add})
-		} else if op == 4 {
-			var start, end int
-			fmt.Fscan(in, &start, &end)
-			fmt.Fprintln(out, rbst.Query(start, end).sum%MOD)
-		}
-	}
-
+	return rbst.QueryAll()
 }
 
 func main() {
-	nums := []E{{1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}}
-	rbst := NewRBST(nums)
-	rbst.RotateLeft(2, 3, 2)
-	fmt.Println(rbst)
+	nums := []int{1, 3, 5, 4, 7}
+	R := NewRBST(nums)
+	fmt.Println(R.QueryAll())
+	R.Set(0, 100)
+	fmt.Println(R)
 }
 
-type E = struct{ sum, size int }
-type Id = struct {
-	flip     bool
-	mul, add int
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
+
+const INF int = 1e18
+
+type E = int
+type Id = int
 
 // toggle时翻转左右的行为
+// toggle时翻转左右的行为
 func (*RBST) rev(e E) E     { return e }
-func (*RBST) id() Id        { return Id{flip: false, mul: 1, add: 0} }
-func (*RBST) op(e1, e2 E) E { return E{(e1.sum + e2.sum) % MOD, e1.size + e2.size} }
+func (*RBST) id() Id        { return -INF }
+func (*RBST) op(e1, e2 E) E { return max(e1, e2) }
 
 func (*RBST) mapping(f Id, e E) E {
-	if !f.flip {
-		return e
-	}
-	mul, add := f.mul, f.add
-	return E{(mul*e.sum%MOD + add*e.size%MOD) % MOD, e.size}
+	return max(f, e)
 }
-
 func (*RBST) composition(f, g Id) Id {
-	if !f.flip {
-		return g
-	}
-	if !g.flip {
-		return f
-	}
-	newMul, newAdd := f.mul, f.add
-	oldMul, oldAdd := g.mul, g.add
-	return Id{flip: true, mul: newMul * oldMul % MOD, add: (newMul*oldAdd%MOD + newAdd) % MOD}
+	return max(f, g)
 }
 
 type RNode struct {
@@ -131,21 +88,15 @@ func (n *RNode) String() string {
 }
 
 type RBST struct {
-	x, y, z, w uint32
-	data       []*RNode
-	dptr       int
-	root       *RNode
+	seed uint64
+	root *RNode
 }
 
 // Lazy randomized binary search tree
 func NewRBST(nums []E) *RBST {
-	res := &RBST{x: 123456789, y: 362436069, z: 521288629, w: 88675123, data: make([]*RNode, len(nums))}
+	res := &RBST{seed: uint64(time.Now().UnixNano()/2 + 1)}
 	if len(nums) > 0 {
 		res.root = res.build(0, len(nums), nums)
-	}
-	init := rand.Intn(100) + 1
-	for i := 0; i < init; i++ {
-		res.nextRand()
 	}
 	return res
 }
@@ -192,10 +143,10 @@ func (rb *RBST) Reverse(start, end int) {
 	if start >= end {
 		return
 	}
-	f1, s1 := rb.split(rb.root, end)
-	f2, s2 := rb.split(f1, start)
-	rb.toggle(s2)
-	rb.root = rb.merge(rb.merge(f2, s2), s1)
+	p21, p22 := rb.split(rb.root, end)
+	p11, p12 := rb.split(p21, start)
+	rb.toggle(p12)
+	rb.root = rb.merge(rb.merge(p11, p12), p22)
 }
 
 func (rb *RBST) ReverseAll() { rb.toggle(rb.root) }
@@ -227,7 +178,7 @@ func (rb *RBST) RotateLeft(start, stop, k int) {
 func (rb *RBST) Query(start, end int) E {
 	f1, s1 := rb.split(rb.root, start)
 	f2, s2 := rb.split(s1, end-start)
-	rb.push(f2)
+	// rb.push(f2)  // TODO
 	res := f2.sum
 	rb.root = rb.merge(f1, rb.merge(f2, s2))
 	return res
@@ -246,16 +197,10 @@ func (rb *RBST) Update(start, end int, lazy Id) {
 }
 
 func (rb *RBST) Get(pos int) E {
-	if pos < 0 {
-		pos += rb.Size()
-	}
 	return rb.Query(pos, pos+1)
 }
 
 func (rb *RBST) Set(pos int, e E) {
-	if pos < 0 {
-		pos += rb.Size()
-	}
 	f1, s1 := rb.split(rb.root, pos)
 	f2, s2 := rb.split(s1, 1)
 	*f2 = *rb.alloc(e)
@@ -365,22 +310,21 @@ func (rb *RBST) String() string {
 
 // merge l and r, return new root
 func (rb *RBST) merge(l, r *RNode) *RNode {
-	if l == nil {
-		return r
-	}
-	if r == nil {
+	if l == nil || r == nil {
+		if l == nil {
+			return r
+		}
 		return l
 	}
 
-	if rb.nextRand()%uint32((l.sz+r.sz)) < uint32(l.sz) {
+	if int(rb.nextRand()*(uint64(l.sz)+uint64(r.sz))>>32) < l.sz {
 		rb.push(l)
 		l.right = rb.merge(l.right, r)
 		return rb.update(l)
-	} else {
-		rb.push(r)
-		r.left = rb.merge(l, r.left)
-		return rb.update(r)
 	}
+	rb.push(r)
+	r.left = rb.merge(l, r.left)
+	return rb.update(r)
 }
 
 // split root to [0,k) and [k,n)
@@ -393,11 +337,10 @@ func (rb *RBST) split(root *RNode, k int) (*RNode, *RNode) {
 		first, second := rb.split(root.left, k)
 		root.left = second
 		return first, rb.update(root)
-	} else {
-		first, second := rb.split(root.right, k-rb.size(root.left)-1)
-		root.right = first
-		return rb.update(root), second
 	}
+	first, second := rb.split(root.right, k-rb.size(root.left)-1)
+	root.right = first
+	return rb.update(root), second
 }
 
 func (rb *RBST) update(t *RNode) *RNode {
@@ -451,27 +394,23 @@ func (rb *RBST) push(t *RNode) {
 }
 
 func (rb *RBST) alloc(v E) *RNode {
-	if rb.dptr >= len(rb.data) {
-		rb.resize(1 + len(rb.data)*2)
-	}
 	res := &RNode{val: v, sum: v, sz: 1, lazy: rb.id()}
-	rb.data[rb.dptr] = res
-	rb.dptr++
 	return res
-}
-
-func (rb *RBST) resize(n int) {
-	newData := make([]*RNode, n)
-	copy(newData, rb.data)
-	rb.data = newData
 }
 
 func (rb *RBST) build(l, r int, nums []E) *RNode {
 	if r-l == 1 {
-		t := rb.alloc(nums[l])
-		return rb.update(t)
+		return rb.alloc(nums[l])
 	}
-	return rb.update(rb.merge(rb.build(l, (l+r)/2, nums), rb.build((l+r)/2, r, nums)))
+	mid := (l + r) >> 1
+	root := rb.alloc(nums[mid])
+	if l < mid {
+		root.left = rb.build(l, mid, nums)
+	}
+	if mid+1 < r {
+		root.right = rb.build(mid+1, r, nums)
+	}
+	return rb.update(root)
 }
 
 func (rb *RBST) size(node *RNode) int {
@@ -482,9 +421,8 @@ func (rb *RBST) size(node *RNode) int {
 }
 
 // XORShift
-func (rb *RBST) nextRand() uint32 {
-	t := rb.x ^ (rb.x << 11)
-	rb.x, rb.y, rb.z = rb.y, rb.z, rb.w
-	rb.w = (rb.w ^ (rb.w >> 19)) ^ (t ^ (t >> 8))
-	return rb.w
+func (rb *RBST) nextRand() uint64 {
+	rb.seed ^= rb.seed << 7
+	rb.seed ^= rb.seed >> 9
+	return rb.seed & 0xFFFFFFFF
 }
