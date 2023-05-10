@@ -26,7 +26,7 @@
 #  In Proceedings of the 7th Annual ACM Symposium on Theory of Computing (STOC'75),
 #  pp. 245--254.
 #
-
+# https://sotanishy.github.io/cp-library-cpp/graph/chordal_graph_recognition.hpp
 
 # 弦图判定
 # 弦(chordal):连接环上不相邻两点之间的边

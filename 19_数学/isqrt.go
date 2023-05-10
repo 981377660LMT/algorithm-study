@@ -3,21 +3,27 @@
 
 package main
 
-import "math"
+import (
+	"fmt"
+)
 
-// 求 x 的平方根的整数部分.
-//  0 <= x < 1<<31
-func ISqrt(x int) int {
-	if x == 0 {
-		return 0
+func Isqrt(x int) int {
+	x0 := x >> 1
+	if x0 == 0 {
+		return x
 	}
-	C, x0 := float64(x), float64(x)
-	for {
-		xi := 0.5 * (x0 + C/x0)
-		if math.Abs(x0-xi) < 1e-7 {
-			break
-		}
-		x0 = xi
+	x1 := (x0 + x/x0) >> 1
+	for x1 < x0 {
+		x0 = x1
+		x1 = (x0 + x/x0) >> 1
 	}
-	return int(x0)
+	return x0
+}
+
+func main() {
+	fmt.Println(Isqrt(5))
+	// check 1e18 to 1e18+100
+	for i := 0; i < 100; i++ {
+		fmt.Println(Isqrt(1000000000000000000 + i))
+	}
 }

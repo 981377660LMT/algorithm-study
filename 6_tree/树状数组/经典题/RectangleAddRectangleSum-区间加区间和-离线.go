@@ -43,7 +43,7 @@ func main() {
 	}
 }
 
-const MOD int = 998244353
+const MOD int = 998244353 // 如果不需要取模，则为1e18
 
 type RectangleAddRectangleSum struct {
 	addQueries []_addQuery

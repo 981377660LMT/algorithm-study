@@ -160,6 +160,8 @@ class 写像十二相:
 
     def H(self, n: int, k: int) -> int:
         """可重复选取元素的组合数"""
+        if n == 0:
+            return 1 if k == 0 else 0
         return self.C(n + k - 1, k)
 
     def put(self, n: int, k: int) -> int:

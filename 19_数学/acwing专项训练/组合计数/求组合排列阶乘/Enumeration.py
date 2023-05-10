@@ -1,4 +1,7 @@
 # 求组合数
+# mod为素数且0<=n,k<min(mod,1e7)
+
+
 class Enumeration:
     __slots__ = ("_fac", "_ifac", "_inv", "_mod")
 
@@ -35,18 +38,21 @@ class Enumeration:
         return self.fac(n) * self.ifac(n - k) % mod
 
     def H(self, n: int, k: int) -> int:
-        """可重复选取元素的组合数."""
+        """可重复选取元素的组合数"""
+        if n == 0:
+            return 1 if k == 0 else 0
         return self.C(n + k - 1, k)
 
     def put(self, n: int, k: int) -> int:
-        """n个相同的球放入k个不同的盒子(盒子可放任意个球)的方法数."""
+        """n个相同的球放入k个不同的盒子(盒子可放任意个球)的方案数."""
         return self.C(n + k - 1, n)
 
     def catalan(self, n: int) -> int:
-        """卡特兰数."""
+        """卡特兰数"""
         return self.C(2 * n, n) * self.inv(n + 1) % self._mod
 
     def _expand(self, size: int) -> None:
+        size = min(size, self._mod - 1)
         if len(self._fac) < size + 1:
             mod = self._mod
             preSize = len(self._fac)
@@ -70,14 +76,14 @@ if __name__ == "__main__":
     sys.setrecursionlimit(int(1e9))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
     T = int(input())
-    C = Combination(2 * 10**6 + 10)
+    C = Enumeration(10**6 + 10, 10**9 + 7)
     for _ in range(T):
         s = input()
         op = s[0]
         inner = s[2:-1]
         n, k = map(int, inner.split(","))
         if op == "C":
-            print(C(n, k))
+            print(C.C(n, k))
         elif op == "P":
             print(C.P(n, k))
         elif op == "H":

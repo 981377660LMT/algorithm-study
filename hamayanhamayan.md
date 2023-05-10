@@ -45,6 +45,10 @@ https://emthrm.github.io/cp-library/dual_problem.html
 - noshi 的分享
   算法:https://noshi91.github.io/algorithm-encyclopedia/#boruvka
   数据结构:https://scrapbox.io/data-structures/
+- 好的博客
+  https://rsk0315.hatenablog.com/archive/2022/10
+  https://qiita.com/drken
+  https://qiita.com/e869120
 - **数学**
 
   - [ ] 总览

@@ -228,6 +228,28 @@ def countPrime(lower: int, upper: int) -> int:
     return sum(isPrime)
 
 
+def segmentedSieve(floor: int, higher: int) -> List[bool]:
+    """分段筛求 [floor,higher) 中的每个数是否为质数.
+    1<=floor<=higher<=1e12,higher-floor<=5e5
+    """
+    root = 1
+    while (root + 1) * (root + 1) < higher:
+        root += 1
+    is_prime = [True] * (root + 1)
+    is_prime[0] = False
+    is_prime[1] = False
+    res = [True] * (higher - floor)
+    if floor < 2:
+        res[: 2 - floor] = [False] * (2 - floor)
+    for i in range(2, root + 1):
+        if is_prime[i]:
+            for j in range(i * i, root + 1, i):
+                is_prime[j] = False
+            for j in range(max((floor + i - 1) // i, 2) * i, higher, i):
+                res[j - floor] = False
+    return res
+
+
 if __name__ == "__main__":
     for i in range(1000):
         assert getPrimeFactors1(i) == getPrimeFactors2(i)

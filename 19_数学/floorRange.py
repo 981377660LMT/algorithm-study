@@ -1,5 +1,5 @@
-# quotient_range
-# 数论分块
+# quotient_range/Enumerate Quotients
+# 数论分块-商列举
 
 
 from typing import List, Tuple
@@ -51,3 +51,10 @@ if __name__ == "__main__":
         res += x * y
         res %= MOD
     print(res)
+
+    # https://judge.yosupo.jp/problem/enumerate_quotients
+    n = int(input())
+    res = floorRange(n)
+    print(len(res))
+    for left, right, div in res[::-1]:
+        print(div, end=" ")

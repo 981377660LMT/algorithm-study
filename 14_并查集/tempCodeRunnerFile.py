@@ -1,1 +1,0 @@
-len(adjMap[u]) for u in group

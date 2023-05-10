@@ -47,6 +47,25 @@ func main() {
 	fmt.Println(nums2)
 }
 
+type FHQTreap struct {
+	seed  uint64
+	root  int
+	nodes []Node
+}
+
+// Need to be modified according to the actual situation to implement a segment tree.
+func NewDynamicSequence(nums []int) *FHQTreap {
+	treap := &FHQTreap{
+		seed:  uint64(time.Now().UnixNano()/2 + 1),
+		nodes: make([]Node, 0, max(len(nums), 16)),
+	}
+
+	dummy := &Node{size: 0} // 0 is dummy
+	treap.nodes = append(treap.nodes, *dummy)
+	treap.root = treap.build(1, len(nums), nums)
+	return treap
+}
+
 type Node struct {
 	// !Raw value
 	element int
@@ -113,25 +132,6 @@ func (t *FHQTreap) propagate(root int, delta int) {
 	node.element += delta // need to update raw value (differs from segment tree)
 	node.sum += delta * node.size
 	node.lazyAdd += delta
-}
-
-type FHQTreap struct {
-	seed  uint64
-	root  int
-	nodes []Node
-}
-
-// Need to be modified according to the actual situation to implement a segment tree.
-func NewDynamicSequence(nums []int) *FHQTreap {
-	treap := &FHQTreap{
-		seed:  uint64(time.Now().UnixNano()/2 + 1),
-		nodes: make([]Node, 0, max(len(nums), 16)),
-	}
-
-	dummy := &Node{size: 0} // 0 is dummy
-	treap.nodes = append(treap.nodes, *dummy)
-	treap.root = treap.build(1, len(nums), nums)
-	return treap
 }
 
 // Return the value at the k-th position (0-indexed).

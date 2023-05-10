@@ -56,6 +56,8 @@ class Enumeration:
 
     def H(self, n: int, k: int) -> int:
         """可重复选取元素的组合数"""
+        if n == 0:
+            return 1 if k == 0 else 0
         return self.C(n + k - 1, k)
 
     def put(self, n: int, k: int) -> int:
@@ -67,6 +69,7 @@ class Enumeration:
         return self.C(2 * n, n) * self.inv(n + 1) % self._mod
 
     def _expand(self, size: int) -> None:
+        size = min(size, self._mod - 1)
         if len(self._fac) < size + 1:
             mod = self._mod
             preSize = len(self._fac)

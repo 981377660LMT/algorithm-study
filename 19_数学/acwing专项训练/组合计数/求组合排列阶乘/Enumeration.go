@@ -2,6 +2,12 @@
 
 package main
 
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
+
 var E *Enumeration
 
 func init() {
@@ -68,6 +74,12 @@ func (e *Enumeration) P(n, k int) int {
 
 // 可重复选取元素的组合数.
 func (e *Enumeration) H(n, k int) int {
+	if n == 0 {
+		if k == 0 {
+			return 1
+		}
+		return 0
+	}
 	return e.C(n+k-1, k)
 }
 
@@ -82,6 +94,9 @@ func (e *Enumeration) Catalan(n int) int {
 }
 
 func (e *Enumeration) expand(size int) {
+	if upper := e.mod - 1; size > upper {
+		size = upper
+	}
 	if len(e.fac) < size+1 {
 		mod := e.mod
 		preSize := len(e.fac)
@@ -114,22 +129,28 @@ func Pow(base, exp, mod int) int {
 	return res
 }
 
-// if __name__ == "__main__":
-//     # https://yukicoder.me/problems/no/117
-//     import sys
+func main() {
+	// https://yukicoder.me/problems/no/117
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-//     sys.setrecursionlimit(int(1e9))
-//     input = lambda: sys.stdin.readline().rstrip("\r\n")
-//     T = int(input())
-//     C = Combination(2 * 10**6 + 10)
-//     for _ in range(T):
-//         s = input()
-//         op = s[0]
-//         inner = s[2:-1]
-//         n, k = map(int, inner.split(","))
-//         if op == "C":
-//             print(C(n, k))
-//         elif op == "P":
-//             print(C.P(n, k))
-//         elif op == "H":
-//             print(C.H(n, k))
+	var T int
+	fmt.Fscan(in, &T)
+	for ; T > 0; T-- {
+		var s string
+		fmt.Fscan(in, &s)
+		op := s[0]
+		inner := s[2 : len(s)-1]
+		var n, k int
+		fmt.Sscanf(inner, "%d,%d", &n, &k)
+		switch op {
+		case 'C':
+			fmt.Fprintln(out, E.C(n, k))
+		case 'P':
+			fmt.Fprintln(out, E.P(n, k))
+		case 'H':
+			fmt.Fprintln(out, E.H(n, k))
+		}
+	}
+}

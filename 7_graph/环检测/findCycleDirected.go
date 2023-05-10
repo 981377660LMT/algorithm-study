@@ -1,4 +1,4 @@
-// 有向图找环(任意一个环)
+// 有向图找环(返回任意一个极小的环(即环里不存在弦))
 
 package main
 
@@ -37,8 +37,10 @@ func FindCycleDirected(n int, edges [][2]int) (vs []int, es []int) {
 	parent := make([][2]int, n)
 	type edge struct{ to, id int }
 	graph := make([][]edge, n)
+	edgesWithId := make([][3]int, len(edges))
 	for i, e := range edges {
 		u, v := e[0], e[1]
+		edgesWithId[i] = [3]int{e[0], e[1], i}
 		graph[u] = append(graph[u], edge{v, i})
 	}
 
@@ -78,9 +80,44 @@ func FindCycleDirected(n int, edges [][2]int) (vs []int, es []int) {
 		return
 	}
 
-	vs = make([]int, len(es))
-	for i := range es {
-		vs[i] = edges[es[i]][0]
+	// 寻找极小环
+	nexts := make([]int, n)
+	for i := 0; i < n; i++ {
+		nexts[i] = -1
 	}
+	for _, eid := range es {
+		nexts[edgesWithId[eid][0]] = eid
+	}
+
+	for _, e := range edgesWithId {
+		a, b := e[0], e[1]
+		if nexts[a] == -1 || nexts[b] == -1 || edgesWithId[nexts[a]][1] == b {
+			continue
+		}
+		for a != b {
+			t := edgesWithId[nexts[a]][1]
+			nexts[a] = -1
+			a = t
+		}
+		nexts[e[0]] = e[2]
+	}
+
+	es = es[:0]
+	for v := 0; v < n; v++ {
+		if nexts[v] == -1 {
+			continue
+		}
+		x := v
+		for {
+			vs = append(vs, x)
+			es = append(es, nexts[x])
+			x = edgesWithId[nexts[x]][1]
+			if x == v {
+				break
+			}
+		}
+		break
+	}
+
 	return
 }

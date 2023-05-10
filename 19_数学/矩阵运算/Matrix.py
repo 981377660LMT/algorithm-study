@@ -275,21 +275,22 @@ if __name__ == "__main__":
     # inv = A.inverse()
     # print(-1 if inv is None else inv)
 
-    # System of Linear Equations
-    # 解方程 Ax = b
-    # n, m = map(int, input().split())
-    # grid = [list(map(int, input().split())) for _ in range(n)]
-    # A = Matrix.fromlist(grid)
-    # b = list(map(int, input().split()))
-    # dim, sol, vecs = A.linear_equations(b)
-    # print(dim)
-    # print(*sol)
-    # for v in vecs:
-    #     print(*v)
-
     # 特征多项式
-    N = int(input())
-    mat = [list(map(int, input().split())) for _ in range(N)]
-    A = Matrix.fromlist(mat)
-    P = A.characteristic_polynomial()
-    print(*P)
+    # N = int(input())
+    # mat = [list(map(int, input().split())) for _ in range(N)]
+    # A = Matrix.fromlist(mat)
+    # P = A.characteristic_polynomial()
+    # print(*P)
+
+    # System of Linear Equations
+    # 求解线性方程组 Ax=b
+    # O(m*n^2)
+    n, m = map(int, input().split())
+    grid = [list(map(int, input().split())) for _ in range(n)]
+    A = Matrix.fromlist(grid)
+    b = list(map(int, input().split()))
+    dim, sol, vecs = A.linear_equations(b)
+    print(dim)
+    print(*sol)
+    for v in vecs:
+        print(*v)
