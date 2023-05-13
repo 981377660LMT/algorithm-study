@@ -5,13 +5,53 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 	"strings"
 )
 
 func main() {
+	// 3 1 2
+	// 112
+	// 2 2 3 1
+	// 1 1 3 8
+	// 2 1 2 1
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
+	var n, m, k int
+	fmt.Fscan(in, &n, &m, &k)
+	var s string
+	fmt.Fscan(in, &s)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		nums[i] = int(s[i] - '0')
+	}
+	leaves := make([]E, n)
+	for i := 0; i < n; i++ {
+		leaves[i] = CreateE(uint(nums[i]))
+	}
+
+	seg := NewLazySegTree(leaves)
+	for i := 0; i < m+k; i++ {
+		var op, l, r, v int
+		fmt.Fscan(in, &op, &l, &r, &v)
+		l--
+		if op == 1 { // RangeAssign
+			seg.Update(l, r, uint(v))
+		} else { // RangeQuery
+			res1 := seg.Query(l+v, r)
+			res2 := seg.Query(l, r-v)
+			if res1.hash1 == res2.hash1 && res1.hash2 == res2.hash2 {
+				fmt.Fprintln(out, "YES")
+			} else {
+				fmt.Fprintln(out, "NO")
+			}
+		}
+	}
 }
 
 const INF uint = 1e18
@@ -19,17 +59,23 @@ const N int = 1e5 + 10
 
 var BASEPOW0 [N]uint
 var BASEPOW1 [N]uint
+var BASEPOW2 [N]uint
+var BASEPOW3 [N]uint
 
 func init() {
 	BASEPOW0[0] = 1
 	BASEPOW1[0] = 1
+	BASEPOW2[0] = 1
+	BASEPOW3[0] = 1
 	for i := 1; i < N; i++ {
 		BASEPOW0[i] = BASEPOW0[i-1] * BASE0
 		BASEPOW1[i] = BASEPOW1[i-1] * BASE1
+		BASEPOW2[i] = BASEPOW2[i-1]*BASE0 + 1
+		BASEPOW3[i] = BASEPOW3[i-1]*BASE1 + 1
 	}
 }
 
-// RangeAssignRangeHash
+// !RangeAssignRangeHash
 
 // 131/13331/1713302033171(回文素数)
 const BASE0 = 131
@@ -40,8 +86,8 @@ type E = struct {
 	hash1, hash2 uint
 }
 
-func CreateE(c uint) E {
-	return E{len: 1, hash1: c, hash2: c}
+func CreateE(h uint) E {
+	return E{len: 1, hash1: h, hash2: h}
 }
 
 type Id = uint
@@ -55,12 +101,14 @@ func (*LazySegTree) op(a, b E) E {
 		hash2: a.hash2*BASEPOW1[b.len] + b.hash2,
 	}
 }
+
 func (*LazySegTree) mapping(f Id, g E) E {
 	if f == INF {
 		return g
 	}
-	return E{f * g.size, g.size, f}
+	return E{len: g.len, hash1: f * BASEPOW2[g.len-1], hash2: f * BASEPOW3[g.len-1]}
 }
+
 func (*LazySegTree) composition(f, g Id) Id {
 	if f == INF {
 		return g
@@ -74,6 +122,7 @@ func min(a, b int) int {
 	}
 	return b
 }
+
 func max(a, b int) int {
 	if a < b {
 		return b

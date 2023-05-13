@@ -1,7 +1,3 @@
-from typing import List
-from functools import lru_cache
-from bisect import bisect_right
-
 # 每一步「操作」中，你可以分别从 arr1 和 arr2 中各选出一个索引，
 # 分别为 i 和 j，0 <= i < arr1.length 和 0 <= j < arr2.length，
 # 然后进行赋值运算 arr1[i] = arr2[j]。
@@ -12,6 +8,12 @@ from bisect import bisect_right
 
 # dfs(i, prev): "i" represents index in arr1. "prev" represents the previous element in arr1 after swap (or maybe not swap).
 # 每遍历一个arr1中的元素，就要看是否需要交换，需要比pre大；并作为pre记录进行下一次dfs
+
+
+from typing import List
+from functools import lru_cache
+from bisect import bisect_right
+
 
 INF = int(1e20)
 

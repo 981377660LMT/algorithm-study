@@ -43,6 +43,7 @@ type E = struct {
 func CreateE(c uint) E {
 	return E{len: 1, hash1: c, hash2: c}
 }
+
 func (*SegmentTreeHash) e() E { return E{} }
 func (*SegmentTreeHash) op(a, b E) E {
 	return E{

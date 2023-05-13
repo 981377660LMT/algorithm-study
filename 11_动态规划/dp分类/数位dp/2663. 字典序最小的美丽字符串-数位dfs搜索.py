@@ -1,12 +1,3 @@
-import sys
-from typing import List, Tuple, Optional
-from collections import defaultdict, Counter
-from sortedcontainers import SortedList
-
-MOD = int(1e9 + 7)
-INF = int(1e20)
-
-
 # 如果一个字符串满足以下条件，则称其为 美丽字符串 ：
 
 # 它由英语小写字母表的前 k 个字母组成。
@@ -16,8 +7,8 @@ INF = int(1e20)
 # 对于长度相同的两个字符串 a 和 b ，如果字符串 a 在与字符串 b 不同的第一个位置上的字符字典序更大，则字符串 a 的字典序大于字符串 b 。
 # 例如，"abcd" 的字典序比 "abcc" 更大，因为在不同的第一个位置（第四个字符）上 d 的字典序大于 c 。
 
-
-# 不存在长度>=2的回文子串等价于不存在长2和3的回文串(ARC考过一次)
+# 2663. 字典序最小的美丽字符串
+# !不存在长度>=2的回文子串等价于不存在长2和3的回文串(ARC考过一次)
 # !记录前两个字符，然后dfs
 
 
@@ -41,12 +32,6 @@ class Solution:
         ords = list(map(ord, s))
         res = next(dfs(0, True, 0, -1), [])
         return "".join(res)
-
-
-# "abcz"
-# 26
-
-# "cegba"
 
 
 print(Solution().smallestBeautifulString(s="dcb" * 100, k=4))

@@ -1,1 +1,0 @@
-res.append(str(d))

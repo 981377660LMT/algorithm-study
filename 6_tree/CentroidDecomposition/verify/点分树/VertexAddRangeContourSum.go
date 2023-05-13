@@ -9,70 +9,39 @@ package main
 import (
 	"bufio"
 	"fmt"
-	stdio "io"
 	"os"
-	"strconv"
 )
 
-// from https://atcoder.jp/users/ccppjsrb
-var io *Iost
-
-type Iost struct {
-	Scanner *bufio.Scanner
-	Writer  *bufio.Writer
-}
-
-func NewIost(fp stdio.Reader, wfp stdio.Writer) *Iost {
-	const BufSize = 2000005
-	scanner := bufio.NewScanner(fp)
-	scanner.Split(bufio.ScanWords)
-	scanner.Buffer(make([]byte, BufSize), BufSize)
-	return &Iost{Scanner: scanner, Writer: bufio.NewWriter(wfp)}
-}
-func (io *Iost) Text() string {
-	if !io.Scanner.Scan() {
-		panic("scan failed")
-	}
-	return io.Scanner.Text()
-}
-func (io *Iost) Atoi(s string) int                 { x, _ := strconv.Atoi(s); return x }
-func (io *Iost) Atoi64(s string) int64             { x, _ := strconv.ParseInt(s, 10, 64); return x }
-func (io *Iost) Atof64(s string) float64           { x, _ := strconv.ParseFloat(s, 64); return x }
-func (io *Iost) NextInt() int                      { return io.Atoi(io.Text()) }
-func (io *Iost) NextInt64() int64                  { return io.Atoi64(io.Text()) }
-func (io *Iost) NextFloat64() float64              { return io.Atof64(io.Text()) }
-func (io *Iost) Print(x ...interface{})            { fmt.Fprint(io.Writer, x...) }
-func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x...) }
-func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
-
 func main() {
-	in := os.Stdin
-	out := os.Stdout
-	io = NewIost(in, out)
-	defer func() {
-		io.Writer.Flush()
-	}()
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-	n, q := io.NextInt(), io.NextInt()
+	var n, q int
+	fmt.Fscan(in, &n, &q)
 	values := make([]AbleGroup, n)
 	for i := range values {
-		values[i] = AbleGroup(io.NextInt())
+		fmt.Fscan(in, &values[i])
 	}
 	tree := make([][]int, n)
 	for i := 0; i < n-1; i++ {
-		a, b := io.NextInt(), io.NextInt()
+		var a, b int
+		fmt.Fscan(in, &a, &b)
 		tree[a] = append(tree[a], b)
 		tree[b] = append(tree[b], a)
 	}
 	cs := NewContourSum(tree, values)
 	for i := 0; i < q; i++ {
-		kind := io.NextInt()
+		var kind int
+		fmt.Fscan(in, &kind)
 		if kind == 0 {
-			root, x := io.NextInt(), io.NextInt()
+			var root, x int
+			fmt.Fscan(in, &root, &x)
 			cs.Add(root, x)
 		} else {
-			root, floor, higher := io.NextInt(), io.NextInt(), io.NextInt()
-			io.Println(cs.Sum(root, floor, higher))
+			var root, floor, higher int
+			fmt.Fscan(in, &root, &floor, &higher)
+			fmt.Fprintln(out, cs.Sum(root, floor, higher))
 		}
 	}
 }
@@ -97,7 +66,7 @@ func NewContourSum(tree [][]int, values []AbleGroup) *ContourSum {
 	return res
 }
 
-// root的点权加上value.
+// root的点权加上value.O(logn).
 func (cs *ContourSum) Add(root int, value AbleGroup) {
 	for _, d := range cs.data[root] {
 		i := d[2]
@@ -105,7 +74,7 @@ func (cs *ContourSum) Add(root int, value AbleGroup) {
 	}
 }
 
-// 查询距离root的距离在[lower, higher)的点的和.
+// 查询距离root的距离在[lower, higher)的点的和.O(logn^2).
 func (cs *ContourSum) Sum(root int, floor, higher int) AbleGroup {
 	res := e()
 	for _, d := range cs.data[root] {

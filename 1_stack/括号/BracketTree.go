@@ -3,15 +3,15 @@
 
 // (())() → 得到(n//2)+1 个结点,其中0号结点是虚拟根结点
 // graph: [[1 3] [2] [] []] (有向邻接表)
-// leftRight: [[0 5] [0 3] [1 2] [4 5]] (每个顶点的括号序)
+// leftRight: [[0 6] [0 3] [1 2] [4 5]] (每个顶点的括号范围,左闭右开)
 //
-//           0 (0,5)
+//           0 [0,6)
 //          / \
-//   (0,3) 1   3 (4,5)
+//   [0,4) 1   3 [4,6)
 //        /
-// (1,2) 2
+// [1,3) 2
 
-// 有效的括号序列形成的树，结合LCA
+// 有效的括号序列形成的树(括号树)，结合LCA
 
 package main
 
@@ -43,7 +43,7 @@ func main() {
 	for i := 1; i < len(leftRight); i++ {
 		left, right := leftRight[i][0], leftRight[i][1]
 		idToRoot[left] = i
-		idToRoot[right] = i
+		idToRoot[right-1] = i
 	}
 
 	lca := NewLCA((n / 2) + 1)
@@ -65,7 +65,7 @@ func main() {
 			fmt.Fprintln(out, -1)
 		} else {
 			left, right := leftRight[lca_][0], leftRight[lca_][1]
-			fmt.Fprintln(out, left+1, right+1)
+			fmt.Fprintln(out, left+1, right)
 		}
 	}
 }
@@ -73,13 +73,13 @@ func main() {
 // BracketTree :有效括号序列转换成树.
 //  (())() → 得到 `(n/2)+1` 个结点,其中0号结点是虚拟根结点.
 //  tree: [[1 3] [2] [] []] (有向邻接表)
-//  leftRight: [[0 5] [0 3] [1 2] [4 5]] (每个顶点的括号序/欧拉序)
+//  leftRight: [[0 6) [0 4) [1 3) [4 6)] (每个顶点的括号范围,左闭右开)
 //
-//            0 (0,5)
-//           / \
-//    (0,3) 1   3 (4,5)
-//         /
-//  (1,2) 2
+//           0 [0,6)
+//          / \
+//   [0,4) 1   3 [4,6)
+//        /
+// [1,3) 2
 func BracketTree(s string) (tree [][]int, leftRight [][2]int) {
 	n := len(s) / 2
 	tree = make([][]int, n+1)
@@ -100,7 +100,7 @@ func BracketTree(s string) (tree [][]int, leftRight [][2]int) {
 			nxt++
 		}
 		if s[i] == ')' {
-			leftRight[now][1] = i
+			leftRight[now][1] = i + 1
 			now = par[now]
 		}
 	}

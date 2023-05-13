@@ -1,7 +1,7 @@
 # 1461. 检查一个字符串是否包含所有长度为 K 的二进制子串
 class Solution:
     def hasAllCodes(self, s: str, k: int) -> bool:
-        return len(set(s[i : i + k] for i in range(len(s) - k + 1))) == 2 ** k
+        return len(set(s[i : i + k] for i in range(len(s) - k + 1))) == 2**k
 
 
 # 1016. 子串能表示从 1 到 N 数字的二进制串

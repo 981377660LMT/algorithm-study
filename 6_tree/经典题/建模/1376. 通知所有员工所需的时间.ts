@@ -6,9 +6,11 @@
 
 // 即：求出根节点到叶子节点的`最长路径` => dfs
 function numOfMinutes(n: number, headID: number, manager: number[], informTime: number[]): number {
-  const adjList = Array.from<unknown, [next: number, weight: number][]>({ length: n }, () => [])
+  const adjList: [number, number][][] = Array(n)
+  for (let i = 0; i < n; i++) adjList[i] = []
+
   for (let i = 0; i < n; i++) {
-    if (i == headID) continue
+    if (i === headID) continue
     const parent = manager[i]
     const weight = informTime[i]
     adjList[parent].push([i, weight])

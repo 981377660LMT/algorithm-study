@@ -141,6 +141,8 @@
    - [CentroidDecomposition](6_tree/CentroidDecomposition/CentroidDecomposition.go)
    - [DualShorestPath](7_graph/%E5%B8%A6%E6%9D%83%E5%9B%BE%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%92%8C%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/Bellman_ford/spfa/%E5%B7%AE%E5%88%86%E7%BA%A6%E6%9D%9F/%E5%B7%AE%E5%88%86%E7%BA%A6%E6%9D%9F.py)
    - [PeriodicFunctionPower](22_%E4%B8%93%E9%A2%98/%E5%80%8D%E5%A2%9E%E4%B8%8E%E5%91%A8%E6%9C%9F%E6%80%A7/PeriodicFunctionPower.ts)
+   - [BracketTree](1_stack/%E6%8B%AC%E5%8F%B7/BracketTree.py)
+   - [MinLexEulerTour](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/%E6%A0%91%E7%9A%84%E6%AC%A7%E6%8B%89%E8%B7%AF%E5%BE%84/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95-%E6%8B%AC%E5%8F%B7%E6%A0%91-%E6%A0%91%E7%9A%84%E6%AC%A7%E6%8B%89%E8%B7%AF%E5%BE%84/minLexEulerTour.py)
 
 7. **UnionFind**
 
