@@ -198,6 +198,7 @@
     - [Grundy 数](19_%E6%95%B0%E5%AD%A6/grundy/GrundyNumber.go)
     - [ModInt](19_%E6%95%B0%E5%AD%A6%E5%8D%B7%E7%A7%AF/ModInt.go)
     - [Isqrt](19_%E6%95%B0%E5%AD%A6/isqrt.go)
+    - [Nim](19_%E6%95%B0%E5%AD%A6/grundy/grundy%E6%95%B0-nim%E6%B8%B8%E6%88%8F%E6%89%BE%E8%A7%84%E5%BE%8B.py)
 
 11. **Miscellaneous**
 

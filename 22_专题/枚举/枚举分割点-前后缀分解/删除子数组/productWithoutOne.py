@@ -4,7 +4,7 @@ T = TypeVar("T")
 
 
 def productWithoutOne(nums: List[T], e: Callable[[], T], op: Callable[[T, T], T]) -> List[T]:
-    """除自身以外数组的乘积."""
+    """除自身以外数组的乘积.nums数组维护区间上的幺半群."""
     n = len(nums)
     res = [e() for _ in range(n)]
     for i in range(n - 1):

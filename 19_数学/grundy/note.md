@@ -1,3 +1,5 @@
+# sg 函数/grundy 数/nim 游戏
+
 https://zhuanlan.zhihu.com/p/20611132
 https://www.creativ.xyz/grundy-number-1065/
 ![1656079142908](image/note/1656079142908.png)

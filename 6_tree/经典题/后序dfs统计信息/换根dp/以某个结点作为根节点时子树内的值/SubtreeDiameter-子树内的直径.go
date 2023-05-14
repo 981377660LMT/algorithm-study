@@ -81,7 +81,7 @@ func (sd *SubTreeDiameter) Build() {
 		dp.path += edge.weight
 		if dp.diam < dp.path {
 			dp.diam = dp.path
-			dp.left = edge.to
+			dp.left = edge.from
 			dp.right = dp.end
 		}
 		return dp

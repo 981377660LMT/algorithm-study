@@ -11,7 +11,7 @@ function productWithoutOne<E>(nums: E[], e: () => E, op: (a: E, b: E) => E): E[]
     res[i + 1] = op(res[i], nums[i])
   }
   let x = e()
-  for (let i = n - 1; i >= 0; i--) {
+  for (let i = n - 1; ~i; i--) {
     res[i] = op(res[i], x)
     x = op(nums[i], x)
   }
