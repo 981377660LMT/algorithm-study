@@ -2,7 +2,7 @@
  * @param {Function} func
  * @param {number} wait
  */
-function throttle(func: Function, wait: number) {
+function throttle(func: (...args: any[]) => void, wait: number) {
   let timer: ReturnType<typeof setTimeout> | null = null
   let lastArgs: any = null
 

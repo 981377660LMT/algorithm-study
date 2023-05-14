@@ -143,14 +143,14 @@ if (require.main === module) {
 // 2.同步级联then
 // 3. 异步级联then：then 生产 resolve时消费
 
-function isFunction(input: any): input is Function {
+function isFunction(input: unknown): input is Function {
   return typeof input === 'function'
 }
 
-function isObject(input: any): input is Record<any, any> {
+function isObject(input: unknown): input is Record<any, unknown> {
   return input !== null && typeof input === 'object'
 }
 
-function isPromise(input: any): input is MyPromise {
+function isPromise(input: unknown): input is MyPromise {
   return isObject(input) && isFunction(input.then)
 }

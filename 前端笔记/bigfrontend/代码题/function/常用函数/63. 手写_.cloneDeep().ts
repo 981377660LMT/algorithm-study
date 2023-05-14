@@ -22,7 +22,7 @@ function cloneDeep<T = any>(o: T, visited = new WeakMap()): T {
   return res
 }
 
-function isObject(o: any): o is object {
+function isObject(o: unknown): o is object {
   return typeof o === 'object' && o !== null
 }
 

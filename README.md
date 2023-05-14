@@ -240,6 +240,7 @@
     - [SortableArray](<%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/0-segmenttree/library/SortableArray/SortableArray.go>)
     - [SortableDeque](2_queue/SortableDeque.py)
     - [SegmentSet](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/SegmentSet.ts)
+    - [productWithoutOne](22_%E4%B8%93%E9%A2%98/%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%88%86%E5%89%B2%E7%82%B9-%E5%89%8D%E5%90%8E%E7%BC%80%E5%88%86%E8%A7%A3/%E5%88%A0%E9%99%A4%E5%AD%90%E6%95%B0%E7%BB%84/productWithoutOne.py)
     - RetroactiveDS
       - [FullyRetroactiveQueue](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveQueue.go)
       - [FullyRetroactiveDeque](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveDeque.go)

@@ -1,3 +1,6 @@
+// 防抖
+// 应用场景：搜索框输入，停止输入后，再发送请求
+
 type F = (...p: unknown[]) => unknown
 
 function debounce(fn: F, ms: number): F {
