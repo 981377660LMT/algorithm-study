@@ -62,6 +62,10 @@ declare class ITree {
    */
   eid(u: number, v: number): number
   lca(u: number, v: number): number
+  /**
+   * 返回 root 为根时, u 和 v 的最近公共祖先.
+   */
+  rootedLca(u: number, v: number, root: number): number
   dist(u: number, v: number, weighted: boolean): number
   /**
    * 返回 root 的第 k 个祖先, k 从 0 开始计数.
@@ -177,6 +181,10 @@ class Tree implements ITree {
       }
       v = this.parent[this._top[v]]
     }
+  }
+
+  rootedLca(u: number, v: number, root: number): number {
+    return this.lca(u, v) ^ this.lca(u, root) ^ this.lca(v, root)
   }
 
   dist(u: number, v: number, weighted: boolean): number {

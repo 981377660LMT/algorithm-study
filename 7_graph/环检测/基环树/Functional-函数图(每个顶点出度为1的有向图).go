@@ -362,6 +362,10 @@ func (tree *Tree) LCA(u, v int) int {
 	}
 }
 
+func (tree *Tree) RootedLCA(u, v int, root int) int {
+	return tree.LCA(u, v) ^ tree.LCA(u, root) ^ tree.LCA(v, root)
+}
+
 // k: 0-based
 //  如果不存在第k个祖先，返回-1
 func (tree *Tree) KthAncestor(root, k int) int {

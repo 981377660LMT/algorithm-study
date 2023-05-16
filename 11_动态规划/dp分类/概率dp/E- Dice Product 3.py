@@ -1,24 +1,20 @@
 # Dice Product 3
+# 六面骰子，每面等概率出现。
+# 现在不断掷骰子，直到掷出来的数的乘积大于等于N
+# 问恰好为 N的概率。
+# 对 998244353取模。
+
+# !dp[n]=dp[n/1]/6+dp[n/2]/6+dp[n/3]/6+dp[n/4]/6+dp[n/5]/6+dp[n/6]/6
+# !即dp[n]=dp[n/2]/5+dp[n/3]/5+dp[n/4]/5+dp[n/5]/5+dp[n/6]/5
+
 from functools import lru_cache
 import sys
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = 998244353
-INF = int(4e18)
-# あなたは
-# 1 以上
-# 6 以下の整数が等確率で出るサイコロと整数
-# 1 を持っています。
-# あなたは持っている整数が
-# N 未満である間、次の操作を繰り返します。
 
-# サイコロを振り、出た目を
-# x とする。持っている整数に
-# x を掛ける。
-# 全ての操作を終了した時に、持っている整数が
-# N に一致する確率を
-# mod 998244353 で求めてください。
+
 if __name__ == "__main__":
     N = int(input())
 

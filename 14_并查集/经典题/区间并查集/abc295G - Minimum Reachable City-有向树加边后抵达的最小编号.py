@@ -160,6 +160,12 @@ class LCA_HLD:
             return self.rid[v] - self.lid[v]
         return len(self.tree) - self.rid[x] + self.lid[x]
 
+    def rootedLca(self, u: int, v: int, root: int) -> int:
+        lca1 = self.lca(root, u)
+        lca2 = self.lca(root, v)
+        lca3 = self.lca(u, v)
+        return lca1 ^ lca2 ^ lca3
+
     def id(self, root) -> Tuple[int, int]:
         """返回 root 的欧拉序区间, 左闭右开, 0-indexed."""
         return self.lid[root], self.rid[root]

@@ -399,6 +399,10 @@ func (tree *Tree) LCA(u, v int) int {
 	}
 }
 
+func (tree *Tree) RootedLCA(u, v int, root int) int {
+	return tree.LCA(u, v) ^ tree.LCA(u, root) ^ tree.LCA(v, root)
+}
+
 func (tree *Tree) Dist(u, v int, weighted bool) int {
 	if weighted {
 		return tree.DepthWeighted[u] + tree.DepthWeighted[v] - 2*tree.DepthWeighted[tree.LCA(u, v)]

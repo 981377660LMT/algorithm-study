@@ -12,3 +12,7 @@ for state in range(1, 1 << n):
     res += tmp * (1 if count & 1 else -1)
     res %= MOD
 ```
+
+---
+
+https://compro.tsutaj.com//archive/181015_incexc.pdf
