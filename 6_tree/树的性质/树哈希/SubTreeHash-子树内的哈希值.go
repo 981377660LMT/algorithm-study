@@ -137,9 +137,9 @@ type Edge = struct{ from, to, weight, eid int }
 
 type _ReRootingEdge struct {
 	tree *_T
-	dp1  []E // 边 parent-root 的子树 root 的 dp值
-	dp2  []E // 边 parent-root 的子树 parent 的 dp值
-	dp   []E // 顶点 v 的子树的 dp值
+	dp1  []E
+	dp2  []E
+	dp   []E
 }
 
 func _NewReRootingEdge(n int) *_ReRootingEdge {

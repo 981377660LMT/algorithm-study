@@ -11,17 +11,14 @@ https://www.cnblogs.com/xsl19/p/abc221f.html
 https://www.cnblogs.com/Kanoon/p/15380590.html#f---diameter-set
 """
 
-from collections import deque
-import sys
 from 树的直径 import calDiameter3
 
-sys.setrecursionlimit(int(1e9))
-input = lambda: sys.stdin.readline().rstrip("\r\n")
-MOD = 998244353
-INF = int(4e18)
+
+from typing import List, Set
+from collections import deque
 
 
-def bfs(start: int, depth: int) -> int:
+def bfs(adjList: List[Set[int]], start: int, depth: int) -> int:
     """统计距离start为depth的点的个数"""
     queue = deque([start])
     visited = set([start])
@@ -39,17 +36,17 @@ def bfs(start: int, depth: int) -> int:
     return 0
 
 
-def solve1() -> int:
+def solve1(adjList: List[Set[int]]) -> int:
     """直径长度为奇数,移去中间边(桥),答案为两边子树内f1*f2"""
     u, v = path[diameter // 2], path[diameter // 2 + 1]
     adjList[u].remove(v)
     adjList[v].remove(u)
-    res1 = bfs(u, diameter // 2)
-    res2 = bfs(v, diameter // 2)
+    res1 = bfs(adjList, u, diameter // 2)
+    res2 = bfs(adjList, v, diameter // 2)
     return res1 * res2 % MOD
 
 
-def solve2() -> int:
+def solve2(adjList: List[Set[int]]) -> int:
     """直径长度为偶数,移去中间点(割点),从所有染色情况中减去只染一个或不染的情况
     答案为 (f1+1)*(f2+1)*...*(fn+1)-(f1+f2+...+fn+1)
     """
@@ -58,7 +55,7 @@ def solve2() -> int:
     adjList[u].clear()
     for next in nexts:
         adjList[next].remove(u)
-    nextRes = [bfs(next, diameter // 2 - 1) for next in nexts]
+    nextRes = [bfs(adjList, next, diameter // 2 - 1) for next in nexts]
     res = 1
     for num in nextRes:
         res = res * (num + 1) % MOD
@@ -67,6 +64,12 @@ def solve2() -> int:
 
 
 if __name__ == "__main__":
+    import sys
+
+    sys.setrecursionlimit(int(1e9))
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
+    MOD = 998244353
+    INF = int(4e18)
     n = int(input())
     adjList = [set() for _ in range(n)]
     for _ in range(n - 1):
@@ -78,6 +81,6 @@ if __name__ == "__main__":
     path = calDiameter3(adjList)
     diameter = len(path) - 1
     if diameter % 2 == 0:
-        print(solve2())
+        print(solve2(adjList))
     else:
-        print(solve1())
+        print(solve1(adjList))

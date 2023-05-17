@@ -10,10 +10,14 @@
  * @returns 每个结点的子树哈希值(子树包括自己).
  */
 function treeHash(n: number, tree: number[][], root: number, seed: number): Uint32Array {
-  const random = useRandom(seed)
-  const bases = new Uint32Array(n).fill(random.next())
+  const rand = useRandom(seed)
+  const bases = new Uint32Array(n)
   const depths = new Uint32Array(n)
-  const hashes = new Uint32Array(n).fill(1)
+  const hashes = new Uint32Array(n)
+  for (let i = 0; i < n; ++i) {
+    bases[i] = rand()
+    hashes[i] = 1
+  }
   dfs(root, -1)
   return hashes
 
@@ -43,9 +47,7 @@ function useRandom(seed: number) {
     return seed >>> 0
   }
 
-  return {
-    next: fastRandom
-  }
+  return fastRandom
 }
 
 export { treeHash }

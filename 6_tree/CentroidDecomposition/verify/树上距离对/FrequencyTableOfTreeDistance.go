@@ -1,5 +1,5 @@
 // https://judge.yosupo.jp/problem/frequency_table_of_tree_distance
-// 树上所有点对的距离表(距离指两点路径上的的边数)
+// 树上所有点对的距离表(距离指两点路径上的的边数,Frequency Table of Tree Distance)
 // n<=2e5 O(nlognlogn)
 
 package main
