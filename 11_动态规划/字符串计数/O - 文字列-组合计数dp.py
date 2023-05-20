@@ -12,16 +12,14 @@
 # !分别为 C(f-1,g-1) C(a,j) C(b,g-j)
 # !新的连续槽个数为 a+f-g-j
 
+from itertools import accumulate
 import sys
 
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
-
-#########################################################
-from itertools import accumulate
-
 MOD = int(1e9 + 7)
+INF = int(4e18)
 
 fac = [1]
 ifac = [1]
@@ -41,12 +39,11 @@ freq = [num for num in (map(int, input().split())) if num > 0]
 preSum = [0] + list(accumulate(freq))
 n = len(freq)
 
-fsum = sum(freq)
-dp = [0] * (fsum + 5)
+dp = [0] * 265
 dp[0] = 1
 
 for ci, cc in enumerate(freq):
-    ndp = [0] * (fsum + 5)
+    ndp = [0] * 265
     for adj, preRes in enumerate(dp):  # 相邻插入槽adj
         if preRes == 0:
             continue
@@ -60,4 +57,4 @@ for ci, cc in enumerate(freq):
                 ndp[adj + cc - group - slot1] %= MOD
     dp = ndp
 
-print(dp[0] % MOD)
+print(dp[0])

@@ -228,6 +228,7 @@ def countPrime(lower: int, upper: int) -> int:
     return sum(isPrime)
 
 
+# 区间筛/区间素数
 def segmentedSieve(floor: int, higher: int) -> List[bool]:
     """分段筛求 [floor,higher) 中的每个数是否为质数.
     1<=floor<=higher<=1e12,higher-floor<=5e5

@@ -1,12 +1,12 @@
-// 深拷贝
+// 深拷贝 deepcopy
 // 简单起见，该题目中你只需要支持：
-
-import _ from 'lodash'
-
 // 基础数据类型(包括Symbol) 及其wrapper object。
 // 简单Object（仅需处理可枚举属性）
 // 数组Array
-function cloneDeep<T = any>(o: T, visited = new WeakMap()): T {
+
+import _ from 'lodash'
+
+function deepcopy<T = any>(o: T, visited = new WeakMap()): T {
   if (!isObject(o)) return o
   if (visited.has(o)) return visited.get(o) // !如果已经访问过，则直接返回
 
@@ -14,17 +14,18 @@ function cloneDeep<T = any>(o: T, visited = new WeakMap()): T {
   visited.set(o, res)
 
   const keys = [...Object.getOwnPropertySymbols(o), ...Object.getOwnPropertyNames(o)]
-  for (const key of keys) {
+  keys.forEach(key => {
     const val = (o as Record<PropertyKey, any>)[key]
-    res[key] = cloneDeep(val, visited)
-  }
-
+    res[key] = deepcopy(val, visited)
+  })
   return res
 }
 
 function isObject(o: unknown): o is object {
   return typeof o === 'object' && o !== null
 }
+
+export { deepcopy }
 
 if (require.main === module) {
   const o = {
@@ -39,12 +40,10 @@ if (require.main === module) {
   const bad = { cycle: o }
   Object.assign(o, { cycle: bad })
 
-  const res = cloneDeep(o)
+  const res = deepcopy(o)
   console.log(res)
   console.log(_.cloneDeep(o))
 }
-
-export {}
 
 // Object.keys() 返回对象的可枚举属性
 // Reflect.ownKeys() :

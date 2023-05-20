@@ -204,9 +204,9 @@ func (rp *PersistentRope) _cut(a *_RNode, l, r int) (*_RNode, *_RNode) {
 }
 
 type _RNode struct {
-	v    R
+	v    R // 叶子结点存储的字符
 	l, r *_RNode
-	s    int
+	s    int // 非叶子结点存储的子树字符长度之和
 }
 
 func _NewNode(v R, l, r *_RNode) *_RNode {
@@ -219,3 +219,5 @@ func _NewNode(v R, l, r *_RNode) *_RNode {
 	}
 	return res
 }
+
+// https://leetcode.cn/problems/extract-kth-character-from-the-rope-tree/

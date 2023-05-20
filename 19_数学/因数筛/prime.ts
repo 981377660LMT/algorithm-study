@@ -104,59 +104,63 @@ function getPrimeFactors(n: number): ReadonlyMap<number, number> {
   return factors
 }
 
-function eulersSieve(n: number): readonly number[] {
-  const primes = []
-  const isPrime = new Uint8Array(n + 1).fill(1)
-  for (let cand = 2; cand <= n; cand++) {
-    if (isPrime[cand]) primes.push(cand)
-    // prime is the smallest factor
-    for (let index = 0; index < primes.length; index++) {
-      const prime = primes[index]
-      // overflow
-      if (prime * cand > n) break
-      isPrime[prime * cand] = 0
-      // prime is no longer the SPF of the above multiple
-      if (cand % prime === 0) break
+/**
+ * 区间质数个数.
+ * [floor, ceiling]内的质数个数.
+ * 1<=floor<=ceiling<=1e12,ceiling-floor<=5e5
+ */
+function countPrime(floor: number, ceiling: number): number {
+  const isPrime = new Uint8Array(ceiling - floor + 1)
+  for (let i = 0; i < isPrime.length; i++) isPrime[i] = 1
+  isPrime[0] = +(floor !== 1)
+
+  const last = ~~Math.sqrt(ceiling)
+  for (let fac = 2; fac <= last; fac++) {
+    let start = fac * Math.max(0 | (floor + fac - 1 / fac), 2) - floor
+    while (start < isPrime.length) {
+      isPrime[start] = 0
+      start += fac
     }
   }
-  return primes
+
+  let res = 0
+  isPrime.forEach(v => {
+    res += v
+  })
+  return res
 }
 
-// O(nloglogn)
-function eratosthenesSieve(n: number): readonly number[] {
-  const isPrime = new Uint8Array(n + 1).fill(1)
-  for (let p = 2; p * p <= n; p++) {
-    if (isPrime[p]) {
-      for (let j = p * p; j <= n; j += p) {
+/**
+ * 区间筛/分段筛求 [floor,higher) 中的每个数是否为质数.
+ * 1<=floor<=higher<=1e12,higher-floor<=5e5.
+ */
+function segmentedSieve(floor: number, higher: number): boolean[] {
+  let root = 1
+  while ((root + 1) * (root + 1) < higher) {
+    root++
+  }
+
+  const isPrime = new Uint8Array(root + 1)
+  for (let i = 0; i < isPrime.length; i++) isPrime[i] = 1
+  isPrime[0] = 0
+  isPrime[1] = 0
+
+  const res: boolean[] = Array(higher - floor)
+  for (let i = 0; i < res.length; i++) res[i] = true
+  for (let i = 0; i < 2 - floor; i++) res[i] = false
+
+  for (let i = 2; i <= root; i++) {
+    if (isPrime[i]) {
+      for (let j = i * i; j <= root; j += i) {
         isPrime[j] = 0
+      }
+      for (let j = Math.max(0 | ((floor + i - 1) / i), 2) * i; j < higher; j += i) {
+        res[j - floor] = false
       }
     }
   }
 
-  const primes = []
-  for (let i = 2; i <= n; i++) if (isPrime[i]) primes.push(i)
-  return primes
-}
-
-/**
- *
- * @param nth
- * @returns 返回第 n（从 1 开始）个质数，例如 prime(1) 返回 2。
- */
-function prime(nth: number): number {
-  let f = 20
-  if (nth > 5e7) f = 50
-  if (nth > 1e22) f = 100
-  return getPrimes(f * nth)[nth - 1]
-}
-
-/**
- *
- * @param n
- * @returns 得到小于等于 n 的所有质数，返回一个数组。
- */
-function getPrimes(n: number): readonly number[] {
-  return n < 1000 ? eratosthenesSieve(n) : eulersSieve(n)
+  return res
 }
 
 if (require.main === module) {
@@ -172,15 +176,11 @@ if (require.main === module) {
   )
 
   assert.deepStrictEqual(getFactors(25), [1, 5, 25])
+  assert.strictEqual(countPrime(1, 1e6), P.getPrimes().length)
+  assert.deepStrictEqual(
+    segmentedSieve(0, 1e6),
+    Array.from({ length: 1e6 }, (_, i) => i).map(v => P.isPrime(v))
+  )
 }
 
-export {
-  EratosthenesSieve,
-  eulersSieve,
-  eratosthenesSieve,
-  prime,
-  getPrimes,
-  isPrime,
-  getPrimeFactors,
-  getFactors
-}
+export { EratosthenesSieve, isPrime, getPrimeFactors, getFactors, countPrime, segmentedSieve }
