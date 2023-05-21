@@ -1,6 +1,6 @@
 // UnionFindWithUndoAndWeight
 // https://nyaannyaan.github.io/library/data-structure/rollback-union-find.hpp
-// 可撤销的并查集(时间旅行)
+// 可撤销并查集(时间旅行)
 
 // RollbackUnionFind(int sz)：
 //   サイズszのUnionFindを生成する。
@@ -15,6 +15,7 @@
 // rollback(int state = -1)：UnionFindをロールバックする。計算量は状況による。(ボトルネックにはならない)
 //   state = -1のとき：snapshot()で保存した状態にロールバックする。
 //   そうでないとき：uniteがstate回呼び出された時の状態にロールバックする。
+
 package main
 
 import (
@@ -58,7 +59,7 @@ type RollbackUnionFind struct {
 	history   []struct{ a, b int }
 }
 
-// 撤销上一次合并操作.
+// !撤销上一次合并操作，没合并成功也要撤销.
 func (uf *RollbackUnionFind) Undo() bool {
 	if len(uf.history) == 0 {
 		return false

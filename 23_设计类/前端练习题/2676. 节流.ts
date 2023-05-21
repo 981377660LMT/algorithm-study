@@ -3,24 +3,25 @@ export {}
 // 需要立即执行
 // !应用场景：滚动事件，resize事件，鼠标移动事件（mousemove），DOM元素拖拽（mousemove），抢购疯狂点击（click）
 
-type F = (...args: any[]) => void
+type F = (...args: unknown[]) => void
 
 function throttle(fn: F, t: number): F {
-  let timer: ReturnType<typeof setTimeout> | null
-  let preArgs: any
+  let timer: ReturnType<typeof setTimeout> | null = null
+  let preArgs: unknown[] | null = null
 
-  return function (...args) {
+  return function dfs(...args) {
     if (timer) {
       preArgs = args
       return
     }
-    fn.apply(this, args)
+
+    fn(...args)
     timer = setTimeout(() => {
+      timer = null
       if (preArgs) {
-        fn.apply(this, preArgs)
+        dfs(...preArgs)
         preArgs = null
       }
-      timer = null
     }, t)
   }
 }

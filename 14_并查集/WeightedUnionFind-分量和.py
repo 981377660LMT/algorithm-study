@@ -45,7 +45,7 @@ class WeightedUnionFind:
         self._delta[v] -= self._delta[u]
         self._total[u] += self._total[v]
         self._part -= 1
-        if f:
+        if f is not None:
             f(u, v)
         return True
 
@@ -75,31 +75,29 @@ class WeightedUnionFind:
     def _find(self, u: int) -> Tuple[int, int]:
         if self._parent[u] < 0:
             return u, self._delta[u]
-        p = self._find(self._parent[u])
-        first = p[0]
-        second = p[1] + self._delta[u] - self._delta[first]
-        self._parent[u] = first
-        self._delta[u] = second
-        return p
+        a, b = self._find(self._parent[u])
+        b += self._delta[u]
+        self._parent[u] = a
+        self._delta[u] = b - self._delta[a]
+        return a, b
 
 
 if __name__ == "__main__":
-    N = 5
-    uf = WeightedUnionFind(N)
-    for i in range(N):
-        uf.add(i, i)
-    uf.union(2, 4)
-    for i in range(N):
-        print(uf.get(i), uf.getGroup(i))
-    print()
-    uf.union(3, 4)
-    for i in range(N):
-        print(uf.get(i), uf.getGroup(i))
-    print()
-    uf.add(3, 10)
-    for i in range(N):
-        print(uf.get(i), uf.getGroup(i))
-    print()
-    uf.addGroup(4, 5)
-    for i in range(N):
-        print(uf.get(i), uf.getGroup(i))
+    # https://yukicoder.me/problems/no/1054
+    import sys
+
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
+
+    n, q = map(int, input().split())
+    uf = WeightedUnionFind(n)
+    for _ in range(q):
+        op, a, b = map(int, input().split())
+        if op == 1:
+            a, b = a - 1, b - 1
+            uf.union(a, b)
+        elif op == 2:
+            a -= 1
+            uf.addGroup(a, b)
+        else:
+            a -= 1
+            print(uf.get(a))

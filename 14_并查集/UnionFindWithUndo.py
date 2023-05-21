@@ -6,7 +6,7 @@
 
 应用场景:
 可持久化并查集的离线处理
-在树上(版本之间)dfs 递归时要union结点 回溯时候需要撤销的场合
+!在树上(版本之间)dfs 递归时要union结点 回溯时候需要撤销的场合
 """
 
 
@@ -57,7 +57,8 @@ class RevocableUnionFindArray:
     def revocate(self) -> None:
         """
         用一个栈记录前面的合并操作，
-        撤销时要依次取出栈顶元素做合并操作的逆操作
+        撤销时要依次取出栈顶元素做合并操作的逆操作.
+        !没合并成功也要撤销.
         """
         if not self.optStack:
             raise IndexError("no union option to revocate")
@@ -130,7 +131,8 @@ class RevocableUnionFindMap(Generic[T]):
     def revocate(self) -> None:
         """
         用一个栈记录前面的合并操作，
-        撤销时要依次取出栈顶元素做合并操作的逆操作
+        撤销时要依次取出栈顶元素做合并操作的逆操作.
+        !没合并成功也要撤销.
         """
         if not self.optStack:
             raise IndexError("no union option to revocate")
@@ -174,62 +176,6 @@ class RevocableUnionFindMap(Generic[T]):
         return key in self.parent
 
 
-class ATCRevocableUnionFindArray:
-    """维护分量之和的可撤销并查集"""
-
-    __slots__ = ("n", "parentSize", "sum", "history")
-
-    def __init__(self, n: int):
-        self.n = n
-        self.parentSize = [-1] * n
-        self.sum = [0] * n
-        self.history = []
-
-    def addSum(self, i: int, delta: int):
-        """第i个元素的值加上v"""
-        x = i
-        while x >= 0:
-            self.sum[x] += delta
-            x = self.parentSize[x]
-
-    def union(self, a: int, b: int) -> bool:
-        x = self.find(a)
-        y = self.find(b)
-        if -self.parentSize[x] < -self.parentSize[y]:
-            x, y = y, x
-        self.history.append((x, self.parentSize[x]))
-        self.history.append((y, self.parentSize[y]))
-        if x == y:
-            return False
-        self.parentSize[x] += self.parentSize[y]
-        self.parentSize[y] = x
-        self.sum[x] += self.sum[y]
-        return True
-
-    def find(self, a: int) -> int:
-        x = a
-        while self.parentSize[x] >= 0:
-            x = self.parentSize[x]
-        return x
-
-    def isConnected(self, a: int, b: int) -> bool:
-        return self.find(a) == self.find(b)
-
-    def revocate(self) -> bool:
-        if not self.history:
-            return False
-        y, py = self.history.pop()
-        x, px = self.history.pop()
-        if self.parentSize[x] != px:
-            self.sum[x] -= self.sum[y]
-        self.parentSize[x] = px
-        self.parentSize[y] = py
-        return True
-
-    def getComponentSum(self, i) -> int:
-        return self.sum[self.find(i)]
-
-
 if __name__ == "__main__":
     uf = RevocableUnionFindArray(10)
     uf.union(2, 4)
@@ -242,11 +188,3 @@ if __name__ == "__main__":
     assert uf2.isConnected(2, 4)
     uf2.revocate()
     assert not uf2.isConnected(2, 4)
-
-    uf3 = ATCRevocableUnionFindArray(10)
-    uf3.addSum(2, 10)
-    assert uf3.getComponentSum(2) == 10
-    uf3.union(2, 4)
-    assert uf3.getComponentSum(4) == 10
-    uf3.addSum(4, 10)
-    assert uf3.getComponentSum(2) == 20

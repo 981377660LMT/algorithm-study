@@ -3,6 +3,7 @@ import { BinaryTree } from '../分类/Tree'
 import { deserializeNode } from '../重构json/297.二叉树的序列化与反序列化'
 
 type Return = [isValidBST: boolean, min: number, max: number, sum: number]
+const INF = 2e15
 
 /**
  * @param {BinaryTree} root
@@ -16,9 +17,9 @@ function maxSumBST(root: BinaryTree): number {
   return maxSum
 
   function dfs(root: BinaryTree | null): Return {
-    if (!root) return [true, Infinity, -Infinity, 0]
+    if (!root) return [true, INF, -INF, 0]
 
-    const res: Return = [true, Infinity, -Infinity, 0]
+    const res: Return = [true, INF, -INF, 0]
     const left = dfs(root.left)
     const right = dfs(root.right)
     if (left[0] && right[0] && root.val > left[2] && root.val < right[1]) {

@@ -1,9 +1,9 @@
 // UnionFindWithUndoAndWeight
 // https://hitonanode.github.io/cplib-cpp/unionfind/undo_monoid_unionfind.hpp
-// 可撤销 / 维护 `满足可换律的monoid` 权值 的并查集
+// 可撤销并查集 / 维护 `满足可换律的monoid` 权值 的并查集
 // Set: 将下标为index元素`所在集合`的权值置为value.
 // Get: 获取下标为index元素`所在集合`的权值.
-// Undo: 撤销上一次合并(Union)或者修改权值(Set)操作
+// !Undo: 撤销上一次合并(Union)或者修改权值(Set)操作，没合并成功也要撤销
 // Reset: 撤销所有操作
 
 package main

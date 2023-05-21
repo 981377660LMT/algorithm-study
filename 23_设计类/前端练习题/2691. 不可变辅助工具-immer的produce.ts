@@ -128,8 +128,3 @@ function isObj(obj: unknown): obj is Obj {
 }
 
 export {}
-if (require.main === module) {
-  const immer = new ImmutableHelper({ arr: [1, 2, 3] })
-  const res = immer.produce(draft => (draft.arr[0] = 4))
-  console.log(res.arr[0])
-}

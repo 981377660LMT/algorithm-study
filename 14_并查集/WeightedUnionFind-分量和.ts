@@ -121,40 +121,12 @@ class WeightedUnionFind {
 
   private _find(u: number): [root: number, delta: number] {
     if (this._parent[u] < 0) return [u, this._delta[u]]
-    const p = this._find(this._parent[u])
-    const first = p[0]
-    const second = p[1] + this._delta[u] - this._delta[first]
-    this._parent[u] = first
-    this._delta[u] = second
-    return p
+    let [a, b] = this._find(this._parent[u])
+    b += this._delta[u]
+    this._parent[u] = a
+    this._delta[u] = b - this._delta[a]
+    return [a, b]
   }
 }
 
 export { WeightedUnionFind }
-
-if (require.main === module) {
-  const uf = new WeightedUnionFind(5)
-  for (let i = 0; i < 5; ++i) {
-    uf.add(i, i)
-  }
-  uf.union(2, 4)
-  console.log(uf.getGroups())
-  for (let i = 0; i < 5; ++i) {
-    console.log(uf.get(i), uf.getGroup(i))
-  }
-  uf.union(3, 4)
-  console.log(uf.getGroups())
-  for (let i = 0; i < 5; ++i) {
-    console.log(uf.get(i), uf.getGroup(i))
-  }
-  uf.add(3, 10)
-  console.log(uf.getGroups())
-  for (let i = 0; i < 5; ++i) {
-    console.log(uf.get(i), uf.getGroup(i))
-  }
-  uf.addGroup(4, 5)
-  console.log(uf.getGroups())
-  for (let i = 0; i < 5; ++i) {
-    console.log(uf.get(i), uf.getGroup(i))
-  }
-}

@@ -446,6 +446,8 @@ IBM PC 发布，采用开放架构，兼容的机器都叫 IBM Compatible (IBM �
 
 08:44 苹果选封闭架构，一切都自己来，只有苹果在非 &quot;IBM 兼容&quot; 下保持了足够市场份额
 
+总的来说，编译器和解释器在速度、灵活性和使用场景上有所不同。某些语言设计为主要使用编译器（如 C++、Java），而另一些语言设计为主要使用解释器（如 Python、JavaScript）。然而，这并非绝对，许多现代语言（包括 Python 和 JavaScript）有 JIT（Just-In-Time）编译器，它们在解释和编译之间找到了一种折衷，以提高运行时性能。
+
 ## 第 26 集：图形用户界面 (GUI)
 
 01:10 图形界面先驱：道格拉斯·恩格尔巴特（Douglas Engelbart）  
@@ -464,11 +466,14 @@ IBM PC 发布，采用开放架构，兼容的机器都叫 IBM Compatible (IBM �
 ## 第 27 集：3D 图形
 
 01:15 线框渲染 Wireframe Rendering  
-01:39 正交投影 Orthographic Projection  
-01:50 透视投射 Perspective Projection  
-02:14 网格 Mesh  
+01:39 正交投影 Orthographic Projection ，立方体的各个边在投影中互相平行
+01:50 透视投射 Perspective Projection，平行的线在远处收敛于一点
+02:14 网格 Mesh
 02:37 三角形更常用因为能定义唯一的平面  
-03:09 扫描线渲染 Scanline Rendering  
+03:09 `扫描线渲染 Scanline Rendering`，填充图形
+抗锯齿 Anti-Aliasing
+抗锯齿技术的主要思想是通过改变像素的颜色和亮度来模拟更高的分辨率，从而让边缘看起来更加平滑。
+
 05:04 遮挡 Occlusion  
 05:19 画家算法 Painter&apos;s Algorithm  
 06:09 深度缓冲 Z Buffering  
@@ -485,11 +490,15 @@ IBM PC 发布，采用开放架构，兼容的机器都叫 IBM Compatible (IBM �
 02:05 局域网 Local Area Networks - LAN  
 02:36 媒体访问控制地址 Media Access Control address - MAC  
 02:55 载波侦听多路访问 Carrier Sense Multiple Access - CSMA  
-05:18 指数退避 Exponential Backoff  
+05:18 `指数退避 Exponential Backoff`  
 05:36 冲突域 Collision Domain  
 07:08 电路交换 Circuit Switching  
 07:36 报文交换 Message Switching  
 10:20 分组交换 Packet Switching
+
+当一个网络节点检测到临时的资源不足或数据包碰撞（例如，两个节点在同一时间发送数据到同一个接收者）时，该节点会暂时停止发送数据，等待一个随机的、指数级增长的时间间隔后，再尝试重新发送。通过这种方式，指数退避算法能够有效降低网络拥塞和碰撞的概率，提高网络的总体吞吐量。
+
+在实践中，许多协议和系统都采用了指数退避算法，如以太网的 CSMA/CD 协议、无线网络的 CSMA/CA 协议、以及许多云服务和分布式系统在面临服务端过载或暂时不可用时的重试策略等。
 
 ## 第 29 集：互联网
 
@@ -522,19 +531,40 @@ IBM PC 发布，采用开放架构，兼容的机器都叫 IBM Compatible (IBM �
 01:49 Threat Model 威胁模型
 
 03:14 身份验证 (Authentication) 的三种方式：  
-What you know, 你知道什么  
-What you have, 你有什么  
-What you are, 你是什么
+`What you know, 你知道什么`  
+`What you have, 你有什么`  
+`What you are, 你是什么`
 
 07:34 访问控制 Access Control  
 08:48 Bell LaPadula model 不能向上读取，不能向下写入  
 11:00 隔离 Isolation, 沙盒 Sandbox
 
+双因子验证（Two-Factor Authentication，简称 `2FA`）是一种增强安全性的身份验证方法。它要求用户提供两种不同形式的身份凭证，才能访问其帐户或系统。
+
+这两种形式的身份凭证通常来自以下三类因素中的两类：
+
+1. 知识因素：你知道的信息，如密码或 PIN 码。
+2. 所有权因素：你拥有的物品，如硬件设备（例如智能手机或安全令牌设备）。
+3. 身份特征因素：身体或行为特征，例如指纹、面部识别、语音识别或虹膜扫描。
+
+双因子验证增强了帐户安全性，因为即使攻击者获得了用户的密码（知识因素），他们仍然需要第二个因素（例如用户的手机或指纹）才能访问该帐户。
+
+例如，许多在线服务，如 Google、Apple 和 Facebook，都提供了双因子验证选项。用户在输入密码后，系统会向用户的手机发送一个验证码（通过短信或者专用的验证应用）。只有在输入这个验证码后，用户才能登陆到他们的帐户。
+
 ## 第 32 集：黑客与攻击
 
-01:28 社会工程学 Social Engineering  
-01:38 钓鱼 Phishing  
-02:06 假托 Pretexting  
+01:28 社会工程学 Social Engineering
+
+社会工程学是一种技巧，通常在信息安全领域中使用，攻击者通过操纵人际关系，以骗取或获得其他人的信任，然后诱使他们泄露重要信息。
+
+01:38 钓鱼 Phishing
+
+"钓鱼"是一种网络诈骗的手段，攻击者通过伪装成合法和值得信任的个体或组织（例如，一家知名银行或社交媒体网站）来进行的。这种攻击通常以电子邮件、文字消息或电话呼叫的形式出现，骗取用户的敏感信息，如用户名、密码和信用卡细节。
+
+02:06 假托 Pretexting
+
+"假托"（Pretexting）是一种社会工程技巧，攻击者在这种情况下会假装成一个有权获取某种信息或访问特定资源的人，目的是诱骗目标个体或机构泄露他们的敏感信息或者提供非法的访问权限。
+
 02:50 木马 Trojan Horses  
 03:32 NAND 镜像 NAND Mirroring  
 04:12 漏洞利用 Exploit  
@@ -550,13 +580,13 @@ What you are, 你是什么
 
 00:16 多层防御 Defence in depth  
 01:00 加密 - Encryption，解密 - Decryption  
-01:11 凯撒加密 Caesar cipher  
-01:27 替换加密 Substitution cipher  
-01:59 移位加密 Permutation cipher  
+01:11 `凯撒加密 Caesar cipher ， Shift cipher`
+01:27 替换加密 Substitution cipher ，每个字母都替换成另一个字母，缺点是字母频率不变
+01:59 移位加密 Permutation cipher ，换个顺序来读
 02:03 列移位加密 Columnar transposition cipher  
 02:37 德国 Enigma 加密机  
 04:54 1977 年&quot;数据加密标准&quot; - Data Encryption Standard (DES)  
-05:24 2001 年&quot;高级加密标准&quot; - Advanced Encryption Standard (AES)  
+05:24 2001 年&quot;高级加密标准&quot; - Advanced Encryption Standard (`AES`)  
 07:06 密钥交换 - Key exchange  
 07:33 用颜色来举例&quot;单向函数&quot;和&quot;密钥加密&quot;的原理  
 08:24 迪菲-赫尔曼密钥交换 - Diffie-Hellman Key Exchange  
