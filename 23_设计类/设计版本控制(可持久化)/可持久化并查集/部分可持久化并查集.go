@@ -9,6 +9,7 @@ import (
 
 const INF int = 1e18
 
+// 部分可持久化并查集(初始版本为0).
 type PartiallyPersistentUnionFind struct {
 	CurVersion int
 	Dead       []int

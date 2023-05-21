@@ -15,7 +15,7 @@
 import { PersistentArraySqrtInt32 } from './PersistentArraySqrt'
 
 /**
- * 可持久化并查集.
+ * 完全可持久化并查集.
  */
 class PersistentUnionFindSqrt {
   private readonly _parent: PersistentArraySqrtInt32

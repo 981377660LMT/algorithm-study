@@ -7,7 +7,61 @@
 """
 
 from collections import defaultdict
-from typing import DefaultDict, Generic, Hashable, Iterable, List, Optional, TypeVar
+from typing import Callable, DefaultDict, Generic, Hashable, Iterable, List, Optional, TypeVar
+
+
+class UnionFindArrayWithDist:
+    __slots__ = ("part", "_data", "_potential")
+
+    def __init__(self, n: int):
+        self.part = n
+        self._data = [-1] * n
+        self._potential = [0] * n
+
+    def union(
+        self, x: int, y: int, dist: int, cb: Optional[Callable[[int, int], None]] = None
+    ) -> bool:
+        dist += self._potential[y] - self._potential[x]
+        x, y = self.find(x), self.find(y)
+        if x == y:
+            return dist == 0
+        if self._data[x] < self._data[y]:
+            x, y = y, x
+            dist = -dist
+        self._data[y] += self._data[x]
+        self._data[x] = y
+        self._potential[x] = dist
+        self.part -= 1
+        if cb is not None:
+            cb(x, y)
+        return True
+
+    def find(self, x: int) -> int:
+        if self._data[x] < 0:
+            return x
+        r = self.find(self._data[x])
+        self._potential[x] += self._potential[self._data[x]]
+        self._data[x] = r
+        return r
+
+    def dist(self, x: int, y: int) -> int:
+        return self.distToRoot(x) - self.distToRoot(y)
+
+    def distToRoot(self, x: int) -> int:
+        self.find(x)
+        return self._potential[x]
+
+    def isConnected(self, x: int, y: int) -> bool:
+        return self.find(x) == self.find(y)
+
+    def getSize(self, x: int) -> int:
+        return -self._data[self.find(x)]
+
+    def getGroups(self) -> DefaultDict[int, List[int]]:
+        res = defaultdict(list)
+        for i in range(len(self._data)):
+            res[self.find(i)].append(i)
+        return res
 
 
 T = TypeVar("T", bound=Hashable)
@@ -97,7 +151,7 @@ class UnionFindMapWithDist2(Generic[T]):
         for item in iterable or []:
             self.add(item)
 
-    def getDist(self, key1: T, key2: T) -> int:
+    def dist(self, key1: T, key2: T) -> int:
         """有向边 key1 -> key2 的距离"""
         if (key1 not in self.parent) or (key2 not in self.parent):
             raise KeyError("key not in UnionFindMapWithDist")
@@ -161,40 +215,6 @@ class UnionFindMapWithDist2(Generic[T]):
         return key in self.parent
 
 
-class UnionFindArrayWithDist:
-    """固定大小,维护加法(距离)的并查集"""
-
-    def __init__(self, n: int):
-        self.parent = list(range(n))
-        self.part = n
-        self.distToRoot = [0] * n
-
-    def getDist(self, key1: int, key2: int) -> int:
-        """有向边 key1 -> key2 的距离"""
-        return self.distToRoot[key1] - self.distToRoot[key2]
-
-    def union(self, son: int, father: int, dist: int) -> bool:
-        """有向边 son -> father 的距离为 dist"""
-        root1 = self.find(son)
-        root2 = self.find(father)
-        if root1 == root2:
-            return False
-        self.parent[root1] = root2
-        self.distToRoot[root1] = dist + self.distToRoot[father] - self.distToRoot[son]
-        self.part -= 1
-        return True
-
-    def find(self, key: int) -> int:
-        if key != self.parent[key]:
-            root = self.find(self.parent[key])
-            self.distToRoot[key] += self.distToRoot[self.parent[key]]
-            self.parent[key] = root  # 路径压缩
-        return self.parent[key]
-
-    def isConnected(self, key1: int, key2: int) -> bool:
-        return self.find(key1) == self.find(key2)
-
-
 # https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_1_B&lang=ja
 if __name__ == "__main__":
     import sys
@@ -214,4 +234,4 @@ if __name__ == "__main__":
             if not uf.isConnected(x, y):
                 print("?")
             else:
-                print(uf.getDist(x, y))
+                print(uf.dist(x, y))

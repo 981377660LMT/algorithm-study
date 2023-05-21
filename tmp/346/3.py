@@ -36,3 +36,28 @@ def check(num: int) -> bool:
 class Solution:
     def punishmentNumber(self, n: int) -> int:
         return sum(i * i for i in range(1, n + 1) if check(i))
+
+
+def isPu(a):
+    A = list(map(int, str(a * a)))
+    n = len(A)
+    dp = [set() for i in range(n + 1)]
+    dp[0].add(0)
+    for i in range(n):
+        cur = 0
+        for j in range(i, n):
+            cur = cur * 10 + A[j]
+            if cur > a:
+                break
+            dp[j + 1] |= {v + cur for v in dp[i] if v + cur <= a}
+        if a in dp[n]:
+            return True
+    return False
+
+
+pu = [i for i in range(1001) if isPu(i)]
+
+
+class Solution:
+    def punishmentNumber(self, n: int) -> int:
+        return sum(a * a for a in pu if a <= n)

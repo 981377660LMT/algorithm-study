@@ -28,7 +28,7 @@
 // !整体的时间复杂度是O(sqrt(n)).
 
 /**
- * 基于分块的持久化数组.
+ * 基于分块的完全可持久化数组.
  */
 class PersistentArraySqrt<T> {
   private _arr: ArrayLike<T>
