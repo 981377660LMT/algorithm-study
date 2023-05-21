@@ -1,7 +1,7 @@
 # https://leetcode.cn/problems/evaluate-division/submissions/
 
 from typing import List
-from UnionFindMapWithDist import UnionFindMapWithDist1
+from UnionFindWithDist import UnionFindMapWithDist2
 
 
 class Solution:
@@ -12,26 +12,35 @@ class Solution:
         如果问题中出现了给定的已知条件中没有出现的字符串，也需要用 -1.0 替代这个答案。
         乘积关系取对数就是加法 等价于维护到根节点的距离
         """
-        uf = UnionFindMapWithDist1[str]()
-        for (key1, key2), value in zip(equations, values):
-            uf.add(key1).add(key2).union(key1, key2, value)  # !key1/key2(距离)为 value
 
+        def id(o: object) -> int:
+            if o not in _pool:
+                _pool[o] = len(_pool)
+            return _pool[o]
+
+        _pool = dict()
+
+        uf = UnionFindMapWithDist2()
+        for (key1, key2), value in zip(equations, values):
+            uf.union(id(key1), id(key2), value)  # !key1/key2(距离)为 value
         res = []
         for u, v in queries:
-            if not uf.isConnected(u, v):
+            id1, id2 = id(u), id(v)
+            if id1 not in uf or id2 not in uf or not uf.isConnected(id1, id2):
                 res.append(-1.0)
             else:
-                res.append(uf.getDist(u, v))
+                res.append(uf.dist(id1, id2))
+
         return res
 
 
-# print(
-#     Solution().calcEquation(
-#         [["a", "b"], ["b", "c"]],
-#         [2.0, 3.0],
-#         [["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"]],
-#     )
-# )
+print(
+    Solution().calcEquation(
+        [["a", "b"], ["b", "c"]],
+        [2.0, 3.0],
+        [["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"]],
+    )
+)
 # print(
 #     Solution().calcEquation(
 #         equations=[["a", "b"], ["b", "c"], ["bc", "cd"]],

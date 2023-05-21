@@ -1,25 +1,36 @@
+# https://leetcode.cn/problems/check-for-contradictions-in-equations/
+# 2307. 检查方程中的矛盾之处
 # 检查方程是否存在矛盾
 # 如果两个结点不在并查集或者不连通，那么就把他们合并到一组
 # 如果两个结点联通，那么就求出距离并检查是否冲突
+# !注意精度问题
 
 from collections import defaultdict
 from typing import List
-from UnionFindMapWithDist import UnionFindMapWithDist1
+from UnionFindWithDist import UnionFindMapWithDist2
 
 EPS = 1e-6
+
+
+def id(o: object) -> int:
+    if o not in _pool:
+        _pool[o] = len(_pool)
+    return _pool[o]
+
+
+_pool = dict()
 
 
 class Solution:
     def checkContradictions(self, equations: List[List[str]], values: List[float]) -> bool:
         """检查方程是否存在矛盾"""
-        uf = UnionFindMapWithDist1[str]()
+        uf = UnionFindMapWithDist2()
         for (key1, key2), value in zip(equations, values):
-            if key1 not in uf or key2 not in uf:
-                uf.add(key1).add(key2)
-            if not uf.isConnected(key1, key2):
-                uf.union(key1, key2, value)
+            id1, id2 = id(key1), id(key2)
+            if not uf.isConnected(id1, id2):
+                uf.union(id1, id2, value)
             else:
-                dist = uf.getDist(key1, key2)
+                dist = uf.dist(id1, id2)
                 if abs(dist - value) > EPS:
                     return True
 

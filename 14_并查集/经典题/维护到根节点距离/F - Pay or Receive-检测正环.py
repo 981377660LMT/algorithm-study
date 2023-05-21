@@ -1,5 +1,6 @@
 # 给定一个n个点m条边的有向图
-# !对于边(u,v)权值为w,从u到v的距离为w,从v到u的距离为-w
+# !对于边(u,v)权值为w,从u到v移动分数加w,从v到u移动分数减w.
+
 # 给定q个查询 (start,end) 求从start到end的最大得分
 # 如果无法到达输出nan，如果可以到达且可以无限增加输出inf
 # 所有数据范围为1e5
@@ -9,7 +10,7 @@
 # !inf:存在矛盾(正环)
 
 from typing import List, Tuple
-from UnionFindMapWithDist import UnionFindArrayWithDist
+from UnionFindWithDist import UnionFindArrayWithDist1
 
 INF = int(1e18)
 NAN = INF + 1
@@ -18,11 +19,11 @@ NAN = INF + 1
 def payOrReceive(
     n: int, edges: List[Tuple[int, int, int]], queries: List[Tuple[int, int]]
 ) -> List[int]:
-    uf = UnionFindArrayWithDist(n)
+    uf = UnionFindArrayWithDist1(n)
     cycleGroup = set()  # 带有正环(距离存在矛盾)的组
     for u, v, w in edges:
         if uf.isConnected(u, v):
-            if uf.getDist(u, v) != w:  # 矛盾,组内存在正环
+            if uf.dist(u, v) != w:  # 矛盾,组内存在正环
                 cycleGroup.add(uf.find(u))
         else:
             root1, root2 = uf.find(u), uf.find(v)
@@ -36,7 +37,7 @@ def payOrReceive(
             res[i] = NAN
             continue
         root = uf.find(u)
-        res[i] = INF if root in cycleGroup else uf.getDist(u, v)
+        res[i] = INF if root in cycleGroup else uf.dist(u, v)
     return res
 
 

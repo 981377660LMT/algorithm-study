@@ -6,15 +6,21 @@
 - 如果组内两点距离存在矛盾(沿着不同边走距离不同),那么在组内会出现正环
 """
 
+# Class:
+#  UnionFindArrayWithDist1(n) : 数组实现的并查集,距离为加法.
+#  UnionFindArrayWithDist2(n) : 数组实现的并查集,距离为乘法.
+#  UnionFindMapWithDist1() : 字典实现的并查集,距离为加法.
+#  UnionFindMapWithDist2() : 字典实现的并查集,距离为乘法.
+
 
 # API:
-#  Union(x,y,dist) : p(x) = p(y) + dist.如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
+#  Union(x,y,dist) : p(x) = p(y) + dist. 如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
 #  Find(x) : 返回x所在组的根节点.
 #  Dist(x,y) : 返回x到y的距离.
 #  DistToRoot(x) : 返回x到所在组根节点的距离.
 
 from collections import defaultdict
-from typing import Callable, DefaultDict, Iterable, List, Optional
+from typing import Callable, DefaultDict, List, Optional
 
 
 class UnionFindArrayWithDist1:
@@ -46,7 +52,7 @@ class UnionFindArrayWithDist1:
         self._potential[x] = dist
         self.part -= 1
         if cb is not None:
-            cb(x, y)
+            cb(y, x)
         return True
 
     def find(self, x: int) -> int:
@@ -79,6 +85,77 @@ class UnionFindArrayWithDist1:
         return res
 
 
+class UnionFindArrayWithDist2:
+    """维护到根节点距离的并查集.距离为乘法."""
+
+    __slots__ = ("part", "_data", "_potential")
+
+    def __init__(self, n: int):
+        self.part = n
+        self._data = [-1] * n
+        self._potential = [1.0] * n
+
+    def union(
+        self, x: int, y: int, dist: float, cb: Optional[Callable[[int, int], None]] = None
+    ) -> bool:
+        """
+        p(x) = p(y) * dist.
+        如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
+        """
+        dist *= self.distToRoot(y) / self.distToRoot(x)
+        x, y = self.find(x), self.find(y)
+        if x == y:
+            return dist == 1
+        if self._data[x] < self._data[y]:
+            x, y = y, x
+            dist = 1 / dist
+        self._data[y] += self._data[x]
+        self._data[x] = y
+        self._potential[x] = dist
+        self.part -= 1
+        if cb is not None:
+            cb(y, x)
+        return True
+
+    def find(self, x: int) -> int:
+        if self._data[x] < 0:
+            return x
+        r = self.find(self._data[x])
+        self._potential[x] *= self._potential[self._data[x]]
+        self._data[x] = r
+        return r
+
+    def dist(self, x: int, y: int) -> float:
+        """返回x到y的距离`f(x)/f(y)`."""
+        return self.distToRoot(x) / self.distToRoot(y)
+
+    def distToRoot(self, x: int) -> float:
+        """返回x到所在组根节点的距离`f(x)/f(find(x))`."""
+        self.find(x)
+        return self._potential[x]
+
+    def isConnected(self, x: int, y: int) -> bool:
+        return self.find(x) == self.find(y)
+
+    def getSize(self, x: int) -> int:
+        return -self._data[self.find(x)]
+
+    def getGroups(self) -> DefaultDict[int, List[int]]:
+        res = defaultdict(list)
+        for i in range(len(self._data)):
+            res[self.find(i)].append(i)
+        return res
+
+
+def id(o: object) -> int:
+    if o not in _pool:
+        _pool[o] = len(_pool)
+    return _pool[o]
+
+
+_pool = dict()
+
+
 class UnionFindMapWithDist1:
     """维护到根节点距离的并查集.距离为加法."""
 
@@ -94,7 +171,7 @@ class UnionFindMapWithDist1:
     ) -> bool:
         """
         p(x) = p(y) + dist.
-        如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
+        !如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
         """
         dist += self.distToRoot(y) - self.distToRoot(x)
         x, y = self.find(x), self.find(y)
@@ -108,7 +185,7 @@ class UnionFindMapWithDist1:
         self._potential[x] = dist
         self.part -= 1
         if cb is not None:
-            cb(x, y)
+            cb(y, x)
         return True
 
     def find(self, x: int) -> int:
@@ -157,68 +234,6 @@ class UnionFindMapWithDist1:
         return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
 
 
-class UnionFindArrayWithDist2:
-    """维护到根节点距离的并查集.距离为乘法."""
-
-    __slots__ = ("part", "_data", "_potential")
-
-    def __init__(self, n: int):
-        self.part = n
-        self._data = [-1] * n
-        self._potential = [1.0] * n
-
-    def union(
-        self, x: int, y: int, dist: float, cb: Optional[Callable[[int, int], None]] = None
-    ) -> bool:
-        """
-        p(x) = p(y) * dist.
-        如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
-        """
-        dist *= self.distToRoot(y) / self.distToRoot(x)
-        x, y = self.find(x), self.find(y)
-        if x == y:
-            return dist == 1
-        if self._data[x] < self._data[y]:
-            x, y = y, x
-            dist = 1 / dist
-        self._data[y] *= self._data[x]
-        self._data[x] = y
-        self._potential[x] = dist
-        self.part -= 1
-        if cb is not None:
-            cb(x, y)
-        return True
-
-    def find(self, x: int) -> int:
-        if self._data[x] < 0:
-            return x
-        r = self.find(self._data[x])
-        self._potential[x] *= self._potential[self._data[x]]
-        self._data[x] = r
-        return r
-
-    def dist(self, x: int, y: int) -> float:
-        """返回x到y的距离`f(x)/f(y)`."""
-        return self.distToRoot(x) / self.distToRoot(y)
-
-    def distToRoot(self, x: int) -> float:
-        """返回x到所在组根节点的距离`f(x)/f(find(x))`."""
-        self.find(x)
-        return self._potential[x]
-
-    def isConnected(self, x: int, y: int) -> bool:
-        return self.find(x) == self.find(y)
-
-    def getSize(self, x: int) -> int:
-        return -self._data[self.find(x)]
-
-    def getGroups(self) -> DefaultDict[int, List[int]]:
-        res = defaultdict(list)
-        for i in range(len(self._data)):
-            res[self.find(i)].append(i)
-        return res
-
-
 class UnionFindMapWithDist2:
     """维护到根节点距离的并查集.距离为乘法."""
 
@@ -234,7 +249,7 @@ class UnionFindMapWithDist2:
     ) -> bool:
         """
         p(x) = p(y) * dist.
-        如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
+        !如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
         """
         dist *= self.distToRoot(y) / self.distToRoot(x)
         x, y = self.find(x), self.find(y)
@@ -243,12 +258,12 @@ class UnionFindMapWithDist2:
         if self._data[x] < self._data[y]:
             x, y = y, x
             dist = 1 / dist
-        self._data[y] *= self._data[x]
+        self._data[y] += self._data[x]
         self._data[x] = y
         self._potential[x] = dist
         self.part -= 1
         if cb is not None:
-            cb(x, y)
+            cb(y, x)
         return True
 
     def find(self, x: int) -> int:

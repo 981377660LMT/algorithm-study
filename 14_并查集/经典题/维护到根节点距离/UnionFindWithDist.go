@@ -7,7 +7,7 @@
 // - 如果组内两点距离存在矛盾(沿着不同边走距离不同),那么在组内会出现正环
 
 // API:
-//  Union(x,y,dist) : p(x) = p(y) + dist.
+//  Union(x,y,dist) : p(x) = p(y) + dist.如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
 //  Find(x) : 返回x所在组的根节点.
 //  Dist(x,y) : 返回x到y的距离.
 //  DistToRoot(x) : 返回x到所在组根节点的距离.
@@ -32,7 +32,7 @@ func WeightedUnionFindTrees() {
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	uf := NewUnionFindArrayWithDist(n)
+	uf := NewUnionFindMapWithDist()
 	for i := 0; i < q; i++ {
 		var op int
 		fmt.Fscan(in, &op)
@@ -54,41 +54,42 @@ func WeightedUnionFindTrees() {
 
 type T = int
 
-func (uf *UnionFindWithDist) e() T        { return 0 }
-func (uf *UnionFindWithDist) op(x, y T) T { return x + y }
-func (uf *UnionFindWithDist) inv(x T) T   { return -x }
+func e() T        { return 0 }
+func op(x, y T) T { return x + y }
+func inv(x T) T   { return -x }
 
-type UnionFindWithDist struct {
+// 数组实现的带权并查集(维护到每个组根节点距离的并查集).
+type UnionFindArrayWithDist struct {
 	Part      int
 	data      []int
 	potential []T
 }
 
-func NewUnionFindArrayWithDist(n int) *UnionFindWithDist {
-	uf := &UnionFindWithDist{
+func NewUnionFindArrayWithDist(n int) *UnionFindArrayWithDist {
+	uf := &UnionFindArrayWithDist{
 		Part:      n,
 		data:      make([]int, n),
 		potential: make([]T, n),
 	}
 	for i := range uf.data {
 		uf.data[i] = -1
-		uf.potential[i] = uf.e()
+		uf.potential[i] = e()
 	}
 	return uf
 }
 
 // p[x] = p[y] + dist.
 //  如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
-func (uf *UnionFindWithDist) Union(x, y int, dist T) bool {
-	dist = uf.op(dist, uf.op(uf.DistToRoot(y), uf.inv(uf.DistToRoot(x))))
+func (uf *UnionFindArrayWithDist) Union(x, y int, dist T) bool {
+	dist = op(dist, op(uf.DistToRoot(y), inv(uf.DistToRoot(x))))
 	x = uf.Find(x)
 	y = uf.Find(y)
 	if x == y {
-		return dist == uf.e()
+		return dist == e()
 	}
 	if uf.data[x] < uf.data[y] {
 		x, y = y, x
-		dist = uf.inv(dist)
+		dist = inv(dist)
 	}
 	uf.data[y] += uf.data[x]
 	uf.data[x] = y
@@ -99,16 +100,16 @@ func (uf *UnionFindWithDist) Union(x, y int, dist T) bool {
 
 // p[x] = p[y] + dist.
 //  如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
-func (uf *UnionFindWithDist) UnionWithCallback(x, y int, dist T, cb func(big, small int)) bool {
-	dist = uf.op(dist, uf.op(uf.DistToRoot(y), uf.inv(uf.DistToRoot(x))))
+func (uf *UnionFindArrayWithDist) UnionWithCallback(x, y int, dist T, cb func(big, small int)) bool {
+	dist = op(dist, op(uf.DistToRoot(y), inv(uf.DistToRoot(x))))
 	x = uf.Find(x)
 	y = uf.Find(y)
 	if x == y {
-		return dist == uf.e()
+		return dist == e()
 	}
 	if uf.data[x] < uf.data[y] {
 		x, y = y, x
-		dist = uf.inv(dist)
+		dist = inv(dist)
 	}
 	uf.data[y] += uf.data[x]
 	uf.data[x] = y
@@ -120,32 +121,164 @@ func (uf *UnionFindWithDist) UnionWithCallback(x, y int, dist T, cb func(big, sm
 	return true
 }
 
-func (uf *UnionFindWithDist) Find(x int) int {
+func (uf *UnionFindArrayWithDist) Find(x int) int {
 	if uf.data[x] < 0 {
 		return x
 	}
 	root := uf.Find(uf.data[x])
-	uf.potential[x] = uf.op(uf.potential[x], uf.potential[uf.data[x]])
+	uf.potential[x] = op(uf.potential[x], uf.potential[uf.data[x]])
 	uf.data[x] = root
 	return root
 }
 
 // f[x]-f[find(x)].
 //  点x到所在组根节点的距离.
-func (uf *UnionFindWithDist) DistToRoot(x int) T {
+func (uf *UnionFindArrayWithDist) DistToRoot(x int) T {
 	uf.Find(x)
 	return uf.potential[x]
 }
 
 // f[x] - f[y].
-func (uf *UnionFindWithDist) Dist(x, y int) T {
-	return uf.op(uf.DistToRoot(x), uf.inv(uf.DistToRoot(y)))
+func (uf *UnionFindArrayWithDist) Dist(x, y int) T {
+	return op(uf.DistToRoot(x), inv(uf.DistToRoot(y)))
 }
 
-func (uf *UnionFindWithDist) GetSize(x int) int {
+func (uf *UnionFindArrayWithDist) GetSize(x int) int {
 	return -uf.data[uf.Find(x)]
 }
 
-func (uf *UnionFindWithDist) IsConnected(x, y int) bool {
+func (uf *UnionFindArrayWithDist) GetGroups() map[int][]int {
+	res := make(map[int][]int)
+	for i := range uf.data {
+		res[uf.Find(i)] = append(res[uf.Find(i)], i)
+	}
+	return res
+}
+
+func (uf *UnionFindArrayWithDist) IsConnected(x, y int) bool {
 	return uf.Find(x) == uf.Find(y)
+}
+
+var _pool = make(map[interface{}]int)
+
+func id(o interface{}) int {
+	if v, ok := _pool[o]; ok {
+		return v
+	}
+	v := len(_pool)
+	_pool[o] = v
+	return v
+}
+
+// Map实现的带权并查集(维护到每个组根节点距离的并查集).
+type UnionFindMapWithDist struct {
+	Part      int
+	data      map[int]int
+	potential map[int]T
+}
+
+func NewUnionFindMapWithDist() *UnionFindMapWithDist {
+	return &UnionFindMapWithDist{
+		data:      make(map[int]int),
+		potential: make(map[int]T),
+	}
+}
+
+// p[x] = p[y] + dist.
+//  如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
+func (uf *UnionFindMapWithDist) Union(x, y int, dist T) bool {
+	dist = op(dist, op(uf.DistToRoot(y), inv(uf.DistToRoot(x))))
+	x = uf.Find(x)
+	y = uf.Find(y)
+	if x == y {
+		return dist == e()
+	}
+	if uf.data[x] < uf.data[y] {
+		x, y = y, x
+		dist = inv(dist)
+	}
+	uf.data[y] += uf.data[x]
+	uf.data[x] = y
+	uf.potential[x] = dist
+	uf.Part--
+	return true
+}
+
+// p[x] = p[y] + dist.
+//  如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
+func (uf *UnionFindMapWithDist) UnionWithCallback(x, y int, dist T, cb func(big, small int)) bool {
+	dist = op(dist, op(uf.DistToRoot(y), inv(uf.DistToRoot(x))))
+	x = uf.Find(x)
+	y = uf.Find(y)
+	if x == y {
+		return dist == e()
+	}
+	if uf.data[x] < uf.data[y] {
+		x, y = y, x
+		dist = inv(dist)
+	}
+	uf.data[y] += uf.data[x]
+	uf.data[x] = y
+	uf.potential[x] = dist
+	uf.Part--
+	if cb != nil {
+		cb(y, x)
+	}
+	return true
+}
+
+func (uf *UnionFindMapWithDist) Find(x int) int {
+	if _, ok := uf.data[x]; !ok {
+		uf.Add(x)
+		return x
+	}
+	if uf.data[x] < 0 {
+		return x
+	}
+	root := uf.Find(uf.data[x])
+	uf.potential[x] = op(uf.potential[x], uf.potential[uf.data[x]])
+	uf.data[x] = root
+	return root
+}
+
+// f[x]-f[find(x)].
+//  点x到所在组根节点的距离.
+func (uf *UnionFindMapWithDist) DistToRoot(x int) T {
+	uf.Find(x)
+	return uf.potential[x]
+}
+
+// f[x] - f[y].
+func (uf *UnionFindMapWithDist) Dist(x, y int) T {
+	return op(uf.DistToRoot(x), inv(uf.DistToRoot(y)))
+}
+
+func (uf *UnionFindMapWithDist) GetSize(x int) int {
+	return -uf.data[uf.Find(x)]
+}
+
+func (uf *UnionFindMapWithDist) GetGroups() map[int][]int {
+	res := make(map[int][]int)
+	for k := range uf.data {
+		res[uf.Find(k)] = append(res[uf.Find(k)], k)
+	}
+	return res
+}
+
+func (uf *UnionFindMapWithDist) IsConnected(x, y int) bool {
+	return uf.Find(x) == uf.Find(y)
+}
+
+func (uf *UnionFindMapWithDist) Add(x int) *UnionFindMapWithDist {
+	if _, ok := uf.data[x]; !ok {
+		uf.data[x] = -1
+		uf.potential[x] = e()
+		uf.Part++
+	}
+	return uf
+}
+
+func (uf *UnionFindMapWithDist) Has(x int) bool {
+	_, ok := uf.data[x]
+	return ok
 }
