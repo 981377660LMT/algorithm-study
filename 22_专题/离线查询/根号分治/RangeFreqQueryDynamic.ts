@@ -28,6 +28,8 @@ class RangeFreqQueryDynamic {
         const updated = () => {
           sortedNums = [...curNums].sort((a, b) => a - b)
         }
+
+        // 区间加
         const updateAll = (lazy: number) => {
           lazyAdd += lazy
         }
@@ -36,6 +38,8 @@ class RangeFreqQueryDynamic {
             curNums[i] += lazy
           }
         }
+
+        // 区间查询.
         const queryAll = (queryArg: [v: number, same: boolean]) => {
           const [v, same] = queryArg
           if (same) {

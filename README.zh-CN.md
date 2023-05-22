@@ -247,7 +247,8 @@
       - [完全可追溯化队列](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveQueue.go)
       - [完全可追溯化双端队列](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveDeque.go)
       - [完全可追溯化并查集](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveUnionFind.go)
-    - [RangeModeQuery](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeModeQuery.ts)
+    - [区间众数查询](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeModeQuery.ts)
+    - [动态区间频率查询](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeFreqQueryDynamic.ts)
     - WaveletMatrix
       - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)
       - [WaveletMatrixSum](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrixSum.go)
