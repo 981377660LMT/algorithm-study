@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 )
 
 func Isqrt(x int) int {
@@ -20,10 +21,26 @@ func Isqrt(x int) int {
 	return x0
 }
 
+// 返回floor(sqrt(x)).x为负数时返回0.
+func Isqrt2(x int) int {
+	if x <= 0 {
+		return 0
+	}
+	sqrt := int(math.Sqrt(float64(x)))
+	for (sqrt+1)*(sqrt+1) <= x {
+		sqrt++
+	}
+	for sqrt*sqrt > x {
+		sqrt--
+	}
+	return sqrt
+}
+
 func main() {
 	fmt.Println(Isqrt(5))
 	// check 1e18 to 1e18+100
 	for i := 0; i < 100; i++ {
 		fmt.Println(Isqrt(1000000000000000000 + i))
 	}
+	fmt.Println(Isqrt2(5))
 }

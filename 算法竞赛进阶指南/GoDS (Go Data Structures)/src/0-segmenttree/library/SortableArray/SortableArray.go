@@ -1,4 +1,4 @@
-// 可排序数组
+// 可排序数组(RangeSort)
 // NewSortableArray(nums []int) *SortableArray
 // Set(i, v int)
 // Get(i int) int

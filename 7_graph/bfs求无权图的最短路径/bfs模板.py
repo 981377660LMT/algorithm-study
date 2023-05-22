@@ -1,7 +1,7 @@
 # bfs模板 类似于dijkstra
 
 from collections import deque
-from typing import List, Tuple
+from typing import List, Sequence, Tuple
 
 INF = int(1e18)
 
@@ -22,11 +22,39 @@ def bfs(start: int, adjList: List[List[int]]) -> List[int]:
     return dist
 
 
-def bfs2(
-    start: int, adjList: List[List[Tuple[int, int]]], banEdge: int
+# bfs求出一条路径
+def bfs2(n: int, adjList: Sequence[Sequence[int]], start: int, end: int) -> Tuple[int, List[int]]:
+    """bfs求出起点到end的(最短距离,路径) 时间复杂度O(V+E)"""
+    dist = [INF] * n
+    dist[start] = 0
+    queue = deque([start])
+    pre = [-1] * n  # 记录每个点的前驱
+
+    while queue:
+        cur = queue.popleft()
+        for next in adjList[cur]:
+            cand = dist[cur] + 1
+            if cand < dist[next]:
+                dist[next] = cand
+                pre[next] = cur
+                queue.append(next)
+
+    if dist[end] == INF:
+        return INF, []
+
+    path = []
+    cur = end
+    while pre[cur] != -1:
+        path.append(cur)
+        cur = pre[cur]
+    path.append(start)
+    return dist[end], path[::-1]
+
+
+def bfsBanEdge(
+    n: int, adjList: Sequence[Sequence[Tuple[int, int]]], start: int, banEdge: int = -1
 ) -> Tuple[List[int], List[Tuple[int, int]]]:
-    """bfs求最短路,并记录一条路径"""
-    n = len(adjList)
+    """bfs求最短路,并记录一条路径."""
     dist = [INF] * n
     dist[start] = 0
     queue = deque([start])
@@ -34,12 +62,12 @@ def bfs2(
 
     while queue:
         cur = queue.popleft()
-        for next, edge in adjList[cur]:
-            if edge == banEdge:
+        for next, eid in adjList[cur]:
+            if eid == banEdge:
                 continue
             cand = dist[cur] + 1
             if cand < dist[next]:
-                pre[next] = (cur, edge)  # type: ignore
+                pre[next] = (cur, eid)  # type: ignore
                 dist[next] = cand
                 queue.append(next)
 
@@ -79,7 +107,7 @@ if __name__ == "__main__":
         u, v = u - 1, v - 1
         adjList[u].append((v, i))  # !记录每条边的编号
 
-    dist, pre = bfs2(0, adjList, -1)
+    dist, pre = bfsBanEdge(n, adjList, 0)
     if dist[n - 1] == INF:
         print(-1)
         exit(0)

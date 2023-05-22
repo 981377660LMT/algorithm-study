@@ -3,9 +3,7 @@ package dijkstra
 
 const INF int = 1e18
 
-type Edge struct{ to, weight int }
-
-func Dijkstra(n int, adjList [][]Edge, start int) (dist []int) {
+func Dijkstra(n int, adjList [][][2]int, start int) (dist []int) {
 	dist = make([]int, n)
 	for i := range dist {
 		dist[i] = INF
@@ -24,7 +22,7 @@ func Dijkstra(n int, adjList [][]Edge, start int) (dist []int) {
 		}
 
 		for _, edge := range adjList[cur] {
-			next, weight := edge.to, edge.weight
+			next, weight := edge[0], edge[1]
 			if cand := curDist + weight; cand < dist[next] {
 				dist[next] = cand
 				pq.Push(H{next, cand})
@@ -35,7 +33,7 @@ func Dijkstra(n int, adjList [][]Edge, start int) (dist []int) {
 	return
 }
 
-func DijkstraPoint(n int, adjList [][]Edge, start, target int) int {
+func DijkstraPoint(n int, adjList [][][2]int, start, target int) int {
 	dist := make([]int, n)
 	for i := range dist {
 		dist[i] = INF
@@ -57,7 +55,7 @@ func DijkstraPoint(n int, adjList [][]Edge, start, target int) int {
 		}
 
 		for _, edge := range adjList[cur] {
-			next, weight := edge.to, edge.weight
+			next, weight := edge[0], edge[1]
 			if cand := curDist + weight; cand < dist[next] {
 				dist[next] = cand
 				pq.Push(H{next, cand})
