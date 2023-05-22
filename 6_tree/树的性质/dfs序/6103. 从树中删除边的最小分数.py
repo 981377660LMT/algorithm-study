@@ -73,24 +73,24 @@ class Solution:
 
         def dfs(cur: int, pre: int) -> None:
             subXor[cur] = nums[cur]
-            for next in adjMap[cur]:
+            for next in adjList[cur]:
                 if next == pre:
                     continue
                 dfs(next, cur)
                 subXor[cur] ^= subXor[next]  # !后序遍历统计异或值
 
         n = len(nums)
-        adjMap = defaultdict(set)
+        adjList = [[] for _ in range(n)]
         for u, v in edges:
-            adjMap[u].add(v)
-            adjMap[v].add(u)
+            adjList[u].append(v)
+            adjList[v].append(u)
 
         subXor = [0] * n
         dfs(0, -1)
 
         allXor = subXor[0]
         res = INF
-        D = DFSOrder(n, adjMap)
+        D = DFSOrder(n, adjList)
 
         for p1, p2 in combinations(range(1, n), 2):
             isP1Parent = D.isAncestor(p1, p2)

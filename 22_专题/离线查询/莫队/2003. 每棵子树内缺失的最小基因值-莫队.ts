@@ -1,62 +1,58 @@
-// todo
 // dfs遍历树，形成dfs数组。子树的dfs序是连续的，该题就变成：
 // !在数组中查询若干区间的正整数mex。
+// 总共有 1e5 个基因值，基因值 互不相同,每个基因值都用 闭区间 [1, 1e5] 中的一个整数表示
 
 // 执行用时：
 // 1448 ms
 // 内存消耗：
 // 120.5 MB
 
-import { useDfsOrder } from '../../../6_tree/树的性质/dfs序/useDfsOrder'
-import { useMoAlgo, WindowManager } from './useMoAlgo'
+import { DfsOrder } from '../../../6_tree/树的性质/dfs序/DfsOrder'
+import { MoAlgo } from './Moalgo'
 
-// 总共有 1e5 个基因值，基因值 互不相同,每个基因值都用 闭区间 [1, 1e5] 中的一个整数表示
 function smallestMissingValueSubtree(parents: number[], nums: number[]): number[] {
   const n = nums.length
-  const adjList = Array.from<unknown, number[]>({ length: n }, () => [])
+  const adjList: number[][] = Array(n)
+  for (let i = 0; i < n; i++) adjList[i] = []
   parents.forEach((pre, cur) => {
     if (pre === -1) return
     adjList[pre].push(cur)
     adjList[cur].push(pre)
   })
 
-  const { queryRange, queryId } = useDfsOrder(n, adjList)
+  const D = new DfsOrder(n, adjList)
   const newNums = new Uint32Array(n)
-
   for (let root = 0; root < n; root++) {
-    const dfsId = queryId(root)
-    newNums[dfsId - 1] = nums[root]
+    const dfsId = D.queryId(root)
+    newNums[dfsId] = nums[root]
   }
 
   // !莫队算法求区间mex
-  let mex = 1
-  const counter = new Map<number, number>()
-  const windowManager: WindowManager<number> = {
-    add(index) {
-      const num = newNums[index]
-      counter.set(num, (counter.get(num) || 0) + 1)
-      while ((counter.get(mex) || 0) > 0) {
-        mex++
-      }
-    },
-    remove(index) {
-      const num = newNums[index]
-      counter.set(num, (counter.get(num) || 0) - 1)
-      if ((counter.get(num) || 0) === 0) mex = Math.min(mex, num)
-    },
-    query() {
-      return mex
-    }
-  }
-  const queryMex = useMoAlgo(n, n, windowManager)
-
+  const rangeMex = new MoAlgo(n, n)
   for (let root = 0; root < n; root++) {
-    let [left, right] = queryRange(root)
-    left--, right--
-    queryMex.addQuery(left, right)
+    let [left, right] = D.queryRange(root)
+    rangeMex.addQuery(left, right)
   }
 
-  return queryMex.work()
+  const res = Array(n).fill(1)
+  let mex = 1
+  const counter = new Uint32Array(Math.max(...newNums) + 1)
+  const add = (index: number) => {
+    const num = newNums[index]
+    counter[num]++
+    while (counter[mex]) mex++
+  }
+  const remove = (index: number) => {
+    const num = newNums[index]
+    counter[num]--
+    if (!counter[num]) mex = Math.min(mex, num)
+  }
+  const query = (qi: number) => {
+    res[qi] = mex
+  }
+  rangeMex.run(add, remove, query)
+
+  return res
 }
 
 if (require.main === module) {

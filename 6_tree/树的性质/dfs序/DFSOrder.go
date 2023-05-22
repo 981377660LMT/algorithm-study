@@ -1,12 +1,19 @@
 // DFS 序
+//            0 [0,5)
+//           /       \
+//          /         \
+//        1 [0,3)      2 [3,4)
+//       /    \
+//      /      \
+//    3 [0,1)   4[1,2)
 
 package main
 
 import "fmt"
 
 func main() {
-	n := 4
-	edges := [][]int{{0, 1}, {1, 2}, {2, 3}}
+	n := 5
+	edges := [][]int{{0, 1}, {0, 2}, {1, 3}, {1, 4}}
 	tree := make([][]int, n)
 	for _, e := range edges {
 		u, v := e[0], e[1]
@@ -25,7 +32,7 @@ func main() {
 type DfsOrder struct {
 	Starts, Ends []int
 	n            int
-	dfsId        int // 从 1 开始
+	dfsId        int // 从0开始
 	tree         [][]int
 }
 
@@ -34,7 +41,6 @@ func NewDfsOrder(n int, tree [][]int, root int) *DfsOrder {
 		Starts: make([]int, n),
 		Ends:   make([]int, n),
 		n:      n,
-		dfsId:  1,
 		tree:   tree,
 	}
 
@@ -42,15 +48,15 @@ func NewDfsOrder(n int, tree [][]int, root int) *DfsOrder {
 	return res
 }
 
-// 求子树映射到的区间.
-//  1 <= start <= end <= n
+// 求子树映射到的区间[start, end).
+//  0 <= start < end <= n.
 func (d *DfsOrder) QueryRange(u, v int) (start, end int) {
-	start, end = d.Starts[v], d.Ends[v]
+	start, end = d.Starts[v], d.Ends[v]+1
 	return
 }
 
 // 求root自身的dfs序.
-//  1 <= id <= n
+//  0 <= id < n.
 func (d *DfsOrder) QueryId(root int) (id int) {
 	return d.Ends[root]
 }

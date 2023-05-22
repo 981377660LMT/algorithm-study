@@ -1,3 +1,4 @@
+// https://atcoder.jp/contests/abc293/tasks/abc293_g
 // 给定一个数组和一些查询区间
 // 求区间内的三元组数目(i,j,k)使得i<j<k且a[i]=a[j]=a[k]
 

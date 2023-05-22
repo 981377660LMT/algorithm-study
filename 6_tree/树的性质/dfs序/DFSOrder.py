@@ -1,10 +1,12 @@
-from typing import List, Tuple
+#            0 [0,5)
+#           /       \
+#          /         \
+#        1 [0,3)      2 [3,4)
+#       /    \
+#      /      \
+#    3 [0,1)   4[1,2)
 
-#           0 (1,6)
-#         /      \
-#        1 (1,2)   3 (3,5)
-#       /        /      \
-#      2 (1,1)   4 (3,3) 5 (4,4)
+from typing import List, Tuple
 
 
 class DFSOrder:
@@ -23,7 +25,7 @@ class DFSOrder:
         self.ends = [0] * n
         self._n = n
         self._tree = tree
-        self._dfsId = 1
+        self._dfsId = 0
         self._dfs(root, -1)
 
     def querySub(self, root: int) -> Tuple[int, int]:
@@ -32,9 +34,9 @@ class DFSOrder:
         Args:
             root (int): 根节点
         Returns:
-            Tuple[int, int]: [start, end] 1 <= start <= end <= n
+            Tuple[int, int]: [start, end] 0 <= start < end <= n
         """
-        return self.starts[root], self.ends[root]
+        return self.starts[root], self.ends[root] + 1
 
     def queryId(self, root: int) -> int:
         """求root自身的dfsId
@@ -80,10 +82,11 @@ if __name__ == "__main__":
     for u, v in edges:
         tree[u].append(v)
         tree[v].append(u)
-    dfsOrder = DFSOrder(N, tree)
-    print(dfsOrder.querySub(1))
-    print(dfsOrder.querySub(2))
-    print(dfsOrder.querySub(3))
-    print(dfsOrder.queryId(1))
-    print(dfsOrder.queryId(2))
-    print(dfsOrder.queryId(3))
+    D = DFSOrder(N, tree)
+    print(D.querySub(1))
+    print(D.querySub(2))
+    print(D.querySub(3))
+    print(D.queryId(1))
+    print(D.queryId(2))
+    print(D.queryId(3))
+    print(D.querySub(3))
