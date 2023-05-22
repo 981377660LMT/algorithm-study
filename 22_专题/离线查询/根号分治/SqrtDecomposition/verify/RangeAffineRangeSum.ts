@@ -13,31 +13,36 @@ class NumArray {
       let sum = 0
       let color = INF
 
-      return {
-        created() {
-          this.updated()
-        },
-        updated() {
-          sum = curNums.reduce((a, b) => a + b, 0)
-        },
-        updatePart(left, right, lazy) {
-          for (let i = left; i < right; i++) {
-            curNums[i] = lazy
-          }
-        },
-        updateAll(lazy) {
-          color = lazy
-        },
-        queryAll() {
-          return color === INF ? sum : color * (right - left + 1)
-        },
-        queryPart(left, right) {
-          let res = 0
-          for (let i = left; i < right; i++) {
-            res += color === INF ? curNums[i] : color
-          }
-          return res
+      const created = () => {
+        updated()
+      }
+      const updated = () => {
+        sum = curNums.reduce((a, b) => a + b, 0)
+      }
+      const updateAll = (lazy: number) => {
+        color = lazy
+      }
+      const updatePart = (left: number, right: number, lazy: number) => {
+        for (let i = left; i < right; i++) {
+          curNums[i] = lazy
         }
+      }
+      const queryAll = () => (color === INF ? sum : color * (right - left))
+      const queryPart = (left: number, right: number) => {
+        let res = 0
+        for (let i = left; i < right; i++) {
+          res += color === INF ? curNums[i] : color
+        }
+        return res
+      }
+
+      return {
+        created,
+        updated,
+        updateAll,
+        updatePart,
+        queryAll,
+        queryPart
       }
     })
   }

@@ -37,17 +37,15 @@ func main() {
 			start--
 			sqrt.Update(start, end, add)
 		} else {
-			var start, end int
+			var start, end, k int
 			fmt.Fscan(in, &start, &end, &k)
 			start--
 			res := 0
-			sqrt.Query(start, end, func(cur E) { res += cur })
+			sqrt.Query(start, end, func(cur E) { res += cur }, k) // 查询区间内大于等于k的元素个数
 			fmt.Fprintln(out, res)
 		}
 	}
 }
-
-var k int
 
 type E = int
 type Id = int
@@ -76,13 +74,12 @@ func (b *Block) UpdatePart(start, end int, lazy Id) {
 	for i := start; i < end; i++ {
 		b.nums[i] += lazy
 	}
-	b.Build() // !注意重构
 }
-func (b *Block) QueryAll() E {
+func (b *Block) QueryAll(k int) E {
 	lower := sort.SearchInts(b.sorted, k-b.lazyAdd)
 	return len(b.sorted) - lower
 }
-func (b *Block) QueryPart(start, end int) E {
+func (b *Block) QueryPart(start, end int, k int) E {
 	res := 0
 	for i := start; i < end; i++ {
 		if b.nums[i]+b.lazyAdd >= k {
@@ -91,14 +88,6 @@ func (b *Block) QueryPart(start, end int) E {
 	}
 	return res
 }
-
-//
-//
-//
-// dont modify the template below
-//
-//
-//
 
 type SqrtDecomposition struct {
 	n   int
@@ -124,29 +113,42 @@ func NewSqrtDecomposition(nums []E, blockSize int) *SqrtDecomposition {
 // 更新左闭右开区间[start,end)的值.
 //  0<=start<=end<=n
 func (s *SqrtDecomposition) Update(start, end int, lazy Id) {
-	if start/s.bs == end/s.bs {
-		s.bls[start/s.bs].UpdatePart(start%s.bs, end%s.bs, lazy)
+	if start >= end {
+		return
+	}
+	id1, id2 := start/s.bs, end/s.bs
+	pos1, pos2 := start%s.bs, end%s.bs
+	if id1 == id2 {
+		s.bls[id1].UpdatePart(pos1, pos2, lazy)
+		s.bls[id1].Build()
 	} else {
-		s.bls[start/s.bs].UpdatePart(start%s.bs, s.bs, lazy)
-		for i := start/s.bs + 1; i < end/s.bs; i++ {
+		s.bls[id1].UpdatePart(pos1, s.bs, lazy)
+		s.bls[id1].Build()
+		for i := id1 + 1; i < id2; i++ {
 			s.bls[i].UpdateAll(lazy)
 		}
-		s.bls[end/s.bs].UpdatePart(0, end%s.bs, lazy)
+		s.bls[id2].UpdatePart(0, pos2, lazy)
+		s.bls[id2].Build()
 	}
 }
 
 // 查询左闭右开区间[start,end)的值.
 //  0<=start<=end<=n
-func (s *SqrtDecomposition) Query(start, end int, cb func(blockRes E)) {
-	if start/s.bs == end/s.bs {
-		s.bls[start/s.bs].QueryPart(start%s.bs, end%s.bs)
+func (s *SqrtDecomposition) Query(start, end int, cb func(blockRes E), k int) {
+	if start >= end {
 		return
 	}
-	cb(s.bls[start/s.bs].QueryPart(start%s.bs, s.bs))
-	for i := start/s.bs + 1; i < end/s.bs; i++ {
-		cb(s.bls[i].QueryAll())
+	id1, id2 := start/s.bs, end/s.bs
+	pos1, pos2 := start%s.bs, end%s.bs
+	if id1 == id2 {
+		cb(s.bls[id1].QueryPart(pos1, pos2, k))
+		return
 	}
-	cb(s.bls[end/s.bs].QueryPart(0, end%s.bs))
+	cb(s.bls[id1].QueryPart(pos1, s.bs, k))
+	for i := id1 + 1; i < id2; i++ {
+		cb(s.bls[i].QueryAll(k))
+	}
+	cb(s.bls[id2].QueryPart(0, pos2, k))
 }
 
 func min(a, b int) int {

@@ -7,41 +7,47 @@ import { SqrtDecomposition } from '../SqrtDecomposition'
 // 操作类型 3 为 queries[i] = [3, 0, 0] 。求 nums2 中所有元素的和。
 // 请你返回一个数组，包含所有第三种操作类型的答案。
 // 区间反转+查询区间1的个数
+
 function handleQuery(nums1: number[], nums2: number[], queries: number[][]): number[] {
   const n = nums1.length
 
   const sqrt = new SqrtDecomposition<number, 0 | 1>(n, (_, start, end) => {
+    const curNums = nums1.slice(start, end)
     const len = end - start
-    const bits = nums1.slice(start, end)
     let ones = 0
     let lazyFlip = 0
 
-    return {
-      created() {
-        this.updated()
-      },
-      updated() {
-        ones = bits.reduce((pre, cur) => pre + cur, 0)
-      },
-      queryPart(start, end) {
-        let res = 0
-        for (let i = start; i < end; i++) {
-          bits[i] ^= lazyFlip
-          res += bits[i] ? 1 : 0
-        }
-        return res
-      },
-      updatePart(start, end, flip) {
-        for (let i = start; i < end; i++) {
-          bits[i] ^= flip
-        }
-      },
-      queryAll() {
-        return lazyFlip === 1 ? len - ones : ones
-      },
-      updateAll(flip) {
-        lazyFlip ^= flip
+    const created = () => {
+      updated()
+    }
+    const updated = () => {
+      ones = curNums.reduce((pre, cur) => pre + cur, 0)
+    }
+    const updateAll = (flip: 0 | 1) => {
+      lazyFlip ^= flip
+    }
+    const updatePart = (start: number, end: number, flip: 0 | 1) => {
+      for (let i = start; i < end; i++) {
+        curNums[i] ^= flip
       }
+    }
+    const queryAll = () => (lazyFlip === 1 ? len - ones : ones)
+    const queryPart = (start: number, end: number) => {
+      let res = 0
+      for (let i = start; i < end; i++) {
+        curNums[i] ^= lazyFlip
+        res += curNums[i] ? 1 : 0
+      }
+      return res
+    }
+
+    return {
+      created,
+      updated,
+      updateAll,
+      updatePart,
+      queryAll,
+      queryPart
     }
   })
 

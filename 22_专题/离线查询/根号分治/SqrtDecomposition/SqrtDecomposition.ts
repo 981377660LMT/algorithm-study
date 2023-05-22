@@ -1,4 +1,4 @@
-interface Block<E, Id> {
+interface Block<E, Id, Q = unknown> {
   /**
    * 在创建块时调用，用于初始化块的值.
    */
@@ -14,7 +14,7 @@ interface Block<E, Id> {
    *
    * !注意查询时需要把块内的懒标记计入影响.
    */
-  queryPart(start: number, end: number): E
+  queryPart(start: number, end: number, queryArg?: Q): E
 
   /**
    * 更新块内左闭右开区间 [start, end) 的值. 0 <= start <= end <= blockSize.
@@ -24,7 +24,7 @@ interface Block<E, Id> {
   /**
    * 查询块内所有值.
    */
-  queryAll(): E
+  queryAll(queryArg?: Q): E
 
   /**
    * 更新块内所有值,打上懒标记.
@@ -35,9 +35,9 @@ interface Block<E, Id> {
 /**
  * 当区间需要维护的数据难以用半群来描述时，可以考虑根号分块。
  */
-class SqrtDecomposition<E, Id> {
+class SqrtDecomposition<E, Id, Q = unknown> {
   private readonly _blockSize: number
-  private readonly _blocks: Block<E, Id>[]
+  private readonly _blocks: Block<E, Id, Q>[]
 
   /**
    * @param n 区间长度.
@@ -46,7 +46,7 @@ class SqrtDecomposition<E, Id> {
    */
   constructor(
     n: number,
-    createBlock: (id: number, start: number, end: number) => Block<E, Id>,
+    createBlock: (id: number, start: number, end: number) => Block<E, Id, Q>,
     blockSize = ~~Math.sqrt(n) + 1
   ) {
     this._blockSize = blockSize
@@ -90,7 +90,7 @@ class SqrtDecomposition<E, Id> {
    * 0 <= start <= end <= n.
    * @param forEach 遍历每个块的结果.
    */
-  query(start: number, end: number, forEach: (blockRes: E) => void) {
+  query(start: number, end: number, forEach: (blockRes: E) => void, queryArg?: Q) {
     if (start >= end) {
       return
     }
@@ -99,14 +99,14 @@ class SqrtDecomposition<E, Id> {
     const pos1 = start % this._blockSize
     const pos2 = end % this._blockSize
     if (id1 === id2) {
-      forEach(this._blocks[id1].queryPart(pos1, pos2))
+      forEach(this._blocks[id1].queryPart(pos1, pos2, queryArg))
       return
     }
-    forEach(this._blocks[id1].queryPart(pos1, this._blockSize))
+    forEach(this._blocks[id1].queryPart(pos1, this._blockSize, queryArg))
     for (let i = id1 + 1; i < id2; i++) {
-      forEach(this._blocks[i].queryAll())
+      forEach(this._blocks[i].queryAll(queryArg))
     }
-    forEach(this._blocks[id2].queryPart(0, pos2))
+    forEach(this._blocks[id2].queryPart(0, pos2, queryArg))
   }
 }
 

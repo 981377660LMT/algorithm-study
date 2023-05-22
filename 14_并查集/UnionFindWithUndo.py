@@ -28,7 +28,7 @@ UnionFindWithUndo/RevocableUnionFind/RollbackUnionFind
 
 # Snapshot():内部保存当前状态。
 #  !Snapshot() 之后可以调用 Rollback(-1) 回滚到这个状态.
-# Rollback(int state = -1)：回滚到指定状态。
+# Rollback(state = -1)：回滚到指定状态。
 #   state等于-1时，会回滚到snapshot()中保存的状态。
 #   否则，会回滚到指定的state次union调用时的状态。
 # GetState()：
