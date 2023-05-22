@@ -1,9 +1,13 @@
+# 979. 在二叉树中分配硬币
+# 树上移动硬币/金币
+# https://leetcode.cn/problems/distribute-coins-in-binary-tree/
+
 from typing import Optional
 
 
 class TreeNode:
     def __init__(
-        self, val: int = 0, left: Optional['TreeNode'] = None, right: Optional['TreeNode'] = None
+        self, val: int = 0, left: Optional["TreeNode"] = None, right: Optional["TreeNode"] = None
     ):
         self.val = val
         self.left = left
@@ -20,6 +24,9 @@ class Solution:
     def distributeCoins(self, root: TreeNode) -> int:
         # !以root为顶点的子树的需要多少硬币才平衡，正数表示我有多余，负数表示我需要别人给我硬币。
         def dfs(root: TreeNode | None) -> int:
+            """返回当前子树需要父结点给的硬币数.
+            大于0表示当前子树有多余的硬币,小于0表示当前子树需要硬币.
+            """
             if not root:
                 return 0
 
@@ -31,4 +38,3 @@ class Solution:
         self.res = 0
         dfs(root)
         return self.res
-

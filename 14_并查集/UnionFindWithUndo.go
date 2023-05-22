@@ -2,29 +2,33 @@
 // https://nyaannyaan.github.io/library/data-structure/rollback-union-find.hpp
 // 可撤销并查集(时间旅行)
 
+// API:
 // RollbackUnionFind(int sz)：
-//   サイズszのUnionFindを生成する。
-// find(int k)：
-//   kの根を返す。
-// same(int x, int y)：
-//   xとyが同じ連結成分に所属しているかを返す。
-// snapshot()：
-//   現在のUnionFindの状態を保存する。(保存した状態はrollback()で再現できる。)計算量
-// get_state()：
-//   現在のuniteが呼ばれた回数を返す。
-// rollback(int state = -1)：UnionFindをロールバックする。計算量は状況による。(ボトルネックにはならない)
-//   state = -1のとき：snapshot()で保存した状態にロールバックする。
-//   そうでないとき：uniteがstate回呼び出された時の状態にロールバックする。
+
+// Union(int x, int y)：
+// Find(int k)：
+// IsConnected(int x, int y)：
+
+// Undo()：撤销上一次合并操作，没合并成功也要撤销.
+
+// Snapshot():内部保存当前状态。
+//  !Snapshot() 之后可以调用 Rollback(-1) 回滚到这个状态.
+// Rollback(int state = -1)：回滚到指定状态。
+//   state等于-1时，会回滚到snapshot()中保存的状态。
+//   否则，会回滚到指定的state次union调用时的状态。
+// GetState()：
+//   返回当前状态，即union调用的次数。
 
 package main
 
 import (
 	"fmt"
 	"sort"
+	"strings"
 )
 
 func main() {
-	uf := NewRollBackUnionFind(10)
+	uf := NewUnionFindArrayWithUndo(10)
 	uf.Union(0, 1)
 	uf.Union(2, 3)
 	fmt.Println(uf.Find(0), uf.Find(1), uf.Find(2), uf.Find(3))
@@ -42,39 +46,53 @@ func main() {
 	uf.Rollback(-1)
 	fmt.Println(uf)
 	uf.Rollback(0)
-	fmt.Println(uf)
+
+	fmt.Println(uf, uf.Part)
 }
 
-func NewRollBackUnionFind(n int) *RollbackUnionFind {
+func NewUnionFindArrayWithUndo(n int) *UnionFindArrayWithUndo {
 	data := make([]int, n)
 	for i := range data {
 		data[i] = -1
 	}
-	return &RollbackUnionFind{data: data}
+	return &UnionFindArrayWithUndo{Part: n, n: n, data: data}
 }
 
-type RollbackUnionFind struct {
+type UnionFindArrayWithUndo struct {
+	Part      int
+	n         int
 	innerSnap int
 	data      []int
-	history   []struct{ a, b int }
+	history   []struct{ a, b int } // (root,data)
 }
 
 // !撤销上一次合并操作，没合并成功也要撤销.
-func (uf *RollbackUnionFind) Undo() bool {
+func (uf *UnionFindArrayWithUndo) Undo() bool {
 	if len(uf.history) == 0 {
 		return false
 	}
-	uf.data[uf.history[len(uf.history)-1].a] = uf.history[len(uf.history)-1].b
+	big, bigData := uf.history[len(uf.history)-1].a, uf.history[len(uf.history)-1].b
+	uf.data[big] = bigData
 	uf.history = uf.history[:len(uf.history)-1]
-	uf.data[uf.history[len(uf.history)-1].a] = uf.history[len(uf.history)-1].b
+	small, smallData := uf.history[len(uf.history)-1].a, uf.history[len(uf.history)-1].b
+	uf.data[small] = smallData
 	uf.history = uf.history[:len(uf.history)-1]
+	if big != small {
+		uf.Part++
+	}
 	return true
+}
+
+// 保存并查集当前的状态.
+//  !Snapshot() 之后可以调用 Rollback(-1) 回滚到这个状态.
+func (uf *UnionFindArrayWithUndo) Snapshot() {
+	uf.innerSnap = len(uf.history) >> 1
 }
 
 // 回滚到指定的状态.
 //  state 为 -1 表示回滚到上一次 `SnapShot` 时保存的状态.
-//  其他值表示回滚到合并(Union) `state` 次后的状态.
-func (uf *RollbackUnionFind) Rollback(state int) bool {
+//  其他值表示回滚到状态id为state时的状态.
+func (uf *UnionFindArrayWithUndo) Rollback(state int) bool {
 	if state == -1 {
 		state = uf.innerSnap
 	}
@@ -88,17 +106,19 @@ func (uf *RollbackUnionFind) Rollback(state int) bool {
 	return true
 }
 
-// 获取当前合并(Union)被调用的次数.
-func (uf *RollbackUnionFind) GetState() int {
+// 获取当前并查集的状态id.
+//  也就是当前合并(Union)被调用的次数.
+func (uf *UnionFindArrayWithUndo) GetState() int {
 	return len(uf.history) >> 1
 }
 
-// 保存并查集当前的状态.
-func (uf *RollbackUnionFind) Snapshot() {
-	uf.innerSnap = len(uf.history) >> 1
+func (uf *UnionFindArrayWithUndo) Reset() {
+	for len(uf.history) > 0 {
+		uf.Undo()
+	}
 }
 
-func (uf *RollbackUnionFind) Union(x, y int) bool {
+func (uf *UnionFindArrayWithUndo) Union(x, y int) bool {
 	x, y = uf.Find(x), uf.Find(y)
 	uf.history = append(uf.history, struct{ a, b int }{x, uf.data[x]})
 	uf.history = append(uf.history, struct{ a, b int }{y, uf.data[y]})
@@ -106,14 +126,17 @@ func (uf *RollbackUnionFind) Union(x, y int) bool {
 		return false
 	}
 	if uf.data[x] > uf.data[y] {
-		x, y = y, x
+		x ^= y
+		y ^= x
+		x ^= y
 	}
 	uf.data[x] += uf.data[y]
 	uf.data[y] = x
+	uf.Part--
 	return true
 }
 
-func (uf *RollbackUnionFind) Find(x int) int {
+func (uf *UnionFindArrayWithUndo) Find(x int) int {
 	cur := x
 	for uf.data[cur] >= 0 {
 		cur = uf.data[cur]
@@ -121,28 +144,32 @@ func (uf *RollbackUnionFind) Find(x int) int {
 	return cur
 }
 
-func (uf *RollbackUnionFind) IsConnected(x, y int) bool { return uf.Find(x) == uf.Find(y) }
+func (uf *UnionFindArrayWithUndo) IsConnected(x, y int) bool { return uf.Find(x) == uf.Find(y) }
 
-func (uf *RollbackUnionFind) GetSize(x int) int { return -uf.data[uf.Find(x)] }
+func (uf *UnionFindArrayWithUndo) GetSize(x int) int { return -uf.data[uf.Find(x)] }
 
-func (uf *RollbackUnionFind) GetGroups() [][]int {
-	mp := make(map[int][]int)
-	for i := range uf.data {
-		mp[uf.Find(i)] = append(mp[uf.Find(i)], i)
+func (ufa *UnionFindArrayWithUndo) GetGroups() map[int][]int {
+	groups := make(map[int][]int)
+	for i := 0; i < ufa.n; i++ {
+		root := ufa.Find(i)
+		groups[root] = append(groups[root], i)
 	}
-	var res [][]int
-	for _, g := range mp {
-		res = append(res, g)
-	}
-	return res
+	return groups
 }
 
-func (uf *RollbackUnionFind) String() string {
-	groups := uf.GetGroups()
-	sort.Slice(groups, func(i, j int) bool { return groups[i][0] < groups[j][0] })
-	res := []string{}
-	for _, g := range groups {
-		res = append(res, fmt.Sprintf("%v", g))
+func (ufa *UnionFindArrayWithUndo) String() string {
+	sb := []string{"UnionFindArray:"}
+	groups := ufa.GetGroups()
+	keys := make([]int, 0, len(groups))
+	for k := range groups {
+		keys = append(keys, k)
 	}
-	return fmt.Sprintf("state = %d, groups = %v", uf.GetState(), res)
+	sort.Ints(keys)
+	for _, root := range keys {
+		member := groups[root]
+		cur := fmt.Sprintf("%d: %v", root, member)
+		sb = append(sb, cur)
+	}
+	sb = append(sb, fmt.Sprintf("Part: %d", ufa.Part))
+	return strings.Join(sb, "\n")
 }

@@ -12,7 +12,7 @@ func TestNewUnionFindArray(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *UnionFindArray
+		want *_UnionFindArray
 	}{
 		// TODO: Add test cases.
 		{
@@ -20,7 +20,7 @@ func TestNewUnionFindArray(t *testing.T) {
 			args: args{
 				n: 10,
 			},
-			want: &UnionFindArray{
+			want: &_UnionFindArray{
 				Part:   10,
 				rank:   []int{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 				n:      10,

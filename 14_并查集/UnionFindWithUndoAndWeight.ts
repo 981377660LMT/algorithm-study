@@ -1,109 +1,139 @@
-// UnionFindWithUndoAndWeight
+/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+// UnionFindWithUndoAndWeight/UnionFindArrayWithUndoAndWeight
 // https://hitonanode.github.io/cplib-cpp/unionfind/undo_monoid_unionfind.hpp
 // 可撤销并查集 / 维护 `满足可换律的monoid` 权值 的并查集
-// Set: 将下标为index元素`所在集合`的权值置为value.
-// Get: 获取下标为index元素`所在集合`的权值.
+// SetGroup: 将下标为index元素`所在集合`的权值置为value.
+// GetGroup: 获取下标为index元素`所在集合`的权值.
 // !Undo: 撤销上一次合并(Union)或者修改权值(Set)操作，没合并成功也要撤销
 // Reset: 撤销所有操作
 
-package main
+/**
+ * 可撤销并查集, 维护连通分量的权值.
+ */
+class UnionFindArrayWithUndoAndWeight<S> {
+  private readonly _ranks: Uint32Array
+  private readonly _parents: Uint32Array
+  private readonly _weights: S[]
+  private readonly _history: [root: number, rank: number, weight: S][] = []
+  private readonly _op: (s1: S, s2: S) => S
+  private _part: number
 
-import "fmt"
+  constructor(initWeights: S[], op: (s1: S, s2: S) => S) {
+    const n = initWeights.length
+    this._ranks = new Uint32Array(n)
+    this._parents = new Uint32Array(n)
+    this._weights = Array(n)
+    for (let i = 0; i < n; ++i) {
+      this._ranks[i] = 1
+      this._parents[i] = i
+      this._weights[i] = initWeights[i]
+    }
+    this._op = op
+    this._part = n
+  }
 
-func main() {
-	uf := NewUndoDSU(10)
-	uf.Union(0, 1)
-	uf.Union(2, 3)
-	fmt.Println(uf.Part)
-	fmt.Println(uf.Find(0), uf.Find(1), uf.Find(2), uf.Find(3))
-	uf.Union(0, 2)
-	fmt.Println(uf.Find(0), uf.Find(1), uf.Find(2), uf.Find(3))
-	fmt.Println(uf.Part)
-	uf.Undo()
-	fmt.Println(uf.Find(0), uf.Find(1), uf.Find(2), uf.Find(3))
-	uf.Reset()
-	fmt.Println(uf.Part)
+  /**
+   * 将下标为index元素`所在集合`的权值置为value.
+   */
+  setGroup(index: number, value: S): void {
+    index = this.find(index)
+    this._history.push([index, this._ranks[index], this._weights[index]])
+    this._weights[index] = value
+  }
+
+  /**
+   * 获取下标为index元素`所在集合`的权值.
+   */
+  getGroup(index: number): S {
+    return this._weights[this.find(index)]
+  }
+
+  /**
+   * 撤销上一次合并(Union)或者修改权值(Set)操作.
+   * 没合并成功也要撤销.
+   */
+  undo(): void {
+    if (!this._history.length) return
+    const [small, rank, weight] = this._history.pop()!
+    const ps = this._parents[small]
+    this._weights[ps] = weight
+    this._ranks[ps] = rank
+    if (ps !== small) {
+      this._parents[small] = small
+      this._part++
+    }
+  }
+
+  /**
+   * 撤销所有操作.
+   */
+  reset(): void {
+    while (this._history.length) {
+      this.undo()
+    }
+  }
+
+  find(x: number): number {
+    if (this._parents[x] === x) return x
+    return this.find(this._parents[x])
+  }
+
+  union(x: number, y: number): boolean {
+    x = this.find(x)
+    y = this.find(y)
+    if (this._ranks[x] < this._ranks[y]) {
+      x ^= y
+      y ^= x
+      x ^= y
+    }
+    this._history.push([y, this._ranks[x], this._weights[x]])
+    if (x !== y) {
+      this._parents[y] = x
+      this._ranks[x] += this._ranks[y]
+      this._weights[x] = this._op(this._weights[x], this._weights[y])
+      this._part--
+      return true
+    }
+    return false
+  }
+
+  isConnected(x: number, y: number): boolean {
+    return this.find(x) === this.find(y)
+  }
+
+  getSize(x: number): number {
+    return this._ranks[this.find(x)]
+  }
+
+  getGroups(): Map<number, number[]> {
+    const groups = new Map<number, number[]>()
+    for (let i = 0; i < this._parents.length; ++i) {
+      const root = this.find(i)
+      if (!groups.has(root)) {
+        groups.set(root, [])
+      }
+      groups.get(root)!.push(i)
+    }
+    return groups
+  }
+
+  get part(): number {
+    return this._part
+  }
 }
 
-type S = int
+export { UnionFindArrayWithUndoAndWeight }
 
-func (*UndoDSU) op(s1, s2 S) S { return s1 + s2 }
-
-func NewUndoDSU(n int) *UndoDSU { return NewUndoDSUWithWeights(make([]S, n)) }
-func NewUndoDSUWithWeights(weights []S) *UndoDSU {
-	n := len(weights)
-	parent, rank, ws := make([]int, n), make([]int, n), make([]S, n)
-	for i := 0; i < n; i++ {
-		parent[i], rank[i], ws[i] = i, 1, weights[i]
-	}
-	history := []historyItem{}
-	return &UndoDSU{Part: n, rank: rank, parents: parent, weights: ws, history: history}
+if (require.main === module) {
+  const uf = new UnionFindArrayWithUndoAndWeight([1, 2, 3, 4, 5], (a, b) => a + b)
+  uf.union(0, 1)
+  uf.union(1, 2)
+  uf.union(3, 4)
+  console.log(uf.getGroup(0), uf.getGroup(1), uf.getGroup(2), uf.getGroup(3), uf.getGroup(4))
+  uf.undo()
+  console.log(uf.getGroup(0), uf.getGroup(1), uf.getGroup(2), uf.getGroup(3), uf.getGroup(4))
+  uf.reset()
+  console.log(uf.getGroup(0), uf.getGroup(1), uf.getGroup(2), uf.getGroup(3), uf.getGroup(4))
 }
-
-type historyItem struct {
-	a, b int
-	c    S
-}
-
-type UndoDSU struct {
-	Part    int
-	rank    []int
-	parents []int
-	weights []S
-	history []historyItem
-}
-
-// 将下标为index元素`所在集合`的权值置为value.
-func (uf *UndoDSU) Set(index int, value S) {
-	index = uf.Find(index)
-	uf.history = append(uf.history, historyItem{index, uf.rank[index], uf.weights[index]})
-	uf.weights[index] = value
-}
-
-// 获取下标为index元素`所在集合`的权值.
-func (uf *UndoDSU) Get(index int) S { return uf.weights[uf.Find(index)] }
-
-// 撤销上一次合并(Union)或者修改权值(Set)操作
-func (uf *UndoDSU) Undo() {
-	uf.weights[uf.parents[uf.history[len(uf.history)-1].a]] = uf.history[len(uf.history)-1].c
-	uf.rank[uf.parents[uf.history[len(uf.history)-1].a]] = uf.history[len(uf.history)-1].b
-	if uf.parents[uf.history[len(uf.history)-1].a] != uf.history[len(uf.history)-1].a {
-		uf.parents[uf.history[len(uf.history)-1].a] = uf.history[len(uf.history)-1].a
-		uf.Part++
-	}
-	uf.history = uf.history[:len(uf.history)-1]
-}
-
-// 撤销所有操作
-func (uf *UndoDSU) Reset() {
-	for len(uf.history) > 0 {
-		uf.Undo()
-	}
-}
-
-func (uf *UndoDSU) Find(x int) int {
-	if uf.parents[x] == x {
-		return x
-	}
-	return uf.Find(uf.parents[x])
-}
-
-func (uf *UndoDSU) Union(x, y int) bool {
-	x, y = uf.Find(x), uf.Find(y)
-	if uf.rank[x] < uf.rank[y] {
-		x, y = y, x
-	}
-	uf.history = append(uf.history, historyItem{y, uf.rank[x], uf.weights[x]})
-	if x != y {
-		uf.parents[y] = x
-		uf.rank[x] += uf.rank[y]
-		uf.weights[x] = uf.op(uf.weights[x], uf.weights[y])
-		uf.Part--
-		return true
-	}
-	return false
-}
-
-func (uf *UndoDSU) IsConnected(x, y int) bool { return uf.Find(x) == uf.Find(y) }
-
-func (uf *UndoDSU) Size(x int) int { return uf.rank[uf.Find(x)] }

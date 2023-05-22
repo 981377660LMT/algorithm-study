@@ -21,7 +21,8 @@ import (
 )
 
 func main() {
-	WeightedUnionFindTrees()
+	// WeightedUnionFindTrees()
+	TreeOfButton()
 }
 
 // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_1_B&lang=jp
@@ -50,6 +51,71 @@ func WeightedUnionFindTrees() {
 			}
 		}
 	}
+}
+
+// F-ボタンの木
+func TreeOfButton() {
+	const INF int = 1e18
+
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	edges := make([][2]int, n-1)
+	for i := range edges {
+		fmt.Fscan(in, &edges[i][0], &edges[i][1])
+		edges[i][0]--
+		edges[i][1]--
+	}
+	starts := make([]int, n)
+	for i := range starts {
+		fmt.Fscan(in, &starts[i])
+	}
+	targets := make([]int, n)
+	for i := range targets {
+		fmt.Fscan(in, &targets[i])
+	}
+
+	tree := make([][]int, n)
+	for _, e := range edges {
+		u, v := e[0], e[1]
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
+	}
+
+	uf := NewUnionFindArrayWithDist(n)
+	var dfs func(int, int) int
+	dfs = func(cur, pre int) int {
+		need := targets[cur] - starts[cur]
+		for _, next := range tree[cur] {
+			if next == pre {
+				continue
+			}
+			sub := dfs(next, cur)
+			uf.Union(cur, next, sub)
+			need += sub
+		}
+		return need
+	}
+
+	dfs(0, -1)
+
+	sum_, min_ := 0, INF
+	for i := 0; i < n; i++ {
+		diff := uf.Dist(i, 0)
+		sum_ += diff
+		min_ = min(min_, diff)
+	}
+	fmt.Fprintln(out, sum_-min_*n)
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 type T = int

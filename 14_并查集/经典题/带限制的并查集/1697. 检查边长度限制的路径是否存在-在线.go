@@ -171,14 +171,14 @@ func Kruskal(n int, edges [][]int) (tree [][]AdjListEdge, ok bool) {
 	return tree, false
 }
 
-func NewUnionFindArray(n int) *UnionFindArray {
+func NewUnionFindArray(n int) *_UnionFindArray {
 	parent, rank := make([]int, n), make([]int, n)
 	for i := 0; i < n; i++ {
 		parent[i] = i
 		rank[i] = 1
 	}
 
-	return &UnionFindArray{
+	return &_UnionFindArray{
 		Part:   n,
 		size:   n,
 		Rank:   rank,
@@ -186,14 +186,14 @@ func NewUnionFindArray(n int) *UnionFindArray {
 	}
 }
 
-type UnionFindArray struct {
+type _UnionFindArray struct {
 	size   int
 	Part   int
 	Rank   []int
 	parent []int
 }
 
-func (ufa *UnionFindArray) Union(key1, key2 int) bool {
+func (ufa *_UnionFindArray) Union(key1, key2 int) bool {
 	root1, root2 := ufa.Find(key1), ufa.Find(key2)
 	if root1 == root2 {
 		return false
@@ -207,7 +207,7 @@ func (ufa *UnionFindArray) Union(key1, key2 int) bool {
 	return true
 }
 
-func (ufa *UnionFindArray) Find(key int) int {
+func (ufa *_UnionFindArray) Find(key int) int {
 	for ufa.parent[key] != key {
 		ufa.parent[key] = ufa.parent[ufa.parent[key]]
 		key = ufa.parent[key]
@@ -215,6 +215,6 @@ func (ufa *UnionFindArray) Find(key int) int {
 	return key
 }
 
-func (ufa *UnionFindArray) IsConnected(key1, key2 int) bool {
+func (ufa *_UnionFindArray) IsConnected(key1, key2 int) bool {
 	return ufa.Find(key1) == ufa.Find(key2)
 }

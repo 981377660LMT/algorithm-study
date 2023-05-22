@@ -101,24 +101,24 @@ func abs(x int) int {
 	return x
 }
 
-func newUnionFindArray(n int) *unionFindArray {
+func newUnionFindArray(n int) *_unionFindArray {
 	parent, rank := make([]int, n), make([]int, n)
 	for i := 0; i < n; i++ {
 		parent[i] = i
 		rank[i] = 1
 	}
-	return &unionFindArray{
+	return &_unionFindArray{
 		Rank:   rank,
 		parent: parent,
 	}
 }
 
-type unionFindArray struct {
+type _unionFindArray struct {
 	Rank   []int
 	parent []int
 }
 
-func (ufa *unionFindArray) union(key1, key2 int) bool {
+func (ufa *_unionFindArray) union(key1, key2 int) bool {
 	root1, root2 := ufa.find(key1), ufa.find(key2)
 	if root1 == root2 {
 		return false
@@ -131,7 +131,7 @@ func (ufa *unionFindArray) union(key1, key2 int) bool {
 	return true
 }
 
-func (ufa *unionFindArray) find(key int) int {
+func (ufa *_unionFindArray) find(key int) int {
 	for ufa.parent[key] != key {
 		ufa.parent[key] = ufa.parent[ufa.parent[key]]
 		key = ufa.parent[key]

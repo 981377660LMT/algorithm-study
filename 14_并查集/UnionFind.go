@@ -1,176 +1,230 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+package main
 
-class UnionFindArray {
-  private readonly _n: number
-  private readonly _data: Int32Array
-  private _part: number
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
 
-  constructor(n: number) {
-    this._n = n
-    this._part = n
-    this._data = new Int32Array(n)
-    for (let i = 0; i < n; i++) {
-      this._data[i] = -1
-    }
-  }
-
-  union(x: number, y: number, callback?: (big: number, small: number) => void): boolean {
-    let rootX = this.find(x)
-    let rootY = this.find(y)
-    if (rootX === rootY) {
-      return false
-    }
-    if (this._data[rootX] > this._data[rootY]) {
-      rootX ^= rootY
-      rootY ^= rootX
-      rootX ^= rootY
-    }
-    this._data[rootX] += this._data[rootY]
-    this._data[rootY] = rootX
-    this._part -= 1
-    callback && callback(rootY, rootX)
-    return true
-  }
-
-  find(x: number): number {
-    // eslint-disable-next-line no-return-assign
-    return this._data[x] < 0 ? x : (this._data[x] = this.find(this._data[x]))
-  }
-
-  isConnected(x: number, y: number): boolean {
-    return this.find(x) === this.find(y)
-  }
-
-  getGroups(): Map<number, number[]> {
-    const groups = new Map<number, number[]>()
-    for (let i = 0; i < this._n; i++) {
-      const root = this.find(i)
-      !groups.has(root) && groups.set(root, [])
-      groups.get(root)!.push(i)
-    }
-    return groups
-  }
-
-  getRoots(): number[] {
-    const res = Array(this._n)
-    for (let i = 0; i < this._n; i++) {
-      res[i] = this.find(i)
-    }
-    return [...new Set(res)]
-  }
-
-  getPart(): number {
-    return this._part
-  }
-
-  getSize(x: number): number {
-    return -this._data[this.find(x)]
-  }
-
-  toString(): string {
-    return [...this.getGroups()].map(([root, member]) => `${root}: ${member}`).join('\n')
-  }
+func countComponents(n int, edges [][]int) int {
+	uf := NewUnionFindArray(n)
+	for _, edge := range edges {
+		uf.Union(edge[0], edge[1])
+	}
+	return uf.Part
 }
 
-class UnionFindMap<V extends number | string> {
-  private readonly _parent: Map<V, V> = new Map()
-  private readonly _rank: Map<V, number> = new Map()
-  private readonly _autoAdd: boolean
-  private _part = 0
-
-  constructor(arrayLike: ArrayLike<V> = [], autoAdd = true) {
-    this._autoAdd = autoAdd
-    for (let i = 0; i < arrayLike.length; i++) {
-      this.add(arrayLike[i])
-    }
-  }
-
-  union(x: V, y: V, callback?: (big: V, small: V) => void): boolean {
-    let rootX = this.find(x)
-    let rootY = this.find(y)
-    if (rootX === rootY) {
-      return false
-    }
-    if (this._rank.get(rootX)! > this._rank.get(rootY)!) {
-      ;[rootX, rootY] = [rootY, rootX]
-    }
-    this._parent.set(rootX, rootY)
-    this._rank.set(rootY, this._rank.get(rootY)! + this._rank.get(rootX)!)
-    this._part -= 1
-    callback && callback(rootY, rootX)
-    return true
-  }
-
-  find(x: V): V {
-    if (!this._parent.has(x)) {
-      if (this._autoAdd) {
-        this.add(x)
-      }
-      return x
-    }
-
-    while ((this._parent.get(x) || x) !== x) {
-      this._parent.set(x, this._parent.get(this._parent.get(x)!)!)
-      x = this._parent.get(x)!
-    }
-    return x
-  }
-
-  add(x: V): boolean {
-    if (this._parent.has(x)) {
-      return false
-    }
-    this._parent.set(x, x)
-    this._rank.set(x, 1)
-    this._part += 1
-    return true
-  }
-
-  isConnected(x: V, y: V): boolean {
-    return this.find(x) === this.find(y)
-  }
-
-  getGroups(): Map<V, V[]> {
-    const groups = new Map<V, V[]>()
-    for (const key of this._parent.keys()) {
-      const root = this.find(key)
-      !groups.has(root) && groups.set(root, [])
-      groups.get(root)!.push(key)
-    }
-    return groups
-  }
-
-  getRoots(): V[] {
-    const res = new Set<V>()
-    this._rank.forEach((_, key) => res.add(this.find(key)))
-    return [...new Set(res)]
-  }
-
-  getPart(): number {
-    return this._part
-  }
-
-  getSize(x: V): number {
-    return this._rank.get(this.find(x)) || 0
-  }
-
-  toString(): string {
-    return [...this.getGroups()].map(([root, member]) => `${root}: ${member}`).join('\n')
-  }
+type UnionFindArray struct {
+	// 连通分量的个数
+	Part int
+	n    int
+	data []int
 }
 
-if (require.main === module) {
-  const uf = new UnionFindArray(10)
-  console.log(uf.toString())
-  uf.union(0, 1)
-  uf.union(1, 2)
-  console.log(uf.toString())
-
-  const uf2 = new UnionFindMap()
-  console.log(uf2.toString())
-  uf2.union('a', 'b')
-  uf2.union('b', 'c')
-  console.log(uf2.toString())
+func NewUnionFindArray(n int) *UnionFindArray {
+	data := make([]int, n)
+	for i := 0; i < n; i++ {
+		data[i] = -1
+	}
+	return &UnionFindArray{
+		Part: n,
+		n:    n,
+		data: data,
+	}
 }
 
-export { UnionFindArray, UnionFindMap }
+func (ufa *UnionFindArray) Union(key1, key2 int) bool {
+	root1, root2 := ufa.Find(key1), ufa.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+	if ufa.data[root1] > ufa.data[root2] {
+		root1 ^= root2
+		root2 ^= root1
+		root1 ^= root2
+	}
+	ufa.data[root1] += ufa.data[root2]
+	ufa.data[root2] = root1
+	ufa.Part--
+	return true
+}
+
+func (ufa *UnionFindArray) UnionWithCallback(key1, key2 int, cb func(big, small int)) bool {
+	root1, root2 := ufa.Find(key1), ufa.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+	if ufa.data[root1] > ufa.data[root2] {
+		root1 ^= root2
+		root2 ^= root1
+		root1 ^= root2
+	}
+	ufa.data[root1] += ufa.data[root2]
+	ufa.data[root2] = root1
+	ufa.Part--
+	if cb != nil {
+		cb(root2, root1)
+	}
+	return true
+}
+
+func (ufa *UnionFindArray) Find(key int) int {
+	if ufa.data[key] < 0 {
+		return key
+	}
+	ufa.data[key] = ufa.Find(ufa.data[key])
+	return ufa.data[key]
+}
+
+func (ufa *UnionFindArray) IsConnected(key1, key2 int) bool {
+	return ufa.Find(key1) == ufa.Find(key2)
+}
+
+func (ufa *UnionFindArray) GetSize(key int) int {
+	return -ufa.data[ufa.Find(key)]
+}
+
+func (ufa *UnionFindArray) GetGroups() map[int][]int {
+	groups := make(map[int][]int)
+	for i := 0; i < ufa.n; i++ {
+		root := ufa.Find(i)
+		groups[root] = append(groups[root], i)
+	}
+	return groups
+}
+
+func (ufa *UnionFindArray) String() string {
+	sb := []string{"UnionFindArray:"}
+	groups := ufa.GetGroups()
+	keys := make([]int, 0, len(groups))
+	for k := range groups {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+	for _, root := range keys {
+		member := groups[root]
+		cur := fmt.Sprintf("%d: %v", root, member)
+		sb = append(sb, cur)
+	}
+	sb = append(sb, fmt.Sprintf("Part: %d", ufa.Part))
+	return strings.Join(sb, "\n")
+}
+
+//
+//
+var _pool = make(map[interface{}]int)
+
+func id(o interface{}) int {
+	if v, ok := _pool[o]; ok {
+		return v
+	}
+	v := len(_pool)
+	_pool[o] = v
+	return v
+}
+
+type UnionFindMap struct {
+	Part int
+	data map[int]int
+}
+
+func NewUnionFindMap() *UnionFindMap {
+	return &UnionFindMap{
+		data: make(map[int]int),
+	}
+}
+
+func (ufm *UnionFindMap) Union(key1, key2 int) bool {
+	root1, root2 := ufm.Find(key1), ufm.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+	if ufm.data[root1] > ufm.data[root2] {
+		root1 ^= root2
+		root2 ^= root1
+		root1 ^= root2
+	}
+	ufm.data[root1] += ufm.data[root2]
+	ufm.data[root2] = root1
+	ufm.Part--
+	return true
+}
+
+func (ufm *UnionFindMap) UnionWithCallback(key1, key2 int, cb func(big, small int)) bool {
+	root1, root2 := ufm.Find(key1), ufm.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+	if ufm.data[root1] > ufm.data[root2] {
+		root1 ^= root2
+		root2 ^= root1
+		root1 ^= root2
+	}
+	ufm.data[root1] += ufm.data[root2]
+	ufm.data[root2] = root1
+	ufm.Part--
+	if cb != nil {
+		cb(root2, root1)
+	}
+	return true
+}
+
+func (ufm *UnionFindMap) Find(key int) int {
+	if _, ok := ufm.data[key]; !ok {
+		ufm.Add(key)
+		return key
+	}
+	if ufm.data[key] < 0 {
+		return key
+	}
+	ufm.data[key] = ufm.Find(ufm.data[key])
+	return ufm.data[key]
+}
+
+func (ufm *UnionFindMap) IsConnected(key1, key2 int) bool {
+	return ufm.Find(key1) == ufm.Find(key2)
+}
+
+func (ufm *UnionFindMap) GetSize(key int) int {
+	return -ufm.data[ufm.Find(key)]
+}
+
+func (ufm *UnionFindMap) GetGroups() map[int][]int {
+	groups := make(map[int][]int)
+	for k := range ufm.data {
+		root := ufm.Find(k)
+		groups[root] = append(groups[root], k)
+	}
+	return groups
+}
+
+func (ufm *UnionFindMap) Has(key int) bool {
+	_, ok := ufm.data[key]
+	return ok
+}
+
+func (ufm *UnionFindMap) Add(key int) bool {
+	if _, ok := ufm.data[key]; ok {
+		return false
+	}
+	ufm.data[key] = -1
+	ufm.Part++
+	return true
+}
+
+func (ufm *UnionFindMap) String() string {
+	sb := []string{"UnionFindMap:"}
+	groups := ufm.GetGroups()
+	keys := make([]int, 0, len(groups))
+	for k := range groups {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+	for _, root := range keys {
+		member := groups[root]
+		cur := fmt.Sprintf("%d: %v", root, member)
+		sb = append(sb, cur)
+	}
+	sb = append(sb, fmt.Sprintf("Part: %d", ufm.Part))
+	return strings.Join(sb, "\n")
+}

@@ -1,109 +1,97 @@
-// UnionFindWithUndoAndWeight
-// https://hitonanode.github.io/cplib-cpp/unionfind/undo_monoid_unionfind.hpp
-// 可撤销并查集 / 维护 `满足可换律的monoid` 权值 的并查集
-// Set: 将下标为index元素`所在集合`的权值置为value.
-// Get: 获取下标为index元素`所在集合`的权值.
-// !Undo: 撤销上一次合并(Union)或者修改权值(Set)操作，没合并成功也要撤销
-// Reset: 撤销所有操作
+# UnionFindWithUndoAndWeight
+# 可撤销并查集,维护连通分量权值
+# SetGroup: 将下标为index元素`所在集合`的权值置为value.
+# GetGroup: 获取下标为index元素`所在集合`的权值.
+# !Undo: 撤销上一次合并(Union)或者修改权值(Set)操作，没合并成功也要撤销
+# Reset: 撤销所有操作
 
-package main
 
-import "fmt"
+from collections import defaultdict
+from typing import DefaultDict, List
 
-func main() {
-	uf := NewUndoDSU(10)
-	uf.Union(0, 1)
-	uf.Union(2, 3)
-	fmt.Println(uf.Part)
-	fmt.Println(uf.Find(0), uf.Find(1), uf.Find(2), uf.Find(3))
-	uf.Union(0, 2)
-	fmt.Println(uf.Find(0), uf.Find(1), uf.Find(2), uf.Find(3))
-	fmt.Println(uf.Part)
-	uf.Undo()
-	fmt.Println(uf.Find(0), uf.Find(1), uf.Find(2), uf.Find(3))
-	uf.Reset()
-	fmt.Println(uf.Part)
-}
 
-type S = int
+class UnionFindArrayWithUndoAndWeight:
+    """可撤销并查集,维护连通分量权值."""
 
-func (*UndoDSU) op(s1, s2 S) S { return s1 + s2 }
+    __slots__ = ("_rank", "_parents", "_weights", "_history", "part")
 
-func NewUndoDSU(n int) *UndoDSU { return NewUndoDSUWithWeights(make([]S, n)) }
-func NewUndoDSUWithWeights(weights []S) *UndoDSU {
-	n := len(weights)
-	parent, rank, ws := make([]int, n), make([]int, n), make([]S, n)
-	for i := 0; i < n; i++ {
-		parent[i], rank[i], ws[i] = i, 1, weights[i]
-	}
-	history := []historyItem{}
-	return &UndoDSU{Part: n, rank: rank, parents: parent, weights: ws, history: history}
-}
+    def __init__(self, initWeights: List[int]):
+        n = len(initWeights)
+        self._rank = [1] * n
+        self._parents = list(range(n))
+        self._weights = initWeights[:]
+        self._history = []
+        self.part = n
 
-type historyItem struct {
-	a, b int
-	c    S
-}
+    def setGroup(self, index: int, value: int) -> None:
+        """将下标为index元素`所在集合`的权值置为value."""
+        index = self.find(index)
+        self._history.append((index, self._rank[index], self._weights[index]))
+        self._weights[index] = value
 
-type UndoDSU struct {
-	Part    int
-	rank    []int
-	parents []int
-	weights []S
-	history []historyItem
-}
+    def getGroup(self, index: int) -> int:
+        """获取下标为index元素`所在集合`的权值."""
+        return self._weights[self.find(index)]
 
-// 将下标为index元素`所在集合`的权值置为value.
-func (uf *UndoDSU) Set(index int, value S) {
-	index = uf.Find(index)
-	uf.history = append(uf.history, historyItem{index, uf.rank[index], uf.weights[index]})
-	uf.weights[index] = value
-}
+    def undo(self) -> None:
+        """撤销上一次合并(Union)或者修改权值(SetGroup)操作."""
+        if not self._history:
+            return
+        small, rank, weight = self._history.pop()
+        ps = self._parents[small]
+        self._weights[ps] = weight
+        self._rank[ps] = rank
+        if ps != small:
+            self._parents[small] = small
+            self.part += 1
 
-// 获取下标为index元素`所在集合`的权值.
-func (uf *UndoDSU) Get(index int) S { return uf.weights[uf.Find(index)] }
+    def reset(self) -> None:
+        """撤销所有操作."""
+        while self._history:
+            self.undo()
 
-// 撤销上一次合并(Union)或者修改权值(Set)操作
-func (uf *UndoDSU) Undo() {
-	uf.weights[uf.parents[uf.history[len(uf.history)-1].a]] = uf.history[len(uf.history)-1].c
-	uf.rank[uf.parents[uf.history[len(uf.history)-1].a]] = uf.history[len(uf.history)-1].b
-	if uf.parents[uf.history[len(uf.history)-1].a] != uf.history[len(uf.history)-1].a {
-		uf.parents[uf.history[len(uf.history)-1].a] = uf.history[len(uf.history)-1].a
-		uf.Part++
-	}
-	uf.history = uf.history[:len(uf.history)-1]
-}
+    def find(self, x: int) -> int:
+        if self._parents[x] == x:
+            return x
+        return self.find(self._parents[x])
 
-// 撤销所有操作
-func (uf *UndoDSU) Reset() {
-	for len(uf.history) > 0 {
-		uf.Undo()
-	}
-}
+    def union(self, x: int, y: int) -> bool:
+        x, y = self.find(x), self.find(y)
+        if self._rank[x] < self._rank[y]:
+            x, y = y, x
+        self._history.append((y, self._rank[x], self._weights[x]))
+        if x != y:
+            self._parents[y] = x
+            self._rank[x] += self._rank[y]
+            self._weights[x] += self._weights[y]
+            self.part -= 1
+            return True
+        return False
 
-func (uf *UndoDSU) Find(x int) int {
-	if uf.parents[x] == x {
-		return x
-	}
-	return uf.Find(uf.parents[x])
-}
+    def isConnected(self, x: int, y: int) -> bool:
+        return self.find(x) == self.find(y)
 
-func (uf *UndoDSU) Union(x, y int) bool {
-	x, y = uf.Find(x), uf.Find(y)
-	if uf.rank[x] < uf.rank[y] {
-		x, y = y, x
-	}
-	uf.history = append(uf.history, historyItem{y, uf.rank[x], uf.weights[x]})
-	if x != y {
-		uf.parents[y] = x
-		uf.rank[x] += uf.rank[y]
-		uf.weights[x] = uf.op(uf.weights[x], uf.weights[y])
-		uf.Part--
-		return true
-	}
-	return false
-}
+    def getSize(self, x: int) -> int:
+        return self._rank[self.find(x)]
 
-func (uf *UndoDSU) IsConnected(x, y int) bool { return uf.Find(x) == uf.Find(y) }
+    def getGroups(self) -> DefaultDict[int, List[int]]:
+        groups = defaultdict(list)
+        for i in range(len(self._parents)):
+            groups[self.find(i)].append(i)
+        return groups
 
-func (uf *UndoDSU) Size(x int) int { return uf.rank[uf.Find(x)] }
+    def __repr__(self) -> str:
+        return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
+
+
+if __name__ == "__main__":
+    uf = UnionFindArrayWithUndoAndWeight([1, 2, 3, 4, 5])
+    print(uf)
+    uf.union(0, 1)
+    print(uf.getGroup(0))
+    uf.setGroup(0, 10)
+    print(uf.getGroup(0))
+    uf.undo()
+    print(uf.getGroup(0))
+    uf.undo()
+    print(uf.getGroup(0))
