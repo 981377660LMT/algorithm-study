@@ -1,8 +1,7 @@
 from typing import List, Tuple
 
 
-# class Tree
-class LCA_HLD:
+class Tree:
     __slots__ = (
         "depth",
         "parent",
@@ -189,12 +188,14 @@ class LCA_HLD:
 
 # test subtreeSize
 if __name__ == "__main__":
-    tree = LCA_HLD(5)
+    tree = Tree(6)
     tree.addEdge(0, 1, 1)
     tree.addEdge(0, 2, 1)
     tree.addEdge(1, 3, 1)
     tree.addEdge(1, 4, 1)
+    tree.addEdge(2, 5, 1)
     tree.build(0)
     print(tree.subSize(0, root=4))
     print(tree.rootedLca(0, 1, 4))
     print(tree.rootedLca(0, 1, 3))
+    print(tree.rootedParent(0, root=5))

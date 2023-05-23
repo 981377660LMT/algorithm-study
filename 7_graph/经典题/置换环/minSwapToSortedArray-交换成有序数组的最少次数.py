@@ -7,6 +7,7 @@ from typing import List
 
 
 def minSwapToSortedArray(nums: List[int]) -> int:
+    """给定一个无重复元素的数组，求交换成有序数组的最少次数(minSwap)."""
     mp = {num: i for i, num in enumerate(nums)}
     target = sorted(nums)
     uf = UnionFind()
@@ -90,7 +91,6 @@ class UnionFind(Generic[T]):
 
 
 if __name__ == "__main__":
-
     # 2471. 逐层排序二叉树所需的最少操作数目
     # Definition for a binary tree node.
     class TreeNode:

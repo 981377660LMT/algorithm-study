@@ -134,6 +134,10 @@ func (tree *Tree) RootedLCA(u, v int, root int) int {
 	return tree.LCA(u, v) ^ tree.LCA(u, root) ^ tree.LCA(v, root)
 }
 
+func (tree *Tree) RootedParent(u int, root int) int {
+	return tree.Jump(u, root, 1)
+}
+
 func (tree *Tree) Dist(u, v int, weighted bool) int {
 	if weighted {
 		return tree.DepthWeighted[u] + tree.DepthWeighted[v] - 2*tree.DepthWeighted[tree.LCA(u, v)]
@@ -286,7 +290,7 @@ func (tree *Tree) GetPath(u, v int) []int {
 }
 
 // 以root为根时,结点v的子树大小.
-func (tree *Tree) SubtreeSize(v, root int) int {
+func (tree *Tree) SubSize(v, root int) int {
 	if root == -1 {
 		return tree.RID[v] - tree.LID[v]
 	}

@@ -66,6 +66,7 @@ declare class ITree {
    * 返回 root 为根时, u 和 v 的最近公共祖先.
    */
   rootedLca(u: number, v: number, root: number): number
+  rootedParent(u: number, root: number): number
   dist(u: number, v: number, weighted: boolean): number
   /**
    * 返回 root 的第 k 个祖先, k 从 0 开始计数.
@@ -96,7 +97,7 @@ declare class ITree {
   /**
    * 以root为根时,结点v的子树大小.
    */
-  subtreeSize(v: number, root?: number): number
+  subSize(v: number, root?: number): number
   /**
    * child 是否在 root 的子树中 (child和root不能相等).
    */
@@ -185,6 +186,10 @@ class Tree implements ITree {
 
   rootedLca(u: number, v: number, root: number): number {
     return this.lca(u, v) ^ this.lca(u, root) ^ this.lca(v, root)
+  }
+
+  rootedParent(u: number, root: number): number {
+    return this.jump(u, root, 1)
   }
 
   dist(u: number, v: number, weighted: boolean): number {
@@ -320,7 +325,7 @@ class Tree implements ITree {
     return res
   }
 
-  subtreeSize(v: number, root = -1): number {
+  subSize(v: number, root = -1): number {
     if (root === -1) {
       return this._rid[v] - this._lid[v]
     }
@@ -420,7 +425,7 @@ if (require.main === module) {
     console.log(start, end, 999)
   })
   console.log(tree.isInSubtree(4, 1))
-  console.log(tree.subtreeSize(1, 3))
+  console.log(tree.subSize(1, 3))
   console.log(tree.dist(2, 3, true))
 }
 
