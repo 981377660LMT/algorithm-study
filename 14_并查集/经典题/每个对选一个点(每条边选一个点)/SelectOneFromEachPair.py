@@ -56,7 +56,7 @@ class SelectOneFromEachPair:
     def countTree(self) -> int:
         return self._treeCount
 
-    def revocate(self) -> None:
+    def undo(self) -> None:
         """合并失败时也要撤销."""
         ...
 

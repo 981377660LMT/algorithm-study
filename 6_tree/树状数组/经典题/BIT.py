@@ -66,7 +66,7 @@ class BIT1:
     __slots__ = "size", "bit", "tree"
 
     def __init__(self, n: int):
-        self.size = n
+        self.size = n + 5
         self.bit = n.bit_length()
         self.tree = dict()
 
@@ -130,7 +130,7 @@ class BIT2:
     __slots__ = "size", "_tree1", "_tree2"
 
     def __init__(self, n: int):
-        self.size = n
+        self.size = n + 5
         self._tree1 = dict()
         self._tree2 = dict()
 
@@ -180,7 +180,7 @@ class BIT3:
     """
 
     def __init__(self, n: int):
-        self.size = n
+        self.size = n + 5
         self.tree = dict()
 
     def update(self, index: int, target: int) -> None:

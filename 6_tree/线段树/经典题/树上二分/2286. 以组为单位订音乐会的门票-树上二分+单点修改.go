@@ -124,7 +124,7 @@ func NewLazySegTree(
 	for i := range tree.lazy {
 		tree.lazy[i] = tree.id()
 	}
-	for i := int(0); i < n; i++ {
+	for i := 0; i < n; i++ {
 		tree.data[tree.size+i] = v[i]
 	}
 	for i := tree.size - 1; i >= 1; i-- {

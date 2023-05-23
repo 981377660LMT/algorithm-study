@@ -825,7 +825,7 @@ func (b *binaryIndexedTree) Apply(i int, v int) {
 
 // [0, r) の要素の総和を求める.
 func (b *binaryIndexedTree) Prod(r int) int {
-	res := int(0)
+	res := 0
 	for ; r > 0; r -= r & -r {
 		res += b.data[r]
 	}

@@ -21,7 +21,7 @@ import (
 func main() {
 	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	bit := NewBitArrayFrom(nums)
-	fmt.Println(bit.UpperBound(10), bit.Prod(4))
+	fmt.Println(bit.UpperBound(10), bit.Query(4))
 }
 
 type BitArray struct {
@@ -55,15 +55,15 @@ func (b *BitArray) Build(arr []int) {
 	}
 }
 
-func (b *BitArray) Apply(i int, v int) {
+func (b *BitArray) Add(i int, v int) {
 	for i++; i <= b.n; i += i & -i {
 		b.data[i] += v
 	}
 }
 
 // [0, r)
-func (b *BitArray) Prod(r int) int {
-	res := int(0)
+func (b *BitArray) Query(r int) int {
+	res := 0
 	for ; r > 0; r -= r & -r {
 		res += b.data[r]
 	}
@@ -71,8 +71,8 @@ func (b *BitArray) Prod(r int) int {
 }
 
 // [l, r) の要素の総和を求める.
-func (b *BitArray) ProdRange(l, r int) int {
-	return b.Prod(r) - b.Prod(l)
+func (b *BitArray) QueryRange(l, r int) int {
+	return b.Query(r) - b.Query(l)
 }
 
 // 区間[0,k]の総和がx以上となる最小のkを求める.数列が単調増加であることを要求する.
@@ -102,7 +102,7 @@ func (b *BitArray) UpperBound(x int) int {
 func (b *BitArray) String() string {
 	sb := []string{}
 	for i := 0; i < b.n; i++ {
-		sb = append(sb, fmt.Sprintf("%d", b.ProdRange(i, i+1)))
+		sb = append(sb, fmt.Sprintf("%d", b.QueryRange(i, i+1)))
 	}
 	return fmt.Sprintf("BitArray: [%v]", strings.Join(sb, ", "))
 }

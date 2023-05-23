@@ -15,6 +15,14 @@
 
 import assert from 'assert'
 
+// BITArray
+// BIT1 (Map)
+// BIT2
+// BIT2Map
+// BIT2D
+// BIT3
+// BIT4
+
 /**
  * Point add range sum, 0-indexed.
  */
@@ -99,16 +107,16 @@ class BITArray {
  * Implemented by Map. Slow.
  */
 class BIT1 {
-  readonly _size: number
+  readonly size: number
   private readonly _tree: Map<number, number> = new Map()
 
   constructor(size: number) {
-    this._size = size
+    this.size = size + 5
   }
 
   add(index: number, delta: number): void {
     index++
-    for (let i = index; i <= this._size; i += i & -i) {
+    for (let i = index; i <= this.size; i += i & -i) {
       this._tree.set(i, (this._tree.get(i) || 0) + delta)
     }
   }
@@ -117,7 +125,7 @@ class BIT1 {
    * [0,index).
    */
   query(index: number): number {
-    if (index > this._size) index = this._size
+    if (index > this.size) index = this.size
     let res = 0
     for (let i = index; i > 0; i &= i - 1) {
       res += this._tree.get(i) || 0
@@ -137,12 +145,12 @@ class BIT1 {
  * 区间修改 区间查询, 0-indexed.
  */
 class BIT2 {
-  readonly _size: number
+  readonly size: number
   private readonly _tree1: number[]
   private readonly _tree2: number[]
 
   constructor(size: number) {
-    this._size = size
+    this.size = size
     this._tree1 = Array(size + 1).fill(0)
     this._tree2 = Array(size + 1).fill(0)
   }
@@ -160,7 +168,7 @@ class BIT2 {
 
   private _add(index: number, delta: number): void {
     index++
-    for (let i = index; i <= this._size; i += i & -i) {
+    for (let i = index; i <= this.size; i += i & -i) {
       this._tree1[i] += delta
       this._tree2[i] += (index - 1) * delta
     }
@@ -168,10 +176,58 @@ class BIT2 {
 
   private _query(index: number): number {
     index++
-    if (index > this._size) index = this._size
+    if (index > this.size) index = this.size
     let res = 0
     for (let i = index; i > 0; i &= i - 1) {
       res += index * this._tree1[i] - this._tree2[i]
+    }
+    return res
+  }
+}
+
+/**
+ * 区间修改 区间查询, 0-indexed.
+ */
+class BIT2Map {
+  readonly size: number
+  private readonly _tree1: Map<number, number> = new Map()
+  private readonly _tree2: Map<number, number> = new Map()
+
+  constructor(size: number) {
+    this.size = size + 5
+  }
+
+  /**
+   * [left,right)
+   */
+  addRange(left: number, right: number, delta: number): void {
+    right--
+    this._add(left, delta)
+    this._add(right + 1, -delta)
+  }
+
+  /**
+   * [left,right)
+   */
+  queryRange(left: number, right: number): number {
+    right--
+    return this._query(right) - this._query(left - 1)
+  }
+
+  private _add(index: number, delta: number): void {
+    index++
+    for (let i = index; i <= this.size; i += i & -i) {
+      this._tree1.set(i, (this._tree1.get(i) || 0) + delta)
+      this._tree2.set(i, (this._tree2.get(i) || 0) + (index - 1) * delta)
+    }
+  }
+
+  private _query(index: number): number {
+    index++
+    if (index > this.size) index = this.size
+    let res = 0
+    for (let i = index; i > 0; i &= i - 1) {
+      res += index * (this._tree1.get(i) || 0) - (this._tree2.get(i) || 0)
     }
     return res
   }
@@ -288,14 +344,12 @@ class BIT4 {
 
   private _add(row: number, col: number, delta: number): void {
     row++, col++
-    const preRow = row
-    const preCol = col
     for (let r = row; r <= this._ROW; r += r & -r) {
       for (let c = col; c <= this._COL; c += c & -c) {
         this._tree1[r][c] += delta
-        this._tree2[r][c] += (preRow - 1) * delta
-        this._tree3[r][c] += (preCol - 1) * delta
-        this._tree4[r][c] += (preRow - 1) * (preCol - 1) * delta
+        this._tree2[r][c] += (row - 1) * delta
+        this._tree3[r][c] += (col - 1) * delta
+        this._tree4[r][c] += (row - 1) * (col - 1) * delta
       }
     }
   }
@@ -304,21 +358,16 @@ class BIT4 {
     row++, col++
     if (row > this._ROW) row = this._ROW
     if (col > this._COL) col = this._COL
-
-    const preRow = row
-    const preCol = col
-
     let res = 0
     for (let r = row; r > 0; r -= r & -r) {
       for (let c = col; c > 0; c -= c & -c) {
         res +=
-          preRow * preCol * this._tree1[r][c] -
-          preCol * this._tree2[r][c] -
-          preRow * this._tree3[r][c] +
+          row * col * this._tree1[r][c] -
+          col * this._tree2[r][c] -
+          row * this._tree3[r][c] +
           this._tree4[r][c]
       }
     }
-
     return res
   }
 }
@@ -353,6 +402,27 @@ if (require.main === module) {
 
   const bitArray = new BITArray([1, 2, 3])
   console.log(bitArray.toString())
+
+  const bit2Map = new BIT2Map(10)
+  bit2Map.addRange(2, 5, 1) // 区间更新
+  bit2Map.addRange(2, 5, 1) // 单点更新
+  assert.strictEqual(bit2Map.queryRange(2, 4), 4)
+  assert.strictEqual(bit2Map.queryRange(2, 3), 2)
 }
 
-export { BIT1, BIT2, BIT3, BIT4, BITArray }
+export { BIT1, BIT2, BIT2Map, BIT3, BIT4, BITArray }
+
+if (require.main === module) {
+  // https://leetcode.cn/problems/maximum-white-tiles-covered-by-a-carpet/
+  function maximumWhiteTiles(tiles: number[][], carpetLen: number): number {
+    const bit = new BIT2(1e9 + 10)
+    let res = 0
+    tiles.forEach(([left, right]) => {
+      bit.addRange(left, right + 1, 1)
+    })
+    tiles.forEach(([left]) => {
+      res = Math.max(res, bit.queryRange(left, left + carpetLen))
+    })
+    return res
+  }
+}

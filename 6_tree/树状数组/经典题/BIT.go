@@ -1,101 +1,143 @@
+// BITArray
+// BITMap
+// BIT2Array
+// BIT2Map
+// BIT2D
+
 package main
 
 import (
 	"fmt"
+	"math/bits"
 	"strings"
 )
-
-func demo() {
-	bitArray := NewBITArrayWithIntSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
-	fmt.Println(bitArray)
-	bitArray.Add(1, 1)
-	fmt.Println(bitArray)
-}
 
 // !Point Add Range Sum, 0-based.
 type BITArray struct {
 	n    int
-	tree []int
+	log  int
+	data []int
 }
 
-func NewBITArray(n int) *BITArray {
-	return &BITArray{n: n, tree: make([]int, n+1)}
+func NewBitArray(n int) *BITArray {
+	return &BITArray{n: n, log: bits.Len(uint(n)), data: make([]int, n+1)}
 }
 
-func NewBITArrayWithIntSlice(nums []int) *BITArray {
-	bitArray := &BITArray{
-		n:    len(nums),
-		tree: make([]int, len(nums)+1),
+func NewBitArrayFrom(arr []int) *BITArray {
+	res := NewBitArray(len(arr))
+	res.Build(arr)
+	return res
+}
+
+func (b *BITArray) Build(arr []int) {
+	if b.n != len(arr) {
+		panic("len of arr is not equal to n")
 	}
-	bitArray.Build(nums)
-	return bitArray
-}
-
-// 常数优化: dp O(n) 建树
-// https://oi-wiki.org/ds/fenwick/#tricks
-func (b *BITArray) Build(nums []int) {
-	for i := 1; i < len(b.tree); i++ {
-		b.tree[i] += nums[i-1]
-		if j := i + (i & -i); j < len(b.tree) {
-			b.tree[j] += b.tree[i]
+	for i := 1; i <= b.n; i++ {
+		b.data[i] = arr[i-1]
+	}
+	for i := 1; i <= b.n; i++ {
+		j := i + (i & -i)
+		if j <= b.n {
+			b.data[j] += b.data[i]
 		}
 	}
 }
 
-// 位置 index 增加 delta
-//  1<=i<=n
-func (b *BITArray) Add(index int, delta int) {
-	for ; index < len(b.tree); index += index & -index {
-		b.tree[index] += delta
+func (b *BITArray) Add(i int, v int) {
+	for i++; i <= b.n; i += i & -i {
+		b.data[i] += v
 	}
 }
 
-// 求前缀和
-//  1<=i<=n
-func (b *BITArray) Query(index int) (res int) {
-	if index > b.n {
-		index = b.n
+// [0, r)
+func (b *BITArray) Query(r int) int {
+	res := 0
+	for ; r > 0; r -= r & -r {
+		res += b.data[r]
 	}
-	for ; index > 0; index &= (index - 1) {
-		res += b.tree[index]
-	}
-	return
+	return res
 }
 
-// 1<=left<=right<=n
-func (b *BITArray) QueryRange(left, right int) int {
-	return b.Query(right) - b.Query(left-1)
+// [l, r).
+func (b *BITArray) QueryRange(l, r int) int {
+	return b.Query(r) - b.Query(l)
 }
 
-func (b *BITArray) Len() int {
-	return b.n
+// 返回闭区间[0,k]的总和>=x的最小k.要求序列单调增加.
+func (b *BITArray) LowerBound(x int) int {
+	i := 0
+	for k := 1 << b.log; k > 0; k >>= 1 {
+		if i+k <= b.n && b.data[i+k] < x {
+			x -= b.data[i+k]
+			i += k
+		}
+	}
+	return i
+}
+
+// 返回闭区间[0,k]的总和>x的最小k.要求序列单调增加.
+func (b *BITArray) UpperBound(x int) int {
+	i := 0
+	for k := 1 << b.log; k > 0; k >>= 1 {
+		if i+k <= b.n && b.data[i+k] <= x {
+			x -= b.data[i+k]
+			i += k
+		}
+	}
+	return i
 }
 
 func (b *BITArray) String() string {
-	sb := strings.Builder{}
-	sb.WriteString("BITArray{")
-	for i := 1; i <= b.n; i++ {
-		sb.WriteString(fmt.Sprintf("%d", b.QueryRange(i, i)))
-		if i != b.n {
-			sb.WriteString(", ")
-		}
+	sb := []string{}
+	for i := 0; i < b.n; i++ {
+		sb = append(sb, fmt.Sprintf("%d", b.QueryRange(i, i+1)))
 	}
-	sb.WriteString("}")
-	return sb.String()
+	return fmt.Sprintf("BitArray: [%v]", strings.Join(sb, ", "))
+}
+
+// !Point Add Range Sum, 0-based.
+type BITMap struct {
+	n    int
+	data map[int]int
+}
+
+func NewBITMap(n int) *BITMap {
+	return &BITMap{n: n + 5, data: make(map[int]int, 1<<10)}
+}
+
+func (b *BITMap) Add(i, v int) {
+	for i++; i <= b.n; i += i & -i {
+		b.data[i] += v
+	}
+}
+
+// [0, r)
+func (b *BITMap) Query(r int) int {
+	res := 0
+	for ; r > 0; r -= r & -r {
+		res += b.data[r]
+	}
+	return res
+}
+
+// [l, r).
+func (b *BITMap) QueryRange(l, r int) int {
+	return b.Query(r) - b.Query(l)
 }
 
 //
 //
 //
 // !Range Add Range Sum, 0-based.
-type BITArray2 struct {
+type BIT2Array struct {
 	n     int
 	tree1 []int
 	tree2 []int
 }
 
-func NewBITArray2(n int) *BITArray2 {
-	return &BITArray2{
+func NewBITArray2(n int) *BIT2Array {
+	return &BIT2Array{
 		n:     n,
 		tree1: make([]int, n+1),
 		tree2: make([]int, n+1),
@@ -104,7 +146,7 @@ func NewBITArray2(n int) *BITArray2 {
 
 // 切片内[start, end)的每个元素加上delta.
 //  0<=start<=end<=n
-func (b *BITArray2) Add(start, end, delta int) {
+func (b *BIT2Array) Add(start, end, delta int) {
 	end--
 	b.add(start, delta)
 	b.add(end+1, -delta)
@@ -112,183 +154,89 @@ func (b *BITArray2) Add(start, end, delta int) {
 
 // 求切片内[start, end)的和.
 //  0<=start<=end<=n
-func (b *BITArray2) Query(start, end int) int {
+func (b *BIT2Array) Query(start, end int) int {
 	end--
 	return b.query(end) - b.query(start-1)
 }
 
-func (b *BITArray2) add(index, delta int) {
+func (b *BIT2Array) add(index, delta int) {
 	index++
-	rawIndex := index
-	for index <= b.n {
-		b.tree1[index] += delta
-		b.tree2[index] += (rawIndex - 1) * delta
-		index += index & -index
+	for i := index; i <= b.n; i += i & -i {
+		b.tree1[i] += delta
+		b.tree2[i] += (index - 1) * delta
 	}
 }
 
-func (b *BITArray2) query(index int) (res int) {
+func (b *BIT2Array) query(index int) (res int) {
 	index++
 	if index > b.n {
 		index = b.n
 	}
-	rawIndex := index
-	for index > 0 {
-		res += rawIndex*b.tree1[index] - b.tree2[index]
-		index &= (index - 1)
+	for i := index; i > 0; i &= i - 1 {
+		res += index*b.tree1[i] - b.tree2[i]
 	}
-	return
+	return res
 }
 
 //
 //
 //
-// !一维区间查询 区间修改, 0-based.
-type BIT interface {
-	// 区间 [left, right) 里的每个数增加 delta
-	Add(left, right, delta int)
-
-	// 查询区间 [left, right) 的和
-	Query(left, right int) int
-}
-
-func NewBIT(n int) BIT {
-	if n <= int(1e6) {
-		return NewBITSlice(n)
-	}
-
-	return NewBITMap(n)
-}
-
-//  tree: map[int]int or []int
-type BITMap struct {
+// !Range Add Range Sum, 0-based.
+type BIT2Map struct {
 	n     int
 	tree1 map[int]int
 	tree2 map[int]int
 }
 
-type BITSlice struct {
-	n     int
-	tree1 []int
-	tree2 []int
-}
-
-func NewBITMap(n int) *BITMap {
-	return &BITMap{
-		n:     n,
+func NewBIT2Map(n int) *BIT2Map {
+	return &BIT2Map{
+		n:     n + 5,
 		tree1: make(map[int]int, 1<<10),
 		tree2: make(map[int]int, 1<<10),
 	}
 }
 
-func NewBITSlice(n int) *BITSlice {
-	return &BITSlice{
-		n:     n,
-		tree1: make([]int, n+1),
-		tree2: make([]int, n+1),
-	}
-}
-
-func (bit *BITMap) Add(left, right, delta int) {
+func (bit *BIT2Map) Add(left, right, delta int) {
 	right--
 	bit.add(left, delta)
 	bit.add(right+1, -delta)
 }
 
-func (bit *BITSlice) Add(left, right, delta int) {
-	right--
-	bit.add(left, delta)
-	bit.add(right+1, -delta)
-}
-
-func (bit *BITMap) Query(left, right int) int {
+func (bit *BIT2Map) Query(left, right int) int {
 	right--
 	return bit.query(right) - bit.query(left-1)
 }
 
-func (bit *BITSlice) Query(left, right int) int {
-	right--
-	return bit.query(right) - bit.query(left-1)
-}
-
-func (bit *BITMap) add(index, delta int) {
+func (bit *BIT2Map) add(index, delta int) {
 	index++
-	rawIndex := index
-	for index <= bit.n {
-		bit.tree1[index] += delta
-		bit.tree2[index] += (rawIndex - 1) * delta
-		index += index & -index
+	for i := index; i <= bit.n; i += i & -i {
+		bit.tree1[i] += delta
+		bit.tree2[i] += (index - 1) * delta
 	}
 }
 
-func (bit *BITSlice) add(index, delta int) {
-	index++
-
-	rawIndex := index
-	for index <= bit.n {
-		bit.tree1[index] += delta
-		bit.tree2[index] += (rawIndex - 1) * delta
-		index += index & -index
-	}
-}
-
-func (bit *BITMap) query(index int) int {
+func (bit *BIT2Map) query(index int) int {
 	index++
 	if index > bit.n {
 		index = bit.n
 	}
-	rawIndex := index
+
 	res := 0
-	for index > 0 {
-		res += rawIndex*bit.tree1[index] - bit.tree2[index]
-		index &= (index - 1)
+	for i := index; i > 0; i &= i - 1 {
+		res += index*bit.tree1[i] - bit.tree2[i]
 	}
 	return res
-}
-
-func (bit *BITSlice) query(index int) int {
-	index++
-	if index > bit.n {
-		index = bit.n
-	}
-	rawIndex := index
-	res := 0
-	for index > 0 {
-		res += rawIndex*bit.tree1[index] - bit.tree2[index]
-		index &= (index - 1)
-	}
-	return res
-}
-
-func (bit *BITMap) String() string {
-	return "not implemented"
-}
-
-func (bit *BITSlice) String() string {
-	nums := make([]int, bit.n+1)
-	for i := 0; i < bit.n; i++ {
-		nums[i+1] = bit.Query(i+1, i+1)
-	}
-	return fmt.Sprint(nums)
-}
-
-func (bit *BITMap) Len() int {
-	return bit.n
-}
-
-func (bit *BITSlice) Len() int {
-	return bit.n
 }
 
 func maximumWhiteTiles(tiles [][]int, carpetLen int) int {
-	bit := NewBIT(1e9)
+	bit := NewBIT2Map(1e9 + 10)
 	for _, tile := range tiles {
-		bit.Add(int(tile[0]), int(tile[1]), 1)
+		bit.Add(int(tile[0]), 1+int(tile[1]), 1)
 	}
 
 	res := 0
 	for _, tile := range tiles {
-		res = max(res, bit.Query(int(tile[0]), int(tile[0]+carpetLen-1)))
+		res = max(res, bit.Query(int(tile[0]), 1+int(tile[0]+carpetLen-1)))
 	}
 
 	return res
@@ -342,13 +290,12 @@ func (b *BIT2D) Query(row1 int, col1 int, row2 int, col2 int) int {
 
 func (b *BIT2D) add(row int, col int, delta int) {
 	row, col = row+1, col+1
-	preRow, preCol := row, col
 	for curRow := row; curRow <= b.row; curRow += curRow & -curRow {
 		for curCol := col; curCol <= b.col; curCol += curCol & -curCol {
 			b.tree1[curRow][curCol] += delta
-			b.tree2[curRow][curCol] += (preRow - 1) * delta
-			b.tree3[curRow][curCol] += (preCol - 1) * delta
-			b.tree4[curRow][curCol] += (preRow - 1) * (preCol - 1) * delta
+			b.tree2[curRow][curCol] += (row - 1) * delta
+			b.tree3[curRow][curCol] += (col - 1) * delta
+			b.tree4[curRow][curCol] += (row - 1) * (col - 1) * delta
 		}
 	}
 }
@@ -362,12 +309,11 @@ func (b *BIT2D) query(row, col int) (res int) {
 		col = b.col
 	}
 
-	preR, preC := row, col
 	for r := row; r > 0; r -= r & -r {
 		for c := col; c > 0; c -= c & -c {
-			res += preR*preC*b.tree1[r][c] -
-				preC*b.tree2[r][c] -
-				preR*b.tree3[r][c] +
+			res += row*col*b.tree1[r][c] -
+				col*b.tree2[r][c] -
+				row*b.tree3[r][c] +
 				b.tree4[r][c]
 		}
 	}
@@ -380,36 +326,6 @@ func max(a, b int) int {
 		return a
 	}
 	return b
-}
-
-type NumMatrix struct {
-	matrix [][]int
-	row    int
-	col    int
-	bit    BIT2D
-}
-
-func Constructor(matrix [][]int) NumMatrix {
-	n := len(matrix)
-	m := len(matrix[0])
-	bit := NewBIT2D(n, m)
-	for i := 0; i < n; i++ {
-		for j := 0; j < m; j++ {
-			bit.Add(i, j, i, j, matrix[i][j])
-		}
-	}
-
-	return NumMatrix{matrix, n, m, *bit}
-}
-
-func (this *NumMatrix) Update(row, col, val int) {
-	delta := val - this.matrix[row][col]
-	this.matrix[row][col] = val
-	this.bit.Add(row, col, row, col, delta)
-}
-
-func (this *NumMatrix) SumRegion(row1, col1, row2, col2 int) int {
-	return this.bit.Query(row1, col1, row2, col2)
 }
 
 //
@@ -480,9 +396,13 @@ func (f *FenwickTreePrefix) Query(right int) S {
 
 func main() {
 	pf := NewFenwickTreePrefixWithSlice([]S{1, 2, 3, 4, 14, 1, 2, 3})
-	pf.Update(9, 1)
-	pf.Update(1, 2)
+	fmt.Println(pf.Query(1))
 	fmt.Println(pf.Query(100))
 	pf.Update(9, 10)
 	fmt.Println(pf.Query(100))
+
+	bitArray := NewBitArrayFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+	fmt.Println(bitArray)
+	bitArray.Add(1, 1)
+	fmt.Println(bitArray)
 }

@@ -123,7 +123,7 @@ func (b *binaryIndexedTree) Apply(i int, v int) {
 }
 
 func (b *binaryIndexedTree) Prod(r int) int {
-	res := int(0)
+	res := 0
 	for ; r > 0; r -= r & -r {
 		res += b.data[r]
 	}
