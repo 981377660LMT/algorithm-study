@@ -20,11 +20,15 @@ def topoSort(n: int, adjList: List[List[int]], deg: List[int], directed=True) ->
     """
     startDeg = 0 if directed else 1
     queue = deque([v for v in range(n) if deg[v] == startDeg])
+    visited = [False] * n
     res = []
     while queue:
         cur = queue.popleft()
         res.append(cur)
+        visited[cur] = True
         for next in adjList[cur]:
+            if visited[next]:
+                continue
             deg[next] -= 1
             if deg[next] == startDeg:
                 queue.append(next)
@@ -44,11 +48,15 @@ def topoSort2(
     """返回图的拓扑排序结果, 若不存在则返回空列表"""
     startDeg = 0 if directed else 1
     queue = deque([v for v in allVertex if deg[v] == startDeg])
+    visited = set()
     res = []
     while queue:
         cur = queue.popleft()
         res.append(cur)
+        visited.add(cur)
         for next in adjMap[cur]:
+            if next in visited:
+                continue
             deg[next] -= 1
             if deg[next] == startDeg:
                 queue.append(next)
@@ -61,12 +69,16 @@ def toposort3(
     """返回有向图拓扑排序方案数和拓扑排序结果"""
     startDeg = 0 if directed else 1
     queue = deque([v for v in allVertex if deg[v] == startDeg])
+    visited = set()
     res, topoCount = [], 1
     while queue:
         topoCount *= len(queue)
         cur = queue.popleft()
         res.append(cur)
+        visited.add(cur)
         for next in adjMap[cur]:
+            if next in visited:
+                continue
             deg[next] -= 1
             if deg[next] == 0:
                 queue.append(next)

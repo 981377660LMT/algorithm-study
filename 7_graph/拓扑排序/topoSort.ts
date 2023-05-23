@@ -11,11 +11,14 @@ function topoSort(n: number, adjList: number[][], deg: number[], directed = true
   for (let i = 0; i < n; i++) {
     if (deg[i] === 0) stack.push(i)
   }
+  const visited = new Uint8Array(n)
 
   while (stack.length) {
     const cur = stack.pop()!
     res.push(cur)
+    visited[cur] = 1
     for (const next of adjList[cur]) {
+      if (visited[next]) continue
       deg[next]--
       if (deg[next] === startDeg) stack.push(next)
     }
@@ -39,11 +42,14 @@ function topoSort2<T extends PropertyKey>(
   for (const v of allVertex) {
     if (deg.get(v) === 0) stack.push(v)
   }
+  const visited = new Set<T>()
 
   while (stack.length) {
     const cur = stack.pop()!
     res.push(cur)
+    visited.add(cur)
     for (const next of adjMap.get(cur)!) {
+      if (visited.has(next)) continue
       deg.set(next, deg.get(next)! - 1)
       if (deg.get(next) === startDeg) stack.push(next)
     }

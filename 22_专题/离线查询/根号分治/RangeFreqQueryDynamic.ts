@@ -10,6 +10,20 @@ import { SqrtDecomposition } from './SqrtDecomposition/SqrtDecomposition'
  * 动态区间频率查询.
  */
 class RangeFreqQueryDynamic {
+  private static _bisectLeft<T>(arr: ArrayLike<T>, value: T): number {
+    let left = 0
+    let right = arr.length - 1
+    while (left <= right) {
+      const mid = (left + right) >> 1
+      if (arr[mid] < value) {
+        left = mid + 1
+      } else {
+        right = mid - 1
+      }
+    }
+    return left
+  }
+
   private readonly _sqrt: SqrtDecomposition<number, number, [v: number, same: boolean]>
 
   constructor(nums: number[]) {
@@ -43,9 +57,12 @@ class RangeFreqQueryDynamic {
         const queryAll = (queryArg: [v: number, same: boolean]) => {
           const [v, same] = queryArg
           if (same) {
-            return bisectLeft(sortedNums, v - lazyAdd + 1) - bisectLeft(sortedNums, v - lazyAdd)
+            return (
+              RangeFreqQueryDynamic._bisectLeft(sortedNums, v - lazyAdd + 1) -
+              RangeFreqQueryDynamic._bisectLeft(sortedNums, v - lazyAdd)
+            )
           }
-          return sortedNums.length - bisectLeft(sortedNums, v - lazyAdd)
+          return sortedNums.length - RangeFreqQueryDynamic._bisectLeft(sortedNums, v - lazyAdd)
         }
 
         const queryPart = (left: number, right: number, queryArg: [v: number, same: boolean]) => {
@@ -121,20 +138,6 @@ class RangeFreqQueryDynamic {
   }
 }
 
-function bisectLeft<T>(arr: ArrayLike<T>, value: T): number {
-  let left = 0
-  let right = arr.length - 1
-  while (left <= right) {
-    const mid = (left + right) >> 1
-    if (arr[mid] < value) {
-      left = mid + 1
-    } else {
-      right = mid - 1
-    }
-  }
-  return left
-}
-
 export { RangeFreqQueryDynamic }
 
 if (require.main === module) {
@@ -153,4 +156,23 @@ if (require.main === module) {
     rf.rangeFreq(0, i + 1, i)
   }
   console.timeEnd('time1') // 1.3s
+
+  // https://leetcode.cn/problems/range-frequency-queries/
+  class RangeFreqQuery {
+    private readonly _rf: RangeFreqQueryDynamic
+
+    constructor(arr: number[]) {
+      this._rf = new RangeFreqQueryDynamic(arr)
+    }
+
+    query(left: number, right: number, value: number): number {
+      return this._rf.rangeFreq(left, right + 1, value)
+    }
+  }
+
+  /**
+   * Your RangeFreqQuery object will be instantiated and called as such:
+   * var obj = new RangeFreqQuery(arr)
+   * var param_1 = obj.query(left,right,value)
+   */
 }

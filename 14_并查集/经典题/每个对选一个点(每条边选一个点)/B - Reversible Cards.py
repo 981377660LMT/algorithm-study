@@ -8,31 +8,19 @@ from collections import defaultdict, deque
 from typing import DefaultDict, List, Tuple
 
 
-class UnionFindGraphMap:
-    """并查集维护无向图每个连通块的边数和顶点数"""
+class UnionFindGraphArray:
+    """并查集维护无向图每个连通块的边数和顶点数."""
 
     __slots__ = ("part", "_parent", "vertex", "edge")
 
-    def __init__(self):
-        self._parent = dict()
-        self.part = 0
-        self.vertex = dict()  # 每个联通块的顶点数
-        self.edge = dict()  # 每个联通块的边数
-
-    def add(self, key: int) -> bool:
-        if key in self._parent:
-            return False
-        self._parent[key] = key
-        self.vertex[key] = 1
-        self.edge[key] = 0
-        self.part += 1
-        return True
+    def __init__(self, n: int):
+        self.part = n
+        self.vertex = [1] * n  # 每个联通块的顶点数
+        self.edge = [0] * n  # 每个联通块的边数
+        self._parent = list(range(n))
 
     def find(self, x: int) -> int:
-        if x not in self._parent:
-            self.add(x)
-            return x
-        while self._parent.get(x, x) != x:
+        while self._parent[x] != x:
             self._parent[x] = self._parent[self._parent[x]]
             x = self._parent[x]
         return x
@@ -56,9 +44,9 @@ class UnionFindGraphMap:
 
     def getGroups(self) -> DefaultDict[int, List[int]]:
         groups = defaultdict(list)
-        for key in self._parent:
-            root = self.find(key)
-            groups[root].append(key)
+        for i in range(len(self._parent)):
+            root = self.find(i)
+            groups[root].append(i)
         return groups
 
     def getSize(self, key: int) -> int:
@@ -67,17 +55,21 @@ class UnionFindGraphMap:
     def __repr__(self) -> str:
         return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
 
-    def __len__(self) -> int:
-        return self.part
-
 
 def selectOneFromEachPair(pairs: List[Tuple[int, int]]) -> int:
     """从每个对中恰好选一个数，最多能选出多少个不同的数.
     对每个大小为m的连通块,树的贡献为m-1,环的贡献为m.
     """
-    uf = UnionFindGraphMap()
+    id = dict()
     for u, v in pairs:
-        uf.union(u, v)
+        id.setdefault(u, len(id))
+        id.setdefault(v, len(id))
+
+    n = len(id)
+    uf = UnionFindGraphArray(n)
+    for u, v in pairs:
+        uf.union(id[u], id[v])
+
     res = 0
     for root, g in uf.getGroups().items():
         isTree = uf.edge[root] == len(g) - 1
@@ -85,43 +77,63 @@ def selectOneFromEachPair(pairs: List[Tuple[int, int]]) -> int:
     return res
 
 
-# TODO
-def selectOneFromEachPair2(pairs: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
-    """从每个对中恰好选一个数，最多能选出多少个不同的数.
-    对每个大小为m的连通块,树的贡献为m-1,环的贡献为m.
+def selectOneFromEachPair2(pairs: List[Tuple[int, int]]) -> List[int]:
     """
-    adjMap = defaultdict(list)
-    visited = dict()
-    for i, (u, v) in enumerate(pairs):
-        adjMap[u].append((v, i))
-        adjMap[v].append((u, i))
-        visited[u] = False
-        visited[v] = False
+    从每个对中恰好选一个数，最多能选出多少个不同的数.
+    返回每个pair选取的数.
 
-    res = []
-    for i in visited:
-        if visited[i]:
-            continue
-        vertex, edge = 0, 0
-        queue = deque([i])
+    环:从叶子结点开始拓扑排序,然后从每个未被访问的结点开始dfs.(这里的环包括自环)
+    树:从叶子结点开始向中心拓扑排序.
+    """
+
+    def solveTree(group: List[int]) -> None:
+        queue = deque(u for u in group if deg[u] == 1)
         while queue:
             cur = queue.popleft()
-            if visited[cur]:
-                continue
             visited[cur] = True
-            vertex += 1
-            count = 0
-            for next, ei in adjMap[cur]:
-                if visited[next] and count == 0:
-                    count += 1
+            for next, ei in adjList[cur]:
+                if visited[next]:
                     continue
-                if visited[next] and count == 1:
-                    edge += 1
-                    continue
-                queue.append(next)
-                edge += 1
-                res.append((ei, next if not visited[next] else cur))
-        return res
+                select[ei] = cur
+                deg[next] -= 1
+                if deg[next] == 1:
+                    queue.append(next)
+
+    def solveCycle(group: List[int]) -> None:
+        ...
+
+    id = dict()
+    for u, v in pairs:
+        id.setdefault(u, len(id))
+        id.setdefault(v, len(id))
+
+    n = len(id)
+    uf = UnionFindGraphArray(n)
+    adjList = [[] for _ in range(n)]  # (next, ei)
+    deg = [0] * n
+    for i, (u, v) in enumerate(pairs):
+        u, v = id[u], id[v]
+        uf.union(u, v)
+        adjList[u].append((v, i))
+        adjList[v].append((u, i))
+        deg[u] += 1
+        deg[v] += 1
+
+    select = [-1] * n  # 每个pair选取的数
+    visited = [False] * n
+    for root, g in uf.getGroups().items():
+        if uf.edge[root] == len(g) - 1:
+            solveTree(g)
+        else:
+            solveCycle(g)
+
+    rid = {v: k for k, v in id.items()}
+    for i, v in enumerate(select):
+        if v == -1:
+            select[i] = rid[pairs[i][0]]  # 任意选一个
+        else:
+            select[i] = rid[v]
+    return select
 
 
 if __name__ == "__main__":
@@ -138,4 +150,5 @@ if __name__ == "__main__":
 
     n = int(input())
     edges = [tuple(map(int, input().split())) for _ in range(n)]
-    print(selectOneFromEachPair2(edges))
+    # print(selectOneFromEachPair(edges))
+    print(len(set(selectOneFromEachPair2(edges))))
