@@ -71,12 +71,12 @@ func (uf *UnionFindArrayWithUndo) Undo() bool {
 	if len(uf.history) == 0 {
 		return false
 	}
-	big, bigData := uf.history[len(uf.history)-1].a, uf.history[len(uf.history)-1].b
-	uf.data[big] = bigData
-	uf.history = uf.history[:len(uf.history)-1]
 	small, smallData := uf.history[len(uf.history)-1].a, uf.history[len(uf.history)-1].b
-	uf.data[small] = smallData
 	uf.history = uf.history[:len(uf.history)-1]
+	big, bigData := uf.history[len(uf.history)-1].a, uf.history[len(uf.history)-1].b
+	uf.history = uf.history[:len(uf.history)-1]
+	uf.data[small] = smallData
+	uf.data[big] = bigData
 	if big != small {
 		uf.Part++
 	}

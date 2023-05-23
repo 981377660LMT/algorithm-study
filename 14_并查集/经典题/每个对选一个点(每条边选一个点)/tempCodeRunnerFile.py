@@ -1,1 +1,0 @@
-res.append((ei, next))

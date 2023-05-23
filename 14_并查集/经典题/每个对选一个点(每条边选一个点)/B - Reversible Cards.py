@@ -52,6 +52,9 @@ class UnionFindGraphArray:
     def getSize(self, key: int) -> int:
         return self.vertex[self.find(key)]
 
+    def getEdge(self, key: int) -> int:
+        return self.edge[self.find(key)]
+
     def __repr__(self) -> str:
         return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
 
@@ -80,7 +83,7 @@ def selectOneFromEachPair(pairs: List[Tuple[int, int]]) -> int:
 def selectOneFromEachPair2(pairs: List[Tuple[int, int]]) -> List[int]:
     """
     从每个对中恰好选一个数，最多能选出多少个不同的数.
-    返回每个pair选取的数.
+    !返回每个pair选取的数(方案).
 
     环:从叶子结点开始拓扑排序,然后从每个未被访问的结点开始dfs.(这里的环包括自环)
     树:从叶子结点开始向中心拓扑排序.
@@ -91,6 +94,7 @@ def selectOneFromEachPair2(pairs: List[Tuple[int, int]]) -> List[int]:
         while queue:
             cur = queue.popleft()
             visited[cur] = True
+            onCycle[cur] = False
             for next, ei in adjList[cur]:
                 if visited[next]:
                     continue
@@ -100,7 +104,32 @@ def selectOneFromEachPair2(pairs: List[Tuple[int, int]]) -> List[int]:
                     queue.append(next)
 
     def solveCycle(group: List[int]) -> None:
-        ...
+        queue = deque(u for u in group if deg[u] == 1)
+        while queue:
+            cur = queue.popleft()
+            visited[cur] = True
+            onCycle[cur] = False
+            for next, ei in adjList[cur]:
+                if visited[next]:
+                    continue
+                select[ei] = cur
+                deg[next] -= 1
+                if deg[next] == 1:
+                    queue.append(next)
+        for v in group:
+            if not visited[v]:
+                _dfsCycle(v, -1)
+
+    def _dfsCycle(cur: int, pre: int) -> None:
+        if visited[cur]:
+            return
+        visited[cur] = True
+        for next, ei in adjList[cur]:
+            if next == pre or not onCycle[next]:
+                continue
+            select[ei] = cur
+            _dfsCycle(next, cur)
+            break
 
     id = dict()
     for u, v in pairs:
@@ -119,8 +148,9 @@ def selectOneFromEachPair2(pairs: List[Tuple[int, int]]) -> List[int]:
         deg[u] += 1
         deg[v] += 1
 
-    select = [-1] * n  # 每个pair选取的数
+    select = [-1] * len(pairs)  # 每个pair选取的数
     visited = [False] * n
+    onCycle = [True] * n
     for root, g in uf.getGroups().items():
         if uf.edge[root] == len(g) - 1:
             solveTree(g)
@@ -130,7 +160,7 @@ def selectOneFromEachPair2(pairs: List[Tuple[int, int]]) -> List[int]:
     rid = {v: k for k, v in id.items()}
     for i, v in enumerate(select):
         if v == -1:
-            select[i] = rid[pairs[i][0]]  # 任意选一个
+            select[i] = pairs[i][0]  # 任意选一个,选第一个
         else:
             select[i] = rid[v]
     return select
@@ -146,7 +176,11 @@ if __name__ == "__main__":
     # 对每个大小为n的连通块
     # 树: n-1
     # 有环: n
-    # 如果要求方案，需要EBCC求边双连通分量.
+
+    import sys
+
+    sys.setrecursionlimit(int(1e9))
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
 
     n = int(input())
     edges = [tuple(map(int, input().split())) for _ in range(n)]

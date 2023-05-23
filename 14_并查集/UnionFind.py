@@ -225,9 +225,9 @@ class UnionFindGraph:
     def __init__(self, n: int):
         self.n = n
         self.part = n
-        self._parent = list(range(n))
         self.vertex = [1] * n  # 每个联通块的顶点数
         self.edge = [0] * n  # 每个联通块的边数
+        self._parent = list(range(n))
 
     def find(self, x: int) -> int:
         while x != self._parent[x]:
@@ -249,6 +249,12 @@ class UnionFindGraph:
         self.part -= 1
         return True
 
+    def getSize(self, x: int) -> int:
+        return self.vertex[self.find(x)]
+
+    def getEdge(self, x: int) -> int:
+        return self.edge[self.find(x)]
+
     def isConnected(self, x: int, y: int) -> bool:
         return self.find(x) == self.find(y)
 
@@ -259,11 +265,5 @@ class UnionFindGraph:
             groups[root].append(key)
         return groups
 
-    def getRoots(self) -> List[int]:
-        return list(set(self.find(i) for i in range(self.n)))
-
     def __repr__(self) -> str:
         return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
-
-    def __len__(self) -> int:
-        return self.part
