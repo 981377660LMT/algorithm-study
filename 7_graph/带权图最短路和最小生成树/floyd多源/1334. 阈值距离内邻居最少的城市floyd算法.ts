@@ -14,17 +14,18 @@ const INF = 2e15
  */
 function findTheCity(n: number, edges: number[][], distanceThreshold: number): number {
   const dist = floyd(n, edges, false)
+
   let res = 0
-  let minNeighbor = Infinity
+  let minCount = INF
   for (let i = 0; i < n; i++) {
-    let count = 0
-    for (const dis of dist[i]) {
-      dis <= distanceThreshold && count++
+    let curCount = 0
+    for (let j = 0; j < n; j++) {
+      curCount += +(dist(i, j) <= distanceThreshold)
     }
 
-    if (count <= minNeighbor) {
+    if (curCount <= minCount) {
       res = i
-      minNeighbor = count
+      minCount = curCount
     }
   }
 

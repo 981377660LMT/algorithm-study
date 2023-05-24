@@ -7,11 +7,10 @@ dist[1] = 0
 
 edges = [tuple(map(int, input().split())) for _ in range(E)]
 
-for _ in range(limit):
+for _ in range(limit):  # !中转点数i=0,1,...,limit-1
     preDist = dist[:]
     for u, v, w in edges:
         if preDist[u] + w < dist[v]:
             dist[v] = preDist[u] + w
 
-print('impossible' if dist[V] > int(1e19) else (dist[V]))
-
+print("impossible" if dist[V] > int(1e19) else (dist[V]))

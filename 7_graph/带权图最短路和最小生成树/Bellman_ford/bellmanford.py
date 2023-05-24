@@ -1,3 +1,6 @@
+# bellman-ford法求带负权边的单源最短路. O(VE).
+
+
 from typing import List, Tuple
 
 INF = int(1e18)
@@ -31,6 +34,8 @@ def bellmanFord(
                 continue
             for to, cost in adjList[from_]:
                 cand = dist[from_] + cost
+                if cand < -INF:
+                    cand = -INF
                 if cand < dist[to]:
                     updated = True
                     pre[to] = from_

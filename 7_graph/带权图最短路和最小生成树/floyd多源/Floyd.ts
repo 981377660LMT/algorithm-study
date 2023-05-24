@@ -28,11 +28,17 @@ class Floyd {
     this._dist = dist
   }
 
+  /**
+   * 添加从`u`到`v`的边权为`w`的无向边.
+   */
   addEdge(u: number, v: number, w: number): void {
     this.addDirectedEdge(u, v, w)
     this.addDirectedEdge(v, u, w)
   }
 
+  /**
+   * 添加从`u`到`v`的边权为`w`的有向边.
+   */
   addDirectedEdge(u: number, v: number, w: number): void {
     if (this._hasBuilt) throw new Error('Can not add edge after build.')
     this._directedEdges.push([u, v, w])
@@ -113,25 +119,22 @@ class FloydDynamic {
 
   constructor(n: number) {
     const dist = Array(n * n)
-    const pre = new Uint32Array(n * n)
-    for (let i = 0; i < n; ++i) {
-      for (let j = 0; j < n; ++j) {
-        const cur = i * n + j
-        pre[cur] = i
-        dist[cur] = INF
-      }
-    }
+    for (let i = 0; i < n * n; ++i) dist[i] = INF
     for (let i = 0; i < n; ++i) dist[i * n + i] = 0
-
     this._n = n
     this._dist = dist
   }
-
+  /**
+   * 添加从`u`到`v`的边权为`w`的无向边.
+   */
   addEdge(u: number, v: number, w: number): void {
     this.addDirectedEdge(u, v, w)
     this.addDirectedEdge(v, u, w)
   }
 
+  /**
+   * 添加从`u`到`v`的边权为`w`的有向边.
+   */
   addDirectedEdge(u: number, v: number, w: number): void {
     if (this._hasBuilt) throw new Error('Can not add edge after build.')
     this._directedEdges.push([u, v, w])
@@ -272,17 +275,9 @@ function floyd(
 export { Floyd, FloydDynamic, floyd }
 
 if (require.main === module) {
-  const n = 10
+  const n = 800
   console.time('floyd')
   const f = new FloydDynamic(n)
-  f.addDirectedEdge(0, 1, 1)
-  f.addDirectedEdge(1, 2, 1)
-  f.addDirectedEdge(2, 3, 1)
-  f.addDirectedEdge(3, 4, 1)
   f.build()
-  console.log(f.dist(0, 4))
-  console.log(f.dist(0, 0), f.hasNegativeCycle())
-  f.updateEdge(0, 2, 1, false)
-  console.log(f.dist(0, 4))
-  console.log(f.dist(2, 0))
+  console.timeEnd('floyd')
 }
