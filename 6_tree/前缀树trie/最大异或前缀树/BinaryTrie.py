@@ -63,7 +63,7 @@ class BinaryTrie:
         x ^= self.lazy
         v = 0
         for i in range(self.max_log - 1, -1, -1):
-            d = (x >> i) % 2
+            d = (x >> i) & 1
             if self.edges[2 * v + d] == -1:
                 self.max_v += 1
                 self.edges[2 * v + d] = self.max_v
@@ -80,7 +80,7 @@ class BinaryTrie:
         x ^= self.lazy
         v = 0
         for i in range(self.max_log - 1, -1, -1):
-            d = (x >> i) % 2
+            d = (x >> i) & 1
             if self.edges[2 * v + d] == -1:
                 return
             v = self.edges[2 * v + d]
@@ -98,7 +98,7 @@ class BinaryTrie:
         x ^= self.lazy
         v = 0
         for i in range(self.max_log - 1, -1, -1):
-            d = (x >> i) % 2
+            d = (x >> i) & 1
             if self.edges[2 * v + d] == -1:
                 return
             v = self.edges[2 * v + d]
@@ -116,7 +116,7 @@ class BinaryTrie:
         x ^= self.lazy
         v = 0
         for i in range(self.max_log - 1, -1, -1):
-            d = (x >> i) % 2
+            d = (x >> i) & 1
             if self.edges[2 * v + d] == -1:
                 return 0
             v = self.edges[2 * v + d]
@@ -130,8 +130,8 @@ class BinaryTrie:
         v = 0
         ret = 0
         for i in range(self.max_log - 1, -1, -1):
-            d = (x >> i) % 2
-            l = (self.lazy >> i) % 2
+            d = (x >> i) & 1
+            l = (self.lazy >> i) & 1
             lc = self.edges[2 * v]
             rc = self.edges[2 * v + 1]
             if l == 1:
@@ -168,7 +168,7 @@ class BinaryTrie:
         v = 0
         ret = 0
         for i in range(self.max_log - 1, -1, -1):
-            l = (self.lazy >> i) % 2
+            l = (self.lazy >> i) & 1
             lc = self.edges[2 * v]
             rc = self.edges[2 * v + 1]
             if l == 1:
@@ -198,7 +198,7 @@ class BinaryTrie:
     def __iter__(self):
         q = [(0, 0)]
         for i in range(self.max_log - 1, -1, -1):
-            l = (self.lazy >> i) % 2
+            l = (self.lazy >> i) & 1
             nq = []
             for v, x in q:
                 lc = self.edges[2 * v]
