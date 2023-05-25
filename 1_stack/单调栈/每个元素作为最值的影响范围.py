@@ -8,7 +8,6 @@ from typing import List, Tuple
 
 def getRange(
     nums: List[int],
-    *,
     isMax=False,
     isLeftStrict=True,
     isRightStrict=False,

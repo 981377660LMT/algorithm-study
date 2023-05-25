@@ -1,4 +1,4 @@
-# 1. 15 Puzzle Game(华容道???) 是否存在解
+# 1. 15Puzzle Game(华容道???) 是否存在解
 # https://cp-algorithms.com/others/15-puzzle.html
 
 
