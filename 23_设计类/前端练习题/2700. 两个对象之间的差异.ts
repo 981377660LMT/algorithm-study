@@ -12,34 +12,24 @@
 // !1. obj1 和 obj2 的类型不同
 // !2. obj1 和 obj2 的类型相同 => 基本类型直接返回/非基本类型递归处理
 
-function objDiff(obj1: any, obj2: any): any {}
+function objDiff(obj1: any, obj2: any): any {
+  if (type(obj1) !== type(obj2)) return [obj1, obj2]
+  if (!isObject(obj1)) return obj1 === obj2 ? {} : [obj1, obj2]
+  const diff: Record<string, unknown> = {}
+  const sameKeys = Object.keys(obj1).filter(key => key in obj2)
+  sameKeys.forEach(key => {
+    const subDiff = objDiff(obj1[key], obj2[key])
+    if (Object.keys(subDiff).length) diff[key] = subDiff
+  })
+  return diff
+}
 
-export {}
-
-// const isPrimitive = o => o == null || typeof o != "object";
-// const { toString } = Object.prototype;
-// /**
-//  * @param {object} obj1
-//  * @param {object} obj2
-//  * @return {object}
-//  */
-// function objDiff(obj1, obj2) {
-//     if (toString.call(obj1) != toString.call(obj2)) return [obj1, obj2];
-//     if (isPrimitive(obj1)) return obj1 === obj2 ? {} : [obj1, obj2];
-//     const res = {};
-//     for (let k of Object.keys(obj1).filter(k => k in obj2)) {
-//         let t = objDiff(obj1[k], obj2[k]);
-//         if (Object.keys(t).length) res[k] = t;
-//     }
-//     return res;
-// };
-
-console.log(Object.prototype.toString.call([]))
-
-function getType(obj: unknown): string {
+function type(obj: unknown): string {
   return Object.prototype.toString.call(obj).slice(8, -1)
 }
 
-function isObject(obj: unknown): obj is object {
+function isObject(obj: unknown): obj is Record<string, unknown> {
   return typeof obj === 'object' && obj !== null
 }
+
+export {}

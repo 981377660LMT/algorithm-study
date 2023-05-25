@@ -1,32 +1,79 @@
 /**
- *
- * @param arr
- * @param k
- * @returns 组合可取重复元素
+ * 可取重复元素的组合，遍历所有大小为`r`的组合.
+ * @param arr 待遍历的数组.
+ * @param r 组合大小.
+ * @param cb 回调函数, 用于处理每个组合的结果.
+ * @param copy 是否浅拷贝每个组合的结果, 默认为`false`.
+ * @example
+ * ```ts
+ * enumerateCombinationsWithReplacement([1, 2, 3], 2, comb => {
+ *   console.log(comb)
+ * })
+ * // [ 1, 1 ]
+ * // [ 1, 2 ]
+ * // [ 1, 3 ]
+ * // [ 2, 2 ]
+ * // [ 2, 3 ]
+ * // [ 3, 3 ]
+ * ```
+ * @complexity 2e7 => 205.486ms
  */
-function* combinationsWithReplacement<T extends ArrayLike<any>>(
-  sequence: T,
-  select?: number
-): Generator<T[]> {
-  select = select ?? sequence.length
+function enumerateCombinationsWithReplacement<C>(
+  arr: ArrayLike<C>,
+  r: number,
+  cb: (comb: readonly C[]) => void,
+  copy = false
+): void {
+  bt(0, [])
+
+  function bt(pos: number, path: C[]): void {
+    if (path.length === r) {
+      cb(copy ? path.slice() : path)
+      return
+    }
+
+    for (let i = pos; i < arr.length; i++) {
+      path.push(arr[i])
+      bt(i, path) // 可取重复的元素
+      path.pop()
+    }
+  }
+}
+
+/**
+ * 可取重复元素的组合.
+ * 模拟python的`itertools.combinations_with_replacement`.
+ * @complexity 2e6 => 809.43ms
+ */
+function* combinationsWithReplacement<C>(arr: ArrayLike<C>, r: number): Generator<C[]> {
   yield* bt(0, [])
 
-  function* bt(pos: number, path: T[]): Generator<T[]> {
-    if (path.length === select) {
+  function* bt(pos: number, path: C[]): Generator<C[]> {
+    if (path.length === r) {
       yield path.slice()
       return
     }
 
-    for (let i = pos; i < sequence.length; i++) {
-      path.push(sequence[i])
-      yield* bt(i, path) // 唯一的区别在此：可取重复的元素
+    for (let i = pos; i < arr.length; i++) {
+      path.push(arr[i])
+      yield* bt(i, path) // 可取重复的元素
       path.pop()
     }
   }
 }
 
 if (require.main === module) {
-  console.log(...combinationsWithReplacement([1, 1, 3, 4], 2))
+  const n = 20
+  const r = 10
+  const arr = Array.from({ length: n }, (_, i) => i)
+
+  console.time('combinations')
+  let count = 0
+  enumerateCombinationsWithReplacement(arr, r, comb => {
+    count++
+  })
+  console.timeEnd('combinations') // !205.486ms
+  console.log(count) // !20030010
 }
 
-export { combinationsWithReplacement }
+export { enumerateCombinationsWithReplacement, combinationsWithReplacement }

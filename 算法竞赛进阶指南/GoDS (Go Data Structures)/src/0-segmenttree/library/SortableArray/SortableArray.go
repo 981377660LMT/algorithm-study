@@ -5,7 +5,7 @@
 // GetAll() []int
 // SortInc(start, end int)
 // SortDec(start, end int)
-// !每次操作O(loglogmaxValue)
+// !每次操作O(log^2(maxValue))
 
 package main
 
