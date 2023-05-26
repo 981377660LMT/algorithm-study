@@ -197,7 +197,7 @@ public enum State {
    sleep 只会让出 CPU 不会导致锁行为改变 wait 会让出 CPU 并释放同步资源锁
    sleep 是 Thread 类的方法 wait 是 Object 类的方法
    sleep 到处用 wait 在 synchronized 里使用
-10. Thread.yeild 将线程状态从 running 变成 runnable
+10. Thread.yield 将线程状态从 running 变成 runnable
 11. synchronized 锁的是对象
 12. 异常处理机制:What(异常类型) Where(异常堆栈追踪) Why(异常信息)
     实现了 Throwable 接口

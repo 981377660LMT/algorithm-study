@@ -11,3 +11,5 @@ function findClosestMatchingNode(el: Element | null, target: string) {
 
   return null
 }
+
+export {}

@@ -7,6 +7,7 @@
 //     assert.equal(likes(['Alex', 'Jacob', 'Mark', 'Max']), 'Alex, Jacob and 2 others like this');
 //   });
 // });
+
 export class Kata {
   static squareDigits(num: number): number {
     return Number(
