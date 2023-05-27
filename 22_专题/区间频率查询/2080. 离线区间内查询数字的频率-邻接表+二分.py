@@ -1,4 +1,4 @@
-# 区间内查询数字的频率
+# 静态区间内查询数字的频率(区间频率查询)
 # 求出给定子数组内一个给定值的 频率
 
 from typing import List
@@ -7,23 +7,19 @@ from bisect import bisect_left, bisect_right
 
 
 class RangeFreqQuery:
-    """离线查询子数组内一个值的出现次数，如果要在线，使用树状数组/SortedList"""
+    """静态查询子数组内一个值的出现次数."""
 
     def __init__(self, arr: List[int]):
-        self.indexMap = defaultdict(list)
-        for index, value in enumerate(arr):
-            self.indexMap[value].append(index)
+        self._mp = defaultdict(list)
+        for i, v in enumerate(arr):
+            self._mp[v].append(i)
 
     def query(self, left: int, right: int, value: int) -> int:
-        """查询闭区间[left,right]内value的频率
-
+        """
+        查询闭区间[left,right]内value的频率
         0 <= left <= right < len(arr)
         """
-        return (
-            (bisect_right(self.indexMap[value], right) - 1)
-            - bisect_left(self.indexMap[value], left)
-            + 1
-        )
+        return bisect_right(self._mp[value], right) - bisect_left(self._mp[value], left)
 
 
 # 应用场景:对每笔订单，有订单类型和订单时间

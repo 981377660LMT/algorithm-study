@@ -69,8 +69,8 @@ describe('BitVector', () => {
 
   // count
   it('should support count', () => {
-    expect(bitVector.countPrefix(0, bitVector.size)).toBe(nums.filter(v => v === 0).length)
-    expect(bitVector.countPrefix(1, bitVector.size)).toBe(nums.filter(v => v === 1).length)
+    expect(bitVector.countPrefix(0, bitVector.length)).toBe(nums.filter(v => v === 0).length)
+    expect(bitVector.countPrefix(1, bitVector.length)).toBe(nums.filter(v => v === 1).length)
 
     // random start and end
     for (let i = 0; i < 1; i++) {

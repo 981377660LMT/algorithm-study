@@ -84,13 +84,14 @@ func (mp *MatPow) Pow(exp int) M {
 }
 
 func (mp *MatPow) mul(mat1, mat2 []int) []int {
-	res := make([]int, mp.n*mp.n)
-	for i := 0; i < mp.n; i++ {
-		for k := 0; k < mp.n; k++ {
-			for j := 0; j < mp.n; j++ {
-				res[i*mp.n+j] = (res[i*mp.n+j] + mat1[i*mp.n+k]*mat2[k*mp.n+j]) % mp.mod
-				if res[i*mp.n+j] < 0 {
-					res[i*mp.n+j] += mp.mod
+	n := mp.n
+	res := make([]int, n*n)
+	for i := 0; i < n; i++ {
+		for k := 0; k < n; k++ {
+			for j := 0; j < n; j++ {
+				res[i*n+j] = (res[i*n+j] + mat1[i*n+k]*mat2[k*n+j]) % mp.mod
+				if res[i*n+j] < 0 {
+					res[i*n+j] += mp.mod
 				}
 			}
 		}

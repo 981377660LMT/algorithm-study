@@ -1,6 +1,7 @@
-// 又叫做 64-ary tree / Van Emde Boas Tree
+// 又叫做 64-ary tree / Van Emde Boas Tree (梵峨眉大悲寺树)
 // !时间复杂度:O(log64n)
 // https://zhuanlan.zhihu.com/p/107238627
+// https://www.luogu.com.cn/blog/RuntimeErrror/ni-suo-fou-zhi-dao-di-shuo-ju-jie-gou-van-emde-boas-shu
 // 使用场景:
 // 1. 在存储IP地址的时候， 需要快速查找某个IP地址（2 ^32大小)是否在访问的列表中，
 //    或者需要找到比这个IP地址大一点或者小一点的IP作为重新分配的IP。

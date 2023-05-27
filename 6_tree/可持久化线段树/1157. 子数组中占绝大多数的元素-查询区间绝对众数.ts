@@ -4,19 +4,19 @@
 
 function usePersistentSegmentTree(nums: number[]) {
   const n = nums.length
-  // const tree = Array<SegmentTreeNode>(4 * n + 16 * n)
   const upper = 4 * n + Number(n).toString(2).length * n // 离散化后整个线段树N * 4 + NlogN，索引代表值域
-  const treeLeft = new Uint32Array(upper).fill(0)
-  const treeRight = new Uint32Array(upper).fill(0)
-  const treeCount = new Uint32Array(upper).fill(0)
-
-  const roots = new Uint32Array(n + 1).fill(0) // n+1个版本的根节点的treeId
+  const treeLeft = new Uint32Array(upper)
+  const treeRight = new Uint32Array(upper)
+  const treeCount = new Uint32Array(upper)
+  const roots = new Uint32Array(n + 1) // n+1个版本的根节点的treeId
   let treeId = 1
 
   // 离散化到0-allNums.length-1
   const allNums = [...new Set(nums)].sort((a, b) => a - b)
-  const mapping = new Uint32Array(allNums.length + 10).fill(0)
-  for (const [i, num] of allNums.entries()) mapping[num] = i
+  const mapping = new Uint32Array(allNums.length + 10)
+  allNums.forEach((num, i) => {
+    mapping[num] = i
+  })
 
   roots[0] = _build(0, allNums.length - 1)
   for (let i = 1; i <= n; i++) {
@@ -41,7 +41,7 @@ function usePersistentSegmentTree(nums: number[]) {
   function _build(left: number, right: number): number {
     const curId = treeId++
     if (left === right) return curId
-    const mid = Math.floor((left + right) / 2)
+    const mid = (left + right) >> 1
     treeLeft[curId] = _build(left, mid)
     treeRight[curId] = _build(mid + 1, right)
     return curId
@@ -59,7 +59,7 @@ function usePersistentSegmentTree(nums: number[]) {
       return curId
     }
 
-    const mid = Math.floor((left + right) / 2)
+    const mid = (left + right) >> 1
     if (value <= mid) treeLeft[curId] = _update(treeLeft[preRoot], left, mid, value)
     else treeRight[curId] = _update(treeRight[preRoot], mid + 1, right, value)
     treeCount[curId] = treeCount[treeLeft[curId]] + treeCount[treeRight[curId]]
@@ -81,7 +81,7 @@ function usePersistentSegmentTree(nums: number[]) {
 
     // 值域在[left,mid]里的数的总个数
     const leftHalfCount = treeCount[treeLeft[curRoot]] - treeCount[treeLeft[preRoot]]
-    const mid = Math.floor((left + right) / 2)
+    const mid = (left + right) >> 1
     if (k <= leftHalfCount) return _query(treeLeft[preRoot], treeLeft[curRoot], left, mid, k)
     return _query(treeRight[preRoot], treeRight[curRoot], mid + 1, right, k)
   }

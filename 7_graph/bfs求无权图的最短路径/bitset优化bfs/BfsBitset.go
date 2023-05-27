@@ -194,7 +194,7 @@ func (b Bitset) LastIndex1() int {
 func (b Bitset) Add(i int) { b.FlipRange(i, b.Next0(i)) }
 
 // -= 1 << i，模拟借位
-func (b Bitset) Sub(i int) { b.FlipRange(i, b.Next1(i)) }
+func (b) Sub(i int) { b.FlipRange(i, b.Next1(i)) }
 
 // 判断 [l,r] 范围内的数是否全为 0
 // https://codeforces.com/contest/1107/problem/D（标准做法是二维前缀和）

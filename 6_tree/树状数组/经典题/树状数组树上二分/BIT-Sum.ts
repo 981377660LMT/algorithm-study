@@ -3,7 +3,7 @@
 /**
  * 单点更新, 区间查询，维护加法群的树状数组.
  */
-class BitSum {
+class BitSumGroup {
   private _data!: number[]
   private _total!: number
   private readonly _n: number
@@ -119,17 +119,17 @@ class BitSum {
   }
 }
 
-export { BitSum }
+export { BitSumGroup }
 
 if (require.main === module) {
-  const bit = new BitSum(10)
+  const bit = new BitSumGroup(10)
   console.log(bit.toString())
   // https://leetcode.cn/problems/longest-uploaded-prefix/
 
   class LUPrefix {
-    private readonly _bit: BitSum
+    private readonly _bit: BitSumGroup
     constructor(n: number) {
-      this._bit = new BitSum(n)
+      this._bit = new BitSumGroup(n)
     }
 
     upload(video: number): void {

@@ -38,7 +38,7 @@ class FastSet {
   erase(i: number): void {
     for (let h = 0; h < this._lg; h++) {
       this._seg[h][i >>> 5] &= ~(1 << (i & 31))
-      if (this._seg[h][i >>> 5] > 0) {
+      if (this._seg[h][i >>> 5]) {
         break
       }
       i >>>= 5
@@ -47,14 +47,14 @@ class FastSet {
 
   /**
    * 返回x右侧第一个未被访问过的位置(包含x).
-   * 如果不存在,返回null.
+   * 如果不存在,返回`n`.
    */
-  next(i: number): number | null {
+  next(i: number): number {
     if (i < 0) {
       i = 0
     }
     if (i >= this._n) {
-      return null
+      return this._n
     }
 
     for (let h = 0; h < this._lg; h++) {
@@ -76,16 +76,16 @@ class FastSet {
       return i
     }
 
-    return null
+    return this._n
   }
 
   /**
    * 返回x左侧第一个未被访问过的位置(包含x).
-   * 如果不存在,返回null.
+   * 如果不存在,返回`-1`.
    */
-  prev(i: number): number | null {
+  prev(i: number): number {
     if (i < 0) {
-      return null
+      return -1
     }
     if (i >= this._n) {
       i = this._n - 1
@@ -109,17 +109,17 @@ class FastSet {
       return i
     }
 
-    return null
+    return -1
   }
 
   /**
    * 遍历[start,end)区间内的元素.
    */
   enumerateRange(start: number, end: number, f: (v: number) => void): void {
-    let x: number | null = start - 1
+    let x = start - 1
     while (true) {
       x = this.next(x + 1)
-      if (x == null || x >= end) {
+      if (x >= end) {
         break
       }
       f(x)
@@ -130,6 +130,14 @@ class FastSet {
     const sb: string[] = []
     this.enumerateRange(0, this._n, v => sb.push(v.toString()))
     return `FastSet(${sb.join(', ')})`
+  }
+
+  get min(): number | null {
+    return this.next(-1)
+  }
+
+  get max(): number | null {
+    return this.prev(this._n)
   }
 }
 

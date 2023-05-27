@@ -1,5 +1,11 @@
 /* eslint-disable no-param-reassign */
 class BitVector {
+  private static _onesCount32(uint32: number): number {
+    uint32 -= (uint32 >>> 1) & 0x55555555
+    uint32 = (uint32 & 0x33333333) + ((uint32 >>> 2) & 0x33333333)
+    return (((uint32 + (uint32 >>> 4)) & 0x0f0f0f0f) * 0x01010101) >>> 24
+  }
+
   private readonly _n: number
   private readonly _block: Uint32Array
   private readonly _sum: Uint32Array
@@ -16,12 +22,12 @@ class BitVector {
 
   build(): void {
     for (let i = 0; i < this._block.length - 1; i++) {
-      this._sum[i + 1] = this._sum[i] + onesCount32(this._block[i])
+      this._sum[i + 1] = this._sum[i] + BitVector._onesCount32(this._block[i])
     }
   }
 
   has(i: number): boolean {
-    return ((this._block[i >> 5] >> (i & 31)) & 1) === 1
+    return !!((this._block[i >> 5] >> (i & 31)) & 1)
   }
 
   /**
@@ -31,8 +37,8 @@ class BitVector {
     if (right < 0) return 0
     if (right > this._n) right = this._n
     const mask = (1 << (right & 31)) - 1
-    const res = this._sum[right >> 5] + onesCount32(this._block[right >> 5] & mask)
-    return digit === 1 ? res : right - res
+    const res = this._sum[right >> 5] + BitVector._onesCount32(this._block[right >> 5] & mask)
+    return digit ? res : right - res
   }
 
   /**
@@ -72,7 +78,7 @@ class BitVector {
     this._sum.fill(0)
   }
 
-  get size(): number {
+  get length(): number {
     return this._n
   }
 
@@ -83,12 +89,6 @@ class BitVector {
     }
     return `BitVector(${this._n}): [${res.join(', ')}]`
   }
-}
-
-function onesCount32(uint32: number): number {
-  uint32 -= (uint32 >>> 1) & 0x55555555
-  uint32 = (uint32 & 0x33333333) + ((uint32 >>> 2) & 0x33333333)
-  return (((uint32 + (uint32 >>> 4)) & 0x0f0f0f0f) * 0x01010101) >>> 24
 }
 
 export { BitVector }
