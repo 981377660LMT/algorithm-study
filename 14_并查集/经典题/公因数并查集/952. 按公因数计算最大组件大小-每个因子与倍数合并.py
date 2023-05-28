@@ -8,6 +8,24 @@ from collections import defaultdict
 from typing import DefaultDict, List
 
 
+class Solution:
+    def largestComponentSize(self, nums: List[int]) -> int:
+        """每个因子与倍数合并(从下往上合并) 注意合并前判断倍数在不在nums里"""
+        ok = set(nums)
+        max_ = max(nums)
+        uf = UnionFindArray(max_ + 1)
+        for i in range(2, max_ + 1):
+            for j in range(i * 2, max_ + 1, i):
+                if j in ok:
+                    uf.union(i, j)
+
+        group = defaultdict(int)
+        for num in nums:
+            root = uf.find(num)
+            group[root] += 1
+        return max(group.values(), default=0)
+
+
 class UnionFindArray:
     """元素是0-n-1的并查集写法,不支持动态添加
 
@@ -56,24 +74,6 @@ class UnionFindArray:
 
     def __len__(self) -> int:
         return self.part
-
-
-class Solution:
-    def largestComponentSize(self, nums: List[int]) -> int:
-        """每个因子与倍数合并(从下往上合并) 注意合并前判断倍数在不在nums里"""
-        ok = set(nums)
-        max_ = max(nums)
-        uf = UnionFindArray(max_ + 1)
-        for i in range(2, max_ + 1):
-            for j in range(i * 2, max_ + 1, i):
-                if j in ok:
-                    uf.union(i, j)
-
-        group = defaultdict(int)
-        for num in nums:
-            root = uf.find(num)
-            group[root] += 1
-        return max(group.values(), default=0)
 
 
 print(Solution().largestComponentSize([20, 50, 9, 63]))

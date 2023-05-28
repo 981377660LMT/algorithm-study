@@ -8,36 +8,6 @@ from typing import List
 # 使用字典树可利用字符串的公共前缀来减少查询时间，最大限度地减少无谓的字符串比较
 
 
-class TrieNode:
-    __slots__ = ('count', 'children')
-
-    def __init__(self):
-        self.count = 0
-        self.children = {}
-
-
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
-
-    def insert(self, word: str) -> None:
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                node.children[char] = TrieNode()
-            node = node.children[char]
-        node.count += 1
-
-    def search(self, word: str) -> int:
-        """是否存在word，返回个数"""
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                return 0
-            node = node.children[char]
-        return node.count
-
-
 class Solution:
     def respace(self, dictionary: List[str], sentence: str) -> int:
         # 时间复杂度O(|dictionary|+O(n^2))
@@ -69,3 +39,33 @@ class Solution:
         res = dfs(0)
         dfs.cache_clear()
         return res
+
+
+class TrieNode:
+    __slots__ = ("count", "children")
+
+    def __init__(self):
+        self.count = 0
+        self.children = {}
+
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word: str) -> None:
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.count += 1
+
+    def search(self, word: str) -> int:
+        """是否存在word，返回个数"""
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                return 0
+            node = node.children[char]
+        return node.count

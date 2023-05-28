@@ -11,6 +11,26 @@ from typing import List
 # 将所有根结点与它的叶子结点异或,并将结果相加
 
 
+@lru_cache(None)
+def dfs(index: int) -> int:
+    if index == n:
+        return 0
+
+    res = INF
+    curSum = 0
+    for i in range(index, len(nums)):
+        ...
+        cand = dfs(i + 1) + curSum
+        res = cand if cand < res else res
+    return res
+
+
+n = len(nums)
+res = dfs(0)
+dfs.cache_clear()
+return res
+
+
 class Solution:
     def tree6(self, k: int, a: List[int]) -> int:
         def dfs(root: int) -> None:

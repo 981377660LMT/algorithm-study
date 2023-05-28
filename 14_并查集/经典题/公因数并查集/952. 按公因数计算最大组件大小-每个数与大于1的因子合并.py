@@ -12,6 +12,21 @@ from math import floor
 from typing import DefaultDict, Generic, Hashable, Iterable, List, Optional, TypeVar
 
 
+class Solution:
+    def largestComponentSize(self, nums: List[int]) -> int:
+        """每个数与大于1的因子合并(从上往下合并)"""
+        uf = UnionFindMap()
+        for num in nums:
+            for factor in getFactors(num):
+                uf.union(factor, num)
+
+        group = defaultdict(int)
+        for num in nums:
+            root = uf.find(num)
+            group[root] += 1
+        return max(group.values(), default=0)
+
+
 T = TypeVar("T", bound=Hashable)
 
 
@@ -92,21 +107,6 @@ class UnionFindMap(Generic[T]):
 
     def __contains__(self, key: T) -> bool:
         return key in self.parent
-
-
-class Solution:
-    def largestComponentSize(self, nums: List[int]) -> int:
-        """每个数与大于1的因子合并(从上往下合并)"""
-        uf = UnionFindMap()
-        for num in nums:
-            for factor in getFactors(num):
-                uf.union(factor, num)
-
-        group = defaultdict(int)
-        for num in nums:
-            root = uf.find(num)
-            group[root] += 1
-        return max(group.values(), default=0)
 
 
 print(Solution().largestComponentSize([20, 50, 9, 63]))

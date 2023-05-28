@@ -9,3 +9,4 @@ binaryCycle.next() // { value: 0, done: false }
 binaryCycle.next() // { value: 1, done: false }
 binaryCycle.next() // { value: 0, done: false }
 console.log(binaryCycle.next()) // { value: 1, done: false }
+export {}

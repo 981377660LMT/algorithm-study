@@ -413,6 +413,10 @@ class SortedList<T = number> {
     }
   }
 
+  get length(): number {
+    return this._size
+  }
+
   // Find the block which should contain x. Block must not be empty.
   private _findBlockIndex(x: T): number {
     for (let i = 0; i < this._blocks.length; i++) {
@@ -498,10 +502,6 @@ class SortedList<T = number> {
       index -= block.length
     }
     return [this._blocks.length, 0]
-  }
-
-  get length(): number {
-    return this._size
   }
 }
 
