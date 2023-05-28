@@ -1,6 +1,8 @@
+/* eslint-disable prefer-destructuring */
+/* eslint-disable no-param-reassign */
+/* eslint-disable generator-star-spacing */
+/* eslint-disable no-inner-declarations */
 // 珂朵莉树(ODT)/Intervals
-
-import { FastSet } from './FastSet'
 
 const INF = 2e15
 
@@ -37,8 +39,10 @@ class ODT<S> {
 
   /**
    * 返回包含`x`的区间的信息.
+   * 0 <= x < n.
    */
-  get(x: number, erase = false): [start: number, end: number, value: S] {
+  get(x: number, erase = false): [start: number, end: number, value: S] | undefined {
+    if (x < this._leftLimit || x >= this._rightLimit) return undefined
     const start = this._fs.prev(x)
     const end = this._fs.next(x + 1)
     const value = this._data[start]
@@ -129,12 +133,13 @@ class ODT<S> {
   }
 
   toString(): string {
-    const sb: string[] = []
+    const sb: string[] = [`ODT(${this.length}) {`]
     this.enumerateAll((start, end, value) => {
       const v = value === this._noneValue ? 'null' : value
-      sb.push(`[${start},${end}):${v}`)
+      sb.push(`  [${start},${end}):${v}`)
     })
-    return `ODT{${sb.join(', ')}}`
+    sb.push('}')
+    return sb.join('\n')
   }
 
   /**
@@ -158,6 +163,146 @@ class ODT<S> {
       if (this._data[p] !== this._noneValue) this._len--
       this._fs.erase(p)
     }
+  }
+}
+
+/**
+ * 利用位运算寻找区间的某个位置左侧/右侧第一个未被访问过的位置.
+ * 初始时,所有位置都未被访问过.
+ */
+class FastSet {
+  private readonly _n: number
+  private readonly _lg: number
+  private readonly _seg: Uint32Array[]
+
+  constructor(n: number) {
+    this._n = n
+    const seg: Uint32Array[] = []
+    while (true) {
+      seg.push(new Uint32Array((n + 31) >>> 5))
+      n = (n + 31) >>> 5
+      if (n <= 1) {
+        break
+      }
+    }
+    this._lg = seg.length
+    this._seg = seg
+  }
+
+  insert(i: number): void {
+    for (let h = 0; h < this._lg; h++) {
+      this._seg[h][i >>> 5] |= 1 << (i & 31)
+      i >>>= 5
+    }
+  }
+
+  has(i: number): boolean {
+    return !!(this._seg[0][i >>> 5] & (1 << (i & 31)))
+  }
+
+  erase(i: number): void {
+    for (let h = 0; h < this._lg; h++) {
+      this._seg[h][i >>> 5] &= ~(1 << (i & 31))
+      if (this._seg[h][i >>> 5]) {
+        break
+      }
+      i >>>= 5
+    }
+  }
+
+  /**
+   * 返回x右侧第一个未被访问过的位置(包含x).
+   * 如果不存在,返回`n`.
+   */
+  next(i: number): number {
+    if (i < 0) {
+      i = 0
+    }
+    if (i >= this._n) {
+      return this._n
+    }
+
+    for (let h = 0; h < this._lg; h++) {
+      if (i >>> 5 === this._seg[h].length) {
+        break
+      }
+      let d = this._seg[h][i >>> 5] >>> (i & 31)
+      if (d === 0) {
+        i = (i >>> 5) + 1
+        continue
+      }
+      // !trailingZeros32: 31 - Math.clz32(x & -x)
+      i += 31 - Math.clz32(d & -d)
+      for (let g = h - 1; ~g; g--) {
+        i <<= 5
+        const tmp = this._seg[g][i >>> 5]
+        i += 31 - Math.clz32(tmp & -tmp)
+      }
+      return i
+    }
+
+    return this._n
+  }
+
+  /**
+   * 返回x左侧第一个未被访问过的位置(包含x).
+   * 如果不存在,返回`-1`.
+   */
+  prev(i: number): number {
+    if (i < 0) {
+      return -1
+    }
+    if (i >= this._n) {
+      i = this._n - 1
+    }
+
+    for (let h = 0; h < this._lg; h++) {
+      if (i === -1) {
+        break
+      }
+      let d = this._seg[h][i >>> 5] << (31 - (i & 31))
+      if (d === 0) {
+        i = (i >>> 5) - 1
+        continue
+      }
+
+      i -= Math.clz32(d)
+      for (let g = h - 1; ~g; g--) {
+        i <<= 5
+        i += 31 - Math.clz32(this._seg[g][i >>> 5])
+      }
+      return i
+    }
+
+    return -1
+  }
+
+  /**
+   * 遍历[start,end)区间内的元素.
+   */
+  enumerateRange(start: number, end: number, f: (v: number) => void): void {
+    let x = start - 1
+    while (true) {
+      x = this.next(x + 1)
+      if (x >= end) {
+        break
+      }
+      f(x)
+    }
+  }
+
+  toString(): string {
+    const sb: string[] = []
+    this.enumerateRange(0, this._n, v => sb.push(v.toString()))
+    return `FastSet(${sb.join(', ')})`
+  }
+
+  get min(): number | null {
+    return this.next(-1)
+  }
+
+  get max(): number | null {
+    return this.prev(this._n)
   }
 }
 
@@ -197,11 +342,4 @@ if (require.main === module) {
       return res
     }
   }
-
-  /**
-   * Your SummaryRanges object will be instantiated and called as such:
-   * var obj = new SummaryRanges()
-   * obj.addNum(value)
-   * var param_2 = obj.getIntervals()
-   */
 }

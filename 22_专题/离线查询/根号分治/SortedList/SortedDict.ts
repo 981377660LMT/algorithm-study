@@ -65,6 +65,7 @@ class SortedDict<K = number, V = unknown> {
     return this._dict.get(key)
   }
 
+  /** 注意内部使用 `===` 来比较两个对象是否相等 */
   delete(key: K): boolean {
     if (!this._dict.has(key)) return false
     this._sl.discard(key)
@@ -72,6 +73,7 @@ class SortedDict<K = number, V = unknown> {
     return true
   }
 
+  /** 注意内部使用 `===` 来比较两个对象是否相等 */
   pop(key: K, defaultValue?: V): V | undefined {
     if (!this._dict.has(key)) return defaultValue
     this._sl.discard(key)
@@ -95,6 +97,20 @@ class SortedDict<K = number, V = unknown> {
     return [key, value]
   }
 
+  peekMinItem(): [K, V] | undefined {
+    if (!this._dict.size) return undefined
+    const key = this._sl.min()!
+    const value = this._dict.get(key)!
+    return [key, value]
+  }
+
+  peekMaxItem(): [K, V] | undefined {
+    if (!this._dict.size) return undefined
+    const key = this._sl.max()!
+    const value = this._dict.get(key)!
+    return [key, value]
+  }
+
   forEach(callbackfn: (value: V, key: K) => void): void {
     this._sl.forEach(key => {
       callbackfn(this._dict.get(key)!, key)
@@ -108,10 +124,16 @@ class SortedDict<K = number, V = unknown> {
     })
   }
 
+  /**
+   * 返回`key`在有序字典中的位置.
+   */
   bisectLeft(key: K): number {
     return this._sl.bisectLeft(key)
   }
 
+  /**
+   * 返回`key`在有序字典中的位置.
+   */
   bisectRight(key: K): number {
     return this._sl.bisectRight(key)
   }

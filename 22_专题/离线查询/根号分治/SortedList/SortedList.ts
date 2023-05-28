@@ -276,6 +276,17 @@ class SortedList<T = number> {
     this._size = 0
   }
 
+  min(): T | undefined {
+    if (!this._size) return void 0
+    return this._blocks[0][0]
+  }
+
+  max(): T | undefined {
+    if (!this._size) return void 0
+    const last = this._blocks[this._blocks.length - 1]
+    return last[last.length - 1]
+  }
+
   toString(): string {
     return `SortedList[${[...this].join(', ')}]`
   }

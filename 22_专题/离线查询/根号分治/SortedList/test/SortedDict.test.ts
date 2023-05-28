@@ -67,11 +67,19 @@ describe('SortedDict', () => {
     expect([...sd]).toStrictEqual([...sortedDict].sort((a, b) => a[0] - b[0]))
   })
 
-  // peekItem
+  // peekItem/peekMinItem/peekMaxItem
   it('should support peekItem', () => {
     const peeked = sd.peekItem(0)
     const sortedPeek = sortedDict.entries().next().value
     expect(peeked).toStrictEqual(sortedPeek)
+
+    const peekedMin = sd.peekMinItem()
+    const sortedPeekMin = [...sortedDict].sort((a, b) => a[0] - b[0])[0]
+    expect(peekedMin).toStrictEqual(sortedPeekMin)
+
+    const peekedMax = sd.peekMaxItem()
+    const sortedPeekMax = [...sortedDict].sort((a, b) => b[0] - a[0])[0]
+    expect(peekedMax).toStrictEqual(sortedPeekMax)
   })
 
   // forEach
@@ -139,9 +147,8 @@ describe('SortedDict', () => {
     const end = Math.floor(sd.size * Math.random())
     const reverse = Math.random() > 0.5
     const sliced = sd.islice(start, end, reverse)
-    let sortedSliced = [...sortedDict]
+    let sortedSliced = [...sortedDict].slice(start, end)
     if (reverse) sortedSliced.reverse()
-    sortedSliced = sortedSliced.slice(start, end)
     expect([...sliced]).toStrictEqual(sortedSliced)
   })
 

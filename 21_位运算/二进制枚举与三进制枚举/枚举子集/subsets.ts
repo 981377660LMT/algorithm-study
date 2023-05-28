@@ -1,21 +1,35 @@
 /**
  * 遍历子集.
+ * @param copy 是否复制子集.
+ * @complexity O(2^n), 2^27(1.3e8) => 1.1s.
  */
-function enumerateSubset<T>(nums: ArrayLike<T>, callback: (subset: T[]) => void): void {
+function enumerateSubset<T>(
+  nums: ArrayLike<T>,
+  callback: (subset: T[]) => void,
+  copy = false
+): void {
   const n = nums.length
-  for (let state = 0; state < 1 << n; state++) {
-    const cands: T[] = []
-    for (let j = 0; j < nums.length; j++) {
-      if (state & (1 << j)) cands.push(nums[j])
+  dfs(0, [])
+  function dfs(index: number, path: T[]) {
+    if (index === n) {
+      callback(copy ? path.slice() : path)
+      return
     }
-    callback(cands)
+    dfs(index + 1, path)
+    path.push(nums[index])
+    dfs(index + 1, path)
+    path.pop()
   }
 }
 
 if (require.main === module) {
-  enumerateSubset([1, 2, 3, 4], subset => {
-    console.log(subset)
-  })
+  const nums = Array(27)
+    .fill(0)
+    .map((_, i) => i)
+
+  console.time('enumerateSubset2')
+  enumerateSubset(nums, subset => {})
+  console.timeEnd('enumerateSubset2') // 1.1s
 }
 
 export { enumerateSubset }
