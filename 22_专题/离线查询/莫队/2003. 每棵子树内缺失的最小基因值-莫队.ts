@@ -8,7 +8,8 @@
 // 120.5 MB
 
 import { DfsOrder } from '../../../6_tree/树的性质/dfs序/DfsOrder'
-import { MoAlgo } from './Moalgo'
+import { RangeMexQuery } from './RangeMexQuery-离线查询区间mex-线段树'
+import { RangeMexQueryMo } from './RangeMexQuery-离线查询区间mex-莫队'
 
 function smallestMissingValueSubtree(parents: number[], nums: number[]): number[] {
   const n = nums.length
@@ -28,31 +29,14 @@ function smallestMissingValueSubtree(parents: number[], nums: number[]): number[
   }
 
   // !莫队算法求区间mex
-  const rangeMex = new MoAlgo(n, n)
+  // const rangeMex = new RangeMexQueryMo(newNums, n)
+  const rangeMex = new RangeMexQuery(newNums)
   for (let root = 0; root < n; root++) {
     let [left, right] = D.queryRange(root)
     rangeMex.addQuery(left, right)
   }
 
-  const res = Array(n).fill(1)
-  let mex = 1
-  const counter = new Uint32Array(Math.max(...newNums) + 1)
-  const add = (index: number) => {
-    const num = newNums[index]
-    counter[num]++
-    while (counter[mex]) mex++
-  }
-  const remove = (index: number) => {
-    const num = newNums[index]
-    counter[num]--
-    if (!counter[num]) mex = Math.min(mex, num)
-  }
-  const query = (qi: number) => {
-    res[qi] = mex
-  }
-  rangeMex.run(add, remove, query)
-
-  return res
+  return rangeMex.run(1)
 }
 
 if (require.main === module) {

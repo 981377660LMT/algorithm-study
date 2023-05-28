@@ -1,4 +1,5 @@
 // https://maspypy.github.io/library/ds/offline_query/range_mex_query.hpp
+// RangeMexQuery-离线查询区间mex
 
 package main
 
@@ -118,37 +119,6 @@ func (st *SegmentTree) Set(index int, value E) {
 	}
 }
 
-// [start, end)
-func (st *SegmentTree) Query(start, end int) E {
-	if start < 0 {
-		start = 0
-	}
-	if end > st.n {
-		end = st.n
-	}
-	if start >= end {
-		return e()
-	}
-	leftRes, rightRes := e(), e()
-	start += st.size
-	end += st.size
-	for start < end {
-		if start&1 == 1 {
-			leftRes = op(leftRes, st.seg[start])
-			start++
-		}
-		if end&1 == 1 {
-			end--
-			rightRes = op(st.seg[end], rightRes)
-		}
-		start >>= 1
-		end >>= 1
-	}
-	return op(leftRes, rightRes)
-}
-
-func (st *SegmentTree) QueryAll() E { return st.seg[1] }
-
 // 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
 func (st *SegmentTree) MaxRight(left int, predicate func(E) bool) int {
 	if left == st.n {
@@ -177,34 +147,4 @@ func (st *SegmentTree) MaxRight(left int, predicate func(E) bool) int {
 		}
 	}
 	return st.n
-}
-
-// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (st *SegmentTree) MinLeft(right int, predicate func(E) bool) int {
-	if right == 0 {
-		return 0
-	}
-	right += st.size
-	res := e()
-	for {
-		right--
-		for right > 1 && right&1 == 1 {
-			right >>= 1
-		}
-		if !predicate(op(st.seg[right], res)) {
-			for right < st.size {
-				right = right<<1 | 1
-				if predicate(op(st.seg[right], res)) {
-					res = op(st.seg[right], res)
-					right--
-				}
-			}
-			return right + 1 - st.size
-		}
-		res = op(st.seg[right], res)
-		if right&-right == right {
-			break
-		}
-	}
-	return 0
 }
