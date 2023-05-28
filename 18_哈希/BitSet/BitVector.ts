@@ -12,8 +12,8 @@ class BitVector {
 
   constructor(n: number) {
     this._n = n
-    this._block = new Uint32Array((n + 31) >> 5)
-    this._sum = new Uint32Array((n + 31) >> 5)
+    this._block = new Uint32Array(1 + (n >> 5))
+    this._sum = new Uint32Array(1 + (n >> 5))
   }
 
   add(i: number): void {
@@ -92,3 +92,15 @@ class BitVector {
 }
 
 export { BitVector }
+
+if (require.main === module) {
+  const n = 160
+  const bv = new BitVector(n)
+  for (let i = 0; i < n; i++) {
+    if (Math.random() < 0.5) {
+      bv.add(i)
+    }
+  }
+  bv.build()
+  console.log(bv.countPrefix(0, n))
+}

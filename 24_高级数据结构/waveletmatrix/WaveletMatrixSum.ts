@@ -321,7 +321,7 @@ class _BV {
   private readonly _data: [count: number, sum: number][] = []
 
   constructor(n: number) {
-    this._data = Array((n + 63) >> 5)
+    this._data = Array(((n + 63) >> 5) + 1)
     for (let i = 0; i < this._data.length; i++) {
       this._data[i] = [0, 0]
     }

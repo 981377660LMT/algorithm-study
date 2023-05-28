@@ -154,6 +154,9 @@ class SortedDict<K = number, V = unknown> {
     return sb.join('\n')
   }
 
+  /**
+   * 返回一个迭代器，用于遍历键的范围在 `[start, end)` 内的所有键值对.
+   */
   *islice(start: number, end: number, reverse = false): IterableIterator<[K, V]> {
     const keys = this._sl.islice(start, end, reverse)
     for (const key of keys) {
@@ -161,6 +164,9 @@ class SortedDict<K = number, V = unknown> {
     }
   }
 
+  /**
+   * 返回一个迭代器，用于遍历键的范围在 `[min, max] 闭区间`内的所有键值对.
+   */
   *irange(min: K, max: K, reverse = false): IterableIterator<[K, V]> {
     const keys = this._sl.irange(min, max, reverse)
     for (const key of keys) {

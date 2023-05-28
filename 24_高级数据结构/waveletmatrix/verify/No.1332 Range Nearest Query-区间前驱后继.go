@@ -300,8 +300,8 @@ func NewBitVector(n int) *BitVector {
 	blockCount := (n + 63) >> 6
 	return &BitVector{
 		n:     n,
-		block: make([]int, blockCount),
-		sum:   make([]int, blockCount),
+		block: make([]int, blockCount+1),
+		sum:   make([]int, blockCount+1),
 	}
 }
 

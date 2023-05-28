@@ -290,7 +290,7 @@ class SortedList<T = number> {
     let count = end - start
 
     if (reverse) {
-      let [bid, endPos] = this._moveTo(end - 1)
+      let [bid, endPos] = this._moveTo(end)
       for (; ~bid && count > 0; bid--, ~bid && (endPos = this._blocks[bid].length)) {
         const block = this._blocks[bid]
         const startPos = Math.max(0, endPos - count)

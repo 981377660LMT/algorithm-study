@@ -137,24 +137,27 @@ describe('SortedDict', () => {
   it('should support islice', () => {
     const start = Math.floor(sd.size * Math.random())
     const end = Math.floor(sd.size * Math.random())
-    const isReverse = Math.random() > 0.5
-    const sliced = sd.islice(start, end, isReverse)
-    const sortedSliced = [...sortedDict].slice(start, end)
-    if (isReverse) sortedSliced.reverse()
+    const reverse = Math.random() > 0.5
+    const sliced = sd.islice(start, end, reverse)
+    let sortedSliced = [...sortedDict]
+    if (reverse) sortedSliced.reverse()
+    sortedSliced = sortedSliced.slice(start, end)
     expect([...sliced]).toStrictEqual(sortedSliced)
   })
 
   // irange
   it('should support irange', () => {
-    const min = Math.floor(sd.size * Math.random())
-    const max = Math.floor(sd.size * Math.random())
-    const isReverse = Math.random() > 0.5
-    const ranged = sd.irange(min, max, isReverse)
-    const sortedRanged = [...sortedDict]
-      .sort((a, b) => a[0] - b[0])
-      .filter(([k]) => k >= min && k < max)
-    if (isReverse) sortedRanged.reverse()
-    expect([...ranged]).toStrictEqual(sortedRanged)
+    for (let i = 0; i < 10; i++) {
+      const min = Math.floor(sd.size * Math.random())
+      const max = Math.floor(sd.size * Math.random())
+      const reverse = Math.random() > 0.5
+      const ranged = sd.irange(min, max, reverse)
+      const sortedRanged = [...sortedDict]
+        .sort((a, b) => a[0] - b[0])
+        .filter(([k]) => k >= min && k <= max)
+      if (reverse) sortedRanged.reverse()
+      expect([...ranged]).toStrictEqual(sortedRanged)
+    }
   })
 
   // keys/values/entries/[Symbol.iterator]

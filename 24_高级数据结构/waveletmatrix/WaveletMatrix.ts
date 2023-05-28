@@ -233,8 +233,9 @@ class _BV {
 
   constructor(n: number) {
     this._n = n
-    this._block = new Uint32Array((n + 31) >>> 5)
-    this._sum = new Uint32Array((n + 31) >>> 5)
+    const size = 1 + (n >>> 5)
+    this._block = new Uint32Array(size)
+    this._sum = new Uint32Array(size)
   }
 
   add(i: number): void {

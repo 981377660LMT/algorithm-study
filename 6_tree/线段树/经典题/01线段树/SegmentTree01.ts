@@ -35,9 +35,10 @@ class SegmentTree01 {
    * 翻转[start,end)区间的bit.
    */
   flip(start: number, end: number): void {
-    if (start >= end) {
-      return
-    }
+    if (start < 0) start = 0
+    if (end > this._n) end = this._n
+    if (start >= end) return
+
     start++
     this._flip(1, start, end, 1, this._n)
   }
@@ -79,6 +80,8 @@ class SegmentTree01 {
    * 返回[left,right)区间内1的个数.
    */
   onesCount(start: number, end: number): number {
+    if (start < 0) start = 0
+    if (end > this._n) end = this._n
     if (start >= end) return 0
     start++
     return this._onesCount(1, start, end, 1, this._n)

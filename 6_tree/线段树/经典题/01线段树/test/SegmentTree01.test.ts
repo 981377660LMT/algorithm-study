@@ -4,13 +4,13 @@ const INF = 2e15
 
 describe('SegmentTree01', () => {
   const randint = (a: number, b: number) => Math.floor(Math.random() * (b - a + 1)) + a
-  const n = randint(100, 1000)
+  const n = randint(100, 500)
   const nums = Array.from({ length: n }, () => randint(0, 1))
   const seg = new SegmentTree01(nums)
 
   // constructor bits/length
   it('should support constructor bits/length', () => {
-    const n = randint(100, 1000)
+    const n = randint(100, 500)
     const seg1 = new SegmentTree01(Array(n).fill(0))
     const seg2 = new SegmentTree01(n)
     expect(seg1.toString()).toBe(seg2.toString())

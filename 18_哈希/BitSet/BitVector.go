@@ -6,7 +6,19 @@
 
 package main
 
-import "math/bits"
+import (
+	"fmt"
+	"math/bits"
+)
+
+func main() {
+	bv := NewBitVector(65)
+	for i := 0; i < 65; i++ {
+		bv.Set(i)
+	}
+	bv.Build()
+	fmt.Println(bv.Count(0, 65))
+}
 
 type BitVector struct {
 	n     int
@@ -15,11 +27,11 @@ type BitVector struct {
 }
 
 func NewBitVector(n int) *BitVector {
-	blockCount := (n + 63) >> 6
+	blockCount := n>>6 + 1
 	return &BitVector{
 		n:     n,
-		block: make([]int, blockCount),
-		sum:   make([]int, blockCount),
+		block: make([]int, blockCount+1),
+		sum:   make([]int, blockCount+1),
 	}
 }
 

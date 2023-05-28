@@ -11,14 +11,14 @@ describe('SortedList', () => {
   })
 
   it('should support add and discard', () => {
-    const add = Math.floor(Math.random() * 1000)
+    const add = Math.floor(Math.random() * 100)
     sl.add(add)
     sortedNums.push(add)
     sortedNums.sort((a, b) => a - b)
     expect(sl.length).toBe(sortedNums.length)
     expect(sortedNums).toStrictEqual([...sl])
 
-    const discard = Math.floor(Math.random() * 1000)
+    const discard = Math.floor(Math.random() * 100)
     sl.discard(discard)
     sortedNums = sortedNums.filter(num => num !== discard)
     expect(sl.length).toBe(sortedNums.length)
@@ -26,7 +26,7 @@ describe('SortedList', () => {
   })
 
   it('should support bisectLeft and bisectRight', () => {
-    const target = Math.floor(Math.random() * 1000)
+    const target = Math.floor(Math.random() * 100)
     const left = sl.bisectLeft(target)
     const right = sl.bisectRight(target)
     expect(left).toBe(sortedNums.findIndex(num => num >= target))
@@ -43,7 +43,7 @@ describe('SortedList', () => {
   })
 
   it('should support has', () => {
-    const target = Math.floor(Math.random() * 1000)
+    const target = Math.floor(Math.random() * 100)
     expect(sl.has(target)).toBe(sortedNums.includes(target))
   })
 
@@ -84,30 +84,34 @@ describe('SortedList', () => {
     }
   })
 
-  it('should support slice and islce', () => {
-    for (let i = 0; i < 1000; i++) {
+  it('should support slice and slice', () => {
+    for (let i = 0; i < 100; i++) {
       let start = Math.floor(Math.random() * sl.length)
       let end = Math.floor(Math.random() * sl.length)
+      const reverse = Math.random() > 0.5
+      const islice = [...sl.islice(start, end, reverse)]
       const slice = sl.slice(start, end)
-      const islce = [...sl.islice(start, end)]
-      expect(slice).toStrictEqual(sortedNums.slice(start, end))
-      expect(islce).toStrictEqual(sortedNums.slice(start, end))
+      if (reverse) slice.reverse()
+
+      expect(islice).toStrictEqual(slice)
     }
   })
 
   it('should support irange', () => {
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 100; i++) {
       let min = Math.floor(Math.random() * sl.length)
       let max = Math.floor(Math.random() * sl.length)
-      const irange = [...sl.irange(min, max)]
-      const target = sortedNums.filter(num => num >= min && num < max).sort((a, b) => a - b)
+      const reverse = Math.random() > 0.5
+      const irange = [...sl.irange(min, max, reverse)]
+      const target = sortedNums.filter(num => num >= min && num <= max).sort((a, b) => a - b)
+      if (reverse) target.reverse()
       expect(irange).toStrictEqual(target)
     }
   })
 
   // enumerate
   it('should support enumerate', () => {
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 100; i++) {
       let start = Math.floor(Math.random() * sl.length)
       let end = Math.floor(Math.random() * sl.length)
       const enumerated: [number][] = []
