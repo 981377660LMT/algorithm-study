@@ -16,19 +16,15 @@ class MaxSparseTable:
         self._dp[0] = [a for a in arr]  # type: ignore
         for k in range(1, self._h):
             t, p = self._dp[k], self._dp[k - 1]
-            l = 1 << (k - 1)
-            for i in range(self._n - l * 2 + 1):
-                t[i] = p[i] if p[i] > p[i + l] else p[i + l]
+            step = 1 << (k - 1)
+            for i in range(self._n - step * 2 + 1):
+                t[i] = p[i] if p[i] > p[i + step] else p[i + step]
 
-    def query(self, left: int, right: int) -> int:
-        """[left,right]区间的最大值"""
-        assert 0 <= left <= right < self._n, f"{left}, {right}, {self._n}"
-        right += 1
-        k = (right - left).bit_length() - 1
-        cand1, cand2 = self._dp[k][left], self._dp[k][right - (1 << k)]
-        if cand1 > cand2:
-            return cand1
-        return cand2
+    def query(self, start: int, end: int) -> int:
+        """[start,end)区间的最大值."""
+        k = (end - start).bit_length() - 1
+        cand1, cand2 = self._dp[k][start], self._dp[k][end - (1 << k)]
+        return cand1 if cand1 > cand2 else cand2
 
 
 class MinSparseTable:
@@ -40,34 +36,30 @@ class MinSparseTable:
         self._n = len(arr)
         self._h = self._n.bit_length()
         self._dp = [[0] * self._n for _ in range(self._h)]
-        self._dp[0] = [a for a in arr]  # type: ignore
+        self._dp[0] = [a for a in arr]
         for k in range(1, self._h):
             t, p = self._dp[k], self._dp[k - 1]
-            l = 1 << (k - 1)
-            for i in range(self._n - l * 2 + 1):
-                t[i] = p[i] if p[i] < p[i + l] else p[i + l]
+            step = 1 << (k - 1)
+            for i in range(self._n - step * 2 + 1):
+                t[i] = p[i] if p[i] < p[i + step] else p[i + step]
 
-    def query(self, left: int, right: int) -> int:
-        """[left,right]区间的最小值"""
-        assert 0 <= left <= right < self._n, f"{left}, {right}, {self._n}"
-        right += 1
-        k = (right - left).bit_length() - 1
-        cand1, cand2 = self._dp[k][left], self._dp[k][right - (1 << k)]
-        if cand1 < cand2:
-            return cand1
-        return cand2
+    def query(self, start: int, end: int) -> int:
+        """[start,end)区间的最小值."""
+        k = (end - start).bit_length() - 1
+        cand1, cand2 = self._dp[k][start], self._dp[k][end - (1 << k)]
+        return cand1 if cand1 < cand2 else cand2
 
 
 T = TypeVar("T")
-Merger = Callable[[T, T], T]
 
 
 class SparseTable(Generic[T]):
     """自定义merger的ST表"""
 
-    __slots__ = "_n", "_h", "_dp", "_op"
+    __slots__ = "_n", "_h", "_dp", "_e", "_op"
 
-    def __init__(self, arr: List[T], op: Merger[T]):
+    def __init__(self, arr: List[T], e: Callable[[], T], op: Callable[[T, T], T]):
+        self._e = e
         self._op = op
         self._n = len(arr)
         self._h = self._n.bit_length()
@@ -75,26 +67,25 @@ class SparseTable(Generic[T]):
         self._dp[0] = [a for a in arr]  # type: ignore
         for k in range(1, self._h):
             t, p = self._dp[k], self._dp[k - 1]
-            l = 1 << (k - 1)
-            for i in range(self._n - l * 2 + 1):
-                t[i] = op(p[i], p[i + l])  # type: ignore
+            step = 1 << (k - 1)
+            for i in range(self._n - step * 2 + 1):
+                t[i] = op(p[i], p[i + step])  # type: ignore
 
-    def query(self, left: int, right: int) -> T:
-        """[left,right]区间的贡献值"""
-        assert 0 <= left <= right < self._n, f"{left}, {right}, {self._n}"
-        right += 1
-        k = (right - left).bit_length() - 1
-        return self._op(self._dp[k][left], self._dp[k][right - (1 << k)])  # type: ignore
+    def query(self, start: int, end: int) -> T:
+        """[start,end)区间的贡献值."""
+        k = (end - start).bit_length() - 1
+        return self._op(self._dp[k][start], self._dp[k][end - (1 << k)])  # type: ignore
 
 
 if __name__ == "__main__":
+    INF = int(1e18)
     nums = list(range(10000))
     st1 = MinSparseTable(nums)
     st2 = MaxSparseTable(nums)
-    st3 = SparseTable(nums, min)
-    assert st1.query(32, 636) == 32
-    assert st2.query(32, 636) == 636
-    assert st3.query(32, 636) == 32
+    st3 = SparseTable(nums, lambda: INF, min)
+    assert st1.query(32, 637) == 32
+    assert st2.query(32, 637) == 636
+    assert st3.query(32, 637) == 32
 
 # 通过了 O(1)的方式完成了指定区间任意范围的 RMQ。
 # 对于离线海量数据查询的需求完成了最高度的优化。

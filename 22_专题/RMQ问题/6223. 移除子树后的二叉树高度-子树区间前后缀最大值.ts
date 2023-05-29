@@ -22,8 +22,8 @@ function treeQueries(root: TreeNode | null, queries: number[]): number[] {
     const removeRoot = queries[i]
     const left = ins[removeRoot]
     const right = outs[removeRoot]
-    // const max1 = left - 1 >= 1 ? st.query(1, left - 1) : 0
-    // const max2 = right + 1 <= n ? st.query(right + 1, n) : 0
+    // const max1 = left - 1 >= 1 ? st.query(1, left) : 0
+    // const max2 = right + 1 <= n ? st.query(right + 1, n + 1) : 0
     const max1 = preMax[left - 1]
     const max2 = sufMax[right + 1]
     res.push(Math.max(max1, max2))

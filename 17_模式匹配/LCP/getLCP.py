@@ -1,4 +1,5 @@
 """s的任意`两个`后缀的LCP"""
+
 from typing import List
 
 
@@ -17,6 +18,16 @@ def getLCP(s: str) -> List[List[int]]:
             if s[i] == s[j]:
                 lcp[i][j] = lcp[i + 1][j + 1] + 1
     return lcp
+
+
+def lcpNaive(seq, a: int, b: int, c: int, d: int) -> int:
+    """求seq[a:b]和seq[c:d]的最长公共前缀的长度."""
+    res = 0
+    while a < b and c < d and seq[a] == seq[c]:
+        res += 1
+        a += 1
+        c += 1
+    return res
 
 
 if __name__ == "__main__":

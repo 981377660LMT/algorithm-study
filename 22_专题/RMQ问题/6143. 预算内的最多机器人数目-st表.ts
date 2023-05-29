@@ -10,7 +10,7 @@ import { SparseTable } from '../../22_专题/RMQ问题/SparseTable'
 
 function maximumRobots(chargeTimes: number[], runningCosts: number[], budget: number): number {
   const n = chargeTimes.length
-  const st = new SparseTable(chargeTimes, Math.max)
+  const st = new SparseTable(chargeTimes, () => 0, Math.max)
   const preSum = Array<number>(n + 1).fill(0)
   for (let i = 1; i <= n; i++) preSum[i] = preSum[i - 1] + runningCosts[i - 1]
 
@@ -27,7 +27,7 @@ function maximumRobots(chargeTimes: number[], runningCosts: number[], budget: nu
   function check(mid: number): boolean {
     for (let left = 0; left + mid - 1 < n; left++) {
       const right = left + mid - 1
-      const max = st.query(left, right)
+      const max = st.query(left, right + 1)
       const sum = preSum[right + 1] - preSum[left]
       if (max + mid * sum <= budget) return true
     }

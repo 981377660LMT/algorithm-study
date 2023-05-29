@@ -27,7 +27,7 @@ function distanceLimitedPathsExist(
     const eid = tree.eid(u, v)
     leaves[eid] = w
   })
-  const st = new SparseTable(leaves, Math.max)
+  const st = new SparseTable(leaves, () => 0, Math.max)
 
   const res: boolean[] = Array(queries.length).fill(false)
   for (let i = 0; i < queries.length; i++) {
@@ -35,7 +35,7 @@ function distanceLimitedPathsExist(
     if (!uf.isConnected(u, v)) continue
     let max = 0
     tree.enumeratePathDecomposition(u, v, false, (start, end) => {
-      max = Math.max(max, st.query(start, end - 1)) // 这里的st表是左闭右闭
+      max = Math.max(max, st.query(start, end))
     })
     res[i] = max < limit
   }

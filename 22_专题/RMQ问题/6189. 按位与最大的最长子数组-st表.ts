@@ -7,7 +7,11 @@ import { SparseTable } from './SparseTable'
 function longestSubarray(nums: number[]): number {
   const n = nums.length
   const max = Math.max(...nums)
-  const st = new SparseTable(nums, (a, b) => a & b)
+  const st = new SparseTable(
+    nums,
+    () => 2 ** 32 - 1,
+    (a, b) => a & b
+  )
   let res = 1
 
   for (let start = 0; start < n; start++) {
@@ -15,8 +19,8 @@ function longestSubarray(nums: number[]): number {
     let right = n - 1
 
     while (left <= right) {
-      const mid = Math.floor((left + right) / 2)
-      if (st.query(start, mid) === max) {
+      const mid = (left + right) >> 1
+      if (st.query(start, mid + 1) === max) {
         left = mid + 1
       } else {
         right = mid - 1

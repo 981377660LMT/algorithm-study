@@ -5,16 +5,20 @@ import { SparseTable } from '../../22_专题/RMQ问题/SparseTable'
 
 function smallestSubarrays(nums: number[]): number[] {
   const n = nums.length
-  const st = new SparseTable(nums, (a, b) => a | b)
+  const st = new SparseTable(
+    nums,
+    () => 0,
+    (a, b) => a | b
+  )
   const res = []
 
   for (let i = 0; i < n; i++) {
-    const or = st.query(i, n - 1)
+    const or = st.query(i, n)
     let left = i
     let right = n - 1
     while (left <= right) {
-      const mid = Math.floor((left + right) / 2)
-      if (st.query(i, mid) === or) right = mid - 1
+      const mid = (left + right) >> 1
+      if (st.query(i, mid + 1) === or) right = mid - 1
       else left = mid + 1
     }
 

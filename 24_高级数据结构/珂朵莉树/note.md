@@ -22,6 +22,6 @@ enumerateRange: enumerateRange(start: number, end: number, f: (start: number, en
 ```
 
 只要一个数据结构可以支持**快速寻找前驱和后继**以及**快速删除和插入元素**，那么就可以用来实现珂朵莉树，例如 `SortedDict/64 叉树/Van Emde Boas Tree/链表`，等等...
-下面的珂朵莉树基于 64 叉树实现。
 
-https://leetcode.cn/problems/count-integers-in-intervals/submissions/
+- 珂朵莉树的 set 操作推平区间，有利于降低复杂度
+- 珂朵莉树不擅长范围查询(因为复杂度与范围内的区间个数成正比)，一般需要配合其他数据结构辅助范围查询

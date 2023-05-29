@@ -87,7 +87,7 @@ func NewDisjointSparse(leaves []E) *DisjointSparseTable {
 }
 
 func (ds *DisjointSparseTable) Query(start, end int) E {
-	if start == end {
+	if start >= end {
 		return ds.e()
 	}
 	end--
@@ -100,7 +100,6 @@ func (ds *DisjointSparseTable) Query(start, end int) E {
 
 // 返回最大的 right 使得 [left,right) 内的值满足 check.
 func (ds *DisjointSparseTable) MaxRight(left int, check func(e E) bool) int {
-
 	if left == ds.n {
 		return ds.n
 	}

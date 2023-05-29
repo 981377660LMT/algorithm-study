@@ -1,5 +1,5 @@
 # 高度数组中的最大值对应的就是可重叠最长重复子串
-from SA import useSA
+from oldSA1 import useSA
 
 
 class Solution:

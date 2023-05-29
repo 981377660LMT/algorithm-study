@@ -1,14 +1,6 @@
-// 任意两后缀的 LCP
-// !lcp(sa[i], sa[j])=min{height[i＋1..j}
-// 求两子串最长公共前缀就转化为了 RMQ 问题。
-// 注：若允许离线可以用 Trie+Tarjan 做到线性
-
-// !如果是查询子串[l1:r1],[l2:r2]的LCP 则为min(r1-l1,r2-l2,lcp(l1,l2))
-
 package main
 
 import (
-	"fmt"
 	"index/suffixarray"
 	"math"
 	"math/bits"
@@ -16,12 +8,8 @@ import (
 	"unsafe"
 )
 
-// https://github.dev/EndlessCheng/codeforces-go/copypasta/strings.go
-// 求两个后缀最长公共前缀 O(nlogn)预处理 O(1)查询
-//  _, rank, height := suffixArray("banana")
-//  lcp := queryLCP(rank, height)
-//  fmt.Println(lcp(2, 4)) // "nana" "na"  2
-func queryLCP(rank, height []int) func(int, int) int {
+// 比较两个子串，返回 strings.Compare(s[l1:r1], s[l2:r2])，注意这里是左闭右开区间
+func UseCompareSub(rank, height []int) func(l1, r1, l2, r2 int) int {
 	n := len(rank)
 
 	max := int(math.Ceil(math.Log2(float64(n)))) + 1
@@ -41,9 +29,6 @@ func queryLCP(rank, height []int) func(int, int) int {
 
 	_q := func(l, r int) int { k := bits.Len(uint(r-l)) - 1; return min(st[l][k], st[r-1<<k][k]) }
 	lcp := func(i, j int) int {
-		if i >= n || j >= n {
-			return 0
-		}
 		if i == j {
 			return n - i
 		}
@@ -55,8 +40,25 @@ func queryLCP(rank, height []int) func(int, int) int {
 		return _q(ri+1, rj+1)
 	}
 
-	return lcp
+	compareFunc := func(l1, r1, l2, r2 int) int {
+		len1, len2 := r1-l1, r2-l2
+		l := lcp(l1, l2)
+		if len1 == len2 && l >= len1 {
+			return 0
+		}
+		if l >= len1 || l >= len2 { // 一个是另一个的前缀
+			if len1 < len2 {
+				return -1
+			}
+			return 1
+		}
+		if rank[l1] < rank[l2] { // 或者 s[l1+l] < s[l2+l]
+			return -1
+		}
+		return 1
+	}
 
+	return compareFunc
 }
 
 // https://github.dev/EndlessCheng/codeforces-go/copypasta/strings.go
@@ -95,6 +97,8 @@ func min(a, b int) int {
 
 func main() {
 	_, rank, height := suffixArray("banana")
-	lcp := queryLCP(rank, height)
-	fmt.Println(lcp(2, 4)) // "nana" "na"  2
+	compareSub := UseCompareSub(rank, height)
+	println(compareSub(0, 4, 0, 4))
+	println(compareSub(0, 1, 0, 4))
+	println(compareSub(2, 5, 0, 4))
 }

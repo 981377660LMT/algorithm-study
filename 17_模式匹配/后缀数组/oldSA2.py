@@ -1,7 +1,7 @@
 from typing import List, Sequence, Tuple
 
 
-def sa_is(s: Sequence[int], upper: int) -> List[int]:
+def sa_is(ords: Sequence[int], upper: int) -> List[int]:
     """SA-IS, linear-time suffix array construction
 
     Args:
@@ -12,25 +12,25 @@ def sa_is(s: Sequence[int], upper: int) -> List[int]:
         List[int]: Suffix array
     """
 
-    n = len(s)
+    n = len(ords)
     if n == 0:
         return []
     if n == 1:
         return [0]
     if n == 2:
-        return [0, 1] if s[0] < s[1] else [1, 0]
+        return [0, 1] if ords[0] < ords[1] else [1, 0]
 
     sa = [0] * n
     ls = [False] * n
     for i in range(n - 2, -1, -1):
-        ls[i] = ls[i + 1] if s[i] == s[i + 1] else (s[i] < s[i + 1])
+        ls[i] = ls[i + 1] if ords[i] == ords[i + 1] else (ords[i] < ords[i + 1])
     sum_l = [0] * (upper + 1)
     sum_s = [0] * (upper + 1)
     for i in range(n):
         if not ls[i]:
-            sum_s[s[i]] += 1
+            sum_s[ords[i]] += 1
         else:
-            sum_l[s[i] + 1] += 1
+            sum_l[ords[i] + 1] += 1
     for i in range(upper + 1):
         sum_s[i] += sum_l[i]
         if i < upper:
@@ -43,22 +43,22 @@ def sa_is(s: Sequence[int], upper: int) -> List[int]:
         for d in lms:
             if d == n:
                 continue
-            sa[buf[s[d]]] = d
-            buf[s[d]] += 1
+            sa[buf[ords[d]]] = d
+            buf[ords[d]] += 1
         buf = sum_l[:]
-        sa[buf[s[n - 1]]] = n - 1
-        buf[s[n - 1]] += 1
+        sa[buf[ords[n - 1]]] = n - 1
+        buf[ords[n - 1]] += 1
         for i in range(n):
             v = sa[i]
             if v >= 1 and not ls[v - 1]:
-                sa[buf[s[v - 1]]] = v - 1
-                buf[s[v - 1]] += 1
+                sa[buf[ords[v - 1]]] = v - 1
+                buf[ords[v - 1]] += 1
         buf = sum_l[:]
         for i in range(n - 1, -1, -1):
             v = sa[i]
             if v >= 1 and ls[v - 1]:
-                buf[s[v - 1] + 1] -= 1
-                sa[buf[s[v - 1] + 1]] = v - 1
+                buf[ords[v - 1] + 1] -= 1
+                sa[buf[ords[v - 1] + 1]] = v - 1
 
     lms_map = [-1] * (n + 1)
     m = 0
@@ -89,11 +89,11 @@ def sa_is(s: Sequence[int], upper: int) -> List[int]:
                 same = False
             else:
                 while l < end_l:
-                    if s[l] != s[r]:
+                    if ords[l] != ords[r]:
                         break
                     l += 1
                     r += 1
-                if l == n or s[l] != s[r]:
+                if l == n or ords[l] != ords[r]:
                     same = False
             if not same:
                 rec_upper += 1
@@ -105,7 +105,7 @@ def sa_is(s: Sequence[int], upper: int) -> List[int]:
     return sa
 
 
-def rank_lcp(s: Sequence[int], sa: List[int]) -> Tuple[List[int], List[int]]:
+def rank_lcp(ords: Sequence[int], sa: List[int]) -> Tuple[List[int], List[int]]:
     """Rank and LCP array construction
 
     Args:
@@ -120,15 +120,14 @@ def rank_lcp(s: Sequence[int], sa: List[int]) -> Tuple[List[int], List[int]]:
     ords = [1, 2, 3, 1, 2, 3]
     sa = sa_is(ords, max(ords))
     rank, lcp = rank_lcp(ords, sa)
-    print(rank, lcp)  # [1, 3, 5, 0, 2, 4] [3, 0, 2, 0, 1]
+    print(rank, lcp)  # [1, 3, 5, 0, 2, 4] [0, 3, 0, 2, 0, 1]
     ```
     """
-    n = len(s)
-    assert n >= 1
+    n = len(ords)
     rank = [0] * n
     for i in range(n):
         rank[sa[i]] = i
-    lcp = [0] * (n - 1)
+    lcp = [0] * n
     h = 0
     for i in range(n):
         if h > 0:
@@ -137,24 +136,31 @@ def rank_lcp(s: Sequence[int], sa: List[int]) -> Tuple[List[int], List[int]]:
             continue
         j = sa[rank[i] - 1]
         while j + h < n and i + h < n:
-            if s[j + h] != s[i + h]:
+            if ords[j + h] != ords[i + h]:
                 break
             h += 1
-        lcp[rank[i] - 1] = h
+        lcp[rank[i]] = h
     return rank, lcp
 
 
 if __name__ == "__main__":
+    ords = list(map(ord, "abca"))
+    sa = sa_is(ords, 122)
+    rank, lcp = rank_lcp(ords, sa)
+    print(sa, rank, lcp)  # [3, 0, 1, 2] [1, 2, 3, 0] [0, 1, 0, 0]
+
     # !求每个后缀与所有后缀的公共前缀长度和
+    # https://atcoder.jp/contests/abc213/tasks/abc213_f
     n = int(input())
     S = str(input())
     ords = [ord(c) for c in S]
     sa = sa_is(ords, max(ords))
     _, lcp = rank_lcp(ords, sa)
+    lcp = lcp[1:]
     # print(sa)
     # print(lcp)
 
-    ans = [0] * n
+    res = [0] * n
     stack = []
     cur = 0
     for i in range(n - 1):
@@ -165,10 +171,10 @@ if __name__ == "__main__":
             cur -= a * l
         cur += lcp[i] * length
         stack.append((lcp[i], length))
-        ans[sa[i + 1]] += cur
+        res[sa[i + 1]] += cur
 
-    sa.reverse()
-    lcp.reverse()
+    sa = sa[::-1]
+    lcp = lcp[::-1]
     stack = []
     cur = 0
     for i in range(n - 1):
@@ -179,8 +185,8 @@ if __name__ == "__main__":
             cur -= a * l
         cur += lcp[i] * length
         stack.append((lcp[i], length))
-        ans[sa[i + 1]] += cur
+        res[sa[i + 1]] += cur
 
     for i in range(n):
-        ans[i] += n - i
-    print(*ans, sep="\n")
+        res[i] += n - i
+    print(*res, sep="\n")

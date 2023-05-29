@@ -1,9 +1,14 @@
 import assert from 'assert'
 import { SqrtTree } from './SqrtTree'
+import { SparseTable } from './SparseTable'
 
 function closestToTarget(arr: number[], target: number): number {
   const n = arr.length
-  const st = new SqrtTree(arr, (a, b) => a & b)
+  const st = new SparseTable(
+    arr,
+    () => 2 ** 32 - 1,
+    (a, b) => a & b
+  )
 
   let res = Math.abs(arr[0] - target)
   for (let start = 0; start < n; start++) {
@@ -11,7 +16,7 @@ function closestToTarget(arr: number[], target: number): number {
     let right = n - 1
     while (left <= right) {
       const mid = (left + right) >>> 1
-      const diff = st.query(start, mid) - target
+      const diff = st.query(start, mid + 1) - target
       res = Math.min(res, Math.abs(diff))
       if (diff === 0) return 0
       if (diff > 0) left = mid + 1

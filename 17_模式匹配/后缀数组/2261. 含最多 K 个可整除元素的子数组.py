@@ -1,6 +1,6 @@
 from typing import List
 from SA import useSA
-from atcSA import sa_is, rank_lcp
+from SuffixArray import sa_is, rank_lcp
 
 
 class Solution:

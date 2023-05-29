@@ -1,8 +1,10 @@
+# 这个快一些
+
 from typing import List, Sequence, Tuple
 
 
 def useSA(ords: Sequence[int]) -> Tuple[List[int], List[int], List[int]]:
-    """返回 sa, rank, height 数组
+    """返回 sa, rank, height 数组.ord值很大时,需要先离散化.
 
     Args:
         ords: 可比较的整数序列
@@ -34,7 +36,10 @@ def useSA(ords: Sequence[int]) -> Tuple[List[int], List[int], List[int]]:
 
 # https://leetcode.cn/u/freeyourmind/
 def getSA(ords: Sequence[int]) -> List[int]:
-    """返回sa数组 即每个排名对应的后缀"""
+    """
+    返回sa数组 即每个排名对应的后缀.
+    ord值很大时,需要先离散化.
+    """
 
     def inducedSort(LMS: List[int]) -> List[int]:
         SA = [-1] * (n)
@@ -94,5 +99,5 @@ def getSA(ords: Sequence[int]) -> List[int]:
 
 
 if __name__ == "__main__":
-    print(useSA(list(map(ord, "abca"))))
-    print(getSA([1, 2, 3, 1]))
+    print(useSA(list(map(ord, "abca"))))  # ([3, 0, 1, 2], [1, 2, 3, 0], [0, 1, 0, 0])
+    print(getSA([1, 2, 3, 1]))  # [3, 0, 1, 2]

@@ -10,7 +10,7 @@
 
 from collections import defaultdict
 from typing import List
-from atcSA import sa_is
+from SuffixArray import sa_is
 
 
 class Solution:

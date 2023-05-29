@@ -25,7 +25,7 @@
    - [Z-Algorithm](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/kmp/z%E5%87%BD%E6%95%B0-%E6%89%A9%E5%B1%95kmp.py)
    - [Z-Algorithm Online](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/kmp/ZAlgorithm-Online.go)
    - [Manacher Algorithm](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E9%A9%AC%E6%8B%89%E8%BD%A6%E6%8B%89%E9%A9%AC/Manacher.py)
-   - [Suffix Array](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E6%95%B0%E7%BB%84/SA.py)
+   - [Suffix Array](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E6%95%B0%E7%BB%84/oldSA1.py)
    - [Aho-Corasick Automaton](<17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/AC%E8%87%AA%E5%8A%A8%E6%9C%BA(%E5%A4%9A%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D)/go/AhoCorasick.go>)
    - [PalindromicTree](<17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%9B%9E%E6%96%87%E6%A0%91(%E5%9B%9E%E6%96%87%E8%87%AA%E5%8A%A8%E6%9C%BA)/PalindromicTree.go>)
 

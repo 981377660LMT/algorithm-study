@@ -81,11 +81,11 @@ func main() {
 		if op == 1 {
 			l, r, x := io.NextInt(), io.NextInt(), io.NextInt()
 			l--
-			tmp := [][3]int{}
+			intervals := [][3]int{}
 			odt.EnumerateRange(l, r, func(start, end, value Value) {
-				tmp = append(tmp, [3]int{start, end, value / x})
+				intervals = append(intervals, [3]int{start, end, value / x})
 			}, true)
-			for _, v := range tmp {
+			for _, v := range intervals {
 				odt.Set(v[0], v[1], v[2])
 				seg.Update(v[0], v[1], v[2])
 			}
