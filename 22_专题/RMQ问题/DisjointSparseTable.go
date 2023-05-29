@@ -51,8 +51,8 @@ func gcd(a, b int) int {
 }
 
 type DisjointSparseTable struct {
-	n, log int
-	data   [][]E
+	n    int
+	data [][]E
 }
 
 // DisjointSparseTable 支持幺半群的区间静态查询.
@@ -81,7 +81,6 @@ func NewDisjointSparse(leaves []E) *DisjointSparseTable {
 		}
 	}
 	res.n = n
-	res.log = log
 	res.data = data
 	return res
 }

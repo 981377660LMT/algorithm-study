@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { SqrtTree } from './SqrtTree'
+
 import { SparseTable } from './SparseTable'
 
 function closestToTarget(arr: number[], target: number): number {

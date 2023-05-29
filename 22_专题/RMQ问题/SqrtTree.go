@@ -41,6 +41,7 @@ type SqrtTree struct {
 	layerLg, onLayer []int
 	nums             []S
 	pref, suf, btwn  [][]S
+	n                int
 }
 
 func NewSqrtTree(nums []S) *SqrtTree {
@@ -107,6 +108,7 @@ func NewSqrtTree(nums []S) *SqrtTree {
 	res.pref = pref
 	res.suf = suf
 	res.btwn = btwn
+	res.n = n
 	return res
 }
 
@@ -134,6 +136,40 @@ func (st *SqrtTree) Query(l, r int) S {
 	}
 	val = st.op(val, st.pref[layer][r])
 	return val
+}
+
+// 返回最大的 right 使得 [left,right) 内的值满足 check.
+func (ds *SqrtTree) MaxRight(left int, check func(e S) bool) int {
+	if left == ds.n {
+		return ds.n
+	}
+	ok, ng := left, ds.n+1
+	for ok+1 < ng {
+		mid := (ok + ng) >> 1
+		if check(ds.Query(left, mid)) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
+// 返回最小的 left 使得 [left,right) 内的值满足 check.
+func (ds *SqrtTree) MinLeft(right int, check func(e S) bool) int {
+	if right == 0 {
+		return 0
+	}
+	ok, ng := right, -1
+	for ng+1 < ok {
+		mid := (ok + ng) >> 1
+		if check(ds.Query(mid, right)) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
 }
 
 func max(a, b int) int {

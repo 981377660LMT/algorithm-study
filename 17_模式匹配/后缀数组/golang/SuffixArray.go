@@ -335,24 +335,22 @@ func (suf *SuffixArray) _useSA(ords []int) (sa, rank, lcp []int) {
 }
 
 type St struct {
-	st     [][]int
+	st     []int
 	lookup []int
+	n      int
 }
 
 func NewStMin(nums []int) *St {
 	res := &St{}
 	n := len(nums)
 	b := bits.Len(uint(n))
-	st := make([][]int, b)
-	for i := range st {
-		st[i] = make([]int, n)
-	}
+	st := make([]int, b*n)
 	for i := range nums {
-		st[0][i] = nums[i]
+		st[i] = nums[i]
 	}
 	for i := 1; i < b; i++ {
 		for j := 0; j+(1<<i) <= n; j++ {
-			st[i][j] = min(st[i-1][j], st[i-1][j+(1<<(i-1))])
+			st[i*n+j] = min(st[(i-1)*n+j], st[(i-1)*n+j+(1<<(i-1))])
 		}
 	}
 	lookup := make([]int, n+1)
@@ -361,12 +359,13 @@ func NewStMin(nums []int) *St {
 	}
 	res.st = st
 	res.lookup = lookup
+	res.n = n
 	return res
 }
 
 func (st *St) Query(start, end int) int {
 	b := st.lookup[end-start]
-	return min(st.st[b][start], st.st[b][end-(1<<b)])
+	return min(st.st[b*st.n+start], st.st[b*st.n+end-(1<<b)])
 }
 
 func mins(a ...int) int {

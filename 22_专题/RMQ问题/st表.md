@@ -25,3 +25,11 @@ https://zhuanlan.zhihu.com/p/105439034
   3. 结合律 a+(b+c)=(a+b)+c
 - 半群的 op 需要满足的条件 (DisjointSparseTable)
   1. 结合律 a+(b+c)=(a+b)+c
+
+---
+
+优化 js 的 st 表
+
+1. 注意二维数组的大小，充分利用缓存，`需要开 dp[bit][n] 而不是 dp[n][bit]`
+2. 将二维数组`压缩成一维`的方法，对于 js 优化效果明显，但是对于其他语言优化效果不大
+3. 压缩成一维后还可以用 `Uint32Array` 继续优化空间和访问速度

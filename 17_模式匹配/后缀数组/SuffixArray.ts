@@ -13,7 +13,7 @@
 //
 // "banana" -> sa: [5 3 1 0 4 2], rank: [3 2 5 1 4 0], lcp: [0 1 3 0 0 2]
 
-import { SparseTable } from '../../22_专题/RMQ问题/SparseTable'
+import { SparseTableUint32 } from '../../22_专题/RMQ问题/SparseTable'
 
 /**
  * 后缀数组.
@@ -71,7 +71,7 @@ class SuffixArray {
   }
 
   private _lcp(i: number, j: number): number {
-    if (!this._queryMin) this._queryMin = new SparseTable(this.height, () => 0, Math.min)
+    if (!this._queryMin) this._queryMin = new SparseTableUint32(this.height, () => 0, Math.min)
     if (i === j) return this._n - i
     let r1 = this.rank[i]
     let r2 = this.rank[j]
@@ -221,12 +221,15 @@ if (require.main === module) {
 
   const n = 100
   const ords = Array.from({ length: n }, () => 100 + Math.floor(Math.random() * 26))
+  console.time('test')
+  let count = 0
   const test = new SuffixArray(ords)
   // a,b,c,d
   for (let a = 0; a < n; a++) {
     for (let b = a; b < n; b++) {
       for (let c = 0; c < n; c++) {
         for (let d = c; d < n; d++) {
+          count++
           const lcp = test.lcp(a, b, c, d)
           const lcp2 = lcpNaive(ords, a, b, c, d)
           if (lcp !== lcp2) {
@@ -245,6 +248,8 @@ if (require.main === module) {
   }
 
   console.log('ok')
+  console.timeEnd('test')
+  console.log(count)
 
   function lcpNaive(s: ArrayLike<number>, a: number, b: number, c: number, d: number): number {
     let res = 0

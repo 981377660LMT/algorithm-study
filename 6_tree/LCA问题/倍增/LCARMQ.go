@@ -38,7 +38,7 @@ type LCARMQ struct {
 	Depth     []int
 	order, in []int
 	g         [][]int
-	st        *SparseTable
+	st        *_St
 }
 
 func NewLCA(n int) *LCARMQ { return &LCARMQ{g: make([][]int, n)} }
@@ -95,14 +95,14 @@ func (lca *LCARMQ) dfs(cur, pre, dep int) {
 
 type S = int
 
-type SparseTable struct {
+type _St struct {
 	st     [][]S
 	lookup []int
 	op     func(S, S) S
 }
 
-func NewSparseTable(nums []S, op func(S, S) S) *SparseTable {
-	res := &SparseTable{}
+func NewSparseTable(nums []S, op func(S, S) S) *_St {
+	res := &_St{}
 	n := len(nums)
 	b := bits.Len(uint(n))
 	st := make([][]S, b)
@@ -127,7 +127,7 @@ func NewSparseTable(nums []S, op func(S, S) S) *SparseTable {
 	return res
 }
 
-func (st *SparseTable) Query(start, end int) S {
+func (st *_St) Query(start, end int) S {
 	b := st.lookup[end-start]
 	return st.op(st.st[b][start], st.st[b][end-(1<<b)])
 }

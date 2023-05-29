@@ -8,9 +8,11 @@ class SqrtTree<E> {
   private readonly _op: (a: E, b: E) => E
   private readonly _layerLg: number[]
   private readonly _onLayer: number[]
-  private readonly _pref: E[][]
-  private readonly _suf: E[][]
-  private readonly _btwn: E[][]
+  private readonly _pref: E[]
+  private readonly _suf: E[]
+  private readonly _btwn: E[]
+  private readonly _n: number
+  private readonly _size: number
 
   constructor(nums: E[], e: () => E, op: (a: E, b: E) => E) {
     this._nums = nums
@@ -30,14 +32,10 @@ class SqrtTree<E> {
     }
 
     for (let i = lg - 1; ~i; i--) onLayer[i] = Math.max(onLayer[i], onLayer[i + 1])
-    const pref: E[][] = Array(nLayer)
-    const suf: E[][] = Array(nLayer)
-    const btwn: E[][] = Array(nLayer)
-    for (let i = 0; i < nLayer; i++) {
-      pref[i] = Array(n).fill(0)
-      suf[i] = Array(n).fill(0)
-      btwn[i] = Array(1 << lg).fill(0)
-    }
+    const pref: E[] = Array(nLayer * n)
+    const suf: E[] = Array(nLayer * n)
+    const size = 1 << lg
+    const btwn: E[] = Array(nLayer * size)
 
     for (let layer = 0; layer < nLayer; layer++) {
       const prevBSz = 1 << layerLog[layer]
@@ -47,17 +45,17 @@ class SqrtTree<E> {
         const r = Math.min(l + prevBSz, n)
         for (let a = l; a < r; a += bSz) {
           const b = Math.min(a + bSz, r)
-          pref[layer][a] = nums[a]
-          for (let i = a + 1; i < b; i++) pref[layer][i] = op(pref[layer][i - 1], nums[i])
-          suf[layer][b - 1] = nums[b - 1]
-          for (let i = b - 2; i >= a; i--) suf[layer][i] = op(nums[i], suf[layer][i + 1])
+          pref[layer * n + a] = nums[a]
+          for (let i = a + 1; i < b; i++) pref[layer * n + i] = op(pref[layer * n + i - 1], nums[i])
+          suf[layer * n + b - 1] = nums[b - 1]
+          for (let i = b - 2; i >= a; i--) suf[layer * n + i] = op(nums[i], suf[layer * n + i + 1])
         }
         for (let i = 0; i < bCnt && l + i * bSz < n; i++) {
-          let val = suf[layer][l + i * bSz]
-          btwn[layer][l + i * bCnt + i] = val
+          let val = suf[layer * n + l + i * bSz]
+          btwn[layer * size + l + i * bCnt + i] = val
           for (let j = i + 1; j < bCnt && l + j * bSz < n; j++) {
-            val = op(val, suf[layer][l + j * bSz])
-            btwn[layer][l + i * bCnt + j] = val
+            val = op(val, suf[layer * n + l + j * bSz])
+            btwn[layer * size + l + i * bCnt + j] = val
           }
         }
       }
@@ -68,6 +66,8 @@ class SqrtTree<E> {
     this._pref = pref
     this._suf = suf
     this._btwn = btwn
+    this._n = n
+    this._size = size
   }
 
   /**
@@ -85,10 +85,50 @@ class SqrtTree<E> {
     const a = (l >> this._layerLg[layer]) << this._layerLg[layer]
     const lBlock = (((l - a) / bSz) | 0) + 1
     const rBlock = (((r - a) / bSz) | 0) - 1
-    let val = this._suf[layer][l]
-    if (lBlock <= rBlock) val = this._op(val, this._btwn[layer][a + lBlock * bCnt + rBlock])
-    val = this._op(val, this._pref[layer][r])
+    let val = this._suf[layer * this._n + l]
+    if (lBlock <= rBlock) {
+      val = this._op(val, this._btwn[layer * this._size + a + lBlock * bCnt + rBlock])
+    }
+    val = this._op(val, this._pref[layer * this._n + r])
     return val
+  }
+
+  /**
+   * 返回最大的`right`使得`[left,right)`内的值满足`check`.
+   * 0 <= left <= right <= n.
+   */
+  maxRight(left: number, check: (s: E) => boolean): number {
+    if (left === this._n) return this._n
+    let ok = left
+    let ng = this._n + 1
+    while (ok + 1 < ng) {
+      const mid = (ok + ng) >> 1
+      if (check(this.query(left, mid))) {
+        ok = mid
+      } else {
+        ng = mid
+      }
+    }
+    return ok
+  }
+
+  /**
+   * 返回最小的`left`使得`[left,right)`内的值满足`check`.
+   * 0 <= left <= right <= n.
+   */
+  minLeft(right: number, check: (s: E) => boolean): number {
+    if (!right) return 0
+    let ok = right
+    let ng = -1
+    while (ng + 1 < ok) {
+      const mid = (ok + ng) >> 1
+      if (check(this.query(mid, right))) {
+        ok = mid
+      } else {
+        ng = mid
+      }
+    }
+    return ok
   }
 }
 

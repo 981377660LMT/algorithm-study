@@ -15,7 +15,7 @@ class MaxSparseTable:
         self._dp = [[0] * self._n for _ in range(self._h)]
         self._dp[0] = [a for a in arr]  # type: ignore
         for k in range(1, self._h):
-            t, p = self._dp[k], self._dp[k - 1]
+            t, p = self._dp[k], self._dp[k - 1]  # !cache array
             step = 1 << (k - 1)
             for i in range(self._n - step * 2 + 1):
                 t[i] = p[i] if p[i] > p[i + step] else p[i + step]
@@ -38,7 +38,7 @@ class MinSparseTable:
         self._dp = [[0] * self._n for _ in range(self._h)]
         self._dp[0] = [a for a in arr]
         for k in range(1, self._h):
-            t, p = self._dp[k], self._dp[k - 1]
+            t, p = self._dp[k], self._dp[k - 1]  # !cache array
             step = 1 << (k - 1)
             for i in range(self._n - step * 2 + 1):
                 t[i] = p[i] if p[i] < p[i + step] else p[i + step]
@@ -66,7 +66,7 @@ class SparseTable(Generic[T]):
         self._dp = [[0] * self._n for _ in range(self._h)]
         self._dp[0] = [a for a in arr]  # type: ignore
         for k in range(1, self._h):
-            t, p = self._dp[k], self._dp[k - 1]
+            t, p = self._dp[k], self._dp[k - 1]  # !cache array
             step = 1 << (k - 1)
             for i in range(self._n - step * 2 + 1):
                 t[i] = op(p[i], p[i + step])  # type: ignore

@@ -486,15 +486,15 @@ func (tree *Tree) markTop(cur, top int) {
 
 type S = int
 
-type SparseTable struct {
+type _st struct {
 	st     [][]S
 	lookup []int
 	op     func(S, S) S
 }
 
 // 查询区间 [l, r) 的贡献值.
-func NewSparseTable(nums []S, op func(S, S) S) *SparseTable {
-	res := &SparseTable{}
+func NewSparseTable(nums []S, op func(S, S) S) *_st {
+	res := &_st{}
 	n := len(nums)
 	b := bits.Len(uint(n))
 	st := make([][]S, b)
@@ -519,7 +519,7 @@ func NewSparseTable(nums []S, op func(S, S) S) *SparseTable {
 	return res
 }
 
-func (st *SparseTable) Query(start, end int) S {
+func (st *_st) Query(start, end int) S {
 	b := st.lookup[end-start]
 	return st.op(st.st[b][start], st.st[b][end-(1<<b)])
 }
