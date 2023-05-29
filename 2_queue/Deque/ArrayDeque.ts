@@ -54,6 +54,9 @@ class ArrayDequeFast<E = number> {
     for (let i = 0; i < rl; i++) callback(this._right.at(i)!, ll + i)
   }
 
+  /**
+   * 0<=index<len.
+   */
   at(index: number): E | undefined {
     const ll = this._left.length
     if (index < ll) return this._left.at(ll - 1 - index)
@@ -137,6 +140,9 @@ class ArrayDeque<E = number> {
     for (let i = 0; i < rl; i++) callback(this._right.at(i)!, ll + i)
   }
 
+  /**
+   * 0<=index<len.
+   */
   at(index: number): E | undefined {
     const ll = this._left.length
     if (index < ll) return this._left.at(ll - 1 - index)

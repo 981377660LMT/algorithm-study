@@ -61,6 +61,9 @@ class StackDeque<E> {
     return this._right.length ? this._right[this._right.length - 1] : this._left[0]
   }
 
+  /**
+   * 0<=index<len.
+   */
   at(index: number): E | undefined {
     const ll = this._left.length
     if (index < ll) return this._left[ll - index - 1]
