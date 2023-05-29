@@ -24,7 +24,7 @@ class ErasableHeap(Generic[T]):
         self._normalize()
         return value
 
-    def top(self) -> T:
+    def peek(self) -> T:
         return self._data[0]
 
     def discard(self, value: T) -> None:

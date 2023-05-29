@@ -82,11 +82,14 @@ function useMutableTypedArray(dataType: DataType, options?: Options) {
     insert(0, value)
   }
 
-  function slice(start: number, end?: number): InstanceType<typeof ARRAYTYPE_RECORD[DataType]> {
+  function slice(start: number, end?: number): InstanceType<(typeof ARRAYTYPE_RECORD)[DataType]> {
     return _elementData.slice(start, end)
   }
 
-  function subarray(start: number, end?: number): InstanceType<typeof ARRAYTYPE_RECORD[DataType]> {
+  function subarray(
+    start: number,
+    end?: number
+  ): InstanceType<(typeof ARRAYTYPE_RECORD)[DataType]> {
     return _elementData.subarray(start, end)
   }
 
@@ -218,11 +221,14 @@ function useSortedList(dataType: DataType, options?: Options) {
     return left
   }
 
-  function slice(start: number, end?: number): InstanceType<typeof ARRAYTYPE_RECORD[DataType]> {
+  function slice(start: number, end?: number): InstanceType<(typeof ARRAYTYPE_RECORD)[DataType]> {
     return _elementData.slice(start, end)
   }
 
-  function subarray(start: number, end?: number): InstanceType<typeof ARRAYTYPE_RECORD[DataType]> {
+  function subarray(
+    start: number,
+    end?: number
+  ): InstanceType<(typeof ARRAYTYPE_RECORD)[DataType]> {
     return _elementData.subarray(start, end)
   }
 
@@ -274,7 +280,7 @@ function useSortedList(dataType: DataType, options?: Options) {
   }
 }
 
-export { useMutableTypedArray, useSortedList }
+export {}
 
 if (require.main === module) {
   const arr = Array.from({ length: 2e5 }, () => ~~(Math.random() * 100000))

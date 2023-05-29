@@ -16,7 +16,7 @@ class Solution:
                 d.rotate(-amount)
             else:
                 d.rotate(amount)
-        return ''.join(d)
+        return "".join(d)
 
     # 批量更新
     def stringShift(self, s: str, shift: List[List[int]]) -> str:

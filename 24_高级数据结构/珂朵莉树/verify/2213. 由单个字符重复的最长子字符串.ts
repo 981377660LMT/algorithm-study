@@ -6,7 +6,8 @@
 //    单点修改后，再遍历左段起点到右段终点的每个区间，把这些区间长度加回来。
 // 3. 每次查询的单个字符重复的最长子字符串，就是有序数组中的最大值
 
-import { SortedList } from '../../../22_专题/离线查询/根号分治/SortedList/SortedList'
+import { enumerateGroup } from '../../../0_数组/数组api/groupby'
+import { ErasableHeap } from '../../../8_heap/ErasableHeap'
 import { ODT } from '../ODT-fastset'
 
 function longestRepeating(s: string, queryCharacters: string, queryIndices: number[]): number[] {
@@ -15,15 +16,11 @@ function longestRepeating(s: string, queryCharacters: string, queryIndices: numb
   const res = Array(q).fill(1)
 
   const odt = new ODT(n, -1) // !珂朵莉树维护区间字符类型
-  s.split('').forEach((c, i) => {
-    odt.set(i, i + 1, c.charCodeAt(0) - 97)
-  })
-
-  const lens = new SortedList<number>() // !SortedList维护每个连续段的长度
-  odt.enumerateAll((start, end, value) => {
-    if (value !== -1) {
-      lens.add(end - start)
-    }
+  const lens = new ErasableHeap<number>((a, b) => b - a) // !有序容器维护每个连续段的长度
+  enumerateGroup(s, (group, start, end) => {
+    const value = group[0].charCodeAt(0) - 97
+    odt.set(start, end, value)
+    lens.push(group.length)
   })
 
   for (let i = 0; i < q; i++) {
@@ -38,17 +35,17 @@ function longestRepeating(s: string, queryCharacters: string, queryIndices: numb
     const rightSeg = odt.get(end)
     const first = leftSeg ? leftSeg[0] : 0
     const last = rightSeg ? rightSeg[1] : n
-    odt.enumerateRange(first, last, (start, end) => {
-      lens.discard(end - start)
+    odt.enumerateRange(first, last, (start, end, value) => {
+      if (value !== -1) lens.discard(end - start)
     })
 
     odt.set(pos, pos + 1, target)
 
-    odt.enumerateRange(first, last, (start, end) => {
-      lens.add(end - start)
+    odt.enumerateRange(first, last, (start, end, value) => {
+      if (value !== -1) lens.push(end - start)
     })
 
-    res[i] = lens.max()
+    res[i] = lens.peek()
   }
 
   return res

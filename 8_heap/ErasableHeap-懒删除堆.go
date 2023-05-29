@@ -61,7 +61,9 @@ func (h *ErasableHeap) normalize() {
 func NewHeap(less func(a, b H) bool, nums []H) *Heap {
 	nums = append(nums[:0:0], nums...)
 	heap := &Heap{less: less, data: nums}
-	heap.heapify()
+	if len(nums) > 1 {
+		heap.heapify()
+	}
 	return heap
 }
 

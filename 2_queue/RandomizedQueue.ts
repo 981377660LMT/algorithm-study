@@ -34,7 +34,7 @@ class RandomizedQueue<T> {
   }
 }
 
-export { RandomizedQueue }
+export {}
 
 if (require.main === module) {
   const q = new RandomizedQueue<number>()

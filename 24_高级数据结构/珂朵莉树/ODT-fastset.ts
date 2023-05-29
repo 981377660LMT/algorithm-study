@@ -2,9 +2,9 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable generator-star-spacing */
 /* eslint-disable no-inner-declarations */
-// 珂朵莉树(ODT)/Intervals
 
-const INF = 2e15
+// 珂朵莉树(ODT)/Intervals
+// !noneValue不使用symbol,而是自定义的哨兵值,更加灵活.
 
 /**
  * 珂朵莉树，基于数据随机的颜色段均摊。
@@ -309,6 +309,7 @@ class FastSet {
 export { ODT }
 
 if (require.main === module) {
+  const INF = 2e15
   const odt = new ODT(10, INF)
   console.log(odt.toString())
   odt.set(0, 10, 1)

@@ -4,7 +4,7 @@
 import assert from 'assert'
 
 /**
- * 循环数组实现，慢数组动态扩容
+ * 慢数组实现的双端队列,比定长数组+重构更快.
  */
 class ArrayDeque<E = number> {
   length: number

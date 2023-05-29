@@ -1,30 +1,35 @@
 /**
+ * 遍历连续相同元素的分组.
+ * @alias groupBy
  * @example
  * ```ts
  * const list = [1, 1, 2, 3, 3, 4, 4, 5, 5, 5]
- * groupBy(list) // [[1, 1], [2], [3, 3], [4, 4], [5, 5, 5]]
+ * enumerateGroup(list, group => console.log(group)) // [1, 1], [2], [3, 3], [4, 4], [5, 5, 5]
  * ```
  */
-function groupBy<T>(iterable: Iterable<T>): T[][] {
-  const groups: T[][] = []
-  let pre: any
-
-  for (const char of iterable) {
-    if (char !== pre) {
-      const newGroup = [char]
-      groups.push(newGroup)
-    } else {
-      groups[groups.length - 1].push(char)
+function enumerateGroup<T>(
+  arr: ArrayLike<T>,
+  f: (group: T[], start: number, end: number) => void
+): void {
+  const n = arr.length
+  let ptr = 0
+  while (ptr < n) {
+    const leader = arr[ptr]
+    const group = [leader]
+    const start = ptr
+    ptr++
+    while (ptr < n && arr[ptr] === leader) {
+      group.push(arr[ptr])
+      ptr++
     }
-
-    pre = char
+    f(group, start, ptr)
   }
-
-  return groups
 }
 
 if (require.main === module) {
-  console.log(groupBy('abbcccdddd'))
+  enumerateGroup('abbcccdddd', (group, start, end) => {
+    console.log(group, start, end)
+  })
 }
 
-export { groupBy }
+export { enumerateGroup }

@@ -41,7 +41,7 @@ class Heap<E = number> {
 
     this._comparator = defaultComparator
     this._heap = defaultArray
-    if (this._heap.length) this._heapify()
+    if (this._heap.length > 1) this._heapify()
   }
 
   push(value: E): void {
