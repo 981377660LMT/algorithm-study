@@ -15,7 +15,7 @@ class StackDeque<E> {
   static from<T>(iterable: Iterable<T>): StackDeque<T> {
     const deque = new StackDeque<T>()
     for (const item of iterable) {
-      deque.append(item)
+      deque.push(item)
     }
     return deque
   }
@@ -23,11 +23,11 @@ class StackDeque<E> {
   private _left: E[] = []
   private _right: E[] = []
 
-  append(item: E): void {
+  push(item: E): void {
     this._right.push(item)
   }
 
-  appendLeft(item: E): void {
+  unshift(item: E): void {
     this._left.push(item)
   }
 
@@ -42,7 +42,7 @@ class StackDeque<E> {
     return this._right.pop()
   }
 
-  popLeft(): E | undefined {
+  shift(): E | undefined {
     if (this._left.length) return this._left.pop()
     const tmp: E[] = []
     const n = this._right.length
@@ -62,12 +62,9 @@ class StackDeque<E> {
   }
 
   at(index: number): E | undefined {
-    const n = this.size
-    if (index < 0) index += n
-    if (index < 0 || index >= n) return undefined
-    const leftSize = this._left.length
-    if (index < leftSize) return this._left[leftSize - index - 1]
-    return this._right[index - leftSize]
+    const ll = this._left.length
+    if (index < ll) return this._left[ll - index - 1]
+    return this._right[index - ll]
   }
 
   reverse(): void {
@@ -116,21 +113,41 @@ class StackDeque<E> {
     for (let i = 0; i < rightSize; i++) yield this._right[i]
   }
 
-  get size(): number {
+  get length(): number {
     return this._left.length + this._right.length
   }
 }
 
 if (require.main === module) {
   const deque = new StackDeque<number>()
-  deque.append(1)
-  deque.append(2)
-  deque.appendLeft(3)
+  deque.push(1)
+  deque.push(2)
+  deque.unshift(3)
   console.log(deque.toString())
   deque.reverse()
   console.log(deque.toString(), deque.front(), deque.back())
   deque.reverse()
   deque.forEach((v, i) => console.log(i, v))
+
+  const n = 1e7
+  console.time('StackDeque')
+  const dq = new StackDeque<number>()
+  for (let i = 0; i < n; i++) {
+    dq.push(i)
+  }
+  for (let i = 0; i < n; i++) {
+    dq.shift()
+  }
+  for (let i = 0; i < n; i++) {
+    dq.unshift(i)
+  }
+  for (let i = 0; i < n; i++) {
+    dq.pop()
+  }
+  for (let i = 0; i < n; i++) {
+    dq.at(i)
+  }
+  console.timeEnd('StackDeque') // 2.022s
 }
 
 export { StackDeque }
