@@ -7,10 +7,11 @@
 // !那么C[i][j]代表A的第i行和B的第j列是否包含公共元素。
 //
 // 一个应用是传递闭包(Transitive Closure)的加速计算。
-
+//
+//
 // https://zhuanlan.zhihu.com/p/631804105
 // https://github.com/spaghetti-source/algorithm/blob/4fdac8202e26def25c1baf9127aaaed6a2c9f7c7/math/matrix_bool.cc#L4
-
+//
 //
 // Boolean matrix
 //

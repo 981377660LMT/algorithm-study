@@ -18,7 +18,7 @@
    - **倍增** O(nlogn)预处理 O(logn)查询，两个先跳到一样的高度再同时往上跳直到相等
 
    - **重链剖分**，O(n)预处理 O(logn)查询，沿着最多 logn 段链上跳 `(最快,常数小,甚至比st表快)`
-   - **dfs 序(欧拉序) + st 表**， O(nlogn)预处理 O(1)查询，这两点之间的区间中，深度最小点就是 LCA。这可以用 RMQ 解决
+   - **欧拉序 + RMQ**， O(nlogn)/O(n)预处理 O(1)查询，这两点之间的区间中，深度最小点就是 LCA。这可以用 RMQ 解决；利用加一减 1RMQ 优化的线性时间 LCA。
      > https://www.cnblogs.com/pealicx/p/6859901.html
    - https://github.com/pranjalssh/CP_codes/blob/master/anta/!LCA.cpp 更快的 LCA
 

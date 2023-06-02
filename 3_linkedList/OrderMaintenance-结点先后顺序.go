@@ -2,8 +2,8 @@
 //
 // Order Maintenance
 //
-// - create_node(): return new node x
-// - insert(x, y): insert node y after node x
+// - alloc(): return new node x
+// - insertAfter(x, y): insert node y after node x
 // - erase(x): erase node x from the list
 // - order(x, y): return true if x is before y
 //
@@ -17,66 +17,91 @@
 //   STOC.
 //
 
-// API:
+// !API:
 //  Alloc() *Node
+//  Build(nums []int) // 用nums中的元素构建链表.
 //  InsertAfter(x, y *Node) // 将y插入到x后面.
 //  IsBefore(x, y *Node) bool // 判断x是否在y前面.
 //  Erase(x *Node) // 删除x.
+
+// !维护元素顺序的链表
+// 用于维护元素的先后顺序, 以及判断元素是否在另一个元素的前面.
 
 package main
 
 import (
 	"fmt"
 	"math/rand"
-	"time"
 )
 
 func main() {
-	M := NewOrderMaintenace()
-	n := 10000
+	n := 1000
 
-	nodes := make([]*_Node, n)
-	order := make([]int, n)
+	// check with perm
+	perm := rand.Perm(n)
+	mp := make(map[int]int) // (value->index)
+	for i, v := range perm {
+		mp[v] = i
+	}
+
+	om := NewOrderMaintenace()
+	nodes := om.Build(perm) // 每个节点代表0-n-1中每个元素.
+
 	for i := 0; i < n; i++ {
-		nodes[i] = M.Alloc()
-		order[i] = i
+		for j := i + 1; j < n; j++ {
+			res1 := om.IsBefore(nodes[i], nodes[j])
+			num1, num2 := perm[i], perm[j]
+			res2 := mp[num1] < mp[num2]
+			if res1 != res2 {
+				fmt.Println(perm, res1, res2)
+				panic(fmt.Sprintf("error: %d %d", num1, num2))
+			}
+		}
 	}
-	rand.Shuffle(len(order), func(i, j int) { order[i], order[j] = order[j], order[i] })
+	fmt.Println("pass")
 
-	time1 := time.Now()
-	M.InsertAfter(M.Root, nodes[order[0]])
-	for i := 1; i < n; i++ {
-		M.InsertAfter(nodes[order[i-1]], nodes[order[i]])
-	}
-	fmt.Println(time.Since(time1))
 }
 
 const M uint64 = ^(^uint64(0) >> 1)
 
-type _Node struct {
-	prev, next *_Node
+type Node struct {
+	prev, next *Node
 	label      uint64
 }
 
 type OrderMaintenace struct {
-	Root *_Node
+	Head *Node
 }
 
 func NewOrderMaintenace() *OrderMaintenace {
 	res := &OrderMaintenace{}
-	head := &_Node{}
-	head.next = head
-	head.prev = head
-	res.Root = head
+	root := &Node{}
+	root.next = root
+	root.prev = root
+	res.Head = root
 	return res
 }
 
-func (om *OrderMaintenace) Alloc() *_Node {
-	return &_Node{}
+func (om *OrderMaintenace) Alloc() *Node {
+	return &Node{}
+}
+
+func (om *OrderMaintenace) Build(nums []int) []*Node {
+	n := len(nums)
+	res := make([]*Node, n)
+	for i := 0; i < n; i++ {
+		res[i] = om.Alloc()
+	}
+	pre := om.Head
+	for _, cur := range res {
+		om.InsertAfter(pre, cur)
+		cur = pre
+	}
+	return res
 }
 
 // 将y插入到x后面.
-func (om *OrderMaintenace) InsertAfter(x, y *_Node) {
+func (om *OrderMaintenace) InsertAfter(x, y *Node) {
 	label := x.label
 	if om._width(x, x.next) <= 1 {
 		mid := x.next
@@ -92,15 +117,13 @@ func (om *OrderMaintenace) InsertAfter(x, y *_Node) {
 			end = end.next
 			mid = mid.next
 		}
-		var gap uint64
-		if x == end {
-			gap = M / required
-		} else {
+		gap := M
+		if x != end {
 			gap = om._width(x, end) / required
 		}
 		val := end.label
 		for {
-			if end == om.Root {
+			if end == om.Head {
 				val += M
 			}
 			end = end.prev
@@ -119,17 +142,17 @@ func (om *OrderMaintenace) InsertAfter(x, y *_Node) {
 }
 
 // 从list中删除x.
-func (om *OrderMaintenace) Erase(x *_Node) {
+func (om *OrderMaintenace) Erase(x *Node) {
 	x.prev.next = x.next.prev
 	x.next.prev = x.prev.next
 }
 
 // 判断x是否在y前面.
-func (om *OrderMaintenace) IsBefore(x, y *_Node) bool {
-	return x.label < y.label
+func (om *OrderMaintenace) IsBefore(x, y *Node) bool {
+	return x.label > y.label
 }
 
-func (om *OrderMaintenace) _width(x, y *_Node) uint64 {
+func (om *OrderMaintenace) _width(x, y *Node) uint64 {
 	res := y.label - x.label
 	if res-1 >= M {
 		res += M

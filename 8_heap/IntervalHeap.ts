@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 // https://natsugiri.hatenablog.com/entry/2016/10/10/035445
 
 import assert from 'assert'
@@ -5,7 +6,7 @@ import assert from 'assert'
 type Comparator<T> = (a: T, b: T) => number
 
 /**
- * 维护最大值和最小值的堆.
+ * !维护最大值和最小值的堆.
  */
 class IntervalHeap<E = number> {
   private readonly _data: E[]
@@ -176,4 +177,20 @@ if (require.main === module) {
   assert.strictEqual(pq.popMin(), 0)
   assert.strictEqual(pq.popMax(), 1)
   console.log('OK')
+
+  // time
+  const n = 5e5
+  const pq2 = new IntervalHeap<number>((a, b) => a - b)
+  console.time('IntervalHeap')
+  for (let i = 0; i < n; i++) {
+    pq2.push(i)
+    pq2.push(i)
+  }
+  for (let i = 0; i < n; i++) {
+    pq2.popMax()
+    pq2.popMin()
+    pq.min
+    pq.max
+  }
+  console.timeEnd('IntervalHeap') // IntervalHeap: 310.506ms
 }

@@ -73,6 +73,8 @@ class SparseTable(Generic[T]):
 
     def query(self, start: int, end: int) -> T:
         """[start,end)区间的贡献值."""
+        if start >= end:
+            return self._e()
         k = (end - start).bit_length() - 1
         return self._op(self._dp[k][start], self._dp[k][end - (1 << k)])  # type: ignore
 

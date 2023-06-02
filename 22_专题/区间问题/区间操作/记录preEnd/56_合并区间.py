@@ -1,5 +1,5 @@
-# 区间合并
-
+# 区间合并/合并区间
+# https://leetcode.cn/problems/merge-intervals/
 
 from typing import List
 

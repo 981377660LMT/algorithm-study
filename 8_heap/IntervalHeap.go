@@ -21,7 +21,7 @@ func main() {
 		fmt.Fscan(in, &nums[i])
 	}
 	pq := NewPriorityQueue(
-		func(a, b PqItem) bool { return a < b },
+		func(a, b Item) bool { return a < b },
 		nums,
 	)
 
@@ -40,28 +40,28 @@ func main() {
 	}
 }
 
-type PqItem = int
+type Item = int
 
-type PriorityQueue struct {
-	less func(a, b PqItem) bool
-	data []PqItem
+type MinMaxHeap struct {
+	less func(a, b Item) bool
+	data []Item
 }
 
-func NewPriorityQueue(less func(a, b PqItem) bool, data []PqItem) *PriorityQueue {
-	res := &PriorityQueue{less: less, data: append(data[:0:0], data...)}
+func NewPriorityQueue(less func(a, b Item) bool, data []Item) *MinMaxHeap {
+	res := &MinMaxHeap{less: less, data: append(data[:0:0], data...)}
 	if len(data) > 0 {
 		res.heapify()
 	}
 	return res
 }
 
-func (pq *PriorityQueue) Push(x PqItem) {
+func (pq *MinMaxHeap) Push(x Item) {
 	k := len(pq.data)
 	pq.data = append(pq.data, x)
 	pq.pushUp(k, 1)
 }
 
-func (pq *PriorityQueue) PopMin() (res PqItem) {
+func (pq *MinMaxHeap) PopMin() (res Item) {
 	res = pq.Min()
 	if len(pq.data) < 3 {
 		pq.data = pq.data[:len(pq.data)-1]
@@ -74,7 +74,7 @@ func (pq *PriorityQueue) PopMin() (res PqItem) {
 	return
 }
 
-func (pq *PriorityQueue) PopMax() (res PqItem) {
+func (pq *MinMaxHeap) PopMax() (res Item) {
 	res = pq.Max()
 	if len(pq.data) < 2 {
 		pq.data = pq.data[:len(pq.data)-1]
@@ -87,26 +87,26 @@ func (pq *PriorityQueue) PopMax() (res PqItem) {
 	return
 }
 
-func (pq *PriorityQueue) Min() PqItem {
+func (pq *MinMaxHeap) Min() Item {
 	if len(pq.data) < 2 {
 		return pq.data[0]
 	}
 	return pq.data[1]
 }
 
-func (pq *PriorityQueue) Max() PqItem {
+func (pq *MinMaxHeap) Max() Item {
 	return pq.data[0]
 }
 
-func (pq *PriorityQueue) Len() int {
+func (pq *MinMaxHeap) Len() int {
 	return len(pq.data)
 }
 
-func (pq *PriorityQueue) Empty() bool {
+func (pq *MinMaxHeap) Empty() bool {
 	return len(pq.data) == 0
 }
 
-func (pq *PriorityQueue) heapify() {
+func (pq *MinMaxHeap) heapify() {
 	for i := pq.Len() - 1; i >= 0; i-- {
 		if i&1 != 0 && pq.less(pq.data[i-1], pq.data[i]) {
 			pq.data[i-1], pq.data[i] = pq.data[i], pq.data[i-1]
@@ -116,7 +116,7 @@ func (pq *PriorityQueue) heapify() {
 	}
 }
 
-func (pq *PriorityQueue) pushDown(k int) int {
+func (pq *MinMaxHeap) pushDown(k int) int {
 	n := pq.Len()
 	if k&1 != 0 { // min heap
 		for k<<1|1 < n {
@@ -148,7 +148,7 @@ func (pq *PriorityQueue) pushDown(k int) int {
 	return k
 }
 
-func (pq *PriorityQueue) pushUp(k int, root int) int {
+func (pq *MinMaxHeap) pushUp(k int, root int) int {
 	if a, b := k&^1, k|1; b < pq.Len() && pq.less(pq.data[a], pq.data[b]) {
 		pq.data[a], pq.data[b] = pq.data[b], pq.data[a]
 		k ^= 1

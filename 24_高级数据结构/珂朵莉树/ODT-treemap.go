@@ -19,7 +19,7 @@ func UnionOfInterval() {
 
 	var n int
 	fmt.Fscan(in, &n)
-	odt := NewIntervals(-INF)
+	odt := NewIntervals(-1, -INF, INF)
 	for i := 0; i < n; i++ {
 		var l, r int
 		fmt.Fscan(in, &l, &r)
@@ -41,19 +41,22 @@ const INF int = 1e18
 type Value = int
 
 type Intervals struct {
-	Len       int // 区间数
-	Count     int // 区间元素个数之和
-	noneValue Value
-	mp        *TreeMap
+	Len                   int // 区间数
+	Count                 int // 区间元素个数之和
+	noneValue             Value
+	mp                    *TreeMap
+	leftLimit, rightLimit int
 }
 
-func NewIntervals(noneValue Value) *Intervals {
+func NewIntervals(noneValue Value, leftLimit, rightLimit int) *Intervals {
 	res := &Intervals{
-		noneValue: noneValue,
-		mp:        NewTreeMap(),
+		noneValue:  noneValue,
+		mp:         NewTreeMap(),
+		leftLimit:  leftLimit,
+		rightLimit: rightLimit,
 	}
-	res.mp.Set(-INF, noneValue)
-	res.mp.Set(INF, noneValue)
+	res.mp.Set(res.leftLimit, noneValue)
+	res.mp.Set(res.rightLimit, noneValue)
 	return res
 }
 
@@ -86,12 +89,12 @@ func (odt *Intervals) Set(start, end int, value Value) {
 }
 
 func (odt *Intervals) EnumerateAll(f func(start, end int, value Value)) {
-	odt.EnumerateRange(-INF, INF, f, false)
+	odt.EnumerateRange(odt.leftLimit, odt.rightLimit, f, false)
 }
 
 // 遍历范围 [L, R) 内的所有数据.
 func (odt *Intervals) EnumerateRange(start, end int, f func(start, end int, value Value), erase bool) {
-	if !(-INF <= start && start <= end && end <= INF) {
+	if !(odt.leftLimit <= start && start <= end && end <= odt.rightLimit) {
 		panic(fmt.Sprintf("invalid range [%d, %d)", start, end))
 	}
 
@@ -163,7 +166,7 @@ func (odt *Intervals) String() string {
 }
 
 func (odt *Intervals) mergeAt(p int) {
-	if p == -INF || p == INF {
+	if p == odt.leftLimit || p == odt.rightLimit {
 		return
 	}
 	iter1 := odt.mp.LowerBound(p)

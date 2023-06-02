@@ -35,12 +35,12 @@ func main() {
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &values[i])
 	}
-	tree := make([][]Edge, n)
+	tree := make([][]int, n)
 	for i := 0; i < n-1; i++ {
 		var u, v int
 		fmt.Fscan(in, &u, &v)
-		tree[u-1] = append(tree[u-1], Edge{v - 1, 1})
-		tree[v-1] = append(tree[v-1], Edge{u - 1, 1})
+		tree[u-1] = append(tree[u-1], v-1)
+		tree[v-1] = append(tree[v-1], u-1)
 	}
 	queries := make([][3]int, q) // u, v, k
 	for i := 0; i < q; i++ {
@@ -71,11 +71,11 @@ func main() {
 
 	res := make([]int, q)
 	bit := NewBitArray(len(ids))
-	add := func(i int) { bit.Apply(mp[values[i]], 1) }
-	remove := func(i int) { bit.Apply(mp[values[i]], -1) }
+	add := func(i int) { bit.Add(mp[values[i]], 1) }
+	remove := func(i int) { bit.Add(mp[values[i]], -1) }
 	query := func(qid int) {
 		k := queries[qid][2]
-		pos := bit.LowerBound(k)
+		pos := bit.LowerBound(k) // 小于k的数的个数
 		res[qid] = ids[pos]
 	}
 
@@ -88,15 +88,13 @@ func main() {
 // https://github.com/EndlessCheng/codeforces-go/blob/53262fb81ffea176cd5f039cec71e3bd266dce83/copypasta/mo.go#L301
 
 type MoOnTree struct {
-	tree    [][]Edge
+	tree    [][]int
 	root    int
 	in, vs  []int
 	queries [][2]int
 }
 
-type Edge struct{ to, weight int }
-
-func NewMoOnTree(tree [][]Edge, root int) *MoOnTree {
+func NewMoOnTree(tree [][]int, root int) *MoOnTree {
 	return &MoOnTree{tree: tree, root: root}
 }
 
@@ -109,7 +107,6 @@ func (mo *MoOnTree) AddQuery(u, v int) { mo.queries = append(mo.queries, [2]int{
 //  query: 查询窗口内的数据.
 func (mo *MoOnTree) Run(add func(rootId int), remove func(rootId int), query func(qid int)) {
 	n := len(mo.tree)
-	q := len(mo.queries)
 
 	vs := make([]int, 0, 2*n)
 	tin := make([]int, n)
@@ -119,8 +116,7 @@ func (mo *MoOnTree) Run(add func(rootId int), remove func(rootId int), query fun
 	initTime = func(v, fa int) {
 		tin[v] = len(vs)
 		vs = append(vs, v)
-		for _, w := range mo.tree[v] {
-			to := w.to
+		for _, to := range mo.tree[v] {
 			if to != fa {
 				initTime(to, v)
 			}
@@ -129,8 +125,10 @@ func (mo *MoOnTree) Run(add func(rootId int), remove func(rootId int), query fun
 		vs = append(vs, v)
 	}
 	initTime(mo.root, -1)
-	lca := offlineLCA(mo.tree, mo.queries, mo.root)
-	blockSize := int(math.Ceil(float64(2*n) / math.Sqrt(float64(q)))) // int(math.Round(math.Pow(float64(2*n), 2.0/3)))
+
+	lca := _offlineLCA(mo.tree, mo.queries, mo.root)
+	// blockSize := int(math.Round(math.Pow(float64(2*n), 2.0/3)))
+	blockSize := int(math.Ceil(float64(2*n) / math.Sqrt(float64(len(mo.queries)))))
 	type Q struct{ lb, l, r, lca, qid int }
 	qs := make([]Q, len(mo.queries))
 	for i := range qs {
@@ -207,9 +205,9 @@ func max(a, b int) int {
 }
 
 // LCA离线.
-func offlineLCA(graph [][]Edge, queries [][2]int, root int) []int {
-	n := len(graph)
-	ufa := newUnionFindArray(n)
+func _offlineLCA(tree [][]int, queries [][2]int, root int) []int {
+	n := len(tree)
+	ufa := NewUnionFindArray(n)
 	st, mark, ptr, res := make([]int, n), make([]int, n), make([]int, n), make([]int, len(queries))
 	for i := 0; i < len(queries); i++ {
 		res[i] = -1
@@ -224,16 +222,16 @@ func offlineLCA(graph [][]Edge, queries [][2]int, root int) []int {
 	for i := 0; i < n; i++ {
 		q[i] = make([][2]int, 0, mark[i])
 		mark[i] = -1
-		ptr[i] = len(graph[i])
+		ptr[i] = len(tree[i])
 	}
 	for i := range queries {
-		q[queries[i][0]] = append(q[queries[i][0]], [2]int{queries[i][1], i})
-		q[queries[i][1]] = append(q[queries[i][1]], [2]int{queries[i][0], i})
+		u, v := queries[i][0], queries[i][1]
+		q[u] = append(q[u], [2]int{v, i})
+		q[v] = append(q[v], [2]int{u, i})
 	}
-
 	run := func(u int) bool {
 		for ptr[u] != 0 {
-			v := graph[u][ptr[u]-1].to
+			v := tree[u][ptr[u]-1]
 			ptr[u]--
 			if mark[v] == -1 {
 				top++
@@ -249,7 +247,7 @@ func offlineLCA(graph [][]Edge, queries [][2]int, root int) []int {
 		if mark[u] == -1 {
 			mark[u] = u
 		} else {
-			ufa.Union(u, graph[u][ptr[u]].to)
+			ufa.Union(u, tree[u][ptr[u]])
 			mark[ufa.Find(u)] = u
 		}
 
@@ -266,28 +264,16 @@ func offlineLCA(graph [][]Edge, queries [][2]int, root int) []int {
 	return res
 }
 
-func newUnionFindArray(n int) *_unionFindArray {
-	parent, rank := make([]int, n), make([]int, n)
-	for i := 0; i < n; i++ {
-		parent[i] = i
-		rank[i] = 1
-	}
-
-	return &_unionFindArray{
-		Part:   n,
-		rank:   rank,
-		n:      n,
-		parent: parent,
-	}
+type _unionFindArray struct {
+	data []int
 }
 
-type _unionFindArray struct {
-	// 连通分量的个数
-	Part int
-
-	rank   []int
-	n      int
-	parent []int
+func NewUnionFindArray(n int) *_unionFindArray {
+	data := make([]int, n)
+	for i := 0; i < n; i++ {
+		data[i] = -1
+	}
+	return &_unionFindArray{data: data}
 }
 
 func (ufa *_unionFindArray) Union(key1, key2 int) bool {
@@ -295,49 +281,22 @@ func (ufa *_unionFindArray) Union(key1, key2 int) bool {
 	if root1 == root2 {
 		return false
 	}
-
-	if ufa.rank[root1] > ufa.rank[root2] {
-		root1, root2 = root2, root1
+	if ufa.data[root1] > ufa.data[root2] {
+		root1 ^= root2
+		root2 ^= root1
+		root1 ^= root2
 	}
-	ufa.parent[root1] = root2
-	ufa.rank[root2] += ufa.rank[root1]
-	ufa.Part--
+	ufa.data[root1] += ufa.data[root2]
+	ufa.data[root2] = root1
 	return true
 }
 
 func (ufa *_unionFindArray) Find(key int) int {
-	for ufa.parent[key] != key {
-		ufa.parent[key] = ufa.parent[ufa.parent[key]]
-		key = ufa.parent[key]
+	if ufa.data[key] < 0 {
+		return key
 	}
-	return key
-}
-
-func (ufa *_unionFindArray) IsConnected(key1, key2 int) bool {
-	return ufa.Find(key1) == ufa.Find(key2)
-}
-
-func (ufa *_unionFindArray) GetGroups() map[int][]int {
-	groups := make(map[int][]int)
-	for i := 0; i < ufa.n; i++ {
-		root := ufa.Find(i)
-		groups[root] = append(groups[root], i)
-	}
-	return groups
-}
-
-func (ufa *_unionFindArray) Size(key int) int {
-	return ufa.rank[ufa.Find(key)]
-}
-
-func (ufa *_unionFindArray) String() string {
-	sb := []string{"unionFindArray:"}
-	for root, member := range ufa.GetGroups() {
-		cur := fmt.Sprintf("%d: %v", root, member)
-		sb = append(sb, cur)
-	}
-	sb = append(sb, fmt.Sprintf("Part: %d", ufa.Part))
-	return strings.Join(sb, "\n")
+	ufa.data[key] = ufa.Find(ufa.data[key])
+	return ufa.data[key]
 }
 
 type BitArray struct {
@@ -374,14 +333,14 @@ func (b *BitArray) Build(arr []int) {
 }
 
 // 要素 i に値 v を加える.
-func (b *BitArray) Apply(i int, v int) {
+func (b *BitArray) Add(i int, v int) {
 	for i++; i <= b.n; i += i & -i {
 		b.data[i] += v
 	}
 }
 
 // [0, r) の要素の総和を求める.
-func (b *BitArray) Prod(r int) int {
+func (b *BitArray) Query(r int) int {
 	res := int(0)
 	for ; r > 0; r -= r & -r {
 		res += b.data[r]
@@ -390,8 +349,8 @@ func (b *BitArray) Prod(r int) int {
 }
 
 // [l, r) の要素の総和を求める.
-func (b *BitArray) ProdRange(l, r int) int {
-	return b.Prod(r) - b.Prod(l)
+func (b *BitArray) QueryRange(l, r int) int {
+	return b.Query(r) - b.Query(l)
 }
 
 // 区間[0,k]の総和がx以上となる最小のkを求める.数列が単調増加であることを要求する.
@@ -421,7 +380,7 @@ func (b *BitArray) UpperBound(x int) int {
 func (b *BitArray) String() string {
 	sb := []string{}
 	for i := 0; i < b.n; i++ {
-		sb = append(sb, fmt.Sprintf("%d", b.ProdRange(i, i+1)))
+		sb = append(sb, fmt.Sprintf("%d", b.QueryRange(i, i+1)))
 	}
 	return fmt.Sprintf("BitArray: [%v]", strings.Join(sb, ", "))
 }

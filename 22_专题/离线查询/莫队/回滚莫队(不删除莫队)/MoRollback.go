@@ -13,9 +13,15 @@ import (
 	"sort"
 )
 
+func main() {
+	// StaticRangeInversionsQuery()
+	// AT1219()
+	Luogu5906()
+}
+
 // Static Range Inversions Query - 静态区间逆序对查询
 // https://judge.yosupo.jp/problem/static_range_inversions_query
-func main() {
+func StaticRangeInversionsQuery() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -50,7 +56,7 @@ func main() {
 	}
 
 	bit := NewBitArray(len(keys))
-	inv, snap, snapInv := 0, 0, 0 // inv: 当前逆序对数, snap: 当前快照状态, snapInv: 当前快照状态的逆序对数
+	inv, snap, snapInv := 0, 0, 0 // inv: 当前逆序对数, snap: 当前快照状态, snapInv: 当前快照逆序对数
 	history := make([]int, 0, n)  // history: 当前操作历史便于undo
 	res := make([]int, q)
 
@@ -67,7 +73,7 @@ func main() {
 			history = append(history, x)
 		}
 	}
-	_undo := func(state int) {
+	_move := func(state int) {
 		for len(history) > state {
 			x := history[len(history)-1]
 			history = history[:len(history)-1]
@@ -75,7 +81,7 @@ func main() {
 		}
 	}
 	reset := func() {
-		_undo(0)
+		_move(0)
 		inv = 0
 	}
 	snapshot := func() {
@@ -83,7 +89,7 @@ func main() {
 		snapInv = inv
 	}
 	rollback := func() {
-		_undo(snap)
+		_move(snap)
 		inv = snapInv
 	}
 	query := func(qi int) {
@@ -96,12 +102,171 @@ func main() {
 	}
 }
 
+// 歴史の研究
+// https://www.luogu.com.cn/problem/AT_joisc2014_c
+// 给定一个数组nums和q个查询(l,r)
+// 每次查询[l,r]区间内的`重要度`,一个数字num的重要度定义为`num乘以区间内num的个数`
+func AT1219() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	mo := NewMoRollback(n, q)
+	for i := 0; i < q; i++ {
+		var l, r int
+		fmt.Fscan(in, &l, &r)
+		l--
+		mo.AddQuery(l, r)
+	}
+
+	res := make([]int, q)
+	cur := 0                     // 当前区间的答案
+	snap, snapCur := 0, 0        // 当前快照状态,当前快照答案
+	history := make([]int, 0, n) // x
+	counter := make(map[int]int)
+
+	add := func(index, _ int) { // TODO
+		x := nums[index]
+		counter[x] += 1
+		cur = max(cur, x*counter[x])
+		history = append(history, x)
+	}
+	_move := func(state int) {
+		for len(history) > state {
+			x := history[len(history)-1]
+			history = history[:len(history)-1]
+			counter[x]-- // TODO
+		}
+	}
+
+	reset := func() {
+		_move(0)
+		cur = 0
+	}
+	snapshot := func() {
+		snap = len(history)
+		snapCur = cur
+	}
+	rollback := func() {
+		_move(snap)
+		cur = snapCur
+	}
+	query := func(qi int) {
+		res[qi] = cur
+	}
+
+	mo.Run(add, reset, snapshot, rollback, query)
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
+}
+
+// https://www.luogu.com.cn/problem/P5906
+// 给定一个序列，多次询问一段区间 [l,r]，求区间中相同的数的最远间隔距离。
+// 如果区间内不存在两个数相同，则输出 0。
+// 序列中两个元素的间隔距离指的是两个元素下标差的绝对值。
+//
+// !维护每个数在区间内索引的最大值和最小值.
+func Luogu5906() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	// 离散化
+	_pool := make(map[int]int)
+	id := func(o int) int {
+		if v, ok := _pool[o]; ok {
+			return v
+		}
+		v := len(_pool)
+		_pool[o] = v
+		return v
+	}
+	for i, v := range nums {
+		nums[i] = id(v)
+	}
+
+	var q int
+	fmt.Fscan(in, &q)
+	mo := NewMoRollback(n, q)
+	for i := 0; i < q; i++ {
+		var l, r int
+		fmt.Fscan(in, &l, &r)
+		l--
+		mo.AddQuery(l, r)
+	}
+
+	res := make([]int, q)
+	cur := 0                        // 当前区间的答案
+	snap, snapCur := 0, 0           // 当前快照状态,当前快照答案
+	history := make([][3]int, 0, n) // (x,preMinPos,preMaxPos)
+	minPos := make([]int, n)
+	maxPos := make([]int, n)
+	for i := range minPos {
+		minPos[i] = n
+		maxPos[i] = -1
+	}
+
+	add := func(index, _ int) { // TODO
+		x := nums[index]
+		preMinPos := minPos[x]
+		preMaxPos := maxPos[x]
+		minPos[x] = min(preMinPos, index)
+		maxPos[x] = max(preMaxPos, index)
+		cur = max(cur, maxPos[x]-minPos[x])
+		history = append(history, [3]int{x, preMinPos, preMaxPos})
+	}
+	_move := func(state int) {
+		for len(history) > state {
+			item := history[len(history)-1]
+			x, preMinPos, preMaxPos := item[0], item[1], item[2]
+			history = history[:len(history)-1]
+			minPos[x] = preMinPos
+			maxPos[x] = preMaxPos
+		}
+	}
+
+	reset := func() {
+		_move(0)
+		cur = 0
+	}
+	snapshot := func() {
+		snap = len(history)
+		snapCur = cur
+	}
+	rollback := func() {
+		_move(snap)
+		cur = snapCur
+	}
+	query := func(qi int) {
+		if cur > 0 {
+			res[qi] = cur
+		}
+	}
+
+	mo.Run(add, reset, snapshot, rollback, query)
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
+}
+
 type MoRollback struct {
 	chunkSize          int
 	left, right, order []int
 }
-
-type query struct{ qi, left, right int }
 
 func NewMoRollback(n, q int) *MoRollback {
 	chunkSize := max(1, n/max(1, int(math.Sqrt(float64(q*2/3)))))
@@ -132,19 +297,21 @@ func (mo *MoRollback) Run(
 	rollback func(),
 	query func(qi int),
 ) {
-	sort.Slice(mo.order, func(i, j int) bool {
-		ii, jj := mo.order[i], mo.order[j]
-		iblock, jblock := mo.left[ii]/mo.chunkSize, mo.left[jj]/mo.chunkSize
+	left, right, order := mo.left, mo.right, mo.order
+	chunkSize := mo.chunkSize
+	sort.Slice(order, func(i, j int) bool {
+		ii, jj := order[i], order[j]
+		iblock, jblock := left[ii]/chunkSize, left[jj]/chunkSize
 		if iblock != jblock {
 			return iblock < jblock
 		}
-		return mo.right[ii] < mo.right[jj]
+		return right[ii] < right[jj]
 	})
 
 	reset()
-	for _, idx := range mo.order {
-		if mo.right[idx]-mo.left[idx] < mo.chunkSize {
-			for i := mo.left[idx]; i < mo.right[idx]; i++ {
+	for _, idx := range order {
+		if right[idx]-left[idx] < chunkSize {
+			for i := left[idx]; i < right[idx]; i++ {
 				add(i, 1)
 			}
 			query(idx)
@@ -154,22 +321,22 @@ func (mo *MoRollback) Run(
 
 	nr := 0
 	lastBlock := -1
-	for _, idx := range mo.order {
-		if mo.right[idx]-mo.left[idx] < mo.chunkSize {
+	for _, idx := range order {
+		if right[idx]-left[idx] < chunkSize {
 			continue
 		}
-		block := mo.left[idx] / mo.chunkSize
+		block := left[idx] / chunkSize
 		if lastBlock != block {
 			reset()
 			lastBlock = block
-			nr = (block + 1) * mo.chunkSize
+			nr = (block + 1) * chunkSize
 		}
-		for nr < mo.right[idx] {
+		for nr < right[idx] {
 			add(nr, 1)
 			nr++
 		}
 		snapshot()
-		for j := (block+1)*mo.chunkSize - 1; j >= mo.left[idx]; j-- {
+		for j := (block+1)*chunkSize - 1; j >= left[idx]; j-- {
 			add(j, -1)
 		}
 		query(idx)
@@ -179,6 +346,13 @@ func (mo *MoRollback) Run(
 
 func max(a, b int) int {
 	if a > b {
+		return a
+	}
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
 		return a
 	}
 	return b

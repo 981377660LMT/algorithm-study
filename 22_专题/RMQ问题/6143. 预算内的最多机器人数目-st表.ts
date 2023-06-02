@@ -17,7 +17,7 @@ function maximumRobots(chargeTimes: number[], runningCosts: number[], budget: nu
   let left = 1
   let right = n
   while (left <= right) {
-    const mid = Math.floor((left + right) / 2)
+    const mid = (left + right) >> 1
     if (check(mid)) left = mid + 1
     else right = mid - 1
   }

@@ -4,11 +4,13 @@
 /**
  *@description 用 Fisher-Yates 方法随机打乱数组。
  */
-const shuffle = <T>(arr: T[]): void => {
+function shuffle<T>(arr: T[]): void {
   let n = arr.length
   while (n) {
-    const rand = Math.floor(Math.random() * n)
-    ;[arr[n - 1], arr[rand]] = [arr[rand], arr[n - 1]]
+    const rand = (Math.random() * n) | 0
+    const tmp = arr[n - 1]
+    arr[n - 1] = arr[rand]
+    arr[rand] = tmp
     n--
   }
 }

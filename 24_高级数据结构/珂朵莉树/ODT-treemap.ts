@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 /* eslint-disable no-param-reassign */
 /* eslint-disable generator-star-spacing */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
@@ -7,22 +8,26 @@ const INF = 2e15
 /**
  * 珂朵莉树，基于数据随机的颜色段均摊。
  * `SortedList`实现.
- * 初始时，区间为`[-INF,INF)`，值为`noneValue`.
+ * 初始时，默认区间为`[-INF,INF)`，值为`noneValue`.
  */
 class ODTMap<S> {
   private _count = 0
   private _len = 0
-  private readonly _leftLimit = -INF
-  private readonly _rightLimit = INF
+  private readonly _leftLimit: number
+  private readonly _rightLimit: number
   private readonly _data: SortedDict<number, S> = new SortedDict()
   private readonly _noneValue: S
 
   /**
    * 指定哨兵值建立一个ODTMap.
    * @param noneValue 表示空值的哨兵值.
+   * @param leftLimit 区间左端点(包含).
+   * @param rightLimit 区间右端点(不包含).
    */
-  constructor(noneValue: S) {
+  constructor(noneValue: S, leftLimit = -INF, rightLimit = INF) {
     this._noneValue = noneValue
+    this._leftLimit = leftLimit
+    this._rightLimit = rightLimit
     this._data.set(this._leftLimit, noneValue)
     this._data.set(this._rightLimit, noneValue)
   }
@@ -946,5 +951,38 @@ if (require.main === module) {
     removeRange(left: number, right: number): void {
       this._odt.set(left, right, -1)
     }
+  }
+
+  // 2655. 寻找最大长度的未覆盖区间
+  // https://leetcode.cn/problems/find-maximal-uncovered-ranges/
+  function findMaximalUncoveredRanges(n: number, ranges: number[][]): number[][] {
+    const odt = new ODTMap(-1)
+    ranges.forEach(([left, right]) => {
+      odt.set(left, right + 1, 1)
+    })
+    const res: number[][] = []
+    odt.enumerateRange(0, n, (s, e, v) => {
+      if (v === -1) res.push([s, e - 1])
+    })
+    return res
+  }
+
+  // !56. 合并区间自动合并的方式与这里不同,不能使用
+  // https://leetcode.cn/problems/merge-intervals/
+  //
+
+  // 1272. 删除区间
+  // https://leetcode.cn/problems/remove-interval/
+  function removeInterval(intervals: number[][], toBeRemoved: number[]): number[][] {
+    const odt = new ODTMap(-1)
+    intervals.forEach(([start, end]) => {
+      odt.set(start, end, 1)
+    })
+    odt.set(toBeRemoved[0], toBeRemoved[1], -1)
+    const res: number[][] = []
+    odt.enumerateAll((start, end, value) => {
+      if (value === 1) res.push([start, end])
+    })
+    return res
   }
 }

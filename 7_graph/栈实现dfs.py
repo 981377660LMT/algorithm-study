@@ -4,6 +4,7 @@
 """
 # dfs递归改成栈实现
 # https://tjkendev.github.io/procon-library/python/graph/dfs.html
+# https://github.com/NachiaVivias/cp-library/blob/2ce99831483f07772a1f64b406149450619859e8/docs/column/2022/01.md#L1
 from typing import List
 
 

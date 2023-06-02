@@ -6,7 +6,7 @@
 //     add_edge(s, t):     insert edge (s,t) to the network if
 //                         it does not make a cycle
 //
-//     is_reachable(s, t): return true iff there is a path s --> t
+//     is_reachable(s, t): return true if there is a path s --> t
 //
 // Algorithm:
 //   We maintain reachability trees T(u) for all u in V.
@@ -26,6 +26,7 @@
 //   Information Processing Letters, vol. 28, no. 1, pp. 5--11.
 //
 // 维护DAG可到达性.
+// n<=1e4
 
 package main
 
@@ -56,7 +57,6 @@ type DAGReachability struct {
 
 func NewDAGReachability(n int) *DAGReachability {
 	res := &DAGReachability{}
-
 	parent := make([][]int, n)
 	for i := 0; i < n; i++ {
 		parent[i] = make([]int, n)
@@ -81,7 +81,7 @@ func (dr *DAGReachability) IsReachable(from, to int) bool {
 	return from == to || dr.parent[from][to] >= 0
 }
 
-// 添加边.如果添加后形成环, 则返回false.
+// 添加有向边.如果添加后形成环, 则返回false.
 func (dr *DAGReachability) AddEdge(from, to int) bool {
 	if dr.IsReachable(to, from) {
 		return false

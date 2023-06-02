@@ -17,7 +17,6 @@ func main() {
 	remove := func(u, v int) { fmt.Println(fmt.Sprintf("remove %d<->%d", u, v)) }
 	query := func(t int) { fmt.Println(fmt.Sprintf("query %d", t)) }
 	odc.Run(add, remove, query)
-
 }
 
 type pair = struct{ first, second int }

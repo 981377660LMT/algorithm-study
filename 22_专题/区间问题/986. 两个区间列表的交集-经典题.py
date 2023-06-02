@@ -1,4 +1,6 @@
 # 两个区间列表的交集(区间交集)
+# intervalIntersection
+
 
 from collections import defaultdict
 from typing import List, Tuple
@@ -14,9 +16,9 @@ def solve(intervals1: List[Interval], intervals2: List[Interval]) -> List[Interv
     left, right = 0, 0
     while left < n1 and right < n2:
         s1, e1, s2, e2 = *intervals1[left], *intervals2[right]
-        # 相交
+        # !相交
         if s1 <= e2 <= e1 or s2 <= e1 <= e2:
-            # 尽量往内缩
+            # !尽量往内缩
             res.append((max(s1, s2), min(e1, e2)))
         if e1 < e2:
             left += 1

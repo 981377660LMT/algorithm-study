@@ -7,10 +7,10 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strings"
 )
 
 func main() {
+	// https://judge.yosupo.jp/problem/lca
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -21,10 +21,11 @@ func main() {
 	for i := 0; i < n-1; i++ {
 		fmt.Fscan(in, &parents[i])
 	}
-	g := make([][]Edge, n)
+
+	tree := make([][]int, n)
 	for i := 0; i < n-1; i++ {
-		g[parents[i]] = append(g[parents[i]], Edge{i + 1, 1})
-		g[i+1] = append(g[i+1], Edge{parents[i], 1})
+		tree[parents[i]] = append(tree[parents[i]], i+1)
+		tree[i+1] = append(tree[i+1], parents[i])
 	}
 
 	queries := make([][2]int, q)
@@ -34,17 +35,15 @@ func main() {
 		queries[i] = [2]int{u, v}
 	}
 
-	res := OfflineLCA(g, queries, 0)
+	res := OfflineLCA(tree, queries, 0)
 	for i := 0; i < q; i++ {
 		fmt.Fprintln(out, res[i])
 	}
 }
 
-type Edge struct{ to, weight int }
-
 // LCA离线.
-func OfflineLCA(graph [][]Edge, queries [][2]int, root int) []int {
-	n := len(graph)
+func OfflineLCA(tree [][]int, queries [][2]int, root int) []int {
+	n := len(tree)
 	ufa := NewUnionFindArray(n)
 	st, mark, ptr, res := make([]int, n), make([]int, n), make([]int, n), make([]int, len(queries))
 	for i := 0; i < len(queries); i++ {
@@ -60,16 +59,16 @@ func OfflineLCA(graph [][]Edge, queries [][2]int, root int) []int {
 	for i := 0; i < n; i++ {
 		q[i] = make([][2]int, 0, mark[i])
 		mark[i] = -1
-		ptr[i] = len(graph[i])
+		ptr[i] = len(tree[i])
 	}
 	for i := range queries {
-		q[queries[i][0]] = append(q[queries[i][0]], [2]int{queries[i][1], i})
-		q[queries[i][1]] = append(q[queries[i][1]], [2]int{queries[i][0], i})
+		u, v := queries[i][0], queries[i][1]
+		q[u] = append(q[u], [2]int{v, i})
+		q[v] = append(q[v], [2]int{u, i})
 	}
-
 	run := func(u int) bool {
 		for ptr[u] != 0 {
-			v := graph[u][ptr[u]-1].to
+			v := tree[u][ptr[u]-1]
 			ptr[u]--
 			if mark[v] == -1 {
 				top++
@@ -85,7 +84,7 @@ func OfflineLCA(graph [][]Edge, queries [][2]int, root int) []int {
 		if mark[u] == -1 {
 			mark[u] = u
 		} else {
-			ufa.Union(u, graph[u][ptr[u]].to)
+			ufa.Union(u, tree[u][ptr[u]])
 			mark[ufa.Find(u)] = u
 		}
 
@@ -102,90 +101,35 @@ func OfflineLCA(graph [][]Edge, queries [][2]int, root int) []int {
 	return res
 }
 
-func NewUnionFindArray(n int) *_UnionFindArray {
-	parent, rank := make([]int, n), make([]int, n)
+type UnionFindArray struct {
+	data []int
+}
+
+func NewUnionFindArray(n int) *UnionFindArray {
+	data := make([]int, n)
 	for i := 0; i < n; i++ {
-		parent[i] = i
-		rank[i] = 1
+		data[i] = -1
 	}
-
-	return &_UnionFindArray{
-		Part:   n,
-		rank:   rank,
-		n:      n,
-		parent: parent,
-	}
+	return &UnionFindArray{data: data}
 }
 
-type _UnionFindArray struct {
-	// 连通分量的个数
-	Part int
-
-	rank   []int
-	n      int
-	parent []int
-}
-
-func (ufa *_UnionFindArray) Union(key1, key2 int) bool {
+func (ufa *UnionFindArray) Union(key1, key2 int) bool {
 	root1, root2 := ufa.Find(key1), ufa.Find(key2)
 	if root1 == root2 {
 		return false
 	}
-
-	if ufa.rank[root1] > ufa.rank[root2] {
+	if ufa.data[root1] > ufa.data[root2] {
 		root1, root2 = root2, root1
 	}
-	ufa.parent[root1] = root2
-	ufa.rank[root2] += ufa.rank[root1]
-	ufa.Part--
+	ufa.data[root1] += ufa.data[root2]
+	ufa.data[root2] = root1
 	return true
 }
 
-func (ufa *_UnionFindArray) UnionWithCallback(key1, key2 int, cb func(big, small int)) bool {
-	root1, root2 := ufa.Find(key1), ufa.Find(key2)
-	if root1 == root2 {
-		return false
+func (ufa *UnionFindArray) Find(key int) int {
+	if ufa.data[key] < 0 {
+		return key
 	}
-	if ufa.rank[root1] > ufa.rank[root2] {
-		root1, root2 = root2, root1
-	}
-	ufa.parent[root1] = root2
-	ufa.rank[root2] += ufa.rank[root1]
-	ufa.Part--
-	cb(root2, root1)
-	return true
-}
-func (ufa *_UnionFindArray) Find(key int) int {
-	for ufa.parent[key] != key {
-		ufa.parent[key] = ufa.parent[ufa.parent[key]]
-		key = ufa.parent[key]
-	}
-	return key
-}
-
-func (ufa *_UnionFindArray) IsConnected(key1, key2 int) bool {
-	return ufa.Find(key1) == ufa.Find(key2)
-}
-
-func (ufa *_UnionFindArray) GetGroups() map[int][]int {
-	groups := make(map[int][]int)
-	for i := 0; i < ufa.n; i++ {
-		root := ufa.Find(i)
-		groups[root] = append(groups[root], i)
-	}
-	return groups
-}
-
-func (ufa *_UnionFindArray) Size(key int) int {
-	return ufa.rank[ufa.Find(key)]
-}
-
-func (ufa *_UnionFindArray) String() string {
-	sb := []string{"UnionFindArray:"}
-	for root, member := range ufa.GetGroups() {
-		cur := fmt.Sprintf("%d: %v", root, member)
-		sb = append(sb, cur)
-	}
-	sb = append(sb, fmt.Sprintf("Part: %d", ufa.Part))
-	return strings.Join(sb, "\n")
+	ufa.data[key] = ufa.Find(ufa.data[key])
+	return ufa.data[key]
 }
