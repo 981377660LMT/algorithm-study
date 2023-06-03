@@ -119,9 +119,8 @@ func main() {
 type query struct{ x1, y1, x2, y2, qid int }
 
 type Mo2D struct {
-	chunkSize int
-	queries   []query
-	blockId   []int
+	queries []query
+	blockId []int
 }
 
 func NewMo2D(row, col int, q int) *Mo2D {
@@ -133,7 +132,7 @@ func NewMo2D(row, col int, q int) *Mo2D {
 	for i := range blockId {
 		blockId[i] = i / chunkSize
 	}
-	return &Mo2D{chunkSize: chunkSize, blockId: blockId}
+	return &Mo2D{blockId: blockId}
 }
 
 // 添加查询矩形区域`[x1, x2) * [y1, y2)`.
