@@ -160,6 +160,7 @@ if (require.main === module) {
   let kind = 0
   mo.run(add, remove, query)
   assert.deepStrictEqual(res, [4, 4, 3, 4])
+  console.log('passed')
 
   function add(value: number): void {
     if (!counter[value]) kind++

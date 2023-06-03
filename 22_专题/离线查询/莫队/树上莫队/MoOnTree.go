@@ -20,7 +20,6 @@ import (
 type MoOnTree struct {
 	tree    [][]int
 	root    int
-	in, vs  []int
 	queries [][2]int
 }
 
