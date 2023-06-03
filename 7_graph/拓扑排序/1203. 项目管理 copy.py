@@ -1,6 +1,7 @@
 from typing import List
 from collections import defaultdict
 
+
 # 有 n 个项目，每个项目或者不属于任何小组，或者属于 m 个小组之一
 # group[i] 表示第 i 个项目所属的小组
 # 如果第 i 个项目不属于任何小组，则 group[i] 等于 -1
@@ -69,4 +70,3 @@ print(
         beforeItems=[[], [6], [5], [6], [3, 6], [], [], []],
     )
 )
-
