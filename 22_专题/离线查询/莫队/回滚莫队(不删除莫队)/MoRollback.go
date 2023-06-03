@@ -14,9 +14,9 @@ import (
 )
 
 func main() {
-	// StaticRangeInversionsQuery()
+	StaticRangeInversionsQuery()
 	// AT1219()
-	Luogu5906()
+	// Luogu5906()
 }
 
 // Static Range Inversions Query - 静态区间逆序对查询
@@ -32,22 +32,6 @@ func StaticRangeInversionsQuery() {
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
-
-	// 离散化
-	set := make(map[int]struct{})
-	for _, v := range nums {
-		set[v] = struct{}{}
-	}
-	keys := make([]int, 0, len(set))
-	for k := range set {
-		keys = append(keys, k)
-	}
-	sort.Ints(keys)
-	mp := make(map[int]int, len(keys))
-	for i, v := range keys {
-		mp[v] = i
-	}
-
 	mo := NewMoRollback(n, q)
 	for i := 0; i < q; i++ {
 		var l, r int
@@ -55,19 +39,38 @@ func StaticRangeInversionsQuery() {
 		mo.AddQuery(l, r)
 	}
 
-	bit := NewBitArray(len(keys))
+	// 离散化
+	set := make(map[int]struct{})
+	for _, v := range nums {
+		set[v] = struct{}{}
+	}
+	allNums := make([]int, 0, len(set))
+	for k := range set {
+		allNums = append(allNums, k)
+	}
+	sort.Ints(allNums)
+	mp := make(map[int]int, len(allNums))
+	for i, v := range allNums {
+		mp[v] = i
+	}
+	newNums := make([]int, n)
+	for i, v := range nums {
+		newNums[i] = mp[v]
+	}
+
+	bit := NewBitArray(len(allNums))
 	inv, snap, snapInv := 0, 0, 0 // inv: 当前逆序对数, snap: 当前快照状态, snapInv: 当前快照逆序对数
 	history := make([]int, 0, n)  // history: 当前操作历史便于undo
 	res := make([]int, q)
 
 	add := func(index, delta int) {
 		if delta == 1 { // add_right ->
-			x := mp[nums[index]]
-			inv += bit.ProdRange(x+1, len(keys))
+			x := newNums[index]
+			inv += bit.ProdRange(x+1, len(allNums))
 			bit.Apply(x, 1)
 			history = append(history, x)
 		} else { // add_left <-
-			x := mp[nums[index]]
+			x := newNums[index]
 			inv += bit.Prod(x)
 			bit.Apply(x, 1)
 			history = append(history, x)

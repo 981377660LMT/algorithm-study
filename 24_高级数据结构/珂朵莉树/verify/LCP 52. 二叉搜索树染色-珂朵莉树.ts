@@ -11,7 +11,7 @@ function getNumber(root: TreeNode | null, ops: number[][]): number {
   dfs(root)
   const odt = new ODT(nums.length, -1) // 初始时，所有节点都是蓝色的
 
-  const [_, rank] = sortedSet(nums)
+  const [rank] = sortedSet(nums)
   ops.forEach(([type, x, y]) => {
     const start = rank(x)
     const end = rank(y) + 1
@@ -33,17 +33,19 @@ function getNumber(root: TreeNode | null, ops: number[][]): number {
 }
 
 /**
- * 离散化.
- * @returns 给定一个数，返回其在离散化后的数组中的位置 (0 - {@link nums.length})
+ * (松)离散化.
+ * @returns
+ * rank: 给定一个数,返回它的排名`(0-count)`.
+ * count: 离散化(去重)后的元素个数.
  */
-function sortedSet(nums: number[]): readonly [sorted: number[], getRank: (num: number) => number] {
-  const sorted = [...new Set(nums)].sort((a, b) => a - b)
-  const getRank = (num: number) => {
+function sortedSet(nums: number[]): [rank: (num: number) => number, count: number] {
+  const allNums = [...new Set(nums)].sort((a, b) => a - b)
+  const rank = (num: number) => {
     let left = 0
-    let right = sorted.length - 1
+    let right = allNums.length - 1
     while (left <= right) {
       const mid = (left + right) >>> 1
-      if (sorted[mid] >= num) {
+      if (allNums[mid] >= num) {
         right = mid - 1
       } else {
         left = mid + 1
@@ -51,7 +53,7 @@ function sortedSet(nums: number[]): readonly [sorted: number[], getRank: (num: n
     }
     return left
   }
-  return [sorted, getRank]
+  return [rank, allNums.length]
 }
 
 export {}

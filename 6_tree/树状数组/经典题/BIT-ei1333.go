@@ -64,7 +64,7 @@ func (b *BitArray) Add(i int, v int) {
 // [0, r)
 func (b *BitArray) Query(r int) int {
 	res := 0
-	for ; r > 0; r -= r & -r {
+	for ; r > 0; r &= r - 1 {
 		res += b.data[r]
 	}
 	return res

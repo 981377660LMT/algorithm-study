@@ -98,17 +98,19 @@ function useSortedList(max: number) {
 }
 
 /**
- * 离散化.
- * @returns 给定一个数，返回其在离散化后的数组中的位置 (0 - {@link nums.length})
+ * (松)离散化.
+ * @returns
+ * rank: 给定一个数,返回它的排名`(0-count)`.
+ * count: 离散化(去重)后的元素个数.
  */
-function sortedSet(nums: number[]): readonly [sorted: number[], getRank: (num: number) => number] {
-  const sorted = [...new Set(nums)].sort((a, b) => a - b)
-  const getRank = (num: number) => {
+function sortedSet(nums: number[]): [rank: (num: number) => number, count: number] {
+  const allNums = [...new Set(nums)].sort((a, b) => a - b)
+  const rank = (num: number) => {
     let left = 0
-    let right = sorted.length - 1
+    let right = allNums.length - 1
     while (left <= right) {
       const mid = (left + right) >>> 1
-      if (sorted[mid] >= num) {
+      if (allNums[mid] >= num) {
         right = mid - 1
       } else {
         left = mid + 1
@@ -116,7 +118,7 @@ function sortedSet(nums: number[]): readonly [sorted: number[], getRank: (num: n
     }
     return left
   }
-  return [sorted, getRank]
+  return [rank, allNums.length]
 }
 
 export {}
@@ -130,15 +132,15 @@ if (require.main === module) {
     nums.forEach(num => {
       allNums.push(lower - num, upper - num)
     })
-    const [sorted, get] = sortedSet(allNums)
+    const [rank, n] = sortedSet(allNums)
 
-    const sl = useSortedList(sorted.length)
+    const sl = useSortedList(n)
     let res = 0
     nums.forEach(num => {
-      const right = sl.bisectRight(get(upper - num))
-      const left = sl.bisectLeft(get(lower - num))
+      const right = sl.bisectRight(rank(upper - num))
+      const left = sl.bisectLeft(rank(lower - num))
       res += right - left
-      sl.add(get(num))
+      sl.add(rank(num))
     })
     return res
   }

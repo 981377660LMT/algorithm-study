@@ -21,7 +21,7 @@ function countQuadruplets(nums: number[]): number {
         continue
       }
 
-      const count1 = leftSmaller.query(num3) // 统计i2左侧严格小于num3的数的个数
+      const count1 = leftSmaller.query(num3 + 1) // 统计i2左侧严格小于num3的数的个数
       const count2 = rightBigger.queryRange(num2 + 1, rightBigger.length) // 统计i3右侧严格大于num2的数的个数
       res += count1 * count2
     }
