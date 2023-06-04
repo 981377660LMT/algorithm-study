@@ -10,7 +10,7 @@
 #
 # !"banana" -> sa: [5 3 1 0 4 2], rank: [3 2 5 1 4 0], lcp: [0 1 3 0 0 2]
 
-from typing import List, Sequence, Tuple, Union
+from typing import Any, List, Sequence, Tuple, Union
 
 
 class SuffixArray:
@@ -208,6 +208,65 @@ class MinSparseTable:
         return cand1 if cand1 < cand2 else cand2
 
 
+class SuffixArray2:
+    """用于求解`两个字符串s和t`相关性质的后缀数组."""
+
+    __slots__ = ("_sa", "_offset")
+
+    def __init__(self, sOrOrds1: Union[str, Sequence[int]], sOrOrds2: Union[str, Sequence[int]]):
+        ords1 = [ord(c) if isinstance(c, str) else c for c in sOrOrds1]
+        ords2 = [ord(c) if isinstance(c, str) else c for c in sOrOrds2]
+        ords = ords1 + ords2
+        self._sa = SuffixArray(ords)
+        self._offset = len(ords1)
+
+    def lcp(self, a: int, b: int, c: int, d: int) -> int:
+        """求任意两个子串s[a,b)和t[c,d)的最长公共前缀(lcp)."""
+        return self._sa.lcp(a, b, c + self._offset, d + self._offset)
+
+    def compareSubstr(self, a: int, b: int, c: int, d: int) -> int:
+        """比较任意两个子串s[a,b)和t[c,d)的字典序.
+        s[a,b) < t[c,d) 返回-1.
+        s[a,b) = t[c,d) 返回0.
+        s[a,b) > t[c,d) 返回1.
+        """
+        return self._sa.compareSubstr(a, b, c + self._offset, d + self._offset)
+
+
+def longestCommonSubstring(arr1: Sequence[Any], arr2: Sequence[Any]) -> Tuple[int, int, int, int]:
+    """两个序列的最长公共子串.元素的值很大时,需要对元素进行离散化."""
+    n1 = len(arr1)
+    n2 = len(arr2)
+    if not n1 or not n2:
+        return 0, 0, 0, 0
+
+    if isinstance(arr1, str):
+        arr1 = [ord(c) for c in arr1]
+    if isinstance(arr2, str):
+        arr2 = [ord(c) for c in arr2]
+
+    dummy = max(max(arr1), max(arr2)) + 1
+    sb = list(arr1) + [dummy] + list(arr2)
+    S = SuffixArray(sb)
+    sa = S.sa
+    height = S.height
+    maxSame = 0
+    start1 = 0
+    start2 = 0
+    for i in range(1, len(sb)):
+        if (sa[i - 1] < n1) == (sa[i] < n1) or height[i] <= maxSame:
+            continue
+        maxSame = height[i]
+        i1 = sa[i - 1]
+        i2 = sa[i]
+        if i1 > i2:
+            i1, i2 = i2, i1
+        start1 = i1
+        start2 = i2 - n1 - 1
+
+    return start1, start1 + maxSame, start2, start2 + maxSame
+
+
 if __name__ == "__main__":
     # https://leetcode.cn/problems/sum-of-scores-of-built-strings/
     class Solution:
@@ -245,5 +304,11 @@ if __name__ == "__main__":
                 for d in range(c, n):
                     assert sa.lcp(a, b, c, d) == lcpNaive(ords, a, b, c, d)
                     assert sa.compareSubstr(a, b, c, d) == compareSubstr(ords, a, b, c, d)
+
+    assert (longestCommonSubstring("abcde", "cdeab")) == (2, 5, 0, 3)
+
+    sa2 = SuffixArray2("abcde", "cdeab")
+    assert sa2.lcp(2, 5, 0, 3) == 3
+    assert sa2.compareSubstr(2, 5, 0, 3) == 0
 
     print("pass")

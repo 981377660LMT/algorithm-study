@@ -95,6 +95,8 @@ func main() {
 	time2 := time.Now()
 	fmt.Println((time2.Sub(time1)))
 
+	sa2 := NewSuffixArray2WithString("banana", "nana")
+	fmt.Println(sa2.Lcp(2, 5, 0, 3), sa2.CompareSubstr(2, 5, 0, 3))
 }
 
 type SuffixArray struct {
@@ -366,6 +368,45 @@ func NewStMin(nums []int) *St {
 func (st *St) Query(start, end int) int {
 	b := st.lookup[end-start]
 	return min(st.st[b*st.n+start], st.st[b*st.n+end-(1<<b)])
+}
+
+// 用于求解`两个字符串s和t`相关性质的后缀数组.
+type SuffixArray2 struct {
+	SA     *SuffixArray
+	offset int
+}
+
+// !ord值很大时,需要先离散化.
+// !ords[i]>=0.
+func NewSuffixArray2(ords1, ords2 []int) *SuffixArray2 {
+	newNums := append(ords1, ords2...)
+	sa := NewSuffixArray(newNums)
+	return &SuffixArray2{SA: sa, offset: len(ords1)}
+}
+
+func NewSuffixArray2WithString(s, t string) *SuffixArray2 {
+	ords1 := make([]int, len(s))
+	for i, c := range s {
+		ords1[i] = int(c)
+	}
+	ords2 := make([]int, len(t))
+	for i, c := range t {
+		ords2[i] = int(c)
+	}
+	return NewSuffixArray2(ords1, ords2)
+}
+
+// 求任意两个子串s[a,b)和t[c,d)的最长公共前缀(lcp).
+func (suf *SuffixArray2) Lcp(a, b int, c, d int) int {
+	return suf.SA.Lcp(a, b, c+suf.offset, d+suf.offset)
+}
+
+// 比较任意两个子串s[a,b)和t[c,d)的字典序.
+//  s[a,b) < t[c,d) 返回-1.
+//  s[a,b) = t[c,d) 返回0.
+//  s[a,b) > t[c,d) 返回1.
+func (suf *SuffixArray2) CompareSubstr(a, b int, c, d int) int {
+	return suf.SA.CompareSubstr(a, b, c+suf.offset, d+suf.offset)
 }
 
 func mins(a ...int) int {

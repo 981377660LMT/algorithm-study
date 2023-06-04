@@ -13,6 +13,8 @@
 //
 // "banana" -> sa: [5 3 1 0 4 2], rank: [3 2 5 1 4 0], lcp: [0 1 3 0 0 2]
 
+import assert from 'assert'
+
 import { SparseTableUint32 } from '../../22_专题/RMQ问题/SparseTable'
 
 /**
@@ -203,7 +205,108 @@ class SuffixArray {
   }
 }
 
-export { SuffixArray }
+/**
+ * 用于求解`两个字符串s和t`相关性质的后缀数组.
+ */
+class SuffixArray2<T extends ArrayLike<number | string> | string> {
+  private readonly _sa: SuffixArray
+  private readonly _offset: number
+
+  constructor(sOrOrds1: T, sOrOrds2: T) {
+    const n1 = sOrOrds1.length
+    const n2 = sOrOrds2.length
+    const newOrds = Array<number>(n1 + n2)
+    for (let i = 0; i < n1; i++) {
+      const v = sOrOrds1[i]
+      newOrds[i] = typeof v === 'string' ? v.charCodeAt(0) : v
+    }
+    for (let i = 0; i < n2; i++) {
+      const v = sOrOrds2[i]
+      newOrds[i + n1] = typeof v === 'string' ? v.charCodeAt(0) : v
+    }
+    this._sa = new SuffixArray(newOrds)
+    this._offset = n1
+  }
+
+  /**
+   * 求任意两个子串s[a,b)和t[c,d)的最长公共前缀(lcp).
+   */
+  lcp(a: number, b: number, c: number, d: number): number {
+    return this._sa.lcp(a, b, c + this._offset, d + this._offset)
+  }
+
+  /**
+   * 比较任意两个子串s[a,b)和t[c,d)的字典序.
+   * s[a,b) < t[c,d) 返回-1.
+   * s[a,b) = t[c,d) 返回0.
+   * s[a,b) > t[c,d) 返回1.
+   */
+  compareSubstr(a: number, b: number, c: number, d: number): -1 | 0 | 1 {
+    return this._sa.compareSubstr(a, b, c + this._offset, d + this._offset)
+  }
+}
+
+/**
+ * 两个类数组的最长公共子串.
+ * 元素的值很大时,需要先进行离散化.
+ */
+function longestCommonSubstring<T extends ArrayLike<number> | string>(
+  arr1: T,
+  arr2: T
+): [start1: number, end1: number, start2: number, end2: number] {
+  const n1 = arr1.length
+  const n2 = arr2.length
+  if (!n1 || !n2) return [0, 0, 0, 0]
+
+  let ords1: ArrayLike<number>
+  let ords2: ArrayLike<number>
+  if (typeof arr1 === 'string') {
+    const ords = Array(n1)
+    for (let i = 0; i < n1; i++) ords[i] = arr1.charCodeAt(i)
+    ords1 = ords
+  } else {
+    ords1 = arr1
+  }
+  if (typeof arr2 === 'string') {
+    const ords = Array(n2)
+    for (let i = 0; i < n2; i++) ords[i] = arr2.charCodeAt(i)
+    ords2 = ords
+  } else {
+    ords2 = arr2
+  }
+
+  let dummy = 0
+  for (let i = 0; i < n1; i++) dummy = Math.max(dummy, ords1[i])
+  for (let i = 0; i < n2; i++) dummy = Math.max(dummy, ords2[i])
+  dummy++
+  const sb = Array(n1 + n2 + 1)
+  for (let i = 0; i < n1; i++) sb[i] = ords1[i]
+  sb[n1] = dummy
+  for (let i = 0; i < n2; i++) sb[n1 + 1 + i] = ords2[i]
+
+  const { sa, height } = new SuffixArray(sb)
+  let maxSame = 0
+  let start1 = 0
+  let start2 = 0
+  for (let i = 1; i < sb.length; i++) {
+    if (sa[i - 1] < n1 === sa[i] < n1) continue
+    if (height[i] <= maxSame) continue
+    maxSame = height[i]
+    let i1 = sa[i - 1]
+    let i2 = sa[i]
+    if (i1 > i2) {
+      i1 ^= i2
+      i2 ^= i1
+      i1 ^= i2
+    }
+    start1 = i1
+    start2 = i2 - n1 - 1
+  }
+
+  return [start1, start1 + maxSame, start2, start2 + maxSame]
+}
+
+export { SuffixArray, SuffixArray2, longestCommonSubstring }
 
 if (require.main === module) {
   const sa = new SuffixArray('banana')
@@ -276,4 +379,10 @@ if (require.main === module) {
     if (c === d) return 1
     return s[a] < s[c] ? -1 : 1
   }
+
+  const sa2 = new SuffixArray2('banana', 'nana')
+  assert.strictEqual(sa2.lcp(4, 6, 2, 6), 2)
+  assert.strictEqual(sa2.compareSubstr(0, 2, 1, 3), 1)
+
+  assert.deepStrictEqual(longestCommonSubstring('abcdcde', 'acdcda'), [2, 6, 1, 5])
 }

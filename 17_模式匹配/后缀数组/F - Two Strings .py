@@ -12,7 +12,7 @@
 
 from bisect import bisect_left
 import sys
-from SA import useSA
+from SuffixArray import SuffixArray
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     SMALL, BIG = chr(0), chr(0x10FFFF)
     sstt = s + s + SMALL + t + t + BIG  # 保证两个字符串在比较完长度为n后 S+'#' 小于T+'|'中任意一个字符。
     ords = list(map(ord, sstt))
-    _, rank, _ = useSA(ords)
+    rank = SuffixArray(ords).rank
     sRank, tRank = rank[:n], rank[2 * n + 1 : 2 * n + 1 + n]
     tRank.sort()
 

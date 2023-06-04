@@ -3,7 +3,7 @@
 # https://judge.yosupo.jp/problem/prefix_substring_lcs
 
 
-from typing import Sequence
+from typing import Any, Sequence
 
 
 def max(a: int, b: int) -> int:
@@ -17,7 +17,7 @@ def min(a: int, b: int) -> int:
 class PrefixSubstringLCS:
     __slots__ = "_dp1"
 
-    def __init__(self, seq1: Sequence[int], seq2: Sequence[int]) -> None:
+    def __init__(self, seq1: Sequence[Any], seq2: Sequence[Any]) -> None:
         n1, n2 = len(seq1), len(seq2)
         dp1, dp2 = [[0] * (n2 + 1) for _ in range(n1 + 1)], [[0] * (n2 + 1) for _ in range(n1 + 1)]
         dp1[0] = list(range(n2 + 1))
