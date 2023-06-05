@@ -27,7 +27,7 @@ https://www.creativ.xyz/grundy-number-1065/
 3. 无随机因素(deterministic) ;
 4. 必然在有限步内结束，且每步的走法数有限(finite) ;
 5. 没有平局;
-6. 双方可采取的行动及胜利目标都相同(`impartial`) ;
+6. 双方可采取的行动及胜利目标都相同(`impartial game,公平游戏`) ;
 7. 这个胜利目标是自己亲手达成终局状态，或者说走最后一步者为胜(normal play) ;
 
 则游戏中的`每个状态可以按如下规则赋予一个非负整数`，称为 Sprague-Grundy 数:
@@ -76,3 +76,8 @@ def win(A):                     # 判断状态A是否为胜态
                                 # next_states(A)返回A的所有次态
     return mem[A]
 ```
+
+---
+
+公平游戏/impartial game/不偏ゲーム => sg 函数/dp
+非公平游戏/partisan game/非不偏ゲーム => dp/超现实数的解法

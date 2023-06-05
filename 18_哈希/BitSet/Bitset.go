@@ -40,6 +40,12 @@ func (b Bitset) Flip(p int)     { b[p/_w] ^= 1 << (p % _w) }
 func (b Bitset) Set(p int)      { b[p/_w] |= 1 << (p % _w) }  // 置 1
 func (b Bitset) Reset(p int)    { b[p/_w] &^= 1 << (p % _w) } // 置 0
 
+func (b Bitset) Copy() Bitset {
+	res := make(Bitset, len(b))
+	copy(res, b)
+	return res
+}
+
 // 遍历区间内1的位置
 func (b Bitset) EnumerateOne(start, end int, f func(pos int)) {
 	if start >= end {
@@ -324,10 +330,11 @@ func (b Bitset) HasSubset(c Bitset) bool {
 }
 
 // 将 c 的元素合并进 b
-func (b Bitset) IOr(c Bitset) {
+func (b Bitset) IOr(c Bitset) Bitset {
 	for i, v := range c {
 		b[i] |= v
 	}
+	return b
 }
 
 func (b Bitset) Or(c Bitset) Bitset {
@@ -338,16 +345,32 @@ func (b Bitset) Or(c Bitset) Bitset {
 	return res
 }
 
-func (b Bitset) IAnd(c Bitset) {
+func (b Bitset) IAnd(c Bitset) Bitset {
 	for i, v := range c {
 		b[i] &= v
 	}
+	return b
 }
 
 func (b Bitset) And(c Bitset) Bitset {
 	res := NewBitset(len(b))
 	for i, v := range b {
 		res[i] = v & c[i]
+	}
+	return res
+}
+
+func (b Bitset) IXor(c Bitset) Bitset {
+	for i, v := range c {
+		b[i] ^= v
+	}
+	return b
+}
+
+func (b Bitset) Xor(c Bitset) Bitset {
+	res := NewBitset(len(b))
+	for i, v := range b {
+		res[i] = v ^ c[i]
 	}
 	return res
 }

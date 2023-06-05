@@ -14,7 +14,7 @@ import (
 )
 
 // 枚举所有的三元环,传递回调函数减少空间开销
-func enumerateC3(n int, edges [][]int, cb func(u, v, w int)) {
+func EnumerateC3(n int, edges [][]int, cb func(u, v, w int)) {
 	threshold := 0
 	adjList := make([][]int, n)
 	for _, e := range edges {
@@ -29,7 +29,7 @@ func enumerateC3(n int, edges [][]int, cb func(u, v, w int)) {
 	}
 
 	threshold = int(math.Sqrt(float64(threshold / 4)))
-	memo := make([][][2]int, n)
+	memo := make([][]int, n)
 	visited := make([]bool, n)
 
 	processHighDegree := func() {
@@ -61,7 +61,7 @@ func enumerateC3(n int, edges [][]int, cb func(u, v, w int)) {
 			for _, u := range adjList[i] {
 				for _, v := range adjList[i] {
 					if v > u {
-						memo[u] = append(memo[u], [2]int{i, v})
+						memo[u] = append(memo[u], i*(1<<32)+v)
 					}
 				}
 			}
@@ -71,7 +71,8 @@ func enumerateC3(n int, edges [][]int, cb func(u, v, w int)) {
 				visited[u] = true
 			}
 			for j := 0; j < len(memo[i]); j++ {
-				a, b := memo[i][j][0], memo[i][j][1]
+				hash := memo[i][j]
+				a, b := hash>>32, hash&0xffffffff
 				if visited[b] {
 					cb(a, i, b)
 				}
@@ -110,7 +111,7 @@ func main() {
 	}
 
 	res := 0
-	enumerateC3(n, edges, func(u, v, w int) {
+	EnumerateC3(n, edges, func(u, v, w int) {
 		res += values[u] * values[v] % MOD * values[w] % MOD
 		res %= MOD
 	})

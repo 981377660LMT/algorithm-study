@@ -6,5 +6,6 @@
 
 `O(n^3/w)`
 TODO 没有参考，需要找模板
-https://codeforces.com/contest/506/submission/207121527
+https://github.com/hqztrue/shared_materials/blob/master/code/matrix_multiplication/mat_mul_01.cpp
 https://blog.csdn.net/qq_42101694/article/details/121227383
+https://codeforces.com/contest/506/submission/207121527

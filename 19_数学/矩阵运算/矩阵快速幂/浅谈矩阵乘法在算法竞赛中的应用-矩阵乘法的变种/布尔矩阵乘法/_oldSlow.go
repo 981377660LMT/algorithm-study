@@ -8,7 +8,6 @@
 //
 // 一个应用是传递闭包(Transitive Closure)的加速计算。
 //
-//
 // https://zhuanlan.zhihu.com/p/631804105
 // https://github.com/spaghetti-source/algorithm/blob/4fdac8202e26def25c1baf9127aaaed6a2c9f7c7/math/matrix_bool.cc#L4
 //
@@ -27,17 +26,50 @@
 // Complexity: (in practice)
 //   50--60 times faster than the naive implementation.
 //
-// 这里是分块实现。
+// 这里是分块实现(四毛子方法), 参考 https://www.cnblogs.com/whx1003/p/13996517.html
 
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"math/rand"
+	"os"
 	"strings"
 	"time"
 )
 
 func main() {
+	demo()
+	// yuki1340()
+}
+
+// https://yukicoder.me/problems/no/1340
+func yuki1340() {
+
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m, t int
+	fmt.Fscan(in, &n, &m, &t)
+	mat := NewBooleanMatrix(n, n)
+	for i := 0; i < m; i++ {
+		var a, b int
+		fmt.Fscan(in, &a, &b)
+		mat.Set(a, b, true)
+	}
+	mat = Pow(mat, t)
+	res := 0
+	for i := 0; i < n; i++ {
+		if mat.Get(0, i) {
+			res++
+		}
+	}
+	fmt.Fprintln(out, res)
+}
+
+func demo() {
 	mat := NewBooleanMatrix(3, 3)
 	mat.Set(0, 0, true)
 	mat.Set(0, 1, true)
@@ -47,15 +79,40 @@ func main() {
 	fmt.Println(Transpose(mat))
 	fmt.Println(Mul(Mul(mat, mat), mat), Pow(mat, 3))
 	fmt.Println(Eye(8))
+
+	// 5000*5000的矩阵乘法 => 3.3s
+	N_5000 := 5000
+	eye := Eye(N_5000)
+	for i := 0; i < N_5000; i++ {
+		for j := 0; j < N_5000; j++ {
+			if rand.Intn(2) == 0 {
+				eye.Set(i, j, true)
+			}
+		}
+	}
 	time1 := time.Now()
-	eye := Eye(5000)
 	Mul(eye, eye)
 	time2 := time.Now()
 	fmt.Println(time2.Sub(time1))
+
+	// 2000*2000的传递闭包 => 3.2s
+	N_2000 := 2000
+	eye = Eye(N_2000)
+	for i := 0; i < N_2000; i++ {
+		for j := 0; j < N_2000; j++ {
+			if rand.Intn(2) == 0 {
+				eye.Set(i, j, true)
+			}
+		}
+	}
+	time3 := time.Now()
+	TransitiveClosure(eye)
+	time4 := time.Now()
+	fmt.Println(time4.Sub(time3))
 }
 
 func NewBooleanMatrix(row, col int) *BooleanMatrix {
-	return &BooleanMatrix{row: row, col: col, x: make([]uint64, (1+row>>3)*(1+col>>3))}
+	return &BooleanMatrix{ROW: row, COL: col, c: (1 + col>>3), x: make([]uint64, (1+row>>3)*(1+col>>3))}
 }
 
 func Eye(n int) *BooleanMatrix {
@@ -69,8 +126,8 @@ func Eye(n int) *BooleanMatrix {
 
 // 返回一个新的矩阵,值为mat1*mat2.
 func Mul(mat1, mat2 *BooleanMatrix) *BooleanMatrix {
-	r1, c1, r2, c2 := 1+mat1.row>>3, 1+mat1.col>>3, 1+mat2.row>>3, 1+mat2.col>>3
-	res := NewBooleanMatrix(mat1.row, mat2.col)
+	r1, c1, r2, c2 := 1+mat1.ROW>>3, 1+mat1.COL>>3, 1+mat2.ROW>>3, 1+mat2.COL>>3
+	res := NewBooleanMatrix(mat1.ROW, mat2.COL)
 	for i := 0; i < r1; i++ {
 		for k := 0; k < r2; k++ {
 			for j := 0; j < c2; j++ {
@@ -83,7 +140,7 @@ func Mul(mat1, mat2 *BooleanMatrix) *BooleanMatrix {
 
 // 求方阵mat的k次幂.
 func Pow(mat *BooleanMatrix, k int) *BooleanMatrix {
-	res := Eye(mat.row)
+	res := Eye(mat.ROW)
 	for ; k > 0; k >>= 1 {
 		if k&1 != 0 {
 			res = Mul(res, mat)
@@ -94,8 +151,8 @@ func Pow(mat *BooleanMatrix, k int) *BooleanMatrix {
 }
 
 func Transpose(mat *BooleanMatrix) *BooleanMatrix {
-	row, col := 1+mat.row>>3, 1+mat.col>>3
-	res := NewBooleanMatrix(mat.col, mat.row)
+	row, col := 1+mat.ROW>>3, 1+mat.COL>>3
+	res := NewBooleanMatrix(mat.COL, mat.ROW)
 	for i := 0; i < row; i++ {
 		for j := 0; j < col; j++ {
 			res.x[j*row+i] = _transpose(mat.x[i*col+j])
@@ -107,7 +164,7 @@ func Transpose(mat *BooleanMatrix) *BooleanMatrix {
 // 返回一个新的矩阵,值为mat1|mat2.
 func Add(mat1, mat2 *BooleanMatrix) *BooleanMatrix {
 	res := mat1.Copy()
-	row, col := 1+mat1.row>>3, 1+mat1.col>>3
+	row, col := 1+mat1.ROW>>3, 1+mat1.COL>>3
 	for i := 0; i < row; i++ {
 		for j := 0; j < col; j++ {
 			pos := i*col + j
@@ -117,33 +174,44 @@ func Add(mat1, mat2 *BooleanMatrix) *BooleanMatrix {
 	return res
 }
 
+// (A + I)^n 是传递闭包.
+func TransitiveClosure(mat *BooleanMatrix) *BooleanMatrix {
+	n := mat.ROW
+	return Pow(Add(mat, Eye(n)), n)
+}
+
+//
+//
 type BooleanMatrix struct {
-	row, col int
+	ROW, COL int
+	c        int // 1+COL/8
 	x        []uint64
 }
 
 func (mat *BooleanMatrix) Get(i, j int) bool {
-	return mat.x[(i>>3)<<3|j>>3]&(1<<((i&7)<<3|j&7)) != 0 // % 8 => & 7
+	return mat.x[(i>>3)*mat.c+j>>3]&(1<<((i&7)<<3|j&7)) != 0 // % 8 => & 7
 }
 
 func (mat *BooleanMatrix) Set(i, j int, b bool) {
 	if b {
-		mat.x[(i>>3)<<3|j>>3] |= (1 << ((i&7)<<3 | j&7))
+		mat.x[(i>>3)*mat.c+j>>3] |= (1 << ((i&7)<<3 | j&7))
 	} else {
-		mat.x[(i>>3)<<3|j>>3] &= ^(1 << ((i&7)<<3 | j&7))
+		mat.x[(i>>3)*mat.c+j>>3] &= ^(1 << ((i&7)<<3 | j&7))
 	}
 }
 
 func (mat *BooleanMatrix) Copy() *BooleanMatrix {
-	return &BooleanMatrix{row: mat.row, col: mat.col, x: append(mat.x[:0:0], mat.x...)}
+	copied := make([]uint64, len(mat.x))
+	copy(copied, mat.x)
+	return &BooleanMatrix{ROW: mat.ROW, COL: mat.COL, x: copied}
 }
 
 // To 2D grid.
 func (mat *BooleanMatrix) String() string {
-	grid := make([][]int, mat.row)
-	for i := 0; i < mat.row; i++ {
-		grid[i] = make([]int, mat.col)
-		for j := 0; j < mat.col; j++ {
+	grid := make([][]int, mat.ROW)
+	for i := 0; i < mat.ROW; i++ {
+		grid[i] = make([]int, mat.COL)
+		for j := 0; j < mat.COL; j++ {
 			if mat.Get(i, j) {
 				grid[i][j] = 1
 			} else {
@@ -153,7 +221,7 @@ func (mat *BooleanMatrix) String() string {
 	}
 
 	sb := strings.Builder{}
-	sb.WriteString(fmt.Sprintf("BooleanMatrix(%d,%d)\n", mat.row, mat.col))
+	sb.WriteString(fmt.Sprintf("BooleanMatrix(%d,%d)\n", mat.ROW, mat.COL))
 	for i := 0; i < len(grid); i++ {
 		for j := 0; j < len(grid[0]); j++ {
 			sb.WriteString(fmt.Sprintf("%d ", grid[i][j]))

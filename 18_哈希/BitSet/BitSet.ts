@@ -1,11 +1,13 @@
 /* eslint-disable no-labels */
+// https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/bits.go
 // 位运算:
 // ~~ 或者 | => Math.floor (int)
 // ~~ 或者 | + >>>0 => Math.floor (uint)
 // & (-1 << k) => 清除最低k位的 1
 
 /**
- * @see {@link https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/bits.go}
+ * 位集,用于存储大量的布尔值,可以有效地节省内存.
+ * 1e9个元素 => 125MB.
  */
 class BitSet {
   static from(arrayLike: ArrayLike<number | string>): BitSet {
@@ -282,30 +284,47 @@ class BitSet {
     return true
   }
 
-  ior(other: BitSet): void {
+  ior(other: BitSet): BitSet {
     for (let i = 0; i < this._bits.length; i++) {
       this._bits[i] |= other._bits[i]
     }
+    return this
   }
 
   or(other: BitSet): BitSet {
-    const res = new BitSet(this._bits.length)
+    const res = new BitSet(this._n)
     for (let i = 0; i < this._bits.length; i++) {
       res._bits[i] = this._bits[i] | other._bits[i]
     }
     return res
   }
 
-  iand(other: BitSet): void {
+  iand(other: BitSet): BitSet {
     for (let i = 0; i < this._bits.length; i++) {
       this._bits[i] &= other._bits[i]
     }
+    return this
   }
 
   and(other: BitSet): BitSet {
-    const res = new BitSet(this._bits.length)
+    const res = new BitSet(this._n)
     for (let i = 0; i < this._bits.length; i++) {
       res._bits[i] = this._bits[i] & other._bits[i]
+    }
+    return res
+  }
+
+  ixor(other: BitSet): BitSet {
+    for (let i = 0; i < this._bits.length; i++) {
+      this._bits[i] ^= other._bits[i]
+    }
+    return this
+  }
+
+  xor(other: BitSet): BitSet {
+    const res = new BitSet(this._n)
+    for (let i = 0; i < this._bits.length; i++) {
+      res._bits[i] = this._bits[i] ^ other._bits[i]
     }
     return res
   }

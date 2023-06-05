@@ -1,0 +1,428 @@
+// !布尔矩阵乘法(Boolean Matrix Multiplication, BMM)
+// 输入和输出矩阵的元素均为布尔值。
+// !按矩阵乘法的公式运算时，可以把“乘”看成and，把“加”看成or
+// 对矩阵乘法 C[i][j] |= A[i][k] & B[k][j], 它的一个直观意义是把A的行和B的列看成集合，
+// A的第i行包含元素k当且仅当A[i][k]=1。
+// B的第j列包含元素k当且仅当B[k][j]=1。
+// !那么C[i][j]代表A的第i行和B的第j列是否包含公共元素。
+//
+// 一个应用是传递闭包(Transitive Closure)的加速计算。
+//
+// https://zhuanlan.zhihu.com/p/631804105
+// !https://blog.csdn.net/qq_42101694/article/details/121227383
+// https://github.com/spaghetti-source/algorithm/blob/4fdac8202e26def25c1baf9127aaaed6a2c9f7c7/math/matrix_bool.cc#L4
+//
+//
+// BooleanSquareMatrixDense
+//
+//
+// !这里是bitset+four russians mathod的实现.对于稠密的矩阵,5000*5000的矩阵乘法需要500ms左右.
+// complex: O(n^3 / wlogn)
+
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"math/bits"
+	"math/rand"
+	"os"
+	"strings"
+	"time"
+)
+
+func main() {
+	// yuki1340()
+	test()
+}
+
+// https://yukicoder.me/problems/no/1340
+// 给定一个n个点m条边的有向图，求t步后可能所在的顶点个数(每一步必须移动到一个相邻点).
+// n<=100 m<=1e4 t<=1e18
+func yuki1340() {
+
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m, t int
+	fmt.Fscan(in, &n, &m, &t)
+	mat := NewBooleanSquareMatrix(n)
+	for i := 0; i < m; i++ {
+		var a, b int
+		fmt.Fscan(in, &a, &b)
+		mat.Set(a, b, true)
+	}
+	mat.IPow(t)
+
+	res := 0
+	for i := 0; i < n; i++ {
+		if mat.Get(0, i) {
+			res++
+		}
+	}
+	fmt.Fprintln(out, res)
+}
+
+// https://leetcode.cn/problems/course-schedule-iv/
+func checkIfPrerequisite(numCourses int, prerequisites [][]int, queries [][]int) []bool {
+	mat := NewBooleanSquareMatrix(numCourses)
+	for _, p := range prerequisites {
+		mat.Set(p[0], p[1], true)
+	}
+	trans := mat.TransitiveClosure()
+	res := make([]bool, len(queries))
+	for i, q := range queries {
+		res[i] = trans.Get(q[0], q[1])
+	}
+	return res
+}
+
+func test() {
+	// ====================
+	// 测试随机矩阵
+	// 5000*5000的矩阵乘法:667.1262ms
+	// 2000*2000的传递闭包:813.8359ms
+	// ====================
+	// 测试稀疏矩阵
+	// 5000*5000的矩阵乘法:510.4187ms
+	// 2000*2000的传递闭包:817.7949ms
+	// ====================
+	// 测试稠密矩阵
+	// 5000*5000的矩阵乘法:513.5579ms
+	// 2000*2000的传递闭包:812.9492ms
+
+	mat := NewBooleanSquareMatrix(3)
+	mat.Set(0, 0, true)
+	mat.Set(0, 1, true)
+	mat.Set(1, 2, true)
+	mat.Set(1, 0, true)
+
+	testRandom := func() {
+		fmt.Println(strings.Repeat("=", 20))
+		fmt.Println("测试随机矩阵")
+		// !随机01矩阵
+		// 5000*5000的矩阵乘法 => 697.955ms
+		N_5000 := 5000
+		mat := NewBooleanSquareMatrix(N_5000)
+		for i := 0; i < N_5000; i++ {
+			for j := 0; j < N_5000; j++ {
+				if rand.Intn(2) == 0 {
+					mat.Set(i, j, true)
+				}
+			}
+		}
+		time1 := time.Now()
+		Mul(mat, mat)
+		time2 := time.Now()
+		fmt.Println(fmt.Sprintf("5000*5000的矩阵乘法:%v", time2.Sub(time1)))
+
+		// 2000*2000的传递闭包 => 830.0099ms
+		N_2000 := 2000
+		mat = NewBooleanSquareMatrix(N_2000)
+		for i := 0; i < N_2000; i++ {
+			for j := 0; j < N_2000; j++ {
+				if rand.Intn(2) == 0 {
+					mat.Set(i, j, true)
+				}
+			}
+		}
+		time3 := time.Now()
+		mat.TransitiveClosure()
+		time4 := time.Now()
+		fmt.Println(fmt.Sprintf("2000*2000的传递闭包:%v", time4.Sub(time3)))
+	}
+
+	testSparse := func() {
+		fmt.Println(strings.Repeat("=", 20))
+		fmt.Println("测试稀疏矩阵")
+		// !稀疏矩阵
+		// 5000*5000的矩阵乘法 => 548.3657ms
+		N_5000 := 5000
+		mat := NewBooleanSquareMatrix(N_5000)
+		for i := 0; i < N_5000; i++ {
+			for j := 0; j < N_5000; j++ {
+				if rand.Intn(10) == 0 {
+					mat.Set(i, j, true)
+				}
+			}
+		}
+		time1 := time.Now()
+		Mul(mat, mat)
+		time2 := time.Now()
+		fmt.Println(fmt.Sprintf("5000*5000的矩阵乘法:%v", time2.Sub(time1)))
+
+		// 2000*2000的传递闭包 => 817.5958ms
+		N_2000 := 2000
+		mat = NewBooleanSquareMatrix(N_2000)
+		for i := 0; i < N_2000; i++ {
+			for j := 0; j < N_2000; j++ {
+				if rand.Intn(10) == 0 {
+					mat.Set(i, j, true)
+				}
+			}
+		}
+		time3 := time.Now()
+		mat.TransitiveClosure()
+		time4 := time.Now()
+		fmt.Println(fmt.Sprintf("2000*2000的传递闭包:%v", time4.Sub(time3)))
+	}
+
+	testDense := func() {
+		fmt.Println(strings.Repeat("=", 20))
+		fmt.Println("测试稠密矩阵")
+		// !稠密矩阵
+		// 5000*5000的矩阵乘法 => 491.0388ms
+		N_5000 := 5000
+		mat := NewBooleanSquareMatrix(N_5000)
+		for i := 0; i < N_5000; i++ {
+			for j := 0; j < N_5000; j++ {
+				mat.Set(i, j, true)
+			}
+		}
+		time1 := time.Now()
+		Mul(mat, mat)
+		time2 := time.Now()
+		fmt.Println(fmt.Sprintf("5000*5000的矩阵乘法:%v", time2.Sub(time1)))
+
+		// 2000*2000的传递闭包 => 827.1923ms
+		N_2000 := 2000
+		mat = NewBooleanSquareMatrix(N_2000)
+		for i := 0; i < N_2000; i++ {
+			for j := 0; j < N_2000; j++ {
+				mat.Set(i, j, true)
+			}
+		}
+		time3 := time.Now()
+		mat.TransitiveClosure()
+		time4 := time.Now()
+		fmt.Println(fmt.Sprintf("2000*2000的传递闭包:%v", time4.Sub(time3)))
+	}
+
+	testRandom()
+	testSparse()
+	testDense()
+}
+
+// trailing zero table
+var _BSF [1e4 + 10]int
+
+func init() {
+	for i := range _BSF {
+		_BSF[i] = bits.TrailingZeros(uint(i))
+	}
+}
+
+// 布尔方阵.
+type BooleanSquareMatrix struct {
+	N  int
+	bs []Bitset
+	dp []Bitset // 在计算矩阵乘法时用到
+}
+
+// n<=1e4.
+func NewBooleanSquareMatrix(n int) *BooleanSquareMatrix {
+	bs := make([]Bitset, n)
+	for i := range bs {
+		bs[i] = NewBitset(n)
+	}
+	return &BooleanSquareMatrix{N: n, bs: bs}
+}
+
+// n<=1e4.
+func Eye(n int) *BooleanSquareMatrix {
+	res := NewBooleanSquareMatrix(n)
+	for i := 0; i < n; i++ {
+		res.bs[i].Set(i)
+	}
+	return res
+}
+
+func Pow(mat *BooleanSquareMatrix, k int) *BooleanSquareMatrix {
+	return mat.Copy().IPow(k)
+}
+
+func Mul(mat1, mat2 *BooleanSquareMatrix) *BooleanSquareMatrix {
+	return mat1.Copy().IMul(mat2)
+}
+
+func Add(mat1, mat2 *BooleanSquareMatrix) *BooleanSquareMatrix {
+	return mat1.Copy().IAdd(mat2)
+}
+
+// (A + I)^n 是传递闭包.
+func (bm *BooleanSquareMatrix) TransitiveClosure() *BooleanSquareMatrix {
+	n := bm.N
+	newMat := Eye(n).IAdd(bm)
+	newMat.IPow(n)
+	return newMat
+}
+
+func (bm *BooleanSquareMatrix) IPow(k int) *BooleanSquareMatrix {
+	res := Eye(bm.N)
+	for k > 0 {
+		if k&1 == 1 {
+			res.IMul(bm)
+		}
+		bm.IMul(bm)
+		k >>= 1
+	}
+	res.bs, bm.bs = bm.bs, res.bs
+	return bm
+}
+
+// O(n^3/wlogn),这里logn指的是分块的大小.
+func (bm *BooleanSquareMatrix) IMul(mat *BooleanSquareMatrix) *BooleanSquareMatrix {
+	n := mat.N
+	res := NewBooleanSquareMatrix(n)
+	step := 8 // !理论最优是logn,实际取8效果最好(n为5000时)
+	bm._initDpIfAbsent(step, n)
+	dp := bm.dp
+
+	for l, r := 0, step; l != n; l, r = r, r+step {
+		if r > n {
+			r = n
+		}
+
+		for s := 1; s < (1 << step); s++ {
+			bsf := _BSF[s]
+			if l+bsf < n {
+				dp[s] = Or(dp[s^(1<<bsf)], mat.bs[l+bsf]) // Xor => f2矩阵乘法
+			} else {
+				dp[s] = dp[s^(1<<bsf)]
+			}
+		}
+
+		for i, now := 0, 0; i != n; i, now = i+1, 0 {
+			for j := l; j != r; j++ {
+				if bm.bs[i].Has(j) {
+					now ^= 1 << (j - l)
+				}
+			}
+			res.bs[i].IOr(dp[now]) // IXor => f2矩阵乘法
+		}
+	}
+
+	bm.bs, res.bs = res.bs, bm.bs
+	return res
+}
+
+func (bm *BooleanSquareMatrix) IAdd(mat *BooleanSquareMatrix) *BooleanSquareMatrix {
+	for i := 0; i < bm.N; i++ {
+		bm.bs[i].IOr(mat.bs[i])
+	}
+	return bm
+}
+
+func (bm *BooleanSquareMatrix) Copy() *BooleanSquareMatrix {
+	bs := make([]Bitset, bm.N)
+	for i := range bs {
+		bs[i] = bm.bs[i].Copy()
+	}
+	return &BooleanSquareMatrix{N: bm.N, bs: bs, dp: bm.dp}
+}
+
+func (bm *BooleanSquareMatrix) Get(row, col int) bool {
+	return bm.bs[row].Has(col)
+}
+
+func (bm *BooleanSquareMatrix) Set(row, col int, b bool) {
+	if b {
+		bm.bs[row].Set(col)
+	} else {
+		bm.bs[row].Reset(col)
+	}
+}
+
+// To 2D grid.
+func (mat *BooleanSquareMatrix) String() string {
+	n := mat.N
+	grid := make([][]int, n)
+	for i := 0; i < n; i++ {
+		grid[i] = make([]int, n)
+		for j := 0; j < n; j++ {
+			if mat.Get(i, j) {
+				grid[i][j] = 1
+			} else {
+				grid[i][j] = 0
+			}
+		}
+	}
+
+	sb := strings.Builder{}
+	sb.WriteString(fmt.Sprintf("BooleanSquareMatrix(%d,%d)\n", n, n))
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			sb.WriteString(fmt.Sprintf("%d ", grid[i][j]))
+		}
+		sb.WriteString("\n")
+	}
+
+	return sb.String()
+}
+
+func (mat *BooleanSquareMatrix) _initDpIfAbsent(step int, n int) {
+	if mat.dp == nil {
+		dp := make([]Bitset, 1<<step)
+		for i := range dp {
+			dp[i] = NewBitset(n)
+		}
+		mat.dp = dp
+	}
+}
+
+const _w = bits.UintSize
+
+type Bitset []uint
+
+func NewBitset(n int) Bitset { return make(Bitset, n/_w+1) } // (n+_w-1)/_w
+
+func (b Bitset) Has(p int) bool { return b[p/_w]&(1<<(p%_w)) != 0 }
+func (b Bitset) Flip(p int)     { b[p/_w] ^= 1 << (p % _w) }
+func (b Bitset) Set(p int)      { b[p/_w] |= 1 << (p % _w) }
+func (b Bitset) Reset(p int)    { b[p/_w] &^= 1 << (p % _w) }
+
+func (b Bitset) Copy() Bitset {
+	res := make(Bitset, len(b))
+	copy(res, b)
+	return res
+}
+
+func (b Bitset) BitCount() int {
+	res := 0
+	for _, v := range b {
+		res += bits.OnesCount(v)
+	}
+	return res
+}
+
+// 将 c 的元素合并进 b
+func (b Bitset) IOr(c Bitset) Bitset {
+	for i, v := range c {
+		b[i] |= v
+	}
+	return b
+}
+
+// !f2上的加法
+func (b Bitset) IXOr(c Bitset) {
+	for i, v := range c {
+		b[i] ^= v
+	}
+}
+
+func Or(a, b Bitset) Bitset {
+	res := make(Bitset, len(a))
+	for i, v := range a {
+		res[i] = v | b[i]
+	}
+	return res
+}
+
+func Xor(a, b Bitset) Bitset {
+	res := make(Bitset, len(a))
+	for i, v := range a {
+		res[i] = v ^ b[i]
+	}
+	return res
+}

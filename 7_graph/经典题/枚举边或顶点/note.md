@@ -12,9 +12,20 @@
 
 - 从起点终点分别求最短路,然后枚举中间的点(传送门)
 
-**传送门**
+**传送门+虚拟结点**
 
 - 枚举传送门入口位置,分情况讨论
   1. 不走传送门
   2. 起点走传送门入口,终点走传送门出口
   3. 起点走传送门出口,终点走传送门入口
+
+---
+
+三元环计数
+
+1. 边很少 => O(E^1.5)
+   `1761. 一个图中连通三元组的最小度数-枚举三元环`
+   https://leetcode.cn/problems/minimum-degree-of-a-connected-trio-in-a-graph/submissions/
+2. 边很多 => O(EV/w)
+   `G - Triangle`
+   https://atcoder.jp/contests/abc258/tasks/abc258_g

@@ -40,6 +40,12 @@ func (b Bitset) Flip(p int)     { b[p/_w] ^= 1 << (p % _w) }
 func (b Bitset) Set(p int)      { b[p/_w] |= 1 << (p % _w) }  // 置 1
 func (b Bitset) Reset(p int)    { b[p/_w] &^= 1 << (p % _w) } // 置 0
 
+func (b Bitset) Copy() Bitset {
+	res := make(Bitset, len(b))
+	copy(res, b)
+	return res
+}
+
 // 遍历所有 1 的位置
 // 如果对范围有要求，可在 f 中 return p < n
 func (b Bitset) Foreach(f func(p int) (Break bool)) {
