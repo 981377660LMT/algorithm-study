@@ -207,11 +207,11 @@ func test() {
 
 type BooleanMatrix struct {
 	ROW, COL int
-	bs       []Bitset
+	bs       []BitSet64
 }
 
 func NewBooleanMatrix(row, col int) *BooleanMatrix {
-	bs := make([]Bitset, row)
+	bs := make([]BitSet64, row)
 	for i := range bs {
 		bs[i] = NewBitset(col)
 	}
@@ -289,7 +289,7 @@ func (bm *BooleanMatrix) IAdd(mat *BooleanMatrix) *BooleanMatrix {
 }
 
 func (bm *BooleanMatrix) Copy() *BooleanMatrix {
-	bs := make([]Bitset, bm.ROW)
+	bs := make([]BitSet64, bm.ROW)
 	for i := range bs {
 		bs[i] = bm.bs[i].Copy()
 	}
@@ -334,25 +334,33 @@ func (mat *BooleanMatrix) String() string {
 	return sb.String()
 }
 
-const _w = bits.UintSize
+type BitSet64 []uint64
 
-type Bitset []uint
+func NewBitset(n int) BitSet64 { return make(BitSet64, n>>6+1) } // (n+_w-1)>>6
 
-func NewBitset(n int) Bitset { return make(Bitset, n/_w+1) } // (n+_w-1)/_w
+func (b BitSet64) Has(p int) bool { return b[p>>6]&(1<<(p&63)) != 0 }
+func (b BitSet64) Flip(p int)     { b[p>>6] ^= 1 << (p & 63) }
+func (b BitSet64) Set(p int)      { b[p>>6] |= 1 << (p & 63) }
+func (b BitSet64) Reset(p int)    { b[p>>6] &^= 1 << (p & 63) }
 
-func (b Bitset) Has(p int) bool { return b[p/_w]&(1<<(p%_w)) != 0 }
-func (b Bitset) Flip(p int)     { b[p/_w] ^= 1 << (p % _w) }
-func (b Bitset) Set(p int)      { b[p/_w] |= 1 << (p % _w) }
-func (b Bitset) Reset(p int)    { b[p/_w] &^= 1 << (p % _w) }
+func (b BitSet64) Get(p int) int { return int(b[p>>6] >> (p & 63) & 1) }
 
-func (b Bitset) Copy() Bitset {
-	res := make(Bitset, len(b))
+func (b BitSet64) Copy() BitSet64 {
+	res := make(BitSet64, len(b))
 	copy(res, b)
 	return res
 }
 
+func (b BitSet64) BitCount() int {
+	res := 0
+	for _, v := range b {
+		res += bits.OnesCount64(v)
+	}
+	return res
+}
+
 // 将 c 的元素合并进 b
-func (b Bitset) IOr(c Bitset) Bitset {
+func (b BitSet64) IOr(c BitSet64) BitSet64 {
 	for i, v := range c {
 		b[i] |= v
 	}
@@ -360,22 +368,22 @@ func (b Bitset) IOr(c Bitset) Bitset {
 }
 
 // !f2上的加法
-func (b Bitset) IXOr(c Bitset) {
+func (b BitSet64) IXOr(c BitSet64) {
 	for i, v := range c {
 		b[i] ^= v
 	}
 }
 
-func Or(a, b Bitset) Bitset {
-	res := make(Bitset, len(a))
+func Or(a, b BitSet64) BitSet64 {
+	res := make(BitSet64, len(a))
 	for i, v := range a {
 		res[i] = v | b[i]
 	}
 	return res
 }
 
-func Xor(a, b Bitset) Bitset {
-	res := make(Bitset, len(a))
+func Xor(a, b BitSet64) BitSet64 {
+	res := make(BitSet64, len(a))
 	for i, v := range a {
 		res[i] = v ^ b[i]
 	}

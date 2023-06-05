@@ -34,6 +34,15 @@ import (
 func main() {
 	// yuki1340()
 	test()
+	// bs := NewBitset(70)
+	// bs.Set(10)
+	// bs.Set(15)
+	// fmt.Println(bs.Has(10))
+	// fmt.Println(bs._RangeHas(10, 16))
+	// bs.Set(63)
+	// bs.Set(64)
+	// bs.Set(65)
+	// fmt.Println(bs._RangeHas(62, 66))
 }
 
 // https://yukicoder.me/problems/no/1340
@@ -81,16 +90,16 @@ func checkIfPrerequisite(numCourses int, prerequisites [][]int, queries [][]int)
 func test() {
 	// ====================
 	// 测试随机矩阵
-	// 5000*5000的矩阵乘法:667.1262ms
-	// 2000*2000的传递闭包:813.8359ms
+	// 5000*5000的矩阵乘法:293.2131ms
+	// 2000*2000的传递闭包:398.609ms
 	// ====================
 	// 测试稀疏矩阵
-	// 5000*5000的矩阵乘法:510.4187ms
-	// 2000*2000的传递闭包:817.7949ms
+	// 5000*5000的矩阵乘法:247.3379ms
+	// 2000*2000的传递闭包:394.9004ms
 	// ====================
 	// 测试稠密矩阵
-	// 5000*5000的矩阵乘法:513.5579ms
-	// 2000*2000的传递闭包:812.9492ms
+	// 5000*5000的矩阵乘法:246.341ms
+	// 2000*2000的传递闭包:395.3344ms
 
 	mat := NewBooleanSquareMatrix(3)
 	mat.Set(0, 0, true)
@@ -216,13 +225,13 @@ func init() {
 // 布尔方阵.
 type BooleanSquareMatrix struct {
 	N  int
-	bs []Bitset
-	dp []Bitset // 在计算矩阵乘法时用到
+	bs []BitSet64
+	dp []BitSet64 // 在计算矩阵乘法时用到
 }
 
 // n<=1e4.
 func NewBooleanSquareMatrix(n int) *BooleanSquareMatrix {
-	bs := make([]Bitset, n)
+	bs := make([]BitSet64, n)
 	for i := range bs {
 		bs[i] = NewBitset(n)
 	}
@@ -294,11 +303,9 @@ func (bm *BooleanSquareMatrix) IMul(mat *BooleanSquareMatrix) *BooleanSquareMatr
 		}
 
 		for i, now := 0, 0; i != n; i, now = i+1, 0 {
-			for j := l; j != r; j++ {
-				if bm.bs[i].Has(j) {
-					now ^= 1 << (j - l)
-				}
-			}
+			// !这里是瓶颈
+			// TODO:位运算优化
+			now ^= int(bm.bs[i]._RangeHas(l, r))
 			res.bs[i].IOr(dp[now]) // IXor => f2矩阵乘法
 		}
 	}
@@ -315,7 +322,7 @@ func (bm *BooleanSquareMatrix) IAdd(mat *BooleanSquareMatrix) *BooleanSquareMatr
 }
 
 func (bm *BooleanSquareMatrix) Copy() *BooleanSquareMatrix {
-	bs := make([]Bitset, bm.N)
+	bs := make([]BitSet64, bm.N)
 	for i := range bs {
 		bs[i] = bm.bs[i].Copy()
 	}
@@ -363,7 +370,7 @@ func (mat *BooleanSquareMatrix) String() string {
 
 func (mat *BooleanSquareMatrix) _initDpIfAbsent(step int, n int) {
 	if mat.dp == nil {
-		dp := make([]Bitset, 1<<step)
+		dp := make([]BitSet64, 1<<step)
 		for i := range dp {
 			dp[i] = NewBitset(n)
 		}
@@ -371,33 +378,31 @@ func (mat *BooleanSquareMatrix) _initDpIfAbsent(step int, n int) {
 	}
 }
 
-const _w = bits.UintSize
+type BitSet64 []uint64
 
-type Bitset []uint
+func NewBitset(n int) BitSet64 { return make(BitSet64, n>>6+1) } // (n+_w-1)>>6
 
-func NewBitset(n int) Bitset { return make(Bitset, n/_w+1) } // (n+_w-1)/_w
+func (b BitSet64) Has(p int) bool { return b[p>>6]&(1<<(p&63)) != 0 }
+func (b BitSet64) Flip(p int)     { b[p>>6] ^= 1 << (p & 63) }
+func (b BitSet64) Set(p int)      { b[p>>6] |= 1 << (p & 63) }
+func (b BitSet64) Reset(p int)    { b[p>>6] &^= 1 << (p & 63) }
 
-func (b Bitset) Has(p int) bool { return b[p/_w]&(1<<(p%_w)) != 0 }
-func (b Bitset) Flip(p int)     { b[p/_w] ^= 1 << (p % _w) }
-func (b Bitset) Set(p int)      { b[p/_w] |= 1 << (p % _w) }
-func (b Bitset) Reset(p int)    { b[p/_w] &^= 1 << (p % _w) }
-
-func (b Bitset) Copy() Bitset {
-	res := make(Bitset, len(b))
+func (b BitSet64) Copy() BitSet64 {
+	res := make(BitSet64, len(b))
 	copy(res, b)
 	return res
 }
 
-func (b Bitset) BitCount() int {
+func (b BitSet64) BitCount() int {
 	res := 0
 	for _, v := range b {
-		res += bits.OnesCount(v)
+		res += bits.OnesCount64(v)
 	}
 	return res
 }
 
 // 将 c 的元素合并进 b
-func (b Bitset) IOr(c Bitset) Bitset {
+func (b BitSet64) IOr(c BitSet64) BitSet64 {
 	for i, v := range c {
 		b[i] |= v
 	}
@@ -405,24 +410,38 @@ func (b Bitset) IOr(c Bitset) Bitset {
 }
 
 // !f2上的加法
-func (b Bitset) IXOr(c Bitset) {
+func (b BitSet64) IXOr(c BitSet64) {
 	for i, v := range c {
 		b[i] ^= v
 	}
 }
 
-func Or(a, b Bitset) Bitset {
-	res := make(Bitset, len(a))
+func Or(a, b BitSet64) BitSet64 {
+	res := make(BitSet64, len(a))
 	for i, v := range a {
 		res[i] = v | b[i]
 	}
 	return res
 }
 
-func Xor(a, b Bitset) Bitset {
-	res := make(Bitset, len(a))
+func Xor(a, b BitSet64) BitSet64 {
+	res := make(BitSet64, len(a))
 	for i, v := range a {
 		res[i] = v ^ b[i]
 	}
 	return res
+}
+
+// ![l,r) 范围内数与bitset相交的数.r-l<64.
+// eg: l=10, r=16
+//    [15,14,13,12,11,10] & Bitset(10,11,13,15) => 101011
+func (b BitSet64) _RangeHas(l, r int) uint64 {
+	posL, shiftL := l>>6, l&63
+	posR, shiftR := r>>6, r&63
+	maskL, maskR := ^(^uint64(0) << shiftL), ^(^uint64(0) << shiftR) // 低位全1
+	if posL == posR {
+		return (b[posL] & (maskL ^ maskR)) >> shiftL
+	}
+	// divL+1 == divR
+	return (b[posL] & ^maskL)>>shiftL | (b[posR]&maskR)<<(64-shiftL)
 }

@@ -88,6 +88,11 @@ func foo(x int) {
 	}
 	fmt.Println(popCount64(13) == bits.OnesCount64(13))
 
+	// 全1掩码
+	a = 5
+	fmt.Println(1<<a - 1)
+	fmt.Println(^(^0 << a)) // 全1(-1)左移a位,再取反
+
 	_ = []interface{}{
 		lowbit,
 		isSubset,

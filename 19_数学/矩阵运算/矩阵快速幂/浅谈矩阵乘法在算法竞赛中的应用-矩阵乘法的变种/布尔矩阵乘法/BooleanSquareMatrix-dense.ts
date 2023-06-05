@@ -116,6 +116,7 @@ class BooleanSquareMatrixDense {
       for (let i = 0, now = 0; i < n; i++, now = 0) {
         const thisBsI = this._bs[i]
         const resBsI = res._bs[i]
+        // !这里是瓶颈 TODO:位运算优化
         for (let j = left; j < right; j++) now ^= +thisBsI.has(j) << (j - left)
         resBsI.ior(dp[now]) // !IXor => f2矩阵乘法
       }
