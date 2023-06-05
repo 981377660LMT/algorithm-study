@@ -2,10 +2,10 @@
 // 1462. 课程表 IV
 // https://leetcode.cn/problems/course-schedule-iv/
 
-import { BooleanMatrixSparse } from './BooleanMatrix-sparse'
+import { BooleanSquareMatrixDense } from './BooleanSquareMatrix-dense'
 
 function checkIfPrerequisite(n: number, prerequisites: number[][], queries: number[][]): boolean[] {
-  const mat = new BooleanMatrixSparse(n, n)
+  const mat = new BooleanSquareMatrixDense(n)
   prerequisites.forEach(([u, v]) => mat.set(u, v, true))
   const trans = mat.transitiveClosure()
   const res: boolean[] = Array(queries.length)

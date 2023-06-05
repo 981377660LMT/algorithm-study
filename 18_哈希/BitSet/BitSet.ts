@@ -352,7 +352,7 @@ class BitSet {
     return sb.join('')
   }
 
-  _indexOfZero(): number {
+  private _indexOfZero(): number {
     for (let i = 0; i < this._bits.length; i++) {
       const x = this._bits[i]
       if (~x) {
@@ -362,7 +362,7 @@ class BitSet {
     return -1
   }
 
-  _indexOfOne(): number {
+  private _indexOfOne(): number {
     for (let i = 0; i < this._bits.length; i++) {
       const x = this._bits[i]
       if (x) {
@@ -372,7 +372,7 @@ class BitSet {
     return -1
   }
 
-  _lastIndexOfOne(): number {
+  private _lastIndexOfOne(): number {
     for (let i = this._bits.length - 1; i >= 0; i--) {
       const x = this._bits[i]
       if (x) {
@@ -382,12 +382,30 @@ class BitSet {
     return -1
   }
 
-  _onesCount(): number {
+  private _onesCount(): number {
     let count = 0
     for (let i = 0; i < this._bits.length; i++) {
       count += BitSet._onesCount32(this._bits[i])
     }
     return count
+  }
+
+  /**
+   * hack.
+   * ![start,end) 范围内数与bitset相交的数.end-start<32.
+   * @example
+   * [start,end) = [10,16)
+   * [15,14,13,12,11,10] & Bitset(10,11,13,15) => 101011
+   */
+  _hasRange(start: number, end: number): number {
+    const posL = start >> 5
+    const shiftL = start & 31
+    const posR = end >> 5
+    const shiftR = end & 31
+    const maskL = ~(~0 << shiftL)
+    const maskR = ~(~0 << shiftR)
+    if (posL === posR) return (this._bits[posL] & maskR) >>> shiftL
+    return ((this._bits[posL] & ~maskL) >>> shiftL) | ((this._bits[posR] & maskR) << (32 - shiftL))
   }
 }
 

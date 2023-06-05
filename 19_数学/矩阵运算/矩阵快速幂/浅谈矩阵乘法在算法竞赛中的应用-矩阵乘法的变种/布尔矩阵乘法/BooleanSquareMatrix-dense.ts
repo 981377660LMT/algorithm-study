@@ -24,7 +24,7 @@
 import { BitSet } from '../../../../../18_哈希/BitSet/BitSet'
 
 /**
- * 布尔方针.单次矩阵乘法的复杂度为 `O(n^3/32logn)`.这里的logn为分块的大小.
+ * 布尔方阵.单次矩阵乘法的复杂度为 `O(n^3/32logn)`.这里的logn为分块的大小.
  * 适用于输入矩阵稠密的情形.
  */
 class BooleanSquareMatrixDense {
@@ -39,7 +39,7 @@ class BooleanSquareMatrixDense {
   }
 
   /**
-   * 稠密矩阵,5000*5000 => 920ms.
+   * 稠密矩阵,5000*5000 => 800ms.
    */
   static mul(
     mat1: BooleanSquareMatrixDense,
@@ -98,27 +98,25 @@ class BooleanSquareMatrixDense {
   imul(other: BooleanSquareMatrixDense): BooleanSquareMatrixDense {
     const n = this.n
     const res = new BooleanSquareMatrixDense(n)
-    const step = 6 // !理论最优是logn,实际取6效果最好(n为5000时)
+    const step = 7 // !理论最优是logn,实际取7效果最好(n为5000时)
     this._initDpIfAbsent(step, n)
     const dp = this._dp!
     const otherBs = other._bs
+    const trailingZeros32 = BooleanSquareMatrixDense._trailingZeros32
 
     for (let left = 0, right = step; left < n; left = right, right += step) {
       if (right > n) right = n
       for (let state = 1; state < 1 << step; state++) {
-        const bsf = BooleanSquareMatrixDense._trailingZeros32[state]
+        const bsf = trailingZeros32[state]
         if (left + bsf < n) {
           dp[state] = dp[state ^ (1 << bsf)].or(otherBs[left + bsf]) // !Xor => f2矩阵乘法
         } else {
           dp[state] = dp[state ^ (1 << bsf)]
         }
       }
-      for (let i = 0, now = 0; i < n; i++, now = 0) {
-        const thisBsI = this._bs[i]
-        const resBsI = res._bs[i]
-        // !这里是瓶颈 TODO:位运算优化
-        for (let j = left; j < right; j++) now ^= +thisBsI.has(j) << (j - left)
-        resBsI.ior(dp[now]) // !IXor => f2矩阵乘法
+      for (let i = 0; i < n; i++) {
+        const now = this._bs[i]._hasRange(left, right)
+        res._bs[i].ior(dp[now]) // !IXor => f2矩阵乘法
       }
     }
 
@@ -187,16 +185,16 @@ export { BooleanSquareMatrixDense }
 if (require.main === module) {
   // ====================
   // 测试随机矩阵
-  // BooleanSquareMatrixDense.mul: 995.97ms
-  // BooleanSquareMatrixDense.transitiveClosure: 1.401s
+  // BooleanSquareMatrixDense.mul: 853.116ms
+  // BooleanSquareMatrixDense.transitiveClosure: 1.412s
   // ====================
   // 测试稀疏矩阵
-  // BooleanSquareMatrixDense.mul: 933.747ms
-  // BooleanSquareMatrixDense.transitiveClosure: 1.333s
+  // BooleanSquareMatrixDense.mul: 859.419ms
+  // BooleanSquareMatrixDense.transitiveClosure: 1.387s
   // ====================
   // 测试稠密矩阵
-  // BooleanSquareMatrixDense.mul: 921.894ms
-  // BooleanSquareMatrixDense.transitiveClosure: 1.408s
+  // BooleanSquareMatrixDense.mul: 793.607ms
+  // BooleanSquareMatrixDense.transitiveClosure: 1.323s
 
   const mat = new BooleanSquareMatrixDense(3)
   mat.set(0, 0, true)

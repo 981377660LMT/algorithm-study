@@ -32,7 +32,7 @@ for (let i = 0; i < m; i++) {
   const [a, b] = input().split(' ').map(Number)
   mat.set(a, b, true)
 }
-console.log(mat.print())
+
 mat.ipow(t)
 
 let res = 0

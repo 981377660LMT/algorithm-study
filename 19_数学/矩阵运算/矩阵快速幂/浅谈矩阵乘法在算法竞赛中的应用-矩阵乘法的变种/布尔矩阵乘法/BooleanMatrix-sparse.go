@@ -23,7 +23,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/bits"
 	"math/rand"
 	"os"
 	"strings"
@@ -102,7 +101,7 @@ func test() {
 		fmt.Println(strings.Repeat("=", 20))
 		fmt.Println("测试随机矩阵")
 		// !随机01矩阵
-		// 5000*5000的矩阵乘法 => 836ms
+		// 5000*5000的矩阵乘法
 		N_5000 := 5000
 		eye := Eye(N_5000)
 		for i := 0; i < N_5000; i++ {
@@ -117,7 +116,7 @@ func test() {
 		time2 := time.Now()
 		fmt.Println(fmt.Sprintf("5000*5000的矩阵乘法:%v", time2.Sub(time1)))
 
-		// 2000*2000的传递闭包 => 1.26s
+		// 2000*2000的传递闭包
 		N_2000 := 2000
 		eye = Eye(N_2000)
 		for i := 0; i < N_2000; i++ {
@@ -137,7 +136,7 @@ func test() {
 		fmt.Println(strings.Repeat("=", 20))
 		fmt.Println("测试稀疏矩阵")
 		// !稀疏矩阵
-		// 5000*5000的矩阵乘法 => 196.9621ms
+		// 5000*5000的矩阵乘法
 		N_5000 := 5000
 		eye := NewBooleanMatrix(N_5000, N_5000)
 		for i := 0; i < N_5000; i++ {
@@ -152,7 +151,7 @@ func test() {
 		time2 := time.Now()
 		fmt.Println(fmt.Sprintf("5000*5000的矩阵乘法:%v", time2.Sub(time1)))
 
-		// 2000*2000的传递闭包 => 1.18061s
+		// 2000*2000的传递闭包
 		N_2000 := 2000
 		eye = NewBooleanMatrix(N_2000, N_2000)
 		for i := 0; i < N_2000; i++ {
@@ -172,7 +171,7 @@ func test() {
 		fmt.Println(strings.Repeat("=", 20))
 		fmt.Println("测试稠密矩阵")
 		// !稠密矩阵
-		// 5000*5000的矩阵乘法 => 1.1976128s
+		// 5000*5000的矩阵乘法
 		N_5000 := 5000
 		eye := NewBooleanMatrix(N_5000, N_5000)
 		for i := 0; i < N_5000; i++ {
@@ -185,7 +184,7 @@ func test() {
 		time2 := time.Now()
 		fmt.Println(fmt.Sprintf("5000*5000的矩阵乘法:%v", time2.Sub(time1)))
 
-		// 2000*2000的传递闭包 => 1.2487846s
+		// 2000*2000的传递闭包
 		N_2000 := 2000
 		eye = NewBooleanMatrix(N_2000, N_2000)
 		for i := 0; i < N_2000; i++ {
@@ -348,14 +347,6 @@ func (b BitSet64) Get(p int) int { return int(b[p>>6] >> (p & 63) & 1) }
 func (b BitSet64) Copy() BitSet64 {
 	res := make(BitSet64, len(b))
 	copy(res, b)
-	return res
-}
-
-func (b BitSet64) BitCount() int {
-	res := 0
-	for _, v := range b {
-		res += bits.OnesCount64(v)
-	}
 	return res
 }
 

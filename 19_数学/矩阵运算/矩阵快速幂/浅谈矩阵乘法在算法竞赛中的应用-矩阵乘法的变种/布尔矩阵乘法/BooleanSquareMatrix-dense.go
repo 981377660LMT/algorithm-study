@@ -34,15 +34,15 @@ import (
 func main() {
 	// yuki1340()
 	test()
-	// bs := NewBitset(70)
-	// bs.Set(10)
-	// bs.Set(15)
-	// fmt.Println(bs.Has(10))
-	// fmt.Println(bs._RangeHas(10, 16))
-	// bs.Set(63)
-	// bs.Set(64)
-	// bs.Set(65)
-	// fmt.Println(bs._RangeHas(62, 66))
+	bs := NewBitset(70)
+	bs.Set(10)
+	bs.Set(15)
+	fmt.Println(bs.Has(10))
+	fmt.Println(bs._HasRange(10, 16))
+	bs.Set(63)
+	bs.Set(64)
+	bs.Set(65)
+	fmt.Println(bs._HasRange(62, 66))
 }
 
 // https://yukicoder.me/problems/no/1340
@@ -90,16 +90,16 @@ func checkIfPrerequisite(numCourses int, prerequisites [][]int, queries [][]int)
 func test() {
 	// ====================
 	// 测试随机矩阵
-	// 5000*5000的矩阵乘法:293.2131ms
-	// 2000*2000的传递闭包:398.609ms
+	// 5000*5000的矩阵乘法:275.2395ms
+	// 2000*2000的传递闭包:356.363ms
 	// ====================
 	// 测试稀疏矩阵
-	// 5000*5000的矩阵乘法:247.3379ms
-	// 2000*2000的传递闭包:394.9004ms
+	// 5000*5000的矩阵乘法:235.1503ms
+	// 2000*2000的传递闭包:359.9047ms
 	// ====================
 	// 测试稠密矩阵
-	// 5000*5000的矩阵乘法:246.341ms
-	// 2000*2000的传递闭包:395.3344ms
+	// 5000*5000的矩阵乘法:230.2989ms
+	// 2000*2000的传递闭包:377.9874ms
 
 	mat := NewBooleanSquareMatrix(3)
 	mat.Set(0, 0, true)
@@ -111,7 +111,7 @@ func test() {
 		fmt.Println(strings.Repeat("=", 20))
 		fmt.Println("测试随机矩阵")
 		// !随机01矩阵
-		// 5000*5000的矩阵乘法 => 697.955ms
+		// 5000*5000的矩阵乘法
 		N_5000 := 5000
 		mat := NewBooleanSquareMatrix(N_5000)
 		for i := 0; i < N_5000; i++ {
@@ -126,7 +126,7 @@ func test() {
 		time2 := time.Now()
 		fmt.Println(fmt.Sprintf("5000*5000的矩阵乘法:%v", time2.Sub(time1)))
 
-		// 2000*2000的传递闭包 => 830.0099ms
+		// 2000*2000的传递闭包
 		N_2000 := 2000
 		mat = NewBooleanSquareMatrix(N_2000)
 		for i := 0; i < N_2000; i++ {
@@ -146,7 +146,7 @@ func test() {
 		fmt.Println(strings.Repeat("=", 20))
 		fmt.Println("测试稀疏矩阵")
 		// !稀疏矩阵
-		// 5000*5000的矩阵乘法 => 548.3657ms
+		// 5000*5000的矩阵乘法
 		N_5000 := 5000
 		mat := NewBooleanSquareMatrix(N_5000)
 		for i := 0; i < N_5000; i++ {
@@ -161,7 +161,7 @@ func test() {
 		time2 := time.Now()
 		fmt.Println(fmt.Sprintf("5000*5000的矩阵乘法:%v", time2.Sub(time1)))
 
-		// 2000*2000的传递闭包 => 817.5958ms
+		// 2000*2000的传递闭包
 		N_2000 := 2000
 		mat = NewBooleanSquareMatrix(N_2000)
 		for i := 0; i < N_2000; i++ {
@@ -181,7 +181,7 @@ func test() {
 		fmt.Println(strings.Repeat("=", 20))
 		fmt.Println("测试稠密矩阵")
 		// !稠密矩阵
-		// 5000*5000的矩阵乘法 => 491.0388ms
+		// 5000*5000的矩阵乘法
 		N_5000 := 5000
 		mat := NewBooleanSquareMatrix(N_5000)
 		for i := 0; i < N_5000; i++ {
@@ -194,7 +194,7 @@ func test() {
 		time2 := time.Now()
 		fmt.Println(fmt.Sprintf("5000*5000的矩阵乘法:%v", time2.Sub(time1)))
 
-		// 2000*2000的传递闭包 => 827.1923ms
+		// 2000*2000的传递闭包
 		N_2000 := 2000
 		mat = NewBooleanSquareMatrix(N_2000)
 		for i := 0; i < N_2000; i++ {
@@ -287,6 +287,8 @@ func (bm *BooleanSquareMatrix) IMul(mat *BooleanSquareMatrix) *BooleanSquareMatr
 	step := 8 // !理论最优是logn,实际取8效果最好(n为5000时)
 	bm._initDpIfAbsent(step, n)
 	dp := bm.dp
+	bmBs := bm.bs
+	matBs := mat.bs
 
 	for l, r := 0, step; l != n; l, r = r, r+step {
 		if r > n {
@@ -296,17 +298,14 @@ func (bm *BooleanSquareMatrix) IMul(mat *BooleanSquareMatrix) *BooleanSquareMatr
 		for s := 1; s < (1 << step); s++ {
 			bsf := _BSF[s]
 			if l+bsf < n {
-				dp[s] = Or(dp[s^(1<<bsf)], mat.bs[l+bsf]) // Xor => f2矩阵乘法
+				dp[s] = Or(dp[s^(1<<bsf)], matBs[l+bsf]) // Xor => f2矩阵乘法
 			} else {
 				dp[s] = dp[s^(1<<bsf)]
 			}
 		}
 
-		for i, now := 0, 0; i != n; i, now = i+1, 0 {
-			// !这里是瓶颈
-			// TODO:位运算优化
-			now ^= int(bm.bs[i]._RangeHas(l, r))
-			res.bs[i].IOr(dp[now]) // IXor => f2矩阵乘法
+		for i := 0; i != n; i++ {
+			res.bs[i].IOr(dp[bmBs[i]._HasRange(l, r)]) // IXor => f2矩阵乘法
 		}
 	}
 
@@ -393,14 +392,6 @@ func (b BitSet64) Copy() BitSet64 {
 	return res
 }
 
-func (b BitSet64) BitCount() int {
-	res := 0
-	for _, v := range b {
-		res += bits.OnesCount64(v)
-	}
-	return res
-}
-
 // 将 c 的元素合并进 b
 func (b BitSet64) IOr(c BitSet64) BitSet64 {
 	for i, v := range c {
@@ -435,13 +426,13 @@ func Xor(a, b BitSet64) BitSet64 {
 // ![l,r) 范围内数与bitset相交的数.r-l<64.
 // eg: l=10, r=16
 //    [15,14,13,12,11,10] & Bitset(10,11,13,15) => 101011
-func (b BitSet64) _RangeHas(l, r int) uint64 {
+func (b BitSet64) _HasRange(l, r int) uint64 {
 	posL, shiftL := l>>6, l&63
 	posR, shiftR := r>>6, r&63
 	maskL, maskR := ^(^uint64(0) << shiftL), ^(^uint64(0) << shiftR) // 低位全1
 	if posL == posR {
-		return (b[posL] & (maskL ^ maskR)) >> shiftL
+		return (b[posL] & maskR) >> shiftL
 	}
-	// divL+1 == divR
+	// posL+1 == posR
 	return (b[posL] & ^maskL)>>shiftL | (b[posR]&maskR)<<(64-shiftL)
 }
