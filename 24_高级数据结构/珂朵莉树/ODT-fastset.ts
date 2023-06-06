@@ -100,17 +100,19 @@ class ODT<S> {
     let p = this._fs.prev(start)
     if (p < start) {
       this._fs.insert(start)
-      this._data[start] = this._data[p]
-      if (this._data[start] !== none) {
+      const v = this._data[p]
+      this._data[start] = v
+      if (v !== none) {
         this._len++
       }
     }
 
     p = this._fs.next(end)
     if (end < p) {
-      this._data[end] = this._data[this._fs.prev(end)]
+      const v = this._data[this._fs.prev(end)]
+      this._data[end] = v
       this._fs.insert(end)
-      if (this._data[end] !== none) {
+      if (v !== none) {
         this._len++
       }
     }
@@ -120,7 +122,7 @@ class ODT<S> {
       const q = this._fs.next(p + 1)
       const x = this._data[p]
       f(p, q, x)
-      if (this._data[p] !== none) {
+      if (x !== none) {
         this._len--
         this._count -= q - p
       }
@@ -159,8 +161,10 @@ class ODT<S> {
   private _mergeAt(p: number): void {
     if (p <= 0 || this._rightLimit <= p) return
     const q = this._fs.prev(p - 1)
-    if (this._data[p] === this._data[q]) {
-      if (this._data[p] !== this._noneValue) this._len--
+    const dataP = this._data[p]
+    const dataQ = this._data[q]
+    if (dataP === dataQ) {
+      if (dataP !== this._noneValue) this._len--
       this._fs.erase(p)
     }
   }

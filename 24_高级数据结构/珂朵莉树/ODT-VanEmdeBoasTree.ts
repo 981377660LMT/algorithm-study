@@ -125,18 +125,16 @@ func (odt *ODT) EnumerateRange(start, end int, f func(start, end int, value Valu
 	p := odt.ss.Prev(start)
 	if p < start {
 		odt.ss.Insert(start)
-		v := odt.data[p]
-		odt.data[start] = v
-		if v != NONE {
+		odt.data[start] = odt.data[p]
+		if odt.data[start] != NONE {
 			odt.Len++
 		}
 	}
 	p = odt.ss.Next(end)
 	if end < p {
-		v := odt.data[odt.ss.Prev(end)]
-		odt.data[end] = v
+		odt.data[end] = odt.data[odt.ss.Prev(end)]
 		odt.ss.Insert(end)
-		if v != NONE {
+		if odt.data[end] != NONE {
 			odt.Len++
 		}
 	}
@@ -145,7 +143,7 @@ func (odt *ODT) EnumerateRange(start, end int, f func(start, end int, value Valu
 		q := odt.ss.Next(p + 1)
 		x := odt.data[p]
 		f(p, q, x)
-		if x != NONE {
+		if odt.data[p] != NONE {
 			odt.Len--
 			odt.Count -= q - p
 		}
@@ -173,8 +171,8 @@ func (odt *ODT) mergeAt(p int) {
 		return
 	}
 	q := odt.ss.Prev(p - 1)
-	if dataP, dataQ := odt.data[p], odt.data[q]; dataP == dataQ {
-		if dataP != odt.noneValue {
+	if odt.data[p] == odt.data[q] {
+		if odt.data[p] != odt.noneValue {
 			odt.Len--
 		}
 		odt.ss.Erase(p)

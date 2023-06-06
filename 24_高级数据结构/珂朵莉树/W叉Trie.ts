@@ -7,6 +7,7 @@ class WAryTrie {
   private readonly _a2: Uint32Array
   private readonly _a3: Uint32Array
   private _a4 = 0
+  private _size = 0
 
   /**
    * 建立一个元素范围为`[0,n)`的W叉Trie树.
@@ -19,11 +20,14 @@ class WAryTrie {
     this._a3 = new Uint32Array((n >>> 15) + 1)
   }
 
-  insert(i: number): void {
+  insert(i: number): boolean {
+    if (this.has(i)) return false
     this._a1[i >>> 5] |= 1 << (i & 31)
     this._a2[i >>> 10] |= 1 << ((i >>> 5) & 31)
     this._a3[i >>> 15] |= 1 << ((i >>> 10) & 31)
     this._a4 |= 1 << (i >>> 15)
+    this._size++
+    return true
   }
 
   has(i: number): boolean {
@@ -33,6 +37,7 @@ class WAryTrie {
   erase(i: number): boolean {
     const bit0 = 1 << (i & 31)
     if (!(this._a1[i >>> 5] & bit0)) return false
+    this._size--
     this._a1[i >>> 5] -= bit0
     if (this._a1[i >>> 5]) return true
     const bit1 = 1 << ((i >>> 5) & 31)
@@ -136,7 +141,7 @@ class WAryTrie {
   toString(): string {
     const sb: string[] = []
     this.enumerateRange(0, this._n, v => sb.push(v.toString()))
-    return `WAryTrie(${sb.join(', ')})`
+    return `WAryTrie(${this.size}){${sb.join(', ')}}`
   }
 
   /**
@@ -159,6 +164,10 @@ class WAryTrie {
     x = (x << 5) + WAryTrie._maxBit(this._a3[x])
     x = (x << 5) + WAryTrie._maxBit(this._a2[x])
     return (x << 5) + WAryTrie._maxBit(this._a1[x])
+  }
+
+  get size(): number {
+    return this._size
   }
 
   private static _maxBit(n: number): number {
@@ -186,5 +195,20 @@ if (require.main === module) {
   set.insert(1)
   set.insert(2)
   set.insert(30)
-  console.log(set.toString(), set.next(4))
+  console.log(set.toString(), set.next(4), set.min, set.max)
+  set.erase(30)
+  console.log(set.toString(), set.next(4), set.min, set.max)
+
+  const n = 1e7
+  const set2 = new WAryTrie(n)
+  console.time('WAryTrie')
+  for (let i = 0; i < n; i++) {
+    set2.insert(i)
+    set2.next(i)
+    set2.prev(i)
+    set2.has(i)
+    set2.erase(i)
+    set2.insert(i)
+  }
+  console.timeEnd('WAryTrie') // 250ms
 }

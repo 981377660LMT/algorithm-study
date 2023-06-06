@@ -1,32 +1,97 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 	"strconv"
 	"strings"
 )
 
 func main() {
-	set := NewWAryTrie(1e6)
-	set.Insert(0)
-	set.Insert(1)
-	set.Insert(2)
-	fmt.Println(set.Has(1))
-	fmt.Println(set)
-	fmt.Println(set.Max(), set.Prev(1025*32+1), set.Next(0))
-	set.Discard(2)
-	fmt.Println(set.Min(), set.Max())
+	demo := func() {
+		set := NewWAryTrie(1e6)
+		set.Insert(0)
+		set.Insert(1)
+		set.Insert(2)
+		fmt.Println(set.Has(1))
+		fmt.Println(set)
+		fmt.Println(set.Max(), set.Prev(1025*32+1), set.Next(0))
+		set.Discard(2)
+		fmt.Println(set.Min(), set.Max())
+		fmt.Println(set.Size())
+	}
+	_ = demo
+
+	// https://judge.yosupo.jp/problem/predecessor_problem
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	const N = 1e6 + 10
+	if n > 1e6 {
+		panic("n too large")
+	}
+	set := NewWAryTrie(N)
+	var s string
+	fmt.Fscan(in, &s)
+	for i, v := range s {
+		if v == '1' {
+			set.Insert(i)
+		}
+	}
+
+	for i := 0; i < q; i++ {
+		var op int
+		fmt.Fscan(in, &op)
+		switch op {
+		case 0:
+			var k int
+			fmt.Fscan(in, &k)
+			set.Insert(k)
+		case 1:
+			var k int
+			fmt.Fscan(in, &k)
+			set.Discard(k)
+		case 2:
+			var k int
+			fmt.Fscan(in, &k)
+			if set.Has(k) {
+				fmt.Fprintln(out, 1)
+			} else {
+				fmt.Fprintln(out, 0)
+			}
+		case 3:
+			var k int
+			fmt.Fscan(in, &k)
+			ceiling := set.Next(k)
+			if ceiling < N {
+				fmt.Fprintln(out, ceiling)
+			} else {
+				fmt.Fprintln(out, -1)
+			}
+		case 4:
+			var k int
+			fmt.Fscan(in, &k)
+			floor := set.Prev(k)
+			fmt.Fprintln(out, floor)
+
+		}
+	}
 
 }
 
 // W叉Trie树.
 type WAryTrie struct {
-	n  int
-	a1 []uint32
-	a2 []uint32
-	a3 []uint32
-	a4 uint32
+	n    int
+	a1   []uint32
+	a2   []uint32
+	a3   []uint32
+	a4   uint32
+	size int
 }
 
 // 建立一个元素范围为[0,n)的W叉Trie树.
@@ -44,11 +109,16 @@ func (wat *WAryTrie) Has(x int) bool {
 	return (wat.a1[x>>5]>>(x&31))&1 == 1
 }
 
-func (wat *WAryTrie) Insert(x int) {
+func (wat *WAryTrie) Insert(x int) bool {
+	if wat.Has(x) {
+		return false
+	}
 	wat.a1[x>>5] |= 1 << (x & 31)
 	wat.a2[x>>10] |= 1 << ((x >> 5) & 31)
 	wat.a3[x>>15] |= 1 << ((x >> 10) & 31)
 	wat.a4 |= 1 << (x >> 15)
+	wat.size++
+	return true
 }
 
 // 返回是否成功删除(元素是否存在).
@@ -58,6 +128,7 @@ func (wat *WAryTrie) Discard(x int) (ok bool) {
 		return
 	}
 	ok = true
+	wat.size--
 	wat.a1[x>>5] -= bit0
 	if wat.a1[x>>5] > 0 {
 		return
@@ -96,6 +167,10 @@ func (wat *WAryTrie) Max() int {
 	x = (x << 5) + wat._maxBit(wat.a3[x])
 	x = (x << 5) + wat._maxBit(wat.a2[x])
 	return (x << 5) + wat._maxBit(wat.a1[x])
+}
+
+func (wat *WAryTrie) Size() int {
+	return wat.size
 }
 
 // 返回小于等于i的最大元素.如果不存在,返回-1.

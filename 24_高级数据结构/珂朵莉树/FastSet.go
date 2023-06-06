@@ -1,4 +1,4 @@
-// 又叫做 64-ary tree / Van Emde Boas Tree (梵峨眉大悲寺树)
+// 又叫做 64-ary tree
 // !时间复杂度:O(log64n)
 // https://zhuanlan.zhihu.com/p/107238627
 // https://www.luogu.com.cn/blog/RuntimeErrror/ni-suo-fou-zhi-dao-di-shuo-ju-jie-gou-van-emde-boas-shu
@@ -17,31 +17,92 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
 func main() {
-	n := int(1e7)
-	fs := NewFastSet(n)
-	time1 := time.Now()
-	for i := 0; i < n; i++ {
-		fs.Insert(i)
-		fs.Next(i)
-		fs.Prev(i)
-		fs.Has(i)
-		fs.Erase(i)
-		fs.Insert(i)
+	demo := func() {
+		n := int(1e7)
+		fs := NewFastSet(n)
+		time1 := time.Now()
+		for i := 0; i < n; i++ {
+			fs.Insert(i)
+			fs.Next(i)
+			fs.Prev(i)
+			fs.Has(i)
+			fs.Erase(i)
+			fs.Insert(i)
+		}
+		fmt.Println(time.Since(time1))
 	}
-	fmt.Println(time.Since(time1))
+	_ = demo
+
+	// https://judge.yosupo.jp/problem/predecessor_problem
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	const N = 1e7 + 10
+	set := NewFastSet(N)
+	var s string
+	fmt.Fscan(in, &s)
+	for i, v := range s {
+		if v == '1' {
+			set.Insert(i)
+		}
+	}
+
+	for i := 0; i < q; i++ {
+		var op int
+		fmt.Fscan(in, &op)
+		switch op {
+		case 0:
+			var k int
+			fmt.Fscan(in, &k)
+			set.Insert(k)
+		case 1:
+			var k int
+			fmt.Fscan(in, &k)
+			set.Erase(k)
+		case 2:
+			var k int
+			fmt.Fscan(in, &k)
+			if set.Has(k) {
+				fmt.Fprintln(out, 1)
+			} else {
+				fmt.Fprintln(out, 0)
+			}
+		case 3:
+			var k int
+			fmt.Fscan(in, &k)
+			ceiling := set.Next(k)
+			if ceiling < N {
+				fmt.Fprintln(out, ceiling)
+			} else {
+				fmt.Fprintln(out, -1)
+			}
+		case 4:
+			var k int
+			fmt.Fscan(in, &k)
+			floor := set.Prev(k)
+			fmt.Fprintln(out, floor)
+
+		}
+	}
 }
 
 type FastSet struct {
 	n, lg int
 	seg   [][]int
+	size  int
 }
 
 func NewFastSet(n int) *FastSet {
@@ -64,21 +125,33 @@ func (fs *FastSet) Has(i int) bool {
 	return (fs.seg[0][i>>6]>>(i&63))&1 != 0
 }
 
-func (fs *FastSet) Insert(i int) {
+func (fs *FastSet) Insert(i int) bool {
+	if fs.Has(i) {
+		return false
+	}
 	for h := 0; h < fs.lg; h++ {
 		fs.seg[h][i>>6] |= 1 << (i & 63)
 		i >>= 6
 	}
+	fs.size++
+	return true
+
 }
 
-func (fs *FastSet) Erase(i int) {
+func (fs *FastSet) Erase(i int) bool {
+	if !fs.Has(i) {
+		return false
+	}
 	for h := 0; h < fs.lg; h++ {
-		fs.seg[h][i>>6] &= ^(1 << (i & 63))
-		if fs.seg[h][i>>6] != 0 {
+		cache := fs.seg[h]
+		cache[i>>6] &= ^(1 << (i & 63))
+		if cache[i>>6] != 0 {
 			break
 		}
 		i >>= 6
 	}
+	fs.size--
+	return true
 }
 
 // 返回大于等于i的最小元素.如果不存在,返回n.
@@ -91,10 +164,11 @@ func (fs *FastSet) Next(i int) int {
 	}
 
 	for h := 0; h < fs.lg; h++ {
-		if i>>6 == len(fs.seg[h]) {
+		cache := fs.seg[h]
+		if i>>6 == len(cache) {
 			break
 		}
-		d := fs.seg[h][i>>6] >> (i & 63)
+		d := cache[i>>6] >> (i & 63)
 		if d == 0 {
 			i = i>>6 + 1
 			continue
@@ -163,6 +237,10 @@ func (fs *FastSet) String() string {
 		}
 	}
 	return fmt.Sprintf("FastSet{%v}", strings.Join(res, ", "))
+}
+
+func (fs *FastSet) Size() int {
+	return fs.size
 }
 
 func (*FastSet) bsr(x int) int {

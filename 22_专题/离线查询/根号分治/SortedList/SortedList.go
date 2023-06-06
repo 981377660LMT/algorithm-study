@@ -41,6 +41,8 @@ func main() {
 	sl.Add([2]int{2, 3})
 	sl.Add([2]int{1, 2})
 	fmt.Println(sl.Pop(0))
+	sl.Erase(0, 2)
+	fmt.Println(sl, sl.Len())
 }
 
 type S = [2]int
@@ -82,7 +84,7 @@ func (sl *_SL) Add(value S) {
 		sl.blocks[len(sl.blocks)-1] = append(sl.blocks[len(sl.blocks)-1], value)
 		sl.size++
 		if len(sl.blocks[len(sl.blocks)-1]) > _REBUILD_RATIO*len(sl.blocks) {
-			sl.rebuild()
+			sl._rebuild()
 		}
 		return
 	}
@@ -92,7 +94,7 @@ func (sl *_SL) Add(value S) {
 	sl.blocks[hitIndex] = append(hitted[:pos], append([]S{value}, hitted[pos:]...)...)
 	sl.size++
 	if len(hitted) > _REBUILD_RATIO*len(sl.blocks) {
-		sl.rebuild()
+		sl._rebuild()
 	}
 }
 
@@ -152,6 +154,36 @@ func (sl *_SL) Pop(index int) S {
 		index -= len(block)
 	}
 	panic("impossible")
+}
+
+// 删除区间 [start, end) 内的元素.
+func (sl *_SL) Erase(start, end int) {
+	if start < 0 {
+		start = 0
+	}
+	if end > sl.size {
+		end = sl.size
+	}
+	if start >= end {
+		return
+	}
+
+	bid, startPos := sl._moveTo(start)
+	deleteCount := end - start
+	for ; bid < len(sl.blocks) && deleteCount > 0; bid++ {
+		block := sl.blocks[bid]
+		endPos := min(len(block), startPos+deleteCount)
+		curDeleteCount := endPos - startPos
+		if curDeleteCount == len(block) {
+			sl.blocks = append(sl.blocks[:bid], sl.blocks[bid+1:]...)
+			bid--
+		} else {
+			sl.blocks[bid] = append(block[:startPos], block[endPos:]...)
+		}
+		deleteCount -= curDeleteCount
+		sl.size -= curDeleteCount
+		startPos = 0
+	}
 }
 
 func (sl *_SL) At(index int) S {
@@ -265,7 +297,22 @@ func (sl *_SL) String() string {
 	return fmt.Sprintf("SortedList{%v}", strings.Join(res, ", "))
 }
 
-func (sl *_SL) rebuild() {
+func (sl *_SL) Min() (res S, ok bool) {
+	if len(sl.blocks) == 0 {
+		return
+	}
+	return sl.blocks[0][0], true
+}
+
+func (sl *_SL) Max() (res S, ok bool) {
+	if len(sl.blocks) == 0 {
+		return
+	}
+	last := sl.blocks[len(sl.blocks)-1]
+	return last[len(last)-1], true
+}
+
+func (sl *_SL) _rebuild() {
 	if sl.size == 0 {
 		return
 	}
@@ -314,6 +361,16 @@ func (sl *_SL) _findBlockIndex(x S) int {
 		}
 	}
 	return -1
+}
+
+func (sl *_SL) _moveTo(index int) (blockId, startPos int) {
+	for i, block := range sl.blocks {
+		if index < len(block) {
+			return i, index
+		}
+		index -= len(block)
+	}
+	return len(sl.blocks), 0
 }
 
 func min(a, b int) int {
