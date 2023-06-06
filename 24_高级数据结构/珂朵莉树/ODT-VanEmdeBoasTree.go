@@ -202,7 +202,7 @@ type _Van struct {
 }
 
 func _NewVan() *_Van {
-	return &_Van{root: NewVNode(32)} // 16/32/64
+	return &_Van{root: NewVNode(32)} // 16/32
 }
 
 func (van *_Van) Has(x int) bool {

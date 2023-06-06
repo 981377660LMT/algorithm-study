@@ -1,328 +1,412 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable prefer-destructuring */
+/* eslint-disable no-param-reassign */
+/* eslint-disable generator-star-spacing */
+/* eslint-disable no-inner-declarations */
 // 珂朵莉树(ODT)/Intervals
+// !noneValue不使用symbol,而是自定义的哨兵值,更加灵活.
 
-package main
+const INF = 2e15
 
-import (
-	"bufio"
-	"fmt"
-	"math/bits"
-	"os"
-	"strconv"
-	"strings"
-)
+/**
+ * 珂朵莉树，基于数据随机的颜色段均摊。
+ * `VanEmdeBoasTree`实现.
+ */
+class ODTVan<S> {
+  private readonly _noneValue: S
+  private _len = 0
+  private _count = 0
+  private readonly _data: Map<number, S> = new Map()
+  private readonly _leftLimit = -INF
+  private readonly _rightLimit = INF
+  private readonly _fs: VanEmdeBoasTree = new VanEmdeBoasTree()
 
-const INF int = 1e18
+  /**
+   * 指定哨兵值建立一个ODT.初始时,所有位置的值为 {@link noneValue}.
+   * @param noneValue 表示空值的哨兵值.
+   */
+  constructor(noneValue: S) {
+    this._noneValue = noneValue
+  }
 
-func demo() {
-	odt := NewODT(10, -INF)
-	odt.Set(0, 3, 1)
-	odt.Set(3, 5, 2)
-	fmt.Println(odt.Len, odt.Count, odt)
+  /**
+   * 返回包含`x`的区间的信息.
+   */
+  get(x: number, erase = false): [start: number, end: number, value: S] | undefined {
+    const start = this._fs.prev(x)
+    const end = this._fs.next(x + 1)
+    const value = this._getOrNone(start)
+    if (erase && value !== this._noneValue) {
+      this._len--
+      this._count -= end - start
+      this._data.set(start, this._noneValue)
+      this._mergeAt(start)
+      this._mergeAt(end)
+    }
+    return [start, end, value]
+  }
+
+  set(start: number, end: number, value: S): void {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    this.enumerateRange(start, end, () => {}, true) // remove
+    this._fs.insert(start)
+    this._data.set(start, value)
+    if (value !== this._noneValue) {
+      this._len++
+      this._count += end - start
+    }
+    this._mergeAt(start)
+    this._mergeAt(end)
+  }
+
+  enumerateAll(f: (start: number, end: number, value: S) => void): void {
+    this.enumerateRange(this._leftLimit, this._rightLimit, f, false)
+  }
+
+  /**
+   * 遍历范围`[start, end)`内的所有区间.
+   */
+  enumerateRange(
+    start: number,
+    end: number,
+    f: (start: number, end: number, value: S) => void,
+    erase = false
+  ): void {
+    if (start < this._leftLimit) start = this._leftLimit
+    if (end > this._rightLimit) end = this._rightLimit
+    if (start >= end) return
+
+    const none = this._noneValue
+    if (!erase) {
+      let left = this._fs.prev(start)
+      while (left < end) {
+        const right = this._fs.next(left + 1)
+        f(Math.max(left, start), Math.min(right, end), this._getOrNone(left))
+        left = right
+      }
+      return
+    }
+
+    let p = this._fs.prev(start)
+    if (p < start) {
+      this._fs.insert(start)
+      const v = this._getOrNone(p)
+      this._data.set(start, v)
+      if (v !== none) this._len++
+    }
+
+    p = this._fs.next(end)
+    if (end < p) {
+      const v = this._getOrNone(this._fs.prev(end))
+      this._data.set(end, v)
+      this._fs.insert(end)
+      if (v !== none) this._len++
+    }
+
+    p = start
+    while (p < end) {
+      const q = this._fs.next(p + 1)
+      const x = this._getOrNone(p)
+      f(p, q, x)
+      if (x !== none) {
+        this._len--
+        this._count -= q - p
+      }
+      this._fs.erase(p)
+      p = q
+    }
+
+    this._fs.insert(start)
+    this._data.set(start, none)
+  }
+
+  toString(): string {
+    const sb: string[] = [`ODT(${this.length}) {`]
+    this.enumerateAll((start, end, value) => {
+      const v = value === this._noneValue ? 'null' : value
+      sb.push(`  [${start},${end}):${v}`)
+    })
+    sb.push('}')
+    return sb.join('\n')
+  }
+
+  /**
+   * 区间个数.
+   */
+  get length(): number {
+    return this._len
+  }
+
+  /**
+   * 区间内元素个数之和.
+   */
+  get count(): number {
+    return this._count
+  }
+
+  private _mergeAt(p: number): void {
+    if (p <= 0 || this._rightLimit <= p) return
+    const q = this._fs.prev(p - 1)
+    const dataP = this._getOrNone(p)
+    const dataQ = this._getOrNone(q)
+    if (dataP === dataQ) {
+      if (dataP !== this._noneValue) this._len--
+      this._fs.erase(p)
+    }
+  }
+
+  private _getOrNone(x: number): S {
+    const res = this._data.get(x)
+    return res === void 0 ? this._noneValue : res
+  }
 }
 
-func UnionOfInterval() {
-	// https://atcoder.jp/contests/abc256/tasks/abc256_d
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+/**
+ * Van Tree.
+ * 梵峨眉大悲寺树.
+ */
+class VanEmdeBoasTree {
+  private readonly _root: _VNode
+  private _size = 0
 
-	var n int
-	fmt.Fscan(in, &n)
-	odt := NewODT(2e5+10, -INF)
-	for i := 0; i < n; i++ {
-		var l, r int
-		fmt.Fscan(in, &l, &r)
-		odt.Set(l, r, 1)
-	}
-	odt.EnumerateAll(func(l, r int, x int) {
-		if x == 1 {
-			fmt.Fprintln(out, l, r)
-		}
-	})
+  /**
+   * @param depth 树的深度.默认为16.一般取16或32.
+   */
+  constructor(depth = 16) {
+    this._root = new _VNode(depth)
+  }
+
+  has(x: number): boolean {
+    return this._root.has(x)
+  }
+
+  insert(x: number): boolean {
+    if (this.has(x)) return false
+    this._size++
+    this._root.insert(x)
+    return true
+  }
+
+  erase(x: number): boolean {
+    if (!this.has(x)) return false
+    this._size--
+    this._root.erase(x)
+    return true
+  }
+
+  /**
+   * 返回小于等于i的最大元素.如果不存在,返回-INF.
+   */
+  prev(x: number): number {
+    return this._root.prev(x)
+  }
+
+  /**
+   * 返回大于等于i的最小元素.如果不存在,返回INF.
+   */
+  next(x: number): number {
+    return this._root.next(x)
+  }
+
+  /**
+   * 遍历[start,end)区间内的元素.
+   */
+  enumerateRange(start: number, end: number, f: (v: number) => void): void {
+    let x = start - 1
+    while (true) {
+      x = this.next(x + 1)
+      if (x >= end) break
+      f(x)
+    }
+  }
+
+  toString(): string {
+    const sb: string[] = []
+    this.enumerateRange(-INF, INF, v => sb.push(v.toString()))
+    return `VanEmdeBoasTree(${this.size}){${sb.join(', ')}}`
+  }
+
+  /**
+   * 如果没有元素,返回INF.
+   */
+  get min(): number {
+    return this._root.min
+  }
+
+  /**
+   * 如果没有元素,返回-INF.
+   */
+  get max(): number {
+    return this._root.max
+  }
+
+  get size(): number {
+    return this._size
+  }
 }
 
-func main() {
-	UnionOfInterval()
+class _VNode {
+  dep: number
+  min = INF
+  max = -INF
+  aux: _VNode | undefined = undefined
+  son: Map<number, _VNode> = new Map()
+
+  constructor(dep: number) {
+    this.dep = dep
+  }
+
+  has(x: number): boolean {
+    const { min: vMin, max: vMax, dep: vDep } = this
+    if (x === vMin || x === vMax) return true
+    if (!vDep || x < vMin || x > vMax) return false
+    const i = x >>> vDep
+    const soni = this.son.get(i)
+    if (!soni) return false
+    return soni.has(x - (i << vDep))
+  }
+
+  insert(x: number): void {
+    const { min: vMin, max: vMax, dep: vDep } = this
+    if (vMin > vMax) {
+      this.min = x
+      this.max = x
+      return
+    }
+    if (vMin === vMax) {
+      if (x < vMin) {
+        this.min = x
+        return
+      }
+      if (x > vMax) {
+        this.max = x
+        return
+      }
+    }
+    if (x < vMin) {
+      const tmp = x
+      x = vMin
+      this.min = tmp
+    }
+    if (x > vMax) {
+      const tmp = x
+      x = vMax
+      this.max = tmp
+    }
+    const i = x >>> vDep
+    let soni = this.son.get(i)
+    if (!soni) {
+      soni = new _VNode(vDep >>> 1)
+      this.son.set(i, soni)
+    }
+    if (soni.empty()) {
+      if (!this.aux) this.aux = new _VNode(vDep >>> 1)
+      this.aux.insert(i)
+    }
+    soni.insert(x - (i << vDep))
+  }
+
+  erase(x: number): void {
+    const { min: vMin, max: vMax, dep: vDep, aux: vAux } = this
+    if (vMin === x && vMax === x) {
+      this.min = INF
+      this.max = -INF
+      return
+    }
+    if (x === vMin) {
+      if (!vAux || vAux.empty()) {
+        this.min = vMax
+        return
+      }
+      const auxMin = vAux.min
+      x = (auxMin << vDep) + this.son.get(auxMin)!.min
+      this.min = x
+    }
+    if (x === vMax) {
+      if (!vAux || vAux.empty()) {
+        this.max = vMin
+        return
+      }
+      const auxMax = vAux.max
+      x = (auxMax << vDep) + this.son.get(auxMax)!.max
+      this.max = x
+    }
+    const i = x >>> vDep
+    const soni = this.son.get(i)!
+    soni.erase(x - (i << vDep))
+    if (soni.empty()) vAux!.erase(i)
+  }
+
+  prev(x: number): number {
+    const { min: vMin, max: vMax, dep: vDep } = this
+    if (x < vMin) return -INF
+    if (x >= vMax) return vMax
+    const i = x >>> vDep
+    const hi = i << vDep
+    const lo = x - hi
+    const soni = this.son.get(i)
+    if (soni && lo >= soni.min) return hi + soni.prev(lo)
+    let y = -INF
+    if (this.aux && i > 0) y = this.aux.prev(i - 1)
+    if (y === -INF) return vMin
+    return (y << vDep) + this.son.get(y)!.max
+  }
+
+  next(x: number): number {
+    const { min: vMin, max: vMax, dep: vDep } = this
+    if (x <= vMin) return vMin
+    if (x > vMax) return INF
+    const i = x >>> vDep
+    const hi = i << vDep
+    const lo = x - hi
+    const soni = this.son.get(i)
+    if (soni && lo <= soni.max) return hi + soni.next(lo)
+    let y = INF
+    if (this.aux) y = this.aux.next(i + 1)
+    if (y === INF) return vMax
+    return (y << vDep) + this.son.get(y)!.min
+  }
+
+  empty(): boolean {
+    return this.min > this.max
+  }
 }
 
-type Value = int
+export { ODTVan }
 
-type ODT struct {
-	Len        int // 区间数
-	Count      int // 区间元素个数之和
-	llim, rlim int
-	noneValue  Value
-	data       []Value
-	ss         *_fastSet
-}
+if (require.main === module) {
+  const INF = 2e15
+  const van = new ODTVan(INF)
+  console.log(van.toString())
+  van.set(0, 10, 1)
+  van.set(2, 5, 2)
+  console.log(van.get(8))
+  console.log(van.toString())
+  van.enumerateRange(
+    1,
+    7,
+    (start, end, value) => {
+      console.log(start, end, value)
+    },
+    true
+  )
+  console.log(van.toString(), van.length)
 
-// 指定区间长度 n 和哨兵 noneValue 建立一个 ODT.
-//  区间为[0,n).
-func NewODT(n int, noneValue Value) *ODT {
-	res := &ODT{}
-	dat := make([]Value, n)
-	for i := 0; i < n; i++ {
-		dat[i] = noneValue
-	}
-	ss := _newFastSet(n)
-	ss.Insert(0)
+  // 352. 将数据流变为多个不相交区间
+  // https://leetcode.cn/problems/data-stream-as-disjoint-intervals/
+  class SummaryRanges {
+    private readonly _odt = new ODTVan(-1)
 
-	res.rlim = n
-	res.noneValue = noneValue
-	res.data = dat
-	res.ss = ss
-	return res
-}
+    addNum(value: number): void {
+      this._odt.set(value, value + 1, 0)
+    }
 
-// 返回包含 x 的区间的信息.
-func (odt *ODT) Get(x int, erase bool) (start, end int, value Value) {
-	start, end = odt.ss.Prev(x), odt.ss.Next(x+1)
-	value = odt.data[start]
-	if erase && value != odt.noneValue {
-		odt.Len--
-		odt.Count -= end - start
-		odt.data[start] = odt.noneValue
-		odt.mergeAt(start)
-		odt.mergeAt(end)
-	}
-	return
-}
-
-func (odt *ODT) Set(start, end int, value Value) {
-	odt.EnumerateRange(start, end, func(l, r int, x Value) {}, true)
-	odt.ss.Insert(start)
-	odt.data[start] = value
-	if value != odt.noneValue {
-		odt.Len++
-		odt.Count += end - start
-	}
-	odt.mergeAt(start)
-	odt.mergeAt(end)
-}
-
-func (odt *ODT) EnumerateAll(f func(start, end int, value Value)) {
-	odt.EnumerateRange(0, odt.rlim, f, false)
-}
-
-// 遍历范围 [L, R) 内的所有数据.
-func (odt *ODT) EnumerateRange(start, end int, f func(start, end int, value Value), erase bool) {
-	if !(odt.llim <= start && start <= end && end <= odt.rlim) {
-		panic(fmt.Sprintf("invalid range [%d, %d)", start, end))
-	}
-
-	NONE := odt.noneValue
-	if !erase {
-		l := odt.ss.Prev(start)
-		for l < end {
-			r := odt.ss.Next(l + 1)
-			f(max(l, start), min(r, end), odt.data[l])
-			l = r
-		}
-		return
-	}
-
-	// 分割区间
-	p := odt.ss.Prev(start)
-	if p < start {
-		odt.ss.Insert(start)
-		odt.data[start] = odt.data[p]
-		if odt.data[start] != NONE {
-			odt.Len++
-		}
-	}
-	p = odt.ss.Next(end)
-	if end < p {
-		odt.data[end] = odt.data[odt.ss.Prev(end)]
-		odt.ss.Insert(end)
-		if odt.data[end] != NONE {
-			odt.Len++
-		}
-	}
-	p = start
-	for p < end {
-		q := odt.ss.Next(p + 1)
-		x := odt.data[p]
-		f(p, q, x)
-		if odt.data[p] != NONE {
-			odt.Len--
-			odt.Count -= q - p
-		}
-		odt.ss.Erase(p)
-		p = q
-	}
-	odt.ss.Insert(start)
-	odt.data[start] = NONE
-}
-
-func (odt *ODT) String() string {
-	sb := []string{}
-	odt.EnumerateAll(func(start, end int, value Value) {
-		var v interface{} = value
-		if value == odt.noneValue {
-			v = "nil"
-		}
-		sb = append(sb, fmt.Sprintf("[%d,%d):%v", start, end, v))
-	})
-	return fmt.Sprintf("ODT{%v}", strings.Join(sb, ", "))
-}
-
-func (odt *ODT) mergeAt(p int) {
-	if p <= 0 || odt.rlim <= p {
-		return
-	}
-	q := odt.ss.Prev(p - 1)
-	if odt.data[p] == odt.data[q] {
-		if odt.data[p] != odt.noneValue {
-			odt.Len--
-		}
-		odt.ss.Erase(p)
-	}
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-type _fastSet struct {
-	n, lg int
-	seg   [][]int
-}
-
-func _newFastSet(n int) *_fastSet {
-	res := &_fastSet{n: n}
-	seg := [][]int{}
-	n_ := n
-	for {
-		seg = append(seg, make([]int, (n_+63)>>6))
-		n_ = (n_ + 63) >> 6
-		if n_ <= 1 {
-			break
-		}
-	}
-	res.seg = seg
-	res.lg = len(seg)
-	return res
-}
-
-func (fs *_fastSet) Has(i int) bool {
-	return (fs.seg[0][i>>6]>>(i&63))&1 != 0
-}
-
-func (fs *_fastSet) Insert(i int) {
-	for h := 0; h < fs.lg; h++ {
-		fs.seg[h][i>>6] |= 1 << (i & 63)
-		i >>= 6
-	}
-}
-
-func (fs *_fastSet) Erase(i int) {
-	for h := 0; h < fs.lg; h++ {
-		fs.seg[h][i>>6] &= ^(1 << (i & 63))
-		if fs.seg[h][i>>6] != 0 {
-			break
-		}
-		i >>= 6
-	}
-}
-
-// 返回大于等于i的最小元素.如果不存在,返回n.
-func (fs *_fastSet) Next(i int) int {
-	if i < 0 {
-		i = 0
-	}
-	if i >= fs.n {
-		return fs.n
-	}
-
-	for h := 0; h < fs.lg; h++ {
-		if i>>6 == len(fs.seg[h]) {
-			break
-		}
-		d := fs.seg[h][i>>6] >> (i & 63)
-		if d == 0 {
-			i = i>>6 + 1
-			continue
-		}
-		// find
-		i += fs.bsf(d)
-		for g := h - 1; g >= 0; g-- {
-			i <<= 6
-			i += fs.bsf(fs.seg[g][i>>6])
-		}
-
-		return i
-	}
-
-	return fs.n
-}
-
-// 返回小于等于i的最大元素.如果不存在,返回-1.
-func (fs *_fastSet) Prev(i int) int {
-	if i < 0 {
-		return -1
-	}
-	if i >= fs.n {
-		i = fs.n - 1
-	}
-
-	for h := 0; h < fs.lg; h++ {
-		if i == -1 {
-			break
-		}
-		d := fs.seg[h][i>>6] << (63 - i&63)
-		if d == 0 {
-			i = i>>6 - 1
-			continue
-		}
-		// find
-		i += fs.bsr(d) - 63
-		for g := h - 1; g >= 0; g-- {
-			i <<= 6
-			i += fs.bsr(fs.seg[g][i>>6])
-		}
-
-		return i
-	}
-
-	return -1
-}
-
-// 遍历[start,end)区间内的元素.
-func (fs *_fastSet) Enumerate(start, end int, f func(i int)) {
-	x := start - 1
-	for {
-		x = fs.Next(x + 1)
-		if x >= end {
-			break
-		}
-		f(x)
-	}
-}
-
-func (fs *_fastSet) String() string {
-	res := []string{}
-	for i := 0; i < fs.n; i++ {
-		if fs.Has(i) {
-			res = append(res, strconv.Itoa(i))
-		}
-	}
-	return fmt.Sprintf("_fastSet{%v}", strings.Join(res, ", "))
-}
-
-func (*_fastSet) bsr(x int) int {
-	return 63 - bits.LeadingZeros(uint(x))
-}
-
-func (*_fastSet) bsf(x int) int {
-	return bits.TrailingZeros(uint(x))
+    getIntervals(): number[][] {
+      const res: number[][] = []
+      this._odt.enumerateAll((start, end, value) => {
+        if (value === 0) res.push([start, end - 1])
+      })
+      return res
+    }
+  }
 }

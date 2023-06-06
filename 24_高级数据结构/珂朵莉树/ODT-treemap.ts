@@ -9,6 +9,7 @@ const INF = 2e15
  * 珂朵莉树，基于数据随机的颜色段均摊。
  * `SortedList`实现.
  * 初始时，默认区间为`[-INF,INF)`，值为`noneValue`.
+ * @deprecated 使用`ODTVan`更快,但是空间占用更多.
  */
 class ODTMap<S> {
   private _count = 0

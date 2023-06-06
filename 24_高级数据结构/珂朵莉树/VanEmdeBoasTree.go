@@ -6,12 +6,14 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
 func main() {
 	demo := func() {
-		van := NewVanEmdeBoasTree()
+		van := NewVanEmdeBoasTree(16)
 		fmt.Println(van.Min(), van.Max(), van.Size(), van.Prev(0), van.Next(0))
 		van.Insert(1)
 		van.Insert(2)
@@ -22,9 +24,10 @@ func main() {
 		van.Insert(-111)
 		fmt.Println(van.Min(), van.Max(), van.Size())
 		fmt.Println(van.Has(-111), van.Prev(-1), van.Min())
+		fmt.Println(van)
 
 		n := int(5e5)
-		fs := NewVanEmdeBoasTree()
+		fs := NewVanEmdeBoasTree(16)
 		time1 := time.Now()
 		for i := 0; i < n; i++ {
 			fs.Insert(i)
@@ -34,10 +37,10 @@ func main() {
 			fs.Erase(i)
 			fs.Insert(i)
 		}
-		fmt.Println(time.Since(time1)) // !5e5 => 234ms(depth=8)
+		fmt.Println(time.Since(time1)) // !5e5 => 250ms(depth=16)
 	}
 	_ = demo
-	// demo()
+	demo()
 
 	// https://judge.yosupo.jp/problem/predecessor_problem
 	in := bufio.NewReader(os.Stdin)
@@ -46,7 +49,7 @@ func main() {
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	set := NewVanEmdeBoasTree()
+	set := NewVanEmdeBoasTree(16)
 	var s string
 	fmt.Fscan(in, &s)
 	for i, v := range s {
@@ -106,8 +109,9 @@ type VanEmdeBoasTree struct {
 }
 
 // !建立一个元素范围为(-INF,INF)的VanEmdeBoasTree.
-func NewVanEmdeBoasTree() *VanEmdeBoasTree {
-	return &VanEmdeBoasTree{root: NewVNode(32)} // 16/32/64
+//  depth:树的深度.一般取16.也可以取32.
+func NewVanEmdeBoasTree(depth int) *VanEmdeBoasTree {
+	return &VanEmdeBoasTree{root: NewVNode(depth)}
 }
 
 func (van *VanEmdeBoasTree) Has(x int) bool {
@@ -316,4 +320,24 @@ func (v *VNode) Next(x int) int {
 
 func (v *VNode) Empty() bool {
 	return v.min > v.max
+}
+
+// 遍历[start,end)区间内的元素.
+func (v *VanEmdeBoasTree) Enumerate(start, end int, f func(i int)) {
+	x := start - 1
+	for {
+		x = v.Next(x + 1)
+		if x >= end {
+			break
+		}
+		f(x)
+	}
+}
+
+func (v *VanEmdeBoasTree) String() string {
+	res := []string{}
+	v.Enumerate(-INF, INF, func(i int) {
+		res = append(res, strconv.Itoa(i))
+	})
+	return fmt.Sprintf("VanEmdeBoasTree{%v}", strings.Join(res, ", "))
 }
