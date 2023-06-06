@@ -1,5 +1,7 @@
 // !https://ei1333.github.io/library/structure/others/linear-rmq.hpp
-
+// word-RAM model RMQ
+// 一个RMQ问题的快速算法，以及区间众数 - hqztrue的文章 - 知乎
+// https://zhuanlan.zhihu.com/p/79423299
 package main
 
 import (

@@ -352,6 +352,18 @@ class BitSet {
     return sb.join('')
   }
 
+  /**
+   * 遍历所有 1 的位置.
+   */
+  forEach(callback: (value: number) => void): void {
+    this._bits.forEach((v, i) => {
+      for (; v > 0; v &= v - 1) {
+        const j = (i << 5) | BitSet._trailingZeros32(v)
+        callback(j)
+      }
+    })
+  }
+
   private _indexOfZero(): number {
     for (let i = 0; i < this._bits.length; i++) {
       const x = this._bits[i]

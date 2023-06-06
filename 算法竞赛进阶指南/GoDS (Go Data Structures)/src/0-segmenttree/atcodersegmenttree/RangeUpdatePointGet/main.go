@@ -1,5 +1,6 @@
 // !区间修改单点查询的线段树 Dual-Segment-Tree(双対セグメント木)
 // 双対セグメント木は遅延伝搬セグメント木の作用素モノイドのみを取り出したセグメント木を指す.
+// DualSegTree.
 package main
 
 import (

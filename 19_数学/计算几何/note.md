@@ -31,3 +31,15 @@ Geometry DS
   `O(logn)`
 
 - kinetic DS : moving data
+
+---
+
+多边形的三角剖分
+德劳内三角剖分
+https://zhuanlan.zhihu.com/p/459884570
+
+// todo https://oi-wiki.org/geometry/triangulation/
+// https://cp-algorithms.com/geometry/delaunay.html
+// http://poj.org/problem?id=2986
+
+**Delaunay 三角剖分满足：一个三角形（或边）的外接圆范围内（边界除外），不包含点集 P 中的任何顶点**。

@@ -9,3 +9,8 @@
 - 矩阵乘法算法的实际速度表现依赖于硬件。在算法竞赛的场景中无法使用 GPU，所以我们主要讨论在普通 PC 上使用 CPU 的实现
 
 - 一般用一维数组+交换变量+循环展开(loop unrolling)等方法优化
+
+---
+
+TODO
+https://judge.yosupo.jp/problem/matrix_product

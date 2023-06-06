@@ -1,6 +1,0 @@
-w BooleanSquareMatrixDense(3)
-  // mat.set(0, 0, true)
-  // mat.set(0, 1, true)
-  // mat.set(1, 2, true)
-  // mat.set(1, 0, true)
-  // mat.print()

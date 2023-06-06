@@ -17,3 +17,8 @@ kd 树是一个二叉树结构，它的每一个节点记载了【特征坐标�
   https://www.luogu.com.cn/blog/lc-2018-Canton/solution-p4148
   https://oi-wiki.org/ds/kdt/
   https://github.dev/EndlessCheng/codeforces-go/tree/master/copypasta
+
+---
+
+Binary space partitioning Tree， BSPTree
+二叉空间分割

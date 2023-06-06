@@ -12,5 +12,9 @@ https://zhuanlan.zhihu.com/p/25017840
 **什么样的离线查询可以用莫队算法?**
 如果已知区间[left,right]的答案 并且由此可以推出区间[left±1,right±1]的答案 那么就可以用莫队算法
 
-
 https://ei1333.hateblo.jp/entry/2017/09/11/211011
+
+---
+
+二次离线莫队 将 `O(nsqrt(n)logn)` 优化到 `O(nsqrt(n))`
+https://www.cnblogs.com/jz-597/p/13598510.html

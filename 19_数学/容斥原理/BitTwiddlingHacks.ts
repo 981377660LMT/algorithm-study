@@ -22,6 +22,7 @@ function absInt32(int32: number): number {
   return (int32 + mask) ^ mask
 }
 
+// 不用分支计算最大值
 // -1 = 0b11111...111
 function maxInt32(x: number, y: number): number {
   return x ^ ((x ^ y) & -(x < y))

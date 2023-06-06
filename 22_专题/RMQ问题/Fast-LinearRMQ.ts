@@ -1,6 +1,8 @@
 /**
- * 线性时间RMQ, 查询序列中任意区间的最小值索引.
+ * 线性时间RMQ, 基于word-RAM model, 查询序列中任意区间的最小值的`索引`.
  * !和`SparseTable`差不多快,但是空间复杂度更低,为`O(n)`.
+ * @see {@link  https://zhuanlan.zhihu.com/p/79423299}
+ *      {@link  https://ei1333.github.io/library/structure/others/linear-rmq.hpp}
  */
 class LinearRMQ {
   private readonly _small: number[]
@@ -42,7 +44,7 @@ class LinearRMQ {
   }
 
   /**
-   * 查询区间`[start, end)`中的最小值的索引.
+   * 查询区间`[start, end)`中的最小值的`索引`.
    */
   query(start: number, end: number): number {
     if (start >= end) throw new Error(`start(${start}) should be less than end(${end})`)
