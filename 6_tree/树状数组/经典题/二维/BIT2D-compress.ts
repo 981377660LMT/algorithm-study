@@ -76,21 +76,22 @@ class BIT2DCompress<E> {
     }
     indices.sort((a, b) => ys[a] - ys[b])
 
-    indices.forEach(i => {
-      let ix = this._xtoi(xs[i])
-      const y = ys[i]
+    for (let i = 0; i < indices.length; i++) {
+      const v = indices[i]
+      let ix = this._xtoi(xs[v])
+      const y = ys[v]
       while (ix < n) {
         const ky = keyYRaw[ix]
         const tmp = datRaw[ix]
         if (ky.length === 0 || ky[ky.length - 1] < y) {
           keyYRaw[ix].push(y)
-          tmp.push(ws[i])
+          tmp.push(ws[v])
         } else {
-          tmp[tmp.length - 1] = this._op(tmp[tmp.length - 1], ws[i])
+          tmp[tmp.length - 1] = this._op(tmp[tmp.length - 1], ws[v])
         }
         ix += (ix + 1) & -(ix + 1)
       }
-    })
+    }
 
     this._indptr = new Uint32Array(n + 1)
     for (let i = 0; i < n; i++) {

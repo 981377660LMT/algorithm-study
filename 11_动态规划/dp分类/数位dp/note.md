@@ -66,3 +66,9 @@ class Solution:
         # 1 <= low <= high <= 2×10^8
         return cal(high, d) - cal(low - 1, d)
 ```
+
+---
+
+lru_cache 可以加强一下的 **用户指定哪些 args 或者 kwargs 作为缓存的键**
+像有的地方就没必要把 curSum(返回值) 当键
+**所以还是手写 memo 比较好**

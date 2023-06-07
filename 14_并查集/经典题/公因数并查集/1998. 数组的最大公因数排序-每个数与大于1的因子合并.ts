@@ -1,8 +1,6 @@
+// https://leetcode.cn/problems/gcd-sort-of-an-array/
 // 如果两个数gcd>1 那么这两个数可交换位置(连通)
 // 如果能使用上述交换方式将 nums 按 非递减顺序 排列，返回 true
-
-import { UnionFindArray } from '../../UnionFind'
-
 //  1 <= nums.length <= 3 * 104
 //  2 <= nums[i] <= 105
 
@@ -16,22 +14,27 @@ import { UnionFindArray } from '../../UnionFind'
 // 如果用两层循环来判断来合并任意两个数，此时必然会超时
 // 因此考虑`将每个数和自己的所有因子进行合并`
 
+import { getFactors } from '../../../19_数学/因数筛/prime'
+import { UnionFindArray } from '../../UnionFind'
+
 function gcdSort(nums: number[]): boolean {
-  const n = Math.max(...nums)
+  const n = Math.max(...nums, 0)
   const uf = new UnionFindArray(n + 1)
-  for (const num of nums) {
-    for (let factor = 2; factor <= ~~Math.sqrt(num); factor++) {
-      if (num % factor === 0) {
-        uf.union(num, factor)
-        uf.union(num, num / factor)
+  for (let i = 0; i < nums.length; i++) {
+    const cur = nums[i]
+    const factors = getFactors(cur)
+    for (let j = 0; j < factors.length; j++) {
+      const f = factors[j]
+      // !大于1的因子
+      if (f > 1) {
+        uf.union(cur, f)
       }
     }
   }
 
-  const sortedNums = nums.slice().sort((a, b) => a - b)
+  const sorted = nums.slice().sort((a, b) => a - b)
   for (let i = 0; i < nums.length; i++) {
-    if (nums[i] === sortedNums[i]) continue
-    if (uf.find(nums[i]) !== uf.find(sortedNums[i])) return false
+    if (!uf.isConnected(sorted[i], nums[i])) return false
   }
 
   return true

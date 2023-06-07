@@ -73,3 +73,42 @@ const qs = Array.from({ length: 5e4 }, () => [0, 0, 0])
 console.time('matrixSumQueries')
 matrixSumQueries(n, qs)
 console.timeEnd('matrixSumQueries')
+
+// !要开1e8很大的数组时,最好是在全局开一个pool，然后每次在函数开头memset一下需要使用的部分
+const visited = new Uint8Array(1e8)
+const visitedRow = new Uint8Array(1e4)
+const visitedCol = new Uint8Array(1e4)
+function matrixSumQueries2(n: number, queries: number[][]): number {
+  for (let i = 0; i < n * n; i++) visited[i] = 0
+  for (let i = 0; i < n; i++) visitedRow[i] = 0
+  for (let i = 0; i < n; i++) visitedCol[i] = 0
+
+  let res = 0
+  for (let i = queries.length - 1; ~i; i--) {
+    const [type, rowOrCol, val] = queries[i]
+    // 修改行
+    if (type === 0) {
+      if (visitedRow[rowOrCol]) continue
+      visitedRow[rowOrCol] = 1
+      for (let j = 0; j < n; j++) {
+        const pos = rowOrCol * n + j
+        if (!visited[pos]) {
+          visited[pos] = 1
+          res += val
+        }
+      }
+    } else {
+      if (visitedCol[rowOrCol]) continue
+      visitedCol[rowOrCol] = 1
+      for (let j = 0; j < n; j++) {
+        const pos = j * n + rowOrCol
+        if (!visited[pos]) {
+          visited[pos] = 1
+          res += val
+        }
+      }
+    }
+  }
+
+  return res
+}

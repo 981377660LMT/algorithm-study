@@ -5,10 +5,10 @@
 from typing import List, Optional
 
 
-def solve_linear_equation_F2_col(A: List[int], b: List[int], m: int) -> Optional[List[int]]:
+def solve_linear_equation_F2_col(A: List[int], b: List[int], col: int) -> Optional[List[int]]:
     """使用高斯消元法求解线性方程组Ax = b
 
-    矩阵A 的每一行由一个整数表示,整数的二进制表示即为矩阵行的元素.
+    矩阵A(Bitset) 的每一行由一个整数表示,整数的二进制表示即为矩阵行的元素.
     向量b也是一个整数列表,每个元素对应一个二进制位.
     """
     assert len(A) == len(b)
@@ -33,14 +33,13 @@ def solve_linear_equation_F2_col(A: List[int], b: List[int], m: int) -> Optional
     if any(b[i] for i in range(rank, row)):
         return
 
-    res = [0] * m
+    res = [0] * col
     for r in range(rank):
         res[A[r].bit_length() - 1] = b[r]
     return res
 
 
 if __name__ == "__main__":
-
     # https://yukicoder.me/problems/no/1421
     # 在一个国家里有n个城镇，它们分别被编号为1到n,每个城镇中有若干栋房子，
     # 这个国家的国王想知道每个城镇分别有多少栋房子。
@@ -54,7 +53,7 @@ if __name__ == "__main__":
     # 如果没有（旅行者的报告中存在矛盾），请输出-1。
 
     n, m = map(int, input().split())
-    A = [0] * m
+    A = [0] * m  # Bitset
     b = [0] * m
     for i in range(m):
         _ = int(input())

@@ -14,7 +14,7 @@ Geometry DS
   ![1D RabgeTrees , 叶子存放数据](image/note/1681308089316.png)
 - 替罪羊树处理动态问题->重构
   https://riteme.site/blog/2016-4-6/scapegoat.html
-- fractional cascading (分数级级联)
+- fractional cascading (分数级联/分散层叠)
   https://ei1333.github.io/library/structure/segment-tree/segment-tree-fractional-cascading.hpp
 
   > 实际上分数级联没那么快(常数大)

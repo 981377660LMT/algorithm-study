@@ -378,3 +378,9 @@ if (require.main === module) {
   console.timeEnd('enumerateBits')
 }
 ```
+
+- 需要开很大的布尔数组时(1e9) 使用 bitset
+  https://leetcode.cn/problems/sum-of-matrix-after-queries/
+- 为了防止 MLE，可以使用全局数组 (pool), 在函数开头 memset(fill) 初始化
+  `不过一般 MLE 的都会 TLE`，最好是想别的方法
+  空间占用太大会导致 GC 频繁(一般指小对象)，从而降低执行效率

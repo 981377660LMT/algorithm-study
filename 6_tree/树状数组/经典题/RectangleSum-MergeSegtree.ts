@@ -3,7 +3,7 @@
 // https://kopricky.github.io/code/SegmentTrees/merge_segtree.html
 // 静态二维矩形区间计数(RectangleSum-MergeSegtree)
 // O(nlogn)空间构建 O(logn^2)查询
-// 虽然Fractional Cascading (分数级联)理论可以O(logn)查询 但是更慢
+// 虽然Fractional Cascading (分数级联/分散层叠)理论可以O(logn)查询 但是更慢
 
 /**
  * @alias MergeSegtree

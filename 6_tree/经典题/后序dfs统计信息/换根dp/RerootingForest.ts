@@ -73,10 +73,11 @@ class RerootingForest<DpItem = number> {
 
     const dp1 = new Map<number, DpItem>()
     const dp2 = new Map<number, DpItem>()
-    order.forEach(v => {
+    for (let i = 0; i < order.length; i++) {
+      const v = order[i]
       dp1.set(v, e(v))
       dp2.set(v, e(v))
-    })
+    }
     for (let i = order.length - 1; i > -1; i--) {
       const cur = order[i]
       let res = e(cur)

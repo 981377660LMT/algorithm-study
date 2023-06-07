@@ -75,21 +75,22 @@ class SegmentTree2DCompress<E> {
     }
     indices.sort((a, b) => ys[a] - ys[b])
 
-    indices.forEach(i => {
-      let ix = this._xtoi(xs[i]) + n
-      const y = ys[i]
+    for (let i = 0; i < indices.length; i++) {
+      const v = indices[i]
+      let ix = this._xtoi(xs[v]) + n
+      const y = ys[v]
       while (ix > 0) {
         const KY = keyYRaw[ix]
         const tmp = datRaw[ix]
         if (!KY.length || KY[KY.length - 1] < y) {
           keyYRaw[ix].push(y)
-          tmp.push(ws[i])
+          tmp.push(ws[v])
         } else {
-          tmp[tmp.length - 1] = this._op(tmp[tmp.length - 1], ws[i])
+          tmp[tmp.length - 1] = this._op(tmp[tmp.length - 1], ws[v])
         }
         ix >>= 1
       }
-    })
+    }
 
     this._indptr = new Uint32Array(n + n + 1)
     for (let i = 0; i < n + n; i++) {

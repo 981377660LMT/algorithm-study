@@ -9,17 +9,13 @@ class UnionFindArray {
     this._n = n
     this._part = n
     this._data = new Int32Array(n)
-    for (let i = 0; i < n; i++) {
-      this._data[i] = -1
-    }
+    for (let i = 0; i < n; i++) this._data[i] = -1
   }
 
   union(x: number, y: number, callback?: (big: number, small: number) => void): boolean {
     let rootX = this.find(x)
     let rootY = this.find(y)
-    if (rootX === rootY) {
-      return false
-    }
+    if (rootX === rootY) return false
     if (this._data[rootX] > this._data[rootY]) {
       rootX ^= rootY
       rootY ^= rootX
