@@ -11,7 +11,7 @@
 
 from collections import Counter
 from itertools import permutations
-from 子序列自动机 import SubsequenceAutomaton1
+from SubsequenceAutomaton import SubsequenceAutomaton1
 
 
 class Solution:

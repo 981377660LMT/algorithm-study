@@ -1,22 +1,19 @@
+# !求 words[i] 中是 S 的子序列的单词个数。
+
+
 from typing import List
 from collections import defaultdict
-
-
-# 求 words[i] 中是 S 的子序列的单词个数。
-
-# 经典题
-# 2种解法
-
-from 子序列自动机 import SubsequenceAutomaton1
+from SubsequenceAutomaton import SubsequenceAutomaton1, SubsequenceAutomaton2
 
 
 class Solution:
-    def numMatchingSubseq(self, S: str, words: List[str]) -> int:
-        SA = SubsequenceAutomaton1(S)
-        return sum(SA.match(word)[0] == len(word) for word in words)
+    def numMatchingSubseq(self, s: str, words: List[str]) -> int:
+        """子序列自动机解法."""
+        SA = SubsequenceAutomaton1(s)
+        return sum(SA.includes(word) for word in words)
 
-    def numMatchingSubseq2(self, S: str, words: List[str]) -> int:
-        # 指向下一个字母的指针
+    def numMatchingSubseq2(self, s: str, words: List[str]) -> int:
+        # !指向下一个字母的指针
         # 因为 S 很长，所以寻找一种只需遍历一次 S 的方法，避免暴力解法的多次遍历。
         # !将所有单词根据首字母不同放入不同的桶中
         # 每个桶中的单词就是该单词正在等待匹配的下一个字母
@@ -25,7 +22,7 @@ class Solution:
             wordsByHead[word[0]].append(word)
 
         res = 0
-        for char in S:
+        for char in s:
             matches = wordsByHead[char]
             wordsByHead[char] = []
             for word in matches:
@@ -37,4 +34,4 @@ class Solution:
         return res
 
 
-print(Solution().numMatchingSubseq(S="abcde", words=["a", "bb", "acd", "ace"]))
+print(Solution().numMatchingSubseq(s="abcde", words=["a", "bb", "acd", "ace"]))

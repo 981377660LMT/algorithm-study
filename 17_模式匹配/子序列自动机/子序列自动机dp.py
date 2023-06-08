@@ -19,10 +19,12 @@ def subSequnceDp(s: str) -> int:
     dp = [0] * (n + 1)  # 前i个字符中的本质子序列个数
     dp[0] = 1
     for i in range(n):
+        cache = next[i]
         for j in range(26):
-            if next[i][j] == n:
+            v = cache[j]
+            if v == n:
                 continue
-            dp[next[i][j] + 1] += dp[i]
+            dp[v + 1] += dp[i]
     return sum(dp) - 1
 
 

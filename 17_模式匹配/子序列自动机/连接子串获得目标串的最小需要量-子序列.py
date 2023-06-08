@@ -22,7 +22,7 @@ class Solution:
         # print(nexts)
 
         searchFrom = 0
-        res = 0
+        need = 0
         for char in target:
             ord_ = ord(char) - 97
             if nexts[0][ord_] == -1:
@@ -30,11 +30,11 @@ class Solution:
 
             nextIndex = nexts[searchFrom][ord_]
             if nextIndex == -1:
-                res += 1
+                need += 1
                 nextIndex = nexts[0][ord_]
             searchFrom = nextIndex + 1
 
-        return res + 1
+        return need + 1
 
 
 print(Solution().solve(source="abc", target="abcbcc"))

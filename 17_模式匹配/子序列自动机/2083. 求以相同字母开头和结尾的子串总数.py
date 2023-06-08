@@ -1,7 +1,10 @@
-from collections import defaultdict
-
 # 返回 s 中以相同字符开头和结尾的子字符串总数。
 # 1788. 最大化花园的美观度.py
+
+
+from collections import defaultdict
+
+
 class Solution:
     def numberOfSubstrings(self, s: str) -> int:
         indexMap = defaultdict(list)

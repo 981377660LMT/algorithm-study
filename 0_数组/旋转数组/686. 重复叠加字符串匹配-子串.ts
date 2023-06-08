@@ -1,4 +1,5 @@
 /* eslint-disable func-names */
+
 /**
  * @param {string} a
  * @param {string} b
@@ -12,10 +13,7 @@
 function repeatedStringMatch(a: string, b: string): number {
   const count = Math.ceil(b.length / a.length)
   const str = a.repeat(count)
-  if (str.includes(b)) {
-    return count
-  }
-
+  if (str.includes(b)) return count
   return (str + a).includes(b) ? count + 1 : -1
 }
 

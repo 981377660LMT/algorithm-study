@@ -1,10 +1,11 @@
+# 对于每个查询，你需要找到 子字符串中 在 两支蜡烛之间 的盘子的 数目 。
+# '*' 表示一个 盘子 ，'|' 表示一支 蜡烛 。
+
+
 from typing import List
 from bisect import bisect_left, bisect_right
 
-INF = 2**63 - 1
-
-# 对于每个查询，你需要找到 子字符串中 在 两支蜡烛之间 的盘子的 数目 。
-# '*' 表示一个 盘子 ，'|' 表示一支 蜡烛 。
+INF = int(1e18)
 
 
 class Solution:

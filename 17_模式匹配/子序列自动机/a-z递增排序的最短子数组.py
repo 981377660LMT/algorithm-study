@@ -12,9 +12,9 @@ from typing import List, Tuple
 
 def minWindow(s1: str, s2: str) -> str:
     """
-        找出 s1 中最短的（连续）子串 W ，使得 s2 是 W 的 子序列 。
-        如果有不止一个最短长度的窗口，返回开始位置最靠左的那个。
-        """
+    找出 s1 中最短的（连续）子串 W ，使得 s2 是 W 的 子序列 。
+    如果有不止一个最短长度的窗口，返回开始位置最靠左的那个。
+    """
     n = len(s1)
     nexts: List[Tuple[int, ...]] = [()] * n
     last = [-1] * 26
@@ -38,7 +38,7 @@ def minWindow(s1: str, s2: str) -> str:
             if res is None or cur - start + 1 < res[1] - res[0] + 1:
                 res = (start, cur)
 
-    return s1[res[0] : res[1] + 1] if res is not None else ''
+    return s1[res[0] : res[1] + 1] if res is not None else ""
 
 
 class Solution:
