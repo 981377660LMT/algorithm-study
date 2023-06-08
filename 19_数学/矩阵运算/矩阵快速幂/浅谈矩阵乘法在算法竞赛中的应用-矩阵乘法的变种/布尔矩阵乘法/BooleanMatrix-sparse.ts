@@ -104,6 +104,7 @@ class BooleanMatrixSparse {
   /**
    * 求出邻接矩阵`mat`的传递闭包`(mat+I)^n`.
    * 随机矩阵,2000*2000 => 4.3s.
+   * @deprecated 建议使用`O(n^3/32)`的Floyd-Warshall算法.
    */
   transitiveClosure(): BooleanMatrixSparse {
     if (this.row !== this.col) throw new Error('not a square matrix')

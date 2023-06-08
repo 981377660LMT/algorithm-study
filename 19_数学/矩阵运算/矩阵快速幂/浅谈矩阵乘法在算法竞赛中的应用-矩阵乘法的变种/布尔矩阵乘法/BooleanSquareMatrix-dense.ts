@@ -134,6 +134,7 @@ class BooleanSquareMatrixDense {
   /**
    * 求出邻接矩阵`mat`的传递闭包`(mat+I)^n`.
    * 稠密矩阵,2000*2000 => 1.4s.
+   * @deprecated 建议使用`O(n^3/32)`的Floyd-Warshall算法.
    */
   transitiveClosure(): BooleanSquareMatrixDense {
     const n = this.n

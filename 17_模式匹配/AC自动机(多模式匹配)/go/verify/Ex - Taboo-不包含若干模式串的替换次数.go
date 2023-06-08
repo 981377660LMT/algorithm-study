@@ -13,20 +13,20 @@ import (
 
 func SeparateString(s string, patterns []string) int {
 
-	aho := NewAhoCorasick(26, 'a')
+	ac := NewAhoCorasick(26, 'a')
 	for i, s := range patterns {
-		aho.Add(s, i)
+		ac.Add(s, i)
 	}
-	aho.Build(true)
+	ac.Build(true)
 
-	pos := 0
+	state := 0
 	res := 0
 	for i := 0; i < len(s); i++ {
-		pos = aho.Move(pos, s[i])
-		indexes := aho.stack[pos].Indexes
-		if len(indexes) > 0 {
+		state = ac.Move(state, s[i])
+		indexes := ac.stack[state].Indexes
+		if len(indexes) > 0 { // accpet
 			res++
-			pos = 0
+			state = 0
 		}
 	}
 

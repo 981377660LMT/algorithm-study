@@ -260,6 +260,7 @@ func Add(mat1, mat2 *BooleanSquareMatrix) *BooleanSquareMatrix {
 }
 
 // (A + I)^n 是传递闭包.
+//  Deprecated: 建议使用`O(n^3/64)`的Floyd-Warshall算法.
 func (bm *BooleanSquareMatrix) TransitiveClosure() *BooleanSquareMatrix {
 	n := bm.N
 	newMat := Eye(n).IAdd(bm)

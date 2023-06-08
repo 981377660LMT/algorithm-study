@@ -2,15 +2,14 @@
 // 1462. 课程表 IV
 // https://leetcode.cn/problems/course-schedule-iv/
 
-import { BooleanSquareMatrixDense } from './BooleanSquareMatrix-dense'
+import { TransitiveClosure } from './TransitiveClosure'
 
 function checkIfPrerequisite(n: number, prerequisites: number[][], queries: number[][]): boolean[] {
-  const mat = new BooleanSquareMatrixDense(n)
-  prerequisites.forEach(([u, v]) => mat.set(u, v, true))
-  const trans = mat.transitiveClosure()
+  const T = new TransitiveClosure(n)
+  prerequisites.forEach(([u, v]) => T.addDirectedEdge(u, v))
   const res: boolean[] = Array(queries.length)
   queries.forEach(([pre, cur], i) => {
-    res[i] = trans.get(pre, cur)
+    res[i] = T.canReach(pre, cur)
   })
   return res
 }

@@ -238,6 +238,7 @@ func Add(mat1, mat2 *BooleanMatrix) *BooleanMatrix {
 }
 
 // (A + I)^n 是传递闭包.
+//  Deprecated: 建议使用`O(n^3/64)`的Floyd-Warshall算法.
 func (bm *BooleanMatrix) TransitiveClosure() *BooleanMatrix {
 	if bm.ROW != bm.COL {
 		panic("Not a square matrix")
