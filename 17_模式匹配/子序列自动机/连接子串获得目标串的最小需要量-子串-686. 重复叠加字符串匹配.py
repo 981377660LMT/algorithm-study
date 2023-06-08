@@ -10,4 +10,10 @@
 # !否则不能
 class Solution:
     def repeatedStringMatch(self, a: str, b: str) -> int:
-        ...
+        na, nb = len(a), len(b)
+        ceiling = (nb + na - 1) // na
+        if b in a * ceiling:
+            return ceiling
+        if b in a * (ceiling + 1):
+            return ceiling + 1
+        return -1

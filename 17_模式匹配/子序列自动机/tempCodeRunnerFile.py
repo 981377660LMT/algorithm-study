@@ -1,1 +1,0 @@
-next[index][char] < n

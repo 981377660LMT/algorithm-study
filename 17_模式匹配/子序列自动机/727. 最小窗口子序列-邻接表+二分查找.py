@@ -16,7 +16,7 @@ class Solution:
             if hit != len(s2):
                 continue
 
-            sLen = sEnd - sStart + 1
+            sLen = sEnd - sStart
             if res is None or sLen < res[1] - res[0] + 1:
                 res = [sStart, sEnd]
 

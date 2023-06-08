@@ -6,3 +6,5 @@ interface Automaton<V> {
   accept?(state: number): boolean
   readonly size?: number
 }
+
+// !DFA 和 NFA 有没有接口表示???

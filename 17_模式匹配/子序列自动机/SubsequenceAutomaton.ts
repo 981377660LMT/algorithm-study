@@ -1,97 +1,233 @@
-# 子序列自动机
-# 如果需要进行大量的子序列匹配，那么就不能用朴素的双指针匹配了
+/* eslint-disable no-inner-declarations */
+/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-# 1.nexts数组形式 26*n
-# !O(26*n) 预处理 O(s) 查询
+// !子序列自动机.适用于多次子序列匹配的场景.
+// API:
+// - move(pos, newValue) -> nextPos:
+//     查询当前位置的下一个特定字符的位置(下标严格大于pos).如果不存在，则为 n. 0<=pos<n
+// - includes(t, sStart=0, sEnd=-1, tStart=0, tEnd=-1) -> bool:
+//     查询s[sStart:sEnd]是否含有某序列t[tStart:tEnd].时间复杂度O(len(t)logn).
+// !- !match(t, sStart=0, sEnd=-1, tStart=0, tEnd=-1) -> (hit,end):
+//     在 s[sStart:sEnd] 中寻找子序列 t[tStart:tEnd].时间复杂度 O(len(t)logn).
+//     适合处理需要多次匹配的场景.
 
-# 2.二分形式
-# !O(nlogn) 预处理 O(slogn) 查询
+/**
+ * `O(∑*n)`预处理,`∑`为字符集大小.
+ * `O(len(t))`查询,`len(t)`为待匹配序列的长度.
+ */
+class SubsequnceAutomaton1 {
+  /**
+   * `nexts[i*charset+j]`表示从i索引开始,下一个字符j的索引(严格大于i).
+   * 如果不存在,则为n.
+   */
+  private readonly _nexts: Uint32Array
+  private readonly _s: string
+  private readonly _charset: number
+  private readonly _offset: number
 
-from bisect import bisect_right
-from collections import defaultdict
-from typing import DefaultDict, List, Tuple
+  /**
+   * @param s 主串.
+   * @param charset 字符集大小.
+   * @param offset 字符集偏移量(起始字符).
+   */
+  constructor(s: string, charset = 26, offset = 97) {
+    this._s = s
+    this._charset = charset
+    this._offset = offset
+    this._nexts = this._build()
+  }
 
+  /**
+   * 查询当前位置的下一个特定字符的位置(下标严格大于pos).
+   * 如果不存在，则为 n.
+   * 0<=pos<n.
+   */
+  move(pos: number, newValue: string): number {
+    const v = newValue.charCodeAt(0) - this._offset
+    return this._nexts[pos * this._charset + v]
+  }
 
-# !默认charset为26个小写字母
+  /**
+   * 查询`s[sStart:sEnd]`是否含有某序列`t[tStart:tEnd]`.
+   */
+  includes(
+    t: string,
+    options?: { sStart?: number; sEnd?: number; tStart?: number; tEnd?: number }
+  ): boolean {
+    const [hit] = this.match(t, options)
+    let tLen: number
+    if (!options) {
+      tLen = t.length
+    } else {
+      const { tStart = 0, tEnd = t.length } = options
+      tLen = tEnd - tStart
+    }
+    return hit >= tLen
+  }
 
+  /**
+   * 在`s[sStart:sEnd]`中寻找子序列`t[tStart:tEnd]`.
+   * @returns `(hit,end)`: (`匹配到的的t的长度`, `匹配结束时s的索引`)
+   * 此时,匹配结束时t的索引为`tStart+hit`.
+   * 耗去的s的长度为`end-sStart`.
+   */
+  match(
+    t: string,
+    options?: { sStart?: number; sEnd?: number; tStart?: number; tEnd?: number }
+  ): [hit: number, end: number] {
+    if (!options) options = {}
+    const { sStart = 0, sEnd = this._s.length, tStart = 0, tEnd = t.length } = options
+    if (sStart >= sEnd) return [0, sStart]
+    if (tStart >= tEnd) return [0, sStart]
+    const n = this._s.length
+    let si = sStart
+    let ti = tStart
+    if (this._s[si] === t[ti]) ti++ // !注意需要先判断第一个字符
+    while (si < sEnd && ti < tEnd) {
+      const nextPos = this.move(si, t[ti])
+      if (nextPos === n) return [ti - tStart, si]
+      si = nextPos
+      ti++
+    }
+    return [ti - tStart, si]
+  }
 
-class SubsequenceAutomaton1:
-    def __init__(self, s: str) -> None:
-        self._s = s
-        self._nexts = self._build()
-        """
-        _nexts[i][j] 表示在 i 右侧的字符 j 的最近位置 (右侧表示下标严格大于i).
-        如果不存在，则为 n.
-        """
+  private _build(): Uint32Array {
+    const row = this._s.length
+    const col = this._charset
+    const nexts = new Uint32Array(row * col)
+    nexts.fill(row, -col) // 最后一行全为row
+    for (let i = row - 2; ~i; i--) {
+      nexts.copyWithin(i * col, (i + 1) * col, (i + 2) * col)
+      const v = this._s.charCodeAt(i + 1) - this._offset
+      nexts[i * col + v] = i + 1
+    }
+    return nexts
+  }
+}
 
-    def match(self, t: str, sStart=0, tStart=0) -> Tuple[int, int]:
-        """在 s[sStart:] 的子序列中寻找 t[tStart:]
+/**
+ * `O(n)`预处理.
+ * `O(len(t)logn)`查询,`len(t)`为待匹配序列的长度.
+ * !复杂度与字符种类数无关.占用内存更小.
+ */
+class SubsequnceAutomaton2<V> {
+  private readonly _arr: ArrayLike<V>
+  private readonly _indexes: Map<V, number[]>
 
-        :param sStart: s的起始索引
-        :param tStart: t的起始索引
-        :return: (hit,end) (匹配的前缀长度, 匹配到的前缀对应在s中的结束索引)
-        """
-        if not self._s or not t:
-            return 0, 0
-        n, m = len(self._s), len(t)
-        si, ti = sStart, tStart
-        if self._s[sStart] == t[tStart]:
-            ti += 1
-        while si < n and ti < m:
-            nextPos = self._nexts[si][ord(t[ti]) - 97]
-            if nextPos == n:
-                return ti - tStart, si
-            si, ti = nextPos, ti + 1
-        return ti - tStart, si
+  constructor(arr: ArrayLike<V>) {
+    this._arr = arr
+    this._indexes = this._build()
+  }
 
-    def _build(self) -> List[Tuple[int]]:
-        n = len(self._s)
-        nexts = [None] * n
-        last = [n] * 26
-        for i in range(n - 1, -1, -1):
-            nexts[i] = tuple(last)  # type: ignore
-            last[ord(self._s[i]) - 97] = i
-        return nexts  # type: ignore
+  /**
+   * 查询当前位置的下一个特定字符的位置(下标严格大于pos).
+   * 如果不存在，则为 n.
+   * 0<=pos<n.
+   */
+  move(pos: number, newValue: V): number {
+    const indexes = this._indexes.get(newValue)
+    if (!indexes) return this._arr.length
+    const nextPos = SubsequnceAutomaton2._bisectRight(indexes, pos)
+    return nextPos < indexes.length ? indexes[nextPos] : this._arr.length
+  }
 
+  /**
+   * 查询`s[sStart:sEnd]`是否含有某序列`t[tStart:tEnd]`.
+   */
+  includes(
+    t: ArrayLike<V>,
+    options?: { sStart?: number; sEnd?: number; tStart?: number; tEnd?: number }
+  ): boolean {
+    const [hit] = this.match(t, options)
+    let tLen: number
+    if (!options) {
+      tLen = t.length
+    } else {
+      const { tStart = 0, tEnd = t.length } = options
+      tLen = tEnd - tStart
+    }
+    return hit >= tLen
+  }
 
-class SubsequenceAutomaton2:
-    def __init__(self, s: str) -> None:
-        self._s = s
-        self._indexes = self._build()
+  /**
+   * 在`s[sStart:sEnd]`中寻找子序列`t[tStart:tEnd]`.
+   * @returns `(hit,end)`: (`匹配到的的t的长度`, `匹配结束时s的索引`)
+   * 此时,匹配结束时t的索引为`tStart+hit`.
+   * 耗去的s的长度为`end-sStart`.
+   */
+  match(
+    t: ArrayLike<V>,
+    options?: { sStart?: number; sEnd?: number; tStart?: number; tEnd?: number }
+  ): [hit: number, end: number] {
+    if (!options) options = {}
+    const { sStart = 0, sEnd = this._arr.length, tStart = 0, tEnd = t.length } = options
+    if (sStart >= sEnd) return [0, sStart]
+    if (tStart >= tEnd) return [0, sStart]
+    const n = this._arr.length
+    let si = sStart
+    let ti = tStart
+    if (this._arr[si] === t[ti]) ti++ // !注意需要先判断第一个字符
+    while (si < sEnd && ti < tEnd) {
+      const nextPos = this.move(si, t[ti])
+      if (nextPos === n) return [ti - tStart, si]
+      si = nextPos
+      ti++
+    }
+    return [ti - tStart, si]
+  }
 
-    def match(self, t: str, sStart=0, tStart=0) -> Tuple[int, int]:
-        """在 s[sStart:] 的子序列中寻找 t[tStart:]
+  private _build(): Map<V, number[]> {
+    const indexes = new Map<V, number[]>()
+    for (let i = 0; i < this._arr.length; i++) {
+      const v = this._arr[i]
+      if (!indexes.has(v)) indexes.set(v, [])
+      indexes.get(v)!.push(i)
+    }
+    return indexes
+  }
 
-        :param sStart: s的起始索引
-        :param tStart: t的起始索引
-        :return: (hit,end) (匹配的前缀长度, 匹配到的前缀对应在s中的结束索引)
-        """
-        if not self._s or not t:
-            return 0, 0
-        n, m = len(self._s), len(t)
-        si, ti = sStart, tStart
-        if self._s[sStart] == t[tStart]:
-            ti += 1
-        while si < n and ti < m:
-            indexes = self._indexes[t[ti]]
-            pos = bisect_right(indexes, si)
-            if pos == len(indexes):
-                return ti - tStart, si
-            si, ti = indexes[pos], ti + 1
-        return ti - tStart, si
+  private static _bisectRight<V>(arr: ArrayLike<V>, value: V): number {
+    let left = 0
+    let right = arr.length - 1
+    while (left <= right) {
+      const mid = (left + right) >>> 1
+      if (arr[mid] <= value) {
+        left = mid + 1
+      } else {
+        right = mid - 1
+      }
+    }
+    return left
+  }
+}
 
-    def _build(self) -> DefaultDict[str, List[int]]:
-        indexes = defaultdict(list)
-        for i, char in enumerate(self._s):
-            indexes[char].append(i)
-        return indexes
+export { SubsequnceAutomaton1, SubsequnceAutomaton2 }
 
+if (require.main === module) {
+  // 792. 匹配子序列的单词数
+  // https://leetcode.cn/problems/number-of-matching-subsequences/
+  function numMatchingSubseq(s: string, words: string[]): number {
+    const S = new SubsequnceAutomaton1(s)
+    return words.filter(w => S.includes(w)).length
+  }
 
-if __name__ == "__main__":
+  // 727. 最小窗口子序列
+  // https://leetcode.cn/problems/minimum-window-subsequence/
+  function minWindow(s1: string, s2: string): string {
+    const S = new SubsequnceAutomaton1(s1)
+    const starts: number[] = []
+    for (let i = 0; i < s1.length; i++) if (s1[i] === s2[0]) starts.push(i)
 
-    sa = SubsequenceAutomaton1("abcdebdde")
-    assert sa.match("bde") == (3, 4)
-    assert sa.match("bde", 1) == (3, 4)
+    let res: [number, number] | null = null
+    starts.forEach(sStart => {
+      const [hit, sEnd] = S.match(s2, { sStart })
+      if (hit !== s2.length) return
+      const sLen = sEnd - sStart
+      if (!res || sLen < res[1] - res[0]) res = [sStart, sEnd]
+    })
 
-    sa = SubsequenceAutomaton2("bbabbabbbbabaababab")
-    print(sa.match("bbbbbbbbbbbb"))
+    return res ? s1.slice(res[0], res[1] + 1) : ''
+  }
+}

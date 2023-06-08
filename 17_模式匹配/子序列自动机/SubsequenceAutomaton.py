@@ -1,11 +1,20 @@
 # 子序列自动机
 # 如果需要进行大量的子序列匹配，那么就不能用朴素的双指针匹配了
+# !子序列自动机.适用于多次子序列匹配的场景.
 # 1.nexts数组形式 26*n
 # !O(26*n) 预处理 O(s) 查询
 # 2.二分形式
-# !O(nlogn) 预处理 O(slogn) 查询
-# 查询当前位置的下一个特定字符的位置
-# 查询是否含有某序列
+# !O(n) 预处理 O(slogn) 查询
+
+
+# API:
+# - move(pos, newValue) -> nextPos:
+#     查询当前位置的下一个特定字符的位置(下标严格大于pos).如果不存在，则为 n. 0<=pos<n
+# - includes(t, sStart=0, sEnd=-1, tStart=0, tEnd=-1) -> bool:
+#     查询s[sStart:sEnd]是否含有某序列t[tStart:tEnd].时间复杂度O(len(t)logn).
+# !- !match(t, sStart=0, sEnd=-1, tStart=0, tEnd=-1) -> (hit,end):
+#     在 s[sStart:sEnd] 中寻找子序列 t[tStart:tEnd].时间复杂度 O(len(t)logn).
+#     适合处理需要多次匹配的场景.
 
 
 from bisect import bisect_right
@@ -64,6 +73,8 @@ class SubsequenceAutomaton1:
             tEnd: t的结束索引
         Returns:
             (hit,end): (`匹配到的t的长度`, `匹配结束时s的索引`)
+            此时,匹配结束时t的索引为`tStart+hit`.
+            耗去的s的长度为`end-sStart`.
         """
         if sEnd == -1:
             sEnd = len(self._s)
@@ -76,7 +87,7 @@ class SubsequenceAutomaton1:
 
         n = len(self._s)
         si, ti = sStart, tStart
-        if self._s[sStart] == t[tStart]:
+        if self._s[sStart] == t[tStart]:  # !注意需要先判断第一个字符
             ti += 1
         while si < sEnd and ti < tEnd:
             nextPos = self.move(si, t[ti])
@@ -103,7 +114,7 @@ class SubsequenceAutomaton2(Generic[V]):
     __slots__ = ("_seq", "_indexes")
 
     def __init__(self, seq: Sequence[V]) -> None:
-        """O(nlogn) 预处理."""
+        """O(n) 预处理."""
         self._seq = seq
         self._indexes = self._build()
 
@@ -140,6 +151,8 @@ class SubsequenceAutomaton2(Generic[V]):
             tEnd: t的结束索引
         Returns:
             (hit,end): (`匹配到的的t的长度`, `匹配结束时s的索引`)
+            此时,匹配结束时t的索引为`tStart+hit`.
+            耗去的s的长度为`end-sStart`.
         """
         if sEnd == -1:
             sEnd = len(self._seq)
@@ -152,7 +165,7 @@ class SubsequenceAutomaton2(Generic[V]):
 
         n = len(self._seq)
         si, ti = sStart, tStart
-        if self._seq[sStart] == t[tStart]:
+        if self._seq[sStart] == t[tStart]:  # !注意需要先判断第一个字符
             ti += 1
         while si < sEnd and ti < tEnd:
             nextPos = self.move(si, t[ti])
