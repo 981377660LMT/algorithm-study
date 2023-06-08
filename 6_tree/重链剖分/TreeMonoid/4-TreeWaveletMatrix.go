@@ -21,7 +21,7 @@ func AnUnusualKinginPakenKingdom() {
 
 	var n int
 	fmt.Fscan(in, &n)
-	tree := NewTree(n)
+	tree := _NT(n)
 	values := make([]int, n-1)
 	for i := 0; i < n-1; i++ {
 		var a, b, c int
@@ -54,7 +54,7 @@ func L番目の数字() {
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	tree := NewTree(n)
+	tree := _NT(n)
 	values := make([]int, n)
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &values[i])
@@ -84,7 +84,7 @@ func inv(a E) E   { return -a }
 
 type TreeWaveletMatrix struct {
 	n        int
-	tree     *Tree
+	tree     *_T
 	wm       *WaveletMatrixSegments
 	isVertex bool
 }
@@ -94,7 +94,7 @@ type TreeWaveletMatrix struct {
 //  isVertex: data是否为顶点的值以及查询的时候是否是顶点权值.
 //  log: 如果要支持异或,则需要按照异或的值来决定值域.设为-1时表示不使用异或.
 //  sumData: 如果要支持区间和,设为nil时表示不使用区间和.
-func NewTreeWaveletMatrix(tree *Tree, data []E, isVertex bool, log int, sumData []int) *TreeWaveletMatrix {
+func NewTreeWaveletMatrix(tree *_T, data []E, isVertex bool, log int, sumData []int) *TreeWaveletMatrix {
 	res := &TreeWaveletMatrix{tree: tree, isVertex: isVertex, n: len(tree.Tree)}
 	n := res.n
 	A1 := make([]E, n)
@@ -731,7 +731,7 @@ func (bv *BitVector) Rank(k int, f int) int {
 	return k - ret
 }
 
-type Tree struct {
+type _T struct {
 	Tree                 [][][2]int // (next, weight)
 	Edges                [][3]int   // (u, v, w)
 	Depth, DepthWeighted []int
@@ -742,7 +742,7 @@ type Tree struct {
 	timer                int
 }
 
-func NewTree(n int) *Tree {
+func _NT(n int) *_T {
 	tree := make([][][2]int, n)
 	lid := make([]int, n)
 	rid := make([]int, n)
@@ -757,7 +757,7 @@ func NewTree(n int) *Tree {
 		parent[i] = -1
 	}
 
-	return &Tree{
+	return &_T{
 		Tree:          tree,
 		Depth:         depth,
 		DepthWeighted: depthWeighted,
@@ -772,21 +772,21 @@ func NewTree(n int) *Tree {
 }
 
 // 添加无向边 u-v, 边权为w.
-func (tree *Tree) AddEdge(u, v, w int) {
+func (tree *_T) AddEdge(u, v, w int) {
 	tree.Tree[u] = append(tree.Tree[u], [2]int{v, w})
 	tree.Tree[v] = append(tree.Tree[v], [2]int{u, w})
 	tree.Edges = append(tree.Edges, [3]int{u, v, w})
 }
 
 // 添加有向边 u->v, 边权为w.
-func (tree *Tree) AddDirectedEdge(u, v, w int) {
+func (tree *_T) AddDirectedEdge(u, v, w int) {
 	tree.Tree[u] = append(tree.Tree[u], [2]int{v, w})
 	tree.Edges = append(tree.Edges, [3]int{u, v, w})
 }
 
 // root:0-based
 //  当root设为-1时，会从0开始遍历未访问过的连通分量
-func (tree *Tree) Build(root int) {
+func (tree *_T) Build(root int) {
 	if root != -1 {
 		tree.build(root, -1, 0, 0)
 		tree.markTop(root, root)
@@ -801,12 +801,12 @@ func (tree *Tree) Build(root int) {
 }
 
 // 返回 root 的欧拉序区间, 左闭右开, 0-indexed.
-func (tree *Tree) Id(root int) (int, int) {
+func (tree *_T) Id(root int) (int, int) {
 	return tree.LID[root], tree.RID[root]
 }
 
 // 返回边 u-v 对应的 欧拉序起点编号, 0-indexed.
-func (tree *Tree) Eid(u, v int) int {
+func (tree *_T) Eid(u, v int) int {
 	if tree.LID[u] > tree.LID[v] {
 		return tree.LID[u]
 	}
@@ -814,7 +814,7 @@ func (tree *Tree) Eid(u, v int) int {
 }
 
 // 较深的那个点作为边的编号.
-func (tree *Tree) EidtoV(eid int) int {
+func (tree *_T) EidtoV(eid int) int {
 	e := tree.Edges[eid]
 	u, v := e[0], e[1]
 	if tree.Parent[u] == v {
@@ -823,7 +823,7 @@ func (tree *Tree) EidtoV(eid int) int {
 	return v
 }
 
-func (tree *Tree) LCA(u, v int) int {
+func (tree *_T) LCA(u, v int) int {
 	for {
 		if tree.LID[u] > tree.LID[v] {
 			u, v = v, u
@@ -835,11 +835,11 @@ func (tree *Tree) LCA(u, v int) int {
 	}
 }
 
-func (tree *Tree) RootedLCA(u, v int, root int) int {
+func (tree *_T) RootedLCA(u, v int, root int) int {
 	return tree.LCA(u, v) ^ tree.LCA(u, root) ^ tree.LCA(v, root)
 }
 
-func (tree *Tree) Dist(u, v int, weighted bool) int {
+func (tree *_T) Dist(u, v int, weighted bool) int {
 	if weighted {
 		return tree.DepthWeighted[u] + tree.DepthWeighted[v] - 2*tree.DepthWeighted[tree.LCA(u, v)]
 	}
@@ -848,7 +848,7 @@ func (tree *Tree) Dist(u, v int, weighted bool) int {
 
 // k: 0-based
 //  如果不存在第k个祖先，返回-1
-func (tree *Tree) KthAncestor(root, k int) int {
+func (tree *_T) KthAncestor(root, k int) int {
 	if k > tree.Depth[root] {
 		return -1
 	}
@@ -864,7 +864,7 @@ func (tree *Tree) KthAncestor(root, k int) int {
 
 // 从 from 节点跳向 to 节点,跳过 step 个节点(0-indexed)
 //  返回跳到的节点,如果不存在这样的节点,返回-1
-func (tree *Tree) Jump(from, to, step int) int {
+func (tree *_T) Jump(from, to, step int) int {
 	if step == 1 {
 		if from == to {
 			return -1
@@ -886,7 +886,7 @@ func (tree *Tree) Jump(from, to, step int) int {
 	return tree.KthAncestor(to, dac+dbc-step)
 }
 
-func (tree *Tree) CollectChild(root int) []int {
+func (tree *_T) CollectChild(root int) []int {
 	res := []int{}
 	for _, e := range tree.Tree[root] {
 		next := e[0]
@@ -899,7 +899,7 @@ func (tree *Tree) CollectChild(root int) []int {
 
 // 返回沿着`路径顺序`的 [起点,终点] 的 欧拉序 `左闭右闭` 数组.
 //  !eg:[[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序.
-func (tree *Tree) GetPathDecomposition(u, v int, vertex bool) [][2]int {
+func (tree *_T) GetPathDecomposition(u, v int, vertex bool) [][2]int {
 	up, down := [][2]int{}, [][2]int{}
 	for {
 		if tree.top[u] == tree.top[v] {
@@ -928,7 +928,7 @@ func (tree *Tree) GetPathDecomposition(u, v int, vertex bool) [][2]int {
 	return append(up, down...)
 }
 
-func (tree *Tree) GetPath(u, v int) []int {
+func (tree *_T) GetPath(u, v int) []int {
 	res := []int{}
 	composition := tree.GetPathDecomposition(u, v, true)
 	for _, e := range composition {
@@ -947,7 +947,7 @@ func (tree *Tree) GetPath(u, v int) []int {
 }
 
 // 以root为根时,结点v的子树大小.
-func (tree *Tree) SubtreeSize(v, root int) int {
+func (tree *_T) SubtreeSize(v, root int) int {
 	if root == -1 {
 		return tree.RID[v] - tree.LID[v]
 	}
@@ -962,19 +962,19 @@ func (tree *Tree) SubtreeSize(v, root int) int {
 }
 
 // child 是否在 root 的子树中 (child和root不能相等)
-func (tree *Tree) IsInSubtree(child, root int) bool {
+func (tree *_T) IsInSubtree(child, root int) bool {
 	return tree.LID[root] <= tree.LID[child] && tree.LID[child] < tree.RID[root]
 }
 
-func (tree *Tree) ELID(u int) int {
+func (tree *_T) ELID(u int) int {
 	return 2*tree.LID[u] - tree.Depth[u]
 }
 
-func (tree *Tree) ERID(u int) int {
+func (tree *_T) ERID(u int) int {
 	return 2*tree.RID[u] - tree.Depth[u] - 1
 }
 
-func (tree *Tree) build(cur, pre, dep, dist int) int {
+func (tree *_T) build(cur, pre, dep, dist int) int {
 	subSize, heavySize, heavySon := 1, 0, -1
 	for _, e := range tree.Tree[cur] {
 		next, weight := e[0], e[1]
@@ -993,7 +993,7 @@ func (tree *Tree) build(cur, pre, dep, dist int) int {
 	return subSize
 }
 
-func (tree *Tree) markTop(cur, top int) {
+func (tree *_T) markTop(cur, top int) {
 	tree.top[cur] = top
 	tree.LID[cur] = tree.timer
 	tree.idToNode[tree.timer] = cur

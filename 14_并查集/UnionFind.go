@@ -33,6 +33,7 @@ func NewUnionFindArray(n int) *UnionFindArray {
 	}
 }
 
+// 按秩合并.
 func (ufa *UnionFindArray) Union(key1, key2 int) bool {
 	root1, root2 := ufa.Find(key1), ufa.Find(key2)
 	if root1 == root2 {
@@ -42,6 +43,18 @@ func (ufa *UnionFindArray) Union(key1, key2 int) bool {
 		root1 ^= root2
 		root2 ^= root1
 		root1 ^= root2
+	}
+	ufa.data[root1] += ufa.data[root2]
+	ufa.data[root2] = root1
+	ufa.Part--
+	return true
+}
+
+// 定向合并.
+func (ufa *UnionFindArray) UnionTo(child, parent int) bool {
+	root1, root2 := ufa.Find(child), ufa.Find(parent)
+	if root1 == root2 {
+		return false
 	}
 	ufa.data[root1] += ufa.data[root2]
 	ufa.data[root2] = root1
@@ -63,7 +76,7 @@ func (ufa *UnionFindArray) UnionWithCallback(key1, key2 int, cb func(big, small 
 	ufa.data[root2] = root1
 	ufa.Part--
 	if cb != nil {
-		cb(root2, root1)
+		cb(root1, root2)
 	}
 	return true
 }
@@ -150,6 +163,18 @@ func (ufm *UnionFindMap) Union(key1, key2 int) bool {
 	return true
 }
 
+// 定向合并.
+func (ufa *UnionFindMap) UnionTo(child, parent int) bool {
+	root1, root2 := ufa.Find(child), ufa.Find(parent)
+	if root1 == root2 {
+		return false
+	}
+	ufa.data[root1] += ufa.data[root2]
+	ufa.data[root2] = root1
+	ufa.Part--
+	return true
+}
+
 func (ufm *UnionFindMap) UnionWithCallback(key1, key2 int, cb func(big, small int)) bool {
 	root1, root2 := ufm.Find(key1), ufm.Find(key2)
 	if root1 == root2 {
@@ -164,7 +189,7 @@ func (ufm *UnionFindMap) UnionWithCallback(key1, key2 int, cb func(big, small in
 	ufm.data[root2] = root1
 	ufm.Part--
 	if cb != nil {
-		cb(root2, root1)
+		cb(root1, root2)
 	}
 	return true
 }

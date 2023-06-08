@@ -235,10 +235,11 @@ if __name__ == "__main__":
             self.lid[cur] = self._dfn
             self._idToNode[self._dfn] = cur
             self._dfn += 1
-            if self._heavySon[cur] != -1:
-                self._markTop(self._heavySon[cur], top)
+            heavySon = self._heavySon[cur]
+            if heavySon != -1:
+                self._markTop(heavySon, top)
                 for next, _ in self.tree[cur]:
-                    if next != self._heavySon[cur] and next != self.parent[cur]:
+                    if next != heavySon and next != self.parent[cur]:
                         self._markTop(next, next)
             self.rid[cur] = self._dfn
 

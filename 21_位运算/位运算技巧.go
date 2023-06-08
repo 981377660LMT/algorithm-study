@@ -1,6 +1,7 @@
 // https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/bits.go
 // https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/search.go
 // https://baobaobear.github.io/post/page/4/
+// https://github.dev/old-yan/CP-template/blob/a07b6fe0092e9ee890a0e35ada6ea1bb2c83ba05/MATH/BitwiseHelper.h#L1
 
 package main
 
@@ -88,9 +89,8 @@ func foo(x int) {
 	}
 	fmt.Println(popCount64(13) == bits.OnesCount64(13))
 
-	// 全1掩码
 	a = 5
-	fmt.Println(1<<a - 1)
+	fmt.Println(1<<a - 1)   // 全1掩码
 	fmt.Println(^(^0 << a)) // 全1(-1)左移a位,再取反
 
 	_ = []interface{}{
@@ -105,4 +105,42 @@ func foo(x int) {
 		all_,
 		sub,
 	}
+}
+
+// 掩码操作
+func mask() {
+	// !假定这里的位数为64
+
+	// 生成全1掩码
+	makeMask := func() int { return -1 }
+
+	// 生成末尾有k个1的掩码
+	makeBackOnes := func(k int) int {
+		if k >= 64 {
+			return -1
+		}
+		return (1 << k) - 1
+	}
+
+	// !生成某一段为1的掩码([l,r]闭区间)
+	makeMaskRange := func(l, r int) int {
+		return makeBackOnes(r+1) ^ makeBackOnes(l)
+	}
+
+	// 向上取整到2的幂
+	getCeil := func(x int) int {
+		if x == 0 {
+			return 0
+		}
+		return 1 << (bits.Len(uint(x - 1)))
+	}
+
+	// 向下取整到2的幂
+	getFloor := func(x int) int {
+		if x == 0 {
+			return 0
+		}
+		return 1 << (bits.Len(uint(x)) - 1)
+	}
+
 }

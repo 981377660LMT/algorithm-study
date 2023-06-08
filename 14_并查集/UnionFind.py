@@ -18,13 +18,24 @@ class UnionFindMap(Generic[T]):
             self.add(item)
 
     def union(self, key1: T, key2: T) -> bool:
-        """rank一样时 默认key2作为key1的父节点"""
+        """按秩合并."""
         root1 = self.find(key1)
         root2 = self.find(key2)
         if root1 == root2:
             return False
         if self._rank[root1] > self._rank[root2]:
             root1, root2 = root2, root1
+        self._parent[root1] = root2
+        self._rank[root2] += self._rank[root1]
+        self.part -= 1
+        return True
+
+    def unionTo(self, child: T, parent: T) -> bool:
+        """定向合并."""
+        root1 = self.find(child)
+        root2 = self.find(parent)
+        if root1 == root2:
+            return False
         self._parent[root1] = root2
         self._rank[root2] += self._rank[root1]
         self.part -= 1
@@ -95,13 +106,24 @@ class UnionFindArray:
         return x
 
     def union(self, x: int, y: int) -> bool:
-        """rank一样时 默认key2作为key1的父节点"""
+        """按秩合并."""
         rootX = self.find(x)
         rootY = self.find(y)
         if rootX == rootY:
             return False
         if self._rank[rootX] > self._rank[rootY]:
             rootX, rootY = rootY, rootX
+        self._parent[rootX] = rootY
+        self._rank[rootY] += self._rank[rootX]
+        self.part -= 1
+        return True
+
+    def unionTo(self, child: int, parent: int) -> bool:
+        """定向合并.将child的父节点设置为parent."""
+        rootX = self.find(child)
+        rootY = self.find(parent)
+        if rootX == rootY:
+            return False
         self._parent[rootX] = rootY
         self._rank[rootY] += self._rank[rootX]
         self.part -= 1

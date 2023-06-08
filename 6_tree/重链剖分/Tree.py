@@ -178,10 +178,11 @@ class Tree:
         self.lid[cur] = self._dfn
         self._idToNode[self._dfn] = cur
         self._dfn += 1
-        if self._heavySon[cur] != -1:
-            self._markTop(self._heavySon[cur], top)
+        heavySon = self._heavySon[cur]
+        if heavySon != -1:
+            self._markTop(heavySon, top)
             for next, _ in self.tree[cur]:
-                if next != self._heavySon[cur] and next != self.parent[cur]:
+                if next != heavySon and next != self.parent[cur]:
                     self._markTop(next, next)
         self.rid[cur] = self._dfn
 
@@ -199,3 +200,19 @@ if __name__ == "__main__":
     print(tree.rootedLca(0, 1, 4))
     print(tree.rootedLca(0, 1, 3))
     print(tree.rootedParent(0, root=5))
+
+    class TreeAncestor:
+        def __init__(self, n: int, parent: List[int]):
+            self.tree = Tree(n)
+            for i, p in enumerate(parent):
+                if p != -1:
+                    self.tree.addEdge(p, i, 1)
+            self.tree.build(0)
+
+        def getKthAncestor(self, node: int, k: int) -> int:
+            return self.tree.kthAncestor(node, k)
+
+
+# Your TreeAncestor object will be instantiated and called as such:
+# obj = TreeAncestor(n, parent)
+# param_1 = obj.getKthAncestor(node,k)

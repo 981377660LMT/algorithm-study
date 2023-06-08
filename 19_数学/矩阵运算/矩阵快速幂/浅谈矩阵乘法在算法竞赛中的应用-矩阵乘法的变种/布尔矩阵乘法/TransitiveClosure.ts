@@ -11,7 +11,7 @@
  * O(n^3/32).
  * - 3000*3000 => 930ms
  * - 4000*4000 => 2.3s
- * - 5000*5000 => 4.2s
+ * - 5000*5000 => 4.4s
  */
 class TransitiveClosure {
   private readonly _n: number

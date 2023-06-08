@@ -8,7 +8,7 @@
 
 // 3000*3000 => 250ms
 // 4000*4000 => 620ms
-// 5000*5000 => 1.37s.
+// 5000*5000 => 1.3s.
 
 package main
 
@@ -18,7 +18,7 @@ import (
 )
 
 func main() {
-	n := 3000
+	n := 5000
 	time1 := time.Now()
 	T := NewTransitiveClosure(n)
 	for i := 0; i < n; i++ {
@@ -70,10 +70,11 @@ func (tc *TransitiveClosure) Build() {
 	if tc.hasBuilt {
 		panic("can't build twice")
 	}
-	for k := 0; k < tc.n; k++ {
-		cacheK := tc.canReach[k]
-		for i := 0; i < tc.n; i++ {
-			cacheI := tc.canReach[i]
+	n, canReach := tc.n, tc.canReach
+	for k := 0; k < n; k++ {
+		cacheK := canReach[k]
+		for i := 0; i < n; i++ {
+			cacheI := canReach[i]
 			if cacheI.Has(k) {
 				cacheI.IOr(cacheK)
 			}

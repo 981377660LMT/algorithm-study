@@ -352,11 +352,12 @@ func (tree *Tree) markTop(cur, top int) {
 	tree.LID[cur] = tree.timer
 	tree.idToNode[tree.timer] = cur
 	tree.timer++
-	if tree.heavySon[cur] != -1 {
-		tree.markTop(tree.heavySon[cur], top)
+	heavySon := tree.heavySon[cur]
+	if heavySon != -1 {
+		tree.markTop(heavySon, top)
 		for _, e := range tree.Tree[cur] {
 			next := e[0]
-			if next != tree.heavySon[cur] && next != tree.Parent[cur] {
+			if next != heavySon && next != tree.Parent[cur] {
 				tree.markTop(next, next)
 			}
 		}

@@ -7,11 +7,7 @@ import { TransitiveClosure } from './TransitiveClosure'
 function checkIfPrerequisite(n: number, prerequisites: number[][], queries: number[][]): boolean[] {
   const T = new TransitiveClosure(n)
   prerequisites.forEach(([u, v]) => T.addDirectedEdge(u, v))
-  const res: boolean[] = Array(queries.length)
-  queries.forEach(([pre, cur], i) => {
-    res[i] = T.canReach(pre, cur)
-  })
-  return res
+  return queries.map(([u, v]) => T.canReach(u, v))
 }
 
 export {}
