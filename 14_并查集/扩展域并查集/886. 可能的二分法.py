@@ -1,5 +1,25 @@
 # 敌人开2*n即可
 from typing import List
+from UnionFindKind import UnionFindKindArray
+
+
+# 互相不喜欢的人可以用特殊的并查集，每个集分为 2 部分，不喜欢的人一定在同一个集的另一部分里面
+class Solution:
+    def possibleBipartition(self, n: int, dislikes: List[List[int]]) -> bool:
+        uf = UnionFindArray(n * 2 + 2)
+        for cur, next in dislikes:
+            if uf.isConnected(cur, next):
+                return False
+            uf.union(cur, next + n)
+            uf.union(cur + n, next)
+        return True
+
+    def possibleBipartition2(self, n: int, dislikes: List[List[int]]) -> bool:
+        uf = UnionFindKindArray(n, k=2)
+        for cur, next in dislikes:
+            if not uf.union(cur - 1, next - 1, 1):
+                return False
+        return True
 
 
 class UnionFindArray:
@@ -28,16 +48,3 @@ class UnionFindArray:
 
     def isConnected(self, x: int, y: int) -> bool:
         return self.find(x) == self.find(y)
-
-
-# 互相不喜欢的人可以用特殊的并查集，每个集分为 2 部分，不喜欢的人一定在同一个集的另一部分里面
-class Solution:
-    def possibleBipartition(self, n: int, dislikes: List[List[int]]) -> bool:
-        uf = UnionFindArray(n * 2 + 2)
-        for cur, next in dislikes:
-            if uf.isConnected(cur, next):
-                return False
-            uf.union(cur, next + n)
-            uf.union(cur + n, next)
-        return True
-

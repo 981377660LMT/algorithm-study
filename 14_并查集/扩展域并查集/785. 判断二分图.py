@@ -1,4 +1,30 @@
 from typing import List
+from UnionFindKind import UnionFindKindArray
+
+
+class Solution:
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        n = len(graph)
+        uf = UnionFindArray(n * 2)
+        for cur, nexts in enumerate(graph):
+            for next in nexts:
+                # if uf.isConnected(cur, next):
+                #     return False
+                uf.union(cur, next + n)
+                uf.union(cur + n, next)
+                if uf.isConnected(cur, next):
+                    return False
+        return True
+
+    def isBipartite2(self, graph: List[List[int]]) -> bool:
+        n = len(graph)
+        uf = UnionFindKindArray(n, 2)
+        for cur, nexts in enumerate(graph):
+            for next in nexts:
+                uf.union(cur, next, 1)  # 1表示不同类
+                if uf.hasRelation(cur, next, 0):  # 0表示同类
+                    return False
+        return True
 
 
 class UnionFindArray:
@@ -27,18 +53,3 @@ class UnionFindArray:
 
     def isConnected(self, x: int, y: int) -> bool:
         return self.find(x) == self.find(y)
-
-
-class Solution:
-    def isBipartite(self, graph: List[List[int]]) -> bool:
-        n = len(graph)
-        uf = UnionFindArray(n * 2)
-        for cur, nexts in enumerate(graph):
-            for next in nexts:
-                # if uf.isConnected(cur, next):
-                #     return False
-                uf.union(cur, next + n)
-                uf.union(cur + n, next)
-                if uf.isConnected(cur, next):
-                    return False
-        return True
