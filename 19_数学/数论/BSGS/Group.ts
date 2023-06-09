@@ -1,3 +1,5 @@
+export {}
+
 /**
  * 群（Group）是代数结构的一种，它包括一个集合和一个二元运算。
  * 群需要满足以下四个性质：
@@ -46,4 +48,14 @@ interface AbleGroup<E> extends Group<E> {
 // 线段树维护的代数结构通常是一个幺半群（Monoid）。
 // ST表维护的代数结构通常是一个半群（SemiGroup）。
 
-export {}
+// Promise是自函子上的幺半群
+
+class PromiseMonoid<E> implements Monoid<Promise<E>> {
+  e(): Promise<any> {
+    return Promise.resolve()
+  }
+
+  op(e1: Promise<E>, e2: Promise<E>): Promise<E> {
+    return e1.then(() => e2)
+  }
+}

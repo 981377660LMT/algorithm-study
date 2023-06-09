@@ -10,7 +10,7 @@ from typing import List, Tuple
 from kmp import KMP
 
 
-# KMP求前缀周期
+# KMP求前缀周期/字符串循环节/字符串周期
 # 我们希望知道一个 N 位字符串 S 的前缀是否具有循环节。
 # 换言之，对于每一个从头开始的长度为 i（i>1）的前缀，是否由重复出现的子串 A 组成，即 AAA…A （A 重复出现 K 次,K>1）。
 # 如果存在，请找出最短的循环节对应的 K 值（也就是这个前缀串的所有可能重复节中，最大的 K 值）。
@@ -18,7 +18,7 @@ def getMinCycle(s: str) -> List[Tuple[int, int]]:
     """求字符串 S 的前缀 s[:i+1] 的循环节
 
     Returns:
-        List[Tuple[int, int]]: 前缀的长度 循环节的长度
+        List[Tuple[int, int]]: 前缀的长度 循环节出现的次数
     """
     res = []
     n = len(s)

@@ -11,7 +11,20 @@ import assert from 'assert'
 type Comparator<T> = (a: T, b: T) => number
 
 class Heap<E = number> {
-  private readonly _heap: E[]
+  /**
+   * 破坏性地合并两个堆，返回合并后的堆.采用启发式合并.
+   */
+  static mergeDestructive<E>(heap1: Heap<E>, heap2: Heap<E>): Heap<E> {
+    if (heap1.size < heap2.size) {
+      const tmp = heap1
+      heap1 = heap2
+      heap2 = tmp
+    }
+    for (let i = 0; i < heap2.size; i++) heap1.push(heap2._heap[i])
+    return heap1
+  }
+
+  private _heap: E[]
   private readonly _comparator: Comparator<E>
 
   constructor()
@@ -51,15 +64,18 @@ class Heap<E = number> {
 
   pop(): E | undefined {
     if (this._heap.length <= 1) return this._heap.pop()
-    const returned = this._heap[0]
-    const last = this._heap.pop()!
-    this._heap[0] = last
+    const res = this._heap[0]
+    this._heap[0] = this._heap.pop()!
     this._pushDown(0)
-    return returned
+    return res
   }
 
   peek(): E | undefined {
     return this._heap[0]
+  }
+
+  clear(): void {
+    this._heap = []
   }
 
   get size(): number {
@@ -90,10 +106,7 @@ class Heap<E = number> {
   private _pushDown(root: number): void {
     // 还有孩子，即不是叶子节点
     const n = this._heap.length
-    while (true) {
-      const left = (root << 1) | 1
-      if (left >= n) break
-
+    for (let left = (root << 1) | 1; left < n; left = (root << 1) | 1) {
       const right = left + 1
       let minIndex = root
 
