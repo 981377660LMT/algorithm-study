@@ -11,10 +11,12 @@
 
 /**
  * 原地升降二叉堆.维护0~n-1的n个元素.用于高速化Dijkstra算法.
+ * !相同元素只保留一个(去重).
  * 默认为小顶堆.
  *
  * @alias SiftHeap
  * @see {@link https://github.com/old-yan/CP-template/blob/a07b6fe0092e9ee890a0e35ada6ea1bb2c83ba05/DS/SiftHeap.md}
+ * @compare O(nlogn) n=1e7 => 1s
  */
 class HeapUint32 {
   private readonly _heap: Uint32Array
@@ -164,6 +166,6 @@ if (require.main === module) {
   const pq = new HeapUint32(values.length, (i, j) => values[i] < values[j])
   pq.push(0)
   pq.push(1)
-  pq.push(2)
+  pq.push(1)
   console.log(pq.peek()) // 1 => 字典序最小的是 apple
 }
