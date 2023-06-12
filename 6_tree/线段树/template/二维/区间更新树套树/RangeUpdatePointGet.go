@@ -25,6 +25,7 @@ func main() {
 	for i := 0; i < 2e5; i++ {
 		seg.Update(0, row, 0, col, E{i, i})
 		seg.Get(0, 0)
+		seg.Set(0, 0, E{0, 0})
 	}
 	time2 := time.Now()
 	fmt.Println(time2.Sub(time1)) // 416.2745ms
@@ -53,15 +54,14 @@ func (nat *NaiveTree) Update(start, end int, lazy Id) {
 		nat.data[i] = lazy
 	}
 }
-
-func (nat *NaiveTree) Get(pos int) E {
-	return nat.data[pos]
-}
+func (nat *NaiveTree) Get(pos int) E        { return nat.data[pos] }
+func (nat *NaiveTree) Set(pos int, value E) { nat.data[pos] = value }
 
 // #region template SegTree2DRangeUpdatePointGet
 type IRangeUpdatePointGet1D interface {
 	Update(start int, end int, lazy Id)
 	Get(index int) E
+	Set(index int, value E)
 }
 
 type SegTree2DRangeUpdatePointGet struct {
@@ -133,12 +133,32 @@ func (this *SegTree2DRangeUpdatePointGet) Get(row, col int) E {
 	res := this._seg[row].Get(col)
 	for row > 0 {
 		row = (row - 1) >> 1
+		if this._seg[row] != nil {
+			res = this._mergeRow(res, this._seg[row].Get(col))
+		}
+	}
+	return res
+}
+
+func (this *SegTree2DRangeUpdatePointGet) Set(row, col int, value E) {
+	if this._needRotate {
+		tmp := row
+		row = col
+		col = this._rawRow - tmp - 1
+	}
+
+	row += this._size - 1
+	if this._seg[row] == nil {
+		this._seg[row] = this._init1D()
+	}
+	this._seg[row].Set(col, value)
+	for row > 0 {
+		row = (row - 1) >> 1
 		if this._seg[row] == nil {
 			this._seg[row] = this._init1D()
 		}
-		res = this._mergeRow(res, this._seg[row].Get(col))
+		this._seg[row].Set(col, value)
 	}
-	return res
 }
 
 func (this *SegTree2DRangeUpdatePointGet) _update(R, C, start, end int, lazy Id, pos, r, c int) {

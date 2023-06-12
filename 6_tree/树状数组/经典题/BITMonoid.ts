@@ -85,10 +85,14 @@ class BITMonoidArray<E> {
   constructor(nOrArr: number | ArrayLike<E>, e: () => E, op: (a: E, b: E) => E) {
     const n = typeof nOrArr === 'number' ? nOrArr : nOrArr.length
     this._n = n
-    this._data = Array(n + 1)
-    this._sum = Array(n + 1)
     this._e = e
     this._op = op
+    this._data = Array(n + 1)
+    this._sum = Array(n + 1)
+    for (let i = 0; i < n + 1; i++) {
+      this._data[i] = e()
+      this._sum[i] = e()
+    }
     if (typeof nOrArr !== 'number') this.build(nOrArr)
   }
 
@@ -154,9 +158,6 @@ class BITMonoidArray<E> {
     return res
   }
 
-  /**
-   * O(n)建树.
-   */
   build(arr: ArrayLike<E>): void {
     if (arr.length !== this._n) throw new RangeError(`arr length must be equal to ${this._n}`)
     for (let i = 1; i <= this._n; i++) {
@@ -227,6 +228,11 @@ if (require.main === module) {
   }
   console.timeEnd('get') // get: 7.697ms
 
+  const toBuild = Array.from({ length: n }, (_, i) => i)
+  console.time('build')
+  tree.build(toBuild)
+  console.timeEnd('build') // build: 4.268ms
+
   const INF = 2e15
   // https://leetcode.cn/problems/sliding-window-maximum/submissions/
   function maxSlidingWindow(nums: number[], k: number): number[] {
@@ -239,5 +245,27 @@ if (require.main === module) {
       }
     }
     return res
+  }
+
+  checkSet()
+
+  function checkSet(): void {
+    const INF = 2e15
+    const nums1 = Array.from({ length: 1e4 }, () => ~~(Math.random() * 100))
+    const bit1 = new BITMonoidArray(nums1.length, () => INF, Math.min)
+    bit1.build(nums1)
+
+    for (let i = 0; i < 1000; i++) {
+      const rand = Math.floor(Math.random() * nums1.length)
+      const randPos = Math.floor(Math.random() * nums1.length)
+      bit1.set(randPos, rand)
+      nums1[randPos] = rand
+      if (bit1.toString() !== `BITMonoid{${nums1.join(',')}}`) {
+        console.error(`set error: ${bit1.toString()}`)
+        return
+      }
+    }
+
+    console.log('set test pass')
   }
 }

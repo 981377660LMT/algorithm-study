@@ -20,6 +20,7 @@ const INF = 2e15
 interface IRangeUpdatePointGet1D<E, Id> {
   update(start: number, end: number, lazy: Id): void
   get(index: number): E
+  set(index: number, value: E): void
 }
 
 /**
@@ -109,10 +110,26 @@ class SegmentTree2DRangeUpdatePointGet<E = number, Id = number> {
     let res = this._seg[row].get(col)
     while (row > 0) {
       row = (row - 1) >> 1
-      if (!this._seg[row]) this._seg[row] = this._init1D()
-      res = this._mergeRow(res, this._seg[row].get(col))
+      if (this._seg[row]) res = this._mergeRow(res, this._seg[row].get(col))
     }
     return res
+  }
+
+  set(row: number, col: number, value: E): void {
+    if (this._needRotate) {
+      const tmp = row
+      row = col
+      col = this._rawRow - tmp - 1
+    }
+
+    row += this._size - 1
+    if (!this._seg[row]) this._seg[row] = this._init1D()
+    this._seg[row].set(col, value)
+    while (row > 0) {
+      row = (row - 1) >> 1
+      if (!this._seg[row]) this._seg[row] = this._init1D()
+      this._seg[row].set(col, value)
+    }
   }
 
   private _update(
@@ -228,6 +245,11 @@ if (require.main === module) {
 
     get(index: number): E {
       return [this._time[index], this._value[index]]
+    }
+
+    set(index: number, value: E): void {
+      this._time[index] = value[0]
+      this._value[index] = value[1]
     }
   }
 
