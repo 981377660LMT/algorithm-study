@@ -20,8 +20,10 @@ class LazySegmentTree {
     const log = 32 - Math.clz32(this._n - 1)
     const size = 1 << log
     // !初始化data和lazy数组(可用TypedArray优化) 然后建树
-    this._data = Array(2 * size).fill(e()) // monoid
-    this._lazy = Array(size).fill(id()) // monoid
+    this._data = Array(2 * size) // monoid
+    for (let i = 0; i < this._data.length; i++) this._data = e()
+    this._lazy = Array(size) // monoid
+    for (let i = 0; i < this._lazy.length; i++) this._lazy = id()
     this._build(1, 1, this._n, leaves)
   }
 

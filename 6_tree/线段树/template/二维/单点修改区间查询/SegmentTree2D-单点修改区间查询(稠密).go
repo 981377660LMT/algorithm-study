@@ -1,6 +1,14 @@
 // 如果点的范围很大,需要对xs和ys进行离散化,
 // 查询坐标x为变为 `sort.SearchInts(sortedXs,x)`
 
+// API:
+// 1. NewSegmentTree2D(row,col int) *SegmentTree2D
+// 2. (st *SegmentTree2D) AddPoint(row,col int,value E)
+// 3. (st *SegmentTree2D) Build()
+// 4. (st *SegmentTree2D) Get(row,col int) E
+// 5. (st *SegmentTree2D) Set(row,col int,value E)
+// 6. (st *SegmentTree2D) Query(row1,row2,col1,col2 int) E
+
 package main
 
 import (
@@ -29,7 +37,7 @@ func (this *NumMatrix) Update(row int, col int, val int) {
 }
 
 func (this *NumMatrix) SumRegion(row1 int, col1 int, row2 int, col2 int) int {
-	return this.seg.Query(row1, col1, row2, col2)
+	return this.seg.Query(row1, row2+1, col1, col2+1)
 }
 
 /**
@@ -128,11 +136,9 @@ func (st *SegmentTree2D) Set(row, col int, value E) {
 	}
 }
 
-// (row1,col1) 到 (row2,col2) 闭区间的值.
-//  0<=row1<row2<row, 0<=col1<col2<col
-func (st *SegmentTree2D) Query(row1, col1, row2, col2 int) E {
-	row2++
-	col2++
+// `[row1,row2) x [col1,col2)`
+//  0<=row1<row2<=row, 0<=col1<col2<=col
+func (st *SegmentTree2D) Query(row1, row2, col1, col2 int) E {
 	if row1 >= row2 || col1 >= col2 {
 		return st.unit
 	}
