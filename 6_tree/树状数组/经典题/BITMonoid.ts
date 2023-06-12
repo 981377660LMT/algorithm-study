@@ -158,6 +158,9 @@ class BITMonoidArray<E> {
     return res
   }
 
+  /**
+   * O(nlogn)建树.
+   */
   build(arr: ArrayLike<E>): void {
     if (arr.length !== this._n) throw new RangeError(`arr length must be equal to ${this._n}`)
     for (let i = 1; i <= this._n; i++) {
@@ -214,7 +217,7 @@ if (require.main === module) {
   for (let i = 0; i <= n; i++) {
     tree.set(i, i)
   }
-  console.timeEnd('set') // set: 124.716ms
+  console.timeEnd('set') // set: 90.789ms
 
   console.time('update')
   for (let i = 0; i <= n; i++) {
