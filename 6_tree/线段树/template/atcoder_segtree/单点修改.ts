@@ -140,6 +140,17 @@ if (require.main === module) {
   console.log(tree.query(0, 1))
   tree.update(0, 3)
   console.log(tree.query(0, 1))
+
+  const n = 2e5
+  const arr = Array(n)
+    .fill(0)
+    .map((_, i) => i)
+  const tree2 = new MaxSegmentTree2(arr)
+  console.time('query')
+  for (let i = 0; i < n; i++) {
+    tree2.query(0, n)
+  }
+  console.timeEnd('query')
 }
 
 export {}

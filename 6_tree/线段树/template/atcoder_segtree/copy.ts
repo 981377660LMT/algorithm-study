@@ -4,6 +4,8 @@
 // !注意如果是单点查询,可以去掉所有pushUp函数逻辑(js使用bigint会比较慢)
 // !如果是单点修改,可以去掉所有懒标记逻辑
 
+import { SegmentTree2DCompress } from '../二维/SegmentTree2D-单点修改区间查询(离散化)'
+
 const INF = 2e15
 const n = 10
 

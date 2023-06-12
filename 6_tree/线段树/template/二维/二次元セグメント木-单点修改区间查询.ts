@@ -1,6 +1,8 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-shadow */
 
+import { SegmentTree2DCompress } from './SegmentTree2D-单点修改区间查询(离散化)'
+
 // https://nyaannyaan.github.io/library/data-structure-2d/2d-segment-tree.hpp
 // !二维线段树:单点修改/区间查询 (更新方式为覆盖)
 // 需要预先离散化
@@ -128,6 +130,7 @@ function useSegmentTree2D<E = number>(
 }
 
 export { useSegmentTree2D }
+
 if (require.main === module) {
   // https://leetcode.cn/problems/range-sum-query-2d-mutable/
   class NumMatrix {
