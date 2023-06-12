@@ -32,13 +32,13 @@ func fieldOfGreatestBlessing(forceField [][]int) int {
 		y, s := v[1], v[2]
 		ys = append(ys, y-s, y+s)
 	}
-	ys, rank := sortedSet(ys)
+	rank, _ := sortedSet(ys)
 
 	type event struct{ x, op, y1, y2 int } // 先进，op=-1，后进，op=1
 	events := make([]event, 0, len(forceField)*2)
 	for _, v := range forceField {
 		x, y, s := v[0], v[1], v[2]
-		y1, y2 := rank(y-s), rank(y+s)
+		y1, y2 := rank[y-s], rank[y+s]
 		events = append(events, event{x - s, -1, y1, y2}, event{x + s, 1, y1, y2})
 	}
 	sort.Slice(events, func(i, j int) bool {
@@ -64,17 +64,27 @@ func fieldOfGreatestBlessing(forceField [][]int) int {
 	return res
 }
 
-func sortedSet(xs []int) (sorted []int, getRank func(int) int) {
-	set := make(map[int]struct{}, len(xs))
-	for _, v := range xs {
+// (紧)离散化.
+//  rank: 给定一个在 nums 中的值,返回它的排名(0~len(rank)-1).
+//  sorted: 离散化后的数组.
+func sortedSet(nums []int) (rank map[int]int, sorted []int) {
+	set := make(map[int]struct{})
+	for _, v := range nums {
 		set[v] = struct{}{}
 	}
-	sorted = make([]int, 0, len(set))
+	allNums := make([]int, 0, len(set))
 	for k := range set {
-		sorted = append(sorted, k)
+		allNums = append(allNums, k)
 	}
-	sort.Ints(sorted)
-	getRank = func(x int) int { return sort.SearchInts(sorted, x) }
+	sort.Ints(allNums)
+	rank = make(map[int]int, len(allNums))
+	for i, v := range allNums {
+		rank[v] = i
+	}
+	sorted = make([]int, len(nums))
+	for i, v := range nums {
+		sorted[i] = rank[v]
+	}
 	return
 }
 

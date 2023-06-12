@@ -60,7 +60,7 @@ class DiffMatrix {
 
   /**
    * 查询矩阵中指定位置的元素.
-   * !查询前需要先调用{@link update}方法.
+   * 查询前需要先调用{@link update}方法.
    */
   query(row: number, col: number): number {
     return this.matrix[row * this._col + col]

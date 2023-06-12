@@ -1,18 +1,20 @@
+// https://leetcode.cn/circle/discuss/9n7Hnx/
+
 const INF = 2e15
 
 // TODO
 // !Not Verified
 
 /**
- * 维护最大值的BIT.
+ * 维护幺半群的树状数组.
  * !1-indexed.
  */
-class BITMax {
+class BITMonoid<E> {
   private readonly _tree: number[]
   private readonly _max: number[]
   private readonly _n: number
 
-  constructor(n: number) {
+  constructor(n: number, e: () => E, op: (a: E, b: E) => E) {
     this._tree = Array(n + 1).fill(0)
     this._max = Array(n + 1).fill(0)
     this._n = n
@@ -29,8 +31,20 @@ class BITMax {
     }
   }
 
+  // O(logn)
+  update(index: number, value: number): void {}
+
+  // O(logn)
+  queryPrefix(right: number): number {
+    let res = -INF
+    for (; right > 0; right -= right & -right) {
+      res = Math.max(res, this._tree[right])
+    }
+    return res
+  }
+
   // O(log^2 n)
-  queryMax(left: number, right: number): number {
+  queryRange(left: number, right: number): number {
     let x = right
     let res = -INF
     while (x >= left) {
@@ -49,7 +63,7 @@ class BITMax {
 export {}
 
 if (require.main === module) {
-  const bit = new BITMax(10)
+  const bit = new BITMonoid(10, () => 0, Math.max)
 
   console.log(bit.toString())
   bit.set(1, 3)
@@ -58,6 +72,6 @@ if (require.main === module) {
   console.log(bit.toString())
 
   console.log(bit.toString())
-  console.log(bit.queryMax(1, 3))
+  console.log(bit.queryRange(1, 3))
   console.log(bit.toString())
 }

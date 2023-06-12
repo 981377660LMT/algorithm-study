@@ -36,12 +36,15 @@ const arr = Array(21)
   .map((_, i) => i)
 
 const time1 = performance.now()
-enumerateSubset(arr, () => {})
+enumerateSubset(arr, sub => {
+  const a = sub
+})
 console.log(performance.now() - time1)
 
 const time2 = performance.now()
-for (const _ of genSubset(arr)) {
+for (const sub of genSubset(arr)) {
+  const a = sub
 }
 console.log(performance.now() - time2)
 
-// !前者比后者快200倍
+// !前者比后者快100倍

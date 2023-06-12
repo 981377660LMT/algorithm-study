@@ -15,12 +15,15 @@ class DiffMatrix:
                 tmp1[j] = tmp2[j]
         self._diff = [[0] * (self._col + 2) for _ in range(self._row + 2)]
 
-    def add(self, r1: int, c1: int, r2: int, c2: int, k: int) -> None:
-        """区间更新A[r1:r2+1, c1:c2+1]"""
-        self._diff[r1 + 1][c1 + 1] += k
-        self._diff[r1 + 1][c2 + 2] -= k
-        self._diff[r2 + 2][c1 + 1] -= k
-        self._diff[r2 + 2][c2 + 2] += k
+    def add(self, r1: int, c1: int, r2: int, c2: int, delta: int) -> None:
+        """
+        区间更新左上角`(row1, col1)` 到 右下角`(row2, col2)`闭区间所描述的子矩阵的元素.
+        0<=r1<=r2<row, 0<=c1<=c2<col.
+        """
+        self._diff[r1 + 1][c1 + 1] += delta
+        self._diff[r1 + 1][c2 + 2] -= delta
+        self._diff[r2 + 2][c1 + 1] -= delta
+        self._diff[r2 + 2][c2 + 2] += delta
 
     def update(self) -> None:
         """遍历矩阵，还原对应元素的增量"""
@@ -31,6 +34,12 @@ class DiffMatrix:
                 # 差分数组的前缀和即为nums[i]
                 tmpDiff1[j + 1] += tmpDiff1[j] + tmpDiff0[j + 1] - tmpDiff0[j]
                 tmpMatrix[j] += tmpDiff1[j + 1]
+
+    def query(self, r: int, c: int) -> int:
+        """查询矩阵中指定位置的元素.
+        !查询前需要先调用`update`方法.
+        """
+        return self.matrix[r][c]
 
 
 class PreSumMatrix:
