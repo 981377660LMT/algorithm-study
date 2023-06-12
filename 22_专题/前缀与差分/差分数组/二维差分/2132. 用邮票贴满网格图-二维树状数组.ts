@@ -32,7 +32,7 @@ function possibleToStamp2(grid: number[][], h: number, w: number): boolean {
 
   for (let r = 0; r + h - 1 < ROW; r++) {
     for (let c = 0; c + w - 1 < COL; c++) {
-      if (preSum.queryRange(r, c, r + h - 1, c + w - 1) === 0) {
+      if (!preSum.queryRange(r, c, r + h - 1, c + w - 1)) {
         diff.add(r, c, r + h - 1, c + w - 1, 1)
       }
     }
@@ -42,7 +42,7 @@ function possibleToStamp2(grid: number[][], h: number, w: number): boolean {
 
   for (let r = 0; r < ROW; r++) {
     for (let c = 0; c < COL; c++) {
-      if (grid[r][c] === 0 && diff.query(r, c) === 0) return false
+      if (!grid[r][c] && !diff.query(r, c)) return false
     }
   }
 

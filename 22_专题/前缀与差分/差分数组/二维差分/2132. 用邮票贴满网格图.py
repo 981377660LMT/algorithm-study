@@ -9,7 +9,6 @@ class Solution:
         diffMatrix = DiffMatrix(grid)
         for r in range(row):
             for c in range(col):
-
                 if (
                     r + h - 1 < row
                     and c + w - 1 < col
@@ -25,8 +24,7 @@ class Solution:
         return True
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     assert (
         Solution().possibleToStamp(
             grid=[[1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]], h=4, w=3
@@ -40,4 +38,3 @@ if __name__ == '__main__':
         )
         == False
     )
-
