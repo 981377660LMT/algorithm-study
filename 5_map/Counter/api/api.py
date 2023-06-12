@@ -21,3 +21,9 @@ print(not Counter())
 # 5.freq总和
 print(len(list(c.elements())))
 print(sum(c.values()))
+
+
+# 6.两个序列排序后是否全等/两个序列是否相等 => Counter相等
+counter1 = Counter("abbb")
+counter2 = Counter("babb")
+print(counter1 == counter2)

@@ -38,3 +38,8 @@ https://github.com/spaghetti-source/algorithm/blob/4fdac8202e26def25c1baf9127aaa
 //
 // `Use 1 or 3.`
 //
+
+---
+
+更快的 LA 算法：长链剖分+倍增
+https://leetcode.cn/problems/kth-ancestor-of-a-tree-node/solution/on-o1mo-ban-by-hqztrue-ota3/

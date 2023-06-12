@@ -25,3 +25,8 @@ enumerateRange: enumerateRange(start: number, end: number, f: (start: number, en
 
 - 珂朵莉树的 set 操作推平区间，有利于降低复杂度
 - 珂朵莉树不擅长范围查询(因为复杂度与范围内的区间个数成正比)，一般需要配合其他数据结构辅助范围查询
+
+---
+
+优化:如果区间染色是某个值时,js 可以考虑使用 Int8Array 或者 Uint32Array 上的 `fill 方法`填充
+(类型数组的 fill 方法使用了 `memset`)

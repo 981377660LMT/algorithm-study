@@ -25,32 +25,24 @@ class Solution:
         adjList = [[] for _ in range(3 * all_)]
         dummy = all_
         for r, row in enumerate(mat):
-            rowNode = [(v, r * COL + c) for c, v in enumerate(row)]
-            rowNode.sort()
-            groups = [
-                (char, [id for _, id in group])
-                for char, group in groupby(rowNode, key=lambda x: x[0])
-            ]
-
-            for (_, id1), (_, id2) in zip(groups, groups[1:]):
-                for id in id1:
+            pair = [(v, r * COL + c) for c, v in enumerate(row)]
+            pair.sort()
+            group = [[id for _, id in group] for _, group in groupby(pair, key=lambda x: x[0])]
+            for pre, cur in zip(group, group[1:]):
+                for id in pre:
                     adjList[id].append(dummy)
-                for id in id2:
+                for id in cur:
                     adjList[dummy].append(id)
                 dummy += 1
 
         for c in range(COL):
-            colNode = [(mat[r][c], r * COL + c) for r in range(ROW)]
-            colNode.sort()
-            groups = [
-                (char, [id for _, id in group])
-                for char, group in groupby(colNode, key=lambda x: x[0])
-            ]
-
-            for (_, id1), (_, id2) in zip(groups, groups[1:]):
-                for id in id1:
+            pair = [(mat[r][c], r * COL + c) for r in range(ROW)]
+            pair.sort()
+            group = [[id for _, id in group] for _, group in groupby(pair, key=lambda x: x[0])]
+            for pre, cur in zip(group, group[1:]):
+                for id in pre:
                     adjList[id].append(dummy)
-                for id in id2:
+                for id in cur:
                     adjList[dummy].append(id)
                 dummy += 1
 

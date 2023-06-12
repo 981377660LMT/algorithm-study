@@ -11,17 +11,12 @@ Xi<=1e9
 
 from bisect import bisect_right
 from itertools import accumulate
-import sys
-import os
-from typing import List
 
-sys.setrecursionlimit(int(1e9))
-input = sys.stdin.readline
-MOD = int(1e9 + 7)
+from typing import List
 
 
 def calDistSum(nums: List[int], k: int, preSum: List[int]) -> int:
-    """有序数组所有点到x=k的距离之和
+    """`有序数组`所有点到x=k的距离之和
 
     排序+二分+前缀和 O(logn)
     """
@@ -31,7 +26,23 @@ def calDistSum(nums: List[int], k: int, preSum: List[int]) -> int:
     return leftSum + rightSum
 
 
+def calDistSumOfAllPairs(nums: List[int]) -> int:
+    """`有序数组`中所有点对两两距离之和.一共有n*(n-1)//2对点对."""
+    res, preSum = 0, 0
+    for i, v in enumerate(nums):
+        res += v * i - preSum
+        preSum += v
+    return res
+
+
 def main() -> None:
+    import sys
+    import os
+
+    sys.setrecursionlimit(int(1e9))
+    input = sys.stdin.readline
+    MOD = int(1e9 + 7)
+
     n, q = map(int, input().split())
     nums = list(map(int, input().split()))
     nums.sort()
@@ -39,13 +50,3 @@ def main() -> None:
     for _ in range(q):
         x = int(input())
         print(calDistSum(nums, x, preSum))
-
-
-if os.environ.get("USERNAME", "") == "caomeinaixi":
-    while True:
-        try:
-            main()
-        except (EOFError, ValueError):
-            break
-else:
-    main()

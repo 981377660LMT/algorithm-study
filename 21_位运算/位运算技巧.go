@@ -93,6 +93,13 @@ func foo(x int) {
 	fmt.Println(1<<a - 1)   // 全1掩码
 	fmt.Println(^(^0 << a)) // 全1(-1)左移a位,再取反
 
+	// 利用位运算消除特定分支的方法:
+	// !1.将if条件映射到 -1/0/1,先转变为加法/乘法
+	// !2.-1/0/1的乘法相当于与运算,加法相当于或运算
+	sum := 0
+	flag := 1
+	sum += flag & 128 // 消除分支: if(flag) sum += 128
+
 	_ = []interface{}{
 		lowbit,
 		isSubset,
