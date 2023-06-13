@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 /* eslint-disable no-cond-assign */
 /* eslint-disable no-param-reassign */
 
@@ -6,7 +7,7 @@
 class SegmentTreePointUpdateRangeQuery<E = number> {
   private readonly _n: number
   private readonly _size: number
-  private readonly _seg: E[]
+  private readonly _data: E[]
   private readonly _e: () => E
   private readonly _op: (a: E, b: E) => E
 
@@ -20,12 +21,12 @@ class SegmentTreePointUpdateRangeQuery<E = number> {
     const n = typeof nOrLeaves === 'number' ? nOrLeaves : nOrLeaves.length
     let size = 1
     while (size < n) size <<= 1
-    const seg = Array(size << 1)
-    for (let i = 0; i < seg.length; i++) seg[i] = e()
+    const data = Array(size << 1)
+    for (let i = 0; i < data.length; i++) data[i] = e()
 
     this._n = n
     this._size = size
-    this._seg = seg
+    this._data = data
     this._e = e
     this._op = op
 
@@ -35,15 +36,15 @@ class SegmentTreePointUpdateRangeQuery<E = number> {
   set(index: number, value: E): void {
     if (index < 0 || index >= this._n) return
     index += this._size
-    this._seg[index] = value
+    this._data[index] = value
     while ((index >>= 1)) {
-      this._seg[index] = this._op(this._seg[index << 1], this._seg[(index << 1) | 1])
+      this._data[index] = this._op(this._data[index << 1], this._data[(index << 1) | 1])
     }
   }
 
   get(index: number): E {
     if (index < 0 || index >= this._n) return this._e()
-    return this._seg[index + this._size]
+    return this._data[index + this._size]
   }
 
   /**
@@ -52,9 +53,9 @@ class SegmentTreePointUpdateRangeQuery<E = number> {
   update(index: number, value: E): void {
     if (index < 0 || index >= this._n) return
     index += this._size
-    this._seg[index] = this._op(this._seg[index], value)
+    this._data[index] = this._op(this._data[index], value)
     while ((index >>= 1)) {
-      this._seg[index] = this._op(this._seg[index << 1], this._seg[(index << 1) | 1])
+      this._data[index] = this._op(this._data[index << 1], this._data[(index << 1) | 1])
     }
   }
 
@@ -70,36 +71,38 @@ class SegmentTreePointUpdateRangeQuery<E = number> {
     let leftRes = this._e()
     let rightRes = this._e()
     for (start += this._size, end += this._size; start < end; start >>= 1, end >>= 1) {
-      if (start & 1) leftRes = this._op(leftRes, this._seg[start++])
-      if (end & 1) rightRes = this._op(this._seg[--end], rightRes)
+      if (start & 1) leftRes = this._op(leftRes, this._data[start++])
+      if (end & 1) rightRes = this._op(this._data[--end], rightRes)
     }
     return this._op(leftRes, rightRes)
   }
 
   queryAll(): E {
-    return this._seg[1]
+    return this._data[1]
   }
 
   /**
    * 树上二分查询最大的`end`使得`[start,end)`内的值满足`predicate`.
+   * @alias findFirst
    */
   maxRight(start: number, predicate: (value: E) => boolean): number {
-    if (start === this._n) return this._n
+    if (start < 0) start = 0
+    if (start >= this._n) return this._n
     start += this._size
     let res = this._e()
     while (true) {
       while (!(start & 1)) start >>= 1
-      if (!predicate(this._op(res, this._seg[start]))) {
+      if (!predicate(this._op(res, this._data[start]))) {
         while (start < this._size) {
           start <<= 1
-          if (predicate(this._op(res, this._seg[start]))) {
-            res = this._op(res, this._seg[start])
+          if (predicate(this._op(res, this._data[start]))) {
+            res = this._op(res, this._data[start])
             start++
           }
         }
         return start - this._size
       }
-      res = this._op(res, this._seg[start])
+      res = this._op(res, this._data[start])
       start++
       if ((start & -start) === start) break
     }
@@ -108,25 +111,27 @@ class SegmentTreePointUpdateRangeQuery<E = number> {
 
   /**
    * 树上二分查询最小的`start`使得`[start,end)`内的值满足`predicate`
+   * @alias findLast
    */
   minLeft(end: number, predicate: (value: E) => boolean): number {
-    if (!end) return 0
+    if (end > this._n) end = this._n
+    if (end <= 0) return 0
     end += this._size
     let res = this._e()
     while (true) {
       end--
       while (end > 1 && end & 1) end >>= 1
-      if (!predicate(this._op(this._seg[end], res))) {
+      if (!predicate(this._op(this._data[end], res))) {
         while (end < this._size) {
           end = (end << 1) | 1
-          if (predicate(this._op(this._seg[end], res))) {
-            res = this._op(this._seg[end], res)
+          if (predicate(this._op(this._data[end], res))) {
+            res = this._op(this._data[end], res)
             end--
           }
         }
         return end + 1 - this._size
       }
-      res = this._op(this._seg[end], res)
+      res = this._op(this._data[end], res)
       if ((end & -end) === end) break
     }
     return 0
@@ -135,10 +140,10 @@ class SegmentTreePointUpdateRangeQuery<E = number> {
   build(arr: ArrayLike<E>): void {
     if (arr.length !== this._n) throw new RangeError(`length must be equal to ${this._n}`)
     for (let i = 0; i < arr.length; i++) {
-      this._seg[i + this._size] = arr[i] // 叶子结点
+      this._data[i + this._size] = arr[i] // 叶子结点
     }
     for (let i = this._size - 1; ~i; i--) {
-      this._seg[i] = this._op(this._seg[i << 1], this._seg[(i << 1) | 1])
+      this._data[i] = this._op(this._data[i << 1], this._data[(i << 1) | 1])
     }
   }
 
@@ -174,4 +179,20 @@ if (require.main === module) {
   console.log(seg.minLeft(10, x => x < 15))
   console.log(seg.maxRight(0, x => x <= 15))
   console.log(seg.queryAll())
+
+  benchMark()
+  function benchMark(): void {
+    const n = 2e5
+    const seg = new SegmentTreePointUpdateRangeQuery<number>(
+      n,
+      () => 0,
+      (parent, child) => parent + child
+    )
+    console.time('update')
+    for (let i = 0; i < n; i++) {
+      seg.update(i, i)
+      seg.query(0, i)
+    }
+    console.timeEnd('update')
+  }
 }

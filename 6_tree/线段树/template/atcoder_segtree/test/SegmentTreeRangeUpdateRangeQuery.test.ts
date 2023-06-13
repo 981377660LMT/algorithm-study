@@ -1,21 +1,19 @@
-import { useAtcoderLazySegmentTree, Operation, AtcoderSegmentTree } from '../AtcoderLazySegmentTree'
+import { SegmentTreeRangeUpdateRangeQuery } from '../SegmentTreeRangeUpdateRangeQuery'
 
 const INF = 2e15
 
-describe('useAtcoderLazySegmentTree', () => {
+describe('SegmentTreeRangeUpdateRangeQuery', () => {
   // !叠加更新 区间最大值查询
   describe('MaxSegmentTree', () => {
-    const maxOperation: Operation<number, number> = {
-      e: () => -INF,
-      id: () => 0,
-      op: (a, b) => Math.max(a, b),
-      mapping: (data, lazy) => data + lazy,
-      composition: (lazy1, lazy2) => lazy1 + lazy2
-    }
-
-    let tree: AtcoderSegmentTree<number, number>
+    let tree: SegmentTreeRangeUpdateRangeQuery<number, number>
     beforeEach(() => {
-      tree = useAtcoderLazySegmentTree([1, 2, 3, 4, 5], maxOperation)
+      tree = new SegmentTreeRangeUpdateRangeQuery([1, 2, 3, 4, 5], {
+        e: () => -INF,
+        id: () => 0,
+        op: (a, b) => Math.max(a, b),
+        mapping: (data, lazy) => data + lazy,
+        composition: (lazy1, lazy2) => lazy1 + lazy2
+      })
     })
 
     it('should support query', () => {
@@ -57,25 +55,23 @@ describe('useAtcoderLazySegmentTree', () => {
 
   // !叠加更新 区间和查询
   describe('SumSegmentTree', () => {
-    const sumOperation: Operation<[sum: number, length: number], number> = {
-      e: () => [0, 0],
-      id: () => 0,
-      op(data1, data2) {
-        return [data1[0] + data2[0], data1[1] + data2[1]]
-      },
-      mapping(parentLazy, childData) {
-        return [childData[0] + parentLazy * childData[1], childData[1]]
-      },
-      composition(parentLazy, childLazy) {
-        return parentLazy + childLazy
-      }
-    }
-
-    let tree: AtcoderSegmentTree<[sum: number, length: number], number>
+    let tree: SegmentTreeRangeUpdateRangeQuery<[sum: number, length: number], number>
     beforeEach(() => {
-      tree = useAtcoderLazySegmentTree(
+      tree = new SegmentTreeRangeUpdateRangeQuery(
         Array.from({ length: 5 }, (_, i) => [i, 1]),
-        sumOperation
+        {
+          e: () => [0, 0],
+          id: () => 0,
+          op(data1, data2) {
+            return [data1[0] + data2[0], data1[1] + data2[1]]
+          },
+          mapping(parentLazy, childData) {
+            return [childData[0] + parentLazy * childData[1], childData[1]]
+          },
+          composition(parentLazy, childLazy) {
+            return parentLazy + childLazy
+          }
+        }
       )
     })
 
@@ -116,30 +112,31 @@ describe('useAtcoderLazySegmentTree', () => {
       type Data = [sum: bigint, length: bigint]
       type Lazy = [mul: bigint, add: bigint]
 
-      const operation: Operation<Data, Lazy> = {
-        e: () => [0n, 1n],
-        id: () => [1n, 0n],
-        op(data1, data2) {
-          return [(data1[0] + data2[0]) % MOD, data1[1] + data2[1]]
-        },
-        // 区间和等于原来的区间和乘以mul加上区间的长度乘以add
-        mapping(parentLazy, childData) {
-          return [
-            (childData[0] * parentLazy[0] + BigInt(childData[1]) * parentLazy[1]) % MOD,
-            childData[1]
-          ]
-        },
-        composition(parentLazy, childLazy) {
-          return [
-            (parentLazy[0] * childLazy[0]) % MOD,
-            (parentLazy[0] * childLazy[1] + parentLazy[1]) % MOD
-          ]
-        }
-      }
-
-      const tree = useAtcoderLazySegmentTree(
+      const tree = new SegmentTreeRangeUpdateRangeQuery(
         nums.map<Data>(value => [BigInt(value), 1n]),
-        operation
+        {
+          e: () => [0n, 1n],
+          id: () => [1n, 0n],
+          op(data1, data2) {
+            return [(data1[0] + data2[0]) % MOD, data1[1] + data2[1]]
+          },
+          // 区间和等于原来的区间和乘以mul加上区间的长度乘以add
+          mapping(parentLazy, childData) {
+            return [
+              (childData[0] * parentLazy[0] + BigInt(childData[1]) * parentLazy[1]) % MOD,
+              childData[1]
+            ]
+          },
+          composition(parentLazy, childLazy) {
+            return [
+              (parentLazy[0] * childLazy[0]) % MOD,
+              (parentLazy[0] * childLazy[1] + parentLazy[1]) % MOD
+            ]
+          },
+          equalsId(id1, id2) {
+            return id1[0] === id2[0] && id1[1] === id2[1]
+          }
+        }
       )
 
       const expected = [17n, 2n]
@@ -180,27 +177,25 @@ describe('useAtcoderLazySegmentTree', () => {
       type Data = [count0: number, count1: number]
       type Lazy = 0 | 1 // 0表示不反转，1表示反转
 
-      const operation: Operation<Data, Lazy> = {
-        e: () => [0, 0],
-        id: () => 0,
-        op(data1, data2) {
-          return [data1[0] + data2[0], data1[1] + data2[1]]
-        },
-        mapping(parentLazy, childData) {
-          if (parentLazy === 1) {
-            // eslint-disable-next-line no-param-reassign
-            ;[childData[0], childData[1]] = [childData[1], childData[0]]
-          }
-          return childData
-        },
-        composition(parentLazy, childLazy) {
-          return (parentLazy ^ childLazy) as Lazy
-        }
-      }
-
-      const tree = useAtcoderLazySegmentTree(
+      const tree = new SegmentTreeRangeUpdateRangeQuery(
         s.split('').map<Data>(v => (v === '0' ? [1, 0] : [0, 1])),
-        operation
+        {
+          e: () => [0, 0],
+          id: () => 0,
+          op(data1, data2) {
+            return [data1[0] + data2[0], data1[1] + data2[1]]
+          },
+          mapping(parentLazy, childData) {
+            if (parentLazy === 1) {
+              // eslint-disable-next-line no-param-reassign
+              ;[childData[0], childData[1]] = [childData[1], childData[0]]
+            }
+            return childData
+          },
+          composition(parentLazy, childLazy) {
+            return (parentLazy ^ childLazy) as Lazy
+          }
+        }
       )
 
       const expected = [3, 6, 1]
@@ -233,35 +228,39 @@ describe('useAtcoderLazySegmentTree', () => {
 
     type Data = [count0: number, count1: number, inv: number]
     type Lazy = 0 | 1 // 0表示不反转，1表示反转
-    const operation: Operation<Data, Lazy> = {
-      e() {
-        return [0, 0, 0]
-      },
-      id() {
-        return 0
-      },
-      op(data1, data2) {
-        return [data1[0] + data2[0], data1[1] + data2[1], data1[2] + data2[2] + data1[1] * data2[0]]
-      },
-      mapping(parentLazy, childData) {
-        if (parentLazy === 1) {
-          // !4000ms => 2600ms 不创建新数组节省空间、时间
-          // eslint-disable-next-line no-param-reassign
-          ;[childData[0], childData[1], childData[2]] = [
-            childData[1],
-            childData[0],
-            childData[0] * childData[1] - childData[2]
-          ]
-        }
-        return childData
-      },
-      composition(parentLazy, childLazy) {
-        return (parentLazy ^ childLazy) as Lazy
-      }
-    }
-    const tree = useAtcoderLazySegmentTree(
+
+    const tree = new SegmentTreeRangeUpdateRangeQuery<Data, Lazy>(
       nums.map<Data>(v => (v === 0 ? [1, 0, 0] : [0, 1, 0])),
-      operation
+      {
+        e() {
+          return [0, 0, 0]
+        },
+        id() {
+          return 0
+        },
+        op(data1, data2) {
+          return [
+            data1[0] + data2[0],
+            data1[1] + data2[1],
+            data1[2] + data2[2] + data1[1] * data2[0]
+          ]
+        },
+        mapping(parentLazy, childData) {
+          if (parentLazy === 1) {
+            // !4000ms => 2600ms 不创建新数组节省空间、时间
+            // eslint-disable-next-line no-param-reassign
+            ;[childData[0], childData[1], childData[2]] = [
+              childData[1],
+              childData[0],
+              childData[0] * childData[1] - childData[2]
+            ]
+          }
+          return childData
+        },
+        composition(parentLazy, childLazy) {
+          return (parentLazy ^ childLazy) as Lazy
+        }
+      }
     )
 
     const expected = [2, 0, 1]

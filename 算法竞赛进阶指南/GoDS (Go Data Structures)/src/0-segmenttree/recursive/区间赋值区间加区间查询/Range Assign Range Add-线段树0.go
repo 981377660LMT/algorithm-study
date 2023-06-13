@@ -1,5 +1,5 @@
 // RangeAssignRangeAddRangeSum/RangeAddRangeAssignRangeSum
-// !仿射变换 Range Affine Range Query
+// !仿射变换 RangeAffineRangeQuery
 // 区间赋值区间加区间和查询
 
 package main

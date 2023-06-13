@@ -358,6 +358,7 @@ function useAtcoderLazySegmentTree<E = number, Id = number>(
   }
 
   function _pushDown(root: number): void {
+    if (_lazy[root] === _id()) return
     _propagate(2 * root, _lazy[root])
     _propagate(2 * root + 1, _lazy[root])
     _lazy[root] = _id()

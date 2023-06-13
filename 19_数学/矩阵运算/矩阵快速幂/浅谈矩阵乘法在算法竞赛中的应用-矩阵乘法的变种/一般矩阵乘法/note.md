@@ -14,3 +14,5 @@
 
 TODO
 https://judge.yosupo.jp/problem/matrix_product
+
+实际工程场景很少见 01 矩阵，F2 矩阵也不常见，大部分都是浮点矩阵，一般都是 gpu 算

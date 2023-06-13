@@ -33,3 +33,4 @@ console.time('for')
 const arr4 = new Uint32Array(n)
 for (let i = 0; i < n; i++) arr4[i] = 100
 console.timeEnd('for')
+export {}
