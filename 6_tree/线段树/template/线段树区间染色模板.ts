@@ -161,6 +161,7 @@ class SegmentTree2 {
 }
 
 if (require.main === module) {
+  // https://leetcode.cn/problems/amount-of-new-area-painted-each-day/
   function amountPainted(paint: number[][]): number[] {
     const res: number[] = []
     const tree = new SegmentTree(Math.max(...paint.flat()))

@@ -8,7 +8,7 @@
  * 支持单点更新,单点修改,前缀查询,区间查询.
  * !内部由Map实现,无需离散化.
  */
-class BITMonoidMap<E> {
+class BITMonoidMap<E = number> {
   private readonly _n: number
   private readonly _e: () => E
   private readonly _op: (a: E, b: E) => E
@@ -75,7 +75,7 @@ class BITMonoidMap<E> {
  * 维护幺半群的树状数组.
  * 支持单点更新,单点修改,前缀查询,区间查询.
  */
-class BITMonoidArray<E> {
+class BITMonoidArray<E = number> {
   private readonly _n: number
   private readonly _data: E[]
   private readonly _sum: E[]
@@ -104,7 +104,7 @@ class BITMonoidArray<E> {
     index++
     this._data[index] = value
     for (; index <= this._n; index += index & -index) {
-      this._sum[index] = value
+      this._sum[index] = this._data[index]
       for (let i = 1; i < (index & -index); i <<= 1) {
         this._sum[index] = this._op(this._sum[index], this._sum[index - i])
       }
@@ -184,57 +184,8 @@ class BITMonoidArray<E> {
 export { BITMonoidArray, BITMonoidMap }
 
 if (require.main === module) {
-  const bit = new BITMonoidArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], () => 0, Math.max)
-
-  console.log(bit.toString())
-  bit.set(0, 3)
-  bit.set(1, 4)
-  bit.set(2, 5)
-  console.log(bit.toString())
-
-  console.log(bit.toString())
-  console.log(bit.queryRange(0, 3))
-  console.log(bit.toString())
-
-  bit.update(1, 0)
-  console.log(bit.toString())
-
-  console.time('queryRange')
-  const n = 2e5
-  const tree = new BITMonoidArray(n, () => 0, Math.max)
-  for (let i = 0; i <= n; i++) {
-    tree.queryRange(i, n)
-  }
-  console.timeEnd('queryRange') // queryRange: 69.958ms
-
-  console.time('queryPrefix')
-  for (let i = 0; i <= n; i++) {
-    tree.queryPrefix(i)
-  }
-  console.timeEnd('queryPrefix') // queryPrefix: 14.018ms
-
-  console.time('set')
-  for (let i = 0; i <= n; i++) {
-    tree.set(i, i)
-  }
-  console.timeEnd('set') // set: 90.789ms
-
-  console.time('update')
-  for (let i = 0; i <= n; i++) {
-    tree.update(i, i)
-  }
-  console.timeEnd('update') // update: 12.925ms
-
-  console.time('get')
-  for (let i = 0; i <= n; i++) {
-    tree.get(i)
-  }
-  console.timeEnd('get') // get: 7.697ms
-
-  const toBuild = Array.from({ length: n }, (_, i) => i)
-  console.time('build')
-  tree.build(toBuild)
-  console.timeEnd('build') // build: 4.268ms
+  checkSet()
+  // testTime()
 
   const INF = 2e15
   // https://leetcode.cn/problems/sliding-window-maximum/submissions/
@@ -250,7 +201,33 @@ if (require.main === module) {
     return res
   }
 
-  checkSet()
+  // 1781. 所有子字符串美丽值之和
+  function beautySum(s: string): number {
+    let res = 0
+    for (let i = 0; i < s.length; i++) {
+      const minSeg = new BITMonoidMap(26, () => INF, Math.min)
+      const maxSeg = new BITMonoidMap(26, () => 0, Math.max)
+      const counterSeg = new BITMonoidMap(
+        26,
+        () => 0,
+        (a, b) => a + b
+      )
+
+      for (let j = i; j < s.length; j++) {
+        const c = s.charCodeAt(j) - 97
+        minSeg.set(c, counterSeg.get(c) + 1)
+        maxSeg.set(c, counterSeg.get(c) + 1)
+        counterSeg.update(c, 1)
+
+        const cand1 = maxSeg.queryPrefix(26) - minSeg.queryPrefix(26)
+        const cand2 = maxSeg.queryRange(0, 26) - minSeg.queryRange(0, 26)
+        if (cand1 !== cand2) throw new Error('error')
+
+        res += cand1
+      }
+    }
+    return res
+  }
 
   function checkSet(): void {
     const INF = 2e15
@@ -270,5 +247,39 @@ if (require.main === module) {
     }
 
     console.log('set test pass')
+  }
+
+  function testTime(): void {
+    const n = 2e5
+    console.time('queryRange')
+    const tree = new BITMonoidArray(n, () => 0, Math.max)
+    for (let i = 0; i <= n; i++) {
+      tree.queryRange(i, n)
+    }
+    console.timeEnd('queryRange') // queryRange: 69.958ms
+    console.time('queryPrefix')
+    for (let i = 0; i <= n; i++) {
+      tree.queryPrefix(i)
+    }
+    console.timeEnd('queryPrefix') // queryPrefix: 14.018ms
+    console.time('set')
+    for (let i = 0; i <= n; i++) {
+      tree.set(i, i)
+    }
+    console.timeEnd('set') // set: 90.789ms
+    console.time('update')
+    for (let i = 0; i <= n; i++) {
+      tree.update(i, i)
+    }
+    console.timeEnd('update') // update: 12.925ms
+    console.time('get')
+    for (let i = 0; i <= n; i++) {
+      tree.get(i)
+    }
+    console.timeEnd('get') // get: 7.697ms
+    const toBuild = Array.from({ length: n }, (_, i) => i)
+    console.time('build')
+    tree.build(toBuild)
+    console.timeEnd('build') // build: 4.268ms
   }
 }

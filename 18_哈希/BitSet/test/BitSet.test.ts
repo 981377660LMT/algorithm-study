@@ -148,7 +148,7 @@ describe('BitSet', () => {
 
   // lastIndexOfOne
   it('should support lastIndexOfOne ', () => {
-    expect(bitSet._lastIndexOfOne()).toBe(nums.lastIndexOf(1))
+    expect(bitSet.bitLength() - 1).toBe(nums.lastIndexOf(1))
   })
 
   // onesCount

@@ -38,7 +38,7 @@ func main() {
 type Id = int
 
 func (*SegmentTree) id() Id                 { return 1<<31 - 1 }
-func (*SegmentTree) composition(f, g Id) Id { return g }
+func (*SegmentTree) composition(f, g Id) Id { return f }
 
 type SegmentTree struct {
 	size, height int
@@ -75,12 +75,12 @@ func (seg *SegmentTree) Update(left, right int, value Id) {
 	l, r := left, right+1
 	for l < r {
 		if l&1 == 1 {
-			seg.lazy[l] = seg.composition(seg.lazy[l], value)
+			seg.lazy[l] = seg.composition(value, seg.lazy[l])
 			l++
 		}
 		if r&1 == 1 {
 			r--
-			seg.lazy[r] = seg.composition(seg.lazy[r], value)
+			seg.lazy[r] = seg.composition(value, seg.lazy[r])
 		}
 		l >>= 1
 		r >>= 1
@@ -93,8 +93,8 @@ func (seg *SegmentTree) thrust(k int) {
 }
 func (seg *SegmentTree) propagate(k int) {
 	if seg.lazy[k] != seg.id() {
-		seg.lazy[k<<1] = seg.composition(seg.lazy[k<<1], seg.lazy[k])
-		seg.lazy[k<<1|1] = seg.composition(seg.lazy[k<<1|1], seg.lazy[k])
+		seg.lazy[k<<1] = seg.composition(seg.lazy[k], seg.lazy[k<<1])
+		seg.lazy[k<<1|1] = seg.composition(seg.lazy[k], seg.lazy[k<<1|1])
 		seg.lazy[k] = seg.id()
 	}
 }

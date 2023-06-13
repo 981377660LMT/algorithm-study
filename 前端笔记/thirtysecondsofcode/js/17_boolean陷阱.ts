@@ -14,3 +14,4 @@ if (y) {
 }
 
 console.log(typeof right, typeof y)
+export {}
