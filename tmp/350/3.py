@@ -6,6 +6,8 @@ from sortedcontainers import SortedList
 
 MOD = int(1e9 + 7)
 INF = int(1e20)
+# !遇到影响全局的操作 一般会想到枚举操作次数
+
 
 # 给你一个长度为 n 、下标从 0 开始的整数数组 nums ，表示收集不同巧克力的成本。每个巧克力都对应一个不同的类型，最初，位于下标 i 的巧克力就对应第 i 个类型。
 
