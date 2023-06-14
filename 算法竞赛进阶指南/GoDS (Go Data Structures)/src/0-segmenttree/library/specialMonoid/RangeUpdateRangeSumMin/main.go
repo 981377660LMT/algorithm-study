@@ -1,6 +1,6 @@
 // 更新:区间染色(update)
 // 查询:区间和、区间最小值
-
+// RangeUpdateRangeSumMin
 package main
 
 import (

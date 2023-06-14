@@ -1,3 +1,4 @@
+// MonoidAddChminChmax
 package main
 
 import (

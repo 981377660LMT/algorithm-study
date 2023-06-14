@@ -1,6 +1,6 @@
 // 更新:区间AND/区间OR
 // 查询:区间最大值
-
+// RangeBitwiseAndOrRangeMax
 package main
 
 import (

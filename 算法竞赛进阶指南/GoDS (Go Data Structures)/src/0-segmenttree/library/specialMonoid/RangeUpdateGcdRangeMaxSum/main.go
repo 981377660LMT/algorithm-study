@@ -1,6 +1,6 @@
 // 更新:区间染色/区间gcd(ai,x)
 // 查询:区间最大值、区间和
-
+// RangeGcdRangeMaxSum
 // https://hitonanode.github.io/cplib-cpp/segmenttree/trees/acl_range-update-gcd-range-max-sum.hpp
 // https://rsm9.hatenablog.com/entry/2021/02/01/220408
 

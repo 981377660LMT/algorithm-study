@@ -17,4 +17,4 @@ interface ISegmentTree<TreeItem = number, QueryReturn = number> {
   query: (root: number, left: number, right: number) => QueryReturn
 }
 
-export { ISegmentTree, ISegmentTreeNode, ISegmentTreeNodeWithLazy }
+export {}

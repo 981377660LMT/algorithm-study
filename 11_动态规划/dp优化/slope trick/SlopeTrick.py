@@ -127,7 +127,7 @@ class SlopeTrick:
         """
         self.shift(a, a)
 
-    def get_destructive(self, x: int) -> int:
+    def get_destructively(self, x: int) -> int:
         """
         y = f(x), f(x) broken
         会破坏f内部左右两边的堆.
@@ -143,7 +143,7 @@ class SlopeTrick:
                 res += tmp
         return res
 
-    def merge_destructive(self, st: "SlopeTrick"):
+    def merge_destructively(self, st: "SlopeTrick"):
         """
         f(x) += g(x), g(x) broken
         会破坏g(x)的左右两边的堆.

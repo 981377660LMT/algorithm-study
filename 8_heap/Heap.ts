@@ -14,7 +14,7 @@ class Heap<E = number> {
   /**
    * 破坏性地合并两个堆，返回合并后的堆.采用启发式合并.
    */
-  static mergeDestructive<E>(heap1: Heap<E>, heap2: Heap<E>): Heap<E> {
+  static mergeDestructively<E>(heap1: Heap<E>, heap2: Heap<E>): Heap<E> {
     if (heap1.size < heap2.size) {
       const tmp = heap1
       heap1 = heap2
