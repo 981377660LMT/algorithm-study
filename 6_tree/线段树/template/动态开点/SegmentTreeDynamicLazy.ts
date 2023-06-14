@@ -89,7 +89,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
       composition: (f: Id, g: Id) => Id
 
       /**
-       * 判断两个懒标记是否相等.默认为`===`.
+       * 判断两个懒标记是否相等.比较方式默认为`===`.
        */
       equalsId?: (id1: Id, id2: Id) => boolean
     } & ThisType<void>,

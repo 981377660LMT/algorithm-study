@@ -40,7 +40,7 @@ class SegmentTreeDynamic<E = number> {
   private _root: SegNode<E>
 
   /**
-   * 单点修改区间查询的动态开点懒标记线段树.线段树维护的值域为`[start, end)`.
+   * 单点修改区间查询的动态开点线段树.线段树维护的值域为`[start, end)`.
    * @param start 值域下界.start>=0.
    * @param end 值域上界.
    * @param e 幺元.

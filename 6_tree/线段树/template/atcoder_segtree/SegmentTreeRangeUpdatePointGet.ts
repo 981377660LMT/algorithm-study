@@ -22,7 +22,7 @@ class SegmentTreeRangeUpdatePointGet<Id = number> {
    * @param n 线段树的大小.
    * @param id 单位元.
    * @param composition 父结点`f`与子结点`g`的合成函数.
-   * @param equals 判断两个值是否相等的函数.默认为`===`.
+   * @param equals 判断两个值是否相等的函数.比较方式默认为`===`.
    *
    * @alias DualSegmentTree
    */
