@@ -453,27 +453,32 @@ if (require.main === module) {
   // https://leetcode.cn/problems/range-module/
   // RangeAssignRangeSum
   class RangeModule {
-    private readonly _seg = new SegmentTreeDynamicLazy<number, number>(0, 1e9, {
-      e() {
-        return 0
+    private readonly _seg = new SegmentTreeDynamicLazy<number, number>(
+      0,
+      1e9,
+      {
+        e() {
+          return 0
+        },
+        id() {
+          return -1
+        },
+        op(e1, e2) {
+          return e1 + e2
+        },
+        mapping(lazy, data, size) {
+          return lazy === -1 ? data : lazy * size
+        },
+        composition(f, g) {
+          return f === -1 ? g : f
+        }
       },
-      id() {
-        return -1
-      },
-      op(e1, e2) {
-        return e1 + e2
-      },
-      mapping(lazy, data, size) {
-        return lazy === -1 ? data : lazy * size
-      },
-      composition(f, g) {
-        return f === -1 ? g : f
-      }
-    })
-    private readonly _root = this._seg.newRoot()
+      true
+    )
+    private _root = this._seg.newRoot()
 
     addRange(left: number, right: number): void {
-      this._seg.updateRange(this._root, left, right, 1)
+      this._root = this._seg.updateRange(this._root, left, right, 1)
     }
 
     queryRange(left: number, right: number): boolean {
@@ -481,7 +486,7 @@ if (require.main === module) {
     }
 
     removeRange(left: number, right: number): void {
-      this._seg.updateRange(this._root, left, right, 0)
+      this._root = this._seg.updateRange(this._root, left, right, 0)
     }
   }
 }
