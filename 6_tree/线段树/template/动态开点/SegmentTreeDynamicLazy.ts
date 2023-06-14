@@ -1,5 +1,3 @@
-// TODO: refactor with maspy's SegmentTreeDynamicLazy
-
 type DNode<E, Id> = [
   left: DNode<E, Id> | undefined,
   right: DNode<E, Id> | undefined,
