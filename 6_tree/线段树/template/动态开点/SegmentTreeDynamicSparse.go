@@ -76,16 +76,16 @@ type DynamicSegTreeSparse struct {
 }
 
 type SegNode struct {
-	idx     int
-	l, r    *SegNode
-	x, prod E
+	idx       int
+	l, r      *SegNode
+	data, sum E
 }
 
 // 指定 [left,right) 区间建立动态开点线段树.
 func NewDynamicSegTreeSparse(left, right int, persistent bool) *DynamicSegTreeSparse {
 	return &DynamicSegTreeSparse{
 		L:          left,
-		R:          right,
+		R:          right + 5,
 		persistent: persistent,
 		unit:       e(),
 	}
@@ -105,7 +105,7 @@ func (ds *DynamicSegTreeSparse) Query(root *SegNode, left, right int) E {
 }
 
 func (ds *DynamicSegTreeSparse) QueryAll(root *SegNode) E {
-	return ds.Query(root, ds.L, ds.R)
+	return root.sum
 }
 
 // L<=index<R
@@ -149,24 +149,24 @@ func (ds *DynamicSegTreeSparse) GetAll(root *SegNode) []struct {
 }
 
 func (ds *DynamicSegTreeSparse) _pushUp(node *SegNode) {
-	node.prod = node.x
+	node.sum = node.data
 	if node.l != nil {
-		node.prod = op(node.l.prod, node.prod)
+		node.sum = op(node.l.sum, node.sum)
 	}
 	if node.r != nil {
-		node.prod = op(node.prod, node.r.prod)
+		node.sum = op(node.sum, node.r.sum)
 	}
 }
 
 func (ds *DynamicSegTreeSparse) _newNode(idx int, x E) *SegNode {
-	return &SegNode{idx: idx, x: x, prod: x}
+	return &SegNode{idx: idx, data: x, sum: x}
 }
 
 func (ds *DynamicSegTreeSparse) _copyNode(node *SegNode) *SegNode {
 	if node == nil || !ds.persistent {
 		return node
 	}
-	return &SegNode{idx: node.idx, l: node.l, r: node.r, x: node.x, prod: node.prod}
+	return &SegNode{idx: node.idx, l: node.l, r: node.r, data: node.data, sum: node.sum}
 }
 
 func (ds *DynamicSegTreeSparse) _setRec(root *SegNode, l, r, i int, x E) *SegNode {
@@ -176,7 +176,7 @@ func (ds *DynamicSegTreeSparse) _setRec(root *SegNode, l, r, i int, x E) *SegNod
 	}
 	root = ds._copyNode(root)
 	if root.idx == i {
-		root.x = x
+		root.data = x
 		ds._pushUp(root)
 		return root
 	}
@@ -184,13 +184,13 @@ func (ds *DynamicSegTreeSparse) _setRec(root *SegNode, l, r, i int, x E) *SegNod
 	if i < m {
 		if root.idx < i {
 			root.idx, i = i, root.idx
-			root.x, x = x, root.x
+			root.data, x = x, root.data
 		}
 		root.l = ds._setRec(root.l, l, m, i, x)
 	} else {
 		if i < root.idx {
 			root.idx, i = i, root.idx
-			root.x, x = x, root.x
+			root.data, x = x, root.data
 		}
 		root.r = ds._setRec(root.r, m, r, i, x)
 	}
@@ -205,7 +205,7 @@ func (ds *DynamicSegTreeSparse) _updateRec(root *SegNode, l, r, i int, x E) *Seg
 	}
 	root = ds._copyNode(root)
 	if root.idx == i {
-		root.x = op(root.x, x)
+		root.data = op(root.data, x)
 		ds._pushUp(root)
 		return root
 	}
@@ -213,13 +213,13 @@ func (ds *DynamicSegTreeSparse) _updateRec(root *SegNode, l, r, i int, x E) *Seg
 	if i < m {
 		if root.idx < i {
 			root.idx, i = i, root.idx
-			root.x, x = x, root.x
+			root.data, x = x, root.data
 		}
 		root.l = ds._updateRec(root.l, l, m, i, x)
 	} else {
 		if i < root.idx {
 			root.idx, i = i, root.idx
-			root.x, x = x, root.x
+			root.data, x = x, root.data
 		}
 		root.r = ds._updateRec(root.r, m, r, i, x)
 	}
@@ -234,13 +234,13 @@ func (ds *DynamicSegTreeSparse) _queryRec(root *SegNode, l, r, ql, qr int, x *E)
 		return
 	}
 	if l == ql && r == qr {
-		*x = op(*x, root.prod)
+		*x = op(*x, root.sum)
 		return
 	}
 	m := (l + r) >> 1
 	ds._queryRec(root.l, l, m, ql, qr, x)
 	if ql <= root.idx && root.idx < qr {
-		*x = op(*x, root.x)
+		*x = op(*x, root.data)
 	}
 	ds._queryRec(root.r, m, r, ql, qr, x)
 }
@@ -249,8 +249,8 @@ func (ds *DynamicSegTreeSparse) _minLeftRec(root *SegNode, l, r, qr int, check f
 	if root == nil || qr <= l {
 		return ds.L
 	}
-	if check(op(root.prod, *x)) {
-		*x = op(root.prod, *x)
+	if check(op(root.sum, *x)) {
+		*x = op(root.sum, *x)
 		return ds.L
 	}
 	m := (l + r) >> 1
@@ -259,7 +259,7 @@ func (ds *DynamicSegTreeSparse) _minLeftRec(root *SegNode, l, r, qr int, check f
 		return k
 	}
 	if root.idx < qr {
-		*x = op(root.x, *x)
+		*x = op(root.data, *x)
 		if !check(*x) {
 			return root.idx + 1
 		}
@@ -271,8 +271,8 @@ func (ds *DynamicSegTreeSparse) _maxRightRec(root *SegNode, l, r, ql int, check 
 	if root == nil || r <= ql {
 		return ds.R
 	}
-	if check(op(*x, root.prod)) {
-		*x = op(*x, root.prod)
+	if check(op(*x, root.sum)) {
+		*x = op(*x, root.sum)
 		return ds.R
 	}
 	m := (l + r) >> 1
@@ -281,7 +281,7 @@ func (ds *DynamicSegTreeSparse) _maxRightRec(root *SegNode, l, r, ql int, check 
 		return k
 	}
 	if ql <= root.idx {
-		*x = op(*x, root.x)
+		*x = op(*x, root.data)
 		if !check(*x) {
 			return root.idx
 		}
@@ -300,7 +300,7 @@ func (ds *DynamicSegTreeSparse) _getAllRec(root *SegNode, res *[]struct {
 	*res = append(*res, struct {
 		index int
 		value E
-	}{root.idx, root.x})
+	}{root.idx, root.data})
 	ds._getAllRec(root.r, res)
 }
 
@@ -309,7 +309,7 @@ func (ds *DynamicSegTreeSparse) _getRec(root *SegNode, idx int) E {
 		return ds.unit
 	}
 	if idx == root.idx {
-		return root.x
+		return root.data
 	}
 	if idx < root.idx {
 		return ds._getRec(root.l, idx)

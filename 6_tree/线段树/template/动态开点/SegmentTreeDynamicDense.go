@@ -64,7 +64,7 @@ type SegNode struct {
 func NewDynamicSegTree(left, right int, persistent bool) *DynamicSegTree {
 	return &DynamicSegTree{
 		L:          left,
-		R:          right,
+		R:          right + 5,
 		persistent: persistent,
 		unit:       e1(),
 	}

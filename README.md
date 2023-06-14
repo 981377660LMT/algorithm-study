@@ -104,7 +104,7 @@
      - [SegmentTreeRangeUpdateRangeQuery](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/atcoder_segtree/SegmentTreeRangeUpdateRangeQuery.ts)
      - [SegmentTree2DPointUpdateRangeQuery](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E4%BA%8C%E7%BB%B4/%E5%8D%95%E7%82%B9%E4%BF%AE%E6%94%B9%E5%8C%BA%E9%97%B4%E6%9F%A5%E8%AF%A2/SegmentTree2DPointUpdateRangeQuery.ts)
      - [SegmentTree2DRangeUpdatePointGet](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E4%BA%8C%E7%BB%B4/%E5%8C%BA%E9%97%B4%E6%9B%B4%E6%96%B0%E6%A0%91%E5%A5%97%E6%A0%91/SegmentTree2DRangeUpdatePointGet.ts)
-     - [SegmentTreeDynamic](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E5%8A%A8%E6%80%81%E5%BC%80%E7%82%B9/SegmentTreeDynamicSparse.go)
+     - [SegmentTreeDynamic](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E5%8A%A8%E6%80%81%E5%BC%80%E7%82%B9/SegmentTreeDynamicSparse.ts)
      - [SegmentTreeDynamicLazy](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E5%8A%A8%E6%80%81%E5%BC%80%E7%82%B9/SegmentTreeDynamicLazy.ts)
      - [SegmentTreePersistent](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E5%8A%A8%E6%80%81%E5%BC%80%E7%82%B9/SegmentTreePersistent.ts)
      - [SegmentTree01](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/%E7%BB%8F%E5%85%B8%E9%A2%98/01%E7%BA%BF%E6%AE%B5%E6%A0%91/SegmentTree01.ts)

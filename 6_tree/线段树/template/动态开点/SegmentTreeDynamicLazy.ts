@@ -2,6 +2,24 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable prefer-destructuring */
 
+// API:
+//  new SegmentTreeDynamicLazy(start, end, operations, persistent)
+//  newRoot()
+//  build(leaves)
+//  get(root, index)
+//  set(root, index, value)
+//  update(root, index, value)
+//  updateRange(root, start, end, lazy)
+//  query(root, start, end)
+//  queryAll(root)
+//  maxRight(root, start, predicate)
+//  minLeft(root, end, predicate)
+//  getAll(root)
+//  mergeDestructively(root1, root2)
+
+/**
+ * !不要用数组`[]`代替对象`{}`.数组会导致性能下降.
+ */
 type SegNode<E, Id> = {
   left: SegNode<E, Id> | undefined
   right: SegNode<E, Id> | undefined
@@ -26,11 +44,12 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
   private readonly _composition: (id1: Id, id2: Id) => Id
   private readonly _equalsToId: (o: Id) => boolean
   private readonly _persistent: boolean
+  private _root: SegNode<E, Id>
 
   /**
    * 区间修改区间查询的动态开点懒标记线段树.线段树维护的值域为`[start, end)`.
    * @param start 值域下界.start>=0.
-   * @param end 值域上界.end<=2**31-1.
+   * @param end 值域上界.
    * @param operations 线段树的操作.
    * @param persistent 是否持久化.持久化后,每次修改都会新建一个结点,否则会复用原来的结点.
    * @alias NodeManager
@@ -88,7 +107,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     }
 
     this._lower = start
-    this._upper = end
+    this._upper = end + 5
     this._e = e
     this._eRange = eRange || e
     this._id = id
@@ -98,6 +117,8 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     const identity = id()
     this._equalsToId = equalsId ? (o: Id) => equalsId(o, identity) : (o: Id) => o === identity
     this._persistent = persistent
+
+    this._root = this.newRoot()
   }
 
   newRoot(): SegNode<E, Id> {
@@ -110,39 +131,52 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
   }
 
   build(leaves: ArrayLike<E>): SegNode<E, Id> {
-    return this._build(0, leaves.length, leaves)!
+    const newRoot = this._build(0, leaves.length, leaves)!
+    this._root = newRoot
+    return newRoot
   }
 
-  get(root: SegNode<E, Id>, index: number): E {
-    return this.query(root, index, index + 1)
+  get(index: number, root: SegNode<E, Id> = this._root): E {
+    return this.query(index, index + 1, root)
   }
 
-  set(root: SegNode<E, Id>, index: number, value: E): SegNode<E, Id> {
+  set(index: number, value: E, root: SegNode<E, Id> = this._root): SegNode<E, Id> {
     if (index < this._lower || index >= this._upper) return root
-    return this._set(root, this._lower, this._upper, index, value)
+    const newRoot = this._set(root, this._lower, this._upper, index, value)
+    this._root = newRoot
+    return newRoot
   }
 
-  update(root: SegNode<E, Id>, index: number, value: E): SegNode<E, Id> {
+  update(index: number, value: E, root: SegNode<E, Id> = this._root): SegNode<E, Id> {
     if (index < this._lower || index >= this._upper) return root
-    return this._update(root, this._lower, this._upper, index, value)
+    const newRoot = this._update(root, this._lower, this._upper, index, value)
+    this._root = newRoot
+    return newRoot
   }
 
   /**
    * 区间`[start,end)`的值与`lazy`进行作用.
    * {@link _lower} <= start <= end <= {@link _upper}.
    */
-  updateRange(root: SegNode<E, Id>, start: number, end: number, lazy: Id): SegNode<E, Id> {
+  updateRange(
+    start: number,
+    end: number,
+    lazy: Id,
+    root: SegNode<E, Id> = this._root
+  ): SegNode<E, Id> {
     if (start < this._lower) start = this._lower
     if (end > this._upper) end = this._upper
     if (start >= end) return root
-    return this._updateRange(root, this._lower, this._upper, start, end, lazy)
+    const newRoot = this._updateRange(root, this._lower, this._upper, start, end, lazy)
+    this._root = newRoot
+    return newRoot
   }
 
   /**
    * 查询区间`[start,end)`的聚合值.
    * {@link _lower} <= start <= end <= {@link _upper}.
    */
-  query(root: SegNode<E, Id>, start: number, end: number): E {
+  query(start: number, end: number, root: SegNode<E, Id> = this._root): E {
     if (start < this._lower) start = this._lower
     if (end > this._upper) end = this._upper
     if (start >= end) return this._e()
@@ -167,7 +201,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
         res = this._op(res, this._mapping(lazy, node.data, r - l))
         return
       }
-      const mid = (l + r) >>> 1
+      const mid = Math.floor(l + (r - l) / 2)
       lazy = this._composition(lazy, node.id)
       _query(node.left, l, mid, ql, qr, lazy)
       _query(node.right, mid, r, ql, qr, lazy)
@@ -177,7 +211,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     return res
   }
 
-  queryAll(root: SegNode<E, Id>): E {
+  queryAll(root: SegNode<E, Id> = this._root): E {
     return root.data
   }
 
@@ -186,7 +220,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
    * {@link _lower} <= start <= {@link _upper}.
    * @alias findFirst
    */
-  maxRight(root: SegNode<E, Id>, start: number, check: (e: E) => boolean): number {
+  maxRight(start: number, check: (e: E) => boolean, root: SegNode<E, Id> = this._root): number {
     if (start < this._lower) start = this._lower
     if (start >= this._upper) return this._upper
     let x = this._e()
@@ -208,7 +242,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
       }
       if (r === l + 1) return l
       this._pushDown(node, l, r)
-      const m = (l + r) >>> 1
+      const m = Math.floor(l + (r - l) / 2)
       const k = _maxRight(node.left, l, m, ql)
       if (m > k) return k
       return _maxRight(node.right, m, r, ql)
@@ -221,7 +255,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
    * {@link _lower} <= end <= {@link _upper}.
    * @alias findLast
    */
-  minLeft(root: SegNode<E, Id>, end: number, check: (e: E) => boolean): number {
+  minLeft(end: number, check: (e: E) => boolean, root: SegNode<E, Id> = this._root): number {
     if (end > this._upper) end = this._upper
     if (end <= this._lower) return this._lower
     let x = this._e()
@@ -243,7 +277,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
       }
       if (r === l + 1) return r
       this._pushDown(node, l, r)
-      const m = (l + r) >>> 1
+      const m = Math.floor(l + (r - l) / 2)
       const k = _minLeft(node.right, m, r, qr)
       if (m < k) return k
       return _minLeft(node.left, l, m, qr)
@@ -261,7 +295,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     return newRoot
   }
 
-  getAll(root: SegNode<E, Id>): E[] {
+  getAll(root: SegNode<E, Id> = this._root): E[] {
     if (this._upper - this._lower > 1e7) throw new Error('too large')
     const res: E[] = []
     const _getAll = (node: SegNode<E, Id> | undefined, l: number, r: number, lazy: Id) => {
@@ -270,7 +304,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
         res.push(this._mapping(lazy, node.data, 1))
         return
       }
-      const m = (l + r) >>> 1
+      const m = Math.floor(l + (r - l) / 2)
       lazy = this._composition(lazy, node.id)
       _getAll(node.left, l, m, lazy)
       _getAll(node.right, m, r, lazy)
@@ -278,6 +312,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     _getAll(root, this._lower, this._upper, this._id())
     return res
   }
+
   private _copyNode(node: SegNode<E, Id>): SegNode<E, Id> {
     if (!node || !this._persistent) return node
     // TODO: 如果是引用类型, 持久化时需要深拷贝
@@ -293,14 +328,14 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
       return root
     }
     this._pushDown(root, l, r)
-    const mid = (l + r) >>> 1
-    if (!root.left) root.left = this._newNode(l, mid)
-    if (!root.right) root.right = this._newNode(mid, r)
+    const m = Math.floor(l + (r - l) / 2)
+    if (!root.left) root.left = this._newNode(l, m)
+    if (!root.right) root.right = this._newNode(m, r)
     root = this._copyNode(root)
-    if (i < mid) {
-      root.left = this._set(root.left!, l, mid, i, x)
+    if (i < m) {
+      root.left = this._set(root.left!, l, m, i, x)
     } else {
-      root.right = this._set(root.right!, mid, r, i, x)
+      root.right = this._set(root.right!, m, r, i, x)
     }
     root.data = this._op(root.left!.data, root.right!.data)
     return root
@@ -314,14 +349,14 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
       return root
     }
     this._pushDown(root, l, r)
-    const mid = (l + r) >>> 1
-    if (!root.left) root.left = this._newNode(l, mid)
-    if (!root.right) root.right = this._newNode(mid, r)
+    const m = Math.floor(l + (r - l) / 2)
+    if (!root.left) root.left = this._newNode(l, m)
+    if (!root.right) root.right = this._newNode(m, r)
     root = this._copyNode(root)
-    if (i < mid) {
-      root.left = this._update(root.left!, l, mid, i, x)
+    if (i < m) {
+      root.left = this._update(root.left!, l, m, i, x)
     } else {
-      root.right = this._update(root.right!, mid, r, i, x)
+      root.right = this._update(root.right!, m, r, i, x)
     }
     root.data = this._op(root.left!.data, root.right!.data)
     return root
@@ -346,10 +381,10 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
       return root
     }
     this._pushDown(root, l, r)
-    const mid = (l + r) >>> 1
+    const m = Math.floor(l + (r - l) / 2)
     root = this._copyNode(root)
-    root.left = this._updateRange(root.left, l, mid, ql, qr, lazy)
-    root.right = this._updateRange(root.right, mid, r, ql, qr, lazy)
+    root.left = this._updateRange(root.left, l, m, ql, qr, lazy)
+    root.right = this._updateRange(root.right, m, r, ql, qr, lazy)
     root.data = this._op(root.left!.data, root.right!.data)
     return root
   }
@@ -357,24 +392,24 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
   private _pushDown(node: SegNode<E, Id>, l: number, r: number): void {
     const lazy = node.id
     if (this._equalsToId(lazy)) return
-    const mid = (l + r) >>> 1
+    const m = Math.floor(l + (r - l) / 2)
 
     if (!node.left) {
-      node.left = this._newNode(l, mid)
+      node.left = this._newNode(l, m)
     } else {
       node.left = this._copyNode(node.left)
     }
     const leftChild = node.left!
-    leftChild.data = this._mapping(lazy, leftChild.data, mid - l)
+    leftChild.data = this._mapping(lazy, leftChild.data, m - l)
     leftChild.id = this._composition(lazy, leftChild.id)
 
     if (!node.right) {
-      node.right = this._newNode(mid, r)
+      node.right = this._newNode(m, r)
     } else {
       node.right = this._copyNode(node.right)
     }
     const rightChild = node.right!
-    rightChild.data = this._mapping(lazy, rightChild.data, r - mid)
+    rightChild.data = this._mapping(lazy, rightChild.data, r - m)
     rightChild.id = this._composition(lazy, rightChild.id)
 
     node.id = this._id()
@@ -389,9 +424,9 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     if (right === left + 1) {
       return { left: undefined, right: undefined, data: nums[left], id: this._id() }
     }
-    const mid = (left + right) >>> 1
-    const lRoot = this._build(left, mid, nums)
-    const rRoot = this._build(mid, right, nums)
+    const m = (left + right) >>> 1
+    const lRoot = this._build(left, m, nums)
+    const rRoot = this._build(m, right, nums)
     return { left: lRoot, right: rRoot, data: this._op(lRoot!.data, rRoot!.data), id: this._id() }
   }
 
@@ -434,21 +469,20 @@ if (require.main === module) {
     // equalsId(id1, id2) {}
   })
   let root = seg.newRoot()
-  seg.set(root, 0, 1)
-  console.log(seg.query(root, 0, 1))
+  root = seg.set(0, 1, root)
+  console.log(seg.query(0, 1, root))
   // console.log(seg.getAll(root))
 
   const M = 1e5
   const pos = Array.from({ length: M }, () => Math.floor(Math.random() * n))
   console.time('start')
-
   for (let i = 0; i < M; ++i) {
-    root = seg.set(root, pos[i], 1)
-    seg.query(root, 0, i)
-    root = seg.updateRange(root, 0, i, 1)
-    seg.get(root, i)
+    root = seg.set(pos[i], 1, root)
+    seg.query(0, i, root)
+    root = seg.updateRange(0, i, 1, root)
+    seg.get(i, root)
   }
-  console.timeEnd('start') // start: 455.065ms
+  console.timeEnd('start') // start: 474.62ms
 
   // https://leetcode.cn/problems/range-module/
   // RangeAssignRangeSum
@@ -470,18 +504,52 @@ if (require.main === module) {
         return f === -1 ? g : f
       }
     })
-    private readonly _root = this._seg.newRoot()
 
     addRange(left: number, right: number): void {
-      this._seg.updateRange(this._root, left, right, 1)
+      this._seg.updateRange(left, right, 1)
     }
 
     queryRange(left: number, right: number): boolean {
-      return this._seg.query(this._root, left, right) === right - left
+      return this._seg.query(left, right) === right - left
     }
 
     removeRange(left: number, right: number): void {
-      this._seg.updateRange(this._root, left, right, 0)
+      this._seg.updateRange(left, right, 0)
     }
   }
+
+  class CountIntervals {
+    private readonly _seg = new SegmentTreeDynamicLazy<number, number>(0, 1e9, {
+      e() {
+        return 0
+      },
+      id() {
+        return -1
+      },
+      op(e1, e2) {
+        return e1 + e2
+      },
+      mapping(lazy, data, size) {
+        return lazy === -1 ? data : lazy * size
+      },
+      composition(f, g) {
+        return f === -1 ? g : f
+      }
+    })
+
+    add(left: number, right: number): void {
+      this._seg.updateRange(left, right + 1, 1)
+    }
+
+    count(): number {
+      return this._seg.queryAll()
+    }
+  }
+
+  /**
+   * Your CountIntervals object will be instantiated and called as such:
+   * var obj = new CountIntervals()
+   * obj.add(left,right)
+   * var param_2 = obj.count()
+   */
 }

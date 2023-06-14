@@ -104,9 +104,9 @@
      - [区间修改区间查询](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/atcoder_segtree/SegmentTreeRangeUpdateRangeQuery.ts)
      - [二维单点修改区间查询](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E4%BA%8C%E7%BB%B4/%E5%8D%95%E7%82%B9%E4%BF%AE%E6%94%B9%E5%8C%BA%E9%97%B4%E6%9F%A5%E8%AF%A2/SegmentTree2DPointUpdateRangeQuery.ts)
      - [二维区间修改单点查询](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E4%BA%8C%E7%BB%B4/%E5%8C%BA%E9%97%B4%E6%9B%B4%E6%96%B0%E6%A0%91%E5%A5%97%E6%A0%91/SegmentTree2DRangeUpdatePointGet.ts)
-     - [动态开点单点修改区间查询](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E7%BA%BF%E6%AE%B5%E6%A0%91/maspy's/sparse/main.go>)
-     - [动态开点区间修改区间查询](<%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/0-segmenttree/dynamic/DynamicSegmentTree.go>)
-     - [可持久化线段树](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E7%BA%BF%E6%AE%B5%E6%A0%91/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E7%BA%BF%E6%AE%B5%E6%A0%91-%E5%8D%95%E7%82%B9%E4%BF%AE%E6%94%B9%E5%8C%BA%E9%97%B4%E6%9F%A5%E8%AF%A2.go>)
+     - [动态开点单点修改区间查询](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E5%8A%A8%E6%80%81%E5%BC%80%E7%82%B9/SegmentTreeDynamicSparse.ts)
+     - [动态开点区间修改区间查询](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E5%8A%A8%E6%80%81%E5%BC%80%E7%82%B9/SegmentTreeDynamicLazy.ts)
+     - [可持久化线段树](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E5%8A%A8%E6%80%81%E5%BC%80%E7%82%B9/SegmentTreePersistent.ts)
      - [01 线段树](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/%E7%BB%8F%E5%85%B8%E9%A2%98/01%E7%BA%BF%E6%AE%B5%E6%A0%91/SegmentTree01.ts)
      - [常用的幺半群](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/atcoder_segtree/SegmentTreeUtils.ts)
 

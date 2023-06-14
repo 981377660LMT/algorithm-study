@@ -74,7 +74,7 @@ type SegNode struct {
 func NewDynamicSegTreeLazy(start, end int, persistent bool) *DynamicSegTreeLazy {
 	return &DynamicSegTreeLazy{
 		L:          start,
-		R:          end,
+		R:          end + 5,
 		persistent: persistent,
 		dataUnit:   e1(),
 		lazyUnit:   id(),
@@ -97,6 +97,10 @@ func (ds *DynamicSegTreeLazy) Query(root *SegNode, start, end int) E {
 	x := ds.dataUnit
 	ds._queryRec(root, ds.L, ds.R, start, end, &x, ds.lazyUnit)
 	return x
+}
+
+func (ds *DynamicSegTreeLazy) QueryAll(root *SegNode) E {
+	return root.x
 }
 
 // L<=index<R
