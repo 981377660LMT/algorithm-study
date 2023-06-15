@@ -22,3 +22,10 @@ kd 树是一个二叉树结构，它的每一个节点记载了【特征坐标�
 
 Binary space partitioning Tree， BSPTree
 二叉空间分割
+
+---
+
+KD 树像线段树一样，可以维护二维幺半群
+[单点修改区间查询](https://maspypy.github.io/library/ds/kdtree/kdtree_monoid.hpp)
+[区间修改单点查询](https://maspypy.github.io/library/ds/kdtree/dual_kdtree_monoid.hpp)
+[区间修改区间查询](https://maspypy.github.io/library/ds/kdtree/kdtree_acted_monoid.hpp)

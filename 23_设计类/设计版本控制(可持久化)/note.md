@@ -200,3 +200,16 @@ types of temporal DSs (persistent, retroactive), 4 levels of persistence
 
 好的中文笔记
 https://www.jianshu.com/p/4dbdf07c1501
+
+为什么 OI 界很少有人用跳表?? - 冒泡的回答 - 知乎
+https://www.zhihu.com/question/277048283/answer/2170489606
+
+immutable 结构的优势在于并发访问上
+例如我们做数据库的会经常碰上读多写少的业务场景，这种情况下 immutable 就有优势，由于结构不可变，因此读操作可以多线程并行进行，不需要考虑冲突，单个结构的写操作需要排队，会慢，但是也是 O(lgN)的（全部用平衡树实现），完全可以接受，更进一步的写操作则可以通过聚合批量写来减少拷贝次数
+
+作者：冒泡
+链接：https://www.zhihu.com/question/53804334/answer/2159810792
+来源：知乎
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+另外，当数据是 immutable 的时候，函数本身就可以无状态，即同一个输入肯定有确定性输出，这在 FP 中可以实现语言级别的算法优化，例如天然自带动态规划，你只需要简单写暴力递归就行

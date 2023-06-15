@@ -2,9 +2,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable prefer-destructuring */
 
-import { getSizeOf } from './memory'
-
-type PNode<E> = [data: E, left: PNode<E> | undefined, right: PNode<E> | undefined]
+type SegNode<E> = {
+  data: E
+  left: SegNode<E> | undefined
+  right: SegNode<E> | undefined
+}
 
 class SegmentTreePersistent<E> {
   private readonly _e: () => E
@@ -21,67 +23,84 @@ class SegmentTreePersistent<E> {
     this._op = op
   }
 
-  build(leaves: ArrayLike<E>): PNode<E> {
+  build(leaves: ArrayLike<E>): SegNode<E> {
     this._size = leaves.length
     return this._build(0, this._size, leaves)
   }
 
-  update(root: PNode<E>, index: number, value: E): PNode<E> {
+  set(root: SegNode<E>, index: number, value: E): SegNode<E> {
+    if (index < 0 || index >= this._size) return root
+    return this._set(root, index, value, 0, this._size)
+  }
+
+  update(root: SegNode<E>, index: number, value: E): SegNode<E> {
     if (index < 0 || index >= this._size) return root
     return this._update(root, index, value, 0, this._size)
   }
 
-  query(root: PNode<E>, start: number, end: number): E {
+  query(root: SegNode<E>, start: number, end: number): E {
     if (start < 0) start = 0
     if (end > this._size) end = this._size
     if (start >= end) return this._e()
     return this._query(root, start, end, 0, this._size)
   }
 
-  getAll(root: PNode<E>): E[] {
+  getAll(root: SegNode<E>): E[] {
     const leaves: E[] = Array(this._size)
     let ptr = 0
     dfs(root)
     return leaves
 
-    function dfs(cur: PNode<E> | undefined) {
+    function dfs(cur: SegNode<E> | undefined) {
       if (!cur) return
-      if (!cur[1] && !cur[2]) {
-        leaves[ptr++] = cur[0]
+      if (!cur.left && !cur.right) {
+        leaves[ptr++] = cur.data
         return
       }
-      dfs(cur[1])
-      dfs(cur[2])
+      dfs(cur.left)
+      dfs(cur.right)
     }
   }
 
-  private _build(l: number, r: number, leaves: ArrayLike<E>): PNode<E> {
-    if (l + 1 >= r) return [leaves[l], undefined, undefined]
+  private _build(l: number, r: number, leaves: ArrayLike<E>): SegNode<E> {
+    if (l + 1 >= r) return { data: leaves[l], left: undefined, right: undefined }
     const mid = (l + r) >> 1
     return this._merge(this._build(l, mid, leaves), this._build(mid, r, leaves))
   }
 
-  private _merge(l: PNode<E>, r: PNode<E>): PNode<E> {
-    return [this._op(l[0], r[0]), l, r]
+  private _merge(l: SegNode<E>, r: SegNode<E>): SegNode<E> {
+    return { data: this._op(l.data, r.data), left: l, right: r }
   }
 
-  private _update(root: PNode<E>, index: number, value: E, l: number, r: number): PNode<E> {
+  private _set(root: SegNode<E>, index: number, value: E, l: number, r: number): SegNode<E> {
     if (r <= index || index + 1 <= l) return root
-    if (index <= l && r <= index + 1) return [value, undefined, undefined]
+    if (index <= l && r <= index + 1) return { data: value, left: undefined, right: undefined }
     const mid = (l + r) >> 1
     return this._merge(
-      this._update(root[1]!, index, value, l, mid),
-      this._update(root[2]!, index, value, mid, r)
+      this._set(root.left!, index, value, l, mid),
+      this._set(root.right!, index, value, mid, r)
     )
   }
 
-  private _query(root: PNode<E>, start: number, end: number, l: number, r: number): E {
+  private _update(root: SegNode<E>, index: number, value: E, l: number, r: number): SegNode<E> {
+    if (r <= index || index + 1 <= l) return root
+    if (index <= l && r <= index + 1) {
+      return { data: this._op(root.data, value), left: undefined, right: undefined }
+    }
+    const mid = (l + r) >> 1
+    return this._merge(
+      this._update(root.left!, index, value, l, mid),
+      this._update(root.right!, index, value, mid, r)
+    )
+  }
+
+  private _query(root: SegNode<E>, start: number, end: number, l: number, r: number): E {
     if (r <= start || end <= l) return this._e()
-    if (start <= l && r <= end) return root[0]
+    if (start <= l && r <= end) return root.data
     const mid = (l + r) >> 1
     return this._op(
-      this._query(root[1]!, start, end, l, mid),
-      this._query(root[2]!, start, end, mid, r)
+      this._query(root.left!, start, end, l, mid),
+      this._query(root.right!, start, end, mid, r)
     )
   }
 }
@@ -96,19 +115,22 @@ if (require.main === module) {
 
   let root = seg.build([1, 2, 3, 4, 5])
   console.log(seg.getAll(root))
-  root = seg.update(root, 2, 10)
+
+  root = seg.update(root, 2, 123)
   console.log(seg.getAll(root))
+
+  root = seg.set(root, 2, 123)
+  console.log(seg.getAll(root))
+
   console.log(seg.query(root, 0, 3))
 
   console.time('build')
-  const size = getSizeOf(() => {
-    const n = 2e5
-    let newRoot = seg.build(Array(n).fill(1))
-    for (let i = 0; i < n; ++i) {
-      newRoot = seg.update(newRoot, i, 1)
-      seg.query(newRoot, 0, i)
-    }
-  })
-  console.timeEnd('build') // build: 304.167ms
-  console.log(size) // 54.44MB
+  const n = 2e5
+  let newRoot = seg.build(Array(n).fill(1))
+  for (let i = 0; i < n; ++i) {
+    newRoot = seg.set(newRoot, i, 1)
+    newRoot = seg.update(newRoot, i, 1)
+    seg.query(newRoot, 0, i)
+  }
+  console.timeEnd('build') // build: 391.185ms
 }

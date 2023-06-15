@@ -1,5 +1,7 @@
+# https://zhuanlan.zhihu.com/p/344779506
 # https://nyaannyaan.github.io/library/tree/pruefer-code.hpp
 # https://www.luogu.com.cn/problem/solution/P6086
+
 
 # Prufer序列-树上计数问题
 # Prufer 序列和无根树的相互转化。

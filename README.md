@@ -65,6 +65,7 @@
    - [ErasableHeap](8_heap/ErasableHeap.py)
    - [IntervalHeap](8_heap/IntervalHeap.ts)
    - [PairingHeap](8_heap/%E5%8F%AF%E5%B9%B6%E5%A0%86/PairingHeap-%E9%85%8D%E5%AF%B9%E5%A0%86.ts)
+   - [MinMaxHeap](8_heap/MinMaxHeap.py)
 
 5. **Tree**
 
@@ -112,6 +113,7 @@
 
 6. **Graph**
 
+   - [ChainForwardStar](7_graph/%E9%93%BE%E5%BC%8F%E5%89%8D%E5%90%91%E6%98%9F%E5%AD%98%E5%9B%BE/ChainForwardStar.ts)
    - [Heavy-LightDecomposition](6_tree/%E9%87%8D%E9%93%BE%E5%89%96%E5%88%86/HeavyLightDecomposition-beet.go)
    - [ProcessOfMergeingTree](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/ProcessOfMergeingTree.go)
    - [Tree Diameter](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/%E7%9B%B4%E5%BE%84/%E6%A0%91%E7%9A%84%E7%9B%B4%E5%BE%84.py)
@@ -231,6 +233,7 @@
     - [Palindrome Generator](22_%E4%B8%93%E9%A2%98/%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%9B%9E%E6%96%87/%E6%9E%9A%E4%B8%BE%E5%9B%9E%E6%96%87.py)
     - [Poker](20_%E6%9D%82%E9%A2%98/Poker.py)
     - [Dice](20_%E6%9D%82%E9%A2%98/%E9%AA%B0%E5%AD%90%E6%A8%A1%E6%8B%9F/Dice.py)
+    - [Dictionary](5_map/Dictionary.py)
     - [NthElement](22_%E4%B8%93%E9%A2%98/topK/nthElement.ts)
     - [NextPermutation](12_%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95/%E7%BB%8F%E5%85%B8%E9%A2%98/%E6%8E%92%E5%88%97/api/nextPermutation.py)
     - [Mo without Modification](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E8%8E%AB%E9%98%9F/Moalgo.go)
