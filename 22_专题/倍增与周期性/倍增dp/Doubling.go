@@ -79,9 +79,9 @@ func NewDoubling(n, maxStep int) *Doubling {
 	return res
 }
 
-// 初始状态(leaves):从 `from` 状态到 `to` 状态，状态的值为 `value`.
+// 初始状态(leaves):从 `from` 状态到 `to` 状态，边权为 `weight`.
 //  0 <= from, to < n
-func (d *Doubling) Add(from, to int, value E) {
+func (d *Doubling) Add(from, to int, weight E) {
 	if d.isPrepared {
 		panic("Doubling is prepared")
 	}
@@ -90,7 +90,7 @@ func (d *Doubling) Add(from, to int, value E) {
 	}
 
 	d.to[0][from] = to
-	d.dp[0][from] = value
+	d.dp[0][from] = weight
 }
 
 func (d *Doubling) Build() {

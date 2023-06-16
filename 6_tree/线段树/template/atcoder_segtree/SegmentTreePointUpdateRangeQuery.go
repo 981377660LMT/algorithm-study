@@ -1,17 +1,13 @@
 package main
 
-func main() {
-
-}
-
 const INF int = 1e18
 
-// PointSetRangeMin
+// PointUpdateRangeMax
 
 type E = int
 
-func (*SegmentTreePointUpdateRangeQuery) e() E        { return INF }
-func (*SegmentTreePointUpdateRangeQuery) op(a, b E) E { return min(a, b) }
+func (*SegmentTreePointUpdateRangeQuery) e() E        { return 0 }
+func (*SegmentTreePointUpdateRangeQuery) op(a, b E) E { return max(a, b) }
 func min(a, b int) int {
 	if a < b {
 		return a

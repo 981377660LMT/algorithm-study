@@ -133,4 +133,42 @@ if (require.main === module) {
     seg.query(newRoot, 0, i)
   }
   console.timeEnd('build') // build: 391.185ms
+
+  const INF = 2e15
+  // 1146. 快照数组
+  // https://leetcode.cn/problems/snapshot-array/
+  class SnapshotArray {
+    private readonly _seg: SegmentTreePersistent<number>
+    private readonly _git: SegNode<number>[] = []
+    private _root: SegNode<number>
+
+    constructor(length: number) {
+      this._seg = new SegmentTreePersistent(
+        () => -INF,
+        (a, b) => (a === -INF ? b : a)
+      )
+      this._root = this._seg.build(Array(length).fill(0))
+    }
+
+    set(index: number, val: number): void {
+      this._root = this._seg.set(this._root, index, val)
+    }
+
+    snap(): number {
+      this._git.push(this._root)
+      return this._git.length - 1
+    }
+
+    get(index: number, snapId: number): number {
+      return this._seg.query(this._git[snapId], index, index + 1)
+    }
+  }
+
+  /**
+   * Your SnapshotArray object will be instantiated and called as such:
+   * var obj = new SnapshotArray(length)
+   * obj.set(index,val)
+   * var param_2 = obj.snap()
+   * var param_3 = obj.get(index,snap_id)
+   */
 }

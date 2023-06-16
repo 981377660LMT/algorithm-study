@@ -41,7 +41,6 @@
 //   !点 [in,out) 到父亲的边的序号为 `in`.
 
 class Tree {
-  readonly tree: [next: number, weight: number][][]
   readonly depth: Uint32Array
   readonly parent: Int32Array
   readonly depthWeighted: number[]
@@ -52,29 +51,51 @@ class Tree {
   private readonly _heavySon: Int32Array
   private _timer = 0
 
+  /** 链式前向星存图 */
+  private readonly _n: number
+  private readonly _preEdge: Int32Array
+  private readonly _lastEdge: Int32Array
+  private readonly _edgeTo: Int32Array
+  private readonly _weight: number[]
+  private _edgeId = 0
+
   constructor(n: number) {
-    this.tree = Array(n)
     this.parent = new Int32Array(n)
-    for (let i = 0; i < n; i++) {
-      this.tree[i] = []
-      this.parent[i] = -1
-    }
     this.depth = new Uint32Array(n)
     this.lid = new Uint32Array(n)
     this.rid = new Uint32Array(n)
+    this.depthWeighted = Array(n)
     this._idToNode = new Uint32Array(n)
     this._top = new Uint32Array(n)
-    this.depthWeighted = Array(n)
     this._heavySon = new Int32Array(n)
+    this._lastEdge = new Int32Array(n)
+    this._preEdge = new Int32Array(2 * (n - 1))
+    this._edgeTo = new Int32Array(2 * (n - 1))
+    this._weight = Array(2 * (n - 1))
+    this._n = n
+    for (let i = 0; i < n; i++) {
+      this.parent[i] = -1
+      this.depthWeighted[i] = 0
+      this._lastEdge[i] = -1
+    }
+    for (let i = 0; i < 2 * (n - 1); i++) {
+      this._preEdge[i] = -1
+      this._edgeTo[i] = -1
+      this._weight[i] = 0
+    }
   }
 
   addEdge(from: number, to: number, weight = 1): void {
-    this.tree[from].push([to, weight])
-    this.tree[to].push([from, weight])
+    this.addDirectedEdge(from, to, weight)
+    this.addDirectedEdge(to, from, weight)
   }
 
   addDirectedEdge(from: number, to: number, weight = 1): void {
-    this.tree[from].push([to, weight])
+    const eid = this._edgeId++
+    this._preEdge[eid] = this._lastEdge[from]
+    this._lastEdge[from] = eid
+    this._edgeTo[eid] = to
+    this._weight[eid] = weight
   }
 
   /**
@@ -82,7 +103,7 @@ class Tree {
    */
   build(root = -1): void {
     if (root === -1) {
-      for (let i = 0; i < this.tree.length; i++) {
+      for (let i = 0; i < this._n; i++) {
         if (this.parent[i] === -1) {
           this._build(i, -1, 0, 0)
           this._markTop(i, i)
@@ -190,11 +211,12 @@ class Tree {
 
   collectChildren(root: number): number[] {
     const res: number[] = []
-    this.tree[root].forEach(([next]) => {
+    for (let eid = this._lastEdge[root]; ~eid; eid = this._preEdge[eid]) {
+      const next = this._edgeTo[eid]
       if (next !== this.parent[root]) {
         res.push(next)
       }
-    })
+    }
     return res
   }
 
@@ -292,13 +314,13 @@ class Tree {
       return this.rid[v] - this.lid[v]
     }
     if (v === root) {
-      return this.tree.length
+      return this._n
     }
     const x = this.jump(v, root, 1)
     if (this.isInSubtree(v, x)) {
       return this.rid[v] - this.lid[v]
     }
-    return this.tree.length - this.rid[x] + this.lid[x]
+    return this._n - this.rid[x] + this.lid[x]
   }
 
   /**
@@ -321,19 +343,28 @@ class Tree {
     return res
   }
 
-  toString(): string {
-    return `Tree(${this.tree.map((e, i) => `${i}: ${e}`).join(', ')})`
+  toAdjList(): [next: number, weight: number, edgeId: number][][] {
+    const res = Array(this._n)
+    for (let cur = 0; cur < this._n; cur++) {
+      const nexts: [next: number, weight: number, edgeId: number][] = []
+      for (let eid = this._lastEdge[cur]; ~eid; eid = this._preEdge[eid]) {
+        const next = this._edgeTo[eid]
+        const weight = this._weight[eid]
+        nexts.push([next, weight, eid])
+      }
+      res[cur] = nexts.reverse()
+    }
+    return res
   }
 
   private _build(cur: number, pre: number, dep: number, dist: number): number {
     let subSize = 1
     let heavySon = -1
     let heavySize = 0
-    const treeCur = this.tree[cur]
-    for (let i = 0; i < treeCur.length; i++) {
-      const [next, weight] = treeCur[i]
+    for (let eid = this._lastEdge[cur]; ~eid; eid = this._preEdge[eid]) {
+      const next = this._edgeTo[eid]
       if (next !== pre) {
-        const nextSize = this._build(next, cur, dep + 1, dist + weight)
+        const nextSize = this._build(next, cur, dep + 1, dist + this._weight[eid])
         subSize += nextSize
         if (nextSize > heavySize) {
           heavySize = nextSize
@@ -356,11 +387,12 @@ class Tree {
     const heavySon = this._heavySon[cur]
     if (~heavySon) {
       this._markTop(heavySon, top)
-      this.tree[cur].forEach(([next]) => {
+      for (let eid = this._lastEdge[cur]; ~eid; eid = this._preEdge[eid]) {
+        const next = this._edgeTo[eid]
         if (next !== heavySon && next !== this.parent[cur]) {
           this._markTop(next, next)
         }
-      })
+      }
     }
     this.rid[cur] = this._timer
   }

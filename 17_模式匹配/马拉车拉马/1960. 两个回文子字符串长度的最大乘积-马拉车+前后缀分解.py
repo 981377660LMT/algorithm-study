@@ -16,7 +16,10 @@ class Solution:
         rightMax = list(
             accumulate([M.getLongestOddStartsAt(i) for i in range(n - 1, -1, -1)], max)
         )[::-1]
-        return max(leftMax[i] * rightMax[i + 1] for i in range(len(s) - 1))
+        res = 0
+        for i in range(n - 1):
+            res = max(res, leftMax[i] * rightMax[i + 1])
+        return res
 
 
 print(Solution().maxProduct(s="ababbb"))

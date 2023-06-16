@@ -1,24 +1,46 @@
 from typing import List, Optional
 
 
+def maxInt(a: int, b: int) -> int:
+    return a if a > b else b
+
+
+def minInt(a: int, b: int) -> int:
+    return a if a < b else b
+
+
 class Manacher:
     """马拉车算法 O(n)"""
+
+    __slots__ = (
+        "oddRadius",
+        "evenRadius",
+        "_s",
+        "_n",
+        "_maxOdd1",
+        "_maxOdd2",
+        "_maxEven1",
+        "_maxEven2",
+    )
 
     def __init__(self, s: str):
         self._s = s
         self._n = len(s)
+
         self.oddRadius = self._getOddRadius()
         """
         - 每个中心点的奇回文半径 `radius`
         - 最长回文切片为`[pos-radius+1:pos+radius]`
         - 以此为中心的回文个数为`radius`
         """
+
         self.evenRadius = self._getEvenRadius()
         """
         - 每个中心点的偶回文半径 `radius`
         - 最长回文切片为`[pos-radius:pos+radius]`
         - 以此为中心的回文个数为`radius`
         """
+
         self._maxOdd1: Optional[List[int]] = None
         self._maxOdd2: Optional[List[int]] = None
         self._maxEven1: Optional[List[int]] = None
@@ -34,7 +56,7 @@ class Manacher:
 
         len_ = right - left
         mid = (left + right) // 2
-        if len_ % 2 == 1:
+        if len_ & 1:
             return self.oddRadius[mid] >= len_ // 2 + 1
         return self.evenRadius[mid] >= len_ // 2
 
@@ -46,15 +68,15 @@ class Manacher:
             for i, radius in enumerate(self.oddRadius):
                 start, end = i - radius + 1, i + radius - 1
                 length = 2 * radius - 1
-                self._maxOdd1[start] = max(self._maxOdd1[start], length)
-                self._maxOdd2[end] = max(self._maxOdd2[end], length)
+                self._maxOdd1[start] = maxInt(self._maxOdd1[start], length)
+                self._maxOdd2[end] = maxInt(self._maxOdd2[end], length)
 
             # 根据左右更新端点
             for i in range(self._n):
                 if i - 1 >= 0:
-                    self._maxOdd1[i] = max(self._maxOdd1[i], self._maxOdd1[i - 1] - 2)
+                    self._maxOdd1[i] = maxInt(self._maxOdd1[i], self._maxOdd1[i - 1] - 2)
                 if i + 1 < self._n:
-                    self._maxOdd2[i] = max(self._maxOdd2[i], self._maxOdd2[i + 1] - 2)
+                    self._maxOdd2[i] = maxInt(self._maxOdd2[i], self._maxOdd2[i + 1] - 2)
         return self._maxOdd1[index]
 
     def getLongestOddEndsAt(self, index: int) -> int:
@@ -65,15 +87,15 @@ class Manacher:
             for i, radius in enumerate(self.oddRadius):
                 start, end = i - radius + 1, i + radius - 1
                 length = 2 * radius - 1
-                self._maxOdd1[start] = max(self._maxOdd1[start], length)
-                self._maxOdd2[end] = max(self._maxOdd2[end], length)
+                self._maxOdd1[start] = maxInt(self._maxOdd1[start], length)
+                self._maxOdd2[end] = maxInt(self._maxOdd2[end], length)
 
             # 根据左右更新端点
             for i in range(self._n):
                 if i - 1 >= 0:
-                    self._maxOdd1[i] = max(self._maxOdd1[i], self._maxOdd1[i - 1] - 2)
+                    self._maxOdd1[i] = maxInt(self._maxOdd1[i], self._maxOdd1[i - 1] - 2)
                 if i + 1 < self._n:
-                    self._maxOdd2[i] = max(self._maxOdd2[i], self._maxOdd2[i + 1] - 2)
+                    self._maxOdd2[i] = maxInt(self._maxOdd2[i], self._maxOdd2[i + 1] - 2)
         return self._maxOdd2[index]
 
     def getLongestEvenStartsAt(self, index: int) -> int:
@@ -87,15 +109,15 @@ class Manacher:
                 start = i - radius
                 end = start + 2 * radius - 1
                 length = 2 * radius
-                self._maxEven1[start] = max(self._maxEven1[start], length)
-                self._maxEven2[end] = max(self._maxEven2[end], length)
+                self._maxEven1[start] = maxInt(self._maxEven1[start], length)
+                self._maxEven2[end] = maxInt(self._maxEven2[end], length)
 
             # 根据左右更新端点
             for i in range(self._n):
                 if i - 1 >= 0:
-                    self._maxEven1[i] = max(self._maxEven1[i], self._maxEven1[i - 1] - 2)
+                    self._maxEven1[i] = maxInt(self._maxEven1[i], self._maxEven1[i - 1] - 2)
                 if i + 1 < self._n:
-                    self._maxEven2[i] = max(self._maxEven2[i], self._maxEven2[i + 1] - 2)
+                    self._maxEven2[i] = maxInt(self._maxEven2[i], self._maxEven2[i + 1] - 2)
         return self._maxEven1[index]
 
     def getLongestEvenEndsAt(self, index: int) -> int:
@@ -109,15 +131,15 @@ class Manacher:
                 start = i - radius
                 end = start + 2 * radius - 1
                 length = 2 * radius
-                self._maxEven1[start] = max(self._maxEven1[start], length)
-                self._maxEven2[end] = max(self._maxEven2[end], length)
+                self._maxEven1[start] = maxInt(self._maxEven1[start], length)
+                self._maxEven2[end] = maxInt(self._maxEven2[end], length)
 
             # 根据左右更新端点
             for i in range(self._n):
                 if i - 1 >= 0:
-                    self._maxEven1[i] = max(self._maxEven1[i], self._maxEven1[i - 1] - 2)
+                    self._maxEven1[i] = maxInt(self._maxEven1[i], self._maxEven1[i - 1] - 2)
                 if i + 1 < self._n:
-                    self._maxEven2[i] = max(self._maxEven2[i], self._maxEven2[i + 1] - 2)
+                    self._maxEven2[i] = maxInt(self._maxEven2[i], self._maxEven2[i + 1] - 2)
         return self._maxEven2[index]
 
     def _getOddRadius(self) -> List[int]:
@@ -128,7 +150,7 @@ class Manacher:
         res = [0] * self._n
         left, right = 0, -1
         for i in range(self._n):
-            k = 1 if i > right else min(res[left + right - i], right - i + 1)
+            k = 1 if i > right else minInt(res[left + right - i], right - i + 1)
             while 0 <= i - k and i + k < self._n and self._s[i - k] == self._s[i + k]:
                 k += 1
             res[i] = k
@@ -146,7 +168,7 @@ class Manacher:
         res = [0] * self._n
         left, right = 0, -1
         for i in range(self._n):
-            k = 0 if i > right else min(res[left + right - i + 1], right - i + 1)
+            k = 0 if i > right else minInt(res[left + right - i + 1], right - i + 1)
             while 0 <= i - k - 1 and i + k < self._n and self._s[i - k - 1] == self._s[i + k]:
                 k += 1
             res[i] = k
@@ -158,6 +180,9 @@ class Manacher:
 
     def __len__(self) -> int:
         return self._n
+
+    def __call__(self, start: int, end: int) -> bool:
+        return self.isPalindrome(start, end)
 
 
 if __name__ == "__main__":

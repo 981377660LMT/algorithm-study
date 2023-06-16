@@ -8,8 +8,8 @@ function getRange(
   isRightStrict = false
 ): [left: number, right: number][] {
   const n = nums.length
-  const leftMost = Array<number>(n).fill(0)
-  const rightMost = Array<number>(n).fill(n - 1)
+  const leftMost = new Uint32Array(n)
+  const rightMost = new Uint32Array(n).fill(n - 1)
   let stack: number[] = []
 
   for (let i = 0; i < n; i++) {
@@ -29,7 +29,11 @@ function getRange(
     stack.push(i)
   }
 
-  return leftMost.map((left, index) => [left, rightMost[index]])
+  const res = Array(n)
+  for (let i = 0; i < n; i++) {
+    res[i] = [leftMost[i], rightMost[i]]
+  }
+  return res
 
   function compareLeft(stackValue: number, curValue: number): boolean {
     if (isLeftStrict && isMax) return stackValue <= curValue

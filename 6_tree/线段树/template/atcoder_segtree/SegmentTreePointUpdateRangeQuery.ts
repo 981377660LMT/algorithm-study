@@ -4,6 +4,7 @@
 
 // !单点修改+区间查询
 
+const INF = 2e15
 class SegmentTreePointUpdateRangeQuery<E = number> {
   private readonly _n: number
   private readonly _size: number
@@ -197,6 +198,60 @@ if (require.main === module) {
   }
 
   // https://leetcode.cn/problems/maximum-sum-queries/
-  // 2736. 最大和查询
-  function maximumSumQueries(nums1: number[], nums2: number[], queries: number[][]): number[] {}
+  // 2736. 最大和查询 (二维偏序+离线查询)
+  // 对于第 i 个查询，在所有满足 nums1[j] >= xi 且 nums2[j] >= yi 的下标 j (0 <= j < n) 中，
+  // 找出 nums1[j] + nums2[j] 的 最大值 ，
+  // 如果不存在满足条件的 j 则返回 -1 。
+  // 返回数组 answer ，其中 answer[i] 是第 i 个查询的答案。
+  //
+  // !即:对每个查询(x,y),求出右上角的点的`横坐标+纵坐标`的最大值
+  function maximumSumQueries(nums1: number[], nums2: number[], queries: number[][]): number[] {
+    const points = nums1.map((v, i) => [v, nums2[i]]).sort((a, b) => a[0] - b[0] || a[1] - b[1])
+    const qWithId = queries
+      .map((q, i) => [q[0], q[1], i])
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1])
+
+    const allY = new Set(nums2)
+    queries.forEach(q => allY.add(q[1]))
+    const [rank, count] = sortedSet([...allY])
+
+    const seg = new SegmentTreePointUpdateRangeQuery<number>(count, () => -INF, Math.max)
+    const res = Array(queries.length).fill(-1)
+    let pi = points.length - 1
+    for (let i = qWithId.length - 1; i >= 0; i--) {
+      const [qx, qy, qid] = qWithId[i]
+      while (pi >= 0 && points[pi][0] >= qx) {
+        seg.update(rank(points[pi][1])!, points[pi][0] + points[pi][1])
+        pi--
+      }
+      const curMax = seg.query(rank(qy)!, count)
+      res[qid] = curMax === -INF ? -1 : curMax
+    }
+
+    return res
+  }
+
+  /**
+   * (松)离散化.
+   * @returns
+   * rank: 给定一个数,返回它的排名`(0-count)`.
+   * count: 离散化(去重)后的元素个数.
+   */
+  function sortedSet(nums: number[]): [rank: (num: number) => number, count: number] {
+    const allNums = [...new Set(nums)].sort((a, b) => a - b)
+    const rank = (num: number) => {
+      let left = 0
+      let right = allNums.length - 1
+      while (left <= right) {
+        const mid = (left + right) >>> 1
+        if (allNums[mid] >= num) {
+          right = mid - 1
+        } else {
+          left = mid + 1
+        }
+      }
+      return left
+    }
+    return [rank, allNums.length]
+  }
 }

@@ -1,41 +1,15 @@
-function getMinRange(nums: number[]): [left: number, right: number][] {
-  const n = nums.length
-  const leftMost = Array<number>(n).fill(0)
-  const rightMost = Array<number>(n).fill(n - 1)
-
-  let stack: number[] = []
-  for (let i = 0; i < n; i++) {
-    while (stack.length > 0 && nums[stack[stack.length - 1]] > nums[i]) {
-      const pre = stack.pop()!
-      rightMost[pre] = i - 1
-    }
-    stack.push(i)
-  }
-
-  stack = []
-  for (let i = n - 1; ~i; i--) {
-    while (stack.length > 0 && nums[stack[stack.length - 1]] > nums[i]) {
-      const pre = stack.pop()!
-      leftMost[pre] = i + 1
-    }
-    stack.push(i)
-  }
-
-  const res: [left: number, right: number][] = []
-  for (let i = 0; i < n; i++) {
-    res.push([leftMost[i], rightMost[i]])
-  }
-  return res
-}
-
+// https://leetcode.cn/problems/maximum-of-minimum-values-in-all-subarrays/
 // 0 <= nums[i] <= 109
 // 1.首先利用单调栈,计算出每个数作为区间最小值可以往左右两边延拓的长度
 // 2.用上述求出的延拓长度L,去更新答案数组ans[L - 1]
 // 3.倒序遍历答案数组
+
+import { getRange } from './每个元素作为最值的影响范围'
+
 function findMaximums(nums: number[]): number[] {
   const n = nums.length
   const res = Array<number>(n).fill(-1)
-  const minRange = getMinRange(nums)
+  const minRange = getRange(nums)
 
   for (let i = 0; i < n; i++) {
     const [left, right] = minRange[i]

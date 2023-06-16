@@ -217,7 +217,7 @@ class Tree {
     this.rid = new Uint32Array(n)
     this._idToNode = new Uint32Array(n)
     this._top = new Uint32Array(n)
-    this.depthWeighted = Array(n)
+    this.depthWeighted = Array(n).fill(0)
     this._heavySon = new Int32Array(n)
   }
 

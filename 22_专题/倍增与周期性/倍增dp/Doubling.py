@@ -45,7 +45,7 @@ class Doubling:
 
 
 if __name__ == "__main__":
-
+    # https://leetcode.cn/problems/prison-cells-after-n-days/
     def move(preState: int) -> int:
         s1, s2 = preState >> 1, preState << 1
         nextState = s1 ^ s2 ^ 0b11111111  # 两个相邻的房间都被占用或都是空的，那么该牢房就会被占用

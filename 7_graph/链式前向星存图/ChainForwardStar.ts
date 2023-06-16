@@ -67,6 +67,10 @@ class ChainForwardStar {
 
   private _edgeId = 0
 
+  /**
+   * @param n 图的点数.
+   * @param m 图的边数.这里的边数是指`有向边`的数量,如果是无向图,则是边的数量的两倍.
+   */
   constructor(n: number, m: number) {
     this.preEdge = new Int32Array(m + 1).fill(-1)
     this.lastEdge = new Int32Array(n + 1).fill(-1)
@@ -133,14 +137,7 @@ class ChainForwardStar {
         nexts.push([next, weight, edgeId])
       })
 
-      // dont use reverse, too slow
-      for (let i = 0; i < nexts.length >> 1; i++) {
-        const tmp = nexts[i]
-        nexts[i] = nexts[nexts.length - 1 - i]
-        nexts[nexts.length - 1 - i] = tmp
-      }
-
-      res[cur] = nexts
+      res[cur] = nexts.reverse()
     }
 
     return res
@@ -155,4 +152,10 @@ if (require.main === module) {
   console.log(cfs.toAdjList())
   cfs.removeDirectedEdge(0, 1)
   console.log(cfs.toAdjList())
+
+  const tree = new ChainForwardStar(4, 3 * 2)
+  tree.addEdge(0, 1, 1)
+  tree.addEdge(1, 2, 2)
+  tree.addEdge(2, 3, 3)
+  console.log(tree.toAdjList())
 }
