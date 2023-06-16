@@ -380,7 +380,7 @@ function useAtcoderLazySegmentTree<E = number, Id = number>(
   }
 }
 
-export { useAtcoderLazySegmentTree, Operation, AtcoderSegmentTree } // base api
+export {} // base api
 
 if (require.main === module) {
   const n = 2e5

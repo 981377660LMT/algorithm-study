@@ -1,7 +1,5 @@
-// 链接：https://leetcode.cn/problems/count-subarrays-with-fixed-bounds
 // !6207. 统计定界子数组的数目-线段树树上二分解法
-
-import { useAtcoderLazySegmentTree } from '../AtcoderLazySegmentTree'
+// https://leetcode.cn/problems/count-subarrays-with-fixed-bounds
 
 // 给你一个整数数组 nums 和两个整数 minK 以及 maxK 。
 // nums 的定界子数组是满足下述条件的一个子数组：
@@ -13,44 +11,22 @@ import { useAtcoderLazySegmentTree } from '../AtcoderLazySegmentTree'
 // !固定子数组的一端，则子数组的最小（最大）值关于另一端点具有单调性，
 // !因此可以使用二分查找、滑动窗口来求出使得最小（最大值）值落在某一范围内的区间
 
+import { SegmentTreePointUpdateRangeQuery } from '../SegmentTreePointUpdateRangeQuery'
+
 const INF = 2e15
 function countSubarrays(nums: number[], minK: number, maxK: number): number {
   const n = nums.length
-  const minTree = useAtcoderLazySegmentTree(nums, {
-    e() {
-      return INF
-    },
-    id() {
-      return 0
-    },
-    op(data1, data2) {
-      return Math.min(data1, data2)
-    },
-    mapping(_, childData) {
-      return childData // 无需更新
-    },
-    composition() {
-      return 0 // 无需更新
-    }
-  })
+  const minTree = new SegmentTreePointUpdateRangeQuery(
+    nums,
+    () => INF,
+    (a, b) => Math.min(a, b)
+  )
 
-  const maxTree = useAtcoderLazySegmentTree(nums, {
-    e() {
-      return 0
-    },
-    id() {
-      return 0
-    },
-    op(data1, data2) {
-      return Math.max(data1, data2)
-    },
-    mapping(_, childData) {
-      return childData // 无需更新
-    },
-    composition() {
-      return 0 // 无需更新
-    }
-  })
+  const maxTree = new SegmentTreePointUpdateRangeQuery(
+    nums,
+    () => 0,
+    (a, b) => Math.max(a, b)
+  )
 
   let res = 0
   for (let left = 0; left < n; left++) {

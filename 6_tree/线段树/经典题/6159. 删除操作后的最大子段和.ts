@@ -87,12 +87,6 @@ class SegmentTree {
       this._sufMax[rt << 1] + this._preMax[(rt << 1) | 1]
     )
   }
-
-  private _checkRange(l: number, r: number): void {
-    if (l < 1 || r > this._size) {
-      throw new RangeError(`[${l}, ${r}] out of range: [1, ${this._size}]`)
-    }
-  }
 }
 
 function maximumSegmentSum(nums: number[], removeQueries: number[]): number[] {

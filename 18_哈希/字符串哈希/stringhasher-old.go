@@ -2,6 +2,10 @@ package main
 
 import "fmt"
 
+const MOD1, MOD2 int = 1e8 + 7, 1e9 + 7
+const BASE1, BASE2 int = 131, 13131
+const OFFSET1, OFFSET2 int = 0, 0
+
 // Hasher returns a function that can be used to hash a slice of the string.
 // The returned function takes two indices, left and right,
 // and returns the hash of the slice [left, right).
@@ -69,9 +73,6 @@ func concatHash(hash1, hash2, len2, mod, base int) int {
 
 func main() {
 	s := "abcabc"
-	const MOD1, MOD2 int = 1e8 + 7, 1e9 + 7
-	const BASE1, BASE2 int = 131, 13131
-	const OFFSET1, OFFSET2 int = 0, 0
 	ords := make([]int, len(s))
 	for i, v := range s {
 		ords[i] = int(v)

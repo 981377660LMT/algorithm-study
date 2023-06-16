@@ -90,7 +90,7 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
   set(index: number, value: E): void {
     if (index < 0 || index >= this._n) return
     index += this._size
-    for (let i = this._height; ~i; i--) this._pushDown(index >> i)
+    for (let i = this._height; i > 0; i--) this._pushDown(index >> i)
     this._data[index] = value
     for (let i = 1; i <= this._height; i++) this._pushUp(index >> i)
   }
@@ -98,7 +98,7 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
   get(index: number): E {
     if (index < 0 || index >= this._n) return this._e()
     index += this._size
-    for (let i = this._height; ~i; i--) this._pushDown(index >> i)
+    for (let i = this._height; i > 0; i--) this._pushDown(index >> i)
     return this._data[index]
   }
 
@@ -112,7 +112,7 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     if (start >= end) return
     start += this._size
     end += this._size
-    for (let i = this._height; ~i; i--) {
+    for (let i = this._height; i > 0; i--) {
       if ((start >> i) << i !== start) this._pushDown(start >> i)
       if ((end >> i) << i !== end) this._pushDown((end - 1) >> i)
     }
@@ -140,7 +140,7 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     if (start >= end) return this._e()
     start += this._size
     end += this._size
-    for (let i = this._height; ~i; i--) {
+    for (let i = this._height; i > 0; i--) {
       if ((start >> i) << i !== start) this._pushDown(start >> i)
       if ((end >> i) << i !== end) this._pushDown((end - 1) >> i)
     }
@@ -165,7 +165,7 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     if (start < 0) start = 0
     if (start >= this._n) return this._n
     start += this._size
-    for (let i = this._height; ~i; i--) this._pushDown(start >> i)
+    for (let i = this._height; i > 0; i--) this._pushDown(start >> i)
     let res = this._e()
     while (true) {
       while (!(start & 1)) start >>= 1
@@ -195,7 +195,7 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     if (end > this._n) end = this._n
     if (end <= 0) return 0
     end += this._size
-    for (let i = this._height; ~i; i--) this._pushDown((end - 1) >> i)
+    for (let i = this._height; i > 0; i--) this._pushDown((end - 1) >> i)
     let res = this._e()
     while (true) {
       end--
@@ -220,7 +220,18 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
   build(leaves: ArrayLike<E>): void {
     if (leaves.length !== this._n) throw new RangeError(`length must be equal to ${this._n}`)
     for (let i = 0; i < this._n; i++) this._data[this._size + i] = leaves[i]
-    for (let i = this._size - 1; ~i; i--) this._pushUp(i)
+    for (let i = this._size - 1; i > 0; i--) this._pushUp(i)
+  }
+
+  toString(): string {
+    const sb: string[] = []
+    sb.push('SegmentTreeRangeUpdateRangeQuery(')
+    for (let i = 0; i < this._n; i++) {
+      if (i) sb.push(', ')
+      sb.push(String(this.get(i)))
+    }
+    sb.push(')')
+    return sb.join('')
   }
 
   private _pushUp(index: number): void {

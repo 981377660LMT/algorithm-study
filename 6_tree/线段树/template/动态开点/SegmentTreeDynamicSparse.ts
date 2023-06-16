@@ -317,4 +317,8 @@ if (require.main === module) {
       throw new Error('queryAll failed')
     }
   }
+
+  // https://leetcode.cn/problems/maximum-sum-queries/
+  // 2736. 最大和查询
+  function maximumSumQueries(nums1: number[], nums2: number[], queries: number[][]): number[] {}
 }

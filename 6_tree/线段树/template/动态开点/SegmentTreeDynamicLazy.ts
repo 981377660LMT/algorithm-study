@@ -17,6 +17,8 @@
 //  getAll(root)
 //  mergeDestructively(root1, root2)
 
+const INF = 2e15
+
 /**
  * !不要用数组`[]`代替对象`{}`.数组会导致性能下降.
  */
@@ -449,22 +451,22 @@ export { SegmentTreeDynamicLazy }
 
 if (require.main === module) {
   const n = 1e9
-  // RangeAddRangeSum
+  // RangeChmaxRangeMax
   const seg = new SegmentTreeDynamicLazy<number, number>(0, n, {
     e() {
       return 0
     },
     id() {
-      return 0
+      return -INF
     },
     op(x, y) {
-      return x + y
+      return Math.max(x, y)
     },
     mapping(f, x) {
-      return f + x
+      return f === -INF ? x : Math.max(f, x)
     },
     composition(f, g) {
-      return f + g
+      return f === -INF ? g : Math.max(f, g)
     }
     // equalsId(id1, id2) {}
   })

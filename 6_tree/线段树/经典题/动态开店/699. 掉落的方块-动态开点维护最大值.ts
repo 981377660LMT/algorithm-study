@@ -2,132 +2,104 @@
 // 1 <= positions.length <= 1000.
 // 1 <= positions[i][0] <= 10^8.
 // 1 <= positions[i][1] <= 10^6.
+// https://leetcode.cn/problems/falling-squares/
 
-class SegmentTreeNode {
-  left!: SegmentTreeNode
-  right!: SegmentTreeNode
-  isLazy = false
-  lazyValue = -Infinity
-  value = -Infinity
-}
+import { createRangeUpdateRangeMax } from '../../template/atcoder_segtree/SegmentTreeUtils'
+import { SegmentTreeDynamicLazy } from '../../template/动态开点/SegmentTreeDynamicLazy'
 
-/**
- * @description 维护区间最大值，动态开点
- */
-class SegmentTree {
-  private readonly root = new SegmentTreeNode()
-  private readonly lower: number
-  private readonly upper: number
-
-  constructor(lower = 0, upper = 1e9 + 10) {
-    this.lower = lower
-    this.upper = upper
-  }
-
-  update(left: number, right: number, delta: number): void {
-    this._update(left, right, this.lower, this.upper, this.root, delta)
-  }
-
-  query(left: number, right: number): number {
-    return this._query(left, right, this.lower, this.upper, this.root)
-  }
-
-  queryAll(): number {
-    return this.root.value
-  }
-
-  private _update(
-    L: number,
-    R: number,
-    left: number,
-    right: number,
-    root: SegmentTreeNode,
-    target: number
-  ): void {
-    if (L <= left && right <= R) {
-      root.isLazy = true
-      root.value = Math.max(root.value, target)
-      root.lazyValue = Math.max(root.lazyValue, target)
-      return
-    }
-
-    this.pushDown(root)
-
-    const mid = Math.floor((left + right) / 2)
-    if (L <= mid) {
-      this._update(L, R, left, mid, root.left, target)
-    }
-    if (R >= mid + 1) {
-      this._update(L, R, mid + 1, right, root.right, target)
-    }
-
-    this.pushUp(root)
-  }
-
-  private _query(L: number, R: number, left: number, right: number, root: SegmentTreeNode): number {
-    if (L <= left && right <= R) {
-      return root.value
-    }
-
-    this.pushDown(root)
-    let res = 0
-
-    const mid = Math.floor((left + right) / 2)
-    if (L <= mid) {
-      res = Math.max(res, this._query(L, R, left, mid, root.left))
-    }
-    if (R >= mid + 1) {
-      res = Math.max(res, this._query(L, R, mid + 1, right, root.right))
-    }
-
-    return res
-  }
-
-  private pushUp(root: SegmentTreeNode): void {
-    root.value = Math.max(root.left.value, root.right.value)
-  }
-
-  private pushDown(root: SegmentTreeNode): void {
-    if (root.left == undefined) root.left = new SegmentTreeNode()
-    if (root.right == undefined) root.right = new SegmentTreeNode()
-    if (root.isLazy) {
-      root.left.isLazy = true
-      root.right.isLazy = true
-      root.left.lazyValue = Math.max(root.left.lazyValue, root.lazyValue)
-      root.right.lazyValue = Math.max(root.right.lazyValue, root.lazyValue)
-      root.left.value = Math.max(root.left.value, root.lazyValue)
-      root.right.value = Math.max(root.right.value, root.lazyValue)
-
-      root.isLazy = false
-      root.lazyValue = 0
-    }
-  }
-}
+const INF = 2e15
 
 function fallingSquares(positions: number[][]): number[] {
   const res = Array<number>(positions.length).fill(0)
-  const tree = new SegmentTree(0, 2e8 + 10)
-  for (const [i, [left, size]] of positions.entries()) {
+  const tree = new SegmentTreeDynamicLazy(0, 2e8 + 10, {
+    e() {
+      return 0
+    },
+    id() {
+      return -INF
+    },
+    op(x, y) {
+      return Math.max(x, y)
+    },
+    mapping(f, x) {
+      return f === -INF ? x : Math.max(f, x)
+    },
+    composition(f, g) {
+      return f === -INF ? g : Math.max(f, g)
+    }
+  })
+
+  positions.forEach(([left, size], i) => {
     const right = left + size - 1
-    const preHeihgt = tree.query(left, right)
-    tree.update(left, right, preHeihgt + size)
+    const preHeihgt = tree.query(left, right + 1)
+    tree.updateRange(left, right + 1, preHeihgt + size)
     res[i] = tree.queryAll()
-  }
+  })
 
   return res
 }
 
-console.log(
-  fallingSquares([
-    [1, 2],
-    [2, 3],
-    [6, 1]
-  ])
-)
-console.log(
-  fallingSquares([
-    [100, 100],
-    [200, 100]
-  ])
-)
+function fallingSquares2(positions: number[][]): number[] {
+  const res = Array<number>(positions.length).fill(0)
+  const allNums = new Set<number>()
+  positions.forEach(([left, size]) => {
+    allNums.add(left)
+    allNums.add(left + size - 1)
+  })
+
+  const [rank, count] = sortedSet([...allNums])
+  const tree = createRangeUpdateRangeMax(count)
+
+  positions.forEach(([left, size], i) => {
+    const right = left + size - 1
+    const rankLeft = rank(left)
+    const rankRight = rank(right + 1)
+    const preHeihgt = tree.query(rankLeft, rankRight)
+    tree.update(rankLeft, rankRight, preHeihgt + size)
+    res[i] = tree.queryAll()
+  })
+
+  return res
+}
+
+/**
+ * (松)离散化.
+ * @returns
+ * rank: 给定一个数,返回它的排名`(0-count)`.
+ * count: 离散化(去重)后的元素个数.
+ */
+function sortedSet(nums: number[]): [rank: (num: number) => number, count: number] {
+  const allNums = [...new Set(nums)].sort((a, b) => a - b)
+  const rank = (num: number) => {
+    let left = 0
+    let right = allNums.length - 1
+    while (left <= right) {
+      const mid = (left + right) >>> 1
+      if (allNums[mid] >= num) {
+        right = mid - 1
+      } else {
+        left = mid + 1
+      }
+    }
+    return left
+  }
+  return [rank, allNums.length]
+}
+
 export {}
+
+if (require.main === module) {
+  console.log(
+    fallingSquares([
+      [1, 2],
+      [2, 3],
+      [6, 1]
+    ])
+  )
+  console.log(
+    fallingSquares([
+      [100, 100],
+      [200, 100]
+    ])
+  )
+}

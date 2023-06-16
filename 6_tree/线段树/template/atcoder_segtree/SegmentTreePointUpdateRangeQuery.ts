@@ -142,7 +142,7 @@ class SegmentTreePointUpdateRangeQuery<E = number> {
     for (let i = 0; i < arr.length; i++) {
       this._data[i + this._size] = arr[i] // 叶子结点
     }
-    for (let i = this._size - 1; ~i; i--) {
+    for (let i = this._size - 1; i > 0; i--) {
       this._data[i] = this._op(this._data[i << 1], this._data[(i << 1) | 1])
     }
   }
@@ -152,7 +152,7 @@ class SegmentTreePointUpdateRangeQuery<E = number> {
     sb.push('SegmentTreePointUpdateRangeQuery(')
     for (let i = 0; i < this._n; i++) {
       if (i) sb.push(', ')
-      sb.push(JSON.stringify(this.get(i)))
+      sb.push(String(this.get(i)))
     }
     sb.push(')')
     return sb.join('')
@@ -195,4 +195,8 @@ if (require.main === module) {
     }
     console.timeEnd('update')
   }
+
+  // https://leetcode.cn/problems/maximum-sum-queries/
+  // 2736. 最大和查询
+  function maximumSumQueries(nums1: number[], nums2: number[], queries: number[][]): number[] {}
 }

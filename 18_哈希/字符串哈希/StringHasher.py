@@ -6,27 +6,6 @@
 from typing import Sequence
 
 
-# 哈希值计算方法：
-# hash(s, p, m) = (val(s[0]) * pk-1 + val(s[1]) * pk-2 + ... + val(s[k-1]) * p0) mod m.
-# 越靠左字符权重越大
-def useStringHasher(ords: Sequence[int], mod=10**11 + 7, base=1313131, offset=0):
-    n = len(ords)
-    prePow = [1] * (n + 1)
-    preHash = [0] * (n + 1)
-    for i in range(1, n + 1):
-        prePow[i] = (prePow[i - 1] * base) % mod
-        preHash[i] = (preHash[i - 1] * base + ords[i - 1] - offset) % mod
-
-    def sliceHash(left: int, right: int):
-        """切片 `s[left:right]` 的哈希值"""
-        if left >= right:
-            return 0
-        left += 1
-        return (preHash[right] - preHash[left - 1] * prePow[right - left + 1]) % mod
-
-    return sliceHash
-
-
 class StringHasher:
     __slots__ = ("_ords", "_mod", "_base", "_offset", "_prePow", "_preHash")
 
@@ -53,6 +32,27 @@ class StringHasher:
 
     def __call__(self, left: int, right: int):
         return self.sliceHash(left, right)
+
+
+# 哈希值计算方法：
+# hash(s, p, m) = (val(s[0]) * pk-1 + val(s[1]) * pk-2 + ... + val(s[k-1]) * p0) mod m.
+# 越靠左字符权重越大
+def useStringHasher(ords: Sequence[int], mod=10**11 + 7, base=1313131, offset=0):
+    n = len(ords)
+    prePow = [1] * (n + 1)
+    preHash = [0] * (n + 1)
+    for i in range(1, n + 1):
+        prePow[i] = (prePow[i - 1] * base) % mod
+        preHash[i] = (preHash[i - 1] * base + ords[i - 1] - offset) % mod
+
+    def sliceHash(left: int, right: int):
+        """切片 `s[left:right]` 的哈希值"""
+        if left >= right:
+            return 0
+        left += 1
+        return (preHash[right] - preHash[left - 1] * prePow[right - left + 1]) % mod
+
+    return sliceHash
 
 
 def genHash(word: str, mod=10**11 + 7, base=1313131, offset=0) -> int:
