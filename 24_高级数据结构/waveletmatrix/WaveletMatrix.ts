@@ -17,13 +17,14 @@ class WaveletMatrix {
    */
   constructor(nums: Uint32Array) {
     nums = nums.slice()
-    const max_ = Math.max(...nums, 0)
+    let max_ = 0
+    for (let i = 0; i < nums.length; i++) {
+      max_ = Math.max(max_, nums[i])
+    }
     const n = nums.length
     const maxLog = 32 - Math.clz32(max_) + 1 // bit_len + 1
     const mat = Array(maxLog)
-    for (let i = 0; i < maxLog; i++) {
-      mat[i] = new _BV(n + 1)
-    }
+    for (let i = 0; i < maxLog; i++) mat[i] = new _BV(n + 1)
     const zs = new Uint32Array(maxLog)
     const buff1 = new Uint32Array(maxLog)
     const buff2 = new Uint32Array(maxLog)
@@ -177,21 +178,12 @@ class WaveletMatrix {
     a: number,
     b: number
   ): number {
-    if (left === right) {
-      return 0
-    }
-    if (d === this._maxLog) {
-      return a <= val && val < b ? right - left : 0
-    }
-
+    if (left === right) return 0
+    if (d === this._maxLog) return a <= val && val < b ? right - left : 0
     const nv = (1 << (this._maxLog - d - 1)) | val
     const nnv = ((1 << (this._maxLog - d - 1)) - 1) | nv
-    if (nnv < a || b <= val) {
-      return 0
-    }
-    if (a <= val && nnv < b) {
-      return right - left
-    }
+    if (nnv < a || b <= val) return 0
+    if (a <= val && nnv < b) return right - left
     const lc = this._mat[d].countPrefix(1, left)
     const rc = this._mat[d].countPrefix(1, right)
     return (
@@ -221,8 +213,8 @@ class WaveletMatrix {
   }
 
   private _le(left: number, right: number, val: number): number {
-    const [a, b] = this._ll(left, right, val)
-    return a + b
+    const res = this._ll(left, right, val)
+    return res[0] + res[1]
   }
 }
 
@@ -302,6 +294,22 @@ if (require.main === module) {
   strictEqual(M.floor(0, 3, 2), 2)
   strictEqual(M.higher(0, 10, 1), 2)
   strictEqual(M.ceiling(0, 10, 1), 1)
+
+  // eslint-disable-next-line no-inner-declarations
+  function countQuadruplets(nums: number[]) {
+    const W = new WaveletMatrix(new Uint32Array(nums))
+    let res = 0
+    for (let j = 1; j < nums.length - 2; j++) {
+      for (let k = j + 1; k < nums.length - 1; k++) {
+        if (nums[k] < nums[j]) {
+          const left = W.countRange(0, j, 0, nums[k])
+          const right = W.countRange(k + 1, nums.length, nums[j] + 1, 1e9)
+          res += left * right
+        }
+      }
+    }
+    return res
+  }
 }
 
 export {}

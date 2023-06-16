@@ -55,8 +55,9 @@ class WaveletMatrixSum {
     for (let d = log - 1; d >= -1; d--) {
       let p0 = 0
       let p1 = 0
+      const preSumD = preSum[d + 1]
       for (let i = 0; i < n; i++) {
-        preSum[d + 1][i + 1] = preSum[d + 1][i] + nums[i]
+        preSumD[i + 1] = preSumD[i] + nums[i]
       }
       if (d === -1) {
         break

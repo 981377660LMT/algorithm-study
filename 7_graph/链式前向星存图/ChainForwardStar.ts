@@ -2,6 +2,8 @@
  * 链式前向星存图.边的编号从`0`开始.
  * @see {@link https://segmentfault.com/a/1190000043443360}
  *      {@link https://zhuanlan.zhihu.com/p/343092172}
+ *
+ * 如果要保存反向边,只需要添加两次有向边.正向边的编号为`i`,反向边的编号为`i^1`.
  */
 class ChainForwardStar {
   static fromAdjList(
@@ -130,14 +132,17 @@ class ChainForwardStar {
       this.enumerateNexts(cur, (next, weight, edgeId) => {
         nexts.push([next, weight, edgeId])
       })
+
       // dont use reverse, too slow
       for (let i = 0; i < nexts.length >> 1; i++) {
         const tmp = nexts[i]
         nexts[i] = nexts[nexts.length - 1 - i]
         nexts[nexts.length - 1 - i] = tmp
       }
+
       res[cur] = nexts
     }
+
     return res
   }
 }

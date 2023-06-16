@@ -33,11 +33,13 @@ class SegmentTreeFractionalCascading {
     }
 
     const tmp = 2 * sz - 1
-    const seg: number[][] = new Array(tmp)
-    const ll: number[][] = new Array(tmp)
-    const rr: number[][] = new Array(tmp)
+    const seg: number[][] = Array(tmp)
+    const ll: number[][] = Array(tmp)
+    const rr: number[][] = Array(tmp)
     for (let i = 0; i < tmp; i++) {
       seg[i] = []
+      ll[i] = []
+      rr[i] = []
     }
 
     for (let i = 0; i < n; i++) {
@@ -55,32 +57,44 @@ class SegmentTreeFractionalCascading {
 
       let i = 0
       let j = 0
+      const segA = seg[a]
+      const segB = seg[b]
+      const segK = seg[k]
       while (i < len1 && j < len2) {
-        if (seg[a][i] < seg[b][j]) {
-          seg[k].push(seg[a][i])
+        if (segA[i] < segB[j]) {
+          segK.push(segA[i])
           i++
         } else {
-          seg[k].push(seg[b][j])
+          segK.push(segB[j])
           j++
         }
       }
-      seg[k].push(...seg[a].slice(i))
-      seg[k].push(...seg[b].slice(j))
+
+      while (i < len1) {
+        segK.push(segA[i])
+        i++
+      }
+      while (j < len2) {
+        segK.push(segB[j])
+        j++
+      }
 
       let tail1 = 0
       let tail2 = 0
+      const llk = ll[k]
+      const rrk = rr[k]
       for (let i = 0; i < len; i++) {
-        while (tail1 < len1 && seg[a][tail1] < seg[k][i]) {
+        while (tail1 < len1 && segA[tail1] < segK[i]) {
           tail1++
         }
-        while (tail2 < len2 && seg[b][tail2] < seg[k][i]) {
+        while (tail2 < len2 && segB[tail2] < segK[i]) {
           tail2++
         }
-        ll[k][i] = tail1
-        rr[k][i] = tail2
+        llk[i] = tail1
+        rrk[i] = tail2
       }
-      ll[k][len] = len1
-      rr[k][len] = len2
+      llk[len] = len1
+      rrk[len] = len2
     }
 
     this._seg = seg
@@ -113,9 +127,10 @@ class SegmentTreeFractionalCascading {
     if (a <= l && r <= b) {
       return upper - lower
     }
+    const mid = (l + r) >> 1
     return (
-      this._query(a, b, this._ll[k][lower], this._ll[k][upper], 2 * k + 1, l, (l + r) >> 1) +
-      this._query(a, b, this._rr[k][lower], this._rr[k][upper], 2 * k + 2, (l + r) >> 1, r)
+      this._query(a, b, this._ll[k][lower], this._ll[k][upper], 2 * k + 1, l, mid) +
+      this._query(a, b, this._rr[k][lower], this._rr[k][upper], 2 * k + 2, mid, r)
     )
   }
 }

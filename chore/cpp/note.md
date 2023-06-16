@@ -74,8 +74,38 @@ type_traits: 用于萃取类型`特征`,位于 boost/type_traits.hpp
 - 四个基本接口:
   **初始化、前进、是否结束、访问当前元素**
   cpp: begin/end/++/--/!=/==/\
+
+  ```cpp
+  for (auto it = v.begin(); it != v.end(); ++it) {
+    std::cout << *it << std::endl;
+  }
+  ```
+
   js: next()/done/value
+
+  ```js
+  for (let i of [1, 2, 3]) {
+    console.log(i)
+  }
+  ```
+
   python: iter()/next()
+
+  ```python
+  for i in range(10):
+    print(i)
+  ```
+
+  java: hasNext()/next()
+
+  ```java
+  while (iter.hasNext()) {
+    System.out.println(iter.next());
+  }
+  ```
+
+  有的实现，在 hasNext() 里将下一个位置的值求好，next() 直接返回.
+
 - 更强大的接口：
   比较迭代位置(距离)、前进后退 n 个位置、交换两个迭代器所指元素的值
 - 迭代器分类
