@@ -1,3 +1,4 @@
+// https://leetcode.cn/problems/queue-reconstruction-by-height/
 // 406. 根据身高重建队列-线段树树上二分 O(nlogn)
 // people[i] = [hi, ki] 表示第 i 个人的身高为 hi ，前面 正好 有 ki 个身高大于或等于 hi 的人。
 // 返回的队列应该格式化为数组 queue ，其中 queue[j] = [hj, kj] 是队列中第 j 个人的属性（queue[0] 是排在队列前面的人）。

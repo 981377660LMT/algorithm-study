@@ -88,6 +88,27 @@ class SegmentTree2DPointUpdateRangeQuery<E> {
     }
   }
 
+  /** 0 <= row < ROW, 0 <= col < COL. */
+  update(row: number, col: number, value: E): void {
+    let r = row + this._row
+    let c = col + this._col
+    this._tree[this._id(r, c)] = this._op(this._tree[this._id(r, c)], value)
+    for (let i = r >>> 1; i; i >>>= 1) {
+      this._tree[this._id(i, c)] = this._op(
+        this._tree[this._id(i << 1, c)],
+        this._tree[this._id((i << 1) | 1, c)]
+      )
+    }
+    for (; r; r >>>= 1) {
+      for (let j = c >>> 1; j; j >>>= 1) {
+        this._tree[this._id(r, j)] = this._op(
+          this._tree[this._id(r, j << 1)],
+          this._tree[this._id(r, (j << 1) | 1)]
+        )
+      }
+    }
+  }
+
   /**
    * 查询区间 `[row1, row2)` x `[col1, col2)` 的聚合值.
    * 0 <= row1 <= row2 <= ROW.
@@ -170,4 +191,14 @@ if (require.main === module) {
       return this._tree.query(row1, row2 + 1, col1, col2 + 1)
     }
   }
+
+  const seg2d = new SegmentTree2DPointUpdateRangeQuery(
+    3,
+    4,
+    () => 0,
+    (a, b) => a + b
+  )
+  seg2d.update(0, 0, 2)
+  seg2d.update(0, 0, 2)
+  console.log(seg2d.query(0, 1, 0, 1))
 }

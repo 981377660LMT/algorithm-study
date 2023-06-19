@@ -64,7 +64,7 @@ class ChainForwardStar {
   readonly weight: number[]
 
   private readonly _n: number
-
+  private readonly _m: number
   private _edgeId = 0
 
   /**
@@ -72,11 +72,12 @@ class ChainForwardStar {
    * @param m 图的边数.这里的边数是指`有向边`的数量,如果是无向图,则是边的数量的两倍.
    */
   constructor(n: number, m: number) {
-    this.preEdge = new Int32Array(m + 1).fill(-1)
-    this.lastEdge = new Int32Array(n + 1).fill(-1)
-    this.edgeTo = new Int32Array(m + 1).fill(-1)
-    this.weight = Array(m + 1).fill(0)
+    this.preEdge = new Int32Array(m).fill(-1)
+    this.lastEdge = new Int32Array(n).fill(-1)
+    this.edgeTo = new Int32Array(m).fill(-1)
+    this.weight = Array(m).fill(0)
     this._n = n
+    this._m = m
   }
 
   /**
@@ -84,6 +85,7 @@ class ChainForwardStar {
    */
   addDirectedEdge(from: number, to: number, weight: number): void {
     const eid = this._edgeId++
+    if (eid >= this._m) throw new RangeError('edge number exceeds the limit')
     this.preEdge[eid] = this.lastEdge[from]
     this.lastEdge[from] = eid
     this.edgeTo[eid] = to

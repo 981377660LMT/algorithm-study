@@ -1,3 +1,6 @@
+分享 | 线段树的模板总结 (typescript) (更新中...）
+https://leetcode.cn/circle/discuss/4rJDBt/#typescript-%E6%A8%A1%E6%9D%BF%E5%8F%8A%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B
+
 ## 我对线段树的理解:
 
 0. 用来维护幺半群(monoid)的区间信息

@@ -77,3 +77,13 @@ if __name__ == "__main__":
 
     diffmatrix.update()
     print(diffmatrix.matrix)
+
+    # 2536. 子矩阵元素加 1
+    # https://leetcode.cn/problems/increment-submatrices-by-one/
+    class Solution:
+        def rangeAddQueries(self, n: int, queries: List[List[int]]) -> List[List[int]]:
+            M = DiffMatrix([[0] * n for _ in range(n)])
+            for r1, c1, r2, c2 in queries:
+                M.add(r1, c1, r2, c2, 1)
+            M.update()
+            return M.matrix

@@ -554,4 +554,31 @@ if (require.main === module) {
    * obj.add(left,right)
    * var param_2 = obj.count()
    */
+  // https://leetcode.cn/problems/my-calendar-iii/
+  // 732. 我的日程安排表 III
+  // RangeUpdateRangeMax
+  class MyCalendarThree {
+    private readonly _tree = new SegmentTreeDynamicLazy(0, 1e9 + 10, {
+      e() {
+        return 0
+      },
+      id() {
+        return 0
+      },
+      op(e1, e2) {
+        return Math.max(e1, e2)
+      },
+      mapping(lazy, data) {
+        return lazy + data
+      },
+      composition(f, g) {
+        return f + g
+      }
+    })
+
+    book(start: number, end: number): number {
+      this._tree.updateRange(start, end, 1)
+      return this._tree.queryAll()
+    }
+  }
 }
