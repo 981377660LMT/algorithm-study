@@ -8,6 +8,7 @@ import { SqrtDecomposition } from './SqrtDecomposition/SqrtDecomposition'
 
 /**
  * 动态区间频率查询.
+ * `O(nsqrt(n)logn)`.
  */
 class RangeFreqQueryDynamic {
   private static _bisectLeft<T>(arr: ArrayLike<T>, value: T): number {
@@ -40,7 +41,7 @@ class RangeFreqQueryDynamic {
           updated()
         }
         const updated = () => {
-          sortedNums = [...curNums].sort((a, b) => a - b)
+          sortedNums = curNums.slice().sort((a, b) => a - b)
         }
 
         // 区间加
@@ -55,8 +56,8 @@ class RangeFreqQueryDynamic {
 
         // 区间查询.
         const queryAll = (queryArg: [v: number, same: boolean]) => {
-          const [v, same] = queryArg
-          if (same) {
+          const v = queryArg[0]
+          if (queryArg[1]) {
             return (
               RangeFreqQueryDynamic._bisectLeft(sortedNums, v - lazyAdd + 1) -
               RangeFreqQueryDynamic._bisectLeft(sortedNums, v - lazyAdd)
@@ -66,13 +67,11 @@ class RangeFreqQueryDynamic {
         }
 
         const queryPart = (left: number, right: number, queryArg: [v: number, same: boolean]) => {
-          const [v, same] = queryArg
-          if (same) {
+          const v = queryArg[0]
+          if (queryArg[1]) {
             let res = 0
             for (let i = left; i < right; i++) {
-              if (curNums[i] + lazyAdd === v) {
-                res++
-              }
+              res += +(curNums[i] + lazyAdd === v)
             }
             return res
           }
@@ -148,14 +147,15 @@ if (require.main === module) {
   assert.strictEqual(rf.rangeFreq(0, 10, 5), 2)
   assert.strictEqual(rf.rangeFreqWithFloor(0, 10, 5), 9)
 
-  const nums = Array.from({ length: 1e5 }, (_, i) => i)
+  const N = 1e5
+  const nums = Array.from({ length: N }, (_, i) => i)
   rf = new RangeFreqQueryDynamic(nums)
   console.time('time1')
-  for (let i = 0; i < 1e5; i++) {
-    rf.update(i, i + 1, i)
-    rf.rangeFreq(0, i + 1, i)
+  for (let i = 0; i < N; i++) {
+    rf.update(0, N, i)
+    rf.rangeFreq(0, N, i)
   }
-  console.timeEnd('time1') // 1.3s
+  console.timeEnd('time1') // time1: 2.503s
 
   // https://leetcode.cn/problems/range-frequency-queries/
   class RangeFreqQuery {
