@@ -23,7 +23,7 @@ func max(a, b int) int {
 
 type SegmentTreePointUpdateRangeQuery struct {
 	n, size int
-	seg     []E
+	data    []E
 }
 
 func NewSegmentTreePointUpdateRangeQuery(leaves []E) *SegmentTreePointUpdateRangeQuery {
@@ -34,6 +34,10 @@ func NewSegmentTreePointUpdateRangeQuery(leaves []E) *SegmentTreePointUpdateRang
 		size <<= 1
 	}
 	seg := make([]E, size<<1)
+	for i := range seg {
+		seg[i] = res.e()
+	}
+
 	for i := 0; i < n; i++ {
 		seg[i+size] = leaves[i]
 	}
@@ -42,23 +46,23 @@ func NewSegmentTreePointUpdateRangeQuery(leaves []E) *SegmentTreePointUpdateRang
 	}
 	res.n = n
 	res.size = size
-	res.seg = seg
+	res.data = seg
 	return res
 }
 func (st *SegmentTreePointUpdateRangeQuery) Get(index int) E {
 	if index < 0 || index >= st.n {
 		return st.e()
 	}
-	return st.seg[index+st.size]
+	return st.data[index+st.size]
 }
 func (st *SegmentTreePointUpdateRangeQuery) Set(index int, value E) {
 	if index < 0 || index >= st.n {
 		return
 	}
 	index += st.size
-	st.seg[index] = value
+	st.data[index] = value
 	for index >>= 1; index > 0; index >>= 1 {
-		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+		st.data[index] = st.op(st.data[index<<1], st.data[index<<1|1])
 	}
 }
 func (st *SegmentTreePointUpdateRangeQuery) Update(index int, value E) {
@@ -66,9 +70,9 @@ func (st *SegmentTreePointUpdateRangeQuery) Update(index int, value E) {
 		return
 	}
 	index += st.size
-	st.seg[index] = st.op(st.seg[index], value)
+	st.data[index] = st.op(st.data[index], value)
 	for index >>= 1; index > 0; index >>= 1 {
-		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+		st.data[index] = st.op(st.data[index<<1], st.data[index<<1|1])
 	}
 }
 
@@ -88,19 +92,19 @@ func (st *SegmentTreePointUpdateRangeQuery) Query(start, end int) E {
 	end += st.size
 	for start < end {
 		if start&1 == 1 {
-			leftRes = st.op(leftRes, st.seg[start])
+			leftRes = st.op(leftRes, st.data[start])
 			start++
 		}
 		if end&1 == 1 {
 			end--
-			rightRes = st.op(st.seg[end], rightRes)
+			rightRes = st.op(st.data[end], rightRes)
 		}
 		start >>= 1
 		end >>= 1
 	}
 	return st.op(leftRes, rightRes)
 }
-func (st *SegmentTreePointUpdateRangeQuery) QueryAll() E { return st.seg[1] }
+func (st *SegmentTreePointUpdateRangeQuery) QueryAll() E { return st.data[1] }
 
 // 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
 func (st *SegmentTreePointUpdateRangeQuery) MaxRight(left int, predicate func(E) bool) int {
@@ -113,17 +117,17 @@ func (st *SegmentTreePointUpdateRangeQuery) MaxRight(left int, predicate func(E)
 		for left&1 == 0 {
 			left >>= 1
 		}
-		if !predicate(st.op(res, st.seg[left])) {
+		if !predicate(st.op(res, st.data[left])) {
 			for left < st.size {
 				left <<= 1
-				if predicate(st.op(res, st.seg[left])) {
-					res = st.op(res, st.seg[left])
+				if predicate(st.op(res, st.data[left])) {
+					res = st.op(res, st.data[left])
 					left++
 				}
 			}
 			return left - st.size
 		}
-		res = st.op(res, st.seg[left])
+		res = st.op(res, st.data[left])
 		left++
 		if (left & -left) == left {
 			break
@@ -144,17 +148,17 @@ func (st *SegmentTreePointUpdateRangeQuery) MinLeft(right int, predicate func(E)
 		for right > 1 && right&1 == 1 {
 			right >>= 1
 		}
-		if !predicate(st.op(st.seg[right], res)) {
+		if !predicate(st.op(st.data[right], res)) {
 			for right < st.size {
 				right = right<<1 | 1
-				if predicate(st.op(st.seg[right], res)) {
-					res = st.op(st.seg[right], res)
+				if predicate(st.op(st.data[right], res)) {
+					res = st.op(st.data[right], res)
 					right--
 				}
 			}
 			return right + 1 - st.size
 		}
-		res = st.op(st.seg[right], res)
+		res = st.op(st.data[right], res)
 		if right&-right == right {
 			break
 		}

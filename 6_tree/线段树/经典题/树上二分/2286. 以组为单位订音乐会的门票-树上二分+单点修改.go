@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"math/bits"
+	"strings"
 )
 
 type BookMyShow struct {
@@ -98,25 +100,23 @@ func (tree *LazySegTree) composition(parentLazy, childLazy Id) Id {
 //
 //
 //
+
 // !template
 type LazySegTree struct {
 	n    int
-	log  int
 	size int
+	log  int
 	data []E
 	lazy []Id
 }
 
-func NewLazySegTree(
-	v []E,
-) *LazySegTree {
+func NewLazySegTree(leaves []E) *LazySegTree {
 	tree := &LazySegTree{}
-
-	n := int(len(v))
+	n := len(leaves)
 	tree.n = n
 	tree.log = int(bits.Len(uint(n - 1)))
-	tree.size = int(1) << tree.log
-	tree.data = make([]E, 2*tree.size)
+	tree.size = 1 << tree.log
+	tree.data = make([]E, tree.size<<1)
 	tree.lazy = make([]Id, tree.size)
 	for i := range tree.data {
 		tree.data[i] = tree.e()
@@ -125,7 +125,7 @@ func NewLazySegTree(
 		tree.lazy[i] = tree.id()
 	}
 	for i := 0; i < n; i++ {
-		tree.data[tree.size+i] = v[i]
+		tree.data[tree.size+i] = leaves[i]
 	}
 	for i := tree.size - 1; i >= 1; i-- {
 		tree.pushUp(i)
@@ -145,7 +145,6 @@ func (tree *LazySegTree) Query(left, right int) E {
 	if left >= right {
 		return tree.e()
 	}
-
 	left += tree.size
 	right += tree.size
 	for i := tree.log; i >= 1; i-- {
@@ -171,7 +170,6 @@ func (tree *LazySegTree) Query(left, right int) E {
 	}
 	return tree.op(sml, smr)
 }
-
 func (tree *LazySegTree) QueryAll() E {
 	return tree.data[1]
 }
@@ -188,7 +186,6 @@ func (tree *LazySegTree) Update(left, right int, f Id) {
 	if left >= right {
 		return
 	}
-
 	left += tree.size
 	right += tree.size
 	for i := tree.log; i >= 1; i-- {
@@ -214,7 +211,7 @@ func (tree *LazySegTree) Update(left, right int, f Id) {
 	}
 	left = l2
 	right = r2
-	for i := int(1); i <= tree.log; i++ {
+	for i := 1; i <= tree.log; i++ {
 		if ((left >> i) << i) != left {
 			tree.pushUp(left >> i)
 		}
@@ -229,38 +226,32 @@ func (tree *LazySegTree) MinLeft(right int, predicate func(data E) bool) int {
 	if right == 0 {
 		return 0
 	}
-
 	right += tree.size
 	for i := tree.log; i >= 1; i-- {
 		tree.pushDown((right - 1) >> i)
 	}
-
 	res := tree.e()
 	for {
 		right--
 		for right > 1 && right&1 != 0 {
 			right >>= 1
 		}
-
 		if !predicate(tree.op(tree.data[right], res)) {
 			for right < tree.size {
 				tree.pushDown(right)
-				right = right*2 + 1
+				right = right<<1 | 1
 				if predicate(tree.op(tree.data[right], res)) {
 					res = tree.op(tree.data[right], res)
 					right--
 				}
 			}
-
 			return right + 1 - tree.size
 		}
-
 		res = tree.op(tree.data[right], res)
 		if (right & -right) == right {
 			break
 		}
 	}
-
 	return 0
 }
 
@@ -275,43 +266,60 @@ func (tree *LazySegTree) MaxRight(left int, predicate func(data E) bool) int {
 	}
 	res := tree.e()
 	for {
-		for left%2 == 0 {
+		for left&1 == 0 {
 			left >>= 1
 		}
 		if !predicate(tree.op(res, tree.data[left])) {
 			for left < tree.size {
 				tree.pushDown(left)
-				left *= 2
+				left <<= 1
 				if predicate(tree.op(res, tree.data[left])) {
 					res = tree.op(res, tree.data[left])
 					left++
 				}
 			}
-
 			return left - tree.size
 		}
-
 		res = tree.op(res, tree.data[left])
 		left++
 		if (left & -left) == left {
 			break
 		}
-
 	}
-
 	return tree.n
 }
 
+// 单点查询(不需要 pushUp/op 操作时使用)
+func (tree *LazySegTree) Get(index int) E {
+	index += tree.size
+	for i := tree.log; i >= 1; i-- {
+		tree.pushDown(index >> i)
+	}
+	return tree.data[index]
+}
+
+// 单点赋值
+func (tree *LazySegTree) Set(index int, e E) {
+	index += tree.size
+	for i := tree.log; i >= 1; i-- {
+		tree.pushDown(index >> i)
+	}
+	tree.data[index] = e
+	for i := 1; i <= tree.log; i++ {
+		tree.pushUp(index >> i)
+	}
+}
+
 func (tree *LazySegTree) pushUp(root int) {
-	tree.data[root] = tree.op(tree.data[2*root], tree.data[2*root+1])
+	tree.data[root] = tree.op(tree.data[root<<1], tree.data[root<<1|1])
 }
-
 func (tree *LazySegTree) pushDown(root int) {
-	tree.propagate(2*root, tree.lazy[root])
-	tree.propagate(2*root+1, tree.lazy[root])
-	tree.lazy[root] = tree.id()
+	if tree.lazy[root] != tree.id() {
+		tree.propagate(root<<1, tree.lazy[root])
+		tree.propagate(root<<1|1, tree.lazy[root])
+		tree.lazy[root] = tree.id()
+	}
 }
-
 func (tree *LazySegTree) propagate(root int, f Id) {
 	tree.data[root] = tree.mapping(f, tree.data[root])
 	// !叶子结点不需要更新lazy
@@ -320,13 +328,15 @@ func (tree *LazySegTree) propagate(root int, f Id) {
 	}
 }
 
-// func main() {
-// 	// 	["BookMyShow","gather","gather","scatter","scatter"]
-// 	// [[2,5],[4,0],[2,0],[5,1],[5,1]]
-// 	bookShow := Constructor(2, 5)
-// 	fmt.Println(bookShow.Gather(4, 0))
-// 	fmt.Println(bookShow.Gather(2, 0))
-// 	fmt.Println(bookShow.tree.Query(0, 1), bookShow.tree.Query(1, 2))
-// 	fmt.Println(bookShow.Scatter(5, 1))
-// 	fmt.Println(bookShow.Scatter(5, 1))
-// }
+func (tree *LazySegTree) String() string {
+	var sb []string
+	sb = append(sb, "[")
+	for i := 0; i < tree.n; i++ {
+		if i != 0 {
+			sb = append(sb, ", ")
+		}
+		sb = append(sb, fmt.Sprintf("%v", tree.Get(i)))
+	}
+	sb = append(sb, "]")
+	return strings.Join(sb, "")
+}

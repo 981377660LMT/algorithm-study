@@ -274,6 +274,9 @@ func (tree *LazySegTree) pushUp(root int) {
 }
 
 func (tree *LazySegTree) pushDown(root int) {
+	if tree.lazy[root] == tree.id() {
+		return
+	}
 	tree.propagate(2*root, tree.lazy[root])
 	tree.propagate(2*root+1, tree.lazy[root])
 	tree.lazy[root] = tree.id()

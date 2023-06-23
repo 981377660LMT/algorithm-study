@@ -48,6 +48,8 @@ func (*SegmentTreeDual) composition(f, g Id) Id {
 	return Id{mul: f.mul * g.mul % MOD, add: (f.mul*g.add + f.add) % MOD}
 }
 
+// RangeAssignPointGet
+
 type SegmentTreeDual struct {
 	n            int
 	size, height int
@@ -63,7 +65,7 @@ func NewSegmentTreeDual(n int) *SegmentTreeDual {
 		height++
 	}
 	lazy := make([]Id, 2*size)
-	for i := range lazy {
+	for i := 0; i < 2*size; i++ {
 		lazy[i] = res.id()
 	}
 	res.n = n
@@ -72,6 +74,7 @@ func NewSegmentTreeDual(n int) *SegmentTreeDual {
 	res.lazy = lazy
 	return res
 }
+
 func (seg *SegmentTreeDual) Get(index int) Id {
 	index += seg.size
 	for i := seg.height; i > 0; i-- {
@@ -79,6 +82,7 @@ func (seg *SegmentTreeDual) Get(index int) Id {
 	}
 	return seg.lazy[index]
 }
+
 func (seg *SegmentTreeDual) Update(left, right int, value Id) {
 	if left < 0 {
 		left = 0
@@ -112,6 +116,7 @@ func (seg *SegmentTreeDual) Update(left, right int, value Id) {
 		right >>= 1
 	}
 }
+
 func (seg *SegmentTreeDual) propagate(k int) {
 	if seg.lazy[k] != seg.id() {
 		seg.lazy[k<<1] = seg.composition(seg.lazy[k], seg.lazy[k<<1])
@@ -119,6 +124,7 @@ func (seg *SegmentTreeDual) propagate(k int) {
 		seg.lazy[k] = seg.id()
 	}
 }
+
 func (st *SegmentTreeDual) String() string {
 	var buf bytes.Buffer
 	buf.WriteByte('[')

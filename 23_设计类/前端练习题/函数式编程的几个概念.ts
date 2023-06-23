@@ -1,5 +1,7 @@
 /* eslint-disable implicit-arrow-linebreak */
 
+// 函子 => 自函子 => 单子 => IO函子(类似java8的Stream)
+
 /**
  * 函子是一个能把值装(value)在里面，通过传入函数(map)来变换容器内容的`容器`.
  */
@@ -9,30 +11,9 @@ interface IFunctor<T> {
 }
 
 /**
- * Pointed 函子的构造器.
- */
-interface IPointedConstructor {
-  new <V>(value: V): IFunctor<V>
-  of<V>(value: V): IFunctor<V>
-}
-
-/**
- * 应用函子.
- * 实现了ap方法的Pointed函子.
- * Ap 函子可以让不同的函子可以相互应用，能够把一种函子的函数值应用到另一个函子的值上。
- */
-interface IApplicative<T> extends IFunctor<T> {
-  /**
-   * ap 方法接收另一个函子作为参数，`调用其 map 方法`返回一个新的函子.
-   */
-  ap<U>(f: IFunctor<U>): IApplicative<U>
-}
-
-/**
  * 自函子.
  * 一种特殊的函子，其值和变形关系都是同一种类型.
  * !总是返回一个单层的函子，避免出现嵌套的情况.因此有一个`flatMap`方法.
- * Monad 函子的应用，就是实现 IO（输入、输出）操作。
  * @see {@link https://zhuanlan.zhihu.com/p/269513973}
  */
 interface IEndoFunctor<T> extends IFunctor<T> {
@@ -49,6 +30,7 @@ interface IMonoid<E> {
 
 /**
  * 单子.自函子上的幺半群.
+ * Monad 函子的应用，就是实现 IO（输入、输出）操作。
  * @example
  * !Promise 是一个单子.
  * - 满足幺半群性质：
@@ -151,4 +133,26 @@ if (require.main === module) {
   Stream.of(Stream.of(Stream.of(Stream.of(1))))
     .map(console.log)
     .run()
+}
+
+// 其余的一些函子:(Either/Just/Maybe/Identity/Pointed/Applicative)
+
+/**
+ * Pointed 函子的构造器.
+ */
+interface IPointedConstructor {
+  new <V>(value: V): IFunctor<V>
+  of<V>(value: V): IFunctor<V>
+}
+
+/**
+ * 应用函子.
+ * 实现了ap方法的Pointed函子.
+ * Ap 函子可以让不同的函子可以相互应用，能够把一种函子的函数值应用到另一个函子的值上。
+ */
+interface IApplicative<T> extends IFunctor<T> {
+  /**
+   * ap 方法接收另一个函子作为参数，`调用其 map 方法`返回一个新的函子.
+   */
+  ap<U>(f: IFunctor<U>): IApplicative<U>
 }

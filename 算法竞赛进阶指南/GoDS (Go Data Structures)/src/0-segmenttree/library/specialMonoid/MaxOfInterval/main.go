@@ -1,3 +1,7 @@
+// 最大子段和/最大子数组和
+// 最小子段和/最小子数组和
+// 小白逛公园 : 动态子段和
+
 package main
 
 import (
@@ -8,44 +12,45 @@ import (
 )
 
 func main() {
-
+	小白逛公园()
 }
 
-// https://leetcode.cn/problems/longest-substring-of-one-repeating-character/
-func longestRepeating(s string, queryCharacters string, queryIndices []int) []int {
-
-}
-
-// https://yukicoder.me/problems/no/2281
-func K101Flip() {}
-
-// https://yukicoder.me/problems/no/2333
-// 1 pos val: 将第pos个数修改为val
-// 2 l r: 查询[l, r)区间内的相同值组成的最大连续子段和.
-// !解法:离线预处理修改操作,将要修改的位置预先进行分割.
-func SlimeStructure() {
+// https://www.luogu.com.cn/problem/P4513
+func 小白逛公园() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
-	slimes := make([][2]int, n) // (value,count)
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	leaves := make([]E, n)
 	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &slimes[i][0], &slimes[i][1])
-	}
-	var q int
-	fmt.Fscan(in, &q)
-	queries := make([][3]int, q)
-	for i := 0; i < q; i++ {
-		var op, a, b int
-		fmt.Fscan(in, &op, &a, &b)
-		a--
-		queries[i] = [3]int{op, a, b}
+		var value int
+		fmt.Fscan(in, &value)
+		leaves[i] = NewInterval(value)
 	}
 
-	// TODO
+	seg := NewSegmentTreeInterval(leaves)
 
+	for i := 0; i < m; i++ {
+		var op int
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var start, end int
+			fmt.Fscan(in, &start, &end)
+			if start > end {
+				start, end = end, start
+			}
+			start--
+			res := seg.Query(start, end)
+			fmt.Fprintln(out, res.max)
+		} else {
+			var pos, newValue int
+			fmt.Fscan(in, &pos, &newValue)
+			pos--
+			seg.Set(pos, NewInterval(newValue))
+		}
+	}
 }
 
 // 区间前缀和/区间后缀和.
@@ -61,8 +66,8 @@ type Interval struct {
 }
 
 // 建立长度为1, 值为value的区间.
-func NewInterval(value int) *Interval {
-	return &Interval{
+func NewInterval(value int) Interval {
+	return Interval{
 		sum: value, len: 1,
 		max: value, lmax: value, rmax: value,
 		min: value, lmin: value, rmin: value,
@@ -90,27 +95,21 @@ func NewIntervalWithLength(value int, length int) *Interval {
 	}
 }
 
-func (this *Interval) Equals(other *Interval) bool {
-	return this.sum == other.sum && this.len == other.len &&
-		this.max == other.max && this.lmax == other.lmax && this.rmax == other.rmax &&
-		this.min == other.min && this.lmin == other.lmin && this.rmin == other.rmin
-}
-
-func (this *Interval) IsEmpty() bool {
-	return this.sum == 0 && this.len == 0 &&
-		this.max == 0 && this.lmax == 0 && this.rmax == 0 &&
-		this.min == 0 && this.lmin == 0 && this.rmin == 0
+func IsEmpty(interval Interval) bool {
+	return interval.sum == 0 && interval.len == 0 &&
+		interval.max == 0 && interval.lmax == 0 && interval.rmax == 0 &&
+		interval.min == 0 && interval.lmin == 0 && interval.rmin == 0
 }
 
 // 区间合并.
-func (this *Interval) Merge(other *Interval) *Interval {
-	if this.IsEmpty() {
+func Merge(this, other Interval) Interval {
+	if IsEmpty(this) {
 		return other
 	}
-	if other.IsEmpty() {
+	if IsEmpty(other) {
 		return this
 	}
-	return &Interval{
+	return Interval{
 		sum: this.sum + other.sum, len: this.len + other.len,
 		max:  max(max(this.max, other.max), this.rmax+other.lmax),
 		lmax: max(this.lmax, this.sum+other.lmax),
@@ -121,10 +120,10 @@ func (this *Interval) Merge(other *Interval) *Interval {
 	}
 }
 
-type E = *Interval
+type E = Interval
 
-func (*SegmentTreeInterval) e() E        { return &Interval{} }
-func (*SegmentTreeInterval) op(a, b E) E { return a.Merge(b) }
+func (*SegmentTreeInterval) e() E        { return Interval{} }
+func (*SegmentTreeInterval) op(a, b E) E { return Merge(a, b) }
 
 type SegmentTreeInterval struct {
 	n, size int
@@ -139,6 +138,9 @@ func NewSegmentTreeInterval(leaves []E) *SegmentTreeInterval {
 		size <<= 1
 	}
 	seg := make([]E, size<<1)
+	for i := range seg {
+		seg[i] = res.e()
+	}
 	for i := 0; i < n; i++ {
 		seg[i+size] = leaves[i]
 	}

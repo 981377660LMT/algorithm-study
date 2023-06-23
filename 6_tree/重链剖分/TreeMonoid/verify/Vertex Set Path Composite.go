@@ -552,6 +552,10 @@ func NewSegmentTree(leaves []E, e func() E, op func(E, E) E) *SegmentTree {
 		size <<= 1
 	}
 	seg := make([]E, size<<1)
+
+	for i := range seg {
+		seg[i] = res.e()
+	}
 	for i := 0; i < n; i++ {
 		seg[i+size] = leaves[i]
 	}

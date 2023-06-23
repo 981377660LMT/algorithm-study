@@ -11,32 +11,31 @@ import (
 
 // Promise是一个容量为1的channel.
 type Promise = chan interface{}
+type AsyncFunction = func(args ...interface{}) Promise
 
 // Promise.all
-func PromiseAll(tasks ...Promise) Promise {
+func PromiseAll(tasks ...AsyncFunction) Promise {
 	var wg sync.WaitGroup
 	res := make([]string, len(tasks))
 	promise := make(Promise, 1)
 
-	go func() {
-		for taskId, task := range tasks {
-			wg.Add(1)
-			go func(taskId int, task Promise) {
-				awaited := <-task // await
-				switch v := awaited.(type) {
-				case error:
-					promise <- v // reject
-				case string:
-					res[taskId] = v
-				}
-				wg.Done()
-			}(taskId, task)
-		}
+	for taskId, task := range tasks {
+		wg.Add(1)
+		go func(taskId int, task Promise) {
+			awaited := <-task // await
+			switch v := awaited.(type) {
+			case error:
+				promise <- v // reject
+			case string:
+				res[taskId] = v
+			}
+			wg.Done()
+		}(taskId, task())
+	}
 
-		wg.Wait() // count == 0
-		promise <- res
-		close(promise)
-	}()
+	wg.Wait() // count == 0
+	promise <- res
+	close(promise)
 
 	return promise
 }
@@ -58,9 +57,15 @@ func main() {
 
 	go func() {
 		awaited := <-PromiseAll(
-			asyncTask("A"),
-			asyncTask("B"),
-			asyncTask("C"),
+			func(args ...interface{}) Promise {
+				return asyncTask("A")
+			},
+			func(args ...interface{}) Promise {
+				return asyncTask("B")
+			},
+			func(args ...interface{}) Promise {
+				return asyncTask("C")
+			},
 		)
 		switch v := awaited.(type) {
 		case []string:
