@@ -19,7 +19,7 @@ for (const key in bigObj) {
 }
 console.timeEnd('for in keys')
 
-// 但是for in 会遍历到原型链上的属性，所以需要使用hasOwnProperty()来判断是否是自身属性
+// !但是for in 会遍历到原型链上的属性，所以需要使用hasOwnProperty()来判断是否是自身属性
 console.time('for in keys')
 for (const key in bigObj) {
   if (bigObj.hasOwnProperty(key)) {

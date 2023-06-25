@@ -1,3 +1,5 @@
+// 1021. 删除最外层的括号
+
 function removeOuterParentheses(s: string): string {
   const sb: string[] = []
   let level = 0

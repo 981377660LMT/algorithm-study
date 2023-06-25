@@ -9,10 +9,11 @@ class Solution:
         target = [indexByValue[num] for num in nums2]
 
         res = 0
-        sortedList = SortedList()
+        sl = SortedList()
+
         for i, num in enumerate(target):
-            sortedList.add(num)
-            smaller = sortedList.bisect_left(num)
+            sl.add(num)
+            smaller = sl.bisect_left(num)
             bigger = n - 1 - num - (i - smaller)
             res += smaller * bigger
         return res
