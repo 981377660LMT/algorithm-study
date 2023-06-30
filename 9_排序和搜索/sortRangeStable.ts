@@ -1,7 +1,7 @@
 /* eslint-disable no-inner-declarations */
 /* eslint-disable no-param-reassign */
 
-// sortRange/rangeSort
+// sortRangeStable/rangeSortStable
 
 // 1. 使用高度优化的排序算法
 // !不稳定的部分排序pdqsort:
@@ -23,38 +23,51 @@ function sortRangeStable<V>(
   start = 0,
   end = arr.length
 ): void {
-  const swap = (i: number, j: number): void => {
-    const tmp = arr[i]
-    arr[i] = arr[j]
-    arr[j] = tmp
-  }
+  if (start < 0) start = 0
+  if (end > arr.length) end = arr.length
+  if (start >= end) return
 
-  const swapRange = (a: number, b: number, n: number): void => {
-    for (let i = 0; i < n; i++) {
-      swap(a + i, b + i)
+  stableSort(start, end)
+
+  /**
+   * 1. 分块排序，每块大小为 20(待调节)，每个块内部使用插入排序.
+   * 2. 循环合并相邻的两个 block，每次循环 blockSize 扩大一倍，直到 blockSize > n 为止.
+   *
+   * TODO 调节分块大小(自适应)
+   */
+  function stableSort(start: number, end: number): void {
+    let blockSize = 20 // must be > 0
+    const n = end - start
+    let a = start
+    let b = a + blockSize
+    while (b <= n) {
+      insertionSort(a, b)
+      a = b
+      b += blockSize
     }
-  }
+    insertionSort(a, end)
 
-  const rotateFunc = (a: number, m: number, b: number): void => {
-    let i = m - a
-    let j = b - m
-    while (i !== j) {
-      if (i > j) {
-        swapRange(m - i, m, j)
-        i -= j
-      } else {
-        swapRange(m - i, m + j - i, i)
-        j -= i
+    while (blockSize < n) {
+      let a = start
+      let b = a + blockSize * 2
+      while (b <= n) {
+        symMerge(a, a + blockSize, b)
+        a = b
+        b += blockSize * 2
       }
+      const mid = a + blockSize
+      if (mid < end) {
+        symMerge(a, mid, end)
+      }
+      blockSize *= 2
     }
-    swapRange(m - i, m, i) // i === j
   }
 
   /**
    * 对切片 arr[start:end] 进行插入排序.
    * 适用于短数组.
    */
-  const insertionSort = (start: number, end: number): void => {
+  function insertionSort(start: number, end: number): void {
     for (let i = start + 1; i < end; i++) {
       for (let j = i; j > start && compareFn(arr[j - 1], arr[j]) > 0; j--) {
         swap(j - 1, j)
@@ -66,7 +79,7 @@ function sortRangeStable<V>(
    * 稳定合并两个有序数组 `arr[a:m]` 和 `arr[m:b]`.
    * @see {@link https://link.springer.com/chapter/10.1007/978-3-540-30140-0_63}
    */
-  const symMergeFunc = (a: number, m: number, b: number): void => {
+  function symMerge(a: number, m: number, b: number): void {
     if (m - a === 1) {
       let i = m
       let j = b
@@ -124,51 +137,45 @@ function sortRangeStable<V>(
 
     const end = n - start
     if (start < m && m < end) {
-      rotateFunc(start, m, end)
+      rotate(start, m, end)
     }
     if (a < start && start < mid) {
-      symMergeFunc(a, start, mid)
+      symMerge(a, start, mid)
     }
     if (mid < end && end < b) {
-      symMergeFunc(mid, end, b)
+      symMerge(mid, end, b)
+    }
+  }
+
+  function swap(i: number, j: number): void {
+    const tmp = arr[i]
+    arr[i] = arr[j]
+    arr[j] = tmp
+  }
+
+  function swapRange(a: number, b: number, n: number): void {
+    for (let i = 0; i < n; i++) {
+      swap(a + i, b + i)
     }
   }
 
   /**
-   * 1. 分块排序，每块大小为 20(待调节)，每个块内部使用插入排序.
-   * 2. 逐步合并相邻块，合并长度每轮翻倍，直到合并整个数组.
-   *
-   * TODO 调节分块大小(自适应)
+   * 块的循环旋转操作，使得指定范围内的元素按照特定顺序进行重新排列。
    */
-  const stableFunc = (start: number, end: number): void => {
-    let blockSize = 20 // must be > 0
-    const n = end - start
-    let a = start
-    let b = a + blockSize
-    while (b <= n) {
-      insertionSort(a, b)
-      a = b
-      b += blockSize
-    }
-    insertionSort(a, end)
-
-    while (blockSize < n) {
-      let a = start
-      let b = a + blockSize * 2
-      while (b <= n) {
-        symMergeFunc(a, a + blockSize, b)
-        a = b
-        b += blockSize * 2
+  function rotate(a: number, m: number, b: number): void {
+    let i = m - a
+    let j = b - m
+    while (i !== j) {
+      if (i > j) {
+        swapRange(m - i, m, j)
+        i -= j
+      } else {
+        swapRange(m - i, m + j - i, i)
+        j -= i
       }
-      const mid = a + blockSize
-      if (mid < end) {
-        symMergeFunc(a, mid, end)
-      }
-      blockSize *= 2
     }
+    swapRange(m - i, m, i) // i === j
   }
-
-  stableFunc(start, end)
 }
 
 export { sortRangeStable }

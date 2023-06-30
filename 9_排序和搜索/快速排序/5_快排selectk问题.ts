@@ -55,3 +55,5 @@ const findKLargest = (nums: number[], k: number) => {
 
 console.log(findKSmallest([3, 2, 1, 5, 6, 4, 4, 5, 5, 6], 2))
 console.log(findKLargest([3, 2, 1, 5, 6, 4, 4, 5, 5, 6], 2))
+
+export {}
