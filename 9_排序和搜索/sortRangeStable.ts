@@ -63,7 +63,8 @@ function sortRangeStable<V>(
   }
 
   /**
-   * 合并两个有序数组.
+   * 稳定合并两个有序数组 `arr[a:m]` 和 `arr[m:b]`.
+   * @see {@link https://link.springer.com/chapter/10.1007/978-3-540-30140-0_63}
    */
   const symMergeFunc = (a: number, m: number, b: number): void => {
     if (m - a === 1) {
@@ -141,20 +142,20 @@ function sortRangeStable<V>(
    */
   const stableFunc = (start: number, end: number): void => {
     let blockSize = 20 // must be > 0
-    const len = end - start
+    const n = end - start
     let a = start
     let b = a + blockSize
-    while (b <= len) {
+    while (b <= n) {
       insertionSort(a, b)
       a = b
       b += blockSize
     }
     insertionSort(a, end)
 
-    while (blockSize < len) {
+    while (blockSize < n) {
       let a = start
       let b = a + blockSize * 2
-      while (b <= len) {
+      while (b <= n) {
         symMergeFunc(a, a + blockSize, b)
         a = b
         b += blockSize * 2
@@ -175,6 +176,7 @@ export { sortRangeStable }
 if (require.main === module) {
   demo()
   testPerform()
+  stableDemo()
 
   function demo(): void {
     const arr = [1, 2, 5, 4, 6, -1, 7, 1, 1]
@@ -198,5 +200,17 @@ if (require.main === module) {
     console.time('sort')
     copy2.sort((a, b) => a - b)
     console.timeEnd('sort')
+  }
+
+  function stableDemo(): void {
+    type V = { key: number; value: string }
+    const arr: V[] = Array(10)
+    for (let i = 0; i < arr.length; i++) {
+      arr[i] = { key: i % 3, value: `${i}` }
+    }
+    console.log(arr)
+
+    sortRangeStable(arr, (a, b) => a.key - b.key)
+    console.log(arr)
   }
 }
