@@ -267,6 +267,8 @@
     - [SegmentSet](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/SegmentSet.ts)
     - [ProductWithoutOne](22_%E4%B8%93%E9%A2%98/%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%88%86%E5%89%B2%E7%82%B9-%E5%89%8D%E5%90%8E%E7%BC%80%E5%88%86%E8%A7%A3/%E5%88%A0%E9%99%A4%E5%AD%90%E6%95%B0%E7%BB%84/productWithoutOne.py)
     - [DefaultDict](5_map/DefaultDict.ts)
+    - [SortRange](9_排序和搜索/sortRange.ts)
+    - [SortRangeStable](9_排序和搜索/sortRangeStable.ts)
     - [LongestRepeating](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/verify/LongestRepeating.ts)
     - RetroactiveDS
       - [FullyRetroactiveQueue](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveQueue.go)

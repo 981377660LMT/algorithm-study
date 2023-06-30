@@ -60,3 +60,10 @@ If the state space is `sufficiently small`, use A*.
 Otherwise, use IDA* or RBFS.
 If good solutions are spreaded among search pathes, use IDA\*.
 Otherwise, i.e., good solutions are condensed, use RBFS.
+
+---
+
+golang 的 sort 源码值得学习
+
+https://segmentfault.com/a/1190000039668324
+https://www.huawei.com/cn/open-source/blogs/optimizelab-overlay-developer-guide

@@ -5,6 +5,7 @@
 
 // 如果需要支持set那样的 lowerBound/upperBound/erase 迭代器功能,
 // !需要使用分块链表(所有元素之间有前驱后继,便于迭代器移动,且删除非迭代器所在元素后迭代器不会失效)
+// TODO: 特判 pop/at 头尾的情况，优化到O(1)
 
 /**
  * A fast SortedList with O(sqrt(n)) insertion and deletion.

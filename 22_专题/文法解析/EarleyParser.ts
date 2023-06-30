@@ -28,7 +28,7 @@
 //   vector<int> terminal;
 //   vector<vector<vector<int>>> grammar;
 //   int add_symbol(char c = 0) {
-//     terminal.push_back(c);
+//     terminal.push_back(c);·
 //     grammar.push_back({});
 //     return grammar.size()-1;
 //   }
