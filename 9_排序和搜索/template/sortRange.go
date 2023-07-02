@@ -324,6 +324,7 @@ func pdqsort_func(data lessSwap, a, b, limit int) {
 		}
 
 		// Fall back to heapsort if too many bad choices were made.
+		// 防止快速排序退化，使用堆排序
 		if limit == 0 {
 			heapSort_func(data, a, b)
 			return

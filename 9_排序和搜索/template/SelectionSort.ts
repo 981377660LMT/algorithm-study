@@ -10,11 +10,16 @@ const selectSort = (arr: number[]): void => {
       }
     }
 
-    ;[arr[minIndex], arr[i]] = [arr[i], arr[minIndex]]
+    const tmp = arr[minIndex]
+    arr[minIndex] = arr[i]
+    arr[i] = tmp
   }
 }
 
-const arr = [4, 1, 2, 5, 3, 6, 7]
-selectSort(arr)
-console.log(arr)
 export {}
+
+if (require.main === module) {
+  const arr = [4, 1, 2, 5, 3, 6, 7]
+  selectSort(arr)
+  console.log(arr)
+}

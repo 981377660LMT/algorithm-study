@@ -13,8 +13,6 @@
 // !存id，然后用类型数组subarray对子数组排序，fill更新区间
 // 3. 为什么不slice再排序再赋值回去呢?
 
-// TODO 有问题
-
 /**
  * 不稳定的部分排序.
  * @see {@link https://cs.opensource.google/go/go/+/refs/tags/go1.20.5:src/sort/slice.go;l=21}
@@ -182,9 +180,10 @@ function sortRange<V>(
 
     const l = b - a
     let swaps = 0
-    let i = a + (l >> 2)
-    let j = a + (l >> 2) * 2
-    let k = a + (l >> 2) * 3
+    const step = l >> 2
+    let i = a + step
+    let j = i + step
+    let k = j + step
 
     if (l >= 8) {
       if (l >= SHORTEST_NINTHER) {
@@ -295,6 +294,7 @@ function sortRange<V>(
     }
     return i
   }
+  // #region quickSort
 
   function partialInsertionSort(a: number, b: number): boolean {
     const MAX_STEPS = 5 // maximum number of adjacent out-of-order pairs that will get shifted
@@ -338,7 +338,6 @@ function sortRange<V>(
 
     return false
   }
-  // #region quickSort
 
   // #region utils
   function swap(i: number, j: number): void {

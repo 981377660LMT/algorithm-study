@@ -64,7 +64,9 @@ const randint = (start: number, end: number) => {
   return Math.floor((amplitude + 1) * Math.random()) + start
 }
 
-const swap = (arr: number[], i: number, j: number) => ([[arr[i], arr[j]]] = [[arr[j], arr[i]]])
+function swap(arr: number[], i: number, j: number) {
+  return ([[arr[i], arr[j]]] = [[arr[j], arr[i]]])
+}
 
 if (require.main === module) {
   const arr = [4, 3, 2, 5, 6, 7, 8, 3, 2, 4, 1]
