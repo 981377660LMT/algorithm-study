@@ -269,10 +269,10 @@
     - [DefaultDict](5_map/DefaultDict.ts)
     - Sort
 
-      - [SortRange](9_排序和搜索/sortRange.ts)
-      - [SortRangeStable](9_排序和搜索/sortRangeStable.ts)
+      - [SortRange](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/sortRange.ts)
+      - [SortRangeStable](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/sortRangeStable.ts)
       - [SortRangeUint32](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/SortRangeUint32.ts)
-      - [CountingSort](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/CountingSort.ts)
+      - [CountingSort](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/CountingSort.ts)
       - [BucketSort](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/BucketSort.ts)
       - [RadixSort](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/RadixSort.ts)
       - [BubbleSort](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/BubbleSort.ts)

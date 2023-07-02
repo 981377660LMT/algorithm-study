@@ -268,10 +268,10 @@
     - [除自身以外数组的乘积](22_%E4%B8%93%E9%A2%98/%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%88%86%E5%89%B2%E7%82%B9-%E5%89%8D%E5%90%8E%E7%BC%80%E5%88%86%E8%A7%A3/%E5%88%A0%E9%99%A4%E5%AD%90%E6%95%B0%E7%BB%84/productWithoutOne.py)
     - [DefaultDict](5_map/DefaultDict.ts)
     - Sort
-      - [SortRange](9_排序和搜索/sortRange.ts)
-      - [SortRangeStable](9_排序和搜索/sortRangeStable.ts)
+      - [SortRange](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/sortRange.ts)
+      - [SortRangeStable](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/sortRangeStable.ts)
       - [SortRangeUint32](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/SortRangeUint32.ts)
-      - [计数排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/CountingSort.ts)
+      - [计数排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/CountingSort.ts)
       - [桶排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/BucketSort.ts)
       - [基数排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/RadixSort.ts)
       - [冒泡排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/BubbleSort.ts)
