@@ -11,6 +11,9 @@
 //
 // 2. 使用类型数组加速
 // !存id，然后用类型数组subarray对子数组排序，fill更新区间
+// 3. 为什么不slice再排序再赋值回去呢?
+
+// TODO 有问题
 
 /**
  * 不稳定的部分排序.
@@ -335,7 +338,6 @@ function sortRange<V>(
 
     return false
   }
-
   // #region quickSort
 
   // #region utils
@@ -361,7 +363,6 @@ function sortRange<V>(
   function nextPowerOf2(length: number): number {
     return 1 << (32 - Math.clz32(length))
   }
-
   // #endregion utils
 }
 

@@ -3,7 +3,6 @@
 
 /**
  * 利用位运算寻找区间的某个位置左侧/右侧第一个未被访问过的位置.
- * 初始时,所有位置都未被访问过.
  */
 class FastSet {
   private readonly _n: number
@@ -11,11 +10,19 @@ class FastSet {
   private readonly _seg: Uint32Array[]
   private _size = 0
 
-  constructor(n: number) {
+  /**
+   * @param n [0, n).
+   * @param initValue 初始化时是否全部置为1.默认初始时所有位置都未被访问过.
+   */
+  constructor(n: number, initValue = false) {
     this._n = n
     const seg: Uint32Array[] = []
     while (true) {
-      seg.push(new Uint32Array((n + 31) >>> 5))
+      if (initValue) {
+        seg.push(new Uint32Array((n + 31) >>> 5).fill(-1))
+      } else {
+        seg.push(new Uint32Array((n + 31) >>> 5))
+      }
       n = (n + 31) >>> 5
       if (n <= 1) {
         break
@@ -155,6 +162,9 @@ if (require.main === module) {
     set2.insert(i)
   }
   console.timeEnd('FastSet') // 270ms
+
+  const allOne = new FastSet(10, true)
+  console.log(allOne.toString())
 }
 
 export { FastSet }

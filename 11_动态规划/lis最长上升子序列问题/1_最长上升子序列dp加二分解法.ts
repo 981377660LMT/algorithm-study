@@ -1,3 +1,6 @@
+// https://leetcode.cn/problems/longest-increasing-subsequence/
+// 300. 最长递增子序列
+
 import { bisectLeft } from '../../9_排序和搜索/二分/bisect'
 
 /**

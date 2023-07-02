@@ -76,3 +76,9 @@ const bisectLeft = (arr: number[], target: number) => {
 不严格递增
 插入时 bisectRight
 `1964. 找出到每个位置为止最长的有效障碍赛跑路线.py`
+
+---
+
+O(nloglogn)求 LIS
+
+https://rsk0315.hatenablog.com/entry/2023/01/22/032133

@@ -1,3 +1,6 @@
+// https://leetcode.cn/problems/longest-increasing-subsequence/
+// 300. 最长递增子序列
+
 /**
  * @param {number[]} nums
  * @return {number}

@@ -1,4 +1,7 @@
 // https://nyaannyaan.github.io/library/graph/offline-dynamic-connectivity.hpp
+// 日本那边把这个叫`OffLineDynamicConnectivity`,国内叫`线段树分治`
+// 也就是这个：
+// https://cp-algorithms.com/data_structures/deleting_in_log_n.html
 
 package main
 
@@ -166,8 +169,9 @@ func (uf *rollbackUnionFind) Undo() bool {
 }
 
 // 回滚到指定的状态.
-//  state 为 -1 表示回滚到上一次 `SnapShot` 时保存的状态.
-//  其他值表示回滚到合并(Union) `state` 次后的状态.
+//
+//	state 为 -1 表示回滚到上一次 `SnapShot` 时保存的状态.
+//	其他值表示回滚到合并(Union) `state` 次后的状态.
 func (uf *rollbackUnionFind) Rollback(state int) bool {
 	if state == -1 {
 		state = uf.innerSnap

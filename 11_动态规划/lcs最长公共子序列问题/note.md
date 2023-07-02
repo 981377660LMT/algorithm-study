@@ -42,3 +42,19 @@ const findLength = function (nums1: number[], nums2: number[]): number {
    **衡量一个 diff 算法的优劣指标不应该仅仅由长度 n 决定，还应该由差异数量 d 决定**
 
    `元素不同的 lcs 可以转化为 lis`
+
+---
+
+更快的 LCS
+
+1. 相似度较高(超过 90％)时的线性算法:O(n+m+(编辑距离)^2)
+   https://rsk0315.hatenablog.com/entry/2022/12/30/180216
+   https://atcoder.jp/contests/dp/editorial/3793
+   基因匹配可能有那种相似度极高的场景
+   互联网领域感觉很少
+2. 通用的位运算加速 O(nm/w)
+   https://www.cnblogs.com/-Wallace-/p/bit-lcs.html
+   https://wenku.baidu.com/view/ed99e4f77c1cfad6195fa776.html?_wkts_=1688222807315
+   https://leetcode.cn/problems/longest-common-subsequence/solution/onmw-0ms-100tie-ge-mo-ban-by-hqztrue-s7wc/
+
+3. 如果有一个数组的所有元素不相等，可以通过下标映射转换成 LIS， 值域在[0,max]的 严格递增 LIS 最优可以做到 O(nloglogmax)
