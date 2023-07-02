@@ -27,7 +27,7 @@ class BucketSort {
   /**
    * 返回一个新的排序后的数组.
    */
-  sort(arr: ArrayLike<number>, compareFn: (a: number, b: number) => number): number[] {
+  sorted(arr: ArrayLike<number>, compareFn: (a: number, b: number) => number): number[] {
     for (let i = 0; i < this._buckets.length; i++) this._buckets[i] = []
     for (let i = 0; i < arr.length; i++) {
       const hash = Math.floor((arr[i] - this._offset) / this._bucketSize)
@@ -51,7 +51,7 @@ class BucketSort {
 if (require.main === module) {
   const arr = [3, 1, 4, 1, 5, 99]
   const B = new BucketSort(-10, 100, 10)
-  const sorted = B.sort(arr, (a, b) => a - b)
+  const sorted = B.sorted(arr, (a, b) => a - b)
   console.log(sorted)
 
   // https://leetcode.cn/problems/sort-an-array/
@@ -59,6 +59,6 @@ if (require.main === module) {
 
   function sortArray(nums: number[]): number[] {
     const B = new BucketSort(-5e4, 5e4, 20)
-    return B.sort(nums, (a, b) => a - b)
+    return B.sorted(nums, (a, b) => a - b)
   }
 }

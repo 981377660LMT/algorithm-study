@@ -31,7 +31,7 @@ class CountingSort {
    * 返回一个新的排序后的数组.
    * @complexity `O(max+n)`
    */
-  sort(arr: ArrayLike<number>, reverse = false): number[] {
+  sorted(arr: ArrayLike<number>, reverse = false): number[] {
     const n = arr.length
     const res = Array(n)
     const counter = this._counter
@@ -61,7 +61,7 @@ export { CountingSort }
 if (require.main === module) {
   const B = new CountingSort(0, 100)
   const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-  console.log(B.sort(arr, true))
+  console.log(B.sorted(arr, true))
 
   const asass = new Uint32Array(1e7)
   console.time('clear')
@@ -79,7 +79,7 @@ if (require.main === module) {
   // 912. 排序数组
   const C = new CountingSort(-5e4, 5e4)
   function sortArray(nums: number[]): number[] {
-    return C.sort(nums)
+    return C.sorted(nums)
   }
 
   // https://leetcode.cn/problems/sum-of-imbalance-numbers-of-all-subarrays/
@@ -90,7 +90,7 @@ if (require.main === module) {
     let res = 0
     for (let i = 0; i < nums.length; i++) {
       for (let j = i; j < nums.length; j++) {
-        const sorted = C.sort(nums.subarray(i, j + 1))
+        const sorted = C.sorted(nums.subarray(i, j + 1))
         for (let k = 0; k < sorted.length - 1; k++) res += +(sorted[k + 1] - sorted[k] > 1)
       }
     }

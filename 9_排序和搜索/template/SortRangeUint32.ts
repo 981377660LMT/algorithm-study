@@ -1,44 +1,36 @@
-function sumImbalanceNumbers(N: number[]): number {
-  if (N.length < 2) return 0
-
-  const nums = new Uint16Array(N)
-  const copy = nums.slice()
-  const max = Math.max(...nums)
-  const counter = new Uint16Array(max + 1)
-
-  let res = 0
-
-  // 枚举子数组
-  for (let i = 0; i < nums.length; i++) {
-    for (let j = i; j < nums.length; j++) {
-      // 优化：如果子数组长度小于 200，直接排序
-      if (j + 1 - i <= 200) {
-        nums.subarray(i, j + 1).sort()
-        for (let k = i; k < j; k++) res += +(nums[k + 1] - nums[k] > 1)
-        nums.set(copy.subarray(i, j + 1), i)
-      } else {
-        // 否则计数排序
-        for (let k = i; k <= j; k++) counter[nums[k]]++
-        const cur = Array(j - i + 1)
-        for (let k = 0, l = 0; k < counter.length; k++) {
-          while (counter[k]--) cur[l++] = k
-        }
-        for (let k = 0; k < cur.length - 1; k++) res += +(cur[k + 1] - cur[k] > 1)
-        counter.fill(0)
-      }
-    }
-  }
-
-  return res
-}
-
 /**
  * 所有元素都在[0, 2^32)范围内的数组排序.
  */
 class SortRangeUint32 {
   private readonly _origin: Uint32Array
+  private readonly _worker: Uint32Array
 
-  constructor(nums: Uint32Array) {}
+  constructor(nums: Uint32Array) {
+    this._origin = nums.slice()
+    this._worker = nums.slice()
+  }
 
-  sort(): void {}
+  /**
+   * 返回一个新的排序后的数组.
+   */
+  sorted(start = 0, end = this._worker.length, reverse = false): number[] {
+    const res = Array(end - start).fill(0)
+    this._worker.subarray(start, end).sort()
+    if (reverse) {
+      for (let i = 0; i < end - start; i++) res[i] = this._worker[end - i - 1]
+    } else {
+      for (let i = 0; i < end - start; i++) res[i] = this._worker[start + i]
+    }
+    this._worker.set(this._origin.subarray(start, end), start)
+    return res
+  }
+}
+
+export {}
+
+if (require.main === module) {
+  const arr = new Uint32Array([1, 4, 2, 5, 3, 6, 7])
+  const sorter = new SortRangeUint32(arr)
+  console.log(sorter.sorted(0, 4, true))
+  console.log(sorter.sorted())
 }
