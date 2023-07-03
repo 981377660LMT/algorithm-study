@@ -18,8 +18,8 @@ func main() {
 
 func test() {
 	// 10000*10000
-	nums1 := make([]int, 100000)
-	nums2 := make([]int, 100000)
+	nums1 := make([]int, int(1e5))
+	nums2 := make([]int, int(1e5))
 	for i := range nums1 {
 		nums1[i] = i
 		nums2[i] = i

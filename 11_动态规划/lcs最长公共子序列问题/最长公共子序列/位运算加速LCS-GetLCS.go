@@ -5,28 +5,125 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strings"
+	"time"
 )
 
 func main() {
-	bs := NewBS(100)
-	bs.Set(1).Set(2).Set(3)
-	fmt.Println(bs.Get(1), bs.Get(2), bs.Get(3))
-	fmt.Println(bs)
-	bs.Shift()
-	fmt.Println(bs)
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-	// test minus
-	bs1 := NewBS(100)
-	bs1.Set(1).Set(2).Set(3)
-	bs2 := NewBS(100)
-	bs2.Set(1).Set(2).Set(3).Set(4)
-	fmt.Println(Minus(bs2, bs1))
+	var s, t string
+	fmt.Fscan(in, &s, &t)
+	fmt.Fprintln(out, strings.Join(GetLCSString(s, t), ""))
+}
+
+func perf() {
+	n1, n2 := int(1e5), int(1e5)
+	nums1, nums2 := make([]int, n1), make([]int, n2)
+	for i := 0; i < n1; i++ {
+		nums1[i] = i
+	}
+	for i := 0; i < n2; i++ {
+		nums2[i] = i
+	}
+	time1 := time.Now()
+	GetLCS(nums1, nums2)
+	fmt.Println(time.Since(time1))
+}
+
+func GetLCSString(s, t string) []string {
+	ords1, ords2 := make([]int, len(s)), make([]int, len(t))
+	for i := range s {
+		ords1[i] = int(s[i])
+	}
+	for i := range t {
+		ords2[i] = int(t[i])
+	}
+	ords := GetLCS(ords1, ords2)
+	res := make([]string, 0, len(ords))
+	for _, v := range ords {
+		res = append(res, fmt.Sprintf("%c", v))
+	}
+	return res
+
 }
 
 func GetLCS(nums1, nums2 []int) []int {
+	nums1, nums2 = append(nums1[:0:0], nums1...), append(nums2[:0:0], nums2...)
+	id := make(map[int]int)
+	for i, v := range nums1 {
+		if value, ok := id[v]; ok {
+			nums1[i] = value
+		} else {
+			id[v] = len(id)
+			nums1[i] = len(id) - 1
+		}
+	}
+	for i, v := range nums2 {
+		if value, ok := id[v]; ok {
+			nums2[i] = value
+		} else {
+			id[v] = len(id)
+			nums2[i] = len(id) - 1
+		}
+	}
+	rid := make([]int, len(id))
+	for k, v := range id {
+		rid[v] = k
+	}
+
 	n, m := len(nums1), len(nums2)
+	sets := make([]*BS, len(id))
+	for i := range sets {
+		sets[i] = NewBS(n + 1)
+	}
+	dp := make([]*BS, m+1)
+	for i := range dp {
+		dp[i] = NewBS(n + 1)
+	}
+	tmp := NewBS(n + 1)
+
+	for i, v := range nums1 {
+		sets[v].Set(i + 1)
+	}
+
+	for i := 1; i <= m; i++ {
+		dp[i].SetAll(dp[i-1])
+		tmp.SetAll(dp[i])
+		tmp.OrAll(sets[nums2[i-1]])
+		dp[i].Shift()
+		dp[i].Set(0)
+		dp[i].SetAll(Minus(tmp, dp[i]))
+		dp[i].XorAll(tmp)
+		dp[i].AndAll(tmp)
+	}
+
+	i, j := n, m
+	res := []int{}
+	for i > 0 && j > 0 {
+		if nums1[i-1] == nums2[j-1] {
+			res = append(res, nums1[i-1])
+			i--
+			j--
+		} else if dp[j].Get(i) == false {
+			i--
+		} else {
+			j--
+		}
+	}
+
+	for i, j := 0, len(res)-1; i < j; i, j = i+1, j-1 {
+		res[i], res[j] = res[j], res[i]
+	}
+	for i, v := range res {
+		res[i] = rid[v]
+	}
+	return res
 }
 
 type BS struct {

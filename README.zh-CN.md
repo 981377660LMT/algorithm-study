@@ -15,7 +15,7 @@
 
 ## 📖 Templates
 
-0. **String**
+0. **字符串**
 
    - [子序列匹配](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/isSubsequence.py)
    - [子序列自动机](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%AD%90%E5%BA%8F%E5%88%97%E8%87%AA%E5%8A%A8%E6%9C%BA/SubsequenceAutomaton.py)
@@ -29,14 +29,14 @@
    - [AC 自动机](<17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/AC%E8%87%AA%E5%8A%A8%E6%9C%BA(%E5%A4%9A%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D)/go/AhoCorasick.go>)
    - [回文树](<17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%9B%9E%E6%96%87%E6%A0%91(%E5%9B%9E%E6%96%87%E8%87%AA%E5%8A%A8%E6%9C%BA)/PalindromicTree.go>)
 
-1. **Stack**
+1. **栈**
 
    - [单调栈](1_stack/%E5%8D%95%E8%B0%83%E6%A0%88/%E6%AF%8F%E4%B8%AA%E5%85%83%E7%B4%A0%E4%BD%9C%E4%B8%BA%E6%9C%80%E5%80%BC%E7%9A%84%E5%BD%B1%E5%93%8D%E8%8C%83%E5%9B%B4.py)
    - [下 k 个最大元素](1_stack/%E5%8D%95%E8%B0%83%E6%A0%88/%E4%B8%8Bk%E4%B8%AA%E6%9C%80%E5%A4%A7%E5%85%83%E7%B4%A0/%E5%AF%B9%E6%AF%8F%E4%B8%AA%E6%95%B0%E5%AF%BB%E6%89%BE%E5%8F%B3%E4%BE%A7%E7%AC%ACk%E4%B8%AA%E6%AF%94%E8%87%AA%E5%B7%B1%E5%A4%A7%E7%9A%84%E6%95%B0.py)
    - [笛卡尔树](1_stack/%E5%8D%95%E8%B0%83%E6%A0%88/%E7%AC%9B%E5%8D%A1%E5%B0%94%E6%A0%91/%E7%AC%9B%E5%8D%A1%E5%B0%94%E6%A0%91.py)
    - [StackAggregation](1_stack/StackAggregation.ts)
 
-2. **Queue**
+2. **队列**
 
    - [队列](2_queue/Deque/Queue.ts)
    - [优先队列](8_heap/Heap.ts)
@@ -50,7 +50,7 @@
    - [可持久化队列](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue-fast.ts>)
    - [RealTimeQueue](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue/RealTimeQueue.ts>)
 
-3. **LinkedList**
+3. **链表**
 
    - [链表结点](3_linkedList/LinkedListNode.py)
    - [链表](3_linkedList/LinkedList.ts)
@@ -58,7 +58,7 @@
    - [弗洛伊德探环法](7_graph/%E7%8E%AF%E6%A3%80%E6%B5%8B/%E5%BC%97%E6%B4%9B%E4%BC%8A%E5%BE%B7%E6%8E%A2%E7%8E%AF%E6%B3%95.ts)
    - [XorLinkedList](2_queue/Deque/XorLinkedList.go)
 
-4. **Heap**
+4. **堆**
 
    - [SkewHeap](8_heap/%E5%8F%AF%E5%B9%B6%E5%A0%86/SkewHeap.go)
    - [PersistentLeftistHeap](8_heap/%E5%8F%AF%E5%B9%B6%E5%A0%86/LeftistHeapPersistent.go)
@@ -67,7 +67,7 @@
    - [配对堆](8_heap/%E5%8F%AF%E5%B9%B6%E5%A0%86/PairingHeap-%E9%85%8D%E5%AF%B9%E5%A0%86.ts)
    - [MinMaxHeap](8_heap/MinMaxHeap.py)
 
-5. **Tree**
+5. **树(数据结构)**
 
    - [Trie](6_tree/%E5%89%8D%E7%BC%80%E6%A0%91trie/Trie.py)
    - [BinaryTrie](6_tree/%E5%89%8D%E7%BC%80%E6%A0%91trie/%E6%9C%80%E5%A4%A7%E5%BC%82%E6%88%96%E5%89%8D%E7%BC%80%E6%A0%91/BinaryTrie.py)
@@ -111,7 +111,7 @@
      - [01 线段树](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/%E7%BB%8F%E5%85%B8%E9%A2%98/01%E7%BA%BF%E6%AE%B5%E6%A0%91/SegmentTree01.ts)
      - [常用的幺半群](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/atcoder_segtree/SegmentTreeUtils.ts)
 
-6. **Graph**
+6. **图论**
 
    - [链式前向星存图](7_graph/%E9%93%BE%E5%BC%8F%E5%89%8D%E5%90%91%E6%98%9F%E5%AD%98%E5%9B%BE/ChainForwardStar.ts)
    - [重链剖分](6_tree/%E9%87%8D%E9%93%BE%E5%89%96%E5%88%86/HeavyLightDecomposition-beet.go)
@@ -161,7 +161,7 @@
    - [树的字典序最小欧拉路径](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/%E6%A0%91%E7%9A%84%E6%AC%A7%E6%8B%89%E8%B7%AF%E5%BE%84/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95-%E6%8B%AC%E5%8F%B7%E6%A0%91-%E6%A0%91%E7%9A%84%E6%AC%A7%E6%8B%89%E8%B7%AF%E5%BE%84/minLexEulerTour.py)
    - [SegRayLength](6_tree/SegRayLength.ts)
 
-7. **UnionFind**
+7. **并查集**
 
    - [并查集](14_%E5%B9%B6%E6%9F%A5%E9%9B%86/UnionFind.py)
    - [维护到根的距离的并查集](14_%E5%B9%B6%E6%9F%A5%E9%9B%86/%E7%BB%8F%E5%85%B8%E9%A2%98/%E7%BB%B4%E6%8A%A4%E5%88%B0%E6%A0%B9%E8%8A%82%E7%82%B9%E8%B7%9D%E7%A6%BB/UnionFindWithDist.py)
@@ -173,7 +173,22 @@
    - [维护连通分量和的并查集](14_%E5%B9%B6%E6%9F%A5%E9%9B%86/WeightedUnionFind-%E5%88%86%E9%87%8F%E5%92%8C.ts)
    - [n 对数选择点权种类最多](<14_%E5%B9%B6%E6%9F%A5%E9%9B%86/%E7%BB%8F%E5%85%B8%E9%A2%98/%E6%AF%8F%E4%B8%AA%E5%AF%B9%E9%80%89%E4%B8%80%E4%B8%AA%E7%82%B9(%E6%AF%8F%E6%9D%A1%E8%BE%B9%E9%80%89%E4%B8%80%E4%B8%AA%E7%82%B9)/SelectOneFromEachPair.ts>)
 
-8. **Bit Manipulation**
+8. **排序**
+
+   - [SortRange](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/sortRange.ts)
+   - [SortRangeStable](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/sortRangeStable.ts)
+   - [SortRangeUint32](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/SortRangeUint32.ts)
+   - [计数排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/CountingSort.ts)
+   - [桶排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/BucketSort.ts)
+   - [基数排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/RadixSort.ts)
+   - [冒泡排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/BubbleSort.ts)
+   - [选择排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/SelectionSort.ts)
+   - [插入排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/InsertionSort.ts)
+   - [堆排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/HeapSort.ts)
+   - [快速排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/QuickSort.ts)
+   - [归并排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/MergeSort.ts)
+
+9. **位运算**
 
    - [布隆过滤器](18_%E5%93%88%E5%B8%8C/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8.ts)
    - [BitSet](18_%E5%93%88%E5%B8%8C/BitSet/BitSet.ts)
@@ -182,22 +197,23 @@
    - [枚举状态的子集/超集](21_%E4%BD%8D%E8%BF%90%E7%AE%97/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE%E4%B8%8E%E4%B8%89%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E6%89%80%E6%9C%89%E5%AD%90%E9%9B%86%E7%9A%84%E5%AD%90%E9%9B%86/forSubset.ts)
    - [BitTwiddlingHacks](19_%E6%95%B0%E5%AD%A6/%E5%AE%B9%E6%96%A5%E5%8E%9F%E7%90%86/BitTwiddlingHacks.ts)
 
-9. **Dynamic Programming**
+10. **动态规划**
 
-   - [Knapsack01](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98/atc-01%E8%83%8C%E5%8C%85%E5%88%86%E6%9E%9D%E9%99%90%E5%AE%9A%E8%A7%A3%E6%B3%95/knapsack01.go)
-   - [SlopeTrick](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/slope%20trick/SlopeTrick.py)
-   - [DivideAndConquerOptimization](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E5%88%86%E6%B2%BB%E4%BC%98%E5%8C%96dp/divideAndConquerOptimization.go)
-   - [OfflineOnline](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E5%88%86%E6%B2%BB%E4%BC%98%E5%8C%96dp/offlineOnline.go)
-   - [Monotoneminima](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E5%88%86%E6%B2%BB%E4%BC%98%E5%8C%96dp/monotoneminima.go)
-   - [ConvexHullTrickDeque](<11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E6%96%9C%E7%8E%87%E4%BC%98%E5%8C%96(CHT)dp/convexhulltrick/ConvexHullTrickDeque.go>)
-   - [ConvexHullTrickLichao](<11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E6%96%9C%E7%8E%87%E4%BC%98%E5%8C%96(CHT)dp/convexhulltrick/ConvexHullTrickLichao.go>)
-   - [Kitamasa](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/kitamasa%E6%B3%95.py)
-   - [LCS](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/lcs%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97%E9%97%AE%E9%A2%98/LCS%E6%A8%A1%E6%9D%BF.py)
-   - [位运算加速 LCS](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/lcs%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97%E9%97%AE%E9%A2%98/%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%8A%A0%E9%80%9FLCS.ts)
-   - [LIS](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/lis%E6%9C%80%E9%95%BF%E4%B8%8A%E5%8D%87%E5%AD%90%E5%BA%8F%E5%88%97%E9%97%AE%E9%A2%98/LIS%E6%A8%A1%E6%9D%BF.py)
-   - [AliensDp(wqs 二分)](<11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/AlienDp(wqs%E4%BA%8C%E5%88%86)/AliensDp.go>)
+    - [Knapsack01](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98/atc-01%E8%83%8C%E5%8C%85%E5%88%86%E6%9E%9D%E9%99%90%E5%AE%9A%E8%A7%A3%E6%B3%95/knapsack01.go)
+    - [SlopeTrick](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/slope%20trick/SlopeTrick.py)
+    - [DivideAndConquerOptimization](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E5%88%86%E6%B2%BB%E4%BC%98%E5%8C%96dp/divideAndConquerOptimization.go)
+    - [OfflineOnline](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E5%88%86%E6%B2%BB%E4%BC%98%E5%8C%96dp/offlineOnline.go)
+    - [Monotoneminima](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E5%88%86%E6%B2%BB%E4%BC%98%E5%8C%96dp/monotoneminima.go)
+    - [ConvexHullTrickDeque](<11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E6%96%9C%E7%8E%87%E4%BC%98%E5%8C%96(CHT)dp/convexhulltrick/ConvexHullTrickDeque.go>)
+    - [ConvexHullTrickLichao](<11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E6%96%9C%E7%8E%87%E4%BC%98%E5%8C%96(CHT)dp/convexhulltrick/ConvexHullTrickLichao.go>)
+    - [Kitamasa](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/kitamasa%E6%B3%95.py)
+    - [LCS](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/lcs%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97%E9%97%AE%E9%A2%98/LCS%E6%A8%A1%E6%9D%BF.py)
+    - [位运算加速 LCS](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/lcs%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97%E9%97%AE%E9%A2%98/%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%8A%A0%E9%80%9FLCS.ts)
+    - [位运算加速 LCS-求出 LCS](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/lcs%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97%E9%97%AE%E9%A2%98/%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%8A%A0%E9%80%9FLCS-getLCS.ts)
+    - [LIS](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/lis%E6%9C%80%E9%95%BF%E4%B8%8A%E5%8D%87%E5%AD%90%E5%BA%8F%E5%88%97%E9%97%AE%E9%A2%98/LIS%E6%A8%A1%E6%9D%BF.py)
+    - [AliensDp(wqs 二分)](<11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/AlienDp(wqs%E4%BA%8C%E5%88%86)/AliensDp.go>)
 
-10. **Math**
+11. **数学**
 
     - [写像十二相](19_%E6%95%B0%E5%AD%A6/%E7%BB%84%E5%90%88/%E5%86%99%E5%83%8F%E5%8D%81%E4%BA%8C%E5%83%8F/%E5%86%99%E5%83%8F%E5%8D%81%E4%BA%8C%E7%9B%B8.py)
     - [凸包](19_%E6%95%B0%E5%AD%A6/%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95/%E5%87%B8%E5%8C%85/587.%20%E5%AE%89%E8%A3%85%E6%A0%85%E6%A0%8F.py)
@@ -222,7 +238,7 @@
     - [布尔矩阵乘法-稠密](19_%E6%95%B0%E5%AD%A6/%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/%E6%B5%85%E8%B0%88%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95%E5%9C%A8%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8-%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95%E7%9A%84%E5%8F%98%E7%A7%8D/%E5%B8%83%E5%B0%94%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95/BooleanSquareMatrix-dense.ts)
     - [01 矩阵乘法](19_%E6%95%B0%E5%AD%A6/%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/%E6%B5%85%E8%B0%88%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95%E5%9C%A8%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8-%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95%E7%9A%84%E5%8F%98%E7%A7%8D/01%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95/zeroOneSquareMatrix.ts)
 
-11. **Miscellaneous**
+12. **杂项**
 
     - [二维前缀和](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
     - [二维差分](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
@@ -268,19 +284,6 @@
     - [SegmentSet](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/SegmentSet.ts)
     - [除自身以外数组的乘积](22_%E4%B8%93%E9%A2%98/%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%88%86%E5%89%B2%E7%82%B9-%E5%89%8D%E5%90%8E%E7%BC%80%E5%88%86%E8%A7%A3/%E5%88%A0%E9%99%A4%E5%AD%90%E6%95%B0%E7%BB%84/productWithoutOne.py)
     - [DefaultDict](5_map/DefaultDict.ts)
-    - Sort
-      - [SortRange](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/sortRange.ts)
-      - [SortRangeStable](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/sortRangeStable.ts)
-      - [SortRangeUint32](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/SortRangeUint32.ts)
-      - [计数排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/CountingSort.ts)
-      - [桶排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/BucketSort.ts)
-      - [基数排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/RadixSort.ts)
-      - [冒泡排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/BubbleSort.ts)
-      - [选择排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/SelectionSort.ts)
-      - [插入排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/InsertionSort.ts)
-      - [堆排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/HeapSort.ts)
-      - [快速排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/QuickSort.ts)
-      - [归并排序](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/MergeSort.ts)
     - [LongestRepeating](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/verify/LongestRepeating.ts)
     - [对角线遍历](0_%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84/%E5%AF%B9%E8%A7%92%E7%BA%BF%E9%81%8D%E5%8E%86/enumerateDiagnal.py)
     - 可追溯化数据结构

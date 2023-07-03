@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "C",
+      "request": "launch",
+      "mainClass": "C",
+      "projectName": "js-algorithm_82fe6e83"
+    },
+    {
+      "type": "java",
       "name": "MyStream",
       "request": "launch",
       "mainClass": "MyStream",
