@@ -107,7 +107,7 @@ func GetLCS(nums1, nums2 []int) []int {
 	res := []int{}
 	for i > 0 && j > 0 {
 		if nums1[i-1] == nums2[j-1] {
-			res = append(res, nums1[i-1])
+			res = append(res, rid[nums1[i-1]])
 			i--
 			j--
 		} else if dp[j].Get(i) == false {
@@ -120,9 +120,7 @@ func GetLCS(nums1, nums2 []int) []int {
 	for i, j := 0, len(res)-1; i < j; i, j = i+1, j-1 {
 		res[i], res[j] = res[j], res[i]
 	}
-	for i, v := range res {
-		res[i] = rid[v]
-	}
+
 	return res
 }
 
