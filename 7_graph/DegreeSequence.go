@@ -16,6 +16,9 @@ func main() {
 // 判断度数序列是否属于一个无重边无自环（简单）的无向图.
 func CheckDegreeSequence(deg []int) bool {
 	n := len(deg)
+	if n == 0 {
+		return true
+	}
 	if maxs(deg) >= n {
 		return false
 	}
@@ -76,7 +79,7 @@ func ConstructFromDegreeSequence(deg []int) (edges [][2]int) {
 	}
 	mx := n - 1
 	for i := 0; i < n; i++ {
-		for len(data[mx]) == 0 {
+		for mx >= 0 && len(data[mx]) == 0 {
 			mx--
 		}
 		v := data[mx][len(data[mx])-1]

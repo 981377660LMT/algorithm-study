@@ -1,0 +1,82 @@
+import assert from 'assert'
+
+const INF = 2e15
+
+/**
+ * 朴素的辗转相除法求最大公约数.
+ */
+function gcd(a: number, b: number): number {
+  if (a < 0) a = -a
+  if (b < 0) b = -b
+  while (b) {
+    const mod = a % b
+    a = b
+    b = mod
+  }
+  return a
+}
+
+/**
+ * 求两个数的最小公倍数.
+ * 当答案超过 {@link threshold} 时返回 {@link threshold}.
+ */
+function lcm(a: number, b: number, threshold = INF): number {
+  if (!a || !b) return 0
+  if (a < 0) a = -a
+  if (b < 0) b = -b
+  if (a >= threshold || b >= threshold) return threshold
+  const gcd_ = gcd(a, b)
+  a = Math.floor(a / gcd_)
+  if (a >= Math.ceil(threshold / b)) return threshold
+  return a * b
+}
+
+/**
+ * 扩展gcd的迭代实现.
+ * 扩展欧几里得求 `a*x + b*y = gcd(a,b)` 的一组解.
+ * !注意返回的gcd可能为负数.
+ * @see https://oi-wiki.org/math/number-theory/gcd
+ */
+function exgcd(a: number, b: number): [gcd: number, x: number, y: number] {
+  let x = 1
+  let y = 0
+  let x1 = 0
+  let y1 = 1
+  let a1 = a
+  let b1 = b
+  while (b1) {
+    const q = Math.floor(a1 / b1)
+    let tmp = x - q * x1
+    x = x1
+    x1 = tmp
+    tmp = y - q * y1
+    y = y1
+    y1 = tmp
+    tmp = a1 - q * b1
+    a1 = b1
+    b1 = tmp
+  }
+  return [a1, x, y]
+}
+
+/**
+ * 模逆元.
+ * 求出逆元 `inv` 满足 `a*inv ≡ 1 (mod mod)`.
+ * 如果不存在逆元则返回 `undefined`.
+ */
+function modInv(a: number, mod: number): number | undefined {
+  const [gcd_, x] = exgcd(a, mod)
+  if (gcd_ !== 1) return undefined
+  return ((x % mod) + mod) % mod
+}
+
+export { gcd, lcm, exgcd, modInv }
+
+if (require.main === module) {
+  console.log(exgcd(3, 6))
+
+  assert.strictEqual(modInv(3, 10), 7)
+  const MOD = 998244353
+  const INV2 = (MOD + 1) / 2 // 结论:2的逆元(模998244353)为499122177
+  assert.strictEqual(modInv(2, MOD), INV2)
+}

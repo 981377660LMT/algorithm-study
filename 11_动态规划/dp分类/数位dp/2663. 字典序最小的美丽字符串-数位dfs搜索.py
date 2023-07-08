@@ -14,23 +14,23 @@
 
 class Solution:
     def smallestBeautifulString(self, s: str, k: int) -> str:
-        def dfs(pos: int, isLimit: bool, pre1: int, pre2: int):
+        def dfs(pos: int, isLimit: bool, pre1: int, pre2: int) -> bool:
             if pos == n:
-                if not isLimit:
-                    yield res
-                return
+                return not isLimit
             lower = ords[pos] if isLimit else 97
             for cur in range(lower, 97 + k):
                 if cur == pre1 or cur == pre2:
                     continue
                 res.append(chr(cur))
-                yield from dfs(pos + 1, (isLimit and cur <= ords[pos]), cur, pre1)
+                if dfs(pos + 1, (isLimit and cur <= ords[pos]), cur, pre1):
+                    return True
                 res.pop()
+            return False
 
         res = []
         n = len(s)
         ords = list(map(ord, s))
-        res = next(dfs(0, True, 0, -1), [])
+        dfs(0, True, -1, -1)
         return "".join(res)
 
 

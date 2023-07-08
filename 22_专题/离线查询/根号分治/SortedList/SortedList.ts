@@ -251,7 +251,7 @@ class SortedList<T = number> {
     return res
   }
 
-  slice(start: number, end: number): T[] {
+  slice(start = 0, end = this.length): T[] {
     if (start < 0) start = 0
     if (end > this._size) end = this._size
     if (start >= end) return []
@@ -606,6 +606,23 @@ if (require.main === module) {
       if (right >= k - 1) {
         const xth = sl.at(x - 1)!
         res.push(xth < 0 ? xth : 0)
+      }
+    }
+    return res
+  }
+
+  // https://leetcode.cn/problems/sum-of-imbalance-numbers-of-all-subarrays/
+  function sumImbalanceNumbers(nums: number[]): number {
+    let res = 0
+    const n = nums.length
+    for (let left = 0; left < n; left++) {
+      const sl = new SortedList<number>()
+      for (let right = left; right < n; right++) {
+        sl.add(nums[right])
+        const cur = sl.slice()
+        for (let i = 1; i < cur.length; i++) {
+          res += +(cur[i] - cur[i - 1] > 1)
+        }
       }
     }
     return res

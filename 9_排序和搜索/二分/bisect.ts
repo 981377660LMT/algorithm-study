@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 import assert from 'assert'
 
 interface BisectOptions<E, T> {
@@ -121,6 +122,23 @@ if (require.main === module) {
   assert.deepStrictEqual(arr3, [1, 2, 2, 2, 2, 3])
   insortRight(arr3, 2)
   assert.deepStrictEqual(arr3, [1, 2, 2, 2, 2, 2, 3])
+
+  // 2763. 所有子数组中不平衡数字之和
+  // https://leetcode.cn/problems/sum-of-imbalance-numbers-of-all-subarrays/
+  function sumImbalanceNumbers(nums: number[]): number {
+    let res = 0
+    const n = nums.length
+    for (let left = 0; left < n; left++) {
+      const sl: number[] = []
+      for (let right = left; right < n; right++) {
+        insortLeft(sl, nums[right])
+        for (let i = 1; i < sl.length; i++) {
+          res += +(sl[i] - sl[i - 1] > 1)
+        }
+      }
+    }
+    return res
+  }
 }
 
 export { bisectLeft, bisectRight, insortLeft, insortRight }
