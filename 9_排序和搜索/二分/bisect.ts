@@ -5,12 +5,12 @@ interface BisectOptions<E, T> {
   /**
    * 二分查找的起始索引
    */
-  lower?: number
+  left?: number
 
   /**
    * 二分查找的结束索引
    */
-  upper?: number
+  right?: number
 
   /**
    * 将数组中的元素转换为比较的值
@@ -34,9 +34,9 @@ function bisectLeft<E, T>(
   const n = arrayLike.length
   if (n === 0) return 0
 
-  let { lower: left = 0, upper: right = n - 1, key = (e: E) => e } = options ?? {}
+  let { left = 0, right = n - 1, key = (e: E) => e } = options ?? {}
   while (left <= right) {
-    const mid = Math.floor((left + right) / 2)
+    const mid = (left + right) >>> 1
     const midElement = key(arrayLike[mid])
     if (midElement < target) {
       left = mid + 1
@@ -64,9 +64,9 @@ function bisectRight<E, T>(
   const n = arrayLike.length
   if (n === 0) return 0
 
-  let { lower: left = 0, upper: right = n - 1, key = (e: E) => e } = options ?? {}
+  let { left = 0, right = n - 1, key = (e: E) => e } = options ?? {}
   while (left <= right) {
-    const mid = Math.floor((left + right) / 2)
+    const mid = (left + right) >>> 1
     const midElement = key(arrayLike[mid])
     if (midElement <= target) {
       left = mid + 1
@@ -94,10 +94,13 @@ function insortLeft<E>(array: E[], target: E, options?: BisectOptions<E, E>): vo
 /**
  * 在 `array` 中插入 `target`，并保持 `array` 有序。
  * 如果 `array` 中存在多个相同的值，插入到`最右边`的位置。
+ * !适合用于维护长度较小(2000左右)的有序数组。
  *
  * @param array 某个参数有序的数组
  * @param target 插入的目标值
  * @param options {@link BisectOptions}
+ *
+ * @alias bisectInsort
  */
 function insortRight<E>(array: E[], target: E, options?: BisectOptions<E, E>): void {
   const pos = bisectRight(array, target, options)
@@ -123,7 +126,7 @@ if (require.main === module) {
   insortRight(arr3, 2)
   assert.deepStrictEqual(arr3, [1, 2, 2, 2, 2, 2, 3])
 
-  // 2763. 所有子数组中不平衡数字之和
+  // 2763. 所有子数组中不平衡数字之和 (n^3 -> 1400ms)
   // https://leetcode.cn/problems/sum-of-imbalance-numbers-of-all-subarrays/
   function sumImbalanceNumbers(nums: number[]): number {
     let res = 0
@@ -141,4 +144,4 @@ if (require.main === module) {
   }
 }
 
-export { bisectLeft, bisectRight, insortLeft, insortRight }
+export { bisectLeft, bisectRight, insortLeft, insortRight, insortRight as bisectInsort }

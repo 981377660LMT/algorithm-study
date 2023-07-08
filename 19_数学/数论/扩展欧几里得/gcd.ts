@@ -18,7 +18,7 @@ function gcd(a: number, b: number): number {
 
 /**
  * 求两个数的最小公倍数.
- * 当答案超过 {@link threshold} 时返回 {@link threshold}.
+ * @param threshold 答案超过 {@link threshold} 时返回 {@link threshold}.
  */
 function lcm(a: number, b: number, threshold = INF): number {
   if (!a || !b) return 0
@@ -70,7 +70,32 @@ function modInv(a: number, mod: number): number | undefined {
   return ((x % mod) + mod) % mod
 }
 
-export { gcd, lcm, exgcd, modInv }
+/**
+ * 快速求两个int32的gcd.
+ * @alias binaryGcd(二进制gcd).
+ * @see https://nyaannyaan.github.io/library/trial/fast-gcd.hpp
+ */
+function gcdInt32(a: number, b: number) {
+  if (!a || !b) return a + b
+  if (a < 0) a = -a
+  if (b < 0) b = -b
+
+  const ctz1 = 31 - Math.clz32(a) // __builtin_ctz(a)
+  const ctz2 = 31 - Math.clz32(b)
+  a >>>= ctz1
+  b >>>= ctz2
+  while (a ^ b) {
+    const ctz = 31 - Math.clz32(a - b)
+    const f = a > b
+    const max = f ? a : b
+    b = f ? b : a
+    a = (max - b) >>> ctz
+  }
+
+  return ctz1 < ctz2 ? a << ctz1 : b << ctz2
+}
+
+export { gcd, lcm, exgcd, modInv, gcdInt32 }
 
 if (require.main === module) {
   console.log(exgcd(3, 6))
@@ -79,4 +104,16 @@ if (require.main === module) {
   const MOD = 998244353
   const INV2 = (MOD + 1) / 2 // 结论:2的逆元(模998244353)为499122177
   assert.strictEqual(modInv(2, MOD), INV2)
+
+  console.time('gcd')
+  for (let i = 0; i < 1e7; ++i) {
+    gcd(123456789, 987654321)
+  }
+  console.timeEnd('gcd')
+
+  console.time('gcdInt32')
+  for (let i = 0; i < 1e7; ++i) {
+    gcdInt32(123456789, 987654321)
+  }
+  console.timeEnd('gcdInt32')
 }
