@@ -247,6 +247,7 @@ describe('BitSet', () => {
     }
   })
 
+  // set
   it('should support set', () => {
     const m = (n * Math.random()) | 0
     const newBitSet = new BitSet(m)
@@ -267,6 +268,104 @@ describe('BitSet', () => {
 
     for (let i = 0; i < n; i++) {
       expect(bitSet.has(i)).toBe(!!nums[i])
+    }
+  })
+
+  // iorRange(start, end, other)
+  it('should support iorRange', () => {
+    const m = (n * Math.random()) | 0
+    const newBitSet = new BitSet(m)
+    const newNums: number[] = Array(m).fill(0)
+    for (let i = 0; i < m; i++) {
+      const cur = Math.random() > 0.5 ? 1 : 0
+      if (cur) {
+        newBitSet.add(i)
+        newNums[i] = 1
+      }
+    }
+
+    const offset = ((n - m) * Math.random()) | 0
+    bitSet.iorRange(offset, offset + m, newBitSet)
+    for (let i = 0; i < m; i++) {
+      nums[i + offset] = nums[i + offset] || newNums[i]
+    }
+
+    for (let i = 0; i < n; i++) {
+      expect(bitSet.has(i)).toBe(!!nums[i])
+    }
+  })
+
+  // iandRange(start, end, other)
+  it('should support iandRange', () => {
+    const m = (n * Math.random()) | 0
+    const newBitSet = new BitSet(m)
+    const newNums: number[] = Array(m).fill(0)
+    for (let i = 0; i < m; i++) {
+      const cur = Math.random() > 0.5 ? 1 : 0
+      if (cur) {
+        newBitSet.add(i)
+        newNums[i] = 1
+      }
+    }
+
+    const offset = ((n - m) * Math.random()) | 0
+    bitSet.iandRange(offset, offset + m, newBitSet)
+    for (let i = 0; i < m; i++) {
+      nums[i + offset] = nums[i + offset] && newNums[i]
+    }
+
+    for (let i = 0; i < n; i++) {
+      expect(bitSet.has(i)).toBe(!!nums[i])
+    }
+  })
+
+  // ixorRange(start, end, other)
+  it('should support ixorRange', () => {
+    const m = (n * Math.random()) | 0
+    const newBitSet = new BitSet(m)
+    const newNums: number[] = Array(m).fill(0)
+    for (let i = 0; i < m; i++) {
+      const cur = Math.random() > 0.5 ? 1 : 0
+      if (cur) {
+        newBitSet.add(i)
+        newNums[i] = 1
+      }
+    }
+
+    const offset = ((n - m) * Math.random()) | 0
+    bitSet.ixorRange(offset, offset + m, newBitSet)
+    for (let i = 0; i < m; i++) {
+      nums[i + offset] = +(nums[i + offset] !== newNums[i])
+    }
+
+    for (let i = 0; i < n; i++) {
+      expect(bitSet.has(i)).toBe(!!nums[i])
+    }
+  })
+
+  // next
+  it('should support next', () => {
+    for (let i = 0; i < n; i++) {
+      const index1 = bitSet.next(i)
+      const index2 = nums.indexOf(1, i + 1)
+      if (index2 === -1) {
+        expect(index1).toBe(bitSet.n)
+      } else {
+        expect(index1).toBe(index2)
+      }
+    }
+  })
+
+  // prev
+  it('should support prev', () => {
+    for (let i = n - 1; i > 0; i--) {
+      const index1 = bitSet.prev(i)
+      const index2 = nums.lastIndexOf(1, i - 1)
+      if (index2 === -1) {
+        expect(index1).toBe(-1)
+      } else {
+        expect(index1).toBe(index2)
+      }
     }
   })
 })
