@@ -6,6 +6,7 @@
 // 如果需要支持set那样的 lowerBound/upperBound/erase 迭代器功能,
 // !需要使用分块链表(所有元素之间有前驱后继,便于迭代器移动,且删除非迭代器所在元素后迭代器不会失效)
 // TODO: 特判 pop/at 头尾的情况，优化到O(1)
+// !如果数组较短(<2000),直接使用bisectInsort维护即可.
 
 /**
  * A fast SortedList with O(sqrt(n)) insertion and deletion.
@@ -19,6 +20,11 @@ class SortedList<T = number> {
   /** Optimized for 1e5 elements in javascript. Do not change it. */
   protected static readonly _BLOCK_RATIO = 50
   protected static readonly _REBUILD_RATIO = 170
+  private static _isPrimitive(
+    o: unknown
+  ): o is number | string | boolean | symbol | bigint | null | undefined {
+    return o === null || (typeof o !== 'object' && typeof o !== 'function')
+  }
 
   protected readonly _compareFn: (a: T, b: T) => number
   protected _size: number
@@ -85,24 +91,30 @@ class SortedList<T = number> {
     }
   }
 
-  /** 注意内部使用 `===` 来比较两个对象是否相等 */
-  has(value: T): boolean {
+  has(value: T, equals?: (a: T, b: T) => boolean): boolean {
+    if (!equals && !SortedList._isPrimitive(value)) {
+      throw new Error('equals must be provided when value is a non-primitive value')
+    }
     if (!this._size) return false
     const blockIndex = this._findBlockIndex(value)
     if (blockIndex === void 0) return false
+    equals = equals || ((a, b) => a === b)
     const block = this._blocks[blockIndex]
     const pos = this._bisectLeft(block, value)
-    return pos < block.length && value === block[pos]
+    return pos < block.length && equals(block[pos], value)
   }
 
-  /** 注意内部使用 `===` 来比较两个对象是否相等 */
-  discard(value: T): boolean {
+  discard(value: T, equals?: (a: T, b: T) => boolean): boolean {
+    if (!equals && !SortedList._isPrimitive(value)) {
+      throw new Error('equals must be provided when value is a non-primitive value')
+    }
     if (!this._size) return false
     const blockIndex = this._findBlockIndex(value)
     if (blockIndex === -1) return false
+    equals = equals || ((a, b) => a === b)
     const block = this._blocks[blockIndex]
     const pos = this._bisectLeft(block, value)
-    if (pos === block.length || block[pos] !== value) {
+    if (pos === block.length || !equals(block[pos], value)) {
       return false
     }
     block.splice(pos, 1)

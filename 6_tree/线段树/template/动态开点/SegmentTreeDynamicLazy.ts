@@ -99,7 +99,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
   ) {
     const { e, eRange, id, op, mapping, composition, equalsId } = operations
     if (!equalsId && !SegmentTreeDynamicLazy._isPrimitive(id())) {
-      throw new Error('equalsId must be provided when id() returns an non-primitive value')
+      throw new Error('equalsId must be provided when id() returns a non-primitive value')
     }
     if (
       persistent &&
