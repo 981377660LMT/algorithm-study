@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 // 单点修改, 区间查询
 // 大多数位置的元素始终是单位元素的动态开点线段树.(非常稀疏)
 // !其优点是不使用持久化时, 节点数可以保持在 O(N) 左右.
@@ -318,7 +319,26 @@ if (require.main === module) {
     }
   }
 
-  // https://leetcode.cn/problems/maximum-sum-queries/
-  // 2736. 最大和查询
-  function maximumSumQueries(nums1: number[], nums2: number[], queries: number[][]): number[] {}
+  // https://leetcode.cn/problems/maximum-number-of-jumps-to-reach-the-last-index/
+  // 6899. 达到末尾下标所需的最大跳跃次数
+  // 给你一个下标从 0 开始、由 n 个整数组成的数组 nums 和一个整数 target 。
+  // 你的初始位置在下标 0 。在一步操作中，你可以从下标 i 跳跃到任意满足下述条件的下标 j ：
+  // 0 <= i < j < n
+  // -target <= nums[j] - nums[i] <= target
+  // 返回到达下标 n - 1 处所需的 最大跳跃次数 。
+  // 如果无法到达下标 n - 1 ，返回 -1 。
+  //
+  // !O(nlog(U)), 线段树维护`值域最大值`
+  function maximumJumps(nums: number[], target: number): number {
+    const INF = 2e15
+    const n = nums.length
+    const seg = new SegmentTreeDynamic<number>(-3e9, 3e9, () => -INF, Math.max)
+    seg.update(nums[0], 0)
+    for (let i = 1; i < n; i++) {
+      const preMax = seg.query(nums[i] - target, nums[i] + target + 1)
+      seg.update(nums[i], preMax + 1)
+    }
+    const res = seg.get(nums[n - 1])
+    return res >= 0 ? res : -1
+  }
 }

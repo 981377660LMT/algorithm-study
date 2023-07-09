@@ -222,4 +222,51 @@ describe('BitSet', () => {
     expect(bitSet2.isSubset(bitSet)).toBe(true)
     expect(bitSet.isSuperset(bitSet2)).toBe(true)
   })
+
+  // fill
+  it('should support fill', () => {
+    const bitSet2 = new BitSet(n)
+    const zeroOrOne = Math.random() > 0.5 ? 1 : 0
+    bitSet2.fill(zeroOrOne)
+    for (let i = 0; i < n; i++) {
+      nums[i] = zeroOrOne
+    }
+
+    for (let i = 0; i < n; i++) {
+      expect(bitSet2.has(i)).toBe(!!nums[i])
+    }
+  })
+
+  // slice
+  it('should support slice', () => {
+    const start = Math.floor(Math.random() * n)
+    const end = Math.floor(Math.random() * (n - start)) + start
+    const bitSet2 = bitSet.slice(start, end)
+    for (let i = start; i < end; i++) {
+      expect(bitSet2.has(i - start)).toBe(!!nums[i])
+    }
+  })
+
+  it('should support set', () => {
+    const m = (n * Math.random()) | 0
+    const newBitSet = new BitSet(m)
+    const newNums: number[] = Array(m).fill(0)
+    for (let i = 0; i < m; i++) {
+      const cur = Math.random() > 0.5 ? 1 : 0
+      if (cur) {
+        newBitSet.add(i)
+        newNums[i] = 1
+      }
+    }
+
+    const offset = ((n - m) * Math.random()) | 0
+    bitSet.set(newBitSet, offset)
+    for (let i = 0; i < m; i++) {
+      nums[i + offset] = newNums[i]
+    }
+
+    for (let i = 0; i < n; i++) {
+      expect(bitSet.has(i)).toBe(!!nums[i])
+    }
+  })
 })

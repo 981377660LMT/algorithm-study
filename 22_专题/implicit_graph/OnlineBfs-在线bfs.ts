@@ -1,5 +1,10 @@
 /* eslint-disable no-constant-condition */
 
+// 注意还有一种求拓扑图最长路的问题
+// !这种问题不能用在线bfs(无法保证边数为O(n))
+// !需要利用线段树建图/线段树维护值域最大值来解决
+// https://leetcode.cn/problems/maximum-number-of-jumps-to-reach-the-last-index/
+
 const INF = 2e15
 
 /**

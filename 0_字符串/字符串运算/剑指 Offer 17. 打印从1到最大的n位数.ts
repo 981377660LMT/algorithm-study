@@ -27,3 +27,5 @@ function printNumbers(n: number): number[] {
 console.log(printNumbers(2))
 // 输入: n = 1
 // 输出: [1,2,3,4,5,6,7,8,9]
+
+export {}

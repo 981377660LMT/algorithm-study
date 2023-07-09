@@ -139,6 +139,17 @@ class BIT1 {
   queryRange(left: number, right: number): number {
     return this.query(right) - this.query(left)
   }
+
+  toString(): string {
+    const sb: string[] = []
+    sb.push('BIT1: [')
+    for (let i = 0; i < this.size; i++) {
+      sb.push(String(this.queryRange(i, i + 1)))
+      if (i < this.size - 1) sb.push(',')
+    }
+    sb.push(']')
+    return sb.join('')
+  }
 }
 
 /**
@@ -164,6 +175,17 @@ class BIT2 {
   queryRange(left: number, right: number): number {
     right--
     return this._query(right) - this._query(left - 1)
+  }
+
+  toString(): string {
+    const sb: string[] = []
+    sb.push('BIT2: [')
+    for (let i = 0; i < this.size; i++) {
+      sb.push(String(this.queryRange(i, i + 1)))
+      if (i < this.size - 1) sb.push(',')
+    }
+    sb.push(']')
+    return sb.join('')
   }
 
   private _add(index: number, delta: number): void {
@@ -212,6 +234,17 @@ class BIT2Map {
   queryRange(left: number, right: number): number {
     right--
     return this._query(right) - this._query(left - 1)
+  }
+
+  toString(): string {
+    const sb: string[] = []
+    sb.push('BIT2Map: [')
+    for (let i = 0; i < this.size; i++) {
+      sb.push(String(this.queryRange(i, i + 1)))
+      if (i < this.size - 1) sb.push(',')
+    }
+    sb.push(']')
+    return sb.join('')
   }
 
   private _add(index: number, delta: number): void {
