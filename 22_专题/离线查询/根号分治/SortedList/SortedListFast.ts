@@ -1,10 +1,10 @@
+/* eslint-disable arrow-body-style */
+/* eslint-disable no-inner-declarations */
 /* eslint-disable generator-star-spacing */
 /* eslint-disable prefer-destructuring */
 
-// TODO:类似cpp的迭代器
-
 // API.
-interface ISortedListFast<V> {
+interface ISortedList<V> {
   add(value: V): void
   has(value: V, equals?: (a: V, b: V) => boolean): boolean
   discard(value: V, equals?: (a: V, b: V) => boolean): boolean
@@ -33,9 +33,22 @@ interface ISortedListFast<V> {
   entries(): IterableIterator<[number, V]>
   [Symbol.iterator](): IterableIterator<V>
 
+  iteratorAt(index: number): ISortedListIterator<V>
+  lowerBound(value: V): ISortedListIterator<V>
+  upperBound(value: V): ISortedListIterator<V>
+
   get length(): number
   get min(): V | undefined
   get max(): V | undefined
+}
+
+interface ISortedListIterator<V> {
+  hasNext(): boolean
+  next(): V | undefined
+  hasPrev(): boolean
+  prev(): V | undefined
+  remove(): void
+  get value(): V | undefined
 }
 
 /**
@@ -43,14 +56,15 @@ interface ISortedListFast<V> {
  * !如果数组较短(<2000),直接使用`bisectInsort`维护即可.
  */
 class SortedListFast<V = number> {
-  static setLoadFactor(load = 1000): void {
+  static setLoadFactor(load = 1 << 9): void {
     this._LOAD = load
   }
 
   /**
    * 负载因子，用于控制每个块的长度.
+   * 长度为`1e5`的数组, 负载因子取`500`左右性能较好.
    */
-  private static _LOAD = 1000
+  private static _LOAD = 1 << 9
   private static _isPrimitive(
     o: unknown
   ): o is number | string | boolean | symbol | bigint | null | undefined {
@@ -128,7 +142,7 @@ class SortedListFast<V = number> {
     this._mins = mins
   }
 
-  add(value: V): void {
+  add(value: V): this {
     const { _blocks, _mins, _blockLens } = this
     this._len++
     if (!_blocks.length) {
@@ -136,7 +150,7 @@ class SortedListFast<V = number> {
       _mins.push(value)
       _blockLens.push(1)
       this._shouldRebuild = true
-      return
+      return this
     }
 
     const load = SortedListFast._LOAD
@@ -156,6 +170,8 @@ class SortedListFast<V = number> {
       list.splice(load)
       this._shouldRebuild = true
     }
+
+    return this
   }
 
   has(value: V, equals?: (a: V, b: V) => boolean): boolean {
@@ -437,6 +453,23 @@ class SortedListFast<V = number> {
     }
   }
 
+  iteratorAt(index: number): ISortedListIterator<V> {
+    if (index < 0) index += this._len
+    if (index < 0 || index >= this._len) throw new RangeError('Index out of range')
+    const pair = this._findKth(index)
+    return this._iteratorAt(pair[0], pair[1])
+  }
+
+  lowerBound(value: V): ISortedListIterator<V> {
+    const [pos, index] = this._locLeft(value)
+    return this._iteratorAt(pos, index)
+  }
+
+  upperBound(value: V): ISortedListIterator<V> {
+    const [pos, index] = this._locRight(value)
+    return this._iteratorAt(pos, index)
+  }
+
   get length(): number {
     return this._len
   }
@@ -621,6 +654,56 @@ class SortedListFast<V = number> {
     }
     return [pos + 1, k]
   }
+
+  private _iteratorAt(pos: number, index: number): ISortedListIterator<V> {
+    const hasNext = (): boolean => {
+      return pos < this._blocks.length - 1 || index < this._blocks[pos].length - 1
+    }
+
+    const next = (): V | undefined => {
+      if (!hasNext()) return void 0
+      index++
+      if (index === this._blocks[pos].length) {
+        pos++
+        index = 0
+      }
+      return this._blocks[pos][index]
+    }
+
+    const hasPrev = (): boolean => {
+      return pos > 0 || index > 0
+    }
+
+    const prev = (): V | undefined => {
+      if (!hasPrev()) return void 0
+      index--
+      if (index === -1) {
+        pos--
+        index = this._blocks[pos].length - 1
+      }
+      return this._blocks[pos][index]
+    }
+
+    const remove = (): void => {
+      this._delete(pos, index)
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const sl = this
+    return {
+      hasNext,
+      next,
+      hasPrev,
+      prev,
+      remove,
+      get value(): V | undefined {
+        if (pos < 0 || pos >= sl.length) return void 0
+        const block = sl._blocks[pos]
+        if (index < 0 || index >= block.length) return void 0
+        return block[index]
+      }
+    }
+  }
 }
 
 export { SortedListFast }
@@ -634,4 +717,132 @@ if (require.main === module) {
   console.log(sl.toString())
   console.log(sl.floor(2), sl.lower(2), sl.ceiling(2), sl.higher(2))
   console.log(...sl.irange(0, 2))
+
+  const iter = sl.iteratorAt(0)
+  console.log(iter.value)
+  while (iter.hasNext()) {
+    console.log(iter.next())
+  }
+  console.log(iter.value)
+  while (iter.hasPrev()) {
+    console.log(iter.prev())
+  }
+  console.log(iter.value, iter.remove())
+  sl.add(1).add(8).add(5).add(3)
+  console.log(sl.toString())
+  const lower = sl.lowerBound(3)
+  console.log(lower.value)
+  const upper = sl.upperBound(3)
+  console.log(upper.value)
+  lower.prev()
+  console.log(lower.value)
+
+  // https://leetcode.cn/problems/sliding-subarray-beauty/ 2200ms
+  function getSubarrayBeauty(nums: number[], k: number, x: number): number[] {
+    const res: number[] = []
+    const sl = new SortedListFast()
+    const n = nums.length
+    for (let right = 0; right < n; right++) {
+      sl.add(nums[right])
+      if (right >= k) {
+        sl.discard(nums[right - k])
+      }
+      if (right >= k - 1) {
+        const xth = sl.at(x - 1)!
+        res.push(xth < 0 ? xth : 0)
+      }
+    }
+    return res
+  }
+
+  // https://leetcode.cn/problems/sum-of-imbalance-numbers-of-all-subarrays/
+  function sumImbalanceNumbers(nums: number[]): number {
+    let res = 0
+    const n = nums.length
+    for (let left = 0; left < n; left++) {
+      const sl = new SortedListFast<number>()
+      for (let right = left; right < n; right++) {
+        sl.add(nums[right])
+        const cur = sl.slice()
+        for (let i = 1; i < cur.length; i++) {
+          res += +(cur[i] - cur[i - 1] > 1)
+        }
+      }
+    }
+    return res
+  }
+
+  // https://leetcode.cn/problems/maximum-number-of-tasks-you-can-assign/
+  function maxTaskAssign(
+    tasks: number[],
+    workers: number[],
+    pills: number,
+    strength: number
+  ): number {
+    tasks.sort((a, b) => a - b)
+    workers.sort((a, b) => a - b)
+    let left = 0
+    let right = Math.min(tasks.length, workers.length)
+    while (left <= right) {
+      const mid = (left + right) >> 1
+      if (check(mid)) {
+        left = mid + 1
+      } else {
+        right = mid - 1
+      }
+    }
+
+    return right
+
+    function check(mid: number): boolean {
+      let remain = pills
+      const sl = new SortedListFast<number>(workers.slice(-mid))
+      // const wls = useSortedList(workers.slice(-mid))
+      for (let i = mid - 1; i >= 0; i--) {
+        const t = tasks[i]
+        if (sl.at(sl.length - 1)! >= t) {
+          sl.pop()
+        } else {
+          if (remain === 0) {
+            return false
+          }
+          const cand = sl.bisectLeft(t - strength)
+          if (cand === sl.length) {
+            return false
+          }
+          remain -= 1
+          sl.pop(cand)
+        }
+      }
+
+      return true
+    }
+  }
+
+  // https://leetcode.cn/problems/count-the-number-of-fair-pairs/
+  function countFairPairs(nums: number[], lower: number, upper: number): number {
+    const sl = new SortedListFast<number>()
+    let res = 0
+    nums.forEach(x => {
+      res += sl.bisectRight(upper - x) - sl.bisectLeft(lower - x)
+      sl.add(x)
+    })
+    return res
+  }
+
+  // https://leetcode.cn/problems/find-score-of-an-array-after-marking-all-elements/
+  function findScore(nums: number[]): number {
+    const sl = new SortedListFast<[number, number]>((a, b) => a[0] - b[0] || a[1] - b[1])
+    const equals = (a: [number, number], b: [number, number]) => a[0] === b[0] && a[1] === b[1]
+    nums.forEach((x, i) => sl.add([x, i]))
+
+    let res = 0
+    while (sl.length > 0) {
+      const [v, i] = sl.pop(0)!
+      res += v
+      if (i - 1 >= 0) sl.discard([nums[i - 1], i - 1], equals)
+      if (i + 1 < nums.length) sl.discard([nums[i + 1], i + 1], equals)
+    }
+    return res
+  }
 }
