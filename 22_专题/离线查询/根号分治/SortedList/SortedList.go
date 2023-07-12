@@ -32,191 +32,22 @@
 //  func (sl *SortedList) String() string                                        {}
 //  func (sl *SortedList) Len() int                                              {}
 
+// test:
+// https://leetcode.cn/problems/smallest-missing-genetic-value-in-each-subtree/submissions/
+// https://leetcode.cn/problems/sliding-subarray-beauty/
+// https://leetcode.cn/problems/count-the-number-of-fair-pairs/
+
 package main
 
 import (
 	"fmt"
 	"math/bits"
-	"math/rand"
 	"sort"
 	"strings"
 )
 
-func smallestMissingValueSubtree(parents []int, nums []int) []int {
-	n := len(parents)
-	adjList := make([][]int, n)
-	for i := 1; i < n; i++ {
-		adjList[parents[i]] = append(adjList[parents[i]], i)
-	}
-	res := make([]int, n)
-
-	var findMex func(sl *SortedList) int
-	findMex = func(sl *SortedList) int {
-		left, right := 0, sl.Len()-1
-		for left <= right {
-			mid := (left + right) >> 1
-			diff := sl.At(mid) - (mid + 1)
-			if diff >= 1 {
-				right = mid - 1
-			} else {
-				left = mid + 1
-			}
-		}
-		return left + 1
-	}
-
-	var dfs func(cur, parent int) *SortedList
-	dfs = func(cur, parent int) *SortedList {
-		curTree := NewSortedList(func(a, b int) bool { return a < b })
-		for _, next := range adjList[cur] {
-			if next == parent {
-				continue
-			}
-			subTree := dfs(next, cur)
-			big, small := curTree, subTree
-			if big.Len() < small.Len() {
-				big, small = small, big
-			}
-			small.ForEach(func(value S, _ int) { big.Add(value) }, false)
-			curTree = big
-		}
-		curTree.Add(nums[cur])
-		res[cur] = findMex(curTree)
-		return curTree
-	}
-
-	dfs(0, -1)
-	return res
-}
-
-func getSubarrayBeauty(nums []int, k int, x int) []int {
-	res := []int{}
-	sl := NewSortedList(func(a, b int) bool { return a < b })
-	n := len(nums)
-	for right := 0; right < n; right++ {
-		sl.Add(nums[right])
-		if right >= k {
-			sl.Discard(nums[right-k])
-		}
-		if right >= k-1 {
-			xth := sl.At(x - 1)
-			if xth < 0 {
-				res = append(res, xth)
-			} else {
-				res = append(res, 0)
-			}
-		}
-	}
-	return res
-}
-
-func main() {
-	// [1,-1,-3,-2,3]
-	// 3
-	// 2
-	fmt.Println(getSubarrayBeauty([]int{1, -1, -3, -2, 3}, 3, 2))
-	sl := NewSortedList(func(a, b int) bool { return a < b })
-	sl.Add(2)
-	sl.Add(1)
-	sl.Add(3)
-	sl.Add(4)
-	sl.Add(5)
-	sl.Add(6)
-	fmt.Println(sl)
-
-	checkAdd := func() {
-		sl := NewSortedList(func(a, b int) bool { return a < b })
-		nums := []int{}
-		for i := 0; i < 7; i++ {
-			randNum := rand.Intn(10)
-			sl.Add(randNum)
-			nums = append(nums, randNum)
-		}
-		sort.Slice(nums, func(i, j int) bool { return nums[i] < nums[j] })
-		for i := 0; i < sl.Len(); i++ {
-			if sl.At(i) != nums[i] {
-				fmt.Println("add error")
-				fmt.Println(sl.At(i), nums[i])
-				fmt.Println(sl, sl.Len(), sl.blocks)
-				fmt.Println(nums, len(nums))
-				return
-			}
-		}
-		fmt.Println("add ok")
-	}
-
-	checkDiscard := func() {
-		sl := NewSortedList(func(a, b int) bool { return a < b })
-		nums := []int{}
-		for i := 0; i < 100; i++ {
-			randNum := rand.Intn(100)
-			sl.Add(randNum)
-			nums = append(nums, randNum)
-		}
-		for i := 0; i < 100; i++ {
-			randNum := rand.Intn(sl.Len())
-			sl.Discard(nums[randNum])
-			nums = append(nums[:randNum], nums[randNum+1:]...)
-		}
-		sort.Slice(nums, func(i, j int) bool { return nums[i] < nums[j] })
-		for i := 0; i < 100; i++ {
-			if sl.At(i) != nums[i] {
-				fmt.Println("discard error")
-				return
-			}
-		}
-		fmt.Println("discard ok")
-	}
-
-	checkAt := func() {
-		sl := NewSortedList(func(a, b int) bool { return a < b })
-		nums := []int{}
-		for i := 0; i < 1000000; i++ {
-			randNum := rand.Intn(100)
-			sl.Add(randNum)
-			nums = append(nums, randNum)
-		}
-		sort.Slice(nums, func(i, j int) bool { return nums[i] < nums[j] })
-		for i := 0; i < 100; i++ {
-			if sl.At(i) != nums[i] {
-				fmt.Println("at error")
-				return
-			}
-		}
-		fmt.Println("at ok")
-	}
-
-	randomCheck := func() {
-		sl := NewSortedList(func(a, b int) bool { return a < b })
-		sl.Add(1)
-		nums := []int{1}
-		for i := 0; i < 100; i++ {
-			kind := rand.Intn(300)
-			if kind > 20 {
-				randNum := rand.Intn(sl.Len())
-				sl.Add(randNum)
-				nums = append(nums, randNum)
-				sort.Slice(nums, func(i, j int) bool { return nums[i] < nums[j] })
-			} else if kind > 10 && sl.Len() > 1 {
-				randNum := rand.Intn(sl.Len())
-				fmt.Println(sl.Len(), len(nums))
-				sl.Discard(nums[randNum])
-				nums = append(nums[:randNum], nums[randNum+1:]...)
-				sort.Slice(nums, func(i, j int) bool { return nums[i] < nums[j] })
-			}
-		}
-
-		fmt.Println("random ok")
-	}
-
-	checkAdd()
-	_ = []interface{}{checkDiscard, checkAt, randomCheck}
-	// checkDiscard()
-	// checkAt()
-	// randomCheck()
-}
-
-const _LOAD int = 2
+// 适合1e5左右的数据量.
+const _LOAD int = 100
 
 type S = int
 
@@ -260,24 +91,15 @@ func (sl *SortedList) Add(value S) *SortedList {
 
 	pos, index := sl._locRight(value)
 	sl._updateTree(pos, 1)
-	// block := &sl.blocks[pos]
-	// *block = append((*block)[:index], append([]S{value}, (*block)[index:]...)...)
-	// sl.blockLens[pos]++
-	// sl.mins[pos] = (*block)[0]
-	// if n := len(*block); _LOAD+_LOAD < n {
-	// 	sl.blocks = append(sl.blocks[:pos+1], append([][]S{(*block)[_LOAD:]}, sl.blocks[pos+1:]...)...)
-	// 	sl.blockLens = append(sl.blockLens[:pos+1], append([]int{n - _LOAD}, sl.blockLens[pos+1:]...)...)
-	// 	sl.mins = append(sl.mins[:pos+1], append([]S{(*block)[_LOAD]}, sl.mins[pos+1:]...)...)
-	// 	sl.blockLens[pos] = _LOAD
-	// 	*block = (*block)[:_LOAD]
-	// 	sl.shouldRebuildTree = true
-	// }
+
 	sl.blocks[pos] = append(sl.blocks[pos][:index], append([]S{value}, sl.blocks[pos][index:]...)...)
 	sl.mins[pos] = sl.blocks[pos][0]
+
+	// n -> load + (n - load)
 	if n := len(sl.blocks[pos]); _LOAD+_LOAD < n {
 		sl.blocks = append(sl.blocks[:pos+1], append([][]S{sl.blocks[pos][_LOAD:]}, sl.blocks[pos+1:]...)...)
 		sl.mins = append(sl.mins[:pos+1], append([]S{sl.blocks[pos][_LOAD]}, sl.mins[pos+1:]...)...)
-		sl.blocks[pos] = sl.blocks[pos][:_LOAD]
+		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD] // !注意容量的设置.
 		sl.shouldRebuildTree = true
 	}
 
