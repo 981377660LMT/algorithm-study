@@ -28,8 +28,8 @@ interface ISortedList<V> {
 
   forEach(callbackfn: (value: V, index: number) => void | boolean, reverse?: boolean): void
   enumerate(start: number, end: number, f: (value: V) => void, erase?: boolean): void
-  islice(start: number, end: number, reverse?: boolean): IterableIterator<V>
-  irange(min: V, max: V, reverse?: boolean): IterableIterator<V>
+  iSlice(start: number, end: number, reverse?: boolean): IterableIterator<V>
+  iRange(min: V, max: V, reverse?: boolean): IterableIterator<V>
   entries(): IterableIterator<[number, V]>
   [Symbol.iterator](): IterableIterator<V>
 
@@ -37,9 +37,9 @@ interface ISortedList<V> {
   lowerBound(value: V): ISortedListIterator<V>
   upperBound(value: V): ISortedListIterator<V>
 
-  get length(): number
-  get min(): V | undefined
-  get max(): V | undefined
+  readonly length: number
+  readonly min: V | undefined
+  readonly max: V | undefined
 }
 
 interface ISortedListIterator<V> {
@@ -48,7 +48,7 @@ interface ISortedListIterator<V> {
   hasPrev(): boolean
   prev(): V | undefined
   remove(): void
-  get value(): V | undefined
+  readonly value: V | undefined
 }
 
 /**
@@ -56,7 +56,7 @@ interface ISortedListIterator<V> {
  * !如果数组较短(<2000),直接使用`bisectInsort`维护即可.
  */
 class SortedListFast<V = number> {
-  static setLoadFactor(load = 1 << 9): void {
+  static setLoadFactor(load = 500): void {
     this._LOAD = load
   }
 
@@ -64,36 +64,31 @@ class SortedListFast<V = number> {
    * 负载因子，用于控制每个块的长度.
    * 长度为`1e5`的数组, 负载因子取`500`左右性能较好.
    */
-  private static _LOAD = 1 << 9
+  private static _LOAD = 500
   private static _isPrimitive(
     o: unknown
   ): o is number | string | boolean | symbol | bigint | null | undefined {
     return o === null || (typeof o !== 'object' && typeof o !== 'function')
   }
 
-  private readonly _compareFn: (a: V, b: V) => number
-  private _len: number
+  private _compareFn!: (a: V, b: V) => number
+  private _len!: number
 
   /**
    * 各个块.
    */
-  private _blocks: V[][]
-
-  /**
-   * 各个块的长度.
-   */
-  private _blockLens: number[]
+  private _blocks!: V[][]
 
   /**
    * 各个块的最小值.
    */
-  private _mins: V[]
+  private _mins!: V[]
 
   /**
-   * 树状数组维护 {@link _blockLens} 的前缀和，便于根据索引定位到对应的元素.
+   * 树状数组维护各个块长度的前缀和，便于根据索引定位到对应的元素.
    */
-  private _tree: number[] = []
-  private _shouldRebuild = true
+  private _tree!: number[]
+  private _shouldRebuildTree!: boolean
 
   constructor()
   constructor(iterable: Iterable<V>)
@@ -121,35 +116,16 @@ class SortedListFast<V = number> {
       }
     }
 
-    defaultData.sort(defaultCompareFn)
-    const n = defaultData.length
-    const lists = []
-    for (let i = 0; i < n; i += SortedListFast._LOAD) {
-      lists.push(defaultData.slice(i, i + SortedListFast._LOAD))
-    }
-    const listLens = Array(lists.length)
-    const mins = Array(lists.length)
-    for (let i = 0; i < lists.length; i++) {
-      const cur = lists[i]
-      listLens[i] = cur.length
-      mins[i] = cur[0]
-    }
-
-    this._compareFn = defaultCompareFn
-    this._len = n
-    this._blocks = lists
-    this._blockLens = listLens
-    this._mins = mins
+    this._build(defaultData, defaultCompareFn)
   }
 
   add(value: V): this {
-    const { _blocks, _mins, _blockLens } = this
+    const { _blocks, _mins } = this
     this._len++
     if (!_blocks.length) {
       _blocks.push([value])
       _mins.push(value)
-      _blockLens.push(1)
-      this._shouldRebuild = true
+      this._shouldRebuildTree = true
       return this
     }
 
@@ -157,20 +133,35 @@ class SortedListFast<V = number> {
     const pair = this._locRight(value)
     const pos = pair[0]
     const index = pair[1]
-    this._update(pos, 1)
-    const list = _blocks[pos]
-    list.splice(index, 0, value)
-    _blockLens[pos]++
-    _mins[pos] = list[0]
-    if (load + load < list.length) {
-      _blocks.splice(pos + 1, 0, list.slice(load))
-      _blockLens.splice(pos + 1, 0, list.length - load)
-      _mins.splice(pos + 1, 0, list[load])
-      _blockLens[pos] = load
-      list.splice(load)
-      this._shouldRebuild = true
+    this._updateTree(pos, 1)
+    const block = _blocks[pos]
+    block.splice(index, 0, value)
+    _mins[pos] = block[0]
+    // !-> [x]*load + [x]*(block.length - load)
+    if (load + load < block.length) {
+      _blocks.splice(pos + 1, 0, block.slice(load))
+      _mins.splice(pos + 1, 0, block[load])
+      block.splice(load)
+      this._shouldRebuildTree = true
     }
 
+    return this
+  }
+
+  update(...values: V[]): this {
+    const n = values.length
+    if (n < this._len << 2) {
+      for (let i = 0; i < n; i++) this.add(values[i])
+      return this
+    }
+
+    const data = Array(this._len + n)
+    let ptr = 0
+    this.forEach(v => {
+      data[ptr++] = v
+    })
+    for (let i = 0; i < n; i++) data[ptr++] = values[i]
+    this._build(data, this._compareFn)
     return this
   }
 
@@ -178,26 +169,26 @@ class SortedListFast<V = number> {
     if (!equals && !SortedListFast._isPrimitive(value)) {
       throw new Error('equals must be provided when value is a non-primitive value')
     }
-    const list = this._blocks
-    if (!list.length) return false
+    const block = this._blocks
+    if (!block.length) return false
     equals = equals || ((a: V, b: V) => a === b)
     const pair = this._locLeft(value)
     const pos = pair[0]
     const index = pair[1]
-    return index < list[pos].length && equals(list[pos][index], value)
+    return index < block[pos].length && equals(block[pos][index], value)
   }
 
   discard(value: V, equals?: (a: V, b: V) => boolean): boolean {
     if (!equals && !SortedListFast._isPrimitive(value)) {
       throw new Error('equals must be provided when value is a non-primitive value')
     }
-    const list = this._blocks
-    if (!list.length) return false
+    const block = this._blocks
+    if (!block.length) return false
     equals = equals || ((a: V, b: V) => a === b)
     const pair = this._locRight(value)
     const pos = pair[0]
     const index = pair[1]
-    if (index && equals(list[pos][index - 1], value)) {
+    if (index && equals(block[pos][index - 1], value)) {
       this._delete(pos, index - 1)
       return true
     }
@@ -259,7 +250,7 @@ class SortedListFast<V = number> {
     const pair = this._locLeft(value)
     const pos = pair[0]
     const index = pair[1]
-    return this._query(pos) + index
+    return this._queryTree(pos) + index
   }
 
   /**
@@ -269,7 +260,7 @@ class SortedListFast<V = number> {
     const pair = this._locRight(value)
     const pos = pair[0]
     const index = pair[1]
-    return this._query(pos) + index
+    return this._queryTree(pos) + index
   }
 
   count(value: V): number {
@@ -296,10 +287,9 @@ class SortedListFast<V = number> {
   clear(): void {
     this._len = 0
     this._blocks = []
-    this._blockLens = []
     this._mins = []
     this._tree = []
-    this._shouldRebuild = true
+    this._shouldRebuildTree = true
   }
 
   toString(): string {
@@ -354,15 +344,13 @@ class SortedListFast<V = number> {
         if (deleted === block.length) {
           // !delete block
           this._blocks.splice(pos, 1)
-          this._blockLens.splice(pos, 1)
           this._mins.splice(pos, 1)
-          this._shouldRebuild = true
+          this._shouldRebuildTree = true
           pos--
         } else {
           // !delete [index, end)
-          for (let i = startIndex; i < endIndex; i++) this._update(pos, -1)
+          for (let i = startIndex; i < endIndex; i++) this._updateTree(pos, -1)
           block.splice(startIndex, deleted)
-          this._blockLens[pos] -= deleted
           this._mins[pos] = block[0]
         }
         this._len -= deleted
@@ -376,7 +364,7 @@ class SortedListFast<V = number> {
   /**
    * 返回一个迭代器，用于遍历区间 `[start, end)` 内的元素.
    */
-  *islice(start: number, end: number, reverse = false): IterableIterator<V> {
+  *iSlice(start: number, end: number, reverse = false): IterableIterator<V> {
     if (start < 0) start = 0
     if (end > this._len) end = this._len
     if (start >= end) return
@@ -407,7 +395,7 @@ class SortedListFast<V = number> {
   /**
    * 返回一个迭代器，用于遍历范围在 `[min, max] 闭区间`内的元素.
    */
-  *irange(min: V, max: V, reverse = false): IterableIterator<V> {
+  *iRange(min: V, max: V, reverse = false): IterableIterator<V> {
     if (this._compareFn(min, max) > 0) return
 
     if (reverse) {
@@ -481,29 +469,48 @@ class SortedListFast<V = number> {
 
   get max(): V | undefined {
     if (!this._len) return void 0
-    const { _blocks, _blockLens } = this
-    const last = _blocks.length - 1
-    return _blocks[last][_blockLens[last] - 1]
+    const { _blocks } = this
+    const lastBlock = _blocks[_blocks.length - 1]
+    return lastBlock[lastBlock.length - 1]
+  }
+
+  private _build(data: V[], compareFn: (a: V, b: V) => number): void {
+    data.sort(compareFn)
+    const n = data.length
+    const blocks = []
+    for (let i = 0; i < n; i += SortedListFast._LOAD) {
+      blocks.push(data.slice(i, i + SortedListFast._LOAD))
+    }
+    const mins = Array(blocks.length)
+    for (let i = 0; i < blocks.length; i++) {
+      const cur = blocks[i]
+      mins[i] = cur[0]
+    }
+
+    this._compareFn = compareFn
+    this._len = n
+    this._blocks = blocks
+    this._mins = mins
+    this._tree = []
+    this._shouldRebuildTree = true
   }
 
   private _delete(pos: number, index: number): void {
-    const { _blocks, _mins, _blockLens } = this
+    const { _blocks, _mins } = this
 
     // !delete element
     this._len--
-    this._update(pos, -1)
+    this._updateTree(pos, -1)
     _blocks[pos].splice(index, 1)
-    _blockLens[pos]--
-    if (_blockLens[pos]) {
+    if (_blocks[pos].length) {
       _mins[pos] = _blocks[pos][0]
       return
     }
 
     // !delete block
     _blocks.splice(pos, 1)
-    _blockLens.splice(pos, 1)
     _mins.splice(pos, 1)
-    this._shouldRebuild = true
+    this._shouldRebuildTree = true
   }
 
   private _locLeft(value: V): [pos: number, index: number] {
@@ -598,8 +605,11 @@ class SortedListFast<V = number> {
     return right
   }
 
-  private _build(): void {
-    this._tree = this._blockLens.slice()
+  private _buildTree(): void {
+    this._tree = Array(this._blocks.length)
+    for (let i = 0; i < this._blocks.length; i++) {
+      this._tree[i] = this._blocks[i].length
+    }
     const tree = this._tree
     for (let i = 0; i < tree.length; i++) {
       const j = i | (i + 1)
@@ -607,11 +617,11 @@ class SortedListFast<V = number> {
         tree[j] += tree[i]
       }
     }
-    this._shouldRebuild = false
+    this._shouldRebuildTree = false
   }
 
-  private _update(index: number, delta: number): void {
-    if (!this._shouldRebuild) {
+  private _updateTree(index: number, delta: number): void {
+    if (!this._shouldRebuildTree) {
       const tree = this._tree
       while (index < tree.length) {
         tree[index] += delta
@@ -620,8 +630,8 @@ class SortedListFast<V = number> {
     }
   }
 
-  private _query(end: number): number {
-    if (this._shouldRebuild) this._build()
+  private _queryTree(end: number): number {
+    if (this._shouldRebuildTree) this._buildTree()
     const tree = this._tree
     let x = 0
     while (end) {
@@ -636,12 +646,11 @@ class SortedListFast<V = number> {
    * 内部对头部块和尾部块做了特殊处理.
    */
   private _findKth(k: number): [pos: number, index: number] {
-    const listLens = this._blockLens
-    if (k < listLens[0]) return [0, k]
-    if (k >= this._len - listLens[listLens.length - 1]) {
-      return [listLens.length - 1, k + listLens[listLens.length - 1] - this._len]
-    }
-    if (this._shouldRebuild) this._build()
+    if (k < this._blocks[0].length) return [0, k]
+    const last = this._blocks.length - 1
+    const lastLen = this._blocks[last].length
+    if (k >= this._len - lastLen) return [last, k + lastLen - this._len]
+    if (this._shouldRebuildTree) this._buildTree()
     const tree = this._tree
     let pos = -1
     const bitLength = 32 - Math.clz32(tree.length)
@@ -716,7 +725,7 @@ if (require.main === module) {
   sl.add(3)
   console.log(sl.toString())
   console.log(sl.floor(2), sl.lower(2), sl.ceiling(2), sl.higher(2))
-  console.log(...sl.irange(0, 2))
+  console.log(...sl.iRange(0, 2))
 
   const iter = sl.iteratorAt(0)
   console.log(iter.value)

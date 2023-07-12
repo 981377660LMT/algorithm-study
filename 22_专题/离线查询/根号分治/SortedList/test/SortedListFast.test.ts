@@ -89,7 +89,7 @@ describe('SortedListFast', () => {
       let start = Math.floor(Math.random() * sl.length)
       let end = Math.floor(Math.random() * sl.length)
       const reverse = Math.random() > 0.5
-      const islice = [...sl.islice(start, end, reverse)]
+      const islice = [...sl.iSlice(start, end, reverse)]
       const slice = sl.slice(start, end)
       if (reverse) slice.reverse()
 
@@ -102,7 +102,7 @@ describe('SortedListFast', () => {
       let min = Math.floor(Math.random() * sl.length)
       let max = Math.floor(Math.random() * sl.length)
       const reverse = Math.random() > 0.5
-      const irange = [...sl.irange(min, max, reverse)]
+      const irange = [...sl.iRange(min, max, reverse)]
       const target = sortedNums.filter(num => num >= min && num <= max).sort((a, b) => a - b)
       if (reverse) target.reverse()
       expect(irange).toStrictEqual(target)
@@ -145,6 +145,28 @@ describe('SortedListFast', () => {
     // remove
     it.remove()
     sortedNums.splice(index, 1)
+    expect(sl.length).toBe(sortedNums.length)
+    expect(sortedNums).toStrictEqual([...sl])
+  })
+
+  // update
+  it('should support update', () => {
+    // update(small)
+    const small = Array(10)
+      .fill(0)
+      .map(() => Math.floor(Math.random() * 100))
+    sl.update(...small)
+    sortedNums.push(...small)
+    sortedNums.sort((a, b) => a - b)
+    expect(sl.length).toBe(sortedNums.length)
+    expect(sortedNums).toStrictEqual([...sl])
+
+    const big = Array(sl.length * 10)
+      .fill(0)
+      .map(() => Math.floor(Math.random() * 100))
+    sl.update(...big)
+    sortedNums.push(...big)
+    sortedNums.sort((a, b) => a - b)
     expect(sl.length).toBe(sortedNums.length)
     expect(sortedNums).toStrictEqual([...sl])
   })
