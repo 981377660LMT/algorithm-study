@@ -9,21 +9,31 @@
 //  func (sd *SortedDict) PeekItem(index int) (key K, value V, ok bool)                 {}
 //  func (sd *SortedDict) PeekMinItem() (key K, value V, ok bool)                       {}
 //  func (sd *SortedDict) PeekMaxItem() (key K, value V, ok bool)                       {}
+//
 //  func (sd *SortedDict) ForEach(callbackfn func(value V, key K))                      {}
 //  func (sd *SortedDict) Enumerate(start, end int, f func(key K, value V), erase bool) {}
+//
 //  func (sd *SortedDict) BisectLeft(key K) (index int)                                 {}
 //  func (sd *SortedDict) BisectRight(key K) (index int)                                {}
 //  func (sd *SortedDict) Floor(key K) (floorKey K, floorValue V, ok bool)              {}
 //  func (sd *SortedDict) Ceiling(key K) (ceilKey K, ceilValue V, ok bool)              {}
 //  func (sd *SortedDict) Lower(key K) (lowerKey K, lowerValue V, ok bool)              {}
 //  func (sd *SortedDict) Higher(key K) (higherKey K, higherValue V, ok bool)           {}
-//  func (sd *SortedDict) Slice(start, end int) (res []*Entry)                          {}
-//  func (sd *SortedDict) Range(min, max K) (res []*Entry)                              {}
-//  func (sd *SortedDict) Size() int                                                    {}
+//
+//  func (sd *SortedDict) Slice(start, end int) (res []Entry)                           {}
+//  func (sd *SortedDict) Range(min, max K) (res []Entry)                               {}
+//
 //  func (sd *SortedDict) Keys() (res []K)                                              {}
 //  func (sd *SortedDict) Values() (res []V)                                            {}
+//  func (sd *SortedDict) Entries() (res []Entry)                                       {}
+//
+//  func (sd *SortedDict) Size() int                                                    {}
 //  func (sd *SortedDict) Clear()                                                       {}
-//  func (sd *SortedDict) String() string                                               {}
+//  func (sd *SortedDict) String() string
+//
+//  func (sd *SortedDict) IteratorAt(index int) *Iterator                               {}
+//  func (sd *SortedDict) LowerBound(key K) *Iterator                                   {}
+//  func (sd *SortedDict) UpperBound(key K) *Iterator                                   {}
 
 package main
 
@@ -35,14 +45,90 @@ import (
 )
 
 func main() {
+	sd := NewSortedDict(func(a, b int) bool { return a < b })
+	sd.Set(2, [2]int{2, 2})
+	sd.Set(1, [2]int{1, 1})
+	fmt.Println(sd)
 
+	iter := sd.IteratorAt(0)
+	fmt.Println(iter.Entry())
+	for iter.HasNext() {
+		fmt.Println(iter.Next())
+	}
 }
+
+// 适合1e5左右的数据量.
+const _LOAD int = 100
 
 type K = int
 type V = [2]int
 type Entry struct {
 	key   K
 	value V
+}
+
+type Iterator struct {
+	sd    *SortedDict
+	sIter *_SIterator
+}
+
+func (it *Iterator) Next() (key K, value V, ok bool) {
+	next, ok := it.sIter.Next()
+	if !ok {
+		return
+	}
+	key = next
+	value, ok = it.sd.dict[key]
+	return
+}
+
+func (it *Iterator) Prev() (key K, value V, ok bool) {
+	prev, ok := it.sIter.Prev()
+	if !ok {
+		return
+	}
+	key = prev
+	value, ok = it.sd.dict[key]
+	return
+}
+
+func (it *Iterator) HasNext() bool {
+	return it.sIter.HasNext()
+}
+
+func (it *Iterator) HasPrev() bool {
+	return it.sIter.HasPrev()
+}
+
+func (it *Iterator) Key() (key K, ok bool) {
+	return it.sIter.Value()
+}
+
+func (it *Iterator) Value() (value V, ok bool) {
+	key, ok := it.sIter.Value()
+	if !ok {
+		return
+	}
+	value, ok = it.sd.dict[key]
+	return
+}
+
+func (it *Iterator) Entry() (key K, value V, ok bool) {
+	key, ok = it.sIter.Value()
+	if !ok {
+		return
+	}
+	value, ok = it.sd.dict[key]
+	return
+}
+
+func (it *Iterator) Remove() {
+	key, ok := it.sIter.Value()
+	if !ok {
+		return
+	}
+	it.sIter.Remove()
+	it.sd.Delete(key)
 }
 
 type SortedDict struct {
@@ -54,35 +140,218 @@ func NewSortedDict(less func(a, b K) bool) *SortedDict {
 	return &SortedDict{sl: NewSortedList(less), dict: map[K]V{}}
 }
 
-func (sd *SortedDict) Set(key K, value V) *SortedDict     {}
-func (sd *SortedDict) SetDefault(key K, defaultValue V) V {}
-func (sd *SortedDict) Has(key K) bool                     {}
-func (sd *SortedDict) Get(key K) (value V, ok bool)       {}
+func (sd *SortedDict) Set(key K, value V) *SortedDict {
+	if _, ok := sd.dict[key]; !ok {
+		sd.sl.Add(key)
+	}
+	sd.dict[key] = value
+	return sd
+}
 
-func (sd *SortedDict) Delete(key K) bool                                            {}
-func (sd *SortedDict) Pop(key K, defaultValue V) V                                  {}
-func (sd *SortedDict) PopItem(index int) (key K, value V, ok bool)                  {}
-func (sd *SortedDict) PeekItem(index int) (key K, value V, ok bool)                 {}
-func (sd *SortedDict) PeekMinItem() (key K, value V, ok bool)                       {}
-func (sd *SortedDict) PeekMaxItem() (key K, value V, ok bool)                       {}
-func (sd *SortedDict) ForEach(callbackfn func(value V, key K))                      {}
-func (sd *SortedDict) Enumerate(start, end int, f func(key K, value V), erase bool) {}
-func (sd *SortedDict) BisectLeft(key K) (index int)                                 {}
-func (sd *SortedDict) BisectRight(key K) (index int)                                {}
-func (sd *SortedDict) Floor(key K) (floorKey K, floorValue V, ok bool)              {}
-func (sd *SortedDict) Ceiling(key K) (ceilKey K, ceilValue V, ok bool)              {}
-func (sd *SortedDict) Lower(key K) (lowerKey K, lowerValue V, ok bool)              {}
-func (sd *SortedDict) Higher(key K) (higherKey K, higherValue V, ok bool)           {}
-func (sd *SortedDict) Slice(start, end int) (res []*Entry)                          {}
-func (sd *SortedDict) Range(min, max K) (res []*Entry)                              {}
-func (sd *SortedDict) Size() int                                                    {}
-func (sd *SortedDict) Keys() (res []K)                                              {}
-func (sd *SortedDict) Values() (res []V)                                            {}
-func (sd *SortedDict) Clear()                                                       {}
-func (sd *SortedDict) String() string                                               {}
+func (sd *SortedDict) SetDefault(key K, defaultValue V) V {
+	if v, ok := sd.dict[key]; ok {
+		return v
+	}
+	sd.sl.Add(key)
+	sd.dict[key] = defaultValue
+	return defaultValue
+}
 
-// 适合1e5左右的数据量.
-const _LOAD int = 100
+func (sd *SortedDict) Has(key K) bool {
+	_, ok := sd.dict[key]
+	return ok
+}
+
+func (sd *SortedDict) Get(key K) (value V, ok bool) {
+	value, ok = sd.dict[key]
+	return
+}
+
+func (sd *SortedDict) Delete(key K) bool {
+	if _, ok := sd.dict[key]; !ok {
+		return false
+	}
+	sd.sl.Discard(key)
+	delete(sd.dict, key)
+	return true
+}
+
+func (sd *SortedDict) Pop(key K, defaultValue V) V {
+	if v, ok := sd.dict[key]; ok {
+		sd.sl.Discard(key)
+		delete(sd.dict, key)
+		return v
+	}
+	return defaultValue
+}
+
+func (sd *SortedDict) PopItem(index int) (key K, value V, ok bool) {
+	if len(sd.dict) == 0 {
+		return
+	}
+	key = sd.sl.Pop(index)
+	value, ok = sd.dict[key]
+	delete(sd.dict, key)
+	return
+}
+
+func (sd *SortedDict) PeekItem(index int) (key K, value V, ok bool) {
+	if len(sd.dict) == 0 {
+		return
+	}
+	key = sd.sl.At(index)
+	value, ok = sd.dict[key]
+	return
+}
+
+func (sd *SortedDict) PeekMinItem() (key K, value V, ok bool) {
+	if len(sd.dict) == 0 {
+		return
+	}
+	key = sd.sl.Min()
+	value, ok = sd.dict[key]
+	return
+}
+
+func (sd *SortedDict) PeekMaxItem() (key K, value V, ok bool) {
+	if len(sd.dict) == 0 {
+		return
+	}
+	key = sd.sl.Max()
+	value, ok = sd.dict[key]
+	return
+}
+
+func (sd *SortedDict) ForEach(callbackfn func(value V, key K)) {
+	sd.sl.ForEach(func(key K, _ int) {
+		callbackfn(sd.dict[key], key)
+	}, false)
+}
+
+func (sd *SortedDict) Enumerate(start, end int, f func(key K, value V), erase bool) {
+	sd.sl.Enumerate(start, end, func(key K) {
+		f(key, sd.dict[key])
+		if erase {
+			delete(sd.dict, key)
+		}
+	}, erase)
+}
+
+func (sd *SortedDict) BisectLeft(key K) (index int) {
+	return sd.sl.BisectLeft(key)
+}
+
+func (sd *SortedDict) BisectRight(key K) (index int) {
+	return sd.sl.BisectRight(key)
+}
+
+func (sd *SortedDict) Floor(key K) (floorKey K, floorValue V, ok bool) {
+	floorKey, ok = sd.sl.Floor(key)
+	if !ok {
+		return
+	}
+	floorValue, ok = sd.dict[floorKey]
+	return
+}
+
+func (sd *SortedDict) Ceiling(key K) (ceilKey K, ceilValue V, ok bool) {
+	ceilKey, ok = sd.sl.Ceiling(key)
+	if !ok {
+		return
+	}
+	ceilValue, ok = sd.dict[ceilKey]
+	return
+}
+
+func (sd *SortedDict) Lower(key K) (lowerKey K, lowerValue V, ok bool) {
+	lowerKey, ok = sd.sl.Lower(key)
+	if !ok {
+		return
+	}
+	lowerValue, ok = sd.dict[lowerKey]
+	return
+}
+
+func (sd *SortedDict) Higher(key K) (higherKey K, higherValue V, ok bool) {
+	higherKey, ok = sd.sl.Higher(key)
+	if !ok {
+		return
+	}
+	higherValue, ok = sd.dict[higherKey]
+	return
+}
+
+func (sd *SortedDict) Slice(start, end int) (res []Entry) {
+	res = make([]Entry, 0, end-start)
+	sd.Enumerate(start, end, func(key K, value V) {
+		res = append(res, Entry{key, value})
+	}, false)
+	return
+}
+
+func (sd *SortedDict) Range(min, max K) (res []Entry) {
+	keys := sd.sl.Range(min, max)
+	res = make([]Entry, 0, len(keys))
+	for _, key := range keys {
+		res = append(res, Entry{key, sd.dict[key]})
+	}
+	return
+}
+
+func (sd *SortedDict) Size() int {
+	return len(sd.dict)
+}
+
+func (sd *SortedDict) Keys() (res []K) {
+	res = make([]K, 0, len(sd.dict))
+	sd.sl.ForEach(func(key K, _ int) {
+		res = append(res, key)
+	}, false)
+	return
+}
+
+func (sd *SortedDict) Values() (res []V) {
+	res = make([]V, 0, len(sd.dict))
+	sd.sl.ForEach(func(_ K, value int) {
+		res = append(res, sd.dict[value])
+	}, false)
+	return
+}
+
+func (sd *SortedDict) Entries() (res []Entry) {
+	res = make([]Entry, 0, len(sd.dict))
+	sd.sl.ForEach(func(key K, value int) {
+		res = append(res, Entry{key, sd.dict[value]})
+	}, false)
+	return
+}
+
+func (sd *SortedDict) Clear() {
+	sd.sl.Clear()
+	sd.dict = map[K]V{}
+}
+
+func (sd *SortedDict) String() string {
+	sb := []string{}
+	sb = append(sb, fmt.Sprintf("SortedDict(%d) {", sd.Size()))
+	sd.ForEach(func(value V, key K) {
+		sb = append(sb, fmt.Sprintf("  %v => %v,", key, value))
+	})
+	sb = append(sb, "}")
+	return strings.Join(sb, "\n")
+}
+
+func (sd *SortedDict) IteratorAt(index int) *Iterator {
+	return &Iterator{sd: sd, sIter: sd.sl.IteratorAt(index)}
+}
+
+func (sd *SortedDict) LowerBound(key K) *Iterator {
+	return &Iterator{sd: sd, sIter: sd.sl.LowerBound(key)}
+}
+
+func (sd *SortedDict) UpperBound(key K) *Iterator {
+	return &Iterator{sd: sd, sIter: sd.sl.UpperBound(key)}
+}
 
 // 使用分块+树状数组维护的有序序列.
 type SortedList struct {
@@ -355,7 +624,7 @@ func (sl *SortedList) Range(min, max K) []K {
 	return res
 }
 
-func (sl *SortedList) IteratorAt(index int) *Iterator {
+func (sl *SortedList) IteratorAt(index int) *_SIterator {
 	if index < 0 {
 		index += sl.size
 	}
@@ -366,12 +635,12 @@ func (sl *SortedList) IteratorAt(index int) *Iterator {
 	return sl._iteratorAt(pos, startIndex)
 }
 
-func (sl *SortedList) LowerBound(value K) *Iterator {
+func (sl *SortedList) LowerBound(value K) *_SIterator {
 	pos, index := sl._locLeft(value)
 	return sl._iteratorAt(pos, index)
 }
 
-func (sl *SortedList) UpperBound(value K) *Iterator {
+func (sl *SortedList) UpperBound(value K) *_SIterator {
 	pos, index := sl._locRight(value)
 	return sl._iteratorAt(pos, index)
 }
@@ -582,21 +851,21 @@ func (sl *SortedList) _findKth(k int) (pos, index int) {
 	return pos + 1, k
 }
 
-func (sl *SortedList) _iteratorAt(pos, index int) *Iterator {
-	return &Iterator{sl: sl, pos: pos, index: index}
+func (sl *SortedList) _iteratorAt(pos, index int) *_SIterator {
+	return &_SIterator{sl: sl, pos: pos, index: index}
 }
 
-type Iterator struct {
+type _SIterator struct {
 	sl    *SortedList
 	pos   int
 	index int
 }
 
-func (it *Iterator) HasNext() bool {
+func (it *_SIterator) HasNext() bool {
 	return it.pos < len(it.sl.blocks)-1 || it.index < len(it.sl.blocks[it.pos])-1
 }
 
-func (it *Iterator) Next() (res K, ok bool) {
+func (it *_SIterator) Next() (res K, ok bool) {
 	if !it.HasNext() {
 		return
 	}
@@ -610,11 +879,11 @@ func (it *Iterator) Next() (res K, ok bool) {
 	return
 }
 
-func (it *Iterator) HasPrev() bool {
+func (it *_SIterator) HasPrev() bool {
 	return it.pos > 0 || it.index > 0
 }
 
-func (it *Iterator) Prev() (res K, ok bool) {
+func (it *_SIterator) Prev() (res K, ok bool) {
 	if !it.HasPrev() {
 		return
 	}
@@ -628,11 +897,11 @@ func (it *Iterator) Prev() (res K, ok bool) {
 	return
 }
 
-func (it *Iterator) Remove() {
+func (it *_SIterator) Remove() {
 	it.sl._delete(it.pos, it.index)
 }
 
-func (it *Iterator) Value() (res K, ok bool) {
+func (it *_SIterator) Value() (res K, ok bool) {
 	if it.pos < 0 || it.pos >= it.sl.Len() {
 		return
 	}

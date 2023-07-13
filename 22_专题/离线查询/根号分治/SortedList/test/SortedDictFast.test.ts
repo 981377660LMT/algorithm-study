@@ -103,6 +103,9 @@ describe('SortedDictFast', () => {
     sd.enumerate(0, end, (value, key) => items1.push([key, value]))
     const items2 = [...sortedDict].slice(0, end).sort((a, b) => a[0] - b[0])
     expect(items1).toStrictEqual(items2)
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    sd.enumerate(0, end, () => {}, true)
+    expect(sd.size).toStrictEqual(sortedDict.size - end)
   })
 
   // bisectLeft/bisectRight
@@ -172,6 +175,33 @@ describe('SortedDictFast', () => {
     expect([...sd.keys()]).toStrictEqual([...sortedDict.keys()])
     expect([...sd.values()]).toStrictEqual([...sortedDict.values()])
     expect([...sd.entries()]).toStrictEqual([...sortedDict.entries()])
+    expect([...sd]).toStrictEqual([...sortedDict].sort((a, b) => a[0] - b[0]))
+  })
+
+  it('should support iteratorAt', () => {
+    let index = Math.floor(Math.random() * sd.size)
+    const it = sd.iteratorAt(index)
+    const target = [...sortedDict][index]
+    expect(it.key).toBe(target[0])
+    expect(it.value).toBe(target[1])
+    expect(it.entry).toStrictEqual(target)
+
+    // prev/hastPrev/next/hasNext
+    expect(it.hasPrev()).toBe(index > 0)
+    expect(it.hasNext()).toBe(index < sd.size - 1)
+    if (it.hasPrev()) {
+      index--
+      expect(it.prev()).toStrictEqual([...sortedDict][index])
+    }
+    if (it.hasNext()) {
+      index++
+      expect(it.next()).toStrictEqual([...sortedDict][index])
+    }
+
+    // remove
+    it.remove()
+    sortedDict.delete(target[0])
+    expect(sd.size).toBe(sortedDict.size)
     expect([...sd]).toStrictEqual([...sortedDict].sort((a, b) => a[0] - b[0]))
   })
 })

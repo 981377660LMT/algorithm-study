@@ -118,10 +118,15 @@ class SortedDict<K = number, V = unknown> {
   }
 
   enumerate(start: number, end: number, f: (key: K, value: V) => void, erase = false): void {
-    this._sl.enumerate(start, end, key => {
-      f(key, this._dict.get(key)!)
-      if (erase) this._dict.delete(key)
-    })
+    this._sl.enumerate(
+      start,
+      end,
+      key => {
+        f(key, this._dict.get(key)!)
+        if (erase) this._dict.delete(key)
+      },
+      erase
+    )
   }
 
   /**

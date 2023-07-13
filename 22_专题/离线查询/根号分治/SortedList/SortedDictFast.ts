@@ -3,6 +3,17 @@
 
 import { SortedListFast } from './SortedListFast'
 
+interface ISortedDictIterator<K, V> {
+  hasNext(): boolean
+  next(): [K, V] | undefined
+  hasPrev(): boolean
+  prev(): [K, V] | undefined
+  remove(): void
+  readonly key: K | undefined
+  readonly value: V | undefined
+  readonly entry: [K, V] | undefined
+}
+
 /**
  * 有序字典.
  * 模拟python的`sortedcontainers.SortedDict`.
@@ -116,10 +127,15 @@ class SortedDictFast<K = number, V = unknown> {
   }
 
   enumerate(start: number, end: number, f: (key: K, value: V) => void, erase = false): void {
-    this._sl.enumerate(start, end, key => {
-      f(key, this._dict.get(key)!)
-      if (erase) this._dict.delete(key)
-    })
+    this._sl.enumerate(
+      start,
+      end,
+      key => {
+        f(key, this._dict.get(key)!)
+        if (erase) this._dict.delete(key)
+      },
+      erase
+    )
   }
 
   /**
@@ -218,6 +234,55 @@ class SortedDictFast<K = number, V = unknown> {
 
   get size(): number {
     return this._dict.size
+  }
+
+  iteratorAt(index: number): ISortedDictIterator<K, V> {
+    const it = this._sl.iteratorAt(index)
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const sd = this
+    return {
+      next: () => {
+        const next = it.next()
+        if (next === void 0) return void 0
+        return [next, this._dict.get(next)!]
+      },
+      prev: () => {
+        const prev = it.prev()
+        if (prev === void 0) return void 0
+        return [prev, this._dict.get(prev)!]
+      },
+      hasNext: () => it.hasNext(),
+      hasPrev: () => it.hasPrev(),
+      remove: () => {
+        const key = it.value
+        if (key === void 0) return
+        it.remove()
+        sd._dict.delete(key)
+      },
+      get key() {
+        return it.value
+      },
+      get value() {
+        const key = it.value
+        if (key === void 0) return void 0
+        return sd._dict.get(key)!
+      },
+      get entry() {
+        const key = it.value
+        if (key === void 0) return void 0
+        return [key, sd._dict.get(key)!] as [K, V]
+      }
+    }
+  }
+
+  lowerBound(key: K): ISortedDictIterator<K, V> {
+    const pos = this._sl.bisectLeft(key)
+    return this.iteratorAt(pos)
+  }
+
+  upperBound(key: K): ISortedDictIterator<K, V> {
+    const pos = this._sl.bisectRight(key)
+    return this.iteratorAt(pos)
   }
 }
 
