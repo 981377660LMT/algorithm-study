@@ -1,4 +1,4 @@
-// 模拟`JSON.stringify`方法
+// 手写JSON.stringify方法
 // https://leetcode.com/problems/convert-object-to-json-string/discuss/3406872/Without-using-the-built-in-JSON.stringify-method-or-Recursive-solution
 function jsonStringify(object: any): string {
   if (object === null) return 'null'

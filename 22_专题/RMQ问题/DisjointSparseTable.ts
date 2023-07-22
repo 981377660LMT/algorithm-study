@@ -3,6 +3,7 @@
 /**
  * 支持幺半群的静态区间查询.
  * 比`st表`稍慢一点,但是可以不用满足幂等性.
+ * @deprecated 使用线段树代替.
  */
 class DisjointSparseTable<S> {
   private readonly _n: number

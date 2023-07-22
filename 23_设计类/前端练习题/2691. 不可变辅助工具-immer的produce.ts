@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable prefer-destructuring */
+// 类似 immer.js 的produce
 
 // 创建带有微小修改的不可变对象的克隆副本是一个繁琐的过程。
 // 请你编写一个名为 ImmutableHelper 的类，作为满足这一要求的工具。构造函数接受一个不可变对象 obj ，该对象将是一个 JSON 对象或数组。

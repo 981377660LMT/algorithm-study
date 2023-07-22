@@ -1,3 +1,7 @@
+// https://blog.rexskz.info/a-silly-optimization.html
+// 判断数组 A 是否是数组 B 的一部分 =>
+// 问题的本质是“问一棵树是不是另一棵树的子树”，进一步来说，就是比较某一棵给定的树是否跟森林中的某棵树相等。
+
 class TreeNode {
   val: number
   left: TreeNode | null
@@ -29,3 +33,5 @@ function isSameTree(root1: TreeNode | null, root2: TreeNode | null): boolean {
     isSameTree(root1.right, root2.right)
   )
 }
+
+export {}

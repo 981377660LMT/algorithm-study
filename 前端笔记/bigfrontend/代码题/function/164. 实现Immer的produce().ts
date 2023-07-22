@@ -3,6 +3,9 @@
 // https://segmentfault.com/a/1190000042282263
 // https://yo-cwj.com/2020/09/16/brief-read-immer/
 
+// immer.js - 实现不可变数据的新思路
+// https://blog.rexskz.info/immerjs-a-new-way-to-implement-immutable-data.html
+
 // !immer本身浅拷贝(写时浅拷贝)还是O(n) 只能方便修改对象(proxy的奇技淫巧) 无法提升性能
 // 如果需要提升性能, 可以使用immutable.js
 // 如果需要操作方便，可以使用immer.js

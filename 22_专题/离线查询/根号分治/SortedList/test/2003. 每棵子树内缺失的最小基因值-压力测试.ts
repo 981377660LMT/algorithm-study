@@ -2,7 +2,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable generator-star-spacing */
 
-import { SortedList } from '../SortedList'
+import { SortedListFast } from '../SortedListFast'
 
 // https://leetcode.cn/problems/smallest-missing-genetic-value-in-each-subtree/submissions/
 function smallestMissingValueSubtree(parents: number[], nums: number[]): number[] {
@@ -15,7 +15,7 @@ function smallestMissingValueSubtree(parents: number[], nums: number[]): number[
   dfs(0, -1)
   return res
 
-  function findMex(sl: SortedList<number>): number {
+  function findMex(sl: SortedListFast<number>): number {
     let left = 0
     let right = sl.length - 1
     while (left <= right) {
@@ -30,8 +30,8 @@ function smallestMissingValueSubtree(parents: number[], nums: number[]): number[
     return left + 1
   }
 
-  function dfs(cur: number, parent: number): SortedList<number> {
-    let curTree = new SortedList<number>()
+  function dfs(cur: number, parent: number): SortedListFast<number> {
+    let curTree = new SortedListFast<number>()
     for (const next of adjList[cur]) {
       if (next === parent) {
         continue
@@ -41,7 +41,9 @@ function smallestMissingValueSubtree(parents: number[], nums: number[]): number[
       if (big.length < small.length) {
         ;[big, small] = [small, big]
       }
-      small.forEach(v => big.add(v))
+      small.forEach(v => {
+        big.add(v)
+      })
       curTree = big
     }
 

@@ -107,6 +107,8 @@ function insortRight<E>(array: E[], target: E, options?: BisectOptions<E, E>): v
   array.splice(pos, 0, target)
 }
 
+const bisectInsort = insortRight
+
 if (require.main === module) {
   const arr0 = [-3, -1, 1, 3]
   assert.strictEqual(bisectLeft(arr0, 1), 2)
@@ -144,4 +146,4 @@ if (require.main === module) {
   }
 }
 
-export { bisectLeft, bisectRight, insortLeft, insortRight, insortRight as bisectInsort }
+export { bisectLeft, bisectRight, insortLeft, insortRight, bisectInsort }

@@ -15,3 +15,9 @@
 可以使用数组, 而不是对象来表示 **TrieNode**
 可以节省空间.
 **functools.lru_cache 中链表的实现就是用的四个元素的 list.**
+
+---
+
+利用 Trie 树的变种优化带参数路由的匹配
+https://blog.rexskz.info/use-variant-trie-to-optimize-router-match-with-params.html
+Gin 用了一个叫 Radix Tree 的数据结构，基本可以理解为“压缩节点后的 Trie”

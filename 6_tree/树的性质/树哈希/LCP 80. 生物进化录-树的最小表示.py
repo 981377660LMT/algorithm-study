@@ -1,4 +1,4 @@
-# LCP 80. 生物进化录-字典序最小欧拉路径(树的最小表示法)
+# LCP 80. 生物进化录-字典序最小欧拉路径(树的最小表示法/树的括号序列)
 # 把所有子树的结果排序，然后拼接起来，在开头加上 0，末尾加上 1，然后返回
 # https://leetcode.cn/problems/qoQAMX/solution/di-gui-pai-xu-by-endlesscheng-hnjf/
 # https://leetcode.cn/problems/qoQAMX/solution/bao-li-pai-xu-de-fu-za-du-fen-xi-by-hqzt-clpn/
@@ -60,6 +60,6 @@ class Solution:
         return "".join(map(str, res))
 
 
-n = int(1e5)
-parents = [-1] + [i - 1 for i in range(1, n)]
-print(Solution().evolutionaryRecord2(parents))
+if __name__ == "__main__":
+    parents = [3, 3, -1, 2, 2]
+    print(Solution().evolutionaryRecord(parents))

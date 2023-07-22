@@ -1,6 +1,7 @@
 /**
  * !理论O(nloglogn),但是没有st表快.
  * 优点在于维护的幺半群不需要满足幂等性(例如加法群不具有幂等性).
+ * @deprecated 使用线段树代替.
  */
 class SqrtTree<E> {
   private readonly _nums: E[]

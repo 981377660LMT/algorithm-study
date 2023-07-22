@@ -30,5 +30,16 @@ update
 https://naoya-2.hatenadiary.org/entry/20090405/aho_corasick
 Trie 是很多个字符串组成的树,AC 自动机是 Trie 的子类，用于匹配
 ![非常形象的图](image/note/1676744072418.png)
-
 字典树本质上也是 DFA，但是因为是树所以也可以看作一个字符占据一个节点
+
+基于双数组字典树的 AC 自动机
+https://blog.csdn.net/huoji555/article/details/105435014
+
+---
+
+https://zhuanlan.zhihu.com/p/408665473
+
+1. 构建 trie 树
+2. bfs 构建 fail 表
+3. 模式匹配
+   从目标串从头逐个开始，在 ac 自动机中进行匹配，匹配上的则计数，若未匹配上则跳转失配位置进行尝试匹配，直到全部匹配完成。
