@@ -37,9 +37,11 @@ https://blog.csdn.net/huoji555/article/details/105435014
 
 ---
 
+**最好的文章**
 https://zhuanlan.zhihu.com/p/408665473
+AC 自动机是 Trie 上的自动机
 
-1. 构建 trie 树
+1. 构建 trie 树, ac 自动机**继承**自 trie 树
 2. bfs 构建 fail 表
 3. 模式匹配
    从目标串从头逐个开始，在 ac 自动机中进行匹配，匹配上的则计数，若未匹配上则跳转失配位置进行尝试匹配，直到全部匹配完成。

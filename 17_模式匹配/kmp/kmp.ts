@@ -23,20 +23,20 @@ function getNext(shorter: string | ArrayLike<number>): Uint32Array {
   return next
 }
 
-class KMP {
-  private readonly _pattern: string | ArrayLike<number>
+class KMP<T extends string | ArrayLike<number> = string> {
+  private readonly _pattern: T
   private readonly _next: Uint32Array
 
   /**
    * @param pattern `模式串`或者`模式串`的unicode编码数组.
    * 注意模式串是较短的字符串，搜索串是较长的字符串.
    */
-  constructor(pattern: string | ArrayLike<number>) {
+  constructor(pattern: T) {
     this._pattern = pattern
     this._next = getNext(pattern)
   }
 
-  search(searchString: string, position = 0): number {
+  search(searchString: T, position = 0): number {
     if (searchString.length < this._pattern.length) return -1
     let pos = 0
     for (let i = position; i < searchString.length; i++) {
@@ -46,7 +46,7 @@ class KMP {
     return -1
   }
 
-  searchAll(searchString: string, position = 0): number[] {
+  searchAll(searchString: T, position = 0): number[] {
     if (searchString.length < this._pattern.length) return []
     const res: number[] = []
     let pos = 0
@@ -60,12 +60,12 @@ class KMP {
     return res
   }
 
-  move(pos: number, char: string): number {
+  move(pos: number, input: T[0]): number {
     if (pos < 0 || pos >= this._pattern.length) throw new RangeError(`pos: ${pos} is out of range`)
-    while (pos && char !== this._pattern[pos]) {
+    while (pos && input !== this._pattern[pos]) {
       pos = this._next[pos - 1]
     }
-    if (char === this._pattern[pos]) {
+    if (input === this._pattern[pos]) {
       pos++
     }
     return pos
@@ -100,8 +100,15 @@ if (require.main === module) {
     return kmp.search(haystack)
   }
 
-  const shorter = 'ab'
+  const shorter = 'a'
   const kmp = new KMP(shorter)
-  assert.equal(kmp.search('acab'), 2)
-  console.log(kmp.searchAll('abababab'))
+  console.log(kmp.move(0, 'b'))
+
+  // !无字符串拷贝(slice)的子串匹配
+  const shorter2 = 'ab'
+  const ords1 = new Uint32Array(shorter2.split('').map(c => c.charCodeAt(0)))
+  const kmp2 = new KMP(ords1)
+  const longer2 = 'ababababababaaa'
+  const ords2 = new Uint32Array(longer2.split('').map(c => c.charCodeAt(0)))
+  console.log(kmp2.searchAll(ords2.subarray(0, 10)))
 }

@@ -8,17 +8,11 @@
 # 若使用KMP算法,则每个模式串T,都要与主串S进行一次匹配,
 # 总时间复杂度为O(n×k+m),其中n为主串S的长度,m为各个模式串的长度之和,k为模式串的个数。
 # !而采用AC自动机,时间复杂度只需O(n+m)。
+# TODO
 
-
-from AutoMaton import AhoCorasick
+from ACAutoMaton import ACAutoMaton
 
 if __name__ == "__main__":
     n = int(input())
     words = [input() for _ in range(n)]
-    ac = AhoCorasick(words)
-    match = ac.search("#".join(words))
-    res = [0] * n
-    for *_, wid in match:
-        res[wid] += 1
-
-    print(*res, sep="\n")
+    ...

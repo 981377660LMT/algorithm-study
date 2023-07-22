@@ -39,11 +39,11 @@ class KMP:
                 pos = 0
         return res
 
-    def move(self, pos: int, char: str) -> int:
+    def move(self, pos: int, input_: str) -> int:
         assert 0 <= pos < len(self._pattern)
-        while pos and char != self._pattern[pos]:
+        while pos and input_ != self._pattern[pos]:
             pos = self.next[pos - 1]  # rollback
-        if char == self._pattern[pos]:
+        if input_ == self._pattern[pos]:
             pos += 1
         return pos
 

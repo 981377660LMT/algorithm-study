@@ -23,7 +23,7 @@ class Solution:
         maxLen = max(map(len, forbidden))
         res, left, n = 0, 0, len(word)
         for right in range(n):
-            # 新加入一个元素，尾部不能在bad里，否则这一段都无效
+            # !新加入一个元素，尾部不能在bad里，否则这一段都无效
             for len_ in range(1, min(right - left + 1, maxLen) + 1):
                 if word[right - len_ + 1 : right + 1] in bad:
                     left = right - len_ + 2
