@@ -116,7 +116,9 @@ func (d *DSUonTree) Run(
 			for i := d.down[cur]; i < d.up[cur]; i++ {
 				clear(d.euler[i])
 			}
-			reset()
+			if reset != nil {
+				reset()
+			}
 		}
 	}
 

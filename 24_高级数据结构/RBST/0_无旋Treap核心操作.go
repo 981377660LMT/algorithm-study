@@ -1,8 +1,27 @@
-// 1. Merge(left, right) -> root
-// 2. SplitByRank(root, k) -> [0,k) and [k,n)
-// 3. SplitByValue(root, v) -> [0,v) and [v,n)
-// 4. AllApply(node, lazy) -> node
-// 5. Toggle(node)
+// RBST:  https://nyaannyaan.github.io/library/rbst/lazy-reversible-rbst.hpp
+// Treap: https://nyaannyaan.github.io/library/rbst/treap.hpp
+//
+// https://hitonanode.github.io/cplib-cpp/data_structure/lazy_rbst.hpp
+
+// 分裂api:
+//  1. Merge(left, right) -> root
+//  2. SplitByRank(root, k) -> [0,k) and [k,n)
+//  3. SplitByValue(root, v) -> [0,v) and [v,n)
+//
+// 查询/更新api:
+//  1. AllApply(node, lazy) -> node
+//  2. Toggle(node)
+//  3. Query(node, start, end) -> res
+//  4. Update(node, start, end, lazy)
+//
+// 操作api:
+//  1. Reverse(node, start, end)
+//  2. Size(node) -> size
+//  3. Add(root, node) -> root
+//
+// 构建api:
+//  1. NewRoot() -> root
+//  2. NewNode(v) -> node
 
 package main
 
@@ -14,6 +33,8 @@ import (
 func main() {
 	fmt.Println(maxIncreasingGroups([]int{1, 2, 5}))
 	fmt.Println(maxIncreasingGroups([]int{2, 2, 2}))
+	// [1,1]
+	fmt.Println(maxIncreasingGroups([]int{1, 1}))
 }
 
 // 用一个平衡树存储所有数字的频率，创建长度为 res 的数组时，
@@ -31,19 +52,19 @@ func maxIncreasingGroups(usageLimits []int) int {
 		if Size(left) < i {
 			return i - 1
 		}
-		fmt.Println(left.data, left.size, "pre")
-		if right != nil {
-			fmt.Println(right.data, right.size, "right")
-		}
+		// fmt.Println(left.data, left.size, "pre")
+		// if right != nil {
+		// 	fmt.Println(right.data, right.size, "right")
+		// }
 		AllApply(left, -1) // 取出频率最大的 res 个数, 频率减 1
-		fmt.Println(left.data, left.size, "after")
-		nonZero, zero := SplitByValue(root, 1)
-		if zero != nil {
-			fmt.Println(zero.data, zero.size, "zero")
-		}
-		if nonZero != nil {
-			fmt.Println(nonZero.data, nonZero.size, "nonZero")
-		}
+		// fmt.Println(left.data, left.size, "after")
+		nonZero, _ := SplitByValue(root, 1)
+		// if zero != nil {
+		// 	fmt.Println(zero.data, zero.size, "zero")
+		// }
+		// if nonZero != nil {
+		// 	fmt.Println(nonZero.data, nonZero.size, "nonZero")
+		// }
 		root = Merge(nonZero, right)
 	}
 	return n
@@ -56,6 +77,7 @@ type E = int
 type Id = int
 
 func rev(e E) E              { return e }
+func e() E                   { return INF }
 func id() Id                 { return 0 }
 func op(e1, e2 E) E          { return min(e1, e2) }
 func mapping(f Id, e E) E    { return f + e }
@@ -77,13 +99,13 @@ type Node struct {
 	isReversed  bool
 }
 
+func NewRoot() *Node {
+	return nil
+}
+
 func NewNode(v E) *Node {
 	res := &Node{value: v, data: v, size: 1, lazy: id(), priority: _nextRand()}
 	return res
-}
-
-func NewRoot() *Node {
-	return nil
 }
 
 func Add(root, node *Node) *Node {
@@ -92,43 +114,6 @@ func Add(root, node *Node) *Node {
 	}
 	left, right := SplitByValue(root, node.value)
 	return Merge(Merge(left, node), right)
-}
-
-// 拼接两段区间
-//
-//	Merge left and right, return new root
-func Merge(left, right *Node) *Node {
-	if left == nil || right == nil {
-		if left == nil {
-			return right
-		}
-		return left
-	}
-
-	if left.priority < right.priority {
-		_pushDown(left)
-		left.right = Merge(left.right, right)
-		return _pushUp(left)
-	} else {
-		_pushDown(right)
-		right.left = Merge(left, right.left)
-		return _pushUp(right)
-	}
-}
-
-func Toggle(node *Node) {
-	tmp := node.left
-	node.left = node.right
-	node.right = tmp
-	node.data = rev(node.data)
-	node.isReversed = !node.isReversed
-}
-
-func AllApply(node *Node, f Id) *Node {
-	node.value = mapping(f, node.value)
-	node.data = mapping(f, node.data)
-	node.lazy = composition(f, node.lazy)
-	return node
 }
 
 // split root to [0,k) and [k,n)
@@ -166,6 +151,69 @@ func SplitByValue(root *Node, value E) (*Node, *Node) {
 	}
 }
 
+// 拼接两段区间
+func Merge(left, right *Node) *Node {
+	if left == nil || right == nil {
+		if left == nil {
+			return right
+		}
+		return left
+	}
+
+	if left.priority >= right.priority {
+		_pushDown(left)
+		left.right = Merge(left.right, right)
+		return _pushUp(left)
+	} else {
+		_pushDown(right)
+		right.left = Merge(left, right.left)
+		return _pushUp(right)
+	}
+}
+
+func AllApply(node *Node, f Id) *Node {
+	node.value = mapping(f, node.value)
+	node.data = mapping(f, node.data)
+	node.lazy = composition(f, node.lazy)
+	return node
+}
+
+func Toggle(node *Node) {
+	tmp := node.left
+	node.left = node.right
+	node.right = tmp
+	node.data = rev(node.data)
+	node.isReversed = !node.isReversed
+}
+
+// Fold.
+func Query(node *Node, start, end int) (res E) {
+	left1, right1 := SplitByRank(node, start)
+	left2, right2 := SplitByRank(right1, end-start)
+	if left2 != nil {
+		res = left2.data
+	} else {
+		res = e()
+	}
+	*node = *Merge(left1, Merge(left2, right2))
+	return
+}
+
+// Apply.
+func Update(node *Node, start, end int, f Id) {
+	left1, right1 := SplitByRank(node, start)
+	left2, right2 := SplitByRank(right1, end-start)
+	AllApply(left2, f)
+	*node = *Merge(left1, Merge(left2, right2))
+}
+
+func Reverse(node *Node, start, end int) {
+	left1, right1 := SplitByRank(node, start)
+	left2, right2 := SplitByRank(right1, end-start)
+	Toggle(left2)
+	*node = *Merge(left1, Merge(left2, right2))
+}
+
 func Size(node *Node) int {
 	if node == nil {
 		return 0
@@ -174,6 +222,9 @@ func Size(node *Node) int {
 }
 
 func _pushDown(node *Node) {
+	if node == nil {
+		return
+	}
 	if node.lazy != id() {
 		if node.left != nil {
 			AllApply(node.left, node.lazy)
