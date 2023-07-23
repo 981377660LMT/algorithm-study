@@ -1,5 +1,7 @@
 // https://nyaannyaan.github.io/library/string/aho-corasick.hpp
-
+// 默认字符集为26个小写字母,可以修改_SIZE和_MARGIN来修改字符集大小和起始字符.
+// !Trie由数组实现，比map实现的Trie快很多.
+//
 // API
 //  Insert(id int, s string, didInsert func(pos int)) *ACAutoMatonArray
 //  Build(heavy bool, dp func(fail, next int))

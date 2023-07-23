@@ -31,8 +31,8 @@ def dfs(cur: int, parent: int, curXor: int) -> None:
     for next, weight in adjMap[cur].items():
         if next == parent:
             continue
-        xors[next] = curXor ^ weight
-        dfs(next, cur, xors[next])
+        xorToRoot[next] = curXor ^ weight
+        dfs(next, cur, xorToRoot[next])
 
 
 adjMap = defaultdict(lambda: defaultdict(int))
@@ -42,6 +42,6 @@ for _ in range(n - 1):
     adjMap[u][v] = w
     adjMap[v][u] = w
 
-xors = [0] * n
+xorToRoot = [0] * n
 dfs(0, -1, 0)
-print(maxXor(xors))
+print(maxXor(xorToRoot))

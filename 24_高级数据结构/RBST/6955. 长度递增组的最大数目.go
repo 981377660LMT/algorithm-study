@@ -1,3 +1,14 @@
+package main
+
+func main() {
+
+}
+
+// 用一个堆存储所有数字的频率，创建长度为 res 的数组时，
+// 选取频率最大的 res 个数，将频率减 1 后放回堆中。
+func maxIncreasingGroups(usageLimits []int) int {
+	skewHeap := NewSkewHeap(false)
+}
 // https://hitonanode.github.io/cplib-cpp/data_structure/lazy_rbst.hpp
 
 // Api:
@@ -46,7 +57,7 @@ func main() {
 	for i := 0; i < n; i++ {
 		var x int
 		fmt.Fscan(in, &x)
-		nums[i] = x
+		nums[i] = E{sum: x, size: 1, min: x}
 	}
 
 	// !区间更新：加上一个数，区间查询：区间最小值
@@ -77,7 +88,7 @@ func main() {
 			var pos, val int
 			fmt.Fscan(in, &pos, &val)
 			pos--
-			T.Insert(pos+1, val)
+			T.Insert(pos+1, E{sum: val, size: 1, min: val})
 		} else if op == "DELETE" {
 			var pos int
 			fmt.Fscan(in, &pos)
@@ -87,19 +98,21 @@ func main() {
 			var left, right int
 			fmt.Fscan(in, &left, &right)
 			left--
-			fmt.Fprintln(out, T.Query(left, right))
+			fmt.Fprintln(out, T.Query(left, right).min)
 		}
 	}
 }
 
-type E = int
+type E = struct{ sum, size, min int }
 type Id = int
 
 // toggle时翻转左右的行为
-func (*RBST) rev(e E) E              { return e }
-func (*RBST) id() Id                 { return 0 }
-func (*RBST) op(e1, e2 E) E          { return min(e1, e2) }
-func (*RBST) mapping(f Id, e E) E    { return f + e }
+func (*RBST) rev(e E) E     { return e }
+func (*RBST) id() Id        { return 0 }
+func (*RBST) op(e1, e2 E) E { return E{e1.sum + e2.sum, e1.size + e2.size, min(e1.min, e2.min)} }
+func (*RBST) mapping(f Id, e E) E {
+	return E{e.sum + f*e.size, e.size, e.min + f}
+}
 func (*RBST) composition(f, g Id) Id { return f + g }
 
 func min(a, b int) int {
@@ -114,11 +127,11 @@ type RNode struct {
 	val, sum    E
 	lazy        Id
 	isReversed  bool
-	size        int
+	sz          int
 }
 
 func (n *RNode) String() string {
-	return fmt.Sprintf("{val: %v, sum: %v, size: %v}", n.val, n.sum, n.size)
+	return fmt.Sprintf("{val: %v, sum: %v, size: %v}", n.val, n.sum, n.sz)
 }
 
 type RBST struct {
@@ -212,8 +225,7 @@ func (rb *RBST) RotateLeft(start, stop, k int) {
 }
 
 // 0-indexed.Query [start, end)
-//
-//	!start must be smaller than end.
+//  !start must be smaller than end.
 func (rb *RBST) Query(start, end int) E {
 	f1, s1 := rb.split(rb.root, start)
 	f2, s2 := rb.split(s1, end-start)
@@ -249,10 +261,9 @@ func (rb *RBST) Set(pos int, e E) {
 func (rb *RBST) Size() int { return rb.size(rb.root) }
 
 // rbst.Query(0, i) が true となるような最大の i を返す．
-//
-//	i := rbst.MaxRight(e, func(v E) bool { return v.sum <= k })
-//	単調性を仮定．atcoder::lazy_segtree と同じ．
-//	e は単位元．
+//  i := rbst.MaxRight(e, func(v E) bool { return v.sum <= k })
+//  単調性を仮定．atcoder::lazy_segtree と同じ．
+//  e は単位元．
 func (rb *RBST) MaxRight(e E, f func(E) bool) int {
 	if rb.root == nil {
 		return 0
@@ -267,7 +278,7 @@ func (rb *RBST) MaxRight(e E, f func(E) bool) int {
 			pl := rb.op(prodNow, now.left.sum)
 			if f(pl) {
 				prodNow = pl
-				res += now.left.size
+				res += now.left.sz
 			} else {
 				now = now.left
 				continue
@@ -288,10 +299,9 @@ func (rb *RBST) MaxRight(e E, f func(E) bool) int {
 }
 
 // rbst.Query(i, rbst.Size()) が true となるような最小の i を返す．
-//
-//	i := rbst.MinLeft(e, func(v E) bool { return v.sum >= k })
-//	単調性を仮定．atcoder::lazy_segtree と同じ．
-//	e は単位元．
+//  i := rbst.MinLeft(e, func(v E) bool { return v.sum >= k })
+//  単調性を仮定．atcoder::lazy_segtree と同じ．
+//  e は単位元．
 func (rb *RBST) MinLeft(e E, f func(E) bool) int {
 	if rb.root == nil {
 		return 0
@@ -306,7 +316,7 @@ func (rb *RBST) MinLeft(e E, f func(E) bool) int {
 			pr := rb.op(now.right.sum, prodNow)
 			if f(pr) {
 				prodNow = pr
-				res -= now.right.size
+				res -= now.right.sz
 			} else {
 				now = now.right
 				continue
@@ -358,7 +368,7 @@ func (rb *RBST) merge(l, r *RNode) *RNode {
 		return l
 	}
 
-	if rb.nextRand()%uint32((l.size+r.size)) < uint32(l.size) {
+	if rb.nextRand()%uint32((l.sz+r.sz)) < uint32(l.sz) {
 		rb.push(l)
 		l.right = rb.merge(l.right, r)
 		return rb.update(l)
@@ -385,14 +395,14 @@ func (rb *RBST) split(root *RNode, k int) (*RNode, *RNode) {
 }
 
 func (rb *RBST) update(t *RNode) *RNode {
-	t.size = 1
+	t.sz = 1
 	t.sum = t.val
 	if t.left != nil {
-		t.size += t.left.size
+		t.sz += t.left.sz
 		t.sum = rb.op(t.left.sum, t.sum)
 	}
 	if t.right != nil {
-		t.size += t.right.size
+		t.sz += t.right.sz
 		t.sum = rb.op(t.sum, t.right.sum)
 	}
 	return t
@@ -435,7 +445,7 @@ func (rb *RBST) push(t *RNode) {
 }
 
 func (rb *RBST) alloc(v E) *RNode {
-	res := &RNode{val: v, sum: v, size: 1, lazy: rb.id()}
+	res := &RNode{val: v, sum: v, sz: 1, lazy: rb.id()}
 	return res
 }
 
@@ -458,7 +468,7 @@ func (rb *RBST) size(node *RNode) int {
 	if node == nil {
 		return 0
 	}
-	return node.size
+	return node.sz
 }
 
 // XORShift

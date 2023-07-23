@@ -11,6 +11,10 @@
 # !1 <= forbidden[i].length <= 1e5
 # !sum(len(forbidden)) <= 1e7
 # forbidden[i] 只包含小写英文字母。
+#
+# 思路:
+# 类似字符流, 需要处理出每个位置为结束字符的包含至少一个模式串的`最短后缀`.
+# !那么此时左端点就对应这个位置+1
 
 
 from collections import defaultdict

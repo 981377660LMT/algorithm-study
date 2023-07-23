@@ -100,7 +100,7 @@ func (ds *DynamicSegTreeLazy) Query(root *SegNode, start, end int) E {
 }
 
 func (ds *DynamicSegTreeLazy) QueryAll(root *SegNode) E {
-	return root.x
+	return ds.Query(root, ds.L, ds.R)
 }
 
 // L<=index<R

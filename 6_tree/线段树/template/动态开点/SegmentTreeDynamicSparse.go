@@ -105,7 +105,7 @@ func (ds *DynamicSegTreeSparse) Query(root *SegNode, left, right int) E {
 }
 
 func (ds *DynamicSegTreeSparse) QueryAll(root *SegNode) E {
-	return root.sum
+	return ds.Query(root, ds.L, ds.R)
 }
 
 // L<=index<R

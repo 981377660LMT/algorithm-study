@@ -172,6 +172,7 @@ if __name__ == "__main__":
             for i, small in enumerate(smalls):
                 ac.insert(i, small)
             ac.build(heavy=True)
+
             matching = ac.match(0, big)
             res = [[] for _ in range(len(smalls))]
             for wordId, starts in matching.items():

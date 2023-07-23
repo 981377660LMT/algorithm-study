@@ -34,6 +34,7 @@ Trie 是很多个字符串组成的树,AC 自动机是 Trie 的子类，用于�
 
 基于双数组字典树的 AC 自动机
 https://blog.csdn.net/huoji555/article/details/105435014
+https://zhuanlan.zhihu.com/p/185832624
 
 ---
 

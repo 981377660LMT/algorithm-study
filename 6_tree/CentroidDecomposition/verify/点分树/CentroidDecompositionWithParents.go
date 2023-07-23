@@ -25,10 +25,11 @@ func main() {
 type Edge = struct{ to, cost int }
 
 // 树的重心分解, 返回点分树和点分树的根
-//  g: 原图
-//  centTree: 重心互相连接形成的有根树, 可以想象把树拎起来, 重心在树的中心，连接着各个子树的重心...
-//  root: 重心树的根
-//	parents: 每个点的父亲,不存在则为-1
+//
+//	 g: 原图
+//	 centTree: 重心互相连接形成的有根树, 可以想象把树拎起来, 重心在树的中心，连接着各个子树的重心...
+//	 root: 重心树的根
+//		parents: 每个点的父亲,不存在则为-1
 func CentroidDecompositionWithParents(g [][]Edge) (centTree [][]int, root int, parents []int) {
 	n := len(g)
 	subSize := make([]int, n)

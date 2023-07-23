@@ -214,7 +214,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
   }
 
   queryAll(root: SegNode<E, Id> = this._root): E {
-    return root.data
+    return this.query(this._lower, this._upper, root)
   }
 
   /**

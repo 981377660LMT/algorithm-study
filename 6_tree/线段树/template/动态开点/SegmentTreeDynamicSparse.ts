@@ -115,7 +115,7 @@ class SegmentTreeDynamic<E = number> {
   }
 
   queryAll(root: SegNode<E> = this._root): E {
-    return root.sum
+    return this.query(this._lower, this._upper, root)
   }
 
   /**

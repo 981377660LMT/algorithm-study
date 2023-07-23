@@ -2,28 +2,25 @@
 /* eslint-disable no-inner-declarations */
 
 /**
- * - AC自动机,多模式串匹配.
- * - AC自动机是Trie的子类,在Trie的基础上增加了fail指针(此处不使用继承).
- * - AC自动机是KMP自动机的多模式串版本的推广.
- * @warning 容易MLE.最好使用python/golang 版本.
+ * @deprecated
  */
-class ACAutoMaton<S extends string | ArrayLike<number> = string> {
+class ACAutoMatonArray {
   /**
-   * `模式串/模式串unicode编码`列表.
+   * 模式串列表.
    */
-  private readonly _pattern: S[] = []
+  private readonly _pattern: string[] = []
 
   /**
    * Trie树.
    * `_children[i]`表示节点(状态)`i`的所有子节点,`0`表示虚拟根节点.
    */
-  private readonly _children: Map<S[0], number>[] = [new Map()]
+  private readonly _children: Int32Array[] = []
 
   /**
    * Trie树结点附带的信息.
    * `_matching[i]`表示节点(状态)`i`对应的字符串唯一标识.
    */
-  private readonly _matching: number[][] = [[]]
+  private readonly _matching: number[][] = []
 
   /**
    * Trie树结点附带的信息.
@@ -41,26 +38,40 @@ class ACAutoMaton<S extends string | ArrayLike<number> = string> {
    */
   private _heavy = false
 
+  private readonly _size: number
+  private readonly _margin: number
+
+  /**
+   * @param size 字符集大小.默认为26,即所有小写字母.
+   * @param margin 字符集的起始字符.默认为97,即`a`的ascii码.
+   */
+  constructor(size = 26, margin = 97) {
+    this._size = size
+    this._margin = margin
+    this._children.push(new Int32Array(size).fill(-1))
+    this._matching.push([])
+  }
+
   /**
    * 将模式串`pattern`插入到Trie树中.模式串一般是`被禁用的单词`.
    * @param pid 模式串的唯一标识id.
    * @param pattern 模式串.
    * @param didInsert 模式串插入后的回调函数,入参为结束字符所在的结点(状态).
    */
-  insert(pid: number, pattern: S, didInsert?: (endState: number) => void): this {
+  insert(pid: number, pattern: string, didInsert?: (endState: number) => void): this {
     if (!pattern) return this
 
     let root = 0
     for (let i = 0; i < pattern.length; i++) {
-      const char = pattern[i]
+      const char = pattern[i].charCodeAt(0)! - this._margin
       const nexts = this._children[root]
-      if (nexts.has(char)) {
-        root = nexts.get(char)!
+      if (~nexts[char]) {
+        root = nexts[char]
       } else {
         const nextState = this._children.length
-        nexts.set(char, nextState)
+        nexts[char] = nextState
         root = nextState
-        this._children.push(new Map())
+        this._children.push(new Int32Array(this._size).fill(-1))
         this._matching.push([])
       }
     }
@@ -86,21 +97,28 @@ class ACAutoMaton<S extends string | ArrayLike<number> = string> {
     this._heavy = !!heavy
 
     let queue: number[] = []
-    this._children[0].forEach(next => queue.push(next))
+    for (let i = 0; i < this._size; i++) {
+      const next = this._children[0][i]
+      if (~next) queue.push(next)
+    }
     while (queue.length) {
       const nextQueue: number[] = []
       const len = queue.length
       for (let i = 0; i < len; i++) {
         const cur = queue[i]
         const curFail = this._fail[cur]
-        this._children[cur].forEach((next, input) => {
-          const move = this.move(curFail, input)
-          this._fail[next] = move // !更新子节点的fail指针
-          this._wordCount[next] += this._wordCount[move] // !更新子节点的匹配个数
-          heavy && this._matching[next].push(...this._matching[move]) // !更新move状态匹配的模式串下标
-          dp && dp(move, next)
-          nextQueue.push(next)
-        })
+        const curChildren = this._children[cur]
+        for (let j = 0; j < this._size; j++) {
+          const next = curChildren[j]
+          if (~next) {
+            const move = this.move(curFail, j)
+            this._fail[next] = move // !更新子节点的fail指针
+            this._wordCount[next] += this._wordCount[move] // !更新子节点的匹配个数
+            heavy && this._matching[next].push(...this._matching[move]) // !更新move状态匹配的模式串下标
+            dp && dp(move, next)
+            nextQueue.push(next)
+          }
+        }
       }
       queue = nextQueue
     }
@@ -110,13 +128,14 @@ class ACAutoMaton<S extends string | ArrayLike<number> = string> {
    * 从当前状态`state`沿着字符`input`转移到的下一个状态.
    * 沿着失配链上跳,找到第一个可由input转移的节点.
    * @param state 当前状态.
-   * @param input 输入字符.
+   * @param input 输入字符或字符的ascii码.
    * @returns 下一个状态.
    */
-  move(state: number, input: S[0]): number {
+  move(state: number, input: string | number): number {
+    const char = typeof input === 'string' ? input.charCodeAt(0)! - this._margin : input
     while (true) {
       const nexts = this._children[state]
-      if (nexts.has(input)) return nexts.get(input)!
+      if (~nexts[char]) return nexts[char]
       if (!state) return 0
       state = this._fail[state]
     }
@@ -128,7 +147,7 @@ class ACAutoMaton<S extends string | ArrayLike<number> = string> {
    * @param searchString 待匹配的字符串.
    * @returns 每个模式串在`searchString`中出现的下标.
    */
-  match(state: number, searchString: S): Map<number, number[]> {
+  match(state: number, searchString: string): Map<number, number[]> {
     if (!this._heavy) throw new Error('需要调用build(true)构建AC自动机')
     const res = new Map<number, number[]>()
     let root = state
@@ -158,16 +177,16 @@ class ACAutoMaton<S extends string | ArrayLike<number> = string> {
   }
 }
 
-export { ACAutoMaton }
+export { ACAutoMatonArray }
 
 if (require.main === module) {
   // 1032. 字符流
   // https://leetcode.cn/problems/stream-of-characters/
   class StreamChecker {
-    private readonly _acm: ACAutoMaton
+    private readonly _acm: ACAutoMatonArray
     private _state = 0
     constructor(words: string[]) {
-      this._acm = new ACAutoMaton()
+      this._acm = new ACAutoMatonArray()
       words.forEach((word, i) => this._acm.insert(i, word))
       this._acm.build()
     }
@@ -187,7 +206,7 @@ if (require.main === module) {
   // 面试题 17.17. 多次搜索
   // https://leetcode.cn/problems/multi-search-lcci/
   function multiSearch(big: string, smalls: string[]): number[][] {
-    const acm = new ACAutoMaton()
+    const acm = new ACAutoMatonArray()
     smalls.forEach((small, i) => acm.insert(i, small))
     acm.build(true)
 

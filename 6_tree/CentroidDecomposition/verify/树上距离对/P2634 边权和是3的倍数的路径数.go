@@ -25,8 +25,8 @@ func main() {
 		var u, v, w int
 		fmt.Fscan(in, &u, &v, &w)
 		u, v = u-1, v-1
-		g[u] = append(g[u], Edge{to: v, cost: w})
-		g[v] = append(g[v], Edge{to: u, cost: w})
+		g[u] = append(g[u], Edge{to: v, weight: w})
+		g[v] = append(g[v], Edge{to: u, weight: w})
 	}
 
 	// 全局状态
@@ -38,7 +38,7 @@ func main() {
 	collectDist = func(cur, pre, distMod int, mp map[int]int) {
 		mp[distMod]++
 		for _, e := range g[cur] {
-			next, cost := e.to, e.cost
+			next, cost := e.to, e.weight
 			if next != pre && !removed[next] {
 				collectDist(next, cur, (distMod+cost)%3, mp)
 			}
@@ -58,17 +58,17 @@ func main() {
 		// 统计经过重心的路径
 		counter := map[int]int{0: 1} // mod3 -> count
 		for _, e := range g[cur] {
-			next, cost := e.to, e.cost
+			next, cost := e.to, e.weight
 			if next == pre || removed[next] {
 				continue
 			}
 
-			mp := map[int]int{}
-			collectDist(next, cur, cost%3, mp)
-			for k, v := range mp {
+			sub := map[int]int{}
+			collectDist(next, cur, cost%3, sub)
+			for k, v := range sub {
 				res += v * counter[(3-k)%3]
 			}
-			for k, v := range mp {
+			for k, v := range sub {
 				counter[k] += v // !注意这里不能和上面的循环合并
 			}
 		}
@@ -86,14 +86,15 @@ func main() {
 	fmt.Fprintf(out, "%d/%d", res/gcd_, n*n/gcd_)
 }
 
-type Edge = struct{ to, cost int }
+type Edge = struct{ to, weight int }
 
 // 树的重心分解, 返回点分树和点分树的根
-//  g: 原图
-//  centTree: 重心互相连接形成的有根树, 可以想象把树拎起来, 重心在树的中心，连接着各个子树的重心...
-//  root: 点分树的根
-func CentroidDecomposition(g [][]Edge) (centTree [][]int, root int) {
-	n := len(g)
+//
+//	!tree: `无向`树的邻接表.
+//	centTree: 重心互相连接形成的有根树, 可以想象把树拎起来, 重心在树的中心，连接着各个子树的重心...
+//	root: 点分树的根
+func CentroidDecomposition(tree [][]Edge) (centTree [][]int, root int) {
+	n := len(tree)
 	subSize := make([]int, n)
 	removed := make([]bool, n)
 	centTree = make([][]int, n)
@@ -103,7 +104,7 @@ func CentroidDecomposition(g [][]Edge) (centTree [][]int, root int) {
 	var build func(cur int) int
 	getSize = func(cur, parent int) int {
 		subSize[cur] = 1
-		for _, e := range g[cur] {
+		for _, e := range tree[cur] {
 			next := e.to
 			if next == parent || removed[next] {
 				continue
@@ -113,7 +114,7 @@ func CentroidDecomposition(g [][]Edge) (centTree [][]int, root int) {
 		return subSize[cur]
 	}
 	getCentroid = func(cur, parent, mid int) int {
-		for _, e := range g[cur] {
+		for _, e := range tree[cur] {
 			next := e.to
 			if next == parent || removed[next] {
 				continue
@@ -127,7 +128,7 @@ func CentroidDecomposition(g [][]Edge) (centTree [][]int, root int) {
 	build = func(cur int) int {
 		centroid := getCentroid(cur, -1, getSize(cur, -1)/2)
 		removed[centroid] = true
-		for _, e := range g[centroid] {
+		for _, e := range tree[centroid] {
 			next := e.to
 			if !removed[next] {
 				centTree[centroid] = append(centTree[centroid], build(next))
