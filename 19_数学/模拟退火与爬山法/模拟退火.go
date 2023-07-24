@@ -2,14 +2,11 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
 )
-
-func main() {
-
-}
 
 // https://leetcode-cn.com/contest/weekly-contest-197/problems/best-position-for-a-service-centre/ http://poj.org/problem?id=2420 UVa 10228 https://onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=14&page=show_problem&problem=1169
 func simulatedAnnealing(f func(x float64) float64) float64 {
@@ -45,4 +42,14 @@ func simulatedAnnealingWithinTimeLimit(f func(x float64) float64) float64 {
 		t *= 0.999 // 置于末尾，方便在 roll 到不合适的数据时直接 continue，同时也保证不会因为 roll 不到合适的数据而超时
 	}
 	return ans
+}
+
+func main() {
+	res := simulatedAnnealingWithinTimeLimit(
+		func(x float64) float64 {
+			return x*x*x*x + x
+		},
+	)
+
+	fmt.Println(res)
 }
