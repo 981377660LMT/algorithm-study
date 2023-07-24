@@ -99,7 +99,6 @@ type Id = struct {
 func (*RBST) rev(e E) E     { return e }
 func (*RBST) id() Id        { return Id{flip: false, mul: 1, add: 0} }
 func (*RBST) op(e1, e2 E) E { return E{(e1.sum + e2.sum) % MOD, e1.size + e2.size} }
-
 func (*RBST) mapping(f Id, e E) E {
 	if !f.flip {
 		return e
@@ -107,7 +106,6 @@ func (*RBST) mapping(f Id, e E) E {
 	mul, add := f.mul, f.add
 	return E{(mul*e.sum%MOD + add*e.size%MOD) % MOD, e.size}
 }
-
 func (*RBST) composition(f, g Id) Id {
 	if !f.flip {
 		return g
@@ -223,11 +221,11 @@ func (rb *RBST) RotateLeft(start, stop, k int) {
 }
 
 // 0-indexed.Query [start, end)
-//  !start must be smaller than end.
+//
+//	!start must be smaller than end.
 func (rb *RBST) Query(start, end int) E {
 	f1, s1 := rb.split(rb.root, start)
 	f2, s2 := rb.split(s1, end-start)
-	// rb.push(f2)  // TODO
 	res := f2.sum
 	rb.root = rb.merge(f1, rb.merge(f2, s2))
 	return res
@@ -259,9 +257,10 @@ func (rb *RBST) Set(pos int, e E) {
 func (rb *RBST) Size() int { return rb.size(rb.root) }
 
 // rbst.Query(0, i) が true となるような最大の i を返す．
-//  i := rbst.MaxRight(e, func(v E) bool { return v.sum <= k })
-//  単調性を仮定．atcoder::lazy_segtree と同じ．
-//  e は単位元．
+//
+//	i := rbst.MaxRight(e, func(v E) bool { return v.sum <= k })
+//	単調性を仮定．atcoder::lazy_segtree と同じ．
+//	e は単位元．
 func (rb *RBST) MaxRight(e E, f func(E) bool) int {
 	if rb.root == nil {
 		return 0
@@ -297,9 +296,10 @@ func (rb *RBST) MaxRight(e E, f func(E) bool) int {
 }
 
 // rbst.Query(i, rbst.Size()) が true となるような最小の i を返す．
-//  i := rbst.MinLeft(e, func(v E) bool { return v.sum >= k })
-//  単調性を仮定．atcoder::lazy_segtree と同じ．
-//  e は単位元．
+//
+//	i := rbst.MinLeft(e, func(v E) bool { return v.sum >= k })
+//	単調性を仮定．atcoder::lazy_segtree と同じ．
+//	e は単位元．
 func (rb *RBST) MinLeft(e E, f func(E) bool) int {
 	if rb.root == nil {
 		return 0

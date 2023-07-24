@@ -1,88 +1,50 @@
-// RBST:  https://nyaannyaan.github.io/library/rbst/lazy-reversible-rbst.hpp
-// Treap: https://nyaannyaan.github.io/library/rbst/treap.hpp
+// Reference:
+//  https://maspypy.github.io/library/ds/randomized_bst/rbst_acted_monoid.hpp
 //
-// https://hitonanode.github.io/cplib-cpp/data_structure/lazy_rbst.hpp
-
-// 分裂api:
-//  1. Merge(left, right) -> root
-//  2. SplitByRank(root, k) -> [0,k) and [k,n)
-//  3. SplitByValue(root, v) -> [0,v) and [v,n)
 //
-// 查询/更新api:
-//  1. AllApply(node, lazy) -> node
-//  2. Toggle(node)
-//  3. Query(node, start, end) -> res
-//  4. Update(node, start, end, lazy)
+// !幺半群上的RBST
 //
-// 操作api:
-//  1. Reverse(node, start, end)
-//  2. Size(node) -> size
-//  3. Add(root, node) -> root
+//  分裂/拼接api:
+//   1. Merge(left, right) -> root
+//   2. Add(root, node) -> root
+//   3. SplitByRank(root, k) -> [0,k) and [k,n)
+//   4. SplitByValue(root, v) -> （-inf,v) and [v,inf)
 //
-// 构建api:
-//  1. NewRoot() -> root
-//  2. NewNode(v) -> node
+//  查询/更新api:
+//   1. Query(node, start, end) -> res
+//   2. QueryAll(node) -> res
+//   3. Update(node, start, end, lazy)
+//   4. AllApply(node, lazy) -> node
+//
+//  构建api:
+//   1. NewRoot() -> root
+//   2. NewNode(v) -> node
+//
+//  操作api:
+//   1. Toggle(node)
+//   2. Reverse(node, start, end)
+//   3. Size(node) -> size
+//   Pop/Erase/At/BisectLeft/BisectRight... 都是基于分裂/拼接实现的
 
 package main
 
 import (
-	"fmt"
 	"time"
 )
 
-func main() {
-	fmt.Println(maxIncreasingGroups([]int{1, 2, 5}))
-	fmt.Println(maxIncreasingGroups([]int{2, 2, 2}))
-	// [1,1]
-	fmt.Println(maxIncreasingGroups([]int{1, 1}))
-}
-
-// 用一个平衡树存储所有数字的频率，创建长度为 res 的数组时，
-// 选取频率最大的 res 个数，将频率减 1 后放回平衡树中。
-func maxIncreasingGroups(usageLimits []int) int {
-	n := len(usageLimits)
-	root := NewRoot()
-	for i := 0; i < n; i++ {
-		node := NewNode(usageLimits[i])
-		root = Add(root, node)
-	}
-
-	for i := 1; i <= n; i++ {
-		left, right := SplitByRank(root, i)
-		if Size(left) < i {
-			return i - 1
-		}
-		// fmt.Println(left.data, left.size, "pre")
-		// if right != nil {
-		// 	fmt.Println(right.data, right.size, "right")
-		// }
-		AllApply(left, -1) // 取出频率最大的 res 个数, 频率减 1
-		// fmt.Println(left.data, left.size, "after")
-		nonZero, _ := SplitByValue(root, 1)
-		// if zero != nil {
-		// 	fmt.Println(zero.data, zero.size, "zero")
-		// }
-		// if nonZero != nil {
-		// 	fmt.Println(nonZero.data, nonZero.size, "nonZero")
-		// }
-		root = Merge(nonZero, right)
-	}
-	return n
-}
-
 const INF int = 1e18
 
-// RangeAddRangeMin
+// RangeAddRangeMax
 type E = int
 type Id = int
 
 func rev(e E) E              { return e }
-func e() E                   { return INF }
+func e() E                   { return 0 }
 func id() Id                 { return 0 }
-func op(e1, e2 E) E          { return min(e1, e2) }
+func op(e1, e2 E) E          { return max(e1, e2) }
 func mapping(f Id, e E) E    { return f + e }
 func composition(f, g Id) Id { return f + g }
-func less(e1, e2 E) bool     { return e1 > e2 } // 维护最大值
+func less(e1, e2 E) bool     { return e1 > e2 } // !维护最大值
 
 //
 //
@@ -108,12 +70,33 @@ func NewNode(v E) *Node {
 	return res
 }
 
+// 合并两棵树, 保证Value有序.
 func Add(root, node *Node) *Node {
 	if node == nil {
 		return root
 	}
 	left, right := SplitByValue(root, node.value)
 	return Merge(Merge(left, node), right)
+}
+
+// 合并`左右`两棵树，保证Rank有序.
+func Merge(left, right *Node) *Node {
+	if left == nil || right == nil {
+		if left == nil {
+			return right
+		}
+		return left
+	}
+
+	if left.priority > right.priority {
+		_pushDown(left)
+		left.right = Merge(left.right, right)
+		return _pushUp(left)
+	} else {
+		_pushDown(right)
+		right.left = Merge(left, right.left)
+		return _pushUp(right)
+	}
 }
 
 // split root to [0,k) and [k,n)
@@ -140,7 +123,7 @@ func SplitByValue(root *Node, value E) (*Node, *Node) {
 		return nil, nil
 	}
 	_pushDown(root)
-	if less(root.value, value) {
+	if less(value, root.value) {
 		first, second := SplitByValue(root.left, value)
 		root.left = second
 		return first, _pushUp(root)
@@ -151,26 +134,7 @@ func SplitByValue(root *Node, value E) (*Node, *Node) {
 	}
 }
 
-// 拼接两段区间
-func Merge(left, right *Node) *Node {
-	if left == nil || right == nil {
-		if left == nil {
-			return right
-		}
-		return left
-	}
-
-	if left.priority >= right.priority {
-		_pushDown(left)
-		left.right = Merge(left.right, right)
-		return _pushUp(left)
-	} else {
-		_pushDown(right)
-		right.left = Merge(left, right.left)
-		return _pushUp(right)
-	}
-}
-
+// UpdateAll.
 func AllApply(node *Node, f Id) *Node {
 	node.value = mapping(f, node.value)
 	node.data = mapping(f, node.data)
@@ -179,15 +143,16 @@ func AllApply(node *Node, f Id) *Node {
 }
 
 func Toggle(node *Node) {
-	tmp := node.left
-	node.left = node.right
-	node.right = tmp
+	node.left, node.right = node.right, node.left
 	node.data = rev(node.data)
 	node.isReversed = !node.isReversed
 }
 
 // Fold.
 func Query(node *Node, start, end int) (res E) {
+	if start >= end {
+		return e()
+	}
 	left1, right1 := SplitByRank(node, start)
 	left2, right2 := SplitByRank(right1, end-start)
 	if left2 != nil {
@@ -199,8 +164,18 @@ func Query(node *Node, start, end int) (res E) {
 	return
 }
 
+func QueryAll(node *Node) E {
+	if node == nil {
+		return e()
+	}
+	return node.data
+}
+
 // Apply.
 func Update(node *Node, start, end int, f Id) {
+	if start >= end {
+		return
+	}
 	left1, right1 := SplitByRank(node, start)
 	left2, right2 := SplitByRank(right1, end-start)
 	AllApply(left2, f)
@@ -208,6 +183,9 @@ func Update(node *Node, start, end int, f Id) {
 }
 
 func Reverse(node *Node, start, end int) {
+	if start >= end {
+		return
+	}
 	left1, right1 := SplitByRank(node, start)
 	left2, right2 := SplitByRank(right1, end-start)
 	Toggle(left2)
