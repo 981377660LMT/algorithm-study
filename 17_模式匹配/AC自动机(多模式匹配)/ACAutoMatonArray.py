@@ -11,7 +11,7 @@ from collections import defaultdict, deque
 from typing import Callable, DefaultDict, List, Optional
 
 
-class ACAutoMaton:
+class ACAutoMatonArray:
     """AC自动机,多模式串匹配."""
 
     __slots__ = ("_patterns", "_children", "_wordCount", "_matching", "_fail", "_heavy")
@@ -20,7 +20,7 @@ class ACAutoMaton:
         self._patterns = []
         """模式串列表."""
 
-        self._children = [{}]
+        self._children = []
         """trie树.children[i]表示节点(状态)i的所有子节点,0 表示虚拟根节点."""
 
         self._wordCount = []
@@ -37,7 +37,7 @@ class ACAutoMaton:
 
     def insert(
         self, pid: int, pattern: str, didInsert: Optional[Callable[[int], None]] = None
-    ) -> "ACAutoMaton":
+    ) -> "ACAutoMatonArray":
         """将模式串`pattern`插入到Trie树中.模式串一般是`被禁用的单词`.
 
         Args:
@@ -146,7 +146,7 @@ class ACAutoMaton:
 if __name__ == "__main__":
 
     def demo() -> None:
-        ac = ACAutoMaton()
+        ac = ACAutoMatonArray()
         ac.insert(0, "he")
         ac.insert(1, "she")
         ac.insert(2, "his")
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     class Solution:
         def multiSearch(self, big: str, smalls: List[str]) -> List[List[int]]:
             """多模式匹配indexOfAll"""
-            ac = ACAutoMaton()
+            ac = ACAutoMatonArray()
             for i, small in enumerate(smalls):
                 ac.insert(i, small)
             ac.build(heavy=True)
@@ -186,7 +186,7 @@ if __name__ == "__main__":
     # https://leetcode.cn/problems/stream-of-characters/
     class StreamChecker:
         def __init__(self, words: List[str]):
-            self._ac = ACAutoMaton()
+            self._ac = ACAutoMatonArray()
             for i, word in enumerate(words):
                 self._ac.insert(i, word)
             self._ac.build()
