@@ -1,75 +1,36 @@
-// RBST:  https://nyaannyaan.github.io/library/rbst/lazy-reversible-rbst.hpp
-// Treap: https://nyaannyaan.github.io/library/rbst/treap.hpp
+// Reference:
+//  https://maspypy.github.io/library/ds/randomized_bst/rbst_acted_monoid.hpp
 //
-// https://hitonanode.github.io/cplib-cpp/data_structure/lazy_rbst.hpp
-
-// 分裂/拼接api:
-//  1. Merge(left, right) -> root
-//  2. Add(root, node) -> root
-//  3. SplitByRank(root, k) -> [0,k) and [k,n)
-//  4. SplitByValue(root, v) -> （-inf,v) and [v,inf)
 //
-// 查询/更新api:
-//  1. AllApply(node, lazy) -> node
-//  2. Toggle(node)
-//  3. Query(node, start, end) -> res
-//  4. Update(node, start, end, lazy)
+// !幺半群上的RBST
 //
-// 操作api:
-//  1. Reverse(node, start, end)
-//  2. Size(node) -> size
+//  分裂/拼接api:
+//   1. Merge(left, right) -> root
+//   2. Add(root, node) -> root
+//   3. SplitByRank(root, k) -> [0,k) and [k,n)
+//   4. SplitByValue(root, v) -> （-inf,v) and [v,inf)
 //
-// 构建api:
-//  1. NewRoot() -> root
-//  2. NewNode(v) -> node
+//  查询/更新api:
+//   1. Query(node, start, end) -> res
+//   2. QueryAll(node) -> res
+//   3. Update(node, start, end, lazy)
+//   4. AllApply(node, lazy) -> node
+//
+//  构建api:
+//   1. NewRoot() -> root
+//   2. NewNode(v) -> node
+//
+//  操作api:
+//   1. Toggle(node)
+//   2. Reverse(node, start, end)
+//   3. Size(node) -> size
+//   Pop/Erase/At/BisectLeft/BisectRight... 都是基于分裂/拼接实现的
 
 package main
 
 import (
-	"fmt"
 	"time"
 )
-
-func main() {
-	assert := func(cur, expect interface{}) {
-		if cur != expect {
-			panic(fmt.Sprintf("cur: %v, expect: %v", cur, expect))
-		}
-	}
-	assert(maxIncreasingGroups([]int{1, 2, 5}), 3) // 3
-	assert(maxIncreasingGroups([]int{2, 2, 2}), 3)
-	assert(maxIncreasingGroups([]int{1, 1}), 1)
-	fmt.Println("OK")
-}
-
-// 用一个平衡树存储所有数字的频率，创建长度为 res 的数组时，
-// 选取频率最大的 res 个数，将频率减 1 后放回平衡树中。
-// !难点在于怎么放回平衡树
-// 2790. 长度递增组的最大数目
-// https://leetcode.cn/problems/maximum-number-of-groups-with-increasing-length/solution/bao-li-mo-ni-fa-by-vclip-wcxi/
-func maxIncreasingGroups(usageLimits []int) int {
-	n := len(usageLimits)
-	tree := NewRoot()
-	for i := 0; i < n; i++ {
-		node := NewNode(usageLimits[i])
-		tree = Insert(tree, node)
-	}
-
-	for i := 1; i <= n; i++ {
-		if Size(tree) < i {
-			return i - 1
-		}
-		big, small := SplitByRank(tree, i)
-		AllApply(big, -1) // 取出频率最大的 res 个数, 频率减 1
-		max_ := QueryAll(small)
-		notLess, less := SplitByValue(big, max_)
-		nonZero, _ := SplitByValue(less, 1)
-		tree = Merge(notLess, small) // 左右拼接后是有序的
-		tree = Insert(tree, nonZero) // 顺序插入
-	}
-
-	return n
-}
 
 const INF int = 1e18
 
@@ -109,12 +70,12 @@ func NewNode(v E) *Node {
 	return res
 }
 
-// 将node插入到tree中，插入位置由Value决定.
-func Insert(tree, node *Node) *Node {
+// 合并两棵树, 保证Value有序.
+func Add(root, node *Node) *Node {
 	if node == nil {
-		return tree
+		return root
 	}
-	left, right := SplitByValue(tree, node.value)
+	left, right := SplitByValue(root, node.value)
 	return Merge(Merge(left, node), right)
 }
 
