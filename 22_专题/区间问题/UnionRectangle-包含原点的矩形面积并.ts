@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { SortedList } from '../离线查询/根号分治/SortedList/SortedList'
+import { SortedList } from '../离线查询/根号分治/SortedList/_SortedList'
 
 const INF = 2e15
 

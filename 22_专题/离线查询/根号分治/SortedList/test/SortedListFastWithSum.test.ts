@@ -1,12 +1,12 @@
-import { SortedListFast } from '../SortedListFast'
+import { SortedListFastWithSum } from '../SortedListWithSum'
 
-describe('SortedListFast', () => {
-  let sl: SortedListFast<any>
+describe('SortedListSumWithFast', () => {
+  let sl: SortedListFastWithSum<any>
   let sortedNums: number[]
   beforeEach(() => {
     const n = Math.floor(Math.random() * 100) + 1
     const nums = Array.from({ length: n }, () => Math.floor(Math.random() * 100000))
-    sl = new SortedListFast(nums)
+    sl = new SortedListFastWithSum({ values: nums })
     sortedNums = nums.sort((a, b) => a - b)
   })
 
@@ -179,5 +179,56 @@ describe('SortedListFast', () => {
     sortedNums.sort((a, b) => a - b)
     expect(sl.length).toBe(sortedNums.length)
     expect(sortedNums).toStrictEqual([...sl])
+  })
+
+  // sumSlice(start, end)
+  it('should support sumSlice', () => {
+    for (let i = 0; i < 100; i++) {
+      let start = Math.floor(Math.random() * sl.length)
+      let end = Math.floor(Math.random() * sl.length)
+      if (start > end) [start, end] = [end, start]
+      const sum = sl.sumSlice(start, end)
+      const target = sortedNums.slice(start, end).reduce((a, b) => a + b, 0)
+      expect(sum).toBe(target)
+
+      // discard/add
+      const willDiscard = Math.random() > 0.5
+      if (willDiscard) {
+        const discard = sortedNums[~~(Math.random() * sortedNums.length)]
+        sl.discard(discard)
+        sortedNums = sortedNums.filter(num => num !== discard)
+      } else {
+        const add = Math.floor(Math.random() * 100)
+        sl.add(add)
+        sortedNums.push(add)
+        sortedNums.sort((a, b) => a - b)
+      }
+    }
+  })
+
+  // sumRange(min, max)
+  it('should support sumRange', () => {
+    for (let i = 0; i < 100; i++) {
+      let min = Math.floor(Math.random() * 100000)
+      let max = Math.floor(Math.random() * 100000)
+      if (min > max) [min, max] = [max, min]
+      const sum = sl.sumRange(min, max)
+      const target = sortedNums.filter(num => num >= min && num <= max).reduce((a, b) => a + b, 0)
+      expect(sum).toBe(target)
+
+      // discard/add
+      const willDiscard = Math.random() > 0.5
+      if (willDiscard) {
+        const randint = sortedNums[~~(Math.random() * sortedNums.length)]
+        const index = sortedNums.findIndex(num => num === randint)
+        sl.discard(randint)
+        sortedNums.splice(index, 1)
+      } else {
+        const randint = Math.floor(Math.random() * 100)
+        sl.add(randint)
+        sortedNums.push(randint)
+        sortedNums.sort((a, b) => a - b)
+      }
+    }
   })
 })

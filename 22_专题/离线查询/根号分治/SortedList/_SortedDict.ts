@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable generator-star-spacing */
 
-import { SortedList } from './SortedList'
+import { SortedDictFast } from './SortedDictFast'
+import { SortedList } from './_SortedList'
 
 /**
  * 有序字典.
  * 模拟python的`sortedcontainers.SortedDict`.
+ *
+ * @deprecated use {@link SortedDictFast} instead.
  */
 class SortedDict<K = number, V = unknown> {
   private readonly _sl: SortedList<K> = new SortedList()
