@@ -50,8 +50,10 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
   /**
    * 返回区间 `[start, end)` 的和.
    */
-  sumSlice(start: number, end: number): V {
+  sumSlice(start = 0, end = this.length): V {
+    if (start < 0) start += this._len
     if (start < 0) start = 0
+    if (end < 0) end += this._len
     if (end > this._len) end = this._len
     if (start >= end) return this._e()
 
@@ -70,6 +72,7 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
       count -= curCount
       index = 0
     }
+
     return res
   }
 
@@ -128,7 +131,7 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
       this._shouldRebuildTree = true
 
       this._rebuildSum(pos)
-      this._sums[pos + 1] = this._op(oldSum, this._inv(this._sums[pos]))
+      this._sums.splice(pos + 1, 0, this._op(oldSum, this._inv(this._sums[pos])))
     }
 
     return this
@@ -248,22 +251,9 @@ if (require.main === module) {
   console.log(sl.sumSlice(0, 3))
   console.log(sl.sumRange(0, 1000))
 
-  // class Solution:
-  // def minimumDifference(self, nums: List[int]) -> int:
-  //     # 前面最小n个和后面大n个
-  //     n = len(nums) // 3
-  //     minK, maxK = TopKSum(n, min=True), TopKSum(n, min=False)
-  //     for i in range(n):
-  //         minK.add(nums[i])
-  //     for i in range(n, 3 * n):
-  //         maxK.add(nums[i])
-  //     res = minK.query() + maxK.query()
-  //     for i in range(n, 2 * n):
-  //         minK.add(nums[i])
-  //         maxK.discard(nums[i])
-  //         res = min(res, minK.query() + maxK.query())
-  //     return res
   console.log('-'.repeat(20))
+
+  // https://leetcode.cn/problems/minimum-difference-in-sums-after-removal-of-elements/
   function minimumDifference(nums: number[]): number {
     const n = nums.length / 3
     const pre = new SortedListFastWithSum({ values: nums.slice(0, n) })
@@ -273,21 +263,85 @@ if (require.main === module) {
       pre.add(nums[i])
       suf.discard(nums[i])
       res = Math.min(res, pre.sumSlice(0, n) - suf.sumSlice(suf.length - n, suf.length))
-      console.log(
-        pre.toString(),
-        suf.toString(),
-        pre.sumSlice(0, n),
-        suf.sumSlice(suf.length - n, suf.length)
-      )
     }
     return res
   }
 
-  console.log(minimumDifference([3, 1, 2]))
+  // 1825. 求出 MK 平均值
+  // https://leetcode.cn/problems/finding-mk-average/
+  class MKAverage {
+    private readonly _m: number
+    private readonly _k: number
+    private readonly _queue: number[] = []
+    private _head = 0
+    private _lastK = new SortedListFastWithSum<number>()
 
-  testSumRange()
-  function testSumRange() {
+    constructor(m: number, k: number) {
+      this._m = m
+      this._k = k
+    }
+
+    addElement(num: number): void {
+      this._queue.push(num)
+      if (this._queue.length === this._m) {
+        this._lastK = new SortedListFastWithSum({ values: this._queue.slice(-this._m) })
+        return
+      }
+      if (this._queue.length > this._m) {
+        this._lastK.add(num)
+        this._lastK.discard(this._queue[this._head])
+        this._head++
+      }
+    }
+
+    calculateMKAverage(): number {
+      if (this._queue.length < this._m) return -1
+      const midSum = this._lastK.sumSlice(this._k, -this._k)
+      return Math.floor(midSum / (this._m - 2 * this._k))
+    }
+  }
+
+  // testSumSlice()
+  // testSumRange()
+  function testSumSlice() {
     const sl = new SortedListFastWithSum<number>()
+
+    let sortedNums: number[] = []
+    for (let i = 0; i < 10000; i++) {
+      const num = Math.floor(Math.random() * 10000)
+      sl.add(num)
+      sortedNums.push(num)
+      sortedNums.sort((a, b) => a - b)
+      const start = ~~(sl.length * Math.random())
+      const end = ~~(sl.length * Math.random())
+      const res1 = sl.sumSlice(start, end)
+      const res2 = sortedNums.slice(start, end).reduce((a, b) => a + b, 0)
+      if (res1 !== res2) {
+        console.log(res1, res2)
+        console.log(sl.slice(0, 10))
+        console.log(sortedNums.slice(0, 10))
+        throw new Error()
+      }
+
+      // discard/add
+      const willDiscard = Math.random() > 0.5
+      if (willDiscard) {
+        const discard = sortedNums[~~(Math.random() * sortedNums.length)]
+        sl.discard(discard)
+        const index = sortedNums.findIndex(num => num === discard)
+        sortedNums.splice(index, 1)
+      } else {
+        const add = Math.floor(Math.random() * 100)
+        sl.add(add)
+        sortedNums.push(add)
+        sortedNums.sort((a, b) => a - b)
+      }
+    }
+  }
+  function testSumRange() {
+    // SortedListFastWithSum.setLoadFactor(5)
+    const sl = new SortedListFastWithSum<number>()
+
     const sortedNums = []
     for (let i = 0; i < 10000; i++) {
       const num = Math.floor(Math.random() * 10000)
@@ -304,6 +358,20 @@ if (require.main === module) {
         console.log(sortedNums.slice(0, 10))
         throw new Error()
       }
+      const willDiscard = Math.random() > 0.5
+      if (willDiscard) {
+        const randint = sortedNums[~~(Math.random() * sortedNums.length)]
+        const index = sortedNums.findIndex(num => num === randint)
+        sl.discard(randint)
+        sortedNums.splice(index, 1)
+      } else {
+        const randint = Math.floor(Math.random() * 100)
+        sl.add(randint)
+        sortedNums.push(randint)
+        sortedNums.sort((a, b) => a - b)
+      }
     }
   }
+
+  console.log('ok')
 }

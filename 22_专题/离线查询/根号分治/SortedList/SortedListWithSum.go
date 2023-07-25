@@ -32,6 +32,9 @@
 //  func (sl *SortedListWithSum) String() string                                        {}
 //  func (sl *SortedListWithSum) Len() int                                              {}
 
+//  !func (sl *SortedListWithSum) SumSlice(start, end int) S
+//  !func (sl *SortedListWithSum) SumRange(min, max S) S
+
 // test:
 // https://leetcode.cn/problems/smallest-missing-genetic-value-in-each-subtree/submissions/
 // https://leetcode.cn/problems/sliding-subarray-beauty/
@@ -279,7 +282,13 @@ func (sl *SortedListWithSum) Enumerate(start, end int, f func(value S), erase bo
 
 func (sl *SortedListWithSum) Slice(start, end int) []S {
 	if start < 0 {
+		start += sl.size
+	}
+	if start < 0 {
 		start = 0
+	}
+	if end < 0 {
+		end += sl.size
 	}
 	if end > sl.size {
 		end = sl.size

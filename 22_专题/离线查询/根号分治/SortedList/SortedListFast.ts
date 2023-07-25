@@ -268,7 +268,9 @@ class SortedListFast<V = number> {
   }
 
   slice(start = 0, end = this.length): V[] {
+    if (start < 0) start += this._len
     if (start < 0) start = 0
+    if (end < 0) end += this._len
     if (end > this._len) end = this._len
     if (start >= end) return []
     const res = Array(end - start)
@@ -364,8 +366,10 @@ class SortedListFast<V = number> {
   /**
    * 返回一个迭代器，用于遍历区间 `[start, end)` 内的元素.
    */
-  *iSlice(start: number, end: number, reverse = false): IterableIterator<V> {
+  *iSlice(start = 0, end = this.length, reverse = false): IterableIterator<V> {
+    if (start < 0) start += this._len
     if (start < 0) start = 0
+    if (end < 0) end += this._len
     if (end > this._len) end = this._len
     if (start >= end) return
     let count = end - start

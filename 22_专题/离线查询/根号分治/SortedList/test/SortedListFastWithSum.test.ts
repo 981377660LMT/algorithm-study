@@ -196,7 +196,8 @@ describe('SortedListSumWithFast', () => {
       if (willDiscard) {
         const discard = sortedNums[~~(Math.random() * sortedNums.length)]
         sl.discard(discard)
-        sortedNums = sortedNums.filter(num => num !== discard)
+        const index = sortedNums.findIndex(num => num === discard)
+        sortedNums.splice(index, 1)
       } else {
         const add = Math.floor(Math.random() * 100)
         sl.add(add)
