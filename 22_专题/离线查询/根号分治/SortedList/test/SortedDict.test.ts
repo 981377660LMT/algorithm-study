@@ -1,4 +1,4 @@
-import { SortedDict } from '../SortedDict'
+import { SortedDict } from '../_SortedDict'
 
 describe('SortedDict', () => {
   let sd: SortedDict<number, number>

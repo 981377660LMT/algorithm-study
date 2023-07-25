@@ -3,6 +3,8 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable generator-star-spacing */
 
+import { SortedListFast } from './SortedListFast'
+
 // 如果需要支持set那样的 lowerBound/upperBound/erase 迭代器功能,
 // !需要使用分块链表(所有元素之间有前驱后继,便于迭代器移动,且删除非迭代器所在元素后迭代器不会失效)
 // TODO: 特判 pop/at 头尾的情况，优化到O(1)
@@ -15,6 +17,8 @@
  * @_see {@link https://github.com/tatyam-prime/SortedSet/blob/main/SortedMultiset.py}
  * @_see {@link https://qiita.com/tatyam/items/492c70ac4c955c055602}
  * @_see {@link https://speakerdeck.com/tatyam_prime/python-dezui-qiang-falseping-heng-er-fen-tan-suo-mu-wozuo-ru}
+ *
+ * @deprecated use {@link SortedListFast} instead.
  */
 class SortedList<T = number> {
   /** Optimized for 1e5 elements in javascript. Do not change it. */

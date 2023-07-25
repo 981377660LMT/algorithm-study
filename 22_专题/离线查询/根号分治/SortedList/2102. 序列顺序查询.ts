@@ -1,4 +1,4 @@
-import { SortedList } from './SortedList'
+import { SortedList } from './_SortedList'
 
 class SORTracker {
   private readonly _sl = new SortedList<[score: number, name: string]>(

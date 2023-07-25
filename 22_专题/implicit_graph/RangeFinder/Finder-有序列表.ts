@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // 寻找前驱后继/区间删除
 
-import { SortedList } from '../../离线查询/根号分治/SortedList/SortedList'
+import { SortedList } from '../../离线查询/根号分治/SortedList/_SortedList'
 import { onlineBfs } from '../OnlineBfs-在线bfs'
 
 /**

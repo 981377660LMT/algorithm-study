@@ -1,4 +1,4 @@
-import { SortedList } from '../SortedList'
+import { SortedList } from '../_SortedList'
 
 export {}
 

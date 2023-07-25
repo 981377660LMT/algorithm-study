@@ -90,7 +90,6 @@ class TopKSum:
 
 
 if __name__ == "__main__":
-
     #  brute force
     k = 5
     ts = TopKSum(k, min=False)
@@ -119,7 +118,7 @@ if __name__ == "__main__":
         assert (x in ts) == (x in sl)
 
     # 2163. 删除元素后和的最小差值
-
+    # https://leetcode.cn/problems/minimum-difference-in-sums-after-removal-of-elements/
     class Solution:
         def minimumDifference(self, nums: List[int]) -> int:
             # 前面最小n个和后面大n个

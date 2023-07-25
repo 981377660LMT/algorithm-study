@@ -64,31 +64,31 @@ class SortedListFast<V = number> {
    * 负载因子，用于控制每个块的长度.
    * 长度为`1e5`的数组, 负载因子取`500`左右性能较好.
    */
-  private static _LOAD = 500
+  protected static _LOAD = 500
   private static _isPrimitive(
     o: unknown
   ): o is number | string | boolean | symbol | bigint | null | undefined {
     return o === null || (typeof o !== 'object' && typeof o !== 'function')
   }
 
-  private _compareFn!: (a: V, b: V) => number
-  private _len!: number
+  protected _compareFn!: (a: V, b: V) => number
+  protected _len!: number
 
   /**
    * 各个块.
    */
-  private _blocks!: V[][]
+  protected _blocks!: V[][]
 
   /**
    * 各个块的最小值.
    */
-  private _mins!: V[]
+  protected _mins!: V[]
 
   /**
    * 树状数组维护各个块长度的前缀和，便于根据索引定位到对应的元素.
    */
-  private _tree!: number[]
-  private _shouldRebuildTree!: boolean
+  protected _tree!: number[]
+  protected _shouldRebuildTree!: boolean
 
   constructor()
   constructor(iterable: Iterable<V>)
@@ -400,7 +400,6 @@ class SortedListFast<V = number> {
 
     if (reverse) {
       let pos = this._locBlock(max)
-      if (pos === -1) pos = this._blocks.length - 1
       for (let i = pos; ~i; i--) {
         const block = this._blocks[i]
         for (let j = block.length - 1; ~j; j--) {
@@ -474,7 +473,7 @@ class SortedListFast<V = number> {
     return lastBlock[lastBlock.length - 1]
   }
 
-  private _build(data: V[], compareFn: (a: V, b: V) => number): void {
+  protected _build(data: V[], compareFn: (a: V, b: V) => number): void {
     data.sort(compareFn)
     const n = data.length
     const blocks = []
@@ -495,15 +494,16 @@ class SortedListFast<V = number> {
     this._shouldRebuildTree = true
   }
 
-  private _delete(pos: number, index: number): void {
+  protected _delete(pos: number, index: number): void {
     const { _blocks, _mins } = this
 
     // !delete element
     this._len--
     this._updateTree(pos, -1)
-    _blocks[pos].splice(index, 1)
-    if (_blocks[pos].length) {
-      _mins[pos] = _blocks[pos][0]
+    const block = _blocks[pos]
+    block.splice(index, 1)
+    if (block.length) {
+      _mins[pos] = block[0]
       return
     }
 
@@ -513,7 +513,7 @@ class SortedListFast<V = number> {
     this._shouldRebuildTree = true
   }
 
-  private _locLeft(value: V): [pos: number, index: number] {
+  protected _locLeft(value: V): [pos: number, index: number] {
     if (!this._len) return [0, 0]
     const { _blocks, _mins } = this
 
@@ -552,7 +552,7 @@ class SortedListFast<V = number> {
     return [pos, right]
   }
 
-  private _locRight(value: V): [pos: number, index: number] {
+  protected _locRight(value: V): [pos: number, index: number] {
     if (!this._len) return [0, 0]
     const { _blocks, _mins } = this
 
@@ -585,7 +585,7 @@ class SortedListFast<V = number> {
     return [pos, right]
   }
 
-  private _locBlock(value: V): number {
+  protected _locBlock(value: V): number {
     let left = -1
     let right = this._blocks.length - 1
     while (left + 1 < right) {
@@ -620,7 +620,7 @@ class SortedListFast<V = number> {
     this._shouldRebuildTree = false
   }
 
-  private _updateTree(index: number, delta: number): void {
+  protected _updateTree(index: number, delta: number): void {
     if (!this._shouldRebuildTree) {
       const tree = this._tree
       while (index < tree.length) {
@@ -645,7 +645,7 @@ class SortedListFast<V = number> {
    * 树状数组树上二分, 找到索引为 `k` 的元素的`(所在块的索引pos, 块内的索引index)`.
    * 内部对头部块和尾部块做了特殊处理.
    */
-  private _findKth(k: number): [pos: number, index: number] {
+  protected _findKth(k: number): [pos: number, index: number] {
     if (k < this._blocks[0].length) return [0, k]
     const last = this._blocks.length - 1
     const lastLen = this._blocks[last].length
@@ -715,7 +715,7 @@ class SortedListFast<V = number> {
   }
 }
 
-export { SortedListFast }
+export { SortedListFast, ISortedList, ISortedListIterator }
 
 if (require.main === module) {
   const sl = new SortedListFast<number>()

@@ -21,7 +21,7 @@
 //  length                           SegmentSet中区间的个数.
 //  count                            SegmentSet中区间的元素数量.
 
-import { SortedList } from '../离线查询/根号分治/SortedList/SortedList'
+import { SortedList } from '../离线查询/根号分治/SortedList/_SortedList'
 
 const INF = 2e15
 
