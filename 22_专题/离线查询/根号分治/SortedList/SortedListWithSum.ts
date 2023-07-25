@@ -301,8 +301,8 @@ if (require.main === module) {
     }
   }
 
-  // testSumSlice()
-  // testSumRange()
+  testSumSlice()
+  testSumRange()
   function testSumSlice() {
     const sl = new SortedListFastWithSum<number>()
 

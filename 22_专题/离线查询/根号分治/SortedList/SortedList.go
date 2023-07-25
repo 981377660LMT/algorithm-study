@@ -47,7 +47,7 @@ import (
 )
 
 // 适合1e5左右的数据量.
-const _LOAD int = 100
+const _LOAD int = 200
 
 type S = int
 
