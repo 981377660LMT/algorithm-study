@@ -49,7 +49,7 @@ function minimumVisitedCells(grid: number[][]): number {
       }
       return null
     }
-  )
+  )[0]
 
   return dist[ROW * COL - 1] < INF ? 1 + dist[ROW * COL - 1] : -1
 }

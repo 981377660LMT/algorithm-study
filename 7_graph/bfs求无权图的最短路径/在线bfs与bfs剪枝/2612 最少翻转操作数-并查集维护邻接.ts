@@ -33,6 +33,6 @@ function minReverseOperations(n: number, p: number, banned: number[], k: number)
     return null
   }
 
-  const dist = onlineBfs(n, p, setUsed, findUnused)
+  const dist = onlineBfs(n, p, setUsed, findUnused)[0]
   return dist.map(d => (d === INF ? -1 : d))
 }

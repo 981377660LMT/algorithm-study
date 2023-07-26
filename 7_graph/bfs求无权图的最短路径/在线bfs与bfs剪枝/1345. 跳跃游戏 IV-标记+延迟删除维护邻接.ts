@@ -45,7 +45,7 @@ function minJumps(arr: number[]): number {
 
       return null
     }
-  )
+  )[0]
 
   return dist[n - 1]
 }

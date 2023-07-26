@@ -21,40 +21,28 @@ function onlineBfs(
   start: number,
   setUsed: (cur: number) => void,
   findUnused: (cur: number) => number | null
-): number[] {
-  const dist = new Array(n).fill(INF)
+): [dist: number[], pre: Int32Array] {
+  const dist = Array(n).fill(INF)
   dist[start] = 0
   setUsed(start)
-  let queue1 = new Uint32Array(n)
-  let queue2 = new Uint32Array(n)
-
-  queue1[0] = start
-  let curQueue = queue1
-  let nextQueue = queue2
-  let curPtr = 1
-  let nextPtr = 0
-
-  while (curPtr) {
-    for (let i = 0; i < curPtr; i++) {
-      const cur = curQueue[i]
-      while (true) {
-        const next = findUnused(cur)
-        if (next == null) {
-          break
-        }
-        dist[next] = dist[cur] + 1 // weight
-        nextQueue[nextPtr++] = next
-        setUsed(next)
-      }
+  const pre = new Int32Array(n).fill(-1)
+  const queue = new Uint32Array(n)
+  let left = 0
+  let right = 0
+  queue[right++] = start
+  while (left < right) {
+    const cur = queue[left++]
+    while (true) {
+      const next = findUnused(cur)
+      if (next == null) break
+      dist[next] = dist[cur] + 1
+      pre[next] = cur
+      setUsed(next)
+      queue[right++] = next
     }
-    const tmp = curQueue
-    curQueue = nextQueue
-    nextQueue = tmp
-    curPtr = nextPtr
-    nextPtr = 0
   }
 
-  return dist
+  return [dist, pre]
 }
 
 export { onlineBfs }

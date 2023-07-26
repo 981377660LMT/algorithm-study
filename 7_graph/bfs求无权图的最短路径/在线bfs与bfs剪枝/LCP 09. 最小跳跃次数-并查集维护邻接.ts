@@ -22,6 +22,7 @@ function minJump(jump: number[]): number {
       if (finder.has(right)) return right
       return finder.prev(cur)
     }
-  )
+  )[0]
+
   return dist[n]
 }
