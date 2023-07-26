@@ -68,7 +68,8 @@ func NewUniqueProductQuery(nums []int) *UniqueProductQuery {
 }
 
 // [start, end)
-//  0 <= start <= end <= n
+//
+//	0 <= start <= end <= n
 func (upq *UniqueProductQuery) AddQuery(start, end int) {
 	upq.query = append(upq.query, [2]int{start, end})
 }
@@ -81,7 +82,9 @@ func (upq *UniqueProductQuery) Run(f func(i int) E) []E {
 	for qi := 0; qi < q; qi++ {
 		ids[upq.query[qi][1]] = append(ids[upq.query[qi][1]], qi)
 	}
-
+	for _, q := range ids[0] {
+		res[q] = e()
+	}
 	seg := NewSegmentTree(make([]E, upq.n))
 	pos := make(map[int]int, upq.n)
 	for i := 0; i < upq.n; i++ {

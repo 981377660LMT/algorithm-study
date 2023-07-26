@@ -57,7 +57,7 @@ func main() {
 	}
 }
 
-// 适合1e5左右的数据量.
+// 1e5 -> 200, 2e5 -> 400
 const _LOAD int = 200
 
 type K = int
@@ -364,12 +364,14 @@ type SortedList struct {
 }
 
 func NewSortedList(less func(a, b K) bool, elements ...K) *SortedList {
+	elements = append(elements[:0:0], elements...)
 	res := &SortedList{less: less}
 	sort.Slice(elements, func(i, j int) bool { return less(elements[i], elements[j]) })
 	n := len(elements)
 	blocks := [][]K{}
-	for i := 0; i < n; i += _LOAD {
-		blocks = append(blocks, elements[i:min(i+_LOAD, n)])
+	for start := 0; start < n; start += _LOAD {
+		end := min(start+_LOAD, n)
+		blocks = append(blocks, elements[start:end:end]) // !各个块互不影响, max参数也需要指定为end
 	}
 	mins := make([]K, len(blocks))
 	for i, cur := range blocks {

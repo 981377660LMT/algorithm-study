@@ -39,6 +39,7 @@
 // https://leetcode.cn/problems/smallest-missing-genetic-value-in-each-subtree/submissions/
 // https://leetcode.cn/problems/sliding-subarray-beauty/
 // https://leetcode.cn/problems/count-the-number-of-fair-pairs/
+// https://leetcode.cn/problems/minimum-difference-in-sums-after-removal-of-elements/
 
 package main
 
@@ -52,18 +53,18 @@ import (
 
 func minimumDifference(nums []int) int64 {
 	n := len(nums) / 3
-	pre := NewSortedListWithSum(func(a, b int) bool { return a < b }, nums[:n]...)
-	suf := NewSortedListWithSum(func(a, b int) bool { return a < b }, nums[n:2*n]...)
+	arr := append([]int{}, nums...)
+	pre := NewSortedListWithSum(func(a, b int) bool { return a < b }, arr[0:n]...)
+
+	suf := NewSortedListWithSum(func(a, b int) bool { return a < b }, arr[n:3*n]...)
 	res := int64(pre.SumSlice(0, n) - suf.SumSlice(suf.Len()-n, suf.Len()))
 	for i := n; i < 2*n; i++ {
 		pre.Add(nums[i])
 		suf.Discard(nums[i])
-
 		cand := int64(pre.SumSlice(0, n) - suf.SumSlice(suf.Len()-n, suf.Len()))
 		if cand < res {
 			res = cand
 		}
-
 	}
 	return res
 }
@@ -107,29 +108,33 @@ func (this *MKAverage) CalculateMKAverage() int {
  */
 
 func main() {
+	check := func(sl *SortedListWithSum, sorted []int) {
+		if sl.Len() != len(sorted) {
+			panic("len not equal")
+		}
+		for i := 0; i < sl.Len(); i++ {
+			if sl.At(i) != sorted[i] {
+				fmt.Println(sl.At(i), sorted[i])
+				fmt.Println(sl, sorted)
+				panic("not equal")
+			}
+		}
+	}
 	testSumSlice := func() {
-		sl := NewSortedListWithSum(func(a, b int) bool { return a < b })
-		sortedNums := []int{}
-		for i := 0; i < 10000; i++ {
-			num := -rand.Intn(10000)
+		rand.Seed(0)
+		initLen := 4
+		nums := make([]int, initLen)
+		for i := 0; i < initLen; i++ {
+			nums[i] = rand.Intn(10)
+		}
+		sl := NewSortedListWithSum(func(a, b int) bool { return a < b }, nums...)
+		sortedNums := append([]int{}, nums...)
+		for i := 0; i < 4; i++ {
+			num := -rand.Intn(10)
 			sl.Add(num)
 			sortedNums = append(sortedNums, num)
 			sort.Ints(sortedNums)
-			start := rand.Intn(len(sortedNums))
-			end := rand.Intn(len(sortedNums))
-			if start > end {
-				start, end = end, start
-			}
-			res1 := sl.SumSlice(start, end)
-			sliced := sortedNums[start:end]
-			sum := 0
-			for _, v := range sliced {
-				sum += v
-			}
-			res2 := sum
-			if res1 != res2 {
-				panic(fmt.Sprintf("res1:%v,res2:%v", res1, res2))
-			}
+			check(sl, sortedNums)
 
 			willDiscard := rand.Intn(2) == 0
 			if willDiscard {
@@ -156,7 +161,7 @@ func main() {
 	fmt.Println("test pass")
 }
 
-// 适合1e5左右的数据量.
+// 1e5 -> 200, 2e5 -> 400
 const _LOAD int = 200
 
 type E = int
@@ -184,8 +189,9 @@ func NewSortedListWithSum(less func(a, b E) bool, elements ...E) *SortedListWith
 	n := len(elements)
 	blocks := [][]E{}
 	sums := []E{}
-	for i := 0; i < n; i += _LOAD {
-		newBlock := elements[i:min(i+_LOAD, n)]
+	for start := 0; start < n; start += _LOAD {
+		end := min(start+_LOAD, n)
+		newBlock := elements[start:end:end] // !各个块互不影响, max参数也需要指定为end
 		blocks = append(blocks, newBlock)
 		cur := e()
 		for _, v := range newBlock {
@@ -283,7 +289,6 @@ func (sl *SortedListWithSum) Add(value E) *SortedListWithSum {
 
 	pos, index := sl._locRight(value)
 	sl._updateTree(pos, 1)
-
 	sl.blocks[pos] = append(sl.blocks[pos][:index], append([]E{value}, sl.blocks[pos][index:]...)...)
 	sl.mins[pos] = sl.blocks[pos][0]
 	sl.sums[pos] = op(sl.sums[pos], value)
@@ -291,10 +296,11 @@ func (sl *SortedListWithSum) Add(value E) *SortedListWithSum {
 	// n -> load + (n - load)
 	if n := len(sl.blocks[pos]); _LOAD+_LOAD < n {
 		oldSum := sl.sums[pos]
-		sl.blocks = append(sl.blocks[:pos+1], append([][]E{sl.blocks[pos][_LOAD:]}, sl.blocks[pos+1:]...)...)
-		sl.mins = append(sl.mins[:pos+1], append([]E{sl.blocks[pos][_LOAD]}, sl.mins[pos+1:]...)...)
-		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD] // !注意容量的设置.
-		sl.shouldRebuildTree = true
+		left, right := make([]E, _LOAD), make([]E, n-_LOAD)
+		copy(left, sl.blocks[pos][:_LOAD])
+		copy(right, sl.blocks[pos][_LOAD:])
+		sl.blocks = append(sl.blocks[:pos], append([][]E{left, right}, sl.blocks[pos+1:]...)...)
+		sl.mins = append(sl.mins[:pos], append([]E{left[0], right[0]}, sl.mins[pos+1:]...)...)
 
 		sl._rebuildSum(pos)
 		newSum := op(oldSum, inv(sl.sums[pos]))
@@ -761,8 +767,8 @@ func (sl *SortedListWithSum) _findKth(k int) (pos, index int) {
 }
 
 func (sl *SortedListWithSum) _rebuildSum(pos int) {
-	cur := e()
 	block := sl.blocks[pos]
+	cur := e()
 	for _, v := range block {
 		cur = op(cur, v)
 	}

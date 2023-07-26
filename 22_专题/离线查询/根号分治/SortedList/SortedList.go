@@ -42,11 +42,67 @@ package main
 import (
 	"fmt"
 	"math/bits"
+	"math/rand"
 	"sort"
 	"strings"
 )
 
-// 适合1e5左右的数据量.
+func main() {
+	check := func(sl *SortedList, sorted []int) {
+		if sl.Len() != len(sorted) {
+			panic("len not equal")
+		}
+		for i := 0; i < sl.Len(); i++ {
+			if sl.At(i) != sorted[i] {
+				fmt.Println(sl.At(i), sorted[i])
+				fmt.Println(sl, sorted)
+				panic("not equal")
+			}
+		}
+	}
+
+	testSumSlice := func() {
+		initLen := 3
+		nums := make([]int, initLen)
+		for i := 0; i < initLen; i++ {
+			nums[i] = rand.Intn(10)
+		}
+		sl := NewSortedList(func(a, b int) bool { return a < b }, nums...)
+		sortedNums := append([]int{}, nums...)
+		for i := 0; i < 4; i++ {
+			num := -rand.Intn(10)
+			sl.Add(num)
+			sortedNums = append(sortedNums, num)
+			sort.Ints(sortedNums)
+			check(sl, sortedNums)
+
+			// willDiscard := rand.Intn(2) == 0
+			willDiscard := false
+			if willDiscard {
+				discard := sortedNums[rand.Intn(len(sortedNums))]
+				sl.Discard(discard)
+				index := -1
+				for i, v := range sortedNums {
+					if v == discard {
+						index = i
+						break
+					}
+				}
+				sortedNums = append(sortedNums[:index], sortedNums[index+1:]...)
+			} else {
+				add := rand.Intn(10)
+				sl.Add(add)
+				sortedNums = append(sortedNums, add)
+				sort.Ints(sortedNums)
+			}
+		}
+	}
+
+	testSumSlice()
+	fmt.Println("test pass")
+}
+
+// 1e5 -> 200, 2e5 -> 400
 const _LOAD int = 200
 
 type S = int
@@ -62,12 +118,14 @@ type SortedList struct {
 }
 
 func NewSortedList(less func(a, b S) bool, elements ...S) *SortedList {
+	elements = append(elements[:0:0], elements...)
 	res := &SortedList{less: less}
 	sort.Slice(elements, func(i, j int) bool { return less(elements[i], elements[j]) })
 	n := len(elements)
 	blocks := [][]S{}
-	for i := 0; i < n; i += _LOAD {
-		blocks = append(blocks, elements[i:min(i+_LOAD, n)])
+	for start := 0; start < n; start += _LOAD {
+		end := min(start+_LOAD, n)
+		blocks = append(blocks, elements[start:end:end]) // !各个块互不影响, max参数也需要指定为end
 	}
 	mins := make([]S, len(blocks))
 	for i, cur := range blocks {
@@ -90,8 +148,8 @@ func (sl *SortedList) Add(value S) *SortedList {
 	}
 
 	pos, index := sl._locRight(value)
-	sl._updateTree(pos, 1)
 
+	sl._updateTree(pos, 1)
 	sl.blocks[pos] = append(sl.blocks[pos][:index], append([]S{value}, sl.blocks[pos][index:]...)...)
 	sl.mins[pos] = sl.blocks[pos][0]
 
@@ -99,7 +157,7 @@ func (sl *SortedList) Add(value S) *SortedList {
 	if n := len(sl.blocks[pos]); _LOAD+_LOAD < n {
 		sl.blocks = append(sl.blocks[:pos+1], append([][]S{sl.blocks[pos][_LOAD:]}, sl.blocks[pos+1:]...)...)
 		sl.mins = append(sl.mins[:pos+1], append([]S{sl.blocks[pos][_LOAD]}, sl.mins[pos+1:]...)...)
-		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD] // !注意容量的设置.
+		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD] // !注意max的设置(为了让左右互不影响)
 		sl.shouldRebuildTree = true
 	}
 
