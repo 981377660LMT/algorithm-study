@@ -1,0 +1,2 @@
+
+	fmt.Fscan(in, &n)
