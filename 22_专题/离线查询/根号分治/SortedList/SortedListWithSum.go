@@ -32,133 +32,64 @@
 //  func (sl *SortedListWithSum) String() string                                        {}
 //  func (sl *SortedListWithSum) Len() int                                              {}
 
-//  !func (sl *SortedListWithSum) SumSlice(start, end int) S
-//  !func (sl *SortedListWithSum) SumRange(min, max S) S
+//  !func (sl *SortedListWithSum) SumSlice(start, end int) S 													  {}
+//  !func (sl *SortedListWithSum) SumRange(min, max S) S 														    {}
 
 // test:
 // https://leetcode.cn/problems/smallest-missing-genetic-value-in-each-subtree/submissions/
 // https://leetcode.cn/problems/sliding-subarray-beauty/
 // https://leetcode.cn/problems/count-the-number-of-fair-pairs/
 // https://leetcode.cn/problems/minimum-difference-in-sums-after-removal-of-elements/
+// https://atcoder.jp/contests/abc281/tasks/abc281_e
 
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
-	"math/rand"
+	"os"
 	"sort"
 	"strings"
 )
 
-func minimumDifference(nums []int) int64 {
-	n := len(nums) / 3
-	arr := append([]int{}, nums...)
-	pre := NewSortedListWithSum(func(a, b int) bool { return a < b }, arr[0:n]...)
-
-	suf := NewSortedListWithSum(func(a, b int) bool { return a < b }, arr[n:3*n]...)
-	res := int64(pre.SumSlice(0, n) - suf.SumSlice(suf.Len()-n, suf.Len()))
-	for i := n; i < 2*n; i++ {
-		pre.Add(nums[i])
-		suf.Discard(nums[i])
-		cand := int64(pre.SumSlice(0, n) - suf.SumSlice(suf.Len()-n, suf.Len()))
-		if cand < res {
-			res = cand
-		}
-	}
-	return res
-}
-
-type MKAverage struct {
-	lastK *SortedListWithSum
-	queue []int
-	m, k  int
-}
-
-func Constructor(m int, k int) MKAverage {
-	return MKAverage{m: m, k: k}
-}
-
-func (this *MKAverage) AddElement(num int) {
-	this.queue = append(this.queue, num)
-	if len(this.queue) == this.m {
-		this.lastK = NewSortedListWithSum(func(a, b int) bool { return a < b }, this.queue[len(this.queue)-this.m:]...)
-		return
-	}
-	if len(this.queue) > this.m {
-		this.lastK.Add(num)
-		this.lastK.Discard(this.queue[len(this.queue)-this.m-1])
-		this.queue = this.queue[1:]
-	}
-}
-
-func (this *MKAverage) CalculateMKAverage() int {
-	if len(this.queue) < this.m {
-		return -1
-	}
-	midSum := this.lastK.SumSlice(this.k, -this.k)
-	return (midSum / (this.m - 2*this.k))
-}
-
-/**
- * Your MKAverage object will be instantiated and called as such:
- * obj := Constructor(m, k);
- * obj.AddElement(num);
- * param_2 := obj.CalculateMKAverage();
- */
-
 func main() {
-	check := func(sl *SortedListWithSum, sorted []int) {
-		if sl.Len() != len(sorted) {
-			panic("len not equal")
-		}
-		for i := 0; i < sl.Len(); i++ {
-			if sl.At(i) != sorted[i] {
-				fmt.Println(sl.At(i), sorted[i])
-				fmt.Println(sl, sorted)
-				panic("not equal")
-			}
-		}
-	}
-	testSumSlice := func() {
-		rand.Seed(0)
-		initLen := 4
-		nums := make([]int, initLen)
-		for i := 0; i < initLen; i++ {
-			nums[i] = rand.Intn(10)
-		}
-		sl := NewSortedListWithSum(func(a, b int) bool { return a < b }, nums...)
-		sortedNums := append([]int{}, nums...)
-		for i := 0; i < 4; i++ {
-			num := -rand.Intn(10)
-			sl.Add(num)
-			sortedNums = append(sortedNums, num)
-			sort.Ints(sortedNums)
-			check(sl, sortedNums)
+	// abc241_d()
+	abc281_e()
+}
 
-			willDiscard := rand.Intn(2) == 0
-			if willDiscard {
-				discard := sortedNums[rand.Intn(len(sortedNums))]
-				sl.Discard(discard)
-				index := -1
-				for i, v := range sortedNums {
-					if v == discard {
-						index = i
-						break
-					}
-				}
-				sortedNums = append(sortedNums[:index], sortedNums[index+1:]...)
-			} else {
-				add := rand.Intn(10000)
-				sl.Add(add)
-				sortedNums = append(sortedNums, add)
-				sort.Ints(sortedNums)
-			}
+const INF int = 1e18
+
+// https://atcoder.jp/contests/abc281/tasks/abc281_e
+func abc281_e() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m, k int
+	fmt.Fscan(in, &n, &m, &k)
+
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	sl := NewSortedListWithSum(func(a, b int) bool { return a < b })
+
+	res := make([]int, 0, n-m+1)
+	for i := 0; i < n; i++ {
+		sl.Add(nums[i])
+		if i >= m {
+			sl.Discard(nums[i-m])
+		}
+		if i >= m-1 {
+			res = append(res, sl.SumSlice(0, k))
 		}
 	}
 
-	testSumSlice()
-	fmt.Println("test pass")
+	for _, x := range res {
+		fmt.Fprint(out, x, " ")
+	}
 }
 
 // 1e5 -> 200, 2e5 -> 400
@@ -301,6 +232,7 @@ func (sl *SortedListWithSum) Add(value E) *SortedListWithSum {
 		copy(right, sl.blocks[pos][_LOAD:])
 		sl.blocks = append(sl.blocks[:pos], append([][]E{left, right}, sl.blocks[pos+1:]...)...)
 		sl.mins = append(sl.mins[:pos], append([]E{left[0], right[0]}, sl.mins[pos+1:]...)...)
+		sl.shouldRebuildTree = true
 
 		sl._rebuildSum(pos)
 		newSum := op(oldSum, inv(sl.sums[pos]))

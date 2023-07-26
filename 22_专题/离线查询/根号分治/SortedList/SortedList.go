@@ -40,66 +40,70 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
-	"math/rand"
+	"os"
 	"sort"
 	"strings"
 )
 
 func main() {
-	check := func(sl *SortedList, sorted []int) {
-		if sl.Len() != len(sorted) {
-			panic("len not equal")
-		}
-		for i := 0; i < sl.Len(); i++ {
-			if sl.At(i) != sorted[i] {
-				fmt.Println(sl.At(i), sorted[i])
-				fmt.Println(sl, sorted)
-				panic("not equal")
-			}
-		}
-	}
 
-	testSumSlice := func() {
-		initLen := 3
-		nums := make([]int, initLen)
-		for i := 0; i < initLen; i++ {
-			nums[i] = rand.Intn(10)
-		}
-		sl := NewSortedList(func(a, b int) bool { return a < b }, nums...)
-		sortedNums := append([]int{}, nums...)
-		for i := 0; i < 4; i++ {
-			num := -rand.Intn(10)
-			sl.Add(num)
-			sortedNums = append(sortedNums, num)
-			sort.Ints(sortedNums)
-			check(sl, sortedNums)
+	abc241_d()
+}
 
-			// willDiscard := rand.Intn(2) == 0
-			willDiscard := false
-			if willDiscard {
-				discard := sortedNums[rand.Intn(len(sortedNums))]
-				sl.Discard(discard)
-				index := -1
-				for i, v := range sortedNums {
-					if v == discard {
-						index = i
-						break
-					}
-				}
-				sortedNums = append(sortedNums[:index], sortedNums[index+1:]...)
+const INF int = 1e18
+
+// https://atcoder.jp/contests/abc241/tasks/abc241_d
+func abc241_d() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var q int
+	fmt.Fscan(in, &q)
+
+	sl := NewSortedList(func(a, b int) bool { return a < b })
+	for i := 0; i < q; i++ {
+		var t, x int
+		fmt.Fscan(in, &t, &x)
+		if t == 1 {
+			sl.Add(x)
+			continue
+		}
+
+		// A の
+		// x 以下の要素のうち、大きい方から
+		// k 番目の値を出力する。(
+		// k は
+		// 5 以下)
+		var k int
+		fmt.Fscan(in, &k)
+		if t == 2 {
+			pos := sl.BisectRight(x) - k
+			if pos < 0 {
+				fmt.Fprintln(out, -1)
 			} else {
-				add := rand.Intn(10)
-				sl.Add(add)
-				sortedNums = append(sortedNums, add)
-				sort.Ints(sortedNums)
+				fmt.Fprintln(out, sl.At(pos))
+			}
+		}
+
+		// A の
+		// x 以上の要素のうち、小さい方から
+		// k 番目の値を出力する。(
+		// k は
+		// 5 以下)
+		if t == 3 {
+			pos := sl.BisectLeft(x) + k - 1
+			if pos >= sl.Len() {
+				fmt.Fprintln(out, -1)
+			} else {
+				fmt.Fprintln(out, sl.At(pos))
 			}
 		}
 	}
 
-	testSumSlice()
-	fmt.Println("test pass")
 }
 
 // 1e5 -> 200, 2e5 -> 400
