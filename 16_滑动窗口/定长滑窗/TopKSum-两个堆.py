@@ -128,9 +128,9 @@ if __name__ == "__main__":
                 minK.add(nums[i])
             for i in range(n, 3 * n):
                 maxK.add(nums[i])
-            res = minK.query() + maxK.query()
+            res = minK.query() - maxK.query()
             for i in range(n, 2 * n):
                 minK.add(nums[i])
                 maxK.discard(nums[i])
-                res = min(res, minK.query() + maxK.query())
+                res = min(res, minK.query() - maxK.query())
             return res

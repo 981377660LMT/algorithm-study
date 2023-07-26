@@ -17,6 +17,13 @@ MOD = int(1e9 + 7)
 
 
 def xorDistance(n: int, edges: List[List[int]]) -> int:
+    adjList = [[] for _ in range(n)]
+    for u, v, w in edges:
+        adjList[u].append((v, w))
+        adjList[v].append((u, w))
+
+    xorToRoot = [0] * n  # 节点 i 到根节点的异或和
+
     def dfs(cur: int, pre: int) -> None:
         for next, weight in adjList[cur]:
             if next == pre:
@@ -24,12 +31,6 @@ def xorDistance(n: int, edges: List[List[int]]) -> int:
             xorToRoot[next] = xorToRoot[cur] ^ weight
             dfs(next, cur)
 
-    adjList = [[] for _ in range(n)]
-    for u, v, w in edges:
-        adjList[u].append((v, w))
-        adjList[v].append((u, w))
-
-    xorToRoot = [0] * n  # 节点 i 到根节点的异或和
     dfs(0, -1)
 
     bits = [0] * 61
@@ -46,7 +47,6 @@ def xorDistance(n: int, edges: List[List[int]]) -> int:
 
 
 if __name__ == "__main__":
-
     import sys
 
     sys.setrecursionlimit(int(1e9))
