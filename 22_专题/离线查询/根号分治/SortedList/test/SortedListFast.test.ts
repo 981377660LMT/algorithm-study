@@ -180,4 +180,17 @@ describe('SortedListFast', () => {
     expect(sl.length).toBe(sortedNums.length)
     expect(sortedNums).toStrictEqual([...sl])
   })
+
+  // merge
+  it('should support merge', () => {
+    const sl2 = new SortedListFast<number>()
+    const nums2 = Array(100)
+      .fill(0)
+      .map(() => Math.floor(Math.random() * 100))
+    sl2.update(...nums2)
+    sl.merge(sl2)
+    const target = [...sortedNums, ...nums2].sort((a, b) => a - b)
+    expect(sl.length).toBe(target.length)
+    expect([...sl]).toStrictEqual(target)
+  })
 })

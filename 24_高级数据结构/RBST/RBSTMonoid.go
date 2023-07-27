@@ -26,6 +26,7 @@
 //   3. Size(node) -> size
 //   Pop/Erase/At/BisectLeft/BisectRight... 都是基于分裂/拼接实现的
 
+// !关键是要理解
 package main
 
 import (

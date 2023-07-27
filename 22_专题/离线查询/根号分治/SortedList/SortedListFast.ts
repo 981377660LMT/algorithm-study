@@ -24,6 +24,9 @@ interface ISortedList<V> {
   slice(start?: number, end?: number): V[]
   clear(): void
 
+  update(...values: V[]): void
+  merge(other: ISortedList<V>): void
+
   toString(): string
 
   forEach(callbackfn: (value: V, index: number) => void | boolean, reverse?: boolean): void
@@ -160,7 +163,30 @@ class SortedListFast<V = number> {
     this.forEach(v => {
       data[ptr++] = v
     })
+
     for (let i = 0; i < n; i++) data[ptr++] = values[i]
+    this._build(data, this._compareFn)
+    return this
+  }
+
+  merge(other: SortedListFast<V>): this {
+    const n = other.length
+    if (n < this._len << 2) {
+      other.forEach(v => {
+        this.add(v)
+      })
+      return this
+    }
+
+    const data = Array(this._len + n)
+    let ptr = 0
+    this.forEach(v => {
+      data[ptr++] = v
+    })
+
+    other.forEach(v => {
+      data[ptr++] = v
+    })
     this._build(data, this._compareFn)
     return this
   }
@@ -857,5 +883,40 @@ if (require.main === module) {
       if (i + 1 < nums.length) sl.discard([nums[i + 1], i + 1], equals)
     }
     return res
+  }
+
+  // https://leetcode.cn/problems/count-nodes-that-are-great-enough/
+  class TreeNode {
+    val: number
+    left: TreeNode | null
+    right: TreeNode | null
+    constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+      this.val = val === undefined ? 0 : val
+      this.left = left === undefined ? null : left
+      this.right = right === undefined ? null : right
+    }
+  }
+
+  function countGreatEnoughNodes(root: TreeNode | null, k: number): number {
+    let res = 0
+    dfs(root)
+    return res
+
+    function dfs(cur: TreeNode | null): SortedListFast<number> {
+      if (!cur) {
+        return new SortedListFast()
+      }
+      let left = dfs(cur.left)
+      let right = dfs(cur.right)
+      if (left.length < right.length) {
+        const tmp = left
+        left = right
+        right = tmp
+      }
+      left.merge(right)
+      res += +(left.bisectLeft(cur.val) >= k)
+      left.add(cur.val)
+      return left
+    }
   }
 }
