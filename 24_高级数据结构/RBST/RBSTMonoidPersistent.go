@@ -26,17 +26,15 @@
 //		 2. NewNode(v) -> node
 //	   3. Build(leaves) -> root
 //
-//		操作api:
-//		 1. Reverse(node, start, end) -> node
-//		 2. CopyWithin(node, start, end, to) -> node (持久化为true时)
-//	   3. KthNode(node, k) -> node
-//		 4. At(node, k) -> v
-//		 5. Size(node) -> size
-//		 6. Pop(node, k) -> node, v
-//		 7. Erase(node, start, end) -> node
-//		 8. Insert(node, k, v) -> node
-//		 9. RotateRight(node, start, end, k) -> node
-//		10. RotateLeft(node, start, end, k) -> node
+//	  操作api:
+//	   1. Reverse(node, start, end) -> node
+//	   2. CopyWithin(node, start, end, to) -> node (持久化为true时)
+//	   3. Size(node) -> size
+//	   4. Pop(node, k) -> node, v
+//	   5. Erase(node, start, end) -> node
+//	   6. Insert(node, k, v) -> node
+//	   7. RotateRight(node, start, end, k) -> node
+//	   8. RotateLeft(node, start, end, k) -> node
 //
 //		!因为支持可持久化，所有修改操作都必须返回新的root，所有非修改操作都传入指向root的指针
 
@@ -89,9 +87,10 @@ func main() {
 
 const INF int = 1e18
 
-const _PERSISTENT = true // !是否启用持久化
+const _PERSISTENT = false // !是否启用持久化
 
 // RangeAddRangeMax
+
 type E = struct{ sum, size int }
 type Id = int
 
@@ -270,7 +269,9 @@ func UpdateAll(node *Node, f Id) *Node {
 	if node == nil {
 		return nil
 	}
-	return Update(node, 0, node.size, f)
+	node = _copyNode(node)
+	_allApply(node, f)
+	return node
 }
 
 func Reverse(node *Node, start, end int) *Node {
@@ -403,37 +404,6 @@ func CopyWithin(root *Node, target int, start, end int) *Node {
 	_, p4Right := SplitByRank(p3Right, len)
 	root = Merge(p3Left, Merge(p2Left, p4Right))
 	return root
-}
-
-func KthNode(root *Node, k int) *Node {
-	cur := root
-	for cur != nil {
-		leftSize := Size(cur.left)
-		if leftSize+1 == k {
-			break
-		} else if leftSize >= k {
-			cur = cur.left
-		} else {
-			k -= leftSize + 1
-			cur = cur.right
-		}
-	}
-	return cur
-}
-
-func At(root *Node, index int) E {
-	n := Size(root)
-	if index < 0 {
-		index += n
-	}
-	if index < 0 || index >= n {
-		return e()
-	}
-	node := KthNode(root, index)
-	if node == nil {
-		return e()
-	}
-	return node.value
 }
 
 func Pop(root *Node, index int) (newRoot *Node, res E) {

@@ -163,12 +163,6 @@ func SplitByValue(root *Node, value E) (*Node, *Node) {
 	}
 }
 
-func Toggle(node *Node) {
-	node.left, node.right = node.right, node.left
-	node.data = rev(node.data)
-	node.isReversed = !node.isReversed
-}
-
 // Fold.
 func Query(node **Node, start, end int) (res E) {
 	if start >= end || node == nil {
@@ -239,8 +233,12 @@ func Reverse(node **Node, start, end int) {
 	}
 	left1, right1 := SplitByRank(*node, start)
 	left2, right2 := SplitByRank(right1, end-start)
-	Toggle(left2)
+	_toggle(left2)
 	*node = Merge(left1, Merge(left2, right2))
+}
+
+func ReverseAll(node *Node) {
+	_toggle(node)
 }
 
 func Size(node *Node) int {
@@ -265,10 +263,10 @@ func _pushDown(node *Node) {
 	}
 	if node.isReversed {
 		if node.left != nil {
-			Toggle(node.left)
+			_toggle(node.left)
 		}
 		if node.right != nil {
-			Toggle(node.right)
+			_toggle(node.right)
 		}
 		node.isReversed = false
 	}
@@ -286,6 +284,12 @@ func _pushUp(node *Node) *Node {
 		node.data = op(node.data, right.data)
 	}
 	return node
+}
+
+func _toggle(node *Node) {
+	node.left, node.right = node.right, node.left
+	node.data = rev(node.data)
+	node.isReversed = !node.isReversed
 }
 
 var _seed = uint64(time.Now().UnixNano()/2 + 1)

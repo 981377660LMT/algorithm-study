@@ -29,14 +29,12 @@
 //	操作api:
 //	 1. Reverse(node, start, end) -> node
 //	 2. CopyWithin(node, start, end, to) -> node (持久化为true时)
-//   3. KthNode(node, k) -> node
-//	 4. At(node, k) -> v
-//	 5. Size(node) -> size
-//	 6. Pop(node, k) -> node, v
-//	 7. Erase(node, start, end) -> node
-//	 8. Insert(node, k, v) -> node
-//	 9. RotateRight(node, start, end, k) -> node
-//	10. RotateLeft(node, start, end, k) -> node
+//	 3. Size(node) -> size
+//	 4. Pop(node, k) -> node, v
+//	 5. Erase(node, start, end) -> node
+//	 6. Insert(node, k, v) -> node
+//	 7. RotateRight(node, start, end, k) -> node
+//	 8. RotateLeft(node, start, end, k) -> node
 
 //	 Pop/Erase/At/BisectLeft/BisectRight... 都是基于分裂/拼接实现的
 //
@@ -92,7 +90,8 @@ func main() {
 	left, right := R.SplitMaxRight(root, func(e E) bool { return e <= 10 })
 	fmt.Println(R.GetAll(left))  // [1 2 3 4]
 	fmt.Println(R.GetAll(right)) // [5]
-	left, _ = R.Pop(left, 0)
+	left, a := R.Pop(left, 0)
+	fmt.Println(a)
 	fmt.Println(R.GetAll(left)) // [2 3 4]
 	left = R.Set(left, 0, 3)
 	fmt.Println(R.GetAll(left)) // [3 3 4]
@@ -274,13 +273,6 @@ func (rbst *RBSTAbelGroup) Reverse(root *Node, start, end int) *Node {
 
 func (rbst *RBSTAbelGroup) UpdateRange(root *Node, start, end int, f Id) *Node {
 	return rbst._updateRangeRec(root, start, end, f)
-}
-
-func (rbst *RBSTAbelGroup) UpdateAll(root *Node, f Id) *Node {
-	if root == nil {
-		return root
-	}
-	return rbst._updateRangeRec(root, 0, root.size, f)
 }
 
 func (rbst *RBSTAbelGroup) CopyWithin(root *Node, target int, start, end int) *Node {
@@ -590,37 +582,6 @@ func max(a, b int) int {
 		return a
 	}
 	return b
-}
-
-func (rbst *RBSTAbelGroup) KthNode(root *Node, k int) *Node {
-	cur := root
-	for cur != nil {
-		leftSize := rbst.Size(cur.left)
-		if leftSize+1 == k {
-			break
-		} else if leftSize >= k {
-			cur = cur.left
-		} else {
-			k -= leftSize + 1
-			cur = cur.right
-		}
-	}
-	return cur
-}
-
-func (rbst *RBSTAbelGroup) At(root *Node, index int) E {
-	n := rbst.Size(root)
-	if index < 0 {
-		index += n
-	}
-	if index < 0 || index >= n {
-		return e()
-	}
-	node := rbst.KthNode(root, index)
-	if node == nil {
-		return e()
-	}
-	return node.value
 }
 
 func (rbst *RBSTAbelGroup) Pop(root *Node, index int) (newRoot *Node, res E) {
