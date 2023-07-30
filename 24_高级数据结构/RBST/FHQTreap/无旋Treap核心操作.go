@@ -357,37 +357,6 @@ func Insert(node **Node, index int, value E) {
 	*node = Merge(left, Merge(NewNode(value), right))
 }
 
-func KthNode(root *Node, k int) *Node {
-	cur := root
-	for cur != nil {
-		leftSize := Size(cur.left)
-		if leftSize+1 == k {
-			break
-		} else if leftSize >= k {
-			cur = cur.left
-		} else {
-			k -= leftSize + 1
-			cur = cur.right
-		}
-	}
-	return cur
-}
-
-func At(root *Node, index int) E {
-	n := Size(root)
-	if index < 0 {
-		index += n
-	}
-	if index < 0 || index >= n {
-		return e()
-	}
-	node := KthNode(root, index)
-	if node == nil {
-		return e()
-	}
-	return node.value
-}
-
 func Pop(root **Node, index int) (res E) {
 	n := Size(*root)
 	if index < 0 {
