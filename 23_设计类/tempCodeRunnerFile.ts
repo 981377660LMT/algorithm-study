@@ -1,5 +1,3 @@
-
-
 // // 用户2发送了一个新推文 (推文id = 6).
 // console.log(twitter.postTweet(2, 6))
 

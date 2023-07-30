@@ -52,7 +52,7 @@ func maxIncreasingGroups(usageLimits []int) int {
 	tree := NewRoot()
 	for i := 0; i < n; i++ {
 		node := NewNode(usageLimits[i])
-		tree = Insert(tree, node)
+		tree = Add(tree, node)
 	}
 
 	for i := 1; i <= n; i++ {
@@ -60,12 +60,12 @@ func maxIncreasingGroups(usageLimits []int) int {
 			return i - 1
 		}
 		big, small := SplitByRank(tree, i)
-		AllApply(big, -1) // 取出频率最大的 res 个数, 频率减 1
+		UpdateAll(big, -1) // 取出频率最大的 res 个数, 频率减 1
 		max_ := QueryAll(small)
 		notLess, less := SplitByValue(big, max_)
 		nonZero, _ := SplitByValue(less, 1)
 		tree = Merge(notLess, small) // 左右拼接后是有序的
-		tree = Insert(tree, nonZero) // 顺序插入
+		tree = Add(tree, nonZero)    // 顺序插入
 	}
 
 	return n
@@ -109,12 +109,12 @@ func NewNode(v E) *Node {
 	return res
 }
 
-// 将node插入到tree中，插入位置由Value决定.
-func Insert(tree, node *Node) *Node {
+// 合并两棵树, 保证Value有序.
+func Add(root, node *Node) *Node {
 	if node == nil {
-		return tree
+		return root
 	}
-	left, right := SplitByValue(tree, node.value)
+	left, right := SplitByValue(root, node.value)
 	return Merge(Merge(left, node), right)
 }
 
@@ -156,6 +156,15 @@ func SplitByRank(root *Node, k int) (*Node, *Node) {
 	}
 }
 
+func Split3ByRank(root *Node, l, r int) (*Node, *Node, *Node) {
+	if root == nil {
+		return nil, nil, nil
+	}
+	root, right := SplitByRank(root, r)
+	left, mid := SplitByRank(root, l)
+	return left, mid, right
+}
+
 // split root to `less than value` and `greater than or equal to value`
 func SplitByValue(root *Node, value E) (*Node, *Node) {
 	if root == nil {
@@ -173,14 +182,6 @@ func SplitByValue(root *Node, value E) (*Node, *Node) {
 	}
 }
 
-// UpdateAll.
-func AllApply(node *Node, f Id) *Node {
-	node.value = mapping(f, node.value)
-	node.data = mapping(f, node.data)
-	node.lazy = composition(f, node.lazy)
-	return node
-}
-
 func Toggle(node *Node) {
 	node.left, node.right = node.right, node.left
 	node.data = rev(node.data)
@@ -188,18 +189,18 @@ func Toggle(node *Node) {
 }
 
 // Fold.
-func Query(node *Node, start, end int) (res E) {
-	if start >= end {
+func Query(node **Node, start, end int) (res E) {
+	if start >= end || node == nil {
 		return e()
 	}
-	left1, right1 := SplitByRank(node, start)
+	left1, right1 := SplitByRank(*node, start)
 	left2, right2 := SplitByRank(right1, end-start)
 	if left2 != nil {
 		res = left2.data
 	} else {
 		res = e()
 	}
-	*node = *Merge(left1, Merge(left2, right2))
+	*node = Merge(left1, Merge(left2, right2))
 	return
 }
 
@@ -211,24 +212,54 @@ func QueryAll(node *Node) E {
 }
 
 // Apply.
-func Update(node *Node, start, end int, f Id) {
+func Update(node **Node, start, end int, f Id) {
 	if start >= end {
 		return
 	}
-	left1, right1 := SplitByRank(node, start)
+	left1, right1 := SplitByRank(*node, start)
 	left2, right2 := SplitByRank(right1, end-start)
-	AllApply(left2, f)
-	*node = *Merge(left1, Merge(left2, right2))
+	_allApply(left2, f)
+	*node = Merge(left1, Merge(left2, right2))
 }
 
-func Reverse(node *Node, start, end int) {
+// AllApply.
+func UpdateAll(node *Node, f Id) {
+	node.value = mapping(f, node.value)
+	node.data = mapping(f, node.data)
+	node.lazy = composition(f, node.lazy)
+}
+
+func GetAll(node *Node) []E {
+	res := make([]E, 0, Size(node))
+	var dfs func(node *Node)
+	dfs = func(node *Node) {
+		if node == nil {
+			return
+		}
+		_pushDown(node)
+		dfs(node.left)
+		res = append(res, node.value)
+		dfs(node.right)
+	}
+	dfs(node)
+	return res
+}
+
+func _allApply(node *Node, f Id) *Node {
+	node.value = mapping(f, node.value)
+	node.data = mapping(f, node.data)
+	node.lazy = composition(f, node.lazy)
+	return node
+}
+
+func Reverse(node **Node, start, end int) {
 	if start >= end {
 		return
 	}
-	left1, right1 := SplitByRank(node, start)
+	left1, right1 := SplitByRank(*node, start)
 	left2, right2 := SplitByRank(right1, end-start)
 	Toggle(left2)
-	*node = *Merge(left1, Merge(left2, right2))
+	*node = Merge(left1, Merge(left2, right2))
 }
 
 func Size(node *Node) int {
@@ -244,10 +275,10 @@ func _pushDown(node *Node) {
 	}
 	if node.lazy != id() {
 		if node.left != nil {
-			AllApply(node.left, node.lazy)
+			_allApply(node.left, node.lazy)
 		}
 		if node.right != nil {
-			AllApply(node.right, node.lazy)
+			_allApply(node.right, node.lazy)
 		}
 		node.lazy = id()
 	}
@@ -265,13 +296,13 @@ func _pushDown(node *Node) {
 func _pushUp(node *Node) *Node {
 	node.size = 1
 	node.data = node.value
-	if node.left != nil {
-		node.size += node.left.size
-		node.data = op(node.left.data, node.data)
+	if left := node.left; left != nil {
+		node.size += left.size
+		node.data = op(left.data, node.data)
 	}
-	if node.right != nil {
-		node.size += node.right.size
-		node.data = op(node.data, node.right.data)
+	if right := node.right; right != nil {
+		node.size += right.size
+		node.data = op(node.data, right.data)
 	}
 	return node
 }
@@ -296,4 +327,180 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+
+// 按照leaves的顺序(不是值的顺序)构建一棵树.
+func Build(leaves []E) *Node {
+	if len(leaves) == 0 {
+		return nil
+	}
+	var dfs func(l, r int) *Node
+	dfs = func(l, r int) *Node {
+		if r-l == 1 {
+			node := NewNode(leaves[l])
+			return _pushUp(node)
+		}
+		mid := (l + r) >> 1
+		return Merge(dfs(l, mid), dfs(mid, r))
+	}
+	return dfs(0, len(leaves))
+}
+
+// 将value插入到树node的index位置之前.
+func Insert(node **Node, index int, value E) {
+	left, right := SplitByRank(*node, index)
+	*node = Merge(left, Merge(NewNode(value), right))
+}
+
+func KthNode(root *Node, k int) *Node {
+	cur := root
+	for cur != nil {
+		leftSize := Size(cur.left)
+		if leftSize+1 == k {
+			break
+		} else if leftSize >= k {
+			cur = cur.left
+		} else {
+			k -= leftSize + 1
+			cur = cur.right
+		}
+	}
+	return cur
+}
+
+func At(root *Node, index int) E {
+	n := Size(root)
+	if index < 0 {
+		index += n
+	}
+	if index < 0 || index >= n {
+		return e()
+	}
+	node := KthNode(root, index)
+	if node == nil {
+		return e()
+	}
+	return node.value
+}
+
+func Pop(root **Node, index int) (res E) {
+	n := Size(*root)
+	if index < 0 {
+		index += n
+	}
+
+	x, y, z := Split3ByRank(*root, index, index+1)
+	res = y.value
+	*root = Merge(x, z)
+	return
+}
+
+// Remove [start, stop) from list.
+func Erase(root **Node, start, stop int) {
+	x, _, z := Split3ByRank(*root, start, stop)
+	*root = Merge(x, z)
+}
+
+// Rotate [start, stop) to the right `k` times.
+func RotateRight(root **Node, start, stop, k int) {
+	start++
+	n := stop - start + 1 - k%(stop-start+1)
+	x, y := SplitByRank(*root, start-1)
+	y, z := SplitByRank(y, n)
+	z, p := SplitByRank(z, stop-start+1-n)
+	*root = Merge(Merge(Merge(x, z), y), p)
+}
+
+// Rotate [start, stop) to the left `k` times.
+func RotateLeft(root **Node, start, stop, k int) {
+	start++
+	k %= (stop - start + 1)
+	x, y := SplitByRank(*root, start-1)
+	y, z := SplitByRank(y, k)
+	z, p := SplitByRank(z, stop-start+1-k)
+	*root = Merge(Merge(Merge(x, z), y), p)
+}
+
+// rbst.Query(0, i) が true となるような最大の i を返す．
+//
+//	i := rbst.MaxRight(e, func(v E) bool { return v.sum <= k })
+//	単調性を仮定．atcoder::lazy_segtree と同じ．
+//	e は単位元．
+func MaxRight(root *Node, e E, f func(E) bool) int {
+	if root == nil {
+		return 0
+	}
+	_pushDown(root)
+	now := root
+	prodNow := e
+	res := 0
+	for {
+		if now.left != nil {
+			_pushDown(now.left)
+			pl := op(prodNow, now.left.data)
+			if f(pl) {
+				prodNow = pl
+				res += now.left.size
+			} else {
+				now = now.left
+				continue
+			}
+		}
+		pl := op(prodNow, now.value)
+		if !f(pl) {
+			return res
+		}
+		prodNow = pl
+		res++
+		if now.right == nil {
+			return res
+		}
+		_pushDown(now.right)
+		now = now.right
+	}
+}
+
+// rbst.Query(i, rbst.Size()) が true となるような最小の i を返す．
+//
+//	i := rbst.MinLeft(e, func(v E) bool { return v.sum >= k })
+//	単調性を仮定．atcoder::lazy_segtree と同じ．
+//	e は単位元．
+func MinLeft(root *Node, e E, f func(E) bool) int {
+	if root == nil {
+		return 0
+	}
+	_pushDown(root)
+	now := root
+	prodNow := e
+	res := Size(root)
+	for {
+		if now.right != nil {
+			_pushDown(now.right)
+			pr := op(now.right.data, prodNow)
+			if f(pr) {
+				prodNow = pr
+				res -= now.right.size
+			} else {
+				now = now.right
+				continue
+			}
+		}
+		pr := op(now.value, prodNow)
+		if !f(pr) {
+			return res
+		}
+		prodNow = pr
+		res--
+		if now.left == nil {
+			return res
+		}
+		_pushDown(now.left)
+		now = now.left
+	}
+
 }
