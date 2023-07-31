@@ -11,7 +11,7 @@ import { SortedListFast } from './SortedListFast'
 interface Options<V> {
   values?: Iterable<V>
   compareFn?: (a: V, b: V) => number
-  ableGroup?: {
+  abelGroup?: {
     e: () => V
     op: (a: V, b: V) => V
     inv: (a: V) => V
@@ -34,16 +34,16 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
     const {
       values = [],
       compareFn = (a: any, b: any) => a - b,
-      ableGroup = {
+      abelGroup = {
         e: () => 0 as any,
         op: (a: any, b: any) => a + b,
         inv: (a: any) => -a as any
       }
     } = options ?? {}
 
-    this._e = ableGroup.e
-    this._op = ableGroup.op
-    this._inv = ableGroup.inv
+    this._e = abelGroup.e
+    this._op = abelGroup.op
+    this._inv = abelGroup.inv
     this._build([...values], compareFn)
   }
 
