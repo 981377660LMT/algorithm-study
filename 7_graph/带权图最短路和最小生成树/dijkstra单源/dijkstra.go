@@ -192,3 +192,40 @@ func (h *SiftHeap) _siftDown(i int32) {
 	h.pos[i] = curPos
 	h.heap[curPos] = i
 }
+
+// 稠密图dijkstra模板
+//  (O(n^2+m)
+func DijkstraDense(n int, graph [][][2]int, start int) (dist, pre []int) {
+	dist = make([]int, n)
+	pre = make([]int, n)
+	for i := 0; i < n; i++ {
+		dist[i] = INF
+		pre[i] = -1
+	}
+
+	done := make([]bool, n)
+	dist[start] = 0
+	for {
+		min_ := INF
+		minIndex := -1
+		for i := 0; i < n; i++ {
+			if !done[i] && dist[i] < min_ {
+				minIndex = i
+				min_ = dist[i]
+			}
+		}
+		if minIndex == -1 {
+			break
+		}
+		done[minIndex] = true
+		for _, e := range graph[minIndex] {
+			next, cost := e[0], e[1]
+			if cand := dist[minIndex] + cost; dist[next] > cand {
+				dist[next] = cand
+				pre[next] = minIndex
+			}
+		}
+	}
+
+	return
+}
