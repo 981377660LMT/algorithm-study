@@ -54,6 +54,7 @@ func demo() {
 	// fmt.Println(QueryAll(tree1))
 }
 
+// https://atcoder.jp/contests/arc030/tasks/arc030_4
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -65,7 +66,7 @@ func main() {
 	for i := 0; i < n; i++ {
 		var x int
 		fmt.Fscan(in, &x)
-		leaves[i] = E{sum: x, size: 1}
+		leaves[i] = x
 	}
 	root := Build(leaves)
 
@@ -80,7 +81,7 @@ func main() {
 			root = CopyWithin(root, a-1, c-1, d)
 		} else if t == 3 {
 			fmt.Fscan(in, &a, &b)
-			fmt.Fprintln(out, Query(&root, a-1, b).sum)
+			fmt.Fprintln(out, Query(&root, a-1, b))
 		}
 	}
 }
@@ -89,25 +90,20 @@ const INF int = 1e18
 
 const _PERSISTENT = false // !是否启用持久化
 
-// RangeAddRangeMax
+// RangeAddRangeSum
 
-type E = struct{ sum, size int }
+type E = int
 type Id = int
 
 func rev(e E) E     { return e }
-func e() E          { return E{} }
+func e() E          { return 0 }
 func id() Id        { return 0 }
-func op(e1, e2 E) E { return E{e1.sum + e2.sum, e1.size + e2.size} }
-
-func mapping(f Id, e E) E {
-	if f == 0 {
-		return e
-	}
-	return E{f*e.size + e.sum, e.size}
+func op(e1, e2 E) E { return e1 + e2 }
+func mapping(f Id, e E, size int) E {
+	return f*size + e
 }
-
 func composition(f, g Id) Id { return f + g }
-func less(e1, e2 E) bool     { return e1.sum < e2.sum }
+func less(e1, e2 E) bool     { return e1 < e2 }
 
 //
 //
@@ -339,8 +335,8 @@ func _pushUp(node *Node) *Node {
 }
 
 func _allApply(node *Node, f Id) *Node {
-	node.value = mapping(f, node.value)
-	node.data = mapping(f, node.data)
+	node.value = mapping(f, node.value, 1)
+	node.data = mapping(f, node.data, node.size)
 	node.lazy = composition(f, node.lazy)
 	return node
 }

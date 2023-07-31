@@ -71,19 +71,17 @@ func maxIncreasingGroups(usageLimits []int) int {
 	return n
 }
 
-const INF int = 1e18
-
 // RangeAddRangeMax
 type E = int
 type Id = int
 
-func rev(e E) E              { return e }
-func e() E                   { return 0 }
-func id() Id                 { return 0 }
-func op(e1, e2 E) E          { return max(e1, e2) }
-func mapping(f Id, e E) E    { return f + e }
-func composition(f, g Id) Id { return f + g }
-func less(e1, e2 E) bool     { return e1 > e2 } // !维护最大值
+func rev(e E) E                     { return e }
+func e() E                          { return 0 }
+func id() Id                        { return 0 }
+func op(e1, e2 E) E                 { return max(e1, e2) }
+func mapping(f Id, e E, size int) E { return f + e }
+func composition(f, g Id) Id        { return f + g }
+func less(e1, e2 E) bool            { return e1 > e2 } // !维护最大值
 
 //
 //
@@ -182,12 +180,6 @@ func SplitByValue(root *Node, value E) (*Node, *Node) {
 	}
 }
 
-func Toggle(node *Node) {
-	node.left, node.right = node.right, node.left
-	node.data = rev(node.data)
-	node.isReversed = !node.isReversed
-}
-
 // Fold.
 func Query(node **Node, start, end int) (res E) {
 	if start >= end || node == nil {
@@ -224,8 +216,11 @@ func Update(node **Node, start, end int, f Id) {
 
 // AllApply.
 func UpdateAll(node *Node, f Id) {
-	node.value = mapping(f, node.value)
-	node.data = mapping(f, node.data)
+	if node == nil {
+		return
+	}
+	node.value = mapping(f, node.value, 1)
+	node.data = mapping(f, node.data, node.size)
 	node.lazy = composition(f, node.lazy)
 }
 
@@ -246,8 +241,8 @@ func GetAll(node *Node) []E {
 }
 
 func _allApply(node *Node, f Id) *Node {
-	node.value = mapping(f, node.value)
-	node.data = mapping(f, node.data)
+	node.value = mapping(f, node.value, 1)
+	node.data = mapping(f, node.data, node.size)
 	node.lazy = composition(f, node.lazy)
 	return node
 }
@@ -258,8 +253,12 @@ func Reverse(node **Node, start, end int) {
 	}
 	left1, right1 := SplitByRank(*node, start)
 	left2, right2 := SplitByRank(right1, end-start)
-	Toggle(left2)
+	_toggle(left2)
 	*node = Merge(left1, Merge(left2, right2))
+}
+
+func ReverseAll(node *Node) {
+	_toggle(node)
 }
 
 func Size(node *Node) int {
@@ -284,10 +283,10 @@ func _pushDown(node *Node) {
 	}
 	if node.isReversed {
 		if node.left != nil {
-			Toggle(node.left)
+			_toggle(node.left)
 		}
 		if node.right != nil {
-			Toggle(node.right)
+			_toggle(node.right)
 		}
 		node.isReversed = false
 	}
@@ -305,6 +304,12 @@ func _pushUp(node *Node) *Node {
 		node.data = op(node.data, right.data)
 	}
 	return node
+}
+
+func _toggle(node *Node) {
+	node.left, node.right = node.right, node.left
+	node.data = rev(node.data)
+	node.isReversed = !node.isReversed
 }
 
 var _seed = uint64(time.Now().UnixNano()/2 + 1)
@@ -355,6 +360,37 @@ func Build(leaves []E) *Node {
 func Insert(node **Node, index int, value E) {
 	left, right := SplitByRank(*node, index)
 	*node = Merge(left, Merge(NewNode(value), right))
+}
+
+func KthNode(root *Node, k int) *Node {
+	cur := root
+	for cur != nil {
+		leftSize := Size(cur.left)
+		if leftSize+1 == k {
+			break
+		} else if leftSize >= k {
+			cur = cur.left
+		} else {
+			k -= leftSize + 1
+			cur = cur.right
+		}
+	}
+	return cur
+}
+
+func At(root *Node, index int) E {
+	n := Size(root)
+	if index < 0 {
+		index += n
+	}
+	if index < 0 || index >= n {
+		return e()
+	}
+	node := KthNode(root, index)
+	if node == nil {
+		return e()
+	}
+	return node.value
 }
 
 func Pop(root **Node, index int) (res E) {

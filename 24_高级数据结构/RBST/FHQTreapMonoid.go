@@ -58,13 +58,13 @@ const INF int = 1e18
 type E = int
 type Id = int
 
-func rev(e E) E              { return e }
-func e() E                   { return 0 }
-func id() Id                 { return 0 }
-func op(e1, e2 E) E          { return max(e1, e2) }
-func mapping(f Id, e E) E    { return f + e }
-func composition(f, g Id) Id { return f + g }
-func less(e1, e2 E) bool     { return e1 > e2 } // !维护最大值
+func rev(e E) E                     { return e }
+func e() E                          { return 0 }
+func id() Id                        { return 0 }
+func op(e1, e2 E) E                 { return max(e1, e2) }
+func mapping(f Id, e E, size int) E { return f + e }
+func composition(f, g Id) Id        { return f + g }
+func less(e1, e2 E) bool            { return e1 > e2 } // !维护最大值
 
 //
 //
@@ -199,8 +199,11 @@ func Update(node **Node, start, end int, f Id) {
 
 // AllApply.
 func UpdateAll(node *Node, f Id) {
-	node.value = mapping(f, node.value)
-	node.data = mapping(f, node.data)
+	if node == nil {
+		return
+	}
+	node.value = mapping(f, node.value, 1)
+	node.data = mapping(f, node.data, node.size)
 	node.lazy = composition(f, node.lazy)
 }
 
@@ -221,8 +224,8 @@ func GetAll(node *Node) []E {
 }
 
 func _allApply(node *Node, f Id) *Node {
-	node.value = mapping(f, node.value)
-	node.data = mapping(f, node.data)
+	node.value = mapping(f, node.value, 1)
+	node.data = mapping(f, node.data, node.size)
 	node.lazy = composition(f, node.lazy)
 	return node
 }
