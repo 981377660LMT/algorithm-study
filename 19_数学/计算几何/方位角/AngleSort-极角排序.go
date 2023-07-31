@@ -8,6 +8,10 @@ import (
 )
 
 func main() {
+	fmt.Println(AngleSort([][2]int{{0, 0}, {1, 0}, {0, 1}, {-1, 0}, {0, -1}}))
+}
+
+func demo() {
 
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -19,14 +23,14 @@ func main() {
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &points[i][0], &points[i][1])
 	}
-	order := angleSort(points)
+	order := AngleSort(points)
 	for _, i := range order {
 		fmt.Fprintln(out, points[i][0], points[i][1])
 	}
 }
 
 // 极角排序，返回每个点在极角排序后的位置(order)
-func angleSort(points [][2]int) (order []int) {
+func AngleSort(points [][2]int) (order []int) {
 	lower, origin, upper := []int{}, []int{}, []int{}
 	O := [2]int{0, 0}
 	for i, p := range points {

@@ -2,11 +2,13 @@
 # n<=2e5 -1e9<=x,y<=1e9
 
 
+from collections import defaultdict, deque
 from typing import List, Tuple
 
 
-def sortPointsByArgument(points: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
-    """
+def angleSort(points: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+    """极角排序，返回排序后的结果.
+
     按照atan2(x,y) 排序
     从-pi开始,逆时针到pi
     eg: (-10,-1) -> (0, -1) -> (1, 0) -> (0, 1) -> (-1, 0)
@@ -74,20 +76,46 @@ def sortPointsByArgument(points: List[Tuple[int, int]]) -> List[Tuple[int, int]]
     msort(z3)
     msort(z4)
 
-    return z3 + z4 + z5 + z1 + z2
+    ids = z3 + z4 + z5 + z1 + z2
+    return ids
 
 
-import sys
+def angleArgSort(points: List[Tuple[int, int]]) -> List[int]:
+    """极角排序，返回每个点在极角排序后的索引."""
+    res = angleSort(points)
+    mp = defaultdict(list)
+    for i, p in enumerate(res):
+        mp[p].append(i)
+    order = [0] * len(points)
+    for i, p in enumerate(points):
+        order[i] = mp[p].pop()
+    return order  # type: ignore
 
-sys.setrecursionlimit(int(1e9))
-input = lambda: sys.stdin.readline().rstrip("\r\n")
-MOD = 998244353
-INF = int(4e18)
 
 if __name__ == "__main__":
+    res = angleSort(
+        [
+            (1, 0),
+            (0, 0),
+            (-1, 0),
+            (0, 1),
+            (0, -1),
+            (1, 1),
+            (2, 2),
+            (-10, -1),
+        ]
+    )
+    print(res)
+
+    import sys
+
+    sys.setrecursionlimit(int(1e9))
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
+    MOD = 998244353
+    INF = int(4e18)
     n = int(input())
     points = [tuple(map(int, input().split())) for _ in range(n)]
-    res = sortPointsByArgument(points)
+    res = angleSort(points)
     for x, y in res:
         print(x, y)
 # 8
