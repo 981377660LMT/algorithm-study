@@ -1,5 +1,6 @@
 # https://maspypy.github.io/library/nt/stern_brocot_tree.hpp
 # 正有理数的树状结构(有理数集拓展到实数集)
+# Stern–Brocot Tree
 # SB树???
 # https://oi-wiki.org/math/number-theory/stern-brocot/
 #               1/1
@@ -27,7 +28,6 @@ class SternBrocotTree:
 
     @staticmethod
     def getPathAndRange(x: R) -> Tuple[Path, R, R]:
-
         """求x在树中的路径和范围."""
         path = []
         left, right = (0, 1), (1, 0)  # 根节点为(1, 1)
