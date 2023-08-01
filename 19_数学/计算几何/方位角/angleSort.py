@@ -1,8 +1,7 @@
-# 极角排序(Sort Points by Argument)
+# 极角排序(Sort Points by Argument),快速版本
 # n<=2e5 -1e9<=x,y<=1e9
 
 
-from collections import defaultdict, deque
 from typing import List, Tuple
 
 
@@ -80,33 +79,7 @@ def angleSort(points: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     return ids
 
 
-def angleArgSort(points: List[Tuple[int, int]]) -> List[int]:
-    """极角排序，返回每个点在极角排序后的索引."""
-    res = angleSort(points)
-    mp = defaultdict(list)
-    for i, p in enumerate(res):
-        mp[p].append(i)
-    order = [0] * len(points)
-    for i, p in enumerate(points):
-        order[i] = mp[p].pop()
-    return order  # type: ignore
-
-
 if __name__ == "__main__":
-    res = angleSort(
-        [
-            (1, 0),
-            (0, 0),
-            (-1, 0),
-            (0, 1),
-            (0, -1),
-            (1, 1),
-            (2, 2),
-            (-10, -1),
-        ]
-    )
-    print(res)
-
     import sys
 
     sys.setrecursionlimit(int(1e9))
@@ -118,22 +91,3 @@ if __name__ == "__main__":
     res = angleSort(points)
     for x, y in res:
         print(x, y)
-# 8
-# 1 0
-# 0 0
-# -1 0
-# 0 1
-# 0 -1
-# 1 1
-# 2 2
-# -10 -1
-
-# 输出
-# -10 -1
-# 0 -1
-# 1 0
-# 0 0
-# 1 1
-# 2 2
-# 0 1
-# -1 0
