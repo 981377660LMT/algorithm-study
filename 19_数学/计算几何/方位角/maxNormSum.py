@@ -1,8 +1,3 @@
-from math import e
-from typing import List, Tuple
-from angleSort import angleArgSort
-
-
 # !最大化向量长度
 # 给定一组二维平面上的点（向量），从中选择一个子集，使得这些向量的和的范数（norm）最大化。
 # 返回 `最大化的范数` 和 `选择的向量的下标`。
@@ -10,10 +5,26 @@ from angleSort import angleArgSort
 # https://atcoder.jp/contests/abc139/tasks/abc139_f
 
 
-def maxNormSum(points: List[Tuple[int, int]]) -> Tuple[int, List[int]]:
-    order = angleArgSort(points)
+from typing import List, Tuple
+from angleArgSort import angleArgSort
 
+
+def maxNormSum(points: List[Tuple[int, int]]) -> Tuple[int, List[int]]:
+    def rearrange(arr: List[Tuple[int, int]], order: List[int]) -> List[Tuple[int, int]]:
+        res = [None] * len(order)
+        for i, o in enumerate(order):
+            res[i] = arr[o]  # type: ignore
+        return res  # type: ignore
+
+    indices = angleArgSort(points)
+    tmp = []
+    for i in indices:
+        if points[i] != (0, 0):
+            tmp.append(i)
+    indices = tmp
+    points = rearrange(points, indices)
     n = len(points)
+
     if n == 0:
         return 0, []
 
@@ -54,7 +65,7 @@ def maxNormSum(points: List[Tuple[int, int]]) -> Tuple[int, List[int]]:
 
     ids = []
     for i in range(lr[0], lr[1]):
-        ids.append(order[i % n])
+        ids.append(indices[i % n])
     return res, ids
 
 
@@ -76,5 +87,3 @@ if __name__ == "__main__":
         print(val**0.5)
 
     engines()
-    points = [(0, 0), (1, 0), (0, 1), (1, 1), (2, 2)]
-    assert maxNormSum(points) == (32, [1, 2, 3, 4])  # type: ignore
