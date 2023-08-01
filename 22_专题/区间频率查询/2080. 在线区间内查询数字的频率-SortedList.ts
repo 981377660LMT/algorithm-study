@@ -1,4 +1,4 @@
-import { SortedList } from '../离线查询/根号分治/SortedList/_SortedList'
+import { SortedListFast } from '../离线查询/根号分治/SortedList/SortedListFast'
 
 /**
  * 静态区间频率查询.
@@ -59,13 +59,13 @@ class RangeFreqQueryStatic {
  * 基于`SortedList`实现,单次查询时间复杂度`O(sqrt(n))`.
  */
 class RangeFreqQueryPointUpdate {
-  private readonly _mp: Map<number, SortedList> = new Map()
+  private readonly _mp: Map<number, SortedListFast> = new Map()
   private readonly _arr: number[]
 
   constructor(arr: number[]) {
     this._arr = arr
     arr.forEach((v, i) => {
-      if (!this._mp.has(v)) this._mp.set(v, new SortedList())
+      if (!this._mp.has(v)) this._mp.set(v, new SortedListFast())
       this._mp.get(v)!.add(i)
     })
   }
@@ -87,7 +87,7 @@ class RangeFreqQueryPointUpdate {
     const pre = this._arr[index]
     if (pre === value) return
     this._mp.get(pre)!.discard(index)
-    if (!this._mp.has(value)) this._mp.set(value, new SortedList())
+    if (!this._mp.has(value)) this._mp.set(value, new SortedListFast())
     this._mp.get(value)!.add(index)
   }
 }

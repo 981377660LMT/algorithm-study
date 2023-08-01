@@ -23,7 +23,7 @@ type KMP struct {
 
 func NewKMP(pattern string) *KMP {
 	return &KMP{
-		next:    getNext(pattern),
+		next:    GetNext(pattern),
 		pattern: pattern,
 	}
 }
@@ -68,7 +68,7 @@ func (k *KMP) Period(i int) int {
 	return 0
 }
 
-func getNext(pattern string) []int {
+func GetNext(pattern string) []int {
 	next := make([]int, len(pattern))
 	j := 0
 	for i := 1; i < len(pattern); i++ {

@@ -21,7 +21,7 @@
 //  length                           SegmentSet中区间的个数.
 //  count                            SegmentSet中区间的元素数量.
 
-import { SortedList } from '../离线查询/根号分治/SortedList/_SortedList'
+import { SortedListFast } from '../离线查询/根号分治/SortedList/SortedListFast'
 
 const INF = 2e15
 
@@ -32,7 +32,7 @@ const INF = 2e15
  * !2.有交集的区间会被合并,例如 [1,2]和[2,3]会被合并为[1,3].
  */
 class SegmentSet {
-  private readonly _sl = new SortedList<[left: number, right: number]>((a, b) => a[0] - b[0])
+  private readonly _sl = new SortedListFast<[left: number, right: number]>((a, b) => a[0] - b[0])
   private _count = 0
 
   /**

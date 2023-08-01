@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { SortedList } from '../离线查询/根号分治/SortedList/_SortedList'
+import { SortedListFast } from '../离线查询/根号分治/SortedList/SortedListFast'
 
 const INF = 2e15
 
@@ -35,7 +35,7 @@ class UnionRectangleRange {
  */
 class UnionRectangle {
   sum = 0
-  private readonly _sl = new SortedList(
+  private readonly _sl = new SortedListFast(
     [
       [0, INF],
       [INF, 0]
@@ -78,6 +78,8 @@ if (require.main === module) {
   const R = new UnionRectangleRange()
   R.add(-2, 1, -2, 1)
   console.log(R.query())
+  R.add(-1, 2, -1, 2)
+  console.log(R.query())
 
   // https://yukicoder.me/submissions/857898
   // import * as fs from 'fs'
@@ -105,7 +107,7 @@ if (require.main === module) {
   // const R = new UnionRectangleRange()
   // let pre = 0
   // for (let i = 0; i < n; i++) {
-  //   const [x1, x2, y1, y2] = input().split(' ').map(Number)
+  //   const [x1,y1, x2, y2] = input().split(' ').map(Number)
   //   R.add(x1, x2, y1, y2)
   //   const cur = R.query()
   //   console.log(cur - pre)

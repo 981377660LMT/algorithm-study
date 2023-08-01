@@ -1,7 +1,7 @@
-import { SortedList } from './_SortedList'
+import { SortedListFast } from './SortedListFast'
 
 class SORTracker {
-  private readonly _sl = new SortedList<[score: number, name: string]>(
+  private readonly _sl = new SortedListFast<[score: number, name: string]>(
     (a, b) => -(a[0] - b[0]) || a[1].localeCompare(b[1])
   )
 
