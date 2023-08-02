@@ -10,7 +10,7 @@
 // https://github.com/francisrstokes/arcsecond
 // https://time.geekbang.org/column/intro/436
 
-// 载体：Parser
+// 状态载体：Parser
 // 基本单元：str,regExp, whitespace,identifier,stringLiteral
 // 带空格的基本单元：token,regExpToken
 // 修饰符：zeroOrMore,zeroOrOne,oneOf,seqOf
