@@ -1,0 +1,68 @@
+```
+import { lazy, oneOf, oneOrMore, Parser, regExp, seqOf, str, zeroOrMore, zeroOrOne } from './parserLib'
+
+const whitespace = regExp(/^\s/)
+const ignored = zeroOrMore(whitespace)
+
+const token = (s: string) =>
+  seqOf(ignored, str(s))
+    .map(([_, res]) => res)
+
+const regexToken = (pattern: RegExp) =>
+  seqOf(ignored, regExp(pattern))
+    .map(([_, res]) => res)
+
+const Prologue = regexToken(/^```.*```/s)
+  .map(res => res.substring(3, res.length - 3))
+
+const Regex = regexToken(/^[/][^].*[/](?=\s*[;\.])/)
+
+const MapCode = regexToken(/^\.map\(.*?\)(?=\s*;)/s)
+```
+
+Terminal : /^[A-Z][A-Za-z_]*/ ;
+
+NonTerminal : /^[a-z][A-Za-z_]*/ ;
+
+Literal : /^"[^"]*"/
+  .map(res => `token(${res})`);
+
+primary -> Terminal | NonTerminal | Literal | "(" choice ")"
+  .map(res => {
+    if (Array.isArray(res)) return res[1]
+    return res
+  });
+
+qualified -> primary "?" | primary "*" | primary "+" | primary
+  .map(res => {
+    if (Array.isArray(res)) {
+      const [primary, quantifier] = res
+      if (quantifier === '?') return `zeroOrOne(${primary})`
+      if (quantifier === '*') return `zeroOrMore(${primary})`
+      if (quantifier === '+') return `oneOrMore(${primary})`
+    }
+    return res
+  });
+
+sequence -> qualified+
+  .map(res => res.length > 1 ? `seqOf(${res.join(', ')})` : res[0]);
+
+choice -> sequence ("|" sequence)*
+  .map(([first, rest]) => {
+    if (Array.isArray(rest) && rest.length > 0) {
+      rest = rest.map(r => r[1])
+      return `oneOf(${[first, ...rest].join(', ')})`
+    }
+    return first
+  });
+
+syntax -> NonTerminal "->" choice MapCode? ";"
+  .map(([head, _arrow, body, code, _semi]) =>
+    `export const ${head}: Parser = lazy(() => ${body})${code || ''};\n`);
+
+lexical -> Terminal ":" Regex MapCode? ";"
+  .map(([head, _arrow, body, code, _semi]) =>
+    `export const ${head} = regexToken(${body})${code || ''};\n`);
+
+grammar -> Prologue? (syntax | lexical)*
+  .map(([prologue, rules]) => `${prologue || ''}${rules.join('\n')}`);

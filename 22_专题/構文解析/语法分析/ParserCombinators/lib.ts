@@ -42,15 +42,8 @@ class Parser {
     this._parserFn = parserFn
   }
 
-  parse(s: string): Promise<IParserState> {
+  async parse(s: string): Promise<IParserState> {
     return this._parserFn({ origin: s, index: 0 })
-  }
-
-  map(f: (arg: any) => unknown): Parser {
-    return new Parser(async state => {
-      const nextState = await this.parseFn(state)
-      return { ...nextState, result: f(nextState.result) }
-    })
   }
 
   /**
@@ -59,9 +52,16 @@ class Parser {
   async parseToEnd(s: string): Promise<IParserState> {
     const res = await this.parse(s)
     if (res.index !== s.length) {
-      throw new Error(`Parsing end at ${res.index}: "${peek(res)}"`)
+      throw new Error(`Parsing end at ${res.index}: "${_peek(res)}"`)
     }
     return res
+  }
+
+  map(f: (arg: any) => unknown): Parser {
+    return new Parser(async state => {
+      const nextState = await this.parseFn(state)
+      return { ...nextState, result: f(nextState.result) }
+    })
   }
 
   get parseFn(): ParserFn {
@@ -72,24 +72,16 @@ class Parser {
 function str(s: string): Parser {
   return new Parser(async state => {
     const { origin, index } = state
-    const sliced = origin.slice(index)
-    if (!sliced.length) {
+    if (index >= origin.length) {
       throw new Error(`str: Tried to match "${s}", but got unexpected EOF.`)
     }
 
-    if (sliced.startsWith(s)) {
+    if (origin.startsWith(s, index)) {
       return { origin, index: index + s.length, result: s }
     }
 
-    throw new Error(`str: Tried to match "${s}", but got "${peek(state)}" at index ${index}.`)
+    throw new Error(`str: Tried to match "${s}", but got "${_peek(state)}" at index ${index}.`)
   })
-}
-
-/**
- * 如果遇到前面有空白符号，则在匹配之后丢弃.
- */
-function token(s: string): Parser {
-  return seqOf(whitespace, str(s)).map(([_, res]) => res)
 }
 
 /**
@@ -101,28 +93,20 @@ function regExp(pattern: RegExp): Parser {
     console.assert(pattern.source.startsWith('^'), 'regExp should start with "^"')
 
     const { origin, index } = state
-    const sliced = origin.slice(index)
-    if (!sliced.length) {
+    if (index >= origin.length) {
       throw new Error(`regExp: Tried to match "${pattern}", but got unexpected EOF.`)
     }
 
-    const matching = sliced.match(pattern)
+    const matching = origin.slice(index).match(pattern)
     if (matching != null) {
       const [res] = matching
       return { ...state, index: index + res.length, result: res }
     }
 
     throw new Error(
-      `regExp: Tried to match "${pattern}", but got "${peek(state)}" at index ${index}.`
+      `regExp: Tried to match "${pattern}", but got "${_peek(state)}" at index ${index}.`
     )
   })
-}
-
-/**
- * 如果遇到前面有空白符号，则在匹配之后丢弃.
- */
-function regExpToken(pattern: RegExp): Parser {
-  return seqOf(whitespace, regExp(pattern)).map(([_, res]) => res)
 }
 
 /**
@@ -161,6 +145,30 @@ function zeroOrOne(parser: Parser): Parser {
 }
 
 /**
+ * 对应正则表达式中的 `+`，表示匹配 1 次或多次.
+ * 至少匹配一次，否则抛出错误.
+ */
+function oneOrMore(parser: Parser): Parser {
+  return new Parser(async state => {
+    const res: unknown[] = []
+    let nextState = state
+
+    try {
+      while (true) {
+        nextState = await parser.parseFn(nextState)
+        res.push(nextState.result)
+      }
+    } catch (ignore) {}
+
+    if (!res.length) {
+      throw new Error(`oneOrMore: Unable to match parser at index ${state.index}: "${_peek(state)}`)
+    }
+
+    return { ...nextState, result: res }
+  })
+}
+
+/**
  * 对应正则表达式中的 `|`.
  * 至少匹配一次，否则抛出错误.
  * 构造的parser会返回传入的一连串parser中第一个匹配成功的结果.
@@ -172,7 +180,7 @@ function oneOf(...parsers: Parser[]): Parser {
         return await parser.parseFn(state)
       } catch (ignore) {}
     }
-    throw new Error(`oneOf: Unable to match any parser at index ${state.index}: "${peek(state)}"`)
+    throw new Error(`oneOf: Unable to match any parser at index ${state.index}: "${_peek(state)}"`)
   })
 }
 
@@ -192,34 +200,61 @@ function seqOf(...parsers: Parser[]): Parser {
   })
 }
 
-function peek(state: IParserState) {
-  const { origin, index } = state
-  return origin.slice(index, index + 10)
-}
-
 /**
  * 惰性求值来避免循环引用.
  */
 function lazy(thunk: () => Parser): Parser {
-  return new Parser(async state => {
+  return new Parser(state => {
     const parser = thunk()
     return parser.parseFn(state)
   })
 }
 
-const whitespace = regExp(/^\s*/)
+/**
+ * 如果遇到前面有空白符号，则在匹配之后丢弃.
+ */
+function token(s: string): Parser {
+  return seqOf(Whitespace, str(s)).map(([_, res]) => res)
+}
+
+/**
+ * 如果遇到前面有空白符号，则在匹配之后丢弃.
+ */
+function regExpToken(pattern: RegExp): Parser {
+  return seqOf(Whitespace, regExp(pattern)).map(([_, res]) => res)
+}
+
+function _peek(state: IParserState) {
+  const { origin, index } = state
+  return origin.slice(index, index + 30)
+}
+
+const Whitespace = regExp(/^\s*/)
 
 /**
  * 终结符Identifier.
  */
-const identifier = regExpToken(/^[a-zA-Z_][a-zA-Z0-9_]*/)
+const Identifier = regExpToken(/^[a-zA-Z_][a-zA-Z0-9_]*/)
 
 /**
  * 只支持双引号(“)，单引号(‘)和反引号(`)就不支持了.
  */
-const stringLiteral = regExpToken(/^"[^"]*"/)
+const StringLiteral = regExpToken(/^"[^"]*"/)
 
-export {}
+export {
+  Parser,
+  str,
+  regExp,
+  token,
+  zeroOrMore,
+  zeroOrOne,
+  oneOrMore,
+  oneOf,
+  seqOf,
+  lazy,
+  Identifier,
+  StringLiteral
+}
 
 if (require.main === module) {
   // 1. prog = (functionDecl | functionCall)* ;
@@ -239,7 +274,7 @@ if (require.main === module) {
 
   // 2. functionDecl: "function" Identifier "(" ")"  functionBody;
   const functionDecl = lazy(() =>
-    seqOf(token('function'), identifier, token('('), token(')'), functionBody)
+    seqOf(token('function'), Identifier, token('('), token(')'), functionBody)
   ).map(([_, name, _lp, _rp, body]) => ({ type: 'functionDecl', name, body }))
 
   // 3. functionBody : '{' functionCall* '}' ;
@@ -249,12 +284,12 @@ if (require.main === module) {
 
   // 4. functionCall : Identifier '(' parameterList? ')' ;
   const functionCall = lazy(() =>
-    seqOf(identifier, token('('), zeroOrOne(parameterList), token(')'))
+    seqOf(Identifier, token('('), zeroOrOne(parameterList), token(')'))
   ).map(([name, _lp, params, _rp]) => ({ type: 'functionCall', name, params }))
 
   // 5. parameterList : StringLiteral (',' StringLiteral)* ;
   const parameterList = lazy(() =>
-    seqOf(stringLiteral, zeroOrMore(seqOf(token(','), stringLiteral)))
+    seqOf(StringLiteral, zeroOrMore(seqOf(token(','), StringLiteral)))
   ).map(([param, params]) => [param, ...params.map(([_comma, param]: unknown[]) => param)])
 
   test()
