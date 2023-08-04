@@ -4,40 +4,59 @@
 /* eslint-disable implicit-arrow-linebreak */
 /* eslint-disable no-await-in-loop */
 
-type RecursiveGenerator<T> = Generator<T | RecursiveGenerator<T>, unknown, T>
+type RecursiveGenerator<T> = Generator<T | RecursiveGenerator<T>, T, T>
+type RecursiveAsyncGenerator<T> = AsyncGenerator<T | RecursiveAsyncGenerator<T>, T, T>
 
 /**
- * @param gen 递归生成器.
+ * @param gen 同步/异步的递归生成器.
  * @param shouldBreak 是否中断.如果中断,则返回当前的结果.默认不中断.
  * @param useTimeSlicing 是否使用时间片.如果使用时间片,则每64ms让出cpu一次.默认不使用.
  * @returns 生成器的最终结果.
  */
 async function bootStrapAsync<T>(
-  gen: RecursiveGenerator<T>,
+  gen: RecursiveGenerator<T> | RecursiveAsyncGenerator<T>,
   shouldBreak?: () => boolean,
   useTimeSlicing?: boolean
 ): Promise<T> {
   const stack = [gen]
   let res: any = undefined
   let start = Date.now()
+  const isAsyncGenerator = Object.prototype.toString.call(gen) === '[object AsyncGenerator]'
 
-  while (stack.length) {
+  if (isAsyncGenerator) {
     if (shouldBreak && shouldBreak()) return res
-
     const last = stack[stack.length - 1]
-    const next = last.next(res)
+    const next = await (last as RecursiveAsyncGenerator<T>).next(res)
     if (next.done) {
       res = next.value
       stack.pop()
     } else {
-      stack.push(next.value as RecursiveGenerator<T>)
+      stack.push(next.value as RecursiveAsyncGenerator<T>)
     }
-
     if (useTimeSlicing) {
       const now = Date.now()
       if (now - start > 64) {
         await sleep()
         start = Date.now()
+      }
+    }
+  } else {
+    while (stack.length) {
+      if (shouldBreak && shouldBreak()) return res
+      const last = stack[stack.length - 1]
+      const next = (last as RecursiveGenerator<T>).next(res)
+      if (next.done) {
+        res = next.value
+        stack.pop()
+      } else {
+        stack.push(next.value as RecursiveGenerator<T>)
+      }
+      if (useTimeSlicing) {
+        const now = Date.now()
+        if (now - start > 64) {
+          await sleep()
+          start = Date.now()
+        }
       }
     }
   }
@@ -48,6 +67,7 @@ async function bootStrapAsync<T>(
 function bootStrap<T>(gen: RecursiveGenerator<T>): T {
   const stack = [gen]
   let res = undefined as any
+
   while (stack.length) {
     const last = stack[stack.length - 1]
     const next = last.next(res)
@@ -68,7 +88,7 @@ function sleep(time = 0): Promise<void> {
   })
 }
 
-export { bootStrap, bootStrapAsync }
+export { RecursiveGenerator, RecursiveAsyncGenerator, bootStrap, bootStrapAsync, sleep }
 
 if (require.main === module) {
   // eslint-disable-next-line no-inner-declarations

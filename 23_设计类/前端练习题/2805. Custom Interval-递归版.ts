@@ -1,6 +1,7 @@
-// TODO:不能使用递归，很容易爆栈
-
+// https://leetcode.cn/problems/custom-interval/submissions/
+// !不能使用递归，很容易爆栈
 // ms = delay + period * count
+
 const alivedInterval = new Set<number>()
 
 /**

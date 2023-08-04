@@ -24,3 +24,5 @@ sleep(1000)
 sleepGenerator(1000)
   .next()
   .value.then(() => console.log(1))
+
+export {}

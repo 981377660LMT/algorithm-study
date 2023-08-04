@@ -34,3 +34,9 @@ console.log(generator.throw(new Error('An error occurred'))) // 抛出异常
 ```
 
 在这个示例中，`T` 是 `number`，`TReturn` 是 `string`，`TNext` 是 `boolean`。`next()` 方法接受一个 `boolean` 类型的参数，用于决定生成器函数中哪个 `yield` 语句将被执行。`return()` 方法接受一个 `string` 类型的参数，用于提前结束生成器函数的执行。`throw()` 方法接受一个异常对象，用于在生成器函数中抛出异常。
+
+---
+
+T: 生成器里面的
+TReturn: 外面给生成器的
+TNext: 外面给生成器的
