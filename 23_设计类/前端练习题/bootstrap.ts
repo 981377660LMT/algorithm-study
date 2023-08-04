@@ -83,19 +83,21 @@ if (require.main === module) {
     return BigInt(n) * (yield facGen(n - 1))
   }
 
-  const adjList: number[][] = [[1, 2], [0, 2], [0, 1, 3], [2]]
-
-  function dfs(cur: number, pre: number): void {
-    console.log(cur)
-    for (const next of adjList[cur]) {
-      if (next !== pre) {
-        dfs(next, cur)
-      }
-    }
+  function fooDfs(cur: number): number {
+    if (cur <= 1) return 1
+    return cur + fooDfs(cur - 1)
   }
 
-  console.log(facGen(10).next().value)
+  try {
+    fooDfs(1e5)
+  } catch (error: unknown) {
+    if (error instanceof Error) console.log(error.message)
+  }
 
-  const res = bootStrap(facGen(10))
-  console.log(res)
+  function* fooDfsGen(cur: number): RecursiveGenerator<number> {
+    if (cur <= 1) return 1
+    return cur + (yield fooDfsGen(cur - 1))
+  }
+
+  console.log(bootStrap(fooDfsGen(1e5)))
 }
