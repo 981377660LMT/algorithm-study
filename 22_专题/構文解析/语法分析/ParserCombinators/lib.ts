@@ -9,6 +9,7 @@
 // https://qszhu.github.io/2021/08/22/parser-combinators.html
 // https://github.com/francisrstokes/arcsecond
 // https://time.geekbang.org/column/intro/436
+// 缺点：各种地方都慢，因为是暴力匹配ll(k)，绝大多数情况ll(1)顶多ll(2)就够用了
 
 // 状态载体：Parser
 // 基本单元：str,regExp, whitespace,identifier,stringLiteral
@@ -57,7 +58,7 @@ class Parser {
     return res
   }
 
-  map(f: (arg: any) => unknown): Parser {
+  map(f: (parsedResult: any) => unknown): Parser {
     return new Parser(async state => {
       const nextState = await this.parseFn(state)
       return { ...nextState, result: f(nextState.result) }
@@ -103,9 +104,7 @@ function regExp(pattern: RegExp): Parser {
       return { ...state, index: index + res.length, result: res }
     }
 
-    throw new Error(
-      `regExp: Tried to match "${pattern}", but got "${_peek(state)}" at index ${index}.`
-    )
+    throw new Error(`regExp: Tried to match "${pattern}", but got "${_peek(state)}" at index ${index}.`)
   })
 }
 
@@ -171,7 +170,6 @@ function oneOrMore(parser: Parser): Parser {
 /**
  * 对应正则表达式中的 `|`.
  * 至少匹配一次，否则抛出错误.
- * 构造的parser会返回传入的一连串parser中第一个匹配成功的结果.
  */
 function oneOf(...parsers: Parser[]): Parser {
   return new Parser(async state => {
@@ -241,20 +239,7 @@ const Identifier = regExpToken(/^[a-zA-Z_][a-zA-Z0-9_]*/)
  */
 const StringLiteral = regExpToken(/^"[^"]*"/)
 
-export {
-  Parser,
-  str,
-  regExp,
-  token,
-  zeroOrMore,
-  zeroOrOne,
-  oneOrMore,
-  oneOf,
-  seqOf,
-  lazy,
-  Identifier,
-  StringLiteral
-}
+export { Parser, str, regExp, token, zeroOrMore, zeroOrOne, oneOrMore, oneOf, seqOf, lazy, Identifier, StringLiteral }
 
 if (require.main === module) {
   // 1. prog = (functionDecl | functionCall)* ;
@@ -273,9 +258,9 @@ if (require.main === module) {
   }))
 
   // 2. functionDecl: "function" Identifier "(" ")"  functionBody;
-  const functionDecl = lazy(() =>
-    seqOf(token('function'), Identifier, token('('), token(')'), functionBody)
-  ).map(([_, name, _lp, _rp, body]) => ({ type: 'functionDecl', name, body }))
+  const functionDecl = lazy(() => seqOf(token('function'), Identifier, token('('), token(')'), functionBody)).map(
+    ([_, name, _lp, _rp, body]) => ({ type: 'functionDecl', name, body })
+  )
 
   // 3. functionBody : '{' functionCall* '}' ;
   const functionBody = lazy(() => seqOf(token('{'), zeroOrMore(functionCall), token('}'))).map(
@@ -283,14 +268,14 @@ if (require.main === module) {
   )
 
   // 4. functionCall : Identifier '(' parameterList? ')' ;
-  const functionCall = lazy(() =>
-    seqOf(Identifier, token('('), zeroOrOne(parameterList), token(')'))
-  ).map(([name, _lp, params, _rp]) => ({ type: 'functionCall', name, params }))
+  const functionCall = lazy(() => seqOf(Identifier, token('('), zeroOrOne(parameterList), token(')'))).map(
+    ([name, _lp, params, _rp]) => ({ type: 'functionCall', name, params })
+  )
 
   // 5. parameterList : StringLiteral (',' StringLiteral)* ;
-  const parameterList = lazy(() =>
-    seqOf(StringLiteral, zeroOrMore(seqOf(token(','), StringLiteral)))
-  ).map(([param, params]) => [param, ...params.map(([_comma, param]: unknown[]) => param)])
+  const parameterList = lazy(() => seqOf(StringLiteral, zeroOrMore(seqOf(token(','), StringLiteral)))).map(
+    ([param, params]) => [param, ...params.map(([_comma, param]: unknown[]) => param)]
+  )
 
   test()
   async function test() {
