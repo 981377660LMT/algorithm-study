@@ -1,25 +1,14 @@
+/* eslint-disable max-len */
 /* eslint-disable no-inner-declarations */
 /* eslint-disable implicit-arrow-linebreak */
 
-import {
-  lazy,
-  oneOf,
-  oneOrMore,
-  seqOf,
-  zeroOrMore,
-  zeroOrOne,
-  Identifier,
-  StringLiteral,
-  token
-} from '../lib'
+import { lazy, oneOf, oneOrMore, seqOf, zeroOrMore, zeroOrOne, Identifier, StringLiteral, token } from '../lib'
 
 // prog = statementList* EOF;
 const prog = lazy(() => zeroOrMore(statementList))
 
 // statementList = (variableDecl | functionDecl | expressionStatement)+ ;
-const statementList = lazy(() =>
-  oneOrMore(oneOf(variableStatement, functionDecl, expressionStatement))
-)
+const statementList = lazy(() => oneOrMore(oneOf(variableStatement, functionDecl, expressionStatement)))
 
 // statement: block | expressionStatement | returnStatement | ifStatement | forStatement
 //         | emptyStatement | functionDecl | variableDecl ;
@@ -41,14 +30,7 @@ const block = lazy(() => seqOf(token('{'), zeroOrOne(statementList), token('}'))
 
 // ifStatement : 'if' '(' expression ')' statement ('else' statement)? ;
 const ifStatement = lazy(() =>
-  seqOf(
-    token('if'),
-    token('('),
-    expression,
-    token(')'),
-    statement,
-    zeroOrOne(seqOf(token('else'), statement))
-  )
+  seqOf(token('if'), token('('), expression, token(')'), statement, zeroOrOne(seqOf(token('else'), statement)))
 )
 
 // forStatement :
@@ -71,9 +53,7 @@ const forStatement = lazy(() =>
 const variableStatement = lazy(() => seqOf(token('let'), variableDecl, token(';')))
 
 // variableDecl : Identifier typeAnnotation？ ('=' expression)? ;
-const variableDecl = lazy(() =>
-  seqOf(Identifier, zeroOrOne(typeAnnotation), zeroOrOne(seqOf(token('='), expression)))
-)
+const variableDecl = lazy(() => seqOf(Identifier, zeroOrOne(typeAnnotation), zeroOrOne(seqOf(token('='), expression))))
 
 // typeAnnotation : ':' Identifier;
 const typeAnnotation = lazy(() => seqOf(token(':'), Identifier))
@@ -82,9 +62,7 @@ const typeAnnotation = lazy(() => seqOf(token(':'), Identifier))
 const functionDecl = lazy(() => seqOf(token('function'), Identifier, callSignature, block))
 
 // callSignature: '(' parameterList? ')' typeAnnotation? ;
-const callSignature = lazy(() =>
-  seqOf(token('('), zeroOrOne(parameterList), token(')'), zeroOrOne(typeAnnotation))
-)
+const callSignature = lazy(() => seqOf(token('('), zeroOrOne(parameterList), token(')'), zeroOrOne(typeAnnotation)))
 
 // returnStatement: 'return' expression? ';' ;
 const returnStatement = lazy(() => seqOf(token('return'), zeroOrOne(expression), token(';')))
@@ -108,20 +86,14 @@ const binary = lazy(() => seqOf(unary, zeroOrMore(seqOf(binOp, unary))))
 const unary = lazy(() => oneOf(primary, seqOf(prefixOp, unary), seqOf(primary, postfixOp)))
 
 // primary: StringLiteral |  functionCall | '(' expression ')' ;
-const primary = lazy(() =>
-  oneOf(StringLiteral, functionCall, seqOf(token('('), expression, token(')')))
-)
+const primary = lazy(() => oneOf(StringLiteral, functionCall, seqOf(token('('), expression, token(')'))))
 
 // assignmentOp = '=' | '+=' | '-=' | '*=' | '/=' | '>>=' | '<<=' | '>>>=' | '^=' | '|=' ;
-const assignmentOp = oneOf(
-  ...['=', '+=', '-=', '*=', '/=', '>>=', '<<=', '>>>=', '^=', '|='].map(token)
-)
+const assignmentOp = oneOf(...['=', '+=', '-=', '*=', '/=', '>>=', '<<=', '>>>=', '^=', '|='].map(token))
 
 // binOp: '+' | '-' | '*' | '/' | '==' | '!=' | '<=' | '>=' | '<'
 //      | '>' | '&&'| '||'|...;
-const binOp = oneOf(
-  ...['+', '-', '*', '/', '==', '!=', '<=', '>=', '<', '>', '&&', '||'].map(token)
-)
+const binOp = oneOf(...['+', '-', '*', '/', '==', '!=', '<=', '>=', '<', '>', '&&', '||'].map(token))
 
 // prefixOp = '+' | '-' | '++' | '--' | '!' | '~';
 const prefixOp = oneOf(...['+', '-', '++', '--', '!', '~'].map(token))
@@ -143,7 +115,7 @@ const parameter = lazy(() => seqOf(Identifier, zeroOrOne(typeAnnotation)))
 
 if (require.main === module) {
   async function main() {
-    const source = `let a: number = 1 + 2 + 3;`
+    const source = 'let a: number = 1 + 2 + 3;'
     const res = await prog.parseToEnd(source)
     // Parsing end at 0: "let a: number = 1 + 2 + 3;"
     console.log(res)
