@@ -104,7 +104,9 @@ function regExp(pattern: RegExp): Parser {
       return { ...state, index: index + res.length, result: res }
     }
 
-    throw new Error(`regExp: Tried to match "${pattern}", but got "${_peek(state)}" at index ${index}.`)
+    throw new Error(
+      `regExp: Tried to match "${pattern}", but got "${_peek(state)}" at index ${index}.`
+    )
   })
 }
 
@@ -218,7 +220,7 @@ function token(s: string): Parser {
 /**
  * 如果遇到前面有空白符号，则在匹配之后丢弃.
  */
-function regExpToken(pattern: RegExp): Parser {
+function regexToken(pattern: RegExp): Parser {
   return seqOf(Whitespace, regExp(pattern)).map(([_, res]) => res)
 }
 
@@ -232,14 +234,28 @@ const Whitespace = regExp(/^\s*/)
 /**
  * 终结符Identifier.
  */
-const Identifier = regExpToken(/^[a-zA-Z_][a-zA-Z0-9_]*/)
+const Identifier = regexToken(/^[a-zA-Z_][a-zA-Z0-9_]*/)
 
 /**
  * 只支持双引号(“)，单引号(‘)和反引号(`)就不支持了.
  */
-const StringLiteral = regExpToken(/^"[^"]*"/)
+const StringLiteral = regexToken(/^"[^"]*"/)
 
-export { Parser, str, regExp, token, zeroOrMore, zeroOrOne, oneOrMore, oneOf, seqOf, lazy, Identifier, StringLiteral }
+export {
+  Parser,
+  str,
+  regExp,
+  token,
+  regexToken,
+  zeroOrMore,
+  zeroOrOne,
+  oneOrMore,
+  oneOf,
+  seqOf,
+  lazy,
+  Identifier,
+  StringLiteral
+}
 
 if (require.main === module) {
   // 1. prog = (functionDecl | functionCall)* ;
@@ -258,9 +274,9 @@ if (require.main === module) {
   }))
 
   // 2. functionDecl: "function" Identifier "(" ")"  functionBody;
-  const functionDecl = lazy(() => seqOf(token('function'), Identifier, token('('), token(')'), functionBody)).map(
-    ([_, name, _lp, _rp, body]) => ({ type: 'functionDecl', name, body })
-  )
+  const functionDecl = lazy(() =>
+    seqOf(token('function'), Identifier, token('('), token(')'), functionBody)
+  ).map(([_, name, _lp, _rp, body]) => ({ type: 'functionDecl', name, body }))
 
   // 3. functionBody : '{' functionCall* '}' ;
   const functionBody = lazy(() => seqOf(token('{'), zeroOrMore(functionCall), token('}'))).map(
@@ -268,14 +284,14 @@ if (require.main === module) {
   )
 
   // 4. functionCall : Identifier '(' parameterList? ')' ;
-  const functionCall = lazy(() => seqOf(Identifier, token('('), zeroOrOne(parameterList), token(')'))).map(
-    ([name, _lp, params, _rp]) => ({ type: 'functionCall', name, params })
-  )
+  const functionCall = lazy(() =>
+    seqOf(Identifier, token('('), zeroOrOne(parameterList), token(')'))
+  ).map(([name, _lp, params, _rp]) => ({ type: 'functionCall', name, params }))
 
   // 5. parameterList : StringLiteral (',' StringLiteral)* ;
-  const parameterList = lazy(() => seqOf(StringLiteral, zeroOrMore(seqOf(token(','), StringLiteral)))).map(
-    ([param, params]) => [param, ...params.map(([_comma, param]: unknown[]) => param)]
-  )
+  const parameterList = lazy(() =>
+    seqOf(StringLiteral, zeroOrMore(seqOf(token(','), StringLiteral)))
+  ).map(([param, params]) => [param, ...params.map(([_comma, param]: unknown[]) => param)])
 
   test()
   async function test() {

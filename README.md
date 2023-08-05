@@ -297,6 +297,7 @@
     - [RangeModeQuery](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeModeQuery.ts)
     - [RangeFreqQueryDynamic](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeFreqQueryDynamic.ts)
     - [Bootstrap](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E5%89%8D%E7%AB%AF%E7%BB%83%E4%B9%A0%E9%A2%98/bootstrap.ts)
+    - [ParserCombinator](22_%E4%B8%93%E9%A2%98/%E6%A7%8B%E6%96%87%E8%A7%A3%E6%9E%90/%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90/ParserCombinators/verify/Parser.ts)
     - [EnumerateDiagnal](0_%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84/%E5%AF%B9%E8%A7%92%E7%BA%BF%E9%81%8D%E5%8E%86/enumerateDiagnal.py)
     - WaveletMatrix
       - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)
