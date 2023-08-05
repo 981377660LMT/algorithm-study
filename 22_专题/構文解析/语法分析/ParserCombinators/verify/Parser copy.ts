@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-useless-constructor */
 /* eslint-disable max-len */
 /* eslint-disable no-constant-condition */
@@ -19,7 +18,7 @@
 // 避免循环依赖：lazy
 // 工具函数: between,sepBy...
 
-interface IParserState<T> {
+interface IParserState {
   /** 原始的输入字符串. */
   origin: string
   /** 当前的解析位置. */
@@ -27,28 +26,28 @@ interface IParserState<T> {
   /** 解析过程中是否出错.不使用try-catch来加速. */
   hasError: boolean
   /** 当前的解析结果. */
-  result?: T
+  result?: unknown
 }
 
 /** 解析器函数.输一个状态，返回一个 **新的** 状态. */
-type ParserFn<T> = (state: IParserState<any>) => IParserState<T>
+type ParserFn = (state: IParserState) => IParserState
 
-class Parser<T> {
+class Parser {
   /**
    * @param parserFn 解析器函数.输一个状态，返回一个 **新的** 状态.
    */
-  constructor(readonly parserFn: ParserFn<T>) {}
+  constructor(readonly parserFn: ParserFn) {}
 
-  parse(s: string): IParserState<T> {
+  parse(s: string): IParserState {
     const initState = { origin: s, index: 0, hasError: false }
     const nextState = this.parserFn(initState)
     if (nextState.index !== s.length) nextState.hasError = true
     return nextState
   }
 
-  map<U>(f: (parsedResult: T) => U): Parser<U> {
+  map(f: (parsedResult: any) => unknown): Parser {
     return new Parser(state => {
-      const nextState: IParserState<any> = this.parserFn(state)
+      const nextState = this.parserFn(state)
       if (nextState.hasError) return nextState
       nextState.result = f(nextState.result)
       return nextState
@@ -56,7 +55,7 @@ class Parser<T> {
   }
 }
 
-function str(s: string): Parser<string> {
+function str(s: string): Parser {
   return new Parser(state => {
     if (state.hasError) return state
     const { origin, index } = state
@@ -68,7 +67,7 @@ function str(s: string): Parser<string> {
 /**
  * 支持正则匹配的parser构造函数.
  */
-function regExp(pattern: RegExp): Parser<string> {
+function regExp(pattern: RegExp): Parser {
   return new Parser(state => {
     if (state.hasError) return state
     // !如果正则表达式不是以^开头的话，则可能在某个中间位置匹配到结果，那样就相当于跳过了某些字符做了匹配
@@ -89,10 +88,10 @@ function regExp(pattern: RegExp): Parser<string> {
  * 对应正则表达式中的 `*`，表示匹配 0 次或多次.
  * 不会抛出错误，不能匹配到的话只会返回空的结果。
  */
-function zeroOrMore<T>(parser: Parser<T>): Parser<T[]> {
+function zeroOrMore(parser: Parser): Parser {
   return new Parser(state => {
     if (state.hasError) return state
-    const res: T[] = []
+    const res: unknown[] = []
     let nextState = state
     while (true) {
       const testState = parser.parserFn(nextState)
@@ -108,7 +107,7 @@ function zeroOrMore<T>(parser: Parser<T>): Parser<T[]> {
  * 对应正则表达式中的 `?`，表示匹配 0 次或 1 次.
  * 不会抛出错误，不能匹配到的话只会返回空的结果。
  */
-function zeroOrOne<T>(parser: Parser<T>): Parser<T | undefined> {
+function zeroOrOne(parser: Parser): Parser {
   return new Parser(state => {
     if (state.hasError) return state
     const nextState = parser.parserFn(state)
@@ -121,10 +120,10 @@ function zeroOrOne<T>(parser: Parser<T>): Parser<T | undefined> {
  * 对应正则表达式中的 `+`，表示匹配 1 次或多次.
  * 至少匹配一次，否则抛出错误.
  */
-function oneOrMore<T>(parser: Parser<T>): Parser<T[]> {
+function oneOrMore(parser: Parser): Parser {
   return new Parser(state => {
     if (state.hasError) return state
-    const res: T[] = []
+    const res: unknown[] = []
     let nextState = state
     while (true) {
       nextState = parser.parserFn(nextState)
@@ -140,9 +139,7 @@ function oneOrMore<T>(parser: Parser<T>): Parser<T[]> {
  * 对应正则表达式中的 `|`.
  * 至少匹配一次，否则抛出错误.
  */
-function oneOf<T extends readonly Parser<unknown>[]>(
-  ...parsers: T
-): Parser<{ [K in keyof T]: T[K] extends Parser<infer U> ? U : never }[number]> {
+function oneOf(...parsers: Parser[]): Parser {
   return new Parser(state => {
     if (state.hasError) return state
     for (let i = 0; i < parsers.length; i++) {
@@ -158,9 +155,7 @@ function oneOf<T extends readonly Parser<unknown>[]>(
  * 构造匹配一个`序列`的parser.
  * 传入的parser必须依次匹配成功，否则会抛出错误.
  */
-function seqOf<T extends readonly Parser<unknown>[]>(
-  ...parsers: T
-): Parser<{ [K in keyof T]: T[K] extends Parser<infer U> ? U : never }> {
+function seqOf(...parsers: Parser[]): Parser {
   return new Parser(state => {
     if (state.hasError) return state
     const res: unknown[] = []
@@ -178,37 +173,33 @@ function seqOf<T extends readonly Parser<unknown>[]>(
 /**
  * @see {@link https://github.com/francisrstokes/arcsecond}
  */
-const between =
-  (left: Parser<unknown>, right: Parser<unknown>) =>
-  <T>(content: Parser<T>) =>
-    seqOf(left, content, right).map(([_, res]) => res)
+const between = (left: Parser, right: Parser) => (content: Parser) =>
+  seqOf(left, content, right).map(([_, res]) => res)
 
 /**
  * @see {@link https://github.com/francisrstokes/arcsecond}
  */
-const sepBy =
-  (sep: Parser<any>) =>
-  <T>(value: Parser<T>): Parser<T[]> =>
-    new Parser(state => {
-      if (state.hasError) return state
-      const res: T[] = []
-      let nextState = state
-      while (true) {
-        const valueState = value.parserFn(nextState)
-        if (valueState.hasError) break
-        res.push(valueState.result as T)
-        nextState = valueState
-        const sepState = sep.parserFn(nextState)
-        if (sepState.hasError) break
-        nextState = sepState
-      }
-      return { ...nextState, result: res }
-    })
+const sepBy = (sep: Parser) => (value: Parser) =>
+  new Parser(state => {
+    if (state.hasError) return state
+    const res: unknown[] = []
+    let nextState = state
+    while (true) {
+      const valueState = value.parserFn(nextState)
+      if (valueState.hasError) break
+      res.push(valueState.result)
+      nextState = valueState
+      const sepState = sep.parserFn(nextState)
+      if (sepState.hasError) break
+      nextState = sepState
+    }
+    return { ...nextState, result: res }
+  })
 
 /**
  * 惰性求值来处理语法中的循环依赖.
  */
-const lazy = <T>(thunk: () => Parser<T>) => new Parser(state => thunk().parserFn(state))
+const lazy = (thunk: () => Parser) => new Parser(state => thunk().parserFn(state))
 
 const Whitespace = regExp(/^\s/)
 const Ignored = zeroOrMore(Whitespace)
@@ -216,12 +207,12 @@ const Ignored = zeroOrMore(Whitespace)
 /**
  * 如果遇到前面有空白符号，则在匹配之后丢弃.
  */
-const token = (s: string): Parser<string> => seqOf(Ignored, str(s)).map<string>(([_, res]) => res)
+const token = (s: string): Parser => seqOf(Ignored, str(s)).map(([_, res]) => res)
 
 /**
  * 如果遇到前面有空白符号，则在匹配之后丢弃.
  */
-const regexToken = (pattern: RegExp): Parser<string> =>
+const regexToken = (pattern: RegExp): Parser =>
   seqOf(Ignored, regExp(pattern)).map(([_, res]) => res)
 
 /** 匹配小括号()间的内容. */
