@@ -30,5 +30,7 @@ def segtreeIndexCoveringNodes(n: int, index: int):
         index >>= 1
 
 
-for i in segtreeIndexCoveringNodes(6, 1):
-    print(i, end=" ")
+if __name__ == "__main__":
+    print(segtreeRangeCoveringNodes(6, 1, 4))
+    for i in segtreeIndexCoveringNodes(6, 1):
+        print(i, end=" ")
