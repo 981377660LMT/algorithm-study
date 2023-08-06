@@ -132,7 +132,7 @@ if (require.main === module) {
   deque.reverse()
   deque.forEach((v, i) => console.log(i, v))
 
-  const n = 1e7
+  const n = 1e6
   console.time('StackDeque')
   const dq = new StackDeque<number>()
   for (let i = 0; i < n; i++) {
@@ -150,7 +150,7 @@ if (require.main === module) {
   for (let i = 0; i < n; i++) {
     dq.at(i)
   }
-  console.timeEnd('StackDeque') // 2.022s
+  console.timeEnd('StackDeque') // 210.603ms
 }
 
 export { StackDeque }

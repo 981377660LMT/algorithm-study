@@ -8,11 +8,12 @@ import {
   lazy,
   oneOf,
   seqOf,
-  zeroOrMore
+  zeroOrMore,
+  Parser
 } from './Parser'
 
 // encoded -> (Str | Num "[" encoded "]")*
-const encoded = lazy(() =>
+const encoded: Parser = lazy(() =>
   zeroOrMore(oneOf(LowercaseLiteral, seqOf(NumberLiteral, betweenBrackets(encoded))))
 )
 

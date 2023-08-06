@@ -6,9 +6,9 @@
 // expr -> "t" | "f" | notExpr | andExpr | orExpr
 
 import assert from 'assert'
-import { lazy, oneOf, seqOf, str, zeroOrMore } from './Parser'
+import { Parser, lazy, oneOf, seqOf, str, zeroOrMore } from './Parser'
 
-const expr = lazy(() => oneOf(t, f, notExpr, andExpr, orExpr))
+const expr: Parser<boolean> = lazy(() => oneOf(t, f, notExpr, andExpr, orExpr))
 const t = str('t').map(() => true)
 const f = str('f').map(() => false)
 const orExpr = lazy(() => seqOf(str('|'), exprList)).map(([_, res]) => {
@@ -29,7 +29,6 @@ const andExpr = lazy(() => seqOf(str('&'), exprList)).map(([_, res]) => {
       newRes = newRes && boleans[j]
     }
   }
-
   return newRes
 })
 const notExpr = lazy(() => seqOf(str('!'), exprList)).map(([_, res]) => !res[0][0])
@@ -40,7 +39,7 @@ const exprList = lazy(() =>
     zeroOrMore(seqOf(str(','), expr).map(([_, res]) => res)),
     str(')')
   )
-).map(res => res.slice(1, -1))
+).map<boolean[][]>(res => res.slice(1, -1) as boolean[][])
 
 function parseBoolExpr(expression: string): boolean {
   return expr.parse(expression).result as boolean

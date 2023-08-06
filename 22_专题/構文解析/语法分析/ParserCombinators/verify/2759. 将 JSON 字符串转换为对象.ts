@@ -9,7 +9,8 @@ import {
   seqOf,
   sepBy,
   betweenBrackets,
-  betweenBraces
+  betweenBraces,
+  Parser
 } from './Parser'
 
 // https://leetcode.cn/problems/convert-json-string-to-object/solution/yong-parser-combinatorsmiao-by-qinsi-kmuq/
@@ -17,7 +18,9 @@ import {
 // JSON可以是布尔、null、字符串、数字、数组或对象
 
 // jsonLit -> booleanLit | nullLit | stringLit | numberLit | arrayLit | objectLit ;
-const jsonLit = lazy(() => oneOf(booleanLit, nullLit, stringLit, numberLit, arrayLit, objectLit))
+const jsonLit: Parser = lazy(() =>
+  oneOf(booleanLit, nullLit, stringLit, numberLit, arrayLit, objectLit)
+)
 
 // booleanLit -> "true" | "false" ;
 const booleanLit = oneOf(token('true'), token('false')).map(res => res === 'true')
@@ -40,16 +43,15 @@ const arrayLit = lazy(() => betweenBrackets(_sepByComma(jsonLit)))
 // 对象是,分割的键值对列表，并被{}包围
 // objectLit -> "{" (kvPair ("," kvPair)*)? "}" ;
 const objectLit = lazy(() => betweenBraces(_sepByComma(_kvPair))).map(
-  (res: [key: string, value: string]) =>
+  (res: [key: string, value: string][]) =>
     res.reduce((pre, [key, val]) => ((pre[key] = val), pre), Object.create(null))
 )
 
 const _sepByComma = sepBy(token(','))
 // kvPair -> stringLit ":" jsonLit ;
-const _kvPair = lazy(() => seqOf(stringLit, token(':'), jsonLit)).map(([key, _, value]) => [
-  key,
-  value
-])
+const _kvPair: Parser<[k: string, value: string]> = lazy(() =>
+  seqOf(stringLit, token(':'), jsonLit)
+).map(([key, _, value]) => [key, value])
 
 function jsonParse(str: string): any {
   return jsonLit.parse(str).result

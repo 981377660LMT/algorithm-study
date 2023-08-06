@@ -1,6 +1,7 @@
 from itertools import product
 from typing import List
 
+
 # https://leetcode-cn.com/problems/brace-expansion-ii/solution/python3-18xing-die-dai-fa-by-yuan-zhi-b/
 class Solution:
     def braceExpansionII(self, expression: str) -> List[str]:
@@ -9,7 +10,7 @@ class Solution:
         res, cur = [], []
 
         for char in expression:
-            print(res, cur, stack)
+            # print(res, cur, stack)
             # 看到字母就“乘入”第二个list，例如[a]*b变成“ab”，[a,c]*b就变成['ab','cb']
             if char.isalpha():
                 cur = [pre + char for pre in cur or [""]]
@@ -22,11 +23,7 @@ class Solution:
             elif char == "}":
                 pre = stack.pop()
                 preRes = stack.pop()
-                cur = [
-                    preChar + curChar
-                    for curChar in res + cur
-                    for preChar in pre or [""]
-                ]
+                cur = [preChar + curChar for curChar in res + cur for preChar in pre or [""]]
                 res = preRes
             # 第二个list已经不可能再继续增长了，把第二个list并入第一个list并清空
             elif char == ",":

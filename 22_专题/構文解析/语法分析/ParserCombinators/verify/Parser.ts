@@ -33,7 +33,7 @@ interface IParserState<T> {
 /** 解析器函数.输一个状态，返回一个 **新的** 状态. */
 type ParserFn<T> = (state: IParserState<any>) => IParserState<T>
 
-class Parser<T> {
+class Parser<T = any> {
   /**
    * @param parserFn 解析器函数.输一个状态，返回一个 **新的** 状态.
    */
@@ -56,7 +56,7 @@ class Parser<T> {
   }
 }
 
-function str(s: string): Parser<string> {
+function str<S extends string>(s: S): Parser<S> {
   return new Parser(state => {
     if (state.hasError) return state
     const { origin, index } = state
@@ -131,8 +131,8 @@ function oneOrMore<T>(parser: Parser<T>): Parser<T[]> {
       if (nextState.hasError) break
       res.push(nextState.result)
     }
-    if (!res.length) return { ...state, hasError: true }
-    return { ...nextState, result: res }
+    if (res.length) return { ...nextState, result: res, hasError: false }
+    return { ...state, hasError: true }
   })
 }
 
@@ -216,7 +216,8 @@ const Ignored = zeroOrMore(Whitespace)
 /**
  * 如果遇到前面有空白符号，则在匹配之后丢弃.
  */
-const token = (s: string): Parser<string> => seqOf(Ignored, str(s)).map<string>(([_, res]) => res)
+const token = <S extends string>(s: S): Parser<S> =>
+  seqOf(Ignored, str(s)).map<S>(([_, res]) => res)
 
 /**
  * 如果遇到前面有空白符号，则在匹配之后丢弃.
@@ -230,9 +231,6 @@ const betweenParens = between(token('('), token(')'))
 const betweenBrackets = between(token('['), token(']'))
 /** 匹配大括号{}间的内容. */
 const betweenBraces = between(token('{'), token('}'))
-
-/** 终结符Identifier */
-const Identifier = regexToken(/^[a-zA-Z_][a-zA-Z0-9_]*/)
 
 /** 只支持双引号(“)，单引号(‘)和反引号(`)不支持. */
 const StringLiteral = regexToken(/^"[^"]*"/)
@@ -265,7 +263,6 @@ export {
   betweenParens,
   betweenBrackets,
   betweenBraces,
-  Identifier,
   StringLiteral,
   NumberLiteral,
   LowercaseLiteral,
@@ -307,6 +304,9 @@ if (require.main === module) {
   const parameterList = lazy(() =>
     seqOf(StringLiteral, zeroOrMore(seqOf(token(','), StringLiteral)))
   ).map(([param, params]) => [param, ...params.map(([_comma, param]: unknown[]) => param)])
+
+  /** 终结符Identifier */
+  const Identifier = regexToken(/^[a-zA-Z_][a-zA-Z0-9_]*/)
 
   test()
   function test() {
