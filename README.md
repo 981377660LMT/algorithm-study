@@ -191,6 +191,7 @@
    - [HeapSort](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/HeapSort.ts)
    - [QuickSort](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/QuickSort.ts)
    - [MergeSort](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/template/MergeSort.ts)
+   - [TimSort](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/timSort.ts)
 
 9. **Bit Manipulation**
 
