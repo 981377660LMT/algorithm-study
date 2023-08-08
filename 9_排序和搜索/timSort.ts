@@ -1,17 +1,21 @@
 /* eslint-disable max-len */
 
+type CompareFunc<T> = (a: T, b: T) => number
+type MutableArrayLike<T> = {
+  length: number
+  [n: number]: T
+}
+
 /**
  * `ZRender`库中的`TimSort`原地排序.
  * @see {@link https://github.com/ecomfe/zrender/blob/master/src/core/timsort.ts}
  */
-export function timSort<T>(array: T[], compare: CompareFunc<T>, lo?: number, hi?: number): void {
-  if (!lo) {
-    lo = 0
-  }
-  if (!hi) {
-    hi = array.length
-  }
-
+function timSort<T = number>(
+  array: MutableArrayLike<T>,
+  compare: CompareFunc<T> = (a: any, b: any) => a - b,
+  lo = 0,
+  hi = array.length
+): void {
   let remaining = hi - lo
 
   if (remaining < 2) {
@@ -56,10 +60,6 @@ const DEFAULT_MIN_MERGE = 32
 
 const DEFAULT_MIN_GALLOPING = 7
 
-const DEFAULT_TMP_STORAGE_LENGTH = 256
-
-type CompareFunc<T> = (a: T, b: T) => number
-
 function minRunLength(n: number): number {
   let r = 0
 
@@ -71,7 +71,7 @@ function minRunLength(n: number): number {
   return n + r
 }
 
-function makeAscendingRun<T>(array: T[], lo: number, hi: number, compare: CompareFunc<T>) {
+function makeAscendingRun<T>(array: MutableArrayLike<T>, lo: number, hi: number, compare: CompareFunc<T>) {
   let runHi = lo + 1
 
   if (runHi === hi) {
@@ -93,7 +93,7 @@ function makeAscendingRun<T>(array: T[], lo: number, hi: number, compare: Compar
   return runHi - lo
 }
 
-function reverseRun<T>(array: T[], lo: number, hi: number) {
+function reverseRun<T>(array: MutableArrayLike<T>, lo: number, hi: number) {
   hi--
 
   while (lo < hi) {
@@ -103,7 +103,13 @@ function reverseRun<T>(array: T[], lo: number, hi: number) {
   }
 }
 
-function binaryInsertionSort<T>(array: T[], lo: number, hi: number, start: number, compare: CompareFunc<T>) {
+function binaryInsertionSort<T>(
+  array: MutableArrayLike<T>,
+  lo: number,
+  hi: number,
+  start: number,
+  compare: CompareFunc<T>
+) {
   if (start === lo) {
     start++
   }
@@ -150,7 +156,14 @@ function binaryInsertionSort<T>(array: T[], lo: number, hi: number, start: numbe
   }
 }
 
-function gallopLeft<T>(value: T, array: T[], start: number, length: number, hint: number, compare: CompareFunc<T>) {
+function gallopLeft<T>(
+  value: T,
+  array: MutableArrayLike<T>,
+  start: number,
+  length: number,
+  hint: number,
+  compare: CompareFunc<T>
+) {
   let lastOffset = 0
   let maxOffset = 0
   let offset = 1
@@ -205,7 +218,14 @@ function gallopLeft<T>(value: T, array: T[], start: number, length: number, hint
   return offset
 }
 
-function gallopRight<T>(value: T, array: T[], start: number, length: number, hint: number, compare: CompareFunc<T>) {
+function gallopRight<T>(
+  value: T,
+  array: MutableArrayLike<T>,
+  start: number,
+  length: number,
+  hint: number,
+  compare: CompareFunc<T>
+) {
   let lastOffset = 0
   let maxOffset = 0
   let offset = 1
@@ -264,25 +284,14 @@ function gallopRight<T>(value: T, array: T[], start: number, length: number, hin
   return offset
 }
 
-function TimSort<T>(array: T[], compare: CompareFunc<T>) {
+function TimSort<T>(array: MutableArrayLike<T>, compare: CompareFunc<T>) {
   let minGallop = DEFAULT_MIN_GALLOPING
-  let length = 0
-  let tmpStorageLength = DEFAULT_TMP_STORAGE_LENGTH
-  let stackLength = 0
+
   let runStart: number[]
   let runLength: number[]
   let stackSize = 0
 
-  length = array.length
-
-  if (length < 2 * DEFAULT_TMP_STORAGE_LENGTH) {
-    tmpStorageLength = length >>> 1
-  }
-
   let tmp: T[] = []
-
-  // eslint-disable-next-line no-nested-ternary
-  stackLength = length < 120 ? 5 : length < 1542 ? 10 : length < 119151 ? 19 : 40
 
   runStart = []
   runLength = []
@@ -673,6 +682,8 @@ function TimSort<T>(array: T[], compare: CompareFunc<T>) {
   }
 }
 
+export { timSort }
+
 if (require.main === module) {
   const arr1 = Array(1e6)
   const arr2 = Array(1e6)
@@ -687,4 +698,20 @@ if (require.main === module) {
   console.time('sort1')
   timSort(arr2, (a, b) => b - a)
   console.timeEnd('sort1')
+
+  // eslint-disable-next-line no-inner-declarations
+  function sumImbalanceNumbers(N: number[]): number {
+    const nums = new Uint16Array(N)
+    const copy = nums.slice()
+    let res = 0
+    for (let i = 0; i < nums.length; i++) {
+      for (let j = i; j < nums.length; j++) {
+        const sub = nums.subarray(i, j + 1)
+        timSort(sub)
+        for (let k = 0; k < sub.length - 1; k++) res += +(sub[k + 1] - sub[k] > 1)
+        nums.set(copy.subarray(i, j + 1), i)
+      }
+    }
+    return res
+  }
 }
