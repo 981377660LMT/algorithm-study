@@ -42,8 +42,8 @@ func FastDijkstra(n int, g, rg [][][2]int, start, end int) int {
 	dist[start] = 0
 	drev[end] = 0
 
-	pq1 := NewHeap(func(a, b H) bool { return a[0] < b[0] }, nil)
-	pq2 := NewHeap(func(a, b H) bool { return a[0] < b[0] }, nil)
+	pq1 := NewHeap(func(a, b H) bool { return a[0] < b[0] })
+	pq2 := NewHeap(func(a, b H) bool { return a[0] < b[0] })
 	pq1.Push(H{0, start})
 	pq2.Push(H{0, end})
 
@@ -102,7 +102,7 @@ func FastDijkstra(n int, g, rg [][][2]int, start, end int) int {
 
 type H = [2]int
 
-func NewHeap(less func(a, b H) bool, nums []H) *Heap {
+func NewHeap(less func(a, b H) bool, nums ...H) *Heap {
 	nums = append(nums[:0:0], nums...)
 	heap := &Heap{less: less, data: nums}
 	heap.heapify()
