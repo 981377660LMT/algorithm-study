@@ -53,3 +53,24 @@ class Lock {
 }
 
 export {}
+
+if (require.main === module) {
+  const lock = new Lock()
+  const tasks = [
+    new Promise(resolve => {
+      setTimeout(() => {
+        resolve('task1')
+      }, 1000)
+    }),
+    new Promise(resolve => {
+      setTimeout(() => {
+        resolve('task2')
+      }, 2000)
+    }),
+    new Promise(resolve => {
+      setTimeout(() => {
+        resolve('task3')
+      }, 3000)
+    })
+  ]
+}
