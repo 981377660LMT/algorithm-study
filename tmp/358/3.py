@@ -27,29 +27,48 @@ INF = int(1e20)
 DIR4 = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 
 
+from typing import List, Tuple
+from collections import deque
+
+DIR4 = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+INF = int(1e18)
+
+
+from typing import List, Tuple
+from collections import deque
+
+DIR4 = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+INF = int(1e18)
+
+
+def bfsGrid(row: int, col: int, starts: List[Tuple[int, int]]) -> List[List[int]]:
+    """网格图bfs, 返回每个格子到起点的最短距离."""
+    dist = [[INF] * col for _ in range(row)]
+    queue = deque(starts)
+    for x, y in starts:
+        dist[x][y] = 0
+
+    while queue:
+        len_ = len(queue)
+        for _ in range(len_):
+            curX, curY = queue.popleft()
+            for dx, dy in DIR4:
+                nextX, nextY = curX + dx, curY + dy
+                cand = dist[curX][curY] + 1
+                if 0 <= nextX < row and 0 <= nextY < col and cand < dist[nextX][nextY]:
+                    dist[nextX][nextY] = cand
+                    queue.append((nextX, nextY))
+
+    return dist
+
+
 # !网格图多源bfs
 class Solution:
     def maximumSafenessFactor(self, grid: List[List[int]]) -> int:
         ROW, COL = len(grid), len(grid[0])
-        values = [[0] * COL for _ in range(ROW)]
-        queue = deque()
-        visited = [[False] * COL for _ in range(ROW)]
-        for r in range(ROW):
-            for c in range(COL):
-                if grid[r][c] == 1:
-                    queue.append((r, c))
-                    visited[r][c] = True
-
-        while queue:
-            len_ = len(queue)
-            for _ in range(len_):
-                curRow, curCol = queue.popleft()
-                for dr, dc in DIR4:
-                    newRow, newCol = curRow + dr, curCol + dc
-                    if 0 <= newRow < ROW and 0 <= newCol < COL and not visited[newRow][newCol]:
-                        values[newRow][newCol] = values[curRow][curCol] + 1
-                        visited[newRow][newCol] = True
-                        queue.append((newRow, newCol))
+        values = bfsGrid(
+            ROW, COL, [(r, c) for r in range(ROW) for c in range(COL) if grid[r][c] == 1]
+        )
 
         pq = [(-values[0][0], 0, 0)]  # (safety, row, col)
         dist = [[0] * COL for _ in range(ROW)]
