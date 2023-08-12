@@ -6,12 +6,12 @@ function canFinish(numCourses: number, prerequisites: number[][]): boolean {
     adjList[u].push(v)
   }
 
-  return !hasCycle(adjList)
+  return !hasCycle(numCourses, adjList)
 }
 
 console.log(
   canFinish(2, [
     [1, 0],
-    [0, 1],
+    [0, 1]
   ])
 )

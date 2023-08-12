@@ -22,10 +22,14 @@ console.log(
     'root/a 1.txt(abcd) 2.txt(efgh)',
     'root/c 3.txt(abcd)',
     'root/c/d 4.txt(efgh)',
-    'root 4.txt(efgh)',
+    'root 4.txt(efgh)'
   ])
 )
 // 输出：
 // [["root/a/2.txt","root/c/d/4.txt","root/4.txt"],["root/a/1.txt","root/c/3.txt"]]
 
 export default 1
+// def distOnCircle(n: int, i: int, j: int) -> int:
+//     """环上两点距离."""
+//     cand1, cand2 = abs(i - j), n - abs(i - j)
+//     return cand1 if cand1 < cand2 else cand2

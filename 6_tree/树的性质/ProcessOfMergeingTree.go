@@ -26,7 +26,7 @@ import (
 
 const MOD int = 1e9 + 7
 
-var INV = Pow(2, MOD-2, MOD)
+var INV2 = Pow(2, MOD-2, MOD)
 
 func main() {
 	// https://yukicoder.me/problems/no/1451
@@ -50,43 +50,46 @@ func main() {
 
 	tree, roots := ProcessOfMergingTree(n, edges)
 	subSize := make([]int, len(tree))
-	var dfs1 func(int) int
-	dfs1 = func(cur int) int {
+	var getSubSize func(int) int
+	getSubSize = func(cur int) int {
 		if cur < n { // 原始顶点
 			subSize[cur] = 1
 		}
 		for _, e := range tree[cur] {
-			subSize[cur] += dfs1(e.to)
+			subSize[cur] += getSubSize(e.to)
 		}
 		return subSize[cur]
 	}
 	for _, root := range roots {
-		dfs1(root)
+		getSubSize(root)
 	}
 
 	res := make([]int, n)
-	var dfs2 func(int, int)
-	dfs2 = func(cur, p int) {
+	var run func(int, int)
+	run = func(cur, p int) {
 		if cur < n { // 原始顶点
 			res[cur] = p
 			return
 		}
+
 		if len(tree[cur]) == 1 { // 只有一个子节点
-			dfs2(tree[cur][0].to, p)
+			run(tree[cur][0].to, p)
 			return
 		}
+
 		left, right := tree[cur][0].to, tree[cur][1].to // 两个子节点
 		if subSize[left] > subSize[right] {
-			dfs2(left, p)
+			run(left, p)
 		} else if subSize[left] < subSize[right] {
-			dfs2(right, p)
+			run(right, p)
 		} else {
-			dfs2(left, p*INV%MOD)
-			dfs2(right, p*INV%MOD)
+			run(left, p*INV2%MOD)
+			run(right, p*INV2%MOD)
 		}
 	}
+
 	for _, root := range roots {
-		dfs2(root, 1)
+		run(root, 1)
 	}
 
 	for _, v := range res {
@@ -97,7 +100,8 @@ func main() {
 type Edge struct{ from, to, weight int }
 
 // 表示合并过程的树,按照edges中边的顺序合并顶点.
-//  返回: 树的有向图邻接表, 新图中的各个根节点.
+//
+//	返回: 树的有向图邻接表, 新图中的各个根节点.
 func ProcessOfMergingTree(n int, edges []Edge) (tree [][]Edge, roots []int) {
 	parent := make([]int, 2*n-1)
 	for i := range parent {

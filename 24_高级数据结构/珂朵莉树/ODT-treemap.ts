@@ -170,6 +170,7 @@ export { ODTMap }
 
 if (require.main === module) {
   const odtMap = new ODTMap<number>(-1)
+  console.log(odtMap.toString())
   odtMap.set(1, 3, 1)
   console.log(odtMap.count, 999, odtMap.length)
   odtMap.set(3, 5, 2)

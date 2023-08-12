@@ -23,6 +23,7 @@ class ODTVan<S> {
 
   /**
    * 指定哨兵值建立一个ODT.初始时,所有位置的值为 {@link noneValue}.
+   * 默认区间为`[-INF,INF)`，值为`noneValue`.
    * @param noneValue 表示空值的哨兵值.
    */
   constructor(noneValue: S) {

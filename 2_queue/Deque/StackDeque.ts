@@ -11,7 +11,7 @@
  * 当某个栈空时,将另一个栈分一半给这个已经空的栈(重构).
  * 同时,这个deque也具有了O(1)反转的能力.
  */
-class StackDeque<E> {
+class StackDeque<E = any> {
   static from<T>(iterable: Iterable<T>): StackDeque<T> {
     const deque = new StackDeque<T>()
     for (const item of iterable) {
