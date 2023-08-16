@@ -1,6 +1,9 @@
 """
 计算每个元素作为最值的影响范围
 calculate the range of influence for each element as the maximum/minimum value
+
+结论:
+# !1.以元素nums[i]为最值的影响范围[left,right],则包含nums[i]的子数组个数为(right-i+1)*(i-left+1)
 """
 
 from typing import List, Tuple

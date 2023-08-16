@@ -919,4 +919,23 @@ if (require.main === module) {
       return left
     }
   }
+
+  // https://leetcode.cn/problems/minimum-absolute-difference-between-elements-with-constraint/description/
+  function minAbsoluteDifference(nums: number[], x: number): number {
+    const sl = new SortedListFast<number>()
+    let res = 2e15
+    for (let right = x; right < nums.length; right++) {
+      sl.add(nums[right - x])
+      const cur = nums[right]
+      const floor = sl.floor(cur)
+      if (floor != undefined) {
+        res = Math.min(res, cur - floor)
+      }
+      const ceiling = sl.ceiling(cur)
+      if (ceiling != undefined) {
+        res = Math.min(res, ceiling - cur)
+      }
+    }
+    return res
+  }
 }

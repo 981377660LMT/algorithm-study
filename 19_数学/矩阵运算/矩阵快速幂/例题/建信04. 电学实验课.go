@@ -67,11 +67,12 @@ type MatPow struct {
 }
 
 // 带缓存的矩阵快速幂,适合多次查询
-//  base: 转移矩阵,必须是方阵;
-//  mod: 快速幂的模;
-//  cacheLevel: 矩阵快速幂的log底数.启用缓存时一般设置为`4`;
-//  当调用 pow 次数很多时,可设置为 `16`;
-//  小于 `2` 时不启用缓存.
+//
+//	base: 转移矩阵,必须是方阵;
+//	mod: 快速幂的模;
+//	cacheLevel: 矩阵快速幂的log底数.启用缓存时一般设置为`4`;
+//	当调用 pow 次数很多时,可设置为 `16`;
+//	小于 `2` 时不启用缓存.
 func NewMatPow(base M, mod, cacheLevel int) *MatPow {
 	res := &MatPow{}
 	n := len(base)
