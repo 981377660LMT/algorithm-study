@@ -108,4 +108,11 @@ if (require.main === module) {
     const res = matMul(resT, init, MOD)
     return res[0][0]
   }
+
+  // 100*100
+  const M = Array.from({ length: 100 }, () => new Array(100).fill(2))
+
+  console.time('M')
+  matPow(M, 1e9)
+  console.timeEnd('M')
 }

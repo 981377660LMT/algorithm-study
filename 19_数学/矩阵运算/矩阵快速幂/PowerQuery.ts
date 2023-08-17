@@ -1,4 +1,12 @@
-// 幂运算预处理
+/* eslint-disable no-inner-declarations */
+/* eslint-disable implicit-arrow-linebreak */
+
+// 幂运算预处理.
+// !注意js做带模乘法比较慢.
+
+import { mulUint32 } from '../../数论/快速幂/mulUint32'
+
+type Public<C> = { [K in keyof C]: C[K] }
 
 /**
  * 带有预处理的幺半群的幂运算.
@@ -47,7 +55,8 @@ class PowerQuery<E> {
       const mod = exp % logBase
       exp = Math.floor(exp / logBase)
       if (data.length === level) {
-        data.push(this._makePow(data[level - 1][logBase - 1]))
+        const last = data[level - 1]
+        data.push(this._makePow(last[last.length - 1]))
       }
       res = this._op(res, data[level][mod])
       level++
@@ -87,42 +96,146 @@ class PowerQuery<E> {
 /**
  * 带有预处理的快速幂.
  */
-const usePowerQueryQPow = (base: number, mod = 1e9 + 7, cacheLevel = 16) => {
-  new PowerQuery<number>(
+const usePowerQueryQPow = (base: number, mod = 1e9 + 7, cacheLevel = 16) =>
+  new PowerQuery(
     () => base,
     () => 1,
-    (a, b) => a * b,
+    (a, b) => mulUint32(a, b, mod),
     cacheLevel
   )
-}
 
 /**
  * 带有预处理的矩阵快速幂.
  * 内部使用`uint32`类型数组加速.
  */
 const usePowerQueryMatQPow = (
-  base: ArrayLike<ArrayLike<number>>,
+  base: number[][],
   mod = 1e9 + 7,
   cacheLevel = 16
-) => {}
+): Public<PowerQuery<number[][]>> => {
+  if (base.length !== base[0].length) throw new Error('base must be a square matrix')
+
+  const n = base.length
+  const pq = new PowerQuery(
+    () => compress(base),
+    () => eye(n),
+    (a, b) => mul(a, b, mod),
+    cacheLevel
+  )
+
+  return {
+    pow(exp: number) {
+      const res = pq.pow(exp)
+      return decompress(res)
+    },
+    powWithOutCache(exp: number) {
+      const res = pq.powWithOutCache(exp)
+      return decompress(res)
+    }
+  }
+
+  function compress(mat: number[][]): Uint32Array {
+    const res = new Uint32Array(n * n)
+    for (let i = 0; i < n; i++) {
+      const row = mat[i]
+      for (let j = 0; j < n; j++) {
+        res[i * n + j] = row[j]
+      }
+    }
+    return res
+  }
+
+  function decompress(compressed: Uint32Array): number[][] {
+    const res: number[][] = Array(n)
+    for (let i = 0; i < n; i++) {
+      const row = Array(n)
+      for (let j = 0; j < n; j++) {
+        row[j] = compressed[i * n + j]
+      }
+      res[i] = row
+    }
+    return res
+  }
+
+  function eye(size: number): Uint32Array {
+    const res = new Uint32Array(size * size)
+    for (let i = 0; i < size; i++) {
+      res[i * size + i] = 1
+    }
+    return res
+  }
+
+  function mul(mat1: Uint32Array, mat2: Uint32Array, mod = 1e9 + 7): Uint32Array {
+    const res = new Uint32Array(n * n)
+    for (let i = 0; i < n; i++) {
+      for (let k = 0; k < n; k++) {
+        for (let j = 0; j < n; j++) {
+          const pos = i * n + j
+          res[pos] = (res[pos] + mulUint32(mat1[i * n + k], mat2[k * n + j], mod)) % mod
+        }
+      }
+    }
+    return res
+  }
+}
 
 export { PowerQuery, usePowerQueryQPow, usePowerQueryMatQPow }
 
 if (require.main === module) {
-//   MOD = int(1e9 + 7)
+  const MOD = 1e9 + 7
+  // const pow2 = usePowerQueryQPow(2, MOD)
 
+  // // 2550. 猴子碰撞的方法数
+  // // https://leetcode.cn/problems/count-collisions-of-monkeys-on-a-polygon/
+  // function monkeyMove(n: number): number {
+  //   const res = pow2.pow(n) - 2
+  //   return res < 0 ? res + MOD : res
+  // }
 
-// class Solution:
-//     def numTilings(self, n: int) -> int:
-//         init = [[5], [2], [1], [0]]
-//         if n <= 3:
-//             return init[~n][0]
-//         T = [[2, 0, 1, 0], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]]
-//         resT = matqpow1(T, n - 3, MOD)
-//         res = mul(resT, init, MOD)
-//         return res[0][0]
+  // https://leetcode.cn/contest/ccbft-2021fall/problems/lSjqMF/
+  function electricityExperiment(row: number, col: number, position: [x: number, y: number][]) {
+    const T = Array.from({ length: row }, () => Array(row).fill(0))
+    for (let r = 0; r < row; r++) {
+      T[r][r] = 1
+      if (r !== 0) T[r][r - 1] = 1
+      if (r !== row - 1) T[r][r + 1] = 1
+    }
 
-  // 790. 多米诺和托米诺平铺
-  // https://leetcode.cn/problems/domino-and-tromino-tiling/
-  function numTilings(n: number): number {}
+    const Q = usePowerQueryMatQPow(T, MOD)
+
+    const n = position.length
+    position.sort((a, b) => a[1] - b[1])
+    for (let i = 0; i < n - 1; i++) {
+      const [row1, col1] = position[i]
+      const [row2, col2] = position[i + 1]
+      const rowDiff = Math.abs(row1 - row2)
+      const colDiff = Math.abs(col1 - col2)
+      if (rowDiff > colDiff) return 0
+    }
+    let res = 1
+    for (let i = 0; i < n - 1; i++) {
+      const [row1, col1] = position[i]
+      const [row2, col2] = position[i + 1]
+      const colDiff = Math.abs(col1 - col2)
+      res = mulUint32(res, cal(row1, row2, colDiff), MOD)
+    }
+
+    return res
+
+    function cal(row1: number, row2: number, k: number) {
+      const resT = Q.pow(k)
+      return resT[row1][row2]
+    }
+  }
+
+  //   5
+  // 6
+  // [[1, 3], [3, 2], [4, 1]]
+  console.log(
+    electricityExperiment(5, 6, [
+      [1, 3],
+      [3, 2],
+      [4, 1]
+    ])
+  )
 }
