@@ -8,7 +8,6 @@ from functools import lru_cache
 # 二分+数位dp
 
 
-@lru_cache(None)
 def cal(upper: int) -> int:
     @lru_cache(None)
     def dfs(pos: int, isLimit: bool, count: int, isOk: bool) -> int:
@@ -43,4 +42,3 @@ for _ in range(T):
         else:
             right = mid - 1
     print(left)
-

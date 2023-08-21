@@ -1,7 +1,7 @@
 /* eslint-disable no-confusing-arrow */
 /* eslint-disable implicit-arrow-linebreak */
 
-// 439. 三元表达式解析器-调整语法规则中各部分的顺序
+// 439. 三元器-调整语法规则中各部分的顺序
 // https://leetcode.cn/problems/ternary-expression-parser/
 
 import { NumberLiteral, Parser, lazy, oneOf, seqOf, str } from './Parser'
@@ -18,9 +18,7 @@ const t = str('T').map(() => true)
 const f = str('F').map(() => false)
 const cond = oneOf(t, f)
 const ternary = lazy(() =>
-  seqOf(cond, str('?'), expr, str(':'), expr).map(([cond, _, trueExpr, __, falseExpr]) =>
-    cond ? trueExpr : falseExpr
-  )
+  seqOf(cond, str('?'), expr, str(':'), expr).map(([cond, _, trueExpr, __, falseExpr]) => (cond ? trueExpr : falseExpr))
 )
 
 const expr: Parser<string | boolean> = lazy(() => oneOf(NumberLiteral, ternary, cond))

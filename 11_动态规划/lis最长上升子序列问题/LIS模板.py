@@ -5,6 +5,7 @@ LIS[i]表示长度为 i+1 的子序列尾部元素的值
 """
 # LIS模板
 
+
 from typing import List, Tuple
 from bisect import bisect_left, bisect_right
 
@@ -46,6 +47,7 @@ def getLIS(nums: List[int], isStrict=True) -> Tuple[List[int], List[int]]:
         if dpIndex[i] == j:
             res.append(nums[i])
             resIndex.append(i)
+
             j -= 1
     return res[::-1], resIndex[::-1]
 
@@ -73,3 +75,15 @@ if __name__ == "__main__":
     assert LIS([10, 9, 2, 5, 3, 7, 101, 18]) == 4
     print(caldp([10, 9, 2, 5, 3, 7, 101, 18]))
     assert getLIS([10, 9, 2, 5, 3, 7, 101, 18]) == ([2, 3, 7, 18], [2, 4, 5, 7])
+
+    # 2826. 将三个组排序
+    # https://leetcode.cn/problems/sorting-three-groups/description/
+    # 从 0 到 n - 1 的数字被分为编号从 1 到 3 的三个组，数字 i 属于组 nums[i] 。
+    # 你可以执行以下操作任意次：
+    # 选择数字 x 并改变它的组。更正式的，你可以将 nums[x] 改为数字 1 到 3 中的任意一个。
+    # 请你返回将 nums 变为 非递减数组 需要的最少步数。
+
+    # !等价于保留最长的非递减子序列
+    class Solution:
+        def minimumOperations(self, nums: List[int]) -> int:
+            return len(nums) - LIS(nums, isStrict=False)

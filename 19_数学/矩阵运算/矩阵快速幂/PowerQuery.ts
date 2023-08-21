@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-inner-declarations */
 /* eslint-disable implicit-arrow-linebreak */
 
@@ -5,6 +6,7 @@
 // !注意js做带模乘法比较慢.
 
 import { mulUint32 } from '../../数论/快速幂/mulUint32'
+import { qpow } from '../../数论/快速幂/qpow'
 
 type Public<C> = { [K in keyof C]: C[K] }
 
@@ -100,7 +102,7 @@ const usePowerQueryQPow = (base: number, mod = 1e9 + 7, cacheLevel = 16) =>
   new PowerQuery(
     () => base,
     () => 1,
-    (a, b) => mulUint32(a, b, mod),
+    (a, b) => qpow(a, b, mod),
     cacheLevel
   )
 
@@ -108,11 +110,7 @@ const usePowerQueryQPow = (base: number, mod = 1e9 + 7, cacheLevel = 16) =>
  * 带有预处理的矩阵快速幂.
  * 内部使用`uint32`类型数组加速.
  */
-const usePowerQueryMatQPow = (
-  base: number[][],
-  mod = 1e9 + 7,
-  cacheLevel = 16
-): Public<PowerQuery<number[][]>> => {
+const usePowerQueryMatQPow = (base: number[][], mod = 1e9 + 7, cacheLevel = 16): Public<PowerQuery<number[][]>> => {
   if (base.length !== base[0].length) throw new Error('base must be a square matrix')
 
   const n = base.length
@@ -212,6 +210,7 @@ if (require.main === module) {
       const colDiff = Math.abs(col1 - col2)
       if (rowDiff > colDiff) return 0
     }
+
     let res = 1
     for (let i = 0; i < n - 1; i++) {
       const [row1, col1] = position[i]

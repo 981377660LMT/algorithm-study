@@ -1,7 +1,7 @@
 from functools import lru_cache
 
+
 # 数位dp模板
-@lru_cache(None)
 def cal(upper: int) -> int:
     @lru_cache(None)
     def dfs(pos: int, hasLeadingZero: bool, isLimit: bool, pre: int) -> int:

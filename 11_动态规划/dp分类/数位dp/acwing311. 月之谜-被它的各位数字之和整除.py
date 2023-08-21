@@ -9,7 +9,6 @@ from functools import lru_cache
 # 转换思路，能够整除就是模数为0，所以可以考虑把每步的模数给算出来，算到最后一位判断模数是否为0即可
 
 
-@lru_cache(None)
 def cal(upper: int) -> int:
     @lru_cache(None)
     def dfs(pos: int, isLimit: bool, allSum: int, mod: int, curSum: int) -> int:
