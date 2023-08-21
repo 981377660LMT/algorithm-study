@@ -10,9 +10,9 @@ def minimize(fun: Callable[[int], int], lower: int, upper: int) -> int:
     """三分法求`严格凸函数fun`在`[lower,upper]`间的最小值"""
     res = INF
     while (upper - lower) >= 3:
-        diff = upper - lower
-        mid1 = lower + diff // 3
-        mid2 = lower + 2 * diff // 3
+        diff = (upper - lower) // 3
+        mid1 = lower + diff
+        mid2 = upper - diff
         if fun(mid1) > fun(mid2):
             lower = mid1
         else:
@@ -30,9 +30,9 @@ def maximize(fun: Callable[[int], int], lower: int, upper: int) -> int:
     """三分法求`严格凸函数fun`在`[lower,upper]`间的最大值"""
     res = -INF
     while (upper - lower) >= 3:
-        diff = upper - lower
-        mid1 = lower + diff // 3
-        mid2 = lower + 2 * diff // 3
+        diff = (upper - lower) // 3
+        mid1 = lower + diff
+        mid2 = upper - diff
         if fun(mid1) < fun(mid2):
             lower = mid1
         else:

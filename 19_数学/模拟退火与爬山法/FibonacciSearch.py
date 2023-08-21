@@ -9,9 +9,16 @@ from typing import Callable, Tuple
 INF = int(1e18)
 
 
-def fibonacciSearch(
-    f: Callable[[int], int], start: int, end: int, minimize: bool
-) -> Tuple[int, int]:
+def fibonacciSearch(f: Callable[[int], int], start: int, end: int, min: bool) -> Tuple[int, int]:
+    """斐波那契搜索寻找[start,end)中的一个极值点,不要求单峰性质.
+    Args:
+        f: 目标函数.
+        start: 搜索区间左端点(包含).
+        end: 搜索区间右端点(不包含).
+        min: 是否寻找最小值.
+    Returns:
+        极值点的横坐标x和纵坐标f(x).
+    """
     assert start < end
     end -= 1
     a, b, c, d = start, start + 1, start + 2, start + 3
@@ -25,7 +32,7 @@ def fibonacciSearch(
     def get(i: int) -> int:
         if end < i:
             return INF
-        return f(i) if minimize else -f(i)
+        return f(i) if min else -f(i)
 
     ya, yb, yc, yd = get(a), get(b), get(c), get(d)
     for _ in range(n):
@@ -56,7 +63,7 @@ def fibonacciSearch(
         x = d
         y = yd
 
-    return (x, y) if minimize else (x, -y)
+    return (x, y) if min else (x, -y)
 
 
 if __name__ == "__main__":

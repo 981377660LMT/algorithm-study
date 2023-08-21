@@ -1,6 +1,5 @@
-from typing import List
-from 三分法求凸函数极值 import minimize
-
+# 2448. 使数组相等的最小开销
+# https://leetcode.cn/problems/minimum-cost-to-make-array-equal/
 # n == nums.length == cost.length
 # 1 <= n <= 1e5
 # 1 <= nums[i], cost[i] <= 1e6
@@ -9,6 +8,10 @@ from 三分法求凸函数极值 import minimize
 # !将 nums 中 任意 元素增加或者减小 1 。
 # !对第 i 个元素执行一次操作的开销是 cost[i] 。
 # 请你返回使 nums 中所有元素 相等 的 最少 总开销。
+
+
+from typing import List
+from 三分法求凸函数极值 import minimize
 
 
 class Solution:

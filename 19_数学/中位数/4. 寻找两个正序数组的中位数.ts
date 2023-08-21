@@ -1,79 +1,48 @@
+const INF = 2e15
+
 /**
- * @param {number[]} nums1
- * @param {number[]} nums2
- * @return {number}
- * 给定两个大小分别为 m 和 n 的正序（从小到大）数组 nums1 和 nums2。请你找出并返回这两个正序数组的 一半 。
- * 你能设计一个时间复杂度为 O(log (m+n)) 的算法解决此问题吗
- * @description 找出两个正序数组的中位数等价于找出两个正序数组中的第k小数
+ * O(log(m+n))求两个正序数组的中位数.
+ * @see {@link https://leetcode.cn/problems/median-of-two-sorted-arrays/solutions/258842/xun-zhao-liang-ge-you-xu-shu-zu-de-zhong-wei-s-114/}
  */
-function findMedianSortedArrays(nums1: number[], nums2: number[]): number {
-  const n = nums1.length + nums2.length
-  return (findK(nums1, nums2, n >> 1) + findK(nums1, nums2, (n - 1) >> 1)) / 2
-
-  /**
-   * @returns 寻找两个数组中第k小的数 k从0开始
-   * @description log(m+n)
-   *
-   * 分治法
-   */
-  function findK(nums1: number[], nums2: number[], k: number): number {
-    if (nums1.length === 0) return nums2[k]
-    if (nums2.length === 0) return nums1[k]
-    const i1 = nums1.length >> 1
-    const i2 = nums2.length >> 1
-    const m1 = nums1[i1]
-    const m2 = nums2[i2]
-
-    if (i1 + i2 < k) {
-      // 如果 num1 的一半 大于nums2的一半 那么 nums2 的前半部分不包含第k小的数候选
-      if (m1 > m2) return findK(nums1, nums2.slice(i2 + 1), k - (i2 + 1))
-      return findK(nums1.slice(i1 + 1), nums2, k - (i1 + 1))
-    }
-
-    // 如果 num1 的一半 大于nums2的一半 那么 nums1 的后半部分不包含第k小的数候选
-    if (m1 > m2) return findK(nums1.slice(0, i1), nums2, k)
-    return findK(nums1, nums2.slice(0, i2), k)
+function findMedian(nums1: ArrayLike<number>, nums2: ArrayLike<number>): number {
+  if (nums1.length > nums2.length) {
+    const tmp = nums1
+    nums1 = nums2
+    nums2 = tmp
   }
-}
 
-console.log(findMedianSortedArrays([1, 2], [3, 4]))
-export {}
+  const len1 = nums1.length
+  const len2 = nums2.length
+  let left = 0
+  let right = len1
+  let max1 = 0 // 前一部分最大值
+  let min2 = 0 // 后一部分最小值
 
-/**
- * @param {number[]} arr1 - sorted integer array
- * @param {number[]} arr2 - sorted integer array
- * @returns {number}
- * O(m+n) 双指针 找出两个正序数组的中位数等价于找出两个正序数组中的第k小数
- * ps:有序数组 nums 的中位数为 (nums[n>>1]+nums[(n-1)>>1])/2
- */
-function median(nums1: number[], nums2: number[]): number {
-  const [n1, n2] = [nums1.length, nums2.length]
-  const n = n1 + n2
+  while (left <= right) {
+    const i = (left + right) >>> 1 // 前一部分包含 nums1[0 .. i-1] 和 nums2[0 .. j-1]
+    const j = ((len1 + len2 + 1) >>> 1) - i // 后一部分包含 nums1[i .. m-1] 和 nums2[j .. n-1]
+    const a1 = i ? nums1[i - 1] : -INF
+    const b1 = i < len1 ? nums1[i] : INF
+    const a2 = j ? nums2[j - 1] : -INF
+    const b2 = j < len2 ? nums2[j] : INF
 
-  let [pre, cur] = [0, 0]
-  let [i, j] = [0, 0]
-  let step = (n >> 1) + 1
-
-  while (step--) {
-    pre = cur
-
-    // 边界处理
-    if (i === n1) {
-      cur = nums2[j]
-      j++
-    } else if (j === n2) {
-      cur = nums1[i]
-      i++
-    } else if (nums1[i] < nums2[j]) {
-      cur = nums1[i]
-      i++
+    if (a1 <= b2) {
+      max1 = a1 > a2 ? a1 : a2
+      min2 = b1 < b2 ? b1 : b2
+      left = i + 1
     } else {
-      cur = nums2[j]
-      j++
+      right = i - 1
     }
   }
 
-  return (n & 1) === 0 ? (pre + cur) / 2 : cur
+  return (len1 + len2) & 1 ? max1 : (max1 + min2) / 2
 }
-// console.log(median([1, 3], [2]))
-// console.log(median([1, 3], [2, 4]))
+
+export { findMedian }
+
+if (require.main === module) {
+  // eslint-disable-next-line no-inner-declarations
+  function findMedianSortedArrays(nums1: number[], nums2: number[]): number {
+    return findMedian(nums1, nums2)
+  }
+}

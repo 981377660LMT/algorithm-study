@@ -10,7 +10,7 @@ from typing import List, Tuple
 from bisect import bisect_left, bisect_right
 
 
-def weightedIntervalScheduling(intervals: List[Tuple[int, int, int]], overlapping=False) -> int:
+def weightedIntervalScheduling(intervals: List[Tuple[int, int, int]], overlap=False) -> int:
     """
     给定 n 个闭区间 [left_i,right_i,score_i].
     请你在数轴上选择若干区间,使得选中的区间之间互不相交.
@@ -23,7 +23,7 @@ def weightedIntervalScheduling(intervals: List[Tuple[int, int, int]], overlappin
     n = len(intervals)
     intervals = sorted(intervals, key=lambda x: x[1])
     pre = [0] * n
-    f = bisect_right if overlapping else bisect_left
+    f = bisect_right if overlap else bisect_left
     for i in range(n):
         start = intervals[i][0]
         pre[i] = f(intervals, start, key=lambda x: x[1])
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     class Solution:
         def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
             items = [(x[0], x[1], 1) for x in intervals]
-            return len(intervals) - weightedIntervalScheduling(items)  # type: ignore
+            return len(intervals) - weightedIntervalScheduling(items, True)  # type: ignore
 
     # 2830. 销售利润最大化
     # 给你一个整数 n 表示数轴上的房屋数量，编号从 0 到 n - 1 。
@@ -58,10 +58,10 @@ if __name__ == "__main__":
     class Solution3:
         def maxTaxiEarnings(self, n: int, rides: List[List[int]]) -> int:
             intervals = [(x[0], x[1], x[1] - x[0] + x[2]) for x in rides]
-            return weightedIntervalScheduling(intervals)  # type: ignore
+            return weightedIntervalScheduling(intervals, overlap=True)  # type: ignore
 
     # 1235. 规划兼职工作
     class Solution4:
         def jobScheduling(self, startTime: List[int], endTime: List[int], profit: List[int]) -> int:
             intervals = list(tuple(zip(startTime, endTime, profit)))
-            return weightedIntervalScheduling(intervals, overlapping=True)
+            return weightedIntervalScheduling(intervals, overlap=True)
