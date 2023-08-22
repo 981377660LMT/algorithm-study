@@ -31,12 +31,12 @@ def fibonacciSearch(f: Callable[[int], int], left: int, right: int, min: bool) -
     assert left <= right
 
     a, b, c, d = left, left + 1, left + 2, left + 3
-    n = 0
+    step = 0
     while d < right:
         b = c
         c = d
         d = b + c - a
-        n += 1
+        step += 1
 
     def get(i: int) -> int:
         if right < i:
@@ -44,7 +44,7 @@ def fibonacciSearch(f: Callable[[int], int], left: int, right: int, min: bool) -
         return f(i) if min else -f(i)
 
     ya, yb, yc, yd = get(a), get(b), get(c), get(d)
-    for _ in range(n):
+    for _ in range(step):
         if yb < yc:
             d = c
             c = b
