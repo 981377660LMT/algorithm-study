@@ -343,6 +343,21 @@ class Tree {
     return res
   }
 
+  /**
+   * 返回结点v的重儿子.如果没有重儿子,返回-1.
+   */
+  getHeavyChild(v: number): number {
+    const k = this.lid[v] + 1
+    if (k === this._n) {
+      return -1
+    }
+    const w = this._idToNode[k]
+    if (this.parent[w] === v) {
+      return w
+    }
+    return -1
+  }
+
   toAdjList(): [next: number, weight: number, edgeId: number][][] {
     const res = Array(this._n)
     for (let cur = 0; cur < this._n; cur++) {

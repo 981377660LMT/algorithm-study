@@ -130,6 +130,16 @@ class LCA_HLD:
             up.append((self.lid[from_], self.lid[to] + offset))
         return up + down[::-1]
 
+    def getHeavyChild(self, v: int) -> int:
+        """返回结点v的重儿子.如果没有重儿子,返回-1."""
+        k = self.lid[v] + 1
+        if k == len(self.tree):
+            return -1
+        w = self._idToNode[k]
+        if self.parent[w] == v:
+            return w
+        return -1
+
     def isInSubtree(self, child: int, root: int) -> bool:
         """child是否在root的子树中(child和root不能相等)"""
         return self.lid[root] <= self.lid[child] < self.rid[root]

@@ -1,1 +1,0 @@
-      res = preSum[k] + 2 * threshold * sufLen - (preSum[-1] - preSum[k])

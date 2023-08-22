@@ -38,7 +38,8 @@ func main() {
 	})
 	fmt.Println(tree.GetPath(3, 2))
 	fmt.Println(tree.KthAncestor(4, 0))
-
+	fmt.Println(tree.GetHeavyChild(0))
+	fmt.Println(tree.GetHeavyPath(0))
 }
 
 type Tree struct {
@@ -90,7 +91,8 @@ func (tree *Tree) AddDirectedEdge(u, v, w int) {
 }
 
 // root:0-based
-//  当root设为-1时，会从0开始遍历未访问过的连通分量
+//
+//	当root设为-1时，会从0开始遍历未访问过的连通分量
 func (tree *Tree) Build(root int) {
 	if root != -1 {
 		tree.build(root, -1, 0, 0)
@@ -146,8 +148,9 @@ func (tree *Tree) Dist(u, v int, weighted bool) int {
 }
 
 // k: 0-based
-//  如果不存在第k个祖先，返回-1
-//  kthAncestor(root,0) == root
+//
+//	如果不存在第k个祖先，返回-1
+//	kthAncestor(root,0) == root
 func (tree *Tree) KthAncestor(root, k int) int {
 	if k > tree.Depth[root] {
 		return -1
@@ -163,7 +166,8 @@ func (tree *Tree) KthAncestor(root, k int) int {
 }
 
 // 从 from 节点跳向 to 节点,跳过 step 个节点(0-indexed)
-//  返回跳到的节点,如果不存在这样的节点,返回-1
+//
+//	返回跳到的节点,如果不存在这样的节点,返回-1
 func (tree *Tree) Jump(from, to, step int) int {
 	if step == 1 {
 		if from == to {
@@ -198,7 +202,8 @@ func (tree *Tree) CollectChild(root int) []int {
 }
 
 // 返回沿着`路径顺序`的 [起点,终点] 的 欧拉序 `左闭右闭` 数组.
-//  !eg:[[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序.
+//
+//	!eg:[[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序.
 func (tree *Tree) GetPathDecomposition(u, v int, vertex bool) [][2]int {
 	up, down := [][2]int{}, [][2]int{}
 	for {
@@ -320,6 +325,19 @@ func (tree *Tree) GetHeavyPath(start int) []int {
 	return heavyPath
 }
 
+// 结点v的重儿子.如果没有重儿子,返回-1.
+func (tree *Tree) GetHeavyChild(v int) int {
+	k := tree.LID[v] + 1
+	if k == len(tree.Tree) {
+		return -1
+	}
+	w := tree.idToNode[k]
+	if tree.Parent[w] == v {
+		return w
+	}
+	return -1
+}
+
 func (tree *Tree) ELID(u int) int {
 	return 2*tree.LID[u] - tree.Depth[u]
 }
@@ -395,7 +413,8 @@ func NewBITArray(n int) *BITArray {
 }
 
 // 切片内[start, end)的每个元素加上delta.
-//  0<=start<=end<=n
+//
+//	0<=start<=end<=n
 func (b *BITArray) Add(start, end, delta int) {
 	end--
 	b.add(start, delta)
@@ -403,7 +422,8 @@ func (b *BITArray) Add(start, end, delta int) {
 }
 
 // 求切片内[start, end)的和.
-//  0<=start<=end<=n
+//
+//	0<=start<=end<=n
 func (b *BITArray) Query(start, end int) int {
 	end--
 	return b.query(end) - b.query(start-1)

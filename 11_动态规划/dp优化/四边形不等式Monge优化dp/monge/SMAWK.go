@@ -3,7 +3,8 @@
 // SMAWK算法是一种用于在隐式定义的完全单调矩阵(totally monge)的每一行中查找最小值的算法
 // monotone: 每一行取得最值的列号是单调的
 // totally monotone: 对任意的2x2子矩阵, 取得最值的列号是单调的
-
+//
+// 注意SMAWK没有 monotone minima 快
 package main
 
 import "fmt"

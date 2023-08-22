@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-labels */
 // https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/bits.go
 // 位运算:
@@ -84,15 +85,13 @@ class BitSet {
     return 32 - Math.clz32(uint32)
   }
 
-  readonly n: number
-  private readonly _bits: Uint32Array
+  private _n: number
+  private _bits: Uint32Array
 
   constructor(n: number, filledValue: 0 | 1 = 0) {
     if (n <= 0) throw new RangeError('n must be positive')
-    this.n = n
-    this._bits = filledValue
-      ? new Uint32Array((n + 31) >>> 5).fill(~0)
-      : new Uint32Array((n + 31) >>> 5)
+    this._n = n
+    this._bits = filledValue ? new Uint32Array((n + 31) >>> 5).fill(~0) : new Uint32Array((n + 31) >>> 5)
     this._bits[this._bits.length - 1] >>>= (this._bits.length << 5) - n
   }
 
@@ -177,14 +176,14 @@ class BitSet {
   next(index: number): number {
     if (index <= -1) index = -1
     index++
-    if (index >= this.n) return this.n
+    if (index >= this._n) return this._n
     let mask = index >>> 5
     const buf = this._bits[mask] & (~0 << (index & 31))
     if (buf) return (mask << 5) + BitSet._trailingZeros32(buf)
     while (++mask < this._bits.length) {
       if (this._bits[mask]) return (mask << 5) + BitSet._trailingZeros32(this._bits[mask])
     }
-    return this.n
+    return this._n
   }
 
   /**
@@ -192,7 +191,7 @@ class BitSet {
    * 如果不存在, 返回 -1.
    */
   prev(index: number): number {
-    if (index >= this.n) index = this.n
+    if (index >= this._n) index = this._n
     if (!index) return -1
     index--
     if (this.has(index)) return index
@@ -265,12 +264,12 @@ class BitSet {
       }
       if (~v) {
         const res = (i << 5) | BitSet._trailingZeros32(~v)
-        return res < this.n ? res : -1
+        return res < this._n ? res : -1
       }
       for (i++; i < this._bits.length; i++) {
         if (~this._bits[i]) {
           const res = (i << 5) | BitSet._trailingZeros32(~this._bits[i])
-          return res < this.n ? res : -1
+          return res < this._n ? res : -1
         }
       }
     }
@@ -306,14 +305,14 @@ class BitSet {
   /**
    * 返回 [start, end) 范围内 1 的个数
    */
-  onesCount(start = 0, end = this.n): number {
+  onesCount(start = 0, end = this._n): number {
     if (start < 0) {
       start = 0
     }
-    if (end > this.n) {
-      end = this.n
+    if (end > this._n) {
+      end = this._n
     }
-    if (!start && end === this.n) {
+    if (!start && end === this._n) {
       return this._onesCount()
     }
 
@@ -339,13 +338,13 @@ class BitSet {
 
   fill(value: 0 | 1): void {
     this._bits.fill(value ? ~0 : 0)
-    this._bits[this._bits.length - 1] >>>= (this._bits.length << 5) - this.n
+    this._bits[this._bits.length - 1] >>>= (this._bits.length << 5) - this._n
   }
 
-  slice(start = 0, end = this.n): BitSet {
+  slice(start = 0, end = this._n): BitSet {
     if (start < 0) start = 0
-    if (end > this.n) end = this.n
-    if (start === 0 && end === this.n) return this.copy()
+    if (end > this._n) end = this._n
+    if (start === 0 && end === this._n) return this.copy()
 
     const res = new BitSet(end - start)
     const remain = (end - start) & 31
@@ -414,7 +413,7 @@ class BitSet {
   }
 
   or(other: BitSet): BitSet {
-    const res = new BitSet(this.n)
+    const res = new BitSet(this._n)
     for (let i = 0; i < this._bits.length; i++) {
       res._bits[i] = this._bits[i] | other._bits[i]
     }
@@ -429,7 +428,7 @@ class BitSet {
   }
 
   and(other: BitSet): BitSet {
-    const res = new BitSet(this.n)
+    const res = new BitSet(this._n)
     for (let i = 0; i < this._bits.length; i++) {
       res._bits[i] = this._bits[i] & other._bits[i]
     }
@@ -444,7 +443,7 @@ class BitSet {
   }
 
   xor(other: BitSet): BitSet {
-    const res = new BitSet(this.n)
+    const res = new BitSet(this._n)
     for (let i = 0; i < this._bits.length; i++) {
       res._bits[i] = this._bits[i] ^ other._bits[i]
     }
@@ -455,10 +454,10 @@ class BitSet {
    * 将指定范围内的位与另一个位集进行或运算.
    */
   iorRange(start: number, end: number, other: BitSet): void {
-    if (other.n !== end - start) throw new RangeError('length of other must equal to end-start')
+    if (other._n !== end - start) throw new RangeError('length of other must equal to end-start')
 
     let a = 0
-    let b = other.n
+    let b = other._n
     while (start < end && start & 31) {
       this._bits[start >>> 5] |= +other.has(a) << (start & 31)
       a++
@@ -491,10 +490,10 @@ class BitSet {
    * 将指定范围内的位与另一个位集进行与运算.
    */
   iandRange(start: number, end: number, other: BitSet): void {
-    if (other.n !== end - start) throw new RangeError('length of other must equal to end-start')
+    if (other._n !== end - start) throw new RangeError('length of other must equal to end-start')
 
     let a = 0
-    let b = other.n
+    let b = other._n
     while (start < end && start & 31) {
       if (!other.has(a)) this.discard(start)
       a++
@@ -527,10 +526,10 @@ class BitSet {
    * 将指定范围内的位与另一个位集进行异或运算.
    */
   ixorRange(start: number, end: number, other: BitSet): void {
-    if (other.n !== end - start) throw new RangeError('length of other must equal to end-start')
+    if (other._n !== end - start) throw new RangeError('length of other must equal to end-start')
 
     let a = 0
-    let b = other.n
+    let b = other._n
     while (start < end && start & 31) {
       this._bits[start >>> 5] ^= +other.has(a) << (start & 31)
       a++
@@ -566,9 +565,9 @@ class BitSet {
    */
   set(other: BitSet, offset = 0): void {
     let left = offset
-    let right = offset + other.n
+    let right = offset + other._n
     let a = 0
-    let b = other.n
+    let b = other._n
     while (left < right && left & 31) {
       if (other.has(a++)) {
         this.add(left++)
@@ -600,7 +599,7 @@ class BitSet {
   }
 
   copy(): BitSet {
-    const res = new BitSet(this.n)
+    const res = new BitSet(this._n)
     res._bits.set(this._bits)
     return res
   }
@@ -609,13 +608,26 @@ class BitSet {
     return this._lastIndexOfOne() + 1
   }
 
+  expand(size: number): void {
+    if (size <= this._n) return
+    const newBits = new Uint32Array((size + 31) >>> 5)
+    newBits.set(this._bits)
+    const remainingBits = size & 31
+    if (remainingBits) {
+      const mask = (1 << remainingBits) - 1
+      newBits[newBits.length - 1] &= mask
+    }
+    this._bits = newBits
+    this._n = size
+  }
+
   toString(): string {
     const sb: string[] = []
     for (let i = 0; i < this._bits.length; i++) {
       // eslint-disable-next-line newline-per-chained-call
       let bits = this._bits[i].toString(2).padStart(32, '0').split('').reverse().join('')
       if (i === this._bits.length - 1) {
-        bits = bits.slice(0, this.n - (i << 5))
+        bits = bits.slice(0, this._n - (i << 5))
       }
       sb.push(bits)
     }
@@ -632,6 +644,10 @@ class BitSet {
         callback(j)
       }
     })
+  }
+
+  get n(): number {
+    return this._n
   }
 
   private _indexOfZero(): number {
@@ -753,4 +769,11 @@ if (require.main === module) {
     big.prev(1e5)
   }
   console.timeEnd('prev')
+
+  console.time('expand')
+  const big2 = new BitSet(1e5)
+  for (let i = 1e5; i < 2e5; i++) {
+    big2.expand(i)
+  }
+  console.timeEnd('expand')
 }

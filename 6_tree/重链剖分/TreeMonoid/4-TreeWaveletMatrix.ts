@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-inner-declarations */
 
 import { WaveletMatrixSegments } from '../../../24_高级数据结构/waveletmatrix/WaveletMatrixForTree'
@@ -98,11 +99,7 @@ class TreeWaveletMatrix {
   /**
    * 子树内第k小的数以及前k个数的和.
    */
-  kthValueAndSumSubtree(
-    root: number,
-    k: number,
-    xor = 0
-  ): [res: number, preSum: number] | [res: null, preSum: number] {
+  kthValueAndSumSubtree(root: number, k: number, xor = 0): [res: number, preSum: number] | [res: null, preSum: number] {
     const l = this._tree.lid[root]
     const r = this._tree.rid[root]
     const offset = this._isVertex ? 0 : 1
@@ -409,6 +406,21 @@ class Tree {
       }
     })
     return res
+  }
+
+  /**
+   * 返回结点v的重儿子.如果没有重儿子,返回-1.
+   */
+  getHeavyChild(v: number): number {
+    const k = this.lid[v] + 1
+    if (k === this.tree.length) {
+      return -1
+    }
+    const w = this._idToNode[k]
+    if (this.parent[w] === v) {
+      return w
+    }
+    return -1
   }
 
   subtreeSize(v: number, root = -1): number {
