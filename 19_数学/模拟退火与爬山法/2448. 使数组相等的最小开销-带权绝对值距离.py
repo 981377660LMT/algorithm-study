@@ -11,7 +11,7 @@
 
 
 from typing import List
-from 三分法求凸函数极值 import minimize
+from FibonacciSearch import minimize
 
 
 class Solution:
@@ -21,7 +21,7 @@ class Solution:
         def fun(pos: int) -> int:
             return sum(abs((num - pos)) * c for num, c in zip(nums, cost))
 
-        return minimize(fun, min(nums), max(nums))
+        return minimize(fun, min(nums), max(nums))[1]
 
 
 print(Solution().minCost(nums=[1, 3, 5, 2], cost=[2, 3, 1, 14]))

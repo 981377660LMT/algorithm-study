@@ -1,6 +1,5 @@
-# FibonacciSearch 斐波那契搜索
-
-# !寻找[start,end)中的一个极值点,不要求单峰性质
+# FibonacciSearch 斐波那契搜索求凸函数极值，比三分法稍快一些
+# !寻找[left,right]中的一个极值点,不要求单峰性质
 
 
 from typing import Callable, Tuple
@@ -9,28 +8,38 @@ from typing import Callable, Tuple
 INF = int(1e18)
 
 
-def fibonacciSearch(f: Callable[[int], int], start: int, end: int, min: bool) -> Tuple[int, int]:
-    """斐波那契搜索寻找[start,end)中的一个极值点,不要求单峰性质.
+def minimize(fun: Callable[[int], int], left: int, right: int) -> Tuple[int, int]:
+    """斐波那契搜索求`凸函数fun`在`[left,right]`间的`(极小值点,极小值)`."""
+    return fibonacciSearch(fun, left, right, min=True)
+
+
+def maximize(fun: Callable[[int], int], left: int, right: int) -> Tuple[int, int]:
+    """斐波那契搜索求`凸函数fun`在`[left,right]`间的`(极大值点,极大值)`."""
+    return fibonacciSearch(fun, left, right, min=False)
+
+
+def fibonacciSearch(f: Callable[[int], int], left: int, right: int, min: bool) -> Tuple[int, int]:
+    """斐波那契搜索寻找[left,right]中的一个极值点,不要求单峰性质.
     Args:
         f: 目标函数.
-        start: 搜索区间左端点(包含).
-        end: 搜索区间右端点(不包含).
+        left: 搜索区间左端点(包含).
+        right: 搜索区间右端点(包含).
         min: 是否寻找最小值.
     Returns:
         极值点的横坐标x和纵坐标f(x).
     """
-    assert start < end
-    end -= 1
-    a, b, c, d = start, start + 1, start + 2, start + 3
+    assert left <= right
+
+    a, b, c, d = left, left + 1, left + 2, left + 3
     n = 0
-    while d < end:
+    while d < right:
         b = c
         c = d
         d = b + c - a
         n += 1
 
     def get(i: int) -> int:
-        if end < i:
+        if right < i:
             return INF
         return f(i) if min else -f(i)
 

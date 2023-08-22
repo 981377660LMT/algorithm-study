@@ -14,7 +14,7 @@
 
 from itertools import accumulate
 from typing import List
-from 三分法求凸函数极值 import minimize
+from FibonacciSearch import fibonacciSearch
 
 
 class Solution:
@@ -29,7 +29,7 @@ class Solution:
         sufSum = [0] + list(accumulate(prices[::-1]))
         res = [0] * len(queries)
         for i, (threshold, count) in enumerate(queries):
-            res[i] = minimize(fun, 0, count)
+            res[i] = fibonacciSearch(fun, 0, count, min=True)[1]
         return res
 
 
