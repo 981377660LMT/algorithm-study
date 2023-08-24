@@ -4,38 +4,42 @@
 # 1. 分配 一块大小为 size 的连续空闲内存单元并赋 id mID 。
 # 2. 释放 给定 id mID 对应的所有内存单元。
 
+# 内存分配/CPU/日程安排
 
-# https://leetcode.cn/problems/design-memory-allocator/solution/by-freeyourmind-sc6b/
 
-
-from sortedcontainers import SortedList
+# !1. 优化:线段树O(nlogn)
+# https://leetcode.cn/problems/design-memory-allocator/solutions/2024437/bing-mei-you-geng-kuai-de-wen-ding-lgnfe-ze8b/
 
 
 class Allocator:
     def __init__(self, n: int):
-        self.sl = SortedList([(-1, 1, -1), (n, 1, -1)])  # SortedList[(start, size, mID)]
+        self.visited = [-1] * n
 
     def allocate(self, size: int, mID: int) -> int:
         """
         找出大小为 size 个连续空闲内存单元且位于  最左侧 的块，分配并赋 id mID 。
         返回块的第一个下标。如果不存在这样的块，返回 -1 。
         """
-        for (start1, len1, _), (start2, _, _) in zip(self.sl, self.sl[1:]):
-            if start2 - (start1 + len1) >= size:
-                self.sl.add((start1 + len1, size, mID))
-                return start1 + len1
+        dp = 0
+        for i, id in enumerate(self.visited):
+            if id == -1:
+                dp += 1
+                if dp == size:
+                    self.visited[i - size + 1 : i + 1] = [mID] * size
+                    return i - size + 1
+            else:
+                dp = 0
         return -1
 
     def free(self, mID: int) -> int:
         """
         释放 id mID 对应的所有内存单元。返回释放的内存单元数目。
         """
-        toRemove = [i for i, (*_, id) in enumerate(self.sl) if id == mID]
         res = 0
-        # !倒着删除不会影响前面需要删除的元素的下标
-        for i in toRemove[::-1]:
-            item = self.sl.pop(i)
-            res += item[1]
+        for i in range(len(self.visited)):
+            if self.visited[i] == mID:
+                self.visited[i] = -1
+                res += 1
         return res
 
 
