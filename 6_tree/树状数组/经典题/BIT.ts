@@ -152,6 +152,8 @@ class BIT1 {
   }
 }
 
+const BITMap = BIT1
+
 /**
  * 区间修改 区间查询, 0-indexed.
  */
@@ -394,11 +396,7 @@ class BIT4 {
     let res = 0
     for (let r = row; r > 0; r -= r & -r) {
       for (let c = col; c > 0; c -= c & -c) {
-        res +=
-          row * col * this._tree1[r][c] -
-          col * this._tree2[r][c] -
-          row * this._tree3[r][c] +
-          this._tree4[r][c]
+        res += row * col * this._tree1[r][c] - col * this._tree2[r][c] - row * this._tree3[r][c] + this._tree4[r][c]
       }
     }
     return res
@@ -443,7 +441,7 @@ if (require.main === module) {
   assert.strictEqual(bit2Map.queryRange(2, 3), 2)
 }
 
-export { BIT1, BIT2, BIT2Map, BIT3, BIT4, BITArray }
+export { BIT1, BIT2, BIT2Map, BIT3, BIT4, BITArray, BITMap }
 
 if (require.main === module) {
   // https://leetcode.cn/problems/maximum-white-tiles-covered-by-a-carpet/

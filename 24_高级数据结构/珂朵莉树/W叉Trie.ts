@@ -1,3 +1,6 @@
+// 也叫压位Trie.
+// https://dpair.gitee.io/articles/ywt/
+
 /**
  * W叉Trie树,这里W=32.
  */

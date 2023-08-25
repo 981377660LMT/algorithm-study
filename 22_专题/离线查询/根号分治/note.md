@@ -13,3 +13,4 @@ https://drken1215.hatenablog.com/archive/category/%E3%82%AF%E3%82%A8%E3%83%AA%E3
 ---
 
 [浅谈根号算法](https://ddosvoid.github.io/2020/10/18/%E6%B5%85%E8%B0%88%E6%A0%B9%E5%8F%B7%E7%AE%97%E6%B3%95/)
+[分块的一些技巧](https://dpair.gitee.io/articles/block/)

@@ -17,7 +17,7 @@ def rookScore(n: int, points: List[Tuple[int, int, int]]) -> int:
 
     res = 0
 
-    # !行列交界处有值
+    # !行列交叉处有值
     for (r, c), s in posSum.items():
         res = max(res, rowSum[r] + colSum[c] - s)
 

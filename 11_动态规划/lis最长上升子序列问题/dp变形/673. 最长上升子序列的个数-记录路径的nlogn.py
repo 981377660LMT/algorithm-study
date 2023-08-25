@@ -5,7 +5,7 @@
 
 
 from typing import List
-from bisect import bisect_left
+from bisect import bisect_left, bisect_right
 from collections import defaultdict
 
 
@@ -28,7 +28,7 @@ from collections import defaultdict
 
 # O(nlogn)
 class Solution:
-    def findNumberOfLIS(self, nums: List[int]) -> int:
+    def findNumberOfLIS(self, nums: List[int], isStrict=True) -> int:
         n = len(nums)
         if n <= 1:
             return n
@@ -36,20 +36,22 @@ class Solution:
         LIS = []
         D = Discretizer(nums)
         # 每个长度的LIS对应一个BIT，BIT维护结尾小于等于value的子序列有多少个
-        dp = defaultdict(lambda: BIT(len(D) + 10))
+        dp = defaultdict(lambda: BIT(len(D) + 5))
 
+        f = bisect_left if isStrict else bisect_right
         for num in nums:
-            pos = bisect_left(LIS, num)
+            pos = f(LIS, num)
             if pos == len(LIS):
                 LIS.append(num)
             else:
                 LIS[pos] = num
 
-            # 上一个位置结尾小于当前元素的所有的子序列的个数是多少
-            # 遍历可以用树状数组优化
+            # 上一个位置结尾小于当前元素的所有的子序列的个数是多少,遍历可以用树状数组优化
             preBIT = dp[pos - 1]
-            count = preBIT.query(D.get(num) - 1)
-            dp[pos].add(D.get(num), count if count > 0 else 1)
+            curBIT = dp[pos]
+            curRank = D.get(num)
+            smaller = preBIT.query(curRank - 1)
+            curBIT.add(curRank, smaller if smaller > 0 else 1)
 
         lastPos = len(LIS) - 1
         return dp[lastPos].query(len(D))
@@ -63,6 +65,7 @@ class BIT:
         self.tree = defaultdict(int)
 
     def add(self, index: int, delta: int) -> None:
+        """[1,index]区间加上delta"""
         if index <= 0:
             raise ValueError("index 必须是正整数")
         while index <= self.size:
@@ -70,6 +73,7 @@ class BIT:
             index += index & -index
 
     def query(self, index: int) -> int:
+        """[1,index]区间的和"""
         if index > self.size:
             index = self.size
         res = 0
@@ -101,3 +105,9 @@ class Discretizer:
 print(Solution().findNumberOfLIS([1, 3, 5, 4, 7]))
 # 输出: 2
 # 解释: 有两个最长递增子序列，分别是 [1, 3, 4, 7] 和[1, 3, 5, 7]。
+
+if __name__ == "__main__":
+    import random
+
+    nums = [random.randint(1, int(1e9)) for _ in range(int(1e5))]
+    print(Solution().findNumberOfLIS(nums))
