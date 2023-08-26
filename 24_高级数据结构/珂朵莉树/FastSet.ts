@@ -132,11 +132,11 @@ class FastSet {
     return `FastSet(${this.size}){${sb.join(', ')}}`
   }
 
-  get min(): number | null {
+  get min(): number {
     return this.next(-1)
   }
 
-  get max(): number | null {
+  get max(): number {
     return this.prev(this._n)
   }
 

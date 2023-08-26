@@ -16,7 +16,7 @@ MOD = int(1e9 + 7)
 class Solution:
     def solve1(self, nums: List[int], queries: List[List[int]]) -> List[int]:
         """每个查询要计算nums[start:n:step]的和
-        
+
         注意分块算法O(n*n^1/2)非常卡常 不适合python写
         """
         n = len(nums)

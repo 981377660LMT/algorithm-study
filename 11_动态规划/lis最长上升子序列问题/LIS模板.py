@@ -17,8 +17,9 @@ def LIS(nums: List[int], isStrict=True) -> int:
         return n
 
     lis = []  # lis[i] 表示长度为 i 的上升子序列的最小末尾值
+    f = bisect_left if isStrict else bisect_right
     for i in range(n):
-        pos = bisect_left(lis, nums[i]) if isStrict else bisect_right(lis, nums[i])
+        pos = f(lis, nums[i])
         if pos == len(lis):
             lis.append(nums[i])
         else:
@@ -33,8 +34,9 @@ def getLIS(nums: List[int], isStrict=True) -> Tuple[List[int], List[int]]:
 
     lis = []  # lis[i] 表示长度为 i 的上升子序列的最小末尾值
     dpIndex = [0] * n  # 每个元素对应的LIS长度
+    f = bisect_left if isStrict else bisect_right
     for i in range(n):
-        pos = bisect_left(lis, nums[i]) if isStrict else bisect_right(lis, nums[i])
+        pos = f(lis, nums[i])
         if pos == len(lis):
             lis.append(nums[i])
         else:
@@ -60,8 +62,9 @@ def caldp(nums: List[int], isStrict=True) -> List[int]:
     n = len(nums)
     res = [0] * n
     lis = []
+    f = bisect_left if isStrict else bisect_right
     for i in range(n):
-        pos = bisect_left(lis, nums[i]) if isStrict else bisect_right(lis, nums[i])
+        pos = f(lis, nums[i])
         if pos == len(lis):
             lis.append(nums[i])
             res[i] = len(lis)

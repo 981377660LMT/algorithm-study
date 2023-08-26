@@ -32,6 +32,8 @@ https://www.bilibili.com/video/BV17W41187gL
 
 ### 第二讲：NFA 转换成 DFA：子集构造算法 (3.2)
 
+bfs + 合并状态
+
 ### 第三讲：DFA 的最小化：Hopcroft 算法 (3.3)
 
 ### 第四讲：从 DFA 生成分析算法 (3.4)
