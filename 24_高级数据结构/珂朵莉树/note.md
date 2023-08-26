@@ -30,3 +30,7 @@ enumerateRange: enumerateRange(start: number, end: number, f: (start: number, en
 
 优化:如果区间染色是某个值时,js 可以考虑使用 Int8Array 或者 Uint32Array 上的 `fill 方法`填充
 (类型数组的 fill 方法使用了 `memset`)
+
+---
+
+注意：珂朵莉树如果存在需要`遍历区间内所有颜色段且遍历后不合并`的情况下复杂度是不对的，除非数据随机
