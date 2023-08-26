@@ -4,6 +4,7 @@
 
 // 幂运算预处理.
 // !注意js做带模乘法比较慢.
+// 取模优化: const add = (x,y)=> (x += y) >= mod ? x - mod : x;
 
 import { mulUint32 } from '../../数论/快速幂/mulUint32'
 import { qpow } from '../../数论/快速幂/qpow'
@@ -169,7 +170,8 @@ const usePowerQueryMatQPow = (base: number[][], mod = 1e9 + 7, cacheLevel = 16):
       for (let k = 0; k < n; k++) {
         for (let j = 0; j < n; j++) {
           const pos = i * n + j
-          res[pos] = (res[pos] + mulUint32(mat1[i * n + k], mat2[k * n + j], mod)) % mod
+          const tmp = res[pos] + mulUint32(mat1[i * n + k], mat2[k * n + j], mod)
+          res[pos] = tmp > mod ? tmp - mod : tmp
         }
       }
     }
