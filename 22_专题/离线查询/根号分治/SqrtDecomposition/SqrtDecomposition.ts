@@ -50,7 +50,7 @@ class SqrtDecomposition<E, Id, Q = unknown> {
     blockSize = ~~Math.sqrt(n) + 1
   ) {
     this._blockSize = blockSize
-    this._blocks = Array(1 + ~~(n / blockSize)).fill(null)
+    this._blocks = Array(1 + ~~(n / blockSize))
     for (let i = 0; i < this._blocks.length; i++) {
       this._blocks[i] = createBlock(i, i * blockSize, Math.min((i + 1) * blockSize, n))
       this._blocks[i].created()

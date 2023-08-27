@@ -80,6 +80,7 @@
    - [SortedList](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/ATC-SortedList.py)
      [SortedList](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SortedList/SortedListFast.ts)
    - [SortedListWithSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SortedList/SortedListWithSum.ts)
+   - [值域分块](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/%E5%80%BC%E5%9F%9F%E5%88%86%E5%9D%97/SortedListRangeBlock.ts)
    - [SortedDict](<%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/tree/fhqtreap/sortedlist/SortedDict/SortedDict.go>)
      [SortedDict](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SortedList/SortedDictFast.ts)
    - [TreeMap](<%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/tree/fhqtreap/sortedlist/TreeMap/main.go>)

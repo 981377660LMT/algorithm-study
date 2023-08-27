@@ -30,7 +30,7 @@ interface ISortedList<V> {
   toString(): string
 
   forEach(callbackfn: (value: V, index: number) => void | boolean, reverse?: boolean): void
-  enumerate(start: number, end: number, f: (value: V) => void, erase?: boolean): void
+  enumerate(start: number, end: number, f?: (value: V) => void, erase?: boolean): void
   iSlice(start: number, end: number, reverse?: boolean): IterableIterator<V>
   iRange(min: V, max: V, reverse?: boolean): IterableIterator<V>
   entries(): IterableIterator<[number, V]>
@@ -246,7 +246,7 @@ class SortedListFast<V = number> {
    */
   erase(start = 0, end = this.length): void {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    this.enumerate(start, end, () => {}, true)
+    this.enumerate(start, end, undefined, true)
   }
 
   lower(value: V): V | undefined {
@@ -353,7 +353,7 @@ class SortedListFast<V = number> {
     }
   }
 
-  enumerate(start: number, end: number, f: (value: V) => void, erase = false): void {
+  enumerate(start: number, end: number, f?: (value: V) => void, erase = false): void {
     if (start < 0) start = 0
     if (end > this._len) end = this._len
     if (start >= end) return
@@ -365,7 +365,9 @@ class SortedListFast<V = number> {
     for (; count && pos < this._blocks.length; pos++) {
       const block = this._blocks[pos]
       const endIndex = Math.min(block.length, startIndex + count)
-      for (let j = startIndex; j < endIndex; j++) f(block[j])
+      if (f) {
+        for (let j = startIndex; j < endIndex; j++) f(block[j])
+      }
       const deleted = endIndex - startIndex
 
       if (erase) {

@@ -137,7 +137,7 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
     return this
   }
 
-  override enumerate(start: number, end: number, f: (value: V) => void, erase?: boolean): void {
+  override enumerate(start: number, end: number, f?: (value: V) => void, erase?: boolean): void {
     if (start < 0) start = 0
     if (end > this._len) end = this._len
     if (start >= end) return
@@ -149,7 +149,9 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
     for (; count && pos < this._blocks.length; pos++) {
       const block = this._blocks[pos]
       const endIndex = Math.min(block.length, startIndex + count)
-      for (let j = startIndex; j < endIndex; j++) f(block[j])
+      if (f) {
+        for (let j = startIndex; j < endIndex; j++) f(block[j])
+      }
       const deleted = endIndex - startIndex
 
       if (erase) {

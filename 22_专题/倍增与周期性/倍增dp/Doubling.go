@@ -48,6 +48,27 @@ func main() {
 	}
 }
 
+// 8027. 在传球游戏中最大化函数值
+func getMaxFunctionValue(receiver []int, k int64) int64 {
+	n := len(receiver)
+	intK := int(k)
+	db := NewDoubling(n, intK+1)
+	for i := 0; i < n; i++ {
+		db.Add(i, receiver[i], i)
+	}
+	db.Build()
+
+	res := 0
+	for i := 0; i < n; i++ {
+		_, v := db.Jump(i, intK+1)
+		if v > res {
+			res = v
+		}
+	}
+
+	return int64(res)
+}
+
 type E = int
 
 // monoidAdd
@@ -58,29 +79,27 @@ type Doubling struct {
 	n          int
 	log        int
 	isPrepared bool
-	to         [][]int
-	dp         [][]E
+	to         []int
+	dp         []E
 }
 
 func NewDoubling(n, maxStep int) *Doubling {
 	res := &Doubling{}
 	res.n = n
 	res.log = bits.Len(uint(maxStep))
-	res.to = make([][]int, res.log)
-	res.dp = make([][]E, res.log)
-	for i := 0; i < res.log; i++ {
-		res.to[i] = make([]int, n)
-		res.dp[i] = make([]E, n)
-		for j := 0; j < n; j++ {
-			res.to[i][j] = -1
-			res.dp[i][j] = res.e()
-		}
+	size := n * res.log
+	res.to = make([]int, size)
+	res.dp = make([]E, size)
+	for i := 0; i < size; i++ {
+		res.to[i] = -1
+		res.dp[i] = res.e()
 	}
 	return res
 }
 
 // 初始状态(leaves):从 `from` 状态到 `to` 状态，边权为 `weight`.
-//  0 <= from, to < n
+//
+//	0 <= from, to < n
 func (d *Doubling) Add(from, to int, weight E) {
 	if d.isPrepared {
 		panic("Doubling is prepared")
@@ -89,8 +108,8 @@ func (d *Doubling) Add(from, to int, weight E) {
 		panic("to is out of range")
 	}
 
-	d.to[0][from] = to
-	d.dp[0][from] = weight
+	d.to[from] = to
+	d.dp[from] = weight
 }
 
 func (d *Doubling) Build() {
@@ -99,23 +118,26 @@ func (d *Doubling) Build() {
 	}
 
 	d.isPrepared = true
+	n := d.n
 	for k := 0; k < d.log-1; k++ {
-		for v := 0; v < d.n; v++ {
-			w := d.to[k][v]
+		for v := 0; v < n; v++ {
+			w := d.to[k*n+v]
+			next := (k+1)*n + v
 			if w == -1 {
-				d.to[k+1][v] = -1
-				d.dp[k+1][v] = d.dp[k][v]
+				d.to[next] = -1
+				d.dp[next] = d.dp[k*n+v]
 				continue
 			}
-			d.to[k+1][v] = d.to[k][w]
-			d.dp[k+1][v] = d.op(d.dp[k][v], d.dp[k][w])
+			d.to[next] = d.to[k*n+w]
+			d.dp[next] = d.op(d.dp[k*n+v], d.dp[k*n+w])
 		}
 	}
 }
 
 // 从 `from` 状态开始，执行 `step` 次操作，返回最终状态的编号和操作的结果。
-//  0 <= from < n
-//  如果最终状态不存在，返回 -1, e()
+//
+//	0 <= from < n
+//	如果最终状态不存在，返回 -1, e()
 func (d *Doubling) Jump(from, step int) (to int, res E) {
 	if !d.isPrepared {
 		panic("Doubling is not prepared")
@@ -132,8 +154,9 @@ func (d *Doubling) Jump(from, step int) (to int, res E) {
 		}
 
 		if step&(1<<k) != 0 {
-			res = d.op(res, d.dp[k][to])
-			to = d.to[k][to]
+			pos := k*d.n + to
+			res = d.op(res, d.dp[pos])
+			to = d.to[pos]
 		}
 	}
 	return
@@ -149,8 +172,9 @@ func (d *Doubling) MaxStep(from int, check func(e E) bool) int {
 	step := 0
 
 	for k := d.log - 1; k >= 0; k-- {
-		to := d.to[k][from]
-		next := d.op(res, d.dp[k][from])
+		pos := k*d.n + from
+		to := d.to[pos]
+		next := d.op(res, d.dp[pos])
 		if check(next) {
 			step |= 1 << k
 			from = to

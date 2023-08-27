@@ -16,6 +16,9 @@ https://drken1215.hatenablog.com/archive/category/%E3%82%AF%E3%82%A8%E3%83%AA%E3
 
 [浅谈根号算法](https://ddosvoid.github.io/2020/10/18/%E6%B5%85%E8%B0%88%E6%A0%B9%E5%8F%B7%E7%AE%97%E6%B3%95/)
 
+[Ynoi 做题记录](https://dpair.gitee.io/articles/Ynoi/)
+[数据结构杂题精选](https://www.luogu.com.cn/blog/DPair2005/shuo-ju-jie-gou-za-ti-jing-xuan)
+
 1. 强制在线，只有询问
    对于这种题目，分块算法一般的思想是预处理出块 i 到块 j​ 的答案，边角中间的块对边角的影响用其它数据结构来存储
 
@@ -46,3 +49,8 @@ https://drken1215.hatenablog.com/archive/category/%E3%82%AF%E3%82%A8%E3%83%AA%E3
    - O(sqrt(n))区间查询 O(1)单点修改
    - O(sqrt(n))插入一个数，O(1)查询小于一个数的个数
      值域分块，维护前缀和即可
+7. 根号分治
+   首先对于这种题目，我们考虑设置一个阈值 limit 。
+   对于> limit 的数据，会有一些性质，我们根据这个性质进行处理。
+   对于< limit 的数据同样也会有一些性质，我们也根据这个性质特殊处理。
+   而且这两部分若缺少了这些性质复杂度就难以保证，但把它分开了复杂度就对了。我们 limit 一般取 √n,但实际情况实际考虑。

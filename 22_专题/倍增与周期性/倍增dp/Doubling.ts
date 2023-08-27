@@ -1,3 +1,5 @@
+/* eslint-disable no-inner-declarations */
+
 /**
  * 倍增维护`n`个状态的转移编号和值.
  * 每个状态对应一个`编号(0-n-1)`和`值(幺半群)`.
@@ -77,7 +79,7 @@ class Doubling<E> {
     for (let k = 0; k < this._log; k++) {
       if (to === -1) break
       const div = 2 ** k
-      if (Math.floor(step / div) % 2) {
+      if (Math.floor(step / div) & 1) {
         const pos = k * this._n + to
         value = this._op(value, this._dp[pos])
         to = this._to[pos]
@@ -134,4 +136,25 @@ if (require.main === module) {
    * var obj = new TreeAncestor(n, parent)
    * var param_1 = obj.getKthAncestor(node,k)
    */
+
+  // 8027. 在传球游戏中最大化函数值
+  // https://leetcode.cn/problems/maximize-value-of-function-in-a-ball-passing-game/
+  function getMaxFunctionValue(receiver: number[], k: number): number {
+    const n = receiver.length
+    const db = new Doubling(
+      n,
+      k + 10,
+      () => 0,
+      (a, b) => a + b
+    )
+    for (let i = 0; i < n; i++) db.add(i, receiver[i], i)
+    db.build()
+
+    let res = 0
+    for (let i = 0; i < n; i++) {
+      const [_, value] = db.jump(i, k + 1)
+      res = Math.max(res, value)
+    }
+    return res
+  }
 }

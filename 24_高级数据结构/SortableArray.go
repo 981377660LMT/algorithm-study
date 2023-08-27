@@ -6,6 +6,8 @@
 // SortInc(start, end int)
 // SortDec(start, end int)
 // !每次操作O(log^2(maxValue))
+// https://www.luogu.com.cn/problem/P2824
+// https://dpair.gitee.io/articles/odt/
 
 package main
 
@@ -38,9 +40,10 @@ func demo() {
 }
 
 func main() {
-	abc217e()
+	// abc217e()
 	// abc237g()
 	// demo()
+	Logu2824()
 
 }
 
@@ -112,6 +115,34 @@ func abc237g() {
 			return
 		}
 	}
+}
+
+func Logu2824() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	sa := NewSortableArray(n, nums)
+	for i := 0; i < q; i++ {
+		var op, l, r int
+		fmt.Fscan(in, &op, &l, &r)
+		l--
+		if op == 0 {
+			sa.SortInc(l, r)
+		} else {
+			sa.SortDec(l, r)
+		}
+	}
+
+	var k int
+	fmt.Fscan(in, &k)
+	fmt.Fprintln(out, sa.Get(k-1))
 }
 
 type SortableArray struct {

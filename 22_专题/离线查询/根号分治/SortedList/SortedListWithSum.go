@@ -287,7 +287,7 @@ func (sl *SortedListWithSum) At(index int) E {
 }
 
 func (sl *SortedListWithSum) Erase(start, end int) {
-	sl.Enumerate(start, end, func(value E) {}, true)
+	sl.Enumerate(start, end, nil, true)
 }
 
 func (sl *SortedListWithSum) Lower(value E) (res E, ok bool) {
@@ -386,8 +386,10 @@ func (sl *SortedListWithSum) Enumerate(start, end int, f func(value E), erase bo
 	for ; count > 0 && pos < len(sl.blocks); pos++ {
 		block := sl.blocks[pos]
 		endIndex := min(len(block), startIndex+count)
-		for j := startIndex; j < endIndex; j++ {
-			f(block[j])
+		if f != nil {
+			for j := startIndex; j < endIndex; j++ {
+				f(block[j])
+			}
 		}
 		deleted := endIndex - startIndex
 
