@@ -252,7 +252,7 @@ class SortedListRangeBlock implements ISortedList<number> {
 
     // 以块为单位消耗remain
     let pos = this._belong[cur]
-    while (remain >= this._blockCount[pos]) {
+    while (pos < this._blockCount.length && remain >= this._blockCount[pos]) {
       res += this._blockSum[pos]
       remain -= this._blockCount[pos]
       pos++
@@ -393,7 +393,7 @@ class SortedListRangeBlock implements ISortedList<number> {
 
     // 以块为单位消耗remain
     let pos = this._belong[cur]
-    while (true) {
+    while (pos < this._blockCount.length) {
       const count = this._blockCount[pos]
       if (remain < count) break
       remain -= count

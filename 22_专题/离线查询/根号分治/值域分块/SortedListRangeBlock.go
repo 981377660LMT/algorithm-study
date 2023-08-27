@@ -10,9 +10,41 @@ import (
 	"strings"
 )
 
-func main() {
-
+func getSubarrayBeauty(nums []int, k int, x int) []int {
+	res := []int{}
+	sl := NewSortedListRangeBlock(200)
+	OFFSET := 100
+	n := len(nums)
+	for right := 0; right < n; right++ {
+		sl.Add(nums[right] + OFFSET)
+		if right >= k {
+			sl.Discard(nums[right-k] + OFFSET)
+		}
+		if right >= k-1 {
+			xth := sl.At(x-1) - OFFSET
+			if xth > 0 {
+				xth = 0
+			}
+			res = append(res, xth)
+		}
+	}
+	return res
 }
+
+func minimumDifference(nums []int) int64 {
+	n := len(nums) / 3
+	pre := NewSortedListRangeBlock(1e5+10, nums[:n]...)
+	suf := NewSortedListRangeBlock(1e5+10, nums[n:]...)
+	res := pre.SumSlice(0, n) - suf.SumSlice(suf.Len()-n, suf.Len())
+	for i := n; i < 2*n; i++ {
+		pre.Add(nums[i])
+		suf.Remove(nums[i])
+		res = min(res, pre.SumSlice(0, n)-suf.SumSlice(suf.Len()-n, suf.Len()))
+	}
+	return int64(res)
+}
+
+const INF int = 1e18
 
 type SortedListRangeBlock struct {
 	_blockSize  int   // 每个块的大小.
@@ -279,9 +311,9 @@ func (sl *SortedListRangeBlock) SumSlice(start, end int) int {
 
 	// 以块为单位消耗remain
 	pos := sl._belong[cur]
-	for count := sl._blockCount[pos]; remain >= count; {
+	for pos < len(sl._blockCount) && remain >= sl._blockCount[pos] {
 		res += sl._blockSum[pos]
-		remain -= count
+		remain -= sl._blockCount[pos]
 		pos++
 		cur += sl._blockSize
 	}
@@ -573,4 +605,18 @@ func (sl *SortedListRangeBlock) _findKth(kth int) (value, index int) {
 	}
 
 	panic("unreachable")
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
