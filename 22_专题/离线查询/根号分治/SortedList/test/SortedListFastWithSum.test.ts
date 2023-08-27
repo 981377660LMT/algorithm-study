@@ -232,4 +232,9 @@ describe('SortedListSumWithFast', () => {
       }
     }
   })
+
+  it('should support min/max', () => {
+    expect(sl.min).toBe(sortedNums[0])
+    expect(sl.max).toBe(sortedNums[sortedNums.length - 1])
+  })
 })

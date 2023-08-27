@@ -33,8 +33,9 @@ class SortedListRangeBlock implements ISortedList<number> {
   /**
    * @param max 值域的最大值.
    * 0 <= max <= 1e6.
+   * @param iterable 初始值.
    */
-  constructor(max: number) {
+  constructor(max: number, iterable?: Iterable<number>) {
     max += 5
     const size = Math.sqrt(max) | 0
     const count = 1 + ((max / size) | 0)
@@ -43,10 +44,10 @@ class SortedListRangeBlock implements ISortedList<number> {
     this._blockCount = new Uint32Array(count)
     this._blockSum = Array(count).fill(0)
     const belong = new Uint16Array(max)
-    for (let i = 0; i < max; i++) {
-      belong[i] = (i / size) | 0
-    }
+    for (let i = 0; i < max; i++) belong[i] = (i / size) | 0
     this._belong = belong
+
+    if (iterable) this.update(...iterable)
   }
 
   /** O(1). */
@@ -372,6 +373,7 @@ class SortedListRangeBlock implements ISortedList<number> {
       for (let _ = 0; _ < real; _++) this.remove(cur)
     }
     remain -= sufCount
+    if (!remain) return
     cur++
 
     // 当前块内
@@ -391,17 +393,19 @@ class SortedListRangeBlock implements ISortedList<number> {
 
     // 以块为单位消耗remain
     let pos = this._belong[cur]
-    while (remain >= this._blockCount[pos]) {
-      remain -= this._blockCount[pos]
+    while (true) {
+      const count = this._blockCount[pos]
+      if (remain < count) break
+      remain -= count
       if (f) {
         for (let v = cur; v < cur + this._blockSize; v++) {
-          const count = this._counter[v]
-          for (let _ = 0; _ < count; _++) f(v)
+          const c = this._counter[v]
+          for (let _ = 0; _ < c; _++) f(v)
         }
       }
       if (erase) {
         this._counter.fill(0, cur, cur + this._blockSize)
-        this._len -= this._blockCount[pos]
+        this._len -= count
         this._blockCount[pos] = 0
         this._blockSum[pos] = 0
       }
@@ -453,6 +457,67 @@ class SortedListRangeBlock implements ISortedList<number> {
     }
   }
 
+  /**
+   * 返回一个迭代器，用于遍历区间 `[start, end)` 内的元素.
+   */
+  *iSlice(start: number, end: number, reverse?: boolean | undefined): IterableIterator<number> {
+    if (start < 0) start += this._len
+    if (start < 0) start = 0
+    if (end < 0) end += this._len
+    if (end > this._len) end = this._len
+    if (start >= end) return
+
+    let remain = end - start
+    if (reverse) {
+      let [cur, index] = this._findKth(end)
+      const real = remain < index ? remain : index
+      for (let _ = 0; _ < real; _++) yield cur
+      remain -= real
+      if (!remain) return
+      cur--
+      while (remain > 0) {
+        const count = this._counter[cur]
+        const real = count < remain ? count : remain
+        remain -= real
+        for (let _ = 0; _ < real; _++) yield cur
+        cur--
+      }
+    } else {
+      let [cur, index] = this._findKth(start)
+      const sufCount = this._counter[cur] - index
+      const real = sufCount < remain ? sufCount : remain
+      for (let _ = 0; _ < real; _++) yield cur
+      remain -= sufCount
+      if (!remain) return
+      cur++
+      while (remain > 0) {
+        const count = this._counter[cur]
+        const real = count < remain ? count : remain
+        remain -= real
+        for (let _ = 0; _ < real; _++) yield cur
+        cur++
+      }
+    }
+  }
+
+  /**
+   * 返回一个迭代器，用于遍历范围在 `[min, max] 闭区间`内的元素.
+   */
+  *iRange(min: number, max: number, reverse?: boolean | undefined): IterableIterator<number> {
+    if (min > max) return
+    if (reverse) {
+      for (let v = max; v >= min; v--) {
+        const c = this._counter[v]
+        for (let _ = 0; _ < c; _++) yield v
+      }
+    } else {
+      for (let v = min; v <= max; v++) {
+        const c = this._counter[v]
+        for (let _ = 0; _ < c; _++) yield v
+      }
+    }
+  }
+
   *[Symbol.iterator](): IterableIterator<number> {
     for (let v = 0; v < this._counter.length; v++) {
       const count = this._counter[v]
@@ -492,14 +557,6 @@ class SortedListRangeBlock implements ISortedList<number> {
   }
 
   upperBound(value: number): ISortedListIterator<number> {
-    throw new Error('Method not implemented.')
-  }
-
-  iRange(min: number, max: number, reverse?: boolean | undefined): IterableIterator<number> {
-    throw new Error('Method not implemented.')
-  }
-
-  iSlice(start: number, end: number, reverse?: boolean | undefined): IterableIterator<number> {
     throw new Error('Method not implemented.')
   }
 
@@ -557,7 +614,7 @@ if (require.main === module) {
     }
   }
 
-  // https://leetcode.cn/problems/sliding-subarray-beauty/ 2200ms
+  // https://leetcode.cn/problems/sliding-subarray-beauty/
   function getSubarrayBeauty(nums: number[], k: number, x: number): number[] {
     const res: number[] = []
     const sl = new SortedListRangeBlock(200)
@@ -572,6 +629,20 @@ if (require.main === module) {
         const xth = sl.at(x - 1)! - OFFSET
         res.push(xth < 0 ? xth : 0)
       }
+    }
+    return res
+  }
+
+  // https://leetcode.cn/problems/minimum-difference-in-sums-after-removal-of-elements/
+  function minimumDifference(nums: number[]): number {
+    const n = nums.length / 3
+    const pre = new SortedListRangeBlock(1e5 + 10, nums.slice(0, n))
+    const suf = new SortedListRangeBlock(1e5 + 10, nums.slice(n))
+    let res = pre.sumSlice(0, n) - suf.sumSlice(suf.length - n, suf.length)
+    for (let i = n; i < 2 * n; i++) {
+      pre.add(nums[i])
+      suf.remove(nums[i])
+      res = Math.min(res, pre.sumSlice(0, n) - suf.sumSlice(suf.length - n, suf.length))
     }
     return res
   }

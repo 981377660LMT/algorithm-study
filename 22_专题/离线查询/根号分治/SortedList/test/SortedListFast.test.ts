@@ -193,4 +193,9 @@ describe('SortedListFast', () => {
     expect(sl.length).toBe(target.length)
     expect([...sl]).toStrictEqual(target)
   })
+
+  it('should support min/max', () => {
+    expect(sl.min).toBe(sortedNums[0])
+    expect(sl.max).toBe(sortedNums[sortedNums.length - 1])
+  })
 })

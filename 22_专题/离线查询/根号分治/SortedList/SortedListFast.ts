@@ -58,7 +58,7 @@ interface ISortedListIterator<V> {
  * 使用分块+树状数组维护的有序序列.
  * !如果数组较短(<2000),直接使用`bisectInsort`维护即可.
  */
-class SortedListFast<V = number> {
+class SortedListFast<V = number> implements ISortedList<V> {
   static setLoadFactor(load = 500): void {
     this._LOAD = load
   }
@@ -778,7 +778,7 @@ if (require.main === module) {
   lower.prev()
   console.log(lower.value)
 
-  // https://leetcode.cn/problems/sliding-subarray-beauty/ 2200ms
+  // https://leetcode.cn/problems/sliding-subarray-beauty/
   function getSubarrayBeauty(nums: number[], k: number, x: number): number[] {
     const res: number[] = []
     const sl = new SortedListFast()

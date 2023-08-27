@@ -110,6 +110,31 @@ describe('SortedListFast', () => {
     }
   })
 
+  it('should support islice', () => {
+    for (let i = 0; i < 100; i++) {
+      let start = Math.floor(Math.random() * sl.length)
+      let end = Math.floor(Math.random() * sl.length)
+      const reverse = Math.random() > 0.5
+      const islice = [...sl.iSlice(start, end, reverse)]
+      const slice = sl.slice(start, end)
+      if (reverse) slice.reverse()
+
+      expect(islice).toStrictEqual(slice)
+    }
+  })
+
+  it('should support irange', () => {
+    for (let i = 0; i < 100; i++) {
+      let min = Math.floor(Math.random() * sl.length)
+      let max = Math.floor(Math.random() * sl.length)
+      const reverse = Math.random() > 0.5
+      const irange = [...sl.iRange(min, max, reverse)]
+      const target = sortedNums.filter(num => num >= min && num <= max).sort((a, b) => a - b)
+      if (reverse) target.reverse()
+      expect(irange).toStrictEqual(target)
+    }
+  })
+
   // enumerate
   it('should support enumerate', () => {
     for (let i = 0; i < 100; i++) {
@@ -209,5 +234,10 @@ describe('SortedListFast', () => {
         sortedNums.sort((a, b) => a - b)
       }
     }
+  })
+
+  it('should support min/max', () => {
+    expect(sl.min).toBe(sortedNums[0])
+    expect(sl.max).toBe(sortedNums[sortedNums.length - 1])
   })
 })

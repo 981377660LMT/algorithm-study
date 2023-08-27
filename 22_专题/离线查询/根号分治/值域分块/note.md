@@ -10,11 +10,20 @@ https://www.luogu.com.cn/problem/P4119
 https://livinfly.top/186&decompose_9problems_for_beginner
 https://www.cnblogs.com/flashhu/p/8437062.html
 https://loj.ac/p?keyword=%E5%88%86%E5%9D%97%E5%85%A5%E9%97%A8
-https://www.cnblogs.com/chifan-duck/p/17060540.html
 
 ---
 
 [浅谈根号算法](https://ddosvoid.github.io/2020/10/18/%E6%B5%85%E8%B0%88%E6%A0%B9%E5%8F%B7%E7%AE%97%E6%B3%95/)
+!树状数组在操作个数不平均时并不是最优的
+
+1. 区间查询,单点修改
+   修改少:O(n),查询多:O(nsqrt(n))
+   修改多:O(nsqrt(n)), 查询少:O(n) => 参考 SortedListRangeBlock
+2. 区间修改,单点查询 => 维护差分数组转换成 1
+3. 插入一个数，查询小于一个数的个数
+   修改少:O(n),查询多:O(nsqrt(n))
+   修改多:O(nsqrt(n)), 查询少:O(n) => 参考 SortedListRangeBlock
+
 [莫队套值域分块](https://www.cnblogs.com/zaza-zt/p/15041167.html)
 主要用途是维护一堆数，支持 O(1)插入、删除，以及 O(√N)复杂度实现查询前驱、后继、k 小、x 的排名（类似于平衡树）。
 
