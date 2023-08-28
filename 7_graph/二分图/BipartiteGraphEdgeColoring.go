@@ -1,7 +1,10 @@
 // Bipartite Graph Edge Coloring(二部グラフの辺彩色)
 // https://ei1333.github.io/library/graph/others/bipartite-graph-edge-coloring.hpp
 // 二分图边着色,使得每个顶点的所有相邻边的颜色不同
-// 二分图的边的彩色数为最大度数D,一般图的边彩色为D或者D+1
+// - 算法步骤：先将二分图规约成k-正则二分图，然后对k-正则二分图进行边着色,按照最大度数奇偶性进行分类求解.
+// - 结论：
+//  !二分图的边的彩色数为最大度数D
+//  一般图的边彩色为D或者D+1
 
 // add_edge(a, b):
 //  aからbに辺を張る. aは二部グラフの左側, bは右側の頂点を指す.
@@ -9,7 +12,12 @@
 //  二部グラフの辺彩色を返す.
 //  !同じ色に塗るべき辺の番号が同じ配列に格納される.
 //  !辺の番号は add_edge() を呼び出した順に 0-indexed で付与される.
-// O(E*Sqrt(V)*log(max(deg)))
+// O(E*sqrt(V)*log(max(deg)))
+
+// Hall 定理: 从二分图的左部图中任意选出几个点，如果和它们相连的右部点的数量大于等于这些左部点的数量，那么左部点集存在一个完美匹配。
+// k-正则二分图：如果一个二分图中每个点的度数都是 k，那么称作一个 k-正则二分图。
+// 正则二分图满足 Hall 定理的条件，其必定存在完美匹配。
+// https://www.luogu.com.cn/blog/rqy/hall-theorem-regular-bigraph
 
 package main
 
@@ -21,29 +29,92 @@ import (
 )
 
 func main() {
+	Rearranging()
+}
+
+func judge() {
 	// https://judge.yosupo.jp/problem/bipartite_edge_coloring
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var L, R, m int
+	var L, R, m int // 1<=L,R<=10^5, 0<=m<=10^5
 	fmt.Fscan(in, &L, &R, &m)
 	ecbg := NewBipartiteGraphEdgeColoring()
 	for i := 0; i < m; i++ {
-		var a, b int
+		var a, b int // 0<=a<L, 0<=b<R
 		fmt.Fscan(in, &a, &b)
 		ecbg.AddEdge(a, b)
 	}
 	res := ecbg.Build()
 	fmt.Fprintln(out, len(res))
 	color := make([]int, m)
-	for i, v := range res {
-		for _, e := range v {
-			color[e] = i
+	for c, es := range res {
+		for _, e := range es {
+			color[e] = c // 边e的颜色为i
 		}
 	}
 	for _, c := range color {
 		fmt.Fprintln(out, c)
+	}
+}
+
+// https://atcoder.jp/contests/abc317/tasks/abc317_g
+// https://www.luogu.com.cn/blog/SunnyYuan/solution-at-abc317-g
+// n*m 的矩阵分布着1~n,每种数字有m个
+// 可以对每行的数字进行重新排列,最终能否使得每列的数字都是不同的(1-n)
+// 如果可以，输出矩阵
+// !二分图完美匹配问题 =>
+// !左边的点表示行，右边的点表示方格值，左边的每个点可以连接当前行的所有值(因为可以交换)，问是否存在m组完美匹配(m列染m种颜色)
+// 根据Hall定理(霍尔定理)，k-正则二分图一定存在完美匹配。因此只需求解.
+// 方法1:暴力跑m次匈牙利，每跑一次就删去完美匹配的边
+// 方法2:二分图边着色,时间复杂度更优
+func Rearranging() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var ROW, COL int
+	fmt.Fscan(in, &ROW, &COL)
+	grid := make([][]int, ROW)
+	for i := 0; i < ROW; i++ {
+		grid[i] = make([]int, COL)
+		for j := 0; j < COL; j++ {
+			var v int
+			fmt.Fscan(in, &v)
+			grid[i][j] = v - 1
+		}
+	}
+
+	edges := make([][2]int, 0, ROW*COL)
+	colorGraph := NewBipartiteGraphEdgeColoring()
+	for i := 0; i < ROW; i++ {
+		for j := 0; j < COL; j++ {
+			from, to := i, grid[i][j]
+			colorGraph.AddEdge(from, to)
+			edges = append(edges, [2]int{from, to})
+		}
+	}
+
+	colors := colorGraph.Build()
+
+	res := make([][]int, ROW)
+	for i := 0; i < ROW; i++ {
+		res[i] = make([]int, COL)
+	}
+	for c, es := range colors {
+		for _, e := range es {
+			r, v := edges[e][0], edges[e][1]
+			res[r][c] = v + 1
+		}
+	}
+
+	fmt.Fprintln(out, "Yes")
+	for i := 0; i < ROW; i++ {
+		for j := 0; j < COL; j++ {
+			fmt.Fprintf(out, "%d ", res[i][j])
+		}
+		fmt.Fprintln(out)
 	}
 }
 
@@ -60,7 +131,8 @@ func (bgec *BipartiteGraphEdgeColoring) AddEdge(left, right int) {
 }
 
 // 同じ色に塗るべき辺の番号が同じ配列に格納される.
-//  辺の番号は add_edge() を呼び出した順に 0-indexed で付与される.
+//
+//	辺の番号は add_edge() を呼び出した順に 0-indexed で付与される.
 func (bgec *BipartiteGraphEdgeColoring) Build() [][]int {
 	bgec.g = bgec.buildKRegularGraph()
 	ord := make([]int, len(bgec.g._A))
@@ -281,7 +353,8 @@ func (e *EulerianTrail) AddEdge(a, b int) {
 }
 
 // 枚举所有连通块的`欧拉回路`,返回边的编号.
-//  如果连通块内不存在欧拉回路,返回空.
+//
+//	如果连通块内不存在欧拉回路,返回空.
 func (e *EulerianTrail) EnumerateEulerianTrail() [][]int {
 	if e.directed {
 		for _, d := range e.deg {
@@ -309,7 +382,8 @@ func (e *EulerianTrail) EnumerateEulerianTrail() [][]int {
 }
 
 // 枚举所有连通块的`欧拉路径`(半欧拉回路),返回边的编号.
-//  如果连通块内不存在欧拉路径,返回空.
+//
+//	如果连通块内不存在欧拉路径,返回空.
 func (e *EulerianTrail) EnumerateSemiEulerianTrail() [][]int {
 	uf := newUnionFindArray(len(e.g))
 	for _, es := range e.es {
@@ -530,7 +604,8 @@ func (bt *BipartiteFlow) MinVertexCover() []int {
 }
 
 // 字典序(ord优先度顺序)最小点覆盖.
-//  /* https://atcoder.jp/contests/utpc2013/tasks/utpc2013_11 */
+//
+//	/* https://atcoder.jp/contests/utpc2013/tasks/utpc2013_11 */
 func (bt *BipartiteFlow) LexMinVertexCover(ord []int) []int {
 	if len(ord) != bt.n+bt.m {
 		panic("len(ord) != bt.n+bt.m")
@@ -642,7 +717,8 @@ func (bt *BipartiteFlow) MinEdgeCover() [][2]int {
 }
 
 // 构建残量图.
-//  left: [0,n), right: [n,n+m), S: n+m, T: n+m+1
+//
+//	left: [0,n), right: [n,n+m), S: n+m, T: n+m+1
 func (bf *BipartiteFlow) BuildRisidualGraph() [][]int {
 	if !bf.matched {
 		bf.MaxMatching()
@@ -806,9 +882,10 @@ func (ufa *_unionFindArray) Size(key int) int {
 type H = []int
 
 // Should return a number:
-//    negative , if a < b
-//    zero     , if a == b
-//    positive , if a > b
+//
+//	negative , if a < b
+//	zero     , if a == b
+//	positive , if a > b
 type Comparator func(a, b H) int
 
 func nhp(comparator Comparator, nums []H) *Heap {
