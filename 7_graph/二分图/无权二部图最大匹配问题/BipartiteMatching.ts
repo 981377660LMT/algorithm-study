@@ -1,120 +1,229 @@
-// // 二分图匹配
-// // https://ei1333.github.io/library/graph/flow/bipartite-matching.hpp
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-// // O(V*E)
-// // BipartiteMatching(n):= 全体のグラフの頂点数を n で初期化する.
-// // add_edge(u, v):= 頂点 u, v 間に辺を張る.
-// // bipartite_matching():= 二部グラフの最大マッチングを返す.
-// // erase_vertex(idx):= 頂点 idx を削除し, フローの変化量を返す(-1/0)
-// // add_vertex(idx):= 頂点 idx を追加し, フローの変化量を返す(0/1)
-// // output():= マッチングに使った辺を出力する.
+/**
+ * 二分图最大匹配.
+ */
+class BipartiteMathing {
+  private readonly _graph: number[][]
+  private readonly _alive: Uint8Array
+  private readonly _used: Uint32Array
+  private readonly _match: Int32Array
+  private readonly _n: number
+  private _timestamp = 0
 
-// package main
+  constructor(n: number) {
+    const graph: number[][] = Array(n)
+    for (let i = 0; i < n; i++) graph[i] = []
+    const alive = new Uint8Array(n)
+    const used = new Uint32Array(n)
+    const match = new Int32Array(n)
+    for (let i = 0; i < n; i++) {
+      alive[i] = 1
+      match[i] = -1
+    }
+    this._graph = graph
+    this._alive = alive
+    this._used = used
+    this._match = match
+    this._n = n
+  }
 
-// import (
-// 	"bufio"
-// 	"fmt"
-// 	"os"
-// )
+  /**
+   * 添加边 `left - right`.
+   * @param left 左侧顶点.0 <= left < L.
+   * @param right 右侧顶点.L <= right < n.
+   */
+  addEdge(left: number, right: number): void {
+    this._graph[left].push(right)
+    this._graph[right].push(left)
+  }
 
-// type BipartiteMatching struct {
-// 	timestamp int
-// 	graph     [][]int
-// 	alive     []bool
-// 	used      []int
-// 	match     []int
-// }
+  removeEdge(u: number, v: number): void {
+    const nextsU = this._graph[u]
+    for (let i = 0; i < nextsU.length; i++) {
+      if (nextsU[i] === v) {
+        nextsU.splice(i, 1)
+        break
+      }
+    }
+    const nextsV = this._graph[v]
+    for (let i = 0; i < nextsV.length; i++) {
+      if (nextsV[i] === u) {
+        nextsV.splice(i, 1)
+        break
+      }
+    }
+  }
 
-// func NewBipartiteMatching(n int) *BipartiteMatching {
-// 	graph := make([][]int, n)
-// 	alive := make([]bool, n)
-// 	used := make([]int, n)
-// 	match := make([]int, n)
-// 	for i := 0; i < n; i++ {
-// 		alive[i] = true
-// 		match[i] = -1
-// 	}
-// 	return &BipartiteMatching{graph: graph, alive: alive, used: used, match: match}
-// }
+  /**
+   * `O(VE)`求二分图最大匹配.
+   */
+  maxMatching(): [left: number, right: number][] {
+    this._match.fill(-1) // 重置匹配
+    for (let u = 0; u < this._n; u++) {
+      if (this._alive[u] && this._match[u] === -1) {
+        this._timestamp++
+        this._argument(u)
+      }
+    }
 
-// // left <-> right
-// func (bm *BipartiteMatching) AddEdge(u, v int) {
-// 	bm.graph[u] = append(bm.graph[u], v)
-// 	bm.graph[v] = append(bm.graph[v], u)
-// }
+    const res: [left: number, right: number][] = []
+    for (let u = 0; u < this._n; u++) {
+      const cand = this._match[u]
+      if (u < cand) res.push([u, cand])
+    }
+    return res
+  }
 
-// func (bm *BipartiteMatching) MaxMatching() [][2]int {
-// 	for i := 0; i < len(bm.graph); i++ {
-// 		if !bm.alive[i] {
-// 			continue
-// 		}
-// 		if bm.match[i] == -1 {
-// 			bm.timestamp++
-// 			bm._augment(i)
-// 		}
-// 	}
+  /**
+   * 删除顶点 `idx`, 返回流量的变化量(-1/0).
+   */
+  removeVertex(idx: number): -1 | 0 {
+    this._alive[idx] = 0
+    if (this._match[idx] === -1) return 0
+    this._match[this._match[idx]] = -1
+    this._timestamp++
+    const res = this._argument(this._match[idx])
+    this._match[idx] = -1
+    return res ? 0 : -1
+  }
 
-// 	res := [][2]int{}
-// 	for i := 0; i < len(bm.graph); i++ {
-// 		if i < bm.match[i] {
-// 			res = append(res, [2]int{i, bm.match[i]})
-// 		}
-// 	}
-// 	return res
-// }
+  /**
+   * 添加顶点 `idx`, 返回流量的变化量(0/1).
+   */
+  addVertex(idx: number): 0 | 1 {
+    this._alive[idx] = 1
+    this._timestamp++
+    return this._argument(idx) ? 1 : 0
+  }
 
-// func (bm *BipartiteMatching) EraseVertex(idx int) int {
-// 	bm.alive[idx] = false
-// 	if bm.match[idx] == -1 {
-// 		return 0
-// 	}
-// 	bm.match[bm.match[idx]] = -1
-// 	bm.timestamp++
-// 	res := bm._augment(bm.match[idx])
-// 	bm.match[idx] = -1
-// 	if res {
-// 		return 0
-// 	}
-// 	return -1
-// }
+  /**
+   * 获取匹配边.需要先调用 `maxMatching`.
+   */
+  getMatchingEdges(): [left: number, right: number][] {
+    const res: [left: number, right: number][] = []
+    for (let u = 0; u < this._n; u++) {
+      const cand = this._match[u]
+      if (u < cand) res.push([u, cand])
+    }
+    return res
+  }
 
-// func (bm *BipartiteMatching) AddVertex(idx int) int {
-// 	bm.alive[idx] = true
-// 	bm.timestamp++
-// 	res := bm._augment(idx)
-// 	if res {
-// 		return 1
-// 	}
-// 	return 0
-// }
+  private _argument(idx: number): boolean {
+    this._used[idx] = this._timestamp
+    const nexts = this._graph[idx]
+    for (let i = 0; i < nexts.length; i++) {
+      const to = nexts[i]
+      const toMatch = this._match[to]
+      if (!this._alive[to]) continue
+      if (toMatch === -1 || (this._used[toMatch] !== this._timestamp && this._argument(toMatch))) {
+        this._match[idx] = to
+        this._match[to] = idx
+        return true
+      }
+    }
+    return false
+  }
+}
 
-// // 返回匹配中使用的边.
-// func (bm *BipartiteMatching) Output() [][2]int {
-// 	res := [][2]int{}
-// 	for i := 0; i < len(bm.graph); i++ {
-// 		if i < bm.match[i] {
-// 			res = append(res, [2]int{i, bm.match[i]})
-// 		}
-// 	}
-// 	return res
-// }
+/**
+ * 从边创建二分图最大匹配.
+ * @param n 顶点数.
+ * @param edges 边集.
+ * @returns
+ * bm: 二分图最大匹配
+ * ids: 原图中的点在二分图中的编号.左侧点编号为0-L-1, 右侧点编号为L-n-1.
+ * rids: 二分图中的点在原图中的编号.0-n-1 -> 0-n-1.
+ * @example
+ * ```ts
+ * const [bm, ids, rids] = createBipartiteMathingFromEdges(4, [[0, 1], [1, 2], [2, 3]])
+ * const M = bm.maxMatching()
+ * const edges = M.map(([u, v]) => [rids[u], rids[v]])
+ * console.log(edges) // [[0, 1], [2, 3]]
+ * ```
+ */
+function createBipartiteMathingFromEdges(
+  n: number,
+  edges: [u: number, v: number][]
+): [bm: BipartiteMathing, ids: Uint32Array, rids: Uint32Array] {
+  const graph: number[][] = Array(n)
+  for (let i = 0; i < n; i++) graph[i] = []
+  edges.forEach(([u, v]) => {
+    graph[u].push(v)
+    graph[v].push(u)
+  })
 
-// func (bm *BipartiteMatching) _augment(idx int) bool {
-// 	bm.used[idx] = bm.timestamp
-// 	for _, to := range bm.graph[idx] {
-// 		toMatch := bm.match[to]
-// 		if !bm.alive[to] {
-// 			continue
-// 		}
-// 		if toMatch == -1 || (bm.used[toMatch] != bm.timestamp && bm._augment(toMatch)) {
-// 			bm.match[idx] = to
-// 			bm.match[to] = idx
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
+  const [colors, ok] = isBipartite(n, graph)
+  if (!ok) throw new Error('not bipartite')
 
-class BipartiteMatching {}
+  let leftCount = 0
+  for (let i = 0; i < n; i++) leftCount += +!colors[i] // 规定左侧点颜色为0, 右侧点颜色为1
+  const ids = new Uint32Array(n)
+  const rids = new Uint32Array(n)
+  let left = 0
+  let right = 0
+  for (let i = 0; i < n; i++) {
+    if (!colors[i]) {
+      ids[i] = left
+      rids[left] = i
+      left++
+    } else {
+      ids[i] = right + leftCount
+      rids[right + leftCount] = i
+      right++
+    }
+  }
 
-export { BipartiteMatching }
+  const bm = new BipartiteMathing(n)
+  edges.forEach(([u, v]) => {
+    if (colors[u]) {
+      u ^= v
+      v ^= u
+      u ^= v
+    }
+    bm.addEdge(ids[u], ids[v])
+  })
+
+  return [bm, ids, rids]
+}
+
+/**
+ * 判断是否是二分图.返回 (染色的01数组, 是否是二分图).
+ */
+function isBipartite(n: number, graph: number[][]): [colors: Int8Array, ok: boolean] {
+  const colors = new Int8Array(n).fill(-1)
+  for (let i = 0; i < n; i++) {
+    if (colors[i] === -1) {
+      colors[i] = 0
+      const stack = [i]
+      while (stack.length) {
+        const cur = stack.pop()!
+        const nexts = graph[cur]
+        for (let j = 0; j < nexts.length; j++) {
+          const next = nexts[j]
+          if (colors[next] === -1) {
+            colors[next] = 1 ^ colors[cur]
+            stack.push(next)
+          } else if (colors[next] === colors[cur]) {
+            return [colors, false]
+          }
+        }
+      }
+    }
+  }
+  return [colors, true]
+}
+
+export { BipartiteMathing, createBipartiteMathingFromEdges, isBipartite }
+
+if (require.main === module) {
+  // createBipartiteMathingFromEdges
+  const [bm, _, rids] = createBipartiteMathingFromEdges(4, [
+    [0, 1],
+    [1, 2],
+    [2, 3]
+  ])
+  const M = bm.maxMatching()
+  const edges = M.map(([u, v]) => [rids[u], rids[v]])
+  console.log(edges) // [[0, 1], [2, 3]]
+}
