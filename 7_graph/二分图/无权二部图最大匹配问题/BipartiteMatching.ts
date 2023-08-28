@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 /**
@@ -217,13 +218,40 @@ function isBipartite(n: number, graph: number[][]): [colors: Int8Array, ok: bool
 export { BipartiteMathing, createBipartiteMathingFromEdges, isBipartite }
 
 if (require.main === module) {
-  // createBipartiteMathingFromEdges
-  const [bm, _, rids] = createBipartiteMathingFromEdges(4, [
-    [0, 1],
-    [1, 2],
-    [2, 3]
-  ])
-  const M = bm.maxMatching()
-  const edges = M.map(([u, v]) => [rids[u], rids[v]])
-  console.log(edges) // [[0, 1], [2, 3]]
+  // // createBipartiteMathingFromEdges
+  // const [bm, _, rids] = createBipartiteMathingFromEdges(4, [
+  //   [0, 1],
+  //   [1, 2],
+  //   [2, 3]
+  // ])
+  // const M = bm.maxMatching()
+  // const edges = M.map(([u, v]) => [rids[u], rids[v]])
+  // console.log(edges) // [[0, 1], [2, 3]]
+
+  // https://atcoder.jp/contests/abc317/tasks/abc317_g
+  // 跑m次匈牙利，每跑一次就删去完美匹配的边
+  function rearrange(grid: number[][]): number[][] {
+    const ROW = grid.length
+    const COL = grid[0].length
+    const res: number[][] = Array(ROW)
+    for (let i = 0; i < ROW; i++) res[i] = Array(COL).fill(0)
+
+    const G = new BipartiteMathing(ROW + ROW)
+    for (let i = 0; i < ROW; i++) {
+      const row = grid[i]
+      row.forEach(v => {
+        G.addEdge(i, ROW + v)
+      })
+    }
+
+    for (let c = 0; c < COL; c++) {
+      const matching = G.maxMatching()
+      matching.forEach(([u, v]) => {
+        res[u][c] = v - ROW + 1
+        G.removeEdge(u, v)
+      })
+    }
+
+    return res
+  }
 }

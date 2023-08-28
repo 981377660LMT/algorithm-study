@@ -141,7 +141,8 @@ type AuxiliaryTree struct {
 }
 
 // 给定顶点个数n和无向边集(u,v)构建.
-//  O(nlogn)
+//
+//	O(nlogn)
 func NewAuxiliaryTree(n int, edges [][]int) *AuxiliaryTree {
 	g := make([][]int, n)
 	for _, e := range edges {
@@ -163,8 +164,9 @@ func NewAuxiliaryTree(n int, edges [][]int) *AuxiliaryTree {
 }
 
 // 指定点集,返回虚树的(有向图邻接表,虚树的根).
-//  如果虚树不存在`(len(points<=1))`,返回空邻接表和-1.
-//  O(klogk) 构建虚树.
+//
+//	如果虚树不存在`(len(points<=1))`,返回空邻接表和-1.
+//	O(klogk) 构建虚树.
 func (t *AuxiliaryTree) Query(points []int) ([][]int, int) {
 	k := len(points)
 	if k <= 1 {
@@ -317,7 +319,8 @@ func (lca *LCA) QueryLCA(root1, root2 int) int {
 }
 
 // 查询树节点两点间距离
-//  weighted: 是否将边权计入距离
+//
+//	weighted: 是否将边权计入距离
 func (lca *LCA) QueryDist(root1, root2 int, weighted bool) int {
 	if weighted {
 		return lca.distToRoot[root1] + lca.distToRoot[root2] - 2*lca.distToRoot[lca.QueryLCA(root1, root2)]
@@ -326,7 +329,8 @@ func (lca *LCA) QueryDist(root1, root2 int, weighted bool) int {
 }
 
 // 查询树节点两点路径上最大边权(倍增的时候维护其他属性)
-//  isEdge 为true表示查询路径上边权,为false表示查询路径上点权
+//
+//	isEdge 为true表示查询路径上边权,为false表示查询路径上点权
 func (lca *LCA) QueryMaxWeight(root1, root2 int, isEdge bool) int {
 	res := -INF
 	if lca.depth[root1] < lca.depth[root2] {
@@ -364,7 +368,8 @@ func (lca *LCA) QueryMaxWeight(root1, root2 int, isEdge bool) int {
 }
 
 // 查询树节点两点路径上最小边权(倍增的时候维护其他属性)
-//  isEdge 为true表示查询路径上边权,为false表示查询路径上点权
+//
+//	isEdge 为true表示查询路径上边权,为false表示查询路径上点权
 func (lca *LCA) QueryMinWeight(root1, root2 int, isEdge bool) int {
 	res := INF
 	if lca.depth[root1] < lca.depth[root2] {
@@ -403,6 +408,9 @@ func (lca *LCA) QueryMinWeight(root1, root2 int, isEdge bool) int {
 
 // 查询树节点root的第k个祖先(向上跳k步),如果不存在这样的祖先节点,返回 -1
 func (lca *LCA) QueryKthAncestor(root, k int) int {
+	if k > lca.depth[root] {
+		return -1
+	}
 	bit := 0
 	for k > 0 {
 		if k&1 == 1 {
