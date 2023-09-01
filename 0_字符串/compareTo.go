@@ -8,6 +8,7 @@ func main() {
 	fmt.Println(CompareTo("abc", "abcdd"))
 }
 
+// CompareString
 func CompareTo(s1, s2 string) int {
 	len1 := len(s1)
 	len2 := len(s2)

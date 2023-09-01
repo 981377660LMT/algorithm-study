@@ -99,7 +99,8 @@ type SqrtDecomposition struct {
 }
 
 // 指定维护的序列和分块大小初始化.
-//  blockSize:分块大小,一般取根号n(300)
+//
+//	blockSize:分块大小,一般取根号n(300)
 func NewSqrtDecomposition(nums []E, blockSize int) *SqrtDecomposition {
 	nums = append(nums[:0:0], nums...)
 	res := &SqrtDecomposition{n: len(nums), bs: blockSize, bls: make([]Block, len(nums)/blockSize+1)}
@@ -114,7 +115,8 @@ func NewSqrtDecomposition(nums []E, blockSize int) *SqrtDecomposition {
 }
 
 // 更新左闭右开区间[start,end)的值.
-//  0<=start<=end<=n
+//
+//	0<=start<=end<=n
 func (s *SqrtDecomposition) Update(start, end int, lazy Id) {
 	if start >= end {
 		return
@@ -136,7 +138,8 @@ func (s *SqrtDecomposition) Update(start, end int, lazy Id) {
 }
 
 // 查询左闭右开区间[start,end)的值.
-//  0<=start<=end<=n
+//
+//	0<=start<=end<=n
 func (s *SqrtDecomposition) Query(start, end int, cb func(blockRes E)) {
 	if start >= end {
 		return
