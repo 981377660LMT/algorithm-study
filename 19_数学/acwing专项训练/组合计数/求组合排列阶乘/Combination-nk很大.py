@@ -1,6 +1,13 @@
 # 求组合数2
-# C(n,k) 模 mod , n和k都很大
-# !0<=k<=n<=1e18
+# C(n,k) 模 mod , n和k都很大, mod很小
+
+# !0<=k<=n<=1e18，mod<=1e6
+# 预处理时间复杂度O(mod)，单次调用接近O(1)
+
+from math import comb
+
+
+print(comb(int(1e18), 200000), 2)
 
 
 class BinomialCoefficient:
@@ -93,12 +100,10 @@ class BinomialCoefficient:
         return s0 % MOD
 
 
-import sys
-
-sys.setrecursionlimit(int(1e9))
-input = lambda: sys.stdin.readline().rstrip("\r\n")
-
 if __name__ == "__main__":
+    import sys
+
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
     T, MOD = map(int, input().split())
     C = BinomialCoefficient(MOD)
     for _ in range(T):

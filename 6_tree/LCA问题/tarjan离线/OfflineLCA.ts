@@ -11,24 +11,18 @@ function offLineLca(
 ): number[] {
   const n = tree.length
   const data = new Int32Array(n)
-  for (let i = 0; i < n; ++i) data[i] = -1
   const stack = new Uint32Array(n)
   const mark = new Int32Array(n)
   const ptr = new Uint32Array(n)
   const res = Array(queries.length)
   for (let i = 0; i < queries.length; ++i) res[i] = -1
-
   let top = 0
   stack[top] = root
-  queries.forEach(([start, end]) => {
-    mark[start]++
-    mark[end]++
-  })
-
   const q: [next: number, ei: number][][] = Array(n)
   for (let i = 0; i < n; ++i) {
     q[i] = []
     mark[i] = -1
+    data[i] = -1
     ptr[i] = tree[i].length
   }
   queries.forEach(([start, end], i) => {
@@ -38,11 +32,11 @@ function offLineLca(
 
   while (top !== -1) {
     const u = stack[top]
-    const cache = tree[u]
+    const nexts = tree[u]
     if (mark[u] === -1) {
       mark[u] = u
     } else {
-      union(u, cache[ptr[u]])
+      union(u, nexts[ptr[u]])
       mark[find(u)] = u
     }
 
@@ -79,9 +73,9 @@ function offLineLca(
   }
 
   function run(u: number): boolean {
-    const cache = tree[u]
+    const nexts = tree[u]
     while (ptr[u]) {
-      const v = cache[--ptr[u]]
+      const v = nexts[--ptr[u]]
       if (mark[v] === -1) {
         stack[++top] = v
         return true

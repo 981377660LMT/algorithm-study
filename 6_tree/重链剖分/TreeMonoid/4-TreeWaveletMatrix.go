@@ -90,10 +90,11 @@ type TreeWaveletMatrix struct {
 }
 
 // !树的路径查询, 维护的量需要满足群的性质，且必须要满足交换律.
-//  data: 顶点的值, 或者边的值.(边的编号为两个定点中较深的那个点的编号).
-//  isVertex: data是否为顶点的值以及查询的时候是否是顶点权值.
-//  log: 如果要支持异或,则需要按照异或的值来决定值域.设为-1时表示不使用异或.
-//  sumData: 如果要支持区间和,设为nil时表示不使用区间和.
+//
+//	data: 顶点的值, 或者边的值.(边的编号为两个定点中较深的那个点的编号).
+//	isVertex: data是否为顶点的值以及查询的时候是否是顶点权值.
+//	log: 如果要支持异或,则需要按照异或的值来决定值域.设为-1时表示不使用异或.
+//	sumData: 如果要支持区间和,设为nil时表示不使用区间和.
 func NewTreeWaveletMatrix(tree *_T, data []E, isVertex bool, log int, sumData []int) *TreeWaveletMatrix {
 	res := &TreeWaveletMatrix{tree: tree, isVertex: isVertex, n: len(tree.Tree)}
 	n := res.n
@@ -237,11 +238,13 @@ type WaveletMatrixSegments struct {
 	unit   E
 }
 
-//
 // log:如果要支持异或,则需要按照异或的值来决定值域
-//  设为-1时表示不使用异或
+//
+//	设为-1时表示不使用异或
+//
 // sumData:如果要支持区间和,则需要传入前缀和数组
-//  设为nil时表示不使用区间和
+//
+//	设为nil时表示不使用区间和
 func NewWaveletMatrixSegments(nums []E, log int, sumData []E) *WaveletMatrixSegments {
 	res := &WaveletMatrixSegments{}
 	res.build(nums, log, sumData)
@@ -262,7 +265,8 @@ func (wm *WaveletMatrixSegments) CountRangeSegments(segments [][2]int, a, b, xor
 }
 
 // 返回区间 [left, right) 中的 (第k小的元素, 前k个元素(不包括第k小的元素) 的 op 的结果)
-//  如果k < 0, 返回 (-1, 0); 如果k >= right-left, 返回 (-1, 区间 op 的结果)
+//
+//	如果k < 0, 返回 (-1, 0); 如果k >= right-left, 返回 (-1, 区间 op 的结果)
 func (wm *WaveletMatrixSegments) KthValueAndSum(left, right, k, xor int) (int, E) {
 	if k < 0 {
 		return -1, 0
@@ -305,7 +309,7 @@ func (wm *WaveletMatrixSegments) KthValueAndSum(left, right, k, xor int) (int, E
 	return res, sum
 }
 
-//  如果k < 0, 返回 (-1, 0); 如果k >= segments总长, 返回 (-1, 区间 op 的结果)
+// 如果k < 0, 返回 (-1, 0); 如果k >= segments总长, 返回 (-1, 区间 op 的结果)
 func (wm *WaveletMatrixSegments) KthValueAndSumSegments(segments [][2]int, k, xor int) (int, E) {
 	if k < 0 {
 		return -1, 0
@@ -461,7 +465,8 @@ func (wm *WaveletMatrixSegments) KthSegments(segments [][2]int, k, xor int) E {
 }
 
 // 区间中位数.
-//  upper: true表示上中位数, false表示下中位数.
+//
+//	upper: true表示上中位数, false表示下中位数.
 func (wm *WaveletMatrixSegments) Median(upper bool, left, right, xor int) E {
 	n := right - left
 	var k int
@@ -508,8 +513,9 @@ func (wm *WaveletMatrixSegments) SumAllSegments(segments [][2]int) E {
 }
 
 // 返回使得 check(count,prefixSum) 为 true 的最大 (count, prefixSum) 对.
-//  !(即区间内小于 val 的数的个数count和 和 prefixSum 满足 check函数, 找到这样的最大的 (count, prefixSum).
-//  eg: val = 5 => 即区间内值域在 [0,5) 中的数的和满足 check 函数.
+//
+//	!(即区间内小于 val 的数的个数count和 和 prefixSum 满足 check函数, 找到这样的最大的 (count, prefixSum).
+//	eg: val = 5 => 即区间内值域在 [0,5) 中的数的和满足 check 函数.
 func (wm *WaveletMatrixSegments) MaxRight(left, right, xor int, check func(count int, preSum E) bool) (int, E) {
 	if tmp := wm.get(wm.log, left, right); check(right-left, tmp) {
 		return right - left, tmp
@@ -785,7 +791,8 @@ func (tree *_T) AddDirectedEdge(u, v, w int) {
 }
 
 // root:0-based
-//  当root设为-1时，会从0开始遍历未访问过的连通分量
+//
+//	当root设为-1时，会从0开始遍历未访问过的连通分量
 func (tree *_T) Build(root int) {
 	if root != -1 {
 		tree.build(root, -1, 0, 0)
@@ -805,7 +812,7 @@ func (tree *_T) Id(root int) (int, int) {
 	return tree.LID[root], tree.RID[root]
 }
 
-// 返回边 u-v 对应的 欧拉序起点编号, 0-indexed.
+// 返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1., 0-indexed.
 func (tree *_T) Eid(u, v int) int {
 	if tree.LID[u] > tree.LID[v] {
 		return tree.LID[u]
@@ -847,7 +854,8 @@ func (tree *_T) Dist(u, v int, weighted bool) int {
 }
 
 // k: 0-based
-//  如果不存在第k个祖先，返回-1
+//
+//	如果不存在第k个祖先，返回-1
 func (tree *_T) KthAncestor(root, k int) int {
 	if k > tree.Depth[root] {
 		return -1
@@ -863,7 +871,8 @@ func (tree *_T) KthAncestor(root, k int) int {
 }
 
 // 从 from 节点跳向 to 节点,跳过 step 个节点(0-indexed)
-//  返回跳到的节点,如果不存在这样的节点,返回-1
+//
+//	返回跳到的节点,如果不存在这样的节点,返回-1
 func (tree *_T) Jump(from, to, step int) int {
 	if step == 1 {
 		if from == to {
@@ -898,7 +907,8 @@ func (tree *_T) CollectChild(root int) []int {
 }
 
 // 返回沿着`路径顺序`的 [起点,终点] 的 欧拉序 `左闭右闭` 数组.
-//  !eg:[[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序.
+//
+//	!eg:[[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序.
 func (tree *_T) GetPathDecomposition(u, v int, vertex bool) [][2]int {
 	up, down := [][2]int{}, [][2]int{}
 	for {

@@ -10,6 +10,13 @@ import (
 	"strings"
 )
 
+func main() {
+	sl := NewSortedListRangeBlock(10)
+	sl.Add(1)
+	fmt.Println(sl.Min())
+	fmt.Println(sl.Max())
+}
+
 func getSubarrayBeauty(nums []int, k int, x int) []int {
 	res := []int{}
 	sl := NewSortedListRangeBlock(200)
@@ -531,9 +538,15 @@ func (sl *SortedListRangeBlock) Enumerate(start, end int, f func(value int), era
 }
 
 func (sl *SortedListRangeBlock) Clear() {
-	sl._counter = make([]int, len(sl._counter))
-	sl._blockCount = make([]int, len(sl._blockCount))
-	sl._blockSum = make([]int, len(sl._blockSum))
+	for i := range sl._counter {
+		sl._counter[i] = 0
+	}
+	for i := range sl._blockCount {
+		sl._blockCount[i] = 0
+	}
+	for i := range sl._blockSum {
+		sl._blockSum[i] = 0
+	}
 	sl._len = 0
 }
 
@@ -570,7 +583,7 @@ func (sl *SortedListRangeBlock) Max() int {
 		panic("empty")
 	}
 
-	for i := len(sl._counter) - 1; i >= 0; i-- {
+	for i := len(sl._blockCount) - 1; i >= 0; i-- {
 		if sl._blockCount[i] == 0 {
 			continue
 		}

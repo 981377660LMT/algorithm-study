@@ -2,6 +2,9 @@
 # mod为素数且0<=n,k<min(mod,1e7)
 
 
+from collections import Counter
+
+
 class Enumeration:
     __slots__ = ("_fac", "_ifac", "_inv", "_mod")
 
@@ -70,6 +73,35 @@ class Enumeration:
 
 
 if __name__ == "__main__":
+    MOD = int(1e9 + 7)
+    C = Enumeration(size=int(1e5), mod=MOD)
+
+    # 统计一个字符串的 k 子序列美丽值最大的数目
+    # https://leetcode.cn/contest/biweekly-contest-112/problems/count-k-subsequences-of-a-string-with-maximum-beauty/
+    class Solution:
+        def countKSubsequencesWithMaxBeauty(self, s: str, k: int) -> int:
+            MOD = int(1e9 + 7)
+            counter = Counter(s)
+            if len(counter) < k:
+                return 0
+
+            freqCounter = Counter(counter.values())
+            items = sorted(freqCounter.items(), key=lambda x: -x[0])
+            # print(items)  # "abcdd" -> [(2, 1), (1, 3)]
+            res = 1
+            remain = k
+            for freq, sameCount in items:
+                if remain <= 0:
+                    break
+                min_ = min(remain, sameCount)
+                res *= C.C(sameCount, min_) * pow(freq, min_, MOD)
+                res %= MOD
+                remain -= min_
+
+            return res % MOD
+
+    print(Solution().countKSubsequencesWithMaxBeauty("bcca", 2))
+
     # https://yukicoder.me/problems/no/117
     import sys
 

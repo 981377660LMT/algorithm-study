@@ -1,7 +1,7 @@
 import { SqrtDecomposition } from '../SqrtDecomposition'
 
 // https://leetcode.cn/problems/range-sum-query-mutable/
-// Range Affine Range Sum
+// Range Assign Range Sum
 
 const INF = 2e15
 class NumArray {

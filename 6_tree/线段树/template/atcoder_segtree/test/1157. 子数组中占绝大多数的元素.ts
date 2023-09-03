@@ -1,4 +1,4 @@
-// 线段树+摩尔投票维护区间众数
+// 线段树+摩尔投票维护区间绝对众数(RangeMajority)
 
 import { bisectLeft, bisectRight } from '../../../../../9_排序和搜索/二分/bisect'
 import { SegmentTreePointUpdateRangeQuery } from '../SegmentTreePointUpdateRangeQuery'

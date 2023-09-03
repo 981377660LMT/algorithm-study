@@ -23,7 +23,7 @@ enumerateRange: enumerateRange(start: number, end: number, f: (start: number, en
 
 只要一个数据结构可以支持**快速寻找前驱和后继**以及**快速删除和插入元素**，那么就可以用来实现珂朵莉树，例如 `SortedDict/64 叉树/Van Emde Boas Tree/链表`，等等...
 
-- 珂朵莉树的 set 操作推平区间，有利于降低复杂度
+- 珂朵莉树的 set 操作推平区间(assign)，有利于降低复杂度
 - 珂朵莉树不擅长范围查询(因为复杂度与范围内的区间个数成正比)，一般需要配合其他数据结构辅助范围查询
 
 ---
@@ -33,4 +33,4 @@ enumerateRange: enumerateRange(start: number, end: number, f: (start: number, en
 
 ---
 
-注意：珂朵莉树如果存在需要`遍历区间内所有颜色段且遍历后不合并`的情况下复杂度是不对的，除非数据随机
+注意：珂朵莉树如果存在需要`遍历区间内所有颜色段且遍历后不合并(assign)`的情况下复杂度是不对的，除非数据随机

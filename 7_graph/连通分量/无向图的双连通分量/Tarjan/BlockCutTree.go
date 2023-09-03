@@ -284,7 +284,8 @@ func (bct *BlockCutTree) Build() {
 
 // `原图`的顶点对应的BlockCutTree的顶点编号.
 // !注意孤立点的编号为-1(不存在于BlockCutTree中).
-//  0 <= rawV < len(bct.g)
+//
+//	0 <= rawV < len(bct.g)
 func (bct *BlockCutTree) Get(rawV int) int {
 	if bct.idar[rawV] >= 0 {
 		return bct.idar[rawV]
@@ -293,22 +294,26 @@ func (bct *BlockCutTree) Get(rawV int) int {
 }
 
 // `原图`的顶点是否是割点.
-//  0 <= rawV < len(bct.g)
+//
+//	0 <= rawV < len(bct.g)
 func (bct *BlockCutTree) IsRawCut(rawV int) bool { return bct.idar[rawV] >= 0 }
 
 // `圆方树`中的顶点是否是(原图)的割点.
-//  0 <= v < len(bct.Tree)
+//
+//	0 <= v < len(bct.Tree)
 func (bct *BlockCutTree) IsNewCut(v int) bool {
 	start := len(bct.bcc.BCC)
 	return start <= v && v < start+bct.cutCount
 }
 
 // `原图`的顶点是否属于某个点双.
-//  0 <= rawV < len(bct.g)
+//
+//	0 <= rawV < len(bct.g)
 func (bct *BlockCutTree) IsRawVBCC(rawV int) bool { return bct.idar[rawV] < 0 && bct.idcc[rawV] >= 0 }
 
 // `原图`的顶点是否是孤立点.
-//  0 <= rawV < len(bct.g)
+//
+//	0 <= rawV < len(bct.g)
 func (bct *BlockCutTree) IsRawIsolate(rawV int) bool { return bct.idar[rawV] < 0 && bct.idcc[rawV] < 0 }
 
 // 原图中的割点个数.
@@ -441,9 +446,6 @@ func (ll *_lowlink) dfs(idx, k, par int) int {
 }
 
 // 有时BlockCutTree 需要配合 HLD/Tree 等
-//
-//
-//
 type HeavyLightDecomposition struct {
 	Tree                          [][]int
 	SubSize, Depth, Parent        []int
@@ -489,13 +491,14 @@ func (hld *HeavyLightDecomposition) AddDirectedEdge(u, v int) {
 }
 
 // 返回树节点 u 对应的 欧拉序区间 [down, up).
-//  0 <= down < up <= n.
+//
+//	0 <= down < up <= n.
 func (hld *HeavyLightDecomposition) Id(u int) (down, up int) {
 	down, up = hld.dfn[u], hld.dfn[u]+hld.SubSize[u]
 	return
 }
 
-// 返回边 u-v 对应的 欧拉序起点编号.
+// 返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1..
 func (hld *HeavyLightDecomposition) Eid(u, v int) int {
 	id1, _ := hld.Id(u)
 	id2, _ := hld.Id(v)
@@ -506,7 +509,8 @@ func (hld *HeavyLightDecomposition) Eid(u, v int) int {
 }
 
 // 处理路径上的可换操作.
-//   0 <= start <= end <= n, [start,end).
+//
+//	0 <= start <= end <= n, [start,end).
 func (hld *HeavyLightDecomposition) QueryPath(u, v int, vertex bool, f func(start, end int)) {
 	if vertex {
 		hld.forEach(u, v, f)
@@ -516,7 +520,8 @@ func (hld *HeavyLightDecomposition) QueryPath(u, v int, vertex bool, f func(star
 }
 
 // 处理以 root 为根的子树上的查询.
-//   0 <= start <= end <= n, [start,end).
+//
+//	0 <= start <= end <= n, [start,end).
 func (hld *HeavyLightDecomposition) QuerySubTree(u int, vertex bool, f func(start, end int)) {
 	if vertex {
 		f(hld.dfn[u], hld.dfn[u]+hld.SubSize[u])

@@ -124,7 +124,7 @@ class SqrtArray<T = number> {
     if (end > this._n) end = this._n
     if (start >= end) return
 
-    let [bid, startPos] = this._moveTo(start)
+    let [bid, startPos] = this._findKth(start)
     let deleteCount = end - start
     for (; bid < this._x.length && deleteCount > 0; bid++) {
       const block = this._x[bid]
@@ -176,7 +176,7 @@ class SqrtArray<T = number> {
    * 0<= start <= end <= {@link length}
    */
   enumerate(start: number, end: number, f: (value: T) => void, erase = false): void {
-    let [bid, startPos] = this._moveTo(start)
+    let [bid, startPos] = this._findKth(start)
     let count = end - start
 
     for (; bid < this._x.length && count > 0; bid++) {
@@ -208,7 +208,7 @@ class SqrtArray<T = number> {
     if (start >= end) return []
     let count = end - start
     const res: T[] = Array(count)
-    let [bid, startPos] = this._moveTo(start)
+    let [bid, startPos] = this._findKth(start)
     let ptr = 0
     for (; bid < this._x.length && count > 0; bid++) {
       const block = this._x[bid]
@@ -238,7 +238,7 @@ class SqrtArray<T = number> {
     let count = end - start
 
     if (reverse) {
-      let [bid, endPos] = this._moveTo(end - 1)
+      let [bid, endPos] = this._findKth(end - 1)
       for (; ~bid && count > 0; bid--, ~bid && (endPos = this._x[bid].length)) {
         const block = this._x[bid]
         const startPos = Math.max(0, endPos - count)
@@ -249,7 +249,7 @@ class SqrtArray<T = number> {
         count -= curCount
       }
     } else {
-      let [bid, startPos] = this._moveTo(start)
+      let [bid, startPos] = this._findKth(start)
       for (; bid < this._x.length && count > 0; bid++) {
         const block = this._x[bid]
         const endPos = Math.min(block.length, startPos + count)
@@ -295,7 +295,7 @@ class SqrtArray<T = number> {
     return `SqrtArray{${this._x}}`
   }
 
-  private _moveTo(index: number): [blockId: number, startPos: number] {
+  private _findKth(index: number): [pos: number, index: number] {
     for (let i = 0; i < this._x.length; i++) {
       const block = this._x[i]
       if (index < block.length) {

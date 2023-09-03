@@ -1,6 +1,8 @@
 // https://ei1333.github.io/library/other/mo-tree.hpp
 // https://oi-wiki.org/misc/mo-algo-on-tree/
 // https://github.com/EndlessCheng/codeforces-go/blob/53262fb81ffea176cd5f039cec71e3bd266dce83/copypasta/mo.go#L301
+// https://github.com/EndlessCheng/codeforces-go/blob/53262fb81ffea176cd5f039cec71e3bd266dce83/copypasta/mo.go#L301
+//
 // 处理树上的路径相关的离线查询.
 // 一般的莫队只能处理线性问题，我们要把树强行压成序列。
 // 通过欧拉序(括号序)转化成序列上的查询，然后用莫队解决。
@@ -8,15 +10,11 @@
 package main
 
 import (
-	"fmt"
 	"math"
-	"math/bits"
 	"sort"
-	"strings"
 )
 
-// https://github.com/EndlessCheng/codeforces-go/blob/53262fb81ffea176cd5f039cec71e3bd266dce83/copypasta/mo.go#L301
-
+// 维护点权的树上莫队.
 type MoOnTree struct {
 	tree    [][]int
 	root    int
@@ -31,53 +29,56 @@ func NewMoOnTree(tree [][]int, root int) *MoOnTree {
 func (mo *MoOnTree) AddQuery(u, v int) { mo.queries = append(mo.queries, [2]int{u, v}) }
 
 // 处理每个查询.
-//  add: 将数据添加到窗口.
-//  remove: 将数据从窗口移除.
-//  query: 查询窗口内的数据.
+//
+//	add: 将数据添加到窗口.
+//	remove: 将数据从窗口移除.
+//	query: 查询窗口内的数据.
 func (mo *MoOnTree) Run(add func(rootId int), remove func(rootId int), query func(qid int)) {
+	if len(mo.queries) == 0 {
+		return
+	}
+
 	n := len(mo.tree)
+	dfnToNode := make([]int, 0, 2*n)
+	ins := make([]int, n)
+	outs := make([]int, n)
 
-	vs := make([]int, 0, 2*n)
-	tin := make([]int, n)
-	tout := make([]int, n)
-
-	var initTime func(v, fa int)
-	initTime = func(v, fa int) {
-		tin[v] = len(vs)
-		vs = append(vs, v)
-		for _, to := range mo.tree[v] {
-			if to != fa {
-				initTime(to, v)
+	var dfs func(cur, pre int)
+	dfs = func(cur, pre int) {
+		ins[cur] = len(dfnToNode)
+		dfnToNode = append(dfnToNode, cur)
+		for _, to := range mo.tree[cur] {
+			if to != pre {
+				dfs(to, cur)
 			}
 		}
-		tout[v] = len(vs)
-		vs = append(vs, v)
+		outs[cur] = len(dfnToNode)
+		dfnToNode = append(dfnToNode, cur)
 	}
-	initTime(mo.root, -1)
+	dfs(mo.root, -1)
 
 	lca := _offlineLCA(mo.tree, mo.queries, mo.root)
-	// blockSize := int(math.Round(math.Pow(float64(2*n), 2.0/3)))
 	blockSize := int(math.Ceil(float64(2*n) / math.Sqrt(float64(len(mo.queries)))))
-	type Q struct{ lb, l, r, lca, qid int }
+	type Q struct{ bid, l, r, lca, qid int }
 	qs := make([]Q, len(mo.queries))
 	for i := range qs {
 		v, w := mo.queries[i][0], mo.queries[i][1]
-		if tin[v] > tin[w] {
+		if ins[v] > ins[w] {
 			v, w = w, v
 		}
 		if lca_ := lca[i]; lca_ != v {
-			qs[i] = Q{tout[v] / blockSize, tout[v], tin[w] + 1, lca_, i}
+			qs[i] = Q{outs[v] / blockSize, outs[v], ins[w] + 1, lca_, i}
 		} else {
-			qs[i] = Q{tin[v] / blockSize, tin[v], tin[w] + 1, -1, i}
+			qs[i] = Q{ins[v] / blockSize, ins[v], ins[w] + 1, -1, i}
 		}
 	}
 
 	sort.Slice(qs, func(i, j int) bool {
 		a, b := qs[i], qs[j]
-		if a.lb != b.lb {
-			return a.lb < b.lb
+		if a.bid != b.bid {
+			return a.bid < b.bid
 		}
-		if a.lb&1 == 0 {
+		if a.bid&1 == 0 {
 			return a.r < b.r
 		}
 		return a.r > b.r
@@ -96,18 +97,18 @@ func (mo *MoOnTree) Run(add func(rootId int), remove func(rootId int), query fun
 	l, r := 0, 0
 	for _, q := range qs {
 		for ; r < q.r; r++ {
-			f(vs[r])
+			f(dfnToNode[r])
 		}
 		for ; l < q.l; l++ {
-			f(vs[l])
+			f(dfnToNode[l])
 		}
 		for l > q.l {
 			l--
-			f(vs[l])
+			f(dfnToNode[l])
 		}
 		for r > q.r {
 			r--
-			f(vs[r])
+			f(dfnToNode[r])
 		}
 		if q.lca >= 0 {
 			f(q.lca)
@@ -226,90 +227,4 @@ func (ufa *_unionFindArray) Find(key int) int {
 	}
 	ufa.data[key] = ufa.Find(ufa.data[key])
 	return ufa.data[key]
-}
-
-type BitArray struct {
-	n    int
-	log  int
-	data []int
-}
-
-// 長さ n の 0で初期化された配列で構築する.
-func NewBitArray(n int) *BitArray {
-	return &BitArray{n: n, log: bits.Len(uint(n)), data: make([]int, n+1)}
-}
-
-// 配列で構築する.
-func NewBitArrayFrom(arr []int) *BitArray {
-	res := NewBitArray(len(arr))
-	res.Build(arr)
-	return res
-}
-
-func (b *BitArray) Build(arr []int) {
-	if b.n != len(arr) {
-		panic("len of arr is not equal to n")
-	}
-	for i := 1; i <= b.n; i++ {
-		b.data[i] = arr[i-1]
-	}
-	for i := 1; i <= b.n; i++ {
-		j := i + (i & -i)
-		if j <= b.n {
-			b.data[j] += b.data[i]
-		}
-	}
-}
-
-// 要素 i に値 v を加える.
-func (b *BitArray) Add(i int, v int) {
-	for i++; i <= b.n; i += i & -i {
-		b.data[i] += v
-	}
-}
-
-// [0, r) の要素の総和を求める.
-func (b *BitArray) Query(r int) int {
-	res := int(0)
-	for ; r > 0; r -= r & -r {
-		res += b.data[r]
-	}
-	return res
-}
-
-// [l, r) の要素の総和を求める.
-func (b *BitArray) QueryRange(l, r int) int {
-	return b.Query(r) - b.Query(l)
-}
-
-// 区間[0,k]の総和がx以上となる最小のkを求める.数列が単調増加であることを要求する.
-func (b *BitArray) LowerBound(x int) int {
-	i := 0
-	for k := 1 << uint(b.log); k > 0; k >>= 1 {
-		if i+k <= b.n && b.data[i+k] < x {
-			x -= b.data[i+k]
-			i += k
-		}
-	}
-	return i
-}
-
-// 区間[0,k]の総和がxを上回る最小のkを求める.数列が単調増加であることを要求する.
-func (b *BitArray) UpperBound(x int) int {
-	i := 0
-	for k := 1 << uint(b.log); k > 0; k >>= 1 {
-		if i+k <= b.n && b.data[i+k] <= x {
-			x -= b.data[i+k]
-			i += k
-		}
-	}
-	return i
-}
-
-func (b *BitArray) String() string {
-	sb := []string{}
-	for i := 0; i < b.n; i++ {
-		sb = append(sb, fmt.Sprintf("%d", b.QueryRange(i, i+1)))
-	}
-	return fmt.Sprintf("BitArray: [%v]", strings.Join(sb, ", "))
 }

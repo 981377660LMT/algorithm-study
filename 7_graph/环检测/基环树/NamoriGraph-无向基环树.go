@@ -311,7 +311,8 @@ func (ng *NamoriGraph) GetId(rawV int) (rootId, idInTree int) {
 }
 
 // 给定树的顶点编号root和某个点在树中的顶点编号idInTree,返回这个点在原图中的顶点编号.
-//  GetInvId(root,0) 表示在环上的顶点root在原图中对应的顶点.
+//
+//	GetInvId(root,0) 表示在环上的顶点root在原图中对应的顶点.
 func (ng *NamoriGraph) GetInvId(rootId, idInTree int) (rawV int) {
 	return ng.iv[rootId][idInTree]
 }
@@ -379,13 +380,14 @@ func _NewHLD(tree Graph) *_HLD {
 }
 
 // 返回树节点 u 对应的 欧拉序区间 [down, up).
-//  0 <= down < up <= n.
+//
+//	0 <= down < up <= n.
 func (hld *_HLD) Id(u int) (down, up int) {
 	down, up = hld.dfn[u], hld.dfn[u]+hld.SubSize[u]
 	return
 }
 
-// 返回边 u-v 对应的 欧拉序起点编号.
+// 返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1..
 func (hld *_HLD) Eid(u, v int) int {
 	id1, _ := hld.Id(u)
 	id2, _ := hld.Id(v)
@@ -396,7 +398,8 @@ func (hld *_HLD) Eid(u, v int) int {
 }
 
 // 处理路径上的可换操作.
-//   0 <= start <= end <= n, [start,end).
+//
+//	0 <= start <= end <= n, [start,end).
 func (hld *_HLD) QueryPath(u, v int, vertex bool, f func(start, end int)) {
 	if vertex {
 		hld.forEach(u, v, f)
@@ -406,7 +409,8 @@ func (hld *_HLD) QueryPath(u, v int, vertex bool, f func(start, end int)) {
 }
 
 // 处理以 root 为根的子树上的查询.
-//   0 <= start <= end <= n, [start,end).
+//
+//	0 <= start <= end <= n, [start,end).
 func (hld *_HLD) QuerySubTree(u int, vertex bool, f func(start, end int)) {
 	if vertex {
 		f(hld.dfn[u], hld.dfn[u]+hld.SubSize[u])

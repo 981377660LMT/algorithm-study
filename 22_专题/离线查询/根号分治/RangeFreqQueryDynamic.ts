@@ -1,6 +1,7 @@
 // 动态区间频率查询
 // 区间加
 // 查询区间某元素出现次数
+// RangeAddRangeFreq
 
 import assert from 'assert'
 
@@ -58,6 +59,7 @@ class RangeFreqQueryDynamic {
         const queryAll = (queryArg: [v: number, same: boolean]) => {
           const v = queryArg[0]
           if (queryArg[1]) {
+            // 优化
             return (
               RangeFreqQueryDynamic._bisectLeft(sortedNums, v - lazyAdd + 1) -
               RangeFreqQueryDynamic._bisectLeft(sortedNums, v - lazyAdd)
@@ -98,10 +100,10 @@ class RangeFreqQueryDynamic {
   }
 
   /**
-   * 区间`[left, right)`每个元素加上`value`.
+   * 区间`[left, right)`每个元素加上`delta`.
    */
-  update(left: number, right: number, value: number): void {
-    this._sqrt.update(left, right, value)
+  add(left: number, right: number, delta: number): void {
+    this._sqrt.update(left, right, delta)
   }
 
   /**
@@ -141,9 +143,9 @@ export { RangeFreqQueryDynamic }
 
 if (require.main === module) {
   let rf = new RangeFreqQueryDynamic([1, 2, 2, 4, 5, 6, 7, 8, 9, 10])
-  rf.update(0, 10, 1)
+  rf.add(0, 10, 1)
   assert.strictEqual(rf.rangeFreq(0, 10, 5), 1)
-  rf.update(0, 10, 2)
+  rf.add(0, 10, 2)
   assert.strictEqual(rf.rangeFreq(0, 10, 5), 2)
   assert.strictEqual(rf.rangeFreqWithFloor(0, 10, 5), 9)
 
@@ -152,7 +154,7 @@ if (require.main === module) {
   rf = new RangeFreqQueryDynamic(nums)
   console.time('time1')
   for (let i = 0; i < N; i++) {
-    rf.update(0, N, i)
+    rf.add(0, N, i)
     rf.rangeFreq(0, N, i)
   }
   console.timeEnd('time1') // time1: 2.503s

@@ -67,9 +67,9 @@ func OfflineLCA(tree [][]int, queries [][2]int, root int) []int {
 		q[v] = append(q[v], [2]int{u, i})
 	}
 	run := func(u int) bool {
-		cache := tree[u]
+		nexts := tree[u]
 		for ptr[u] != 0 {
-			v := cache[ptr[u]-1]
+			v := nexts[ptr[u]-1]
 			ptr[u]--
 			if mark[v] == -1 {
 				top++
@@ -82,11 +82,11 @@ func OfflineLCA(tree [][]int, queries [][2]int, root int) []int {
 
 	for top != -1 {
 		u := st[top]
-		cache := tree[u]
+		nexts := tree[u]
 		if mark[u] == -1 {
 			mark[u] = u
 		} else {
-			ufa.Union(u, cache[ptr[u]])
+			ufa.Union(u, nexts[ptr[u]])
 			mark[ufa.Find(u)] = u
 		}
 

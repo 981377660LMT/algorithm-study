@@ -38,6 +38,7 @@ interface Block<E, Id, Q = unknown> {
 class SqrtDecomposition<E, Id, Q = unknown> {
   private readonly _blockSize: number
   private readonly _blocks: Block<E, Id, Q>[]
+  private readonly _belong: Uint16Array
 
   /**
    * @param n 区间长度.
@@ -47,10 +48,12 @@ class SqrtDecomposition<E, Id, Q = unknown> {
   constructor(
     n: number,
     createBlock: (id: number, start: number, end: number) => Block<E, Id, Q>,
-    blockSize = ~~Math.sqrt(n) + 1
+    blockSize = (Math.sqrt(n) + 1) | 0
   ) {
     this._blockSize = blockSize
-    this._blocks = Array(1 + ~~(n / blockSize))
+    this._blocks = Array(1 + ((n / blockSize) | 0))
+    this._belong = new Uint16Array(n)
+    for (let i = 0; i < n; i++) this._belong[i] = (i / blockSize) | 0
     for (let i = 0; i < this._blocks.length; i++) {
       this._blocks[i] = createBlock(i, i * blockSize, Math.min((i + 1) * blockSize, n))
       this._blocks[i].created()
@@ -66,19 +69,17 @@ class SqrtDecomposition<E, Id, Q = unknown> {
     if (start >= end) {
       return
     }
-    const id1 = ~~(start / this._blockSize)
-    const id2 = ~~(end / this._blockSize)
-    const pos1 = start % this._blockSize
-    const pos2 = end % this._blockSize
+    const id1 = this._belong[start]
+    const id2 = this._belong[end - 1]
+    const pos1 = start - id1 * this._blockSize
+    const pos2 = end - id2 * this._blockSize
     if (id1 === id2) {
       this._blocks[id1].updatePart(pos1, pos2, lazy)
       this._blocks[id1].updated()
     } else {
       this._blocks[id1].updatePart(pos1, this._blockSize, lazy)
       this._blocks[id1].updated()
-      for (let i = id1 + 1; i < id2; i++) {
-        this._blocks[i].updateAll(lazy)
-      }
+      for (let i = id1 + 1; i < id2; i++) this._blocks[i].updateAll(lazy)
       this._blocks[id2].updatePart(0, pos2, lazy)
       this._blocks[id2].updated()
     }
@@ -94,18 +95,16 @@ class SqrtDecomposition<E, Id, Q = unknown> {
     if (start >= end) {
       return
     }
-    const id1 = ~~(start / this._blockSize)
-    const id2 = ~~(end / this._blockSize)
-    const pos1 = start % this._blockSize
-    const pos2 = end % this._blockSize
+    const id1 = this._belong[start]
+    const id2 = this._belong[end - 1]
+    const pos1 = start - id1 * this._blockSize
+    const pos2 = end - id2 * this._blockSize
     if (id1 === id2) {
       forEach(this._blocks[id1].queryPart(pos1, pos2, queryArg))
       return
     }
     forEach(this._blocks[id1].queryPart(pos1, this._blockSize, queryArg))
-    for (let i = id1 + 1; i < id2; i++) {
-      forEach(this._blocks[i].queryAll(queryArg))
-    }
+    for (let i = id1 + 1; i < id2; i++) forEach(this._blocks[i].queryAll(queryArg))
     forEach(this._blocks[id2].queryPart(0, pos2, queryArg))
   }
 }

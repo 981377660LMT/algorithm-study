@@ -324,7 +324,8 @@ func (tree *_T) AddDirectedEdge(u, v, w int) {
 }
 
 // root:0-based
-//  当root设为-1时，会从0开始遍历未访问过的连通分量
+//
+//	当root设为-1时，会从0开始遍历未访问过的连通分量
 func (tree *_T) Build(root int) {
 	if root != -1 {
 		tree.build(root, -1, 0, 0)
@@ -344,7 +345,7 @@ func (tree *_T) Id(root int) (int, int) {
 	return tree.LID[root], tree.RID[root]
 }
 
-// 返回边 u-v 对应的 欧拉序起点编号, 0-indexed.
+// 返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1., 0-indexed.
 func (tree *_T) Eid(u, v int) int {
 	if tree.LID[u] > tree.LID[v] {
 		return tree.LID[u]
@@ -386,7 +387,8 @@ func (tree *_T) Dist(u, v int, weighted bool) int {
 }
 
 // k: 0-based
-//  如果不存在第k个祖先，返回-1
+//
+//	如果不存在第k个祖先，返回-1
 func (tree *_T) KthAncestor(root, k int) int {
 	if k > tree.Depth[root] {
 		return -1
@@ -402,7 +404,8 @@ func (tree *_T) KthAncestor(root, k int) int {
 }
 
 // 从 from 节点跳向 to 节点,跳过 step 个节点(0-indexed)
-//  返回跳到的节点,如果不存在这样的节点,返回-1
+//
+//	返回跳到的节点,如果不存在这样的节点,返回-1
 func (tree *_T) Jump(from, to, step int) int {
 	if step == 1 {
 		if from == to {
@@ -437,7 +440,8 @@ func (tree *_T) CollectChild(root int) []int {
 }
 
 // 返回沿着`路径顺序`的 [起点,终点] 的 欧拉序 `左闭右闭` 数组.
-//  !eg:[[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序.
+//
+//	!eg:[[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序.
 func (tree *_T) GetPathDecomposition(u, v int, vertex bool) [][2]int {
 	up, down := [][2]int{}, [][2]int{}
 	for {
@@ -549,8 +553,6 @@ func (tree *_T) markTop(cur, top int) {
 	tree.RID[cur] = tree.timer
 }
 
-//
-//
 type DisjointSparseTable struct {
 	n, log int
 	data   [][]E
@@ -559,7 +561,8 @@ type DisjointSparseTable struct {
 }
 
 // DisjointSparseTable 支持幺半群的区间静态查询.
-//  eg: 区间乘积取模/区间仿射变换...
+//
+//	eg: 区间乘积取模/区间仿射变换...
 func NewDisjointSparse(leaves []E, e func() E, op func(E, E) E) *DisjointSparseTable {
 	res := &DisjointSparseTable{}
 	n := len(leaves)

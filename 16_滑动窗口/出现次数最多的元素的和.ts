@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
+// class FreqManager
+
 /**
  * 统计一个容器内 (最多元素出现的次数, 这些元素key的和).
  */

@@ -124,7 +124,7 @@ class Tree {
   }
 
   /**
-   * 返回边 u-v 对应的 欧拉序起点编号, 0-indexed.
+   * 返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1.
    */
   eid(u: number, v: number): number {
     const id1 = this.lid[u]
@@ -289,9 +289,9 @@ class Tree {
     }
   }
 
-  getPath(u: number, v: number): number[] {
+  getPath(from: number, to: number): number[] {
     const res: number[] = []
-    const composition = this.getPathDecomposition(u, v, true)
+    const composition = this.getPathDecomposition(from, to, true)
     composition.forEach(([start, end]) => {
       if (start <= end) {
         for (let i = start; i <= end; i++) {
@@ -305,6 +305,11 @@ class Tree {
     })
     return res
   }
+
+  /**
+   * 遍历路径上的所有边
+   */
+  getEdges(u: number, v: number): number[] {}
 
   /**
    * 以root为根时,结点v的子树大小.

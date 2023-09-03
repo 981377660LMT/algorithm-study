@@ -18,6 +18,7 @@ https://drken1215.hatenablog.com/archive/category/%E3%82%AF%E3%82%A8%E3%83%AA%E3
 
 [Ynoi 做题记录](https://dpair.gitee.io/articles/Ynoi/)
 [数据结构杂题精选](https://www.luogu.com.cn/blog/DPair2005/shuo-ju-jie-gou-za-ti-jing-xuan)
+[浅 谈 分 块](https://www.luogu.com.cn/blog/220037/Sqrt1)
 
 1. 强制在线，只有询问
    对于这种题目，分块算法一般的思想是预处理出块 i 到块 j​ 的答案，边角中间的块对边角的影响用其它数据结构来存储
