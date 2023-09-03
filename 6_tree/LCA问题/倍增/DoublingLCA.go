@@ -64,7 +64,8 @@ func (lca *LCA) AddDirectedEdge(u, v, w int) {
 }
 
 // root:0-based
-//  当root设为-1时，会从0开始遍历未访问过的连通分量
+//
+//	当root设为-1时，会从0开始遍历未访问过的连通分量
 func (lca *LCA) Build(root int) {
 	lca.dp, lca.dpWeight1, lca.dpWeight2 = makeDp(lca)
 	if root != -1 {
@@ -99,7 +100,8 @@ func (lca *LCA) QueryLCA(root1, root2 int) int {
 }
 
 // 查询树节点两点间距离
-//  weighted: 是否将边权计入距离
+//
+//	weighted: 是否将边权计入距离
 func (lca *LCA) QueryDist(root1, root2 int, weighted bool) int {
 	if weighted {
 		return lca.DepthWeighted[root1] + lca.DepthWeighted[root2] - 2*lca.DepthWeighted[lca.QueryLCA(root1, root2)]
@@ -108,7 +110,8 @@ func (lca *LCA) QueryDist(root1, root2 int, weighted bool) int {
 }
 
 // 查询树节点两点路径上最大边权(倍增的时候维护其他属性)
-//  isEdge 为true表示查询路径上边权,为false表示查询路径上点权
+//
+//	isEdge 为true表示查询路径上边权,为false表示查询路径上点权
 func (lca *LCA) QueryMaxWeight(root1, root2 int, isEdge bool) int {
 	res := -INF
 	if lca.Depth[root1] < lca.Depth[root2] {
@@ -140,7 +143,8 @@ func (lca *LCA) QueryMaxWeight(root1, root2 int, isEdge bool) int {
 }
 
 // 查询树节点两点路径上最小边权(倍增的时候维护其他属性)
-//  isEdge 为true表示查询路径上边权,为false表示查询路径上点权
+//
+//	isEdge 为true表示查询路径上边权,为false表示查询路径上点权
 func (lca *LCA) QueryMinWeight(root1, root2 int, isEdge bool) int {
 	res := INF
 	if lca.Depth[root1] < lca.Depth[root2] {
@@ -173,6 +177,9 @@ func (lca *LCA) QueryMinWeight(root1, root2 int, isEdge bool) int {
 
 // 查询树节点root的第k个祖先(向上跳k步),如果不存在这样的祖先节点,返回 -1
 func (lca *LCA) QueryKthAncestor(root, k int) int {
+	if k > lca.Depth[root] {
+		return -1
+	}
 	bit := 0
 	for k > 0 {
 		if k&1 == 1 {
@@ -244,10 +251,11 @@ func makeDp(lca *LCA) (dp, dpWeight1, dpWeight2 [][]int) {
 func (lca *LCA) fillDp() {
 	for i := 0; i < lca.bitLen-1; i++ {
 		for j := 0; j < lca.n; j++ {
-			if lca.dp[i][j] == -1 {
+			pre := lca.dp[i][j]
+			if pre == -1 {
 				lca.dp[i+1][j] = -1
 			} else {
-				lca.dp[i+1][j] = lca.dp[i][lca.dp[i][j]]
+				lca.dp[i+1][j] = lca.dp[i][pre]
 				lca.dpWeight1[i+1][j] = max(lca.dpWeight1[i][j], lca.dpWeight1[i][lca.dp[i][j]])
 				lca.dpWeight2[i+1][j] = min(lca.dpWeight2[i][j], lca.dpWeight2[i][lca.dp[i][j]])
 			}

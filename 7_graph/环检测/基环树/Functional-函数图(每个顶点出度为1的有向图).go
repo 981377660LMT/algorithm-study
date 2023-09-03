@@ -150,6 +150,9 @@ func NewFunctionalGraph(n int) *FunctionalGraph {
 }
 
 func (fg *FunctionalGraph) AddDirectedEdge(u, v, w int) {
+	if fg.to[u] != -1 {
+		panic("FunctionalGraph: u already has an outgoing edge")
+	}
 	fg.m++
 	fg.to[u] = v
 	fg.weight[u] = w
@@ -335,7 +338,8 @@ func _NT(graph [][][2]int) *Tree {
 }
 
 // root:0-based
-//  当root设为-1时，会从0开始遍历未访问过的连通分量
+//
+//	当root设为-1时，会从0开始遍历未访问过的连通分量
 func (tree *Tree) Build(root int) {
 	if root != -1 {
 		tree.build(root, -1, 0, 0)
@@ -367,7 +371,8 @@ func (tree *Tree) RootedLCA(u, v int, root int) int {
 }
 
 // k: 0-based
-//  如果不存在第k个祖先，返回-1
+//
+//	如果不存在第k个祖先，返回-1
 func (tree *Tree) KthAncestor(root, k int) int {
 	if k > tree.Depth[root] {
 		return -1
@@ -383,7 +388,8 @@ func (tree *Tree) KthAncestor(root, k int) int {
 }
 
 // 从 from 节点跳向 to 节点,跳过 step 个节点(0-indexed)
-//  返回跳到的节点,如果不存在这样的节点,返回-1
+//
+//	返回跳到的节点,如果不存在这样的节点,返回-1
 func (tree *Tree) Jump(from, to, step int) int {
 	if step == 1 {
 		if from == to {

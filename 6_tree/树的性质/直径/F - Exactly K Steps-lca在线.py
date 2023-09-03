@@ -112,6 +112,8 @@ class _LCA:
 
     def queryKthAncestor(self, root: int, k: int) -> int:
         """查询树节点root的第k个祖先,如果不存在这样的祖先节点,返回 -1"""
+        if k > self.depth[root]:
+            return -1
         bit = 0
         while k:
             if k & 1:
@@ -147,7 +149,6 @@ class _LCA:
 
 
 if __name__ == "__main__":
-
     n = int(input())
     adjList = [[] for _ in range(n)]
     for _ in range(n - 1):

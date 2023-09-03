@@ -167,6 +167,9 @@ func (lca *LCA) QueryMinWeight(root1, root2 int, isEdge bool) int {
 
 // 查询树节点root的第k个祖先(向上跳k步),如果不存在这样的祖先节点,返回 -1
 func (lca *LCA) QueryKthAncestor(root, k int) int {
+	if k > lca.depth[root] {
+		return -1
+	}
 	bit := 0
 	for k > 0 {
 		if k&1 == 1 {

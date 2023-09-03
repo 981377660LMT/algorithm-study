@@ -14,6 +14,7 @@
 class TreeAncestor {
   private readonly _dp: Int32Array[]
   private readonly _size: number
+  private readonly _n: number
 
   /**
    * @param n  节点个数
@@ -22,6 +23,7 @@ class TreeAncestor {
   constructor(n: number, parent: number[]) {
     this._size = 32 - Math.clz32(n) // bitLength
     this._dp = Array.from({ length: this._size }, () => new Int32Array(n).fill(-1))
+    this._n = n
 
     for (let j = 0; j < n; j++) this._dp[0][j] = parent[j]
 
@@ -38,6 +40,7 @@ class TreeAncestor {
    * @returns 函数返回节点 node 的第 k 个祖先节点。如果不存在这样的祖先节点，返回 -1
    */
   getKthAncestor(node: number, k: number): number {
+    if (k >= this._n) return -1
     let bit = 0
     while (k > 0) {
       if (k & 1) {

@@ -199,3 +199,8 @@ https://www.nosuchfield.com/2016/02/05/finite-state-automaton/
 
 - 每一台 NFA 都可以转换成一台等价的 DFA，而构造 NFA 有时比直接构造 DFA 容易
 - 如果两台机器识别同样的语言，则称他们是等价的；每一台非确定型有穷自动机都等价于某一台确定型有穷自动机
+
+---
+
+dfa 最小化的一种实现
+https://shanlunjiajian.github.io/2023/05/21/dfa-tech/
