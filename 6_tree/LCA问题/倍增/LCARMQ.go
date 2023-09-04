@@ -1,6 +1,6 @@
 // https://ei1333.github.io/library/graph/tree/rmq-lowest-common-ancestor.hpp
 // オイラーツアーとスパーステーブルによって最小共通祖先を求める.
-
+// O(1) 求 LCA，O(nlogn) 预处理
 package main
 
 import (
