@@ -1,5 +1,4 @@
 /**
- * @description
  * 单调不减的数组nums1和nums2分别找到两个数，其和与target的差最小 返回这个最小差值
  */
 function twoSum(nums1: number[], nums2: number[], target: number) {
@@ -11,8 +10,11 @@ function twoSum(nums1: number[], nums2: number[], target: number) {
     const sum = nums1[left] + nums2[right]
     res = Math.min(res, Math.abs(target - sum))
     if (sum === target) return 0
-    else if (sum > target) right--
-    else left++
+    if (sum > target) {
+      right--
+    } else {
+      left++
+    }
   }
 
   return res

@@ -1,4 +1,5 @@
 // 返回nums的各个子集的元素和的排序后的结果
+// !比求出所有的子集的元素和再排序要快很多
 
 // func
 package main
@@ -6,12 +7,12 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println(subsetSorted([]int{1, 2}))
+	fmt.Println(SubsetSumSorted([]int{1, 2}))
 }
 
 // 返回nums的各个子集的元素和的排序后的结果.
 //  O(2^n)
-func subsetSorted(nums []int) []int {
+func SubsetSumSorted(nums []int) []int {
 	dp := []int{0}
 	for _, v := range nums {
 		ndp := make([]int, len(dp))

@@ -71,7 +71,12 @@ function minRunLength(n: number): number {
   return n + r
 }
 
-function makeAscendingRun<T>(array: MutableArrayLike<T>, lo: number, hi: number, compare: CompareFunc<T>) {
+function makeAscendingRun<T>(
+  array: MutableArrayLike<T>,
+  lo: number,
+  hi: number,
+  compare: CompareFunc<T>
+) {
   let runHi = lo + 1
 
   if (runHi === hi) {
@@ -355,7 +360,14 @@ function TimSort<T>(array: MutableArrayLike<T>, compare: CompareFunc<T>) {
       return
     }
 
-    length2 = gallopLeft<T>(array[start1 + length1 - 1], array, start2, length2, length2 - 1, compare)
+    length2 = gallopLeft<T>(
+      array[start1 + length1 - 1],
+      array,
+      start2,
+      length2,
+      length2 - 1,
+      compare
+    )
 
     if (length2 === 0) {
       return
@@ -581,7 +593,8 @@ function TimSort<T>(array: MutableArrayLike<T>, compare: CompareFunc<T>) {
       }
 
       do {
-        count1 = length1 - gallopRight<T>(tmp[cursor2], array, start1, length1, length1 - 1, compare)
+        count1 =
+          length1 - gallopRight<T>(tmp[cursor2], array, start1, length1, length1 - 1, compare)
 
         if (count1 !== 0) {
           dest -= count1

@@ -1,4 +1,4 @@
-// 可能的子集和,子集和输出方案
+// 和在[l, r)之间的子集个数
 
 package main
 
@@ -24,8 +24,9 @@ func main() {
 }
 
 // 2^n个子集中, 有多少个子集的和在[floor, higher)之间
-//  O(2^{N/2})
-func subsetSumCount(nums []int, floor, higher int) int {
+//
+//	O(2^{N/2})
+func SubsetSumCount(nums []int, floor, higher int) int {
 	n := len(nums)
 	getDp := func(nums []int) []int {
 		dp := []int{0}
@@ -81,7 +82,8 @@ func subsetSumCount(nums []int, floor, higher int) int {
 }
 
 // 2^n个子集中, 有多少个子集的和在[floor, higher)之间, 求出大小为 0,1,...,n 时的子集的个数
-//  O(2^{N/2})
+//
+//	O(2^{N/2})
 func subsetSumCountBySize(nums []int, floor, higher int) []int {
 	n := len(nums)
 	// dp[i]表示用i个数能组成的所有和

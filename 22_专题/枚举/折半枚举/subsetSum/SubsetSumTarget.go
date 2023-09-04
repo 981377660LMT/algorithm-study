@@ -1,4 +1,7 @@
 // 可能的子集和,子集和输出方案
+// SubsetSum 求方案有O(n*max(nums)),O(n*target/w),O(2^(n/2)三种解法
+// 一般的dp，bitset优化dp, 折半搜索，最优算法取决于数据范围
+
 package main
 
 import (
@@ -22,7 +25,7 @@ func main() {
 		sum += nums[i]
 	}
 
-	_, ok := subsetSum(nums, sum/2)
+	_, ok := SubsetSumTarget(nums, sum/2)
 	can := ok || sum == 0
 	if can && sum%2 == 0 {
 		fmt.Fprintln(out, "possible")
@@ -32,9 +35,10 @@ func main() {
 }
 
 // 能否用nums中的若干个数凑出和为target
-//  O(n*max(nums)))
-//  target小于等于0时返回无解
-func subsetSum(nums []int, target int) (res []int, ok bool) {
+//
+//	O(n*max(nums)))
+//	target小于等于0时返回无解
+func SubsetSumTarget(nums []int, target int) (res []int, ok bool) {
 	if target <= 0 {
 		return
 	}

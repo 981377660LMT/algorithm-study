@@ -11,13 +11,13 @@
 function lastStoneWeightII(stones: number[]): number {
   const n = stones.length
   const sum = stones.reduce((pre, cur) => pre + cur, 0)
-  const volumn = sum >> 1
-  let dp = new Uint8Array(volumn + 1) // !dp[i] 表示若干块石头中能否选出一些组成重量和为 i
+  const target = sum >>> 1
+  let dp = new Uint8Array(target + 1) // !dp[i] 表示若干块石头中能否选出一些组成重量和为 i
   dp[0] = 1
 
   for (let i = 0; i < n; i++) {
-    const ndp = dp.slice() // !把前一行的信息复制过来
-    for (let pre = 0; pre + stones[i] <= volumn; pre++) {
+    const ndp = dp.slice()
+    for (let pre = 0; pre + stones[i] <= target; pre++) {
       ndp[pre + stones[i]] |= dp[pre]
     }
     dp = ndp
@@ -27,7 +27,9 @@ function lastStoneWeightII(stones: number[]): number {
   return sum - 2 * maxHalf
 }
 
-console.log(lastStoneWeightII([2, 7, 4, 1, 8, 1]))
-console.log(lastStoneWeightII([31, 26, 33, 21, 40]))
-
 export {}
+
+if (require.main === module) {
+  console.log(lastStoneWeightII([2, 7, 4, 1, 8, 1]))
+  console.log(lastStoneWeightII([31, 26, 33, 21, 40]))
+}

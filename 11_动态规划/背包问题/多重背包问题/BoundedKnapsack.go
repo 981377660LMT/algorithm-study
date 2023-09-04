@@ -1,5 +1,5 @@
 //
-// Bounded Knapsack Problem
+// Bounded Knapsack Problem （多重背包问题）
 //
 // Description:
 //
