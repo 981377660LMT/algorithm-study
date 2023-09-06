@@ -48,6 +48,7 @@ interface IBitSet {
 
   slice: (start?: number, end?: number) => IBitSet
   copy: () => IBitSet
+  resize: (size: number) => void
 
   bitLength: () => number
 
@@ -59,6 +60,7 @@ interface IBitSet {
 /**
  * 位集,用于存储大量的布尔值,可以有效地节省内存.
  * 1e9个元素 => 125MB.
+ * 支持 `resize` 操作.
  */
 class BitSet {
   static from(arrayLike: ArrayLike<number | string>): BitSet {
@@ -91,7 +93,9 @@ class BitSet {
   constructor(n: number, filledValue: 0 | 1 = 0) {
     if (n <= 0) throw new RangeError('n must be positive')
     this._n = n
-    this._bits = filledValue ? new Uint32Array((n + 31) >>> 5).fill(~0) : new Uint32Array((n + 31) >>> 5)
+    this._bits = filledValue
+      ? new Uint32Array((n + 31) >>> 5).fill(~0)
+      : new Uint32Array((n + 31) >>> 5)
     this._bits[this._bits.length - 1] >>>= (this._bits.length << 5) - n
   }
 
@@ -608,10 +612,9 @@ class BitSet {
     return this._lastIndexOfOne() + 1
   }
 
-  expand(size: number): void {
-    if (size <= this._n) return
+  resize(size: number): void {
     const newBits = new Uint32Array((size + 31) >>> 5)
-    newBits.set(this._bits)
+    newBits.set(this._bits.subarray(0, newBits.length))
     const remainingBits = size & 31
     if (remainingBits) {
       const mask = (1 << remainingBits) - 1
@@ -619,6 +622,11 @@ class BitSet {
     }
     this._bits = newBits
     this._n = size
+  }
+
+  expand(size: number): void {
+    if (size <= this._n) return
+    this.resize(size)
   }
 
   toString(): string {

@@ -8,7 +8,7 @@ function subsetSum(arr: ArrayLike<number>, sorted = false): number[] {
 
 /**
  * O(2^n)计算nums所有子集和.
- * 2^25(3e7) -> 200ms
+ * 2^25(3e7) -> 200ms.
  */
 function subsetSumUnsorted(arr: ArrayLike<number>): number[] {
   const n = arr.length
@@ -23,8 +23,8 @@ function subsetSumUnsorted(arr: ArrayLike<number>): number[] {
 
 /**
  * O(2^n)返回nums的各个子集的元素和的排序后的结果.
- * !比求出所有的子集的元素和再排序要快很多
- * 2^25(3e7) -> 650ms
+ * !比求出所有的子集的元素和再排序要快很多.
+ * 2^25(3e7) -> 650ms.
  */
 function subsetSumSorted(arr: ArrayLike<number>): number[] {
   const n = arr.length

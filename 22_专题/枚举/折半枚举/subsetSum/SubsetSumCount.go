@@ -3,24 +3,33 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+	"time"
 )
 
 func main() {
-	// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DPL_4_B
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+	// // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DPL_4_B
+	// in := bufio.NewReader(os.Stdin)
+	// out := bufio.NewWriter(os.Stdout)
+	// defer out.Flush()
 
-	var n, k, l, r int
-	fmt.Fscan(in, &n, &k, &l, &r)
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
+	// var n, k, l, r int
+	// fmt.Fscan(in, &n, &k, &l, &r)
+	// nums := make([]int, n)
+	// for i := 0; i < n; i++ {
+	// 	fmt.Fscan(in, &nums[i])
+	// }
+	// fmt.Fprintln(out, subsetSumCountBySize(nums, l, r+1)[k])
+
+	time1 := time.Now()
+	nums := make([]int, 40)
+	for i := range nums {
+		nums[i] = i
 	}
-	fmt.Fprintln(out, subsetSumCountBySize(nums, l, r+1)[k])
+	subsetSumCountBySize(nums, 0, 1000000000)
+	time2 := time.Now()
+	fmt.Println(time2.Sub(time1)) // 1.5s
+
 }
 
 // 2^n个子集中, 有多少个子集的和在[floor, higher)之间
@@ -32,29 +41,31 @@ func SubsetSumCount(nums []int, floor, higher int) int {
 		dp := []int{0}
 		for _, x := range nums {
 			tmp := make([]int, len(dp))
-			copy(tmp, dp)
 			for i := range tmp {
-				tmp[i] += x
+				tmp[i] = dp[i] + x
 			}
 
-			ndp := make([]int, 0, len(dp)+len(tmp))
-			i, j := 0, 0
+			ndp := make([]int, len(dp)+len(tmp))
+			i, j, k := 0, 0, 0
 			for i < len(dp) && j < len(tmp) {
 				if dp[i] < tmp[j] {
-					ndp = append(ndp, dp[i])
+					ndp[k] = dp[i]
 					i++
 				} else {
-					ndp = append(ndp, tmp[j])
+					ndp[k] = tmp[j]
 					j++
 				}
+				k++
 			}
 			for i < len(dp) {
-				ndp = append(ndp, dp[i])
+				ndp[k] = dp[i]
 				i++
+				k++
 			}
 			for j < len(tmp) {
-				ndp = append(ndp, tmp[j])
+				ndp[k] = tmp[j]
 				j++
+				k++
 			}
 
 			dp = ndp

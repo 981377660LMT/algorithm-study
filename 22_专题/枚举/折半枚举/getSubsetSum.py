@@ -1,7 +1,7 @@
 from typing import List, Set
 
 
-def getSubsetSum(nums: List[int]) -> List[int]:
+def subsetSum(nums: List[int]) -> List[int]:
     """O(2^n)求所有子集对应的和"""
     n = len(nums)
     res = [0] * (1 << n)
@@ -11,7 +11,7 @@ def getSubsetSum(nums: List[int]) -> List[int]:
     return res
 
 
-def getSubsetSum2(nums: List[int]) -> Set[int]:
+def subsetSum2(nums: List[int]) -> Set[int]:
     """O(2^n)求所有非空子集的可能和"""
     dp = set()
     for cur in nums:
@@ -19,6 +19,6 @@ def getSubsetSum2(nums: List[int]) -> Set[int]:
     return dp
 
 
-if __name__ == '__main__':
-    print(getSubsetSum([1, 2, 3]))
-    print(getSubsetSum2([1, 2, 4]))
+if __name__ == "__main__":
+    print(subsetSum([1, 2, 3]))
+    print(subsetSum2([1, 2, 4]))
