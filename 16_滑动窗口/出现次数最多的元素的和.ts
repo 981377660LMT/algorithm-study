@@ -3,6 +3,45 @@
 // class FreqManager
 
 /**
+ * 统计一个容器内出现次数最多的元素的`出现次数`.
+ */
+class MajorFreq {
+  private readonly _counter: Map<number, number> = new Map()
+  private readonly _freqTypes: Map<number, number> = new Map()
+  private _maxFreq = 0
+
+  add(x: number): this {
+    this._counter.set(x, (this._counter.get(x) || 0) + 1)
+    const xFreq = this._counter.get(x)!
+    this._freqTypes.set(xFreq, (this._freqTypes.get(xFreq) || 0) + 1)
+    this._freqTypes.set(xFreq - 1, (this._freqTypes.get(xFreq - 1) || 0) - 1)
+    if (xFreq > this._maxFreq) {
+      this._maxFreq = xFreq
+    }
+    return this
+  }
+
+  discard(x: number): boolean {
+    if (!this._counter.get(x)) return false
+    this._counter.set(x, (this._counter.get(x) || 0) - 1)
+    const xFreq = this._counter.get(x)!
+    this._freqTypes.set(xFreq, (this._freqTypes.get(xFreq) || 0) + 1)
+    this._freqTypes.set(xFreq + 1, (this._freqTypes.get(xFreq + 1) || 0) - 1)
+    if (xFreq + 1 === this._maxFreq && !this._freqTypes.get(this._maxFreq)) {
+      this._maxFreq--
+    }
+    if (!this._counter.get(x)) {
+      this._counter.delete(x)
+    }
+    return true
+  }
+
+  maxFreq(): number {
+    return this._maxFreq
+  }
+}
+
+/**
  * 统计一个容器内 (最多元素出现的次数, 这些元素key的和).
  */
 class MajorSum {
@@ -28,7 +67,7 @@ class MajorSum {
   }
 
   discard(x: number): void {
-    if (this._counter.get(x) === 0) return
+    if (!this._counter.get(x)) return
     this._counter.set(x, (this._counter.get(x) || 0) - 1)
     const xFreq = this._counter.get(x)!
     this._freqSum.set(xFreq, (this._freqSum.get(xFreq) || 0) + x)
@@ -37,12 +76,12 @@ class MajorSum {
     this._freqTypes.set(xFreq + 1, (this._freqTypes.get(xFreq + 1) || 0) - 1)
     if (xFreq + 1 === this._maxFreq) {
       this._sum -= x
-      if (this._freqTypes.get(this._maxFreq) === 0) {
+      if (!this._freqTypes.get(this._maxFreq)) {
         this._maxFreq -= 1
         this._sum = this._freqSum.get(this._maxFreq)!
       }
     }
-    if (this._counter.get(x) === 0) {
+    if (!this._counter.get(x)) {
       this._counter.delete(x)
     }
   }
@@ -70,4 +109,4 @@ if (require.main === module) {
   console.log(majorSum.query())
 }
 
-export { MajorSum }
+export { MajorSum, MajorFreq }

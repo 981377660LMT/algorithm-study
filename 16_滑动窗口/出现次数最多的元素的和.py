@@ -9,6 +9,46 @@ from collections import defaultdict
 from typing import Set, Tuple
 
 
+class MajorFreq:
+    """统计一个容器内 出现次数最多的元素的出现次数."""
+
+    __slots__ = ("_counter", "_freqTypes", "_maxFreq")
+
+    def __init__(self) -> None:
+        self._counter = defaultdict(int)
+        self._freqTypes = defaultdict(int)
+        self._maxFreq = 0
+
+    def add(self, x: int) -> "MajorFreq":
+        """添加元素x."""
+        self._counter[x] += 1
+        xFreq = self._counter[x]
+        self._freqTypes[xFreq] += 1
+        self._freqTypes[xFreq - 1] -= 1
+        if xFreq > self._maxFreq:
+            self._maxFreq = xFreq
+        return self
+
+    def discard(self, x: int) -> bool:
+        """删除元素x."""
+        if not self._counter[x]:
+            return False
+        counter, freqTypes = self._counter, self._freqTypes
+        counter[x] -= 1
+        xFreq = counter[x]
+        freqTypes[xFreq] += 1
+        freqTypes[xFreq + 1] -= 1
+        if xFreq + 1 == self._maxFreq and not freqTypes[self._maxFreq]:
+            self._maxFreq -= 1
+        if not counter[x]:
+            del counter[x]
+        return True
+
+    def maxFreq(self) -> int:
+        """返回出现次数最多的元素的出现次数."""
+        return self._maxFreq
+
+
 class MajorSum:
     """统计一个容器内 (最多元素出现的次数, 这些元素key的和)."""
 
@@ -125,15 +165,18 @@ if __name__ == "__main__":
         counter = defaultdict(int)
         ms = MajorSum()
         mm = MajorManager()
+        mf = MajorFreq()
         for _ in range(1000):
             x = random.randint(0, 100)
             if random.random() < 0.5:
                 ms.add(x)
                 mm.add(x)
+                mf.add(x)
                 counter[x] += 1
             else:
                 ms.discard(x)
                 mm.discard(x)
+                mf.discard(x)
                 if counter[x] > 0:
                     counter[x] -= 1
             maxFreq = max(counter.values())
@@ -149,5 +192,7 @@ if __name__ == "__main__":
 
                 # 出现次数最多的集合
                 assert mm.query()[2] == set(x for x, freq in counter.items() if freq == maxFreq)
+
+                assert mf.maxFreq() == maxFreq
 
     print("Passed!")
