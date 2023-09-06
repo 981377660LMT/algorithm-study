@@ -1,3 +1,5 @@
+// 将动态规划和分治法相结合，使得时间复杂度不变，空间复杂度优化到O ( m + n ) O(m+n)O(m+n)，并且可以输出对应的字符串。
+
 #include <iostream>
 #include <cstdio>
 #include <algorithm>

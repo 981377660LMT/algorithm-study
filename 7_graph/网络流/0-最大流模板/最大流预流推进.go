@@ -1,7 +1,3 @@
-// https://ei1333.github.io/library/graph/flow/dinic-capacity-scaling.hpp
-// 如果边的容量为整数，可以使用容量缩放加速Dinic算法。
-// O(n^2sqrt(m))
-
 package main
 
 import (

@@ -7,6 +7,9 @@
 # 0 <= snap_id < 我们调用 snap() 的总次数
 # 0 <= val <= 10^9
 
+# !这种方法又叫做胖节点(Fat Node)
+# https://usaco.guide/adv/persistent?lang=cpp
+
 
 from bisect import bisect_right
 

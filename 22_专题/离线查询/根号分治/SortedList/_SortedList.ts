@@ -24,9 +24,7 @@ class SortedList<T = number> {
   /** Optimized for 1e5 elements in javascript. Do not change it. */
   protected static readonly _BLOCK_RATIO = 50
   protected static readonly _REBUILD_RATIO = 170
-  private static _isPrimitive(
-    o: unknown
-  ): o is number | string | boolean | symbol | bigint | null | undefined {
+  private static _isPrimitive(o: unknown): o is number | string | boolean | symbol | bigint | null | undefined {
     return o === null || (typeof o !== 'object' && typeof o !== 'function')
   }
 
@@ -39,10 +37,7 @@ class SortedList<T = number> {
   constructor(compareFn: (a: T, b: T) => number)
   constructor(iterable: Iterable<T>, compareFn: (a: T, b: T) => number)
   constructor(compareFn: (a: T, b: T) => number, iterable: Iterable<T>)
-  constructor(
-    arg1?: Iterable<T> | ((a: T, b: T) => number),
-    arg2?: Iterable<T> | ((a: T, b: T) => number)
-  ) {
+  constructor(arg1?: Iterable<T> | ((a: T, b: T) => number), arg2?: Iterable<T> | ((a: T, b: T) => number)) {
     let defaultCompareFn = (a: T, b: T) => (a as unknown as number) - (b as unknown as number)
     let defaultData: T[] = []
     if (arg1 !== void 0) {
@@ -77,10 +72,7 @@ class SortedList<T = number> {
     if (blockIndex === -1) {
       this._blocks[this._blocks.length - 1].push(value)
       this._size++
-      if (
-        this._blocks[this._blocks.length - 1].length >
-        this._blocks.length * SortedList._REBUILD_RATIO
-      ) {
+      if (this._blocks[this._blocks.length - 1].length > this._blocks.length * SortedList._REBUILD_RATIO) {
         this._rebuild()
       }
       return
@@ -548,12 +540,7 @@ if (require.main === module) {
   }
 
   // https://leetcode.cn/problems/maximum-number-of-tasks-you-can-assign/
-  function maxTaskAssign(
-    tasks: number[],
-    workers: number[],
-    pills: number,
-    strength: number
-  ): number {
+  function maxTaskAssign(tasks: number[], workers: number[], pills: number, strength: number): number {
     tasks.sort((a, b) => a - b)
     workers.sort((a, b) => a - b)
     let left = 0
