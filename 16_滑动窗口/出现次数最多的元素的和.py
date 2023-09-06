@@ -40,7 +40,7 @@ class MajorFreq:
         freqTypes[xFreq + 1] -= 1
         if xFreq + 1 == self._maxFreq and not freqTypes[self._maxFreq]:
             self._maxFreq -= 1
-        if not counter[x]:
+        if not xFreq:
             del counter[x]
         return True
 
@@ -90,7 +90,7 @@ class MajorSum:
             if self._freqTypes[self._maxFreq] == 0:
                 self._maxFreq -= 1
                 self._sum = self._freqSum[self._maxFreq]
-        if self._counter[x] == 0:
+        if not xFreq:
             del self._counter[x]
 
     def query(self) -> Tuple[int, int]:
@@ -145,7 +145,7 @@ class MajorManager:
             if len(self._freqKey[self._maxFreq]) == 0:
                 self._maxFreq -= 1
                 self._sum = self._freqSum[self._maxFreq]
-        if self._counter[x] == 0:
+        if not xFreq:
             del self._counter[x]
 
     def query(self) -> Tuple[int, int, Set[int]]:
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     # check with brute force
     import random
 
-    for _ in range(100):
+    for _ in range(1000):
         counter = defaultdict(int)
         ms = MajorSum()
         mm = MajorManager()

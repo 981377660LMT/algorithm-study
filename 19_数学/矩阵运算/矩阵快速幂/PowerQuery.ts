@@ -9,7 +9,7 @@
 import { mulUint32 } from '../../数论/快速幂/mulUint32'
 import { qpow } from '../../数论/快速幂/qpow'
 
-type Public<C> = { [K in keyof C]: C[K] }
+type Public<T extends object> = { [K in keyof T]: T[K] }
 
 /**
  * 带有预处理的幺半群的幂运算.
