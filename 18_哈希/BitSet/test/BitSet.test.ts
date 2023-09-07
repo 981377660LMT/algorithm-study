@@ -249,25 +249,27 @@ describe('BitSet', () => {
 
   // set
   it('should support set', () => {
-    const m = (n * Math.random()) | 0
-    const newBitSet = new BitSet(m)
-    const newNums: number[] = Array(m).fill(0)
-    for (let i = 0; i < m; i++) {
-      const cur = Math.random() > 0.5 ? 1 : 0
-      if (cur) {
-        newBitSet.add(i)
-        newNums[i] = 1
+    for (let i = 0; i < 10; i++) {
+      const m = (n * Math.random()) | 0
+      const newBitSet = new BitSet(m)
+      const newNums: number[] = Array(m).fill(0)
+      for (let i = 0; i < m; i++) {
+        const cur = Math.random() > 0.5 ? 1 : 0
+        if (cur) {
+          newBitSet.add(i)
+          newNums[i] = 1
+        }
       }
-    }
 
-    const offset = ((n - m) * Math.random()) | 0
-    bitSet.set(newBitSet, offset)
-    for (let i = 0; i < m; i++) {
-      nums[i + offset] = newNums[i]
-    }
+      const offset = ((n - m) * Math.random()) | 0
+      bitSet.set(newBitSet, offset)
+      for (let i = 0; i < m; i++) {
+        nums[i + offset] = newNums[i]
+      }
 
-    for (let i = 0; i < n; i++) {
-      expect(bitSet.has(i)).toBe(!!nums[i])
+      for (let i = 0; i < n; i++) {
+        expect(bitSet.has(i)).toBe(!!nums[i])
+      }
     }
   })
 
@@ -347,7 +349,7 @@ describe('BitSet', () => {
   it('should support next', () => {
     for (let i = 0; i < n; i++) {
       const index1 = bitSet.next(i)
-      const index2 = nums.indexOf(1, i + 1)
+      const index2 = nums.indexOf(1, i)
       if (index2 === -1) {
         expect(index1).toBe(bitSet.n)
       } else {
@@ -360,7 +362,7 @@ describe('BitSet', () => {
   it('should support prev', () => {
     for (let i = n - 1; i > 0; i--) {
       const index1 = bitSet.prev(i)
-      const index2 = nums.lastIndexOf(1, i - 1)
+      const index2 = nums.lastIndexOf(1, i)
       if (index2 === -1) {
         expect(index1).toBe(-1)
       } else {

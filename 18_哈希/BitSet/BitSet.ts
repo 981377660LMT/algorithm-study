@@ -93,9 +93,7 @@ class BitSet {
   constructor(n: number, filledValue: 0 | 1 = 0) {
     if (n <= 0) throw new RangeError('n must be positive')
     this._n = n
-    this._bits = filledValue
-      ? new Uint32Array((n + 31) >>> 5).fill(~0)
-      : new Uint32Array((n + 31) >>> 5)
+    this._bits = filledValue ? new Uint32Array((n + 31) >>> 5).fill(~0) : new Uint32Array((n + 31) >>> 5)
     this._bits[this._bits.length - 1] >>>= (this._bits.length << 5) - n
   }
 
@@ -174,36 +172,36 @@ class BitSet {
   }
 
   /**
-   * 返回右侧第一个 1 的位置(不包含当前位置).
+   * 返回右侧第一个 1 的位置(`包含`当前位置).
    * 如果不存在, 返回 {@link n}.
    */
   next(index: number): number {
-    if (index <= -1) index = -1
-    index++
+    if (index < 0) index = 0
     if (index >= this._n) return this._n
     let mask = index >>> 5
     const buf = this._bits[mask] & (~0 << (index & 31))
     if (buf) return (mask << 5) + BitSet._trailingZeros32(buf)
-    while (++mask < this._bits.length) {
+    for (mask++; mask < this._bits.length; mask++) {
       if (this._bits[mask]) return (mask << 5) + BitSet._trailingZeros32(this._bits[mask])
     }
     return this._n
   }
 
   /**
-   * 返回左侧第一个 1 的位置(不包含当前位置).
+   * 返回左侧第一个 1 的位置(`包含`当前位置).
    * 如果不存在, 返回 -1.
    */
   prev(index: number): number {
-    if (index >= this._n) index = this._n
-    if (!index) return -1
-    index--
-    if (this.has(index)) return index
+    if (index >= this._n - 1) index = this._n - 1
+    if (index < 0) return -1
     let mask = index >>> 5
-    const buf = this._bits[mask] & ((1 << (index & 31)) - 1)
-    if (buf) return (mask << 5) + 31 - Math.clz32(buf)
-    while (mask--) {
-      if (this._bits[mask]) return (mask << 5) + 31 - Math.clz32(this._bits[mask])
+    if ((index & 31) < 31) {
+      const buf = this._bits[mask] & ((1 << ((index & 31) + 1)) - 1)
+      if (buf) return (mask << 5) | (31 - Math.clz32(buf))
+      mask--
+    }
+    for (; ~mask; mask--) {
+      if (this._bits[mask]) return (mask << 5) | (31 - Math.clz32(this._bits[mask]))
     }
     return -1
   }
@@ -563,13 +561,16 @@ class BitSet {
   }
 
   /**
-   * 类似 {@link Uint8Array.prototype.set}，区别是超出范围的位会被丢弃，而不是抛出异常.
+   * 类似 {@link Uint8Array.prototype.set}，如果超出赋值范围，抛出异常.
    * @param other 要赋值的位集.
    * @param offset 从哪里开始赋值.
    */
   set(other: BitSet, offset = 0): void {
     let left = offset
     let right = offset + other._n
+    if (right > this._n) {
+      throw new RangeError(`offset + other._n must be less than or equal to ${this._n}`)
+    }
     let a = 0
     let b = other._n
     while (left < right && left & 31) {
@@ -640,6 +641,12 @@ class BitSet {
       sb.push(bits)
     }
     return sb.join('')
+  }
+
+  toSet(): Set<number> {
+    const set = new Set<number>()
+    this.forEach(i => set.add(i))
+    return set
   }
 
   /**
@@ -752,14 +759,13 @@ if (require.main === module) {
   console.log(set.toString())
   const mm = new BitSet(3)
   // mm.add(0)
-  set.set(mm, 3)
+
   console.log(set.toString())
 
   console.log('set')
   //  1001 -> 01
   const bs1 = BitSet.from('1001')
   const bs2 = BitSet.from('01')
-  bs1.set(bs2, 3)
   console.log(bs1.toString())
   bs1.add(1)
   console.log(bs1.next(1))
@@ -784,4 +790,13 @@ if (require.main === module) {
     big2.expand(i)
   }
   console.timeEnd('expand')
+
+  console.log('test set')
+  const set1 = new BitSet(100)
+  set1.add(1)
+  const set2 = new BitSet(60)
+  set2.add(20)
+  set2.add(50)
+  set1.set(set2, 18)
+  console.log(set1.toSet())
 }
