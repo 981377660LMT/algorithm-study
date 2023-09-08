@@ -10,7 +10,7 @@ import (
 
 func main() {
 	time1 := time.Now()
-	for i := 0; i < 1e7; i++ {
+	for i := 0; i < 1e8; i++ {
 		EnumerateBits(uint(i), func(bit int) {})
 	}
 	fmt.Println(time.Since(time1))

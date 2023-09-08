@@ -169,6 +169,18 @@ describe('BitSet', () => {
     expect(bitSet.equals(bitSet2)).toBe(true)
   })
 
+  // copy with newSize (copy and resize)
+  it('should support copy with newSize', () => {
+    const newSize = Math.floor(Math.random() * n * 2)
+    const bitSet2 = bitSet.copy(newSize)
+    for (let i = 0; i < Math.min(n, newSize); i++) {
+      expect(bitSet2.has(i)).toBe(bitSet.has(i))
+    }
+    for (let i = n; i < newSize; i++) {
+      expect(bitSet2.has(i)).toBe(false)
+    }
+  })
+
   // iOr
   it('should support iOr', () => {
     const bitSet2 = new BitSet(n)
@@ -353,7 +365,7 @@ describe('BitSet', () => {
       const index1 = bitSet.next(i)
       const index2 = nums.indexOf(1, i)
       if (index2 === -1) {
-        expect(index1).toBe(bitSet.n)
+        expect(index1).toBe(bitSet.size)
       } else {
         expect(index1).toBe(index2)
       }

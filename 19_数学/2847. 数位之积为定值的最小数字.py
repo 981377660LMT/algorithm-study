@@ -6,6 +6,21 @@ from collections import defaultdict
 
 class Solution:
     def smallestNumber(self, n: int) -> str:
+        """特判n=1之后从大到小贪心取数"""
+        if n == 1:
+            return "1"
+        sb = []
+        for p in range(9, 1, -1):
+            while n % p == 0:
+                sb.append(str(p))
+                n //= p
+        if n != 1:
+            return "-1"
+        return "".join(sb[::-1])
+
+    def smallestNumber2(self, n: int) -> str:
+        if n == 1:
+            return "1"
         counter = defaultdict(int)
         for f in [2, 3, 5, 7]:
             while n % f == 0:
@@ -33,6 +48,6 @@ class Solution:
 
 
 if __name__ == "__main__":
-    print(Solution().smallestNumber(105))
-    print(Solution().smallestNumber(7))
-    print(Solution().smallestNumber(44))
+    print(Solution().smallestNumber2(105))
+    print(Solution().smallestNumber2(7))
+    print(Solution().smallestNumber2(44))

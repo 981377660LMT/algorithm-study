@@ -126,7 +126,7 @@ function subsetSumCountBySize(nums: number[], floor: number, higher: number): nu
 export { subsetSumCount, subsetSumCountBySize }
 
 if (require.main === module) {
-  const n = 40
+  const n = 46
   const nums = Array.from({ length: n }, () => Math.floor(Math.random() * 100))
   console.time('subsetSumCount')
 
@@ -134,6 +134,6 @@ if (require.main === module) {
   console.timeEnd('subsetSumCount')
 
   console.time('subsetSumCountBySize')
-  const b = subsetSumCountBySize(nums, 0, ~~((n * 100) / 2))
+  const b = subsetSumCountBySize(nums, 0, ~~((n * 100) / 2)) // 46 -> 2s
   console.timeEnd('subsetSumCountBySize')
 }

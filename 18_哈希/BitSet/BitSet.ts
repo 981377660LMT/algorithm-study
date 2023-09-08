@@ -8,7 +8,8 @@
 
 // API:
 interface IBitSet {
-  readonly n: number
+  readonly size: number
+  readonly bits: Uint32Array
 
   add: (i: number) => void
   has: (i: number) => boolean
@@ -94,7 +95,7 @@ class BitSet {
     if (n < 0) throw new RangeError('n must be non-negative')
     this._n = n
     this._bits = filledValue ? new Uint32Array((n + 31) >>> 5).fill(~0) : new Uint32Array((n + 31) >>> 5)
-    this._bits[this._bits.length - 1] >>>= (this._bits.length << 5) - n
+    if (n) this._bits[this._bits.length - 1] >>>= (this._bits.length << 5) - n
   }
 
   add(i: number): void {
@@ -173,7 +174,7 @@ class BitSet {
 
   /**
    * 返回右侧第一个 1 的位置(`包含`当前位置).
-   * 如果不存在, 返回 {@link n}.
+   * 如果不存在, 返回 {@link size}.
    */
   next(index: number): number {
     if (index < 0) index = 0
@@ -606,7 +607,11 @@ class BitSet {
     }
   }
 
-  copy(): BitSet {
+  /**
+   * @param newSize 拷贝后的位集大小.默认为原位集大小.
+   */
+  copy(newSize?: number): BitSet {
+    if (newSize !== void 0) return this._copyAndResize(newSize)
     const res = new BitSet(this._n)
     res._bits.set(this._bits)
     return res
@@ -664,8 +669,12 @@ class BitSet {
     })
   }
 
-  get n(): number {
+  get size(): number {
     return this._n
+  }
+
+  get bits(): Uint32Array {
+    return this._bits
   }
 
   private _indexOfZero(): number {
@@ -704,6 +713,17 @@ class BitSet {
       count += BitSet._onesCount32(this._bits[i])
     }
     return count
+  }
+
+  private _copyAndResize(size: number): BitSet {
+    const res = new BitSet(size)
+    res._bits.set(this._bits.subarray(0, res._bits.length))
+    const remainingBits = size & 31
+    if (remainingBits) {
+      const mask = (1 << remainingBits) - 1
+      res._bits[res._bits.length - 1] &= mask
+    }
+    return res
   }
 
   /**

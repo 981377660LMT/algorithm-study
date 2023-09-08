@@ -1,5 +1,5 @@
 /**
- * 单调不减的数组nums1和nums2分别找到两个数，其和与target的差最小 返回这个最小差值
+ * 单调不减的数组 nums1 和 nums2 分别找到两个数，其和与target的差最小, 返回这个最小差值.
  */
 function twoSum(nums1: number[], nums2: number[], target: number) {
   let left = 0

@@ -1,14 +1,111 @@
+// interface IBitSet {
+//   readonly n: number
+
+//   add: (i: number) => void
+//   has: (i: number) => boolean
+//   discard: (i: number) => void
+//   flip: (i: number) => void
+//   addRange: (start: number, end: number) => void
+//   discardRange: (start: number, end: number) => void
+//   flipRange: (start: number, end: number) => void
+
+//   fill: (value: 0 | 1) => void
+//   clear: () => void
+
+//   onesCount: (start?: number, end?: number) => number
+//   allOne: (start: number, end: number) => boolean
+//   allZero: (start: number, end: number) => boolean
+
+//   indexOfOne: (position?: number) => number
+//   indexOfZero: (position?: number) => number
+//   next(index: number): number
+//   prev(index: number): number
+
+//   equals: (other: IBitSet) => boolean
+//   isSubset: (other: IBitSet) => boolean
+//   isSuperset: (other: IBitSet) => boolean
+
+//   ior: (other: IBitSet) => IBitSet
+//   iand: (other: IBitSet) => IBitSet
+//   ixor: (other: IBitSet) => IBitSet
+//   or: (other: IBitSet) => IBitSet
+//   and: (other: IBitSet) => IBitSet
+//   xor: (other: IBitSet) => IBitSet
+//   iorRange: (start: number, end: number, other: IBitSet) => void
+//   iandRange: (start: number, end: number, other: IBitSet) => void
+//   ixorRange: (start: number, end: number, other: IBitSet) => void
+
+//   set: (other: IBitSet, offset?: number) => void
+
+//   slice: (start?: number, end?: number) => IBitSet
+//   copy: () => IBitSet
+//   resize: (size: number) => void
+
+//   bitLength: () => number
+
+//   forEach: (callback: (value: number) => void) => void
+
+//   toString: () => string
+// }
+
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 	"strings"
 	"time"
 )
 
 func main() {
+	yuki142()
+}
+
+// https://yukicoder.me/problems/no/142
+func yuki142() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, s, x, y, z int
+	fmt.Fscan(in, &n, &s, &x, &y, &z)
+	var q int
+	fmt.Fscan(in, &q)
+	bs := NewBitsetDynamic(n, 0)
+	for i := 0; i < n; i++ {
+		if s&1 == 1 {
+			bs.Add(i)
+		} else {
+			bs.Discard(i)
+		}
+		s = (x*s + y) % z
+	}
+
+	for i := 0; i < q; i++ {
+		var a, b, c, d int
+		fmt.Fscan(in, &a, &b, &c, &d)
+		a--
+		c--
+		x := bs.Slice(a, b)
+		bs.IXorRange(c, d, x)
+	}
+
+	res := make([]byte, n)
+	for i := range res {
+		if bs.Has(i) {
+			res[i] = 'O'
+		} else {
+			res[i] = 'E'
+		}
+	}
+	fmt.Fprintln(out, string(res))
+}
+
+func demo() {
 	bs := NewBitsetDynamic(100, 0).Add(0).Add(1).Add(39)
+
 	// IXorRange
 	other := NewBitsetDynamic(40, 0).Add(0).Add(1).Add(39)
 	bs.Set(other, 1)
@@ -40,7 +137,6 @@ func main() {
 		bs.Resize(i)
 	}
 	fmt.Println(time.Since(time1))
-
 }
 
 // 动态bitset，支持切片操作.
@@ -60,7 +156,7 @@ func NewBitsetDynamic(n int, filledValue int) *BitSetDynamic {
 			data[i] = ^uint64(0)
 		}
 		if n != 0 {
-			data[len(data)-1] >>= 64 - n&63
+			data[len(data)-1] >>= (len(data) << 6) - n
 		}
 	}
 	return &BitSetDynamic{n: n, data: data}
@@ -207,17 +303,14 @@ func (bs *BitSetDynamic) AllZero(start, end int) bool {
 		mask := ^uint64(0)<<(start&63) ^ ^uint64(0)<<(end&63)
 		return (bs.data[i] & mask) == 0
 	}
-
 	if (bs.data[i] >> (start & 63)) != 0 {
 		return false
 	}
-
 	for i++; i < end>>6; i++ {
 		if bs.data[i] != 0 {
 			return false
 		}
 	}
-
 	mask := ^uint64(0) << (end & 63)
 	return (bs.data[end>>6] & ^mask) == 0
 }
@@ -256,7 +349,6 @@ func (bs *BitSetDynamic) IndexOfZero(position int) int {
 		}
 		return -1
 	}
-
 	i := position >> 6
 	if i < len(bs.data) {
 		v := bs.data[i]
@@ -618,6 +710,17 @@ func (bs *BitSetDynamic) Copy() *BitSetDynamic {
 	res := NewBitsetDynamic(bs.n, 0)
 	copy(res.data, bs.data)
 	return res
+}
+
+func (bs *BitSetDynamic) CopyAndResize(size int) *BitSetDynamic {
+	newBits := make([]uint64, (size+63)>>6)
+	copy(newBits, bs.data[:min(len(bs.data), len(newBits))])
+	remainingBits := size & 63
+	if remainingBits != 0 {
+		mask := (1 << remainingBits) - 1
+		newBits[len(newBits)-1] &= uint64(mask)
+	}
+	return &BitSetDynamic{data: newBits, n: size}
 }
 
 func (bs *BitSetDynamic) Resize(size int) {

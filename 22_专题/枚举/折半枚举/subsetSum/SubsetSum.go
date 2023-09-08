@@ -20,9 +20,12 @@ func main() {
 	time2 := time.Now()
 	SubsetSum(nums, true)
 	time3 := time.Now()
+	SubsetSumSortedWithState(nums)
+	time4 := time.Now()
 
 	fmt.Println(time2.Sub(time1)) // 1.5s
 	fmt.Println(time3.Sub(time2)) // 300ms
+	fmt.Println(time4.Sub(time3)) // 500ms
 }
 
 // O(2^n)返回nums的各个子集的元素和.
@@ -85,4 +88,46 @@ func merge(a, b []int) []int {
 		k++
 	}
 	return res
+}
+
+// O(2^n)返回nums的各个子集的元素和的排序后的结果, 并且记录状态.
+func SubsetSumSortedWithState(nums []int) [][2]int {
+	merge := func(a, b [][2]int) [][2]int {
+		n1, n2 := len(a), len(b)
+		res := make([][2]int, n1+n2)
+		i, j, k := 0, 0, 0
+		for i < n1 && j < n2 {
+			if a[i][0] < b[j][0] {
+				res[k] = a[i]
+				i++
+			} else {
+				res[k] = b[j]
+				j++
+			}
+			k++
+		}
+		for i < n1 {
+			res[k] = a[i]
+			i++
+			k++
+		}
+		for j < n2 {
+			res[k] = b[j]
+			j++
+			k++
+		}
+		return res
+	}
+
+	dp := [][2]int{{0, 0}}
+	for i, x := range nums {
+		ndp := make([][2]int, len(dp))
+		for j, p := range dp {
+			ndp[j][0] = p[0] + x
+			ndp[j][1] = p[1] | 1<<i
+		}
+		dp = merge(dp, ndp)
+	}
+
+	return dp
 }
