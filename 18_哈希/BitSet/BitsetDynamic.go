@@ -258,6 +258,7 @@ import (
 	"fmt"
 	"math/bits"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -266,6 +267,34 @@ func main() {
 	other := NewBitsetDynamic(40, 0).Add(0).Add(1).Add(39)
 	bs.Set(other, 1)
 	fmt.Println(bs, other)
+	fmt.Println(bs.OnesCount(0, bs.n), bs)
+	bs.Add(80)
+	fmt.Println(bs.OnesCount(0, 79), bs)
+
+	bs.AddRange(0, 80)
+	fmt.Println(bs.OnesCount(0, 100), bs)
+	bs.DiscardRange(0, 80)
+	fmt.Println(bs.OnesCount(0, 100), bs)
+	bs.FlipRange(30, 79)
+	fmt.Println(bs.OnesCount(0, 100), bs)
+
+	bs.Fill(1)
+	fmt.Println(bs.OnesCount(0, 100), bs)
+	bs.Fill(0)
+	fmt.Println(bs.OnesCount(0, 100), bs)
+	bs.AddRange(20, 90)
+	fmt.Println(bs.AllOne(19, 90), bs)
+	fmt.Println(bs.AllZero(90, 100))
+
+	fmt.Println(bs.IndexOfOne(78))
+
+	time1 := time.Now()
+	// resize 1e5
+	for i := 0; i < 1e5; i++ {
+		bs.Resize(i)
+	}
+	fmt.Println(time.Since(time1))
+
 }
 
 // 动态bitset，支持切片操作.
@@ -308,35 +337,205 @@ func (bs *BitSetDynamic) Flip(i int) {
 	bs.data[i>>6] ^= 1 << (i & 63)
 }
 
-func (bs *BitSetDynamic) AddRange(start, end int) {}
+func (bs *BitSetDynamic) AddRange(start, end int) {
+	maskL := ^uint64(0) << (start & 63)
+	maskR := ^uint64(0) << (end & 63)
+	i := start >> 6
+	if i == end>>6 {
+		bs.data[i] |= maskL ^ maskR
+		return
+	}
+	bs.data[i] |= maskL
+	for i++; i < end>>6; i++ {
+		bs.data[i] = ^uint64(0)
+	}
+	bs.data[i] |= ^maskR
+}
 
-func (bs *BitSetDynamic) DiscardRange(start, end int) {}
+func (bs *BitSetDynamic) DiscardRange(start, end int) {
+	maskL := ^uint64(0) << (start & 63)
+	maskR := ^uint64(0) << (end & 63)
+	i := start >> 6
+	if i == end>>6 {
+		bs.data[i] &= ^maskL | maskR
+		return
+	}
+	bs.data[i] &= ^maskL
+	for i++; i < end>>6; i++ {
+		bs.data[i] = 0
+	}
+	bs.data[i] &= maskR
+}
 
-func (bs *BitSetDynamic) FlipRange(start, end int) {}
+func (bs *BitSetDynamic) FlipRange(start, end int) {
+	maskL := ^uint64(0) << (start & 63)
+	maskR := ^uint64(0) << (end & 63)
+	i := start >> 6
+	if i == end>>6 {
+		bs.data[i] ^= maskL ^ maskR
+		return
+	}
+	bs.data[i] ^= maskL
+	for i++; i < end>>6; i++ {
+		bs.data[i] = ^bs.data[i]
+	}
+	bs.data[i] ^= ^maskR
+}
 
-func (bs *BitSetDynamic) Fill(zeroOrOne int) {}
+func (bs *BitSetDynamic) Fill(zeroOrOne int) {
+	if zeroOrOne == 0 {
+		for i := range bs.data {
+			bs.data[i] = 0
+		}
+	} else {
+		for i := range bs.data {
+			bs.data[i] = ^uint64(0)
+		}
+		if bs.n != 0 {
+			bs.data[len(bs.data)-1] >>= 64 - bs.n&63
+		}
+	}
+}
 
-func (bs *BitSetDynamic) Clear() {}
+func (bs *BitSetDynamic) Clear() {
+	for i := range bs.data {
+		bs.data[i] = 0
+	}
+}
 
 func (bs *BitSetDynamic) OnesCount(start, end int) int {
-	return 0
+	if start < 0 {
+		start = 0
+	}
+	if end > bs.n {
+		end = bs.n
+	}
+	if start == 0 && end == bs.n {
+		res := 0
+		for _, v := range bs.data {
+			res += bits.OnesCount64(v)
+		}
+		return res
+	}
+	pos1 := start >> 6
+	pos2 := end >> 6
+	if pos1 == pos2 {
+		return bits.OnesCount64(bs.data[pos1] & (^uint64(0) << (start & 63)) & ((1 << (end & 63)) - 1))
+	}
+	count := 0
+	if (start & 63) > 0 {
+		count += bits.OnesCount64(bs.data[pos1] & (^uint64(0) << (start & 63)))
+		pos1++
+	}
+	for i := pos1; i < pos2; i++ {
+		count += bits.OnesCount64(bs.data[i])
+	}
+	if (end & 63) > 0 {
+		count += bits.OnesCount64(bs.data[pos2] & ((1 << (end & 63)) - 1))
+	}
+	return count
 }
 
 func (bs *BitSetDynamic) AllOne(start, end int) bool {
-	return false
+	i := start >> 6
+	if i == end>>6 {
+		mask := ^uint64(0)<<(start&63) ^ ^uint64(0)<<(end&63)
+		return (bs.data[i] & mask) == mask
+	}
+	mask := ^uint64(0) << (start & 63)
+	if (bs.data[i] & mask) != mask {
+		return false
+	}
+	for i++; i < end>>6; i++ {
+		if bs.data[i] != ^uint64(0) {
+			return false
+		}
+	}
+	mask = ^uint64(0) << (end & 63)
+	return ^(bs.data[end>>6] | mask) == 0
 }
 
 func (bs *BitSetDynamic) AllZero(start, end int) bool {
-	return false
+	i := start >> 6
+	if i == end>>6 {
+		mask := ^uint64(0)<<(start&63) ^ ^uint64(0)<<(end&63)
+		return (bs.data[i] & mask) == 0
+	}
+
+	if (bs.data[i] >> (start & 63)) != 0 {
+		return false
+	}
+
+	for i++; i < end>>6; i++ {
+		if bs.data[i] != 0 {
+			return false
+		}
+	}
+
+	mask := ^uint64(0) << (end & 63)
+	return (bs.data[end>>6] & ^mask) == 0
 }
 
 // 返回第一个 1 的下标，若不存在则返回-1.
 func (bs *BitSetDynamic) IndexOfOne(position int) int {
-	return 0
+	if position == 0 {
+		for i, v := range bs.data {
+			if v != 0 {
+				return i<<6 | bs._lowbit(v)
+			}
+		}
+		return -1
+	}
+	for i := position >> 6; i < len(bs.data); i++ {
+		v := bs.data[i] & (^uint64(0) << (position & 63))
+		if v != 0 {
+			return i<<6 | bs._lowbit(v)
+		}
+		for i++; i < len(bs.data); i++ {
+			if bs.data[i] != 0 {
+				return i<<6 | bs._lowbit(bs.data[i])
+			}
+		}
+	}
+	return -1
 }
 
 // 返回第一个 0 的下标，若不存在则返回-1。
-func (bs *BitSetDynamic) IndexOfZero(position int) int { return 0 }
+func (bs *BitSetDynamic) IndexOfZero(position int) int {
+	if position == 0 {
+		for i, v := range bs.data {
+			if v != ^uint64(0) {
+				return i<<6 | bs._lowbit(^v)
+			}
+		}
+		return -1
+	}
+
+	i := position >> 6
+	if i < len(bs.data) {
+		v := bs.data[i]
+		if position&63 != 0 {
+			v |= ^((^uint64(0)) << (position & 63))
+		}
+		if ^v != 0 {
+			res := i<<6 | bs._lowbit(^v)
+			if res < bs.n {
+				return res
+			}
+			return -1
+		}
+		for i++; i < len(bs.data); i++ {
+			if ^bs.data[i] != 0 {
+				res := i<<6 | bs._lowbit(^bs.data[i])
+				if res < bs.n {
+					return res
+				}
+				return -1
+			}
+		}
+	}
+	return -1
+}
 
 // 返回右侧第一个 1 的位置(`包含`当前位置).
 //
@@ -393,39 +592,84 @@ func (bs *BitSetDynamic) Prev(index int) int {
 }
 
 func (bs *BitSetDynamic) Equals(other *BitSetDynamic) bool {
-	return false
+	if len(bs.data) != len(other.data) {
+		return false
+	}
+	for i := range bs.data {
+		if bs.data[i] != other.data[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func (bs *BitSetDynamic) IsSubset(other *BitSetDynamic) bool {
-	return false
+	if bs.n > other.n {
+		return false
+	}
+	for i, v := range bs.data {
+		if (v & other.data[i]) != v {
+			return false
+		}
+	}
+	return true
 }
 
 func (bs *BitSetDynamic) IsSuperset(other *BitSetDynamic) bool {
-	return false
+	if bs.n < other.n {
+		return false
+	}
+	for i, v := range other.data {
+		if (v & bs.data[i]) != v {
+			return false
+		}
+	}
+	return true
 }
 
 func (bs *BitSetDynamic) Ior(other *BitSetDynamic) *BitSetDynamic {
+	for i, v := range other.data {
+		bs.data[i] |= v
+	}
 	return bs
 }
 
 func (bs *BitSetDynamic) Iand(other *BitSetDynamic) *BitSetDynamic {
+	for i, v := range other.data {
+		bs.data[i] &= v
+	}
 	return bs
 }
 
 func (bs *BitSetDynamic) Ixor(other *BitSetDynamic) *BitSetDynamic {
+	for i, v := range other.data {
+		bs.data[i] ^= v
+	}
 	return bs
 }
 
 func (bs *BitSetDynamic) Or(other *BitSetDynamic) *BitSetDynamic {
-	return bs
+	res := NewBitsetDynamic(bs.n, 0)
+	for i, v := range other.data {
+		res.data[i] = bs.data[i] | v
+	}
+	return res
 }
 
 func (bs *BitSetDynamic) And(other *BitSetDynamic) *BitSetDynamic {
-	return bs
+	res := NewBitsetDynamic(bs.n, 0)
+	for i, v := range other.data {
+		res.data[i] = bs.data[i] & v
+	}
+	return res
 }
 
 func (bs *BitSetDynamic) Xor(other *BitSetDynamic) *BitSetDynamic {
-	return bs
+	res := NewBitsetDynamic(bs.n, 0)
+	for i, v := range other.data {
+		res.data[i] = bs.data[i] ^ v
+	}
+	return res
 }
 
 func (bs *BitSetDynamic) IOrRange(start, end int, other *BitSetDynamic) {
@@ -576,25 +820,93 @@ func (bs *BitSetDynamic) Set(other *BitSetDynamic, offset int) {
 			bs.data[l+i] = (other.data[s+i] >> hi) | (other.data[s+i+1] << lo)
 		}
 	}
-
 }
 
 func (bs *BitSetDynamic) Slice(start, end int) *BitSetDynamic {
-	return bs
+	if start < 0 {
+		start += bs.n
+	}
+	if start < 0 {
+		start = 0
+	}
+	if end < 0 {
+		end += bs.n
+	}
+	if end > bs.n {
+		end = bs.n
+	}
+	if start >= end {
+		return NewBitsetDynamic(0, 0)
+	}
+	if start == 0 && end == bs.n {
+		return bs.Copy()
+	}
+
+	res := NewBitsetDynamic(end-start, 0)
+	remain := (end - start) & 63
+	for i := 0; i < remain; i++ {
+		if bs.Has(end - 1) {
+			res.Add(end - start - 1)
+		}
+		end--
+	}
+
+	n := (end - start) >> 6
+	hi := start & 63
+	lo := 64 - hi
+	s := start >> 6
+	if hi == 0 {
+		for i := 0; i < n; i++ {
+			res.data[i] = bs.data[s+i]
+		}
+	} else {
+		for i := 0; i < n; i++ {
+			res.data[i] = (bs.data[s+i] >> hi) ^ (bs.data[s+i+1] << lo)
+		}
+	}
+
+	return res
 }
 
 func (bs *BitSetDynamic) Copy() *BitSetDynamic {
-	return bs
+	res := NewBitsetDynamic(bs.n, 0)
+	copy(res.data, bs.data)
+	return res
 }
 
-func (bs *BitSetDynamic) Resize(size int) {}
+func (bs *BitSetDynamic) Resize(size int) {
+	newBits := make([]uint64, (size+63)>>6)
+	copy(newBits, bs.data[:min(len(bs.data), len(newBits))])
+	remainingBits := size & 63
+	if remainingBits != 0 {
+		mask := (1 << remainingBits) - 1
+		newBits[len(newBits)-1] &= uint64(mask)
+	}
+	bs.data = newBits
+	bs.n = size
+}
+
+func (bs *BitSetDynamic) Expand(size int) {
+	if size <= bs.n {
+		return
+	}
+	bs.Resize(size)
+}
 
 func (bs *BitSetDynamic) BitLength() int {
-	return 0
+	return bs._lastIndexOfOne() + 1
 }
 
 // 遍历所有 1 的位置.
-func (bs *BitSetDynamic) ForEach(f func(pos int)) {}
+func (bs *BitSetDynamic) ForEach(f func(pos int)) {
+	for i, v := range bs.data {
+		for v != 0 {
+			j := (i << 6) | bs._lowbit(v)
+			f(j)
+			v &= v - 1
+		}
+	}
+}
 
 func (bs *BitSetDynamic) Size() int {
 	return bs.n
@@ -604,11 +916,9 @@ func (bs *BitSetDynamic) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("BitSetDynamic{")
 	nums := []string{}
-	for i := 0; i < bs.n; i++ {
-		if bs.Has(i) {
-			nums = append(nums, fmt.Sprintf("%d", i))
-		}
-	}
+	bs.ForEach(func(pos int) {
+		nums = append(nums, fmt.Sprintf("%d", pos))
+	})
 	sb.WriteString(strings.Join(nums, ","))
 	sb.WriteString("}")
 	return sb.String()
@@ -632,4 +942,21 @@ func (bs *BitSetDynamic) _lowbit(x uint64) int {
 
 func (bs *BitSetDynamic) _get(i int) uint64 {
 	return bs.data[i>>6] >> (i & 63) & 1
+}
+
+func (bs *BitSetDynamic) _lastIndexOfOne() int {
+	for i := len(bs.data) - 1; i >= 0; i-- {
+		x := bs.data[i]
+		if x != 0 {
+			return (i << 6) | (bs._topbit(x))
+		}
+	}
+	return -1
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

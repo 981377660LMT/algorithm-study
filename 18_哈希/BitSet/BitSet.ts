@@ -91,7 +91,7 @@ class BitSet {
   private _bits: Uint32Array
 
   constructor(n: number, filledValue: 0 | 1 = 0) {
-    if (n <= 0) throw new RangeError('n must be positive')
+    if (n < 0) throw new RangeError('n must be non-negative')
     this._n = n
     this._bits = filledValue ? new Uint32Array((n + 31) >>> 5).fill(~0) : new Uint32Array((n + 31) >>> 5)
     this._bits[this._bits.length - 1] >>>= (this._bits.length << 5) - n
@@ -344,8 +344,11 @@ class BitSet {
   }
 
   slice(start = 0, end = this._n): BitSet {
+    if (start < 0) start += this._n
     if (start < 0) start = 0
+    if (end < 0) end += this._n
     if (end > this._n) end = this._n
+    if (start >= end) return new BitSet(0)
     if (start === 0 && end === this._n) return this.copy()
 
     const res = new BitSet(end - start)
@@ -799,4 +802,6 @@ if (require.main === module) {
   set2.add(50)
   set1.set(set2, 18)
   console.log(set1.toSet())
+
+  const slice = new BitSet(0)
 }

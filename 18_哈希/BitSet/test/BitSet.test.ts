@@ -9,7 +9,7 @@ describe('BitSet', () => {
 
   // beforeEach
   beforeEach(() => {
-    n = Math.floor(Math.random() * 100) + 1
+    n = Math.floor(Math.random() * 1000) + 1
     nums = Array.from({ length: n }, () => Math.floor(Math.random() * 2))
     bitSet = new BitSet(n)
     for (let i = 0; i < n; i++) {
@@ -239,11 +239,13 @@ describe('BitSet', () => {
 
   // slice
   it('should support slice', () => {
-    const start = Math.floor(Math.random() * n)
-    const end = Math.floor(Math.random() * (n - start)) + start
-    const bitSet2 = bitSet.slice(start, end)
-    for (let i = start; i < end; i++) {
-      expect(bitSet2.has(i - start)).toBe(!!nums[i])
+    for (let _ = 0; _ < 100; _++) {
+      const start = Math.floor(Math.random() * n)
+      const end = Math.floor(Math.random() * (n - start)) + start
+      const bitSet2 = bitSet.slice(start, end)
+      for (let i = start; i < end; i++) {
+        expect(bitSet2.has(i - start)).toBe(!!nums[i])
+      }
     }
   })
 
