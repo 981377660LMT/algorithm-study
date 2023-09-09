@@ -13,8 +13,8 @@ from functools import lru_cache
 def cal(upper: int, queryDigit: int) -> int:
     @lru_cache(None)
     def dfs(pos: int, hasLeadingZero: bool, isLimit: bool, count: int) -> int:
-        """当前在第pos位，hasLeadingZero表示有前导0，isLimit表示是否贴合上界,出现次数为count"""
-        if pos == len(nums):
+        """当前在第pos位,hasLeadingZero表示有前导0,isLimit表示是否贴合上界,出现次数为count"""
+        if pos == n:
             return count
 
         res = 0
@@ -27,6 +27,7 @@ def cal(upper: int, queryDigit: int) -> int:
         return res
 
     nums = list(map(int, str(upper)))
+    n = len(nums)
     return dfs(0, True, True, 0)
 
 

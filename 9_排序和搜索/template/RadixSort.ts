@@ -7,7 +7,7 @@
  * @param maxDigit 最大位数.
  * @param minValue 每个位数的最小值.
  * @param maxValue 每个位数的最大值.
- * @param getValue 获取元素某一位的值.
+ * @param getValueAtDigit 获取元素某一位的值.
  * @complexity `O(n*maxDigit)`
  */
 function radixSort<T>(
@@ -15,14 +15,14 @@ function radixSort<T>(
   maxDigit: number,
   minValue: number,
   maxValue: number,
-  getValue: (item: T, digit: number) => number
+  getValueAtDigit: (item: T, digit: number) => number
 ): void {
   const buckets = Array(maxValue - minValue + 1)
 
   for (let i = 0; i < maxDigit; i++) {
     resetBuckets()
     for (let j = 0; j < arr.length; j++) {
-      const value = getValue(arr[j], i)
+      const value = getValueAtDigit(arr[j], i)
       buckets[value - minValue].push(arr[j])
     }
 

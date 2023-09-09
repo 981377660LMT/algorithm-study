@@ -1,5 +1,8 @@
+/* eslint-disable no-inner-declarations */
+/* eslint-disable max-len */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-constant-condition */
+
 // https://beet-aizu.github.io/library/tree/heavylightdecomposition.cpp
 // HL分解将树上的路径分成logn条,分割之后只需要op操作logn条链即可
 // 如果原问题可以在序列上O(X)时间解决,那么在树上就可以在O(Xlogn)时间解决
@@ -227,11 +230,7 @@ class Tree {
   getPathDecomposition(u: number, v: number, vertex: boolean): [from: number, to: number][] {
     const up: [start: number, end: number][] = []
     const down: [start: number, end: number][] = []
-    while (true) {
-      if (this._top[u] === this._top[v]) {
-        break
-      }
-
+    while (this._top[u] ^ this._top[v]) {
       if (this.lid[u] < this.lid[v]) {
         down.push([this.lid[this._top[v]], this.lid[v]])
         v = this.parent[this._top[v]]
@@ -253,17 +252,8 @@ class Tree {
   /**
    * 遍历路径上的 `[起点,终点)` 欧拉序 `左闭右开` 区间.
    */
-  enumeratePathDecomposition(
-    u: number,
-    v: number,
-    vertex: boolean,
-    callback: (start: number, end: number) => void
-  ): void {
-    while (true) {
-      if (this._top[u] === this._top[v]) {
-        break
-      }
-
+  enumeratePathDecomposition(u: number, v: number, vertex: boolean, callback: (start: number, end: number) => void): void {
+    while (this._top[u] ^ this._top[v]) {
       if (this.lid[u] < this.lid[v]) {
         const a = this.lid[this._top[v]]
         const b = this.lid[v]
@@ -292,24 +282,20 @@ class Tree {
   getPath(from: number, to: number): number[] {
     const res: number[] = []
     const composition = this.getPathDecomposition(from, to, true)
-    composition.forEach(([start, end]) => {
+    for (let i = 0; i < composition.length; i++) {
+      const { 0: start, 1: end } = composition[i]
       if (start <= end) {
-        for (let i = start; i <= end; i++) {
-          res.push(this._idToNode[i])
+        for (let j = start; j <= end; j++) {
+          res.push(this._idToNode[j])
         }
       } else {
-        for (let i = start; i >= end; i--) {
-          res.push(this._idToNode[i])
+        for (let j = start; j >= end; j--) {
+          res.push(this._idToNode[j])
         }
       }
-    })
+    }
     return res
   }
-
-  /**
-   * 遍历路径上的所有边
-   */
-  getEdges(u: number, v: number): number[] {}
 
   /**
    * 以root为根时,结点v的子树大小.
@@ -435,6 +421,63 @@ if (require.main === module) {
       return this._tree.kthAncestor(node, k)
     }
   }
+
+  // 2846. 边权重均等查询
+  // https://leetcode.cn/problems/minimum-edge-weight-equilibrium-queries-in-a-tree/description/
+  // n<=1e4
+  // q<=2e4
+  function minOperationsQueries(n: number, edges: number[][], queries: number[][]): number[] {
+    const tree = new Tree(n)
+    const weights = Array<Map<number, number>>(n)
+    for (let i = 0; i < weights.length; i++) weights[i] = new Map()
+    edges.forEach(([u, v, w]) => {
+      if (u > v) {
+        u ^= v
+        v ^= u
+        u ^= v
+      }
+      tree.addEdge(u, v, w)
+      weights[u].set(v, w)
+    })
+    tree.build(0)
+
+    // 对每个查询求出边权，答案为边数减去最大频率
+    const res = Array(queries.length).fill(0)
+    for (let i = 0; i < queries.length; i++) {
+      const { 0: from, 1: to } = queries[i]
+      const path = tree.getPath(from, to)
+      const weightCounter = new Uint16Array(27)
+      for (let j = 0; j < path.length - 1; j++) {
+        const pre = path[j]
+        const cur = path[j + 1]
+        const w = pre < cur ? weights[pre].get(cur)! : weights[cur].get(pre)!
+        weightCounter[w]++
+      }
+      res[i] = path.length - 1 - Math.max(...weightCounter)
+    }
+
+    return res
+  }
+
+  console.log(
+    minOperationsQueries(
+      7,
+      [
+        [0, 1, 1],
+        [1, 2, 1],
+        [2, 3, 1],
+        [3, 4, 2],
+        [4, 5, 2],
+        [5, 6, 2]
+      ],
+      [
+        [0, 3],
+        [3, 6],
+        [2, 6],
+        [0, 6]
+      ]
+    )
+  )
 
   const tree = new Tree(5)
   tree.addEdge(0, 1, 8)

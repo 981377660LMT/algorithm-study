@@ -12,19 +12,15 @@ class CountingSort {
    * 否则用遍历清除.
    */
   private readonly _clearThreshold: number
-  private readonly _offset: number
 
   /**
-   * 所有数的范围必须在 `[min, max]` 内.
-   * max - min 不能超过 2e7.
+   * 所有数的范围必须在 `[min, min + gap]` 之间.
+   * gap 不能超过 2e7.
    */
-  constructor(min: number, max: number) {
-    if (min > max) throw new Error('min must be less than or equal to max')
-    if (max - min > 2e7) throw new Error('max - min must be less than or equal to 1e7')
-    const size = max - min + 5
-    this._counter = new Uint32Array(size)
-    this._clearThreshold = ((size + 5) / 5) | 0
-    this._offset = min
+  constructor(gap: number) {
+    if (gap > 2e7) throw new Error('gap must be less than or equal to 2e7')
+    this._counter = new Uint32Array(gap + 1)
+    this._clearThreshold = ((gap + 5) / 5) | 0
   }
 
   /**
@@ -33,24 +29,25 @@ class CountingSort {
    */
   sorted(arr: ArrayLike<number>, reverse = false): number[] {
     const n = arr.length
+    if (n <= 1) return Array.from(arr)
     const res = Array(n)
     const counter = this._counter
-    const offset = this._offset
-
-    for (let i = 0; i < n; i++) counter[arr[i] - offset]++
+    let min = arr[0]
+    for (let i = 1; i < n; i++) min = Math.min(min, arr[i])
+    for (let i = 0; i < n; i++) counter[arr[i] - min]++
 
     if (reverse) {
       for (let i = counter.length - 1, ptr = 0; ~i; i--) {
-        for (let j = 0; j < counter[i]; j++) res[ptr++] = i + offset
+        for (let j = 0; j < counter[i]; j++) res[ptr++] = i + min
       }
     } else {
       for (let i = 0, ptr = 0; i < counter.length; i++) {
-        for (let j = 0; j < counter[i]; j++) res[ptr++] = i + offset
+        for (let j = 0; j < counter[i]; j++) res[ptr++] = i + min
       }
     }
 
     if (n >= this._clearThreshold) counter.fill(0)
-    else for (let i = 0; i < n; i++) counter[arr[i] - offset]--
+    else for (let i = 0; i < n; i++) counter[arr[i] - min]--
 
     return res
   }
@@ -59,7 +56,7 @@ class CountingSort {
 export { CountingSort }
 
 if (require.main === module) {
-  const B = new CountingSort(0, 100)
+  const B = new CountingSort(100)
   const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9]
   console.log(B.sorted(arr, true))
 
@@ -77,7 +74,7 @@ if (require.main === module) {
 
   // https://leetcode.cn/problems/sort-an-array/
   // 912. 排序数组
-  const C = new CountingSort(-5e4, 5e4)
+  const C = new CountingSort(1e5)
   function sortArray(nums: number[]): number[] {
     return C.sorted(nums)
   }
@@ -86,7 +83,7 @@ if (require.main === module) {
   // 6894. 所有子数组中不平衡数字之和
   function sumImbalanceNumbers(N: number[]): number {
     const nums = new Uint16Array(N)
-    const C = new CountingSort(Math.min(...nums), Math.max(...nums))
+    const C = new CountingSort(Math.max(...nums) - Math.min(...nums))
     let res = 0
     for (let i = 0; i < nums.length; i++) {
       for (let j = i; j < nums.length; j++) {

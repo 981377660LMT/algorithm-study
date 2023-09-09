@@ -180,7 +180,9 @@ function log10Uint32(x: number): number {
 }
 
 // 找到比自己大或相同的2的幂次。
+// ceilingPow2
 function nextPow2Int32(x: number): number {
+  return 1 << (32 - Math.clz32(x))
   x--
   x |= x >>> 1
   x |= x >>> 2
@@ -191,6 +193,7 @@ function nextPow2Int32(x: number): number {
 }
 
 // 找到比自己小或相同的2的幂次。
+// floorPow2
 function prevPow2Int32(x: number): number {
   x |= x >>> 1
   x |= x >>> 2
@@ -228,4 +231,4 @@ function zipBitInt16(a: number, b: number): number {
   return (a << 1) | b
 }
 
-export { nextPow2Int32, prevPow2Int32 }
+export { nextPow2Int32, prevPow2Int32, nextPow2Int32 as ceilingPow2, prevPow2Int32 as floorPow2 }

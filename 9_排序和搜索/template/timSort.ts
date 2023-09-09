@@ -10,12 +10,7 @@ type MutableArrayLike<T> = {
  * `ZRender`库中的`TimSort`原地排序.
  * @see {@link https://github.com/ecomfe/zrender/blob/master/src/core/timsort.ts}
  */
-function timSort<T = number>(
-  array: MutableArrayLike<T>,
-  compare: CompareFunc<T> = (a: any, b: any) => a - b,
-  lo = 0,
-  hi = array.length
-): void {
+function timSort<T = number>(array: MutableArrayLike<T>, compare: CompareFunc<T> = (a: any, b: any) => a - b, lo = 0, hi = array.length): void {
   let remaining = hi - lo
 
   if (remaining < 2) {
@@ -30,7 +25,7 @@ function timSort<T = number>(
     return
   }
 
-  let ts = TimSort<T>(array, compare)
+  let ts = _TimSort<T>(array, compare)
 
   let minRun = minRunLength(remaining)
 
@@ -71,12 +66,7 @@ function minRunLength(n: number): number {
   return n + r
 }
 
-function makeAscendingRun<T>(
-  array: MutableArrayLike<T>,
-  lo: number,
-  hi: number,
-  compare: CompareFunc<T>
-) {
+function makeAscendingRun<T>(array: MutableArrayLike<T>, lo: number, hi: number, compare: CompareFunc<T>) {
   let runHi = lo + 1
 
   if (runHi === hi) {
@@ -108,13 +98,7 @@ function reverseRun<T>(array: MutableArrayLike<T>, lo: number, hi: number) {
   }
 }
 
-function binaryInsertionSort<T>(
-  array: MutableArrayLike<T>,
-  lo: number,
-  hi: number,
-  start: number,
-  compare: CompareFunc<T>
-) {
+function binaryInsertionSort<T>(array: MutableArrayLike<T>, lo: number, hi: number, start: number, compare: CompareFunc<T>) {
   if (start === lo) {
     start++
   }
@@ -161,14 +145,7 @@ function binaryInsertionSort<T>(
   }
 }
 
-function gallopLeft<T>(
-  value: T,
-  array: MutableArrayLike<T>,
-  start: number,
-  length: number,
-  hint: number,
-  compare: CompareFunc<T>
-) {
+function gallopLeft<T>(value: T, array: MutableArrayLike<T>, start: number, length: number, hint: number, compare: CompareFunc<T>) {
   let lastOffset = 0
   let maxOffset = 0
   let offset = 1
@@ -223,14 +200,7 @@ function gallopLeft<T>(
   return offset
 }
 
-function gallopRight<T>(
-  value: T,
-  array: MutableArrayLike<T>,
-  start: number,
-  length: number,
-  hint: number,
-  compare: CompareFunc<T>
-) {
+function gallopRight<T>(value: T, array: MutableArrayLike<T>, start: number, length: number, hint: number, compare: CompareFunc<T>) {
   let lastOffset = 0
   let maxOffset = 0
   let offset = 1
@@ -289,7 +259,7 @@ function gallopRight<T>(
   return offset
 }
 
-function TimSort<T>(array: MutableArrayLike<T>, compare: CompareFunc<T>) {
+function _TimSort<T>(array: MutableArrayLike<T>, compare: CompareFunc<T>) {
   let minGallop = DEFAULT_MIN_GALLOPING
 
   let runStart: number[]
@@ -311,10 +281,7 @@ function TimSort<T>(array: MutableArrayLike<T>, compare: CompareFunc<T>) {
     while (stackSize > 1) {
       let n = stackSize - 2
 
-      if (
-        (n >= 1 && runLength[n - 1] <= runLength[n] + runLength[n + 1]) ||
-        (n >= 2 && runLength[n - 2] <= runLength[n] + runLength[n - 1])
-      ) {
+      if ((n >= 1 && runLength[n - 1] <= runLength[n] + runLength[n + 1]) || (n >= 2 && runLength[n - 2] <= runLength[n] + runLength[n - 1])) {
         if (runLength[n - 1] < runLength[n + 1]) {
           n--
         }
@@ -360,14 +327,7 @@ function TimSort<T>(array: MutableArrayLike<T>, compare: CompareFunc<T>) {
       return
     }
 
-    length2 = gallopLeft<T>(
-      array[start1 + length1 - 1],
-      array,
-      start2,
-      length2,
-      length2 - 1,
-      compare
-    )
+    length2 = gallopLeft<T>(array[start1 + length1 - 1], array, start2, length2, length2 - 1, compare)
 
     if (length2 === 0) {
       return
@@ -593,8 +553,7 @@ function TimSort<T>(array: MutableArrayLike<T>, compare: CompareFunc<T>) {
       }
 
       do {
-        count1 =
-          length1 - gallopRight<T>(tmp[cursor2], array, start1, length1, length1 - 1, compare)
+        count1 = length1 - gallopRight<T>(tmp[cursor2], array, start1, length1, length1 - 1, compare)
 
         if (count1 !== 0) {
           dest -= count1
