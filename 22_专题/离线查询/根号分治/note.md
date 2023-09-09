@@ -33,9 +33,10 @@ https://drken1215.hatenablog.com/archive/category/%E3%82%AF%E3%82%A8%E3%83%AA%E3
    - [哈希冲突](https://ddosvoid.github.io/2020/10/17/Luogu-P3396-%E5%93%88%E5%B8%8C%E5%86%B2%E7%AA%81/)
 
 3. 对操作序列分块
-   对于根号个修改一同处理它们对询问的贡献，对于每个询问块内的修改暴力算，块外的之前已经预处理好了
+   `对于根号个修改一同处理(batching)`它们对询问的贡献，对于每个询问块内的修改暴力算，块外的之前已经预处理好了
 
    - [CF 342E Xenia and Tree](https://ddosvoid.github.io/2021/04/21/CF-342E-Xenia-and-Tree/)
+   - [记录修改操作，每有根号个修改就新建一个版本，查询时倒序查询修改记录](https://usaco.guide/plat/sqrt?lang=py)
 
 4. 更加一般的数据结构题目(SqrtDecomposition 数据结构)
    思想类似于线段树，只不过有些东西线段树没法维护，所以只能用分块来操作
