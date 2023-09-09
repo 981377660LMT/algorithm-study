@@ -53,7 +53,7 @@ function useDinic(n: number, start: number, end: number) {
     _edges.push([from, 0])
   }
 
-  function calMaxFlow(): number {
+  function maxFlow(): number {
     const levels = new Int32Array(n)
     const curEdges = new Int32Array(n) // 当前弧优化
 
@@ -187,7 +187,7 @@ function useDinic(n: number, start: number, end: number) {
   return {
     addEdge,
     addEdgeIfAbsent,
-    calMaxFlow,
+    maxFlow,
     useQueryRemainOfEdge,
     getPath
   }

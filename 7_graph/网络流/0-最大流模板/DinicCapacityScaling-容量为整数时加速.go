@@ -41,23 +41,33 @@ type edge struct {
 }
 
 type DinicCapacityScaling struct {
-	graph   [][]edge
-	minCost []int
-	iter    []int
-	maxCap  int
+	graph       [][]edge
+	minCost     []int
+	iter        []int
+	maxCap      int
+	visitedEdge map[int]struct{}
+	n           int
 }
 
 func NewDinicCapacityScaling(n int) *DinicCapacityScaling {
 	return &DinicCapacityScaling{
-		graph: make([][]edge, n),
+		graph:       make([][]edge, n),
+		visitedEdge: make(map[int]struct{}),
+		n:           n,
 	}
 }
 
+// 内部会对边去重.
 func (d *DinicCapacityScaling) AddEdge(from, to, cap int) {
 	d.AddEdgeWithIndex(from, to, cap, -1)
 }
 
 func (d *DinicCapacityScaling) AddEdgeWithIndex(from, to, cap, index int) {
+	hash := from*d.n + to
+	if _, ok := d.visitedEdge[hash]; ok {
+		return
+	}
+	d.visitedEdge[hash] = struct{}{}
 	d.maxCap = max(d.maxCap, cap)
 	d.graph[from] = append(d.graph[from], edge{to, cap, len(d.graph[to]), false, index})
 	d.graph[to] = append(d.graph[to], edge{from, 0, len(d.graph[from]) - 1, true, index})

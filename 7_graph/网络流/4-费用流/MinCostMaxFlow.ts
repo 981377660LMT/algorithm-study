@@ -47,7 +47,7 @@ class MinCostMaxFlow {
     }
   }
 
-  addEdge(from: number, to: number, capacity: number, cost: number) {
+  addEdge(from: number, to: number, capacity: number, cost: number): void {
     this._graph[from].push({ to, rid: this._graph[to].length, capacity, cost, id: this._ei })
     this._graph[to].push({ to: from, rid: this._graph[from].length - 1, capacity: 0, cost: -cost, id: -1 })
     this._ei++

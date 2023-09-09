@@ -30,16 +30,26 @@ const INF int = 1e18
 type edge struct{ to, rid, cap int }
 
 type PushRelabel struct {
-	graph [][]edge
+	graph       [][]edge
+	visitedEdge map[int]struct{}
+	n           int
 }
 
 func NewPushRelabel(n int) *PushRelabel {
 	return &PushRelabel{
-		graph: make([][]edge, n),
+		graph:       make([][]edge, n),
+		visitedEdge: make(map[int]struct{}),
+		n:           n,
 	}
 }
 
+// 内部会对边去重.
 func (pr *PushRelabel) AddEdge(from, to, cap int) {
+	hash := from*pr.n + to
+	if _, ok := pr.visitedEdge[hash]; ok {
+		return
+	}
+	pr.visitedEdge[hash] = struct{}{}
 	pr.graph[from] = append(pr.graph[from], edge{to, len(pr.graph[to]), cap})
 	pr.graph[to] = append(pr.graph[to], edge{from, len(pr.graph[from]) - 1, 0})
 }
@@ -52,12 +62,12 @@ func (pr *PushRelabel) MaxFlow(s, t int) int {
 	}
 
 	dist[t] = 0
-	cd := make([]int, 2*n)
+	distCounter := make([]int, 2*n)
 	queue := []int{t}
 	for len(queue) > 0 {
 		v := queue[0]
 		queue = queue[1:]
-		cd[dist[v]]++
+		distCounter[dist[v]]++
 		for _, e := range pr.graph[v] {
 			if w := e.to; dist[w] < 0 {
 				dist[w] = dist[v] + 1
@@ -104,7 +114,7 @@ func (pr *PushRelabel) MaxFlow(s, t int) int {
 
 			dv := dist[v]
 			if dv != -1 {
-				if cd[dv]--; cd[dv] == 0 {
+				if distCounter[dv]--; distCounter[dv] == 0 {
 					for i, h := range dist {
 						if i != s && i != t && dv < h && h <= n {
 							dist[i] = n + 1
@@ -120,7 +130,7 @@ func (pr *PushRelabel) MaxFlow(s, t int) int {
 				}
 			}
 			dist[v] = minD + 1
-			cd[dist[v]]++
+			distCounter[dist[v]]++
 		}
 	}
 

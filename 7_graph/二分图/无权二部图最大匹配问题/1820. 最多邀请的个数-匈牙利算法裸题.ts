@@ -4,6 +4,7 @@
 // # 一个男孩最多可以邀请一个女孩，一个女孩最多可以接受一个男孩的一个邀请。
 // # 返回可能的最多邀请的个数。
 // 男孩是行,女孩是列
+// https://leetcode.cn/problems/maximum-number-of-accepted-invitations/
 
 import { useHungarian } from './匈牙利算法'
 

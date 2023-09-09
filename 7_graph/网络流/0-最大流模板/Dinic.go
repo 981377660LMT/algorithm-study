@@ -33,28 +33,39 @@ const INF int = 1e18
 type DinicEdge struct {
 	to    int
 	cap   int // 剩余容量
-	rev   int // 逆向边在 G[to] 中的序号
+	rev   int // 反向边在 G[to] 中的序号
 	isRev bool
 	index int
 }
 
 type Dinic struct {
-	graph   [][]DinicEdge
-	minCost []int
-	iter    []int
+	graph       [][]DinicEdge
+	minCost     []int
+	iter        []int
+	visitedEdge map[int]struct{}
+	n           int
 }
 
 func NewDinic(n int) *Dinic {
 	return &Dinic{
-		graph: make([][]DinicEdge, n),
+		graph:       make([][]DinicEdge, n),
+		visitedEdge: make(map[int]struct{}),
+		n:           n,
 	}
 }
 
+// 内部会对边去重.
 func (d *Dinic) AddEdge(from, to, cap int) {
 	d.AddEdgeWithIndex(from, to, cap, -1)
 }
 
+// 内部会对边去重.
 func (d *Dinic) AddEdgeWithIndex(from, to, cap, index int) {
+	hash := from*d.n + to
+	if _, ok := d.visitedEdge[hash]; ok {
+		return
+	}
+	d.visitedEdge[hash] = struct{}{}
 	d.graph[from] = append(d.graph[from], DinicEdge{to, cap, len(d.graph[to]), false, index})
 	d.graph[to] = append(d.graph[to], DinicEdge{from, 0, len(d.graph[from]) - 1, true, index})
 }
@@ -76,7 +87,8 @@ func (d *Dinic) MaxFlow(s, t int) int {
 }
 
 // (from,to,流量,容量)
-//  flow = revEdge.cap; cap = e.cap + revEdge.cap
+//
+//	flow = revEdge.cap; cap = e.cap + revEdge.cap
 func (d *Dinic) GetEdges() [][4]int {
 	res := make([][4]int, 0)
 	for i, edges := range d.graph {
@@ -97,12 +109,13 @@ func (d *Dinic) findMinDistAugmentPath(idx, t, flow int) int {
 	}
 
 	i := d.iter[idx]
-	for i < len(d.graph[idx]) {
-		e := d.graph[idx][i]
+	nexts := d.graph[idx]
+	for i < len(nexts) {
+		e := nexts[i]
 		if e.cap > 0 && d.minCost[idx] < d.minCost[e.to] {
 			f := d.findMinDistAugmentPath(e.to, t, min(flow, e.cap))
 			if f > 0 {
-				d.graph[idx][i].cap -= f
+				nexts[i].cap -= f
 				d.graph[e.to][e.rev].cap += f
 				return f
 			}
