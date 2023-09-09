@@ -1,0 +1,3 @@
+class MaxFlowDinic {}
+
+export { MaxFlowDinic }

@@ -7,13 +7,7 @@
 const INF = 2e15
 
 class Edge {
-  constructor(
-    public readonly from: number,
-    public readonly to: number,
-    public readonly capacity: number,
-    public readonly cost: number,
-    public flow: number
-  ) {}
+  constructor(public readonly from: number, public readonly to: number, public readonly capacity: number, public readonly cost: number, public flow: number) {}
 }
 
 /**
@@ -30,7 +24,7 @@ function useMinCostMaxFlow(n: number, start: number, end: number) {
 
   const _dist = Array<number>(n).fill(INF)
   const _flow = Array<number>(n).fill(0)
-  const _pre = new Int16Array(n).fill(-1)
+  const _pre = new Int32Array(n).fill(-1)
 
   function addEdge(from: number, to: number, capacity: number, cost: number): void {
     // 原边索引为i 反向边索引为i^1
