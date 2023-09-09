@@ -13,6 +13,10 @@ type Edge = {
 
 const INF = 2e15
 
+/**
+ * Dinic算法求最大流.
+ * @complexity `O(V^2*E)` , 二分图上为 O(E*√V)
+ */
 class MaxFlowDinic {
   private readonly _graph: Edge[][]
   private readonly _minCost: Int32Array
@@ -31,14 +35,7 @@ class MaxFlowDinic {
   /**
    * 内部会对边去重.
    */
-  addEdge(from: number, to: number, cap: number): void {
-    this.addEdgeWithIndex(from, to, cap, -1)
-  }
-
-  /**
-   * 内部会对边去重.
-   */
-  addEdgeWithIndex(from: number, to: number, cap: number, index: number): void {
+  addEdge(from: number, to: number, cap: number, index = -1): void {
     const hash = from * this._n + to
     if (this._visitedEdge.has(hash)) return
     this._visitedEdge.add(hash)
