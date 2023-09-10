@@ -18,7 +18,7 @@ trans[i][j] 表示 j 对 i 的贡献
 
 import sys
 from typing import List, Tuple
-from matqpow import matqpow1, mul
+from matqpow import matqpow1, matmul
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -45,7 +45,7 @@ def graphSmoothing(n: int, edges: List[Tuple[int, int]], values: List[int], k: i
 
     trans = matqpow1(trans, k, MOD)
     res = [[num] for num in values]
-    res = mul(trans, res, MOD)
+    res = matmul(trans, res, MOD)
     return [row[0] for row in res]
 
 

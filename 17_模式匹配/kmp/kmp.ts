@@ -23,17 +23,80 @@ function getNext(shorter: string | ArrayLike<number>): Uint32Array {
   return next
 }
 
+/**
+ * `O(n+m)` 寻找 `shorter` 在 `longer` 中的所有匹配位置.
+ */
+function indexOfAll<S extends string | ArrayLike<number> = string>(
+  longer: S,
+  shorter: S,
+  position = 0
+): number[] {
+  if (shorter.length === 0) return [0]
+  if (longer.length < shorter.length) return []
+  const res: number[] = []
+  const next = getNext(shorter)
+  let hitJ = 0
+  for (let i = position; i < longer.length; i++) {
+    while (hitJ > 0 && longer[i] !== shorter[hitJ]) hitJ = next[hitJ - 1]
+    if (longer[i] === shorter[hitJ]) hitJ++
+    if (hitJ === shorter.length) {
+      res.push(i - shorter.length + 1)
+      hitJ = next[hitJ - 1] // 不允许重叠时 hitJ = 0
+    }
+  }
+  return res
+}
+
 class KMP<T extends string | ArrayLike<number> = string> {
+  /**
+   * `O(n+m)` 寻找 `shorter` 在 `longer` 中的所有匹配位置.
+   * @param longer 搜索串.
+   * @param shorter 模式串.
+   * @param position 搜索的起始位置.
+   * @returns 所有匹配的位置.
+   */
+  static indexOfAll<S extends string | ArrayLike<number> = string>(
+    longer: S,
+    shorter: S,
+    position = 0
+  ): number[] {
+    if (shorter.length === 0) return [0]
+    if (longer.length < shorter.length) return []
+    const res: number[] = []
+    const next = this.getNext(shorter)
+    let hitJ = 0
+    for (let i = position; i < longer.length; i++) {
+      while (hitJ > 0 && longer[i] !== shorter[hitJ]) hitJ = next[hitJ - 1]
+      if (longer[i] === shorter[hitJ]) hitJ++
+      if (hitJ === shorter.length) {
+        res.push(i - shorter.length + 1)
+        hitJ = next[hitJ - 1] // 不允许重叠时 hitJ = 0
+      }
+    }
+    return res
+  }
+
+  static getNext(shorter: string | ArrayLike<number>): Uint32Array {
+    const next = new Uint32Array(shorter.length)
+    let j = 0
+    for (let i = 1; i < shorter.length; i++) {
+      while (j > 0 && shorter[i] !== shorter[j]) j = next[j - 1]
+      if (shorter[i] === shorter[j]) j++
+      next[i] = j
+    }
+    return next
+  }
+
   private readonly _pattern: T
   private readonly _next: Uint32Array
 
   /**
    * @param pattern `模式串`或者`模式串`的unicode编码数组.
-   * 注意模式串是较短的字符串，搜索串是较长的字符串.
+   * 注意模式串是`较短`的字符串，搜索串是`较长`的字符串.
    */
   constructor(pattern: T) {
     this._pattern = pattern
-    this._next = getNext(pattern)
+    this._next = KMP.getNext(pattern)
   }
 
   search(searchString: T, position = 0): number {
@@ -46,6 +109,13 @@ class KMP<T extends string | ArrayLike<number> = string> {
     return -1
   }
 
+  /**
+   * `o(n+m)`求搜索串 {@link searchString} 中所有匹配 {@link _pattern} 的位置.
+   * @param searchString 搜索串.
+   * @param position 搜索的起始位置.
+   * @returns 所有匹配的位置.
+   * @alias indexOfAll/findAll
+   */
   searchAll(searchString: T, position = 0): number[] {
     if (searchString.length < this._pattern.length) return []
     const res: number[] = []
@@ -54,7 +124,7 @@ class KMP<T extends string | ArrayLike<number> = string> {
       pos = this.move(pos, searchString[i])
       if (this.accept(pos)) {
         res.push(i - this._pattern.length + 1)
-        pos = 0
+        pos = this._next[pos - 1]
       }
     }
     return res
@@ -88,10 +158,11 @@ class KMP<T extends string | ArrayLike<number> = string> {
   }
 }
 
-export { getNext, getNext as getLPS, KMP }
+export { getNext, indexOfAll, getNext as getLPS, KMP }
 
 if (require.main === module) {
   assert.deepStrictEqual(getNext('ababaaa'), new Uint32Array([0, 0, 1, 2, 3, 1, 1]))
+  assert.deepStrictEqual(indexOfAll('ababaaa', 'ab'), [0, 2])
 
   // https://leetcode.cn/problems/find-the-index-of-the-first-occurrence-in-a-string/
   // eslint-disable-next-line no-inner-declarations

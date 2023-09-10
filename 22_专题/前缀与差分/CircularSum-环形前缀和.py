@@ -18,6 +18,8 @@ def circularPresum(nums: List[int]) -> Callable[[int, int], int]:
         """[start,end)的和.
         0 <= start < end <= n.
         """
+        if start >= end:
+            return 0
         return _cal(end) - _cal(start)
 
     return query

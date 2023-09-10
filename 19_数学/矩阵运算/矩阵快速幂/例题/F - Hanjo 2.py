@@ -5,7 +5,7 @@
 # !dfs预处理状态转移+矩阵快速幂'
 # dp[col][state] 表示当前在第col列，状态为state的方案数
 import sys
-from matqpow import matqpow1, mul
+from matqpow import matqpow1, matmul
 
 sys.setrecursionlimit(int(1e9))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -37,7 +37,7 @@ def hanjo2(ROW: int, COL: int) -> int:
         res[i][i] = 1
 
     trans = matqpow1(trans, COL, MOD)
-    res = mul(trans, res, MOD)
+    res = matmul(trans, res, MOD)
     return res[0][0]
 
 

@@ -4,7 +4,7 @@
 
 # [an  ]     =  [2 1]   * [an-1]
 # [an-1]        [1 0]     [an-2]
-from matqpow import matqpow1, mul
+from matqpow import matqpow1, matmul
 import sys
 
 sys.setrecursionlimit(int(1e9))
@@ -20,5 +20,5 @@ if n <= 2:
 res = [[1], [1]]
 trans = [[2, 1], [1, 0]]
 tmp = matqpow1(trans, n - 2, MOD)
-res = mul(tmp, res, MOD)  # 第N项的值
+res = matmul(tmp, res, MOD)  # 第N项的值
 print(res[0][0])

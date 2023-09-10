@@ -7,7 +7,7 @@ package main
 
 type M = [][]int
 
-type MatPow struct {
+type MatPowWithCache struct {
 	n          int
 	mod        int
 	base       []int
@@ -22,8 +22,8 @@ type MatPow struct {
 //  cacheLevel: 矩阵快速幂的log底数.启用缓存时一般设置为`4`;
 //  当调用 pow 次数很多时,可设置为 `16`;
 //  小于 `2` 时不启用缓存.
-func NewMatPow(base M, mod, cacheLevel int) *MatPow {
-	res := &MatPow{}
+func NewMatPow(base M, mod, cacheLevel int) *MatPowWithCache {
+	res := &MatPowWithCache{}
 	n := len(base)
 	base_ := make([]int, n*n)
 	for i := 0; i < n; i++ {
@@ -50,7 +50,7 @@ func NewMatPow(base M, mod, cacheLevel int) *MatPow {
 }
 
 // 时间复杂度: O(n^3*log(exp))
-func (mp *MatPow) Pow(exp int) M {
+func (mp *MatPowWithCache) Pow(exp int) M {
 	if !mp.useCache {
 		return mp.powWithOutCache(exp)
 	}
@@ -83,7 +83,7 @@ func (mp *MatPow) Pow(exp int) M {
 	return mp.to2D(e)
 }
 
-func (mp *MatPow) mul(mat1, mat2 []int) []int {
+func (mp *MatPowWithCache) mul(mat1, mat2 []int) []int {
 	n := mp.n
 	res := make([]int, n*n)
 	for i := 0; i < n; i++ {
@@ -99,7 +99,7 @@ func (mp *MatPow) mul(mat1, mat2 []int) []int {
 	return res
 }
 
-func (mp *MatPow) powWithOutCache(exp int) M {
+func (mp *MatPowWithCache) powWithOutCache(exp int) M {
 	e := mp.eye(mp.n)
 	b := append(mp.base[:0:0], mp.base...)
 	for exp > 0 {
@@ -113,7 +113,7 @@ func (mp *MatPow) powWithOutCache(exp int) M {
 	return mp.to2D(e)
 }
 
-func (mp *MatPow) eye(n int) []int {
+func (mp *MatPowWithCache) eye(n int) []int {
 	res := make([]int, n*n)
 	for i := 0; i < n; i++ {
 		res[i*n+i] = 1
@@ -121,7 +121,7 @@ func (mp *MatPow) eye(n int) []int {
 	return res
 }
 
-func (mp *MatPow) to2D(mat []int) M {
+func (mp *MatPowWithCache) to2D(mat []int) M {
 	res := make(M, mp.n)
 	for i := 0; i < mp.n; i++ {
 		res[i] = make([]int, mp.n)
@@ -150,7 +150,7 @@ func NewMatrix(row, col int) M {
 	return res
 }
 
-func Mul(m1, m2 M, mod int) M {
+func MatMul(m1, m2 M, mod int) M {
 	res := NewMatrix(len(m1), len(m2[0]))
 	for i := 0; i < len(m1); i++ {
 		for k := 0; k < len(m2); k++ {
@@ -165,7 +165,8 @@ func Mul(m1, m2 M, mod int) M {
 	return res
 }
 
-func Pow(m1 M, exp, mod int) M {
+// matPow/matqpow
+func MatPow(m1 M, exp, mod int) M {
 	n := len(m1)
 	e := NewIdentityMatrix(n)
 	b := make(M, n)
@@ -175,9 +176,9 @@ func Pow(m1 M, exp, mod int) M {
 	}
 	for exp > 0 {
 		if exp&1 == 1 {
-			e = Mul(e, b, mod)
+			e = MatMul(e, b, mod)
 		}
-		b = Mul(b, b, mod)
+		b = MatMul(b, b, mod)
 		exp >>= 1
 	}
 	return e

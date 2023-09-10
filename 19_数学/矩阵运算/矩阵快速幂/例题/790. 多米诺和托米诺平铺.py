@@ -17,7 +17,7 @@ MOD = int(1e9 + 7)
 
 class Solution:
     def numTilings(self, n: int) -> int:
-        init = [[5], [2], [1], [0]]
+        init = [[5], [2], [1], [1]]
         if n <= 3:
             return init[~n][0]
         T = [[2, 0, 1, 0], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]]
@@ -66,3 +66,6 @@ def matqpow1(base: Matrix, exp: int, mod: int) -> Matrix:
 
     pow2 = [base]
     return inner(base, exp, mod)
+
+
+print(Solution().numTilings(4))

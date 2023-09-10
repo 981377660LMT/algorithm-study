@@ -41,7 +41,7 @@ class KMP:
             pos = self.move(pos, s[i])
             if self.isMatched(pos):
                 res.append(i - len(self._pattern) + 1)
-                pos = 0
+                pos = self.next[pos - 1]  # rollback
         return res
 
     def move(self, pos: int, char: str) -> int:

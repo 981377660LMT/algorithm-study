@@ -105,7 +105,7 @@ class MatPow:
         return self.pow(exp)
 
 
-def mul(mat1: M, mat2: M, mod: int) -> M:
+def matmul(mat1: List[List[int]], mat2: List[List[int]], mod: int) -> List[List[int]]:
     """矩阵相乘"""
     i_, j_, k_ = len(mat1), len(mat2[0]), len(mat2)
     res = [[0] * j_ for _ in range(i_)]
@@ -116,16 +116,17 @@ def mul(mat1: M, mat2: M, mod: int) -> M:
     return res
 
 
-def matpow(base: M, exp: int, mod: int) -> M:
+def matpow(base: List[List[int]], exp: int, mod: int) -> List[List[int]]:
+    n = len(base)
     e = [[0] * n for _ in range(n)]
     for i in range(n):
         e[i][i] = 1
     b = [row[:] for row in base]
     while exp:
         if exp & 1:
-            e = mul(e, b, mod)
+            e = matmul(e, b, mod)
         exp >>= 1
-        b = mul(b, b, mod)
+        b = matmul(b, b, mod)
     return e
 
 
@@ -137,7 +138,7 @@ if __name__ == "__main__":
     T = [[1, 1, 1], [1, 0, 0], [0, 1, 0]]
     mp = MatPow(T, MOD, cacheLevel=-1)
     resT = mp ** (n - 3)
-    dp = mul(resT, dp, MOD)
+    dp = matmul(resT, dp, MOD)
     assert dp[0][0] == 639479200
 
     dp = [[2], [1], [1]]  # 初始状态

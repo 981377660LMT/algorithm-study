@@ -1,8 +1,8 @@
 from typing import List
 
 
-def getZ(string: str) -> List[int]:
-    """z算法求字符串公共前后缀的长度
+def zAlgo(string: str) -> List[int]:
+    """z算法求字符串每个后缀与原串的最长公共前缀长度
 
     z[0]=0
     z[i]是s[i:]与s的最长公共前缀(LCP)的长度 (i>=1)
@@ -24,5 +24,5 @@ if __name__ == "__main__":
     class Solution:
         # 求的就是扩展 KMP（Z 数组）的所有元素之和
         def sumScores(self, s: str) -> int:
-            z = getZ(s)
+            z = zAlgo(s)
             return sum(z) + len(s)

@@ -1,18 +1,57 @@
 // 使用方式类似于AC自动机:
 // KMP(pattern)：构造函数, pattern为模式串.
-// Match(s,start): 返回模式串在s中出现的所有位置.
+// IndexOfAll(s,start): 返回模式串在s中出现的所有位置.
 // Move(pos, char): 从当前状态pos沿着char移动到下一个状态, 如果不存在则移动到fail指针指向的状态.
 // IsMatched(pos): 判断当前状态pos是否为匹配状态.
 
 package main
 
-func strStr(haystack string, needle string) int {
-	kmp := NewKMP(needle)
-	res := kmp.Match(haystack, 0)
-	if len(res) == 0 {
-		return -1
+import "fmt"
+
+func main() {
+	a, b := "ababab", "a"
+	fmt.Println(IndexOfAll(a, b, 0))
+}
+
+func GetNext(pattern string) []int {
+	next := make([]int, len(pattern))
+	j := 0
+	for i := 1; i < len(pattern); i++ {
+		for j > 0 && pattern[i] != pattern[j] {
+			j = next[j-1]
+		}
+		if pattern[i] == pattern[j] {
+			j++
+		}
+		next[i] = j
 	}
-	return res[0]
+	return next
+}
+
+// `O(n+m)` 寻找 `shorter` 在 `longer` 中的所有匹配位置.
+func IndexOfAll(longer string, shorter string, position int) []int {
+	if len(shorter) == 0 {
+		return []int{0}
+	}
+	if len(longer) < len(shorter) {
+		return nil
+	}
+	res := []int{}
+	next := GetNext(shorter)
+	hitJ := 0
+	for i := position; i < len(longer); i++ {
+		for hitJ > 0 && longer[i] != shorter[hitJ] {
+			hitJ = next[hitJ-1]
+		}
+		if longer[i] == shorter[hitJ] {
+			hitJ++
+		}
+		if hitJ == len(shorter) {
+			res = append(res, i-len(shorter)+1)
+			hitJ = next[hitJ-1] // 不允许重叠时 hitJ = 0
+		}
+	}
+	return res
 }
 
 // 单模式串匹配
@@ -28,17 +67,30 @@ func NewKMP(pattern string) *KMP {
 	}
 }
 
-func (k *KMP) Match(s string, start int) []int {
+// `o(n+m)`求搜索串 longer 中所有匹配 pattern 的位置.
+//  findAll/indexOfAll
+func (k *KMP) IndexOfAll(longer string, start int) []int {
 	var res []int
 	pos := 0
-	for i := start; i < len(s); i++ {
-		pos = k.Move(pos, s[i])
+	for i := start; i < len(longer); i++ {
+		pos = k.Move(pos, longer[i])
 		if k.IsMatched(pos) {
 			res = append(res, i-len(k.pattern)+1)
-			pos = 0
+			pos = k.next[pos-1]
 		}
 	}
 	return res
+}
+
+func (k *KMP) IndexOf(longer string, start int) int {
+	pos := 0
+	for i := start; i < len(longer); i++ {
+		pos = k.Move(pos, longer[i])
+		if k.IsMatched(pos) {
+			return i - len(k.pattern) + 1
+		}
+	}
+	return -1
 }
 
 func (k *KMP) Move(pos int, char byte) int {
@@ -66,19 +118,4 @@ func (k *KMP) Period(i int) int {
 		return res
 	}
 	return 0
-}
-
-func GetNext(pattern string) []int {
-	next := make([]int, len(pattern))
-	j := 0
-	for i := 1; i < len(pattern); i++ {
-		for j > 0 && pattern[i] != pattern[j] {
-			j = next[j-1]
-		}
-		if pattern[i] == pattern[j] {
-			j++
-		}
-		next[i] = j
-	}
-	return next
 }

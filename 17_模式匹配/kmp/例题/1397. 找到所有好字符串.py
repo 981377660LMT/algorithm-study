@@ -13,7 +13,6 @@ from typing import List, Optional
 MOD = int(1e9 + 7)
 
 
-
 class KMP:
     """单模式串匹配"""
 
@@ -42,7 +41,7 @@ class KMP:
             pos = self.move(pos, s[i])
             if self.isMatched(pos):
                 res.append(i - len(self._pattern) + 1)
-                pos = 0
+                pos = self.next[pos - 1]  # rollback
         return res
 
     def move(self, pos: int, char: str) -> int:
@@ -68,6 +67,7 @@ class KMP:
         if res and (i + 1) > res and (i + 1) % res == 0:
             return res
         return 0
+
 
 def cal(upper: str, evil: str) -> int:
     """字典序小于等于upper且不含evil的字符串个数"""
