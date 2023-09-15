@@ -2,30 +2,35 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable max-len */
 /* eslint-disable eqeqeq */
+
 interface IOptions<NoneLeaf, Leaf> {
-  getChildren: (noneLeaf: NoneLeaf) => Array<Leaf | NoneLeaf>
   isLeaf: (o: Leaf | NoneLeaf) => o is Leaf
+  getChildren: (noneLeaf: NoneLeaf) => Array<Leaf | NoneLeaf>
 }
 
 class TreeManager<NoneLeaf, Leaf> {
   readonly root: NoneLeaf
-  readonly getChildren: (node: Leaf | NoneLeaf) => Array<Leaf | NoneLeaf>
-  readonly isLeaf: (o: Leaf | NoneLeaf) => o is Leaf
+  readonly isLeaf: (o: Leaf | NoneLeaf | undefined | null) => o is Leaf
+  readonly getChildren: (node: Leaf | NoneLeaf | undefined | null) => Array<Leaf | NoneLeaf>
 
   constructor(root: NoneLeaf, options: IOptions<NoneLeaf, Leaf>) {
     this.root = root
-    this.getChildren = (node: Leaf | NoneLeaf) => (options.isLeaf(node) ? [] : options.getChildren(node))
-    this.isLeaf = options.isLeaf
+    this.isLeaf = (o: Leaf | NoneLeaf | undefined | null): o is Leaf => o != undefined && options.isLeaf(o)
+    this.getChildren = (node: Leaf | NoneLeaf | undefined | null) => (!node || options.isLeaf(node) ? [] : options.getChildren(node))
   }
 
   /**
-   * 将结点筛选条件添加到 {@link parentPath} 对应结点的子结点末尾.
+   * 将结点筛选插入到 {@link parentPath} 对应结点的子结点位置之前.
+   * @param pos 插入位置，默认为末尾.
+   * @returns 返回插入结点的路径.
    */
-  addNode = (parentPath: number[], newNode: Leaf | NoneLeaf): void => {
+  insertNode = (parentPath: number[], newNode: Leaf | NoneLeaf, pos?: number): number[] => {
     const parent = this.searchNode(parentPath)
-    this.assertNoneLeaf(parent)
+    this._assertNoneLeaf(parent)
     const children = this.getChildren(parent)
-    children.push(newNode)
+    if (pos == undefined) pos = children.length
+    children.splice(pos, 0, newNode)
+    return [...parentPath, pos]
   }
 
   /**
@@ -35,7 +40,7 @@ class TreeManager<NoneLeaf, Leaf> {
     if (!nodePath.length) throw new Error('path must not be empty when delete')
     const parentPath = nodePath.slice(0, -1)
     const parent = this.searchNode(parentPath)
-    this.assertNoneLeaf(parent)
+    this._assertNoneLeaf(parent)
     const children = this.getChildren(parent)
     const childIndex = nodePath[nodePath.length - 1]
     children.splice(childIndex, 1)
@@ -49,7 +54,7 @@ class TreeManager<NoneLeaf, Leaf> {
     if (!nodePath.length) throw new Error('path must not be empty when update')
     const parentPath = nodePath.slice(0, -1)
     const parent = this.searchNode(parentPath)
-    this.assertNoneLeaf(parent)
+    this._assertNoneLeaf(parent)
     const children = this.getChildren(parent)
     const childIndex = nodePath[nodePath.length - 1]
     children.splice(childIndex, 1, newNode)
@@ -84,11 +89,11 @@ class TreeManager<NoneLeaf, Leaf> {
    * 对树进行剪枝，删除不需要的叶子节点.
    * @param shouldPrune 返回 true 则该叶子节点从树中删除.
    */
-  pruneTree = (shouldPrune: (leaf: Leaf) => boolean): void => {
+  pruneTree = (shouldPrune: (leaf: Leaf, path: number[]) => boolean): void => {
     const dfs = (cur: Leaf | NoneLeaf, parent: Leaf | NoneLeaf | undefined, path: number[]): void => {
       if (this.isLeaf(cur)) {
-        this.assertNoneLeaf(parent)
-        if (shouldPrune(cur)) {
+        this._assertNoneLeaf(parent)
+        if (shouldPrune(cur, path)) {
           const children = this.getChildren(parent)
           children.splice(path[path.length - 1], 1)
         }
@@ -127,7 +132,7 @@ class TreeManager<NoneLeaf, Leaf> {
 
   getPath = (node: Leaf | NoneLeaf): number[] => {
     const dfs = (cur: Leaf | NoneLeaf, path: number[]): boolean => {
-      if (this.isLeaf(cur)) return cur === node
+      if (cur === node) return true
       const children = this.getChildren(cur)
       for (let i = 0; i < children.length; i++) {
         path.push(i)
@@ -157,13 +162,7 @@ class TreeManager<NoneLeaf, Leaf> {
     console.dir(this.root, { depth: null })
   }
 
-  assertLeaf(node: Leaf | NoneLeaf | undefined | null): asserts node is Leaf {
-    if (node == undefined || !this.isLeaf(node)) {
-      throw new TypeError(`node must be a leaf node, but got ${node}`)
-    }
-  }
-
-  assertNoneLeaf(node: Leaf | NoneLeaf | undefined | null): asserts node is NoneLeaf {
+  private _assertNoneLeaf(node: Leaf | NoneLeaf | undefined | null): asserts node is NoneLeaf {
     if (node == undefined || this.isLeaf(node)) {
       throw new TypeError(`node must be a none leaf node, but got ${node}`)
     }
@@ -192,7 +191,7 @@ if (require.main === module) {
     isLeaf: (node): node is Leaf => 'value' in node
   })
 
-  T.addNode([], { value: 233 })
+  T.insertNode([], { value: 233 })
   T.print()
 
   T.removeNode([2, 0])
