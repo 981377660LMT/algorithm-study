@@ -9,7 +9,7 @@ import assert from 'assert'
  * 失配数组.`next[i]`表示`[:i+1]`这一段字符串中最长公共前后缀(不含这一段字符串本身,即真前后缀)的长度.
  * 在AC自动机中被命名为`fail`.
  */
-function getNext(shorter: string | ArrayLike<number>): Uint32Array {
+function getNext(shorter: string | ArrayLike<number | string>): Uint32Array {
   const next = new Uint32Array(shorter.length)
   let j = 0
   for (let i = 1; i < shorter.length; i++) {
@@ -26,7 +26,7 @@ function getNext(shorter: string | ArrayLike<number>): Uint32Array {
 /**
  * `O(n+m)` 寻找 `shorter` 在 `longer` 中的所有匹配位置.
  */
-function indexOfAll<S extends string | ArrayLike<number> = string>(
+function indexOfAll<S extends string | ArrayLike<number | string> = string>(
   longer: S,
   shorter: S,
   position = 0
@@ -47,7 +47,29 @@ function indexOfAll<S extends string | ArrayLike<number> = string>(
   return res
 }
 
-class KMP<T extends string | ArrayLike<number> = string> {
+/**
+ * `O(n+m)` 寻找 `shorter` 在 `longer` 中的第一个匹配位置.
+ */
+function indexOf<S extends string | ArrayLike<number | string> = string>(
+  longer: S,
+  shorter: S,
+  position = 0
+): number {
+  if (shorter.length === 0) return 0
+  if (longer.length < shorter.length) return -1
+  const next = getNext(shorter)
+  let hitJ = 0
+  for (let i = position; i < longer.length; i++) {
+    while (hitJ > 0 && longer[i] !== shorter[hitJ]) hitJ = next[hitJ - 1]
+    if (longer[i] === shorter[hitJ]) hitJ++
+    if (hitJ === shorter.length) {
+      return i - shorter.length + 1
+    }
+  }
+  return -1
+}
+
+class KMP<T extends string | ArrayLike<number | string> = string> {
   /**
    * `O(n+m)` 寻找 `shorter` 在 `longer` 中的所有匹配位置.
    * @param longer 搜索串.
@@ -55,7 +77,7 @@ class KMP<T extends string | ArrayLike<number> = string> {
    * @param position 搜索的起始位置.
    * @returns 所有匹配的位置.
    */
-  static indexOfAll<S extends string | ArrayLike<number> = string>(
+  static indexOfAll<S extends string | ArrayLike<number | string> = string>(
     longer: S,
     shorter: S,
     position = 0
@@ -76,7 +98,7 @@ class KMP<T extends string | ArrayLike<number> = string> {
     return res
   }
 
-  static getNext(shorter: string | ArrayLike<number>): Uint32Array {
+  static getNext(shorter: string | ArrayLike<number | string>): Uint32Array {
     const next = new Uint32Array(shorter.length)
     let j = 0
     for (let i = 1; i < shorter.length; i++) {
@@ -158,7 +180,7 @@ class KMP<T extends string | ArrayLike<number> = string> {
   }
 }
 
-export { getNext, indexOfAll, getNext as getLPS, KMP }
+export { getNext, indexOf, indexOfAll, getNext as getLPS, KMP }
 
 if (require.main === module) {
   assert.deepStrictEqual(getNext('ababaaa'), new Uint32Array([0, 0, 1, 2, 3, 1, 1]))

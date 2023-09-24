@@ -7,10 +7,12 @@
 
 # https://www.ruanyifeng.com/blog/2013/05/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm.html
 
-from typing import List, Optional
+from typing import Generic, List, Optional, Sequence, TypeVar
+
+T = TypeVar("T", int, str)
 
 
-def getNext(needle: str) -> List[int]:
+def getNext(needle: Sequence[T]) -> List[int]:
     """kmp O(n)求 `needle`串的 `next`数组
     `next[i]`表示`[:i+1]`这一段字符串中最长公共前后缀(不含这一段字符串本身,即真前后缀)的长度
     """
@@ -25,7 +27,7 @@ def getNext(needle: str) -> List[int]:
     return next
 
 
-def indexOfAll(longer, shorter, start=0) -> List[int]:
+def indexOfAll(longer: Sequence[T], shorter: Sequence[T], start=0) -> List[int]:
     """kmp O(n+m)求搜索串 `longer` 中所有匹配 `shorter` 的位置."""
     if not shorter:
         return [0]
@@ -45,11 +47,29 @@ def indexOfAll(longer, shorter, start=0) -> List[int]:
     return res
 
 
-class KMP:
+def indexOf(longer: Sequence[T], shorter: Sequence[T], start=0) -> int:
+    """kmp O(n+m)求搜索串 `longer` 中第一个匹配 `shorter` 的位置."""
+    if not shorter:
+        return 0
+    if len(longer) < len(shorter):
+        return -1
+    next = getNext(shorter)
+    hitJ = 0
+    for i in range(start, len(longer)):
+        while hitJ > 0 and longer[i] != shorter[hitJ]:
+            hitJ = next[hitJ - 1]
+        if longer[i] == shorter[hitJ]:
+            hitJ += 1
+        if hitJ == len(shorter):
+            return i - len(shorter) + 1
+    return -1
+
+
+class KMP(Generic[T]):
     """单模式串匹配"""
 
     @staticmethod
-    def getNext(pattern: str) -> List[int]:
+    def getNext(pattern: Sequence[T]) -> List[int]:
         next = [0] * len(pattern)
         j = 0
         for i in range(1, len(pattern)):
@@ -62,11 +82,11 @@ class KMP:
 
     __slots__ = ("next", "_pattern")
 
-    def __init__(self, pattern: str):
+    def __init__(self, pattern: Sequence[T]):
         self._pattern = pattern
         self.next = self.getNext(pattern)
 
-    def findAll(self, longer: str, start=0) -> List[int]:
+    def findAll(self, longer: Sequence[T], start=0) -> List[int]:
         """findAll/indexOfAll.
         `o(n+m)`求搜索串 longer 中所有匹配 pattern 的位置.
         """
@@ -79,7 +99,7 @@ class KMP:
                 pos = self.next[pos - 1]  # rollback
         return res
 
-    def find(self, longer: str, start=0) -> int:
+    def find(self, longer: Sequence[T], start=0) -> int:
         """find/indexOf.
         `o(n+m)`求搜索串 longer 中第一个匹配 pattern 的位置.
         """
@@ -90,7 +110,7 @@ class KMP:
                 return i - len(self._pattern) + 1
         return -1
 
-    def move(self, pos: int, input_: str) -> int:
+    def move(self, pos: int, input_: T) -> int:
         assert 0 <= pos < len(self._pattern)
         while pos and input_ != self._pattern[pos]:
             pos = self.next[pos - 1]  # rollback
@@ -116,6 +136,17 @@ class KMP:
 
 
 if __name__ == "__main__":
+    # 2855. 使数组成为递增数组的最少右移次数
+    # https://leetcode.cn/problems/minimum-right-shifts-to-sort-the-array/description/
+    class Solution:
+        def minimumRightShifts(self, nums: List[int]) -> int:
+            index = indexOf(nums[::-1] + nums[::-1], sorted(nums)[::-1])
+            return index if index != -1 else -1
+
+    print(Solution().minimumRightShifts([3, 4, 5, 1, 2]))
+    # [1,3,5]
+    print(Solution().minimumRightShifts([1, 3, 5]))
+
     next = getNext("aabaabaabaab")  # 模式串的next数组
     assert next == [0, 1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
@@ -133,3 +164,10 @@ if __name__ == "__main__":
     assert nextPos == 2
     nextPos = kmp.move(nextPos, "b")
     assert kmp.isMatched(nextPos)
+
+    next = KMP.getNext([1, 2, 3, 1, 2, 3, 1, 2, 3, 4])
+    assert next == [0, 0, 0, 1, 2, 3, 4, 5, 6, 0]
+    next = KMP.getNext([1, 2, 3, 1, 2, 3, 1, 2, 3, 1])
+    assert next == [0, 0, 0, 1, 2, 3, 4, 5, 6, 7]
+    kmp = KMP([1, 2, 3, 1, 2, 3, 1, 2, 3, 1])
+    assert kmp.findAll([1, 2, 3, 1, 2, 3, 1, 2, 3, 1]) == [0]

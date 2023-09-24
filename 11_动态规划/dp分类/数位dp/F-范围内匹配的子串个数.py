@@ -6,14 +6,16 @@ MOD = 998244353
 
 
 from functools import lru_cache
-from typing import List, Optional
+from typing import Generic, List, Optional, Sequence, TypeVar
+
+T = TypeVar("T", int, str)
 
 
-class KMP:
+class _KMP(Generic[T]):
     """单模式串匹配"""
 
     @staticmethod
-    def getNext(pattern: str) -> List[int]:
+    def getNext(pattern: Sequence[T]) -> List[int]:
         next = [0] * len(pattern)
         j = 0
         for i in range(1, len(pattern)):
@@ -26,11 +28,11 @@ class KMP:
 
     __slots__ = ("next", "_pattern")
 
-    def __init__(self, pattern: str):
+    def __init__(self, pattern: Sequence[T]):
         self._pattern = pattern
         self.next = self.getNext(pattern)
 
-    def match(self, s: str, start=0) -> List[int]:
+    def match(self, s: Sequence[T], start=0) -> List[int]:
         res = []
         pos = 0
         for i in range(start, len(s)):
@@ -40,7 +42,7 @@ class KMP:
                 pos = self.next[pos - 1]  # rollback
         return res
 
-    def move(self, pos: int, char: str) -> int:
+    def move(self, pos: int, char: T) -> int:
         assert 0 <= pos < len(self._pattern)
         while pos and char != self._pattern[pos]:
             pos = self.next[pos - 1]  # rollback
@@ -90,7 +92,7 @@ def cal(upper: str, need: str) -> int:
         return res
 
     n = len(upper)
-    kmp = KMP(need)
+    kmp = _KMP(need)
     upperNums = [int(x) for x in upper]
     res = dfs(0, True, True, 0, 0)
     dfs.cache_clear()
