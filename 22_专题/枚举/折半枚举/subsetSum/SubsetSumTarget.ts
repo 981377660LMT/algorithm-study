@@ -12,20 +12,24 @@ function subsetSumTarget(arr: number[], target: number): [res: number[], ok: boo
   const n = arr.length
   if (!n) return [[], false]
   let max = 0
+  let sum = 0
   for (let i = 0; i < n; i++) {
     max = Math.max(max, arr[i])
+    sum += arr[i]
   }
 
   const cost1 = n * max
-  const cost2 = (n / 32) * target // 经验值
-  let cost3 = 2e15
+  const cost2 = sum * Math.floor(Math.sqrt(sum))
+  const cost3 = (n / 32) * target // 经验值
+  let cost4 = 2e15
   if (n <= 50) {
-    cost3 = 1 << ((n >>> 1) + 2)
+    cost4 = 1 << ((n >>> 1) + 2)
   }
 
-  const minCost = Math.min(cost1, cost2, cost3)
+  const minCost = Math.min(cost1, cost2, cost3, cost4)
   if (minCost === cost1) return subsetSumTargetDp(arr, target)
-  if (minCost === cost2) return subsetSumTargetBitset(arr, target)
+  if (minCost === cost2) return subsetSumTargetDp2(arr, target)
+  if (minCost === cost3) return subsetSumTargetBitset(arr, target)
   return subsetSumTargetMeetInMiddle(arr, target)
 }
 
@@ -106,6 +110,62 @@ function subsetSumTargetDp(arr: number[], target: number): [res: number[], ok: b
   for (let i = 0; i < n; i++) {
     if (used[i]) res.push(i)
   }
+  return [res, true]
+}
+
+/**
+ * 能否从arr中选出若干个数，使得它们的和为target.
+ * @complexity O(sum(arr) ^ 1.5).
+ */
+function subsetSumTargetDp2(arr: number[], target: number): [res: number[], ok: boolean] {
+  let sum = 0
+  for (let i = 0; i < arr.length; i++) {
+    sum += arr[i]
+  }
+  if (target > sum) {
+    return [[], false]
+  }
+
+  const counter = new Uint32Array(sum + 1)
+  const dp = new Uint8Array(sum + 1)
+  const last = new Uint32Array(sum + 1)
+  const id: Map<number, number[]> = new Map()
+  for (let i = 0; i < arr.length; i++) {
+    const v = arr[i]
+    if (v <= sum) {
+      if (!id.has(v)) id.set(v, [])
+      id.get(v)!.push(i)
+      counter[v]++
+    }
+  }
+
+  dp[0] = 1
+  for (let i = 1; i <= sum; i++) {
+    if (!counter[i]) continue
+    for (let j = 0; j < i; j++) {
+      let c = 0
+      for (let k = j; k <= sum; k += i) {
+        if (dp[k] === 1) {
+          c = counter[i]
+        } else if (c > 0) {
+          dp[k] = 1
+          c--
+          last[k] = id.get(i)![c]
+        }
+      }
+    }
+  }
+
+  if (!dp[target]) {
+    return [[], false]
+  }
+
+  const res: number[] = []
+  while (target > 0) {
+    res.push(last[target])
+    target -= arr[last[target]]
+  }
+
   return [res, true]
 }
 
@@ -204,6 +264,7 @@ export { subsetSumTarget, subsetSumTargetDp, subsetSumTargetBitset, subsetSumTar
 
 if (require.main === module) {
   console.log(subsetSumTargetDp([2, 3, 4, 5, 6, 7, 8, 9], 10))
+  console.log(subsetSumTargetDp2([2, 3, 4, 5, 6, 7, 8, 9], 10))
   console.log(subsetSumTargetBitset([2, 3, 4, 5, 6, 7, 8, 9], 10))
   console.log(subsetSumTargetMeetInMiddle([2, 3, 4, 5, 6, 7, 8, 9], 10))
 
@@ -219,6 +280,10 @@ if (require.main === module) {
   console.time('subsetSumTargetBitset')
   subsetSumTargetBitset(nums, target)
   console.timeEnd('subsetSumTargetBitset')
+
+  console.time('subsetSumTargetDp2')
+  subsetSumTargetDp2(nums, target)
+  console.timeEnd('subsetSumTargetDp2')
 
   const cost1 = n * max
   const cost2 = (n * target) / 32

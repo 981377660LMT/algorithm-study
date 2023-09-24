@@ -126,9 +126,6 @@ func (b *BITMap) QueryRange(l, r int) int {
 	return b.Query(r) - b.Query(l)
 }
 
-//
-//
-//
 // !Range Add Range Sum, 0-based.
 type BIT2Array struct {
 	n     int
@@ -145,7 +142,8 @@ func NewBITArray2(n int) *BIT2Array {
 }
 
 // 切片内[start, end)的每个元素加上delta.
-//  0<=start<=end<=n
+//
+//	0<=start<=end<=n
 func (b *BIT2Array) Add(start, end, delta int) {
 	end--
 	b.add(start, delta)
@@ -153,7 +151,8 @@ func (b *BIT2Array) Add(start, end, delta int) {
 }
 
 // 求切片内[start, end)的和.
-//  0<=start<=end<=n
+//
+//	0<=start<=end<=n
 func (b *BIT2Array) Query(start, end int) int {
 	end--
 	return b.query(end) - b.query(start-1)
@@ -178,9 +177,6 @@ func (b *BIT2Array) query(index int) (res int) {
 	return res
 }
 
-//
-//
-//
 // !Range Add Range Sum, 0-based.
 type BIT2Map struct {
 	n     int
@@ -242,9 +238,6 @@ func maximumWhiteTiles(tiles [][]int, carpetLen int) int {
 	return res
 }
 
-//
-//
-//
 // !二维区间查询 区间修改
 type BIT2D struct {
 	row   int
@@ -273,8 +266,9 @@ func NewBIT2D(row, col int) *BIT2D {
 	}
 }
 
-//  (row1,col1) 到 (row2,col2) 里的每一个点的值加上delta
-//   0<=row1<=row2<=ROW-1, 0<=col1<=col2<=COL-1
+// (row1,col1) 到 (row2,col2) 里的每一个点的值加上delta
+//
+//	0<=row1<=row2<=ROW-1, 0<=col1<=col2<=COL-1
 func (b *BIT2D) Add(row1 int, col1 int, row2 int, col2 int, delta int) {
 	b.add(row1, col1, delta)
 	b.add(row2+1, col1, -delta)
@@ -283,7 +277,8 @@ func (b *BIT2D) Add(row1 int, col1 int, row2 int, col2 int, delta int) {
 }
 
 // 查询左上角 (row1,col1) 到右下角 (row2,col2) 的和
-//  0<=row1<=row2<=ROW-1, 0<=col1<=col2<=COL-1
+//
+//	0<=row1<=row2<=ROW-1, 0<=col1<=col2<=COL-1
 func (b *BIT2D) Query(row1 int, col1 int, row2 int, col2 int) int {
 	return b.query(row2, col2) - b.query(row2, col1-1) - b.query(row1-1, col2) + b.query(row1-1, col1-1)
 }
@@ -328,10 +323,6 @@ func max(a, b int) int {
 	return b
 }
 
-//
-//
-//
-//
 // Fenwick Tree Prefix
 // https://suisen-cp.github.io/cp-library-cpp/library/datastructure/fenwick_tree/fenwick_tree_prefix.hpp
 // 如果每次都是查询前缀，那么可以使用Fenwick Tree Prefix 维护 monoid.
@@ -405,4 +396,5 @@ func main() {
 	fmt.Println(bitArray)
 	bitArray.Add(1, 1)
 	fmt.Println(bitArray)
+
 }

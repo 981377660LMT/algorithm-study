@@ -7,6 +7,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"math/bits"
 	"os"
 	"sort"
@@ -16,29 +17,33 @@ import (
 
 func main() {
 	// yuki04()
-	fmt.Println(SubsetSumTargetBitset([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
+	// fmt.Println(SubsetSumTargetDp2([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
+	testTime()
 }
 
 func testTime() {
-	max := int(1e5)
-	n := 200
+	max := int(1e7)
+	n := 20
 	nums := make([]int, n)
 	for i := range nums {
 		nums[i] = max
 	}
 
-	target := int(1e7)
+	target := int(1e6)
 	time1 := time.Now()
 	SubsetSumTargetDp(nums, target)
 	time2 := time.Now()
 	SubsetSumTargetBitset(nums, target)
 	time3 := time.Now()
+	SubsetSumTargetDp2(nums, target)
+	time4 := time.Now()
 
 	cost1 := n * max
 	cost2 := n * target / 100 // TODO, 待调整
 
 	fmt.Println(time2.Sub(time1)) // 1.5s
 	fmt.Println(time3.Sub(time2)) // 300ms
+	fmt.Println(time4.Sub(time3))
 	fmt.Println(cost1, cost2)
 }
 
@@ -78,21 +83,27 @@ func SubsetSumTarget(nums []int, target int) (res []int, ok bool) {
 		return
 	}
 	max_ := 0
+	sum := 0
 	for _, v := range nums {
 		max_ = max(max_, v)
+		sum += v
 	}
 
 	cost1 := n * max_
-	cost2 := n * target / 100 // 经验值
-	cost3 := INF
+	cost2 := sum * int(math.Sqrt(float64(sum)))
+	cost3 := n * target / 100 // 经验值
+	cost4 := INF
 	if n <= 50 {
-		cost3 = 1 << ((n / 2) + 2)
+		cost4 = 1 << ((n / 2) + 2)
 	}
-	minCost := min(cost1, min(cost2, cost3))
+	minCost := min(cost1, min(cost2, min(cost3, cost4)))
 	if minCost == cost1 {
 		return SubsetSumTargetDp(nums, target)
 	}
 	if minCost == cost2 {
+		return SubsetSumTargetDp2(nums, target)
+	}
+	if minCost == cost3 {
 		return SubsetSumTargetBitset(nums, target)
 	}
 	return SubsetSumTargetMeetInMiddle(nums, target)
@@ -185,6 +196,60 @@ func SubsetSumTargetDp(nums []int, target int) (res []int, ok bool) {
 		if used[i] {
 			res = append(res, i)
 		}
+	}
+
+	ok = true
+	return
+}
+
+// 能否用nums中的若干个数凑出和为target.
+//
+//	O(sum(nums)^1.5)
+func SubsetSumTargetDp2(nums []int, target int) (res []int, ok bool) {
+	sum := 0
+	for _, v := range nums {
+		sum += v
+	}
+	if target > sum {
+		return
+	}
+	counter := make([]int, sum+1)
+	dp := make([]int, sum+1)
+	last := make([]int, sum+1)
+	id := make(map[int][]int)
+	for i, v := range nums {
+		if v <= sum {
+			id[v] = append(id[v], i)
+			counter[v]++
+		}
+	}
+
+	dp[0] = 1
+	for i := 1; i <= sum; i++ {
+		if counter[i] == 0 {
+			continue
+		}
+		for j := 0; j < i; j++ {
+			c := 0
+			for k := j; k <= sum; k += i {
+				if dp[k] == 1 {
+					c = counter[i]
+				} else if c > 0 {
+					dp[k] = 1
+					c--
+					last[k] = id[i][c]
+				}
+			}
+		}
+	}
+
+	if dp[target] == 0 {
+		return
+	}
+
+	for target > 0 {
+		res = append(res, last[target])
+		target -= nums[last[target]]
 	}
 
 	ok = true
