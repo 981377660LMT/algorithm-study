@@ -33,9 +33,9 @@ function countPalindromePaths(parent: number[], s: string): number {
   function decomposition(cur: number, pre: number): void {
     // 点分树的子树中的答案(不经过重心)
     removed[cur] = 1
-    const _nexts = centTree[cur]
-    for (let i = 0; i < _nexts.length; i++) {
-      const next = _nexts[i]
+    const nexts_ = centTree[cur]
+    for (let i = 0; i < nexts_.length; i++) {
+      const next = nexts_[i]
       if (!removed[next]) {
         decomposition(next, cur)
       }
@@ -50,7 +50,7 @@ function countPalindromePaths(parent: number[], s: string): number {
       const cost = nexts[i][1]
       if (next === pre || removed[next]) continue
 
-      const sub = new Map<number, number>() // state -> count
+      const sub = new Map<number, number>() // state -> count, 统计子树内(不含cur)
       collect(next, cur, cost, sub)
       sub.forEach((count, state) => {
         res += count * (counter.get(state) || 0)

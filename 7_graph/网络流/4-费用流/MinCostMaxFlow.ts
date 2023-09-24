@@ -191,7 +191,7 @@ if (require.main === module) {
   }
 
   // https://leetcode.cn/problems/minimum-moves-to-spread-stones-over-grid/solutions/2435374/zui-xiao-fei-yong-zui-da-liu-by-98137766-afei/
-  // 将石头分散到网格图的最少移动次数
+  // 将石头分散到网格图的最少移动次数(移动石头)
   // 1.源点向所有格子连一条容量为 grid[r][c]grid[r][c]grid[r][c], 费用为000的边；
   // 2.每个格子的向其他格子连一条容量为INFINFINF, 费用为曼哈顿距离曼哈顿距离曼哈顿距离的边；
   // 3.每个格子向汇点连一条容量为111, 费用为000的边；

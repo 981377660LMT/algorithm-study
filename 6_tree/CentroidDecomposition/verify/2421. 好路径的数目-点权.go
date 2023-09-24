@@ -52,7 +52,7 @@ func numberOfGoodPaths(vals []int, edges [][]int) int {
 			if next == pre || removed[next] {
 				continue
 			}
-			sub := map[int]int{} // value -> count
+			sub := map[int]int{} // value -> count, 统计子树内(不含cur)
 			collect(next, cur, vals[cur], sub)
 			for k, v := range sub {
 				res += v * counter[k]

@@ -62,7 +62,7 @@ func countPalindromePaths(parent []int, s string) int64 {
 			if next == pre || removed[next] {
 				continue
 			}
-			sub := map[int]int{} // state -> count
+			sub := map[int]int{} // state -> count，统计子树内(不含cur)
 			collect(next, cur, cost, sub)
 			for s, v := range sub {
 				res += v * counter[s]
