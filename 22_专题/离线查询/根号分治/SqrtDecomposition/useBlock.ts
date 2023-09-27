@@ -1,4 +1,7 @@
-function useBlock(arr: ArrayLike<unknown>): {
+function useBlock(
+  arr: ArrayLike<unknown>,
+  blockSize = (Math.sqrt(arr.length) + 1) | 0
+): {
   /** 下标所属的块. */
   belong: Uint16Array
   /** 每个块的起始下标(包含). */
@@ -9,7 +12,6 @@ function useBlock(arr: ArrayLike<unknown>): {
   blockCount: number
 } {
   const n = arr.length
-  const blockSize = (Math.sqrt(n) + 1) | 0
   const blockCount = 1 + ((n / blockSize) | 0)
   const blockStart = new Uint32Array(blockCount)
   const blockEnd = new Uint32Array(blockCount)
