@@ -15,7 +15,7 @@
 
 import assert from 'assert'
 
-import { SparseTableUint32 } from '../../22_专题/RMQ问题/SparseTable'
+import { SparseTableInt32 } from '../../22_专题/RMQ问题/SparseTable'
 
 /**
  * 后缀数组.
@@ -73,7 +73,7 @@ class SuffixArray {
   }
 
   private _lcp(i: number, j: number): number {
-    if (!this._queryMin) this._queryMin = new SparseTableUint32(this.height, () => 0, Math.min)
+    if (!this._queryMin) this._queryMin = new SparseTableInt32(this.height, () => 0, Math.min)
     if (i === j) return this._n - i
     let r1 = this.rank[i]
     let r2 = this.rank[j]
@@ -179,10 +179,7 @@ class SuffixArray {
     }
   }
 
-  private static _rankLcp(
-    ords: ArrayLike<number>,
-    sa: ArrayLike<number>
-  ): [rank: number[], lcp: number[]] {
+  private static _rankLcp(ords: ArrayLike<number>, sa: ArrayLike<number>): [rank: number[], lcp: number[]] {
     const n = ords.length
     const rank = Array(n)
     const lcp = Array(n)
@@ -364,13 +361,7 @@ if (require.main === module) {
     return res
   }
 
-  function compareSubstrNaive(
-    s: ArrayLike<number>,
-    a: number,
-    b: number,
-    c: number,
-    d: number
-  ): -1 | 0 | 1 {
+  function compareSubstrNaive(s: ArrayLike<number>, a: number, b: number, c: number, d: number): -1 | 0 | 1 {
     while (a < b && c < d && s[a] === s[c]) {
       a++
       c++

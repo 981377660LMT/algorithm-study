@@ -1,6 +1,9 @@
+/* eslint-disable no-inner-declarations */
 /* eslint-disable no-param-reassign */
 
 import assert from 'assert'
+
+const INF = 2e15
 
 /**
  * st表适用于可重复贡献问题/RMQ静态区间最值查询。
@@ -89,12 +92,12 @@ class SparseTable<S = number> {
 }
 
 /**
- * 元素类型为`uint32`类型的st表.
+ * 元素类型为`int32`类型的st表.
  */
-class SparseTableUint32 {
+class SparseTableInt32 {
   private readonly _e: () => number
   private readonly _op: (a: number, b: number) => number
-  private readonly _dp: Uint32Array
+  private readonly _dp: Int32Array
   private readonly _n: number
 
   constructor(nums: ArrayLike<number>, e: () => number, op: (a: number, b: number) => number) {
@@ -103,7 +106,7 @@ class SparseTableUint32 {
     this._n = n
     this._e = e
     this._op = op
-    this._dp = new Uint32Array(size * n) // !dp[i][j]表示区间[j,j+2**i)的贡献值
+    this._dp = new Int32Array(size * n) // !dp[i][j]表示区间[j,j+2**i)的贡献值
     for (let i = 0; i < n; i++) this._dp[i] = nums[i]
     for (let i = 1; i < size; i++) {
       for (let j = 0; j < n - (1 << i) + 1; j++) {
@@ -164,7 +167,7 @@ class SparseTableUint32 {
   }
 }
 
-export { SparseTable, SparseTableUint32 }
+export { SparseTable, SparseTableInt32 }
 
 if (require.main === module) {
   const st = new SparseTable(
