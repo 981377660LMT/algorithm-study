@@ -47,10 +47,11 @@ func main() {
 }
 
 // dag: 博弈的每个状态组成的有向无环图.
-//  返回值: 每个状态的Grundy数.
-//  grundy[i] = mex{grundy[j] | j in dag[i]}.
-//  - 如果grundy为0,则先手必败,否则先手必胜.
-//  - 若一个母状态可以拆分成多个相互独立的子状态，`则母状态的 SG 数等于各个子状态的 SG 数的异或。`
+//
+//	返回值: 每个状态的Grundy数.
+//	grundy[i] = mex{grundy[j] | j in dag[i]}.
+//	- 如果grundy为0,则先手必败,否则先手必胜.
+//	- 若一个母状态可以拆分成多个相互独立的子状态，`则母状态的 SG 数等于各个子状态的 SG 数的异或。`
 func GrundyNumber(dag [][]int) (grundy []int) {
 	order, ok := topoSort(dag)
 	if !ok {
@@ -80,14 +81,14 @@ func GrundyNumber(dag [][]int) (grundy []int) {
 
 func topoSort(dag [][]int) (order []int, ok bool) {
 	n := len(dag)
-	visited, temp := make([]bool, n), make([]bool, n)
+	visited, onPath := make([]bool, n), make([]bool, n)
 	var dfs func(int) bool
 	dfs = func(i int) bool {
-		if temp[i] {
+		if onPath[i] {
 			return false
 		}
 		if !visited[i] {
-			temp[i] = true
+			onPath[i] = true
 			for _, v := range dag[i] {
 				if !dfs(v) {
 					return false
@@ -95,7 +96,7 @@ func topoSort(dag [][]int) (order []int, ok bool) {
 			}
 			visited[i] = true
 			order = append(order, i)
-			temp[i] = false
+			onPath[i] = false
 		}
 		return true
 	}
@@ -114,10 +115,6 @@ func topoSort(dag [][]int) (order []int, ok bool) {
 	return order, true
 }
 
-//
-//
-//
-//
 // 埃氏筛
 type eratosthenesSieve struct {
 	minPrime []int
