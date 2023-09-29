@@ -2,6 +2,7 @@
 // word-RAM model RMQ
 // 一个RMQ问题的快速算法，以及区间众数 - hqztrue的文章 - 知乎
 // https://zhuanlan.zhihu.com/p/79423299
+
 package main
 
 import (
@@ -44,13 +45,14 @@ type LinearRMQ struct {
 
 // n: 序列长度.
 // less: 入参为两个索引,返回值表示索引i处的值是否小于索引j处的值.
-//  消除了泛型.
+//
+//	消除了泛型.
 func NewLinearRMQ(n int, less func(i, j int) bool) *LinearRMQ {
 	res := &LinearRMQ{less: less}
-	stack := make([]int, 0, 32)
+	stack := make([]int, 0, 64)
 	small := make([]int, 0, n)
 	var large [][]int
-	large = append(large, make([]int, 0, n>>5))
+	large = append(large, make([]int, 0, n>>6))
 	for i := 0; i < n; i++ {
 		for len(stack) > 0 && !less(stack[len(stack)-1], i) {
 			stack = stack[:len(stack)-1]
@@ -59,16 +61,16 @@ func NewLinearRMQ(n int, less func(i, j int) bool) *LinearRMQ {
 		if len(stack) > 0 {
 			tmp = small[stack[len(stack)-1]]
 		}
-		small = append(small, tmp|(1<<(i&31)))
+		small = append(small, tmp|(1<<(i&63)))
 		stack = append(stack, i)
-		if (i+1)&31 == 0 {
+		if (i+1)&63 == 0 {
 			large[0] = append(large[0], stack[0])
 			stack = stack[:0]
 		}
 	}
 
-	for i := 1; (i << 1) <= n>>5; i <<= 1 {
-		csz := n>>5 + 1 - (i << 1)
+	for i := 1; (i << 1) <= n>>6; i <<= 1 {
+		csz := n>>6 + 1 - (i << 1)
 		v := make([]int, csz)
 		for k := 0; k < csz; k++ {
 			back := large[len(large)-1]
@@ -88,23 +90,23 @@ func (rmq *LinearRMQ) Query(start, end int) (minIndex int) {
 		panic(fmt.Sprintf("start(%d) should be less than end(%d)", start, end))
 	}
 	end--
-	left := start>>5 + 1
-	right := end >> 5
+	left := start>>6 + 1
+	right := end >> 6
 	if left < right {
-		msb := bits.Len32(uint32(right-left)) - 1
+		msb := bits.Len64(uint64(right-left)) - 1
 		cache := rmq.large[msb]
-		i := (left-1)<<5 + bits.TrailingZeros32(uint32(rmq.small[left<<5-1]&(^0<<(start&31))))
+		i := (left-1)<<6 + bits.TrailingZeros64(uint64(rmq.small[left<<6-1]&(^0<<(start&63))))
 		cand1 := rmq._getMin(i, cache[left])
-		j := right<<5 + bits.TrailingZeros32(uint32(rmq.small[end]))
+		j := right<<6 + bits.TrailingZeros64(uint64(rmq.small[end]))
 		cand2 := rmq._getMin(cache[right-(1<<msb)], j)
 		return rmq._getMin(cand1, cand2)
 	}
 	if left == right {
-		i := (left-1)<<5 + bits.TrailingZeros32(uint32(rmq.small[left<<5-1]&(^0<<(start&31))))
-		j := left<<5 + bits.TrailingZeros32(uint32(rmq.small[end]))
+		i := (left-1)<<6 + bits.TrailingZeros64(uint64(rmq.small[left<<6-1]&(^0<<(start&63))))
+		j := left<<6 + bits.TrailingZeros64(uint64(rmq.small[end]))
 		return rmq._getMin(i, j)
 	}
-	return right<<5 + bits.TrailingZeros32(uint32(rmq.small[end]&(^0<<(start&31))))
+	return right<<6 + bits.TrailingZeros64(uint64(rmq.small[end]&(^0<<(start&63))))
 }
 
 func (rmq *LinearRMQ) _getMin(i, j int) int {

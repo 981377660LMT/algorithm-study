@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"sort"
 )
 
 // 给出一个长为 n 的数列，以及 n 个操作，操作涉及询问区间的最小众数。
@@ -23,138 +24,134 @@ func main() {
 
 	var n int
 	fmt.Fscan(in, &n)
-	nums := make([]E, n)
+	nums := make([]int, n)
 	for i := range nums {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	sqrt := NewSqrtDecomposition(nums, 1+int(math.Sqrt(float64(n))))
+	block := UseBlock(nums)
+	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
+
+	D := NewDictionary()
+	newNums := make([]int, n)
+	mp := make([][]int, n+1) // n 表示不存在的数字.
+	for i := range nums {
+		newNums[i] = D.Id(nums[i])
+		mp[newNums[i]] = append(mp[newNums[i]], i)
+	}
+
+	// [start,end)区间内等于target的元素个数.
+	rangeFreq := func(start, end int, target int) int {
+		pos := mp[target]
+		return sort.SearchInts(pos, end) - sort.SearchInts(pos, start)
+	}
+
+	// !O(nsqrt(n))预处理从第i块到第j块的区间最小众数(0<=i<=j<blockCount).
+	blockMode := make([][]int, blockCount)
+	for i := 0; i < blockCount; i++ {
+		blockMode[i] = make([]int, blockCount)
+		for j := 0; j < blockCount; j++ {
+			blockMode[i][j] = n
+		}
+	}
+	for bid1 := 0; bid1 < blockCount; bid1++ {
+		counter := make([]int, D.Size())
+		res, max_ := 0, 0
+		for j := blockStart[bid1]; j < n; j++ {
+			bid2 := belong[j]
+			counter[newNums[j]]++
+			if counter[newNums[j]] > max_ || (counter[newNums[j]] == max_ && D.Value(newNums[j]) < D.Value(res)) {
+				max_ = counter[newNums[j]]
+				res = newNums[j]
+			}
+			blockMode[bid1][bid2] = res
+		}
+	}
+
+	// 查询[start,end)区间的最小众数.
+	// ![start,end)的区间众数，一定是在[start,end)中一段连续的整块的众数和两边非完整块的数的并集内。
+	queryMode := func(start, end int) int {
+		bid1, bid2 := belong[start], belong[end-1]
+		res, max_ := 0, 0
+		if bid1 == bid2 {
+			for i := start; i < end; i++ {
+				freq := rangeFreq(start, end, newNums[i])
+				if freq > max_ || (freq == max_ && D.Value(newNums[i]) < D.Value(res)) {
+					max_ = freq
+					res = newNums[i]
+				}
+			}
+		} else {
+			res = blockMode[bid1+1][bid2-1]
+			max_ = rangeFreq(start, end, res)
+			for i := start; i < blockEnd[bid1]; i++ {
+				freq := rangeFreq(start, end, newNums[i])
+				if freq > max_ || (freq == max_ && D.Value(newNums[i]) < D.Value(res)) {
+					res = newNums[i]
+					max_ = freq
+				}
+			}
+			for i := blockStart[bid2]; i < end; i++ {
+				freq := rangeFreq(start, end, newNums[i])
+				if freq > max_ || (freq == max_ && D.Value(newNums[i]) < D.Value(res)) {
+					res = newNums[i]
+					max_ = freq
+				}
+			}
+		}
+
+		return D.Value(res)
+	}
+
 	for i := 0; i < n; i++ {
 		var left, right int
 		fmt.Fscan(in, &left, &right)
-		left--
-
-	}
-}
-
-type E = int                     // 需要查询的值的类型
-type Id = struct{ mul, add int } // 懒标记的类型
-
-type Block struct {
-	id, start, end int // 0 <= id < bs, 0 <= start <= end <= n
-	nums           []E // block内的原序列
-
-	sum        E
-	lazyAffine Id
-}
-
-// 初始化块内数据(只会调用一次)
-func (b *Block) Init() {
-	b.Build()
-}
-
-// 重构
-func (b *Block) Build() {
-	b.sum = 0
-	for i := range b.nums {
-		b.sum += b.nums[i]
-	}
-}
-func (b *Block) QueryPart(start, end int) E {
-	res := 0
-	for i := start; i < end; i++ {
-		res += b.nums[i] + b.lazyAdd // !查询时才加上懒标记
-	}
-	return res
-}
-func (b *Block) UpdatePart(start, end int, lazy Id) {
-	for i := start; i < end; i++ {
-		b.nums[i] += lazy
-	}
-}
-func (b *Block) QueryAll() E       { return b.sum + b.lazyAdd*(b.end-b.start) }
-func (b *Block) UpdateAll(lazy Id) { b.lazyAdd += lazy }
-
-//
-//
-//
-// dont modify the template below
-//
-//
-//
-
-type SqrtDecomposition struct {
-	n      int
-	bs     int
-	bls    []Block
-	belong []int
-}
-
-// 指定维护的序列和分块大小初始化.
-//
-//	blockSize:分块大小,一般取根号n(300)
-func NewSqrtDecomposition(nums []E, blockSize int) *SqrtDecomposition {
-	nums = append(nums[:0:0], nums...)
-	res := &SqrtDecomposition{
-		n:      len(nums),
-		bs:     blockSize,
-		bls:    make([]Block, len(nums)/blockSize+1),
-		belong: make([]int, len(nums)),
-	}
-	for i := range res.belong {
-		res.belong[i] = i / blockSize
-	}
-	for i := range res.bls {
-		res.bls[i].id = i
-		res.bls[i].start = i * blockSize
-		res.bls[i].end = min((i+1)*blockSize, len(nums))
-		res.bls[i].nums = nums[res.bls[i].start:res.bls[i].end]
-		res.bls[i].Init()
-	}
-	return res
-}
-
-// 更新左闭右开区间[start,end)的值.
-//
-//	0<=start<=end<=n
-func (s *SqrtDecomposition) Update(start, end int, lazy Id) {
-	if start >= end {
-		return
-	}
-	id1, id2 := s.belong[start], s.belong[end-1]
-	pos1, pos2 := start-s.bs*id1, end-s.bs*id2
-	if id1 == id2 {
-		s.bls[id1].UpdatePart(pos1, pos2, lazy)
-		s.bls[id1].Build()
-	} else {
-		s.bls[id1].UpdatePart(pos1, s.bs, lazy)
-		s.bls[id1].Build()
-		for i := id1 + 1; i < id2; i++ {
-			s.bls[i].UpdateAll(lazy)
+		if left > right {
+			left, right = right, left
 		}
-		s.bls[id2].UpdatePart(0, pos2, lazy)
-		s.bls[id2].Build()
+		left--
+		fmt.Println(queryMode(left, right))
 	}
 }
 
-// 查询左闭右开区间[start,end)的值.
-//
-//	0<=start<=end<=n
-func (s *SqrtDecomposition) Query(start, end int, cb func(blockRes E)) {
-	if start >= end {
-		return
+func UseBlock(nums []int) struct {
+	belong     []int // 下标所属的块.
+	blockStart []int // 每个块的起始下标(包含).
+	blockEnd   []int // 每个块的结束下标(不包含).
+	blockCount int   // 块的数量.
+} {
+	n := len(nums)
+	// blockSize := int(math.Sqrt(float64(n)) + 1)
+	blockSize := int((math.Sqrt(float64(n)) / 4) + 1)
+	blockCount := 1 + (n / blockSize)
+	blockStart := make([]int, blockCount)
+	blockEnd := make([]int, blockCount)
+	belong := make([]int, n)
+	for i := 0; i < blockCount; i++ {
+		blockStart[i] = i * blockSize
+		tmp := (i + 1) * blockSize
+		if tmp > n {
+			tmp = n
+		}
+		blockEnd[i] = tmp
 	}
-	id1, id2 := s.belong[start], s.belong[end-1]
-	pos1, pos2 := start-s.bs*id1, end-s.bs*id2
-	if id1 == id2 {
-		cb(s.bls[id1].QueryPart(pos1, pos2))
-		return
+	for i := 0; i < n; i++ {
+		belong[i] = i / blockSize
 	}
-	cb(s.bls[id1].QueryPart(pos1, s.bs))
-	for i := id1 + 1; i < id2; i++ {
-		cb(s.bls[i].QueryAll())
+
+	return struct {
+		belong     []int
+		blockStart []int
+		blockEnd   []int
+		blockCount int
+	}{belong, blockStart, blockEnd, blockCount}
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
 	}
-	cb(s.bls[id2].QueryPart(0, pos2))
+	return b
 }
 
 func min(a, b int) int {
@@ -164,9 +161,33 @@ func min(a, b int) int {
 	return b
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
+type Dictionary struct {
+	_idToValue []int
+	_valueToId map[int]int
+}
+
+// A dictionary that maps values to unique ids.
+func NewDictionary() *Dictionary {
+	return &Dictionary{
+		_valueToId: map[int]int{},
 	}
-	return b
+}
+
+func (d *Dictionary) Id(value int) int {
+	res, ok := d._valueToId[value]
+	if ok {
+		return res
+	}
+	id := len(d._idToValue)
+	d._idToValue = append(d._idToValue, value)
+	d._valueToId[value] = id
+	return id
+}
+
+func (d *Dictionary) Value(id int) (value int) {
+	return d._idToValue[id]
+}
+
+func (d *Dictionary) Size() int {
+	return len(d._idToValue)
 }

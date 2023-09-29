@@ -16,6 +16,8 @@ import (
 // !需要维护块内是否全1, 区间更新时把已经不能再开方的块进行跳过
 func main() {
 	// https://loj.ac/d?problemId=6281
+	// https://www.luogu.com.cn/problem/P4145
+	// P4145 上帝造题的七分钟 2 / 花神游历各国
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -28,13 +30,18 @@ func main() {
 	}
 
 	sqrt := NewSqrtDecomposition(nums, 1+int(math.Sqrt(float64(n))))
-	for i := 0; i < n; i++ {
-		var op, l, r, c int
-		fmt.Fscan(in, &op, &l, &r, &c)
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var op, l, r int
+		fmt.Fscan(in, &op, &l, &r)
+		if l > r {
+			l, r = r, l
+		}
 		l--
 
 		if op == 0 {
-			sqrt.Update(l, r, c)
+			sqrt.Update(l, r, 0)
 		} else {
 			res := 0
 			sqrt.Query(l, r, func(cur E) { res += cur })
@@ -171,6 +178,7 @@ func (s *SqrtDecomposition) Query(start, end int, cb func(blockRes E)) {
 	if start >= end {
 		return
 	}
+
 	id1, id2 := s.belong[start], s.belong[end-1]
 	pos1, pos2 := start-s.bs*id1, end-s.bs*id2
 	if id1 == id2 {

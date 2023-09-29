@@ -32,4 +32,4 @@ function useBlock(
   }
 }
 
-export { useBlock }
+export { useBlock, useBlock as createBlock }

@@ -95,7 +95,7 @@ if (require.main === module) {
   console.log(uf.prev(2))
   console.log(uf.prev(9))
   uf.erase(9)
-  console.log(uf.prev(9))
+  console.log(uf.prev(90))
 
   console.log(uf.toString())
 }

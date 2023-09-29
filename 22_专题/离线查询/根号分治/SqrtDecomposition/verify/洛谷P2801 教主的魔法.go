@@ -1,5 +1,6 @@
 // SqrtDecomposition
 // https://nyaannyaan.github.io/library/data-structure/square-root-decomposition.hpp
+// 洛谷P2801 教主的魔法
 
 package main
 

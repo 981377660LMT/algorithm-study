@@ -9,7 +9,7 @@ func main() {
 	fmt.Println(dict.Value(10))
 }
 
-type V interface{}
+type V = interface{}
 type Dictionary struct {
 	_idToValue []V
 	_valueToId map[V]int
@@ -33,11 +33,8 @@ func (d *Dictionary) Id(value V) int {
 	return id
 }
 
-func (d *Dictionary) Value(id int) (value V, ok bool) {
-	if id < 0 || id >= len(d._idToValue) {
-		return nil, false
-	}
-	return d._idToValue[id], true
+func (d *Dictionary) Value(id int) V {
+	return d._idToValue[id]
 }
 
 func (d *Dictionary) Size() int {
