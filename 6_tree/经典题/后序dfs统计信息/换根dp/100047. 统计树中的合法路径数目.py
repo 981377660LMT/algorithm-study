@@ -60,7 +60,7 @@ class Solution:
             """direction: 0: cur -> parent, 1: parent -> cur"""
             from_ = cur if direction == 0 else parent
             to_ = parent if direction == 0 else cur
-            isPrime = int(P.isPrime(from_ + 1))
+            isPrime = int(P.isPrime(from_ + 1))  # !注意统计的是from
             zero, one = fromRes
             return (0, zero + 1) if isPrime else (zero + 1, one)
 

@@ -16,6 +16,7 @@
 
 from collections import defaultdict
 from typing import List, Tuple
+
 from Rerooting import Rerooting
 
 
@@ -27,7 +28,7 @@ class Solution:
         E = Tuple[int, int]  # (maxDist, weightSum)
 
         def e(root: int) -> E:
-            return (-INF, 0) if coins[root] == 0 else (0, 0)
+            return (-INF, 0)
 
         def op(childRes1: E, childRes2: E) -> E:
             dist1, wSum1 = childRes1
@@ -36,10 +37,14 @@ class Solution:
 
         def composition(fromRes: E, parent: int, cur: int, direction: int) -> E:
             """direction: 0: cur -> parent, 1: parent -> cur"""
-            dist, wSum = fromRes
-            w = weights[cur][parent] if direction == 0 else weights[parent][cur]
-            # dist>=2 时这条边才开始算入必须经过的路径
-            return (dist + w, wSum + 1) if dist >= 2 else (dist + w, wSum)
+            maxDist, distSum = fromRes
+            from_ = cur if direction == 0 else parent
+            to = parent if direction == 0 else cur
+            if maxDist == -INF:
+                return (1, 0) if coins[from_] else (-INF, 0)
+            w = weights[from_][to]
+            # maxDist>=2 时这条边才开始算入必须经过的路径
+            return (maxDist + w, distSum + w) if maxDist >= 2 else (maxDist + w, distSum)
 
         n = len(coins)
         R = Rerooting(n)
