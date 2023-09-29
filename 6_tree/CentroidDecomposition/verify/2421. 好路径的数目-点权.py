@@ -11,16 +11,6 @@ from typing import DefaultDict, List, Tuple
 
 class Solution:
     def numberOfGoodPaths(self, vals: List[int], edges: List[List[int]]) -> int:
-        n = len(edges) + 1
-        tree = [[] for _ in range(n)]
-        for u, v in edges:
-            tree[u].append(v)
-            tree[v].append(u)
-
-        centTree, root = centroidDecomposition(n, tree)
-        removed = [False] * n
-        res = 0
-
         def collect(cur: int, pre: int, sub: "DefaultDict[int, int]", maxValue: int) -> None:
             """统计子树内的答案."""
             curValue = vals[cur]
@@ -48,6 +38,16 @@ class Solution:
                 for v, count in sub.items():
                     res += count * counter[v]
                     counter[v] += count
+
+        n = len(edges) + 1
+        tree = [[] for _ in range(n)]
+        for u, v in edges:
+            tree[u].append(v)
+            tree[v].append(u)
+
+        centTree, root = centroidDecomposition(n, tree)
+        removed = [False] * n
+        res = 0
 
         decomposition(root, -1)
         return res + n

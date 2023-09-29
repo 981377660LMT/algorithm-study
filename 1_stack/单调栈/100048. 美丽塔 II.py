@@ -28,10 +28,9 @@ class Solution:
                 dp[i + 1] = dp[j] + (i - j + 1) * cur
             return dp
 
-        n = len(maxHeights)
         pre, suf = makeDp(maxHeights[:], False), makeDp(maxHeights[::-1])[::-1]
         res = 0
-        for i in range(n):  # 枚举分割点
+        for i in range(len(pre)):  # 枚举分割点
             res = max(res, pre[i] + suf[i])
         return res
 

@@ -1,4 +1,4 @@
-// 给出一个长为 n 的数列，以及 n 个操作，操作涉及区间乘法，区间加法，单点询问。
+// 区间最小众数(RangeMode)
 
 package main
 
@@ -9,15 +9,11 @@ import (
 	"os"
 )
 
+// 给出一个长为 n 的数列，以及 n 个操作，操作涉及询问区间的最小众数。
 // 第一行输入一个数字 n。
 // 第二行输入 n 个数字，第 i 个数字为 a_i，以空格隔开。
-// 接下来输入 n 行询问，每行输入四个数字 \mathrm{opt}、l、r、c，以空格隔开。
-// 若 \mathrm{opt} = 0，表示将位于 [l, r] 的之间的数字都加 c。
-// 若 \mathrm{opt} = 1，表示将位于 [l, r] 的之间的数字都乘 c。
-// 若 \mathrm{opt} = 2，表示询问 a_r 的值 \mathop{\mathrm{mod}} 10007（l 和 c 忽略）。
-
-// 区间最小众数(RangeMode)
-const MOD int = 10007
+// 接下来输入 n 行询问，每行输入两个数字 l、r，以空格隔开。
+// 表示查询位于 [l,r] 的数字的众数。
 
 func main() {
 	// https://loj.ac/p/6277
@@ -34,19 +30,10 @@ func main() {
 
 	sqrt := NewSqrtDecomposition(nums, 1+int(math.Sqrt(float64(n))))
 	for i := 0; i < n; i++ {
-		var op, l, r, c int
-		fmt.Fscan(in, &op, &l, &r, &c)
-		l--
+		var left, right int
+		fmt.Fscan(in, &left, &right)
+		left--
 
-		if op == 0 {
-			sqrt.Update(l, r, Id{1, c})
-		} else if op == 1 {
-			sqrt.Update(l, r, Id{c, 0})
-		} else {
-			res := 0
-			sqrt.Query(r, r+1, func(cur E) { res = cur })
-			fmt.Fprintln(out, res)
-		}
 	}
 }
 

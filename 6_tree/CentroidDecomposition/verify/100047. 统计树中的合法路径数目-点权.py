@@ -54,16 +54,6 @@ E = EratosthenesSieve(int(1e5) + 10)
 
 class Solution:
     def countPaths(self, n: int, edges: List[List[int]]) -> int:
-        tree = [[] for _ in range(n)]
-        for u, v in edges:
-            u, v = u - 1, v - 1
-            tree[u].append(v)
-            tree[v].append(u)
-
-        centTree, root = centroidDecomposition(n, tree)
-        removed = [False] * n
-        res = 0
-
         def collect(cur: int, pre: int, sub: "DefaultDict[int, int]", primeCount: int) -> None:
             """统计子树内的答案."""
             primeCount += int(E.isPrime(cur + 1))
@@ -98,6 +88,16 @@ class Solution:
                 else:
                     res += sub[1] * counter[1]
                     counter[1] += sub[1]
+
+        tree = [[] for _ in range(n)]
+        for u, v in edges:
+            u, v = u - 1, v - 1
+            tree[u].append(v)
+            tree[v].append(u)
+
+        centTree, root = centroidDecomposition(n, tree)
+        removed = [False] * n
+        res = 0
 
         decomposition(root, -1)
         return res
