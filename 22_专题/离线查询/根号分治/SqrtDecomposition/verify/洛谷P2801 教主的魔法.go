@@ -1,6 +1,7 @@
 // SqrtDecomposition
 // https://nyaannyaan.github.io/library/data-structure/square-root-decomposition.hpp
 // 洛谷P2801 教主的魔法
+// 询问时二分，角块修改时暴力重构
 
 package main
 

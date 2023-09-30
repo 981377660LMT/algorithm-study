@@ -1,5 +1,6 @@
 // https://www.cnblogs.com/MoyouSayuki/p/17595714.html
 // https://www.luogu.com.cn/problem/solution/P3793
+// https://kewth.github.io/2019/10/11/RMQ/
 //
 // 块间分为整块和散块，对于散块可以预处理出每一个块的前后缀最大值，
 // 这样预处理是 (O(n)) 的，查询降为 (O(1))，
