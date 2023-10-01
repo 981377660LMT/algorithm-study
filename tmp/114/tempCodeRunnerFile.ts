@@ -1,1 +1,0 @@
-i + 1 === nums.length || st.query(i + 1, nums.length) === and

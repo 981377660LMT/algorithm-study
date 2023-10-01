@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 from random import randint
-from typing import List
+from typing import Any, Iterable, List, Optional
 
 
 class FastHashSet:
@@ -12,9 +12,12 @@ class FastHashSet:
 
     __slots__ = ("_set", "_hash")
 
-    def __init__(self) -> None:
+    def __init__(self, iterable: Optional[Iterable[Any]] = None) -> None:
         self._set = set()
         self._hash = 0
+        if iterable is not None:
+            for x in iterable:
+                self.add(x)
 
     def add(self, x: int) -> None:
         if x not in self._set:

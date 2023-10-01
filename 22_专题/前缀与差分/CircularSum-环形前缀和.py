@@ -5,6 +5,8 @@ from itertools import accumulate
 from random import randint
 from typing import Callable, List
 
+INF = int(1e18)
+
 
 def circularPresum(nums: List[int]) -> Callable[[int, int], int]:
     """环形数组前缀和."""
@@ -67,6 +69,25 @@ if __name__ == "__main__":
 
     # 100076. 无限数组的最短子数组
     # https://leetcode.cn/problems/minimum-size-subarray-in-infinite-array/
+    # 求循环数组中和为 target 的最短子数组的长度.不存在则返回 -1.
+    # 1 <= nums.length <= 1e5
+    # 1 <= nums[i] <= 1e5
+    # 1 <= target <= 1e9
     class Solution:
         def minSizeSubarray(self, nums: List[int], target: int) -> int:
-            ...
+            Q = circularPresum(nums)
+            res = INF
+            for start in range(len(nums)):
+                left, right = 0, int(1e9 + 10)
+                while left <= right:
+                    mid = (left + right) // 2
+                    curSum = Q(start, start + mid)
+                    if curSum == target:
+                        res = min(res, mid)
+                        break
+                    elif curSum < target:
+                        left = mid + 1
+                    else:
+                        right = mid - 1
+
+            return res if res != INF else -1

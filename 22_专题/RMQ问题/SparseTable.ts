@@ -1,5 +1,6 @@
 /* eslint-disable no-inner-declarations */
 /* eslint-disable no-param-reassign */
+// !note: 与运算的幺元为-1(每位都是1)
 
 import assert from 'assert'
 

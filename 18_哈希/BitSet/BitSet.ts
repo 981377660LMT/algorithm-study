@@ -94,7 +94,9 @@ class BitSet {
   constructor(n: number, filledValue: 0 | 1 = 0) {
     if (n < 0) throw new RangeError('n must be non-negative')
     this._n = n
-    this._bits = filledValue ? new Uint32Array((n + 31) >>> 5).fill(~0) : new Uint32Array((n + 31) >>> 5)
+    this._bits = filledValue
+      ? new Uint32Array((n + 31) >>> 5).fill(~0)
+      : new Uint32Array((n + 31) >>> 5)
     if (n) this._bits[this._bits.length - 1] >>>= (this._bits.length << 5) - n
   }
 

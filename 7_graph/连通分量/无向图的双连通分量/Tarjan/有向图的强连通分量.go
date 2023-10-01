@@ -68,6 +68,39 @@ func main() {
 	fmt.Fprintln(out, max(in0, out0))
 }
 
+func countVisitedNodes(edges []int) []int {
+	n := len(edges)
+	scc := NewStronglyConnectedComponents(n)
+	for i := 0; i < n; i++ {
+		scc.AddEdge(i, edges[i], 1)
+	}
+	scc.Build()
+
+	dag, group, belong := scc.Dag, scc.Group, scc.CompId
+	cache := make([]int, n)
+	for i := 0; i < n; i++ {
+		cache[i] = -1
+	}
+	var dfs func(curId int) int
+	dfs = func(curId int) int {
+		if cache[curId] != -1 {
+			return cache[curId]
+		}
+		res := len(group[curId])
+		for _, nextId := range dag[curId] {
+			res += dfs(nextId)
+		}
+		cache[curId] = res
+		return res
+	}
+
+	res := make([]int, n)
+	for i := 0; i < n; i++ {
+		res[i] = dfs(belong[i])
+	}
+	return res
+}
+
 func yuki1293() {
 	// https://yukicoder.me/problems/no/1293
 	// No.1293 2種類の道路-SCC
@@ -130,12 +163,13 @@ func max(a, b int) int {
 	return b
 }
 
+// kosaraju算法求强连通分量.
 type WeightedEdge struct{ from, to, cost, index int }
 type StronglyConnectedComponents struct {
 	G      [][]WeightedEdge // 原图
 	Dag    [][]int          // 强连通分量缩点后的DAG(有向图邻接表)
-	CompId []int            // 每个顶点所属的强连通分量的编号
 	Group  [][]int          // 每个强连通分量所包含的顶点
+	CompId []int            // 每个顶点所属的强连通分量的编号
 	rg     [][]WeightedEdge
 	order  []int
 	used   []bool
@@ -185,7 +219,7 @@ func (scc *StronglyConnectedComponents) Build() {
 		for _, e := range scc.G[i] {
 			x, y := scc.CompId[e.from], scc.CompId[e.to]
 			if x == y {
-				continue // 原来的边 x->y 的顶点在同一个强连通分量内,可以汇合同一个 SCC 的权值
+				continue // 原来的边 x->y 的顶点在同一个强连通分量内
 			}
 			hash := x*len(scc.G) + y
 			if _, ok := visited[hash]; !ok {
