@@ -1,6 +1,7 @@
 /* eslint-disable no-inner-declarations */
 
 // TODO: 速度较慢(与python差不多)，建议使用python
+// !比较慢的地方是数组的push和pop，可以用静态数组+ptr来优化
 
 /**
  * Tarjan 求有向图的强联通分量.用于缩点成拓扑图.
@@ -17,7 +18,8 @@ function findSCC(
 ): [groups: number[][], belong: Uint32Array] {
   const dfn = new Uint32Array(n)
   let time = 0
-  const stack: number[] = []
+  const stack = new Uint32Array(n)
+  let stackTop = 0
   const inStack = new Uint8Array(n)
   const groups: number[][] = []
 
@@ -25,7 +27,7 @@ function findSCC(
     time++
     dfn[cur] = time
     let curLow = time
-    stack.push(cur)
+    stack[stackTop++] = cur
     inStack[cur] = 1
     const nexts = graph[cur]
     for (let i = 0; i < nexts.length; i++) {
@@ -39,7 +41,7 @@ function findSCC(
     if (dfn[cur] === curLow) {
       const group: number[] = []
       while (true) {
-        const top = stack.pop()!
+        const top = stack[--stackTop]
         group.push(top)
         inStack[top] = 0
         if (top === cur) break
