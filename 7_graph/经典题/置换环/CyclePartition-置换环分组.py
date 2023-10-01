@@ -10,20 +10,7 @@ def cyclePartition(nexts: List[int]) -> List[List[int]]:
     """给定一个0-n-1的排列,返回环分组
     nexts[i]表示i的下一个元素.
     """
-    n = len(nexts)
-    groups = []
-    visited = [False] * n
-    for i in range(n):
-        if not visited[nexts[i]]:
-            cur = [i]
-            pos = nexts[i]
-            visited[i] = True
-            while pos != i:
-                cur.append(pos)
-                visited[pos] = True
-                pos = nexts[pos]
-            groups.append(cur)
-    return groups
+    ...
 
 
 def dontBeTogether(perm: List[int], m: int) -> int:

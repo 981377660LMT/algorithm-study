@@ -12,44 +12,10 @@
 from collections import defaultdict, deque
 from heapq import nlargest
 from typing import DefaultDict, List, Set, Tuple
+from 基环树找到所有环 import cyclePartition
 
 AdjMap = DefaultDict[int, DefaultDict[int, int]]
 Degrees = List[int]
-
-
-def findCycleAndCalDepth(
-    n: int, adjMap: AdjMap, degrees: Degrees
-) -> Tuple[List[List[int]], List[int]]:
-    """内向基环树找环上的点，并记录每个点在拓扑排序中的最大距离(带权)，最外层的点深度为0"""
-    depth = [0] * n
-    queue = deque([(i, 0) for i in range(n) if degrees[i] == 0])
-    visited = [False] * n
-    while queue:
-        cur, dist = queue.popleft()
-        visited[cur] = True
-        for next in adjMap[cur]:
-            depth[next] = max(depth[next], dist + adjMap[cur][next])
-            degrees[next] -= 1
-            if degrees[next] == 0:
-                queue.append((next, dist + adjMap[cur][next]))
-
-    def dfs(cur: int, path: List[int]) -> None:
-        if visited[cur]:
-            return
-        visited[cur] = True
-        path.append(cur)
-        for next in adjMap[cur]:
-            dfs(next, path)
-
-    cycleGroup = []
-    for i in range(n):
-        if visited[i]:
-            continue
-        path = []
-        dfs(i, path)
-        cycleGroup.append(path)
-
-    return cycleGroup, depth
 
 
 def calMax1(root: int, rAdjMap: AdjMap, cycle: Set[int]) -> int:
@@ -97,11 +63,10 @@ def calMax2(scores: List[int], dists: List[int]) -> int:
     return res
 
 
-def calLongestPath(adjMap: AdjMap, degrees: Degrees) -> int:
+def calLongestPath(adjMap: AdjMap) -> int:
     """求基环树最长链"""
-    cycleGroup, depth = findCycleAndCalDepth(n, adjMap, degrees)  # 所有在环上的点，所有点的最大深度
+    cycleGroup, *_, depth = cyclePartition(n, adjMap, directed=True)  # 所有在环上的点，所有点的最大深度
     onCycle = set([v for g in cycleGroup for v in g])
-    # print(cycleGroup, depth, onCycle)
 
     res = 0
     for group in cycleGroup:  # 遍历所有的环 在每个环(联通分量)里找最长的链
@@ -114,7 +79,7 @@ def calLongestPath(adjMap: AdjMap, degrees: Degrees) -> int:
             [depth[i] for i in group],
             [adjMap[u][v] for u, v in zip(group, group[1:] + [group[0]])],
         )
-        # print(scores, dists)
+
         cand2 = calMax2(scores, dists)
 
         res += max(cand1, cand2)
@@ -126,13 +91,11 @@ n = int(input())
 adjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))  # !内向基环树用来求环分组
 rAdjMap = defaultdict(lambda: defaultdict(lambda: int(1e20)))  # !外向基环树用来求子树链
 # 岛屿 i 上建了一座通向岛屿 a 的桥，桥的长度为 L。
-degrees = [0] * n
 for u in range(n):
     v, w = map(int, input().split())
     v -= 1
     adjMap[u][v] = w
-    degrees[v] += 1
     rAdjMap[v][u] = w
 
 
-print(calLongestPath(adjMap, degrees))
+print(calLongestPath(adjMap))

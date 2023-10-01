@@ -22,13 +22,31 @@ def bfs(start: int, adjList: List[List[int]]) -> List[int]:
     return dist
 
 
-# bfs求出一条路径
-def bfs2(n: int, adjList: Sequence[Sequence[int]], start: int, end: int) -> Tuple[int, List[int]]:
-    """bfs求出起点到end的(最短距离,路径) 时间复杂度O(V+E)"""
+def bfsMultiStart(starts: Sequence[int], adjList: List[List[int]]) -> List[int]:
+    """多源bfs"""
+    n = len(adjList)
+    dist = [INF] * n
+    queue = deque(starts)
+    for start in starts:
+        dist[start] = 0
+    while queue:
+        cur = queue.popleft()
+        for next in adjList[cur]:
+            cand = dist[cur] + 1
+            if cand < dist[next]:
+                dist[next] = cand
+                queue.append(next)
+    return dist
+
+
+def bfsPath(
+    n: int, adjList: Sequence[Sequence[int]], start: int, end: int
+) -> Tuple[int, List[int]]:
+    """bfs求出起点到end的(最短距离,路径).时间复杂度O(V+E)"""
     dist = [INF] * n
     dist[start] = 0
     queue = deque([start])
-    pre = [-1] * n  # 记录每个点的前驱
+    pre = [-1] * n
 
     while queue:
         cur = queue.popleft()

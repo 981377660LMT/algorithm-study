@@ -47,6 +47,31 @@ def countInv(nums: List[int]) -> int:
     return res
 
 
+def countInv2(nums: List[int]) -> int:
+    """归并排序求逆序对."""
+    if len(nums) < 2:
+        return 0
+    if len(nums) == 2:
+        return 1 if nums[0] > nums[1] else 0
+
+    res, midCount = 0, 0
+    upper, lower = [], []
+    mid = nums[len(nums) // 2]
+    for num in nums:
+        if num < mid:
+            lower.append(num)
+            res += len(upper)
+            res += midCount
+        elif num > mid:
+            upper.append(num)
+        else:
+            midCount += 1
+            res += len(upper)
+    res += countInv2(lower)
+    res += countInv2(upper)
+    return res
+
+
 class WindowInv:
     """滑动窗口逆序对"""
 

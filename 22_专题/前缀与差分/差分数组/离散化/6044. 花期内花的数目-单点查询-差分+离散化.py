@@ -40,7 +40,6 @@ class Solution:
 
 
 if __name__ == "__main__":
-
     print(
         Solution().fullBloomFlowers(
             flowers=[[1, 6], [3, 7], [9, 12], [4, 13]], persons=[2, 3, 7, 11]

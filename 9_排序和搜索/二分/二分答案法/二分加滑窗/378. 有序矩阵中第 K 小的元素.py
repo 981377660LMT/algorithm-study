@@ -12,10 +12,11 @@ class Solution:
             """有多少个不超过mid的候选"""
             return sum(bisect_right(row, mid) for row in matrix)
 
+        k -= 1
         left, right = -int(1e9), int(1e9)
         while left <= right:
             mid = (left + right) // 2
-            if countNGT(mid) < k:
+            if countNGT(mid) <= k:
                 left = mid + 1
             else:
                 right = mid - 1

@@ -2,6 +2,8 @@
 // 定义：Directed graphs in which every vertex has exactly one outgoing edge.
 // !每个点的出度为1(如果顶点没有出边，那么它的出边指向自己)
 // 连通分量个数=环的个数
+//
+// !建议使用 基环树找到所有环.go
 
 package main
 

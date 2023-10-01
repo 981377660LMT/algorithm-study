@@ -13,44 +13,10 @@
 
 from collections import defaultdict, deque
 from typing import DefaultDict, List, Set, Tuple
+from 基环树找到所有环 import cyclePartition
 
 AdjMap = DefaultDict[int, Set[int]]
 Degrees = List[int]
-
-
-def findCycleAndCalDepth(
-    n: int, adjMap: AdjMap, degrees: Degrees
-) -> Tuple[List[List[int]], List[int]]:
-    """内向基环树找环上的点，并记录每个点在拓扑排序中的最大深度，最外层的点深度为0"""
-    depth = [0] * n
-    queue = deque([(i, 0) for i in range(n) if degrees[i] == 0])
-    visited = [False] * n
-    while queue:
-        cur, dist = queue.popleft()
-        visited[cur] = True
-        for next in adjMap[cur]:
-            depth[next] = max(depth[next], dist + 1)
-            degrees[next] -= 1
-            if degrees[next] == 0:
-                queue.append((next, dist + 1))
-
-    def dfs(cur: int, path: List[int]) -> None:
-        if visited[cur]:
-            return
-        visited[cur] = True
-        path.append(cur)
-        for next in adjMap[cur]:
-            dfs(next, path)
-
-    cycleGroup = []
-    for i in range(n):
-        if visited[i]:
-            continue
-        path = []
-        dfs(i, path)
-        cycleGroup.append(path)
-
-    return cycleGroup, depth
 
 
 def dfs(cur: int, removed: int) -> List[int]:
@@ -74,8 +40,8 @@ def dfs(cur: int, removed: int) -> List[int]:
     return res
 
 
-def main(n: int, adjMap: AdjMap, degrees: Degrees) -> int:
-    cycleGroup = findCycleAndCalDepth(n, adjMap, degrees)[0]  # 找到所有环分组
+def main(n: int, adjMap: AdjMap) -> int:
+    cycleGroup = cyclePartition(n, adjMap, directed=True)[0]  # 找到所有环分组
     res = 0
     # 从所有环开始dp
     for group in cycleGroup:
@@ -91,14 +57,14 @@ n = int(input())
 nums = list(map(int, input().split()))
 adjMap = defaultdict(set)  # 内向基环树
 radjMap = defaultdict(set)  # 外向基环树
-degrees = [0] * n
+
 for u, v in enumerate(nums):
     v -= 1
     adjMap[u].add(v)
-    degrees[v] += 1
+
     radjMap[v].add(u)
 
 
-print(main(n, adjMap, degrees))
+print(main(n, adjMap))
 
 # 树形dp不太对

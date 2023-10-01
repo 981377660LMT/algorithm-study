@@ -154,6 +154,7 @@
    - [Mincostcycle](7_graph/%E7%8E%AF%E6%A3%80%E6%B5%8B/%E6%9C%80%E5%B0%8F%E7%8E%AF/Mincostcycle.py)
    - [MincostcycleWithPoint](7_graph/%E7%8E%AF%E6%A3%80%E6%B5%8B/%E6%9C%80%E5%B0%8F%E7%8E%AF/MincostcycleWithPoint.go)
    - [NamoriGraph](7_graph/%E7%8E%AF%E6%A3%80%E6%B5%8B/%E5%9F%BA%E7%8E%AF%E6%A0%91/NamoriGraph.go)
+   - [CyclePartition](7_graph/%E7%8E%AF%E6%A3%80%E6%B5%8B/%E5%9F%BA%E7%8E%AF%E6%A0%91/%E5%9F%BA%E7%8E%AF%E6%A0%91%E6%89%BE%E5%88%B0%E6%89%80%E6%9C%89%E7%8E%AF.py)
    - [OfflineDagReachability](7_graph/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F/OfflineDagReachability.go)
    - [ChromaticNumber](7_graph/Chromatic%20Number-%E5%9B%BE%E8%89%B2%E6%95%B0.py)
    - [EnumerateCliques](7_graph/EnumerateCliques.go)
@@ -299,6 +300,7 @@
     - [ProductWithoutOne](22_%E4%B8%93%E9%A2%98/%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%88%86%E5%89%B2%E7%82%B9-%E5%89%8D%E5%90%8E%E7%BC%80%E5%88%86%E8%A7%A3/%E5%88%A0%E9%99%A4%E5%AD%90%E6%95%B0%E7%BB%84/productWithoutOne.py)
     - [MutateWithOutOne](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E7%BA%BF%E6%AE%B5%E6%A0%91%E5%88%86%E6%B2%BB/mutateWithOutOne.ts)
     - [DefaultDict](5_map/DefaultDict.ts)
+    - [Diff](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/Diff.py)
     - [LongestRepeating](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/verify/LongestRepeating.ts)
     - [FibonacciSearch](19_%E6%95%B0%E5%AD%A6/%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB%E4%B8%8E%E7%88%AC%E5%B1%B1%E6%B3%95/FibonacciSearch.py)
     - RetroactiveDS

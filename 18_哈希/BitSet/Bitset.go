@@ -47,6 +47,12 @@ func (b Bitset) Copy() Bitset {
 	return res
 }
 
+func (bs Bitset) Clear() {
+	for i := range bs {
+		bs[i] = 0
+	}
+}
+
 // 遍历所有 1 的位置
 // 如果对范围有要求，可在 f 中 return p < n
 func (b Bitset) Foreach(f func(p int) (Break bool)) {

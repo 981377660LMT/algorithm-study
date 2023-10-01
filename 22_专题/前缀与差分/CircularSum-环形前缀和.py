@@ -38,6 +38,7 @@ if __name__ == "__main__":
         assert sum1 == sum2, (left, right, sum1, sum2)
 
     # F - More Holidays
+    # https://atcoder.jp/contests/abc300/tasks/abc300_f
     # 给定一个01字符串t，它由一个长度为n的串s重复m次拼接得到。
     # 要求将恰好 k个0变成1，问连续1的最大长度。
     # !x->0 o->1
@@ -63,3 +64,9 @@ if __name__ == "__main__":
     n, m, k = map(int, input().split())
     s = input()
     print(moreHolidays(s, m, k))
+
+    # 100076. 无限数组的最短子数组
+    # https://leetcode.cn/problems/minimum-size-subarray-in-infinite-array/
+    class Solution:
+        def minSizeSubarray(self, nums: List[int], target: int) -> int:
+            ...

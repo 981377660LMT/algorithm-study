@@ -1,6 +1,6 @@
 package main
 
-// 环形数组前缀和
+// 环形前缀和.
 func CircularPresum(nums []int) func(start int, end int) int {
 	n := len(nums)
 	preSum := make([]int, n+1)
