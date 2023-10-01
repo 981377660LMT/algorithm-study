@@ -1,3 +1,6 @@
+"""前缀后缀和."""
+
+
 from typing import Callable, Generic, List, Sequence, TypeVar
 
 

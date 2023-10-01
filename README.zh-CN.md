@@ -253,11 +253,12 @@
     - [MinPlusConvolution](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E5%9B%9B%E8%BE%B9%E5%BD%A2%E4%B8%8D%E7%AD%89%E5%BC%8FMonge%E4%BC%98%E5%8C%96dp/monge/MinPlusConvolution.go)
 
 12. **杂项**
-
+    - [一维前缀后缀和](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/preSumSuffixSum.py)
     - [二维前缀和](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
     - [一维差分](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/Diff.py)
     - [二维差分](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
-    - [Sparse Table](22_%E4%B8%93%E9%A2%98/RMQ%E9%97%AE%E9%A2%98/SparseTable.py)
+    - [SparseTable](22_%E4%B8%93%E9%A2%98/RMQ%E9%97%AE%E9%A2%98/SparseTable.py)
+    - [分块优化 st 表](22_%E4%B8%93%E9%A2%98/RMQ%E9%97%AE%E9%A2%98/SparseTableSqrt.ts)
     - [SqrtTree](22_%E4%B8%93%E9%A2%98/RMQ%E9%97%AE%E9%A2%98/SqrtTree.ts)
     - [线性时间 RMQ](22_%E4%B8%93%E9%A2%98/RMQ%E9%97%AE%E9%A2%98/Fast-LinearRMQ.ts)
     - [Bisect](9_%E6%8E%92%E5%BA%8F%E5%92%8C%E6%90%9C%E7%B4%A2/%E4%BA%8C%E5%88%86/bisect.ts)

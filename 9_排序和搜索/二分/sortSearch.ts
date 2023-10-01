@@ -1,5 +1,5 @@
 /**
- * 在区间 `[start, end)` 中查找使 `f(i)` 为 `true` 的最小值 `i`.
+ * 在区间 `[start, end)` 中寻找使 `f(i)` 为 `true` 的最小值 `i`.
  * @see https://cs.opensource.google/go/go/+/refs/tags/go1.21.1:src/sort/search.go;l=58
  */
 function sortSearch(
