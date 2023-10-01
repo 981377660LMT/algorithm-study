@@ -85,6 +85,8 @@ function bisectRight<E, T>(
  * @param array 某个参数有序的数组
  * @param target 插入的目标值
  * @param options {@link BisectOptions}
+ *
+ * @deprecated 使用 {@link insortRight} 代替
  */
 function insortLeft<E>(array: E[], target: E, options?: BisectOptions<E, E>): void {
   const pos = bisectLeft(array, target, options)

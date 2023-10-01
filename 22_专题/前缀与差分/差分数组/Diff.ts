@@ -1,94 +1,105 @@
-// type DiffArray struct {
-// 	diff  []int
-// 	dirty bool
-// }
+/* eslint-disable no-inner-declarations */
 
-// func NewDiffArray(n int) *DiffArray {
-// 	return &DiffArray{
-// 		diff: make([]int, n+1),
-// 	}
-// }
+class DiffArray {
+  private readonly _diff: number[]
+  private dirty = false
 
-// func (d *DiffArray) Add(start, end, delta int) {
-// 	if start < 0 {
-// 		start = 0
-// 	}
-// 	if end >= len(d.diff) {
-// 		end = len(d.diff) - 1
-// 	}
-// 	if start >= end {
-// 		return
-// 	}
-// 	d.dirty = true
-// 	d.diff[start] += delta
-// 	d.diff[end] -= delta
-// }
+  constructor(n: number) {
+    this._diff = Array(n + 1).fill(0)
+  }
 
-// func (d *DiffArray) Build() {
-// 	if d.dirty {
-// 		preSum := make([]int, len(d.diff))
-// 		for i := 1; i < len(d.diff); i++ {
-// 			preSum[i] = preSum[i-1] + d.diff[i]
-// 		}
-// 		d.diff = preSum
-// 		d.dirty = false
-// 	}
-// }
+  /**
+   * 区间 `[start,end)` 加上 `delta`.
+   */
+  add(start: number, end: number, delta: number): void {
+    if (start < 0) start = 0
+    if (end >= this._diff.length) end = this._diff.length - 1
+    if (start >= end) return
+    this.dirty = true
+    this._diff[start] += delta
+    this._diff[end] -= delta
+  }
 
-// func (d *DiffArray) Get(pos int) int {
-// 	d.Build()
-// 	return d.diff[pos]
-// }
+  build(): void {
+    if (!this.dirty) return
+    for (let i = 1; i < this._diff.length; i++) this._diff[i] += this._diff[i - 1]
+    this.dirty = false
+  }
 
-// func (d *DiffArray) GetAll() []int {
-// 	d.Build()
-// 	return d.diff[:len(d.diff)-1]
-// }
+  get(index: number): number {
+    this.build()
+    return this._diff[index]
+  }
 
-// type DiffMap struct {
-// 	diff       map[int]int
-// 	sortedKeys []int
-// 	preSum     []int
-// 	dirty      bool
-// }
+  getAll(): number[] {
+    this.build()
+    return this._diff.slice(0, this._diff.length - 1)
+  }
+}
 
-// func NewDiffMap() *DiffMap {
-// 	return &DiffMap{
-// 		diff: make(map[int]int),
-// 	}
-// }
+class DiffMap {
+  private readonly _diff: Map<number, number> = new Map()
+  private _sortedKeys: number[] = []
+  private _preSum: number[] = []
+  private dirty = false
 
-// func (d *DiffMap) Add(start, end, delta int) {
-// 	if start >= end {
-// 		return
-// 	}
-// 	d.dirty = true
-// 	d.diff[start] += delta
-// 	d.diff[end] -= delta
-// }
+  add(start: number, end: number, delta: number): void {
+    if (start >= end) return
+    this.dirty = true
+    this._diff.set(start, (this._diff.get(start) || 0) + delta)
+    this._diff.set(end, (this._diff.get(end) || 0) - delta)
+  }
 
-// func (d *DiffMap) Build() {
-// 	if d.dirty {
-// 		d.sortedKeys = make([]int, 0, len(d.diff))
-// 		for key := range d.diff {
-// 			d.sortedKeys = append(d.sortedKeys, key)
-// 		}
-// 		sort.Ints(d.sortedKeys)
-// 		d.preSum = make([]int, len(d.sortedKeys)+1)
-// 		for i, key := range d.sortedKeys {
-// 			d.preSum[i+1] = d.preSum[i] + d.diff[key]
-// 		}
-// 		d.dirty = false
-// 	}
-// }
+  build(): void {
+    if (!this.dirty) return
+    this._sortedKeys = [...this._diff.keys()].sort((a, b) => a - b)
+    const preSum: number[] = Array(this._sortedKeys.length + 1)
+    preSum[0] = 0
+    for (let i = 1; i < preSum.length; i++) {
+      preSum[i] = preSum[i - 1] + (this._diff.get(this._sortedKeys[i - 1]) || 0)
+    }
+    this._preSum = preSum
+    this.dirty = false
+  }
 
-// func (d *DiffMap) Get(pos int) int {
-// 	d.Build()
-// 	return d.preSum[sort.SearchInts(d.sortedKeys, pos+1)]
-// }
+  get(pos: number): number {
+    this.build()
+    return this._preSum[this._bisectRight(this._sortedKeys, pos)]
+  }
 
-class DiffArray {}
-
-class DiffMap {}
+  // eslint-disable-next-line class-methods-use-this
+  private _bisectRight(arr: ArrayLike<number>, target: number): number {
+    let left = 0
+    let right = arr.length - 1
+    while (left <= right) {
+      const mid = (left + right) >>> 1
+      if (arr[mid] <= target) left = mid + 1
+      else right = mid - 1
+    }
+    return left
+  }
+}
 
 export { DiffArray, DiffMap }
+
+if (require.main === module) {
+  // 2251. 花期内花的数目
+  // https://leetcode.cn/problems/number-of-flowers-in-full-bloom/description/
+  function fullBloomFlowers(flowers: number[][], people: number[]): number[] {
+    const diff = new DiffMap()
+    flowers.forEach(([start, end]) => diff.add(start, end + 1, 1))
+    return people.map(pos => diff.get(pos))
+  }
+
+  console.log(
+    fullBloomFlowers(
+      [
+        [1, 6],
+        [3, 7],
+        [9, 12],
+        [4, 13]
+      ],
+      [2, 3, 7, 7]
+    )
+  )
+}

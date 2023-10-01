@@ -44,11 +44,9 @@ func (d *DiffArray) Add(start, end, delta int) {
 
 func (d *DiffArray) Build() {
 	if d.dirty {
-		preSum := make([]int, len(d.diff))
 		for i := 1; i < len(d.diff); i++ {
-			preSum[i] = preSum[i-1] + d.diff[i]
+			d.diff[i] += d.diff[i-1]
 		}
-		d.diff = preSum
 		d.dirty = false
 	}
 }

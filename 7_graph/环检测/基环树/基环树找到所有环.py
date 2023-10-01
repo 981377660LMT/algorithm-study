@@ -44,7 +44,7 @@ def cyclePartition(
                     deg[v] += 1
 
     startDeg = 0 if directed else 1
-    queue = deque([i for i in range(n) if deg[i] == startDeg])
+    queue = deque(i for i in range(n) if deg[i] == startDeg)
     visited = [False] * n
     depth = [0] * n
     while queue:
