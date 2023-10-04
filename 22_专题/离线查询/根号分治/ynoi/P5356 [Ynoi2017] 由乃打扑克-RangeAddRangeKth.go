@@ -1,3 +1,4 @@
+// P5356 [Ynoi2017] 由乃打扑克-RangeAddRangeKth
 // https://www.luogu.com.cn/problem/P5356
 // https://blog.csdn.net/qq_42101694/article/details/109823342
 // RangeAddRangeKth
@@ -14,8 +15,8 @@
 //
 // 优化：
 // !1.将角块修改的地方不用直接排序，可以用归并排序讲一些无序和有序的数列段和起来，就将修改的复杂度优化到sqrt(n)
-// 通过分块，统计懒标记，对块内归并来维护块内有序性，然后根据分块进行统计答案即可。
-// !2.二分边界取区间最大和最小值
+// 通过分块，统计懒标记，对块内归并来维护块内有序性(MergeTrick)，然后根据分块进行统计答案即可。
+// !2.二分边界取区间最大和最小值(缩减二分长度)
 // !3.查询时，如果当前区间的最大值小于 k那么就可以直接加上区间大小，如果当前区间最小值大于 k那么就不用再去计算它了。
 // !4.玄学的块长:当块的大小为b时，修改是O(n/b+b)的，查询是O((n/b)*logb*logA)的。
 // !取b=sqrt(n)*logA，单次复杂度就是O(sqrt(n)*logA)了。
@@ -40,13 +41,10 @@ func RangeAddRangeKth(nums []int, operations [][4]int) []int {
 	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
 
 	blockLazy := make([]int, blockCount)
-	sortedNums := make([]int, len(nums))
+	blockMergeTrick := make([]*MergeTrick, blockCount)
 	for bid := 0; bid < blockCount; bid++ {
 		start, end := blockStart[bid], blockEnd[bid]
-		for i := start; i < end; i++ {
-			sortedNums[i] = nums[i]
-		}
-		sort.Ints(sortedNums[start:end])
+		blockMergeTrick[bid] = NewMergeTrick(nums[start:end], false)
 	}
 
 	getMinAndMax := func(start, end int, bid1, bid2 int) (min_, max_ int) {
@@ -65,8 +63,9 @@ func RangeAddRangeKth(nums []int, operations [][4]int) []int {
 				max_ = max(max_, cur)
 			}
 			for i := bid1 + 1; i < bid2; i++ {
-				min_ = min(min_, blockLazy[i]+sortedNums[blockStart[i]])
-				max_ = max(max_, blockLazy[i]+sortedNums[blockEnd[i]-1])
+				sortedNums := blockMergeTrick[i].GetSortedNums()
+				min_ = min(min_, blockLazy[i]+sortedNums[0])
+				max_ = max(max_, blockLazy[i]+sortedNums[len(sortedNums)-1])
 			}
 			for i := blockStart[bid2]; i < end; i++ {
 				cur := nums[i] + blockLazy[bid2]
@@ -85,34 +84,13 @@ func RangeAddRangeKth(nums []int, operations [][4]int) []int {
 			start, end, delta := op[1], op[2], op[3]
 			bid1, bid2 := belong[start], belong[end-1]
 			if bid1 == bid2 {
-				for i := start; i < end; i++ {
-					nums[i] += delta
-				}
-				for i := blockStart[bid1]; i < blockEnd[bid1]; i++ {
-					sortedNums[i] = nums[i]
-				}
-				// TODO: 这里相当于多段有序，可以用merge优化
-				sort.Ints(sortedNums[blockStart[bid1]:blockEnd[bid1]])
+				blockMergeTrick[bid1].Add(start-blockStart[bid1], end-blockStart[bid1], delta)
 			} else {
-				for i := start; i < blockEnd[bid1]; i++ {
-					nums[i] += delta
-				}
-				for i := blockStart[bid1]; i < blockEnd[bid1]; i++ {
-					sortedNums[i] = nums[i]
-				}
-				sort.Ints(sortedNums[blockStart[bid1]:blockEnd[bid1]])
-
+				blockMergeTrick[bid1].Add(start-blockStart[bid1], blockEnd[bid1]-blockStart[bid1], delta)
 				for i := bid1 + 1; i < bid2; i++ {
 					blockLazy[i] += delta
 				}
-
-				for i := blockStart[bid2]; i < end; i++ {
-					nums[i] += delta
-				}
-				for i := blockStart[bid2]; i < blockEnd[bid2]; i++ {
-					sortedNums[i] = nums[i]
-				}
-				sort.Ints(sortedNums[blockStart[bid2]:blockEnd[bid2]])
+				blockMergeTrick[bid2].Add(0, end-blockStart[bid2], delta)
 			}
 		} else {
 			start, end, k := op[1], op[2], op[3]
@@ -122,7 +100,7 @@ func RangeAddRangeKth(nums []int, operations [][4]int) []int {
 			}
 			bid1, bid2 := belong[start], belong[end-1]
 
-			// 二分答案mid，区间里<=mid的数不超过k个
+			// 二分答案mid，区间里<=mid的数不超过k个.小段暴力统计，大段二分.
 			check := func(mid int) bool {
 				res := 0
 				if bid1 == bid2 {
@@ -139,8 +117,18 @@ func RangeAddRangeKth(nums []int, operations [][4]int) []int {
 				}
 
 				for bid := bid1 + 1; bid < bid2; bid++ {
-					left, right := blockStart[bid], blockEnd[bid]-1
-					ngt := bisectRight(sortedNums, mid-blockLazy[bid], left, right) - left
+					sortedNums := blockMergeTrick[bid].GetSortedNums()
+					if sortedNums[0]+blockLazy[bid] > mid {
+						continue
+					}
+					if sortedNums[len(sortedNums)-1]+blockLazy[bid] <= mid {
+						res += len(sortedNums)
+						if res > k {
+							return false
+						}
+						continue
+					}
+					ngt := bisectRight(sortedNums, mid-blockLazy[bid])
 					res += ngt
 					if res > k {
 						return false
@@ -262,35 +250,6 @@ func UseBlock(nums []int, blockSize int) struct {
 	}{belong, blockStart, blockEnd, blockCount}
 }
 
-type V = int
-type Dictionary struct {
-	_idToValue []V
-	_valueToId map[V]int
-}
-
-// A dictionary that maps values to unique ids.
-func NewDictionary() *Dictionary {
-	return &Dictionary{
-		_valueToId: map[V]int{},
-	}
-}
-func (d *Dictionary) Id(value V) int {
-	res, ok := d._valueToId[value]
-	if ok {
-		return res
-	}
-	id := len(d._idToValue)
-	d._idToValue = append(d._idToValue, value)
-	d._valueToId[value] = id
-	return id
-}
-func (d *Dictionary) Value(id int) V {
-	return d._idToValue[id]
-}
-func (d *Dictionary) Size() int {
-	return len(d._idToValue)
-}
-
 func max(a, b int) int {
 	if a > b {
 		return a
@@ -305,7 +264,8 @@ func min(a, b int) int {
 	return b
 }
 
-func bisectRight(nums []int, target int, left, right int) int {
+func bisectRight(nums []int, target int) int {
+	left, right := 0, len(nums)-1
 	for left <= right {
 		mid := (left + right) >> 1
 		if nums[mid] <= target {
@@ -317,122 +277,96 @@ func bisectRight(nums []int, target int, left, right int) int {
 	return left
 }
 
-func MergeTwoSortedArray(nums1, nums2 []int) []int {
-	n1 := len(nums1)
-	if n1 == 0 {
-		return nums2
-	}
-	n2 := len(nums2)
-	if n2 == 0 {
-		return nums1
-	}
-	res := make([]int, n1+n2)
-	i := 0
-	j := 0
-	k := 0
-	for i < n1 && j < n2 {
-		if nums1[i] < nums2[j] {
-			res[k] = nums1[i]
-			i++
-		} else {
-			res[k] = nums2[j]
-			j++
-		}
-		k++
-	}
-	for i < n1 {
-		res[k] = nums1[i]
-		i++
-		k++
-	}
-	for j < n2 {
-		res[k] = nums2[j]
-		j++
-		k++
-	}
-	return res
+type SortedItem = struct{ value, index int }
+type MergeTrick struct {
+	_nums        []int
+	_sortedItems []*SortedItem
+	_sortedNums  []int
+	_dirty       bool
 }
 
-func MergeThreeSortedArray(nums1, nums2, nums3 []int) []int {
-	n1 := len(nums1)
-	if n1 == 0 {
-		return MergeTwoSortedArray(nums2, nums3)
+// O(n)区间加, O(n)整体排序.
+//
+//	shouldCopy: 是否复制nums.
+func NewMergeTrick(nums []int, shouldCopy bool) *MergeTrick {
+	if shouldCopy {
+		nums = append(nums[:0:0], nums...)
 	}
-	n2 := len(nums2)
-	if n2 == 0 {
-		return MergeTwoSortedArray(nums1, nums3)
+	sortedItems := make([]*SortedItem, len(nums))
+	for i := range nums {
+		sortedItems[i] = &SortedItem{value: nums[i], index: i}
 	}
-	n3 := len(nums3)
-	if n3 == 0 {
-		return MergeTwoSortedArray(nums1, nums2)
+	sort.Slice(sortedItems, func(i, j int) bool { return sortedItems[i].value < sortedItems[j].value })
+	sortedNums := make([]int, len(nums))
+	for i := range sortedItems {
+		sortedNums[i] = sortedItems[i].value
 	}
-	res := make([]int, n1+n2+n3)
-	i1 := 0
-	i2 := 0
-	i3 := 0
-	k := 0
-	for i1 < n1 && i2 < n2 && i3 < n3 {
-		if nums1[i1] < nums2[i2] {
-			if nums1[i1] < nums3[i3] {
-				res[k] = nums1[i1]
-				i1++
-			} else {
-				res[k] = nums3[i3]
-				i3++
-			}
-		} else if nums2[i2] < nums3[i3] {
-			res[k] = nums2[i2]
-			i2++
+	return &MergeTrick{
+		_nums:        nums,
+		_sortedItems: sortedItems,
+		_sortedNums:  sortedNums,
+	}
+}
+
+func (mt *MergeTrick) Add(start, end, delta int) {
+	mt._dirty = true
+	n := len(mt._nums)
+	modified := make([]*SortedItem, end-start)
+	unmodified := make([]*SortedItem, n-(end-start))
+	for i, ptr1, ptr2 := 0, 0, 0; i < n; i++ {
+		item := mt._sortedItems[i]
+		if index := item.index; index >= start && index < end {
+			item.value += delta
+			modified[ptr1] = item
+			ptr1++
+			mt._nums[index] += delta
 		} else {
-			res[k] = nums3[i3]
-			i3++
+			unmodified[ptr2] = item
+			ptr2++
 		}
-		k++
 	}
-	for i1 < n1 && i2 < n2 {
-		if nums1[i1] < nums2[i2] {
-			res[k] = nums1[i1]
+
+	// 归并
+	i1, i2, k := 0, 0, 0
+	for i1 < len(modified) && i2 < len(unmodified) {
+		if modified[i1].value < unmodified[i2].value {
+			mt._sortedItems[k] = modified[i1]
 			i1++
 		} else {
-			res[k] = nums2[i2]
+			mt._sortedItems[k] = unmodified[i2]
 			i2++
 		}
 		k++
 	}
-	for i1 < n1 && i3 < n3 {
-		if nums1[i1] < nums3[i3] {
-			res[k] = nums1[i1]
-			i1++
-		} else {
-			res[k] = nums3[i3]
-			i3++
-		}
-		k++
-	}
-	for i2 < n2 && i3 < n3 {
-		if nums2[i2] < nums3[i3] {
-			res[k] = nums2[i2]
-			i2++
-		} else {
-			res[k] = nums3[i3]
-			i3++
-		}
-		k++
-	}
-	for i1 < n1 {
-		res[k] = nums1[i1]
+
+	for i1 < len(modified) {
+		mt._sortedItems[k] = modified[i1]
 		i1++
 		k++
 	}
-	for i2 < n2 {
-		res[k] = nums2[i2]
+
+	for i2 < len(unmodified) {
+		mt._sortedItems[k] = unmodified[i2]
 		i2++
 		k++
 	}
-	for i3 < n3 {
-		res[k] = nums3[i3]
-		i3++
-		k++
+}
+
+// 返回原始数组.
+func (mt *MergeTrick) GetNums() []int {
+	return mt._nums
+}
+
+// 返回排序后的数组.
+func (mt *MergeTrick) GetSortedNums() []int {
+	if !mt._dirty {
+		return mt._sortedNums
 	}
+	mt._dirty = false
+	res := make([]int, len(mt._nums))
+	for i := range res {
+		res[i] = mt._sortedItems[i].value
+	}
+	mt._sortedNums = res
 	return res
 }

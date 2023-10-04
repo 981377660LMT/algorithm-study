@@ -1,1 +1,2 @@
-	fmt.Println("nums:", nums)
+
+	for i := 0; i < q; i++ {

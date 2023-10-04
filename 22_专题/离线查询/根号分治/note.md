@@ -56,3 +56,7 @@ https://drken1215.hatenablog.com/archive/category/%E3%82%AF%E3%82%A8%E3%83%AA%E3
    对于> limit 的数据，会有一些性质，我们根据这个性质进行处理。
    对于< limit 的数据同样也会有一些性质，我们也根据这个性质特殊处理。
    而且这两部分若缺少了这些性质复杂度就难以保证，但把它分开了复杂度就对了。我们 limit 一般取 √n,但实际情况实际考虑。
+
+---
+
+https://github.com/EndlessCheng/codeforces-go/blob/bd8ed7c9523602007483193b3855fe6204f5349a/copypasta/sqrt_decomposition.go#L1

@@ -8,8 +8,8 @@
 // CutEdge(u,v) : u と v の間の辺を切り離す.如果边不存在则不进行操作
 // QueryToRoot(u): u から根までのパス上の頂点の値を二項演算でまとめた結果を返す.
 // QueryPath(u, v): u から v までのパス上の頂点の値を二項演算でまとめた結果を返す.
-// QeuryKthAncestor(x, k): x から根までのパスに出現するノードを並べたとき, 0-indexed で k 番目のノードを返す.
-// QueryLCA(u, v): u と v の lca を返す. u と v が異なる連結成分なら nullptr を返す.
+// KthAncestor(x, k): x から根までのパスに出現するノードを並べたとき, 0-indexed で k 番目のノードを返す.
+// LCA(u, v): u と v の lca を返す. u と v が異なる連結成分なら nullptr を返す.
 //  !上記の操作は根を勝手に変えるため、根を固定したい場合は Evert で根を固定してから操作する.
 // IsConnected(u, v): u と v が同じ連結成分に属する場合は true, そうでなければ false を返す.
 // Alloc(v): 要素の値を v としたノードを生成する.
@@ -21,7 +21,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"runtime/debug"
 )
 
@@ -30,15 +32,109 @@ func init() {
 	debug.SetGCPercent(-1)
 }
 
-func main() {
+func demo() {
 	uf := NewLinkCutTree(true)
 	n := 10
 	nodes := uf.Build(make([]E, n))
+	for i := 0; i < n; i++ {
+		uf.Set(nodes[i], 1)
+	}
 	uf.LinkEdge(nodes[1], nodes[0])
 	uf.LinkEdge(nodes[2], nodes[0])
 	fmt.Println(uf.GetRoot(nodes[1]) == nodes[0])
 	fmt.Println(uf.GetRoot(nodes[2]) == nodes[0])
 	fmt.Println(uf.GetRoot(nodes[3]) == nodes[0])
+	fmt.Println(uf.QueryPath(nodes[1], nodes[2]))
+}
+
+// https://www.luogu.com.cn/problem/P3203
+// 每个弹力装置初始系数为nums[i].
+// 当绵羊踩到第i个弹力装置时，会被弹到第i+nums[i]个弹力装置上。如果不存在第i+nums[i]个弹力装置，则绵羊会被弹飞。
+//
+// 1 index : 输出从index出发被弹几次后弹飞
+// 2 index newValue : 将index位置的弹力装置系数改为newValue
+// n<=2e5 q<=1e5
+//
+// 方法1：LCT
+// 方法2：分块
+func 弹飞绵羊(nums []int, operations [][3]int) []int {
+	n := len(nums)
+	weights := make([]int, n+1) // n是虚拟结点
+	for i := range weights {
+		weights[i] = 1
+	}
+	tree := NewLinkCutTree(false)
+	nodes := tree.Build(weights)
+	for i, v := range nums {
+		if i+v < n {
+			tree.LinkEdge(nodes[i], nodes[i+v])
+		} else {
+			tree.LinkEdge(nodes[i], nodes[n])
+		}
+	}
+
+	res := []int{}
+	for _, op := range operations {
+		kind := op[0]
+		if kind == 1 {
+			// 查询index到虚拟根节点的距离
+			cur := op[1]
+			dist := tree.QueryPath(nodes[cur], nodes[n]) - 1
+			res = append(res, dist)
+		} else {
+			cur, newValue := op[1], op[2]
+			preValue := nums[cur]
+			nums[cur] = newValue
+			if cur+preValue < n {
+				tree.CutEdge(nodes[cur], nodes[cur+preValue])
+			} else {
+				tree.CutEdge(nodes[cur], nodes[n])
+			}
+			if cur+newValue < n {
+				tree.LinkEdge(nodes[cur], nodes[cur+newValue])
+			} else {
+				tree.LinkEdge(nodes[cur], nodes[n])
+			}
+		}
+	}
+
+	return res
+}
+
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	var q int
+	fmt.Fscan(in, &q)
+	var operations [][3]int
+	for i := 0; i < q; i++ {
+		var op int
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var index int
+			fmt.Fscan(in, &index)
+
+			operations = append(operations, [3]int{op, index, 0})
+		} else {
+			var index, newValue int
+			fmt.Fscan(in, &index, &newValue)
+
+			operations = append(operations, [3]int{op, index, newValue})
+		}
+	}
+
+	res := 弹飞绵羊(nums, operations)
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
 }
 
 type E = int
@@ -81,7 +177,8 @@ func (lct *LinkCutTree) Evert(t *treeNode) {
 }
 
 // 存在していない辺 uv を新たに張る.
-//  すでに存在している辺 uv に対しては何もしない.
+//
+//	すでに存在している辺 uv に対しては何もしない.
 func (lct *LinkCutTree) LinkEdge(child, parent *treeNode) (ok bool) {
 	if lct.check {
 		if lct.IsConnected(child, parent) {
@@ -104,7 +201,8 @@ func (lct *LinkCutTree) LinkEdge(child, parent *treeNode) (ok bool) {
 }
 
 // 存在している辺を切り離す.
-//  存在していない辺に対しては何もしない.
+//
+//	存在していない辺に対しては何もしない.
 func (lct *LinkCutTree) CutEdge(u, v *treeNode) (ok bool) {
 	if lct.check {
 		id1, id2 := u.id, v.id
@@ -128,9 +226,10 @@ func (lct *LinkCutTree) CutEdge(u, v *treeNode) (ok bool) {
 }
 
 // u と v の lca を返す.
-//  u と v が異なる連結成分なら nullptr を返す.
-//  !上記の操作は根を勝手に変えるため, 事前に Evert する必要があるかも.
-func (lct *LinkCutTree) QueryLCA(u, v *treeNode) *treeNode {
+//
+//	u と v が異なる連結成分なら nullptr を返す.
+//	!上記の操作は根を勝手に変えるため, 事前に Evert する必要があるかも.
+func (lct *LinkCutTree) LCA(u, v *treeNode) *treeNode {
 	if !lct.IsConnected(u, v) {
 		return nil
 	}
@@ -138,7 +237,7 @@ func (lct *LinkCutTree) QueryLCA(u, v *treeNode) *treeNode {
 	return lct.expose(v)
 }
 
-func (lct *LinkCutTree) QueryKthAncestor(x *treeNode, k int) *treeNode {
+func (lct *LinkCutTree) KthAncestor(x *treeNode, k int) *treeNode {
 	lct.expose(x)
 	for x != nil {
 		lct.push(x)

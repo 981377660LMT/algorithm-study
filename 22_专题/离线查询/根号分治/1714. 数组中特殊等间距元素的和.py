@@ -2,7 +2,8 @@ from typing import List
 
 MOD = int(1e9 + 7)
 # 1 <= n <= 5 * 104
-# 其中 queries[i] = [xi, yi]。 第 i 个查询指令的答案是 nums[j] 中满足该条件的所有元素的和：
+# 其中 queries[i] = [xi, yi]。
+# 第 i 个查询指令的答案是 nums[j] 中满足该条件的所有元素的和：
 # xi <= j < n 且 (j - xi) 能被 yi 整除。 (即分段点的和)
 
 # 离线查询：先map后排序再处理，优先处理范围小的query，后面再扩大范围时直接去cache里取

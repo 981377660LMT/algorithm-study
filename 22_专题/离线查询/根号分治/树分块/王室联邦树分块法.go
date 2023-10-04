@@ -13,9 +13,8 @@
 //
 // - topCluster 分块法
 // !- 王室联邦分块法
-//
-// 分块方式:满足每块大小在 [B,3B]，
-// 块内每个点到核心点路径上的所有点都在块内.
+// !分块方式:满足每块大小在 [B,3B]，块内每个点到核心点路径上的所有点都在块内.
+// !但是不保证每个块都是连通的.
 //
 // dfs，并创建一个栈，dfs一个点时先记录初始栈顶高度，
 // 每dfs完当前节点的一棵子树就判断栈内（相对于刚开始dfs时）新增节点的数量是否≥B，
@@ -32,6 +31,13 @@ import (
 )
 
 func main() {
+	n := 5
+	tree := [][]int{{1}, {0, 2, 3}, {1, 4}, {1}, {2}}
+	blockSize := 2
+	fmt.Println(LimitSizeDecompose(n, tree, blockSize))
+}
+
+func P2325() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -60,11 +66,12 @@ func main() {
 }
 
 // 王室联邦分块法
-//  https://github.com/EndlessCheng/codeforces-go/blob/29153e2c702970aaccc69db6c4739c3103f95429/copypasta/graph_tree.go#LL1585C2-L1585C2
-//  https://www.luogu.com.cn/problem/P2325
-func LimitSizeDecompose(n int, tree [][]int, blockSize int) (blockId []int, roots []int) {
-	roots = []int{}          // 每个块的根节点
-	blockId = make([]int, n) // blockId[i]表示节点i所属的块的编号, roots[blockId[i]]即为i所属块的根节点
+//
+//	https://github.com/EndlessCheng/codeforces-go/blob/29153e2c702970aaccc69db6c4739c3103f95429/copypasta/graph_tree.go#LL1585C2-L1585C2
+//	https://www.luogu.com.cn/problem/P2325
+func LimitSizeDecompose(n int, tree [][]int, blockSize int) (belong []int, blockRoot []int) {
+	blockRoot = []int{}     // 每个块的根节点(关键点)
+	belong = make([]int, n) // belong[i]表示节点i所属的块的编号, blockRoot[belong[i]]即为i所属块的根节点(关键点)
 	stack := []int{}
 	var dfs func(cur, pre int)
 	dfs = func(cur, pre int) {
@@ -73,9 +80,9 @@ func LimitSizeDecompose(n int, tree [][]int, blockSize int) (blockId []int, root
 			if next != pre {
 				dfs(next, cur)
 				if len(stack)-size >= blockSize {
-					roots = append(roots, cur)
+					blockRoot = append(blockRoot, cur)
 					for len(stack) > size {
-						blockId[stack[len(stack)-1]] = len(roots) - 1
+						belong[stack[len(stack)-1]] = len(blockRoot) - 1
 						stack = stack[:len(stack)-1]
 					}
 				}
@@ -85,11 +92,11 @@ func LimitSizeDecompose(n int, tree [][]int, blockSize int) (blockId []int, root
 	}
 
 	dfs(0, -1)
-	if len(roots) == 0 {
-		roots = []int{0}
+	if len(blockRoot) == 0 {
+		blockRoot = []int{0}
 	}
 	for _, v := range stack {
-		blockId[v] = len(roots) - 1
+		belong[v] = len(blockRoot) - 1
 	}
 	return
 }

@@ -13,23 +13,26 @@ class MergeTrick {
   private readonly _nums: number[]
   private readonly _sortedItems: SortedItem[]
   private _sortedNums: number[]
-  private dirty = false
+  private _dirty = false
 
-  constructor(nums: ArrayLike<number>) {
-    const copy = Array(nums.length)
-    for (let i = 0; i < nums.length; i++) copy[i] = nums[i]
+  /**
+   * @param nums 原数组.
+   * @param shouldCopy 是否浅拷贝{@link nums}.默认为false.
+   */
+  constructor(nums: number[], shouldCopy = false) {
+    if (shouldCopy) nums = nums.slice()
     const sortedItems: SortedItem[] = Array(nums.length)
     for (let i = 0; i < nums.length; i++) sortedItems[i] = { value: nums[i], index: i }
     sortedItems.sort((a, b) => a.value - b.value)
     const sortedNums = Array(nums.length)
     for (let i = 0; i < nums.length; i++) sortedNums[i] = sortedItems[i].value
-    this._nums = copy
+    this._nums = nums
     this._sortedItems = sortedItems
     this._sortedNums = sortedNums
   }
 
   add(start: number, end: number, delta: number): void {
-    this.dirty = true
+    this._dirty = true
     const n = this._nums.length
     const modified: SortedItem[] = Array(end - start)
     const unmodified: SortedItem[] = Array(n - (end - start))
@@ -82,8 +85,8 @@ class MergeTrick {
    * 返回排序后的数组.
    */
   get sortedNums(): number[] {
-    if (!this.dirty) return this._sortedNums
-    this.dirty = false
+    if (!this._dirty) return this._sortedNums
+    this._dirty = false
     const res = Array(this._nums.length)
     for (let i = 0; i < res.length; i++) res[i] = this._sortedItems[i].value
     this._sortedNums = res
@@ -95,64 +98,74 @@ export { MergeTrick }
 
 if (require.main === module) {
   class _MergeTrickNaive {
+    private _nums: number[]
     private _sorted: number[]
 
     constructor(nums: number[]) {
-      this._sorted = nums.sort((a, b) => a - b)
+      this._nums = nums.slice()
+      this._sorted = this._nums.slice().sort((a, b) => a - b)
     }
 
     add(start: number, end: number, delta: number): void {
       for (let i = start; i < end; i++) {
-        this._sorted[i] += delta
+        this._nums[i] += delta
       }
-      this._sorted.sort((a, b) => a - b)
+      this._sorted = this._nums.slice().sort((a, b) => a - b)
     }
 
     sorted(): number[] {
-      return this._sorted.slice()
+      return this._sorted
     }
   }
 
-  // // time
-  // const bigArr = Array(2e3)
-  // for (let i = 0; i < bigArr.length; i++) {
-  //   bigArr[i] = Math.floor(Math.random() * 1e9)
-  // }
-  // const mt2 = new MergeTrick(bigArr)
+  // time
+  const bigArr = Array(1000)
+  for (let i = 0; i < bigArr.length; i++) {
+    bigArr[i] = Math.floor(Math.random() * 1e9)
+  }
+  const mt2 = new MergeTrick(bigArr)
 
-  // const mt3 = new _MergeTrickNaive(bigArr)
+  const mt3 = new _MergeTrickNaive(bigArr)
 
-  // console.time('merge trick')
-  // for (let i = 0; i < 1e5; i++) {
-  //   mt2.add(0, 800, 1)
-  //   mt2.sortedNums
-  // }
-  // console.timeEnd('merge trick')
+  console.time('merge trick')
+  for (let i = 0; i < 1e5; i++) {
+    mt2.add(0, 800, 1)
+    mt2.sortedNums
+  }
+  console.timeEnd('merge trick')
 
-  // console.time('naive')
-  // for (let i = 0; i < 1e5; i++) {
-  //   mt3.add(0, 800, 1)
-  //   mt3.sorted()
-  // }
-  // console.timeEnd('naive')
+  console.time('naive')
+  for (let i = 0; i < 1e5; i++) {
+    mt3.add(0, 800, 1)
+    mt3.sorted()
+  }
+  console.timeEnd('naive')
+
+  //
+  // [ 1, 2, 2, 1 ]
+  // add 1 3 0
+  // add 0 3 2
+  // not match
+  // [ 1, 3, 4, 4 ]
+  // [ 2, 3, 3, 4 ]
 
   check()
   function check(): void {
-    const arr = Array(4)
+    const arr = Array(4000)
     for (let i = 0; i < arr.length; i++) {
       arr[i] = Math.floor(Math.random() * 4)
     }
-    console.log(arr)
+
     const mt = new MergeTrick(arr)
     const naive = new _MergeTrickNaive(arr)
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < arr.length; i++) {
       let start = Math.floor(Math.random() * arr.length)
       let end = Math.floor(Math.random() * arr.length)
       if (start > end) [start, end] = [end, start]
       const delta = Math.floor(Math.random() * 4)
-      mt.add(start, end, delta)
-      naive.add(start, end, delta)
-      console.log('add', start, end, delta)
+      // mt.add(start, end, delta)
+      // naive.add(start, end, delta)
+      // console.log('add', start, end, delta)
       const res1 = mt.sortedNums
       const res2 = naive.sorted()
 
@@ -165,5 +178,6 @@ if (require.main === module) {
         }
       }
     }
+    console.log('ok')
   }
 }

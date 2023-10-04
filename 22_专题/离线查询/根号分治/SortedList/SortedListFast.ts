@@ -940,4 +940,21 @@ if (require.main === module) {
     }
     return res
   }
+
+  // 1649. 通过指令创建有序数组
+  // https://leetcode.cn/problems/create-sorted-array-through-instructions/description/
+
+  function createSortedArray(instructions: number[]): number {
+    const MOD = 1e9 + 7
+    let res = 0
+    const sl = new SortedListFast<number>()
+    instructions.forEach(num => {
+      const smaller = sl.bisectLeft(num)
+      const bigger = sl.length - sl.bisectRight(num)
+      res += Math.min(smaller, bigger)
+      res %= MOD
+      sl.add(num)
+    })
+    return res % MOD
+  }
 }

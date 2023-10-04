@@ -28,44 +28,51 @@ func main() {
 
 }
 
+type SortedItem = struct{ value, index int }
 type MergeTrick struct {
 	_nums        []int
-	_originIndex []int
+	_sortedItems []*SortedItem
 	_sortedNums  []int
 	_dirty       bool
 }
 
-func NewMergeTrick(nums []int) *MergeTrick {
-	nums = append(nums[:0:0], nums...)
-	order := make([]int, len(nums))
-	for i := range order {
-		order[i] = i
+// O(n)区间加, O(n)整体排序.
+//
+//	shouldCopy: 是否复制nums.
+func NewMergeTrick(nums []int, shouldCopy bool) *MergeTrick {
+	if shouldCopy {
+		nums = append(nums[:0:0], nums...)
 	}
-	sort.Slice(order, func(i, j int) bool {
-		return nums[order[i]] < nums[order[j]]
-	})
-	originIndex := make([]int, len(nums))
-	for i := range originIndex {
-		originIndex[order[i]] = i
+	sortedItems := make([]*SortedItem, len(nums))
+	for i := range nums {
+		sortedItems[i] = &SortedItem{value: nums[i], index: i}
 	}
-	sortedNums := append(nums[:0:0], nums...)
-	sort.Ints(sortedNums)
-	return &MergeTrick{_nums: nums, _originIndex: originIndex, _sortedNums: sortedNums}
+	sort.Slice(sortedItems, func(i, j int) bool { return sortedItems[i].value < sortedItems[j].value })
+	sortedNums := make([]int, len(nums))
+	for i := range sortedItems {
+		sortedNums[i] = sortedItems[i].value
+	}
+	return &MergeTrick{
+		_nums:        nums,
+		_sortedItems: sortedItems,
+		_sortedNums:  sortedNums,
+	}
 }
 
 func (mt *MergeTrick) Add(start, end, delta int) {
 	mt._dirty = true
 	n := len(mt._nums)
-	modified := make([]int, end-start)
-	unmodified := make([]int, n-(end-start))
+	modified := make([]*SortedItem, end-start)
+	unmodified := make([]*SortedItem, n-(end-start))
 	for i, ptr1, ptr2 := 0, 0, 0; i < n; i++ {
-		index := mt._originIndex[i]
-		if index >= start && index < end {
-			modified[ptr1] = index
-			mt._nums[index] += delta
+		item := mt._sortedItems[i]
+		if index := item.index; index >= start && index < end {
+			item.value += delta
+			modified[ptr1] = item
 			ptr1++
+			mt._nums[index] += delta
 		} else {
-			unmodified[ptr2] = index
+			unmodified[ptr2] = item
 			ptr2++
 		}
 	}
@@ -73,24 +80,24 @@ func (mt *MergeTrick) Add(start, end, delta int) {
 	// 归并
 	i1, i2, k := 0, 0, 0
 	for i1 < len(modified) && i2 < len(unmodified) {
-		if mt._nums[modified[i1]] < mt._nums[unmodified[i2]] {
-			mt._originIndex[k] = modified[i1]
+		if modified[i1].value < unmodified[i2].value {
+			mt._sortedItems[k] = modified[i1]
 			i1++
 		} else {
-			mt._originIndex[k] = unmodified[i2]
+			mt._sortedItems[k] = unmodified[i2]
 			i2++
 		}
 		k++
 	}
 
 	for i1 < len(modified) {
-		mt._originIndex[k] = modified[i1]
+		mt._sortedItems[k] = modified[i1]
 		i1++
 		k++
 	}
 
 	for i2 < len(unmodified) {
-		mt._originIndex[k] = unmodified[i2]
+		mt._sortedItems[k] = unmodified[i2]
 		i2++
 		k++
 	}
@@ -109,7 +116,7 @@ func (mt *MergeTrick) GetSortedNums() []int {
 	mt._dirty = false
 	res := make([]int, len(mt._nums))
 	for i := range res {
-		res[i] = mt._nums[mt._originIndex[i]]
+		res[i] = mt._sortedItems[i].value
 	}
 	mt._sortedNums = res
 	return res

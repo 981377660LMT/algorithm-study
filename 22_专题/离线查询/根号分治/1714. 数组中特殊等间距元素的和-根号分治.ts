@@ -1,9 +1,13 @@
 // https://leetcode.cn/problems/sum-of-special-evenly-spaced-elements-in-array/
 // !每个查询[start,step]要计算nums[start:n:step]的和
 // n<=5e4,q<=1e5
-// 分块思想:
+// 对step的大小进行根号分治：
 // 1. 如果step比较大(大于根号n，那么查询只需根号n次运算，没问题)
 // 2. 如果step比较小(小于根号n,那么只需要在时间复杂度O(n*根号n)内预处理答案，然后O(1)查询)
+
+// 支持修改的版本：
+// 哈希冲突
+// https://www.luogu.com.cn/blog/danieljiang/ha-xi-chong-tu-ti-xie-gen-hao-ke-ji
 
 const MOD = 1e9 + 7
 
