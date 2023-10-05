@@ -19,6 +19,10 @@ class Dictionary<V> {
     return this._idToValue[id]
   }
 
+  has(value: V): boolean {
+    return this._valueToId.has(value)
+  }
+
   get size(): number {
     return this._idToValue.length
   }

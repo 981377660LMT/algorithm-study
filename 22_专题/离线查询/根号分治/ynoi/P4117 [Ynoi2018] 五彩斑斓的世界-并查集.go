@@ -1,4 +1,5 @@
-// RangeAddRangeKth
+// P4117 [Ynoi2018] 五彩斑斓的世界(第二分块)
+// https://www.luogu.com.cn/problem/P4117
 
 package main
 
@@ -9,9 +10,9 @@ import (
 	"os"
 )
 
-// 0 start end delta
-// 1 start end k
-func RangeAddRangeKth(nums []int, operations [][4]int) []int {
+// 0 start end x：把区间 [start, end) 内大于 x 的数减去 x.
+// 1 start end x: 查询区间 [start, end) 内等于 x 的数的个数.
+func RangeClampRangeFreq(nums []int, operations [][4]int) []int {
 	block := UseBlock(nums, int(math.Sqrt(float64(len(nums)))+1))
 	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
 
@@ -19,13 +20,13 @@ func RangeAddRangeKth(nums []int, operations [][4]int) []int {
 	for _, op := range operations {
 		kind := op[0]
 		if kind == 0 {
-			start, end, _ := op[1], op[2], op[3]
+			start, end, x := op[1], op[2], op[3]
 			bid1, bid2 := belong[start], belong[end-1]
 			if bid1 == bid2 {
 			} else {
 			}
 		} else {
-			start, end, _ := op[1], op[2], op[3]
+			start, end, x := op[1], op[2], op[3]
 			bid1, bid2 := belong[start], belong[end-1]
 			if bid1 == bid2 {
 			} else {
@@ -54,20 +55,19 @@ func main() {
 		var op int
 		fmt.Fscan(in, &op)
 		if op == 1 {
-			var start, end, delta int
-			fmt.Fscan(in, &start, &end, &delta)
+			var start, end, x int
+			fmt.Fscan(in, &start, &end, &x)
 			start--
-			operations[i] = [4]int{0, start, end, delta}
+			operations[i] = [4]int{0, start, end, x}
 		} else {
-			var start, end, k int
-			fmt.Fscan(in, &start, &end, &k)
+			var start, end, x int
+			fmt.Fscan(in, &start, &end, &x)
 			start--
-			k--
-			operations[i] = [4]int{1, start, end, k}
+			operations[i] = [4]int{1, start, end, x}
 		}
 	}
 
-	res := RangeAddRangeKth(nums, operations)
+	res := RangeClampRangeFreq(nums, operations)
 	for _, v := range res {
 		fmt.Fprintln(out, v)
 	}

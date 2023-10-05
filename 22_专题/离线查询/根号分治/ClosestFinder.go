@@ -20,7 +20,7 @@ type V = string
 type ClosestFinder struct {
 	_threshold      int
 	_ids            []int
-	_mp             map[int][]int
+	_mp             [][]int
 	_largeResRecord map[int][]int
 	_valueToId      map[V]int
 }
@@ -33,13 +33,16 @@ func NewClosestFinder(arr []V, threshold int) *ClosestFinder {
 	res := &ClosestFinder{
 		_threshold:      threshold,
 		_ids:            make([]int, len(arr)),
-		_mp:             map[int][]int{},
+		_mp:             [][]int{},
 		_largeResRecord: map[int][]int{},
 		_valueToId:      map[V]int{},
 	}
 	for i, v := range arr {
 		id := res._getId(v)
 		res._ids[i] = id
+		if len(res._mp) <= id {
+			res._mp = append(res._mp, []int{})
+		}
 		res._mp[id] = append(res._mp[id], i)
 	}
 	for id := range res._mp {

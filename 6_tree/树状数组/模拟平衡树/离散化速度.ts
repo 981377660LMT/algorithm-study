@@ -22,7 +22,7 @@ function oldSortedSet(nums: number[]): [rank: (num: number) => number, count: nu
  * rank: 给定一个数,返回它的排名`(0-count)`.
  * count: 离散化(去重)后的元素个数.
  */
-function sortedSet(nums: number[]): [rank: (num: number) => number, count: number] {
+function discretize(nums: number[]): [rank: (num: number) => number, count: number] {
   const allNums = [...new Set(nums)].sort((a, b) => a - b)
   const rank = (num: number) => {
     let left = 0
@@ -49,7 +49,7 @@ console.time('old')
 const [rank, count] = oldSortedSet(nums)
 console.timeEnd('old')
 console.time('new')
-const [rank2, count2] = sortedSet(nums)
+const [rank2, count2] = discretize(nums)
 console.timeEnd('new')
 
 export {}

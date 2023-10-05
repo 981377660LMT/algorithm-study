@@ -10,7 +10,7 @@
 class ClosestFinder<T> {
   private readonly _threshold: number
   private readonly _ids: number[]
-  private readonly _mp: Map<number, number[]> = new Map()
+  private readonly _mp: number[][] = []
   private readonly _largeResRecord: Map<number, Uint32Array> = new Map()
   private readonly _valueToId = new Map<T, number>()
 
@@ -23,8 +23,8 @@ class ClosestFinder<T> {
     for (let i = 0; i < arr.length; i++) {
       const id = this._getId(arr[i])
       ids[i] = id
-      if (!this._mp.has(id)) this._mp.set(id, [])
-      this._mp.get(id)!.push(i)
+      if (this._mp.length <= id) this._mp.push([])
+      this._mp[id].push(i)
     }
     this._ids = ids
     this._mp.forEach((_, id) => {
@@ -37,7 +37,7 @@ class ClosestFinder<T> {
   /**
    * 查询`x`和`y`的最近距离.
    * 如果`x`和`y`相同，返回`0`.
-   * 如果`x`或`y`不存在，返回`-1`.
+   * 如果`x`或`y`不存在，返回`undefined`.
    */
   findClosest(x: T, y: T): number | undefined {
     if (x === y) return 0
@@ -46,8 +46,8 @@ class ClosestFinder<T> {
     const id2 = this._getId(y)
     if (this._isLarge(id1)) return this._largeResRecord.get(id1)![id2]
     if (this._isLarge(id2)) return this._largeResRecord.get(id2)![id1]
-    const pos1 = this._mp.get(id1)!
-    const pos2 = this._mp.get(id2)!
+    const pos1 = this._mp[id1]
+    const pos2 = this._mp[id2]
     let i = 0
     let j = 0
     let res = this._ids.length
@@ -68,8 +68,7 @@ class ClosestFinder<T> {
   }
 
   private _isLarge(id: number): boolean {
-    const pos = this._mp.get(id) || []
-    return pos.length > this._threshold
+    return this._mp[id].length > this._threshold
   }
 
   private _buildLargeRes(id: number): Uint32Array {
@@ -102,6 +101,8 @@ class ClosestFinder<T> {
 export { ClosestFinder }
 
 if (require.main === module) {
+  // 面试题 17.11. 单词距离
+  // https://leetcode.cn/problems/find-closest-lcci/
   // eslint-disable-next-line no-inner-declarations
   function findClosest(words: string[], word1: string, word2: string): number {
     const finder = new ClosestFinder(words)
@@ -126,4 +127,24 @@ if (require.main === module) {
    * var obj = new WordDistance(wordsDict)
    * var param_1 = obj.shortest(word1,word2)
    */
+
+  // test time
+  const n = 1e6
+  const bigArr = Array(n)
+  for (let i = 0; i < bigArr.length; i++) {
+    bigArr[i] = (Math.random() * 100) | 0
+  }
+  const finder = new ClosestFinder(bigArr)
+  const randomPairs = Array(n)
+  for (let i = 0; i < randomPairs.length; i++) {
+    const pos1 = (Math.random() * 100) | 0
+    const pos2 = (Math.random() * 100) | 0
+    randomPairs[i] = [bigArr[pos1], bigArr[pos2]]
+  }
+
+  console.time('build')
+  for (let i = 0; i < randomPairs.length; i++) {
+    finder.findClosest(randomPairs[i][0], randomPairs[i][1])
+  }
+  console.timeEnd('build')
 }

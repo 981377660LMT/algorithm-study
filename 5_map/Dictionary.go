@@ -37,6 +37,11 @@ func (d *Dictionary) Value(id int) V {
 	return d._idToValue[id]
 }
 
+func (d *Dictionary) HasValue(value V) bool {
+	_, ok := d._valueToId[value]
+	return ok
+}
+
 func (d *Dictionary) Size() int {
 	return len(d._idToValue)
 }

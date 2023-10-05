@@ -15,12 +15,12 @@ class MoAlgo {
   }
 
   /**
-   * 添加一个查询，查询范围为`左闭右开区间` [left, right).
-   * 0 <= left <= right <= n
+   * 添加一个查询，查询范围为`左闭右开区间` [start, end).
+   * 0 <= start <= end <= n
    */
-  addQuery(left: number, right: number): void {
-    const index = (left / this._chunkSize) | 0
-    this._buckets[index].push([this._queryOrder, left, right])
+  addQuery(start: number, end: number): void {
+    const index = (start / this._chunkSize) | 0
+    this._buckets[index].push([this._queryOrder, start, end])
     this._queryOrder++
   }
 

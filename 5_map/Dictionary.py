@@ -29,6 +29,9 @@ class Dictionary(Generic[V]):
     def __len__(self) -> int:
         return len(self._idToValue)
 
+    def __contains__(self, v: V) -> bool:
+        return v in self._valueToId
+
 
 if __name__ == "__main__":
     d = Dictionary[str]()

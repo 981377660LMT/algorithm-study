@@ -213,7 +213,7 @@ if (require.main === module) {
 
     const allY = new Set(nums2)
     queries.forEach(q => allY.add(q[1]))
-    const [rank, count] = sortedSet([...allY])
+    const [rank, count] = discretize([...allY])
 
     const seg = new SegmentTreePointUpdateRangeQuery<number>(count, () => -INF, Math.max)
     const res = Array(queries.length).fill(-1)
@@ -237,7 +237,7 @@ if (require.main === module) {
    * rank: 给定一个数,返回它的排名`(0-count)`.
    * count: 离散化(去重)后的元素个数.
    */
-  function sortedSet(nums: number[]): [rank: (num: number) => number, count: number] {
+  function discretize(nums: number[]): [rank: (num: number) => number, count: number] {
     const allNums = [...new Set(nums)].sort((a, b) => a - b)
     const rank = (num: number) => {
       let left = 0

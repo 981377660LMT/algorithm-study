@@ -103,7 +103,7 @@ function useSortedList(max: number) {
  * rank: 给定一个数,返回它的排名`(0-count)`.
  * count: 离散化(去重)后的元素个数.
  */
-function sortedSet(nums: number[]): [rank: (num: number) => number, count: number] {
+function discretize(nums: number[]): [rank: (num: number) => number, count: number] {
   const allNums = [...new Set(nums)].sort((a, b) => a - b)
   const rank = (num: number) => {
     let left = 0
@@ -132,7 +132,7 @@ if (require.main === module) {
     nums.forEach(num => {
       allNums.push(lower - num, upper - num)
     })
-    const [rank, n] = sortedSet(allNums)
+    const [rank, n] = discretize(allNums)
 
     const sl = useSortedList(n)
     let res = 0

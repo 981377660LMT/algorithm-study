@@ -9,7 +9,7 @@ function countLIS(nums: number[], isStrict = true): number {
   const n = nums.length
   if (n <= 1) return n
 
-  const [rank, count] = sortedSet(nums)
+  const [rank, count] = discretize(nums)
   const bits = new DefaultDict(() => new BIT1(count + 10))
   const lis: number[] = []
   const bisect = isStrict ? bisectLeft : bisectRight
@@ -33,7 +33,7 @@ function countLIS(nums: number[], isStrict = true): number {
   return bits.get(lastPos).query(count)
 }
 
-function sortedSet(nums: number[]): [rank: (num: number) => number, count: number] {
+function discretize(nums: number[]): [rank: (num: number) => number, count: number] {
   const allNums = [...new Set(nums)].sort((a, b) => a - b)
   const rank = (num: number) => {
     let left = 0

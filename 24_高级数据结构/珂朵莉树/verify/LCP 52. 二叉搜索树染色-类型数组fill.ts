@@ -9,7 +9,7 @@ function getNumber(root: TreeNode | null, ops: number[][]): number {
   dfs(root)
   const odt = new Int8Array(nums.length).fill(-1) // 初始时，所有节点都是蓝色的
 
-  const [rank] = sortedSet(nums)
+  const [rank] = discretize(nums)
   ops.forEach(([type, x, y]) => {
     const start = rank(x)
     const end = rank(y) + 1
@@ -36,7 +36,7 @@ function getNumber(root: TreeNode | null, ops: number[][]): number {
  * rank: 给定一个数,返回它的排名`(0-count)`.
  * count: 离散化(去重)后的元素个数.
  */
-function sortedSet(nums: number[]): [rank: (num: number) => number, count: number] {
+function discretize(nums: number[]): [rank: (num: number) => number, count: number] {
   const allNums = [...new Set(nums)].sort((a, b) => a - b)
   const rank = (num: number) => {
     let left = 0

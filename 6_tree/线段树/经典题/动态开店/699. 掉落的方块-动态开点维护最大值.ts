@@ -47,7 +47,7 @@ function fallingSquares2(positions: number[][]): number[] {
     allNums.add(left + size - 1)
   })
 
-  const [rank, count] = sortedSet([...allNums])
+  const [rank, count] = discretize([...allNums])
   const tree = createRangeUpdateRangeMax(count)
 
   positions.forEach(([left, size], i) => {
@@ -68,7 +68,7 @@ function fallingSquares2(positions: number[][]): number[] {
  * rank: 给定一个数,返回它的排名`(0-count)`.
  * count: 离散化(去重)后的元素个数.
  */
-function sortedSet(nums: number[]): [rank: (num: number) => number, count: number] {
+function discretize(nums: number[]): [rank: (num: number) => number, count: number] {
   const allNums = [...new Set(nums)].sort((a, b) => a - b)
   const rank = (num: number) => {
     let left = 0

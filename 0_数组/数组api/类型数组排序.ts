@@ -13,3 +13,4 @@ console.time('naive')
 
 order2.sort((a, b) => nums[a] - nums[b])
 console.timeEnd('naive')
+export {}

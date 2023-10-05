@@ -3,6 +3,9 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
+	"os"
 	"sort"
 )
 
@@ -21,6 +24,36 @@ func (this *MajorityChecker) Query(left int, right int, threshold int) int {
 		return mode
 	}
 	return -1
+}
+
+// Yuno loves sqrt technology III
+// https://www.luogu.com.cn/problem/P5048
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int, n)
+	for i := range nums {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	preRes := 0
+	rangeMode := NewRangeModeQuery(nums)
+	for i := 0; i < q; i++ {
+		var start, end int
+		fmt.Fscan(in, &start, &end)
+		start ^= preRes
+		end ^= preRes
+		start--
+
+		_, freq := rangeMode.Query(start, end)
+		preRes = freq
+		fmt.Fprintln(out, freq)
+	}
+
 }
 
 // 在线查询区间众数(出现次数最多的数和出现次数).
@@ -92,7 +125,8 @@ func NewRangeModeQuery(nums []int) *RangeModeQuery {
 }
 
 // O(sqrt(n))查询区间 [start, end) 中出现次数最多的数mode, 以及出现的次数freq.
-//  0 <= start < end <= len(nums)
+//
+//	0 <= start < end <= len(nums)
 func (rmq *RangeModeQuery) Query(start, end int) (mode, freq int) {
 	if start >= end {
 		panic("start>=end")

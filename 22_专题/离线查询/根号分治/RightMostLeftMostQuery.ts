@@ -3,15 +3,15 @@
 // 对每个下标，查询 最右侧/最左侧 lower/floor/ceiling/higher 的元素.
 
 class RightMostLeftMostQuery {
-  readonly _nums: number[]
-  readonly _belong: Uint16Array
+  private readonly _nums: number[]
+  private readonly _belong: Uint16Array
   private readonly _blockStart: Uint32Array
   private readonly _blockEnd: Uint32Array
   private readonly _blockCount: number
 
-  readonly _blockMin: number[]
-  readonly _blockMax: number[]
-  readonly _blockLazy: number[]
+  private readonly _blockMin: number[]
+  private readonly _blockMax: number[]
+  private readonly _blockLazy: number[]
 
   constructor(arr: ArrayLike<number>) {
     const copy = Array(arr.length)
@@ -232,9 +232,9 @@ if (require.main === module) {
     const Q = new RightMostLeftMostQuery(nums)
     let res = 0
     for (let i = 0; i < nums.length; i++) {
-      const rightMostLower = Q.rightMostCeiling(i)
-      if (rightMostLower !== -1) {
-        res = Math.max(res, rightMostLower - i)
+      const cand = Q.rightMostCeiling(i)
+      if (cand !== -1) {
+        res = Math.max(res, cand - i)
       }
     }
     return res
@@ -246,9 +246,9 @@ if (require.main === module) {
     const Q = new RightMostLeftMostQuery(nums)
     let res = 0
     for (let i = 0; i < nums.length; i++) {
-      const rightMostLower = Q.rightMostLower(i)
-      if (rightMostLower !== -1) {
-        res = Math.max(res, rightMostLower - i + 1)
+      const cand = Q.rightMostLower(i)
+      if (cand !== -1) {
+        res = Math.max(res, cand - i + 1)
       }
     }
     return res
@@ -341,9 +341,9 @@ if (require.main === module) {
       const QRes = realFunc(index)
       if (mockerRes !== QRes) {
         console.log(realFunc.name, index, mockerRes, QRes)
-        console.log(mocker._nums, real._nums, real._blockLazy)
-        console.log('blockMin', real._blockMin)
-        console.log('blockMax', real._blockMax)
+        // console.log(mocker._nums, real._nums, real._blockLazy)
+        // console.log('blockMin', real._blockMin)
+        // console.log('blockMax', real._blockMax)
         throw new Error(realFunc.name)
       }
     }
