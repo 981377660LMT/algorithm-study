@@ -1,6 +1,4 @@
-// 静态区间逆序对
-// 二次离线莫队
-
+// P4887 【模板】莫队二次离线（第十四分块(前体)
 package main
 
 import (
@@ -8,33 +6,46 @@ import (
 	"fmt"
 	stdio "io"
 	"math"
+	"math/bits"
 	"os"
 	"sort"
 	"strconv"
-	"strings"
 )
 
-// 静态区间逆序对-离线.
-// 时间复杂度O(nsqrt(n)),空间复杂度O(n).
-// https://judge.yosupo.jp/problem/static_range_inversions_query
-func StaticRangeInversionsQuery(nums []int, ranges [][2]int) []int {
+// !每次查询一个区间中有几个二元组的的异或值在二进制下有k个1
+// 1<=n,q<=1e5 0<=ai,k<=16384 (2^14)
+// 莫队二次离线要求O(1)查询,O(sqrt(n))修改=>注意到C(14,k)最多C(14,7)=3432种情况.转移时可以枚举.
+// !预处理出所有有 k 个1的数组ok，利用异或性质即可得到答案(a^b=c => a^c=b, b^c=a)
+// 每一次插入一个数，就把它与ok数组中所有的数异或起来的值放进一个桶里，然后查询就直接查当前数在桶中出现了几次
+func Solve(nums []int, ranges [][2]int, k int) []int {
 	n, q := len(nums), len(ranges)
-	rank, newNums := discretize(nums)
-	bit := _newBITRangeBlockFastQuery(len(rank))
 	M := NewMoOfflineAgain(n, q, -1)
 	for _, query := range ranges {
 		start, end := query[0], query[1]
 		M.AddQuery(start, end)
 	}
+
+	ok := []int{} // 有k个1的数
+	for i := 0; i <= 1<<14; i++ {
+		if bits.OnesCount(uint(i)) == k {
+			ok = append(ok, i)
+		}
+	}
+	xorCounter := make([]int, 1<<15)
 	res := M.Run(
 		func(index int) {
-			bit.Add(newNums[index], 1)
+			cur := nums[index]
+			for _, v := range ok {
+				xorCounter[v^cur]++
+			}
 		},
 		func(index int) AbelianGroup {
-			return bit.QueryRange(0, newNums[index])
+			cur := nums[index]
+			return xorCounter[cur]
 		},
 		func(index int) AbelianGroup {
-			return bit.QueryRange(newNums[index]+1, len(rank))
+			cur := nums[index]
+			return xorCounter[cur]
 		},
 	)
 	return res
@@ -167,148 +178,6 @@ func (mo *MoOfflineAgain) Run(
 	return res
 }
 
-// 基于分块实现的`树状数组`.
-// `O(sqrt(n))`单点加，`O(1)`查询区间和.
-// 一般配合莫队算法使用.
-type _BITRangeBlockFastQuery struct {
-	_n           int
-	_belong      []int
-	_blockStart  []int
-	_blockEnd    []int
-	_blockCount  int
-	_partPreSum  []int
-	_blockPreSum []int
-}
-
-func _newBITRangeBlockFastQuery(lengthOrArray interface{}) *_BITRangeBlockFastQuery {
-	var n int
-	var isArray bool
-	if length, ok := lengthOrArray.(int); ok {
-		n = length
-	} else {
-		n = len(lengthOrArray.([]int))
-		isArray = true
-	}
-	blockSize := int(math.Sqrt(float64(n)) + 1)
-	blockCount := 1 + (n / blockSize)
-	belong := make([]int, n)
-	for i := range belong {
-		belong[i] = i / blockSize
-	}
-	blockStart := make([]int, blockCount)
-	blockEnd := make([]int, blockCount)
-	for i := range blockStart {
-		blockStart[i] = i * blockSize
-		tmp := (i + 1) * blockSize
-		if tmp > n {
-			tmp = n
-		}
-		blockEnd[i] = tmp
-	}
-	partPreSum := make([]int, n)
-	blockPreSum := make([]int, blockCount)
-	res := &_BITRangeBlockFastQuery{
-		_n:           n,
-		_belong:      belong,
-		_blockStart:  blockStart,
-		_blockEnd:    blockEnd,
-		_blockCount:  blockCount,
-		_partPreSum:  partPreSum,
-		_blockPreSum: blockPreSum,
-	}
-	if isArray {
-		res.Build(lengthOrArray.([]int))
-	}
-	return res
-}
-
-func (b *_BITRangeBlockFastQuery) Add(index int, delta int) {
-	if index < 0 || index >= b._n {
-		panic("index out of range")
-	}
-	bid := b._belong[index]
-	for i := index; i < b._blockEnd[bid]; i++ {
-		b._partPreSum[i] += delta
-	}
-	for id := bid + 1; id < b._blockCount; id++ {
-		b._blockPreSum[id] += delta
-	}
-}
-
-func (b *_BITRangeBlockFastQuery) QueryRange(start int, end int) int {
-	if start < 0 {
-		start = 0
-	}
-	if end > b._n {
-		end = b._n
-	}
-	if start >= end {
-		return 0
-	}
-	return b._query(end) - b._query(start)
-}
-
-func (b *_BITRangeBlockFastQuery) Build(arr []int) {
-	if len(arr) != b._n {
-		panic("array length mismatch n")
-	}
-	curBlockSum := 0
-	for bid := 0; bid < b._blockCount; bid++ {
-		curPartSum := 0
-		for i := b._blockStart[bid]; i < b._blockEnd[bid]; i++ {
-			curPartSum += arr[i]
-			b._partPreSum[i] = curPartSum
-		}
-		b._blockPreSum[bid] = curBlockSum
-		curBlockSum += curPartSum
-	}
-}
-
-func (b *_BITRangeBlockFastQuery) String() string {
-	sb := strings.Builder{}
-	sb.WriteString("BITRangeBlock{")
-	for i := range b._partPreSum {
-		if i > 0 {
-			sb.WriteString(", ")
-		}
-		sb.WriteString(fmt.Sprintf("%d", b.QueryRange(i, i+1)))
-	}
-	sb.WriteString("}")
-	return sb.String()
-}
-
-func (b *_BITRangeBlockFastQuery) _query(end int) int {
-	if end <= 0 {
-		return 0
-	}
-	return b._partPreSum[end-1] + b._blockPreSum[b._belong[end-1]]
-}
-
-// (紧)离散化.
-//
-//	rank: 给定一个在 nums 中的值,返回它的排名(0~len(rank)-1).
-//	newNums: 离散化后的数组.
-func discretize(nums []int) (rank map[int]int, newNums []int) {
-	set := make(map[int]struct{})
-	for _, v := range nums {
-		set[v] = struct{}{}
-	}
-	allNums := make([]int, 0, len(set))
-	for k := range set {
-		allNums = append(allNums, k)
-	}
-	sort.Ints(allNums)
-	rank = make(map[int]int, len(allNums))
-	for i, v := range allNums {
-		rank[v] = i
-	}
-	newNums = make([]int, len(nums))
-	for i, v := range nums {
-		newNums[i] = rank[v]
-	}
-	return
-}
-
 func min(a, b int) int {
 	if a < b {
 		return a
@@ -362,7 +231,7 @@ func main() {
 		io.Writer.Flush()
 	}()
 
-	n, q := io.NextInt(), io.NextInt()
+	n, q, k := io.NextInt(), io.NextInt(), io.NextInt()
 	nums := make([]int, n)
 	for i := 0; i < n; i++ {
 		nums[i] = io.NextInt()
@@ -372,7 +241,7 @@ func main() {
 		ranges[i] = [2]int{io.NextInt() - 1, io.NextInt()}
 	}
 
-	res := StaticRangeInversionsQuery(nums, ranges)
+	res := Solve(nums, ranges, k)
 	for _, v := range res {
 		io.Println(v)
 	}

@@ -9,7 +9,6 @@
 
 import { DfsOrder } from '../../../6_tree/树的性质/dfs序/DfsOrder'
 import { RangeMexQuery } from './RangeMexQuery-离线查询区间mex-线段树'
-import { RangeMexQueryMo } from './RangeMexQuery-离线查询区间mex-莫队'
 
 function smallestMissingValueSubtree(parents: number[], nums: number[]): number[] {
   const n = nums.length

@@ -2,6 +2,8 @@ https://leetcode.cn/circle/discuss/LLJ0oX/view/Vvwa9T/
 
 # SortedList 源码简析 (python)
 
+总结：SortedList = 分块 + 树状数组 + 定期重构
+
 [toc]
 
 ---

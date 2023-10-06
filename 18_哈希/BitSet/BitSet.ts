@@ -19,6 +19,9 @@ interface IBitSet {
   discardRange: (start: number, end: number) => void
   flipRange: (start: number, end: number) => void
 
+  lsh: (k: number) => void
+  rsh: (k: number) => void
+
   fill: (value: 0 | 1) => void
   clear: () => void
 
@@ -168,6 +171,54 @@ class BitSet {
       this._bits[i] = ~this._bits[i]
     }
     this._bits[i] ^= ~maskR
+  }
+
+  /**
+   * 左移k位(<<k).
+   * !TODO:需要处理位移超出n位后多出来的1的情况.
+   */
+  lsh(k: number): void {
+    if (!k) return
+    const shift = k >>> 5
+    const offset = k & 31
+    if (shift >= this._bits.length) {
+      this._bits.fill(0)
+      return
+    }
+    if (!offset) {
+      this._bits.copyWithin(shift, 0)
+    } else {
+      for (let i = this._bits.length - 1; i > shift; i--) {
+        this._bits[i] =
+          (this._bits[i - shift] << offset) | (this._bits[i - shift - 1] >>> (32 - offset))
+      }
+      this._bits[shift] = this._bits[0] << offset
+    }
+    this._bits.fill(0, 0, shift)
+  }
+
+  /**
+   * 右移k位(>>k).
+   */
+  rsh(k: number): void {
+    if (!k) return
+    const shift = k >>> 5
+    const offset = k & 31
+    if (shift >= this._bits.length) {
+      this._bits.fill(0)
+      return
+    }
+    const limit = this._bits.length - shift - 1
+    if (!offset) {
+      this._bits.copyWithin(0, shift)
+    } else {
+      for (let i = 0; i < limit; i++) {
+        this._bits[i] =
+          (this._bits[i + shift] >>> offset) | (this._bits[i + shift + 1] << (32 - offset))
+      }
+      this._bits[limit] = this._bits[this._bits.length - 1] >>> offset
+    }
+    this._bits.fill(0, limit + 1)
   }
 
   clear(): void {
@@ -328,14 +379,14 @@ class BitSet {
     }
 
     let count = 0
-    if ((start & 31) > 0) {
+    if (start & 31) {
       count += BitSet._onesCount32(this._bits[pos1] & (~0 << (start & 31)))
       pos1++
     }
     for (let i = pos1; i < pos2; i++) {
       count += BitSet._onesCount32(this._bits[i])
     }
-    if ((end & 31) > 0) {
+    if (end & 31) {
       count += BitSet._onesCount32(this._bits[pos2] & ((1 << (end & 31)) - 1))
     }
     return count
@@ -664,7 +715,8 @@ class BitSet {
    */
   forEach(callback: (value: number) => void): void {
     this._bits.forEach((v, i) => {
-      for (; v > 0; v &= v - 1) {
+      // !注意结束条件是v!==0 而不是v>0
+      for (; v; v &= v - 1) {
         const j = (i << 5) | BitSet._trailingZeros32(v)
         callback(j)
       }
@@ -750,6 +802,21 @@ class BitSet {
 export { BitSet }
 
 if (require.main === module) {
+  // lsh/rsh demo
+  const newA = new BitSet(1000)
+  newA.add(20)
+  newA.lsh(173)
+  console.log(newA.toSet())
+
+  const newB = new BitSet(100)
+  newB.add(76)
+  newB.add(80)
+  newB.add(33)
+  newB.add(10)
+  console.log(newB.toSet())
+  newB.rsh(17)
+  console.log(newB.toSet(), newB.has(63))
+
   // // onesCountRange demo
   // const n = 330
   // const bs = new BitSet(n)
@@ -774,56 +841,56 @@ if (require.main === module) {
   // }
   // console.log('ok')
 
-  const set = new BitSet(33)
-  set.fill(1)
-  set.fill(1)
-  console.log(set.has(34))
-  set.discard(1)
-  console.log(set.slice(0, 33).toString())
+  // const set = new BitSet(33)
+  // set.fill(1)
+  // set.fill(1)
+  // console.log(set.has(34))
+  // set.discard(1)
+  // console.log(set.slice(0, 33).toString())
 
-  console.log(set.toString())
-  const mm = new BitSet(3)
-  // mm.add(0)
+  // console.log(set.toString())
+  // const mm = new BitSet(3)
+  // // mm.add(0)
 
-  console.log(set.toString())
+  // console.log(set.toString())
 
-  console.log('set')
-  //  1001 -> 01
-  const bs1 = BitSet.from('1001')
-  const bs2 = BitSet.from('01')
-  console.log(bs1.toString())
-  bs1.add(1)
-  console.log(bs1.next(1))
+  // console.log('set')
+  // //  1001 -> 01
+  // const bs1 = BitSet.from('1001')
+  // const bs2 = BitSet.from('01')
+  // console.log(bs1.toString())
+  // bs1.add(1)
+  // console.log(bs1.next(1))
 
-  console.log(bs1.toString())
-  console.log(bs1.prev(3))
+  // console.log(bs1.toString())
+  // console.log(bs1.prev(3))
 
-  const bs3 = new BitSet(50)
-  bs3.add(35)
-  console.log(bs3.prev(40))
+  // const bs3 = new BitSet(50)
+  // bs3.add(35)
+  // console.log(bs3.prev(40))
 
-  console.time('prev')
-  const big = new BitSet(1e5)
-  for (let i = 0; i < 1e5; i++) {
-    big.prev(1e5)
-  }
-  console.timeEnd('prev')
+  // console.time('prev')
+  // const big = new BitSet(1e5)
+  // for (let i = 0; i < 1e5; i++) {
+  //   big.prev(1e5)
+  // }
+  // console.timeEnd('prev')
 
-  console.time('expand')
-  const big2 = new BitSet(1e5)
-  for (let i = 1e5; i < 2e5; i++) {
-    big2.expand(i)
-  }
-  console.timeEnd('expand')
+  // console.time('expand')
+  // const big2 = new BitSet(1e5)
+  // for (let i = 1e5; i < 2e5; i++) {
+  //   big2.expand(i)
+  // }
+  // console.timeEnd('expand')
 
-  console.log('test set')
-  const set1 = new BitSet(100)
-  set1.add(1)
-  const set2 = new BitSet(60)
-  set2.add(20)
-  set2.add(50)
-  set1.set(set2, 18)
-  console.log(set1.toSet())
+  // console.log('test set')
+  // const set1 = new BitSet(100)
+  // set1.add(1)
+  // const set2 = new BitSet(60)
+  // set2.add(20)
+  // set2.add(50)
+  // set1.set(set2, 18)
+  // console.log(set1.toSet())
 
-  const slice = new BitSet(0)
+  // const slice = new BitSet(0)
 }

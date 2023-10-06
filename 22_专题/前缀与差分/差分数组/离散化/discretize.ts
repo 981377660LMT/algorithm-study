@@ -1,8 +1,8 @@
 /**
  * (紧)离散化.
  * @returns
- * rank: 给定一个在 nums 中的值,返回它的排名`(0~rank.size-1)`.
- * newNums: 离散化后的数组.
+ * - rank: 给定一个在 nums 中的值,返回它的排名`(0~rank.size-1)`.
+ * - newNums: 离散化后的数组.
  */
 function discretizeCompressed(nums: number[]): [rank: Map<number, number>, newNums: Uint32Array] {
   const allNums = [...new Set(nums)].sort((a, b) => a - b)
@@ -16,8 +16,8 @@ function discretizeCompressed(nums: number[]): [rank: Map<number, number>, newNu
 /**
  * (松)离散化.
  * @returns
- * rank: 给定一个数,返回它的排名`(0-count)`.
- * count: 离散化(去重)后的元素个数.
+ * - rank: 给定一个数,返回它的排名`(0-count)`.
+ * - count: 离散化(去重)后的元素个数.
  */
 function discretizeSparse(nums: number[]): [rank: (num: number) => number, count: number] {
   const allNums = [...new Set(nums)].sort((a, b) => a - b)

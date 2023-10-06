@@ -384,4 +384,34 @@ describe('BitSet', () => {
       }
     }
   })
+
+  // lsh
+  it('should support lsh', () => {
+    for (let i = 0; i < n; i++) {
+      const shift = Math.floor(Math.random() * n)
+      const set1 = bitSet.toSet()
+      bitSet.lsh(shift)
+      const set2 = bitSet.toSet()
+      for (const v of set1) {
+        if (v + shift <= n) {
+          expect(set2.has(v + shift)).toBe(true)
+        }
+      }
+    }
+  })
+
+  // rsh
+  it('should support rsh', () => {
+    for (let i = 0; i < n; i++) {
+      const shift = Math.floor(Math.random() * n)
+      const set1 = bitSet.toSet()
+      bitSet.rsh(shift)
+      const set2 = bitSet.toSet()
+      for (const v of set1) {
+        if (v - shift >= 0) {
+          expect(set2.has(v - shift)).toBe(true)
+        }
+      }
+    }
+  })
 })

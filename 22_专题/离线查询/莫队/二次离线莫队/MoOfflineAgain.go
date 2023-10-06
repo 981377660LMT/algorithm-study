@@ -23,6 +23,14 @@ import (
 	"strings"
 )
 
+func main() {
+	// [0 4]
+	fmt.Println(StaticRangeInversionsQuery([]int{4, 1, 4, 0}, [][2]int{{1, 3}, {0, 4}}))
+}
+
+// 静态区间逆序对-离线.
+// 时间复杂度O(nsqrt(n)),空间复杂度O(n).
+// https://judge.yosupo.jp/problem/static_range_inversions_query
 func StaticRangeInversionsQuery(nums []int, ranges [][2]int) []int {
 	n, q := len(nums), len(ranges)
 	rank, newNums := discretize(nums)
@@ -37,12 +45,15 @@ func StaticRangeInversionsQuery(nums []int, ranges [][2]int) []int {
 			bit.Add(newNums[index], 1)
 		},
 		func(index int) AbelianGroup {
-			return bit.QueryRange(0, newNums[index])
+			res := bit.QueryRange(0, newNums[index])
+			return res
 		},
 		func(index int) AbelianGroup {
-			return bit.QueryRange(newNums[index]+1, len(rank))
+			res := bit.QueryRange(newNums[index]+1, len(rank))
+			return res
 		},
 	)
+
 	return res
 }
 
@@ -81,20 +92,20 @@ func (mo *MoOfflineAgain) AddQuery(start, end int) {
 	mo.queryOrder++
 }
 
-// add: 将`A[i]`加入数据结构中.
-// queryLeft: 查询`A[i]`左侧的贡献之和.
-// queryRight: 查询`A[i]`右侧的贡献之和.
+// add: 将`A[index]`加入窗口中.
+// queryLeft: 窗口最左侧的`A[index]`对答案的贡献.
+// queryRight: 窗口最右侧的`A[index]`对答案的贡献.
+// `add` 操作次数为`O(n)`，`query` 操作次数为`O(nsqrt(n))`.
 func (mo *MoOfflineAgain) Run(
 	add func(index int),
 	queryLeft func(index int) AbelianGroup,
 	queryRight func(index int) AbelianGroup,
 ) []AbelianGroup {
 	n, q, blocks := mo.n, mo.q, mo.queryBlocks
-	type event struct{ start, end, qi, kind int }
+	type event struct{ qi, start, end, kind int }
 	eventGroups := make([][]event, n+1)
 
 	left, right := 0, 0
-
 	for i, block := range blocks {
 		if i&1 == 1 {
 			sort.Slice(block, func(i, j int) bool { return block[i].right < block[j].right })
@@ -127,12 +138,15 @@ func (mo *MoOfflineAgain) Run(
 	rightSum, leftSum := make([]AbelianGroup, n+1), make([]AbelianGroup, n+1)
 	rightSum[0], leftSum[0] = e(), e()
 	res := make([]AbelianGroup, q)
+	for i := range res {
+		res[i] = e()
+	}
 	for i := 0; i <= n; i++ {
 		events := eventGroups[i]
 		for _, event := range events {
 			qi, start, end, kind := event.qi, event.start, event.end, event.kind
 			sum := e()
-			if kind&1 == 1 {
+			if kind&1 != 0 {
 				for j := start; j < end; j++ {
 					sum = op(sum, queryRight(j))
 				}
@@ -141,11 +155,13 @@ func (mo *MoOfflineAgain) Run(
 					sum = op(sum, queryLeft(j))
 				}
 			}
-			if kind&2 == 1 {
+
+			if kind&2 != 0 {
 				res[qi] = op(res[qi], inv(sum))
 			} else {
 				res[qi] = op(res[qi], sum)
 			}
+
 		}
 
 		if i < n {

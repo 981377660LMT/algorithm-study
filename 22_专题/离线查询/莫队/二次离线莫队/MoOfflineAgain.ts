@@ -15,6 +15,7 @@
 // 适用范围：
 // !贡献是可交换群(阿贝尔群), 即 f(x,start,end)) = f(x,0,end) - f(x,0,start);
 
+import { discretizeCompressed } from '../../../前缀与差分/差分数组/离散化/discretize'
 import { BITRangeBlockFastQuery } from '../../根号分治/值域分块/BITRangeBlockFastQuery'
 
 /** 可交换群(commutative group). */
@@ -75,9 +76,10 @@ class MoOfflineAgain<V = number> {
   }
 
   /**
-   * @param add 将`A[i]`加入数据结构中.
-   * @param queryLeft 查询`A[i]`左侧的贡献之和.
-   * @param queryRight 查询`A[i]`右侧的贡献之和.
+   * @param add 将`A[index]`加入窗口中.
+   * @param queryLeft 窗口最左侧的`A[index]`对答案的贡献.
+   * @param queryRight 窗口最右侧的`A[index]`对答案的贡献.
+   * @complexity `add` 操作次数为`O(n)`，`query` 操作次数为`O(nsqrt(n))`.
    */
   run(add: (i: number) => void, queryLeft: (i: number) => V, queryRight: (i: number) => V): V[] {
     const { _n: n, _q: q, _queryBlocks: blocks, _e: e, _op: op, _inv: inv } = this
@@ -163,29 +165,8 @@ class MoOfflineAgain<V = number> {
 export { MoOfflineAgain }
 
 if (require.main === module) {
-  // func StaticRangeInversionsQuery(nums []int, ranges [][2]int) []int {
-  // 	n, q := len(nums), len(ranges)
-  // 	rank, newNums := discretize(nums)
-  // 	bit := _newBITRangeBlockFastQuery(len(rank))
-  // 	M := NewMoOfflineAgain(n, q, -1)
-  // 	for _, query := range ranges {
-  // 		start, end := query[0], query[1]
-  // 		M.AddQuery(start, end)
-  // 	}
-  // 	res := M.Run(
-  // 		func(index int) {
-  // 			bit.Add(newNums[index], 1)
-  // 		},
-  // 		func(index int) AbelianGroup {
-  // 			return bit.QueryRange(0, newNums[index])
-  // 		},
-  // 		func(index int) AbelianGroup {
-  // 			return bit.QueryRange(newNums[index]+1, len(rank))
-  // 		},
-  // 	)
-  // 	return res
-  // }
-  // 静态区间逆序对
+  // 静态区间逆序对-离线.
+  // 时间复杂度O(nsqrt(n)),空间复杂度O(n).
   // https://judge.yosupo.jp/problem/static_range_inversions_query
   function staticRangeInversionsQuery(
     nums: number[],
@@ -193,10 +174,39 @@ if (require.main === module) {
   ): number[] {
     const n = nums.length
     const q = ranges.length
-    const [rank, newNums] = discretize(nums)
+    const [rank, newNums] = discretizeCompressed(nums)
+    const bit = new BITRangeBlockFastQuery(rank.size)
+    const mo = new MoOfflineAgain(n, q)
+    ranges.forEach(([start, end]) => {
+      mo.addQuery(start, end)
+    })
+    const res = mo.run(
+      (index: number) => {
+        bit.add(newNums[index], 1)
+      },
+      (index: number) => {
+        const res = bit.queryRange(0, newNums[index])
+        return res
+      },
+      (index: number) => {
+        const res = bit.queryRange(newNums[index] + 1, rank.size)
+        return res
+      }
+    )
+    return res
   }
 
-  testTime()
+  console.log(
+    staticRangeInversionsQuery(
+      [4, 1, 4, 0],
+      [
+        [1, 3],
+        [0, 4]
+      ]
+    )
+  )
+
+  // testTime()
   function testTime(): void {
     const n = 1e5
     const q = 1e5

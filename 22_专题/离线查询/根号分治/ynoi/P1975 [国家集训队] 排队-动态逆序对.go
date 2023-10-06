@@ -1,6 +1,6 @@
 // https://www.luogu.com.cn/problem/P1975
 // P1975 [国家集训队] 排队
-// 动态区间逆序对
+// 区间动态逆序对
 // n<=2e4 q<=2e3 nums[i]<=1e9
 
 // !update/set = remove + add

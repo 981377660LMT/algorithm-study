@@ -9,6 +9,9 @@
 //   discardRange: (start: number, end: number) => void
 //   flipRange: (start: number, end: number) => void
 
+//   lsh: (k: number) => void
+//   rsh: (k: number) => void
+
 //   fill: (value: 0 | 1) => void
 //   clear: () => void
 
@@ -60,7 +63,12 @@ import (
 )
 
 func main() {
-	yuki142()
+	bs := NewBitsetDynamic(100, 0).Add(10).Add(33).Add(76).Add(80)
+	fmt.Println(bs)
+	bs.Rsh(17)
+
+	fmt.Println(bs)
+	// yuki142()
 }
 
 // https://yukicoder.me/problems/no/142
@@ -222,6 +230,59 @@ func (bs *BitSetDynamic) FlipRange(start, end int) {
 		bs.data[i] = ^bs.data[i]
 	}
 	bs.data[i] ^= ^maskR
+}
+
+// 左移 k 位 (<<k).
+func (b *BitSetDynamic) Lsh(k int) {
+	if k == 0 {
+		return
+	}
+	shift, offset := k>>6, k&63
+	if shift >= len(b.data) {
+		for i := range b.data {
+			b.data[i] = 0
+		}
+		return
+	}
+
+	if offset == 0 {
+		copy(b.data[shift:], b.data)
+	} else {
+		for i := len(b.data) - 1; i > shift; i-- {
+			b.data[i] = b.data[i-shift]<<offset | b.data[i-shift-1]>>(64-offset)
+		}
+		b.data[shift] = b.data[0] << offset
+	}
+
+	for i := 0; i < shift; i++ {
+		b.data[i] = 0
+	}
+}
+
+// 右移 k 位 (>>k).
+func (b *BitSetDynamic) Rsh(k int) {
+	if k == 0 {
+		return
+	}
+	shift, offset := k>>6, k&63
+	if shift >= len(b.data) {
+		for i := range b.data {
+			b.data[i] = 0
+		}
+		return
+	}
+	lim := len(b.data) - 1 - shift
+	if offset == 0 {
+		copy(b.data, b.data[shift:])
+	} else {
+		for i := 0; i < lim; i++ {
+			b.data[i] = b.data[i+shift]>>offset | b.data[i+shift+1]<<(64-offset)
+		}
+		b.data[lim] = b.data[len(b.data)-1] >> offset
+	}
+	for i := lim + 1; i < len(b.data); i++ {
+		b.data[i] = 0
+	}
 }
 
 func (bs *BitSetDynamic) Fill(zeroOrOne int) {
@@ -747,12 +808,13 @@ func (bs *BitSetDynamic) BitLength() int {
 }
 
 // 遍历所有 1 的位置.
-func (bs *BitSetDynamic) ForEach(f func(pos int)) {
+func (bs *BitSetDynamic) ForEach(f func(pos int) (shouldBreak bool)) {
 	for i, v := range bs.data {
-		for v != 0 {
+		for ; v != 0; v &= v - 1 {
 			j := (i << 6) | bs._lowbit(v)
-			f(j)
-			v &= v - 1
+			if f(j) {
+				return
+			}
 		}
 	}
 }
@@ -765,8 +827,9 @@ func (bs *BitSetDynamic) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("BitSetDynamic{")
 	nums := []string{}
-	bs.ForEach(func(pos int) {
+	bs.ForEach(func(pos int) bool {
 		nums = append(nums, fmt.Sprintf("%d", pos))
+		return false
 	})
 	sb.WriteString(strings.Join(nums, ","))
 	sb.WriteString("}")

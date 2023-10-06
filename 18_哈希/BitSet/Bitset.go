@@ -30,7 +30,21 @@
 
 package main
 
-import "math/bits"
+import (
+	"fmt"
+	"math/bits"
+	"strings"
+)
+
+func main() {
+	b := NewBitset(100)
+	b.Set(10)
+	b.Set(33)
+	b.Set(76)
+	b.Set(80)
+	b.Rsh(17)
+	fmt.Println(b)
+}
 
 type Bitset []uint
 
@@ -55,9 +69,9 @@ func (bs Bitset) Clear() {
 
 // 遍历所有 1 的位置
 // 如果对范围有要求，可在 f 中 return p < n
-func (b Bitset) Foreach(f func(p int) (Break bool)) {
+func (b Bitset) ForEach(f func(p int) (shouldBreak bool)) {
 	for i, v := range b {
-		for ; v > 0; v &= v - 1 {
+		for ; v != 0; v &= v - 1 {
 			j := i<<6 | bits.TrailingZeros(v)
 			if f(j) {
 				return
@@ -66,27 +80,27 @@ func (b Bitset) Foreach(f func(p int) (Break bool)) {
 	}
 }
 
-// 返回第一个 0 的下标，若不存在则返回一个不小于 n 的位置
+// 返回第一个 0 的下标，若不存在则返回-1。
 func (b Bitset) Index0() int {
 	for i, v := range b {
 		if ^v != 0 {
 			return i<<6 | bits.TrailingZeros(^v)
 		}
 	}
-	return len(b) << 6
+	return -1
 }
 
-// 返回第一个 1 的下标，若不存在则返回一个不小于 n 的位置（同 C++ 中的 _Find_first）
+// 返回第一个 1 的下标，若不存在则返回-1.
 func (b Bitset) Index1() int {
 	for i, v := range b {
 		if v != 0 {
 			return i<<6 | bits.TrailingZeros(v)
 		}
 	}
-	return len(b) << 6
+	return -1
 }
 
-// 返回下标 >= p 的第一个 1 的下标，若不存在则返回一个不小于 n 的位置（类似 C++ 中的 _Find_next，这里是 >=, C++里是 >）
+// 返回下标 >= p 的第一个 1 的下标，若不存在则返回-1.
 func (b Bitset) Next1(p int) int {
 	if i := p >> 6; i < len(b) {
 		v := b[i] & (^uint(0) << (p & 63)) // mask off bits below bound
@@ -99,14 +113,14 @@ func (b Bitset) Next1(p int) int {
 			}
 		}
 	}
-	return len(b) << 6
+	return -1
 }
 
-// 返回下标 >= p 的第一个 0 的下标，若不存在则返回一个不小于 n 的位置
+// 返回下标 >= p 的第一个 0 的下标，若不存在则返回-1.
 func (b Bitset) Next0(p int) int {
 	if i := p >> 6; i < len(b) {
 		v := b[i]
-		if p&63 > 0 {
+		if p&63 != 0 {
 			v |= ^(^uint(0) << (p & 63))
 		}
 		if ^v != 0 {
@@ -118,7 +132,7 @@ func (b Bitset) Next0(p int) int {
 			}
 		}
 	}
-	return len(b) << 6
+	return -1
 }
 
 // 返回最后第一个 1 的下标，若不存在则返回 -1
@@ -349,6 +363,19 @@ func (b Bitset) Xor(c Bitset) Bitset {
 		res[i] = v ^ c[i]
 	}
 	return res
+}
+
+func (b Bitset) String() string {
+	sb := strings.Builder{}
+	sb.WriteString("BitSet{")
+	nums := []string{}
+	b.ForEach(func(pos int) bool {
+		nums = append(nums, fmt.Sprintf("%d", pos))
+		return false
+	})
+	sb.WriteString(strings.Join(nums, ","))
+	sb.WriteString("}")
+	return sb.String()
 }
 
 // https://nyaannyaan.github.io/library/misc/bitset-find-prev.hpp

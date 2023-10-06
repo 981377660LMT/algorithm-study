@@ -1,6 +1,7 @@
 /* eslint-disable no-inner-declarations */
 
-// 对每个下标，查询 最右侧/最左侧 lower/floor/ceiling/higher 的元素.
+// 对每个下标，查询 最右侧/最左侧/右侧第一个/左侧第一个 lower/floor/ceiling/higher 的元素.
+// 动态单调栈(DynamicMonoStack).
 
 class RightMostLeftMostQuery {
   private readonly _nums: number[]

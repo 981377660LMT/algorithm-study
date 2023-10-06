@@ -76,6 +76,7 @@ def isPrime(n: int) -> bool:
             return False
     return True
 
+
 # https://judge.yosupo.jp/problem/primality_test
 def isPrimeFast(n: int) -> bool:
     "O(logN) miller rabin algorithm"
