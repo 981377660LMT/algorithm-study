@@ -25,13 +25,9 @@ class SqrtArray<T = number> {
   private readonly _x: T[][] = []
 
   constructor(nOrNums: number | ArrayLike<T> = 0) {
-    if (typeof nOrNums === 'number') {
-      nOrNums = Array(nOrNums)
-    }
+    if (typeof nOrNums === 'number') nOrNums = Array(nOrNums).fill(0)
     const n = nOrNums.length
-    if (n === 0) {
-      return
-    }
+    if (!n) return
 
     const bCount = ~~Math.sqrt(n)
     const bSize = ~~((n + bCount - 1) / bCount)
@@ -164,6 +160,7 @@ class SqrtArray<T = number> {
     this._n++
 
     const sqrtn2 = ~~Math.sqrt(this._n) * 3
+    // 定期重构
     // !rebuild when block size > 6 * sqrt(n), about 2000 when n = 1e5
     if (this._x[bi].length > 2 * sqrtn2) {
       const y = this._x[bi].splice(sqrtn2)

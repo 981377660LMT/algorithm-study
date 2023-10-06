@@ -211,6 +211,111 @@ func (rm *RightMostLeftMostQuery) LeftMostHigher(index int) int {
 	)
 }
 
+func (rm *RightMostLeftMostQuery) RightNearestLower(index int) int {
+	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+	return rm._queryRightNearest(
+		index,
+		func(bid int) bool {
+			return rm._blockMin[bid]+rm._blockLazy[bid] < cur
+		},
+		func(eid, bid int) bool {
+			return rm._nums[eid]+rm._blockLazy[bid] < cur
+		},
+	)
+}
+
+func (rm *RightMostLeftMostQuery) RightNearestFloor(index int) int {
+	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+
+	return rm._queryRightNearest(
+		index,
+		func(bid int) bool {
+			return rm._blockMin[bid]+rm._blockLazy[bid] <= cur
+		},
+		func(eid, bid int) bool {
+			return rm._nums[eid]+rm._blockLazy[bid] <= cur
+		},
+	)
+}
+
+func (rm *RightMostLeftMostQuery) RightNearestCeiling(index int) int {
+	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+	return rm._queryRightNearest(
+		index,
+		func(bid int) bool {
+			return rm._blockMax[bid]+rm._blockLazy[bid] >= cur
+		},
+		func(eid, bid int) bool {
+			return rm._nums[eid]+rm._blockLazy[bid] >= cur
+		},
+	)
+}
+
+func (rm *RightMostLeftMostQuery) RightNearestHigher(index int) int {
+	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+	return rm._queryRightNearest(
+		index,
+		func(bid int) bool {
+			return rm._blockMax[bid]+rm._blockLazy[bid] > cur
+		},
+		func(eid, bid int) bool {
+			return rm._nums[eid]+rm._blockLazy[bid] > cur
+		},
+	)
+}
+
+func (rm *RightMostLeftMostQuery) LeftNearestLower(index int) int {
+	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+	return rm._queryLeftNearest(
+		index,
+		func(bid int) bool {
+			return rm._blockMin[bid]+rm._blockLazy[bid] < cur
+		},
+		func(eid, bid int) bool {
+			return rm._nums[eid]+rm._blockLazy[bid] < cur
+		},
+	)
+}
+
+func (rm *RightMostLeftMostQuery) LeftNearestFloor(index int) int {
+	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+	return rm._queryLeftNearest(
+		index,
+		func(bid int) bool {
+			return rm._blockMin[bid]+rm._blockLazy[bid] <= cur
+		},
+		func(eid, bid int) bool {
+			return rm._nums[eid]+rm._blockLazy[bid] <= cur
+		},
+	)
+}
+
+func (rm *RightMostLeftMostQuery) LeftNearestCeiling(index int) int {
+	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+	return rm._queryLeftNearest(
+		index,
+		func(bid int) bool {
+			return rm._blockMax[bid]+rm._blockLazy[bid] >= cur
+		},
+		func(eid, bid int) bool {
+			return rm._nums[eid]+rm._blockLazy[bid] >= cur
+		},
+	)
+}
+
+func (rm *RightMostLeftMostQuery) LeftNearestHigher(index int) int {
+	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+	return rm._queryLeftNearest(
+		index,
+		func(bid int) bool {
+			return rm._blockMax[bid]+rm._blockLazy[bid] > cur
+		},
+		func(eid, bid int) bool {
+			return rm._nums[eid]+rm._blockLazy[bid] > cur
+		},
+	)
+}
+
 func (rm *RightMostLeftMostQuery) _queryRightMost(
 	pos int,
 	predicateBlock func(bid int) bool,
@@ -254,6 +359,54 @@ func (rm *RightMostLeftMostQuery) _queryLeftMost(
 	for i := rm._blockStart[bid]; i < pos; i++ {
 		if predicateElement(i, bid) {
 			return i
+		}
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) _queryRightNearest(
+	pos int,
+	predicateBlock func(bid int) bool,
+	predicateElement func(eid, bid int) bool,
+) int {
+	bid := rm._belong[pos]
+	for i := pos + 1; i < rm._blockEnd[bid]; i++ {
+		if predicateElement(i, bid) {
+			return i
+		}
+	}
+	for i := bid + 1; i < rm._blockCount; i++ {
+		if !predicateBlock(i) {
+			continue
+		}
+		for j := rm._blockStart[i]; j < rm._blockEnd[i]; j++ {
+			if predicateElement(j, i) {
+				return j
+			}
+		}
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) _queryLeftNearest(
+	pos int,
+	predicateBlock func(bid int) bool,
+	predicateElement func(eid, bid int) bool,
+) int {
+	bid := rm._belong[pos]
+	for i := pos - 1; i >= rm._blockStart[bid]; i-- {
+		if predicateElement(i, bid) {
+			return i
+		}
+	}
+	for i := bid - 1; i >= 0; i-- {
+		if !predicateBlock(i) {
+			continue
+		}
+		for j := rm._blockEnd[i] - 1; j >= rm._blockStart[i]; j-- {
+			if predicateElement(j, i) {
+				return j
+			}
 		}
 	}
 	return -1
