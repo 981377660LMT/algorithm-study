@@ -13,7 +13,7 @@ func main() {
 	for i := 0; i < 1e3; i++ {
 		bigArr[i] = rand.Intn(1e3)
 	}
-	mt := NewMergeTrick(bigArr)
+	mt := NewMergeTrick(bigArr, true)
 	time1 := time.Now()
 	for i := 0; i < 1e5; i++ {
 		mt.Add(0, 500, 1)
@@ -22,7 +22,7 @@ func main() {
 	fmt.Println(time.Since(time1))
 
 	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	mt = NewMergeTrick(arr)
+	mt = NewMergeTrick(arr, true)
 	mt.Add(0, 5, 1)
 	fmt.Println(mt.GetSortedNums())
 

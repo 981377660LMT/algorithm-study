@@ -5,12 +5,16 @@
 // 线段树实现.
 
 import { SegmentTreeRangeUpdateRangeQuery } from '../../../6_tree/线段树/template/atcoder_segtree/SegmentTreeRangeUpdateRangeQuery'
+import { RightMostLeftMostQuery } from './RightMostLeftMostQuery'
 
 type E = { min: number; max: number }
 type Id = number
 
 const INF = 2e15
 
+/**
+ * @deprecated 效率不如{@link RightMostLeftMostQuery}
+ */
 class RightMostLeftMostQuerySegmentTree {
   private readonly _n: number
   private readonly _rangeAddRangeMinMax: SegmentTreeRangeUpdateRangeQuery<E, Id>
@@ -167,7 +171,7 @@ class RightMostLeftMostQuerySegmentTree {
   leftNearestLower(index: number): number {
     const cur = this._rangeAddRangeMinMax.get(index).max
     const cand = this._rangeAddRangeMinMax.minLeft(index, e => e.min >= cur) - 1
-    return cand === -1 ? -1 : cand
+    return cand
   }
 
   /**
@@ -177,7 +181,7 @@ class RightMostLeftMostQuerySegmentTree {
   leftNearestFloor(index: number): number {
     const cur = this._rangeAddRangeMinMax.get(index).max
     const cand = this._rangeAddRangeMinMax.minLeft(index, e => e.min > cur) - 1
-    return cand === -1 ? -1 : cand
+    return cand
   }
 
   /**
@@ -187,7 +191,7 @@ class RightMostLeftMostQuerySegmentTree {
   leftNearestCeiling(index: number): number {
     const cur = this._rangeAddRangeMinMax.get(index).max
     const cand = this._rangeAddRangeMinMax.minLeft(index, e => e.max < cur) - 1
-    return cand === -1 ? -1 : cand
+    return cand
   }
 
   /**
@@ -197,13 +201,8 @@ class RightMostLeftMostQuerySegmentTree {
   leftNearestHigher(index: number): number {
     const cur = this._rangeAddRangeMinMax.get(index).max
     const cand = this._rangeAddRangeMinMax.minLeft(index, e => e.max <= cur) - 1
-    return cand === -1 ? -1 : cand
+    return cand
   }
-}
-
-export {
-  RightMostLeftMostQuerySegmentTree,
-  RightMostLeftMostQuerySegmentTree as DynamicMonoStackSegmentTree
 }
 
 if (require.main === module) {

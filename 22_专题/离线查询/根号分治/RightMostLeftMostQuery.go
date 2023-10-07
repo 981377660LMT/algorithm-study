@@ -16,6 +16,36 @@ func maxWidthRamp(nums []int) int {
 	return res
 }
 
+// 901. 股票价格跨度
+// https://leetcode.cn/problems/online-stock-span
+type StockSpanner struct {
+	Q   *RightMostLeftMostQuery
+	ptr int
+}
+
+func Constructor() StockSpanner {
+	return StockSpanner{
+		Q: NewRightMostLeftMostQuery(make([]int, 1e5+10)),
+	}
+}
+
+func (this *StockSpanner) Next(price int) int {
+	pos := this.ptr
+	this.ptr++
+	this.Q.Set(pos, price)
+	leftNearestHigher := this.Q.LeftNearestHigher(pos)
+	if leftNearestHigher == -1 {
+		return pos + 1
+	}
+	return pos - leftNearestHigher
+}
+
+/**
+ * Your StockSpanner object will be instantiated and called as such:
+ * obj := Constructor();
+ * param_1 := obj.Next(price);
+ */
+
 type RightMostLeftMostQuery struct {
 	_nums       []int
 	_belong     []int

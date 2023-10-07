@@ -5,6 +5,7 @@
 // !单点修改+区间查询
 
 const INF = 2e15
+
 class SegmentTreePointUpdateRangeQuery<E = number> {
   private readonly _n: number
   private readonly _size: number

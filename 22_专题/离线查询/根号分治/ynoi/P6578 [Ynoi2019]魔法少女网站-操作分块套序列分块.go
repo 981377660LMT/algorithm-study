@@ -23,12 +23,12 @@ func 魔法少女网站(nums []int, operations [][4]int) []int {
 
 // 给定一个数组nums和一些查询(start,end,x)，对每个查询回答区间[start,end)内有多少个子数组最大值不超过x.
 // nums.length<=1e5,nums[i]<=1e5,查询个数<=1e5
-// 线段树或者分块
+// 离线查询+线段树.
 func 魔法少女网站无修改版本(nums []int, queries [][3]int) []int {
 	type queryWithId struct{ start, end, x, id int }
 	qs := make([]queryWithId, len(queries))
 	for i, q := range queries {
-		qs[i] = queryWithId{q[0], q[1], q[2], i}
+		qs[i] = queryWithId{start: q[0], end: q[1], x: q[2], id: i}
 	}
 	sort.Slice(qs, func(i, j int) bool { return qs[i].x < qs[j].x })
 

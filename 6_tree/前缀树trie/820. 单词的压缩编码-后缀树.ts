@@ -6,7 +6,7 @@ import { Trie } from './Trie'
  * @description 给你一个单词数组 words ，返回成功对 words 进行编码的最小助记字符串 s 的长度 。
  * 助记字符串 s 以 '#' 字符结尾
  * @summary 将每个word倒序会发现规律
- * 使用前缀树 + 倒序插入的形式来模拟后缀树
+ * 使用前缀树 + 倒序插入的形式来模拟
  */
 function minimumLengthEncoding(words: string[]): number {
   let res = 0
