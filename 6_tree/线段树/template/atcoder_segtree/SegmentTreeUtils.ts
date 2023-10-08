@@ -75,13 +75,13 @@ function createRangeUpdateRangeMin(
  * 区间赋值,查询区间和(幺元为0).
  */
 function createRangeAssignRangeSum(
-  nOrNums: number | ArrayLike<[sum: number, size: number]>
-): SegmentTreeRangeUpdateRangeQuery<[sum: number, size: number], number> {
-  return new SegmentTreeRangeUpdateRangeQuery<[sum: number, size: number], number>(nOrNums, {
-    e: () => [0, 1],
+  nOrNums: number | ArrayLike<{ sum: number; size: number }>
+): SegmentTreeRangeUpdateRangeQuery<{ sum: number; size: number }, number> {
+  return new SegmentTreeRangeUpdateRangeQuery<{ sum: number; size: number }, number>(nOrNums, {
+    e: () => ({ sum: 0, size: 1 }),
     id: () => -1,
-    op: ([sum1, size1], [sum2, size2]) => [sum1 + sum2, size1 + size2],
-    mapping: (f, [sum, size]) => (f === -1 ? [sum, size] : [f * size, size]),
+    op: (e1, e2) => ({ sum: e1.sum + e2.sum, size: e1.size + e2.size }),
+    mapping: (f, e) => (f === -1 ? e : { sum: f * e.size, size: e.size }),
     composition: (f, g) => (f === -1 ? g : f)
   })
 }
@@ -120,13 +120,13 @@ function createRangeAssignRangeMin(
  * 01区间翻转,查询区间和.
  */
 function createRangeFlipRangeSum(
-  nOrNums: number | ArrayLike<[sum: number, size: number]>
-): SegmentTreeRangeUpdateRangeQuery<[sum: number, size: number], number> {
-  return new SegmentTreeRangeUpdateRangeQuery<[sum: number, size: number], number>(nOrNums, {
-    e: () => [0, 1],
+  nOrNums: number | ArrayLike<{ sum: number; size: number }>
+): SegmentTreeRangeUpdateRangeQuery<{ sum: number; size: number }, number> {
+  return new SegmentTreeRangeUpdateRangeQuery<{ sum: number; size: number }, number>(nOrNums, {
+    e: () => ({ sum: 0, size: 1 }),
     id: () => 0,
-    op: ([sum1, size1], [sum2, size2]) => [sum1 + sum2, size1 + size2],
-    mapping: (f, [sum, size]) => (f === 0 ? [sum, size] : [size - sum, size]),
+    op: (e1, e2) => ({ sum: e1.sum + e2.sum, size: e1.size + e2.size }),
+    mapping: (f, e) => (f === 0 ? e : { sum: e.size - e.sum, size: e.size }),
     composition: (f, g) => f ^ g
   })
 }
@@ -135,29 +135,29 @@ function createRangeFlipRangeSum(
  * 区间赋值区间加,区间和.
  */
 function createRangeAssignRangeAddRangeSum(
-  nOrNums: number | ArrayLike<[size: number, sum: number]>
-): SegmentTreeRangeUpdateRangeQuery<[size: number, sum: number], [mul: number, add: number]> {
+  nOrNums: number | ArrayLike<{ size: number; sum: number }>
+): SegmentTreeRangeUpdateRangeQuery<{ size: number; sum: number }, { mul: number; add: number }> {
   return new SegmentTreeRangeUpdateRangeQuery<
-    [size: number, sum: number],
-    [mul: number, add: number]
+    { size: number; sum: number },
+    { mul: number; add: number }
   >(nOrNums, {
     e() {
-      return [1, 0]
+      return { size: 1, sum: 0 }
     },
     id() {
-      return [1, 0]
+      return { mul: 1, add: 0 }
     },
     op(e1, e2) {
-      return [e1[0] + e2[0], e1[1] + e2[1]]
+      return { size: e1.size + e2.size, sum: e1.sum + e2.sum }
     },
     mapping(lazy, data) {
-      return [data[0], data[1] * lazy[0] + data[0] * lazy[1]]
+      return { size: data.size, sum: data.sum * lazy.mul + data.size * lazy.add }
     },
     composition(f, g) {
-      return [f[0] * g[0], f[0] * g[1] + f[1]]
+      return { mul: f.mul * g.mul, add: f.mul * g.add + f.add }
     },
     equalsId(id1, id2) {
-      return id1[0] === id2[0] && id1[1] === id2[1]
+      return id1.mul === id2.mul && id1.add === id2.add
     }
   })
 }
@@ -166,27 +166,27 @@ function createRangeAssignRangeAddRangeSum(
  * 区间仿射变换,区间和.
  */
 function createRangeAffineRangeSum(
-  nOrNums: number | ArrayLike<[size: bigint, sum: bigint]>,
+  nOrNums: number | ArrayLike<{ size: bigint; sum: bigint }>,
   bigMod: bigint
-): SegmentTreeRangeUpdateRangeQuery<[size: bigint, sum: bigint], [mul: bigint, add: bigint]> {
+): SegmentTreeRangeUpdateRangeQuery<{ size: bigint; sum: bigint }, { mul: bigint; add: bigint }> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e() {
-      return [1n, 0n]
+      return { size: 1n, sum: 0n }
     },
     id() {
-      return [1n, 0n]
+      return { mul: 1n, add: 0n }
     },
     op(e1, e2) {
-      return [e1[0] + e2[0], (e1[1] + e2[1]) % bigMod]
+      return { size: e1.size + e2.size, sum: (e1.sum + e2.sum) % bigMod }
     },
     mapping(lazy, data) {
-      return [data[0], (data[1] * lazy[0] + data[0] * lazy[1]) % bigMod]
+      return { size: data.size, sum: (data.sum * lazy.mul + data.size * lazy.add) % bigMod }
     },
     composition(f, g) {
-      return [(f[0] * g[0]) % bigMod, (f[0] * g[1] + f[1]) % bigMod]
+      return { mul: (f.mul * g.mul) % bigMod, add: (f.mul * g.add + f.add) % bigMod }
     },
     equalsId(id1, id2) {
-      return id1[0] === id2[0] && id1[1] === id2[1]
+      return id1.mul === id2.mul && id1.add === id2.add
     }
   })
 }

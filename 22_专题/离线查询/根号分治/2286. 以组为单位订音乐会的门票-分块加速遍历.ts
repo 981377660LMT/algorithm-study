@@ -31,14 +31,14 @@ class BookMyShow {
   private readonly _blockEnd: Uint32Array
 
   private readonly _remain: Uint32Array
-  private readonly _blockSum: number[]
-  private readonly _blockMax: number[]
+  private readonly _blockSum: Float64Array
+  private readonly _blockMax: Float64Array
 
   constructor(row: number, col: number) {
     const remain = new Uint32Array(row).fill(col)
     const { belong, blockStart, blockEnd, blockCount } = useBlock(remain)
-    const blockMax = Array(blockCount).fill(0)
-    const blockSum = Array(blockCount).fill(0)
+    const blockMax = new Float64Array(blockCount)
+    const blockSum = new Float64Array(blockCount)
     for (let i = 0; i < row; i++) {
       const bid = belong[i]
       blockMax[bid] = Math.max(blockMax[bid], remain[i])

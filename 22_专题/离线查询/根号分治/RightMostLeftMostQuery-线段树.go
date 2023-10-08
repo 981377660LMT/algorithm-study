@@ -3,6 +3,7 @@
 // 对每个下标，查询 最右侧/最左侧/右侧第一个/左侧第一个 lower/floor/ceiling/higher 的元素.
 // 动态单调栈(DynamicMonoStack).
 // 线段树实现.
+
 package main
 
 import (
@@ -14,8 +15,8 @@ import (
 const INF int = 1e18
 
 type RightMostLeftMostQuery struct {
-	n    int
-	tree *SegmentTreeRangeAddRangeMinMax
+	_n    int
+	_tree *SegmentTreeRangeAddRangeMinMax
 }
 
 func NewRightMostLeftMostQuery(arr []int) *RightMostLeftMostQuery {
@@ -25,12 +26,12 @@ func NewRightMostLeftMostQuery(arr []int) *RightMostLeftMostQuery {
 		leaves[i] = E{arr[i], arr[i]}
 	}
 	tree := NewSegmentTreeRangeAddRangeMinMax(leaves)
-	return &RightMostLeftMostQuery{n: n, tree: tree}
+	return &RightMostLeftMostQuery{_n: n, _tree: tree}
 }
 
 func (rm *RightMostLeftMostQuery) Set(index int, value int) {
-	if 0 <= index && index < rm.n {
-		rm.tree.Set(index, E{min: value, max: value})
+	if 0 <= index && index < rm._n {
+		rm._tree.Set(index, E{min: value, max: value})
 	}
 }
 
@@ -38,18 +39,18 @@ func (rm *RightMostLeftMostQuery) AddRange(start, end int, delta int) {
 	if start < 0 {
 		start = 0
 	}
-	if end > rm.n {
-		end = rm.n
+	if end > rm._n {
+		end = rm._n
 	}
 	if start >= end {
 		return
 	}
-	rm.tree.Update(start, end, delta)
+	rm._tree.Update(start, end, delta)
 }
 
 func (rm *RightMostLeftMostQuery) RightMostLower(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MinLeft(rm.n, func(e E) bool { return e.min >= cur }) - 1
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.min >= cur }) - 1
 	if cand > index {
 		return cand
 	}
@@ -57,8 +58,8 @@ func (rm *RightMostLeftMostQuery) RightMostLower(index int) int {
 }
 
 func (rm *RightMostLeftMostQuery) RightMostFloor(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MinLeft(rm.n, func(e E) bool { return e.min > cur }) - 1
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.min > cur }) - 1
 	if cand > index {
 		return cand
 	}
@@ -66,8 +67,8 @@ func (rm *RightMostLeftMostQuery) RightMostFloor(index int) int {
 }
 
 func (rm *RightMostLeftMostQuery) RightMostCeiling(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MinLeft(rm.n, func(e E) bool { return e.max < cur }) - 1
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.max < cur }) - 1
 	if cand > index {
 		return cand
 	}
@@ -75,8 +76,8 @@ func (rm *RightMostLeftMostQuery) RightMostCeiling(index int) int {
 }
 
 func (rm *RightMostLeftMostQuery) RightMostHigher(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MinLeft(rm.n, func(e E) bool { return e.max <= cur }) - 1
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.max <= cur }) - 1
 	if cand > index {
 		return cand
 	}
@@ -84,8 +85,8 @@ func (rm *RightMostLeftMostQuery) RightMostHigher(index int) int {
 }
 
 func (rm *RightMostLeftMostQuery) LeftMostLower(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MaxRight(0, func(e E) bool { return e.min >= cur })
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MaxRight(0, func(e E) bool { return e.min >= cur })
 	if cand < index {
 		return cand
 	}
@@ -93,8 +94,8 @@ func (rm *RightMostLeftMostQuery) LeftMostLower(index int) int {
 }
 
 func (rm *RightMostLeftMostQuery) LeftMostFloor(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MaxRight(0, func(e E) bool { return e.min > cur })
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MaxRight(0, func(e E) bool { return e.min > cur })
 	if cand < index {
 		return cand
 	}
@@ -102,8 +103,8 @@ func (rm *RightMostLeftMostQuery) LeftMostFloor(index int) int {
 }
 
 func (rm *RightMostLeftMostQuery) LeftMostCeiling(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MaxRight(0, func(e E) bool { return e.max < cur })
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MaxRight(0, func(e E) bool { return e.max < cur })
 	if cand < index {
 		return cand
 	}
@@ -111,8 +112,8 @@ func (rm *RightMostLeftMostQuery) LeftMostCeiling(index int) int {
 }
 
 func (rm *RightMostLeftMostQuery) LeftMostHigher(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MaxRight(0, func(e E) bool { return e.max <= cur })
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MaxRight(0, func(e E) bool { return e.max <= cur })
 	if cand < index {
 		return cand
 	}
@@ -120,62 +121,62 @@ func (rm *RightMostLeftMostQuery) LeftMostHigher(index int) int {
 }
 
 func (rm *RightMostLeftMostQuery) RightNearestLower(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MaxRight(index+1, func(e E) bool { return e.min >= cur })
-	if cand < rm.n {
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.min >= cur })
+	if cand < rm._n {
 		return cand
 	}
 	return -1
 }
 
 func (rm *RightMostLeftMostQuery) RightNearestFloor(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MaxRight(index+1, func(e E) bool { return e.min > cur })
-	if cand < rm.n {
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.min > cur })
+	if cand < rm._n {
 		return cand
 	}
 	return -1
 }
 
 func (rm *RightMostLeftMostQuery) RightNearestCeiling(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MaxRight(index+1, func(e E) bool { return e.max < cur })
-	if cand < rm.n {
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.max < cur })
+	if cand < rm._n {
 		return cand
 	}
 	return -1
 }
 
 func (rm *RightMostLeftMostQuery) RightNearestHigher(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MaxRight(index+1, func(e E) bool { return e.max <= cur })
-	if cand < rm.n {
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.max <= cur })
+	if cand < rm._n {
 		return cand
 	}
 	return -1
 }
 
 func (rm *RightMostLeftMostQuery) LeftNearestLower(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MinLeft(index, func(e E) bool { return e.min >= cur }) - 1
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MinLeft(index, func(e E) bool { return e.min >= cur }) - 1
 	return cand
 }
 
 func (rm *RightMostLeftMostQuery) LeftNearestFloor(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MinLeft(index, func(e E) bool { return e.min > cur }) - 1
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MinLeft(index, func(e E) bool { return e.min > cur }) - 1
 	return cand
 }
 
 func (rm *RightMostLeftMostQuery) LeftNearestCeiling(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MinLeft(index, func(e E) bool { return e.max < cur }) - 1
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MinLeft(index, func(e E) bool { return e.max < cur }) - 1
 	return cand
 }
 
 func (rm *RightMostLeftMostQuery) LeftNearestHigher(index int) int {
-	cur := rm.tree.Get(index).min
-	cand := rm.tree.MinLeft(index, func(e E) bool { return e.max <= cur }) - 1
+	cur := rm._tree.Get(index).min
+	cand := rm._tree.MinLeft(index, func(e E) bool { return e.max <= cur }) - 1
 	return cand
 }
 
@@ -450,181 +451,4 @@ func (tree *SegmentTreeRangeAddRangeMinMax) String() string {
 	}
 	sb = append(sb, "]")
 	return strings.Join(sb, "")
-}
-
-type Mocker struct {
-	nums []int
-}
-
-func NewMocker(nums []int) *Mocker {
-	return &Mocker{nums: nums}
-}
-
-func (m *Mocker) Set(index int, value int) {
-	m.nums[index] = value
-}
-func (m *Mocker) AddRange(start, end, delta int) {
-	for i := start; i < end; i++ {
-		m.nums[i] += delta
-	}
-}
-
-func (m *Mocker) RightMostLower(index int) int {
-	cur := m.nums[index]
-	for i := len(m.nums) - 1; i > index; i-- {
-		if m.nums[i] < cur {
-			return i
-		}
-	}
-	return -1
-}
-func (m *Mocker) RightMostFloor(index int) int {
-	cur := m.nums[index]
-	for i := len(m.nums) - 1; i > index; i-- {
-		if m.nums[i] <= cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) RightMostCeiling(index int) int {
-	cur := m.nums[index]
-	for i := len(m.nums) - 1; i > index; i-- {
-		if m.nums[i] >= cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) RightMostHigher(index int) int {
-	cur := m.nums[index]
-	for i := len(m.nums) - 1; i > index; i-- {
-		if m.nums[i] > cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) LeftMostLower(index int) int {
-
-	cur := m.nums[index]
-	for i := 0; i < index; i++ {
-		if m.nums[i] < cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) LeftMostFloor(index int) int {
-	cur := m.nums[index]
-	for i := 0; i < index; i++ {
-		if m.nums[i] <= cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) LeftMostCeiling(index int) int {
-	cur := m.nums[index]
-	for i := 0; i < index; i++ {
-		if m.nums[i] >= cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) LeftMostHigher(index int) int {
-	cur := m.nums[index]
-	for i := 0; i < index; i++ {
-		if m.nums[i] > cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) RightNearestLower(index int) int {
-	cur := m.nums[index]
-	for i := index + 1; i < len(m.nums); i++ {
-		if m.nums[i] < cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) RightNearestFloor(index int) int {
-	cur := m.nums[index]
-	for i := index + 1; i < len(m.nums); i++ {
-		if m.nums[i] <= cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) RightNearestCeiling(index int) int {
-	cur := m.nums[index]
-	for i := index + 1; i < len(m.nums); i++ {
-		if m.nums[i] >= cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) RightNearestHigher(index int) int {
-	cur := m.nums[index]
-	for i := index + 1; i < len(m.nums); i++ {
-		if m.nums[i] > cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) LeftNearestLower(index int) int {
-	cur := m.nums[index]
-	for i := index - 1; i >= 0; i-- {
-		if m.nums[i] < cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) LeftNearestFloor(index int) int {
-	cur := m.nums[index]
-	for i := index - 1; i >= 0; i-- {
-		if m.nums[i] <= cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) LeftNearestCeiling(index int) int {
-	cur := m.nums[index]
-	for i := index - 1; i >= 0; i-- {
-		if m.nums[i] >= cur {
-			return i
-		}
-	}
-	return -1
-}
-
-func (m *Mocker) LeftNearestHigher(index int) int {
-	cur := m.nums[index]
-	for i := index - 1; i >= 0; i-- {
-		if m.nums[i] > cur {
-			return i
-		}
-	}
-	return -1
 }
