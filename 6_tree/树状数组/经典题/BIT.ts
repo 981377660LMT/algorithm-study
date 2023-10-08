@@ -31,10 +31,10 @@ class BITArray {
    * Build a tree from an array-like object using dp.
    * O(n) time.
    */
-  private static _buildTree(arrayLike: ArrayLike<number>): number[] {
-    const tree = Array(arrayLike.length + 1).fill(0)
+  private static _buildTree(arr: ArrayLike<number>): Float64Array {
+    const tree = new Float64Array(arr.length + 1)
     for (let i = 1; i < tree.length; i++) {
-      tree[i] += arrayLike[i - 1]
+      tree[i] += arr[i - 1]
       const parent = i + (i & -i)
       if (parent < tree.length) tree[parent] += tree[i]
     }
@@ -42,7 +42,7 @@ class BITArray {
   }
 
   readonly length: number
-  private readonly _tree: number[]
+  private readonly _tree: Float64Array
 
   /**
    * 指定长度或者从类数组建立树状数组.
@@ -53,7 +53,7 @@ class BITArray {
   constructor(lengthOrArrayLike: number | ArrayLike<number>) {
     if (typeof lengthOrArrayLike === 'number') {
       this.length = lengthOrArrayLike
-      this._tree = Array(lengthOrArrayLike + 1).fill(0)
+      this._tree = new Float64Array(lengthOrArrayLike + 1)
     } else {
       this.length = lengthOrArrayLike.length
       this._tree = BITArray._buildTree(lengthOrArrayLike)
@@ -62,7 +62,7 @@ class BITArray {
 
   /**
    * Add delta to the element at index.
-   * @param index 0 <= index < {@link length}
+   * @param index 0 <= index < {@link length}.
    */
   add(index: number, delta: number): void {
     index++
@@ -72,22 +72,22 @@ class BITArray {
   }
 
   /**
-   * Query the sum of [0, right).
+   * Query the sum of [0, end).
    */
-  query(right: number): number {
-    if (right > this.length) right = this.length
+  query(end: number): number {
+    if (end > this.length) end = this.length
     let res = 0
-    for (let i = right; i > 0; i &= i - 1) {
+    for (let i = end; i > 0; i &= i - 1) {
       res += this._tree[i]
     }
     return res
   }
 
   /**
-   * Query the sum of [left, right).
+   * Query the sum of [start, end).
    */
-  queryRange(left: number, right: number): number {
-    return this.query(right) - this.query(left)
+  queryRange(start: number, end: number): number {
+    return this.query(end) - this.query(start)
   }
 
   toString(): string {
@@ -396,7 +396,11 @@ class BIT4 {
     let res = 0
     for (let r = row; r > 0; r -= r & -r) {
       for (let c = col; c > 0; c -= c & -c) {
-        res += row * col * this._tree1[r][c] - col * this._tree2[r][c] - row * this._tree3[r][c] + this._tree4[r][c]
+        res +=
+          row * col * this._tree1[r][c] -
+          col * this._tree2[r][c] -
+          row * this._tree3[r][c] +
+          this._tree4[r][c]
       }
     }
     return res

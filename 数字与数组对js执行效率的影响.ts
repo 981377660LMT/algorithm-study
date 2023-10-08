@@ -16,6 +16,7 @@
 // !4.将普通数组number[]换成Float64Array
 // number[] // 800ms, 82MB
 // Float64Array // 550ms, 70MB
+// !类型数组的数字不受范围影响(例如INF的取值影响效率)
 
 // 得出优化结论:
 // 1.尽量使用number而不是对象，尽量使用对象存pair而不是数组.
@@ -24,11 +25,11 @@
 
 const INF = 2e9
 class StockSpanner {
-  private readonly _Q: RightMostLeftMostQuerySegmentTree
+  private readonly _Q: _RightMostLeftMostQuerySegmentTree
   private _ptr = 0
 
   constructor() {
-    this._Q = new RightMostLeftMostQuerySegmentTree(Array(1e5 + 10).fill(0))
+    this._Q = new _RightMostLeftMostQuerySegmentTree(Array(1e5 + 10).fill(0))
   }
 
   next(price: number): number {
@@ -42,7 +43,7 @@ class StockSpanner {
 type E = number
 type Id = number
 
-class RightMostLeftMostQuerySegmentTree {
+class _RightMostLeftMostQuerySegmentTree {
   private readonly _n: number
   private readonly _rangeAddRangeMinMax: _SegmentTreeRangeUpdateRangeQuery<E, Id>
 
@@ -193,3 +194,5 @@ class _SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     if (index < this._size) this._lazy[index] = this._composition(lazy, this._lazy[index])
   }
 }
+
+export {}

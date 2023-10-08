@@ -1,6 +1,7 @@
-// 更新:区间染色(update)
-// 查询:区间和、区间最小值
-// RangeUpdateRangeSumMin
+// RangeAddRangeSquareSum
+
+// 区间加/区间平方和
+
 package main
 
 import (
@@ -11,70 +12,64 @@ import (
 )
 
 func main() {
-	// https://www.luogu.com.cn/problem/CF1439C 饥饿的男人
-	// !给定一个大小为 n 的`非升序`列 a 。现在有两类操作：
-	// 1 x y 对 1<=i<=x 的元素取 max(ai,y) <=> 前缀`Chmax`
-	// 2 x y 从下标x开始,从左到右遍历,如果ai<=y,则res+=1,y-=ai,最后输出res
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int
-	fmt.Fscan(in, &n, &q)
+	var n int
+	fmt.Fscan(in, &n)
 	nums := make([]int, n)
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
+
 	leaves := make([]E, n)
 	for i := 0; i < n; i++ {
-		leaves[i] = E{nums[i], 1, nums[i]}
+		leaves[i] = E{1, nums[i], nums[i] * nums[i]}
 	}
 	tree := NewLazySegTree(leaves)
 
+	var q int
+	fmt.Fscan(in, &q)
 	for i := 0; i < q; i++ {
-		var op, x, y int
-		fmt.Fscan(in, &op, &x, &y)
+		var op int
+		fmt.Fscan(in, &op)
 		if op == 1 {
-			// !前缀chMax的操作可以看成找到第一个小于等于y的位置,然后`区间更新`[first,x]的值为y
-			right := tree.MaxRight(0, func(e E) bool { return e.min > y })
-			tree.Update(right, x, y)
+			var l, r, v int
+			fmt.Fscan(in, &l, &r, &v)
+			l--
+			tree.Update(l, r, v)
 		} else {
-			x--
-			res := 0
-			for x < n {
-				right := tree.MaxRight(x, func(e E) bool { return e.sum <= y })
-				y -= tree.Query(x, right).sum
-				res += right - x
-				x = tree.MaxRight(right, func(e E) bool { return e.min > y })
-			}
-			fmt.Fprintln(out, res)
+			var l, r int
+			fmt.Fscan(in, &l, &r)
+			l--
+			res := tree.Query(l, r)
+			fmt.Fprintln(out, res.sum2)
 		}
 	}
 }
 
 const INF = 1e18
 
-// RangeAssignRangeSumMin
-type E = struct{ sum, size, min int }
+// RangeAddRangeSquareSum
+
+type E = struct{ sum0, sum1, sum2 int } // !0次和(size),1次和(sum),2次和(square sum)
 type Id = int
 
-func (*LazySegTree) e() E   { return E{min: INF} }
-func (*LazySegTree) id() Id { return INF }
+func (*LazySegTree) e() E   { return E{} }
+func (*LazySegTree) id() Id { return 0 }
 func (*LazySegTree) op(left, right E) E {
-	return E{left.sum + right.sum, left.size + right.size, min(left.min, right.min)}
+	return E{left.sum0 + right.sum0, left.sum1 + right.sum1, left.sum2 + right.sum2}
 }
+
 func (*LazySegTree) mapping(f Id, g E) E {
-	if f == INF {
-		return g
-	}
-	return E{f * g.size, g.size, f}
+	return E{g.sum0, g.sum1 + f*g.sum0, g.sum2 + 2*g.sum1*f + g.sum0*f*f}
 }
+
 func (*LazySegTree) composition(f, g Id) Id {
-	if f == INF {
-		return g
-	}
-	return f
+	return f + g
 }
+
 func min(a, b int) int {
 	if a < b {
 		return a

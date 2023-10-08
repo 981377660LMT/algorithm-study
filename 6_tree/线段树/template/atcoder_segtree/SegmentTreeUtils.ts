@@ -9,7 +9,7 @@
 
 import { SegmentTreeRangeUpdateRangeQuery } from './SegmentTreeRangeUpdateRangeQuery'
 
-const INF = 2e15
+const INF = 2e9 // !超过int32使用2e15
 
 /**
  * 区间加,查询区间最大值(幺元为0).
