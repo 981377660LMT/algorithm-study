@@ -97,8 +97,9 @@ class SegmentTreePointUpdateRangeQuery<E = number> {
       if (!predicate(this._op(res, this._data[start]))) {
         while (start < this._size) {
           start <<= 1
-          if (predicate(this._op(res, this._data[start]))) {
-            res = this._op(res, this._data[start])
+          const tmp = this._op(res, this._data[start])
+          if (predicate(tmp)) {
+            res = tmp
             start++
           }
         }
@@ -126,8 +127,9 @@ class SegmentTreePointUpdateRangeQuery<E = number> {
       if (!predicate(this._op(this._data[end], res))) {
         while (end < this._size) {
           end = (end << 1) | 1
-          if (predicate(this._op(this._data[end], res))) {
-            res = this._op(this._data[end], res)
+          const tmp = this._op(this._data[end], res)
+          if (predicate(tmp)) {
+            res = tmp
             end--
           }
         }

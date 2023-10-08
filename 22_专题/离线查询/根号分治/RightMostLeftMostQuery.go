@@ -1,6 +1,10 @@
 package main
 
-import "math"
+import (
+	"fmt"
+	"math"
+	"math/rand"
+)
 
 // 962. 最大宽度坡
 // https://leetcode.cn/problems/maximum-width-ramp/
@@ -466,4 +470,272 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
+type Mocker struct {
+	nums []int
+}
+
+func NewMocker(nums []int) *Mocker {
+	return &Mocker{nums: nums}
+}
+
+func (m *Mocker) Set(index int, value int) {
+	m.nums[index] = value
+}
+func (m *Mocker) AddRange(start, end, delta int) {
+	for i := start; i < end; i++ {
+		m.nums[i] += delta
+	}
+}
+
+func (m *Mocker) RightMostLower(index int) int {
+	cur := m.nums[index]
+	for i := len(m.nums) - 1; i > index; i-- {
+		if m.nums[i] < cur {
+			return i
+		}
+	}
+	return -1
+}
+func (m *Mocker) RightMostFloor(index int) int {
+	cur := m.nums[index]
+	for i := len(m.nums) - 1; i > index; i-- {
+		if m.nums[i] <= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) RightMostCeiling(index int) int {
+	cur := m.nums[index]
+	for i := len(m.nums) - 1; i > index; i-- {
+		if m.nums[i] >= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) RightMostHigher(index int) int {
+	cur := m.nums[index]
+	for i := len(m.nums) - 1; i > index; i-- {
+		if m.nums[i] > cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftMostLower(index int) int {
+
+	cur := m.nums[index]
+	for i := 0; i < index; i++ {
+		if m.nums[i] < cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftMostFloor(index int) int {
+	cur := m.nums[index]
+	for i := 0; i < index; i++ {
+		if m.nums[i] <= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftMostCeiling(index int) int {
+	cur := m.nums[index]
+	for i := 0; i < index; i++ {
+		if m.nums[i] >= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftMostHigher(index int) int {
+	cur := m.nums[index]
+	for i := 0; i < index; i++ {
+		if m.nums[i] > cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) RightNearestLower(index int) int {
+	cur := m.nums[index]
+	for i := index + 1; i < len(m.nums); i++ {
+		if m.nums[i] < cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) RightNearestFloor(index int) int {
+	cur := m.nums[index]
+	for i := index + 1; i < len(m.nums); i++ {
+		if m.nums[i] <= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) RightNearestCeiling(index int) int {
+	cur := m.nums[index]
+	for i := index + 1; i < len(m.nums); i++ {
+		if m.nums[i] >= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) RightNearestHigher(index int) int {
+	cur := m.nums[index]
+	for i := index + 1; i < len(m.nums); i++ {
+		if m.nums[i] > cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftNearestLower(index int) int {
+	cur := m.nums[index]
+	for i := index - 1; i >= 0; i-- {
+		if m.nums[i] < cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftNearestFloor(index int) int {
+	cur := m.nums[index]
+	for i := index - 1; i >= 0; i-- {
+		if m.nums[i] <= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftNearestCeiling(index int) int {
+	cur := m.nums[index]
+	for i := index - 1; i >= 0; i-- {
+		if m.nums[i] >= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftNearestHigher(index int) int {
+	cur := m.nums[index]
+	for i := index - 1; i >= 0; i-- {
+		if m.nums[i] > cur {
+			return i
+		}
+	}
+	return -1
+}
+
+// checkWithBruteForce
+func main() {
+	N := int(1e5)
+	MAX := int(1e9)
+	randNums := make([]int, N)
+	for i := 0; i < N; i++ {
+		randNums[i] = rand.Intn(MAX)
+	}
+	mocker := NewMocker(append([]int{}, randNums...))
+	real := NewRightMostLeftMostQuery(append([]int{}, randNums...))
+	debug := func(f1, f2 func(int) int) {
+		index := rand.Intn(N)
+		res1 := f1(index)
+		res2 := f2(index)
+		if res1 != res2 {
+			panic("error")
+		}
+	}
+
+	for i := 0; i < 100000; i++ {
+		op := rand.Intn(18)
+		switch op {
+		case 0:
+			index := rand.Intn(N)
+			value := rand.Intn(MAX)
+			mocker.Set(index, value)
+			real.Set(index, value)
+
+		case 1:
+			start := rand.Intn(N)
+			end := start + rand.Intn(N-start)
+			delta := rand.Intn(MAX)
+			mocker.AddRange(start, end, delta)
+			real.AddRange(start, end, delta)
+		case 2:
+			debug(mocker.RightMostLower, real.RightMostLower)
+		case 3:
+			debug(mocker.RightMostFloor, real.RightMostFloor)
+		case 4:
+			debug(mocker.RightMostCeiling, real.RightMostCeiling)
+		case 5:
+			debug(mocker.RightMostHigher, real.RightMostHigher)
+		case 6:
+			debug(mocker.LeftMostLower, real.LeftMostLower)
+		case 7:
+			debug(mocker.LeftMostFloor, real.LeftMostFloor)
+		case 8:
+			debug(mocker.LeftMostCeiling, real.LeftMostCeiling)
+		case 9:
+			debug(mocker.LeftMostHigher, real.LeftMostHigher)
+		case 10:
+			debug(mocker.RightNearestLower, real.RightNearestLower)
+		case 11:
+			debug(mocker.RightNearestFloor, real.RightNearestFloor)
+		case 12:
+			debug(mocker.RightNearestCeiling, real.RightNearestCeiling)
+		case 13:
+			debug(mocker.RightNearestHigher, real.RightNearestHigher)
+		case 14:
+			debug(mocker.LeftNearestLower, real.LeftNearestLower)
+		case 15:
+			debug(mocker.LeftNearestFloor, real.LeftNearestFloor)
+		case 16:
+			debug(mocker.LeftNearestCeiling, real.LeftNearestCeiling)
+		case 17:
+			debug(mocker.LeftNearestHigher, real.LeftNearestHigher)
+		}
+	}
+
+	fmt.Println("done")
 }

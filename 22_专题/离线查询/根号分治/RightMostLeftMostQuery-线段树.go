@@ -1,0 +1,630 @@
+/* eslint-disable no-inner-declarations */
+
+// 对每个下标，查询 最右侧/最左侧/右侧第一个/左侧第一个 lower/floor/ceiling/higher 的元素.
+// 动态单调栈(DynamicMonoStack).
+// 线段树实现.
+package main
+
+import (
+	"fmt"
+	"math/bits"
+	"strings"
+)
+
+const INF int = 1e18
+
+type RightMostLeftMostQuery struct {
+	n    int
+	tree *SegmentTreeRangeAddRangeMinMax
+}
+
+func NewRightMostLeftMostQuery(arr []int) *RightMostLeftMostQuery {
+	n := len(arr)
+	leaves := make([]E, n)
+	for i := 0; i < n; i++ {
+		leaves[i] = E{arr[i], arr[i]}
+	}
+	tree := NewSegmentTreeRangeAddRangeMinMax(leaves)
+	return &RightMostLeftMostQuery{n: n, tree: tree}
+}
+
+func (rm *RightMostLeftMostQuery) Set(index int, value int) {
+	if 0 <= index && index < rm.n {
+		rm.tree.Set(index, E{min: value, max: value})
+	}
+}
+
+func (rm *RightMostLeftMostQuery) AddRange(start, end int, delta int) {
+	if start < 0 {
+		start = 0
+	}
+	if end > rm.n {
+		end = rm.n
+	}
+	if start >= end {
+		return
+	}
+	rm.tree.Update(start, end, delta)
+}
+
+func (rm *RightMostLeftMostQuery) RightMostLower(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MinLeft(rm.n, func(e E) bool { return e.min >= cur }) - 1
+	if cand > index {
+		return cand
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) RightMostFloor(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MinLeft(rm.n, func(e E) bool { return e.min > cur }) - 1
+	if cand > index {
+		return cand
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) RightMostCeiling(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MinLeft(rm.n, func(e E) bool { return e.max < cur }) - 1
+	if cand > index {
+		return cand
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) RightMostHigher(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MinLeft(rm.n, func(e E) bool { return e.max <= cur }) - 1
+	if cand > index {
+		return cand
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) LeftMostLower(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MaxRight(0, func(e E) bool { return e.min >= cur })
+	if cand < index {
+		return cand
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) LeftMostFloor(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MaxRight(0, func(e E) bool { return e.min > cur })
+	if cand < index {
+		return cand
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) LeftMostCeiling(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MaxRight(0, func(e E) bool { return e.max < cur })
+	if cand < index {
+		return cand
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) LeftMostHigher(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MaxRight(0, func(e E) bool { return e.max <= cur })
+	if cand < index {
+		return cand
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) RightNearestLower(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MaxRight(index+1, func(e E) bool { return e.min >= cur })
+	if cand < rm.n {
+		return cand
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) RightNearestFloor(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MaxRight(index+1, func(e E) bool { return e.min > cur })
+	if cand < rm.n {
+		return cand
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) RightNearestCeiling(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MaxRight(index+1, func(e E) bool { return e.max < cur })
+	if cand < rm.n {
+		return cand
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) RightNearestHigher(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MaxRight(index+1, func(e E) bool { return e.max <= cur })
+	if cand < rm.n {
+		return cand
+	}
+	return -1
+}
+
+func (rm *RightMostLeftMostQuery) LeftNearestLower(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MinLeft(index, func(e E) bool { return e.min >= cur }) - 1
+	return cand
+}
+
+func (rm *RightMostLeftMostQuery) LeftNearestFloor(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MinLeft(index, func(e E) bool { return e.min > cur }) - 1
+	return cand
+}
+
+func (rm *RightMostLeftMostQuery) LeftNearestCeiling(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MinLeft(index, func(e E) bool { return e.max < cur }) - 1
+	return cand
+}
+
+func (rm *RightMostLeftMostQuery) LeftNearestHigher(index int) int {
+	cur := rm.tree.Get(index).min
+	cand := rm.tree.MinLeft(index, func(e E) bool { return e.max <= cur }) - 1
+	return cand
+}
+
+// RangeAddRangeMinMax-区间加区间最大最小值
+type E = struct{ min, max int }
+type Id = int
+
+func (*SegmentTreeRangeAddRangeMinMax) e() E   { return E{min: INF, max: -INF} }
+func (*SegmentTreeRangeAddRangeMinMax) id() Id { return 0 }
+func (*SegmentTreeRangeAddRangeMinMax) op(left, right E) E {
+	return E{min(left.min, right.min), max(left.max, right.max)}
+}
+func (*SegmentTreeRangeAddRangeMinMax) mapping(f Id, g E) E {
+	if f == 0 {
+		return g
+	}
+	return E{g.min + f, g.max + f}
+}
+func (*SegmentTreeRangeAddRangeMinMax) composition(f, g Id) Id {
+	return f + g
+}
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+func max(a, b int) int {
+	if a < b {
+		return b
+	}
+	return a
+}
+
+// !template
+type SegmentTreeRangeAddRangeMinMax struct {
+	n    int
+	size int
+	log  int
+	data []E
+	lazy []Id
+}
+
+func NewSegmentTreeRangeAddRangeMinMax(leaves []E) *SegmentTreeRangeAddRangeMinMax {
+	tree := &SegmentTreeRangeAddRangeMinMax{}
+	n := len(leaves)
+	tree.n = n
+	tree.log = int(bits.Len(uint(n - 1)))
+	tree.size = 1 << tree.log
+	tree.data = make([]E, tree.size<<1)
+	tree.lazy = make([]Id, tree.size)
+	for i := range tree.data {
+		tree.data[i] = tree.e()
+	}
+	for i := range tree.lazy {
+		tree.lazy[i] = tree.id()
+	}
+	for i := 0; i < n; i++ {
+		tree.data[tree.size+i] = leaves[i]
+	}
+	for i := tree.size - 1; i >= 1; i-- {
+		tree.pushUp(i)
+	}
+	return tree
+}
+
+// 查询切片[left:right]的值
+//
+//	0<=left<=right<=len(tree.data)
+func (tree *SegmentTreeRangeAddRangeMinMax) Query(left, right int) E {
+	if left < 0 {
+		left = 0
+	}
+	if right > tree.n {
+		right = tree.n
+	}
+	if left >= right {
+		return tree.e()
+	}
+	left += tree.size
+	right += tree.size
+	for i := tree.log; i >= 1; i-- {
+		if ((left >> i) << i) != left {
+			tree.pushDown(left >> i)
+		}
+		if ((right >> i) << i) != right {
+			tree.pushDown((right - 1) >> i)
+		}
+	}
+	sml, smr := tree.e(), tree.e()
+	for left < right {
+		if left&1 != 0 {
+			sml = tree.op(sml, tree.data[left])
+			left++
+		}
+		if right&1 != 0 {
+			right--
+			smr = tree.op(tree.data[right], smr)
+		}
+		left >>= 1
+		right >>= 1
+	}
+	return tree.op(sml, smr)
+}
+func (tree *SegmentTreeRangeAddRangeMinMax) QueryAll() E {
+	return tree.data[1]
+}
+
+// 更新切片[left:right]的值
+//
+//	0<=left<=right<=len(tree.data)
+func (tree *SegmentTreeRangeAddRangeMinMax) Update(left, right int, f Id) {
+	if left < 0 {
+		left = 0
+	}
+	if right > tree.n {
+		right = tree.n
+	}
+	if left >= right {
+		return
+	}
+	left += tree.size
+	right += tree.size
+	for i := tree.log; i >= 1; i-- {
+		if ((left >> i) << i) != left {
+			tree.pushDown(left >> i)
+		}
+		if ((right >> i) << i) != right {
+			tree.pushDown((right - 1) >> i)
+		}
+	}
+	l2, r2 := left, right
+	for left < right {
+		if left&1 != 0 {
+			tree.propagate(left, f)
+			left++
+		}
+		if right&1 != 0 {
+			right--
+			tree.propagate(right, f)
+		}
+		left >>= 1
+		right >>= 1
+	}
+	left = l2
+	right = r2
+	for i := 1; i <= tree.log; i++ {
+		if ((left >> i) << i) != left {
+			tree.pushUp(left >> i)
+		}
+		if ((right >> i) << i) != right {
+			tree.pushUp((right - 1) >> i)
+		}
+	}
+}
+
+// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
+func (tree *SegmentTreeRangeAddRangeMinMax) MinLeft(right int, predicate func(data E) bool) int {
+	if right == 0 {
+		return 0
+	}
+	right += tree.size
+	for i := tree.log; i >= 1; i-- {
+		tree.pushDown((right - 1) >> i)
+	}
+	res := tree.e()
+	for {
+		right--
+		for right > 1 && right&1 != 0 {
+			right >>= 1
+		}
+		if !predicate(tree.op(tree.data[right], res)) {
+			for right < tree.size {
+				tree.pushDown(right)
+				right = right<<1 | 1
+				if tmp := tree.op(tree.data[right], res); predicate(tmp) {
+					res = tmp
+					right--
+				}
+			}
+			return right + 1 - tree.size
+		}
+		res = tree.op(tree.data[right], res)
+		if (right & -right) == right {
+			break
+		}
+	}
+	return 0
+}
+
+// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
+func (tree *SegmentTreeRangeAddRangeMinMax) MaxRight(left int, predicate func(data E) bool) int {
+	if left == tree.n {
+		return tree.n
+	}
+	left += tree.size
+	for i := tree.log; i >= 1; i-- {
+		tree.pushDown(left >> i)
+	}
+	res := tree.e()
+	for {
+		for left&1 == 0 {
+			left >>= 1
+		}
+		if !predicate(tree.op(res, tree.data[left])) {
+			for left < tree.size {
+				tree.pushDown(left)
+				left <<= 1
+				if tmp := tree.op(res, tree.data[left]); predicate(tmp) {
+					res = tmp
+					left++
+				}
+			}
+			return left - tree.size
+		}
+		res = tree.op(res, tree.data[left])
+		left++
+		if (left & -left) == left {
+			break
+		}
+	}
+	return tree.n
+}
+
+// 单点查询(不需要 pushUp/op 操作时使用)
+func (tree *SegmentTreeRangeAddRangeMinMax) Get(index int) E {
+	index += tree.size
+	for i := tree.log; i >= 1; i-- {
+		tree.pushDown(index >> i)
+	}
+	return tree.data[index]
+}
+
+// 单点赋值
+func (tree *SegmentTreeRangeAddRangeMinMax) Set(index int, e E) {
+	index += tree.size
+	for i := tree.log; i >= 1; i-- {
+		tree.pushDown(index >> i)
+	}
+	tree.data[index] = e
+	for i := 1; i <= tree.log; i++ {
+		tree.pushUp(index >> i)
+	}
+}
+
+func (tree *SegmentTreeRangeAddRangeMinMax) pushUp(root int) {
+	tree.data[root] = tree.op(tree.data[root<<1], tree.data[root<<1|1])
+}
+func (tree *SegmentTreeRangeAddRangeMinMax) pushDown(root int) {
+	if tree.lazy[root] != tree.id() {
+		tree.propagate(root<<1, tree.lazy[root])
+		tree.propagate(root<<1|1, tree.lazy[root])
+		tree.lazy[root] = tree.id()
+	}
+}
+func (tree *SegmentTreeRangeAddRangeMinMax) propagate(root int, f Id) {
+	tree.data[root] = tree.mapping(f, tree.data[root])
+	// !叶子结点不需要更新lazy
+	if root < tree.size {
+		tree.lazy[root] = tree.composition(f, tree.lazy[root])
+	}
+}
+
+func (tree *SegmentTreeRangeAddRangeMinMax) String() string {
+	var sb []string
+	sb = append(sb, "[")
+	for i := 0; i < tree.n; i++ {
+		if i != 0 {
+			sb = append(sb, ", ")
+		}
+		sb = append(sb, fmt.Sprintf("%v", tree.Get(i)))
+	}
+	sb = append(sb, "]")
+	return strings.Join(sb, "")
+}
+
+type Mocker struct {
+	nums []int
+}
+
+func NewMocker(nums []int) *Mocker {
+	return &Mocker{nums: nums}
+}
+
+func (m *Mocker) Set(index int, value int) {
+	m.nums[index] = value
+}
+func (m *Mocker) AddRange(start, end, delta int) {
+	for i := start; i < end; i++ {
+		m.nums[i] += delta
+	}
+}
+
+func (m *Mocker) RightMostLower(index int) int {
+	cur := m.nums[index]
+	for i := len(m.nums) - 1; i > index; i-- {
+		if m.nums[i] < cur {
+			return i
+		}
+	}
+	return -1
+}
+func (m *Mocker) RightMostFloor(index int) int {
+	cur := m.nums[index]
+	for i := len(m.nums) - 1; i > index; i-- {
+		if m.nums[i] <= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) RightMostCeiling(index int) int {
+	cur := m.nums[index]
+	for i := len(m.nums) - 1; i > index; i-- {
+		if m.nums[i] >= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) RightMostHigher(index int) int {
+	cur := m.nums[index]
+	for i := len(m.nums) - 1; i > index; i-- {
+		if m.nums[i] > cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftMostLower(index int) int {
+
+	cur := m.nums[index]
+	for i := 0; i < index; i++ {
+		if m.nums[i] < cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftMostFloor(index int) int {
+	cur := m.nums[index]
+	for i := 0; i < index; i++ {
+		if m.nums[i] <= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftMostCeiling(index int) int {
+	cur := m.nums[index]
+	for i := 0; i < index; i++ {
+		if m.nums[i] >= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftMostHigher(index int) int {
+	cur := m.nums[index]
+	for i := 0; i < index; i++ {
+		if m.nums[i] > cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) RightNearestLower(index int) int {
+	cur := m.nums[index]
+	for i := index + 1; i < len(m.nums); i++ {
+		if m.nums[i] < cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) RightNearestFloor(index int) int {
+	cur := m.nums[index]
+	for i := index + 1; i < len(m.nums); i++ {
+		if m.nums[i] <= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) RightNearestCeiling(index int) int {
+	cur := m.nums[index]
+	for i := index + 1; i < len(m.nums); i++ {
+		if m.nums[i] >= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) RightNearestHigher(index int) int {
+	cur := m.nums[index]
+	for i := index + 1; i < len(m.nums); i++ {
+		if m.nums[i] > cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftNearestLower(index int) int {
+	cur := m.nums[index]
+	for i := index - 1; i >= 0; i-- {
+		if m.nums[i] < cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftNearestFloor(index int) int {
+	cur := m.nums[index]
+	for i := index - 1; i >= 0; i-- {
+		if m.nums[i] <= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftNearestCeiling(index int) int {
+	cur := m.nums[index]
+	for i := index - 1; i >= 0; i-- {
+		if m.nums[i] >= cur {
+			return i
+		}
+	}
+	return -1
+}
+
+func (m *Mocker) LeftNearestHigher(index int) int {
+	cur := m.nums[index]
+	for i := index - 1; i >= 0; i-- {
+		if m.nums[i] > cur {
+			return i
+		}
+	}
+	return -1
+}

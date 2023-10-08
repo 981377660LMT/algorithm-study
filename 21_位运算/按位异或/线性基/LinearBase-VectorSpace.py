@@ -1,12 +1,11 @@
 # https://maspypy.github.io/library/linalg/xor/vector_space.hpp
-# 可合并的线性基
+# 可合并的线性基/线性基合并
 
 
 from typing import List, Optional
 
 
 class VectorSpace:
-
     __slots__ = ("bases", "_max")
 
     def __init__(self, nums: Optional[List[int]] = None) -> None:

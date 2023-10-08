@@ -2,38 +2,22 @@
 
 // 对每个下标，查询 最右侧/最左侧/右侧第一个/左侧第一个 lower/floor/ceiling/higher 的元素.
 // 动态单调栈(DynamicMonoStack).
-// 线段树实现.
+// 线段树实现(非常快).
 
-import { RightMostLeftMostQuery } from './RightMostLeftMostQuery'
+import { SegmentTreeRangeAddRangeMinMax } from '../../../6_tree/线段树/template/atcoder_segtree/hot/SegmentTreeRangeAddRangeMinMax-区间加区间最大最小值'
 
-type E = { min: number; max: number }
-type Id = number
-
-const INF = 2e9 // !超过int32使用2e15
-
-/**
- * @deprecated 效率不如{@link RightMostLeftMostQuery}.
- */
 class RightMostLeftMostQuerySegmentTree {
   private readonly _n: number
   private readonly _rangeAddRangeMinMax: SegmentTreeRangeAddRangeMinMax
 
   constructor(arr: ArrayLike<number>) {
     this._n = arr.length
-    const leaves: E[] = Array(this._n)
-    for (let i = 0; i < this._n; i++) leaves[i] = { min: arr[i], max: arr[i] }
-    this._rangeAddRangeMinMax = new SegmentTreeRangeUpdateRangeQuery<E, Id>(leaves, {
-      e: () => ({ min: INF, max: -INF }),
-      id: () => 0,
-      op: (a, b) => ({ min: Math.min(a.min, b.min), max: Math.max(a.max, b.max) }),
-      mapping: (f, x) => ({ min: f + x.min, max: f + x.max }),
-      composition: (f, g) => f + g
-    })
+    this._rangeAddRangeMinMax = new SegmentTreeRangeAddRangeMinMax(arr)
   }
 
   set(index: number, value: number): void {
     if (index < 0 || index >= this._n) return
-    this._rangeAddRangeMinMax.set(index, { min: value, max: value })
+    this._rangeAddRangeMinMax.set(index, value)
   }
 
   addRange(start: number, end: number, delta: number): void {
@@ -48,8 +32,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   rightMostLower(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.minLeft(this._n, e => e.min >= cur) - 1
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(this._n, min => min >= cur) - 1
     return cand > index ? cand : -1
   }
 
@@ -58,8 +42,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   rightMostFloor(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.minLeft(this._n, e => e.min > cur) - 1
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(this._n, min => min > cur) - 1
     return cand > index ? cand : -1
   }
 
@@ -68,8 +52,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   rightMostCeiling(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.minLeft(this._n, e => e.max < cur) - 1
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(this._n, (_, max) => max < cur) - 1
     return cand > index ? cand : -1
   }
 
@@ -78,8 +62,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   rightMostHigher(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.minLeft(this._n, e => e.max <= cur) - 1
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(this._n, (_, max) => max <= cur) - 1
     return cand > index ? cand : -1
   }
 
@@ -88,8 +72,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   leftMostLower(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.maxRight(0, e => e.min >= cur)
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(0, min => min >= cur)
     return cand < index ? cand : -1
   }
 
@@ -98,8 +82,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   leftMostFloor(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.maxRight(0, e => e.min > cur)
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(0, min => min > cur)
     return cand < index ? cand : -1
   }
 
@@ -108,8 +92,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   leftMostCeiling(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.maxRight(0, e => e.max < cur)
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(0, (_, max) => max < cur)
     return cand < index ? cand : -1
   }
 
@@ -118,8 +102,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   leftMostHigher(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.maxRight(0, e => e.max <= cur)
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(0, (_, max) => max <= cur)
     return cand < index ? cand : -1
   }
 
@@ -128,8 +112,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   rightNearestLower(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, e => e.min >= cur)
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, min => min >= cur)
     return cand === this._n ? -1 : cand
   }
 
@@ -138,8 +122,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   rightNearestFloor(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, e => e.min > cur)
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, min => min > cur)
     return cand === this._n ? -1 : cand
   }
 
@@ -148,8 +132,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   rightNearestCeiling(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, e => e.max < cur)
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, (_, max) => max < cur)
     return cand === this._n ? -1 : cand
   }
 
@@ -158,8 +142,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   rightNearestHigher(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, e => e.max <= cur)
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, (_, max) => max <= cur)
     return cand === this._n ? -1 : cand
   }
 
@@ -168,8 +152,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   leftNearestLower(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.minLeft(index, e => e.min >= cur) - 1
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(index, min => min >= cur) - 1
     return cand
   }
 
@@ -178,8 +162,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   leftNearestFloor(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.minLeft(index, e => e.min > cur) - 1
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(index, min => min > cur) - 1
     return cand
   }
 
@@ -188,8 +172,8 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   leftNearestCeiling(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.minLeft(index, e => e.max < cur) - 1
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(index, (_, max) => max < cur) - 1
     return cand
   }
 
@@ -198,13 +182,11 @@ class RightMostLeftMostQuerySegmentTree {
    * 如果不存在，返回`-1`.
    */
   leftNearestHigher(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index).max
-    const cand = this._rangeAddRangeMinMax.minLeft(index, e => e.max <= cur) - 1
+    const cur = this._rangeAddRangeMinMax.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(index, (_, max) => max <= cur) - 1
     return cand
   }
 }
-
-class SegmentTreeRangeAddRangeMinMax {}
 
 if (require.main === module) {
   // 962. 最大宽度坡
@@ -484,6 +466,6 @@ if (require.main === module) {
       Q.leftNearestCeiling(i)
       Q.leftNearestHigher(i)
     }
-    console.timeEnd('bigArr') // bigArr: 1.5s (比分块的2s快一些)
+    console.timeEnd('bigArr') // bigArr: 330.583ms (比分块的2s快)
   }
 }

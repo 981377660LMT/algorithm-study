@@ -173,8 +173,9 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
         while (start < this._size) {
           this._pushDown(start)
           start <<= 1
-          if (predicate(this._op(res, this._data[start]))) {
-            res = this._op(res, this._data[start])
+          const tmp = this._op(res, this._data[start])
+          if (predicate(tmp)) {
+            res = tmp
             start++
           }
         }
@@ -204,8 +205,9 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
         while (end < this._size) {
           this._pushDown(end)
           end = (end << 1) | 1
-          if (predicate(this._op(this._data[end], res))) {
-            res = this._op(this._data[end], res)
+          const tmp = this._op(this._data[end], res)
+          if (predicate(tmp)) {
+            res = tmp
             end--
           }
         }

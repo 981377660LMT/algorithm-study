@@ -1,75 +1,36 @@
-// RangeAddRangeSquareSum
-
-// 区间加区间平方和
-
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math/bits"
-	"os"
+	"strings"
 )
 
 func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
-	}
-
-	leaves := make([]E, n)
-	for i := 0; i < n; i++ {
-		leaves[i] = E{1, nums[i], nums[i] * nums[i]}
-	}
-	tree := NewSegmentTreeRangeAddRangeSquareSum(leaves)
-
-	var q int
-	fmt.Fscan(in, &q)
-	for i := 0; i < q; i++ {
-		var op int
-		fmt.Fscan(in, &op)
-		if op == 1 {
-			var l, r, v int
-			fmt.Fscan(in, &l, &r, &v)
-			l--
-			tree.Update(l, r, v)
-		} else {
-			var l, r int
-			fmt.Fscan(in, &l, &r)
-			l--
-			res := tree.Query(l, r)
-			fmt.Fprintln(out, res.sum2)
-		}
-	}
 }
 
-const INF = 1e18
+const INF int = 1e18
 
-// SegmentTreeRangeAddRangeSquareSum-区间加区间平方和
+// SegmentTreeRangeAddRangeMinMax-区间加区间最大最小值
 
-type E = struct{ sum0, sum1, sum2 int } // !0次和(size),1次和(sum),2次和(square sum)
+type E = struct{ min, max int }
 type Id = int
 
-func (*SegmentTreeRangeAddRangeSquareSum) e() E   { return E{} }
-func (*SegmentTreeRangeAddRangeSquareSum) id() Id { return 0 }
-func (*SegmentTreeRangeAddRangeSquareSum) op(left, right E) E {
-	return E{left.sum0 + right.sum0, left.sum1 + right.sum1, left.sum2 + right.sum2}
+func (*SegmentTreeRangeAddRangeMinMax) e() E   { return E{min: INF, max: -INF} }
+func (*SegmentTreeRangeAddRangeMinMax) id() Id { return 0 }
+func (*SegmentTreeRangeAddRangeMinMax) op(left, right E) E {
+	return E{min(left.min, right.min), max(left.max, right.max)}
 }
-
-func (*SegmentTreeRangeAddRangeSquareSum) mapping(f Id, g E) E {
-	return E{g.sum0, g.sum1 + f*g.sum0, g.sum2 + 2*g.sum1*f + g.sum0*f*f}
+func (*SegmentTreeRangeAddRangeMinMax) mapping(f Id, g E) E {
+	if f == 0 {
+		return g
+	}
+	return E{g.min + f, g.max + f}
 }
-
-func (*SegmentTreeRangeAddRangeSquareSum) composition(f, g Id) Id {
+func (*SegmentTreeRangeAddRangeMinMax) composition(f, g Id) Id {
 	return f + g
 }
-
 func min(a, b int) int {
 	if a < b {
 		return a
@@ -84,7 +45,7 @@ func max(a, b int) int {
 }
 
 // !template
-type SegmentTreeRangeAddRangeSquareSum struct {
+type SegmentTreeRangeAddRangeMinMax struct {
 	n    int
 	size int
 	log  int
@@ -92,8 +53,8 @@ type SegmentTreeRangeAddRangeSquareSum struct {
 	lazy []Id
 }
 
-func NewSegmentTreeRangeAddRangeSquareSum(leaves []E) *SegmentTreeRangeAddRangeSquareSum {
-	tree := &SegmentTreeRangeAddRangeSquareSum{}
+func NewSegmentTreeRangeAddRangeMinMax(leaves []E) *SegmentTreeRangeAddRangeMinMax {
+	tree := &SegmentTreeRangeAddRangeMinMax{}
 	n := len(leaves)
 	tree.n = n
 	tree.log = int(bits.Len(uint(n - 1)))
@@ -118,7 +79,7 @@ func NewSegmentTreeRangeAddRangeSquareSum(leaves []E) *SegmentTreeRangeAddRangeS
 // 查询切片[left:right]的值
 //
 //	0<=left<=right<=len(tree.data)
-func (tree *SegmentTreeRangeAddRangeSquareSum) Query(left, right int) E {
+func (tree *SegmentTreeRangeAddRangeMinMax) Query(left, right int) E {
 	if left < 0 {
 		left = 0
 	}
@@ -153,14 +114,14 @@ func (tree *SegmentTreeRangeAddRangeSquareSum) Query(left, right int) E {
 	}
 	return tree.op(sml, smr)
 }
-func (tree *SegmentTreeRangeAddRangeSquareSum) QueryAll() E {
+func (tree *SegmentTreeRangeAddRangeMinMax) QueryAll() E {
 	return tree.data[1]
 }
 
 // 更新切片[left:right]的值
 //
 //	0<=left<=right<=len(tree.data)
-func (tree *SegmentTreeRangeAddRangeSquareSum) Update(left, right int, f Id) {
+func (tree *SegmentTreeRangeAddRangeMinMax) Update(left, right int, f Id) {
 	if left < 0 {
 		left = 0
 	}
@@ -206,7 +167,7 @@ func (tree *SegmentTreeRangeAddRangeSquareSum) Update(left, right int, f Id) {
 }
 
 // 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (tree *SegmentTreeRangeAddRangeSquareSum) MinLeft(right int, predicate func(data E) bool) int {
+func (tree *SegmentTreeRangeAddRangeMinMax) MinLeft(right int, predicate func(data E) bool) int {
 	if right == 0 {
 		return 0
 	}
@@ -224,8 +185,8 @@ func (tree *SegmentTreeRangeAddRangeSquareSum) MinLeft(right int, predicate func
 			for right < tree.size {
 				tree.pushDown(right)
 				right = right<<1 | 1
-				if predicate(tree.op(tree.data[right], res)) {
-					res = tree.op(tree.data[right], res)
+				if tmp := tree.op(tree.data[right], res); predicate(tmp) {
+					res = tmp
 					right--
 				}
 			}
@@ -240,7 +201,7 @@ func (tree *SegmentTreeRangeAddRangeSquareSum) MinLeft(right int, predicate func
 }
 
 // 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-func (tree *SegmentTreeRangeAddRangeSquareSum) MaxRight(left int, predicate func(data E) bool) int {
+func (tree *SegmentTreeRangeAddRangeMinMax) MaxRight(left int, predicate func(data E) bool) int {
 	if left == tree.n {
 		return tree.n
 	}
@@ -257,8 +218,8 @@ func (tree *SegmentTreeRangeAddRangeSquareSum) MaxRight(left int, predicate func
 			for left < tree.size {
 				tree.pushDown(left)
 				left <<= 1
-				if predicate(tree.op(res, tree.data[left])) {
-					res = tree.op(res, tree.data[left])
+				if tmp := tree.op(res, tree.data[left]); predicate(tmp) {
+					res = tmp
 					left++
 				}
 			}
@@ -274,7 +235,7 @@ func (tree *SegmentTreeRangeAddRangeSquareSum) MaxRight(left int, predicate func
 }
 
 // 单点查询(不需要 pushUp/op 操作时使用)
-func (tree *SegmentTreeRangeAddRangeSquareSum) Get(index int) E {
+func (tree *SegmentTreeRangeAddRangeMinMax) Get(index int) E {
 	index += tree.size
 	for i := tree.log; i >= 1; i-- {
 		tree.pushDown(index >> i)
@@ -283,7 +244,7 @@ func (tree *SegmentTreeRangeAddRangeSquareSum) Get(index int) E {
 }
 
 // 单点赋值
-func (tree *SegmentTreeRangeAddRangeSquareSum) Set(index int, e E) {
+func (tree *SegmentTreeRangeAddRangeMinMax) Set(index int, e E) {
 	index += tree.size
 	for i := tree.log; i >= 1; i-- {
 		tree.pushDown(index >> i)
@@ -294,20 +255,33 @@ func (tree *SegmentTreeRangeAddRangeSquareSum) Set(index int, e E) {
 	}
 }
 
-func (tree *SegmentTreeRangeAddRangeSquareSum) pushUp(root int) {
+func (tree *SegmentTreeRangeAddRangeMinMax) pushUp(root int) {
 	tree.data[root] = tree.op(tree.data[root<<1], tree.data[root<<1|1])
 }
-func (tree *SegmentTreeRangeAddRangeSquareSum) pushDown(root int) {
+func (tree *SegmentTreeRangeAddRangeMinMax) pushDown(root int) {
 	if tree.lazy[root] != tree.id() {
 		tree.propagate(root<<1, tree.lazy[root])
 		tree.propagate(root<<1|1, tree.lazy[root])
 		tree.lazy[root] = tree.id()
 	}
 }
-func (tree *SegmentTreeRangeAddRangeSquareSum) propagate(root int, f Id) {
+func (tree *SegmentTreeRangeAddRangeMinMax) propagate(root int, f Id) {
 	tree.data[root] = tree.mapping(f, tree.data[root])
 	// !叶子结点不需要更新lazy
 	if root < tree.size {
 		tree.lazy[root] = tree.composition(f, tree.lazy[root])
 	}
+}
+
+func (tree *SegmentTreeRangeAddRangeMinMax) String() string {
+	var sb []string
+	sb = append(sb, "[")
+	for i := 0; i < tree.n; i++ {
+		if i != 0 {
+			sb = append(sb, ", ")
+		}
+		sb = append(sb, fmt.Sprintf("%v", tree.Get(i)))
+	}
+	sb = append(sb, "]")
+	return strings.Join(sb, "")
 }
