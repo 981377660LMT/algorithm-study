@@ -21,6 +21,8 @@ func demo() {
 	fmt.Println(tree.Query(0, 10))
 	tree.Update(0, 3, 1)
 	fmt.Println(tree.Query(1, 4))
+	tree.Set(1, E{1, 2, 4})
+	fmt.Println(tree.Query(1, 4))
 
 }
 
