@@ -1,85 +1,32 @@
+// SegmentTreeRangeAddRangeSumMinMax-区间加区间和区间最大最小值
+
 package main
 
 import (
-	"fmt"
 	"math/bits"
-	"strings"
 )
-
-func main() {
-	demo()
-}
-
-func demo() {
-	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	leaves := make([]E, len(nums))
-	for i := range leaves {
-		leaves[i] = FromElement(nums[i])
-	}
-	tree := NewSegmentTreeRangeAssignRangePowerSum(leaves)
-
-	fmt.Println(tree.Query(0, 10))
-	tree.Update(0, 3, 1)
-	fmt.Println(tree.Query(1, 4))
-	tree.Set(1, E{1, 2, 4})
-	fmt.Println(tree.Query(1, 4))
-	tree.Update(1, 2, 0)
-	fmt.Println(tree.Query(1, 4), tree)
-
-	nums = make([]int, 5)
-	leaves = make([]E, len(nums))
-	for i := range leaves {
-		leaves[i] = FromElement(nums[i])
-	}
-	tree = NewSegmentTreeRangeAssignRangePowerSum(leaves)
-	tree.Update(0, 5, 2)
-	fmt.Println(tree.Query(0, 5))
-}
 
 const INF = 1e18
 
-// RangeAssignRangePowerSum-区间赋值区间幂次和
-
-const K int = 2 // 维护区间 0, 1, ..., k 次幂的和
-
-type E = [K + 1]int
+// RangeAddRangeSumMinMax
+type E = struct{ sum, size, min, max int }
 type Id = int
 
-func FromElement(v int) E {
-	res := E{}
-	pow := 1
-	for i := 0; i <= K; i++ {
-		res[i] = pow
-		pow *= v
-	}
-	return res
-}
+func FromElement(v int) E { return E{sum: v, size: 1, min: v, max: v} }
 
-func (*SegmentTreeRangeAssignRangePowerSum) e() E   { return E{} }
-func (*SegmentTreeRangeAssignRangePowerSum) id() Id { return INF }
-func (*SegmentTreeRangeAssignRangePowerSum) op(left, right E) E {
-	res := E{}
-	for i := 0; i <= K; i++ {
-		res[i] = left[i] + right[i]
-	}
-	return res
+func (*SegmentTreeRangeAddRangeSumMinMax) e() E   { return E{min: INF, max: -INF} }
+func (*SegmentTreeRangeAddRangeSumMinMax) id() Id { return 0 }
+func (*SegmentTreeRangeAddRangeSumMinMax) op(left, right E) E {
+	return E{left.sum + right.sum, left.size + right.size, min(left.min, right.min), max(left.max, right.max)}
 }
-func (*SegmentTreeRangeAssignRangePowerSum) mapping(f Id, g E) E {
-	if f == INF {
+func (*SegmentTreeRangeAddRangeSumMinMax) mapping(f Id, g E) E {
+	if f == 0 {
 		return g
 	}
-	res, pow, g0 := g, 1, g[0]
-	for i := 0; i <= K; i++ {
-		res[i] = g0 * pow
-		pow *= f
-	}
-	return res
+	return E{sum: g.sum + f*g.size, size: g.size, min: g.min + f, max: g.max + f}
 }
-func (*SegmentTreeRangeAssignRangePowerSum) composition(f, g Id) Id {
-	if f == INF {
-		return g
-	}
-	return f
+func (*SegmentTreeRangeAddRangeSumMinMax) composition(f, g Id) Id {
+	return f + g
 }
 func min(a, b int) int {
 	if a < b {
@@ -95,7 +42,7 @@ func max(a, b int) int {
 }
 
 // !template
-type SegmentTreeRangeAssignRangePowerSum struct {
+type SegmentTreeRangeAddRangeSumMinMax struct {
 	n    int
 	size int
 	log  int
@@ -103,8 +50,8 @@ type SegmentTreeRangeAssignRangePowerSum struct {
 	lazy []Id
 }
 
-func NewSegmentTreeRangeAssignRangePowerSum(leaves []E) *SegmentTreeRangeAssignRangePowerSum {
-	tree := &SegmentTreeRangeAssignRangePowerSum{}
+func NewSegmentTreeRangeAddRangeSumMinMax(leaves []E) *SegmentTreeRangeAddRangeSumMinMax {
+	tree := &SegmentTreeRangeAddRangeSumMinMax{}
 	n := len(leaves)
 	tree.n = n
 	tree.log = int(bits.Len(uint(n - 1)))
@@ -129,7 +76,7 @@ func NewSegmentTreeRangeAssignRangePowerSum(leaves []E) *SegmentTreeRangeAssignR
 // 查询切片[left:right]的值
 //
 //	0<=left<=right<=len(tree.data)
-func (tree *SegmentTreeRangeAssignRangePowerSum) Query(left, right int) E {
+func (tree *SegmentTreeRangeAddRangeSumMinMax) Query(left, right int) E {
 	if left < 0 {
 		left = 0
 	}
@@ -164,14 +111,14 @@ func (tree *SegmentTreeRangeAssignRangePowerSum) Query(left, right int) E {
 	}
 	return tree.op(sml, smr)
 }
-func (tree *SegmentTreeRangeAssignRangePowerSum) QueryAll() E {
+func (tree *SegmentTreeRangeAddRangeSumMinMax) QueryAll() E {
 	return tree.data[1]
 }
 
 // 更新切片[left:right]的值
 //
 //	0<=left<=right<=len(tree.data)
-func (tree *SegmentTreeRangeAssignRangePowerSum) Update(left, right int, f Id) {
+func (tree *SegmentTreeRangeAddRangeSumMinMax) Update(left, right int, f Id) {
 	if left < 0 {
 		left = 0
 	}
@@ -217,7 +164,7 @@ func (tree *SegmentTreeRangeAssignRangePowerSum) Update(left, right int, f Id) {
 }
 
 // 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (tree *SegmentTreeRangeAssignRangePowerSum) MinLeft(right int, predicate func(data E) bool) int {
+func (tree *SegmentTreeRangeAddRangeSumMinMax) MinLeft(right int, predicate func(data E) bool) int {
 	if right == 0 {
 		return 0
 	}
@@ -251,7 +198,7 @@ func (tree *SegmentTreeRangeAssignRangePowerSum) MinLeft(right int, predicate fu
 }
 
 // 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-func (tree *SegmentTreeRangeAssignRangePowerSum) MaxRight(left int, predicate func(data E) bool) int {
+func (tree *SegmentTreeRangeAddRangeSumMinMax) MaxRight(left int, predicate func(data E) bool) int {
 	if left == tree.n {
 		return tree.n
 	}
@@ -285,7 +232,7 @@ func (tree *SegmentTreeRangeAssignRangePowerSum) MaxRight(left int, predicate fu
 }
 
 // 单点查询(不需要 pushUp/op 操作时使用)
-func (tree *SegmentTreeRangeAssignRangePowerSum) Get(index int) E {
+func (tree *SegmentTreeRangeAddRangeSumMinMax) Get(index int) E {
 	index += tree.size
 	for i := tree.log; i >= 1; i-- {
 		tree.pushDown(index >> i)
@@ -294,7 +241,7 @@ func (tree *SegmentTreeRangeAssignRangePowerSum) Get(index int) E {
 }
 
 // 单点赋值
-func (tree *SegmentTreeRangeAssignRangePowerSum) Set(index int, e E) {
+func (tree *SegmentTreeRangeAddRangeSumMinMax) Set(index int, e E) {
 	index += tree.size
 	for i := tree.log; i >= 1; i-- {
 		tree.pushDown(index >> i)
@@ -305,33 +252,20 @@ func (tree *SegmentTreeRangeAssignRangePowerSum) Set(index int, e E) {
 	}
 }
 
-func (tree *SegmentTreeRangeAssignRangePowerSum) pushUp(root int) {
+func (tree *SegmentTreeRangeAddRangeSumMinMax) pushUp(root int) {
 	tree.data[root] = tree.op(tree.data[root<<1], tree.data[root<<1|1])
 }
-func (tree *SegmentTreeRangeAssignRangePowerSum) pushDown(root int) {
+func (tree *SegmentTreeRangeAddRangeSumMinMax) pushDown(root int) {
 	if tree.lazy[root] != tree.id() {
 		tree.propagate(root<<1, tree.lazy[root])
 		tree.propagate(root<<1|1, tree.lazy[root])
 		tree.lazy[root] = tree.id()
 	}
 }
-func (tree *SegmentTreeRangeAssignRangePowerSum) propagate(root int, f Id) {
+func (tree *SegmentTreeRangeAddRangeSumMinMax) propagate(root int, f Id) {
 	tree.data[root] = tree.mapping(f, tree.data[root])
 	// !叶子结点不需要更新lazy
 	if root < tree.size {
 		tree.lazy[root] = tree.composition(f, tree.lazy[root])
 	}
-}
-
-func (tree *SegmentTreeRangeAssignRangePowerSum) String() string {
-	var sb []string
-	sb = append(sb, "[")
-	for i := 0; i < tree.n; i++ {
-		if i != 0 {
-			sb = append(sb, ", ")
-		}
-		sb = append(sb, fmt.Sprintf("%v", tree.Get(i)))
-	}
-	sb = append(sb, "]")
-	return strings.Join(sb, "")
 }

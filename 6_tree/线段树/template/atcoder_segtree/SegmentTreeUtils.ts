@@ -14,7 +14,9 @@ const INF = 2e9 // !超过int32使用2e15
 /**
  * 区间加,查询区间最大值(幺元为0).
  */
-function createRangeAddRangeMax(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAddRangeMax(
+  nOrNums: number | ArrayLike<number>
+): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => 0,
     id: () => 0,
@@ -27,7 +29,9 @@ function createRangeAddRangeMax(nOrNums: number | ArrayLike<number>): SegmentTre
 /**
  * 区间加,查询区间最小值(幺元为INF).
  */
-function createRangeAddRangeMin(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAddRangeMin(
+  nOrNums: number | ArrayLike<number>
+): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => INF,
     id: () => 0,
@@ -41,7 +45,9 @@ function createRangeAddRangeMin(nOrNums: number | ArrayLike<number>): SegmentTre
  * 区间更新最大值,查询区间最大值(幺元为0).
  * RangeChmaxRangeMax
  */
-function createRangeUpdateRangeMax(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeUpdateRangeMax(
+  nOrNums: number | ArrayLike<number>
+): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => 0,
     id: () => -INF,
@@ -55,7 +61,9 @@ function createRangeUpdateRangeMax(nOrNums: number | ArrayLike<number>): Segment
  * 区间更新最小值,查询区间最小值(幺元为INF).
  * RangeChminRangeMin
  */
-function createRangeUpdateRangeMin(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeUpdateRangeMin(
+  nOrNums: number | ArrayLike<number>
+): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => INF,
     id: () => INF,
@@ -83,7 +91,9 @@ function createRangeAssignRangeSum(
 /**
  * 区间赋值,查询区间最大值(幺元为-INF).
  */
-function createRangeAssignRangeMax(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAssignRangeMax(
+  nOrNums: number | ArrayLike<number>
+): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => 0,
     id: () => -INF,
@@ -96,7 +106,9 @@ function createRangeAssignRangeMax(nOrNums: number | ArrayLike<number>): Segment
 /**
  * 区间赋值,查询区间最小值(幺元为INF).
  */
-function createRangeAssignRangeMin(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAssignRangeMin(
+  nOrNums: number | ArrayLike<number>
+): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => INF,
     id: () => INF,
@@ -127,7 +139,10 @@ function createRangeFlipRangeSum(
 function createRangeAssignRangeAddRangeSum(
   nOrNums: number | ArrayLike<{ size: number; sum: number }>
 ): SegmentTreeRangeUpdateRangeQuery<{ size: number; sum: number }, { mul: number; add: number }> {
-  return new SegmentTreeRangeUpdateRangeQuery<{ size: number; sum: number }, { mul: number; add: number }>(nOrNums, {
+  return new SegmentTreeRangeUpdateRangeQuery<
+    { size: number; sum: number },
+    { mul: number; add: number }
+  >(nOrNums, {
     e() {
       return { size: 1, sum: 0 }
     },

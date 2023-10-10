@@ -1,29 +1,19 @@
-/* eslint-disable arrow-body-style */
 /* eslint-disable no-inner-declarations */
 
-const MOD = 1e9 + 7
-
-const modAdd = (num1: number, num2: number, mod = 1e9 + 7): number => {
-  let cand = (num1 + num2) % mod
-  if (cand < 0) cand += mod
-  return cand
-}
-
-const modMul = (num1: number, num2: number, mod = 1e9 + 7): number => {
-  return (((Math.floor(num1 / 65536) * num2) % mod) * 65536 + (num1 & 65535) * num2) % mod
-}
+const INF = 2e15 // !超过int32使用2e15
 
 /**
- * 区间仿射变换，区间和.
+ * 区间加, 区间和区间最大最小值.
  */
-class SegmentTreeRangeAffineRangeSum {
+class SegmentTreeRangeAddRangeSumMinMax {
   private readonly _n: number
   private readonly _m: number
   private readonly _height: number
+  private readonly _min: Float64Array
+  private readonly _max: Float64Array
   private readonly _sum: Float64Array
   private readonly _size: Uint32Array
-  private readonly _lazyMul: Float64Array
-  private readonly _lazyAdd: Float64Array
+  private readonly _lazy: Float64Array
 
   constructor(nOrArr: number | ArrayLike<number>) {
     const n = typeof nOrArr === 'number' ? nOrArr : nOrArr.length
@@ -38,14 +28,16 @@ class SegmentTreeRangeAffineRangeSum {
     this._height = height
 
     // !0.init data and lazy
+    const min = new Float64Array(m << 1).fill(INF)
+    const max = new Float64Array(m << 1).fill(-INF)
     const sum = new Float64Array(m << 1)
     const size = new Uint32Array(m << 1).fill(1)
-    const lazyMul = new Float64Array(m).fill(1)
-    const lazyAdd = new Float64Array(m)
+    const lazy = new Float64Array(m)
+    this._min = min
+    this._max = max
     this._sum = sum
     this._size = size
-    this._lazyMul = lazyMul
-    this._lazyAdd = lazyAdd
+    this._lazy = lazy
 
     if (typeof nOrArr !== 'number') this._build(nOrArr)
   }
@@ -54,7 +46,10 @@ class SegmentTreeRangeAffineRangeSum {
     if (index < 0 || index >= this._n) return
     index += this._m
     for (let i = this._height; i > 0; i--) this._pushDown(index >> i)
-    this._set(index, value)
+    // !1. set
+    this._min[index] = value
+    this._max[index] = value
+    this._sum[index] = value
     for (let i = 1; i <= this._height; i++) this._pushUp(index >> i)
   }
 
@@ -64,14 +59,14 @@ class SegmentTreeRangeAffineRangeSum {
     }
     index += this._m
     for (let i = this._height; i > 0; i--) this._pushDown(index >> i)
-    return this._sum[index]
+    return this._max[index]
   }
 
   /**
    * 区间`[start,end)`的值与`lazy`进行作用.
    * 0 <= start <= end <= n.
    */
-  update(start: number, end: number, lazyMul: number, lazyAdd: number): void {
+  update(start: number, end: number, lazy: number): void {
     if (start < 0) start = 0
     if (end > this._n) end = this._n
     if (start >= end) return
@@ -84,8 +79,8 @@ class SegmentTreeRangeAffineRangeSum {
     let start2 = start
     let end2 = end
     for (; start < end; start >>= 1, end >>= 1) {
-      if (start & 1) this._propagate(start++, lazyMul, lazyAdd)
-      if (end & 1) this._propagate(--end, lazyMul, lazyAdd)
+      if (start & 1) this._propagate(start++, lazy)
+      if (end & 1) this._propagate(--end, lazy)
     }
     start = start2
     end = end2
@@ -99,55 +94,83 @@ class SegmentTreeRangeAffineRangeSum {
    * 查询区间`[start,end)`的聚合值.
    * 0 <= start <= end <= n.
    */
-  query(start: number, end: number): number {
+  query(start: number, end: number): { min: number; max: number; sum: number } {
     if (start < 0) start = 0
     if (end > this._n) end = this._n
-    if (start >= end) return 0
+    if (start >= end) return { min: INF, max: -INF, sum: 0 }
     start += this._m
     end += this._m
     for (let i = this._height; i > 0; i--) {
       if ((start >> i) << i !== start) this._pushDown(start >> i)
       if ((end >> i) << i !== end) this._pushDown((end - 1) >> i)
     }
+    let leftMin = INF
+    let leftMax = -INF
     let leftSum = 0
+    let rightMin = INF
+    let rightMax = -INF
     let rightSum = 0
     for (; start < end; start >>= 1, end >>= 1) {
-      if (start & 1) leftSum = modAdd(leftSum, this._sum[start++])
-      if (end & 1) rightSum = modAdd(this._sum[--end], rightSum)
+      if (start & 1) {
+        leftMin = Math.min(leftMin, this._min[start])
+        leftMax = Math.max(leftMax, this._max[start])
+        leftSum += this._sum[start]
+        start++
+      }
+      if (end & 1) {
+        end--
+        rightMin = Math.min(rightMin, this._min[end])
+        rightMax = Math.max(rightMax, this._max[end])
+        rightSum += this._sum[end]
+      }
     }
-    return modAdd(leftSum, rightSum)
+    return {
+      min: Math.min(leftMin, rightMin),
+      max: Math.max(leftMax, rightMax),
+      sum: leftSum + rightSum
+    }
   }
 
-  queryAll(): number {
-    return this._sum[1]
+  queryAll(): { min: number; max: number; sum: number } {
+    return { min: this._min[1], max: this._max[1], sum: this._sum[1] }
   }
 
   /**
    * 树上二分查询最大的`end`使得`[start,end)`内的值满足`predicate`.
    * @alias findFirst
    */
-  maxRight(start: number, predicate: (sum: number) => boolean): number {
+  maxRight(start: number, predicate: (min: number, max: number, sum: number) => boolean): number {
     if (start < 0) start = 0
     if (start >= this._n) return this._n
     start += this._m
     for (let i = this._height; i > 0; i--) this._pushDown(start >> i)
+    let resMin = INF
+    let resMax = -INF
     let resSum = 0
     while (true) {
       while (!(start & 1)) start >>= 1
-      const tmpSum1 = modAdd(resSum, this._sum[start])
-      if (!predicate(tmpSum1)) {
+      const tmpMin1 = Math.min(resMin, this._min[start])
+      const tmpMax1 = Math.max(resMax, this._max[start])
+      const tmpSum1 = resSum + this._sum[start]
+      if (!predicate(tmpMin1, tmpMax1, tmpSum1)) {
         while (start < this._m) {
           this._pushDown(start)
           start <<= 1
-          const tmpSum2 = modAdd(resSum, this._sum[start])
-          if (predicate(tmpSum2)) {
+          const tmpMin2 = Math.min(resMin, this._min[start])
+          const tmpMax2 = Math.max(resMax, this._max[start])
+          const tmpSum2 = resSum + this._sum[start]
+          if (predicate(tmpMin2, tmpMax2, tmpSum2)) {
+            resMin = tmpMin2
+            resMax = tmpMax2
             resSum = tmpSum2
             start++
           }
         }
         return start - this._m
       }
-      resSum = modAdd(resSum, this._sum[start])
+      resMin = Math.min(resMin, this._min[start])
+      resMax = Math.max(resMax, this._max[start])
+      resSum += this._sum[start]
       start++
       if ((start & -start) === start) break
     }
@@ -158,29 +181,39 @@ class SegmentTreeRangeAffineRangeSum {
    * 树上二分查询最小的`start`使得`[start,end)`内的值满足`predicate`
    * @alias findLast
    */
-  minLeft(end: number, predicate: (sum: number) => boolean): number {
+  minLeft(end: number, predicate: (min: number, max: number, sum: number) => boolean): number {
     if (end > this._n) end = this._n
     if (end <= 0) return 0
     end += this._m
     for (let i = this._height; i > 0; i--) this._pushDown((end - 1) >> i)
+    let resMin = INF
+    let resMax = -INF
     let resSum = 0
     while (true) {
       end--
       while (end > 1 && end & 1) end >>= 1
-      const tmpSum1 = modAdd(this._sum[end], resSum)
-      if (!predicate(tmpSum1)) {
+      const tmpMin1 = Math.min(resMin, this._min[end])
+      const tmpMax1 = Math.max(resMax, this._max[end])
+      const tmpSum1 = resSum + this._sum[end]
+      if (!predicate(tmpMin1, tmpMax1, tmpSum1)) {
         while (end < this._m) {
           this._pushDown(end)
           end = (end << 1) | 1
-          const tmpSum2 = modAdd(this._sum[end], resSum)
-          if (predicate(tmpSum2)) {
+          const tmpMin2 = Math.min(resMin, this._min[end])
+          const tmpMax2 = Math.max(resMax, this._max[end])
+          const tmpSum2 = resSum + this._sum[end]
+          if (predicate(tmpMin2, tmpMax2, tmpSum2)) {
+            resMin = tmpMin2
+            resMax = tmpMax2
             resSum = tmpSum2
             end--
           }
         }
         return end + 1 - this._m
       }
-      resSum = modAdd(this._sum[end], resSum)
+      resMin = Math.min(resMin, this._min[end])
+      resMax = Math.max(resMax, this._max[end])
+      resSum += this._sum[end]
       if ((end & -end) === end) break
     }
     return 0
@@ -199,44 +232,42 @@ class SegmentTreeRangeAffineRangeSum {
 
   private _build(leaves: ArrayLike<number>): void {
     if (leaves.length !== this._n) throw new RangeError(`length must be equal to ${this._n}`)
-    for (let i = 0; i < this._n; i++) this._set(i + this._m, leaves[i])
+    for (let i = 0; i < this._n; i++) {
+      this._min[this._m + i] = leaves[i]
+      this._max[this._m + i] = leaves[i]
+      this._sum[this._m + i] = leaves[i]
+    }
     for (let i = this._m - 1; i > 0; i--) this._pushUp(i)
   }
 
-  private _set(index: number, value: number): void {
-    this._sum[index] = value
-    this._size[index] = 1
-  }
-
   private _pushUp(index: number): void {
-    this._sum[index] = modAdd(this._sum[index << 1], this._sum[(index << 1) | 1])
+    this._min[index] = Math.min(this._min[index << 1], this._min[(index << 1) | 1])
+    this._max[index] = Math.max(this._max[index << 1], this._max[(index << 1) | 1])
+    this._sum[index] = this._sum[index << 1] + this._sum[(index << 1) | 1]
     this._size[index] = this._size[index << 1] + this._size[(index << 1) | 1]
   }
 
   private _pushDown(index: number): void {
-    const add = this._lazyAdd[index]
-    const mul = this._lazyMul[index]
-    if (mul === 1 && !add) return
-    this._propagate(index << 1, mul, add)
-    this._propagate((index << 1) | 1, mul, add)
-    this._lazyMul[index] = 1
-    this._lazyAdd[index] = 0
+    const lazy = this._lazy[index]
+    if (!lazy) return
+    this._propagate(index << 1, lazy)
+    this._propagate((index << 1) | 1, lazy)
+    this._lazy[index] = 0
   }
 
-  private _propagate(index: number, mul: number, add: number): void {
-    this._sum[index] = modAdd(modMul(this._sum[index], mul), modMul(add, this._size[index]))
-    if (index < this._m) {
-      this._lazyMul[index] = modMul(this._lazyMul[index], mul)
-      this._lazyAdd[index] = modAdd(modMul(this._lazyAdd[index], mul), add)
-    }
+  private _propagate(index: number, lazy: number): void {
+    this._min[index] += lazy
+    this._max[index] += lazy
+    this._sum[index] += this._size[index] * lazy
+    if (index < this._m) this._lazy[index] += lazy
   }
 }
 
-export { SegmentTreeRangeAffineRangeSum }
+export { SegmentTreeRangeAddRangeSumMinMax }
 
 if (require.main === module) {
-  checkWithBruteForce()
-  // timeit()
+  // checkWithBruteForce()
+  timeit()
 
   function checkWithBruteForce(): void {
     class Mocker {
@@ -255,38 +286,51 @@ if (require.main === module) {
         return this._a[index]
       }
 
-      update(start: number, end: number, lazyMul: number, lazyAdd: number): void {
-        for (let i = start; i < end; i++) {
-          this._a[i] = modAdd(modMul(this._a[i], lazyMul), modMul(lazyAdd, 1))
-        }
+      update(start: number, end: number, lazy: number): void {
+        for (let i = start; i < end; i++) this._a[i] += lazy
       }
 
-      query(start: number, end: number): number {
+      query(start: number, end: number): { min: number; max: number; sum: number } {
+        let min = INF
+        let max = -INF
         let sum = 0
         for (let i = start; i < end; i++) {
-          sum = modAdd(sum, this._a[i])
+          min = Math.min(min, this._a[i])
+          max = Math.max(max, this._a[i])
+          sum += this._a[i]
         }
-        return sum
+        return { min, max, sum }
       }
 
-      queryAll(): number {
+      queryAll(): { min: number; max: number; sum: number } {
         return this.query(0, this._n)
       }
 
-      maxRight(start: number, predicate: (sum: number) => boolean): number {
+      maxRight(
+        start: number,
+        predicate: (min: number, max: number, sum: number) => boolean
+      ): number {
+        let min = INF
+        let max = -INF
         let sum = 0
         for (let i = start; i < this._n; i++) {
-          sum = modAdd(sum, this._a[i])
-          if (!predicate(sum)) return i
+          min = Math.min(min, this._a[i])
+          max = Math.max(max, this._a[i])
+          sum += this._a[i]
+          if (!predicate(min, max, sum)) return i
         }
         return this._n
       }
 
-      minLeft(end: number, predicate: (sum: number) => boolean): number {
+      minLeft(end: number, predicate: (min: number, max: number, sum: number) => boolean): number {
+        let min = INF
+        let max = -INF
         let sum = 0
         for (let i = end - 1; i >= 0; i--) {
-          sum = modAdd(this._a[i], sum)
-          if (!predicate(sum)) return i + 1
+          min = Math.min(min, this._a[i])
+          max = Math.max(max, this._a[i])
+          sum += this._a[i]
+          if (!predicate(min, max, sum)) return i + 1
         }
         return 0
       }
@@ -304,13 +348,12 @@ if (require.main === module) {
         throw new Error(`expect ${JSON.stringify(obj2)}, got ${JSON.stringify(obj1)}`)
       }
     }
-
     const randint = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
     const N = 5e4
-    const real = new SegmentTreeRangeAffineRangeSum(Array(N).fill(0))
+    const real = new SegmentTreeRangeAddRangeSumMinMax(Array(N).fill(0))
     const mock = new Mocker(Array(N).fill(0))
     for (let i = 0; i < N; i++) {
-      const op = randint(0, 5)
+      const op = randint(0, 6)
       if (op === 0) {
         // set
         const index = randint(0, N - 1)
@@ -330,10 +373,9 @@ if (require.main === module) {
         // update
         const start = randint(0, N - 1)
         const end = randint(start, N)
-        const lazyMul = randint(0, 2)
-        const lazyAdd = randint(0, 10)
-        real.update(start, end, lazyMul, lazyAdd)
-        mock.update(start, end, lazyMul, lazyAdd)
+        const lazy = randint(0, 2)
+        real.update(start, end, lazy)
+        mock.update(start, end, lazy)
         // console.log('update', start, end, lazy)
       } else if (op === 3) {
         // query
@@ -371,15 +413,15 @@ if (require.main === module) {
     const n = 2e5
     const arr = Array(n)
     for (let i = 0; i < n; i++) arr[i] = Math.floor(Math.random() * 10)
-    const seg = new SegmentTreeRangeAffineRangeSum(arr)
-    console.time('SegmentTreeRangeAffineRangeSum')
+    const seg = new SegmentTreeRangeAddRangeSumMinMax(arr)
+    console.time('SegmentTreeRangeAddRangeSumMinMax')
     for (let i = 0; i < n; i++) {
       seg.query(i, n)
-      seg.update(i, n, 1, 1)
+      seg.update(i, n, 1)
       seg.set(i, 1)
       seg.maxRight(i, min => min >= i)
       seg.minLeft(i, min => min >= i)
     }
-    console.timeEnd('SegmentTreeRangeAffineRangeSum') // SegmentTreeRangeAffineRangeSum: 732.575ms
+    console.timeEnd('SegmentTreeRangeAddRangeSumMinMax') // SegmentTreeRangeAddRangeSumMinMax: 239.59ms
   }
 }

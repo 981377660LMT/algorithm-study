@@ -1,3 +1,5 @@
+/* eslint-disable no-inner-declarations */
+
 const INF = 2e15 // !超过int32使用2e15
 
 /**
@@ -129,7 +131,6 @@ class SegmentTreeRangeAddRangeMinMax {
     for (let i = this._height; i > 0; i--) this._pushDown(start >> i)
     let resMin = INF
     let resMax = -INF
-
     while (true) {
       while (!(start & 1)) start >>= 1
       const tmpMin1 = Math.min(resMin, this._min[start])
@@ -234,3 +235,161 @@ class SegmentTreeRangeAddRangeMinMax {
 }
 
 export { SegmentTreeRangeAddRangeMinMax }
+
+if (require.main === module) {
+  // checkWithBruteForce()
+  timeit()
+
+  function checkWithBruteForce(): void {
+    class Mocker {
+      readonly _n: number
+      private readonly _a: number[]
+      constructor(nums: number[]) {
+        this._n = nums.length
+        this._a = nums.slice()
+      }
+
+      set(index: number, value: number): void {
+        this._a[index] = value
+      }
+
+      get(index: number): number {
+        return this._a[index]
+      }
+
+      update(start: number, end: number, lazy: number): void {
+        for (let i = start; i < end; i++) this._a[i] += lazy
+      }
+
+      query(start: number, end: number): { min: number; max: number } {
+        let min = INF
+        let max = -INF
+
+        for (let i = start; i < end; i++) {
+          min = Math.min(min, this._a[i])
+          max = Math.max(max, this._a[i])
+        }
+        return { min, max }
+      }
+
+      queryAll(): { min: number; max: number } {
+        return this.query(0, this._n)
+      }
+
+      maxRight(start: number, predicate: (min: number, max: number) => boolean): number {
+        let min = INF
+        let max = -INF
+
+        for (let i = start; i < this._n; i++) {
+          min = Math.min(min, this._a[i])
+          max = Math.max(max, this._a[i])
+
+          if (!predicate(min, max)) return i
+        }
+        return this._n
+      }
+
+      minLeft(end: number, predicate: (min: number, max: number) => boolean): number {
+        let min = INF
+        let max = -INF
+
+        for (let i = end - 1; i >= 0; i--) {
+          min = Math.min(min, this._a[i])
+          max = Math.max(max, this._a[i])
+
+          if (!predicate(min, max)) return i + 1
+        }
+        return 0
+      }
+
+      build(leaves: ArrayLike<number>): void {
+        for (let i = 0; i < this._a.length; i++) this._a[i] = leaves[i]
+      }
+
+      toString(): string {
+        return `Mocker(${this._a})`
+      }
+    }
+    function assertSame(obj1: unknown, obj2: unknown) {
+      if (JSON.stringify(obj1) !== JSON.stringify(obj2)) {
+        throw new Error(`expect ${JSON.stringify(obj2)}, got ${JSON.stringify(obj1)}`)
+      }
+    }
+
+    const randint = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
+    const N = 5e4
+    const real = new SegmentTreeRangeAddRangeMinMax(Array(N).fill(0))
+    const mock = new Mocker(Array(N).fill(0))
+    for (let i = 0; i < N; i++) {
+      const op = randint(0, 5)
+      if (op === 0) {
+        // set
+        const index = randint(0, N - 1)
+        const value = randint(0, 10)
+        real.set(index, value)
+        mock.set(index, value)
+        // console.log('set', index, value)
+      } else if (op === 1) {
+        // get
+        const index = randint(0, N - 1)
+        const realValue = real.get(index)
+        const mockValue = mock.get(index)
+        // console.log(realValue, mockValue, index)
+        // console.log('get', index, realValue, mockValue)
+        assertSame(realValue, mockValue)
+      } else if (op === 2) {
+        // update
+        const start = randint(0, N - 1)
+        const end = randint(start, N)
+        const lazy = randint(0, 2)
+        real.update(start, end, lazy)
+        mock.update(start, end, lazy)
+        // console.log('update', start, end, lazy)
+      } else if (op === 3) {
+        // query
+        const start = randint(0, N - 1)
+        const end = randint(start, N)
+        const realValue = real.query(start, end)
+        const mockValue = mock.query(start, end)
+        // console.log('query', start, end, realValue, mockValue)
+        assertSame(realValue, mockValue)
+      } else if (op === 4) {
+        // queryAll
+        const realValue = real.queryAll()
+        const mockValue = mock.queryAll()
+        assertSame(realValue, mockValue)
+      } else if (op === 5) {
+        // maxRight
+        const start = randint(0, N - 1)
+        const target = randint(0, N)
+        const realValue = real.maxRight(start, min => min >= target)
+        const mockValue = mock.maxRight(start, min => min >= target)
+        assertSame(realValue, mockValue)
+      } else if (op === 6) {
+        // minLeft
+        const end = randint(0, N)
+        const target = randint(0, N)
+        const realValue = real.minLeft(end, min => min >= target)
+        const mockValue = mock.minLeft(end, min => min >= target)
+        assertSame(realValue, mockValue)
+      }
+    }
+    console.log('test passed')
+  }
+
+  function timeit(): void {
+    const n = 2e5
+    const arr = Array(n)
+    for (let i = 0; i < n; i++) arr[i] = Math.floor(Math.random() * 10)
+    const seg = new SegmentTreeRangeAddRangeMinMax(arr)
+    console.time('SegmentTreeRangeAddRangeMinMax')
+    for (let i = 0; i < n; i++) {
+      seg.query(i, n)
+      seg.update(i, n, 1)
+      seg.set(i, 1)
+      seg.maxRight(i, min => min >= i)
+      seg.minLeft(i, min => min >= i)
+    }
+    console.timeEnd('SegmentTreeRangeAddRangeMinMax') // SegmentTreeRangeAddRangeMinMax: 227.276ms
+  }
+}

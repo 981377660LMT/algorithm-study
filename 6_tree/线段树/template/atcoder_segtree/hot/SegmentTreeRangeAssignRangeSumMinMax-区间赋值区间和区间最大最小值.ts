@@ -419,9 +419,9 @@ if (require.main === module) {
       seg.query(i, n)
       seg.update(i, n, 1)
       seg.set(i, 1)
-      seg.maxRight(i, (min, max, sum) => min + max + sum <= i)
-      seg.minLeft(i, (min, max, sum) => min + max + sum <= i)
+      seg.maxRight(i, min => min >= i)
+      seg.minLeft(i, min => min >= i)
     }
-    console.timeEnd('SegmentTreeRangeAssignRangeSumMinMax') // SegmentTreeRangeAssignRangeSumMinMax: 329.496ms
+    console.timeEnd('SegmentTreeRangeAssignRangeSumMinMax') // SegmentTreeRangeAssignRangeSumMinMax: 221.365ms
   }
 }

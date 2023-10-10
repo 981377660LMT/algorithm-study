@@ -5,7 +5,7 @@ const DIR2 = [
   [0, 1],
   [1, 0]
 ]
-const INF = 2e15
+const INF = 2e9
 
 function guardCastle(grid: string[]): number {
   const [ROW, COL] = [grid.length, grid[0].length]
@@ -55,7 +55,13 @@ function guardCastle(grid: string[]): number {
     const [curRow, curCol] = [Math.floor(cur / COL), cur % COL]
     for (const [dr, dc] of DIR2) {
       const [nextRow, nextCol] = [curRow + dr, curCol + dc]
-      if (nextRow >= 0 && nextRow < ROW && nextCol >= 0 && nextCol < COL && grid[nextRow][nextCol] !== '#') {
+      if (
+        nextRow >= 0 &&
+        nextRow < ROW &&
+        nextCol >= 0 &&
+        nextCol < COL &&
+        grid[nextRow][nextCol] !== '#'
+      ) {
         yield nextRow * COL + nextCol
       }
     }
