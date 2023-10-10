@@ -270,86 +270,80 @@ class SegmentTreeRangeAssignRangePowerSum<Pow extends number = 2> {
 export { SegmentTreeRangeAssignRangePowerSum }
 
 if (require.main === module) {
-  const powerSum = new SegmentTreeRangeAssignRangePowerSum(3, 2)
-  console.log(powerSum.toString())
-  powerSum.update(0, 3, 2)
-  console.log(powerSum.queryAll())
-  console.log(powerSum.toString())
-
-  class Mocker {
-    readonly _n: number
-    private readonly _a: number[]
-    constructor(nums: number[]) {
-      this._n = nums.length
-      this._a = nums.slice()
-    }
-
-    set(index: number, value: number): void {
-      this._a[index] = value
-    }
-
-    get(index: number): [number, number] {
-      return [this._a[index], this._a[index] * this._a[index]]
-    }
-
-    update(start: number, end: number, lazy: number): void {
-      this._a.fill(lazy, start, end)
-    }
-
-    query(start: number, end: number): [number, number] {
-      let sum1 = 0
-      let sum2 = 0
-      for (let i = start; i < end; i++) {
-        sum1 += this._a[i]
-        sum2 += this._a[i] * this._a[i]
-      }
-      return [sum1, sum2]
-    }
-
-    queryAll(): [number, number] {
-      return this.query(0, this._n)
-    }
-
-    maxRight(start: number, predicate: (a: [number, number]) => boolean): number {
-      let sum1 = 0
-      let sum2 = 0
-      for (let i = start; i < this._n; i++) {
-        sum1 += this._a[i]
-        sum2 += this._a[i] * this._a[i]
-        if (!predicate([sum1, sum2])) return i
-      }
-      return this._n
-    }
-
-    minLeft(end: number, predicate: (a: [number, number]) => boolean): number {
-      let sum1 = 0
-      let sum2 = 0
-      for (let i = end - 1; i >= 0; i--) {
-        sum1 += this._a[i]
-        sum2 += this._a[i] * this._a[i]
-        if (!predicate([sum1, sum2])) return i + 1
-      }
-      return 0
-    }
-
-    build(leaves: ArrayLike<number>): void {
-      for (let i = 0; i < this._a.length; i++) this._a[i] = leaves[i]
-    }
-
-    toString(): string {
-      return `Mocker(${this._a})`
-    }
-  }
-
-  // TODO:FIXME
-  checkWithBruteForce()
-  function assertSame(obj1: unknown, obj2: unknown) {
-    if (JSON.stringify(obj1) !== JSON.stringify(obj2)) {
-      throw new Error(`expect ${JSON.stringify(obj2)}, got ${JSON.stringify(obj1)}`)
-    }
-  }
+  // checkWithBruteForce()
+  timeit()
 
   function checkWithBruteForce(): void {
+    class Mocker {
+      readonly _n: number
+      private readonly _a: number[]
+      constructor(nums: number[]) {
+        this._n = nums.length
+        this._a = nums.slice()
+      }
+
+      set(index: number, value: number): void {
+        this._a[index] = value
+      }
+
+      get(index: number): [number, number] {
+        return [this._a[index], this._a[index] * this._a[index]]
+      }
+
+      update(start: number, end: number, lazy: number): void {
+        this._a.fill(lazy, start, end)
+      }
+
+      query(start: number, end: number): [number, number] {
+        let sum1 = 0
+        let sum2 = 0
+        for (let i = start; i < end; i++) {
+          sum1 += this._a[i]
+          sum2 += this._a[i] * this._a[i]
+        }
+        return [sum1, sum2]
+      }
+
+      queryAll(): [number, number] {
+        return this.query(0, this._n)
+      }
+
+      maxRight(start: number, predicate: (a: [number, number]) => boolean): number {
+        let sum1 = 0
+        let sum2 = 0
+        for (let i = start; i < this._n; i++) {
+          sum1 += this._a[i]
+          sum2 += this._a[i] * this._a[i]
+          if (!predicate([sum1, sum2])) return i
+        }
+        return this._n
+      }
+
+      minLeft(end: number, predicate: (a: [number, number]) => boolean): number {
+        let sum1 = 0
+        let sum2 = 0
+        for (let i = end - 1; i >= 0; i--) {
+          sum1 += this._a[i]
+          sum2 += this._a[i] * this._a[i]
+          if (!predicate([sum1, sum2])) return i + 1
+        }
+        return 0
+      }
+
+      build(leaves: ArrayLike<number>): void {
+        for (let i = 0; i < this._a.length; i++) this._a[i] = leaves[i]
+      }
+
+      toString(): string {
+        return `Mocker(${this._a})`
+      }
+    }
+    function assertSame(obj1: unknown, obj2: unknown) {
+      if (JSON.stringify(obj1) !== JSON.stringify(obj2)) {
+        throw new Error(`expect ${JSON.stringify(obj2)}, got ${JSON.stringify(obj1)}`)
+      }
+    }
+
     const randint = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
     const N = 2e4
     const real = new SegmentTreeRangeAssignRangePowerSum(N, 2)
@@ -408,7 +402,23 @@ if (require.main === module) {
         assertSame(realValue, mockValue)
       }
     }
+
+    console.log('All tests passed')
   }
 
-  console.log('All tests passed')
+  function timeit(): void {
+    const n = 2e5
+    const arr = Array(n)
+    for (let i = 0; i < n; i++) arr[i] = Math.floor(Math.random() * 10)
+    const seg = new SegmentTreeRangeAssignRangePowerSum(arr, 2)
+    console.time('SegmentTreeRangeAssignRangePowerSum')
+    for (let i = 0; i < n; i++) {
+      seg.query(i, n)
+      seg.update(i, n, 1)
+      seg.set(i, 1)
+      seg.maxRight(i, ([sum1, sum2]) => sum1 + sum2 <= 10)
+      seg.minLeft(i, ([sum1, sum2]) => sum1 + sum2 <= 10)
+    }
+    console.timeEnd('SegmentTreeRangeAssignRangePowerSum') // SegmentTreeRangeAssignRangePowerSum: 523.843ms
+  }
 }

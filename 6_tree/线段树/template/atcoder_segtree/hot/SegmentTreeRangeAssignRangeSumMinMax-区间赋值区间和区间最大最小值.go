@@ -29,7 +29,7 @@ func main() {
 	}
 	leaves := make([]E, n)
 	for i := 0; i < n; i++ {
-		leaves[i] = E{nums[i], 1, nums[i], nums[i]}
+		leaves[i] = FromElement(nums[i])
 	}
 	tree := NewSegmentTreeRangeAssignRangeSumMinMax(leaves)
 
@@ -60,7 +60,9 @@ const INF = 1e18
 type E = struct{ sum, size, min, max int }
 type Id = int
 
-func (*SegmentTreeRangeAssignRangeSumMinMax) e() E   { return E{min: INF, max: -INF} }
+func FromElement(v int) E { return E{sum: v, size: 1, min: v, max: v} }
+
+func (*SegmentTreeRangeAssignRangeSumMinMax) e() E   { return E{size: 1, min: INF, max: -INF} }
 func (*SegmentTreeRangeAssignRangeSumMinMax) id() Id { return INF }
 func (*SegmentTreeRangeAssignRangeSumMinMax) op(left, right E) E {
 	return E{left.sum + right.sum, left.size + right.size, min(left.min, right.min), max(left.max, right.max)}
