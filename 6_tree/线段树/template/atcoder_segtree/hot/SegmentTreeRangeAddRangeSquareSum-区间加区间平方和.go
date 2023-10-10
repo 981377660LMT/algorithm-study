@@ -12,6 +12,21 @@ import (
 )
 
 func main() {
+	nums := make([]int, 6)
+	leaves := make([]E, 6)
+	for i := range nums {
+		leaves[i] = FromElement(nums[i])
+	}
+	tree := NewSegmentTreeRangeAddRangeSquareSum(leaves)
+	fmt.Println(tree.Query(2, 4))
+	tree.Set(1, FromElement(-4))
+	fmt.Println(tree.Query(3, 5))
+	tree.Update(2, 6, -2)
+	tree.Set(4, FromElement(4))
+	fmt.Println(tree.Query(0, 6))
+}
+
+func test() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -55,6 +70,8 @@ const INF = 1e18
 
 type E = struct{ sum0, sum1, sum2 int } // !0次和(size),1次和(sum),2次和(square sum)
 type Id = int
+
+func FromElement(v int) E { return E{1, v, v * v} }
 
 func (*SegmentTreeRangeAddRangeSquareSum) e() E   { return E{} }
 func (*SegmentTreeRangeAddRangeSquareSum) id() Id { return 0 }
@@ -224,8 +241,8 @@ func (tree *SegmentTreeRangeAddRangeSquareSum) MinLeft(right int, predicate func
 			for right < tree.size {
 				tree.pushDown(right)
 				right = right<<1 | 1
-				if predicate(tree.op(tree.data[right], res)) {
-					res = tree.op(tree.data[right], res)
+				if tmp := tree.op(tree.data[right], res); predicate(tmp) {
+					res = tmp
 					right--
 				}
 			}
@@ -257,8 +274,8 @@ func (tree *SegmentTreeRangeAddRangeSquareSum) MaxRight(left int, predicate func
 			for left < tree.size {
 				tree.pushDown(left)
 				left <<= 1
-				if predicate(tree.op(res, tree.data[left])) {
-					res = tree.op(res, tree.data[left])
+				if tmp := tree.op(res, tree.data[left]); predicate(tmp) {
+					res = tmp
 					left++
 				}
 			}

@@ -14,7 +14,7 @@ func demo() {
 	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	leaves := make([]E, len(nums))
 	for i := range leaves {
-		leaves[i] = E{1, nums[i], nums[i] * nums[i]}
+		leaves[i] = FromElement(nums[i])
 	}
 	tree := NewLazySegTree(leaves)
 
@@ -23,17 +23,28 @@ func demo() {
 	fmt.Println(tree.Query(1, 4))
 	tree.Set(1, E{1, 2, 4})
 	fmt.Println(tree.Query(1, 4))
-
+	tree.Update(1, 2, 0)
+	fmt.Println(tree.Query(1, 4), tree)
 }
 
 const INF = 1e18
 
 // RangeAssignRangePowerSum-区间赋值区间幂次和
 
-const K int = 2 // 0, 1, ..., k 次幂的和
+const K int = 2 // 维护区间 0, 1, ..., k 次幂的和
 
 type E = [K + 1]int
 type Id = int
+
+func FromElement(v int) E {
+	res := E{}
+	pow := 1
+	for i := 0; i <= K; i++ {
+		res[i] = pow
+		pow *= v
+	}
+	return res
+}
 
 func (*LazySegTree) e() E   { return E{} }
 func (*LazySegTree) id() Id { return INF }
@@ -48,10 +59,9 @@ func (*LazySegTree) mapping(f Id, g E) E {
 	if f == INF {
 		return g
 	}
-	res := g
-	pow := 1
+	res, pow, g0 := g, 1, g[0]
 	for i := 0; i <= K; i++ {
-		res[i] = g[0] * pow
+		res[i] = g0 * pow
 		pow *= f
 	}
 	return res

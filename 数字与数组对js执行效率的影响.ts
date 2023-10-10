@@ -125,7 +125,7 @@ class _SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     this._mapping = mapping
     this._composition = composition
 
-    if (typeof nOrLeaves !== 'number') this.build(nOrLeaves)
+    if (typeof nOrLeaves !== 'number') this._build(nOrLeaves)
   }
 
   set(index: number, value: E): void {
@@ -171,7 +171,7 @@ class _SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     return 0
   }
 
-  build(leaves: ArrayLike<E>): void {
+  private _build(leaves: ArrayLike<E>): void {
     if (leaves.length !== this._n) throw new RangeError(`length must be equal to ${this._n}`)
     for (let i = 0; i < this._n; i++) this._data[this._size + i] = leaves[i]
     for (let i = this._size - 1; i > 0; i--) this._pushUp(i)

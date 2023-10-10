@@ -17,6 +17,8 @@ const INF int = 1e18
 type E = struct{ min, max int }
 type Id = int
 
+func FromElement(v int) E { return E{v, v} }
+
 func (*SegmentTreeRangeAddRangeMinMax) e() E   { return E{min: INF, max: -INF} }
 func (*SegmentTreeRangeAddRangeMinMax) id() Id { return 0 }
 func (*SegmentTreeRangeAddRangeMinMax) op(left, right E) E {

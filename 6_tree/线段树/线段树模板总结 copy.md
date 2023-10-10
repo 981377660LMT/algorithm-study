@@ -237,7 +237,7 @@ class SegmentTreePointUpdateRangeQuery<E = number> {
     sb.push('SegmentTreePointUpdateRangeQuery(')
     for (let i = 0; i < this._n; i++) {
       if (i) sb.push(', ')
-      sb.push(String(this.get(i)))
+      sb.push(JSON.stringify(this.get(i)))
     }
     sb.push(')')
     return sb.join('')
@@ -534,13 +534,12 @@ class SegmentTreeRangeUpdatePointGet<Id = number> {
 const BIGMOD = BigInt(1e9 + 7)
 
 class Fancy {
-  private readonly _seg: SegmentTreeRangeUpdatePointGet<[mul: bigint, add: bigint]> =
-    new SegmentTreeRangeUpdatePointGet(
-      1e5 + 10,
-      () => [1n, 0n],
-      (f, g) => [(f[0] * g[0]) % BIGMOD, (f[0] * g[1] + f[1]) % BIGMOD],
-      (a, b) => a[0] === b[0] && a[1] === b[1]
-    )
+  private readonly _seg: SegmentTreeRangeUpdatePointGet<[mul: bigint, add: bigint]> = new SegmentTreeRangeUpdatePointGet(
+    1e5 + 10,
+    () => [1n, 0n],
+    (f, g) => [(f[0] * g[0]) % BIGMOD, (f[0] * g[1] + f[1]) % BIGMOD],
+    (a, b) => a[0] === b[0] && a[1] === b[1]
+  )
   private _length = 0
 
   append(val: number): void {
@@ -781,21 +780,21 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     return 0
   }
 
-  build(leaves: ArrayLike<E>): void {
-    if (leaves.length !== this._n) throw new RangeError(`length must be equal to ${this._n}`)
-    for (let i = 0; i < this._n; i++) this._data[this._size + i] = leaves[i]
-    for (let i = this._size - 1; i > 0; i--) this._pushUp(i)
-  }
-
   toString(): string {
     const sb: string[] = []
     sb.push('SegmentTreeRangeUpdateRangeQuery(')
     for (let i = 0; i < this._n; i++) {
       if (i) sb.push(', ')
-      sb.push(String(this.get(i)))
+      sb.push(JSON.stringify(this.get(i)))
     }
     sb.push(')')
     return sb.join('')
+  }
+
+  private _build(leaves: ArrayLike<E>): void {
+    if (leaves.length !== this._n) throw new RangeError(`length must be equal to ${this._n}`)
+    for (let i = 0; i < this._n; i++) this._data[this._size + i] = leaves[i]
+    for (let i = this._size - 1; i > 0; i--) this._pushUp(i)
   }
 
   private _pushUp(index: number): void {
@@ -815,9 +814,7 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     if (index < this._size) this._lazy[index] = this._composition(lazy, this._lazy[index])
   }
 
-  private static _isPrimitive(
-    o: unknown
-  ): o is number | string | boolean | symbol | bigint | null | undefined {
+  private static _isPrimitive(o: unknown): o is number | string | boolean | symbol | bigint | null | undefined {
     return o === null || (typeof o !== 'object' && typeof o !== 'function')
   }
 }
@@ -832,10 +829,7 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
 const BIGMOD = BigInt(1e9 + 7)
 
 class Fancy {
-  private readonly _seg = new SegmentTreeRangeUpdateRangeQuery<
-    [size: bigint, sum: bigint],
-    [mul: bigint, add: bigint]
-  >(1e5 + 10, {
+  private readonly _seg = new SegmentTreeRangeUpdateRangeQuery<[size: bigint, sum: bigint], [mul: bigint, add: bigint]>(1e5 + 10, {
     e() {
       return [1n, 0n]
     },
@@ -973,18 +967,12 @@ class SegmentTree2DPointUpdateRangeQuery<E> {
   build(): void {
     for (let c = this._col; c < this._col << 1; c++) {
       for (let r = this._row - 1; ~r; r--) {
-        this._tree[this._id(r, c)] = this._op(
-          this._tree[this._id(r << 1, c)],
-          this._tree[this._id((r << 1) | 1, c)]
-        )
+        this._tree[this._id(r, c)] = this._op(this._tree[this._id(r << 1, c)], this._tree[this._id((r << 1) | 1, c)])
       }
     }
     for (let r = 0; r < this._row << 1; r++) {
       for (let c = this._col - 1; ~c; c--) {
-        this._tree[this._id(r, c)] = this._op(
-          this._tree[this._id(r, c << 1)],
-          this._tree[this._id(r, (c << 1) | 1)]
-        )
+        this._tree[this._id(r, c)] = this._op(this._tree[this._id(r, c << 1)], this._tree[this._id(r, (c << 1) | 1)])
       }
     }
   }
@@ -1000,17 +988,11 @@ class SegmentTree2DPointUpdateRangeQuery<E> {
     let c = col + this._col
     this._tree[this._id(r, c)] = target
     for (let i = r >>> 1; i; i >>>= 1) {
-      this._tree[this._id(i, c)] = this._op(
-        this._tree[this._id(i << 1, c)],
-        this._tree[this._id((i << 1) | 1, c)]
-      )
+      this._tree[this._id(i, c)] = this._op(this._tree[this._id(i << 1, c)], this._tree[this._id((i << 1) | 1, c)])
     }
     for (; r; r >>>= 1) {
       for (let j = c >>> 1; j; j >>>= 1) {
-        this._tree[this._id(r, j)] = this._op(
-          this._tree[this._id(r, j << 1)],
-          this._tree[this._id(r, (j << 1) | 1)]
-        )
+        this._tree[this._id(r, j)] = this._op(this._tree[this._id(r, j << 1)], this._tree[this._id(r, (j << 1) | 1)])
       }
     }
   }
@@ -1147,12 +1129,7 @@ class SegmentTree2DRangeUpdatePointGet<E = number, Id = number> {
    * @param createRangeUpdatePointGet1D 初始化内层"树"的函数.入参为内层"树"的大小.
    * @param mergeRow 合并两个内层"树"的结果.
    */
-  constructor(
-    row: number,
-    col: number,
-    createRangeUpdatePointGet1D: (n: number) => IRangeUpdatePointGet1D<E, Id>,
-    mergeRow: (a: E, b: E) => E
-  ) {
+  constructor(row: number, col: number, createRangeUpdatePointGet1D: (n: number) => IRangeUpdatePointGet1D<E, Id>, mergeRow: (a: E, b: E) => E) {
     this._rawRow = row
     this._needRotate = row < col
     if (this._needRotate) {
@@ -1219,16 +1196,7 @@ class SegmentTree2DRangeUpdatePointGet<E = number, Id = number> {
     }
   }
 
-  private _update(
-    R: number,
-    C: number,
-    start: number,
-    end: number,
-    lazy: Id,
-    pos: number,
-    r: number,
-    c: number
-  ): void {
+  private _update(R: number, C: number, start: number, end: number, lazy: Id, pos: number, r: number, c: number): void {
     if (c <= R || C <= r) return
     if (R <= r && c <= C) {
       if (!this._seg[pos]) this._seg[pos] = this._init1D()
@@ -1277,13 +1245,7 @@ class SubrectangleQueries {
   /**
    * 将左上角为`[row1, col1]`,右下角为`[row2, col2]`的子矩形中的所有元素更新为`newValue`.
    */
-  updateSubrectangle(
-    row1: number,
-    col1: number,
-    row2: number,
-    col2: number,
-    newValue: number
-  ): void {
+  updateSubrectangle(row1: number, col1: number, row2: number, col2: number, newValue: number): void {
     this._seg2d.update(row1, row2 + 1, col1, col2 + 1, [this._updateTime++, newValue])
   }
 
@@ -1384,9 +1346,7 @@ type SegNode<E> = {
 }
 
 class SegmentTreeDynamic<E = number> {
-  private static _isPrimitive(
-    o: unknown
-  ): o is number | string | boolean | symbol | bigint | null | undefined {
+  private static _isPrimitive(o: unknown): o is number | string | boolean | symbol | bigint | null | undefined {
     return o === null || (typeof o !== 'object' && typeof o !== 'function')
   }
 
@@ -1686,9 +1646,7 @@ type SegNode<E, Id> = {
 }
 
 class SegmentTreeDynamicLazy<E = number, Id = number> {
-  private static _isPrimitive(
-    o: unknown
-  ): o is number | string | boolean | symbol | bigint | null | undefined {
+  private static _isPrimitive(o: unknown): o is number | string | boolean | symbol | bigint | null | undefined {
     return o === null || (typeof o !== 'object' && typeof o !== 'function')
   }
 
@@ -1757,10 +1715,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     if (!equalsId && !SegmentTreeDynamicLazy._isPrimitive(id())) {
       throw new Error('equalsId must be provided when id() returns an non-primitive value')
     }
-    if (
-      persistent &&
-      !(SegmentTreeDynamicLazy._isPrimitive(e()) && SegmentTreeDynamicLazy._isPrimitive(id()))
-    ) {
+    if (persistent && !(SegmentTreeDynamicLazy._isPrimitive(e()) && SegmentTreeDynamicLazy._isPrimitive(id()))) {
       throw new Error('persistent is only supported when e() and id() return primitive values')
     }
 
@@ -1816,12 +1771,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
    * 区间`[start,end)`的值与`lazy`进行作用.
    * {@link _lower} <= start <= end <= {@link _upper}.
    */
-  updateRange(
-    start: number,
-    end: number,
-    lazy: Id,
-    root: SegNode<E, Id> = this._root
-  ): SegNode<E, Id> {
+  updateRange(start: number, end: number, lazy: Id, root: SegNode<E, Id> = this._root): SegNode<E, Id> {
     if (start < this._lower) start = this._lower
     if (end > this._upper) end = this._upper
     if (start >= end) return root
@@ -1840,14 +1790,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     if (start >= end) return this._e()
 
     let res = this._e()
-    const _query = (
-      node: SegNode<E, Id> | undefined,
-      l: number,
-      r: number,
-      ql: number,
-      qr: number,
-      lazy: Id
-    ) => {
+    const _query = (node: SegNode<E, Id> | undefined, l: number, r: number, ql: number, qr: number, lazy: Id) => {
       ql = l > ql ? l : ql
       qr = r < qr ? r : qr
       if (ql >= qr) return
@@ -1882,12 +1825,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     if (start < this._lower) start = this._lower
     if (start >= this._upper) return this._upper
     let x = this._e()
-    const _maxRight = (
-      node: SegNode<E, Id> | undefined,
-      l: number,
-      r: number,
-      ql: number
-    ): number => {
+    const _maxRight = (node: SegNode<E, Id> | undefined, l: number, r: number, ql: number): number => {
       if (r <= ql) return r
       if (!node) node = this._newNode(l, r)
       ql = l > ql ? l : ql
@@ -1917,12 +1855,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     if (end > this._upper) end = this._upper
     if (end <= this._lower) return this._lower
     let x = this._e()
-    const _minLeft = (
-      node: SegNode<E, Id> | undefined,
-      l: number,
-      r: number,
-      qr: number
-    ): number => {
+    const _minLeft = (node: SegNode<E, Id> | undefined, l: number, r: number, qr: number): number => {
       if (qr <= l) return l
       if (!node) node = this._newNode(l, r)
       qr = r < qr ? r : qr
@@ -2020,14 +1953,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     return root
   }
 
-  private _updateRange(
-    root: SegNode<E, Id> | undefined,
-    l: number,
-    r: number,
-    ql: number,
-    qr: number,
-    lazy: Id
-  ): SegNode<E, Id> {
+  private _updateRange(root: SegNode<E, Id> | undefined, l: number, r: number, ql: number, qr: number, lazy: Id): SegNode<E, Id> {
     if (!root) root = this._newNode(l, r)
     ql = l > ql ? l : ql
     qr = r < qr ? r : qr
@@ -2088,10 +2014,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     return { left: lRoot, right: rRoot, data: this._op(lRoot!.data, rRoot!.data), id: this._id() }
   }
 
-  private _merge(
-    node1: SegNode<E, Id> | undefined,
-    node2: SegNode<E, Id> | undefined
-  ): SegNode<E, Id> | undefined {
+  private _merge(node1: SegNode<E, Id> | undefined, node2: SegNode<E, Id> | undefined): SegNode<E, Id> | undefined {
     if (!node1 || !node2) return node1 || node2
     node1.left = this._merge(node1.left, node2.left)
     node1.right = this._merge(node1.right, node2.right)
@@ -2352,10 +2275,7 @@ class SegmentTreePersistent<E> {
     if (r <= index || index + 1 <= l) return root
     if (index <= l && r <= index + 1) return { data: value, left: undefined, right: undefined }
     const mid = (l + r) >> 1
-    return this._merge(
-      this._set(root.left!, index, value, l, mid),
-      this._set(root.right!, index, value, mid, r)
-    )
+    return this._merge(this._set(root.left!, index, value, l, mid), this._set(root.right!, index, value, mid, r))
   }
 
   private _update(root: SegNode<E>, index: number, value: E, l: number, r: number): SegNode<E> {
@@ -2364,20 +2284,14 @@ class SegmentTreePersistent<E> {
       return { data: this._op(root.data, value), left: undefined, right: undefined }
     }
     const mid = (l + r) >> 1
-    return this._merge(
-      this._update(root.left!, index, value, l, mid),
-      this._update(root.right!, index, value, mid, r)
-    )
+    return this._merge(this._update(root.left!, index, value, l, mid), this._update(root.right!, index, value, mid, r))
   }
 
   private _query(root: SegNode<E>, start: number, end: number, l: number, r: number): E {
     if (r <= start || end <= l) return this._e()
     if (start <= l && r <= end) return root.data
     const mid = (l + r) >> 1
-    return this._op(
-      this._query(root.left!, start, end, l, mid),
-      this._query(root.right!, start, end, mid, r)
-    )
+    return this._op(this._query(root.left!, start, end, l, mid), this._query(root.right!, start, end, mid, r))
   }
 }
 ```
@@ -2754,9 +2668,7 @@ const INF = 2e15
 /**
  * 区间加,查询区间最大值(幺元为0).
  */
-function createRangeAddRangeMax(
-  nOrNums: number | ArrayLike<number>
-): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAddRangeMax(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => 0,
     id: () => 0,
@@ -2769,9 +2681,7 @@ function createRangeAddRangeMax(
 /**
  * 区间加,查询区间最小值(幺元为INF).
  */
-function createRangeAddRangeMin(
-  nOrNums: number | ArrayLike<number>
-): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAddRangeMin(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => INF,
     id: () => 0,
@@ -2784,9 +2694,7 @@ function createRangeAddRangeMin(
 /**
  * 区间更新最大值,查询区间最大值(幺元为0).
  */
-function createRangeUpdateRangeMax(
-  nOrNums: number | ArrayLike<number>
-): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeUpdateRangeMax(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => 0,
     id: () => -INF,
@@ -2799,9 +2707,7 @@ function createRangeUpdateRangeMax(
 /**
  * 区间更新最小值,查询区间最小值(幺元为INF).
  */
-function createRangeUpdateRangeMin(
-  nOrNums: number | ArrayLike<number>
-): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeUpdateRangeMin(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => INF,
     id: () => INF,
@@ -2829,9 +2735,7 @@ function createRangeAssignRangeSum(
 /**
  * 区间赋值,查询区间最大值(幺元为-INF).
  */
-function createRangeAssignRangeMax(
-  nOrNums: number | ArrayLike<number>
-): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAssignRangeMax(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => 0,
     id: () => -INF,
@@ -2844,9 +2748,7 @@ function createRangeAssignRangeMax(
 /**
  * 区间赋值,查询区间最小值(幺元为INF).
  */
-function createRangeAssignRangeMin(
-  nOrNums: number | ArrayLike<number>
-): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAssignRangeMin(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => INF,
     id: () => INF,
@@ -2877,10 +2779,7 @@ function createRangeFlipRangeSum(
 function createRangeAssignRangeAddRangeSum(
   nOrNums: number | ArrayLike<[size: number, sum: number]>
 ): SegmentTreeRangeUpdateRangeQuery<[size: number, sum: number], [mul: number, add: number]> {
-  return new SegmentTreeRangeUpdateRangeQuery<
-    [size: number, sum: number],
-    [mul: number, add: number]
-  >(nOrNums, {
+  return new SegmentTreeRangeUpdateRangeQuery<[size: number, sum: number], [mul: number, add: number]>(nOrNums, {
     e() {
       return [1, 0]
     },

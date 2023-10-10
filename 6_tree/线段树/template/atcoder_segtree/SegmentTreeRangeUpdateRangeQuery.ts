@@ -84,7 +84,7 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     const identity = id()
     this._equalsToId = equalsId ? (o: Id) => equalsId(o, identity) : (o: Id) => o === identity
 
-    if (typeof nOrLeaves !== 'number') this.build(nOrLeaves)
+    if (typeof nOrLeaves !== 'number') this._build(nOrLeaves)
   }
 
   set(index: number, value: E): void {
@@ -219,21 +219,21 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     return 0
   }
 
-  build(leaves: ArrayLike<E>): void {
-    if (leaves.length !== this._n) throw new RangeError(`length must be equal to ${this._n}`)
-    for (let i = 0; i < this._n; i++) this._data[this._size + i] = leaves[i]
-    for (let i = this._size - 1; i > 0; i--) this._pushUp(i)
-  }
-
   toString(): string {
     const sb: string[] = []
     sb.push('SegmentTreeRangeUpdateRangeQuery(')
     for (let i = 0; i < this._n; i++) {
       if (i) sb.push(', ')
-      sb.push(String(this.get(i)))
+      sb.push(JSON.stringify(this.get(i)))
     }
     sb.push(')')
     return sb.join('')
+  }
+
+  private _build(leaves: ArrayLike<E>): void {
+    if (leaves.length !== this._n) throw new RangeError(`length must be equal to ${this._n}`)
+    for (let i = 0; i < this._n; i++) this._data[this._size + i] = leaves[i]
+    for (let i = this._size - 1; i > 0; i--) this._pushUp(i)
   }
 
   private _pushUp(index: number): void {
@@ -253,9 +253,7 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     if (index < this._size) this._lazy[index] = this._composition(lazy, this._lazy[index])
   }
 
-  private static _isPrimitive(
-    o: unknown
-  ): o is number | string | boolean | symbol | bigint | null | undefined {
+  private static _isPrimitive(o: unknown): o is number | string | boolean | symbol | bigint | null | undefined {
     return o === null || (typeof o !== 'object' && typeof o !== 'function')
   }
 }

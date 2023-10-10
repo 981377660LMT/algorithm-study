@@ -11,8 +11,8 @@ class SegmentTreeRangeAddRangeMinMax {
   private readonly _max: Float64Array
   private readonly _lazy: Float64Array
 
-  constructor(nOrLeaves: number | ArrayLike<number>) {
-    const n = typeof nOrLeaves === 'number' ? nOrLeaves : nOrLeaves.length
+  constructor(nOrArr: number | ArrayLike<number>) {
+    const n = typeof nOrArr === 'number' ? nOrArr : nOrArr.length
     let size = 1
     let height = 0
     while (size < n) {
@@ -31,7 +31,7 @@ class SegmentTreeRangeAddRangeMinMax {
     this._max = max
     this._lazy = lazy
 
-    if (typeof nOrLeaves !== 'number') this.build(nOrLeaves)
+    if (typeof nOrArr !== 'number') this._build(nOrArr)
   }
 
   set(index: number, value: number): void {
@@ -193,24 +193,24 @@ class SegmentTreeRangeAddRangeMinMax {
     return 0
   }
 
-  build(leaves: ArrayLike<number>): void {
+  toString(): string {
+    const sb: string[] = []
+    sb.push('SegmentTreeRangeUpdateRangeQuery(')
+    for (let i = 0; i < this._n; i++) {
+      if (i) sb.push(', ')
+      sb.push(JSON.stringify(this.get(i)))
+    }
+    sb.push(')')
+    return sb.join('')
+  }
+
+  private _build(leaves: ArrayLike<number>): void {
     if (leaves.length !== this._n) throw new RangeError(`length must be equal to ${this._n}`)
     for (let i = 0; i < this._n; i++) {
       this._min[this._size + i] = leaves[i]
       this._max[this._size + i] = leaves[i]
     }
     for (let i = this._size - 1; i > 0; i--) this._pushUp(i)
-  }
-
-  toString(): string {
-    const sb: string[] = []
-    sb.push('SegmentTreeRangeUpdateRangeQuery(')
-    for (let i = 0; i < this._n; i++) {
-      if (i) sb.push(', ')
-      sb.push(String(this.get(i)))
-    }
-    sb.push(')')
-    return sb.join('')
   }
 
   private _pushUp(index: number): void {

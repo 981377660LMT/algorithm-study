@@ -29,3 +29,7 @@ KD 树像线段树一样，可以维护二维幺半群
 [单点修改区间查询](https://maspypy.github.io/library/ds/kdtree/kdtree_monoid.hpp)
 [区间修改单点查询](https://maspypy.github.io/library/ds/kdtree/dual_kdtree_monoid.hpp)
 [区间修改区间查询](https://maspypy.github.io/library/ds/kdtree/kdtree_acted_monoid.hpp)
+
+---
+
+https://github.com/spaghetti-source/algorithm/tree/master/data_structure
