@@ -25,6 +25,15 @@ func demo() {
 	fmt.Println(tree.Query(1, 4))
 	tree.Update(1, 2, 0)
 	fmt.Println(tree.Query(1, 4), tree)
+
+	nums = make([]int, 5)
+	leaves = make([]E, len(nums))
+	for i := range leaves {
+		leaves[i] = FromElement(nums[i])
+	}
+	tree = NewLazySegTree(leaves)
+	tree.Update(0, 5, 2)
+	fmt.Println(tree.Query(0, 5))
 }
 
 const INF = 1e18
