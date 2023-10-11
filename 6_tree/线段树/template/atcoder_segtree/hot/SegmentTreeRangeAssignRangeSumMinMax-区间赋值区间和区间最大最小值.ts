@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-inner-declarations */
 
 const INF = 2e15 // !超过int32使用2e15
@@ -31,7 +32,7 @@ class SegmentTreeRangeAssignRangeSumMinMax {
     const min = new Float64Array(m << 1).fill(INF)
     const max = new Float64Array(m << 1).fill(-INF)
     const sum = new Float64Array(m << 1)
-    const size = new Uint32Array(m << 1).fill(1)
+    const size = new Uint32Array(m << 1)
     const lazy = new Float64Array(m).fill(INF)
     this._min = min
     this._max = max
@@ -222,7 +223,7 @@ class SegmentTreeRangeAssignRangeSumMinMax {
 
   toString(): string {
     const sb: string[] = []
-    sb.push('SegmentTreeRangeUpdateRangeQuery(')
+    sb.push('SegmentTreeRangeAssignRangeSumMinMax(')
     for (let i = 0; i < this._n; i++) {
       if (i) sb.push(', ')
       sb.push(JSON.stringify(this.get(i)))
@@ -237,6 +238,7 @@ class SegmentTreeRangeAssignRangeSumMinMax {
       this._min[this._m + i] = leaves[i]
       this._max[this._m + i] = leaves[i]
       this._sum[this._m + i] = leaves[i]
+      this._size[this._m + i] = 1
     }
     for (let i = this._m - 1; i > 0; i--) this._pushUp(i)
   }
@@ -267,7 +269,7 @@ class SegmentTreeRangeAssignRangeSumMinMax {
 export { SegmentTreeRangeAssignRangeSumMinMax }
 
 if (require.main === module) {
-  // checkWithBruteForce()
+  checkWithBruteForce()
   timeit()
 
   function checkWithBruteForce(): void {

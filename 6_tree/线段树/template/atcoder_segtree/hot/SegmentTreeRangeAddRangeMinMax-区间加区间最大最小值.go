@@ -6,10 +6,6 @@ import (
 	"strings"
 )
 
-func main() {
-
-}
-
 const INF int = 1e18
 
 // SegmentTreeRangeAddRangeMinMax-区间加区间最大最小值

@@ -1,3 +1,5 @@
+// https://leetcode.cn/problems/fancy-sequence/
+
 /* eslint-disable no-param-reassign */
 
 // !区间修改+单点查询 => DualSegmentTree
@@ -150,13 +152,12 @@ if (require.main === module) {
   const BIGMOD = BigInt(1e9 + 7)
 
   class Fancy {
-    private readonly _seg: SegmentTreeRangeUpdatePointGet<[mul: bigint, add: bigint]> =
-      new SegmentTreeRangeUpdatePointGet(
-        1e5 + 10,
-        () => [1n, 0n],
-        (f, g) => [(f[0] * g[0]) % BIGMOD, (f[0] * g[1] + f[1]) % BIGMOD],
-        (a, b) => a[0] === b[0] && a[1] === b[1]
-      )
+    private readonly _seg: SegmentTreeRangeUpdatePointGet<[mul: bigint, add: bigint]> = new SegmentTreeRangeUpdatePointGet(
+      1e5 + 10,
+      () => [1n, 0n],
+      (f, g) => [(f[0] * g[0]) % BIGMOD, (f[0] * g[1] + f[1]) % BIGMOD],
+      (a, b) => a[0] === b[0] && a[1] === b[1]
+    )
     private _length = 0
 
     append(val: number): void {

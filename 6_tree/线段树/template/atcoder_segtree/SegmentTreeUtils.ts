@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-constant-condition */
 /* eslint-disable no-param-reassign */
 // !由于lazy模板通用性 效率不如自己维护数组的线段树
@@ -7,6 +8,7 @@
 // !一些monoid (如果难以设计半群,就使用分块解决吧)
 // https://maspypy.github.io/library/alg/acted_monoid/summax_assign.hpp
 
+import { SegmentTreePointUpdateRangeQuery } from './SegmentTreePointUpdateRangeQuery'
 import { SegmentTreeRangeUpdateRangeQuery } from './SegmentTreeRangeUpdateRangeQuery'
 
 const INF = 2e9 // !超过int32使用2e15
@@ -14,9 +16,7 @@ const INF = 2e9 // !超过int32使用2e15
 /**
  * 区间加,查询区间最大值(幺元为0).
  */
-function createRangeAddRangeMax(
-  nOrNums: number | ArrayLike<number>
-): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAddRangeMax(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => 0,
     id: () => 0,
@@ -29,9 +29,7 @@ function createRangeAddRangeMax(
 /**
  * 区间加,查询区间最小值(幺元为INF).
  */
-function createRangeAddRangeMin(
-  nOrNums: number | ArrayLike<number>
-): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAddRangeMin(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => INF,
     id: () => 0,
@@ -45,9 +43,7 @@ function createRangeAddRangeMin(
  * 区间更新最大值,查询区间最大值(幺元为0).
  * RangeChmaxRangeMax
  */
-function createRangeUpdateRangeMax(
-  nOrNums: number | ArrayLike<number>
-): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeUpdateRangeMax(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => 0,
     id: () => -INF,
@@ -61,9 +57,7 @@ function createRangeUpdateRangeMax(
  * 区间更新最小值,查询区间最小值(幺元为INF).
  * RangeChminRangeMin
  */
-function createRangeUpdateRangeMin(
-  nOrNums: number | ArrayLike<number>
-): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeUpdateRangeMin(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => INF,
     id: () => INF,
@@ -91,9 +85,7 @@ function createRangeAssignRangeSum(
 /**
  * 区间赋值,查询区间最大值(幺元为-INF).
  */
-function createRangeAssignRangeMax(
-  nOrNums: number | ArrayLike<number>
-): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAssignRangeMax(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => 0,
     id: () => -INF,
@@ -106,9 +98,7 @@ function createRangeAssignRangeMax(
 /**
  * 区间赋值,查询区间最小值(幺元为INF).
  */
-function createRangeAssignRangeMin(
-  nOrNums: number | ArrayLike<number>
-): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAssignRangeMin(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => INF,
     id: () => INF,
@@ -139,10 +129,7 @@ function createRangeFlipRangeSum(
 function createRangeAssignRangeAddRangeSum(
   nOrNums: number | ArrayLike<{ size: number; sum: number }>
 ): SegmentTreeRangeUpdateRangeQuery<{ size: number; sum: number }, { mul: number; add: number }> {
-  return new SegmentTreeRangeUpdateRangeQuery<
-    { size: number; sum: number },
-    { mul: number; add: number }
-  >(nOrNums, {
+  return new SegmentTreeRangeUpdateRangeQuery<{ size: number; sum: number }, { mul: number; add: number }>(nOrNums, {
     e() {
       return { size: 1, sum: 0 }
     },
@@ -193,6 +180,48 @@ function createRangeAffineRangeSum(
   })
 }
 
+type Interval = {
+  sum: number
+  maxSum: number
+  preMaxSum: number
+  sufMaxSum: number
+  minSum: number
+  preMinSum: number
+  sufMinSum: number
+}
+
+/**
+ * 单点修改，区间最大子数组和最小子数组和.
+ */
+function createPointSetRangeMaxSumMinSum(arr: ArrayLike<number>): {
+  tree: SegmentTreePointUpdateRangeQuery<Interval>
+  fromElement: (value: number) => Interval
+} {
+  const intervals: Interval[] = Array(arr.length)
+  for (let i = 0; i < arr.length; ++i) {
+    intervals[i] = { sum: arr[i], maxSum: arr[i], preMaxSum: arr[i], sufMaxSum: arr[i], minSum: arr[i], preMinSum: arr[i], sufMinSum: arr[i] }
+  }
+
+  return {
+    tree: new SegmentTreePointUpdateRangeQuery(
+      intervals,
+      () => ({ sum: 0, maxSum: -INF, preMaxSum: -INF, sufMaxSum: -INF, minSum: INF, preMinSum: INF, sufMinSum: INF }),
+      (e1, e2) => ({
+        sum: e1.sum + e2.sum,
+        maxSum: Math.max(e1.maxSum, e2.maxSum, e1.sufMaxSum + e2.preMaxSum),
+        preMaxSum: Math.max(e1.preMaxSum, e1.sum + e2.preMaxSum),
+        sufMaxSum: Math.max(e2.sufMaxSum, e2.sum + e1.sufMaxSum),
+        minSum: Math.min(e1.minSum, e2.minSum, e1.sufMinSum + e2.preMinSum),
+        preMinSum: Math.min(e1.preMinSum, e1.sum + e2.preMinSum),
+        sufMinSum: Math.min(e2.sufMinSum, e2.sum + e1.sufMinSum)
+      })
+    ),
+    fromElement(value: number): Interval {
+      return { sum: value, maxSum: value, preMaxSum: value, sufMaxSum: value, minSum: value, preMinSum: value, sufMinSum: value }
+    }
+  }
+}
+
 export {
   //
   createRangeAddRangeMax,
@@ -209,5 +238,7 @@ export {
   //
   createRangeAssignRangeAddRangeSum,
   //
-  createRangeAffineRangeSum
+  createRangeAffineRangeSum,
+  //
+  createPointSetRangeMaxSumMinSum
 }

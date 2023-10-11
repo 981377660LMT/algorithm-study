@@ -201,7 +201,7 @@ class SegmentTreeRangeAddRangeSquareSum {
 
   toString(): string {
     const sb: string[] = []
-    sb.push('SegmentTreeRangeUpdateRangeQuery(')
+    sb.push('SegmentTreeRangeAddRangeSquareSum(')
     for (let i = 0; i < this._n; i++) {
       if (i) sb.push(', ')
       sb.push(JSON.stringify(this.get(i)))

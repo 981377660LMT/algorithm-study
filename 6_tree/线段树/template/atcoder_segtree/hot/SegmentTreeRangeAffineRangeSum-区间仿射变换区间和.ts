@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable arrow-body-style */
 /* eslint-disable no-inner-declarations */
 
@@ -39,7 +40,7 @@ class SegmentTreeRangeAffineRangeSum {
 
     // !0.init data and lazy
     const sum = new Float64Array(m << 1)
-    const size = new Uint32Array(m << 1).fill(1)
+    const size = new Uint32Array(m << 1)
     const lazyMul = new Float64Array(m).fill(1)
     const lazyAdd = new Float64Array(m)
     this._sum = sum
@@ -191,7 +192,7 @@ class SegmentTreeRangeAffineRangeSum {
 
   toString(): string {
     const sb: string[] = []
-    sb.push('SegmentTreeRangeUpdateRangeQuery(')
+    sb.push('SegmentTreeRangeAffineRangeSum(')
     for (let i = 0; i < this._n; i++) {
       if (i) sb.push(', ')
       sb.push(JSON.stringify(this.get(i)))
@@ -238,6 +239,30 @@ class SegmentTreeRangeAffineRangeSum {
 export { SegmentTreeRangeAffineRangeSum }
 
 if (require.main === module) {
+  // https://leetcode.cn/problems/fancy-sequence/description/
+  class Fancy {
+    private readonly _seg: SegmentTreeRangeAffineRangeSum = new SegmentTreeRangeAffineRangeSum(1e5 + 10)
+    private _length = 0
+
+    append(val: number): void {
+      this._seg.update(this._length, this._length + 1, 1, val)
+      this._length++
+    }
+
+    addAll(inc: number): void {
+      this._seg.update(0, this._length, 1, inc)
+    }
+
+    multAll(m: number): void {
+      this._seg.update(0, this._length, m, 0)
+    }
+
+    getIndex(idx: number): number {
+      if (idx >= this._length) return -1
+      return this._seg.get(idx)
+    }
+  }
+
   checkWithBruteForce()
   // timeit()
 
