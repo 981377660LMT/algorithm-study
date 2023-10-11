@@ -39,7 +39,8 @@ class SegmentTreeRangeAddRangeSumMinMax {
     this._size = size
     this._lazy = lazy
 
-    if (typeof nOrArr !== 'number') this._build(nOrArr)
+    if (typeof nOrArr === 'number') nOrArr = new Uint8Array(nOrArr)
+    this._build(nOrArr)
   }
 
   set(index: number, value: number): void {
@@ -266,8 +267,8 @@ class SegmentTreeRangeAddRangeSumMinMax {
 export { SegmentTreeRangeAddRangeSumMinMax }
 
 if (require.main === module) {
-  // checkWithBruteForce()
-  timeit()
+  checkWithBruteForce()
+  // timeit()
 
   function checkWithBruteForce(): void {
     class Mocker {
@@ -306,10 +307,7 @@ if (require.main === module) {
         return this.query(0, this._n)
       }
 
-      maxRight(
-        start: number,
-        predicate: (min: number, max: number, sum: number) => boolean
-      ): number {
+      maxRight(start: number, predicate: (min: number, max: number, sum: number) => boolean): number {
         let min = INF
         let max = -INF
         let sum = 0
@@ -350,7 +348,7 @@ if (require.main === module) {
     }
     const randint = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
     const N = 5e4
-    const real = new SegmentTreeRangeAddRangeSumMinMax(Array(N).fill(0))
+    const real = new SegmentTreeRangeAddRangeSumMinMax(N)
     const mock = new Mocker(Array(N).fill(0))
     for (let i = 0; i < N; i++) {
       const op = randint(0, 6)

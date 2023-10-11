@@ -33,7 +33,8 @@ class SegmentTreeRangeAddRangeMinMax {
     this._max = max
     this._lazy = lazy
 
-    if (typeof nOrArr !== 'number') this._build(nOrArr)
+    if (typeof nOrArr === 'number') nOrArr = new Uint8Array(nOrArr)
+    this._build(nOrArr)
   }
 
   set(index: number, value: number): void {
@@ -237,7 +238,7 @@ class SegmentTreeRangeAddRangeMinMax {
 export { SegmentTreeRangeAddRangeMinMax }
 
 if (require.main === module) {
-  // checkWithBruteForce()
+  checkWithBruteForce()
   timeit()
 
   function checkWithBruteForce(): void {
@@ -318,7 +319,7 @@ if (require.main === module) {
 
     const randint = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
     const N = 5e4
-    const real = new SegmentTreeRangeAddRangeMinMax(Array(N).fill(0))
+    const real = new SegmentTreeRangeAddRangeMinMax(N)
     const mock = new Mocker(Array(N).fill(0))
     for (let i = 0; i < N; i++) {
       const op = randint(0, 5)

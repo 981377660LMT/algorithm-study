@@ -47,7 +47,8 @@ class SegmentTreeRangeAffineRangeSum {
     this._lazyMul = lazyMul
     this._lazyAdd = lazyAdd
 
-    if (typeof nOrArr !== 'number') this._build(nOrArr)
+    if (typeof nOrArr === 'number') nOrArr = new Uint8Array(nOrArr)
+    this._build(nOrArr)
   }
 
   set(index: number, value: number): void {
@@ -125,6 +126,7 @@ class SegmentTreeRangeAffineRangeSum {
   /**
    * 树上二分查询最大的`end`使得`[start,end)`内的值满足`predicate`.
    * @alias findFirst
+   * @deprecated 取模时无法使用二分查找
    */
   maxRight(start: number, predicate: (sum: number) => boolean): number {
     if (start < 0) start = 0
@@ -157,6 +159,7 @@ class SegmentTreeRangeAffineRangeSum {
   /**
    * 树上二分查询最小的`start`使得`[start,end)`内的值满足`predicate`
    * @alias findLast
+   * @deprecated 取模时无法使用二分查找
    */
   minLeft(end: number, predicate: (sum: number) => boolean): number {
     if (end > this._n) end = this._n
@@ -307,12 +310,12 @@ if (require.main === module) {
 
     const randint = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
     const N = 5e4
-    const real = new SegmentTreeRangeAffineRangeSum(Array(N).fill(0))
+    const real = new SegmentTreeRangeAffineRangeSum(N)
     const mock = new Mocker(Array(N).fill(0))
     for (let i = 0; i < N; i++) {
       const op = randint(0, 5)
       if (op === 0) {
-        // set
+        // sets
         const index = randint(0, N - 1)
         const value = randint(0, 10)
         real.set(index, value)
@@ -350,18 +353,18 @@ if (require.main === module) {
         assertSame(realValue, mockValue)
       } else if (op === 5) {
         // maxRight
-        const start = randint(0, N - 1)
-        const target = randint(0, N)
-        const realValue = real.maxRight(start, min => min >= target)
-        const mockValue = mock.maxRight(start, min => min >= target)
-        assertSame(realValue, mockValue)
+        // const start = randint(0, N - 1)
+        // const target = randint(0, N)
+        // const realValue = real.maxRight(start, min => min >= target)
+        // const mockValue = mock.maxRight(start, min => min >= target)
+        // assertSame(realValue, mockValue)
       } else if (op === 6) {
         // minLeft
-        const end = randint(0, N)
-        const target = randint(0, N)
-        const realValue = real.minLeft(end, min => min >= target)
-        const mockValue = mock.minLeft(end, min => min >= target)
-        assertSame(realValue, mockValue)
+        // const end = randint(0, N)
+        // const target = randint(0, N)
+        // const realValue = real.minLeft(end, min => min >= target)
+        // const mockValue = mock.minLeft(end, min => min >= target)
+        // assertSame(realValue, mockValue)
       }
     }
     console.log('test passed')
@@ -380,6 +383,6 @@ if (require.main === module) {
       seg.maxRight(i, min => min >= i)
       seg.minLeft(i, min => min >= i)
     }
-    console.timeEnd('SegmentTreeRangeAffineRangeSum') // SegmentTreeRangeAffineRangeSum: 732.575ms
+    console.timeEnd('SegmentTreeRangeAffineRangeSum') // SegmentTreeRangeAffineRangeSum: 572.291ms
   }
 }

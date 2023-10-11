@@ -39,7 +39,8 @@ class SegmentTreeRangeAssignRangeSumMinMax {
     this._size = size
     this._lazy = lazy
 
-    if (typeof nOrArr !== 'number') this._build(nOrArr)
+    if (typeof nOrArr === 'number') nOrArr = new Uint8Array(nOrArr)
+    this._build(nOrArr)
   }
 
   set(index: number, value: number): void {
@@ -306,10 +307,7 @@ if (require.main === module) {
         return this.query(0, this._n)
       }
 
-      maxRight(
-        start: number,
-        predicate: (min: number, max: number, sum: number) => boolean
-      ): number {
+      maxRight(start: number, predicate: (min: number, max: number, sum: number) => boolean): number {
         let min = INF
         let max = -INF
         let sum = 0
