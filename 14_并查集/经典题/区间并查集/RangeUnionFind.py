@@ -70,27 +70,31 @@ class UnionFindRange2:
     按秩合并.
     """
 
-    ___slots___ = ("left", "right", "part", "_n", "_data")
+    ___slots___ = ("groupStart", "groupEnd", "part", "_n", "_data")
 
     def __init__(self, n: int):
+        self.groupStart = list(range(n))  # 每个组的左边界,包含端点
+        self.groupEnd = [i + 1 for i in range(n)]  # 每个组的右边界,不包含端点
+        self.part = n
         self._n = n
         self._data = [-1] * n
-        self.left = list(range(n))  # 每个组的左边界,包含端点
-        self.right = [i + 1 for i in range(n)]  # 每个组的右边界,不包含端点
-        self.part = n
 
-    def unionRange(self, left: int, right: int) -> int:
-        """合并[left,right]闭区间, 返回合并次数.
-        0<=left<=right<n.
+    def unionRange(self, start: int, end: int) -> int:
+        """合并[start,end)左闭右开区间, 返回合并次数.
+        0<=groupStart<=groupEnd<=n.
         """
-        if left >= right:
+        if start < 0:
+            start = 0
+        if end > self._n:
+            end = self._n
+        if start >= end:
             return 0
         count = 0
         while True:
-            m = self.right[self.find(left)]
-            if m > right:
+            next_ = self.groupEnd[self.find(start)]
+            if next_ >= end:
                 break
-            self.union(left, m)
+            self.union(start, next_)
             count += 1
         return count
 
@@ -109,10 +113,10 @@ class UnionFindRange2:
             rootX, rootY = rootY, rootX
         self._data[rootX] += self._data[rootY]
         self._data[rootY] = rootX
-        if self.left[rootY] < self.left[rootX]:
-            self.left[rootX] = self.left[rootY]
-        if self.right[rootY] > self.right[rootX]:
-            self.right[rootX] = self.right[rootY]
+        if self.groupStart[rootY] < self.groupStart[rootX]:
+            self.groupStart[rootX] = self.groupStart[rootY]
+        if self.groupEnd[rootY] > self.groupEnd[rootX]:
+            self.groupEnd[rootX] = self.groupEnd[rootY]
         return True
 
     def isConnected(self, x: int, y: int) -> bool:
@@ -124,7 +128,7 @@ class UnionFindRange2:
     def getRange(self, x: int) -> Tuple[int, int]:
         """每个点所在的组的左右边界[左边界,右边界)."""
         root = self.find(x)
-        return self.left[root], self.right[root]
+        return self.groupStart[root], self.groupEnd[root]
 
     def getGroups(self) -> "DefaultDict[int, List[int]]":
         group = defaultdict(list)
@@ -134,7 +138,6 @@ class UnionFindRange2:
 
 
 if __name__ == "__main__":
-
     # No.1170 Never Want to Walk
     # https://yukicoder.me/problems/no/1170
     # 数轴上有n个车站,第i个位置在xi
@@ -164,5 +167,5 @@ if __name__ == "__main__":
 
     class Solution:
         def amountPainted(self, paint: List[List[int]]) -> List[int]:
-            uf = UnionFindRange(int(5e4) + 10)
-            return [uf.unionRange(start, end) for start, end in paint]
+            uf = UnionFindRange2(int(5e4) + 10)
+            return [uf.unionRange(start, end + 1) for start, end in paint]

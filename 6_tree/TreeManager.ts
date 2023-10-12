@@ -89,7 +89,7 @@ class TreeManager<NoneLeaf, Leaf> {
    * 对树进行剪枝，删除不需要的叶子节点.
    * @param shouldPrune 返回 true 则该叶子节点从树中删除.
    */
-  pruneTree = (shouldPrune: (leaf: Leaf, path: number[]) => boolean): void => {
+  pruneLeaf = (shouldPrune: (leaf: Leaf, path: number[]) => boolean): void => {
     const dfs = (cur: Leaf | NoneLeaf, parent: Leaf | NoneLeaf | undefined, path: number[]): void => {
       if (this.isLeaf(cur)) {
         this._assertNoneLeaf(parent)
@@ -98,6 +98,28 @@ class TreeManager<NoneLeaf, Leaf> {
           children.splice(path[path.length - 1], 1)
         }
         return
+      }
+
+      const children = this.getChildren(cur)
+      for (let i = children.length - 1; i >= 0; i--) {
+        path.push(i)
+        dfs(children[i], cur, path)
+        path.pop()
+      }
+    }
+
+    dfs(this.root, undefined, [])
+  }
+
+  /**
+   * 对树进行剪枝，删除不需要的节点(无法删除根结点).
+   * @param shouldPrune 返回 true 则该节点从树中删除.
+   */
+  pruneTree = (shouldPrune: (node: Leaf | NoneLeaf, path: number[]) => boolean): void => {
+    const dfs = (cur: Leaf | NoneLeaf, parent: Leaf | NoneLeaf | undefined, path: number[]): void => {
+      if (parent != undefined && shouldPrune(cur, path)) {
+        const children = this.getChildren(parent)
+        children.splice(path[path.length - 1], 1)
       }
 
       const children = this.getChildren(cur)
@@ -205,6 +227,6 @@ if (require.main === module) {
 
   console.log(T.searchNode([2, 0]))
   console.log(11)
-  T.pruneTree(leaf => leaf.value >= 5)
+  T.pruneLeaf(leaf => leaf.value >= 5)
   T.print()
 }

@@ -6,6 +6,8 @@
 
 import { createPointSetRangeMaxSumMinSum } from '../SegmentTreeUtils'
 
+export { createPointSetRangeMaxSumMinSum as SegmentTreeMaxOfInterval }
+
 if (require.main === module) {
   const nums = [1, 2, 3, 4, 5]
   const { tree, fromElement } = createPointSetRangeMaxSumMinSum(nums)

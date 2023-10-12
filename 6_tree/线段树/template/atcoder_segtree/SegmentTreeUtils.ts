@@ -194,17 +194,19 @@ type Interval = {
  * 单点修改，区间最大子数组和最小子数组和.
  */
 function createPointSetRangeMaxSumMinSum(arr: ArrayLike<number>): {
-  tree: SegmentTreePointUpdateRangeQuery<Interval>
   fromElement: (value: number) => Interval
+  tree: SegmentTreePointUpdateRangeQuery<Interval>
 } {
-  const intervals: Interval[] = Array(arr.length)
+  const leaves: Interval[] = Array(arr.length)
+  const fromElement = (v: number) => ({ sum: v, maxSum: v, preMaxSum: v, sufMaxSum: v, minSum: v, preMinSum: v, sufMinSum: v })
   for (let i = 0; i < arr.length; ++i) {
-    intervals[i] = { sum: arr[i], maxSum: arr[i], preMaxSum: arr[i], sufMaxSum: arr[i], minSum: arr[i], preMinSum: arr[i], sufMinSum: arr[i] }
+    leaves[i] = fromElement(arr[i])
   }
 
   return {
+    fromElement,
     tree: new SegmentTreePointUpdateRangeQuery(
-      intervals,
+      leaves,
       () => ({ sum: 0, maxSum: -INF, preMaxSum: -INF, sufMaxSum: -INF, minSum: INF, preMinSum: INF, sufMinSum: INF }),
       (e1, e2) => ({
         sum: e1.sum + e2.sum,
@@ -215,10 +217,135 @@ function createPointSetRangeMaxSumMinSum(arr: ArrayLike<number>): {
         preMinSum: Math.min(e1.preMinSum, e1.sum + e2.preMinSum),
         sufMinSum: Math.min(e2.sufMinSum, e2.sum + e1.sufMinSum)
       })
-    ),
-    fromElement(value: number): Interval {
-      return { sum: value, maxSum: value, preMaxSum: value, sufMaxSum: value, minSum: value, preMinSum: value, sufMinSum: value }
+    )
+  }
+}
+
+type LongestRepeating<V> = {
+  size: number
+  max: number
+  preMax: number
+  sufMax: number
+  leftValue?: V
+  rightValue?: V
+}
+
+/**
+ * 单点修改，区间最长相同元素连续个数.
+ */
+function createPointSetRangeLongestRepeating<V>(arr: ArrayLike<V>): {
+  fromElement: (value: V) => LongestRepeating<V>
+  tree: SegmentTreePointUpdateRangeQuery<LongestRepeating<V>>
+} {
+  const leaves: LongestRepeating<V>[] = Array(arr.length)
+  const fromElement = (v: V) => ({ size: 1, max: 1, preMax: 1, sufMax: 1, leftValue: v, rightValue: v })
+  for (let i = 0; i < arr.length; ++i) {
+    leaves[i] = fromElement(arr[i])
+  }
+
+  return {
+    fromElement,
+    tree: new SegmentTreePointUpdateRangeQuery(
+      leaves,
+      () => ({ size: 0, max: 0, preMax: 0, sufMax: 0 } as LongestRepeating<V>),
+      (a, b) => {
+        const res: LongestRepeating<V> = {
+          size: a.size + b.size,
+          max: 0,
+          preMax: 0,
+          sufMax: 0,
+          leftValue: a.leftValue,
+          rightValue: b.rightValue
+        }
+        if (a.rightValue === b.leftValue) {
+          res.preMax = a.preMax
+          if (a.preMax === a.size) res.preMax += b.preMax
+          res.sufMax = b.sufMax
+          if (b.sufMax === b.size) res.sufMax += a.sufMax
+          res.max = Math.max(a.max, b.max, a.sufMax + b.preMax)
+        } else {
+          res.preMax = a.preMax
+          res.sufMax = b.sufMax
+          res.max = Math.max(a.max, b.max)
+        }
+        return res
+      }
+    )
+  }
+}
+
+type LongestOne = {
+  size: number
+  preOne: number
+  sufOne: number
+  longestOne: number
+  leftValue: 0 | 1
+  rightValue: 0 | 1
+
+  /**
+   * 区间内所有极长连续1段的贡献和 sum(len_i*(len_i+1)/2)
+   */
+  pairCount: number
+}
+
+/**
+ * 单点修改，区间最长连续1.
+ */
+function createPointSetRangeLongestOne(nOrArr: number | ArrayLike<0 | 1>): {
+  fromElement: (bit: 0 | 1) => LongestOne
+  tree: SegmentTreePointUpdateRangeQuery<LongestOne>
+} {
+  if (typeof nOrArr === 'number') nOrArr = new Uint8Array(nOrArr) as ArrayLike<0 | 1>
+  const leaves: LongestOne[] = Array(nOrArr.length)
+  const fromElement = (v: 0 | 1) => {
+    if (v === 1) {
+      return { size: 1, preOne: 1, sufOne: 1, longestOne: 1, leftValue: 1, rightValue: 1, pairCount: 1 } as const
     }
+    return { size: 1, preOne: 0, sufOne: 0, longestOne: 0, leftValue: 0, rightValue: 0, pairCount: 0 } as const
+  }
+  for (let i = 0; i < nOrArr.length; ++i) {
+    leaves[i] = fromElement(nOrArr[i])
+  }
+
+  return {
+    fromElement,
+    tree: new SegmentTreePointUpdateRangeQuery(
+      leaves,
+      () => ({ size: 0, preOne: 0, sufOne: 0, longestOne: 0, leftValue: 0, rightValue: 0, pairCount: 0 }),
+      (a, b) => {
+        const res: LongestOne = {
+          size: a.size + b.size,
+          preOne: 0,
+          sufOne: 0,
+          longestOne: 0,
+          leftValue: a.leftValue,
+          rightValue: b.rightValue,
+          pairCount: 0
+        }
+
+        if (a.rightValue === b.leftValue) {
+          res.preOne = a.preOne
+          if (a.preOne === a.size) res.preOne += b.preOne
+          res.sufOne = b.sufOne
+          if (b.sufOne === b.size) res.sufOne += a.sufOne
+          res.longestOne = Math.max(a.longestOne, b.longestOne, a.sufOne + b.preOne)
+
+          // TODO
+          const n1 = a.sufOne
+          const n2 = b.preOne
+          const n3 = n1 + n2
+          res.pairCount = a.pairCount + b.pairCount + (n3 * (n3 + 1)) / 2 - (n1 * (n1 + 1)) / 2 - (n2 * (n2 + 1)) / 2
+        } else {
+          res.preOne = a.preOne
+          res.sufOne = b.sufOne
+          res.longestOne = Math.max(a.longestOne, b.longestOne)
+
+          // TODO
+          res.pairCount = a.pairCount + b.pairCount
+        }
+        return res
+      }
+    )
   }
 }
 
@@ -240,5 +367,9 @@ export {
   //
   createRangeAffineRangeSum,
   //
-  createPointSetRangeMaxSumMinSum
+  createPointSetRangeMaxSumMinSum,
+  //
+  createPointSetRangeLongestRepeating,
+  //
+  createPointSetRangeLongestOne
 }

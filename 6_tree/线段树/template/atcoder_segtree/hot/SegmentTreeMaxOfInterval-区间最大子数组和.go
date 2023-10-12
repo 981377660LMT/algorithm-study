@@ -1,4 +1,4 @@
-// MaxOfInterval
+// MaxInterval
 // 最大子段和/最大子数组和
 // 最小子段和/最小子数组和
 // 小白逛公园 : 动态子段和
@@ -219,8 +219,8 @@ func (st *SegmentTreeInterval) MaxRight(left int, predicate func(E) bool) int {
 		if !predicate(st.op(res, st.seg[left])) {
 			for left < st.size {
 				left <<= 1
-				if predicate(st.op(res, st.seg[left])) {
-					res = st.op(res, st.seg[left])
+				if tmp := st.op(res, st.seg[left]); predicate(tmp) {
+					res = tmp
 					left++
 				}
 			}
@@ -250,8 +250,8 @@ func (st *SegmentTreeInterval) MinLeft(right int, predicate func(E) bool) int {
 		if !predicate(st.op(st.seg[right], res)) {
 			for right < st.size {
 				right = right<<1 | 1
-				if predicate(st.op(st.seg[right], res)) {
-					res = st.op(st.seg[right], res)
+				if tmp := st.op(st.seg[right], res); predicate(tmp) {
+					res = tmp
 					right--
 				}
 			}
