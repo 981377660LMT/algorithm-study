@@ -12,19 +12,15 @@ import { NextFinder } from '../../../22_专题/implicit_graph/RangeFinder/Finder
 // 如果无法到达右下角格子，请你返回 -1 。
 // https://leetcode.cn/problems/minimum-number-of-visited-cells-in-a-grid/solution/typescript-zai-xian-bfs-jie-jue-bian-shu-9awi/
 
-const INF = 2e15
+const INF = 2e9
 
 function minimumVisitedCells(grid: number[][]): number {
   const ROW = grid.length
   const COL = grid[0].length
-  const rowVisited: NextFinder[] = Array(ROW).fill(0)
-  const colVisited: NextFinder[] = Array(COL).fill(0)
-  for (let i = 0; i < ROW; i++) {
-    rowVisited[i] = new NextFinder(COL)
-  }
-  for (let j = 0; j < COL; j++) {
-    colVisited[j] = new NextFinder(ROW)
-  }
+  const rowVisited: NextFinder[] = Array(ROW)
+  for (let i = 0; i < ROW; i++) rowVisited[i] = new NextFinder(COL)
+  const colVisited: NextFinder[] = Array(COL)
+  for (let j = 0; j < COL; j++) colVisited[j] = new NextFinder(ROW)
 
   const dist = onlineBfs(
     ROW * COL,

@@ -9,28 +9,31 @@ import (
 	"fmt"
 	stdio "io"
 	"os"
-	"sort"
 	"strconv"
 )
 
 // 1 pos x: 将 pos 位置的值修改为 x
 // 2 start end x: 查询区间 [start, end) 中有多少子数组最大值不超过 x.
 //
-// 不带修怎么做? -> 全部元素小于给定数的极长连续段, 大于等于 x 的数为1, 小于 x 的数为0.
-func 魔法少女网站(nums []int, operations [][4]int) []int {
-
+// 不带修怎么做? ->
+// 将所有查询按照x从小到大排序,然后从小到大依次处理，即维护一个01数组.
+// 长为len的极长连续段的贡献为len*(len+1)/2.
+// 用线段树维护.
+// 带修 ->
+// 线段树不好维护,用分块维护。
+// 看一下分块不带修改怎么做。
+// !对于一个询问，我们只需要从左到右合并当前阈值下 0,1 对应的信息就好了，但复杂度过大，考虑序列分块，从左到右逐块处理，维护每个询问合并到当前块的信息。
+// 如果遇到散块，就直接暴力合并信息。否则考虑对于一个大小O(sqrt(n))的块也只有O(sqrt(n))种本质不用的x。
+// 带修改需要操作分块。
+// !https://www.luogu.com.cn/blog/ryoku/solution-p6578
+type Node struct {
+	size      int // 区间长度
+	preOne    int // 	前缀连续1的个数
+	sufOne    int // 后缀连续1的个数
+	pairCount int // !区间贡献
 }
 
-// 给定一个数组nums和一些查询(start,end,x)，对每个查询回答区间[start,end)内有多少个子数组最大值不超过x.
-// nums.length<=1e5,nums[i]<=1e5,查询个数<=1e5
-// 离线查询+线段树.
-func 魔法少女网站无修改版本(nums []int, queries [][3]int) []int {
-	type queryWithId struct{ start, end, x, id int }
-	qs := make([]queryWithId, len(queries))
-	for i, q := range queries {
-		qs[i] = queryWithId{start: q[0], end: q[1], x: q[2], id: i}
-	}
-	sort.Slice(qs, func(i, j int) bool { return qs[i].x < qs[j].x })
+func 魔法少女网站(nums []int, operations [][4]int) []int {
 
 }
 

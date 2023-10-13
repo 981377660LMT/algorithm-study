@@ -194,39 +194,41 @@ class TreeManager<NoneLeaf, Leaf> {
 export { TreeManager }
 
 if (require.main === module) {
-  type NoneLeaf = { children: Array<Leaf | NoneLeaf> }
+  type NoneLeaf = { value: number; children: Array<Leaf | NoneLeaf> }
   type Leaf = { value: number }
   const root = {
+    value: 0,
     children: [
       { value: 1 },
       { value: 2 },
       {
+        value: 99,
         children: [{ value: 3 }, { value: 4 }, { value: 5 }, { value: 6 }]
       },
       { value: 7 },
       { value: 8 }
     ]
-  }
+  } satisfies NoneLeaf
 
   const T = new TreeManager<NoneLeaf, Leaf>(root, {
     getChildren: node => node.children,
-    isLeaf: (node): node is Leaf => 'value' in node
+    isLeaf: (node): node is Leaf => !('children' in node)
   })
 
   T.insertNode([], { value: 233 })
+  T.insertNode([], { value: 234 })
+  T.insertNode([], { value: 235 })
   T.print()
 
-  T.removeNode([2, 0])
+  T.insertNode([2], { value: 666, children: [] })
   T.print()
 
-  T.updateNode([2, 0], { value: 666 })
+  T.pruneTree(node => node.value === 99)
   T.print()
 
-  T.patchNode([0], { value: 233 })
-  T.print()
+  // T.updateNode([2, 0], { value: 666 })
+  // T.print()
 
-  console.log(T.searchNode([2, 0]))
-  console.log(11)
-  T.pruneLeaf(leaf => leaf.value >= 5)
-  T.print()
+  // T.patchNode([0], { value: 233 })
+  // T.print()
 }

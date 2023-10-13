@@ -22,6 +22,7 @@ class Finder {
     }
     this._lg = seg.length
     this._seg = seg
+
     for (let i = 0; i < this._n; i++) {
       this.insert(i)
     }
