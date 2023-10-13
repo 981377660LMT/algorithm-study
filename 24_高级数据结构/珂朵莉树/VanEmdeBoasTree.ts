@@ -1,8 +1,12 @@
+/* eslint-disable no-inner-declarations */
+// Van Tree.
+// 梵峨眉大悲寺树.
+
 const INF = 2e15
 
 /**
- * Van Tree.
- * 梵峨眉大悲寺树.
+ * !建立一个元素范围为(-INF,INF)的VanEmdeBoasTree.
+ * @warning 允许插入的元素范围为[0,INF).
  */
 class VanEmdeBoasTree {
   private readonly _root: _VNode
@@ -19,7 +23,11 @@ class VanEmdeBoasTree {
     return this._root.has(x)
   }
 
+  /**
+   * !0<=x<INF.
+   */
   insert(x: number): boolean {
+    if (x < 0) throw new Error('inserted value must be non-negative!')
     if (this.has(x)) return false
     this._size++
     this._root.insert(x)
@@ -211,18 +219,15 @@ class _VNode {
   }
 }
 
-export {}
+export { VanEmdeBoasTree }
 
 if (require.main === module) {
   const van = new VanEmdeBoasTree()
   console.log(van.min, van.max, van.size)
-  van.insert(3)
-  van.insert(1)
-  van.insert(2)
-  console.log(van.has(1))
-  console.log(van.has(2))
-  console.log(van.has(3))
-  console.log(van.toString())
+  van.insert(0)
+  console.log(van.prev(0.5))
+  console.log(van.prev(-1))
+  console.log(van.prev(1))
 
   const n = 2e5
   const set2 = new VanEmdeBoasTree()
@@ -236,4 +241,63 @@ if (require.main === module) {
     set2.insert(i)
   }
   console.timeEnd('VanEmdeBoasTree') // 360ms
+
+  testWithBruteForce()
+  function testWithBruteForce(): void {
+    class Mocker {
+      private readonly _set = new Set<number>()
+      insert(x: number): void {
+        this._set.add(x)
+      }
+      erase(x: number): void {
+        this._set.delete(x)
+      }
+      has(x: number): boolean {
+        return this._set.has(x)
+      }
+      prev(x: number): number {
+        let res = -INF
+        for (const v of this._set) {
+          if (v > x) continue
+          if (v > res) res = v
+        }
+        return res
+      }
+      next(x: number): number {
+        let res = INF
+        for (const v of this._set) {
+          if (v < x) continue
+          if (v < res) res = v
+        }
+        return res
+      }
+    }
+
+    const mocker = new Mocker()
+    const set = new VanEmdeBoasTree()
+    for (let i = 0; i < 4e4; i++) {
+      const x = Math.floor(Math.random() * 1000)
+      if (Math.random() < 0.5) {
+        mocker.insert(x)
+        set.insert(x)
+      } else {
+        mocker.erase(x - 500)
+        set.erase(x - 500)
+      }
+      const x2 = Math.floor(Math.random() * 1000) - 500
+      const prev1 = mocker.prev(x2)
+      const prev2 = set.prev(x2)
+      if (prev1 !== prev2) {
+        console.log('prev1:', prev1, 'prev2:', prev2)
+        throw new Error()
+      }
+      const next1 = mocker.next(x2)
+      const next2 = set.next(x2)
+      if (next1 !== next2) {
+        console.log('next1:', next1, 'next2:', next2)
+        throw new Error()
+      }
+    }
+  }
+  console.log('ok')
 }

@@ -91,15 +91,7 @@ class VectorSpace:
             res.add(v)
         return res
 
-    def __ior__(self, other: "VectorSpace") -> "VectorSpace":
-        for v in other.bases:
-            self.add(v)
-        return self
-
     def __and__(self, other: "VectorSpace") -> "VectorSpace":
-        return self.__iand__(other)
-
-    def __iand__(self, other: "VectorSpace") -> "VectorSpace":
         maxDim = max(self._max, other._max).bit_length()
         x = self._orthogonalSpace(maxDim)
         y = other._orthogonalSpace(maxDim)
@@ -148,6 +140,9 @@ def max(a: int, b: int) -> int:
 
 
 if __name__ == "__main__":
+    a = VectorSpace([1, 2, 3])
+    b = VectorSpace([6])
+
     # # # https://atcoder.jp/contests/abc141/tasks/abc141_f
     # # # !把一个数组分成两个非空子集, 使得两个集合的异或和之和最大
 

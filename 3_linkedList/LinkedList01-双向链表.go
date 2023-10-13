@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type LinkedList01 struct {
 	m       int32
@@ -47,5 +50,48 @@ func main() {
 	fmt.Println(list.SetOne(6))
 	fmt.Println(list.SetOne(7))
 	fmt.Println(list.SetOne(9))
-	fmt.Println(list.SetOne(9))
+
+	n := int(1e4)
+	real := NewLinkedList01(n)
+	mocker := NewMocker(make([]int, n))
+	perm := rand.Perm(n)
+
+	for _, i := range perm {
+		prev, next := real.SetOne(i)
+		prev2, next2 := mocker.SetOne(i)
+		if prev != prev2 || next != next2 {
+			panic(fmt.Sprintf("prev: %d, next: %d, prev2: %d, next2: %d", prev, next, prev2, next2))
+		}
+	}
+
+	fmt.Println("ok")
+}
+
+type Mocker struct {
+	nums []int
+}
+
+func NewMocker(nums []int) *Mocker {
+	return &Mocker{nums: append([]int{}, nums...)}
+}
+
+func (m *Mocker) SetOne(i int) (prev, next int) {
+	if m.nums[i] == 1 {
+		panic("can not add same element twice")
+	}
+	m.nums[i] = 1
+	prev, next = -1, -1
+	for j := i - 1; j >= 0; j-- {
+		if m.nums[j] == 0 {
+			prev = j
+			break
+		}
+	}
+	for j := i + 1; j < len(m.nums); j++ {
+		if m.nums[j] == 0 {
+			next = j
+			break
+		}
+	}
+	return
 }

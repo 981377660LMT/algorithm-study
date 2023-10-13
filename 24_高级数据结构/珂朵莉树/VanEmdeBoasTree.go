@@ -109,7 +109,9 @@ type VanEmdeBoasTree struct {
 }
 
 // !建立一个元素范围为(-INF,INF)的VanEmdeBoasTree.
-//  depth:树的深度.一般取16.也可以取32.
+//
+//	depth:树的深度.一般取16.也可以取32.
+//	!允许插入的元素范围为[0,INF).
 func NewVanEmdeBoasTree(depth int) *VanEmdeBoasTree {
 	return &VanEmdeBoasTree{root: NewVNode(depth)}
 }
@@ -118,7 +120,11 @@ func (van *VanEmdeBoasTree) Has(x int) bool {
 	return van.root.Has(x)
 }
 
+// x>=0.
 func (van *VanEmdeBoasTree) Insert(x int) bool {
+	if x < 0 {
+		panic("can not insert negative number")
+	}
 	if van.Has(x) {
 		return false
 	}

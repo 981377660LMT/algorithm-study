@@ -26,6 +26,8 @@ import (
 // 如果遇到散块，就直接暴力合并信息。否则考虑对于一个大小O(sqrt(n))的块也只有O(sqrt(n))种本质不用的x。
 // 带修改需要操作分块。
 // !https://www.luogu.com.cn/blog/ryoku/solution-p6578
+
+// todo
 type Node struct {
 	size      int // 区间长度
 	preOne    int // 	前缀连续1的个数

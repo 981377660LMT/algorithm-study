@@ -26,18 +26,21 @@
 //   and other many problems.
 //
 
+/**
+ * 维护联通分量和的并查集.
+ */
 class WeightedUnionFind {
   private readonly _parent: Int32Array
-  private readonly _value: number[]
-  private readonly _delta: number[]
-  private readonly _total: number[]
+  private readonly _value: Float64Array
+  private readonly _delta: Float64Array
+  private readonly _total: Float64Array
   private _part: number
 
   constructor(n: number) {
     this._parent = new Int32Array(n).fill(-1)
-    this._value = Array(n).fill(0)
-    this._delta = Array(n).fill(0)
-    this._total = Array(n).fill(0)
+    this._value = new Float64Array(n)
+    this._delta = new Float64Array(n)
+    this._total = new Float64Array(n)
     this._part = n
   }
 
@@ -62,7 +65,7 @@ class WeightedUnionFind {
    * u的值.
    */
   get(u: number): number {
-    return this._value[u] + this._find(u)[1]
+    return this._value[u] + this._find(u).delta
   }
 
   /**
@@ -91,7 +94,7 @@ class WeightedUnionFind {
   }
 
   find(u: number): number {
-    return this._find(u)[0]
+    return this._find(u).root
   }
 
   isConnected(u: number, v: number): boolean {
@@ -119,14 +122,36 @@ class WeightedUnionFind {
     return this._part
   }
 
-  private _find(u: number): [root: number, delta: number] {
-    if (this._parent[u] < 0) return [u, this._delta[u]]
-    let [a, b] = this._find(this._parent[u])
-    b += this._delta[u]
-    this._parent[u] = a
-    this._delta[u] = b - this._delta[a]
-    return [a, b]
+  private _find(u: number): { root: number; delta: number } {
+    if (this._parent[u] < 0) return { root: u, delta: this._delta[u] }
+    let { root, delta } = this._find(this._parent[u])
+    delta += this._delta[u]
+    this._parent[u] = root
+    this._delta[u] = delta - this._delta[root]
+    return { root, delta }
   }
 }
 
 export { WeightedUnionFind }
+
+// 2382. 删除操作后的最大子段和
+// https://leetcode.cn/problems/maximum-segment-sum-after-removals/
+//
+function maximumSegmentSum(nums: number[], removeQueries: number[]): number[] {
+  const n = nums.length
+  const q = removeQueries.length
+  const uf = new WeightedUnionFind(n)
+  const res: number[] = Array(q).fill(0)
+  let maxPartSum = 0
+  const visited = new Uint8Array(n)
+  for (let qi = q - 1; ~qi; qi--) {
+    res[qi] = maxPartSum
+    const pos = removeQueries[qi]
+    uf.add(pos, nums[pos])
+    visited[pos] = 1
+    if (pos > 0 && visited[pos - 1]) uf.union(pos, pos - 1)
+    if (pos < n - 1 && visited[pos + 1]) uf.union(pos, pos + 1)
+    maxPartSum = Math.max(maxPartSum, uf.getGroup(pos))
+  }
+  return res
+}

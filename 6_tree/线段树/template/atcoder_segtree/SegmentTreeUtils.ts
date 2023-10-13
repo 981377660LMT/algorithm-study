@@ -16,7 +16,9 @@ const INF = 2e9 // !超过int32使用2e15
 /**
  * 区间加,查询区间最大值(幺元为0).
  */
-function createRangeAddRangeMax(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAddRangeMax(
+  nOrNums: number | ArrayLike<number>
+): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => 0,
     id: () => 0,
@@ -29,7 +31,9 @@ function createRangeAddRangeMax(nOrNums: number | ArrayLike<number>): SegmentTre
 /**
  * 区间加,查询区间最小值(幺元为INF).
  */
-function createRangeAddRangeMin(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAddRangeMin(
+  nOrNums: number | ArrayLike<number>
+): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => INF,
     id: () => 0,
@@ -43,7 +47,9 @@ function createRangeAddRangeMin(nOrNums: number | ArrayLike<number>): SegmentTre
  * 区间更新最大值,查询区间最大值(幺元为0).
  * RangeChmaxRangeMax
  */
-function createRangeUpdateRangeMax(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeUpdateRangeMax(
+  nOrNums: number | ArrayLike<number>
+): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => 0,
     id: () => -INF,
@@ -57,7 +63,9 @@ function createRangeUpdateRangeMax(nOrNums: number | ArrayLike<number>): Segment
  * 区间更新最小值,查询区间最小值(幺元为INF).
  * RangeChminRangeMin
  */
-function createRangeUpdateRangeMin(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeUpdateRangeMin(
+  nOrNums: number | ArrayLike<number>
+): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => INF,
     id: () => INF,
@@ -85,7 +93,9 @@ function createRangeAssignRangeSum(
 /**
  * 区间赋值,查询区间最大值(幺元为-INF).
  */
-function createRangeAssignRangeMax(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAssignRangeMax(
+  nOrNums: number | ArrayLike<number>
+): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => 0,
     id: () => -INF,
@@ -98,7 +108,9 @@ function createRangeAssignRangeMax(nOrNums: number | ArrayLike<number>): Segment
 /**
  * 区间赋值,查询区间最小值(幺元为INF).
  */
-function createRangeAssignRangeMin(nOrNums: number | ArrayLike<number>): SegmentTreeRangeUpdateRangeQuery<number, number> {
+function createRangeAssignRangeMin(
+  nOrNums: number | ArrayLike<number>
+): SegmentTreeRangeUpdateRangeQuery<number, number> {
   return new SegmentTreeRangeUpdateRangeQuery(nOrNums, {
     e: () => INF,
     id: () => INF,
@@ -129,7 +141,10 @@ function createRangeFlipRangeSum(
 function createRangeAssignRangeAddRangeSum(
   nOrNums: number | ArrayLike<{ size: number; sum: number }>
 ): SegmentTreeRangeUpdateRangeQuery<{ size: number; sum: number }, { mul: number; add: number }> {
-  return new SegmentTreeRangeUpdateRangeQuery<{ size: number; sum: number }, { mul: number; add: number }>(nOrNums, {
+  return new SegmentTreeRangeUpdateRangeQuery<
+    { size: number; sum: number },
+    { mul: number; add: number }
+  >(nOrNums, {
     e() {
       return { size: 1, sum: 0 }
     },
@@ -198,7 +213,15 @@ function createPointSetRangeMaxSumMinSum(arr: ArrayLike<number>): {
   tree: SegmentTreePointUpdateRangeQuery<Interval>
 } {
   const leaves: Interval[] = Array(arr.length)
-  const fromElement = (v: number) => ({ sum: v, maxSum: v, preMaxSum: v, sufMaxSum: v, minSum: v, preMinSum: v, sufMinSum: v })
+  const fromElement = (v: number) => ({
+    sum: v,
+    maxSum: v,
+    preMaxSum: v,
+    sufMaxSum: v,
+    minSum: v,
+    preMinSum: v,
+    sufMinSum: v
+  })
   for (let i = 0; i < arr.length; ++i) {
     leaves[i] = fromElement(arr[i])
   }
@@ -207,9 +230,17 @@ function createPointSetRangeMaxSumMinSum(arr: ArrayLike<number>): {
     fromElement,
     tree: new SegmentTreePointUpdateRangeQuery(
       leaves,
-      () => ({ sum: 0, maxSum: -INF, preMaxSum: -INF, sufMaxSum: -INF, minSum: INF, preMinSum: INF, sufMinSum: INF }),
+      () => ({
+        sum: 0,
+        maxSum: -INF,
+        preMaxSum: -INF,
+        sufMaxSum: -INF,
+        minSum: INF,
+        preMinSum: INF,
+        sufMinSum: INF
+      }),
       (e1, e2) => ({
-        sum: e1.sum + e2.sum,
+        sum: Math.min(Math.max(e1.sum + e2.sum, -INF), INF),
         maxSum: Math.max(e1.maxSum, e2.maxSum, e1.sufMaxSum + e2.preMaxSum),
         preMaxSum: Math.max(e1.preMaxSum, e1.sum + e2.preMaxSum),
         sufMaxSum: Math.max(e2.sufMaxSum, e2.sum + e1.sufMaxSum),
@@ -238,7 +269,14 @@ function createPointSetRangeLongestRepeating<V>(arr: ArrayLike<V>): {
   tree: SegmentTreePointUpdateRangeQuery<LongestRepeating<V>>
 } {
   const leaves: LongestRepeating<V>[] = Array(arr.length)
-  const fromElement = (v: V) => ({ size: 1, max: 1, preMax: 1, sufMax: 1, leftValue: v, rightValue: v })
+  const fromElement = (v: V) => ({
+    size: 1,
+    max: 1,
+    preMax: 1,
+    sufMax: 1,
+    leftValue: v,
+    rightValue: v
+  })
   for (let i = 0; i < arr.length; ++i) {
     leaves[i] = fromElement(arr[i])
   }
@@ -299,9 +337,25 @@ function createPointSetRangeLongestOne(nOrArr: number | ArrayLike<0 | 1>): {
   const leaves: LongestOne[] = Array(nOrArr.length)
   const fromElement = (v: 0 | 1) => {
     if (v === 1) {
-      return { size: 1, preOne: 1, sufOne: 1, longestOne: 1, leftValue: 1, rightValue: 1, pairCount: 1 } as const
+      return {
+        size: 1,
+        preOne: 1,
+        sufOne: 1,
+        longestOne: 1,
+        leftValue: 1,
+        rightValue: 1,
+        pairCount: 1
+      } as const
     }
-    return { size: 1, preOne: 0, sufOne: 0, longestOne: 0, leftValue: 0, rightValue: 0, pairCount: 0 } as const
+    return {
+      size: 1,
+      preOne: 0,
+      sufOne: 0,
+      longestOne: 0,
+      leftValue: 0,
+      rightValue: 0,
+      pairCount: 0
+    } as const
   }
   for (let i = 0; i < nOrArr.length; ++i) {
     leaves[i] = fromElement(nOrArr[i])
@@ -311,7 +365,15 @@ function createPointSetRangeLongestOne(nOrArr: number | ArrayLike<0 | 1>): {
     fromElement,
     tree: new SegmentTreePointUpdateRangeQuery(
       leaves,
-      () => ({ size: 0, preOne: 0, sufOne: 0, longestOne: 0, leftValue: 0, rightValue: 0, pairCount: 0 }),
+      () => ({
+        size: 0,
+        preOne: 0,
+        sufOne: 0,
+        longestOne: 0,
+        leftValue: 0,
+        rightValue: 0,
+        pairCount: 0
+      }),
       (a, b) => {
         const res: LongestOne = {
           size: a.size + b.size,
@@ -334,7 +396,12 @@ function createPointSetRangeLongestOne(nOrArr: number | ArrayLike<0 | 1>): {
           const n1 = a.sufOne
           const n2 = b.preOne
           const n3 = n1 + n2
-          res.pairCount = a.pairCount + b.pairCount + (n3 * (n3 + 1)) / 2 - (n1 * (n1 + 1)) / 2 - (n2 * (n2 + 1)) / 2
+          res.pairCount =
+            a.pairCount +
+            b.pairCount +
+            (n3 * (n3 + 1)) / 2 -
+            (n1 * (n1 + 1)) / 2 -
+            (n2 * (n2 + 1)) / 2
         } else {
           res.preOne = a.preOne
           res.sufOne = b.sufOne

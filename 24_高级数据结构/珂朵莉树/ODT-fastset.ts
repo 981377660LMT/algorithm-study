@@ -313,22 +313,22 @@ class FastSet {
 export { ODT }
 
 if (require.main === module) {
-  const INF = 2e15
-  const odt = new ODT(10, INF)
-  console.log(odt.toString())
-  odt.set(0, 10, 1)
-  odt.set(2, 5, 2)
-  console.log(odt.get(8))
-  console.log(odt.toString())
-  odt.enumerateRange(
-    1,
-    7,
-    (start, end, value) => {
-      console.log(start, end, value)
-    },
-    true
-  )
-  console.log(odt.toString(), odt.length)
+  // const INF = 2e15
+  // const odt = new ODT(10, INF)
+  // console.log(odt.toString())
+  // odt.set(0, 10, 1)
+  // odt.set(2, 5, 2)
+  // console.log(odt.get(8))
+  // console.log(odt.toString())
+  // odt.enumerateRange(
+  //   1,
+  //   7,
+  //   (start, end, value) => {
+  //     console.log(start, end, value)
+  //   },
+  //   true
+  // )
+  // console.log(odt.toString(), odt.length)
 
   // 352. 将数据流变为多个不相交区间
   // https://leetcode.cn/problems/data-stream-as-disjoint-intervals/

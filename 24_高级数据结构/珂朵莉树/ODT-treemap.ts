@@ -170,13 +170,9 @@ export { ODTMap }
 
 if (require.main === module) {
   const odtMap = new ODTMap<number>(-1)
+  odtMap.set(0, 1, 1)
+  odtMap.set(-1, 0, 1)
   console.log(odtMap.toString())
-  odtMap.set(1, 3, 1)
-  console.log(odtMap.count, 999, odtMap.length)
-  odtMap.set(3, 5, 2)
-  console.log(odtMap.toString())
-  console.log(odtMap.get(2))
-  console.log(odtMap.length, odtMap.count)
 
   // https://leetcode.cn/problems/count-integers-in-intervals/
   class CountIntervals {
@@ -256,6 +252,21 @@ if (require.main === module) {
     const res: number[][] = []
     odt.enumerateAll((start, end, value) => {
       if (value === 1) res.push([start, end])
+    })
+    return res
+  }
+
+  // 128. 最长连续序列
+  // https://leetcode.cn/problems/longest-consecutive-sequence/
+  // 给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
+  function longestConsecutive(nums: number[]): number {
+    const odt = new ODTMap(-1)
+    nums.forEach(v => odt.set(v, v + 1, 1))
+    let res = 0
+    odt.enumerateAll((start, end, value) => {
+      if (value === 1) {
+        res = Math.max(res, end - start)
+      }
     })
     return res
   }

@@ -76,29 +76,23 @@ class Solution:
     def findLatestStep2(self, arr: List[int], m: int) -> int:
         """反向查找第一个 出现m个1的情况"""
         n = len(arr)
-
         if m > n:
             return -1
         if m == n:
             return m
-
         zeros = SortedList([-1, n])
-
         for i in range(n - 1, -1, -1):
             pos = arr[i] - 1
             zeros.add(pos)
             index = zeros.bisect_left(pos)
-
             if index + 1 < len(zeros):
                 rightPos = zeros[index + 1]
                 if rightPos - pos == m + 1:
                     return i
-
             if index > 0:
                 leftPos = zeros[index - 1]
                 if pos - leftPos == m + 1:
                     return i
-
         return -1
 
 

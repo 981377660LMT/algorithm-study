@@ -34,4 +34,16 @@ if (require.main === module) {
     const { tree } = createPointSetRangeMaxSumMinSum(nums)
     return tree.queryAll().maxSum
   }
+
+  // https://leetcode.cn/problems/maximum-segment-sum-after-removals/
+  function maximumSegmentSum(nums: number[], removeQueries: number[]): number[] {
+    const INF = 2e15
+    const { tree, fromElement } = createPointSetRangeMaxSumMinSum(nums)
+    const res: number[] = Array(removeQueries.length)
+    for (let i = 0; i < removeQueries.length; i++) {
+      tree.set(removeQueries[i], fromElement(-INF))
+      res[i] = Math.max(0, tree.queryAll().maxSum)
+    }
+    return res
+  }
 }

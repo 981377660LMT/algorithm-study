@@ -13,9 +13,28 @@ const INF int = 1e18
 
 func demo() {
 	odt := NewODTVan(-INF)
-	odt.Set(0, 3, 1)
-	odt.Set(3, 5, 2)
+	odt.Set(0, 1, 1)
+	odt.Set(-1, 0, 1)
 	fmt.Println(odt.Len, odt.Count, odt)
+}
+
+// 128. 最长连续序列
+// https://leetcode.cn/problems/longest-consecutive-sequence/
+// 给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
+func longestConsecutive(nums []int) int {
+	odt := NewODTVan(0)
+	OFFSET := int(1e9 + 10)
+	for _, v := range nums {
+		odt.Set(v+OFFSET, v+OFFSET+1, 1)
+
+	}
+	res := 0
+	odt.EnumerateAll(func(start, end int, value Value) {
+		if value == 1 {
+			res = max(res, end-start)
+		}
+	})
+	return res
 }
 
 func UnionOfInterval() {
@@ -26,7 +45,7 @@ func UnionOfInterval() {
 
 	var n int
 	fmt.Fscan(in, &n)
-	odt := NewODTVan(-INF)
+	odt := NewODTVan(0)
 	for i := 0; i < n; i++ {
 		var l, r int
 		fmt.Fscan(in, &l, &r)
@@ -40,8 +59,8 @@ func UnionOfInterval() {
 }
 
 func main() {
-	// demo()
-	UnionOfInterval()
+	demo()
+	// UnionOfInterval()
 }
 
 type Value = int
@@ -56,11 +75,12 @@ type ODTVan struct {
 }
 
 // 指定哨兵 noneValue 建立一个 ODT.
-//  区间为[-INF,INF).
+//
+//	区间为[0,INF).
 func NewODTVan(noneValue Value) *ODTVan {
 	res := &ODTVan{
+		llim:      0,
 		rlim:      INF,
-		llim:      -INF,
 		noneValue: noneValue,
 		data:      make(map[int]Value),
 		ss:        _NewVan(),
@@ -82,7 +102,11 @@ func (odt *ODTVan) Get(x int, erase bool) (start, end int, value Value) {
 	return
 }
 
+// start>=0.
 func (odt *ODTVan) Set(start, end int, value Value) {
+	if start < 0 {
+		panic("start must be non-negative")
+	}
 	odt.EnumerateRange(start, end, func(l, r int, x Value) {}, true)
 	odt.ss.Insert(start)
 	odt.data[start] = value
@@ -202,14 +226,18 @@ type _Van struct {
 }
 
 func _NewVan() *_Van {
-	return &_Van{root: NewVNode(32)} // 16/32
+	return &_Van{root: NewVNode(16)} // 16/32
 }
 
 func (van *_Van) Has(x int) bool {
 	return van.root.Has(x)
 }
 
+// x>=0.
 func (van *_Van) Insert(x int) bool {
+	if x < 0 {
+		panic("x must be non-negative")
+	}
 	if van.Has(x) {
 		return false
 	}

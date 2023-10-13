@@ -1,144 +1,230 @@
-// # https://maspypy.github.io/library/linalg/xor/vector_space.hpp
-// # 可合并的线性基/线性基合并
-
-// from typing import List, Optional
-
-// class VectorSpace:
-//     __slots__ = ("bases", "_max")
-
-//     def __init__(self, nums: Optional[List[int]] = None) -> None:
-//         self.bases = []
-//         self._max = 0
-//         if nums is not None:
-//             for v in nums:
-//                 self.add(v)
-
-//     def add(self, v: int) -> bool:
-//         for e in self.bases:
-//             if e == 0 or v == 0:
-//                 break
-//             v = min(v, v ^ e)
-//         if v:
-//             self.bases.append(v)
-//             if v > self._max:
-//                 self._max = v
-//             return True
-//         return False
-
-//     def getMax(self, xorVal=0) -> int:
-//         res = xorVal
-//         for e in self.bases:
-//             res = max(res, res ^ e)
-//         return res
-
-//     def getMin(self, xorVal=0) -> int:
-//         res = xorVal
-//         for e in self.bases:
-//             res = min(res, res ^ e)
-//         return res
-
-//     def copy(self) -> "VectorSpace":
-//         res = VectorSpace()
-//         res.bases = self.bases[:]
-//         res._max = self._max
-//         return res
-
-//     def _orthogonalSpace(self, maxDim: int) -> "VectorSpace":
-//         self._normalize()
-//         m = maxDim
-//         tmp = [0] * m
-//         for e in self.bases:
-//             tmp[e.bit_length() - 1] = e
-//         tmp = transpose(m, m, tmp, inplace=True)
-//         res = VectorSpace()
-//         for j in range(m):
-//             if tmp[j] & (1 << j):
-//                 continue
-//             res.add(tmp[j] | (1 << j))
-//         return res
-
-//     def _normalize(self, reverse=True) -> None:
-//         n = len(self.bases)
-//         for j in range(n):
-//             for i in range(j):
-//                 self.bases[i] = min(self.bases[i], self.bases[i] ^ self.bases[j])
-//         self.bases.sort(reverse=reverse)
-
-//     def __len__(self) -> int:
-//         return len(self.bases)
-
-//     def __iter__(self):
-//         return iter(self.bases)
-
-//     def __repr__(self) -> str:
-//         return repr(self.bases)
-
-//     def __contains__(self, v: int) -> bool:
-//         for e in self.bases:
-//             if v == 0:
-//                 break
-//             v = min(v, v ^ e)
-//         return v == 0
-
-//     def __or__(self, other: "VectorSpace") -> "VectorSpace":
-//         v1, v2 = self, other
-//         if len(v1) < len(v2):
-//             v1, v2 = v2, v1
-//         res = v1.copy()
-//         for v in v2.bases:
-//             res.add(v)
-//         return res
-
-//     def __ior__(self, other: "VectorSpace") -> "VectorSpace":
-//         for v in other.bases:
-//             self.add(v)
-//         return self
-
-//     def __and__(self, other: "VectorSpace") -> "VectorSpace":
-//         return self.__iand__(other)
-
-//     def __iand__(self, other: "VectorSpace") -> "VectorSpace":
-//         maxDim = max(self._max, other._max).bit_length()
-//         x = self._orthogonalSpace(maxDim)
-//         y = other._orthogonalSpace(maxDim)
-//         if len(x) < len(y):
-//             x, y = y, x
-//         for v in y.bases:
-//             x.add(v)
-//         return x._orthogonalSpace(maxDim)
-
-// def transpose(row: int, col: int, matrix1D: List[int], inplace=False) -> List[int]:
-//     """矩阵转置
-
-//     matrix1D:每个元素是状压的数字
-//     inplace:是否修改原矩阵
-//     """
-//     assert row == len(matrix1D)
-//     m = matrix1D[:] if not inplace else matrix1D
-//     log = 0
-//     max_ = max(row, col)
-//     while (1 << log) < max_:
-//         log += 1
-//     if len(m) < (1 << log):
-//         m += [0] * ((1 << log) - len(m))
-//     w = 1 << log
-//     mask = 1
-//     for i in range(log):
-//         mask = mask | (mask << (1 << i))
-//     for t in range(log):
-//         w >>= 1
-//         mask = mask ^ (mask >> w)
-//         for i in range(1 << t):
-//             for j in range(w):
-//                 m[w * 2 * i + j] = ((m[w * (2 * i + 1) + j] << w) & mask) ^ m[w * 2 * i + j]
-//                 m[w * (2 * i + 1) + j] = ((m[w * 2 * i + j] & mask) >> w) ^ m[w * (2 * i + 1) + j]
-//                 m[w * 2 * i + j] = ((m[w * (2 * i + 1) + j] << w) & mask) ^ m[w * 2 * i + j]
-//     return m[:col]
-
 package main
 
-func main() {
+import (
+	"bufio"
+	"fmt"
+	"math/bits"
+	"os"
+	"sort"
+)
 
+func main() {
+	v1, v2 := NewLinearBase(nil), NewLinearBase(nil)
+	v1.Add(1)
+	v1.Add(2)
+	v1.Add(3)
+	v2.Add(1)
+	v2.Add(5)
+	v2.Add(7)
+	v2.Add(8)
+
+	fmt.Println(v1.Or(v2))
+	fmt.Println(v1)
+	fmt.Println(v1.And(v2))
+	fmt.Println(v1.And(NewLinearBase(nil)))
+	fmt.Println(v1)
+}
+
+func demo() {
+
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	xor := 0
+	V1 := NewLinearBase(nil)
+	for _, v := range nums {
+		xor ^= v
+		V1.Add(v)
+	}
+
+	mask := ^xor
+	V2 := NewLinearBase(nil)
+	V1.ForEach(func(v int) {
+		V2.Add(v & mask)
+	})
+
+	res := V2.Max(0) + (xor ^ V2.Max(0))
+	fmt.Fprintln(out, res)
+
+}
+
+// VectorSpace，线性基空间.支持线性基合并.
+type LinearBase struct {
+	bases  []int
+	maxBit int
+}
+
+func NewLinearBase(nums []int) *LinearBase {
+	res := &LinearBase{}
+	for _, num := range nums {
+		res.Add(num)
+	}
+	return res
+}
+
+func (lb *LinearBase) Add(num int) bool {
+	for _, base := range lb.bases {
+		if base == 0 || num == 0 {
+			break
+		}
+		num = min(num, num^base)
+	}
+	if num != 0 {
+		lb.bases = append(lb.bases, num)
+		lb.maxBit = max(lb.maxBit, num)
+		return true
+	}
+	return false
+}
+
+func (lb *LinearBase) Max(xor int) int {
+	res := xor
+	for _, base := range lb.bases {
+		res = max(res, res^base)
+	}
+	return res
+}
+
+func (lb *LinearBase) Min(xorVal int) int {
+	res := xorVal
+	for _, base := range lb.bases {
+		res = min(res, res^base)
+	}
+	return res
+}
+
+func (lb *LinearBase) Copy() *LinearBase {
+	res := &LinearBase{}
+	res.bases = append(res.bases, lb.bases...)
+	res.maxBit = lb.maxBit
+	return res
+}
+
+func (lb *LinearBase) Len() int {
+	return len(lb.bases)
+}
+
+func (lb *LinearBase) ForEach(f func(base int)) {
+	for _, base := range lb.bases {
+		f(base)
+	}
+}
+
+func (lb *LinearBase) Has(v int) bool {
+	for _, w := range lb.bases {
+		if v == 0 {
+			break
+		}
+		v = min(v, v^w)
+	}
+	return v == 0
+}
+
+func (lb *LinearBase) Or(other *LinearBase) *LinearBase {
+	v1, v2 := lb, other
+	if v1.Len() < v2.Len() {
+		v1, v2 = v2, v1
+	}
+	res := v1.Copy()
+	for _, base := range v2.bases {
+		res.Add(base)
+	}
+	return res
+}
+
+func (lb *LinearBase) And(other *LinearBase) *LinearBase {
+	maxDim := max(lb.maxBit, other.maxBit)
+	x := lb.orthogonalSpace(maxDim)
+	y := other.orthogonalSpace(maxDim)
+	if x.Len() < y.Len() {
+		x, y = y, x
+	}
+	for _, base := range y.bases {
+		x.Add(base)
+	}
+	return x.orthogonalSpace(maxDim)
+}
+
+func (lb *LinearBase) String() string {
+	return fmt.Sprintf("%v", lb.bases)
+}
+
+// 正交空间.
+func (lb *LinearBase) orthogonalSpace(maxDim int) *LinearBase {
+	lb.normalize(true)
+	m := maxDim
+	tmp := make([]int, m)
+	for _, base := range lb.bases {
+		tmp[bits.Len(uint(base))-1] = base
+	}
+	tmp = Transpose(m, m, tmp, true)
+	res := &LinearBase{}
+	for j := 0; j < m; j++ {
+		if tmp[j]>>j&1 == 1 {
+			continue
+		}
+		res.Add(tmp[j] | 1<<j)
+	}
+	return res
+}
+
+func (lb *LinearBase) normalize(reverse bool) {
+	n := len(lb.bases)
+	for j := 0; j < n; j++ {
+		for i := 0; i < j; i++ {
+			lb.bases[i] = min(lb.bases[i], lb.bases[i]^lb.bases[j])
+		}
+	}
+	if !reverse {
+		sort.Ints(lb.bases)
+	} else {
+		sort.Sort(sort.Reverse(sort.IntSlice(lb.bases)))
+	}
+}
+
+// 矩阵转置,O(n+m)log(n+m)
+func Transpose(row, col int, grid []int, inPlace bool) []int {
+	if len(grid) != row {
+		panic("row not match")
+	}
+	if !inPlace {
+		grid = append(grid[:0:0], grid...)
+	}
+	log := 0
+	max_ := max(row, col)
+	for 1<<log < max_ {
+		log++
+	}
+	if len(grid) < 1<<log {
+		*&grid = append(grid, make([]int, 1<<log-len(grid))...)
+	}
+	width := 1 << log
+	mask := int(1)
+	for i := 0; i < log; i++ {
+		mask |= (mask << (1 << i))
+	}
+	for t := 0; t < log; t++ {
+		width >>= 1
+		mask ^= (mask >> width)
+		for i := 0; i < 1<<t; i++ {
+			for j := 0; j < width; j++ {
+				x := &grid[width*(2*i)+j]
+				y := &grid[width*(2*i+1)+j]
+				*x = ((*y << width) & mask) ^ *x
+				*y = ((*x & mask) >> width) ^ *y
+				*x = ((*y << width) & mask) ^ *x
+			}
+		}
+	}
+	return grid[:col]
 }
 
 func min(a, b int) int {

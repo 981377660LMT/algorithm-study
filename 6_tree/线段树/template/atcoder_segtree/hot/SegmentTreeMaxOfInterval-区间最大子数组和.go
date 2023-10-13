@@ -54,6 +54,27 @@ func 小白逛公园() {
 	}
 }
 
+// 2382. 删除操作后的最大子段和
+// https://leetcode.cn/problems/maximum-segment-sum-after-removals/description/
+const INF int = 2e15
+
+func maximumSegmentSum(nums []int, removeQueries []int) []int64 {
+	leave := make([]E, len(nums))
+	for i, v := range nums {
+		leave[i] = FromElement(v)
+	}
+	seg := NewSegmentTreeInterval(leave)
+	res := make([]int64, len(removeQueries))
+	for i, v := range removeQueries {
+		seg.Set(v, FromElement(-INF))
+		res[i] = int64(seg.QueryAll().max)
+		if res[i] < 0 {
+			res[i] = 0
+		}
+	}
+	return res
+}
+
 // 区间前缀和/区间后缀和.
 type Interval struct {
 	sum  int // 区间和
@@ -81,6 +102,12 @@ func FromElementWithLength(value int, length int) Interval {
 		return Interval{}
 	}
 	sum := value * length
+	if sum > INF {
+		sum = INF
+	}
+	if sum < -INF {
+		sum = -INF
+	}
 	tmp1 := value
 	if value > 0 {
 		tmp1 *= length
@@ -104,8 +131,16 @@ func Merge(this, other Interval) Interval {
 	if other.len == 0 {
 		return this
 	}
+
+	candSum := this.sum + other.sum
+	if candSum > INF {
+		candSum = INF
+	}
+	if candSum < -INF {
+		candSum = -INF
+	}
 	return Interval{
-		sum:  this.sum + other.sum,
+		sum:  candSum,
 		len:  this.len + other.len,
 		max:  max(max(this.max, other.max), this.rmax+other.lmax),
 		lmax: max(this.lmax, this.sum+other.lmax),
