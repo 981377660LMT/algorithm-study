@@ -10,6 +10,9 @@ function modSub(num1: number, num2: number, mod = 1e9 + 7): number {
   return modAdd(num1, -num2, mod)
 }
 
+/**
+ * 效率不如bigint，但是对数组存储更友好.
+ */
 function modMul(num1: number, num2: number, mod = 1e9 + 7): number {
   return (((Math.floor(num1 / 65536) * num2) % mod) * 65536 + (num1 & 65535) * num2) % mod
 }

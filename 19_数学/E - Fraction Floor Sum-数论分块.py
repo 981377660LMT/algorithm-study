@@ -10,7 +10,7 @@
 def floorSum(lower: int, upper: int, num: int) -> int:
     """
     ```
-    sum(num//i for i in range(lower,upper+1)
+    sum(num // i for i in range(lower,upper+1)
     ```
     """
     res = 0

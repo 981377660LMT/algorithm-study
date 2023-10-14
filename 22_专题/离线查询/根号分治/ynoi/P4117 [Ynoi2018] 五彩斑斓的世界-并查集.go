@@ -12,6 +12,10 @@ import (
 
 // 0 start end x：把区间 [start, end) 内大于 x 的数减去 x.
 // 1 start end x: 查询区间 [start, end) 内等于 x 的数的个数.
+//
+// TODO:
+//
+
 func RangeClampRangeFreq(nums []int, operations [][4]int) []int {
 	block := UseBlock(nums, int(math.Sqrt(float64(len(nums)))+1))
 	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount

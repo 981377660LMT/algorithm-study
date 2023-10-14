@@ -5,24 +5,28 @@
 
 三维情形:
 扫描z轴,维护一个二维的矩形面积并。
+https://maspypy.github.io/library/other/cuboid_union_volume.hpp
+https://maspypy.github.io/library/ds/incremental_rectangle_union.hpp
 https://kmjp.hatenablog.jp/entry/2017/06/20/0900
 https://ei1333.github.io/library/structure/others/union-rectangle.hpp
 """
+# IncrementalRectangleUnion-包含原点的矩形面积并/RectangleUnion/IncrementalRectangleUnion
 
-from typing import List
+
+from typing import List, Tuple
 from sortedcontainers import SortedList
 
 INF = int(1e18)
 
 
-class UnionRectangleRange:
+class IncrementalRectangleUnionRange:
     __slots__ = ("_ur", "_ul", "_dr", "_dl")
 
     def __init__(self) -> None:
-        self._ur = UnionRectangle()
-        self._ul = UnionRectangle()
-        self._dr = UnionRectangle()
-        self._dl = UnionRectangle()
+        self._ur = IncrementalRectangleUnion()
+        self._ul = IncrementalRectangleUnion()
+        self._dr = IncrementalRectangleUnion()
+        self._dl = IncrementalRectangleUnion()
 
     def add(self, x1: int, x2: int, y1: int, y2: int) -> None:
         """Add [x1, x2] * [y1, y2].
@@ -40,7 +44,7 @@ class UnionRectangleRange:
         return self._ur.sum + self._ul.sum + self._dr.sum + self._dl.sum
 
 
-class UnionRectangle:
+class IncrementalRectangleUnion:
     __slots__ = ("_sl", "sum")
 
     def __init__(self) -> None:
@@ -73,17 +77,41 @@ class UnionRectangle:
         return self.sum
 
 
+def cuboidUnionVolumn(points: List[Tuple[int, int, int]]) -> int:
+    """求出所有左下角为原点的立方体的体积并.
+
+    Args:
+        points (List[Tuple[int,int,int]]): [x, y, z] 每个点的坐标，表示一个[0, x] * [0, y] * [0, z]的立方体.
+
+    Returns:
+        int: 所有立方体的体积并.
+    """
+    points = sorted(points, key=lambda x: x[2], reverse=True)
+    preZ = INF
+    res = 0
+    area = 0
+    manager = IncrementalRectangleUnion()
+    for x, y, z in points:
+        res += (preZ - z) * area
+        manager.add(x, y)
+        area = manager.query()
+        preZ = z
+    res += preZ * area
+    return res
+
+
 if __name__ == "__main__":
-    # points = [(2, 2), (3, 4), (1, 7)]
-    # ur = UnionRectangleRange()
-    # for x, y in points:
-    #     ur.add(1, 3, 1, 3)
-    #     print(ur.query())
+    ur = IncrementalRectangleUnionRange()
+
+    ur.add(-2, 1, -2, 1)
+    print(ur.query())
+    ur.add(-1, 2, -1, 2)
+    print(ur.query())
 
     # https://yukicoder.me/problems/2577
     n = int(input())
     adds = [tuple(map(int, input().split())) for _ in range(n)]  # (x1,y1,x2,y2)
-    UR = UnionRectangleRange()
+    UR = IncrementalRectangleUnionRange()
     pre = 0
     for x1, y1, x2, y2 in adds:
         UR.add(x1, x2, y1, y2)
@@ -93,7 +121,7 @@ if __name__ == "__main__":
 
     class Solution:
         def rectangleArea(self, rectangles: List[List[int]]) -> int:
-            ur = UnionRectangleRange()
+            ur = IncrementalRectangleUnionRange()
             for x1, y1, x2, y2 in rectangles:
                 ur.add(x1, x2, y1, y2)
             return ur.query() % int(1e9 + 7)

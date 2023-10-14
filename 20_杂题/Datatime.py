@@ -33,6 +33,15 @@ class DateTime:
             return True
         return y % 4 == 0 and y % 100 != 0
 
+    @staticmethod
+    def is_valid_date(y: int, m: int, d: int) -> bool:
+        if not (1 <= m <= 12):
+            return False
+        mx = DateTime._MONTH_DAYS[m]
+        if m == 2 and DateTime.is_leap_year(y):
+            mx += 1
+        return 1 <= d <= mx
+
     __slots__ = ("year", "month", "day")
 
     def __init__(self, y: int, m: int, d: int):

@@ -123,8 +123,6 @@ func (ufa *UnionFindArray) String() string {
 	return strings.Join(sb, "\n")
 }
 
-//
-//
 var _pool = make(map[interface{}]int)
 
 func id(o interface{}) int {
