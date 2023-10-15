@@ -1,22 +1,192 @@
 // 动态区间频率查询
-// 区间加
-// 查询区间某元素出现次数
+// 区间加，查询区间某元素出现次数
 // RangeAddRangeFreq
 
 import assert from 'assert'
 
-import { SqrtDecomposition } from './SqrtDecomposition/SqrtDecomposition'
+import { useBlock } from './SqrtDecomposition/useBlock'
+
+const INF = 2e9 // !超过int32使用2e15
+
+const ARRAYTYPE_RECORD = {
+  int8: Int8Array,
+  uint8: Uint8Array,
+  int16: Int16Array,
+  uint16: Uint16Array,
+  int32: Int32Array,
+  uint32: Uint32Array,
+  float32: Float32Array,
+  float64: Float64Array
+}
+
+type ArrayType = InstanceType<(typeof ARRAYTYPE_RECORD)[keyof typeof ARRAYTYPE_RECORD]>
 
 /**
- * 动态区间频率查询.
- * `O(nsqrt(n)logn)`.
+ * 区间加，区间频率查询.
+ * 单次修改、查询时间复杂度`O(sqrt(n)logn)`，空间复杂度`O(n)`.
  */
-class RangeFreqQueryDynamic {
-  private static _bisectLeft<T>(arr: ArrayLike<T>, value: T): number {
-    let left = 0
-    let right = arr.length - 1
+class RangeAddRangeFreq {
+  private readonly _nums: ArrayType
+  private readonly _belong: Uint16Array
+  private readonly _blockStart: Uint32Array
+  private readonly _blockEnd: Uint32Array
+  private readonly _blockLazy: number[]
+  private readonly _blockSorted: ArrayType
+
+  /**
+   * @param arr 初始数组.
+   * @param arrayType 初始数组类型.
+   * 用于指定`arr`的类型.例如，如果始终为int32，可指定为`int32`来加速内部排序.
+   * 默认为`float64`.
+   */
+  constructor(arr: ArrayLike<number>, type: keyof typeof ARRAYTYPE_RECORD = 'float64') {
+    const n = arr.length
+    const blockSize = type === 'float64' ? Math.sqrt(n + 1) | 0 : 2 * (Math.sqrt(n + 1) | 0)
+    const { belong, blockStart, blockEnd, blockCount } = useBlock(n, blockSize)
+    this._nums = new ARRAYTYPE_RECORD[type](arr)
+    this._belong = belong
+    this._blockStart = blockStart
+    this._blockEnd = blockEnd
+    this._blockLazy = Array(blockCount).fill(0)
+    this._blockSorted = new ARRAYTYPE_RECORD[type](n)
+    for (let i = 0; i < blockCount; i++) this._rebuild(i)
+  }
+
+  set(index: number, value: number): void {
+    if (index < 0 || index >= this._nums.length || this._nums[index] === value) return
+    this._nums[index] = value
+    this._rebuild(this._belong[index])
+  }
+
+  /**
+   * 区间`[start, end)`每个元素加上`delta`.
+   */
+  add(start: number, end: number, delta: number): void {
+    if (start < 0) start = 0
+    if (end > this._nums.length) end = this._nums.length
+    if (start >= end) return
+    const bid1 = this._belong[start]
+    const bid2 = this._belong[end - 1]
+    if (bid1 === bid2) {
+      for (let i = start; i < end; i++) this._nums[i] += delta
+      this._rebuild(bid1)
+    } else {
+      for (let i = start; i < this._blockEnd[bid1]; i++) this._nums[i] += delta
+      this._rebuild(bid1)
+      for (let bid = bid1 + 1; bid < bid2; bid++) this._blockLazy[bid] += delta
+      for (let i = this._blockStart[bid2]; i < end; i++) this._nums[i] += delta
+      this._rebuild(bid2)
+    }
+  }
+
+  /**
+   * 查询区间`[start, end)`中元素`target`出现的次数.
+   */
+  rangeFreq(start: number, end: number, target: number): number {
+    return this.rangeFreqLower(start, end, target - 1) - this.rangeFreqLower(start, end, target)
+  }
+
+  /**
+   * 查询区间`[start, end)`中严格大于`lower`的元素出现的次数.
+   */
+  rangeFreqLower(start: number, end: number, lower: number): number {
+    if (start < 0) start = 0
+    if (end > this._nums.length) end = this._nums.length
+    if (start >= end) return 0
+    const bid1 = this._belong[start]
+    const bid2 = this._belong[end - 1]
+    let res = 0
+    if (bid1 === bid2) {
+      for (let i = start; i < end; i++) {
+        res += +(this._nums[i] + this._blockLazy[bid1] > lower)
+      }
+    } else {
+      for (let i = start; i < this._blockEnd[bid1]; i++) {
+        res += +(this._nums[i] + this._blockLazy[bid1] > lower)
+      }
+      for (let bid = bid1 + 1; bid < bid2; bid++) {
+        const bEnd = this._blockEnd[bid]
+        res +=
+          bEnd -
+          RangeAddRangeFreq._bisectRight(
+            this._blockSorted,
+            lower - this._blockLazy[bid],
+            this._blockStart[bid],
+            bEnd - 1
+          )
+      }
+      for (let i = this._blockStart[bid2]; i < end; i++) {
+        res += +(this._nums[i] + this._blockLazy[bid2] > lower)
+      }
+    }
+    return res
+  }
+
+  /**
+   * 查询区间`[start, end)`中大于等于`floor`的元素出现的次数.
+   */
+  rangeFreqFloor(start: number, end: number, floor: number): number {
+    if (start < 0) start = 0
+    if (end > this._nums.length) end = this._nums.length
+    if (start >= end) return 0
+    const bid1 = this._belong[start]
+    const bid2 = this._belong[end - 1]
+    let res = 0
+    if (bid1 === bid2) {
+      for (let i = start; i < end; i++) {
+        res += +(this._nums[i] + this._blockLazy[bid1] >= floor)
+      }
+    } else {
+      for (let i = start; i < this._blockEnd[bid1]; i++) {
+        res += +(this._nums[i] + this._blockLazy[bid1] >= floor)
+      }
+      for (let bid = bid1 + 1; bid < bid2; bid++) {
+        const bEnd = this._blockEnd[bid]
+        res +=
+          bEnd -
+          RangeAddRangeFreq._bisectLeft(
+            this._blockSorted,
+            floor - this._blockLazy[bid],
+            this._blockStart[bid],
+            bEnd - 1
+          )
+      }
+      for (let i = this._blockStart[bid2]; i < end; i++) {
+        res += +(this._nums[i] + this._blockLazy[bid2] >= floor)
+      }
+    }
+    return res
+  }
+
+  /**
+   * 查询区间`[start, end)`中小于等于`ceiling`的元素出现的次数.
+   */
+  rangeFreqCeiling(start: number, end: number, ceiling: number): number {
+    return end - start - this.rangeFreqLower(start, end, ceiling)
+  }
+
+  /**
+   * 查询区间`[start, end)`中严格小于`upper`的元素出现的次数.
+   */
+  rangeFreqUpper(start: number, end: number, upper: number): number {
+    return end - start - this.rangeFreqFloor(start, end, upper)
+  }
+
+  private _rebuild(bid: number): void {
+    this._blockSorted.set(
+      this._nums.slice(this._blockStart[bid], this._blockEnd[bid]).sort(),
+      this._blockStart[bid]
+    )
+  }
+
+  private static _bisectLeft<T>(
+    arr: ArrayLike<T>,
+    value: T,
+    left = 0,
+    right = arr.length - 1
+  ): number {
     while (left <= right) {
-      const mid = (left + right) >> 1
+      const mid = (left + right) >>> 1
       if (arr[mid] < value) {
         left = mid + 1
       } else {
@@ -26,145 +196,57 @@ class RangeFreqQueryDynamic {
     return left
   }
 
-  private readonly _sqrt: SqrtDecomposition<number, number, [v: number, same: boolean]>
-
-  constructor(nums: number[]) {
-    const n = nums.length
-
-    this._sqrt = new SqrtDecomposition<number, number, [v: number, same: boolean]>(
-      n,
-      (_, left, right) => {
-        const curNums = nums.slice(left, right)
-        let sortedNums: number[] = []
-        let lazyAdd = 0
-
-        const created = () => {
-          updated()
-        }
-        const updated = () => {
-          sortedNums = curNums.slice().sort((a, b) => a - b)
-        }
-
-        // 区间加
-        const updateAll = (lazy: number) => {
-          lazyAdd += lazy
-        }
-        const updatePart = (left: number, right: number, lazy: number) => {
-          for (let i = left; i < right; i++) {
-            curNums[i] += lazy
-          }
-        }
-
-        // 区间查询.
-        const queryAll = (queryArg: [v: number, same: boolean]) => {
-          const v = queryArg[0]
-          if (queryArg[1]) {
-            // 优化
-            return (
-              RangeFreqQueryDynamic._bisectLeft(sortedNums, v - lazyAdd + 1) -
-              RangeFreqQueryDynamic._bisectLeft(sortedNums, v - lazyAdd)
-            )
-          }
-          return sortedNums.length - RangeFreqQueryDynamic._bisectLeft(sortedNums, v - lazyAdd)
-        }
-
-        const queryPart = (left: number, right: number, queryArg: [v: number, same: boolean]) => {
-          const v = queryArg[0]
-          if (queryArg[1]) {
-            let res = 0
-            for (let i = left; i < right; i++) {
-              res += +(curNums[i] + lazyAdd === v)
-            }
-            return res
-          }
-
-          let res = 0
-          for (let i = left; i < right; i++) {
-            if (curNums[i] + lazyAdd >= v) {
-              res++
-            }
-          }
-          return res
-        }
-
-        return {
-          created,
-          updated,
-          updateAll,
-          updatePart,
-          queryAll,
-          queryPart
-        }
+  private static _bisectRight<T>(
+    arr: ArrayLike<T>,
+    value: T,
+    left = 0,
+    right = arr.length - 1
+  ): number {
+    while (left <= right) {
+      const mid = (left + right) >>> 1
+      if (arr[mid] <= value) {
+        left = mid + 1
+      } else {
+        right = mid - 1
       }
-    )
-  }
-
-  /**
-   * 区间`[left, right)`每个元素加上`delta`.
-   */
-  add(left: number, right: number, delta: number): void {
-    this._sqrt.update(left, right, delta)
-  }
-
-  /**
-   * 查询区间`[left, right)`中元素`target`出现的次数.
-   */
-  rangeFreq(left: number, right: number, target: number): number {
-    let res = 0
-    this._sqrt.query(
-      left,
-      right,
-      blockRes => {
-        res += blockRes
-      },
-      [target, true]
-    )
-    return res
-  }
-
-  /**
-   * 查询区间`[left, right)`中大于等于`floor`的元素出现的次数.
-   */
-  rangeFreqWithFloor(left: number, right: number, floor: number): number {
-    let res = 0
-    this._sqrt.query(
-      left,
-      right,
-      blockRes => {
-        res += blockRes
-      },
-      [floor, false]
-    )
-    return res
+    }
+    return left
   }
 }
 
-export { RangeFreqQueryDynamic }
+/**
+ * 区间赋值，区间频率查询.
+ * 单次修改时间复杂度 `O(sqrt(n))`，单次查询时间复杂度`O(sqrt(n)logn)`，空间复杂度`O(n)`.
+ */
+class RangeAssignRangeFreq {}
+
+export { RangeAddRangeFreq, RangeAssignRangeFreq }
 
 if (require.main === module) {
-  let rf = new RangeFreqQueryDynamic([1, 2, 2, 4, 5, 6, 7, 8, 9, 10])
+  let rf = new RangeAddRangeFreq([1, 2, 2, 4, 5, 6, 7, 8, 9, 10])
   rf.add(0, 10, 1)
   assert.strictEqual(rf.rangeFreq(0, 10, 5), 1)
   rf.add(0, 10, 2)
   assert.strictEqual(rf.rangeFreq(0, 10, 5), 2)
-  assert.strictEqual(rf.rangeFreqWithFloor(0, 10, 5), 9)
+  console.log(rf.rangeFreqLower(0, 10, 5))
+  assert.strictEqual(rf.rangeFreqFloor(0, 10, 5), 9)
 
   const N = 1e5
-  const nums = Array.from({ length: N }, (_, i) => i)
-  rf = new RangeFreqQueryDynamic(nums)
+  const arr = Array.from({ length: N }, (_, i) => i)
+  rf = new RangeAddRangeFreq(arr, 'int32')
   console.time('time1')
   for (let i = 0; i < N; i++) {
     rf.add(0, N, i)
     rf.rangeFreq(0, N, i)
   }
-  console.timeEnd('time1') // time1: 2.503s
+  console.timeEnd('time1') // time1: 2.1s
 
   // https://leetcode.cn/problems/range-frequency-queries/
   class RangeFreqQuery {
-    private readonly _rf: RangeFreqQueryDynamic
+    private readonly _rf: RangeAddRangeFreq
 
     constructor(arr: number[]) {
-      this._rf = new RangeFreqQueryDynamic(arr)
+      this._rf = new RangeAddRangeFreq(arr)
     }
 
     query(left: number, right: number, value: number): number {

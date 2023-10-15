@@ -56,7 +56,7 @@ class EratosthenesSieve {
  *
  * @complexity O(n^0.5)
  */
-function getFactors(n: number): readonly number[] {
+function getFactors(n: number): number[] {
   if (n <= 0) return []
   const small: number[] = []
   const big: number[] = []
@@ -89,7 +89,7 @@ function isPrime(n: number): boolean {
  * @returns 返回 n 的所有质数因子，键为质数，值为因子的指数。
  * O(n^0.5)
  */
-function getPrimeFactors(n: number): ReadonlyMap<number, number> {
+function getPrimeFactors(n: number): Map<number, number> {
   const factors = new Map()
   const sqrt = Math.sqrt(n)
   for (let f = 2; f <= sqrt; f++) {
@@ -163,6 +163,58 @@ function segmentedSieve(floor: number, higher: number): boolean[] {
   return res
 }
 
+/**
+ * 返回约数个数.
+ * @param primeFactors 质因子分解.如果分解为空，则返回 0.
+ */
+function countFactors(primeFactors: ReadonlyMap<number, number>): number {
+  if (!primeFactors.size) return 0
+  let res = 1
+  primeFactors.forEach(count => {
+    res *= count + 1
+  })
+  return res
+}
+
+/**
+ * 返回区间 `[0, upper]` 内的所有数的约数个数.
+ * @param upper 上界.
+ */
+function countFactorsOfAll(upper: number): Uint32Array {
+  const res = new Uint32Array(upper + 1)
+  for (let i = 1; i <= upper; i++) {
+    for (let j = i; j <= upper; j += i) res[j]++
+  }
+  return res
+}
+
+/**
+ * 返回约数之和.
+ * @param primeFactors 质因子分解.如果分解为空，则返回 0.
+ */
+function sumFactors(primeFactors: ReadonlyMap<number, number>): number {
+  if (!primeFactors.size) return 0
+  let res = 1
+  primeFactors.forEach((count, prime) => {
+    let cur = 1
+    for (let _ = 0; _ < count; _++) cur = cur * prime + 1
+    res *= cur
+  })
+  return res
+}
+
+/**
+ * 返回区间 `[0, upper]` 内的所有数的约数之和.
+ * @param upper 上界.
+ */
+function sumFactorsOfAll(upper: number): number[] {
+  const res = Array(upper + 1).fill(0)
+  for (let i = 1; i <= upper; i++) {
+    for (let j = i; j <= upper; j += i) res[j] += i
+  }
+  return res
+}
+
 if (require.main === module) {
   const P = new EratosthenesSieve(1e6)
   assert.strictEqual(P.isPrime(3), true)
@@ -181,6 +233,37 @@ if (require.main === module) {
     segmentedSieve(0, 1e6),
     Array.from({ length: 1e6 }, (_, i) => i).map(v => P.isPrime(v))
   )
+
+  // countFactors
+  assert.strictEqual(
+    countFactors(
+      new Map([
+        [2, 2],
+        [3, 1]
+      ])
+    ),
+    6
+  )
+
+  console.log(countFactors(getPrimeFactors(0)))
+  console.log(sumFactors(getPrimeFactors(0)))
+  console.log(countFactorsOfAll(10))
+  console.log(sumFactorsOfAll(10))
 }
 
-export { EratosthenesSieve, isPrime, getPrimeFactors, getFactors, countPrime, segmentedSieve }
+export {
+  EratosthenesSieve,
+
+  //
+  isPrime,
+  getPrimeFactors,
+  getFactors,
+  countPrime,
+  segmentedSieve,
+
+  //
+  countFactors,
+  countFactorsOfAll,
+  sumFactors,
+  sumFactorsOfAll
+}

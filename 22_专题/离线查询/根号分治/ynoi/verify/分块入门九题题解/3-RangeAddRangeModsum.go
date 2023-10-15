@@ -1,4 +1,4 @@
-// RangeAddRangeKth
+// RangeAddRangeModSum
 
 package main
 
@@ -9,15 +9,22 @@ import (
 	"os"
 )
 
+// https://loj.ac/p/6280
 // 0 start end delta
-// 1 start end k
-func RangeAddRangeKth(nums []int, operations [][4]int) []int {
+// 1 start end mod
+func RangeAddRangeModSum(nums []int, operations [][4]int) []int {
 	block := UseBlock(len(nums), int(math.Sqrt(float64(len(nums)))+1))
 
 	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
+	blockLazy := make([]int, blockCount)
+	blockSum := make([]int, blockCount)
 
 	// 初始化/更新零散块后重构整个块
 	rebuild := func(bid int) {
+		blockSum[bid] = 0
+		for i := blockStart[bid]; i < blockEnd[bid]; i++ {
+			blockSum[bid] += nums[i]
+		}
 	}
 	for bid := 0; bid < blockCount; bid++ {
 		rebuild(bid)
@@ -27,18 +34,54 @@ func RangeAddRangeKth(nums []int, operations [][4]int) []int {
 	for _, op := range operations {
 		kind := op[0]
 		if kind == 0 {
-			start, end, _ := op[1], op[2], op[3]
+			start, end, delta := op[1], op[2], op[3]
 			bid1, bid2 := belong[start], belong[end-1]
 			if bid1 == bid2 {
+				for i := start; i < end; i++ {
+					nums[i] += delta
+				}
+				rebuild(bid1)
 			} else {
+				for i := start; i < blockEnd[bid1]; i++ {
+					nums[i] += delta
+				}
+				rebuild(bid1)
+				for i := bid1 + 1; i < bid2; i++ {
+					blockLazy[i] += delta
+				}
+				for i := blockStart[bid2]; i < end; i++ {
+					nums[i] += delta
+				}
+				rebuild(bid2)
 			}
 		} else {
-			start, end, _ := op[1], op[2], op[3]
+			start, end, mod := op[1], op[2], op[3]
 			bid1, bid2 := belong[start], belong[end-1]
+			modSum := 0
 			if bid1 == bid2 {
+				for i := start; i < end; i++ {
+					modSum += nums[i] + blockLazy[bid1]
+					modSum %= mod
+				}
 			} else {
-
+				for i := start; i < blockEnd[bid1]; i++ {
+					modSum += nums[i] + blockLazy[bid1]
+					modSum %= mod
+				}
+				for i := bid1 + 1; i < bid2; i++ {
+					modSum += blockSum[i] + blockLazy[i]*(blockEnd[i]-blockStart[i])
+					modSum %= mod
+				}
+				for i := blockStart[bid2]; i < end; i++ {
+					modSum += nums[i] + blockLazy[bid2]
+					modSum %= mod
+				}
 			}
+
+			if modSum < 0 {
+				modSum += mod
+			}
+			res = append(res, modSum)
 		}
 	}
 
@@ -50,32 +93,31 @@ func main() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int
-	fmt.Fscan(in, &n, &q)
+	var n int
+	fmt.Fscan(in, &n)
 	nums := make([]int, n)
 	for i := range nums {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	operations := make([][4]int, q)
+	operations := make([][4]int, n)
 	for i := range operations {
 		var op int
 		fmt.Fscan(in, &op)
-		if op == 1 {
+		if op == 0 {
 			var start, end, delta int
 			fmt.Fscan(in, &start, &end, &delta)
 			start--
 			operations[i] = [4]int{0, start, end, delta}
 		} else {
-			var start, end, k int
-			fmt.Fscan(in, &start, &end, &k)
+			var start, end, mod int
+			fmt.Fscan(in, &start, &end, &mod)
 			start--
-			k--
-			operations[i] = [4]int{1, start, end, k}
+			operations[i] = [4]int{1, start, end, mod + 1}
 		}
 	}
 
-	res := RangeAddRangeKth(nums, operations)
+	res := RangeAddRangeModSum(nums, operations)
 	for _, v := range res {
 		fmt.Fprintln(out, v)
 	}
@@ -110,75 +152,4 @@ func UseBlock(n int, blockSize int) struct {
 		blockEnd   []int
 		blockCount int
 	}{belong, blockStart, blockEnd, blockCount}
-}
-
-type V = int
-type Dictionary struct {
-	_idToValue []V
-	_valueToId map[V]int
-}
-
-// A dictionary that maps values to unique ids.
-func NewDictionary() *Dictionary {
-	return &Dictionary{
-		_valueToId: map[V]int{},
-	}
-}
-func (d *Dictionary) Id(value V) int {
-	res, ok := d._valueToId[value]
-	if ok {
-		return res
-	}
-	id := len(d._idToValue)
-	d._idToValue = append(d._idToValue, value)
-	d._valueToId[value] = id
-	return id
-}
-func (d *Dictionary) Value(id int) V {
-	return d._idToValue[id]
-}
-func (d *Dictionary) Has(value V) bool {
-	_, ok := d._valueToId[value]
-	return ok
-}
-func (d *Dictionary) Size() int {
-	return len(d._idToValue)
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func bisectLeft(nums []int, target int) int {
-	left, right := 0, len(nums)-1
-	for left <= right {
-		mid := (left + right) >> 1
-		if nums[mid] < target {
-			left = mid + 1
-		} else {
-			right = mid - 1
-		}
-	}
-	return left
-}
-func bisectRight(nums []int, target int) int {
-	left, right := 0, len(nums)-1
-	for left <= right {
-		mid := (left + right) >> 1
-		if nums[mid] <= target {
-			left = mid + 1
-		} else {
-			right = mid - 1
-		}
-	}
-	return left
 }

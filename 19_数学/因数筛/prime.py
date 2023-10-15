@@ -4,7 +4,7 @@ from collections import Counter, defaultdict
 from functools import lru_cache
 from math import ceil, floor, gcd, sqrt
 from random import randint
-from typing import DefaultDict, List
+from typing import DefaultDict, List, Mapping
 
 
 class EratosthenesSieve:
@@ -40,6 +40,53 @@ class EratosthenesSieve:
 
     def getPrimes(self) -> List[int]:
         return [x for i, x in enumerate(self.minPrime) if i >= 2 and i == x]
+
+
+def countFactors(primeFactors: "Mapping[int, int]") -> int:
+    """
+    返回约数个数.`primeFactors`为这个数的所有质数因子分解.
+    如果`primeFactors`为空,返回0.
+    """
+    if not primeFactors:
+        return 0
+    res = 1
+    for count in primeFactors.values():
+        res *= count + 1
+    return res
+
+
+def countFactorsOfAll(upper: int) -> List[int]:
+    """返回[0,upper]的所有数的约数个数."""
+    res = [0] * (upper + 1)
+    for i in range(1, upper + 1):
+        for j in range(i, upper + 1, i):
+            res[j] += 1
+    return res
+
+
+def sumFactors(primeFactors: "Mapping[int, int]") -> int:
+    """
+    返回约数之和.`primeFactors`为这个数的所有质数因子分解.
+    如果`primeFactors`为空,返回0.
+    """
+    if not primeFactors:
+        return 0
+    res = 1
+    for p, count in primeFactors.items():
+        cur = 1
+        for _ in range(count):
+            cur = cur * p + 1
+        res *= cur
+    return res
+
+
+def sumFactorsOfAll(upper: int) -> List[int]:
+    """返回[0,upper]的所有数的约数之和."""
+    res = [0] * (upper + 1)
+    for i in range(1, upper + 1):
+        for j in range(i, upper + 1, i):
+            res[j] += i
+    return res
 
 
 def getPrimes(n: int) -> List[int]:

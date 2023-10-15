@@ -202,6 +202,58 @@ func SegmentedSieve(floor, higher int) []bool {
 	return res
 }
 
+// 返回约数个数.`primeFactors`为这个数的所有质数因子分解.
+// 如果`primeFactors`为空,返回0.
+func CountFactors(primeFactors map[int]int) int {
+	if len(primeFactors) == 0 {
+		return 0
+	}
+	res := 1
+	for _, count := range primeFactors {
+		res *= count + 1
+	}
+	return res
+}
+
+// 返回[0,upper]的所有数的约数个数.
+func CountFactorsOfAll(upper int) []int {
+	res := make([]int, upper+1)
+	for i := 1; i <= upper; i++ {
+		for j := i; j <= upper; j += i {
+			res[j]++
+		}
+	}
+	return res
+}
+
+// 返回约数之和.`primeFactors`为这个数的所有质数因子分解.
+// 如果`primeFactors`为空,返回0.
+func SumFactors(primeFactors map[int]int) int {
+	if len(primeFactors) == 0 {
+		return 0
+	}
+	res := 1
+	for prime, count := range primeFactors {
+		cur := 1
+		for i := 0; i < count; i++ {
+			cur = cur*prime + 1
+		}
+		res *= cur
+	}
+	return res
+}
+
+// 返回[0,upper]的所有数的约数之和.
+func SumFactorsOfAll(upper int) []int {
+	res := make([]int, upper+1)
+	for i := 1; i <= upper; i++ {
+		for j := i; j <= upper; j += i {
+			res[j] += i
+		}
+	}
+	return res
+}
+
 func Pow(base, exp, mod int) int {
 	base %= mod
 	res := 1

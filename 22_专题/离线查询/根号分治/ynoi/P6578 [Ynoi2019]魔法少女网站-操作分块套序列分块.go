@@ -40,13 +40,12 @@ func 魔法少女网站(nums []int, operations [][4]int) []int {
 }
 
 // blockSize = int(math.Sqrt(float64(len(nums)))+1)
-func UseBlock(nums []int, blockSize int) struct {
+func UseBlock(n int, blockSize int) struct {
 	belong     []int // 下标所属的块.
 	blockStart []int // 每个块的起始下标(包含).
 	blockEnd   []int // 每个块的结束下标(不包含).
 	blockCount int   // 块的数量.
 } {
-	n := len(nums)
 	blockCount := 1 + (n / blockSize)
 	blockStart := make([]int, blockCount)
 	blockEnd := make([]int, blockCount)

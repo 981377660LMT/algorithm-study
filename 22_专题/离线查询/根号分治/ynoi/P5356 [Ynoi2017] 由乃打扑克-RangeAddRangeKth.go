@@ -37,7 +37,8 @@ const INF int = 1e18
 // 1 start end k (k从0开始)
 func RangeAddRangeKth(nums []int, operations [][4]int) []int {
 	nums = append(nums[:0:0], nums...)
-	block := UseBlock(nums, int(math.Sqrt(float64(len(nums)))+1))
+	block := UseBlock(len(nums), int(math.Sqrt(float64(len(nums)))+1))
+
 	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
 
 	blockLazy := make([]int, blockCount)
@@ -218,14 +219,12 @@ func main() {
 }
 
 // blockSize = int(math.Sqrt(float64(len(nums)))+1)
-func UseBlock(nums []int, blockSize int) struct {
+func UseBlock(n int, blockSize int) struct {
 	belong     []int // 下标所属的块.
 	blockStart []int // 每个块的起始下标(包含).
 	blockEnd   []int // 每个块的结束下标(不包含).
 	blockCount int   // 块的数量.
 } {
-	n := len(nums)
-
 	blockCount := 1 + (n / blockSize)
 	blockStart := make([]int, blockCount)
 	blockEnd := make([]int, blockCount)

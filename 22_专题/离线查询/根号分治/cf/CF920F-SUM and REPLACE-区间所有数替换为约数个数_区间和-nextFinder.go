@@ -1,31 +1,27 @@
-// P4145 上帝造题的七分钟 2 / 花神游历各国
-// 并查集(NextFinder) + 树状数组
-// https://www.luogu.com.cn/problem/P4145
-
-// 给出一个长为 n 的数列 a_1 \ldots a_n，以及 n 个操作，操作涉及区间开方，区间求和。
-// 若 \mathrm{opt} = 0，表示将位于 [l, r] 的之间的数字都开方后向下取整。
-// 若 \mathrm{opt} = 1，表示询问位于 [l, r] 的所有数字的和。
-// RangeSqrtRangeSum
-// 区间开方，区间求和
-// n<=1e5, q<=1e5,nums[i]<=1e12
-
-// !1e12的数开方6次就变成了1，
-// 所以需要修改的次数实际上很少，用并查集可以跳过小于等于1的数
-// 树状数组单点修改即可
+// CF920F-SUM and REPLACE-区间所有数替换为约数个数_区间和
 
 package main
 
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"math/bits"
 	"os"
 	"strings"
 )
 
-// 区间开方，区间求和
-func RangeSqrtRangeSum(nums []int, operations [][3]int) []int {
+var C []int
+
+func init() {
+	C = CountFactorsOfAll(1e6 + 10)
+}
+
+// 0 start end : 将区间所有数nums[i]替换为nums[i]的约数个数.
+// 1 start end : 求区间所有数的和.
+// n,q<=3e5, nums[i]<=1e6
+//
+// !类似区间开方, 有限次操作内nums[i]会不发生变化, 之后就不会变了.
+func RangeReplaceRangeSum(nums []int, operations [][3]int) []int {
 	nums = append(nums[:0:0], nums...)
 	n := len(nums)
 	nextFinder := NewNextFinder(n)
@@ -38,9 +34,9 @@ func RangeSqrtRangeSum(nums []int, operations [][3]int) []int {
 			i := start
 			for i < end {
 				pre := nums[i]
-				nums[i] = int(math.Sqrt(float64(nums[i])))
+				nums[i] = C[nums[i]]
 				bit.Add(i, nums[i]-pre)
-				if nums[i] <= 1 {
+				if nums[i] == pre { // 不变
 					nextFinder.Erase(i)
 				}
 				i = nextFinder.Next(i + 1)
@@ -54,34 +50,35 @@ func RangeSqrtRangeSum(nums []int, operations [][3]int) []int {
 }
 
 func main() {
-	// https://www.luogu.com.cn/problem/P4145
-	// P4145 上帝造题的七分钟 2 / 花神游历各国
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
+	var n, q int
+	fmt.Fscan(in, &n, &q)
 	nums := make([]int, n)
 	for i := range nums {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	var q int
-	fmt.Fscan(in, &q)
 	operations := make([][3]int, q)
-	for i := 0; i < q; i++ {
-		var op, l, r int
-		fmt.Fscan(in, &op, &l, &r)
-		if l > r {
-			l, r = r, l
+	for i := range operations {
+		var op int
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var start, end int
+			fmt.Fscan(in, &start, &end)
+			start--
+			operations[i] = [3]int{0, start, end}
+		} else {
+			var start, end int
+			fmt.Fscan(in, &start, &end)
+			start--
+			operations[i] = [3]int{1, start, end}
 		}
-		l--
-
-		operations[i] = [3]int{op, l, r}
 	}
 
-	res := RangeSqrtRangeSum(nums, operations)
+	res := RangeReplaceRangeSum(nums, operations)
 	for _, v := range res {
 		fmt.Fprintln(out, v)
 	}
@@ -249,4 +246,28 @@ func (b *BITArray) String() string {
 		sb = append(sb, fmt.Sprintf("%d", b.QueryRange(i, i+1)))
 	}
 	return fmt.Sprintf("BitArray: [%v]", strings.Join(sb, ", "))
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// 返回[0,upper]的所有数的约数个数.
+func CountFactorsOfAll(upper int) []int {
+	res := make([]int, upper+1)
+	for i := 1; i <= upper; i++ {
+		for j := i; j <= upper; j += i {
+			res[j]++
+		}
+	}
+	return res
 }

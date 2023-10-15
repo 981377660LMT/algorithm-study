@@ -1,4 +1,4 @@
-// RangeAddRangeKth
+// RangeAddRangeSmaller
 
 package main
 
@@ -7,17 +7,24 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"sort"
 )
 
+// https://loj.ac/p/6278
 // 0 start end delta
 // 1 start end k
-func RangeAddRangeKth(nums []int, operations [][4]int) []int {
+func RangeAddRangeSmaller(nums []int, operations [][4]int) []int {
 	block := UseBlock(len(nums), int(math.Sqrt(float64(len(nums)))+1))
 
 	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
+	blockLazy := make([]int, blockCount)
+	blockSorted := make([][]int, blockCount)
 
 	// 初始化/更新零散块后重构整个块
 	rebuild := func(bid int) {
+		blockSorted[bid] = make([]int, blockEnd[bid]-blockStart[bid])
+		copy(blockSorted[bid], nums[blockStart[bid]:blockEnd[bid]])
+		sort.Ints(blockSorted[bid])
 	}
 	for bid := 0; bid < blockCount; bid++ {
 		rebuild(bid)
@@ -27,18 +34,53 @@ func RangeAddRangeKth(nums []int, operations [][4]int) []int {
 	for _, op := range operations {
 		kind := op[0]
 		if kind == 0 {
-			start, end, _ := op[1], op[2], op[3]
+			start, end, delta := op[1], op[2], op[3]
 			bid1, bid2 := belong[start], belong[end-1]
 			if bid1 == bid2 {
+				for i := start; i < end; i++ {
+					nums[i] += delta
+				}
+				rebuild(bid1)
 			} else {
+				for i := start; i < blockEnd[bid1]; i++ {
+					nums[i] += delta
+				}
+				rebuild(bid1)
+				for i := bid1 + 1; i < bid2; i++ {
+					blockLazy[i] += delta
+				}
+				for i := blockStart[bid2]; i < end; i++ {
+					nums[i] += delta
+				}
+				rebuild(bid2)
 			}
 		} else {
-			start, end, _ := op[1], op[2], op[3]
+			start, end, k := op[1], op[2], op[3]
 			bid1, bid2 := belong[start], belong[end-1]
+			smaller := 0
 			if bid1 == bid2 {
+				for i := start; i < end; i++ {
+					if nums[i]+blockLazy[bid1] < k {
+						smaller++
+					}
+				}
 			} else {
-
+				for i := start; i < blockEnd[bid1]; i++ {
+					if nums[i]+blockLazy[bid1] < k {
+						smaller++
+					}
+				}
+				for i := bid1 + 1; i < bid2; i++ {
+					smaller += bisectLeft(blockSorted[i], k-blockLazy[i])
+				}
+				for i := blockStart[bid2]; i < end; i++ {
+					if nums[i]+blockLazy[bid2] < k {
+						smaller++
+					}
+				}
 			}
+
+			res = append(res, smaller)
 		}
 	}
 
@@ -50,32 +92,26 @@ func main() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int
-	fmt.Fscan(in, &n, &q)
+	var n int
+	fmt.Fscan(in, &n)
 	nums := make([]int, n)
 	for i := range nums {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	operations := make([][4]int, q)
+	operations := make([][4]int, n)
 	for i := range operations {
-		var op int
-		fmt.Fscan(in, &op)
-		if op == 1 {
-			var start, end, delta int
-			fmt.Fscan(in, &start, &end, &delta)
-			start--
-			operations[i] = [4]int{0, start, end, delta}
+		var op, start, end, k int
+		fmt.Fscan(in, &op, &start, &end, &k)
+		start--
+		if op == 0 {
+			operations[i] = [4]int{op, start, end, k}
 		} else {
-			var start, end, k int
-			fmt.Fscan(in, &start, &end, &k)
-			start--
-			k--
-			operations[i] = [4]int{1, start, end, k}
+			operations[i] = [4]int{op, start, end, k * k}
 		}
 	}
 
-	res := RangeAddRangeKth(nums, operations)
+	res := RangeAddRangeSmaller(nums, operations)
 	for _, v := range res {
 		fmt.Fprintln(out, v)
 	}
@@ -110,52 +146,6 @@ func UseBlock(n int, blockSize int) struct {
 		blockEnd   []int
 		blockCount int
 	}{belong, blockStart, blockEnd, blockCount}
-}
-
-type V = int
-type Dictionary struct {
-	_idToValue []V
-	_valueToId map[V]int
-}
-
-// A dictionary that maps values to unique ids.
-func NewDictionary() *Dictionary {
-	return &Dictionary{
-		_valueToId: map[V]int{},
-	}
-}
-func (d *Dictionary) Id(value V) int {
-	res, ok := d._valueToId[value]
-	if ok {
-		return res
-	}
-	id := len(d._idToValue)
-	d._idToValue = append(d._idToValue, value)
-	d._valueToId[value] = id
-	return id
-}
-func (d *Dictionary) Value(id int) V {
-	return d._idToValue[id]
-}
-func (d *Dictionary) Has(value V) bool {
-	_, ok := d._valueToId[value]
-	return ok
-}
-func (d *Dictionary) Size() int {
-	return len(d._idToValue)
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
 
 func bisectLeft(nums []int, target int) int {

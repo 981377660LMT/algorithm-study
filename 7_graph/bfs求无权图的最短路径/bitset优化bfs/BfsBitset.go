@@ -102,7 +102,7 @@ func BfsBitset(graph []_Bitset, start int) []int {
 	return dist
 }
 
-type _Bitset []uint
+type _Bitset []uint64
 
 func _NewBitset(n int) _Bitset { return make(_Bitset, n>>6+1) } // (n+64-1)>>6
 
@@ -122,7 +122,7 @@ func (b _Bitset) Copy() _Bitset {
 func (b _Bitset) Foreach(f func(p int) (Break bool)) {
 	for i, v := range b {
 		for ; v > 0; v &= v - 1 {
-			j := i<<6 | bits.TrailingZeros(v)
+			j := i<<6 | bits.TrailingZeros64(v)
 			if f(j) {
 				return
 			}
@@ -134,7 +134,7 @@ func (b _Bitset) Foreach(f func(p int) (Break bool)) {
 func (b _Bitset) Index0() int {
 	for i, v := range b {
 		if ^v != 0 {
-			return i<<6 | bits.TrailingZeros(^v)
+			return i<<6 | bits.TrailingZeros64(^v)
 		}
 	}
 	return len(b) << 6
@@ -144,7 +144,7 @@ func (b _Bitset) Index0() int {
 func (b _Bitset) Index1() int {
 	for i, v := range b {
 		if v != 0 {
-			return i<<6 | bits.TrailingZeros(v)
+			return i<<6 | bits.TrailingZeros64(v)
 		}
 	}
 	return len(b) << 6
@@ -153,13 +153,13 @@ func (b _Bitset) Index1() int {
 // 返回下标 >= p 的第一个 1 的下标，若不存在则返回一个不小于 n 的位置（类似 C++ 中的 _Find_next，这里是 >=, C++里是 >）
 func (b _Bitset) Next1(p int) int {
 	if i := p >> 6; i < len(b) {
-		v := b[i] & (^uint(0) << (p & 63)) // mask off bits below bound
+		v := b[i] & (^uint64(0) << (p & 63)) // mask off bits below bound
 		if v != 0 {
-			return i<<6 | bits.TrailingZeros(v)
+			return i<<6 | bits.TrailingZeros64(v)
 		}
 		for i++; i < len(b); i++ {
 			if b[i] != 0 {
-				return i<<6 | bits.TrailingZeros(b[i])
+				return i<<6 | bits.TrailingZeros64(b[i])
 			}
 		}
 	}
@@ -171,14 +171,14 @@ func (b _Bitset) Next0(p int) int {
 	if i := p >> 6; i < len(b) {
 		v := b[i]
 		if p&63 > 0 {
-			v |= ^(^uint(0) << (p & 63))
+			v |= ^(^uint64(0) << (p & 63))
 		}
 		if ^v != 0 {
-			return i<<6 | bits.TrailingZeros(^v)
+			return i<<6 | bits.TrailingZeros64(^v)
 		}
 		for i++; i < len(b); i++ {
 			if ^b[i] != 0 {
-				return i<<6 | bits.TrailingZeros(^b[i])
+				return i<<6 | bits.TrailingZeros64(^b[i])
 			}
 		}
 	}
@@ -189,7 +189,7 @@ func (b _Bitset) Next0(p int) int {
 func (b _Bitset) LastIndex1() int {
 	for i := len(b) - 1; i >= 0; i-- {
 		if b[i] != 0 {
-			return i<<6 | (bits.Len(b[i]) - 1) // 如果再 +1，需要改成 i<<6 + bits.Len(b[i])
+			return i<<6 | (bits.Len64(b[i]) - 1) // 如果再 +1，需要改成 i<<6 + bits.Len64(b[i])
 		}
 	}
 	return -1
@@ -206,7 +206,7 @@ func (b _Bitset) Sub(i int) { b.FlipRange(i, b.Next1(i)) }
 func (b _Bitset) All0(l, r int) bool {
 	i := l >> 6
 	if i == r>>6 {
-		mask := ^uint(0)<<(l&63) ^ ^uint(0)<<(r&63)
+		mask := ^uint64(0)<<(l&63) ^ ^uint64(0)<<(r&63)
 		return b[i]&mask == 0
 	}
 	if b[i]>>(l&63) != 0 {
@@ -217,7 +217,7 @@ func (b _Bitset) All0(l, r int) bool {
 			return false
 		}
 	}
-	mask := ^uint(0) << (r & 63)
+	mask := ^uint64(0) << (r & 63)
 	return b[r>>6]&^mask == 0
 }
 
@@ -225,10 +225,10 @@ func (b _Bitset) All0(l, r int) bool {
 func (b _Bitset) All1(l, r int) bool {
 	i := l >> 6
 	if i == r>>6 {
-		mask := ^uint(0)<<(l&63) ^ ^uint(0)<<(r&63)
+		mask := ^uint64(0)<<(l&63) ^ ^uint64(0)<<(r&63)
 		return b[i]&mask == mask
 	}
-	mask := ^uint(0) << (l & 63)
+	mask := ^uint64(0) << (l & 63)
 	if b[i]&mask != mask {
 		return false
 	}
@@ -237,14 +237,14 @@ func (b _Bitset) All1(l, r int) bool {
 			return false
 		}
 	}
-	mask = ^uint(0) << (r & 63)
+	mask = ^uint64(0) << (r & 63)
 	return ^(b[r>>6] | mask) == 0
 }
 
 // 反转 [l,r) 范围内的比特
 // https://codeforces.com/contest/1705/problem/E
 func (b _Bitset) FlipRange(l, r int) {
-	maskL, maskR := ^uint(0)<<(l&63), ^uint(0)<<(r&63)
+	maskL, maskR := ^uint64(0)<<(l&63), ^uint64(0)<<(r&63)
 	i := l >> 6
 	if i == r>>6 {
 		b[i] ^= maskL ^ maskR
@@ -259,7 +259,7 @@ func (b _Bitset) FlipRange(l, r int) {
 
 // 将 [l,r) 范围内的比特全部置 1
 func (b _Bitset) SetRange(l, r int) {
-	maskL, maskR := ^uint(0)<<(l&63), ^uint(0)<<(r&63)
+	maskL, maskR := ^uint64(0)<<(l&63), ^uint64(0)<<(r&63)
 	i := l >> 6
 	if i == r>>6 {
 		b[i] |= maskL ^ maskR
@@ -267,14 +267,14 @@ func (b _Bitset) SetRange(l, r int) {
 	}
 	b[i] |= maskL
 	for i++; i < r>>6; i++ {
-		b[i] = ^uint(0)
+		b[i] = ^uint64(0)
 	}
 	b[i] |= ^maskR
 }
 
 // 将 [l,r) 范围内的比特全部置 0
 func (b _Bitset) ResetRange(l, r int) {
-	maskL, maskR := ^uint(0)<<(l&63), ^uint(0)<<(r&63)
+	maskL, maskR := ^uint64(0)<<(l&63), ^uint64(0)<<(r&63)
 	i := l >> 6
 	if i == r>>6 {
 		b[i] &= ^maskL | maskR
@@ -345,12 +345,12 @@ func (b _Bitset) Rsh(k int) {
 // 借用 bits 库中的一些方法的名字
 func (b _Bitset) OnesCount() (c int) {
 	for _, v := range b {
-		c += bits.OnesCount(v)
+		c += bits.OnesCount64(v)
 	}
 	return
 }
-func (b _Bitset) TrailingZeros() int { return b.Index1() }
-func (b _Bitset) Len() int           { return b.LastIndex1() + 1 }
+func (b _Bitset) TrailingZeros64() int { return b.Index1() }
+func (b _Bitset) Len() int             { return b.LastIndex1() + 1 }
 
 // 下面几个方法均需保证长度相同
 func (b _Bitset) Equals(c _Bitset) bool {

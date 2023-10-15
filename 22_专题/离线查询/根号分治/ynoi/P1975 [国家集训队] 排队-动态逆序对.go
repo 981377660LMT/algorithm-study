@@ -169,7 +169,7 @@ type _PointSetRangeFreq struct {
 func _NewPointSetRangeFreq(nums []int, blockSize int) *_PointSetRangeFreq {
 	nums = append(nums[:0:0], nums...)
 	res := &_PointSetRangeFreq{}
-	block := UseBlock(nums, blockSize)
+	block := UseBlock(len(nums), blockSize)
 	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
 
 	blockSorted := make([][]int, blockCount)
@@ -360,13 +360,12 @@ func (ps *_PointSetRangeFreq) _count(nums []int, target int, left, right int) in
 }
 
 // blockSize := int(math.Sqrt(float64(len(nums))) + 1)
-func UseBlock(nums []int, blockSize int) struct {
+func UseBlock(n int, blockSize int) struct {
 	belong     []int // 下标所属的块.
 	blockStart []int // 每个块的起始下标(包含).
 	blockEnd   []int // 每个块的结束下标(不包含).
 	blockCount int   // 块的数量.
 } {
-	n := len(nums)
 	blockCount := 1 + (n / blockSize)
 	blockStart := make([]int, blockCount)
 	blockEnd := make([]int, blockCount)

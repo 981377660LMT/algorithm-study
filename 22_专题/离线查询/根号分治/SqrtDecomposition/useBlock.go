@@ -7,7 +7,8 @@ import "math"
 // !返回最长的子数组，子数组的第一个元素严格大于最后一个元素
 // 分块加速查找.分块的好处是，可以支持修改操作.
 func maxSubarrayLength(nums []int) int {
-	block := UseBlock(nums, int(math.Sqrt(float64(len(nums)))+1))
+	block := UseBlock(len(nums), int(math.Sqrt(float64(len(nums)))+1))
+
 	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
 	blockMin := make([]int, blockCount)
 	for i := range blockMin {
@@ -52,13 +53,12 @@ func maxSubarrayLength(nums []int) int {
 const INF int = 1e18
 
 // blockSize := int(math.Sqrt(float64(len(nums))) + 1)
-func UseBlock(nums []int, blockSize int) struct {
+func UseBlock(n int, blockSize int) struct {
 	belong     []int // 下标所属的块.
 	blockStart []int // 每个块的起始下标(包含).
 	blockEnd   []int // 每个块的结束下标(不包含).
 	blockCount int   // 块的数量.
 } {
-	n := len(nums)
 	blockCount := 1 + (n / blockSize)
 	blockStart := make([]int, blockCount)
 	blockEnd := make([]int, blockCount)

@@ -1,4 +1,4 @@
-// RangeAddRangeKth
+// RangeReplaceRangeSum
 
 package main
 
@@ -11,17 +11,10 @@ import (
 
 // 0 start end delta
 // 1 start end k
-func RangeAddRangeKth(nums []int, operations [][4]int) []int {
+func RangeReplaceRangeSum(nums []int, operations [][4]int) []int {
 	block := UseBlock(len(nums), int(math.Sqrt(float64(len(nums)))+1))
 
 	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
-
-	// 初始化/更新零散块后重构整个块
-	rebuild := func(bid int) {
-	}
-	for bid := 0; bid < blockCount; bid++ {
-		rebuild(bid)
-	}
 
 	res := []int{}
 	for _, op := range operations {
@@ -75,7 +68,7 @@ func main() {
 		}
 	}
 
-	res := RangeAddRangeKth(nums, operations)
+	res := RangeReplaceRangeSum(nums, operations)
 	for _, v := range res {
 		fmt.Fprintln(out, v)
 	}
@@ -112,39 +105,6 @@ func UseBlock(n int, blockSize int) struct {
 	}{belong, blockStart, blockEnd, blockCount}
 }
 
-type V = int
-type Dictionary struct {
-	_idToValue []V
-	_valueToId map[V]int
-}
-
-// A dictionary that maps values to unique ids.
-func NewDictionary() *Dictionary {
-	return &Dictionary{
-		_valueToId: map[V]int{},
-	}
-}
-func (d *Dictionary) Id(value V) int {
-	res, ok := d._valueToId[value]
-	if ok {
-		return res
-	}
-	id := len(d._idToValue)
-	d._idToValue = append(d._idToValue, value)
-	d._valueToId[value] = id
-	return id
-}
-func (d *Dictionary) Value(id int) V {
-	return d._idToValue[id]
-}
-func (d *Dictionary) Has(value V) bool {
-	_, ok := d._valueToId[value]
-	return ok
-}
-func (d *Dictionary) Size() int {
-	return len(d._idToValue)
-}
-
 func max(a, b int) int {
 	if a > b {
 		return a
@@ -156,29 +116,4 @@ func min(a, b int) int {
 		return a
 	}
 	return b
-}
-
-func bisectLeft(nums []int, target int) int {
-	left, right := 0, len(nums)-1
-	for left <= right {
-		mid := (left + right) >> 1
-		if nums[mid] < target {
-			left = mid + 1
-		} else {
-			right = mid - 1
-		}
-	}
-	return left
-}
-func bisectRight(nums []int, target int) int {
-	left, right := 0, len(nums)-1
-	for left <= right {
-		mid := (left + right) >> 1
-		if nums[mid] <= target {
-			left = mid + 1
-		} else {
-			right = mid - 1
-		}
-	}
-	return left
 }

@@ -1,3 +1,5 @@
+import { createBlock } from './useBlock'
+
 interface Block<E, Id, Q = unknown> {
   /**
    * 在创建块时调用，用于初始化块的值.
@@ -34,6 +36,7 @@ interface Block<E, Id, Q = unknown> {
 
 /**
  * 当区间需要维护的数据难以用半群来描述时，可以考虑根号分块。
+ * @deprecated 使用 {@link createBlock}.
  */
 class SqrtDecomposition<E, Id, Q = unknown> {
   private readonly _blockSize: number
