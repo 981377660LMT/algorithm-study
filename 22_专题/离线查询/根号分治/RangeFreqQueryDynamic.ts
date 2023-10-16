@@ -51,6 +51,10 @@ class PointSetRangeFreq {
     }
   }
 
+  get(pos: number): number {
+    return this._nums[pos]
+  }
+
   /**
    * 修改下标 `pos` 的值为 `newValue`.
    */
@@ -144,6 +148,14 @@ class PointSetRangeFreq {
    */
   rangeFreqLower(start: number, end: number, lower: number): number {
     return end - start - this.rangeFreqCeiling(start, end, lower)
+  }
+
+  toString(): string {
+    const res = Array(this._nums.length)
+    for (let i = 0; i < this._nums.length; i++) {
+      res[i] = this.get(i)
+    }
+    return `PointSetRangeFreq{${res.join(',')}}`
   }
 
   // eslint-disable-next-line class-methods-use-this
