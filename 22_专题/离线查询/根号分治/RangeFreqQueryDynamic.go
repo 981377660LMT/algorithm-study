@@ -1,204 +1,323 @@
 // 动态区间频率查询
-// 区间加
-// 查询区间某元素出现次数
-// RangeAddRangeFreq
+// 0.单点修改，查询区间某元素出现次数(PointSetRangeFreq)
+// 1.区间加，查询区间某元素出现次数(RangeAddRangeFreq)
+// 2.区间赋值，查询区间某元素出现次数(RangeAssignRangeFreq)
+
 package main
 
 import (
 	"fmt"
-	"math"
+	"math/rand"
 	"sort"
-	"time"
 )
 
 func main() {
-	nums := []int{1, 2, 2, 4, 5, 6, 7, 8, 9, 10}
-	rf := NewRangeFreqQueryDynamic(nums)
-	rf.Add(0, 10, 1)
-	fmt.Println(rf.RangeFreq(0, 10, 5))
-	rf.Add(0, 10, 2)
-	fmt.Println(rf.RangeFreq(0, 10, 5))
-	fmt.Println(rf.RangeFreqWithFloor(0, 10, 5))
+	ps := NewPointSetRangeFreq([]int{12, 33, 4, 56, 22, 2, 34, 33, 22, 12, 34, 56}, 3)
 
-	nums = make([]int, 1e5)
-	rf = NewRangeFreqQueryDynamic(nums)
-	time1 := time.Now()
-	for i := 0; i < 1e5; i++ {
-		rf.Add(i, i+1, i)
-		rf.RangeFreq(0, i+1, i)
-	}
-	fmt.Println(time.Since(time1))
-}
-
-type RangeFreqQueryDynamic struct {
-	sqrt *SqrtDecomposition
-}
-
-func NewRangeFreqQueryDynamic(nums []int) *RangeFreqQueryDynamic {
-	n := len(nums)
-	return &RangeFreqQueryDynamic{sqrt: NewSqrtDecomposition(nums, 1+int(math.Sqrt(float64(n))))}
-}
-
-// 左闭右开区间[start,end)的每个数加上add.
-func (rf *RangeFreqQueryDynamic) Add(start, end, add int) {
-	rf.sqrt.Update(start, end, add)
-}
-
-// 左闭右开区间[start,end)内元素k的出现次数.
-func (rf *RangeFreqQueryDynamic) RangeFreq(start, end int, k int) int {
-	res := 0
-	rf.sqrt.Query(start, end, func(blockRes int) { res += blockRes }, k, true)
-	return res
-}
-
-// 左闭右开区间[start,end)内大于等于floor的元素个数.
-func (rf *RangeFreqQueryDynamic) RangeFreqWithFloor(start, end int, floor int) int {
-	res := 0
-	rf.sqrt.Query(start, end, func(blockRes int) { res += blockRes }, floor, false)
-	return res
-}
-
-type E = int
-type Id = int
-
-type Block struct {
-	id, start, end int
-	nums           []E
-
-	sorted  []E
-	lazyAdd Id
-}
-
-func (b *Block) Created() { b.Updated() }
-func (b *Block) Updated() {
-	b.sorted = append(b.sorted[:0:0], b.nums...)
-	sort.Ints(b.sorted)
-}
-
-// !区间加.
-func (b *Block) UpdateAll(lazy Id) { b.lazyAdd += lazy }
-func (b *Block) UpdatePart(start, end int, lazy Id) {
-	for i := start; i < end; i++ {
-		b.nums[i] += lazy
-	}
-}
-
-// !查询区间等于x的元素个数/大于等于x的元素个数.
-func (b *Block) QueryAll(x int, same bool) E {
-	if same {
-		pos2 := sort.SearchInts(b.sorted, x-b.lazyAdd+1)
-		pos1 := sort.SearchInts(b.sorted, x-b.lazyAdd)
-		return pos2 - pos1
-	}
-
-	lower := sort.SearchInts(b.sorted, x-b.lazyAdd)
-	return len(b.sorted) - lower
-}
-
-func (b *Block) QueryPart(start, end int, x int, same bool) E {
-	if same {
+	countNavie := func(nums []int, target int) int {
 		res := 0
-		for i := start; i < end; i++ {
-			if b.nums[i]+b.lazyAdd == x {
+		for _, v := range nums {
+			if v == target {
 				res++
 			}
 		}
 		return res
 	}
 
+	countLowerNavie := func(nums []int, target int) int {
+		res := 0
+		for _, v := range nums {
+			if v < target {
+				res++
+			}
+		}
+		return res
+	}
+
+	countFloorNavie := func(nums []int, target int) int {
+		res := 0
+		for _, v := range nums {
+			if v <= target {
+				res++
+			}
+		}
+		return res
+	}
+
+	for i := 0; i < len(ps.nums); i++ {
+		for j := i; j < len(ps.nums); j++ {
+			for k := 0; k <= 1000; k++ {
+				if ps.Count(i, j+1, k) != countNavie(ps.nums[i:j+1], k) {
+					fmt.Println(i, j+1, k)
+					fmt.Println(ps.Count(i, j+1, k), countNavie(ps.nums[i:j+1], k))
+					panic("")
+				}
+				if ps.CountLower(i, j+1, k) != countLowerNavie(ps.nums[i:j+1], k) {
+					fmt.Println(i, j+1, k)
+					fmt.Println(ps.CountLower(i, j+1, k), countLowerNavie(ps.nums[i:j+1], k))
+					panic("")
+				}
+				if ps.CountFloor(i, j+1, k) != countFloorNavie(ps.nums[i:j+1], k) {
+					fmt.Println(i, j+1, k)
+					fmt.Println(ps.CountFloor(i, j+1, k), countFloorNavie(ps.nums[i:j+1], k))
+					panic("")
+				}
+
+				randPos := i + rand.Intn(j-i+1)
+				randValue := rand.Intn(1000)
+				ps.Set(randPos, randValue)
+			}
+		}
+	}
+
+	fmt.Println("OK")
+
+}
+
+// https://leetcode.cn/problems/range-frequency-queries/description/
+type RangeFreqQuery struct {
+	ps *PointSetRangeFreq
+}
+
+func Constructor(arr []int) RangeFreqQuery {
+	return RangeFreqQuery{}
+}
+
+func (this *RangeFreqQuery) Query(left int, right int, value int) int {
+	return this.ps.Count(left, right+1, value)
+}
+
+// 单点修改，区间频率查询.
+//
+//	单次修改复杂度 O(sqrt(n)), 单次查询复杂度 O(sqrt(n) * log(sqrt(n))).
+type PointSetRangeFreq struct {
+	nums        []int
+	belong      []int
+	blockStart  []int
+	blockEnd    []int
+	blockCount  int
+	blockSorted [][]int
+}
+
+// ps := NewPointSetRangeFreq(arr, 2*int(math.Sqrt(float64(len(arr)))+1))
+func NewPointSetRangeFreq(nums []int, blockSize int) *PointSetRangeFreq {
+	nums = append(nums[:0:0], nums...)
+	res := &PointSetRangeFreq{}
+	block := UseBlock(len(nums), blockSize)
+	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
+
+	blockSorted := make([][]int, blockCount)
+	for bid := 0; bid < blockCount; bid++ {
+		curSorted := make([]int, blockEnd[bid]-blockStart[bid])
+		copy(curSorted, nums[blockStart[bid]:blockEnd[bid]])
+		sort.Ints(curSorted)
+		blockSorted[bid] = curSorted
+	}
+
+	res.nums = nums
+	res.belong = belong
+	res.blockStart = blockStart
+	res.blockEnd = blockEnd
+	res.blockCount = blockCount
+	res.blockSorted = blockSorted
+	return res
+}
+
+func (ps *PointSetRangeFreq) Set(pos, newValue int) {
+	if ps.nums[pos] == newValue {
+		return
+	}
+	pre := ps.nums[pos]
+	ps.nums[pos] = newValue
+
+	bid := ps.belong[pos]
+	removeIndex := ps._bisectRight(ps.blockSorted[bid], pre, 0, len(ps.blockSorted[bid])-1) - 1
+	ps.blockSorted[bid] = append(ps.blockSorted[bid][:removeIndex], ps.blockSorted[bid][removeIndex+1:]...)
+	insertIndex := ps._bisectRight(ps.blockSorted[bid], newValue, 0, len(ps.blockSorted[bid])-1)
+	ps.blockSorted[bid] = append(ps.blockSorted[bid], 0)
+	copy(ps.blockSorted[bid][insertIndex+1:], ps.blockSorted[bid][insertIndex:])
+	ps.blockSorted[bid][insertIndex] = newValue
+}
+
+// 统计 [start, end) 中等于 target 的元素个数.
+func (ps *PointSetRangeFreq) Count(start, end int, target int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > len(ps.nums) {
+		end = len(ps.nums)
+	}
+	if start >= end {
+		return 0
+	}
+	bid1, bid2 := ps.belong[start], ps.belong[end-1]
+	if bid1 == bid2 {
+		res := 0
+		for i := start; i < end; i++ {
+			if ps.nums[i] == target {
+				res++
+			}
+		}
+		return res
+	}
 	res := 0
-	for i := start; i < end; i++ {
-		if b.nums[i]+b.lazyAdd >= x {
+	for i := start; i < ps.blockEnd[bid1]; i++ {
+		if ps.nums[i] == target {
+			res++
+		}
+	}
+	for bid := bid1 + 1; bid < bid2; bid++ {
+		res += ps._count(ps.blockSorted[bid], target, 0, len(ps.blockSorted[bid])-1)
+	}
+	for i := ps.blockStart[bid2]; i < end; i++ {
+		if ps.nums[i] == target {
 			res++
 		}
 	}
 	return res
 }
 
-type SqrtDecomposition struct {
-	n      int
-	bs     int
-	bls    []Block
-	belong []int
-}
-
-// 指定维护的序列和分块大小初始化.
-//
-//	blockSize:分块大小,一般取根号n(300)
-func NewSqrtDecomposition(nums []E, blockSize int) *SqrtDecomposition {
-	nums = append(nums[:0:0], nums...)
-	res := &SqrtDecomposition{
-		n:      len(nums),
-		bs:     blockSize,
-		bls:    make([]Block, len(nums)/blockSize+1),
-		belong: make([]int, len(nums)),
+// 统计 [start, end) 中严格小于 target 的元素个数.
+func (ps *PointSetRangeFreq) CountLower(start, end int, target int) int {
+	if start < 0 {
+		start = 0
 	}
-	for i := range res.belong {
-		res.belong[i] = i / blockSize
+	if end > len(ps.nums) {
+		end = len(ps.nums)
 	}
-	for i := range res.bls {
-		res.bls[i].id = i
-		res.bls[i].start = i * blockSize
-		res.bls[i].end = min((i+1)*blockSize, len(nums))
-		res.bls[i].nums = nums[res.bls[i].start:res.bls[i].end]
-		res.bls[i].Created()
+	if start >= end {
+		return 0
+	}
+	bid1, bid2 := ps.belong[start], ps.belong[end-1]
+	if bid1 == bid2 {
+		res := 0
+		for i := start; i < end; i++ {
+			if ps.nums[i] < target {
+				res++
+			}
+		}
+		return res
+	}
+	res := 0
+	for i := start; i < ps.blockEnd[bid1]; i++ {
+		if ps.nums[i] < target {
+			res++
+		}
+	}
+	for bid := bid1 + 1; bid < bid2; bid++ {
+		res += ps._bisectLeft(ps.blockSorted[bid], target, 0, len(ps.blockSorted[bid])-1)
+	}
+	for i := ps.blockStart[bid2]; i < end; i++ {
+		if ps.nums[i] < target {
+			res++
+		}
 	}
 	return res
 }
 
-// 更新左闭右开区间[start,end)的值.
-//
-//	0<=start<=end<=n
-func (s *SqrtDecomposition) Update(start, end int, lazy Id) {
-	if start >= end {
-		return
+// 统计 [start, end) 中小于等于 target 的元素个数.
+func (ps *PointSetRangeFreq) CountFloor(start, end int, target int) int {
+	if start < 0 {
+		start = 0
 	}
-	id1, id2 := s.belong[start], s.belong[end-1]
-	pos1, pos2 := start-s.bs*id1, end-s.bs*id2
-	if id1 == id2 {
-		s.bls[id1].UpdatePart(pos1, pos2, lazy)
-		s.bls[id1].Updated()
-	} else {
-		s.bls[id1].UpdatePart(pos1, s.bs, lazy)
-		s.bls[id1].Updated()
-		for i := id1 + 1; i < id2; i++ {
-			s.bls[i].UpdateAll(lazy)
+	if end > len(ps.nums) {
+		end = len(ps.nums)
+	}
+	if start >= end {
+		return 0
+	}
+	bid1, bid2 := ps.belong[start], ps.belong[end-1]
+	if bid1 == bid2 {
+		res := 0
+		for i := start; i < end; i++ {
+			if ps.nums[i] <= target {
+				res++
+			}
 		}
-		s.bls[id2].UpdatePart(0, pos2, lazy)
-		s.bls[id2].Updated()
+		return res
 	}
+	res := 0
+	for i := start; i < ps.blockEnd[bid1]; i++ {
+		if ps.nums[i] <= target {
+			res++
+		}
+	}
+	for bid := bid1 + 1; bid < bid2; bid++ {
+		res += ps._bisectRight(ps.blockSorted[bid], target, 0, len(ps.blockSorted[bid])-1)
+	}
+	for i := ps.blockStart[bid2]; i < end; i++ {
+		if ps.nums[i] <= target {
+			res++
+		}
+	}
+	return res
 }
 
-// 查询左闭右开区间[start,end)的值.
-//
-//	0<=start<=end<=n
-func (s *SqrtDecomposition) Query(start, end int, cb func(blockRes E), k int, same bool) {
-	if start >= end {
-		return
-	}
-	id1, id2 := s.belong[start], s.belong[end-1]
-	pos1, pos2 := start-s.bs*id1, end-s.bs*id2
-	if id1 == id2 {
-		cb(s.bls[id1].QueryPart(pos1, pos2, k, same))
-		return
-	}
-	cb(s.bls[id1].QueryPart(pos1, s.bs, k, same))
-	for i := id1 + 1; i < id2; i++ {
-		cb(s.bls[i].QueryAll(k, same))
-	}
-	cb(s.bls[id2].QueryPart(0, pos2, k, same))
+// 统计 [start, end) 中大于等于 target 的元素个数.
+func (ps *PointSetRangeFreq) CountCeiling(start, end int, target int) int {
+	return (end - start) - ps.CountLower(start, end, target)
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
+// 统计 [start, end) 中严格大于 target 的元素个数.
+func (ps *PointSetRangeFreq) CountHigher(start, end int, target int) int {
+	return (end - start) - ps.CountFloor(start, end, target)
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
+func (ps *PointSetRangeFreq) _bisectLeft(nums []int, target int, left, right int) int {
+	for left <= right {
+		mid := (left + right) >> 1
+		if nums[mid] >= target {
+			right = mid - 1
+		} else {
+			left = mid + 1
+		}
 	}
-	return b
+	return left
+}
+
+func (ps *PointSetRangeFreq) _bisectRight(nums []int, target int, left, right int) int {
+	for left <= right {
+		mid := (left + right) >> 1
+		if nums[mid] > target {
+			right = mid - 1
+		} else {
+			left = mid + 1
+		}
+	}
+	return left
+}
+
+func (ps *PointSetRangeFreq) _count(nums []int, target int, left, right int) int {
+	return ps._bisectRight(nums, target, left, right) - ps._bisectLeft(nums, target, left, right)
+}
+
+// blockSize := int(math.Sqrt(float64(len(nums))) + 1)
+func UseBlock(n int, blockSize int) struct {
+	belong     []int // 下标所属的块.
+	blockStart []int // 每个块的起始下标(包含).
+	blockEnd   []int // 每个块的结束下标(不包含).
+	blockCount int   // 块的数量.
+} {
+	blockCount := 1 + (n / blockSize)
+	blockStart := make([]int, blockCount)
+	blockEnd := make([]int, blockCount)
+	belong := make([]int, n)
+	for i := 0; i < blockCount; i++ {
+		blockStart[i] = i * blockSize
+		tmp := (i + 1) * blockSize
+		if tmp > n {
+			tmp = n
+		}
+		blockEnd[i] = tmp
+	}
+	for i := 0; i < n; i++ {
+		belong[i] = i / blockSize
+	}
+
+	return struct {
+		belong     []int
+		blockStart []int
+		blockEnd   []int
+		blockCount int
+	}{belong, blockStart, blockEnd, blockCount}
 }
