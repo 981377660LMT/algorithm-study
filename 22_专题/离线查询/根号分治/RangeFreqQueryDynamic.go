@@ -14,326 +14,6 @@ import (
 	"time"
 )
 
-func main() {
-
-	testPointSetRangeFreq := func() {
-		countNavie := func(nums []int, target int) int {
-			res := 0
-			for _, v := range nums {
-				if v == target {
-					res++
-				}
-			}
-			return res
-		}
-
-		countLowerNavie := func(nums []int, target int) int {
-			res := 0
-			for _, v := range nums {
-				if v < target {
-					res++
-				}
-			}
-			return res
-		}
-
-		countFloorNavie := func(nums []int, target int) int {
-			res := 0
-			for _, v := range nums {
-				if v <= target {
-					res++
-				}
-			}
-			return res
-		}
-
-		countHigherNavie := func(nums []int, target int) int {
-			res := 0
-			for _, v := range nums {
-				if v > target {
-					res++
-				}
-			}
-			return res
-		}
-
-		countCeilingNavie := func(nums []int, target int) int {
-			res := 0
-			for _, v := range nums {
-				if v >= target {
-					res++
-				}
-			}
-			return res
-		}
-
-		ps := NewPointSetRangeFreq([]int{12, 33, 4, 56, 22, 2, 34, 33, 22, 12, 34, 56}, 3)
-		fmt.Println(ps)
-		for i := 0; i < len(ps.nums); i++ {
-			for j := i; j < len(ps.nums); j++ {
-				for k := 0; k <= 1000; k++ {
-					if ps.RangeFreq(i, j+1, k) != countNavie(ps.nums[i:j+1], k) {
-						fmt.Println(i, j+1, k)
-						fmt.Println(ps.RangeFreq(i, j+1, k), countNavie(ps.nums[i:j+1], k))
-						panic("")
-					}
-					if ps.RangeFreqHigher(i, j+1, k) != countLowerNavie(ps.nums[i:j+1], k) {
-						fmt.Println(i, j+1, k)
-						fmt.Println(ps.RangeFreqHigher(i, j+1, k), countLowerNavie(ps.nums[i:j+1], k))
-						panic("")
-					}
-					if ps.RangeFreqCeiling(i, j+1, k) != countFloorNavie(ps.nums[i:j+1], k) {
-						fmt.Println(i, j+1, k)
-						fmt.Println(ps.RangeFreqCeiling(i, j+1, k), countFloorNavie(ps.nums[i:j+1], k))
-						panic("")
-					}
-					if ps.RangeFreqLower(i, j+1, k) != countHigherNavie(ps.nums[i:j+1], k) {
-						fmt.Println(i, j+1, k)
-						fmt.Println(ps.RangeFreqLower(i, j+1, k), countHigherNavie(ps.nums[i:j+1], k))
-						panic("")
-					}
-					if ps.RangeFreqFloor(i, j+1, k) != countCeilingNavie(ps.nums[i:j+1], k) {
-						fmt.Println(i, j+1, k)
-						fmt.Println(ps.RangeFreqFloor(i, j+1, k), countCeilingNavie(ps.nums[i:j+1], k))
-						panic("")
-					}
-
-					randPos := i + rand.Intn(j-i+1)
-					randValue := rand.Intn(1000)
-					ps.Set(randPos, randValue)
-				}
-			}
-		}
-
-		fmt.Println("OK")
-
-	}
-
-	testRangeAddRangeFreq := func() {
-		N := int(2e4)
-		arr := make([]int, N)
-		for i := 0; i < N; i++ {
-			arr[i] = i
-		}
-		real := NewRangeAddRangeFreq(arr, int(math.Sqrt(float64(len(arr)))+1))
-		mock := NewMocker(arr)
-		randint := func(a, b int) int {
-			return rand.Intn(b-a+1) + a
-		}
-		for i := 0; i < 2e4; i++ {
-			op := randint(0, 6)
-			if op == 0 {
-				index := randint(0, N-1)
-				value := randint(-10, 10)
-				real.Set(index, value)
-				mock.Set(index, value)
-			} else if op == 1 {
-				start := randint(0, N-1)
-				end := randint(start, N-1)
-				delta := randint(-5, 5)
-				real.Add(start, end, delta)
-				mock.Add(start, end, delta)
-			} else if op == 2 {
-				start := randint(0, N-1)
-				end := randint(start, N-1)
-				floor := randint(-10, 10)
-				res := real.RangeFreq(start, end, floor)
-				ans := mock.RangeFreq(start, end, floor)
-				if res != ans {
-					fmt.Println(start, end, floor)
-					fmt.Println(res, ans)
-					panic("")
-				}
-			} else if op == 3 {
-				start := randint(0, N-1)
-				end := randint(start, N-1)
-				floor := randint(-10, 10)
-				res := real.RangeFreqFloor(start, end, floor)
-				ans := mock.RangeFreqFloor(start, end, floor)
-				if res != ans {
-					fmt.Println(start, end, floor)
-					fmt.Println(res, ans)
-					panic("")
-				}
-			} else if op == 4 {
-				start := randint(0, N-1)
-				end := randint(start, N-1)
-				floor := randint(-10, 10)
-				res := real.RangeFreqCeiling(start, end, floor)
-				ans := mock.RangeFreqCeiling(start, end, floor)
-				if res != ans {
-					fmt.Println(start, end, floor)
-					fmt.Println(res, ans)
-					panic("")
-				}
-			} else if op == 5 {
-				start := randint(0, N-1)
-				end := randint(start, N-1)
-				floor := randint(-10, 10)
-				res := real.RangeFreqHigher(start, end, floor)
-				ans := mock.RangeFreqHigher(start, end, floor)
-				if res != ans {
-					fmt.Println(start, end, floor)
-					fmt.Println(res, ans)
-					panic("")
-				}
-			} else if op == 6 {
-				start := randint(0, N-1)
-				end := randint(start, N-1)
-				floor := randint(-10, 10)
-				res := real.RangeFreqLower(start, end, floor)
-				ans := mock.RangeFreqLower(start, end, floor)
-				if res != ans {
-					fmt.Println(start, end, floor)
-					fmt.Println(res, ans)
-					panic("")
-				}
-			}
-		}
-	}
-
-	testRangeAssignRangeFreq := func() {
-		N := int(2e4)
-		arr := make([]int, N)
-		for i := 0; i < N; i++ {
-			arr[i] = i
-		}
-		real := NewRangeAssignRangeFreq(arr, int(math.Sqrt(float64(len(arr)))+1))
-		mock := NewMocker(arr)
-		randint := func(a, b int) int {
-			return rand.Intn(b-a+1) + a
-		}
-		for i := 0; i < 2e4; i++ {
-			op := randint(0, 6)
-			if op == 0 {
-				index := randint(0, N-1)
-				value := randint(-10, 10)
-				real.Set(index, value)
-				mock.Set(index, value)
-			} else if op == 1 {
-				start := randint(0, N-1)
-				end := randint(start, N-1)
-				delta := randint(-5, 5)
-				real.Assign(start, end, delta)
-				mock.Assign(start, end, delta)
-			} else if op == 2 {
-				start := randint(0, N-1)
-				end := randint(start, N-1)
-				floor := randint(-10, 10)
-				res := real.RangeFreq(start, end, floor)
-				ans := mock.RangeFreq(start, end, floor)
-				if res != ans {
-					fmt.Println(start, end, floor)
-					fmt.Println(res, ans)
-					panic("")
-				}
-			} else if op == 3 {
-				start := randint(0, N-1)
-				end := randint(start, N-1)
-				floor := randint(-10, 10)
-				res := real.RangeFreqFloor(start, end, floor)
-				ans := mock.RangeFreqFloor(start, end, floor)
-				if res != ans {
-					fmt.Println(start, end, floor)
-					fmt.Println(res, ans)
-					panic("")
-				}
-			} else if op == 4 {
-				start := randint(0, N-1)
-				end := randint(start, N-1)
-				floor := randint(-10, 10)
-				res := real.RangeFreqCeiling(start, end, floor)
-				ans := mock.RangeFreqCeiling(start, end, floor)
-				if res != ans {
-					fmt.Println(start, end, floor)
-					fmt.Println(res, ans)
-					panic("")
-				}
-			} else if op == 5 {
-				start := randint(0, N-1)
-				end := randint(start, N-1)
-				floor := randint(-10, 10)
-				res := real.RangeFreqHigher(start, end, floor)
-				ans := mock.RangeFreqHigher(start, end, floor)
-				if res != ans {
-					fmt.Println(start, end, floor)
-					fmt.Println(res, ans)
-					panic("")
-				}
-			} else if op == 6 {
-				start := randint(0, N-1)
-				end := randint(start, N-1)
-				floor := randint(-10, 10)
-				res := real.RangeFreqLower(start, end, floor)
-				ans := mock.RangeFreqLower(start, end, floor)
-				if res != ans {
-					fmt.Println(start, end, floor)
-					fmt.Println(res, ans)
-					panic("")
-				}
-			}
-		}
-
-		fmt.Println("ok 3")
-	}
-
-	testTime1 := func() {
-		N := int(1e5)
-		nums := make([]int, N)
-		for i := 0; i < N; i++ {
-			nums[i] = i
-		}
-		ps := NewPointSetRangeFreq(nums, 3*int(math.Sqrt(float64(len(nums)))+1))
-		time1 := time.Now()
-		for i := range nums {
-			ps.Set(i, i+1)
-			ps.RangeFreq(0, len(nums), i)
-		}
-		time2 := time.Now()
-		fmt.Println(time2.Sub(time1))
-	}
-
-	testTime2 := func() {
-		N := int(1e5)
-		nums := make([]int, N)
-		for i := 0; i < N; i++ {
-			nums[i] = i
-		}
-		ps := NewRangeAddRangeFreq(nums, int(math.Sqrt(float64(len(nums)))+1))
-		time1 := time.Now()
-		for i := range nums {
-			ps.Add(0, N, i)
-			ps.RangeFreq(0, len(nums), i)
-		}
-		time2 := time.Now()
-		fmt.Println(time2.Sub(time1))
-	}
-
-	testTime3 := func() {
-		N := int(1e5)
-		nums := make([]int, N)
-		for i := 0; i < N; i++ {
-			nums[i] = i
-		}
-		ps := NewRangeAssignRangeFreq(nums, int(0.75*math.Sqrt(float64(len(nums)))+1))
-		time1 := time.Now()
-		for i := range nums {
-			ps.Assign(i, N, i)
-			ps.RangeFreq(0, len(nums), i)
-		}
-		time2 := time.Now()
-		fmt.Println(time2.Sub(time1))
-	}
-
-	_ = testPointSetRangeFreq
-	_ = testRangeAddRangeFreq
-	_ = testRangeAssignRangeFreq
-	_ = testTime1
-	testTime2()
-	_ = testTime3
-
-}
-
 // https://leetcode.cn/problems/range-frequency-queries/description/
 type RangeFreqQuery struct {
 	ps *PointSetRangeFreq
@@ -1159,4 +839,324 @@ func (m *_Mocker) RangeFreqHigher(start, end int, higher int) int {
 		}
 	}
 	return res
+}
+
+func main() {
+
+	testPointSetRangeFreq := func() {
+		countNavie := func(nums []int, target int) int {
+			res := 0
+			for _, v := range nums {
+				if v == target {
+					res++
+				}
+			}
+			return res
+		}
+
+		countLowerNavie := func(nums []int, target int) int {
+			res := 0
+			for _, v := range nums {
+				if v < target {
+					res++
+				}
+			}
+			return res
+		}
+
+		countFloorNavie := func(nums []int, target int) int {
+			res := 0
+			for _, v := range nums {
+				if v <= target {
+					res++
+				}
+			}
+			return res
+		}
+
+		countHigherNavie := func(nums []int, target int) int {
+			res := 0
+			for _, v := range nums {
+				if v > target {
+					res++
+				}
+			}
+			return res
+		}
+
+		countCeilingNavie := func(nums []int, target int) int {
+			res := 0
+			for _, v := range nums {
+				if v >= target {
+					res++
+				}
+			}
+			return res
+		}
+
+		ps := NewPointSetRangeFreq([]int{12, 33, 4, 56, 22, 2, 34, 33, 22, 12, 34, 56}, 3)
+		fmt.Println(ps)
+		for i := 0; i < len(ps.nums); i++ {
+			for j := i; j < len(ps.nums); j++ {
+				for k := 0; k <= 1000; k++ {
+					if ps.RangeFreq(i, j+1, k) != countNavie(ps.nums[i:j+1], k) {
+						fmt.Println(i, j+1, k)
+						fmt.Println(ps.RangeFreq(i, j+1, k), countNavie(ps.nums[i:j+1], k))
+						panic("")
+					}
+					if ps.RangeFreqHigher(i, j+1, k) != countLowerNavie(ps.nums[i:j+1], k) {
+						fmt.Println(i, j+1, k)
+						fmt.Println(ps.RangeFreqHigher(i, j+1, k), countLowerNavie(ps.nums[i:j+1], k))
+						panic("")
+					}
+					if ps.RangeFreqCeiling(i, j+1, k) != countFloorNavie(ps.nums[i:j+1], k) {
+						fmt.Println(i, j+1, k)
+						fmt.Println(ps.RangeFreqCeiling(i, j+1, k), countFloorNavie(ps.nums[i:j+1], k))
+						panic("")
+					}
+					if ps.RangeFreqLower(i, j+1, k) != countHigherNavie(ps.nums[i:j+1], k) {
+						fmt.Println(i, j+1, k)
+						fmt.Println(ps.RangeFreqLower(i, j+1, k), countHigherNavie(ps.nums[i:j+1], k))
+						panic("")
+					}
+					if ps.RangeFreqFloor(i, j+1, k) != countCeilingNavie(ps.nums[i:j+1], k) {
+						fmt.Println(i, j+1, k)
+						fmt.Println(ps.RangeFreqFloor(i, j+1, k), countCeilingNavie(ps.nums[i:j+1], k))
+						panic("")
+					}
+
+					randPos := i + rand.Intn(j-i+1)
+					randValue := rand.Intn(1000)
+					ps.Set(randPos, randValue)
+				}
+			}
+		}
+
+		fmt.Println("OK")
+
+	}
+
+	testRangeAddRangeFreq := func() {
+		N := int(2e4)
+		arr := make([]int, N)
+		for i := 0; i < N; i++ {
+			arr[i] = i
+		}
+		real := NewRangeAddRangeFreq(arr, int(math.Sqrt(float64(len(arr)))+1))
+		mock := NewMocker(arr)
+		randint := func(a, b int) int {
+			return rand.Intn(b-a+1) + a
+		}
+		for i := 0; i < 2e4; i++ {
+			op := randint(0, 6)
+			if op == 0 {
+				index := randint(0, N-1)
+				value := randint(-10, 10)
+				real.Set(index, value)
+				mock.Set(index, value)
+			} else if op == 1 {
+				start := randint(0, N-1)
+				end := randint(start, N-1)
+				delta := randint(-5, 5)
+				real.Add(start, end, delta)
+				mock.Add(start, end, delta)
+			} else if op == 2 {
+				start := randint(0, N-1)
+				end := randint(start, N-1)
+				floor := randint(-10, 10)
+				res := real.RangeFreq(start, end, floor)
+				ans := mock.RangeFreq(start, end, floor)
+				if res != ans {
+					fmt.Println(start, end, floor)
+					fmt.Println(res, ans)
+					panic("")
+				}
+			} else if op == 3 {
+				start := randint(0, N-1)
+				end := randint(start, N-1)
+				floor := randint(-10, 10)
+				res := real.RangeFreqFloor(start, end, floor)
+				ans := mock.RangeFreqFloor(start, end, floor)
+				if res != ans {
+					fmt.Println(start, end, floor)
+					fmt.Println(res, ans)
+					panic("")
+				}
+			} else if op == 4 {
+				start := randint(0, N-1)
+				end := randint(start, N-1)
+				floor := randint(-10, 10)
+				res := real.RangeFreqCeiling(start, end, floor)
+				ans := mock.RangeFreqCeiling(start, end, floor)
+				if res != ans {
+					fmt.Println(start, end, floor)
+					fmt.Println(res, ans)
+					panic("")
+				}
+			} else if op == 5 {
+				start := randint(0, N-1)
+				end := randint(start, N-1)
+				floor := randint(-10, 10)
+				res := real.RangeFreqHigher(start, end, floor)
+				ans := mock.RangeFreqHigher(start, end, floor)
+				if res != ans {
+					fmt.Println(start, end, floor)
+					fmt.Println(res, ans)
+					panic("")
+				}
+			} else if op == 6 {
+				start := randint(0, N-1)
+				end := randint(start, N-1)
+				floor := randint(-10, 10)
+				res := real.RangeFreqLower(start, end, floor)
+				ans := mock.RangeFreqLower(start, end, floor)
+				if res != ans {
+					fmt.Println(start, end, floor)
+					fmt.Println(res, ans)
+					panic("")
+				}
+			}
+		}
+	}
+
+	testRangeAssignRangeFreq := func() {
+		N := int(2e4)
+		arr := make([]int, N)
+		for i := 0; i < N; i++ {
+			arr[i] = i
+		}
+		real := NewRangeAssignRangeFreq(arr, int(math.Sqrt(float64(len(arr)))+1))
+		mock := NewMocker(arr)
+		randint := func(a, b int) int {
+			return rand.Intn(b-a+1) + a
+		}
+		for i := 0; i < 2e4; i++ {
+			op := randint(0, 6)
+			if op == 0 {
+				index := randint(0, N-1)
+				value := randint(-10, 10)
+				real.Set(index, value)
+				mock.Set(index, value)
+			} else if op == 1 {
+				start := randint(0, N-1)
+				end := randint(start, N-1)
+				delta := randint(-5, 5)
+				real.Assign(start, end, delta)
+				mock.Assign(start, end, delta)
+			} else if op == 2 {
+				start := randint(0, N-1)
+				end := randint(start, N-1)
+				floor := randint(-10, 10)
+				res := real.RangeFreq(start, end, floor)
+				ans := mock.RangeFreq(start, end, floor)
+				if res != ans {
+					fmt.Println(start, end, floor)
+					fmt.Println(res, ans)
+					panic("")
+				}
+			} else if op == 3 {
+				start := randint(0, N-1)
+				end := randint(start, N-1)
+				floor := randint(-10, 10)
+				res := real.RangeFreqFloor(start, end, floor)
+				ans := mock.RangeFreqFloor(start, end, floor)
+				if res != ans {
+					fmt.Println(start, end, floor)
+					fmt.Println(res, ans)
+					panic("")
+				}
+			} else if op == 4 {
+				start := randint(0, N-1)
+				end := randint(start, N-1)
+				floor := randint(-10, 10)
+				res := real.RangeFreqCeiling(start, end, floor)
+				ans := mock.RangeFreqCeiling(start, end, floor)
+				if res != ans {
+					fmt.Println(start, end, floor)
+					fmt.Println(res, ans)
+					panic("")
+				}
+			} else if op == 5 {
+				start := randint(0, N-1)
+				end := randint(start, N-1)
+				floor := randint(-10, 10)
+				res := real.RangeFreqHigher(start, end, floor)
+				ans := mock.RangeFreqHigher(start, end, floor)
+				if res != ans {
+					fmt.Println(start, end, floor)
+					fmt.Println(res, ans)
+					panic("")
+				}
+			} else if op == 6 {
+				start := randint(0, N-1)
+				end := randint(start, N-1)
+				floor := randint(-10, 10)
+				res := real.RangeFreqLower(start, end, floor)
+				ans := mock.RangeFreqLower(start, end, floor)
+				if res != ans {
+					fmt.Println(start, end, floor)
+					fmt.Println(res, ans)
+					panic("")
+				}
+			}
+		}
+
+		fmt.Println("ok 3")
+	}
+
+	testTime1 := func() {
+		N := int(1e5)
+		nums := make([]int, N)
+		for i := 0; i < N; i++ {
+			nums[i] = i
+		}
+		ps := NewPointSetRangeFreq(nums, 3*int(math.Sqrt(float64(len(nums)))+1))
+		time1 := time.Now()
+		for i := range nums {
+			ps.Set(i, i+1)
+			ps.RangeFreq(0, len(nums), i)
+		}
+		time2 := time.Now()
+		fmt.Println(time2.Sub(time1))
+	}
+
+	testTime2 := func() {
+		N := int(1e5)
+		nums := make([]int, N)
+		for i := 0; i < N; i++ {
+			nums[i] = i
+		}
+		ps := NewRangeAddRangeFreq(nums, int(math.Sqrt(float64(len(nums)))+1))
+		time1 := time.Now()
+		for i := range nums {
+			ps.Add(0, N, i)
+			ps.RangeFreq(0, len(nums), i)
+		}
+		time2 := time.Now()
+		fmt.Println(time2.Sub(time1))
+	}
+
+	testTime3 := func() {
+		N := int(1e5)
+		nums := make([]int, N)
+		for i := 0; i < N; i++ {
+			nums[i] = i
+		}
+		ps := NewRangeAssignRangeFreq(nums, int(0.75*math.Sqrt(float64(len(nums)))+1))
+		time1 := time.Now()
+		for i := range nums {
+			ps.Assign(i, N, i)
+			ps.RangeFreq(0, len(nums), i)
+		}
+		time2 := time.Now()
+		fmt.Println(time2.Sub(time1))
+	}
+
+	_ = testPointSetRangeFreq
+	_ = testRangeAddRangeFreq
+	_ = testRangeAssignRangeFreq
+	_ = testTime1
+	testTime2()
+	_ = testTime3
+
 }

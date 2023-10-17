@@ -7,3 +7,18 @@
   关注左侧，从右往左遍历
 
 注意：`单调栈的这个功能可以被 SortedList 代替`
+
+---
+
+单调栈不需要栈
+
+```go
+	left := make([]int, n)
+	for i, v := range nums {
+		j := i - 1
+		for j >= 0 && nums[j] <= v {
+			j = left[j]
+		}
+		left[i] = j
+	}
+```

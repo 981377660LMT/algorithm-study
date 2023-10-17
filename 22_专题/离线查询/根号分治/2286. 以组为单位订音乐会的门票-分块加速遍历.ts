@@ -36,7 +36,7 @@ class BookMyShow {
 
   constructor(row: number, col: number) {
     const remain = new Uint32Array(row).fill(col)
-    const { belong, blockStart, blockEnd, blockCount } = useBlock(remain)
+    const { belong, blockStart, blockEnd, blockCount } = useBlock(remain.length)
     const blockMax = new Float64Array(blockCount)
     const blockSum = new Float64Array(blockCount)
     for (let i = 0; i < row; i++) {

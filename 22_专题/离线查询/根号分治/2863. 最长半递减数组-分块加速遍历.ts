@@ -8,7 +8,7 @@
 import { useBlock } from './SqrtDecomposition/useBlock'
 
 function maxSubarrayLength(nums: number[]): number {
-  const { belong, blockStart, blockEnd, blockCount } = useBlock(nums)
+  const { belong, blockStart, blockEnd, blockCount } = useBlock(nums.length)
   const blockMin = Array(blockCount).fill(Infinity)
   nums.forEach((num, i) => {
     const bid = belong[i]

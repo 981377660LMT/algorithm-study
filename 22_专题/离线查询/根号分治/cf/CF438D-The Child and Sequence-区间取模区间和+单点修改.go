@@ -6,7 +6,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"os"
 )
 
@@ -19,29 +18,83 @@ import (
 // !即：如果一个数在取模后改变了，那么它必定缩小至少一半.
 // !需要维护块内最大值, 而且如果区间最大值小于模数，那取模就没有意义了，直接跳过.
 func RangeModRangeSum(nums []int, operations [][4]int) []int {
-	block := UseBlock(len(nums), int(math.Sqrt(float64(len(nums)))+1))
+	block := UseBlock(len(nums), 40) // 块大小为40，跑得很快
 
 	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
-	res := []int{}
+	blockSum := make([]int, blockCount)
+	blockMax := make([]int, blockCount) // <mod 则跳过整块取模
 
+	// 初始化/更新零散块后重构整个块
+	rebuild := func(bid int) {
+		blockSum[bid] = 0
+		blockMax[bid] = 0
+		for i := blockStart[bid]; i < blockEnd[bid]; i++ {
+			blockSum[bid] += nums[i]
+			blockMax[bid] = max(blockMax[bid], nums[i])
+		}
+	}
+	for bid := 0; bid < blockCount; bid++ {
+		rebuild(bid)
+	}
+
+	res := []int{}
 	for _, op := range operations {
 		kind := op[0]
 		if kind == 0 {
 			start, end := op[1], op[2]
 			bid1, bid2 := belong[start], belong[end-1]
+			sum := 0
 			if bid1 == bid2 {
+				for i := start; i < end; i++ {
+					sum += nums[i]
+				}
 			} else {
+				for i := start; i < blockEnd[bid1]; i++ {
+					sum += nums[i]
+				}
+				for i := bid1 + 1; i < bid2; i++ {
+					sum += blockSum[i]
+				}
+				for i := blockStart[bid2]; i < end; i++ {
+					sum += nums[i]
+				}
 			}
+			res = append(res, sum)
 		} else if kind == 1 {
 			start, end, mod := op[1], op[2], op[3]
 			bid1, bid2 := belong[start], belong[end-1]
 			if bid1 == bid2 {
+				for i := start; i < end; i++ {
+					nums[i] %= mod
+				}
+				rebuild(bid1)
 			} else {
+				for i := start; i < blockEnd[bid1]; i++ {
+					nums[i] %= mod
+				}
+				rebuild(bid1)
+				for i := bid1 + 1; i < bid2; i++ {
+					if blockMax[i] < mod {
+						continue
+					}
+					for j := blockStart[i]; j < blockEnd[i]; j++ {
+						nums[j] %= mod
+					}
+					rebuild(i)
+				}
+				for i := blockStart[bid2]; i < end; i++ {
+					nums[i] %= mod
+				}
+				rebuild(bid2)
 			}
 		} else {
 			pos, target := op[1], op[2]
 			pre := nums[pos]
-
+			if pre == target {
+				continue
+			}
+			nums[pos] = target
+			rebuild(belong[pos])
 		}
 	}
 

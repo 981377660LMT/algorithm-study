@@ -13,7 +13,7 @@ import (
 	"sort"
 )
 
-func main() {
+func 数颜色() {
 	// https://www.luogu.com.cn/problem/P1903
 	// Q L R 查询第L支画笔到第R支画笔中共有几种不同颜色的画笔。
 	// R P Col 把第P支画笔替换为颜色 Col
@@ -98,7 +98,8 @@ func NewMoModify(nums []T, q int) *MoModify {
 }
 
 // 添加一个查询，查询范围为`左闭右开区间` [left, right).
-//  0 <= left <= right <= n.
+//
+//	0 <= left <= right <= n.
 func (mo *MoModify) AddQuery(left, right int) {
 	left++
 	mo.queries = append(
@@ -108,16 +109,18 @@ func (mo *MoModify) AddQuery(left, right int) {
 }
 
 // 添加一个修改，修改位置为 pos, 修改值为 val.
-//  0 <= pos < n.
+//
+//	0 <= pos < n.
 func (mo *MoModify) AddModify(pos int, val T) {
 	pos++
 	mo.modifies = append(mo.modifies, modify{pos, val})
 }
 
 // 返回每个查询的结果.
-//  add: 将数据添加到窗口. delta: 1 表示向右移动，-1 表示向左移动.
-//  remove: 将数据从窗口移除. delta: 1 表示向右移动，-1 表示向左移动.
-//  query: 查询窗口内的数据.
+//
+//	add: 将数据添加到窗口. delta: 1 表示向右移动，-1 表示向左移动.
+//	remove: 将数据从窗口移除. delta: 1 表示向右移动，-1 表示向左移动.
+//	query: 查询窗口内的数据.
 func (mo *MoModify) Run(
 	add func(value T),
 	remove func(value T),

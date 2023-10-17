@@ -168,10 +168,7 @@ if (require.main === module) {
   // 静态区间逆序对-离线.
   // 时间复杂度O(nsqrt(n)),空间复杂度O(n).
   // https://judge.yosupo.jp/problem/static_range_inversions_query
-  function staticRangeInversionsQuery(
-    nums: number[],
-    ranges: [start: number, end: number][]
-  ): number[] {
+  function staticRangeInversionsQuery(nums: number[], ranges: [start: number, end: number][]): number[] {
     const n = nums.length
     const q = ranges.length
     const [rank, newNums] = discretizeCompressed(nums)

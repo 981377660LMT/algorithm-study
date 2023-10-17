@@ -1,5 +1,6 @@
 # https://zhuanlan.zhihu.com/p/563177000 求区间mex的多种方法
 
+# E - Mex Min-滑动窗口mex
 # !O(nlogn) 定长滑动窗口mex (区间mex特殊情况)
 # !（1）添加一个数到集合中
 # !（2）从集合中删除一个数 (如果没有删除操作,只用while维护mex)
@@ -10,6 +11,41 @@
 
 from typing import List
 from sortedcontainers import SortedList
+
+
+class WindowMex:
+    __slots__ = "_maxOperation", "_mexStart", "_counter", "_sl"
+
+    def __init__(self, maxOperation: int, mexStart=0) -> None:
+        self._maxOperation = maxOperation
+        self._mexStart = mexStart
+        self._counter = [0] * (maxOperation + 1)
+        self._sl = SortedList(list(range(mexStart, mexStart + maxOperation + 1)))
+
+    def add(self, v: int) -> bool:
+        mexStart, maxOperation = self._mexStart, self._maxOperation
+        if v < mexStart or v > mexStart + maxOperation:
+            return False
+        self._counter[v - mexStart] += 1
+        if self._counter[v - mexStart] == 1:
+            self._sl.remove(v)
+        return True
+
+    def discard(self, v: int) -> bool:
+        mexStart, maxOperation = self._mexStart, self._maxOperation
+        if v < mexStart or v > mexStart + maxOperation:
+            return False
+        if self._counter[v - mexStart] == 0:
+            return False
+        self._counter[v - mexStart] -= 1
+        if self._counter[v - mexStart] == 0:
+            self._sl.add(v)
+        return True
+
+    def query(self) -> int:
+        if not self._sl:
+            return self._mexStart
+        return self._sl[0]  # type: ignore
 
 
 def windowMex(nums: List[int], k: int) -> List[int]:
