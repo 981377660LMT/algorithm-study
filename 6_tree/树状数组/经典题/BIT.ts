@@ -93,9 +93,9 @@ class BITArray {
   toString(): string {
     const sb: string[] = []
     sb.push('BITArray: [')
-    for (let i = 1; i < this._tree.length; i++) {
+    for (let i = 0; i < this.length; i++) {
       sb.push(String(this.queryRange(i, i + 1)))
-      if (i < this._tree.length - 1) sb.push(', ')
+      if (i < this.length - 1) sb.push(', ')
     }
     sb.push(']')
     return sb.join('')
@@ -305,12 +305,7 @@ class BIT3 {
    * 0 <= col1 <= col2 < {@link _COL}
    */
   queryRange(row1: number, col1: number, row2: number, col2: number): number {
-    return (
-      this._query(row2, col2) -
-      this._query(row1 - 1, col2) -
-      this._query(row2, col1 - 1) +
-      this._query(row1 - 1, col1 - 1)
-    )
+    return this._query(row2, col2) - this._query(row1 - 1, col2) - this._query(row2, col1 - 1) + this._query(row1 - 1, col1 - 1)
   }
 
   private _query(row: number, col: number): number {
@@ -369,12 +364,7 @@ class BIT4 {
    * 0<=row1<=row2<=ROW-1, 0<=col1<=col2<=COL-1
    */
   queryRange(row1: number, col1: number, row2: number, col2: number): number {
-    return (
-      this._query(row2, col2) -
-      this._query(row1 - 1, col2) -
-      this._query(row2, col1 - 1) +
-      this._query(row1 - 1, col1 - 1)
-    )
+    return this._query(row2, col2) - this._query(row1 - 1, col2) - this._query(row2, col1 - 1) + this._query(row1 - 1, col1 - 1)
   }
 
   private _add(row: number, col: number, delta: number): void {
@@ -396,11 +386,7 @@ class BIT4 {
     let res = 0
     for (let r = row; r > 0; r -= r & -r) {
       for (let c = col; c > 0; c -= c & -c) {
-        res +=
-          row * col * this._tree1[r][c] -
-          col * this._tree2[r][c] -
-          row * this._tree3[r][c] +
-          this._tree4[r][c]
+        res += row * col * this._tree1[r][c] - col * this._tree2[r][c] - row * this._tree3[r][c] + this._tree4[r][c]
       }
     }
     return res

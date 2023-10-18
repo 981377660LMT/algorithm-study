@@ -1,21 +1,19 @@
 /* eslint-disable no-inner-declarations */
 
 class RangeModRangeSum {
-  private readonly _nums: number[]
-  private readonly _belong: Uint32Array
+  private readonly _nums: Float64Array
+  private readonly _belong: Uint16Array
   private readonly _blockStart: Uint32Array
   private readonly _blockEnd: Uint32Array
-  private readonly _blockSum: number[]
-  private readonly _blockMax: number[]
+  private readonly _blockSum: Float64Array
+  private readonly _blockMax: Float64Array
 
   /**
    * @param arr 非负整数数组.
    */
-  constructor(arr: ArrayLike<number>, blockSize = 60) {
+  constructor(arr: ArrayLike<number>, blockSize = 80) {
     const n = arr.length
-    const copy = Array(n)
-    for (let i = 0; i < n; ++i) copy[i] = arr[i]
-    const belong = new Uint32Array(n)
+    const belong = new Uint16Array(n)
     for (let i = 0; i < n; ++i) belong[i] = (i / blockSize) | 0
     const blockCount = (1 + n / blockSize) | 0
     const blockStart = new Uint32Array(blockCount)
@@ -24,9 +22,9 @@ class RangeModRangeSum {
       blockStart[i] = i * blockSize
       blockEnd[i] = Math.min((i + 1) * blockSize, n)
     }
-    const blockSum = Array(blockCount)
-    const blockMax = Array(blockCount)
-    this._nums = copy
+    const blockSum = new Float64Array(blockCount)
+    const blockMax = new Float64Array(blockCount)
+    this._nums = new Float64Array(arr)
     this._belong = belong
     this._blockStart = blockStart
     this._blockEnd = blockEnd
