@@ -11,7 +11,7 @@ const MOD int = 1e9 + 7
 // https://leetcode.cn/problems/sum-of-special-evenly-spaced-elements-in-array/
 func solve(nums []int, queries [][]int) []int {
 	n := len(nums)
-	R := NewRangeStepSum(nums, 80)
+	R := NewRangeStepSum(nums, 40)
 	res := make([]int, len(queries))
 	for qi, query := range queries {
 		start, stop, step := query[0], n, query[1]
@@ -31,7 +31,7 @@ type RangeStepSum struct {
 // stepThreshold: 步长阈值,当步长小于等于该值时,使用dp数组预处理答案,否则直接遍历.
 // 预处理时间空间复杂度均为`O(n*stepThreshold)`.
 // 单次遍历时间复杂度为`O(n/stepThreshold)`.
-// 取80较为合适.
+// 取40较为合适.
 func NewRangeStepSum(arr []int, stepThreshold int) *RangeStepSum {
 	n := len(arr)
 	dp := make([][]int, stepThreshold)
