@@ -6,12 +6,12 @@ func main() {
 	s := "abcdbc"
 	leaves := make([]E, len(s))
 	for i := 0; i < len(s); i++ {
-		leaves[i] = CreateE(uint(s[i]))
+		leaves[i] = FromElement(uint(s[i]))
 	}
 	seg := NewSegmentTree(leaves)
 	fmt.Println(seg.Query(0, 3))
 	fmt.Println(seg.Query(3, 6))
-	seg.Set(3, CreateE('a'))
+	seg.Set(3, FromElement('a'))
 	fmt.Println(seg.Query(0, 3))
 	fmt.Println(seg.Query(3, 6))
 }
@@ -40,7 +40,7 @@ type E = struct {
 	hash1, hash2 uint
 }
 
-func CreateE(c uint) E {
+func FromElement(c uint) E {
 	return E{len: 1, hash1: c, hash2: c}
 }
 

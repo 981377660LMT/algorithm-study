@@ -1,4 +1,5 @@
 # 求前n项和
+
 from math import log2
 from typing import Tuple, List
 
@@ -13,7 +14,7 @@ def powerSum(x: int, n: int, mod: int) -> Tuple[int, int]:
     """
     if mod == 1:
         return 0, 0
-    sum_, p = 1, x  # res = x^0 + ... + x^(len - 1), p = x^len
+    sum_, p = 1, x  # res = x^0 + ... + x^(n - 1), p = x^n
     start = int(log2(n)) - 1
     for d in range(start, -1, -1):
         sum_ *= p + 1

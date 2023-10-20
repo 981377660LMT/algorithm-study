@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-param-reassign */
 
 /**
@@ -17,10 +18,7 @@ class BitAbleGroup<E> {
    * 如果只查询前缀和(不使用区间查询), 可以不指定逆元`inv`.
    * 默认为加法群.
    */
-  constructor(
-    nOrArr: number | E[],
-    ableGroup?: { e: () => E; op: (e1: E, e2: E) => E; inv?: (e: E) => E }
-  ) {
+  constructor(nOrArr: number | E[], ableGroup?: { e: () => E; op: (e1: E, e2: E) => E; inv?: (e: E) => E }) {
     let defaultE = () => 0 as any
     let defaultOp = (e1: any, e2: any) => e1 + e2
     let defaultInv = (e: E) => -e as any
@@ -64,35 +62,35 @@ class BitAbleGroup<E> {
   }
 
   /**
-   * [0, right)的和.
+   * [0, end)的和.
    */
-  queryPrefix(right: number): E {
-    if (right > this._n) right = this._n
+  queryPrefix(end: number): E {
+    if (end > this._n) end = this._n
     let res = this._e()
-    while (right > 0) {
-      res = this._op(res, this._data[right - 1])
-      right &= right - 1
+    while (end > 0) {
+      res = this._op(res, this._data[end - 1])
+      end &= end - 1
     }
     return res
   }
 
   /**
-   * [left, right)的和.
+   * [start, end)的和.
    */
-  queryRange(left: number, right: number): E {
-    if (left < 0) left = 0
-    if (right > this._n) right = this._n
-    if (left === 0) return this.queryPrefix(right)
-    if (left > right) return this._e()
+  queryRange(start: number, end: number): E {
+    if (start < 0) start = 0
+    if (end > this._n) end = this._n
+    if (start === 0) return this.queryPrefix(end)
+    if (start > end) return this._e()
     let pos = this._e()
     let neg = this._e()
-    while (right > left) {
-      pos = this._op(pos, this._data[right - 1])
-      right &= right - 1
+    while (end > start) {
+      pos = this._op(pos, this._data[end - 1])
+      end &= end - 1
     }
-    while (left > right) {
-      neg = this._op(neg, this._data[left - 1])
-      left &= left - 1
+    while (start > end) {
+      neg = this._op(neg, this._data[start - 1])
+      start &= start - 1
     }
     return this._op(pos, this._inv(neg))
   }
@@ -105,15 +103,15 @@ class BitAbleGroup<E> {
   }
 
   /**
-   * 返回最大的 right 使得 `check(QueryPrefix(right)) == true`.
-   * @param check check(preSum, right): preSum 对应的是 [0, right) 的和.
+   * 返回最大的 end 使得 `check(QueryPrefix(end)) == true`.
+   * @param check check(preSum, end): preSum 对应的是 [0, end) 的和.
    *
    * @example
    * ```ts
    * const fw = new BitGroup(10)
    * fw.maxRight(preSum => preSum <= 10)
    */
-  maxRight(check: (preSum: E, right: number) => boolean): number {
+  maxRight(check: (preSum: E, end: number) => boolean): number {
     let i = 0
     let cur = this._e()
     let k = 1
@@ -158,7 +156,7 @@ if (require.main === module) {
     }
 
     longest(): number {
-      return this._bit.maxRight((preSum, right) => preSum >= right)
+      return this._bit.maxRight((preSum, end) => preSum >= end)
     }
   }
 }

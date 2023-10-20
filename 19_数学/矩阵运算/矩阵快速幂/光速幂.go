@@ -1,6 +1,7 @@
 // 光速幂
 // 已知base和模数mod，求base^n 模mod
-// !O(sqrt(maxN))预处理,O(1)查询
+// !O(sqrt(maxN))预处理,O(1)查询 (分块打表)
+// https://www.luogu.com.cn/problem/P5110
 
 package main
 
@@ -9,7 +10,6 @@ import (
 )
 
 func main() {
-
 	fp := NewFastPow(2, 1e5)
 	println(fp.Pow(1e18))
 }
@@ -64,4 +64,16 @@ func NewFastPow(base E, maxN int) *FastPow {
 // n<=maxN.
 func (fp *FastPow) Pow(n int) E {
 	return fp.op(fp.divData[n/fp.max], fp.modData[n%fp.max])
+}
+
+// 区间以2为底的幂和 (2^start + 2^(start+1) + ... + 2^(end-1)) % MOD.
+func (fp *FastPow) RangePow2Sum(start, end int) int {
+	if start >= end {
+		return 0
+	}
+	res := (fp.Pow(end) - fp.Pow(start)) % MOD
+	if res < 0 {
+		res += MOD
+	}
+	return res
 }

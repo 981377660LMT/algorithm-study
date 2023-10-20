@@ -113,23 +113,17 @@ if (require.main === module) {
     const mocker = new Mocker(arr)
     const pointSetRangeStepSum = new RangeStepSum(arr)
     for (let i = 0; i < 1e5; i++) {
-      const op = Math.random() < 0 ? 'set' : 'query'
       const start = (Math.random() * n) | 0
       const stop = (Math.random() * n) | 0
       const step = (1 + Math.random() * n) | 0
-      if (op === 'set') {
-        // const value = (Math.random() * 5) | 0
-        // mocker.set(start, value)
-        // pointSetRangeStepSum.set(start, value)
-      } else {
-        const res1 = mocker.query(start, stop, step)
-        const res2 = pointSetRangeStepSum.query(start, stop, step)
-        if (res1 !== res2) {
-          console.error('error', res1, res2, start, stop, step)
-          console.log("mocker's arr", mocker.toString())
-          console.log('pointSetRangeStepSum', pointSetRangeStepSum.toString())
-          throw new Error()
-        }
+
+      const res1 = mocker.query(start, stop, step)
+      const res2 = pointSetRangeStepSum.query(start, stop, step)
+      if (res1 !== res2) {
+        console.error('error', res1, res2, start, stop, step)
+        console.log("mocker's arr", mocker.toString())
+        console.log('pointSetRangeStepSum', pointSetRangeStepSum.toString())
+        throw new Error()
       }
     }
 

@@ -16,6 +16,10 @@ import (
 )
 
 func main() {
+	P6328我是仙人掌()
+}
+
+func yukicoder1400() {
 	// https://yukicoder.me/problems/no/1400
 	// V<=2000,D<=1e18
 	// 如果当前在第i行，Matrix[i][j]为1,就可以移动到第j列的任意一行
@@ -26,11 +30,10 @@ func main() {
 
 	var V, D int
 	fmt.Fscan(in, &V, &D)
-	graph := make([]_Bitset, V+V)
+	graph := make([]_BS, V+V)
 	for i := range graph {
-		graph[i] = _NewBitset(V + V)
+		graph[i] = _NewBS(V + V)
 	}
-
 	for i := 0; i < V; i++ {
 		var S string
 		fmt.Fscan(in, &S)
@@ -44,7 +47,6 @@ func main() {
 	}
 	for s := 0; s < V; s++ {
 		dist := BfsBitset(graph, s)
-
 		if D%2 == 0 {
 			for t := 0; t < V; t++ {
 				if dist[t] == -1 || dist[t] > D {
@@ -53,7 +55,6 @@ func main() {
 				}
 			}
 		}
-
 		if D%2 == 1 {
 			for t := V; t < V+V; t++ {
 				if dist[t] == -1 || dist[t] > D {
@@ -63,32 +64,89 @@ func main() {
 			}
 		}
 	}
-
 	fmt.Fprintln(out, "Yes")
 }
 
+// func P6328我是仙人掌() {
+// 	// https://www.luogu.com.cn/problem/P6328
+// 	// n<=1000,m,q<=1e5
+// 	// 每个查询给定(x,dist),查询图中与x距离不超过dist的点的个数
+// 	// 无向图，求最短路
+// 	in := bufio.NewReader(os.Stdin)
+// 	out := bufio.NewWriter(os.Stdout)
+// 	defer out.Flush()
+
+// 	var n, m, q int
+// 	fmt.Fscan(in, &n, &m, &q)
+// 	adjMatrix := make([]_BS, n)
+// 	for i := range adjMatrix {
+// 		adjMatrix[i] = _NewBS(n)
+// 	}
+// 	for i := 0; i < m; i++ {
+// 		var u, v int
+// 		fmt.Fscan(in, &u, &v)
+// 		u--
+// 		v--
+// 		adjMatrix[u].Set(v)
+// 		adjMatrix[v].Set(u)
+// 	}
+
+// 	res := make([]int, q)
+// 	queries := make([][2]int, q)
+// 	queryGroup := make([][]int, n)
+// 	for qi := range queries {
+// 		var x, dist int
+// 		fmt.Fscan(in, &x, &dist)
+// 		x--
+// 		queries[qi] = [2]int{x, dist}
+// 		queryGroup[x] = append(queryGroup[x], qi)
+// 	}
+
+// 	for s := 0; s < n; s++ {
+// 		if len(queryGroup[s]) == 0 {
+// 			continue
+// 		}
+// 		curQueries := queryGroup[s]
+// 		sort.Slice(curQueries, func(i, j int) bool {
+// 			return queries[curQueries[i]][1] < queries[curQueries[j]][1]
+// 		})
+// 		dist := BfsBitset(adjMatrix, s)
+// 		sort.Ints(dist)
+// 		ptr := 0
+// 		for _, qi := range curQueries {
+// 			for ptr < len(dist) && dist[ptr] <= queries[qi][1] {
+// 				ptr++
+// 			}
+// 			res[qi] = ptr
+// 		}
+// 	}
+
+// 	for _, v := range res {
+// 		fmt.Fprintln(out, v)
+// 	}
+// }
+
 // O(n^2/w)
-func BfsBitset(graph []_Bitset, start int) []int {
+// graph: 01邻接矩阵.
+func BfsBitset(graph []_BS, start int) []int {
 	n := len(graph)
 	dist := make([]int, n)
 	for i := range dist {
 		dist[i] = -1
 	}
-
-	unused := _NewBitset(n)
+	unused := _NewBS(n)
 	for i := 0; i < n; i++ {
 		unused.Set(i)
 	}
-	queue := _NewBitset(n)
+	queue := _NewBS(n)
 	queue.Set(start)
-
 	d := 0
 	for {
 		p := queue.Index1()
 		if p >= n {
 			break
 		}
-		next := _NewBitset(n)
+		next := _NewBS(n)
 		for p < n {
 			dist[p] = d
 			unused.Reset(p)
@@ -98,50 +156,17 @@ func BfsBitset(graph []_Bitset, start int) []int {
 		queue = next.And(unused)
 		d++
 	}
-
 	return dist
 }
 
-type _Bitset []uint64
+type _BS []uint64
 
-func _NewBitset(n int) _Bitset { return make(_Bitset, n>>6+1) } // (n+64-1)>>6
+func _NewBS(n int) _BS    { return make(_BS, n>>6+1) }  // (n+64-1)>>6
+func (b _BS) Set(p int)   { b[p>>6] |= 1 << (p & 63) }  // 置 1
+func (b _BS) Reset(p int) { b[p>>6] &^= 1 << (p & 63) } // 置 0
 
-func (b _Bitset) Has(p int) bool { return b[p>>6]&(1<<(p&63)) != 0 } // get
-func (b _Bitset) Flip(p int)     { b[p>>6] ^= 1 << (p & 63) }
-func (b _Bitset) Set(p int)      { b[p>>6] |= 1 << (p & 63) }  // 置 1
-func (b _Bitset) Reset(p int)    { b[p>>6] &^= 1 << (p & 63) } // 置 0
-
-func (b _Bitset) Copy() _Bitset {
-	res := make(_Bitset, len(b))
-	copy(res, b)
-	return res
-}
-
-// 遍历所有 1 的位置
-// 如果对范围有要求，可在 f 中 return p < n
-func (b _Bitset) Foreach(f func(p int) (Break bool)) {
-	for i, v := range b {
-		for ; v > 0; v &= v - 1 {
-			j := i<<6 | bits.TrailingZeros64(v)
-			if f(j) {
-				return
-			}
-		}
-	}
-}
-
-// 返回第一个 0 的下标，若不存在则返回一个不小于 n 的位置
-func (b _Bitset) Index0() int {
-	for i, v := range b {
-		if ^v != 0 {
-			return i<<6 | bits.TrailingZeros64(^v)
-		}
-	}
-	return len(b) << 6
-}
-
-// 返回第一个 1 的下标，若不存在则返回一个不小于 n 的位置（同 C++ 中的 _Find_first）
-func (b _Bitset) Index1() int {
+// 返回第一个 1 的下标，若不存在则返回一个不小于 n 的位置.
+func (b _BS) Index1() int {
 	for i, v := range b {
 		if v != 0 {
 			return i<<6 | bits.TrailingZeros64(v)
@@ -150,10 +175,10 @@ func (b _Bitset) Index1() int {
 	return len(b) << 6
 }
 
-// 返回下标 >= p 的第一个 1 的下标，若不存在则返回一个不小于 n 的位置（类似 C++ 中的 _Find_next，这里是 >=, C++里是 >）
-func (b _Bitset) Next1(p int) int {
+// 返回下标 >= p 的第一个 1 的下标，若不存在则返回一个不小于 n 的位置
+func (b _BS) Next1(p int) int {
 	if i := p >> 6; i < len(b) {
-		v := b[i] & (^uint64(0) << (p & 63)) // mask off bits below bound
+		v := b[i] & (^uint64(0) << (p & 63))
 		if v != 0 {
 			return i<<6 | bits.TrailingZeros64(v)
 		}
@@ -166,234 +191,14 @@ func (b _Bitset) Next1(p int) int {
 	return len(b) << 6
 }
 
-// 返回下标 >= p 的第一个 0 的下标，若不存在则返回一个不小于 n 的位置
-func (b _Bitset) Next0(p int) int {
-	if i := p >> 6; i < len(b) {
-		v := b[i]
-		if p&63 > 0 {
-			v |= ^(^uint64(0) << (p & 63))
-		}
-		if ^v != 0 {
-			return i<<6 | bits.TrailingZeros64(^v)
-		}
-		for i++; i < len(b); i++ {
-			if ^b[i] != 0 {
-				return i<<6 | bits.TrailingZeros64(^b[i])
-			}
-		}
-	}
-	return len(b) << 6
-}
-
-// 返回最后第一个 1 的下标，若不存在则返回 -1
-func (b _Bitset) LastIndex1() int {
-	for i := len(b) - 1; i >= 0; i-- {
-		if b[i] != 0 {
-			return i<<6 | (bits.Len64(b[i]) - 1) // 如果再 +1，需要改成 i<<6 + bits.Len64(b[i])
-		}
-	}
-	return -1
-}
-
-// += 1 << i，模拟进位
-func (b _Bitset) Add(i int) { b.FlipRange(i, b.Next0(i)) }
-
-// -= 1 << i，模拟借位
-func (b _Bitset) Sub(i int) { b.FlipRange(i, b.Next1(i)) }
-
-// 判断 [l,r] 范围内的数是否全为 0
-// https://codeforces.com/contest/1107/problem/D（标准做法是二维前缀和）
-func (b _Bitset) All0(l, r int) bool {
-	i := l >> 6
-	if i == r>>6 {
-		mask := ^uint64(0)<<(l&63) ^ ^uint64(0)<<(r&63)
-		return b[i]&mask == 0
-	}
-	if b[i]>>(l&63) != 0 {
-		return false
-	}
-	for i++; i < r>>6; i++ {
-		if b[i] != 0 {
-			return false
-		}
-	}
-	mask := ^uint64(0) << (r & 63)
-	return b[r>>6]&^mask == 0
-}
-
-// 判断 [l,r] 范围内的数是否全为 1
-func (b _Bitset) All1(l, r int) bool {
-	i := l >> 6
-	if i == r>>6 {
-		mask := ^uint64(0)<<(l&63) ^ ^uint64(0)<<(r&63)
-		return b[i]&mask == mask
-	}
-	mask := ^uint64(0) << (l & 63)
-	if b[i]&mask != mask {
-		return false
-	}
-	for i++; i < r>>6; i++ {
-		if ^b[i] != 0 {
-			return false
-		}
-	}
-	mask = ^uint64(0) << (r & 63)
-	return ^(b[r>>6] | mask) == 0
-}
-
-// 反转 [l,r) 范围内的比特
-// https://codeforces.com/contest/1705/problem/E
-func (b _Bitset) FlipRange(l, r int) {
-	maskL, maskR := ^uint64(0)<<(l&63), ^uint64(0)<<(r&63)
-	i := l >> 6
-	if i == r>>6 {
-		b[i] ^= maskL ^ maskR
-		return
-	}
-	b[i] ^= maskL
-	for i++; i < r>>6; i++ {
-		b[i] = ^b[i]
-	}
-	b[i] ^= ^maskR
-}
-
-// 将 [l,r) 范围内的比特全部置 1
-func (b _Bitset) SetRange(l, r int) {
-	maskL, maskR := ^uint64(0)<<(l&63), ^uint64(0)<<(r&63)
-	i := l >> 6
-	if i == r>>6 {
-		b[i] |= maskL ^ maskR
-		return
-	}
-	b[i] |= maskL
-	for i++; i < r>>6; i++ {
-		b[i] = ^uint64(0)
-	}
-	b[i] |= ^maskR
-}
-
-// 将 [l,r) 范围内的比特全部置 0
-func (b _Bitset) ResetRange(l, r int) {
-	maskL, maskR := ^uint64(0)<<(l&63), ^uint64(0)<<(r&63)
-	i := l >> 6
-	if i == r>>6 {
-		b[i] &= ^maskL | maskR
-		return
-	}
-	b[i] &= ^maskL
-	for i++; i < r>>6; i++ {
-		b[i] = 0
-	}
-	b[i] &= maskR
-}
-
-// 左移 k 位
-// LC1981 https://leetcode-cn.com/problems/minimize-the-difference-between-target-and-chosen-elements/
-func (b _Bitset) Lsh(k int) {
-	if k == 0 {
-		return
-	}
-	shift, offset := k>>6, k&63
-	if shift >= len(b) {
-		for i := range b {
-			b[i] = 0
-		}
-		return
-	}
-	if offset == 0 {
-		// Fast path
-		copy(b[shift:], b)
-	} else {
-		for i := len(b) - 1; i > shift; i-- {
-			b[i] = b[i-shift]<<offset | b[i-shift-1]>>(64-offset)
-		}
-		b[shift] = b[0] << offset
-	}
-	for i := 0; i < shift; i++ {
-		b[i] = 0
-	}
-}
-
-// 右移 k 位
-func (b _Bitset) Rsh(k int) {
-	if k == 0 {
-		return
-	}
-	shift, offset := k>>6, k&63
-	if shift >= len(b) {
-		for i := range b {
-			b[i] = 0
-		}
-		return
-	}
-	lim := len(b) - 1 - shift
-	if offset == 0 {
-		// Fast path
-		copy(b, b[shift:])
-	} else {
-		for i := 0; i < lim; i++ {
-			b[i] = b[i+shift]>>offset | b[i+shift+1]<<(64-offset)
-		}
-		// 注意：若前后调用 lsh 和 rsh，需要注意超出 n 的范围的 1 对结果的影响（如果需要，可以把范围开大点）
-		b[lim] = b[len(b)-1] >> offset
-	}
-	for i := lim + 1; i < len(b); i++ {
-		b[i] = 0
-	}
-}
-
-// 借用 bits 库中的一些方法的名字
-func (b _Bitset) OnesCount() (c int) {
-	for _, v := range b {
-		c += bits.OnesCount64(v)
-	}
-	return
-}
-func (b _Bitset) TrailingZeros64() int { return b.Index1() }
-func (b _Bitset) Len() int             { return b.LastIndex1() + 1 }
-
-// 下面几个方法均需保证长度相同
-func (b _Bitset) Equals(c _Bitset) bool {
-	for i, v := range b {
-		if v != c[i] {
-			return false
-		}
-	}
-	return true
-}
-
-func (b _Bitset) HasSubset(c _Bitset) bool {
-	for i, v := range b {
-		if v|c[i] != v {
-			return false
-		}
-	}
-	return true
-}
-
-// 将 c 的元素合并进 b
-func (b _Bitset) IOr(c _Bitset) {
+func (b _BS) IOr(c _BS) {
 	for i, v := range c {
 		b[i] |= v
 	}
 }
 
-func (b _Bitset) Or(c _Bitset) _Bitset {
-	res := make(_Bitset, len(b))
-	for i, v := range b {
-		res[i] = v | c[i]
-	}
-	return res
-}
-
-func (b _Bitset) IAnd(c _Bitset) {
-	for i, v := range c {
-		b[i] &= v
-	}
-}
-
-func (b _Bitset) And(c _Bitset) _Bitset {
-	res := make(_Bitset, len(b))
+func (b _BS) And(c _BS) _BS {
+	res := make(_BS, len(b))
 	for i, v := range b {
 		res[i] = v & c[i]
 	}

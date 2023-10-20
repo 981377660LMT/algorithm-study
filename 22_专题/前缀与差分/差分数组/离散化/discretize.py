@@ -1,26 +1,39 @@
 from bisect import bisect_left
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, List, Tuple
 
 
-def discretizeCompressed(nums: List[int]) -> Tuple[Dict[int, int], List[int]]:
+def discretizeCompressed(nums: List[int], offset=0) -> Tuple[Callable[[int], int], int]:
     """紧离散化.
 
-    Returns:
-        - rank: 原数组中的值 -> 离散化后的值(0 ~ len(rank)-1).
-        - newNums: 离散化后的数组.
-    """
-    allNums = sorted(set(nums))
-    rank = {num: i for i, num in enumerate(allNums)}
-    newNums = [rank[num] for num in nums]
-    return rank, newNums
-
-
-def discretizeSparse(nums: List[int]) -> Tuple[Callable[[int], int], int]:
-    """松离散化.
+    Args:
+        - nums: 原数组.
+        - offset: 离散化的起始值偏移量.
 
     Returns:
-        - rank: 给定一个数,返回它的排名(0 ~ count).
+        - rank: 给定一个数,返回它的排名(offset ~ offset + count).
         - count: 离散化(去重)后的元素个数.
     """
     allNums = sorted(set(nums))
-    return lambda x: bisect_left(allNums, x), len(allNums)
+    rank = {num: i + offset for i, num in enumerate(allNums)}
+    return lambda x: rank[x], len(allNums)
+
+
+def discretizeSparse(nums: List[int], offset=0) -> Tuple[Callable[[int], int], int]:
+    """松离散化.
+
+    Args:
+        - nums: 原数组.
+        - offset: 离散化的起始值偏移量.
+
+    Returns:
+        - rank: 给定一个数,返回它的排名(offset ~ offset + count).
+        - count: 离散化(去重)后的元素个数.
+    """
+    allNums = sorted(set(nums))
+    return lambda x: bisect_left(allNums, x) + offset, len(allNums)
+
+
+if __name__ == "__main__":
+    nums = [1, 2, 34]
+    q1, _ = discretizeSparse(nums)
+    print(q1(99))

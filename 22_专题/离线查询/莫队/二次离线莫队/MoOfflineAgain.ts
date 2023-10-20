@@ -171,8 +171,10 @@ if (require.main === module) {
   function staticRangeInversionsQuery(nums: number[], ranges: [start: number, end: number][]): number[] {
     const n = nums.length
     const q = ranges.length
-    const [rank, newNums] = discretizeCompressed(nums)
-    const bit = new BITRangeBlockFastQuery(rank.size)
+    const [rank, size] = discretizeCompressed(nums)
+    const newNums = new Uint32Array(n)
+    for (let i = 0; i < n; i++) newNums[i] = rank(nums[i])
+    const bit = new BITRangeBlockFastQuery(size)
     const mo = new MoOfflineAgain(n, q)
     ranges.forEach(([start, end]) => {
       mo.addQuery(start, end)
@@ -186,7 +188,7 @@ if (require.main === module) {
         return res
       },
       (index: number) => {
-        const res = bit.queryRange(newNums[index] + 1, rank.size)
+        const res = bit.queryRange(newNums[index] + 1, size)
         return res
       }
     )

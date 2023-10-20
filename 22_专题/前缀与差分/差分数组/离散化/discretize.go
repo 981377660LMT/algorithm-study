@@ -4,9 +4,11 @@ import "sort"
 
 // (松)离散化.
 //
-//	rank: 给定一个数，返回它的排名`(0-count)`.
+//  offset: 离散化的起始值偏移量.
+//
+//	rank: 给定一个数，返回它的排名`(offset ~ offset + count)`.
 //	count: 离散化(去重)后的元素个数.
-func DiscretizeSparse(nums []int) (rank func(int) int, count int) {
+func DiscretizeSparse(nums []int, offset int) (rank func(int) int, count int) {
 	set := make(map[int]struct{})
 	for _, v := range nums {
 		set[v] = struct{}{}
@@ -17,14 +19,17 @@ func DiscretizeSparse(nums []int) (rank func(int) int, count int) {
 		allNums = append(allNums, k)
 	}
 	sort.Ints(allNums)
-	rank = func(x int) int { return sort.SearchInts(allNums, x) }
+	rank = func(x int) int { return sort.SearchInts(allNums, x) + offset }
 	return
 }
 
 // (紧)离散化.
-//  rank: 给定一个在 nums 中的值,返回它的排名(0~len(rank)-1).
-//  newNums: 离散化后的数组.
-func discretize(nums []int) (rank map[int]int, newNums []int) {
+//
+//  offset: 离散化的起始值偏移量.
+//
+//	rank: 给定一个数，返回它的排名`(offset ~ offset + count)`.
+//	count: 离散化(去重)后的元素个数.
+func DiscretizeCompressed(nums []int, offset int) (rank func(int) int, count int) {
 	set := make(map[int]struct{})
 	for _, v := range nums {
 		set[v] = struct{}{}
@@ -34,13 +39,11 @@ func discretize(nums []int) (rank map[int]int, newNums []int) {
 		allNums = append(allNums, k)
 	}
 	sort.Ints(allNums)
-	rank = make(map[int]int, len(allNums))
+	mp := make(map[int]int, len(allNums))
 	for i, v := range allNums {
-		rank[v] = i
+		mp[v] = i + offset
 	}
-	newNums = make([]int, len(nums))
-	for i, v := range nums {
-		newNums[i] = rank[v]
-	}
+	rank = func(v int) int { return mp[v] }
+	count = len(allNums)
 	return
 }

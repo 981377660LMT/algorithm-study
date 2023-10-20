@@ -117,16 +117,16 @@ class TreeManager<NoneLeaf, Leaf> {
    */
   pruneTree = (shouldPrune: (node: Leaf | NoneLeaf, path: number[]) => boolean): void => {
     const dfs = (cur: Leaf | NoneLeaf, parent: Leaf | NoneLeaf | undefined, path: number[]): void => {
-      if (parent != undefined && shouldPrune(cur, path)) {
-        const children = this.getChildren(parent)
-        children.splice(path[path.length - 1], 1)
-      }
-
       const children = this.getChildren(cur)
       for (let i = children.length - 1; i >= 0; i--) {
         path.push(i)
         dfs(children[i], cur, path)
         path.pop()
+      }
+      // 后序遍历时删除
+      if (parent != undefined && shouldPrune(cur, path)) {
+        const children = this.getChildren(parent)
+        children.splice(path[path.length - 1], 1)
       }
     }
 
@@ -223,7 +223,15 @@ if (require.main === module) {
   T.insertNode([2], { value: 666, children: [] })
   T.print()
 
+  console.log('------------------')
   T.pruneTree(node => node.value === 99)
+  T.print()
+
+  let path = T.insertNode([], { value: -1, children: [] })
+  T.print()
+  T.insertNode(path, { value: -1, children: [] })
+  T.print()
+  T.pruneTree(v => 'children' in v && v.children.length === 0)
   T.print()
 
   // T.updateNode([2, 0], { value: 666 })

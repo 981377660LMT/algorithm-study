@@ -38,3 +38,21 @@ func (r *RollingHash) Query(hashes []uint, start, end int) uint {
    https://yukicoder.me/problems/no/469
 
 5. https://www.cnblogs.com/zltzlt-blog/p/16797435.html
+
+---
+
+线段树维护多项式哈希
+
+https://www.luogu.com.cn/blog/220037/solution-p3792
+哈希函数 f(nums) 将一个序列转为一个整数，且满足：
+
+- 如果 a 为 b 的一个重排列，那么 f(a)=f(b)
+- 如果 a 不为 b 的一个重排列，那么大概率 f(a)≠f(b)
+- f([i,i+1,...,i+l])可以快速计算
+- 在一个带修改的序列中,可以快速计算 f([l,r]) 的值
+
+这样的函数很多，一个通用函数类型就是
+
+`f(k,p,nums) = sum(nums[i]*k^i) % p`
+
+取 k=2,p=1e9+7,就是 rangePow2Sum
