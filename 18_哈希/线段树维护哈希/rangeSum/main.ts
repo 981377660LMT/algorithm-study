@@ -64,7 +64,19 @@ function rangePowKSum(start: number, end: number, k: number, mod = 1e9 + 7): num
   return cal(end) - cal(start)
 }
 
-export { rangeSum, rangeSquareSum, rangeCubeSum, rangeXorSum, rangePowKSum }
+/**
+ * 从区间和与区间长度还原区间.
+ */
+function recoverIntervalFrom(sum_: number, length: number): [first: number, last: number, ok: boolean] {
+  if (!length) return [0, 0, false]
+  if ((2 * sum_) % length) return [0, 0, false]
+  const div = (2 * sum_) / length
+  if ((div + 1 - length) & 1) return [0, 0, false]
+  const x = (div + 1 - length) / 2
+  return [x, x + length - 1, true]
+}
+
+export { rangeSum, rangeSquareSum, rangeCubeSum, rangeXorSum, rangePowKSum, recoverIntervalFrom }
 
 if (require.main === module) {
   // check

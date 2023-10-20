@@ -102,3 +102,21 @@ func RangePow2Sum(start, end int, mod int) int {
 	}
 	return res
 }
+
+// 从区间和与区间长度还原区间.
+func RecoverIntervalFrom(sum int, len int) (first, last int, ok bool) {
+	// 首项: x 末项 x+(len-1) 项数 len
+	// (2*x+len-1)*len=2*sum
+	if len == 0 {
+		return 0, 0, false
+	}
+	if 2*sum%len != 0 {
+		return 0, 0, false
+	}
+	div := 2 * sum / len
+	if (div+1-len)&1 == 1 {
+		return 0, 0, false
+	}
+	x := (div + 1 - len) / 2
+	return x, x + len - 1, true
+}

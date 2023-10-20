@@ -1,4 +1,5 @@
 from math import log2
+from typing import Tuple
 
 
 def rangeSum(start: int, end: int) -> int:
@@ -73,6 +74,21 @@ def rangePowKSum(start: int, end: int, k: int, mod=int(1e9 + 7)) -> int:
         return sum_
 
     return cal(end) - cal(start)
+
+
+def recoverIntervalFrom(sum_: int, length: int) -> Tuple[int, int, bool]:
+    """从区间和与区间长度还原区间."""
+    # 首项: x 末项 x+(len-1) 项数 len
+    # (2*x+len-1)*len=2*sum
+    if length == 0:
+        return 0, 0, False
+    if 2 * sum_ % length != 0:
+        return 0, 0, False
+    div = 2 * sum_ // length
+    if (div + 1 - length) & 1 == 1:
+        return 0, 0, False
+    x = (div + 1 - length) // 2
+    return x, x + length - 1, True
 
 
 if __name__ == "__main__":
