@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 // 二维线段树区间修改单点查询
 // Query(lx, rx, ly, ry) 查询区间[lx, rx) * [ly, ry)的值.
 // Update(x, y, val) 将点(x, y)的值加上(op) val.
@@ -6,21 +7,26 @@
 /**
  * 注意运算需要满足交换律.
  */
-interface Options<E> {
+interface IOptions<E> {
   xs: number[]
   ys: number[]
   ws?: E[]
+
+  /**
+   * 是否离散化x.
+   * - 为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
+   * - 为 false 时不对x维度二分离散化,而是直接用x的值作为下标(内部给x一个偏移量minX),此时x维度数组长度为最大值减最小值.
+   *
+   * 默认为 true.
+   */
+  discretizeX?: boolean
+
   e: () => E
   op: (a: E, b: E) => E
 }
 
 class SegmentTree2DCompress<E> {
-  private static _bisectLeft(
-    arr: ArrayLike<number>,
-    x: number,
-    left: number,
-    right: number
-  ): number {
+  private static _bisectLeft(arr: ArrayLike<number>, x: number, left: number, right: number): number {
     while (left <= right) {
       const mid = (left + right) >> 1
       if (arr[mid] < x) {
@@ -34,24 +40,59 @@ class SegmentTree2DCompress<E> {
 
   private readonly _e: () => E
   private readonly _op: (a: E, b: E) => E
-  private _n!: number
+  private readonly _discretizeX: boolean
   private _keyX!: number[]
   private _keyY!: number[]
   private _indptr!: Uint32Array
   private _data!: E[]
+  private _minX = 0
+  private _n = 0
 
-  constructor(options: Options<E>) {
-    const { xs, ys, e, op, ws } = options
+  constructor(options: IOptions<E>) {
+    const { xs, ys, e, op, ws, discretizeX = true } = options
     this._e = e
     this._op = op
     let leaves = ws
+    this._discretizeX = discretizeX
     if (!leaves) {
       leaves = Array(xs.length)
-      for (let i = 0; i < leaves.length; i++) {
-        leaves[i] = e()
-      }
+      for (let i = 0; i < leaves.length; i++) leaves[i] = e()
     }
     this._build(xs, ys, leaves)
+  }
+
+  /**
+   * 点 (x,y) 与 val 作用.
+   */
+  update(x: number, y: number, val: E): void {
+    let i = this._xtoi(x) + this._n
+    while (i > 0) {
+      this._update(i, y, val)
+      i >>>= 1
+    }
+  }
+
+  /**
+   * [lx,rx) * [ly,ry) 的和.
+   */
+  query(lx: number, rx: number, ly: number, ry: number): E {
+    if (lx >= rx || ly >= ry) return this._e()
+    let left = this._xtoi(lx) + this._n
+    let right = this._xtoi(rx) + this._n
+    let res = this._e()
+    while (left < right) {
+      if (left & 1) {
+        res = this._op(res, this._prodI(left, ly, ry))
+        left++
+      }
+      if (right & 1) {
+        right--
+        res = this._op(this._prodI(right, ly, ry), res)
+      }
+      left >>>= 1
+      right >>>= 1
+    }
+    return res
   }
 
   private _build(xs: number[], ys: number[], ws: E[]): void {
@@ -59,8 +100,26 @@ class SegmentTree2DCompress<E> {
       throw new Error('Lengths of X, Y, and wt must be equal.')
     }
 
-    this._keyX = [...new Set(xs)].sort((a, b) => a - b)
-    this._n = this._keyX.length
+    if (this._discretizeX) {
+      this._keyX = [...new Set(xs)].sort((a, b) => a - b)
+      this._n = this._keyX.length
+    } else {
+      if (xs.length) {
+        let min = 0
+        let max = 0
+        for (let i = 0; i < xs.length; i++) {
+          min = Math.min(min, xs[i])
+          max = Math.max(max, xs[i])
+        }
+        this._minX = min
+        this._n = max - min + 1
+      }
+      this._keyX = Array(this._n)
+      for (let i = 0; i < this._n; i++) {
+        this._keyX[i] = i + this._minX
+      }
+    }
+
     const n = this._n
     const keyYRaw: number[][] = Array(n + n)
     const datRaw: E[][] = Array(n + n)
@@ -69,14 +128,12 @@ class SegmentTree2DCompress<E> {
       keyYRaw[i] = []
       datRaw[i] = []
     }
-    const indices = Array(ys.length)
-    for (let i = 0; i < ys.length; i++) {
-      indices[i] = i
-    }
-    indices.sort((a, b) => ys[a] - ys[b])
+    const order = Array(ys.length)
+    for (let i = 0; i < ys.length; i++) order[i] = i
+    order.sort((a, b) => ys[a] - ys[b])
 
-    for (let i = 0; i < indices.length; i++) {
-      const v = indices[i]
+    for (let i = 0; i < order.length; i++) {
+      const v = order[i]
       let ix = this._xtoi(xs[v]) + n
       const y = ys[v]
       while (ix > 0) {
@@ -88,7 +145,7 @@ class SegmentTree2DCompress<E> {
         } else {
           tmp[tmp.length - 1] = this._op(tmp[tmp.length - 1], ws[v])
         }
-        ix >>= 1
+        ix >>>= 1
       }
     }
 
@@ -98,18 +155,19 @@ class SegmentTree2DCompress<E> {
     }
 
     const fullN = this._indptr[n + n]
-    this._keyY = new Array(fullN)
+    this._keyY = Array(fullN).fill(0)
     this._data = Array(2 * fullN)
-    for (let i = 0; i < this._data.length; i++) {
-      this._data[i] = this._e()
-    }
+    for (let i = 0; i < this._data.length; i++) this._data[i] = this._e()
 
     for (let i = 0; i < n + n; i++) {
-      const off = 2 * this._indptr[i]
-      const diff = this._indptr[i + 1] - this._indptr[i]
+      const ptr = this._indptr[i]
+      const off = 2 * ptr
+      const diff = this._indptr[i + 1] - ptr
+      const keyY = keyYRaw[i]
+      const dat = datRaw[i]
       for (let j = 0; j < diff; j++) {
-        this._keyY[this._indptr[i] + j] = keyYRaw[i][j]
-        this._data[off + diff + j] = datRaw[i][j]
+        this._keyY[ptr + j] = keyY[j]
+        this._data[off + diff + j] = dat[j]
       }
       for (let j = diff - 1; j >= 1; j--) {
         this._data[off + j] = this._op(this._data[off + 2 * j], this._data[off + 2 * j + 1])
@@ -118,40 +176,11 @@ class SegmentTree2DCompress<E> {
   }
 
   private _xtoi(x: number): number {
-    return SegmentTree2DCompress._bisectLeft(this._keyX, x, 0, this._n - 1)
-  }
-
-  /**
-   * 点 (x,y) 与 val 作用.
-   */
-  update(x: number, y: number, val: E): void {
-    let i = this._xtoi(x) + this._n
-    while (i > 0) {
-      this._update(i, y, val)
-      i >>= 1
-    }
-  }
-
-  /**
-   * [lx,rx) * [ly,ry) 的和.
-   */
-  query(lx: number, rx: number, ly: number, ry: number): E {
-    let L = this._xtoi(lx) + this._n
-    let R = this._xtoi(rx) + this._n
-    let val = this._e()
-    while (L < R) {
-      if (L & 1) {
-        val = this._op(val, this._prodI(L, ly, ry))
-        L++
-      }
-      if (R & 1) {
-        R--
-        val = this._op(this._prodI(R, ly, ry), val)
-      }
-      L >>= 1
-      R >>= 1
-    }
-    return val
+    if (this._discretizeX) return SegmentTree2DCompress._bisectLeft(this._keyX, x, 0, this._n - 1)
+    const res = x - this._minX
+    if (res < 0) return 0
+    if (res >= this._n) return this._n
+    return res
   }
 
   private _update(i: number, y: number, val: E): void {
@@ -254,12 +283,7 @@ if (require.main === module) {
   })
   for (let i = 0; i < 500000; i++) {
     seg.update(~~(Math.random() * ROW), ~~(Math.random() * COL), ~~(Math.random() * 1e9) - 8e5)
-    seg.query(
-      ~~(Math.random() * ROW),
-      ~~(Math.random() * ROW),
-      ~~(Math.random() * COL),
-      ~~(Math.random() * COL)
-    )
+    seg.query(~~(Math.random() * ROW), ~~(Math.random() * ROW), ~~(Math.random() * COL), ~~(Math.random() * COL))
   }
   console.timeEnd('1e5')
 }

@@ -10,7 +10,7 @@ def discretizeCompressed(nums: List[int], offset=0) -> Tuple[Callable[[int], int
         - offset: 离散化的起始值偏移量.
 
     Returns:
-        - rank: 给定一个数,返回它的排名(offset ~ offset + count).
+        - getRank: 给定一个数,返回它的排名(offset ~ offset + count).
         - count: 离散化(去重)后的元素个数.
     """
     allNums = sorted(set(nums))
@@ -26,7 +26,7 @@ def discretizeSparse(nums: List[int], offset=0) -> Tuple[Callable[[int], int], i
         - offset: 离散化的起始值偏移量.
 
     Returns:
-        - rank: 给定一个数,返回它的排名(offset ~ offset + count).
+        - getRank: 给定一个数,返回它的排名(offset ~ offset + count).
         - count: 离散化(去重)后的元素个数.
     """
     allNums = sorted(set(nums))
@@ -35,5 +35,5 @@ def discretizeSparse(nums: List[int], offset=0) -> Tuple[Callable[[int], int], i
 
 if __name__ == "__main__":
     nums = [1, 2, 34]
-    q1, _ = discretizeSparse(nums)
-    print(q1(99))
+    getRank, _ = discretizeSparse(nums)
+    print(getRank(99))

@@ -1,3 +1,7 @@
+# 5999. 统计数组中好三元组数目
+# 三元组：枚举中间值
+
+
 from typing import List
 from sortedcontainers import SortedList
 

@@ -1,8 +1,12 @@
+/* eslint-disable no-inner-declarations */
 /* eslint-disable max-len */
 /* eslint-disable no-param-reassign */
 
+import { discretizeSparse } from '../../../../22_专题/前缀与差分/差分数组/离散化/discretize'
+
 /**
- * 单点更新, 区间查询，维护阿贝尔群的树状数组.
+ * 单点更新, 区间查询，维护阿贝尔群(或者幺半群)的树状数组.
+ * @alias BITMonoid
  */
 class BitAbleGroup<E> {
   private _data!: E[]
@@ -138,13 +142,11 @@ class BitAbleGroup<E> {
   }
 }
 
-export { BitAbleGroup }
+export { BitAbleGroup, BitAbleGroup as BITMonoid }
 
 if (require.main === module) {
-  const bit = new BitAbleGroup(10)
-  console.log(bit.toString())
+  // 最长上传前缀
   // https://leetcode.cn/problems/longest-uploaded-prefix/
-
   class LUPrefix {
     private readonly _bit: BitAbleGroup<number>
     constructor(n: number) {

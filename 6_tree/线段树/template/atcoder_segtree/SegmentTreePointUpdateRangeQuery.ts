@@ -2,6 +2,8 @@
 /* eslint-disable no-cond-assign */
 /* eslint-disable no-param-reassign */
 
+import { discretizeSparse } from '../../../../22_专题/前缀与差分/差分数组/离散化/discretize'
+
 // !单点修改+区间查询
 
 const INF = 2e15
@@ -254,5 +256,42 @@ if (require.main === module) {
       return left
     }
     return [rank, allNums.length]
+  }
+
+  // 2907. Maximum Profitable Triplets With Increasing Prices I
+  // 找到三个下标 i, j, k,使得 i < j < k 且 prices[i] < prices[j] < prices[k],
+  // 并且 profits[i] + profits[j] + profits[k] 最大。
+  // 如果无法找到则返回 -1。
+  //
+  // !三元组:枚举中间.
+  // 用树状数组更新和查询各节点左边和右边各个价格的最高利润。如果计算得到的利润为 0 则表明没有符合要求的利润，因此可以忽略该节点。
+  function maxProfit(prices: number[], profits: number[]): number {
+    const n = prices.length
+    const [getRank, count] = discretizeSparse(prices)
+
+    const leftMax = Array<number>(count).fill(0)
+    const tree1 = new SegmentTreePointUpdateRangeQuery(count, () => 0, Math.max)
+    for (let i = 0; i < n; i++) {
+      const rank = getRank(prices[i])
+      const max = tree1.query(0, rank)
+      leftMax[i] = max
+      tree1.update(rank, profits[i])
+    }
+
+    const rightMax = Array<number>(count).fill(0)
+    const tree2 = new SegmentTreePointUpdateRangeQuery(count, () => 0, Math.max)
+    for (let i = n - 1; ~i; i--) {
+      const rank = getRank(prices[i])
+      const max = tree2.query(rank + 1, count)
+      rightMax[i] = max
+      tree2.update(rank, profits[i])
+    }
+
+    let res = -1
+    for (let i = 1; i < n - 1; i++) {
+      if (leftMax[i] === 0 || rightMax[i] === 0) continue
+      res = Math.max(res, leftMax[i] + rightMax[i] + profits[i])
+    }
+    return res
   }
 }

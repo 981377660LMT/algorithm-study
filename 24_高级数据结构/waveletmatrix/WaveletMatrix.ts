@@ -170,14 +170,7 @@ class WaveletMatrix {
     return right - left
   }
 
-  private _freqDfs(
-    d: number,
-    left: number,
-    right: number,
-    val: number,
-    a: number,
-    b: number
-  ): number {
+  private _freqDfs(d: number, left: number, right: number, val: number, a: number, b: number): number {
     if (left === right) return 0
     if (d === this._maxLog) return a <= val && val < b ? right - left : 0
     const nv = (1 << (this._maxLog - d - 1)) | val
@@ -186,10 +179,7 @@ class WaveletMatrix {
     if (a <= val && nnv < b) return right - left
     const lc = this._mat[d].countPrefix(1, left)
     const rc = this._mat[d].countPrefix(1, right)
-    return (
-      this._freqDfs(d + 1, left - lc, right - rc, val, a, b) +
-      this._freqDfs(d + 1, lc + this._zs[d], rc + this._zs[d], nv, a, b)
-    )
+    return this._freqDfs(d + 1, left - lc, right - rc, val, a, b) + this._freqDfs(d + 1, lc + this._zs[d], rc + this._zs[d], nv, a, b)
   }
 
   private _ll(left: number, right: number, val: number): [number, number] {
@@ -199,8 +189,7 @@ class WaveletMatrix {
       this._buff2[dep] = right
       const bit = ((val >>> (this._maxLog - dep - 1)) & 1) as 0 | 1
       if (bit) {
-        res +=
-          right - left + this._mat[dep].countPrefix(1, left) - this._mat[dep].countPrefix(1, right)
+        res += right - left + this._mat[dep].countPrefix(1, left) - this._mat[dep].countPrefix(1, right)
       }
       left = this._mat[dep].countPrefix(bit, left) + this._zs[dep] * bit
       right = this._mat[dep].countPrefix(bit, right) + this._zs[dep] * bit
@@ -280,6 +269,8 @@ function onesCount32(uint32: number): number {
   uint32 = (uint32 & 0x33333333) + ((uint32 >>> 2) & 0x33333333)
   return (((uint32 + (uint32 >>> 4)) & 0x0f0f0f0f) * 0x01010101) >>> 24
 }
+
+export { WaveletMatrix }
 
 if (require.main === module) {
   const M = new WaveletMatrix(new Uint32Array([1, 2, 3, 1, 5, 6, 7, 8, 9, 10]))

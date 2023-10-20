@@ -16,6 +16,34 @@ import (
 	"sort"
 )
 
+const INF int = 1e18
+
+// https://leetcode.cn/problems/maximum-profitable-triplets-with-increasing-prices-i/description/
+func maxProfit(prices []int, profits []int) int {
+	n := len(prices)
+	xs := make([]int, n)
+	for i := 0; i < n; i++ {
+		xs[i] = i
+	}
+
+	tree := NewSegmentTree2DWithWeights(xs, prices, profits, false)
+	res := -1
+	for i := 0; i < n; i++ {
+		x, y := i, prices[i]
+		max1 := tree.Query(0, x, 0, y)
+		if max1 == 0 {
+			continue
+		}
+		max2 := tree.Query(x+1, n, y+1, INF)
+		if max2 == 0 {
+			continue
+		}
+		res = max(res, max1+max2+profits[i])
+	}
+
+	return res
+}
+
 func main2() {
 	// https://judge.yosupo.jp/problem/point_add_rectangle_sum
 
@@ -96,9 +124,10 @@ type SegmentTree2D struct {
 }
 
 // discretize:
-//  为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
-//  为 false 时不对x维度二分离散化,而是直接用x的值作为下标(所有x给一个偏移量minX),
-//  x 维度数组长度为最大值减最小值.
+//
+//	为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
+//	为 false 时不对x维度二分离散化,而是直接用x的值作为下标(自动所有x给一个偏移量minX),
+//	x 维度数组长度为最大值减最小值.
 func NewSegmentTree2D(xs, ys []int, discretize bool) *SegmentTree2D {
 	res := &SegmentTree2D{discretize: discretize, unit: e()}
 	ws := make([]E, len(xs))
@@ -110,9 +139,10 @@ func NewSegmentTree2D(xs, ys []int, discretize bool) *SegmentTree2D {
 }
 
 // discretize:
-//  为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
-//  为 false 时不对x维度二分离散化,而是直接用x的值作为下标(所有x给一个偏移量minX),
-//  x 维度数组长度为最大值减最小值.
+//
+//	为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
+//	为 false 时不对x维度二分离散化,而是直接用x的值作为下标(自动所有x给一个偏移量minX),
+//	x 维度数组长度为最大值减最小值.
 func NewSegmentTree2DWithWeights(xs, ys []int, ws []E, discretize bool) *SegmentTree2D {
 	res := &SegmentTree2D{discretize: discretize, unit: e()}
 	res._build(xs, ys, ws)

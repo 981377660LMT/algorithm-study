@@ -7,6 +7,7 @@
  * 维护幺半群的树状数组.
  * 支持单点更新,单点修改,前缀查询,区间查询.
  * !内部由Map实现,无需离散化.
+ * @deprecated
  */
 class BITMonoidMap<E = number> {
   private readonly _n: number
@@ -74,6 +75,7 @@ class BITMonoidMap<E = number> {
 /**
  * 维护幺半群的树状数组.
  * 支持单点更新,单点修改,前缀查询,区间查询.
+ * @deprecated
  */
 class BITMonoidArray<E = number> {
   private readonly _n: number
@@ -181,7 +183,7 @@ class BITMonoidArray<E = number> {
   }
 }
 
-export { BITMonoidArray, BITMonoidMap }
+export {}
 
 if (require.main === module) {
   checkSet()
