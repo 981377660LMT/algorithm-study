@@ -10,6 +10,32 @@ from itertools import permutations
 MOD = int(1e9 + 7)
 
 
+class Solution:
+    def numTilePossibilities(self, tiles: str) -> int:
+        """
+        O(n^2) dp.
+        dp[i][j]表示用前i种字母组成长度为j的序列的个数.
+        如果选第i种字母k个, 则dp[i][j] = dp[i-1][j-k]*C(j, k).
+        """
+        freq = Counter(tiles).values()  # 每个字母的频率
+        dp = [[0] * (len(tiles) + 1) for _ in range(len(freq) + 1)]
+        dp[0][0] = 1
+        for i, count in enumerate(freq, 1):
+            for j in range(len(tiles) + 1):
+                for k in range(min(j, count) + 1):
+                    dp[i][j] += dp[i - 1][j - k] * E.C(j, k)
+                    dp[i][j] %= MOD
+        return sum(dp[-1][1:]) % MOD
+
+    def numTilePossibilities2(self, tiles: str) -> int:
+        """O(n!*n)."""
+        res = set()
+        for len_ in range(1, len(tiles) + 1):
+            for perm in permutations(tiles, len_):
+                res.add(perm)
+        return len(res)
+
+
 class Enumeration:
     __slots__ = ("_fac", "_ifac", "_inv", "_mod")
 
@@ -78,32 +104,6 @@ class Enumeration:
 
 
 E = Enumeration(int(1e3), MOD)
-
-
-class Solution:
-    def numTilePossibilities(self, tiles: str) -> int:
-        """
-        O(n^2) dp.
-        dp[i][j]表示用前i种字母组成长度为j的序列的个数.
-        如果选第i种字母k个, 则dp[i][j] = dp[i-1][j-k]*C(j, k).
-        """
-        freq = Counter(tiles).values()  # 每个字母的频率
-        dp = [[0] * (len(tiles) + 1) for _ in range(len(freq) + 1)]
-        dp[0][0] = 1
-        for i, count in enumerate(freq, 1):
-            for j in range(len(tiles) + 1):
-                for k in range(min(j, count) + 1):
-                    dp[i][j] += dp[i - 1][j - k] * E.C(j, k)
-                    dp[i][j] %= MOD
-        return sum(dp[-1][1:]) % MOD
-
-    def numTilePossibilities2(self, tiles: str) -> int:
-        """O(n!*n)."""
-        res = set()
-        for len_ in range(1, len(tiles) + 1):
-            for perm in permutations(tiles, len_):
-                res.add(perm)
-        return len(res)
 
 
 print(Solution().numTilePossibilities("AAB"))

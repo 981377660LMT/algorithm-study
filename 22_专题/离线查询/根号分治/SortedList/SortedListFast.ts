@@ -36,8 +36,11 @@ interface ISortedList<V> {
   entries(): IterableIterator<[number, V]>
   [Symbol.iterator](): IterableIterator<V>
 
+  /** @deprecated */
   iteratorAt(index: number): ISortedListIterator<V>
+  /** @deprecated */
   lowerBound(value: V): ISortedListIterator<V>
+  /** @deprecated */
   upperBound(value: V): ISortedListIterator<V>
 
   readonly length: number
@@ -50,6 +53,7 @@ interface ISortedListIterator<V> {
   next(): V | undefined
   hasPrev(): boolean
   prev(): V | undefined
+  /** 删除后会使所有迭代器失效. */
   remove(): void
   readonly value: V | undefined
 }
@@ -104,14 +108,14 @@ class SortedListFast<V = number> implements ISortedList<V> {
   ) {
     let defaultCompareFn = (a: V, b: V) => (a as unknown as number) - (b as unknown as number)
     let defaultData: V[] = []
-    if (arg1 !== void 0) {
+    if (arg1 !== undefined) {
       if (typeof arg1 === 'function') {
         defaultCompareFn = arg1
       } else {
         defaultData = [...arg1]
       }
     }
-    if (arg2 !== void 0) {
+    if (arg2 !== undefined) {
       if (typeof arg2 === 'function') {
         defaultCompareFn = arg2
       } else {
@@ -133,9 +137,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
     }
 
     const load = SortedListFast._LOAD
-    const pair = this._locRight(value)
-    const pos = pair[0]
-    const index = pair[1]
+    const { pos, index } = this._locRight(value)
     this._updateTree(pos, 1)
     const block = _blocks[pos]
     block.splice(index, 0, value)
@@ -198,9 +200,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
     const block = this._blocks
     if (!block.length) return false
     equals = equals || ((a: V, b: V) => a === b)
-    const pair = this._locLeft(value)
-    const pos = pair[0]
-    const index = pair[1]
+    const { pos, index } = this._locLeft(value)
     return index < block[pos].length && equals(block[pos][index], value)
   }
 
@@ -211,9 +211,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
     const block = this._blocks
     if (!block.length) return false
     equals = equals || ((a: V, b: V) => a === b)
-    const pair = this._locRight(value)
-    const pos = pair[0]
-    const index = pair[1]
+    const { pos, index } = this._locRight(value)
     if (index && equals(block[pos][index - 1], value)) {
       this._delete(pos, index - 1)
       return true
@@ -223,10 +221,8 @@ class SortedListFast<V = number> implements ISortedList<V> {
 
   pop(index = -1): V | undefined {
     if (index < 0) index += this._len
-    if (index < 0 || index >= this._len) return void 0
-    const pair = this._findKth(index)
-    const pos = pair[0]
-    const index_ = pair[1]
+    if (index < 0 || index >= this._len) return undefined
+    const { pos, index: index_ } = this._findKth(index)
     const value = this._blocks[pos][index_]
     this._delete(pos, index_)
     return value
@@ -234,10 +230,8 @@ class SortedListFast<V = number> implements ISortedList<V> {
 
   at(index: number): V | undefined {
     if (index < 0) index += this._len
-    if (index < 0 || index >= this._len) return void 0
-    const pair = this._findKth(index)
-    const pos = pair[0]
-    const index_ = pair[1]
+    if (index < 0 || index >= this._len) return undefined
+    const { pos, index: index_ } = this._findKth(index)
     return this._blocks[pos][index_]
   }
 
@@ -251,31 +245,29 @@ class SortedListFast<V = number> implements ISortedList<V> {
 
   lower(value: V): V | undefined {
     const pos = this.bisectLeft(value)
-    return pos ? this.at(pos - 1) : void 0
+    return pos ? this.at(pos - 1) : undefined
   }
 
   higher(value: V): V | undefined {
     const pos = this.bisectRight(value)
-    return pos < this._len ? this.at(pos) : void 0
+    return pos < this._len ? this.at(pos) : undefined
   }
 
   floor(value: V): V | undefined {
     const pos = this.bisectRight(value)
-    return pos ? this.at(pos - 1) : void 0
+    return pos ? this.at(pos - 1) : undefined
   }
 
   ceiling(value: V): V | undefined {
     const pos = this.bisectLeft(value)
-    return pos < this._len ? this.at(pos) : void 0
+    return pos < this._len ? this.at(pos) : undefined
   }
 
   /**
    * 返回第一个大于等于 `value` 的元素的索引/严格小于 `value` 的元素的个数.
    */
   bisectLeft(value: V): number {
-    const pair = this._locLeft(value)
-    const pos = pair[0]
-    const index = pair[1]
+    const { pos, index } = this._locLeft(value)
     return this._queryTree(pos) + index
   }
 
@@ -283,9 +275,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
    * 返回第一个严格大于 `value` 的元素的索引/小于等于 `value` 的元素的个数.
    */
   bisectRight(value: V): number {
-    const pair = this._locRight(value)
-    const pos = pair[0]
-    const index = pair[1]
+    const { pos, index } = this._locRight(value)
     return this._queryTree(pos) + index
   }
 
@@ -325,7 +315,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
     this.forEach((value, index) => {
       res[index] = value
     })
-    return `SortedList{${res.join(',')}}`
+    return `SortedList{${JSON.stringify(res)}}`
   }
 
   /**
@@ -359,8 +349,8 @@ class SortedListFast<V = number> implements ISortedList<V> {
     if (start >= end) return
 
     const pair = this._findKth(start)
-    let pos = pair[0]
-    let startIndex = pair[1]
+    let pos = pair.pos
+    let startIndex = pair.index
     let count = end - start
     for (; count && pos < this._blocks.length; pos++) {
       const block = this._blocks[pos]
@@ -403,7 +393,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
     let count = end - start
 
     if (reverse) {
-      let [pos, index] = this._findKth(end)
+      let { pos, index } = this._findKth(end)
       for (; count && ~pos; pos--, ~pos && (index = this._blocks[pos].length)) {
         const block = this._blocks[pos]
         const startPos = Math.max(0, index - count)
@@ -412,7 +402,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
         count -= curCount
       }
     } else {
-      let [pos, index] = this._findKth(start)
+      let { pos, index } = this._findKth(start)
       for (; count && pos < this._blocks.length; pos++) {
         const block = this._blocks[pos]
         const endPos = Math.min(block.length, index + count)
@@ -475,17 +465,17 @@ class SortedListFast<V = number> implements ISortedList<V> {
   iteratorAt(index: number): ISortedListIterator<V> {
     if (index < 0) index += this._len
     if (index < 0 || index >= this._len) throw new RangeError('Index out of range')
-    const pair = this._findKth(index)
-    return this._iteratorAt(pair[0], pair[1])
+    const { pos, index: index_ } = this._findKth(index)
+    return this._iteratorAt(pos, index_)
   }
 
   lowerBound(value: V): ISortedListIterator<V> {
-    const [pos, index] = this._locLeft(value)
+    const { pos, index } = this._locLeft(value)
     return this._iteratorAt(pos, index)
   }
 
   upperBound(value: V): ISortedListIterator<V> {
-    const [pos, index] = this._locRight(value)
+    const { pos, index } = this._locRight(value)
     return this._iteratorAt(pos, index)
   }
 
@@ -494,12 +484,12 @@ class SortedListFast<V = number> implements ISortedList<V> {
   }
 
   get min(): V | undefined {
-    if (!this._len) return void 0
+    if (!this._len) return undefined
     return this._mins[0]
   }
 
   get max(): V | undefined {
-    if (!this._len) return void 0
+    if (!this._len) return undefined
     const { _blocks } = this
     const lastBlock = _blocks[_blocks.length - 1]
     return lastBlock[lastBlock.length - 1]
@@ -545,8 +535,8 @@ class SortedListFast<V = number> implements ISortedList<V> {
     this._shouldRebuildTree = true
   }
 
-  protected _locLeft(value: V): [pos: number, index: number] {
-    if (!this._len) return [0, 0]
+  protected _locLeft(value: V): { pos: number; index: number } {
+    if (!this._len) return { pos: 0, index: 0 }
     const { _blocks, _mins } = this
 
     // find pos
@@ -581,11 +571,11 @@ class SortedListFast<V = number> implements ISortedList<V> {
       }
     }
 
-    return [pos, right]
+    return { pos, index: right }
   }
 
-  protected _locRight(value: V): [pos: number, index: number] {
-    if (!this._len) return [0, 0]
+  protected _locRight(value: V): { pos: number; index: number } {
+    if (!this._len) return { pos: 0, index: 0 }
     const { _blocks, _mins } = this
 
     // find pos
@@ -614,7 +604,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
       }
     }
 
-    return [pos, right]
+    return { pos, index: right }
   }
 
   protected _locBlock(value: V): number {
@@ -677,11 +667,11 @@ class SortedListFast<V = number> implements ISortedList<V> {
    * 树状数组树上二分, 找到索引为 `k` 的元素的`(所在块的索引pos, 块内的索引index)`.
    * 内部对头部块和尾部块做了特殊处理.
    */
-  protected _findKth(k: number): [pos: number, index: number] {
-    if (k < this._blocks[0].length) return [0, k]
+  protected _findKth(k: number): { pos: number; index: number } {
+    if (k < this._blocks[0].length) return { pos: 0, index: k }
     const last = this._blocks.length - 1
     const lastLen = this._blocks[last].length
-    if (k >= this._len - lastLen) return [last, k + lastLen - this._len]
+    if (k >= this._len - lastLen) return { pos: last, index: k + lastLen - this._len }
     if (this._shouldRebuildTree) this._buildTree()
     const tree = this._tree
     let pos = -1
@@ -693,7 +683,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
         k -= tree[pos]
       }
     }
-    return [pos + 1, k]
+    return { pos: pos + 1, index: k }
   }
 
   private _iteratorAt(pos: number, index: number): ISortedListIterator<V> {
@@ -702,7 +692,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
     }
 
     const next = (): V | undefined => {
-      if (!hasNext()) return void 0
+      if (!hasNext()) return undefined
       index++
       if (index === this._blocks[pos].length) {
         pos++
@@ -716,7 +706,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
     }
 
     const prev = (): V | undefined => {
-      if (!hasPrev()) return void 0
+      if (!hasPrev()) return undefined
       index--
       if (index === -1) {
         pos--
@@ -738,9 +728,9 @@ class SortedListFast<V = number> implements ISortedList<V> {
       prev,
       remove,
       get value(): V | undefined {
-        if (pos < 0 || pos >= sl.length) return void 0
+        if (pos < 0 || pos >= sl.length) return undefined
         const block = sl._blocks[pos]
-        if (index < 0 || index >= block.length) return void 0
+        if (index < 0 || index >= block.length) return undefined
         return block[index]
       }
     }

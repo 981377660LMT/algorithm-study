@@ -88,6 +88,7 @@
    - [TreeMap](<%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/tree/fhqtreap/sortedlist/TreeMap/main.go>)
    - [TreeSet](<%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/tree/fhqtreap/sortedlist/TreeSet/main.go>)
    - [MultiSet](<%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/tree/fhqtreap/sortedlist/MultiSet/main.go>)
+   - [MaxSuffixQuerywithInsertionsOnly](26_misc/MaxSuffixQuerywithInsertionsOnly/MaxSuffixQuerywithInsertionsOnly.ts)
    - [DynamicSequence](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/RBST/DynamicSequence.go)
    - [PersistentArray](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentArray2.py>)
    - [PersistentQueue](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue-fast.go>)

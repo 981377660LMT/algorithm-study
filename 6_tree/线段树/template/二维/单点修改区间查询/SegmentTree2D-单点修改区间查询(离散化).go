@@ -18,6 +18,7 @@ import (
 
 const INF int = 1e18
 
+// 2907.最大递增三元组的和
 // https://leetcode.cn/problems/maximum-profitable-triplets-with-increasing-prices-i/description/
 func maxProfit(prices []int, profits []int) int {
 	n := len(prices)

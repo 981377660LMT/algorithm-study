@@ -212,7 +212,9 @@ if (require.main === module) {
   // !即:对每个查询(x,y),求出右上角的点的`横坐标+纵坐标`的最大值
   function maximumSumQueries(nums1: number[], nums2: number[], queries: number[][]): number[] {
     const points = nums1.map((v, i) => [v, nums2[i]]).sort((a, b) => a[0] - b[0] || a[1] - b[1])
-    const qWithId = queries.map((q, i) => [q[0], q[1], i]).sort((a, b) => a[0] - b[0] || a[1] - b[1])
+    const qWithId = queries
+      .map((q, i) => [q[0], q[1], i])
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1])
 
     const allY = new Set(nums2)
     queries.forEach(q => allY.add(q[1]))

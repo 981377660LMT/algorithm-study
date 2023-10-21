@@ -1,3 +1,4 @@
+// 2907.最大递增三元组的和
 // https://leetcode.cn/problems/maximum-profitable-triplets-with-increasing-prices-i/description/
 
 import { SegmentTree2DCompress } from './SegmentTree2D-单点修改区间查询(离散化)'
