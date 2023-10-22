@@ -13,6 +13,7 @@
 #
 # 最后每种频率需要拆成size和size+1两种
 # !频率的种类数不超过根号n，因此可以直接枚举size
+# !即 len(freqCounter) <= sqrt(n)
 
 from typing import List, Tuple
 from collections import Counter

@@ -10,6 +10,10 @@
 // 对于每个组 g ，同一组内所有下标在 nums 中对应的数值都相等。
 // 对于任意两个组 g1 和 g2 ，两个组中 下标数量 的 差值不超过 1 。
 // 请你返回一个整数，表示得到一个合法分组方案的 最少 组数。
+//
+// 最后每种频率需要拆成size和size+1两种
+// !频率的种类数不超过根号n，因此可以直接枚举size
+// !即 len(freqCounter) <= sqrt(n)
 
 import { splitToKAndKPlusOne } from '../../../../11_动态规划/背包问题/1_完全背包/同余最短路/splitTo/splitToKAndKPlusOne'
 
@@ -21,8 +25,6 @@ function minGroupsForValidAssignment(nums: number[]): number {
   const freqCounter = new Map<number, number>()
   freq.forEach(v => freqCounter.set(v, (freqCounter.get(v) || 0) + 1))
 
-  // 最后每种频率需要拆成size和size+1两种
-  // !频率的种类数不超过根号n，因此可以直接枚举size
   let res = n
   for (let size = 1; size < n; size++) {
     let ok = true

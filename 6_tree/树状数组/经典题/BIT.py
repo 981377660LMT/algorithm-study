@@ -177,6 +177,7 @@ class BIT2:
 class BIT3:
     """
     单点修改、前缀最大值查询 维护`前缀区间`最大值
+    BITMax,BITPrefixMax
     """
 
     def __init__(self, n: int):

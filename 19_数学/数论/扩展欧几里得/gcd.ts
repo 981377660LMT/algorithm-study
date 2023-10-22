@@ -67,7 +67,8 @@ function exgcd(a: number, b: number): [gcd: number, x: number, y: number] {
 function modInv(a: number, mod: number): number | undefined {
   const [gcd_, x] = exgcd(a, mod)
   if (gcd_ !== 1) return undefined
-  return ((x % mod) + mod) % mod
+  const res = x % mod
+  return res < 0 ? res + mod : res
 }
 
 /**

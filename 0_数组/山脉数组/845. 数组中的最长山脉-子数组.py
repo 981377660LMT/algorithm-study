@@ -1,10 +1,11 @@
-from typing import List
-
 # 数组 A 中符合下列属性的任意`连续子数组` B 称为 “山脉”：
 # B.length >= 3
 # 先绝对单增后绝对单减
 
 # 返回最长 “山脉” 的长度。
+
+
+from typing import List
 
 
 class Solution:

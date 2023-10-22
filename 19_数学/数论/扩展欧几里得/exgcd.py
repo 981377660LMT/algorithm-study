@@ -28,7 +28,7 @@ def modInv(a: int, mod: int) -> Optional[int]:
 
 
 def modInvNums(nums: List[int], mod: int) -> List[int]:
-    """计算数组中每个数的逆元.通过前缀积和后缀积求解.
+    """计算数组中每个数的逆元(modInvOfAll).通过前缀积和后缀积求解.
     https://cp-algorithms.com/algebra/module-inverse.html#finding-the-modular-inverse-for-array-of-numbers-modulo-m
 
     inv[i]=preMul[i-1]*sufMul[i+1]*(x1*x2*...*xn)^-1

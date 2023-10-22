@@ -1,4 +1,5 @@
 import { FastSet } from '../../24_高级数据结构/珂朵莉树/FastSet'
+import { SegmentTreeDynamic } from '../../6_tree/线段树/template/动态开点/SegmentTreeDynamicSparse'
 import { bisectLeft, bisectRight } from '../../9_排序和搜索/二分/bisect'
 
 function LIS(nums: ArrayLike<number>, isStrict = true): number {
@@ -17,6 +18,30 @@ function LIS(nums: ArrayLike<number>, isStrict = true): number {
   }
 
   return lis.length
+}
+
+/**
+ * 求以每个元素结尾的LIS长度.
+ */
+function LISDp(nums: ArrayLike<number>, isStrict = true): Uint32Array {
+  const n = nums.length
+  if (n <= 1) return new Uint32Array(n).fill(1)
+
+  const lis: number[] = []
+  const dp = new Uint32Array(n)
+  const bisect = isStrict ? bisectLeft : bisectRight
+  for (let i = 0; i < n; i++) {
+    const pos = bisect(lis, nums[i])
+    if (pos === lis.length) {
+      lis.push(nums[i])
+      dp[i] = lis.length
+    } else {
+      lis[pos] = nums[i]
+      dp[i] = pos + 1
+    }
+  }
+
+  return dp
 }
 
 /**
@@ -53,6 +78,31 @@ function getLIS(nums: ArrayLike<number>, isStrict = true): [lis: number[], lisIn
 }
 
 /**
+ * 求和最大的LIS.
+ * @param nums nums[i]>=0.
+ * @param isStrict 是否严格递增.默认为true.
+ * @returns res[i] 表示以nums[i]结尾的LIS的最大和.
+ */
+function LISMaxSum(nums: ArrayLike<number>, isStrict = true): number[] {
+  const n = nums.length
+  if (n <= 1) return Array.from(nums)
+
+  let max = 0
+  for (let i = 0; i < n; i++) max = Math.max(max, nums[i])
+  const dp = new SegmentTreeDynamic(0, max, () => 0, Math.max)
+  const res = Array(n)
+
+  for (let i = 0; i < n; i++) {
+    const num = nums[i]
+    const preMax = isStrict ? dp.query(0, num) : dp.query(0, num + 1)
+    res[i] = preMax + num
+    dp.update(num, res[i])
+  }
+
+  return res
+}
+
+/**
  * O(nloglogmax)求`严格递增`的LIS,要求所有元素范围在`[0, max]`内.
  * @param nums 数组.
  * @param max 数组的最大值.不超过1e9.
@@ -76,7 +126,7 @@ function LIS2Strict(nums: ArrayLike<number>, max: number): number {
   return res
 }
 
-export { LIS, LIS2Strict, getLIS }
+export { LIS, LISDp, getLIS, LISMaxSum }
 
 if (require.main === module) {
   // https://leetcode.cn/problems/longest-increasing-subsequence/
@@ -87,8 +137,10 @@ if (require.main === module) {
     return LIS(nums)
   }
 
-  const arr = [1, 2, 2, 3, 3, 3, 1]
+  const arr = [1, 2, 2, 3, 3, 3, 1, 4, 3]
   console.log(LIS2Strict(arr, 10))
   console.log(LIS2Strict(arr, 10))
   console.log(getLIS(arr))
+  console.log(LISMaxSum(arr, false))
+  console.log(LISMaxSum([10, 9, 2, 5, 3, 7, 101, 18]))
 }
