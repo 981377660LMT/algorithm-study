@@ -9,7 +9,7 @@ func RangeSum(start, end int) int {
 	return ((end - start) * (start + end - 1)) / 2
 }
 
-// 区间平方和.
+// 区间平方和(二次方和).
 func RangeSquareSum(start, end int) int {
 	if start >= end {
 		return 0
@@ -19,7 +19,7 @@ func RangeSquareSum(start, end int) int {
 	return tmp1 - tmp2
 }
 
-// 区间立方和.
+// 区间立方和(三次方和).
 func RangeCubeSum(start, end int) int {
 	if start >= end {
 		return 0
@@ -80,7 +80,7 @@ func RangePowKSum(start, end, k int, mod int) int {
 
 func Pow(base int, exp int, mod int) int {
 	base %= mod
-	res := 1
+	res := 1 % mod
 	for exp != 0 {
 		if exp&1 == 1 {
 			res = res * base % mod

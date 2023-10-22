@@ -124,7 +124,7 @@ def getFactorsOfAll(upper: int) -> List[List[int]]:
 
 def isPrime(n: int) -> bool:
     """判断n是否是素数 O(sqrt(n))"""
-    if n < 2:
+    if n < 2 or (n >= 4 and n % 2 == 0):
         return False
     upper = floor(n**0.5) + 1
     for i in range(2, upper):
@@ -161,7 +161,45 @@ def isPrimeFast(n: int) -> bool:
     return True
 
 
-@lru_cache(None)
+# primeDivisors2 := func(x int) (primes []int) {
+# 	if x&1 == 0 {
+# 		primes = append(primes, 2)
+# 		x /= x & -x // 去掉所有的因子 2
+# 	}
+# 	for i := 3; i*i <= x; i += 2 {
+# 		if x%i > 0 {
+# 			continue
+# 		}
+# 		for x /= i; x%i == 0; x /= i {
+# 		}
+# 		primes = append(primes, i)
+# 	}
+# 	if x > 1 {
+# 		primes = append(primes, x)
+# 	}
+# 	return
+# }
+def getPrimeFactors(n: int) -> "Counter[int]":
+    res = Counter()
+    while n & 1 == 0:
+        res[2] += 1
+        n >>= 1
+
+    cur = 3
+    while cur * cur <= n:
+        if n % cur != 0:
+            cur += 2
+            continue
+        # n //= cur
+        while n % cur == 0:
+            n //= cur
+            res[cur] += 1
+        cur += 2
+    if n > 1:
+        res[n] += 1
+    return res
+
+
 def getPrimeFactors1(n: int) -> "Counter[int]":
     """n 的素因子分解 O(sqrt(n))"""
     res = Counter()
@@ -360,3 +398,14 @@ if __name__ == "__main__":
             ok = countPrime(n)
             ng = n - ok
             return (fac[ok] * fac[ng]) % MOD
+
+    import time
+
+    time1 = time.time()
+    getPrimeFactors1(int(1e14))
+    print(time.time() - time1)
+
+    print(getPrimeFactors(100))
+    time2 = time.time()
+    getPrimeFactors(int(1e14))
+    print(time.time() - time1)

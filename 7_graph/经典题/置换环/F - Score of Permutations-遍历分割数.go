@@ -35,7 +35,7 @@ func init() {
 
 func Pow(base, exp, mod int) int {
 	base %= mod
-	res := 1
+	res := 1 % mod
 	for ; exp > 0; exp >>= 1 {
 		if exp&1 == 1 {
 			res = res * base % mod
@@ -85,15 +85,16 @@ func main() {
 }
 
 // https://maspypy.github.io/library/enumerate/partition.hpp
-//  按照字典序降序遍历给定整数 n 的所有可能的正整数分割(和等于 n 的正整数组合).
-//  n：要进行整数划分的目标值。
-//  ・n = 50（204226）：20 ms
-//  ・n = 60（966467）：80 ms
-//  ・n = 70（4087968）：360 ms
-//  ・n = 80（15796476）：1500 ms
-//  f ：在每次找到有效的整数划分时被调用，参数是一个表示划分的整数数组。
-//  lenLimit：限制整数划分的最大长度。-1表示没有限制。
-//  valLimit：限制整数划分中最大整数的值。-1表示没有限制。
+//
+//	按照字典序降序遍历给定整数 n 的所有可能的正整数分割(和等于 n 的正整数组合).
+//	n：要进行整数划分的目标值。
+//	・n = 50（204226）：20 ms
+//	・n = 60（966467）：80 ms
+//	・n = 70（4087968）：360 ms
+//	・n = 80（15796476）：1500 ms
+//	f ：在每次找到有效的整数划分时被调用，参数是一个表示划分的整数数组。
+//	lenLimit：限制整数划分的最大长度。-1表示没有限制。
+//	valLimit：限制整数划分中最大整数的值。-1表示没有限制。
 func EnumeratePartition(n int, f func(partition []int), lenLimit, valLimit int) {
 	var dfs func([]int, int)
 	dfs = func(partition []int, sum int) {

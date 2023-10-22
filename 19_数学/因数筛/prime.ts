@@ -1,6 +1,9 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-shadow */
 
+// 注意质因数分解/因数分解的上界不要写sqrt(n)，要写 f*f <=n .
+// a%-b == a%b
+
 import assert from 'assert'
 
 /**
@@ -53,9 +56,7 @@ class EratosthenesSieve {
 
 // O(n^0.5)
 function isPrime(n: number): boolean {
-  if (n < 2) {
-    return false
-  }
+  if (n < 2 || (n >= 4 && n % 2 === 0)) return false
   const upper = ~~Math.sqrt(n)
   for (let i = 2; i <= upper; i++) {
     if (n % i === 0) {
@@ -70,15 +71,22 @@ function isPrime(n: number): boolean {
  * O(n^0.5)
  */
 function getPrimeFactors(n: number): Map<number, number> {
-  const factors = new Map()
-  const sqrt = Math.sqrt(n)
-  for (let f = 2; f <= sqrt; f++) {
+  if (n <= 1) return new Map()
+  const factors = new Map<number, number>()
+  let count2 = 0
+  while (n % 2 === 0) {
+    n /= 2
+    count2++
+  }
+  if (count2) factors.set(2, count2)
+  // 跳过偶数
+  for (let i = 3; i * i <= n; i += 2) {
     let count = 0
-    while (n % f === 0) {
-      n /= f
+    while (n % i === 0) {
+      n /= i
       count++
     }
-    if (count) factors.set(f, count)
+    if (count) factors.set(i, count)
   }
   if (n > 1) factors.set(n, 1)
   return factors
@@ -149,17 +157,36 @@ function segmentedSieve(floor: number, higher: number): boolean[] {
  */
 function getFactors(n: number): number[] {
   if (n <= 0) return []
-  const small: number[] = []
   const big: number[] = []
+  const small: number[] = []
   const upper = Math.floor(Math.sqrt(n))
-  for (let f = 1; f <= upper; f++) {
-    if (n % f === 0) {
-      small.push(f)
-      big.push(n / f)
+  for (let i = 1; i <= upper; i++) {
+    if (n % i === 0) {
+      small.push(i)
+      if (i * i < n) big.push(n / i)
     }
   }
-  if (small[small.length - 1] === big[big.length - 1]) big.pop()
-  return [...small, ...big.reverse()]
+  for (let i = big.length - 1; i >= 0; i--) {
+    small.push(big[i])
+  }
+  return small
+}
+
+/**
+ * 空间复杂度为O(1)的枚举因子.枚举顺序为从小到大.
+ */
+function enumerateFactors(n: number, f: (factor: number) => void): void {
+  if (n <= 0) return
+  let i = 1
+  const upper = Math.floor(Math.sqrt(n))
+  for (; i <= upper; i++) {
+    if (n % i === 0) f(i)
+  }
+  i--
+  if (i * i === n) i--
+  for (; i > 0; i--) {
+    if (n % i === 0) f(n / i)
+  }
 }
 
 /**
@@ -231,6 +258,7 @@ if (require.main === module) {
   const P = new EratosthenesSieve(1e6)
   assert.strictEqual(P.isPrime(3), true)
   assert.deepStrictEqual(P.getPrimes(20), [2, 3, 5, 7, 11, 13, 17, 19])
+
   assert.deepStrictEqual(
     P.getPrimeFactors(20),
     new Map([
@@ -261,6 +289,18 @@ if (require.main === module) {
   console.log(sumFactors(getPrimeFactors(0)))
   console.log(countFactorsOfAll(10))
   console.log(sumFactorsOfAll(10))
+
+  console.time('countFactors')
+  getPrimeFactors(1e9)
+  console.timeEnd('countFactors')
+
+  console.log(getPrimeFactors(21))
+  console.time('ffoo')
+  for (let i = 0; i < 1e6; i++) {
+    // getFactors(i)
+    enumerateFactors(i, () => {})
+  }
+  console.timeEnd('ffoo')
 }
 
 export {

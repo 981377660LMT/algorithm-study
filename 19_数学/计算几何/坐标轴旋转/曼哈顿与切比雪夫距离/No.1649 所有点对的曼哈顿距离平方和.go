@@ -332,7 +332,7 @@ func max(a, b int) int {
 
 func Pow(base, exp, mod int) int {
 	base %= mod
-	res := 1
+	res := 1 % mod
 	for ; exp > 0; exp >>= 1 {
 		if exp&1 == 1 {
 			res = res * base % mod

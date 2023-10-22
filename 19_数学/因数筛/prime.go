@@ -1,28 +1,38 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math"
+	"math/big"
+	"math/rand"
+	"os"
 )
 
-func main() {
-	// in := bufio.NewReader(os.Stdin)
-	// out := bufio.NewWriter(os.Stdout)
-	// defer out.Flush()
-
-	// var n int
-	// fmt.Fscan(in, &n)
-	// for i := 0; i < n; i++ {
-	// 	var p int
-	// 	fmt.Fscan(in, &p)
-	// 	if IsPrimeFast(p) {
-	// 		fmt.Fprintln(out, "Yes")
-	// 	} else {
-	// 		fmt.Fprintln(out, "No")
-	// 	}
-	// }
+func demo() {
 	fmt.Println(SegmentedSieve(0, 100))
+	fmt.Println(IsPrimeMillerRabin(4))
+	fmt.Println(PollardRhoPrimeFactor(100))
+	fmt.Println(GetPrimeFactorsFast(1e18 + 9))
+}
 
+func Luogu4718() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var T int
+	fmt.Fscan(in, &T)
+	for i := 0; i < T; i++ {
+		var n int
+		fmt.Fscan(in, &n)
+		if IsPrimeMillerRabin(n) {
+			fmt.Fprintln(out, "Prime")
+		} else {
+			maxPf := PollardRhoPrimeFactor(n)
+			fmt.Fprintln(out, maxPf)
+		}
+	}
 }
 
 // 埃氏筛
@@ -112,8 +122,8 @@ func GetFactorsOfAll(upper int) [][]int {
 }
 
 // O(n^0.5) 判断 n 是否为素数.
-func isPrime(n int) bool {
-	if n < 2 {
+func IsPrime(n int) bool {
+	if n < 2 || (n >= 4 && n%2 == 0) {
 		return false
 	}
 	upper := int(math.Sqrt(float64(n)))
@@ -123,6 +133,10 @@ func isPrime(n int) bool {
 		}
 	}
 	return true
+}
+
+func IsPrimeMillerRabin(n int) bool {
+	return big.NewInt(int64(n)).ProbablyPrime(0)
 }
 
 // 返回 n 的所有质数因子，键为质数，值为因子的指数.O(n^0.5).
@@ -143,6 +157,93 @@ func GetPrimeFactors(n int) map[int]int {
 		res[n] = 1
 	}
 	return res
+}
+
+func GetPrimeFactorsFast(n int) map[int]int {
+	res := make(map[int]int)
+	for n > 1 {
+		p := PollardRhoPrimeFactor(n)
+		for n%p == 0 {
+			n /= p
+			res[p]++
+		}
+	}
+	return res
+}
+
+// Pollard-Rho 算法求出一个因子 O(n^1/4)
+func PollardRhoFactor(n int) int {
+	if n == 4 {
+		return 2
+	}
+	if IsPrimeMillerRabin(n) {
+		return n
+	}
+
+	gcd := func(a, b int) int {
+		for a != 0 {
+			a, b = b%a, a
+		}
+		return b
+	}
+
+	abs := func(x int) int {
+		if x < 0 {
+			return -x
+		}
+		return x
+	}
+
+	mul := func(a, b int) (res int) {
+		for ; b > 0; b >>= 1 {
+			if b&1 == 1 {
+				res = (res + a) % n
+			}
+			a = (a + a) % n
+		}
+		return
+	}
+
+	for {
+		c := 1 + rand.Intn(n-1)
+		f := func(x int) int { return (mul(x, x) + c) % n }
+		for t, r := f(0), f(f(0)); t != r; t, r = f(t), f(f(r)) {
+			if d := gcd(abs(t-r), n); d > 1 {
+				return d
+			}
+		}
+	}
+}
+
+// 判断质数+求最大质因子
+// 先用 Pollard-Rho 算法求出一个因子，然后递归求最大质因子
+// https://zhuanlan.zhihu.com/p/267884783
+// https://www.luogu.com.cn/problem/P4718
+func PollardRhoPrimeFactor(n int) int {
+	if n == 4 {
+		return 2
+	}
+	if IsPrimeMillerRabin(n) {
+		return n
+	}
+
+	cache := map[int]int{}
+	var getPrimeFactor func(int) int
+	getPrimeFactor = func(x int) (res int) {
+		if cache[x] > 0 {
+			return cache[x]
+		}
+		p := PollardRhoFactor(x)
+		if p == x {
+			cache[x] = x
+			return p
+		}
+		res = max(getPrimeFactor(p), getPrimeFactor(x/p))
+		cache[x] = res
+		return
+	}
+
+	return getPrimeFactor(n)
 }
 
 // 区间质数个数.
@@ -265,9 +366,73 @@ func SumFactorsOfAll(upper int) []int {
 	return res
 }
 
+// // n 以内的最多约数个数，以及对应的最小数字
+// 	// n <= 1e9
+// 	// https://www.luogu.com.cn/problem/P1221
+// 	maxDivisorNum := func(n int) (mxc, ans int) {
+// 		primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29} // 多取一个质数，让乘法超出 n
+// 		var dfs func(int, int, int, int)
+// 		dfs = func(i, mxE, c, v int) {
+// 			if c > mxc || c == mxc && v < ans {
+// 				mxc, ans = c, v
+// 			}
+// 			for e := 1; e <= mxE; e++ {
+// 				v *= primes[i]
+// 				if v > n {
+// 					break
+// 				}
+// 				dfs(i+1, e, c*(e+1), v)
+// 			}
+// 		}
+// 		dfs(0, 30, 1, 1)
+// 		return
+// 	}
+
+// // 在有 mxcLimit 的前提下（限制约数个数），mxc 最大是多少
+//
+//	maxDivisorNumWithLimit := func(mxcLimit int) (mxc, ans int) {
+//		rawAns := sort.Search(1e9, func(n int) bool {
+//			c, _ := maxDivisorNum(n + 1)
+//			return c > mxcLimit
+//		})
+//		return maxDivisorNum(rawAns)
+//	}
+
+// // Number of odd divisors of n https://oeis.org/A001227
+// // a(n) = d(2*n) - d(n)
+// // 亦为整数 n 分拆成若干连续整数的方法数
+// // Number of partitions of n into consecutive positive integers including the trivial partition of length 1
+// // e.g. 9 = 2+3+4 or 4+5 or 9 so a(9)=3
+// // 相关题目 LC829 https://leetcode.cn/problems/consecutive-numbers-sum/
+// // Kick Start 2021 Round C Alien Generator https://codingcompetitions.withgoogle.com/kickstart/round/0000000000435c44/00000000007ec1cb
+// oddDivisorsNum := func(n int) (ans int) {
+// 	for i := 1; i*i <= n; i++ {
+// 		if n%i == 0 {
+// 			if i&1 == 1 {
+// 				ans++
+// 			}
+// 			if i*i < n && n/i&1 == 1 {
+// 				ans++
+// 			}
+// 		}
+// 	}
+// 	return
+// }
+
+// // 因子的中位数（偶数个因子时取小的那个）
+// // Lower central (median) divisor of n https://oeis.org/A060775
+// // EXTRA: Largest divisor of n <= sqrt(n) https://oeis.org/A033676
+// maxSqrtDivisor := func(n int) int {
+// 	for d := int(math.Sqrt(float64(n))); ; d-- {
+// 		if n%d == 0 {
+// 			return d
+// 		}
+// 	}
+// }
+
 func Pow(base, exp, mod int) int {
 	base %= mod
-	res := 1
+	res := 1 % mod
 	for ; exp > 0; exp >>= 1 {
 		if exp&1 == 1 {
 			res = res * base % mod

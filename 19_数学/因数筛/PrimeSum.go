@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"math/big"
 )
 
 func main() {
@@ -18,7 +19,8 @@ type PrimeSum struct {
 
 // 给定n和函数f, 计算前缀和 sum_{p <= x} f(p),
 // 其中x必须要形如floor(n/i)的形式。
-//  O(n^(3/4)/logn) time, O(n^(1/2)) space.
+//
+//	O(n^(3/4)/logn) time, O(n^(1/2)) space.
 func NewPrimeSum(n int) *PrimeSum {
 	return &PrimeSum{n: n, sqN: int(math.Sqrt(float64(n)))}
 }

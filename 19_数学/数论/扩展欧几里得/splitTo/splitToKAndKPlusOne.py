@@ -1,4 +1,5 @@
-from typing import Tuple
+from collections import Counter
+from typing import List, Tuple
 
 
 def splitToKAndKPlusOne(num: int, k: int, minimize=True) -> Tuple[int, int, bool]:
@@ -26,6 +27,18 @@ def splitToKAndKPlusOne(num: int, k: int, minimize=True) -> Tuple[int, int, bool
 
 
 if __name__ == "__main__":
+    # 2870. 使数组为空的最少操作次数
+    # https://leetcode.cn/problems/minimum-number-of-operations-to-make-array-empty/
+    class Solution:
+        def minOperations(self, nums: List[int]) -> int:
+            counter = Counter(nums)
+            res = 0
+            for v in counter.values():
+                c1, c2, ok = splitToKAndKPlusOne(v, 2)
+                if not ok:
+                    return -1
+                res += c1 + c2
+            return res
 
     def checkWithBruteForce(num: int, k: int, minimize=True) -> Tuple[int, int, bool]:
         res = [0, 0, False]

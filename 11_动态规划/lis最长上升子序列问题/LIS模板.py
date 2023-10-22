@@ -68,7 +68,6 @@ def getLIS(nums: List[int], isStrict=True) -> Tuple[List[int], List[int]]:
         if dpIndex[i] == j:
             res.append(nums[i])
             resIndex.append(i)
-
             j -= 1
     return res[::-1], resIndex[::-1]
 

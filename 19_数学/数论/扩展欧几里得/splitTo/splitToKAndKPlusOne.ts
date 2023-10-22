@@ -70,4 +70,19 @@ if (require.main === module) {
   }
 
   console.log('pass!')
+
+  // 2870. 使数组为空的最少操作次数
+  // https://leetcode.cn/problems/minimum-number-of-operations-to-make-array-empty/
+  // eslint-disable-next-line no-inner-declarations
+  function minOperations(nums: number[]): number {
+    const counter = new Map<number, number>()
+    nums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))
+    let res = 0
+    for (const count of counter.values()) {
+      const [count1, count2, ok] = splitToKAndKPlusOne(count, 2, true)
+      if (!ok) return -1
+      res += count1 + count2
+    }
+    return res
+  }
 }
