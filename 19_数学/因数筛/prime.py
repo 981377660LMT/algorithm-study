@@ -113,6 +113,15 @@ def getFactors(n: int) -> List[int]:
     return small + big[::-1]
 
 
+def getFactorsOfAll(upper: int) -> List[List[int]]:
+    """返回区间 `[0, upper]` 内所有数的约数."""
+    res = [[] for _ in range(upper + 1)]
+    for i in range(1, upper + 1):
+        for j in range(i, upper + 1, i):
+            res[j].append(i)
+    return res
+
+
 def isPrime(n: int) -> bool:
     """判断n是否是素数 O(sqrt(n))"""
     if n < 2:

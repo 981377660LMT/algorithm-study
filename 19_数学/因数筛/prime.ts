@@ -51,26 +51,6 @@ class EratosthenesSieve {
   }
 }
 
-/**
- * 返回 n 的所有因子
- *
- * @complexity O(n^0.5)
- */
-function getFactors(n: number): number[] {
-  if (n <= 0) return []
-  const small: number[] = []
-  const big: number[] = []
-  const upper = Math.floor(Math.sqrt(n))
-  for (let f = 1; f <= upper; f++) {
-    if (n % f === 0) {
-      small.push(f)
-      big.push(n / f)
-    }
-  }
-  if (small[small.length - 1] === big[big.length - 1]) big.pop()
-  return [...small, ...big.reverse()]
-}
-
 // O(n^0.5)
 function isPrime(n: number): boolean {
   if (n < 2) {
@@ -160,6 +140,38 @@ function segmentedSieve(floor: number, higher: number): boolean[] {
     }
   }
 
+  return res
+}
+
+/**
+ * 返回 n 的所有因子.
+ * @complexity O(n^0.5)
+ */
+function getFactors(n: number): number[] {
+  if (n <= 0) return []
+  const small: number[] = []
+  const big: number[] = []
+  const upper = Math.floor(Math.sqrt(n))
+  for (let f = 1; f <= upper; f++) {
+    if (n % f === 0) {
+      small.push(f)
+      big.push(n / f)
+    }
+  }
+  if (small[small.length - 1] === big[big.length - 1]) big.pop()
+  return [...small, ...big.reverse()]
+}
+
+/**
+ * 返回区间 `[0, upper]` 内所有数的约数.
+ * @param upper 上界.
+ */
+function getFactorsOfAll(upper: number): number[][] {
+  const res: number[][] = Array(upper + 1)
+  for (let i = 0; i <= upper; i++) res[i] = []
+  for (let i = 1; i <= upper; i++) {
+    for (let j = i; j <= upper; j += i) res[j].push(i)
+  }
   return res
 }
 
@@ -257,11 +269,12 @@ export {
   //
   isPrime,
   getPrimeFactors,
-  getFactors,
   countPrime,
   segmentedSieve,
 
   //
+  getFactors,
+  getFactorsOfAll,
   countFactors,
   countFactorsOfAll,
   sumFactors,

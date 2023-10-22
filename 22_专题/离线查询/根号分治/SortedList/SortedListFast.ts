@@ -228,6 +228,9 @@ class SortedListFast<V = number> implements ISortedList<V> {
     return value
   }
 
+  /**
+   * @complexity O(log(blockCount))
+   */
   at(index: number): V | undefined {
     if (index < 0) index += this._len
     if (index < 0 || index >= this._len) return undefined

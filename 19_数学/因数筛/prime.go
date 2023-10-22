@@ -100,6 +100,17 @@ func GetFactors(n int) []int {
 	return res
 }
 
+// 返回区间 `[0, upper]` 内所有数的约数.
+func GetFactorsOfAll(upper int) [][]int {
+	res := make([][]int, upper+1)
+	for i := 1; i <= upper; i++ {
+		for j := i; j <= upper; j += i {
+			res[j] = append(res[j], i)
+		}
+	}
+	return res
+}
+
 // O(n^0.5) 判断 n 是否为素数.
 func isPrime(n int) bool {
 	if n < 2 {
