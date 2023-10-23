@@ -17,6 +17,8 @@ def floorRange(n: int) -> List[Tuple[int, int, int]]:
         每个元素为(left,right,div)
         表示 left <= i <= right 内的 n//i == div
     """
+    if n <= 0:
+        return []
     res = []
     m = 1
     while m * m <= n:
@@ -31,10 +33,6 @@ def floorRange(n: int) -> List[Tuple[int, int, int]]:
 
 
 if __name__ == "__main__":
-    # n = int(input())
-    # print(floorRange(n))
-    # [(1, 2, 9), (2, 3, 4), (3, 4, 3), (5, 10, 1)]
-
     # https://yukicoder.me/problems/no/1573
     # 约数总和
     MOD = 998244353

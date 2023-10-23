@@ -1,7 +1,8 @@
+/* eslint-disable no-inner-declarations */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-shadow */
 
-// 注意质因数分解/因数分解的上界不要写sqrt(n)，要写 f*f <=n .
+// 注意质因数分解的上界不要写sqrt(n)，要写 f*f <=n .
 // a%-b == a%b
 
 import assert from 'assert'
@@ -13,7 +14,7 @@ class EratosthenesSieve {
   /**
    * 每个数的最小质因子.
    */
-  private readonly minPrime: Uint32Array
+  private readonly _minPrime: Uint32Array
   private readonly _max: number
 
   constructor(max: number) {
@@ -26,16 +27,16 @@ class EratosthenesSieve {
         if (minPrime[j] === j) minPrime[j] = i
       }
     }
-    this.minPrime = minPrime
+    this._minPrime = minPrime
     this._max = max
   }
 
   isPrime(n: number): boolean {
-    return n >= 2 && this.minPrime[n] === n
+    return n >= 2 && this._minPrime[n] === n
   }
 
   getPrimeFactors(n: number): ReadonlyMap<number, number> {
-    const f = this.minPrime
+    const f = this._minPrime
     const res = new Map<number, number>()
     while (n > 1) {
       const p = f[n]
@@ -48,7 +49,7 @@ class EratosthenesSieve {
   getPrimes(n = this._max): readonly number[] {
     const res: number[] = []
     for (let i = 2; i <= n; i++) {
-      if (i === this.minPrime[i]) res.push(i)
+      if (i === this._minPrime[i]) res.push(i)
     }
     return res
   }
@@ -301,6 +302,21 @@ if (require.main === module) {
     enumerateFactors(i, () => {})
   }
   console.timeEnd('ffoo')
+
+  // https://leetcode.cn/problems/smallest-value-after-replacing-with-sum-of-prime-factors/
+  function smallestValue(n: number): number {
+    let res = n
+    while (true) {
+      const pf = getPrimeFactors(res)
+      let sum = 0
+      pf.forEach((count, prime) => {
+        sum += prime * count
+      })
+      if (sum === res) break
+      res = sum
+    }
+    return res
+  }
 }
 
 export {
