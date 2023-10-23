@@ -35,8 +35,8 @@ def logTrick(
                 dp[ptr] = v
             else:
                 dp[ptr][2] = v[2]
-
         dp = dp[: ptr + 1]
+
         for v in dp:
             res[v[0]] += v[2] - v[1]
         if f is not None:
