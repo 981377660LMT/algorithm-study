@@ -56,66 +56,12 @@ n 的**素因子个数(质因子个数)**是啥数量级:`log(n)`，因为每个
 
 TODO:
 
-- 优化质数分解和因数分解
-  https://leetcode.cn/problems/smallest-value-after-replacing-with-sum-of-prime-factors/
 - `光速gcd/基于值域预处理的快速gcd`
   https://www.luogu.com.cn/problem/solution/P5435
-- 统计数组的所有子区间的 GCD 的不同个数
-  代码和题目见 bits.go 中的 bitOpTrick
 
-- 统计数组的所有子序列的 GCD 的不同个数，复杂度 O(Clog^2C)
-  LC1819 https://leetcode.cn/problems/number-of-different-subsequences-gcds/solution/ji-bai-100mei-ju-gcdxun-huan-you-hua-pyt-get7/
 - n 以内的最多约数个数，以及对应的最小数字
+
 - exgcd
-
-```
-package main
-
-import "fmt"
-
-func main() {
-	setPartition(3)
-}
-
-func setPartition(n int) {
-	groups := [][]int{} // 或者用一个 roots 数组表示集合的根节点（代表元）
-	var f func(int)
-	f = func(p int) {
-		if p == n {
-			// do groups ...
-			fmt.Println(groups)
-			return
-		}
-		groups = append(groups, []int{p})
-		f(p + 1)
-		groups = groups[:len(groups)-1]
-		for i := range groups {
-			groups[i] = append(groups[i], p)
-			f(p + 1)
-			groups[i] = groups[i][:len(groups[i])-1]
-		}
-	}
-
-	f(0)
-}
-```
-
-- floorRange
-  enumerateFloorRange
-  ```go
-  floorLoopRange := func(low, up, x int) (sum int) {
-  	for l, r := low, 0; l <= up; l = r + 1 {
-  		h := x / l
-  		if h == 0 {
-  			break
-  		}
-  		r = min(x/h, up)
-  		w := r - l + 1
-  		sum += h * w
-  	}
-  	return
-  }
-  ```
 
 ```go
 	// 余数求和
@@ -156,3 +102,5 @@ func setPartition(n int) {
 		return
 	}
 ```
+
+- bitOpTrick 及练习题
