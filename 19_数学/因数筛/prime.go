@@ -9,11 +9,13 @@ import (
 	"os"
 )
 
-func demo() {
+func main() {
 	fmt.Println(SegmentedSieve(0, 100))
 	fmt.Println(IsPrimeMillerRabin(4))
 	fmt.Println(PollardRhoPrimeFactor(100))
 	fmt.Println(GetPrimeFactorsFast(1e18 + 9))
+	EnumerateFactors(100, func(factor int) { fmt.Println(factor) })
+	fmt.Println(GetFactors(100))
 }
 
 func Luogu4718() {
@@ -97,17 +99,38 @@ func GetFactors(n int) []int {
 	for f := 1; f <= upper; f++ {
 		if n%f == 0 {
 			small = append(small, f)
-			big = append(big, n/f)
+			if f*f < n {
+				big = append(big, n/f)
+			}
 		}
 	}
-	if small[len(small)-1] == big[len(big)-1] {
-		big = big[:len(big)-1]
+	for i := len(big) - 1; i >= 0; i-- {
+		small = append(small, big[i])
 	}
-	for i, j := 0, len(big)-1; i < j; i, j = i+1, j-1 {
-		big[i], big[j] = big[j], big[i]
+	return small
+}
+
+// 空间复杂度为O(1)的枚举因子.枚举顺序为从小到大.
+func EnumerateFactors(n int, f func(factor int)) {
+	if n <= 0 {
+		return
 	}
-	res := append(small, big...)
-	return res
+	i := 1
+	upper := int(math.Sqrt(float64(n)))
+	for ; i <= upper; i++ {
+		if n%i == 0 {
+			f(i)
+		}
+	}
+	i--
+	if i*i == n {
+		i--
+	}
+	for ; i > 0; i-- {
+		if n%i == 0 {
+			f(n / i)
+		}
+	}
 }
 
 // 返回区间 `[0, upper]` 内所有数的约数.
@@ -142,20 +165,34 @@ func IsPrimeMillerRabin(n int) bool {
 // 返回 n 的所有质数因子，键为质数，值为因子的指数.O(n^0.5).
 func GetPrimeFactors(n int) map[int]int {
 	res := make(map[int]int)
-	upper := int(math.Sqrt(float64(n)))
-	for f := 2; f <= upper; f++ {
+	if n <= 1 {
+		return res
+	}
+
+	count2 := 0
+	for n%2 == 0 {
+		n /= 2
+		count2++
+	}
+	if count2 > 0 {
+		res[2] = count2
+	}
+
+	for i := 3; i*i <= n; i += 2 {
 		count := 0
-		for n%f == 0 {
-			n /= f
+		for n%i == 0 {
+			n /= i
 			count++
 		}
 		if count > 0 {
-			res[f] = count
+			res[i] = count
 		}
 	}
+
 	if n > 1 {
 		res[n] = 1
 	}
+
 	return res
 }
 

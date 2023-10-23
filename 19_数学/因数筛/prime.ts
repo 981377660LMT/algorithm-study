@@ -13,7 +13,7 @@ class EratosthenesSieve {
   /**
    * 每个数的最小质因子.
    */
-  private readonly minPrime: Uint32Array
+  readonly minPrime: Uint32Array
   private readonly _max: number
 
   constructor(max: number) {

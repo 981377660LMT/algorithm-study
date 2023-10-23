@@ -1,10 +1,9 @@
 """primes"""
 
+from typing import DefaultDict, List, Mapping
 from collections import Counter, defaultdict
-from functools import lru_cache
 from math import ceil, floor, gcd, sqrt
 from random import randint
-from typing import DefaultDict, List, Mapping
 
 
 class EratosthenesSieve:
@@ -161,55 +160,28 @@ def isPrimeFast(n: int) -> bool:
     return True
 
 
-# primeDivisors2 := func(x int) (primes []int) {
-# 	if x&1 == 0 {
-# 		primes = append(primes, 2)
-# 		x /= x & -x // 去掉所有的因子 2
-# 	}
-# 	for i := 3; i*i <= x; i += 2 {
-# 		if x%i > 0 {
-# 			continue
-# 		}
-# 		for x /= i; x%i == 0; x /= i {
-# 		}
-# 		primes = append(primes, i)
-# 	}
-# 	if x > 1 {
-# 		primes = append(primes, x)
-# 	}
-# 	return
-# }
 def getPrimeFactors(n: int) -> "Counter[int]":
     res = Counter()
+    if n <= 1:
+        return res
+
+    count2 = 0
     while n & 1 == 0:
-        res[2] += 1
         n >>= 1
+        count2 += 1
+    if count2:
+        res[2] = count2
 
     cur = 3
     while cur * cur <= n:
-        if n % cur != 0:
-            cur += 2
-            continue
-        # n //= cur
+        count = 0
         while n % cur == 0:
             n //= cur
-            res[cur] += 1
+            count += 1
+        if count:
+            res[cur] = count
         cur += 2
-    if n > 1:
-        res[n] += 1
-    return res
 
-
-def getPrimeFactors1(n: int) -> "Counter[int]":
-    """n 的素因子分解 O(sqrt(n))"""
-    res = Counter()
-    upper = int(n**0.5) + 1  # isqrt(n) + 1
-    for i in range(2, upper):
-        while n % i == 0:
-            res[i] += 1
-            n //= i
-
-    # 注意考虑本身
     if n > 1:
         res[n] += 1
     return res
@@ -375,7 +347,7 @@ def segmentedSieve(floor: int, higher: int) -> List[bool]:
 
 if __name__ == "__main__":
     for i in range(1000):
-        assert getPrimeFactors1(i) == getPrimeFactors2(i)
+        assert getPrimeFactors(i) == getPrimeFactors2(i)
 
     MOD = int(1e9 + 7)
     fac = [1, 1, 2]  # 阶乘打表
@@ -402,10 +374,5 @@ if __name__ == "__main__":
     import time
 
     time1 = time.time()
-    getPrimeFactors1(int(1e14))
-    print(time.time() - time1)
-
-    print(getPrimeFactors(100))
-    time2 = time.time()
     getPrimeFactors(int(1e14))
     print(time.time() - time1)
