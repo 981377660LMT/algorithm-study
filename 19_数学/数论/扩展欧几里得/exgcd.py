@@ -2,6 +2,28 @@ from math import gcd
 from typing import List, Optional, Tuple
 
 
+def lcm(a: int, b: int) -> int:
+    """最小公倍数"""
+    return a // gcd(a, b) * b
+
+
+def lcmWithClamp(a: int, b: int, clamp: int) -> int:
+    """最小公倍数, 结果大于 clamp 则返回 clamp."""
+    if a == 0 or b == 0:
+        return 0
+    if a < 0:
+        a = -a
+    if b < 0:
+        b = -b
+    if a >= clamp or b >= clamp:
+        return clamp
+    gcd_ = gcd(a, b)
+    a //= gcd_
+    if a >= (clamp + b - 1) // b:
+        return clamp
+    return a * b
+
+
 def exgcd(a: int, b: int) -> Tuple[int, int, int]:
     """
     求a, b最大公约数,同时求出裴蜀定理中的一组系数x, y,

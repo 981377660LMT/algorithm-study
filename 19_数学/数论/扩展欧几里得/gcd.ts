@@ -18,16 +18,16 @@ function gcd(a: number, b: number): number {
 
 /**
  * 求两个数的最小公倍数.
- * @param threshold 答案超过 {@link threshold} 时返回 {@link threshold}.
+ * @param clamp 答案超过 {@link clamp} 时返回 {@link clamp}.
  */
-function lcm(a: number, b: number, threshold = INF): number {
+function lcm(a: number, b: number, clamp = INF): number {
   if (!a || !b) return 0
   if (a < 0) a = -a
   if (b < 0) b = -b
-  if (a >= threshold || b >= threshold) return threshold
+  if (a >= clamp || b >= clamp) return clamp
   const gcd_ = gcd(a, b)
   a = Math.floor(a / gcd_)
-  if (a >= Math.ceil(threshold / b)) return threshold
+  if (a >= Math.ceil(clamp / b)) return clamp
   return a * b
 }
 
@@ -96,7 +96,7 @@ function gcdInt32(a: number, b: number) {
   return ctz1 < ctz2 ? a << ctz1 : b << ctz2
 }
 
-export { gcd, lcm, exgcd, modInv, gcdInt32 }
+export { gcd, lcm, exgcd, modInv, gcdInt32, gcdInt32 as binaryGcd, gcdInt32 as fastGcd }
 
 if (require.main === module) {
   console.log(exgcd(3, 6))

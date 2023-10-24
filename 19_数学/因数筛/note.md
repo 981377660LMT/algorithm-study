@@ -56,9 +56,6 @@ n 的**素因子个数(质因子个数)**是啥数量级:`log(n)`，因为每个
 
 TODO:
 
-- `光速gcd/基于值域预处理的快速gcd`
-  https://www.luogu.com.cn/problem/solution/P5435
-
 - n 以内的最多约数个数，以及对应的最小数字
 
 - exgcd
@@ -102,5 +99,3 @@ TODO:
 		return
 	}
 ```
-
-- bitOpTrick 及练习题
