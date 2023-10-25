@@ -24,11 +24,10 @@ const mulUint32Array = (arr: ArrayLike<number>, mod = 1e9 + 7): number => {
 
 /**
  * uint32数的快速幂.
- * @deprecated 使用`qpow`代替.
  */
 const powUint32 = (base: number, exp: number, mod = 1e9 + 7): number => {
   base %= mod
-  let res = 1
+  let res = 1 % mod
   while (exp) {
     if (exp & 1) res = mulUint32(res, base, mod)
     base = mulUint32(base, base, mod)

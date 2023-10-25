@@ -29,8 +29,8 @@ function modInv(num: number, mod = 1e9 + 7): number {
 }
 
 function modPow(num: number, pow: number, mod = 1e9 + 7): number {
-  num = modAdd(num, 0)
-  let res = 1
+  num %= mod
+  let res = 1 % mod
   while (pow) {
     if (pow & 1) res = modMul(res, num, mod)
     num = modMul(num, num, mod)

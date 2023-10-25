@@ -1,3 +1,0 @@
-class EnumerationBigint {}
-
-export { EnumerationBigint }
