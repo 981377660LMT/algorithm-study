@@ -271,3 +271,44 @@ func MergeThreeSortedArrayTo(nums1, nums2, nums3 []int, target []int) {
 	}
 
 }
+
+// 合并有序数组，保留至多 k 个元素
+// https://codeforces.com/problemset/problem/587/C
+func MergeTwoSortedArrayWithLimit(a, b []int, k int) []int {
+	i, n := 0, len(a)
+	j, m := 0, len(b)
+	res := make([]int, 0, min(n+m, k))
+	for len(res) < k {
+		if i == n {
+			if len(res)+m-j > k {
+				res = append(res, b[j:j+k-len(res)]...)
+			} else {
+				res = append(res, b[j:]...)
+			}
+			break
+		}
+		if j == m {
+			if len(res)+n-i > k {
+				res = append(res, a[i:i+k-len(res)]...)
+			} else {
+				res = append(res, a[i:]...)
+			}
+			break
+		}
+		if a[i] < b[j] {
+			res = append(res, a[i])
+			i++
+		} else {
+			res = append(res, b[j])
+			j++
+		}
+	}
+	return res
+}
+
+func min(a, b int) int {
+	if a <= b {
+		return a
+	}
+	return b
+}

@@ -8,13 +8,9 @@ import (
 	"os"
 )
 
-var E *Enumeration
+const MOD int = 1e9 + 7
 
-func init() {
-	const SIZE int = 1e6 + 10
-	const MOD int = 1e9 + 7
-	E = NewEnumeration(SIZE, MOD)
-}
+var E = NewEnumeration(1e5+10, MOD)
 
 type Enumeration struct {
 	fac, ifac, inv []int
