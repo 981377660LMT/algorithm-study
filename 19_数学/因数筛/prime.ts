@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-shadow */
 
@@ -308,7 +309,8 @@ function sumFactorsOfAll(upper: number): number[] {
  * @param n 上界.n <= 1e9.
  */
 function maxDivisorNum(n: number): [count: number, res: number] {
-  const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+  if (n === 0) return [0, 0]
+  const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
   let count = 0
   let res = 1
   const dfs = (i: number, maxExp: number, curCount: number, curRes: number) => {
@@ -322,7 +324,7 @@ function maxDivisorNum(n: number): [count: number, res: number] {
       dfs(i + 1, e, curCount * (e + 1), curRes)
     }
   }
-  dfs(0, 32 - Math.clz32(n), 1, 1)
+  dfs(0, Math.floor(Math.log2(n)) + 1, 1, 1)
   return [count, res]
 }
 
@@ -363,8 +365,7 @@ function maxDivisorNumInInterval(min: number, max: number): [count: number, res:
     }
     return [count, res]
   }
-
-  const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23]
+  const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
   let count = 0
   let res = 0
   const dfs = (i: number, maxExp: number, curCount: number, curRes: number) => {
@@ -380,7 +381,7 @@ function maxDivisorNumInInterval(min: number, max: number): [count: number, res:
       dfs(i + 1, e, curCount * (e + 1), curRes)
     }
   }
-  dfs(0, 32 - Math.clz32(max), 1, 1)
+  dfs(0, Math.floor(Math.log2(max)) + 1, 1, 1)
   return [count, res]
 }
 
@@ -443,6 +444,9 @@ if (require.main === module) {
     }
     if (sumFactors(i) !== sumFactors(getPrimeFactors(i))) {
       throw new Error(`sumFactors(${i}) !== sumFactors(getPrimeFactors(${i}))`)
+    }
+    if (32 - Math.clz32(i) !== Math.floor(Math.log2(i)) + 1) {
+      throw new Error(`(32-Math.clz32(${i}))!==Math.floor(Math.log2(${i}))`)
     }
   }
 

@@ -36,7 +36,53 @@ def range_count(a: int, b: int, m: int, xr: int, yr: int) -> int:
     return floorSum(xr, m, a, b + m) - floorSum(xr, m, a, b + m - yr)
 
 
-T = int(input())
-for _ in range(T):
-    N, M, A, B = map(int, input().split())
-    print(floorSum(N, M, A, B))
+def modSum(n: int, k: int) -> int:
+    """
+    余数求和(ModSum/remainderSum)
+    ∑k%i (i in [1,n]), 即 sum(k%i for i in [1,n])
+    = ∑k-(k/i)*i
+    = n*k-∑(k/i)*i
+    对于 [l,r] 范围内的 i,k/i 不变，此时 ∑(k/i)*i = (k/i)*∑i = (k/i)*(l+r)*(r-l+1)/2
+    """
+
+    def min(a, b):
+        return a if a < b else b
+
+    res = n * k
+    left, right = 1, 0
+    while left <= n:
+        h = k // left
+        if h > 0:
+            right = min(k // h, n)
+        else:
+            right = n
+        w = right - left + 1
+        s = (left + right) * w // 2
+        res -= h * s
+        left = right + 1
+    return res
+
+
+def floorSum2D(n: int, m: int) -> int:
+    """
+    二维整除分块和。
+    ∑{i=1..min(n,m)} floor(n/i)*floor(m/i)
+    """
+
+    def min(a, b):
+        return a if a < b else b
+
+    res = 0
+    left, right = 1, 0
+    min_ = min(n, m)
+    while left <= min_:
+        hn, hm = n // left, m // left
+        right = min(n // hn, m // hm)
+        w = right - left + 1
+        res += hn * hm * w
+        left = right + 1
+    return res
+
+
+if __name__ == "__main__":
+    print(modSum(*map(int, input().split())))

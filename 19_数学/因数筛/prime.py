@@ -395,7 +395,34 @@ def maxDivisorNum(n: int) -> Tuple[int, int]:
     """n 以内的最多约数个数，以及对应的最小数字.
     n <= 1e9
     """
-    primes = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29)  # 多取一个质数，让乘法超出 n
+
+    primes = (
+        2,
+        3,
+        5,
+        7,
+        11,
+        13,
+        17,
+        19,
+        23,
+        29,
+        31,
+        37,
+        41,
+        43,
+        47,
+        53,
+        59,
+        61,
+        67,
+        71,
+        73,
+        79,
+        83,
+        89,
+        97,
+    )
     count, res = 0, 1
 
     def dfs(i: int, maxExp: int, curCount: int, curRes: int) -> None:
@@ -439,7 +466,33 @@ def maxDivisorNumInInterval(min: int, max: int) -> Tuple[int, int]:
                 count, res = curCount, i
         return count, res
 
-    primes = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29)
+    primes = (
+        2,
+        3,
+        5,
+        7,
+        11,
+        13,
+        17,
+        19,
+        23,
+        29,
+        31,
+        37,
+        41,
+        43,
+        47,
+        53,
+        59,
+        61,
+        67,
+        71,
+        73,
+        79,
+        83,
+        89,
+        97,
+    )
     count, res = 0, 0
 
     def dfs(i: int, maxExp: int, curCount: int, curRes: int) -> None:

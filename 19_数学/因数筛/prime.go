@@ -32,6 +32,8 @@ func main() {
 	for i := 0; i <= 10; i++ {
 		fmt.Println(MaxDivisorNumWithLimit(i))
 	}
+
+	fmt.Println(MaxDivisorNum(5e17))
 }
 
 func Luogu4718() {
@@ -477,7 +479,7 @@ func SumFactorsOfAll(upper int) []int {
 // n <= 1e9
 // https://www.luogu.com.cn/problem/P1221
 func MaxDivisorNum(n int) (count, res int) {
-	primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47}
+	primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97}
 	var dfs func(i, maxExp, curCount, curRes int)
 	dfs = func(i, maxExp, curCount, curRes int) {
 		if curCount > count || (curCount == count && curRes < res) {
@@ -521,7 +523,7 @@ func MaxDivisorNumInInterval(min, max int) (count, res int) {
 		}
 		return
 	}
-	primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47}
+	primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97}
 	var dfs func(i, maxExp, curCount, curRes int)
 	dfs = func(i, maxExp, curCount, curRes int) {
 		if curRes >= min && (curCount > count || (curCount == count && curRes < res)) {
