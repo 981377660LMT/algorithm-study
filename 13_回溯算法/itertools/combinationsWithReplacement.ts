@@ -2,7 +2,7 @@
  * 可取重复元素的组合，遍历所有大小为`r`的组合.
  * @param arr 待遍历的数组.
  * @param r 组合大小.
- * @param cb 回调函数, 用于处理每个组合的结果.
+ * @param cb 回调函数, 用于处理每个组合的结果.返回`true`时停止遍历.
  * @param copy 是否浅拷贝每个组合的结果, 默认为`false`.
  * @example
  * ```ts
@@ -18,25 +18,20 @@
  * ```
  * @complexity 2e7 => 205.486ms
  */
-function enumerateCombinationsWithReplacement<C>(
-  arr: ArrayLike<C>,
-  r: number,
-  cb: (comb: readonly C[]) => void,
-  copy = false
-): void {
+function enumerateCombinationsWithReplacement<C>(arr: ArrayLike<C>, r: number, cb: (comb: readonly C[]) => boolean | void, copy = false): void {
   bt(0, [])
 
-  function bt(pos: number, path: C[]): void {
+  function bt(pos: number, path: C[]): boolean {
     if (path.length === r) {
-      cb(copy ? path.slice() : path)
-      return
+      return !!cb(copy ? path.slice() : path)
     }
 
     for (let i = pos; i < arr.length; i++) {
       path.push(arr[i])
-      bt(i, path) // 可取重复的元素
+      if (bt(i, path)) return true // 可取重复的元素
       path.pop()
     }
+    return false
   }
 }
 
@@ -44,6 +39,7 @@ function enumerateCombinationsWithReplacement<C>(
  * 可取重复元素的组合.
  * 模拟python的`itertools.combinations_with_replacement`.
  * @complexity 2e6 => 809.43ms
+ * @deprecated
  */
 function* combinationsWithReplacement<C>(arr: ArrayLike<C>, r: number): Generator<C[]> {
   yield* bt(0, [])
@@ -76,4 +72,4 @@ if (require.main === module) {
   console.log(count) // !20030010
 }
 
-export { enumerateCombinationsWithReplacement, combinationsWithReplacement }
+export { enumerateCombinationsWithReplacement }

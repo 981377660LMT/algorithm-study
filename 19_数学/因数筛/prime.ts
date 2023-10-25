@@ -172,18 +172,19 @@ function getFactors(n: number): number[] {
 
 /**
  * 空间复杂度为O(1)的枚举因子.枚举顺序为从小到大.
+ * @param f 回调函数, 返回 true 时停止遍历.
  */
-function enumerateFactors(n: number, f: (factor: number) => void): void {
+function enumerateFactors(n: number, f: (factor: number) => boolean | void): void {
   if (n <= 0) return
   let i = 1
   const upper = Math.floor(Math.sqrt(n))
   for (; i <= upper; i++) {
-    if (n % i === 0) f(i)
+    if (n % i === 0) if (f(i)) return
   }
   i--
   if (i * i === n) i--
   for (; i > 0; i--) {
-    if (n % i === 0) f(n / i)
+    if (n % i === 0) if (f(n / i)) return
   }
 }
 

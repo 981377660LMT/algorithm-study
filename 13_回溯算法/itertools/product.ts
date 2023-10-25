@@ -1,7 +1,7 @@
 /**
  * 遍历多个类数组对象的笛卡尔积.
  * @param arrs `selects`中的每个类数组对象都是一个可选项列表.
- * @param cb 回调函数, 用于处理每个笛卡尔积的结果.
+ * @param cb 回调函数, 用于处理每个笛卡尔积的结果.返回`true`时停止遍历.
  * @param copy 是否浅拷贝每个笛卡尔积的结果, 默认为`false`.
  * @example
  * ```ts
@@ -15,32 +15,30 @@
  * ```
  * @complexity 11!(4e7) => 383.51ms
  */
-function enumerateProduct<S>(
-  arrs: ArrayLike<S>[],
-  cb: (select: readonly S[]) => void,
-  copy = false
-): void {
+function enumerateProduct<S>(arrs: ArrayLike<S>[], cb: (select: readonly S[]) => boolean | void, copy = false): void {
   const n = arrs.length
   bt(0, [])
 
-  function bt(pos: number, path: S[]): void {
+  function bt(pos: number, path: S[]): boolean {
     if (pos === n) {
-      cb(copy ? path.slice() : path)
-      return
+      return !!cb(copy ? path.slice() : path)
     }
 
     const arr = arrs[pos]
     for (let i = 0; i < arr.length; i++) {
       path.push(arr[i])
-      bt(pos + 1, path)
+      if (bt(pos + 1, path)) return true
       path.pop()
     }
+
+    return false
   }
 }
 
 /**
  * 模拟python的`itertools.product`.
  * @complexity 11!(4e7) => 17.461s
+ * @deprecated
  */
 function* product<S>(...arrs: ArrayLike<S>[]): Generator<S[]> {
   const n = arrs.length
@@ -61,7 +59,7 @@ function* product<S>(...arrs: ArrayLike<S>[]): Generator<S[]> {
   }
 }
 
-export { enumerateProduct, product }
+export { enumerateProduct }
 
 if (require.main === module) {
   enumerateProduct([['A', 'a'], ['1'], ['B', 'b'], ['2']], select => {

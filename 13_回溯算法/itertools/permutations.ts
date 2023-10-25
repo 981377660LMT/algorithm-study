@@ -2,7 +2,7 @@
  * 遍历所有大小为`r`的排列.
  * @param arr 待遍历的数组.
  * @param r 排列大小.
- * @param cb 回调函数, 用于处理每个排列的结果.
+ * @param cb 回调函数, 用于处理每个排列的结果.返回`true`时停止遍历.
  * @param copy 是否浅拷贝每个排列的结果, 默认为`false`.
  * @example
  * ```ts
@@ -18,35 +18,32 @@
  * ```
  * @complexity 11!(4e7) => 2.049s
  */
-function enumeratePermutations<P>(
-  arr: ArrayLike<P>,
-  r: number,
-  cb: (perm: readonly P[]) => void,
-  copy = false
-): void {
+function enumeratePermutations<P>(arr: ArrayLike<P>, r: number, cb: (perm: readonly P[]) => boolean | void, copy = false): void {
   const n = arr.length
   bt([], new Uint8Array(n))
 
-  function bt(path: P[], visited: Uint8Array): void {
+  function bt(path: P[], visited: Uint8Array): boolean {
     if (path.length === r) {
-      cb(copy ? path.slice() : path)
-      return
+      return !!cb(copy ? path.slice() : path)
     }
 
     for (let i = 0; i < n; i++) {
       if (visited[i]) continue
       visited[i] = 1
       path.push(arr[i])
-      bt(path, visited)
+      if (bt(path, visited)) return true
       path.pop()
       visited[i] = 0
     }
+
+    return false
   }
 }
 
 /**
  * 模拟python的`itertools.permutations`.
  * @complexity 11!(4e7) => 19.233s
+ * @deprecated
  */
 function* permutations<P>(arr: ArrayLike<P>, r = arr.length): Generator<P[]> {
   const n = arr.length
@@ -81,4 +78,4 @@ if (require.main === module) {
   console.log(count) // 39916800
 }
 
-export { enumeratePermutations, permutations }
+export { enumeratePermutations }
