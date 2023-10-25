@@ -1,6 +1,6 @@
 """primes"""
 
-from typing import DefaultDict, List, Mapping
+from typing import DefaultDict, List, Mapping, Tuple
 from collections import Counter, defaultdict
 from math import ceil, floor, gcd, sqrt
 from random import randint
@@ -44,13 +44,37 @@ class EratosthenesSieve:
 def countFactors(primeFactors: "Mapping[int, int]") -> int:
     """
     返回约数个数.`primeFactors`为这个数的所有质数因子分解.
-    如果`primeFactors`为空,返回0.
+    如果`primeFactors`为空,返回1.
     """
-    if not primeFactors:
-        return 0
     res = 1
     for count in primeFactors.values():
         res *= count + 1
+    return res
+
+
+def countFactors2(n: int) -> int:
+    if n <= 0:
+        return 0
+    res = 1
+    if n & 1 == 0:
+        e = 2
+        n >>= 1
+        while n & 1 == 0:
+            n >>= 1
+            e += 1
+        res *= e
+    f = 3
+    while f * f <= n:
+        if n % f == 0:
+            e = 2
+            n //= f
+            while n % f == 0:
+                n //= f
+                e += 1
+            res *= e
+        f += 2
+    if n > 1:
+        res *= 2
     return res
 
 
@@ -66,16 +90,38 @@ def countFactorsOfAll(upper: int) -> List[int]:
 def sumFactors(primeFactors: "Mapping[int, int]") -> int:
     """
     返回约数之和.`primeFactors`为这个数的所有质数因子分解.
-    如果`primeFactors`为空,返回0.
+    如果`primeFactors`为空,返回1.
     """
-    if not primeFactors:
-        return 0
     res = 1
     for p, count in primeFactors.items():
         cur = 1
         for _ in range(count):
             cur = cur * p + 1
         res *= cur
+    return res
+
+
+def sumFactors2(n: int) -> int:
+    if n <= 0:
+        return 0
+    res = 1
+    if n & 1 == 0:
+        cur = 1
+        while n & 1 == 0:
+            n >>= 1
+            cur = cur * 2 + 1
+        res *= cur
+    f = 3
+    while f * f <= n:
+        if n % f == 0:
+            cur = 1
+            while n % f == 0:
+                n //= f
+                cur = cur * f + 1
+            res *= cur
+        f += 2
+    if n > 1:
+        res *= n + 1
     return res
 
 
@@ -345,10 +391,100 @@ def segmentedSieve(floor: int, higher: int) -> List[bool]:
     return res
 
 
-if __name__ == "__main__":
-    for i in range(1000):
-        assert getPrimeFactors(i) == getPrimeFactors2(i)
+def maxDivisorNum(n: int) -> Tuple[int, int]:
+    """n 以内的最多约数个数，以及对应的最小数字.
+    n <= 1e9
+    """
+    primes = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29)  # 多取一个质数，让乘法超出 n
+    count, res = 0, 1
 
+    def dfs(i: int, maxExp: int, curCount: int, curRes: int) -> None:
+        nonlocal count, res
+        if (curCount > count) or (curCount == count and curRes < res):
+            count, res = curCount, curRes
+        for e in range(1, maxExp + 1):
+            curRes *= primes[i]
+            if curRes > n:
+                break
+            dfs(i + 1, e, curCount * (e + 1), curRes)
+
+    dfs(0, n.bit_length(), 1, 1)
+    return count, res
+
+
+def maxDivisorNumWithLimit(maxCount: int) -> Tuple[int, int]:
+    """在有 最大约数个数限制 的前提下, maxCount 最大是多少，以及对应的最小数字."""
+    if maxCount == 0:
+        return 0, 0
+    left, right = 0, int(1e9)
+    while left <= right:
+        mid = (left + right) // 2
+        count, _ = maxDivisorNum(mid)
+        if count > maxCount:
+            right = mid - 1
+        else:
+            left = mid + 1
+    return maxDivisorNum(right)
+
+
+def maxDivisorNumInInterval(min: int, max: int) -> Tuple[int, int]:
+    """[min,max]以内的最多约数个数，以及对应的最小数字.
+    1<=min<=max<=1e9
+    """
+    if max - min <= 100000:
+        count, res = 0, 0
+        for i in range(min, max + 1):
+            curCount = countFactors2(i)
+            if curCount > count:
+                count, res = curCount, i
+        return count, res
+
+    primes = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29)
+    count, res = 0, 0
+
+    def dfs(i: int, maxExp: int, curCount: int, curRes: int) -> None:
+        nonlocal count, res
+        if curRes >= min and (curCount > count or (curCount == count and curRes < res)):
+            count, res = curCount, curRes
+        for e in range(1, maxExp + 1):
+            curRes *= primes[i]
+            if curRes > max:
+                break
+            dfs(i + 1, e, curCount * (e + 1), curRes)
+
+    dfs(0, max.bit_length(), 1, 1)
+    return count, res
+
+
+def oddDivisorsNum(n: int) -> int:
+    """n 拆分成若干连续整数的方法数/奇约数个数"""
+    res = 0
+    upper = int(sqrt(n)) + 1
+    for i in range(1, upper):
+        if n % i == 0:
+            if i & 1 == 1:
+                res += 1
+            if i * i < n and n // i & 1 == 1:
+                res += 1
+    return res
+
+
+def medianDivisor(n: int) -> int:
+    """因子的中位数（偶数个因子时取小的那个）"""
+    start = int(sqrt(n))
+    for d in range(start, 0, -1):
+        if n % d == 0:
+            return d
+    raise ValueError("medianDivisor: n must be positive")
+
+
+if __name__ == "__main__":
+    for i in range(1, 1000):
+        assert getPrimeFactors(i) == getPrimeFactors2(i)
+        assert countFactors2(i) == len(getFactors(i)) == countFactors(getPrimeFactors(i))
+        assert sumFactors(getPrimeFactors(i)) == sumFactors2(i) == sum(getFactors(i))
+    for i in range(10 + 1):
+        print(maxDivisorNumWithLimit(i))
     MOD = int(1e9 + 7)
     fac = [1, 1, 2]  # 阶乘打表
     while len(fac) <= 100:

@@ -44,13 +44,25 @@ def modInv(a: int, mod: int) -> Optional[int]:
     即求出逆元 `inv` 满足 `a*inv ≡ 1 (mod m)`
     """
     gcd_, x, _ = exgcd(a, mod)
-    if gcd_ != 1:
+    if gcd_ not in (1, -1):
         return None
     return x % mod
 
 
+def modInv2(a: int, b: int, mod: int) -> Optional[int]:
+    """扩展gcd求a在mod下的逆元
+    即求出逆元 `inv` 满足 `a*inv ≡ b (mod m)`
+    """
+    gcd_, x, _ = exgcd(a, mod)
+    if b % gcd_ != 0:
+        return None
+    x *= b // gcd_
+    mod //= gcd_
+    return x % mod
+
+
 def modInvNums(nums: List[int], mod: int) -> List[int]:
-    """计算数组中每个数的逆元(modInvOfAll).通过前缀积和后缀积求解.
+    """计算数组中每个数的逆元(modInvOfAll/modInvAll).通过前缀积和后缀积求解.
     https://cp-algorithms.com/algebra/module-inverse.html#finding-the-modular-inverse-for-array-of-numbers-modulo-m
 
     inv[i]=preMul[i-1]*sufMul[i+1]*(x1*x2*...*xn)^-1

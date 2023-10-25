@@ -61,12 +61,21 @@ function exgcd(a: number, b: number): [gcd: number, x: number, y: number] {
 
 /**
  * 模逆元.
- * 求出逆元 `inv` 满足 `a*inv ≡ 1 (mod mod)`.
+ * 求出逆元 `inv` 满足 `a*inv ≡ target (mod mod)`.
  * 如果不存在逆元则返回 `undefined`.
+ * @param [target=1] 目标值.默认为1.
  */
-function modInv(a: number, mod: number): number | undefined {
-  const [gcd_, x] = exgcd(a, mod)
-  if (gcd_ !== 1) return undefined
+function modInv(a: number, mod: number, target = 1): number | undefined {
+  if (target === 1) {
+    const [gcd_, x] = exgcd(a, mod)
+    if (gcd_ !== 1) return undefined
+    const res = x % mod
+    return res < 0 ? res + mod : res
+  }
+  let [gcd_, x] = exgcd(a, mod)
+  if (target % gcd_) return undefined
+  x *= target / gcd_
+  mod /= gcd_
   const res = x % mod
   return res < 0 ? res + mod : res
 }

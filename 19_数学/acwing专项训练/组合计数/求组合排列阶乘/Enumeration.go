@@ -93,6 +93,15 @@ func (e *Enumeration) Catalan(n int) int {
 	return e.C(2*n, n) * e.Inv(n+1) % e.mod
 }
 
+// lucas定理求解组合数.适合模数较小的情况.
+func (e *Enumeration) Lucas(n, k int) int {
+	if k == 0 {
+		return 1
+	}
+	mod := e.mod
+	return e.C(n%mod, k%mod) * e.Lucas(n/mod, k/mod) % mod
+}
+
 func (e *Enumeration) expand(size int) {
 	if upper := e.mod - 1; size > upper {
 		size = upper

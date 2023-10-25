@@ -1,0 +1,3 @@
+class EnumerationBigint {}
+
+export { EnumerationBigint }

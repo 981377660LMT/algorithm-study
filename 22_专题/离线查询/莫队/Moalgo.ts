@@ -1,6 +1,6 @@
 class MoAlgo {
   private readonly _chunkSize: number
-  private readonly _buckets: [qi: number, left: number, right: number][][]
+  private readonly _buckets: { qi: number; left: number; right: number }[][]
   private _queryOrder = 0
 
   constructor(n: number, q: number) {
@@ -20,19 +20,15 @@ class MoAlgo {
    */
   addQuery(start: number, end: number): void {
     const index = (start / this._chunkSize) | 0
-    this._buckets[index].push([this._queryOrder, start, end])
+    this._buckets[index].push({ qi: this._queryOrder, left: start, right: end })
     this._queryOrder++
   }
 
-  /**
-   * 返回每个查询的结果.
-   * @param add 将数据添加到窗口. delta: 1 表示向右移动，-1 表示向左移动.
-   * @param remove 将数据从窗口移除. delta: 1 表示向右移动，-1 表示向左移动.
-   * @param query 查询窗口内的数据.
-   */
   run(
-    add: (index: number, delta: -1 | 1) => void,
-    remove: (index: number, delta: -1 | 1) => void,
+    addLeft: (index: number) => void,
+    addRight: (index: number) => void,
+    removeLeft: (index: number) => void,
+    removeRight: (index: number) => void,
     query: (qid: number) => void
   ): void {
     let left = 0
@@ -40,26 +36,26 @@ class MoAlgo {
 
     this._buckets.forEach((bucket, i) => {
       if (i & 1) {
-        bucket.sort((a, b) => a[2] - b[2])
+        bucket.sort((a, b) => a.right - b.right)
       } else {
-        bucket.sort((a, b) => b[2] - a[2])
+        bucket.sort((a, b) => b.right - a.right)
       }
 
-      bucket.forEach(([qi, ql, qr]) => {
+      bucket.forEach(({ qi, left: ql, right: qr }) => {
         // !窗口扩张
         while (left > ql) {
-          add(--left, -1)
+          addLeft(--left)
         }
         while (right < qr) {
-          add(right++, 1)
+          addRight(right++)
         }
 
         // !窗口收缩
         while (left < ql) {
-          remove(left++, 1)
+          removeLeft(left++)
         }
         while (right > qr) {
-          remove(--right, -1)
+          removeRight(--right)
         }
 
         query(qi)
