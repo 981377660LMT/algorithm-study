@@ -271,3 +271,76 @@ func MergeThreeSortedArrayTo(nums1, nums2, nums3 []int, target []int) {
 	}
 
 }
+
+// 合并有序数组，保留至多 k 个元素
+// https://codeforces.com/problemset/problem/587/C
+func MergeTwoSortedArrayWithLimit(a, b []int, k int) []int {
+	i, n := 0, len(a)
+	j, m := 0, len(b)
+	res := make([]int, 0, min(n+m, k))
+	for len(res) < k {
+		if i == n {
+			if len(res)+m-j > k {
+				res = append(res, b[j:j+k-len(res)]...)
+			} else {
+				res = append(res, b[j:]...)
+			}
+			break
+		}
+		if j == m {
+			if len(res)+n-i > k {
+				res = append(res, a[i:i+k-len(res)]...)
+			} else {
+				res = append(res, a[i:]...)
+			}
+			break
+		}
+		if a[i] < b[j] {
+			res = append(res, a[i])
+			i++
+		} else {
+			res = append(res, b[j])
+			j++
+		}
+	}
+	return res
+}
+
+// 求差集 A-B, B-A 和交集 A∩B
+// EXTRA: 求并集 union: A∪B = A-B+A∩B = merge(differenceA, intersection) 或 merge(differenceB, intersection)
+// EXTRA: 求对称差 symmetric_difference: A▲B = A-B ∪ B-A = merge(differenceA, differenceB)
+// a b 必须是有序的（可以为空）
+// 与图论结合 https://codeforces.com/problemset/problem/243/B
+func SplitDifferenceAndIntersection(a, b []int) (differenceA, differenceB, intersection []int) {
+	i, n := 0, len(a)
+	j, m := 0, len(b)
+	for {
+		if i == n {
+			differenceB = append(differenceB, b[j:]...)
+			return
+		}
+		if j == m {
+			differenceA = append(differenceA, a[i:]...)
+			return
+		}
+		x, y := a[i], b[j]
+		if x < y { // 改成 > 为降序
+			differenceA = append(differenceA, x)
+			i++
+		} else if x > y { // 改成 < 为降序
+			differenceB = append(differenceB, y)
+			j++
+		} else {
+			intersection = append(intersection, x)
+			i++
+			j++
+		}
+	}
+}
+
+func min(a, b int) int {
+	if a <= b {
+		return a
+	}
+	return b
+}

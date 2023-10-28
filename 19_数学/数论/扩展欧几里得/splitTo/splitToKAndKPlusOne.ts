@@ -1,3 +1,5 @@
+/* eslint-disable no-inner-declarations */
+
 /**
  * 将 num 拆分成 k 和 k+1 的和，使得拆分的个数最(多/少).
  * @param num 正整数.
@@ -5,11 +7,7 @@
  * @param minimize 是否使得拆分的个数最少. 默认为最少(true).
  * @returns [count1, count2, ok] count1和count2分别是拆分成k和k+1的个数，ok表示是否可以拆分.
  */
-function splitToKAndKPlusOne(
-  num: number,
-  k: number,
-  minimize = true
-): [count1: number, count2: number, ok: boolean] {
+function splitToKAndKPlusOne(num: number, k: number, minimize = true): [count1: number, count2: number, ok: boolean] {
   if (minimize) {
     const count2 = Math.ceil(num / (k + 1))
     const diff = (k + 1) * count2 - num
@@ -26,6 +24,49 @@ function splitToKAndKPlusOne(
 export { splitToKAndKPlusOne }
 
 if (require.main === module) {
+  // 2870. 使数组为空的最少操作次数
+  // https://leetcode.cn/problems/minimum-number-of-operations-to-make-array-empty/
+
+  function minOperations(nums: number[]): number {
+    const counter = new Map<number, number>()
+    nums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))
+    let res = 0
+    for (const count of counter.values()) {
+      const [count1, count2, ok] = splitToKAndKPlusOne(count, 2, true)
+      if (!ok) return -1
+      res += count1 + count2
+    }
+    return res
+  }
+
+  // 2910. 合法分组的最少组数
+  // https://leetcode.cn/problems/minimum-number-of-groups-to-create-a-valid-assignment/
+  function minGroupsForValidAssignment(nums: number[]): number {
+    const n = nums.length
+    const tmpCounter = new Map<number, number>()
+    nums.forEach(v => tmpCounter.set(v, (tmpCounter.get(v) || 0) + 1))
+    const freq = [...tmpCounter.values()]
+    const freqCounter = new Map<number, number>()
+    freq.forEach(v => freqCounter.set(v, (freqCounter.get(v) || 0) + 1))
+
+    let res = n
+    for (let size = 1; size < n; size++) {
+      let ok = true
+      let cand = 0
+      for (const value of freqCounter.keys()) {
+        const [count1, count2, ok_] = splitToKAndKPlusOne(value, size, true)
+        if (!ok_) {
+          ok = false
+          break
+        }
+        cand += (count1 + count2) * freqCounter.get(value)!
+      }
+      if (ok) res = Math.min(res, cand)
+    }
+
+    return res
+  }
+
   console.log(splitToKAndKPlusOne(12, 3))
   console.log(splitToKAndKPlusOne(12, 3, false))
   console.log(splitToKAndKPlusOne(5, 2))
@@ -34,11 +75,7 @@ if (require.main === module) {
   console.log(splitToKAndKPlusOne(16, 3, false))
 
   // eslint-disable-next-line no-inner-declarations
-  function checkWithBruteForce(
-    num: number,
-    k: number,
-    minimize = true
-  ): [count1: number, count2: number, ok: boolean] {
+  function checkWithBruteForce(num: number, k: number, minimize = true): [count1: number, count2: number, ok: boolean] {
     let res = [0, 0, false]
     for (let count1 = 0; count1 <= num; count1++) {
       for (let count2 = 0; count2 <= num; count2++) {
@@ -70,19 +107,4 @@ if (require.main === module) {
   }
 
   console.log('pass!')
-
-  // 2870. 使数组为空的最少操作次数
-  // https://leetcode.cn/problems/minimum-number-of-operations-to-make-array-empty/
-  // eslint-disable-next-line no-inner-declarations
-  function minOperations(nums: number[]): number {
-    const counter = new Map<number, number>()
-    nums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))
-    let res = 0
-    for (const count of counter.values()) {
-      const [count1, count2, ok] = splitToKAndKPlusOne(count, 2, true)
-      if (!ok) return -1
-      res += count1 + count2
-    }
-    return res
-  }
 }

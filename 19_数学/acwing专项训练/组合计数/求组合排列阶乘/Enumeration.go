@@ -8,13 +8,9 @@ import (
 	"os"
 )
 
-var E *Enumeration
+const MOD int = 1e9 + 7
 
-func init() {
-	const SIZE int = 1e6 + 10
-	const MOD int = 1e9 + 7
-	E = NewEnumeration(SIZE, MOD)
-}
+var E = NewEnumeration(1e5+10, MOD)
 
 type Enumeration struct {
 	fac, ifac, inv []int
@@ -93,6 +89,15 @@ func (e *Enumeration) Catalan(n int) int {
 	return e.C(2*n, n) * e.Inv(n+1) % e.mod
 }
 
+// lucas定理求解组合数.适合模数较小的情况.
+func (e *Enumeration) Lucas(n, k int) int {
+	if k == 0 {
+		return 1
+	}
+	mod := e.mod
+	return e.C(n%mod, k%mod) * e.Lucas(n/mod, k/mod) % mod
+}
+
 func (e *Enumeration) expand(size int) {
 	if upper := e.mod - 1; size > upper {
 		size = upper
@@ -119,7 +124,7 @@ func (e *Enumeration) expand(size int) {
 
 func Pow(base, exp, mod int) int {
 	base %= mod
-	res := 1
+	res := 1 % mod
 	for ; exp > 0; exp >>= 1 {
 		if exp&1 == 1 {
 			res = res * base % mod

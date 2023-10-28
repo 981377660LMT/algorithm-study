@@ -42,7 +42,7 @@ func foo(x int) {
 	sub := func(A, B int) int { return A &^ B }
 
 	// 全集 (0-n-1)
-	all_ := func(n int) int { return (1 << n) - 1 }
+	all_ := func(n int) int { return ^(-1 << n) }
 
 	// -1 表示为 -1 = 0b1111...1111
 	x &= (^0 << 3)    // 清除从第三位开始右边的所有1 (截断下界)

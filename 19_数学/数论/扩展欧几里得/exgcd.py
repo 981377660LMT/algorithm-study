@@ -2,6 +2,28 @@ from math import gcd
 from typing import List, Optional, Tuple
 
 
+def lcm(a: int, b: int) -> int:
+    """最小公倍数"""
+    return a // gcd(a, b) * b
+
+
+def lcmWithClamp(a: int, b: int, clamp: int) -> int:
+    """最小公倍数, 结果大于 clamp 则返回 clamp."""
+    if a == 0 or b == 0:
+        return 0
+    if a < 0:
+        a = -a
+    if b < 0:
+        b = -b
+    if a >= clamp or b >= clamp:
+        return clamp
+    gcd_ = gcd(a, b)
+    a //= gcd_
+    if a >= (clamp + b - 1) // b:
+        return clamp
+    return a * b
+
+
 def exgcd(a: int, b: int) -> Tuple[int, int, int]:
     """
     求a, b最大公约数,同时求出裴蜀定理中的一组系数x, y,
@@ -22,13 +44,25 @@ def modInv(a: int, mod: int) -> Optional[int]:
     即求出逆元 `inv` 满足 `a*inv ≡ 1 (mod m)`
     """
     gcd_, x, _ = exgcd(a, mod)
-    if gcd_ != 1:
+    if gcd_ not in (1, -1):
         return None
     return x % mod
 
 
+def modInv2(a: int, b: int, mod: int) -> Optional[int]:
+    """扩展gcd求a在mod下的逆元
+    即求出逆元 `inv` 满足 `a*inv ≡ b (mod m)`
+    """
+    gcd_, x, _ = exgcd(a, mod)
+    if b % gcd_ != 0:
+        return None
+    x *= b // gcd_
+    mod //= gcd_
+    return x % mod
+
+
 def modInvNums(nums: List[int], mod: int) -> List[int]:
-    """计算数组中每个数的逆元(modInvOfAll).通过前缀积和后缀积求解.
+    """计算数组中每个数的逆元(modInvOfAll/modInvAll).通过前缀积和后缀积求解.
     https://cp-algorithms.com/algebra/module-inverse.html#finding-the-modular-inverse-for-array-of-numbers-modulo-m
 
     inv[i]=preMul[i-1]*sufMul[i+1]*(x1*x2*...*xn)^-1

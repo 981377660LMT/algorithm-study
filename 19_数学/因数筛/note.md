@@ -32,16 +32,21 @@ n 的**素因子个数(质因子个数)**是啥数量级:`log(n)`，因为每个
 
 - 等比数列之和：
   `Sn = a1*(q^n-1)/(q-1), q!=1`
+
 - 等差乘以等比数列之和：
   `∑i*q^(i-1) = n*q^n - (q^n-1)/(q-1)`
+
 - 若干无穷级数之和的公式
   `∑^∞ r^i = 1/(1-r)`
   `∑^∞ i*r^i = r/(1-r)^2`
+
 - 等幂和
   `1^2 + ... + n^2 = n*(n+1)*(2*n+1)/6`
   `1^3 + ... + n^3 = [n(n+1)/2]^2`
+
 - 长为 n 的数组的所有子数组长度之和
   `n*(n+1)*(n+2)/6`
+
 - 长为 n 的数组的所有子数组的「长度/2 下取整」之和
   n 为偶数时：`m=n/2, m*(m+1)*(4*m-1)/6` https://oeis.org/A002412
   n 为奇数时：`m=n/2, m*(m+1)*(4*m+5)/6` https://oeis.org/A016061
@@ -51,108 +56,3 @@ n 的**素因子个数(质因子个数)**是啥数量级:`log(n)`，因为每个
 - a 中任意两数互质 <=> 每个质数至多整除一个 a[i]
 - 两种硬币面额为 a 和 b，互质，数量无限，所不能凑出的数值的最大值为 `a*b-a-b`
 - 对于一任意非负序列，前 i 个数的 GCD 是非增序列，且至多有 O(logMax) 个不同值
-
----
-
-TODO:
-
-- 优化质数分解和因数分解
-  https://leetcode.cn/problems/smallest-value-after-replacing-with-sum-of-prime-factors/
-- `光速gcd/基于值域预处理的快速gcd`
-  https://www.luogu.com.cn/problem/solution/P5435
-- 统计数组的所有子区间的 GCD 的不同个数
-  代码和题目见 bits.go 中的 bitOpTrick
-
-- 统计数组的所有子序列的 GCD 的不同个数，复杂度 O(Clog^2C)
-  LC1819 https://leetcode.cn/problems/number-of-different-subsequences-gcds/solution/ji-bai-100mei-ju-gcdxun-huan-you-hua-pyt-get7/
-- n 以内的最多约数个数，以及对应的最小数字
-- exgcd
-
-```
-package main
-
-import "fmt"
-
-func main() {
-	setPartition(3)
-}
-
-func setPartition(n int) {
-	groups := [][]int{} // 或者用一个 roots 数组表示集合的根节点（代表元）
-	var f func(int)
-	f = func(p int) {
-		if p == n {
-			// do groups ...
-			fmt.Println(groups)
-			return
-		}
-		groups = append(groups, []int{p})
-		f(p + 1)
-		groups = groups[:len(groups)-1]
-		for i := range groups {
-			groups[i] = append(groups[i], p)
-			f(p + 1)
-			groups[i] = groups[i][:len(groups[i])-1]
-		}
-	}
-
-	f(0)
-}
-```
-
-- floorRange
-  enumerateFloorRange
-  ```go
-  floorLoopRange := func(low, up, x int) (sum int) {
-  	for l, r := low, 0; l <= up; l = r + 1 {
-  		h := x / l
-  		if h == 0 {
-  			break
-  		}
-  		r = min(x/h, up)
-  		w := r - l + 1
-  		sum += h * w
-  	}
-  	return
-  }
-  ```
-
-```go
-	// 余数求和
-	//   ∑k%i (i in [1,n])
-	// = ∑k-(k/i)*i
-	// = n*k-∑(k/i)*i
-	// 对于 [l,r] 范围内的 i，k/i 不变，此时 ∑(k/i)*i = (k/i)*∑i = (k/i)*(l+r)*(r-l+1)/2
-	// https://www.luogu.com.cn/problem/P2261
-	// https://codeforces.com/problemset/problem/616/E
-	// NEERC05，紫书例题 10-25，UVa1363 https://onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=446&page=show_problem&problem=4109 https://codeforces.com/gym/101334 J
-	floorLoopRem := func(n, k int) int {
-		sum := n * k
-		for l, r := 1, 0; l <= n; l = r + 1 {
-			h := k / l
-			if h > 0 {
-				r = min(k/h, n)
-			} else {
-				r = n
-			}
-			w := r - l + 1
-			s := (l + r) * w / 2
-			sum -= h * s
-		}
-		return sum
-	}
-
-	// 二维整除分块
-	// ∑{i=1..min(n,m)} floor(n/i)*floor(m/i)
-	// https://www.luogu.com.cn/blog/command-block/zheng-chu-fen-kuai-ru-men-xiao-ji
-	// todo ∑∑(n%i)*(m%j) 模积和 https://www.luogu.com.cn/problem/P2260
-	floorLoop2D := func(n, m int) (sum int) {
-		for l, r := 1, 0; l <= min(n, m); l = r + 1 {
-			hn, hm := n/l, m/l
-			r = min(n/hn, m/hm)
-			w := r - l + 1
-			sum += hn * hm * w
-		}
-		return
-	}
-```

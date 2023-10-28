@@ -5,15 +5,35 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"math/bits"
 	"math/rand"
 	"os"
+	"sort"
 )
 
-func demo() {
+func main() {
 	fmt.Println(SegmentedSieve(0, 100))
 	fmt.Println(IsPrimeMillerRabin(4))
 	fmt.Println(PollardRhoPrimeFactor(100))
 	fmt.Println(GetPrimeFactorsFast(1e18 + 9))
+	EnumerateFactors(100, func(factor int) { fmt.Println(factor) })
+	fmt.Println(GetFactors(10), SumFactors2(10))
+
+	for i := 1; i <= 1000; i++ {
+		if SumFactors(GetPrimeFactors(i)) != SumFactors2(i) {
+			panic("err")
+		}
+		if CountFactors(GetPrimeFactors(i)) != CountFactors2(i) {
+			panic("err")
+		}
+	}
+
+	fmt.Println(MaxDivisorNum(100))
+	for i := 0; i <= 10; i++ {
+		fmt.Println(MaxDivisorNumWithLimit(i))
+	}
+
+	fmt.Println(MaxDivisorNum(5e17))
 }
 
 func Luogu4718() {
@@ -97,17 +117,38 @@ func GetFactors(n int) []int {
 	for f := 1; f <= upper; f++ {
 		if n%f == 0 {
 			small = append(small, f)
-			big = append(big, n/f)
+			if f*f < n {
+				big = append(big, n/f)
+			}
 		}
 	}
-	if small[len(small)-1] == big[len(big)-1] {
-		big = big[:len(big)-1]
+	for i := len(big) - 1; i >= 0; i-- {
+		small = append(small, big[i])
 	}
-	for i, j := 0, len(big)-1; i < j; i, j = i+1, j-1 {
-		big[i], big[j] = big[j], big[i]
+	return small
+}
+
+// 空间复杂度为O(1)的枚举因子.枚举顺序为从小到大.
+func EnumerateFactors(n int, f func(factor int)) {
+	if n <= 0 {
+		return
 	}
-	res := append(small, big...)
-	return res
+	i := 1
+	upper := int(math.Sqrt(float64(n)))
+	for ; i <= upper; i++ {
+		if n%i == 0 {
+			f(i)
+		}
+	}
+	i--
+	if i*i == n {
+		i--
+	}
+	for ; i > 0; i-- {
+		if n%i == 0 {
+			f(n / i)
+		}
+	}
 }
 
 // 返回区间 `[0, upper]` 内所有数的约数.
@@ -142,20 +183,34 @@ func IsPrimeMillerRabin(n int) bool {
 // 返回 n 的所有质数因子，键为质数，值为因子的指数.O(n^0.5).
 func GetPrimeFactors(n int) map[int]int {
 	res := make(map[int]int)
-	upper := int(math.Sqrt(float64(n)))
-	for f := 2; f <= upper; f++ {
+	if n <= 1 {
+		return res
+	}
+
+	count2 := 0
+	for n%2 == 0 {
+		n /= 2
+		count2++
+	}
+	if count2 > 0 {
+		res[2] = count2
+	}
+
+	for i := 3; i*i <= n; i += 2 {
 		count := 0
-		for n%f == 0 {
-			n /= f
+		for n%i == 0 {
+			n /= i
 			count++
 		}
 		if count > 0 {
-			res[f] = count
+			res[i] = count
 		}
 	}
+
 	if n > 1 {
 		res[n] = 1
 	}
+
 	return res
 }
 
@@ -315,14 +370,42 @@ func SegmentedSieve(floor, higher int) []bool {
 }
 
 // 返回约数个数.`primeFactors`为这个数的所有质数因子分解.
-// 如果`primeFactors`为空,返回0.
+// 如果`primeFactors`为空,返回1.
 func CountFactors(primeFactors map[int]int) int {
-	if len(primeFactors) == 0 {
-		return 0
-	}
 	res := 1
 	for _, count := range primeFactors {
 		res *= count + 1
+	}
+	return res
+}
+
+func CountFactors2(x int) int {
+	if x <= 0 {
+		return 0
+	}
+	res := 1
+	if x&1 == 0 {
+		e := 2
+		x >>= 1
+		for x&1 == 0 {
+			x >>= 1
+			e++
+		}
+		res *= e
+	}
+	for f := 3; f*f <= x; f += 2 {
+		if x%f == 0 {
+			e := 2
+			x /= f
+			for x%f == 0 {
+				x /= f
+				e++
+			}
+			res *= e
+		}
+	}
+	if x > 1 {
+		res *= 2
 	}
 	return res
 }
@@ -339,11 +422,8 @@ func CountFactorsOfAll(upper int) []int {
 }
 
 // 返回约数之和.`primeFactors`为这个数的所有质数因子分解.
-// 如果`primeFactors`为空,返回0.
+// 如果`primeFactors`为空,返回1.
 func SumFactors(primeFactors map[int]int) int {
-	if len(primeFactors) == 0 {
-		return 0
-	}
 	res := 1
 	for prime, count := range primeFactors {
 		cur := 1
@@ -351,6 +431,35 @@ func SumFactors(primeFactors map[int]int) int {
 			cur = cur*prime + 1
 		}
 		res *= cur
+	}
+	return res
+}
+
+func SumFactors2(n int) int {
+	if n <= 0 {
+		return 0
+	}
+	res := 1
+	if n&1 == 0 {
+		cur := 1
+		for n&1 == 0 {
+			n >>= 1
+			cur = cur*2 + 1
+		}
+		res *= cur
+	}
+	for f := 3; f*f <= n; f += 2 {
+		if n%f == 0 {
+			cur := 1
+			for n%f == 0 {
+				n /= f
+				cur = cur*f + 1
+			}
+			res *= cur
+		}
+	}
+	if n > 1 {
+		res *= n + 1
 	}
 	return res
 }
@@ -366,69 +475,102 @@ func SumFactorsOfAll(upper int) []int {
 	return res
 }
 
-// // n 以内的最多约数个数，以及对应的最小数字
-// 	// n <= 1e9
-// 	// https://www.luogu.com.cn/problem/P1221
-// 	maxDivisorNum := func(n int) (mxc, ans int) {
-// 		primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29} // 多取一个质数，让乘法超出 n
-// 		var dfs func(int, int, int, int)
-// 		dfs = func(i, mxE, c, v int) {
-// 			if c > mxc || c == mxc && v < ans {
-// 				mxc, ans = c, v
-// 			}
-// 			for e := 1; e <= mxE; e++ {
-// 				v *= primes[i]
-// 				if v > n {
-// 					break
-// 				}
-// 				dfs(i+1, e, c*(e+1), v)
-// 			}
-// 		}
-// 		dfs(0, 30, 1, 1)
-// 		return
-// 	}
+// n 以内的最多约数个数，以及对应的最小数字
+// n <= 1e9
+// https://www.luogu.com.cn/problem/P1221
+func MaxDivisorNum(n int) (count, res int) {
+	primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97}
+	var dfs func(i, maxExp, curCount, curRes int)
+	dfs = func(i, maxExp, curCount, curRes int) {
+		if curCount > count || (curCount == count && curRes < res) {
+			count, res = curCount, curRes
+		}
+		for e := 1; e <= maxExp; e++ {
+			curRes *= primes[i]
+			if curRes > n {
+				break
+			}
+			dfs(i+1, e, curCount*(e+1), curRes)
+		}
+	}
+	dfs(0, bits.Len(uint(n)), 1, 1)
+	return
+}
 
-// // 在有 mxcLimit 的前提下（限制约数个数），mxc 最大是多少
-//
-//	maxDivisorNumWithLimit := func(mxcLimit int) (mxc, ans int) {
-//		rawAns := sort.Search(1e9, func(n int) bool {
-//			c, _ := maxDivisorNum(n + 1)
-//			return c > mxcLimit
-//		})
-//		return maxDivisorNum(rawAns)
-//	}
+// 在有 最大约数个数限制 的前提下，maxCount 最大是多少，以及对应的最小数字.
+func MaxDivisorNumWithLimit(maxCount int) (count, res int) {
+	if maxCount == 0 {
+		return
+	}
+	num := sort.Search(1e9, func(n int) bool {
+		c, _ := MaxDivisorNum(n + 1)
+		return c > maxCount
+	})
+	return MaxDivisorNum(num)
+}
 
-// // Number of odd divisors of n https://oeis.org/A001227
-// // a(n) = d(2*n) - d(n)
-// // 亦为整数 n 分拆成若干连续整数的方法数
-// // Number of partitions of n into consecutive positive integers including the trivial partition of length 1
-// // e.g. 9 = 2+3+4 or 4+5 or 9 so a(9)=3
-// // 相关题目 LC829 https://leetcode.cn/problems/consecutive-numbers-sum/
-// // Kick Start 2021 Round C Alien Generator https://codingcompetitions.withgoogle.com/kickstart/round/0000000000435c44/00000000007ec1cb
-// oddDivisorsNum := func(n int) (ans int) {
-// 	for i := 1; i*i <= n; i++ {
-// 		if n%i == 0 {
-// 			if i&1 == 1 {
-// 				ans++
-// 			}
-// 			if i*i < n && n/i&1 == 1 {
-// 				ans++
-// 			}
-// 		}
-// 	}
-// 	return
-// }
+// [min,max]以内的最多约数个数，以及对应的最小数字.
+// 1<=min<=max<=1e9
+// dfs+剪枝
+// https://www.luogu.com.cn/problem/P1221
+func MaxDivisorNumInInterval(min, max int) (count, res int) {
+	if max-min <= 100000 {
+		for i := min; i <= max; i++ {
+			curCount := CountFactors2(i)
+			if curCount > count {
+				count, res = curCount, i
+			}
+		}
+		return
+	}
+	primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97}
+	var dfs func(i, maxExp, curCount, curRes int)
+	dfs = func(i, maxExp, curCount, curRes int) {
+		if curRes >= min && (curCount > count || (curCount == count && curRes < res)) {
+			count, res = curCount, curRes
+		}
+		for e := 1; e <= maxExp; e++ {
+			curRes *= primes[i]
+			if curRes > max {
+				break
+			}
+			dfs(i+1, e, curCount*(e+1), curRes)
+		}
+	}
+	dfs(0, bits.Len(uint(max)), 1, 1)
+	return
+}
 
-// // 因子的中位数（偶数个因子时取小的那个）
-// // Lower central (median) divisor of n https://oeis.org/A060775
-// // EXTRA: Largest divisor of n <= sqrt(n) https://oeis.org/A033676
-// maxSqrtDivisor := func(n int) int {
-// 	for d := int(math.Sqrt(float64(n))); ; d-- {
-// 		if n%d == 0 {
-// 			return d
-// 		}
-// 	}
-// }
+// 整数n拆分成若干连续整数的方法数/奇约数个数
+// Number of odd divisors of n https://oeis.org/A001227
+// e.g. 9 = 2+3+4 or 4+5 or 9 so a(9)=3
+// LC829 连续整数求和
+// https://leetcode.cn/problems/consecutive-numbers-sum/
+func OddDivisorsNum(n int) int {
+	res := 0
+	for i := 1; i*i <= n; i++ {
+		if n%i == 0 {
+			if i&1 == 1 {
+				res++
+			}
+			if i*i < n && n/i&1 == 1 {
+				res++
+			}
+		}
+	}
+	return res
+}
+
+// 因子的中位数（偶数个因子时取小的那个）
+// Lower central (median) divisor of n https://oeis.org/A060775
+// EXTRA: Largest divisor of n <= sqrt(n) https://oeis.org/A033676
+func MedianDivisor(n int) int {
+	for d := int(math.Sqrt(float64(n))); ; d-- {
+		if n%d == 0 {
+			return d
+		}
+	}
+}
 
 func Pow(base, exp, mod int) int {
 	base %= mod

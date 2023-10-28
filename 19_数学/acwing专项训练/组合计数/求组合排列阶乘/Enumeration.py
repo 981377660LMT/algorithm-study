@@ -54,6 +54,12 @@ class Enumeration:
         """卡特兰数"""
         return self.C(2 * n, n) * self.inv(n + 1) % self._mod
 
+    def lucas(self, n: int, k: int) -> int:
+        if k == 0:
+            return 1
+        mod = self._mod
+        return self.C(n % mod, k % mod) * self.lucas(n // mod, k // mod) % mod
+
     def _expand(self, size: int) -> None:
         size = min(size, self._mod - 1)
         if len(self._fac) < size + 1:

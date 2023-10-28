@@ -52,3 +52,5 @@ function productWithoutOne<E>(nums: E[], e: () => E, op: (a: E, b: E) => E): E[]
   }
   return res
 }
+
+export {}

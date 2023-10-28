@@ -2,7 +2,7 @@
  * 遍历所有大小为`r`的组合.
  * @param arr 待遍历的数组.
  * @param r 组合大小.
- * @param cb 回调函数, 用于处理每个组合的结果.
+ * @param cb 回调函数, 用于处理每个组合的结果.返回`true`时停止遍历.
  * @param copy 是否浅拷贝每个组合的结果, 默认为`false`.
  * @example
  * ```ts
@@ -18,31 +18,27 @@
  * ```
  * @complexity C(30,10)(3e7) => 347.592ms
  */
-function enumerateCombinations<C>(
-  arr: ArrayLike<C>,
-  r: number,
-  cb: (comb: readonly C[]) => void,
-  copy = false
-): void {
+function enumerateCombinations<C>(arr: ArrayLike<C>, r: number, cb: (comb: readonly C[]) => boolean | void, copy = false): void {
   bt(0, [])
 
-  function bt(pos: number, path: C[]): void {
+  function bt(pos: number, path: C[]): boolean {
     if (path.length === r) {
-      cb(copy ? path.slice() : path)
-      return
+      return !!cb(copy ? path.slice() : path)
     }
 
     for (let i = pos; i < arr.length; i++) {
       path.push(arr[i])
-      bt(i + 1, path) // 不可取重复的元素
+      if (bt(i + 1, path)) return true // 不可取重复的元素
       path.pop()
     }
+    return false
   }
 }
 
 /**
  * 模拟python的`itertools.combinations`.
  * @complexity C(24,10)(2e6) => 946.732ms
+ * @deprecated
  */
 function* combinations<C>(arr: ArrayLike<C>, r: number): Generator<C[]> {
   yield* bt(0, [])
@@ -61,7 +57,7 @@ function* combinations<C>(arr: ArrayLike<C>, r: number): Generator<C[]> {
   }
 }
 
-export { enumerateCombinations, combinations }
+export { enumerateCombinations }
 
 if (require.main === module) {
   enumerateCombinations([1, 2, 3, 4], 2, comb => {

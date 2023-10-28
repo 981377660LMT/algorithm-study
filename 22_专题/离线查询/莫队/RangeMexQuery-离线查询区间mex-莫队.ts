@@ -43,7 +43,7 @@ class RangeMexQueryMo {
     const query = (qi: number) => {
       res[qi] = mex
     }
-    this._mo.run(add, remove, query)
+    this._mo.run(add, add, remove, remove, query)
     return res
   }
 }

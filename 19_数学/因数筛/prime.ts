@@ -1,4 +1,5 @@
 /* eslint-disable no-inner-declarations */
+/* eslint-disable max-len */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-shadow */
 
@@ -7,14 +8,12 @@
 
 import assert from 'assert'
 
-/**
- * 埃氏筛.
- */
+/** 埃氏筛. */
 class EratosthenesSieve {
   /**
    * 每个数的最小质因子.
    */
-  private readonly _minPrime: Uint32Array
+  readonly minPrime: Uint32Array
   private readonly _max: number
 
   constructor(max: number) {
@@ -27,16 +26,16 @@ class EratosthenesSieve {
         if (minPrime[j] === j) minPrime[j] = i
       }
     }
-    this._minPrime = minPrime
+    this.minPrime = minPrime
     this._max = max
   }
 
   isPrime(n: number): boolean {
-    return n >= 2 && this._minPrime[n] === n
+    return n >= 2 && this.minPrime[n] === n
   }
 
   getPrimeFactors(n: number): ReadonlyMap<number, number> {
-    const f = this._minPrime
+    const f = this.minPrime
     const res = new Map<number, number>()
     while (n > 1) {
       const p = f[n]
@@ -49,7 +48,7 @@ class EratosthenesSieve {
   getPrimes(n = this._max): readonly number[] {
     const res: number[] = []
     for (let i = 2; i <= n; i++) {
-      if (i === this._minPrime[i]) res.push(i)
+      if (i === this.minPrime[i]) res.push(i)
     }
     return res
   }
@@ -175,18 +174,19 @@ function getFactors(n: number): number[] {
 
 /**
  * 空间复杂度为O(1)的枚举因子.枚举顺序为从小到大.
+ * @param f 回调函数, 返回 true 时停止遍历.
  */
-function enumerateFactors(n: number, f: (factor: number) => void): void {
+function enumerateFactors(n: number, f: (factor: number) => boolean | void): void {
   if (n <= 0) return
   let i = 1
   const upper = Math.floor(Math.sqrt(n))
   for (; i <= upper; i++) {
-    if (n % i === 0) f(i)
+    if (n % i === 0) if (f(i)) return
   }
   i--
   if (i * i === n) i--
   for (; i > 0; i--) {
-    if (n % i === 0) f(n / i)
+    if (n % i === 0) if (f(n / i)) return
   }
 }
 
@@ -205,12 +205,38 @@ function getFactorsOfAll(upper: number): number[][] {
 
 /**
  * 返回约数个数.
- * @param primeFactors 质因子分解.如果分解为空，则返回 0.
+ * @param primeFactors 质因子分解.如果分解为空，则返回 1.
  */
-function countFactors(primeFactors: ReadonlyMap<number, number>): number {
-  if (!primeFactors.size) return 0
+function countFactors(nOrprimeFactors: number | ReadonlyMap<number, number>): number {
+  if (typeof nOrprimeFactors === 'number') {
+    if (nOrprimeFactors <= 0) return 0
+    let res = 1
+    if (!(nOrprimeFactors & 1)) {
+      let e = 2
+      nOrprimeFactors /= 2
+      while (!(nOrprimeFactors & 1)) {
+        nOrprimeFactors /= 2
+        e++
+      }
+      res *= e
+    }
+    for (let f = 3; f * f <= nOrprimeFactors; f += 2) {
+      if (!(nOrprimeFactors % f)) {
+        let e = 2
+        nOrprimeFactors /= f
+        while (!(nOrprimeFactors % f)) {
+          nOrprimeFactors /= f
+          e++
+        }
+        res *= e
+      }
+    }
+    if (nOrprimeFactors > 1) res *= 2
+    return res
+  }
+
   let res = 1
-  primeFactors.forEach(count => {
+  nOrprimeFactors.forEach(count => {
     res *= count + 1
   })
   return res
@@ -230,12 +256,36 @@ function countFactorsOfAll(upper: number): Uint32Array {
 
 /**
  * 返回约数之和.
- * @param primeFactors 质因子分解.如果分解为空，则返回 0.
+ * @param primeFactors 质因子分解.如果分解为空，则返回 1.
  */
-function sumFactors(primeFactors: ReadonlyMap<number, number>): number {
-  if (!primeFactors.size) return 0
+function sumFactors(nOrprimeFactors: number | ReadonlyMap<number, number>): number {
+  if (typeof nOrprimeFactors === 'number') {
+    if (nOrprimeFactors <= 0) return 0
+    let res = 1
+    if (!(nOrprimeFactors & 1)) {
+      let cur = 1
+      while (!(nOrprimeFactors & 1)) {
+        nOrprimeFactors /= 2
+        cur = cur * 2 + 1
+      }
+      res *= cur
+    }
+    for (let f = 3; f * f <= nOrprimeFactors; f += 2) {
+      if (!(nOrprimeFactors % f)) {
+        let cur = 1
+        while (!(nOrprimeFactors % f)) {
+          nOrprimeFactors /= f
+          cur = cur * f + 1
+        }
+        res *= cur
+      }
+    }
+    if (nOrprimeFactors > 1) res *= nOrprimeFactors + 1
+    return res
+  }
+
   let res = 1
-  primeFactors.forEach((count, prime) => {
+  nOrprimeFactors.forEach((count, prime) => {
     let cur = 1
     for (let _ = 0; _ < count; _++) cur = cur * prime + 1
     res *= cur
@@ -255,7 +305,156 @@ function sumFactorsOfAll(upper: number): number[] {
   return res
 }
 
+/**
+ * n 以内的最多约数个数，以及对应的最小数字.
+ * @param n 上界.n <= 1e9.
+ */
+function maxDivisorNum(n: number): [count: number, res: number] {
+  if (n === 0) return [0, 0]
+  const primes = [
+    2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97
+  ]
+  let count = 0
+  let res = 1
+  const dfs = (i: number, maxExp: number, curCount: number, curRes: number) => {
+    if (curCount > count || (curCount === count && curRes < res)) {
+      count = curCount
+      res = curRes
+    }
+    for (let e = 1; e <= maxExp; e++) {
+      curRes *= primes[i]
+      if (curRes > n) break
+      dfs(i + 1, e, curCount * (e + 1), curRes)
+    }
+  }
+  dfs(0, Math.floor(Math.log2(n)) + 1, 1, 1)
+  return [count, res]
+}
+
+/**
+ * 在有 最大约数个数限制 的前提下，maxCount 最大是多少，以及对应的最小数字.
+ */
+function maxDivisorNumWithLimit(maxCount: number): [count: number, res: number] {
+  if (maxCount === 0) return [0, 0]
+  let left = 0
+  let right = 1e9
+  while (left <= right) {
+    const mid = (left + right) >>> 1
+    const [count] = maxDivisorNum(mid)
+    if (count > maxCount) {
+      right = mid - 1
+    } else {
+      left = mid + 1
+    }
+  }
+  return maxDivisorNum(right)
+}
+
+/**
+ * [min,max]以内的最多约数个数，以及对应的最小数字.
+ * 1<=min<=max<=1e9
+ * dfs+剪枝
+ */
+function maxDivisorNumInInterval(min: number, max: number): [count: number, res: number] {
+  if (max - min <= 100000) {
+    let count = 0
+    let res = 0
+    for (let i = min; i <= max; i++) {
+      const curCount = countFactors(i)
+      if (curCount > count) {
+        count = curCount
+        res = i
+      }
+    }
+    return [count, res]
+  }
+  const primes = [
+    2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97
+  ]
+  let count = 0
+  let res = 0
+  const dfs = (i: number, maxExp: number, curCount: number, curRes: number) => {
+    if (curRes >= min && (curCount > count || (curCount === count && curRes < res))) {
+      count = curCount
+      res = curRes
+    }
+    for (let e = 1; e <= maxExp; e++) {
+      curRes *= primes[i]
+      if (curRes > max) {
+        break
+      }
+      dfs(i + 1, e, curCount * (e + 1), curRes)
+    }
+  }
+  dfs(0, Math.floor(Math.log2(max)) + 1, 1, 1)
+  return [count, res]
+}
+
+/**
+ * n 拆分成若干连续整数的方法数/奇约数个数.
+ */
+function oddDivisorsNum(n: number): number {
+  let res = 0
+  const upper = Math.floor(Math.sqrt(n))
+  for (let i = 1; i <= upper; i++) {
+    if (n % i === 0) {
+      if (i & 1) res++
+      if (i * i < n && (n / i) & 1) res++
+    }
+  }
+  return res
+}
+
+/**
+ * 因子的中位数（偶数个因子时取小的那个）.
+ */
+function medianDivisor(n: number): number {
+  const start = Math.floor(Math.sqrt(n))
+  for (let d = start; d > 0; d--) {
+    if (n % d === 0) return d
+  }
+  throw new Error('medianDivisor: n must be positive')
+}
+
+export {
+  EratosthenesSieve,
+
+  //
+  isPrime,
+  getPrimeFactors,
+  countPrime,
+  segmentedSieve,
+
+  //
+  getFactors,
+  getFactorsOfAll,
+  enumerateFactors,
+  countFactors,
+  countFactorsOfAll,
+  sumFactors,
+  sumFactorsOfAll,
+
+  //
+  maxDivisorNum,
+  maxDivisorNumWithLimit,
+  maxDivisorNumInInterval,
+  oddDivisorsNum,
+  medianDivisor
+}
+
 if (require.main === module) {
+  for (let i = 1; i <= 100; i++) {
+    if (countFactors(i) !== countFactors(getPrimeFactors(i))) {
+      throw new Error(`countFactors(${i}) !== countFactors(getPrimeFactors(${i}))`)
+    }
+    if (sumFactors(i) !== sumFactors(getPrimeFactors(i))) {
+      throw new Error(`sumFactors(${i}) !== sumFactors(getPrimeFactors(${i}))`)
+    }
+    if (32 - Math.clz32(i) !== Math.floor(Math.log2(i)) + 1) {
+      throw new Error(`(32-Math.clz32(${i}))!==Math.floor(Math.log2(${i}))`)
+    }
+  }
+
   const P = new EratosthenesSieve(1e6)
   assert.strictEqual(P.isPrime(3), true)
   assert.deepStrictEqual(P.getPrimes(20), [2, 3, 5, 7, 11, 13, 17, 19])
@@ -317,22 +516,4 @@ if (require.main === module) {
     }
     return res
   }
-}
-
-export {
-  EratosthenesSieve,
-
-  //
-  isPrime,
-  getPrimeFactors,
-  countPrime,
-  segmentedSieve,
-
-  //
-  getFactors,
-  getFactorsOfAll,
-  countFactors,
-  countFactorsOfAll,
-  sumFactors,
-  sumFactorsOfAll
 }

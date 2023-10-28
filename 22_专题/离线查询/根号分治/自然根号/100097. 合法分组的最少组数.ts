@@ -15,7 +15,7 @@
 // !频率的种类数不超过根号n，因此可以直接枚举size
 // !即 len(freqCounter) <= sqrt(n)
 
-import { splitToKAndKPlusOne } from '../../../../11_动态规划/背包问题/1_完全背包/同余最短路/splitTo/splitToKAndKPlusOne'
+import { splitToKAndKPlusOne } from '../../../../19_数学/数论/扩展欧几里得/splitTo/splitToKAndKPlusOne'
 
 function minGroupsForValidAssignment(nums: number[]): number {
   const n = nums.length

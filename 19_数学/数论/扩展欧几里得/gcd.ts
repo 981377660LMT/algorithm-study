@@ -18,16 +18,16 @@ function gcd(a: number, b: number): number {
 
 /**
  * 求两个数的最小公倍数.
- * @param threshold 答案超过 {@link threshold} 时返回 {@link threshold}.
+ * @param clamp 答案超过 {@link clamp} 时返回 {@link clamp}.
  */
-function lcm(a: number, b: number, threshold = INF): number {
+function lcm(a: number, b: number, clamp = INF): number {
   if (!a || !b) return 0
   if (a < 0) a = -a
   if (b < 0) b = -b
-  if (a >= threshold || b >= threshold) return threshold
+  if (a >= clamp || b >= clamp) return clamp
   const gcd_ = gcd(a, b)
   a = Math.floor(a / gcd_)
-  if (a >= Math.ceil(threshold / b)) return threshold
+  if (a >= Math.ceil(clamp / b)) return clamp
   return a * b
 }
 
@@ -61,12 +61,21 @@ function exgcd(a: number, b: number): [gcd: number, x: number, y: number] {
 
 /**
  * 模逆元.
- * 求出逆元 `inv` 满足 `a*inv ≡ 1 (mod mod)`.
+ * 求出逆元 `inv` 满足 `a*inv ≡ target (mod mod)`.
  * 如果不存在逆元则返回 `undefined`.
+ * @param [target=1] 目标值.默认为1.
  */
-function modInv(a: number, mod: number): number | undefined {
-  const [gcd_, x] = exgcd(a, mod)
-  if (gcd_ !== 1) return undefined
+function modInv(a: number, mod: number, target = 1): number | undefined {
+  if (target === 1) {
+    const [gcd_, x] = exgcd(a, mod)
+    if (gcd_ !== 1) return undefined
+    const res = x % mod
+    return res < 0 ? res + mod : res
+  }
+  let [gcd_, x] = exgcd(a, mod)
+  if (target % gcd_) return undefined
+  x *= target / gcd_
+  mod /= gcd_
   const res = x % mod
   return res < 0 ? res + mod : res
 }
@@ -96,7 +105,7 @@ function gcdInt32(a: number, b: number) {
   return ctz1 < ctz2 ? a << ctz1 : b << ctz2
 }
 
-export { gcd, lcm, exgcd, modInv, gcdInt32 }
+export { gcd, lcm, exgcd, modInv, gcdInt32, gcdInt32 as binaryGcd, gcdInt32 as fastGcd }
 
 if (require.main === module) {
   console.log(exgcd(3, 6))

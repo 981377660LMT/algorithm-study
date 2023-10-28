@@ -117,6 +117,39 @@ def LISMaxSum(nums: List[int], isStrict=True) -> List[int]:
     return res
 
 
+# // LIS 方案数 O(nlogn)
+# // 原理见下面这题官方题解的方法二
+# // LC673 https://leetcode-cn.com/problems/number-of-longest-increasing-subsequence/
+# cntLis := func(a []int) int {
+# 	g := [][]int{}   // 保留所有历史信息
+# 	cnt := [][]int{} // 个数前缀和
+# 	for _, v := range a {
+# 		p := sort.Search(len(g), func(i int) bool { return g[i][len(g[i])-1] >= v })
+# 		c := 1
+# 		if p > 0 {
+# 			// 根据 g[p-1] 来计算 cnt
+# 			i := sort.Search(len(g[p-1]), func(i int) bool { return g[p-1][i] < v })
+# 			c = cnt[p-1][len(cnt[p-1])-1] - cnt[p-1][i]
+# 		}
+# 		if p == len(g) {
+# 			g = append(g, []int{v})
+# 			cnt = append(cnt, []int{0, c})
+# 		} else {
+# 			g[p] = append(g[p], v)
+# 			cnt[p] = append(cnt[p], cnt[p][len(cnt[p])-1]+c)
+# 		}
+# 	}
+# 	c := cnt[len(cnt)-1]
+# 	return c[len(c)-1]
+# }
+def countLIS(nums: List[int]) -> int:
+    history = []  # 保留所有历史信息
+    count = []  # 个数前缀和
+    for v in nums:
+        pos = bisect_left(range(len(history)), key=lambda i: history[i][-1] >= v)
+
+
+countLIS([10, 9, 2, 5, 3, 7, 101, 18])
 if __name__ == "__main__":
     assert LIS([10, 9, 2, 5, 3, 7, 101, 18]) == 4
     assert getLIS([10, 9, 2, 5, 3, 7, 101, 18]) == ([2, 3, 7, 18], [2, 4, 5, 7])

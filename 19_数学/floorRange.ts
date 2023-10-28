@@ -1,27 +1,56 @@
 /**
- * 将 [1,n] 内的数分成O(2*sqrt(n))段, 每段内的 n//i 相同.
- * 每个段为(left,right,div)，表示 left <= i <= right 内的 n//i == div.
+ * 数论分块.
+ * 将 `[1,n]` 内的数分成 `O(2*sqrt(n))` 段, 每段内的 `n//i` 相同。
  */
-function floorRange(n: number): { left: number; right: number; div: number }[] {
-  if (n <= 0) return []
-  const res: { left: number; right: number; div: number }[] = []
-  let m = 1
-  while (m * m <= n) {
-    res.push({ left: m, right: m, div: Math.floor(n / m) })
-    m++
+function enumerateFloor(n: number, f: (left: number, right: number, div: number) => void): void {
+  for (let l = 1, r = 0; l <= n; l = r + 1) {
+    const h = Math.floor(n / l)
+    r = Math.floor(n / h)
+    f(l, r, h)
   }
-  for (let i = m; i > 0; i--) {
-    const left = Math.floor(n / (i + 1)) + 1
-    const right = Math.floor(n / i)
-    if (left <= right && res.length > 0 && res[res.length - 1].right < left) {
-      res.push({ left, right, div: Math.floor(n / left) })
-    }
-  }
-  return res
 }
 
-export { floorRange }
+/**
+ * 数论分块.
+ * 将 `[lower,upper]` 内的数分成 `O(2*sqrt(upper))` 段, 每段内的 `upper//i` 相同。
+ */
+function enumerateFloorInterval(
+  lower: number,
+  upper: number,
+  f: (left: number, right: number, div: number) => void
+): void {
+  for (let l = lower, r = 0; l <= upper; l = r + 1) {
+    const h = Math.floor(upper / l)
+    if (h === 0) break
+    r = Math.min(Math.floor(upper / h), upper)
+    f(l, r, h)
+  }
+}
+
+/**
+ * 二维数论分块.
+ * 将 `[1,n] x [1,m]` 内的数分成 `O(2*sqrt(n)*2*sqrt(m))` 段, 每段内的 `(n//i, m//i)` 相同。
+ */
+function enumerateFloor2D(
+  n: number,
+  m: number,
+  f: (x1: number, x2: number, y1: number, y2: number, div1: number, div2: number) => void
+): void {
+  for (let x1 = 1, x2 = 0; x1 <= n; x1 = x2 + 1) {
+    const hn = Math.floor(n / x1)
+    x2 = Math.floor(n / hn)
+    for (let y1 = 1, y2 = 0; y1 <= m; y1 = y2 + 1) {
+      const hm = Math.floor(m / y1)
+      y2 = Math.floor(m / hm)
+      f(x1, x2, y1, y2, hn, hm)
+    }
+  }
+}
+
+export { enumerateFloor, enumerateFloorInterval, enumerateFloor2D }
 
 if (require.main === module) {
-  console.log(floorRange(10))
+  enumerateFloor(10, console.log)
+  enumerateFloorInterval(19, 20, console.log)
+  enumerateFloor2D(5, 5, console.log)
 }

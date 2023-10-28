@@ -9,24 +9,18 @@
    - n = 60（966467）：65 ms
    - n = 70（4087968）：230 ms
    - n = 80（15796476）：900 ms
- * @param callbackFn 在每次找到有效的整数划分时被调用，参数是一个表示划分的整数数组。
+ * @param callbackFn 在每次找到有效的整数划分时被调用，参数是一个表示划分的整数数组。返回`true`时停止遍历。
  * @param lenLimit 限制整数划分的最大长度。-1表示没有限制。
  * @param valLimit 限制整数划分中最大整数的值。-1表示没有限制。
  */
-function enumeratePartition(
-  n: number,
-  callbackFn: (partition: readonly number[]) => void,
-  lenLimit = -1,
-  valLimit = -1
-) {
-  const dfs = (partition: number[], sum: number): void => {
+function enumeratePartition(n: number, callbackFn: (partition: readonly number[]) => boolean | void, lenLimit = -1, valLimit = -1) {
+  const dfs = (partition: number[], sum: number): boolean => {
     if (sum === n) {
-      callbackFn(partition)
-      return
+      return !!callbackFn(partition)
     }
 
     if (lenLimit !== -1 && partition.length === lenLimit) {
-      return
+      return false
     }
 
     let next = partition.length === 0 ? n : partition[partition.length - 1]
@@ -38,10 +32,11 @@ function enumeratePartition(
     partition.push(0)
     for (let x = next; x >= 1; x--) {
       partition[partition.length - 1] = x
-      dfs(partition, sum + x)
+      if (dfs(partition, sum + x)) return true
     }
 
     partition.pop()
+    return false
   }
 
   dfs([], 0)
@@ -49,10 +44,13 @@ function enumeratePartition(
 
 if (require.main === module) {
   console.time('enumeratePartition')
+  let count = 0
   enumeratePartition(80, partition => {
     // // console.log(partition)
     // console.log(partition)
+    count++
   })
+  console.log(count)
   console.timeEnd('enumeratePartition')
 }
 
