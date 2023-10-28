@@ -3,11 +3,34 @@
 #     **((∑fi)^2-∑fi^2)/2 (fi 为子树大小)**
 #   - 长为奇数(2d+1)，直径个数为左侧深度为 d 的顶点数乘以右侧深度为 d 的顶点数
 
-
+from typing import List, Set, Tuple
 from 树的直径 import getTreeDiameter
-
 from collections import deque
-from typing import List, Set
+
+
+def countDiameter2(tree: List[List[int]], start=0) -> Tuple[int, int]:
+    """树的直径个数."""
+
+    def dfs(cur: int, pre: int) -> Tuple[int, int]:
+        maxDepth, count = 0, 1
+        for next in tree[cur]:
+            if next != pre:
+                nextDepth, nextCount = dfs(next, cur)
+                nonlocal diameter, diameterCount
+                tmp = maxDepth + nextDepth
+                if tmp > diameter:
+                    diameter, diameterCount = tmp, count * nextCount
+                elif tmp == diameter:
+                    diameterCount += count * nextCount
+                if nextDepth > maxDepth:
+                    maxDepth, count = nextDepth, nextCount
+                elif nextDepth == maxDepth:
+                    count += nextCount
+        return maxDepth + 1, count
+
+    diameter, diameterCount = 0, 0
+    dfs(start, -1)
+    return diameter, diameterCount
 
 
 def bfs(adjList: List[Set[int]], start: int, depth: int) -> int:
