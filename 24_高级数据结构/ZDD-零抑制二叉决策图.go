@@ -47,7 +47,6 @@ func main() {
 	fmt.Println(zdd.ToSet(zdd.Mul(set1, set2)))
 	fmt.Println(zdd.ToSet(zdd.Div(set1, set2)))
 	fmt.Println(zdd.ToSet(zdd.Mod(set1, set2)))
-
 }
 
 // !ZDD 压缩集合.

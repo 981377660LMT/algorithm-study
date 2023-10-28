@@ -1,4 +1,3 @@
-from functools import lru_cache
 from itertools import accumulate
 from typing import List
 
@@ -36,4 +35,3 @@ print(
         piles=[[100], [100], [100], [100], [100], [100], [1, 1, 1, 1, 1, 1, 700]], k=7
     )
 )
-
