@@ -7,15 +7,7 @@
 // !deep watch
 
 type Obj = Record<PropertyKey, unknown> | unknown[]
-const MUTABLE_ARRAY_METHODS: (keyof [])[] = [
-  'pop',
-  'push',
-  'shift',
-  'unshift',
-  'splice',
-  'sort',
-  'reverse'
-]
+const MUTABLE_ARRAY_METHODS: (keyof [])[] = ['pop', 'push', 'shift', 'unshift', 'splice', 'sort', 'reverse']
 
 function makeImmutable<T extends Obj>(obj: T): T {
   return proxify(obj)
