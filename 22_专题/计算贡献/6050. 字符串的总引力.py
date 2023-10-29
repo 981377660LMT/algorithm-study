@@ -26,4 +26,3 @@ class Solution:
 
 print(Solution().appealSum(s="abbca"))
 print(Solution().appealSum(s="code"))
-

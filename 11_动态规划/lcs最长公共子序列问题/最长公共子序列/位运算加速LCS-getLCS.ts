@@ -4,7 +4,7 @@
  * `O(nm/32)`求最长公共子序列.
  * 5e4x5e4 => 1s.
  */
-function getLCS<T>(arr1: ArrayLike<T>, arr2: ArrayLike<T>): T[] {
+function getLCSFast<T>(arr1: ArrayLike<T>, arr2: ArrayLike<T>): T[] {
   const n = arr1.length
   const m = arr2.length
   const copy1 = new Uint32Array(n)
@@ -133,12 +133,12 @@ class _BS {
   }
 }
 
-export { getLCS }
+export { getLCSFast }
 
 if (require.main === module) {
   // https://leetcode.cn/problems/longest-common-subsequence/
   function longestCommonSubsequence(text1: string, text2: string): number {
-    return getLCS(text1, text2).length
+    return getLCSFast(text1, text2).length
   }
 
   const n1 = 5e4

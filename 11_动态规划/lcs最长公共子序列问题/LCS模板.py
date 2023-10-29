@@ -6,17 +6,21 @@ from typing import Any, Sequence
 
 def LCS(seq1: Sequence["Any"], seq2: Sequence["Any"]) -> int:
     """返回LCS长度"""
+
+    def max(a: int, b: int) -> int:
+        return a if a > b else b
+
     n1, n2 = len(seq1), len(seq2)
     res = 0
     dp = [[0] * (n2 + 1) for _ in range(n1 + 1)]
     for i in range(1, n1 + 1):
+        tmp1, tmp2 = dp[i], dp[i - 1]
         for j in range(1, n2 + 1):
             if seq1[i - 1] == seq2[j - 1]:
-                dp[i][j] = dp[i - 1][j - 1] + 1
-                res = max(res, dp[i][j])
+                tmp1[j] = tmp2[j - 1] + 1
+                res = max(res, tmp1[j])
             else:
-                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
-
+                tmp1[j] = max(dp[i - 1][j], tmp1[j - 1])
     return res
 
 
@@ -28,27 +32,31 @@ def getLCS(seq1: Sequence["Any"], seq2: Sequence["Any"]) -> Sequence["Any"]:
     for i in range(n + 1):
         for j in range(m + 1):
             if i < n and j < m and seq1[i] == seq2[j]:
-                if dp[i + 1][j + 1] < dp[i][j] + 1:
-                    dp[i + 1][j + 1] = dp[i][j] + 1
+                tmp1, tmp2 = dp[i + 1], dp[i]
+                if tmp1[j + 1] < tmp2[j] + 1:
+                    tmp1[j + 1] = tmp2[j] + 1
                     pre[i + 1][j + 1] = 1
             if i < n:
-                if dp[i + 1][j] < dp[i][j]:
-                    dp[i + 1][j] = dp[i][j]
+                tmp1, tmp2 = dp[i + 1], dp[i]
+                if tmp1[j] < tmp2[j]:
+                    tmp1[j] = tmp2[j]
                     pre[i + 1][j] = 2
             if j < m:
-                if dp[i][j + 1] < dp[i][j]:
-                    dp[i][j + 1] = dp[i][j]
+                tmp1, tmp2 = dp[i + 1], dp[i]
+                if tmp1[j + 1] < tmp1[j]:
+                    tmp2[j + 1] = tmp2[j]
                     pre[i][j + 1] = 3
     res = []
     i, j = n, m
     while i and j and pre[i][j] > 0:
-        if pre[i][j] == 1:
+        cur = pre[i][j]
+        if cur == 1:
             i -= 1
             j -= 1
             res.append(seq1[i])
-        elif pre[i][j] == 2:
+        elif cur == 2:
             i -= 1
-        elif pre[i][j] == 3:
+        elif cur == 3:
             j -= 1
     return res[::-1]
 

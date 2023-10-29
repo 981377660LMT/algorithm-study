@@ -1,70 +1,46 @@
-// RangeAddRangeSquareSum
-
-// 区间加区间平方和
-
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"math/bits"
-	"os"
 )
 
-func main() {
-	nums := make([]int, 6)
-	leaves := make([]E, 6)
-	for i := range nums {
-		leaves[i] = FromElement(nums[i])
-	}
-	tree := NewSegmentTreeRangeAddRangeSquareSum(leaves)
-	fmt.Println(tree.Query(2, 4))
-	tree.Set(1, FromElement(-4))
-	fmt.Println(tree.Query(3, 5))
-	tree.Update(2, 6, -2)
-	tree.Set(4, FromElement(4))
-	fmt.Println(tree.Query(0, 6))
-}
+// 前置问题： [2262. 字符串的总引力
+// ](https://leetcode.cn/problems/total-appeal-of-a-string/solutions/1461618/by-endlesscheng-g405/)
 
-func test() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+// ---
+// 1. 从左往右遍历数组，考虑新加入一个数 $nums[i]$ 会对左侧数组产生什么影响。类似 2262，用一个哈希表 $last$ 记录上次 $nums[i]$ 出现的的位置 $j$(没有出现就是$-1$)，那么左端点在区间 $[j+1,i+1)$ 内的子数组不同元素个数都会加一。
+// 2. 用线段树维护区间平方和即可。基于 atcoder library 的 [lazy segtree](https://github.com/atcoder/ac-library/blob/master/atcoder/lazysegtree.hpp) , 幺半群实现如下：
+// ![lazysegtree.png](https://pic.leetcode.cn/1698550695-vTBhCS-QQ%E5%9B%BE%E7%89%8720231029113758.png)
 
-	var n int
-	fmt.Fscan(in, &n)
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
-	}
+// ---
+// 线段树只是工具，难基本都是难在写幺半群，除了这道题之外比较难的：
+// - [2213. 由单个字符重复的最长子字符串](https://leetcode.cn/problems/longest-substring-of-one-repeating-character/)
+// - [2286. 以组为单位订音乐会的门票
+// ](https://leetcode.cn/problems/booking-concert-tickets-in-groups/)
 
+func sumCounts(nums []int) int {
+	n := len(nums)
 	leaves := make([]E, n)
 	for i := 0; i < n; i++ {
-		leaves[i] = E{1, nums[i], nums[i] * nums[i]}
+		leaves[i] = FromElement(0)
 	}
-	tree := NewSegmentTreeRangeAddRangeSquareSum(leaves)
-
-	var q int
-	fmt.Fscan(in, &q)
-	for i := 0; i < q; i++ {
-		var op int
-		fmt.Fscan(in, &op)
-		if op == 1 {
-			var l, r, v int
-			fmt.Fscan(in, &l, &r, &v)
-			l--
-			tree.Update(l, r, v)
-		} else {
-			var l, r int
-			fmt.Fscan(in, &l, &r)
-			l--
-			res := tree.Query(l, r)
-			fmt.Fprintln(out, res.sum2)
+	seg := NewSegmentTreeRangeAddRangeSquareSum(leaves)
+	last := make(map[int]int)
+	res := 0
+	for i, num := range nums {
+		pre := -1
+		if v, ok := last[num]; ok {
+			pre = v
 		}
+		seg.Update(pre+1, i+1, 1)
+		last[num] = i
+		res = (seg.Query(0, i+1).sum2 + res) % MOD
 	}
+	return res
 }
 
 const INF = 1e18
+const MOD int = 1e9 + 7
 
 // SegmentTreeRangeAddRangeSquareSum-区间加区间平方和
 

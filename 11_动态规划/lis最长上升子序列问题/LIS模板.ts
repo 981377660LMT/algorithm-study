@@ -78,7 +78,7 @@ function getLIS(nums: ArrayLike<number>, isStrict = true): [lis: number[], lisIn
 }
 
 /**
- * 求和最大的LIS.
+ * 求和最大的LIS(最大上升子序列和).
  * @param nums nums[i]>=0.
  * @param isStrict 是否严格递增.默认为true.
  * @returns res[i] 表示以nums[i]结尾的LIS的最大和.

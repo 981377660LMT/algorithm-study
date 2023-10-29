@@ -1,1 +1,0 @@
-pow(2, counter[0], MOD) - 1

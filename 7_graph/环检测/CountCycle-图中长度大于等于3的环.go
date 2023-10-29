@@ -1,22 +1,50 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 )
 
 func main() {
-	undirectedGraph := [][]int{{1, 2}, {0, 2}, {0, 1, 3}, {2}}
-	cycle := CountCycle(undirectedGraph)
-	fmt.Println(cycle)
+	// undirectedGraph := [][]int{{1, 2}, {0, 2}, {0, 1, 3}, {2}}
+	// cycle := CountCycle(undirectedGraph)
+	// fmt.Println(cycle)
 
-	undirectedGraph = [][]int{{1, 2}, {0, 2}, {0, 1}}
-	cycle = CountCycle(undirectedGraph) // [0 0 0 0 0 0 0 1] -> 0<<1 | 1<<1 | 2<<1
-	fmt.Println(cycle)
+	// undirectedGraph = [][]int{{1, 2}, {0, 2}, {0, 1}}
+	// cycle = CountCycle(undirectedGraph) // [0 0 0 0 0 0 0 1] -> 0<<1 | 1<<1 | 2<<1
+	// fmt.Println(cycle)
+
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	g := make([][]int, n)
+	for i := 0; i < m; i++ {
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		u--
+		v--
+		g[u] = append(g[u], v)
+		g[v] = append(g[v], u)
+	}
+
+	cycle := CountCycle(g)
+	res := 0
+	for _, v := range cycle {
+		res += v
+	}
+	fmt.Fprintln(out, res)
 }
 
 // 给定一个无重边、自环的无向图，求图中`长度大于等于3的环`的集合.
 // O(n^2 * 2^n)
+// https://blog.csdn.net/fangzhenpeng/article/details/49078233
+// https://codeforces.com/problemset/problem/11/D 求图中简单环的数量
+// n<=19
 func CountCycle(undirectedGraph [][]int) (cycleGroup []int) {
 	n := uint32(len(undirectedGraph))
 	nexts := make([]uint32, n)

@@ -73,7 +73,7 @@ def getLIS(nums: List[int], isStrict=True) -> Tuple[List[int], List[int]]:
 
 
 def LISMaxSum(nums: List[int], isStrict=True) -> List[int]:
-    """求以每个位置为结尾的LIS最大和(包括自身)"""
+    """求以每个位置为结尾的LIS最大和(包括自身).最大上升子序列和."""
 
     def max(a: int, b: int) -> int:
         return a if a > b else b
@@ -134,3 +134,7 @@ if __name__ == "__main__":
     class Solution:
         def minimumOperations(self, nums: List[int]) -> int:
             return len(nums) - LIS(nums, isStrict=False)
+
+    n = int(input())
+    nums = list(map(int, input().split()))
+    print(max(LISMaxSum(nums)))
