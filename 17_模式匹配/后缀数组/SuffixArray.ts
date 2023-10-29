@@ -179,7 +179,10 @@ class SuffixArray {
     }
   }
 
-  private static _rankLcp(ords: ArrayLike<number>, sa: ArrayLike<number>): [rank: number[], lcp: number[]] {
+  private static _rankLcp(
+    ords: ArrayLike<number>,
+    sa: ArrayLike<number>
+  ): [rank: number[], lcp: number[]] {
     const n = ords.length
     const rank = Array(n)
     const lcp = Array(n)
@@ -361,7 +364,13 @@ if (require.main === module) {
     return res
   }
 
-  function compareSubstrNaive(s: ArrayLike<number>, a: number, b: number, c: number, d: number): -1 | 0 | 1 {
+  function compareSubstrNaive(
+    s: ArrayLike<number>,
+    a: number,
+    b: number,
+    c: number,
+    d: number
+  ): -1 | 0 | 1 {
     while (a < b && c < d && s[a] === s[c]) {
       a++
       c++
