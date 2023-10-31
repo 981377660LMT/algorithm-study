@@ -2,6 +2,8 @@ https://github.com/EndlessCheng/codeforces-go/blob/04c3e9c75964d0a5dd701db92e5c3
 
 https://www.cnblogs.com/Schucking-Sattin/p/17726836.html
 
+https://codeforces.com/blog/entry/59606
+
 ---
 
 物品：物品。
@@ -21,3 +23,5 @@ https://www.cnblogs.com/Schucking-Sattin/p/17726836.html
 https://www.luogu.com.cn/training/5197
 https://www.luogu.com.cn/training/8917
 https://www.luogu.com.cn/training/231055
+
+---

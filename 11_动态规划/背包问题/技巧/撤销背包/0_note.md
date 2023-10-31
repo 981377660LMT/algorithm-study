@@ -1,7 +1,11 @@
 # 撤销背包
 
-1. 撤销方式 1:线段树分治(分治删点)，参考模版 `mutateWithoutOne`
-2. 撤销方式 2
+https://www.cnblogs.com/Schucking-Sattin/p/17726836.html
+
+1. 撤销方式 1: 线段树分治(分治删点)，参考模版 `mutateWithoutOne`
+   好处是不需要删除接口(undo)
+2. 撤销方式 2: 直接撤销(naive)
+   必须要有删除接口(undo)
 
 ---
 

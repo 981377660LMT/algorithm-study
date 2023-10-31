@@ -6,11 +6,6 @@ func _(min, max func(int, int) int, abs func(int) int) {
 	// https://www.luogu.com.cn/training/5197
 	// https://www.luogu.com.cn/training/8917
 	// https://www.luogu.com.cn/training/231055
-	//
-	// https://www.cnblogs.com/Schucking-Sattin/p/17726836.html
-
-	// todo 撤销计数 撤销多重背包计数入门
-	//  https://leetcode.cn/circle/article/YnZBve/
 
 	// 树上背包/树形背包/依赖背包
 	// todo 树上背包的上下界优化 https://ouuan.github.io/post/%E6%A0%91%E4%B8%8A%E8%83%8C%E5%8C%85%E7%9A%84%E4%B8%8A%E4%B8%8B%E7%95%8C%E4%BC%98%E5%8C%96/
