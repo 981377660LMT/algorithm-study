@@ -2,6 +2,11 @@
 
 package main
 
+import (
+	"fmt"
+	"strings"
+)
+
 // https://leetcode.cn/problems/longest-substring-of-one-repeating-character/
 func longestRepeating(s string, queryCharacters string, queryIndices []int) []int {
 	n := len(s)
@@ -202,6 +207,19 @@ func (st *SegmentTreeLongestRepeating) MinLeft(right int, predicate func(E) bool
 		}
 	}
 	return 0
+}
+
+func (tree *SegmentTreeLongestRepeating) String() string {
+	var sb []string
+	sb = append(sb, "[")
+	for i := 0; i < tree.n; i++ {
+		if i != 0 {
+			sb = append(sb, ", ")
+		}
+		sb = append(sb, fmt.Sprintf("%v", tree.Get(i)))
+	}
+	sb = append(sb, "]")
+	return strings.Join(sb, "")
 }
 
 func min(a, b int) int {

@@ -42,7 +42,7 @@ type E = int
 type Id = int
 
 func e1() E               { return 0 }
-func e2(start, end int) E { return 0 } // 区间[start,end)幺元的查询结果.
+func e2(start, end int) E { return 0 } // 区间[start,end)的初始值.
 func id() Id              { return -1 }
 func op(a, b E) E         { return a + b }
 func mapping(f Id, g E, size int) E {

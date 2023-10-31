@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math/bits"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -319,4 +320,17 @@ func (tree *SegmentTreeRangeAssignRangeSumMinMax) propagate(root int, f Id) {
 	if root < tree.size {
 		tree.lazy[root] = tree.composition(f, tree.lazy[root])
 	}
+}
+
+func (tree *SegmentTreeRangeAssignRangeSumMinMax) String() string {
+	var sb []string
+	sb = append(sb, "[")
+	for i := 0; i < tree.n; i++ {
+		if i != 0 {
+			sb = append(sb, ", ")
+		}
+		sb = append(sb, fmt.Sprintf("%v", tree.Get(i)))
+	}
+	sb = append(sb, "]")
+	return strings.Join(sb, "")
 }

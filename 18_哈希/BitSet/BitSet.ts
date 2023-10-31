@@ -19,8 +19,8 @@ interface IBitSet {
   discardRange: (start: number, end: number) => void
   flipRange: (start: number, end: number) => void
 
-  lsh: (k: number) => void
-  rsh: (k: number) => void
+  lsh: (k: number) => IBitSet
+  rsh: (k: number) => IBitSet
 
   fill: (value: 0 | 1) => void
   clear: () => void
@@ -56,7 +56,7 @@ interface IBitSet {
 
   bitLength: () => number
 
-  forEach: (callback: (value: number) => void) => void
+  forEach: (callback: (value: number) => void) => boolean | void
 
   toString: () => string
 }
@@ -97,9 +97,7 @@ class BitSet {
   constructor(n: number, filledValue: 0 | 1 = 0) {
     if (n < 0) throw new RangeError('n must be non-negative')
     this._n = n
-    this._bits = filledValue
-      ? new Uint32Array((n + 31) >>> 5).fill(~0)
-      : new Uint32Array((n + 31) >>> 5)
+    this._bits = filledValue ? new Uint32Array((n + 31) >>> 5).fill(~0) : new Uint32Array((n + 31) >>> 5)
     if (n) this._bits[this._bits.length - 1] >>>= (this._bits.length << 5) - n
   }
 
@@ -177,48 +175,48 @@ class BitSet {
    * 左移k位(<<k).
    * !TODO:需要处理位移超出n位后多出来的1的情况.
    */
-  lsh(k: number): void {
-    if (!k) return
+  lsh(k: number): BitSet {
+    if (!k) return this
     const shift = k >>> 5
     const offset = k & 31
     if (shift >= this._bits.length) {
       this._bits.fill(0)
-      return
+      return this
     }
     if (!offset) {
       this._bits.copyWithin(shift, 0)
     } else {
       for (let i = this._bits.length - 1; i > shift; i--) {
-        this._bits[i] =
-          (this._bits[i - shift] << offset) | (this._bits[i - shift - 1] >>> (32 - offset))
+        this._bits[i] = (this._bits[i - shift] << offset) | (this._bits[i - shift - 1] >>> (32 - offset))
       }
       this._bits[shift] = this._bits[0] << offset
     }
     this._bits.fill(0, 0, shift)
+    return this
   }
 
   /**
    * 右移k位(>>k).
    */
-  rsh(k: number): void {
-    if (!k) return
+  rsh(k: number): BitSet {
+    if (!k) return this
     const shift = k >>> 5
     const offset = k & 31
     if (shift >= this._bits.length) {
       this._bits.fill(0)
-      return
+      return this
     }
     const limit = this._bits.length - shift - 1
     if (!offset) {
       this._bits.copyWithin(0, shift)
     } else {
       for (let i = 0; i < limit; i++) {
-        this._bits[i] =
-          (this._bits[i + shift] >>> offset) | (this._bits[i + shift + 1] << (32 - offset))
+        this._bits[i] = (this._bits[i + shift] >>> offset) | (this._bits[i + shift + 1] << (32 - offset))
       }
       this._bits[limit] = this._bits[this._bits.length - 1] >>> offset
     }
     this._bits.fill(0, limit + 1)
+    return this
   }
 
   clear(): void {
@@ -706,19 +704,21 @@ class BitSet {
 
   toSet(): Set<number> {
     const set = new Set<number>()
-    this.forEach(i => set.add(i))
+    this.forEach(i => {
+      set.add(i)
+    })
     return set
   }
 
   /**
    * 遍历所有 1 的位置.
    */
-  forEach(callback: (value: number) => void): void {
+  forEach(callback: (value: number) => boolean | void): void {
     this._bits.forEach((v, i) => {
       // !注意结束条件是v!==0 而不是v>0
       for (; v; v &= v - 1) {
         const j = (i << 5) | BitSet._trailingZeros32(v)
-        callback(j)
+        if (callback(j)) return
       }
     })
   }

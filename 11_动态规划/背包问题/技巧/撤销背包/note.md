@@ -1,0 +1,39 @@
+# 撤销背包
+
+1. 撤销方式 1:线段树分治(分治删点)，参考模版 `mutateWithoutOne`
+2. 撤销方式 2
+
+---
+
+- 01 背包撤销操作：
+
+```cpp
+void insert(int x)
+{
+    for(int i = n; i >= x; --i)
+        Inc(f[i], f[i - x]);
+}
+void remove(int x)
+{
+    for(int i = x; i <= n; ++i)
+        Dec(f[i], f[i - x]);
+}
+```
+
+- 完全背包撤销操作：
+
+```cpp
+void insert(int x)
+{
+    for(int i = x; i <= n; ++i)
+        Inc(f[i], f[i - x]);
+}
+void remove(int x)
+{
+    for(int i = n; i >= x; --i)
+        Dec(f[i], f[i - x]);
+}
+```
+
+- 多重背包撤销操作
+  https://leetcode.cn/circle/discuss/YnZBve/

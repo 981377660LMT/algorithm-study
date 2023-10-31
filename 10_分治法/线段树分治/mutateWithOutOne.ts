@@ -3,7 +3,8 @@
 /**
  * 分治删点.类似`除自身以外数组的乘积`.
  * 调用 `query` 时，`state` 为对除了 `index` 以外所有点均调用过了 `mutate` 的状态。但不保证调用 `mutate` 的顺序。
- * 总计会调用 $O(NlgN)$ 次的 `mutate` 和 `query`.
+ *
+ * 总计会调用 $O(NlgN)$ 次的 `mutate` 和 `query`, 以及 $O(N)$ 次的 `copy`.
  * @link
  * https://github.com/tdzl2003/leetcode_live/blob/master/templates/%E5%9F%BA%E7%A1%80/%E5%88%86%E6%B2%BB%E5%88%A0%E7%82%B9.cpp
  * @note
@@ -63,8 +64,11 @@ if (require.main === module) {
         res[index] = state.mul
       }
     })
+
     return res
   }
 
-  console.log(productExceptSelf([1, 2, 3, 4]))
+  console.log(productExceptSelf([1, 2, 3, 4])) // [24,12,8,6]
+
+  // https://leetcode.cn/contest/tianchi2022/problems/tRZfIV/
 }

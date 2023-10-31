@@ -47,7 +47,7 @@ func main() {
 type E = int
 
 func e1() E                { return 0 }
-func e2(left, right int) E { return 0 } // 区间[left,right]幺元的查询结果.
+func e2(left, right int) E { return 0 } // 区间[left,right)的初始值.
 func op(a, b E) E          { return a + b }
 
 type DynamicSegTree struct {

@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math/bits"
 	"os"
+	"strings"
 )
 
 // https://atcoder.jp/contests/practice2/tasks/practice2_l
@@ -71,10 +72,6 @@ func (*LazySegTree) composition(parentLazy, childLazy Id) Id {
 	return (parentLazy && !childLazy) || (!parentLazy && childLazy)
 }
 
-//
-//
-//
-//
 // !template
 type LazySegTree struct {
 	n    int
@@ -110,7 +107,8 @@ func NewLazySegTree(
 }
 
 // 查询切片[left:right]的值
-//   0<=left<=right<=len(tree.data)
+//
+//	0<=left<=right<=len(tree.data)
 func (tree *LazySegTree) Query(left, right int) E {
 	if left < 0 {
 		left = 0
@@ -153,7 +151,8 @@ func (tree *LazySegTree) QueryAll() E {
 }
 
 // 更新切片[left:right]的值
-//   0<=left<=right<=len(tree.data)
+//
+//	0<=left<=right<=len(tree.data)
 func (tree *LazySegTree) Update(left, right int, f Id) {
 	if left < 0 {
 		left = 0
@@ -318,4 +317,17 @@ func (tree *LazySegTree) propagate(root int, f Id) {
 	if root < tree.size {
 		tree.lazy[root] = tree.composition(f, tree.lazy[root])
 	}
+}
+
+func (tree *LazySegTree) String() string {
+	var sb []string
+	sb = append(sb, "[")
+	for i := 0; i < tree.n; i++ {
+		if i != 0 {
+			sb = append(sb, ", ")
+		}
+		sb = append(sb, fmt.Sprintf("%v", tree.Get(i)))
+	}
+	sb = append(sb, "]")
+	return strings.Join(sb, "")
 }

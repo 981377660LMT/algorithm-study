@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 const INF int = 1e18
 
 // PointUpdateRangeMax
@@ -164,4 +166,12 @@ func (st *SegmentTreePointUpdateRangeQuery) MinLeft(right int, predicate func(E)
 		}
 	}
 	return 0
+}
+
+func (st *SegmentTreePointUpdateRangeQuery) String() string {
+	res := make([]E, st.n)
+	for i := range res {
+		res[i] = st.Get(i)
+	}
+	return fmt.Sprintf("SegmentTreePointUpdateRangeQuery: %v", res)
 }

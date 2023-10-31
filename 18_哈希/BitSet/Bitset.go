@@ -239,16 +239,16 @@ func (b Bitset) ResetRange(l, r int) {
 
 // 左移 k 位
 // LC1981 https://leetcode-cn.com/problems/minimize-the-difference-between-target-and-chosen-elements/
-func (b Bitset) Lsh(k int) {
+func (b Bitset) Lsh(k int) Bitset {
 	if k == 0 {
-		return
+		return b
 	}
 	shift, offset := k>>6, k&63
 	if shift >= len(b) {
 		for i := range b {
 			b[i] = 0
 		}
-		return
+		return b
 	}
 	if offset == 0 {
 		// Fast path
@@ -262,19 +262,20 @@ func (b Bitset) Lsh(k int) {
 	for i := 0; i < shift; i++ {
 		b[i] = 0
 	}
+	return b
 }
 
 // 右移 k 位
-func (b Bitset) Rsh(k int) {
+func (b Bitset) Rsh(k int) Bitset {
 	if k == 0 {
-		return
+		return b
 	}
 	shift, offset := k>>6, k&63
 	if shift >= len(b) {
 		for i := range b {
 			b[i] = 0
 		}
-		return
+		return b
 	}
 	lim := len(b) - 1 - shift
 	if offset == 0 {
@@ -290,6 +291,7 @@ func (b Bitset) Rsh(k int) {
 	for i := lim + 1; i < len(b); i++ {
 		b[i] = 0
 	}
+	return b
 }
 
 // 借用 bits 库中的一些方法的名字
@@ -322,10 +324,11 @@ func (b Bitset) HasSubset(c Bitset) bool {
 }
 
 // 将 c 的元素合并进 b
-func (b Bitset) IOr(c Bitset) {
+func (b Bitset) IOr(c Bitset) Bitset {
 	for i, v := range c {
 		b[i] |= v
 	}
+	return b
 }
 
 func (b Bitset) Or(c Bitset) Bitset {
@@ -336,10 +339,11 @@ func (b Bitset) Or(c Bitset) Bitset {
 	return res
 }
 
-func (b Bitset) IAnd(c Bitset) {
+func (b Bitset) IAnd(c Bitset) Bitset {
 	for i, v := range c {
 		b[i] &= v
 	}
+	return b
 }
 
 func (b Bitset) And(c Bitset) Bitset {

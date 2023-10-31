@@ -65,6 +65,7 @@ func solver1(values []int, weights []int, limit int) int {
 }
 
 // ∑vi*n 很小的情况下，dp[i][j] 表示前 i 个物品，达成总价值为 j 时的最小重量
+// 把重量看成价值，价值看成重量，求同等价值下能得到的最小重量，若该最小重量不超过背包容量，则该价值合法。所有合法价值的最大值即为答案
 func solver2(values []int, weights []int, limit int) int {
 	vSum := 0
 	for _, v := range values {
@@ -91,7 +92,8 @@ func solver2(values []int, weights []int, limit int) int {
 }
 
 // n<=40 的情况下，可以 meet in the middle
-//  dp处理出子集的(价值，重量)对，排序后双指针求解
+//
+//	dp处理出子集的(价值，重量)对，排序后双指针求解
 func solver3(values []int, weights []int, limit int) int {
 	getDp := func(vs, ws []int) [][2]int {
 		dp := make([][2]int, 0, 1<<uint(len(vs)))

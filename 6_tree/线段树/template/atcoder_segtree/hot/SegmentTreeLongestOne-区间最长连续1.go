@@ -2,7 +2,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func main() {
 	nums := []int{1, 0, 1, 1, 0, 1, 1, 1}
@@ -216,6 +219,19 @@ func (st *SegmentTreeLongestOne) MinLeft(right int, predicate func(E) bool) int 
 		}
 	}
 	return 0
+}
+
+func (tree *SegmentTreeLongestOne) String() string {
+	var sb []string
+	sb = append(sb, "[")
+	for i := 0; i < tree.n; i++ {
+		if i != 0 {
+			sb = append(sb, ", ")
+		}
+		sb = append(sb, fmt.Sprintf("%v", tree.Get(i)))
+	}
+	sb = append(sb, "]")
+	return strings.Join(sb, "")
 }
 
 func min(a, b int) int {

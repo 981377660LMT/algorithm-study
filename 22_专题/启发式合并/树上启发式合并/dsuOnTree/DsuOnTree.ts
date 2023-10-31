@@ -32,12 +32,7 @@ class DsuOnTree {
    * @param query 查询root的子树的贡献并更新答案.
    * @param reset 退出轻儿子时的回调函数.
    */
-  run(
-    add: (root: number) => void,
-    remove: (root: number) => void,
-    query: (root: number) => void,
-    reset?: () => void
-  ) {
+  run(add: (root: number) => void, remove: (root: number) => void, query: (root: number) => void, reset?: () => void) {
     const dsu = (cur: number, pre: number, keep: boolean): void => {
       const nexts = this._tree[cur]
       for (let i = 1; i < nexts.length; i++) {
@@ -74,18 +69,18 @@ class DsuOnTree {
     this._subSize[cur] = 1
     const nexts = this._tree[cur]
     if (nexts.length >= 2 && nexts[0] === pre) {
-      const tmp = nexts[0]
-      nexts[0] = nexts[1]
-      nexts[1] = tmp
+      nexts[0] ^= nexts[1]
+      nexts[1] ^= nexts[0]
+      nexts[0] ^= nexts[1]
     }
     for (let i = 0; i < nexts.length; i++) {
       const next = nexts[i]
       if (next === pre) continue
       this._subSize[cur] += this._dfs1(next, cur)
       if (this._subSize[next] > this._subSize[nexts[0]]) {
-        const tmp = nexts[0]
-        nexts[0] = next
-        nexts[i] = tmp
+        nexts[0] ^= nexts[i]
+        nexts[i] ^= nexts[0]
+        nexts[0] ^= nexts[i]
       }
     }
     return this._subSize[cur]
@@ -118,21 +113,20 @@ if (require.main === module) {
     const dsu = new DsuOnTree(n, adjList)
 
     const res: number[] = Array(n).fill(1)
-    const counter = new Map<number, number>()
+    const counter = new Uint32Array(Math.max(...nums) + 10)
     let mex = 1
     dsu.run(add, remove, query)
     return res
 
     function add(root: number): void {
       const num = nums[root]
-      counter.set(num, (counter.get(num) || 0) + 1)
-      while (counter.get(mex)) mex++
+      counter[num]++
+      while (counter[mex]) mex++
     }
     function remove(root: number): void {
       const num = nums[root]
-      const count = counter.get(num)!
-      counter.set(num, count - 1)
-      if (count === 1) mex = Math.min(mex, num)
+      counter[num]--
+      if (!counter[num]) mex = Math.min(mex, num)
     }
     function query(root: number): void {
       res[root] = mex

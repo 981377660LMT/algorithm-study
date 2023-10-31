@@ -18,13 +18,13 @@ func main() {
 	var n int
 	fmt.Fscan(in, &n)
 
-	tree := make([][]Edge, n)
+	tree := make([][]int, n)
 	for i := 0; i < n-1; i++ {
 		var u, v int
 		fmt.Fscan(in, &u, &v)
 		u, v = u-1, v-1
-		tree[u] = append(tree[u], Edge{u, v, 1})
-		tree[v] = append(tree[v], Edge{v, u, 1})
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
 	}
 
 	values := make([]int, n)
@@ -42,20 +42,33 @@ func main() {
 		queries[root] = append(queries[root], i)
 	}
 
+	id := make(map[int]int, n)
+	newValues := make([]int, n)
+	for i, v := range values {
+		if _, ok := id[v]; !ok {
+			id[v] = len(id)
+		}
+		newValues[i] = id[v]
+	}
+
 	res := make([]int, q)
-	mp := make(map[int]int)
+	counter := make([]int, len(id))
+	count := 0
 	update := func(root int) {
-		mp[values[root]]++
+		counter[newValues[root]]++
+		if counter[newValues[root]] == 1 {
+			count++
+		}
 	}
 	query := func(root int) {
 		for _, qi := range queries[root] {
-			res[qi] = len(mp)
+			res[qi] = count
 		}
 	}
 	clear := func(root int) {
-		mp[values[root]]--
-		if mp[values[root]] == 0 {
-			delete(mp, values[root])
+		counter[newValues[root]]--
+		if counter[newValues[root]] == 0 {
+			count--
 		}
 	}
 	reset := func() {}
@@ -68,16 +81,14 @@ func main() {
 }
 
 type DSUonTree struct {
-	g                        [][]Edge
+	g                        [][]int
 	n                        int
 	subSize, euler, down, up []int
 	idx                      int
 	root                     int
 }
 
-type Edge struct{ from, to, weight int }
-
-func NewDSUonTree(tree [][]Edge, root int) *DSUonTree {
+func NewDSUonTree(tree [][]int, root int) *DSUonTree {
 	res := &DSUonTree{
 		g:       tree,
 		n:       len(tree),
@@ -105,18 +116,19 @@ func (d *DSUonTree) Run(
 ) {
 	var dsu func(cur, par int, keep bool)
 	dsu = func(cur, par int, keep bool) {
-		for i := 1; i < len(d.g[cur]); i++ {
-			if to := d.g[cur][i].to; to != par {
+		nexts := d.g[cur]
+		for i := 1; i < len(nexts); i++ {
+			if to := nexts[i]; to != par {
 				dsu(to, cur, false)
 			}
 		}
 
 		if d.subSize[cur] != 1 {
-			dsu(d.g[cur][0].to, cur, true)
+			dsu(nexts[0], cur, true)
 		}
 
 		if d.subSize[cur] != 1 {
-			for i := d.up[d.g[cur][0].to]; i < d.up[cur]; i++ {
+			for i := d.up[nexts[0]]; i < d.up[cur]; i++ {
 				update(d.euler[i])
 			}
 		}
@@ -127,7 +139,9 @@ func (d *DSUonTree) Run(
 			for i := d.down[cur]; i < d.up[cur]; i++ {
 				clear(d.euler[i])
 			}
-			reset()
+			if reset != nil {
+				reset()
+			}
 		}
 	}
 
@@ -141,17 +155,17 @@ func (d *DSUonTree) Id(root int) int {
 
 func (d *DSUonTree) dfs1(cur, par int) int {
 	d.subSize[cur] = 1
-	if len(d.g[cur]) >= 2 && d.g[cur][0].to == par {
-		d.g[cur][0], d.g[cur][1] = d.g[cur][1], d.g[cur][0]
+	nexts := d.g[cur]
+	if len(nexts) >= 2 && nexts[0] == par {
+		nexts[0], nexts[1] = nexts[1], nexts[0]
 	}
-	for i := range d.g[cur] {
-		next := d.g[cur][i].to
+	for i, next := range nexts {
 		if next == par {
 			continue
 		}
 		d.subSize[cur] += d.dfs1(next, cur)
-		if d.subSize[next] > d.subSize[d.g[cur][0].to] {
-			d.g[cur][0], d.g[cur][i] = d.g[cur][i], d.g[cur][0]
+		if d.subSize[next] > d.subSize[nexts[0]] {
+			nexts[0], nexts[i] = nexts[i], nexts[0]
 		}
 	}
 	return d.subSize[cur]
@@ -161,8 +175,7 @@ func (d *DSUonTree) dfs2(cur, par int) {
 	d.euler[d.idx] = cur
 	d.down[cur] = d.idx
 	d.idx++
-	for i := range d.g[cur] {
-		next := d.g[cur][i].to
+	for _, next := range d.g[cur] {
 		if next == par {
 			continue
 		}
