@@ -16,35 +16,86 @@ import (
 )
 
 func main() {
-	// yuki04()
+
+	// fmt.Println(SubsetSumTargetDp([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
 	// fmt.Println(SubsetSumTargetDp2([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
-	testTime()
+	// fmt.Println(SubsetSumTargetBitset([]int{3, 4, 5, 6, 7, 8, 9}, 11))
+	// fmt.Println(SubsetSumTargetMeetInMiddle([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
+
+	// yuki04()
+	// testTime()
+	JumpingSequence()
 }
 
-func testTime() {
-	max := int(1e7)
-	n := 20
+// G - Jumping sequence
+// https://atcoder.jp/contests/abc221/tasks/abc221_g
+// 有一个无限大的二维平面，开始时位于原点(0,0).
+// 给定一个长为n的序列nums.
+// 每一步可以向上、下、左、右四个方向移动nums[i].
+// 想要在n步后到达(A,B).问是否存在并输出方案(L/R/U/D).
+// n<=2000,di<=1800.
+//
+//  1. 坐标系旋转45度下考虑问题, (x,y)=>(x-y,x+y).
+//  2. 问题变为 d1 ± d2 ± ... ± dn = C.两边同时加∑di,系数变为0/2，除以二后转化为01背包问题.
+//     x和y维度分别独立处理.
+func JumpingSequence() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, targetX, targetY int
+	fmt.Fscan(in, &n, &targetX, &targetY)
 	nums := make([]int, n)
 	for i := range nums {
-		nums[i] = max
+		fmt.Fscan(in, &nums[i])
 	}
 
-	target := int(1e6)
-	time1 := time.Now()
-	SubsetSumTargetDp(nums, target)
-	time2 := time.Now()
-	SubsetSumTargetBitset(nums, target)
-	time3 := time.Now()
-	SubsetSumTargetDp2(nums, target)
-	time4 := time.Now()
+	newTargetX := targetX + targetY
+	newTargetY := targetX - targetY
+	sum := 0
+	for _, v := range nums {
+		sum += v
+	}
 
-	cost1 := n * max
-	cost2 := n * target / 100 // TODO, 待调整
+	if (newTargetX+sum)%2 == 1 {
+		fmt.Fprintln(out, "No")
+		return
+	}
+	newTargetX = (newTargetX + sum) / 2
+	newTargetY = (newTargetY + sum) / 2
+	if newTargetX < 0 || sum < newTargetX {
+		fmt.Fprintln(out, "No")
+		return
+	}
+	if newTargetY < 0 || sum < newTargetY {
+		fmt.Fprintln(out, "No")
+		return
+	}
 
-	fmt.Println(time2.Sub(time1)) // 1.5s
-	fmt.Println(time3.Sub(time2)) // 300ms
-	fmt.Println(time4.Sub(time3))
-	fmt.Println(cost1, cost2)
+	res1, ok1 := SubsetSumTargetDp1(nums, newTargetX)
+	res2, ok2 := SubsetSumTargetDp1(nums, newTargetY)
+	if !ok1 && newTargetX != 0 {
+		fmt.Fprintln(out, "No")
+		return
+	}
+	if !ok2 && newTargetY != 0 {
+		fmt.Fprintln(out, "No")
+		return
+	}
+
+	fmt.Fprintln(out, "Yes")
+	state := make([]int, n)
+	for _, i := range res1 {
+		state[i] |= 1
+	}
+	for _, i := range res2 {
+		state[i] |= 2
+	}
+
+	cmd := "LUDR"
+	for _, v := range state {
+		fmt.Fprint(out, string(cmd[v]))
+	}
 }
 
 func yuki04() {
@@ -69,6 +120,32 @@ func yuki04() {
 	} else {
 		fmt.Fprintln(out, "impossible")
 	}
+}
+
+func testTime() {
+	max := int(1e7)
+	n := 20
+	nums := make([]int, n)
+	for i := range nums {
+		nums[i] = max
+	}
+
+	target := int(1e7)
+	time1 := time.Now()
+	SubsetSumTargetDp1(nums, target)
+	time2 := time.Now()
+	SubsetSumTargetBitset(nums, target)
+	time3 := time.Now()
+	SubsetSumTargetDp2(nums, target)
+	time4 := time.Now()
+
+	cost1 := n * max
+	cost2 := n * target / 100 // TODO, 待调整
+
+	fmt.Println(time2.Sub(time1)) // 1.5s
+	fmt.Println(time3.Sub(time2)) // 300ms
+	fmt.Println(time4.Sub(time3))
+	fmt.Println(cost1, cost2)
 }
 
 const INF int = 1e18
@@ -98,7 +175,7 @@ func SubsetSumTarget(nums []int, target int) (res []int, ok bool) {
 	}
 	minCost := min(cost1, min(cost2, min(cost3, cost4)))
 	if minCost == cost1 {
-		return SubsetSumTargetDp(nums, target)
+		return SubsetSumTargetDp1(nums, target)
 	}
 	if minCost == cost2 {
 		return SubsetSumTargetDp2(nums, target)
@@ -112,7 +189,7 @@ func SubsetSumTarget(nums []int, target int) (res []int, ok bool) {
 // 能否用nums中的若干个数凑出和为target.
 //
 //	O(n*max(nums)))
-func SubsetSumTargetDp(nums []int, target int) (res []int, ok bool) {
+func SubsetSumTargetDp1(nums []int, target int) (res []int, ok bool) {
 	if target <= 0 {
 		return
 	}
@@ -258,11 +335,12 @@ func SubsetSumTargetDp2(nums []int, target int) (res []int, ok bool) {
 
 // Bitset优化dp.能否用nums中的若干个数凑出和为target.
 //
-//		O(n*target/w)
-//	 TODO:FIXME
+//	O(n*target/w)
+//
+// TODO:FIXME
 func SubsetSumTargetBitset(nums []int, target int) (res []int, ok bool) {
 	_enumerateBits64 := func(s uint64, f func(bit int)) {
-		for s > 0 {
+		for s != 0 {
 			i := bits.TrailingZeros64(s)
 			f(i)
 			s ^= 1 << i
@@ -285,6 +363,7 @@ func SubsetSumTargetBitset(nums []int, target int) (res []int, ok bool) {
 	for i := range last {
 		last[i] = -1
 	}
+
 	for k := 0; k < n; k++ {
 		v := nums[order[k]]
 		if v > target {
@@ -295,14 +374,17 @@ func SubsetSumTargetBitset(nums []int, target int) (res []int, ok bool) {
 		ndp := dp.CopyAndResize(newSize)
 		dp.Resize(newSize - v)
 		ndp.IOrRange(v, newSize, dp)
-		for i := 0; i < len(ndp.data); i++ {
+		for i := 0; i < len(dp.data); i++ {
 			var updatedBits uint64
 			if i < len(dp.data) {
 				updatedBits = dp.data[i] ^ ndp.data[i]
 			} else {
 				updatedBits = ndp.data[i]
 			}
-			_enumerateBits64(updatedBits, func(p int) { last[(i<<6)|p] = order[k] })
+
+			_enumerateBits64(updatedBits, func(p int) {
+				last[(i<<6)|p] = order[k]
+			})
 		}
 		dp = ndp
 	}
@@ -314,7 +396,6 @@ func SubsetSumTargetBitset(nums []int, target int) (res []int, ok bool) {
 	for target > 0 {
 		i := last[target]
 		res = append(res, i)
-		fmt.Println(res, i, target)
 		target -= nums[i]
 	}
 
@@ -957,11 +1038,11 @@ func (bs *BitSetDynamic) Slice(start, end int) *BitSetDynamic {
 	s := start >> 6
 	if hi == 0 {
 		for i := 0; i < n; i++ {
-			res.data[i] = bs.data[s+i]
+			res.data[i] ^= bs.data[s+i]
 		}
 	} else {
 		for i := 0; i < n; i++ {
-			res.data[i] = (bs.data[s+i] >> hi) ^ (bs.data[s+i+1] << lo)
+			res.data[i] ^= (bs.data[s+i] >> hi) ^ (bs.data[s+i+1] << lo)
 		}
 	}
 	return res
@@ -978,8 +1059,8 @@ func (bs *BitSetDynamic) CopyAndResize(size int) *BitSetDynamic {
 	copy(newBits, bs.data[:min(len(bs.data), len(newBits))])
 	remainingBits := size & 63
 	if remainingBits != 0 {
-		mask := (1 << remainingBits) - 1
-		newBits[len(newBits)-1] &= uint64(mask)
+		mask := (uint64(1) << remainingBits) - 1
+		newBits[len(newBits)-1] &= mask
 	}
 	return &BitSetDynamic{data: newBits, n: size}
 }
@@ -989,8 +1070,8 @@ func (bs *BitSetDynamic) Resize(size int) {
 	copy(newBits, bs.data[:min(len(bs.data), len(newBits))])
 	remainingBits := size & 63
 	if remainingBits != 0 {
-		mask := (1 << remainingBits) - 1
-		newBits[len(newBits)-1] &= uint64(mask)
+		mask := (uint64(1) << remainingBits) - 1
+		newBits[len(newBits)-1] &= mask
 	}
 	bs.data = newBits
 	bs.n = size

@@ -26,23 +26,23 @@ type item struct{ value, weight int }
 //
 // NOIP06·提高 金明的预算方案 https://www.luogu.com.cn/problem/P1064
 
-func TreeKnapsackDpNaive(tree [][]int, items []item, maxCapacity, root int) int {
+func TreeKnapsackDpNaive(tree [][]int, values, weights []int, maxCapacity, root int) int {
 	var dfs func(int, int) []int
 	dfs = func(cur, pre int) []int {
-		it := items[cur]
+		curWeight, curValue := weights[cur], values[cur]
 		dp := make([]int, maxCapacity+1)
-		for i := it.weight; i <= maxCapacity; i++ {
-			dp[i] = it.value // 根节点必须选
+		for i := curWeight; i <= maxCapacity; i++ {
+			dp[i] = curValue // 根节点必须选
 		}
 		for _, next := range tree[cur] {
 			if next == pre {
 				continue
 			}
 			ndp := dfs(next, cur)
-			for j := maxCapacity; j >= it.weight; j-- {
+			for j := maxCapacity; j >= curWeight; j-- {
 				// 类似分组背包，枚举分给子树 to 的容量 w，对应的子树的最大价值为 dt[w]
-				// w 不可超过 j-it.weight，否则无法选择根节点
-				for w := 0; w <= j-it.weight; w++ {
+				// w 不可超过 j-curWeight，否则无法选择根节点
+				for w := 0; w <= j-curWeight; w++ {
 					dp[j] = max(dp[j], dp[j-w]+ndp[w])
 				}
 			}
@@ -51,6 +51,9 @@ func TreeKnapsackDpNaive(tree [][]int, items []item, maxCapacity, root int) int 
 	}
 
 	return dfs(root, -1)[maxCapacity]
+}
+
+func TreeKnapsackDpSquare(tree [][]int, values, weights []int, maxCapacity, root int) int {
 }
 
 func max(a, b int) int {

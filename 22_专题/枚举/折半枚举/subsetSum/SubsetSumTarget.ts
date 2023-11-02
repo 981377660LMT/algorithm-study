@@ -27,7 +27,7 @@ function subsetSumTarget(arr: number[], target: number): [res: number[], ok: boo
   }
 
   const minCost = Math.min(cost1, cost2, cost3, cost4)
-  if (minCost === cost1) return subsetSumTargetDp(arr, target)
+  if (minCost === cost1) return subsetSumTargetDp1(arr, target)
   if (minCost === cost2) return subsetSumTargetDp2(arr, target)
   if (minCost === cost3) return subsetSumTargetBitset(arr, target)
   return subsetSumTargetMeetInMiddle(arr, target)
@@ -37,7 +37,7 @@ function subsetSumTarget(arr: number[], target: number): [res: number[], ok: boo
  * 能否从arr中选出若干个数，使得它们的和为target.
  * @complexity O(n * max(arr)).
  */
-function subsetSumTargetDp(arr: number[], target: number): [res: number[], ok: boolean] {
+function subsetSumTargetDp1(arr: number[], target: number): [res: number[], ok: boolean] {
   if (target <= 0) {
     return [[], false]
   }
@@ -260,10 +260,10 @@ function subsetSumTargetMeetInMiddle(arr: number[], target: number): [res: numbe
   }
 }
 
-export { subsetSumTarget, subsetSumTargetDp, subsetSumTargetBitset, subsetSumTargetMeetInMiddle }
+export { subsetSumTarget, subsetSumTargetDp1, subsetSumTargetDp2, subsetSumTargetBitset, subsetSumTargetMeetInMiddle }
 
 if (require.main === module) {
-  console.log(subsetSumTargetDp([2, 3, 4, 5, 6, 7, 8, 9], 10))
+  console.log(subsetSumTargetDp1([2, 3, 4, 5, 6, 7, 8, 9], 10))
   console.log(subsetSumTargetDp2([2, 3, 4, 5, 6, 7, 8, 9], 10))
   console.log(subsetSumTargetBitset([2, 3, 4, 5, 6, 7, 8, 9], 10))
   console.log(subsetSumTargetMeetInMiddle([2, 3, 4, 5, 6, 7, 8, 9], 10))
@@ -273,9 +273,9 @@ if (require.main === module) {
   const nums = Array.from({ length: n }, () => max)
   const target = 3e6
 
-  console.time('subsetSumTargetDp')
-  subsetSumTargetDp(nums, target)
-  console.timeEnd('subsetSumTargetDp')
+  console.time('subsetSumTargetDp1')
+  subsetSumTargetDp1(nums, target)
+  console.timeEnd('subsetSumTargetDp1')
 
   console.time('subsetSumTargetBitset')
   subsetSumTargetBitset(nums, target)

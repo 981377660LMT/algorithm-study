@@ -251,7 +251,7 @@ describe('BitSet', () => {
 
   // slice
   it('should support slice', () => {
-    for (let _ = 0; _ < 100; _++) {
+    for (let _ = 0; _ < 1000; _++) {
       const start = Math.floor(Math.random() * n)
       const end = Math.floor(Math.random() * (n - start)) + start
       const bitSet2 = bitSet.slice(start, end)

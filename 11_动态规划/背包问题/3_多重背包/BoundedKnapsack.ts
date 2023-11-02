@@ -134,7 +134,65 @@ function boundedKnapsackDpCountWays(values: ArrayLike<number>, counts: ArrayLike
   return dp
 }
 
-export { boundedKnapsackDp, boundedKnapsackDpBinary, boundedKnapsackDpNaive, boundedKnapsackDpCountWays }
+/**
+ * 多重背包求方案数.
+ */
+class BoundedKnapsack {
+  private readonly _dp: number[]
+  private readonly _mod?: number | undefined
+  private readonly _maxValue: number
+  private _maxJ = 0
+
+  constructor(maxValue: number, mod?: number, dp?: number[]) {
+    if (dp != undefined) {
+      this._dp = dp
+    } else {
+      this._dp = Array(maxValue + 1).fill(0)
+      this._dp[0] = 1
+    }
+    this._maxValue = maxValue
+    this._mod = mod
+  }
+
+  /**
+   * 加入一个价值为value(value>0)的物品，数量为count.
+   * @complexity O(maxValue)
+   */
+  add(value: number, count: number): void {
+    if (value <= 0) throw new Error(`value must be positive, but got ${value}`)
+    this._maxJ = Math.min(this._maxJ + count * value, this._maxValue)
+    if (this._mod == undefined) {
+      for (let j = value; j <= this._maxJ; j++) {
+        this._dp[j] += this._dp[j - value]
+      }
+      for (let j = this._maxJ; j >= value * (count + 1); j--) {
+        this._dp[j] -= this._dp[j - value * (count + 1)]
+      }
+    } else {
+      for (let j = value; j <= this._maxJ; j++) {
+        this._dp[j] = (this._dp[j] + this._dp[j - value]) % this._mod
+      }
+      for (let j = this._maxJ; j >= value * (count + 1); j--) {
+        this._dp[j] = (this._dp[j] - this._dp[j - value * (count + 1)]) % this._mod
+      }
+    }
+  }
+
+  query(value: number): number {
+    if (value < 0 || value > this._maxValue) return 0
+    if (this._mod == undefined) return this._dp[value]
+    if (this._dp[value] < 0) this._dp[value] += this._mod
+    return this._dp[value]
+  }
+
+  copy(): BoundedKnapsack {
+    const res = new BoundedKnapsack(this._maxValue, this._mod, this._dp.slice())
+    res._maxJ = this._maxJ
+    return res
+  }
+}
+
+export { boundedKnapsackDp, boundedKnapsackDpBinary, boundedKnapsackDpNaive, boundedKnapsackDpCountWays, BoundedKnapsack }
 
 if (require.main === module) {
   //   4 20
@@ -152,9 +210,12 @@ if (require.main === module) {
   console.timeEnd('boundedKnapsackDp')
 
   function waysToReachTarget(target: number, types: number[][]): number {
-    const counts = types.map(t => t[0])
-    const values = types.map(t => t[1])
-    return boundedKnapsackDpCountWays(values, counts, target)[target]
+    // const counts = types.map(t => t[0])
+    // const values = types.map(t => t[1])
+    // return boundedKnapsackDpCountWays(values, counts, target)[target]
+    const K = new BoundedKnapsack(target, 1e9 + 7)
+    types.forEach(v => K.add(v[1], v[0]))
+    return K.query(target)
   }
 
   console.log(

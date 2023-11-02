@@ -9,6 +9,8 @@ https://www.cnblogs.com/Schucking-Sattin/p/17726836.html
 
 ---
 
+可行性背包转方案数背包，以方便进行回退。
+
 - 01 背包撤销操作：
 
 ```cpp

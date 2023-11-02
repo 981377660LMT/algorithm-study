@@ -416,11 +416,11 @@ class BitSet {
     const s = start >>> 5
     if (!hi) {
       for (let i = 0; i < n; i++) {
-        res._bits[i] = this._bits[s + i]
+        res._bits[i] ^= this._bits[s + i]
       }
     } else {
       for (let i = 0; i < n; i++) {
-        res._bits[i] = (this._bits[s + i] >>> hi) ^ (this._bits[s + i + 1] << lo)
+        res._bits[i] ^= (this._bits[s + i] >>> hi) ^ (this._bits[s + i + 1] << lo)
       }
     }
     return res

@@ -1,5 +1,5 @@
 from collections import Counter, deque
-from typing import List
+from typing import List, Optional
 
 MOD = int(1e9 + 7)
 
@@ -121,7 +121,6 @@ def boundedKnapsackDpCountWaysWithUpper(
         value = values[i]
         if value == 0:
             count0 += count
-            continue
     dp = [0] * (upper + 1)
     dp[0] = count0 + 1
 
@@ -139,6 +138,47 @@ def boundedKnapsackDpCountWaysWithUpper(
         for j in range(maxJ, value * (count + 1) - 1, -1):
             dp[j] = (dp[j] - dp[j - value * (count + 1)]) % MOD
     return dp
+
+
+class BoundedKnapsack:
+    __slots__ = "_dp", "_mod", "_maxValue", "_maxJ"
+
+    def __init__(
+        self, maxValue: int, mod: Optional[int] = None, dp: Optional[List[int]] = None
+    ) -> None:
+        if dp is not None:
+            self._dp = dp
+        else:
+            self._dp = [0] * (maxValue + 1)
+            self._dp[0] = 1
+        self._mod = mod
+        self._maxValue = maxValue
+        self._maxJ = 0
+
+    def add(self, value: int, count: int) -> None:
+        if value <= 0:
+            raise ValueError("value must be positive, but got %d" % value)
+        dp = self._dp
+        self._maxJ = min(self._maxJ + count * value, self._maxValue)
+        if self._mod is None:
+            for j in range(value, self._maxJ + 1):
+                dp[j] += dp[j - value]
+            for j in range(self._maxJ, value * (count + 1) - 1, -1):
+                dp[j] -= dp[j - value * (count + 1)]
+        else:
+            mod = self._mod
+            for j in range(value, self._maxJ + 1):
+                dp[j] = (dp[j] + dp[j - value]) % mod
+            for j in range(self._maxJ, value * (count + 1) - 1, -1):
+                dp[j] = (dp[j] - dp[j - value * (count + 1)]) % mod
+
+    def query(self, value: int) -> int:
+        return self._dp[value] if 0 <= value <= self._maxValue else 0
+
+    def copy(self) -> "BoundedKnapsack":
+        res = BoundedKnapsack(self._maxValue, self._mod, self._dp[:])
+        res._maxJ = self._maxJ
+        return res
 
 
 if __name__ == "__main__":
@@ -174,9 +214,10 @@ if __name__ == "__main__":
     # 这是一个按模分组的前缀和
     class Solution:
         def waysToReachTarget(self, target: int, types: List[List[int]]) -> int:
-            values = [v[0] for v in types]
-            counts = [v[1] for v in types]
-            return boundedKnapsackDpCountWaysWithUpper(values, counts, target)[target]
+            K = BoundedKnapsack(target, MOD)
+            for count, mark in types:
+                K.add(mark, count)
+            return K.query(target)
 
     # 2902. 和带限制的子多重集合的数目
     # https://leetcode.cn/problems/count-of-sub-multisets-with-bounded-sum/description/

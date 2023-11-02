@@ -12,7 +12,7 @@
 // 即：给定 n 个物品，对 i=1,2,⋯,n，你需要求出：去掉第 i 个物品后，对其他物品做背包的结果(可撤销01背包)。
 // !所以我们就可以通过枚举哪个数组不全选，采用分治删点(线段树分治/可撤销背包)的方式dp
 
-import { mutateWithoutOne } from '../../../../10_分治法/线段树分治/mutateWithOutOne'
+import { mutateWithoutOne } from '../../../../../../10_分治法/线段树分治/mutateWithOutOne'
 
 function brilliantSurprise(present: number[][], limit: number): number {
   const n = present.length

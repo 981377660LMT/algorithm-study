@@ -16,6 +16,12 @@ import (
 	"sort"
 )
 
+// https://www.luogu.com.cn/problem/P4103
+// P4103 [HEOI2014] 大工程
+func P4103(n int, edges [][2]int, queries [][]int) []int {
+
+}
+
 type AuxiliaryTree struct {
 	G             [][]int // 原图邻接表(无向边)
 	vg            [][]int // 虚树邻接表(有向边)
@@ -27,7 +33,8 @@ type AuxiliaryTree struct {
 }
 
 // 给定顶点个数n和无向边集(u,v)构建.
-//  O(nlogn)
+//
+//	O(nlogn)
 func NewAuxiliaryTree(n int, edges [][]int) *AuxiliaryTree {
 	g := make([][]int, n)
 	for _, e := range edges {
@@ -49,8 +56,9 @@ func NewAuxiliaryTree(n int, edges [][]int) *AuxiliaryTree {
 }
 
 // 指定点集,返回虚树的(有向图邻接表,虚树的根).
-//  如果虚树不存在`(len(points<=1))`,返回空邻接表和-1.
-//  O(klogk) 构建虚树.
+//
+//	如果虚树不存在`(len(points<=1))`,返回空邻接表和-1.
+//	O(klogk) 构建虚树.
 func (t *AuxiliaryTree) Query(points []int) ([][]int, int) {
 	k := len(points)
 	points = append(points[:0:0], points...)

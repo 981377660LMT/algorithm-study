@@ -526,21 +526,21 @@ func (bs *BitSetDynamic) IsSuperset(other *BitSetDynamic) bool {
 	return true
 }
 
-func (bs *BitSetDynamic) Ior(other *BitSetDynamic) *BitSetDynamic {
+func (bs *BitSetDynamic) IOr(other *BitSetDynamic) *BitSetDynamic {
 	for i, v := range other.data {
 		bs.data[i] |= v
 	}
 	return bs
 }
 
-func (bs *BitSetDynamic) Iand(other *BitSetDynamic) *BitSetDynamic {
+func (bs *BitSetDynamic) IAnd(other *BitSetDynamic) *BitSetDynamic {
 	for i, v := range other.data {
 		bs.data[i] &= v
 	}
 	return bs
 }
 
-func (bs *BitSetDynamic) Ixor(other *BitSetDynamic) *BitSetDynamic {
+func (bs *BitSetDynamic) IXor(other *BitSetDynamic) *BitSetDynamic {
 	for i, v := range other.data {
 		bs.data[i] ^= v
 	}
@@ -756,11 +756,11 @@ func (bs *BitSetDynamic) Slice(start, end int) *BitSetDynamic {
 	s := start >> 6
 	if hi == 0 {
 		for i := 0; i < n; i++ {
-			res.data[i] = bs.data[s+i]
+			res.data[i] ^= bs.data[s+i]
 		}
 	} else {
 		for i := 0; i < n; i++ {
-			res.data[i] = (bs.data[s+i] >> hi) ^ (bs.data[s+i+1] << lo)
+			res.data[i] ^= (bs.data[s+i] >> hi) ^ (bs.data[s+i+1] << lo)
 		}
 	}
 
@@ -871,4 +871,11 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func max(a, b int) int {
+	if a < b {
+		return b
+	}
+	return a
 }

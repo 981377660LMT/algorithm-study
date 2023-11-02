@@ -4,10 +4,10 @@ from typing import List, Tuple
 # TODO:优化：上下界优化，二乘木dp
 # https://ouuan.github.io/post/%E6%A0%91%E4%B8%8A%E8%83%8C%E5%8C%85%E7%9A%84%E4%B8%8A%E4%B8%8B%E7%95%8C%E4%BC%98%E5%8C%96/
 def treeKnapsackDpNaive(
-    tree: List[List[int]], items: List[Tuple[int, int]], maxCapacity: int, root=0
+    tree: List[List[int]], values: List[int], weights: List[int], maxCapacity: int, root=0
 ) -> int:
     def dfs(cur: int, pre: int) -> List[int]:
-        curValue, curWeight = items[cur]
+        curValue, curWeight = values[cur], weights[cur]
         dp = [0] * (maxCapacity + 1)
         for i in range(curWeight, maxCapacity + 1):
             dp[i] = curValue  # 根节点必须选
@@ -24,3 +24,9 @@ def treeKnapsackDpNaive(
 
     res = dfs(root, -1)
     return res[maxCapacity]
+
+
+def treeKnapsackDpSquare(
+    tree: List[List[int]], values: List[int], weights: List[int], maxCapacity: int, root=0
+) -> int:
+    ...

@@ -83,9 +83,10 @@ func solver2(values []int, weights []int, limit int) int {
 		}
 	}
 	res := 0
-	for j := 0; j <= vSum; j++ {
+	for j := vSum; j >= 0; j-- {
 		if dp[j] <= limit {
 			res = j
+			break
 		}
 	}
 	return res
@@ -134,6 +135,7 @@ func solver3(values []int, weights []int, limit int) int {
 	return res
 }
 
+// knapsack01-branch-and-bound
 // n<=2000,vi<=1e9,wi<=1e9,limit<=1e9
 func solver4(values []int, weights []int, limit int) int {
 	n := len(values)

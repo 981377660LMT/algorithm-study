@@ -88,17 +88,11 @@ func Luogu1077() {
 }
 
 func waysToReachTarget(target int, types [][]int) int {
-	counts := make([]int, len(types))
-	for i := range types {
-		counts[i] = types[i][0]
+	K := NewBoundedKnapsack(target, MOD)
+	for _, t := range types {
+		K.Add(t[1], t[0])
 	}
-	values := make([]int, len(types))
-	for i := range types {
-		values[i] = types[i][1]
-	}
-
-	dp := BoundedKnapsackDPCountWays(values, counts)
-	return dp[target]
+	return K.Query(target)
 }
 
 // 多重背包问题
@@ -217,7 +211,6 @@ func BoundedKnapsackDpCountWaysWithUpper(values []int, counts []int, upper int) 
 		v := values[i]
 		if v == 0 {
 			count0 += count
-			continue
 		}
 	}
 	dp := make([]int, upper+1)
@@ -248,6 +241,73 @@ func BoundedKnapsackDpCountWaysWithUpper(values []int, counts []int, upper int) 
 	}
 
 	return dp
+}
+
+// 多重背包求方案数.
+type BoundedKnapsack struct {
+	dp       []int
+	mod      int
+	maxValue int
+	maxJ     int
+}
+
+// maxWeight: 需要的价值上限.
+// mod: 模数，传入-1表示不需要取模.
+func NewBoundedKnapsack(maxValue int, mod int) *BoundedKnapsack {
+	dp := make([]int, maxValue+1)
+	dp[0] = 1
+	return &BoundedKnapsack{
+		dp:       dp,
+		mod:      mod,
+		maxValue: maxValue,
+	}
+}
+
+// 加入一个价值为value(value>0)的物品，数量为count.
+// O(maxValue).
+func (ks *BoundedKnapsack) Add(value, count int) {
+	if value <= 0 {
+		panic(fmt.Sprintf("value must be positive, but got %d", value))
+	}
+	ks.maxJ = min(ks.maxJ+count*value, ks.maxValue)
+	if ks.mod == -1 {
+		for j := value; j <= ks.maxJ; j++ {
+			ks.dp[j] += ks.dp[j-value]
+		}
+		for j := ks.maxJ; j >= value*(count+1); j-- {
+			ks.dp[j] -= ks.dp[j-value*(count+1)]
+		}
+	} else {
+		for j := value; j <= ks.maxJ; j++ {
+			ks.dp[j] = (ks.dp[j] + ks.dp[j-value]) % ks.mod
+		}
+		for j := ks.maxJ; j >= value*(count+1); j-- {
+			ks.dp[j] = (ks.dp[j] - ks.dp[j-value*(count+1)]) % ks.mod
+		}
+	}
+}
+
+func (ks *BoundedKnapsack) Query(value int) int {
+	if value < 0 || value > ks.maxValue {
+		return 0
+	}
+	if ks.mod == -1 {
+		return ks.dp[value]
+	}
+	if ks.dp[value] < 0 {
+		ks.dp[value] += ks.mod
+	}
+	return ks.dp[value]
+}
+
+func (ks *BoundedKnapsack) Copy() *BoundedKnapsack {
+	dp := append(ks.dp[:0:0], ks.dp...)
+	return &BoundedKnapsack{
+		dp:       dp,
+		mod:      ks.mod,
+		maxValue: ks.maxValue,
+		maxJ:     ks.maxJ,
+	}
 }
 
 func min(a, b int) int {

@@ -5,6 +5,9 @@ package main
 type S = struct{ value int }
 
 // 线段树分治的特殊情形.
+// 调用 `query` 时，`state` 为对除了 `index` 以外所有点均调用过了 `mutate` 的状态。但不保证调用 `mutate` 的顺序。
+// 总计会调用 $O(NlgN)$ 次的 `mutate` 和 `query`, 以及 $O(N)$ 次的 `copy`.
+// !将一个不可撤销的数据结构以`O(logn)`的代价变成可撤销的.
 func MutateWithoutOne(
 	initState *S,
 	start, end int,
