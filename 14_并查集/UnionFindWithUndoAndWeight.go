@@ -1,8 +1,8 @@
 // UnionFindArrayWithUndoAndWeight/UnionFindWithUndoAndWeight
 // https://hitonanode.github.io/cplib-cpp/unionfind/undo_monoid_unionfind.hpp
 // 可撤销并查集 / 维护 `满足可换律的monoid` 权值 的并查集
-// SetGroup: 将下标为index元素`所在集合`的权值置为value.
-// GetGroup: 获取下标为index元素`所在集合`的权值.
+// SetGroupWeight: 将下标为index元素`所在集合`的权值置为value.
+// GetGroupWeight: 获取下标为index元素`所在集合`的权值.
 // !Undo: 撤销上一次合并(Union)或者修改权值(Set)操作，没合并成功也要撤销
 // Reset: 撤销所有操作
 
@@ -14,13 +14,13 @@ func main() {
 	uf := NewUnionFindArrayWithUndoAndWeight(make([]int, 5))
 	uf.Union(0, 1)
 	uf.Union(2, 3)
-	fmt.Println(uf.GetGroup(0), uf.GetGroup(1), uf.GetGroup(2), uf.GetGroup(3), uf.GetGroup(4))
-	uf.SetGroup(0, 1)
-	fmt.Println(uf.GetGroup(0), uf.GetGroup(1), uf.GetGroup(2), uf.GetGroup(3), uf.GetGroup(4))
-	uf.SetGroup(0, 2)
-	fmt.Println(uf.GetGroup(0), uf.GetGroup(1), uf.GetGroup(2), uf.GetGroup(3), uf.GetGroup(4))
+	fmt.Println(uf.GetGroupWeight(0), uf.GetGroupWeight(1), uf.GetGroupWeight(2), uf.GetGroupWeight(3), uf.GetGroupWeight(4))
+	uf.SetGroupWeight(0, 1)
+	fmt.Println(uf.GetGroupWeight(0), uf.GetGroupWeight(1), uf.GetGroupWeight(2), uf.GetGroupWeight(3), uf.GetGroupWeight(4))
+	uf.SetGroupWeight(0, 2)
+	fmt.Println(uf.GetGroupWeight(0), uf.GetGroupWeight(1), uf.GetGroupWeight(2), uf.GetGroupWeight(3), uf.GetGroupWeight(4))
 	uf.Undo()
-	fmt.Println(uf.GetGroup(0), uf.GetGroup(1), uf.GetGroup(2), uf.GetGroup(3), uf.GetGroup(4))
+	fmt.Println(uf.GetGroupWeight(0), uf.GetGroupWeight(1), uf.GetGroupWeight(2), uf.GetGroupWeight(3), uf.GetGroupWeight(4))
 }
 
 type S = int
@@ -51,14 +51,16 @@ type UnionFindArrayWithUndoAndWeight struct {
 }
 
 // 将下标为index元素`所在集合`的权值置为value.
-func (uf *UnionFindArrayWithUndoAndWeight) SetGroup(index int, value S) {
+func (uf *UnionFindArrayWithUndoAndWeight) SetGroupWeight(index int, value S) {
 	index = uf.Find(index)
 	uf.history = append(uf.history, historyItem{index, uf.rank[index], uf.weight[index]})
 	uf.weight[index] = value
 }
 
 // 获取下标为index元素`所在集合`的权值.
-func (uf *UnionFindArrayWithUndoAndWeight) GetGroup(index int) S { return uf.weight[uf.Find(index)] }
+func (uf *UnionFindArrayWithUndoAndWeight) GetGroupWeight(index int) S {
+	return uf.weight[uf.Find(index)]
+}
 
 // 撤销上一次合并(Union)或者修改权值(Set)操作
 func (uf *UnionFindArrayWithUndoAndWeight) Undo() {

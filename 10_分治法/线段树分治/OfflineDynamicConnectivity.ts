@@ -2,115 +2,9 @@
 /* eslint-disable max-len */
 /* eslint-disable class-methods-use-this */
 
-// #pragma once
-// #include <algorithm>
-// #include <limits>
-// #include <set>
-// #include <utility>
-// #include <vector>
-
-import { UnionFindArrayWithUndo } from '../../14_并查集/UnionFindWithUndo'
 import { UnionFindArrayWithUndoAndWeight } from '../../14_并查集/UnionFindWithUndoAndWeight'
 
-// enum class DyConOperation {
-//     Begins = 1,
-//     Ends = 2,
-//     Event = 3,
-// };
-
-// template <class Time = int> struct offline_dynamic_connectivity {
-
-//     std::vector<std::pair<Time, int>> queries;
-
-//     struct Edge {
-//         Time since;
-//         Time until;
-//         int edge_id;
-//     };
-//     std::vector<Edge> edges;
-
-//     offline_dynamic_connectivity() = default;
-
-//     void add_observation(Time clk, int event_id) { queries.emplace_back(clk, event_id); }
-
-//     void apply_time_range(Time since, Time until, int edge_id) {
-//         edges.push_back(Edge{since, until, edge_id});
-//     }
-
-//     struct Procedure {
-//         DyConOperation op;
-//         int id_;
-//     };
-
-//     std::vector<std::vector<Procedure>> nodes;
-//     std::vector<Procedure> seg;
-
-//     void rec(int now) {
-//         seg.insert(seg.end(), nodes[now].cbegin(), nodes[now].cend());
-//         if (now * 2 < int(nodes.size())) rec(now * 2);
-//         if (now * 2 + 1 < int(nodes.size())) rec(now * 2 + 1);
-
-//         for (auto itr = nodes[now].rbegin(); itr != nodes[now].rend(); ++itr) {
-//             if (itr->op == DyConOperation::Begins) {
-//                 seg.push_back(Procedure{DyConOperation::Ends, itr->id_});
-//             }
-//         }
-//     }
-
-//     std::vector<Procedure> generate() {
-//         if (queries.empty()) return {};
-
-//         std::vector<Time> query_ts;
-//         {
-//             query_ts.reserve(queries.size());
-//             for (const auto &p : queries) query_ts.push_back(p.first);
-//             std::sort(query_ts.begin(), query_ts.end());
-//             query_ts.erase(std::unique(query_ts.begin(), query_ts.end()), query_ts.end());
-
-//             std::vector<int> t_use(query_ts.size() + 1);
-//             t_use.at(0) = 1;
-
-//             for (const Edge &e : edges) {
-//                 t_use[std::lower_bound(query_ts.begin(), query_ts.end(), e.since) - query_ts.begin()] =
-//                     1;
-//                 t_use[std::lower_bound(query_ts.begin(), query_ts.end(), e.until) - query_ts.begin()] =
-//                     1;
-//             }
-//             for (int i = 1; i < int(query_ts.size()); ++i) {
-//                 if (!t_use[i]) query_ts[i] = query_ts[i - 1];
-//             }
-
-//             query_ts.erase(std::unique(query_ts.begin(), query_ts.end()), query_ts.end());
-//         }
-
-//         const int N = query_ts.size();
-//         int D = 1;
-//         while (D < int(query_ts.size())) D *= 2;
-
-//         nodes.assign(D + N, {});
-
-//         for (const Edge &e : edges) {
-//             int l =
-//                 D + (std::lower_bound(query_ts.begin(), query_ts.end(), e.since) - query_ts.begin());
-//             int r =
-//                 D + (std::lower_bound(query_ts.begin(), query_ts.end(), e.until) - query_ts.begin());
-
-//             while (l < r) {
-//                 if (l & 1) nodes[l++].push_back(Procedure{DyConOperation::Begins, e.edge_id});
-//                 if (r & 1) nodes[--r].push_back(Procedure{DyConOperation::Begins, e.edge_id});
-//                 l >>= 1, r >>= 1;
-//             }
-//         }
-
-//         for (const auto &op : queries) {
-//             int t = std::upper_bound(query_ts.begin(), query_ts.end(), op.first) - query_ts.begin();
-//             nodes.at(t + D - 1).push_back(Procedure{DyConOperation::Event, op.second});
-//         }
-//         seg.clear();
-//         rec(1);
-//         return seg;
-//     }
-// };
+const INF = 1e9
 
 /**
  * 线段树分治.
@@ -119,23 +13,29 @@ import { UnionFindArrayWithUndoAndWeight } from '../../14_并查集/UnionFindWit
  * 运用可撤销数据结构维护来得到每个时间点的答案.
  */
 class OfflineDynamicConnectivity {
-  private readonly _add: (edgeId: number) => void
+  private readonly _add: (mutationId: number) => void
   private readonly _undo: () => void
   private readonly _query: (queryId: number) => void
-  private readonly _edges: { start: number; end: number; id: number }[] = []
+  private readonly _mutations: { start: number; end: number; id: number }[] = []
   private readonly _queries: { time: number; id: number }[] = []
   private _nodes: number[][] = []
-  private _edgeId = 0
+  private _mutationId = 0
   private _queryId = 0
 
   /**
    * dfs 遍历整棵线段树来得到每个时间点的答案.
-   * @param add 添加编号为`edgeId`的边后产生的副作用.
+   * @param add 添加编号为`mutationId`的变更后产生的副作用.
    * @param undo 撤销一次`add`操作.
    * @param query 响应编号为`queryId`的查询.
    */
-  constructor(options: { add: (edgeId: number) => void; undo: () => void; query: (queryId: number) => void } & ThisType<void>)
-  constructor(add: (edgeId: number) => void, undo: () => void, query: (queryId: number) => void)
+  constructor(
+    options: {
+      add: (mutationId: number) => void
+      undo: () => void
+      query: (queryId: number) => void
+    } & ThisType<void>
+  )
+  constructor(add: (mutationId: number) => void, undo: () => void, query: (queryId: number) => void)
   constructor(arg1: any, arg2?: any, arg3?: any) {
     if (typeof arg1 === 'object') {
       this._add = arg1.add
@@ -149,20 +49,20 @@ class OfflineDynamicConnectivity {
   }
 
   /**
-   * 在时间范围`[startTime, endTime)`内添加一条编号为`edgeId`的边.
+   * 在时间范围`[startTime, endTime)`内添加一个编号为`id`的变更.
    */
-  addEdge(startTime: number, endTime: number, edgeId?: number): void {
+  addMutation(startTime: number, endTime: number, id?: number): void {
     if (startTime >= endTime) return
-    if (edgeId == undefined) edgeId = this._edgeId++
-    this._edges.push({ start: startTime, end: endTime, id: edgeId })
+    if (id == undefined) id = this._mutationId++
+    this._mutations.push({ start: startTime, end: endTime, id })
   }
 
   /**
-   * 在时间`time`时添加一个编号为`queryId`的查询.
+   * 在时间`time`时添加一个编号为`id`的查询.
    */
-  addQuery(time: number, queryId?: number): void {
-    if (queryId == undefined) queryId = this._queryId++
-    this._queries.push({ time, id: queryId })
+  addQuery(time: number, id?: number): void {
+    if (id == undefined) id = this._queryId++
+    this._queries.push({ time, id })
   }
 
   run(): void {
@@ -173,8 +73,8 @@ class OfflineDynamicConnectivity {
     this._uniqueInplace(times)
     const usedTimes = new Uint8Array(times.length + 1)
     usedTimes[0] = 1
-    for (let i = 0; i < this._edges.length; i++) {
-      const e = this._edges[i]
+    for (let i = 0; i < this._mutations.length; i++) {
+      const e = this._mutations[i]
       usedTimes[this._lowerBound(times, e.start)] = 1
       usedTimes[this._lowerBound(times, e.end)] = 1
     }
@@ -188,16 +88,16 @@ class OfflineDynamicConnectivity {
     while (offset < n) offset <<= 1
     this._nodes = Array(offset + n)
     for (let i = 0; i < this._nodes.length; i++) this._nodes[i] = []
-    for (let i = 0; i < this._edges.length; i++) {
-      const e = this._edges[i]
+    for (let i = 0; i < this._mutations.length; i++) {
+      const e = this._mutations[i]
       let left = offset + this._lowerBound(times, e.start)
       let right = offset + this._lowerBound(times, e.end)
       const eid = e.id * 2
       while (left < right) {
         if (left & 1) this._nodes[left++].push(eid) // add
         if (right & 1) this._nodes[--right].push(eid)
-        left >>= 1
-        right >>= 1
+        left >>>= 1
+        right >>>= 1
       }
     }
 
@@ -269,68 +169,140 @@ class OfflineDynamicConnectivity {
 export { OfflineDynamicConnectivity }
 
 if (require.main === module) {
-  // let add = 0
-  // let undo = 0
-  // let query = 0
-  // const dc = new OfflineDynamicConnectivity({
-  //   add(edgeId) {
-  //     // console.log('add', edgeId)
-  //     add++
-  //   },
-  //   undo() {
-  //     // console.log('undo')
-  //     undo++
-  //   },
-  //   query(queryId) {
-  //     // console.log('query', queryId)
-  //     query++
-  //   }
-  // })
-
-  // // dc.addEdge(0, 100, 1) // 在时间范围[0, 100)内添加一条编号为1的边
-  // // dc.addQuery(50, 2) // 在时间50时添加一个编号为2的查询
-  // // dc.run()
-  // const n = 1e5
-  // const m = 1e5
-  // const q = 1e5
-  // for (let i = 0; i < m; i++) {
-  //   dc.addEdge(Math.floor(Math.random() * n), Math.floor(Math.random() * n), i)
-  // }
-  // for (let i = 0; i < q; i++) {
-  //   dc.addQuery(Math.floor(Math.random() * n), i)
-  // }
-  // console.time('offline_dynamic_connectivity')
-  // dc.run()
-  // console.timeEnd('offline_dynamic_connectivity')
-
-  // console.log(add, undo, query)
-  test()
-  function test(): void {
+  testTime()
+  function testTime(): void {
     let add = 0
     let undo = 0
     let query = 0
     const dc = new OfflineDynamicConnectivity({
-      add(edgeId) {
-        // console.log('add', edgeId)
+      add(id) {
         add++
       },
       undo() {
-        // console.log('undo')
         undo++
       },
-      query(queryId) {
-        // console.log('query', queryId)
+      query(id) {
         query++
       }
     })
 
-    const n = 1e5
-    for (let i = 0; i < 1e5; i++) {
-      dc.addEdge(0, i)
-
+    const n = 2e5
+    console.time('add')
+    for (let i = 0; i < n; i++) {
+      dc.addMutation(0, i)
       dc.addQuery(i)
     }
     dc.run()
+    console.timeEnd('add')
     console.log(add, undo, query)
   }
+
+  // Dynamic Graph Vertex Add Component Sum
+  // https://judge.yosupo.jp/problem/dynamic_graph_vertex_add_component_sum
+  // 0 u v 连接u v (保证u v不连接)
+  // 1 u v 断开u v  (保证u v连接)
+  // 2 u x 将u的值加上x
+  // 3 u 输出u所在连通块的值
+  function dynamicGraphVertexAddComponentSum(weights: number[], operations: number[][]): number[] {
+    const n = weights.length
+    const edges: { u: number; v: number }[] = []
+    const existEdge = new Map<number, { id: number; startTime: number }>()
+    const adds: { pos: number; add: number }[] = []
+    const queries: number[] = []
+    const res: number[] = []
+
+    const uf = new UnionFindArrayWithUndoAndWeight(weights, (a, b) => a + b)
+    const dc = new OfflineDynamicConnectivity({
+      add(mutationId) {
+        if (mutationId >= 0) {
+          const e = edges[mutationId]
+          uf.union(e.u, e.v)
+        } else {
+          mutationId = ~mutationId
+          const a = adds[mutationId]
+          uf.setGroupWeight(a.pos, uf.getGroupWeight(a.pos) + a.add)
+        }
+      },
+      undo() {
+        uf.undo()
+      },
+      query(queryId) {
+        const pos = queries[queryId]
+        res[queryId] = uf.getGroupWeight(pos)
+      }
+    })
+
+    for (let time = 0; time < operations.length; time++) {
+      const operation = operations[time]
+      const op = operation[0]
+      if (op === 0) {
+        let { 1: u, 2: v } = operation
+        if (u < v) {
+          u ^= v
+          v ^= u
+          u ^= v
+        }
+        const hash = u * n + v
+        existEdge.set(hash, { id: edges.length, startTime: time })
+        edges.push({ u, v })
+      } else if (op === 1) {
+        let { 1: u, 2: v } = operation
+        if (u < v) {
+          u ^= v
+          v ^= u
+          u ^= v
+        }
+        const hash = u * n + v
+        const item = existEdge.get(hash)!
+        dc.addMutation(item.startTime, time, item.id)
+        existEdge.delete(hash)
+      } else if (op === 2) {
+        const { 1: pos, 2: add } = operation
+        const id = ~adds.length
+        dc.addMutation(time, INF, id)
+        adds.push({ pos, add })
+      } else {
+        const pos = operation[1]
+        dc.addQuery(time, queries.length)
+        queries.push(pos)
+        res.push(0)
+      }
+    }
+
+    existEdge.forEach(item => {
+      dc.addMutation(item.startTime, INF, item.id)
+    })
+
+    dc.run()
+
+    return res
+  }
+
+  const weights = [1, 10, 100, 1000, 10000]
+  const operations = [
+    [0, 0, 1],
+    [0, 1, 2],
+    [0, 2, 3],
+    [0, 3, 4],
+    [0, 0, 4],
+    [3, 3],
+    [1, 1, 2],
+    [3, 1],
+    [1, 3, 4],
+    [3, 0],
+    [2, 1, 100000],
+    [3, 1],
+    [0, 1, 4],
+    [3, 2],
+    [0, 3, 4],
+    [3, 0]
+  ]
+
+  // 11111
+  // 11111
+  // 10011
+  // 110011
+  // 1100
+  // 111111
+  console.log(dynamicGraphVertexAddComponentSum(weights, operations))
 }

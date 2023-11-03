@@ -42,6 +42,7 @@ type WeightedUnionFind struct {
 	total  []int
 }
 
+// NewUnionFindWeighted
 func NewWeightedUnionFind(n int) *WeightedUnionFind {
 	uf := &WeightedUnionFind{
 		Part:   n,

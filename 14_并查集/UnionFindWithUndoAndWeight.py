@@ -23,13 +23,13 @@ class UnionFindArrayWithUndoAndWeight:
         self._history = []
         self.part = n
 
-    def setGroup(self, index: int, value: int) -> None:
+    def setGroupWeight(self, index: int, value: int) -> None:
         """将下标为index元素`所在集合`的权值置为value."""
         index = self.find(index)
         self._history.append((index, self._rank[index], self._weights[index]))
         self._weights[index] = value
 
-    def getGroup(self, index: int) -> int:
+    def getGroupWeight(self, index: int) -> int:
         """获取下标为index元素`所在集合`的权值."""
         return self._weights[self.find(index)]
 
@@ -88,10 +88,10 @@ if __name__ == "__main__":
     uf = UnionFindArrayWithUndoAndWeight([1, 2, 3, 4, 5])
     print(uf)
     uf.union(0, 1)
-    print(uf.getGroup(0))
-    uf.setGroup(0, 10)
-    print(uf.getGroup(0))
+    print(uf.getGroupWeight(0))
+    uf.setGroupWeight(0, 10)
+    print(uf.getGroupWeight(0))
     uf.undo()
-    print(uf.getGroup(0))
+    print(uf.getGroupWeight(0))
     uf.undo()
-    print(uf.getGroup(0))
+    print(uf.getGroupWeight(0))

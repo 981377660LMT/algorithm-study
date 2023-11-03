@@ -132,14 +132,38 @@ if (require.main === module) {
   uf.union(1, 2)
   uf.union(3, 4)
   console.log(uf.getGroups())
-  console.log(uf.getGroupWeight(0), uf.getGroupWeight(1), uf.getGroupWeight(2), uf.getGroupWeight(3), uf.getGroupWeight(4))
+  console.log(
+    uf.getGroupWeight(0),
+    uf.getGroupWeight(1),
+    uf.getGroupWeight(2),
+    uf.getGroupWeight(3),
+    uf.getGroupWeight(4)
+  )
   uf.undo()
-  console.log(uf.getGroupWeight(0), uf.getGroupWeight(1), uf.getGroupWeight(2), uf.getGroupWeight(3), uf.getGroupWeight(4))
+  console.log(
+    uf.getGroupWeight(0),
+    uf.getGroupWeight(1),
+    uf.getGroupWeight(2),
+    uf.getGroupWeight(3),
+    uf.getGroupWeight(4)
+  )
   uf.reset()
-  console.log(uf.getGroupWeight(0), uf.getGroupWeight(1), uf.getGroupWeight(2), uf.getGroupWeight(3), uf.getGroupWeight(4))
+  console.log(
+    uf.getGroupWeight(0),
+    uf.getGroupWeight(1),
+    uf.getGroupWeight(2),
+    uf.getGroupWeight(3),
+    uf.getGroupWeight(4)
+  )
   console.log(uf.getGroups())
   uf.union(0, 1)
   console.log(uf.getGroups())
   uf.setGroupWeight(0, 2)
-  console.log(uf.getGroupWeight(0), uf.getGroupWeight(1), uf.getGroupWeight(2), uf.getGroupWeight(3), uf.getGroupWeight(4))
+  console.log(
+    uf.getGroupWeight(0),
+    uf.getGroupWeight(1),
+    uf.getGroupWeight(2),
+    uf.getGroupWeight(3),
+    uf.getGroupWeight(4)
+  )
 }
