@@ -16,7 +16,7 @@ class UnionFindArrayWithUndoAndWeight<S> {
   private readonly _ranks: Uint32Array
   private readonly _parents: Uint32Array
   private readonly _weights: S[]
-  private readonly _history: [root: number, rank: number, weight: S][] = []
+  private readonly _history: { root: number; rank: number; weight: S }[] = []
   private readonly _op: (s1: S, s2: S) => S
   private _part: number
 
@@ -37,16 +37,16 @@ class UnionFindArrayWithUndoAndWeight<S> {
   /**
    * 将下标为index元素`所在集合`的权值置为value.
    */
-  setGroup(index: number, value: S): void {
+  setGroupWeight(index: number, value: S): void {
     index = this.find(index)
-    this._history.push([index, this._ranks[index], this._weights[index]])
+    this._history.push({ root: index, rank: this._ranks[index], weight: this._weights[index] })
     this._weights[index] = value
   }
 
   /**
    * 获取下标为index元素`所在集合`的权值.
    */
-  getGroup(index: number): S {
+  getGroupWeight(index: number): S {
     return this._weights[this.find(index)]
   }
 
@@ -56,12 +56,12 @@ class UnionFindArrayWithUndoAndWeight<S> {
    */
   undo(): void {
     if (!this._history.length) return
-    const [small, rank, weight] = this._history.pop()!
-    const ps = this._parents[small]
+    const { root, rank, weight } = this._history.pop()!
+    const ps = this._parents[root]
     this._weights[ps] = weight
     this._ranks[ps] = rank
-    if (ps !== small) {
-      this._parents[small] = small
+    if (ps !== root) {
+      this._parents[root] = root
       this._part++
     }
   }
@@ -88,7 +88,7 @@ class UnionFindArrayWithUndoAndWeight<S> {
       y ^= x
       x ^= y
     }
-    this._history.push([y, this._ranks[x], this._weights[x]])
+    this._history.push({ root: y, rank: this._ranks[x], weight: this._weights[x] })
     if (x !== y) {
       this._parents[y] = x
       this._ranks[x] += this._ranks[y]
@@ -131,9 +131,15 @@ if (require.main === module) {
   uf.union(0, 1)
   uf.union(1, 2)
   uf.union(3, 4)
-  console.log(uf.getGroup(0), uf.getGroup(1), uf.getGroup(2), uf.getGroup(3), uf.getGroup(4))
+  console.log(uf.getGroups())
+  console.log(uf.getGroupWeight(0), uf.getGroupWeight(1), uf.getGroupWeight(2), uf.getGroupWeight(3), uf.getGroupWeight(4))
   uf.undo()
-  console.log(uf.getGroup(0), uf.getGroup(1), uf.getGroup(2), uf.getGroup(3), uf.getGroup(4))
+  console.log(uf.getGroupWeight(0), uf.getGroupWeight(1), uf.getGroupWeight(2), uf.getGroupWeight(3), uf.getGroupWeight(4))
   uf.reset()
-  console.log(uf.getGroup(0), uf.getGroup(1), uf.getGroup(2), uf.getGroup(3), uf.getGroup(4))
+  console.log(uf.getGroupWeight(0), uf.getGroupWeight(1), uf.getGroupWeight(2), uf.getGroupWeight(3), uf.getGroupWeight(4))
+  console.log(uf.getGroups())
+  uf.union(0, 1)
+  console.log(uf.getGroups())
+  uf.setGroupWeight(0, 2)
+  console.log(uf.getGroupWeight(0), uf.getGroupWeight(1), uf.getGroupWeight(2), uf.getGroupWeight(3), uf.getGroupWeight(4))
 }

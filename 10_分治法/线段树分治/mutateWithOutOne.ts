@@ -9,16 +9,17 @@
  * https://github.com/tdzl2003/leetcode_live/blob/master/templates/%E5%9F%BA%E7%A1%80/%E5%88%86%E6%B2%BB%E5%88%A0%E7%82%B9.cpp
  * @note
  * `线段树分治`的特殊情形，第 i 个操作的作用时间范围为[0,i)+[i+1,n).
- * 此时可以在线段树每个非叶子节点上保存一个版本，回溯撤销只需读取这个版本即可.
+ * 此时可以在线段树每个非叶子节点上保存一个版本，回溯撤销只需读取这个版本即可,
+ * 将一个不可撤销的数据结构以`修改时拷贝`的方式变成了`可撤销`的.
  * 不要求`mutate`操作可撤销(undo/存在逆元).
- * @summary
- * 将一个不可撤销的数据结构以`O(logn)`的代价变成可撤销的.
+ * 不要求`mutate`操作满足结合律(如果操作满足结合律，则可以使用前后缀合并).
  */
 function mutateWithoutOne<S>(
   state: S,
   start: number,
   end: number,
   options: {
+    /** 通过拷贝实现撤销接口. */
     copy: (state: S) => S
     /** 这里的 index 也就是 time. */
     mutate: (state: S, index: number) => void

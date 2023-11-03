@@ -1,10 +1,11 @@
-import { NodeWithNext } from './116. 填充每个节点的下一个右侧节点指针常量空间'
+import { NodeWithNext } from './116. 填充每个节点的下一个右侧节点指针-dfs'
 
 class Node {
   val: number
   left: Node | null
   right: Node | null
   next: Node | null
+
   constructor(val = 0) {
     this.val = val
     this.left = null
@@ -12,8 +13,8 @@ class Node {
     this.next = null
   }
 }
+
 /**
- *
  * @param root 二叉树 并不一定完全二叉树
  * 利用next指针，将每层节点链接成链表进行遍历
  */
@@ -27,7 +28,6 @@ function connect(root: Node | null): Node | null {
 
     while (rootP) {
       if (rootP.left) {
-        // 链接下一行的节点
         pre.next = rootP.left
         pre = pre.next
       }

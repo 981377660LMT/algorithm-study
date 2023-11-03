@@ -1,3 +1,13 @@
+// https://www.luogu.com.cn/problem/CF981E
+// 线段树分治+bitset 优化
+// 给一个长度为n的序列(初始全为0)和q条操作(以(left,right,x)表示将[left,right]中的每个数都加上x(1<=x<=n)
+// 对于1≤k≤n,求哪些k满足:选出若干条操作后序列最大值为k.(对于一个k,每条操作至多用一次)
+// n,q<=1e4
+//
+// !用线段树分治，将[left,right]区间的影响下放到线段树的O(log(n))个结点上。
+// 最后从根dfs一下,把信息下推至叶子节点即可.叶子节点的bitset or起来的结果就是答案.
+// O(n*qlogn/w)
+
 package main
 
 import (
@@ -8,39 +18,73 @@ import (
 	"strings"
 )
 
-func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+func additionOnSegments(n int, operations [][3]int) []int {
 
-	var n, target int
-	fmt.Fscan(in, &n, &target)
-	jumps := make([][2]int, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &jumps[i][0], &jumps[i][1])
-	}
+	ok := make([]bool, n+1)
 
-	ok := JumpingTakahashi(jumps, target)
-	if ok {
-		fmt.Fprintln(out, "Yes")
-	} else {
-		fmt.Fprintln(out, "No")
-	}
+	initState := NewBitset(n)
+	initState.Set(0)
+	MutateWithoutOne(
+		&initState,
+		1, n+1,
+		func(state *S) *S {
+			dp := *state
+			res := dp.Copy()
+			return &res
+		},
+		func(state *S, index int) {
+			dp := *state
+			dp.IOr(dp.Copy().Lsh(nums[index]))
+		},
+		func(state *S, index int) {
+			num := nums[index]
+			if num < k {
+				dp := state
+				if dp.All0(k-nums[index], k) {
+					res++
+				}
+			}
+		},
+	)
+
+	return res
 }
 
-// 起始时在原点.问跳跃n次是否能跳到target.
-// 每次跳跃jumps[i]可以跳jumps[i][0]或者跳jumps[i][1].
-// n<=100, target<=1e4, jumps[i][0]<=100, jumps[i][1]<=100.
-// 时间复杂度 O(n*target/w)
-func JumpingTakahashi(jumps [][2]int, target int) bool {
-	dp := NewBitset(target)
-	dp.Set(0)
-	for _, jump := range jumps {
-		a, b := jump[0], jump[1]
-		tmp := dp.Copy().Lsh(b)
-		dp.Lsh(a).IOr(tmp)
+type S = Bitset
+
+// 线段树分治的特殊情形.
+// 调用 `query` 时，`state` 为对除了 `index` 以外所有点均调用过了 `mutate` 的状态。但不保证调用 `mutate` 的顺序。
+// 总计会调用 $O(NlgN)$ 次的 `mutate` 和 `query`, 以及 $O(N)$ 次的 `copy`.
+// !将一个不可撤销的数据结构以`O(logn)`的代价变成可撤销的.
+func MutateWithoutOne(
+	initState *S,
+	start, end int,
+	copy func(state *S) *S,
+	mutate func(state *S, index int),
+	query func(state *S, index int),
+) {
+	var dfs func(state *S, curStart, curEnd int)
+	dfs = func(state *S, curStart, curEnd int) {
+		if curEnd == curStart+1 {
+			query(state, curStart)
+			return
+		}
+
+		mid := (curStart + curEnd) >> 1
+		leftCopy := copy(state)
+		for i := curStart; i < mid; i++ {
+			mutate(leftCopy, i)
+		}
+		dfs(leftCopy, mid, curEnd)
+
+		rightCopy := copy(state)
+		for i := mid; i < curEnd; i++ {
+			mutate(rightCopy, i)
+		}
+		dfs(rightCopy, curStart, mid)
 	}
-	return dp.Has(target)
+
+	dfs(initState, start, end)
 }
 
 type Bitset []uint
@@ -377,4 +421,22 @@ func (b Bitset) String() string {
 	return sb.String()
 }
 
-// https://nyaannyaan.github.io/library/misc/bitset-find-prev.hpp
+func main() {
+	in, out := bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	operations := make([][3]int, q)
+	for i := 0; i < q; i++ {
+		var left, right, x int
+		fmt.Fscan(in, &left, &right, &x)
+		operations[i] = [3]int{left, right, x}
+	}
+
+	res := additionOnSegments(n, operations)
+	fmt.Fprintln(out, len(res))
+	for _, v := range res {
+		fmt.Fprint(out, v, " ")
+	}
+}

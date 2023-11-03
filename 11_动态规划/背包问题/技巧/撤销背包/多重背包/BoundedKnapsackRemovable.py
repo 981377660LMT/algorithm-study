@@ -57,3 +57,6 @@ class BoundedKnapsackRemovable:
         res = BoundedKnapsackRemovable(self._maxValue, self._mod, self._dp[:])
         res._countSum = self._countSum
         return res
+
+    def __repr__(self) -> str:
+        return self._dp.__repr__()

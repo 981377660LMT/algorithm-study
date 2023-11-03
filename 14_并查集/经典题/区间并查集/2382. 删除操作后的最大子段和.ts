@@ -14,11 +14,11 @@ function maximumSegmentSum(nums: number[], removeQueries: number[]): number[] {
   for (let qi = q - 1; ~qi; qi--) {
     res[qi] = maxPartSum
     const pos = removeQueries[qi]
-    uf.add(pos, nums[pos])
+    uf.addWeight(pos, nums[pos])
     visited[pos] = 1
     if (pos > 0 && visited[pos - 1]) uf.union(pos, pos - 1)
     if (pos < n - 1 && visited[pos + 1]) uf.union(pos, pos + 1)
-    maxPartSum = Math.max(maxPartSum, uf.getGroup(pos))
+    maxPartSum = Math.max(maxPartSum, uf.getGroupWeight(pos))
   }
 
   return res

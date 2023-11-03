@@ -44,6 +44,9 @@ class UnboundedKnapsackRemovable:
     def copy(self) -> "UnboundedKnapsackRemovable":
         return UnboundedKnapsackRemovable(self._maxWeight, self._mod, self._dp[:])
 
+    def __repr__(self) -> str:
+        return self._dp.__repr__()
+
 
 if __name__ == "__main__":
     # https://atcoder.jp/contests/agc049/tasks/agc049_d

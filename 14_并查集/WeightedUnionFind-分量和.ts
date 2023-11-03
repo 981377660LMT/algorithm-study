@@ -47,7 +47,7 @@ class WeightedUnionFind {
   /**
    * u的值加上delta.
    */
-  add(u: number, delta: number): void {
+  addWeight(u: number, delta: number): void {
     this._value[u] += delta
     this._total[this.find(u)] += delta
   }
@@ -55,7 +55,7 @@ class WeightedUnionFind {
   /**
    * u所在集合的值加上delta.
    */
-  addGroup(u: number, delta: number): void {
+  addGroupWeight(u: number, delta: number): void {
     const root = this.find(u)
     this._delta[root] += delta
     this._total[root] -= this._parent[root] * delta
@@ -64,14 +64,14 @@ class WeightedUnionFind {
   /**
    * u的值.
    */
-  get(u: number): number {
+  getWeight(u: number): number {
     return this._value[u] + this._find(u).delta
   }
 
   /**
    * u所在集合的值.
    */
-  getGroup(u: number): number {
+  getGroupWeight(u: number): number {
     return this._total[this.find(u)]
   }
 
@@ -132,7 +132,7 @@ class WeightedUnionFind {
   }
 }
 
-export { WeightedUnionFind }
+export { WeightedUnionFind, WeightedUnionFind as UnionFindWeighted }
 
 // 2382. 删除操作后的最大子段和
 // https://leetcode.cn/problems/maximum-segment-sum-after-removals/
@@ -147,11 +147,11 @@ function maximumSegmentSum(nums: number[], removeQueries: number[]): number[] {
   for (let qi = q - 1; ~qi; qi--) {
     res[qi] = maxPartSum
     const pos = removeQueries[qi]
-    uf.add(pos, nums[pos])
+    uf.addWeight(pos, nums[pos])
     visited[pos] = 1
     if (pos > 0 && visited[pos - 1]) uf.union(pos, pos - 1)
     if (pos < n - 1 && visited[pos + 1]) uf.union(pos, pos + 1)
-    maxPartSum = Math.max(maxPartSum, uf.getGroup(pos))
+    maxPartSum = Math.max(maxPartSum, uf.getGroupWeight(pos))
   }
   return res
 }

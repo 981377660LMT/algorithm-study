@@ -14,15 +14,15 @@ const bt: NodeWithNext = {
       val: 4,
       left: null,
       right: null,
-      next: null,
+      next: null
     },
     right: {
       val: 5,
       left: null,
       right: null,
-      next: null,
+      next: null
     },
-    next: null,
+    next: null
   },
   right: {
     val: 3,
@@ -31,11 +31,11 @@ const bt: NodeWithNext = {
       val: 7,
       left: null,
       right: null,
-      next: null,
+      next: null
     },
-    next: null,
+    next: null
   },
-  next: null,
+  next: null
 }
 
 /**

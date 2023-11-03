@@ -258,7 +258,7 @@ func (b _Bitset) Add(i int) { b.FlipRange(i, b.Next0(i)) }
 // -= 1 << i，模拟借位
 func (b _Bitset) Sub(i int) { b.FlipRange(i, b.Next1(i)) }
 
-// 判断 [l,r] 范围内的数是否全为 0
+// 判断 [l,r) 范围内的数是否全为 0
 // https://codeforces.com/contest/1107/problem/D（标准做法是二维前缀和）
 func (b _Bitset) All0(l, r int) bool {
 	i := l >> 6
@@ -278,7 +278,7 @@ func (b _Bitset) All0(l, r int) bool {
 	return b[r>>6]&^mask == 0
 }
 
-// 判断 [l,r] 范围内的数是否全为 1
+// 判断 [l,r) 范围内的数是否全为 1
 func (b _Bitset) All1(l, r int) bool {
 	i := l >> 6
 	if i == r>>6 {
