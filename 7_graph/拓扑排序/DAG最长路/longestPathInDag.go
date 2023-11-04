@@ -12,7 +12,7 @@ func minimumTime(n int, relations [][]int, time []int) int {
 	for i := 0; i < n; i++ {
 		dag[dummy] = append(dag[dummy], i)
 	}
-	dp := LongestPathInDag(n+1, dag, func(_, to int) int { return time[to] })
+	dp, _ := LongestPathInDag(n+1, dag, func(_, to int) int { return time[to] })
 	res := 0
 	for _, d := range dp {
 		res = max(res, d)
@@ -36,8 +36,8 @@ func maximumJumps(nums []int, target int) int {
 	return LongestPathInDagWithStart(n, dag, func(_, to int) int { return 1 }, 0, n-1)
 }
 
-// dag最长路.
-func LongestPathInDag(n int, dag [][]int, getWeight func(from, to int) int) []int {
+// dag最长路, 并检验是否为dag(是否有环).
+func LongestPathInDag(n int, dag [][]int, getWeight func(from, to int) int) (dp []int, ok bool) {
 	indeg := make([]int, n)
 	for _, nexts := range dag {
 		for _, j := range nexts {
@@ -45,6 +45,7 @@ func LongestPathInDag(n int, dag [][]int, getWeight func(from, to int) int) []in
 		}
 	}
 
+	count := 0
 	queue := []int{}
 	for i, d := range indeg {
 		if d == 0 {
@@ -52,10 +53,11 @@ func LongestPathInDag(n int, dag [][]int, getWeight func(from, to int) int) []in
 		}
 	}
 
-	dp := make([]int, n)
+	dp = make([]int, n)
 	for len(queue) > 0 {
 		cur := queue[0]
 		queue = queue[1:]
+		count++
 		for _, next := range dag[cur] {
 			dp[next] = max(dp[next], dp[cur]+getWeight(cur, next))
 			indeg[next]--
@@ -65,7 +67,8 @@ func LongestPathInDag(n int, dag [][]int, getWeight func(from, to int) int) []in
 		}
 	}
 
-	return dp
+	ok = count == n
+	return
 }
 
 const INF int = 1e18

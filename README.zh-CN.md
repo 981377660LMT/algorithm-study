@@ -308,6 +308,8 @@
     - [SegmentSet](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/SegmentSet.ts)
     - [除自身以外数组的乘积](22_%E4%B8%93%E9%A2%98/%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%88%86%E5%89%B2%E7%82%B9-%E5%89%8D%E5%90%8E%E7%BC%80%E5%88%86%E8%A7%A3/%E5%88%A0%E9%99%A4%E5%AD%90%E6%95%B0%E7%BB%84/productWithoutOne.py)
     - [MutateWithOutOne](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E7%BA%BF%E6%AE%B5%E6%A0%91%E5%88%86%E6%B2%BB/mutateWithOutOne.ts)
+    - [线段树分治-undo](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E7%BA%BF%E6%AE%B5%E6%A0%91%E5%88%86%E6%B2%BB/SegmentTreeDivideAndConquerUndo.ts)
+    - [线段树分治-copy](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E7%BA%BF%E6%AE%B5%E6%A0%91%E5%88%86%E6%B2%BB/SegmentTreeDivideAndConquerCopy.ts)
     - [DefaultDict](5_map/DefaultDict.ts)
     - [LongestRepeating](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/verify/LongestRepeating.ts)
     - [最短单词距离](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/ClosestFinder.ts)

@@ -19,10 +19,10 @@ function mutateWithoutOne<S>(
   start: number,
   end: number,
   options: {
-    /** 通过拷贝实现撤销接口. */
-    copy: (state: S) => S
     /** 这里的 index 也就是 time. */
     mutate: (state: S, index: number) => void
+    /** 通过拷贝实现撤销接口. */
+    copy: (state: S) => S
     query: (state: S, index: number) => void
   } & ThisType<void>
 ): void {

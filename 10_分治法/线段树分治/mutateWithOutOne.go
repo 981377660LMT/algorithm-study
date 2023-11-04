@@ -11,10 +11,10 @@ type S = struct{ value int }
 func MutateWithoutOne(
 	initState *S,
 	start, end int,
-	/** 通过拷贝实现撤销接口. */
-	copy func(state *S) *S,
 	/** 这里的 index 也就是 time. */
 	mutate func(state *S, index int),
+	/** 通过拷贝实现撤销接口. */
+	copy func(state *S) *S,
 	query func(state *S, index int),
 ) {
 	var dfs func(state *S, curStart, curEnd int)
@@ -52,11 +52,11 @@ func productExceptSelf(nums []int) []int {
 	MutateWithoutOne(
 		&S{value: 1},
 		0, len(nums),
-		func(state *S) *S {
-			return &S{value: state.value}
-		},
 		func(state *S, index int) {
 			state.value *= nums[index]
+		},
+		func(state *S) *S {
+			return &S{value: state.value}
 		},
 		func(state *S, index int) {
 			res[index] = state.value

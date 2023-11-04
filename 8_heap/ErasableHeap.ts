@@ -161,7 +161,7 @@ class _ErasableHeap2<E> {
   }
 }
 
-export { ErasableHeap }
+export { ErasableHeap, ErasableHeap as RemovableHeap }
 
 if (require.main === module) {
   const pq = new ErasableHeap<number>()

@@ -117,12 +117,13 @@ func (seg *SegmentTreeDual) Update(left, right int, value Id) {
 	}
 }
 
-func (seg *SegmentTreeDual) propagate(k int) {
-	if seg.lazy[k] != seg.id() {
-		seg.lazy[k<<1] = seg.composition(seg.lazy[k], seg.lazy[k<<1])
-		seg.lazy[k<<1|1] = seg.composition(seg.lazy[k], seg.lazy[k<<1|1])
-		seg.lazy[k] = seg.id()
+func (st *SegmentTreeDual) GetAll() []Id {
+	for i := 0; i < st.size; i++ {
+		st.propagate(i)
 	}
+	res := make([]Id, st.n)
+	copy(res, st.lazy[st.size:st.size+st.n])
+	return res
 }
 
 func (st *SegmentTreeDual) String() string {
@@ -136,4 +137,12 @@ func (st *SegmentTreeDual) String() string {
 	}
 	buf.WriteByte(']')
 	return buf.String()
+}
+
+func (seg *SegmentTreeDual) propagate(k int) {
+	if seg.lazy[k] != seg.id() {
+		seg.lazy[k<<1] = seg.composition(seg.lazy[k], seg.lazy[k<<1])
+		seg.lazy[k<<1|1] = seg.composition(seg.lazy[k], seg.lazy[k<<1|1])
+		seg.lazy[k] = seg.id()
+	}
 }

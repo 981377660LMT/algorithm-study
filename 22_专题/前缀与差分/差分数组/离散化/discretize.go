@@ -9,16 +9,17 @@ import "sort"
 //	getRank: 给定一个数，返回它的排名`(offset ~ offset + count)`.
 //	count: 离散化(去重)后的元素个数.
 func DiscretizeSparse(nums []int, offset int) (getRank func(int) int, count int) {
-	set := make(map[int]struct{})
-	for _, v := range nums {
-		set[v] = struct{}{}
-	}
-	count = len(set)
-	allNums := make([]int, 0, count)
-	for k := range set {
-		allNums = append(allNums, k)
-	}
+	allNums := append(nums[:0:0], nums...)
 	sort.Ints(allNums)
+	slow := 0
+	for fast := 1; fast < len(allNums); fast++ {
+		if allNums[fast] != allNums[slow] {
+			slow++
+			allNums[slow] = allNums[fast]
+		}
+	}
+	allNums = allNums[:slow+1]
+	count = len(allNums)
 	getRank = func(x int) int { return sort.SearchInts(allNums, x) + offset }
 	return
 }
@@ -30,15 +31,16 @@ func DiscretizeSparse(nums []int, offset int) (getRank func(int) int, count int)
 //	getRank: 给定一个数，返回它的排名`(offset ~ offset + count)`.
 //	count: 离散化(去重)后的元素个数.
 func DiscretizeCompressed(nums []int, offset int) (getRank func(int) int, count int) {
-	set := make(map[int]struct{})
-	for _, v := range nums {
-		set[v] = struct{}{}
-	}
-	allNums := make([]int, 0, len(set))
-	for k := range set {
-		allNums = append(allNums, k)
-	}
+	allNums := append(nums[:0:0], nums...)
 	sort.Ints(allNums)
+	slow := 0
+	for fast := 1; fast < len(allNums); fast++ {
+		if allNums[fast] != allNums[slow] {
+			slow++
+			allNums[slow] = allNums[fast]
+		}
+	}
+	allNums = allNums[:slow+1]
 	mp := make(map[int]int, len(allNums))
 	for i, v := range allNums {
 		mp[v] = i + offset

@@ -25,7 +25,7 @@ const MOD int = 1e9 + 7
 // 查询时统计两侧不完整块、中间完整块和不同周期在查询区间内的修改总和即可。
 func RangeStepAddRangeSum(nums []int, operations [][4]int) []int {
 	sqrt := int(math.Sqrt(float64(len(nums))) + 1)
-	B := UseBlock(nums, sqrt)
+	B := UseBlock(len(nums), sqrt)
 	belong, blockStart, blockEnd, blockCount := B.belong, B.blockStart, B.blockEnd, B.blockCount
 	blockSum := make([]int, blockCount)
 	for i := range blockSum {

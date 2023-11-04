@@ -20,11 +20,11 @@ import (
 // 方法1：LCT
 // !方法2：分块：
 // 线性遍历太慢，需要`分块加速遍历`.
-// !维护`跳跃后到达的位置`与`跳出当前块所用的步数`
+// !维护`跳出当前块后到达的位置`与`跳出当前块所用的步数`
 // !需要从后往前维护。 修改时也是在块内从后往前。
 func 弹飞绵羊(nums []int, operations [][3]int) []int {
 	n := len(nums)
-	B := UseBlock(nums, int(math.Sqrt(float64(n))+1))
+	B := UseBlock(n, int(math.Sqrt(float64(n))+1))
 	belong, blockStart, blockEnd, blockCount := B.belong, B.blockStart, B.blockEnd, B.blockCount
 
 	jumpTo := make([]int, n)
@@ -38,7 +38,6 @@ func 弹飞绵羊(nums []int, operations [][3]int) []int {
 				jumpTo[i] = i + nums[i]
 				jumpStep[i] = 1
 			} else {
-				// 否则继承同一个块中下一个跳到的位置
 				jumpTo[i] = jumpTo[i+nums[i]]
 				jumpStep[i] = jumpStep[i+nums[i]] + 1
 			}

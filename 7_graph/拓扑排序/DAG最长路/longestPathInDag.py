@@ -5,15 +5,15 @@ DAG中最长路径只和当前位置有关.
 
 from collections import deque
 from functools import lru_cache
-from typing import Callable, List, Optional, Sequence
+from typing import Callable, List, Optional, Sequence, Tuple
 
 INF = int(1e18)
 
 
 def longestPathInDag(
     n: int, adjList: Sequence[Sequence[int]], getWeight: Optional[Callable[[int, int], int]] = None
-) -> List[int]:
-    """返回DAG中每个点的最长路径长度."""
+) -> Tuple[List[int], bool]:
+    """返回DAG中每个点的最长路径长度,并检验是否有环."""
 
     def max(a: int, b: int) -> int:
         return a if a > b else b
@@ -26,18 +26,20 @@ def longestPathInDag(
         for j in adjList[i]:
             indeg[j] += 1
 
+    count = 0
     queue = deque(i for i in range(n) if indeg[i] == 0)
     dp = [0] * n
 
     while queue:
         cur = queue.popleft()
+        count += 1
         for next_ in adjList[cur]:
             dp[next_] = max(dp[next_], dp[cur] + getWeight(cur, next_))
             indeg[next_] -= 1
             if indeg[next_] == 0:
                 queue.append(next_)
 
-    return dp
+    return dp, count == n
 
 
 def longestPathInDag2(dag: Sequence[Sequence[int]], start: int, target: int) -> int:
@@ -85,4 +87,60 @@ if __name__ == "__main__":
                 adjList[DUMMY].append(i)  # 虚拟源点指向所有点
 
             dp = longestPathInDag(n + 1, adjList, lambda from_, to: time[to])
-            return max(dp)
+            return max(dp[0])
+
+    # https://www.luogu.com.cn/problem/CF1679D
+    # Toss a Coin to Your Graph...
+    # 给定一个有向图，
+    # 每个点有一个点权，任选起点，走k步，问经过的点的最大权值最小能是多少
+    # 无解输出-1，没有重边和自环，但是会有环
+    # n,m<=2e5,k<=1e18.
+    def tossACoinToYourGraph(
+        n: int, edges: List[Tuple[int, int]], values: List[int], k: int
+    ) -> int:
+        def check(mid: int) -> bool:
+            alive = [v <= mid for v in values]
+            adjList = [[] for _ in range(n)]
+            indeg = [0] * n
+            for a, b in edges:
+                if alive[a] and alive[b]:
+                    adjList[a].append(b)
+                    indeg[b] += 1
+
+            queue = deque(i for i in range(n) if (indeg[i] == 0 and alive[i]))
+            dp = [0] * n
+            count = 0
+            while queue:
+                cur = queue.popleft()
+                count += 1
+                for next_ in adjList[cur]:
+                    dp[next_] = max(dp[next_], dp[cur] + 1)
+                    indeg[next_] -= 1
+                    if indeg[next_] == 0:
+                        queue.append(next_)
+
+            if count < sum(alive):
+                return True  # 有环
+            return max(dp) >= k - 1  # 最长路>=k
+
+        if k == 1:
+            return min(values)
+
+        left, right = 0, max(values)
+        ok = False
+        while left <= right:
+            mid = (left + right) // 2
+            if check(mid):
+                right = mid - 1
+                ok = True
+            else:
+                left = mid + 1
+        return left if ok else -1
+
+    n, m, k = map(int, input().split())
+    values = list(map(int, input().split()))
+    edges = []
+    for _ in range(m):
+        a, b = map(int, input().split())
+        edges.append((a - 1, b - 1))
+    print(tossACoinToYourGraph(n, edges, values, k))

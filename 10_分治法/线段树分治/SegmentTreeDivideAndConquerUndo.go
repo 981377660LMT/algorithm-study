@@ -14,7 +14,7 @@ func main() {
 }
 
 func demo() {
-	dc := NewOffLineDynamicConnectivity(
+	dc := NewSegmentTreeDivideAndConquerUndo(
 		func(edgeId int) {
 			fmt.Println(fmt.Sprintf("add %d", edgeId))
 		},
@@ -80,7 +80,7 @@ func DynamicGraphVertexAddComponentSum() {
 	queries := []int{}                // pos
 	res := []int{}
 	uf := NewUnionFindArrayWithUndoAndWeight(sums)
-	dc := NewOffLineDynamicConnectivity(
+	dc := NewSegmentTreeDivideAndConquerUndo(
 		func(mutationId int) {
 			if mutationId >= 0 {
 				e := edges[mutationId]
@@ -147,12 +147,12 @@ func DynamicGraphVertexAddComponentSum() {
 	}
 }
 
-// 线段树分治.
+// 线段树分治undo流派.
 // 线段树分治是一种处理动态修改和询问的离线算法.
-// 通过将某一元素的出现时间段在线段树上保存，我们可以 dfs 遍历整棵线段树，
-// 运用可撤销数据结构维护来得到每个时间点的答案.
-type OffLineDynamicConnectivity struct {
-	add       func(mutationId int)
+// 通过将某一元素的出现时间段在线段树上保存到`log(n)`个结点中,
+// 我们可以 dfs 遍历整棵线段树，运用可撤销数据结构维护来得到每个时间点的答案.
+type SegmentTreeDivideAndConquerUndo struct {
+	mutate    func(mutationId int)
 	undo      func()
 	query     func(queryId int)
 	mutations []struct{ start, end, id int }
@@ -162,15 +162,16 @@ type OffLineDynamicConnectivity struct {
 
 // dfs 遍历整棵线段树来得到每个时间点的答案.
 //
-//	add: 添加编号为`mutationId`的变更后产生的副作用.
-//	undo: 撤销一次`add`操作.
+//	mutate: 添加编号为`mutationId`的变更后产生的副作用.
+//	undo: 撤销一次`mutate`操作.
 //	query: 响应编号为`queryId`的查询.
-func NewOffLineDynamicConnectivity(add func(mutationId int), undo func(), query func(queryId int)) *OffLineDynamicConnectivity {
-	return &OffLineDynamicConnectivity{add: add, undo: undo, query: query}
+//	一共调用**O(nlogn)**次`mutate`和`undo`，**O(q)**次`query`.
+func NewSegmentTreeDivideAndConquerUndo(mutate func(mutationId int), undo func(), query func(queryId int)) *SegmentTreeDivideAndConquerUndo {
+	return &SegmentTreeDivideAndConquerUndo{mutate: mutate, undo: undo, query: query}
 }
 
 // 在时间范围`[startTime, endTime)`内添加一个编号为`id`的变更.
-func (o *OffLineDynamicConnectivity) AddMutation(startTime, endTime int, id int) {
+func (o *SegmentTreeDivideAndConquerUndo) AddMutation(startTime, endTime int, id int) {
 	if startTime >= endTime {
 		return
 	}
@@ -178,11 +179,11 @@ func (o *OffLineDynamicConnectivity) AddMutation(startTime, endTime int, id int)
 }
 
 // 在时间`time`时添加一个编号为`id`的查询.
-func (o *OffLineDynamicConnectivity) AddQuery(time int, id int) {
+func (o *SegmentTreeDivideAndConquerUndo) AddQuery(time int, id int) {
 	o.queries = append(o.queries, struct{ time, id int }{time, id})
 }
 
-func (o *OffLineDynamicConnectivity) Run() {
+func (o *SegmentTreeDivideAndConquerUndo) Run() {
 	if len(o.queries) == 0 {
 		return
 	}
@@ -237,13 +238,13 @@ func (o *OffLineDynamicConnectivity) Run() {
 	o.dfs(1)
 }
 
-func (o *OffLineDynamicConnectivity) dfs(now int) {
+func (o *SegmentTreeDivideAndConquerUndo) dfs(now int) {
 	curNodes := o.nodes[now]
 	for _, id := range curNodes {
 		if id&1 == 1 {
 			o.query(id >> 1)
 		} else {
-			o.add(id >> 1)
+			o.mutate(id >> 1)
 		}
 	}
 	if now<<1 < len(o.nodes) {

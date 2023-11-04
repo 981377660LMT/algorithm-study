@@ -1,87 +1,89 @@
-"""
-最好是根据实际场景写逻辑 而不是复用模板
-"""
-
-from typing import DefaultDict, Hashable, List, Mapping, MutableMapping, Set, Tuple, TypeVar
+from typing import List, Tuple
 from collections import deque
 
 
-def topoSort(n: int, adjList: List[List[int]], deg: List[int], directed=True) -> List[int]:
-    """求图的拓扑排序
+def hasCycle(n: int, adjList: List[List[int]], directed=True) -> bool:
+    """拓扑排序判环."""
+    if directed:
+        deg = [0] * n
+        for i in range(n):
+            for j in adjList[i]:
+                deg[j] += 1
+    else:
+        deg = [len(adj) for adj in adjList]
 
-    Args:
-        n (int): 顶点0~n-1
-        adjList (List[List[int]]): 邻接表
-        deg (List[int]): 有向图的入度/无向图的度
-        directed (bool): 是否为有向图
-
-    Returns:
-        List[int]: 拓扑排序结果, 若不存在则返回空列表
-    """
     startDeg = 0 if directed else 1
     queue = deque([v for v in range(n) if deg[v] == startDeg])
-    visited = [False] * n
-    res = []
+    count = 0
     while queue:
         cur = queue.popleft()
-        res.append(cur)
-        visited[cur] = True
+        count += 1
         for next in adjList[cur]:
-            if visited[next]:
-                continue
             deg[next] -= 1
             if deg[next] == startDeg:
                 queue.append(next)
-
-    return [] if len(res) < n else res
-
-
-T = TypeVar("T", bound=Hashable)
+    return count < n
 
 
-def topoSort2(
-    allVertex: Set[T],
-    adjMap: Mapping[T, List[T]],
-    deg: MutableMapping[T, int],
-    directed=True,
-) -> List[T]:
-    """返回图的拓扑排序结果, 若不存在则返回空列表"""
+def topoSort(n: int, adjList: List[List[int]], directed=True) -> Tuple[List[int], bool]:
+    """求图的拓扑排序."""
+    if directed:
+        deg = [0] * n
+        for i in range(n):
+            for j in adjList[i]:
+                deg[j] += 1
+    else:
+        deg = [len(adj) for adj in adjList]
+
     startDeg = 0 if directed else 1
-    queue = deque([v for v in allVertex if deg[v] == startDeg])
-    visited = set()
+    queue = deque([v for v in range(n) if deg[v] == startDeg])
     res = []
     while queue:
         cur = queue.popleft()
         res.append(cur)
-        visited.add(cur)
-        for next in adjMap[cur]:
-            if next in visited:
-                continue
+        for next in adjList[cur]:
             deg[next] -= 1
             if deg[next] == startDeg:
                 queue.append(next)
-    return [] if len(res) < len(allVertex) else res
+
+    if len(res) != n:
+        return [], False
+    return res, True
 
 
-def toposort3(
-    allVertex: Set[T], adjMap: Mapping[T, List[T]], deg: DefaultDict[T, int], directed=True
-) -> Tuple[int, List[T]]:
-    """返回有向图拓扑排序方案数和拓扑排序结果"""
-    startDeg = 0 if directed else 1
-    queue = deque([v for v in allVertex if deg[v] == startDeg])
-    visited = set()
-    res, topoCount = [], 1
-    while queue:
-        topoCount *= len(queue)
-        cur = queue.popleft()
-        res.append(cur)
-        visited.add(cur)
-        for next in adjMap[cur]:
-            if next in visited:
-                continue
-            deg[next] -= 1
-            if deg[next] == 0:
-                queue.append(next)
-    if len(res) != len(allVertex):
-        return 0, []
-    return topoCount, res
+if __name__ == "__main__":
+
+    class Solution:
+        def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+            n = numCourses
+            adjList = [[] for _ in range(n)]
+            for pre, cur in prerequisites:
+                adjList[pre].append(cur)
+            return not hasCycle(n, adjList)
+
+
+# T = TypeVar("T", bound=Hashable)
+
+
+# def toposort3(
+#     allVertex: Set[T], adjMap: Mapping[T, List[T]], deg: DefaultDict[T, int], directed=True
+# ) -> Tuple[int, List[T]]:
+#     """返回有向图拓扑排序方案数和拓扑排序结果"""
+#     startDeg = 0 if directed else 1
+#     queue = deque([v for v in allVertex if deg[v] == startDeg])
+#     visited = set()
+#     res, topoCount = [], 1
+#     while queue:
+#         topoCount *= len(queue)
+#         cur = queue.popleft()
+#         res.append(cur)
+#         visited.add(cur)
+#         for next in adjMap[cur]:
+#             if next in visited:
+#                 continue
+#             deg[next] -= 1
+#             if deg[next] == 0:
+#                 queue.append(next)
+#     if len(res) != len(allVertex):
+#         return 0, []
+#     return topoCount, res

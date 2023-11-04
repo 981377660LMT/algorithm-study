@@ -28,6 +28,7 @@ func maxProfit(k int, prices []int) int {
 	return AliensDp(k, getDp)
 }
 
+// 解决dp`恰好选k个`的问题
 // 需要高速化 dp[pos][使用次数] 的 dp 时,
 // 如果dp(k+1)-dp(k)<=dp(k)-dp(k-1) ，则可以使用 wqs 二分.
 // !问题转化为`每使用一次操作罚款 penalty 元,求最大分数`.

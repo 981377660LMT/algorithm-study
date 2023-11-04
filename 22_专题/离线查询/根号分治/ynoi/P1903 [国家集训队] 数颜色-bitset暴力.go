@@ -16,7 +16,7 @@ import (
 )
 
 func PointSetRangeType(nums []int, operations [][3]int) []int {
-	block := UseBlock(nums, int(30*math.Sqrt(float64(len(nums)))+1))
+	block := UseBlock(len(nums), int(30*math.Sqrt(float64(len(nums)))+1))
 	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
 
 	n := len(nums)

@@ -3,37 +3,82 @@ package main
 // https://leetcode.cn/problems/course-schedule/
 func canFinish(numCourses int, prerequisites [][]int) bool {
 	adjList := make([][]int, numCourses)
-	deg := make([]int, numCourses)
 	for _, e := range prerequisites {
 		u, v := e[0], e[1]
 		adjList[u] = append(adjList[u], v)
-		deg[v]++
 	}
-	_, ok := TopoSort(numCourses, adjList, deg, true)
+	_, ok := TopoSort(numCourses, adjList, true)
 	return ok
 }
 
-func TopoSort(n int, adjList [][]int, deg []int, directed bool) (order []int, ok bool) {
+// 拓扑排序环检测.
+func HasCycle(n int, adjList [][]int, directed bool) bool {
+	deg := make([]int, n)
 	startDeg := 0
-	if !directed {
+	if directed {
+		for _, adj := range adjList {
+			for _, j := range adj {
+				deg[j]++
+			}
+		}
+	} else {
+		for i, adj := range adjList {
+			deg[i] = len(adj)
+		}
 		startDeg = 1
 	}
-	queue := make([]int, 0, n)
+
+	queue := []int{}
 	for v := 0; v < n; v++ {
 		if deg[v] == startDeg {
 			queue = append(queue, v)
 		}
 	}
-	visited := make([]bool, n)
+	count := 0
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		count++
+		for _, next := range adjList[cur] {
+			deg[next]--
+			if deg[next] == startDeg {
+				queue = append(queue, next)
+			}
+		}
+	}
+
+	return count < n
+}
+
+// 拓扑排序结果.
+func TopoSort(n int, adjList [][]int, directed bool) (order []int, ok bool) {
+	deg := make([]int, n)
+	startDeg := 0
+	if directed {
+		for _, adj := range adjList {
+			for _, j := range adj {
+				deg[j]++
+			}
+		}
+	} else {
+		for i, adj := range adjList {
+			deg[i] = len(adj)
+		}
+		startDeg = 1
+	}
+
+	queue := []int{}
+	for v := 0; v < n; v++ {
+		if deg[v] == startDeg {
+			queue = append(queue, v)
+		}
+	}
+
 	for len(queue) > 0 {
 		cur := queue[0]
 		queue = queue[1:]
 		order = append(order, cur)
-		visited[cur] = true
 		for _, next := range adjList[cur] {
-			if visited[next] {
-				continue
-			}
 			deg[next]--
 			if deg[next] == startDeg {
 				queue = append(queue, next)

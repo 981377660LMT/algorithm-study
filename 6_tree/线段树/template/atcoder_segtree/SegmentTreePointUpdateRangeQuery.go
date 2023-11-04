@@ -168,6 +168,12 @@ func (st *SegmentTreePointUpdateRangeQuery) MinLeft(right int, predicate func(E)
 	return 0
 }
 
+func (st *SegmentTreePointUpdateRangeQuery) GetAll() []E {
+	res := make([]E, st.n)
+	copy(res, st.data[st.size:st.size+st.n])
+	return res
+}
+
 func (st *SegmentTreePointUpdateRangeQuery) String() string {
 	res := make([]E, st.n)
 	for i := range res {

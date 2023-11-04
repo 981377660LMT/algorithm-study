@@ -2,8 +2,6 @@
 /* eslint-disable max-len */
 /* eslint-disable no-param-reassign */
 
-import { discretizeSparse } from '../../../../22_专题/前缀与差分/差分数组/离散化/discretize'
-
 /**
  * 单点更新, 区间查询，维护阿贝尔群(或者幺半群)的树状数组.
  * @alias BITMonoid
@@ -22,7 +20,10 @@ class BitAbleGroup<E> {
    * 如果只查询前缀和(不使用区间查询), 可以不指定逆元`inv`.
    * 默认为加法群.
    */
-  constructor(nOrArr: number | E[], ableGroup?: { e: () => E; op: (e1: E, e2: E) => E; inv?: (e: E) => E }) {
+  constructor(
+    nOrArr: number | E[],
+    ableGroup?: { e: () => E; op: (e1: E, e2: E) => E; inv?: (e: E) => E }
+  ) {
     let defaultE = () => 0 as any
     let defaultOp = (e1: any, e2: any) => e1 + e2
     let defaultInv = (e: E) => -e as any

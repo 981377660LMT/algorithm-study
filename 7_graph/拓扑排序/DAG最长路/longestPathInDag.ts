@@ -2,7 +2,11 @@
 /* eslint-disable no-inner-declarations */
 
 /** DAG最长路. */
-function longestPathInDag(n: number, adjList: ArrayLike<ArrayLike<number>>, getWeight: (from: number, to: number) => number = () => 1): number[] {
+function longestPathInDag(
+  n: number,
+  adjList: ArrayLike<ArrayLike<number>>,
+  getWeight: (from: number, to: number) => number = () => 1
+): [dp: number[], hasCycle: boolean] {
   const indeg = new Uint32Array(n)
   for (let i = 0; i < n; i++) {
     const nexts = adjList[i]
@@ -11,6 +15,7 @@ function longestPathInDag(n: number, adjList: ArrayLike<ArrayLike<number>>, getW
     }
   }
 
+  let count = 0
   const queue = new Uint32Array(n)
   let head = 0
   let tail = 0
@@ -24,6 +29,7 @@ function longestPathInDag(n: number, adjList: ArrayLike<ArrayLike<number>>, getW
   while (head < tail) {
     const cur = queue[head++]
     const nexts = adjList[cur]
+    count++
     for (let i = 0; i < nexts.length; i++) {
       const next = nexts[i]
       dp[next] = Math.max(dp[next], dp[cur] + getWeight(cur, next))
@@ -33,7 +39,7 @@ function longestPathInDag(n: number, adjList: ArrayLike<ArrayLike<number>>, getW
     }
   }
 
-  return dp
+  return [dp, count === n]
 }
 
 const INF = 2e15
@@ -88,7 +94,7 @@ if (require.main === module) {
       adjList[dummy].push(i)
     }
     const dp = longestPathInDag(n + 1, adjList, (_, to) => time[to])
-    return Math.max(...dp)
+    return Math.max(...dp[0])
   }
 
   // 2770. 达到末尾下标所需的最大跳跃次数

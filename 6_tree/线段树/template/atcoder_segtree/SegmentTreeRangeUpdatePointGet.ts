@@ -93,6 +93,13 @@ class SegmentTreeRangeUpdatePointGet<Id = number> {
     }
   }
 
+  getAll(): Id[] {
+    for (let i = 0; i < this._size; i++) {
+      this._propagate(i)
+    }
+    return this._lazy.slice(this._size, this._size + this._n)
+  }
+
   toString(): string {
     const sb: string[] = []
     sb.push('SegmentTreeRangeUpdatePointGet(')
@@ -152,12 +159,13 @@ if (require.main === module) {
   const BIGMOD = BigInt(1e9 + 7)
 
   class Fancy {
-    private readonly _seg: SegmentTreeRangeUpdatePointGet<[mul: bigint, add: bigint]> = new SegmentTreeRangeUpdatePointGet(
-      1e5 + 10,
-      () => [1n, 0n],
-      (f, g) => [(f[0] * g[0]) % BIGMOD, (f[0] * g[1] + f[1]) % BIGMOD],
-      (a, b) => a[0] === b[0] && a[1] === b[1]
-    )
+    private readonly _seg: SegmentTreeRangeUpdatePointGet<[mul: bigint, add: bigint]> =
+      new SegmentTreeRangeUpdatePointGet(
+        1e5 + 10,
+        () => [1n, 0n],
+        (f, g) => [(f[0] * g[0]) % BIGMOD, (f[0] * g[1] + f[1]) % BIGMOD],
+        (a, b) => a[0] === b[0] && a[1] === b[1]
+      )
     private _length = 0
 
     append(val: number): void {

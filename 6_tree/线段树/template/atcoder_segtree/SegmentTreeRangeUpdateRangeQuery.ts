@@ -219,6 +219,13 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     return 0
   }
 
+  getAll(): E[] {
+    for (let i = 1; i < this._size; i++) {
+      this._pushDown(i)
+    }
+    return this._data.slice(this._size, this._size + this._n)
+  }
+
   toString(): string {
     const sb: string[] = []
     sb.push('SegmentTreeRangeUpdateRangeQuery(')
@@ -253,9 +260,25 @@ class SegmentTreeRangeUpdateRangeQuery<E = number, Id = number> {
     if (index < this._size) this._lazy[index] = this._composition(lazy, this._lazy[index])
   }
 
-  private static _isPrimitive(o: unknown): o is number | string | boolean | symbol | bigint | null | undefined {
+  private static _isPrimitive(
+    o: unknown
+  ): o is number | string | boolean | symbol | bigint | null | undefined {
     return o === null || (typeof o !== 'object' && typeof o !== 'function')
   }
 }
 
 export { SegmentTreeRangeUpdateRangeQuery }
+
+if (require.main === module) {
+  const seg = new SegmentTreeRangeUpdateRangeQuery(10, {
+    e: () => 0,
+    id: () => 0,
+    op: (a, b) => Math.max(a, b),
+    mapping: (lazy, data) => Math.max(lazy, data),
+    composition: (f, g) => Math.max(f, g)
+  })
+
+  console.log(seg.getAll())
+  seg.update(0, 10, 1)
+  console.log(seg.getAll())
+}

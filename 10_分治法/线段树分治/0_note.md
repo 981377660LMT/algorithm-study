@@ -20,17 +20,28 @@
 
 ---
 
+updates:
+
 https://www.luogu.com.cn/blog/yszs/xian-duan-shu-fen-zhi
 
-考虑这一类问题：
+考虑这一类离线问题：
 `给定一个时间轴（或者设想一个），有若干个操作(可交换,commutative)在时间 l−r 中起作用。询问某一个时间某个值是什么。`
 
-- 如果操作可删除(remove 接口)：扫描线算法,ins 和 outs 保存修改
-- 如果操作难删除，但是容易撤销(undo 接口)：线段树分治
+- 如果操作可删除(remove 接口)：扫描线算法, ins 和 outs 保存修改
+- 如果操作难删除，但是容易撤销(undo 接口)或者拷贝(copy 接口)的总代价不大：线段树分治
   一般来说，数据结构撤销的方法包括两种：修改时拷贝(copy)、修改时记录变更(updates)
   前一种可以参考模版`mutateWithOutOne.go`，后一种可以参考可撤销并查集。
+  下面把基于记录变更的撤销方法叫做`undo`，修改时拷贝的撤销方法叫做`copy`.
 
   线段树分治是一种处理动态修改和询问的离线算法。通过将某一元素的出现时间段在线段树上保存，我们可以 dfs 遍历整棵线段树，运用可撤销数据结构维护来得到每个时间点的答案。
+
+  **undo 流派 和 copy 流派 什么时候用？**
+  线段树分治中，使用 undo 需要`nlog(n)`次，使用 copy 需要`O(n)`次.
+  实际问题中，谁的代价小就用谁.
+  例如，可撤销并查集适合 undo 流派，可持久化数据结构适合 copy 流派.
+  有些数据结构难以撤销，就只能使用拷贝.
+
+  [注意到如果单次 mutate 可以 log(n)，那么单次 undo 也可以 log(n)，总复杂度 nlog(n)log(n)](https://cp-algorithms.com/data_structures/deleting_in_log_n.html)
 
 ---
 

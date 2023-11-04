@@ -4,45 +4,52 @@
 
 import { UnionFindArrayWithUndoAndWeight } from '../../14_并查集/UnionFindWithUndoAndWeight'
 
-const INF = 1e9
+const INF = 2e9 // !超过int32使用2e15
 
 /**
- * 线段树分治.
+ * 线段树分治undo流派.
  * 线段树分治是一种处理动态修改和询问的离线算法.
- * 通过将某一元素的出现时间段在线段树上保存，我们可以 dfs 遍历整棵线段树，
- * 运用可撤销数据结构维护来得到每个时间点的答案.
+ * 通过将某一元素的出现时间段在线段树上保存到`log(n)`个结点中,
+ * 我们可以 dfs 遍历整棵线段树，运用可撤销数据结构维护来得到每个时间点的答案.
+ * @link https://cp-algorithms.com/data_structures/deleting_in_log_n.html
+ * @alias OfflineDynamicConnectivity
  */
-class OfflineDynamicConnectivity {
-  private readonly _add: (mutationId: number) => void
+class SegmentTreeDivideAndConquerUndo {
+  private readonly _mutate: (mutationId: number) => void
   private readonly _undo: () => void
   private readonly _query: (queryId: number) => void
   private readonly _mutations: { start: number; end: number; id: number }[] = []
   private readonly _queries: { time: number; id: number }[] = []
-  private _nodes: number[][] = []
+  private _nodes: number[][] = [] // 在每个节点上保存对应的变更和查询的编号
   private _mutationId = 0
   private _queryId = 0
 
   /**
    * dfs 遍历整棵线段树来得到每个时间点的答案.
-   * @param add 添加编号为`mutationId`的变更后产生的副作用.
-   * @param undo 撤销一次`add`操作.
+   * @param mutate 添加编号为`mutationId`的变更后产生的副作用.
+   * @param undo 撤销一次`mutate`操作.
    * @param query 响应编号为`queryId`的查询.
+   * @complexity 一共调用 **O(nlogn)** 次`mutate`和`undo`，**O(q)** 次`query`.
    */
   constructor(
+    mutate: (mutationId: number) => void,
+    undo: () => void,
+    query: (queryId: number) => void
+  )
+  constructor(
     options: {
-      add: (mutationId: number) => void
+      mutate: (mutationId: number) => void
       undo: () => void
       query: (queryId: number) => void
     } & ThisType<void>
   )
-  constructor(add: (mutationId: number) => void, undo: () => void, query: (queryId: number) => void)
   constructor(arg1: any, arg2?: any, arg3?: any) {
     if (typeof arg1 === 'object') {
-      this._add = arg1.add
+      this._mutate = arg1.mutate
       this._undo = arg1.undo
       this._query = arg1.query
     } else {
-      this._add = arg1
+      this._mutate = arg1
       this._undo = arg2
       this._query = arg3
     }
@@ -94,7 +101,7 @@ class OfflineDynamicConnectivity {
       let right = offset + this._lowerBound(times, e.end)
       const eid = e.id * 2
       while (left < right) {
-        if (left & 1) this._nodes[left++].push(eid) // add
+        if (left & 1) this._nodes[left++].push(eid) // mutate
         if (right & 1) this._nodes[--right].push(eid)
         left >>>= 1
         right >>>= 1
@@ -116,12 +123,15 @@ class OfflineDynamicConnectivity {
         // query
         this._query((id - 1) / 2)
       } else {
-        // add
-        this._add(id / 2)
+        // mutate
+        this._mutate(id / 2)
       }
     }
+
     if (now << 1 < this._nodes.length) this._dfs(now << 1)
     if (((now << 1) | 1) < this._nodes.length) this._dfs((now << 1) | 1)
+
+    // 回溯时撤销
     for (let i = curNodes.length - 1; ~i; i--) {
       if (!(curNodes[i] & 1)) {
         this._undo()
@@ -166,17 +176,20 @@ class OfflineDynamicConnectivity {
   }
 }
 
-export { OfflineDynamicConnectivity }
+export {
+  SegmentTreeDivideAndConquerUndo,
+  SegmentTreeDivideAndConquerUndo as OfflineDynamicConnectivity
+}
 
 if (require.main === module) {
   testTime()
   function testTime(): void {
-    let add = 0
+    let mutate = 0
     let undo = 0
     let query = 0
-    const dc = new OfflineDynamicConnectivity({
-      add(id) {
-        add++
+    const dc = new SegmentTreeDivideAndConquerUndo({
+      mutate(id) {
+        mutate++
       },
       undo() {
         undo++
@@ -187,14 +200,14 @@ if (require.main === module) {
     })
 
     const n = 2e5
-    console.time('add')
+    console.time('foo')
     for (let i = 0; i < n; i++) {
       dc.addMutation(0, i)
       dc.addQuery(i)
     }
     dc.run()
-    console.timeEnd('add')
-    console.log(add, undo, query)
+    console.timeEnd('foo')
+    console.log(mutate, undo, query)
   }
 
   // Dynamic Graph Vertex Add Component Sum
@@ -212,8 +225,8 @@ if (require.main === module) {
     const res: number[] = []
 
     const uf = new UnionFindArrayWithUndoAndWeight(weights, (a, b) => a + b)
-    const dc = new OfflineDynamicConnectivity({
-      add(mutationId) {
+    const dc = new SegmentTreeDivideAndConquerUndo({
+      mutate(mutationId) {
         if (mutationId >= 0) {
           const e = edges[mutationId]
           uf.union(e.u, e.v)

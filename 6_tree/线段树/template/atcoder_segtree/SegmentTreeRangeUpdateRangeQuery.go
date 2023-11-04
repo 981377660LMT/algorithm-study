@@ -125,7 +125,8 @@ func NewLazySegTreeRangeUpdateRangeQuery(leaves []E) *LazySegTree {
 }
 
 // 查询切片[left:right]的值
-//   0<=left<=right<=len(tree.data)
+//
+//	0<=left<=right<=len(tree.data)
 func (tree *LazySegTree) Query(left, right int) E {
 	if left < 0 {
 		left = 0
@@ -166,7 +167,8 @@ func (tree *LazySegTree) QueryAll() E {
 }
 
 // 更新切片[left:right]的值
-//   0<=left<=right<=len(tree.data)
+//
+//	0<=left<=right<=len(tree.data)
 func (tree *LazySegTree) Update(left, right int, f Id) {
 	if left < 0 {
 		left = 0
@@ -299,6 +301,15 @@ func (tree *LazySegTree) Set(index int, e E) {
 	for i := 1; i <= tree.log; i++ {
 		tree.pushUp(index >> i)
 	}
+}
+
+func (tree *LazySegTree) GetAll() []E {
+	for i := 1; i < tree.size; i++ {
+		tree.pushDown(i)
+	}
+	res := make([]E, tree.n)
+	copy(res, tree.data[tree.size:tree.size+tree.n])
+	return res
 }
 
 func (tree *LazySegTree) pushUp(root int) {
