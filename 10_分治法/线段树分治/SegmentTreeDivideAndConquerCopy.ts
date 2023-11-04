@@ -26,17 +26,17 @@ class SegmentTreeDivideAndConquerCopy<S> {
    */
   constructor(
     initState: S,
-    mutate: (state: S, mutationId: number) => void,
-    copy: (state: S) => S,
-    query: (state: S, queryId: number) => void
-  )
-  constructor(
-    initState: S,
     options: {
       mutate: (state: S, mutationId: number) => void
       copy: (state: S) => S
       query: (state: S, queryId: number) => void
     } & ThisType<void>
+  )
+  constructor(
+    initState: S,
+    mutate: (state: S, mutationId: number) => void,
+    copy: (state: S) => S,
+    query: (state: S, queryId: number) => void
   )
   constructor(arg1: any, arg2: any, arg3?: any, arg4?: any) {
     this._initState = arg1
@@ -116,10 +116,8 @@ class SegmentTreeDivideAndConquerCopy<S> {
     for (let i = 0; i < curNodes.length; i++) {
       const id = curNodes[i]
       if (id & 1) {
-        // query
         this._query(state, (id - 1) / 2)
       } else {
-        // mutate
         this._mutate(state, id / 2)
       }
     }
@@ -177,15 +175,30 @@ if (require.main === module) {
   function productExceptSelf(nums: number[]): number[] {
     const n = nums.length
     const res = Array(n).fill(1)
-    mutateWithoutOne({ mul: 1 }, 0, n, {
-      copy: state => ({ mul: state.mul }),
-      mutate: (state, index) => {
-        state.mul *= nums[index]
-      },
-      query: (state, index) => {
-        res[index] = state.mul
+    const seg = new SegmentTreeDivideAndConquerCopy(
+      { value: 1 },
+      {
+        mutate(state, mutationId) {
+          state.value *= nums[mutationId]
+        },
+        copy(state) {
+          return { value: state.value }
+        },
+        query(state, queryId) {
+          res[queryId] = state.value
+        }
       }
-    })
+    )
+
+    // 第i次变更在时间段 `[0, i) + [i+1, n)` 内存在.
+    for (let i = 0; i < n; i++) {
+      seg.addMutation(0, i, i)
+      seg.addMutation(i + 1, n, i)
+    }
+    for (let i = 0; i < n; i++) {
+      seg.addQuery(i, i)
+    }
+    seg.run()
 
     return res
   }

@@ -1,12 +1,42 @@
 package main
 
-import "sort"
+import (
+	"sort"
+)
 
-func main() {
+// 238. 除自身以外数组的乘积
+// https://leetcode.cn/problems/product-of-array-except-self/
+func productExceptSelf(nums []int) []int {
+	n := len(nums)
+	res := make([]int, n)
+	initState := State{value: 1}
+	seg := NewSegmentTreeDivideAndConquerCopy(
+		&initState,
+		func(state *State, mutationId int) {
+			state.value *= nums[mutationId]
+		},
+		func(state *State) *State {
+			copy_ := *state
+			return &copy_
+		},
+		func(state *State, queryId int) {
+			res[queryId] = state.value
+		},
+	)
 
+	// 第i次变更在时间段 `[0, i) + [i+1, n)` 内存在.
+	for i := 0; i < n; i++ {
+		seg.AddMutation(0, i, i)
+		seg.AddMutation(i+1, n, i)
+	}
+	for i := 0; i < n; i++ {
+		seg.AddQuery(i, i)
+	}
+	seg.Run()
+	return res
 }
 
-type State = int
+type State = struct{ value int }
 
 // 线段树分治copy流派.
 // 如果修改操作难以撤销，可以在每个节点处保存一份副本.
@@ -22,18 +52,21 @@ type SegmentTreeDivideAndConquerCopy struct {
 
 // dfs 遍历整棵线段树来得到每个时间点的答案.
 //
-//  initState: 数据结构的初始状态.
-//	mutate: 添加编号为`mutationId`的变更后产生的副作用.
-//	copy: 拷贝一份数据结构的副本.
-//	query: 响应编号为`queryId`的查询.
-//	一共调用 **O(nlogn)** 次`mutate`，**O(n)** 次`copy` 和 **O(q)** 次`query`.
+//	 initState: 数据结构的初始状态.
+//		mutate: 添加编号为`mutationId`的变更后产生的副作用.
+//		copy: 拷贝一份数据结构的副本.
+//		query: 响应编号为`queryId`的查询.
+//		一共调用 **O(nlogn)** 次`mutate`，**O(n)** 次`copy` 和 **O(q)** 次`query`.
 func NewSegmentTreeDivideAndConquerCopy(
 	initState *State,
 	mutate func(state *State, mutationId int),
 	copy func(state *State) *State,
 	query func(state *State, queryId int),
 ) *SegmentTreeDivideAndConquerCopy {
-	return &SegmentTreeDivideAndConquerCopy{mutate: mutate, copy: copy, query: query}
+	return &SegmentTreeDivideAndConquerCopy{
+		initState: initState,
+		mutate:    mutate, copy: copy, query: query,
+	}
 }
 
 // 在时间范围`[startTime, endTime)`内添加一个编号为`id`的变更.
