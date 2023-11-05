@@ -8,10 +8,14 @@
 
 # 此处存为列表
 # 311. 稀疏矩阵的乘法
+# 稀疏矩阵的常用存储格式（COO、CSR、CSC）
+# https://blog.csdn.net/m0_64204369/article/details/123035598
+# COO, coordinate format.
+# CSR, compressed sparse row format.
+# CSC, compressed sparse column format.
+
 
 from typing import List
-
-# 矩阵乘法
 
 
 class Solution:

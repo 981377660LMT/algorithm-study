@@ -17,9 +17,9 @@ import (
 
 func main() {
 
-	// fmt.Println(SubsetSumTargetDp([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
+	// fmt.Println(SubsetSumTargetDp1([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
 	// fmt.Println(SubsetSumTargetDp2([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
-	// fmt.Println(SubsetSumTargetBitset([]int{3, 4, 5, 6, 7, 8, 9}, 11))
+	fmt.Println(SubsetSumTargetBitset([]int{3, 4, 5, 6, 7, 8, 9}, 11))
 	// fmt.Println(SubsetSumTargetMeetInMiddle([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
 
 	// yuki04()
@@ -336,9 +336,8 @@ func SubsetSumTargetDp2(nums []int, target int) (res []int, ok bool) {
 // Bitset优化dp.能否用nums中的若干个数凑出和为target.
 //
 //	O(n*target/w)
-//
-// TODO:FIXME
 func SubsetSumTargetBitset(nums []int, target int) (res []int, ok bool) {
+
 	_enumerateBits64 := func(s uint64, f func(bit int)) {
 		for s != 0 {
 			i := bits.TrailingZeros64(s)
@@ -370,10 +369,12 @@ func SubsetSumTargetBitset(nums []int, target int) (res []int, ok bool) {
 			continue
 		}
 
-		newSize := min(dp.Size()+v, target+1)
+		newSize := dp.Size() + v
 		ndp := dp.CopyAndResize(newSize)
-		dp.Resize(newSize - v)
 		ndp.IOrRange(v, newSize, dp)
+		if ndp.Size() > target+1 {
+			ndp.Resize(target + 1)
+		}
 		for i := 0; i < len(dp.data); i++ {
 			var updatedBits uint64
 			if i < len(dp.data) {

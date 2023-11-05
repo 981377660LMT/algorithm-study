@@ -43,6 +43,8 @@ https://www.luogu.com.cn/blog/yszs/xian-duan-shu-fen-zhi
 
   [注意到如果单次 mutate 可以 log(n)，那么单次 undo 也可以 log(n)，总复杂度 nlog(n)log(n)](https://cp-algorithms.com/data_structures/deleting_in_log_n.html)
 
+  注意线段树数组的 index 表示的是时间
+
 ---
 
 Marser 的线段树分治题单

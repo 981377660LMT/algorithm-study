@@ -32,6 +32,9 @@ func EnumeratePytagoreanTriple(cLimit int, f func(a, b, c int), coprimeOnly bool
 		cur := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 		a, b, c := cur[0], cur[1], cur[2]
+		if a > b {
+			a, b = b, a
+		}
 		add(a-2*b+2*c, 2*a-b+2*c, 2*a-2*b+3*c)
 		add(a+2*b+2*c, 2*a+b+2*c, 2*a+2*b+3*c)
 		add(-a+2*b+2*c, -2*a+b+2*c, -2*a+2*b+3*c)

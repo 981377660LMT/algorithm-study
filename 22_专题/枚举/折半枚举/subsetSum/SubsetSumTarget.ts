@@ -181,10 +181,10 @@ function subsetSumTargetBitset(arr: number[], target: number): [res: number[], o
   for (let k = 0; k < n; k++) {
     const v = arr[order[k]]
     if (v > target) continue
-    const newSize = Math.min(dp.size + v, target + 1)
+    const newSize = dp.size + v
     const ndp = dp.copy(newSize)
-    dp.resize(newSize - v)
     ndp.iorRange(v, newSize, dp)
+    if (ndp.size > target + 1) ndp.resize(target + 1)
     for (let i = 0; i < ndp.bits.length; i++) {
       const updatedBits = i < dp.bits.length ? dp.bits[i] ^ ndp.bits[i] : ndp.bits[i]
       enumerateBits32(updatedBits, p => {
@@ -248,7 +248,12 @@ function subsetSumTargetMeetInMiddle(arr: number[], target: number): [res: numbe
   return [[], false]
 
   // eslint-disable-next-line max-len
-  function resolveState(leftSize: number, leftState: number, rightSize: number, rightState: number): number[] {
+  function resolveState(
+    leftSize: number,
+    leftState: number,
+    rightSize: number,
+    rightState: number
+  ): number[] {
     const res: number[] = []
     for (let i = 0; i < leftSize; i++) {
       if (leftState & (1 << i)) res.push(i)
@@ -260,7 +265,13 @@ function subsetSumTargetMeetInMiddle(arr: number[], target: number): [res: numbe
   }
 }
 
-export { subsetSumTarget, subsetSumTargetDp1, subsetSumTargetDp2, subsetSumTargetBitset, subsetSumTargetMeetInMiddle }
+export {
+  subsetSumTarget,
+  subsetSumTargetDp1,
+  subsetSumTargetDp2,
+  subsetSumTargetBitset,
+  subsetSumTargetMeetInMiddle
+}
 
 if (require.main === module) {
   console.log(subsetSumTargetDp1([2, 3, 4, 5, 6, 7, 8, 9], 10))

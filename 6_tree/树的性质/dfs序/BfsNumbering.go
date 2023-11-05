@@ -74,17 +74,17 @@ func NewBFSNumbering(graph [][]Edge, root int) *BFSNumbering {
 	return res
 }
 
-// 查询root的子树中,深度为dep的顶点的欧拉序/括号序的左闭右开区间[left, right).
-//  0 <= left < right <= n.
-//  dep 是绝对深度.
-func (b *BFSNumbering) FindRange(root, dep int) (left, right int) {
+// 查询root的子树中,`绝对深度`为dep的顶点的欧拉序/括号序的左闭右开区间[start, end).
+//
+//	0 <= start < end <= n.
+func (b *BFSNumbering) FindRange(root, dep int) (start, end int) {
 	if dep < b.Depth[root] || dep >= len(b.depId)-1 {
 		return 0, 0
 	}
 	left1, right1 := b.lid[root], b.rid[root]
 	left2, right2 := b.depId[dep], b.depId[dep+1]
-	left = b.bs(left2-1, right2, left1)
-	right = b.bs(left2-1, right2, right1)
+	start = b.bs(left2-1, right2, left1)
+	end = b.bs(left2-1, right2, right1)
 	return
 }
 

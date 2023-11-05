@@ -7,7 +7,7 @@ import { UnionFindArrayWithUndoAndWeight } from '../../14_并查集/UnionFindWit
 const INF = 2e9 // !超过int32使用2e15
 
 /**
- * 线段树分治undo流派.
+ * 线段树分治undo版.
  * 线段树分治是一种处理动态修改和询问的离线算法.
  * 通过将某一元素的出现时间段在线段树上保存到`log(n)`个结点中,
  * 我们可以 dfs 遍历整棵线段树，运用可撤销数据结构维护来得到每个时间点的答案.

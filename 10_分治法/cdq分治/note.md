@@ -7,3 +7,10 @@ https://www.bilibili.com/video/BV1mC4y1s7ic
 https://www.luogu.com.cn/blog/ljc20020730/cdq-fen-zhi-xue-xi-bi-ji
 动态逆序对 https://www.luogu.com.cn/problem/P3157 https://www.luogu.com.cn/problem/UVA11990
 CDQ 优化 DP https://www.luogu.com.cn/problem/P2487
+
+---
+
+流程：
+
+1. 将问题转为数据结构问题，变为时间序列上的修改与查询
+2. 分治

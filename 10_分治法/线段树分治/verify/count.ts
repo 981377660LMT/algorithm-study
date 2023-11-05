@@ -1,5 +1,6 @@
 import { SegmentTreeDivideAndConquerCopy } from '../SegmentTreeDivideAndConquerCopy'
 import { SegmentTreeDivideAndConquerUndo } from '../SegmentTreeDivideAndConquerUndo'
+import { SweepLine } from '../SweepLine'
 import { mutateWithoutOne } from '../mutateWithOutOne'
 
 function test1(): void {
@@ -94,3 +95,35 @@ function test3(): void {
 }
 
 test3()
+
+function test4(): void {
+  let mutate = 0
+  let remove = 0
+  let query = 0
+
+  const n = 1e5
+
+  const sweepLine = new SweepLine({
+    mutate(mutationId) {
+      mutate++
+    },
+    remove(mutationId) {
+      remove++
+    },
+    query(mutationId) {
+      query++
+    }
+  })
+
+  for (let i = 0; i < n; i++) {
+    sweepLine.addMutation(i, i + 1, i)
+  }
+  for (let i = 0; i < 2 * n; i++) {
+    sweepLine.addQuery(i, i)
+  }
+  sweepLine.run()
+
+  console.log(mutate, remove, query) // 100000 100000 200000
+}
+
+test4()

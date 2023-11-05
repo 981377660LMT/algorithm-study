@@ -20,7 +20,13 @@ function enumeratePytagoreanTriple(
   add(3, 4, 5)
   while (stack.length) {
     const cur = stack.pop()!
-    const { a, b, c } = cur
+    let { a, b, c } = cur
+    if (a > b) {
+      const tmp = a
+      a = b
+      b = tmp
+    }
+
     add(a - 2 * b + 2 * c, 2 * a - b + 2 * c, 2 * a - 2 * b + 3 * c)
     add(a + 2 * b + 2 * c, 2 * a + b + 2 * c, 2 * a + 2 * b + 3 * c)
     add(-a + 2 * b + 2 * c, -2 * a + b + 2 * c, -2 * a + 2 * b + 3 * c)
@@ -54,4 +60,5 @@ if (require.main === module) {
   )
   console.log(count)
   console.timeEnd('enumeratePytagoreanTriple')
+  enumeratePytagoreanTriple(100, console.log)
 }

@@ -38,7 +38,7 @@ func productExceptSelf(nums []int) []int {
 
 type State = struct{ value int }
 
-// 线段树分治copy流派.
+// 线段树分治copy版.
 // 如果修改操作难以撤销，可以在每个节点处保存一份副本.
 type SegmentTreeDivideAndConquerCopy struct {
 	initState *State
