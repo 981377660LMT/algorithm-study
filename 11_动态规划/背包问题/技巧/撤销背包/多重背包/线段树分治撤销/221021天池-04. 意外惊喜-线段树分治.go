@@ -31,7 +31,7 @@ func brilliantSurprise(present [][]int, limit int) int {
 
 	res := 0
 	initState := make([]int, limit+1)
-	MutateWithoutOne(
+	MutateWithoutOneCopy(
 		&initState,
 		0, n,
 		func(state *S) *S {
@@ -62,7 +62,7 @@ func brilliantSurprise(present [][]int, limit int) int {
 type S = []int
 
 // 线段树分治的特殊情形.
-func MutateWithoutOne(
+func MutateWithoutOneCopy(
 	initState *S,
 	start, end int,
 	copy func(state *S) *S,

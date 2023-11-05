@@ -4,7 +4,7 @@
  * 分治删点.类似`除自身以外数组的乘积`.
  * 调用 `query` 时，`state` 为对除了 `index` 以外所有点均调用过了 `mutate` 的状态。但不保证调用 `mutate` 的顺序。
  *
- * 总计会调用 $O(NlgN)$ 次的 `mutate` 和 `query`, 以及 $O(N)$ 次的 `copy`.
+ * 总计会调用 $O(NlgN)$ 次的 `mutate` , $O(N)$ 次的 `copy` 和 `query`.
  * @link
  * https://github.com/tdzl2003/leetcode_live/blob/master/templates/%E5%9F%BA%E7%A1%80/%E5%88%86%E6%B2%BB%E5%88%A0%E7%82%B9.cpp
  * @note
@@ -14,7 +14,7 @@
  * 不要求`mutate`操作可撤销(undo/存在逆元).
  * 不要求`mutate`操作满足结合律(如果操作满足结合律，则可以使用前后缀合并).
  */
-function mutateWithoutOne<S>(
+function mutateWithoutOneCopy<S>(
   state: S,
   start: number,
   end: number,
@@ -50,7 +50,7 @@ function mutateWithoutOne<S>(
   dfs(state, start, end)
 }
 
-export { mutateWithoutOne }
+export { mutateWithoutOneCopy }
 
 if (require.main === module) {
   // 238. 除自身以外数组的乘积
@@ -58,7 +58,7 @@ if (require.main === module) {
   function productExceptSelf(nums: number[]): number[] {
     const n = nums.length
     const res = Array(n).fill(1)
-    mutateWithoutOne({ mul: 1 }, 0, n, {
+    mutateWithoutOneCopy({ mul: 1 }, 0, n, {
       copy: state => ({ mul: state.mul }),
       mutate: (state, index) => {
         state.mul *= nums[index]

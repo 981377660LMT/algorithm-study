@@ -31,7 +31,7 @@ func ARC028D(counts []int, need int, queries [][2]int) []int {
 
 	res := make([]int, q)
 	initState := NewBoundedKnapsack(need, MOD)
-	MutateWithoutOne(
+	MutateWithoutOneCopy(
 		initState,
 		0, n,
 		func(state *S) *S {
@@ -56,7 +56,7 @@ func ARC028D(counts []int, need int, queries [][2]int) []int {
 type S = BoundedKnapsack
 
 // 线段树分治的特殊情形.
-func MutateWithoutOne(
+func MutateWithoutOneCopy(
 	initState *S,
 	start, end int,
 	copy func(state *S) *S,

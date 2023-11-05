@@ -1,7 +1,7 @@
 import { SegmentTreeDivideAndConquerCopy } from '../SegmentTreeDivideAndConquerCopy'
 import { SegmentTreeDivideAndConquerUndo } from '../SegmentTreeDivideAndConquerUndo'
 import { SweepLine } from '../SweepLine'
-import { mutateWithoutOne } from '../mutateWithOutOne'
+import { mutateWithoutOneCopy } from '../mutateWithOutOneCopy'
 
 function test1(): void {
   let mutate = 0
@@ -78,7 +78,7 @@ function test3(): void {
 
   const n = 1e5
 
-  mutateWithoutOne({ value: 1 }, 0, n, {
+  mutateWithoutOneCopy({ value: 1 }, 0, n, {
     mutate(state, index) {
       mutate++
     },
