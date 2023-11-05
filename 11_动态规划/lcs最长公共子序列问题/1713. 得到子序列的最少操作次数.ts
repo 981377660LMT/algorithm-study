@@ -1,4 +1,4 @@
-import { LIS, LIS2Strict } from '../lis最长上升子序列问题/LIS模板'
+import { LIS } from '../lis最长上升子序列问题/LIS模板'
 
 /**
  * @param {number[]} target 1 <= target.length, arr.length <= 10**5 且 target 数组元素各不相同
@@ -25,7 +25,7 @@ function minOperations(target: number[], arr: number[]): number {
     const num = arr[i]
     valueToIndex.has(num) && newNums.push(valueToIndex.get(num)!)
   }
-  const lis = LIS2Strict(newNums, valueToIndex.size)
+  const lis = LIS(newNums, true)
   return target.length - lis
 }
 

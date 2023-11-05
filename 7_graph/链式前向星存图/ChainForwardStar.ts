@@ -122,7 +122,7 @@ class ChainForwardStar {
     this.removeDirectedEdge(v, u)
   }
 
-  enumerateNexts(
+  enumerateNeigbor(
     cur: number,
     callbackfn: (next: number, weight: number, edgeId: number) => void
   ): void {
@@ -135,7 +135,7 @@ class ChainForwardStar {
     const res = Array(this._n)
     for (let cur = 0; cur < this._n; cur++) {
       const nexts: [next: number, weight: number, edgeId: number][] = []
-      this.enumerateNexts(cur, (next, weight, edgeId) => {
+      this.enumerateNeigbor(cur, (next, weight, edgeId) => {
         nexts.push([next, weight, edgeId])
       })
 
