@@ -27,9 +27,7 @@ type SegNode<E> = {
 }
 
 class SegmentTreeDynamic<E = number> {
-  private static _isPrimitive(
-    o: unknown
-  ): o is number | string | boolean | symbol | bigint | null | undefined {
+  private static _isPrimitive(o: unknown): o is number | string | boolean | symbol | bigint | null | undefined {
     return o === null || (typeof o !== 'object' && typeof o !== 'function')
   }
 
@@ -194,7 +192,7 @@ class SegmentTreeDynamic<E = number> {
     return res
   }
 
-  private _copyNode(node: SegNode<E>): SegNode<E> {
+  copy(node: SegNode<E>): SegNode<E> {
     if (!node || !this._persistent) return node
     return { left: node.left, right: node.right, index: node.index, data: node.data, sum: node.sum }
   }
@@ -208,7 +206,7 @@ class SegmentTreeDynamic<E = number> {
 
   private _set(root: SegNode<E> | undefined, l: number, r: number, i: number, x: E): SegNode<E> {
     if (!root) return SegmentTreeDynamic._newNode(i, x)
-    root = this._copyNode(root)
+    root = this.copy(root)
     if (root.index === i) {
       root.data = x
       this._pushUp(root)
@@ -248,7 +246,7 @@ class SegmentTreeDynamic<E = number> {
 
   private _update(root: SegNode<E> | undefined, l: number, r: number, i: number, x: E): SegNode<E> {
     if (!root) return SegmentTreeDynamic._newNode(i, x)
-    root = this._copyNode(root)
+    root = this.copy(root)
     if (root.index === i) {
       root.data = this._op(root.data, x)
       this._pushUp(root)

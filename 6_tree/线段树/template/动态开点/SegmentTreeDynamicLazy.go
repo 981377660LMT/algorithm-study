@@ -141,19 +141,19 @@ func (ds *DynamicSegTreeLazy) GetAll(root *SegNode) []E {
 	return res
 }
 
+func (ds *DynamicSegTreeLazy) Copy(node *SegNode) *SegNode {
+	if node == nil || !ds.persistent {
+		return node
+	}
+	return &SegNode{l: node.l, r: node.r, x: node.x, lazy: node.lazy}
+}
+
 func (ds *DynamicSegTreeLazy) _newNode(left, right int) *SegNode {
 	return &SegNode{x: e2(left, right), lazy: ds.lazyUnit}
 }
 
 func (ds *DynamicSegTreeLazy) _newNodeWithValue(x E) *SegNode {
 	return &SegNode{x: x, lazy: ds.lazyUnit}
-}
-
-func (ds *DynamicSegTreeLazy) _copyNode(node *SegNode) *SegNode {
-	if node == nil || !ds.persistent {
-		return node
-	}
-	return &SegNode{l: node.l, r: node.r, x: node.x, lazy: node.lazy}
 }
 
 func (ds *DynamicSegTreeLazy) _pushDown(node *SegNode, l, r int) {
@@ -164,14 +164,14 @@ func (ds *DynamicSegTreeLazy) _pushDown(node *SegNode, l, r int) {
 	if node.l == nil {
 		node.l = ds._newNode(l, m)
 	} else {
-		node.l = ds._copyNode(node.l)
+		node.l = ds.Copy(node.l)
 	}
 	node.l.x = mapping(node.lazy, node.l.x, m-l)
 	node.l.lazy = composition(node.lazy, node.l.lazy)
 	if node.r == nil {
 		node.r = ds._newNode(m, r)
 	} else {
-		node.r = ds._copyNode(node.r)
+		node.r = ds.Copy(node.r)
 	}
 	node.r.x = mapping(node.lazy, node.r.x, r-m)
 	node.r.lazy = composition(node.lazy, node.r.lazy)
@@ -197,7 +197,7 @@ func (ds *DynamicSegTreeLazy) _buildRec(left, right int, nums []E) *SegNode {
 
 func (ds *DynamicSegTreeLazy) _setRec(root *SegNode, l, r, i int, x E) *SegNode {
 	if l == r-1 {
-		root = ds._copyNode(root)
+		root = ds.Copy(root)
 		root.x = x
 		root.lazy = ds.lazyUnit
 		return root
@@ -210,7 +210,7 @@ func (ds *DynamicSegTreeLazy) _setRec(root *SegNode, l, r, i int, x E) *SegNode 
 	if root.r == nil {
 		root.r = ds._newNode(m, r)
 	}
-	root = ds._copyNode(root)
+	root = ds.Copy(root)
 	if i < m {
 		root.l = ds._setRec(root.l, l, m, i, x)
 	} else {
@@ -222,7 +222,7 @@ func (ds *DynamicSegTreeLazy) _setRec(root *SegNode, l, r, i int, x E) *SegNode 
 
 func (ds *DynamicSegTreeLazy) _updateRec(root *SegNode, l, r, i int, x E) *SegNode {
 	if l == r-1 {
-		root = ds._copyNode(root)
+		root = ds.Copy(root)
 		root.x = op(root.x, x)
 		root.lazy = ds.lazyUnit
 		return root
@@ -235,7 +235,7 @@ func (ds *DynamicSegTreeLazy) _updateRec(root *SegNode, l, r, i int, x E) *SegNo
 	if root.r == nil {
 		root.r = ds._newNode(m, r)
 	}
-	root = ds._copyNode(root)
+	root = ds.Copy(root)
 	if i < m {
 		root.l = ds._updateRec(root.l, l, m, i, x)
 	} else {
@@ -275,14 +275,14 @@ func (ds *DynamicSegTreeLazy) _updateRangeRec(root *SegNode, l, r, ql, qr int, l
 		return root
 	}
 	if l == ql && r == qr {
-		root = ds._copyNode(root)
+		root = ds.Copy(root)
 		root.x = mapping(lazy, root.x, r-l)
 		root.lazy = composition(lazy, root.lazy)
 		return root
 	}
 	ds._pushDown(root, l, r)
 	m := (l + r) >> 1
-	root = ds._copyNode(root)
+	root = ds.Copy(root)
 	root.l = ds._updateRangeRec(root.l, l, m, ql, qr, lazy)
 	root.r = ds._updateRangeRec(root.r, m, r, ql, qr, lazy)
 	root.x = op(root.l.x, root.r.x)

@@ -122,19 +122,19 @@ func (ds *DynamicSegTree) GetAll(root *SegNode) []struct {
 	return res
 }
 
+func (ds *DynamicSegTree) Copy(node *SegNode) *SegNode {
+	if node == nil || !ds.persistent {
+		return node
+	}
+	return &SegNode{l: node.l, r: node.r, x: node.x}
+}
+
 func (ds *DynamicSegTree) _newNode(left, right int) *SegNode {
 	return &SegNode{x: e2(left, right)}
 }
 
 func (ds *DynamicSegTree) _newNodeWithValue(x E) *SegNode {
 	return &SegNode{x: x}
-}
-
-func (ds *DynamicSegTree) _copyNode(node *SegNode) *SegNode {
-	if node == nil || !ds.persistent {
-		return node
-	}
-	return &SegNode{l: node.l, r: node.r, x: node.x}
 }
 
 func (ds *DynamicSegTree) _buildRec(left, right int, nums []E) *SegNode {
@@ -156,12 +156,12 @@ func (ds *DynamicSegTree) _buildRec(left, right int, nums []E) *SegNode {
 
 func (ds *DynamicSegTree) _setRec(root *SegNode, l, r, i int, x E) *SegNode {
 	if l == r-1 {
-		root = ds._copyNode(root)
+		root = ds.Copy(root)
 		root.x = x
 		return root
 	}
 	m := (l + r) >> 1
-	root = ds._copyNode(root)
+	root = ds.Copy(root)
 	if i < m {
 		if root.l == nil {
 			root.l = ds._newNode(l, m)
@@ -190,12 +190,12 @@ func (ds *DynamicSegTree) _setRec(root *SegNode, l, r, i int, x E) *SegNode {
 
 func (ds *DynamicSegTree) _updateRec(root *SegNode, l, r, i int, x E) *SegNode {
 	if l == r-1 {
-		root = ds._copyNode(root)
+		root = ds.Copy(root)
 		root.x = op(root.x, x)
 		return root
 	}
 	m := (l + r) >> 1
-	root = ds._copyNode(root)
+	root = ds.Copy(root)
 	if i < m {
 		if root.l == nil {
 			root.l = ds._newNode(l, m)

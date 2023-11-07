@@ -148,6 +148,13 @@ func (ds *DynamicSegTreeSparse) GetAll(root *SegNode) []struct {
 	return res
 }
 
+func (ds *DynamicSegTreeSparse) Copy(node *SegNode) *SegNode {
+	if node == nil || !ds.persistent {
+		return node
+	}
+	return &SegNode{idx: node.idx, l: node.l, r: node.r, data: node.data, sum: node.sum}
+}
+
 func (ds *DynamicSegTreeSparse) _pushUp(node *SegNode) {
 	node.sum = node.data
 	if node.l != nil {
@@ -162,19 +169,12 @@ func (ds *DynamicSegTreeSparse) _newNode(idx int, x E) *SegNode {
 	return &SegNode{idx: idx, data: x, sum: x}
 }
 
-func (ds *DynamicSegTreeSparse) _copyNode(node *SegNode) *SegNode {
-	if node == nil || !ds.persistent {
-		return node
-	}
-	return &SegNode{idx: node.idx, l: node.l, r: node.r, data: node.data, sum: node.sum}
-}
-
 func (ds *DynamicSegTreeSparse) _setRec(root *SegNode, l, r, i int, x E) *SegNode {
 	if root == nil {
 		root = ds._newNode(i, x)
 		return root
 	}
-	root = ds._copyNode(root)
+	root = ds.Copy(root)
 	if root.idx == i {
 		root.data = x
 		ds._pushUp(root)
@@ -203,7 +203,7 @@ func (ds *DynamicSegTreeSparse) _updateRec(root *SegNode, l, r, i int, x E) *Seg
 		root = ds._newNode(i, x)
 		return root
 	}
-	root = ds._copyNode(root)
+	root = ds.Copy(root)
 	if root.idx == i {
 		root.data = op(root.data, x)
 		ds._pushUp(root)
