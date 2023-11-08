@@ -4,6 +4,7 @@
 - 对子树信息进行统计（链上的信息在某些条件下也可以统计）
 
 **比一般的启发式合并快一些(使用空间少，更快)，作用是一样的。**
+https://hitonanode.github.io/cplib-cpp/tree/guni.hpp
 https://pzy.blog.luogu.org/dsu-on-tree-xue-xi-bi-ji
 https://oi-wiki.org/graph/dsu-on-tree/
 https://nyaannyaan.github.io/library/tree/dsu-on-tree.hpp

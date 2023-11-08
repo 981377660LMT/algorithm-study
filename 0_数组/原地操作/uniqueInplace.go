@@ -3,6 +3,7 @@ package main
 import "fmt"
 
 // 有序数组原地去重.
+// Compact
 func UniqueInplace(sorted *([]int)) {
 	nums := *sorted
 	slow := 0

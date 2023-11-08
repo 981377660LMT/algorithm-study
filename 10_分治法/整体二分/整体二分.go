@@ -4,10 +4,10 @@
 // 整体二分的主体思路就是把`多个查询`一起解决。
 // !`单个查询可以二分答案解决，但是多个查询就会TLE`的这种场合，就可以考虑整体二分。
 // 整体二分解决这样一类问题:
-//  - 给定一个长度为n的操作序列,对某个对象按顺序执行这些操作。
-//  - 给定q个查询,形如:"对象第一次满足条件qi时,执行了多少次操作"。
-//  - 具有单调性,即第一次满足条件的操作后,后续操作都会满足条件。
-
+//  - 给定一个长度为n的操作序列,按顺序执行这些操作。
+//  - 给定q个查询,每个查询形如:"条件qi为真(满足条件)是在第几次操作之后?"
+//  - 对条件的判定具有单调性，即某个操作后qi为真,后续操作都会满足qi为真。
+//
 // 一些时候整体二分可以被持久化数据结构取代.
 
 package main
@@ -35,6 +35,7 @@ func main() {
 	queries := make([][3]int, q) // [l, r) 中第 k+1 小 (0-indexed)
 	for i := 0; i < q; i++ {
 		fmt.Fscan(in, &queries[i][0], &queries[i][1], &queries[i][2])
+		queries[i][0]--
 	}
 
 	// argsort
@@ -51,7 +52,7 @@ func main() {
 	update := func(t int) { bit.Apply(I[t], 1) }
 	check := func(q int) bool {
 		l, r, k := queries[q][0], queries[q][1], queries[q][2]
-		return bit.ProdRange(l, r) > k
+		return bit.ProdRange(l, r) > k-1
 	}
 	ok := ParallelBinarySearch(q, n, 0, init, update, check)
 	for i := 0; i < q; i++ {
@@ -61,21 +62,22 @@ func main() {
 }
 
 // 整体二分 (q, ok, ng, init, update, check).
-//  给定一个`操作序列`和 q 个`查询`.
-//  对每个查询，返回使得 check 第一次成立时的 update 的次数.
-//  - q: 查询的数量.
-//  - ok, ng: 二分的上下界.
-//  - init(): 每次二分前的初始化.
-//  - update(t): 执行操作序列中的第 t 次操作(0-indexed).
-//  - check(q): 对查询 q 的判定.
+//
+//	给定一个`操作序列`和 q 个`查询`.
+//	对每个查询，返回使得 check 第一次成立时的 update 的次数.
+//	- q: 查询的数量.
+//	- ok, ng: 二分的上下界.
+//	- init(): 每次二分前的初始化.
+//	- update(t): 执行操作序列中的第 t 次操作(0-indexed).
+//	- check(q): 对查询 q 的判定.
 func ParallelBinarySearch(
 	q, ok, ng int,
 	init func(), update func(t int), check func(q int) bool,
 ) []int {
 	T := max(ok, ng)
-	OK, NG := make([]int, q), make([]int, q)
+	right, left := make([]int, q), make([]int, q)
 	for i := 0; i < q; i++ {
-		OK[i], NG[i] = ok, ng
+		right[i], left[i] = ok, ng
 	}
 
 	for {
@@ -85,31 +87,27 @@ func ParallelBinarySearch(
 		}
 
 		for i := 0; i < q; i++ {
-			t := &checkT[i]
-			if abs(OK[i]-NG[i]) > 1 {
-				*t = (OK[i] + NG[i]) / 2
+			if abs(right[i]-left[i]) > 1 {
+				checkT[i] = (right[i] + left[i]) / 2
 			}
 		}
 
-		indptr := make([]int, T+1)
+		indeg := make([]int, T+1)
 		for i := 0; i < q; i++ {
 			t := checkT[i]
 			if t != -1 {
-				indptr[t+1]++
+				indeg[t+1]++
 			}
 		}
-
 		for i := 0; i < T; i++ {
-			indptr[i+1] += indptr[i]
+			indeg[i+1] += indeg[i]
 		}
-
-		total := indptr[T]
+		total := indeg[T]
 		if total == 0 {
 			break
 		}
-
 		counter := make([]int, T+1)
-		copy(counter, indptr)
+		copy(counter, indeg)
 		csr := make([]int, total)
 		for i := 0; i < q; i++ {
 			t := checkT[i]
@@ -128,14 +126,14 @@ func ParallelBinarySearch(
 			}
 
 			if check(q) {
-				OK[q] = t
+				right[q] = t
 			} else {
-				NG[q] = t
+				left[q] = t
 			}
 		}
 	}
 
-	return OK
+	return right
 }
 
 func min(a, b int) int {

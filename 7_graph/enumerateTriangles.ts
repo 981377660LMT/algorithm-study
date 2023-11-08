@@ -11,11 +11,7 @@
  * @param callback 回调函数.参数为三元环的三个顶点.
  * @complexity O(E^1.5).
  */
-function enumerateTriangles(
-  n: number,
-  edges: [u: number, v: number][] | number[][],
-  callback: (a: number, b: number, c: number) => void
-): void {
+function enumerateTriangles(n: number, edges: [u: number, v: number][] | number[][], callback: (a: number, b: number, c: number) => void): void {
   let edgeCount = 0
   const adjList: number[][] = Array(n)
   for (let i = 0; i < n; i++) adjList[i] = []
