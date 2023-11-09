@@ -1,12 +1,8 @@
 /**
  * 分治法处理离线RMQ问题.
+ * @link https://usaco.guide/plat/DC-SRQ?lang=py
  */
-function offlineRMQDivideAndConquer<E>(
-  arr: ArrayLike<E>,
-  queries: ArrayLike<[start: number, end: number]>,
-  e: () => E,
-  op: (a: E, b: E) => E
-): E[] {
+function offlineRMQDivideAndConquer<E>(arr: ArrayLike<E>, queries: ArrayLike<[start: number, end: number]>, e: () => E, op: (a: E, b: E) => E): E[] {
   const n = arr.length
   const q = queries.length
   const res: E[] = Array(q).fill(e())

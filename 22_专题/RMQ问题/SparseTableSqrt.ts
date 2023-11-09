@@ -1,6 +1,7 @@
 // https://www.cnblogs.com/MoyouSayuki/p/17595714.html
 // https://www.luogu.com.cn/problem/solution/P3793
 // https://kewth.github.io/2019/10/11/RMQ/
+// https://oi-wiki.org/topic/rmq/#four-russian
 //
 // 块间分为整块和散块，对于散块可以预处理出每一个块的前后缀最大值，
 // 这样预处理是 (O(n)) 的，查询降为 (O(1))，
@@ -23,12 +24,7 @@ class SparseTableSqrt<S> {
   private readonly _pre: S[]
   private readonly _suf: S[]
 
-  constructor(
-    arr: ArrayLike<S>,
-    e: () => S,
-    op: (a: S, b: S) => S,
-    blockSize = (Math.sqrt(arr.length) + 1) | 0
-  ) {
+  constructor(arr: ArrayLike<S>, e: () => S, op: (a: S, b: S) => S, blockSize = (Math.sqrt(arr.length) + 1) | 0) {
     const n = arr.length
     const belong = (index: number) => (index / blockSize) | 0
     const blockStart = (index: number) => index * blockSize
@@ -104,12 +100,7 @@ class SparseTableSqrtInt32 {
   private readonly _pre: Int32Array
   private readonly _suf: Int32Array
 
-  constructor(
-    arr: ArrayLike<number>,
-    e: () => number,
-    op: (a: number, b: number) => number,
-    blockSize = (Math.sqrt(arr.length) + 1) | 0
-  ) {
+  constructor(arr: ArrayLike<number>, e: () => number, op: (a: number, b: number) => number, blockSize = (Math.sqrt(arr.length) + 1) | 0) {
     const n = arr.length
     const belong = (index: number) => (index / blockSize) | 0
     const blockStart = (index: number) => index * blockSize

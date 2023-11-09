@@ -22,10 +22,10 @@ interface IOptions<E> {
 
   e: () => E
   op: (a: E, b: E) => E
-  inv: (a: E) => E
+  inv?: (a: E) => E
 }
 
-class BIT2DCompress<E> {
+class BIT2DSparse<E> {
   private static _bisectLeft(arr: ArrayLike<number>, x: number, left: number, right: number): number {
     while (left <= right) {
       const mid = (left + right) >> 1
@@ -40,7 +40,7 @@ class BIT2DCompress<E> {
 
   private readonly _e: () => E
   private readonly _op: (a: E, b: E) => E
-  private readonly _inv: (a: E) => E
+  private readonly _inv?: (a: E) => E
   private readonly _discretizeX: boolean
   private _keyX!: number[]
   private _keyY!: number[]
@@ -65,7 +65,7 @@ class BIT2DCompress<E> {
   /**
    * 点 (x,y) 的值加上 val.
    */
-  add(x: number, y: number, val: E): void {
+  update(x: number, y: number, val: E): void {
     for (let i = this._xtoi(x); i < this._n; i += (i + 1) & -(i + 1)) {
       this._add(i, y, val)
     }
@@ -74,8 +74,9 @@ class BIT2DCompress<E> {
   /**
    * [lx,rx) * [ly,ry) 的和.
    */
-  query(lx: number, rx: number, ly: number, ry: number): E {
+  queryRange(lx: number, rx: number, ly: number, ry: number): E {
     if (lx >= rx || ly >= ry) return this._e()
+    if (this._inv == undefined) throw new Error('inv must be defined when query is called.')
     let pos = this._e()
     let neg = this._e()
     let l = this._xtoi(lx) - 1
@@ -107,7 +108,7 @@ class BIT2DCompress<E> {
   private _add(i: number, y: number, val: E): void {
     const lid = this._indptr[i]
     const n = this._indptr[i + 1] - this._indptr[i]
-    let j = BIT2DCompress._bisectLeft(this._keyY, y, lid, lid + n - 1) - lid
+    let j = BIT2DSparse._bisectLeft(this._keyY, y, lid, lid + n - 1) - lid
     while (j < n) {
       this._data[lid + j] = this._op(this._data[lid + j], val)
       j += (j + 1) & -(j + 1)
@@ -119,8 +120,8 @@ class BIT2DCompress<E> {
     let neg = this._e()
     const lid = this._indptr[i]
     const n = this._indptr[i + 1] - this._indptr[i]
-    let left = BIT2DCompress._bisectLeft(this._keyY, ly, lid, lid + n - 1) - lid - 1
-    let right = BIT2DCompress._bisectLeft(this._keyY, ry, lid, lid + n - 1) - lid - 1
+    let left = BIT2DSparse._bisectLeft(this._keyY, ly, lid, lid + n - 1) - lid - 1
+    let right = BIT2DSparse._bisectLeft(this._keyY, ry, lid, lid + n - 1) - lid - 1
     while (left < right) {
       pos = this._op(pos, this._data[lid + right])
       right -= (right + 1) & -(right + 1)
@@ -129,14 +130,14 @@ class BIT2DCompress<E> {
       neg = this._op(neg, this._data[lid + left])
       left -= (left + 1) & -(left + 1)
     }
-    return this._op(pos, this._inv(neg))
+    return this._op(pos, this._inv!(neg))
   }
 
   private _prefixProdI(i: number, ry: number): E {
     let pos = this._e()
     const lid = this._indptr[i]
     const n = this._indptr[i + 1] - this._indptr[i]
-    let right = BIT2DCompress._bisectLeft(this._keyY, ry, lid, lid + n - 1) - lid - 1
+    let right = BIT2DSparse._bisectLeft(this._keyY, ry, lid, lid + n - 1) - lid - 1
     while (right >= 0) {
       pos = this._op(pos, this._data[lid + right])
       right -= (right + 1) & -(right + 1)
@@ -228,7 +229,7 @@ class BIT2DCompress<E> {
   }
 
   private _xtoi(x: number): number {
-    if (this._discretizeX) return BIT2DCompress._bisectLeft(this._keyX, x, 0, this._n - 1)
+    if (this._discretizeX) return BIT2DSparse._bisectLeft(this._keyX, x, 0, this._n - 1)
     const res = x - this._minX
     if (res < 0) return 0
     if (res >= this._n) return this._n
@@ -236,8 +237,10 @@ class BIT2DCompress<E> {
   }
 }
 
+export { BIT2DSparse }
+
 if (require.main === module) {
-  const tree = new BIT2DCompress({
+  const tree = new BIT2DSparse({
     xs: [0, 0, 0, 1, 1, 1, 2, 2, 2],
     ys: [0, 1, 2, 0, 1, 2, 0, 1, 2],
     ws: [1, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -245,14 +248,14 @@ if (require.main === module) {
     e: () => 0,
     inv: a => -a
   })
-  console.log(tree.query(0, 3, 0, 3))
+  console.log(tree.queryRange(0, 3, 0, 3))
 
   // https://leetcode.cn/problems/range-sum-query-2d-mutable/submissions/
   class NumMatrix {
     private readonly matrix: number[][]
     private readonly ROW: number
     private readonly COL: number
-    private readonly tree: BIT2DCompress<number>
+    private readonly tree: BIT2DSparse<number>
 
     constructor(matrix: number[][]) {
       this.matrix = matrix
@@ -268,7 +271,7 @@ if (require.main === module) {
           ws[r * this.COL + c] = matrix[r][c]
         }
       }
-      this.tree = new BIT2DCompress({
+      this.tree = new BIT2DSparse({
         xs,
         ys,
         ws,
@@ -282,13 +285,11 @@ if (require.main === module) {
       const pre = this.matrix[row][col]
       const diff = val - pre
       this.matrix[row][col] = val
-      this.tree.add(row, col, diff)
+      this.tree.update(row, col, diff)
     }
 
     sumRegion(row1: number, col1: number, row2: number, col2: number): number {
-      return this.tree.query(row1, row2 + 1, col1, col2 + 1)
+      return this.tree.queryRange(row1, row2 + 1, col1, col2 + 1)
     }
   }
 }
-
-export { BIT2DCompress }

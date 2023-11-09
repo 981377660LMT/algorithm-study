@@ -42,6 +42,7 @@ https://www.luogu.com.cn/blog/yszs/xian-duan-shu-fen-zhi
   有些数据结构难以撤销，就只能使用拷贝.
 
   [注意到如果单次 mutate 可以 log(n)，那么单次 undo 也可以 log(n)，总复杂度 nlog(n)log(n)](https://cp-algorithms.com/data_structures/deleting_in_log_n.html)
+  https://oi-wiki.org/topic/segment-tree-offline/
   即：如果一个数据结构可以以 O(a)时间修改，那么离线条件下可以以 O(alogn)的时间复杂度删除.
 
   注意线段树数组的 index 表示的是时间

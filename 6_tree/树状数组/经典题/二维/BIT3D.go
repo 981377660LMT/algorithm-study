@@ -39,11 +39,11 @@ func (b *BIT3D) Add(x, y, z, v int) {
 }
 
 // 0<=x<X, 0<=y<Y, 0<=z<Z
-func (b *BIT3D) Query(x, y, z int) int {
-	res := 0
+func (b *BIT3D) QueryPrefix(x, y, z int) int {
 	x--
 	y--
 	z--
+	res := 0
 	for i := x; i >= 0; i = (i & (i + 1)) - 1 {
 		for j := y; j >= 0; j = (j & (j + 1)) - 1 {
 			for k := z; k >= 0; k = (k & (k + 1)) - 1 {
@@ -56,8 +56,8 @@ func (b *BIT3D) Query(x, y, z int) int {
 
 // 0<=x1<=x2<X, 0<=y1<=y2<Y, 0<=z1<=z2<Z
 func (b *BIT3D) QueryRange(x1, y1, z1, x2, y2, z2 int) int {
-	return b.Query(x2, y2, z2) - b.Query(x1, y2, z2) -
-		b.Query(x2, y1, z2) - b.Query(x2, y2, z1) +
-		b.Query(x1, y1, z2) + b.Query(x1, y2, z1) +
-		b.Query(x2, y1, z1) - b.Query(x1, y1, z1)
+	return b.QueryPrefix(x2, y2, z2) - b.QueryPrefix(x1, y2, z2) -
+		b.QueryPrefix(x2, y1, z2) - b.QueryPrefix(x2, y2, z1) +
+		b.QueryPrefix(x1, y1, z2) + b.QueryPrefix(x1, y2, z1) +
+		b.QueryPrefix(x2, y1, z1) - b.QueryPrefix(x1, y1, z1)
 }

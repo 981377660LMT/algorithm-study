@@ -239,7 +239,7 @@ func maximumWhiteTiles(tiles [][]int, carpetLen int) int {
 }
 
 // !二维区间查询 区间修改
-type BIT2D struct {
+type BIT2DRangeAddRangeSum struct {
 	row   int
 	col   int
 	tree1 [][]int
@@ -248,7 +248,7 @@ type BIT2D struct {
 	tree4 [][]int
 }
 
-func NewBIT2D(row, col int) *BIT2D {
+func NewBIT2D(row, col int) *BIT2DRangeAddRangeSum {
 	t1, t2, t3, t4 := make([][]int, row+1), make([][]int, row+1), make([][]int, row+1), make([][]int, row+1)
 	for i := 0; i <= row; i++ {
 		t1[i] = make([]int, col+1)
@@ -256,7 +256,7 @@ func NewBIT2D(row, col int) *BIT2D {
 		t3[i] = make([]int, col+1)
 		t4[i] = make([]int, col+1)
 	}
-	return &BIT2D{
+	return &BIT2DRangeAddRangeSum{
 		row:   row,
 		col:   col,
 		tree1: t1,
@@ -269,33 +269,14 @@ func NewBIT2D(row, col int) *BIT2D {
 // (row1,col1) 到 (row2,col2) 里的每一个点的值加上delta
 //
 //	0<=row1<=row2<=ROW-1, 0<=col1<=col2<=COL-1
-func (b *BIT2D) Add(row1 int, col1 int, row2 int, col2 int, delta int) {
-	b.add(row1, col1, delta)
-	b.add(row2+1, col1, -delta)
-	b.add(row1, col2+1, -delta)
-	b.add(row2+1, col2+1, delta)
+func (b *BIT2DRangeAddRangeSum) Add(row1 int, col1 int, row2 int, col2 int, delta int) {
+	b._add(row1, col1, delta)
+	b._add(row2+1, col1, -delta)
+	b._add(row1, col2+1, -delta)
+	b._add(row2+1, col2+1, delta)
 }
 
-// 查询左上角 (row1,col1) 到右下角 (row2,col2) 的和
-//
-//	0<=row1<=row2<=ROW-1, 0<=col1<=col2<=COL-1
-func (b *BIT2D) Query(row1 int, col1 int, row2 int, col2 int) int {
-	return b.query(row2, col2) - b.query(row2, col1-1) - b.query(row1-1, col2) + b.query(row1-1, col1-1)
-}
-
-func (b *BIT2D) add(row int, col int, delta int) {
-	row, col = row+1, col+1
-	for curRow := row; curRow <= b.row; curRow += curRow & -curRow {
-		for curCol := col; curCol <= b.col; curCol += curCol & -curCol {
-			b.tree1[curRow][curCol] += delta
-			b.tree2[curRow][curCol] += (row - 1) * delta
-			b.tree3[curRow][curCol] += (col - 1) * delta
-			b.tree4[curRow][curCol] += (row - 1) * (col - 1) * delta
-		}
-	}
-}
-
-func (b *BIT2D) query(row, col int) (res int) {
+func (b *BIT2DRangeAddRangeSum) QueryPrefix(row, col int) (res int) {
 	row, col = row+1, col+1
 	if row > b.row {
 		row = b.row
@@ -314,6 +295,25 @@ func (b *BIT2D) query(row, col int) (res int) {
 	}
 
 	return
+}
+
+// 查询左上角 (row1,col1) 到右下角 (row2,col2) 的和
+//
+//	0<=row1<=row2<=ROW-1, 0<=col1<=col2<=COL-1
+func (b *BIT2DRangeAddRangeSum) QueryRange(row1 int, col1 int, row2 int, col2 int) int {
+	return b.QueryPrefix(row2, col2) - b.QueryPrefix(row2, col1-1) - b.QueryPrefix(row1-1, col2) + b.QueryPrefix(row1-1, col1-1)
+}
+
+func (b *BIT2DRangeAddRangeSum) _add(row int, col int, delta int) {
+	row, col = row+1, col+1
+	for curRow := row; curRow <= b.row; curRow += curRow & -curRow {
+		for curCol := col; curCol <= b.col; curCol += curCol & -curCol {
+			b.tree1[curRow][curCol] += delta
+			b.tree2[curRow][curCol] += (row - 1) * delta
+			b.tree3[curRow][curCol] += (col - 1) * delta
+			b.tree4[curRow][curCol] += (row - 1) * (col - 1) * delta
+		}
+	}
 }
 
 func max(a, b int) int {
@@ -396,5 +396,9 @@ func main() {
 	fmt.Println(bitArray)
 	bitArray.Add(1, 1)
 	fmt.Println(bitArray)
+
+	bit2d := NewBIT2D(3, 3)
+	bit2d.Add(0, 0, 2, 2, 2)
+	fmt.Println(bit2d.QueryRange(0, 0, 1, 1))
 
 }

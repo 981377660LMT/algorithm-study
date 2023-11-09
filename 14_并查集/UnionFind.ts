@@ -8,8 +8,7 @@ class UnionFindArray {
   constructor(n: number) {
     this._n = n
     this._part = n
-    this._data = new Int32Array(n)
-    for (let i = 0; i < n; i++) this._data[i] = -1
+    this._data = new Int32Array(n).fill(-1)
   }
 
   union(x: number, y: number, callback?: (big: number, small: number) => void): boolean {
@@ -75,6 +74,11 @@ class UnionFindArray {
 
   getSize(x: number): number {
     return -this._data[this.find(x)]
+  }
+
+  clear(): void {
+    this._part = this._n
+    this._data.fill(-1)
   }
 
   toString(): string {

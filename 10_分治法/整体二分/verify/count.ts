@@ -1,4 +1,4 @@
-import { parallelBinarySearch } from '../ParallelBinarySearch'
+import { parallelBinarySearch } from '../parallelBinarySearch'
 import { parallelBinarySearchUndo } from '../parallelBinarySearchUndo'
 
 function testCount1(): void {

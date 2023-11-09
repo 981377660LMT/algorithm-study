@@ -2,12 +2,12 @@
 // 查询坐标x为变为 `sort.SearchInts(sortedXs,x)`
 
 // API:
-// 1. NewSegmentTree2D(row,col int) *SegmentTree2D
-// 2. (st *SegmentTree2D) AddPoint(row,col int,value E)
-// 3. (st *SegmentTree2D) Build()
-// 4. (st *SegmentTree2D) Get(row,col int) E
-// 5. (st *SegmentTree2D) Set(row,col int,value E)
-// 6. (st *SegmentTree2D) Query(row1,row2,col1,col2 int) E
+// 1. NewSegmentTree2DDense(row,col int) *SegmentTree2DDense
+// 2. (st *SegmentTree2DDense) AddPoint(row,col int,value E)
+// 3. (st *SegmentTree2DDense) Build()
+// 4. (st *SegmentTree2DDense) Get(row,col int) E
+// 5. (st *SegmentTree2DDense) Set(row,col int,value E)
+// 6. (st *SegmentTree2DDense) Query(row1,row2,col1,col2 int) E
 
 package main
 
@@ -17,11 +17,11 @@ import (
 )
 
 type NumMatrix struct {
-	seg *SegmentTree2D
+	seg *SegmentTree2DDense
 }
 
 func Constructor(matrix [][]int) NumMatrix {
-	seg := NewSegmentTree2D(len(matrix), len(matrix[0]))
+	seg := NewSegmentTree2DDense(len(matrix), len(matrix[0]))
 	for i := range matrix {
 		for j := range matrix[i] {
 			seg.AddPoint(i, j, matrix[i][j])
@@ -53,8 +53,8 @@ const INF int = 1e18
 
 type E = int
 
-func (*SegmentTree2D) e() E        { return 0 }
-func (*SegmentTree2D) op(a, b E) E { return a + b }
+func (*SegmentTree2DDense) e() E        { return 0 }
+func (*SegmentTree2DDense) op(a, b E) E { return a + b }
 
 func sortedSet(nums []int) (getRank func(int) int) {
 	set := make(map[int]struct{}, len(nums))
@@ -83,14 +83,14 @@ func max(a, b int) int {
 	return b
 }
 
-type SegmentTree2D struct {
+type SegmentTree2DDense struct {
 	row, col int
 	tree     []E
 	unit     E
 }
 
-func NewSegmentTree2D(row, col int) *SegmentTree2D {
-	res := &SegmentTree2D{}
+func NewSegmentTree2DDense(row, col int) *SegmentTree2DDense {
+	res := &SegmentTree2DDense{}
 	res.unit = res.e()
 	row_, col_ := 1<<uint(bits.Len(uint(row-1))), 1<<uint(bits.Len(uint(col-1)))
 	tree := make([]E, (row_*col_)<<2)
@@ -102,11 +102,11 @@ func NewSegmentTree2D(row, col int) *SegmentTree2D {
 }
 
 // 在Build之前调用, 为每个点赋值
-func (st *SegmentTree2D) AddPoint(row, col int, value E) {
+func (st *SegmentTree2DDense) AddPoint(row, col int, value E) {
 	st.tree[st.id(row+st.row, col+st.col)] = value
 }
 
-func (st *SegmentTree2D) Build() {
+func (st *SegmentTree2DDense) Build() {
 	for c := st.col; c < st.col<<1; c++ {
 		for r := st.row - 1; r > 0; r-- {
 			st.tree[st.id(r, c)] = st.op(st.tree[st.id(r<<1, c)], st.tree[st.id((r<<1)|1, c)])
@@ -119,11 +119,11 @@ func (st *SegmentTree2D) Build() {
 	}
 }
 
-func (st *SegmentTree2D) Get(row, col int) E {
+func (st *SegmentTree2DDense) Get(row, col int) E {
 	return st.tree[st.id(row+st.row, col+st.col)]
 }
 
-func (st *SegmentTree2D) Set(row, col int, value E) {
+func (st *SegmentTree2DDense) Set(row, col int, value E) {
 	r, c := row+st.row, col+st.col
 	st.tree[st.id(r, c)] = value
 	for i := r >> 1; i > 0; i >>= 1 {
@@ -137,8 +137,9 @@ func (st *SegmentTree2D) Set(row, col int, value E) {
 }
 
 // `[row1,row2) x [col1,col2)`
-//  0<=row1<row2<=row, 0<=col1<col2<=col
-func (st *SegmentTree2D) Query(row1, row2, col1, col2 int) E {
+//
+//	0<=row1<row2<=row, 0<=col1<col2<=col
+func (st *SegmentTree2DDense) Query(row1, row2, col1, col2 int) E {
 	if row1 >= row2 || col1 >= col2 {
 		return st.unit
 	}
@@ -162,7 +163,7 @@ func (st *SegmentTree2D) Query(row1, row2, col1, col2 int) E {
 	return res
 }
 
-func (st *SegmentTree2D) query(r, c1, c2 int) E {
+func (st *SegmentTree2DDense) query(r, c1, c2 int) E {
 	res := st.unit
 	for c1 < c2 {
 		if c1&1 == 1 {
@@ -179,4 +180,4 @@ func (st *SegmentTree2D) query(r, c1, c2 int) E {
 	return res
 }
 
-func (st *SegmentTree2D) id(r, c int) int { return ((r * st.col) << 1) + c }
+func (st *SegmentTree2DDense) id(r, c int) int { return ((r * st.col) << 1) + c }

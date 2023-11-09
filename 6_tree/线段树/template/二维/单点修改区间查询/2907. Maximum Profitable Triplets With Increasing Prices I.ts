@@ -1,13 +1,13 @@
 // 2907.最大递增三元组的和
 // https://leetcode.cn/problems/maximum-profitable-triplets-with-increasing-prices-i/description/
 
-import { SegmentTree2DCompress } from './SegmentTree2D-单点修改区间查询(离散化)'
-
 // 找到三个下标 i, j, k,使得 i < j < k 且 prices[i] < prices[j] < prices[k],
 // 并且 profits[i] + profits[j] + profits[k] 最大。
 // 如果无法找到则返回 -1。
 
 // !三元组:枚举中间.
+
+import { SegmentTree2DSparse } from './SegmentTree2DSparse'
 
 const INF = 1e9
 
@@ -15,7 +15,7 @@ function maxProfit(prices: number[], profits: number[]): number {
   const n = prices.length
   const xs = Array<number>(n)
   for (let i = 0; i < n; i++) xs[i] = i
-  const tree = new SegmentTree2DCompress({
+  const tree = new SegmentTree2DSparse({
     xs,
     ys: prices,
     ws: profits,

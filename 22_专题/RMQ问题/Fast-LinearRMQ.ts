@@ -3,6 +3,7 @@
  * !和`SparseTable`差不多快,但是空间复杂度更低,为`O(n)`.
  * @see {@link  https://zhuanlan.zhihu.com/p/79423299}
  *      {@link  https://ei1333.github.io/library/structure/others/linear-rmq.hpp}
+ *      {@link https://oi-wiki.org/topic/rmq/#%E5%9F%BA%E4%BA%8E%E7%8A%B6%E5%8E%8B%E7%9A%84%E7%BA%BF%E6%80%A7-rmq-%E7%AE%97%E6%B3%95}
  */
 class LinearRMQ {
   private readonly _small: number[]

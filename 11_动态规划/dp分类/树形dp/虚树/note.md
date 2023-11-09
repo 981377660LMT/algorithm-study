@@ -12,3 +12,6 @@ https://oi-wiki.org/graph/virtual-tree/
   3. 将根节点加入点集后,建立出来的虚树一定包含根节点，方便 dp
 
 ---
+
+TODO:
+https://www.cnblogs.com/ydtz/p/16276275.html

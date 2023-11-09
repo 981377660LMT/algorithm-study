@@ -26,7 +26,6 @@ import (
 )
 
 func main() {
-	// demo()
 	StaticRangeKthSmallest()
 }
 
@@ -50,27 +49,74 @@ func StaticRangeKthSmallest() {
 	}
 
 	// argsort
-	I := make([]int, len(nums))
+	order := make([]int, len(nums))
 	for i := 0; i < len(nums); i++ {
-		I[i] = i
+		order[i] = i
 	}
-	sort.Slice(I, func(i, j int) bool {
-		return nums[I[i]] < nums[I[j]]
+	sort.Slice(order, func(i, j int) bool {
+		return nums[order[i]] < nums[order[j]]
 	})
 
 	bit := NewBitArray(n)
-	init := func() { bit.Build(make([]int, n)) }
-	update := func(t int) { bit.Apply(I[t], 1) }
-	check := func(q int) bool {
-		l, r, k := queries[q][0], queries[q][1], queries[q][2]
+	mutate := func(mid int) { bit.Apply(order[mid], 1) }
+	reset := func() { bit.Build(make([]int, n)) }
+	predicate := func(qid int) bool {
+		l, r, k := queries[qid][0], queries[qid][1], queries[qid][2]
 		return bit.ProdRange(l, r) >= k
 	}
-	ok := ParallelBinarySearch(n, q, update, init, check)
+
+	left := ParallelBinarySearch(n, q, mutate, reset, predicate)
 	for i := 0; i < q; i++ {
-		t := ok[i]
-		fmt.Fprintln(out, nums[I[t]])
+		v := left[i]
+		fmt.Fprintln(out, nums[order[v]])
 	}
 }
+
+// 静态二维矩阵第 k 小
+// P1527 [国家集训队] 矩阵乘法
+// https://www.luogu.com.cn/problem/P1527
+func 矩阵乘法() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	queries := make([][3]int, q) // [l, r) 中第 k 小 (1-indexed)
+	for i := 0; i < q; i++ {
+		fmt.Fscan(in, &queries[i][0], &queries[i][1], &queries[i][2])
+		queries[i][0]--
+	}
+
+	// argsort
+	order := make([]int, len(nums))
+	for i := 0; i < len(nums); i++ {
+		order[i] = i
+	}
+	sort.Slice(order, func(i, j int) bool {
+		return nums[order[i]] < nums[order[j]]
+	})
+}
+
+// P7424 [THUPC2017] 天天爱射击
+// https://www.luogu.com.cn/problem/P7424
+// 将【每个子弹射出之后有多少个木板会碎掉】转化为【每个木板会在第几次子弹射击之后碎掉】
+
+// P3527 [POI2011] MET-Meteors 流星
+// https://www.luogu.com.cn/problem/P3527
+
+// P4269 [USACO18FEB] Snow Boots G
+// https://www.luogu.com.cn/problem/P4269
+
+// P4602 [CTSC2018] 混合果汁
+// https://www.luogu.com.cn/problem/P4602
+
+// P8955 「VUSC」Card Tricks
+// https://www.luogu.com.cn/problem/P8955
 
 func demo() {
 	// n个操作，第i个操作将curSum增加i+1.

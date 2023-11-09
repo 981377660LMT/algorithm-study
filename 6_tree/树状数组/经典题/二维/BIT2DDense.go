@@ -11,9 +11,11 @@ import (
 )
 
 func main() {
-	tree := NewFenwickTree2DDense(5, 5)
-	tree.Add(1, 1, 1)
-	tree.Add(1, 2, 10)
+	tree := NewBIT2DDense(5, 5)
+	tree.Update(1, 1, 1)
+	tree.Update(1, 2, 10)
+	tree.Build(func(x, y int) int { return x + y })
+	fmt.Println(tree)
 	fmt.Println(tree.QueryPrefix(2, 2))
 }
 
@@ -33,8 +35,8 @@ func taiyaki() {
 			time[i][j] = 1e18
 		}
 	}
-	A := NewFenwickTree2DDense(H, W)
-	B := NewFenwickTree2DDense(H, W)
+	A := NewBIT2DDense(H, W)
+	B := NewBIT2DDense(H, W)
 
 	end := NewDeque(Q)
 	for i := 0; i < Q; i++ {
@@ -45,20 +47,20 @@ func taiyaki() {
 		for end.Size() > 0 && end.At(0)[2] <= t {
 			e := end.PopLeft()
 			x, y := e[0], e[1]
-			A.Add(x, y, 1)
-			B.Add(x, y, -1)
+			A.Update(x, y, 1)
+			B.Update(x, y, -1)
 		}
 		if c == 0 {
-			B.Add(x, y, 1)
+			B.Update(x, y, 1)
 			end.Append([3]int{x, y, t + T})
 		} else if c == 1 {
-			if A.Query(x, x+1, y, y+1) > 0 {
-				A.Add(x, y, -1)
+			if A.QueryRange(x, x+1, y, y+1) > 0 {
+				A.Update(x, y, -1)
 			}
 		} else if c == 2 {
 			var x2, y2 int
 			fmt.Fscan(in, &x2, &y2)
-			fmt.Fprintln(out, A.Query(x, x2, y, y2), B.Query(x, x2, y, y2))
+			fmt.Fprintln(out, A.QueryRange(x, x2, y, y2), B.QueryRange(x, x2, y, y2))
 		}
 	}
 }
@@ -69,23 +71,49 @@ func e() E        { return 0 }
 func op(a, b E) E { return a + b }
 func inv(a E) E   { return -a }
 
-type FenwickTree2DDense struct {
+// BIT2DDense
+type BIT2DDense struct {
 	H, W int
 	data []E
 	unit E
 }
 
 // 指定二维树状数组的高度和宽度.
-func NewFenwickTree2DDense(h, w int) *FenwickTree2DDense {
-	res := &FenwickTree2DDense{H: h, W: w, data: make([]E, h*w), unit: e()}
+func NewBIT2DDense(h, w int) *BIT2DDense {
+	res := &BIT2DDense{H: h, W: w, data: make([]E, h*w), unit: e()}
 	for i := 0; i < h*w; i++ {
 		res.data[i] = res.unit
 	}
 	return res
 }
 
+func (ft *BIT2DDense) Build(f func(x, y int) int) {
+	H, W := ft.H, ft.W
+	for x := 0; x < H; x++ {
+		for y := 0; y < W; y++ {
+			ft.data[W*x+y] = f(x, y)
+		}
+	}
+	for x := 1; x <= H; x++ {
+		for y := 1; y <= W; y++ {
+			ny := y + (y & -y)
+			if ny <= W {
+				ft.data[ft.idx(x, ny)] = op(ft.data[ft.idx(x, ny)], ft.data[ft.idx(x, y)])
+			}
+		}
+	}
+	for x := 1; x <= H; x++ {
+		for y := 1; y <= W; y++ {
+			nx := x + (x & -x)
+			if nx <= H {
+				ft.data[ft.idx(nx, y)] = op(ft.data[ft.idx(nx, y)], ft.data[ft.idx(x, y)])
+			}
+		}
+	}
+}
+
 // 点 (x,y) 的值加上 val.
-func (ft *FenwickTree2DDense) Add(x, y int, val E) {
+func (ft *BIT2DDense) Update(x, y int, val E) {
 	x++
 	for x <= ft.H {
 		ft.addX(x, y, val)
@@ -94,7 +122,7 @@ func (ft *FenwickTree2DDense) Add(x, y int, val E) {
 }
 
 // [lx,rx) * [ly,ry)
-func (ft *FenwickTree2DDense) Query(lx, rx, ly, ry int) E {
+func (ft *BIT2DDense) QueryRange(lx, rx, ly, ry int) E {
 	pos, neg := ft.unit, ft.unit
 	for lx < rx {
 		pos = op(pos, ft.sumX(rx, ly, ry))
@@ -108,7 +136,7 @@ func (ft *FenwickTree2DDense) Query(lx, rx, ly, ry int) E {
 }
 
 // [0,rx) * [0,ry)
-func (ft *FenwickTree2DDense) QueryPrefix(rx, ry int) E {
+func (ft *BIT2DDense) QueryPrefix(rx, ry int) E {
 	pos := ft.unit
 	for rx > 0 {
 		pos = op(pos, ft.sumXPrefix(rx, ry))
@@ -117,11 +145,23 @@ func (ft *FenwickTree2DDense) QueryPrefix(rx, ry int) E {
 	return pos
 }
 
-func (ft *FenwickTree2DDense) idx(x, y int) int {
+func (ft *BIT2DDense) String() string {
+	res := make([][]string, ft.H)
+	for i := 0; i < ft.H; i++ {
+		res[i] = make([]string, ft.W)
+		for j := 0; j < ft.W; j++ {
+			res[i][j] = fmt.Sprintf("%v", ft.QueryRange(i, i+1, j, j+1))
+		}
+
+	}
+	return fmt.Sprintf("%v", res)
+}
+
+func (ft *BIT2DDense) idx(x, y int) int {
 	return ft.W*(x-1) + (y - 1)
 }
 
-func (ft *FenwickTree2DDense) addX(x, y int, val E) {
+func (ft *BIT2DDense) addX(x, y int, val E) {
 	y++
 	for y <= ft.W {
 		ft.data[ft.idx(x, y)] = op(ft.data[ft.idx(x, y)], val)
@@ -129,7 +169,7 @@ func (ft *FenwickTree2DDense) addX(x, y int, val E) {
 	}
 }
 
-func (ft *FenwickTree2DDense) sumX(x, ly, ry int) E {
+func (ft *BIT2DDense) sumX(x, ly, ry int) E {
 	pos, neg := ft.unit, ft.unit
 	for ly < ry {
 		pos = op(pos, ft.data[ft.idx(x, ry)])
@@ -142,7 +182,7 @@ func (ft *FenwickTree2DDense) sumX(x, ly, ry int) E {
 	return op(pos, inv(neg))
 }
 
-func (ft *FenwickTree2DDense) sumXPrefix(x, ry int) E {
+func (ft *BIT2DDense) sumXPrefix(x, ry int) E {
 	pos := ft.unit
 	for ry > 0 {
 		pos = op(pos, ft.data[ft.idx(x, ry)])
@@ -151,8 +191,6 @@ func (ft *FenwickTree2DDense) sumXPrefix(x, ry int) E {
 	return pos
 }
 
-//
-//
 type D = [3]int
 type Deque struct{ l, r []D }
 

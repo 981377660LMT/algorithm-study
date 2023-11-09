@@ -43,13 +43,13 @@ func main() {
 		}
 	}
 
-	tree := NewFenwickTree2DWithWeights(xs, ys, ws, true)
+	tree := NewBIT2DSparseWithWeights(xs, ys, ws, true)
 	for i := 0; i < q; i++ {
 		a, b, c, d := query[i][0], query[i][1], query[i][2], query[i][3]
 		if a == -1 {
-			tree.Add(b, c, d)
+			tree.Update(b, c, d)
 		} else {
-			fmt.Fprintln(out, tree.Query(a, b, c, d))
+			fmt.Fprintln(out, tree.QueryRange(a, b, c, d))
 		}
 	}
 }
@@ -66,19 +66,19 @@ func main2() {
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &xs[i], &ys[i], &ws[i])
 	}
-	tree := NewFenwickTree2DWithWeights(xs, ys, ws, true)
+	tree := NewBIT2DSparseWithWeights(xs, ys, ws, true)
 	for i := 0; i < q; i++ {
 		var l, d, r, u int
 		fmt.Fscan(in, &l, &d, &r, &u)
-		fmt.Fprintln(out, tree.Query(l, r, d, u))
+		fmt.Fprintln(out, tree.QueryRange(l, r, d, u))
 	}
 }
 
 func demo() {
 	xs, ys := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	tree := NewFenwickTree2D(xs, ys, false)
-	tree.Add(1, 1, 91)
-	fmt.Println(tree.Query(1, 2, 1, 2))
+	tree := NewBIT2DSparse(xs, ys, false)
+	tree.Update(1, 1, 91)
+	fmt.Println(tree.QueryRange(1, 2, 1, 2))
 	fmt.Println(tree.QueryPrefix(1, 2))
 }
 
@@ -89,7 +89,7 @@ func e() Able           { return 0 }
 func op(a, b Able) Able { return a + b }
 func inv(a Able) Able   { return -a }
 
-type FenwickTree2D struct {
+type BIT2DSparse struct {
 	n          int
 	keyX       []int
 	keyY       []int
@@ -101,11 +101,12 @@ type FenwickTree2D struct {
 }
 
 // discretize:
-//  为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
-//  为 false 时不对x维度二分离散化,而是直接用x的值作为下标(所有x给一个偏移量minX),
-//  x 维度数组长度为最大值减最小值.
-func NewFenwickTree2D(xs, ys []int, discretize bool) *FenwickTree2D {
-	res := &FenwickTree2D{discretize: discretize, unit: e()}
+//
+//	为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
+//	为 false 时不对x维度二分离散化,而是直接用x的值作为下标(所有x给一个偏移量minX),
+//	x 维度数组长度为最大值减最小值.
+func NewBIT2DSparse(xs, ys []int, discretize bool) *BIT2DSparse {
+	res := &BIT2DSparse{discretize: discretize, unit: e()}
 	ws := make([]Able, len(xs))
 	for i := range ws {
 		ws[i] = res.unit
@@ -115,17 +116,18 @@ func NewFenwickTree2D(xs, ys []int, discretize bool) *FenwickTree2D {
 }
 
 // discretize:
-//  为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
-//  为 false 时不对x维度二分离散化,而是直接用x的值作为下标(所有x给一个偏移量minX),
-//  x 维度数组长度为最大值减最小值.
-func NewFenwickTree2DWithWeights(xs, ys []int, ws []Able, discretize bool) *FenwickTree2D {
-	res := &FenwickTree2D{discretize: discretize, unit: e()}
+//
+//	为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
+//	为 false 时不对x维度二分离散化,而是直接用x的值作为下标(所有x给一个偏移量minX),
+//	x 维度数组长度为最大值减最小值.
+func NewBIT2DSparseWithWeights(xs, ys []int, ws []Able, discretize bool) *BIT2DSparse {
+	res := &BIT2DSparse{discretize: discretize, unit: e()}
 	res._build(xs, ys, ws)
 	return res
 }
 
 // 点 (x,y) 的值加上 val.
-func (fwt *FenwickTree2D) Add(x, y int, val Able) {
+func (fwt *BIT2DSparse) Update(x, y int, val Able) {
 	i := fwt._xtoi(x)
 	for ; i < fwt.n; i += ((i + 1) & -(i + 1)) {
 		fwt._add(i, y, val)
@@ -133,7 +135,7 @@ func (fwt *FenwickTree2D) Add(x, y int, val Able) {
 }
 
 // [lx,rx) * [ly,ry)
-func (t *FenwickTree2D) Query(lx, rx, ly, ry int) Able {
+func (t *BIT2DSparse) QueryRange(lx, rx, ly, ry int) Able {
 	pos, neg := t.unit, t.unit
 	l, r := t._xtoi(lx)-1, t._xtoi(rx)-1
 	for l < r {
@@ -148,7 +150,7 @@ func (t *FenwickTree2D) Query(lx, rx, ly, ry int) Able {
 }
 
 // [0,rx) * [0,ry)
-func (t *FenwickTree2D) QueryPrefix(rx, ry int) Able {
+func (t *BIT2DSparse) QueryPrefix(rx, ry int) Able {
 	pos := t.unit
 	r := t._xtoi(rx) - 1
 	for r >= 0 {
@@ -158,7 +160,7 @@ func (t *FenwickTree2D) QueryPrefix(rx, ry int) Able {
 	return pos
 }
 
-func (t *FenwickTree2D) _add(i int, y int, val Able) {
+func (t *BIT2DSparse) _add(i int, y int, val Able) {
 	lid := t.indptr[i]
 	n := t.indptr[i+1] - t.indptr[i]
 	j := bisectLeft(t.keyY, y, lid, lid+n-1) - lid
@@ -168,7 +170,7 @@ func (t *FenwickTree2D) _add(i int, y int, val Able) {
 	}
 }
 
-func (t *FenwickTree2D) _prodI(i int, ly, ry int) Able {
+func (t *BIT2DSparse) _prodI(i int, ly, ry int) Able {
 	pos, neg := t.unit, t.unit
 	lid := t.indptr[i]
 	n := t.indptr[i+1] - t.indptr[i]
@@ -185,7 +187,7 @@ func (t *FenwickTree2D) _prodI(i int, ly, ry int) Able {
 	return op(pos, inv(neg))
 }
 
-func (t *FenwickTree2D) _prefixProdI(i int, ry int) Able {
+func (t *BIT2DSparse) _prefixProdI(i int, ry int) Able {
 	pos := t.unit
 	lid := t.indptr[i]
 	n := t.indptr[i+1] - t.indptr[i]
@@ -197,7 +199,7 @@ func (t *FenwickTree2D) _prefixProdI(i int, ry int) Able {
 	return pos
 }
 
-func (ft *FenwickTree2D) _build(X, Y []int, wt []Able) {
+func (ft *BIT2DSparse) _build(X, Y []int, wt []Able) {
 	if len(X) != len(Y) || len(X) != len(wt) {
 		panic("Lengths of X, Y, and wt must be equal.")
 	}
@@ -270,7 +272,7 @@ func (ft *FenwickTree2D) _build(X, Y []int, wt []Able) {
 	}
 }
 
-func (ft *FenwickTree2D) _xtoi(x int) int {
+func (ft *BIT2DSparse) _xtoi(x int) int {
 	if ft.discretize {
 		return bisectLeft(ft.keyX, x, 0, len(ft.keyX)-1)
 	}

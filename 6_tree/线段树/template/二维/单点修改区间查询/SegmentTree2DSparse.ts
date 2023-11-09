@@ -25,7 +25,7 @@ interface IOptions<E> {
   op: (a: E, b: E) => E
 }
 
-class SegmentTree2DCompress<E> {
+class SegmentTree2DSparse<E> {
   private static _bisectLeft(arr: ArrayLike<number>, x: number, left: number, right: number): number {
     while (left <= right) {
       const mid = (left + right) >> 1
@@ -176,7 +176,7 @@ class SegmentTree2DCompress<E> {
   }
 
   private _xtoi(x: number): number {
-    if (this._discretizeX) return SegmentTree2DCompress._bisectLeft(this._keyX, x, 0, this._n - 1)
+    if (this._discretizeX) return SegmentTree2DSparse._bisectLeft(this._keyX, x, 0, this._n - 1)
     const res = x - this._minX
     if (res < 0) return 0
     if (res >= this._n) return this._n
@@ -186,7 +186,7 @@ class SegmentTree2DCompress<E> {
   private _update(i: number, y: number, val: E): void {
     const lid = this._indptr[i]
     const diff = this._indptr[i + 1] - this._indptr[i]
-    let j = SegmentTree2DCompress._bisectLeft(this._keyY, y, lid, lid + diff - 1) - lid
+    let j = SegmentTree2DSparse._bisectLeft(this._keyY, y, lid, lid + diff - 1) - lid
     const offset = 2 * lid
     j += diff
     while (j > 0) {
@@ -198,8 +198,8 @@ class SegmentTree2DCompress<E> {
   private _prodI(i: number, ly: number, ry: number): E {
     const lid = this._indptr[i]
     const diff = this._indptr[i + 1] - this._indptr[i]
-    let left = SegmentTree2DCompress._bisectLeft(this._keyY, ly, lid, lid + diff - 1) - lid + diff
-    let right = SegmentTree2DCompress._bisectLeft(this._keyY, ry, lid, lid + diff - 1) - lid + diff
+    let left = SegmentTree2DSparse._bisectLeft(this._keyY, ly, lid, lid + diff - 1) - lid + diff
+    let right = SegmentTree2DSparse._bisectLeft(this._keyY, ry, lid, lid + diff - 1) - lid + diff
     const offset = 2 * lid
     let val = this._e()
     while (left < right) {
@@ -223,7 +223,7 @@ if (require.main === module) {
     private readonly matrix: number[][]
     private readonly ROW: number
     private readonly COL: number
-    private readonly tree: SegmentTree2DCompress<number>
+    private readonly tree: SegmentTree2DSparse<number>
 
     constructor(matrix: number[][]) {
       this.matrix = matrix
@@ -239,7 +239,7 @@ if (require.main === module) {
           ws[r * this.COL + c] = matrix[r][c]
         }
       }
-      this.tree = new SegmentTree2DCompress({
+      this.tree = new SegmentTree2DSparse({
         xs,
         ys,
         ws,
@@ -261,6 +261,8 @@ if (require.main === module) {
   }
 }
 
+export { SegmentTree2DSparse }
+
 if (require.main === module) {
   // test performance
   const ROW = 400
@@ -275,7 +277,7 @@ if (require.main === module) {
   console.time('1e5')
   const xs = points.map(([x]) => x)
   const ys = points.map(([y]) => y)
-  const seg = new SegmentTree2DCompress({
+  const seg = new SegmentTree2DSparse({
     xs,
     ys,
     e: () => 0,
@@ -287,5 +289,3 @@ if (require.main === module) {
   }
   console.timeEnd('1e5')
 }
-
-export { SegmentTree2DCompress }

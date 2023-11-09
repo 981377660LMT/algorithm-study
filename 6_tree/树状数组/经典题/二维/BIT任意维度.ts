@@ -6,13 +6,13 @@ class BITMultiDimension {
   private readonly _dim: number[]
   private readonly _data: number[]
 
-  constructor(dimension: number[]) {
+  constructor(...dimensions: number[]) {
     let n = 1
-    dimension.forEach(v => {
+    dimensions.forEach(v => {
       n *= v
     })
 
-    this._dim = dimension.slice()
+    this._dim = dimensions
     this._data = Array(n).fill(0)
   }
 
@@ -26,7 +26,7 @@ class BITMultiDimension {
   /**
    * 0<=indices[i]<dimension[i]
    */
-  query(indices: number[]): number {
+  queryPrefix(indices: number[]): number {
     return this._queryRec(indices, 0, 0)
   }
 
@@ -84,7 +84,9 @@ class BITMultiDimension {
 export { BITMultiDimension }
 
 if (require.main === module) {
-  const bit = new BITMultiDimension([10, 10])
+  const bit = new BITMultiDimension(10, 10)
   bit.add([1, 1], 1)
-  console.log(bit.query([2, 2]))
+  console.log(bit.queryPrefix([2, 2]))
+  bit.add([2, 2], -2)
+  console.log(bit.queryPrefix([3, 3]))
 }

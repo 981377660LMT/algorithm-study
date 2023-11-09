@@ -60,12 +60,7 @@ class SegmentTree2DRangeUpdatePointGet<E = number, Id = number> {
    * @param createRangeUpdatePointGet1D 初始化内层"树"的函数.入参为内层"树"的大小.
    * @param mergeRow 合并两个内层"树"的结果.
    */
-  constructor(
-    row: number,
-    col: number,
-    createRangeUpdatePointGet1D: (n: number) => IRangeUpdatePointGet1D<E, Id>,
-    mergeRow: (a: E, b: E) => E
-  ) {
+  constructor(row: number, col: number, createRangeUpdatePointGet1D: (n: number) => IRangeUpdatePointGet1D<E, Id>, mergeRow: (a: E, b: E) => E) {
     this._rawRow = row
     this._needRotate = row < col
     if (this._needRotate) {
@@ -132,16 +127,7 @@ class SegmentTree2DRangeUpdatePointGet<E = number, Id = number> {
     }
   }
 
-  private _update(
-    R: number,
-    C: number,
-    start: number,
-    end: number,
-    lazy: Id,
-    pos: number,
-    r: number,
-    c: number
-  ): void {
+  private _update(R: number, C: number, start: number, end: number, lazy: Id, pos: number, r: number, c: number): void {
     if (c <= R || C <= r) return
     if (R <= r && c <= C) {
       if (!this._seg[pos]) this._seg[pos] = this._init1D()

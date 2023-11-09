@@ -14,7 +14,7 @@
 /**
  * 单点修改，区间查询的二维线段树.
  */
-class SegmentTree2DPointUpdateRangeQuery<E> {
+class SegmentTree2DDense<E> {
   private readonly _row: number
   private readonly _col: number
   private readonly _tree: E[]
@@ -46,18 +46,12 @@ class SegmentTree2DPointUpdateRangeQuery<E> {
   build(): void {
     for (let c = this._col; c < this._col << 1; c++) {
       for (let r = this._row - 1; ~r; r--) {
-        this._tree[this._id(r, c)] = this._op(
-          this._tree[this._id(r << 1, c)],
-          this._tree[this._id((r << 1) | 1, c)]
-        )
+        this._tree[this._id(r, c)] = this._op(this._tree[this._id(r << 1, c)], this._tree[this._id((r << 1) | 1, c)])
       }
     }
     for (let r = 0; r < this._row << 1; r++) {
       for (let c = this._col - 1; ~c; c--) {
-        this._tree[this._id(r, c)] = this._op(
-          this._tree[this._id(r, c << 1)],
-          this._tree[this._id(r, (c << 1) | 1)]
-        )
+        this._tree[this._id(r, c)] = this._op(this._tree[this._id(r, c << 1)], this._tree[this._id(r, (c << 1) | 1)])
       }
     }
   }
@@ -73,17 +67,11 @@ class SegmentTree2DPointUpdateRangeQuery<E> {
     let c = col + this._col
     this._tree[this._id(r, c)] = target
     for (let i = r >>> 1; i; i >>>= 1) {
-      this._tree[this._id(i, c)] = this._op(
-        this._tree[this._id(i << 1, c)],
-        this._tree[this._id((i << 1) | 1, c)]
-      )
+      this._tree[this._id(i, c)] = this._op(this._tree[this._id(i << 1, c)], this._tree[this._id((i << 1) | 1, c)])
     }
     for (; r; r >>>= 1) {
       for (let j = c >>> 1; j; j >>>= 1) {
-        this._tree[this._id(r, j)] = this._op(
-          this._tree[this._id(r, j << 1)],
-          this._tree[this._id(r, (j << 1) | 1)]
-        )
+        this._tree[this._id(r, j)] = this._op(this._tree[this._id(r, j << 1)], this._tree[this._id(r, (j << 1) | 1)])
       }
     }
   }
@@ -94,17 +82,11 @@ class SegmentTree2DPointUpdateRangeQuery<E> {
     let c = col + this._col
     this._tree[this._id(r, c)] = this._op(this._tree[this._id(r, c)], value)
     for (let i = r >>> 1; i; i >>>= 1) {
-      this._tree[this._id(i, c)] = this._op(
-        this._tree[this._id(i << 1, c)],
-        this._tree[this._id((i << 1) | 1, c)]
-      )
+      this._tree[this._id(i, c)] = this._op(this._tree[this._id(i << 1, c)], this._tree[this._id((i << 1) | 1, c)])
     }
     for (; r; r >>>= 1) {
       for (let j = c >>> 1; j; j >>>= 1) {
-        this._tree[this._id(r, j)] = this._op(
-          this._tree[this._id(r, j << 1)],
-          this._tree[this._id(r, (j << 1) | 1)]
-        )
+        this._tree[this._id(r, j)] = this._op(this._tree[this._id(r, j << 1)], this._tree[this._id(r, (j << 1) | 1)])
       }
     }
   }
@@ -155,19 +137,19 @@ class SegmentTree2DPointUpdateRangeQuery<E> {
   }
 }
 
-export { SegmentTree2DPointUpdateRangeQuery }
+export { SegmentTree2DDense }
 
 if (require.main === module) {
   // https://leetcode.cn/problems/range-sum-query-2d-mutable/
   class NumMatrix {
     private readonly _ROW: number
     private readonly _COL: number
-    private readonly _tree: SegmentTree2DPointUpdateRangeQuery<number>
+    private readonly _tree: SegmentTree2DDense<number>
 
     constructor(matrix: number[][]) {
       this._ROW = matrix.length
       this._COL = matrix[0].length
-      this._tree = new SegmentTree2DPointUpdateRangeQuery(
+      this._tree = new SegmentTree2DDense(
         this._ROW,
         this._COL,
         () => 0,
@@ -192,7 +174,7 @@ if (require.main === module) {
     }
   }
 
-  const seg2d = new SegmentTree2DPointUpdateRangeQuery(
+  const seg2d = new SegmentTree2DDense(
     3,
     4,
     () => 0,

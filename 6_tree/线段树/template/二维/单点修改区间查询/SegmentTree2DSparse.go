@@ -27,7 +27,7 @@ func maxProfit(prices []int, profits []int) int {
 		xs[i] = i
 	}
 
-	tree := NewSegmentTree2DWithWeights(xs, prices, profits, false)
+	tree := NewSegmentTree2DSparseWithWeights(xs, prices, profits, false)
 	res := -1
 	for i := 0; i < n; i++ {
 		x, y := i, prices[i]
@@ -76,7 +76,7 @@ func main2() {
 		}
 	}
 
-	tree := NewSegmentTree2DWithWeights(xs, ys, ws, true)
+	tree := NewSegmentTree2DSparseWithWeights(xs, ys, ws, true)
 	for i := 0; i < q; i++ {
 		a, b, c, d := query[i][0], query[i][1], query[i][2], query[i][3]
 		if a == -1 {
@@ -99,7 +99,7 @@ func main() {
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &xs[i], &ys[i], &ws[i])
 	}
-	tree := NewSegmentTree2DWithWeights(xs, ys, ws, true)
+	tree := NewSegmentTree2DSparseWithWeights(xs, ys, ws, true)
 	for i := 0; i < q; i++ {
 		var l, d, r, u int
 		fmt.Fscan(in, &l, &d, &r, &u)
@@ -113,7 +113,7 @@ type E = int
 func e() E        { return 0 }
 func op(a, b E) E { return a + b }
 
-type SegmentTree2D struct {
+type SegmentTree2DSparse struct {
 	n          int
 	keyX       []int
 	keyY       []int
@@ -129,8 +129,8 @@ type SegmentTree2D struct {
 //	为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
 //	为 false 时不对x维度二分离散化,而是直接用x的值作为下标(自动所有x给一个偏移量minX),
 //	x 维度数组长度为最大值减最小值.
-func NewSegmentTree2D(xs, ys []int, discretize bool) *SegmentTree2D {
-	res := &SegmentTree2D{discretize: discretize, unit: e()}
+func NewSegmentTree2DSparse(xs, ys []int, discretize bool) *SegmentTree2DSparse {
+	res := &SegmentTree2DSparse{discretize: discretize, unit: e()}
 	ws := make([]E, len(xs))
 	for i := range ws {
 		ws[i] = res.unit
@@ -144,14 +144,14 @@ func NewSegmentTree2D(xs, ys []int, discretize bool) *SegmentTree2D {
 //	为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
 //	为 false 时不对x维度二分离散化,而是直接用x的值作为下标(自动所有x给一个偏移量minX),
 //	x 维度数组长度为最大值减最小值.
-func NewSegmentTree2DWithWeights(xs, ys []int, ws []E, discretize bool) *SegmentTree2D {
-	res := &SegmentTree2D{discretize: discretize, unit: e()}
+func NewSegmentTree2DSparseWithWeights(xs, ys []int, ws []E, discretize bool) *SegmentTree2DSparse {
+	res := &SegmentTree2DSparse{discretize: discretize, unit: e()}
 	res._build(xs, ys, ws)
 	return res
 }
 
 // 点 (x,y) 的值加上 val.
-func (t *SegmentTree2D) Update(x, y int, val E) {
+func (t *SegmentTree2DSparse) Update(x, y int, val E) {
 	i := t._xtoi(x)
 	i += t.n
 	for i > 0 {
@@ -161,7 +161,7 @@ func (t *SegmentTree2D) Update(x, y int, val E) {
 }
 
 // [lx,rx) * [ly,ry)
-func (t *SegmentTree2D) Query(lx, rx, ly, ry int) E {
+func (t *SegmentTree2DSparse) Query(lx, rx, ly, ry int) E {
 	L := t._xtoi(lx) + t.n
 	R := t._xtoi(rx) + t.n
 	val := t.unit
@@ -180,7 +180,7 @@ func (t *SegmentTree2D) Query(lx, rx, ly, ry int) E {
 	return val
 }
 
-func (t *SegmentTree2D) _add(i int, y int, val E) {
+func (t *SegmentTree2DSparse) _add(i int, y int, val E) {
 	lid := t.indptr[i]
 	n := t.indptr[i+1] - t.indptr[i]
 	j := bisectLeft(t.keyY, y, lid, lid+n-1) - lid
@@ -192,7 +192,7 @@ func (t *SegmentTree2D) _add(i int, y int, val E) {
 	}
 }
 
-func (t *SegmentTree2D) _prodI(i int, ly, ry int) E {
+func (t *SegmentTree2DSparse) _prodI(i int, ly, ry int) E {
 	lid := t.indptr[i]
 	n := t.indptr[i+1] - t.indptr[i]
 	left := bisectLeft(t.keyY, ly, lid, lid+n-1) - lid + n
@@ -214,7 +214,7 @@ func (t *SegmentTree2D) _prodI(i int, ly, ry int) E {
 	return val
 }
 
-func (seg *SegmentTree2D) _build(X, Y []int, wt []E) {
+func (seg *SegmentTree2DSparse) _build(X, Y []int, wt []E) {
 	if len(X) != len(Y) || len(X) != len(wt) {
 		panic("Lengths of X, Y, and wt must be equal.")
 	}
@@ -283,7 +283,7 @@ func (seg *SegmentTree2D) _build(X, Y []int, wt []E) {
 	}
 }
 
-func (seg *SegmentTree2D) _xtoi(x int) int {
+func (seg *SegmentTree2DSparse) _xtoi(x int) int {
 	if seg.discretize {
 		return bisectLeft(seg.keyX, x, 0, len(seg.keyX)-1)
 	}
