@@ -51,6 +51,8 @@ class BIT2DDenseRangeAddRangesum {
    * 0<=row1<=row2<=ROW, 0<=col1<=col2<=COL.
    */
   queryRange(row1: number, row2: number, col1: number, col2: number): number {
+    if (row1 < 0) row1 = 0
+    if (col1 < 0) col1 = 0
     if (row2 > this._ROW) row2 = this._ROW
     if (col2 > this._COL) col2 = this._COL
     if (row1 >= row2 || col1 >= col2) return 0
@@ -97,6 +99,7 @@ if (require.main === module) {
   console.log(bit.toString())
   console.log(bit.queryPrefix(2, 2), bit.queryPrefix(2, 3), bit.queryPrefix(3, 2), bit.queryPrefix(3, 3))
 
+  // https://leetcode.cn/problems/range-sum-query-2d-mutable/
   class NumMatrix {
     private readonly _bit: BIT2DDenseRangeAddRangesum
     private readonly _matrix: number[][]
@@ -122,17 +125,4 @@ if (require.main === module) {
       return this._bit.queryRange(row1, row2 + 1, col1, col2 + 1)
     }
   }
-
-  ;['NumMatrix', 'sumRegion', 'update', 'sumRegion']
-  // [[[[3, 0, 1, 4, 2], [5, 6, 3, 2, 1], [1, 2, 0, 1, 5], [4, 1, 0, 1, 7], [1, 0, 3, 0, 5]]], [2, 1, 4, 3], [3, 2, 2], [2, 1, 4, 3]]
-
-  const numMatrix = new NumMatrix([
-    [3, 0, 1, 4, 2],
-    [5, 6, 3, 2, 1],
-    [1, 2, 0, 1, 5],
-    [4, 1, 0, 1, 7],
-    [1, 0, 3, 0, 5]
-  ])
-
-  console.log(numMatrix.sumRegion(2, 1, 4, 3))
 }

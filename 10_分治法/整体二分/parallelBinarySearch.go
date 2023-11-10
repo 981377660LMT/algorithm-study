@@ -26,7 +26,9 @@ import (
 )
 
 func main() {
-	StaticRangeKthSmallest()
+	// StaticRangeKthSmallest()
+	// 矩阵乘法()
+	天天爱射击()
 }
 
 // 静态区间第 k 小
@@ -57,15 +59,19 @@ func StaticRangeKthSmallest() {
 		return nums[order[i]] < nums[order[j]]
 	})
 
-	bit := NewBitArray(n)
-	mutate := func(mid int) { bit.Apply(order[mid], 1) }
-	reset := func() { bit.Build(make([]int, n)) }
+	bit := NewBitArray(n) // 子弹击中的范围
+	reset := func() {
+		bit.Build(make([]int, n))
+	}
+	mutate := func(id int) {
+		bit.Update(order[id], 1)
+	}
 	predicate := func(qid int) bool {
 		l, r, k := queries[qid][0], queries[qid][1], queries[qid][2]
-		return bit.ProdRange(l, r) >= k
+		return bit.QueryRange(l, r) >= k
 	}
 
-	left := ParallelBinarySearch(n, q, mutate, reset, predicate)
+	left := ParallelBinarySearch(n, q, reset, mutate, predicate)
 	for i := 0; i < q; i++ {
 		v := left[i]
 		fmt.Fprintln(out, nums[order[v]])
@@ -82,29 +88,118 @@ func 矩阵乘法() {
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
+	nums := make([]int, n*n)
+	for i := 0; i < n*n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
-	queries := make([][3]int, q) // [l, r) 中第 k 小 (1-indexed)
+	queries := make([][5]int, q) // [x1,x2) x [y1,y2) 中第 k 小 (1-indexed)
 	for i := 0; i < q; i++ {
-		fmt.Fscan(in, &queries[i][0], &queries[i][1], &queries[i][2])
-		queries[i][0]--
+		var x1, y1, x2, y2, k int
+		fmt.Fscan(in, &x1, &y1, &x2, &y2, &k)
+		x1--
+		y1--
+		queries[i] = [5]int{x1, x2, y1, y2, k}
 	}
 
 	// argsort
-	order := make([]int, len(nums))
-	for i := 0; i < len(nums); i++ {
+	order := make([]int, n*n)
+	for i := range order {
 		order[i] = i
 	}
 	sort.Slice(order, func(i, j int) bool {
 		return nums[order[i]] < nums[order[j]]
 	})
+
+	bit := NewBIT2DDense(n, n)
+	reset := func() {
+		bit.Build(func(x, y int) int { return 0 })
+	}
+	mutate := func(id int) {
+		bit.Add(order[id]/n, order[id]%n, 1)
+	}
+	predicate := func(qid int) bool {
+		item := queries[qid]
+		x1, x2, y1, y2, k := item[0], item[1], item[2], item[3], item[4]
+		return bit.QueryRange(x1, x2, y1, y2) >= k
+	}
+
+	res := ParallelBinarySearch(n*n, q, reset, mutate, predicate)
+	for i := 0; i < q; i++ {
+		v := res[i]
+		fmt.Fprintln(out, nums[order[v]])
+	}
 }
 
 // P7424 [THUPC2017] 天天爱射击
 // https://www.luogu.com.cn/problem/P7424
 // 将【每个子弹射出之后有多少个木板会碎掉】转化为【每个木板会在第几次子弹射击之后碎掉】
+// 子弹按照发射顺序给出
+func 天天爱射击() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var board, bullet int
+	fmt.Fscan(in, &board, &bullet)
+
+	boardInfo := make([][3]int, board) // [left,right,hp]
+	for i := 0; i < board; i++ {
+		var left, right, hp int
+		fmt.Fscan(in, &left, &right, &hp)
+		boardInfo[i] = [3]int{left, right, hp}
+	}
+
+	bulletInfo := make([]int, bullet) // pos
+	for i := 0; i < bullet; i++ {
+		fmt.Fscan(in, &bulletInfo[i])
+	}
+
+	// 离散化
+	allNums := make([]int, 0, board*2+bullet)
+	for i := 0; i < board; i++ {
+		allNums = append(allNums, boardInfo[i][0], boardInfo[i][1])
+	}
+	for i := 0; i < bullet; i++ {
+		allNums = append(allNums, bulletInfo[i])
+	}
+	getRank, count := DiscretizeCompressed(allNums, 0)
+	for i := 0; i < board; i++ {
+		boardInfo[i][0] = getRank(boardInfo[i][0])
+		boardInfo[i][1] = getRank(boardInfo[i][1])
+	}
+	for i := 0; i < bullet; i++ {
+		bulletInfo[i] = getRank(bulletInfo[i])
+	}
+
+	bit := NewBitArray(count) // 每个子弹击中的位置计数
+	reset := func() {
+		bit.Build(make([]int, count))
+	}
+
+	mutate := func(id int) {
+		pos := bulletInfo[id]
+		bit.Update(pos, 1)
+	}
+
+	predicate := func(qid int) bool {
+		item := boardInfo[qid]
+		left, right, hp := item[0], item[1], item[2]
+		return bit.QueryRange(left, right+1) >= hp
+	}
+
+	// bullet 次修改，board 次查询
+	left := ParallelBinarySearch(bullet, board, reset, mutate, predicate)
+	counter := make([]int, bullet)
+	for _, v := range left {
+		if v < 0 || v >= bullet {
+			continue
+		}
+		counter[v]++
+	}
+	for _, v := range counter {
+		fmt.Fprintln(out, v)
+	}
+}
 
 // P3527 [POI2011] MET-Meteors 流星
 // https://www.luogu.com.cn/problem/P3527
@@ -126,12 +221,13 @@ func demo() {
 	curSum := 0
 	res := ParallelBinarySearch(
 		10, 10,
-		func(mutationId int) {
-			curSum += mutationId + 1
-		},
 		func() {
 			curSum = 0
 		},
+		func(mutationId int) {
+			curSum += mutationId + 1
+		},
+
 		func(queryId int) bool {
 			return curSum >= 560
 		},
@@ -153,8 +249,8 @@ func demo() {
 // https://betrue12.hateblo.jp/entry/2019/08/14/152227
 func ParallelBinarySearch(
 	n, q int,
-	mutate func(mutationId int), // 执行第 mutationId 次操作，一共调用 nlogn 次.
 	reset func(), // 重置操作序列，一共调用 logn 次.
+	mutate func(mutationId int), // 执行第 mutationId 次操作，一共调用 nlogn 次.
 	predicate func(queryId int) bool, // 判断第 queryId 次查询是否满足条件，一共调用 qlogn 次.
 ) []int {
 	left, right := make([]int, q), make([]int, q)
@@ -257,14 +353,14 @@ func (b *BitArray) Build(arr []int) {
 }
 
 // 要素 i に値 v を加える.
-func (b *BitArray) Apply(i int, v int) {
+func (b *BitArray) Update(i int, v int) {
 	for i++; i <= b.n; i += i & -i {
 		b.data[i] += v
 	}
 }
 
 // [0, r) の要素の総和を求める.
-func (b *BitArray) Prod(r int) int {
+func (b *BitArray) QueryPrefix(r int) int {
 	res := int(0)
 	for ; r > 0; r -= r & -r {
 		res += b.data[r]
@@ -273,8 +369,8 @@ func (b *BitArray) Prod(r int) int {
 }
 
 // [l, r) の要素の総和を求める.
-func (b *BitArray) ProdRange(l, r int) int {
-	return b.Prod(r) - b.Prod(l)
+func (b *BitArray) QueryRange(l, r int) int {
+	return b.QueryPrefix(r) - b.QueryPrefix(l)
 }
 
 // 区間[0,k]の総和がx以上となる最小のkを求める.数列が単調増加であることを要求する.
@@ -299,4 +395,139 @@ func (b *BitArray) UpperBound(x int) int {
 		}
 	}
 	return i
+}
+
+type BIT2DPointAddRangeSum struct {
+	H, W int
+	data []int
+}
+
+// 指定二维树状数组的高度和宽度.
+func NewBIT2DDense(h, w int) *BIT2DPointAddRangeSum {
+	res := &BIT2DPointAddRangeSum{H: h, W: w, data: make([]int, h*w)}
+	return res
+}
+
+func (ft *BIT2DPointAddRangeSum) Build(f func(x, y int) int) {
+	H, W := ft.H, ft.W
+	for x := 0; x < H; x++ {
+		for y := 0; y < W; y++ {
+			ft.data[W*x+y] = f(x, y)
+		}
+	}
+	for x := 1; x <= H; x++ {
+		for y := 1; y <= W; y++ {
+			ny := y + (y & -y)
+			if ny <= W {
+				ft.data[ft.idx(x, ny)] += ft.data[ft.idx(x, y)]
+			}
+		}
+	}
+	for x := 1; x <= H; x++ {
+		for y := 1; y <= W; y++ {
+			nx := x + (x & -x)
+			if nx <= H {
+				ft.data[ft.idx(nx, y)] += ft.data[ft.idx(x, y)]
+			}
+		}
+	}
+}
+
+// 点 (x,y) 的值加上 val.
+func (ft *BIT2DPointAddRangeSum) Add(x, y int, val int) {
+	x++
+	for x <= ft.H {
+		ft.addX(x, y, val)
+		x += x & -x
+	}
+}
+
+// [lx,rx) * [ly,ry)
+func (ft *BIT2DPointAddRangeSum) QueryRange(lx, rx, ly, ry int) int {
+	pos, neg := 0, 0
+	for lx < rx {
+		pos += ft.sumX(rx, ly, ry)
+		rx -= rx & -rx
+	}
+	for rx < lx {
+		neg += ft.sumX(lx, ly, ry)
+		lx -= lx & -lx
+	}
+	return pos - neg
+}
+
+// [0,rx) * [0,ry)
+func (ft *BIT2DPointAddRangeSum) QueryPrefix(rx, ry int) int {
+	pos := 0
+	for rx > 0 {
+		pos += ft.sumXPrefix(rx, ry)
+		rx -= rx & -rx
+	}
+	return pos
+}
+
+func (ft *BIT2DPointAddRangeSum) String() string {
+	res := make([][]string, ft.H)
+	for i := 0; i < ft.H; i++ {
+		res[i] = make([]string, ft.W)
+		for j := 0; j < ft.W; j++ {
+			res[i][j] = fmt.Sprintf("%v", ft.QueryRange(i, i+1, j, j+1))
+		}
+
+	}
+	return fmt.Sprintf("%v", res)
+}
+
+func (ft *BIT2DPointAddRangeSum) idx(x, y int) int {
+	return ft.W*(x-1) + (y - 1)
+}
+
+func (ft *BIT2DPointAddRangeSum) addX(x, y int, val int) {
+	y++
+	for y <= ft.W {
+		ft.data[ft.idx(x, y)] += val
+		y += y & -y
+	}
+}
+
+func (ft *BIT2DPointAddRangeSum) sumX(x, ly, ry int) int {
+	pos, neg := 0, 0
+	for ly < ry {
+		pos += ft.data[ft.idx(x, ry)]
+		ry -= ry & -ry
+	}
+	for ry < ly {
+		neg += ft.data[ft.idx(x, ly)]
+		ly -= ly & -ly
+	}
+	return pos - neg
+}
+
+func (ft *BIT2DPointAddRangeSum) sumXPrefix(x, ry int) int {
+	pos := 0
+	for ry > 0 {
+		pos += ft.data[ft.idx(x, ry)]
+		ry -= ry & -ry
+	}
+	return pos
+}
+
+func DiscretizeCompressed(nums []int, offset int) (getRank func(int) int, count int) {
+	set := make(map[int]struct{}, len(nums))
+	for _, v := range nums {
+		set[v] = struct{}{}
+	}
+	count = len(set)
+	rank := make([]int, 0, count)
+	for v := range set {
+		rank = append(rank, v)
+	}
+	sort.Ints(rank)
+	mp := make(map[int]int, count)
+	for i, v := range rank {
+		mp[v] = i + offset
+	}
+	getRank = func(v int) int { return mp[v] }
+	count = len(nums)
+	return
 }

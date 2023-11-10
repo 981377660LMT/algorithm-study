@@ -23,8 +23,8 @@
  *
  * @param n 操作序列的长度.
  * @param q 查询的个数.
- * @param mutate 执行第`mutationId`次操作.一共调用`O(nlogn)`次.
  * @param reset 重置操作序列.一共调用`O(logn)`次.
+ * @param mutate 执行第`mutationId`次操作.一共调用`O(nlogn)`次.
  * @param predicate 判断第`queryId`次查询是否满足条件.一共调用`O(qlogn)`次.
  * @returns
  *  - `-1` => 不需要操作就满足条件的查询.
@@ -37,12 +37,12 @@ function parallelBinarySearch(
   n: number,
   q: number,
   options: {
-    mutate: (mutationId: number) => void
     reset: () => void
+    mutate: (mutationId: number) => void
     predicate: (queryId: number) => boolean
   } & ThisType<void>
 ): Int32Array {
-  const { mutate, reset, predicate } = options
+  const { reset, mutate, predicate } = options
   const left = new Int32Array(q)
   const right = new Int32Array(q).fill(n)
 
@@ -110,11 +110,11 @@ export { parallelBinarySearch, parallelBinarySearch as parallelSortSearch }
 if (require.main === module) {
   let curSum = 0
   const res = parallelBinarySearch(10, 10, {
-    mutate(mutationId) {
-      curSum += mutationId + 1
-    },
     reset() {
       curSum = 0
+    },
+    mutate(mutationId) {
+      curSum += mutationId + 1
     },
     predicate(queryId) {
       return curSum >= 56

@@ -3,8 +3,7 @@
 
 // API:
 // 1. NewSegmentTree2DDense(row,col int) *SegmentTree2DDense
-// 2. (st *SegmentTree2DDense) AddPoint(row,col int,value E)
-// 3. (st *SegmentTree2DDense) Build()
+// 3. (st *SegmentTree2DDense) Build(f func(r,c int) E)
 // 4. (st *SegmentTree2DDense) Get(row,col int) E
 // 5. (st *SegmentTree2DDense) Set(row,col int,value E)
 // 6. (st *SegmentTree2DDense) Query(row1,row2,col1,col2 int) E
@@ -22,13 +21,7 @@ type NumMatrix struct {
 
 func Constructor(matrix [][]int) NumMatrix {
 	seg := NewSegmentTree2DDense(len(matrix), len(matrix[0]))
-	for i := range matrix {
-		for j := range matrix[i] {
-			seg.AddPoint(i, j, matrix[i][j])
-		}
-	}
-
-	seg.Build()
+	seg.Build(func(r, c int) E { return matrix[r][c] })
 	return NumMatrix{seg}
 }
 
@@ -69,6 +62,7 @@ func sortedSet(nums []int) (getRank func(int) int) {
 	getRank = func(x int) int { return sort.SearchInts(sorted, x) }
 	return
 }
+
 func min(a, b int) int {
 	if a < b {
 		return a
@@ -84,54 +78,59 @@ func max(a, b int) int {
 }
 
 type SegmentTree2DDense struct {
-	row, col int
-	tree     []E
-	unit     E
+	Row, Col             int
+	rowOffset, colOffset int
+	tree                 []E
+	unit                 E
 }
 
 func NewSegmentTree2DDense(row, col int) *SegmentTree2DDense {
 	res := &SegmentTree2DDense{}
 	res.unit = res.e()
-	row_, col_ := 1<<uint(bits.Len(uint(row-1))), 1<<uint(bits.Len(uint(col-1)))
-	tree := make([]E, (row_*col_)<<2)
+	rowOffset, colOffset := 1<<uint(bits.Len(uint(row-1))), 1<<uint(bits.Len(uint(col-1)))
+	tree := make([]E, (rowOffset*colOffset)<<2)
 	for i := range tree {
 		tree[i] = res.unit
 	}
-	res.row, res.col, res.tree = row_, col_, tree
+	res.Row, res.Col = row, col
+	res.rowOffset, res.colOffset, res.tree = rowOffset, colOffset, tree
 	return res
 }
 
-// 在Build之前调用, 为每个点赋值
-func (st *SegmentTree2DDense) AddPoint(row, col int, value E) {
-	st.tree[st.id(row+st.row, col+st.col)] = value
-}
-
-func (st *SegmentTree2DDense) Build() {
-	for c := st.col; c < st.col<<1; c++ {
-		for r := st.row - 1; r > 0; r-- {
-			st.tree[st.id(r, c)] = st.op(st.tree[st.id(r<<1, c)], st.tree[st.id((r<<1)|1, c)])
+func (st *SegmentTree2DDense) Build(f func(r, c int) E) {
+	ROW, COL := st.Row, st.Col
+	rowOffset, colOffset := st.rowOffset, st.colOffset
+	for r := 0; r < ROW; r++ {
+		for c := 0; c < COL; c++ {
+			st.tree[st._id(r+rowOffset, c+colOffset)] = f(r, c)
 		}
 	}
-	for r := 0; r < st.row<<1; r++ {
-		for c := st.col - 1; c > 0; c-- {
-			st.tree[st.id(r, c)] = st.op(st.tree[st.id(r, c<<1)], st.tree[st.id(r, (c<<1)|1)])
+
+	for c := colOffset; c < colOffset<<1; c++ {
+		for r := rowOffset - 1; r > 0; r-- {
+			st.tree[st._id(r, c)] = st.op(st.tree[st._id(r<<1, c)], st.tree[st._id((r<<1)|1, c)])
+		}
+	}
+	for r := 0; r < rowOffset<<1; r++ {
+		for c := colOffset - 1; c > 0; c-- {
+			st.tree[st._id(r, c)] = st.op(st.tree[st._id(r, c<<1)], st.tree[st._id(r, (c<<1)|1)])
 		}
 	}
 }
 
 func (st *SegmentTree2DDense) Get(row, col int) E {
-	return st.tree[st.id(row+st.row, col+st.col)]
+	return st.tree[st._id(row+st.rowOffset, col+st.colOffset)]
 }
 
 func (st *SegmentTree2DDense) Set(row, col int, value E) {
-	r, c := row+st.row, col+st.col
-	st.tree[st.id(r, c)] = value
+	r, c := row+st.rowOffset, col+st.colOffset
+	st.tree[st._id(r, c)] = value
 	for i := r >> 1; i > 0; i >>= 1 {
-		st.tree[st.id(i, c)] = st.op(st.tree[st.id(i<<1, c)], st.tree[st.id((i<<1)|1, c)])
+		st.tree[st._id(i, c)] = st.op(st.tree[st._id(i<<1, c)], st.tree[st._id((i<<1)|1, c)])
 	}
 	for ; r > 0; r >>= 1 {
 		for j := c >> 1; j > 0; j >>= 1 {
-			st.tree[st.id(r, j)] = st.op(st.tree[st.id(r, j<<1)], st.tree[st.id(r, (j<<1)|1)])
+			st.tree[st._id(r, j)] = st.op(st.tree[st._id(r, j<<1)], st.tree[st._id(r, (j<<1)|1)])
 		}
 	}
 }
@@ -144,18 +143,18 @@ func (st *SegmentTree2DDense) Query(row1, row2, col1, col2 int) E {
 		return st.unit
 	}
 	res := st.unit
-	row1 += st.row
-	row2 += st.row
-	col1 += st.col
-	col2 += st.col
+	row1 += st.rowOffset
+	row2 += st.rowOffset
+	col1 += st.colOffset
+	col2 += st.colOffset
 	for row1 < row2 {
 		if row1&1 == 1 {
-			res = st.op(res, st.query(row1, col1, col2))
+			res = st.op(res, st._query(row1, col1, col2))
 			row1++
 		}
 		if row2&1 == 1 {
 			row2--
-			res = st.op(res, st.query(row2, col1, col2))
+			res = st.op(res, st._query(row2, col1, col2))
 		}
 		row1 >>= 1
 		row2 >>= 1
@@ -163,16 +162,16 @@ func (st *SegmentTree2DDense) Query(row1, row2, col1, col2 int) E {
 	return res
 }
 
-func (st *SegmentTree2DDense) query(r, c1, c2 int) E {
+func (st *SegmentTree2DDense) _query(r, c1, c2 int) E {
 	res := st.unit
 	for c1 < c2 {
 		if c1&1 == 1 {
-			res = st.op(res, st.tree[st.id(r, c1)])
+			res = st.op(res, st.tree[st._id(r, c1)])
 			c1++
 		}
 		if c2&1 == 1 {
 			c2--
-			res = st.op(res, st.tree[st.id(r, c2)])
+			res = st.op(res, st.tree[st._id(r, c2)])
 		}
 		c1 >>= 1
 		c2 >>= 1
@@ -180,4 +179,4 @@ func (st *SegmentTree2DDense) query(r, c1, c2 int) E {
 	return res
 }
 
-func (st *SegmentTree2DDense) id(r, c int) int { return ((r * st.col) << 1) + c }
+func (st *SegmentTree2DDense) _id(r, c int) int { return ((r * st.colOffset) << 1) + c }
