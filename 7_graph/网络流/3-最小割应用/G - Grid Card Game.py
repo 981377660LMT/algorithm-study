@@ -22,7 +22,7 @@
 import sys
 import os
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 INF = int(1e18)
 

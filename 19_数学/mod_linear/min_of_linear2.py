@@ -34,7 +34,7 @@ def min_of_linear(n: int, mod: int, a: int, b: int, is_min=True, p=1, q=1) -> in
 if __name__ == "__main__":
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
     T = int(input())
     for _ in range(T):

@@ -86,7 +86,7 @@ def _min_of_linear_segments(a: int, b: int, mod: int) -> Tuple[List[int], List[i
 if __name__ == "__main__":
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
     T = int(input())
     for _ in range(T):

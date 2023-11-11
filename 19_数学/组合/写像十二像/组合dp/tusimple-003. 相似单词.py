@@ -6,7 +6,7 @@ from collections import Counter
 from functools import lru_cache
 from math import comb
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 comb = lru_cache(comb)
 
 

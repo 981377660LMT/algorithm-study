@@ -14,7 +14,7 @@ import sys
 import numpy as np
 from functools import lru_cache
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = sys.stdin.readline
 MOD = 998244353
 

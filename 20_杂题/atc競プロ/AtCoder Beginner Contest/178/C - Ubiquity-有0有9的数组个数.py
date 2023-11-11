@@ -2,7 +2,7 @@
 # !容斥原理 减去没有0的情况 减去没有9的情况 加上没有0也没有9的情况
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = int(1e9 + 7)
 INF = int(4e18)

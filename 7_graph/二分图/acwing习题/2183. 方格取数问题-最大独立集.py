@@ -172,7 +172,7 @@ def solve(grid: List[List[int]]) -> int:
 
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 

@@ -81,7 +81,7 @@ def countDescendants2(n: int, parents: List[int], queries: List[Tuple[int, int]]
 
 
 if __name__ == "__main__":
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     n = int(input())
     parents = [-1] + [int(x) - 1 for x in input().split()]
     q = int(input())

@@ -2,6 +2,7 @@
 # 树上距离的频数表
 # n<=2e5
 
+
 # https://judge.yosupo.jp/submission/24182
 class CentroidDecomposition:
     def __init__(self, n):
@@ -501,7 +502,7 @@ def g(tree, v):
 
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = 998244353
 INF = int(4e18)

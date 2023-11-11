@@ -127,14 +127,14 @@ func (b *BITMap) QueryRange(l, r int) int {
 }
 
 // !Range Add Range Sum, 0-based.
-type BIT2Array struct {
+type BITRangeAddRangeSum struct {
 	n     int
 	tree1 []int
 	tree2 []int
 }
 
-func NewBITArray2(n int) *BIT2Array {
-	return &BIT2Array{
+func NewBITRangeAddRangeSum(n int) *BITRangeAddRangeSum {
+	return &BITRangeAddRangeSum{
 		n:     n,
 		tree1: make([]int, n+1),
 		tree2: make([]int, n+1),
@@ -144,29 +144,13 @@ func NewBITArray2(n int) *BIT2Array {
 // 切片内[start, end)的每个元素加上delta.
 //
 //	0<=start<=end<=n
-func (b *BIT2Array) Add(start, end, delta int) {
+func (b *BITRangeAddRangeSum) AddRange(start, end, delta int) {
 	end--
-	b.add(start, delta)
-	b.add(end+1, -delta)
+	b._add(start, delta)
+	b._add(end+1, -delta)
 }
 
-// 求切片内[start, end)的和.
-//
-//	0<=start<=end<=n
-func (b *BIT2Array) Query(start, end int) int {
-	end--
-	return b.query(end) - b.query(start-1)
-}
-
-func (b *BIT2Array) add(index, delta int) {
-	index++
-	for i := index; i <= b.n; i += i & -i {
-		b.tree1[i] += delta
-		b.tree2[i] += (index - 1) * delta
-	}
-}
-
-func (b *BIT2Array) query(index int) (res int) {
+func (b *BITRangeAddRangeSum) QueryPrefix(index int) (res int) {
 	index++
 	if index > b.n {
 		index = b.n
@@ -175,6 +159,30 @@ func (b *BIT2Array) query(index int) (res int) {
 		res += index*b.tree1[i] - b.tree2[i]
 	}
 	return res
+}
+
+// 求切片内[start, end)的和.
+//
+//	0<=start<=end<=n
+func (b *BITRangeAddRangeSum) QueryRange(start, end int) int {
+	end--
+	return b.QueryPrefix(end) - b.QueryPrefix(start-1)
+}
+
+func (b *BITRangeAddRangeSum) String() string {
+	res := []string{}
+	for i := 0; i < b.n; i++ {
+		res = append(res, fmt.Sprintf("%d", b.QueryRange(i, i+1)))
+	}
+	return fmt.Sprintf("BITRangeAddRangeSum: [%v]", strings.Join(res, ", "))
+}
+
+func (b *BITRangeAddRangeSum) _add(index, delta int) {
+	index++
+	for i := index; i <= b.n; i += i & -i {
+		b.tree1[i] += delta
+		b.tree2[i] += (index - 1) * delta
+	}
 }
 
 // !Range Add Range Sum, 0-based.

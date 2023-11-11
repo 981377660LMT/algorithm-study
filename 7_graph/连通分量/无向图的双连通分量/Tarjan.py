@@ -17,7 +17,7 @@ Graph = Union[AdjList, AdjMap]
 
 class Tarjan:
     INF = int(1e20)
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
 
     @staticmethod
     def getSCC(n: int, graph: Graph) -> Tuple[int, DefaultDict[int, Set[int]], List[int]]:

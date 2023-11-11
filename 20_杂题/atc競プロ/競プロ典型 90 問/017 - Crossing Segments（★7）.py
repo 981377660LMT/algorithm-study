@@ -48,7 +48,7 @@ class BIT1:
         return self.query(right) - self.query(left - 1)
 
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = sys.stdin.readline
 MOD = int(1e9 + 7)
 n, m = map(int, input().split())

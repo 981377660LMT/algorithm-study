@@ -62,14 +62,14 @@ type IncrementalBridgeConnectivity struct {
 	bridge  int
 }
 
-func NewIncrementalBridgeConnectivity(sz int) *IncrementalBridgeConnectivity {
-	bbf := make([]int, sz)
-	for i := 0; i < sz; i++ {
-		bbf[i] = sz
+func NewIncrementalBridgeConnectivity(n int) *IncrementalBridgeConnectivity {
+	bbf := make([]int, n)
+	for i := 0; i < n; i++ {
+		bbf[i] = n
 	}
 	return &IncrementalBridgeConnectivity{
-		cc:  NewUnionFindArray(sz),
-		bcc: NewUnionFindArray(sz),
+		cc:  NewUnionFindArray(n),
+		bcc: NewUnionFindArray(n),
 		bbf: bbf,
 	}
 }

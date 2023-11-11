@@ -15,7 +15,7 @@
 from math import floor, log2
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 
 input = lambda: sys.stdin.readline()
 

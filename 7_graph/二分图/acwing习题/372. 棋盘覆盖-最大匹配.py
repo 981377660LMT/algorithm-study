@@ -8,7 +8,7 @@ from hungarian import Hungarian
 
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 
 
 DIR4 = [(0, 1), (1, 0), (0, -1), (-1, 0)]

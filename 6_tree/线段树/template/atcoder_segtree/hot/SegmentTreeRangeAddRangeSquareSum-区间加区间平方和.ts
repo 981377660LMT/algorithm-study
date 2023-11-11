@@ -244,6 +244,39 @@ class SegmentTreeRangeAddRangeSquareSum {
 export { SegmentTreeRangeAddRangeSquareSum }
 
 if (require.main === module) {
+  // 2262. 字符串的总引力
+  function appealSum(s: string): number {
+    const n = s.length
+    const seg = new SegmentTreeRangeAddRangeSquareSum(n)
+    const last = new Map<string, number>()
+    let res = 0
+    for (let i = 0; i < n; i++) {
+      const pre = last.get(s[i]) ?? -1
+      seg.update(pre + 1, i + 1, 1)
+      last.set(s[i], i)
+      const { sum1 } = seg.query(0, i + 1)
+      res += sum1
+    }
+    return res
+  }
+
+  // https://leetcode.cn/problems/subarrays-distinct-element-sum-of-squares-ii/description/
+  function sumCounts(nums: number[]): number {
+    const MOD = 1e9 + 7
+    const n = nums.length
+    const seg = new SegmentTreeRangeAddRangeSquareSum(n)
+    let res = 0
+    const last = new Map<number, number>()
+    for (let i = 0; i < n; i++) {
+      const pre = last.get(nums[i]) ?? -1
+      seg.update(pre + 1, i + 1, 1)
+      last.set(nums[i], i)
+      const { sum2 } = seg.query(0, i + 1)
+      res = (res + sum2) % MOD
+    }
+    return res
+  }
+
   // checkWithBruteForce()
   timeit()
 

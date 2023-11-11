@@ -19,7 +19,7 @@ import sys
 from collections import defaultdict, deque
 from typing import DefaultDict, List
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = 998244353
 INF = int(4e18)
@@ -76,7 +76,6 @@ class UnionFindArray:
 
 
 if __name__ == "__main__":
-
     n = int(input())
     perm = [int(num) - 1 for num in input().split()]  # 0-n-1 的全排列
 

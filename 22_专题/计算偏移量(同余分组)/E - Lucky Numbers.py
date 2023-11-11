@@ -44,7 +44,7 @@ if __name__ == "__main__":
     from collections import defaultdict
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = sys.stdin.readline
     n, _ = map(int, input().split())
     pairSums = list(map(int, input().split()))

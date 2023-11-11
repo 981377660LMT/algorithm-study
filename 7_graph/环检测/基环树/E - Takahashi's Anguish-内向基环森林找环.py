@@ -17,7 +17,7 @@ from 基环树找到所有环 import cyclePartition
 
 
 input = sys.stdin.readline
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 
 n = int(input())
 hates = [int(num) - 1 for num in input().split()]

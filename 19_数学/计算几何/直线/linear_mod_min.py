@@ -31,7 +31,7 @@ def linear_mod_min(n: int, mod: int, a: int, b: int, is_min=True, p=1, q=1) -> i
 
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 

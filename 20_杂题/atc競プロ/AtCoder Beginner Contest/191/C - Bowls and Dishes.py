@@ -1,7 +1,7 @@
 from itertools import product
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 # 1,2,…,N の番号がついた N 個の皿と、

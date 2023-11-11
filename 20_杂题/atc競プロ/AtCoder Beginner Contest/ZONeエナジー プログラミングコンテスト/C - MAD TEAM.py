@@ -2,7 +2,7 @@ from itertools import product
 import sys
 from typing import List, Tuple
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 # 从团队中选出3个人,这个队伍每门科目的的得分都是这3个人中最高的那个人的得分

@@ -45,7 +45,7 @@ def useStringHasher(ords: Sequence[int], mod=10**11 + 7, base=1313131):
 
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 

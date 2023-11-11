@@ -6,36 +6,6 @@ import (
 	"strings"
 )
 
-func main() {
-	demo()
-}
-
-func demo() {
-	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	leaves := make([]E, len(nums))
-	for i := range leaves {
-		leaves[i] = FromElement(nums[i])
-	}
-	tree := NewSegmentTreeRangeAssignRangePowerSum(leaves)
-
-	fmt.Println(tree.Query(0, 10))
-	tree.Update(0, 3, 1)
-	fmt.Println(tree.Query(1, 4))
-	tree.Set(1, E{1, 2, 4})
-	fmt.Println(tree.Query(1, 4))
-	tree.Update(1, 2, 0)
-	fmt.Println(tree.Query(1, 4), tree)
-
-	nums = make([]int, 5)
-	leaves = make([]E, len(nums))
-	for i := range leaves {
-		leaves[i] = FromElement(nums[i])
-	}
-	tree = NewSegmentTreeRangeAssignRangePowerSum(leaves)
-	tree.Update(0, 5, 2)
-	fmt.Println(tree.Query(0, 5))
-}
-
 const INF = 1e18
 
 // RangeAssignRangePowerSum-区间赋值区间幂次和
@@ -50,7 +20,7 @@ func FromElement(v int) E {
 	pow := 1
 	for i := 0; i <= K; i++ {
 		res[i] = pow
-		pow *= v
+		pow = pow * v
 	}
 	return res
 }

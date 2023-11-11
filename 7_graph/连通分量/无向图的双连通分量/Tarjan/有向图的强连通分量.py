@@ -129,7 +129,7 @@ if __name__ == "__main__":
     #   求一条路径，使路径经过的点权值之和最大
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
 
     n, m = map(int, input().split())

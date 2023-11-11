@@ -5,7 +5,7 @@ from collections import defaultdict
 from itertools import combinations, permutations
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = 998244353
 INF = int(4e18)

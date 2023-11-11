@@ -37,7 +37,7 @@ def train(n: int, edges: List[Tuple[int, int, int, int]], START: int, END: int) 
 if __name__ == "__main__":
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
     n, m, start, end = map(int, input().split())
     start, end = start - 1, end - 1

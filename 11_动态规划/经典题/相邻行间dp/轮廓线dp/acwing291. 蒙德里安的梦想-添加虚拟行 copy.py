@@ -9,7 +9,7 @@ from functools import lru_cache
 import sys
 from typing import Tuple
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 
 
 def solve(row: int, col: int) -> int:

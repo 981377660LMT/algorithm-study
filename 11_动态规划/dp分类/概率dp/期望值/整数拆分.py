@@ -21,7 +21,7 @@ def splitNum(n: int) -> int:
 print(splitNum(2000))
 
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 
 
 def splitNum2(n: int) -> int:

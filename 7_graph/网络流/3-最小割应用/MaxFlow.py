@@ -243,7 +243,7 @@ if __name__ == "__main__":
     # 图中可能存在重边和自环。求从点 S 到点 T 的最大流。
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
 
     input = sys.stdin.readline
     n, m, start, end = map(int, input().split())

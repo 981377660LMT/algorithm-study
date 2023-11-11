@@ -6,7 +6,7 @@ import sys
 # ai<=2^D
 # !反向思考、按位考虑:与哪些数与运算会使得按位与为0,再用容斥原理计算
 # 和n1+n2+..+nn -n1 and n2 -n1 and n3 -n1 and ... and nn-n1 +...
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = sys.stdin.readline
 MOD = int(1e9 + 7)
 

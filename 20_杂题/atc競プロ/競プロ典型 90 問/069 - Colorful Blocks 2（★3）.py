@@ -7,7 +7,7 @@
 
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = sys.stdin.readline
 MOD = int(1e9 + 7)
 
@@ -24,4 +24,3 @@ if k == 1:
 res1 = k * (k - 1) % MOD
 res2 = pow(k - 2, n - 2, MOD)
 print(res1 * res2 % MOD)
-

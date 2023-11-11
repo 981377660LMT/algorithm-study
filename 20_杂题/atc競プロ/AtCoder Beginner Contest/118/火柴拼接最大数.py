@@ -39,7 +39,7 @@ def matchMathing(n: int, digits: List[int]) -> int:
 
 
 if __name__ == "__main__":
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     n, _ = map(int, input().split())
     digits = list(map(int, input().split()))
     print(matchMathing(n, digits))

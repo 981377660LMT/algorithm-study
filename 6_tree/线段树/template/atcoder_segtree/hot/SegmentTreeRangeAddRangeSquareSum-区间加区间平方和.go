@@ -65,6 +65,34 @@ func test() {
 	}
 }
 
+// 1. 从左往右遍历数组，考虑新加入一个数 $nums[i]$ 会对左侧数组产生什么影响。
+// 类似 2262，用一个哈希表 $last$ 记录上次 $nums[i]$ 出现的的位置 $j$(没有出现就是$-1$)，
+// 那么左端点在区间 $[j+1,i+1)$ 内的子数组不同元素个数都会加一。
+// 2. 用线段树维护区间平方和即可。
+// 2916. 子数组不同元素数目的平方和 II
+// https://leetcode.cn/problems/subarrays-distinct-element-sum-of-squares-ii/
+func sumCounts(nums []int) int {
+	n := len(nums)
+	leaves := make([]E, n)
+	for i := 0; i < n; i++ {
+		leaves[i] = FromElement(0)
+	}
+	seg := NewSegmentTreeRangeAddRangeSquareSum(leaves)
+	last := make(map[int]int)
+	res := 0
+	for i, num := range nums {
+		pre := -1
+		if v, ok := last[num]; ok {
+			pre = v
+		}
+		seg.Update(pre+1, i+1, 1)
+		last[num] = i
+		res = (seg.Query(0, i+1).sum2 + res) % MOD
+	}
+	return res
+}
+
+const MOD int = 1e9 + 7
 const INF = 1e18
 
 // SegmentTreeRangeAddRangeSquareSum-区间加区间平方和

@@ -13,7 +13,7 @@ from bisect import bisect_right
 from math import degrees, atan2
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = sys.stdin.readline
 
 n = int(input())

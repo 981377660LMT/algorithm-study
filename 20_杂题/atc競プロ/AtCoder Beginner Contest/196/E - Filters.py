@@ -40,7 +40,7 @@ def clampComposition(funcs: List[Tuple[int, int]], queries: List[int]) -> List[i
 if __name__ == "__main__":
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
     n = int(input())
     funcs = [tuple(map(int, input().split())) for _ in range(n)]  # (a, kind)

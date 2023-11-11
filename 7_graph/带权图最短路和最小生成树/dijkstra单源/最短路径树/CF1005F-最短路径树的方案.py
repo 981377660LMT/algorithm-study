@@ -76,7 +76,7 @@ def dijkstraSPT(
 if __name__ == "__main__":
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
 
     # 你需要找到 k 种不同的可行解，如果解的个数少于 k 种，你需要输出所有可行解。

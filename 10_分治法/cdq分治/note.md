@@ -31,5 +31,14 @@ https://www.cnblogs.com/TianMeng-hyl/p/14978786.html
 应用场景：
 
 - 解决和点对有关的问题。
+
+> P4602 [CTSC2018] 混合果汁
+> https://www.luogu.com.cn/problem/P4602
+
 - 1D 动态规划的优化与转移。（注意必须中序遍历:如果将 CDQ 分治的递归树看成一颗线段树，那么 CDQ 分治就是这个线段树的 中序遍历函数，因此我们相当于按顺序处理了所有的 DP 值，只是转移顺序被拆开了而已)
+
+> cdq 分治+单调队列优化 dp
+> P4269 [USACO18FEB] Snow Boots G
+> https://www.luogu.com.cn/problem/P4269
+
 - 通过 CDQ 分治，将一些动态问题转化为静态问题(时间序列分治,按照中序遍历序进行分治才能保证每一个修改都是严格按照时间顺序执行的)。

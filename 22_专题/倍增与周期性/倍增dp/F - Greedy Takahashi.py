@@ -17,7 +17,7 @@ dp[i][0] 可以用二分查找求出
 import sys
 from sortedcontainers import SortedList
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = 998244353
 INF = int(4e18)

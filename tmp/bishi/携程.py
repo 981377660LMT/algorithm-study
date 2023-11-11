@@ -45,7 +45,7 @@ for _ in range(t):
 # 4*n-8个点的度数为3
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = int(1e9 + 7)
 INF = int(4e18)

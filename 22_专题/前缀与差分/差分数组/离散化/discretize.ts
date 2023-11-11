@@ -11,13 +11,7 @@ function discretizeSparse(
   nums: number[],
   offset = 0
 ): [getRank: (num: number) => number, count: number] {
-  const allNums = nums.slice().sort((a, b) => a - b)
-  // uniqueInplace
-  let slow = 0
-  for (let fast = 0; fast < allNums.length; fast++) {
-    if (allNums[fast] !== allNums[slow]) allNums[++slow] = allNums[fast]
-  }
-  allNums.length = slow + 1
+  const allNums = [...new Set(nums)].sort((a, b) => a - b)
 
   // bisect_left
   const getRank = (num: number): number => {
@@ -47,14 +41,7 @@ function discretizeCompressed(
   nums: number[],
   offset = 0
 ): [getRank: (num: number) => number, count: number] {
-  const allNums = nums.slice().sort((a, b) => a - b)
-  // uniqueInplace
-  let slow = 0
-  for (let fast = 0; fast < allNums.length; fast++) {
-    if (allNums[fast] !== allNums[slow]) allNums[++slow] = allNums[fast]
-  }
-  allNums.length = slow + 1
-
+  const allNums = [...new Set(nums)].sort((a, b) => a - b)
   const mp = new Map<number, number>()
   for (let index = 0; index < allNums.length; index++) mp.set(allNums[index], index + offset)
   const getRank = (num: number) => mp.get(num)!

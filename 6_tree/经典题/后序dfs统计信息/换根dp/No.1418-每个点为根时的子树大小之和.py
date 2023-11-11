@@ -4,7 +4,7 @@
 import sys
 
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 
 if __name__ == "__main__":
     from Rerooting import Rerooting

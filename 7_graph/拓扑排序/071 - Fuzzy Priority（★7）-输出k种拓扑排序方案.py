@@ -13,7 +13,7 @@ from collections import defaultdict, deque
 from typing import List
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = sys.stdin.readline
 MOD = int(1e9 + 7)
 

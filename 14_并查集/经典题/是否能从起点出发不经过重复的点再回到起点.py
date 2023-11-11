@@ -7,7 +7,7 @@
 import sys
 from typing import List
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 
@@ -15,7 +15,6 @@ DIR4 = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
 
 class UnionFindArray:
-
     __slots__ = ("n", "part", "parent", "rank")
 
     def __init__(self, n: int):

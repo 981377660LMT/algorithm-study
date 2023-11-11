@@ -14,7 +14,7 @@ K个K (R-K)个R (G-K)个G B个B 组成的没有RG子串的字符串个数
 
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 

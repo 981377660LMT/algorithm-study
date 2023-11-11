@@ -21,7 +21,7 @@ dp[j+getLRELen(blockLen)][i+blockLen]+=dp[j][i]*25 (i>=1,1≤k≤N,k表示新追
 import sys
 import os
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 POW10 = [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000]
 

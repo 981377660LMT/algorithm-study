@@ -23,12 +23,14 @@ import (
 	"math/bits"
 	"os"
 	"sort"
+	"strings"
 )
 
 func main() {
 	// StaticRangeKthSmallest()
 	// 矩阵乘法()
-	天天爱射击()
+	// 天天爱射击()
+	流星()
 }
 
 // 静态区间第 k 小
@@ -59,7 +61,7 @@ func StaticRangeKthSmallest() {
 		return nums[order[i]] < nums[order[j]]
 	})
 
-	bit := NewBitArray(n) // 子弹击中的范围
+	bit := NewBitArray(n)
 	reset := func() {
 		bit.Build(make([]int, n))
 	}
@@ -154,26 +156,10 @@ func 天天爱射击() {
 		fmt.Fscan(in, &bulletInfo[i])
 	}
 
-	// 离散化
-	allNums := make([]int, 0, board*2+bullet)
-	for i := 0; i < board; i++ {
-		allNums = append(allNums, boardInfo[i][0], boardInfo[i][1])
-	}
-	for i := 0; i < bullet; i++ {
-		allNums = append(allNums, bulletInfo[i])
-	}
-	getRank, count := DiscretizeCompressed(allNums, 0)
-	for i := 0; i < board; i++ {
-		boardInfo[i][0] = getRank(boardInfo[i][0])
-		boardInfo[i][1] = getRank(boardInfo[i][1])
-	}
-	for i := 0; i < bullet; i++ {
-		bulletInfo[i] = getRank(bulletInfo[i])
-	}
-
-	bit := NewBitArray(count) // 每个子弹击中的位置计数
+	const N = 2e5 + 10
+	bit := NewBitArray(N) // 每个子弹击中的位置计数
 	reset := func() {
-		bit.Build(make([]int, count))
+		bit = NewBitArray(N)
 	}
 
 	mutate := func(id int) {
@@ -200,18 +186,6 @@ func 天天爱射击() {
 		fmt.Fprintln(out, v)
 	}
 }
-
-// P3527 [POI2011] MET-Meteors 流星
-// https://www.luogu.com.cn/problem/P3527
-
-// P4269 [USACO18FEB] Snow Boots G
-// https://www.luogu.com.cn/problem/P4269
-
-// P4602 [CTSC2018] 混合果汁
-// https://www.luogu.com.cn/problem/P4602
-
-// P8955 「VUSC」Card Tricks
-// https://www.luogu.com.cn/problem/P8955
 
 func demo() {
 	// n个操作，第i个操作将curSum增加i+1.
@@ -530,4 +504,62 @@ func DiscretizeCompressed(nums []int, offset int) (getRank func(int) int, count 
 	getRank = func(v int) int { return mp[v] }
 	count = len(nums)
 	return
+}
+
+type BITRangeAddRangeSum struct {
+	n     int
+	tree1 []int
+	tree2 []int
+}
+
+func NewBITRangeAddRangeSum(n int) *BITRangeAddRangeSum {
+	return &BITRangeAddRangeSum{
+		n:     n,
+		tree1: make([]int, n+1),
+		tree2: make([]int, n+1),
+	}
+}
+
+// 切片内[start, end)的每个元素加上delta.
+//
+//	0<=start<=end<=n
+func (b *BITRangeAddRangeSum) AddRange(start, end, delta int) {
+	end--
+	b._add(start, delta)
+	b._add(end+1, -delta)
+}
+
+func (b *BITRangeAddRangeSum) QueryPrefix(index int) (res int) {
+	index++
+	if index > b.n {
+		index = b.n
+	}
+	for i := index; i > 0; i &= i - 1 {
+		res += index*b.tree1[i] - b.tree2[i]
+	}
+	return res
+}
+
+// 求切片内[start, end)的和.
+//
+//	0<=start<=end<=n
+func (b *BITRangeAddRangeSum) QueryRange(start, end int) int {
+	end--
+	return b.QueryPrefix(end) - b.QueryPrefix(start-1)
+}
+
+func (b *BITRangeAddRangeSum) String() string {
+	res := []string{}
+	for i := 0; i < b.n; i++ {
+		res = append(res, fmt.Sprintf("%d", b.QueryRange(i, i+1)))
+	}
+	return fmt.Sprintf("BITRangeAddRangeSum: [%v]", strings.Join(res, ", "))
+}
+
+func (b *BITRangeAddRangeSum) _add(index, delta int) {
+	index++
+	for i := index; i <= b.n; i += i & -i {
+		b.tree1[i] += delta
+		b.tree2[i] += (index - 1) * delta
+	}
 }

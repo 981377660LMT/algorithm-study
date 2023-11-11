@@ -3,7 +3,7 @@
 from functools import lru_cache
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 
 n = int(input())
 nums = list(map(int, input().split()))

@@ -12,7 +12,7 @@
 # !最后要求恰好两个连通块,且两个连通块的大小之和为36
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = 998244353
 INF = int(4e18)
@@ -22,7 +22,6 @@ from typing import DefaultDict, List
 
 
 class UnionFindArray:
-
     __slots__ = ("n", "part", "parent", "rank")
 
     def __init__(self, n: int):

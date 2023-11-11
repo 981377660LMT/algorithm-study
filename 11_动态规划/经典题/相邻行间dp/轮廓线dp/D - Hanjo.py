@@ -44,7 +44,7 @@ def hanjo(ROW: int, COL: int, A: int, B: int) -> int:
 if __name__ == "__main__":
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
 
     ROW, COL, A, B = map(int, input().split())

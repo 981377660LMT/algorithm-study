@@ -28,7 +28,7 @@ def C(n: int, k: int) -> int:
     return ((fac(n) * ifac(k)) % MOD * ifac(n - k)) % MOD
 
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = sys.stdin.readline
 MOD = int(1e9 + 7)
 

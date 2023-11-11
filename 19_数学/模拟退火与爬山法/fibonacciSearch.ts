@@ -5,7 +5,7 @@
 const INF = 2e15
 
 /**
- * 斐波那契搜索寻找`[left,right]`中的一个极值点,不要求单峰性质.
+ * 斐波那契搜索(黄金分割搜索)寻找`[left,right]`中的一个极值点,不要求单峰性质.
  * @param fun 代价函数.
  * @param left 搜索区间左端点(包含).
  * @param right 搜索区间右端点(包含).
@@ -76,10 +76,12 @@ function fibonacciSearch(
 }
 
 /** 斐波那契搜索求`凸函数fun`在`[left,right]`间的`(极小值点,极小值)`. */
-const minimize = (fun: (x: number) => number, left: number, right: number) => fibonacciSearch(fun, left, right, true)
+const minimize = (fun: (x: number) => number, left: number, right: number) =>
+  fibonacciSearch(fun, left, right, true)
 
 /** 斐波那契搜索求`凹函数fun`在`[left,right]`间的`(极大值点,极大值)`. */
-const maximize = (fun: (x: number) => number, left: number, right: number) => fibonacciSearch(fun, left, right, false)
+const maximize = (fun: (x: number) => number, left: number, right: number) =>
+  fibonacciSearch(fun, left, right, false)
 
 export { fibonacciSearch, minimize, maximize }
 

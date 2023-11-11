@@ -6,7 +6,7 @@ from math import floor
 import sys
 from typing import List
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = sys.stdin.readline
 MOD = int(1e9 + 7)
 
@@ -16,7 +16,7 @@ def getFactors(n: int) -> List[int]:
     if n <= 0:
         return []
     small, big = [], []
-    upper = floor(n ** 0.5) + 1
+    upper = floor(n**0.5) + 1
     for i in range(1, upper):
         if n % i == 0:
             small.append(i)

@@ -3,7 +3,7 @@
 # !.周期性解法(鸽巢原理)
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = sys.stdin.readline
 MOD = int(1e5)
 

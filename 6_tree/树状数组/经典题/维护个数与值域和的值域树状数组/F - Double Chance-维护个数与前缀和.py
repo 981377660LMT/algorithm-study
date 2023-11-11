@@ -10,7 +10,7 @@
 # !注意到ai范围很小,因此需要用到值域这个条件
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = 998244353
 INF = int(4e18)

@@ -19,20 +19,20 @@ def solve(point: Point, line: Line) -> float:
 
     # BAとBCのなす角が90度以上
     if (BAx * BCx + BAy * BCy) < 0:
-        return sqrt(BAx ** 2 + BAy ** 2)
+        return sqrt(BAx**2 + BAy**2)
 
     # CAとCBのなす角が90度以上
     if (CAx * CBx + CAy * CBy) < 0:
-        return sqrt(CAx ** 2 + CAy ** 2)
+        return sqrt(CAx**2 + CAy**2)
 
     area = abs(BAx * BCy - BAy * BCx)  # 平行四边形の面積
-    return area / sqrt(BCx ** 2 + BCy ** 2)
+    return area / sqrt(BCx**2 + BCy**2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = sys.stdin.readline
     MOD = int(1e9 + 7)
 

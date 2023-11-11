@@ -7,7 +7,7 @@
 # 求方案数模998244353,1<N≤5e6, 0≤A, B,C ≤N。
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = 998244353
 INF = int(4e18)

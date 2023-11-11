@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import DefaultDict, List, Set, Tuple
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 
 
 class Tarjan:

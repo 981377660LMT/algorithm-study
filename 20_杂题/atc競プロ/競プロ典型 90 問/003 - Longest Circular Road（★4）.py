@@ -2,7 +2,7 @@ from collections import defaultdict
 from heapq import nlargest
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 
 # !树中加一条边 求最大环  => 木の直径+1
 

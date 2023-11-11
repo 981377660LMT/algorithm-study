@@ -21,7 +21,7 @@ import os
 import sys
 
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = sys.stdin.readline
 MOD = 998244353
 INV2 = pow(2, MOD - 2, MOD)

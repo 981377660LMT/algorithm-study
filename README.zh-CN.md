@@ -128,7 +128,7 @@
    - [换根 dp](6_tree/%E7%BB%8F%E5%85%B8%E9%A2%98/%E5%90%8E%E5%BA%8Fdfs%E7%BB%9F%E8%AE%A1%E4%BF%A1%E6%81%AF/%E6%8D%A2%E6%A0%B9dp/Rerooting.py)
    - [BfsNumbering](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/dfs%E5%BA%8F/BfsNumbering.go)
    - [树的重心](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/%E6%A0%91%E7%9A%84%E9%87%8D%E5%BF%83.py)
-   - [虚树](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E5%88%86%E7%B1%BB/%E6%A0%91%E4%B8%8Adp/%E8%99%9A%E6%A0%91/AuxiliaryTree.go)
+   - [虚树](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E5%88%86%E7%B1%BB/%E6%A0%91%E5%BD%A2dp/%E8%99%9A%E6%A0%91/AuxiliaryTree.go)
    - [LCA](6_tree/LCA%E9%97%AE%E9%A2%98/%E5%80%8D%E5%A2%9E/LCAHLD-FAST.py)
    - [OfflineLCA](6_tree/LCA%E9%97%AE%E9%A2%98/tarjan%E7%A6%BB%E7%BA%BF/OfflineLCA.ts)
    - [DFS 序](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/dfs%E5%BA%8F/DFSOrder.py)

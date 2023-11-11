@@ -237,7 +237,7 @@ def runEnumerate(s: str) -> List[Tuple[int, int, int]]:
 if __name__ == "__main__":
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
     s = input()
     res = runEnumerate(s)

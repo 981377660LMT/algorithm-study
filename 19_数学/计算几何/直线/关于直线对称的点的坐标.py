@@ -39,10 +39,9 @@ def reflection(
 # # => (1.6, 3.2)
 
 if __name__ == "__main__":
-
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
     x1, y1, x2, y2 = map(int, input().split())
     line = ((x1, y1), (x2, y2))

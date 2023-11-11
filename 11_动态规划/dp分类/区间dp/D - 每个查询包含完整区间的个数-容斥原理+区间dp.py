@@ -14,7 +14,7 @@ from typing import List, Tuple
 
 from sortedcontainers import SortedList
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 

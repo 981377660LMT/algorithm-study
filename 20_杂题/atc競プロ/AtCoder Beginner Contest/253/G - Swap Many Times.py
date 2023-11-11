@@ -163,7 +163,7 @@ class SplayTreeList:
 # https://atcoder.jp/contests/abc253/submissions/33192417
 
 
-# sys.setrecursionlimit(int(1e9))
+# sys.setrecursionlimit(int(1e6))
 # input = lambda: sys.stdin.readline().rstrip("\r\n")
 # MOD = int(1e9 + 7)
 

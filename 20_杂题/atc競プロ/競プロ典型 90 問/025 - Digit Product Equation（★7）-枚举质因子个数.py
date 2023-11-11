@@ -9,7 +9,7 @@ from functools import reduce
 from math import ceil, log, log2
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = sys.stdin.readline
 MOD = int(1e9 + 7)
 

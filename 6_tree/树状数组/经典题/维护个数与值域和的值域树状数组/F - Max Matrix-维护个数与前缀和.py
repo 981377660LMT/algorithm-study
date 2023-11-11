@@ -82,7 +82,7 @@ if __name__ == "__main__":
         def queryRange(self, left: int, right: int) -> int:
             return self.query(right) - self.query(left - 1)
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
     n, m, q = map(int, input().split())
     Q = []

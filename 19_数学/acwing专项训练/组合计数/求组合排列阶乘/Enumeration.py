@@ -111,7 +111,7 @@ if __name__ == "__main__":
     # https://yukicoder.me/problems/no/117
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
     T = int(input())
     C = Enumeration(10**6 + 10, 10**9 + 7)

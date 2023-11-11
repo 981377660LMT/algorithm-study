@@ -35,7 +35,7 @@ def countSimplePaths(n: int, adjList: List[List[int]], start: int, limit=int(1e6
 
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 

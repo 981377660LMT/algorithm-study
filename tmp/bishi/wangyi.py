@@ -1,7 +1,7 @@
 # from collections import deque
 # import sys
 
-# sys.setrecursionlimit(int(1e9))
+# sys.setrecursionlimit(int(1e6))
 # input = lambda: sys.stdin.readline().rstrip("\r\n")
 # INF = int(1e18)
 
@@ -36,7 +36,7 @@
 # from collections import Counter
 # import sys
 
-# sys.setrecursionlimit(int(1e9))
+# sys.setrecursionlimit(int(1e6))
 # input = lambda: sys.stdin.readline().rstrip("\r\n")
 # INF = int(1e18)
 
@@ -73,7 +73,7 @@
 # from math import log2
 # import sys
 
-# sys.setrecursionlimit(int(1e9))
+# sys.setrecursionlimit(int(1e6))
 # input = lambda: sys.stdin.readline().rstrip("\r\n")
 # INF = int(1e18)
 
@@ -127,7 +127,7 @@
 # from itertools import combinations
 # import sys
 
-# sys.setrecursionlimit(int(1e9))
+# sys.setrecursionlimit(int(1e6))
 # input = lambda: sys.stdin.readline().rstrip("\r\n")
 # INF = int(1e18)
 
@@ -213,6 +213,7 @@
 # @param colors string字符串 T恤颜色字符串
 # @return int整型
 #
+
 
 # R必须与B组队 且R在B前
 # Y自由插入

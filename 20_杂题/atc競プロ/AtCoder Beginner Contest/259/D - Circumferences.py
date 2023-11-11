@@ -16,7 +16,7 @@ import os
 from collections import defaultdict
 from typing import DefaultDict, Generic, Hashable, Iterable, List, Optional, Tuple, TypeVar
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = int(1e9 + 7)
 

@@ -95,7 +95,7 @@ def kruskal(n: int, edges: List[Tuple[P, P, int]]) -> int:
     return res if hit == n - 1 else INF
 
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = sys.stdin.readline
 
 n, m = map(int, input().split())

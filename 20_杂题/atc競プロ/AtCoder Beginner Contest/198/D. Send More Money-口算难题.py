@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
     s1, s2, s3 = input(), input(), input()
     res, ok = sendMoreMoney([s1, s2], s3)

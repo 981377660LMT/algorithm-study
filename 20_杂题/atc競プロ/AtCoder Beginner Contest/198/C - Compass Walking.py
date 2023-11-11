@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
     R, tr, tc = map(int, input().split())
     print(compassWalk(R, tr, tc))

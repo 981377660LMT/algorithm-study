@@ -12,7 +12,7 @@ q 个查询 询问距离树结点u距离为k的结点是否存在,并输出一�
 
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = 998244353
 INF = int(4e18)

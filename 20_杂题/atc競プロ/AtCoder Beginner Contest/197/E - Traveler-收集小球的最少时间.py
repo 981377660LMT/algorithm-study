@@ -41,7 +41,7 @@ def traveler(balls: List[Tuple[int, int]]) -> int:
 if __name__ == "__main__":
     import sys
 
-    sys.setrecursionlimit(int(1e9))
+    sys.setrecursionlimit(int(1e6))
     input = lambda: sys.stdin.readline().rstrip("\r\n")
     balls = [tuple(map(int, input().split())) for _ in range(int(input()))]
     print(traveler(balls))

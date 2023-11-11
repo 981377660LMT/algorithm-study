@@ -83,7 +83,7 @@ def solve(graph: List[List[int]], S: List[int]) -> int:
 
 import sys
 
-sys.setrecursionlimit(int(1e9))
+sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 n, m = map(int, input().split())
 values = list(map(int, input().split()))
