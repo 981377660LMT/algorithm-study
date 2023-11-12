@@ -6,13 +6,10 @@
 // 配对堆是一棵满足堆性质的带权多叉树（如下图），即每个节点的权值都小于或等于他的所有儿子
 // 一个节点的所有儿子节点形成一个单向链表。每个节点储存第一个儿子的指针，即链表的头节点；和他的右兄弟的指针。
 
-class PNode<T> {
+type PNode<T> = {
   value: T
-  head: PNode<T> | undefined = undefined
-  next: PNode<T> | undefined = undefined
-  constructor(value: T) {
-    this.value = value
-  }
+  head: PNode<T> | undefined
+  next: PNode<T> | undefined
 }
 
 /**
@@ -79,7 +76,15 @@ class PairingHeap<T> {
   }
 
   push(value: T): void {
-    this._root = PairingHeap._merge(this._root, new PNode(value), this._compare)
+    this._root = PairingHeap._merge(
+      this._root,
+      {
+        value,
+        head: undefined,
+        next: undefined
+      },
+      this._compare
+    )
   }
 
   pop(): T | undefined {

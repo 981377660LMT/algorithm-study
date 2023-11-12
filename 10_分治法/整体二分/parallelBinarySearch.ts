@@ -1,3 +1,4 @@
+/* eslint-disable no-inner-declarations */
 // parallelBinarySearch/parallelSortSearch
 // 並列二分探索
 //
@@ -14,6 +15,8 @@
 //     !要求对条件为真的判定具有单调性，即某个操作后qi为真,后续操作都会满足qi为真.
 //
 // 一些时候整体二分可以被持久化数据结构取代.
+
+import { UnionFindArray } from '../../14_并查集/UnionFind'
 
 /**
  * 整体二分解决这样一类问题:
@@ -108,6 +111,38 @@ function parallelBinarySearch(
 export { parallelBinarySearch, parallelBinarySearch as parallelSortSearch }
 
 if (require.main === module) {
+  // https://atcoder.jp/contests/code-thanks-festival-2017-open/tasks/code_thanks_festival_2017_h
+  // 给定n个集合,初始时第i个集合只有一个元素i (i=1,2,...,n)
+  // 之后进行m次合并操作,每次合并ai和bi所在的集合
+  // 如果ai和bi在同一个集合,则无事发生
+  // 给定q个询问,问ai和bi是在第几次操作后第一次连通的,如果不连通则输出-1
+  function unionSets(
+    n: number,
+    mutations: [number, number][],
+    queries: [number, number][]
+  ): number[] {
+    let uf = new UnionFindArray(n)
+    const left = parallelBinarySearch(mutations.length, queries.length, {
+      reset() {
+        uf.clear()
+      },
+      mutate(mutationId) {
+        const { 0: a, 1: b } = mutations[mutationId]
+        uf.union(a, b)
+      },
+      predicate(queryId) {
+        const { 0: a, 1: b } = queries[queryId]
+        return uf.isConnected(a, b)
+      }
+    })
+
+    const res = Array<number>(queries.length)
+    for (let i = 0; i < queries.length; i++) {
+      res[i] = left[i] === mutations.length ? -1 : left[i] + 1
+    }
+    return res
+  }
+
   let curSum = 0
   const res = parallelBinarySearch(10, 10, {
     reset() {

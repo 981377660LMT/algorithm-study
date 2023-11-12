@@ -38,7 +38,10 @@ class UnboundedKnapsackRemovable:
                 dp[i] = (dp[i] - dp[i - weight]) % mod
 
     def query(self, weight: int) -> int:
-        """查询组成重量为weight的物品有多少种方案."""
+        """
+        查询组成重量为weight的物品有多少种方案.
+        !注意需要特判重量为0.
+        """
         return self._dp[weight] if 0 <= weight <= self._maxWeight else 0
 
     def copy(self) -> "UnboundedKnapsackRemovable":

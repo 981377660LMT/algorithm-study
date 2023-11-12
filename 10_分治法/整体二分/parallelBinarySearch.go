@@ -30,7 +30,7 @@ func main() {
 	// StaticRangeKthSmallest()
 	// 矩阵乘法()
 	// 天天爱射击()
-	流星()
+	UnionSets()
 }
 
 // 静态区间第 k 小
@@ -184,6 +184,59 @@ func 天天爱射击() {
 	}
 	for _, v := range counter {
 		fmt.Fprintln(out, v)
+	}
+}
+
+// https://atcoder.jp/contests/code-thanks-festival-2017-open/tasks/code_thanks_festival_2017_h
+// 给定n个集合,初始时第i个集合只有一个元素i (i=1,2,...,n)
+// 之后进行m次合并操作,每次合并ai和bi所在的集合
+// 如果ai和bi在同一个集合,则无事发生
+// 给定q个询问,问ai和bi是在第几次操作后第一次连通的,如果不连通则输出-1
+func UnionSets() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	mutaions := make([][2]int, m)
+	for i := 0; i < m; i++ {
+		fmt.Fscan(in, &mutaions[i][0], &mutaions[i][1])
+		mutaions[i][0]--
+		mutaions[i][1]--
+	}
+	var q int
+	fmt.Fscan(in, &q)
+	queries := make([][2]int, q)
+	for i := 0; i < q; i++ {
+		fmt.Fscan(in, &queries[i][0], &queries[i][1])
+		queries[i][0]--
+		queries[i][1]--
+	}
+
+	uf := NewUnionFindArray(n)
+	reset := func() {
+		uf = NewUnionFindArray(n)
+	}
+	mutate := func(id int) {
+		mutation := mutaions[id]
+		u, v := mutation[0], mutation[1]
+		uf.Union(u, v)
+	}
+	predicate := func(qid int) bool {
+		query := queries[qid]
+		u, v := query[0], query[1]
+		return uf.Find(u) == uf.Find(v)
+	}
+
+	res := ParallelBinarySearch(m, q, reset, mutate, predicate)
+	for i := 0; i < q; i++ {
+		v := res[i]
+		if v == m {
+			fmt.Fprintln(out, -1)
+		} else {
+			fmt.Fprintln(out, v+1)
+		}
 	}
 }
 
@@ -562,4 +615,37 @@ func (b *BITRangeAddRangeSum) _add(index, delta int) {
 		b.tree1[i] += delta
 		b.tree2[i] += (index - 1) * delta
 	}
+}
+
+type UnionFindArray struct {
+	data []int
+}
+
+func NewUnionFindArray(n int) *UnionFindArray {
+	data := make([]int, n)
+	for i := 0; i < n; i++ {
+		data[i] = -1
+	}
+	return &UnionFindArray{data: data}
+}
+
+func (ufa *UnionFindArray) Union(key1, key2 int) bool {
+	root1, root2 := ufa.Find(key1), ufa.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+	if ufa.data[root1] > ufa.data[root2] {
+		root1, root2 = root2, root1
+	}
+	ufa.data[root1] += ufa.data[root2]
+	ufa.data[root2] = root1
+	return true
+}
+
+func (ufa *UnionFindArray) Find(key int) int {
+	if ufa.data[key] < 0 {
+		return key
+	}
+	ufa.data[key] = ufa.Find(ufa.data[key])
+	return ufa.data[key]
 }

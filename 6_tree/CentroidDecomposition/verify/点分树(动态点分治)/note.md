@@ -25,3 +25,7 @@ https://atcoder.jp/contests/abc291/tasks/abc291_h
    S2 修改它的贡献，时空复杂度为`点分树高 × 节点上的子数据结构单次修改复杂度`。
 4. 对 x 进行查询时，从 x 开始不断跳点分树的父亲一直到根，每次把 S 1 的贡献添加进答案，把 S 2 的贡献从答案刨去
 5. 初始化可视为直接进行 n 次修改
+
+---
+
+https://oi-wiki.org/graph/dynamic-tree-divide/

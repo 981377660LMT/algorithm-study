@@ -51,6 +51,7 @@ class BoundedKnapsackRemovable:
         self._countSum -= count * value
 
     def query(self, value: int) -> int:
+        """!注意需要特判重量为0."""
         return self._dp[value] if 0 <= value <= self._maxValue else 0
 
     def copy(self) -> "BoundedKnapsackRemovable":

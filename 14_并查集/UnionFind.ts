@@ -16,9 +16,9 @@ class UnionFindArray {
     let rootY = this.find(y)
     if (rootX === rootY) return false
     if (this._data[rootX] > this._data[rootY]) {
-      rootX ^= rootY
-      rootY ^= rootX
-      rootX ^= rootY
+      const tmp = rootX
+      rootX = rootY
+      rootY = tmp
     }
     this._data[rootX] += this._data[rootY]
     this._data[rootY] = rootX

@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable eqeqeq */
 
+// TODO: 一种基础的XorTrie，另一种XorTrieAdvanced，支持类平衡树操作
+// 把以前的useXorTrie删除，重构
+
 class TrieNode {
   children: [TrieNode | undefined, TrieNode | undefined] = [undefined, undefined]
   count = 0

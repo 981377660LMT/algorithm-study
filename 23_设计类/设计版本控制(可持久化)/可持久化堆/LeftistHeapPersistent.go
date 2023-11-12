@@ -102,7 +102,8 @@ type leftistHeap struct {
 
 type heap struct {
 	Value       V
-	Id          int
+	Id   
+	       int
 	rank        int // 维持平衡
 	left, right *heap
 }

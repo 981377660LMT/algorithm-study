@@ -51,6 +51,7 @@ class UnboundedKnapsackRemovable {
 
   /**
    * 查询组成重量为weight的物品有多少种方案.
+   * !注意需要特判重量为0.
    * @complexity O(1)
    */
   query(weight: number): number {

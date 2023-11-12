@@ -71,7 +71,7 @@ class Doubling<E> {
    * 0 <= from < n.
    * 如果最终状态不存在，返回 [-1, e()].
    */
-  jump(from: number, step: number): [to: number, value: E] {
+  jump(from: number, step: number): { to: number; value: E } {
     if (!this._isPrepared) this.build()
     if (step >= 2 ** this._log) throw new RangeError('step is over max step')
     let value = this._e()
@@ -85,14 +85,14 @@ class Doubling<E> {
         to = this._to[pos]
       }
     }
-    return [to, value]
+    return { to, value }
   }
 
   /**
-   * 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step`.
+   * 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step`以及对应的状态编号和值.
    * 0 <= from < n.
    */
-  maxStep(from: number, check: (e: E) => boolean): number {
+  maxStep(from: number, check: (e: E) => boolean): { step: number; to: number; value: E } {
     if (!this._isPrepared) this.build()
     let res = this._e()
     let step = 0
@@ -106,7 +106,7 @@ class Doubling<E> {
         res = next
       }
     }
-    return step
+    return { step, to: from, value: res }
   }
 }
 
@@ -127,7 +127,7 @@ if (require.main === module) {
     }
 
     getKthAncestor(node: number, k: number): number {
-      return this._db.jump(node, k)[0]
+      return this._db.jump(node, k).to
     }
   }
 
@@ -152,7 +152,7 @@ if (require.main === module) {
 
     let res = 0
     for (let i = 0; i < n; i++) {
-      const [_, value] = db.jump(i, k + 1)
+      const { value } = db.jump(i, k + 1)
       res = Math.max(res, value)
     }
     return res

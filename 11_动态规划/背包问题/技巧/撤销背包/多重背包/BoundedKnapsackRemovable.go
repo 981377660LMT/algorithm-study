@@ -82,6 +82,7 @@ func (ks *BoundedKnapsackRemovable) Remove(value, count int) {
 	ks.countSum -= count * value
 }
 
+// !注意需要特判重量为0.
 func (ks *BoundedKnapsackRemovable) Query(value int) int {
 	if value < 0 || value > ks.maxValue {
 		return 0

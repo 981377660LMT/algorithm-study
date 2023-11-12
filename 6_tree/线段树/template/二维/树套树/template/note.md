@@ -1,2 +1,24 @@
-参考 maspy/nyann 的二维数树状数组和线段树的实现
+参考 maspy/nyann/ei13333 的二维数树状数组和线段树的实现
 https://nyaannyaan.github.io/library/data-structure-2d/abstract-range-tree.hpp
+
+树状数组(离散/非离散)套数据结构
+https://ei1333.github.io/library/structure/others/abstract-2d-binary-indexed-tree-compressed.hpp
+https://ei1333.github.io/library/structure/others/abstract-binary-indexed-tree.hpp
+
+线段树(非离散)套数据结构
+https://ei1333.github.io/library/structure/segment-tree/segment-tree-2d-2.hpp
+
+---
+
+树套树维护维护多维度信息
+
+https://oi-wiki.org/ds/seg-in-seg/
+
+应用举例：
+
+- 线段树套平衡树(SortedList) -> 区间前驱后继,第 k 大等
+- 线段树套线段树 -> 一般的二维线段树
+- 树状数组套权值线段树 -> O(nlogn)动态区间 kth，优于线段树套平衡树 O(nlognlogn)
+- 分块套树状数组 -> 动态二维矩形区域查询；分块也可以看成一种树，因为 duck typing
+
+面对多维度信息的题目时，如果题目没有要求强制在线，我们还可以考虑 CDQ 分治，或者 整体二分 等分治算法，来避免使用高级数据结构，减少代码实现难度。

@@ -20,9 +20,65 @@
 
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
 func main() {
+	P3066()
+}
+
+// https://www.luogu.com.cn/problem/P3066
+// 给出以0号点为根的一棵有根树,问每个点的子树中与它距离小于等于k的点有多少个
+func P3066() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, k int
+	fmt.Fscan(in, &n, &k)
+
+	tree := make([][][2]int, n)
+	for i := 1; i < n; i++ {
+		var parent, w int
+		fmt.Fscan(in, &parent, &w)
+		parent--
+		tree[parent] = append(tree[parent], [2]int{i, w})
+	}
+
+	sk := NewSkewHeap(false)
+	subHeap := sk.Build(make([]int, n))
+	subHeapSize := make([]int, n)
+	res := make([]int, n)
+	var dfs func(cur, pre int, dist int)
+	dfs = func(cur, pre int, dist int) {
+		subHeap[cur] = sk.Push(subHeap[cur], dist, cur)
+		subHeapSize[cur]++
+		for _, e := range tree[cur] {
+			next, weight := e[0], e[1]
+			if next == pre {
+				continue
+			}
+			dfs(next, cur, dist+weight)
+			subHeapSize[cur] += subHeapSize[next]
+			subHeap[cur] = sk.Meld(subHeap[cur], subHeap[next])
+		}
+		for subHeapSize[cur] > 0 && sk.Top(subHeap[cur])-dist > k {
+			subHeap[cur] = sk.Pop(subHeap[cur])
+			subHeapSize[cur]--
+		}
+		res[cur] = subHeapSize[cur]
+	}
+	dfs(0, -1, 0)
+
+	for i := 0; i < n; i++ {
+		fmt.Fprintln(out, res[i])
+	}
+}
+
+func demo() {
 	sk := NewSkewHeap(true)
 	heaps := sk.Build([]E{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
 	fmt.Println(heaps[1].Value)

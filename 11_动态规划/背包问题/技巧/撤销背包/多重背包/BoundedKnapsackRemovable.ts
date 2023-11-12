@@ -70,6 +70,9 @@ class BoundedKnapsackRemovable {
     this._countSum -= count * value
   }
 
+  /**
+   * !注意需要特判重量为0.
+   */
   query(value: number): number {
     if (value < 0 || value > this._maxValue) return 0
     if (this._mod == undefined) return this._dp[value]

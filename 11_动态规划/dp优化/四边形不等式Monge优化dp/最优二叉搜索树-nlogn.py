@@ -1,6 +1,7 @@
 # // 还有nlogn的解法 hu_tucker算法
+# https://oi-wiki.org/misc/garsia-wachs/
 # https://atcoder.jp/contests/atc002/submissions/18244148
-
+# https://beet-aizu.github.io/library/algorithm/optimalbinarytree.cpp
 
 from heapq import heappop, heappush, heapify
 

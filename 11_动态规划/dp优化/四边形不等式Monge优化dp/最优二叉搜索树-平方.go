@@ -1,6 +1,11 @@
 // https://atcoder.jp/contests/atc002/submissions/18244148
-// 还有nlogn的解法
+// 还有nlogn的解法 https://oi-wiki.org/misc/garsia-wachs/
+// Garsia–Wachs 算法（Garsia–Wachs Algorithm）是计算机用来在
+// 线性时间 内构建 最优二叉查找树 和 字母霍夫曼码 的有效算法。
+// 函数性编程语言 Haskell 的 garsia-wachs package 对 Garsia–Wachs 算法做了函数性实现。
+// 它主要用于构建最佳搜索表，或者以最优复杂度平衡 rope 数据结构。
 
+//
 // 最优二叉搜索树
 // https://blog.csdn.net/weixin_43914593/article/details/105150937
 // https://beet-aizu.github.io/library/algorithm/optimalbinarytree.cpp

@@ -125,6 +125,7 @@ func (ks *Knapsack01Removable) Remove(weight int) {
 }
 
 // 查询组成重量为weight的物品有多少种方案.
+// !注意需要特判重量为0.
 func (ks *Knapsack01Removable) Query(weight int) int {
 	if weight < 0 || weight > ks.maxWeight {
 		return 0

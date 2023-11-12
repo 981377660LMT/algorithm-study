@@ -162,25 +162,24 @@ func (d *Doubling) Jump(from, step int) (to int, res E) {
 	return
 }
 
-// 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step`.
-func (d *Doubling) MaxStep(from int, check func(e E) bool) int {
+// 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号和操作的结果。
+func (d *Doubling) MaxStep(from int, check func(e E) bool) (step int, to int, res E) {
 	if !d.isPrepared {
 		panic("Doubling is not prepared")
 	}
 
-	res := d.e()
-	step := 0
-
+	res = d.e()
 	for k := d.log - 1; k >= 0; k-- {
 		pos := k*d.n + from
-		to := d.to[pos]
+		tmp := d.to[pos]
 		next := d.op(res, d.dp[pos])
 		if check(next) {
 			step |= 1 << k
-			from = to
+			from = tmp
 			res = next
 		}
 	}
 
-	return step
+	to = from
+	return
 }
