@@ -1,19 +1,17 @@
+# 564. 寻找最近的回文数
+# https://leetcode-cn.com/problems/find-the-closest-palindrome/comments/467740
 # 小于等于10的数，返回n-1
 # 10的幂，返回n-1
 # 11，这个数字比较特殊，返回9
-# https://leetcode-cn.com/problems/find-the-closest-palindrome/comments/467740
+
+from enumeratePalindrome import getPalindromeByHalf
+
 
 INF = int(1e20)
 
 
 class Solution:
     def nearestPalindromic(self, n: str) -> str:
-        def getPalindromeByHalf(half: str, length: int) -> int:
-            if length & 1:
-                return int(str(half)[:-1] + str(half)[::-1])
-            else:
-                return int(str(half) + str(half)[::-1])
-
         def bisect(length: int) -> None:
             nonlocal res, minDiff
 
@@ -22,7 +20,7 @@ class Solution:
 
             while left <= right:
                 mid = (left + right) >> 1
-                palindrome = getPalindromeByHalf(mid, length)
+                palindrome = int(getPalindromeByHalf(mid, length % 2 == 0))
                 diff = abs(palindrome - target)
                 if palindrome != target:
                     if diff < minDiff:

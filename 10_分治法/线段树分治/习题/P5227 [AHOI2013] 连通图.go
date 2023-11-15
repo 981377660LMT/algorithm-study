@@ -1,8 +1,3 @@
-// https://www.luogu.com.cn/problem/P5787
-// 给定n个节点的图，在k个时间内有m条边会出现后消失。问第i时刻是否是二分图。
-// 二分图判定使用可撤销的扩展域并查集维护。
-// TODO: MLE，什么地方占用空间太大
-
 package main
 
 import (
@@ -13,21 +8,61 @@ import (
 	"strings"
 )
 
+const INF int = 1e9
+
+// P5227 [AHOI2013] 连通图
+// https://www.luogu.com.cn/problem/P5227
+// 给定一个无向连通图和若干个小集合，每个小集合包含一些边(不超过4条)，
+// !对于每个集合，你需要确定将集合中的边删掉后改图是否保持联通。
+// !注意不等价于"不考虑这个集合".
+// 集合间的询问相互独立
+//
+// !每条边会在若干个时间区间内出现。预处理每条边删除的时间.
 func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
+	in, out := bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, m, k int
-	fmt.Fscan(in, &n, &m, &k)
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	edges := make([][2]int, m)
+	for i := range edges {
+		fmt.Fscan(in, &edges[i][0], &edges[i][1])
+		edges[i][0]--
+		edges[i][1]--
+	}
 
-	mutations := make([][4]int, m) // (u,v,start,end)
-	for i := 0; i < m; i++ {
-		var u, v, start, end int
-		fmt.Fscan(in, &u, &v, &start, &end)
-		u--
-		v--
-		mutations[i] = [4]int{u, v, start, end}
+	var k int
+	fmt.Fscan(in, &k)
+	edgeGroups := make([][]int, k)
+	for i := range edgeGroups {
+		var g int
+		fmt.Fscan(in, &g)
+		edgeGroups[i] = make([]int, g)
+		for j := range edgeGroups[i] {
+			fmt.Fscan(in, &edgeGroups[i][j])
+			edgeGroups[i][j]--
+		}
+	}
+
+	removedTimes := make([][]int, m) // 每条边在哪些时间消失
+	for i, g := range edgeGroups {
+		for _, e := range g {
+			removedTimes[e] = append(removedTimes[e], i)
+		}
+	}
+
+	mutations := [][3]int{} // (start,end,edgeId)
+	for eid, curTimes := range removedTimes {
+		if len(curTimes) == 0 {
+			mutations = append(mutations, [3]int{-INF, INF, eid})
+			continue
+		}
+		startTime := -INF
+		for _, endTime := range curTimes {
+			mutations = append(mutations, [3]int{startTime, endTime, eid})
+			startTime = endTime + 1
+		}
+		mutations = append(mutations, [3]int{curTimes[len(curTimes)-1] + 1, INF, eid})
 	}
 
 	queries := make([]int, k)
@@ -36,43 +71,33 @@ func main() {
 	}
 
 	res := make([]bool, k)
-	uf := NewUnionFindArrayWithUndo(2 * n) // 扩展域并查集
-	history := make([]bool, 0, m+1)
-	history = append(history, true)
-	S := NewSegmentTreeDivideAndConquerUndo(
-		func(mutationId int) {
-			u, v := mutations[mutationId][0], mutations[mutationId][1]
-			uf.Union(u, v+n)
-			uf.Union(u+n, v)
-			if !history[len(history)-1] {
-				history = append(history, false)
-			} else {
-				history = append(history, uf.Find(u) != uf.Find(v))
-			}
+	uf := NewUnionFindArrayWithUndo(n)
+	seg := NewSegmentTreeDivideAndConquerUndo(
+		func(index int) {
+			item := mutations[index]
+			edge := item[2]
+			uf.Union(edges[edge][0], edges[edge][1])
 		},
 		func() {
 			uf.Undo()
-			history = history[:len(history)-1]
 		},
-		func(queryId int) {
-			res[queryId] = history[len(history)-1]
+		func(index int) {
+			res[index] = uf.Part == 1
 		},
 	)
-
-	for id := range mutations {
-		start, end := mutations[id][2], mutations[id][3]
-		S.AddMutation(start, end, id)
+	for id, item := range mutations {
+		seg.AddMutation(item[0], item[1], id)
 	}
 	for id, time := range queries {
-		S.AddQuery(time, id)
+		seg.AddQuery(time, id)
 	}
-	S.Run()
+	seg.Run()
 
-	for _, v := range res {
-		if v {
-			fmt.Fprintln(out, "Yes")
+	for _, b := range res {
+		if b {
+			fmt.Fprintln(out, "Connected")
 		} else {
-			fmt.Fprintln(out, "No")
+			fmt.Fprintln(out, "Disconnected")
 		}
 	}
 }
@@ -125,7 +150,14 @@ func (o *SegmentTreeDivideAndConquerUndo) Run() {
 		times[i] = o.queries[i].time
 	}
 	sort.Ints(times)
-	uniqueInplace(&times)
+	slow := 0
+	for fast := 0; fast < len(times); fast++ {
+		if times[fast] != times[slow] {
+			slow++
+			times[slow] = times[fast]
+		}
+	}
+	times = times[:slow+1]
 	usedTimes := make([]bool, len(times)+1)
 	usedTimes[0] = true
 	for _, e := range o.mutations {
@@ -137,7 +169,14 @@ func (o *SegmentTreeDivideAndConquerUndo) Run() {
 			times[i] = times[i-1]
 		}
 	}
-	uniqueInplace(&times)
+	slow = 0
+	for fast := 0; fast < len(times); fast++ {
+		if times[fast] != times[slow] {
+			slow++
+			times[slow] = times[fast]
+		}
+	}
+	times = times[:slow+1]
 
 	n := len(times)
 	offset := 1
@@ -145,6 +184,7 @@ func (o *SegmentTreeDivideAndConquerUndo) Run() {
 		offset <<= 1
 	}
 	o.nodes = make([][]int, offset+n)
+
 	for _, e := range o.mutations {
 		left := offset + lowerBound(times, e.start)
 		right := offset + lowerBound(times, e.end)
@@ -153,6 +193,7 @@ func (o *SegmentTreeDivideAndConquerUndo) Run() {
 			if left&1 == 1 {
 				o.nodes[left] = append(o.nodes[left], eid)
 				left++
+
 			}
 			if right&1 == 1 {
 				right--
@@ -193,18 +234,6 @@ func (o *SegmentTreeDivideAndConquerUndo) dfs(now int) {
 	}
 }
 
-func uniqueInplace(sorted *[]int) {
-	tmp := *sorted
-	slow := 0
-	for fast := 0; fast < len(tmp); fast++ {
-		if tmp[fast] != tmp[slow] {
-			slow++
-			tmp[slow] = tmp[fast]
-		}
-	}
-	*sorted = tmp[:slow+1]
-}
-
 func lowerBound(arr []int, target int) int {
 	left, right := 0, len(arr)-1
 	for left <= right {
@@ -231,118 +260,93 @@ func upperBound(arr []int, target int) int {
 	return left
 }
 
-type historyItem struct{ a, b int }
-type UnionFindArrayWithUndo struct {
+type historyItem struct{ small, big, smallRank int }
+
+type UnionFindArrayWithUndo2 struct {
 	Part      int
-	n         int
-	innerSnap int
-	data      []int
-	history   []historyItem // (root,data)
+	_n        int
+	_parent   []int
+	_rank     []int
+	_optStack []historyItem
 }
 
-func NewUnionFindArrayWithUndo(n int) *UnionFindArrayWithUndo {
-	data := make([]int, n)
-	for i := range data {
-		data[i] = -1
+func NewUnionFindArrayWithUndo(n int) *UnionFindArrayWithUndo2 {
+	parent := make([]int, n)
+	rank := make([]int, n)
+	for i := 0; i < n; i++ {
+		parent[i] = i
+		rank[i] = 1
 	}
-	return &UnionFindArrayWithUndo{Part: n, n: n, data: data}
+	return &UnionFindArrayWithUndo2{
+		_n:      n,
+		_parent: parent,
+		_rank:   rank,
+		Part:    n,
+	}
 }
 
-// !撤销上一次合并操作，没合并成功也要撤销.
-func (uf *UnionFindArrayWithUndo) Undo() bool {
-	if len(uf.history) == 0 {
+func (uf *UnionFindArrayWithUndo2) Find(x int) int {
+	for uf._parent[x] != x {
+		x = uf._parent[x]
+	}
+	return x
+}
+
+func (uf *UnionFindArrayWithUndo2) Union(x, y int) bool {
+	rootX := uf.Find(x)
+	rootY := uf.Find(y)
+	if rootX == rootY {
+		uf._optStack = append(uf._optStack, historyItem{-1, -1, -1})
 		return false
 	}
-	small, smallData := uf.history[len(uf.history)-1].a, uf.history[len(uf.history)-1].b
-	uf.history = uf.history[:len(uf.history)-1]
-	big, bigData := uf.history[len(uf.history)-1].a, uf.history[len(uf.history)-1].b
-	uf.history = uf.history[:len(uf.history)-1]
-	uf.data[small] = smallData
-	uf.data[big] = bigData
-	if big != small {
-		uf.Part++
+	if uf._rank[rootX] > uf._rank[rootY] {
+		rootX, rootY = rootY, rootX
 	}
-	return true
-}
-
-// 保存并查集当前的状态.
-//
-//	!Snapshot() 之后可以调用 Rollback(-1) 回滚到这个状态.
-func (uf *UnionFindArrayWithUndo) Snapshot() {
-	uf.innerSnap = len(uf.history) >> 1
-}
-
-// 回滚到指定的状态.
-//
-//	state 为 -1 表示回滚到上一次 `SnapShot` 时保存的状态.
-//	其他值表示回滚到状态id为state时的状态.
-func (uf *UnionFindArrayWithUndo) Rollback(state int) bool {
-	if state == -1 {
-		state = uf.innerSnap
-	}
-	state <<= 1
-	if state < 0 || state > len(uf.history) {
-		return false
-	}
-	for state < len(uf.history) {
-		uf.Undo()
-	}
-	return true
-}
-
-// 获取当前并查集的状态id.
-//
-//	也就是当前合并(Union)被调用的次数.
-func (uf *UnionFindArrayWithUndo) GetState() int {
-	return len(uf.history) >> 1
-}
-
-func (uf *UnionFindArrayWithUndo) Reset() {
-	for len(uf.history) > 0 {
-		uf.Undo()
-	}
-}
-
-func (uf *UnionFindArrayWithUndo) Union(x, y int) bool {
-	x, y = uf.Find(x), uf.Find(y)
-	uf.history = append(uf.history, historyItem{x, uf.data[x]})
-	uf.history = append(uf.history, historyItem{y, uf.data[y]})
-	if x == y {
-		return false
-	}
-	if uf.data[x] > uf.data[y] {
-		x ^= y
-		y ^= x
-		x ^= y
-	}
-	uf.data[x] += uf.data[y]
-	uf.data[y] = x
+	uf._parent[rootX] = rootY
+	uf._rank[rootY] += uf._rank[rootX]
 	uf.Part--
+	uf._optStack = append(uf._optStack, historyItem{rootX, rootY, uf._rank[rootX]})
 	return true
 }
 
-func (uf *UnionFindArrayWithUndo) Find(x int) int {
-	cur := x
-	for uf.data[cur] >= 0 {
-		cur = uf.data[cur]
+func (uf *UnionFindArrayWithUndo2) Undo() {
+	if len(uf._optStack) == 0 {
+		return
 	}
-	return cur
+	opt := uf._optStack[len(uf._optStack)-1]
+	uf._optStack = uf._optStack[:len(uf._optStack)-1]
+	if opt.small == -1 {
+		return
+	}
+	uf._parent[opt.small] = opt.small
+	uf._rank[opt.big] -= opt.smallRank
+	uf.Part++
 }
 
-func (uf *UnionFindArrayWithUndo) IsConnected(x, y int) bool { return uf.Find(x) == uf.Find(y) }
+func (uf *UnionFindArrayWithUndo2) Reset() {
+	for len(uf._optStack) > 0 {
+		uf.Undo()
+	}
+}
 
-func (uf *UnionFindArrayWithUndo) GetSize(x int) int { return -uf.data[uf.Find(x)] }
+func (uf *UnionFindArrayWithUndo2) IsConnected(x, y int) bool {
+	return uf.Find(x) == uf.Find(y)
+}
 
-func (ufa *UnionFindArrayWithUndo) GetGroups() map[int][]int {
+func (uf *UnionFindArrayWithUndo2) GetGroups() map[int][]int {
 	groups := make(map[int][]int)
-	for i := 0; i < ufa.n; i++ {
-		root := ufa.Find(i)
+	for i := 0; i < uf._n; i++ {
+		root := uf.Find(i)
 		groups[root] = append(groups[root], i)
 	}
 	return groups
 }
 
-func (ufa *UnionFindArrayWithUndo) String() string {
+func (uf *UnionFindArrayWithUndo2) GetPart() int {
+	return uf.Part
+}
+
+func (ufa *UnionFindArrayWithUndo2) String() string {
 	sb := []string{"UnionFindArray:"}
 	groups := ufa.GetGroups()
 	keys := make([]int, 0, len(groups))

@@ -1,5 +1,3 @@
-"""回文生成器"""
-
 from typing import Generator
 from itertools import chain
 

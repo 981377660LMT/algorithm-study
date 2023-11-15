@@ -1,5 +1,5 @@
 # F - Intervals on Tree-森林的连通分量个数
-# !森林（点导出子图）中树（连通块）的数量 = 总顶点数 − 总边数
+# !森林中树的数量 = 总顶点数 − 总边数
 # https://blog.csdn.net/Ratina/article/details/107163248
 
 

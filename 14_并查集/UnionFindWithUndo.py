@@ -98,6 +98,9 @@ class UnionFindArrayWithUndo:
             groups[root].append(key)
         return groups
 
+    def getSize(self, x: int) -> int:
+        return self._rank[self.find(x)]
+
 
 T = TypeVar("T", bound=Hashable)
 
@@ -166,9 +169,6 @@ class UnionFindMapWithUndo(Generic[T]):
     def isConnected(self, key1: T, key2: T) -> bool:
         return self.find(key1) == self.find(key2)
 
-    def getRoots(self) -> List[T]:
-        return list(set(self.find(key) for key in self._parent))
-
     def getGroups(self) -> DefaultDict[T, List[T]]:
         groups = defaultdict(list)
         for key in self._parent:
@@ -183,6 +183,9 @@ class UnionFindMapWithUndo(Generic[T]):
         self._rank[key] = 1
         self.part += 1
         return True
+
+    def getSize(self, x: T) -> int:
+        return self._rank[self.find(x)]
 
     def __repr__(self) -> str:
         return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())

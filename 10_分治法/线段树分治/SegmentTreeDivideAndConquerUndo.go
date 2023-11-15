@@ -147,6 +147,9 @@ func DynamicGraphVertexAddComponentSum() {
 	}
 }
 
+type segMutation struct{ start, end, id int }
+type segQuery struct{ time, id int }
+
 // 线段树分治undo版.
 // 线段树分治是一种处理动态修改和询问的离线算法.
 // 通过将某一元素的出现时间段在线段树上保存到`log(n)`个结点中,
@@ -155,8 +158,8 @@ type SegmentTreeDivideAndConquerUndo struct {
 	mutate    func(mutationId int)
 	undo      func()
 	query     func(queryId int)
-	mutations []struct{ start, end, id int }
-	queries   []struct{ time, id int }
+	mutations []segMutation
+	queries   []segQuery
 	nodes     [][]int
 }
 
@@ -175,12 +178,12 @@ func (o *SegmentTreeDivideAndConquerUndo) AddMutation(startTime, endTime int, id
 	if startTime >= endTime {
 		return
 	}
-	o.mutations = append(o.mutations, struct{ start, end, id int }{startTime, endTime, id})
+	o.mutations = append(o.mutations, segMutation{startTime, endTime, id})
 }
 
 // 在时间`time`时添加一个编号为`id`的查询.
 func (o *SegmentTreeDivideAndConquerUndo) AddQuery(time int, id int) {
-	o.queries = append(o.queries, struct{ time, id int }{time, id})
+	o.queries = append(o.queries, segQuery{time, id})
 }
 
 func (o *SegmentTreeDivideAndConquerUndo) Run() {

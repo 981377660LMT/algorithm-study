@@ -38,15 +38,19 @@ func productExceptSelf(nums []int) []int {
 
 type State = struct{ value int }
 
+type segMutation struct{ start, end, id int }
+type segQuery struct{ time, id int }
+
 // 线段树分治copy版.
 // 如果修改操作难以撤销，可以在每个节点处保存一份副本.
+// !调用O(n)次拷贝注意不要超出内存.
 type SegmentTreeDivideAndConquerCopy struct {
 	initState *State
 	mutate    func(state *State, mutationId int)
 	copy      func(state *State) *State
 	query     func(state *State, queryId int)
-	mutations []struct{ start, end, id int }
-	queries   []struct{ time, id int }
+	mutations []segMutation
+	queries   []segQuery
 	nodes     [][]int
 }
 
@@ -74,12 +78,12 @@ func (o *SegmentTreeDivideAndConquerCopy) AddMutation(startTime, endTime int, id
 	if startTime >= endTime {
 		return
 	}
-	o.mutations = append(o.mutations, struct{ start, end, id int }{startTime, endTime, id})
+	o.mutations = append(o.mutations, segMutation{startTime, endTime, id})
 }
 
 // 在时间`time`时添加一个编号为`id`的查询.
 func (o *SegmentTreeDivideAndConquerCopy) AddQuery(time int, id int) {
-	o.queries = append(o.queries, struct{ time, id int }{time, id})
+	o.queries = append(o.queries, segQuery{time, id})
 }
 
 func (o *SegmentTreeDivideAndConquerCopy) Run() {

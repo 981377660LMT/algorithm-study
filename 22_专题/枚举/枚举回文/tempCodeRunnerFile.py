@@ -1,1 +1,1 @@
-int(str(half) + str(half)[::-1])
+[:-1]

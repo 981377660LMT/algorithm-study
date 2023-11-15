@@ -4,6 +4,7 @@
 /**
  * 线段树分治copy版.
  * 如果修改操作难以撤销，可以在每个节点处保存一份副本.
+ * !调用O(n)次拷贝注意不要超出内存.
  */
 class SegmentTreeDivideAndConquerCopy<S> {
   private readonly _initState: S
@@ -32,12 +33,7 @@ class SegmentTreeDivideAndConquerCopy<S> {
       query: (state: S, queryId: number) => void
     } & ThisType<void>
   )
-  constructor(
-    initState: S,
-    mutate: (state: S, mutationId: number) => void,
-    copy: (state: S) => S,
-    query: (state: S, queryId: number) => void
-  )
+  constructor(initState: S, mutate: (state: S, mutationId: number) => void, copy: (state: S) => S, query: (state: S, queryId: number) => void)
   constructor(arg1: any, arg2: any, arg3?: any, arg4?: any) {
     this._initState = arg1
     if (typeof arg2 === 'object') {

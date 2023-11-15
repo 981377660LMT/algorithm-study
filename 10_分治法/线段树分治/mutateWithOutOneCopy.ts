@@ -5,6 +5,8 @@
  * 调用 `query` 时，`state` 为对除了 `index` 以外所有点均调用过了 `mutate` 的状态。但不保证调用 `mutate` 的顺序。
  *
  * 总计会调用 $O(NlgN)$ 次的 `mutate` , $O(N)$ 次的 `copy` 和 `query`.
+ * !调用O(n)次拷贝注意不要超出内存.
+ *
  * @link
  * https://github.com/tdzl2003/leetcode_live/blob/master/templates/%E5%9F%BA%E7%A1%80/%E5%88%86%E6%B2%BB%E5%88%A0%E7%82%B9.cpp
  * @note

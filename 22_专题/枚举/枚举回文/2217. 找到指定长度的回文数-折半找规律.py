@@ -1,11 +1,14 @@
-from typing import List
-
-
 # 反思：这道题打表去了，实际上打表是过不了的
+# 2217. 找到指定长度的回文数
+#
+# https://leetcode.cn/problems/find-palindrome-with-fixed-length/
 # intLength<=15 有1e8种情况
 # 1 <= queries.length <= 5 * 104
 # 1 <= queries[i] <= 109
 # 1 <= intLength <= 15
+
+
+from typing import List
 
 
 class Solution:

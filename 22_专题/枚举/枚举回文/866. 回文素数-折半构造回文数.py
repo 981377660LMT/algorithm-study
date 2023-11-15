@@ -1,28 +1,8 @@
-from typing import Generator, Iterable
-from itertools import chain
+# 866. 回文素数-折半构造回文数
+# https://leetcode.cn/problems/prime-palindrome/
 
 
-def genPalindromeByLength(minLen: int, maxLen: int, isReversed=False) -> Iterable[int]:
-    """返回minLength<=长度<=maxLength的回文数字"""
-
-    def inner(length: int, isReversed=False) -> Generator[int, None, None]:
-        """返回长度为length的回文数字"""
-        # 长为3，4的回文都是从10开始的，所以只需要构造10-99的回文即可
-        start = 10 ** ((length - 1) >> 1)
-        end = start * 10 - 1
-
-        for half in reversed(range(start, end + 1)) if isReversed else range(start, end + 1):
-            if length & 1:
-                yield (int(str(half)[:-1] + str(half)[::-1]))
-            else:
-                yield (int(str(half) + str(half)[::-1]))
-
-    return chain.from_iterable(
-        inner(len_, isReversed)
-        for len_ in (
-            reversed(range(minLen, maxLen + 1)) if isReversed else range(minLen, maxLen + 1)
-        )
-    )
+from enumeratePalindrome import emumeratePalindrome
 
 
 def isPrime(n: int) -> bool:
@@ -36,18 +16,19 @@ class Solution:
         1 <= N <= 10^8
         """
 
-        for cand in genPalindromeByLength(1, 9):
-            if cand < n:
+        for p in emumeratePalindrome(1, 9):
+            p = int(p)
+            if p < n:
                 continue
-            if isPrime(cand):
-                return cand
+            if isPrime(p):
+                return p
 
         return -1
 
 
 if __name__ == "__main__":
-    for cand in genPalindromeByLength(7, 8):  # 生成回文素数
-        if isPrime(cand):
+    for cand in emumeratePalindrome(7, 8):  # 生成回文素数
+        if isPrime(int(cand)):
             print(cand)
 # 10301
 # 10501

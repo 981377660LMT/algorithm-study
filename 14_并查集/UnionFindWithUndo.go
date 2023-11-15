@@ -58,12 +58,14 @@ func NewUnionFindArrayWithUndo(n int) *UnionFindArrayWithUndo {
 	return &UnionFindArrayWithUndo{Part: n, n: n, data: data}
 }
 
+type historyItem struct{ a, b int }
+
 type UnionFindArrayWithUndo struct {
 	Part      int
 	n         int
 	innerSnap int
 	data      []int
-	history   []struct{ a, b int } // (root,data)
+	history   []historyItem // (root,data)
 }
 
 // !撤销上一次合并操作，没合并成功也要撤销.
@@ -84,14 +86,16 @@ func (uf *UnionFindArrayWithUndo) Undo() bool {
 }
 
 // 保存并查集当前的状态.
-//  !Snapshot() 之后可以调用 Rollback(-1) 回滚到这个状态.
+//
+//	!Snapshot() 之后可以调用 Rollback(-1) 回滚到这个状态.
 func (uf *UnionFindArrayWithUndo) Snapshot() {
 	uf.innerSnap = len(uf.history) >> 1
 }
 
 // 回滚到指定的状态.
-//  state 为 -1 表示回滚到上一次 `SnapShot` 时保存的状态.
-//  其他值表示回滚到状态id为state时的状态.
+//
+//	state 为 -1 表示回滚到上一次 `SnapShot` 时保存的状态.
+//	其他值表示回滚到状态id为state时的状态.
 func (uf *UnionFindArrayWithUndo) Rollback(state int) bool {
 	if state == -1 {
 		state = uf.innerSnap
@@ -107,7 +111,8 @@ func (uf *UnionFindArrayWithUndo) Rollback(state int) bool {
 }
 
 // 获取当前并查集的状态id.
-//  也就是当前合并(Union)被调用的次数.
+//
+//	也就是当前合并(Union)被调用的次数.
 func (uf *UnionFindArrayWithUndo) GetState() int {
 	return len(uf.history) >> 1
 }
@@ -120,8 +125,8 @@ func (uf *UnionFindArrayWithUndo) Reset() {
 
 func (uf *UnionFindArrayWithUndo) Union(x, y int) bool {
 	x, y = uf.Find(x), uf.Find(y)
-	uf.history = append(uf.history, struct{ a, b int }{x, uf.data[x]})
-	uf.history = append(uf.history, struct{ a, b int }{y, uf.data[y]})
+	uf.history = append(uf.history, historyItem{x, uf.data[x]})
+	uf.history = append(uf.history, historyItem{y, uf.data[y]})
 	if x == y {
 		return false
 	}
