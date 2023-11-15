@@ -10,19 +10,7 @@ func productExceptSelf(nums []int) []int {
 	n := len(nums)
 	res := make([]int, n)
 	initState := State{value: 1}
-	seg := NewSegmentTreeDivideAndConquerCopy(
-		&initState,
-		func(state *State, mutationId int) {
-			state.value *= nums[mutationId]
-		},
-		func(state *State) *State {
-			copy_ := *state
-			return &copy_
-		},
-		func(state *State, queryId int) {
-			res[queryId] = state.value
-		},
-	)
+	seg := NewSegmentTreeDivideAndConquerCopy()
 
 	// 第i次变更在时间段 `[0, i) + [i+1, n)` 内存在.
 	for i := 0; i < n; i++ {
@@ -32,7 +20,17 @@ func productExceptSelf(nums []int) []int {
 	for i := 0; i < n; i++ {
 		seg.AddQuery(i, i)
 	}
-	seg.Run()
+	seg.Run(&initState,
+		func(state *State, mutationId int) {
+			state.value *= nums[mutationId]
+		},
+		func(state *State) *State {
+			copy_ := *state
+			return &copy_
+		},
+		func(state *State, queryId int) {
+			res[queryId] = state.value
+		})
 	return res
 }
 
@@ -54,23 +52,8 @@ type SegmentTreeDivideAndConquerCopy struct {
 	nodes     [][]int
 }
 
-// dfs 遍历整棵线段树来得到每个时间点的答案.
-//
-//	 initState: 数据结构的初始状态.
-//		mutate: 添加编号为`mutationId`的变更后产生的副作用.
-//		copy: 拷贝一份数据结构的副本.
-//		query: 响应编号为`queryId`的查询.
-//		一共调用 **O(nlogn)** 次`mutate`，**O(n)** 次`copy` 和 **O(q)** 次`query`.
-func NewSegmentTreeDivideAndConquerCopy(
-	initState *State,
-	mutate func(state *State, mutationId int),
-	copy func(state *State) *State,
-	query func(state *State, queryId int),
-) *SegmentTreeDivideAndConquerCopy {
-	return &SegmentTreeDivideAndConquerCopy{
-		initState: initState,
-		mutate:    mutate, copy: copy, query: query,
-	}
+func NewSegmentTreeDivideAndConquerCopy() *SegmentTreeDivideAndConquerCopy {
+	return &SegmentTreeDivideAndConquerCopy{}
 }
 
 // 在时间范围`[startTime, endTime)`内添加一个编号为`id`的变更.
@@ -86,10 +69,24 @@ func (o *SegmentTreeDivideAndConquerCopy) AddQuery(time int, id int) {
 	o.queries = append(o.queries, segQuery{time, id})
 }
 
-func (o *SegmentTreeDivideAndConquerCopy) Run() {
+// dfs 遍历整棵线段树来得到每个时间点的答案.
+//
+//	 initState: 数据结构的初始状态.
+//		mutate: 添加编号为`mutationId`的变更后产生的副作用.
+//		copy: 拷贝一份数据结构的副本.
+//		query: 响应编号为`queryId`的查询.
+//		一共调用 **O(nlogn)** 次`mutate`，**O(n)** 次`copy` 和 **O(q)** 次`query`.
+func (o *SegmentTreeDivideAndConquerCopy) Run(
+	initState *State,
+	mutate func(state *State, mutationId int),
+	copy func(state *State) *State,
+	query func(state *State, queryId int),
+) {
 	if len(o.queries) == 0 {
 		return
 	}
+	o.initState = initState
+	o.mutate, o.copy, o.query = mutate, copy, query
 	times := make([]int, len(o.queries))
 	for i := range o.queries {
 		times[i] = o.queries[i].time

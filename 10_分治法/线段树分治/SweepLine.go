@@ -7,17 +7,7 @@ import "sort"
 func fullBloomFlowers(flowers [][]int, people []int) []int {
 	res := make([]int, len(people))
 	count := 0
-	sweepLine := NewSweepLine(
-		func(mutationId int) {
-			count++
-		},
-		func(mutationId int) {
-			count--
-		},
-		func(queryId int) {
-			res[queryId] = count
-		},
-	)
+	sweepLine := NewSweepLine()
 
 	for i, e := range flowers {
 		sweepLine.AddMutation(e[0], e[1]+1, i)
@@ -26,7 +16,15 @@ func fullBloomFlowers(flowers [][]int, people []int) []int {
 		sweepLine.AddQuery(e, i)
 	}
 
-	sweepLine.Run()
+	sweepLine.Run(func(mutationId int) {
+		count++
+	},
+		func(mutationId int) {
+			count--
+		},
+		func(queryId int) {
+			res[queryId] = count
+		})
 	return res
 }
 
@@ -36,25 +34,7 @@ func countServers(n int, logs [][]int, x int, queries []int) []int {
 	res := make([]int, len(queries))
 	count := n
 	serverCounter := make([]int, n+1)
-	sweepLine := NewSweepLine(
-		func(mutationId int) {
-			serverId := logs[mutationId][0]
-			serverCounter[serverId]++
-			if serverCounter[serverId] == 1 {
-				count--
-			}
-		},
-		func(mutationId int) {
-			serverId := logs[mutationId][0]
-			serverCounter[serverId]--
-			if serverCounter[serverId] == 0 {
-				count++
-			}
-		},
-		func(queryId int) {
-			res[queryId] = count
-		},
-	)
+	sweepLine := NewSweepLine()
 
 	for i, e := range logs {
 		start := e[1]
@@ -64,7 +44,23 @@ func countServers(n int, logs [][]int, x int, queries []int) []int {
 		sweepLine.AddQuery(q, i)
 	}
 
-	sweepLine.Run()
+	sweepLine.Run(func(mutationId int) {
+		serverId := logs[mutationId][0]
+		serverCounter[serverId]++
+		if serverCounter[serverId] == 1 {
+			count--
+		}
+	},
+		func(mutationId int) {
+			serverId := logs[mutationId][0]
+			serverCounter[serverId]--
+			if serverCounter[serverId] == 0 {
+				count++
+			}
+		},
+		func(queryId int) {
+			res[queryId] = count
+		})
 	return res
 }
 
@@ -81,18 +77,8 @@ type SweepLine struct {
 	nodes     [][]int
 }
 
-// 使用扫描线得到每个时间点的答案.
-//
-//	mutate: 添加编号为`mutationId`的变更.
-//	remove: 删除编号为`mutationId`的变更.
-//	query: 响应编号为`queryId`的查询.
-//	一共调用 **O(n)** 次`mutate`、`remove` 和 **O(q)** 次`query`.
-func NewSweepLine(
-	mutate func(mutationId int),
-	remove func(mutationId int),
-	query func(queryId int),
-) *SweepLine {
-	return &SweepLine{mutate: mutate, remove: remove, query: query}
+func NewSweepLine() *SweepLine {
+	return &SweepLine{}
 }
 
 // 在时间范围`[startTime, endTime)`内添加一个编号为`id`的变更.
@@ -108,10 +94,21 @@ func (s *SweepLine) AddQuery(time int, id int) {
 	s.queries = append(s.queries, struct{ time, id int }{time, id})
 }
 
-func (s *SweepLine) Run() {
+// 使用扫描线得到每个时间点的答案.
+//
+//	mutate: 添加编号为`mutationId`的变更.
+//	remove: 删除编号为`mutationId`的变更.
+//	query: 响应编号为`queryId`的查询.
+//	一共调用 **O(n)** 次`mutate`、`remove` 和 **O(q)** 次`query`.
+func (s *SweepLine) Run(
+	mutate func(mutationId int),
+	remove func(mutationId int),
+	query func(queryId int),
+) {
 	if len(s.queries) == 0 {
 		return
 	}
+	s.mutate, s.remove, s.query = mutate, remove, query
 	times := make([]int, len(s.queries))
 	for i := range s.queries {
 		times[i] = s.queries[i].time

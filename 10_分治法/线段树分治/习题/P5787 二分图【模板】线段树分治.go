@@ -35,11 +35,20 @@ func main() {
 		queries[i] = i
 	}
 
+	S := NewSegmentTreeDivideAndConquerUndo()
+	for id := range mutations {
+		start, end := mutations[id][2], mutations[id][3]
+		S.AddMutation(start, end, id)
+	}
+	for id, time := range queries {
+		S.AddQuery(time, id)
+	}
+
 	res := make([]bool, k)
 	uf := NewUnionFindArrayWithUndo(2 * n) // 扩展域并查集
 	history := make([]bool, 0, m+1)
 	history = append(history, true)
-	S := NewSegmentTreeDivideAndConquerUndo(
+	S.Run(
 		func(mutationId int) {
 			u, v := mutations[mutationId][0], mutations[mutationId][1]
 			uf.Union(u, v+n)
@@ -58,15 +67,6 @@ func main() {
 			res[queryId] = history[len(history)-1]
 		},
 	)
-
-	for id := range mutations {
-		start, end := mutations[id][2], mutations[id][3]
-		S.AddMutation(start, end, id)
-	}
-	for id, time := range queries {
-		S.AddQuery(time, id)
-	}
-	S.Run()
 
 	for _, v := range res {
 		if v {
@@ -93,14 +93,8 @@ type SegmentTreeDivideAndConquerUndo struct {
 	nodes     [][]int
 }
 
-// dfs 遍历整棵线段树来得到每个时间点的答案.
-//
-//	mutate: 添加编号为`mutationId`的变更后产生的副作用.
-//	undo: 撤销一次`mutate`操作.
-//	query: 响应编号为`queryId`的查询.
-//	一共调用**O(nlogn)**次`mutate`和`undo`，**O(q)**次`query`.
-func NewSegmentTreeDivideAndConquerUndo(mutate func(mutationId int), undo func(), query func(queryId int)) *SegmentTreeDivideAndConquerUndo {
-	return &SegmentTreeDivideAndConquerUndo{mutate: mutate, undo: undo, query: query}
+func NewSegmentTreeDivideAndConquerUndo() *SegmentTreeDivideAndConquerUndo {
+	return &SegmentTreeDivideAndConquerUndo{}
 }
 
 // 在时间范围`[startTime, endTime)`内添加一个编号为`id`的变更.
@@ -116,10 +110,17 @@ func (o *SegmentTreeDivideAndConquerUndo) AddQuery(time int, id int) {
 	o.queries = append(o.queries, segQuery{time, id})
 }
 
-func (o *SegmentTreeDivideAndConquerUndo) Run() {
+// dfs 遍历整棵线段树来得到每个时间点的答案.
+//
+//	mutate: 添加编号为`mutationId`的变更后产生的副作用.
+//	undo: 撤销一次`mutate`操作.
+//	query: 响应编号为`queryId`的查询.
+//	一共调用**O(nlogn)**次`mutate`和`undo`，**O(q)**次`query`.
+func (o *SegmentTreeDivideAndConquerUndo) Run(mutate func(mutationId int), undo func(), query func(queryId int)) {
 	if len(o.queries) == 0 {
 		return
 	}
+	o.mutate, o.undo, o.query = mutate, undo, query
 	times := make([]int, len(o.queries))
 	for i := range o.queries {
 		times[i] = o.queries[i].time

@@ -2,76 +2,114 @@
 
 package main
 
-func main() {
+import (
+	"fmt"
+	"sort"
+)
 
+func main() {
+	Q := NewAddRemoveQuery(true)
+	Q.Add(1, 1)
+	Q.Add(2, 2)
+	Q.Add(3, 3)
+	Q.Remove(4, 1)
+	fmt.Println(Q.Work(5))
 }
 
-// /*
-// ・時刻 t に x を追加する
-// ・時刻 t に x を削除する
-// があるときに、
-// ・時刻 [l, r) に x を追加する
-// に変換する。
-// クエリが時系列順に来ることが分かっているときは monotone = true の方が高速。
-// */
-// template <typename X, bool monotone>
-// struct Add_Remove_Query {
-//   map<X, int> MP;
-//   vc<tuple<int, int, X>> dat;
-//   map<X, vc<int>> ADD;
-//   map<X, vc<int>> RM;
+type V = int
+type Event = struct {
+	start int
+	end   int
+	value V
+}
 
-//   void add(int time, X x) {
-//     if (monotone) return add_monotone(time, x);
-//     ADD[x].eb(time);
-//   }
-//   void remove(int time, X x) {
-//     if (monotone) return remove_monotone(time, x);
-//     RM[x].eb(time);
-//   }
+// 将时间轴上单点的 add 和 remove 转化为区间上的 add.
+// !不能加入相同的元素，删除时元素必须要存在。
+// 如果 add 和 remove 按照时间顺序严格单增，那么可以使用 monotone = true 来加速。
+type AddRemoveQuery struct {
+	mp       map[V]int
+	events   []Event
+	adds     map[V][]int
+	removes  map[V][]int
+	monotone bool
+}
 
-//   // すべてのクエリが終わった現在時刻を渡す
-//   vc<tuple<int, int, X>> calc(int time) {
-//     if (monotone) return calc_monotone(time);
-//     vc<tuple<int, int, X>> dat;
-//     for (auto&& [x, A]: ADD) {
-//       vc<int> B;
-//       if (RM.count(x)) {
-//         B = RM[x];
-//         RM.erase(x);
-//       }
-//       if (len(B) < len(A)) B.eb(time);
-//       assert(len(A) == len(B));
+func NewAddRemoveQuery(monotone bool) *AddRemoveQuery {
+	return &AddRemoveQuery{
+		mp:       map[V]int{},
+		events:   []Event{},
+		adds:     map[V][]int{},
+		removes:  map[V][]int{},
+		monotone: monotone,
+	}
+}
 
-//       sort(all(A));
-//       sort(all(B));
-//       FOR(i, len(A)) {
-//         assert(A[i] <= B[i]);
-//         if (A[i] < B[i]) dat.eb(A[i], B[i], x);
-//       }
-//     }
-//     assert(len(RM) == 0);
-//     return dat;
-//   }
+func (adq *AddRemoveQuery) Add(time int, value V) {
+	if adq.monotone {
+		adq.addMonotone(time, value)
+	} else {
+		adq.adds[value] = append(adq.adds[value], time)
+	}
+}
 
-// private:
-//   void add_monotone(int time, X x) {
-//     assert(!MP.count(x));
-//     MP[x] = time;
-//   }
-//   void remove_monotone(int time, X x) {
-//     auto it = MP.find(x);
-//     assert(it != MP.end());
-//     int t = (*it).se;
-//     MP.erase(it);
-//     if (t == time) return;
-//     dat.eb(t, time, x);
-//   }
-//   vc<tuple<int, int, X>> calc_monotone(int time) {
-//     for (auto&& [x, t]: MP) {
-//       if (t == time) continue;
-//       dat.eb(t, time, x);
-//     }
-//     return dat;
-//   }
-// };
+func (adq *AddRemoveQuery) Remove(time int, value V) {
+	if adq.monotone {
+		adq.removeMonotone(time, value)
+	} else {
+		adq.removes[value] = append(adq.removes[value], time)
+	}
+}
+
+// lastTime: 所有变更都结束的时间.例如INF.
+func (adq *AddRemoveQuery) Work(lastTime int) []Event {
+	if adq.monotone {
+		return adq.workMonotone(lastTime)
+	}
+	res := []Event{}
+	for value, addTimes := range adq.adds {
+		removeTimes := []int{}
+		if cand, ok := adq.removes[value]; ok {
+			removeTimes = cand
+			delete(adq.removes, value)
+		}
+		if len(removeTimes) < len(addTimes) {
+			removeTimes = append(removeTimes, lastTime)
+		}
+		sort.Ints(addTimes)
+		sort.Ints(removeTimes)
+		for i, t := range addTimes {
+			if t < removeTimes[i] {
+				res = append(res, Event{t, removeTimes[i], value})
+			}
+		}
+	}
+	return res
+}
+
+func (adq *AddRemoveQuery) addMonotone(time int, value V) {
+	if _, ok := adq.mp[value]; ok {
+		panic("can't add a value that already exists")
+	}
+	adq.mp[value] = time
+}
+
+func (adq *AddRemoveQuery) removeMonotone(time int, value V) {
+	if startTime, ok := adq.mp[value]; !ok {
+		panic("can't remove a value that doesn't exist")
+	} else {
+		delete(adq.mp, value)
+		if startTime != time {
+			adq.events = append(adq.events, Event{startTime, time, value})
+		}
+	}
+}
+
+func (adq *AddRemoveQuery) workMonotone(lastTime int) []Event {
+	for value, startTime := range adq.mp {
+		if startTime == lastTime {
+			continue
+		}
+		adq.events = append(adq.events, Event{startTime, lastTime, value})
+	}
+	return adq.events
+}

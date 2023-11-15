@@ -4,10 +4,18 @@
  * 遍历长度在 `[minLength, maxLength]` 之间的回文数字字符串.
  * @param maxLength maxLength <= 12.
  */
-function enumeratePalindrome(minLength: number, maxLength: number, f: (palindrome: string) => boolean | void, reversed = false): void {
+function enumeratePalindrome(
+  minLength: number,
+  maxLength: number,
+  f: (palindrome: string) => boolean | void,
+  options: {
+    reverse?: boolean
+  } = {}
+): void {
   if (minLength > maxLength) return
+  const { reverse = false } = options
 
-  if (reversed) {
+  if (reverse) {
     for (let len = maxLength; len >= minLength; len--) {
       const start = 10 ** ((len - 1) >> 1)
       const end = start * 10 - 1
@@ -25,6 +33,36 @@ function enumeratePalindrome(minLength: number, maxLength: number, f: (palindrom
         if (len & 1) {
           if (f(`${half}${String(half).slice(0, -1).split('').reverse().join('')}`)) return
         } else if (f(`${half}${String(half).split('').reverse().join('')}`)) return
+      }
+    }
+  }
+}
+
+/**
+ * 遍历长度在 `[minLength, maxLength]` 之间的回文数字字符串.
+ * @param maxLength maxLength <= 12.
+ */
+function* generatePalindrome(minLength: number, maxLength: number, reversed = false): Generator<string> {
+  if (minLength > maxLength) return
+
+  if (reversed) {
+    for (let len = maxLength; len >= minLength; len--) {
+      const start = 10 ** ((len - 1) >> 1)
+      const end = start * 10 - 1
+      for (let half = end; half >= start; half--) {
+        if (len & 1) {
+          yield `${half}${String(half).slice(0, -1).split('').reverse().join('')}`
+        } else yield `${half}${String(half).split('').reverse().join('')}`
+      }
+    }
+  } else {
+    for (let len = minLength; len <= maxLength; len++) {
+      const start = 10 ** ((len - 1) >> 1)
+      const end = start * 10 - 1
+      for (let half = start; half <= end; half++) {
+        if (len & 1) {
+          yield `${half}${String(half).slice(0, -1).split('').reverse().join('')}`
+        } else yield `${half}${String(half).split('').reverse().join('')}`
       }
     }
   }
@@ -60,7 +98,7 @@ function getKthPalindrome(length: number, k: number): string | undefined {
   return `${half}${String(half).split('').reverse().join('')}`
 }
 
-export { enumeratePalindrome, getPalindromeByHalf, countPalindrome, getKthPalindrome }
+export { enumeratePalindrome, generatePalindrome, getPalindromeByHalf, countPalindrome, getKthPalindrome }
 
 if (require.main === module) {
   let count = 0

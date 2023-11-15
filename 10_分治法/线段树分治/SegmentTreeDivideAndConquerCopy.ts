@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-inner-declarations */
 /* eslint-disable class-methods-use-this */
 
@@ -6,46 +7,16 @@
  * 如果修改操作难以撤销，可以在每个节点处保存一份副本.
  * !调用O(n)次拷贝注意不要超出内存.
  */
-class SegmentTreeDivideAndConquerCopy<S> {
-  private readonly _initState: S
-  private readonly _mutate: (state: S, mutationId: number) => void
-  private readonly _copy: (state: S) => S
-  private readonly _query: (state: S, queryId: number) => void
+class SegmentTreeDivideAndConquerCopy {
+  private _initState!: unknown
+  private _mutate!: (state: unknown, mutationId: number) => void
+  private _copy!: (state: unknown) => unknown
+  private _query!: (state: unknown, queryId: number) => void
   private readonly _mutations: { start: number; end: number; id: number }[] = []
   private readonly _queries: { time: number; id: number }[] = []
   private _nodes: number[][] = [] // 在每个节点上保存对应的变更和查询的编号
   private _mutationId = 0
   private _queryId = 0
-
-  /**
-   * dfs 遍历整棵线段树来得到每个时间点的答案.
-   * @param initState 数据结构的初始状态.
-   * @param mutate 添加编号为`mutationId`的变更后产生的副作用.
-   * @param copy 拷贝一份数据结构的副本.
-   * @param query 响应编号为`queryId`的查询.
-   * @complexity 一共调用 **O(nlogn)** 次`mutate`，**O(n)** 次`copy` 和 **O(q)** 次`query`.
-   */
-  constructor(
-    initState: S,
-    options: {
-      mutate: (state: S, mutationId: number) => void
-      copy: (state: S) => S
-      query: (state: S, queryId: number) => void
-    } & ThisType<void>
-  )
-  constructor(initState: S, mutate: (state: S, mutationId: number) => void, copy: (state: S) => S, query: (state: S, queryId: number) => void)
-  constructor(arg1: any, arg2: any, arg3?: any, arg4?: any) {
-    this._initState = arg1
-    if (typeof arg2 === 'object') {
-      this._mutate = arg2.mutate
-      this._copy = arg2.copy
-      this._query = arg2.query
-    } else {
-      this._mutate = arg2
-      this._copy = arg3
-      this._query = arg4
-    }
-  }
 
   /**
    * 在时间范围`[startTime, endTime)`内添加一个编号为`id`的变更.
@@ -64,8 +35,35 @@ class SegmentTreeDivideAndConquerCopy<S> {
     this._queries.push({ time, id })
   }
 
-  run(): void {
+  /**
+   * dfs 遍历整棵线段树来得到每个时间点的答案.
+   * @param initState 数据结构的初始状态.
+   * @param mutate 添加编号为`mutationId`的变更后产生的副作用.
+   * @param copy 拷贝一份数据结构的副本.
+   * @param query 响应编号为`queryId`的查询.
+   * @complexity 一共调用 **O(nlogn)** 次`mutate`，**O(n)** 次`copy` 和 **O(q)** 次`query`.
+   */
+  run<S>(
+    initState: S,
+    options: {
+      mutate: (state: S, mutationId: number) => void
+      copy: (state: S) => S
+      query: (state: S, queryId: number) => void
+    } & ThisType<void>
+  ): void
+  run<S>(initState: S, mutate: (state: S, mutationId: number) => void, copy: (state: S) => S, query: (state: S, queryId: number) => void): void
+  run(arg1: any, arg2: any, arg3?: any, arg4?: any) {
     if (!this._queries.length) return
+    this._initState = arg1
+    if (typeof arg2 === 'object') {
+      this._mutate = arg2.mutate
+      this._copy = arg2.copy
+      this._query = arg2.query
+    } else {
+      this._mutate = arg2
+      this._copy = arg3
+      this._query = arg4
+    }
     const times: number[] = Array(this._queries.length)
     for (let i = 0; i < this._queries.length; i++) times[i] = this._queries[i].time
     times.sort((a, b) => a - b)
@@ -107,7 +105,7 @@ class SegmentTreeDivideAndConquerCopy<S> {
     this._dfs(1, this._initState)
   }
 
-  private _dfs(now: number, state: S): void {
+  private _dfs(now: number, state: unknown): void {
     const curNodes = this._nodes[now]
     for (let i = 0; i < curNodes.length; i++) {
       const id = curNodes[i]
@@ -171,7 +169,17 @@ if (require.main === module) {
   function productExceptSelf(nums: number[]): number[] {
     const n = nums.length
     const res = Array(n).fill(1)
-    const seg = new SegmentTreeDivideAndConquerCopy(
+    const seg = new SegmentTreeDivideAndConquerCopy()
+
+    // 第i次变更在时间段 `[0, i) + [i+1, n)` 内存在.
+    for (let i = 0; i < n; i++) {
+      seg.addMutation(0, i, i)
+      seg.addMutation(i + 1, n, i)
+    }
+    for (let i = 0; i < n; i++) {
+      seg.addQuery(i, i)
+    }
+    seg.run(
       { value: 1 },
       {
         mutate(state, mutationId) {
@@ -185,16 +193,6 @@ if (require.main === module) {
         }
       }
     )
-
-    // 第i次变更在时间段 `[0, i) + [i+1, n)` 内存在.
-    for (let i = 0; i < n; i++) {
-      seg.addMutation(0, i, i)
-      seg.addMutation(i + 1, n, i)
-    }
-    for (let i = 0; i < n; i++) {
-      seg.addQuery(i, i)
-    }
-    seg.run()
 
     return res
   }

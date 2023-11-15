@@ -8,17 +8,7 @@ function test1(): void {
   let undo = 0
   let query = 0
 
-  const dc = new SegmentTreeDivideAndConquerUndo({
-    mutate(id) {
-      mutate++
-    },
-    undo() {
-      undo++
-    },
-    query(id) {
-      query++
-    }
-  })
+  const dc = new SegmentTreeDivideAndConquerUndo()
 
   const n = 1e5
   for (let i = 0; i < n; i++) {
@@ -29,7 +19,17 @@ function test1(): void {
     dc.addQuery(i)
   }
 
-  dc.run()
+  dc.run({
+    mutate(id) {
+      mutate++
+    },
+    undo() {
+      undo++
+    },
+    query(id) {
+      query++
+    }
+  })
   console.log(mutate, undo, query) // 2056006 2056006 100000
 }
 
@@ -40,7 +40,18 @@ function test2(): void {
   let copy = 0
   let query = 0
 
-  const dc = new SegmentTreeDivideAndConquerCopy(
+  const dc = new SegmentTreeDivideAndConquerCopy()
+
+  const n = 1e5
+  for (let i = 0; i < n; i++) {
+    dc.addMutation(0, i)
+    dc.addMutation(i, n)
+  }
+  for (let i = 0; i < n; i++) {
+    dc.addQuery(i)
+  }
+
+  dc.run(
     { value: 1 },
     {
       mutate(id) {
@@ -56,16 +67,6 @@ function test2(): void {
     }
   )
 
-  const n = 1e5
-  for (let i = 0; i < n; i++) {
-    dc.addMutation(0, i)
-    dc.addMutation(i, n)
-  }
-  for (let i = 0; i < n; i++) {
-    dc.addQuery(i)
-  }
-
-  dc.run()
   console.log(mutate, copy, query) // 2056006 231070 100000
 }
 
@@ -103,7 +104,15 @@ function test4(): void {
 
   const n = 1e5
 
-  const sweepLine = new SweepLine({
+  const sweepLine = new SweepLine()
+
+  for (let i = 0; i < n; i++) {
+    sweepLine.addMutation(i, i + 1, i)
+  }
+  for (let i = 0; i < 2 * n; i++) {
+    sweepLine.addQuery(i, i)
+  }
+  sweepLine.run({
     mutate(mutationId) {
       mutate++
     },
@@ -114,14 +123,6 @@ function test4(): void {
       query++
     }
   })
-
-  for (let i = 0; i < n; i++) {
-    sweepLine.addMutation(i, i + 1, i)
-  }
-  for (let i = 0; i < 2 * n; i++) {
-    sweepLine.addQuery(i, i)
-  }
-  sweepLine.run()
 
   console.log(mutate, remove, query) // 100000 100000 200000
 }

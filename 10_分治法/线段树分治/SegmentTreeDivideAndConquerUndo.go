@@ -10,21 +10,10 @@ import (
 func main() {
 	// demo()
 	DynamicGraphVertexAddComponentSum()
-
 }
 
 func demo() {
-	dc := NewSegmentTreeDivideAndConquerUndo(
-		func(edgeId int) {
-			fmt.Println(fmt.Sprintf("add %d", edgeId))
-		},
-		func() {
-			fmt.Println("undo")
-		},
-		func(queryId int) {
-			fmt.Println(fmt.Sprintf("query %d", queryId))
-		},
-	)
+	dc := NewSegmentTreeDivideAndConquerUndo()
 
 	adds := [][2]int{{0, 1}, {1, 2}, {2, 3}}
 	queries := []int{0, 1, 2}
@@ -36,7 +25,17 @@ func demo() {
 		dc.AddQuery(pos, i)
 	}
 
-	dc.Run()
+	dc.Run(
+		func(edgeId int) {
+			fmt.Println(fmt.Sprintf("add %d", edgeId))
+		},
+		func() {
+			fmt.Println("undo")
+		},
+		func(queryId int) {
+			fmt.Println(fmt.Sprintf("query %d", queryId))
+		},
+	)
 }
 
 const INF int = 1e18
@@ -73,23 +72,51 @@ func DynamicGraphVertexAddComponentSum() {
 		}
 	}
 
-	// !solution
-	edges := [][2]int{}               // (u, v), u > v
-	existEdge := make(map[int][2]int) // (u, v) -> (id, startTime)
-	adds := [][2]int{}                // (pos, add)
-	queries := []int{}                // pos
-	res := []int{}
+	queries := []int{} // pos
+	Q := NewAddRemoveQuery(true)
+	seg := NewSegmentTreeDivideAndConquerUndo()
+	for time, operation := range operations {
+		op := operation[0]
+		if op == 0 {
+			u, v := operation[1], operation[2]
+			if u < v {
+				u, v = v, u
+			}
+			hash := u*n + v
+			Q.Add(time, hash)
+		} else if op == 1 {
+			u, v := operation[1], operation[2]
+			if u < v {
+				u, v = v, u
+			}
+			hash := u*n + v
+			Q.Remove(time, hash)
+		} else if op == 2 {
+			pos, add := operation[1], operation[2]
+			hash := ^(add*n + pos)
+			Q.Add(time, hash)
+		} else {
+			pos := operation[1]
+			queries = append(queries, pos)
+			seg.AddQuery(time, len(queries)-1)
+		}
+	}
+	mutations := Q.Work(INF) // start,end,hash
+	for _, item := range mutations {
+		seg.AddMutation(item.start, item.end, item.value)
+	}
+
 	uf := NewUnionFindArrayWithUndoAndWeight(sums)
-	dc := NewSegmentTreeDivideAndConquerUndo(
-		func(mutationId int) {
-			if mutationId >= 0 {
-				e := edges[mutationId]
-				u, v := e[0], e[1]
+	res := make([]int, len(queries))
+
+	seg.Run(
+		func(hash int) {
+			if hash >= 0 {
+				u, v := hash/n, hash%n
 				uf.Union(u, v)
 			} else {
-				mutationId = ^mutationId
-				a := adds[mutationId]
-				pos, add := a[0], a[1]
+				hash = ^hash
+				add, pos := hash/n, hash%n
 				uf.SetGroupWeight(pos, uf.GetGroupWeight(pos)+add)
 			}
 		},
@@ -99,48 +126,7 @@ func DynamicGraphVertexAddComponentSum() {
 		func(queryId int) {
 			pos := queries[queryId]
 			res[queryId] = uf.GetGroupWeight(pos)
-		},
-	)
-
-	for time, operation := range operations {
-		op := operation[0]
-		if op == 0 {
-			u, v := operation[1], operation[2]
-			if u < v {
-				u, v = v, u
-			}
-			hash := u*n + v
-			existEdge[hash] = [2]int{len(edges), time}
-			edges = append(edges, [2]int{u, v})
-		} else if op == 1 {
-			u, v := operation[1], operation[2]
-			if u < v {
-				u, v = v, u
-			}
-			hash := u*n + v
-			item := existEdge[hash]
-			id, startTime := item[0], item[1]
-			dc.AddMutation(startTime, time, id)
-			delete(existEdge, hash)
-		} else if op == 2 {
-			pos, add := operation[1], operation[2]
-			id := ^len(adds) // 加权值操作的mutationId取反
-			dc.AddMutation(time, INF, id)
-			adds = append(adds, [2]int{pos, add})
-		} else {
-			pos := operation[1]
-			dc.AddQuery(time, len(queries))
-			queries = append(queries, pos)
-			res = append(res, 0)
-		}
-	}
-
-	for _, item := range existEdge {
-		id, startTime := item[0], item[1]
-		dc.AddMutation(startTime, INF, id)
-	}
-
-	dc.Run()
+		})
 
 	for _, v := range res {
 		fmt.Fprintln(out, v)
@@ -163,14 +149,8 @@ type SegmentTreeDivideAndConquerUndo struct {
 	nodes     [][]int
 }
 
-// dfs 遍历整棵线段树来得到每个时间点的答案.
-//
-//	mutate: 添加编号为`mutationId`的变更后产生的副作用.
-//	undo: 撤销一次`mutate`操作.
-//	query: 响应编号为`queryId`的查询.
-//	一共调用**O(nlogn)**次`mutate`和`undo`，**O(q)**次`query`.
-func NewSegmentTreeDivideAndConquerUndo(mutate func(mutationId int), undo func(), query func(queryId int)) *SegmentTreeDivideAndConquerUndo {
-	return &SegmentTreeDivideAndConquerUndo{mutate: mutate, undo: undo, query: query}
+func NewSegmentTreeDivideAndConquerUndo() *SegmentTreeDivideAndConquerUndo {
+	return &SegmentTreeDivideAndConquerUndo{}
 }
 
 // 在时间范围`[startTime, endTime)`内添加一个编号为`id`的变更.
@@ -186,10 +166,17 @@ func (o *SegmentTreeDivideAndConquerUndo) AddQuery(time int, id int) {
 	o.queries = append(o.queries, segQuery{time, id})
 }
 
-func (o *SegmentTreeDivideAndConquerUndo) Run() {
+// dfs 遍历整棵线段树来得到每个时间点的答案.
+//
+//	mutate: 添加编号为`mutationId`的变更后产生的副作用.
+//	undo: 撤销一次`mutate`操作.
+//	query: 响应编号为`queryId`的查询.
+//	一共调用**O(nlogn)**次`mutate`和`undo`，**O(q)**次`query`.
+func (o *SegmentTreeDivideAndConquerUndo) Run(mutate func(mutationId int), undo func(), query func(queryId int)) {
 	if len(o.queries) == 0 {
 		return
 	}
+	o.mutate, o.undo, o.query = mutate, undo, query
 	times := make([]int, len(o.queries))
 	for i := range o.queries {
 		times[i] = o.queries[i].time
@@ -397,3 +384,101 @@ func (uf *UnionFindArrayWithUndoAndWeight) IsConnected(x, y int) bool {
 }
 
 func (uf *UnionFindArrayWithUndoAndWeight) Size(x int) int { return uf.rank[uf.Find(x)] }
+
+type V = int
+type Event = struct {
+	start int
+	end   int
+	value V
+}
+
+// 将时间轴上单点的 add 和 remove 转化为区间上的 add.
+// !不能加入相同的元素，删除时元素必须要存在。
+// 如果 add 和 remove 按照时间顺序严格单增，那么可以使用 monotone = true 来加速。
+type AddRemoveQuery struct {
+	mp       map[V]int
+	events   []Event
+	adds     map[V][]int
+	removes  map[V][]int
+	monotone bool
+}
+
+func NewAddRemoveQuery(monotone bool) *AddRemoveQuery {
+	return &AddRemoveQuery{
+		mp:       map[V]int{},
+		events:   []Event{},
+		adds:     map[V][]int{},
+		removes:  map[V][]int{},
+		monotone: monotone,
+	}
+}
+
+func (adq *AddRemoveQuery) Add(time int, value V) {
+	if adq.monotone {
+		adq.addMonotone(time, value)
+	} else {
+		adq.adds[value] = append(adq.adds[value], time)
+	}
+}
+
+func (adq *AddRemoveQuery) Remove(time int, value V) {
+	if adq.monotone {
+		adq.removeMonotone(time, value)
+	} else {
+		adq.removes[value] = append(adq.removes[value], time)
+	}
+}
+
+// lastTime: 所有变更都结束的时间.例如INF.
+func (adq *AddRemoveQuery) Work(lastTime int) []Event {
+	if adq.monotone {
+		return adq.workMonotone(lastTime)
+	}
+	res := []Event{}
+	for value, addTimes := range adq.adds {
+		removeTimes := []int{}
+		if cand, ok := adq.removes[value]; ok {
+			removeTimes = cand
+			delete(adq.removes, value)
+		}
+		if len(removeTimes) < len(addTimes) {
+			removeTimes = append(removeTimes, lastTime)
+		}
+		sort.Ints(addTimes)
+		sort.Ints(removeTimes)
+		for i, t := range addTimes {
+			if t < removeTimes[i] {
+				res = append(res, Event{t, removeTimes[i], value})
+			}
+		}
+	}
+	return res
+}
+
+func (adq *AddRemoveQuery) addMonotone(time int, value V) {
+	if _, ok := adq.mp[value]; ok {
+		panic("can't add a value that already exists")
+	}
+	adq.mp[value] = time
+}
+
+func (adq *AddRemoveQuery) removeMonotone(time int, value V) {
+	if startTime, ok := adq.mp[value]; !ok {
+		panic("can't remove a value that doesn't exist")
+	} else {
+		delete(adq.mp, value)
+		if startTime != time {
+			adq.events = append(adq.events, Event{startTime, time, value})
+		}
+	}
+}
+
+func (adq *AddRemoveQuery) workMonotone(lastTime int) []Event {
+	for value, startTime := range adq.mp {
+		if startTime == lastTime {
+			continue
+		}
+		adq.events = append(adq.events, Event{startTime, lastTime, value})
+	}
+	return adq.events
+}

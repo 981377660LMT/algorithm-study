@@ -41,64 +41,47 @@ func main() {
 			}
 		}
 
-		removedTimes := make([][]int, q) // 1操作的mul在哪些时间消失
-		for i, operation := range operations {
-			op := operation[0]
-			if op == 2 {
-				pos := operation[1]
-				removedTimes[pos] = append(removedTimes[pos], i)
+		Q := NewAddRemoveQuery(true)
+		for i, item := range operations {
+			op := item[0]
+			if op == 1 {
+				Q.Add(i, i)
+			} else {
+				pos := item[1]
+				Q.Remove(i, pos)
 			}
 		}
 
-		mutations := [][3]int{} // (start,end,posId)
-		for eid, operation := range operations {
-			op := operation[0]
-			if op == 2 {
-				continue
-			}
-			curTimes := removedTimes[eid]
-			if len(curTimes) == 0 {
-				mutations = append(mutations, [3]int{-INF, INF, eid})
-				continue
-			}
-			startTime := -INF
-			for _, endTime := range curTimes {
-				mutations = append(mutations, [3]int{startTime, endTime, eid})
-				startTime = endTime + 1
-			}
-			mutations = append(mutations, [3]int{curTimes[len(curTimes)-1] + 1, INF, eid})
-		}
-
+		mutations := Q.Work(q) // start, end, pos
 		queries := make([]int, q)
 		for i := range queries {
 			queries[i] = i
 		}
 
+		seg := NewSegmentTreeDivideAndConquerCopy()
+		for id, item := range mutations {
+			seg.AddMutation(item.start, item.end, id)
+		}
+		for id, time := range queries {
+			seg.AddQuery(time, id)
+		}
+
 		res := make([]int, q)
 		initState := &State{value: 1}
-		seg := NewSegmentTreeDivideAndConquerCopy(
+		seg.Run(
 			initState,
 			func(state *State, mutationId int) {
-				pos := mutations[mutationId][2]
+				pos := mutations[mutationId].value
 				mul := operations[pos][1]
 				state.value = (state.value * mul) % MOD
-				fmt.Println("mutate", state.value, pos, mul)
 			},
 			func(state *State) *State {
 				return &State{state.value}
 			},
 			func(state *State, queryId int) {
-				fmt.Println("query,", state.value, queryId)
 				res[queryId] = state.value % MOD
 			},
 		)
-		for id, item := range mutations {
-			seg.AddMutation(item[0], item[1], id)
-		}
-		for id, time := range queries {
-			seg.AddQuery(time, id)
-		}
-		seg.Run()
 
 		for _, v := range res {
 			fmt.Fprintln(out, v)
@@ -130,23 +113,8 @@ type SegmentTreeDivideAndConquerCopy struct {
 	nodes     [][]int
 }
 
-// dfs 遍历整棵线段树来得到每个时间点的答案.
-//
-//	 initState: 数据结构的初始状态.
-//		mutate: 添加编号为`mutationId`的变更后产生的副作用.
-//		copy: 拷贝一份数据结构的副本.
-//		query: 响应编号为`queryId`的查询.
-//		一共调用 **O(nlogn)** 次`mutate`，**O(n)** 次`copy` 和 **O(q)** 次`query`.
-func NewSegmentTreeDivideAndConquerCopy(
-	initState *State,
-	mutate func(state *State, mutationId int),
-	copy func(state *State) *State,
-	query func(state *State, queryId int),
-) *SegmentTreeDivideAndConquerCopy {
-	return &SegmentTreeDivideAndConquerCopy{
-		initState: initState,
-		mutate:    mutate, copy: copy, query: query,
-	}
+func NewSegmentTreeDivideAndConquerCopy() *SegmentTreeDivideAndConquerCopy {
+	return &SegmentTreeDivideAndConquerCopy{}
 }
 
 // 在时间范围`[startTime, endTime)`内添加一个编号为`id`的变更.
@@ -162,10 +130,24 @@ func (o *SegmentTreeDivideAndConquerCopy) AddQuery(time int, id int) {
 	o.queries = append(o.queries, segQuery{time, id})
 }
 
-func (o *SegmentTreeDivideAndConquerCopy) Run() {
+// dfs 遍历整棵线段树来得到每个时间点的答案.
+//
+//	 initState: 数据结构的初始状态.
+//		mutate: 添加编号为`mutationId`的变更后产生的副作用.
+//		copy: 拷贝一份数据结构的副本.
+//		query: 响应编号为`queryId`的查询.
+//		一共调用 **O(nlogn)** 次`mutate`，**O(n)** 次`copy` 和 **O(q)** 次`query`.
+func (o *SegmentTreeDivideAndConquerCopy) Run(
+	initState *State,
+	mutate func(state *State, mutationId int),
+	copy func(state *State) *State,
+	query func(state *State, queryId int),
+) {
 	if len(o.queries) == 0 {
 		return
 	}
+	o.initState = initState
+	o.mutate, o.copy, o.query = mutate, copy, query
 	times := make([]int, len(o.queries))
 	for i := range o.queries {
 		times[i] = o.queries[i].time
@@ -270,4 +252,102 @@ func upperBound(arr []int, target int) int {
 		}
 	}
 	return left
+}
+
+type V = int
+type Event = struct {
+	start int
+	end   int
+	value V
+}
+
+// 将时间轴上单点的 add 和 remove 转化为区间上的 add.
+// !不能加入相同的元素，删除时元素必须要存在。
+// 如果 add 和 remove 按照时间顺序严格单增，那么可以使用 monotone = true 来加速。
+type AddRemoveQuery struct {
+	mp       map[V]int
+	events   []Event
+	adds     map[V][]int
+	removes  map[V][]int
+	monotone bool
+}
+
+func NewAddRemoveQuery(monotone bool) *AddRemoveQuery {
+	return &AddRemoveQuery{
+		mp:       map[V]int{},
+		events:   []Event{},
+		adds:     map[V][]int{},
+		removes:  map[V][]int{},
+		monotone: monotone,
+	}
+}
+
+func (adq *AddRemoveQuery) Add(time int, value V) {
+	if adq.monotone {
+		adq.addMonotone(time, value)
+	} else {
+		adq.adds[value] = append(adq.adds[value], time)
+	}
+}
+
+func (adq *AddRemoveQuery) Remove(time int, value V) {
+	if adq.monotone {
+		adq.removeMonotone(time, value)
+	} else {
+		adq.removes[value] = append(adq.removes[value], time)
+	}
+}
+
+// lastTime: 所有变更都结束的时间.例如INF.
+func (adq *AddRemoveQuery) Work(lastTime int) []Event {
+	if adq.monotone {
+		return adq.workMonotone(lastTime)
+	}
+	res := []Event{}
+	for value, addTimes := range adq.adds {
+		removeTimes := []int{}
+		if cand, ok := adq.removes[value]; ok {
+			removeTimes = cand
+			delete(adq.removes, value)
+		}
+		if len(removeTimes) < len(addTimes) {
+			removeTimes = append(removeTimes, lastTime)
+		}
+		sort.Ints(addTimes)
+		sort.Ints(removeTimes)
+		for i, t := range addTimes {
+			if t < removeTimes[i] {
+				res = append(res, Event{t, removeTimes[i], value})
+			}
+		}
+	}
+	return res
+}
+
+func (adq *AddRemoveQuery) addMonotone(time int, value V) {
+	if _, ok := adq.mp[value]; ok {
+		panic("can't add a value that already exists")
+	}
+	adq.mp[value] = time
+}
+
+func (adq *AddRemoveQuery) removeMonotone(time int, value V) {
+	if startTime, ok := adq.mp[value]; !ok {
+		panic("can't remove a value that doesn't exist")
+	} else {
+		delete(adq.mp, value)
+		if startTime != time {
+			adq.events = append(adq.events, Event{startTime, time, value})
+		}
+	}
+}
+
+func (adq *AddRemoveQuery) workMonotone(lastTime int) []Event {
+	for value, startTime := range adq.mp {
+		if startTime == lastTime {
+			continue
+		}
+		adq.events = append(adq.events, Event{startTime, lastTime, value})
+	}
+	return adq.events
 }

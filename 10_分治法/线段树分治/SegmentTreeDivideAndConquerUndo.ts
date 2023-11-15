@@ -3,6 +3,7 @@
 /* eslint-disable class-methods-use-this */
 
 import { UnionFindArrayWithUndoAndWeight } from '../../14_并查集/UnionFindWithUndoAndWeight'
+import { AddRemoveQuery } from './AddRemoveQuery'
 
 const INF = 2e9 // !超过int32使用2e15
 
@@ -15,45 +16,14 @@ const INF = 2e9 // !超过int32使用2e15
  * @alias OfflineDynamicConnectivity
  */
 class SegmentTreeDivideAndConquerUndo {
-  private readonly _mutate: (mutationId: number) => void
-  private readonly _undo: () => void
-  private readonly _query: (queryId: number) => void
+  private _mutate!: (mutationId: number) => void
+  private _undo!: () => void
+  private _query!: (queryId: number) => void
   private readonly _mutations: { start: number; end: number; id: number }[] = []
   private readonly _queries: { time: number; id: number }[] = []
   private _nodes: number[][] = [] // 在每个节点上保存对应的变更和查询的编号
   private _mutationId = 0
   private _queryId = 0
-
-  /**
-   * dfs 遍历整棵线段树来得到每个时间点的答案.
-   * @param mutate 添加编号为`mutationId`的变更后产生的副作用.
-   * @param undo 撤销一次`mutate`操作.
-   * @param query 响应编号为`queryId`的查询.
-   * @complexity 一共调用 **O(nlogn)** 次`mutate`和`undo`，**O(q)** 次`query`.
-   */
-  constructor(
-    mutate: (mutationId: number) => void,
-    undo: () => void,
-    query: (queryId: number) => void
-  )
-  constructor(
-    options: {
-      mutate: (mutationId: number) => void
-      undo: () => void
-      query: (queryId: number) => void
-    } & ThisType<void>
-  )
-  constructor(arg1: any, arg2?: any, arg3?: any) {
-    if (typeof arg1 === 'object') {
-      this._mutate = arg1.mutate
-      this._undo = arg1.undo
-      this._query = arg1.query
-    } else {
-      this._mutate = arg1
-      this._undo = arg2
-      this._query = arg3
-    }
-  }
 
   /**
    * 在时间范围`[startTime, endTime)`内添加一个编号为`id`的变更.
@@ -72,8 +42,33 @@ class SegmentTreeDivideAndConquerUndo {
     this._queries.push({ time, id })
   }
 
-  run(): void {
+  /**
+   * dfs 遍历整棵线段树来得到每个时间点的答案.
+   * @param mutate 添加编号为`mutationId`的变更后产生的副作用.
+   * @param undo 撤销一次`mutate`操作.
+   * @param query 响应编号为`queryId`的查询.
+   * @complexity 一共调用 **O(nlogn)** 次`mutate`和`undo`，**O(q)** 次`query`.
+   */
+  run(mutate: (mutationId: number) => void, undo: () => void, query: (queryId: number) => void): void
+  run(
+    options: {
+      mutate: (mutationId: number) => void
+      undo: () => void
+      query: (queryId: number) => void
+    } & ThisType<void>
+  ): void
+  run(arg1: any, arg2?: any, arg3?: any): void {
     if (!this._queries.length) return
+    if (typeof arg1 === 'object') {
+      this._mutate = arg1.mutate
+      this._undo = arg1.undo
+      this._query = arg1.query
+    } else {
+      this._mutate = arg1
+      this._undo = arg2
+      this._query = arg3
+    }
+
     const times: number[] = Array(this._queries.length)
     for (let i = 0; i < this._queries.length; i++) times[i] = this._queries[i].time
     times.sort((a, b) => a - b)
@@ -176,10 +171,7 @@ class SegmentTreeDivideAndConquerUndo {
   }
 }
 
-export {
-  SegmentTreeDivideAndConquerUndo,
-  SegmentTreeDivideAndConquerUndo as OfflineDynamicConnectivity
-}
+export { SegmentTreeDivideAndConquerUndo, SegmentTreeDivideAndConquerUndo as OfflineDynamicConnectivity }
 
 if (require.main === module) {
   testTime()
@@ -187,7 +179,15 @@ if (require.main === module) {
     let mutate = 0
     let undo = 0
     let query = 0
-    const dc = new SegmentTreeDivideAndConquerUndo({
+    const dc = new SegmentTreeDivideAndConquerUndo()
+
+    const n = 2e5
+    console.time('foo')
+    for (let i = 0; i < n; i++) {
+      dc.addMutation(0, i)
+      dc.addQuery(i)
+    }
+    dc.run({
       mutate(id) {
         mutate++
       },
@@ -198,14 +198,6 @@ if (require.main === module) {
         query++
       }
     })
-
-    const n = 2e5
-    console.time('foo')
-    for (let i = 0; i < n; i++) {
-      dc.addMutation(0, i)
-      dc.addQuery(i)
-    }
-    dc.run()
     console.timeEnd('foo')
     console.log(mutate, undo, query)
   }
@@ -218,22 +210,60 @@ if (require.main === module) {
   // 3 u 输出u所在连通块的值
   function dynamicGraphVertexAddComponentSum(weights: number[], operations: number[][]): number[] {
     const n = weights.length
-    const edges: { u: number; v: number }[] = []
-    const existEdge = new Map<number, { id: number; startTime: number }>()
-    const adds: { pos: number; add: number }[] = []
     const queries: number[] = []
-    const res: number[] = []
+    const Q = new AddRemoveQuery(true)
+    const seg = new SegmentTreeDivideAndConquerUndo()
 
+    for (let time = 0; time < operations.length; time++) {
+      const operation = operations[time]
+      const op = operation[0]
+      if (op === 0) {
+        let { 1: u, 2: v } = operation
+        if (u < v) {
+          const tmp = u
+          u = v
+          v = tmp
+        }
+        const hash = u * n + v
+        Q.add(time, hash)
+      } else if (op === 1) {
+        let { 1: u, 2: v } = operation
+        if (u < v) {
+          const tmp = u
+          u = v
+          v = tmp
+        }
+        const hash = u * n + v
+        Q.remove(time, hash)
+      } else if (op === 2) {
+        const { 1: pos, 2: add } = operation
+        const hash = -(add * n + pos) - 1
+        Q.add(time, hash)
+      } else {
+        const pos = operation[1]
+        queries.push(pos)
+        seg.addQuery(time, queries.length - 1)
+      }
+    }
+    const mutations = Q.work(INF)
+    mutations.forEach(({ start, end, value }) => {
+      seg.addMutation(start, end, value)
+    })
+
+    const res = Array(queries.length).fill(0)
     const uf = new UnionFindArrayWithUndoAndWeight(weights, (a, b) => a + b)
-    const dc = new SegmentTreeDivideAndConquerUndo({
-      mutate(mutationId) {
-        if (mutationId >= 0) {
-          const e = edges[mutationId]
-          uf.union(e.u, e.v)
+
+    seg.run({
+      mutate(hash) {
+        if (hash >= 0) {
+          const u = Math.floor(hash / n)
+          const v = hash % n
+          uf.union(u, v)
         } else {
-          mutationId = ~mutationId
-          const a = adds[mutationId]
-          uf.setGroupWeight(a.pos, uf.getGroupWeight(a.pos) + a.add)
+          hash = -hash - 1
+          const add = Math.floor(hash / n)
+          const pos = hash % n
+          uf.setGroupWeight(pos, uf.getGroupWeight(pos) + add)
         }
       },
       undo() {
@@ -244,49 +274,6 @@ if (require.main === module) {
         res[queryId] = uf.getGroupWeight(pos)
       }
     })
-
-    for (let time = 0; time < operations.length; time++) {
-      const operation = operations[time]
-      const op = operation[0]
-      if (op === 0) {
-        let { 1: u, 2: v } = operation
-        if (u < v) {
-          u ^= v
-          v ^= u
-          u ^= v
-        }
-        const hash = u * n + v
-        existEdge.set(hash, { id: edges.length, startTime: time })
-        edges.push({ u, v })
-      } else if (op === 1) {
-        let { 1: u, 2: v } = operation
-        if (u < v) {
-          u ^= v
-          v ^= u
-          u ^= v
-        }
-        const hash = u * n + v
-        const item = existEdge.get(hash)!
-        dc.addMutation(item.startTime, time, item.id)
-        existEdge.delete(hash)
-      } else if (op === 2) {
-        const { 1: pos, 2: add } = operation
-        const id = ~adds.length
-        dc.addMutation(time, INF, id)
-        adds.push({ pos, add })
-      } else {
-        const pos = operation[1]
-        dc.addQuery(time, queries.length)
-        queries.push(pos)
-        res.push(0)
-      }
-    }
-
-    existEdge.forEach(item => {
-      dc.addMutation(item.startTime, INF, item.id)
-    })
-
-    dc.run()
 
     return res
   }

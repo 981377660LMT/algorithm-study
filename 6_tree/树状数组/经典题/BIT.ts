@@ -22,7 +22,6 @@ import assert from 'assert'
 
 /**
  * Point add range sum, 0-indexed.
- * TODO: 区间查询优化.
  */
 class BITArray {
   /**

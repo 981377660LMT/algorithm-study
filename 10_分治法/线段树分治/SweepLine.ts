@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-inner-declarations */
 /* eslint-disable class-methods-use-this */
 
@@ -10,9 +11,9 @@ import { SortedListFast } from '../../22_专题/离线查询/根号分治/Sorted
  * 如果修改操作可删除，那么可以使用'扫描线'来解决.
  */
 class SweepLine {
-  private readonly _mutate: (mutationId: number) => void
-  private readonly _remove: (mutationId: number) => void
-  private readonly _query: (queryId: number) => void
+  private _mutate!: (mutationId: number) => void
+  private _remove!: (mutationId: number) => void
+  private _query!: (queryId: number) => void
   private readonly _mutations: { start: number; end: number; id: number }[] = []
   private readonly _queries: { time: number; id: number }[] = []
 
@@ -24,37 +25,6 @@ class SweepLine {
 
   private _mutationId = 0
   private _queryId = 0
-
-  /**
-   * 使用扫描线得到每个时间点的答案.
-   * @param mutate 添加编号为`mutationId`的变更.
-   * @param remove 删除编号为`mutationId`的变更.
-   * @param query 响应编号为`queryId`的查询.
-   * @complexity 一共调用 **O(n)** 次`mutate`、`remove` 和 **O(q)** 次`query`.
-   */
-  constructor(
-    mutate: (mutationId: number) => void,
-    remove: (mutationId: number) => void,
-    query: (queryId: number) => void
-  )
-  constructor(
-    options: {
-      mutate: (mutationId: number) => void
-      remove: (mutationId: number) => void
-      query: (queryId: number) => void
-    } & ThisType<void>
-  )
-  constructor(arg1: any, arg2?: any, arg3?: any) {
-    if (typeof arg1 === 'object') {
-      this._mutate = arg1.mutate
-      this._remove = arg1.remove
-      this._query = arg1.query
-    } else {
-      this._mutate = arg1
-      this._remove = arg2
-      this._query = arg3
-    }
-  }
 
   /**
    * 在时间范围`[startTime, endTime)`内添加一个编号为`id`的变更.
@@ -73,8 +43,33 @@ class SweepLine {
     this._queries.push({ time, id })
   }
 
-  run(): void {
+  /**
+   * 使用扫描线得到每个时间点的答案.
+   * @param mutate 添加编号为`mutationId`的变更.
+   * @param remove 删除编号为`mutationId`的变更.
+   * @param query 响应编号为`queryId`的查询.
+   * @complexity 一共调用 **O(n)** 次`mutate`、`remove` 和 **O(q)** 次`query`.
+   */
+  run(mutate: (mutationId: number) => void, remove: (mutationId: number) => void, query: (queryId: number) => void): void
+  run(
+    options: {
+      mutate: (mutationId: number) => void
+      remove: (mutationId: number) => void
+      query: (queryId: number) => void
+    } & ThisType<void>
+  ): void
+  run(arg1: any, arg2?: any, arg3?: any) {
     if (!this._queries.length) return
+    if (typeof arg1 === 'object') {
+      this._mutate = arg1.mutate
+      this._remove = arg1.remove
+      this._query = arg1.query
+    } else {
+      this._mutate = arg1
+      this._remove = arg2
+      this._query = arg3
+    }
+
     const times: number[] = Array(this._queries.length)
     for (let i = 0; i < this._queries.length; i++) times[i] = this._queries[i].time
     times.sort((a, b) => a - b)
@@ -178,17 +173,7 @@ export { SweepLine }
 if (require.main === module) {
   demo()
   function demo(): void {
-    const sweepLine = new SweepLine({
-      mutate(id) {
-        console.log(`mutate ${id}`)
-      },
-      remove(id) {
-        console.log(`remove ${id}`)
-      },
-      query(id) {
-        console.log(`query ${id}`)
-      }
-    })
+    const sweepLine = new SweepLine()
 
     sweepLine.addMutation(-1, 10, 0)
     sweepLine.addMutation(5, 15, 1)
@@ -204,7 +189,17 @@ if (require.main === module) {
     sweepLine.addQuery(25, 5)
     sweepLine.addQuery(25, 6)
 
-    sweepLine.run()
+    sweepLine.run({
+      mutate(id) {
+        console.log(`mutate ${id}`)
+      },
+      remove(id) {
+        console.log(`remove ${id}`)
+      },
+      query(id) {
+        console.log(`query ${id}`)
+      }
+    })
   }
 
   // 2251. 花期内花的数目
@@ -212,7 +207,17 @@ if (require.main === module) {
   function fullBloomFlowers(flowers: number[][], people: number[]): number[] {
     const res = Array(people.length).fill(0)
     let count = 0
-    const sweepLine = new SweepLine({
+    const sweepLine = new SweepLine()
+
+    for (let i = 0; i < flowers.length; i++) {
+      const { 0: left, 1: right } = flowers[i]
+      sweepLine.addMutation(left, right + 1, i)
+    }
+    for (let i = 0; i < people.length; i++) {
+      sweepLine.addQuery(people[i], i)
+    }
+
+    sweepLine.run({
       mutate(id) {
         count++
       },
@@ -223,16 +228,6 @@ if (require.main === module) {
         res[id] = count
       }
     })
-
-    for (let i = 0; i < flowers.length; i++) {
-      const { 0: left, 1: right } = flowers[i]
-      sweepLine.addMutation(left, right + 1, i)
-    }
-    for (let i = 0; i < people.length; i++) {
-      sweepLine.addQuery(people[i], i)
-    }
-
-    sweepLine.run()
     return res
   }
 
@@ -242,7 +237,17 @@ if (require.main === module) {
     const res = Array(queries.length).fill(0)
     let count = n
     const serverCount = new Map<number, number>()
-    const sweepLine = new SweepLine({
+    const sweepLine = new SweepLine()
+
+    for (let i = 0; i < logs.length; i++) {
+      const start = logs[i][1]
+      sweepLine.addMutation(start, start + x + 1, i) // 可以覆盖[start, start + x] 的查询区间
+    }
+    for (let i = 0; i < queries.length; i++) {
+      sweepLine.addQuery(queries[i], i)
+    }
+
+    sweepLine.run({
       mutate(id) {
         const serverId = logs[id][0]
         const c = (serverCount.get(serverId) || 0) + 1
@@ -259,16 +264,6 @@ if (require.main === module) {
         res[id] = count
       }
     })
-
-    for (let i = 0; i < logs.length; i++) {
-      const start = logs[i][1]
-      sweepLine.addMutation(start, start + x + 1, i) // 可以覆盖[start, start + x] 的查询区间
-    }
-    for (let i = 0; i < queries.length; i++) {
-      sweepLine.addQuery(queries[i], i)
-    }
-
-    sweepLine.run()
     return res
   }
 
@@ -277,7 +272,17 @@ if (require.main === module) {
   function minInterval(intervals: number[][], queries: number[]): number[] {
     const res = Array(queries.length).fill(0)
     const minLen = new SortedListFast<number>()
-    const sweepLine = new SweepLine({
+    const sweepLine = new SweepLine()
+
+    for (let i = 0; i < intervals.length; i++) {
+      const { 0: left, 1: right } = intervals[i]
+      sweepLine.addMutation(left, right + 1, i)
+    }
+    for (let i = 0; i < queries.length; i++) {
+      sweepLine.addQuery(queries[i], i)
+    }
+
+    sweepLine.run({
       mutate(id) {
         const interval = intervals[id]
         minLen.add(interval[1] - interval[0] + 1)
@@ -290,16 +295,6 @@ if (require.main === module) {
         res[id] = minLen.length ? minLen.min : -1
       }
     })
-
-    for (let i = 0; i < intervals.length; i++) {
-      const { 0: left, 1: right } = intervals[i]
-      sweepLine.addMutation(left, right + 1, i)
-    }
-    for (let i = 0; i < queries.length; i++) {
-      sweepLine.addQuery(queries[i], i)
-    }
-
-    sweepLine.run()
     return res
   }
 
@@ -308,7 +303,18 @@ if (require.main === module) {
   function closestRoom(rooms: number[][], queries: number[][]): number[] {
     const res = Array(queries.length).fill(-1)
     const sl = new SortedListFast<number>()
-    const sweepLine = new SweepLine({
+    const sweepLine = new SweepLine()
+
+    for (let i = 0; i < rooms.length; i++) {
+      const size = rooms[i][1]
+      sweepLine.addMutation(0, size + 1, i)
+    }
+    for (let i = 0; i < queries.length; i++) {
+      const minSize = queries[i][1]
+      sweepLine.addQuery(minSize, i)
+    }
+
+    sweepLine.run({
       mutate(id) {
         const roomId = rooms[id][0]
         sl.add(roomId)
@@ -338,17 +344,6 @@ if (require.main === module) {
         }
       }
     })
-
-    for (let i = 0; i < rooms.length; i++) {
-      const size = rooms[i][1]
-      sweepLine.addMutation(0, size + 1, i)
-    }
-    for (let i = 0; i < queries.length; i++) {
-      const minSize = queries[i][1]
-      sweepLine.addQuery(minSize, i)
-    }
-
-    sweepLine.run()
     return res
   }
 }
