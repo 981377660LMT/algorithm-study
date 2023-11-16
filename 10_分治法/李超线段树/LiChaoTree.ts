@@ -11,8 +11,8 @@ const INF = 2e9 // 2e15
 class LiChaoTree {
   private readonly _n: number
   private readonly _offset: number
-  private readonly _lower: number
-  private readonly _higher: number
+  private readonly _start: number
+  private readonly _end: number
   private readonly _compress: boolean
   private readonly _minimize: boolean
   private readonly _lineIds: Int32Array
@@ -33,11 +33,11 @@ class LiChaoTree {
 
   /**
    * 指定查询的 x 值范围建立李超线段树，不采用坐标压缩.
-   * higher - lower <= 1e6.
+   * end - start <= 1e6.
    */
   constructor(
-    lower: number,
-    higher: number,
+    start: number,
+    end: number,
     options?: {
       minimize?: boolean
       evaluate?: (line: Line, x: number) => number
@@ -56,8 +56,8 @@ class LiChaoTree {
       const lineIds = new Int32Array(offset << 1).fill(-1)
       this._n = n
       this._offset = offset
-      this._lower = 0
-      this._higher = 0
+      this._start = 0
+      this._end = 0
       this._compress = true
       this._minimize = minimize
       this._lineIds = lineIds
@@ -66,6 +66,7 @@ class LiChaoTree {
       this._evaluate = evaluate
     } else {
       const { minimize = true, evaluate = (line: Line, x: number) => line.k * x + line.b } = arg3 || {}
+      arg2++
       const n = arg2 - arg1
       let log = 1
       while (1 << log < n) log++
@@ -73,8 +74,8 @@ class LiChaoTree {
       const lineIds = new Int32Array(offset << 1).fill(-1)
       this._n = n
       this._offset = offset
-      this._lower = arg1
-      this._higher = arg2
+      this._start = arg1
+      this._end = arg2
       this._compress = false
       this._minimize = minimize
       this._lineIds = lineIds
@@ -172,14 +173,14 @@ class LiChaoTree {
 
   private _evaluateInner(fid: number, x: number): number {
     if (fid === -1) return this._minimize ? INF : -INF
-    const target = this._compress ? this._xs[Math.min(x, this._n - 1)] : x + this._lower
+    const target = this._compress ? this._xs[Math.min(x, this._n - 1)] : x + this._start
     return this._evaluate(this._lines[fid], target)
   }
 
   private _getIndex(x: number): number {
     if (this._compress) return LiChaoTree._lowerBound(this._xs, x)
-    if (x < this._lower || x > this._higher) throw new RangeError(`x out of range: ${x}`)
-    return x - this._lower
+    if (x < this._start || x > this._end) throw new RangeError(`x out of range: ${x}`)
+    return x - this._start
   }
 
   private static _lowerBound(arr: ArrayLike<number>, x: number): number {
@@ -239,7 +240,7 @@ if (require.main === module) {
     const points = Array(q)
       .fill(0)
       .map(() => Math.floor(-Math.random() * 1e5) + 5e4)
-    const tree1 = new LiChaoTree(points, { minimize: false })
+    const tree1 = new LiChaoTree(-1e5, 1e5, { minimize: false })
     const tree2 = new Mocker(false)
     for (let i = 0; i < q; i++) {
       const k = -Math.floor(Math.random() * 1e5) + 5e4

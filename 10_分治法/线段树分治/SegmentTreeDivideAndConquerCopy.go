@@ -9,7 +9,6 @@ import (
 func productExceptSelf(nums []int) []int {
 	n := len(nums)
 	res := make([]int, n)
-	initState := State{value: 1}
 	seg := NewSegmentTreeDivideAndConquerCopy()
 
 	// 第i次变更在时间段 `[0, i) + [i+1, n)` 内存在.
@@ -20,7 +19,8 @@ func productExceptSelf(nums []int) []int {
 	for i := 0; i < n; i++ {
 		seg.AddQuery(i, i)
 	}
-	seg.Run(&initState,
+	seg.Run(
+		&State{value: 1},
 		func(state *State, mutationId int) {
 			state.value *= nums[mutationId]
 		},

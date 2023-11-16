@@ -67,9 +67,8 @@ func main() {
 		}
 
 		res := make([]int, q)
-		initState := &State{value: 1}
 		seg.Run(
-			initState,
+			&State{value: 1},
 			func(state *State, mutationId int) {
 				pos := mutations[mutationId].value
 				mul := operations[pos][1]

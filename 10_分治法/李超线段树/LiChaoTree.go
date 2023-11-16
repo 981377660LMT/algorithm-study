@@ -128,13 +128,13 @@ type queryPair = struct {
 }
 
 type LiChaoTree struct {
-	n, offset     int
-	lower, higher int
-	compress      bool
-	minimize      bool
-	xs            []int
-	lines         []Line
-	lineIds       []int
+	n, offset  int
+	start, end int
+	compress   bool
+	minimize   bool
+	xs         []int
+	lines      []Line
+	lineIds    []int
 }
 
 // 指定查询的 x 值建立李超线段树，采用坐标压缩.
@@ -167,9 +167,10 @@ func NewLiChaoTreeCompress(queryX []int, minimize bool) *LiChaoTree {
 }
 
 // 指定查询的 x 值范围建立李超线段树，不采用坐标压缩.
-// higher - lower <= 1e6.
-func NewLiChaoTreeNoCompress(lower, higher int, minimize bool) *LiChaoTree {
-	n := higher - lower
+// end - start <= 1e6.
+func NewLiChaoTreeNoCompress(start, end int, minimize bool) *LiChaoTree {
+	end++
+	n := end - start
 	log := 1
 	for (1 << log) < n {
 		log++
@@ -181,7 +182,7 @@ func NewLiChaoTreeNoCompress(lower, higher int, minimize bool) *LiChaoTree {
 	}
 	return &LiChaoTree{
 		n: n, offset: offset,
-		lower: lower, higher: higher,
+		start: start, end: end,
 		compress: false, minimize: minimize,
 		lineIds: lineIds,
 	}
@@ -315,7 +316,7 @@ func (tree *LiChaoTree) _evaluateInner(fid int, x int) T {
 	if tree.compress {
 		target = tree.xs[min(x, tree.n-1)]
 	} else {
-		target = x + tree.lower
+		target = x + tree.start
 	}
 	return Evaluate(tree.lines[fid], target)
 }
@@ -324,10 +325,10 @@ func (tree *LiChaoTree) _getIndex(x int) int {
 	if tree.compress {
 		return sort.SearchInts(tree.xs, x)
 	}
-	if x < tree.lower || x > tree.higher {
+	if x < tree.start || x > tree.end {
 		panic("x out of range")
 	}
-	return x - tree.lower
+	return x - tree.start
 }
 
 func min(a, b int) int {
