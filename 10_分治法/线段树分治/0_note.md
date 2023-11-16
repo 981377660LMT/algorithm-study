@@ -39,7 +39,7 @@ https://www.luogu.com.cn/blog/yszs/xian-duan-shu-fen-zhi
   线段树分治中，使用 undo 需要`nlog(n)`次，使用 copy 需要`O(n)`次.
   实际问题中，谁的代价小就用谁.
   注意拷贝空间过大导致 MLE!!.
-  例如，可撤销并查集适合 undo 流派，可持久化数据结构适合 copy 流派.
+  例如，可撤销并查集适合 undo 流派，可持久化数据结构/线性基适合 copy 流派.
   有些数据结构难以撤销，就只能使用拷贝.
 
   [注意到如果单次 mutate 可以 log(n)，那么单次 undo 也可以 log(n)，总复杂度 nlog(n)log(n)](https://cp-algorithms.com/data_structures/deleting_in_log_n.html)

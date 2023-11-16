@@ -101,7 +101,7 @@ func DynamicGraphVertexAddComponentSum() {
 			seg.AddQuery(time, len(queries)-1)
 		}
 	}
-	mutations := Q.Work(INF) // start,end,hash
+	mutations := Q.GetEvents(INF) // start,end,hash
 	for _, item := range mutations {
 		seg.AddMutation(item.start, item.end, item.value)
 	}
@@ -430,9 +430,9 @@ func (adq *AddRemoveQuery) Remove(time int, value V) {
 }
 
 // lastTime: 所有变更都结束的时间.例如INF.
-func (adq *AddRemoveQuery) Work(lastTime int) []Event {
+func (adq *AddRemoveQuery) GetEvents(lastTime int) []Event {
 	if adq.monotone {
-		return adq.workMonotone(lastTime)
+		return adq.getMonotone(lastTime)
 	}
 	res := []Event{}
 	for value, addTimes := range adq.adds {
@@ -473,7 +473,7 @@ func (adq *AddRemoveQuery) removeMonotone(time int, value V) {
 	}
 }
 
-func (adq *AddRemoveQuery) workMonotone(lastTime int) []Event {
+func (adq *AddRemoveQuery) getMonotone(lastTime int) []Event {
 	for value, startTime := range adq.mp {
 		if startTime == lastTime {
 			continue

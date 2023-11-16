@@ -1,6 +1,6 @@
 /**
  * 将时间轴上单点的 add 和 remove 转化为区间上的 add, 删除时元素必须要存在。
- * 如果 add 和 remove 按照时间顺序严格单增，那么可以使用 monotone = true 来加速。
+ * 如果 add 和 remove 按照时间顺序单增，那么可以使用 monotone = true 来加速。
  * !不能加入相同的元素，删除时元素必须要存在。
  */
 class AddRemoveQuery<V extends string | number = number> {
@@ -11,7 +11,7 @@ class AddRemoveQuery<V extends string | number = number> {
   private readonly _monotone: boolean
 
   /**
-   * @param monotone add 和 remove 是否按照时间顺序严格单增
+   * @param monotone add 和 remove 是否按照时间顺序单增
    */
   constructor(monotone: boolean) {
     this._monotone = monotone
@@ -44,11 +44,12 @@ class AddRemoveQuery<V extends string | number = number> {
   }
 
   /**
+   * 获取所有的事件, 每个事件形如 `起始时间,结束时间,事件的信息`.
    * @param lastTime 所有变更都结束的时间.例如INF.
    */
-  work(lastTime: number): { start: number; end: number; value: V }[] {
+  getEvents(lastTime: number): { start: number; end: number; value: V }[] {
     if (this._monotone) {
-      return this._workMonotone(lastTime)
+      return this._getMonotone(lastTime)
     }
     const res: { start: number; end: number; value: V }[] = []
     this._adds.forEach((addTimes, value) => {
@@ -90,7 +91,7 @@ class AddRemoveQuery<V extends string | number = number> {
     }
   }
 
-  private _workMonotone(lastTime: number): { start: number; end: number; value: V }[] {
+  private _getMonotone(lastTime: number): { start: number; end: number; value: V }[] {
     this._mp.forEach((startTime, value) => {
       if (startTime !== lastTime) {
         this._events.push({ start: startTime, end: lastTime, value })
@@ -108,5 +109,5 @@ if (require.main === module) {
   Q.add(2, 2)
   Q.add(3, 3)
   Q.remove(4, 1)
-  console.log(Q.work(5))
+  console.log(Q.getEvents(5))
 }

@@ -406,9 +406,9 @@ func (adq *AddRemoveQuery) Remove(time int, value V) {
 }
 
 // lastTime: 所有变更都结束的时间.例如INF.
-func (adq *AddRemoveQuery) Work(lastTime int) []Event {
+func (adq *AddRemoveQuery) GetEvents(lastTime int) []Event {
 	if adq.monotone {
-		return adq.workMonotone(lastTime)
+		return adq.getMonotone(lastTime)
 	}
 	res := []Event{}
 	for value, addTimes := range adq.adds {
@@ -449,7 +449,7 @@ func (adq *AddRemoveQuery) removeMonotone(time int, value V) {
 	}
 }
 
-func (adq *AddRemoveQuery) workMonotone(lastTime int) []Event {
+func (adq *AddRemoveQuery) getMonotone(lastTime int) []Event {
 	for value, startTime := range adq.mp {
 		if startTime == lastTime {
 			continue

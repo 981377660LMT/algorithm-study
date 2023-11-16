@@ -13,7 +13,7 @@ func main() {
 	Q.Add(2, 2)
 	Q.Add(3, 3)
 	Q.Remove(4, 1)
-	fmt.Println(Q.Work(5))
+	fmt.Println(Q.GetEvents(5))
 }
 
 type V = int
@@ -25,7 +25,7 @@ type Event = struct {
 
 // 将时间轴上单点的 add 和 remove 转化为区间上的 add.
 // !不能加入相同的元素，删除时元素必须要存在。
-// 如果 add 和 remove 按照时间顺序严格单增，那么可以使用 monotone = true 来加速。
+// 如果 add 和 remove 按照时间顺序单增，那么可以使用 monotone = true 来加速。
 type AddRemoveQuery struct {
 	mp       map[V]int
 	events   []Event
@@ -61,9 +61,9 @@ func (adq *AddRemoveQuery) Remove(time int, value V) {
 }
 
 // lastTime: 所有变更都结束的时间.例如INF.
-func (adq *AddRemoveQuery) Work(lastTime int) []Event {
+func (adq *AddRemoveQuery) GetEvents(lastTime int) []Event {
 	if adq.monotone {
-		return adq.workMonotone(lastTime)
+		return adq.getMonotone(lastTime)
 	}
 	res := []Event{}
 	for value, addTimes := range adq.adds {
@@ -104,7 +104,7 @@ func (adq *AddRemoveQuery) removeMonotone(time int, value V) {
 	}
 }
 
-func (adq *AddRemoveQuery) workMonotone(lastTime int) []Event {
+func (adq *AddRemoveQuery) getMonotone(lastTime int) []Event {
 	for value, startTime := range adq.mp {
 		if startTime == lastTime {
 			continue

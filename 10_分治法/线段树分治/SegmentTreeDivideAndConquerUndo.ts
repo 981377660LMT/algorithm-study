@@ -245,7 +245,7 @@ if (require.main === module) {
         seg.addQuery(time, queries.length - 1)
       }
     }
-    const mutations = Q.work(INF)
+    const mutations = Q.getEvents(INF)
     mutations.forEach(({ start, end, value }) => {
       seg.addMutation(start, end, value)
     })
