@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Generic, Optional, TypeVar
 
 V = TypeVar("V")
@@ -41,4 +42,7 @@ if __name__ == "__main__":
     print(d.value(0))
     print(d.value(1))
     print(d.value(2))
+
     print(len(d))
+
+    id = defaultdict(lambda: len(id))
