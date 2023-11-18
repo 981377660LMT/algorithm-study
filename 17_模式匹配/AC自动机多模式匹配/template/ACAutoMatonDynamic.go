@@ -1,4 +1,6 @@
 // https://sotanishy.github.io/cp-library-cpp/string/aho_corasick.cpp
+// 静的データ構造で動的に処理する (1) - えびちゃんの日記
+// https://rsk0315.hatenablog.com/entry/2019/06/19/124528
 
 // API
 // !NewAhoCorasick() *AhoCorasick

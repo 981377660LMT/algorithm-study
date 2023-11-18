@@ -1,5 +1,4 @@
-// https://beet-aizu.github.io/library/algorithm/optimalbinarytree.cpp
-
+// https://sotanishy.github.io/cp-library-cpp/dp/hu_tucker.cpp
 package main
 
 func main() {

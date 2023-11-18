@@ -12,3 +12,9 @@ https://ei1333.github.io/library/structure/segment-tree/segment-tree-beats.hpp
 
 nyann 实装：
 https://nyaannyaan.github.io/library/segment-tree/segment-tree-beats-abstract.hpp
+
+---
+
+https://sotanishy.github.io/cp-library-cpp/data-structure/segtree/segment_tree_beats.cpp
+
+https://smijake3.hatenablog.com/entry/2019/04/28/021457

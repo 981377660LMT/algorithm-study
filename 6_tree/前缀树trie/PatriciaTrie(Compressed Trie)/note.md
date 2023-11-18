@@ -28,3 +28,7 @@ https://blog.csdn.net/lindorx/article/details/103431530
 ---
 
 https://xlinux.nist.gov/dads/HTML/patriciatree.html
+
+---
+
+实装：https://sotanishy.github.io/cp-library-cpp/string/trie.cpp

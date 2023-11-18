@@ -1,5 +1,5 @@
 import { DefaultDict } from '../../../5_map/DefaultDict'
-import { ACAutoMatonLegacy } from './ACAutoMatonLegacy'
+import { ACAutoMatonLegacy } from './ACAutoMatonMapLegacy'
 
 // !因为字符串总长度太大(1e6),MLE了
 const INF = 2e15

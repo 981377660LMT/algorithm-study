@@ -9,7 +9,7 @@
 // 结论: 当前看到big中第i个字符,匹配到的模式串下标为j时,
 // !模式串在big中的起始索引 为 i-len(smalls[j])+1
 
-package main
+package ma
 
 import (
 	"fmt"
@@ -55,7 +55,8 @@ func NewAhoCorasick(size int, margin byte) *AhoCorasick {
 }
 
 // matchAll: 匹配时是否需要每个模式串的信息.
-//   如果需要匹配每个模式串的信息, 那么在构建时会对匹配的模式串索引排序(额外开销).
+//
+//	如果需要匹配每个模式串的信息, 那么在构建时会对匹配的模式串索引排序(额外开销).
 func (ac *AhoCorasick) Build(matchAll bool) {
 	n := len(ac.stack)
 	ac.count = make([]int, n)
@@ -128,8 +129,9 @@ func (ac *AhoCorasick) Build(matchAll bool) {
 }
 
 // matchAll: 是否返回`每个`模式串的匹配次数.
-//  返回值: 如果 matchAll 为 false, 则返回值只有一个元素, 为所有模式串的匹配次数之和.
-//  如果 matchAll 为 true, 则返回值有 len(模式串集合) 个元素, 第 i 个元素为第 i 个模式串的匹配次数.
+//
+//	返回值: 如果 matchAll 为 false, 则返回值只有一个元素, 为所有模式串的匹配次数之和.
+//	如果 matchAll 为 true, 则返回值有 len(模式串集合) 个元素, 第 i 个元素为第 i 个模式串的匹配次数.
 func (ac *AhoCorasick) Match(s string, matchAll bool) []int {
 	size := 1
 	if matchAll {
@@ -175,10 +177,6 @@ func (ac *AhoCorasick) Count(pos int) int {
 	return ac.count[pos]
 }
 
-//
-//
-//
-//
 type Trie struct {
 	size   int
 	margin byte
