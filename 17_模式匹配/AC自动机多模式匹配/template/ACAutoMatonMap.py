@@ -17,17 +17,17 @@ class ACAutoMatonMap:
     每个状态对应Trie中的一个结点, 也对应一个字符串.
     """
 
-    __slots__ = ("words", "_bfsOrder", "_children", "_suffixLink")
+    __slots__ = ("wordPos", "_children", "_suffixLink", "_bfsOrder")
 
     def __init__(self):
-        self.words = []
-        """words[i] 表示加入的第i个模式串对应的节点编号."""
-        self._bfsOrder = []
-        """结点的拓扑序,0表示虚拟节点."""
+        self.wordPos = []
+        """wordPos[i] 表示加入的第i个模式串对应的节点编号."""
         self._children = [{}]
         """_children[v][c] 表示节点v通过字符c转移到的节点."""
         self._suffixLink = []
         """又叫fail.指向当前节点最长真后缀对应结点,例如"bc"是"abc"的最长真后缀."""
+        self._bfsOrder = []
+        """结点的拓扑序,0表示虚拟节点."""
 
     def addString(self, string: str) -> int:
         if not string:
@@ -42,7 +42,7 @@ class ACAutoMatonMap:
                 nexts[char] = nextState
                 pos = nextState
                 self._children.append({})
-        self.words.append(pos)
+        self.wordPos.append(pos)
         return pos
 
     def addChar(self, pos: int, char: str) -> int:
@@ -89,7 +89,7 @@ class ACAutoMatonMap:
     def getCounter(self) -> List[int]:
         """获取每个状态匹配到的模式串的个数."""
         counter = [0] * len(self._children)
-        for pos in self.words:
+        for pos in self.wordPos:
             counter[pos] += 1
         for v in self._bfsOrder:
             if v != 0:
@@ -99,7 +99,7 @@ class ACAutoMatonMap:
     def getIndexes(self) -> List[List[int]]:
         """获取每个状态匹配到的模式串的索引."""
         res = [[] for _ in range(len(self._children))]
-        for i, pos in enumerate(self.words):
+        for i, pos in enumerate(self.wordPos):
             res[pos].append(i)
         for v in self._bfsOrder:
             if v != 0:
@@ -139,6 +139,9 @@ class ACAutoMatonMap:
     def size(self) -> int:
         return len(self._children)
 
+    def __len__(self) -> int:
+        return len(self._children)
+
 
 if __name__ == "__main__":
     # 1032. 字符流
@@ -146,9 +149,9 @@ if __name__ == "__main__":
     class StreamChecker:
         __slots__ = ("ac", "counter", "pos")
 
-        def __init__(self, words: List[str]):
+        def __init__(self, wordPos: List[str]):
             self.ac = ACAutoMatonMap()
-            for word in words:
+            for word in wordPos:
                 self.ac.addString(word)
             self.ac.buildSuffixLink()
             self.counter = self.ac.getCounter()
@@ -209,8 +212,8 @@ if __name__ == "__main__":
                 acm.addString(s)
             acm.buildSuffixLink()
 
-            minLen = [INF] * acm.size
-            for i, pos in enumerate(acm.words):
+            minLen = [INF] * len(acm)
+            for i, pos in enumerate(acm.wordPos):
                 minLen[pos] = min(minLen[pos], len(forbidden[i]))
             for pre, cur in acm.dp():
                 minLen[cur] = min(minLen[cur], minLen[pre])

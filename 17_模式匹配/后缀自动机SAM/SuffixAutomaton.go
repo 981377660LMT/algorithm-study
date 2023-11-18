@@ -90,6 +90,7 @@ func (sa *SuffixAutomaton) CalcDAG() [][]int {
 	return graph
 }
 
+// suffixLink 形成的树.也叫 parent tree.
 func (sa *SuffixAutomaton) CalcTree() [][]int {
 	n := len(sa.nodes)
 	graph := make([][]int, n)

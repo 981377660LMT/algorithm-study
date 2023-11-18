@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, Iterable, List, Optional
+from typing import DefaultDict, Iterable, List, Optional
 
 
 class TrieNodeWithParent:
@@ -9,7 +9,9 @@ class TrieNodeWithParent:
         self.wordCount = 0  # 以当前节点为结尾的单词个数
         self.preCount = 0  # 以当前节点为前缀的单词个数
         self.parent = parent
-        self.children: Dict[str, TrieNodeWithParent] = defaultdict(lambda: TrieNodeWithParent(self))
+        self.children: DefaultDict[str, TrieNodeWithParent] = defaultdict(
+            lambda: TrieNodeWithParent(self)
+        )
 
 
 class TrieWithParent:
@@ -28,6 +30,27 @@ class TrieWithParent:
             node = node.children[char]
             node.preCount += 1
         node.wordCount += 1
+
+    def remove(self, s: str) -> None:
+        """从前缀树中移除`1个`s 需要保证s在前缀树中"""
+        if not s:
+            return
+        node = self.root
+        for char in s:
+            node = node.children[char]
+            node.preCount -= 1
+        node.wordCount -= 1
+
+    def find(self, s: str) -> Optional[TrieNodeWithParent]:
+        """返回s所在结点"""
+        if not s:
+            return None
+        node = self.root
+        for char in s:
+            if char not in node.children:
+                return None
+            node = node.children[char]
+        return node
 
     def countWord(self, s: str) -> List[int]:
         """对s的每个非空前缀pre,返回trie中有多少个等于pre的单词"""
@@ -57,7 +80,7 @@ class TrieWithParent:
 
     def countWordAsPrefix(self, s: str) -> List[int]:
         """对s的每个非空前缀pre,返回trie中有多少个单词是pre的前缀"""
-        node = self._find(s)
+        node = self.find(s)
         if node is None:
             return []
 
@@ -71,32 +94,6 @@ class TrieWithParent:
             cur += diff[i]
             res.append(cur)
         return res
-
-    def remove(self, s: str) -> None:
-        """从前缀树中移除`1个`s 需要保证s在前缀树中"""
-        if not s:
-            return
-        node = self.root
-        for char in s:
-            if char not in node.children:
-                raise ValueError(f"word {s} not in trie")
-            if node.children[char].preCount == 1:
-                del node.children[char]
-                return
-            node = node.children[char]
-            node.preCount -= 1
-        node.wordCount -= 1
-
-    def _find(self, s: str) -> Optional[TrieNodeWithParent]:
-        """返回s所在结点"""
-        if not s:
-            return None
-        node = self.root
-        for char in s:
-            if char not in node.children:
-                return None
-            node = node.children[char]
-        return node
 
 
 if __name__ == "__main__":

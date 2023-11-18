@@ -9,7 +9,8 @@ import (
 )
 
 func main() {
-	SeparateString()
+	// SeparateString()
+	P5357()
 }
 
 func demo() {
@@ -50,7 +51,7 @@ func longestValidSubstring(word string, forbidden []string) int {
 	for i := range minLen {
 		minLen[i] = INF
 	}
-	for i, pos := range acm.Words {
+	for i, pos := range acm.WordPos {
 		minLen[pos] = min(minLen[pos], len(forbidden[i]))
 	}
 	acm.Dp(func(from, to int) { minLen[to] = min(minLen[to], minLen[from]) })
@@ -71,7 +72,6 @@ func longestValidSubstring(word string, forbidden []string) int {
 func SeparateString() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
 
 	var s string
 	fmt.Fscan(in, &s)
@@ -150,10 +150,47 @@ func multiSearch(big string, smalls []string) [][]int {
 	return res
 }
 
+// P5357 【模板】AC 自动机（二次加强版）
+// https://www.luogu.com.cn/problem/P5357
+func P5357() {
+	const INF int = int(1e18)
+	const MOD int = 998244353
+
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	acm := NewACAutoMatonArray(26, 'a')
+	for i := 0; i < n; i++ {
+		var s string
+		fmt.Fscan(in, &s)
+		acm.AddString(s)
+	}
+	acm.BuildSuffixLink(false)
+
+	var s string
+	fmt.Fscan(in, &s)
+
+	indexes := acm.GetIndexes()
+	res := make([]int, n)
+	pos := 0
+	for i := 0; i < len(s); i++ {
+		pos = acm.Move(pos, int(s[i]))
+		for _, j := range indexes[pos] {
+			res[j]++
+		}
+	}
+	for i := 0; i < n; i++ {
+		fmt.Fprintln(out, res[i])
+	}
+}
+
 // 不调用 BuildSuffixLink 就是Trie，调用 BuildSuffixLink 就是AC自动机.
 // 每个状态对应Trie中的一个结点，也对应一个字符串.
 type ACAutoMatonArray struct {
-	Words              []int   // words[i] 表示加入的第i个模式串对应的节点编号.
+	WordPos            []int   // WordPos[i] 表示加入的第i个模式串对应的节点编号.
 	Parent             []int   // parent[v] 表示节点v的父节点.
 	sigma              int     // 字符集大小.
 	offset             int     // 字符集的偏移量.
@@ -182,7 +219,7 @@ func (trie *ACAutoMatonArray) AddString(str string) int {
 		}
 		pos = trie.children[pos][ord]
 	}
-	trie.Words = append(trie.Words, pos)
+	trie.WordPos = append(trie.WordPos, pos)
 	return pos
 }
 
@@ -220,7 +257,8 @@ func (trie *ACAutoMatonArray) Size() int {
 }
 
 // 构建后缀链接(失配指针).
-// needUpdateChildren 表示是否需要更新children数组.
+// needUpdateChildren 表示是否需要更新children数组(连接trie图).
+//
 // !设置为false更快.
 func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 	trie.needUpdateChildren = needUpdateChildren
@@ -273,7 +311,7 @@ func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 // 获取每个状态匹配到的模式串的个数.
 func (trie *ACAutoMatonArray) GetCounter() []int {
 	counter := make([]int, len(trie.children))
-	for _, pos := range trie.Words {
+	for _, pos := range trie.WordPos {
 		counter[pos]++
 	}
 	for _, v := range trie.bfsOrder {
@@ -287,7 +325,7 @@ func (trie *ACAutoMatonArray) GetCounter() []int {
 // 获取每个状态匹配到的模式串的索引.
 func (trie *ACAutoMatonArray) GetIndexes() [][]int {
 	res := make([][]int, len(trie.children))
-	for i, pos := range trie.Words {
+	for i, pos := range trie.WordPos {
 		res[pos] = append(res[pos], i)
 	}
 	for _, v := range trie.bfsOrder {

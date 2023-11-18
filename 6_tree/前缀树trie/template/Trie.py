@@ -1,5 +1,4 @@
-from collections import defaultdict
-from typing import Dict, Iterable, List, Optional
+from typing import Generator, Iterable, Optional, Tuple
 
 
 class TrieNode:
@@ -8,7 +7,7 @@ class TrieNode:
     def __init__(self):
         self.wordCount = 0
         self.preCount = 0
-        self.children: Dict[str, TrieNode] = defaultdict(TrieNode)
+        self.children = dict()
 
 
 class Trie:
@@ -24,7 +23,12 @@ class Trie:
             return
         node = self.root
         for char in s:
-            node = node.children[char]
+            if char not in node.children:
+                newNode = TrieNode()
+                node.children[char] = newNode
+                node = newNode
+            else:
+                node = node.children[char]
             node.preCount += 1
         node.wordCount += 1
 
@@ -34,37 +38,52 @@ class Trie:
             return
         node = self.root
         for char in s:
-            if char not in node.children:
-                raise ValueError(f"word {s} not in trie")
-            if node.children[char].preCount == 1:
-                del node.children[char]
-                return
             node = node.children[char]
             node.preCount -= 1
         node.wordCount -= 1
 
-    def countWord(self, s: str) -> List[int]:
-        """对s的每个非空前缀pre,返回trie中有多少个等于pre的单词"""
+    def find(self, s: str) -> Optional[TrieNode]:
+        """返回s所在结点"""
         if not s:
-            return []
-        res = []
+            return None
         node = self.root
         for char in s:
             if char not in node.children:
-                return []
+                return None
             node = node.children[char]
-            res.append(node.wordCount)
-        return res
+        return node
 
-    def countWordStartsWith(self, s: str) -> List[int]:
-        """对s的每个非空前缀pre,返回trie中有多少个单词以pre为前缀"""
+    def enumerate(self, s: str) -> Generator[Tuple[int, TrieNode], None, None]:
         if not s:
-            return []
-        res = []
+            return
         node = self.root
-        for char in s:
+        for i, char in enumerate(s):
             if char not in node.children:
-                return []
+                return
             node = node.children[char]
-            res.append(node.preCount)
-        return res
+            yield i, node
+
+
+if __name__ == "__main__":
+
+    class Trie2:
+        def __init__(self):
+            self.trie = Trie()
+
+        def insert(self, word: str) -> None:
+            self.trie.insert(word)
+
+        def countWordsEqualTo(self, word: str) -> int:
+            for i, node in self.trie.enumerate(word):
+                if i == len(word) - 1:
+                    return node.wordCount
+            return 0
+
+        def countWordsStartingWith(self, prefix: str) -> int:
+            for i, node in self.trie.enumerate(prefix):
+                if i == len(prefix) - 1:
+                    return node.preCount
+            return 0
+
+        def erase(self, word: str) -> None:
+            self.trie.remove(word)

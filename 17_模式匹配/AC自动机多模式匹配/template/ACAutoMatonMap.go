@@ -1,24 +1,43 @@
 package main
 
-import "fmt"
-
-// 参考python
-
 const INF = int(2e18)
 
+func longestValidSubstring(word string, forbidden []string) int {
+	acm := NewACAutoMatonMap()
+	for _, w := range forbidden {
+		acm.AddString(w)
+	}
+	acm.BuildSuffixLink()
+
+	minLen := make([]int, acm.Size()) // 每个状态匹配到的模式串的最小长度
+	for i := range minLen {
+		minLen[i] = INF
+	}
+	for i, pos := range acm.WordPos {
+		minLen[pos] = min(minLen[pos], len(forbidden[i]))
+	}
+	acm.Dp(func(from, to int) { minLen[to] = min(minLen[to], minLen[from]) })
+
+	res, left, pos := 0, 0, 0
+	for right, char := range word {
+		pos = acm.Move(pos, int(char))
+		left = max(left, right-minLen[pos]+2)
+		res = max(res, right-left+1)
+	}
+	return res
+}
+
 type ACAutoMatonMap struct {
-	words      []int
-	bfsOrder   []int
-	children   []map[rune]int
-	suffixLink []int
+	WordPos    []int         // WordPos[i] 表示加入的第i个模式串对应的节点编号.
+	children   []map[int]int // children[v][c] 表示节点v通过字符c转移到的节点.
+	suffixLink []int         // 又叫fail.指向当前节点最长真后缀对应结点.
+	bfsOrder   []int         // 结点的拓扑序,0表示虚拟节点.
 }
 
 func NewACAutoMatonMap() *ACAutoMatonMap {
 	return &ACAutoMatonMap{
-		words:      []int{},
-		bfsOrder:   []int{},
-		children:   []map[rune]int{{}},
-		suffixLink: []int{},
+		WordPos:  []int{},
+		children: []map[int]int{{}},
 	}
 }
 
@@ -28,35 +47,36 @@ func (ac *ACAutoMatonMap) AddString(str string) int {
 	}
 	pos := 0
 	for _, char := range str {
+		ord := int(char)
 		nexts := ac.children[pos]
-		if next, ok := nexts[char]; ok {
+		if next, ok := nexts[ord]; ok {
 			pos = next
 		} else {
 			nextState := len(ac.children)
-			nexts[char] = nextState
+			nexts[ord] = nextState
 			pos = nextState
-			ac.children = append(ac.children, map[rune]int{})
+			ac.children = append(ac.children, map[int]int{})
 		}
 	}
-	ac.words = append(ac.words, pos)
+	ac.WordPos = append(ac.WordPos, pos)
 	return pos
 }
 
-func (ac *ACAutoMatonMap) AddChar(pos int, char rune) int {
+func (ac *ACAutoMatonMap) AddChar(pos int, ord int) int {
 	nexts := ac.children[pos]
-	if next, ok := nexts[char]; ok {
+	if next, ok := nexts[ord]; ok {
 		return next
 	}
 	nextState := len(ac.children)
-	nexts[char] = nextState
-	ac.children = append(ac.children, map[rune]int{})
+	nexts[ord] = nextState
+	ac.children = append(ac.children, map[int]int{})
 	return nextState
 }
 
-func (ac *ACAutoMatonMap) Move(pos int, char rune) int {
+func (ac *ACAutoMatonMap) Move(pos int, ord int) int {
 	for {
 		nexts := ac.children[pos]
-		if next, ok := nexts[char]; ok {
+		if next, ok := nexts[ord]; ok {
 			return next
 		}
 		if pos == 0 {
@@ -68,6 +88,9 @@ func (ac *ACAutoMatonMap) Move(pos int, char rune) int {
 
 func (ac *ACAutoMatonMap) BuildSuffixLink() {
 	ac.suffixLink = make([]int, len(ac.children))
+	for i := range ac.suffixLink {
+		ac.suffixLink[i] = -1
+	}
 	ac.bfsOrder = make([]int, len(ac.children))
 	head, tail := 0, 1
 	for head < tail {
@@ -95,7 +118,7 @@ func (ac *ACAutoMatonMap) BuildSuffixLink() {
 
 func (ac *ACAutoMatonMap) GetCounter() []int {
 	counter := make([]int, len(ac.children))
-	for _, pos := range ac.words {
+	for _, pos := range ac.WordPos {
 		counter[pos]++
 	}
 	for _, v := range ac.bfsOrder {
@@ -108,7 +131,7 @@ func (ac *ACAutoMatonMap) GetCounter() []int {
 
 func (ac *ACAutoMatonMap) GetIndexes() [][]int {
 	res := make([][]int, len(ac.children))
-	for i, pos := range ac.words {
+	for i, pos := range ac.WordPos {
 		res[pos] = append(res[pos], i)
 	}
 	for _, v := range ac.bfsOrder {
@@ -154,8 +177,4 @@ func (ac *ACAutoMatonMap) Dp(f func(from, to int)) {
 
 func (ac *ACAutoMatonMap) Size() int {
 	return len(ac.children)
-}
-
-func main() {
-	fmt.Println("Hello, World!")
 }

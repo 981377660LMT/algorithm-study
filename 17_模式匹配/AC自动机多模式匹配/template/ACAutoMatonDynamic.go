@@ -59,63 +59,62 @@ func multiSearch(big string, smalls []string) [][]int {
 
 }
 
-type ANode struct {
-	ch     map[byte]int
-	accept []int
-	link   int
-	cnt    int
+type ACNode struct {
+	children map[byte]int
+	accept   []int
+	link     int
+	count    int
 }
 
-func NewANode() *ANode {
-	return &ANode{
-		ch:   make(map[byte]int),
-		link: -1,
+func NewACNode() *ACNode {
+	return &ACNode{
+		children: make(map[byte]int),
+		link:     -1,
 	}
 }
 
 // AC自动机.
 type AhoCorasick struct {
-	states      []*ANode
+	states      []*ACNode
 	acceptState map[int]int
 }
 
 func NewAhoCorasick() *AhoCorasick {
 	return &AhoCorasick{
-		states:      []*ANode{NewANode()},
+		states:      []*ACNode{NewACNode()},
 		acceptState: make(map[int]int),
 	}
 }
 
 // 插入字符串s, id为该字符串的标识符.
-//  id为-1时, 表示不需要标识符.
 func (ac *AhoCorasick) Insert(s string, id int) {
 	if len(s) == 0 {
 		return
 	}
-	i := 0
+	pos := 0
 	for j := 0; j < len(s); j++ {
 		c := s[j]
-		if _, ok := ac.states[i].ch[c]; !ok {
-			ac.states[i].ch[c] = len(ac.states)
-			ac.states = append(ac.states, NewANode())
+		if _, ok := ac.states[pos].children[c]; !ok {
+			ac.states[pos].children[c] = len(ac.states)
+			ac.states = append(ac.states, NewACNode())
 		}
-		i = ac.states[i].ch[c]
+		pos = ac.states[pos].children[c]
 	}
-	ac.states[i].cnt++
-	ac.states[i].accept = append(ac.states[i].accept, id)
-	ac.acceptState[id] = i
+	ac.states[pos].count++
+	ac.states[pos].accept = append(ac.states[pos].accept, id)
+	ac.acceptState[id] = pos
 }
 
 func (ac *AhoCorasick) Build() {
-	que := []int{0}
-	for len(que) > 0 {
-		i := que[0]
-		que = que[1:]
-		for c, j := range ac.states[i].ch {
-			ac.states[j].link = ac.Move(ac.states[i].link, c)
-			ac.states[j].cnt += ac.states[ac.states[j].link].cnt
-			a := ac.states[j].accept
-			b := ac.states[ac.states[j].link].accept
+	queue := []int{0}
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		for c, next := range ac.states[cur].children {
+			ac.states[next].link = ac.Move(ac.states[cur].link, c)
+			ac.states[next].count += ac.states[ac.states[next].link].count
+			a := ac.states[next].accept
+			b := ac.states[ac.states[next].link].accept
 			accept := make([]int, 0, len(a)+len(b))
 			p1, p2 := 0, 0
 			for p1 < len(a) && p2 < len(b) {
@@ -129,18 +128,17 @@ func (ac *AhoCorasick) Build() {
 			}
 			accept = append(accept, a[p1:]...)
 			accept = append(accept, b[p2:]...)
-			ac.states[j].accept = accept
-			que = append(que, j)
+			ac.states[next].accept = accept
+			queue = append(queue, next)
 		}
 	}
-
 }
 
 // 当前状态为state, 输入字符c, 转移到下一个状态.
 //  初始/失败状态为0.
 func (ac *AhoCorasick) Move(state int, c byte) int {
 	for state != -1 {
-		if _, ok := ac.states[state].ch[c]; !ok {
+		if _, ok := ac.states[state].children[c]; !ok {
 			state = ac.states[state].link
 		} else {
 			break
@@ -149,7 +147,7 @@ func (ac *AhoCorasick) Move(state int, c byte) int {
 	if state == -1 {
 		return 0
 	}
-	return ac.states[state].ch[c]
+	return ac.states[state].children[c]
 }
 
 // 匹配字符串s, 返回匹配的位置.
@@ -174,15 +172,14 @@ func (ac *AhoCorasick) Count(s string) int {
 	for k := 0; k < len(s); k++ {
 		c := s[k]
 		i = ac.Move(i, c)
-		res += ac.states[i].cnt
+		res += ac.states[i].count
 	}
 	return res
 }
 
-// clear
 func (ac *AhoCorasick) Clear() {
 	ac.states = ac.states[:0]
-	ac.states = append(ac.states, NewANode())
+	ac.states = append(ac.states, NewACNode())
 }
 
 // 动态AC自动机.
