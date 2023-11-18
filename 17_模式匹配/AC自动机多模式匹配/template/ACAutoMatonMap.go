@@ -106,7 +106,6 @@ func (ac *ACAutoMatonMap) BuildSuffixLink() {
 				}
 				f = ac.suffixLink[f]
 			}
-			ac.suffixLink[next] = f
 			if f == -1 {
 				ac.suffixLink[next] = 0
 			} else {

@@ -69,7 +69,7 @@
 
 5. **树(数据结构)**
 
-   - [Trie](6_tree/%E5%89%8D%E7%BC%80%E6%A0%91trie/Trie.py)
+   - [Trie](6_tree/%E5%89%8D%E7%BC%80%E6%A0%91trie/template/Trie.py)
    - [BinaryTrie](6_tree/%E5%89%8D%E7%BC%80%E6%A0%91trie/%E6%9C%80%E5%A4%A7%E5%BC%82%E6%88%96%E5%89%8D%E7%BC%80%E6%A0%91/BinaryTrie.py)
    - [可持久化 BinaryTrie](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E5%B9%B3%E8%A1%A1%E6%A0%91/BinaryTriePersistent.go>)
    - [树状数组](6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/BIT.py)
