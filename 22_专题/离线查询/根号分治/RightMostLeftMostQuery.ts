@@ -1,10 +1,11 @@
 /* eslint-disable no-inner-declarations */
 
+// class MonoStack
 // 对每个下标，查询 最右侧/最左侧/右侧第一个/左侧第一个 lower/floor/ceiling/higher 的元素.
 // 动态单调栈(DynamicMonoStack).
 // 分块实现.
 
-class RightMostLeftMostQuery {
+class MonoStackDynamic {
   private readonly _nums: number[]
   private readonly _belong: Uint16Array
   private readonly _blockStart: Uint32Array
@@ -44,6 +45,11 @@ class RightMostLeftMostQuery {
     for (let bid = 0; bid < blockCount; bid++) this._rebuildBlock(bid)
   }
 
+  get(index: number): number | undefined {
+    if (index < 0 || index >= this._nums.length) return undefined
+    return this._nums[index] + this._blockLazy[this._belong[index]]
+  }
+
   set(index: number, value: number): void {
     if (index < 0 || index >= this._nums.length) return
     const bid = this._belong[index]
@@ -76,12 +82,14 @@ class RightMostLeftMostQuery {
    * 查询`index`右侧最远的下标`j`，使得 `nums[j] < nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightMostLower(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  rightMostLower(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryRightMost(
       index,
-      bid => this._blockMin[bid] + this._blockLazy[bid] < cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] < cur
+      bid => this._blockMin[bid] + this._blockLazy[bid] < target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] < target!
     )
   }
 
@@ -89,12 +97,14 @@ class RightMostLeftMostQuery {
    * 查询`index`右侧最远的下标`j`，使得 `nums[j] <= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightMostFloor(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  rightMostFloor(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryRightMost(
       index,
-      bid => this._blockMin[bid] + this._blockLazy[bid] <= cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] <= cur
+      bid => this._blockMin[bid] + this._blockLazy[bid] <= target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] <= target!
     )
   }
 
@@ -102,12 +112,14 @@ class RightMostLeftMostQuery {
    * 查询`index`右侧最远的下标`j`，使得 `nums[j] >= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightMostCeiling(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  rightMostCeiling(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryRightMost(
       index,
-      bid => this._blockMax[bid] + this._blockLazy[bid] >= cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] >= cur
+      bid => this._blockMax[bid] + this._blockLazy[bid] >= target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] >= target!
     )
   }
 
@@ -115,12 +127,14 @@ class RightMostLeftMostQuery {
    * 查询`index`右侧最远的下标`j`，使得 `nums[j] > nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightMostHigher(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  rightMostHigher(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryRightMost(
       index,
-      bid => this._blockMax[bid] + this._blockLazy[bid] > cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] > cur
+      bid => this._blockMax[bid] + this._blockLazy[bid] > target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] > target!
     )
   }
 
@@ -128,12 +142,14 @@ class RightMostLeftMostQuery {
    * 查询`index`左侧最远的下标`j`，使得 `nums[j] < nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftMostLower(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  leftMostLower(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryLeftMost(
       index,
-      bid => this._blockMin[bid] + this._blockLazy[bid] < cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] < cur
+      bid => this._blockMin[bid] + this._blockLazy[bid] < target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] < target!
     )
   }
 
@@ -141,12 +157,14 @@ class RightMostLeftMostQuery {
    * 查询`index`左侧最远的下标`j`，使得 `nums[j] <= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftMostFloor(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  leftMostFloor(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryLeftMost(
       index,
-      bid => this._blockMin[bid] + this._blockLazy[bid] <= cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] <= cur
+      bid => this._blockMin[bid] + this._blockLazy[bid] <= target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] <= target!
     )
   }
 
@@ -154,12 +172,14 @@ class RightMostLeftMostQuery {
    * 查询`index`左侧最远的下标`j`，使得 `nums[j] >= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftMostCeiling(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  leftMostCeiling(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryLeftMost(
       index,
-      bid => this._blockMax[bid] + this._blockLazy[bid] >= cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] >= cur
+      bid => this._blockMax[bid] + this._blockLazy[bid] >= target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] >= target!
     )
   }
 
@@ -167,12 +187,14 @@ class RightMostLeftMostQuery {
    * 查询`index`左侧最远的下标`j`，使得 `nums[j] > nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftMostHigher(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  leftMostHigher(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryLeftMost(
       index,
-      bid => this._blockMax[bid] + this._blockLazy[bid] > cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] > cur
+      bid => this._blockMax[bid] + this._blockLazy[bid] > target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] > target!
     )
   }
 
@@ -180,12 +202,14 @@ class RightMostLeftMostQuery {
    * 查询`index`右侧最近的下标`j`，使得 `nums[j] < nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightNearestLower(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  rightNearestLower(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryRightNearest(
       index,
-      bid => this._blockMin[bid] + this._blockLazy[bid] < cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] < cur
+      bid => this._blockMin[bid] + this._blockLazy[bid] < target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] < target!
     )
   }
 
@@ -193,12 +217,14 @@ class RightMostLeftMostQuery {
    * 查询`index`右侧最近的下标`j`，使得 `nums[j] <= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightNearestFloor(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  rightNearestFloor(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryRightNearest(
       index,
-      bid => this._blockMin[bid] + this._blockLazy[bid] <= cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] <= cur
+      bid => this._blockMin[bid] + this._blockLazy[bid] <= target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] <= target!
     )
   }
 
@@ -206,12 +232,14 @@ class RightMostLeftMostQuery {
    * 查询`index`右侧最近的下标`j`，使得 `nums[j] >= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightNearestCeiling(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  rightNearestCeiling(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryRightNearest(
       index,
-      bid => this._blockMax[bid] + this._blockLazy[bid] >= cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] >= cur
+      bid => this._blockMax[bid] + this._blockLazy[bid] >= target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] >= target!
     )
   }
 
@@ -219,12 +247,14 @@ class RightMostLeftMostQuery {
    * 查询`index`右侧最近的下标`j`，使得 `nums[j] > nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightNearestHigher(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  rightNearestHigher(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryRightNearest(
       index,
-      bid => this._blockMax[bid] + this._blockLazy[bid] > cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] > cur
+      bid => this._blockMax[bid] + this._blockLazy[bid] > target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] > target!
     )
   }
 
@@ -232,12 +262,14 @@ class RightMostLeftMostQuery {
    * 查询`index`左侧最近的下标`j`，使得 `nums[j] < nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftNearestLower(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  leftNearestLower(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryLeftNearest(
       index,
-      bid => this._blockMin[bid] + this._blockLazy[bid] < cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] < cur
+      bid => this._blockMin[bid] + this._blockLazy[bid] < target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] < target!
     )
   }
 
@@ -245,12 +277,14 @@ class RightMostLeftMostQuery {
    * 查询`index`左侧最近的下标`j`，使得 `nums[j] <= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftNearestFloor(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  leftNearestFloor(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryLeftNearest(
       index,
-      bid => this._blockMin[bid] + this._blockLazy[bid] <= cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] <= cur
+      bid => this._blockMin[bid] + this._blockLazy[bid] <= target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] <= target!
     )
   }
 
@@ -258,12 +292,14 @@ class RightMostLeftMostQuery {
    * 查询`index`左侧最近的下标`j`，使得 `nums[j] >= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftNearestCeiling(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  leftNearestCeiling(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryLeftNearest(
       index,
-      bid => this._blockMax[bid] + this._blockLazy[bid] >= cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] >= cur
+      bid => this._blockMax[bid] + this._blockLazy[bid] >= target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] >= target!
     )
   }
 
@@ -271,12 +307,14 @@ class RightMostLeftMostQuery {
    * 查询`index`左侧最近的下标`j`，使得 `nums[j] > nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftNearestHigher(index: number): number {
-    const cur = this._nums[index] + this._blockLazy[this._belong[index]]
+  leftNearestHigher(index: number, target?: number): number {
+    if (target == undefined) {
+      target = this.get(index)
+    }
     return this._queryLeftNearest(
       index,
-      bid => this._blockMax[bid] + this._blockLazy[bid] > cur,
-      (eid, bid) => this._nums[eid] + this._blockLazy[bid] > cur
+      bid => this._blockMax[bid] + this._blockLazy[bid] > target!,
+      (eid, bid) => this._nums[eid] + this._blockLazy[bid] > target!
     )
   }
 
@@ -365,13 +403,17 @@ class RightMostLeftMostQuery {
   }
 }
 
-export { RightMostLeftMostQuery, RightMostLeftMostQuery as DynamicMonoStack }
+export {
+  MonoStackDynamic,
+  MonoStackDynamic as MomoStack,
+  MonoStackDynamic as RightMostLeftMostQuery
+}
 
 if (require.main === module) {
   // 962. 最大宽度坡
   // https://leetcode.cn/problems/maximum-width-ramp/
   function maxWidthRamp(nums: number[]): number {
-    const Q = new RightMostLeftMostQuery(nums)
+    const Q = new MonoStackDynamic(nums)
     let res = 0
     for (let i = 0; i < nums.length; i++) {
       const cand = Q.rightMostCeiling(i)
@@ -385,7 +427,7 @@ if (require.main === module) {
   // 2863. 最长半递减数组
   // https://leetcode.cn/problems/maximum-length-of-semi-decreasing-subarrays/description/
   function maxSubarrayLength(nums: number[]): number {
-    const Q = new RightMostLeftMostQuery(nums)
+    const Q = new MonoStackDynamic(nums)
     let res = 0
     for (let i = 0; i < nums.length; i++) {
       const cand = Q.rightMostLower(i)
@@ -399,11 +441,11 @@ if (require.main === module) {
   // 901. 股票价格跨度
   // 当日股票价格的 跨度 被定义为股票价格小于或等于今天价格的最大连续日数
   class StockSpanner {
-    private readonly _Q: RightMostLeftMostQuery
+    private readonly _Q: MonoStackDynamic
     private _ptr = 0
 
     constructor() {
-      this._Q = new RightMostLeftMostQuery(Array(1e5 + 10).fill(0))
+      this._Q = new MonoStackDynamic(Array(1e5 + 10).fill(0))
     }
 
     next(price: number): number {
@@ -547,7 +589,7 @@ if (require.main === module) {
     const MAX = 1e9
     const randomNums = Array.from({ length: N }, () => (Math.random() * MAX) | 0)
     const mocker = new Mocker(randomNums.slice())
-    const real = new RightMostLeftMostQuery(randomNums)
+    const real = new MonoStackDynamic(randomNums)
     const debug = (
       mockerFunc: (index: number) => number,
       realFunc: (index: number) => number
@@ -623,7 +665,7 @@ if (require.main === module) {
     const bigArr = Array(1e5)
       .fill(0)
       .map(() => (Math.random() * 1e9) | 0)
-    const Q = new RightMostLeftMostQuery(bigArr)
+    const Q = new MonoStackDynamic(bigArr)
     console.time('bigArr')
     for (let i = 0; i < 1e5; i++) {
       Q.set(i, i)

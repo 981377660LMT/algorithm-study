@@ -94,7 +94,7 @@ class KMP(Generic[T]):
         pos = 0
         for i in range(start, len(longer)):
             pos = self.move(pos, longer[i])
-            if self.isMatched(pos):
+            if self.accept(pos):
                 res.append(i - len(self._pattern) + 1)
                 pos = self.next[pos - 1]  # rollback
         return res
@@ -106,7 +106,7 @@ class KMP(Generic[T]):
         pos = 0
         for i in range(start, len(longer)):
             pos = self.move(pos, longer[i])
-            if self.isMatched(pos):
+            if self.accept(pos):
                 return i - len(self._pattern) + 1
         return -1
 
@@ -118,7 +118,7 @@ class KMP(Generic[T]):
             pos += 1
         return pos
 
-    def isMatched(self, pos: int) -> bool:
+    def accept(self, pos: int) -> bool:
         return pos == len(self._pattern)
 
     def period(self, i: Optional[int] = None) -> int:
@@ -163,7 +163,7 @@ if __name__ == "__main__":
     nextPos = kmp.move(nextPos, "a")
     assert nextPos == 2
     nextPos = kmp.move(nextPos, "b")
-    assert kmp.isMatched(nextPos)
+    assert kmp.accept(nextPos)
 
     next = KMP.getNext([1, 2, 3, 1, 2, 3, 1, 2, 3, 4])
     assert next == [0, 0, 0, 1, 2, 3, 4, 5, 6, 0]

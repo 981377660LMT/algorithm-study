@@ -6,13 +6,18 @@
 
 import { SegmentTreeRangeAddRangeMinMax } from '../../../6_tree/线段树/template/atcoder_segtree/hot/SegmentTreeRangeAddRangeMinMax-区间加区间最大最小值'
 
-class RightMostLeftMostQuerySegmentTree {
+class MonoStackDynamicSegmentTree {
   private readonly _n: number
   private readonly _rangeAddRangeMinMax: SegmentTreeRangeAddRangeMinMax
 
   constructor(arr: ArrayLike<number>) {
     this._n = arr.length
     this._rangeAddRangeMinMax = new SegmentTreeRangeAddRangeMinMax(arr)
+  }
+
+  get(index: number): number | undefined {
+    if (index < 0 || index >= this._n) return undefined
+    return this._rangeAddRangeMinMax.get(index)
   }
 
   set(index: number, value: number): void {
@@ -31,9 +36,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`右侧最远的下标`j`，使得 `nums[j] < nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightMostLower(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.minLeft(this._n, min => min >= cur) - 1
+  rightMostLower(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(this._n, min => min >= target!) - 1
     return cand > index ? cand : -1
   }
 
@@ -41,9 +46,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`右侧最远的下标`j`，使得 `nums[j] <= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightMostFloor(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.minLeft(this._n, min => min > cur) - 1
+  rightMostFloor(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(this._n, min => min > target!) - 1
     return cand > index ? cand : -1
   }
 
@@ -51,9 +56,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`右侧最远的下标`j`，使得 `nums[j] >= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightMostCeiling(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.minLeft(this._n, (_, max) => max < cur) - 1
+  rightMostCeiling(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(this._n, (_, max) => max < target!) - 1
     return cand > index ? cand : -1
   }
 
@@ -61,9 +66,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`右侧最远的下标`j`，使得 `nums[j] > nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightMostHigher(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.minLeft(this._n, (_, max) => max <= cur) - 1
+  rightMostHigher(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(this._n, (_, max) => max <= target!) - 1
     return cand > index ? cand : -1
   }
 
@@ -71,9 +76,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`左侧最远的下标`j`，使得 `nums[j] < nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftMostLower(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.maxRight(0, min => min >= cur)
+  leftMostLower(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(0, min => min >= target!)
     return cand < index ? cand : -1
   }
 
@@ -81,9 +86,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`左侧最远的下标`j`，使得 `nums[j] <= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftMostFloor(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.maxRight(0, min => min > cur)
+  leftMostFloor(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(0, min => min > target!)
     return cand < index ? cand : -1
   }
 
@@ -91,9 +96,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`左侧最远的下标`j`，使得 `nums[j] >= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftMostCeiling(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.maxRight(0, (_, max) => max < cur)
+  leftMostCeiling(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(0, (_, max) => max < target!)
     return cand < index ? cand : -1
   }
 
@@ -101,9 +106,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`左侧最远的下标`j`，使得 `nums[j] > nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftMostHigher(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.maxRight(0, (_, max) => max <= cur)
+  leftMostHigher(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(0, (_, max) => max <= target!)
     return cand < index ? cand : -1
   }
 
@@ -111,9 +116,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`右侧最近的下标`j`，使得 `nums[j] < nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightNearestLower(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, min => min >= cur)
+  rightNearestLower(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, min => min >= target!)
     return cand === this._n ? -1 : cand
   }
 
@@ -121,9 +126,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`右侧最近的下标`j`，使得 `nums[j] <= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightNearestFloor(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, min => min > cur)
+  rightNearestFloor(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, min => min > target!)
     return cand === this._n ? -1 : cand
   }
 
@@ -131,9 +136,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`右侧最近的下标`j`，使得 `nums[j] >= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightNearestCeiling(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, (_, max) => max < cur)
+  rightNearestCeiling(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, (_, max) => max < target!)
     return cand === this._n ? -1 : cand
   }
 
@@ -141,9 +146,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`右侧最近的下标`j`，使得 `nums[j] > nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  rightNearestHigher(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, (_, max) => max <= cur)
+  rightNearestHigher(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.maxRight(index + 1, (_, max) => max <= target!)
     return cand === this._n ? -1 : cand
   }
 
@@ -151,9 +156,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`左侧最近的下标`j`，使得 `nums[j] < nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftNearestLower(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.minLeft(index, min => min >= cur) - 1
+  leftNearestLower(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(index, min => min >= target!) - 1
     return cand
   }
 
@@ -161,9 +166,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`左侧最近的下标`j`，使得 `nums[j] <= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftNearestFloor(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.minLeft(index, min => min > cur) - 1
+  leftNearestFloor(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(index, min => min > target!) - 1
     return cand
   }
 
@@ -171,9 +176,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`左侧最近的下标`j`，使得 `nums[j] >= nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftNearestCeiling(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.minLeft(index, (_, max) => max < cur) - 1
+  leftNearestCeiling(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(index, (_, max) => max < target!) - 1
     return cand
   }
 
@@ -181,9 +186,9 @@ class RightMostLeftMostQuerySegmentTree {
    * 查询`index`左侧最近的下标`j`，使得 `nums[j] > nums[index]`.
    * 如果不存在，返回`-1`.
    */
-  leftNearestHigher(index: number): number {
-    const cur = this._rangeAddRangeMinMax.get(index)
-    const cand = this._rangeAddRangeMinMax.minLeft(index, (_, max) => max <= cur) - 1
+  leftNearestHigher(index: number, target?: number): number {
+    if (target == undefined) target = this.get(index)
+    const cand = this._rangeAddRangeMinMax.minLeft(index, (_, max) => max <= target!) - 1
     return cand
   }
 }
@@ -192,7 +197,7 @@ if (require.main === module) {
   // 962. 最大宽度坡
   // https://leetcode.cn/problems/maximum-width-ramp/
   function maxWidthRamp(nums: number[]): number {
-    const Q = new RightMostLeftMostQuerySegmentTree(nums)
+    const Q = new MonoStackDynamicSegmentTree(nums)
     let res = 0
     for (let i = 0; i < nums.length; i++) {
       const cand = Q.rightMostCeiling(i)
@@ -206,7 +211,7 @@ if (require.main === module) {
   // 2863. 最长半递减数组
   // https://leetcode.cn/problems/maximum-length-of-semi-decreasing-subarrays/description/
   function maxSubarrayLength(nums: number[]): number {
-    const Q = new RightMostLeftMostQuerySegmentTree(nums)
+    const Q = new MonoStackDynamicSegmentTree(nums)
     let res = 0
     for (let i = 0; i < nums.length; i++) {
       const cand = Q.rightMostLower(i)
@@ -220,11 +225,11 @@ if (require.main === module) {
   // 901. 股票价格跨度
   // 当日股票价格的 跨度 被定义为股票价格小于或等于今天价格的最大连续日数
   class StockSpanner {
-    private readonly _Q: RightMostLeftMostQuerySegmentTree
+    private readonly _Q: MonoStackDynamicSegmentTree
     private _ptr = 0
 
     constructor() {
-      this._Q = new RightMostLeftMostQuerySegmentTree(Array(1e5 + 10).fill(0))
+      this._Q = new MonoStackDynamicSegmentTree(Array(1e5 + 10).fill(0))
     }
 
     next(price: number): number {
@@ -368,7 +373,7 @@ if (require.main === module) {
     const MAX = 1e9
     const randomNums = Array.from({ length: N }, () => (Math.random() * MAX) | 0)
     const mocker = new Mocker(randomNums.slice())
-    const real = new RightMostLeftMostQuerySegmentTree(randomNums)
+    const real = new MonoStackDynamicSegmentTree(randomNums)
     const debug = (
       mockerFunc: (index: number) => number,
       realFunc: (index: number) => number
@@ -444,7 +449,7 @@ if (require.main === module) {
     const bigArr = Array(1e5)
       .fill(0)
       .map(() => (Math.random() * 1e9) | 0)
-    const Q = new RightMostLeftMostQuerySegmentTree(bigArr)
+    const Q = new MonoStackDynamicSegmentTree(bigArr)
     console.time('bigArr')
     for (let i = 0; i < 1e5; i++) {
       Q.set(i, i)

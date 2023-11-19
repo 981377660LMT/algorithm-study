@@ -18,9 +18,9 @@ class Trie:
         for word in words or ():
             self.insert(word)
 
-    def insert(self, s: str) -> None:
+    def insert(self, s: str) -> "TrieNode":
         if not s:
-            return
+            return self.root
         node = self.root
         for char in s:
             if char not in node.children:
@@ -31,16 +31,18 @@ class Trie:
                 node = node.children[char]
             node.preCount += 1
         node.wordCount += 1
+        return node
 
-    def remove(self, s: str) -> None:
+    def remove(self, s: str) -> "TrieNode":
         """从前缀树中移除`1个`s 需要保证s在前缀树中"""
         if not s:
-            return
+            return self.root
         node = self.root
         for char in s:
             node = node.children[char]
             node.preCount -= 1
         node.wordCount -= 1
+        return node
 
     def find(self, s: str) -> Optional[TrieNode]:
         """返回s所在结点"""

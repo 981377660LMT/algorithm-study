@@ -42,9 +42,9 @@ func NewTrie() *Trie {
 	}
 }
 
-func (t *Trie) Insert(s string) {
+func (t *Trie) Insert(s string) *TrieNode {
 	if len(s) == 0 {
-		return
+		return t.root
 	}
 	root := t.root
 	for i := 0; i < len(s); i++ {
@@ -56,11 +56,12 @@ func (t *Trie) Insert(s string) {
 		root = root.Children[char]
 	}
 	root.WordCount++
+	return root
 }
 
-func (t *Trie) Remove(s string) {
+func (t *Trie) Remove(s string) *TrieNode {
 	if len(s) == 0 {
-		return
+		return t.root
 	}
 	root := t.root
 	for i := 0; i < len(s); i++ {
@@ -69,6 +70,7 @@ func (t *Trie) Remove(s string) {
 		root = root.Children[char]
 	}
 	root.WordCount--
+	return root
 }
 
 func (t *Trie) Find(s string) (node *TrieNode, ok bool) {

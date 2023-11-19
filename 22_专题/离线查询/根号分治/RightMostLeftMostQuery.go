@@ -12,7 +12,7 @@ func maxWidthRamp(nums []int) int {
 	res := 0
 	Q := NewRightMostLeftMostQuery(nums)
 	for i := 0; i < len(nums); i++ {
-		rightMostCeiling := Q.RightMostCeiling(i)
+		rightMostCeiling := Q.RightMostCeiling(i, Q.Get(i))
 		if rightMostCeiling != -1 {
 			res = max(res, rightMostCeiling-i)
 		}
@@ -37,7 +37,7 @@ func (this *StockSpanner) Next(price int) int {
 	pos := this.ptr
 	this.ptr++
 	this.Q.Set(pos, price)
-	leftNearestHigher := this.Q.LeftNearestHigher(pos)
+	leftNearestHigher := this.Q.LeftNearestHigher(pos, this.Q.Get(pos))
 	if leftNearestHigher == -1 {
 		return pos + 1
 	}
@@ -93,6 +93,13 @@ func NewRightMostLeftMostQuery(arr []int) *RightMostLeftMostQuery {
 	return res
 }
 
+func (rm *RightMostLeftMostQuery) Get(index int) int {
+	if index < 0 || index >= len(rm._nums) {
+		panic(fmt.Sprintf("index out of range: %d", index))
+	}
+	return rm._nums[index] + rm._blockLazy[rm._belong[index]]
+}
+
 func (rm *RightMostLeftMostQuery) Set(index, value int) {
 	if index < 0 || index >= len(rm._nums) {
 		return
@@ -141,211 +148,195 @@ func (rm *RightMostLeftMostQuery) AddRange(start, end, delta int) {
 
 // 查询`index`右侧最远的下标`j`，使得 `nums[j] < nums[index]`.
 // 如果不存在，返回`-1`.
-func (rm *RightMostLeftMostQuery) RightMostLower(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) RightMostLower(index int, target int) int {
 	return rm._queryRightMost(
 		index,
 		func(bid int) bool {
-			return rm._blockMin[bid]+rm._blockLazy[bid] < cur
+			return rm._blockMin[bid]+rm._blockLazy[bid] < target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] < cur
+			return rm._nums[eid]+rm._blockLazy[bid] < target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightMostFloor(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) RightMostFloor(index int, target int) int {
 	return rm._queryRightMost(
 		index,
 		func(bid int) bool {
-			return rm._blockMin[bid]+rm._blockLazy[bid] <= cur
+			return rm._blockMin[bid]+rm._blockLazy[bid] <= target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] <= cur
+			return rm._nums[eid]+rm._blockLazy[bid] <= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightMostCeiling(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) RightMostCeiling(index int, target int) int {
 	return rm._queryRightMost(
 		index,
 		func(bid int) bool {
-			return rm._blockMax[bid]+rm._blockLazy[bid] >= cur
+			return rm._blockMax[bid]+rm._blockLazy[bid] >= target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] >= cur
+			return rm._nums[eid]+rm._blockLazy[bid] >= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightMostHigher(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) RightMostHigher(index int, target int) int {
 	return rm._queryRightMost(
 		index,
 		func(bid int) bool {
-			return rm._blockMax[bid]+rm._blockLazy[bid] > cur
+			return rm._blockMax[bid]+rm._blockLazy[bid] > target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] > cur
+			return rm._nums[eid]+rm._blockLazy[bid] > target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftMostLower(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) LeftMostLower(index int, target int) int {
 	return rm._queryLeftMost(
 		index,
 		func(bid int) bool {
-			return rm._blockMin[bid]+rm._blockLazy[bid] < cur
+			return rm._blockMin[bid]+rm._blockLazy[bid] < target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] < cur
+			return rm._nums[eid]+rm._blockLazy[bid] < target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftMostFloor(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) LeftMostFloor(index int, target int) int {
 	return rm._queryLeftMost(
 		index,
 		func(bid int) bool {
-			return rm._blockMin[bid]+rm._blockLazy[bid] <= cur
+			return rm._blockMin[bid]+rm._blockLazy[bid] <= target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] <= cur
+			return rm._nums[eid]+rm._blockLazy[bid] <= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftMostCeiling(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) LeftMostCeiling(index int, target int) int {
 	return rm._queryLeftMost(
 		index,
 		func(bid int) bool {
-			return rm._blockMax[bid]+rm._blockLazy[bid] >= cur
+			return rm._blockMax[bid]+rm._blockLazy[bid] >= target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] >= cur
+			return rm._nums[eid]+rm._blockLazy[bid] >= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftMostHigher(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) LeftMostHigher(index int, target int) int {
 	return rm._queryLeftMost(
 		index,
 		func(bid int) bool {
-			return rm._blockMax[bid]+rm._blockLazy[bid] > cur
+			return rm._blockMax[bid]+rm._blockLazy[bid] > target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] > cur
+			return rm._nums[eid]+rm._blockLazy[bid] > target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightNearestLower(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) RightNearestLower(index int, target int) int {
 	return rm._queryRightNearest(
 		index,
 		func(bid int) bool {
-			return rm._blockMin[bid]+rm._blockLazy[bid] < cur
+			return rm._blockMin[bid]+rm._blockLazy[bid] < target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] < cur
+			return rm._nums[eid]+rm._blockLazy[bid] < target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightNearestFloor(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) RightNearestFloor(index int, target int) int {
 
 	return rm._queryRightNearest(
 		index,
 		func(bid int) bool {
-			return rm._blockMin[bid]+rm._blockLazy[bid] <= cur
+			return rm._blockMin[bid]+rm._blockLazy[bid] <= target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] <= cur
+			return rm._nums[eid]+rm._blockLazy[bid] <= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightNearestCeiling(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) RightNearestCeiling(index int, target int) int {
 	return rm._queryRightNearest(
 		index,
 		func(bid int) bool {
-			return rm._blockMax[bid]+rm._blockLazy[bid] >= cur
+			return rm._blockMax[bid]+rm._blockLazy[bid] >= target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] >= cur
+			return rm._nums[eid]+rm._blockLazy[bid] >= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightNearestHigher(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) RightNearestHigher(index int, target int) int {
 	return rm._queryRightNearest(
 		index,
 		func(bid int) bool {
-			return rm._blockMax[bid]+rm._blockLazy[bid] > cur
+			return rm._blockMax[bid]+rm._blockLazy[bid] > target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] > cur
+			return rm._nums[eid]+rm._blockLazy[bid] > target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftNearestLower(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) LeftNearestLower(index int, target int) int {
 	return rm._queryLeftNearest(
 		index,
 		func(bid int) bool {
-			return rm._blockMin[bid]+rm._blockLazy[bid] < cur
+			return rm._blockMin[bid]+rm._blockLazy[bid] < target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] < cur
+			return rm._nums[eid]+rm._blockLazy[bid] < target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftNearestFloor(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) LeftNearestFloor(index int, target int) int {
 	return rm._queryLeftNearest(
 		index,
 		func(bid int) bool {
-			return rm._blockMin[bid]+rm._blockLazy[bid] <= cur
+			return rm._blockMin[bid]+rm._blockLazy[bid] <= target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] <= cur
+			return rm._nums[eid]+rm._blockLazy[bid] <= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftNearestCeiling(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) LeftNearestCeiling(index int, target int) int {
 	return rm._queryLeftNearest(
 		index,
 		func(bid int) bool {
-			return rm._blockMax[bid]+rm._blockLazy[bid] >= cur
+			return rm._blockMax[bid]+rm._blockLazy[bid] >= target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] >= cur
+			return rm._nums[eid]+rm._blockLazy[bid] >= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftNearestHigher(index int) int {
-	cur := rm._nums[index] + rm._blockLazy[rm._belong[index]]
+func (rm *RightMostLeftMostQuery) LeftNearestHigher(index int, target int) int {
 	return rm._queryLeftNearest(
 		index,
 		func(bid int) bool {
-			return rm._blockMax[bid]+rm._blockLazy[bid] > cur
+			return rm._blockMax[bid]+rm._blockLazy[bid] > target
 		},
 		func(eid, bid int) bool {
-			return rm._nums[eid]+rm._blockLazy[bid] > cur
+			return rm._nums[eid]+rm._blockLazy[bid] > target
 		},
 	)
 }
@@ -678,10 +669,16 @@ func main() {
 	}
 	mocker := NewMocker(append([]int{}, randNums...))
 	real := NewRightMostLeftMostQuery(append([]int{}, randNums...))
-	debug := func(f1, f2 func(int) int) {
+
+	adapter := func(f func(index int, target int) int, dep *RightMostLeftMostQuery) func(index int) int {
+		return func(index int) int {
+			return f(index, dep.Get(index))
+		}
+	}
+	debug := func(f1 func(int) int, f2 func(int, int) int) {
 		index := rand.Intn(N)
 		res1 := f1(index)
-		res2 := f2(index)
+		res2 := adapter(f2, real)(index)
 		if res1 != res2 {
 			panic("error")
 		}

@@ -12,8 +12,8 @@ class TrieNode<K> {
 class Trie<K extends PropertyKey> {
   readonly root: TrieNode<K> = new TrieNode()
 
-  insert(s: ArrayLike<K>): void {
-    if (!s.length) return
+  insert(s: ArrayLike<K>): TrieNode<K> {
+    if (!s.length) return this.root
     let { root } = this
     for (let i = 0; i < s.length; i++) {
       const char = s[i]
@@ -22,14 +22,15 @@ class Trie<K extends PropertyKey> {
       root = root.children.get(char)!
     }
     root.wordCount++
+    return root
   }
 
   /**
    * @param s 从前缀树中移除 `1个` s
    * !需要保证s在前缀树中
    */
-  remove(s: ArrayLike<K>): void {
-    if (!s.length) return
+  remove(s: ArrayLike<K>): TrieNode<K> {
+    if (!s.length) return this.root
     let { root } = this
     for (let i = 0; i < s.length; i++) {
       const char = s[i]
@@ -38,6 +39,7 @@ class Trie<K extends PropertyKey> {
       root = root.children.get(char)!
     }
     root.wordCount--
+    return root
   }
 
   find(s: ArrayLike<K>): TrieNode<K> | undefined {

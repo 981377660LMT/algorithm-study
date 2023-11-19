@@ -29,6 +29,13 @@ func NewRightMostLeftMostQuery(arr []int) *RightMostLeftMostQuery {
 	return &RightMostLeftMostQuery{_n: n, _tree: tree}
 }
 
+func (rm *RightMostLeftMostQuery) Get(index int) int {
+	if index < 0 || index >= rm._n {
+		panic(fmt.Sprintf("index %v out of range [0, %v)", index, rm._n))
+	}
+	return rm._tree.Get(index).min
+}
+
 func (rm *RightMostLeftMostQuery) Set(index int, value int) {
 	if 0 <= index && index < rm._n {
 		rm._tree.Set(index, E{min: value, max: value})
@@ -48,135 +55,119 @@ func (rm *RightMostLeftMostQuery) AddRange(start, end int, delta int) {
 	rm._tree.Update(start, end, delta)
 }
 
-func (rm *RightMostLeftMostQuery) RightMostLower(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.min >= cur }) - 1
+func (rm *RightMostLeftMostQuery) RightMostLower(index int, target int) int {
+	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.min >= target }) - 1
 	if cand > index {
 		return cand
 	}
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) RightMostFloor(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.min > cur }) - 1
+func (rm *RightMostLeftMostQuery) RightMostFloor(index int, target int) int {
+	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.min > target }) - 1
 	if cand > index {
 		return cand
 	}
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) RightMostCeiling(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.max < cur }) - 1
+func (rm *RightMostLeftMostQuery) RightMostCeiling(index int, target int) int {
+	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.max < target }) - 1
 	if cand > index {
 		return cand
 	}
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) RightMostHigher(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.max <= cur }) - 1
+func (rm *RightMostLeftMostQuery) RightMostHigher(index int, target int) int {
+	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.max <= target }) - 1
 	if cand > index {
 		return cand
 	}
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) LeftMostLower(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MaxRight(0, func(e E) bool { return e.min >= cur })
+func (rm *RightMostLeftMostQuery) LeftMostLower(index int, target int) int {
+	cand := rm._tree.MaxRight(0, func(e E) bool { return e.min >= target })
 	if cand < index {
 		return cand
 	}
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) LeftMostFloor(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MaxRight(0, func(e E) bool { return e.min > cur })
+func (rm *RightMostLeftMostQuery) LeftMostFloor(index int, target int) int {
+	cand := rm._tree.MaxRight(0, func(e E) bool { return e.min > target })
 	if cand < index {
 		return cand
 	}
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) LeftMostCeiling(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MaxRight(0, func(e E) bool { return e.max < cur })
+func (rm *RightMostLeftMostQuery) LeftMostCeiling(index int, target int) int {
+	cand := rm._tree.MaxRight(0, func(e E) bool { return e.max < target })
 	if cand < index {
 		return cand
 	}
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) LeftMostHigher(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MaxRight(0, func(e E) bool { return e.max <= cur })
+func (rm *RightMostLeftMostQuery) LeftMostHigher(index int, target int) int {
+	cand := rm._tree.MaxRight(0, func(e E) bool { return e.max <= target })
 	if cand < index {
 		return cand
 	}
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) RightNearestLower(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.min >= cur })
+func (rm *RightMostLeftMostQuery) RightNearestLower(index int, target int) int {
+	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.min >= target })
 	if cand < rm._n {
 		return cand
 	}
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) RightNearestFloor(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.min > cur })
+func (rm *RightMostLeftMostQuery) RightNearestFloor(index int, target int) int {
+	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.min > target })
 	if cand < rm._n {
 		return cand
 	}
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) RightNearestCeiling(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.max < cur })
+func (rm *RightMostLeftMostQuery) RightNearestCeiling(index int, target int) int {
+	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.max < target })
 	if cand < rm._n {
 		return cand
 	}
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) RightNearestHigher(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.max <= cur })
+func (rm *RightMostLeftMostQuery) RightNearestHigher(index int, target int) int {
+	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.max <= target })
 	if cand < rm._n {
 		return cand
 	}
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) LeftNearestLower(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MinLeft(index, func(e E) bool { return e.min >= cur }) - 1
+func (rm *RightMostLeftMostQuery) LeftNearestLower(index int, target int) int {
+	cand := rm._tree.MinLeft(index, func(e E) bool { return e.min >= target }) - 1
 	return cand
 }
 
-func (rm *RightMostLeftMostQuery) LeftNearestFloor(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MinLeft(index, func(e E) bool { return e.min > cur }) - 1
+func (rm *RightMostLeftMostQuery) LeftNearestFloor(index int, target int) int {
+	cand := rm._tree.MinLeft(index, func(e E) bool { return e.min > target }) - 1
 	return cand
 }
 
-func (rm *RightMostLeftMostQuery) LeftNearestCeiling(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MinLeft(index, func(e E) bool { return e.max < cur }) - 1
+func (rm *RightMostLeftMostQuery) LeftNearestCeiling(index int, target int) int {
+	cand := rm._tree.MinLeft(index, func(e E) bool { return e.max < target }) - 1
 	return cand
 }
 
-func (rm *RightMostLeftMostQuery) LeftNearestHigher(index int) int {
-	cur := rm._tree.Get(index).min
-	cand := rm._tree.MinLeft(index, func(e E) bool { return e.max <= cur }) - 1
+func (rm *RightMostLeftMostQuery) LeftNearestHigher(index int, target int) int {
+	cand := rm._tree.MinLeft(index, func(e E) bool { return e.max <= target }) - 1
 	return cand
 }
 
