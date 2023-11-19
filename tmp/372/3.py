@@ -13,6 +13,18 @@ INF = int(1e20)
 
 # 注意，XOR 是按位异或操作。
 
+# class Solution(object):
+#     def maximumXorProduct(self, a, b, n):
+#         max_val = a * b # 初始化最大值为a * b（不异或）
+#         for i in range(n): # 遍历每一位
+#             cur = (a ^ (1 << i)) * (b ^ (1 << i)) # 当前位异或后的乘积
+#             if max_val < cur: # 比之前的最大值大
+#                 a ^= 1 << i # 异或
+#                 b ^= 1 << i # 异或
+#                 max_val = cur # 更新最大值
+
+#         return max_val % (10 ** 9 + 7) # 返回取余后的最大值
+
 
 class Solution:
     def maximumXorProduct(self, a: int, b: int, n: int) -> int:
