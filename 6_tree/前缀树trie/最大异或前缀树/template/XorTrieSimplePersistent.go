@@ -46,7 +46,7 @@ func (o Trie01Node) Insert(index, value, k int) *Trie01Node {
 func (o *Trie01Node) Query(value, lowerIndex int) *Trie01Node {
 	for k := BITLEN - 1; k >= 0; k-- {
 		bit := (value >> k) & 1
-		if o.chidlren[bit^1] != nil && o.chidlren[bit^1].lastIndex >= lowerIndex {
+		if o.chidlren[bit^1] != nil && o.chidlren[bit^1].lastIndex >= lowerIndex { // guard
 			bit ^= 1
 		}
 		o = o.chidlren[bit]
