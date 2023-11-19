@@ -15,6 +15,8 @@ https://nyaannyaan.github.io/library/segment-tree/segment-tree-beats-abstract.hp
 
 ---
 
+mapping 需要多返回一个 bool 值表示是否作用成功
+
 https://sotanishy.github.io/cp-library-cpp/data-structure/segtree/segment_tree_beats.cpp
 
 https://smijake3.hatenablog.com/entry/2019/04/28/021457

@@ -13,7 +13,8 @@ import (
 )
 
 func main() {
-	yosupo()
+	// yosupo()
+	P4735()
 }
 
 func demo() {
@@ -80,6 +81,7 @@ func max(a, b int) int {
 	return b
 }
 
+// XorTriePersistent
 type BinaryTriePersistent struct {
 	maxLog     int
 	persistent bool

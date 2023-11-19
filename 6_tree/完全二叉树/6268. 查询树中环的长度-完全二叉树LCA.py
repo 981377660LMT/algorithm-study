@@ -29,13 +29,24 @@ class Solution:
             return root.bit_length() - 1
 
         def getLCA(a: int, b: int) -> int:
-            if getDepth(a) < getDepth(b):
+            """
+            https://leetcode.cn/problems/cycle-length-queries-in-a-tree/solutions/1/shinei-by-vclip-ch6n/
+            1. 一个结点从最高位的 1开始,往下遍历每一个二进制位,得到的就是从根节点出发走到这个结点的路径选择,
+               0代表向左,1代表向右;
+            2. 求出两个结点的深度，然后把较深结点向上移动，对齐到另一个节点，让两者的二进制位对应上;
+            3. 之后，对两个二进制数求异或，异或值就代表了两者选择路径时走的方向不同的位置，
+               异或为0,说明a就是LCA;否则上跳
+            """
+            if a == b:
+                return a
+            if a > b:
                 a, b = b, a
-            a >>= getDepth(a) - getDepth(b)
-            while a != b:
-                a >>= 1
-                b >>= 1
-            return a
+            depthA, depthB = a.bit_length() - 1, b.bit_length() - 1
+            diff = a ^ (b >> (depthB - depthA))
+            if diff == 0:
+                return a
+            len_ = diff.bit_length()
+            return a >> len_
 
         res = [0] * len(queries)
         for i, (root1, root2) in enumerate(queries):

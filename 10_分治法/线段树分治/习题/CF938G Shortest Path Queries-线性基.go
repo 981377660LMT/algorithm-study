@@ -1,3 +1,5 @@
+// https://www.luogu.com.cn/blog/yszs/xian-duan-shu-fen-zhi
+
 // https://www.luogu.com.cn/problem/CF938G
 // 每条无向边有边权和一段作用时间区间，查询两个点之间的异或最短路。
 //

@@ -1,9 +1,10 @@
+// TODO: 优化写法.补充remove.补充enumerate方法.以及若何扩展Node属性.
+
 package main
 
 import (
 	"bufio"
 	"fmt"
-	"math/bits"
 	"os"
 	"runtime/debug"
 )
@@ -13,18 +14,20 @@ func init() { debug.SetGCPercent(-1) }
 
 type Trie01Node struct {
 	lastIndex int
-	children  [2]*Trie01Node
+	chidlren  [2]*Trie01Node
 }
 
-var BITLEN int = bits.Len(uint(1e7 + 5))
+var BITLEN int = 24
 var preXor []int
 
 // 持久化01字典树
 // 注意为了拷贝一份 trie01Node，这里的接收器不是指针
 // usage:
-//  roots := make([]*trie01Node, n+1)
-//  roots[0] = trie01Node{}.put(0, trieBitLen-1)
-//  roots[i+1] = roots[i].put(v, trieBitLen-1)
+//
+//	roots := make([]*trie01Node, n+1)
+//	roots[0] = trie01Node{}.put(0, trieBitLen-1)
+//	roots[i+1] = roots[i].put(v, trieBitLen-1)
+//
 // !https://github.dev/EndlessCheng/codeforces-go/blob/cca30623b9ac0f3333348ca61b4894cd00b753cc/copypasta/trie01.go#L19
 // 在第k位插入一个数，返回新的根节点
 func (o Trie01Node) Insert(index, value, k int) *Trie01Node {
@@ -33,20 +36,20 @@ func (o Trie01Node) Insert(index, value, k int) *Trie01Node {
 		return &o
 	}
 	bit := (value >> k) & 1
-	if o.children[bit] == nil {
-		o.children[bit] = &Trie01Node{}
+	if o.chidlren[bit] == nil {
+		o.chidlren[bit] = &Trie01Node{}
 	}
-	o.children[bit] = o.children[bit].Insert(index, value, k-1)
+	o.chidlren[bit] = o.chidlren[bit].Insert(index, value, k-1)
 	return &o
 }
 
 func (o *Trie01Node) Query(value, lowerIndex int) *Trie01Node {
 	for k := BITLEN - 1; k >= 0; k-- {
 		bit := (value >> k) & 1
-		if o.children[bit^1] != nil && o.children[bit^1].lastIndex >= lowerIndex {
+		if o.chidlren[bit^1] != nil && o.chidlren[bit^1].lastIndex >= lowerIndex {
 			bit ^= 1
 		}
-		o = o.children[bit]
+		o = o.chidlren[bit]
 	}
 	return o
 }

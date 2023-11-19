@@ -59,15 +59,16 @@ func main() {
 		}
 	}
 	mutations := Q.GetEvents(INF) // start,end,edgeHash
-	for _, m := range mutations {
-		seg.AddMutation(m.start, m.end, m.value)
+	for i, m := range mutations {
+		seg.AddMutation(m.start, m.end, i)
 	}
 
 	res := make([]int, len(queries))
 	uf := NewUnionFindArrayWithUndo(n)
 	seg.Run(
-		func(edgeHash int) {
-			u, v := edgeHash/n, edgeHash%n
+		func(mutationId int) {
+			edgeId := mutations[mutationId].value
+			u, v := edgeId/n, edgeId%n
 			uf.Union(u, v)
 		},
 		func() {
