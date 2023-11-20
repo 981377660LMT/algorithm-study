@@ -25,10 +25,12 @@ func NewTrieNode() *TrieNode {
 	return &TrieNode{}
 }
 
-type TriePersistent struct{}
+type TriePersistent struct {
+	persistent bool
+}
 
-func NewTriePersistent() *TriePersistent {
-	return &TriePersistent{}
+func NewTriePersistent(persistent bool) *TriePersistent {
+	return &TriePersistent{persistent: persistent}
 }
 
 func (trie *TriePersistent) NewRoot() *TrieNode {
@@ -87,8 +89,8 @@ func (trie *TriePersistent) Enumerate(root *TrieNode, s []byte, f func(index int
 }
 
 func (trie *TriePersistent) Copy(node *TrieNode) *TrieNode {
-	if node == nil {
-		return nil
+	if node == nil || !trie.persistent {
+		return node
 	}
 	return &TrieNode{
 		PreCount:  node.PreCount,

@@ -4,7 +4,8 @@
 
 class TrieNode {
   count = 0
-  children: [TrieNode | undefined, TrieNode | undefined] = [undefined, undefined]
+  zero: TrieNode | undefined = undefined
+  one: TrieNode | undefined = undefined
 }
 
 class XORTrieSimple {
@@ -16,11 +17,11 @@ class XORTrieSimple {
   private readonly _bitLength: number
 
   /**
-   * @param upper 最大值，用于确定树的最大高度.
+   * @param upperInt32 最大值，用于确定树的最大高度.
    * @warning 需要保证答案不超过32位(js中位运算会强制转为int32).
    */
-  constructor(upper: number) {
-    this._bitLength = 32 - Math.clz32(upper)
+  constructor(upperInt32: number) {
+    this._bitLength = 32 - Math.clz32(upperInt32)
     this._root = new TrieNode()
   }
 
@@ -28,8 +29,13 @@ class XORTrieSimple {
     let root = this._root
     for (let i = this._bitLength; ~i; i--) {
       const bit = (int32 >>> i) & 1
-      if (root.children[bit] == undefined) root.children[bit] = new TrieNode()
-      root = root.children[bit]!
+      if (!bit) {
+        if (!root.zero) root.zero = new TrieNode()
+        root = root.zero
+      } else {
+        if (!root.one) root.one = new TrieNode()
+        root = root.one
+      }
       root.count++
     }
     return root
@@ -43,8 +49,8 @@ class XORTrieSimple {
     let root = this._root
     for (let i = this._bitLength; ~i; i--) {
       const bit = (int32 >>> i) & 1
-      root.children[bit]!.count--
-      root = root.children[bit]!
+      root = bit ? root.one! : root.zero!
+      root.count--
     }
     return root
   }
@@ -53,15 +59,24 @@ class XORTrieSimple {
    * 求int32与树中异或最大值.
    */
   query(int32: number): number {
-    let root = this._root
+    let root: TrieNode | undefined = this._root
     let res = 0
     for (let i = this._bitLength; ~i; i--) {
+      if (!root) break
       let bit = (int32 >>> i) & 1
-      if (root.children[bit ^ 1] && root.children[bit ^ 1]!.count > 0) {
+      if (!bit) {
+        if (root.one && root.one.count > 0) {
+          res |= 1 << i
+          root = root.one
+        } else {
+          root = root.zero
+        }
+      } else if (root.zero && root.zero.count > 0) {
         res |= 1 << i
-        bit ^= 1
+        root = root.zero
+      } else {
+        root = root.one
       }
-      root = root.children[bit]!
     }
     return res
   }
@@ -85,6 +100,17 @@ if (require.main === module) {
         left++
       }
       res = Math.max(res, trie.query(nums[right]))
+    }
+    return res
+  }
+
+  // https://leetcode.cn/problems/maximum-xor-of-two-numbers-in-an-array/description/
+  function findMaximumXOR(nums: number[]): number {
+    const trie = new XORTrieSimple(Math.max(...nums))
+    let res = 0
+    for (let i = 0; i < nums.length; i++) {
+      trie.insert(nums[i])
+      res = Math.max(res, trie.query(nums[i]))
     }
     return res
   }

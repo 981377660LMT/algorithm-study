@@ -38,6 +38,25 @@ func main() {
 	fmt.Println(xorTrie)
 }
 
+// https://leetcode.cn/problems/maximum-xor-of-two-numbers-in-an-array/
+func findMaximumXOR(nums []int) int {
+	max_ := 1
+	for _, num := range nums {
+		max_ = max(max_, num)
+	}
+	tree := NewBinaryTrie(max_, len(nums), true)
+
+	maxXor := 0
+	for _, num := range nums {
+		tree.Add(num)
+		tree.XorAll(num)
+		maxXor = max(maxXor, tree.Max())
+		tree.XorAll(num)
+	}
+	return maxXor
+
+}
+
 // 1803. 统计异或值在范围内的数对有多少
 // https://leetcode.cn/problems/count-pairs-with-xor-in-a-range/description/
 func countPairs(nums []int, low int, high int) int {
@@ -70,21 +89,6 @@ func maximumStrongPairXor(nums []int) int {
 		trie.XorAll(cur)
 		res = max(res, trie.Max())
 		trie.XorAll(cur)
-	}
-	return res
-}
-
-func findMaximumXOR(nums []int) int {
-	n := len(nums)
-	bt := NewBinaryTrie(max(nums...), n, true)
-	for _, v := range nums {
-		bt.Add(v)
-	}
-	res := 0
-	for _, v := range nums {
-		bt.XorAll(v)
-		res = max(res, bt.Max())
-		bt.XorAll(v)
 	}
 	return res
 }

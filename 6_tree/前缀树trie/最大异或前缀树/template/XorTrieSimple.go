@@ -5,6 +5,23 @@ import (
 	"sort"
 )
 
+// https://leetcode.cn/problems/maximum-xor-of-two-numbers-in-an-array/
+func findMaximumXOR(nums []int) int {
+	max_ := 1
+	for _, num := range nums {
+		max_ = max(max_, num)
+	}
+	tree := NewXORTrie(max_)
+
+	maxXor := 0
+	for _, num := range nums {
+		tree.Insert(num)
+		maxXor = max(maxXor, tree.Query(num))
+	}
+	return maxXor
+
+}
+
 // 2935. 找出强数对的最大异或值 II
 // https://leetcode.cn/problems/maximum-strong-pair-xor-ii/description/
 func maximumStrongPairXor(nums []int) int {
@@ -31,7 +48,7 @@ func max(a, b int) int {
 
 type Node struct {
 	count    int
-	children [2]*Node
+	children [2]*Node // 数组比 left,right 更快
 }
 
 type XORTrieSimple struct {
@@ -72,6 +89,9 @@ func (bt *XORTrieSimple) Remove(num int) {
 func (bt *XORTrieSimple) Query(num int) (maxXor int) {
 	root := bt.root
 	for i := bt.bit - 1; i >= 0; i-- {
+		if root == nil {
+			return
+		}
 		bit := (num >> i) & 1
 		if root.children[bit^1] != nil && root.children[bit^1].count > 0 {
 			maxXor |= 1 << i

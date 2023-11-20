@@ -228,6 +228,18 @@ class BinaryTrie:
 
 
 if __name__ == "__main__":
+
+    class Solution:
+        def findMaximumXOR(self, nums: List[int]) -> int:
+            trie = BinaryTrie(max=max(nums), addLimit=len(nums), allowMultipleElements=True)
+            res = 0
+            for num in nums:
+                trie.add(num)
+                trie.xorAll(num)
+                res = max(res, trie.maximum())
+                trie.xorAll(num)
+            return res
+
     # 2935. 找出强数对的最大异或值 II
     # https://leetcode.cn/problems/maximum-strong-pair-xor-ii/
     # 给你一个下标从 0 开始的整数数组 nums 。如果一对整数 x 和 y 满足以下条件，则称其为 强数对 ：
@@ -236,7 +248,7 @@ if __name__ == "__main__":
     # 返回数组 nums 所有可能的强数对中的 最大 异或值。
     #
     # 排序后，变为 y <= 2x
-    class Solution:
+    class Solution2:
         def maximumStrongPairXor(self, nums: List[int]) -> int:
             nums.sort()
             res, left, n = 0, 0, len(nums)
@@ -254,7 +266,7 @@ if __name__ == "__main__":
 
     # 1803. 统计异或值在范围内的数对有多少
     # https://leetcode.cn/problems/count-pairs-with-xor-in-a-range/description/
-    class Solution2:
+    class Solution3:
         def countPairs(self, nums: List[int], low: int, high: int) -> int:
             n = len(nums)
             bt = BinaryTrie(max=max(nums), addLimit=n, allowMultipleElements=True)

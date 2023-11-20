@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-inner-declarations */
 
 class XorTrie {
@@ -14,19 +15,19 @@ class XorTrie {
   constructor(
     options: {
       /** 最大值, 默认为2^30. */
-      max?: number
+      maxInt32?: number
       /** 最多添加的元素个数, 默认为1e5. */
       addLimit?: number
       /** 是否允许重复元素, 默认为true. */
       allowMultipleElements?: boolean
     } = {}
   ) {
-    const { max = (1 << 30) + 10, addLimit = 1e5 + 10, allowMultipleElements = true } = options
-    const maxLog = 32 - Math.clz32(max)
+    const { maxInt32 = (1 << 30) + 10, addLimit = 1e5 + 10, allowMultipleElements = true } = options
+    const maxLog = 32 - Math.clz32(maxInt32)
     const n = maxLog * addLimit + 1
     this._multiset = allowMultipleElements
     this._maxLog = maxLog
-    this._xEnd = 1 << maxLog
+    this._xEnd = 2 ** maxLog // !不要用1 << maxLog, 会溢出
     this._vList = Array(maxLog + 1).fill(0)
     this._edges = new Int32Array(2 * n).fill(-1)
     this._size = new Int32Array(n)
@@ -237,17 +238,24 @@ class XorTrie {
 export { XorTrie, XorTrie as BinaryTrie }
 
 if (require.main === module) {
-  const xorTrie = new XorTrie({ max: 1e9, addLimit: 1e5 + 10, allowMultipleElements: true })
-  xorTrie.add(1)
-  xorTrie.add(2)
-  xorTrie.add(3)
-  console.log(xorTrie.toString())
+  // https://leetcode.cn/problems/maximum-xor-of-two-numbers-in-an-array/description/
+  function findMaximumXOR(nums: number[]): number {
+    const trie = new XorTrie({ maxInt32: Math.max(...nums), addLimit: nums.length, allowMultipleElements: true })
+    let res = 0
+    nums.forEach(num => {
+      trie.add(num)
+      trie.xorAll(num)
+      res = Math.max(res, trie.max!)
+      trie.xorAll(num)
+    })
+    return res
+  }
 
   // 1803. 统计异或值在范围内的数对有多少
   // https://leetcode.cn/problems/count-pairs-with-xor-in-a-range/description/
   function countPairs(nums: number[], low: number, high: number): number {
     const n = nums.length
-    const xorTrie = new XorTrie({ max: 1e5 + 10, addLimit: n, allowMultipleElements: true })
+    const xorTrie = new XorTrie({ maxInt32: 1e5 + 10, addLimit: n, allowMultipleElements: true })
     nums.forEach(x => xorTrie.add(x))
     let res = 0
     for (let i = 0; i < n; i++) {
@@ -266,7 +274,7 @@ if (require.main === module) {
     const n = nums.length
     let res = 0
     let left = 0
-    const trie = new XorTrie({ max: Math.max(...nums), addLimit: n, allowMultipleElements: true })
+    const trie = new XorTrie({ maxInt32: Math.max(...nums), addLimit: n, allowMultipleElements: true })
     for (let right = 0; right < n; right++) {
       trie.add(nums[right])
       while (left <= right && nums[right] > 2 * nums[left]) {
