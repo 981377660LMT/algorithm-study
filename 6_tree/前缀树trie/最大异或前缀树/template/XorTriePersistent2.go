@@ -13,8 +13,7 @@ import (
 )
 
 func main() {
-	// yosupo()
-	P4735()
+	yosupo()
 }
 
 func demo() {

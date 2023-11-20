@@ -1,54 +1,182 @@
-// https://github.dev/EndlessCheng/codeforces-go/blob/cca30623b9ac0f3333348ca61b4894cd00b753cc/copypasta/trie.go#L344
 package main
 
-import "runtime/debug"
+import "fmt"
 
-// 注：由于用的是指针写法，必要时禁止 GC，能加速不少
-func init() { debug.SetGCPercent(-1) }
+func main() {
+	trie := NewTriePersistent()
+	root := trie.NewRoot()
+	root1 := trie.Insert(root, []byte("apple"))
+	root2 := trie.Insert(root1, []byte("app"))
+	root3 := trie.Remove(root2, []byte("app"))
+
+	fmt.Println(trie.Find(root, []byte("app")))
+	fmt.Println(trie.Find(root1, []byte("app")))
+	fmt.Println(trie.Find(root2, []byte("app")))
+	fmt.Println(trie.Find(root3, []byte("app")))
+}
 
 type TrieNode struct {
-	wordCount, prefixCount int
-	chidlren               [26]*TrieNode
+	PreCount  int // 多少单词以该结点为前缀
+	WordCount int // 多少单词以该节点为结束
+	Children  [26]*TrieNode
 }
 
-// 可持久化字典树
-// 注意为了拷贝一份 trieNode，这里的接收器不是指针
-// https://oi-wiki.org/ds/persistent-trie/
-// usage:
-//  git := make([]*TrieNode, maxVersion+1)  // restore all versions
-//  git[0] = &TrieNode{}  // init version 0
-//  newTrie = git[0].Insert([]byte("bcd"))  // version 1
-//  git[1] = newTrie
-func (o TrieNode) Insert(s []byte) *TrieNode {
-	o.prefixCount++
+func NewTrieNode() *TrieNode {
+	return &TrieNode{}
+}
+
+type TriePersistent struct{}
+
+func NewTriePersistent() *TriePersistent {
+	return &TriePersistent{}
+}
+
+func (trie *TriePersistent) NewRoot() *TrieNode {
+	return nil
+}
+
+func (trie *TriePersistent) Insert(root *TrieNode, s []byte) *TrieNode {
 	if len(s) == 0 {
-		o.wordCount++
-		return &o
+		return root
 	}
-
-	ord_ := ord(s[0])
-	if o.chidlren[ord_] == nil {
-		o.chidlren[ord_] = &TrieNode{}
+	if root == nil {
+		root = NewTrieNode()
 	}
-	o.chidlren[ord_] = o.chidlren[ord_].Insert(s[1:])
-	return &o
+	return trie._insert(root, s, 0)
 }
 
-// 查找字符串s
-func (o *TrieNode) Search(s []byte) *TrieNode {
-	root := o
-	for _, b := range s {
-		root = root.chidlren[ord(b)]
-		if root == nil {
-			return nil
+// 需要保证s存在.
+func (trie *TriePersistent) Remove(root *TrieNode, s []byte) *TrieNode {
+	if len(s) == 0 {
+		return root
+	}
+	if root == nil {
+		panic("can not remove from nil root")
+	}
+	return trie._remove(root, s, 0)
+}
+
+func (trie *TriePersistent) Find(root *TrieNode, s []byte) (res *TrieNode, ok bool) {
+	if root == nil || len(s) == 0 {
+		return
+	}
+	for _, char := range s {
+		ord_ := ord(char)
+		if root.Children[ord_] == nil {
+			return nil, false
+		}
+		root = root.Children[ord_]
+	}
+	return root, true
+}
+
+func (trie *TriePersistent) Enumerate(root *TrieNode, s []byte, f func(index int, node *TrieNode) bool) {
+	if root == nil || len(s) == 0 {
+		return
+	}
+	for i, char := range s {
+		ord_ := ord(char)
+		if root.Children[ord_] == nil {
+			return
+		}
+		root = root.Children[ord_]
+		if f(i, root) {
+			return
 		}
 	}
+}
 
-	if root.wordCount == 0 {
+func (trie *TriePersistent) Copy(node *TrieNode) *TrieNode {
+	if node == nil {
 		return nil
 	}
+	return &TrieNode{
+		PreCount:  node.PreCount,
+		WordCount: node.WordCount,
+		Children:  node.Children,
+	}
+}
+
+func (trie *TriePersistent) _insert(root *TrieNode, s []byte, depth int) *TrieNode {
+	root = trie.Copy(root)
+	if depth == len(s) {
+		root.WordCount++
+		return root
+	}
+	ord_ := ord(s[depth])
+	if root.Children[ord_] == nil {
+		root.Children[ord_] = NewTrieNode()
+	}
+	root.Children[ord_] = trie._insert(root.Children[ord_], s, depth+1)
+	root.Children[ord_].PreCount++
+	return root
+}
+
+func (trie *TriePersistent) _remove(root *TrieNode, s []byte, depth int) *TrieNode {
+	root = trie.Copy(root)
+	if depth == len(s) {
+		root.WordCount--
+		return root
+	}
+	ord_ := ord(s[depth])
+	root.Children[ord_] = trie._remove(root.Children[ord_], s, depth+1)
+	root.Children[ord_].PreCount--
 	return root
 }
 
 func ord(c byte) byte { return c - 'a' }
 func chr(v byte) byte { return v + 'a' }
+
+// 1804. 实现 Trie （前缀树） II
+// https://leetcode.cn/problems/implement-trie-ii-prefix-tree/
+type Trie struct {
+	pt   *TriePersistent
+	root *TrieNode
+}
+
+func Constructor() Trie {
+	pt := NewTriePersistent()
+	return Trie{
+		pt:   pt,
+		root: pt.NewRoot(),
+	}
+}
+
+func (this *Trie) Insert(word string) {
+	this.root = this.pt.Insert(this.root, []byte(word))
+}
+
+func (this *Trie) CountWordsEqualTo(word string) int {
+	res := 0
+	this.pt.Enumerate(this.root, []byte(word), func(index int, node *TrieNode) bool {
+		if index == len(word)-1 {
+			res = node.WordCount
+		}
+		return false
+	})
+	return res
+}
+
+func (this *Trie) CountWordsStartingWith(prefix string) int {
+	res := 0
+	this.pt.Enumerate(this.root, []byte(prefix), func(index int, node *TrieNode) bool {
+		if index == len(prefix)-1 {
+			res = node.PreCount
+		}
+		return false
+	})
+	return res
+}
+
+func (this *Trie) Erase(word string) {
+	this.root = this.pt.Remove(this.root, []byte(word))
+}
+
+/**
+ * Your Trie object will be instantiated and called as such:
+ * obj := Constructor();
+ * obj.Insert(word);
+ * param_2 := obj.CountWordsEqualTo(word);
+ * param_3 := obj.CountWordsStartingWith(prefix);
+ * obj.Erase(word);
+ */

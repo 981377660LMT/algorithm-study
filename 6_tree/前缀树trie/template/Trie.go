@@ -9,10 +9,10 @@ import "fmt"
 
 func main() {
 	trie := NewTrie()
-	trie.Insert("hello")
-	trie.Insert("apple")
-	trie.Insert("banana")
-	trie.Enumerate("app", func(index int, node *TrieNode) bool {
+	trie.Insert([]byte("apple"))
+	trie.Insert([]byte("app"))
+	trie.Insert([]byte("banana"))
+	trie.Enumerate([]byte("aba"), func(index int, node *TrieNode) bool {
 		fmt.Println(index, node)
 		return false
 	})
@@ -42,7 +42,7 @@ func NewTrie() *Trie {
 	}
 }
 
-func (t *Trie) Insert(s string) *TrieNode {
+func (t *Trie) Insert(s []byte) *TrieNode {
 	if len(s) == 0 {
 		return t.root
 	}
@@ -59,7 +59,7 @@ func (t *Trie) Insert(s string) *TrieNode {
 	return root
 }
 
-func (t *Trie) Remove(s string) *TrieNode {
+func (t *Trie) Remove(s []byte) *TrieNode {
 	if len(s) == 0 {
 		return t.root
 	}
@@ -73,7 +73,7 @@ func (t *Trie) Remove(s string) *TrieNode {
 	return root
 }
 
-func (t *Trie) Find(s string) (node *TrieNode, ok bool) {
+func (t *Trie) Find(s []byte) (node *TrieNode, ok bool) {
 	if len(s) == 0 {
 		return
 	}
@@ -88,7 +88,7 @@ func (t *Trie) Find(s string) (node *TrieNode, ok bool) {
 	return root, true
 }
 
-func (t *Trie) Enumerate(s string, f func(index int, node *TrieNode) bool) {
+func (t *Trie) Enumerate(s []byte, f func(index int, node *TrieNode) bool) {
 	if len(s) == 0 {
 		return
 	}

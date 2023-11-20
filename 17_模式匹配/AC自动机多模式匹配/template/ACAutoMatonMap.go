@@ -2,10 +2,11 @@ package main
 
 const INF = int(2e18)
 
+// https://leetcode.cn/problems/length-of-the-longest-valid-substring/description/
 func longestValidSubstring(word string, forbidden []string) int {
 	acm := NewACAutoMatonMap()
 	for _, w := range forbidden {
-		acm.AddString(w)
+		acm.AddString([]byte(w))
 	}
 	acm.BuildSuffixLink()
 
@@ -20,7 +21,7 @@ func longestValidSubstring(word string, forbidden []string) int {
 
 	res, left, pos := 0, 0, 0
 	for right, char := range word {
-		pos = acm.Move(pos, int(char))
+		pos = acm.Move(pos, byte(char))
 		left = max(left, right-minLen[pos]+2)
 		res = max(res, right-left+1)
 	}
@@ -28,26 +29,26 @@ func longestValidSubstring(word string, forbidden []string) int {
 }
 
 type ACAutoMatonMap struct {
-	WordPos    []int         // WordPos[i] 表示加入的第i个模式串对应的节点编号.
-	children   []map[int]int // children[v][c] 表示节点v通过字符c转移到的节点.
-	suffixLink []int         // 又叫fail.指向当前节点最长真后缀对应结点.
-	bfsOrder   []int         // 结点的拓扑序,0表示虚拟节点.
+	WordPos    []int          // WordPos[i] 表示加入的第i个模式串对应的节点编号.
+	children   []map[byte]int // children[v][c] 表示节点v通过字符c转移到的节点.
+	suffixLink []int          // 又叫fail.指向当前节点最长真后缀对应结点.
+	bfsOrder   []int          // 结点的拓扑序,0表示虚拟节点.
 }
 
 func NewACAutoMatonMap() *ACAutoMatonMap {
 	return &ACAutoMatonMap{
 		WordPos:  []int{},
-		children: []map[int]int{{}},
+		children: []map[byte]int{{}},
 	}
 }
 
-func (ac *ACAutoMatonMap) AddString(str string) int {
-	if len(str) == 0 {
+func (ac *ACAutoMatonMap) AddString(s []byte) int {
+	if len(s) == 0 {
 		return 0
 	}
 	pos := 0
-	for _, char := range str {
-		ord := int(char)
+	for i := 0; i < len(s); i++ {
+		ord := s[i]
 		nexts := ac.children[pos]
 		if next, ok := nexts[ord]; ok {
 			pos = next
@@ -55,25 +56,25 @@ func (ac *ACAutoMatonMap) AddString(str string) int {
 			nextState := len(ac.children)
 			nexts[ord] = nextState
 			pos = nextState
-			ac.children = append(ac.children, map[int]int{})
+			ac.children = append(ac.children, map[byte]int{})
 		}
 	}
 	ac.WordPos = append(ac.WordPos, pos)
 	return pos
 }
 
-func (ac *ACAutoMatonMap) AddChar(pos int, ord int) int {
+func (ac *ACAutoMatonMap) AddChar(pos int, ord byte) int {
 	nexts := ac.children[pos]
 	if next, ok := nexts[ord]; ok {
 		return next
 	}
 	nextState := len(ac.children)
 	nexts[ord] = nextState
-	ac.children = append(ac.children, map[int]int{})
+	ac.children = append(ac.children, map[byte]int{})
 	return nextState
 }
 
-func (ac *ACAutoMatonMap) Move(pos int, ord int) int {
+func (ac *ACAutoMatonMap) Move(pos int, ord byte) int {
 	for {
 		nexts := ac.children[pos]
 		if next, ok := nexts[ord]; ok {

@@ -7,8 +7,13 @@ from collections import deque
 # 这题很像
 # 1591. 奇怪的打印机 II.py
 
+
+# stamp = "abc"
+# target = "abcbabc"
+# 染色问题倒着看。
+# !哪些位置可以作为最后一次的操作?
+
 # 拓扑排序：
-# 倒着看，可以想象该窗口中的字符全部替换为 '*' ，表示可以匹配任意字符。
 # !入度为窗口内与印章不同的字符数
 # 边为字符 => 窗口
 
@@ -18,8 +23,8 @@ from collections import deque
 class Solution:
     def movesToStamp(self, stamp: str, target: str) -> List[int]:
         m, n = len(stamp), len(target)
-        indeg = [m] * (n - m + 1)
-        adjList = [[] for _ in range(n)]
+        indeg = [m] * (n - m + 1)  # 入度为每个窗口中对应字符不相同的总数
+        adjList = [[] for _ in range(n)]  # 如果一个滑动窗口的某一个字符与目标字符串不一致，那么我们就连一条边。
         queue = deque()
         visited = [False] * n
 

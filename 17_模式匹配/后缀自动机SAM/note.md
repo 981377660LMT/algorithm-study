@@ -38,3 +38,14 @@ https://www.bilibili.com/video/BV1ED4y1U7aU
 
 suffixLink 可以形成一棵树，有的地方叫 parent 树
 ![suffixLink 树](image.png)
+
+---
+
+https://www.bilibili.com/video/BV1qF411G7u5
+![SAM讲解](image-1.png)
+
+三要素：
+
+1. 转移边
+2. 链接边
+3. 最长串的长度

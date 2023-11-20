@@ -1,6 +1,6 @@
 // https://maspypy.github.io/library/string/suffix_automaton.hpp
 // https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/sam.go
-// 完全没有理解
+// 在线构建SAM
 
 package main
 
@@ -18,14 +18,20 @@ func main() {
 	var s string
 	fmt.Fscan(in, &s)
 	sa := NewSuffixAutomaton()
-	for _, c := range s {
-		sa.Add(string(c))
+	for i := 0; i < len(s); i++ {
+		sa.Add(s[i])
 	}
 	fmt.Fprintln(out, sa.CountSubstring())
 }
 
 const SIZE int = 26     // 字符集大小
 const MARGIN byte = 'a' // 字符集的起始字符
+
+type Node struct {
+	next [SIZE]int // automaton の遷移先
+	link int       // suffix link
+	size int       // node が受理する最長文字列の長さ
+}
 
 type SuffixAutomaton struct {
 	size   int // 字符集大小
@@ -34,20 +40,14 @@ type SuffixAutomaton struct {
 	last   int // 文字列全体を入れたときの行き先
 }
 
-type Node struct {
-	next [SIZE]int // automaton の遷移先
-	link int       // suffix link
-	size int       // node が受理する最長文字列の長さ
-}
-
 func NewSuffixAutomaton() *SuffixAutomaton {
 	res := &SuffixAutomaton{size: SIZE, margin: MARGIN}
 	res.nodes = append(res.nodes, res.newNode(-1, 0))
 	return res
 }
 
-func (sa *SuffixAutomaton) Add(char string) {
-	c := char[0] - sa.margin
+func (sa *SuffixAutomaton) Add(char byte) {
+	c := char - sa.margin
 	newNode := len(sa.nodes)
 	sa.nodes = append(sa.nodes, sa.newNode(-1, sa.nodes[sa.last].size+1))
 	p := sa.last
@@ -77,7 +77,18 @@ func (sa *SuffixAutomaton) Add(char string) {
 	sa.last = newNode
 }
 
-func (sa *SuffixAutomaton) CalcDAG() [][]int {
+// 后缀链接树.也叫 parent tree.
+func (sa *SuffixAutomaton) BuildTree() [][]int {
+	n := len(sa.nodes)
+	graph := make([][]int, n)
+	for v := 1; v < n; v++ {
+		p := sa.nodes[v].link
+		graph[p] = append(graph[p], v)
+	}
+	return graph
+}
+
+func (sa *SuffixAutomaton) BuildDAG() [][]int {
 	n := len(sa.nodes)
 	graph := make([][]int, n)
 	for v := 0; v < n; v++ {
@@ -86,17 +97,6 @@ func (sa *SuffixAutomaton) CalcDAG() [][]int {
 				graph[v] = append(graph[v], to)
 			}
 		}
-	}
-	return graph
-}
-
-// suffixLink 形成的树.也叫 parent tree.
-func (sa *SuffixAutomaton) CalcTree() [][]int {
-	n := len(sa.nodes)
-	graph := make([][]int, n)
-	for v := 1; v < n; v++ {
-		p := sa.nodes[v].link
-		graph[p] = append(graph[p], v)
 	}
 	return graph
 }
