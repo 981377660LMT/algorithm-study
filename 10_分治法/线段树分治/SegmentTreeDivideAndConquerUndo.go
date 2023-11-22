@@ -172,7 +172,11 @@ func (o *SegmentTreeDivideAndConquerUndo) AddQuery(time int, id int) {
 //	undo: 撤销一次`mutate`操作.
 //	query: 响应编号为`queryId`的查询.
 //	一共调用**O(nlogn)**次`mutate`和`undo`，**O(q)**次`query`.
-func (o *SegmentTreeDivideAndConquerUndo) Run(mutate func(mutationId int), undo func(), query func(queryId int)) {
+func (o *SegmentTreeDivideAndConquerUndo) Run(
+	mutate func(mutationId int),
+	undo func(),
+	query func(queryId int),
+) {
 	if len(o.queries) == 0 {
 		return
 	}

@@ -117,7 +117,7 @@ func main() {
 			start, end, x := operation[1], operation[2], operation[3]
 			// fmt.Println("start, end, x:", start, end, x, preXor, x^preXor[len(preXor)-1])
 			// trie.Enumerate(roots[end-1], func(num int) { fmt.Println(num) })
-			maxXor := trie.Query(roots[end-1], x^preXor[len(preXor)-1], func(node *XorTrieNode) bool {
+			maxXor, _ := trie.Query(roots[end-1], x^preXor[len(preXor)-1], func(node *XorTrieNode) bool {
 				return node.data >= start
 			})
 			fmt.Fprintln(out, maxXor)
@@ -150,7 +150,8 @@ func findMaximumXOR(nums []int) int {
 	maxXor := 0
 	for _, num := range nums {
 		root = tree.Insert(root, num, 0)
-		maxXor = max(maxXor, tree.Query(root, num, nil))
+		cand, _ := tree.Query(root, num, nil)
+		maxXor = max(maxXor, cand)
 	}
 	return maxXor
 }
@@ -204,9 +205,9 @@ func (trie *XorTrieSimplePersistent) Remove(root *XorTrieNode, num int) *XorTrie
 }
 
 // 查询num与root中的数异或的最大值.
-// !如果root为nil,返回0.
+// !如果root为nil,返回 0,nil.
 // !canSwap: 判断是否能切换到另一位的子树.传nil表示不需要自定义判断.
-func (trie *XorTrieSimplePersistent) Query(root *XorTrieNode, num int, canSwap func(node *XorTrieNode) bool) (maxXor int) {
+func (trie *XorTrieSimplePersistent) Query(root *XorTrieNode, num int, canSwap func(node *XorTrieNode) bool) (maxXor int, node *XorTrieNode) {
 	if root == nil {
 		return
 	}
@@ -220,7 +221,7 @@ func (trie *XorTrieSimplePersistent) Query(root *XorTrieNode, num int, canSwap f
 			}
 			root = root.chidlren[bit]
 		}
-		return
+		return maxXor, root
 	} else {
 		for k := trie.bit - 1; k >= 0; k-- {
 			bit := (num >> k) & 1
@@ -230,7 +231,7 @@ func (trie *XorTrieSimplePersistent) Query(root *XorTrieNode, num int, canSwap f
 			}
 			root = root.chidlren[bit]
 		}
-		return
+		return maxXor, root
 	}
 }
 

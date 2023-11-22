@@ -1,4 +1,5 @@
 // 树套树(外层为线段树),支持区间更新,单点查询.
+// 保证内层树的col不大于row.
 
 package main
 
@@ -10,7 +11,7 @@ import (
 func main() {
 	// 区间赋值,单点查询
 	row, col := 500, 500
-	seg := NewSegTree2DRangeUpdatePointGet(
+	seg := NewSegmentTree2DRangeUpdatePointGet(
 		row, col,
 		func(n int) IRangeUpdatePointGet1D { return NewNavieTree(n) },
 		func(a E, b E) E {
@@ -22,13 +23,13 @@ func main() {
 	)
 
 	time1 := time.Now()
-	for i := 0; i < 2e5; i++ {
+	for i := 0; i < 1e5; i++ {
 		seg.Update(0, row, 0, col, E{i, i})
 		seg.Get(0, 0)
 		seg.Set(0, 0, E{0, 0})
 	}
 	time2 := time.Now()
-	fmt.Println(time2.Sub(time1)) // 416.2745ms
+	fmt.Println(time2.Sub(time1)) // 214.725792ms
 }
 
 const INF int = 1e18
@@ -57,14 +58,14 @@ func (nat *NaiveTree) Update(start, end int, lazy Id) {
 func (nat *NaiveTree) Get(pos int) E        { return nat.data[pos] }
 func (nat *NaiveTree) Set(pos int, value E) { nat.data[pos] = value }
 
-// #region template SegTree2DRangeUpdatePointGet
+// #region template SegmentTree2DRangeUpdatePointGet
 type IRangeUpdatePointGet1D interface {
 	Update(start int, end int, lazy Id)
 	Get(index int) E
 	Set(index int, value E)
 }
 
-type SegTree2DRangeUpdatePointGet struct {
+type SegmentTree2DRangeUpdatePointGet struct {
 	_seg        []IRangeUpdatePointGet1D
 	_mergeRow   func(a E, b E) E
 	_init1D     func() IRangeUpdatePointGet1D
@@ -74,16 +75,17 @@ type SegTree2DRangeUpdatePointGet struct {
 }
 
 // 二维区间更新，单点查询的线段树(树套树).
-//  row 行数.对时间复杂度贡献为`O(log(row))`.
-//  col 列数.内部树的大小为.列数越小,对内部树的时间复杂度要求越低.
-//  createRangeUpdatePointGet1D 初始化内层"树"的函数.入参为内层"树"的大小.
-//  mergeRow 合并两个内层"树"的结果.
-func NewSegTree2DRangeUpdatePointGet(
+//
+//	row 行数.对时间复杂度贡献为`O(log(row))`.
+//	col 列数.内部树的大小为.列数越小,对内部树的时间复杂度要求越低.
+//	createRangeUpdatePointGet1D 初始化内层"树"的函数.入参为内层"树"的大小.
+//	mergeRow 合并两个内层"树"的结果.
+func NewSegmentTree2DRangeUpdatePointGet(
 	row, col int,
 	createRangeUpdatePointGet1D func(n int) IRangeUpdatePointGet1D,
 	mergeRow func(a E, b E) E,
-) *SegTree2DRangeUpdatePointGet {
-	res := &SegTree2DRangeUpdatePointGet{}
+) *SegmentTree2DRangeUpdatePointGet {
+	res := &SegmentTree2DRangeUpdatePointGet{}
 	res._rawRow = row
 	res._needRotate = row < col
 	if res._needRotate {
@@ -106,7 +108,7 @@ func NewSegTree2DRangeUpdatePointGet(
 }
 
 // 将`[row1,row2)`x`[col1,col2)`的区间值与`lazy`作用.
-func (this *SegTree2DRangeUpdatePointGet) Update(row1, row2, col1, col2 int, lazy Id) {
+func (this *SegmentTree2DRangeUpdatePointGet) Update(row1, row2, col1, col2 int, lazy Id) {
 	if this._needRotate {
 		tmp1 := row1
 		tmp2 := row2
@@ -119,7 +121,7 @@ func (this *SegTree2DRangeUpdatePointGet) Update(row1, row2, col1, col2 int, laz
 	this._update(row1, row2, col1, col2, lazy, 0, 0, this._size)
 }
 
-func (this *SegTree2DRangeUpdatePointGet) Get(row, col int) E {
+func (this *SegmentTree2DRangeUpdatePointGet) Get(row, col int) E {
 	if this._needRotate {
 		tmp := row
 		row = col
@@ -140,7 +142,7 @@ func (this *SegTree2DRangeUpdatePointGet) Get(row, col int) E {
 	return res
 }
 
-func (this *SegTree2DRangeUpdatePointGet) Set(row, col int, value E) {
+func (this *SegmentTree2DRangeUpdatePointGet) Set(row, col int, value E) {
 	if this._needRotate {
 		tmp := row
 		row = col
@@ -161,7 +163,7 @@ func (this *SegTree2DRangeUpdatePointGet) Set(row, col int, value E) {
 	}
 }
 
-func (this *SegTree2DRangeUpdatePointGet) _update(R, C, start, end int, lazy Id, pos, r, c int) {
+func (this *SegmentTree2DRangeUpdatePointGet) _update(R, C, start, end int, lazy Id, pos, r, c int) {
 	if c <= R || C <= r {
 		return
 	}
@@ -183,14 +185,14 @@ func (this *SegTree2DRangeUpdatePointGet) _update(R, C, start, end int, lazy Id,
 //1476. 子矩形查询
 
 type SubrectangleQueries struct {
-	seg  *SegTree2DRangeUpdatePointGet
+	seg  *SegmentTree2DRangeUpdatePointGet
 	time int
 }
 
 func Constructor(rectangle [][]int) SubrectangleQueries {
 	res := SubrectangleQueries{}
 	row, col := len(rectangle), len(rectangle[0])
-	seg := NewSegTree2DRangeUpdatePointGet(
+	seg := NewSegmentTree2DRangeUpdatePointGet(
 		row, col,
 		func(n int) IRangeUpdatePointGet1D { return NewNavieTree(n) },
 		func(a E, b E) E {

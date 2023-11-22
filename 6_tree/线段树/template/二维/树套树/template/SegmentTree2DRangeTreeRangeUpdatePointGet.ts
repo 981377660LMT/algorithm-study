@@ -26,7 +26,7 @@ interface IRangeUpdatePointGet1D<E, Id> {
 /**
  * 二维区间更新，单点查询的线段树(树套树).
  */
-class SegmentTree2DRangeUpdatePointGet<E = number, Id = number> {
+class SegmentTree2DRangeTreeRangeUpdatePointGet<E = number, Id = number> {
   /**
    * 存储内层的"树"结构.
    */
@@ -140,7 +140,7 @@ class SegmentTree2DRangeUpdatePointGet<E = number, Id = number> {
   }
 }
 
-export { SegmentTree2DRangeUpdatePointGet }
+export { SegmentTree2DRangeTreeRangeUpdatePointGet }
 
 if (require.main === module) {
   // https://leetcode.cn/problems/subrectangle-queries/
@@ -149,7 +149,7 @@ if (require.main === module) {
    * !区间染色，单点求值的线段树.
    */
   class SubrectangleQueries<V> {
-    private _seg2d: SegmentTree2DRangeUpdatePointGet<E, Id>
+    private _seg2d: SegmentTree2DRangeTreeRangeUpdatePointGet<E, Id>
     private _updateTime = 1
     private readonly _id: Map<V, number> = new Map()
     private readonly _rId: V[] = []
@@ -157,7 +157,7 @@ if (require.main === module) {
     constructor(rectangle: ArrayLike<ArrayLike<V>>) {
       const row = rectangle.length
       const col = rectangle[0].length
-      const seg2d = new SegmentTree2DRangeUpdatePointGet<E, Id>(
+      const seg2d = new SegmentTree2DRangeTreeRangeUpdatePointGet<E, Id>(
         row,
         col,
         n => new NaiveTree(n),
@@ -247,9 +247,9 @@ if (require.main === module) {
       .map(() => Array(COL).fill(0))
   )
   console.time('update')
-  for (let i = 0; i < 1e6; ++i) {
+  for (let i = 0; i < 1e5; ++i) {
     tree.updateSubrectangle(0, 0, ROW - 1, COL - 1, i)
     tree.getValue(0, 0)
   }
-  console.timeEnd('update') // update: 1.672s
+  console.timeEnd('update') // update: 428.639ms
 }

@@ -133,6 +133,13 @@ func (o *PersistentArray) Set(root *AryNode, index int, data E) *AryNode {
 	return newNode
 }
 
+func (o *PersistentArray) Copy(root *AryNode) *AryNode {
+	if root == nil {
+		return nil
+	}
+	return &AryNode{data: root.data, children: root.children}
+}
+
 func (o *PersistentArray) setWithoutCopy(root *AryNode, index int, data E) *AryNode {
 	if root == nil {
 		root = o.Alloc()

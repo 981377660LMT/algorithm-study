@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func main() {
-	trie := NewTriePersistent()
+	trie := NewTriePersistent(true)
 	root := trie.NewRoot()
 	root1 := trie.Insert(root, []byte("apple"))
 	root2 := trie.Insert(root1, []byte("app"))
@@ -137,7 +137,7 @@ type Trie struct {
 }
 
 func Constructor() Trie {
-	pt := NewTriePersistent()
+	pt := NewTriePersistent(false)
 	return Trie{
 		pt:   pt,
 		root: pt.NewRoot(),

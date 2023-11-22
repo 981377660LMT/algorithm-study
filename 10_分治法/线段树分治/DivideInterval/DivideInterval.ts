@@ -4,7 +4,7 @@
  */
 class DivideInterval {
   /**
-   * 线段树中一共有`2*offset`个节点.
+   * 线段树中一共有`offset+n`个节点.
    * `offset+i`对应原图的第i个顶点(0<=i<n).
    */
   readonly offset: number
@@ -53,7 +53,7 @@ class DivideInterval {
 
   /** 线段树结点个数. */
   get size(): number {
-    return 2 * this.offset
+    return this.offset + this._n
   }
 
   /**

@@ -1,36 +1,161 @@
-package main
+// 树套树：线段树套树/树状数组套树
 
-import (
-	"bufio"
-	"fmt"
-	"os"
-)
+package main
 
 func main() {
 
 }
 
-// P3332 [ZJOI2013] K大数查询
-// https://www.luogu.com.cn/problem/P3332
-// 初识时有n个空数组，每个数组有一个编号，编号从0到n-1.
-// 1 start end c :将 c 加入编号在 [start,end) 的数组中.
-// 2 start end k :查询编号在 [start,end) 的数组的所有数中第 k 大的数, k>=1.
-func K大数查询() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+type InnerTree struct{}
 
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-	queries := make([][4]int, q)
-	for i := 0; i < q; i++ {
-		var op, start, end, c int
-		fmt.Fscan(in, &op, &start, &end, &c)
-		start--
-		queries[i] = [4]int{op, start, end, c}
+// 线段树套树.
+type SegmentTreeDivideInterval struct {
+	n               int
+	smallN          bool
+	offset          int // 线段树中一共offset+n个节点,offset+i对应原来的第i个节点.
+	createInnerTree func() InnerTree
+	innerTreeList   []InnerTree
+	innerTreeMap    map[int]InnerTree
+}
+
+// 单点更新，区间查询的树套树.
+// n: 第一个维度(一般是序列)的长度.
+// createInnerTree: 创建第二个维度(一般是线段树)的树.
+// smallN: n较小时，会预先创建好所有的内层树; 否则会用map保存内层树，并在需要的时候创建.
+func NewSegmentTree2DPointUpdateRangeQuery(n int, createInnerTree func() InnerTree, smallN bool) *SegmentTreeDivideInterval {
+	offset := 1
+	for offset < n {
+		offset <<= 1
+	}
+	var innerTreeList []InnerTree
+	if smallN {
+		innerTreeList = make([]InnerTree, offset+n)
+		for i := range innerTreeList {
+			innerTreeList[i] = createInnerTree()
+		}
+	}
+	return &SegmentTreeDivideInterval{
+		n:               n,
+		smallN:          smallN,
+		offset:          offset,
+		createInnerTree: createInnerTree,
+		innerTreeList:   innerTreeList,
+		innerTreeMap:    map[int]InnerTree{},
 	}
 }
 
-// P2617 Dynamic Rankings
-// https://www.luogu.com.cn/problem/P2617
-// 动态区间第k小
+func (tree *SegmentTreeDivideInterval) EnumeratePoint(index int, f func(tree InnerTree)) {
+	if index < 0 || index >= tree.n {
+		return
+	}
+	index += tree.offset
+	for index > 0 {
+		f(tree.getTree(index))
+		index >>= 1
+	}
+}
+
+func (tree *SegmentTreeDivideInterval) EnumerateRange(start, end int, f func(tree InnerTree)) {
+	if start < 0 {
+		start = 0
+	}
+	if end > tree.n {
+		end = tree.n
+	}
+	if start >= end {
+		return
+	}
+
+	leftSegments := []InnerTree{}
+	rightSegments := []InnerTree{}
+	for start, end = start+tree.offset, end+tree.offset; start < end; start, end = start>>1, end>>1 {
+		if start&1 == 1 {
+			leftSegments = append(leftSegments, tree.getTree(start))
+			start++
+		}
+		if end&1 == 1 {
+			end--
+			rightSegments = append(rightSegments, tree.getTree(end))
+		}
+	}
+
+	for i := 0; i < len(leftSegments); i++ {
+		f(leftSegments[i])
+	}
+	for i := len(rightSegments) - 1; i >= 0; i-- {
+		f(rightSegments[i])
+	}
+}
+
+func (tree *SegmentTreeDivideInterval) getTree(segmentId int) InnerTree {
+	if tree.smallN {
+		return tree.innerTreeList[segmentId]
+	} else {
+		if v, ok := tree.innerTreeMap[segmentId]; ok {
+			return v
+		} else {
+			newTree := tree.createInnerTree()
+			tree.innerTreeMap[segmentId] = newTree
+			return newTree
+		}
+	}
+}
+
+// 树状数组套树.
+type FenwickTreeDivideInterval struct {
+	n               int
+	smallN          bool
+	createInnerTree func() InnerTree
+	innerTreeList   []InnerTree
+	innerTreeMap    map[int]InnerTree
+}
+
+func NewFenwickTreeDivideInterval(n int, createInnerTree func() InnerTree, smallN bool) *FenwickTreeDivideInterval {
+	var innerTreeList []InnerTree
+	if smallN {
+		innerTreeList = make([]InnerTree, n)
+		for i := range innerTreeList {
+			innerTreeList[i] = createInnerTree()
+		}
+	}
+	return &FenwickTreeDivideInterval{
+		n:               n,
+		smallN:          smallN,
+		createInnerTree: createInnerTree,
+		innerTreeList:   innerTreeList,
+		innerTreeMap:    map[int]InnerTree{},
+	}
+}
+
+func (tree *FenwickTreeDivideInterval) Update(index int, f func(tree InnerTree)) {
+	if index < 0 || index >= tree.n {
+		return
+	}
+	for index++; index <= tree.n; index += index & -index {
+		f(tree.getTree(index - 1))
+	}
+}
+
+func (tree *FenwickTreeDivideInterval) QueryPrefix(end int, f func(tree InnerTree)) {
+	if end > tree.n {
+		end = tree.n
+	}
+	for end > 0 {
+		f(tree.getTree(end - 1))
+		end &= end - 1
+	}
+}
+
+func (tree *FenwickTreeDivideInterval) getTree(segmentId int) InnerTree {
+	if tree.smallN {
+		return tree.innerTreeList[segmentId]
+	} else {
+		if v, ok := tree.innerTreeMap[segmentId]; ok {
+			return v
+		} else {
+			newTree := tree.createInnerTree()
+			tree.innerTreeMap[segmentId] = newTree
+			return newTree
+		}
+	}
+}

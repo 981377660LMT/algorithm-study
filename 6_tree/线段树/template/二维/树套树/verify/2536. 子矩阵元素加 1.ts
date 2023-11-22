@@ -1,8 +1,8 @@
-import { SegmentTree2DRangeUpdatePointGet } from '../SegmentTree2DRangeUpdatePointGet'
+import { SegmentTree2DRangeTreeRangeUpdatePointGet } from '../template/SegmentTree2DRangeTreeRangeUpdatePointGet'
 
 // https://leetcode.cn/problems/increment-submatrices-by-one/
 function rangeAddQueries(n: number, queries: number[][]): number[][] {
-  const seg2d = new SegmentTree2DRangeUpdatePointGet(
+  const seg2d = new SegmentTree2DRangeTreeRangeUpdatePointGet(
     n,
     n,
     n => new NaiveTree(n),
@@ -47,7 +47,7 @@ class NaiveTree {
 }
 
 if (require.main === module) {
-  const seg2d = new SegmentTree2DRangeUpdatePointGet(
+  const seg2d = new SegmentTree2DRangeTreeRangeUpdatePointGet(
     3,
     3,
     n => new NaiveTree(n),

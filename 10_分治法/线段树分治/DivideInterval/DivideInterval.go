@@ -68,7 +68,7 @@ func main() {
 }
 
 type DivideInterval struct {
-	Offset int // 线段树中一共2*offset个节点,offset+i对应原来的第i个节点.
+	Offset int // 线段树中一共offset+n个节点,offset+i对应原来的第i个节点.
 	n      int
 }
 
@@ -114,7 +114,7 @@ func (d *DivideInterval) PushUp(f func(parent, child1, child2 int)) {
 
 // 线段树的节点个数.
 func (d *DivideInterval) Size() int {
-	return 2 * d.Offset
+	return d.Offset + d.n
 }
 
 func (d *DivideInterval) IsLeaf(segmentId int) bool {

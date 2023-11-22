@@ -7,7 +7,7 @@
 
 // !三元组:枚举中间.
 
-import { SegmentTree2DSparse } from './SegmentTree2DSparse'
+import { SegmentTree2DSparse } from '../SegmentTree2DSparse'
 
 const INF = 1e9
 
