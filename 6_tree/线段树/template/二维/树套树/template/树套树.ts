@@ -4,7 +4,7 @@
 
 import { BITArray2 } from '../../../../../重链剖分/BIT'
 
-/** 线段树套树. */
+/** 线段树套数据结构. */
 class SegmentTreeDivideInterval<InnerTree> {
   private readonly _n: number
   private readonly _smallN: boolean
@@ -81,7 +81,7 @@ class SegmentTreeDivideInterval<InnerTree> {
   }
 }
 
-/** 树状数组套树. */
+/** 树状数组套数据结构. */
 class FenwickTreeDivideInterval<InnerTree> {
   private readonly _n: number
   private readonly _smallN: boolean
@@ -139,7 +139,7 @@ if (require.main === module) {
 
   function testSegmentTreeDivideInterval() {
     const seg = new SegmentTreeDivideInterval(10, () => 1, true)
-    seg.enumerateRange(0, 9, tree => console.log(tree))
+    seg.enumerateRange(2, 9, tree => console.log(tree))
   }
 
   function testFenwickTreeDivideInterval() {

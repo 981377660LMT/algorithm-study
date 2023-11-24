@@ -1,11 +1,11 @@
-import { RightMostLeftMostQuery } from '../../22_专题/离线查询/根号分治/RightMostLeftMostQuery'
+import { MonoStackDynamic } from '../../22_专题/离线查询/根号分治/RightMostLeftMostQuery'
 
 export {}
 
 const INF = 2e9 // !超过int32使用2e15
 
 function leftmostBuildingQueries(heights: number[], queries: number[][]): number[] {
-  const finder = new RightMostLeftMostQuery(heights)
+  const finder = new MonoStackDynamic(heights)
   const res: number[] = []
   for (let [alice, bob] of queries) {
     if (alice === bob) {

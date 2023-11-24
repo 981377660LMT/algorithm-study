@@ -12,6 +12,7 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 MOD = 998244353
 INF = int(4e18)
 
+
 if __name__ == "__main__":
     # !四舍五入小数使用floor(f+0.5)
     f = float(input())

@@ -1,10 +1,15 @@
-from typing import List
+# 418. 屏幕可显示句子的数量
 
 # 请你计算出给定句子可以在屏幕上完整显示的次数。
 # 给你一个 rows x cols 的屏幕和一个用 非空 的单词列表组成的句子
-
 # 在一行中 的两个连续单词必须用一个空格符分隔。
 # 请你计算出给定句子可以在屏幕上完整显示的次数。
+# https://leetcode.cn/problems/sentence-screen-fitting/
+
+
+from typing import List
+
+
 class Solution:
     def wordsTyping(self, sentence: List[str], rows: int, cols: int) -> int:
         word_len = [len(word) for word in sentence]

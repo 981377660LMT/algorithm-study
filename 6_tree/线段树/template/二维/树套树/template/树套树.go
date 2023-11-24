@@ -6,9 +6,8 @@ func main() {
 
 }
 
-type InnerTree struct{}
+type InnerTree = struct{}
 
-// 线段树套树.
 type SegmentTreeDivideInterval struct {
 	n               int
 	smallN          bool
@@ -18,11 +17,11 @@ type SegmentTreeDivideInterval struct {
 	innerTreeMap    map[int]InnerTree
 }
 
-// 单点更新，区间查询的树套树.
+// 线段树套数据结构.
 // n: 第一个维度(一般是序列)的长度.
 // createInnerTree: 创建第二个维度(一般是线段树)的树.
 // smallN: n较小时，会预先创建好所有的内层树; 否则会用map保存内层树，并在需要的时候创建.
-func NewSegmentTree2DPointUpdateRangeQuery(n int, createInnerTree func() InnerTree, smallN bool) *SegmentTreeDivideInterval {
+func NewSegmentTreeDivideInterval(n int, createInnerTree func() InnerTree, smallN bool) *SegmentTreeDivideInterval {
 	offset := 1
 	for offset < n {
 		offset <<= 1
@@ -101,7 +100,7 @@ func (tree *SegmentTreeDivideInterval) getTree(segmentId int) InnerTree {
 	}
 }
 
-// 树状数组套树.
+// 树状数组套数据结构.
 type FenwickTreeDivideInterval struct {
 	n               int
 	smallN          bool
