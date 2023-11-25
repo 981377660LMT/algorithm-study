@@ -125,6 +125,7 @@ func op(x, y T) T { return x + y }
 func inv(x T) T   { return -x }
 
 // 数组实现的带权并查集(维护到每个组根节点距离的并查集).
+// 用于维护环的权值，树上的距离等.
 type UnionFindArrayWithDist struct {
 	Part      int
 	data      []int
@@ -145,7 +146,8 @@ func NewUnionFindArrayWithDist(n int) *UnionFindArrayWithDist {
 }
 
 // p[x] = p[y] + dist.
-//  如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
+//
+//	如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
 func (uf *UnionFindArrayWithDist) Union(x, y int, dist T) bool {
 	dist = op(dist, op(uf.DistToRoot(y), inv(uf.DistToRoot(x))))
 	x = uf.Find(x)
@@ -165,7 +167,8 @@ func (uf *UnionFindArrayWithDist) Union(x, y int, dist T) bool {
 }
 
 // p[x] = p[y] + dist.
-//  如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
+//
+//	如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
 func (uf *UnionFindArrayWithDist) UnionWithCallback(x, y int, dist T, cb func(big, small int)) bool {
 	dist = op(dist, op(uf.DistToRoot(y), inv(uf.DistToRoot(x))))
 	x = uf.Find(x)
@@ -198,7 +201,8 @@ func (uf *UnionFindArrayWithDist) Find(x int) int {
 }
 
 // f[x]-f[find(x)].
-//  点x到所在组根节点的距离.
+//
+//	点x到所在组根节点的距离.
 func (uf *UnionFindArrayWithDist) DistToRoot(x int) T {
 	uf.Find(x)
 	return uf.potential[x]
@@ -216,7 +220,8 @@ func (uf *UnionFindArrayWithDist) GetSize(x int) int {
 func (uf *UnionFindArrayWithDist) GetGroups() map[int][]int {
 	res := make(map[int][]int)
 	for i := range uf.data {
-		res[uf.Find(i)] = append(res[uf.Find(i)], i)
+		root := uf.Find(i)
+		res[root] = append(res[root], i)
 	}
 	return res
 }
@@ -225,16 +230,10 @@ func (uf *UnionFindArrayWithDist) IsConnected(x, y int) bool {
 	return uf.Find(x) == uf.Find(y)
 }
 
-var _pool = make(map[interface{}]int)
-
-func id(o interface{}) int {
-	if v, ok := _pool[o]; ok {
-		return v
-	}
-	v := len(_pool)
-	_pool[o] = v
-	return v
-}
+//
+//
+//
+//
 
 // Map实现的带权并查集(维护到每个组根节点距离的并查集).
 type UnionFindMapWithDist struct {
@@ -251,7 +250,8 @@ func NewUnionFindMapWithDist() *UnionFindMapWithDist {
 }
 
 // p[x] = p[y] + dist.
-//  如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
+//
+//	如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
 func (uf *UnionFindMapWithDist) Union(x, y int, dist T) bool {
 	dist = op(dist, op(uf.DistToRoot(y), inv(uf.DistToRoot(x))))
 	x = uf.Find(x)
@@ -271,7 +271,8 @@ func (uf *UnionFindMapWithDist) Union(x, y int, dist T) bool {
 }
 
 // p[x] = p[y] + dist.
-//  如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
+//
+//	如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
 func (uf *UnionFindMapWithDist) UnionWithCallback(x, y int, dist T, cb func(big, small int)) bool {
 	dist = op(dist, op(uf.DistToRoot(y), inv(uf.DistToRoot(x))))
 	x = uf.Find(x)
@@ -308,7 +309,8 @@ func (uf *UnionFindMapWithDist) Find(x int) int {
 }
 
 // f[x]-f[find(x)].
-//  点x到所在组根节点的距离.
+//
+//	点x到所在组根节点的距离.
 func (uf *UnionFindMapWithDist) DistToRoot(x int) T {
 	uf.Find(x)
 	return uf.potential[x]

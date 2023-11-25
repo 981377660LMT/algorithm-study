@@ -15,7 +15,7 @@ func main() {
 	var n, q int
 	fmt.Fscan(in, &n, &q)
 
-	uf := NewWeightedUnionFind(n)
+	uf := NewUnionFindWeighted(n)
 	for i := 0; i < q; i++ {
 		var op, a, b int
 		fmt.Fscan(in, &op, &a, &b)
@@ -34,7 +34,7 @@ func main() {
 }
 
 // 维护分量和的并查集.
-type WeightedUnionFind struct {
+type UnionFindWeighted struct {
 	Part   int
 	parent []int
 	value  []int
@@ -43,8 +43,8 @@ type WeightedUnionFind struct {
 }
 
 // NewUnionFindWeighted
-func NewWeightedUnionFind(n int) *WeightedUnionFind {
-	uf := &WeightedUnionFind{
+func NewUnionFindWeighted(n int) *UnionFindWeighted {
+	uf := &UnionFindWeighted{
 		Part:   n,
 		parent: make([]int, n),
 		value:  make([]int, n),
@@ -58,30 +58,30 @@ func NewWeightedUnionFind(n int) *WeightedUnionFind {
 }
 
 // u的值加上delta.
-func (uf *WeightedUnionFind) Add(u, delta int) {
+func (uf *UnionFindWeighted) Add(u, delta int) {
 	uf.value[u] += delta
 	uf.total[uf.Find(u)] += delta
 }
 
 // u所在集合的值加上delta.
-func (uf *WeightedUnionFind) AddGroup(u, delta int) {
+func (uf *UnionFindWeighted) AddGroup(u, delta int) {
 	root := uf.Find(u)
 	uf.delta[root] += delta
 	uf.total[root] -= uf.parent[root] * delta
 }
 
 // u的值.
-func (uf *WeightedUnionFind) Get(u int) int {
+func (uf *UnionFindWeighted) Get(u int) int {
 	_, delta := uf._find(u)
 	return uf.value[u] + delta
 }
 
 // u所在集合的值.
-func (uf *WeightedUnionFind) GetGroup(u int) int {
+func (uf *UnionFindWeighted) GetGroup(u int) int {
 	return uf.total[uf.Find(u)]
 }
 
-func (uf *WeightedUnionFind) Union(u, v int) bool {
+func (uf *UnionFindWeighted) Union(u, v int) bool {
 	u = uf.Find(u)
 	v = uf.Find(v)
 	if u == v {
@@ -100,7 +100,7 @@ func (uf *WeightedUnionFind) Union(u, v int) bool {
 	return true
 }
 
-func (uf *WeightedUnionFind) UnionWithCallback(u, v int, f func(u, v int)) bool {
+func (uf *UnionFindWeighted) UnionWithCallback(u, v int, f func(u, v int)) bool {
 	u = uf.Find(u)
 	v = uf.Find(v)
 	if u == v {
@@ -123,23 +123,23 @@ func (uf *WeightedUnionFind) UnionWithCallback(u, v int, f func(u, v int)) bool 
 }
 
 // u的根.
-func (uf *WeightedUnionFind) Find(u int) int {
+func (uf *UnionFindWeighted) Find(u int) int {
 	root, _ := uf._find(u)
 	return root
 }
 
 // u和v是否连通.
-func (uf *WeightedUnionFind) IsConnected(u, v int) bool {
+func (uf *UnionFindWeighted) IsConnected(u, v int) bool {
 	return uf.Find(u) == uf.Find(v)
 }
 
 // u所在集合的大小.
-func (uf *WeightedUnionFind) GetSize(u int) int {
+func (uf *UnionFindWeighted) GetSize(u int) int {
 	return -uf.parent[uf.Find(u)]
 }
 
 // 所有分量.
-func (uf *WeightedUnionFind) GetGroups() map[int][]int {
+func (uf *UnionFindWeighted) GetGroups() map[int][]int {
 	groups := make(map[int][]int)
 	for i := range uf.parent {
 		root := uf.Find(i)
@@ -148,7 +148,7 @@ func (uf *WeightedUnionFind) GetGroups() map[int][]int {
 	return groups
 }
 
-func (uf *WeightedUnionFind) _find(u int) (root, delta int) {
+func (uf *UnionFindWeighted) _find(u int) (root, delta int) {
 	if uf.parent[u] < 0 {
 		return u, uf.delta[u]
 	}

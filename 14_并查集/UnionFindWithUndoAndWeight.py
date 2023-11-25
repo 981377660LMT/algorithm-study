@@ -6,30 +6,35 @@
 # Reset: 撤销所有操作
 
 
+from typing import Callable, Generic, TypeVar
 from collections import defaultdict
 from typing import DefaultDict, List
 
 
-class UnionFindArrayWithUndoAndWeight:
+V = TypeVar("V")
+
+
+class UnionFindArrayWithUndoAndWeight(Generic[V]):
     """可撤销并查集,维护连通分量权值."""
 
-    __slots__ = ("_rank", "_parents", "_weights", "_history", "part")
+    __slots__ = ("part", "_rank", "_parents", "_weights", "_history", "_op")
 
-    def __init__(self, initWeights: List[int]):
+    def __init__(self, initWeights: List[V], op: Callable[[V, V], V]):
         n = len(initWeights)
+        self.part = n
         self._rank = [1] * n
         self._parents = list(range(n))
         self._weights = initWeights[:]
         self._history = []
-        self.part = n
+        self._op = op
 
-    def setGroupWeight(self, index: int, value: int) -> None:
+    def setGroupWeight(self, index: int, value: V) -> None:
         """将下标为index元素`所在集合`的权值置为value."""
         index = self.find(index)
         self._history.append((index, self._rank[index], self._weights[index]))
         self._weights[index] = value
 
-    def getGroupWeight(self, index: int) -> int:
+    def getGroupWeight(self, index: int) -> V:
         """获取下标为index元素`所在集合`的权值."""
         return self._weights[self.find(index)]
 
@@ -63,7 +68,7 @@ class UnionFindArrayWithUndoAndWeight:
         if x != y:
             self._parents[y] = x
             self._rank[x] += self._rank[y]
-            self._weights[x] += self._weights[y]
+            self._weights[x] = self._op(self._weights[x], self._weights[y])
             self.part -= 1
             return True
         return False
@@ -85,7 +90,7 @@ class UnionFindArrayWithUndoAndWeight:
 
 
 if __name__ == "__main__":
-    uf = UnionFindArrayWithUndoAndWeight([1, 2, 3, 4, 5])
+    uf = UnionFindArrayWithUndoAndWeight([1, 2, 3, 4, 5], lambda x, y: x ^ y)
     print(uf)
     uf.union(0, 1)
     print(uf.getGroupWeight(0))

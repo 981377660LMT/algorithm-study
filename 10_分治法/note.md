@@ -15,3 +15,20 @@
 
    - divide：按照 IP 模 1024 分散到 1024 台机器，每台机器上 counter 计数获取最大
    - merge：将 1024 个最大值堆排序
+
+---
+
+```python
+
+def dfs(start: int, end: int) -> None:
+    """当前处于[start, end)区间结点内."""
+    if start >= end:
+        return
+    mid = (start + end) >> 1
+    dfs(start, mid)
+    dfs(mid, end)
+    ...  # op合并操作
+
+
+dfs(0, n)
+```

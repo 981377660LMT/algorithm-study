@@ -9,7 +9,11 @@ import (
 )
 
 func main() {
-	v1, v2 := NewLinearBase(nil), NewLinearBase(nil)
+	P4151()
+}
+
+func demo() {
+	v1, v2 := NewVectorSpace(nil), NewVectorSpace(nil)
 	v1.Add(1)
 	v1.Add(2)
 	v1.Add(3)
@@ -21,56 +25,64 @@ func main() {
 	fmt.Println(v1.Or(v2))
 	fmt.Println(v1)
 	fmt.Println(v1.And(v2))
-	fmt.Println(v1.And(NewLinearBase(nil)))
+	fmt.Println(v1.And(NewVectorSpace(nil)))
 	fmt.Println(v1)
 }
 
-func demo() {
-
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
+// P4151 [WC2011] 最大XOR和路径
+// https://www.luogu.com.cn/problem/P4151
+// 考虑一个边权为非负整数的`无向连通图`，节点编号为 0 到 N-1.
+// 试求出一条从 0 号节点到 N-1 号节点的路径，使得路径上经过的边的权值的 XOR 和最大。
+// !路径可以重复经过某些点或边
+//
+// !将所有环的异或扔进线性基，答案就是0到n-1的路径的权值与线性基的最大异或和.
+func P4151() {
+	in, out := bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	edges := make([][3]int, m)
+	for i := range edges {
+		fmt.Fscan(in, &edges[i][0], &edges[i][1], &edges[i][2])
+		edges[i][0]--
+		edges[i][1]--
+	}
+	start, end := 0, n-1
+
+	uf := NewUnionFindArrayWithDist(n)
+	vs := NewVectorSpace(nil)
+	for _, e := range edges {
+		u, v, w := e[0], e[1], e[2]
+		root1, root2 := uf.Find(u), uf.Find(v)
+		if root1 != root2 {
+			uf.Union(u, v, w)
+		} else {
+			cycleXor := uf.Dist(u, v) ^ w
+			vs.Add(cycleXor)
+		}
 	}
 
-	xor := 0
-	V1 := NewLinearBase(nil)
-	for _, v := range nums {
-		xor ^= v
-		V1.Add(v)
-	}
-
-	mask := ^xor
-	V2 := NewLinearBase(nil)
-	V1.ForEach(func(v int) {
-		V2.Add(v & mask)
-	})
-
-	res := V2.Max(0) + (xor ^ V2.Max(0))
-	fmt.Fprintln(out, res)
-
+	dist := uf.Dist(start, end)
+	fmt.Fprintln(out, vs.Max(dist))
 }
 
 // VectorSpace，线性基空间.支持线性基合并.
-type LinearBase struct {
+type VectorSpace struct {
 	bases  []int
 	maxBit int
 }
 
-func NewLinearBase(nums []int) *LinearBase {
-	res := &LinearBase{}
+func NewVectorSpace(nums []int) *VectorSpace {
+	res := &VectorSpace{}
 	for _, num := range nums {
 		res.Add(num)
 	}
 	return res
 }
 
-func (lb *LinearBase) Add(num int) bool {
+// 插入一个向量,如果插入成功(不能被表出)返回True,否则返回False.
+func (lb *VectorSpace) Add(num int) bool {
 	for _, base := range lb.bases {
 		if base == 0 || num == 0 {
 			break
@@ -85,7 +97,8 @@ func (lb *LinearBase) Add(num int) bool {
 	return false
 }
 
-func (lb *LinearBase) Max(xor int) int {
+// 求xor与所有向量异或的最大值.
+func (lb *VectorSpace) Max(xor int) int {
 	res := xor
 	for _, base := range lb.bases {
 		res = max(res, res^base)
@@ -93,7 +106,8 @@ func (lb *LinearBase) Max(xor int) int {
 	return res
 }
 
-func (lb *LinearBase) Min(xorVal int) int {
+// 求xor与所有向量异或的最小值.
+func (lb *VectorSpace) Min(xorVal int) int {
 	res := xorVal
 	for _, base := range lb.bases {
 		res = min(res, res^base)
@@ -101,24 +115,24 @@ func (lb *LinearBase) Min(xorVal int) int {
 	return res
 }
 
-func (lb *LinearBase) Copy() *LinearBase {
-	res := &LinearBase{}
+func (lb *VectorSpace) Copy() *VectorSpace {
+	res := &VectorSpace{}
 	res.bases = append(res.bases, lb.bases...)
 	res.maxBit = lb.maxBit
 	return res
 }
 
-func (lb *LinearBase) Len() int {
+func (lb *VectorSpace) Len() int {
 	return len(lb.bases)
 }
 
-func (lb *LinearBase) ForEach(f func(base int)) {
+func (lb *VectorSpace) ForEach(f func(base int)) {
 	for _, base := range lb.bases {
 		f(base)
 	}
 }
 
-func (lb *LinearBase) Has(v int) bool {
+func (lb *VectorSpace) Has(v int) bool {
 	for _, w := range lb.bases {
 		if v == 0 {
 			break
@@ -128,7 +142,8 @@ func (lb *LinearBase) Has(v int) bool {
 	return v == 0
 }
 
-func (lb *LinearBase) Or(other *LinearBase) *LinearBase {
+// Merge.
+func (lb *VectorSpace) Or(other *VectorSpace) *VectorSpace {
 	v1, v2 := lb, other
 	if v1.Len() < v2.Len() {
 		v1, v2 = v2, v1
@@ -140,7 +155,7 @@ func (lb *LinearBase) Or(other *LinearBase) *LinearBase {
 	return res
 }
 
-func (lb *LinearBase) And(other *LinearBase) *LinearBase {
+func (lb *VectorSpace) And(other *VectorSpace) *VectorSpace {
 	maxDim := max(lb.maxBit, other.maxBit)
 	x := lb.orthogonalSpace(maxDim)
 	y := other.orthogonalSpace(maxDim)
@@ -153,12 +168,12 @@ func (lb *LinearBase) And(other *LinearBase) *LinearBase {
 	return x.orthogonalSpace(maxDim)
 }
 
-func (lb *LinearBase) String() string {
+func (lb *VectorSpace) String() string {
 	return fmt.Sprintf("%v", lb.bases)
 }
 
 // 正交空间.
-func (lb *LinearBase) orthogonalSpace(maxDim int) *LinearBase {
+func (lb *VectorSpace) orthogonalSpace(maxDim int) *VectorSpace {
 	lb.normalize(true)
 	m := maxDim
 	tmp := make([]int, m)
@@ -166,21 +181,20 @@ func (lb *LinearBase) orthogonalSpace(maxDim int) *LinearBase {
 		tmp[bits.Len(uint(base))-1] = base
 	}
 	tmp = Transpose(m, m, tmp, true)
-	res := &LinearBase{}
-	for j := 0; j < m; j++ {
-		if tmp[j]>>j&1 == 1 {
+	res := &VectorSpace{}
+	for j, v := range tmp {
+		if v>>j&1 == 1 {
 			continue
 		}
-		res.Add(tmp[j] | 1<<j)
+		res.Add(v | 1<<j)
 	}
 	return res
 }
 
-func (lb *LinearBase) normalize(reverse bool) {
-	n := len(lb.bases)
-	for j := 0; j < n; j++ {
+func (lb *VectorSpace) normalize(reverse bool) {
+	for j, v := range lb.bases {
 		for i := 0; i < j; i++ {
-			lb.bases[i] = min(lb.bases[i], lb.bases[i]^lb.bases[j])
+			lb.bases[i] = min(lb.bases[i], lb.bases[i]^v)
 		}
 	}
 	if !reverse {
@@ -239,4 +253,119 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+//
+//
+
+type T = int // 距离为异或
+
+func e() T        { return 0 }
+func op(x, y T) T { return x ^ y }
+func inv(x T) T   { return x }
+
+// 数组实现的带权并查集(维护到每个组根节点距离的并查集).
+// 用于维护环的权值，树上的距离等.
+type UnionFindArrayWithDist struct {
+	Part      int
+	data      []int
+	potential []T
+}
+
+func NewUnionFindArrayWithDist(n int) *UnionFindArrayWithDist {
+	uf := &UnionFindArrayWithDist{
+		Part:      n,
+		data:      make([]int, n),
+		potential: make([]T, n),
+	}
+	for i := range uf.data {
+		uf.data[i] = -1
+		uf.potential[i] = e()
+	}
+	return uf
+}
+
+// p[x] = p[y] + dist.
+//
+//	如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
+func (uf *UnionFindArrayWithDist) Union(x, y int, dist T) bool {
+	dist = op(dist, op(uf.DistToRoot(y), inv(uf.DistToRoot(x))))
+	x = uf.Find(x)
+	y = uf.Find(y)
+	if x == y {
+		return dist == e()
+	}
+	if uf.data[x] < uf.data[y] {
+		x, y = y, x
+		dist = inv(dist)
+	}
+	uf.data[y] += uf.data[x]
+	uf.data[x] = y
+	uf.potential[x] = dist
+	uf.Part--
+	return true
+}
+
+// p[x] = p[y] + dist.
+//
+//	如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
+func (uf *UnionFindArrayWithDist) UnionWithCallback(x, y int, dist T, cb func(big, small int)) bool {
+	dist = op(dist, op(uf.DistToRoot(y), inv(uf.DistToRoot(x))))
+	x = uf.Find(x)
+	y = uf.Find(y)
+	if x == y {
+		return dist == e()
+	}
+	if uf.data[x] < uf.data[y] {
+		x, y = y, x
+		dist = inv(dist)
+	}
+	uf.data[y] += uf.data[x]
+	uf.data[x] = y
+	uf.potential[x] = dist
+	uf.Part--
+	if cb != nil {
+		cb(y, x)
+	}
+	return true
+}
+
+func (uf *UnionFindArrayWithDist) Find(x int) int {
+	if uf.data[x] < 0 {
+		return x
+	}
+	root := uf.Find(uf.data[x])
+	uf.potential[x] = op(uf.potential[x], uf.potential[uf.data[x]])
+	uf.data[x] = root
+	return root
+}
+
+// f[x]-f[find(x)].
+//
+//	点x到所在组根节点的距离.
+func (uf *UnionFindArrayWithDist) DistToRoot(x int) T {
+	uf.Find(x)
+	return uf.potential[x]
+}
+
+// f[x] - f[y].
+func (uf *UnionFindArrayWithDist) Dist(x, y int) T {
+	return op(uf.DistToRoot(x), inv(uf.DistToRoot(y)))
+}
+
+func (uf *UnionFindArrayWithDist) GetSize(x int) int {
+	return -uf.data[uf.Find(x)]
+}
+
+func (uf *UnionFindArrayWithDist) GetGroups() map[int][]int {
+	res := make(map[int][]int)
+	for i := range uf.data {
+		root := uf.Find(i)
+		res[root] = append(res[root], i)
+	}
+	return res
+}
+
+func (uf *UnionFindArrayWithDist) IsConnected(x, y int) bool {
+	return uf.Find(x) == uf.Find(y)
 }

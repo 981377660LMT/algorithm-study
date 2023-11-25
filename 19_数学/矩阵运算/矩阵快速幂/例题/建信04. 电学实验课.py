@@ -24,6 +24,7 @@ from typing import List
 
 MOD = int(1e9 + 7)
 
+
 class Solution:
     def electricityExperiment(self, row: int, col: int, position: List[List[int]]) -> int:
         def cal(row1: int, row2: int, k: int) -> int:

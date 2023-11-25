@@ -20,7 +20,7 @@ class LinearBase:
 
     def add(self, x: int) -> bool:
         """插入一个向量,如果插入成功返回True,否则返回False"""
-        x = self._normalize(x)
+        x = self.normalize(x)
         if x == 0:
             return False
         i = x.bit_length() - 1
@@ -50,7 +50,14 @@ class LinearBase:
     def maxXor(self) -> int:
         return self.kthXor(2 ** len(self.bases))
 
-    def _normalize(self, x: int) -> int:
+    def copy(self) -> "LinearBase":
+        res = LinearBase(self._bit)
+        res.bases = self.bases.copy()
+        res._rows = self._rows.copy()
+        res._bit = self._bit
+        return res
+
+    def normalize(self, x: int) -> int:
         for i in range(x.bit_length() - 1, -1, -1):
             if (x >> i) & 1:
                 x ^= self._rows[i]
@@ -61,7 +68,7 @@ class LinearBase:
 
     def __contains__(self, x: int) -> bool:
         """x是否能由线性基表出"""
-        return self._normalize(x) == 0
+        return self.normalize(x) == 0
 
 
 if __name__ == "__main__":

@@ -57,12 +57,12 @@ func NewYearConcert(nums []int) []int {
 	n := len(nums)
 	res := make([]int, len(nums))
 
-	dp := []interval{}
+	dp := []Interval{}
 	for pos, cur := range nums {
 		for i, pre := range dp {
 			dp[i].value = gcd(pre.value, cur)
 		}
-		dp = append(dp, interval{leftStart: pos, leftEnd: pos + 1, value: cur})
+		dp = append(dp, Interval{leftStart: pos, leftEnd: pos + 1, value: cur})
 
 		ptr := 0
 		for _, v := range dp[1:] {
@@ -98,7 +98,23 @@ func NewYearConcert(nums []int) []int {
 	return preSum[1:]
 }
 
-type interval = struct{ leftStart, leftEnd, value int }
+func maxGcdSum(nums []int, k int) int64 {
+	res := 0
+	preSum := make([]int, len(nums)+1)
+	for i, v := range nums {
+		preSum[i+1] = preSum[i] + v
+	}
+	LogTrick(nums, gcd, func(left []Interval, right int) {
+		for _, v := range left {
+			if right-v.leftStart+1 >= k {
+				res = max(res, v.value*(preSum[right+1]-preSum[v.leftStart]))
+			}
+		}
+	})
+	return int64(res)
+}
+
+type Interval = struct{ leftStart, leftEnd, value int }
 
 // 将 nums 的所有非空子数组的元素进行 op 操作，返回所有不同的结果和其出现次数.
 //
@@ -106,17 +122,17 @@ type interval = struct{ leftStart, leftEnd, value int }
 // op: 与/或/gcd/lcm 中的一种操作，具有单调性.
 // f:
 // 数组的右端点为right.
-// interval 的 leftStart/leftEnd 表示子数组的左端点left的范围.
-// interval 的 value 表示该子数组 arr[left,right] 的 op 结果.
-func LogTrick(nums []int, op func(int, int) int, f func(left []interval, right int)) map[int]int {
+// Interval 的 leftStart/leftEnd 表示子数组的左端点left的范围.
+// Interval 的 value 表示该子数组 arr[left,right] 的 op 结果.
+func LogTrick(nums []int, op func(int, int) int, f func(left []Interval, right int)) map[int]int {
 	res := make(map[int]int)
 
-	dp := []interval{}
+	dp := []Interval{}
 	for pos, cur := range nums {
 		for i, pre := range dp {
 			dp[i].value = op(pre.value, cur)
 		}
-		dp = append(dp, interval{leftStart: pos, leftEnd: pos + 1, value: cur})
+		dp = append(dp, Interval{leftStart: pos, leftEnd: pos + 1, value: cur})
 
 		// 去重
 		ptr := 0

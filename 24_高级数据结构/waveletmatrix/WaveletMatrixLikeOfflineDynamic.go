@@ -1,13 +1,108 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math"
 	"math/rand"
+	"os"
 	"sort"
 )
 
 func main() {
+	P3380()
+}
+
+// 二逼平衡树(树套树)
+// https://www.luogu.com.cn/problem/P3380
+// 1 start end num: 查询num在[start, end)内的排名.
+// 2 start end k: 查询[start, end)内排名为k(k>=0)的数.
+// 3 pos num: 将pos位置的数修改为num.
+// 4 start end num: 查询[start, end)内num的严格前驱.不存在输出-2147483647.
+// 5 start end num: 查询[start, end)内num的严格后继.不存在输出2147483647.
+func P3380() {
+	in, out := bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int = 2147483647
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int, n)
+	for i := range nums {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	operations := make([][4]int, q)
+	allNums := append(nums[:0:0], nums...)
+	for i := range operations {
+		var op int
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var start, end, num int
+			fmt.Fscan(in, &start, &end, &num)
+			start--
+			operations[i] = [4]int{1, start, end, num}
+			allNums = append(allNums, num)
+		} else if op == 2 {
+			var start, end, k int
+			fmt.Fscan(in, &start, &end, &k)
+			start--
+			k--
+			operations[i] = [4]int{2, start, end, k}
+		} else if op == 3 {
+			var pos, num int
+			fmt.Fscan(in, &pos, &num)
+			pos--
+			operations[i] = [4]int{3, pos, num, 0}
+			allNums = append(allNums, num)
+		} else if op == 4 || op == 5 {
+			var start, end, num int
+			fmt.Fscan(in, &start, &end, &num)
+			start--
+			operations[i] = [4]int{op, start, end, num}
+			allNums = append(allNums, num)
+		}
+	}
+
+	blockSize := int(math.Sqrt(float64(len(nums)))+1) * 2
+	wm := NewWaveletMatrixLikeOfflineDynamic(nums, allNums, blockSize)
+	res := make([]int, 0, q)
+	for _, op := range operations {
+		kind := op[0]
+		if kind == 1 {
+			start, end, num := op[1], op[2], op[3]
+			res = append(res, wm.CountLower(start, end, num)+1)
+		} else if kind == 2 {
+			start, end, k := op[1], op[2], op[3]
+			kth, _ := wm.Kth(start, end, k)
+			res = append(res, kth)
+		} else if kind == 3 {
+			pos, num := op[1], op[2]
+			wm.Set(pos, num)
+		} else if kind == 4 {
+			start, end, num := op[1], op[2], op[3]
+			if lower, ok := wm.Lower(start, end, num); ok {
+				res = append(res, lower)
+			} else {
+				res = append(res, -INF)
+			}
+		} else if kind == 5 {
+			start, end, num := op[1], op[2], op[3]
+			if higher, ok := wm.Higher(start, end, num); ok {
+				res = append(res, higher)
+			} else {
+				res = append(res, INF)
+			}
+		}
+	}
+
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
+}
+
+func test() {
 	// test
 	n := rand.Intn(5000) + 1
 	q := 5000
@@ -130,8 +225,8 @@ type WaveletMatrixLikeOfflineDynamic struct {
 //
 //	initNums: 初始化的序列.
 //	allowedNums: 允许出现的数, 包含修改和查询的数.
-//	blockSize: 序列分块的大小.为了减少空间复杂度`O(n*块数)`，可以把块的大小增大一些以减少内存占用.
-//	blockSize := int(math.Sqrt(float64(len(initNums)))+1) * 4
+//	blockSize: 序列分块的大小.为了减少空间复杂度`O(n*块数)`，可以把块的大小增大一些(2-4倍)以减少内存占用.
+//	blockSize := int(math.Sqrt(float64(len(initNums)))+1) * 2
 func NewWaveletMatrixLikeOfflineDynamic(initNums []int, allowedNums []int, blockSize int) *WaveletMatrixLikeOfflineDynamic {
 	set := make(map[int]struct{})
 	for _, v := range allowedNums {

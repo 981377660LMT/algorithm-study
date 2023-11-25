@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import Callable, DefaultDict, List, Optional, Tuple
 
 
-class WeightedUnionFind:
+class UnionFindWeighted:
     """维护分量和的并查集."""
 
     __slots__ = "_parent", "_value", "_delta", "_total", "_part"
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     input = lambda: sys.stdin.readline().rstrip("\r\n")
 
     n, q = map(int, input().split())
-    uf = WeightedUnionFind(n)
+    uf = UnionFindWeighted(n)
     for _ in range(q):
         op, a, b = map(int, input().split())
         if op == 1:

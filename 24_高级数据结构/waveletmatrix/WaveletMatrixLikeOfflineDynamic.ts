@@ -34,7 +34,7 @@ class WaveletMatrixLikeOfflineDynamic {
    *
    * @param initNums 初始化的序列.
    * @param allowedNums 允许出现的数, 包含修改和查询的数.
-   * @param blockSize 序列分块的大小.为了减少空间复杂度`O(n*块数)`，可以把块的大小增大一些.默认为`4*sqrt(n)`.
+   * @param blockSize 序列分块的大小.为了减少空间复杂度`O(n*块数)`，可以把块的大小增大一些(2-4倍).默认为`4*sqrt(n)`.
    */
   constructor(initNums: number[], allowedNums: Iterable<number>, blockSize = 4 * (Math.sqrt(initNums.length + 1) | 0)) {
     const sorted = [...new Set(allowedNums)].sort((a, b) => a - b)
@@ -494,12 +494,23 @@ if (require.main === module) {
     const toadd = Array.from({ length: 1e5 }, () => ~~(Math.random() * 1e9))
     const allowed = new Set([...arr, ...toadd])
     console.time('init')
-    const ps = new WaveletMatrixLikeOfflineDynamic(arr, allowed)
+    const ps = new WaveletMatrixLikeOfflineDynamic(arr, allowed, 4 * (Math.sqrt(arr.length + 1) | 0))
     for (let i = 0; i < arr.length; i++) {
       ps.set(0, toadd[i])
       ps.kth(0, arr.length, arr.length - 1)
+      ps.lower(0, arr.length, arr[i])
+      ps.higher(0, arr.length, arr[i])
+      ps.floor(0, arr.length, arr[i])
+      ps.ceiling(0, arr.length, arr[i])
+      ps.count(0, arr.length, arr[i])
+      ps.countRange(0, arr.length, arr[i], arr[i])
+      ps.countLower(0, arr.length, arr[i])
+      ps.countHigher(0, arr.length, arr[i])
+      ps.countFloor(0, arr.length, arr[i])
+      ps.countCeiling(0, arr.length, arr[i])
+      ps.get(0)
     }
-    console.timeEnd('init')
+    console.timeEnd('init') // init: 3.687s
   }
 
   function test(): void {

@@ -14,14 +14,20 @@ class RollbackArray(Generic[T]):
         self._data = data[:]
         self._history = []  # (index, value)
 
-    def time(self) -> int:
+    def getTime(self) -> int:
         return len(self._history)
 
-    def rollback(self, t: int) -> None:
-        for i in range(self.time() - 1, t - 1, -1):
-            index, value = self._history[i]
-            self._data[index] = value
-        self._history = self._history[:t]
+    def rollback(self, time: int) -> None:
+        while len(self._history) > time:
+            i, v = self._history.pop()
+            self._data[i] = v
+
+    def undo(self) -> bool:
+        if not self._history:
+            return False
+        i, v = self._history.pop()
+        self._data[i] = v
+        return True
 
     def __getitem__(self, i: int) -> T:
         return self._data[i]
@@ -47,7 +53,7 @@ if __name__ == "__main__":
     print(arr)
     arr[1] = 20
     print(arr)
-    state = arr.time()
+    state = arr.getTime()
     arr[2] = 30
     print(arr)
     arr.rollback(state)

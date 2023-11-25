@@ -1,7 +1,7 @@
 // 2382. 删除操作后的最大子段和
 // https://leetcode.cn/problems/maximum-segment-sum-after-removals/
 
-import { WeightedUnionFind } from '../../WeightedUnionFind-分量和'
+import { WeightedUnionFind } from '../../UnionFindWeighted-分量和'
 
 function maximumSegmentSum(nums: number[], removeQueries: number[]): number[] {
   const n = nums.length

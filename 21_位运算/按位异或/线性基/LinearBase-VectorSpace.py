@@ -16,10 +16,11 @@ class VectorSpace:
                 self.add(v)
 
     def add(self, v: int) -> bool:
+        """插入一个向量,如果插入成功(不能被表出)返回True,否则返回False."""
         for e in self.bases:
             if e == 0 or v == 0:
                 break
-            v = min(v, v ^ e)
+            v = min2(v, v ^ e)
         if v:
             self.bases.append(v)
             if v > self._max:
@@ -28,15 +29,17 @@ class VectorSpace:
         return False
 
     def getMax(self, xorVal=0) -> int:
+        """求xorVal与所有向量异或的最大值."""
         res = xorVal
         for e in self.bases:
-            res = max(res, res ^ e)
+            res = max2(res, res ^ e)
         return res
 
     def getMin(self, xorVal=0) -> int:
+        """求xorVal与所有向量异或的最小值."""
         res = xorVal
         for e in self.bases:
-            res = min(res, res ^ e)
+            res = min2(res, res ^ e)
         return res
 
     def copy(self) -> "VectorSpace":
@@ -53,17 +56,16 @@ class VectorSpace:
             tmp[e.bit_length() - 1] = e
         tmp = transpose(m, m, tmp, inplace=True)
         res = VectorSpace()
-        for j in range(m):
-            if tmp[j] & (1 << j):
+        for j, v in enumerate(tmp):
+            if v & (1 << j):
                 continue
-            res.add(tmp[j] | (1 << j))
+            res.add(v | (1 << j))
         return res
 
     def _normalize(self, reverse=True) -> None:
-        n = len(self.bases)
-        for j in range(n):
+        for j, v in enumerate(self.bases):
             for i in range(j):
-                self.bases[i] = min(self.bases[i], self.bases[i] ^ self.bases[j])
+                self.bases[i] = min2(self.bases[i], self.bases[i] ^ v)
         self.bases.sort(reverse=reverse)
 
     def __len__(self) -> int:
@@ -79,7 +81,7 @@ class VectorSpace:
         for e in self.bases:
             if v == 0:
                 break
-            v = min(v, v ^ e)
+            v = min2(v, v ^ e)
         return v == 0
 
     def __or__(self, other: "VectorSpace") -> "VectorSpace":
@@ -92,7 +94,7 @@ class VectorSpace:
         return res
 
     def __and__(self, other: "VectorSpace") -> "VectorSpace":
-        maxDim = max(self._max, other._max).bit_length()
+        maxDim = max2(self._max, other._max).bit_length()
         x = self._orthogonalSpace(maxDim)
         y = other._orthogonalSpace(maxDim)
         if len(x) < len(y):
@@ -111,7 +113,7 @@ def transpose(row: int, col: int, matrix1D: List[int], inplace=False) -> List[in
     assert row == len(matrix1D)
     m = matrix1D[:] if not inplace else matrix1D
     log = 0
-    max_ = max(row, col)
+    max_ = max2(row, col)
     while (1 << log) < max_:
         log += 1
     if len(m) < (1 << log):
@@ -131,11 +133,11 @@ def transpose(row: int, col: int, matrix1D: List[int], inplace=False) -> List[in
     return m[:col]
 
 
-def min(a: int, b: int) -> int:
+def min2(a: int, b: int) -> int:
     return a if a < b else b
 
 
-def max(a: int, b: int) -> int:
+def max2(a: int, b: int) -> int:
     return a if a > b else b
 
 

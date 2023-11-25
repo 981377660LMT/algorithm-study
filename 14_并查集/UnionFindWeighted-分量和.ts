@@ -29,7 +29,7 @@
 /**
  * 维护联通分量和的并查集.
  */
-class WeightedUnionFind {
+class UnionFindWeighted {
   private readonly _parent: Int32Array
   private readonly _value: Float64Array
   private readonly _delta: Float64Array
@@ -132,7 +132,7 @@ class WeightedUnionFind {
   }
 }
 
-export { WeightedUnionFind, WeightedUnionFind as UnionFindWeighted }
+export { UnionFindWeighted, UnionFindWeighted as WeightedUnionFind }
 
 // 2382. 删除操作后的最大子段和
 // https://leetcode.cn/problems/maximum-segment-sum-after-removals/
@@ -140,7 +140,7 @@ export { WeightedUnionFind, WeightedUnionFind as UnionFindWeighted }
 function maximumSegmentSum(nums: number[], removeQueries: number[]): number[] {
   const n = nums.length
   const q = removeQueries.length
-  const uf = new WeightedUnionFind(n)
+  const uf = new UnionFindWeighted(n)
   const res: number[] = Array(q).fill(0)
   let maxPartSum = 0
   const visited = new Uint8Array(n)

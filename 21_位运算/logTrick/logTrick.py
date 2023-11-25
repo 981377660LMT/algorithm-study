@@ -1,3 +1,5 @@
+from itertools import accumulate
+from math import gcd
 from typing import Callable, DefaultDict, List, Optional, Tuple
 from collections import defaultdict
 
@@ -25,20 +27,20 @@ def logTrick(
     dp = []
     for pos, cur in enumerate(nums):
         for v in dp:
-            v[0] = op(v[0], cur)
-        dp.append([cur, pos, pos + 1])
+            v[2] = op(v[2], cur)
+        dp.append([pos, pos + 1, cur])
 
         ptr = 0
         for v in dp[1:]:
-            if dp[ptr][0] != v[0]:
+            if dp[ptr][2] != v[2]:
                 ptr += 1
                 dp[ptr] = v
             else:
-                dp[ptr][2] = v[2]
+                dp[ptr][1] = v[1]
         dp = dp[: ptr + 1]
 
         for v in dp:
-            res[v[0]] += v[2] - v[1]
+            res[v[2]] += v[1] - v[0]
         if f is not None:
             f(dp, pos)
 
@@ -47,7 +49,23 @@ def logTrick(
 
 if __name__ == "__main__":
     # 1521. 找到最接近目标值的函数值
-    class Solution:
+    class Solution2:
         def closestToTarget(self, arr: List[int], target: int) -> int:
             counter = logTrick(arr, lambda x, y: x & y)
             return min(abs(k - target) for k in counter)
+
+    # 2941. 子数组的最大 GCD-Sum
+    # https://leetcode.cn/problems/maximum-gcd-sum-of-a-subarray/description/
+    class Solution:
+        def maxGcdSum(self, nums: List[int], k: int) -> int:
+            def f(interval: List[Tuple[int, int, int]], right: int) -> None:
+                nonlocal res
+                for start, _, gcd_ in interval:
+                    len_ = right - start + 1
+                    if len_ >= k:
+                        res = max(res, gcd_ * (preSum[right + 1] - preSum[start]))
+
+            res = 0
+            preSum = [0] + list(accumulate(nums))
+            logTrick(nums, gcd, f)
+            return res

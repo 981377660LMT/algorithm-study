@@ -1,0 +1,176 @@
+package main
+
+import "fmt"
+
+func main() {
+	uf := NewUnionFindWithDistAndUndo(10)
+	uf.Union(1, 2, 1)
+	fmt.Println(uf.DistToRoot(1))
+	fmt.Println(uf.DistToRoot(2))
+	fmt.Println(uf.Dist(1, 2))
+	uf.Union(2, 3, 2)
+	fmt.Println(uf.GetSize(1))
+	uf.Undo()
+	fmt.Println(uf.GetSize(1))
+}
+
+type T = int
+
+func e() T        { return 0 }
+func op(x, y T) T { return x + y }
+func inv(x T) T   { return -x }
+
+// 维护到每个组根节点距离的可撤销并查集.
+// 用于维护环的权值，树上的距离等.
+type UnionFindWithDistAndUndo struct {
+	data *RollbackArray
+}
+
+func NewUnionFindWithDistAndUndo(n int) *UnionFindWithDistAndUndo {
+	return &UnionFindWithDistAndUndo{
+		data: NewRollbackArray(n, func(index int) arrayItem { return arrayItem{value: -1, dist: e()} }),
+	}
+}
+
+// distToRoot(parent) + dist = distToRoot(child).
+func (uf *UnionFindWithDistAndUndo) Union(parent int, child int, dist T) bool {
+	v1, x1 := uf.Find(parent)
+	v2, x2 := uf.Find(child)
+	if v1 == v2 {
+		return dist == e()
+	}
+	s1, s2 := -uf.data.Get(v1).value, -uf.data.Get(v2).value
+	if s1 < s2 {
+		v1, v2 = v2, v1
+		x1, x2 = x2, x1
+		dist = inv(dist)
+	}
+	// v1 <- v2
+	dist = op(x1, dist)
+	dist = op(dist, inv(x2))
+	uf.data.Set(v2, arrayItem{value: v1, dist: dist})
+	uf.data.Set(v1, arrayItem{value: -(s1 + s2), dist: e()})
+	return true
+}
+
+// 返回v所在组的根节点和到v到根节点的距离.
+func (uf *UnionFindWithDistAndUndo) Find(v int) (root int, distToRoot T) {
+	root, distToRoot = v, e()
+	for {
+		item := uf.data.Get(root)
+		if item.value < 0 {
+			break
+		}
+		distToRoot = op(distToRoot, item.dist)
+		root = item.value
+	}
+	return
+}
+
+// Dist(x, y) = DistToRoot(x) - DistToRoot(y).
+// 如果x和y不在同一个集合,抛出错误.
+func (uf *UnionFindWithDistAndUndo) Dist(x int, y int) T {
+	vx, dx := uf.Find(x)
+	vy, dy := uf.Find(y)
+	if vx != vy {
+		panic("x and y are not in the same set")
+	}
+	return op(dx, inv(dy))
+}
+
+func (uf *UnionFindWithDistAndUndo) DistToRoot(x int) T {
+	_, dx := uf.Find(x)
+	return dx
+}
+
+func (uf *UnionFindWithDistAndUndo) GetTime() int {
+	return uf.data.GetTime()
+}
+
+func (uf *UnionFindWithDistAndUndo) Rollback(time int) {
+	uf.data.Rollback(time)
+}
+
+func (uf *UnionFindWithDistAndUndo) Undo() bool {
+	return uf.data.Undo()
+}
+
+func (uf *UnionFindWithDistAndUndo) GetSize(x int) int {
+	root, _ := uf.Find(x)
+	return -uf.data.Get(root).value
+}
+
+func (uf *UnionFindWithDistAndUndo) GetGroups() map[int][]int {
+	res := make(map[int][]int)
+	for i := 0; i < uf.data.Len(); i++ {
+		root, _ := uf.Find(i)
+		res[root] = append(res[root], i)
+	}
+	return res
+}
+
+type arrayItem struct {
+	value int
+	dist  T
+}
+
+type historyItem struct {
+	index int
+	value arrayItem
+}
+
+type RollbackArray struct {
+	n       int
+	data    []arrayItem
+	history []historyItem
+}
+
+func NewRollbackArray(n int, f func(index int) arrayItem) *RollbackArray {
+	data := make([]arrayItem, n)
+	for i := 0; i < n; i++ {
+		data[i] = f(i)
+	}
+	return &RollbackArray{
+		n:    n,
+		data: data,
+	}
+}
+
+func (r *RollbackArray) GetTime() int {
+	return len(r.history)
+}
+
+func (r *RollbackArray) Rollback(time int) {
+	for len(r.history) > time {
+		pair := r.history[len(r.history)-1]
+		r.history = r.history[:len(r.history)-1]
+		r.data[pair.index] = pair.value
+	}
+}
+
+func (r *RollbackArray) Undo() bool {
+	if len(r.history) == 0 {
+		return false
+	}
+	pair := r.history[len(r.history)-1]
+	r.history = r.history[:len(r.history)-1]
+	r.data[pair.index] = pair.value
+	return true
+}
+
+func (r *RollbackArray) Get(index int) arrayItem {
+	return r.data[index]
+}
+
+func (r *RollbackArray) Set(index int, value arrayItem) {
+	r.history = append(r.history, historyItem{index: index, value: r.data[index]})
+	r.data[index] = value
+}
+
+func (r *RollbackArray) GetAll() []arrayItem {
+	return append(r.data[:0:0], r.data...)
+}
+
+func (r *RollbackArray) Len() int {
+	return r.n
+}

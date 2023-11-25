@@ -42,3 +42,7 @@ if __name__ == "__main__":
             main()
     else:
         main()
+
+
+def dfs(start: int, end: int) -> None:
+    ...

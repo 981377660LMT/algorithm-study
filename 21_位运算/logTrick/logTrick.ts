@@ -13,11 +13,7 @@ type Interval = { leftStart: number; leftEnd: number; value: number }
  * interval 的 leftStart/leftEnd 表示子数组的左端点left的范围.
  * interval 的 value 表示该子数组 arr[left,right] 的 op 结果.
  */
-function logTrick(
-  arr: ArrayLike<number>,
-  op: (a: number, b: number) => number,
-  f?: (left: Interval[], right: number) => void
-): Map<number, number> {
+function logTrick(arr: ArrayLike<number>, op: (a: number, b: number) => number, f?: (left: Interval[], right: number) => void): Map<number, number> {
   const res: Map<number, number> = new Map()
   const dp: Interval[] = []
   for (let pos = 0; pos < arr.length; pos++) {
@@ -83,5 +79,22 @@ if (require.main === module) {
   function subarrayLCM(nums: number[], k: number): number {
     const counter = logTrick(nums, lcm)
     return counter.get(k) || 0
+  }
+
+  // 2941. 子数组的最大 GCD-Sum
+  // https://leetcode.cn/problems/maximum-gcd-sum-of-a-subarray/description/
+  function maxGcdSum(nums: number[], k: number): number {
+    const preSum = Array(nums.length + 1).fill(0)
+    for (let i = 0; i < nums.length; i++) preSum[i + 1] = preSum[i] + nums[i]
+    let res = 0
+    logTrick(nums, gcd, (leftIntervals, right) => {
+      for (let j = 0; j < leftIntervals.length; j++) {
+        const { leftStart, value } = leftIntervals[j]
+        if (right - leftStart + 1 >= k) {
+          res = Math.max(res, value * (preSum[right + 1] - preSum[leftStart]))
+        }
+      }
+    })
+    return res
   }
 }
