@@ -10,6 +10,9 @@ n<=5000 k<=5000 M<=5000
 !正难则反
 dp[i-1][pre] => dp[i][cur] 转移时
 !不计算 `合理的转移次数` 而是 `总次数 - 不合理的转移次数`(往不通的路上靠)
+
+E - Safety Journey
+https://atcoder.jp/contests/abc212/submissions/35392362
 """
 
 import sys
@@ -21,12 +24,12 @@ INF = int(4e18)
 
 if __name__ == "__main__":
     n, m, k = map(int, input().split())
-    adjList = [[] for _ in range(n)]  # !表示路不通的邻接表
+    ban = [[] for _ in range(n)]  # !表示路不通的邻接表
     for _ in range(m):
         u, v = map(int, input().split())
         u, v = u - 1, v - 1
-        adjList[u].append(v)
-        adjList[v].append(u)
+        ban[u].append(v)
+        ban[v].append(u)
 
     dp = [0] * (n + 10)
     dp[0] = 1
@@ -34,7 +37,7 @@ if __name__ == "__main__":
         ndp, sum_ = [0] * (n + 10), sum(dp) % MOD
         for cur in range(n):
             ndp[cur] = (sum_ - dp[cur]) % MOD  # !不能原地转移
-            for badPre in adjList[cur]:
-                ndp[cur] = (ndp[cur] - dp[badPre]) % MOD  # !不能从不通的路转移过来
+            for pre in ban[cur]:
+                ndp[cur] = (ndp[cur] - dp[pre]) % MOD  # !不能从不通的路转移过来
         dp = ndp
     print(dp[0])
