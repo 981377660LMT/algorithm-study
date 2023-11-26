@@ -1,4 +1,7 @@
 /* eslint-disable max-len */
+// 由于每次Union不一定会修改成功,从而不记录修改
+// (实际上这种设计并不好，但是出于性能考虑，这里还是这么做了)
+// !因此不提供Undo操作,只提供GetTime/Rollback操作
 
 import { RollbackArray } from '../../../0_数组/RollbackArray'
 
@@ -90,10 +93,6 @@ class UnionFindWithDistAndUndo<D> {
 
   rollback(time: number): void {
     this._data.rollback(time)
-  }
-
-  undo(): boolean {
-    return this._data.undo()
   }
 
   getSize(x: number): number {

@@ -1,3 +1,7 @@
+// 由于每次Union不一定会修改成功,从而不记录修改
+// (实际上这种设计并不好，但是出于性能考虑，这里还是这么做了)
+// 因此不提供Undo操作,只提供GetTime/Rollback操作
+
 package main
 
 import (
@@ -21,7 +25,7 @@ func demo() {
 	fmt.Println(uf.Dist(1, 2))
 	uf.Union(2, 3, 2)
 	fmt.Println(uf.GetSize(1))
-	uf.Undo()
+
 	fmt.Println(uf.GetSize(1))
 }
 
@@ -121,10 +125,6 @@ func (uf *UnionFindWithDistAndUndo) GetTime() int {
 
 func (uf *UnionFindWithDistAndUndo) Rollback(time int) {
 	uf.data.Rollback(time)
-}
-
-func (uf *UnionFindWithDistAndUndo) Undo() bool {
-	return uf.data.Undo()
 }
 
 func (uf *UnionFindWithDistAndUndo) GetSize(x int) int {

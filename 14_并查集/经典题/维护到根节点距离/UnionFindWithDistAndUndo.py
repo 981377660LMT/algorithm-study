@@ -1,3 +1,7 @@
+# 由于每次Union不一定会修改成功,从而不记录修改
+# (实际上这种设计并不好，但是出于性能考虑，这里还是这么做了)
+# !因此不提供Undo操作,只提供GetTime/Rollback操作
+
 from collections import defaultdict
 from typing import Callable, DefaultDict, Generic, List, Tuple, TypeVar
 
@@ -73,13 +77,6 @@ class UnionFindWithDistAndUndo(Generic[D]):
         while len(self._history) > time:
             v, value = self._history.pop()
             self._data[v] = value
-
-    def undo(self) -> bool:
-        if not self._history:
-            return False
-        v, value = self._history.pop()
-        self._data[v] = value
-        return True
 
     def getSize(self, x: int) -> int:
         root, _ = self.find(x)
