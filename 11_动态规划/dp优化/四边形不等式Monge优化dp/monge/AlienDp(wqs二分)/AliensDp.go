@@ -1,3 +1,5 @@
+// https://github.com/EndlessCheng/codeforces-go/blob/13510980250d7b265d308ea4ff5b51eeb1b5e3e4/copypasta/dp.go#L2781
+
 package main
 
 // 给定一个整数数组 prices ，

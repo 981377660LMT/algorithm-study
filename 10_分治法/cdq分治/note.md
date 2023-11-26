@@ -42,3 +42,8 @@ https://www.cnblogs.com/TianMeng-hyl/p/14978786.html
 > https://www.luogu.com.cn/problem/P4269
 
 - 通过 CDQ 分治，将一些动态问题转化为静态问题(时间序列分治,按照中序遍历序进行分治才能保证每一个修改都是严格按照时间顺序执行的)。
+
+---
+
+https://blog.nowcoder.net/n/f44d4aada5a24f619442dd6ddffa7320
+https://www.luogu.com.cn/blog/Owencodeisking/post-xue-xi-bi-ji-cdq-fen-zhi-hu-zheng-ti-er-fen
