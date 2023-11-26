@@ -13,7 +13,10 @@ class UnionFindWithDistAndUndo<D> {
   private readonly _inv: (x: D) => D
   private readonly _data: RollbackArray<{ parent: number; dist: D }>
 
-  constructor(n: number, monoid: { e: () => D; op: (x: D, y: D) => D; inv: (x: D) => D } & ThisType<void>) {
+  constructor(
+    n: number,
+    monoid: { e: () => D; op: (x: D, y: D) => D; inv: (x: D) => D } & ThisType<void>
+  ) {
     this._n = n
     this._e = monoid.e
     this._op = monoid.op
@@ -29,7 +32,7 @@ class UnionFindWithDistAndUndo<D> {
     let { groupRoot: v1, distToRoot: x1 } = this.find(parent)
     let { groupRoot: v2, distToRoot: x2 } = this.find(child)
     if (v1 === v2) {
-      return dist === this._e()
+      return dist === this._op(x2, this._inv(x1))
     }
     let s1 = -this._data.get(v1).parent
     let s2 = -this._data.get(v2).parent
@@ -109,3 +112,10 @@ class UnionFindWithDistAndUndo<D> {
 }
 
 export { UnionFindWithDistAndUndo }
+
+if (require.main === module) {
+  const uf = new UnionFindWithDistAndUndo(10, { e: () => 0, op: (x, y) => x + y, inv: x => -x })
+  console.log(uf.union(1, 2, 1))
+  console.log(uf.union(2, 3, 2))
+  console.log(uf.union(1, 3, 3))
+}

@@ -12,6 +12,7 @@ class SegmentTreeDivideAndConquerCopy {
   private _mutate!: (state: unknown, mutationId: number) => void
   private _copy!: (state: unknown) => unknown
   private _query!: (state: unknown, queryId: number) => void
+  private _undo?: () => void
   private readonly _mutations: { start: number; end: number; id: number }[] = []
   private readonly _queries: { time: number; id: number }[] = []
   private _nodes: number[][] = [] // 在每个节点上保存对应的变更和查询的编号
@@ -41,7 +42,8 @@ class SegmentTreeDivideAndConquerCopy {
    * @param mutate 添加编号为`mutationId`的变更后产生的副作用.
    * @param copy 拷贝一份数据结构的副本.
    * @param query 响应编号为`queryId`的查询.
-   * @complexity 一共调用 **O(nlogn)** 次`mutate`，**O(n)** 次`copy` 和 **O(q)** 次`query`.
+   * @param undo 撤销最近一次变更.
+   * @complexity 一共调用 **O(nlogn)** 次`mutate`，**O(n)** 次`copy` , **O(q)** 次`query`，**O(nlogn)** 次`undo`.
    */
   run<S>(
     initState: S,
@@ -49,20 +51,29 @@ class SegmentTreeDivideAndConquerCopy {
       mutate: (state: S, mutationId: number) => void
       copy: (state: S) => S
       query: (state: S, queryId: number) => void
+      undo?: () => void
     } & ThisType<void>
   ): void
-  run<S>(initState: S, mutate: (state: S, mutationId: number) => void, copy: (state: S) => S, query: (state: S, queryId: number) => void): void
-  run(arg1: any, arg2: any, arg3?: any, arg4?: any) {
+  run<S>(
+    initState: S,
+    mutate: (state: S, mutationId: number) => void,
+    copy: (state: S) => S,
+    query: (state: S, queryId: number) => void,
+    undo?: () => void
+  ): void
+  run(arg1: any, arg2: any, arg3?: any, arg4?: any, arg5?: any): void {
     if (!this._queries.length) return
     this._initState = arg1
     if (typeof arg2 === 'object') {
       this._mutate = arg2.mutate
       this._copy = arg2.copy
       this._query = arg2.query
+      this._undo = arg2.undo
     } else {
       this._mutate = arg2
       this._copy = arg3
       this._query = arg4
+      this._undo = arg5
     }
     const times: number[] = Array(this._queries.length)
     for (let i = 0; i < this._queries.length; i++) times[i] = this._queries[i].time
@@ -121,6 +132,15 @@ class SegmentTreeDivideAndConquerCopy {
     }
     if (((now << 1) | 1) < this._nodes.length) {
       this._dfs((now << 1) | 1, this._copy(state))
+    }
+
+    if (this._undo) {
+      for (let i = 0; i < curNodes.length; i++) {
+        const id = curNodes[i]
+        if (!(id & 1)) {
+          this._undo()
+        }
+      }
     }
   }
 

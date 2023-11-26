@@ -4,7 +4,7 @@ console.log(new Set([res, res]))
 console.log(
   new Set([
     [1, 2],
-    [1, 2],
+    [1, 2]
   ])
 )
 // Set(2) { [ 1, 2 ], [ 1, 2 ] }

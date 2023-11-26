@@ -1,10 +1,21 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
 func main() {
+	Arc90B()
+	// demo()
+}
+
+func demo() {
 	uf := NewUnionFindWithDistAndUndo(10)
-	uf.Union(1, 2, 1)
+	fmt.Println(uf.Union(1, 2, 1))
+	fmt.Println(uf.Union(2, 3, 1))
+	fmt.Println(uf.Union(1, 3, 2))
 	fmt.Println(uf.DistToRoot(1))
 	fmt.Println(uf.DistToRoot(2))
 	fmt.Println(uf.Dist(1, 2))
@@ -12,6 +23,26 @@ func main() {
 	fmt.Println(uf.GetSize(1))
 	uf.Undo()
 	fmt.Println(uf.GetSize(1))
+}
+
+// https://atcoder.jp/contests/abc087/tasks/arc090_b
+func Arc90B() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	uf := NewUnionFindWithDistAndUndo(n + 10)
+	for i := 0; i < m; i++ {
+		var left, right, weight int
+		fmt.Fscan(in, &left, &right, &weight)
+		if !uf.Union(left, right, weight) {
+			fmt.Fprintln(out, "No")
+			return
+		}
+	}
+	fmt.Fprintln(out, "Yes")
 }
 
 type T = int
@@ -28,7 +59,7 @@ type UnionFindWithDistAndUndo struct {
 
 func NewUnionFindWithDistAndUndo(n int) *UnionFindWithDistAndUndo {
 	return &UnionFindWithDistAndUndo{
-		data: NewRollbackArray(n, func(index int) arrayItem { return arrayItem{value: -1, dist: e()} }),
+		data: NewRollbackArray(n, func(index int) arrayItem { return arrayItem{parent: -1, dist: e()} }),
 	}
 }
 
@@ -37,10 +68,11 @@ func (uf *UnionFindWithDistAndUndo) Union(parent int, child int, dist T) bool {
 	v1, x1 := uf.Find(parent)
 	v2, x2 := uf.Find(child)
 	if v1 == v2 {
-		return dist == e()
+		return dist == op(x2, inv(x1))
 	}
-	s1, s2 := -uf.data.Get(v1).value, -uf.data.Get(v2).value
+	s1, s2 := -uf.data.Get(v1).parent, -uf.data.Get(v2).parent
 	if s1 < s2 {
+		s1, s2 = s2, s1
 		v1, v2 = v2, v1
 		x1, x2 = x2, x1
 		dist = inv(dist)
@@ -48,8 +80,8 @@ func (uf *UnionFindWithDistAndUndo) Union(parent int, child int, dist T) bool {
 	// v1 <- v2
 	dist = op(x1, dist)
 	dist = op(dist, inv(x2))
-	uf.data.Set(v2, arrayItem{value: v1, dist: dist})
-	uf.data.Set(v1, arrayItem{value: -(s1 + s2), dist: e()})
+	uf.data.Set(v2, arrayItem{parent: v1, dist: dist})
+	uf.data.Set(v1, arrayItem{parent: -(s1 + s2), dist: e()})
 	return true
 }
 
@@ -58,11 +90,11 @@ func (uf *UnionFindWithDistAndUndo) Find(v int) (root int, distToRoot T) {
 	root, distToRoot = v, e()
 	for {
 		item := uf.data.Get(root)
-		if item.value < 0 {
+		if item.parent < 0 {
 			break
 		}
 		distToRoot = op(distToRoot, item.dist)
-		root = item.value
+		root = item.parent
 	}
 	return
 }
@@ -97,7 +129,7 @@ func (uf *UnionFindWithDistAndUndo) Undo() bool {
 
 func (uf *UnionFindWithDistAndUndo) GetSize(x int) int {
 	root, _ := uf.Find(x)
-	return -uf.data.Get(root).value
+	return -uf.data.Get(root).parent
 }
 
 func (uf *UnionFindWithDistAndUndo) GetGroups() map[int][]int {
@@ -110,8 +142,8 @@ func (uf *UnionFindWithDistAndUndo) GetGroups() map[int][]int {
 }
 
 type arrayItem struct {
-	value int
-	dist  T
+	parent int
+	dist   T
 }
 
 type historyItem struct {

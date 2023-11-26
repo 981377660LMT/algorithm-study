@@ -42,7 +42,12 @@ class UnionFindWithDistArray<V> {
    * p(child) = p(parent) + dist.
    * 如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
    */
-  union(child: number, parent: number, dist: V, cb?: (big: number, small: number) => void): boolean {
+  union(
+    child: number,
+    parent: number,
+    dist: V,
+    cb?: (big: number, small: number) => void
+  ): boolean {
     dist = this._op(dist, this._op(this.distToRoot(parent), this._inv(this.distToRoot(child))))
     child = this.find(child)
     parent = this.find(parent)
@@ -148,7 +153,12 @@ class UnionFindWithDistMap<V> {
    * p(child) = p(parent) + dist.
    * 如果组内两点距离存在矛盾(沿着不同边走距离不同),返回false.
    */
-  union(child: number, parent: number, dist: V, cb?: (big: number, small: number) => void): boolean {
+  union(
+    child: number,
+    parent: number,
+    dist: V,
+    cb?: (big: number, small: number) => void
+  ): boolean {
     dist = this._op(dist, this._op(this.distToRoot(parent), this._inv(this.distToRoot(child))))
     child = this.find(child)
     parent = this.find(parent)
@@ -178,7 +188,10 @@ class UnionFindWithDistMap<V> {
       return x
     }
     const root = this.find(this._data.get(x)!)
-    this._potential.set(x, this._op(this._potential.get(x)!, this._potential.get(this._data.get(x)!)!))
+    this._potential.set(
+      x,
+      this._op(this._potential.get(x)!, this._potential.get(this._data.get(x)!)!)
+    )
     this._data.set(x, root)
     return root
   }
@@ -237,9 +250,13 @@ class UnionFindWithDistMap<V> {
 export { UnionFindWithDistArray, UnionFindWithDistMap }
 
 if (require.main === module) {
-  const uf = new UnionFindWithDistArray<number>(10, { e: () => 0, op: (a, b) => a + b, inv: a => -a })
-  uf.union(0, 1, 1)
-  uf.union(1, 3, 2)
-  uf.union(4, 5, 3)
+  const uf = new UnionFindWithDistArray<number>(10, {
+    e: () => 0,
+    op: (a, b) => a + b,
+    inv: a => -a
+  })
+  console.log(uf.union(1, 2, 1))
+  console.log(uf.union(2, 3, 1))
+  console.log(uf.union(1, 3, 2))
   console.log(uf.dist(0, 1))
 }

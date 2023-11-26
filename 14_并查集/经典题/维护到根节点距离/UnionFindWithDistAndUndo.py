@@ -29,7 +29,7 @@ class UnionFindWithDistAndUndo(Generic[D]):
         v1, x1 = self.find(parent)
         v2, x2 = self.find(child)
         if v1 == v2:
-            return dist == self._e()
+            return dist == self._op(x2, self._inv(x1))
         s1, s2 = -self._data[v1][0], -self._data[v2][0]
         if s1 < s2:
             v1, v2 = v2, v1
@@ -94,9 +94,17 @@ class UnionFindWithDistAndUndo(Generic[D]):
 
 
 if __name__ == "__main__":
-    uf = UnionFindWithDistAndUndo(5, lambda: 0, lambda x, y: x + y, lambda x: -x)
-    print(uf.union(0, 1, 1))
-    print(uf.union(2, 3, 2))
-    print(uf.union(0, 2, 3))
-    print(uf.union(0, 4, 4))
-    print(uf.find(4))
+    # https://atcoder.jp/contests/abc087/tasks/arc090_b
+    # 每个判断为 right-left=dist
+    # 问所有的判断是否无矛盾
+    def solve1() -> None:
+        n, m = map(int, input().split())
+        uf = UnionFindWithDistAndUndo(n + 10, lambda: 0, lambda a, b: a + b, lambda a: -a)
+        for _ in range(m):
+            left, right, weight = map(int, input().split())
+            if not uf.union(left, right, weight):
+                print("No")
+                exit(0)
+        print("Yes")
+
+    solve1()
