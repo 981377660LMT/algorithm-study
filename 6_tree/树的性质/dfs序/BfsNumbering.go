@@ -1,4 +1,5 @@
 // https://maspypy.github.io/library/graph/ds/bfs_numbering.hpp
+// 给一颗以1为根大小为n的有根树，每个点有点权，查询若干次，每次查询以x的子树，深度为y的这一层中，所有点权的和（节点x的深度为0）.
 // !求每个root的子树中,绝对深度为dep的顶点的欧拉序/括号序的范围
 
 // !ID[v]：每个顶点的欧拉序编号 (0-indexed)
