@@ -15,6 +15,7 @@ class UnionFindWithDistAndUndo<D> {
   private readonly _op: (x: D, y: D) => D
   private readonly _inv: (x: D) => D
   private readonly _data: RollbackArray<{ parent: number; dist: D }>
+  private readonly _snapShots: number[] = []
 
   constructor(
     n: number,
@@ -87,12 +88,29 @@ class UnionFindWithDistAndUndo<D> {
     return this.find(x).distToRoot
   }
 
+  /** 将当前快照加入栈顶. */
+  snapshot(): number {
+    const res = this._data.getTime()
+    this._snapShots.push(res)
+    return res
+  }
+
   getTime(): number {
     return this._data.getTime()
   }
 
+  /**
+   * 回滚到time时刻的状态.
+   * time=-1表示回滚到栈顶(上一次)快照的时间，并删除该快照.
+   */
   rollback(time: number): void {
-    this._data.rollback(time)
+    if (time !== -1) {
+      this._data.rollback(time)
+    } else {
+      if (this._snapShots.length === 0) return
+      time = this._snapShots.pop()!
+      this._data.rollback(time)
+    }
   }
 
   getSize(x: number): number {

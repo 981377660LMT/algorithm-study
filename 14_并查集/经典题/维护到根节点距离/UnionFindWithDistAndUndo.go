@@ -1,6 +1,6 @@
-// 由于每次Union不一定会修改成功,从而不记录修改
+// 由于每次Union不一定会修改成功,此时不记录修改
 // (实际上这种设计并不好，但是出于性能考虑，这里还是这么做了)
-// 因此不提供Undo操作,只提供GetTime/Rollback操作
+// 因此不提供Undo操作,只提供GetTime/Snapshot/Rollback操作
 
 package main
 
@@ -58,12 +58,38 @@ func inv(x T) T   { return -x }
 // 维护到每个组根节点距离的可撤销并查集.
 // 用于维护环的权值，树上的距离等.
 type UnionFindWithDistAndUndo struct {
-	data *RollbackArray
+	data      *RollbackArray
+	snapShots []int
 }
 
 func NewUnionFindWithDistAndUndo(n int) *UnionFindWithDistAndUndo {
 	return &UnionFindWithDistAndUndo{
 		data: NewRollbackArray(n, func(index int) arrayItem { return arrayItem{parent: -1, dist: e()} }),
+	}
+}
+
+// 将当前快照加入栈顶.
+func (uf *UnionFindWithDistAndUndo) SnapShot() int {
+	res := uf.data.GetTime()
+	uf.snapShots = append(uf.snapShots, res)
+	return res
+}
+
+func (uf *UnionFindWithDistAndUndo) GetTime() int {
+	return uf.data.GetTime()
+}
+
+// time=-1表示回滚到栈顶(上一次)快照的时间，并删除该快照.
+func (uf *UnionFindWithDistAndUndo) Rollback(time int) {
+	if time != -1 {
+		uf.data.Rollback(time)
+	} else {
+		if len(uf.snapShots) == 0 {
+			return
+		}
+		time = uf.snapShots[len(uf.snapShots)-1]
+		uf.snapShots = uf.snapShots[:len(uf.snapShots)-1]
+		uf.data.Rollback(time)
 	}
 }
 
@@ -117,14 +143,6 @@ func (uf *UnionFindWithDistAndUndo) Dist(x int, y int) T {
 func (uf *UnionFindWithDistAndUndo) DistToRoot(x int) T {
 	_, dx := uf.Find(x)
 	return dx
-}
-
-func (uf *UnionFindWithDistAndUndo) GetTime() int {
-	return uf.data.GetTime()
-}
-
-func (uf *UnionFindWithDistAndUndo) Rollback(time int) {
-	uf.data.Rollback(time)
 }
 
 func (uf *UnionFindWithDistAndUndo) GetSize(x int) int {

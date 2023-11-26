@@ -14,12 +14,10 @@ package main
 
 import (
 	"bufio"
-	"container/list"
 	"fmt"
 	"math/bits"
 	"os"
 	"sort"
-	"strings"
 )
 
 const INF int = 1e18
@@ -38,7 +36,7 @@ func main() {
 
 	var n, m int
 	fmt.Fscan(in, &n, &m)
-	edges := make([][3]int, n)
+	edges := make([][3]int, m)
 	for i := range edges {
 		fmt.Fscan(in, &edges[i][0], &edges[i][1], &edges[i][2])
 		edges[i][0]--
@@ -64,15 +62,14 @@ func main() {
 
 	R := NewAddRemoveQuery(true)
 	seg := NewSegmentTreeDivideAndConquerCopy()
-	edgeWeight := make(map[int]int)
+	edgeId := make(map[int]int, n+q)
 	for i := range edges {
-		u, v, w := edges[i][0], edges[i][1], edges[i][2]
+		u, v := edges[i][0], edges[i][1]
 		if u > v {
 			u, v = v, u
 		}
-		edgeHash := u*n + v
-		edgeWeight[edgeHash] = w
-		R.Add(-1, edgeHash) // 初始时刻的边
+		edgeId[u*n+v] = i
+		R.Add(-1, i) // 初始时刻的边
 	}
 
 	queryCount := 0
@@ -83,10 +80,13 @@ func main() {
 		}
 		edgeHash := u*n + v
 		if op == 1 {
-			R.Add(queryCount, edgeHash)
-			edgeWeight[edgeHash] = w
+			edges = append(edges, [3]int{u, v, w})
+			newId := len(edges) - 1
+			edgeId[edgeHash] = newId
+			R.Add(queryCount, newId)
 		} else if op == 2 {
-			R.Remove(queryCount, edgeHash)
+			id := edgeId[edgeHash]
+			R.Remove(queryCount, id)
 		} else {
 			seg.AddQuery(queryCount, i)
 			queryCount++
@@ -94,7 +94,7 @@ func main() {
 	}
 	events := R.GetEvents(INF)
 	for _, e := range events {
-		seg.AddMutation(e.start, e.end, e.value) // value为edgeHash
+		seg.AddMutation(e.start, e.end, e.value) // value为edges的下标
 	}
 
 	res := make([]int, q)
@@ -103,20 +103,17 @@ func main() {
 	}
 
 	uf := NewUnionFindWithDistAndUndo(n)
-
 	initVectorSpace := NewVectorSpace(nil)
 	seg.Run(
 		&initVectorSpace,
-		func(vectorSpace *State, edgeHash int) {
+		func(vectorSpace *State, edgeId int) {
 			vs := *vectorSpace
-			u, v := edgeHash/n, edgeHash%n
-			w := edgeWeight[edgeHash]
-
+			edge := edges[edgeId]
+			u, v, w := edge[0], edge[1], edge[2]
 			uf.SnapShot()
-			// fmt.Println("add", u, v, w, *vectorSpace)
+
 			root1, x1 := uf.Find(u)
 			root2, x2 := uf.Find(v)
-
 			if root1 != root2 {
 				uf.Union(u, v, w)
 			} else {
@@ -126,25 +123,18 @@ func main() {
 		},
 		func(vectorSpace *State) *State {
 			tmp := *vectorSpace
-			// fmt.Println("copy", tmp)
 			res := tmp.Copy()
 			return &res
 		},
 		func(vectorSpace *State, queryId int) {
 			vs := *vectorSpace
-
 			query := operations[queryId]
 			u, v := query[1], query[2]
-			// fmt.Println("query", u, v, vs)
-
 			dist := uf.Dist(u, v)
-			// fmt.Println(dist, uf.GetGroups())
 			res[queryId] = vs.Min(dist)
-
 		},
 		func() {
 			uf.Rollback(-1)
-			// fmt.Println("undo", uf.data.history)
 		},
 	)
 
@@ -338,17 +328,16 @@ type Event = struct {
 // !不能加入相同的元素，删除时元素必须要存在。
 // 如果 add 和 remove 按照时间顺序单增，那么可以使用 monotone = true 来加速。
 type AddRemoveQuery struct {
-	mp       *LinkedHashMap
+	mp       map[V]int
 	events   []Event
 	adds     map[V][]int
-	addKeys  []V
 	removes  map[V][]int
 	monotone bool
 }
 
 func NewAddRemoveQuery(monotone bool) *AddRemoveQuery {
 	return &AddRemoveQuery{
-		mp:       NewLinkedHashMap(16),
+		mp:       map[V]int{},
 		events:   []Event{},
 		adds:     map[V][]int{},
 		removes:  map[V][]int{},
@@ -361,7 +350,6 @@ func (adq *AddRemoveQuery) Add(time int, value V) {
 		adq.addMonotone(time, value)
 	} else {
 		adq.adds[value] = append(adq.adds[value], time)
-		adq.addKeys = append(adq.addKeys, value)
 	}
 }
 
@@ -378,15 +366,8 @@ func (adq *AddRemoveQuery) GetEvents(lastTime int) []Event {
 	if adq.monotone {
 		return adq.getMonotone(lastTime)
 	}
-
 	res := []Event{}
-	// visited := make(map[V]struct{}, len(adq.adds))
 	for value, addTimes := range adq.adds {
-		// if _, v := visited[value]; v {
-		// 	continue
-		// }
-		// visited[value] = struct{}{}
-		// addTimes := adq.adds[value]
 		removeTimes := []int{}
 		if cand, ok := adq.removes[value]; ok {
 			removeTimes = cand
@@ -403,35 +384,34 @@ func (adq *AddRemoveQuery) GetEvents(lastTime int) []Event {
 			}
 		}
 	}
-
 	return res
 }
 
 func (adq *AddRemoveQuery) addMonotone(time int, value V) {
-	if adq.mp.Has(value) {
+	if _, ok := adq.mp[value]; ok {
 		panic("can't add a value that already exists")
 	}
-	adq.mp.Set(value, time)
+	adq.mp[value] = time
 }
 
 func (adq *AddRemoveQuery) removeMonotone(time int, value V) {
-	if startTime, ok := adq.mp.Get(value); !ok {
+	if startTime, ok := adq.mp[value]; !ok {
 		panic("can't remove a value that doesn't exist")
 	} else {
-		adq.mp.Delete(value)
+		delete(adq.mp, value)
 		if startTime != time {
-			adq.events = append(adq.events, Event{startTime.(int), time, value})
+			adq.events = append(adq.events, Event{startTime, time, value})
 		}
 	}
 }
 
 func (adq *AddRemoveQuery) getMonotone(lastTime int) []Event {
-	adq.mp.ForEach(func(value interface{}, startTime interface{}) bool {
-		if startTime.(int) != lastTime {
-			adq.events = append(adq.events, Event{startTime.(int), lastTime, value.(int)})
+	for value, startTime := range adq.mp {
+		if startTime == lastTime {
+			continue
 		}
-		return false
-	})
+		adq.events = append(adq.events, Event{startTime, lastTime, value})
+	}
 	return adq.events
 }
 
@@ -674,10 +654,6 @@ func (uf *UnionFindWithDistAndUndo) Union(parent int, child int, dist T) bool {
 	v1, x1 := uf.Find(parent)
 	v2, x2 := uf.Find(child)
 	if v1 == v2 {
-		if v1 < 0 {
-			fmt.Println("v1<0")
-			return false
-		}
 		return dist == op(x2, inv(x1))
 	}
 	s1, s2 := -uf.data.Get(v1).parent, -uf.data.Get(v2).parent
@@ -784,70 +760,4 @@ func (r *RollbackArray) GetAll() []arrayItem {
 
 func (r *RollbackArray) Len() int {
 	return r.n
-}
-
-type listItem = struct{ key, value interface{} }
-type LinkedHashMap struct {
-	mp   map[interface{}]*list.Element
-	list *list.List
-}
-
-func NewLinkedHashMap(initCapacity int) *LinkedHashMap {
-	return &LinkedHashMap{make(map[interface{}]*list.Element, initCapacity), list.New()}
-}
-
-func (s *LinkedHashMap) Get(key interface{}) (res interface{}, ok bool) {
-	if ele, hit := s.mp[key]; hit {
-		return ele.Value.(listItem).value, true
-	}
-	return
-}
-
-func (s *LinkedHashMap) Set(key, value interface{}) *LinkedHashMap {
-	if ele, hit := s.mp[key]; hit {
-		ele.Value = listItem{key, value}
-	} else {
-		s.mp[key] = s.list.PushBack(listItem{key, value})
-	}
-	return s
-}
-
-func (s *LinkedHashMap) Delete(key interface{}) bool {
-	if ele, hit := s.mp[key]; hit {
-		s.list.Remove(ele)
-		delete(s.mp, key)
-		return true
-	}
-	return false
-}
-
-func (s *LinkedHashMap) Has(key interface{}) bool {
-	_, ok := s.mp[key]
-	return ok
-}
-
-func (s *LinkedHashMap) Size() int {
-	return len(s.mp)
-}
-
-// 按照插入顺序遍历哈希表中的元素
-// 当 f 返回 true 时停止遍历
-func (s *LinkedHashMap) ForEach(f func(key interface{}, value interface{}) bool) {
-	for node := s.list.Front(); node != nil; node = node.Next() {
-		if f(node.Value.(listItem).key, node.Value.(listItem).value) {
-			break
-		}
-	}
-}
-
-func (s *LinkedHashMap) String() string {
-	res := []string{"LinkedHashMap{"}
-	content := []string{}
-	s.ForEach(func(key interface{}, value interface{}) bool {
-		content = append(content, fmt.Sprintf("%v: %v", key, value))
-		return false
-	})
-	res = append(res, strings.Join(content, ", "))
-	res = append(res, "}")
-	return strings.Join(res, "")
 }

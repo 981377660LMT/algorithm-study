@@ -47,14 +47,14 @@ func main() {
 	for i, operation := range operations {
 		kind := operation[0]
 		if kind == 1 {
-			Q.Add(i, i)
+			Q.Add(len(queries), i)
 		} else if kind == 2 {
 			prePos := operation[1]
-			Q.Remove(i, prePos)
+			Q.Remove(len(queries), prePos)
 		} else {
 			x := operation[1]
+			seg.AddQuery(len(queries), len(queries))
 			queries = append(queries, x)
-			seg.AddQuery(i, len(queries)-1)
 		}
 	}
 	mutations := Q.GetEvents(INF)

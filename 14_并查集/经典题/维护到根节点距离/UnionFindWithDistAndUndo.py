@@ -15,7 +15,7 @@ class UnionFindWithDistAndUndo(Generic[D]):
     用于维护环的权值，树上的距离等.
     """
 
-    __slots__ = ("_data", "_history", "_n", "_e", "_op", "_inv")
+    __slots__ = ("_data", "_history", "_n", "_e", "_op", "_inv", "_snapshots")
 
     def __init__(self, n: int, e: Callable[[], D], op: Callable[[D, D], D], inv: Callable[[D], D]):
         self._data: List[Tuple[int, D]] = [(-1, e()) for _ in range(n)]
@@ -24,6 +24,7 @@ class UnionFindWithDistAndUndo(Generic[D]):
         self._e = e
         self._op = op
         self._inv = inv
+        self._snapshots = []
 
     def union(self, parent: int, child: int, dist: D) -> bool:
         """
@@ -70,13 +71,29 @@ class UnionFindWithDistAndUndo(Generic[D]):
     def distToRoot(self, x: int) -> D:
         return self.find(x)[1]
 
+    def snapShot(self) -> int:
+        """将当前快照加入栈顶."""
+        res = self.getTime()
+        self._snapshots.append(res)
+        return res
+
     def getTime(self) -> int:
         return len(self._history)
 
     def rollback(self, time: int) -> None:
-        while len(self._history) > time:
-            v, value = self._history.pop()
-            self._data[v] = value
+        """
+        回滚到time时刻.
+        time=-1表示回滚到栈顶(上一次)快照的时间，并删除该快照.
+        """
+        if time != -1:
+            while len(self._history) > time:
+                v, value = self._history.pop()
+                self._data[v] = value
+        else:
+            if not self._snapshots:
+                return
+            time = self._snapshots.pop()
+            self.rollback(time)
 
     def getSize(self, x: int) -> int:
         root, _ = self.find(x)
