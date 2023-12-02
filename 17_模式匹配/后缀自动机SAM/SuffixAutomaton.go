@@ -28,9 +28,9 @@ const SIZE int = 26     // 字符集大小
 const MARGIN byte = 'a' // 字符集的起始字符
 
 type Node struct {
-	next [SIZE]int // automaton の遷移先
-	link int       // suffix link
-	size int       // node が受理する最長文字列の長さ
+	next      [SIZE]int // automaton の遷移先
+	link      int       // suffix link
+	maxLength int       // node が受理する最長文字列の長さ
 }
 
 type SuffixAutomaton struct {
@@ -49,7 +49,7 @@ func NewSuffixAutomaton() *SuffixAutomaton {
 func (sa *SuffixAutomaton) Add(char byte) {
 	c := char - sa.margin
 	newNode := len(sa.nodes)
-	sa.nodes = append(sa.nodes, sa.newNode(-1, sa.nodes[sa.last].size+1))
+	sa.nodes = append(sa.nodes, sa.newNode(-1, sa.nodes[sa.last].maxLength+1))
 	p := sa.last
 	for p != -1 && sa.nodes[p].next[c] == -1 {
 		sa.nodes[p].next[c] = newNode
@@ -59,12 +59,11 @@ func (sa *SuffixAutomaton) Add(char byte) {
 	if p != -1 {
 		q = sa.nodes[p].next[c]
 	}
-
-	if p == -1 || sa.nodes[p].size+1 == sa.nodes[q].size {
+	if p == -1 || sa.nodes[p].maxLength+1 == sa.nodes[q].maxLength {
 		sa.nodes[newNode].link = q
 	} else {
 		newQ := len(sa.nodes)
-		sa.nodes = append(sa.nodes, sa.newNode(sa.nodes[q].link, sa.nodes[p].size+1))
+		sa.nodes = append(sa.nodes, sa.newNode(sa.nodes[q].link, sa.nodes[p].maxLength+1))
 		sa.nodes[len(sa.nodes)-1].next = sa.nodes[q].next
 		sa.nodes[q].link = newQ
 		sa.nodes[newNode].link = newQ
@@ -108,7 +107,7 @@ func (sa *SuffixAutomaton) CountSubstringAt(p int) int {
 	if p == 0 {
 		return 0
 	}
-	return sa.nodes[p].size - sa.nodes[sa.nodes[p].link].size
+	return sa.nodes[p].maxLength - sa.nodes[sa.nodes[p].link].maxLength
 }
 
 // 本质不同的子串个数.
@@ -121,7 +120,7 @@ func (sa *SuffixAutomaton) CountSubstring() int {
 }
 
 func (sa *SuffixAutomaton) newNode(link, size int) *Node {
-	res := &Node{link: link, size: size}
+	res := &Node{link: link, maxLength: size}
 	for i := 0; i < sa.size; i++ {
 		res.next[i] = -1
 	}

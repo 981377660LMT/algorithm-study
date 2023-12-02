@@ -25,7 +25,7 @@ func NewBitArray(n int) *BITArray {
 	return res
 }
 
-func NewBitArrayFrom(n int, f func(index int) int) *BITArray {
+func NewBitArrayFrom(n int, f func(i int) int) *BITArray {
 	total := 0
 	data := make([]int, n)
 	for i := 0; i < n; i++ {

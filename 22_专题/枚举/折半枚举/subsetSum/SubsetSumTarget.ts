@@ -19,18 +19,18 @@ function subsetSumTarget(arr: number[], target: number): [res: number[], ok: boo
   }
 
   const cost1 = n * max
-  const cost2 = sum * Math.floor(Math.sqrt(sum))
-  const cost3 = (n / 32) * target // 经验值
-  let cost4 = 2e15
-  if (n <= 50) {
-    cost4 = 1 << ((n >>> 1) + 2)
+  const cost2 = (sum * Math.floor(Math.sqrt(sum))) / 100
+  const cost3 = (n * target) / 32 // 经验值
+  let cost5 = 2e15
+  if (n <= 46) {
+    cost5 = 1 << ((n >>> 1) + 1)
   }
 
-  const minCost = Math.min(cost1, cost2, cost3, cost4)
+  const minCost = Math.min(cost1, cost2, cost3, cost5)
   if (minCost === cost1) return subsetSumTargetDp1(arr, target)
   if (minCost === cost2) return subsetSumTargetDp2(arr, target)
-  if (minCost === cost3) return subsetSumTargetBitset(arr, target)
-  return subsetSumTargetMeetInMiddle(arr, target)
+  if (minCost === cost3) return subsetSumTargetDp3(arr, target)
+  return subsetSumTargetDp5(arr, target)
 }
 
 /**
@@ -112,7 +112,6 @@ function subsetSumTargetDp1(arr: number[], target: number): [res: number[], ok: 
   }
   return [res, true]
 }
-
 /**
  * 能否从arr中选出若干个数，使得它们的和为target.
  * @complexity O(sum(arr) ^ 1.5).
@@ -173,7 +172,7 @@ function subsetSumTargetDp2(arr: number[], target: number): [res: number[], ok: 
  * 能否从arr中选出若干个数，使得它们的和为target.
  * @complexity O(n * target / 32).
  */
-function subsetSumTargetBitset(arr: number[], target: number): [res: number[], ok: boolean] {
+function subsetSumTargetDp3(arr: number[], target: number): [res: number[], ok: boolean] {
   const n = arr.length
   const order = argSort(arr)
   let dp = new BitSet(1, 1)
@@ -224,9 +223,66 @@ function subsetSumTargetBitset(arr: number[], target: number): [res: number[], o
 
 /**
  * 能否从arr中选出若干个数，使得它们的和为target.
+ * @complexity O(sum(arr) ^ 1.5 / 32).常数较大.
+ * @deprecated
+ */
+function subsetSumTargetDp4(arr: number[], target: number): [res: number[], ok: boolean] {
+  let sum = 0
+  for (let i = 0; i < arr.length; i++) {
+    sum += arr[i]
+  }
+  if (target > sum) {
+    return [[], false]
+  }
+  const n = arr.length
+  const ids: number[][] = Array(sum + 1)
+  for (let i = 0; i < ids.length; i++) ids[i] = []
+  for (let i = 0; i < n; i++) {
+    ids[arr[i]].push(i)
+  }
+  const pre: { a: number; b: number }[] = Array(n)
+  for (let i = 0; i < pre.length; i++) pre[i] = { a: -1, b: -1 }
+  const grpVals: number[] = []
+  const rawIdx: number[] = []
+  for (let x = 1; x <= sum; x++) {
+    const I = ids[x]
+    while (I.length >= 3) {
+      const a = I.pop()!
+      const b = I.pop()!
+      const c = pre.length
+      pre.push({ a, b })
+      ids[2 * x].push(c)
+    }
+    for (let i = 0; i < I.length; i++) {
+      grpVals.push(x)
+      rawIdx.push(I[i])
+    }
+  }
+  const [I, tmp] = subsetSumTargetDp3(grpVals, target)
+  if (!tmp) {
+    return [[], false]
+  }
+  const res: number[] = []
+  for (let i = 0; i < I.length; i++) {
+    const st = [rawIdx[I[i]]]
+    while (st.length > 0) {
+      const c = st.pop()!
+      if (c < n) {
+        res.push(c)
+        continue
+      }
+      const { a, b } = pre[c]
+      st.push(a, b)
+    }
+  }
+  return [res, true]
+}
+
+/**
+ * 能否从arr中选出若干个数，使得它们的和为target.
  * @complexity O(2^(n/2)).注意常数较大.
  */
-function subsetSumTargetMeetInMiddle(arr: number[], target: number): [res: number[], ok: boolean] {
+function subsetSumTargetDp5(arr: number[], target: number): [res: number[], ok: boolean] {
   const n = arr.length
   const mid = n >>> 1
   const dp1 = subsetSumSortedWithState(arr.slice(0, mid))
@@ -248,12 +304,7 @@ function subsetSumTargetMeetInMiddle(arr: number[], target: number): [res: numbe
   return [[], false]
 
   // eslint-disable-next-line max-len
-  function resolveState(
-    leftSize: number,
-    leftState: number,
-    rightSize: number,
-    rightState: number
-  ): number[] {
+  function resolveState(leftSize: number, leftState: number, rightSize: number, rightState: number): number[] {
     const res: number[] = []
     for (let i = 0; i < leftSize; i++) {
       if (leftState & (1 << i)) res.push(i)
@@ -269,34 +320,55 @@ export {
   subsetSumTarget,
   subsetSumTargetDp1,
   subsetSumTargetDp2,
-  subsetSumTargetBitset,
-  subsetSumTargetMeetInMiddle
+  subsetSumTargetDp3,
+  subsetSumTargetDp3 as subsetSumTargetBitset,
+  subsetSumTargetDp4,
+  subsetSumTargetDp5,
+  subsetSumTargetDp5 as subsetSumTargetMeetInMiddle
 }
 
 if (require.main === module) {
   console.log(subsetSumTargetDp1([2, 3, 4, 5, 6, 7, 8, 9], 10))
   console.log(subsetSumTargetDp2([2, 3, 4, 5, 6, 7, 8, 9], 10))
-  console.log(subsetSumTargetBitset([2, 3, 4, 5, 6, 7, 8, 9], 10))
-  console.log(subsetSumTargetMeetInMiddle([2, 3, 4, 5, 6, 7, 8, 9], 10))
+  console.log(subsetSumTargetDp3([2, 3, 4, 5, 6, 7, 8, 9], 10))
+  console.log(subsetSumTargetDp4([2, 3, 4, 5, 6, 7, 8, 9], 10))
+  console.log(subsetSumTargetDp5([2, 3, 4, 5, 6, 7, 8, 9], 10))
+  console.log(subsetSumTargetDp1([3], 3))
+  console.log(subsetSumTargetDp2([3], 3))
+  console.log(subsetSumTargetDp3([3], 3))
+  console.log(subsetSumTargetDp4([3], 3))
+  console.log(subsetSumTargetDp5([3], 3))
 
-  const max = 1e5
-  const n = 200
+  const max = 1e6
+  const n = 10
   const nums = Array.from({ length: n }, () => max)
   const target = 3e6
+  const sum = nums.reduce((a, b) => a + b, 0)
 
   console.time('subsetSumTargetDp1')
   subsetSumTargetDp1(nums, target)
   console.timeEnd('subsetSumTargetDp1')
 
-  console.time('subsetSumTargetBitset')
-  subsetSumTargetBitset(nums, target)
-  console.timeEnd('subsetSumTargetBitset')
-
   console.time('subsetSumTargetDp2')
   subsetSumTargetDp2(nums, target)
   console.timeEnd('subsetSumTargetDp2')
 
+  console.time('subsetSumTargetDp3')
+  subsetSumTargetDp3(nums, target)
+  console.timeEnd('subsetSumTargetDp3')
+
+  console.time('subsetSumTargetDp4')
+  subsetSumTargetDp4(nums, target)
+  console.timeEnd('subsetSumTargetDp4')
+
+  // console.time('subsetSumTargetDp5')
+  // subsetSumTargetDp5(nums, target)
+  // console.timeEnd('subsetSumTargetDp5')
+
   const cost1 = n * max
-  const cost2 = (n * target) / 32
-  console.log(cost1, cost2)
+  const cost2 = sum * Math.floor(Math.sqrt(sum))
+  const cost3 = (n * target) / 32
+  const cost4 = (sum * Math.floor(Math.sqrt(sum))) / 100
+  const cost5 = 2 ** (n / 2)
+  console.log(cost1, cost2, cost3, cost4, cost5)
 }

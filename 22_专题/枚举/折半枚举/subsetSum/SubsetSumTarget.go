@@ -16,15 +16,18 @@ import (
 )
 
 func main() {
-
-	// fmt.Println(SubsetSumTargetDp1([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
-	// fmt.Println(SubsetSumTargetDp2([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
-	fmt.Println(SubsetSumTargetBitset([]int{3, 4, 5, 6, 7, 8, 9}, 11))
-	// fmt.Println(SubsetSumTargetMeetInMiddle([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
-
-	// yuki04()
-	// testTime()
 	JumpingSequence()
+	// testTime()
+}
+
+func demo() {
+
+	fmt.Println(SubsetSumTargetDp1([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
+	fmt.Println(SubsetSumTargetDp4([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
+	fmt.Println(SubsetSumTargetDp3([]int{3, 4, 5, 6, 7, 8, 9}, 11))
+	fmt.Println(SubsetSumTargetDp2([]int{300}, 300))
+	fmt.Println(SubsetSumTargetDp5([]int{2, 3, 4, 5, 6, 7, 8, 9}, 10))
+
 }
 
 // G - Jumping sequence
@@ -72,8 +75,8 @@ func JumpingSequence() {
 		return
 	}
 
-	res1, ok1 := SubsetSumTargetDp1(nums, newTargetX)
-	res2, ok2 := SubsetSumTargetDp1(nums, newTargetY)
+	res1, ok1 := SubsetSumTarget(nums, newTargetX)
+	res2, ok2 := SubsetSumTarget(nums, newTargetY)
 	if !ok1 && newTargetX != 0 {
 		fmt.Fprintln(out, "No")
 		return
@@ -124,28 +127,41 @@ func yuki04() {
 
 func testTime() {
 	max := int(1e7)
-	n := 20
+	n := 40
 	nums := make([]int, n)
 	for i := range nums {
 		nums[i] = max
+	}
+	sumNums := 0
+	for _, v := range nums {
+		sumNums += v
 	}
 
 	target := int(1e7)
 	time1 := time.Now()
 	SubsetSumTargetDp1(nums, target)
 	time2 := time.Now()
-	SubsetSumTargetBitset(nums, target)
-	time3 := time.Now()
 	SubsetSumTargetDp2(nums, target)
+	time3 := time.Now()
+	SubsetSumTargetDp3(nums, target)
 	time4 := time.Now()
+	SubsetSumTargetDp4(nums, target)
+	time5 := time.Now()
+	SubsetSumTargetDp5(nums, target)
+	time6 := time.Now()
 
 	cost1 := n * max
-	cost2 := n * target / 100 // TODO, 待调整
+	cost2 := int(math.Pow(float64(sumNums), 1.5)) / 100
+	cost3 := n * target / 500 // TODO, 待调整
+	cost4 := int(math.Pow(float64(sumNums), 1.5) / 500)
+	cost5 := 1 << (n / 2)
 
-	fmt.Println(time2.Sub(time1)) // 1.5s
-	fmt.Println(time3.Sub(time2)) // 300ms
-	fmt.Println(time4.Sub(time3))
-	fmt.Println(cost1, cost2)
+	fmt.Println(time2.Sub(time1)) // 3.05312s
+	fmt.Println(time3.Sub(time2)) // 1.752335916s
+	fmt.Println(time4.Sub(time3)) // 63.696375ms
+	fmt.Println(time5.Sub(time4)) // 4.00797975s
+	fmt.Println(time6.Sub(time5)) // 24.724042ms
+	fmt.Println(cost1, cost2, cost3, cost4, cost5)
 }
 
 const INF int = 1e18
@@ -167,11 +183,11 @@ func SubsetSumTarget(nums []int, target int) (res []int, ok bool) {
 	}
 
 	cost1 := n * max_
-	cost2 := sum * int(math.Sqrt(float64(sum)))
-	cost3 := n * target / 100 // 经验值
+	cost2 := int(math.Pow(float64(sum), 1.5) / 100)
+	cost3 := n * target / 500 // 经验值
 	cost4 := INF
-	if n <= 50 {
-		cost4 = 1 << ((n / 2) + 2)
+	if n <= 60 {
+		cost4 = 1 << (n / 2)
 	}
 	minCost := min(cost1, min(cost2, min(cost3, cost4)))
 	if minCost == cost1 {
@@ -181,9 +197,9 @@ func SubsetSumTarget(nums []int, target int) (res []int, ok bool) {
 		return SubsetSumTargetDp2(nums, target)
 	}
 	if minCost == cost3 {
-		return SubsetSumTargetBitset(nums, target)
+		return SubsetSumTargetDp3(nums, target)
 	}
-	return SubsetSumTargetMeetInMiddle(nums, target)
+	return SubsetSumTargetDp5(nums, target)
 }
 
 // 能否用nums中的若干个数凑出和为target.
@@ -336,8 +352,7 @@ func SubsetSumTargetDp2(nums []int, target int) (res []int, ok bool) {
 // Bitset优化dp.能否用nums中的若干个数凑出和为target.
 //
 //	O(n*target/w)
-func SubsetSumTargetBitset(nums []int, target int) (res []int, ok bool) {
-
+func SubsetSumTargetDp3(nums []int, target int) (res []int, ok bool) {
 	_enumerateBits64 := func(s uint64, f func(bit int)) {
 		for s != 0 {
 			i := bits.TrailingZeros64(s)
@@ -375,18 +390,18 @@ func SubsetSumTargetBitset(nums []int, target int) (res []int, ok bool) {
 		if ndp.Size() > target+1 {
 			ndp.Resize(target + 1)
 		}
-		for i := 0; i < len(dp.data); i++ {
+		for i := 0; i < len(ndp.data); i++ {
 			var updatedBits uint64
 			if i < len(dp.data) {
 				updatedBits = dp.data[i] ^ ndp.data[i]
 			} else {
 				updatedBits = ndp.data[i]
 			}
-
 			_enumerateBits64(updatedBits, func(p int) {
 				last[(i<<6)|p] = order[k]
 			})
 		}
+
 		dp = ndp
 	}
 
@@ -404,10 +419,65 @@ func SubsetSumTargetBitset(nums []int, target int) (res []int, ok bool) {
 	return
 }
 
+// 能否用nums中的若干个数凑出和为target.
+//
+//	O(sum(nums)^1.5/w).常数较大.
+func SubsetSumTargetDp4(nums []int, target int) (res []int, ok bool) {
+	sum := 0
+	for _, v := range nums {
+		sum += v
+	}
+	n := len(nums)
+	ids := make([][]int, sum+1)
+	for i := 0; i < n; i++ {
+		ids[nums[i]] = append(ids[nums[i]], i)
+	}
+	pre := make([][2]int, n)
+	for i := range pre {
+		pre[i] = [2]int{-1, -1}
+	}
+	var grpVals []int
+	var rawIdx []int
+	for x := 1; x <= sum; x++ {
+		I := ids[x]
+		for len(I) >= 3 {
+			a, b := I[len(I)-1], I[len(I)-2]
+			I = I[:len(I)-2]
+			c := len(pre)
+			pre = append(pre, [2]int{a, b})
+			ids[2*x] = append(ids[2*x], c)
+		}
+		for _, i := range I {
+			grpVals = append(grpVals, x)
+			rawIdx = append(rawIdx, i)
+		}
+	}
+	I, tmp := SubsetSumTargetDp3(grpVals, target)
+	if !tmp {
+		return
+	}
+	for _, i := range I {
+		st := []int{rawIdx[i]}
+		for len(st) > 0 {
+			c := st[len(st)-1]
+			st = st[:len(st)-1]
+			if c < n {
+				res = append(res, c)
+				continue
+			}
+			a, b := pre[c][0], pre[c][1]
+			st = append(st, a, b)
+		}
+	}
+	ok = true
+	return
+}
+
+// SubsetSumTargetMeetInTheMiddle
 // 折半搜索.能否用nums中的若干个数凑出和为target.
 //
 //	O(2^(n/2))
-func SubsetSumTargetMeetInMiddle(nums []int, target int) (res []int, ok bool) {
+func SubsetSumTargetDp5(nums []int, target int) (res []int, ok bool) {
 	_merge := func(a, b [][2]int) [][2]int {
 		n1, n2 := len(a), len(b)
 		res := make([][2]int, n1+n2)

@@ -1,23 +1,27 @@
 // 树上等高线汇集
 // https://maspypy.com/%e9%87%8d%e5%bf%83%e5%88%86%e8%a7%a3%e3%83%bb1-3%e9%87%8d%e5%bf%83%e5%88%86%e8%a7%a3%e3%81%ae%e3%81%8a%e7%b5%b5%e6%8f%8f%e3%81%8d
+// !注意不包含距离0,需额外处理.
 
 package main
 
 import (
 	"bufio"
 	"fmt"
-	"math/bits"
 	"os"
 	"strings"
 )
+
+func main() {
+	// VertexGetRangeContourAdd()
+	Yuki1038()
+}
 
 // https://judge.yosupo.jp/problem/vertex_add_range_contour_sum_on_tree
 // 给定q个操作，操作有两种：
 // 0 root x : 将root节点的值加上x (点权加)
 // 1 root floor higher: 求出距离root节点距离在[floor,higher)之间的所有节点的值的和 (区间点权和)
 // n<=1e5 q<=2e5
-
-func main() {
+func VertexAddRangeContourSum() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -44,30 +48,137 @@ func main() {
 		})
 	}
 
-	bit := NewBitArrayFrom(data)
+	bit := NewBitArrayFrom(len(data), func(i int) int { return data[i] })
 	for i := 0; i < q; i++ {
 		var kind int
 		fmt.Fscan(in, &kind)
 		if kind == 0 {
 			var root, x int
 			fmt.Fscan(in, &root, &x)
+
 			weights[root] += x
 			C.EnumeratePoint(root, func(pos int) {
 				bit.Add(pos, x)
 			})
+
 		} else {
 			var root, floor, higher int
 			fmt.Fscan(in, &root, &floor, &higher)
 			res := 0
-			if floor <= 0 && higher > 0 {
+
+			if floor <= 0 && 0 < higher {
 				res += weights[root]
 			}
 			C.EnumerateRange(root, floor, higher, func(start, end int) {
 				res += bit.QueryRange(start, end)
 			})
+
 			fmt.Fprintln(out, res)
 		}
 	}
+}
+
+// https://judge.yosupo.jp/problem/vertex_get_range_contour_add_on_tree
+// 给定q个操作，操作有两种：
+// 0 root floor higher x: 距离root节点距离在[floor,higher)之间的所有节点的值加上x (区间点权加)
+// 1 root : 求出root节点的值 (点权)
+// n<=1e5 q<=2e5
+func VertexGetRangeContourAdd() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	values := make([]int, n)
+	for i := range values {
+		fmt.Fscan(in, &values[i])
+	}
+	tree := make([][]int, n)
+	for i := 0; i < n-1; i++ {
+		var a, b int
+		fmt.Fscan(in, &a, &b)
+		tree[a] = append(tree[a], b)
+		tree[b] = append(tree[b], a)
+	}
+
+	C := NewContourQueryRange(n, tree)
+	bit := NewBitArray(C.Size() + 1)
+
+	add := func(root, floor, higher, x int) {
+		if floor <= 0 && 0 < higher {
+			values[root] += x
+		}
+		C.EnumerateRange(root, floor, higher, func(start, end int) {
+			bit.Add(start, x)
+			bit.Add(end, -x)
+		})
+	}
+
+	query := func(root int) int {
+		res := values[root]
+		C.EnumeratePoint(root, func(pos int) {
+			res += bit.QueryPrefix(pos + 1)
+		})
+		return res
+	}
+
+	for i := 0; i < q; i++ {
+		var kind int
+		fmt.Fscan(in, &kind)
+		if kind == 0 {
+			var root, floor, higher, x int
+			fmt.Fscan(in, &root, &floor, &higher, &x)
+			add(root, floor, higher, x)
+		} else {
+			var root int
+			fmt.Fscan(in, &root)
+			fmt.Fprintln(out, query(root))
+		}
+	}
+}
+
+// https://yukicoder.me/problems/no/1038
+// 给定一颗树，初始时点权为0，有q个操作.
+// 每次操作输出顶点x的点权，并将距离x距离在[0,y]之间的所有节点的点权加上z.
+func Yuki1038() {
+	in, out := bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	tree := make([][]int, n)
+	for i := 0; i < n-1; i++ {
+		var a, b int
+		fmt.Fscan(in, &a, &b)
+		a--
+		b--
+		tree[a] = append(tree[a], b)
+		tree[b] = append(tree[b], a)
+	}
+	weights := make([]int, n)
+
+	C := NewContourQueryRange(n, tree)
+	bit := NewBitArray(C.Size() + 1)
+	for i := 0; i < q; i++ {
+		var node, dist, delta int
+		fmt.Fscan(in, &node, &dist, &delta)
+		node--
+		dist++
+
+		res := weights[node]
+		C.EnumeratePoint(node, func(pos int) {
+			res += bit.QueryPrefix(pos + 1)
+		})
+		fmt.Fprintln(out, res)
+
+		weights[node] += delta
+		C.EnumerateRange(node, 0, dist, func(start, end int) {
+			bit.Add(start, delta)
+			bit.Add(end, -delta)
+		})
+	}
+
 }
 
 // !注意不包含距离0.
@@ -389,79 +500,107 @@ func min(a, b int) int {
 	return b
 }
 
+// !Point Add Range Sum, 0-based.
 type BITArray struct {
-	n    int
-	log  int
-	data []int
+	n     int
+	total int
+	data  []int
 }
 
 func NewBitArray(n int) *BITArray {
-	return &BITArray{n: n, log: bits.Len(uint(n)), data: make([]int, n+1)}
-}
-
-func NewBitArrayFrom(arr []int) *BITArray {
-	res := NewBitArray(len(arr))
-	res.Build(arr)
+	res := &BITArray{n: n, data: make([]int, n)}
 	return res
 }
 
-func (b *BITArray) Build(arr []int) {
-	if b.n != len(arr) {
-		panic("len of arr is not equal to n")
+func NewBitArrayFrom(n int, f func(i int) int) *BITArray {
+	total := 0
+	data := make([]int, n)
+	for i := 0; i < n; i++ {
+		data[i] = f(i)
+		total += data[i]
 	}
-	for i := 1; i <= b.n; i++ {
-		b.data[i] = arr[i-1]
-	}
-	for i := 1; i <= b.n; i++ {
+	for i := 1; i <= n; i++ {
 		j := i + (i & -i)
-		if j <= b.n {
-			b.data[j] += b.data[i]
+		if j <= n {
+			data[j-1] += data[i-1]
 		}
 	}
+	return &BITArray{n: n, total: total, data: data}
 }
 
-func (b *BITArray) Add(i int, v int) {
-	for i++; i <= b.n; i += i & -i {
-		b.data[i] += v
+func (b *BITArray) Add(index int, v int) {
+	b.total += v
+	for index++; index <= b.n; index += index & -index {
+		b.data[index-1] += v
 	}
 }
 
-// [0, r)
-func (b *BITArray) Query(r int) int {
+// [0, end).
+func (b *BITArray) QueryPrefix(end int) int {
+	if end > b.n {
+		end = b.n
+	}
 	res := 0
-	for ; r > 0; r -= r & -r {
-		res += b.data[r]
+	for ; end > 0; end -= end & -end {
+		res += b.data[end-1]
 	}
 	return res
 }
 
-// [l, r).
-func (b *BITArray) QueryRange(l, r int) int {
-	return b.Query(r) - b.Query(l)
+// [start, end).
+func (b *BITArray) QueryRange(start, end int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.n {
+		end = b.n
+	}
+	if start >= end {
+		return 0
+	}
+	if start == 0 {
+		return b.QueryPrefix(end)
+	}
+	pos, neg := 0, 0
+	for end > start {
+		pos += b.data[end-1]
+		end &= end - 1
+	}
+	for start > end {
+		neg += b.data[start-1]
+		start &= start - 1
+	}
+	return pos - neg
 }
 
-// 返回闭区间[0,k]的总和>=x的最小k.要求序列单调增加.
-func (b *BITArray) LowerBound(x int) int {
+func (b *BITArray) QueryAll() int {
+	return b.total
+}
+
+func (b *BITArray) MaxRight(check func(index, preSum int) bool) int {
 	i := 0
-	for k := 1 << b.log; k > 0; k >>= 1 {
-		if i+k <= b.n && b.data[i+k] < x {
-			x -= b.data[i+k]
-			i += k
+	s := 0
+	k := 1
+	for 2*k <= b.n {
+		k *= 2
+	}
+	for k > 0 {
+		if i+k-1 < b.n {
+			t := s + b.data[i+k-1]
+			if check(i+k, t) {
+				i += k
+				s = t
+			}
 		}
+		k >>= 1
 	}
 	return i
 }
 
-// 返回闭区间[0,k]的总和>x的最小k.要求序列单调增加.
-func (b *BITArray) UpperBound(x int) int {
-	i := 0
-	for k := 1 << b.log; k > 0; k >>= 1 {
-		if i+k <= b.n && b.data[i+k] <= x {
-			x -= b.data[i+k]
-			i += k
-		}
-	}
-	return i
+// 0/1树状数组查找第 k(0-based) 个1的位置.
+// UpperBound.
+func (b *BITArray) Kth(k int) int {
+	return b.MaxRight(func(index, preSum int) bool { return preSum <= k })
 }
 
 func (b *BITArray) String() string {
