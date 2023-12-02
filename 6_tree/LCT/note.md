@@ -13,3 +13,7 @@ https://wenku.baidu.com/view/7857b870aaea998fcc220ed8.html
 ---
 
 有的时候删除结点不必真的删除，而是在`线段树上标记删除`
+
+---
+
+https://www.luogu.com.cn/blog/LawrenceSivan/post-mu-ban-dong-tai-shu-link-cut-tree

@@ -73,7 +73,7 @@ type DivideInterval struct {
 }
 
 // 线段树分割区间.
-// 将长度为n的序列搬到长度为2*offset的线段树上, 以实现快速的区间操作.
+// 将长度为n的序列搬到长度为offset+n的线段树上, 以实现快速的区间操作.
 func NewDivideInterval(n int) *DivideInterval {
 	offset := 1
 	for offset < n {

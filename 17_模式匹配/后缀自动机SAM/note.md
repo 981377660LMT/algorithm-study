@@ -31,7 +31,7 @@ https://ddosvoid.github.io/2021/01/03/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C
 ---
 
 https://www.bilibili.com/video/BV1ED4y1U7aU
-直观上，字符串的 SAM 可以理解为给定字符串的 所有子串 的压缩形式。
+直观上，字符串的 SAM 可以理解为给定字符串的 `所有子串` 的压缩形式。
 值得注意的事实是，SAM 将所有的这些信息以高度压缩的形式储存。
 对于一个长度为 n 的字符串，它的空间复杂度仅为 O(n)。
 此外，构造 SAM 的时间复杂度仅为 O(n)。准确地说，一个 SAM 最多有 2n-1 个节点和 3n-4 条转移边。
@@ -49,3 +49,5 @@ https://www.bilibili.com/video/BV1qF411G7u5
 1. 转移边
 2. 链接边
 3. 最长串的长度
+
+![SAM图解](image-2.png)

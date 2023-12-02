@@ -12,6 +12,7 @@ import (
 // https://loj.ac/p/6280
 // 0 start end delta
 // 1 start end mod
+
 func RangeAddRangeModSum(nums []int, operations [][4]int) []int {
 	block := UseBlock(len(nums), int(math.Sqrt(float64(len(nums)))+1))
 

@@ -13,288 +13,390 @@
  * 4. 树的高度为logn+1
  */
 
-import assert from 'assert'
+// 下标从0开始
+// 1.BITArray: 区间修改, 单点查询
+// 2.BITMap: 区间修改, 单点查询
+// 3.BITRangeAddRangeSumArray: 区间修改, 区间查询
+// 4.BITRangeAddRangeSumMap: 区间修改, 区间查询
+// 5.BITPrefixArray: 单点修改, 区间查询
+// 6.BITPrefixMap: 单点修改, 区间查询
 
-// BITArray
-// BIT1 (Map)
-// BITRangeAddRangeSum
-// BIT2Map
-
-/**
- * Point add range sum, 0-indexed.
- */
 class BITArray {
-  /**
-   * Build a tree from an array-like object using dp.
-   * O(n) time.
-   */
-  private static _buildTree(arr: ArrayLike<number>): Float64Array {
-    const tree = new Float64Array(arr.length + 1)
-    for (let i = 1; i < tree.length; i++) {
-      tree[i] += arr[i - 1]
-      const parent = i + (i & -i)
-      if (parent < tree.length) tree[parent] += tree[i]
-    }
-    return tree
-  }
+  private readonly _n: number
+  private readonly _data: number[]
+  private _total = 0
 
-  readonly length: number
-  private readonly _tree: Float64Array
-
-  /**
-   * 指定长度或者从类数组建立树状数组.
-   *
-   * @warning
-   * !如果需要使用`值域树状数组`，需要在构造函数中传入`长度n(值域1-n)`而不是类数组.
-   */
-  constructor(lengthOrArrayLike: number | ArrayLike<number>) {
-    if (typeof lengthOrArrayLike === 'number') {
-      this.length = lengthOrArrayLike
-      this._tree = new Float64Array(lengthOrArrayLike + 1)
+  constructor(n: number, f?: (i: number) => number) {
+    if (f == undefined) {
+      this._n = n
+      this._data = Array(n).fill(0)
     } else {
-      this.length = lengthOrArrayLike.length
-      this._tree = BITArray._buildTree(lengthOrArrayLike)
+      this._n = n
+      this._data = Array(n)
+      for (let i = 0; i < n; i++) {
+        this._data[i] = f(i)
+        this._total += this._data[i]
+      }
+      for (let i = 1; i <= n; i++) {
+        let j = i + (i & -i)
+        if (j <= n) {
+          this._data[j - 1] += this._data[i - 1]
+        }
+      }
     }
   }
 
-  /**
-   * Add delta to the element at index.
-   * @param index 0 <= index < {@link length}.
-   */
-  add(index: number, delta: number): void {
-    index++
-    for (let i = index; i <= this.length; i += i & -i) {
-      this._tree[i] += delta
+  add(index: number, v: number): void {
+    this._total += v
+    index += 1
+    while (index <= this._n) {
+      this._data[index - 1] += v
+      index += index & -index
     }
-  }
-
-  /**
-   * Query the sum of [0, end).
-   */
-  query(end: number): number {
-    if (end > this.length) end = this.length
-    let res = 0
-    for (let i = end; i > 0; i &= i - 1) {
-      res += this._tree[i]
-    }
-    return res
-  }
-
-  /**
-   * Query the sum of [start, end).
-   */
-  queryRange(start: number, end: number): number {
-    return this.query(end) - this.query(start)
-  }
-
-  toString(): string {
-    const sb: string[] = []
-    sb.push('BITArray: [')
-    for (let i = 0; i < this.length; i++) {
-      sb.push(String(this.queryRange(i, i + 1)))
-      if (i < this.length - 1) sb.push(', ')
-    }
-    sb.push(']')
-    return sb.join('')
-  }
-}
-
-/**
- * Point add range sum, 0-indexed.
- * Implemented by Map. Slow.
- */
-class BIT1 {
-  readonly size: number
-  private readonly _tree: Map<number, number> = new Map()
-
-  constructor(size: number) {
-    this.size = size + 5
-  }
-
-  add(index: number, delta: number): void {
-    index++
-    for (let i = index; i <= this.size; i += i & -i) {
-      this._tree.set(i, (this._tree.get(i) || 0) + delta)
-    }
-  }
-
-  /**
-   * [0,index).
-   */
-  query(index: number): number {
-    if (index > this.size) index = this.size
-    let res = 0
-    for (let i = index; i > 0; i &= i - 1) {
-      res += this._tree.get(i) || 0
-    }
-    return res
-  }
-
-  /**
-   * [left,right).
-   */
-  queryRange(left: number, right: number): number {
-    return this.query(right) - this.query(left)
-  }
-
-  toString(): string {
-    const sb: string[] = []
-    sb.push('BIT1: [')
-    for (let i = 0; i < this.size; i++) {
-      sb.push(String(this.queryRange(i, i + 1)))
-      if (i < this.size - 1) sb.push(',')
-    }
-    sb.push(']')
-    return sb.join('')
-  }
-}
-
-const BITMap = BIT1
-
-/**
- * 区间修改 区间查询, 0-indexed.
- */
-class BITRangeAddRangeSum {
-  readonly size: number
-  private readonly _tree1: number[]
-  private readonly _tree2: number[]
-
-  constructor(size: number) {
-    this.size = size
-    this._tree1 = Array(size + 1).fill(0)
-    this._tree2 = Array(size + 1).fill(0)
-  }
-
-  addRange(start: number, end: number, delta: number): void {
-    this._add(start, delta)
-    this._add(end, -delta)
   }
 
   queryPrefix(end: number): number {
-    if (end > this.size) end = this.size
+    if (end > this._n) {
+      end = this._n
+    }
     let res = 0
-    for (let i = end; i > 0; i &= i - 1) {
-      res += end * this._tree1[i] - this._tree2[i]
+    while (end > 0) {
+      res += this._data[end - 1]
+      end -= end & -end
     }
     return res
   }
 
   queryRange(start: number, end: number): number {
     if (start < 0) start = 0
-    if (end > this.size) end = this.size
+    if (end > this._n) end = this._n
     if (start >= end) return 0
-    return this.queryPrefix(end) - this.queryPrefix(start)
+    if (start === 0) return this.queryPrefix(end)
+    let pos = 0
+    let neg = 0
+    while (end > start) {
+      pos += this._data[end - 1]
+      end &= end - 1
+    }
+    while (start > end) {
+      neg += this._data[start - 1]
+      start &= start - 1
+    }
+    return pos - neg
+  }
+
+  queryAll(): number {
+    return this._total
+  }
+
+  /**
+   * 查询满足`predicate`的最大的`end`(不包含).
+   */
+  maxRight(predicate: (index: number, preSum: number) => boolean): number {
+    let i = 0
+    let s = 0
+    let k = 1
+    while (2 * k <= this._n) {
+      k *= 2
+    }
+    while (k > 0) {
+      if (i + k - 1 < this._n) {
+        let t = s + this._data[i + k - 1]
+        if (predicate(i + k, t)) {
+          i += k
+          s = t
+        }
+      }
+      k >>>= 1
+    }
+    return i
+  }
+
+  /**
+   * 01树状数组查找第 k(0-based) 个1的位置.
+   */
+  kth(k: number): number {
+    return this.maxRight((_, preSum) => preSum <= k)
   }
 
   toString(): string {
-    const sb: string[] = []
-    sb.push('BITRangeAddRangeSum: [')
-    for (let i = 0; i < this.size; i++) {
-      sb.push(String(this.queryRange(i, i + 1)))
-      if (i < this.size - 1) sb.push(',')
-    }
-    sb.push(']')
-    return sb.join('')
-  }
-
-  private _add(index: number, delta: number): void {
-    index++
-    for (let i = index; i <= this.size; i += i & -i) {
-      this._tree1[i] += delta
-      this._tree2[i] += (index - 1) * delta
-    }
+    return `BITArray: [${Array.from({ length: this._n }, (_, i) => this.queryRange(i, i + 1)).join(', ')}]`
   }
 }
 
-/**
- * 区间修改 区间查询, 0-indexed.
- */
-class BIT2Map {
-  readonly size: number
-  private readonly _tree1: Map<number, number> = new Map()
-  private readonly _tree2: Map<number, number> = new Map()
+class BITMap {
+  private readonly _n: number
+  private readonly _data: Map<number, number> = new Map()
+  private _total = 0
 
-  constructor(size: number) {
-    this.size = size + 5
+  constructor(n: number) {
+    if (n > 2 ** 31 - 1) throw new Error('BITMap: n must be less than 2^31-1')
+    this._n = n
+  }
+
+  add(index: number, v: number): void {
+    this._total += v
+    index += 1
+    while (index <= this._n) {
+      this._data.set(index, (this._data.get(index) || 0) + v)
+      index += index & -index
+    }
+  }
+
+  queryPrefix(end: number): number {
+    if (end > this._n) {
+      end = this._n
+    }
+    let res = 0
+    while (end > 0) {
+      res += this._data.get(end) || 0
+      end -= end & -end
+    }
+    return res
+  }
+
+  queryRange(start: number, end: number): number {
+    if (start < 0) start = 0
+    if (end > this._n) end = this._n
+    if (start >= end) return 0
+    if (start === 0) return this.queryPrefix(end)
+    let pos = 0
+    let neg = 0
+    while (end > start) {
+      pos += this._data.get(end) || 0
+      end &= end - 1
+    }
+    while (start > end) {
+      neg += this._data.get(start) || 0
+      start &= start - 1
+    }
+    return pos - neg
+  }
+
+  queryAll(): number {
+    return this._total
   }
 
   /**
-   * [left,right)
+   * 查询满足`predicate`的最大的`end`(不包含).
    */
-  addRange(left: number, right: number, delta: number): void {
-    right--
-    this._add(left, delta)
-    this._add(right + 1, -delta)
+  maxRight(predicate: (index: number, preSum: number) => boolean): number {
+    let i = 0
+    let s = 0
+    let k = 1
+    while (2 * k <= this._n) {
+      k *= 2
+    }
+    while (k > 0) {
+      if (i + k - 1 < this._n) {
+        let t = s + (this._data.get(i + k) || 0)
+        if (predicate(i + k, t)) {
+          i += k
+          s = t
+        }
+      }
+      k >>>= 1
+    }
+    return i
   }
 
   /**
-   * [left,right)
+   * 01树状数组查找第 k(0-based) 个1的位置.
    */
-  queryRange(left: number, right: number): number {
-    right--
-    return this._query(right) - this._query(left - 1)
+  kth(k: number): number {
+    return this.maxRight((_, preSum) => preSum <= k)
+  }
+}
+
+class BITRangeAddRangeSumArray {
+  private readonly _n: number
+  private readonly _bit0: BITArray
+  private readonly _bit1: BITArray
+
+  constructor(n: number, f?: (i: number) => number) {
+    if (f == undefined) {
+      this._n = n
+      this._bit0 = new BITArray(n)
+      this._bit1 = new BITArray(n)
+    } else {
+      this._n = n
+      this._bit0 = new BITArray(n, f)
+      this._bit1 = new BITArray(n)
+    }
+  }
+
+  add(index: number, delta: number): void {
+    this._bit0.add(index, delta)
+  }
+
+  addRange(start: number, end: number, delta: number): void {
+    if (start < 0) start = 0
+    if (end > this._n) end = this._n
+    if (start >= end) return
+    this._bit0.add(start, -delta * start)
+    this._bit0.add(end, delta * end)
+    this._bit1.add(start, delta)
+    this._bit1.add(end, -delta)
+  }
+
+  queryRange(start: number, end: number): number {
+    if (start < 0) start = 0
+    if (end > this._n) end = this._n
+    if (start >= end) return 0
+    let rightRes = this._bit1.queryPrefix(end) * end + this._bit0.queryPrefix(end)
+    let leftRes = this._bit1.queryPrefix(start) * start + this._bit0.queryPrefix(start)
+    return rightRes - leftRes
   }
 
   toString(): string {
-    const sb: string[] = []
-    sb.push('BIT2Map: [')
-    for (let i = 0; i < this.size; i++) {
-      sb.push(String(this.queryRange(i, i + 1)))
-      if (i < this.size - 1) sb.push(',')
-    }
-    sb.push(']')
-    return sb.join('')
+    return `BITRangeAddRangeSumArray: [${Array.from({ length: this._n }, (_, i) => this.queryRange(i, i + 1)).join(', ')}]`
+  }
+}
+
+class BITRangeAddRangeSumMap {
+  private readonly _n: number
+  private readonly _bit0: BITMap
+  private readonly _bit1: BITMap
+
+  constructor(n: number) {
+    this._n = n
+    this._bit0 = new BITMap(n)
+    this._bit1 = new BITMap(n)
   }
 
-  private _add(index: number, delta: number): void {
-    index++
-    for (let i = index; i <= this.size; i += i & -i) {
-      this._tree1.set(i, (this._tree1.get(i) || 0) + delta)
-      this._tree2.set(i, (this._tree2.get(i) || 0) + (index - 1) * delta)
+  add(index: number, delta: number): void {
+    this._bit0.add(index, delta)
+  }
+
+  addRange(start: number, end: number, delta: number): void {
+    if (start < 0) start = 0
+    if (end > this._n) end = this._n
+    if (start >= end) return
+    this._bit0.add(start, -delta * start)
+    this._bit0.add(end, delta * end)
+    this._bit1.add(start, delta)
+    this._bit1.add(end, -delta)
+  }
+
+  queryRange(start: number, end: number): number {
+    if (start < 0) start = 0
+    if (end > this._n) end = this._n
+    if (start >= end) return 0
+    let rightRes = this._bit1.queryPrefix(end) * end + this._bit0.queryPrefix(end)
+    let leftRes = this._bit1.queryPrefix(start) * start + this._bit0.queryPrefix(start)
+    return rightRes - leftRes
+  }
+
+  toString(): string {
+    return `BITRangeAddRangeSumMap: [${Array.from({ length: this._n }, (_, i) => this.queryRange(i, i + 1)).join(', ')}]`
+  }
+}
+
+class BITPrefixArray<S> {
+  private readonly _n: number
+  private readonly _data: S[]
+  private readonly _e: () => S
+  private readonly _op: (a: S, b: S) => S
+
+  constructor(n: number, e: () => S, op: (a: S, b: S) => S, f?: (i: number) => S) {
+    this._n = n
+    this._data = Array(n)
+    for (let i = 0; i < n; i++) this._data[i] = e()
+    this._e = e
+    this._op = op
+    if (f != undefined) {
+      for (let i = 1; i <= n; i++) {
+        let j = i + (i & -i)
+        if (j <= n) {
+          this._data[j - 1] = op(this._data[j - 1], this._data[i - 1])
+        }
+      }
     }
   }
 
-  private _query(index: number): number {
-    index++
-    if (index > this.size) index = this.size
-    let res = 0
-    for (let i = index; i > 0; i &= i - 1) {
-      res += index * (this._tree1.get(i) || 0) - (this._tree2.get(i) || 0)
+  update(index: number, value: S): void {
+    index += 1
+    while (index <= this._n) {
+      this._data[index - 1] = this._op(this._data[index - 1], value)
+      index += index & -index
+    }
+  }
+
+  query(end: number): S {
+    if (end > this._n) {
+      end = this._n
+    }
+    let res = this._e()
+    while (end > 0) {
+      res = this._op(res, this._data[end - 1])
+      end -= end & -end
     }
     return res
   }
 }
 
-if (require.main === module) {
-  const bit1 = new BIT1(5)
-  assert.strictEqual(bit1.query(1), 0)
-  bit1.add(0, 3)
-  assert.strictEqual(bit1.query(1), 3)
+class BITPrefixMap<S> {
+  private readonly _n: number
+  private readonly _data: Map<number, S> = new Map()
+  private readonly _e: () => S
+  private readonly _op: (a: S, b: S) => S
 
-  const bit2 = new BITRangeAddRangeSum(10)
-  bit2.addRange(2, 5, 1)
-  bit2.addRange(2, 5, 1)
-  assert.strictEqual(bit2.queryRange(2, 4), 4)
-  assert.strictEqual(bit2.queryRange(2, 3), 2)
-  assert.strictEqual(bit2.queryRange(2, 6), 6)
-  assert.strictEqual(bit2.queryPrefix(100), 6)
+  constructor(n: number, e: () => S, op: (a: S, b: S) => S) {
+    if (n > 2 ** 31 - 1) throw new Error('BITPrefixMap: n must be less than 2^31-1')
+    this._n = n
+    this._e = e
+    this._op = op
+  }
 
-  const bitArray = new BITArray([1, 2, 3])
-  console.log(bitArray.toString())
+  update(index: number, value: S): void {
+    index += 1
+    while (index <= this._n) {
+      this._data.set(index - 1, this._op(this._data.get(index - 1) ?? this._e(), value))
+      index += index & -index
+    }
+  }
 
-  const bit2Map = new BIT2Map(10)
-  bit2Map.addRange(2, 5, 1) // 区间更新
-  bit2Map.addRange(2, 5, 1) // 单点更新
-  assert.strictEqual(bit2Map.queryRange(2, 4), 4)
-  assert.strictEqual(bit2Map.queryRange(2, 3), 2)
+  query(end: number): S {
+    if (end > this._n) {
+      end = this._n
+    }
+    let res = this._e()
+    while (end > 0) {
+      res = this._op(res, this._data.get(end - 1) ?? this._e())
+      end -= end & -end
+    }
+    return res
+  }
 }
 
-export { BIT1, BITRangeAddRangeSum, BIT2Map, BITArray, BITMap }
+export { BITArray, BITMap, BITRangeAddRangeSumArray, BITRangeAddRangeSumMap, BITPrefixArray, BITPrefixMap }
 
 if (require.main === module) {
+  const bitArray = new BITArray(10)
+  console.log(bitArray.toString())
+  const bitMap = new BITMap(1e9 + 10)
+  bitMap.add(1e7, 11)
+  console.log(bitMap.queryPrefix(1e7 + 1))
+
+  const bitRangeAddRangeSumArray = new BITRangeAddRangeSumArray(10)
+  bitRangeAddRangeSumArray.addRange(1, 3, 2)
+  console.log(bitRangeAddRangeSumArray.toString())
+  const bitRangeAddRangeSumMap = new BITRangeAddRangeSumMap(10)
+  bitRangeAddRangeSumMap.addRange(1, 3, 2)
+  console.log(bitRangeAddRangeSumMap.queryRange(1, 3))
+
+  const bitPrefixArray = new BITPrefixArray(10, () => 0, Math.max)
+  bitPrefixArray.update(0, 1)
+  bitPrefixArray.update(1, 2)
+  console.log(bitPrefixArray.query(2))
+  const bitPrefixMap = new BITPrefixMap(1e9, () => 0, Math.max)
+  bitPrefixMap.update(0, 1)
+  bitPrefixMap.update(1, 2)
+  console.log(bitPrefixMap.query(2))
+
   // https://leetcode.cn/problems/maximum-white-tiles-covered-by-a-carpet/
   function maximumWhiteTiles(tiles: number[][], carpetLen: number): number {
-    const bit = new BITRangeAddRangeSum(1e9 + 10)
+    const bit = new BITRangeAddRangeSumMap(1e9 + 10)
     let res = 0
     tiles.forEach(([left, right]) => {
       bit.addRange(left, right + 1, 1)

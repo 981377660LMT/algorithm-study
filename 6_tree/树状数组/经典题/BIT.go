@@ -1,91 +1,119 @@
-// BITArray
-// BITMap
-// BIT2Array
-// BIT2Map
-// BIT2D
+// 下标从0开始
+// 1.BITArray: 区间修改, 单点查询
+// 2.BITMap: 区间修改, 单点查询
+// 3.BITRangeAddRangeSumArray: 区间修改, 区间查询
+// 4.BITRangeAddRangeSumMap: 区间修改, 区间查询
+// 5.BITPrefixArray: 单点修改, 区间查询
+// 6.BITPrefixMap: 单点修改, 区间查询
 
 package main
 
 import (
 	"fmt"
-	"math/bits"
 	"strings"
 )
 
 // !Point Add Range Sum, 0-based.
 type BITArray struct {
-	n    int
-	log  int
-	data []int
+	n     int
+	total int
+	data  []int
 }
 
 func NewBitArray(n int) *BITArray {
-	return &BITArray{n: n, log: bits.Len(uint(n)), data: make([]int, n+1)}
-}
-
-func NewBitArrayFrom(arr []int) *BITArray {
-	res := NewBitArray(len(arr))
-	res.Build(arr)
+	res := &BITArray{n: n, data: make([]int, n)}
 	return res
 }
 
-func (b *BITArray) Build(arr []int) {
-	if b.n != len(arr) {
-		panic("len of arr is not equal to n")
+func NewBitArrayFrom(n int, f func(index int) int) *BITArray {
+	total := 0
+	data := make([]int, n)
+	for i := 0; i < n; i++ {
+		data[i] = f(i)
+		total += data[i]
 	}
-	for i := 1; i <= b.n; i++ {
-		b.data[i] = arr[i-1]
-	}
-	for i := 1; i <= b.n; i++ {
+	for i := 1; i <= n; i++ {
 		j := i + (i & -i)
-		if j <= b.n {
-			b.data[j] += b.data[i]
+		if j <= n {
+			data[j-1] += data[i-1]
 		}
 	}
+	return &BITArray{n: n, total: total, data: data}
 }
 
-func (b *BITArray) Add(i int, v int) {
-	for i++; i <= b.n; i += i & -i {
-		b.data[i] += v
+func (b *BITArray) Add(index int, v int) {
+	b.total += v
+	for index++; index <= b.n; index += index & -index {
+		b.data[index-1] += v
 	}
 }
 
-// [0, r)
-func (b *BITArray) Query(r int) int {
+// [0, end).
+func (b *BITArray) QueryPrefix(end int) int {
+	if end > b.n {
+		end = b.n
+	}
 	res := 0
-	for ; r > 0; r -= r & -r {
-		res += b.data[r]
+	for ; end > 0; end -= end & -end {
+		res += b.data[end-1]
 	}
 	return res
 }
 
-// [l, r).
-func (b *BITArray) QueryRange(l, r int) int {
-	return b.Query(r) - b.Query(l)
+// [start, end).
+func (b *BITArray) QueryRange(start, end int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.n {
+		end = b.n
+	}
+	if start >= end {
+		return 0
+	}
+	if start == 0 {
+		return b.QueryPrefix(end)
+	}
+	pos, neg := 0, 0
+	for end > start {
+		pos += b.data[end-1]
+		end &= end - 1
+	}
+	for start > end {
+		neg += b.data[start-1]
+		start &= start - 1
+	}
+	return pos - neg
 }
 
-// 返回闭区间[0,k]的总和>=x的最小k.要求序列单调增加.
-func (b *BITArray) LowerBound(x int) int {
+func (b *BITArray) QueryAll() int {
+	return b.total
+}
+
+func (b *BITArray) MaxRight(check func(index, preSum int) bool) int {
 	i := 0
-	for k := 1 << b.log; k > 0; k >>= 1 {
-		if i+k <= b.n && b.data[i+k] < x {
-			x -= b.data[i+k]
-			i += k
+	s := 0
+	k := 1
+	for 2*k <= b.n {
+		k *= 2
+	}
+	for k > 0 {
+		if i+k-1 < b.n {
+			t := s + b.data[i+k-1]
+			if check(i+k, t) {
+				i += k
+				s = t
+			}
 		}
+		k >>= 1
 	}
 	return i
 }
 
-// 返回闭区间[0,k]的总和>x的最小k.要求序列单调增加.
-func (b *BITArray) UpperBound(x int) int {
-	i := 0
-	for k := 1 << b.log; k > 0; k >>= 1 {
-		if i+k <= b.n && b.data[i+k] <= x {
-			x -= b.data[i+k]
-			i += k
-		}
-	}
-	return i
+// 0/1 树状数组查找第 k(0-based) 个1的位置.
+// UpperBound.
+func (b *BITArray) Kth(k int) int {
+	return b.MaxRight(func(index, preSum int) bool { return preSum <= k })
 }
 
 func (b *BITArray) String() string {
@@ -98,149 +126,322 @@ func (b *BITArray) String() string {
 
 // !Point Add Range Sum, 0-based.
 type BITMap struct {
-	n    int
-	data map[int]int
+	n     int
+	total int
+	data  map[int]int
 }
 
 func NewBITMap(n int) *BITMap {
-	return &BITMap{n: n + 5, data: make(map[int]int, 1<<10)}
+	return &BITMap{n: n + 1, data: make(map[int]int)}
 }
 
 func (b *BITMap) Add(i, v int) {
+	b.total += v
 	for i++; i <= b.n; i += i & -i {
-		b.data[i] += v
+		b.data[i-1] += v
 	}
 }
 
-// [0, r)
-func (b *BITMap) Query(r int) int {
+// [0, end)
+func (b *BITMap) QueryPrefix(end int) int {
+	if end > b.n {
+		end = b.n
+	}
 	res := 0
-	for ; r > 0; r -= r & -r {
-		res += b.data[r]
+	for ; end > 0; end -= end & -end {
+		res += b.data[end-1]
 	}
 	return res
 }
 
-// [l, r).
-func (b *BITMap) QueryRange(l, r int) int {
-	return b.Query(r) - b.Query(l)
+func (b *BITMap) QueryRange(start, end int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.n {
+		end = b.n
+	}
+	if start >= end {
+		return 0
+	}
+	if start == 0 {
+		return b.QueryPrefix(end)
+	}
+	pos, neg := 0, 0
+	for end > start {
+		pos += b.data[end-1]
+		end &= end - 1
+	}
+	for start > end {
+		neg += b.data[start-1]
+		start &= start - 1
+	}
+	return pos - neg
+}
+
+func (b *BITMap) QueryAll() int {
+	return b.total
+}
+
+func (b *BITMap) MaxRight(check func(index, preSum int) bool) int {
+	i := 0
+	s := 0
+	k := 1
+	for 2*k <= b.n {
+		k *= 2
+	}
+	for k > 0 {
+		if i+k-1 < b.n {
+			t := s + b.data[i+k-1]
+			if check(i+k, t) {
+				i += k
+				s = t
+			}
+		}
+		k >>= 1
+	}
+	return i
+}
+
+// 0/1 树状数组查找第 k(0-based) 个1的位置.
+// UpperBound.
+func (b *BITMap) Kth(k int) int {
+	return b.MaxRight(func(index, preSum int) bool { return preSum <= k })
 }
 
 // !Range Add Range Sum, 0-based.
-type BITRangeAddRangeSum struct {
-	n     int
-	tree1 []int
-	tree2 []int
+type BITRangeAddRangeSumArray struct {
+	n    int
+	bit0 *BITArray
+	bit1 *BITArray
 }
 
-func NewBITRangeAddRangeSum(n int) *BITRangeAddRangeSum {
-	return &BITRangeAddRangeSum{
-		n:     n,
-		tree1: make([]int, n+1),
-		tree2: make([]int, n+1),
+func NewBITRangeAddRangeSumArray(n int) *BITRangeAddRangeSumArray {
+	return &BITRangeAddRangeSumArray{
+		n:    n,
+		bit0: NewBitArray(n),
+		bit1: NewBitArray(n),
 	}
 }
 
-// 切片内[start, end)的每个元素加上delta.
-//
-//	0<=start<=end<=n
-func (b *BITRangeAddRangeSum) AddRange(start, end, delta int) {
-	end--
-	b._add(start, delta)
-	b._add(end+1, -delta)
-}
-
-func (b *BITRangeAddRangeSum) QueryPrefix(index int) (res int) {
-	index++
-	if index > b.n {
-		index = b.n
+func NewBITRangeAddRangeSumFrom(n int, f func(index int) int) *BITRangeAddRangeSumArray {
+	return &BITRangeAddRangeSumArray{
+		n:    n,
+		bit0: NewBitArrayFrom(n, f),
+		bit1: NewBitArray(n),
 	}
-	for i := index; i > 0; i &= i - 1 {
-		res += index*b.tree1[i] - b.tree2[i]
+}
+
+func (b *BITRangeAddRangeSumArray) Add(index int, delta int) {
+	b.bit0.Add(index, delta)
+}
+
+func (b *BITRangeAddRangeSumArray) AddRange(start, end int, delta int) {
+	if start < 0 {
+		start = 0
 	}
-	return res
+	if end > b.n {
+		end = b.n
+	}
+	if start >= end {
+		return
+	}
+	b.bit0.Add(start, -delta*start)
+	b.bit0.Add(end, delta*end)
+	b.bit1.Add(start, delta)
+	b.bit1.Add(end, -delta)
 }
 
-// 求切片内[start, end)的和.
-//
-//	0<=start<=end<=n
-func (b *BITRangeAddRangeSum) QueryRange(start, end int) int {
-	end--
-	return b.QueryPrefix(end) - b.QueryPrefix(start-1)
+func (b *BITRangeAddRangeSumArray) QueryRange(start, end int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.n {
+		end = b.n
+	}
+	if start >= end {
+		return 0
+	}
+	rightRes := b.bit1.QueryPrefix(end)*end + b.bit0.QueryPrefix(end)
+	leftRes := b.bit1.QueryPrefix(start)*start + b.bit0.QueryPrefix(start)
+	return rightRes - leftRes
 }
 
-func (b *BITRangeAddRangeSum) String() string {
+func (b *BITRangeAddRangeSumArray) String() string {
 	res := []string{}
 	for i := 0; i < b.n; i++ {
 		res = append(res, fmt.Sprintf("%d", b.QueryRange(i, i+1)))
 	}
-	return fmt.Sprintf("BITRangeAddRangeSum: [%v]", strings.Join(res, ", "))
-}
-
-func (b *BITRangeAddRangeSum) _add(index, delta int) {
-	index++
-	for i := index; i <= b.n; i += i & -i {
-		b.tree1[i] += delta
-		b.tree2[i] += (index - 1) * delta
-	}
+	return fmt.Sprintf("BITRangeAddRangeSumArray: [%v]", strings.Join(res, ", "))
 }
 
 // !Range Add Range Sum, 0-based.
-type BIT2Map struct {
-	n     int
-	tree1 map[int]int
-	tree2 map[int]int
+type BITRangeAddRangeSumMap struct {
+	n    int
+	bit0 *BITMap
+	bit1 *BITMap
 }
 
-func NewBIT2Map(n int) *BIT2Map {
-	return &BIT2Map{
-		n:     n + 5,
-		tree1: make(map[int]int, 1<<10),
-		tree2: make(map[int]int, 1<<10),
+func NewBITRangeAddRangeSumMap(n int) *BITRangeAddRangeSumMap {
+	return &BITRangeAddRangeSumMap{
+		n:    n + 5,
+		bit0: NewBITMap(n),
+		bit1: NewBITMap(n),
 	}
 }
 
-func (bit *BIT2Map) Add(left, right, delta int) {
-	right--
-	bit.add(left, delta)
-	bit.add(right+1, -delta)
+func (b *BITRangeAddRangeSumMap) Add(index int, delta int) {
+	b.bit0.Add(index, delta)
 }
 
-func (bit *BIT2Map) Query(left, right int) int {
-	right--
-	return bit.query(right) - bit.query(left-1)
+func (b *BITRangeAddRangeSumMap) AddRange(start, end int, delta int) {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.n {
+		end = b.n
+	}
+	if start >= end {
+		return
+	}
+	b.bit0.Add(start, -delta*start)
+	b.bit0.Add(end, delta*end)
+	b.bit1.Add(start, delta)
+	b.bit1.Add(end, -delta)
 }
 
-func (bit *BIT2Map) add(index, delta int) {
-	index++
-	for i := index; i <= bit.n; i += i & -i {
-		bit.tree1[i] += delta
-		bit.tree2[i] += (index - 1) * delta
+func (b *BITRangeAddRangeSumMap) QueryRange(start, end int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.n {
+		end = b.n
+	}
+	if start >= end {
+		return 0
+	}
+	rightRes := b.bit1.QueryPrefix(end)*end + b.bit0.QueryPrefix(end)
+	leftRes := b.bit1.QueryPrefix(start)*start + b.bit0.QueryPrefix(start)
+	return rightRes - leftRes
+}
+
+// Fenwick Tree Prefix
+// https://suisen-cp.github.io/cp-library-cpp/library/datastructure/fenwick_tree/fenwick_tree_prefix.hpp
+// 如果每次都是查询前缀，那么可以使用Fenwick Tree Prefix 维护 monoid.
+type S = int
+
+func (*BITPrefixArray) e() S        { return 0 }
+func (*BITPrefixArray) op(a, b S) S { return max(a, b) }
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+type BITPrefixArray struct {
+	n    int
+	data []S
+}
+
+func NewBITPrefixArray(n int) *BITPrefixArray {
+	res := &BITPrefixArray{}
+	data := make([]S, n)
+	for i := range data {
+		data[i] = res.e()
+	}
+	res.n = n
+	res.data = data
+	return res
+}
+
+func NewBITPrefixFrom(n int, f func(index int) S) *BITPrefixArray {
+	res := &BITPrefixArray{}
+	total := res.e()
+	data := make([]S, n)
+	for i := range data {
+		data[i] = f(i)
+		total = res.op(total, data[i])
+	}
+	for i := 1; i <= n; i++ {
+		j := i + (i & -i)
+		if j <= n {
+			data[j-1] = res.op(data[j-1], data[i-1])
+		}
+	}
+	res.n = n
+	res.data = data
+	return res
+}
+
+// 单点更新index处的元素.
+// 0 <= index < n
+func (f *BITPrefixArray) Update(index int, value S) {
+	for index++; index <= f.n; index += index & -index {
+		f.data[index-1] = f.op(f.data[index-1], value)
 	}
 }
 
-func (bit *BIT2Map) query(index int) int {
-	index++
-	if index > bit.n {
-		index = bit.n
+// 查询前缀区间 [0,right) 的值.
+// 0 <= end <= n
+func (f *BITPrefixArray) Query(end int) S {
+	if end > f.n {
+		end = f.n
 	}
-
-	res := 0
-	for i := index; i > 0; i &= i - 1 {
-		res += index*bit.tree1[i] - bit.tree2[i]
+	res := f.e()
+	for ; end > 0; end &= end - 1 {
+		res = f.op(res, f.data[end-1])
 	}
 	return res
 }
 
+type V = int
+
+func (*BITPrefixMap) e() V        { return 0 }
+func (*BITPrefixMap) op(a, b V) V { return max(a, b) }
+
+type BITPrefixMap struct {
+	n    int
+	data map[int]V
+}
+
+func NewBITPrefixMap(n int) *BITPrefixMap {
+	return &BITPrefixMap{n: n, data: make(map[int]V)}
+}
+
+func (f *BITPrefixMap) Update(index int, value V) {
+	for index++; index <= f.n; index += index & -index {
+		f.data[index-1] = f.op(f._get(index-1), value)
+	}
+}
+
+func (f *BITPrefixMap) Query(end int) V {
+	if end > f.n {
+		end = f.n
+	}
+	res := f.e()
+	for ; end > 0; end &= end - 1 {
+		res = f.op(res, f._get(end-1))
+	}
+	return res
+}
+
+func (f *BITPrefixMap) _get(index int) V {
+	if v, ok := f.data[index]; ok {
+		return v
+	}
+	return f.e()
+}
+
 func maximumWhiteTiles(tiles [][]int, carpetLen int) int {
-	bit := NewBIT2Map(1e9 + 10)
+	bit := NewBITRangeAddRangeSumMap(1e9 + 10)
 	for _, tile := range tiles {
-		bit.Add(int(tile[0]), 1+int(tile[1]), 1)
+		bit.AddRange(int(tile[0]), 1+int(tile[1]), 1)
 	}
 
 	res := 0
 	for _, tile := range tiles {
-		res = max(res, bit.Query(int(tile[0]), 1+int(tile[0]+carpetLen-1)))
+		res = max(res, bit.QueryRange(int(tile[0]), 1+int(tile[0]+carpetLen-1)))
 	}
 
 	return res
@@ -253,78 +454,26 @@ func max(a, b int) int {
 	return b
 }
 
-// Fenwick Tree Prefix
-// https://suisen-cp.github.io/cp-library-cpp/library/datastructure/fenwick_tree/fenwick_tree_prefix.hpp
-// 如果每次都是查询前缀，那么可以使用Fenwick Tree Prefix 维护 monoid.
-type S = int
-
-func (*FenwickTreePrefix) e() S        { return 0 }
-func (*FenwickTreePrefix) op(a, b S) S { return max(a, b) }
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-type FenwickTreePrefix struct {
-	n    int
-	data []S
-}
-
-func NewFenwickTreePrefix(n int) *FenwickTreePrefix {
-	res := &FenwickTreePrefix{n, make([]S, n+1)}
-	for i := 0; i < n+1; i++ {
-		res.data[i] = res.e()
-	}
-	return res
-}
-
-func NewFenwickTreePrefixWithSlice(nums []S) *FenwickTreePrefix {
-	n := len(nums)
-	res := &FenwickTreePrefix{n, make([]S, n+1)}
-	for i := 1; i < n+1; i++ {
-		res.data[i] = nums[i-1]
-	}
-	for i := 1; i < n+1; i++ {
-		if j := i + (i & -i); j <= n {
-			res.data[j] = res.op(res.data[j], res.data[i])
-		}
-	}
-	return res
-}
-
-// 单点更新index处的元素.
-// 0 <= index < n
-func (f *FenwickTreePrefix) Update(index int, value S) {
-	for index++; index <= f.n; index += index & -index {
-		f.data[index] = f.op(f.data[index], value)
-	}
-}
-
-// 查询前缀区间 [0,right) 的值.
-// 0 <= right <= n
-func (f *FenwickTreePrefix) Query(right int) S {
-	res := f.e()
-	if right > f.n {
-		right = f.n
-	}
-	for ; right > 0; right -= right & -right {
-		res = f.op(res, f.data[right])
-	}
-	return res
-}
-
 func main() {
-	pf := NewFenwickTreePrefixWithSlice([]S{1, 2, 3, 4, 14, 1, 2, 3})
-	fmt.Println(pf.Query(1))
-	fmt.Println(pf.Query(100))
-	pf.Update(9, 10)
-	fmt.Println(pf.Query(100))
 
-	bitArray := NewBitArrayFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+	bitArray := NewBitArrayFrom(10, func(index int) int { return index + 1 })
 	fmt.Println(bitArray)
 	bitArray.Add(1, 1)
 	fmt.Println(bitArray)
+	fmt.Println(bitArray.Kth(0))
+
+	bitArray2 := NewBITRangeAddRangeSumFrom(10, func(index int) int { return index + 1 })
+	fmt.Println(bitArray2)
+	bitArray2.AddRange(1, 3, 1)
+	fmt.Println(bitArray2)
+	fmt.Println(bitArray2.QueryRange(1, 3))
+	fmt.Println(bitArray2.QueryRange(1, 4))
+	bitArray2.Add(1, 1)
+	fmt.Println(bitArray2)
+
+	bitPrefixMap := NewBITPrefixMap(int(1e9))
+	bitPrefixMap.Update(1, 1)
+	bitPrefixMap.Update(2e9, 2)
+	fmt.Println(bitPrefixMap.Query(int(1e8)))
 
 }

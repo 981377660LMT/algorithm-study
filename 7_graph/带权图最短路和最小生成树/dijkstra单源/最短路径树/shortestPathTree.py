@@ -10,29 +10,9 @@ from typing import List, Sequence, Tuple
 INF = int(1e18)
 
 
-def shortestPathTree(
-    n: int, edges: List[Tuple[int, int, int]], start: int
-) -> Tuple[int, List[int]]:
-    """求出最短路径树的最小边权之和和每条边的编号"""
-    adjList = [[] for _ in range(n)]
-    for i, (u, v, w) in enumerate(edges):
-        adjList[u].append((v, w, i))
-        adjList[v].append((u, w, i))
-    *_, preE = dijkstraSPT(n, adjList, start)
-
-    res, eids = 0, []
-    for i in range(n):
-        if i == start:
-            continue
-        pre = preE[i]
-        res += edges[pre][2]
-        eids.append(pre)
-    return res, eids
-
-
 # !dijkstra求出路径上每个点的前驱点和前驱边
 # 其中邻接表的每个元素是一个三元组，分别是邻接点，边权，边的编号
-def dijkstraSPT(
+def dijkstraShortestPathTree(
     n: int, adjList: Sequence[Sequence[Tuple[int, int, int]]], start: int
 ) -> Tuple[List[int], List[int], List[int]]:
     dist = [INF] * n
@@ -57,6 +37,24 @@ def dijkstraSPT(
 
 
 if __name__ == "__main__":
+
+    def CF545E(n: int, edges: List[Tuple[int, int, int]], start: int) -> Tuple[int, List[int]]:
+        """求出最短路径树的最小边权之和和每条边的编号"""
+        adjList = [[] for _ in range(n)]
+        for i, (u, v, w) in enumerate(edges):
+            adjList[u].append((v, w, i))
+            adjList[v].append((u, w, i))
+        *_, preE = dijkstraShortestPathTree(n, adjList, start)
+
+        res, eids = 0, []
+        for i in range(n):
+            if i == start:
+                continue
+            pre = preE[i]
+            res += edges[pre][2]
+            eids.append(pre)
+        return res, eids
+
     n, m = map(int, input().split())
     edges = []
     for i in range(m):
@@ -65,6 +63,6 @@ if __name__ == "__main__":
         edges.append((u, v, w))
     start = int(input())
     start -= 1
-    res, eids = shortestPathTree(n, edges, start)
+    res, eids = CF545E(n, edges, start)
     print(res)
     print(*[i + 1 for i in eids])

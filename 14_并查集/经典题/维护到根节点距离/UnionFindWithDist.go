@@ -111,6 +111,28 @@ func TreeOfButton() {
 	fmt.Fprintln(out, sum_-min_*n)
 }
 
+// https://leetcode.cn/problems/is-graph-bipartite/
+// 785. 判断二分图
+// 二分图的充要条件是: 不存在奇环.
+func isBipartite(graph [][]int) bool {
+	n := len(graph)
+	uf := NewUnionFindArrayWithDist(n)
+	for cur := range graph {
+		for _, next := range graph[cur] {
+			root1, root2 := uf.Find(cur), uf.Find(next)
+			if root1 == root2 {
+				cycleLen := uf.Dist(cur, next) + 1
+				if cycleLen&1 == 1 {
+					return false
+				}
+			} else {
+				uf.Union(cur, next, 1)
+			}
+		}
+	}
+	return true
+}
+
 func min(a, b int) int {
 	if a < b {
 		return a

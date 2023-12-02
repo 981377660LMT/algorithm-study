@@ -56,6 +56,7 @@ func main() {
 }
 
 type Edge struct{ to, weight int }
+
 type BFSNumbering struct {
 	Depth  []int // 每个点的绝对深度(0-based)
 	Id     []int // 每个点的欧拉序起点编号(0-based)

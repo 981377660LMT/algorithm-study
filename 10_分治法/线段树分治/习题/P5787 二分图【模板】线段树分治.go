@@ -1,7 +1,6 @@
 // https://www.luogu.com.cn/problem/P5787
 // 给定n个节点的图，在k个时间内有m条边会出现后消失。问第i时刻是否是二分图。
 // 二分图判定使用可撤销的扩展域并查集维护。
-// TODO: MLE，什么地方占用空间太大
 
 package main
 
@@ -10,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 )
 
 func main() {
@@ -45,22 +43,27 @@ func main() {
 	}
 
 	res := make([]bool, k)
-	uf := NewUnionFindArrayWithUndo(2 * n) // 扩展域并查集
-	history := make([]bool, 0, m+1)
-	history = append(history, true)
+	uf := NewUnionFindWithDistAndUndo(n) // 带权并查集
+	history := []bool{true}
 	S.Run(
 		func(mutationId int) {
 			u, v := mutations[mutationId][0], mutations[mutationId][1]
-			uf.Union(u, v+n)
-			uf.Union(u+n, v)
+			uf.SnapShot()
 			if !history[len(history)-1] {
 				history = append(history, false)
+				return
+			}
+			root1, dist1 := uf.Find(u)
+			root2, dist2 := uf.Find(v)
+			if root1 == root2 {
+				history = append(history, (dist1-dist2+1)&1 != 1)
 			} else {
-				history = append(history, uf.Find(u) != uf.Find(v))
+				uf.Union(u, v, 1)
+				history = append(history, true)
 			}
 		},
 		func() {
-			uf.Undo()
+			uf.Rollback(-1)
 			history = history[:len(history)-1]
 		},
 		func(queryId int) {
@@ -232,130 +235,178 @@ func upperBound(arr []int, target int) int {
 	return left
 }
 
-type historyItem struct{ a, b int }
-type UnionFindArrayWithUndo struct {
-	Part      int
-	n         int
-	innerSnap int
-	data      []int
-	history   []historyItem // (root,data)
+type T = int
+
+func e() T        { return 0 }
+func op(x, y T) T { return x + y }
+func inv(x T) T   { return -x }
+
+// 维护到每个组根节点距离的可撤销并查集.
+// 用于维护环的权值，树上的距离等.
+type UnionFindWithDistAndUndo struct {
+	data      *RollbackArray
+	snapShots []int
 }
 
-func NewUnionFindArrayWithUndo(n int) *UnionFindArrayWithUndo {
-	data := make([]int, n)
-	for i := range data {
-		data[i] = -1
+func NewUnionFindWithDistAndUndo(n int) *UnionFindWithDistAndUndo {
+	return &UnionFindWithDistAndUndo{
+		data: NewRollbackArray(n, func(index int) arrayItem { return arrayItem{parent: -1, dist: e()} }),
 	}
-	return &UnionFindArrayWithUndo{Part: n, n: n, data: data}
 }
 
-// !撤销上一次合并操作，没合并成功也要撤销.
-func (uf *UnionFindArrayWithUndo) Undo() bool {
-	if len(uf.history) == 0 {
-		return false
+// 将当前快照加入栈顶.
+func (uf *UnionFindWithDistAndUndo) SnapShot() int {
+	res := uf.data.GetTime()
+	uf.snapShots = append(uf.snapShots, res)
+	return res
+}
+
+func (uf *UnionFindWithDistAndUndo) GetTime() int {
+	return uf.data.GetTime()
+}
+
+// time=-1表示回滚到栈顶(上一次)快照的时间，并删除该快照.
+func (uf *UnionFindWithDistAndUndo) Rollback(time int) {
+	if time != -1 {
+		uf.data.Rollback(time)
+	} else {
+		if len(uf.snapShots) == 0 {
+			return
+		}
+		time = uf.snapShots[len(uf.snapShots)-1]
+		uf.snapShots = uf.snapShots[:len(uf.snapShots)-1]
+		uf.data.Rollback(time)
 	}
-	small, smallData := uf.history[len(uf.history)-1].a, uf.history[len(uf.history)-1].b
-	uf.history = uf.history[:len(uf.history)-1]
-	big, bigData := uf.history[len(uf.history)-1].a, uf.history[len(uf.history)-1].b
-	uf.history = uf.history[:len(uf.history)-1]
-	uf.data[small] = smallData
-	uf.data[big] = bigData
-	if big != small {
-		uf.Part++
+}
+
+// distToRoot(parent) + dist = distToRoot(child).
+func (uf *UnionFindWithDistAndUndo) Union(parent int, child int, dist T) bool {
+	v1, x1 := uf.Find(parent)
+	v2, x2 := uf.Find(child)
+	if v1 == v2 {
+		return dist == op(x2, inv(x1))
 	}
+	s1, s2 := -uf.data.Get(v1).parent, -uf.data.Get(v2).parent
+	if s1 < s2 {
+		s1, s2 = s2, s1
+		v1, v2 = v2, v1
+		x1, x2 = x2, x1
+		dist = inv(dist)
+	}
+	// v1 <- v2
+	dist = op(x1, dist)
+	dist = op(dist, inv(x2))
+	uf.data.Set(v2, arrayItem{parent: v1, dist: dist})
+	uf.data.Set(v1, arrayItem{parent: -(s1 + s2), dist: e()})
 	return true
 }
 
-// 保存并查集当前的状态.
-//
-//	!Snapshot() 之后可以调用 Rollback(-1) 回滚到这个状态.
-func (uf *UnionFindArrayWithUndo) Snapshot() {
-	uf.innerSnap = len(uf.history) >> 1
+// 返回v所在组的根节点和到v到根节点的距离.
+func (uf *UnionFindWithDistAndUndo) Find(v int) (root int, distToRoot T) {
+	root, distToRoot = v, e()
+	for {
+		item := uf.data.Get(root)
+		if item.parent < 0 {
+			break
+		}
+		distToRoot = op(distToRoot, item.dist)
+		root = item.parent
+	}
+	return
 }
 
-// 回滚到指定的状态.
-//
-//	state 为 -1 表示回滚到上一次 `SnapShot` 时保存的状态.
-//	其他值表示回滚到状态id为state时的状态.
-func (uf *UnionFindArrayWithUndo) Rollback(state int) bool {
-	if state == -1 {
-		state = uf.innerSnap
+// Dist(x, y) = DistToRoot(x) - DistToRoot(y).
+// 如果x和y不在同一个集合,抛出错误.
+func (uf *UnionFindWithDistAndUndo) Dist(x int, y int) T {
+	vx, dx := uf.Find(x)
+	vy, dy := uf.Find(y)
+	if vx != vy {
+		panic("x and y are not in the same set")
 	}
-	state <<= 1
-	if state < 0 || state > len(uf.history) {
+	return op(dx, inv(dy))
+}
+
+func (uf *UnionFindWithDistAndUndo) DistToRoot(x int) T {
+	_, dx := uf.Find(x)
+	return dx
+}
+
+func (uf *UnionFindWithDistAndUndo) GetSize(x int) int {
+	root, _ := uf.Find(x)
+	return -uf.data.Get(root).parent
+}
+
+func (uf *UnionFindWithDistAndUndo) GetGroups() map[int][]int {
+	res := make(map[int][]int)
+	for i := 0; i < uf.data.Len(); i++ {
+		root, _ := uf.Find(i)
+		res[root] = append(res[root], i)
+	}
+	return res
+}
+
+type arrayItem struct {
+	parent int
+	dist   T
+}
+
+type historyItem struct {
+	index int
+	value arrayItem
+}
+
+type RollbackArray struct {
+	n       int
+	data    []arrayItem
+	history []historyItem
+}
+
+func NewRollbackArray(n int, f func(index int) arrayItem) *RollbackArray {
+	data := make([]arrayItem, n)
+	for i := 0; i < n; i++ {
+		data[i] = f(i)
+	}
+	return &RollbackArray{
+		n:    n,
+		data: data,
+	}
+}
+
+func (r *RollbackArray) GetTime() int {
+	return len(r.history)
+}
+
+func (r *RollbackArray) Rollback(time int) {
+	for len(r.history) > time {
+		pair := r.history[len(r.history)-1]
+		r.history = r.history[:len(r.history)-1]
+		r.data[pair.index] = pair.value
+	}
+}
+
+func (r *RollbackArray) Undo() bool {
+	if len(r.history) == 0 {
 		return false
 	}
-	for state < len(uf.history) {
-		uf.Undo()
-	}
+	pair := r.history[len(r.history)-1]
+	r.history = r.history[:len(r.history)-1]
+	r.data[pair.index] = pair.value
 	return true
 }
 
-// 获取当前并查集的状态id.
-//
-//	也就是当前合并(Union)被调用的次数.
-func (uf *UnionFindArrayWithUndo) GetState() int {
-	return len(uf.history) >> 1
+func (r *RollbackArray) Get(index int) arrayItem {
+	return r.data[index]
 }
 
-func (uf *UnionFindArrayWithUndo) Reset() {
-	for len(uf.history) > 0 {
-		uf.Undo()
-	}
+func (r *RollbackArray) Set(index int, value arrayItem) {
+	r.history = append(r.history, historyItem{index: index, value: r.data[index]})
+	r.data[index] = value
 }
 
-func (uf *UnionFindArrayWithUndo) Union(x, y int) bool {
-	x, y = uf.Find(x), uf.Find(y)
-	uf.history = append(uf.history, historyItem{x, uf.data[x]})
-	uf.history = append(uf.history, historyItem{y, uf.data[y]})
-	if x == y {
-		return false
-	}
-	if uf.data[x] > uf.data[y] {
-		x ^= y
-		y ^= x
-		x ^= y
-	}
-	uf.data[x] += uf.data[y]
-	uf.data[y] = x
-	uf.Part--
-	return true
+func (r *RollbackArray) GetAll() []arrayItem {
+	return append(r.data[:0:0], r.data...)
 }
 
-func (uf *UnionFindArrayWithUndo) Find(x int) int {
-	cur := x
-	for uf.data[cur] >= 0 {
-		cur = uf.data[cur]
-	}
-	return cur
-}
-
-func (uf *UnionFindArrayWithUndo) IsConnected(x, y int) bool { return uf.Find(x) == uf.Find(y) }
-
-func (uf *UnionFindArrayWithUndo) GetSize(x int) int { return -uf.data[uf.Find(x)] }
-
-func (ufa *UnionFindArrayWithUndo) GetGroups() map[int][]int {
-	groups := make(map[int][]int)
-	for i := 0; i < ufa.n; i++ {
-		root := ufa.Find(i)
-		groups[root] = append(groups[root], i)
-	}
-	return groups
-}
-
-func (ufa *UnionFindArrayWithUndo) String() string {
-	sb := []string{"UnionFindArray:"}
-	groups := ufa.GetGroups()
-	keys := make([]int, 0, len(groups))
-	for k := range groups {
-		keys = append(keys, k)
-	}
-	sort.Ints(keys)
-	for _, root := range keys {
-		member := groups[root]
-		cur := fmt.Sprintf("%d: %v", root, member)
-		sb = append(sb, cur)
-	}
-	sb = append(sb, fmt.Sprintf("Part: %d", ufa.Part))
-	return strings.Join(sb, "\n")
+func (r *RollbackArray) Len() int {
+	return r.n
 }

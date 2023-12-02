@@ -1,369 +1,351 @@
 """
 下标从0开始
+1.BITArray: 区间修改, 单点查询
+2.BITMap: 区间修改, 单点查询
+3.BITRangeAddRangeSumArray: 区间修改, 区间查询
+4.BITRangeAddRangeSumMap: 区间修改, 区间查询
+5.BITPrefixArray: 单点修改, 区间查询
+6.BITPrefixMap: 单点修改, 区间查询
 """
 
 
-from collections import defaultdict
-from typing import List, Sequence, Union
+from typing import Callable, Generic, Optional, TypeVar
 
 
 class BITArray:
-    """Point Add Range Sum, 0-indexed."""
+    __slots__ = ("n", "_data", "_total")
 
-    @staticmethod
-    def _build(sequence: Sequence[int]) -> List[int]:
-        tree = [0] * (len(sequence) + 1)
-        for i in range(1, len(tree)):
-            tree[i] += sequence[i - 1]
-            parent = i + (i & -i)
-            if parent < len(tree):
-                tree[parent] += tree[i]
-        return tree
-
-    __slots__ = ("_n", "_tree")
-
-    def __init__(self, lenOrSequence: Union[int, Sequence[int]]):
-        if isinstance(lenOrSequence, int):
-            self._n = lenOrSequence
-            self._tree = [0] * (lenOrSequence + 1)
+    def __init__(self, n: int, f: Optional[Callable[[int], int]] = None):
+        if f is None:
+            self.n = n
+            self._data = [0] * n
+            self._total = 0
         else:
-            self._n = len(lenOrSequence)
-            self._tree = self._build(lenOrSequence)
+            self.n = n
+            self._data = [f(i) for i in range(n)]
+            self._total = sum(self._data)
+            for i in range(1, n + 1):
+                j = i + (i & -i)
+                if j <= n:
+                    self._data[j - 1] += self._data[i - 1]
 
-    def add(self, index: int, delta: int) -> None:
+    def add(self, index: int, v: int) -> None:
+        self._total += v
         index += 1
-        while index <= self._n:
-            self._tree[index] += delta
+        while index <= self.n:
+            self._data[index - 1] += v
             index += index & -index
 
-    def query(self, right: int) -> int:
-        """Query sum of [0, right)."""
-        if right > self._n:
-            right = self._n
+    def queryPrefix(self, end: int) -> int:
+        if end > self.n:
+            end = self.n
         res = 0
-        while right > 0:
-            res += self._tree[right]
-            right -= right & -right
+        while end > 0:
+            res += self._data[end - 1]
+            end -= end & -end
         return res
 
-    def queryRange(self, left: int, right: int) -> int:
-        """Query sum of [left, right)."""
-        return self.query(right) - self.query(left)
+    def queryRange(self, start: int, end: int) -> int:
+        if start < 0:
+            start = 0
+        if end > self.n:
+            end = self.n
+        if start >= end:
+            return 0
+        if start == 0:
+            return self.queryPrefix(end)
+        pos, neg = 0, 0
+        while end > start:
+            pos += self._data[end - 1]
+            end &= end - 1
+        while start > end:
+            neg += self._data[start - 1]
+            start &= start - 1
+        return pos - neg
 
-    def __len__(self) -> int:
-        return self._n
+    def queryAll(self) -> int:
+        return self._total
 
-    def __repr__(self) -> str:
-        nums = []
-        for i in range(1, self._n + 1):
-            nums.append(self.queryRange(i, i + 1))
-        return f"BITArray({nums})"
+    def maxRight(self, check: Callable[[int, int], bool]) -> int:
+        """查询满足check的最右位置(不包含), check(index, preSum)."""
+        i = 0
+        s = 0
+        k = 1
+        while 2 * k <= self.n:
+            k *= 2
+        while k > 0:
+            if i + k - 1 < self.n:
+                t = s + self._data[i + k - 1]
+                if check(i + k, t):
+                    i += k
+                    s = t
+            k >>= 1
+        return i
 
-
-class BIT1:
-    """单点修改"""
-
-    __slots__ = "size", "bit", "tree"
-
-    def __init__(self, n: int):
-        self.size = n + 5
-        self.bit = n.bit_length()
-        self.tree = dict()
-
-    def add(self, index: int, delta: int) -> None:
-        index += 1
-        while index <= self.size:
-            self.tree[index] = self.tree.get(index, 0) + delta
-            index += index & -index
-
-    def query(self, right: int) -> int:
-        """Query sum of [0, right)."""
-        if right > self.size:
-            right = self.size
-        res = 0
-        while right > 0:
-            res += self.tree.get(right, 0)
-            right -= right & -right
-        return res
-
-    def queryRange(self, left: int, right: int) -> int:
-        """Query sum of [left, right)."""
-        return self.query(right) - self.query(left)
-
-    def bisectLeft(self, k: int) -> int:
-        """返回第一个前缀和大于等于k的位置pos
-        0 <= pos <= self.size
-        """
-        curSum, pos = 0, 0
-        for i in range(self.bit, -1, -1):
-            nextPos = pos + (1 << i)
-            if nextPos <= self.size and curSum + self.tree.get(nextPos, 0) < k:
-                pos = nextPos
-                curSum += self.tree.get(pos, 0)
-        return pos
-
-    def bisectRight(self, k: int) -> int:
-        """返回第一个前缀和大于k的位置pos
-        0 <= pos <= self.size
-        """
-        curSum, pos = 0, 0
-        for i in range(self.bit, -1, -1):
-            nextPos = pos + (1 << i)
-            if nextPos <= self.size and curSum + self.tree.get(nextPos, 0) <= k:
-                pos = nextPos
-                curSum += self.tree.get(pos, 0)
-        return pos
-
-    def __repr__(self) -> str:
-        arr = []
-        for i in range(self.size):
-            arr.append(self.queryRange(i, i + 1))
-        return str(arr)
-
-    def __len__(self) -> int:
-        return self.size
-
-
-class BIT2:
-    """范围修改,0-indexed"""
-
-    __slots__ = "size", "_tree1", "_tree2"
-
-    def __init__(self, n: int):
-        self.size = n + 5
-        self._tree1 = dict()
-        self._tree2 = dict()
-
-    def add(self, left: int, right: int, delta: int) -> None:
-        """区间[left, right)加delta."""
-        right -= 1
-        self._add(left, delta)
-        self._add(right + 1, -delta)
-
-    def query(self, left: int, right: int) -> int:
-        """区间[left, right)的和."""
-        right -= 1
-        return self._query(right) - self._query(left - 1)
-
-    def _add(self, index: int, delta: int) -> None:
-        index += 1
-        rawIndex = index
-        while index <= self.size:
-            self._tree1[index] = self._tree1.get(index, 0) + delta
-            self._tree2[index] = self._tree2.get(index, 0) + (rawIndex - 1) * delta
-            index += index & -index
-
-    def _query(self, index: int) -> int:
-        index += 1
-        if index > self.size:
-            index = self.size
-        rawIndex = index
-        res = 0
-        while index > 0:
-            res += rawIndex * self._tree1.get(index, 0) - self._tree2.get(index, 0)
-            index &= index - 1
-        return res
+    def kth(self, k: int) -> int:
+        """01树状数组查找第 k(0-based) 个1的位置."""
+        return self.maxRight(lambda _, preSum: preSum <= k)
 
     def __repr__(self):
-        arr = []
-        for i in range(self.size):
-            arr.append(self.query(i, i + 1))
-        return str(arr)
-
-    def __len__(self):
-        return self.size
+        return (
+            "BitArray: [" + ", ".join(str(self.queryRange(i, i + 1)) for i in range(self.n)) + "]"
+        )
 
 
-class BIT3:
-    """
-    单点修改、前缀最大值查询 维护`前缀区间`最大值
-    BITMax,BITPrefixMax
-    """
+class BITMap:
+    __slots__ = ("n", "_data", "_total")
 
     def __init__(self, n: int):
-        self.size = n + 5
-        self.tree = dict()
+        self.n = n
+        self._data = dict()
+        self._total = 0
 
-    def update(self, index: int, target: int) -> None:
-        """将`index`位置的值与`target`取op运算"""
+    def add(self, index: int, v: int) -> None:
+        self._total += v
         index += 1
-        while index <= self.size:
-            self.tree[index] = max(self.tree.get(index, 0), target)
+        while index <= self.n:
+            self._data[index - 1] = self._data.get(index - 1, 0) + v
             index += index & -index
 
-    def query(self, right: int) -> int:
-        """查询前缀区间`[0,right)`的最大值"""
-        if right > self.size:
-            right = self.size
+    def queryPrefix(self, end: int) -> int:
+        if end > self.n:
+            end = self.n
         res = 0
-        while right > 0:
-            res = max(res, self.tree.get(right, 0))
-            right -= right & -right
+        while end > 0:
+            res += self._data.get(end - 1, 0)
+            end -= end & -end
         return res
 
+    def queryRange(self, start: int, end: int) -> int:
+        if start < 0:
+            start = 0
+        if end > self.n:
+            end = self.n
+        if start >= end:
+            return 0
+        if start == 0:
+            return self.queryPrefix(end)
+        pos, neg = 0, 0
+        while end > start:
+            pos += self._data.get(end - 1, 0)
+            end &= end - 1
+        while start > end:
+            neg += self._data.get(start - 1, 0)
+            start &= start - 1
+        return pos - neg
 
-class BIT4:
-    """二维树状数组 单点修改+区间查询 每个操作都是 log(m*n)"""
+    def queryAll(self) -> int:
+        return self._total
 
-    def __init__(self, row: int, col: int) -> None:
-        self.row = row
-        self.col = col
-        self.tree = defaultdict(lambda: defaultdict(int))
+    def maxRight(self, check: Callable[[int, int], bool]) -> int:
+        """查询满足check的最右位置(不包含), check(index, preSum)."""
+        i = 0
+        s = 0
+        k = 1
+        while 2 * k <= self.n:
+            k *= 2
+        while k > 0:
+            if i + k - 1 < self.n:
+                t = s + self._data.get(i + k - 1, 0)
+                if check(i + k, t):
+                    i += k
+                    s = t
+            k >>= 1
+        return i
 
-    def add(self, row: int, col: int, delta: int) -> None:
-        """矩阵中的点 (row,col) 的值加上delta"""
-        row, col = row + 1, col + 1
-        curRow = row
-        while curRow <= self.row:
-            curCol = col
-            while curCol <= self.col:
-                self.tree[curRow][curCol] += delta
-                curCol += curCol & -curCol
-            curRow += curRow & -curRow
+    def kth(self, k: int) -> int:
+        """01树状数组查找第 k(0-based) 个1的位置."""
+        return self.maxRight(lambda _, preSum: preSum <= k)
 
-    def query(self, row: int, col: int) -> int:
-        """左上角 (0,0) 到 右下角(row,col) 的矩形里所有数的和"""
-        row, col = row + 1, col + 1
-        if row > self.row:
-            row = self.row
-        if col > self.col:
-            col = self.col
-        res = 0
-        curRow = row
-        while curRow > 0:
-            curCol = col
-            while curCol > 0:
-                res += self.tree[curRow][curCol]
-                curCol -= curCol & -curCol
-            curRow -= curRow & -curRow
-        return res
 
-    def queryRange(self, row1: int, col1: int, row2: int, col2: int) -> int:
-        """查询左上角 (row1,col1) 到右下角 (row2,col2) 的和"""
+class BITRangeAddRangeSumArray:
+    __slots__ = ("n", "_bit0", "_bit1")
+
+    def __init__(self, n: int, f: Optional[Callable[[int], int]] = None):
+        if f is None:
+            self.n = n
+            self._bit0 = BITArray(n)
+            self._bit1 = BITArray(n)
+        else:
+            self.n = n
+            self._bit0 = BITArray(n, f)
+            self._bit1 = BITArray(n)
+
+    def add(self, index: int, delta: int) -> None:
+        self._bit0.add(index, delta)
+
+    def addRange(self, start: int, end: int, delta: int) -> None:
+        if start < 0:
+            start = 0
+        if end > self.n:
+            end = self.n
+        if start >= end:
+            return
+        self._bit0.add(start, -delta * start)
+        self._bit0.add(end, delta * end)
+        self._bit1.add(start, delta)
+        self._bit1.add(end, -delta)
+
+    def queryRange(self, start: int, end: int) -> int:
+        if start < 0:
+            start = 0
+        if end > self.n:
+            end = self.n
+        if start >= end:
+            return 0
+        rightRes = self._bit1.queryPrefix(end) * end + self._bit0.queryPrefix(end)
+        leftRes = self._bit1.queryPrefix(start) * start + self._bit0.queryPrefix(start)
+        return rightRes - leftRes
+
+    def __repr__(self):
         return (
-            self.query(row2, col2)
-            - self.query(row2, col1 - 1)
-            - self.query(row1 - 1, col2)
-            + self.query(row1 - 1, col1 - 1)
+            "BITRangeAddRangeSumArray: ["
+            + ", ".join(str(self.queryRange(i, i + 1)) for i in range(self.n))
+            + "]"
         )
 
 
-# !二维单点修改、区间查询
-# https://leetcode.cn/problems/range-sum-query-2d-mutable/solution/er-wei-bitshu-tao-shu-onjian-shu-ologn2c-nxvy/
-# !二维区间修改、区间查询
-# https://www.cnblogs.com/hbhszxyb/p/14157271.html
+class BITRangeAddRangeSumMap:
+    __slots__ = ("n", "_bit0", "_bit1")
 
+    def __init__(self, n: int):
+        self.n = n
+        self._bit0 = BITMap(n)
+        self._bit1 = BITMap(n)
 
-# 非常慢 不要使用python版本
-class BIT5:
-    """二维树状数组 区间修改+区间查询 每个操作都是 log(m*n)"""
+    def add(self, index: int, delta: int) -> None:
+        self._bit0.add(index, delta)
 
-    def __init__(self, row: int, col: int) -> None:
-        self.row = row
-        self.col = col
-        self.tree1 = defaultdict(lambda: defaultdict(int))
-        self.tree2 = defaultdict(lambda: defaultdict(int))
-        self.tree3 = defaultdict(lambda: defaultdict(int))
-        self.tree4 = defaultdict(lambda: defaultdict(int))
+    def addRange(self, start: int, end: int, delta: int) -> None:
+        if start < 0:
+            start = 0
+        if end > self.n:
+            end = self.n
+        if start >= end:
+            return
+        self._bit0.add(start, -delta * start)
+        self._bit0.add(end, delta * end)
+        self._bit1.add(start, delta)
+        self._bit1.add(end, -delta)
 
-    def addRange(self, row1: int, col1: int, row2: int, col2: int, delta: int) -> None:
-        """左上角 (row1,col1) 到右下角 (row2,col2) 的所有数加上delta"""
-        self._add(row1, col1, delta)
-        self._add(row2 + 1, col1, -delta)
-        self._add(row1, col2 + 1, -delta)
-        self._add(row2 + 1, col2 + 1, delta)
+    def queryRange(self, start: int, end: int) -> int:
+        if start < 0:
+            start = 0
+        if end > self.n:
+            end = self.n
+        if start >= end:
+            return 0
+        rightRes = self._bit1.queryPrefix(end) * end + self._bit0.queryPrefix(end)
+        leftRes = self._bit1.queryPrefix(start) * start + self._bit0.queryPrefix(start)
+        return rightRes - leftRes
 
-    def queryRange(self, row1: int, col1: int, row2: int, col2: int) -> int:
-        """查询左上角 (row1,col1) 到右下角 (row2,col2) 的和"""
+    def __repr__(self):
         return (
-            self._query(row2, col2)
-            - self._query(row2, col1 - 1)
-            - self._query(row1 - 1, col2)
-            + self._query(row1 - 1, col1 - 1)
+            "BITRangeAddRangeSumMap: ["
+            + ", ".join(str(self.queryRange(i, i + 1)) for i in range(self.n))
+            + "]"
         )
 
-    def _add(self, row: int, col: int, delta: int) -> None:
-        """[row,col]的值加上delta"""
-        row, col = row + 1, col + 1
-        preRow, preCol = row, col
-        curRow = row
-        while curRow <= self.row:
-            curCol = col
-            while curCol <= self.col:
-                self.tree1[curRow][curCol] += delta
-                self.tree2[curRow][curCol] += (preRow - 1) * delta
-                self.tree3[curRow][curCol] += (preCol - 1) * delta
-                self.tree4[curRow][curCol] += (preRow - 1) * (preCol - 1) * delta
-                curCol += curCol & -curCol
-            curRow += curRow & -curRow
 
-    def _query(self, row: int, col: int) -> int:
-        row, col = row + 1, col + 1
-        if row > self.row:
-            row = self.row
-        if col > self.col:
-            col = self.col
+S = TypeVar("S")
 
-        preRow, preCol = row, col
-        curRow = row
-        res = 0
-        while curRow > 0:
-            curCol = col
-            while curCol > 0:
-                res += (
-                    preRow * preCol * self.tree1[curRow][curCol]
-                    - preCol * self.tree2[curRow][curCol]
-                    - preRow * self.tree3[curRow][curCol]
-                    + self.tree4[curRow][curCol]
-                )
-                curCol -= curCol & -curCol
-            curRow -= curRow & -curRow
+
+class BITPrefixArray(Generic[S]):
+    __slots__ = ("n", "_data", "_e", "_op")
+
+    def __init__(
+        self,
+        n: int,
+        e: Callable[[], S],
+        op: Callable[[S, S], S],
+        f: Optional[Callable[[int], S]] = None,
+    ):
+        if f is None:
+            self.n = n
+            self._data = [e() for _ in range(n)]
+            self._e = e
+            self._op = op
+        else:
+            self.n = n
+            self._data = [f(i) for i in range(n)]
+            self._e = e
+            self._op = op
+            for i in range(1, n + 1):
+                j = i + (i & -i)
+                if j <= n:
+                    self._data[j - 1] = op(self._data[j - 1], self._data[i - 1])
+
+    def update(self, index: int, value: S) -> None:
+        index += 1
+        while index <= self.n:
+            self._data[index - 1] = self._op(self._data[index - 1], value)
+            index += index & -index
+
+    def query(self, end: int) -> S:
+        if end > self.n:
+            end = self.n
+        res = self._e()
+        while end > 0:
+            res = self._op(res, self._data[end - 1])
+            end -= end & -end
+        return res
+
+
+class BITPrefixMap(Generic[S]):
+    __slots__ = ("n", "_data", "_e", "_op")
+
+    def __init__(
+        self,
+        n: int,
+        e: Callable[[], S],
+        op: Callable[[S, S], S],
+    ):
+        self.n = n
+        self._data = dict()
+        self._e = e
+        self._op = op
+
+    def update(self, index: int, value: S) -> None:
+        index += 1
+        while index <= self.n:
+            self._data[index - 1] = self._op(self._data.get(index - 1, self._e()), value)
+            index += index & -index
+
+    def query(self, end: int) -> S:
+        if end > self.n:
+            end = self.n
+        res = self._e()
+        while end > 0:
+            res = self._op(res, self._data.get(end - 1, self._e()))
+            end -= end & -end
         return res
 
 
 if __name__ == "__main__":
-    bit1 = BIT1(100)
-    bit1.add(1, 2)
-    assert bit1.query(2) == 2
-    assert bit1.queryRange(1, 4) == 2
-    assert bit1.queryRange(2, 4) == 0
-    assert bit1.queryRange(0, 102) == 2
-    assert bit1.queryRange(0, 1000) == 2
-    assert bit1.queryRange(-10000, 1000) == 2
-    assert bit1.bisectLeft(2) == 1
-    assert bit1.bisectRight(2) == len(bit1)
+    bitArray = BITArray(10)
+    bitArray.add(0, 1)
+    print(bitArray)
+    bitArray.add(1, 2)
+    print(bitArray)
 
-    bit2 = BIT2(100)
-    bit2.add(1, 2, 2)
-    assert bit2.query(1, 2) == 2
-    assert bit2.query(1, 4) == 2
-    assert bit2.query(2, 4) == 0
-    assert bit2.query(0, 102) == 2
-    assert bit2.query(0, 1000) == 2
-    assert bit2.query(-10000, 1000) == 2
+    bitMap = BITMap(int(1e9))
+    bitMap.add(0, 1)
+    bitMap.add(int(1e7), 1)
+    print(bitMap.queryPrefix(int(1e8)))
 
-    bit3 = BIT3(100)
-    bit3.update(1, 2)
-    bit3.update(2, 3)
-    bit3.update(4, 5)
-    print(bit3.query(4))  # 5
-    bit3.update(4, 1)
-    print(bit3.query(4))  # 5 不可以修改原来的值(变小)
+    bitRangeAddRangeSumArray = BITRangeAddRangeSumArray(10, lambda i: i + 1)
+    bitRangeAddRangeSumArray.addRange(0, 10, 1)
+    print(bitRangeAddRangeSumArray)
 
-    bit4 = BIT4(100, 100)
-    bit4.add(0, 0, 2)
-    assert bit4.query(0, 0) == 2
-    bit4.add(1, 1, 2)
-    assert bit4.query(1, 1) == 4
+    bitRangeAddRangeSumMap = BITRangeAddRangeSumMap(int(1e9))
+    bitRangeAddRangeSumMap.addRange(0, int(1e7), 1)
+    print(bitRangeAddRangeSumMap.queryRange(0, int(1e8)))
 
-    bit5 = BIT5(100, 100)
-    bit5.addRange(0, 0, 3, 3, 1)
-    assert bit5.queryRange(0, 0, 1, 1) == 4
-    assert bit5.queryRange(0, 0, 3, 3) == 16
+    bitPrefixArray = BITPrefixArray(10, lambda: 0, max)
+    bitPrefixArray.update(0, 1)
+    bitPrefixArray.update(1, 0)
+    print(bitPrefixArray.query(2))
 
-    arrayBIT = BITArray([1, 2, 3])
-    assert arrayBIT.queryRange(1, 3) == 5
-    arrayBIT.add(1, 1)
-    assert arrayBIT.queryRange(1, 3) == 6
-    arrayBIT.add(2, 1)
-    assert arrayBIT.queryRange(1, 3) == 7
+    bitPrefixMap = BITPrefixMap(int(1e9), lambda: 0, max)
+    bitPrefixMap.update(0, 1)
+    bitPrefixMap.update(int(1e7), 0)

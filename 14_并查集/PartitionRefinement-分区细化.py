@@ -3,7 +3,8 @@
 # https://slidesplayer.com/slide/16477387/
 # https://sotanishy.github.io/cp-library-cpp/data-structure/partition_refinement.hpp
 
-# Partition refinement は，素集合を管理するデータ構造である．Union find が集合の併合を処理するのに対し，partition refinement は集合の分割を処理する．
+# Partition refinement は，素集合を管理するデータ構造である．Union find が集合の併合を処理するのに対し，
+# partition refinement は集合の分割を処理する．
 
 # DFA 最小化などに用いられる．
 
@@ -24,7 +25,7 @@ class PartitionRefinement:
 
     def refine(self, pivot: List[int]) -> List[Tuple[int, int]]:
         """
-        给定一个划分,将每个集合Si划分为 Si ∩ P 和 Si\\P 两个集合.
+        给定一个划分,将每个集合Si划分为 Si + P 和 Si - P 两个集合.
         返回分割后的集合编号对.
         """
         mp = defaultdict(list)

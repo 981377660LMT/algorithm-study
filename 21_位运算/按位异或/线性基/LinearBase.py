@@ -1,3 +1,5 @@
+# 线性基第k小异或
+
 from collections import defaultdict
 from typing import List
 

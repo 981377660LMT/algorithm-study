@@ -1,1 +1,0 @@
-// https://nyaannyaan.github.io/library/string/rolling-hash.hpp

@@ -105,8 +105,8 @@ class SternBrocotTree:
         return SternBrocotTree.fromPath(res)
 
     @staticmethod
-    def la(x: R, dep: int) -> R:
-        """求x的深度为dep的祖先, 如果不存在则返回(-1, -1)."""
+    def kthAncestor(x: R, k: int) -> R:
+        """求x的k级祖先, 如果不存在则返回(-1, -1)."""
         left = (0, 1)
         right = (1, 0)
         mid = (1, 1)
@@ -114,25 +114,25 @@ class SternBrocotTree:
         detR = right[0] * x[1] - right[1] * x[0]
         detM = detL + detR
         while True:
-            if detM == 0 or dep == 0:
+            if detM == 0 or k == 0:
                 break
             tmp = ceil(-detM / detR)
-            k = dep if dep < tmp else tmp
-            left = (left[0] + k * right[0], left[1] + k * right[1])
+            min_ = k if k < tmp else tmp
+            left = (left[0] + min_ * right[0], left[1] + min_ * right[1])
             mid = (left[0] + right[0], left[1] + right[1])
-            detL += k * detR
-            detM += k * detR
-            dep -= k
-            if detM == 0 or dep == 0:
+            detL += min_ * detR
+            detM += min_ * detR
+            k -= min_
+            if detM == 0 or k == 0:
                 break
             tmp = ceil(detM / -detL)
-            k = dep if dep < tmp else tmp
-            right = (right[0] + k * left[0], right[1] + k * left[1])
+            min_ = k if k < tmp else tmp
+            right = (right[0] + min_ * left[0], right[1] + min_ * left[1])
             mid = (left[0] + right[0], left[1] + right[1])
-            detR += k * detL
-            detM += k * detL
-            dep -= k
-        if dep == 0:
+            detR += min_ * detL
+            detM += min_ * detL
+            k -= min_
+        if k == 0:
             return mid
         return -1, -1
 
@@ -165,6 +165,49 @@ def farey(a: int, b: int) -> Tuple[int, int, int, int]:
 
 
 if __name__ == "__main__":
+
+    def yosupoJudge() -> None:
+        T = int(input())
+        for _ in range(T):
+            s = input().split()
+            if s[0] == "DECODE_PATH":
+                path = []
+                for char, num in zip(s[2::2], s[3::2]):
+                    if not path and char == "L":
+                        path.append(0)
+                    path.append(int(num))
+                a, b = SternBrocotTree.fromPath(path)
+                print(a, b)
+            elif s[0] == "ENCODE_PATH":
+                a, b = map(int, s[1:])
+                path = SternBrocotTree.getPath((a, b))
+                res = []
+                for i in range(len(path)):
+                    if path[i] == 0:
+                        continue
+                    x = "R" if i % 2 == 0 else "L"
+                    res.append(x)
+                    res.append(str(path[i]))
+                print(len(res) // 2, " ".join(res))
+
+            elif s[0] == "LCA":
+                a, b, c, d = map(int, s[1:])
+                e, f = SternBrocotTree.lca((a, b), (c, d))
+                print(e, f)
+            elif s[0] == "ANCESTOR":
+                k, a, b = map(int, s[1:])
+                x, y = SternBrocotTree.kthAncestor((a, b), k)
+                if x == -1:
+                    print(-1)
+                else:
+                    print(x, y)
+            elif s[0] == "RANGE":
+                a, b = map(int, s[1:])
+                x, y = SternBrocotTree.getRange((a, b))
+                print(x, y)
+
+    yosupoJudge()
+
     SBT = SternBrocotTree
     # diy
     print(SBT.toString(SBT.getPath((4, 3))))
@@ -214,18 +257,18 @@ if __name__ == "__main__":
 
     # la
     NG = (-1, -1)
-    assert SBT.la((1, 1), 0) == (1, 1)
-    assert SBT.la((1, 1), 1) == NG
-    assert SBT.la((3, 4), 0) == (1, 1)
-    assert SBT.la((3, 4), 1) == (1, 2)
-    assert SBT.la((3, 4), 2) == (2, 3)
-    assert SBT.la((3, 4), 3) == (3, 4)
-    assert SBT.la((3, 4), 4) == NG
-    assert SBT.la((3, 5), 0) == (1, 1)
-    assert SBT.la((3, 5), 1) == (1, 2)
-    assert SBT.la((3, 5), 2) == (2, 3)
-    assert SBT.la((3, 5), 3) == (3, 5)
-    assert SBT.la((3, 5), 4) == NG
+    assert SBT.kthAncestor((1, 1), 0) == (1, 1)
+    assert SBT.kthAncestor((1, 1), 1) == NG
+    assert SBT.kthAncestor((3, 4), 0) == (1, 1)
+    assert SBT.kthAncestor((3, 4), 1) == (1, 2)
+    assert SBT.kthAncestor((3, 4), 2) == (2, 3)
+    assert SBT.kthAncestor((3, 4), 3) == (3, 4)
+    assert SBT.kthAncestor((3, 4), 4) == NG
+    assert SBT.kthAncestor((3, 5), 0) == (1, 1)
+    assert SBT.kthAncestor((3, 5), 1) == (1, 2)
+    assert SBT.kthAncestor((3, 5), 2) == (2, 3)
+    assert SBT.kthAncestor((3, 5), 3) == (3, 5)
+    assert SBT.kthAncestor((3, 5), 4) == NG
 
     import random
     from math import gcd

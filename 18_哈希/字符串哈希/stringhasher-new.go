@@ -15,8 +15,9 @@ import (
 )
 
 // 顺序遍历每个单词,问之前是否见过类似的单词.
-//  `类似`: 最多交换一次相邻字符,可以得到相同的单词.
-//  n<=2e5 sum(len(s))<=1e6
+//
+//	`类似`: 最多交换一次相邻字符,可以得到相同的单词.
+//	n<=2e5 sum(len(s))<=1e6
 func ConditionalReflection(words []string) []bool {
 
 	R := NewRollingHash(13331)
