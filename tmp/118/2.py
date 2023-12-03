@@ -30,28 +30,23 @@ def max2(a, b):
 
 class Solution:
     def maximizeSquareHoleArea(self, n: int, m: int, hBars: List[int], vBars: List[int]) -> int:
-        hBars.sort()
-        vBars.sort()
+        def cal(arr: List[int]) -> int:
+            arr.sort()
+            pre = -10
+            res = 0
+            dp = 0
+            for v in arr:
+                if v == pre + 1:
+                    dp += 1
+                else:
+                    dp = 1
+                pre = v
+                res = max2(res, dp)
+            return res
 
-        arr1 = list(set(sorted([0] + [v - 1 for v in hBars] + [n + 1])))
-        arr2 = list(set(sorted([0] + [v - 1 for v in vBars] + [m + 1])))
-
-        res = 0
-        # 枚举左上角
-        for i1 in range(len(arr1)):
-            for j1 in range(len(arr2)):
-                curJ = j1
-                curX, curY = 0, 0
-                for i2 in range(i1 + 1, len(arr1)):
-                    curX += arr1[i2] - arr1[i2 - 1]
-                    while curJ + 1 < len(arr2) and curY < curX:
-                        curJ += 1
-                        curY += arr2[curJ] - arr2[curJ - 1]
-                    if curX == curY:
-                        res = max2(res, curX * curY)
-                        print(arr1[i1], arr2[j1], arr1[i2], arr2[curJ], res)
-
-        return res
+        res1 = cal(hBars[:])
+        res2 = cal(vBars[:])
+        return min(res1, res2) ** 2
 
 
 # 2

@@ -1,5 +1,5 @@
 /**
- * 遍历连续相同元素的分组.
+ * 遍历连续相同元素的分组(分组循环).
  * @alias groupBy
  * @example
  * ```ts
@@ -7,7 +7,10 @@
  * enumerateGroup(list, group => console.log(group)) // [1, 1], [2], [3, 3], [4, 4], [5, 5, 5]
  * ```
  */
-function enumerateGroup<T>(arr: ArrayLike<T>, f: (group: T[], start: number, end: number) => boolean | void): void {
+function enumerateGroup<T>(
+  arr: ArrayLike<T>,
+  f: (group: T[], start: number, end: number) => boolean | void
+): void {
   const n = arr.length
   let ptr = 0
   while (ptr < n) {

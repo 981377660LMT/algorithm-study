@@ -1,5 +1,9 @@
 # 用两个栈模拟一个双端队列，注意到每个栈的前缀最小值是可以 O(1) 修改和询问的
 # 当某个栈空的时候将另一个栈分一半给这个已经空的栈（即暴力重构）
+
+# 参考 SlidingWindowAggregationDeque
+
+
 from typing import Tuple
 
 

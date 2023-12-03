@@ -1,6 +1,7 @@
+from MonoQueue import MonoQueue
+
+from typing import List, Tuple
 from itertools import accumulate
-from typing import Any, Deque, Iterable, List, Optional
-from collections import deque
 
 # 你需要用这一辆车把一些箱子从仓库运送到码头。这辆卡车每次运输有 箱子数目的限制 和 总重量的限制 。
 # 箱子需要按照 数组顺序 运输
@@ -11,69 +12,6 @@ from collections import deque
 # https://leetcode.cn/problems/delivering-boxes-from-storage-to-ports/solution/python-dan-diao-dui-lie-you-hua-dp-by-98-6elh/
 
 INF = int(1e20)
-
-
-class MonoQueue:
-    """具有 O(1) 求 `min` 和 `max` API的 deque"""
-
-    def __init__(self, iterable: Optional[Iterable[int]] = None) -> None:
-        self.minQueue: Deque[Any] = deque()
-        self.maxQueue: Deque[Any] = deque()
-        self.rawQueue: Deque[int] = deque()
-
-        if iterable is not None:
-            for value in iterable:
-                self.append(value)
-
-    @property
-    def min(self) -> int:
-        if not self.minQueue:
-            raise ValueError("monoQueue is empty")
-        return self.minQueue[0][0]
-
-    @property
-    def max(self) -> int:
-        if not self.maxQueue:
-            raise ValueError("monoQueue is empty")
-        return self.maxQueue[0][0]
-
-    def popleft(self) -> int:
-        if not self.rawQueue:
-            raise IndexError("popleft from empty queue")
-
-        self.minQueue[0][-1] -= 1
-        if self.minQueue[0][-1] == 0:
-            self.minQueue.popleft()
-
-        self.maxQueue[0][-1] -= 1
-        if self.maxQueue[0][-1] == 0:
-            self.maxQueue.popleft()
-
-        return self.rawQueue.popleft()
-
-    def append(self, value: int, *metaInfo: Any) -> None:
-        """
-        Args:
-            value (int): 元素的值
-            metaInfo: Any 当前元素附加的元信息，不会添加到原始队列
-        """
-        count = 1
-        while self.minQueue and self.minQueue[-1][0] > value:
-            count += self.minQueue.pop()[-1]
-        self.minQueue.append([value, *metaInfo, count])
-
-        count = 1
-        while self.maxQueue and self.maxQueue[-1][0] < value:
-            count += self.maxQueue.pop()[-1]
-        self.maxQueue.append([value, *metaInfo, count])
-
-        self.rawQueue.append(value)
-
-    def __len__(self) -> int:
-        return len(self.rawQueue)
-
-    def __getitem__(self, index: int) -> int:
-        return self.rawQueue[index]
 
 
 class Solution:
@@ -113,17 +51,17 @@ class Solution:
 
         dp = [INF] * (n + 1)
         dp[0] = 0
-        queue = MonoQueue()
+        queue = MonoQueue[Tuple[int, int]](lambda x, y: x[0] < y[0])  # (value, index)
         for i in range(n + 1):
-            while queue.minQueue and (
-                i - queue.minQueue[0][1] > maxBoxes  # 超出数量限制
-                or preWeight[i] - preWeight[queue.minQueue[0][1]] > maxWeight  # 超出重量限制
+            while queue and (
+                i - queue.head()[1] > maxBoxes  # 超出数量限制
+                or preWeight[i] - preWeight[queue.head()[1]] > maxWeight  # 超出重量限制
             ):
                 queue.popleft()
             if queue:
-                dp[i] = min(dp[i], preCost[i - 1] + queue.min + 2)
+                dp[i] = min(dp[i], preCost[i - 1] + queue.min[0] + 2)
             if i < len(preCost):
-                queue.append(dp[i] - preCost[i], i)
+                queue.append((dp[i] - preCost[i], i))
         return dp[-1]
 
 

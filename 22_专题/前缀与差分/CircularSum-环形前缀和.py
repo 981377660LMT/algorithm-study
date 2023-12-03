@@ -27,6 +27,39 @@ def circularPresum(nums: List[int]) -> Callable[[int, int], int]:
     return query
 
 
+def circularPreSum2D(grid: List[List[int]]) -> Callable[[int, int, int, int], int]:
+    """二维环形数组前缀和."""
+    n = len(grid)
+    m = len(grid[0])
+    preSum = [[0] * (m + 1) for _ in range(n + 1)]
+    for i, row in enumerate(grid):
+        tmp1, tmp2 = preSum[i], preSum[i + 1]
+        for j in range(m):
+            tmp2[j + 1] = tmp2[j] + tmp1[j + 1] - tmp1[j] + row[j]
+
+    def _cal(r: int, c: int) -> int:
+        res1 = preSum[n][m] * (r // n) * (c // m)
+        res2 = preSum[r % n][m] * (c // m)
+        res3 = preSum[n][c % m] * (r // n)
+        res4 = preSum[r % n][c % m]
+        return res1 + res2 + res3 + res4
+
+    def query(row1: int, col1: int, row2: int, col2: int) -> int:
+        """[row1,row2) * [col1,col2)的和.
+        0 <= row1 < row2 <= n.
+        0 <= col1 < col2 <= m.
+        """
+        if row1 >= row2 or col1 >= col2:
+            return 0
+        res1 = _cal(row2, col2)
+        res2 = _cal(row1, col2)
+        res3 = _cal(row2, col1)
+        res4 = _cal(row1, col1)
+        return res1 - res2 - res3 + res4
+
+    return query
+
+
 if __name__ == "__main__":
     nums = list(range(1000))
     cs = circularPresum(nums)
@@ -91,3 +124,16 @@ if __name__ == "__main__":
                         right = mid - 1
 
             return res if res != INF else -1
+
+    # https://atcoder.jp/contests/abc331/tasks/abc331_d
+    def tilePattern():
+        N, Q = map(int, input().split())
+        grid = [[0] * N for _ in range(N)]
+        for i in range(N):
+            row = input()
+            grid[i] = [1 if c == "B" else 0 for c in row]
+
+        query = circularPreSum2D(grid)
+        for _ in range(Q):
+            row1, col1, row2, col2 = map(int, input().split())
+            print(query(row1, col1, row2 + 1, col2 + 1))

@@ -11,7 +11,6 @@ class MonoQueue:
         self.minQueue: Deque[List[Any]] = deque()
         self.maxQueue: Deque[List[Any]] = deque()
         self.rawQueue: Deque[int] = deque()
-
         if iterable is not None:
             for value in iterable:
                 self.append(value)

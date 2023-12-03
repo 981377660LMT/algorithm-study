@@ -35,6 +35,10 @@ class FastHashSet:
     def symmetricDifference(self, other: "FastHashSet") -> int:
         return self._hash ^ other._hash
 
+    def clear(self) -> None:
+        self._hash = 0
+        self._set.clear()
+
     def __hash__(self) -> int:
         return self._hash
 
@@ -66,6 +70,10 @@ class FastHashCounter:
 
     def symmetricDifference(self, other: "FastHashCounter") -> int:
         return self._hash ^ other._hash
+
+    def clear(self) -> None:
+        self._hash = 0
+        self._counter.clear()
 
     def __hash__(self) -> int:
         return self._hash
@@ -141,7 +149,9 @@ class FastHashRange:
 
 
 class AllCountKChecker:
-    """判断数据结构中每个数出现的次数是否均k的倍数."""
+    """
+    判断数据结构中每个数出现的次数是否均`k的倍数`.
+    """
 
     _poolSingleton = defaultdict(lambda: randint(1, (1 << 61) - 1))
 
@@ -176,3 +186,7 @@ class AllCountKChecker:
 
     def getHash(self) -> int:
         return self._hash
+
+    def clear(self) -> None:
+        self._hash = 0
+        self._counter.clear()

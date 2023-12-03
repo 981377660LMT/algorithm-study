@@ -8,6 +8,7 @@ import (
 	"os"
 )
 
+// https://yukicoder.me/problems/no/705
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -48,8 +49,9 @@ func abs(x int) int {
 const INF int = 1e18
 
 // dp[j]=min(dp[i]+f(i,j)) (0<=i<j<=n)
-//  !f(i,j): 左闭右开区间[i,j)的代价(0<=i<j<=n)
-//  f函数需要满足Monge性质.
+//
+//	!f(i,j): 左闭右开区间[i,j)的代价(0<=i<j<=n)
+//	f函数需要满足Monge性质.
 func MongeShortestPath(N int, f func(i, j int) int) []int {
 	dp := make([]int, N+1)
 	for i := range dp {
@@ -70,10 +72,12 @@ func MongeShortestPath(N int, f func(i, j int) int) []int {
 	return dp
 }
 
-// O(nlogn)求从0到n-1恰好经过d条边的最短路,其中边权f(from,to)满足Monge性质.
-//  d: 边数, fLimit: 边权的最大值, f: 边权函数
-//  AliensDp可以归结为这个问题.
-//  https://noshi91.github.io/algorithm-encyclopedia/d-edge-shortest-path-monge
+// O(nlogn)求从0到n恰好经过d条边的最短路,其中边权f(from,to)满足Monge性质.
+//
+//	d: 边数, fLimit: 边权的最大值, f: 边权函数
+//	AliensDp可以归结为这个问题.
+//	https://noshi91.github.io/algorithm-encyclopedia/d-edge-shortest-path-monge
+//
 // 网格图负权最短路 https://zhuanlan.zhihu.com/p/33808530
 func MongeShortestPathDEdge(N, d, fLimit int, f func(i, j int) int) int {
 	if d > N {
@@ -86,7 +90,7 @@ func MongeShortestPathDEdge(N, d, fLimit int, f func(i, j int) int) int {
 		dp := MongeShortestPath(N, cost)
 		return dp[N] - lambda*d
 	}
-	_, fx := _FibonacciSearch(calcL, -3*fLimit, 3*fLimit+1, false)
+	_, fx := _FibonacciSearch(calcL, -fLimit, fLimit+1, false)
 	return fx
 }
 
@@ -135,7 +139,8 @@ func MongeDpUpdate(n int, dp []int, f func(i, j int) int) []int {
 }
 
 // choose: func(i, j, k int) int 选择(i,j)和(i,k)中的哪一个(j or k)
-//  返回值: minArg[i] 表示第i行的最小值的列号
+//
+//	返回值: minArg[i] 表示第i行的最小值的列号
 func _SMAWK(H, W int, choose func(i, j, k int) int) (minArg []int) {
 	var dfs func(X, Y []int) []int
 	dfs = func(X, Y []int) []int {
@@ -221,7 +226,6 @@ func _newReduceRow(n int) *_reduceRow {
 	res := &_reduceRow{n: n}
 	m := n / 2
 	if m != 0 {
-
 		res.rec = _newReduceCol(m)
 	}
 	return res
@@ -309,7 +313,9 @@ func (r *_reduceCol) getArgmin() int {
 }
 
 // 寻找[start,end)中的一个极值点,不要求单峰性质.
-//  返回值: (极值点,极值)
+// GoldenSectionSearch, 黄金比搜索.
+//
+//	返回值: (极值点,极值)
 func _FibonacciSearch(f func(x int) int, start, end int, minimize bool) (int, int) {
 	end--
 	a, b, c, d := start, start+1, start+2, start+3
@@ -369,7 +375,6 @@ func _FibonacciSearch(f func(x int) int, start, end int, minimize bool) (int, in
 		return x, y
 	}
 	return x, -y
-
 }
 
 func min(a, b int) int {

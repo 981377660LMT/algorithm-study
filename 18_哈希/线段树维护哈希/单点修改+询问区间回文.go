@@ -5,30 +5,33 @@ import "fmt"
 func main() {
 	// abcda
 	// 5
-	// palindrome? 1 5
-	// palindrome? 1 1
-	// change 4 b
-	// palindrome? 1 5
-	// palindrome? 2 4
+	// 1 1 5
+	// 1 1 1
+	// 2 4 b
+	// 1 1 5
+	// 1 2 4
+
 	s := "abcda"
 	nums := make([]int, len(s))
 	for i := range s {
 		nums[i] = int(s[i])
 	}
 	operations := [][3]int{
-		{1, 1, 5},
-		{1, 1, 1},
-		{2, 4, int('b')},
-		{1, 1, 5},
-		{1, 2, 4},
+		{1, 0, 5},
+		{1, 0, 1},
+		{2, 3, int('b')},
+		{1, 0, 5},
+		{1, 1, 4},
 	}
 
 	fmt.Println(Subpalindromes(nums, operations))
 }
 
+const N int = 1e5 + 10 // 预处理BASE长度
+
 // nums[i]>=0
-// 1：palindrome? x y  :询问[x, y]是否为回文串
-// 2：change 4 b       :把s[4]修改为b
+// 1 start end :判断s[start:end)是否是回文串
+// 2 pos b     :将s[pos]修改为b
 func Subpalindromes(nums []int, operations [][3]int) []bool {
 	n := len(nums)
 	leaves0, leaves1 := make([]E, n), make([]E, n)
@@ -41,25 +44,23 @@ func Subpalindromes(nums []int, operations [][3]int) []bool {
 	// 0<=start<=end<=n
 	isPalindrome := func(start, end int) bool {
 		h1 := seg0.Query(start, end)
-		h2 := seg1.Query(start, end)
+		h2 := seg1.Query(n-end, n-start)
 		return h1.hash1 == h2.hash1 && h1.hash2 == h2.hash2
 	}
 
 	res := []bool{}
 	for _, op := range operations {
 		if op[0] == 1 {
-			start, end := op[1]-1, op[2]
+			start, end := op[1], op[2]
 			res = append(res, isPalindrome(start, end))
 		} else {
-			i, v := op[1]-1, uint(op[2])
+			i, v := op[1], uint(op[2])
 			seg0.Set(i, CreateE(v))
 			seg1.Set(n-1-i, CreateE(v))
 		}
 	}
 	return res
 }
-
-const N int = 1e5 + 10
 
 var BASEPOW0 [N]uint
 var BASEPOW1 [N]uint
