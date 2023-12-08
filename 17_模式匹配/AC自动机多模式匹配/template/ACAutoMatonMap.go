@@ -10,39 +10,41 @@ func longestValidSubstring(word string, forbidden []string) int {
 	}
 	acm.BuildSuffixLink()
 
-	minLen := make([]int, acm.Size()) // 每个状态匹配到的模式串的最小长度
-	for i := range minLen {
-		minLen[i] = INF
+	minBorder := make([]int, acm.Size()) // 每个状态匹配到的模式串的最小长度
+	for i := range minBorder {
+		minBorder[i] = INF
 	}
 	for i, pos := range acm.WordPos {
-		minLen[pos] = min(minLen[pos], len(forbidden[i]))
+		minBorder[pos] = min(minBorder[pos], len(forbidden[i]))
 	}
-	acm.Dp(func(from, to int) { minLen[to] = min(minLen[to], minLen[from]) })
+	acm.Dp(func(from, to int) { minBorder[to] = min(minBorder[to], minBorder[from]) })
 
 	res, left, pos := 0, 0, 0
 	for right, char := range word {
 		pos = acm.Move(pos, byte(char))
-		left = max(left, right-minLen[pos]+2)
+		left = max(left, right-minBorder[pos]+2)
 		res = max(res, right-left+1)
 	}
 	return res
 }
 
+type T = byte
+
 type ACAutoMatonMap struct {
-	WordPos    []int          // WordPos[i] 表示加入的第i个模式串对应的节点编号.
-	children   []map[byte]int // children[v][c] 表示节点v通过字符c转移到的节点.
-	suffixLink []int          // 又叫fail.指向当前节点最长真后缀对应结点.
-	bfsOrder   []int          // 结点的拓扑序,0表示虚拟节点.
+	WordPos    []int       // WordPos[i] 表示加入的第i个模式串对应的节点编号.
+	children   []map[T]int // children[v][c] 表示节点v通过字符c转移到的节点.
+	suffixLink []int       // 又叫fail.指向当前节点最长真后缀对应结点.
+	bfsOrder   []int       // 结点的拓扑序,0表示虚拟节点.
 }
 
 func NewACAutoMatonMap() *ACAutoMatonMap {
 	return &ACAutoMatonMap{
 		WordPos:  []int{},
-		children: []map[byte]int{{}},
+		children: []map[T]int{{}},
 	}
 }
 
-func (ac *ACAutoMatonMap) AddString(s []byte) int {
+func (ac *ACAutoMatonMap) AddString(s []T) int {
 	if len(s) == 0 {
 		return 0
 	}
@@ -56,25 +58,25 @@ func (ac *ACAutoMatonMap) AddString(s []byte) int {
 			nextState := len(ac.children)
 			nexts[ord] = nextState
 			pos = nextState
-			ac.children = append(ac.children, map[byte]int{})
+			ac.children = append(ac.children, map[T]int{})
 		}
 	}
 	ac.WordPos = append(ac.WordPos, pos)
 	return pos
 }
 
-func (ac *ACAutoMatonMap) AddChar(pos int, ord byte) int {
+func (ac *ACAutoMatonMap) AddChar(pos int, ord T) int {
 	nexts := ac.children[pos]
 	if next, ok := nexts[ord]; ok {
 		return next
 	}
 	nextState := len(ac.children)
 	nexts[ord] = nextState
-	ac.children = append(ac.children, map[byte]int{})
+	ac.children = append(ac.children, map[T]int{})
 	return nextState
 }
 
-func (ac *ACAutoMatonMap) Move(pos int, ord byte) int {
+func (ac *ACAutoMatonMap) Move(pos int, ord T) int {
 	for {
 		nexts := ac.children[pos]
 		if next, ok := nexts[ord]; ok {
@@ -177,4 +179,11 @@ func (ac *ACAutoMatonMap) Dp(f func(from, to int)) {
 
 func (ac *ACAutoMatonMap) Size() int {
 	return len(ac.children)
+}
+
+func min(a, b int) int {
+	if a <= b {
+		return a
+	}
+	return b
 }

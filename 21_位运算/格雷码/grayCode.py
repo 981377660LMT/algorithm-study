@@ -1,3 +1,17 @@
+def g(n: int) -> int:
+    """二进制转格雷码."""
+    return n ^ (n >> 1)
+
+
+def revG(g: int) -> int:
+    """格雷码转二进制."""
+    n = 0
+    while g:
+        n ^= g
+        g >>= 1
+    return n
+
+
 def grayCode2Binary(grayCode: str) -> str:
     """格雷码转二进制."""
     binary = [grayCode[0]]

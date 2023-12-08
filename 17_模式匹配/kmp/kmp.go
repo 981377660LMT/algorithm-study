@@ -6,11 +6,51 @@
 
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
 func main() {
-	a, b := "ababab", "a"
-	fmt.Println(IndexOfAll(a, b, 0))
+	// a, b := "ababab", "a"
+	// fmt.Println(IndexOfAll(a, b, 0))
+	P4824()
+}
+
+// https://www.luogu.com.cn/problem/P4824
+// 在longer中不断删除shorter，求剩下的字符串.
+func P4824() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var longer, shorter string
+	fmt.Fscan(in, &longer, &shorter)
+
+	kmp := NewKMP(shorter)
+	pos := 0
+	stack := make([]int, 0, len(longer))
+	posRecord := make([]int, len(longer))
+	for i := range longer {
+		pos = kmp.Move(pos, longer[i])
+		posRecord[i] = pos
+		stack = append(stack, i)
+		if kmp.IsMatched(pos) {
+			stack = stack[:len(stack)-len(shorter)]
+			if len(stack) > 0 {
+				pos = posRecord[stack[len(stack)-1]]
+			} else {
+				pos = 0
+			}
+		}
+	}
+
+	res := make([]byte, 0, len(stack))
+	for _, v := range stack {
+		res = append(res, longer[v])
+	}
+	fmt.Fprintln(out, string(res))
 }
 
 func GetNext(pattern string) []int {
@@ -68,7 +108,8 @@ func NewKMP(pattern string) *KMP {
 }
 
 // `o(n+m)`求搜索串 longer 中所有匹配 pattern 的位置.
-//  findAll/indexOfAll
+//
+//	findAll/indexOfAll
 func (k *KMP) IndexOfAll(longer string, start int) []int {
 	var res []int
 	pos := 0
@@ -111,7 +152,8 @@ func (k *KMP) IsMatched(pos int) bool {
 }
 
 // 求s的前缀[0:i+1)的最小周期.如果不存在,则返回0.
-//  0<=i<len(s).
+//
+//	0<=i<len(s).
 func (k *KMP) Period(i int) int {
 	res := i + 1 - k.next[i]
 	if res > 0 && (i+1) > res && (i+1)%res == 0 {

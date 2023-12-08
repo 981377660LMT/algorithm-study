@@ -24,7 +24,7 @@ class VeniceTech {
     this._sl.discard(value + this._delta)
   }
 
-  updateAll(delta: number): void {
+  addAll(delta: number): void {
     this._delta -= delta
   }
 
@@ -46,7 +46,7 @@ if (require.main === module) {
   vt.add(2)
   vt.add(3)
   console.log(vt.min())
-  vt.updateAll(10)
+  vt.addAll(10)
   console.log(vt.min())
   vt.discard(11)
   console.log(vt.min())

@@ -17,5 +17,5 @@ def kthFibonacci(k: int) -> int:
     return res[1]
 
 
-res = [kthFibonacci(i) for i in range(10)]
-assert res == [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+res = [kthFibonacci(i) for i in range(11)]
+assert res == [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55]

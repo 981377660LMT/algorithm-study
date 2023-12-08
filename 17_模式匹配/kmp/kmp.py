@@ -73,7 +73,7 @@ class KMP(Generic[T]):
         next = [0] * len(pattern)
         j = 0
         for i in range(1, len(pattern)):
-            while j and pattern[i] != pattern[j]:
+            while j > 0 and pattern[i] != pattern[j]:
                 j = next[j - 1]
             if pattern[i] == pattern[j]:
                 j += 1
@@ -112,8 +112,8 @@ class KMP(Generic[T]):
 
     def move(self, pos: int, input_: T) -> int:
         assert 0 <= pos < len(self._pattern)
-        while pos and input_ != self._pattern[pos]:
-            pos = self.next[pos - 1]  # rollback
+        while pos > 0 and input_ != self._pattern[pos]:
+            pos = self.next[pos - 1]  # fail
         if input_ == self._pattern[pos]:
             pos += 1
         return pos
@@ -136,6 +136,36 @@ class KMP(Generic[T]):
 
 
 if __name__ == "__main__":
+    # https://www.luogu.com.cn/problem/P4824
+    # 在longer中不断删除shorter，求剩下的字符串(消消乐).
+    def P4824():
+        import sys
+
+        input = sys.stdin.readline
+        longer = input().strip()
+        shorter = input().strip()
+        kmp = KMP(shorter)
+
+        pos = 0
+        stack = []
+        posRecord = [0] * len(longer)
+        for i, c in enumerate(longer):
+            pos = kmp.move(pos, c)
+            posRecord[i] = pos
+            stack.append(i)
+
+            if kmp.accept(pos):
+                for _ in range(len(shorter)):
+                    stack.pop()
+                pos = posRecord[stack[-1]] if stack else 0
+
+        res = []
+        for v in stack:
+            res.append(longer[v])
+        print("".join(res))
+
+    P4824()
+
     # 2855. 使数组成为递增数组的最少右移次数
     # https://leetcode.cn/problems/minimum-right-shifts-to-sort-the-array/description/
     class Solution:

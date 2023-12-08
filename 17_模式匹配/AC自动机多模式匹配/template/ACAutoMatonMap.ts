@@ -2,18 +2,18 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable max-len */
 
-class ACAutoMatonMap {
+class ACAutoMatonMap<T = string> {
   /** wordPos[i] 表示加入的第i个模式串对应的节点编号. */
   readonly wordPos: number[] = [] //
-  private readonly _children: Map<number, number>[] = [new Map()]
+  private readonly _children: Map<T, number>[] = [new Map()]
   private _suffixLink!: Int32Array
   private _bfsOrder!: Int32Array
 
-  addString(str: string): number {
+  addString(str: ArrayLike<T>): number {
     if (str.length === 0) return 0
     let pos = 0
     for (let i = 0; i < str.length; i++) {
-      const ord = str[i].charCodeAt(0)
+      const ord = str[i]
       const nexts = this._children[pos]
       if (nexts.has(ord)) {
         pos = nexts.get(ord)!
@@ -28,7 +28,7 @@ class ACAutoMatonMap {
     return pos
   }
 
-  addChar(pos: number, ord: number): number {
+  addChar(pos: number, ord: T): number {
     let nexts = this._children[pos]
     if (nexts.has(ord)) {
       return nexts.get(ord)!
@@ -39,7 +39,7 @@ class ACAutoMatonMap {
     return nextState
   }
 
-  move(pos: number, ord: number): number {
+  move(pos: number, ord: T): number {
     while (true) {
       const nexts = this._children[pos]
       if (nexts.has(ord)) {
@@ -149,20 +149,20 @@ if (require.main === module) {
     forbidden.forEach(w => acm.addString(w))
     acm.buildSuffixLink()
 
-    const minLen = new Uint32Array(acm.size).fill(-1)
+    const minBorder = new Uint32Array(acm.size).fill(-1)
     for (let i = 0; i < forbidden.length; i++) {
-      minLen[acm.wordPos[i]] = Math.min(minLen[acm.wordPos[i]], forbidden[i].length)
+      minBorder[acm.wordPos[i]] = Math.min(minBorder[acm.wordPos[i]], forbidden[i].length)
     }
     acm.dp((from, to) => {
-      minLen[to] = Math.min(minLen[to], minLen[from])
+      minBorder[to] = Math.min(minBorder[to], minBorder[from])
     })
 
     let res = 0
     let left = 0
     let pos = 0
     for (let right = 0; right < word.length; right++) {
-      pos = acm.move(pos, word.charCodeAt(right))
-      left = Math.max(left, right - minLen[pos] + 2)
+      pos = acm.move(pos, word[right])
+      left = Math.max(left, right - minBorder[pos] + 2)
       res = Math.max(res, right - left + 1)
     }
     return res
@@ -171,13 +171,13 @@ if (require.main === module) {
   // 1032. 字符流
   // https://leetcode.cn/problems/stream-of-characters/description/
   class StreamChecker {
-    private readonly _acm: ACAutoMatonMap
+    private readonly _acm: ACAutoMatonMap<number>
     private readonly _counter: Uint32Array
     private _pos = 0
 
     constructor(words: string[]) {
-      const acm = new ACAutoMatonMap()
-      words.forEach(w => acm.addString(w))
+      const acm = new ACAutoMatonMap<number>()
+      words.forEach(w => acm.addString(w.split('').map(c => c.charCodeAt(0))))
       acm.buildSuffixLink()
       this._acm = acm
       this._counter = acm.getCounter()

@@ -1,5 +1,9 @@
 // https://www.luogu.com.cn/blog/yszs/ac-zi-dong-ji-fou-guo-shi-jian-fail-shu-di-gong-ju-pi-liao
-
+// !fail[i]表示在trie树上的第i个点表示的前缀，它在trie树上的最长后缀是第fail[i]个点表示的前缀。
+//
+// 1.dp: 一般都是dfs(index,pos):长度为index的字符串，当前trie状态为pos.
+//
+//	枚举26种字符(字符集)转移.
 package main
 
 import (
@@ -10,7 +14,11 @@ import (
 
 func main() {
 	// SeparateString()
-	P5357()
+	// P5357()
+	// P3966()
+	// P3121()
+	// P4052()
+	P3041()
 }
 
 func demo() {
@@ -47,19 +55,19 @@ func longestValidSubstring(word string, forbidden []string) int {
 	}
 	acm.BuildSuffixLink(false)
 
-	minLen := make([]int, acm.Size()) // 每个状态匹配到的模式串的最小长度
-	for i := range minLen {
-		minLen[i] = INF
+	minBorder := make([]int, acm.Size()) // 每个状态(前缀)的最短border
+	for i := range minBorder {
+		minBorder[i] = INF
 	}
 	for i, pos := range acm.WordPos {
-		minLen[pos] = min(minLen[pos], len(forbidden[i]))
+		minBorder[pos] = min(minBorder[pos], len(forbidden[i]))
 	}
-	acm.Dp(func(from, to int) { minLen[to] = min(minLen[to], minLen[from]) })
+	acm.Dp(func(from, to int) { minBorder[to] = min(minBorder[to], minBorder[from]) })
 
 	res, left, pos := 0, 0, 0
 	for right, char := range word {
 		pos = acm.Move(pos, int(char))
-		left = max(left, right-minLen[pos]+2)
+		left = max(left, right-minBorder[pos]+2)
 		res = max(res, right-left+1)
 	}
 	return res
@@ -187,6 +195,233 @@ func P5357() {
 	}
 }
 
+// https://www.luogu.com.cn/problem/P3966
+// 一篇论文是由许多单词组成但小张发现一个单词会在论文中出现很多次。
+// 他想知道每个单词分别在论文中出现了多少次。
+func P3966() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+
+	acm := NewACAutoMatonArray(26, 97)
+	words := make([]string, n)
+	for i := 0; i < n; i++ {
+		var s string
+		fmt.Fscan(in, &s)
+		words[i] = s
+		acm.AddString(s)
+	}
+	acm.BuildSuffixLink(false)
+
+	res := make([]int, n)
+	indexes := acm.GetIndexes()
+	pos := 0
+	for _, w := range words {
+		for i := range w {
+			pos = acm.Move(pos, int(w[i]))
+			for _, v := range indexes[pos] {
+				res[v]++
+			}
+		}
+		pos = 0 // !每个单词之间是独立的，所以要重置pos
+	}
+
+	for _, v := range res {
+		fmt.Println(v)
+	}
+}
+
+// https://www.luogu.com.cn/problem/P3121
+// 在longer中不断删除toRemove中的字符(按顺序遍历toRemove查找到要删除的)，求剩下的字符串.
+// 注意删除一个单词后可能会导致 s 中出现另一个toRemove中的单词.
+// !保证toRemove中没有包含关系(子串关系)，即删除时保证只会删除一个单词.
+func P3121() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var longer string
+	fmt.Fscan(in, &longer)
+
+	acm := NewACAutoMatonArray(26, 97)
+
+	var n int
+	fmt.Fscan(in, &n)
+	toRemove := make([]string, n)
+	for i := 0; i < n; i++ {
+		var s string
+		fmt.Fscan(in, &s)
+		toRemove[i] = s
+		acm.AddString(s)
+	}
+
+	acm.BuildSuffixLink(true)
+
+	posLen := make([]int, acm.Size()) // 每个状态对应的字符长度
+	for i, p := range acm.WordPos {
+		posLen[p] = len(toRemove[i])
+	}
+
+	pos := 0
+	stack := make([]int, 0, len(longer))
+	posRecord := make([]int, len(longer))
+	for i := range longer {
+		v := int(longer[i])
+		pos = acm.Move(pos, v)
+		posRecord[i] = pos
+		stack = append(stack, i)
+		if wordLen := posLen[pos]; wordLen > 0 { // 由于模式串不存在包含关系，所以不会出现多个模式串同时匹配的情况
+			stack = stack[:len(stack)-wordLen]
+			if len(stack) > 0 {
+				pos = posRecord[stack[len(stack)-1]]
+			} else {
+				pos = 0
+			}
+		}
+	}
+
+	res := make([]byte, 0, len(stack))
+	for _, v := range stack {
+		res = append(res, longer[v])
+	}
+	fmt.Fprintln(out, string(res))
+}
+
+// P4052 [JSOI2007] 文本生成器
+// https://www.luogu.com.cn/problem/P4052
+// !给定一些模式串，求长度为m的所有文本串的个数，且该文本串至少包括一个模式串，答案对10007取模
+// n<=60,targetLen<=100,len(word[i])<=100.
+// 合法的情况总数并不好求，考虑求出不合法的情况（即不存在一个子串等于模式串），最后用总数26^m减去即可。
+func P4052() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const MOD int = 1e4 + 7
+
+	acm := NewACAutoMatonArray(26, 'A')
+
+	var n, targetLen int
+	fmt.Fscan(in, &n, &targetLen)
+	words := make([]string, n)
+	lengthSum := 0
+	for i := 0; i < n; i++ {
+		var s string
+		fmt.Fscan(in, &s)
+		words[i] = s
+		acm.AddString(s)
+		lengthSum += len(s)
+	}
+	acm.BuildSuffixLink(true)
+
+	size := acm.Size()
+	counter := acm.GetCounter()
+
+	memo := make([][]int, targetLen)
+	for i := range memo {
+		row := make([]int, size)
+		for j := range row {
+			row[j] = -1
+			memo[i] = row
+		}
+	}
+	var dfs func(index int, pos int) int
+	dfs = func(index, pos int) int {
+		if index == targetLen {
+			return 1
+		}
+		if tmp := memo[index][pos]; tmp != -1 {
+			return tmp
+		}
+		res := 0
+		for v := 65; v < 65+26; v++ {
+			nextPos := acm.Move(pos, v)
+			if counter[nextPos] > 0 {
+				continue
+			}
+			res += dfs(index+1, nextPos)
+			res %= MOD
+		}
+
+		memo[index][pos] = res
+		return res
+	}
+	bad := dfs(0, 0)
+
+	qpow := func(a, b int) int {
+		res := 1
+		for b > 0 {
+			if b&1 == 1 {
+				res = res * a % MOD
+			}
+			a = a * a % MOD
+			b >>= 1
+		}
+		return res
+	}
+
+	res := (qpow(26, targetLen) - bad) % MOD
+	if res < 0 {
+		res += MOD
+	}
+
+	fmt.Println(res)
+}
+
+// P3041 [USACO12JAN] Video Game G
+// https://www.luogu.com.cn/problem/P3041
+// 给出n个字典单词，问长度为k的字符串最多可以包含多少个字典单词。
+// n<=20,k<=1000,len(word[i])<=15
+func P3041() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, k int
+	fmt.Fscan(in, &n, &k)
+	words := make([]string, n)
+	acm := NewACAutoMatonArray(26, 'A')
+	for i := range words {
+		var s string
+		fmt.Fscan(in, &s)
+		words[i] = s
+		acm.AddString(s)
+	}
+	acm.BuildSuffixLink(true)
+	size := acm.Size()
+	counter := acm.GetCounter()
+	memo := make([][]int, k)
+	for i := range memo {
+		row := make([]int, size)
+		for j := range row {
+			row[j] = -1
+			memo[i] = row
+		}
+	}
+	var dfs func(index int, pos int) int
+	dfs = func(index, pos int) int {
+		if index == k {
+			return 0
+		}
+		if tmp := memo[index][pos]; tmp != -1 {
+			return tmp
+		}
+		res := 0
+		for v := 65; v < 65+26; v++ {
+			nextPos := acm.Move(pos, v)
+			res = max(res, dfs(index+1, nextPos)+counter[nextPos])
+		}
+		memo[index][pos] = res
+		return res
+	}
+
+	res := dfs(0, 0)
+	fmt.Println(res)
+}
+
 // 不调用 BuildSuffixLink 就是Trie，调用 BuildSuffixLink 就是AC自动机.
 // 每个状态对应Trie中的一个结点，也对应一个字符串.
 type ACAutoMatonArray struct {
@@ -195,7 +430,7 @@ type ACAutoMatonArray struct {
 	sigma              int     // 字符集大小.
 	offset             int     // 字符集的偏移量.
 	children           [][]int // children[v][c] 表示节点v通过字符c转移到的节点.
-	suffixLink         []int   // 又叫fail.指向当前节点最长真后缀对应结点，例如"bc"是"abc"的最长真后缀.
+	suffixLink         []int   // 又叫fail.指向当前trie节点(对应一个前缀)的最长真后缀对应结点，例如"bc"是"abc"的最长真后缀.
 	bfsOrder           []int   // 结点的拓扑序,0表示虚拟节点.
 	needUpdateChildren bool    // 是否需要更新children数组.
 }
@@ -206,6 +441,7 @@ func NewACAutoMatonArray(sigma, offset int) *ACAutoMatonArray {
 	return res
 }
 
+// 添加一个字符串，返回最后一个字符对应的节点编号.
 func (trie *ACAutoMatonArray) AddString(str string) int {
 	if len(str) == 0 {
 		return 0
@@ -223,6 +459,7 @@ func (trie *ACAutoMatonArray) AddString(str string) int {
 	return pos
 }
 
+// 在pos位置添加一个字符，返回新的节点编号.
 func (trie *ACAutoMatonArray) AddChar(pos int, ord int) int {
 	ord -= trie.offset
 	if trie.children[pos][ord] != -1 {
@@ -259,7 +496,7 @@ func (trie *ACAutoMatonArray) Size() int {
 // 构建后缀链接(失配指针).
 // needUpdateChildren 表示是否需要更新children数组(连接trie图).
 //
-// !设置为false更快.
+// !move调用较少时，设置为false更快.
 func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 	trie.needUpdateChildren = needUpdateChildren
 	trie.suffixLink = make([]int, len(trie.children))
@@ -308,7 +545,7 @@ func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 	}
 }
 
-// 获取每个状态匹配到的模式串的个数.
+// 获取每个状态包含的模式串的个数.
 func (trie *ACAutoMatonArray) GetCounter() []int {
 	counter := make([]int, len(trie.children))
 	for _, pos := range trie.WordPos {
@@ -322,7 +559,7 @@ func (trie *ACAutoMatonArray) GetCounter() []int {
 	return counter
 }
 
-// 获取每个状态匹配到的模式串的索引.
+// 获取每个状态包含的模式串的索引.
 func (trie *ACAutoMatonArray) GetIndexes() [][]int {
 	res := make([][]int, len(trie.children))
 	for i, pos := range trie.WordPos {
@@ -363,7 +600,7 @@ func (trie *ACAutoMatonArray) GetIndexes() [][]int {
 	return res
 }
 
-// 按照拓扑序进行转移.
+// 按照拓扑序进行转移(EnumerateFail).
 func (trie *ACAutoMatonArray) Dp(f func(from, to int)) {
 	for _, v := range trie.bfsOrder {
 		if v != 0 {

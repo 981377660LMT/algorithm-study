@@ -6,12 +6,17 @@
 # https://ikatakos.com/pot/programming_algorithm/string_search
 # AC自动机又叫AhoCorasick
 
-from typing import Generator, List, Tuple
+
+from functools import lru_cache
+from typing import Generator, Generic, Iterable, List, Tuple, TypeVar
 
 INF = int(2e18)
 
 
-class ACAutoMatonMap:
+T = TypeVar("T", str, int)
+
+
+class ACAutoMatonMap(Generic[T]):
     """
     不调用 BuildSuffixLink 就是Trie, 调用 BuildSuffixLink 就是AC自动机.
     每个状态对应Trie中的一个结点, 也对应一个字符串.
@@ -29,7 +34,7 @@ class ACAutoMatonMap:
         self._bfsOrder = []
         """结点的拓扑序,0表示虚拟节点."""
 
-    def addString(self, string: str) -> int:
+    def addString(self, string: Iterable[T]) -> int:
         if not string:
             return 0
         pos = 0
@@ -45,7 +50,7 @@ class ACAutoMatonMap:
         self.wordPos.append(pos)
         return pos
 
-    def addChar(self, pos: int, char: str) -> int:
+    def addChar(self, pos: int, char: T) -> int:
         nexts = self._children[pos]
         if char in nexts:
             return nexts[char]
@@ -54,7 +59,7 @@ class ACAutoMatonMap:
         self._children.append({})
         return nextState
 
-    def move(self, pos: int, char: str) -> int:
+    def move(self, pos: int, char: T) -> int:
         children, link = self._children, self._suffixLink
         while True:
             nexts = children[pos]
@@ -212,16 +217,60 @@ if __name__ == "__main__":
                 acm.addString(s)
             acm.buildSuffixLink()
 
-            minLen = [INF] * len(acm)
+            minBorder = [INF] * len(acm)
             for i, pos in enumerate(acm.wordPos):
-                minLen[pos] = min(minLen[pos], len(forbidden[i]))
+                minBorder[pos] = min(minBorder[pos], len(forbidden[i]))
             for pre, cur in acm.dp():
-                minLen[cur] = min(minLen[cur], minLen[pre])
+                minBorder[cur] = min(minBorder[cur], minBorder[pre])
 
             res, left, pos = 0, 0, 0
             for right, char in enumerate(word):
                 pos = acm.move(pos, char)
-                left = max(left, right - minLen[pos] + 2)
+                left = max(left, right - minBorder[pos] + 2)
                 res = max(res, right - left + 1)
 
             return res
+
+    # https://www.luogu.com.cn/problem/P3311
+    # 我们称一个正整数 x 是幸运数，当且仅当它的十进制表示中不包含数字串集合 words 中任意一个元素作为其子串。
+    # ac自动机 + 数位dp
+    def p3311() -> None:
+        import sys
+
+        sys.setrecursionlimit(int(1e6))
+        input = lambda: sys.stdin.readline().rstrip("\r\n")
+        MOD = int(1e9 + 7)
+
+        upper = input()
+        wordCount = int(input())
+        words = [input() for _ in range(wordCount)]
+        acm = ACAutoMatonMap[int]()
+        for v in words:
+            acm.addString((int(c) for c in v))
+        acm.buildSuffixLink()
+
+        nums = list(map(int, str(upper)))
+        counter = acm.getCounter()
+
+        @lru_cache(None)
+        def dfs(index: int, hasLeadingZero: int, isLimit: bool, acPos: int) -> int:
+            """当前在第index位,hasLeadingZero表示有前导0,isLimit表示是否贴合上界"""
+            if index == len(nums):
+                return int(not hasLeadingZero)
+
+            res = 0
+            up = nums[index] if isLimit else 9
+            for cur in range(up + 1):
+                if hasLeadingZero and cur == 0:
+                    res += dfs(index + 1, True, (isLimit and cur == up), acPos)
+                else:
+                    nextPos = acm.move(acPos, cur)
+                    if counter[nextPos] == 0:
+                        res += dfs(index + 1, False, (isLimit and cur == up), nextPos)
+            return res % MOD
+
+        res = dfs(0, True, True, 0)
+        dfs.cache_clear()
+        print(res)
+
+    p3311()

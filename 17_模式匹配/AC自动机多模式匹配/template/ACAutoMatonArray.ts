@@ -63,6 +63,9 @@ class ACAutoMatonArray {
     }
   }
 
+  /**
+   * @param needUpdateChildren move调用较少时，设置为false更快.
+   */
   buildSuffixLink(needUpdateChildren = false) {
     this._needUpdateChildren = needUpdateChildren
     this._suffixLink = new Int32Array(this._nodeCount).fill(-1)
@@ -197,12 +200,12 @@ if (require.main === module) {
     forbidden.forEach(w => acm.addString(w))
     acm.buildSuffixLink(false)
 
-    const minLen = new Uint32Array(acm.size).fill(-1)
+    const minBorder = new Uint32Array(acm.size).fill(-1)
     for (let i = 0; i < forbidden.length; i++) {
-      minLen[acm.wordPos[i]] = Math.min(minLen[acm.wordPos[i]], forbidden[i].length)
+      minBorder[acm.wordPos[i]] = Math.min(minBorder[acm.wordPos[i]], forbidden[i].length)
     }
     acm.dp((from, to) => {
-      minLen[to] = Math.min(minLen[to], minLen[from])
+      minBorder[to] = Math.min(minBorder[to], minBorder[from])
     })
 
     let res = 0
@@ -210,7 +213,7 @@ if (require.main === module) {
     let pos = 0
     for (let right = 0; right < word.length; right++) {
       pos = acm.move(pos, word.charCodeAt(right))
-      left = Math.max(left, right - minLen[pos] + 2)
+      left = Math.max(left, right - minBorder[pos] + 2)
       res = Math.max(res, right - left + 1)
     }
     return res
