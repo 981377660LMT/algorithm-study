@@ -16,7 +16,11 @@ func main() {
 	// P2336()
 	// CF163E()
 	// CF1437G()
-	SP9941()
+	// SP9941()
+	// P2414()
+	acm := NewACAutoMatonArray(26, 97)
+	// acm.AddString("a")
+	fmt.Println(acm.Parent)
 }
 
 // P2444 [POI2000] 病毒
@@ -531,10 +535,58 @@ func SP9941() {
 
 // P2414 [NOI2011] 阿狸的打字机
 // https://www.luogu.com.cn/problem/P2414
+// 打字机上只有 28 个按键，分别印有 26 个小写英文字母和 B、P 两个字母。
+// 经阿狸研究发现，这个打字机是这样工作的：
+// - 输入小写字母，打字机的一个凹槽中会加入这个字母(这个字母加在凹槽的最后)。
+// - 按一下印有 B 的按键，打字机凹槽中最后一个字母会消失。
+// - 按一下印有 P 的按键，打字机会在纸上打印出凹槽中现有的所有字母并换行，但凹槽中的字母不会消失。
+// 例如，阿狸输入 aPaPBbP，纸上被打印的字符如下：
+//
+// a
+// aa
+// ab
+//
+// 我们把纸上打印出来的字符串从 1 开始顺序编号，一直到 n。
+// 打字机有一个非常有趣的功能，在打字机中暗藏一个带数字的小键盘，
+// 在小键盘上输入两个数 (x,y)（其中 1≤x,y≤n），打字机会显示第 x 个打印的字符串在第 y 个打印的字符串中出现了多少次。
+// !即：给你一颗 Trie，每次询问两个节点 ,u,v，u 代表的字符串在 v 代表的字符串中出现了多少次。
 // ACAM+树状数组
-func P2414() {
+// func P2414() {
+// 	in := bufio.NewReader(os.Stdin)
+// 	out := bufio.NewWriter(os.Stdout)
+// 	defer out.Flush()
 
-}
+// 	var command string
+// 	fmt.Fscan(in, &command)
+// 	acm := NewACAutoMatonArray(26, 97)
+// 	wordToPos := []int{}
+// 	pos := 0
+// 	for _, v := range command {
+// 		if v == 'B' {
+// 			if len(posHistory) > 1 {
+// 				posHistory = posHistory[:len(posHistory)-1]
+// 				pos = posHistory[len(posHistory)-1]
+// 			} else {
+// 				pos = 0
+// 			}
+// 		} else if v == 'P' {
+// 			wordToPos = append(wordToPos, pos)
+// 		} else {
+// 			pos = acm.AddChar(pos, int(v))
+// 		}
+// 		posHistory = append(posHistory, pos)
+// 	}
+// 	acm.BuildSuffixLink(true)
+
+// 	var q int
+// 	fmt.Fscan(in, &q)
+// 	for i := 0; i < q; i++ {
+// 		var x, y int
+// 		fmt.Fscan(in, &x, &y)
+// 		x--
+// 		y--
+// 	}
+// }
 
 // Indie Album
 // https://www.luogu.com.cn/problem/CF1207G
@@ -577,7 +629,7 @@ func (trie *ACAutoMatonArray) AddString(str string) int {
 		ord := int32(s) - trie.offset
 		if trie.children[pos][ord] == -1 {
 			trie.children[pos][ord] = trie.newNode()
-			trie.Parent = append(trie.Parent, pos)
+			trie.Parent[len(trie.Parent)-1] = pos
 		}
 		pos = int(trie.children[pos][ord])
 	}
@@ -592,7 +644,7 @@ func (trie *ACAutoMatonArray) AddChar(pos int, ord int) int {
 		return int(trie.children[pos][ord])
 	}
 	trie.children[pos][ord] = trie.newNode()
-	trie.Parent = append(trie.Parent, pos)
+	trie.Parent[len(trie.Parent)-1] = pos
 	return int(trie.children[pos][ord])
 }
 

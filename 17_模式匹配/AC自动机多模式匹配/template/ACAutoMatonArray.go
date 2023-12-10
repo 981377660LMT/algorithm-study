@@ -427,7 +427,7 @@ func P3041() {
 }
 
 // 不调用 BuildSuffixLink 就是Trie，调用 BuildSuffixLink 就是AC自动机.
-// 每个状态对应Trie中的一个结点，也对应一个字符串.
+// 每个状态对应Trie中的一个结点，也对应一个前缀.
 type ACAutoMatonArray struct {
 	WordPos            []int     // WordPos[i] 表示加入的第i个模式串对应的节点编号.
 	Parent             []int     // parent[v] 表示节点v的父节点.
@@ -455,7 +455,7 @@ func (trie *ACAutoMatonArray) AddString(str string) int {
 		ord := int32(s) - trie.offset
 		if trie.children[pos][ord] == -1 {
 			trie.children[pos][ord] = trie.newNode()
-			trie.Parent = append(trie.Parent, pos)
+			trie.Parent[len(trie.Parent)-1] = pos
 		}
 		pos = int(trie.children[pos][ord])
 	}
@@ -470,7 +470,7 @@ func (trie *ACAutoMatonArray) AddChar(pos int, ord int) int {
 		return int(trie.children[pos][ord])
 	}
 	trie.children[pos][ord] = trie.newNode()
-	trie.Parent = append(trie.Parent, pos)
+	trie.Parent[len(trie.Parent)-1] = pos
 	return int(trie.children[pos][ord])
 }
 
