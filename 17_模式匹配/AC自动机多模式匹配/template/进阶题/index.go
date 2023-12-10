@@ -14,7 +14,9 @@ func main() {
 	// CF1202E()
 	// P2292()
 	// P2336()
-	CF163E()
+	// CF163E()
+	// CF1437G()
+	SP9941()
 }
 
 // P2444 [POI2000] 病毒
@@ -325,10 +327,8 @@ func CF163E() {
 	dfs(0, -1)
 
 	ok := make([]bool, n)
-	bit := NewBITRangeAddRangeSumArray(n)
-	// bit := NewBitArray(n)
+	bit := NewBITRangeAddPointGet(n)
 
-	// TODO: bit问题
 	add := func(index int) {
 		if ok[index] {
 			return
@@ -336,8 +336,6 @@ func CF163E() {
 		ok[index] = true
 		pos := acm.WordPos[index]
 		bit.AddRange(lid[pos], rid[pos], 1)
-		// bit.Add(lid[pos], 1)
-		// bit.Add(rid[pos], -1)
 	}
 	remove := func(index int) {
 		if !ok[index] {
@@ -346,14 +344,9 @@ func CF163E() {
 		ok[index] = false
 		pos := acm.WordPos[index]
 		bit.AddRange(lid[pos], rid[pos], -1)
-		// bit.Add(lid[pos], -1)
-		// bit.Add(rid[pos], 1)
-
 	}
-	// 到根节点的路径上的点权和.
 	getCount := func(pos int) int {
-		return bit.QueryRange(0, lid[pos]+1)
-		// return bit.QueryPrefix(lid[pos] + 1)
+		return bit.Get(lid[pos])
 	}
 	for i := 0; i < k; i++ {
 		add(i)
@@ -380,6 +373,179 @@ func CF163E() {
 			fmt.Println(res)
 		}
 	}
+}
+
+// Death DBMS - 死亡笔记数据库管理系统
+// https://www.luogu.com.cn/problem/CF1437G
+// 给定m个字符串，每个字符串有一个权值.初始时，所有字符串的权值都为0.
+// 给定q个操作，操作有两种类型：
+// 1 i v 表示将第i个字符串的权值修改为v.
+// 2 s 求所有是s的子串的字符串的权值最大值.
+//
+// 对所有 s 建出 AC 自动机。每次询问把 t 扔进去匹配，
+// 每个节点在 fail 树上的祖先都是这个节点所代表字符串的子串，树剖取最大值即可。
+// 注意重复的字符串,用一个可删除堆维护每个node处的最大值.
+func CF1437G() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var m, q int
+	fmt.Fscan(in, &m, &q)
+
+	words := make([]string, m)
+	acm := NewACAutoMatonArray(26, 97)
+	for i := 0; i < m; i++ {
+		fmt.Fscan(in, &words[i])
+		acm.AddString(words[i])
+	}
+	acm.BuildSuffixLink(true)
+
+	tree := NewTree(acm.Size())
+	acm.Dp(func(from, to int) {
+		tree.AddDirectedEdge(from, to, 1)
+	})
+	tree.Build(0)
+
+	values := make([]int, m)
+	heaps := make([]*ErasableHeap, acm.Size()) // 维护每个结点的最大值.
+	for i := range heaps {
+		heaps[i] = NewErasableHeap(func(a, b H) bool { return a > b }, []int{-INF})
+	}
+	for _, p := range acm.WordPos {
+		heaps[p].Push(0)
+	}
+
+	seg := NewSegmentTree(acm.Size(), func(i int) E { return -INF })
+	for i := 0; i < acm.Size(); i++ {
+		seg.Set(tree.LID[i], heaps[i].Peek())
+	}
+
+	update := func(index, value int) {
+		if values[index] == value {
+			return
+		}
+		node := acm.WordPos[index]
+		preValue := values[index]
+		values[index] = value
+		heaps[node].Erase(preValue)
+		heaps[node].Push(value)
+		lid := tree.LID[node]
+		seg.Set(lid, heaps[node].Peek())
+	}
+
+	query := func(s string) int {
+		res := -1
+		pos := 0
+		for _, v := range s {
+			pos = acm.Move(pos, int(v))
+			tree.EnumeratePathDecomposition(0, pos, true, func(start, end int) {
+				cur := seg.Query(start, end)
+				res = max(res, cur)
+			})
+		}
+		return res
+	}
+
+	for i := 0; i < q; i++ {
+		var kind int
+		fmt.Fscan(in, &kind)
+		if kind == 1 {
+			var index, value int
+			fmt.Fscan(in, &index, &value)
+			index--
+			update(index, value)
+		} else {
+			var s string
+			fmt.Fscan(in, &s)
+			fmt.Fprintln(out, query(s))
+		}
+	}
+}
+
+// GRE - GRE Words
+// https://www.luogu.com.cn/problem/SP9941
+// 给定一个由字符串构成的序列，不同位置的字符串有自己权值。
+// 现在让你选出一个子序列，使得在这个子序列中，
+// !前面的串是后面的串的子串。
+// 请你求满足条件的子序列的权值的最大值。
+// 一个子序列权值是所有元素权值的和。
+// 线段树优化dp
+// dp[i] = max(dp[j]) + values[i], j 是 fail 树上 i 到根的路径上的点.
+func SP9941() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var T int
+	fmt.Fscan(in, &T)
+
+	solve := func() int {
+		var n int
+		fmt.Fscan(in, &n)
+		words := make([]string, n)
+		values := make([]int, n)
+		acm := NewACAutoMatonArray(26, 97)
+		for i := 0; i < n; i++ {
+			fmt.Fscan(in, &words[i])
+			fmt.Fscan(in, &values[i])
+			acm.AddString(words[i])
+		}
+		acm.BuildSuffixLink(true)
+
+		tree := NewTree(acm.Size())
+		acm.Dp(func(from, to int) {
+			tree.AddDirectedEdge(from, to, 1)
+		})
+		tree.Build(0)
+
+		dp := NewSegmentTree(acm.Size(), func(i int) E { return 0 })
+
+		res := 0
+		for i := 0; i < n; i++ {
+			preMax := 0
+
+			// query
+			pos := 0
+			for _, v := range words[i] {
+				pos = acm.Move(pos, int(v))
+				tree.EnumeratePathDecomposition(0, pos, true, func(start, end int) {
+					cur := dp.Query(start, end)
+					preMax = max(preMax, cur)
+				})
+			}
+
+			// update
+			res = max(res, preMax+values[i])
+			dp.Update(tree.LID[pos], preMax+values[i])
+		}
+
+		return res
+	}
+
+	for i := 0; i < T; i++ {
+		res := solve()
+		fmt.Fprintf(out, "Case #%d: %d\n", i+1, res)
+	}
+}
+
+// P2414 [NOI2011] 阿狸的打字机
+// https://www.luogu.com.cn/problem/P2414
+// ACAM+树状数组
+func P2414() {
+
+}
+
+// Indie Album
+// https://www.luogu.com.cn/problem/CF1207G
+func CF1207G() {
+
+}
+
+// Genetic engineering
+// https://www.luogu.com.cn/problem/CF86C
+func CF86C() {
+
 }
 
 // 不调用 BuildSuffixLink 就是Trie，调用 BuildSuffixLink 就是AC自动机.
@@ -904,6 +1070,44 @@ func (b *BITArray) String() string {
 	return fmt.Sprintf("BitArray: [%v]", strings.Join(sb, ", "))
 }
 
+type BITRangeAddPointGetArray struct {
+	bit *BITArray
+}
+
+func NewBITRangeAddPointGet(n int) *BITRangeAddPointGetArray {
+	return &BITRangeAddPointGetArray{bit: NewBitArray(n)}
+}
+
+func NewBITRangeAddPointGetFrom(n int, f func(i int) int) *BITRangeAddPointGetArray {
+	return &BITRangeAddPointGetArray{bit: NewBitArrayFrom(n, f)}
+}
+
+func (b *BITRangeAddPointGetArray) AddRange(start, end int, delta int) {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.bit.n {
+		end = b.bit.n
+	}
+	if start >= end {
+		return
+	}
+	b.bit.Add(start, delta)
+	b.bit.Add(end, -delta)
+}
+
+func (b *BITRangeAddPointGetArray) Get(index int) int {
+	return b.bit.QueryPrefix(index + 1)
+}
+
+func (b *BITRangeAddPointGetArray) String() string {
+	res := []string{}
+	for i := 0; i < b.bit.n; i++ {
+		res = append(res, fmt.Sprintf("%d", b.Get(i)))
+	}
+	return fmt.Sprintf("BITRangeAddPointGetArray: [%v]", strings.Join(res, ", "))
+}
+
 // !Range Add Range Sum, 0-based.
 type BITRangeAddRangeSumArray struct {
 	n    int
@@ -968,6 +1172,67 @@ func (b *BITRangeAddRangeSumArray) String() string {
 		res = append(res, fmt.Sprintf("%d", b.QueryRange(i, i+1)))
 	}
 	return fmt.Sprintf("BITRangeAddRangeSumArray: [%v]", strings.Join(res, ", "))
+}
+
+type S = int
+
+func (*BITPrefixArray) e() S        { return 0 }
+func (*BITPrefixArray) op(a, b S) S { return max(a, b) }
+
+type BITPrefixArray struct {
+	n    int
+	data []S
+}
+
+func NewBITPrefixArray(n int) *BITPrefixArray {
+	res := &BITPrefixArray{}
+	data := make([]S, n)
+	for i := range data {
+		data[i] = res.e()
+	}
+	res.n = n
+	res.data = data
+	return res
+}
+
+func NewBITPrefixFrom(n int, f func(index int) S) *BITPrefixArray {
+	res := &BITPrefixArray{}
+	total := res.e()
+	data := make([]S, n)
+	for i := range data {
+		data[i] = f(i)
+		total = res.op(total, data[i])
+	}
+	for i := 1; i <= n; i++ {
+		j := i + (i & -i)
+		if j <= n {
+			data[j-1] = res.op(data[j-1], data[i-1])
+		}
+	}
+	res.n = n
+	res.data = data
+	return res
+}
+
+// 单点更新index处的元素.
+// 0 <= index < n
+func (f *BITPrefixArray) Update(index int, value S) {
+	for index++; index <= f.n; index += index & -index {
+		f.data[index-1] = f.op(f.data[index-1], value)
+	}
+}
+
+// 查询前缀区间 [0,right) 的值.
+// 0 <= end <= n
+func (f *BITPrefixArray) QueryPrefix(end int) S {
+	if end > f.n {
+		end = f.n
+	}
+	res := f.e()
+	for ; end > 0; end &= end - 1 {
+		res = f.op(res, f.data[end-1])
+	}
+	return res
 }
 
 type Tree struct {
@@ -1309,4 +1574,279 @@ func (tree *Tree) markTop(cur, top int) {
 		}
 	}
 	tree.RID[cur] = tree.timer
+}
+
+const INF int = 1e18
+
+// PointSetRangeMax
+
+type E = int
+
+func (*SegmentTree) e() E        { return -INF }
+func (*SegmentTree) op(a, b E) E { return max(a, b) }
+
+type SegmentTree struct {
+	n, size int
+	seg     []E
+}
+
+func NewSegmentTree(n int, f func(i int) E) *SegmentTree {
+	res := &SegmentTree{}
+	size := 1
+	for size < n {
+		size <<= 1
+	}
+	seg := make([]E, size<<1)
+	for i := range seg {
+		seg[i] = res.e()
+	}
+	for i := 0; i < n; i++ {
+		seg[i+size] = f(i)
+	}
+	for i := size - 1; i > 0; i-- {
+		seg[i] = res.op(seg[i<<1], seg[i<<1|1])
+	}
+	res.n = n
+	res.size = size
+	res.seg = seg
+	return res
+}
+
+func (st *SegmentTree) Get(index int) E {
+	if index < 0 || index >= st.n {
+		return st.e()
+	}
+	return st.seg[index+st.size]
+}
+func (st *SegmentTree) Set(index int, value E) {
+	if index < 0 || index >= st.n {
+		return
+	}
+	index += st.size
+	st.seg[index] = value
+	for index >>= 1; index > 0; index >>= 1 {
+		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+	}
+}
+func (st *SegmentTree) Update(index int, value E) {
+	if index < 0 || index >= st.n {
+		return
+	}
+	index += st.size
+	st.seg[index] = st.op(st.seg[index], value)
+	for index >>= 1; index > 0; index >>= 1 {
+		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+	}
+}
+
+// [start, end)
+func (st *SegmentTree) Query(start, end int) E {
+	if start < 0 {
+		start = 0
+	}
+	if end > st.n {
+		end = st.n
+	}
+	if start >= end {
+		return st.e()
+	}
+	leftRes, rightRes := st.e(), st.e()
+	start += st.size
+	end += st.size
+	for start < end {
+		if start&1 == 1 {
+			leftRes = st.op(leftRes, st.seg[start])
+			start++
+		}
+		if end&1 == 1 {
+			end--
+			rightRes = st.op(st.seg[end], rightRes)
+		}
+		start >>= 1
+		end >>= 1
+	}
+	return st.op(leftRes, rightRes)
+}
+func (st *SegmentTree) QueryAll() E { return st.seg[1] }
+
+// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
+func (st *SegmentTree) MaxRight(left int, predicate func(E) bool) int {
+	if left == st.n {
+		return st.n
+	}
+	left += st.size
+	res := st.e()
+	for {
+		for left&1 == 0 {
+			left >>= 1
+		}
+		if !predicate(st.op(res, st.seg[left])) {
+			for left < st.size {
+				left <<= 1
+				if tmp := st.op(res, st.seg[left]); predicate(tmp) {
+					res = tmp
+					left++
+				}
+			}
+			return left - st.size
+		}
+		res = st.op(res, st.seg[left])
+		left++
+		if (left & -left) == left {
+			break
+		}
+	}
+	return st.n
+}
+
+// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
+func (st *SegmentTree) MinLeft(right int, predicate func(E) bool) int {
+	if right == 0 {
+		return 0
+	}
+	right += st.size
+	res := st.e()
+	for {
+		right--
+		for right > 1 && right&1 == 1 {
+			right >>= 1
+		}
+		if !predicate(st.op(st.seg[right], res)) {
+			for right < st.size {
+				right = right<<1 | 1
+				if tmp := st.op(st.seg[right], res); predicate(tmp) {
+					res = tmp
+					right--
+				}
+			}
+			return right + 1 - st.size
+		}
+		res = st.op(st.seg[right], res)
+		if right&-right == right {
+			break
+		}
+	}
+	return 0
+}
+
+type H = int
+
+type ErasableHeap struct {
+	base   *Heap
+	erased *Heap
+}
+
+func NewErasableHeap(less func(a, b H) bool, nums []H) *ErasableHeap {
+	return &ErasableHeap{NewHeap(less, nums), NewHeap(less, nil)}
+}
+
+// 从堆中删除一个元素,要保证堆中存在该元素.
+func (h *ErasableHeap) Erase(value H) {
+	h.erased.Push(value)
+	h.normalize()
+}
+
+func (h *ErasableHeap) Push(value H) {
+	h.base.Push(value)
+	h.normalize()
+}
+
+func (h *ErasableHeap) Pop() (value H) {
+	value = h.base.Pop()
+	h.normalize()
+	return
+}
+
+func (h *ErasableHeap) Peek() (value H) {
+	value = h.base.Top()
+	return
+}
+
+func (h *ErasableHeap) Len() int {
+	return h.base.Len()
+}
+
+func (h *ErasableHeap) normalize() {
+	for h.base.Len() > 0 && h.erased.Len() > 0 && h.base.Top() == h.erased.Top() {
+		h.base.Pop()
+		h.erased.Pop()
+	}
+}
+
+func NewHeap(less func(a, b H) bool, nums []H) *Heap {
+	nums = append(nums[:0:0], nums...)
+	heap := &Heap{less: less, data: nums}
+	if len(nums) > 1 {
+		heap.heapify()
+	}
+	return heap
+}
+
+type Heap struct {
+	data []H
+	less func(a, b H) bool
+}
+
+func (h *Heap) Push(value H) {
+	h.data = append(h.data, value)
+	h.pushUp(h.Len() - 1)
+}
+
+func (h *Heap) Pop() (value H) {
+	if h.Len() == 0 {
+		panic("heap is empty")
+	}
+
+	value = h.data[0]
+	h.data[0] = h.data[h.Len()-1]
+	h.data = h.data[:h.Len()-1]
+	h.pushDown(0)
+	return
+}
+
+func (h *Heap) Top() (value H) {
+	if h.Len() == 0 {
+		panic("heap is empty")
+	}
+	value = h.data[0]
+	return
+}
+
+func (h *Heap) Len() int { return len(h.data) }
+
+func (h *Heap) heapify() {
+	n := h.Len()
+	for i := (n >> 1) - 1; i > -1; i-- {
+		h.pushDown(i)
+	}
+}
+
+func (h *Heap) pushUp(root int) {
+	for parent := (root - 1) >> 1; parent >= 0 && h.less(h.data[root], h.data[parent]); parent = (root - 1) >> 1 {
+		h.data[root], h.data[parent] = h.data[parent], h.data[root]
+		root = parent
+	}
+}
+
+func (h *Heap) pushDown(root int) {
+	n := h.Len()
+	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
+		right := left + 1
+		minIndex := root
+
+		if h.less(h.data[left], h.data[minIndex]) {
+			minIndex = left
+		}
+
+		if right < n && h.less(h.data[right], h.data[minIndex]) {
+			minIndex = right
+		}
+
+		if minIndex == root {
+			return
+		}
+
+		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
+		root = minIndex
+	}
 }
