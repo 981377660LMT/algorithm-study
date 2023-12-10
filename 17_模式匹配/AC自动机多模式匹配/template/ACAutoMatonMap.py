@@ -147,6 +147,17 @@ class ACAutoMatonMap(Generic[T]):
                 adjList[self._suffixLink[v]].append(v)
         return adjList
 
+    def buildTrieTree(self) -> List[List[int]]:
+        adjList = [[] for _ in range(len(self._children))]
+
+        def dfs(pos: int) -> None:
+            for next_ in self._children[pos].values():
+                adjList[pos].append(next_)
+                dfs(next_)
+
+        dfs(0)
+        return adjList
+
     @property
     def size(self) -> int:
         return len(self._children)

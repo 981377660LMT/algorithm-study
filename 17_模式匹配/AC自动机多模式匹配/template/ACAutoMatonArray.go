@@ -1,5 +1,8 @@
 // https://www.luogu.com.cn/blog/yszs/ac-zi-dong-ji-fou-guo-shi-jian-fail-shu-di-gong-ju-pi-liao
-// !fail[i]表示在trie树上的第i个点表示的前缀，它在trie树上的最长后缀是第fail[i]个点表示的前缀。
+// - !fail[i]表示在trie树上的第i个点表示的前缀，它在trie树上的最长后缀是第fail[i]个点表示的前缀。
+// - 子串 = 前缀的后缀
+//   Trie树（AC自动机）的祖先节点 = 前缀
+//   Fail树的祖先节点 = 后缀
 //
 // 1.dp类型题: 一般都是dfs(index,pos):长度为index的字符串，当前trie状态为pos.
 //	枚举26种字符(字符集)转移.
@@ -618,6 +621,14 @@ func (trie *ACAutoMatonArray) BuildFailTree() [][]int {
 	trie.Dp(func(pre, cur int) {
 		res[pre] = append(res[pre], cur)
 	})
+	return res
+}
+
+func (trie *ACAutoMatonArray) BuildTrieTree() [][]int {
+	res := make([][]int, trie.Size())
+	for i := 1; i < trie.Size(); i++ {
+		res[trie.Parent[i]] = append(res[trie.Parent[i]], i)
+	}
 	return res
 }
 

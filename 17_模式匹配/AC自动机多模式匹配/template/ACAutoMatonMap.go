@@ -185,6 +185,19 @@ func (trie *ACAutoMatonMap) BuildFailTree() [][]int {
 	return res
 }
 
+func (ac *ACAutoMatonMap) BuildTrieTree() [][]int {
+	res := make([][]int, ac.Size())
+	var dfs func(int)
+	dfs = func(cur int) {
+		for _, next := range ac.children[cur] {
+			res[cur] = append(res[cur], int(next))
+			dfs(int(next))
+		}
+	}
+	dfs(0)
+	return res
+}
+
 func (ac *ACAutoMatonMap) Size() int {
 	return len(ac.children)
 }

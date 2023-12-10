@@ -144,6 +144,19 @@ class ACAutoMatonMap<T = string> {
     return res
   }
 
+  buildTrieTree(): number[][] {
+    const res: number[][] = Array(this.size)
+    for (let i = 0; i < res.length; i++) res[i] = []
+    const dfs = (cur: number): void => {
+      this._children[cur].forEach((next, _) => {
+        res[cur].push(next)
+        dfs(next)
+      })
+    }
+    dfs(0)
+    return res
+  }
+
   get size(): number {
     return this._children.length
   }

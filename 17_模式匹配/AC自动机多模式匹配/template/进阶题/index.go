@@ -17,10 +17,8 @@ func main() {
 	// CF163E()
 	// CF1437G()
 	// SP9941()
-	// P2414()
-	acm := NewACAutoMatonArray(26, 97)
-	// acm.AddString("a")
-	fmt.Println(acm.Parent)
+	P2414()
+
 }
 
 // P2444 [POI2000] 病毒
@@ -549,44 +547,89 @@ func SP9941() {
 // 我们把纸上打印出来的字符串从 1 开始顺序编号，一直到 n。
 // 打字机有一个非常有趣的功能，在打字机中暗藏一个带数字的小键盘，
 // 在小键盘上输入两个数 (x,y)（其中 1≤x,y≤n），打字机会显示第 x 个打印的字符串在第 y 个打印的字符串中出现了多少次。
-// !即：给你一颗 Trie，每次询问两个节点 ,u,v，u 代表的字符串在 v 代表的字符串中出现了多少次。
+// !即：给你一颗 Trie，每次询问两个节点 x和y，求 x 代表的字符串在 y 代表的字符串中出现了多少次。
+// !也即：给出若干个字符串，每次询问一个串在另一个串的出现次数。
+// !等价于:fail树中x的子树(对应一些更长的后缀)与trie树中y到根节点的路径(对应一些更短的前缀)的公共结点数.
+// 离线查询，将所有询问保存到y上，在 Trie树 上 dfs+回溯 即可.
 // ACAM+树状数组
-// func P2414() {
-// 	in := bufio.NewReader(os.Stdin)
-// 	out := bufio.NewWriter(os.Stdout)
-// 	defer out.Flush()
+func P2414() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-// 	var command string
-// 	fmt.Fscan(in, &command)
-// 	acm := NewACAutoMatonArray(26, 97)
-// 	wordToPos := []int{}
-// 	pos := 0
-// 	for _, v := range command {
-// 		if v == 'B' {
-// 			if len(posHistory) > 1 {
-// 				posHistory = posHistory[:len(posHistory)-1]
-// 				pos = posHistory[len(posHistory)-1]
-// 			} else {
-// 				pos = 0
-// 			}
-// 		} else if v == 'P' {
-// 			wordToPos = append(wordToPos, pos)
-// 		} else {
-// 			pos = acm.AddChar(pos, int(v))
-// 		}
-// 		posHistory = append(posHistory, pos)
-// 	}
-// 	acm.BuildSuffixLink(true)
+	var command string
+	fmt.Fscan(in, &command)
+	acm := NewACAutoMatonArray(26, 97)
+	wordToPos := []int{}
+	pos := 0
+	for _, v := range command {
+		if v == 'B' {
+			if p := acm.Parent[pos]; p != -1 {
+				pos = p
+			} else {
+				pos = 0
+			}
+		} else if v == 'P' {
+			wordToPos = append(wordToPos, pos)
+		} else {
+			pos = acm.AddChar(pos, int(v))
+		}
+	}
+	acm.BuildSuffixLink(true)
 
-// 	var q int
-// 	fmt.Fscan(in, &q)
-// 	for i := 0; i < q; i++ {
-// 		var x, y int
-// 		fmt.Fscan(in, &x, &y)
-// 		x--
-// 		y--
-// 	}
-// }
+	failTree := acm.BuildFailTree()
+	trieTree := acm.BuildTrieTree()
+	type query struct{ id, value int }
+	queryGroup := make([][]query, len(trieTree))
+
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var x, y int
+		fmt.Fscan(in, &x, &y)
+		x--
+		y--
+		node1, node2 := wordToPos[x], wordToPos[y]
+		queryGroup[node2] = append(queryGroup[node2], query{id: i, value: node1})
+	}
+
+	lid, rid := make([]int, acm.Size()), make([]int, acm.Size())
+	dfn := 0
+	var dfsOrder func(cur, pre int)
+	dfsOrder = func(cur, pre int) {
+		lid[cur] = dfn
+		dfn++
+		for _, next := range failTree[cur] {
+			if next != pre {
+				dfsOrder(next, cur)
+			}
+		}
+		rid[cur] = dfn
+	}
+	dfsOrder(0, -1)
+
+	bit := NewBitArray(acm.Size())
+	res := make([]int, q)
+	var dfs func(cur int, pre int)
+	dfs = func(cur int, pre int) {
+		bit.Add(lid[cur], 1) // dfs序为fail树的dfs序
+		for _, q := range queryGroup[cur] {
+			qi, node := q.id, q.value
+			res[qi] = bit.QueryRange(lid[node], rid[node])
+		}
+		for _, next := range trieTree[cur] {
+			if next != pre {
+				dfs(next, cur)
+			}
+		}
+		bit.Add(lid[cur], -1)
+	}
+	dfs(0, -1)
+
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
+}
 
 // Indie Album
 // https://www.luogu.com.cn/problem/CF1207G
@@ -795,6 +838,14 @@ func (trie *ACAutoMatonArray) BuildFailTree() [][]int {
 	return res
 }
 
+func (trie *ACAutoMatonArray) BuildTrieTree() [][]int {
+	res := make([][]int, trie.Size())
+	for i := 1; i < trie.Size(); i++ {
+		res[trie.Parent[i]] = append(res[trie.Parent[i]], i)
+	}
+	return res
+}
+
 func (trie *ACAutoMatonArray) newNode() int32 {
 	trie.Parent = append(trie.Parent, -1)
 	nexts := make([]int32, trie.sigma)
@@ -960,6 +1011,19 @@ func (ac *ACAutoMatonMap) BuildFailTree() [][]int {
 	ac.Dp(func(pre, cur int) {
 		res[pre] = append(res[pre], cur)
 	})
+	return res
+}
+
+func (ac *ACAutoMatonMap) BuildTrieTree() [][]int {
+	res := make([][]int, ac.Size())
+	var dfs func(int)
+	dfs = func(cur int) {
+		for _, next := range ac.children[cur] {
+			res[cur] = append(res[cur], int(next))
+			dfs(int(next))
+		}
+	}
+	dfs(0)
 	return res
 }
 
