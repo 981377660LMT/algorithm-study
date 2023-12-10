@@ -135,6 +135,15 @@ class ACAutoMatonMap<T = string> {
     })
   }
 
+  buildFailTree(): number[][] {
+    const res: number[][] = Array(this.size)
+    for (let i = 0; i < res.length; i++) res[i] = []
+    this.dp((pre, cur) => {
+      res[pre].push(cur)
+    })
+    return res
+  }
+
   get size(): number {
     return this._children.length
   }

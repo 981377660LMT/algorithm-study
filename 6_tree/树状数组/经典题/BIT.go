@@ -1,10 +1,12 @@
 // 下标从0开始
-// 1.BITArray: 区间修改, 单点查询
-// 2.BITMap: 区间修改, 单点查询
-// 3.BITRangeAddRangeSumArray: 区间修改, 区间查询
-// 4.BITRangeAddRangeSumMap: 区间修改, 区间查询
-// 5.BITPrefixArray: 单点修改, 区间查询
-// 6.BITPrefixMap: 单点修改, 区间查询
+// 1.BITArray: 单点修改, 区间查询
+// 2.BITMap: 单点修改, 区间查询
+// 3.BITRangeAddPointGetArray: 区间修改, 单点查询(差分)
+// 4.BITRangeAddPointGetMap: 区间修改, 单点查询(差分)
+// 5.BITRangeAddRangeSumArray: 区间修改, 区间查询
+// 6.BITRangeAddRangeSumMap: 区间修改, 区间查询
+// 7.BITPrefixArray: 单点修改, 前缀查询
+// 8.BITPrefixMap: 单点修改, 前缀查询
 
 package main
 
@@ -209,6 +211,71 @@ func (b *BITMap) Kth(k int) int {
 	return b.MaxRight(func(index, preSum int) bool { return preSum <= k })
 }
 
+// 基于差分实现，区间修改，单点查询.
+type BITRangeAddPointGetArray struct {
+	bit *BITArray
+}
+
+func NewBITRangeAddPointGet(n int) *BITRangeAddPointGetArray {
+	return &BITRangeAddPointGetArray{bit: NewBitArray(n)}
+}
+
+func NewBITRangeAddPointGetFrom(n int, f func(i int) int) *BITRangeAddPointGetArray {
+	return &BITRangeAddPointGetArray{bit: NewBitArrayFrom(n, f)}
+}
+
+func (b *BITRangeAddPointGetArray) AddRange(start, end int, delta int) {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.bit.n {
+		end = b.bit.n
+	}
+	if start >= end {
+		return
+	}
+	b.bit.Add(start, delta)
+	b.bit.Add(end, -delta)
+}
+
+func (b *BITRangeAddPointGetArray) Get(index int) int {
+	return b.bit.QueryPrefix(index + 1)
+}
+
+func (b *BITRangeAddPointGetArray) String() string {
+	res := []string{}
+	for i := 0; i < b.bit.n; i++ {
+		res = append(res, fmt.Sprintf("%d", b.Get(i)))
+	}
+	return fmt.Sprintf("BITRangeAddPointGetArray: [%v]", strings.Join(res, ", "))
+}
+
+type BITRangeAddPointGetMap struct {
+	bit *BITMap
+}
+
+func NewBITRangeAddPointGetMap(n int) *BITRangeAddPointGetMap {
+	return &BITRangeAddPointGetMap{bit: NewBITMap(n)}
+}
+
+func (b *BITRangeAddPointGetMap) AddRange(start, end int, delta int) {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.bit.n {
+		end = b.bit.n
+	}
+	if start >= end {
+		return
+	}
+	b.bit.Add(start, delta)
+	b.bit.Add(end, -delta)
+}
+
+func (b *BITRangeAddPointGetMap) Get(end int) int {
+	return b.bit.QueryPrefix(end)
+}
+
 // !Range Add Range Sum, 0-based.
 type BITRangeAddRangeSumArray struct {
 	n    int
@@ -384,7 +451,7 @@ func (f *BITPrefixArray) Update(index int, value S) {
 
 // 查询前缀区间 [0,right) 的值.
 // 0 <= end <= n
-func (f *BITPrefixArray) Query(end int) S {
+func (f *BITPrefixArray) QueryPrefix(end int) S {
 	if end > f.n {
 		end = f.n
 	}
@@ -415,7 +482,7 @@ func (f *BITPrefixMap) Update(index int, value V) {
 	}
 }
 
-func (f *BITPrefixMap) Query(end int) V {
+func (f *BITPrefixMap) QueryPrefix(end int) V {
 	if end > f.n {
 		end = f.n
 	}
@@ -462,18 +529,24 @@ func main() {
 	fmt.Println(bitArray)
 	fmt.Println(bitArray.Kth(0))
 
+	bp := NewBITRangeAddPointGetFrom(10, func(index int) int { return index + 1 })
+	fmt.Println(bp)
+	bp.AddRange(2, 2, 2)
+	fmt.Println(bp)
+	fmt.Println(bp.Get(3))
+
 	bitArray2 := NewBITRangeAddRangeSumFrom(10, func(index int) int { return index + 1 })
 	fmt.Println(bitArray2)
-	bitArray2.AddRange(1, 3, 1)
+	bitArray2.AddRange(1, 3, 2)
 	fmt.Println(bitArray2)
-	fmt.Println(bitArray2.QueryRange(1, 3))
-	fmt.Println(bitArray2.QueryRange(1, 4))
-	bitArray2.Add(1, 1)
+	bitArray2.AddRange(1, 3, -2)
+	fmt.Println(bitArray2)
+	bitArray2.AddRange(1, 1, -2)
 	fmt.Println(bitArray2)
 
 	bitPrefixMap := NewBITPrefixMap(int(1e9))
 	bitPrefixMap.Update(1, 1)
 	bitPrefixMap.Update(2e9, 2)
-	fmt.Println(bitPrefixMap.Query(int(1e8)))
+	fmt.Println(bitPrefixMap.QueryPrefix(int(1e8)))
 
 }

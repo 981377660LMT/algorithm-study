@@ -1,11 +1,13 @@
 """
 下标从0开始
-1.BITArray: 区间修改, 单点查询
-2.BITMap: 区间修改, 单点查询
-3.BITRangeAddRangeSumArray: 区间修改, 区间查询
-4.BITRangeAddRangeSumMap: 区间修改, 区间查询
-5.BITPrefixArray: 单点修改, 区间查询
-6.BITPrefixMap: 单点修改, 区间查询
+1.BITArray: 单点修改, 区间查询
+2.BITMap: 单点修改, 区间查询
+3.BITRangeAddPointGetArray: 区间修改, 单点查询(差分)
+4.BITRangeAddPointGetMap: 区间修改, 单点查询(差分)
+5.BITRangeAddRangeSumArray: 区间修改, 区间查询
+6.BITRangeAddRangeSumMap: 区间修改, 区间查询
+7.BITPrefixArray: 单点修改, 前缀查询
+8.BITPrefixMap: 单点修改, 前缀查询
 """
 
 
@@ -158,6 +160,58 @@ class BITMap:
         return self.maxRight(lambda _, preSum: preSum <= k)
 
 
+class BITRangeAddPointGetArray:
+    __slots__ = "_bit"
+
+    def __init__(self, n: int, f: Optional[Callable[[int], int]] = None):
+        if f is None:
+            self._bit = BITArray(n)
+        else:
+            self._bit = BITArray(n, f)
+
+    def addRange(self, start: int, end: int, delta: int) -> None:
+        n = self._bit.n
+        if start < 0:
+            start = 0
+        if end > n:
+            end = n
+        if start >= end:
+            return
+        self._bit.add(start, delta)
+        self._bit.add(end, -delta)
+
+    def get(self, index: int) -> int:
+        return self._bit.queryPrefix(index + 1)
+
+    def __repr__(self):
+        return (
+            "BITRangeAddPointGetArray: ["
+            + ", ".join(str(self.get(i)) for i in range(self._bit.n))
+            + "]"
+        )
+
+
+class BITRangeAddPointGetMap:
+    __slots__ = "_bit"
+
+    def __init__(self, n: int):
+        self._bit = BITMap(n)
+
+    def addRange(self, start: int, end: int, delta: int) -> None:
+        n = self._bit.n
+        if start < 0:
+            start = 0
+        if end > n:
+            end = n
+        if start >= end:
+            return
+        self._bit.add(start, delta)
+        self._bit.add(end, -delta)
+
+    def get(self, end: int) -> int:
+        return self._bit.queryPrefix(end + 1)
+
+
 class BITRangeAddRangeSumArray:
     __slots__ = ("n", "_bit0", "_bit1")
 
@@ -281,7 +335,7 @@ class BITPrefixArray(Generic[S]):
             self._data[index - 1] = self._op(self._data[index - 1], value)
             index += index & -index
 
-    def query(self, end: int) -> S:
+    def queryPrefix(self, end: int) -> S:
         if end > self.n:
             end = self.n
         res = self._e()
@@ -311,7 +365,7 @@ class BITPrefixMap(Generic[S]):
             self._data[index - 1] = self._op(self._data.get(index - 1, self._e()), value)
             index += index & -index
 
-    def query(self, end: int) -> S:
+    def queryPrefix(self, end: int) -> S:
         if end > self.n:
             end = self.n
         res = self._e()
@@ -344,8 +398,27 @@ if __name__ == "__main__":
     bitPrefixArray = BITPrefixArray(10, lambda: 0, max)
     bitPrefixArray.update(0, 1)
     bitPrefixArray.update(1, 0)
-    print(bitPrefixArray.query(2))
+    print(bitPrefixArray.queryPrefix(2))
 
     bitPrefixMap = BITPrefixMap(int(1e9), lambda: 0, max)
     bitPrefixMap.update(0, 1)
     bitPrefixMap.update(int(1e7), 0)
+
+    def testBITRangeAddPrefixQueryArrayAndBITRangeAddRangeSumArray() -> None:
+        import random
+
+        n = random.randint(1, 100)
+        bit1 = BITRangeAddPointGetArray(n)
+        bit2 = BITRangeAddRangeSumArray(n)
+        for _ in range(100):
+            start = random.randint(0, n)
+            end = random.randint(start, n)
+            delta = random.randint(-100, 100)
+            bit1.addRange(start, end, delta)
+            bit2.addRange(start, end, delta)
+            pos = random.randint(0, n - 1)
+            # assert bit1.queryPrefix(end) == bit2.queryRange(0, end)
+            assert bit1.get(pos) == bit2.queryRange(pos, pos + 1), (pos, start, end, delta, n)
+            # assert bit1.queryPrefix(end) - bit1.queryPrefix(start) == bit2.queryRange(start, end)
+
+    testBITRangeAddPrefixQueryArrayAndBITRangeAddRangeSumArray()

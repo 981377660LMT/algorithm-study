@@ -1,3 +1,4 @@
+/* eslint-disable implicit-arrow-linebreak */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-inner-declarations */
 /* eslint-disable class-methods-use-this */
@@ -14,24 +15,26 @@
  */
 
 // 下标从0开始
-// 1.BITArray: 区间修改, 单点查询
-// 2.BITMap: 区间修改, 单点查询
-// 3.BITRangeAddRangeSumArray: 区间修改, 区间查询
-// 4.BITRangeAddRangeSumMap: 区间修改, 区间查询
-// 5.BITPrefixArray: 单点修改, 区间查询
-// 6.BITPrefixMap: 单点修改, 区间查询
+// 1.BITArray: 单点修改, 区间查询
+// 2.BITMap: 单点修改, 区间查询
+// 3.BITRangeAddPointGetArray: 区间修改, 单点查询(差分)
+// 4.BITRangeAddPointGetMap: 区间修改, 单点查询(差分)
+// 5.BITRangeAddRangeSumArray: 区间修改, 区间查询
+// 6.BITRangeAddRangeSumMap: 区间修改, 区间查询
+// 7.BITPrefixArray: 单点修改, 前缀查询
+// 8.BITPrefixMap: 单点修改, 前缀查询
 
 class BITArray {
-  private readonly _n: number
+  readonly n: number
   private readonly _data: number[]
   private _total = 0
 
   constructor(n: number, f?: (i: number) => number) {
     if (f == undefined) {
-      this._n = n
+      this.n = n
       this._data = Array(n).fill(0)
     } else {
-      this._n = n
+      this.n = n
       this._data = Array(n)
       for (let i = 0; i < n; i++) {
         this._data[i] = f(i)
@@ -49,15 +52,15 @@ class BITArray {
   add(index: number, v: number): void {
     this._total += v
     index += 1
-    while (index <= this._n) {
+    while (index <= this.n) {
       this._data[index - 1] += v
       index += index & -index
     }
   }
 
   queryPrefix(end: number): number {
-    if (end > this._n) {
-      end = this._n
+    if (end > this.n) {
+      end = this.n
     }
     let res = 0
     while (end > 0) {
@@ -69,7 +72,7 @@ class BITArray {
 
   queryRange(start: number, end: number): number {
     if (start < 0) start = 0
-    if (end > this._n) end = this._n
+    if (end > this.n) end = this.n
     if (start >= end) return 0
     if (start === 0) return this.queryPrefix(end)
     let pos = 0
@@ -96,11 +99,11 @@ class BITArray {
     let i = 0
     let s = 0
     let k = 1
-    while (2 * k <= this._n) {
+    while (2 * k <= this.n) {
       k *= 2
     }
     while (k > 0) {
-      if (i + k - 1 < this._n) {
+      if (i + k - 1 < this.n) {
         let t = s + this._data[i + k - 1]
         if (predicate(i + k, t)) {
           i += k
@@ -120,7 +123,9 @@ class BITArray {
   }
 
   toString(): string {
-    return `BITArray: [${Array.from({ length: this._n }, (_, i) => this.queryRange(i, i + 1)).join(', ')}]`
+    return `BITArray: [${Array.from({ length: this.n }, (_, i) => this.queryRange(i, i + 1)).join(
+      ', '
+    )}]`
   }
 }
 
@@ -208,6 +213,29 @@ class BITMap {
   }
 }
 
+class BITRangeAddPointGetArray {
+  private readonly _bit: BITArray
+
+  constructor(n: number, f?: (i: number) => number) {
+    this._bit = new BITArray(n, f)
+  }
+
+  addRange(start: number, end: number, delta: number): void {
+    this._bit.add(start, delta)
+    this._bit.add(end, -delta)
+  }
+
+  get(index: number): number {
+    return this._bit.queryPrefix(index + 1)
+  }
+
+  toString(): string {
+    return `BITRangeAddPointGetArray: [${Array.from({ length: this._bit.n }, (_, i) =>
+      this.get(i)
+    ).join(', ')}]`
+  }
+}
+
 class BITRangeAddRangeSumArray {
   private readonly _n: number
   private readonly _bit0: BITArray
@@ -249,7 +277,26 @@ class BITRangeAddRangeSumArray {
   }
 
   toString(): string {
-    return `BITRangeAddRangeSumArray: [${Array.from({ length: this._n }, (_, i) => this.queryRange(i, i + 1)).join(', ')}]`
+    return `BITRangeAddRangeSumArray: [${Array.from({ length: this._n }, (_, i) =>
+      this.queryRange(i, i + 1)
+    ).join(', ')}]`
+  }
+}
+
+class BITRangeAddPointGetMap {
+  private readonly _bit: BITMap
+
+  constructor(n: number) {
+    this._bit = new BITMap(n)
+  }
+
+  addRange(start: number, end: number, delta: number): void {
+    this._bit.add(start, delta)
+    this._bit.add(end, -delta)
+  }
+
+  get(index: number): number {
+    return this._bit.queryPrefix(index + 1)
   }
 }
 
@@ -288,7 +335,9 @@ class BITRangeAddRangeSumMap {
   }
 
   toString(): string {
-    return `BITRangeAddRangeSumMap: [${Array.from({ length: this._n }, (_, i) => this.queryRange(i, i + 1)).join(', ')}]`
+    return `BITRangeAddRangeSumMap: [${Array.from({ length: this._n }, (_, i) =>
+      this.queryRange(i, i + 1)
+    ).join(', ')}]`
   }
 }
 
@@ -369,7 +418,16 @@ class BITPrefixMap<S> {
   }
 }
 
-export { BITArray, BITMap, BITRangeAddRangeSumArray, BITRangeAddRangeSumMap, BITPrefixArray, BITPrefixMap }
+export {
+  BITArray,
+  BITMap,
+  BITRangeAddPointGetArray,
+  BITRangeAddPointGetMap,
+  BITRangeAddRangeSumArray,
+  BITRangeAddRangeSumMap,
+  BITPrefixArray,
+  BITPrefixMap
+}
 
 if (require.main === module) {
   const bitArray = new BITArray(10)
@@ -393,6 +451,10 @@ if (require.main === module) {
   bitPrefixMap.update(0, 1)
   bitPrefixMap.update(1, 2)
   console.log(bitPrefixMap.query(2))
+
+  const bb = new BITRangeAddPointGetArray(10)
+  bb.addRange(1, 3, 2)
+  console.log(bb.toString(), bb.get(1))
 
   // https://leetcode.cn/problems/maximum-white-tiles-covered-by-a-carpet/
   function maximumWhiteTiles(tiles: number[][], carpetLen: number): number {

@@ -140,6 +140,13 @@ class ACAutoMatonMap(Generic[T]):
             if v != 0:
                 yield self._suffixLink[v], v
 
+    def buildFailTree(self) -> List[List[int]]:
+        adjList = [[] for _ in range(len(self._children))]
+        for v in self._bfsOrder:
+            if v != 0:
+                adjList[self._suffixLink[v]].append(v)
+        return adjList
+
     @property
     def size(self) -> int:
         return len(self._children)

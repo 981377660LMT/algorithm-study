@@ -1,5 +1,46 @@
 const INF = 2e15
 
+/**
+ * 返回一个函数,该函数可以求出从`start`到`target`的最短路径长度.
+ * 如果不存在这样的路径,返回`-1`.
+ */
+function floyd(
+  n: number,
+  edges: [u: number, v: number, w: number][] | number[][],
+  directed = false
+): (start: number, target: number) => number {
+  const dist: number[] = Array(n * n)
+  for (let i = 0; i < n * n; ++i) dist[i] = INF
+  for (let i = 0; i < n; ++i) dist[i * n + i] = 0
+
+  if (directed) {
+    edges.forEach(([u, v, w]) => {
+      dist[u * n + v] = Math.min(dist[u * n + v], w)
+    })
+  } else {
+    edges.forEach(([u, v, w]) => {
+      dist[u * n + v] = Math.min(dist[u * n + v], w)
+      dist[v * n + u] = Math.min(dist[v * n + u], w)
+    })
+  }
+
+  for (let k = 0; k < n; ++k) {
+    for (let i = 0; i < n; ++i) {
+      for (let j = 0; j < n; ++j) {
+        const cand = dist[i * n + k] + dist[k * n + j]
+        if (dist[i * n + j] > cand) {
+          dist[i * n + j] = cand
+        }
+      }
+    }
+  }
+
+  return (start: number, target: number) => {
+    const res = dist[start * n + target]
+    return res === INF ? -1 : res
+  }
+}
+
 class Floyd {
   private _hasBuilt = false
   private readonly _n: number
@@ -124,6 +165,7 @@ class FloydDynamic {
     this._n = n
     this._dist = dist
   }
+
   /**
    * 添加从`u`到`v`的边权为`w`的无向边.
    */
@@ -228,47 +270,6 @@ class FloydDynamic {
         }
       }
     }
-  }
-}
-
-/**
- * 返回一个函数,该函数可以求出从`start`到`target`的最短路径长度.
- * 如果不存在这样的路径,返回`-1`.
- */
-function floyd(
-  n: number,
-  edges: [u: number, v: number, w: number][] | number[][],
-  directed = false
-): (start: number, target: number) => number {
-  const dist: number[] = Array(n * n)
-  for (let i = 0; i < n * n; ++i) dist[i] = INF
-  for (let i = 0; i < n; ++i) dist[i * n + i] = 0
-
-  if (directed) {
-    edges.forEach(([u, v, w]) => {
-      dist[u * n + v] = Math.min(dist[u * n + v], w)
-    })
-  } else {
-    edges.forEach(([u, v, w]) => {
-      dist[u * n + v] = Math.min(dist[u * n + v], w)
-      dist[v * n + u] = Math.min(dist[v * n + u], w)
-    })
-  }
-
-  for (let k = 0; k < n; ++k) {
-    for (let i = 0; i < n; ++i) {
-      for (let j = 0; j < n; ++j) {
-        const cand = dist[i * n + k] + dist[k * n + j]
-        if (dist[i * n + j] > cand) {
-          dist[i * n + j] = cand
-        }
-      }
-    }
-  }
-
-  return (start: number, target: number) => {
-    const res = dist[start * n + target]
-    return res === INF ? -1 : res
   }
 }
 

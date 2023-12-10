@@ -1,9 +1,13 @@
 // https://www.luogu.com.cn/blog/yszs/ac-zi-dong-ji-fou-guo-shi-jian-fail-shu-di-gong-ju-pi-liao
 // !fail[i]表示在trie树上的第i个点表示的前缀，它在trie树上的最长后缀是第fail[i]个点表示的前缀。
 //
-// 1.dp: 一般都是dfs(index,pos):长度为index的字符串，当前trie状态为pos.
-//
+// 1.dp类型题: 一般都是dfs(index,pos):长度为index的字符串，当前trie状态为pos.
 //	枚举26种字符(字符集)转移.
+//
+// 2.自定义结点信息题：用WordPos初始化状态，用SuffixLink转移.
+// 3.Trie图：用 Move 来获取每个点的临边.
+// 4.失配树：用SuffixLink来获取每个点的父亲.
+
 package main
 
 import (
@@ -425,18 +429,18 @@ func P3041() {
 // 不调用 BuildSuffixLink 就是Trie，调用 BuildSuffixLink 就是AC自动机.
 // 每个状态对应Trie中的一个结点，也对应一个字符串.
 type ACAutoMatonArray struct {
-	WordPos            []int   // WordPos[i] 表示加入的第i个模式串对应的节点编号.
-	Parent             []int   // parent[v] 表示节点v的父节点.
-	sigma              int     // 字符集大小.
-	offset             int     // 字符集的偏移量.
-	children           [][]int // children[v][c] 表示节点v通过字符c转移到的节点.
-	suffixLink         []int   // 又叫fail.指向当前trie节点(对应一个前缀)的最长真后缀对应结点，例如"bc"是"abc"的最长真后缀.
-	bfsOrder           []int   // 结点的拓扑序,0表示虚拟节点.
-	needUpdateChildren bool    // 是否需要更新children数组.
+	WordPos            []int     // WordPos[i] 表示加入的第i个模式串对应的节点编号.
+	Parent             []int     // parent[v] 表示节点v的父节点.
+	sigma              int32     // 字符集大小.
+	offset             int32     // 字符集的偏移量.
+	children           [][]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
+	suffixLink         []int32   // 又叫fail.指向当前trie节点(对应一个前缀)的最长真后缀对应结点，例如"bc"是"abc"的最长真后缀.
+	bfsOrder           []int32   // 结点的拓扑序,0表示虚拟节点.
+	needUpdateChildren bool      // 是否需要更新children数组.
 }
 
 func NewACAutoMatonArray(sigma, offset int) *ACAutoMatonArray {
-	res := &ACAutoMatonArray{sigma: sigma, offset: offset}
+	res := &ACAutoMatonArray{sigma: int32(sigma), offset: int32(offset)}
 	res.newNode()
 	return res
 }
@@ -448,12 +452,12 @@ func (trie *ACAutoMatonArray) AddString(str string) int {
 	}
 	pos := 0
 	for _, s := range str {
-		ord := int(s) - trie.offset
+		ord := int32(s) - trie.offset
 		if trie.children[pos][ord] == -1 {
 			trie.children[pos][ord] = trie.newNode()
 			trie.Parent = append(trie.Parent, pos)
 		}
-		pos = trie.children[pos][ord]
+		pos = int(trie.children[pos][ord])
 	}
 	trie.WordPos = append(trie.WordPos, pos)
 	return pos
@@ -461,30 +465,30 @@ func (trie *ACAutoMatonArray) AddString(str string) int {
 
 // 在pos位置添加一个字符，返回新的节点编号.
 func (trie *ACAutoMatonArray) AddChar(pos int, ord int) int {
-	ord -= trie.offset
+	ord -= int(trie.offset)
 	if trie.children[pos][ord] != -1 {
-		return trie.children[pos][ord]
+		return int(trie.children[pos][ord])
 	}
 	trie.children[pos][ord] = trie.newNode()
 	trie.Parent = append(trie.Parent, pos)
-	return trie.children[pos][ord]
+	return int(trie.children[pos][ord])
 }
 
 // pos: DFA的状态集, ord: DFA的字符集
 func (trie *ACAutoMatonArray) Move(pos int, ord int) int {
-	ord -= trie.offset
+	ord -= int(trie.offset)
 	if trie.needUpdateChildren {
-		return trie.children[pos][ord]
+		return int(trie.children[pos][ord])
 	}
 	for {
 		nexts := trie.children[pos]
 		if nexts[ord] != -1 {
-			return nexts[ord]
+			return int(nexts[ord])
 		}
 		if pos == 0 {
 			return 0
 		}
-		pos = trie.suffixLink[pos]
+		pos = int(trie.suffixLink[pos])
 	}
 }
 
@@ -499,11 +503,11 @@ func (trie *ACAutoMatonArray) Size() int {
 // !move调用较少时，设置为false更快.
 func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 	trie.needUpdateChildren = needUpdateChildren
-	trie.suffixLink = make([]int, len(trie.children))
+	trie.suffixLink = make([]int32, len(trie.children))
 	for i := range trie.suffixLink {
 		trie.suffixLink[i] = -1
 	}
-	trie.bfsOrder = make([]int, len(trie.children))
+	trie.bfsOrder = make([]int32, len(trie.children))
 	head, tail := 0, 0
 	trie.bfsOrder[tail] = 0
 	tail++
@@ -604,19 +608,27 @@ func (trie *ACAutoMatonArray) GetIndexes() [][]int {
 func (trie *ACAutoMatonArray) Dp(f func(from, to int)) {
 	for _, v := range trie.bfsOrder {
 		if v != 0 {
-			f(trie.suffixLink[v], v)
+			f(int(trie.suffixLink[v]), int(v))
 		}
 	}
 }
 
-func (trie *ACAutoMatonArray) newNode() int {
+func (trie *ACAutoMatonArray) BuildFailTree() [][]int {
+	res := make([][]int, trie.Size())
+	trie.Dp(func(pre, cur int) {
+		res[pre] = append(res[pre], cur)
+	})
+	return res
+}
+
+func (trie *ACAutoMatonArray) newNode() int32 {
 	trie.Parent = append(trie.Parent, -1)
-	nexts := make([]int, trie.sigma)
+	nexts := make([]int32, trie.sigma)
 	for i := range nexts {
 		nexts[i] = -1
 	}
 	trie.children = append(trie.children, nexts)
-	return len(trie.children) - 1
+	return int32(len(trie.children) - 1)
 }
 
 func min(a, b int) int {

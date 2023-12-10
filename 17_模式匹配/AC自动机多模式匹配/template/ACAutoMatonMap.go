@@ -31,16 +31,16 @@ func longestValidSubstring(word string, forbidden []string) int {
 type T = byte
 
 type ACAutoMatonMap struct {
-	WordPos    []int       // WordPos[i] 表示加入的第i个模式串对应的节点编号.
-	children   []map[T]int // children[v][c] 表示节点v通过字符c转移到的节点.
-	suffixLink []int       // 又叫fail.指向当前节点最长真后缀对应结点.
-	bfsOrder   []int       // 结点的拓扑序,0表示虚拟节点.
+	WordPos    []int         // WordPos[i] 表示加入的第i个模式串对应的节点编号.
+	children   []map[T]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
+	suffixLink []int32       // 又叫fail.指向当前节点最长真后缀对应结点.
+	bfsOrder   []int32       // 结点的拓扑序,0表示虚拟节点.
 }
 
 func NewACAutoMatonMap() *ACAutoMatonMap {
 	return &ACAutoMatonMap{
 		WordPos:  []int{},
-		children: []map[T]int{{}},
+		children: []map[T]int32{{}},
 	}
 }
 
@@ -53,12 +53,12 @@ func (ac *ACAutoMatonMap) AddString(s []T) int {
 		ord := s[i]
 		nexts := ac.children[pos]
 		if next, ok := nexts[ord]; ok {
-			pos = next
+			pos = int(next)
 		} else {
 			nextState := len(ac.children)
-			nexts[ord] = nextState
+			nexts[ord] = int32(nextState)
 			pos = nextState
-			ac.children = append(ac.children, map[T]int{})
+			ac.children = append(ac.children, map[T]int32{})
 		}
 	}
 	ac.WordPos = append(ac.WordPos, pos)
@@ -68,11 +68,11 @@ func (ac *ACAutoMatonMap) AddString(s []T) int {
 func (ac *ACAutoMatonMap) AddChar(pos int, ord T) int {
 	nexts := ac.children[pos]
 	if next, ok := nexts[ord]; ok {
-		return next
+		return int(next)
 	}
 	nextState := len(ac.children)
-	nexts[ord] = nextState
-	ac.children = append(ac.children, map[T]int{})
+	nexts[ord] = int32(nextState)
+	ac.children = append(ac.children, map[T]int32{})
 	return nextState
 }
 
@@ -80,21 +80,21 @@ func (ac *ACAutoMatonMap) Move(pos int, ord T) int {
 	for {
 		nexts := ac.children[pos]
 		if next, ok := nexts[ord]; ok {
-			return next
+			return int(next)
 		}
 		if pos == 0 {
 			return 0
 		}
-		pos = ac.suffixLink[pos]
+		pos = int(ac.suffixLink[pos])
 	}
 }
 
 func (ac *ACAutoMatonMap) BuildSuffixLink() {
-	ac.suffixLink = make([]int, len(ac.children))
+	ac.suffixLink = make([]int32, len(ac.children))
 	for i := range ac.suffixLink {
 		ac.suffixLink[i] = -1
 	}
-	ac.bfsOrder = make([]int, len(ac.children))
+	ac.bfsOrder = make([]int32, len(ac.children))
 	head, tail := 0, 1
 	for head < tail {
 		v := ac.bfsOrder[head]
@@ -172,9 +172,17 @@ func (ac *ACAutoMatonMap) GetIndexes() [][]int {
 func (ac *ACAutoMatonMap) Dp(f func(from, to int)) {
 	for _, v := range ac.bfsOrder {
 		if v != 0 {
-			f(ac.suffixLink[v], v)
+			f(int(ac.suffixLink[v]), int(v))
 		}
 	}
+}
+
+func (trie *ACAutoMatonMap) BuildFailTree() [][]int {
+	res := make([][]int, trie.Size())
+	trie.Dp(func(pre, cur int) {
+		res[pre] = append(res[pre], cur)
+	})
+	return res
 }
 
 func (ac *ACAutoMatonMap) Size() int {
@@ -183,6 +191,13 @@ func (ac *ACAutoMatonMap) Size() int {
 
 func min(a, b int) int {
 	if a <= b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a >= b {
 		return a
 	}
 	return b

@@ -13,6 +13,27 @@ from typing import List
 INF = int(1e20)
 
 
+def floyd(n: int, edges: List[List[int]]) -> List[List[int]]:
+    """
+    Floyd 求多源最短路
+    """
+    dist = [[INF] * n for _ in range(n)]
+    for i in range(n):
+        dist[i][i] = 0
+
+    for u, v, w in edges:
+        dist[u][v] = dist[v][u] = min(dist[u][v], w)  # 有重边时取最小值
+
+    # dis[k][i][j] 表示「经过若干个编号不超过 k 的节点」时，从 i 到 j 的最短路长度
+    for k in range(n):  # 经过的中转点
+        for i in range(n):
+            for j in range(n):
+                # 松弛：如果一条边可以被松弛了，说明这条边就没有必要留下了
+                cand = dist[i][k] + dist[k][j]
+                dist[i][j] = cand if dist[i][j] > cand else dist[i][j]
+    return dist
+
+
 if __name__ == "__main__":
     n = 3
     edges = [[0, 1, 2], [1, 0, 3], [2, 1, 1]]  # 无向带权边
@@ -23,7 +44,7 @@ if __name__ == "__main__":
         dist[i][i] = 0
 
     for u, v, w in edges:
-        dist[u][v] = dist[v][u] = w
+        dist[u][v] = dist[v][u] = min(dist[u][v], w)  # !有重边时取最小值
 
     # !dis[k][i][j] 表示「经过若干个编号不超过 k 的节点」时，从 i 到 j 的最短路长度
     for k in range(n):  # !经过的中转点
@@ -40,7 +61,7 @@ if __name__ == "__main__":
 
     count = [[0] * n for _ in range(n)]
     for u, v, w in edges:
-        dist[u][v] = dist[v][u] = w
+        dist[u][v] = dist[v][u] = min(dist[u][v], w)
         count[u][v] = count[v][u] = 1
     for k, i, j in product(range(n), repeat=3):
         cand = dist[i][k] + dist[k][j]
