@@ -65,6 +65,28 @@ func (ac *ACAutoMatonMap) AddString(s []T) int {
 	return pos
 }
 
+// 功能与 AddString 相同.
+func (ac *ACAutoMatonMap) AddFrom(n int, getOrd func(i int) T) int {
+	if n == 0 {
+		return 0
+	}
+	pos := 0
+	for i := 0; i < n; i++ {
+		ord := getOrd(i)
+		nexts := ac.children[pos]
+		if next, ok := nexts[ord]; ok {
+			pos = int(next)
+		} else {
+			nextState := len(ac.children)
+			nexts[ord] = int32(nextState)
+			pos = nextState
+			ac.children = append(ac.children, map[T]int32{})
+		}
+	}
+	ac.WordPos = append(ac.WordPos, pos)
+	return pos
+}
+
 func (ac *ACAutoMatonMap) AddChar(pos int, ord T) int {
 	nexts := ac.children[pos]
 	if next, ok := nexts[ord]; ok {

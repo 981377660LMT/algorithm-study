@@ -3,11 +3,42 @@ package main
 import (
 	"bufio"
 	"fmt"
+	stdio "io"
 	"math/bits"
 	"os"
 	"strconv"
 	"strings"
 )
+
+var io *Iost
+
+type Iost struct {
+	Scanner *bufio.Scanner
+	Writer  *bufio.Writer
+}
+
+func NewIost(fp stdio.Reader, wfp stdio.Writer) *Iost {
+	const BufSize = 2000005
+	scanner := bufio.NewScanner(fp)
+	scanner.Split(bufio.ScanWords)
+	scanner.Buffer(make([]byte, BufSize), BufSize)
+	return &Iost{Scanner: scanner, Writer: bufio.NewWriter(wfp)}
+}
+func (io *Iost) Text() string {
+	if !io.Scanner.Scan() {
+		panic("scan failed")
+	}
+	return io.Scanner.Text()
+}
+func (io *Iost) Atoi(s string) int                 { x, _ := strconv.Atoi(s); return x }
+func (io *Iost) Atoi64(s string) int64             { x, _ := strconv.ParseInt(s, 10, 64); return x }
+func (io *Iost) Atof64(s string) float64           { x, _ := strconv.ParseFloat(s, 64); return x }
+func (io *Iost) NextInt() int                      { return io.Atoi(io.Text()) }
+func (io *Iost) NextInt64() int64                  { return io.Atoi64(io.Text()) }
+func (io *Iost) NextFloat64() float64              { return io.Atof64(io.Text()) }
+func (io *Iost) Print(x ...interface{})            { fmt.Fprint(io.Writer, x...) }
+func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x...) }
+func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
 
 func main() {
 
@@ -17,7 +48,9 @@ func main() {
 	// CF163E()
 	// CF1437G()
 	// SP9941()
-	P2414()
+	// P2414()
+	// CF1207G()
+	CF86C()
 
 }
 
@@ -633,15 +666,248 @@ func P2414() {
 
 // Indie Album
 // https://www.luogu.com.cn/problem/CF1207G
+// 有q1次操作,操作有两种类型：
+// 1 c : 新建一个字符c.
+// 2 i c : 在第i次操作的串后面加上字符c.
+// 接着是q2次询问,格式为：
+// i t: 每次询问版本为i的串中，t串出现了多少次。
+// q1,q2<=4e5, sum(len(text[i]))<=4e5
+//
+// !看见多字符串匹配，会想到AC自动机
+// 相当于：给定一些(posOnTrie, posOnACM)对，查询posOnACM对应的串在posOnTrie对应的串中出现了多少次
+// !离线查询，将查询挂在trieTree每个节点上，在trieTree上dfs，树状数组维护 failTree 的 dfs序.
+// 类似阿狸的打字机,离线+树状数组.
 func CF1207G() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
 
+	q1 := io.NextInt()
+	trie1 := NewACAutoMatonArray(26, 97)
+	posHistory := make([]int, q1)
+	for i := 0; i < q1; i++ {
+		kind := io.NextInt()
+		if kind == 1 {
+			c := io.Text()
+			posHistory[i] = trie1.AddChar(0, int(c[0]))
+		} else {
+			version := io.NextInt() - 1
+			c := io.Text()
+			posHistory[i] = trie1.AddChar(posHistory[version], int(c[0]))
+		}
+	}
+	// trie1.BuildSuffixLink(true)
+
+	q2 := io.NextInt()
+	acm2 := NewACAutoMatonArray(26, 97)
+	queries := make([][2]int, q2) // !(posOnTrie, posOnACM)：查询posOnACM对应的串在posOnTrie对应的串中出现了多少次
+	for i := 0; i < q2; i++ {
+		version := io.NextInt() - 1
+		text := io.Text()
+		textPos := acm2.AddString(text)
+		queries[i] = [2]int{posHistory[version], textPos}
+	}
+	acm2.BuildSuffixLink(true)
+
+	failTree := acm2.BuildFailTree()
+	lid, rid := make([]int, acm2.Size()), make([]int, acm2.Size())
+	dfn := 0
+	var dfsOrder func(cur, pre int)
+	dfsOrder = func(cur, pre int) {
+		lid[cur] = dfn
+		dfn++
+		for _, next := range failTree[cur] {
+			if next != pre {
+				dfsOrder(next, cur)
+			}
+		}
+		rid[cur] = dfn
+	}
+	dfsOrder(0, -1) // failTree 的 dfs序
+	bit := NewBitArray(acm2.Size())
+
+	queryGroup := make([][]int, trie1.Size())
+	for qid, query := range queries {
+		triePos := query[0]
+		queryGroup[triePos] = append(queryGroup[triePos], qid)
+	}
+	res := make([]int, q2)
+
+	// 在 trie 上 dfs，计算 failTree 的某个节点的子树权值.
+	var dfs func(triePos, acmPos int)
+	dfs = func(triePos, acmPos int) {
+		bit.Add(lid[acmPos], 1)
+
+		for _, qid := range queryGroup[triePos] {
+			qv := queries[qid][1]
+			res[qid] = bit.QueryRange(lid[qv], rid[qv])
+		}
+
+		for c, next := range trie1.children[triePos] {
+			if next != -1 {
+				dfs(int(next), acm2.Move(acmPos, c+97))
+			}
+		}
+
+		bit.Add(lid[acmPos], -1)
+	}
+	dfs(0, 0)
+
+	for _, v := range res {
+		io.Println(v)
+	}
 }
 
 // Genetic engineering
 // https://www.luogu.com.cn/problem/CF86C
+// 给定w个由ATCG组成的字符串words，求构造一个长度为n的ATCG字符串s，使得:
+// 对字符串s任意一个位置i，存在left和right 满足 s[left:right] 至少与一个word匹配.(left<=i<=right)
+// (即：字符串完全被这些DNA片段覆盖)
+// 求方案总数对1e9+9取模.
+// n<=1000,w<=10,len(words[i]<=10).
+// dp[index][pos][need]: 前index个字符，当前在ac自动机位置为pos,未匹配need个字符
+// !需要判断：匹配好的长度加上最长的DNA的后缀长度是否大于等于整个当前字符串的长度即可（等价于前一部分和后一部分正好拼接或覆盖）
+// 如果下一步结点x'是某DNA的后缀且长度比k大, 则将need置为0
 func CF86C() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	const MOD int = 1e9 + 9
+	getOrd := func(v byte) int {
+		if v == 'A' {
+			return 0
+		} else if v == 'C' {
+			return 1
+		} else if v == 'G' {
+			return 2
+		} else {
+			return 3
+		}
+	}
+	n, w := io.NextInt(), io.NextInt()
+	words := make([]string, w)
+	acm := NewACAutoMatonArray(4, 0)
+	for i := 0; i < w; i++ {
+		word := io.Text()
+		words[i] = word
+		acm.AddFrom(len(word), func(i int) int { return getOrd(word[i]) })
+	}
+	acm.BuildSuffixLink(true)
+
+	maxLen := make([]int, acm.Size()) // 每个节点匹配到的最大长度
+	for i, p := range acm.WordPos {
+		maxLen[p] = max(maxLen[p], len(words[i]))
+	}
+	acm.Dp(func(from, to int) {
+		maxLen[to] = max(maxLen[to], maxLen[from])
+	})
+
+	m := acm.Size()
+	upper := 0
+	for _, v := range words {
+		upper = max(upper, len(v))
+	}
+
+	{
+		// 记忆化搜索求解
+		m := acm.Size()
+		memo := make([][][]int, n)
+		for i := range memo {
+			inner1 := make([][]int, m)
+			for j := range inner1 {
+				inner2 := make([]int, upper+1)
+				for k := range inner2 {
+					inner2[k] = -1
+				}
+				inner1[j] = inner2
+			}
+			memo[i] = inner1
+		}
+
+		var dfs func(index, pos, need int) int
+		dfs = func(index, pos, need int) int {
+			if index == n {
+				if need == 0 {
+					return 1
+				}
+				return 0
+			}
+			if tmp := memo[index][pos][need]; tmp != -1 {
+				return tmp
+			}
+			res := 0
+			for c := 0; c < 4; c++ {
+				nextPos := acm.Move(pos, c)
+				coverLen := maxLen[nextPos]
+				nextNeed := need + 1
+				if coverLen >= nextNeed {
+					nextNeed = 0
+				}
+				if nextNeed <= upper {
+					res += dfs(index+1, nextPos, nextNeed)
+					res %= MOD
+				}
+			}
+			memo[index][pos][need] = res
+			return res
+		}
+
+		io.Println(dfs(0, 0, 0))
+
+	}
+
+	{
+		dp := func() {
+			makeDp := func(row, col int) [][]int {
+				res := make([][]int, row)
+				for i := range res {
+					res[i] = make([]int, col)
+				}
+				return res
+			}
+
+			dp := makeDp(m, upper+1)
+			dp[0][0] = 1
+			for i := 0; i < n; i++ {
+				ndp := makeDp(m, upper+1)
+				for pos := 0; pos < m; pos++ {
+					for k := 0; k < upper+1; k++ {
+						for c := 0; c < 4; c++ {
+							nextPos := acm.Move(pos, c)
+							nextK := k + 1
+							if maxLen[nextPos] >= nextK {
+								nextK = 0
+							}
+							if nextK <= upper {
+								ndp[nextPos][nextK] += dp[pos][k]
+								ndp[nextPos][nextK] %= MOD
+							}
+						}
+					}
+				}
+				dp = ndp
+			}
+
+			res := 0
+			for i := range dp {
+				res = (res + dp[i][0]) % MOD
+			}
+
+			io.Println(res)
+		}
+		_ = dp
+	}
 
 }
+
+func aaa() {}
 
 // 不调用 BuildSuffixLink 就是Trie，调用 BuildSuffixLink 就是AC自动机.
 // 每个状态对应Trie中的一个结点，也对应一个字符串.
@@ -669,6 +935,25 @@ func (trie *ACAutoMatonArray) AddString(str string) int {
 	}
 	pos := 0
 	for _, s := range str {
+		ord := int32(s) - trie.offset
+		if trie.children[pos][ord] == -1 {
+			trie.children[pos][ord] = trie.newNode()
+			trie.Parent[len(trie.Parent)-1] = pos
+		}
+		pos = int(trie.children[pos][ord])
+	}
+	trie.WordPos = append(trie.WordPos, pos)
+	return pos
+}
+
+// 功能与 AddString 相同.
+func (trie *ACAutoMatonArray) AddFrom(n int, getOrd func(i int) int) int {
+	if n == 0 {
+		return 0
+	}
+	pos := 0
+	for i := 0; i < n; i++ {
+		s := getOrd(i)
 		ord := int32(s) - trie.offset
 		if trie.children[pos][ord] == -1 {
 			trie.children[pos][ord] = trie.newNode()
@@ -879,6 +1164,28 @@ func (ac *ACAutoMatonMap) AddString(s []T) int {
 	pos := 0
 	for i := 0; i < len(s); i++ {
 		ord := s[i]
+		nexts := ac.children[pos]
+		if next, ok := nexts[ord]; ok {
+			pos = int(next)
+		} else {
+			nextState := len(ac.children)
+			nexts[ord] = int32(nextState)
+			pos = nextState
+			ac.children = append(ac.children, map[T]int32{})
+		}
+	}
+	ac.WordPos = append(ac.WordPos, pos)
+	return pos
+}
+
+// 功能与 AddString 相同.
+func (ac *ACAutoMatonMap) AddFrom(n int, getOrd func(i int) int) int {
+	if n == 0 {
+		return 0
+	}
+	pos := 0
+	for i := 0; i < n; i++ {
+		ord := getOrd(i)
 		nexts := ac.children[pos]
 		if next, ok := nexts[ord]; ok {
 			pos = int(next)

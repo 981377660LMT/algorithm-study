@@ -3,6 +3,7 @@
 // - 子串 = 前缀的后缀
 //   Trie树（AC自动机）的祖先节点 = 前缀
 //   Fail树的祖先节点 = 后缀
+//   字符串x在字符串y中出现的次数 = `Fail树中x的子树`与`Trie树中y到根的路径`的交点个数
 //
 // 1.dp类型题: 一般都是dfs(index,pos):长度为index的字符串，当前trie状态为pos.
 //	枚举26种字符(字符集)转移.
@@ -455,6 +456,25 @@ func (trie *ACAutoMatonArray) AddString(str string) int {
 	}
 	pos := 0
 	for _, s := range str {
+		ord := int32(s) - trie.offset
+		if trie.children[pos][ord] == -1 {
+			trie.children[pos][ord] = trie.newNode()
+			trie.Parent[len(trie.Parent)-1] = pos
+		}
+		pos = int(trie.children[pos][ord])
+	}
+	trie.WordPos = append(trie.WordPos, pos)
+	return pos
+}
+
+// 功能与 AddString 相同.
+func (trie *ACAutoMatonArray) AddFrom(n int, getOrd func(i int) int) int {
+	if n == 0 {
+		return 0
+	}
+	pos := 0
+	for i := 0; i < n; i++ {
+		s := getOrd(i)
 		ord := int32(s) - trie.offset
 		if trie.children[pos][ord] == -1 {
 			trie.children[pos][ord] = trie.newNode()
