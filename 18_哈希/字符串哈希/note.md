@@ -28,3 +28,8 @@ hash1 = hasher1(2,5)
 hash2 = hasher2(2,5)
 newHash = f'{hash1},{hash2}'
 ```
+
+---
+
+自然溢出哈希冲突
+https://hos.ac/blog/#blog0003

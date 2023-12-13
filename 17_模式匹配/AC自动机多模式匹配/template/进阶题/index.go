@@ -50,7 +50,8 @@ func main() {
 	// SP9941()
 	// P2414()
 	// CF1207G()
-	CF86C()
+	// CF86C()
+	CF547E()
 
 }
 
@@ -907,7 +908,111 @@ func CF86C() {
 
 }
 
-func aaa() {}
+// Mike and Friends
+// https://www.luogu.com.cn/problem/CF547E
+// 给定n个字符串words和q个查询，每个查询为：
+// !(left, right, index) 查询 words[index]在 [left,right] 中出现了多少次(0<=left<=right<n).
+// 将区间查询转换为两个前缀的差.
+// 类似阿狸的打字机，模式串 fail 树向下，文本串 trie 树向上
+// 沿着trie文本串从根到结束位置点权+1，查询时为fail树某节点子树和.
+func CF547E() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	n, q := io.NextInt(), io.NextInt()
+	words := make([]string, n)
+	acm := NewACAutoMatonArray(26, 97)
+	for i := 0; i < n; i++ {
+		words[i] = io.Text()
+		acm.AddString(words[i])
+	}
+	acm.BuildSuffixLink(true)
+
+	queries := make([][3]int, q)
+	leftQueryGroup := make([][]int, n)
+	rightQueryGroup := make([][]int, n)
+	for i := 0; i < q; i++ {
+		left, right, index := io.NextInt(), io.NextInt(), io.NextInt()
+		left--
+		right--
+		index--
+		queries[i] = [3]int{left, right, index}
+
+		rightQueryGroup[right] = append(rightQueryGroup[right], i)
+		if left > 0 {
+			leftQueryGroup[left-1] = append(leftQueryGroup[left-1], i)
+		}
+	}
+
+	failTree := acm.BuildFailTree()
+	lid, rid := make([]int, acm.Size()), make([]int, acm.Size())
+	dfn := 0
+	var dfsOrder func(cur, pre int)
+	dfsOrder = func(cur, pre int) {
+		lid[cur] = dfn
+		dfn++
+		for _, next := range failTree[cur] {
+			if next != pre {
+				dfsOrder(next, cur)
+			}
+		}
+		rid[cur] = dfn
+	}
+	dfsOrder(0, -1)
+	bit := NewBitArray(acm.Size())
+
+	res := make([]int, q)
+	for i := 0; i < n; i++ {
+		pos := 0
+		for _, v := range words[i] {
+			pos = acm.Move(pos, int(v))
+			bit.Add(lid[pos], 1) // !沿着trie走，从根节点到endPos链上的点加1
+		}
+		for _, qid := range rightQueryGroup[i] {
+			index := queries[qid][2]
+			node := acm.WordPos[index]
+			res[qid] += bit.QueryRange(lid[node], rid[node])
+		}
+		for _, qid := range leftQueryGroup[i] {
+			index := queries[qid][2]
+			node := acm.WordPos[index]
+			res[qid] -= bit.QueryRange(lid[node], rid[node])
+		}
+	}
+
+	for _, v := range res {
+		io.Println(v)
+	}
+}
+
+// Legen...
+// https://www.luogu.com.cn/problem/CF696D
+func CF696D() {
+}
+
+// Duff is Mad
+// https://www.luogu.com.cn/problem/CF587F
+func CF587F() {
+}
+
+// Digits of Number Pi
+// https://www.luogu.com.cn/problem/CF585F
+func CF585F() {
+}
+
+// Birthday
+// https://www.luogu.com.cn/problem/CF590E
+func CF590E() {
+}
+
+// Exam
+// https://www.luogu.com.cn/problem/CF1483F
+func CF1483F() {
+}
 
 // 不调用 BuildSuffixLink 就是Trie，调用 BuildSuffixLink 就是AC自动机.
 // 每个状态对应Trie中的一个结点，也对应一个字符串.

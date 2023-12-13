@@ -51,3 +51,8 @@ https://www.bilibili.com/video/BV1qF411G7u5
 3. 最长串的长度
 
 ![SAM图解](image-2.png)
+
+---
+
+（广义）后缀自动机 - nekko 的文章 - 知乎
+https://zhuanlan.zhihu.com/p/34838533

@@ -1,5 +1,6 @@
 // https://ei1333.github.io/library/structure/heap/skew-heap.hpp
 // https://nyaannyaan.github.io/library/data-structure/skew-heap.hpp
+// https://hos.ac/blog/#blog0001
 
 // !用于有向图最小生成树
 // https://judge.yosupo.jp/problem/directedmst

@@ -3,6 +3,28 @@
  * 将长度为n的序列搬到长度为offset+n的线段树上, 以实现快速的区间操作.
  */
 class DivideInterval {
+  /** 线段树中两个节点的最近公共祖先(两个二进制数字的最长公共前缀). */
+  static lca(u: number, v: number): number {
+    if (u === v) return u
+    if (u > v) {
+      const tmp = u
+      u = v
+      v = tmp
+    }
+    const depth1 = this.depth(u)
+    const depth2 = this.depth(v)
+    const diff = u ^ (v >>> (depth2 - depth1))
+    if (diff === 0) return u
+    const len = 32 - Math.clz32(diff)
+    return u >>> len
+  }
+
+  /** 线段树中节点的深度. */
+  static depth(u: number): number {
+    if (u === 0) return 0
+    return 31 - Math.clz32(u)
+  }
+
   /**
    * 线段树中一共有`offset+n`个节点.
    * `offset+i`对应原图的第i个顶点(0<=i<n).
@@ -51,11 +73,6 @@ class DivideInterval {
     return segmentId >= this.offset
   }
 
-  /** 线段树结点个数. */
-  get size(): number {
-    return this.offset + this._n
-  }
-
   /**
    * O(n) 从根向叶子方向push.
    */
@@ -75,26 +92,9 @@ class DivideInterval {
     }
   }
 
-  /** 线段树中两个节点的最近公共祖先(两个二进制数字的最长公共前缀). */
-  static lca(u: number, v: number): number {
-    if (u === v) return u
-    if (u > v) {
-      const tmp = u
-      u = v
-      v = tmp
-    }
-    const depth1 = this.depth(u)
-    const depth2 = this.depth(v)
-    const diff = u ^ (v >>> (depth2 - depth1))
-    if (diff === 0) return u
-    const len = 32 - Math.clz32(diff)
-    return u >>> len
-  }
-
-  /** 线段树中节点的深度. */
-  static depth(u: number): number {
-    if (u === 0) return 0
-    return 31 - Math.clz32(u)
+  /** 线段树结点个数. */
+  get size(): number {
+    return this.offset + this._n
   }
 
   private _getSegmentIds(start: number, end: number): number[] {

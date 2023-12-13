@@ -4,11 +4,11 @@ import (
 	"bufio"
 	"fmt"
 	stdio "io"
+	"os"
 	"strconv"
 	"strings"
 )
 
-// from https://atcoder.jp/users/ccppjsrb
 var io *Iost
 
 type Iost struct {
@@ -40,7 +40,77 @@ func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x
 func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
 
 func main() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
 
+	n, q := io.NextInt(), io.NextInt()
+	words := make([]string, n)
+	acm := NewACAutoMatonArray(26, 97)
+	for i := 0; i < n; i++ {
+		words[i] = io.Text()
+		acm.AddString(words[i])
+	}
+	acm.BuildSuffixLink(true)
+
+	queries := make([][3]int, q)
+	leftQueryGroup := make([][]int, n)
+	rightQueryGroup := make([][]int, n)
+	for i := 0; i < q; i++ {
+		left, right, index := io.NextInt(), io.NextInt(), io.NextInt()
+		left--
+		right--
+		index--
+		queries[i] = [3]int{left, right, index}
+
+		rightQueryGroup[right] = append(rightQueryGroup[right], i)
+		if left > 0 {
+			leftQueryGroup[left-1] = append(leftQueryGroup[left-1], i)
+		}
+	}
+
+	failTree := acm.BuildFailTree()
+	lid, rid := make([]int, acm.Size()), make([]int, acm.Size())
+	dfn := 0
+	var dfsOrder func(cur, pre int)
+	dfsOrder = func(cur, pre int) {
+		lid[cur] = dfn
+		dfn++
+		for _, next := range failTree[cur] {
+			if next != pre {
+				dfsOrder(next, cur)
+			}
+		}
+		rid[cur] = dfn
+	}
+	dfsOrder(0, -1)
+	bit := NewBitArray(acm.Size())
+
+	res := make([]int, q)
+	for i := 0; i < n; i++ {
+		pos := 0
+		for _, v := range words[i] {
+			pos = acm.Move(pos, int(v))
+			bit.Add(lid[pos], 1)
+		}
+		for _, qid := range rightQueryGroup[i] {
+			index := queries[qid][2]
+			node := acm.WordPos[index]
+			res[qid] += bit.QueryRange(lid[node], rid[node])
+		}
+		for _, qid := range leftQueryGroup[i] {
+			index := queries[qid][2]
+			node := acm.WordPos[index]
+			res[qid] -= bit.QueryRange(lid[node], rid[node])
+		}
+	}
+
+	for _, v := range res {
+		io.Println(v)
+	}
 }
 
 // 不调用 BuildSuffixLink 就是Trie，调用 BuildSuffixLink 就是AC自动机.

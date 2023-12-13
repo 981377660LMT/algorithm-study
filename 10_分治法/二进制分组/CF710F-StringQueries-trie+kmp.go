@@ -5,8 +5,33 @@
 
 package main
 
-func main() {
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
+// 1 s : 在数据结构中插入 s
+// 2 s : 在数据结构中删除 s
+// 3 s : 在数据结构中查询 s 出现的次数
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+
+	var q int
+	fmt.Fscan(in, &q)
+
+	for i := 0; i < q; i++ {
+		var op int
+		var s string
+		fmt.Fscan(in, &op, &s)
+
+		if op == 1 {
+		} else if op == 2 {
+		} else {
+			out.Flush() // 强制在线，需要刷新缓冲区
+		}
+	}
 }
 
 // 很明显这像是一个 AC 自动机可以完成的题目，但是这个题要求强制在线，且需要删除，这个东西显然无法动态修改来完成，我们考虑二进制分组。

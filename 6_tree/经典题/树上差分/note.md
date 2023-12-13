@@ -11,3 +11,7 @@ https://www.luogu.com.cn/blog/LawrenceSivan/shu-shang-ci-fen-zong-jie
 
 点差分：https://www.luogu.com.cn/problem/P3128
 边差分：https://www.luogu.com.cn/problem/P2680
+
+---
+
+https://zhuanlan.zhihu.com/p/30677133

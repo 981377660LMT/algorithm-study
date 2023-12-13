@@ -16,3 +16,12 @@ https://www.luogu.com.cn/problem/P2713
 
 启发式合并的可并堆 => O(logn^2)
 skewHeap => O(logn)
+
+---
+
+还有一种二项堆，实现思路类似二进制分组（注意不是二叉堆）。
+https://zhuanlan.zhihu.com/p/98859548
+
+https://blog.51cto.com/u_13393656/3065850
+
+![Alt text](image.png)
