@@ -20,7 +20,7 @@ import (
 //	n<=2e5 sum(len(s))<=1e6
 func ConditionalReflection(words []string) []bool {
 
-	R := NewRollingHash(37, 2102001800968)
+	R := NewRollingHash(13331)
 	res := make([]bool, len(words))
 	visited := make(map[uint]struct{})
 
@@ -77,28 +77,26 @@ func main() {
 
 type S = string
 
-func GetHash(s S, base uint, mod uint) uint {
+func GetHash(s S, base uint) uint {
 	if len(s) == 0 {
 		return 0
 	}
 	res := uint(0)
 	for i := 0; i < len(s); i++ {
-		res = (res*base + uint(s[i])) % mod
+		res = res*base + uint(s[i])
 	}
 	return res
 }
 
 type RollingHash struct {
 	base  uint
-	mod   uint
 	power []uint
 }
 
 // 131/13331/1713302033171(回文素数)
-func NewRollingHash(base uint, mod uint) *RollingHash {
+func NewRollingHash(base uint) *RollingHash {
 	return &RollingHash{
 		base:  base,
-		mod:   mod,
 		power: []uint{1},
 	}
 }
@@ -107,23 +105,23 @@ func (r *RollingHash) Build(s S) (hashTable []uint) {
 	sz := len(s)
 	hashTable = make([]uint, sz+1)
 	for i := 0; i < sz; i++ {
-		hashTable[i+1] = (hashTable[i]*r.base + uint(s[i])) % r.mod
+		hashTable[i+1] = hashTable[i]*r.base + uint(s[i])
 	}
 	return hashTable
 }
 
 func (r *RollingHash) Query(sTable []uint, start, end int) uint {
 	r.expand(end - start)
-	return (r.mod + sTable[end] - sTable[start]*r.power[end-start]%r.mod) % r.mod
+	return sTable[end] - sTable[start]*r.power[end-start]
 }
 
 func (r *RollingHash) Combine(h1, h2 uint, h2len int) uint {
 	r.expand(h2len)
-	return (h1*r.power[h2len] + h2) % r.mod
+	return h1*r.power[h2len] + h2
 }
 
 func (r *RollingHash) AddChar(hash uint, c byte) uint {
-	return (hash*r.base + uint(c)) % r.mod
+	return hash*r.base + uint(c)
 }
 
 // 两个字符串的最长公共前缀长度.
@@ -149,7 +147,7 @@ func (r *RollingHash) expand(sz int) {
 		preSz := len(r.power)
 		r.power = append(r.power, make([]uint, sz+1-preSz)...)
 		for i := preSz - 1; i < sz; i++ {
-			r.power[i+1] = (r.power[i] * r.base) % r.mod
+			r.power[i+1] = r.power[i] * r.base
 		}
 	}
 }

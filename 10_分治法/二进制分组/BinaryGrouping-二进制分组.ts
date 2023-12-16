@@ -47,21 +47,3 @@ class BinaryGrouping<V> {
 }
 
 export { BinaryGrouping }
-
-if (require.main === module) {
-  // 二进制分组实现堆
-  // 每次添加点直接push_back
-  // 如果相邻两块的大小相同，那么将这两块合并掉，并弹掉最后一个块
-
-  class Foo {
-    private _value: number
-
-    constructor(value: number) {
-      this._value = value
-    }
-
-    get value(): number {
-      return this._value
-    }
-  }
-}

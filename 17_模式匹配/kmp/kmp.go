@@ -33,7 +33,7 @@ func P4824() {
 	stack := make([]int, 0, len(longer))
 	posRecord := make([]int, len(longer))
 	for i := range longer {
-		pos = kmp.Move(pos, longer[i])
+		pos = kmp.Move(pos, int(longer[i]))
 		posRecord[i] = pos
 		stack = append(stack, i)
 		if kmp.IsMatched(pos) {
@@ -53,7 +53,9 @@ func P4824() {
 	fmt.Fprintln(out, string(res))
 }
 
-func GetNext(pattern string) []int {
+type Str = string
+
+func GetNext(pattern Str) []int {
 	next := make([]int, len(pattern))
 	j := 0
 	for i := 1; i < len(pattern); i++ {
@@ -69,7 +71,8 @@ func GetNext(pattern string) []int {
 }
 
 // `O(n+m)` 寻找 `shorter` 在 `longer` 中的所有匹配位置.
-func IndexOfAll(longer string, shorter string, position int) []int {
+// nexts 数组为nil时, 会调用GetNext(shorter)求nexts数组.
+func IndexOfAll(longer Str, shorter Str, position int, nexts []int) []int {
 	if len(shorter) == 0 {
 		return []int{0}
 	}
@@ -77,18 +80,20 @@ func IndexOfAll(longer string, shorter string, position int) []int {
 		return nil
 	}
 	res := []int{}
-	next := GetNext(shorter)
+	if nexts == nil {
+		nexts = GetNext(shorter)
+	}
 	hitJ := 0
 	for i := position; i < len(longer); i++ {
 		for hitJ > 0 && longer[i] != shorter[hitJ] {
-			hitJ = next[hitJ-1]
+			hitJ = nexts[hitJ-1]
 		}
 		if longer[i] == shorter[hitJ] {
 			hitJ++
 		}
 		if hitJ == len(shorter) {
 			res = append(res, i-len(shorter)+1)
-			hitJ = next[hitJ-1] // 不允许重叠时 hitJ = 0
+			hitJ = nexts[hitJ-1] // 不允许重叠时 hitJ = 0
 		}
 	}
 	return res
@@ -97,10 +102,10 @@ func IndexOfAll(longer string, shorter string, position int) []int {
 // 单模式串匹配
 type KMP struct {
 	next    []int
-	pattern string
+	pattern Str
 }
 
-func NewKMP(pattern string) *KMP {
+func NewKMP(pattern Str) *KMP {
 	return &KMP{
 		next:    GetNext(pattern),
 		pattern: pattern,
@@ -110,11 +115,14 @@ func NewKMP(pattern string) *KMP {
 // `o(n+m)`求搜索串 longer 中所有匹配 pattern 的位置.
 //
 //	findAll/indexOfAll
-func (k *KMP) IndexOfAll(longer string, start int) []int {
+func (k *KMP) IndexOfAll(longer Str, start int) []int {
+	if len(longer) < len(k.pattern) {
+		return nil
+	}
 	var res []int
 	pos := 0
 	for i := start; i < len(longer); i++ {
-		pos = k.Move(pos, longer[i])
+		pos = k.Move(pos, int(longer[i]))
 		if k.IsMatched(pos) {
 			res = append(res, i-len(k.pattern)+1)
 			pos = k.next[pos-1]
@@ -123,10 +131,29 @@ func (k *KMP) IndexOfAll(longer string, start int) []int {
 	return res
 }
 
-func (k *KMP) IndexOf(longer string, start int) int {
+// `o(n+m)`求文本串 longer 中所有匹配 pattern 的次数.
+//
+//	findAll/indexOfAll
+func (k *KMP) CountIndexOfAll(longer string, start int) int {
+	if len(longer) < len(k.pattern) {
+		return 0
+	}
+	res := 0
 	pos := 0
 	for i := start; i < len(longer); i++ {
-		pos = k.Move(pos, longer[i])
+		pos = k.Move(pos, int(longer[i]))
+		if k.IsMatched(pos) {
+			res++
+			pos = k.next[pos-1]
+		}
+	}
+	return res
+}
+
+func (k *KMP) IndexOf(longer Str, start int) int {
+	pos := 0
+	for i := start; i < len(longer); i++ {
+		pos = k.Move(pos, int(longer[i]))
 		if k.IsMatched(pos) {
 			return i - len(k.pattern) + 1
 		}
@@ -134,14 +161,14 @@ func (k *KMP) IndexOf(longer string, start int) int {
 	return -1
 }
 
-func (k *KMP) Move(pos int, char byte) int {
+func (k *KMP) Move(pos int, ord int) int {
 	if pos < 0 || pos >= len(k.pattern) {
 		panic("pos out of range")
 	}
-	for pos > 0 && char != k.pattern[pos] {
+	for pos > 0 && ord != int(k.pattern[pos]) {
 		pos = k.next[pos-1]
 	}
-	if char == k.pattern[pos] {
+	if ord == int(k.pattern[pos]) {
 		pos++
 	}
 	return pos

@@ -14,119 +14,175 @@ import (
 // 1 s : 在数据结构中插入 s
 // 2 s : 在数据结构中删除 s
 // 3 s : 在数据结构中查询 s 出现的次数
+//
+// !短的串丢进 trie 维护，长的串用 kmp 维护
+// !每次查询时，对文本串的所有后缀扔到 trie 里查询其前缀匹配个数，求总和。再把文本串与所有较大模式串单独 KMP。
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 
+	type info = struct {
+		str    string
+		nexts  []int
+		weight int
+	}
+
+	THRESHOLD := 1000
+	longPattern := []info{}
+	shortPattern := NewSimpleTrie(26, 'a')
+
 	var q int
 	fmt.Fscan(in, &q)
-
 	for i := 0; i < q; i++ {
 		var op int
 		var s string
 		fmt.Fscan(in, &op, &s)
 
-		if op == 1 {
-		} else if op == 2 {
+		// 增加、删除
+		if op == 1 || op == 2 {
+			var weight int
+			if op == 1 {
+				weight = 1
+			} else {
+				weight = -1
+			}
+
+			len_ := len(s)
+
+			// 模式串长度小于 THRESHOLD 时，用 trie 维护
+			if len_ <= THRESHOLD {
+				shortPattern.Add(len_, func(i int) int { return int(s[i]) }, weight)
+			} else {
+				// 模式串长度大于 THRESHOLD 时，用 kmp 维护
+				longPattern = append(longPattern, info{str: s, nexts: GetNext(s), weight: weight})
+			}
 		} else {
+			// 查询
+			res := 0
+			len_ := len(s)
+			for start := 0; start < len_; start++ {
+				res += shortPattern.Query(len_-start, func(i int) int { return int(s[start+i]) })
+			}
+
+			for _, p := range longPattern {
+				res += p.weight * CountIndexOfAll(s, p.str, 0, p.nexts)
+			}
+
+			fmt.Fprintln(out, res)
 			out.Flush() // 强制在线，需要刷新缓冲区
 		}
 	}
 }
 
-// 很明显这像是一个 AC 自动机可以完成的题目，但是这个题要求强制在线，且需要删除，这个东西显然无法动态修改来完成，我们考虑二进制分组。
+type SimpleTrie struct {
+	sigma    int32     // 字符集大小.
+	offset   int32     // 字符集的偏移量.
+	weight   []int     // weight[v] 表示节点v对应的字符串出现的次数.
+	children [][]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
+}
 
-// 当我们需要合并的时候，我们暴力合并两颗 Trie 树，然后构造 fail 指针，再进行回答询问。
+func NewSimpleTrie(sigma, offset int) *SimpleTrie {
+	res := &SimpleTrie{sigma: int32(sigma), offset: int32(offset)}
+	res.newNode()
+	return res
+}
 
-// 因为笔者并没有联系很多 AC 自动机的题目，所以打的时候代码并不是非常美观，这里的代码在树上的 dp 统计十分巧妙，且以前一直没有察觉到的一点是 AC 自动机构造 fail 指针的正确性依靠于这张 Trie 图，所以我们要注意对根节点的处理。
+// 添加一个字符串.
+func (trie *SimpleTrie) Add(n int, getAt func(int) int, delta int) {
+	pos := int32(0)
+	for i := 0; i < n; i++ {
+		ord := int32(getAt(i)) - trie.offset
+		if trie.children[pos][ord] == -1 {
+			trie.children[pos][ord] = trie.newNode()
+		}
+		pos = trie.children[pos][ord]
+	}
 
-// 以及这个题需要维护两个：一个是 Trie 图，另一个是 Trie 树。
+	// !afterInsert
+	trie.weight[pos] += delta
+}
 
-// 关于 Trie 图到 Trie 树的赋值，我们直接在求
-// f
-// a
-// i
-// l
-//  的时候赋值就可以。
+// 查询一个字符串所有前缀出现的次数之和.
+func (trie *SimpleTrie) Query(n int, getAt func(int) int) int {
+	res := 0
+	pos := int32(0)
+	for i := 0; i < n; i++ {
+		ord := int32(getAt(i)) - trie.offset
+		if trie.children[pos][ord] == -1 {
+			break
+		}
+		pos = trie.children[pos][ord]
+		res += trie.weight[pos]
+	}
+	return res
+}
 
-// const int N = 1000010;
-// const int INF = 0x3fffffff;
+func (trie *SimpleTrie) newNode() int32 {
+	nexts := make([]int32, trie.sigma)
+	for i := range nexts {
+		nexts[i] = -1
+	}
+	trie.children = append(trie.children, nexts)
+	trie.weight = append(trie.weight, 0)
+	return int32(len(trie.children) - 1)
+}
 
-// struct Trie {
-//     int ch[26];
-//     int fail;
-// };
+type Str = string
 
-// struct ACAM {
-//     Trie t[N]; int son[N][26], tot;
-//     int rt[N], last, siz[N], cnt[N], end[N];
+func GetNext(pattern Str) []int {
+	next := make([]int, len(pattern))
+	j := 0
+	for i := 1; i < len(pattern); i++ {
+		for j > 0 && pattern[i] != pattern[j] {
+			j = next[j-1]
+		}
+		if pattern[i] == pattern[j] {
+			j++
+		}
+		next[i] = j
+	}
+	return next
+}
 
-//     inline void build(int root) {
-//         queue <int> q;
-//         for (int i = 0; i < 26; ++ i)
-//           if (son[root][i]) {
-//               t[t[root].ch[i] = son[root][i]].fail = root;
-//               q.push(t[root].ch[i]);
-//           } else t[root].ch[i] = root;
-//         while (q.size()) {
-//             int now = q.front(); q.pop();
-//             for (int i = 0; i < 26; ++ i)
-//               if (son[now][i]) {
-//                   t[now].ch[i] = son[now][i];
-//                   t[t[now].ch[i]].fail = t[t[now].fail].ch[i];
-//                   q.push(t[now].ch[i]);
-//               } else t[now].ch[i] = t[t[now].fail].ch[i];
-//             cnt[now] = end[now] + cnt[t[now].fail];
-//         }
-//     }
+// `O(n+m)` 寻找 `shorter` 在 `longer` 中匹配次数.
+// nexts 数组为nil时, 会调用GetNext(shorter)求nexts数组.
+func CountIndexOfAll(longer Str, shorter Str, position int, nexts []int) int {
+	if len(shorter) == 0 {
+		return 0
+	}
+	if len(longer) < len(shorter) {
+		return 0
+	}
+	res := 0
+	if nexts == nil {
+		nexts = GetNext(shorter)
+	}
+	hitJ := 0
+	for i := position; i < len(longer); i++ {
+		for hitJ > 0 && longer[i] != shorter[hitJ] {
+			hitJ = nexts[hitJ-1]
+		}
+		if longer[i] == shorter[hitJ] {
+			hitJ++
+		}
+		if hitJ == len(shorter) {
+			res++
+			hitJ = nexts[hitJ-1] // 不允许重叠时 hitJ = 0
+		}
+	}
+	return res
+}
 
-//     inline int merge(int a, int b) {
-//         if (!a || !b) return a + b;
-//         end[a] += end[b];
-//         for (int i = 0; i < 26; ++ i)
-//           son[a][i] = merge(son[a][i], son[b][i]);
-//         return a;
-//     }
+func min(a, b int) int {
+	if a <= b {
+		return a
+	}
+	return b
+}
 
-//     inline void insert(char *s) {
-//         int len = strlen(s); rt[++ last] = ++ tot;
-//         int now = rt[last]; siz[last] = 1;
-//         for (int i = 0; i < len; ++ i) {
-//             int k = s[i] - 'a';
-//             if (!son[now][k])
-//               son[now][k] = ++ tot;
-//             now = son[now][k];
-//         } end[now] = 1;
-//         while (siz[last] == siz[last - 1]) {
-//             rt[-- last] = merge(rt[last], rt[last + 1]);
-//             siz[last] += siz[last + 1];
-//         }
-//         build(rt[last]);
-//     }
-
-//     inline int query(char *s) {
-//         int res = 0, len = strlen(s);
-//         for (int i = 1; i <= last; i ++)
-//           for (int j = 0, now = rt[i]; j < len; j ++)
-//             now = t[now].ch[s[j] - 'a'], res += cnt[now];
-//         return res;
-//     }
-// };
-// ACAM ac1, ac2;
-
-// char s[N];
-
-// int main() {
-//     int m; scanf("%d", &m);
-//     for (int i = 1; i <= m; ++ i) {
-//         int op; scanf("%d", &op);
-//         scanf("%s", s);
-//         if (op == 1) ac1.insert(s);
-//         else if (op == 2) ac2.insert(s);
-//         else {
-//             printf("%d\n", ac1.query(s) - ac2.query(s));
-//             fflush(stdout);
-//         }
-//     }
-//     return 0;
-// }
+func max(a, b int) int {
+	if a >= b {
+		return a
+	}
+	return b
+}

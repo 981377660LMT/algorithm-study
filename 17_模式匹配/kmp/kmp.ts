@@ -29,12 +29,13 @@ function getNext(shorter: string | ArrayLike<number | string>): Uint32Array {
 function indexOfAll<S extends string | ArrayLike<number | string> = string>(
   longer: S,
   shorter: S,
-  position = 0
+  position = 0,
+  nexts: ArrayLike<number> | undefined = undefined
 ): number[] {
   if (shorter.length === 0) return [0]
   if (longer.length < shorter.length) return []
   const res: number[] = []
-  const next = getNext(shorter)
+  const next = nexts || getNext(shorter)
   let hitJ = 0
   for (let i = position; i < longer.length; i++) {
     while (hitJ > 0 && longer[i] !== shorter[hitJ]) hitJ = next[hitJ - 1]
@@ -53,11 +54,12 @@ function indexOfAll<S extends string | ArrayLike<number | string> = string>(
 function indexOf<S extends string | ArrayLike<number | string> = string>(
   longer: S,
   shorter: S,
-  position = 0
+  position = 0,
+  nexts: ArrayLike<number> | undefined = undefined
 ): number {
   if (shorter.length === 0) return 0
   if (longer.length < shorter.length) return -1
-  const next = getNext(shorter)
+  const next = nexts || getNext(shorter)
   let hitJ = 0
   for (let i = position; i < longer.length; i++) {
     while (hitJ > 0 && longer[i] !== shorter[hitJ]) hitJ = next[hitJ - 1]
@@ -80,12 +82,13 @@ class KMP<T extends string | ArrayLike<number | string> = string> {
   static indexOfAll<S extends string | ArrayLike<number | string> = string>(
     longer: S,
     shorter: S,
-    position = 0
+    position = 0,
+    nexts: ArrayLike<number> | undefined = undefined
   ): number[] {
     if (shorter.length === 0) return [0]
     if (longer.length < shorter.length) return []
     const res: number[] = []
-    const next = this.getNext(shorter)
+    const next = nexts || this.getNext(shorter)
     let hitJ = 0
     for (let i = position; i < longer.length; i++) {
       while (hitJ > 0 && longer[i] !== shorter[hitJ]) hitJ = next[hitJ - 1]

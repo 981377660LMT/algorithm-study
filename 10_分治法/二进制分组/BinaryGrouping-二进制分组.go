@@ -2,10 +2,6 @@
 
 package main
 
-func main() {
-
-}
-
 type V = int
 
 type IPreprocessor interface {

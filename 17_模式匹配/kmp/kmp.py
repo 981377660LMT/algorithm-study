@@ -27,14 +27,16 @@ def getNext(needle: Sequence[T]) -> List[int]:
     return next
 
 
-def indexOfAll(longer: Sequence[T], shorter: Sequence[T], start=0) -> List[int]:
+def indexOfAll(
+    longer: Sequence[T], shorter: Sequence[T], start=0, nexts: Optional[List[int]] = None
+) -> List[int]:
     """kmp O(n+m)求搜索串 `longer` 中所有匹配 `shorter` 的位置."""
     if not shorter:
         return [0]
     if len(longer) < len(shorter):
         return []
     res = []
-    next = getNext(shorter)
+    next = getNext(shorter) if nexts is None else nexts
     hitJ = 0
     for i in range(start, len(longer)):
         while hitJ > 0 and longer[i] != shorter[hitJ]:
@@ -47,13 +49,15 @@ def indexOfAll(longer: Sequence[T], shorter: Sequence[T], start=0) -> List[int]:
     return res
 
 
-def indexOf(longer: Sequence[T], shorter: Sequence[T], start=0) -> int:
+def indexOf(
+    longer: Sequence[T], shorter: Sequence[T], start=0, nexts: Optional[List[int]] = None
+) -> int:
     """kmp O(n+m)求搜索串 `longer` 中第一个匹配 `shorter` 的位置."""
     if not shorter:
         return 0
     if len(longer) < len(shorter):
         return -1
-    next = getNext(shorter)
+    next = getNext(shorter) if nexts is None else nexts
     hitJ = 0
     for i in range(start, len(longer)):
         while hitJ > 0 and longer[i] != shorter[hitJ]:
@@ -90,6 +94,8 @@ class KMP(Generic[T]):
         """findAll/indexOfAll.
         `o(n+m)`求搜索串 longer 中所有匹配 pattern 的位置.
         """
+        if len(longer) < len(self._pattern):
+            return []
         res = []
         pos = 0
         for i in range(start, len(longer)):

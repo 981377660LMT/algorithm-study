@@ -21,8 +21,11 @@ func main() {
 	var q int
 	fmt.Fscan(in, &q)
 
-	bg := NewBinaryGrouping(func() IPreprocessor {
-		return NewACAutoMatonArray(26, 'a')
+	bg1 := NewBinaryGrouping(func() IPreprocessor {
+		return NewSimpleACAutoMatonArray(26, 'a')
+	})
+	bg2 := NewBinaryGrouping(func() IPreprocessor {
+		return NewSimpleACAutoMatonArray(26, 'a')
 	})
 
 	for i := 0; i < q; i++ {
@@ -30,16 +33,23 @@ func main() {
 		var s string
 		fmt.Fscan(in, &op, &s)
 		if op == 1 {
-			bg.Add(V{value: s, delta: 1})
+			bg1.Add(s)
 		} else if op == 2 {
-			bg.Add(V{value: s, delta: -1})
+			bg2.Add(s)
 		} else {
 			res := 0
-			bg.Query(func(p IPreprocessor) {
+			bg1.Query(func(p IPreprocessor) {
 				pos := 0
 				for _, c := range s {
 					pos = p.(*SimpleACAutoMatonArray).Move(pos, int(c))
 					res += int(p.(*SimpleACAutoMatonArray).count[pos])
+				}
+			}, true)
+			bg2.Query(func(p IPreprocessor) {
+				pos := 0
+				for _, c := range s {
+					pos = p.(*SimpleACAutoMatonArray).Move(pos, int(c))
+					res -= int(p.(*SimpleACAutoMatonArray).count[pos])
 				}
 			}, true)
 
@@ -49,10 +59,7 @@ func main() {
 	}
 }
 
-type V = struct {
-	value string
-	delta int
-}
+type V = string
 
 type IPreprocessor interface {
 	Add(value V)
@@ -111,15 +118,14 @@ type SimpleACAutoMatonArray struct {
 	children [][]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
 }
 
-func NewACAutoMatonArray(sigma, offset int) *SimpleACAutoMatonArray {
+func NewSimpleACAutoMatonArray(sigma, offset int) *SimpleACAutoMatonArray {
 	res := &SimpleACAutoMatonArray{sigma: int32(sigma), offset: int32(offset)}
 	res.Clear()
 	return res
 }
 
 // 添加一个字符串.
-func (trie *SimpleACAutoMatonArray) Add(value V) {
-	str, delta := value.value, value.delta
+func (trie *SimpleACAutoMatonArray) Add(str string) {
 	pos := int32(0)
 	for _, s := range str {
 		ord := int32(s) - trie.offset
@@ -130,7 +136,7 @@ func (trie *SimpleACAutoMatonArray) Add(value V) {
 	}
 
 	// !afterInsert
-	trie.count[pos] += int32(delta)
+	trie.count[pos]++
 }
 
 // 构建后缀链接(失配指针).

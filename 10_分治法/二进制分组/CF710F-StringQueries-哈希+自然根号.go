@@ -14,119 +14,117 @@ import (
 // 1 s : 在数据结构中插入 s
 // 2 s : 在数据结构中删除 s
 // 3 s : 在数据结构中查询 s 出现的次数
+//
+// 哈希+自然根号：
+// !由于字符串总长度不超过3e5，因此最多有不超过根号种不同的长度。
+// 所以遍历子串时只需要遍历根号种长度的子串即可。
+// 维护根号个set即可.
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 
+	R := NewSimpleHash(BASE, MOD)
+	hashGroup := make(map[int]map[uint]int) // 每个长度对应一个counter
+
 	var q int
 	fmt.Fscan(in, &q)
-
 	for i := 0; i < q; i++ {
 		var op int
 		var s string
 		fmt.Fscan(in, &op, &s)
 
 		if op == 1 {
+			hash := GetHash(s, BASE, MOD)
+			len_ := len(s)
+			if _, ok := hashGroup[len_]; !ok {
+				hashGroup[len_] = make(map[uint]int)
+			}
+			hashGroup[len_][hash]++
 		} else if op == 2 {
+			hash := GetHash(s, BASE, MOD)
+			len_ := len(s)
+			if _, ok := hashGroup[len_]; !ok {
+				continue
+			}
+			inner := hashGroup[len_]
+			if _, ok := inner[hash]; !ok {
+				continue
+			}
+			inner[hash]--
 		} else {
+			res := 0
+			hashTable := R.Build(s)
+			// !遍历每种长度的子串
+			for len_, group := range hashGroup {
+				for start := 0; start+len_ <= len(s); start++ {
+					hash := R.Query(hashTable, start, start+len_)
+					res += group[hash]
+				}
+			}
+			fmt.Fprintln(out, res)
 			out.Flush() // 强制在线，需要刷新缓冲区
 		}
 	}
 }
 
-// 很明显这像是一个 AC 自动机可以完成的题目，但是这个题要求强制在线，且需要删除，这个东西显然无法动态修改来完成，我们考虑二进制分组。
+const BASE uint = 13331
+const MOD uint = 1e9 + 7
 
-// 当我们需要合并的时候，我们暴力合并两颗 Trie 树，然后构造 fail 指针，再进行回答询问。
+type S = string
 
-// 因为笔者并没有联系很多 AC 自动机的题目，所以打的时候代码并不是非常美观，这里的代码在树上的 dp 统计十分巧妙，且以前一直没有察觉到的一点是 AC 自动机构造 fail 指针的正确性依靠于这张 Trie 图，所以我们要注意对根节点的处理。
+func GetHash(s S, base uint, mod uint) uint {
+	if len(s) == 0 {
+		return 0
+	}
+	res := uint(0)
+	for i := 0; i < len(s); i++ {
+		res = (res*base + uint(s[i])) % mod
+	}
+	return res
+}
 
-// 以及这个题需要维护两个：一个是 Trie 图，另一个是 Trie 树。
+type SimpleHash struct {
+	base  uint
+	mod   uint
+	power []uint
+}
 
-// 关于 Trie 图到 Trie 树的赋值，我们直接在求
-// f
-// a
-// i
-// l
-//  的时候赋值就可以。
+// 131/13331/1713302033171(回文素数)
+func NewSimpleHash(base uint, mod uint) *SimpleHash {
+	return &SimpleHash{
+		base:  base,
+		mod:   mod,
+		power: []uint{1},
+	}
+}
 
-// const int N = 1000010;
-// const int INF = 0x3fffffff;
+func (r *SimpleHash) Build(s S) (hashTable []uint) {
+	sz := len(s)
+	hashTable = make([]uint, sz+1)
+	for i := 0; i < sz; i++ {
+		hashTable[i+1] = (hashTable[i]*r.base + uint(s[i])) % r.mod
+	}
+	return hashTable
+}
 
-// struct Trie {
-//     int ch[26];
-//     int fail;
-// };
+func (r *SimpleHash) Query(sTable []uint, start, end int) uint {
+	r.expand(end - start)
+	return (r.mod + sTable[end] - sTable[start]*r.power[end-start]%r.mod) % r.mod
+}
 
-// struct ACAM {
-//     Trie t[N]; int son[N][26], tot;
-//     int rt[N], last, siz[N], cnt[N], end[N];
+func (r *SimpleHash) expand(sz int) {
+	if len(r.power) < sz+1 {
+		preSz := len(r.power)
+		r.power = append(r.power, make([]uint, sz+1-preSz)...)
+		for i := preSz - 1; i < sz; i++ {
+			r.power[i+1] = (r.power[i] * r.base) % r.mod
+		}
+	}
+}
 
-//     inline void build(int root) {
-//         queue <int> q;
-//         for (int i = 0; i < 26; ++ i)
-//           if (son[root][i]) {
-//               t[t[root].ch[i] = son[root][i]].fail = root;
-//               q.push(t[root].ch[i]);
-//           } else t[root].ch[i] = root;
-//         while (q.size()) {
-//             int now = q.front(); q.pop();
-//             for (int i = 0; i < 26; ++ i)
-//               if (son[now][i]) {
-//                   t[now].ch[i] = son[now][i];
-//                   t[t[now].ch[i]].fail = t[t[now].fail].ch[i];
-//                   q.push(t[now].ch[i]);
-//               } else t[now].ch[i] = t[t[now].fail].ch[i];
-//             cnt[now] = end[now] + cnt[t[now].fail];
-//         }
-//     }
-
-//     inline int merge(int a, int b) {
-//         if (!a || !b) return a + b;
-//         end[a] += end[b];
-//         for (int i = 0; i < 26; ++ i)
-//           son[a][i] = merge(son[a][i], son[b][i]);
-//         return a;
-//     }
-
-//     inline void insert(char *s) {
-//         int len = strlen(s); rt[++ last] = ++ tot;
-//         int now = rt[last]; siz[last] = 1;
-//         for (int i = 0; i < len; ++ i) {
-//             int k = s[i] - 'a';
-//             if (!son[now][k])
-//               son[now][k] = ++ tot;
-//             now = son[now][k];
-//         } end[now] = 1;
-//         while (siz[last] == siz[last - 1]) {
-//             rt[-- last] = merge(rt[last], rt[last + 1]);
-//             siz[last] += siz[last + 1];
-//         }
-//         build(rt[last]);
-//     }
-
-//     inline int query(char *s) {
-//         int res = 0, len = strlen(s);
-//         for (int i = 1; i <= last; i ++)
-//           for (int j = 0, now = rt[i]; j < len; j ++)
-//             now = t[now].ch[s[j] - 'a'], res += cnt[now];
-//         return res;
-//     }
-// };
-// ACAM ac1, ac2;
-
-// char s[N];
-
-// int main() {
-//     int m; scanf("%d", &m);
-//     for (int i = 1; i <= m; ++ i) {
-//         int op; scanf("%d", &op);
-//         scanf("%s", s);
-//         if (op == 1) ac1.insert(s);
-//         else if (op == 2) ac2.insert(s);
-//         else {
-//             printf("%d\n", ac1.query(s) - ac2.query(s));
-//             fflush(stdout);
-//         }
-//     }
-//     return 0;
-// }
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
