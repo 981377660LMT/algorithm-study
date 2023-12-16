@@ -5,7 +5,7 @@
 class ACAutoMatonMap<T = string> {
   /** wordPos[i] 表示加入的第i个模式串对应的节点编号. */
   readonly wordPos: number[] = [] //
-  private readonly _children: Map<T, number>[] = [new Map()]
+  private _children: Map<T, number>[] = [new Map()]
   private _suffixLink!: Int32Array
   private _bfsOrder!: Int32Array
 
@@ -155,6 +155,17 @@ class ACAutoMatonMap<T = string> {
     }
     dfs(0)
     return res
+  }
+
+  empty(): boolean {
+    return this._children.length === 1
+  }
+
+  clear(): void {
+    this.wordPos.length = 0
+    this._children = [new Map()]
+    this._suffixLink = new Int32Array(0)
+    this._bfsOrder = new Int32Array(0)
   }
 
   get size(): number {

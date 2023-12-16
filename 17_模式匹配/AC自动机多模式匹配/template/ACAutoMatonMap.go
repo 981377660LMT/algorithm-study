@@ -140,6 +140,18 @@ func (ac *ACAutoMatonMap) BuildSuffixLink() {
 	}
 }
 
+func (ac *ACAutoMatonMap) Empty() bool {
+	return len(ac.children) == 1
+}
+
+func (ac *ACAutoMatonMap) Clear() {
+	ac.WordPos = ac.WordPos[:0]
+	ac.children = ac.children[:1]
+	ac.children[0] = map[T]int32{}
+	ac.suffixLink = ac.suffixLink[:0]
+	ac.bfsOrder = ac.bfsOrder[:0]
+}
+
 func (ac *ACAutoMatonMap) GetCounter() []int {
 	counter := make([]int, len(ac.children))
 	for _, pos := range ac.WordPos {

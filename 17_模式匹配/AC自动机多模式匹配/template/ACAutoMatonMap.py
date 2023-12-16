@@ -158,11 +158,17 @@ class ACAutoMatonMap(Generic[T]):
         dfs(0)
         return adjList
 
+    def empty(self) -> bool:
+        return len(self._children) == 1
+
+    def clear(self) -> None:
+        self.wordPos = []
+        self._children = [{}]
+        self._suffixLink = []
+        self._bfsOrder = []
+
     @property
     def size(self) -> int:
-        return len(self._children)
-
-    def __len__(self) -> int:
         return len(self._children)
 
 

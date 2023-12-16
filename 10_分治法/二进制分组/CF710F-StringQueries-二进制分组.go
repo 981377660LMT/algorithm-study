@@ -21,10 +21,7 @@ func main() {
 	var q int
 	fmt.Fscan(in, &q)
 
-	bg1 := NewBinaryGrouping(func() IPreprocessor {
-		return NewACAutoMatonArray(26, 'a')
-	})
-	bg2 := NewBinaryGrouping(func() IPreprocessor {
+	bg := NewBinaryGrouping(func() IPreprocessor {
 		return NewACAutoMatonArray(26, 'a')
 	})
 
@@ -33,31 +30,29 @@ func main() {
 		var s string
 		fmt.Fscan(in, &op, &s)
 		if op == 1 {
-			bg1.Add(s)
+			bg.Add(V{value: s, delta: 1})
 		} else if op == 2 {
-			bg2.Add(s)
+			bg.Add(V{value: s, delta: -1})
 		} else {
 			res := 0
-			bg1.Query(func(p IPreprocessor) {
+			bg.Query(func(p IPreprocessor) {
 				pos := 0
 				for _, c := range s {
 					pos = p.(*SimpleACAutoMatonArray).Move(pos, int(c))
 					res += int(p.(*SimpleACAutoMatonArray).count[pos])
 				}
-			})
-			bg2.Query(func(p IPreprocessor) {
-				pos := 0
-				for _, c := range s {
-					pos = p.(*SimpleACAutoMatonArray).Move(pos, int(c))
-					res -= int(p.(*SimpleACAutoMatonArray).count[pos])
-				}
-			})
+			}, true)
+
+			fmt.Fprintln(out, res)
 			out.Flush() // 强制在线，需要刷新缓冲区
 		}
 	}
 }
 
-type V = string
+type V = struct {
+	value string
+	delta int
+}
 
 type IPreprocessor interface {
 	Add(value V)
@@ -96,10 +91,14 @@ func (b *BinaryGrouping) Add(value V) {
 		b.preprocessors[i].Clear()
 		b.groups[i] = b.groups[i][:0]
 	}
+	b.preprocessors[k].Build()
 }
 
-func (b *BinaryGrouping) Query(onQuery func(p IPreprocessor)) {
+func (b *BinaryGrouping) Query(onQuery func(p IPreprocessor), ignoreEmpty bool) {
 	for i := 0; i < len(b.preprocessors); i++ {
+		if ignoreEmpty && len(b.groups[i]) == 0 {
+			continue
+		}
 		onQuery(b.preprocessors[i])
 	}
 }
@@ -114,12 +113,13 @@ type SimpleACAutoMatonArray struct {
 
 func NewACAutoMatonArray(sigma, offset int) *SimpleACAutoMatonArray {
 	res := &SimpleACAutoMatonArray{sigma: int32(sigma), offset: int32(offset)}
-	res.newNode()
+	res.Clear()
 	return res
 }
 
 // 添加一个字符串.
-func (trie *SimpleACAutoMatonArray) Add(str string) {
+func (trie *SimpleACAutoMatonArray) Add(value V) {
+	str, delta := value.value, value.delta
 	pos := int32(0)
 	for _, s := range str {
 		ord := int32(s) - trie.offset
@@ -128,18 +128,9 @@ func (trie *SimpleACAutoMatonArray) Add(str string) {
 		}
 		pos = (trie.children[pos][ord])
 	}
-	trie.count[pos]++
-}
 
-// pos: DFA的状态集, ord: DFA的字符集
-func (trie *SimpleACAutoMatonArray) Move(pos int, ord int) int {
-	ord -= int(trie.offset)
-	return int(trie.children[pos][ord])
-}
-
-// 自动机中的节点(状态)数量，包括虚拟节点0.
-func (trie *SimpleACAutoMatonArray) Size() int {
-	return len(trie.children)
+	// !afterInsert
+	trie.count[pos] += int32(delta)
 }
 
 // 构建后缀链接(失配指针).
@@ -176,6 +167,7 @@ func (trie *SimpleACAutoMatonArray) Build() {
 			}
 		}
 	}
+
 	for _, v := range bfsOrder {
 		for i, next := range trie.children[v] {
 			if next == -1 {
@@ -187,12 +179,29 @@ func (trie *SimpleACAutoMatonArray) Build() {
 				}
 			}
 		}
+
+		if v != 0 {
+			// !update
+			trie.count[v] += trie.count[suffixLink[v]]
+		}
 	}
 }
 
 func (trie *SimpleACAutoMatonArray) Clear() {
-	trie.count = trie.count[:1]
-	trie.children = trie.children[:1]
+	trie.count = trie.count[:0]
+	trie.children = trie.children[:0]
+	trie.newNode()
+}
+
+// pos: DFA的状态集, ord: DFA的字符集
+func (trie *SimpleACAutoMatonArray) Move(pos int, ord int) int {
+	ord -= int(trie.offset)
+	return int(trie.children[pos][ord])
+}
+
+// 自动机中的节点(状态)数量，包括虚拟节点0.
+func (trie *SimpleACAutoMatonArray) Size() int {
+	return len(trie.children)
 }
 
 func (trie *SimpleACAutoMatonArray) newNode() int32 {

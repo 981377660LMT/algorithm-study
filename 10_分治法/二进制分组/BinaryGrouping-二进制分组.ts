@@ -1,3 +1,5 @@
+// 二进制分组，模拟二进制加法。
+
 interface IPreprocessor<V> {
   add(value: V): void
   build(): void
@@ -31,10 +33,14 @@ class BinaryGrouping<V> {
       this._preprocessors[i].clear()
       this._groups[i].length = 0
     }
+    this._preprocessors[k].build()
   }
 
-  query(onQuery: (p: IPreprocessor<V>) => void): void {
+  query(onQuery: (p: IPreprocessor<V>) => void, ignoreEmpty = true): void {
     for (let i = 0; i < this._preprocessors.length; i++) {
+      if (ignoreEmpty && this._groups[i].length === 0) {
+        continue
+      }
       onQuery(this._preprocessors[i])
     }
   }
@@ -58,5 +64,4 @@ if (require.main === module) {
       return this._value
     }
   }
-  // const bg=
 }

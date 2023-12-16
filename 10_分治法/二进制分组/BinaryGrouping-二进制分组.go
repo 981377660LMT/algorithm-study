@@ -1,3 +1,5 @@
+// BinaryGrouping-二进制分组
+
 package main
 
 func main() {
@@ -43,10 +45,14 @@ func (b *BinaryGrouping) Add(value V) {
 		b.preprocessors[i].Clear()
 		b.groups[i] = b.groups[i][:0]
 	}
+	b.preprocessors[k].Build()
 }
 
-func (b *BinaryGrouping) Query(onQuery func(p IPreprocessor)) {
+func (b *BinaryGrouping) Query(onQuery func(p IPreprocessor), ignoreEmpty bool) {
 	for i := 0; i < len(b.preprocessors); i++ {
+		if ignoreEmpty && len(b.groups[i]) == 0 {
+			continue
+		}
 		onQuery(b.preprocessors[i])
 	}
 }

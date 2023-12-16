@@ -181,6 +181,10 @@ class ACAutoMatonArray {
     return res
   }
 
+  empty(): boolean {
+    return this._nodeCount === 1
+  }
+
   get size(): number {
     return this._nodeCount
   }

@@ -128,7 +128,7 @@ type ACAutoMatonArray struct {
 
 func NewACAutoMatonArray(sigma, offset int) *ACAutoMatonArray {
 	res := &ACAutoMatonArray{sigma: int32(sigma), offset: int32(offset)}
-	res.newNode()
+	res.Clear()
 	return res
 }
 
@@ -203,6 +203,10 @@ func (trie *ACAutoMatonArray) Size() int {
 	return len(trie.children)
 }
 
+func (trie *ACAutoMatonArray) Empty() bool {
+	return len(trie.children) == 1
+}
+
 // 构建后缀链接(失配指针).
 // needUpdateChildren 表示是否需要更新children数组(连接trie图).
 //
@@ -253,6 +257,15 @@ func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 			}
 		}
 	}
+}
+
+func (trie *ACAutoMatonArray) Clear() {
+	trie.WordPos = trie.WordPos[:0]
+	trie.Parent = trie.Parent[:0]
+	trie.children = trie.children[:0]
+	trie.suffixLink = trie.suffixLink[:0]
+	trie.bfsOrder = trie.bfsOrder[:0]
+	trie.newNode()
 }
 
 // 获取每个状态包含的模式串的个数.
