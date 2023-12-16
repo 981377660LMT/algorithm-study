@@ -18,9 +18,9 @@ type BinaryGrouping struct {
 	createPreprocessor func() IPreprocessor
 }
 
-func NewBinaryGrouping(createContainer func() IPreprocessor) *BinaryGrouping {
+func NewBinaryGrouping(createPreprocessor func() IPreprocessor) *BinaryGrouping {
 	return &BinaryGrouping{
-		createPreprocessor: createContainer,
+		createPreprocessor: createPreprocessor,
 	}
 }
 

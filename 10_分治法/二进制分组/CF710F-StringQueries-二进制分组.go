@@ -21,112 +21,200 @@ func main() {
 	var q int
 	fmt.Fscan(in, &q)
 
+	bg1 := NewBinaryGrouping(func() IPreprocessor {
+		return NewACAutoMatonArray(26, 'a')
+	})
+	bg2 := NewBinaryGrouping(func() IPreprocessor {
+		return NewACAutoMatonArray(26, 'a')
+	})
+
 	for i := 0; i < q; i++ {
 		var op int
 		var s string
 		fmt.Fscan(in, &op, &s)
-
 		if op == 1 {
+			bg1.Add(s)
 		} else if op == 2 {
+			bg2.Add(s)
 		} else {
+			res := 0
+			bg1.Query(func(p IPreprocessor) {
+				pos := 0
+				for _, c := range s {
+					pos = p.(*SimpleACAutoMatonArray).Move(pos, int(c))
+					res += int(p.(*SimpleACAutoMatonArray).count[pos])
+				}
+			})
+			bg2.Query(func(p IPreprocessor) {
+				pos := 0
+				for _, c := range s {
+					pos = p.(*SimpleACAutoMatonArray).Move(pos, int(c))
+					res -= int(p.(*SimpleACAutoMatonArray).count[pos])
+				}
+			})
 			out.Flush() // 强制在线，需要刷新缓冲区
 		}
 	}
 }
 
-// 很明显这像是一个 AC 自动机可以完成的题目，但是这个题要求强制在线，且需要删除，这个东西显然无法动态修改来完成，我们考虑二进制分组。
+type V = string
 
-// 当我们需要合并的时候，我们暴力合并两颗 Trie 树，然后构造 fail 指针，再进行回答询问。
+type IPreprocessor interface {
+	Add(value V)
+	Build()
+	Clear()
+}
 
-// 因为笔者并没有联系很多 AC 自动机的题目，所以打的时候代码并不是非常美观，这里的代码在树上的 dp 统计十分巧妙，且以前一直没有察觉到的一点是 AC 自动机构造 fail 指针的正确性依靠于这张 Trie 图，所以我们要注意对根节点的处理。
+type BinaryGrouping struct {
+	groups             [][]V
+	preprocessors      []IPreprocessor
+	createPreprocessor func() IPreprocessor
+}
 
-// 以及这个题需要维护两个：一个是 Trie 图，另一个是 Trie 树。
+func NewBinaryGrouping(createPreprocessor func() IPreprocessor) *BinaryGrouping {
+	return &BinaryGrouping{
+		createPreprocessor: createPreprocessor,
+	}
+}
 
-// 关于 Trie 图到 Trie 树的赋值，我们直接在求
-// f
-// a
-// i
-// l
-//  的时候赋值就可以。
+func (b *BinaryGrouping) Add(value V) {
+	k := 0
+	for k < len(b.groups) && len(b.groups[k]) > 0 {
+		k++
+	}
+	if k == len(b.groups) {
+		b.groups = append(b.groups, []V{})
+		b.preprocessors = append(b.preprocessors, b.createPreprocessor())
+	}
+	b.groups[k] = append(b.groups[k], value)
+	b.preprocessors[k].Add(value)
+	for i := 0; i < k; i++ {
+		for _, v := range b.groups[i] {
+			b.preprocessors[k].Add(v)
+		}
+		b.groups[k] = append(b.groups[k], b.groups[i]...)
+		b.preprocessors[i].Clear()
+		b.groups[i] = b.groups[i][:0]
+	}
+}
 
-// const int N = 1000010;
-// const int INF = 0x3fffffff;
+func (b *BinaryGrouping) Query(onQuery func(p IPreprocessor)) {
+	for i := 0; i < len(b.preprocessors); i++ {
+		onQuery(b.preprocessors[i])
+	}
+}
 
-// struct Trie {
-//     int ch[26];
-//     int fail;
-// };
+// 满足IPreprocessor接口的AC自动机.
+type SimpleACAutoMatonArray struct {
+	sigma    int32     // 字符集大小.
+	offset   int32     // 字符集的偏移量.
+	count    []int32   // count[i] 表示第i个状态匹配到的个数.
+	children [][]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
+}
 
-// struct ACAM {
-//     Trie t[N]; int son[N][26], tot;
-//     int rt[N], last, siz[N], cnt[N], end[N];
+func NewACAutoMatonArray(sigma, offset int) *SimpleACAutoMatonArray {
+	res := &SimpleACAutoMatonArray{sigma: int32(sigma), offset: int32(offset)}
+	res.newNode()
+	return res
+}
 
-//     inline void build(int root) {
-//         queue <int> q;
-//         for (int i = 0; i < 26; ++ i)
-//           if (son[root][i]) {
-//               t[t[root].ch[i] = son[root][i]].fail = root;
-//               q.push(t[root].ch[i]);
-//           } else t[root].ch[i] = root;
-//         while (q.size()) {
-//             int now = q.front(); q.pop();
-//             for (int i = 0; i < 26; ++ i)
-//               if (son[now][i]) {
-//                   t[now].ch[i] = son[now][i];
-//                   t[t[now].ch[i]].fail = t[t[now].fail].ch[i];
-//                   q.push(t[now].ch[i]);
-//               } else t[now].ch[i] = t[t[now].fail].ch[i];
-//             cnt[now] = end[now] + cnt[t[now].fail];
-//         }
-//     }
+// 添加一个字符串.
+func (trie *SimpleACAutoMatonArray) Add(str string) {
+	pos := int32(0)
+	for _, s := range str {
+		ord := int32(s) - trie.offset
+		if trie.children[pos][ord] == -1 {
+			trie.children[pos][ord] = trie.newNode()
+		}
+		pos = (trie.children[pos][ord])
+	}
+	trie.count[pos]++
+}
 
-//     inline int merge(int a, int b) {
-//         if (!a || !b) return a + b;
-//         end[a] += end[b];
-//         for (int i = 0; i < 26; ++ i)
-//           son[a][i] = merge(son[a][i], son[b][i]);
-//         return a;
-//     }
+// pos: DFA的状态集, ord: DFA的字符集
+func (trie *SimpleACAutoMatonArray) Move(pos int, ord int) int {
+	ord -= int(trie.offset)
+	return int(trie.children[pos][ord])
+}
 
-//     inline void insert(char *s) {
-//         int len = strlen(s); rt[++ last] = ++ tot;
-//         int now = rt[last]; siz[last] = 1;
-//         for (int i = 0; i < len; ++ i) {
-//             int k = s[i] - 'a';
-//             if (!son[now][k])
-//               son[now][k] = ++ tot;
-//             now = son[now][k];
-//         } end[now] = 1;
-//         while (siz[last] == siz[last - 1]) {
-//             rt[-- last] = merge(rt[last], rt[last + 1]);
-//             siz[last] += siz[last + 1];
-//         }
-//         build(rt[last]);
-//     }
+// 自动机中的节点(状态)数量，包括虚拟节点0.
+func (trie *SimpleACAutoMatonArray) Size() int {
+	return len(trie.children)
+}
 
-//     inline int query(char *s) {
-//         int res = 0, len = strlen(s);
-//         for (int i = 1; i <= last; i ++)
-//           for (int j = 0, now = rt[i]; j < len; j ++)
-//             now = t[now].ch[s[j] - 'a'], res += cnt[now];
-//         return res;
-//     }
-// };
-// ACAM ac1, ac2;
+// 构建后缀链接(失配指针).
+// needUpdateChildren 表示是否需要更新children数组(连接trie图).
+//
+// !move调用较少时，设置为false更快.
+func (trie *SimpleACAutoMatonArray) Build() {
+	suffixLink := make([]int32, len(trie.children))
+	for i := range suffixLink {
+		suffixLink[i] = -1
+	}
+	bfsOrder := make([]int32, len(trie.children))
+	head, tail := 0, 0
+	bfsOrder[tail] = 0
+	tail++
+	for head < tail {
+		v := bfsOrder[head]
+		head++
+		for i, next := range trie.children[v] {
+			if next == -1 {
+				continue
+			}
+			bfsOrder[tail] = next
+			tail++
+			f := suffixLink[v]
+			for f != -1 && trie.children[f][i] == -1 {
+				f = suffixLink[f]
+			}
+			suffixLink[next] = f
+			if f == -1 {
+				suffixLink[next] = 0
+			} else {
+				suffixLink[next] = trie.children[f][i]
+			}
+		}
+	}
+	for _, v := range bfsOrder {
+		for i, next := range trie.children[v] {
+			if next == -1 {
+				f := suffixLink[v]
+				if f == -1 {
+					trie.children[v][i] = 0
+				} else {
+					trie.children[v][i] = trie.children[f][i]
+				}
+			}
+		}
+	}
+}
 
-// char s[N];
+func (trie *SimpleACAutoMatonArray) Clear() {
+	trie.count = trie.count[:1]
+	trie.children = trie.children[:1]
+}
 
-// int main() {
-//     int m; scanf("%d", &m);
-//     for (int i = 1; i <= m; ++ i) {
-//         int op; scanf("%d", &op);
-//         scanf("%s", s);
-//         if (op == 1) ac1.insert(s);
-//         else if (op == 2) ac2.insert(s);
-//         else {
-//             printf("%d\n", ac1.query(s) - ac2.query(s));
-//             fflush(stdout);
-//         }
-//     }
-//     return 0;
-// }
+func (trie *SimpleACAutoMatonArray) newNode() int32 {
+	nexts := make([]int32, trie.sigma)
+	for i := range nexts {
+		nexts[i] = -1
+	}
+	trie.children = append(trie.children, nexts)
+	trie.count = append(trie.count, 0)
+	return int32(len(trie.children) - 1)
+}
+
+func min(a, b int) int {
+	if a <= b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a >= b {
+		return a
+	}
+	return b
+}

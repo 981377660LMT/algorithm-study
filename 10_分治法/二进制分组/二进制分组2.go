@@ -1,6 +1,3 @@
-// 二进制分组，模拟二进制加法。
-// 也可以每次添加点直接push_back，如果相邻两块的大小相同，那么将这两块合并掉，并弹掉最后一个块
-
 interface IPreprocessor<V> {
   add(value: V): void
   build(): void
