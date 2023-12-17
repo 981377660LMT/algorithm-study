@@ -62,6 +62,10 @@ def exgcd(a: int, b: int) -> Tuple[int, int, int]:
     return gcd_, y, x - a // b * y
 
 
+# def modInv(a: int, mod: int) -> int:
+#     return pow(a, mod - 2, mod)
+
+
 def modInv(a: int, mod: int) -> Optional[int]:
     """
     扩展gcd求a在mod下的逆元

@@ -48,8 +48,8 @@ class DisjointSparseTable<S> {
     if (start >= end) return this._e()
     end--
     if (start === end) return this._data[start]
-    const k = 31 - Math.clz32(start ^ end)
-    return this._op(this._data[k * this._n + start], this._data[k * this._n + end])
+    const lca = 31 - Math.clz32(start ^ end)
+    return this._op(this._data[lca * this._n + start], this._data[lca * this._n + end])
   }
 
   /**

@@ -1,4 +1,5 @@
 // https://sotanishy.github.io/cp-library-cpp/data-structure/sqrt_tree.cpp
+// https://www.luogu.com.cn/blog/221955/mao-shu
 // 比st表稍快，且节省空间
 // O(nloglogn)
 
