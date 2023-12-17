@@ -1,10 +1,10 @@
-# 两个有序数组中查找和最小的k对数字
-# 给定两个以 升序排列 的整数数组 nums1 和 nums2 , 以及一个整数 k 。
-# 定义一对值 (u,v)，其中第一个元素来自 nums1，第二个元素来自 nums2 。
-# 请找到和最小的 k 个数对 (u1,v1),  (u2,v2)  ...  (uk,vk) 。
+from collections import deque
+import sys
 
-
-"""时间复杂度O(k*logmin(n,k))"""
+sys.setrecursionlimit(int(1e6))
+input = lambda: sys.stdin.readline().rstrip("\r\n")
+MOD = 998244353
+INF = int(4e18)
 
 from functools import reduce
 from heapq import heappop, heappush
@@ -54,5 +54,10 @@ def kthSmallest(matrix: List[List[int]], k: int, unique=False) -> int:
     return reduce(lambda x, y: kSmallestPairs(x, y, k, unique=unique), matrix)[-1]
 
 
-assert kSmallestPairs1(nums1=[1, 7, 11], nums2=[2, 4, 6], k=3) == [(1, 2), (1, 4), (1, 6)]
-assert kSmallestPairs(nums1=[1, 7, 11], nums2=[2, 4, 6], k=3) == [(1, 2), (1, 4), (1, 6)]
+if __name__ == "__main__":
+    n = int(input())
+    nums1 = [int("1" * i) for i in range(1, 100)]
+    nums2 = [int("1" * i) for i in range(1, 100)]
+    nums3 = [int("1" * i) for i in range(1, 100)]
+    matrix = [nums1, nums2, nums3]
+    print(kthSmallest(matrix, n, unique=True))

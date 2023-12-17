@@ -1,100 +1,81 @@
-// API:
-//  func (sl *SortedListWithSum) Add(value S) *SortedListWithSum                               {}
-//  func (sl *SortedListWithSum) Has(value S) bool                                      {}
-//  func (sl *SortedListWithSum) Discard(value S) bool                                  {}
-//  func (sl *SortedListWithSum) Pop(index int) S                                       {}
-//  func (sl *SortedListWithSum) At(index int) S                                        {}
-//  func (sl *SortedListWithSum) Erase(start, end int)                                  {}
-//
-//  func (sl *SortedListWithSum) Lower(value S) S                                       {}
-//  func (sl *SortedListWithSum) Higher(value S) S                                      {}
-//  func (sl *SortedListWithSum) Floor(value S) S                                       {}
-//  func (sl *SortedListWithSum) Ceiling(value S) S                                     {}
-//
-//  func (sl *SortedListWithSum) BisectLeft(value S) int                                {}
-//  func (sl *SortedListWithSum) BisectRight(value S) int                               {}
-//  func (sl *SortedListWithSum) Count(value S) int                                     {}
-//
-//  func (sl *SortedListWithSum) Clear()                                                {}
-//
-//  func (sl *SortedListWithSum) ForEach(f func(value S, index int) bool, reverse bool) {}
-//  func (sl *SortedListWithSum) Enumerate(start, end int, f func(value S), erase bool) {}
-//
-//  func (sl *SortedListWithSum) Slice(start, end int) []S                              {}
-//  func (sl *SortedListWithSum) Range(min, max S) []S                                  {}
-//
-//  func (sl *SortedListWithSum) IteratorAt(index int) *Iterator                        {}
-//  func (sl *SortedListWithSum) LowerBound(value S) *Iterator                          {}
-//  func (sl *SortedListWithSum) UpperBound(value S) *Iterator                          {}
-//
-//  func (sl *SortedListWithSum) Min() S                                                {}
-//  func (sl *SortedListWithSum) Max() S                                                {}
-//  func (sl *SortedListWithSum) String() string                                        {}
-//  func (sl *SortedListWithSum) Len() int                                              {}
-
-//  !func (sl *SortedListWithSum) SumSlice(start, end int) S 													  {}
-//  !func (sl *SortedListWithSum) SumRange(min, max S) S
-//  !func (sl *SortedListWithSum) SumAll() S
-
-// test:
-// https://leetcode.cn/problems/smallest-missing-genetic-value-in-each-subtree/submissions/
-// https://leetcode.cn/problems/sliding-subarray-beauty/
-// https://leetcode.cn/problems/count-the-number-of-fair-pairs/
-// https://leetcode.cn/problems/minimum-difference-in-sums-after-removal-of-elements/
-// https://atcoder.jp/contests/abc281/tasks/abc281_e
-
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math/bits"
-	"os"
 	"sort"
 	"strings"
 )
 
-func main() {
-	// abc241_d()
-	abc281_e()
+// 100123. 执行操作使频率分数最大
+// https://leetcode.cn/problems/apply-operations-to-maximize-frequency-score/description/
+func maxFrequencyScore(nums []int, k int64) int {
+	sort.Ints(nums)
+	sl := NewSortedListWithSum(func(a, b int) bool { return a < b })
+	proxy := NewMedianFinderSortedList(sl)
+	res, left := 0, 0
+	for right := 0; right < len(nums); right++ {
+		sl.Add(nums[right])
+		for left <= right && int64(proxy.DistSumToMedian()) > k {
+			sl.Discard(nums[left])
+			left++
+		}
+		res = max(res, right-left+1)
+	}
+	return res
 }
 
-const INF int = 1e18
+// SortedList 动态维护中位数信息.
+// `Proxy 的内部持有一个对 SortedList 的引用`.
+type MedianFinderSortedList struct {
+	List *SortedListWithSum
+}
 
-// https://atcoder.jp/contests/abc281/tasks/abc281_e
-func abc281_e() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+func NewMedianFinderSortedList(sortedList *SortedListWithSum) *MedianFinderSortedList {
+	return &MedianFinderSortedList{List: sortedList}
+}
 
-	var n, m, k int
-	fmt.Fscan(in, &n, &m, &k)
-
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
+// 返回向下取整的中位数.
+func (mfs *MedianFinderSortedList) Median() (res int) {
+	if mfs.List.Len() == 0 {
+		panic("Median() called on empty MedianFinderSortedList")
 	}
-
-	sl := NewSortedListWithSum(func(a, b int) bool { return a < b })
-
-	res := make([]int, 0, n-m+1)
-	for i := 0; i < n; i++ {
-		sl.Add(nums[i])
-		if i >= m {
-			sl.Discard(nums[i-m])
-		}
-		if i >= m-1 {
-			res = append(res, sl.SumSlice(0, k))
-		}
+	if mfs.List.Len()&1 == 1 {
+		return mfs.List.At(mfs.List.Len() >> 1)
+	} else {
+		mid := mfs.List.Len() >> 1
+		return (mfs.List.At(mid-1) + mfs.List.At(mid)) >> 1
 	}
+}
 
-	for _, x := range res {
-		fmt.Fprint(out, x, " ")
+// 返回所有数到`to`的距离和.
+func (mfs *MedianFinderSortedList) DistSum(to int) int {
+	sl := mfs.List
+	pos := sl.BisectRight(to)
+	allSum := sl.SumAll()
+	var sum1, sum2 int
+	if pos < sl.Len()>>1 {
+		sum1 = sl.SumSlice(0, pos)
+		sum2 = allSum - sum1
+	} else {
+		sum2 = sl.SumSlice(pos, sl.Len())
+		sum1 = allSum - sum2
 	}
+	leftSum := to*pos - sum1
+	rightSum := sum2 - to*(sl.Len()-pos)
+	return leftSum + rightSum
+}
+
+// 返回所有数到中位数的距离和.
+func (mfs *MedianFinderSortedList) DistSumToMedian() int {
+	if mfs.List.Len() == 0 {
+		return 0
+	}
+	return mfs.DistSum(mfs.Median())
 }
 
 // 1e5 -> 200, 2e5 -> 400
-const _LOAD int = 200
+const _LOAD int = 500
 
 type E = int
 

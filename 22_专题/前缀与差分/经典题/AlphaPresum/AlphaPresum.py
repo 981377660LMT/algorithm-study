@@ -1,31 +1,32 @@
-class AlphaPresum:
-    def __init__(self, s: str) -> None:
-        # n = len(s)
-        # preSum = [[0] * 26 for _ in range(n + 1)]
-        # for i in range(1, n + 1):
-        #     preSum[i][ord(s[i - 1]) - ord('a')] += 1
-        #     for j in range(26):
-        #         preSum[i][j] += preSum[i - 1][j]
-        preSum = [[0] * 26]
-        for char in s:
-            cur = preSum[-1][:]
-            cur[ord(char) - ord('a')] += 1
-            preSum.append(cur)
-
-        self._preSum = preSum
-
-    def getCountOfSlice(self, char: str, left: int, right: int) -> int:
-        """
-        >>> preSum = AlphaPresum("abcdabcd")
-        >>> print(preSum.getCountOfSlice('a', 0, 2)) # s[0:2]间'a'个数为1
-        >>> print(preSum.getCountOfSlice('a', 0, 8)) # s[0:8]间'a'个数为2
-        """
-        assert 0 <= left <= right < len(self._preSum)
-        ord_ = ord(char) - ord('a')
-        return self._preSum[right][ord_] - self._preSum[left][ord_]
+from typing import Callable, List, Union
 
 
-preSum = AlphaPresum("abcdabcd")
-# s[0:2]间'a'个数为1
-assert preSum.getCountOfSlice('a', 0, 2) == 1
-assert preSum.getCountOfSlice('a', 0, 8) == 2
+def alphaPresum(
+    sOrOrds: Union[str, List[int]], sigma=26, offset=97
+) -> Callable[[int, int, int], int]:
+    """
+    给定字符集信息和字符s,返回一个查询函数.用于查询s[start:end]间char的个数.
+    """
+    if isinstance(sOrOrds, str):
+        sOrOrds = [ord(v) for v in sOrOrds]
+    preSum = [[0] * sigma for _ in range(len(sOrOrds) + 1)]
+    for i in range(1, len(sOrOrds) + 1):
+        preSum[i][:] = preSum[i - 1][:]
+        preSum[i][sOrOrds[i - 1] - offset] += 1
+
+    def getCountOfSlice(start: int, end: int, ord: int) -> int:
+        if start < 0:
+            start = 0
+        if end > len(sOrOrds):
+            end = len(sOrOrds)
+        if start >= end:
+            return 0
+        return preSum[end][ord - offset] - preSum[start][ord - offset]
+
+    return getCountOfSlice
+
+
+if __name__ == "__main__":
+    preSum = alphaPresum("abcdabcd")
+    assert preSum(0, 2, 97) == 1
+    assert preSum(0, 8, 97) == 2

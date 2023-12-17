@@ -1,5 +1,5 @@
+/* eslint-disable brace-style */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable arrow-body-style */
 /* eslint-disable no-inner-declarations */
 /* eslint-disable generator-star-spacing */
 /* eslint-disable prefer-destructuring */
@@ -8,7 +8,7 @@
 
 import { SortedListFast } from './SortedListFast'
 
-interface Options<V> {
+interface IOptions<V> {
   values?: Iterable<V>
   compareFn?: (a: V, b: V) => number
   abelGroup?: {
@@ -18,19 +18,29 @@ interface Options<V> {
   }
 }
 
+interface ISortedListFastWithSum<V> {
+  sumSlice(start?: number, end?: number): V
+  sumRange(min: V, max: V): V
+  sumAll(): V
+}
+
 /**
  * 支持区间求和的有序列表.
  * {@link sumSlice} 和 {@link sumRange} 的时间复杂度为 `O(sqrt(n))`.
+ * {@link sumAll} 的时间复杂度为 `O(1)`.
  */
-class SortedListFastWithSum<V = number> extends SortedListFast<V> {
+class SortedListFastWithSum<V = number>
+  extends SortedListFast<V>
+  implements ISortedListFastWithSum<V>
+{
   private readonly _e: () => V
   private readonly _op: (a: V, b: V) => V
   private readonly _inv: (a: V) => V
+  private _allSum: V
   private _sums: V[] = []
 
-  constructor(options?: Options<V>) {
+  constructor(options?: IOptions<V>) {
     super()
-
     const {
       values = [],
       compareFn = (a: any, b: any) => a - b,
@@ -40,11 +50,11 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
         inv: (a: any) => -a as any
       }
     } = options ?? {}
-
     this._e = abelGroup.e
     this._op = abelGroup.op
     this._inv = abelGroup.inv
-    this._build([...values], compareFn)
+    this._allSum = this._e()
+    this._reBuild([...values], compareFn)
   }
 
   /**
@@ -58,7 +68,7 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
     if (start >= end) return this._e()
 
     let res = this._e()
-    let [pos, index] = this._findKth(start)
+    let { pos, index } = this._findKth(start)
     let count = end - start
     for (; count && pos < this._blocks.length; pos++) {
       const block = this._blocks[pos]
@@ -83,7 +93,7 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
     if (this._compareFn(min, max) > 0) return this._e()
 
     let res = this._e()
-    let [pos, start] = this._locLeft(min)
+    let { pos, index: start } = this._locLeft(min)
     for (let i = pos; i < this._blocks.length; i++) {
       const block = this._blocks[i]
       if (this._compareFn(max, block[0]) < 0) break
@@ -101,9 +111,49 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
     return res
   }
 
+  sumAll(): V {
+    return this._allSum
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  protected override _init(): void {
+    return undefined
+  }
+
+  protected override _reBuild(data: V[], compareFn: (a: V, b: V) => number): void {
+    data.sort(compareFn)
+    const n = data.length
+    const blocks = []
+    const sums = []
+    let allSum = this._e()
+    for (let i = 0; i < n; i += SortedListFast._LOAD) {
+      const newBlock = data.slice(i, i + SortedListFast._LOAD)
+      blocks.push(newBlock)
+      let cur = this._e()
+      for (let j = 0; j < newBlock.length; j++) cur = this._op(cur, newBlock[j])
+      sums.push(cur)
+      allSum = this._op(allSum, cur)
+    }
+    const mins = Array(blocks.length)
+    for (let i = 0; i < blocks.length; i++) {
+      const cur = blocks[i]
+      mins[i] = cur[0]
+    }
+
+    this._compareFn = compareFn
+    this._len = n
+    this._blocks = blocks
+    this._mins = mins
+    this._tree = []
+    this._shouldRebuildTree = true
+    this._sums = sums
+    this._allSum = allSum
+  }
+
   override add(value: V): this {
     const { _blocks, _mins, _sums } = this
     this._len++
+    this._allSum = this._op(this._allSum, value)
     if (!_blocks.length) {
       _blocks.push([value])
       _mins.push(value)
@@ -113,9 +163,7 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
     }
 
     const load = SortedListFast._LOAD
-    const pair = this._locRight(value)
-    const pos = pair[0]
-    const index = pair[1]
+    const { pos, index } = this._locRight(value)
     this._updateTree(pos, 1)
     const block = _blocks[pos]
     block.splice(index, 0, value)
@@ -142,9 +190,7 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
     if (end > this._len) end = this._len
     if (start >= end) return
 
-    const pair = this._findKth(start)
-    let pos = pair[0]
-    let startIndex = pair[1]
+    let { pos, index: startIndex } = this._findKth(start)
     let count = end - start
     for (; count && pos < this._blocks.length; pos++) {
       const block = this._blocks[pos]
@@ -159,6 +205,7 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
           // !delete block
           this._blocks.splice(pos, 1)
           this._mins.splice(pos, 1)
+          this._allSum = this._op(this._allSum, this._inv(this._sums[pos]))
           this._sums.splice(pos, 1)
           this._shouldRebuildTree = true
           pos--
@@ -166,7 +213,9 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
           // !delete [index, end)
           for (let i = startIndex; i < endIndex; i++) {
             this._updateTree(pos, -1)
-            this._sums[pos] = this._op(this._sums[pos], this._inv(block[i]))
+            const inv = this._inv(block[i])
+            this._allSum = this._op(this._allSum, inv)
+            this._sums[pos] = this._op(this._sums[pos], inv)
           }
           block.splice(startIndex, deleted)
           this._mins[pos] = block[0]
@@ -182,33 +231,7 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
   override clear(): void {
     super.clear()
     this._sums = []
-  }
-
-  protected override _build(data: V[], compareFn: (a: V, b: V) => number): void {
-    data.sort(compareFn)
-    const n = data.length
-    const blocks = []
-    const sums = []
-    for (let i = 0; i < n; i += SortedListFast._LOAD) {
-      const newBlock = data.slice(i, i + SortedListFast._LOAD)
-      blocks.push(newBlock)
-      let cur = this._e()
-      for (let j = 0; j < newBlock.length; j++) cur = this._op(cur, newBlock[j])
-      sums.push(cur)
-    }
-    const mins = Array(blocks.length)
-    for (let i = 0; i < blocks.length; i++) {
-      const cur = blocks[i]
-      mins[i] = cur[0]
-    }
-
-    this._compareFn = compareFn
-    this._len = n
-    this._blocks = blocks
-    this._mins = mins
-    this._tree = []
-    this._shouldRebuildTree = true
-    this._sums = sums
+    this._allSum = this._e()
   }
 
   protected override _delete(pos: number, index: number): void {
@@ -220,6 +243,7 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> {
     const block = _blocks[pos]
     const deleted = block[index]
     block.splice(index, 1)
+    this._allSum = this._op(this._allSum, this._inv(deleted))
     if (block.length) {
       _mins[pos] = block[0]
       _sums[pos] = this._op(_sums[pos], this._inv(deleted))

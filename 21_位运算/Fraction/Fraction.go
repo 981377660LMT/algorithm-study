@@ -1,5 +1,6 @@
 // Rational/Fraction
 // https://nyaannyaan.github.io/library/math/rational.hpp
+// 手写分数类(type Fraction struct)
 
 package main
 

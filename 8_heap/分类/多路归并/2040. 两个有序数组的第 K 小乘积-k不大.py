@@ -8,10 +8,13 @@ from typing import Generator, List
 # 1 ≤ m ≤ 100,000
 # 时间复杂度O(m+nlogn+klogm),
 
+
 # 2040. 两个有序数组的第 K 小乘积-check函数也二分
 class Solution:
     def kthSmallestProduct(self, nums1: List[int], nums2: List[int], k: int) -> int:
-        """TLE"""
+        """
+        !TLE
+        """
 
         def g1(index: int) -> Generator[int, None, None]:
             return (nums1[index] * num for num in nums2)

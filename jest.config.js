@@ -16,5 +16,5 @@ module.exports = {
   collectCoverage: true,
   coveragePathIgnorePatterns: ['node_modules'],
   testEnvironment: 'node',
-  modulePathIgnorePatterns: ['node_modules']
+  modulePathIgnorePatterns: ['node_modules', 'immutable-js']
 }

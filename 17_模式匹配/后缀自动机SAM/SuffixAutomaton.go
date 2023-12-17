@@ -24,13 +24,13 @@ func main() {
 	fmt.Fprintln(out, sa.CountSubstring())
 }
 
-const SIZE int = 26     // 字符集大小
-const MARGIN byte = 'a' // 字符集的起始字符
+const SIGMA int = 26    // 字符集大小
+const OFFSET byte = 'a' // 字符集的起始字符
 
 type Node struct {
-	next      [SIZE]int // automaton の遷移先
-	link      int       // suffix link
-	maxLength int       // node が受理する最長文字列の長さ
+	next      [SIGMA]int // automaton の遷移先
+	link      int        // suffix link
+	maxLength int        // node が受理する最長文字列の長さ
 }
 
 type SuffixAutomaton struct {
@@ -41,7 +41,7 @@ type SuffixAutomaton struct {
 }
 
 func NewSuffixAutomaton() *SuffixAutomaton {
-	res := &SuffixAutomaton{size: SIZE, margin: MARGIN}
+	res := &SuffixAutomaton{size: SIGMA, margin: OFFSET}
 	res.nodes = append(res.nodes, res.newNode(-1, 0))
 	return res
 }

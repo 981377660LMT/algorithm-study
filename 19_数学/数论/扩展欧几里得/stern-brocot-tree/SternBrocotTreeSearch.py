@@ -1,3 +1,5 @@
+# 作用：可以用在01分数规划问题，避免浮点数二分精度
+
 from typing import Callable, Tuple
 
 

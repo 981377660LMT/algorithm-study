@@ -1,59 +1,53 @@
-/* eslint-disable no-inner-declarations */
-/* eslint-disable generator-star-spacing */
-/* eslint-disable prefer-destructuring */
+function maxFrequencyScore(nums: number[], k: number): number {
+  nums.sort((a, b) => a - b)
 
-// API.
-interface ISortedList<V> {
-  add(value: V): void
-  has(value: V, equals?: (a: V, b: V) => boolean): boolean
-  discard(value: V, equals?: (a: V, b: V) => boolean): boolean
-  pop(index?: number): V | undefined
-  at(index: number): V | undefined
-  erase(start?: number, end?: number): void
+  const sl = new SortedListFastWithSum()
+  const D = distSum(sl)
+  let res = 0
+  let left = 0
+  for (let right = 0; right < nums.length; right++) {
+    sl.add(nums[right])
+    while (left <= right) {
+      const median =
+        sl.length % 2 === 0
+          ? Math.floor((sl.at(sl.length / 2 - 1)! + sl.at(sl.length / 2)!) / 2)
+          : sl.at((sl.length - 1) / 2)!
 
-  lower(value: V): V | undefined
-  higher(value: V): V | undefined
-  floor(value: V): V | undefined
-  ceiling(value: V): V | undefined
+      const distSum = D(median)
+      if (distSum <= k) break
+      sl.discard(nums[left])
+      left++
+    }
+    res = Math.max(res, right - left + 1)
+  }
 
-  bisectLeft(value: V): number
-  bisectRight(value: V): number
-  count(value: V): number
+  return res
 
-  slice(start?: number, end?: number): V[]
-  clear(): void
-  update(...values: V[]): void
-  merge(other: ISortedList<V>): void
-
-  toString(): string
-
-  forEach(callbackfn: (value: V, index: number) => void | boolean, reverse?: boolean): void
-  enumerate(start: number, end: number, f?: (value: V) => void, erase?: boolean): void
-  iSlice(start: number, end: number, reverse?: boolean): IterableIterator<V>
-  iRange(min: V, max: V, reverse?: boolean): IterableIterator<V>
-  entries(): IterableIterator<[number, V]>
-  [Symbol.iterator](): IterableIterator<V>
-
-  readonly length: number
-  readonly min: V | undefined
-  readonly max: V | undefined
+  function distSum(sl: SortedListFastWithSum): (k: number) => number {
+    return (k: number): number => {
+      const pos = sl.bisectRight(k)
+      const leftSum = k * pos - sl.sumSlice(0, pos)
+      const rightSum = sl.sumSlice(pos, sl.length) - k * (sl.length - pos)
+      return leftSum + rightSum
+    }
+  }
 }
 
-interface ISortedListIterator<V> {
-  hasNext(): boolean
-  next(): V | undefined
-  hasPrev(): boolean
-  prev(): V | undefined
-  /** 删除后会使所有迭代器失效. */
-  remove(): void
-  readonly value: V | undefined
+interface Options<V> {
+  values?: Iterable<V>
+  compareFn?: (a: V, b: V) => number
+  abelGroup?: {
+    e: () => V
+    op: (a: V, b: V) => V
+    inv: (a: V) => V
+  }
 }
 
 /**
  * 使用分块+树状数组维护的有序序列.
  * !如果数组较短(<2000),直接使用`bisectInsort`维护即可.
  */
-class SortedListFast<V = number> implements ISortedList<V> {
+class SortedListFast<V = number> {
   static setLoadFactor(load = 500): void {
     this._LOAD = load
   }
@@ -114,7 +108,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
       }
     }
 
-    this._init(defaultData, defaultCompareFn)
+    this._build(defaultData, defaultCompareFn)
   }
 
   add(value: V): this {
@@ -158,7 +152,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
     })
 
     for (let i = 0; i < n; i++) data[ptr++] = values[i]
-    this._reBuild(data, this._compareFn)
+    this._build(data, this._compareFn)
     return this
   }
 
@@ -180,7 +174,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
     other.forEach(v => {
       data[ptr++] = v
     })
-    this._reBuild(data, this._compareFn)
+    this._build(data, this._compareFn)
     return this
   }
 
@@ -342,9 +336,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
     if (end > this._len) end = this._len
     if (start >= end) return
 
-    const pair = this._findKth(start)
-    let pos = pair.pos
-    let startIndex = pair.index
+    let { pos, index: startIndex } = this._findKth(start)
     let count = end - start
     for (; count && pos < this._blocks.length; pos++) {
       const block = this._blocks[pos]
@@ -472,11 +464,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
     return lastBlock[lastBlock.length - 1]
   }
 
-  protected _init(data: V[], compareFn: (a: V, b: V) => number): void {
-    this._reBuild(data, compareFn)
-  }
-
-  protected _reBuild(data: V[], compareFn: (a: V, b: V) => number): void {
+  protected _build(data: V[], compareFn: (a: V, b: V) => number): void {
     data.sort(compareFn)
     const n = data.length
     const blocks = []
@@ -588,7 +576,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
     return { pos, index: right }
   }
 
-  private _locBlock(value: V): number {
+  protected _locBlock(value: V): number {
     let left = -1
     let right = this._blocks.length - 1
     while (left + 1 < right) {
@@ -668,195 +656,221 @@ class SortedListFast<V = number> implements ISortedList<V> {
   }
 }
 
-export { SortedListFast, ISortedList, ISortedListIterator }
+/**
+ * 支持区间求和的有序列表.
+ * {@link sumSlice} 和 {@link sumRange} 的时间复杂度为 `O(sqrt(n))`.
+ */
+class SortedListFastWithSum<V = number> extends SortedListFast<V> {
+  private readonly _e: () => V
+  private readonly _op: (a: V, b: V) => V
+  private readonly _inv: (a: V) => V
+  private _sums: V[] = []
 
-if (require.main === module) {
-  const sl = new SortedListFast<number>()
-  sl.add(2)
-  sl.add(2)
-  sl.add(1)
-  sl.add(3)
-  console.log(sl.toString())
-  console.log(sl.floor(2), sl.lower(2), sl.ceiling(2), sl.higher(2))
-  console.log(...sl.iRange(0, 2))
+  constructor(options?: Options<V>) {
+    super()
 
-  // https://leetcode.cn/problems/sliding-subarray-beauty/
-  function getSubarrayBeauty(nums: number[], k: number, x: number): number[] {
-    const res: number[] = []
-    const sl = new SortedListFast()
-    const n = nums.length
-    for (let right = 0; right < n; right++) {
-      sl.add(nums[right])
-      if (right >= k) {
-        sl.discard(nums[right - k])
+    const {
+      values = [],
+      compareFn = (a: any, b: any) => a - b,
+      abelGroup = {
+        e: () => 0 as any,
+        op: (a: any, b: any) => a + b,
+        inv: (a: any) => -a as any
       }
-      if (right >= k - 1) {
-        const xth = sl.at(x - 1)!
-        res.push(xth < 0 ? xth : 0)
-      }
-    }
-    return res
+    } = options ?? {}
+
+    this._e = abelGroup.e
+    this._op = abelGroup.op
+    this._inv = abelGroup.inv
+    this._build([...values], compareFn)
   }
 
-  // https://leetcode.cn/problems/sum-of-imbalance-numbers-of-all-subarrays/
-  function sumImbalanceNumbers(nums: number[]): number {
-    let res = 0
-    const n = nums.length
-    for (let left = 0; left < n; left++) {
-      const sl = new SortedListFast<number>()
-      for (let right = left; right < n; right++) {
-        sl.add(nums[right])
-        const cur = sl.slice()
-        for (let i = 1; i < cur.length; i++) {
-          res += +(cur[i] - cur[i - 1] > 1)
-        }
-      }
-    }
-    return res
-  }
+  /**
+   * 返回区间 `[start, end)` 的和.
+   */
+  sumSlice(start = 0, end = this.length): V {
+    if (start < 0) start += this._len
+    if (start < 0) start = 0
+    if (end < 0) end += this._len
+    if (end > this._len) end = this._len
+    if (start >= end) return this._e()
 
-  // https://leetcode.cn/problems/maximum-number-of-tasks-you-can-assign/
-  function maxTaskAssign(
-    tasks: number[],
-    workers: number[],
-    pills: number,
-    strength: number
-  ): number {
-    tasks.sort((a, b) => a - b)
-    workers.sort((a, b) => a - b)
-    let left = 0
-    let right = Math.min(tasks.length, workers.length)
-    while (left <= right) {
-      const mid = (left + right) >> 1
-      if (check(mid)) {
-        left = mid + 1
+    let res = this._e()
+    let { pos, index } = this._findKth(start)
+    let count = end - start
+    for (; count && pos < this._blocks.length; pos++) {
+      const block = this._blocks[pos]
+      const endPos = Math.min(block.length, index + count)
+      const curCount = endPos - index
+      if (curCount === block.length) {
+        res = this._op(res, this._sums[pos])
       } else {
-        right = mid - 1
+        for (let j = index; j < endPos; j++) res = this._op(res, block[j])
       }
+      count -= curCount
+      index = 0
     }
 
-    return right
+    return res
+  }
 
-    function check(mid: number): boolean {
-      let remain = pills
-      const sl = new SortedListFast<number>(workers.slice(-mid))
-      // const wls = useSortedList(workers.slice(-mid))
-      for (let i = mid - 1; i >= 0; i--) {
-        const t = tasks[i]
-        if (sl.at(sl.length - 1)! >= t) {
-          sl.pop()
-        } else {
-          if (remain === 0) {
-            return false
-          }
-          const cand = sl.bisectLeft(t - strength)
-          if (cand === sl.length) {
-            return false
-          }
-          remain -= 1
-          sl.pop(cand)
+  /**
+   * 返回范围 `[min, max]` 的和.
+   */
+  sumRange(min: V, max: V): V {
+    if (this._compareFn(min, max) > 0) return this._e()
+
+    let res = this._e()
+    let { pos, index: start } = this._locLeft(min)
+    for (let i = pos; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
+      if (this._compareFn(max, block[0]) < 0) break
+      if (start === 0 && this._compareFn(block[block.length - 1], max) <= 0) {
+        res = this._op(res, this._sums[i])
+      } else {
+        for (let j = start; j < block.length; j++) {
+          const cur = block[j]
+          if (this._compareFn(cur, max) > 0) break
+          res = this._op(res, cur)
         }
       }
-
-      return true
-    }
-  }
-
-  // https://leetcode.cn/problems/count-the-number-of-fair-pairs/
-  function countFairPairs(nums: number[], lower: number, upper: number): number {
-    const sl = new SortedListFast<number>()
-    let res = 0
-    nums.forEach(x => {
-      res += sl.bisectRight(upper - x) - sl.bisectLeft(lower - x)
-      sl.add(x)
-    })
-    return res
-  }
-
-  // https://leetcode.cn/problems/find-score-of-an-array-after-marking-all-elements/
-  function findScore(nums: number[]): number {
-    const sl = new SortedListFast<[number, number]>((a, b) => a[0] - b[0] || a[1] - b[1])
-    const equals = (a: [number, number], b: [number, number]) => a[0] === b[0] && a[1] === b[1]
-    nums.forEach((x, i) => sl.add([x, i]))
-
-    let res = 0
-    while (sl.length > 0) {
-      const [v, i] = sl.pop(0)!
-      res += v
-      if (i - 1 >= 0) sl.discard([nums[i - 1], i - 1], equals)
-      if (i + 1 < nums.length) sl.discard([nums[i + 1], i + 1], equals)
+      start = 0
     }
     return res
   }
 
-  // https://leetcode.cn/problems/count-nodes-that-are-great-enough/
-  class TreeNode {
-    val: number
-    left: TreeNode | null
-    right: TreeNode | null
-    constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
-      this.val = val === undefined ? 0 : val
-      this.left = left === undefined ? null : left
-      this.right = right === undefined ? null : right
+  override add(value: V): this {
+    const { _blocks, _mins, _sums } = this
+    this._len++
+    if (!_blocks.length) {
+      _blocks.push([value])
+      _mins.push(value)
+      _sums.push(value)
+      this._shouldRebuildTree = true
+      return this
+    }
+
+    const load = SortedListFast._LOAD
+    const { pos, index } = this._locRight(value)
+    this._updateTree(pos, 1)
+    const block = _blocks[pos]
+    block.splice(index, 0, value)
+    _mins[pos] = block[0]
+    _sums[pos] = this._op(_sums[pos], value)
+
+    // !-> [x]*load + [x]*(block.length - load)
+    if (load + load < block.length) {
+      const oldSum = _sums[pos]
+      _blocks.splice(pos + 1, 0, block.slice(load))
+      _mins.splice(pos + 1, 0, block[load])
+      block.splice(load)
+      this._shouldRebuildTree = true
+
+      this._rebuildSum(pos)
+      this._sums.splice(pos + 1, 0, this._op(oldSum, this._inv(this._sums[pos])))
+    }
+
+    return this
+  }
+
+  override enumerate(start: number, end: number, f?: (value: V) => void, erase?: boolean): void {
+    if (start < 0) start = 0
+    if (end > this._len) end = this._len
+    if (start >= end) return
+
+    let { pos, index: startIndex } = this._findKth(start)
+    let count = end - start
+    for (; count && pos < this._blocks.length; pos++) {
+      const block = this._blocks[pos]
+      const endIndex = Math.min(block.length, startIndex + count)
+      if (f) {
+        for (let j = startIndex; j < endIndex; j++) f(block[j])
+      }
+      const deleted = endIndex - startIndex
+
+      if (erase) {
+        if (deleted === block.length) {
+          // !delete block
+          this._blocks.splice(pos, 1)
+          this._mins.splice(pos, 1)
+          this._sums.splice(pos, 1)
+          this._shouldRebuildTree = true
+          pos--
+        } else {
+          // !delete [index, end)
+          for (let i = startIndex; i < endIndex; i++) {
+            this._updateTree(pos, -1)
+            this._sums[pos] = this._op(this._sums[pos], this._inv(block[i]))
+          }
+          block.splice(startIndex, deleted)
+          this._mins[pos] = block[0]
+        }
+        this._len -= deleted
+      }
+
+      count -= deleted
+      startIndex = 0
     }
   }
 
-  function countGreatEnoughNodes(root: TreeNode | null, k: number): number {
-    let res = 0
-    dfs(root)
-    return res
-
-    function dfs(cur: TreeNode | null): SortedListFast<number> {
-      if (!cur) {
-        return new SortedListFast()
-      }
-      let left = dfs(cur.left)
-      let right = dfs(cur.right)
-      if (left.length < right.length) {
-        const tmp = left
-        left = right
-        right = tmp
-      }
-      left.merge(right)
-      res += +(left.bisectLeft(cur.val) >= k)
-      left.add(cur.val)
-      return left
-    }
+  override clear(): void {
+    super.clear()
+    this._sums = []
   }
 
-  // https://leetcode.cn/problems/minimum-absolute-difference-between-elements-with-constraint/description/
-  function minAbsoluteDifference(nums: number[], x: number): number {
-    const sl = new SortedListFast<number>()
-    let res = 2e15
-    for (let right = x; right < nums.length; right++) {
-      sl.add(nums[right - x])
-      const cur = nums[right]
-      const floor = sl.floor(cur)
-      if (floor != undefined) {
-        res = Math.min(res, cur - floor)
-      }
-      const ceiling = sl.ceiling(cur)
-      if (ceiling != undefined) {
-        res = Math.min(res, ceiling - cur)
-      }
+  protected override _build(data: V[], compareFn: (a: V, b: V) => number): void {
+    data.sort(compareFn)
+    const n = data.length
+    const blocks = []
+    const sums = []
+    for (let i = 0; i < n; i += SortedListFast._LOAD) {
+      const newBlock = data.slice(i, i + SortedListFast._LOAD)
+      blocks.push(newBlock)
+      let cur = this._e()
+      for (let j = 0; j < newBlock.length; j++) cur = this._op(cur, newBlock[j])
+      sums.push(cur)
     }
-    return res
+    const mins = Array(blocks.length)
+    for (let i = 0; i < blocks.length; i++) {
+      const cur = blocks[i]
+      mins[i] = cur[0]
+    }
+
+    this._compareFn = compareFn
+    this._len = n
+    this._blocks = blocks
+    this._mins = mins
+    this._tree = []
+    this._shouldRebuildTree = true
+    this._sums = sums
   }
 
-  // 1649. 通过指令创建有序数组
-  // https://leetcode.cn/problems/create-sorted-array-through-instructions/description/
+  protected override _delete(pos: number, index: number): void {
+    const { _blocks, _mins, _sums } = this
 
-  function createSortedArray(instructions: number[]): number {
-    const MOD = 1e9 + 7
-    let res = 0
-    const sl = new SortedListFast<number>()
-    instructions.forEach(num => {
-      const smaller = sl.bisectLeft(num)
-      const bigger = sl.length - sl.bisectRight(num)
-      res += Math.min(smaller, bigger)
-      res %= MOD
-      sl.add(num)
-    })
-    return res % MOD
+    // !delete element
+    this._len--
+    this._updateTree(pos, -1)
+    const block = _blocks[pos]
+    const deleted = block[index]
+    block.splice(index, 1)
+    if (block.length) {
+      _mins[pos] = block[0]
+      _sums[pos] = this._op(_sums[pos], this._inv(deleted))
+      return
+    }
+
+    // !delete block
+    _blocks.splice(pos, 1)
+    _mins.splice(pos, 1)
+    _sums.splice(pos, 1)
+    this._shouldRebuildTree = true
+  }
+
+  private _rebuildSum(pos: number): void {
+    let cur = this._e()
+    const block = this._blocks[pos]
+    for (let i = 0; i < block.length; i++) cur = this._op(cur, block[i])
+    this._sums[pos] = cur
   }
 }

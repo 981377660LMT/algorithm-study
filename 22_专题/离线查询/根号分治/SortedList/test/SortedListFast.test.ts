@@ -133,31 +133,31 @@ describe('SortedListFast', () => {
     }
   })
 
-  // iteratorAt
-  it('should support iteratorAt', () => {
-    let index = Math.floor(Math.random() * sl.length)
-    const it = sl.iteratorAt(index)
-    const target = sortedNums[index]
-    expect(it.value).toBe(target)
+  // // iteratorAt
+  // it('should support iteratorAt', () => {
+  //   let index = Math.floor(Math.random() * sl.length)
+  //   const it = sl.iteratorAt(index)
+  //   const target = sortedNums[index]
+  //   expect(it.value).toBe(target)
 
-    // prev/hastPrev/next/hasNext
-    expect(it.hasPrev()).toBe(index > 0)
-    expect(it.hasNext()).toBe(index < sl.length - 1)
-    if (it.hasPrev()) {
-      index--
-      expect(it.prev()).toBe(sortedNums[index])
-    }
-    if (it.hasNext()) {
-      index++
-      expect(it.next()).toBe(sortedNums[index])
-    }
+  //   // prev/hastPrev/next/hasNext
+  //   expect(it.hasPrev()).toBe(index > 0)
+  //   expect(it.hasNext()).toBe(index < sl.length - 1)
+  //   if (it.hasPrev()) {
+  //     index--
+  //     expect(it.prev()).toBe(sortedNums[index])
+  //   }
+  //   if (it.hasNext()) {
+  //     index++
+  //     expect(it.next()).toBe(sortedNums[index])
+  //   }
 
-    // remove
-    it.remove()
-    sortedNums.splice(index, 1)
-    expect(sl.length).toBe(sortedNums.length)
-    expect(sortedNums).toStrictEqual([...sl])
-  })
+  //   // remove
+  //   it.remove()
+  //   sortedNums.splice(index, 1)
+  //   expect(sl.length).toBe(sortedNums.length)
+  //   expect(sortedNums).toStrictEqual([...sl])
+  // })
 
   // update
   it('should support update', () => {

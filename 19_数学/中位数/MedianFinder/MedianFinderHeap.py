@@ -1,7 +1,9 @@
 from heapq import heappush, heappushpop
 
 
-class MedianFinder:
+class MedianFinderHeap:
+    """对顶堆动态维护中位数."""
+
     def __init__(self):
         self.small = []  # 左边，大顶堆
         self.large = []  # 右边，小顶堆
@@ -19,3 +21,6 @@ class MedianFinder:
             return self.large[0]
 
         raise Exception("Invalid state")
+
+    def __len__(self):
+        return len(self.small) + len(self.large)
