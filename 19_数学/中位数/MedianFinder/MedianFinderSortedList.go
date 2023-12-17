@@ -66,12 +66,44 @@ func (mfs *MedianFinderSortedList) DistSum(to int) int {
 	return leftSum + rightSum
 }
 
+// 返回切片`[start,end)`中所有数到`to`的距离和.
+func (mfs *MedianFinderSortedList) DistSumRange(to int, start, end int) int {
+	sl := mfs.List
+	if start < 0 {
+		start = 0
+	}
+	if end > sl.Len() {
+		end = sl.Len()
+	}
+	if start >= end {
+		return 0
+	}
+	pos := sl.BisectLeft(to)
+	if pos <= start {
+		return sl.SumSlice(start, end) - to*(end-start)
+	}
+	if pos >= end {
+		return to*(end-start) - sl.SumSlice(start, end)
+	}
+	leftSum := to*(pos-start) - sl.SumSlice(start, pos)
+	rightSum := sl.SumSlice(pos, end) - to*(end-pos)
+	return leftSum + rightSum
+}
+
 // 返回所有数到中位数的距离和.
 func (mfs *MedianFinderSortedList) DistSumToMedian() int {
 	if mfs.List.Len() == 0 {
 		return 0
 	}
 	return mfs.DistSum(mfs.Median())
+}
+
+// 返回切片`[start,end)`中所有数到中位数的距离和.
+func (mfs *MedianFinderSortedList) DistSumToMedianRange(start, end int) int {
+	if mfs.List.Len() == 0 {
+		return 0
+	}
+	return mfs.DistSumRange(mfs.Median(), start, end)
 }
 
 // 1e5 -> 200, 2e5 -> 400

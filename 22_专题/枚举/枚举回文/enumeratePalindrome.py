@@ -61,6 +61,18 @@ def getKthPalindrome(length: int, k: int) -> Optional[str]:
     return f"{half}{str(half)[::-1]}"
 
 
+def nextPalindrome(x: str) -> str:
+    """返回比x大的下一个回文数."""
+    if x == "9" * len(x):
+        return "1" + "0" * (len(x) - 1) + "1"
+    if len(x) & 1:
+        half = str(int(x[: len(x) // 2 + 1]) + 1)
+        return half + half[:-1][::-1]
+    else:
+        half = str(int(x[: len(x) // 2]) + 1)
+        return half + half[::-1]
+
+
 if __name__ == "__main__":
     count = 0
     for p in emumeratePalindrome(1, 12):
@@ -68,3 +80,4 @@ if __name__ == "__main__":
     print(count)
     print(getPalindromeByHalf(123, False))
     print(getKthPalindrome(2, 9))
+    print(nextPalindrome("9999"))

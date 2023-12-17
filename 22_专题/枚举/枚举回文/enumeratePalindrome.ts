@@ -1,3 +1,4 @@
+/* eslint-disable no-else-return */
 /* eslint-disable newline-per-chained-call */
 
 /**
@@ -42,7 +43,11 @@ function enumeratePalindrome(
  * 遍历长度在 `[minLength, maxLength]` 之间的回文数字字符串.
  * @param maxLength maxLength <= 12.
  */
-function* generatePalindrome(minLength: number, maxLength: number, reversed = false): Generator<string> {
+function* generatePalindrome(
+  minLength: number,
+  maxLength: number,
+  reversed = false
+): Generator<string> {
   if (minLength > maxLength) return
 
   if (reversed) {
@@ -98,7 +103,26 @@ function getKthPalindrome(length: number, k: number): string | undefined {
   return `${half}${String(half).split('').reverse().join('')}`
 }
 
-export { enumeratePalindrome, generatePalindrome, getPalindromeByHalf, countPalindrome, getKthPalindrome }
+/** 返回比x大的下一个回文数. */
+function nextPalindrome(x: string): string {
+  if (x === '9'.repeat(x.length)) return `1${'0'.repeat(x.length - 1)}1`
+  if (x.length & 1) {
+    const half = String(Number(x.slice(0, (x.length >>> 1) + 1)) + 1)
+    return `${half}${half.slice(0, -1).split('').reverse().join('')}`
+  } else {
+    const half = String(Number(x.slice(0, x.length >>> 1)) + 1)
+    return `${half}${half.split('').reverse().join('')}`
+  }
+}
+
+export {
+  enumeratePalindrome,
+  generatePalindrome,
+  getPalindromeByHalf,
+  countPalindrome,
+  getKthPalindrome,
+  nextPalindrome
+}
 
 if (require.main === module) {
   let count = 0

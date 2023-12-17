@@ -54,11 +54,39 @@ class MedianFinderSortedList {
   }
 
   /**
+   * 返回切片`[start,end)`中所有数到`to`的距离和.
+   */
+  distSumRange(to: number, start: number, end: number): number {
+    const sl = this.sortedList
+    if (start < 0) start = 0
+    if (end > sl.length) end = sl.length
+    if (start >= end) return 0
+    const pos = sl.bisectLeft(to)
+    if (pos <= start) {
+      return sl.sumSlice(start, end) - to * (end - start)
+    }
+    if (pos >= end) {
+      return to * (end - start) - sl.sumSlice(start, end)
+    }
+    const leftSum = to * (pos - start) - sl.sumSlice(start, pos)
+    const rightSum = sl.sumSlice(pos, end) - to * (end - pos)
+    return leftSum + rightSum
+  }
+
+  /**
    * 返回所有数到中位数的距离和.
    */
   distSumToMedian(): number {
     if (!this.sortedList.length) return 0
     return this.distSum(this.median()!)
+  }
+
+  /**
+   * 返回切片`[start,end)`中所有数到中位数的距离和.
+   */
+  distSumToMedianRange(start: number, end: number): number {
+    if (!this.sortedList.length) return 0
+    return this.distSumRange(this.median()!, start, end)
   }
 }
 
