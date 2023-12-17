@@ -1,4 +1,3 @@
-// https://codeforces.com/contest/710/submission/187615267
 // https://www.cnblogs.com/TianMeng-hyl/p/14989441.html
 // https://www.cnblogs.com/Dfkuaid-210/p/bit_divide.html
 // https://codeforces.com/contest/710/submission/187615267
