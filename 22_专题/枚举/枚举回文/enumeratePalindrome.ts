@@ -1,11 +1,53 @@
+/* eslint-disable no-inner-declarations */
 /* eslint-disable no-else-return */
 /* eslint-disable newline-per-chained-call */
+
+import { distSum } from '../../前缀与差分/template/distSum/distSum'
+
+/**
+ * 从小到大遍历`[min,max]`闭区间内的回文数.返回 true 可提前终止遍历.
+ * @link https://github.com/EndlessCheng/codeforces-go
+ */
+function enumeratePalindrome(
+  min: number,
+  max: number,
+  f: (palindrome: number) => boolean | void
+): void {
+  if (min > max) return
+  const minLength = String(min).length
+  const startBase = 10 ** ((minLength - 1) >>> 1)
+  for (let base = startBase; ; base *= 10) {
+    // 生成奇数长度回文数，例如 base = 10，生成的范围是 101 ~ 999
+    for (let i = base; i < base * 10; i++) {
+      let x = i
+      for (let t = Math.floor(i / 10); t > 0; t = Math.floor(t / 10)) {
+        x = x * 10 + (t % 10)
+      }
+      if (x > max) return
+      if (x >= min) {
+        if (f(x)) return
+      }
+    }
+
+    // 生成偶数长度回文数，例如 base = 10，生成的范围是 1001 ~ 9999
+    for (let i = base; i < base * 10; i++) {
+      let x = i
+      for (let t = i; t > 0; t = Math.floor(t / 10)) {
+        x = x * 10 + (t % 10)
+      }
+      if (x > max) return
+      if (x >= min) {
+        if (f(x)) return
+      }
+    }
+  }
+}
 
 /**
  * 遍历长度在 `[minLength, maxLength]` 之间的回文数字字符串.
  * @param maxLength maxLength <= 12.
  */
-function enumeratePalindrome(
+function enumeratePalindromeByLength(
   minLength: number,
   maxLength: number,
   f: (palindrome: string) => boolean | void,
@@ -117,6 +159,7 @@ function nextPalindrome(x: string): string {
 
 export {
   enumeratePalindrome,
+  enumeratePalindromeByLength,
   generatePalindrome,
   getPalindromeByHalf,
   countPalindrome,
@@ -125,9 +168,21 @@ export {
 }
 
 if (require.main === module) {
-  let count = 0
-  enumeratePalindrome(1, 13, p => {
-    count++
+  // 100151. 使数组成为等数数组的最小代价
+  // https://leetcode.cn/problems/minimum-cost-to-make-array-equalindromic/description/
+  const palindromes: number[] = []
+  enumeratePalindrome(1, 10 ** 9, p => {
+    palindromes.push(p)
   })
-  console.log(count) // 1999998
+
+  function minimumCost(nums: number[]): number {
+    nums.sort((a, b) => a - b)
+    const D = distSum(nums)
+    let res = Infinity
+    // !注意不要用 Math.min(...palindromes.map(D))，会超时
+    for (let i = 0; i < palindromes.length; i++) {
+      res = Math.min(res, D(palindromes[i]))
+    }
+    return res
+  }
 }

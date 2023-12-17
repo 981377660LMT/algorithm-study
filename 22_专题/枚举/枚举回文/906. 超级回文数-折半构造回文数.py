@@ -2,10 +2,10 @@
 # 返回包含在范围 [L, R] 中的超级回文数的数目。
 # L 和 R 是表示 [1, 10^18) 范围的整数的字符串。
 
-from enumeratePalindrome import emumeratePalindrome
+from enumeratePalindrome import emumeratePalindromeByLength
 
 
-palindromes = [int(v) for v in emumeratePalindrome(1, 9)]
+palindromes = [int(v) for v in emumeratePalindromeByLength(1, 9)]
 
 
 class Solution:

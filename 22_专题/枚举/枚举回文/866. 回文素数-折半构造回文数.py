@@ -2,7 +2,7 @@
 # https://leetcode.cn/problems/prime-palindrome/
 
 
-from enumeratePalindrome import emumeratePalindrome
+from enumeratePalindrome import emumeratePalindromeByLength
 
 
 def isPrime(n: int) -> bool:
@@ -16,7 +16,7 @@ class Solution:
         1 <= N <= 10^8
         """
 
-        for p in emumeratePalindrome(1, 9):
+        for p in emumeratePalindromeByLength(1, 9):
             p = int(p)
             if p < n:
                 continue
@@ -27,7 +27,7 @@ class Solution:
 
 
 if __name__ == "__main__":
-    for cand in emumeratePalindrome(7, 8):  # 生成回文素数
+    for cand in emumeratePalindromeByLength(7, 8):  # 生成回文素数
         if isPrime(int(cand)):
             print(cand)
 # 10301

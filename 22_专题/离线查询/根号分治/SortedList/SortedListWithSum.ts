@@ -177,7 +177,6 @@ class SortedListFastWithSum<V = number>
       _mins.splice(pos + 1, 0, block[load])
       block.splice(load)
       this._shouldRebuildTree = true
-
       this._rebuildSum(pos)
       this._sums.splice(pos + 1, 0, this._op(oldSum, this._inv(this._sums[pos])))
     }

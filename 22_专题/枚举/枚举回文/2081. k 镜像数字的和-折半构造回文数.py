@@ -2,7 +2,7 @@
 # 2 <= k <= 9
 # 1 <= n <= 30
 
-from enumeratePalindrome import emumeratePalindrome
+from enumeratePalindrome import emumeratePalindromeByLength
 
 
 def check(num: int, radix: int) -> bool:
@@ -20,7 +20,7 @@ def check(num: int, radix: int) -> bool:
 class Solution:
     def kMirror(self, k: int, n: int) -> int:
         res = []
-        iter = emumeratePalindrome(1, int(1e20))
+        iter = emumeratePalindromeByLength(1, int(1e20))
         while len(res) < n:
             palindrome = int(next(iter))
             if check(palindrome, k):

@@ -5,14 +5,14 @@
 # 回文串最多17位
 
 
-from enumeratePalindrome import emumeratePalindrome
+from enumeratePalindrome import emumeratePalindromeByLength
 
 MOD = 1337
 
 
 class Solution:
     def largestPalindrome(self, n: int) -> int:
-        iter = emumeratePalindrome(1, 2 * n, reverse=True)
+        iter = emumeratePalindromeByLength(1, 2 * n, reverse=True)
         lower, upper = 10 ** (n - 1), 10**n - 1
         for p in iter:
             # 这里用大的范围，是因为从后往前找，[lower,sqrt]里的数多 [sqrt,upper]里的数少

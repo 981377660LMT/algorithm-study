@@ -3,7 +3,44 @@
 from typing import Generator, Optional, Union
 
 
-def emumeratePalindrome(
+def enumeratePalindrome(min: int, max: int) -> Generator[int, None, None]:
+    """
+    遍历[min,max]闭区间内的回文数.
+    https://github.com/EndlessCheng/codeforces-go
+    """
+    if min > max:
+        return
+    minLength = len(str(min))
+    base = pow(10, (minLength - 1) >> 1)
+    while True:
+        # 生成奇数长度回文数，例如 base = 10，生成的范围是 101 ~ 999
+        for i in range(base, base * 10):
+            x = i
+            t = i // 10
+            while t > 0:
+                x = x * 10 + t % 10
+                t //= 10
+            if x > max:
+                return
+            if x >= min:
+                yield x
+
+        # 生成偶数长度回文数，例如 base = 10，生成的范围是 1001 ~ 9999
+        for i in range(base, base * 10):
+            x = i
+            t = i
+            while t > 0:
+                x = x * 10 + t % 10
+                t //= 10
+            if x > max:
+                return
+            if x >= min:
+                yield x
+
+        base *= 10
+
+
+def emumeratePalindromeByLength(
     minLength: int, maxLength: int, reverse=False
 ) -> Generator[str, None, None]:
     """
@@ -75,9 +112,10 @@ def nextPalindrome(x: str) -> str:
 
 if __name__ == "__main__":
     count = 0
-    for p in emumeratePalindrome(1, 12):
+    for p in emumeratePalindromeByLength(1, 12):
         count += 1
     print(count)
     print(getPalindromeByHalf(123, False))
     print(getKthPalindrome(2, 9))
     print(nextPalindrome("9999"))
+    print(list(enumeratePalindrome(1, 100)))
