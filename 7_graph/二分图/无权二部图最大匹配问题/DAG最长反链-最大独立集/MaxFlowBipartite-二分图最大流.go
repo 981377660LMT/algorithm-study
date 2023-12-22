@@ -3,7 +3,9 @@
 // MaxIndependentSet
 // MinEdgeCover
 // DMDecomposition
-// !MaxAntiChain dag最长反链
+// !MaxAntiChain
+//
+// !注意是无向图!!!
 
 package main
 
@@ -18,7 +20,12 @@ func main() {
 	// Movie()
 	// MerryChristmas()
 	// demo()
-	Hakata()
+	// abc237ex()
+	abc274g()
+	// Yuki1479()
+	// Yuki1744()
+	// Yuki1745()
+
 }
 
 // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1566
@@ -51,10 +58,11 @@ func Movie() {
 		start, end := intervals[i][0], intervals[i][1]
 		for v := start; v < end; v++ {
 			graph[v] = append(graph[v], OFFSET+i)
+			graph[OFFSET+i] = append(graph[OFFSET+i], v)
 			isIn[v] = true
 		}
 	}
-	bm := NewBipartiteMatching(OFFSET+n, graph, nil)
+	bm := NewBipartiteMatching(graph, nil)
 	a := len(bm.MaxMatching())
 	b := 0
 	for _, v := range isIn {
@@ -133,9 +141,10 @@ func MerryChristmas() {
 // https://atcoder.jp/contests/abc237/tasks/abc237_h
 // 给定一个字符串, 你需要从中选出若干回文子串, 并且使得选出的串不存在某一个是另一个的子串, 问最多能选出多少子串.
 // n<=200
-// 遍历所有回文子串，如果j是i的子串，则连边 i->j，求dag最长反链即可.
-// 偏序包含关系(偏序关系最长链)
-func Hakata() {
+//
+// 给定一些偏序包含关系,求最大独立集(互相无法到达).
+// !遍历所有回文子串，如果j是i的子串，则连边 i->j，求dag最长反链即可.
+func abc237ex() {
 	zAlgo := func(s string) []int {
 		n := len(s)
 		if n == 0 {
@@ -224,12 +233,200 @@ func Hakata() {
 
 	res := MaxAntiChain(len(dag), dag)
 	fmt.Fprintln(out, len(res))
+}
 
+// G - Security Camera 3
+// https://atcoder.jp/contests/abc274/tasks/abc274_g
+// 网格图中有一些障碍,现在在这个图中放置一些监视器监视.
+// 每个监视器可以监视一条直线(不被阻挡的情况下).
+// 覆盖所有格子最少需要放置多少个监视器?
+// ROW,COL<=300
+// 障碍:"#"，无障碍:"."
+func abc274g() {
+	in, out := bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var ROW, COL int
+	fmt.Fscan(in, &ROW, &COL)
+	grid := make([]string, ROW)
+	for i := range grid {
+		var row string
+		fmt.Fscan(in, &row)
+		grid[i] = row
+	}
+
+	OFFSET := ROW * COL
+	graph := make([][]int, ROW*COL*2)
+	for x := 0; x < ROW; x++ {
+		for y := 0; y < COL; y++ {
+			if grid[x][y] == '#' {
+				continue
+			}
+			curX, curY := x, y
+			for curX > 0 && grid[curX-1][y] == '.' {
+				curX--
+			}
+			for curY > 0 && grid[x][curY-1] == '.' {
+				curY--
+			}
+			// 要么取(curX, y)，要么取(x, curY)
+			a := curX*COL + y
+			b := x*COL + curY
+			graph[a] = append(graph[a], b+OFFSET)
+			graph[b+OFFSET] = append(graph[b+OFFSET], a)
+		}
+	}
+
+	bm := NewBipartiteMatching(graph, nil)
+	res := bm.MinVertexCover()
+	fmt.Fprintln(out, len(res))
+}
+
+// https://yukicoder.me/problems/no/1479
+// 给定一个矩阵, 你可以按照任意顺序执行以下操作任意多次：
+// 选择矩阵的行。此时，将行中所有等于行元素最大值的元素全部变为0。
+// 选择矩阵的列。此时，将列中所有等于列元素最大值的元素全部变为0。
+// 你的目标是将矩阵的所有元素变为0。请求出达成目标所需的最小操作次数。
+// ROW,COL<=500
+// A[i][j]<=5e5
+func Yuki1479() {
+	in, out := bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	unique := func(a *[]int) {
+		set := make(map[int]struct{})
+		for _, v := range *a {
+			set[v] = struct{}{}
+		}
+		allNums := make([]int, 0, len(set))
+		for k := range set {
+			allNums = append(allNums, k)
+		}
+		sort.Ints(allNums)
+		*a = allNums
+	}
+
+	var ROW, COL int
+	fmt.Fscan(in, &ROW, &COL)
+
+	mp := make(map[int][][2]int)
+	for i := 0; i < ROW; i++ {
+		for j := 0; j < COL; j++ {
+			var v int
+			fmt.Fscan(in, &v)
+			mp[v] = append(mp[v], [2]int{i, j})
+		}
+	}
+
+	res := 0
+	for k, points := range mp {
+		if k == 0 {
+			continue
+		}
+		xs, ys := make([]int, len(points)), make([]int, len(points))
+		for i, p := range points {
+			xs[i], ys[i] = p[0], p[1]
+		}
+		unique(&xs)
+		unique(&ys)
+		g := make([][]int, len(xs)+len(ys))
+		for _, p := range points {
+			x, y := p[0], p[1]
+			x = sort.SearchInts(xs, x)
+			y = sort.SearchInts(ys, y)
+			g[x] = append(g[x], len(xs)+y)
+			g[len(xs)+y] = append(g[len(xs)+y], x)
+		}
+		bm := NewBipartiteMatching(g, nil)
+		res += len(bm.MinVertexCover())
+	}
+
+	fmt.Fprintln(out, res)
+}
+
+// https://yukicoder.me/problems/no/1744
+// 间谍分配任务。
+// 每个任务最多只能分配给一个间谍，每个间谍最多只能分配一个任务(匹配)。
+// !给出q个查询，每个查询形如(u,v)，问能否在不选择间谍u和v的情况下，达成最大匹配。
+// n,m,q<=1e5
+// DM分解.O(n+m+q*sqrt(n+m))
+func Yuki1744() {
+	in, out := bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var left, right, p int
+	fmt.Fscan(in, &left, &right, &p)
+	graph := make([][]int, left+right)
+	edges := make([][2]int, p)
+	for i := 0; i < p; i++ {
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		u--
+		v--
+		edges[i] = [2]int{u, v + left}
+		graph[u] = append(graph[u], v+left)
+		graph[v+left] = append(graph[v+left], u)
+	}
+
+	bm := NewBipartiteMatching(graph, nil)
+	compCount, belong := bm.DMDecomposition(edges)
+	sameCounter := make([]int, compCount+1)
+	for _, e := range edges {
+		u, v := e[0], e[1]
+		if belong[u] == belong[v] {
+			sameCounter[belong[u]]++
+		}
+	}
+	for _, e := range edges {
+		// 一定在最大匹配中，删除后最大匹配减少1.
+		if belong[e[0]] == belong[e[1]] && sameCounter[belong[e[0]]] == 1 {
+			fmt.Fprintln(out, "No")
+		} else {
+			fmt.Fprintln(out, "Yes")
+		}
+	}
+}
+
+// https://yukicoder.me/problems/no/1745
+// 间谍分配任务。
+// 每个任务最多只能分配给一个间谍，每个间谍最多只能分配一个任务(匹配)。
+// !给出q个查询，每个查询形如(u,v)，问选择间谍u和v的情况下能否达成最大匹配。
+// n,m,q<=1e5
+// DM分解.O(n+m+q*sqrt(n+m))
+func Yuki1745() {
+	in, out := bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var left, right, p int
+	fmt.Fscan(in, &left, &right, &p)
+	graph := make([][]int, left+right)
+	edges := make([][2]int, p)
+	for i := 0; i < p; i++ {
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		u--
+		v--
+		edges[i] = [2]int{u, v + left}
+		graph[u] = append(graph[u], v+left)
+		graph[v+left] = append(graph[v+left], u)
+	}
+
+	bm := NewBipartiteMatching(graph, nil)
+	_, belong := bm.DMDecomposition(edges)
+
+	for _, e := range edges {
+		// 可能在最大匹配中
+		if belong[e[0]] == belong[e[1]] {
+			fmt.Fprintln(out, "Yes")
+		} else {
+			fmt.Fprintln(out, "No")
+		}
+	}
 }
 
 const INF int = 1e18
 
-// 二分图最大匹配.
+// `无向`二分图最大匹配.
 type BipartiteMatching struct {
 	n       int32
 	graph   [][]int
@@ -239,8 +436,10 @@ type BipartiteMatching struct {
 	visited []bool
 }
 
+// `无向`二分图最大匹配.
 // colors: 如果为nil，内部会自动计算.
-func NewBipartiteMatching(n int, graph [][]int, colors []int8) *BipartiteMatching {
+func NewBipartiteMatching(graph [][]int, colors []int8) *BipartiteMatching {
+	n := len(graph)
 	bm := &BipartiteMatching{
 		n:       int32(n),
 		graph:   graph,
@@ -385,8 +584,8 @@ func (bm *BipartiteMatching) DMDecomposition(edges [][2]int) (compCount int, bel
 		}
 	}
 	for len(queue) > 0 {
-		v := queue[0]
-		queue = queue[1:]
+		v := queue[len(queue)-1]
+		queue = queue[:len(queue)-1]
 		if bm.match[v] != -1 {
 			add(int(bm.match[v]), belong[v])
 		}
@@ -428,7 +627,7 @@ func (bm *BipartiteMatching) DMDecomposition(edges [][2]int) (compCount int, bel
 		}
 	}
 
-	compCount, comp := StronglyConnectedComponent(len(dg), dg)
+	compCount, comp := StronglyConnectedComponent(dg)
 	compCount++
 
 	for i := 0; i < m; i++ {
@@ -548,8 +747,8 @@ func (ufa *Uf) Find(key int) int {
 }
 
 // 有向图强连通分量.
-func StronglyConnectedComponent(n int, graph [][]int) (compCount int, belong []int) {
-	n32 := int32(n)
+func StronglyConnectedComponent(graph [][]int) (compCount int, belong []int) {
+	n32 := int32(len(graph))
 	compId := int32(0)
 	comp := make([]int32, n32)
 	low := make([]int32, n32)
@@ -597,8 +796,8 @@ func StronglyConnectedComponent(n int, graph [][]int) (compCount int, belong []i
 	}
 
 	compCount = int(compId)
-	belong = make([]int, n)
-	for v := 0; v < n; v++ {
+	belong = make([]int, n32)
+	for v := int32(0); v < n32; v++ {
 		belong[v] = compCount - 1 - int(comp[v])
 	}
 	return
@@ -647,7 +846,7 @@ func MaxAntiChain(n int, dag [][]int) []int {
 			newGraph[i] = append(newGraph[i], to+n)
 		}
 	}
-	bm := NewBipartiteMatching(n+n, newGraph, nil)
+	bm := NewBipartiteMatching(newGraph, nil)
 	cover := bm.MinVertexCover()
 	ok := make([]bool, n)
 	for i := range ok {
