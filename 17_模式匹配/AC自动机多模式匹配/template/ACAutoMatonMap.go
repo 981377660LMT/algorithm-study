@@ -232,6 +232,26 @@ func (ac *ACAutoMatonMap) BuildTrieTree() [][]int {
 	return res
 }
 
+// 返回str在trie树上的节点位置.如果不存在，返回0.
+func (trie *ACAutoMatonMap) Search(str string) int {
+	if len(str) == 0 {
+		return 0
+	}
+	pos := 0
+	for i := 0; i < len(str); i++ {
+		if pos >= len(trie.children) || pos < 0 {
+			return 0
+		}
+		nexts := trie.children[pos]
+		if next, ok := nexts[str[i]]; ok {
+			pos = int(next)
+		} else {
+			return 0
+		}
+	}
+	return pos
+}
+
 func (ac *ACAutoMatonMap) Size() int {
 	return len(ac.children)
 }

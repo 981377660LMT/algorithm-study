@@ -6,6 +6,7 @@ import (
 	stdio "io"
 	"math/bits"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -989,19 +990,248 @@ func CF547E() {
 	}
 }
 
+// P5840 [COCI2015] Divljak
+// https://www.luogu.com.cn/problem/P5840
+// https://blog.csdn.net/kxl5180/article/details/103876152
+// 给定n个字符串s1~sn和一个空的字典。
+// 给定q个操作，每个操作包含两种：
+// 1 p: 向字典中插入一个字符串p
+// !2 i: 求出si是字典中多少个串的子串（注意每个串最多算一次，与出现次数不同）
+//
+// 一个问题是插入p时可能会对一个串造成许多贡献
+// !一个很妙的trick:
+// !把所有待插入位置按dfs序排序，
+// !然后把每个点单点加的时候在每两个点lca处差分，这样就可以保证每个串只被计算一次贡献。
+func P5840Divljak() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	n := io.NextInt()
+	words := make([]string, n)
+	wordsPos := make([]int, n) // 对应树中结点编号
+	acm := NewACAutoMatonArray(26, 97)
+	for i := 0; i < n; i++ {
+		words[i] = io.Text()
+		wordsPos[i] = acm.AddString(words[i])
+	}
+	acm.BuildSuffixLink(true)
+
+	failTree := NewTree(acm.Size())
+	acm.Dp(func(from, to int) {
+		failTree.AddDirectedEdge(from, to, 1)
+	})
+	failTree.Build(0)
+
+	bit := NewBitArray(acm.Size())
+
+	q := io.NextInt()
+	for i := 0; i < q; i++ {
+		kind := io.NextInt()
+		if kind == 1 {
+			s := io.Text()
+			dfn := []int{}
+			// !一次加入中只每个点最多只能加1，因此需要去重，同时对于同一条链上点，需要利用DFS序加LCA处理
+			// 本质上是一个树链求并。
+			// !按照dfn排序后，对每个i，将ui到根节点的链上点+1，将lca(ui,ui+1)到根节点的链上点-1即可
+			// !现在问题转化为了：" 路径加 " & " 单点求值 "。
+			// !可以使用树上差分将问题转化为：" 单点加 " & " 子树求和 "。
+			pos := 0
+			for i := 0; i < len(s); i++ {
+				pos = acm.Move(pos, int(s[i]))
+				dfn = append(dfn, failTree.LID[pos])
+			}
+			sort.Ints(dfn)
+			bit.Add(dfn[0], 1)
+			for i := 1; i < len(dfn); i++ {
+				bit.Add(dfn[i], 1)
+				u, v := failTree.IdToNode[dfn[i-1]], failTree.IdToNode[dfn[i]]
+				lca := failTree.LCA(u, v)
+				bit.Add(failTree.LID[lca], -1)
+			}
+		} else {
+			id := io.NextInt()
+			id--
+
+			// 统计的时候就用树状数组
+			pos := wordsPos[id]
+			start, end := failTree.Id(pos)
+			pointValue := bit.QueryRange(start, end)
+			io.Println(pointValue)
+		}
+	}
+
+}
+
 // Legen...
 // https://www.luogu.com.cn/problem/CF696D
+// 给定一些带有权重的单词(长度之和不超过200)，如果单词在串中出现c次，则获得c*分数的得分。
+// 创建一个长度为k(k<=1e14)的字符串，最大化得分。
+// ac自动机+矩阵快速幂
+// !本质上是一个经过k条边的有向图最长路.
+// dp[i][j]=考虑到最终字符串的第i个位置，在AC自动机上的第j个点时的最大答案。
 func CF696D() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	n, k := io.NextInt(), io.NextInt()
+	weights := make([]int, n)
+	for i := 0; i < n; i++ {
+		weights[i] = io.NextInt()
+	}
+	acm := NewACAutoMatonArray(26, 97)
+	for i := 0; i < n; i++ {
+		word := io.Text()
+		acm.AddString(word)
+	}
+	acm.BuildSuffixLink(true)
+
+	size := acm.Size()
+	nodeValue := make([]int, size)
+	for i, p := range acm.WordPos {
+		nodeValue[p] += weights[i]
+	}
+	acm.Dp(func(from, to int) {
+		nodeValue[to] += nodeValue[from]
+	})
+
+	// 转移临接矩阵保存边权dist
+	adjMatrix := newMatrix(size, size, -INF)
+	for i := 0; i < size; i++ {
+		adjMatrix[i][i] = 0
+	}
+	for cur := 0; cur < size; cur++ {
+		for c := 0; c < 26; c++ {
+			next := acm.children[cur][c]
+			adjMatrix[cur][next] = max(adjMatrix[cur][next], nodeValue[next])
+		}
+	}
+
+	res := MaxGraphTransition(adjMatrix, k)
+	max_ := 0
+	for _, v := range res[0] {
+		max_ = max(max_, v)
+	}
+	io.Print(max_)
 }
 
-// Duff is Mad
-// https://www.luogu.com.cn/problem/CF587F
-func CF587F() {
-}
+// GEN - Text Generator
+// https://www.luogu.com.cn/problem/SP1676
+// P4052 [JSOI2007] 文本生成器 的加强版.
+// 给定n(n<=10)个字符串(长度<=6)，要求构造一个长度为L(<=10^6)的字符串，至少包含n个字符串中任何一个，求方案数mod10007的值(所有字符都是大写字母)
+// 输入为多组数据，每组数据第一行N,L，接下来N行每行一个字符串
+//
+// 用总方案数减去不合法方案数(不包含模式串).
+// !等价于：有向图中转移k次后到达目的地的方案数.
+// !其中adjMatrix表示转移矩阵，只有当u和v都不是接受状态，adjMatrix[u][v]才为true.
+func SP1676() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
 
-// Digits of Number Pi
-// https://www.luogu.com.cn/problem/CF585F
-func CF585F() {
+	const MOD int = 10007
+	matMul := func(m1, m2 [][]int, mod int) [][]int {
+		res := make([][]int, len(m1))
+		for i := range res {
+			res[i] = make([]int, len(m2[0]))
+		}
+		for i := 0; i < len(m1); i++ {
+			for k := 0; k < len(m2); k++ {
+				for j := 0; j < len(m2[0]); j++ {
+					res[i][j] = (res[i][j] + m1[i][k]*m2[k][j]) % mod
+					if res[i][j] < 0 {
+						res[i][j] += mod
+					}
+				}
+			}
+		}
+		return res
+	}
+
+	matPow := func(mat [][]int, exp int, mod int) [][]int {
+		n := len(mat)
+		matCopy := make([][]int, n)
+		for i := 0; i < n; i++ {
+			matCopy[i] = make([]int, n)
+			copy(matCopy[i], mat[i])
+		}
+		res := make([][]int, n)
+		for i := 0; i < n; i++ {
+			res[i] = make([]int, n)
+			res[i][i] = 1
+		}
+		for exp > 0 {
+			if exp&1 == 1 {
+				res = matMul(res, matCopy, mod)
+			}
+			matCopy = matMul(matCopy, matCopy, mod)
+			exp >>= 1
+		}
+		return res
+	}
+
+	qpow := func(a, b, mod int) int {
+		a %= mod
+		res := 1
+		for b > 0 {
+			if b&1 == 1 {
+				res = res * a % mod
+			}
+			a = a * a % mod
+			b >>= 1
+		}
+		return res
+	}
+
+	n, k := io.NextInt(), io.NextInt()
+	acm := NewACAutoMatonArray(26, 'A')
+	for i := 0; i < n; i++ {
+		s := io.Text()
+		acm.AddString(s)
+	}
+	acm.BuildSuffixLink(true)
+
+	counter := acm.GetCounter()
+	size := acm.Size()
+
+	adjMatrix := make([][]int, size)
+	for i := range adjMatrix {
+		adjMatrix[i] = make([]int, size)
+	}
+
+	for cur := 0; cur < size; cur++ {
+		if counter[cur] == 0 {
+			for c := 0; c < 26; c++ {
+				next := acm.children[cur][c]
+				if counter[next] == 0 {
+					adjMatrix[cur][next]++
+				}
+			}
+		}
+	}
+
+	transition := matPow(adjMatrix, k, MOD)
+	bad := 0
+	for _, v := range transition[0] {
+		bad = (bad + v) % MOD
+	}
+
+	res := (qpow(26, k, MOD) - bad) % MOD
+	if res < 0 {
+		res += MOD
+	}
+
+	io.Println(res)
 }
 
 // Birthday
@@ -1247,6 +1477,26 @@ func (trie *ACAutoMatonArray) BuildTrieTree() [][]int {
 		res[trie.Parent[i]] = append(res[trie.Parent[i]], i)
 	}
 	return res
+}
+
+// 返回str在trie树上的节点位置.如果不存在，返回0.
+func (trie *ACAutoMatonArray) Search(str string) int {
+	if len(str) == 0 {
+		return 0
+	}
+	pos := 0
+	for _, s := range str {
+		if pos >= len(trie.children) || pos < 0 {
+			return 0
+		}
+		ord := int32(s) - trie.offset
+		if next := int(trie.children[pos][ord]); next == -1 {
+			return 0
+		} else {
+			pos = next
+		}
+	}
+	return pos
 }
 
 func (trie *ACAutoMatonArray) newNode() int32 {
@@ -1781,7 +2031,7 @@ type Tree struct {
 	Depth, DepthWeighted []int
 	Parent               []int
 	LID, RID             []int // 欧拉序[in,out)
-	idToNode             []int
+	IdToNode             []int
 	top, heavySon        []int
 	timer                int
 }
@@ -1790,7 +2040,7 @@ func NewTree(n int) *Tree {
 	tree := make([][][2]int, n)
 	lid := make([]int, n)
 	rid := make([]int, n)
-	idToNode := make([]int, n)
+	IdToNode := make([]int, n)
 	top := make([]int, n)   // 所处轻/重链的顶点（深度最小），轻链的顶点为自身
 	depth := make([]int, n) // 深度
 	depthWeighted := make([]int, n)
@@ -1807,7 +2057,7 @@ func NewTree(n int) *Tree {
 		Parent:        parent,
 		LID:           lid,
 		RID:           rid,
-		idToNode:      idToNode,
+		IdToNode:      IdToNode,
 		top:           top,
 		heavySon:      heavySon,
 	}
@@ -1892,7 +2142,7 @@ func (tree *Tree) KthAncestor(root, k int) int {
 	for {
 		u := tree.top[root]
 		if tree.LID[root]-k >= tree.LID[u] {
-			return tree.idToNode[tree.LID[root]-k]
+			return tree.IdToNode[tree.LID[root]-k]
 		}
 		k -= tree.LID[root] - tree.LID[u] + 1
 		root = tree.Parent[u]
@@ -2017,11 +2267,11 @@ func (tree *Tree) GetPath(u, v int) []int {
 		a, b := e[0], e[1]
 		if a <= b {
 			for i := a; i <= b; i++ {
-				res = append(res, tree.idToNode[i])
+				res = append(res, tree.IdToNode[i])
 			}
 		} else {
 			for i := a; i >= b; i-- {
-				res = append(res, tree.idToNode[i])
+				res = append(res, tree.IdToNode[i])
 			}
 		}
 	}
@@ -2065,7 +2315,7 @@ func (tree *Tree) GetHeavyChild(v int) int {
 	if k == len(tree.Tree) {
 		return -1
 	}
-	w := tree.idToNode[k]
+	w := tree.IdToNode[k]
 	if tree.Parent[w] == v {
 		return w
 	}
@@ -2102,7 +2352,7 @@ func (tree *Tree) build(cur, pre, dep, dist int) int {
 func (tree *Tree) markTop(cur, top int) {
 	tree.top[cur] = top
 	tree.LID[cur] = tree.timer
-	tree.idToNode[tree.timer] = cur
+	tree.IdToNode[tree.timer] = cur
 	tree.timer++
 	heavySon := tree.heavySon[cur]
 	if heavySon != -1 {
@@ -2390,4 +2640,56 @@ func (h *Heap) pushDown(root int) {
 		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
 		root = minIndex
 	}
+}
+
+// 给定一个图的临接矩阵，求转移k次(每次转移可以从一个点到到任意一个点)后的最长路(矩阵).
+// 转移1次就是floyd.
+func MaxGraphTransition(adjMatrix [][]int, k int) [][]int {
+	n := len(adjMatrix)
+	adjMatrixCopy := make([][]int, n)
+	for i := range adjMatrixCopy {
+		adjMatrixCopy[i] = make([]int, n)
+		copy(adjMatrixCopy[i], adjMatrix[i])
+	}
+
+	dist := newMatrix(n, n, -INF)
+	for i := 0; i < n; i++ {
+		dist[i][i] = 0
+	}
+
+	for k > 0 {
+		if k&1 == 1 {
+			dist = MatMul(dist, adjMatrixCopy)
+		}
+		k >>= 1
+		adjMatrixCopy = MatMul(adjMatrixCopy, adjMatrixCopy)
+	}
+
+	return dist
+}
+
+// 转移的自定义函数.
+// ed:内部的结合律为取max(Floyd).
+func MatMul(m1, m2 [][]int) [][]int {
+	res := newMatrix(len(m1), len(m2[0]), -INF)
+	for i := 0; i < len(m1); i++ {
+		for k := 0; k < len(m2); k++ {
+			for j := 0; j < len(m2[0]); j++ {
+				res[i][j] = max(res[i][j], m1[i][k]+m2[k][j])
+			}
+		}
+	}
+	return res
+}
+
+func newMatrix(row, col int, fill int) [][]int {
+	res := make([][]int, row)
+	for i := range res {
+		row := make([]int, col)
+		for j := range row {
+			row[j] = fill
+		}
+		res[i] = row
+	}
+	return res
 }

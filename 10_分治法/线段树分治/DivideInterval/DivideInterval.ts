@@ -69,6 +69,15 @@ class DivideInterval {
     }
   }
 
+  enumeratePoint(index: number, f: (segmentId: number) => void): void {
+    if (index < 0 || index >= this._n) return
+    index += this.offset
+    while (index > 0) {
+      f(index)
+      index >>>= 1
+    }
+  }
+
   isLeaf(segmentId: number): boolean {
     return segmentId >= this.offset
   }

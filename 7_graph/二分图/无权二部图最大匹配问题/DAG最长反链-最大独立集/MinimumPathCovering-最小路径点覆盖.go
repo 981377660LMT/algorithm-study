@@ -1,3 +1,4 @@
+// DAG最小路径覆盖与最小不相交路径覆盖
 // https://ei1333.github.io/library/graph/flow/bipartite-flow.hpp
 // https://www.luogu.com.cn/problem/P2764
 // https://zhuanlan.zhihu.com/p/125759333
@@ -19,111 +20,75 @@
 
 package main
 
-import "fmt"
-
-// func main() {
-// 	// https://www.luogu.com.cn/problem/P2764
-// 	in := bufio.NewReader(os.Stdin)
-// 	out := bufio.NewWriter(os.Stdout)
-// 	defer out.Flush()
-
-// 	var n, m int
-// 	fmt.Fscan(in, &n, &m)
-// 	edges := make([][]int, m)
-// 	for i := 0; i < m; i++ {
-// 		edges[i] = make([]int, 2)
-// 		fmt.Fscan(in, &edges[i][0], &edges[i][1])
-// 		edges[i][0]--
-// 		edges[i][1]--
-// 	}
-
-// 	count, paths := MinimumPathCovering(n, edges)
-// 	for _, path := range paths {
-// 		for _, v := range path {
-// 			fmt.Fprint(out, v+1, " ")
-// 		}
-// 		fmt.Fprintln(out)
-// 	}
-// 	fmt.Fprintln(out, count)
-// }
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
 func main() {
-	n := 6
-
-	edges := [][]int{
-		{0, 1},
-		{0, 2},
-		{1, 3},
-		{2, 3},
-		{3, 4},
-		{3, 5}}
-
-	fmt.Println(MinimumPathCovering(n, edges))  // 3 [[0 1 3 4] [2] [5]]
-	fmt.Println(MinimumPathCovering2(n, edges)) // 2
+	// demo()
+	P2764()
 }
 
-// DAG最小不相交路径覆盖
+// https://www.luogu.com.cn/problem/P2764
+func P2764() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	edges := make([][]int, m)
+	for i := 0; i < m; i++ {
+		edges[i] = make([]int, 2)
+		fmt.Fscan(in, &edges[i][0], &edges[i][1])
+		edges[i][0]--
+		edges[i][1]--
+	}
+
+	count, paths := MinimumPathCovering(n, edges)
+	for _, path := range paths {
+		for _, v := range path {
+			fmt.Fprint(out, v+1, " ")
+		}
+		fmt.Fprintln(out)
+	}
+	fmt.Fprintln(out, count)
+}
+
+const INF int = 1e18
+
+// DAG最小不相交路径覆盖(最小路径点覆盖)
 func MinimumPathCovering(n int, edges [][]int) (count int, paths [][]int) {
 	newEdges := make([][]int, 0, len(edges))
 	bf := NewBipartiteFlow(n, n)
 	for _, edge := range edges {
 		u, v := edge[0], edge[1]
-		newEdges = append(newEdges, []int{u, v + n}) // 拆点 , A'in => B'out
+		newEdges = append(newEdges, []int{u, v + n}) // 拆点 , A'in => B'out,从A点到B'点的每一条流，都代表着一次合并
 		bf.AddEdge(u, v)
 	}
 
 	maxMathing := bf.MaxMatching()
 	count = n - len(maxMathing)
 
-	visited := make([]bool, n)
+	uf := NewUnionFindArray(n)
 	ml := bf.MatchL
 	for i := 0; i < n; i++ {
-		if visited[i] {
+		if ml[i] == -1 {
 			continue
 		}
-		path := []int{i}
-		for ml[path[len(path)-1]] > 0 {
-			u := path[len(path)-1]
-			v := ml[u]
-			path = append(path, v)
-			visited[v] = true
-		}
-		paths = append(paths, path)
+		uf.Union(i, ml[i])
 	}
 
+	groups := make(map[int][]int)
+	for i := 0; i < n; i++ {
+		groups[uf.Find(i)] = append(groups[uf.Find(i)], i)
+	}
+	for _, group := range groups {
+		paths = append(paths, group)
+	}
 	return
-}
-
-// DAG最小可相交路径覆盖
-// 先用floyd求出原图的传递闭包，即如果a到b有路径，那么就加边a->b。然后就转化成了最小不相交路径覆盖问题。
-func MinimumPathCovering2(n int, edges [][]int) int {
-	adjMatrix := make([][]bool, n)
-	for i := 0; i < n; i++ {
-		adjMatrix[i] = make([]bool, n)
-	}
-	for _, edge := range edges {
-		adjMatrix[edge[0]][edge[1]] = true
-	}
-	for k := 0; k < n; k++ {
-		for i := 0; i < n; i++ {
-			for j := 0; j < n; j++ {
-				if adjMatrix[i][k] && adjMatrix[k][j] {
-					adjMatrix[i][j] = true
-				}
-			}
-		}
-	}
-	newEdges := make([][]int, 0, len(edges))
-	for i := 0; i < n; i++ {
-		for j := 0; j < n; j++ {
-			if adjMatrix[i][j] {
-				newEdges = append(newEdges, []int{i, j})
-			}
-		}
-	}
-
-	res, _ := MinimumPathCovering(n, newEdges)
-	return res
 }
 
 type BipartiteFlow struct {
@@ -163,15 +128,17 @@ func NewBipartiteFlow(n, m int) *BipartiteFlow {
 }
 
 // 增加一条边u-v.u属于左侧点集，v属于右侧点集.
-//  !0<=u<n,0<=v<m.
+//
+//	!0<=u<n,0<=v<m.
 func (bf *BipartiteFlow) AddEdge(u, v int) {
 	bf.g[u] = append(bf.g[u], v)
 	bf.rg[v] = append(bf.rg[v], u)
 }
 
 // 求最大匹配.
-//  返回(左侧点,右侧点)的匹配对.
-//  !0<=左侧点<n,0<=右侧点<m.
+//
+//	返回(左侧点,右侧点)的匹配对.
+//	!0<=左侧点<n,0<=右侧点<m.
 func (bf *BipartiteFlow) MaxMatching() [][2]int {
 	bf.matched = true
 	for {
@@ -202,7 +169,8 @@ func (bf *BipartiteFlow) MaxMatching() [][2]int {
 }
 
 // 构建残量图.
-//  left: [0,n), right: [n,n+m), S: n+m, T: n+m+1
+//
+//	left: [0,n), right: [n,n+m), S: n+m, T: n+m+1
 func (bf *BipartiteFlow) BuildRisidualGraph() [][]int {
 	if !bf.matched {
 		bf.MaxMatching()
@@ -296,4 +264,175 @@ func (bf *BipartiteFlow) findMinDistAugmentPath(a int) bool {
 		}
 	}
 	return false
+}
+
+type UnionFindArray struct {
+	data []int
+}
+
+func NewUnionFindArray(n int) *UnionFindArray {
+	data := make([]int, n)
+	for i := 0; i < n; i++ {
+		data[i] = -1
+	}
+	return &UnionFindArray{data: data}
+}
+
+func (ufa *UnionFindArray) Union(key1, key2 int) bool {
+	root1, root2 := ufa.Find(key1), ufa.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+	if ufa.data[root1] > ufa.data[root2] {
+		root1, root2 = root2, root1
+	}
+	ufa.data[root1] += ufa.data[root2]
+	ufa.data[root2] = root1
+	return true
+}
+
+func (ufa *UnionFindArray) Find(key int) int {
+	if ufa.data[key] < 0 {
+		return key
+	}
+	ufa.data[key] = ufa.Find(ufa.data[key])
+	return ufa.data[key]
+}
+
+type Edge = [2]int
+
+func Dijkstra(n int, adjList [][]Edge, start int) (dist, preV []int) {
+	type pqItem struct{ node, dist int }
+	dist = make([]int, n)
+	for i := range dist {
+		dist[i] = INF
+	}
+	dist[start] = 0
+	preV = make([]int, n)
+	for i := range preV {
+		preV[i] = -1
+	}
+
+	pq := nhp(func(a, b H) int {
+		return a.(pqItem).dist - b.(pqItem).dist
+	}, nil)
+	pq.Push(pqItem{start, 0})
+
+	for pq.Len() > 0 {
+		curNode := pq.Pop().(pqItem)
+		cur, curDist := curNode.node, curNode.dist
+		if curDist > dist[cur] {
+			continue
+		}
+
+		for _, edge := range adjList[cur] {
+			next, weight := edge[0], edge[1]
+			if cand := curDist + weight; cand < dist[next] {
+				dist[next] = cand
+				preV[next] = cur
+				pq.Push(pqItem{next, cand})
+			}
+		}
+	}
+
+	return
+}
+
+type H = interface{}
+
+// Should return a number:
+//
+//	negative , if a < b
+//	zero     , if a == b
+//	positive , if a > b
+type Comparator func(a, b H) int
+
+func nhp(comparator Comparator, nums []H) *Heap {
+	nums = append(nums[:0:0], nums...)
+	heap := &Heap{comparator: comparator, data: nums}
+	heap.heapify()
+	return heap
+}
+
+type Heap struct {
+	data       []H
+	comparator Comparator
+}
+
+func (h *Heap) Push(value H) {
+	h.data = append(h.data, value)
+	h.pushUp(h.Len() - 1)
+}
+
+func (h *Heap) Pop() (value H) {
+	if h.Len() == 0 {
+		return
+	}
+
+	value = h.data[0]
+	h.data[0] = h.data[h.Len()-1]
+	h.data = h.data[:h.Len()-1]
+	h.pushDown(0)
+	return
+}
+
+func (h *Heap) Peek() (value H) {
+	if h.Len() == 0 {
+		return
+	}
+	value = h.data[0]
+	return
+}
+
+func (h *Heap) Len() int { return len(h.data) }
+
+func (h *Heap) heapify() {
+	n := h.Len()
+	for i := (n >> 1) - 1; i > -1; i-- {
+		h.pushDown(i)
+	}
+}
+
+func (h *Heap) pushUp(root int) {
+	for parent := (root - 1) >> 1; parent >= 0 && h.comparator(h.data[root], h.data[parent]) < 0; parent = (root - 1) >> 1 {
+		h.data[root], h.data[parent] = h.data[parent], h.data[root]
+		root = parent
+	}
+}
+
+func (h *Heap) pushDown(root int) {
+	n := h.Len()
+	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
+		right := left + 1
+		minIndex := root
+
+		if h.comparator(h.data[left], h.data[minIndex]) < 0 {
+			minIndex = left
+		}
+
+		if right < n && h.comparator(h.data[right], h.data[minIndex]) < 0 {
+			minIndex = right
+		}
+
+		if minIndex == root {
+			return
+		}
+
+		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
+		root = minIndex
+	}
+}
+
+func min(a, b int) int {
+	if a <= b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a >= b {
+		return a
+	}
+	return b
 }

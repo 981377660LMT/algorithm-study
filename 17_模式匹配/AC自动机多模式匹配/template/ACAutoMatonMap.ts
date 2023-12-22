@@ -157,6 +157,27 @@ class ACAutoMatonMap<T = string> {
     return res
   }
 
+  /**
+   * 返回str在trie树上的节点位置.如果不存在，返回0.
+   */
+  search(str: ArrayLike<T>): number {
+    if (str.length === 0) return 0
+    let pos = 0
+    for (let i = 0; i < str.length; i++) {
+      if (pos < 0 || pos >= this._children.length) {
+        return 0
+      }
+      const ord = str[i]
+      const nexts = this._children[pos]
+      if (nexts.has(ord)) {
+        pos = nexts.get(ord)!
+      } else {
+        return 0
+      }
+    }
+    return pos
+  }
+
   empty(): boolean {
     return this._children.length === 1
   }

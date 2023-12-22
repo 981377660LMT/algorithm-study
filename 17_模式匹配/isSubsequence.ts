@@ -3,7 +3,7 @@
  * 如果需要多次匹配，使用`子序列自动机`.
  * @complexity O(n1 + n2)
  */
-function isSubsequnceNaive(longer: string, shorter: string): boolean {
+function isSubsequnceNaive<S extends ArrayLike<unknown>>(longer: S, shorter: S): boolean {
   const n1 = longer.length
   const n2 = shorter.length
   if (!n2) return true

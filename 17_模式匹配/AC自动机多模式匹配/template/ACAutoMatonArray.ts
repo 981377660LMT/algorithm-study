@@ -185,6 +185,23 @@ class ACAutoMatonArray {
     return this._nodeCount === 1
   }
 
+  /**
+   * 返回str在trie树上的节点位置.如果不存在，返回0.
+   */
+  search(str: string): number {
+    if (str.length === 0) return 0
+    let pos = 0
+    for (let i = 0; i < str.length; i++) {
+      const ord = str.charCodeAt(i) - this._offset
+      const hash = pos * this._sigma + ord
+      if (hash < 0 || hash >= this._children.length || this._children[hash] === -1) {
+        return 0
+      }
+      pos = this._children[hash]
+    }
+    return pos
+  }
+
   get size(): number {
     return this._nodeCount
   }

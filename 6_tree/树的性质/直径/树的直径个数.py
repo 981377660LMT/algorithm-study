@@ -92,7 +92,7 @@ if __name__ == "__main__":
             "depthWeighted",
             "lid",
             "rid",
-            "_idToNode",
+            "idToNode",
             "_top",
             "_heavySon",
             "_dfn",
@@ -105,7 +105,7 @@ if __name__ == "__main__":
             self.depthWeighted = [0] * n
             self.lid = [0] * n
             self.rid = [0] * n
-            self._idToNode = [0] * n
+            self.idToNode = [0] * n
             self._top = [0] * n
             self._heavySon = [0] * n
             self._dfn = 0
@@ -154,7 +154,7 @@ if __name__ == "__main__":
             while True:
                 u = self._top[root]
                 if self.lid[root] - k >= self.lid[u]:
-                    return self._idToNode[self.lid[root] - k]
+                    return self.idToNode[self.lid[root] - k]
                 k -= self.lid[root] - self.lid[u] + 1
                 root = self.parent[u]
 
@@ -183,9 +183,9 @@ if __name__ == "__main__":
             composition = self.getPathDecomposition(from_, to, True)
             for a, b in composition:
                 if a <= b:
-                    res += self._idToNode[a : b + 1]
+                    res += self.idToNode[a : b + 1]
                 else:
-                    res += self._idToNode[b : a + 1][::-1]
+                    res += self.idToNode[b : a + 1][::-1]
             return res
 
         def getPathDecomposition(self, from_: int, to: int, vertex: bool) -> List[Tuple[int, int]]:
@@ -214,7 +214,7 @@ if __name__ == "__main__":
             k = self.lid[v] + 1
             if k == len(self.tree):
                 return -1
-            w = self._idToNode[k]
+            w = self.idToNode[k]
             if self.parent[w] == v:
                 return w
             return -1
@@ -266,7 +266,7 @@ if __name__ == "__main__":
         def _markTop(self, cur: int, top: int) -> None:
             self._top[cur] = top
             self.lid[cur] = self._dfn
-            self._idToNode[self._dfn] = cur
+            self.idToNode[self._dfn] = cur
             self._dfn += 1
             heavySon = self._heavySon[cur]
             if heavySon != -1:

@@ -97,6 +97,17 @@ func (d *DivideInterval) EnumerateSegment(start, end int, f func(segmentId int))
 	}
 }
 
+func (d *DivideInterval) EnumeratePoint(index int, f func(segmentId int)) {
+	if index < 0 || index >= d.n {
+		return
+	}
+	index += d.Offset
+	for index > 0 {
+		f(index)
+		index >>= 1
+	}
+}
+
 // O(n) 从根向叶子方向push.
 func (d *DivideInterval) PushDown(f func(parent, child int)) {
 	for p := 1; p < d.Offset; p++ {

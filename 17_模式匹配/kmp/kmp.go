@@ -36,7 +36,7 @@ func P4824() {
 		pos = kmp.Move(pos, int(longer[i]))
 		posRecord[i] = pos
 		stack = append(stack, i)
-		if kmp.IsMatched(pos) {
+		if kmp.Accept(pos) {
 			stack = stack[:len(stack)-len(shorter)]
 			if len(stack) > 0 {
 				pos = posRecord[stack[len(stack)-1]]
@@ -99,6 +99,33 @@ func IndexOfAll(longer Str, shorter Str, position int, nexts []int) []int {
 	return res
 }
 
+func CountIndexOfAll(longer Str, shorter Str, position int, nexts []int) int {
+	if len(shorter) == 0 {
+		return 0
+	}
+	if len(longer) < len(shorter) {
+		return 0
+	}
+	res := 0
+	if nexts == nil {
+		nexts = GetNext(shorter)
+	}
+	hitJ := 0
+	for i := position; i < len(longer); i++ {
+		for hitJ > 0 && longer[i] != shorter[hitJ] {
+			hitJ = nexts[hitJ-1]
+		}
+		if longer[i] == shorter[hitJ] {
+			hitJ++
+		}
+		if hitJ == len(shorter) {
+			res++
+			hitJ = nexts[hitJ-1] // 不允许重叠时 hitJ = 0
+		}
+	}
+	return res
+}
+
 // 单模式串匹配
 type KMP struct {
 	next    []int
@@ -123,7 +150,7 @@ func (k *KMP) IndexOfAll(longer Str, start int) []int {
 	pos := 0
 	for i := start; i < len(longer); i++ {
 		pos = k.Move(pos, int(longer[i]))
-		if k.IsMatched(pos) {
+		if k.Accept(pos) {
 			res = append(res, i-len(k.pattern)+1)
 			pos = k.next[pos-1]
 		}
@@ -142,7 +169,7 @@ func (k *KMP) CountIndexOfAll(longer string, start int) int {
 	pos := 0
 	for i := start; i < len(longer); i++ {
 		pos = k.Move(pos, int(longer[i]))
-		if k.IsMatched(pos) {
+		if k.Accept(pos) {
 			res++
 			pos = k.next[pos-1]
 		}
@@ -154,7 +181,7 @@ func (k *KMP) IndexOf(longer Str, start int) int {
 	pos := 0
 	for i := start; i < len(longer); i++ {
 		pos = k.Move(pos, int(longer[i]))
-		if k.IsMatched(pos) {
+		if k.Accept(pos) {
 			return i - len(k.pattern) + 1
 		}
 	}
@@ -174,7 +201,7 @@ func (k *KMP) Move(pos int, ord int) int {
 	return pos
 }
 
-func (k *KMP) IsMatched(pos int) bool {
+func (k *KMP) Accept(pos int) bool {
 	return pos == len(k.pattern)
 }
 

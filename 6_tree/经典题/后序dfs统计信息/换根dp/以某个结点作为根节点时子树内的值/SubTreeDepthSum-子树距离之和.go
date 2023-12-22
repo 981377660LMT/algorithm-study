@@ -133,7 +133,7 @@ func (rr *_ReRootingEdge) ReRooting(
 		dp[i] = unit
 	}
 
-	V := rr.tree.idToNode
+	V := rr.tree.IdToNode
 	par := rr.tree.Parent
 	for i := N - 1; i >= 0; i-- {
 		v := V[i]
@@ -198,7 +198,7 @@ type Tree struct {
 	Depth         []int
 	Parent        []int
 	LID, RID      []int // 欧拉序[in,out)
-	idToNode      []int
+	IdToNode      []int
 	top, heavySon []int
 	timer         int
 	eid           int
@@ -208,7 +208,7 @@ func NewTree(n int) *Tree {
 	tree := make([][]Edge, n)
 	lid := make([]int, n)
 	rid := make([]int, n)
-	idToNode := make([]int, n)
+	IdToNode := make([]int, n)
 	top := make([]int, n)      // 所处轻/重链的顶点（深度最小），轻链的顶点为自身
 	depth := make([]int, n)    // 深度
 	parent := make([]int, n)   // 父结点
@@ -223,7 +223,7 @@ func NewTree(n int) *Tree {
 		Parent:   parent,
 		LID:      lid,
 		RID:      rid,
-		idToNode: idToNode,
+		IdToNode: IdToNode,
 		top:      top,
 		heavySon: heavySon,
 	}
@@ -275,7 +275,7 @@ func (tree *Tree) KthAncestor(root, k int) int {
 	for {
 		u := tree.top[root]
 		if tree.LID[root]-k >= tree.LID[u] {
-			return tree.idToNode[tree.LID[root]-k]
+			return tree.IdToNode[tree.LID[root]-k]
 		}
 		k -= tree.LID[root] - tree.LID[u] + 1
 		root = tree.Parent[u]
@@ -344,7 +344,7 @@ func (tree *Tree) build(cur, pre, dep int) int {
 func (tree *Tree) markTop(cur, top int) {
 	tree.top[cur] = top
 	tree.LID[cur] = tree.timer
-	tree.idToNode[tree.timer] = cur
+	tree.IdToNode[tree.timer] = cur
 	tree.timer++
 	if tree.heavySon[cur] != -1 {
 		tree.markTop(tree.heavySon[cur], top)

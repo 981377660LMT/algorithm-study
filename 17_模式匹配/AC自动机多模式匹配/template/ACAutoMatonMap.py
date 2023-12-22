@@ -158,6 +158,21 @@ class ACAutoMatonMap(Generic[T]):
         dfs(0)
         return adjList
 
+    def search(self, string: Iterable[T]) -> int:
+        """返回string在trie树上的节点位置.如果不存在,返回0."""
+        if not string:
+            return 0
+        pos = 0
+        for char in string:
+            if pos < 0 or pos >= len(self._children):
+                return 0
+            nexts = self._children[pos]
+            if char in nexts:
+                pos = nexts[char]
+            else:
+                return 0
+        return pos
+
     def empty(self) -> bool:
         return len(self._children) == 1
 

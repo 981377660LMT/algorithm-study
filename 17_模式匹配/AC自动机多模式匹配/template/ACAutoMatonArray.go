@@ -666,6 +666,26 @@ func (trie *ACAutoMatonArray) BuildTrieTree() [][]int {
 	return res
 }
 
+// 返回str在trie树上的节点位置.如果不存在，返回0.
+func (trie *ACAutoMatonArray) Search(str string) int {
+	if len(str) == 0 {
+		return 0
+	}
+	pos := 0
+	for _, s := range str {
+		if pos >= len(trie.children) || pos < 0 {
+			return 0
+		}
+		ord := int32(s) - trie.offset
+		if next := int(trie.children[pos][ord]); next == -1 {
+			return 0
+		} else {
+			pos = next
+		}
+	}
+	return pos
+}
+
 func (trie *ACAutoMatonArray) newNode() int32 {
 	trie.Parent = append(trie.Parent, -1)
 	nexts := make([]int32, trie.sigma)

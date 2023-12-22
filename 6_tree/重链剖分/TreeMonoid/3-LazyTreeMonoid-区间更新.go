@@ -208,7 +208,7 @@ func (tm *LazyTreeMonoid) MaxPath(check func(E) bool, start, target int) int {
 		}
 		if tmp := op(val, x); check(tmp) {
 			val = tmp
-			start = tm.tree.idToNode[b]
+			start = tm.tree.IdToNode[b]
 			continue
 		}
 		checkTmp := func(x E) bool {
@@ -219,13 +219,13 @@ func (tm *LazyTreeMonoid) MaxPath(check func(E) bool, start, target int) int {
 			if i == a {
 				return start
 			}
-			return tm.tree.idToNode[i-1]
+			return tm.tree.IdToNode[i-1]
 		} else {
 			i := tm.seg.MinLeft(a+1, checkTmp)
 			if i == a+1 {
 				return start
 			}
-			return tm.tree.idToNode[i]
+			return tm.tree.IdToNode[i]
 		}
 	}
 	return target
@@ -261,7 +261,7 @@ func (tm *LazyTreeMonoid) _maxPathEdge(check func(E) bool, u, v int) int {
 		x := tm.seg.Query(b, a+1)
 		if tmp := op(val, x); check(tmp) {
 			val = tmp
-			u = tm.tree.Parent[tm.tree.idToNode[b]]
+			u = tm.tree.Parent[tm.tree.IdToNode[b]]
 			continue
 		}
 		checkTmp := func(x E) bool {
@@ -271,7 +271,7 @@ func (tm *LazyTreeMonoid) _maxPathEdge(check func(E) bool, u, v int) int {
 		if i == a+1 {
 			return u
 		}
-		return tm.tree.Parent[tm.tree.idToNode[i]]
+		return tm.tree.Parent[tm.tree.IdToNode[i]]
 	}
 
 	// down
@@ -281,7 +281,7 @@ func (tm *LazyTreeMonoid) _maxPathEdge(check func(E) bool, u, v int) int {
 		x := tm.seg.Query(a, b+1)
 		if tmp := op(val, x); check(tmp) {
 			val = tmp
-			u = tm.tree.idToNode[b]
+			u = tm.tree.IdToNode[b]
 			continue
 		}
 		checkTmp := func(x E) bool {
@@ -291,7 +291,7 @@ func (tm *LazyTreeMonoid) _maxPathEdge(check func(E) bool, u, v int) int {
 		if i == a {
 			return u
 		}
-		return tm.tree.idToNode[i-1]
+		return tm.tree.IdToNode[i-1]
 	}
 	return v
 }
@@ -302,7 +302,7 @@ type _T struct {
 	Depth, DepthWeighted []int
 	Parent               []int
 	LID, RID             []int // 欧拉序[in,out)
-	idToNode             []int
+	IdToNode             []int
 	top, heavySon        []int
 	timer                int
 }
@@ -311,7 +311,7 @@ func _NT(n int) *_T {
 	tree := make([][][2]int, n)
 	lid := make([]int, n)
 	rid := make([]int, n)
-	idToNode := make([]int, n)
+	IdToNode := make([]int, n)
 	top := make([]int, n)   // 所处轻/重链的顶点（深度最小），轻链的顶点为自身
 	depth := make([]int, n) // 深度
 	depthWeighted := make([]int, n)
@@ -329,7 +329,7 @@ func _NT(n int) *_T {
 		Parent:        parent,
 		LID:           lid,
 		RID:           rid,
-		idToNode:      idToNode,
+		IdToNode:      IdToNode,
 		top:           top,
 		heavySon:      heavySon,
 		Edges:         edges,
@@ -422,7 +422,7 @@ func (tree *_T) KthAncestor(root, k int) int {
 	for {
 		u := tree.top[root]
 		if tree.LID[root]-k >= tree.LID[u] {
-			return tree.idToNode[tree.LID[root]-k]
+			return tree.IdToNode[tree.LID[root]-k]
 		}
 		k -= tree.LID[root] - tree.LID[u] + 1
 		root = tree.Parent[u]
@@ -504,11 +504,11 @@ func (tree *_T) GetPath(u, v int) []int {
 		a, b := e[0], e[1]
 		if a <= b {
 			for i := a; i <= b; i++ {
-				res = append(res, tree.idToNode[i])
+				res = append(res, tree.IdToNode[i])
 			}
 		} else {
 			for i := a; i >= b; i-- {
-				res = append(res, tree.idToNode[i])
+				res = append(res, tree.IdToNode[i])
 			}
 		}
 	}
@@ -565,7 +565,7 @@ func (tree *_T) build(cur, pre, dep, dist int) int {
 func (tree *_T) markTop(cur, top int) {
 	tree.top[cur] = top
 	tree.LID[cur] = tree.timer
-	tree.idToNode[tree.timer] = cur
+	tree.IdToNode[tree.timer] = cur
 	tree.timer++
 	if tree.heavySon[cur] != -1 {
 		tree.markTop(tree.heavySon[cur], top)

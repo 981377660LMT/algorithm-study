@@ -107,8 +107,9 @@ type TreeAbelGroup struct {
 }
 
 // 静态树的路径查询，维护的量需要满足阿贝尔群的性质.
-//  data: 顶点的值, 或者边的值.(边的编号为两个定点中较深的那个点的编号)
-//  isVertex: data是否为顶点的值以及查询的时候是否是顶点权值.
+//
+//	data: 顶点的值, 或者边的值.(边的编号为两个定点中较深的那个点的编号)
+//	isVertex: data是否为顶点的值以及查询的时候是否是顶点权值.
 func NewTreeAbelGroup(tree *_T, data []Abel, isVertex, pathQuery, subtreeQuery bool) *TreeAbelGroup {
 	res := &TreeAbelGroup{
 		tree: tree, n: len(tree.Tree),
@@ -200,7 +201,7 @@ type _T struct {
 	Depth, DepthWeighted []int
 	Parent               []int
 	LID, RID             []int // 欧拉序[in,out)
-	idToNode             []int
+	IdToNode             []int
 	top, heavySon        []int
 	timer                int
 }
@@ -209,7 +210,7 @@ func _NT(n int) *_T {
 	tree := make([][][2]int, n)
 	lid := make([]int, n)
 	rid := make([]int, n)
-	idToNode := make([]int, n)
+	IdToNode := make([]int, n)
 	top := make([]int, n)   // 所处轻/重链的顶点（深度最小），轻链的顶点为自身
 	depth := make([]int, n) // 深度
 	depthWeighted := make([]int, n)
@@ -227,7 +228,7 @@ func _NT(n int) *_T {
 		Parent:        parent,
 		LID:           lid,
 		RID:           rid,
-		idToNode:      idToNode,
+		IdToNode:      IdToNode,
 		top:           top,
 		heavySon:      heavySon,
 		Edges:         edges,
@@ -248,7 +249,8 @@ func (tree *_T) AddDirectedEdge(u, v, w int) {
 }
 
 // root:0-based
-//  当root设为-1时，会从0开始遍历未访问过的连通分量
+//
+//	当root设为-1时，会从0开始遍历未访问过的连通分量
 func (tree *_T) Build(root int) {
 	if root != -1 {
 		tree.build(root, -1, 0, 0)
@@ -310,7 +312,8 @@ func (tree *_T) Dist(u, v int, weighted bool) int {
 }
 
 // k: 0-based
-//  如果不存在第k个祖先，返回-1
+//
+//	如果不存在第k个祖先，返回-1
 func (tree *_T) KthAncestor(root, k int) int {
 	if k > tree.Depth[root] {
 		return -1
@@ -318,7 +321,7 @@ func (tree *_T) KthAncestor(root, k int) int {
 	for {
 		u := tree.top[root]
 		if tree.LID[root]-k >= tree.LID[u] {
-			return tree.idToNode[tree.LID[root]-k]
+			return tree.IdToNode[tree.LID[root]-k]
 		}
 		k -= tree.LID[root] - tree.LID[u] + 1
 		root = tree.Parent[u]
@@ -326,7 +329,8 @@ func (tree *_T) KthAncestor(root, k int) int {
 }
 
 // 从 from 节点跳向 to 节点,跳过 step 个节点(0-indexed)
-//  返回跳到的节点,如果不存在这样的节点,返回-1
+//
+//	返回跳到的节点,如果不存在这样的节点,返回-1
 func (tree *_T) Jump(from, to, step int) int {
 	if step == 1 {
 		if from == to {
@@ -361,7 +365,8 @@ func (tree *_T) CollectChild(root int) []int {
 }
 
 // 返回沿着`路径顺序`的 [起点,终点] 的 欧拉序 `左闭右闭` 数组.
-//  !eg:[[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序.
+//
+//	!eg:[[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序.
 func (tree *_T) GetPathDecomposition(u, v int, vertex bool) [][2]int {
 	up, down := [][2]int{}, [][2]int{}
 	for {
@@ -398,11 +403,11 @@ func (tree *_T) GetPath(u, v int) []int {
 		a, b := e[0], e[1]
 		if a <= b {
 			for i := a; i <= b; i++ {
-				res = append(res, tree.idToNode[i])
+				res = append(res, tree.IdToNode[i])
 			}
 		} else {
 			for i := a; i >= b; i-- {
-				res = append(res, tree.idToNode[i])
+				res = append(res, tree.IdToNode[i])
 			}
 		}
 	}
@@ -459,7 +464,7 @@ func (tree *_T) build(cur, pre, dep, dist int) int {
 func (tree *_T) markTop(cur, top int) {
 	tree.top[cur] = top
 	tree.LID[cur] = tree.timer
-	tree.idToNode[tree.timer] = cur
+	tree.IdToNode[tree.timer] = cur
 	tree.timer++
 	if tree.heavySon[cur] != -1 {
 		tree.markTop(tree.heavySon[cur], top)

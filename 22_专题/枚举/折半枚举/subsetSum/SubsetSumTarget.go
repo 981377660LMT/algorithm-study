@@ -650,7 +650,7 @@ func (bs *BitSetDynamic) Fill(zeroOrOne int) {
 			bs.data[i] = ^uint64(0)
 		}
 		if bs.n != 0 {
-			bs.data[len(bs.data)-1] >>= 64 - bs.n&63
+			bs.data[len(bs.data)-1] >>= (len(bs.data) << 6) - bs.n
 		}
 	}
 }

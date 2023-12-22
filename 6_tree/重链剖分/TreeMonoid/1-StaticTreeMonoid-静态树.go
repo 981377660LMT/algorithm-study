@@ -116,7 +116,7 @@ func (st *StaticTreeMonoid) MaxPath(check func(E) bool, start, target int) int {
 		}
 		if tmp := op(val, x); check(tmp) {
 			val = tmp
-			start = st.tree.idToNode[b]
+			start = st.tree.IdToNode[b]
 			continue
 		}
 		checkTmp := func(x E) bool {
@@ -127,7 +127,7 @@ func (st *StaticTreeMonoid) MaxPath(check func(E) bool, start, target int) int {
 			if i == a {
 				return start
 			}
-			return st.tree.idToNode[i-1]
+			return st.tree.IdToNode[i-1]
 		} else {
 			var i int
 			if IS_COMMUTATIVE {
@@ -138,7 +138,7 @@ func (st *StaticTreeMonoid) MaxPath(check func(E) bool, start, target int) int {
 			if i == a+1 {
 				return start
 			}
-			return st.tree.idToNode[i]
+			return st.tree.IdToNode[i]
 		}
 	}
 	return target
@@ -168,7 +168,7 @@ func (st *StaticTreeMonoid) _maxPathEdge(check func(E) bool, u, v int) int {
 		}
 		if tmp := op(val, x); check(tmp) {
 			val = tmp
-			u = st.tree.Parent[st.tree.idToNode[b]]
+			u = st.tree.Parent[st.tree.IdToNode[b]]
 			continue
 		}
 		checkTmp := func(x E) bool {
@@ -183,7 +183,7 @@ func (st *StaticTreeMonoid) _maxPathEdge(check func(E) bool, u, v int) int {
 		if i == a+1 {
 			return u
 		}
-		return st.tree.Parent[st.tree.idToNode[i]]
+		return st.tree.Parent[st.tree.IdToNode[i]]
 	}
 
 	// down
@@ -193,7 +193,7 @@ func (st *StaticTreeMonoid) _maxPathEdge(check func(E) bool, u, v int) int {
 		x := st.seg.Query(a, b+1)
 		if tmp := op(val, x); check(tmp) {
 			val = tmp
-			u = st.tree.idToNode[b]
+			u = st.tree.IdToNode[b]
 			continue
 		}
 		checkTmp := func(x E) bool {
@@ -203,7 +203,7 @@ func (st *StaticTreeMonoid) _maxPathEdge(check func(E) bool, u, v int) int {
 		if i == a {
 			return u
 		}
-		return st.tree.idToNode[i-1]
+		return st.tree.IdToNode[i-1]
 	}
 	return v
 }
@@ -214,7 +214,7 @@ type _T struct {
 	Depth, DepthWeighted []int
 	Parent               []int
 	LID, RID             []int // 欧拉序[in,out)
-	idToNode             []int
+	IdToNode             []int
 	top, heavySon        []int
 	timer                int
 }
@@ -223,7 +223,7 @@ func _NT(n int) *_T {
 	tree := make([][][2]int, n)
 	lid := make([]int, n)
 	rid := make([]int, n)
-	idToNode := make([]int, n)
+	IdToNode := make([]int, n)
 	top := make([]int, n)   // 所处轻/重链的顶点（深度最小），轻链的顶点为自身
 	depth := make([]int, n) // 深度
 	depthWeighted := make([]int, n)
@@ -241,7 +241,7 @@ func _NT(n int) *_T {
 		Parent:        parent,
 		LID:           lid,
 		RID:           rid,
-		idToNode:      idToNode,
+		IdToNode:      IdToNode,
 		top:           top,
 		heavySon:      heavySon,
 		Edges:         edges,
@@ -334,7 +334,7 @@ func (tree *_T) KthAncestor(root, k int) int {
 	for {
 		u := tree.top[root]
 		if tree.LID[root]-k >= tree.LID[u] {
-			return tree.idToNode[tree.LID[root]-k]
+			return tree.IdToNode[tree.LID[root]-k]
 		}
 		k -= tree.LID[root] - tree.LID[u] + 1
 		root = tree.Parent[u]
@@ -416,11 +416,11 @@ func (tree *_T) GetPath(u, v int) []int {
 		a, b := e[0], e[1]
 		if a <= b {
 			for i := a; i <= b; i++ {
-				res = append(res, tree.idToNode[i])
+				res = append(res, tree.IdToNode[i])
 			}
 		} else {
 			for i := a; i >= b; i-- {
-				res = append(res, tree.idToNode[i])
+				res = append(res, tree.IdToNode[i])
 			}
 		}
 	}
@@ -477,7 +477,7 @@ func (tree *_T) build(cur, pre, dep, dist int) int {
 func (tree *_T) markTop(cur, top int) {
 	tree.top[cur] = top
 	tree.LID[cur] = tree.timer
-	tree.idToNode[tree.timer] = cur
+	tree.IdToNode[tree.timer] = cur
 	tree.timer++
 	if tree.heavySon[cur] != -1 {
 		tree.markTop(tree.heavySon[cur], top)

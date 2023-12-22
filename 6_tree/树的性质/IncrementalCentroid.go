@@ -123,7 +123,7 @@ func (icc *IncrementalCentroid) _moveTo(v int) int {
 		a := icc.Tree.Jump(cent, v, 1)
 		left, right := icc.Tree.LID[a], icc.Tree.RID[a]
 		left, right = icc.fs.Next(left), icc.fs.Prev(right-1)
-		x, y := icc.Tree.idToNode[left], icc.Tree.idToNode[right]
+		x, y := icc.Tree.IdToNode[left], icc.Tree.IdToNode[right]
 		return icc.Tree.LCA(x, y)
 	}
 	left, right := icc.Tree.LID[cent], icc.Tree.RID[cent]
@@ -138,7 +138,7 @@ func (icc *IncrementalCentroid) _moveTo(v int) int {
 		if left <= idx && idx < right {
 			continue
 		}
-		y := icc.Tree.idToNode[idx]
+		y := icc.Tree.IdToNode[idx]
 		x = icc.Tree.RootedLCA(x, y, cent)
 	}
 	return x
@@ -266,7 +266,7 @@ type Tree struct {
 	Depth, DepthWeighted []int
 	Parent               []int
 	LID, RID             []int // 欧拉序[in,out)
-	idToNode             []int
+	IdToNode             []int
 	top, heavySon        []int
 	timer                int
 }
@@ -275,7 +275,7 @@ func NewTree(n int) *Tree {
 	tree := make([][][2]int, n)
 	lid := make([]int, n)
 	rid := make([]int, n)
-	idToNode := make([]int, n)
+	IdToNode := make([]int, n)
 	top := make([]int, n)   // 所处轻/重链的顶点（深度最小），轻链的顶点为自身
 	depth := make([]int, n) // 深度
 	depthWeighted := make([]int, n)
@@ -293,7 +293,7 @@ func NewTree(n int) *Tree {
 		Parent:        parent,
 		LID:           lid,
 		RID:           rid,
-		idToNode:      idToNode,
+		IdToNode:      IdToNode,
 		top:           top,
 		heavySon:      heavySon,
 		Edges:         edges,
@@ -386,7 +386,7 @@ func (tree *Tree) KthAncestor(root, k int) int {
 	for {
 		u := tree.top[root]
 		if tree.LID[root]-k >= tree.LID[u] {
-			return tree.idToNode[tree.LID[root]-k]
+			return tree.IdToNode[tree.LID[root]-k]
 		}
 		k -= tree.LID[root] - tree.LID[u] + 1
 		root = tree.Parent[u]
@@ -468,11 +468,11 @@ func (tree *Tree) GetPath(u, v int) []int {
 		a, b := e[0], e[1]
 		if a <= b {
 			for i := a; i <= b; i++ {
-				res = append(res, tree.idToNode[i])
+				res = append(res, tree.IdToNode[i])
 			}
 		} else {
 			for i := a; i >= b; i-- {
-				res = append(res, tree.idToNode[i])
+				res = append(res, tree.IdToNode[i])
 			}
 		}
 	}
@@ -529,7 +529,7 @@ func (tree *Tree) build(cur, pre, dep, dist int) int {
 func (tree *Tree) markTop(cur, top int) {
 	tree.top[cur] = top
 	tree.LID[cur] = tree.timer
-	tree.idToNode[tree.timer] = cur
+	tree.IdToNode[tree.timer] = cur
 	tree.timer++
 	if tree.heavySon[cur] != -1 {
 		tree.markTop(tree.heavySon[cur], top)

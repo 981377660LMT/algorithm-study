@@ -168,18 +168,18 @@ func MatMul(m1, m2 M, mod int) M {
 // matPow/matqpow
 func MatPow(m1 M, exp, mod int) M {
 	n := len(m1)
-	e := NewIdentityMatrix(n)
-	b := make(M, n)
+	mCopy := make(M, n)
 	for i := 0; i < n; i++ {
-		b[i] = make([]int, n)
-		copy(b[i], m1[i])
+		mCopy[i] = make([]int, n)
+		copy(mCopy[i], m1[i])
 	}
+	res := NewIdentityMatrix(n)
 	for exp > 0 {
 		if exp&1 == 1 {
-			e = MatMul(e, b, mod)
+			res = MatMul(res, mCopy, mod)
 		}
-		b = MatMul(b, b, mod)
 		exp >>= 1
+		mCopy = MatMul(mCopy, mCopy, mod)
 	}
-	return e
+	return res
 }

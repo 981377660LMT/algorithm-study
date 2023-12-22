@@ -49,7 +49,7 @@ class Tree {
   readonly depthWeighted: number[]
   readonly lid: Uint32Array
   readonly rid: Uint32Array
-  private readonly _idToNode: Uint32Array
+  readonly idToNode: Uint32Array
   private readonly _top: Uint32Array
   private readonly _heavySon: Int32Array
   private _timer = 0
@@ -68,7 +68,7 @@ class Tree {
     this.lid = new Uint32Array(n)
     this.rid = new Uint32Array(n)
     this.depthWeighted = Array(n)
-    this._idToNode = new Uint32Array(n)
+    this.idToNode = new Uint32Array(n)
     this._top = new Uint32Array(n)
     this._heavySon = new Int32Array(n)
     this._lastEdge = new Int32Array(n)
@@ -178,7 +178,7 @@ class Tree {
     while (true) {
       const u = this._top[root]
       if (this.lid[root] - k >= this.lid[u]) {
-        return this._idToNode[this.lid[root] - k]
+        return this.idToNode[this.lid[root] - k]
       }
       k -= this.lid[root] - this.lid[u] + 1
       root = this.parent[u]
@@ -286,11 +286,11 @@ class Tree {
       const { 0: start, 1: end } = composition[i]
       if (start <= end) {
         for (let j = start; j <= end; j++) {
-          res.push(this._idToNode[j])
+          res.push(this.idToNode[j])
         }
       } else {
         for (let j = start; j >= end; j--) {
-          res.push(this._idToNode[j])
+          res.push(this.idToNode[j])
         }
       }
     }
@@ -342,7 +342,7 @@ class Tree {
     if (k === this._n) {
       return -1
     }
-    const w = this._idToNode[k]
+    const w = this.idToNode[k]
     if (this.parent[w] === v) {
       return w
     }
@@ -388,7 +388,7 @@ class Tree {
   private _markTop(cur: number, top: number): void {
     this._top[cur] = top
     this.lid[cur] = this._timer
-    this._idToNode[this._timer] = cur
+    this.idToNode[this._timer] = cur
     this._timer++
     const heavySon = this._heavySon[cur]
     if (~heavySon) {

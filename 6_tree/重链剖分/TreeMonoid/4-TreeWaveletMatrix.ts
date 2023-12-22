@@ -87,12 +87,7 @@ class TreeWaveletMatrix {
   /**
    * s到t的路径上第k小的数以及前k个数的和.
    */
-  kthValueAndSumPath(
-    s: number,
-    t: number,
-    k: number,
-    xor = 0
-  ): [res: number, preSum: number] | [res: null, preSum: number] {
+  kthValueAndSumPath(s: number, t: number, k: number, xor = 0): [res: number, preSum: number] | [res: null, preSum: number] {
     return this._wm.kthValueAndSumSegments(this._getSegments(s, t), k, xor)
   }
 
@@ -198,7 +193,7 @@ class Tree {
   readonly edges: [from: number, to: number, weight: number][] = []
   readonly lid: Uint32Array
   readonly rid: Uint32Array
-  private readonly _idToNode: Uint32Array
+  readonly idToNode: Uint32Array
   private readonly _top: Uint32Array
   private readonly _heavySon: Int32Array
   private _timer = 0
@@ -212,7 +207,7 @@ class Tree {
     this.parent = new Int32Array(n).fill(-1)
     this.lid = new Uint32Array(n)
     this.rid = new Uint32Array(n)
-    this._idToNode = new Uint32Array(n)
+    this.idToNode = new Uint32Array(n)
     this._top = new Uint32Array(n)
     this.depthWeighted = Array(n).fill(0)
     this._heavySon = new Int32Array(n)
@@ -289,7 +284,7 @@ class Tree {
     while (true) {
       const u = this._top[root]
       if (this.lid[root] - k >= this.lid[u]) {
-        return this._idToNode[this.lid[root] - k]
+        return this.idToNode[this.lid[root] - k]
       }
       k -= this.lid[root] - this.lid[u] + 1
       root = this.parent[u]
@@ -355,12 +350,7 @@ class Tree {
     return up
   }
 
-  enumeratePathDecomposition(
-    u: number,
-    v: number,
-    vertex: boolean,
-    callback: (start: number, end: number) => void
-  ): void {
+  enumeratePathDecomposition(u: number, v: number, vertex: boolean, callback: (start: number, end: number) => void): void {
     while (true) {
       if (this._top[u] === this._top[v]) {
         break
@@ -397,11 +387,11 @@ class Tree {
     composition.forEach(([start, end]) => {
       if (start <= end) {
         for (let i = start; i <= end; i++) {
-          res.push(this._idToNode[i])
+          res.push(this.idToNode[i])
         }
       } else {
         for (let i = start; i >= end; i--) {
-          res.push(this._idToNode[i])
+          res.push(this.idToNode[i])
         }
       }
     })
@@ -416,7 +406,7 @@ class Tree {
     if (k === this.tree.length) {
       return -1
     }
-    const w = this._idToNode[k]
+    const w = this.idToNode[k]
     if (this.parent[w] === v) {
       return w
     }
@@ -475,7 +465,7 @@ class Tree {
   private _markTop(cur: number, top: number): void {
     this._top[cur] = top
     this.lid[cur] = this._timer
-    this._idToNode[this._timer] = cur
+    this.idToNode[this._timer] = cur
     this._timer++
     if (~this._heavySon[cur]) {
       this._markTop(this._heavySon[cur], top)
