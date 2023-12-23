@@ -1234,16 +1234,6 @@ func SP1676() {
 	io.Println(res)
 }
 
-// Birthday
-// https://www.luogu.com.cn/problem/CF590E
-func CF590E() {
-}
-
-// Exam
-// https://www.luogu.com.cn/problem/CF1483F
-func CF1483F() {
-}
-
 // 不调用 BuildSuffixLink 就是Trie，调用 BuildSuffixLink 就是AC自动机.
 // 每个状态对应Trie中的一个结点，也对应一个字符串.
 type ACAutoMatonArray struct {

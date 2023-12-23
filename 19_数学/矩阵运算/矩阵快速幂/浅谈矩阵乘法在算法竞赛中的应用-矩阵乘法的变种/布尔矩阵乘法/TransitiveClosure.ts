@@ -26,13 +26,13 @@ class TransitiveClosure {
   }
 
   addDirectedEdge(from: number, to: number): void {
-    if (this._hasBuilt) throw new Error("can't add edge after build")
+    this._hasBuilt = false
     this._canReach[from][to >>> 5] |= 1 << (to & 31)
   }
 
   build(): void {
-    if (this._hasBuilt) throw new Error("can't build twice")
-
+    if (this._hasBuilt) return
+    this._hasBuilt = true
     const n = this._n
     const canReach = this._canReach
     for (let k = 0; k < n; k++) {
@@ -46,8 +46,6 @@ class TransitiveClosure {
         }
       }
     }
-
-    this._hasBuilt = true
   }
 
   canReach(from: number, to: number): boolean {

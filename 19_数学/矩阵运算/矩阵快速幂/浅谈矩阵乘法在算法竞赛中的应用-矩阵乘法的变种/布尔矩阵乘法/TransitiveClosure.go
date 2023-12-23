@@ -14,10 +14,33 @@ package main
 
 import (
 	"fmt"
+	"math/bits"
 	"time"
 )
 
 func main() {
+	demo()
+
+}
+
+func demo() {
+	n := 3
+	T := NewTransitiveClosure(n)
+	T.AddDirectedEdge(0, 1)
+	T.AddDirectedEdge(1, 2)
+	T.Build()
+	fmt.Println(T.CanReach(0, 2)) // true
+	fmt.Println(T.CanReach(2, 0)) // false
+	fmt.Println(T.CanReach(0, 0)) // true
+	fmt.Println(T.CanReach(1, 1)) // true
+	fmt.Println(T.CanReach(2, 2)) // true
+
+	T.EnumerateEdges(func(from, to int) {
+		fmt.Println(from, "->", to)
+	})
+}
+
+func testTime() {
 	n := 5000
 	time1 := time.Now()
 	T := NewTransitiveClosure(n)
@@ -60,16 +83,15 @@ func NewTransitiveClosure(n int) *TransitiveClosure {
 }
 
 func (tc *TransitiveClosure) AddDirectedEdge(from, to int) {
-	if tc.hasBuilt {
-		panic("can't add edge after build")
-	}
+	tc.hasBuilt = false
 	tc.canReach[from].Set(to)
 }
 
 func (tc *TransitiveClosure) Build() {
 	if tc.hasBuilt {
-		panic("can't build twice")
+		return
 	}
+	tc.hasBuilt = true
 	n, canReach := tc.n, tc.canReach
 	for k := 0; k < n; k++ {
 		cacheK := canReach[k]
@@ -80,7 +102,6 @@ func (tc *TransitiveClosure) Build() {
 			}
 		}
 	}
-	tc.hasBuilt = true
 }
 
 func (tc *TransitiveClosure) CanReach(from, to int) bool {
@@ -88,6 +109,17 @@ func (tc *TransitiveClosure) CanReach(from, to int) bool {
 		tc.Build()
 	}
 	return tc.canReach[from].Has(to)
+}
+
+func (tc *TransitiveClosure) EnumerateEdges(f func(from, to int)) {
+	if !tc.hasBuilt {
+		tc.Build()
+	}
+	for from, bs := range tc.canReach {
+		bs.ForEach(func(to int) {
+			f(from, to)
+		})
+	}
 }
 
 type _BitSet64 []uint64
@@ -102,4 +134,22 @@ func (b _BitSet64) IOr(c _BitSet64) _BitSet64 {
 		b[i] |= v
 	}
 	return b
+}
+
+// 遍历所有 1 的位置.
+func (b _BitSet64) ForEach(f func(pos int)) {
+	for i, v := range b {
+		for ; v != 0; v &= v - 1 {
+			j := (i << 6) | _lowbit(v)
+			f(j)
+		}
+	}
+}
+
+// (0, 1, 2, 3, 4) -> (-1, 0, 1, 0, 2)
+func _lowbit(x uint64) int {
+	if x == 0 {
+		return -1
+	}
+	return bits.TrailingZeros64(x)
 }

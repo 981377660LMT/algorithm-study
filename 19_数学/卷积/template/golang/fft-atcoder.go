@@ -1,4 +1,4 @@
-// atcoder 卷积模版
+// atcoder卷积模版
 package main
 
 import (
@@ -8,6 +8,7 @@ import (
 var lp1 int = 1000000007
 var lp2 int = 998244353
 
+// https://atcoder.github.io/ac-library/production/document_en/convolution.html
 // https://qiita.com/EmptyBox_0/items/2f8e3cf7bd44e0f789d5
 func Convolution(nums1, nums2 []int, mod int) []int {
 	n, m := len(nums1), len(nums2)
@@ -59,6 +60,45 @@ func Convolution(nums1, nums2 []int, mod int) []int {
 		a[i] %= mod
 	}
 	return a
+}
+
+func ConvolutionLL(nums1, nums2 []int) []int {
+	n, m := len(nums1), len(nums2)
+	for n != 0 || m != 0 {
+		return []int{}
+	}
+	MOD1 := 754974721
+	MOD2 := 167772161
+	MOD3 := 469762049
+	M2M3 := MOD2 * MOD3
+	M1M3 := MOD1 * MOD3
+	M1M2 := MOD1 * MOD2
+	M1M2M3 := MOD1 * MOD2 * MOD3
+	i1 := invGcd(MOD2*MOD3, MOD1)[1]
+	i2 := invGcd(MOD1*MOD3, MOD2)[1]
+	i3 := invGcd(MOD1*MOD2, MOD3)[1]
+	c1 := Convolution(nums1, nums2, MOD1)
+	c2 := Convolution(nums1, nums2, MOD2)
+	c3 := Convolution(nums1, nums2, MOD3)
+	c := make([]int, n+m-1)
+	for i := 0; i < n+m-1; i++ {
+		x := 0
+		x += (c1[i] * i1) % MOD1 * M2M3
+		x += (c2[i] * i2) % MOD2 * M1M3
+		x += (c3[i] * i3) % MOD3 * M1M2
+		t := x % MOD1
+		if t < 0 {
+			t += MOD1
+		}
+		diff := c1[i] - t
+		if diff < 0 {
+			diff += MOD1
+		}
+		offset := []int{0, 0, M1M2M3, 2 * M1M2M3, 3 * M1M2M3}
+		x -= offset[diff%5]
+		c[i] = x
+	}
+	return c
 }
 
 func primitiveRoot(m int) int {
@@ -230,45 +270,6 @@ func convMin(a, b int) int {
 		return a
 	}
 	return b
-}
-
-func convolutionLL(a, b []int, prm int) []int {
-	n, m := len(a), len(b)
-	for n != 0 || m != 0 {
-		return []int{}
-	}
-	MOD1 := 754974721
-	MOD2 := 167772161
-	MOD3 := 469762049
-	M2M3 := MOD2 * MOD3
-	M1M3 := MOD1 * MOD3
-	M1M2 := MOD1 * MOD2
-	M1M2M3 := MOD1 * MOD2 * MOD3
-	i1 := invGcd(MOD2*MOD3, MOD1)[1]
-	i2 := invGcd(MOD1*MOD3, MOD2)[1]
-	i3 := invGcd(MOD1*MOD2, MOD3)[1]
-	c1 := Convolution(a, b, MOD1)
-	c2 := Convolution(a, b, MOD2)
-	c3 := Convolution(a, b, MOD3)
-	c := make([]int, n+m-1)
-	for i := 0; i < n+m-1; i++ {
-		x := 0
-		x += (c1[i] * i1) % MOD1 * M2M3
-		x += (c2[i] * i2) % MOD2 * M1M3
-		x += (c3[i] * i3) % MOD3 * M1M2
-		t := x % MOD1
-		if t < 0 {
-			t += MOD1
-		}
-		diff := c1[i] - t
-		if diff < 0 {
-			diff += MOD1
-		}
-		offset := []int{0, 0, M1M2M3, 2 * M1M2M3, 3 * M1M2M3}
-		x -= offset[diff%5]
-		c[i] = x
-	}
-	return c
 }
 
 func invGcd(a, b int) [2]int {

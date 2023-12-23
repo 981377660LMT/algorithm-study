@@ -1,16 +1,18 @@
 // https://www.luogu.com.cn/blog/yszs/ac-zi-dong-ji-fou-guo-shi-jian-fail-shu-di-gong-ju-pi-liao
-// - !fail[i]表示在trie树上的第i个点表示的前缀，它在trie树上的最长后缀是第fail[i]个点表示的前缀。
-// - 子串 = 前缀的后缀
+// !- !fail[i]表示在trie树上的第i个点表示的前缀，它在trie树上的最长后缀是第fail[i]个点表示的前缀。
+// !- 子串 = 前缀的后缀
 //   Trie树（AC自动机）的祖先节点 = 前缀
 //   Fail树的祖先节点 = 后缀
 //   字符串x在字符串y中出现的次数 = `Fail树中x的子树`与`Trie树中y到根的路径`的交点个数
 //
 // 1.dp类型题: 一般都是dfs(index,pos):长度为index的字符串，当前trie状态为pos.
 //	枚举26种字符(字符集)转移.
-//
 // 2.自定义结点信息题：用WordPos初始化状态，用SuffixLink转移.
 // 3.Trie图：用 Move 来获取每个点的临边.
 // 4.失配树：用SuffixLink来获取每个点的父亲.
+// 5.字符串之间的包含关系:
+//   根据"子串是某个前缀的后缀",
+//   遍历长串的每个前缀，在fail树上找到对应最长后缀，然后在trie树上定位到对应串.
 
 package main
 

@@ -18,20 +18,19 @@ class TransitiveClosure:
         self._hasBuilt = False
 
     def addDirectedEdge(self, from_: int, to: int) -> None:
-        if self._hasBuilt:
-            raise RuntimeError("can't add edge after build")
+        self._hasBuilt = False
         self._canReach[from_] |= 1 << to
 
     def build(self) -> None:
         if self._hasBuilt:
-            raise RuntimeError("can't build twice")
+            return
+        self._hasBuilt = True
         n, canReach = self._n, self._canReach
         for k in range(n):
             canReachK = canReach[k]
             for i in range(n):
                 if canReach[i] & (1 << k):
                     canReach[i] |= canReachK
-        self._hasBuilt = True
 
     def canReach(self, from_: int, to: int) -> bool:
         if not self._hasBuilt:
