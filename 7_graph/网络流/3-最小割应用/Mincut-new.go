@@ -1,8 +1,3 @@
-// OnAntiChain
-// MaxAntiChain
-// MinimumPathCovering
-// MinCut
-
 package main
 
 import (
@@ -11,8 +6,12 @@ import (
 	"os"
 )
 
-// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A
 func main() {
+
+}
+
+// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A
+func demo() {
 	in, out := bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
@@ -25,35 +24,6 @@ func main() {
 		F.Add(a, b, c, 0)
 	}
 	fmt.Println(F.Flow())
-}
-
-// P4298 [CTSC2008] 祭祀
-// https://www.luogu.com.cn/problem/P4298
-// 给定一个 n 个点，m 条边的简单有向无环图（DAG).
-// 0.求最大独立集(反链)的大小。
-// 1.求出它的最长反链(最大独立集)，并构造方案。
-// 2.判断每个点是否在最长反链上.
-func P4298祭祀() {
-	in, out := bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, m int
-	fmt.Fscan(in, &n, &m)
-	edges := make([][]int, m)
-	for i := 0; i < m; i++ {
-		var u, v int
-		fmt.Fscan(in, &u, &v)
-		u--
-		v--
-		edges[i] = []int{u, v}
-	}
-
-}
-
-// abc237-Ex - Hakata
-// https://atcoder.jp/contests/abc237/tasks/abc237_h
-func abc237Ex() {
-
 }
 
 const INF int = 1e18
@@ -82,10 +52,10 @@ func NewMaxFlow(n, source, sink int) *MaxFlow {
 }
 
 func (mf *MaxFlow) Add(from, to int, cap, revCap int) {
-	mf.calculated = false
 	if from == to {
 		return
 	}
+	mf.calculated = false
 	a := len(mf.edges[from])
 	b := len(mf.edges[to])
 	mf.edges[from] = append(mf.edges[from], Edge{to: int32(to), rev: int32(b), cap: cap})
@@ -130,6 +100,7 @@ func (mf *MaxFlow) Flow() int {
 	return mf.flowRes
 }
 
+// 最小割(边).返回最小割的值和每个点是否在最小割中.
 func (mf *MaxFlow) MinCut() (res int, isCut []bool) {
 	mf.Flow()
 	isCut = make([]bool, mf.n)
