@@ -111,6 +111,8 @@ func (uf *UnionFindArrayWithUndoAndWeight) Union(x, y int) bool {
 	return false
 }
 
+func (ufa *UnionFindArrayWithUndoAndWeight) SetPart(part int) { ufa.Part = part }
+
 func (uf *UnionFindArrayWithUndoAndWeight) IsConnected(x, y int) bool {
 	return uf.Find(x) == uf.Find(y)
 }

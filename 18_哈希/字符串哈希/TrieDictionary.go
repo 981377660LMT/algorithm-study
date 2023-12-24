@@ -75,8 +75,8 @@ func minimumCost(source string, target string, original []string, changed []stri
 		}
 		pos1, pos2 := 0, 0 // 在trie中的位置
 		for j := index; j < n; j++ {
-			pos1 = int(D.Children[pos1][int(source[j]-'a')])
-			pos2 = int(D.Children[pos2][int(target[j]-'a')])
+			pos1 = D.Move(pos1, int(source[j]))
+			pos2 = D.Move(pos2, int(target[j]))
 			if pos1 == -1 || pos2 == -1 {
 				break
 			}

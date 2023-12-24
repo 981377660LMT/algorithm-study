@@ -1,7 +1,3 @@
-// TODO1: ts版本字符串哈希
-// TODO2: 优化哈希类型(type S = string)
-// TODO4: dp[i][j]表示两个字符串是否想等
-
 package main
 
 const BASE uint = 13131
@@ -20,7 +16,6 @@ func GetHash(s S, base uint) uint {
 	return res
 }
 
-// TODO: 优化哈希类型
 type RollingHash struct {
 	base  uint
 	power []uint
@@ -102,6 +97,72 @@ func (d *Dictionary) HasValue(value V) bool {
 
 func (d *Dictionary) Size() int {
 	return len(d._idToValue)
+}
+
+const INF int = 1e18
+
+func minimumCost(source string, target string, original []string, changed []string, cost []int) int64 {
+	originId := make([]int, len(original))
+	changedId := make([]int, len(changed))
+	hashToId := NewDictionary()
+	for i, s := range original {
+		hash_ := GetHash(s, BASE)
+		originId[i] = hashToId.Id(hash_)
+	}
+	for i, s := range changed {
+		hash_ := GetHash(s, BASE)
+		changedId[i] = hashToId.Id(hash_)
+	}
+	gSize := hashToId.Size()
+	adjList := make([][]int, gSize)
+	for i := 0; i < gSize; i++ {
+		adjList[i] = make([]int, gSize)
+		for j := 0; j < gSize; j++ {
+			adjList[i][j] = INF
+		}
+		adjList[i][i] = 0
+	}
+	for i := 0; i < len(originId); i++ {
+		a, b, c := originId[i], changedId[i], cost[i]
+		adjList[a][b] = min2(adjList[a][b], c)
+	}
+	for k := 0; k < gSize; k++ {
+		for i := 0; i < gSize; i++ {
+			if adjList[i][k] == INF {
+				continue
+			}
+			for j := 0; j < gSize; j++ {
+				adjList[i][j] = min2(adjList[i][j], adjList[i][k]+adjList[k][j])
+			}
+		}
+	}
+
+	H := NewRollingHash(BASE)
+	table1 := H.Build(source)
+	table2 := H.Build(target)
+
+	n := len(source)
+	dp := make([]int, n+1)
+	for i := 0; i <= n; i++ {
+		dp[i] = INF
+	}
+	dp[0] = 0
+	for i := 0; i < n; i++ {
+		for j := i + 1; j <= n; j++ {
+			hash_ := H.Query(table1, i, j)
+			targetHash := H.Query(table2, i, j)
+			if hash_ == targetHash {
+				dp[j] = min2(dp[j], dp[i])
+			} else if hashToId.HasValue(hash_) && hashToId.HasValue(targetHash) {
+				dp[j] = min2(dp[j], dp[i]+adjList[hashToId.Id(hash_)][hashToId.Id(targetHash)])
+			}
+		}
+	}
+
+	if dp[n] == INF {
+		return -1
+	}
+	return int64(dp[n])
 }
 
 func min2(a, b int) int {

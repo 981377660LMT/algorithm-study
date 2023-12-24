@@ -26,6 +26,7 @@ function floyd(
 
   for (let k = 0; k < n; ++k) {
     for (let i = 0; i < n; ++i) {
+      if (dist[i * n + k] === INF) continue
       for (let j = 0; j < n; ++j) {
         const cand = dist[i * n + k] + dist[k * n + j]
         if (dist[i * n + j] > cand) {
@@ -81,7 +82,7 @@ class Floyd {
    * 添加从`u`到`v`的边权为`w`的有向边.
    */
   addDirectedEdge(u: number, v: number, w: number): void {
-    if (this._hasBuilt) throw new Error('Can not add edge after build.')
+    this._hasBuilt = false
     this._directedEdges.push([u, v, w])
   }
 
@@ -89,7 +90,9 @@ class Floyd {
    * @complexity O(n^3)
    */
   build(): void {
-    if (this._hasBuilt) throw new Error('Can not build twice.')
+    if (this._hasBuilt) return
+    this._hasBuilt = true
+
     const n = this._n
     this._directedEdges.forEach(([u, v, w]) => {
       this._dist[u * n + v] = Math.min(this._dist[u * n + v], w)
@@ -97,6 +100,7 @@ class Floyd {
 
     for (let k = 0; k < n; ++k) {
       for (let i = 0; i < n; ++i) {
+        if (this._dist[i * n + k] === INF) continue
         for (let j = 0; j < n; ++j) {
           const cand = this._dist[i * n + k] + this._dist[k * n + j]
           if (this._dist[i * n + j] > cand) {
@@ -106,8 +110,6 @@ class Floyd {
         }
       }
     }
-
-    this._hasBuilt = true
   }
 
   /**
@@ -178,7 +180,7 @@ class FloydDynamic {
    * 添加从`u`到`v`的边权为`w`的有向边.
    */
   addDirectedEdge(u: number, v: number, w: number): void {
-    if (this._hasBuilt) throw new Error('Can not add edge after build.')
+    this._hasBuilt = false
     this._directedEdges.push([u, v, w])
   }
 
@@ -186,7 +188,9 @@ class FloydDynamic {
    * @complexity O(n^3)
    */
   build(): void {
-    if (this._hasBuilt) throw new Error('Can not build twice.')
+    if (this._hasBuilt) return
+    this._hasBuilt = true
+
     const n = this._n
     this._directedEdges.forEach(([u, v, w]) => {
       this._dist[u * n + v] = Math.min(this._dist[u * n + v], w)
@@ -194,6 +198,7 @@ class FloydDynamic {
 
     for (let k = 0; k < n; ++k) {
       for (let i = 0; i < n; ++i) {
+        if (this._dist[i * n + k] === INF) continue
         for (let j = 0; j < n; ++j) {
           const cand = this._dist[i * n + k] + this._dist[k * n + j]
           if (this._dist[i * n + j] > cand) {
@@ -202,8 +207,6 @@ class FloydDynamic {
         }
       }
     }
-
-    this._hasBuilt = true
   }
 
   /**

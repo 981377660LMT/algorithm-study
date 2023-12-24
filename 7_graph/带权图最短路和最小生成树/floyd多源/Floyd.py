@@ -27,6 +27,8 @@ def floyd(n: int, edges: List[List[int]]) -> List[List[int]]:
     # dis[k][i][j] 表示「经过若干个编号不超过 k 的节点」时，从 i 到 j 的最短路长度
     for k in range(n):  # 经过的中转点
         for i in range(n):
+            if dist[i][k] == INF:
+                continue
             for j in range(n):
                 # 松弛：如果一条边可以被松弛了，说明这条边就没有必要留下了
                 cand = dist[i][k] + dist[k][j]
@@ -49,6 +51,8 @@ if __name__ == "__main__":
     # !dis[k][i][j] 表示「经过若干个编号不超过 k 的节点」时，从 i 到 j 的最短路长度
     for k in range(n):  # !经过的中转点
         for i in range(n):
+            if dist[i][k] == INF:
+                continue
             for j in range(n):
                 # !松弛：如果一条边可以被松弛了，说明这条边就没有必要留下了
                 cand = dist[i][k] + dist[k][j]

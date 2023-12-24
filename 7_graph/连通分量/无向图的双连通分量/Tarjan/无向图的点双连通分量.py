@@ -10,7 +10,7 @@ from typing import List, Tuple
 # !https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/graph.go#L2739
 
 
-def findVBCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[int], List[bool]]:
+def findVBCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[List[int]], List[bool]]:
     """
     !Tarjan 算法求无向图的 v-BCC
 
@@ -19,8 +19,8 @@ def findVBCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[int]
         graph (List[List[int]]):  邻接表
 
     Returns:
-        Tuple[List[List[int]], List[int], List[bool]]:
-        每个 v-BCC 组里包含哪些点，每个点所在 v-BCC 的编号(从0开始)，每个顶点是否为割点(便于缩点成树)
+        Tuple[List[List[int]], List[List[int], List[bool]]:
+        每个 v-BCC 组里包含哪些点，每个点所在 v-BCC 的编号(从0开始,割点有多个)，每个顶点是否为割点(便于缩点成树)
 
     Notes:
         - 原图的割点`至少`在两个不同的 v-BCC 中
@@ -90,7 +90,12 @@ def findVBCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[int]
                 continue
             dfs(i, -1)
 
-    return groups, [v - 1 for v in vbccId], isCut
+    belong = [[] for _ in range(n)]
+    for i, group in enumerate(groups):
+        for v in group:
+            belong[v].append(i)
+
+    return groups, belong, isCut
 
 
 def toTree(graph: List[List[int]], groups: List[List[int]], isCut: List[bool]) -> List[List[int]]:
@@ -129,7 +134,7 @@ def toTree(graph: List[List[int]], groups: List[List[int]], isCut: List[bool]) -
 if __name__ == "__main__":
     assert findVBCC(5, [[1, 2], [0, 2], [0, 1, 3, 4], [2], [2]]) == (
         [[2, 3], [2, 4], [2, 0, 1]],
-        [2, 2, 2, 0, 1],
+        [[2], [2], [0, 1, 2], [0], [1]],
         [False, False, True, False, False],
     )
 

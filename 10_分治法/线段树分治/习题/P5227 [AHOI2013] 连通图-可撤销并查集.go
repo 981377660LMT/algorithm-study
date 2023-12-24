@@ -326,6 +326,7 @@ func (uf *UnionFindArrayWithUndo2) Reset() {
 		uf.Undo()
 	}
 }
+func (ufa *UnionFindArrayWithUndo2) SetPart(part int) { ufa.Part = part }
 
 func (uf *UnionFindArrayWithUndo2) IsConnected(x, y int) bool {
 	return uf.Find(x) == uf.Find(y)

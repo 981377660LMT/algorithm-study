@@ -24,7 +24,7 @@ def minimumRechableCity(
             u, v = args
             target = uf.find(v)
             while True:
-                # 暴力上跳，向父节点连边
+                # 暴力上跳，向父节点连边union
                 u = uf.find(u)
                 if u == target:
                     break
