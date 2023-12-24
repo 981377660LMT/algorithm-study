@@ -16,7 +16,6 @@ import "fmt"
 const INF int = 1e18
 
 func main() {
-	// source = "abcd", target = "acbe", original = ["a","b","c","c","e","d"], changed = ["b","c","b","e","b","e"], cost = [2,5,5,1,2,20]
 	fmt.Println(minimumCost("abcd", "acbe", []string{"a", "b", "c", "c", "e", "d"}, []string{"b", "c", "b", "e", "b", "e"}, []int{2, 5, 5, 1, 2, 20}))
 }
 
