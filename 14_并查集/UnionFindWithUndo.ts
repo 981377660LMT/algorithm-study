@@ -62,6 +62,18 @@ class UnionFindArrayWithUndo {
     }
   }
 
+  getState(): number {
+    return this._optStack.length
+  }
+
+  rollback(state: number): boolean {
+    if (state < 0 || state > this._optStack.length) return false
+    while (this._optStack.length > state) {
+      this.undo()
+    }
+    return true
+  }
+
   isConnected(x: number, y: number): boolean {
     return this.find(x) === this.find(y)
   }

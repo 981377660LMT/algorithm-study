@@ -75,6 +75,18 @@ class UnionFindArrayWithUndoAndWeight<S> {
     }
   }
 
+  getState(): number {
+    return this._history.length
+  }
+
+  rollback(state: number): boolean {
+    if (state < 0 || state > this._history.length) return false
+    while (this._history.length > state) {
+      this.undo()
+    }
+    return true
+  }
+
   find(x: number): number {
     if (this._parents[x] === x) return x
     return this.find(this._parents[x])

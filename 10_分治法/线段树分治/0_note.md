@@ -52,3 +52,8 @@ https://www.luogu.com.cn/blog/yszs/xian-duan-shu-fen-zhi
 
 Marser 的线段树分治题单
 https://www.luogu.com.cn/training/5037
+
+---
+
+分治删点使用了正难则反的想法：
+**删一个点 = 加这个点以外的所有点**

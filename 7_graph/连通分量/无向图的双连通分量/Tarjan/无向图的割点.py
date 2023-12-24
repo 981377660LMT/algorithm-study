@@ -9,11 +9,10 @@ from typing import List
 # !https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/graph.go#L2739
 
 
-def findCutVertices(n: int, graph: List[List[int]]) -> List[bool]:
+def findCutVertices(graph: List[List[int]]) -> List[bool]:
     """Tarjan 算法求无向图的割点
 
     Args:
-        n (int): 顶点数
         graph (List[List[int]]): 邻接表
 
     Returns:
@@ -40,6 +39,7 @@ def findCutVertices(n: int, graph: List[List[int]]) -> List[bool]:
             isCut[cur] = False
         return curLow
 
+    n = len(graph)
     isCut = [False] * n
     dfsOrder = [0] * n  # 值从 1 开始
     dfsId = 0

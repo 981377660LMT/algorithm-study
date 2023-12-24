@@ -88,6 +88,17 @@ class UnionFindArrayWithUndo:
         while self._optStack:
             self.undo()
 
+    def getState(self) -> int:
+        return len(self._optStack)
+
+    def rollback(self, state: int) -> bool:
+        """回滚到指定状态"""
+        if state < 0 or state > len(self._optStack):
+            return False
+        while len(self._optStack) > state:
+            self.undo()
+        return True
+
     def isConnected(self, x: int, y: int) -> bool:
         return self.find(x) == self.find(y)
 
@@ -165,6 +176,17 @@ class UnionFindMapWithUndo(Generic[T]):
     def reset(self) -> None:
         while self._optStack:
             self.undo()
+
+    def getState(self) -> int:
+        return len(self._optStack)
+
+    def rollback(self, state: int) -> bool:
+        """回滚到指定状态"""
+        if state < 0 or state > len(self._optStack):
+            return False
+        while len(self._optStack) > state:
+            self.undo()
+        return True
 
     def isConnected(self, key1: T, key2: T) -> bool:
         return self.find(key1) == self.find(key2)

@@ -10,12 +10,11 @@ from typing import List, Tuple
 # !https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/graph.go#L2739
 
 
-def findVBCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[List[int]], List[bool]]:
+def findVBCC(graph: List[List[int]]) -> Tuple[List[List[int]], List[List[int]], List[bool]]:
     """
     !Tarjan 算法求无向图的 v-BCC
 
     Args:
-        n (int): 图的顶点数
         graph (List[List[int]]):  邻接表
 
     Returns:
@@ -73,6 +72,7 @@ def findVBCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[List
             isCut[cur] = False
         return curLow
 
+    n = len(graph)
     dfsId = 0
     dfsOrder = [0] * n
     vbccId = [0] * n

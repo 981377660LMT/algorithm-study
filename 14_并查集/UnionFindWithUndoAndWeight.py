@@ -73,6 +73,17 @@ class UnionFindArrayWithUndoAndWeight(Generic[V]):
             return True
         return False
 
+    def getState(self) -> int:
+        return len(self._history)
+
+    def rollback(self, state: int) -> bool:
+        """回滚到指定状态"""
+        if state < 0 or state > len(self._history):
+            return False
+        while len(self._history) > state:
+            self.undo()
+        return True
+
     def isConnected(self, x: int, y: int) -> bool:
         return self.find(x) == self.find(y)
 
