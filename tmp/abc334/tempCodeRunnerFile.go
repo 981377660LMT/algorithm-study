@@ -1,0 +1,1 @@
+	fmt.Println(res * inv % MOD)

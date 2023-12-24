@@ -6,6 +6,11 @@ def divCount(lower: int, upper: int, k: int) -> int:
     return upper // k - (lower - 1) // k
 
 
+def divCount2(lower: int, upper: int, k: int, b: int) -> int:
+    """区间[lower,upper]内形如k*x+b的个数."""
+    return (upper - b) // k - (lower - 1 - b) // k
+
+
 def divSum(lower: int, upper: int, k: int) -> int:
     """区间[lower,upper]内k的倍数和."""
     if lower > upper:

@@ -34,7 +34,7 @@ def findVBCC(n: int, graph: List[List[int]]) -> Tuple[List[List[int]], List[int]
         dfsOrder[cur] = dfsId
         curLow = dfsId
         childCount = 0
-        for _ei, next in enumerate(graph[cur]):
+        for _, next in enumerate(graph[cur]):
             # edge = (cur, next, ei)
             edge = (cur, next)
             if dfsOrder[next] == 0:

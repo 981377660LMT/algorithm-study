@@ -12,6 +12,8 @@
 //  !如果原图中某个连通分量只有一个点，则需要具体情况具体分析，
 //  !这里不将孤立点当成点双.
 
+// TODO: 重构，类似python版本
+
 package main
 
 import (
@@ -34,8 +36,8 @@ func main() {
 	for i := 0; i < m; i++ {
 		var u, v int
 		fmt.Fscan(in, &u, &v)
-		g[u] = append(g[u], Edge{u, v, 1, i})
-		g[v] = append(g[v], Edge{v, u, 1, i})
+		g[u] = append(g[u], Edge{u, v, i})
+		g[v] = append(g[v], Edge{v, u, i})
 	}
 
 	tec := NewBiConnectedComponents(g)
@@ -78,9 +80,9 @@ func main() {
 	}
 }
 
-type Edge = struct{ from, to, cost, index int }
+type Edge = struct{ from, to, index int }
 type BiConnectedComponents struct {
-	BCC     [][]Edge // 每个边双连通分量中的边
+	BCC     [][]Edge // 每个点双连通分量中的边
 	g       [][]Edge
 	lowLink *LowLink
 	used    []bool

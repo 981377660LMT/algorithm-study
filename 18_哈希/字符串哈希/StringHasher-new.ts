@@ -1,4 +1,116 @@
 /**
+ * !`注意这种方式很容易哈希冲突,需要使用双哈希.`
+ * @example
+ * ```ts
+ * const H1 = new StringHasher1(131, 1e7 + 19)
+ * const H2 = new StringHasher1(13331, 1e7 + 79)
+ * const s = 'abcde'
+ * const table1 = H1.build(s)
+ * const table2 = H2.build(s)
+ * const hash1 = H1.query(table1, 0, 3)
+ * const hash2 = H2.query(table2, 0, 3)
+ * ```
+ * mod和base的选取使得运算过程中不超过2^53-1,这种方式比BigInt64要快.
+ *
+ *
+ * 哈希值计算方法：
+ * hash(s, p, m) = (val(s[0]) * p^k-1 + val(s[1]) * p^k-2 + ... + val(s[k-1]) * p^0) mod m.
+ * 越靠左字符权重越大.
+ */
+class StringHasher1 {
+  private readonly _base: number
+  private readonly _mod: number
+  private readonly _power: number[]
+
+  /**
+   * @param base
+   * 131/13331/1333331/12821/12721/12421
+   * @param mod
+   * 1e7+19/1e7+79/1e7+103/1e7+121/1e7+139/1e7+141/1e7+169
+   */
+  constructor(base = 131, mod = 1e7 + 19) {
+    this._base = base
+    this._mod = mod
+    this._power = [1]
+  }
+
+  build(s: ArrayLike<number> | string): number[] {
+    const n = s.length
+    const hashTable = Array(n + 1).fill(0)
+    const mod = this._mod
+    const base = this._base
+    if (typeof s === 'string') {
+      for (let i = 0; i < n; i++) {
+        hashTable[i + 1] = (hashTable[i] * base + s.charCodeAt(i)) % mod
+      }
+    } else {
+      for (let i = 0; i < n; i++) {
+        hashTable[i + 1] = (hashTable[i] * base + s[i]) % mod
+      }
+    }
+    return hashTable
+  }
+
+  query(sTable: number[], start: number, end: number): number {
+    this._expand(end - start)
+    const res = (sTable[end] - sTable[start] * this._power[end - start]) % this._mod
+    return res < 0 ? res + this._mod : res
+  }
+
+  combine(h1: number, h2: number, h2len: number): number {
+    this._expand(h2len)
+    return (h1 * this._power[h2len] + h2) % this._mod
+  }
+
+  addChar(hash: number, c: string | number): number {
+    if (typeof c === 'string') {
+      return (hash * this._base + c.charCodeAt(0)) % this._mod
+    }
+    return (hash * this._base + c) % this._mod
+  }
+
+  lcp(
+    sTable: number[],
+    start1: number,
+    end1: number,
+    tTable: number[],
+    start2: number,
+    end2: number
+  ): number {
+    const len1 = end1 - start1
+    const len2 = end2 - start2
+    const len = Math.min(len1, len2)
+    let low = 0
+    let high = len + 1
+    while (high - low > 1) {
+      const mid = (low + high) >>> 1
+      if (this.query(sTable, start1, start1 + mid) === this.query(tTable, start2, start2 + mid)) {
+        low = mid
+      } else {
+        high = mid
+      }
+    }
+    return low
+  }
+
+  private _expand(size: number): void {
+    if (this._power.length < size + 1) {
+      const preSize = this._power.length
+      const diff = size + 1 - preSize
+      const power = this._power
+      const base = this._base
+      const mod = this._mod
+      for (let i = 0; i < diff; i++) {
+        power.push(0)
+      }
+      for (let i = preSize - 1; i < size; i++) {
+        power[i + 1] = (power[i] * base) % mod
+      }
+    }
+  }
+}
+
+/**
  * 使用了双哈希的字符串哈希.
  * @important 比 {@link StringHasher2} 慢.
  */
@@ -243,118 +355,6 @@ class StringHasher2 {
       for (let i = preSize - 1; i < size; i++) {
         power0[i + 1] = (power0[i] * base0) % mod0
         power1[i + 1] = (power1[i] * base1) % mod1
-      }
-    }
-  }
-}
-
-/**
- * !`注意这种方式很容易哈希冲突,需要使用双哈希.`
- * @example
- * ```ts
- * const H1 = new StringHasher1(131, 1e7 + 19)
- * const H2 = new StringHasher1(13331, 1e7 + 79)
- * const s = 'abcde'
- * const table1 = H1.build(s)
- * const table2 = H2.build(s)
- * const hash1 = H1.query(table1, 0, 3)
- * const hash2 = H2.query(table2, 0, 3)
- * ```
- * mod和base的选取使得运算过程中不超过2^53-1,这种方式比BigInt64要快.
- *
- *
- * 哈希值计算方法：
- * hash(s, p, m) = (val(s[0]) * p^k-1 + val(s[1]) * p^k-2 + ... + val(s[k-1]) * p^0) mod m.
- * 越靠左字符权重越大.
- */
-class StringHasher1 {
-  private readonly _base: number
-  private readonly _mod: number
-  private readonly _power: number[]
-
-  /**
-   * @param base
-   * 131/13331/1333331/12821/12721/12421
-   * @param mod
-   * 1e7+19/1e7+79/1e7+103/1e7+121/1e7+139/1e7+141/1e7+169
-   */
-  constructor(base = 131, mod = 1e7 + 19) {
-    this._base = base
-    this._mod = mod
-    this._power = [1]
-  }
-
-  build(s: ArrayLike<number> | string): number[] {
-    const n = s.length
-    const hashTable = Array(n + 1).fill(0)
-    const mod = this._mod
-    const base = this._base
-    if (typeof s === 'string') {
-      for (let i = 0; i < n; i++) {
-        hashTable[i + 1] = (hashTable[i] * base + s.charCodeAt(i)) % mod
-      }
-    } else {
-      for (let i = 0; i < n; i++) {
-        hashTable[i + 1] = (hashTable[i] * base + s[i]) % mod
-      }
-    }
-    return hashTable
-  }
-
-  query(sTable: number[], start: number, end: number): number {
-    this._expand(end - start)
-    const res = (sTable[end] - sTable[start] * this._power[end - start]) % this._mod
-    return res < 0 ? res + this._mod : res
-  }
-
-  combine(h1: number, h2: number, h2len: number): number {
-    this._expand(h2len)
-    return (h1 * this._power[h2len] + h2) % this._mod
-  }
-
-  addChar(hash: number, c: string | number): number {
-    if (typeof c === 'string') {
-      return (hash * this._base + c.charCodeAt(0)) % this._mod
-    }
-    return (hash * this._base + c) % this._mod
-  }
-
-  lcp(
-    sTable: number[],
-    start1: number,
-    end1: number,
-    tTable: number[],
-    start2: number,
-    end2: number
-  ): number {
-    const len1 = end1 - start1
-    const len2 = end2 - start2
-    const len = Math.min(len1, len2)
-    let low = 0
-    let high = len + 1
-    while (high - low > 1) {
-      const mid = (low + high) >>> 1
-      if (this.query(sTable, start1, start1 + mid) === this.query(tTable, start2, start2 + mid)) {
-        low = mid
-      } else {
-        high = mid
-      }
-    }
-    return low
-  }
-
-  private _expand(size: number): void {
-    if (this._power.length < size + 1) {
-      const preSize = this._power.length
-      const diff = size + 1 - preSize
-      const power = this._power
-      const base = this._base
-      const mod = this._mod
-      for (let i = 0; i < diff; i++) {
-        power.push(0)
-      }
-      for (let i = preSize - 1; i < size; i++) {
-        power[i + 1] = (power[i] * base) % mod
       }
     }
   }

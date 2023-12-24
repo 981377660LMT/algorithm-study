@@ -17,3 +17,8 @@ https://wenku.baidu.com/view/7857b870aaea998fcc220ed8.html
 ---
 
 https://www.luogu.com.cn/blog/LawrenceSivan/post-mu-ban-dong-tai-shu-link-cut-tree
+
+---
+
+**注意 lct 始终是联通的**
+如果图可能不连通，需要使用`BlockCutTree`或者`DynamicBridge`维护

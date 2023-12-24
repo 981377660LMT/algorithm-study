@@ -1,3 +1,5 @@
+# Leetcode题解：1574. 删除最短的子数组使剩余数组有序
+# https://leetcode.cn/problems/shortest-subarray-to-be-removed-to-make-array-sorted/
 # 删除子数组
 # 请你删除一个子数组（可以为空），使得 arr 中剩下的元素是 非递减 的。
 # 返回满足题目要求删除的最短子数组的长度。
@@ -34,18 +36,18 @@ class Solution:
         #     res = min(res, right - left - 1)
 
         # !2. 二分
-        for i in range(i + 1):
+        for v in range(i + 1):
             left, right = j, n - 1
             ok = False
             while left <= right:
                 mid = (left + right) // 2
-                if arr[mid] >= arr[i]:
+                if arr[mid] >= arr[v]:
                     right = mid - 1
                     ok = True
                 else:
                     left = mid + 1
             if ok:
-                res = min(res, left - i - 1)
+                res = min(res, left - v - 1)
 
         return res
 

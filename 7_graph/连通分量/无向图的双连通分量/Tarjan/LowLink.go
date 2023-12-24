@@ -78,9 +78,10 @@ func yuki1983() {
 }
 
 type Edge = struct{ from, to int }
+
 type LowLink struct {
-	Articulation []int  // 関節点
-	Bridge       []Edge // 橋
+	Articulation []int  // 割点
+	Bridge       []Edge // 桥
 	g            [][]Edge
 	ord, low     []int
 	used         []bool
@@ -149,8 +150,6 @@ func min(a, b int) int {
 	return b
 }
 
-//
-//
 func NewUnionFindArray(n int) *_UnionFindArray {
 	parent, rank := make([]int, n), make([]int, n)
 	for i := 0; i < n; i++ {

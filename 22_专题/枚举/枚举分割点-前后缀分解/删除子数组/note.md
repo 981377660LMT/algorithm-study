@@ -31,3 +31,10 @@
        if ok:
            first[i] = left
    ```
+
+---
+
+**注意删除一个元素也叫删除子数组**
+C - Socks 2
+https://atcoder.jp/contests/abc334/tasks/abc334_c
+求删除一个元素后，`sum(nums[i+1]-nums[i])` 的最小值
