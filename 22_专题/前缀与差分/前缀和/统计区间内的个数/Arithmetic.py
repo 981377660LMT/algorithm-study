@@ -158,10 +158,10 @@ if __name__ == "__main__":
                     res += cur
             return res
 
-        for _ in range(1000):
-            x = random.randint(-1000, 1000)
-            k = random.randint(-1000, 1000)
-            b = random.randint(-1000, 1000)
+        for _ in range(int(5e3)):
+            x = random.randint(-int(5e3), int(5e3))
+            k = random.randint(-int(5e3), int(5e3))
+            b = random.randint(-int(5e3), int(5e3))
             res1, ok1 = findFloor(x, k, b)
             res2, ok2 = findFloorBrute(x, k, b)
             assert ok1 == ok2, f"{res1} {ok1} {res2} {ok2}"
@@ -170,11 +170,11 @@ if __name__ == "__main__":
             res2, ok2 = findCeilingBrute(x, k, b)
             assert ok1 == ok2, f"{res1} {ok1} {res2} {ok2}"
             assert res1 == res2, f"{res1} {ok1} {res2} {ok2}"
-        for _ in range(1000):
-            lower = random.randint(-1000, 1000)
-            upper = random.randint(-1000, 1000)
-            k = random.randint(-1000, 1000)
-            b = random.randint(-1000, 1000)
+        for _ in range(int(5e3)):
+            lower = random.randint(-int(5e3), int(5e3))
+            upper = random.randint(-int(5e3), int(5e3))
+            k = random.randint(-int(5e3), int(5e3))
+            b = random.randint(-int(5e3), int(5e3))
             res1, ok1 = findFirst(lower, upper, k, b)
             res2, ok2 = findFirstBruteForce(lower, upper, k, b)
             assert ok1 == ok2, f"{res1} {ok1} {res2} {ok2}"
@@ -183,11 +183,11 @@ if __name__ == "__main__":
             res2, ok2 = findLastBruteForce(lower, upper, k, b)
             assert ok1 == ok2, f"{res1} {ok1} {res2} {ok2}"
             assert res1 == res2, f"{res1} {ok1} {res2} {ok2}"
-        for _ in range(1000):
-            lower = random.randint(-1000, 1000)
-            upper = random.randint(-1000, 1000)
-            k = random.randint(-1000, 1000)
-            b = random.randint(-1000, 1000)
+        for _ in range(int(5e3)):
+            lower = random.randint(-int(5e3), int(5e3))
+            upper = random.randint(-int(5e3), int(5e3))
+            k = random.randint(-int(5e3), int(5e3))
+            b = random.randint(-int(5e3), int(5e3))
             res1 = arithmeticCount(lower, upper, k, b)
             res2 = arithmeticCountBruteForce(lower, upper, k, b)
             assert res1 == res2, f"{res1} {res2}"

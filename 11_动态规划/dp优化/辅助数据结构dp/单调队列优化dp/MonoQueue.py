@@ -61,7 +61,7 @@ class MonoQueue(Generic[T]):
                 return f"[value: {self.value}, count: {self.count}]"
 
         res = []
-        for i in range(len(self)):
+        for i in range(len(self.minQueue)):
             res.append(Item(self.minQueue[i], self._minQueueCount[i]))
         return f"MonoQueue({res})"
 

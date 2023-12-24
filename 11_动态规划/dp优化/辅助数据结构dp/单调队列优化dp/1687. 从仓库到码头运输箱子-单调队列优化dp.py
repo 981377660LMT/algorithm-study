@@ -1,20 +1,45 @@
+# 1687. 从仓库到码头运输箱子
+#
+# https://leetcode.cn/problems/delivering-boxes-from-storage-to-ports/solution/python-dan-diao-dui-lie-you-hua-dp-by-98-6elh/
+# 你需要用这一辆车把一些箱子从仓库运送到码头。
+# 这辆卡车每次运输有 箱子数目的限制 和 总重量的限制 。
+# 箱子需要按照 数组顺序 运输
+# 对于在卡车上的箱子，我们需要 按顺序 处理它们。
+# 卡车上所有箱子都被卸货后，卡车需要 一趟行程 回到仓库，从箱子队列里再取出一些箱子。
+# 请你返回将所有箱子送到相应码头的 最少行程 次数。
+
 from MonoQueue import MonoQueue
 
 from typing import List, Tuple
 from itertools import accumulate
 
-# 你需要用这一辆车把一些箱子从仓库运送到码头。这辆卡车每次运输有 箱子数目的限制 和 总重量的限制 。
-# 箱子需要按照 数组顺序 运输
-# 对于在卡车上的箱子，我们需要 按顺序 处理它们
-
-# 请你返回将所有箱子送到相应码头的 最少行程 次数。
-
-# https://leetcode.cn/problems/delivering-boxes-from-storage-to-ports/solution/python-dan-diao-dui-lie-you-hua-dp-by-98-6elh/
 
 INF = int(1e20)
 
 
 class Solution:
+    def boxDelivering2(self, boxes: List[List[int]], _: int, maxBoxes: int, maxWeight: int) -> int:
+        n = len(boxes)
+        preWeight = [0] + list(accumulate(box[1] for box in boxes))  # 重量前缀和
+        preCost = [0, 0]  # 运送次数前缀和 一次搬运前1个到前3个需要`preCost[2] - preCost[0]`次转移
+        for (pre, _), (cur, _) in zip(boxes, boxes[1:]):
+            preCost.append(preCost[-1] + int(cur != pre))
+
+        print(preWeight, preCost)
+        dp = [INF] * n
+        queue = MonoQueue[Tuple[int, int]](lambda x, y: x[0] < y[0])  # (value, index)
+        for i in range(n):
+            while queue and (
+                i + 1 - queue.head()[1] > maxBoxes  # 超出数量限制
+                or preWeight[i + 1] - preWeight[queue.head()[1]] > maxWeight  # 超出重量限制
+            ):
+                queue.popleft()
+            preMin = queue.head()[0] if queue else 0
+            dp[i] = min(dp[i], preMin + (preCost[i] + 2))
+            queue.append((dp[i] - preCost[i], i))
+            print(dp)
+        return dp[-1]
+
     def boxDelivering(self, boxes: List[List[int]], _: int, maxBoxes: int, maxWeight: int) -> int:
         """问题的关键是哪几个箱子一起运送 dp[i] 表示前i个箱子运送到码头的最少次数
         显然 可以写一个O(n^2) 的dp
@@ -40,28 +65,6 @@ class Solution:
                 if weightSum > maxWeight:
                     continue
                 dp[i] = min(dp[i], dp[j] + preCost[i - 1] - preCost[j] + 2)
-        return dp[-1]
-
-    def boxDelivering2(self, boxes: List[List[int]], _: int, maxBoxes: int, maxWeight: int) -> int:
-        n = len(boxes)
-        preWeight = [0] + list(accumulate(box[1] for box in boxes))  # 重量前缀和
-        preCost = [0]  # 运送次数前缀和 一次搬运前1个到前3个需要`preCost[2] - preCost[0]`次转移
-        for (pre, _), (cur, _) in zip(boxes, boxes[1:]):
-            preCost.append(preCost[-1] + int(cur != pre))
-
-        dp = [INF] * (n + 1)
-        dp[0] = 0
-        queue = MonoQueue[Tuple[int, int]](lambda x, y: x[0] < y[0])  # (value, index)
-        for i in range(n + 1):
-            while queue and (
-                i - queue.head()[1] > maxBoxes  # 超出数量限制
-                or preWeight[i] - preWeight[queue.head()[1]] > maxWeight  # 超出重量限制
-            ):
-                queue.popleft()
-            if queue:
-                dp[i] = min(dp[i], preCost[i - 1] + queue.min[0] + 2)
-            if i < len(preCost):
-                queue.append((dp[i] - preCost[i], i))
         return dp[-1]
 
 

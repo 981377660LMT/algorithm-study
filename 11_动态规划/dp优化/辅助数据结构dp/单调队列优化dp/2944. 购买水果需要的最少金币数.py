@@ -6,9 +6,9 @@
 # 注意 ，即使你 可以 免费获得水果 j ，你仍然可以花费 prices[j] 个金币去购买它以便能免费获得接下来的 j 个水果。
 # 请你返回获得所有水果所需要的 最少 金币数。
 
+from MonoQueue import MonoQueue
 
 from typing import List
-from MonoQueue import MonoQueue
 
 
 class Solution:
