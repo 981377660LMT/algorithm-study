@@ -12,3 +12,18 @@
 如果 dp 转移中出现`滑动窗口最值`，就可以用单调队列优化
 
 dp[i] = min(dp[j] for j in [i-k, i-1]) + C[i]
+
+---
+
+`统一用 n+1 长度的 dp 数组`
+
+```python
+dp = [-INF] * n
+seg = MonoQueue[Tuple[int, int]](lambda x, y: x[0] > y[0])
+for i, num in enumerate(nums):
+  while seg and i - seg.head()[1] > k:  # 1.不在窗口内的元素出队
+      seg.popleft()
+  preMax = max(0, seg.head()[0]) if seg else 0
+  dp[i] = max(dp[i], preMax + num)  # 2.更新dp
+  seg.append((dp[i], i))  # 3.入队
+```

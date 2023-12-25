@@ -55,9 +55,11 @@ INF = int(1e20)
 n,k<=2e5
 
 思路:
-1. 每次送有两种选择:
-- 从i直接送到i+1
-- 从i回到起点,再送到i+1
+类似"从仓库到码头运输箱子"
+dp[i] = dp[j] + (preSum[i]-preSum[j]) + (distToStart[i]+distToStart[j]) | j in [i-k,i)
+合并同类项得
+d[i] = (dp[j] - preSum[j] + distToStart[j]) + preSum[i] + distToStart[i] | j in [i-k,i)
+!单调队列维护滑动窗口` (dp[j] - preSum[j] + distToStart[j])`的最小值即可
 """
 
 

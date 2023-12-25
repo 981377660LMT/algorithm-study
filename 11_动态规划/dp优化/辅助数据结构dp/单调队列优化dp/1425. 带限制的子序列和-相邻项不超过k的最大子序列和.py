@@ -21,7 +21,7 @@ def constrainedSubsetSum(nums: List[int], k: int) -> int:
     - res = max(dp)
     """
     n = len(nums)
-    dp = [-INF] * n
+    dp = [-INF] * (n + 1)
     seg = MonoQueue[Tuple[int, int]](lambda x, y: x[0] > y[0])  # (dp[i], i)
     for i, num in enumerate(nums):
         while seg and i - seg.head()[1] > k:

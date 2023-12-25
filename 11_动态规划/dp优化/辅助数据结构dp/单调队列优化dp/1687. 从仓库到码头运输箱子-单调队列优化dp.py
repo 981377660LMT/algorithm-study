@@ -7,6 +7,11 @@
 # 对于在卡车上的箱子，我们需要 按顺序 处理它们。
 # 卡车上所有箱子都被卸货后，卡车需要 一趟行程 回到仓库，从箱子队列里再取出一些箱子。
 # 请你返回将所有箱子送到相应码头的 最少行程 次数。
+#
+# dp[i] 表示前i个箱子运送到码头的最少次数 (0<=i<=n)
+# 那么 dp[i] = dp[j] + 搬运第j+1到第i个箱子的相邻移动距离 + 折返距离
+# dp[i] = min(dp[j] - preDist[j+1] + preDist[i] + 2 ) | preWeight[i]-preWeight[j]<=maxWeight, i-j<=maxBoxes
+# !只需要维护滑动窗口内`dp[j]-preDist[j+1]`的最小值即可
 
 from MonoQueue import MonoQueue
 
@@ -18,29 +23,33 @@ INF = int(1e20)
 
 
 class Solution:
-    def boxDelivering2(self, boxes: List[List[int]], _: int, maxBoxes: int, maxWeight: int) -> int:
+    def boxDelivering(self, boxes: List[List[int]], _: int, maxBoxes: int, maxWeight: int) -> int:
         n = len(boxes)
-        preWeight = [0] + list(accumulate(box[1] for box in boxes))  # 重量前缀和
-        preCost = [0, 0]  # 运送次数前缀和 一次搬运前1个到前3个需要`preCost[2] - preCost[0]`次转移
-        for (pre, _), (cur, _) in zip(boxes, boxes[1:]):
-            preCost.append(preCost[-1] + int(cur != pre))
-
-        print(preWeight, preCost)
-        dp = [INF] * n
-        queue = MonoQueue[Tuple[int, int]](lambda x, y: x[0] < y[0])  # (value, index)
+        preWeight = [0] * (n + 1)  # 前i个箱子的重量和
         for i in range(n):
+            preWeight[i + 1] = preWeight[i] + boxes[i][1]
+        preDist = [0, 0]  # 运送前i个箱子的相邻移动距离(数组长度为n+1)
+        for i in range(n - 1):
+            preDist.append(preDist[-1] + int(boxes[i][0] != boxes[i + 1][0]))
+
+        queue = MonoQueue[Tuple[int, int]](lambda x, y: x[0] < y[0])  # (value, index)
+        dp = [INF] * (n + 1)
+        dp[0] = 0
+        queue.append((dp[0] - preDist[1], 0))
+        for i in range(1, n + 1):
             while queue and (
-                i + 1 - queue.head()[1] > maxBoxes  # 超出数量限制
-                or preWeight[i + 1] - preWeight[queue.head()[1]] > maxWeight  # 超出重量限制
+                (i - queue.head()[1]) > maxBoxes  # 超出数量限制
+                or (preWeight[i] - preWeight[queue.head()[1]]) > maxWeight  # 超出重量限制
             ):
                 queue.popleft()
-            preMin = queue.head()[0] if queue else 0
-            dp[i] = min(dp[i], preMin + (preCost[i] + 2))
-            queue.append((dp[i] - preCost[i], i))
-            print(dp)
+
+            preMin = queue.head()[0] if queue else INF
+            dp[i] = min(dp[i], preMin + (preDist[i] + 2))
+            if i < n:
+                queue.append((dp[i] - preDist[i + 1], i))
         return dp[-1]
 
-    def boxDelivering(self, boxes: List[List[int]], _: int, maxBoxes: int, maxWeight: int) -> int:
+    def boxDelivering2(self, boxes: List[List[int]], _: int, maxBoxes: int, maxWeight: int) -> int:
         """问题的关键是哪几个箱子一起运送 dp[i] 表示前i个箱子运送到码头的最少次数
         显然 可以写一个O(n^2) 的dp
         dp[i]=min(dp[j]+cost(j+1,i)+2 for j in range(i)) 其中cost(i+1,j)可以前缀和O(1)求出
@@ -68,7 +77,7 @@ class Solution:
         return dp[-1]
 
 
-print(Solution().boxDelivering2(boxes=[[1, 1], [2, 1], [1, 1]], _=2, maxBoxes=3, maxWeight=3))
+print(Solution().boxDelivering(boxes=[[1, 1], [2, 1], [1, 1]], _=2, maxBoxes=3, maxWeight=3))
 # 输出：4
 # 解释：最优策略如下：
 # - 卡车将所有箱子装上车，到达码头 1 ，然后去码头 2 ，然后再回到码头 1 ，最后回到仓库，总共需要 4 趟行程。
