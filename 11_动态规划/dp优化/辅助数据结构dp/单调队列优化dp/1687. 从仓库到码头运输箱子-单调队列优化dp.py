@@ -42,10 +42,9 @@ class Solution:
                 or (preWeight[i] - preWeight[queue.head()[1]]) > maxWeight  # 超出重量限制
             ):
                 queue.popleft()
-
             preMin = queue.head()[0] if queue else INF
             dp[i] = min(dp[i], preMin + (preDist[i] + 2))
-            if i < n:
+            if i + 1 < len(preDist):
                 queue.append((dp[i] - preDist[i + 1], i))
         return dp[-1]
 
