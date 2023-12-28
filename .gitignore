@@ -198,3 +198,4 @@ python-sortedcontainers
 /immutable-js
 
 /ICPC
+.flake8

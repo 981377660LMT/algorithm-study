@@ -52,7 +52,7 @@ class MonoQueue:
 
 
 def windowMax2D(
-    matrix: List[List[int]], rowSize: int, colSize: int, *, isMax: bool
+    matrix: List[List[int]], rowSize: int, colSize: int, isMax: bool
 ) -> List[List[int]]:
     """
     每个rowSize*colSize窗口(和)的最值

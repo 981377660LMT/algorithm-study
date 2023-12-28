@@ -19,7 +19,7 @@ for i in range(n):
     nums[i] = int(input())
 preSum = [0] + list(accumulate(nums))
 
-'''
+"""
 dp(i)表示前i头牛的合法选择中最大总价值的数值
 用最后一头牛的状态切分状态
 1. 最后一头牛不选 子集1的最大价值就是dp(i-1)
@@ -32,7 +32,7 @@ dp(i)表示前i头牛的合法选择中最大总价值的数值
         dp(j-m-1) + S(i) - S(j-m)        
     }
     那么只需要求i位置前面长度为m的滑动窗口中，dp(j-2)-S(j-1)这个序列在窗口中的最大值即可
-'''
+"""
 
 
 def cal(j: int) -> int:
@@ -52,4 +52,3 @@ for i in range(1, len(preSum)):
     queue.append(i)
 
 print(dp[-1])
-

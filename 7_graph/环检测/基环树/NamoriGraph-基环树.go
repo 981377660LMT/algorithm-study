@@ -1,40 +1,49 @@
-// https://ei1333.github.io/library/graph/others/namori-graph.hpp
+// https://maspypy.github.io/library/graph/unicyclic.hpp
 // Namori Graph 无向图基环树
-
 // !一个有 n 个顶点和 n 条边的“连通”无向图。图中只有一个环。
 // 这个图被称为“Namori图”，这是根据一位漫画家的名字而命名的，
 // 但在学术界中，正确的称呼是“单环图(Unicyclic)”或“伪森林(Pseudoforest)”。
-// 在这里，将该图分解为一个环和附加在各个环上顶点的树。
-// !将包含在环中的顶点重新编号为 [0, k)，其中 k 是环中的顶点数，对应各个treeRoot.
-// !同样，附加的树也被重新编号为 [0, l)，其中 l 是树的顶点数, 0 是树的根。
 
-// NewNamoriGraph(g Graph)。
-// Build()：构建基环树和各个环上的子树。
-// GetId(rawV int) (rootId, idInTree int)：
-//   给定原图的顶点rawV,返回rawV所在的树的根节点和rawV在树中的编号.
-// GetInvId(rootId, idInTree int) (rawV int)：
-//   给定树的顶点编号root和某个点在树中的顶点编号idInTree, 返回这个点在原图中的顶点编号.
-//   GetInvId(root,0) 表示在环上的顶点root在原图中对应的顶点.
+// 例如：下图是一个无向基环树，其中的边权都是1。
+//
+//	  0
+//	  |
+//	  1
+//	 / \
+//	2   3 - 4 - 5
+//	 \ /
+//	  6
+//
+// root: 3
+// outEdge: 3-6
+// to: [1 3 1 6 3 4 2]
+// cycle: [6 2 1 3] (bottom到root的路径)
+// directedGraph:
+//
+//	    3(root)
+//	   / \
+//	  1   4
+//	 / \   \
+//	0   2   5
+//	     \
+//	      6(bottom)
+//
+// !性质1：点u在所在子树的根节点(在环上)为lca(u, bottom).
 
-// Trees []Graph : !以环上各个顶点i为根的无向树
-// CycleEdges []Edge : !基环树中在环上的边,边i连接着树的 root i和i+1 (i>=0)
-// HLDs []*HeavyLightDecomposition : !各个树的HLD
-
-// !如果原图不连通，需要并查集找到连通块后，对每个连通块建图
 package main
 
 import (
 	"bufio"
 	"fmt"
 	"os"
-	"sort"
-	"strings"
 )
 
 func main() {
-	yuki1254()
+	// yuki1254()
+	abc266f()
 }
 
+// https://yukicoder.me/problems/no/1254
 func yuki1254() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -42,62 +51,67 @@ func yuki1254() {
 
 	var n int
 	fmt.Fscan(in, &n)
-	g := make([][]Edge, n)
+	edges := make([]Edge, n)
 	for i := 0; i < n; i++ {
-		var a, b int
-		fmt.Fscan(in, &a, &b)
-		a--
-		b--
-		g[a] = append(g[a], Edge{a, b, 1, i})
-		g[b] = append(g[b], Edge{b, a, 1, i})
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		u--
+		v--
+		edges[i] = Edge{u, v, 1}
 	}
 
-	G := NewNamoriGraph(g)
-	G.Build(false)
+	namori := NewNamoriGraph(n, edges)
 	res := []int{}
-	for _, e := range G.CycleEdges {
-		res = append(res, e.id+1)
+	for i, e := range edges {
+		if namori.InCycle[e[0]] && namori.InCycle[e[1]] {
+			res = append(res, i+1)
+		}
 	}
-	sort.Ints(res)
+
 	fmt.Fprintln(out, len(res))
 	for _, v := range res {
 		fmt.Fprint(out, v, " ")
 	}
 }
 
-func abc266_f() {
-	// https://atcoder.jp/contests/abc266/tasks/abc266_f
-	// 给定一个基环树,问从x到y的路径是否唯一
-	// 等价于不能走环上=>在同一个子树中
+// https://atcoder.jp/contests/abc266/tasks/abc266_f
+// 每次查询基环树中两个点是否由唯一的路径相连.
+// 等价于：所在子树的根节点是否相同.
+func abc266f() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
 	var n int
 	fmt.Fscan(in, &n)
-	graph := make([][]Edge, n)
+	edges := make([]Edge, n)
 	for i := 0; i < n; i++ {
-		var a, b int
-		fmt.Fscan(in, &a, &b)
-		a--
-		b--
-		graph[a] = append(graph[a], Edge{a, b, 1, i})
-		graph[b] = append(graph[b], Edge{b, a, 1, i})
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		u--
+		v--
+		edges[i] = Edge{u, v, 1}
 	}
-
-	G := NewNamoriGraph(graph)
-	G.Build(false) // !without HLD
 
 	var q int
 	fmt.Fscan(in, &q)
+	queries := make([][2]int, q)
 	for i := 0; i < q; i++ {
-		var x, y int
-		fmt.Fscan(in, &x, &y)
-		x--
-		y--
-		root1, _ := G.GetId(x)
-		root2, _ := G.GetId(y)
-		if root1 == root2 {
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		u--
+		v--
+		queries[i] = [2]int{u, v}
+	}
+
+	namori := NewNamoriGraph(n, edges)
+	_, tree := namori.BuildTree()
+	root := namori.Root
+	bottom := namori.To[root]
+	for _, q := range queries {
+		u, v := q[0], q[1]
+		lca1, lca2 := tree.LCA(u, bottom), tree.LCA(v, bottom)
+		if lca1 == lca2 {
 			fmt.Fprintln(out, "Yes")
 		} else {
 			fmt.Fprintln(out, "No")
@@ -105,238 +119,515 @@ func abc266_f() {
 	}
 }
 
-func namoriCut() {
-	// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2891
-	// 给定一个基环树 q个询问(x,y)
-	// 求使得x和y不连通最少需要切掉多少条边
-	// 如果两个点都在环上,则答案为2
-	// 否则答案为1(两点之间只有唯一的一条路径)
-
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	graph := make([][]Edge, n)
-	for i := 0; i < n; i++ {
-		var a, b int
-		fmt.Fscan(in, &a, &b)
-		a, b = a-1, b-1
-		graph[a] = append(graph[a], Edge{a, b, 1, i})
-		graph[b] = append(graph[b], Edge{b, a, 1, i})
+func demo() {
+	edges := []Edge{
+		{0, 1, 1}, {1, 2, 2}, {1, 3, 3}, {2, 6, 6}, {3, 6, 6}, {3, 4, 4}, {4, 5, 5},
 	}
-	G := NewNamoriGraph(graph)
-	G.Build(false)
+	namori := NewNamoriGraph(7, edges)
+	fmt.Println(namori.Root)
+	fmt.Println(namori.OutEdgeId)
+	fmt.Println(namori.OutCost)
+	fmt.Println(namori.To)
+	fmt.Println(namori.Cycle)
 
-	var q int
-	fmt.Fscan(in, &q)
-	for i := 0; i < q; i++ {
-		var x, y int
-		fmt.Fscan(in, &x, &y)
-		x, y = x-1, y-1
-		_, treeId1 := G.GetId(x)
-		_, treeId2 := G.GetId(y)
-		if treeId1 != 0 || treeId2 != 0 {
-			fmt.Fprintln(out, 1)
-		} else {
-			fmt.Fprintln(out, 2)
+	directedGraph, tree := namori.BuildTree()
+	fmt.Println(directedGraph)
+	fmt.Println(namori.Dist(tree, 0, 5))
+}
+
+type Edge = [3]int // (u,v,w)
+type Neighbor = struct{ to, weight, eid int }
+
+// !无向基环树.
+type NamoriGraph struct {
+	RawEdges []Edge
+	RawGraph [][]Neighbor
+
+	N         int
+	Root      int // 断开outEdge后有向树的根
+	OutEdgeId int // build后不在树中的边
+	OutCost   int
+	To        []int // !向Root方向移动1步后的结点，Root的To为对应outEdge的另一端
+	Cycle     []int
+	InCycle   []bool
+}
+
+func NewNamoriGraph(n int, edges []Edge) *NamoriGraph {
+	m := len(edges)
+	if m != n {
+		panic("invalid namori graph")
+	}
+
+	graph := make([][]Neighbor, n)
+	for eid := 0; eid < m; eid++ {
+		e := &edges[eid]
+		u, v, w := e[0], e[1], e[2]
+		graph[u] = append(graph[u], Neighbor{to: v, weight: w, eid: eid})
+		graph[v] = append(graph[v], Neighbor{to: u, weight: w, eid: eid})
+	}
+
+	uf := NewUf(n)
+	to := make([]int, n)
+	for i := range to {
+		to[i] = -1
+	}
+
+	root := -1
+	outEdgeId, outCost := -1, -1
+	for eid := 0; eid < m; eid++ {
+		e := &edges[eid]
+		u, v, w := e[0], e[1], e[2]
+		if uf.Union(u, v) {
+			continue
 		}
+		outEdgeId, outCost = eid, w
+		root = u
+		to[root] = v
+		break
+	}
+	visited := make([]bool, n)
+	stack := []int{root}
+	for len(stack) > 0 {
+		pre := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		visited[pre] = true
+		for _, e := range graph[pre] {
+			next, eid := e.to, e.eid
+			if visited[next] || eid == outEdgeId {
+				continue
+			}
+			to[next] = pre
+			stack = append(stack, next)
+		}
+	}
+
+	cycle := []int{to[root]}
+	for cycle[len(cycle)-1] != root {
+		cycle = append(cycle, to[cycle[len(cycle)-1]])
+	}
+
+	inCycle := make([]bool, n)
+	for _, v := range cycle {
+		inCycle[v] = true
+	}
+
+	return &NamoriGraph{
+		RawEdges:  edges,
+		RawGraph:  graph,
+		N:         n,
+		Root:      root,
+		OutEdgeId: outEdgeId,
+		OutCost:   outCost,
+		To:        to,
+		Cycle:     cycle,
+		InCycle:   inCycle,
 	}
 }
 
-func BuildNamoriForest(n int, edges []Edge, needHLD bool) (forest []*NamoriGraph, groupId, idInGroup []int) {
-	uf := NewUnionFindArray(n)
-	for _, e := range edges {
-		uf.Union(e.from, e.to)
-	}
-	groups := uf.GetGroups()
-	idInGroup = make([]int, n)          // 每个点在连通块中的编号
-	groupId = make([]int, n)            // 每个点所在的连通块编号
-	gs := make([]Graph, 0, len(groups)) // !每个连通块的图
-	gid := 0
-	for _, g := range groups {
-		id := 0
-		for _, v := range g {
-			groupId[v] = gid
-			idInGroup[v] = id
-			id++
+// 断开outEdge, 生成有向树.
+func (ng *NamoriGraph) BuildTree() (directedGraph [][]Neighbor, tree *Tree) {
+	directedGraph = make([][]Neighbor, ng.N)
+	for eid := 0; eid < ng.N; eid++ {
+		if eid == ng.OutEdgeId {
+			continue
 		}
-		gs = append(gs, make(Graph, len(g)))
-		gid++
+		e := &ng.RawEdges[eid]
+		u, v, w := e[0], e[1], e[2]
+		if ng.To[u] == v {
+			u, v = v, u
+		}
+		directedGraph[u] = append(directedGraph[u], Neighbor{to: v, weight: w, eid: eid})
 	}
-	for _, e := range edges {
-		u, v := e.from, e.to
-		gid := groupId[u]
-		id1, id2 := idInGroup[u], idInGroup[v]
-		gs[gid][id1] = append(gs[gid][id1], Edge{from: id1, to: id2, cost: e.cost, id: e.id})
-		gs[gid][id2] = append(gs[gid][id2], Edge{from: id2, to: id1, cost: e.cost, id: e.id})
-	}
-
-	forest = make([]*NamoriGraph, len(gs))
-	for i, g := range gs {
-		forest[i] = NewNamoriGraph(g)
-		forest[i].Build(needHLD)
-	}
+	tree = NewTree(directedGraph, ng.Root)
 	return
 }
 
-type NamoriGraph struct {
-	// !以环上各个顶点i为根的无向树
-	Trees []Graph
-	// !基环树中在环上的边,边i连接着树的 root i和i+1 (i>=0)
-	CycleEdges []Edge
-
-	// 每个树的重链剖分(需要在Build(needHLD=true)后才能使用)
-	HLDs []*_HLD
-
-	g          Graph
-	iv         [][]int
-	markId, id []int
+func (ng *NamoriGraph) Dist(tree *Tree, u, v int) int {
+	bottom := ng.To[ng.Root]
+	lca1, lca2 := tree.LCA(u, bottom), tree.LCA(v, bottom)
+	diff := abs(tree.Depth[lca1] - tree.Depth[lca2])
+	diff = min(diff, len(ng.Cycle)-diff)
+	return diff + tree.Depth[u] + tree.Depth[v] - tree.Depth[lca1] - tree.Depth[lca2]
 }
 
-type Edge = struct{ from, to, cost, id int }
-type Graph = [][]Edge
-
-func NewNamoriGraph(g Graph) *NamoriGraph {
-	return &NamoriGraph{g: g}
+func (ng *NamoriGraph) DistWeighted(tree *Tree, u, v int) int {
+	bottom := ng.To[ng.Root]
+	lca1, lca2 := tree.LCA(u, bottom), tree.LCA(v, bottom)
+	diff := abs(tree.DepthWeighted[lca1] - tree.DepthWeighted[lca2])
+	diff = min(diff, tree.DepthWeighted[bottom]+ng.OutCost-diff)
+	return diff + tree.DepthWeighted[u] + tree.DepthWeighted[v] - tree.DepthWeighted[lca1] - tree.DepthWeighted[lca2]
 }
 
-// needHLD :是否需要对各个子树进行重链剖分.
-func (ng *NamoriGraph) Build(needHLD bool) {
-	n := len(ng.g)
-	deg := make([]int, n)
-	used := make([]bool, n)
-	que := []int{}
+type Uf struct {
+	data []int
+}
+
+func NewUf(n int) *Uf {
+	data := make([]int, n)
 	for i := 0; i < n; i++ {
-		deg[i] = len(ng.g[i])
-		if deg[i] == 1 {
-			que = append(que, i)
-			used[i] = true
-		}
+		data[i] = -1
 	}
-
-	for len(que) > 0 {
-		idx := que[0]
-		que = que[1:]
-		for _, e := range ng.g[idx] {
-			if used[e.to] {
-				continue
-			}
-			deg[e.to]--
-			if deg[e.to] == 1 {
-				que = append(que, e.to)
-				used[e.to] = true
-			}
-		}
-	}
-
-	mx := 0
-	for _, edges := range ng.g {
-		for _, e := range edges {
-			mx = max(mx, e.id)
-		}
-	}
-
-	edgeUsed := make([]bool, mx+1)
-	loop := []int{}
-	for i := 0; i < n; i++ {
-		if used[i] {
-			continue
-		}
-		for update := true; update; {
-			update = false
-			loop = append(loop, i)
-			for _, e := range ng.g[i] {
-				if used[e.to] || edgeUsed[e.id] {
-					continue
-				}
-				edgeUsed[e.id] = true
-				ng.CycleEdges = append(ng.CycleEdges, Edge{i, e.to, e.cost, e.id})
-				i = e.to
-				update = true
-				break
-			}
-		}
-		break
-	}
-
-	if len(loop) > 0 {
-		loop = loop[:len(loop)-1]
-	}
-	ng.markId = make([]int, n)
-	ng.id = make([]int, n)
-	for i := 0; i < len(loop); i++ {
-		pre := loop[(i+len(loop)-1)%len(loop)]
-		nxt := loop[(i+1)%len(loop)]
-		sz := 0
-		ng.markId[loop[i]] = i
-		ng.iv = append(ng.iv, []int{})
-		ng.id[loop[i]] = sz
-		sz++
-		ng.iv[len(ng.iv)-1] = append(ng.iv[len(ng.iv)-1], loop[i])
-		for _, e := range ng.g[loop[i]] {
-			if e.to != pre && e.to != nxt {
-				ng.markDfs(e.to, loop[i], i, &sz)
-			}
-		}
-		tree := make(Graph, sz)
-		for _, e := range ng.g[loop[i]] {
-			if e.to != pre && e.to != nxt {
-				tree[ng.id[loop[i]]] = append(tree[ng.id[loop[i]]], Edge{ng.id[loop[i]], ng.id[e.to], e.cost, e.id})
-				tree[ng.id[e.to]] = append(tree[ng.id[e.to]], Edge{ng.id[e.to], ng.id[loop[i]], e.cost, e.id})
-				ng.buildDfs(e.to, loop[i], tree)
-			}
-		}
-		ng.Trees = append(ng.Trees, tree)
-	}
-
-	// HLD
-	if !needHLD {
-		return
-	}
-
-	t := len(ng.Trees)
-	ng.HLDs = make([]*_HLD, 0, t)
-	for _, tree := range ng.Trees {
-		hld := _NewHLD(tree)
-		hld.Build(0)
-		ng.HLDs = append(ng.HLDs, hld)
-	}
+	return &Uf{data: data}
 }
 
-// 给定原图的顶点rawV,返回rawV所在的树的根节点和rawV在树中的编号.
-func (ng *NamoriGraph) GetId(rawV int) (rootId, idInTree int) {
-	return ng.markId[rawV], ng.id[rawV]
+func (ufa *Uf) Union(key1, key2 int) bool {
+	root1, root2 := ufa.Find(key1), ufa.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+	if ufa.data[root1] > ufa.data[root2] {
+		root1, root2 = root2, root1
+	}
+	ufa.data[root1] += ufa.data[root2]
+	ufa.data[root2] = root1
+	return true
 }
 
-// 给定树的顶点编号root和某个点在树中的顶点编号idInTree,返回这个点在原图中的顶点编号.
+func (ufa *Uf) Find(key int) int {
+	if ufa.data[key] < 0 {
+		return key
+	}
+	ufa.data[key] = ufa.Find(ufa.data[key])
+	return ufa.data[key]
+}
+
+type Tree struct {
+	Tree                 [][]Neighbor
+	Depth, DepthWeighted []int
+	Parent               []int
+	LID, RID             []int // 欧拉序[in,out)
+	IdToNode             []int
+	top, heavySon        []int
+	timer                int
+}
+
+func NewTree(adjList [][]Neighbor, root int) *Tree {
+	n := len(adjList)
+	lid := make([]int, n)
+	rid := make([]int, n)
+	idToNode := make([]int, n)
+	top := make([]int, n)   // 所处轻/重链的顶点（深度最小），轻链的顶点为自身
+	depth := make([]int, n) // 深度
+	depthWeighted := make([]int, n)
+	parent := make([]int, n)   // 父结点
+	heavySon := make([]int, n) // 重儿子
+	for i := range parent {
+		parent[i] = -1
+	}
+
+	res := &Tree{
+		Tree:          adjList,
+		Depth:         depth,
+		DepthWeighted: depthWeighted,
+		Parent:        parent,
+		LID:           lid,
+		RID:           rid,
+		IdToNode:      idToNode,
+		top:           top,
+		heavySon:      heavySon,
+	}
+	res.Build(root)
+	return res
+}
+
+// root:0-based
 //
-//	GetInvId(root,0) 表示在环上的顶点root在原图中对应的顶点.
-func (ng *NamoriGraph) GetInvId(rootId, idInTree int) (rawV int) {
-	return ng.iv[rootId][idInTree]
-}
-
-func (ng *NamoriGraph) markDfs(idx, par, k int, l *int) {
-	ng.markId[idx] = k
-	ng.id[idx] = *l
-	*l++
-	ng.iv[len(ng.iv)-1] = append(ng.iv[len(ng.iv)-1], idx)
-	for _, e := range ng.g[idx] {
-		if e.to != par {
-			ng.markDfs(e.to, idx, k, l)
+//	当root设为-1时，会从0开始遍历未访问过的连通分量
+func (tree *Tree) Build(root int) {
+	if root != -1 {
+		tree.build(root, -1, 0, 0)
+		tree.markTop(root, root)
+	} else {
+		for i := 0; i < len(tree.Tree); i++ {
+			if tree.Parent[i] == -1 {
+				tree.build(i, -1, 0, 0)
+				tree.markTop(i, i)
+			}
 		}
 	}
 }
 
-func (ng *NamoriGraph) buildDfs(idx, par int, tree Graph) {
-	for _, e := range ng.g[idx] {
-		if e.to != par {
-			tree[ng.id[idx]] = append(tree[ng.id[idx]], Edge{ng.id[idx], ng.id[e.to], e.cost, e.id})
-			tree[ng.id[e.to]] = append(tree[ng.id[e.to]], Edge{ng.id[e.to], ng.id[idx], e.cost, e.id})
-			ng.buildDfs(e.to, idx, tree)
+// 返回 root 的欧拉序区间, 左闭右开, 0-indexed.
+func (tree *Tree) Id(root int) (int, int) {
+	return tree.LID[root], tree.RID[root]
+}
+
+// 返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1., 0-indexed.
+func (tree *Tree) Eid(u, v int) int {
+	if tree.LID[u] > tree.LID[v] {
+		return tree.LID[u]
+	}
+	return tree.LID[v]
+}
+
+func (tree *Tree) LCA(u, v int) int {
+	for {
+		if tree.LID[u] > tree.LID[v] {
+			u, v = v, u
+		}
+		if tree.top[u] == tree.top[v] {
+			return u
+		}
+		v = tree.Parent[tree.top[v]]
+	}
+}
+
+func (tree *Tree) RootedLCA(u, v int, root int) int {
+	return tree.LCA(u, v) ^ tree.LCA(u, root) ^ tree.LCA(v, root)
+}
+
+func (tree *Tree) RootedParent(u int, root int) int {
+	return tree.Jump(u, root, 1)
+}
+
+func (tree *Tree) Dist(u, v int, weighted bool) int {
+	if weighted {
+		return tree.DepthWeighted[u] + tree.DepthWeighted[v] - 2*tree.DepthWeighted[tree.LCA(u, v)]
+	}
+	return tree.Depth[u] + tree.Depth[v] - 2*tree.Depth[tree.LCA(u, v)]
+}
+
+// k: 0-based
+//
+//	如果不存在第k个祖先，返回-1
+//	kthAncestor(root,0) == root
+func (tree *Tree) KthAncestor(root, k int) int {
+	if k > tree.Depth[root] {
+		return -1
+	}
+	for {
+		u := tree.top[root]
+		if tree.LID[root]-k >= tree.LID[u] {
+			return tree.IdToNode[tree.LID[root]-k]
+		}
+		k -= tree.LID[root] - tree.LID[u] + 1
+		root = tree.Parent[u]
+	}
+}
+
+// 从 from 节点跳向 to 节点,跳过 step 个节点(0-indexed)
+//
+//	返回跳到的节点,如果不存在这样的节点,返回-1
+func (tree *Tree) Jump(from, to, step int) int {
+	if step == 1 {
+		if from == to {
+			return -1
+		}
+		if tree.IsInSubtree(to, from) {
+			return tree.KthAncestor(to, tree.Depth[to]-tree.Depth[from]-1)
+		}
+		return tree.Parent[from]
+	}
+	c := tree.LCA(from, to)
+	dac := tree.Depth[from] - tree.Depth[c]
+	dbc := tree.Depth[to] - tree.Depth[c]
+	if step > dac+dbc {
+		return -1
+	}
+	if step <= dac {
+		return tree.KthAncestor(from, step)
+	}
+	return tree.KthAncestor(to, dac+dbc-step)
+}
+
+func (tree *Tree) CollectChild(root int) []int {
+	res := []int{}
+	for _, e := range tree.Tree[root] {
+		next := e.to
+		if next != tree.Parent[root] {
+			res = append(res, next)
 		}
 	}
+	return res
+}
+
+// 返回沿着`路径顺序`的 [起点,终点] 的 欧拉序 `左闭右闭` 数组.
+//
+//	!eg:[[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序.
+func (tree *Tree) GetPathDecomposition(u, v int, vertex bool) [][2]int {
+	up, down := [][2]int{}, [][2]int{}
+	for {
+		if tree.top[u] == tree.top[v] {
+			break
+		}
+		if tree.LID[u] < tree.LID[v] {
+			down = append(down, [2]int{tree.LID[tree.top[v]], tree.LID[v]})
+			v = tree.Parent[tree.top[v]]
+		} else {
+			up = append(up, [2]int{tree.LID[u], tree.LID[tree.top[u]]})
+			u = tree.Parent[tree.top[u]]
+		}
+	}
+	edgeInt := 1
+	if vertex {
+		edgeInt = 0
+	}
+	if tree.LID[u] < tree.LID[v] {
+		down = append(down, [2]int{tree.LID[u] + edgeInt, tree.LID[v]})
+	} else if tree.LID[v]+edgeInt <= tree.LID[u] {
+		up = append(up, [2]int{tree.LID[u], tree.LID[v] + edgeInt})
+	}
+	for i := 0; i < len(down)/2; i++ {
+		down[i], down[len(down)-1-i] = down[len(down)-1-i], down[i]
+	}
+	return append(up, down...)
+}
+
+// 遍历路径上的 `[起点,终点)` 欧拉序 `左闭右开` 区间.
+func (tree *Tree) EnumeratePathDecomposition(u, v int, vertex bool, f func(start, end int)) {
+	for {
+		if tree.top[u] == tree.top[v] {
+			break
+		}
+		if tree.LID[u] < tree.LID[v] {
+			a, b := tree.LID[tree.top[v]], tree.LID[v]
+			if a > b {
+				a, b = b, a
+			}
+			f(a, b+1)
+			v = tree.Parent[tree.top[v]]
+		} else {
+			a, b := tree.LID[u], tree.LID[tree.top[u]]
+			if a > b {
+				a, b = b, a
+			}
+			f(a, b+1)
+			u = tree.Parent[tree.top[u]]
+		}
+	}
+
+	edgeInt := 1
+	if vertex {
+		edgeInt = 0
+	}
+
+	if tree.LID[u] < tree.LID[v] {
+		a, b := tree.LID[u]+edgeInt, tree.LID[v]
+		if a > b {
+			a, b = b, a
+		}
+		f(a, b+1)
+	} else if tree.LID[v]+edgeInt <= tree.LID[u] {
+		a, b := tree.LID[u], tree.LID[v]+edgeInt
+		if a > b {
+			a, b = b, a
+		}
+		f(a, b+1)
+	}
+}
+
+func (tree *Tree) GetPath(u, v int) []int {
+	res := []int{}
+	composition := tree.GetPathDecomposition(u, v, true)
+	for _, e := range composition {
+		a, b := e[0], e[1]
+		if a <= b {
+			for i := a; i <= b; i++ {
+				res = append(res, tree.IdToNode[i])
+			}
+		} else {
+			for i := a; i >= b; i-- {
+				res = append(res, tree.IdToNode[i])
+			}
+		}
+	}
+	return res
+}
+
+// 以root为根时,结点v的子树大小.
+func (tree *Tree) SubSize(v, root int) int {
+	if root == -1 {
+		return tree.RID[v] - tree.LID[v]
+	}
+	if v == root {
+		return len(tree.Tree)
+	}
+	x := tree.Jump(v, root, 1)
+	if tree.IsInSubtree(v, x) {
+		return tree.RID[v] - tree.LID[v]
+	}
+	return len(tree.Tree) - tree.RID[x] + tree.LID[x]
+}
+
+// child 是否在 root 的子树中 (child和root不能相等)
+func (tree *Tree) IsInSubtree(child, root int) bool {
+	return tree.LID[root] <= tree.LID[child] && tree.LID[child] < tree.RID[root]
+}
+
+// 寻找以 start 为 top 的重链 ,heavyPath[-1] 即为重链底端节点.
+func (tree *Tree) GetHeavyPath(start int) []int {
+	heavyPath := []int{start}
+	cur := start
+	for tree.heavySon[cur] != -1 {
+		cur = tree.heavySon[cur]
+		heavyPath = append(heavyPath, cur)
+	}
+	return heavyPath
+}
+
+// 结点v的重儿子.如果没有重儿子,返回-1.
+func (tree *Tree) GetHeavyChild(v int) int {
+	k := tree.LID[v] + 1
+	if k == len(tree.Tree) {
+		return -1
+	}
+	w := tree.IdToNode[k]
+	if tree.Parent[w] == v {
+		return w
+	}
+	return -1
+}
+
+func (tree *Tree) ELID(u int) int {
+	return 2*tree.LID[u] - tree.Depth[u]
+}
+
+func (tree *Tree) ERID(u int) int {
+	return 2*tree.RID[u] - tree.Depth[u] - 1
+}
+
+func (tree *Tree) build(cur, pre, dep, dist int) int {
+	subSize, heavySize, heavySon := 1, 0, -1
+	for _, e := range tree.Tree[cur] {
+		next, weight := e.to, e.weight
+		if next != pre {
+			nextSize := tree.build(next, cur, dep+1, dist+weight)
+			subSize += nextSize
+			if nextSize > heavySize {
+				heavySize, heavySon = nextSize, next
+			}
+		}
+	}
+	tree.Depth[cur] = dep
+	tree.DepthWeighted[cur] = dist
+	tree.heavySon[cur] = heavySon
+	tree.Parent[cur] = pre
+	return subSize
+}
+
+func (tree *Tree) markTop(cur, top int) {
+	tree.top[cur] = top
+	tree.LID[cur] = tree.timer
+	tree.IdToNode[tree.timer] = cur
+	tree.timer++
+	heavySon := tree.heavySon[cur]
+	if heavySon != -1 {
+		tree.markTop(heavySon, top)
+		for _, e := range tree.Tree[cur] {
+			next := e.to
+			if next != heavySon && next != tree.Parent[cur] {
+				tree.markTop(next, next)
+			}
+		}
+	}
+	tree.RID[cur] = tree.timer
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func max(a, b int) int {
@@ -346,243 +637,9 @@ func max(a, b int) int {
 	return b
 }
 
-type _HLD struct {
-	Tree                          Graph
-	SubSize, Depth, Parent        []int
-	dfn, dfnToNode, top, heavySon []int
-	dfnId                         int
-}
-
-func (hld *_HLD) Build(root int) {
-	hld.build(root, -1, 0)
-	hld.markTop(root, root)
-}
-
-func _NewHLD(tree Graph) *_HLD {
-	n := len(tree)
-	dfn := make([]int, n)       // vertex => dfn
-	dfnToNode := make([]int, n) // dfn => vertex
-	top := make([]int, n)       // 所处轻/重链的顶点（深度最小），轻链的顶点为自身
-	subSize := make([]int, n)   // 子树大小
-	depth := make([]int, n)     // 深度
-	parent := make([]int, n)    // 父结点
-	heavySon := make([]int, n)  // 重儿子
-	return &_HLD{
-		Tree:      tree,
-		dfn:       dfn,
-		dfnToNode: dfnToNode,
-		top:       top,
-		SubSize:   subSize,
-		Depth:     depth,
-		Parent:    parent,
-		heavySon:  heavySon,
+func abs(a int) int {
+	if a < 0 {
+		return -a
 	}
-}
-
-// 返回树节点 u 对应的 欧拉序区间 [down, up).
-//
-//	0 <= down < up <= n.
-func (hld *_HLD) Id(u int) (down, up int) {
-	down, up = hld.dfn[u], hld.dfn[u]+hld.SubSize[u]
-	return
-}
-
-// 返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1..
-func (hld *_HLD) Eid(u, v int) int {
-	id1, _ := hld.Id(u)
-	id2, _ := hld.Id(v)
-	if id1 < id2 {
-		return id2
-	}
-	return id1
-}
-
-// 处理路径上的可换操作.
-//
-//	0 <= start <= end <= n, [start,end).
-func (hld *_HLD) QueryPath(u, v int, vertex bool, f func(start, end int)) {
-	if vertex {
-		hld.forEach(u, v, f)
-	} else {
-		hld.forEachEdge(u, v, f)
-	}
-}
-
-// 处理以 root 为根的子树上的查询.
-//
-//	0 <= start <= end <= n, [start,end).
-func (hld *_HLD) QuerySubTree(u int, vertex bool, f func(start, end int)) {
-	if vertex {
-		f(hld.dfn[u], hld.dfn[u]+hld.SubSize[u])
-	} else {
-		f(hld.dfn[u]+1, hld.dfn[u]+hld.SubSize[u])
-	}
-}
-
-func (hld *_HLD) forEach(u, v int, cb func(start, end int)) {
-	for {
-		if hld.dfn[u] > hld.dfn[v] {
-			u, v = v, u
-		}
-		cb(max(hld.dfn[hld.top[v]], hld.dfn[u]), hld.dfn[v]+1)
-		if hld.top[u] != hld.top[v] {
-			v = hld.Parent[hld.top[v]]
-		} else {
-			break
-		}
-	}
-}
-
-func (hld *_HLD) LCA(u, v int) int {
-	for {
-		if hld.dfn[u] > hld.dfn[v] {
-			u, v = v, u
-		}
-		if hld.top[u] == hld.top[v] {
-			return u
-		}
-		v = hld.Parent[hld.top[v]]
-	}
-}
-
-func (hld *_HLD) Dist(u, v int) int {
-	return hld.Depth[u] + hld.Depth[v] - 2*hld.Depth[hld.LCA(u, v)]
-}
-
-// 寻找以 start 为 top 的重链 ,heavyPath[-1] 即为重链末端节点.
-func (hld *_HLD) GetHeavyPath(start int) []int {
-	heavyPath := []int{start}
-	cur := start
-	for hld.heavySon[cur] != -1 {
-		cur = hld.heavySon[cur]
-		heavyPath = append(heavyPath, cur)
-	}
-	return heavyPath
-}
-
-func (hld *_HLD) forEachEdge(u, v int, cb func(start, end int)) {
-	for {
-		if hld.dfn[u] > hld.dfn[v] {
-			u, v = v, u
-		}
-		if hld.top[u] != hld.top[v] {
-			cb(hld.dfn[hld.top[v]], hld.dfn[v]+1)
-			v = hld.Parent[hld.top[v]]
-		} else {
-			if u != v {
-				cb(hld.dfn[u]+1, hld.dfn[v]+1)
-			}
-			break
-		}
-	}
-}
-
-func (hld *_HLD) build(cur, pre, dep int) int {
-	subSize, heavySize, heavySon := 1, 0, -1
-	for _, e := range hld.Tree[cur] {
-		next := e.to
-		if next != pre {
-			nextSize := hld.build(next, cur, dep+1)
-			subSize += nextSize
-			if nextSize > heavySize {
-				heavySize, heavySon = nextSize, next
-			}
-		}
-	}
-	hld.Depth[cur] = dep
-	hld.SubSize[cur] = subSize
-	hld.heavySon[cur] = heavySon
-	hld.Parent[cur] = pre
-	return subSize
-}
-
-func (hld *_HLD) markTop(cur, top int) {
-	hld.top[cur] = top
-	hld.dfn[cur] = hld.dfnId
-	hld.dfnId++
-	hld.dfnToNode[hld.dfn[cur]] = cur
-	if hld.heavySon[cur] != -1 {
-		hld.markTop(hld.heavySon[cur], top)
-		for _, e := range hld.Tree[cur] {
-			next := e.to
-			if next != hld.heavySon[cur] && next != hld.Parent[cur] {
-				hld.markTop(next, next)
-			}
-		}
-	}
-}
-
-// NewUnionFindWithCallback ...
-func NewUnionFindArray(n int) *_UnionFindArray {
-	parent, rank := make([]int, n), make([]int, n)
-	for i := 0; i < n; i++ {
-		parent[i] = i
-		rank[i] = 1
-	}
-
-	return &_UnionFindArray{
-		Part:   n,
-		rank:   rank,
-		n:      n,
-		parent: parent,
-	}
-}
-
-type _UnionFindArray struct {
-	// 连通分量的个数
-	Part int
-
-	rank   []int
-	n      int
-	parent []int
-}
-
-func (ufa *_UnionFindArray) Union(key1, key2 int) bool {
-	root1, root2 := ufa.Find(key1), ufa.Find(key2)
-	if root1 == root2 {
-		return false
-	}
-
-	if ufa.rank[root1] > ufa.rank[root2] {
-		root1, root2 = root2, root1
-	}
-	ufa.parent[root1] = root2
-	ufa.rank[root2] += ufa.rank[root1]
-	ufa.Part--
-	return true
-}
-
-func (ufa *_UnionFindArray) Find(key int) int {
-	for ufa.parent[key] != key {
-		ufa.parent[key] = ufa.parent[ufa.parent[key]]
-		key = ufa.parent[key]
-	}
-	return key
-}
-
-func (ufa *_UnionFindArray) IsConnected(key1, key2 int) bool {
-	return ufa.Find(key1) == ufa.Find(key2)
-}
-
-func (ufa *_UnionFindArray) GetGroups() map[int][]int {
-	groups := make(map[int][]int)
-	for i := 0; i < ufa.n; i++ {
-		root := ufa.Find(i)
-		groups[root] = append(groups[root], i)
-	}
-	return groups
-}
-
-func (ufa *_UnionFindArray) Size(key int) int {
-	return ufa.rank[ufa.Find(key)]
-}
-
-func (ufa *_UnionFindArray) String() string {
-	sb := []string{"UnionFindArray:"}
-	for root, member := range ufa.GetGroups() {
-		cur := fmt.Sprintf("%d: %v", root, member)
-		sb = append(sb, cur)
-	}
-	sb = append(sb, fmt.Sprintf("Part: %d", ufa.Part))
-	return strings.Join(sb, "\n")
+	return a
 }

@@ -1256,11 +1256,7 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": [
-      "前后缀滑窗",
-      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
-      "不存在时为INF"
-    ]
+    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -2634,7 +2630,28 @@
       " n, size int",
       " seg     []E",
       "}",
-      "func NewSegmentTree(leaves []E) *SegmentTree {",
+      "func NewSegmentTree(n int, f func(int) E) *SegmentTree {",
+      "\tres := &SegmentTree{}",
+      "\tsize := 1",
+      "\tfor size < n {",
+      "\t\tsize <<= 1",
+      "\t}",
+      "\tseg := make([]E, size<<1)",
+      "\tfor i := range seg {",
+      "\t\tseg[i] = res.e()",
+      "\t}",
+      "\tfor i := 0; i < n; i++ {",
+      "\t\tseg[i+size] = f(i)",
+      "\t}",
+      "\tfor i := size - 1; i > 0; i-- {",
+      "\t\tseg[i] = res.op(seg[i<<1], seg[i<<1|1])",
+      "\t}",
+      "\tres.n = n",
+      "\tres.size = size",
+      "\tres.seg = seg",
+      "\treturn res",
+      "}",
+      "func NewSegmentTreeFrom(leaves []E) *SegmentTree {",
       " res := &SegmentTree{}",
       " n := len(leaves)",
       " size := 1",
@@ -2918,7 +2935,30 @@
       "  data []E",
       "  lazy []Id",
       "}",
-      "func NewLazySegTree(leaves []E) *LazySegTree {",
+      "",
+      "func NewLazySegTree(n int, f func(int) E) *LazySegTree {",
+      "\ttree := &LazySegTree{}",
+      "\ttree.n = n",
+      "\ttree.log = int(bits.Len(uint(n - 1)))",
+      "\ttree.size = 1 << tree.log",
+      "\ttree.data = make([]E, tree.size<<1)",
+      "\ttree.lazy = make([]Id, tree.size)",
+      "\tfor i := range tree.data {",
+      "\t\ttree.data[i] = tree.e()",
+      "\t}",
+      "\tfor i := range tree.lazy {",
+      "\t\ttree.lazy[i] = tree.id()",
+      "\t}",
+      "\tfor i := 0; i < n; i++ {",
+      "\t\ttree.data[tree.size+i] = f(i)",
+      "\t}",
+      "\tfor i := tree.size - 1; i >= 1; i-- {",
+      "\t\ttree.pushUp(i)",
+      "\t}",
+      "\treturn tree",
+      "}",
+      "",
+      "func NewLazySegTreeFrom(leaves []E) *LazySegTree {",
       "  tree := &LazySegTree{}",
       "  n := len(leaves)",
       "  tree.n = n",
@@ -2940,7 +2980,6 @@
       "  }",
       "  return tree",
       "}",
-      "",
       "// 查询切片[left:right]的值",
       "//   0<=left<=right<=len(tree.data)",
       "func (tree *LazySegTree) Query(left, right int) E {",
@@ -3841,14 +3880,7 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": [
-      "func gcd(a, b int) int {",
-      "  for b != 0 {",
-      "    a, b = b, a%b",
-      "  }",
-      "  return a",
-      "}"
-    ],
+    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -4739,14 +4771,7 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": [
-      "n = len(nums)",
-      "res = 0",
-      "for left in range(n):",
-      "\t\tcur = []",
-      "\t\tfor right in range(left, n):",
-      "\t\t\t\t..."
-    ],
+    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -5785,21 +5810,13 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": [
-      "\t\tconst counter = new Map<number, number>()",
-      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
-    ],
+    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": [
-      "\\counter := make(map[int]int)",
-      "\tfor _, v := range nums {",
-      "\t\\counter[v]++",
-      "\t}"
-    ],
+    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
     "description": "counter计数"
   },
   "rangeFreq-python": {

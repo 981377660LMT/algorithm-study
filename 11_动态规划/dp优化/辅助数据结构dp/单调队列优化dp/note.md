@@ -15,9 +15,12 @@ dp[i] = min(dp[j] for j in [i-k, i-1]) + C[i]
 
 ---
 
-`统一用 n+1 长度的 dp 数组`
+`用 n+1 还是 n  长度的 dp 数组取决于实际情况`
 
 ```python
+# dp[i] 表示前 i 个元素中，以第 i 个元素结尾的子序列元素和的最大值(0<=i<n)
+# dp[i] = max(dp[i], max(dp[i - k] ,..., dp[i-1], 0) + nums[i])
+# res = max(dp)
 dp = [-INF] * n
 seg = MonoQueue[Tuple[int, int]](lambda x, y: x[0] > y[0])
 for i, num in enumerate(nums):
@@ -26,4 +29,26 @@ for i, num in enumerate(nums):
   preMax = max(0, seg.head()[0]) if seg else 0
   dp[i] = max(dp[i], preMax + num)  # 2.更新dp
   seg.append((dp[i], i))  # 3.入队
+return max(dp)
+
+# dp[i]:获得前i个水果`且最后一个水果i是花钱买的`，所需的最少金币数(0<=i<=n)
+# dp[0]=0
+# dp[i]=min(dp[j]+prices[i-1]) | i//2<=j<i)
+# !维护窗口内的`dp[j]`的最小值即可
+# !答案为min(dp[(n+1)//2],dp[n//2+1],...,dp[n])
+queue = MonoQueue[Tuple[int, int]](lambda x, y: x[0] < y[0])  # (value, index)
+dp = [INF] * (n + 1)
+dp[0] = 0
+queue.append((dp[0], 0))
+for i in range(1, n + 1):
+   while queue and queue.head()[1] < i // 2:
+       queue.popleft()
+   preMin = queue.head()[0] if queue else INF
+   dp[i] = min(dp[i], preMin + prices[i - 1])
+   queue.append((dp[i], i))
+return min(dp[(n + 1) // 2 : n + 1])
 ```
+
+---
+
+实际上，优化 dp 时线段树写出来可读性更好，建议使用线段树代替
