@@ -1,6 +1,8 @@
 // Get
+// GetAll
 // UpdatePath
 // UpdateSubtree
+// UpdateOuttree
 
 package main
 
@@ -19,6 +21,7 @@ func main() {
 	fmt.Println(DM.Get(0))
 	DM.UpdateSubtree(1, 1)
 	fmt.Println(DM.Get(0))
+	fmt.Println(DM.GetAll())
 }
 
 const INF int = 1e18
@@ -57,6 +60,28 @@ func (tm *DualTreeMonoid) Get(i int) Id {
 	return tm.seg.Get(tm.tree.LID[v])
 }
 
+func (tm *DualTreeMonoid) GetAll() []Id {
+	tmp := tm.seg.GetAll()
+	res := make([]Id, 0, tm.n)
+	for i := 0; i < tm.n; i++ {
+		if !tm.isVertex && i == tm.n-1 {
+			break
+		}
+		v := i
+		if !tm.isVertex {
+			e := &tm.tree.Edges[i]
+			from, to := e[0], e[1]
+			if tm.tree.Parent[from] == to {
+				v = from
+			} else {
+				v = to
+			}
+		}
+		res = append(res, tmp[tm.tree.LID[v]])
+	}
+	return res
+}
+
 func (tm *DualTreeMonoid) UpdatePath(start, target int, lazy Id) {
 	path := tm.tree.GetPathDecomposition(start, target, tm.isVertex)
 	for _, p := range path {
@@ -76,6 +101,16 @@ func (tm *DualTreeMonoid) UpdateSubtree(root int, lazy Id) {
 		offset = 0
 	}
 	tm.seg.Update(l+offset, r, lazy)
+}
+
+func (tm *DualTreeMonoid) UpdateOuttree(root int, lazy Id) {
+	l, r := tm.tree.LID[root], tm.tree.RID[root]
+	offset := 1
+	if tm.isVertex {
+		offset = 0
+	}
+	tm.seg.Update(offset, l+offset, lazy)
+	tm.seg.Update(r, tm.n, lazy)
 }
 
 type _T struct {
@@ -361,6 +396,7 @@ func (tree *_T) markTop(cur, top int) {
 //
 
 type _DST struct {
+	n            int
 	size, height int
 	lazy         []Id
 
@@ -381,6 +417,7 @@ func _NewDST(n int, id func() Id, composition func(f, g Id) Id) *_DST {
 	for i := 0; i < 2*size; i++ {
 		lazy[i] = res.lazyUnit
 	}
+	res.n = n
 	res.size = size
 	res.height = height
 	res.lazy = lazy
@@ -391,6 +428,15 @@ func (seg *_DST) Get(index int) Id {
 	index += seg.size
 	seg.thrust(index)
 	return seg.lazy[index]
+}
+
+func (seg *_DST) GetAll() []Id {
+	for i := 0; i < seg.size; i++ {
+		seg.propagate(i)
+	}
+	res := make([]Id, seg.n)
+	copy(res, seg.lazy[seg.size:seg.size+seg.n])
+	return res
 }
 
 func (seg *_DST) Update(left, right int, value Id) {

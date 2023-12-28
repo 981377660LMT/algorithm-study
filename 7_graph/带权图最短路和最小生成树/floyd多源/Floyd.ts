@@ -4,11 +4,7 @@ const INF = 2e15
  * 返回一个函数,该函数可以求出从`start`到`target`的最短路径长度.
  * 如果不存在这样的路径,返回`-1`.
  */
-function floyd(
-  n: number,
-  edges: [u: number, v: number, w: number][] | number[][],
-  directed = false
-): (start: number, target: number) => number {
+function floyd(n: number, edges: [u: number, v: number, w: number][] | number[][], directed = false): (start: number, target: number) => number {
   const dist: number[] = Array(n * n)
   for (let i = 0; i < n * n; ++i) dist[i] = INF
   for (let i = 0; i < n; ++i) dist[i * n + i] = 0
@@ -28,6 +24,7 @@ function floyd(
     for (let i = 0; i < n; ++i) {
       if (dist[i * n + k] === INF) continue
       for (let j = 0; j < n; ++j) {
+        if (dist[k * n + j] === INF) continue
         const cand = dist[i * n + k] + dist[k * n + j]
         if (dist[i * n + j] > cand) {
           dist[i * n + j] = cand
@@ -102,6 +99,7 @@ class Floyd {
       for (let i = 0; i < n; ++i) {
         if (this._dist[i * n + k] === INF) continue
         for (let j = 0; j < n; ++j) {
+          if (this._dist[k * n + j] === INF) continue
           const cand = this._dist[i * n + k] + this._dist[k * n + j]
           if (this._dist[i * n + j] > cand) {
             this._dist[i * n + j] = cand
@@ -200,6 +198,7 @@ class FloydDynamic {
       for (let i = 0; i < n; ++i) {
         if (this._dist[i * n + k] === INF) continue
         for (let j = 0; j < n; ++j) {
+          if (this._dist[k * n + j] === INF) continue
           const cand = this._dist[i * n + k] + this._dist[k * n + j]
           if (this._dist[i * n + j] > cand) {
             this._dist[i * n + j] = cand

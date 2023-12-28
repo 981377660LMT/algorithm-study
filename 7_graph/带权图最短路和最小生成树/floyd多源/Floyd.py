@@ -30,6 +30,8 @@ def floyd(n: int, edges: List[List[int]]) -> List[List[int]]:
             if dist[i][k] == INF:
                 continue
             for j in range(n):
+                if dist[k][j] == INF:
+                    continue
                 # 松弛：如果一条边可以被松弛了，说明这条边就没有必要留下了
                 cand = dist[i][k] + dist[k][j]
                 dist[i][j] = cand if dist[i][j] > cand else dist[i][j]

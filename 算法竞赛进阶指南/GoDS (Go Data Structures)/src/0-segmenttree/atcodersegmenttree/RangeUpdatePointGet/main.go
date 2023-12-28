@@ -41,6 +41,7 @@ func (*SegmentTree) id() Id                 { return 1<<31 - 1 }
 func (*SegmentTree) composition(f, g Id) Id { return f }
 
 type SegmentTree struct {
+	n            int
 	size, height int
 	lazy         []Id
 }
@@ -57,6 +58,7 @@ func NewSegmentTree(n int) *SegmentTree {
 	for i := 0; i < 2*size; i++ {
 		lazy[i] = res.id()
 	}
+	res.n = n
 	res.size = size
 	res.height = height
 	res.lazy = lazy
@@ -67,6 +69,16 @@ func (seg *SegmentTree) Get(index int) Id {
 	seg.thrust(index)
 	return seg.lazy[index]
 }
+
+func (seg *SegmentTree) GetAll() []Id {
+	for i := 0; i < seg.size; i++ {
+		seg.propagate(i)
+	}
+	res := make([]Id, seg.n)
+	copy(res, seg.lazy[seg.size:seg.size+seg.n])
+	return res
+}
+
 func (seg *SegmentTree) Update(left, right int, value Id) {
 	left += seg.size
 	right += seg.size - 1

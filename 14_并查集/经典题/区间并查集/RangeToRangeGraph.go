@@ -194,8 +194,6 @@ func (g *RangeToRangeGraph) toLowerIdx(i int) int {
 	return g.n + g.n + i
 }
 
-//
-//
 type D = int
 type Deque struct{ l, r []D }
 

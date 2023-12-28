@@ -5916,6 +5916,9 @@
       "\t\t\t\tcontinue",
       "\t\t\t}",
       "\t\t\tfor j := 0; j < n; j++ {",
+      "\t\t\tif dist[k][j] == INF {",
+      "\t\t\t\tcontinue",
+      "\t\t\t}",
       "\t\t\t\tdist[i][j] = min(dist[i][j], dist[i][k]+dist[k][j])",
       "\t\t\t}",
       "\t\t}",
@@ -5965,6 +5968,8 @@
       "\t\t\t\t\t\tif dist[i][k] == INF:",
       "\t\t\t\t\t\t\t\tcontinue",
       "\t\t\t\t\t\tfor j in range(n):",
+      "\t\t\t\t\t\t\t\tif dist[k][j] == INF:",
+      "\t\t\t\t\t\t\t\t\t\tcontinue",
       "\t\t\t\t\t\t\t\tcand = dist[i][k] + dist[k][j]",
       "\t\t\t\t\t\t\t\tdist[i][j] = cand if dist[i][j] > cand else dist[i][j]",
       "\t\treturn dist"

@@ -3,6 +3,7 @@ package main
 const INF int = 1e18
 
 // Floyd 求多源最短路.
+// 如果返回值dist[i][i]<0,则说明存在负环.
 func Floyd(n int, edges [][3]int, directed bool) [][]int {
 	dist := make([][]int, n)
 	for i := 0; i < n; i++ {
@@ -28,6 +29,9 @@ func Floyd(n int, edges [][3]int, directed bool) [][]int {
 				continue
 			}
 			for j := 0; j < n; j++ {
+				if dist[k][j] == INF { // 稀疏图优化
+					continue
+				}
 				// 松弛：如果一条边可以被松弛了，说明这条边就没有必要留下了
 				dist[i][j] = min(dist[i][j], dist[i][k]+dist[k][j])
 			}
@@ -88,6 +92,9 @@ func (fs *FloydStatic) Build() {
 				continue
 			}
 			for j := 0; j < fs.n; j++ {
+				if fs.dist[k][j] == INF {
+					continue
+				}
 				cand := fs.dist[i][k] + fs.dist[k][j]
 				if fs.dist[i][j] > cand {
 					fs.dist[i][j] = cand
@@ -191,6 +198,10 @@ func (fd *FloydDynamic) Build() {
 				continue
 			}
 			for j := 0; j < fd.n; j++ {
+				if fd.dist[k][j] == INF {
+					continue
+				}
+
 				cand := fd.dist[i][k] + fd.dist[k][j]
 				if fd.dist[i][j] > cand {
 					fd.dist[i][j] = cand

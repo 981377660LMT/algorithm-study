@@ -249,6 +249,16 @@ func (tm *LazyTreeMonoid) UpdateSubtree(root int, lazy Id) {
 	tm.seg.Update(l+offset, r, lazy)
 }
 
+func (tm *LazyTreeMonoid) UpdateOuttree(root int, lazy Id) {
+	l, r := tm.tree.LID[root], tm.tree.RID[root]
+	offset := 1
+	if tm.isVertex {
+		offset = 0
+	}
+	tm.seg.Update(offset, l+offset, lazy)
+	tm.seg.Update(r, tm.n, lazy)
+}
+
 func (tm *LazyTreeMonoid) QueryAll() E { return tm.seg.QueryAll() }
 
 func (tm *LazyTreeMonoid) _maxPathEdge(check func(E) bool, u, v int) int {
