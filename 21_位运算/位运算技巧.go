@@ -69,6 +69,9 @@ func foo(x int) {
 		return v&(v+1) > 0
 	}
 
+	// 代替(1<<bit)-1
+	createMask := func(bit int) int { return ^(-1 << bit) }
+
 	// 快速计算尾随0 trialingZeros: lowbit+bit_length
 	tz := func(v int64) int64 { return int64(bits.Len(uint(v&-v)) - 1) }
 
@@ -104,6 +107,7 @@ func foo(x int) {
 		lowbit,
 		isSubset,
 		isPow2,
+		createMask,
 		hasAdjacentOnes,
 		hasAdjacentZeros,
 		abs,

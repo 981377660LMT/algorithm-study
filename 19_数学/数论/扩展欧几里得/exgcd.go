@@ -88,3 +88,12 @@ func modInv2(a, b, m int) int {
 	}
 	return res
 }
+
+// Chicken McNugget Theorem
+// 麦乐鸡定理
+// https://artofproblemsolving.com/wiki/index.php/Chicken_McNugget_Theorem
+// 给定两个互质正整数，求最大不能用这两个数的线性组合表示的数
+// https://leetcode.cn/problems/most-expensive-item-that-can-not-be-bought/description/
+func mostExpensiveItem(primeOne int, primeTwo int) int {
+	return primeOne*primeTwo - primeOne - primeTwo
+}

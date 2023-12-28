@@ -15,7 +15,7 @@ func main() {
 	fmt.Println(s1[start1:end1], s2[start2:end2])
 }
 
-// 最长公共子串
+// 最长公共子串(最长公共子数组)
 func longestCommonSubstring1(s1, s2 string) (start1, end1, start2, end2 int) {
 	ords1, ords2 := make([]int, len(s1)), make([]int, len(s2))
 	for i, x := range s1 {

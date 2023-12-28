@@ -34,7 +34,7 @@ func (r *Random) Next() uint64 { return r.Rng() }
 func (r *Random) RngWithMod(mod uint64) uint64 { return r.Rng() % mod }
 
 // [left, right]
-func (r *Random) RandInt(left, right uint64) uint64 { return left + r.Rng()%(right-left+1) }
+func (r *Random) RandInt(min, max uint64) uint64 { return min + r.Rng()%(max-min+1) }
 
 // FastShuffle
 func (r *Random) ShuffleInt(nums []int) {

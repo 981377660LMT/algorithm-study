@@ -29,6 +29,8 @@
 //	      6(bottom)
 //
 // !性质1：点u在所在子树的根节点(在环上)为lca(u, bottom).
+//
+// !这种维护方法的优势是支持动态修改点权或者边权
 
 package main
 
@@ -244,18 +246,19 @@ func (ng *NamoriGraph) BuildTree() (directedGraph [][]Neighbor, tree *Tree) {
 
 func (ng *NamoriGraph) Dist(tree *Tree, u, v int) int {
 	bottom := ng.To[ng.Root]
+	// lca为在环上的点
 	lca1, lca2 := tree.LCA(u, bottom), tree.LCA(v, bottom)
-	diff := abs(tree.Depth[lca1] - tree.Depth[lca2])
-	diff = min(diff, len(ng.Cycle)-diff)
-	return diff + tree.Depth[u] + tree.Depth[v] - tree.Depth[lca1] - tree.Depth[lca2]
+	distOnCyle := abs(tree.Depth[lca1] - tree.Depth[lca2])
+	distOnCyle = min(distOnCyle, len(ng.Cycle)-distOnCyle)
+	return distOnCyle + tree.Depth[u] + tree.Depth[v] - tree.Depth[lca1] - tree.Depth[lca2]
 }
 
 func (ng *NamoriGraph) DistWeighted(tree *Tree, u, v int) int {
 	bottom := ng.To[ng.Root]
 	lca1, lca2 := tree.LCA(u, bottom), tree.LCA(v, bottom)
-	diff := abs(tree.DepthWeighted[lca1] - tree.DepthWeighted[lca2])
-	diff = min(diff, tree.DepthWeighted[bottom]+ng.OutCost-diff)
-	return diff + tree.DepthWeighted[u] + tree.DepthWeighted[v] - tree.DepthWeighted[lca1] - tree.DepthWeighted[lca2]
+	distOnCycle := abs(tree.DepthWeighted[lca1] - tree.DepthWeighted[lca2])
+	distOnCycle = min(distOnCycle, tree.DepthWeighted[bottom]+ng.OutCost-distOnCycle)
+	return distOnCycle + tree.DepthWeighted[u] + tree.DepthWeighted[v] - tree.DepthWeighted[lca1] - tree.DepthWeighted[lca2]
 }
 
 type Uf struct {

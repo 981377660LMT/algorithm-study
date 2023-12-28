@@ -1,4 +1,5 @@
 // 任意子串的rank(子串排序)
+// subStringRank
 
 package main
 
@@ -16,7 +17,8 @@ func main() {
 }
 
 // dp[i][j]：S[i:i+j) 的 rank, -1 表示空串
-//  maxLen: 子串最大长度，-1 表示最长为len(s)
+//
+//	maxLen: 子串最大长度，-1 表示最长为len(s)
 func SortSubstrings(s string, maxLen int) (dp [][]int) {
 	n := len(s)
 	if maxLen == -1 {

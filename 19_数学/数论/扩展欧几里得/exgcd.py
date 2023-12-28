@@ -126,6 +126,16 @@ def farey(a: int, b: int) -> Tuple[int, int, int, int]:
     return q * x2 + y2, x2, q * x1 + y1, x1
 
 
+# Chicken McNugget Theorem
+# 麦乐鸡定理
+# https://artofproblemsolving.com/wiki/index.php/Chicken_McNugget_Theorem
+# 给定两个互质正整数，求最大不能用这两个数的线性组合表示的数
+# https://leetcode.cn/problems/most-expensive-item-that-can-not-be-bought/description/
+class Solution:
+    def mostExpensiveItem(self, primeOne: int, primeTwo: int) -> int:
+        return primeOne * primeTwo - primeOne - primeTwo
+
+
 if __name__ == "__main__":
     print(farey(1, 3))
     assert exgcd(2, 3) == (1, -1, 1)
