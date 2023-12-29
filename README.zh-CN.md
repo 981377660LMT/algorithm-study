@@ -108,6 +108,7 @@
      - [ODTVanEmdeBoasTree](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/ODT-VanEmdeBoasTree.go)
    - [W 叉 Trie](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/W%E5%8F%89Trie.ts)
    - [梵峨眉大悲寺树](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/VanEmdeBoasTree.go)
+   - [猫树分治](<10_分治法/猫树分治/CF1100F_Ivan and Burgers.go>)
    - 线段树
      - [单点修改区间查询](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/atcoder_segtree/SegmentTreePointUpdateRangeQuery.ts)
      - [区间修改单点查询](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/atcoder_segtree/SegmentTreeRangeUpdatePointGet.ts)
