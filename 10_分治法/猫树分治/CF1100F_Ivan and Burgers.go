@@ -36,7 +36,14 @@ func main() {
 		D.AddQuery(left, right)
 	}
 
-	res := D.QueryAll()
+	res := D.Run(
+		func() Merger { return &VS{} },
+		func(e Merger) { e.Clear() },
+		func(e Merger, value ArrayItem) { e.Add(value) },
+		func(e Merger) Merger { return e.Copy() },
+		func(qid int, e1, e2 Merger) QueryRes { return (e1.Or(e2)).Max(0) },
+		func(qid int, value ArrayItem) QueryRes { return value },
+	)
 	for _, r := range res {
 		fmt.Fprintln(out, r)
 	}
@@ -44,49 +51,27 @@ func main() {
 
 type ArrayItem = int32
 type QueryRes = int32
-type DataStrcuture = *VS
-
-func (dc *DivideAndConquerOffline) Init() DataStrcuture {
-	return &VS{}
-}
-func (dc *DivideAndConquerOffline) Clear(e DataStrcuture) {
-	e.Clear()
-}
-func (dc *DivideAndConquerOffline) Add(e DataStrcuture, value ArrayItem) {
-	e.Add(value)
-}
-func (dc *DivideAndConquerOffline) Copy(e DataStrcuture) DataStrcuture {
-	return e.Copy()
-}
-func (dc *DivideAndConquerOffline) Merge(e1, e2 DataStrcuture) DataStrcuture {
-	return e1.Or(e2)
-}
-func (dc *DivideAndConquerOffline) Query(e DataStrcuture) QueryRes {
-	return e.Max(0)
-}
-func (dc *DivideAndConquerOffline) QueryLeaf(value ArrayItem) QueryRes {
-	return value
-}
+type Merger = *VS
 
 // 猫树分治.
 // !一共调用了n次Init、Clear, nlogn次Add、Copy, q次Merge、Query、QueryLeaf.
 type DivideAndConquerOffline struct {
 	arr               []ArrayItem
-	data              []DataStrcuture // 用于维护arr区间查询的结果
+	merger            []Merger // 用于维护arr区间查询的结果
 	qid, qStart, qEnd []int32
-	queries           [][3]int32
 	tmpStart, tmpEnd  []int32
 	res               []QueryRes
+
+	init       func() Merger
+	clear      func(e Merger)
+	add        func(e Merger, value ArrayItem)
+	copy       func(e Merger) Merger
+	queryMerge func(qid int, e1, e2 Merger) QueryRes
+	queryLeaf  func(qid int, value ArrayItem) QueryRes
 }
 
 func NewDivideAndConquerOffline(arr []ArrayItem) *DivideAndConquerOffline {
-	res := &DivideAndConquerOffline{arr: arr}
-	data := make([]DataStrcuture, len(arr))
-	for i := range arr {
-		data[i] = res.Init()
-	}
-	res.data = data
-	return res
+	return &DivideAndConquerOffline{arr: arr}
 }
 
 func (dc *DivideAndConquerOffline) AddQuery(start, end int) {
@@ -95,12 +80,29 @@ func (dc *DivideAndConquerOffline) AddQuery(start, end int) {
 	dc.qEnd = append(dc.qEnd, int32(end))
 }
 
-func (dc *DivideAndConquerOffline) QueryAll() []QueryRes {
-	n := int32(len(dc.data))
+func (dc *DivideAndConquerOffline) Run(
+	init func() Merger,
+	clear func(e Merger),
+	add func(e Merger, value ArrayItem),
+	copy func(e Merger) Merger,
+	queryMerge func(qid int, e1, e2 Merger) QueryRes,
+	queryLeaf func(qid int, value ArrayItem) QueryRes,
+) []QueryRes {
+	dc.merger = make([]Merger, len(dc.arr))
+	for i := range dc.arr {
+		dc.merger[i] = init()
+	}
+	n := int32(len(dc.merger))
 	q := int32(len(dc.qid))
 	dc.tmpStart = make([]int32, q)
 	dc.tmpEnd = make([]int32, q)
 	dc.res = make([]QueryRes, q)
+	dc.init = init
+	dc.clear = clear
+	dc.add = add
+	dc.copy = copy
+	dc.queryMerge = queryMerge
+	dc.queryLeaf = queryLeaf
 	dc.solve(0, n, 0, q)
 	return dc.res
 }
@@ -111,27 +113,28 @@ func (dc *DivideAndConquerOffline) solve(nStart, nEnd, qStart, qEnd int32) {
 	}
 	if nStart+1 == nEnd {
 		for i := qStart; i < qEnd; i++ {
-			dc.res[dc.qid[i]] = dc.QueryLeaf(dc.arr[nStart])
+			id := int(dc.qid[i])
+			dc.res[id] = dc.queryLeaf(id, dc.arr[nStart])
 		}
 		return
 	}
 	leftCount, rightCount := int32(0), int32(0)
 	mid := (nStart + nEnd) >> 1
-	dc.Clear(dc.data[mid])
-	dc.Add(dc.data[mid], dc.arr[mid])
+	dc.clear(dc.merger[mid])
 	for i := mid - 1; i >= nStart; i-- {
-		dc.data[i] = dc.Copy(dc.data[i+1])
-		dc.Add(dc.data[i], dc.arr[i])
+		dc.merger[i] = dc.copy(dc.merger[i+1])
+		dc.add(dc.merger[i], dc.arr[i])
 	}
+	dc.add(dc.merger[mid], dc.arr[mid])
 	for i := mid + 1; i < nEnd; i++ {
-		dc.data[i] = dc.Copy(dc.data[i-1])
-		dc.Add(dc.data[i], dc.arr[i])
+		dc.merger[i] = dc.copy(dc.merger[i-1])
+		dc.add(dc.merger[i], dc.arr[i])
 	}
 	for i := qStart; i < qEnd; i++ {
 		id := dc.qid[i]
 		if start := dc.qStart[id]; start < mid {
 			if end := dc.qEnd[id]; end > mid {
-				dc.res[id] = dc.Query(dc.Merge(dc.data[start], dc.data[end-1]))
+				dc.res[id] = dc.queryMerge(int(id), dc.merger[start], dc.merger[end-1])
 			} else {
 				dc.tmpStart[leftCount] = id
 				leftCount++
