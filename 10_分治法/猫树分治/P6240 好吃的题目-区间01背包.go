@@ -1,6 +1,3 @@
-// 空间复杂度O(n*O(merge))
-// 时间复杂度O((n+q)*O(merge))
-
 package main
 
 import (
@@ -9,42 +6,41 @@ import (
 	"os"
 )
 
-// Ivan and Burgers
-// https://codeforces.com/contest/1100/problem/F
-// 给定一个数组和q个查询,每个查询给定一个区间[lefti, righti],
-// 求在原数组区间[lefti, righti]中选取任意个数,能凑出的最大异或和
+// P6240 好吃的题目(分治+背包,区间01背包)
+// https://www.luogu.com.cn/problem/P6240
+// 有n个物品，每个物品有一个重量和一个分数，
+// 现在有q个询问，每个询问给出一个区间[l,r]和一个容量c，
+// 要求在这个区间内选出若干个物品，使得选出的物品的重量和不超过c，且选出的物品的分数之和最大。
+// n<=4e4,q<=2e5,c<=200
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
-	nums := make([]int32, n)
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	weights := make([]int, n)
 	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
+		fmt.Fscan(in, &weights[i])
+	}
+	scores := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &scores[i])
 	}
 
-	D := NewDivideAndConquerOffline(nums)
+	queries := make([][3]int, q) // [start, end, capacity]
 
-	var q int
-	fmt.Fscan(in, &q)
 	for i := 0; i < q; i++ {
-		var left, right int
-		fmt.Fscan(in, &left, &right)
+		var left, right, capacity int
+		fmt.Fscan(in, &left, &right, &capacity)
 		left--
-		D.AddQuery(left, right)
-	}
-
-	res := D.QueryAll()
-	for _, r := range res {
-		fmt.Fprintln(out, r)
+		queries[i] = [3]int{left, right, capacity}
 	}
 }
 
 type ArrayItem = int32
 type QueryRes = int32
-type DataStrcuture = *VS
+type DataStrcuture = []int32
 
 func (dc *DivideAndConquerOffline) Init() DataStrcuture {
 	return &VS{}
@@ -150,109 +146,4 @@ func (dc *DivideAndConquerOffline) solve(nStart, nEnd, qStart, qEnd int32) {
 	}
 	dc.solve(nStart, mid, qStart, qStart+leftCount)
 	dc.solve(mid, nEnd, qStart+leftCount, qStart+leftCount+rightCount)
-}
-
-type VS [20]int32
-
-func NewVectorSpaceArray(nums []int32) *VS {
-	res := VS{}
-	for _, num := range nums {
-		res.Add(num)
-	}
-	return &res
-}
-
-func (lb *VS) Add(num int32) {
-	if num != 0 {
-		for i := len(lb) - 1; i >= 0; i-- {
-			if num>>i&1 == 1 {
-				if lb[i] == 0 {
-					lb[i] = num
-					break
-				}
-				num ^= lb[i]
-			}
-		}
-	}
-}
-
-// 求xor与所有向量异或的最大值.
-func (lb *VS) Max(xor int32) int32 {
-	res := xor
-	for i := len(lb) - 1; i >= 0; i-- {
-		if tmp := res ^ lb[i]; tmp > res {
-			res = tmp
-		}
-	}
-	return res
-}
-
-// 求xor与所有向量异或的最小值.
-func (lb *VS) Min(xorVal int32) int32 {
-	res := xorVal
-	for i := len(lb) - 1; i >= 0; i-- {
-		if tmp := res ^ lb[i]; tmp < res {
-			res = tmp
-		}
-	}
-	return res
-}
-
-func (lb *VS) Copy() *VS {
-	res := &VS{}
-	copy(res[:], lb[:])
-	return res
-}
-
-func (lb *VS) Clear() {
-	for i := range lb {
-		lb[i] = 0
-	}
-}
-
-func (lb *VS) Len() int {
-	return len(lb)
-}
-
-func (lb *VS) ForEach(f func(base int32)) {
-	for _, base := range lb {
-		f(base)
-	}
-}
-
-func (lb *VS) Has(v int32) bool {
-	for i := len(lb) - 1; i >= 0; i-- {
-		if v == 0 {
-			break
-		}
-		v = min32(v, v^lb[i])
-	}
-	return v == 0
-}
-
-// Merge.
-func (lb *VS) Or(other *VS) *VS {
-	v1, v2 := lb, other
-	if v1.Len() < v2.Len() {
-		v1, v2 = v2, v1
-	}
-	res := v1.Copy()
-	for _, base := range v2 {
-		res.Add(base)
-	}
-	return res
-}
-
-func min32(a, b int32) int32 {
-	if a <= b {
-		return a
-	}
-	return b
-}
-
-func max32(a, b int32) int32 {
-	if a >= b {
-		return a
-	}
-	return b
 }

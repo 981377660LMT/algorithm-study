@@ -1,6 +1,7 @@
 // https://maspypy.github.io/library/string/suffix_automaton.hpp
 // https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/sam.go
-// 在线构建SAM
+
+// Blumber 算法在线构建SAM
 
 package main
 

@@ -9,7 +9,8 @@ import (
 )
 
 func main() {
-	P4151()
+	// P4151()
+	demo()
 }
 
 func demo() {
@@ -120,6 +121,11 @@ func (lb *VectorSpace) Copy() *VectorSpace {
 	res.bases = append(res.bases, lb.bases...)
 	res.maxBit = lb.maxBit
 	return res
+}
+
+func (lb *VectorSpace) Clear() {
+	lb.bases = lb.bases[:0]
+	lb.maxBit = 0
 }
 
 func (lb *VectorSpace) Len() int {
