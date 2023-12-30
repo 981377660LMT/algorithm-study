@@ -9,8 +9,6 @@ import (
 	"os"
 )
 
-const INF int32 = 1e9
-
 // P6240 好吃的题目(分治+背包,区间01背包)
 // https://www.luogu.com.cn/problem/P6240
 // 有n个物品，每个物品有一个重量和一个分数，

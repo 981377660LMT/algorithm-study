@@ -1,3 +1,6 @@
+// https://www.mathenachia.blog/dp/
+// O(n^2)/O(n*k) 的 dp
+
 package copypasta
 
 func _(min, max func(int, int) int, abs func(int) int) {
@@ -10,6 +13,9 @@ func _(min, max func(int, int) int, abs func(int) int) {
 	//   子树合并背包的复杂度证明 https://blog.csdn.net/lyd_7_29/article/details/79854245
 
 	//   复杂度(二乘木dp) https://leetcode.cn/circle/discuss/t7l62c/
+	// https://atcoder.jp/contests/arc130/tasks/arc130_d
+	// https://atcoder.jp/contests/tdpc/tasks/tdpc_eel
+	// https://snuke.hatenablog.com/entry/2019/01/15/211812
 	//   https://www.cnblogs.com/shaojia/p/15520224.html
 	//   https://snuke.hatenablog.com/entry/2019/01/15/211812
 	//   复杂度优化 https://loj.ac/d/3144

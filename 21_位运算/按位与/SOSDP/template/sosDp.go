@@ -1,6 +1,8 @@
 package main
 
 func main() {
+	// 又叫高速ゼータ変換
+
 	// 高维前缀和 SOS DP (Sum over Subsets)
 	// 给一个集合，对该集合的所有子集，计算该子集的所有子集之和（这个「和」不一定是加法，可以是其它的满足合并性质的统计量）
 	// https://codeforces.com/blog/entry/45223
