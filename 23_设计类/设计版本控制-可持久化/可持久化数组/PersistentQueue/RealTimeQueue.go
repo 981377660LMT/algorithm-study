@@ -6,12 +6,11 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"runtime/debug"
 	"time"
 )
 
-func init() {
-	debug.SetGCPercent(-1)
+func main() {
+	main2()
 }
 
 func main2() {
@@ -35,16 +34,16 @@ func main2() {
 	assert(queue4.Empty() == true)
 
 	time1 := time.Now()
-	for i := 0; i < 1e6; i++ {
+	for i := 0; i < 1e7; i++ {
 		queue = queue.Push(i)
 		queue = queue.Shift()
 		queue.Empty()
 	}
 
-	fmt.Println(time.Since(time1)) // 343ms
+	fmt.Println(time.Since(time1)) // 1.99322975s
 }
 
-func main() {
+func yosupo() {
 	// https://judge.yosupo.jp/problem/persistent_queue
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -74,7 +73,8 @@ func main() {
 type S = int
 
 // 可持久化队列.
-//  https://scrapbox.io/data-structures/Realtime_Queue
+//
+//	https://scrapbox.io/data-structures/Realtime_Queue
 type RealTimeQueue struct {
 	front    *_Stream
 	back     *_PersistentStack

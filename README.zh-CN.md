@@ -48,14 +48,14 @@
    - [单调队列](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E8%BE%85%E5%8A%A9%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84dp/%E5%8D%95%E8%B0%83%E9%98%9F%E5%88%97%E4%BC%98%E5%8C%96dp/MonoQueue.py)
    - [SlidingWindowAggregation](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/SlidingWindowAggregation/SlidingWindowAggregation.py)
    - [SlidingWindowAggregationDeque](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/SlidingWindowAggregation/SlidingWindowAggregationDeque.py)
-   - [可持久化队列](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue-fast.ts>)
-   - [RealTimeQueue](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue/RealTimeQueue.ts>)
+   - [可持久化队列](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue/PersistentQueue.ts)
+   - [RealTimeQueue](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue/RealTimeQueue.ts)
 
 3. **链表**
 
    - [链表结点](3_linkedList/LinkedListNode.py)
    - [链表](3_linkedList/LinkedList.ts)
-   - [可持久化栈](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%A0%88/PersistentStack.py>)
+   - [可持久化栈](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%A0%88/PersistentStack.py)
    - [弗洛伊德探环法](7_graph/%E7%8E%AF%E6%A3%80%E6%B5%8B/%E5%BC%97%E6%B4%9B%E4%BC%8A%E5%BE%B7%E6%8E%A2%E7%8E%AF%E6%B3%95.ts)
    - [XorLinkedList](2_queue/Deque/XorLinkedList.go)
 
@@ -92,8 +92,8 @@
    - [MultiSet](<%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/tree/fhqtreap/sortedlist/MultiSet/main.go>)
    - [MaxSuffixQuerywithInsertionsOnly](26_misc/MaxSuffixQuerywithInsertionsOnly/MaxSuffixQuerywithInsertionsOnly.ts)
    - [动态数组](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/RBST/DynamicSequence.go)
-   - [可持久化数组](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentArray2.py>)
-   - [可持久化队列](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue-fast.go>)
+   - [可持久化数组](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentArray-16ary-fast.go)
+   - [可持久化队列](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue-fast.go)
    - [幺半群上的无旋 Treap](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/RBST/FHQTreapMonoid.go)
    - [阿贝尔群上的可持久化 RBST](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/RBST/RBSTAbelGroupPersistent.go)
    - [幺半群上的可持久化 RBST](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/RBST/RBSTMonoidPersistent.go)
@@ -183,8 +183,8 @@
    - [可撤销并查集](14_%E5%B9%B6%E6%9F%A5%E9%9B%86/UnionFindWithUndo.go)
    - [可撤销&&维护连通分量和的并查集](14_%E5%B9%B6%E6%9F%A5%E9%9B%86/UnionFindWithUndoAndWeight.go)
    - [区间并查集](14_%E5%B9%B6%E6%9F%A5%E9%9B%86/%E7%BB%8F%E5%85%B8%E9%A2%98/%E5%8C%BA%E9%97%B4%E5%B9%B6%E6%9F%A5%E9%9B%86/RangeUnionFind.py)
-   - [部分可持久化并查集](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E5%B9%B6%E6%9F%A5%E9%9B%86/%E9%83%A8%E5%88%86%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E5%B9%B6%E6%9F%A5%E9%9B%86.py>)
-   - [完全可持久化并查集](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E5%B9%B6%E6%9F%A5%E9%9B%86/%E5%AE%8C%E5%85%A8%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E5%B9%B6%E6%9F%A5%E9%9B%86-%E5%B8%A6size.go>)
+   - [部分可持久化并查集](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E5%B9%B6%E6%9F%A5%E9%9B%86/%E9%83%A8%E5%88%86%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E5%B9%B6%E6%9F%A5%E9%9B%86.py)
+   - [完全可持久化并查集](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E5%B9%B6%E6%9F%A5%E9%9B%86/%E5%AE%8C%E5%85%A8%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E5%B9%B6%E6%9F%A5%E9%9B%86-%E5%B8%A6size.go)
    - [维护连通分量和的并查集](14_%E5%B9%B6%E6%9F%A5%E9%9B%86/WeightedUnionFind-%E5%88%86%E9%87%8F%E5%92%8C.ts)
    - [n 对数选择点权种类最多](<14_%E5%B9%B6%E6%9F%A5%E9%9B%86/%E7%BB%8F%E5%85%B8%E9%A2%98/%E6%AF%8F%E4%B8%AA%E5%AF%B9%E9%80%89%E4%B8%80%E4%B8%AA%E7%82%B9(%E6%AF%8F%E6%9D%A1%E8%BE%B9%E9%80%89%E4%B8%80%E4%B8%AA%E7%82%B9)/SelectOneFromEachPair.ts>)
 

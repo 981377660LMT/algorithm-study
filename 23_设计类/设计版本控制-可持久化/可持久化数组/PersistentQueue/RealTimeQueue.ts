@@ -20,11 +20,7 @@ class RealTimeQueue<T> {
     })
   }
 
-  private static _makeQueue<T>(
-    f: Stream<T>,
-    b: PersistentStack<T>,
-    s: Stream<T>
-  ): RealTimeQueue<T> {
+  private static _makeQueue<T>(f: Stream<T>, b: PersistentStack<T>, s: Stream<T>): RealTimeQueue<T> {
     if (!s.empty()) {
       return new RealTimeQueue(f, b, s.pop()!)
     }
@@ -91,11 +87,11 @@ if (require.main === module) {
   assert(queue4.front() === undefined)
 
   console.time('queue')
-  for (let i = 0; i < 1e5; i++) {
+  for (let i = 0; i < 1e7; i++) {
     queue = queue.push(i)
     queue = queue.shift()
     queue.empty()
     queue.front()
   }
-  console.timeEnd('queue') // 320s
+  console.timeEnd('queue') // queue: 1.447s
 }
