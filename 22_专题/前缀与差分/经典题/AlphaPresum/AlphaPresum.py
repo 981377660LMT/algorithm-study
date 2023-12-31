@@ -6,6 +6,7 @@ def alphaPresum(
 ) -> Callable[[int, int, int], int]:
     """
     给定字符集信息和字符s,返回一个查询函数.用于查询s[start:end]间char的个数.
+    当字符种类很少时,可以用一个counter数组实现区间哈希值的快速计算.
     """
     if isinstance(sOrOrds, str):
         sOrOrds = [ord(v) for v in sOrOrds]

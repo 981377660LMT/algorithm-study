@@ -8,7 +8,7 @@
 # 0 <= li <= ri < s.length
 
 from typing import List
-from alphaPresum import alphaPresum
+from AlphaPresum import alphaPresum
 
 
 class Solution:

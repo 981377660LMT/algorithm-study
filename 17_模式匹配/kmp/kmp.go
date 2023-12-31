@@ -18,6 +18,16 @@ func main() {
 	P4824()
 }
 
+// 面试题 17.17. 多次搜索
+// https://leetcode.cn/problems/multi-search-lcci/
+func multiSearch(big string, smalls []string) [][]int {
+	res := make([][]int, len(smalls))
+	for i, small := range smalls {
+		res[i] = IndexOfAll(big, small, 0, nil)
+	}
+	return res
+}
+
 // https://www.luogu.com.cn/problem/P4824
 // 在longer中不断删除shorter，求剩下的字符串.
 func P4824() {
@@ -74,7 +84,7 @@ func GetNext(pattern Str) []int {
 // nexts 数组为nil时, 会调用GetNext(shorter)求nexts数组.
 func IndexOfAll(longer Str, shorter Str, position int, nexts []int) []int {
 	if len(shorter) == 0 {
-		return []int{0}
+		return []int{}
 	}
 	if len(longer) < len(shorter) {
 		return nil

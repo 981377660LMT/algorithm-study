@@ -18,10 +18,11 @@ func intervalIntersection(firstList [][]int, secondList [][]int) [][]int {
 
 	res := [][]int{}
 	enumerate := EnumerateInterval(intervals1, intervals2)
-	enumerate(-INF, INF, func(kind int, start, end int, value1, value2 Value) {
+	enumerate(-INF, INF, func(kind int, start, end int, value1, value2 Value) bool {
 		if kind == 3 {
 			res = append(res, []int{start, end - 1})
 		}
+		return false
 	})
 	return res
 }
@@ -44,14 +45,14 @@ type Interval = struct {
 // - 3: 在两个区间列表中.
 func EnumerateInterval(intervals1 []Interval, intervals2 []Interval) func(
 	allStart, allEnd int,
-	f func(kind int, start, end int, value1, value2 Value),
+	f func(kind int, start, end int, value1, value2 Value) bool,
 ) {
 	intervals1 = append(intervals1[:0:0], intervals1...)
 	intervals2 = append(intervals2[:0:0], intervals2...)
 	sort.Slice(intervals1, func(i, j int) bool { return intervals1[i].start < intervals1[j].start })
 	sort.Slice(intervals2, func(i, j int) bool { return intervals2[i].start < intervals2[j].start })
 
-	return func(allStart, allEnd int, f func(kind int, start, end int, value1, value2 Value)) {
+	return func(allStart, allEnd int, f func(kind int, start, end int, value1, value2 Value) bool) {
 		ptr1, ptr2 := 0, 0
 		curStart := allStart
 		for ptr1 < len(intervals1) && intervals1[ptr1].end <= curStart {
@@ -82,7 +83,9 @@ func EnumerateInterval(intervals1 []Interval, intervals2 []Interval) func(
 
 			if intersect1 && intersect2 {
 				minEnd := min(end1, end2)
-				f(3, curStart, minEnd, intervals1[ptr1].value, intervals2[ptr2].value)
+				if f(3, curStart, minEnd, intervals1[ptr1].value, intervals2[ptr2].value) {
+					return
+				}
 				curStart = minEnd
 				if end1 == minEnd {
 					ptr1++
@@ -92,21 +95,27 @@ func EnumerateInterval(intervals1 []Interval, intervals2 []Interval) func(
 				}
 			} else if intersect1 {
 				curEnd := min(end1, start2)
-				f(1, curStart, curEnd, intervals1[ptr1].value, NoneValue)
+				if f(1, curStart, curEnd, intervals1[ptr1].value, NoneValue) {
+					return
+				}
 				curStart = curEnd
 				if end1 == curEnd {
 					ptr1++
 				}
 			} else if intersect2 {
 				curEnd := min(end2, start1)
-				f(2, curStart, curEnd, NoneValue, intervals2[ptr2].value)
+				if f(2, curStart, curEnd, NoneValue, intervals2[ptr2].value) {
+					return
+				}
 				curStart = curEnd
 				if end2 == curEnd {
 					ptr2++
 				}
 			} else {
 				minStart := min(start1, start2)
-				f(0, curStart, minStart, NoneValue, NoneValue)
+				if f(0, curStart, minStart, NoneValue, NoneValue) {
+					return
+				}
 				curStart = minStart
 			}
 		}

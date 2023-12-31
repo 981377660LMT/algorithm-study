@@ -32,7 +32,7 @@ function indexOfAll<S extends string | ArrayLike<number | string> = string>(
   position = 0,
   nexts: ArrayLike<number> | undefined = undefined
 ): number[] {
-  if (shorter.length === 0) return [0]
+  if (shorter.length === 0) return []
   if (longer.length < shorter.length) return []
   const res: number[] = []
   const next = nexts || getNext(shorter)
@@ -85,7 +85,7 @@ class KMP<T extends string | ArrayLike<number | string> = string> {
     position = 0,
     nexts: ArrayLike<number> | undefined = undefined
   ): number[] {
-    if (shorter.length === 0) return [0]
+    if (shorter.length === 0) return []
     if (longer.length < shorter.length) return []
     const res: number[] = []
     const next = nexts || this.getNext(shorter)

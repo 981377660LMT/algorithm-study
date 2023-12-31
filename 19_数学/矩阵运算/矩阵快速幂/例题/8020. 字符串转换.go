@@ -131,7 +131,7 @@ func GetNext(pattern string) []int {
 // `O(n+m)` 寻找 `shorter` 在 `longer` 中的所有匹配位置.
 func IndexOfAll(longer string, shorter string, position int) []int {
 	if len(shorter) == 0 {
-		return []int{0}
+		return []int{}
 	}
 	if len(longer) < len(shorter) {
 		return nil

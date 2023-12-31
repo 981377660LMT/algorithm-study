@@ -60,7 +60,7 @@ def getNext(needle: str) -> List[int]:
 def indexOfAll(longer, shorter, start=0) -> List[int]:
     """kmp O(n+m)求搜索串 `longer` 中所有匹配 `shorter` 的位置."""
     if not shorter:
-        return [0]
+        return []
     if len(longer) < len(shorter):
         return []
     res = []
