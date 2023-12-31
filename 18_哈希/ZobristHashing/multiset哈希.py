@@ -4,6 +4,8 @@
 # 普通に超便利なので将棋AI以外にも浸透したほうが良いと思ってるんだけど、
 # 普通に浸透してるのかな。
 # https://blog.hamayanhamayan.com/entry/2017/05/24/154618
+# !缺点是无法快速判断包含、存在关系
+# !注意如果元素种类少(例如只有小写英文字母)，可以用一个counter元组来表示集合哈希，支持快速判断包含、存在关系、增删改查.
 
 from collections import Counter, defaultdict
 from random import randint

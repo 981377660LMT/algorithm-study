@@ -1,4 +1,5 @@
 // https://37zigen.com/bankers-queue/
+// Okasaki C. Purely functional data structures[M]. Cambridge University Press, 1999.
 
 package main
 
@@ -79,6 +80,9 @@ func timeit() {
 	fmt.Println(time.Since(time1)) // 1.666934792s
 }
 
+// 完全可持久化队列.均摊时间复杂度O(1)，最坏时间复杂度O(N).
+// https://www.kmonos.net/pub/Presen/PFDS.pdf
+// https://37zigen.com/bankers-queue/
 type PersistentQueue struct {
 	frontSize, rearSize int32
 	front, rear         *PersistentStack

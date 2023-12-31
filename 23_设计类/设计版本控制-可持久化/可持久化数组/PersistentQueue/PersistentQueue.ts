@@ -8,7 +8,9 @@
 import assert from 'assert'
 
 /**
- * 完全可持久化队列.
+ * 完全可持久化队列.均摊时间复杂度O(1)，最坏时间复杂度O(N).
+ * @see https://www.kmonos.net/pub/Presen/PFDS.pdf
+ * @see https://37zigen.com/bankers-queue/
  */
 class PersistentQueue<V> {
   static init<V>(): PersistentQueue<V> {
@@ -48,6 +50,7 @@ class PersistentQueue<V> {
     return this._frontSize + this._rearSize
   }
 
+  /** 延迟reverse. */
   private _normalize(): PersistentQueue<V> {
     if (this._frontSize >= this._rearSize) {
       return this

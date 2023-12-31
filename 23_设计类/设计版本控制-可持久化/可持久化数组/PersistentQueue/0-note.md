@@ -12,3 +12,8 @@ https://noshi91.github.io/Library/data_structure/bankers_queue.cpp
 
 銀行家の Queue
 https://37zigen.com/bankers-queue/
+
+---
+
+20 分でわかる Purely Functional Data Structures
+https://www.kmonos.net/pub/Presen/PFDS.pdf

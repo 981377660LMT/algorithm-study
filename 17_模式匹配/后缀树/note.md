@@ -8,3 +8,7 @@ https://www.luogu.com.cn/blog/EternalAlexander/xuan-ku-hou-zhui-shu-mo-shu
 **反串的 SAM 的 parent 树就是后缀树**
 parent 树有一个性质,父亲是孩子的最长后缀( edp 不同)。
 而把串翻转过来之后,反串的 parent 树就满足 : 父亲是孩子的最长前缀 ( beginpos 不同 )。
+
+---
+
+https://37zigen.com/suffix-tree/
