@@ -93,6 +93,7 @@
    - [MaxSuffixQuerywithInsertionsOnly](26_misc/MaxSuffixQuerywithInsertionsOnly/MaxSuffixQuerywithInsertionsOnly.ts)
    - [DynamicSequence](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/RBST/DynamicSequence.go)
    - [PersistentArray](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentArray-16ary-fast.go)
+   - [PersistentList](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96/%E5%87%BD%E6%95%B0%E5%BC%8F%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/PersistentList.go)
    - [PersistentQueue](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue-fast.go)
    - [FHQTreapMonoid](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/RBST/FHQTreapMonoid.go)
    - [RBSTAbelGroupPersistent](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/RBST/RBSTAbelGroupPersistent.go)
