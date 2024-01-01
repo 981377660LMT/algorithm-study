@@ -6,11 +6,47 @@ package main
 
 import (
 	"fmt"
+	"runtime/debug"
 	"time"
 )
 
 func main() {
 	demo()
+}
+
+func init() {
+	debug.SetGCPercent(-1)
+}
+
+// 1146. 快照数组
+// https://leetcode.cn/problems/snapshot-array/
+
+type SnapshotArray struct {
+	arr IPersistentList
+	git []IPersistentList
+}
+
+func Constructor(length int) SnapshotArray {
+	arr := NewPersistentList().WithMutations(func(t ITransientList) {
+		for i := 0; i < length; i++ {
+			t.Push(0)
+		}
+	})
+	return SnapshotArray{arr: arr}
+}
+
+func (this *SnapshotArray) Set(index int, val int) {
+	this.arr, _ = this.arr.Set(index, val)
+}
+
+func (this *SnapshotArray) Snap() int {
+	this.git = append(this.git, this.arr)
+	return len(this.git) - 1
+}
+
+func (this *SnapshotArray) Get(index int, snap_id int) int {
+	res, _ := this.git[snap_id].Get(index)
+	return res.(int)
 }
 
 func demo() {
@@ -32,6 +68,8 @@ func demo() {
 	_ = list5
 	// fmt.Println(list5)
 }
+
+type Value = int
 
 const (
 	SHIFT     = 5
@@ -129,7 +167,7 @@ type ITransientList interface {
 	Pop() interface{}
 	Len() int
 
-	// !dont modify previous transient list after AsImmutable
+	// !dont modify previous transient list after `AsImmutable`
 	AsImmutable() IPersistentList
 }
 
