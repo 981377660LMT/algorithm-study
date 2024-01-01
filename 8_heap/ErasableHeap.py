@@ -27,7 +27,7 @@ class ErasableHeap(Generic[T]):
     def peek(self) -> T:
         return self._data[0]
 
-    def discard(self, value: T) -> None:
+    def remove(self, value: T) -> None:
         """从堆中删除一个元素,要保证堆中存在该元素."""
         heappush(self._erased, value)
         self._normalize()
@@ -36,6 +36,10 @@ class ErasableHeap(Generic[T]):
         while self._data and self._erased and self._data[0] == self._erased[0]:
             heappop(self._data)
             heappop(self._erased)
+
+    def clear(self) -> None:
+        self._data.clear()
+        self._erased.clear()
 
     def __len__(self) -> int:
         return len(self._data)
@@ -48,9 +52,9 @@ if __name__ == "__main__":
     pq = ErasableHeap((3, 5, 4, 1, 2))
     print(pq.pop())  # 1
     print(pq.pop())  # 2
-    pq.discard(3)
+    pq.remove(3)
     print(pq.pop())  # 4
-    pq.discard(5)
+    pq.remove(5)
     print(len(pq))  # 1
     pq.push(5)
     num = 0

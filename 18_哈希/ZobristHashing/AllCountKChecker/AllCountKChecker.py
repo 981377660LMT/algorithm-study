@@ -5,8 +5,8 @@
 #     在右指针扫到 i 的时候，不停将左指针向右移动并减去这个桶的出现次数，
 #     直到 nums[i] 的出现次数小于等于 k 为止。此时再统计答案，两个限制都可以满足。
 
-
-from typing import List
+from heapq import heapify, heappop, heappush
+from typing import Generic, Iterable, Literal, Optional, TypeVar, List
 from collections import defaultdict
 from random import randint
 
@@ -43,7 +43,151 @@ def countSubarrayWithFrequencyEqualToK(arr: List[int], k: int) -> int:
     return res
 
 
+class AllCountKChecker:
+    """
+    判断数据结构中每个数出现的次数是否均恰好等于k(k>0).
+    如果为空集合,则返回True.
+    """
+
+    _poolSingleton = defaultdict(lambda: randint(1, (1 << 61) - 1))
+
+    __slots__ = ("_hash", "_counter", "_modCounter", "_k", "_countPq")
+
+    def __init__(self, k: int) -> None:
+        self._hash = 0
+        self._counter = defaultdict(int)
+        self._modCounter = defaultdict(int)
+        self._k = k
+        self._countPq = ErasableHeap()
+
+    def add(self, x) -> None:
+        count, random = self._modCounter[x], self._poolSingleton[x]
+        self._hash -= count * random
+        count += 1
+        if count == self._k:
+            count = 0
+        self._hash += count * random
+        self._modCounter[x] = count
+
+        preCount = self._counter[x]
+        self._counter[x] = preCount + 1
+        if preCount > 0:
+            self._countPq.remove(-preCount)
+        self._countPq.push(-(preCount + 1))
+
+    def remove(self, x) -> None:
+        """删除前需要保证x在集合中存在."""
+        count, random = self._modCounter[x], self._poolSingleton[x]
+        self._hash -= count * random
+        count -= 1
+        if count == -1:
+            count = self._k - 1
+        self._hash += count * random
+        self._modCounter[x] = count
+
+        preCount = self._counter[x]
+        self._counter[x] = preCount - 1
+        if preCount == 1:
+            self._counter.pop(x)
+        self._countPq.remove(-preCount)
+        if preCount > 1:
+            self._countPq.push(-(preCount - 1))
+
+    def query(self) -> bool:
+        if not self._countPq:
+            return True
+        return self._hash == 0 and -self._countPq.peek() == self._k
+
+    def getHash(self) -> int:
+        return self._hash
+
+    def clear(self) -> None:
+        self._hash = 0
+        self._modCounter.clear()
+        self._counter.clear()
+        self._countPq.clear()
+
+    def __repr__(self) -> str:
+        return f"hash:{self._hash}, counter:{self._counter}"
+
+
+T = TypeVar("T")
+
+
+class ErasableHeap(Generic[T]):
+    __slots__ = ("_data", "_erased")
+
+    def __init__(self, items: Optional[Iterable[T]] = None) -> None:
+        self._erased = []
+        self._data = [] if items is None else list(items)
+        if self._data:
+            heapify(self._data)
+
+    def push(self, value: T) -> None:
+        heappush(self._data, value)
+        self._normalize()
+
+    def pop(self) -> T:
+        value = heappop(self._data)
+        self._normalize()
+        return value
+
+    def peek(self) -> T:
+        return self._data[0]
+
+    def remove(self, value: T) -> None:
+        """从堆中删除一个元素,要保证堆中存在该元素."""
+        heappush(self._erased, value)
+        self._normalize()
+
+    def clear(self) -> None:
+        self._data.clear()
+        self._erased.clear()
+
+    def _normalize(self) -> None:
+        while self._data and self._erased and self._data[0] == self._erased[0]:
+            heappop(self._data)
+            heappop(self._erased)
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def __getitem__(self, index: Literal[0]) -> T:
+        return self._data[index]
+
+
 if __name__ == "__main__":
+
+    def check() -> None:
+        for k in range(1, 10):
+            container = defaultdict(int)
+            C = AllCountKChecker(k)
+
+            for _ in range(100000):
+                # add
+                if randint(1, 5) >= 3:
+                    x = randint(1, 10)
+                    container[x] += 1
+                    C.add(x)
+                # remove
+                else:
+                    x = randint(1, 10)
+                    if x in container:
+                        container[x] -= 1
+                        if container[x] == 0:
+                            del container[x]
+                        C.remove(x)
+                if C.query() != all(freq == k for freq in container.values()):
+                    print(C.query(), all(freq == k for freq in container.values()))
+                    print(container)
+                    print(C)
+                    print(k)
+                    raise ValueError("error")
+
+        print("ok")
+
+    check()
+
     # https://leetcode.cn/problems/count-complete-substrings
 
     class Solution:
@@ -53,8 +197,7 @@ if __name__ == "__main__":
             groups = []
             ptr = 0
             while ptr < n:
-                leader = ords[ptr]
-                group = [leader]
+                group = [ords[ptr]]
                 ptr += 1
                 while ptr < n and abs(ords[ptr] - ords[ptr - 1]) <= 2:
                     group.append(ords[ptr])

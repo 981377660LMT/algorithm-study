@@ -51,6 +51,11 @@ func (h *ErasableHeap) Len() int {
 	return h.base.Len()
 }
 
+func (h *ErasableHeap) Clear() {
+	h.base.Clear()
+	h.erased.Clear()
+}
+
 func (h *ErasableHeap) normalize() {
 	for h.base.Len() > 0 && h.erased.Len() > 0 && h.base.Top() == h.erased.Top() {
 		h.base.Pop()
@@ -98,6 +103,10 @@ func (h *Heap) Top() (value H) {
 }
 
 func (h *Heap) Len() int { return len(h.data) }
+
+func (h *Heap) Clear() {
+	h.data = h.data[:0]
+}
 
 func (h *Heap) heapify() {
 	n := h.Len()
