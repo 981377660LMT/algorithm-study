@@ -265,6 +265,7 @@
     - [BinomialPresum](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E7%BB%84%E5%90%88%E8%AE%A1%E6%95%B0/%E6%B1%82%E7%BB%84%E5%90%88%E6%8E%92%E5%88%97%E9%98%B6%E4%B9%98/%E7%BB%84%E5%90%88%E6%95%B0%E5%89%8D%E7%BC%80%E5%92%8C/binomialPresum.go)
 
 12. **Miscellaneous**
+
     - [1D PreSumSuffixSum](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/preSumSuffixSum.py)
     - [1D Diff](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/Diff.py)
     - [2D PreSum Matrix](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
@@ -310,6 +311,7 @@
     - [PowerQuery](19_%E6%95%B0%E5%AD%A6/%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/PowerQuery.go)
     - [FastHashContainer](18_%E5%93%88%E5%B8%8C/ZobristHashing/fastHash.py)
     - [AllCountKChecker](18_%E5%93%88%E5%B8%8C/ZobristHashing/AllCountKChecker/AllCountKChecker.py)
+    - [AllCountMultipleOfKChecker](18_%E5%93%88%E5%B8%8C/ZobristHashing/AllCountKChecker/AllCountMultipleOfKChecker.py)
     - [SortableArray](<%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/0-segmenttree/library/SortableArray/SortableArray.go>)
     - [SortableDeque](2_queue/SortableDeque.py)
     - [SegmentSet](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/SegmentSet.ts)

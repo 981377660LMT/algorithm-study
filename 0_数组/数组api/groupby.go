@@ -56,7 +56,7 @@ func EnumerateGroupByKey(arr []Element, key func(index int) interface{}, f func(
 
 // 遍历分组(分组循环).
 //  isDivider: 判断当前元素是否为分组的分界点.如果返回true,则以当前元素为分界点,新建下一个分组.
-func EnumerateGroupByDivider(arr []Element, isDivider func(index int, curGroup []Element) bool, f func(group []Element, start, end int)) {
+func EnumerateGroupByDivider(arr []Element, isDivider func(elementIndex int, curGroup []Element) bool, f func(group []Element, start, end int)) {
 	ptr := 0
 	n := len(arr)
 	for ptr < n {

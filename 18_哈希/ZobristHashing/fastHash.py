@@ -148,7 +148,7 @@ class FastHashRange:
         return self._hash
 
 
-class AllCountKChecker:
+class AllCountMultipleOfKChecker:
     """
     判断数据结构中每个数出现的次数是否均`k的倍数`.
     """

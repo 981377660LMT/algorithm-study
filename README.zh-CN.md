@@ -311,6 +311,7 @@
     - [PowerQuery](19_%E6%95%B0%E5%AD%A6/%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/PowerQuery.go)
     - [FastHashContainer](18_%E5%93%88%E5%B8%8C/ZobristHashing/fastHash.py)
     - [AllCountKChecker](18_%E5%93%88%E5%B8%8C/ZobristHashing/AllCountKChecker/AllCountKChecker.py)
+    - [AllCountMultipleOfKChecker](18_%E5%93%88%E5%B8%8C/ZobristHashing/AllCountKChecker/AllCountMultipleOfKChecker.py)
     - [SortableArray](<%E7%AE%97%E6%B3%95%E7%AB%9E%E8%B5%9B%E8%BF%9B%E9%98%B6%E6%8C%87%E5%8D%97/GoDS%20(Go%20Data%20Structures)/src/0-segmenttree/library/SortableArray/SortableArray.go>)
     - [SortableDeque](2_queue/SortableDeque.py)
     - [SegmentSet](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/SegmentSet.ts)

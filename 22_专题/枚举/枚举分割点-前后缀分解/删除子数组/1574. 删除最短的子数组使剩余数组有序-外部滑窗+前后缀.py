@@ -3,7 +3,7 @@
 # 删除子数组
 # 请你删除一个子数组（可以为空），使得 arr 中剩下的元素是 非递减 的。
 # 返回满足题目要求删除的最短子数组的长度。
-
+# 同 https://leetcode.cn/problems/count-the-number-of-incremovable-subarrays-ii/
 
 # 答案肯定是前缀+后缀组成的
 # 处理出包含每个位置的前缀和后缀的非递减长度
@@ -37,6 +37,7 @@ class Solution:
 
         # !2. 二分
         for v in range(i + 1):
+            # !找到最左边的left,使得nums[left] > nums[v]
             left, right = j, n - 1
             ok = False
             while left <= right:

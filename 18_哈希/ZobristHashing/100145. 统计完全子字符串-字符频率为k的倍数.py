@@ -13,7 +13,7 @@
 
 from collections import defaultdict
 from random import randint
-from fastHash import AllCountKChecker
+from fastHash import AllCountMultipleOfKChecker
 
 
 class Solution:
@@ -21,7 +21,7 @@ class Solution:
         if k == 0:
             return 0
 
-        H = AllCountKChecker(k)
+        H = AllCountMultipleOfKChecker(k)
         nums = [ord(x) - 97 for x in word]
         res = 0
         preXor = defaultdict(int, {0: 1})

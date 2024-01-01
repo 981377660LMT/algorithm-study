@@ -42,7 +42,7 @@ class EratosthenesSieve:
         return [x for i, x in enumerate(self._minPrime) if i >= 2 and i == x]
 
 
-class AllCountKChecker:
+class AllCountMultipleOfKChecker:
     """判断数据结构中每个数出现的次数是否均k的倍数."""
 
     _poolSingleton = defaultdict(lambda: randint(1, (1 << 61) - 1))
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     n, q = map(int, input().split())
     nums = list(map(int, input().split()))
-    CC = AllCountKChecker(3)
+    CC = AllCountMultipleOfKChecker(3)
     preHash = [0]
     for x in nums:
         ps = E.getPrimeFactors(x)

@@ -106,8 +106,8 @@ func nextId() uint32 {
 
 // todo: has key to uint32
 func keyHash32(s Key, seed uint32) uint32 {
-	// h := hashString(([]byte)(s), seed) // hash string to uint32 (slow)
-	h := uint32(s) // hash int to uint32 (fast)
+	// h := hashString(([]byte)(s), seed) // hash string to uint32
+	h := uint32(s) // hash int to uint32
 
 	// !The most significant two bits will be abandoned during insert and lookup,
 	// !Thus we'd better mix them down with the least significant two bits
