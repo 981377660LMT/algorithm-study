@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable consistent-return */
 // Myers' Diff Algorithm
 // Modified from https://github.com/kpdecker/jsdiff/blob/master/src/diff/base.js
@@ -18,7 +19,7 @@ type DiffPath = {
 
 // Using O(ND) algorithm
 // TODO: Optimize when diff is large.
-function diff<T>(oldArr: T[], newArr: T[], equals: EqualFunc<T>): DiffComponent[] {
+function diff<T>(oldArr: T[], newArr: T[], equals: EqualFunc<T> | undefined): DiffComponent[] {
   if (!equals) {
     equals = function (a, b) {
       return a === b
@@ -50,7 +51,7 @@ function diff<T>(oldArr: T[], newArr: T[], equals: EqualFunc<T>): DiffComponent[
     // Identity per the equality and tokenizer
     return [
       {
-        indices: indices,
+        indices,
         count: indices.length,
         added: allCreated,
         removed: allCleared
@@ -95,10 +96,9 @@ function diff<T>(oldArr: T[], newArr: T[], equals: EqualFunc<T>): DiffComponent[
       // If we have hit the end of both strings, then we are done
       if (basePath.newPos + 1 >= newLen && oldPos + 1 >= oldLen) {
         return buildValues(basePath.components)
-      } else {
-        // Otherwise track this path as a potential candidate and continue.
-        bestPath[diagonalPath] = basePath
       }
+      // Otherwise track this path as a potential candidate and continue.
+      bestPath[diagonalPath] = basePath
     }
 
     editLength++
@@ -193,7 +193,7 @@ function clonePath(path: DiffPath) {
   return { newPos: path.newPos, components: path.components.slice(0) }
 }
 
-export default function arrayDiff<T>(oldArr: T[], newArr: T[], equal?: EqualFunc<T>): DiffComponent[] {
+export function arrayDiff<T>(oldArr: T[], newArr: T[], equal?: EqualFunc<T>): DiffComponent[] {
   return diff(oldArr, newArr, equal)
 }
 

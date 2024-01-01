@@ -22,9 +22,9 @@ type Str = string // []byte
 // 给定字符集信息和字符s，返回一个查询函数.该函数可以查询s[start:end]间ord的个数.
 // 当字符种类很少时，可以用一个counter数组实现区间哈希值的快速计算.
 func AlphaPresum(s Str, sigma int, offset int) func(start, end int, ord int) int {
-	preSum := make([][]int, len(s)+1)
+	preSum := make([][]int32, len(s)+1)
 	for i := range preSum {
-		preSum[i] = make([]int, sigma)
+		preSum[i] = make([]int32, sigma)
 	}
 	for i := 1; i <= len(s); i++ {
 		copy(preSum[i], preSum[i-1])
@@ -41,6 +41,6 @@ func AlphaPresum(s Str, sigma int, offset int) func(start, end int, ord int) int
 		if start >= end {
 			return 0
 		}
-		return preSum[end][ord-offset] - preSum[start][ord-offset]
+		return int(preSum[end][ord-offset] - preSum[start][ord-offset])
 	}
 }
