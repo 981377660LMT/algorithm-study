@@ -128,7 +128,32 @@ if (require.main === module) {
     /**
      * 每个字符恰好出现k次的子字符串数目.
      */
-    const solve = (group: number[]): number => {}
+    const solve = (group: number[]): number => {
+      let res = 0
+
+      for (let i = 1; i <= 26; i++) {
+        const windowLength = i * k
+        if (windowLength > group.length) break
+
+        const counter = Array(26).fill(0)
+        for (let right = 0; right < group.length; right++) {
+          counter[group[right]]++
+          if (right >= windowLength) counter[group[right - windowLength]]--
+          if (right >= windowLength - 1) {
+            let ok = true
+            for (let j = 0; j < 26; j++) {
+              if (counter[j] !== 0 && counter[j] !== k) {
+                ok = false
+                break
+              }
+            }
+            if (ok) res++
+          }
+        }
+      }
+
+      return res
+    }
 
     let res = 0
     groups.forEach(g => {
@@ -136,6 +161,9 @@ if (require.main === module) {
     })
     return res
   }
+
+  // word = "igigee", k = 2
+  console.log(countCompleteSubstrings('igigee', 2))
 }
 
 export { enumerateGroup, enumerateGroupByKey, enumerateGroupByDivider }

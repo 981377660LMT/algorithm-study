@@ -1,1 +1,0 @@
-            if counter[i] != 0:
