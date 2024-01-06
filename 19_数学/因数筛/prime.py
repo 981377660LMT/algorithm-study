@@ -531,6 +531,56 @@ def medianDivisor(n: int) -> int:
     raise ValueError("medianDivisor: n must be positive")
 
 
+def allLcm(nums: List[int], mod: int, useLpf=True) -> int:
+    """求所有数的最小公倍数模mod."""
+    if len(nums) == 0:
+        return 1
+    mp = defaultdict(int)
+    mx = max(nums)
+
+    if mx > int(5e6):
+        useLpf = False
+
+    if useLpf:
+        E = EratosthenesSieve(mx)
+
+    if useLpf:
+        for n in nums:
+            pfs = E.getPrimeFactors(n)
+            for p, e in pfs.items():
+                if e > mp[p]:
+                    mp[p] = e
+    else:
+        for n in nums:
+            pfs = getPrimeFactors2(n)
+            for p, e in pfs.items():
+                if e > mp[p]:
+                    mp[p] = e
+
+    res = 1
+    for p, e in mp.items():
+        res = res * pow(p, e, mod) % mod
+    return res
+
+
+def eulerPhi(n: int) -> int:
+    """给定正整数n,求[1,n]内的数与n互质的个数"""
+    mp = getPrimeFactors(n) if n <= int(1e7) else getPrimeFactors2(n)
+    for p in mp:
+        n -= n // p
+    return n
+
+
+def eulerPhiTable(n: int) -> List[int]:
+    """返回[1,n]内的数与n互质的个数"""
+    res = list(range(n + 1))
+    for i in range(2, n + 1):
+        if res[i] == i:
+            for j in range(i, n + 1, i):
+                res[j] = res[j] // i * (i - 1)
+    return res
+
+
 if __name__ == "__main__":
     for i in range(1, 1000):
         assert getPrimeFactors(i) == getPrimeFactors2(i)
@@ -563,5 +613,8 @@ if __name__ == "__main__":
     import time
 
     time1 = time.time()
-    getPrimeFactors(int(1e14))
+    for v in range(int(1e17), int(1e17 + 1000)):
+        getPrimeFactors2(v)
     print(time.time() - time1)
+
+    print(eulerPhi(3))

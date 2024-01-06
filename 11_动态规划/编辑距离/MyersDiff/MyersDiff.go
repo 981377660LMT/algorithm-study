@@ -4,6 +4,12 @@
 
 package main
 
+import "fmt"
+
+func main() {
+	fmt.Println(minDistance("horse", "ros"))
+}
+
 // https://leetcode.cn/problems/edit-distance/
 func minDistance(word1 string, word2 string) int {
 	return EditingDistance(word1, word2)

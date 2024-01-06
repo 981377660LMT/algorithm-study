@@ -198,8 +198,8 @@ export function arrayDiff<T>(oldArr: T[], newArr: T[], equal?: EqualFunc<T>): Di
 }
 
 if (require.main === module) {
-  const arr1 = [1, 2, 3, 4, 5, 6, 7, 8]
-  const arr2 = [1, 2, 3, 4, 5, 6, 7, 8, 112, 9]
+  const arr1 = 'horse'
+  const arr2 = 'ros'
 
   console.log(arrayDiff(arr1, arr2))
 }

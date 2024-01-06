@@ -15,7 +15,7 @@ func main() {
 	fmt.Println(SegmentedSieve(0, 100))
 	fmt.Println(IsPrimeMillerRabin(4))
 	fmt.Println(PollardRhoPrimeFactor(100))
-	fmt.Println(GetPrimeFactorsFast(1e18 + 9))
+	fmt.Println(GetPrimeFactorsBig(1e18 + 9))
 	EnumerateFactors(100, func(factor int) { fmt.Println(factor) })
 	fmt.Println(GetFactors(10), SumFactors2(10))
 
@@ -214,7 +214,7 @@ func GetPrimeFactors(n int) map[int]int {
 	return res
 }
 
-func GetPrimeFactorsFast(n int) map[int]int {
+func GetPrimeFactorsBig(n int) map[int]int {
 	res := make(map[int]int)
 	for n > 1 {
 		p := PollardRhoPrimeFactor(n)
