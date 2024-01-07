@@ -44,6 +44,10 @@ class PointSetStepSum {
     }
   }
 
+  get(index: number): number {
+    return this._nums[index]
+  }
+
   query(start: number, step: number): number {
     if (start < 0) start = 0
     if (step <= this._stepThreshold) {

@@ -1,7 +1,3 @@
-// P3396 哈希冲突
-// https://www.luogu.com.cn/problem/P3396
-// https://www.luogu.com.cn/blog/danieljiang/ha-xi-chong-tu-ti-xie-gen-hao-ke-ji
-
 package main
 
 import (
@@ -10,7 +6,37 @@ import (
 	"os"
 )
 
-func main() {
+// F - Hop Sugoroku
+// https://atcoder.jp/contests/abc335/tasks/abc335_f
+func abc335f() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const MOD int = 998244353
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	dp := make([]int, n)
+	for i := 0; i < n; i++ {
+		dp[i] = 1
+	}
+	S := NewPointSetStepSum(dp, 50)
+	for i := n - 1; i >= 0; i-- {
+	}
+
+	fmt.Fprintln(out, S.Get(0))
+}
+
+// P3396 哈希冲突
+// https://www.luogu.com.cn/problem/P3396
+// https://www.luogu.com.cn/blog/danieljiang/ha-xi-chong-tu-ti-xie-gen-hao-ke-ji
+func luogu3396() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -22,7 +48,7 @@ func main() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	S := NewPointSetModSum(nums, 50)
+	S := NewPointSetStepSum(nums, 50)
 	for i := 0; i < q; i++ {
 		var op string
 		fmt.Fscan(in, &op)
@@ -43,7 +69,7 @@ func main() {
 	}
 }
 
-type PointSetModSum struct {
+type PointSetStepSum struct {
 	nums          []int
 	stepThreshold int
 	// dp[step][start] 表示步长为step,起点为start的所有元素的和.
@@ -55,7 +81,7 @@ type PointSetModSum struct {
 // 预处理时间空间复杂度均为`O(n*stepThreshold)`.
 // 单次遍历时间复杂度为`O(n/stepThreshold)`.
 // 取50较为合适.
-func NewPointSetModSum(nums []int, stepThreshold int) *PointSetModSum {
+func NewPointSetStepSum(nums []int, stepThreshold int) *PointSetStepSum {
 	n := len(nums)
 	dp := make([][]int, stepThreshold)
 	for step := 1; step <= stepThreshold; step++ {
@@ -65,10 +91,10 @@ func NewPointSetModSum(nums []int, stepThreshold int) *PointSetModSum {
 		}
 		dp[step-1] = curSum
 	}
-	return &PointSetModSum{nums: nums, stepThreshold: stepThreshold, dp: dp}
+	return &PointSetStepSum{nums: nums, stepThreshold: stepThreshold, dp: dp}
 }
 
-func (pss *PointSetModSum) Set(index, value int) {
+func (pss *PointSetStepSum) Set(index, value int) {
 	if index < 0 || index >= len(pss.nums) {
 		return
 	}
@@ -83,8 +109,15 @@ func (pss *PointSetModSum) Set(index, value int) {
 	}
 }
 
+func (pss *PointSetStepSum) Get(index int) int {
+	if index < 0 || index >= len(pss.nums) {
+		return 0
+	}
+	return pss.nums[index]
+}
+
 // 查询 sum(nums[start::step]).
-func (pss *PointSetModSum) Query(start, step int) int {
+func (pss *PointSetStepSum) Query(start, step int) int {
 	if start < 0 {
 		start = 0
 	}
@@ -98,7 +131,7 @@ func (pss *PointSetModSum) Query(start, step int) int {
 	return sum
 }
 
-func (pss *PointSetModSum) String() string {
+func (pss *PointSetStepSum) String() string {
 	return fmt.Sprintf("PointSetModSum{nums: %v}", pss.nums)
 }
 

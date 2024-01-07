@@ -4,6 +4,7 @@
 # 红包在一开始创建的时候，分配方案就订好了 生成一组加权随机数即可
 
 from random import randint
+
 from typing import List
 
 

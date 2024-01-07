@@ -1256,7 +1256,11 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
+    "description": [
+      "前后缀滑窗",
+      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
+      "不存在时为INF"
+    ]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -3880,7 +3884,14 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
+    "body": [
+      "func gcd(a, b int) int {",
+      "  for b != 0 {",
+      "    a, b = b, a%b",
+      "  }",
+      "  return a",
+      "}"
+    ],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -4771,7 +4782,14 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
+    "body": [
+      "n = len(nums)",
+      "res = 0",
+      "for left in range(n):",
+      "\t\tcur = []",
+      "\t\tfor right in range(left, n):",
+      "\t\t\t\t..."
+    ],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -5810,13 +5828,21 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
+    "body": [
+      "\t\tconst counter = new Map<number, number>()",
+      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
+    ],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
+    "body": [
+      "\\counter := make(map[int]int)",
+      "\tfor _, v := range nums {",
+      "\t\\counter[v]++",
+      "\t}"
+    ],
     "description": "counter计数"
   },
   "rangeFreq-python": {
@@ -5975,5 +6001,17 @@
       "\t\treturn dist"
     ],
     "description": "floyd求全源最短路"
+  },
+  "max2": {
+    "scope": "python",
+    "prefix": "max2",
+    "body": ["def max2(a: int, b: int) -> int:", "\t\treturn a if a > b else b", ""],
+    "description": "max2"
+  },
+  "min2": {
+    "scope": "python",
+    "prefix": "min2",
+    "body": ["def min2(a: int, b: int) -> int:", "\t\treturn a if a < b else b"],
+    "description": "min2"
   }
 }

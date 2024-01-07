@@ -10,7 +10,10 @@
  * enumerateGroup(list, group => console.log(group)) // [1, 1], [2], [3, 3], [4, 4], [5, 5, 5]
  * ```
  */
-function enumerateGroup<T>(arr: ArrayLike<T>, f: (group: T[], start: number, end: number) => boolean | void): void {
+function enumerateGroup<T>(
+  arr: ArrayLike<T>,
+  f: (group: T[], start: number, end: number) => boolean | void
+): void {
   const n = arr.length
   let ptr = 0
   while (ptr < n) {
@@ -103,6 +106,36 @@ if (require.main === module) {
     }
   )
 
+  /**
+   * 每组最多k个元素的分组.
+   */
+  function maxPartitionsAfterOperations(s: string, k: number): number {
+    const n = s.length
+    const ords = new Uint8Array(n)
+    for (let i = 0; i < s.length; i++) ords[i] = s[i].codePointAt(0)! - 97
+    let res = 0
+
+    let ptr = 0
+    while (ptr < n) {
+      // !当前分组的第一个元素
+      let visited = 1 << ords[ptr]
+      let visitedCount = 1
+      ptr++
+
+      // !能否继续向后扩展
+      while (ptr < n && visitedCount + (1 ^ ((visited >>> ords[ptr]) & 1)) <= k) {
+        visitedCount += ((visited >>> ords[ptr]) & 1) ^ 1
+        visited |= 1 << ords[ptr]
+        ptr++
+      }
+
+      // !当前分组结束
+      res++
+    }
+
+    return res
+  }
+
   // 2953. 统计完全子字符串
   // https://leetcode.cn/problems/count-complete-substrings/
   // 给你一个字符串 word 和一个整数 k 。
@@ -161,9 +194,6 @@ if (require.main === module) {
     })
     return res
   }
-
-  // word = "igigee", k = 2
-  console.log(countCompleteSubstrings('igigee', 2))
 }
 
 export { enumerateGroup, enumerateGroupByKey, enumerateGroupByDivider }

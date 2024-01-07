@@ -10,42 +10,52 @@ import (
 func main() {
 	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	r := NewRandom()
-	r.ShuffleInt(nums)
-	fmt.Println(nums)
+	r.Shuffle(nums)
+	fmt.Println(r.RandRange(1, 10, 2))
 }
 
 type Random struct {
-	seed     uint64
-	hashBase uint64
+	seed     int
+	hashBase int
 }
 
-func NewRandom() *Random {
-	return &Random{seed: uint64(time.Now().UnixNano()/2 + 1)}
-}
+func NewRandom() *Random                 { return &Random{seed: int(time.Now().UnixNano()/2 + 1)} }
+func NewRandomWithSeed(seed int) *Random { return &Random{seed: seed} }
 
-func (r *Random) Rng() uint64 {
+func (r *Random) Rng() int {
 	r.seed ^= r.seed << 7
 	r.seed ^= r.seed >> 9
 	return r.seed
 }
 
-func (r *Random) Next() uint64 { return r.Rng() }
+func (r *Random) Next() int { return r.Rng() }
 
-func (r *Random) RngWithMod(mod uint64) uint64 { return r.Rng() % mod }
+func (r *Random) RngWithMod(mod int) int { return r.Rng() % mod }
 
 // [left, right]
-func (r *Random) RandInt(min, max uint64) uint64 { return min + r.Rng()%(max-min+1) }
+func (r *Random) RandInt(min, max int) int { return min + r.Rng()%(max-min+1) }
+
+// [start:stop:step]
+func (r *Random) RandRange(start, stop int, step int) int {
+	return start + r.Rng()%(stop-start)/step*step
+}
 
 // FastShuffle
-func (r *Random) ShuffleInt(nums []int) {
+func (r *Random) Shuffle(nums []int) {
 	for i := range nums {
-		rand := r.RandInt(0, uint64(i))
+		rand := r.RandInt(0, i)
 		nums[i], nums[rand] = nums[rand], nums[i]
 	}
 }
 
+func (r *Random) Sample(nums []int, k int) []int {
+	nums = append(nums[:0:0], nums...)
+	r.Shuffle(nums)
+	return nums[:k]
+}
+
 // 元组哈希
-func (r *Random) HashPair(a, b uint64) uint64 {
+func (r *Random) HashPair(a, b int) int {
 	if r.hashBase == 0 {
 		r.hashBase = r.Rng()
 	}

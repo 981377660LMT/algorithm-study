@@ -19,16 +19,6 @@ func main() {
 	fmt.Println(nums)
 }
 
-func DivisorZeta(nums []int) {
-	if nums[0] != 0 {
-		panic("nums[0] != 0")
-	}
-	n := len(nums) - 1
-	EnumeratePrefixPrimeFactors(n, func(num, primeFactor int) {
-		nums[num] += nums[primeFactor] // add
-	})
-}
-
 func DivisorMobius(nums []int) {
 	if nums[0] != 0 {
 		panic("nums[0] != 0")
@@ -56,6 +46,15 @@ func MultiplierMobius(nums []int) {
 	n := len(nums) - 1
 	EnumeratePrefixPrimeFactors(n, func(num, primeFactor int) {
 		nums[primeFactor] -= nums[num] // sub
+	})
+}
+func DivisorZeta(nums []int) {
+	if nums[0] != 0 {
+		panic("nums[0] != 0")
+	}
+	n := len(nums) - 1
+	EnumeratePrefixPrimeFactors(n, func(num, primeFactor int) {
+		nums[num] += nums[primeFactor] // add
 	})
 }
 
