@@ -91,6 +91,7 @@ if __name__ == "__main__":
     # https://atcoder.jp/contests/abc212/tasks/abc212_g
     def f(p: int, k: int) -> None:
         global res
+        print(p, k)
         res += p * k
 
     p = int(input())

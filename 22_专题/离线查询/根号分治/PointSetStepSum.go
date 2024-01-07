@@ -6,8 +6,34 @@ import (
 	"os"
 )
 
+func main() {
+	abc335f()
+	// demo()
+	// luogu3396()
+
+}
+
+func demo() {
+	S := NewPointSetStepSum([]int{1, 1, 1, 1, 1}, 50)
+	fmt.Println(S)
+	// fmt.Println(S.Query(0, 2)
+	S.Set(0, 2)
+	fmt.Println(S)
+
+}
+
 // F - Hop Sugoroku
 // https://atcoder.jp/contests/abc335/tasks/abc335_f
+// 加速:
+//
+// dp = [1]*n
+//
+// for i in range(n-1,-1,-1):
+//
+//	for j in range(i+A[i],n,A[i]):
+//		dp[i] += dp[j]
+//
+// print(dp[0])
 func abc335f() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -28,9 +54,24 @@ func abc335f() {
 	}
 	S := NewPointSetStepSum(dp, 50)
 	for i := n - 1; i >= 0; i-- {
+		sum := S.Query(i+nums[i], nums[i]) % MOD
+		S.Add(i, sum)
+		fmt.Println(S, sum, i+nums[i], nums[i], S.Query(1, 1))
 	}
+	fmt.Fprintln(out, S.Get(0)%MOD)
+	// fmt.Println(S)
+	// dp := make([]int, n)
+	// for i := 0; i < n; i++ {
+	// 	dp[i] = 1
+	// }
+	// for i := n - 1; i >= 0; i-- {
+	// 	for j := i + nums[i]; j < n; j += nums[i] {
+	// 		dp[i] += dp[j]
+	// 		dp[i] %= MOD
+	// 	}
+	// }
+	// fmt.Fprintln(out, dp[0])
 
-	fmt.Fprintln(out, S.Get(0))
 }
 
 // P3396 哈希冲突
@@ -72,8 +113,7 @@ func luogu3396() {
 type PointSetStepSum struct {
 	nums          []int
 	stepThreshold int
-	// dp[step][start] 表示步长为step,起点为start的所有元素的和.
-	// `dp[step][start] = dp[step][start+step] + nums[start]`.
+	// dp[step][mod] 表示步长为step时，模为mod的所有数之和.
 	dp [][]int
 }
 
@@ -82,12 +122,13 @@ type PointSetStepSum struct {
 // 单次遍历时间复杂度为`O(n/stepThreshold)`.
 // 取50较为合适.
 func NewPointSetStepSum(nums []int, stepThreshold int) *PointSetStepSum {
+	nums = append(nums[:0:0], nums...)
 	n := len(nums)
 	dp := make([][]int, stepThreshold)
 	for step := 1; step <= stepThreshold; step++ {
-		curSum := make([]int, n+1)
-		for start := n - 1; start >= 0; start-- {
-			curSum[start] = curSum[min(n, start+step)] + nums[start]
+		curSum := make([]int, step)
+		for i := 0; i < n; i++ {
+			curSum[i%step] += nums[i]
 		}
 		dp[step-1] = curSum
 	}
@@ -116,7 +157,21 @@ func (pss *PointSetStepSum) Get(index int) int {
 	return pss.nums[index]
 }
 
+func (pss *PointSetStepSum) Add(index, delta int) {
+	if index < 0 || index >= len(pss.nums) {
+		return
+	}
+	if delta == 0 {
+		return
+	}
+	pss.nums[index] += delta
+	for step := 1; step <= pss.stepThreshold; step++ {
+		pss.dp[step-1][index%step] += delta
+	}
+}
+
 // 查询 sum(nums[start::step]).
+// !step<=start.
 func (pss *PointSetStepSum) Query(start, step int) int {
 	if start < 0 {
 		start = 0

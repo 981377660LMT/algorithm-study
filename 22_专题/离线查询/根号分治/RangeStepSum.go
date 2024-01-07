@@ -33,6 +33,7 @@ type RangeStepSum struct {
 // 单次遍历时间复杂度为`O(n/stepThreshold)`.
 // 取40较为合适.
 func NewRangeStepSum(arr []int, stepThreshold int) *RangeStepSum {
+	arr = append(arr[:0:0], arr...)
 	n := len(arr)
 	dp := make([][]int, stepThreshold)
 	for step := 1; step <= stepThreshold; step++ {

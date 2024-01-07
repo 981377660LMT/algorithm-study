@@ -13,7 +13,11 @@ type Interval = { leftStart: number; leftEnd: number; value: number }
  * interval 的 leftStart/leftEnd 表示子数组的左端点left的范围.
  * interval 的 value 表示该子数组 arr[left,right] 的 op 结果.
  */
-function logTrick(arr: ArrayLike<number>, op: (a: number, b: number) => number, f?: (left: Interval[], right: number) => void): Map<number, number> {
+function logTrick(
+  arr: ArrayLike<number>,
+  op: (a: number, b: number) => number,
+  f?: (left: Interval[], right: number) => void
+): Map<number, number> {
   const res: Map<number, number> = new Map()
   const dp: Interval[] = []
   for (let pos = 0; pos < arr.length; pos++) {
