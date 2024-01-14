@@ -44,6 +44,7 @@ class Solution:
 
 
 print(Solution().longestMountain([2, 1, 4, 7, 3, 2, 5]))
+print(Solution().longestMountain([1, 1, 1]))
 # 输入：[2,1,4,7,3,2,5]
 # 输出：5
 # 解释：最长的 “山脉” 是 [1,4,7,3,2]，长度为 5。

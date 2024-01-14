@@ -12,7 +12,15 @@ class Random {
   }
 
   static randRange(start: number, stop: number, step = 1): number {
-    return start + Math.floor(((stop - start) * Math.random()) / step) * step
+    const width = stop - start
+    if (step === 1) return start + Random.randInt(0, width - 1)
+    let n = 0
+    if (step > 0) {
+      n = Math.floor((width + step - 1) / step)
+    } else {
+      n = Math.floor((width + step + 1) / step)
+    }
+    return start + step * Random.randInt(0, n - 1)
   }
 
   /** Fisher-Yates. */
@@ -40,6 +48,13 @@ class Random {
 export { Random }
 
 if (require.main === module) {
+  const counter = new Map<number, number>()
+  for (let _ = 0; _ < 100; _++) {
+    const rand = Random.randRange(1, 10, 2)
+    counter.set(rand, (counter.get(rand) ?? 0) + 1)
+  }
+  console.log(counter)
+
   // 给你一个下标从 0 开始的字符串 s 和一个整数 k。
   // 你需要执行以下分割操作，直到字符串 s 变为 空：
   // 选择 s 的最长前缀，该前缀最多包含 k 个 不同 字符。

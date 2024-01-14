@@ -13,6 +13,17 @@ import (
 	"strconv"
 )
 
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n string
+	var k int
+	fmt.Fscan(in, &n, &k)
+	fmt.Fprintln(out, digitsParadiseInHexadecimal(n, k))
+}
+
 const MOD int = 1e9 + 7
 
 func cal(upper string, k int) int {
@@ -33,8 +44,8 @@ func cal(upper string, k int) int {
 			}
 		}
 	}
-	var dfs func(pos int, hasLeadingZero int, isLimit int, visited int) int
-	dfs = func(pos int, hasLeadingZero int, isLimit int, visited int) int {
+	var dfs func(pos int, hasLeadingZero bool, isLimit bool, visited int) int
+	dfs = func(pos int, hasLeadingZero bool, isLimit bool, visited int) int {
 		bitCount := bits.OnesCount(uint(visited))
 		if bitCount > k {
 			return 0
@@ -45,47 +56,40 @@ func cal(upper string, k int) int {
 			}
 			return 0
 		}
-		if cand := memo[pos][hasLeadingZero][isLimit][bitCount]; cand != -1 {
-			return cand
+
+		ptr := &memo[pos][BoolToInt(hasLeadingZero)][BoolToInt(isLimit)][bitCount]
+		if *ptr != -1 {
+			return *ptr
 		}
 
 		res := 0
 		up := 15
-		if isLimit == 1 {
+		if isLimit {
 			up = nums[pos]
 		}
 		for cur := 0; cur <= up; cur++ {
-			nextIsLimit := 0
-			if isLimit == 1 && cur == up {
-				nextIsLimit = 1
-			}
-			if hasLeadingZero == 1 && cur == 0 {
-				res += dfs(pos+1, 1, nextIsLimit, visited)
+			if hasLeadingZero && cur == 0 {
+				res += dfs(pos+1, true, (isLimit && cur == up), visited)
 				res %= MOD
 			} else {
-				res += dfs(pos+1, 0, nextIsLimit, (visited | (1 << cur)))
+				res += dfs(pos+1, false, (isLimit && cur == up), (visited | (1 << cur)))
 				res %= MOD
 			}
 		}
-
-		memo[pos][hasLeadingZero][isLimit][bitCount] = res
+		*ptr = res
 		return res
 	}
 
-	return dfs(0, 1, 1, 0)
+	return dfs(0, true, true, 0)
 }
 
 func digitsParadiseInHexadecimal(n string, k int) int {
 	return cal(n, k) - cal("0", k)
 }
 
-func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n string
-	var k int
-	fmt.Fscan(in, &n, &k)
-	fmt.Fprintln(out, digitsParadiseInHexadecimal(n, k))
+func BoolToInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }

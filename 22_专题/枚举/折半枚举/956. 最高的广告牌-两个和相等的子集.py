@@ -1,4 +1,5 @@
 # 956. 最高的广告牌-两个和相等的子集
+# 时间复杂度O(len(nums)*sum(nums))
 # 分成两个子集，和相等
 
 
@@ -7,7 +8,7 @@ from typing import List
 
 INF = int(1e20)
 
-# 时间复杂度O(len(nums)*sum(nums))
+
 class Solution:
     def tallestBillboard(self, nums: List[int]) -> int:
         @lru_cache(None)
