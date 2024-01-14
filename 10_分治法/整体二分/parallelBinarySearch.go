@@ -30,7 +30,7 @@ func main() {
 	// StaticRangeKthSmallest()
 	// 矩阵乘法()
 	// 天天爱射击()
-	UnionSets()
+	// UnionSets()
 }
 
 // 静态区间第 k 小
@@ -648,4 +648,10 @@ func (ufa *UnionFindArray) Find(key int) int {
 	}
 	ufa.data[key] = ufa.Find(ufa.data[key])
 	return ufa.data[key]
+}
+
+func (ufa *UnionFindArray) Clear() {
+	for i := range ufa.data {
+		ufa.data[i] = -1
+	}
 }

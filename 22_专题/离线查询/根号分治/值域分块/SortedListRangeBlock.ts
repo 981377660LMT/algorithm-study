@@ -4,7 +4,7 @@
 
 // SortedListRangeBlock
 
-import { ISortedList, ISortedListIterator } from '../SortedList/SortedListFast'
+import { ISortedList } from '../SortedList/SortedListFast'
 
 /**
  * 值域分块模拟SortedList.
@@ -546,18 +546,6 @@ class SortedListRangeBlock implements ISortedList<number> {
       }
     }
     return void 0
-  }
-
-  iteratorAt(index: number): ISortedListIterator<number> {
-    throw new Error('Method not implemented.')
-  }
-
-  lowerBound(value: number): ISortedListIterator<number> {
-    throw new Error('Method not implemented.')
-  }
-
-  upperBound(value: number): ISortedListIterator<number> {
-    throw new Error('Method not implemented.')
   }
 
   /**

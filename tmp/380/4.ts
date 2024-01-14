@@ -1,118 +1,55 @@
-/* eslint-disable no-inner-declarations */
-/* eslint-disable prefer-destructuring */
+import { indexOfAll } from '../../17_模式匹配/kmp/kmp'
+import { SortedListFast } from '../../22_专题/离线查询/根号分治/SortedList/SortedListFast'
+
+export {}
+
+const INF = 2e9 // !超过int32使用2e15
 
 /**
- * `O(nlogn)` 静态查询每个子树内的信息, 空间复杂度优于启发式合并.
- * @see {@link https://blog.csdn.net/qq_43472263/article/details/104150940}
+ * 构建某个模式串(较短串)的失配数组.
+ * @param shorter 模式串或者模式串的unicode编码数组.
+ * @returns
+ * 失配数组.`next[i]`表示`[:i+1]`这一段字符串中最长公共前后缀(不含这一段字符串本身,即真前后缀)的长度.
+ * 在AC自动机中被命名为`fail`.
  */
-class DsuOnTree {
-  private readonly _tree: number[][]
-  private readonly _root: number
-  private readonly _subSize: Uint32Array
-  private readonly _euler: Uint32Array
-  private readonly _down: Uint32Array
-  private readonly _up: Uint32Array
-  private _order = 0
-
-  constructor(n: number, tree: number[][], root = 0) {
-    this._tree = tree
-    this._root = root
-    this._subSize = new Uint32Array(n)
-    this._euler = new Uint32Array(n)
-    this._down = new Uint32Array(n)
-    this._up = new Uint32Array(n)
-
-    this._dfs1(root, -1)
-    this._dfs2(root, -1)
-  }
-
-  /**
-   * @param add 添加root处的贡献.
-   * @param remove 移除root处的贡献.
-   * @param query 查询root的子树的贡献并更新答案.
-   * @param reset 退出轻儿子时的回调函数.
-   */
-  run(
-    add: (root: number) => void,
-    remove: (root: number) => void,
-    query: (root: number) => void,
-    reset?: () => void
-  ) {
-    const dsu = (cur: number, pre: number, keep: boolean): void => {
-      const nexts = this._tree[cur]
-      for (let i = 1; i < nexts.length; i++) {
-        const next = nexts[i]
-        if (next !== pre) {
-          dsu(next, cur, false)
-        }
-      }
-
-      if (this._subSize[cur] !== 1) {
-        dsu(nexts[0], cur, true)
-      }
-
-      if (this._subSize[cur] !== 1) {
-        for (let i = this._up[nexts[0]]; i < this._up[cur]; i++) {
-          add(this._euler[i])
-        }
-      }
-
-      add(cur)
-      query(cur)
-      if (!keep) {
-        for (let i = this._down[cur]; i < this._up[cur]; i++) {
-          remove(this._euler[i])
-        }
-        reset && reset()
-      }
+function getNext(shorter: string | ArrayLike<number | string>): Uint32Array {
+  const next = new Uint32Array(shorter.length)
+  let j = 0
+  for (let i = 1; i < shorter.length; i++) {
+    while (j > 0 && shorter[i] !== shorter[j]) {
+      // 新来了一个字符如果不匹配，需要上跳fail指针到最长公共后缀结尾处，看下一个(子节点)是否能匹配
+      j = next[j - 1]
     }
-
-    dsu(this._root, -1, false)
+    if (shorter[i] === shorter[j]) j++
+    next[i] = j
   }
-
-  private _dfs1(cur: number, pre: number): number {
-    this._subSize[cur] = 1
-    const nexts = this._tree[cur]
-    if (nexts.length >= 2 && nexts[0] === pre) {
-      nexts[0] ^= nexts[1]
-      nexts[1] ^= nexts[0]
-      nexts[0] ^= nexts[1]
-    }
-    for (let i = 0; i < nexts.length; i++) {
-      const next = nexts[i]
-      if (next === pre) continue
-      this._subSize[cur] += this._dfs1(next, cur)
-      if (this._subSize[next] > this._subSize[nexts[0]]) {
-        nexts[0] ^= nexts[i]
-        nexts[i] ^= nexts[0]
-        nexts[0] ^= nexts[i]
-      }
-    }
-    return this._subSize[cur]
-  }
-
-  private _dfs2(cur: number, pre: number): void {
-    this._euler[this._order] = cur
-    this._down[cur] = this._order++
-    const nexts = this._tree[cur]
-    for (let i = 0; i < nexts.length; i++) {
-      const next = nexts[i]
-      if (next === pre) continue
-      this._dfs2(next, cur)
-    }
-    this._up[cur] = this._order
-  }
+  return next
 }
 
-// 给你一棵 n 个节点的 无向 树，节点编号为 0 到 n - 1 ，树的根节点在节点 0 处。同时给你一个长度为 n - 1 的二维整数数组 edges ，其中 edges[i] = [ai, bi] 表示树中节点 ai 和 bi 之间有一条边。
-
-// 给你一个长度为 n 下标从 0 开始的整数数组 cost ，其中 cost[i] 是第 i 个节点的 开销 。
-
-// 你需要在树中每个节点都放置金币，在节点 i 处的金币数目计算方法如下：
-
-// 如果节点 i 对应的子树中的节点数目小于 3 ，那么放 1 个金币。
-// 否则，计算节点 i 对应的子树内 3 个不同节点的开销乘积的 最大值 ，并在节点 i 处放置对应数目的金币。如果最大乘积是 负数 ，那么放置 0 个金币。
-// 请你返回一个长度为 n 的数组 coin ，coin[i]是节点 i 处的金币数目。
+/**
+ * `O(n+m)` 寻找 `shorter` 在 `longer` 中的所有匹配位置.
+ */
+function indexOfAll<S extends string | ArrayLike<number | string> = string>(
+  longer: S,
+  shorter: S,
+  position = 0,
+  nexts: ArrayLike<number> | undefined = undefined
+): number[] {
+  if (shorter.length === 0) return []
+  if (longer.length < shorter.length) return []
+  const res: number[] = []
+  const next = nexts || getNext(shorter)
+  let hitJ = 0
+  for (let i = position; i < longer.length; i++) {
+    while (hitJ > 0 && longer[i] !== shorter[hitJ]) hitJ = next[hitJ - 1]
+    if (longer[i] === shorter[hitJ]) hitJ++
+    if (hitJ === shorter.length) {
+      res.push(i - shorter.length + 1)
+      hitJ = next[hitJ - 1] // 不允许重叠时 hitJ = 0
+    }
+  }
+  return res
+}
 // API.
 interface ISortedList<V> {
   add(value: V): void
@@ -148,16 +85,6 @@ interface ISortedList<V> {
   readonly length: number
   readonly min: V | undefined
   readonly max: V | undefined
-}
-
-interface ISortedListIterator<V> {
-  hasNext(): boolean
-  next(): V | undefined
-  hasPrev(): boolean
-  prev(): V | undefined
-  /** 删除后会使所有迭代器失效. */
-  remove(): void
-  readonly value: V | undefined
 }
 
 /**
@@ -778,36 +705,22 @@ class SortedListFast<V = number> implements ISortedList<V> {
     return { pos: pos + 1, index: k }
   }
 }
-
-function placedCoins(edges: number[][], cost: number[]): number[] {
-  const n = cost.length
-  const tree: number[][] = Array(n)
-  for (let i = 0; i < n; i++) tree[i] = []
-  for (const [u, v] of edges) {
-    tree[u].push(v)
-    tree[v].push(u)
-  }
-
-  const dsu = new DsuOnTree(n, tree)
-  const res: number[] = Array(n).fill(0)
-  const sl = new SortedListFast<number>()
-
-  dsu.run(add, remove, query)
-  return res
-
-  function add(root: number): void {
-    sl.add(cost[root])
-  }
-  function remove(root: number): void {
-    sl.discard(cost[root])
-  }
-  function query(root: number): void {
-    if (sl.length < 3) {
-      res[root] = 1
-    } else {
-      const cand1 = sl.at(sl.length - 1)! * sl.at(sl.length - 2)! * sl.at(sl.length - 3)!
-      const cand2 = sl.at(0)! * sl.at(1)! * sl.at(sl.length - 1)!
-      res[root] = Math.max(cand1, cand2, 0)
+function beautifulIndices(s: string, a: string, b: string, k: number): number[] {
+  const indexes1 = indexOfAll(s, a)
+  const sl = new SortedListFast(indexOfAll(s, b))
+  const res: number[] = []
+  for (let i = 0; i < indexes1.length; i++) {
+    const v = indexes1[i]
+    const prev = sl.floor(v)
+    if (prev !== undefined && Math.abs(prev - v) <= k) {
+      res.push(v)
+      continue
+    }
+    const next = sl.ceiling(v)
+    if (next !== undefined && Math.abs(next - v) <= k) {
+      res.push(v)
+      continue
     }
   }
+  return res
 }

@@ -40,5 +40,3 @@ https://www.luogu.com.cn/blog/LawrenceSivan/kruskal-zhong-gou-shu-zong-jie
 6. `从 u 出发只经过边权不超过 x 的边能到达的节点`:只需要`倍增`找到边权升序的 Kruskal 重构树中找到`深度最小的，点权不超过 x 的节点`，那么这个节点的子树即为所求。
    [P4197 Peaks](https://www.luogu.com.cn/problem/P4197)
    [P7834 [ONTAK2010] Peaks 加强版](https://www.luogu.com.cn/problem/P7834)
-
-- 一般用倍增维护 Kruskal 重构树 LCA.如果需要对树进行修改，就需要用 LCT 维护 Kruskal 重构树。
