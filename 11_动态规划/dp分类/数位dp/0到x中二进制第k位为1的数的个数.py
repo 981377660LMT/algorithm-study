@@ -17,7 +17,7 @@ def cal(upper: int, k: int) -> int:
         """当前在第pos位,hasLeadingZero表示有前导0，isLimit表示是否贴合上界"""
         if pos == -1:
             return not hasLeadingZero
-        if pos == k:
+        if pos == k:  # 这一位必须填1
             if isLimit and nums[pos] == 0:
                 return 0
             return dfs(pos - 1, False, isLimit)
