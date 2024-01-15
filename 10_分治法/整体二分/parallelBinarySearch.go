@@ -27,10 +27,71 @@ import (
 )
 
 func main() {
+	StampRally()
 	// StaticRangeKthSmallest()
 	// 矩阵乘法()
 	// 天天爱射击()
-	UnionSets()
+	// UnionSets()
+}
+
+// https://atcoder.jp/contests/agc002/tasks/agc002_d
+// 一张连通图，q 次询问从两个点 x 和 y 出发，
+// 希望经过的点数量等于 z（每个点可以重复经过，但是重复经过只计算一次）
+// 求经过的边最大编号最小是多少。
+//
+// 整体二分，这里的操作序列为：将边按照编号从小到大加入到图中。
+func StampRally() []int {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	edges := make([][2]int, m)
+	for i := 0; i < m; i++ {
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		u--
+		v--
+		edges[i] = [2]int{u, v}
+	}
+
+	var q int
+	fmt.Fscan(in, &q)
+	queries := make([][3]int, q)
+	for i := 0; i < q; i++ {
+		var x, y, z int
+		fmt.Fscan(in, &x, &y, &z)
+		x--
+		y--
+		queries[i] = [3]int{x, y, z}
+	}
+
+	uf := NewUnionFindArray(n)
+	reset := func() {
+		uf.Clear()
+	}
+	mutate := func(mutationId int) {
+		u, v := edges[mutationId][0], edges[mutationId][1]
+		uf.Union(u, v)
+	}
+	// 当前点数量是否大于等于 z
+	predicate := func(queryId int) bool {
+		u, v, z := queries[queryId][0], queries[queryId][1], queries[queryId][2]
+		if uf.Find(u) == uf.Find(v) {
+			size := uf.GetSize(u)
+			return size >= z
+		} else {
+			size1, size2 := uf.GetSize(u), uf.GetSize(v)
+			return size1+size2 >= z
+		}
+	}
+
+	res := ParallelBinarySearch(m, q, reset, mutate, predicate)
+	for i := range res {
+		res[i]++
+	}
+	return res
 }
 
 // 静态区间第 k 小
@@ -648,4 +709,14 @@ func (ufa *UnionFindArray) Find(key int) int {
 	}
 	ufa.data[key] = ufa.Find(ufa.data[key])
 	return ufa.data[key]
+}
+
+func (ufa *UnionFindArray) Clear() {
+	for i := range ufa.data {
+		ufa.data[i] = -1
+	}
+}
+
+func (ufa *UnionFindArray) GetSize(key int) int {
+	return -ufa.data[ufa.Find(key)]
 }

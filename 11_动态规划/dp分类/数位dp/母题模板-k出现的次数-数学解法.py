@@ -7,6 +7,7 @@
 # https://www.acwing.com/activity/content/code/content/4041182/
 
 
+# TODO: k进制
 def countDigit(n: int, digit: int) -> int:
     """O(lgn)求[1,n]中digit出现的次数."""
     res = 0

@@ -39,16 +39,6 @@ interface ISortedList<V> {
   readonly max: V | undefined
 }
 
-interface ISortedListIterator<V> {
-  hasNext(): boolean
-  next(): V | undefined
-  hasPrev(): boolean
-  prev(): V | undefined
-  /** 删除后会使所有迭代器失效. */
-  remove(): void
-  readonly value: V | undefined
-}
-
 /**
  * 使用分块+树状数组维护的有序序列.
  * !如果数组较短(<2000),直接使用`bisectInsort`维护即可.
@@ -668,7 +658,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
   }
 }
 
-export { SortedListFast, ISortedList, ISortedListIterator }
+export { SortedListFast, ISortedList }
 
 if (require.main === module) {
   const sl = new SortedListFast<number>()

@@ -1,5 +1,5 @@
 import { groupSubsetSumBySize } from '../subsetSum/subsetSum'
-import { twoSum } from '../twoSum'
+import { twoSum } from './twoSum'
 
 /**
  * 2035. 将数组分成两个数组并最小化数组和的差

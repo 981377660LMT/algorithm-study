@@ -70,3 +70,17 @@
        next = (preX+dx,preY+dy)
        ...
    ```
+
+---
+
+https://atcoder.jp/contests/abc336/submissions/me
+
+@cache 递归(数位 dp)执行效率
+
+**Cython 0.29.34 8618 ms**
+CPython 3.11.4 9739 ms
+CPython 3.10.10 10197 ms
+PyPy 3.10-v7.3.12 10723 ms
+
+非递归(数位 dp)执行效率
+**PyPy 3.10-v7.3.12** 最快

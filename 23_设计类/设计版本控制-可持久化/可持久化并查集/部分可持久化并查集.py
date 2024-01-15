@@ -1,7 +1,6 @@
 # 部分可持久化并查集(初始版本为0)
 # !只有最新版本可修改,历史版本只能查询
 
-# https://tjkendev.github.io/procon-library/python/union_find/pp_union_find.html
 # 部分永続Union-Findでは以下の操作を行える。
 
 # union(u,v)
@@ -18,94 +17,150 @@
 # print(uf.isConnected(v1, 0, 1))  # v1版本的0和1是连通的
 # print(uf.isConnected(v1, 0, 2))  # v1版本的0和2是不连通的
 
-from bisect import bisect_right
 from collections import defaultdict
 from typing import DefaultDict, List
 
 
-INF = int(1e18)
-
-
 class PartiallyPersistentUnionFind:
-    __slots__ = ("dead", "curVersion", "_history", "_parent", "_size", "_height")
+    """部分可持久化并查集(初始版本为0)."""
+
+    __slots__ = ("curVersion", "_history", "_data", "_last")
 
     def __init__(self, n: int):
-        self.dead = [INF] * n  # !每个顶点被合并的时刻(不再是每个集合的根的时刻) 0-indexed
-        self.curVersion = 0  # !起始版本为0
-        self._history = [[(0, 1)] for _ in range(n)]  # (t,s) 表示在t时刻合并完另一个组后的大小s
-        self._parent = list(range(n))
-        self._size = [1] * n
-        self._height = [1] * n
+        self.curVersion = 0
+        self._history = [[(0, -1)] for _ in range(n)]
+        self._data = [-1] * n
+        self._last = [int(1e9)] * n
 
     def union(self, x: int, y: int) -> int:
-        """合并x和y所在的集合,返回当前版本号"""
-        px = self.find(self.curVersion, x)
-        py = self.find(self.curVersion, y)
-        if px == py:
-            self.curVersion += 1
-            return self.curVersion
-        if self._height[py] < self._height[px]:
-            self._parent[py] = px
-            self.dead[py] = self.curVersion
-            self._size[px] += self._size[py]
-            self._history[px].append((self.curVersion, self._size[px]))  # type: ignore
-        else:
-            self._parent[px] = py
-            self.dead[px] = self.curVersion
-            self._size[py] += self._size[px]
-            self._history[py].append((self.curVersion, self._size[py]))  # type: ignore
-            cand = self._height[px] + 1
-            if cand > self._height[py]:
-                self._height[py] = cand
+        """合并x和y所在的集合,返回当前版本号."""
         self.curVersion += 1
+        x, y = self.find(self.curVersion, x), self.find(self.curVersion, y)
+        if x == y:
+            return self.curVersion
+        if self._data[x] > self._data[y]:
+            x, y = y, x
+        self._data[x] += self._data[y]
+        self._history[x].append((self.curVersion, self._data[x]))  # type: ignore
+        self._data[y] = x
+        self._last[y] = self.curVersion
         return self.curVersion
 
     def find(self, time: int, u: int) -> int:
-        while self.dead[u] < time:
-            u = self._parent[u]
-        return u
+        if time < self._last[u]:
+            return u
+        return self.find(time, self._data[u])
 
     def isConnected(self, time: int, u: int, v: int) -> bool:
         return self.find(time, u) == self.find(time, v)
 
     def getSize(self, time: int, u: int) -> int:
-        y = self.find(time, u)
-        index = bisect_right(self._history[y], (time, INF)) - 1
-        return self._history[y][index][1]
+        u = self.find(time, u)
+        tmp = self._history[u]
+        left, right = 0, len(tmp) - 1
+        while left <= right:
+            mid = (left + right) // 2
+            if tmp[mid][0] <= time:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return -tmp[left - 1][1]
 
     def getGroups(self, time: int) -> "DefaultDict[int, List[int]]":
         groups = defaultdict(list)
-        for i in range(len(self._parent)):
+        for i in range(len(self._data)):
             groups[self.find(time, i)].append(i)
         return groups
 
 
 if __name__ == "__main__":
-    # https://atcoder.jp/contests/code-thanks-festival-2017-open/tasks/code_thanks_festival_2017_h
-    # 给定n个集合,初始时第i个集合只有一个元素i (i=1,2,...,n)
-    # 之后进行m次合并操作,每次合并ai和bi所在的集合
-    # 如果ai和bi在同一个集合,则无事发生
-    # 给定q个询问,问ai和bi是在第几次操作后第一次连通的,如果不连通则输出-1
-    n, m = map(int, input().split())
-    uf = PartiallyPersistentUnionFind(n)
-    for _ in range(m):
-        a, b = map(int, input().split())
-        a, b = a - 1, b - 1
-        uf.union(a, b)
 
-    q = int(input())
-    for _ in range(q):
-        a, b = map(int, input().split())
-        a, b = a - 1, b - 1
-        if not uf.isConnected(uf.curVersion, a, b):
-            print(-1)
-            continue
+    def demo() -> None:
+        uf = PartiallyPersistentUnionFind(10)
+        print(uf.getSize(0, 1))
+        uf.union(0, 1)
+        print(uf.getSize(0, 1))
+        print(uf.getSize(1, 1))
+        uf.union(1, 2)
+        print(uf.getSize(1, 1))
+        print(uf.getSize(2, 1))
+        print(uf.getSize(2, 2))
 
-        left, right = 0, m  # !二分版本号
-        while left <= right:
-            mid = (left + right) // 2
-            if uf.isConnected(mid, a, b):  # !mid版本是否连通
-                right = mid - 1
-            else:
-                left = mid + 1
-        print(left)
+    def unionSets() -> None:
+        # https://atcoder.jp/contests/code-thanks-festival-2017-open/tasks/code_thanks_festival_2017_h
+        # 给定n个集合,初始时第i个集合只有一个元素i (i=1,2,...,n)
+        # 之后进行m次合并操作,每次合并ai和bi所在的集合
+        # 如果ai和bi在同一个集合,则无事发生
+        # 给定q个询问,问ai和bi是在第几次操作后第一次连通的,如果不连通则输出-1
+        n, m = map(int, input().split())
+        uf = PartiallyPersistentUnionFind(n)
+        for _ in range(m):
+            a, b = map(int, input().split())
+            a, b = a - 1, b - 1
+            uf.union(a, b)
+
+        q = int(input())
+        for _ in range(q):
+            a, b = map(int, input().split())
+            a, b = a - 1, b - 1
+            if not uf.isConnected(uf.curVersion, a, b):
+                print(-1)
+                continue
+
+            left, right = 0, m  # !二分版本号
+            while left <= right:
+                mid = (left + right) // 2
+                if uf.isConnected(mid, a, b):  # !mid版本是否连通
+                    right = mid - 1
+                else:
+                    left = mid + 1
+            print(left)
+
+    def stampRally() -> None:
+        #  https://atcoder.jp/contests/agc002/tasks/agc002_d
+        #  一张连通图，q 次询问从两个点 x 和 y 出发，
+        #  希望经过的点数量等于 z（每个点可以重复经过，但是重复经过只计算一次）
+        #  求经过的边最大编号最小是多少。
+
+        import sys
+
+        input = sys.stdin.readline
+
+        n, m = map(int, input().split())
+        edges = []
+        for _ in range(m):
+            a, b = map(int, input().split())
+            edges.append((a - 1, b - 1))
+        q = int(input())
+        queries = []
+        for _ in range(q):
+            x, y, z = map(int, input().split())
+            queries.append((x - 1, y - 1, z))
+
+        uf = PartiallyPersistentUnionFind(n)
+        for u, v in edges:
+            uf.union(u, v)
+
+        res = [0] * q
+        for i, (x, y, z) in enumerate(queries):
+
+            def check(mid: int) -> bool:
+                if uf.isConnected(mid, x, y):
+                    size = uf.getSize(mid, x)
+                    return size >= z
+                else:
+                    size1, size2 = uf.getSize(mid, x), uf.getSize(mid, y)
+                    return size1 + size2 >= z
+
+            left, right = 1, m
+            while left <= right:
+                mid = (left + right) // 2
+                if check(mid):
+                    right = mid - 1
+                else:
+                    left = mid + 1
+            res[i] = left
+
+        print(*res, sep="\n")
+
+    stampRally()

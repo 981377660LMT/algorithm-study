@@ -47,3 +47,8 @@ https://github.com/spaghetti-source/algorithm/blob/4fdac8202e26def25c1baf9127aaa
 更快的 LA 算法：长链剖分 O(n)预处理，O(1)查询
 https://37zigen.com/level-ancestor-problem/
 https://leetcode.cn/problems/kth-ancestor-of-a-tree-node/solution/on-o1mo-ban-by-hqztrue-ota3/
+
+---
+
+树上多个点的 LCA，就是 DFS 序最小的和 DFS 序最大的这两个点的 LCA
+https://www.zhihu.com/question/46440863/answer/165741734

@@ -35,7 +35,7 @@ func main() {
 		queries[i] = [3]int{x, y, z}
 	}
 
-	res := StampRally(edges, queries)
+	res := StampRally(n, edges, queries)
 	for _, v := range res {
 		fmt.Fprintln(out, v)
 	}
@@ -46,8 +46,36 @@ func main() {
 // 希望经过的点数量等于 z（每个点可以重复经过，但是重复经过只计算一次）
 // 求经过的边最大编号最小是多少。
 //
-// 整体二分，这里的操作序列为：将点i加入经过的点集合.
-func StampRally(edges [][2]int, queries [][3]int) []int {}
+// 整体二分，这里的操作序列为：将边按照编号从小到大加入到图中。
+func StampRally(n int, edges [][2]int, queries [][3]int) []int {
+	m, q := len(edges), len(queries)
+	uf := NewUf(n)
+
+	reset := func() {
+		uf.Clear()
+	}
+	mutate := func(mutationId int) {
+		u, v := edges[mutationId][0], edges[mutationId][1]
+		uf.Union(u, v)
+	}
+	// 当前点数量是否大于等于 z
+	predicate := func(queryId int) bool {
+		u, v, z := queries[queryId][0], queries[queryId][1], queries[queryId][2]
+		if uf.Find(u) == uf.Find(v) {
+			size := uf.GetSize(u)
+			return size >= z
+		} else {
+			size1, size2 := uf.GetSize(u), uf.GetSize(v)
+			return size1+size2 >= z
+		}
+	}
+
+	res := ParallelBinarySearch(m, q, reset, mutate, predicate)
+	for i := range res {
+		res[i]++
+	}
+	return res
+}
 
 // 整体二分解决这样一类问题:
 //   - 给定一个长度为n的操作序列, 按顺序执行这些操作;
@@ -163,4 +191,14 @@ func (ufa *Uf) Find(key int) int {
 	}
 	ufa.data[key] = ufa.Find(ufa.data[key])
 	return ufa.data[key]
+}
+
+func (ufa *Uf) GetSize(key int) int {
+	return -ufa.data[ufa.Find(key)]
+}
+
+func (ufa *Uf) Clear() {
+	for i := range ufa.data {
+		ufa.data[i] = -1
+	}
 }

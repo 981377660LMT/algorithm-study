@@ -7,7 +7,7 @@
 // -1e9 <= goal <= 1e9
 
 import { subsetSumSorted } from '../subsetSum/subsetSum'
-import { twoSum } from '../twoSum'
+import { twoSum } from './twoSum'
 
 function minAbsDifference(nums: number[], goal: number): number {
   const mid = nums.length >>> 1

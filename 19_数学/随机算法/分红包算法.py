@@ -3,9 +3,11 @@
 # 自己想出来的算法
 # 红包在一开始创建的时候，分配方案就订好了 生成一组加权随机数即可
 
-from random import randint
+from random import randint, randrange
 
 from typing import List
+
+randrange
 
 
 def randomSplit(people: int, money: float) -> List[int]:

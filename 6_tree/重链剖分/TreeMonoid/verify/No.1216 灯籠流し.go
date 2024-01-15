@@ -47,6 +47,7 @@ func main() {
 	dist := tree.DepthWeighted
 	lid := tree.LID
 	query := make([][3]int, 0, q)
+	xs, ys := []int{}, []int{}
 	for i := 0; i < q; i++ {
 		var op int
 		fmt.Fscan(in, &op)
@@ -56,10 +57,14 @@ func main() {
 			pos--
 			check := func(e int) bool { return e <= alive } // 不消失可以达到的最远点
 			to := S.MaxPath(check, pos, 0)
-			p := tree.Parent[to]
-			query = append(query, [3]int{1, lid[pos], startTime}) // 灯笼开始流动
-			if p != -1 {                                          // 还没进入河流就消失了,在p处减一个灯笼
-				query = append(query, [3]int{-1, lid[p], startTime + dist[pos]})
+			parent := tree.Parent[to]
+			query = append(query, [3]int{1, lid[pos], startTime + dist[pos]}) // 灯笼开始流动
+			xs = append(xs, lid[pos])
+			ys = append(ys, startTime+dist[pos])
+			if parent != -1 { // 还没进入河流就消失了,在p处减一个灯笼
+				xs = append(xs, lid[parent])
+				ys = append(ys, startTime+dist[pos])
+				query = append(query, [3]int{-1, lid[parent], startTime + dist[pos]})
 			}
 		} else {
 			var pos, endTime, null int
@@ -69,26 +74,22 @@ func main() {
 		}
 	}
 
-	R := NewStaticPointAddRectangleSum(q, q)
-	// fmt.Fprintln(out, query)
+	R := NewBIT2DSparse(xs, ys, false)
+
 	for _, q := range query {
 		op, pos, time := q[0], q[1], q[2]
 		if op == 0 {
 			l, r := lid[pos], tree.RID[pos]
 			time += dist[pos]
-			// fmt.Fprintln(out, op, pos, time, l, r, time+1)
-			R.AddQuery(l, r, 0, time+1)
+
+			fmt.Fprintln(out, R.QueryRange(l, r, 0, time+1))
 		} else if op == 1 {
-			R.AddPoint(pos, time, 1)
+			R.Update(pos, time, 1)
 		} else {
-			R.AddPoint(pos, time, -1)
+			R.Update(pos, time, -1)
 		}
 	}
 
-	res := R.Work()
-	for _, v := range res {
-		fmt.Fprintln(out, v)
-	}
 }
 
 const INF int = 1e18
@@ -96,8 +97,12 @@ const INF int = 1e18
 type E = int
 
 const IS_COMMUTATIVE = true // 幺半群是否满足交换律
-func e() E                  { return 0 }
-func op(e1, e2 E) E         { return e1 + e2 }
+type Able = int
+
+// 需要是阿贝尔群(满足交换律)
+func e() Able           { return 0 }
+func op(a, b Able) Able { return a + b }
+func inv(a Able) Able   { return -a }
 
 type StaticTreeMonoid struct {
 	tree     *_T
@@ -640,6 +645,236 @@ func (ds *DisjointSparseTable) MinLeft(right int, check func(e E) bool) int {
 	return ok
 }
 
+type BIT2DSparse struct {
+	n          int
+	keyX       []int
+	keyY       []int
+	minX       int
+	indptr     []int
+	data       []Able
+	discretize bool
+	unit       Able
+}
+
+// discretize:
+//
+//	为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
+//	为 false 时不对x维度二分离散化,而是直接用x的值作为下标(所有x给一个偏移量minX),
+//	x 维度数组长度为最大值减最小值.
+func NewBIT2DSparse(xs, ys []int, discretize bool) *BIT2DSparse {
+	res := &BIT2DSparse{discretize: discretize, unit: e()}
+	ws := make([]Able, len(xs))
+	for i := range ws {
+		ws[i] = res.unit
+	}
+	res._build(xs, ys, ws)
+	return res
+}
+
+// discretize:
+//
+//	为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
+//	为 false 时不对x维度二分离散化,而是直接用x的值作为下标(所有x给一个偏移量minX),
+//	x 维度数组长度为最大值减最小值.
+func NewBIT2DSparseWithWeights(xs, ys []int, ws []Able, discretize bool) *BIT2DSparse {
+	res := &BIT2DSparse{discretize: discretize, unit: e()}
+	res._build(xs, ys, ws)
+	return res
+}
+
+// 点 (x,y) 的值加上 val.
+func (fwt *BIT2DSparse) Update(x, y int, val Able) {
+	i := fwt._xtoi(x)
+	for ; i < fwt.n; i += ((i + 1) & -(i + 1)) {
+		fwt._add(i, y, val)
+	}
+}
+
+// [lx,rx) * [ly,ry)
+func (t *BIT2DSparse) QueryRange(lx, rx, ly, ry int) Able {
+	pos, neg := t.unit, t.unit
+	l, r := t._xtoi(lx)-1, t._xtoi(rx)-1
+	for l < r {
+		pos = op(pos, t._prodI(r, ly, ry))
+		r -= ((r + 1) & -(r + 1))
+	}
+	for r < l {
+		neg = op(neg, t._prodI(l, ly, ry))
+		l -= ((l + 1) & -(l + 1))
+	}
+	return op(pos, inv(neg))
+}
+
+// [0,rx) * [0,ry)
+func (t *BIT2DSparse) QueryPrefix(rx, ry int) Able {
+	pos := t.unit
+	r := t._xtoi(rx) - 1
+	for r >= 0 {
+		pos = op(pos, t._prefixProdI(r, ry))
+		r -= ((r + 1) & -(r + 1))
+	}
+	return pos
+}
+
+func (t *BIT2DSparse) _add(i int, y int, val Able) {
+	lid := t.indptr[i]
+	n := t.indptr[i+1] - t.indptr[i]
+	j := bisectLeft(t.keyY, y, lid, lid+n-1) - lid
+	for j < n {
+		t.data[lid+j] = op(t.data[lid+j], val)
+		j += ((j + 1) & -(j + 1))
+	}
+}
+
+func (t *BIT2DSparse) _prodI(i int, ly, ry int) Able {
+	pos, neg := t.unit, t.unit
+	lid := t.indptr[i]
+	n := t.indptr[i+1] - t.indptr[i]
+	left := bisectLeft(t.keyY, ly, lid, lid+n-1) - lid - 1
+	right := bisectLeft(t.keyY, ry, lid, lid+n-1) - lid - 1
+	for left < right {
+		pos = op(pos, t.data[lid+right])
+		right -= ((right + 1) & -(right + 1))
+	}
+	for right < left {
+		neg = op(neg, t.data[lid+left])
+		left -= ((left + 1) & -(left + 1))
+	}
+	return op(pos, inv(neg))
+}
+
+func (t *BIT2DSparse) _prefixProdI(i int, ry int) Able {
+	pos := t.unit
+	lid := t.indptr[i]
+	n := t.indptr[i+1] - t.indptr[i]
+	R := bisectLeft(t.keyY, ry, lid, lid+n-1) - lid - 1
+	for R >= 0 {
+		pos = op(pos, t.data[lid+R])
+		R -= ((R + 1) & -(R + 1))
+	}
+	return pos
+}
+
+func (ft *BIT2DSparse) _build(X, Y []int, wt []Able) {
+	if len(X) != len(Y) || len(X) != len(wt) {
+		panic("Lengths of X, Y, and wt must be equal.")
+	}
+
+	if ft.discretize {
+		ft.keyX = unique(X)
+		ft.n = len(ft.keyX)
+	} else {
+		if len(X) > 0 {
+			min_, max_ := 0, 0
+			for _, x := range X {
+				if x < min_ {
+					min_ = x
+				}
+				if x > max_ {
+					max_ = x
+				}
+			}
+			ft.minX = min_
+			ft.n = max_ - min_ + 1
+		}
+		ft.keyX = make([]int, ft.n)
+		for i := 0; i < ft.n; i++ {
+			ft.keyX[i] = ft.minX + i
+		}
+	}
+
+	N := ft.n
+	keyYRaw := make([][]int, N)
+	datRaw := make([][]Able, N)
+	indices := argSort(Y)
+
+	for _, i := range indices {
+		ix := ft._xtoi(X[i])
+		y := Y[i]
+		for ix < N {
+			kY := keyYRaw[ix]
+			if len(kY) == 0 || kY[len(kY)-1] < y {
+				keyYRaw[ix] = append(keyYRaw[ix], y)
+				datRaw[ix] = append(datRaw[ix], wt[i])
+			} else {
+				datRaw[ix][len(datRaw[ix])-1] = op(datRaw[ix][len(datRaw[ix])-1], wt[i])
+			}
+			ix += ((ix + 1) & -(ix + 1))
+		}
+	}
+
+	ft.indptr = make([]int, N+1)
+	for i := 0; i < N; i++ {
+		ft.indptr[i+1] = ft.indptr[i] + len(keyYRaw[i])
+	}
+	ft.keyY = make([]int, ft.indptr[N])
+	ft.data = make([]Able, ft.indptr[N])
+
+	for i := 0; i < N; i++ {
+		for j := 0; j < ft.indptr[i+1]-ft.indptr[i]; j++ {
+			ft.keyY[ft.indptr[i]+j] = keyYRaw[i][j]
+			ft.data[ft.indptr[i]+j] = datRaw[i][j]
+		}
+	}
+
+	for i := 0; i < N; i++ {
+		n := ft.indptr[i+1] - ft.indptr[i]
+		for j := 0; j < n-1; j++ {
+			k := j + ((j + 1) & -(j + 1))
+			if k < n {
+				ft.data[ft.indptr[i]+k] = op(ft.data[ft.indptr[i]+k], ft.data[ft.indptr[i]+j])
+			}
+		}
+	}
+}
+
+func (ft *BIT2DSparse) _xtoi(x int) int {
+	if ft.discretize {
+		return bisectLeft(ft.keyX, x, 0, len(ft.keyX)-1)
+	}
+	tmp := x - ft.minX
+	if tmp < 0 {
+		tmp = 0
+	} else if tmp > ft.n {
+		tmp = ft.n
+	}
+	return tmp
+}
+
+func bisectLeft(nums []int, x int, left, right int) int {
+	for left <= right {
+		mid := (left + right) >> 1
+		if nums[mid] < x {
+			left = mid + 1
+		} else {
+			right = mid - 1
+		}
+	}
+	return left
+}
+
+func unique(nums []int) (sorted []int) {
+	set := make(map[int]struct{}, len(nums))
+	for _, v := range nums {
+		set[v] = struct{}{}
+	}
+	sorted = make([]int, 0, len(set))
+	for k := range set {
+		sorted = append(sorted, k)
+	}
+	sort.Ints(sorted)
+	return
+}
+
+func argSort(nums []int) []int {
+	order := make([]int, len(nums))
+	for i := range order {
+		order[i] = i
+	}
+	sort.Slice(order, func(i, j int) bool { return nums[order[i]] < nums[order[j]] })
+	return order
+}
+
 func min(a, b int) int {
 	if a < b {
 		return a
@@ -652,229 +887,4 @@ func max(a, b int) int {
 		return a
 	}
 	return b
-}
-
-type Point struct{ x, y, w int }
-type Query struct{ l, d, r, u int }
-type DynamicPointAddRectangleSum struct {
-	queries []interface{} // Point or Query
-}
-
-// 根据总点数初始化容量.
-func NewPointAddRectangleSum(n int) *DynamicPointAddRectangleSum {
-	return &DynamicPointAddRectangleSum{queries: make([]interface{}, 0, n)}
-}
-
-// 在(x,y)点上添加w权重.
-func (dpars *DynamicPointAddRectangleSum) AddPoint(x, y, w int) {
-	dpars.queries = append(dpars.queries, Point{x, y, w})
-}
-
-// 添加查询为区间 [x1, x2) * [y1, y2) 的权重和.
-func (dpars *DynamicPointAddRectangleSum) AddQuery(x1, x2, y1, y2 int) {
-	dpars.queries = append(dpars.queries, Query{x1, y1, x2, y2})
-}
-
-// 按照添加顺序返回所有查询结果..
-func (dpars *DynamicPointAddRectangleSum) Work() []int {
-	q := len(dpars.queries)
-	rev := make([]int, q)
-	sz := 0
-	for i := 0; i < q; i++ {
-		if _, ok := dpars.queries[i].(Query); ok { // holds_alternative
-			rev[i] = sz
-			sz++
-		}
-	}
-
-	res := make([]int, sz)
-	rangeQ := [][]int{{0, q}}
-	for len(rangeQ) > 0 {
-		l, r := rangeQ[0][0], rangeQ[0][1]
-		rangeQ = rangeQ[1:]
-		m := (l + r) >> 1
-		solver := NewStaticPointAddRectangleSum(0, 0)
-		for k := l; k < m; k++ {
-			if p, ok := dpars.queries[k].(Point); ok {
-				solver.AddPoint(p.x, p.y, p.w)
-			}
-		}
-
-		for k := m; k < r; k++ {
-			if q, ok := dpars.queries[k].(Query); ok {
-				solver.AddQuery(q.l, q.r, q.d, q.u)
-			}
-		}
-
-		sub := solver.Work()
-		for k, t := m, 0; k < r; k++ {
-			if _, ok := dpars.queries[k].(Query); ok {
-				res[rev[k]] += sub[t]
-				t++
-			}
-		}
-
-		if l+1 < m {
-			rangeQ = append(rangeQ, []int{l, m})
-		}
-		if m+1 < r {
-			rangeQ = append(rangeQ, []int{m, r})
-		}
-	}
-
-	return res
-}
-
-type StaticPointAddRectangleSum struct {
-	points  []Point
-	queries []Query
-}
-
-// 指定点集和查询个数初始化容量.
-func NewStaticPointAddRectangleSum(n, q int) *StaticPointAddRectangleSum {
-	return &StaticPointAddRectangleSum{
-		points:  make([]Point, 0, n),
-		queries: make([]Query, 0, q),
-	}
-}
-
-// 在(x,y)点上添加w权重.
-func (sp *StaticPointAddRectangleSum) AddPoint(x, y, w int) {
-	sp.points = append(sp.points, Point{x: x, y: y, w: w})
-}
-
-// 添加查询为区间 [x1, x2) * [y1, y2) 的权重和.
-func (sp *StaticPointAddRectangleSum) AddQuery(x1, x2, y1, y2 int) {
-	sp.queries = append(sp.queries, Query{l: x1, r: x2, d: y1, u: y2})
-}
-
-// 按照添加顺序返回所有查询结果..
-func (sp *StaticPointAddRectangleSum) Work() []int {
-	n := len(sp.points)
-	q := len(sp.queries)
-	res := make([]int, q)
-	if n == 0 || q == 0 {
-		return res
-	}
-
-	sort.Slice(sp.points, func(i, j int) bool { return sp.points[i].y < sp.points[j].y })
-	ys := make([]int, 0, n)
-	for i := range sp.points {
-		if len(ys) == 0 || ys[len(ys)-1] != sp.points[i].y {
-			ys = append(ys, sp.points[i].y)
-		}
-		sp.points[i].y = len(ys) - 1
-	}
-
-	type Q struct {
-		x    int
-		d, u int
-		t    bool
-		idx  int
-	}
-
-	qs := make([]Q, 0, q+q)
-	for i := 0; i < q; i++ {
-		query := sp.queries[i]
-		d := sort.SearchInts(ys, query.d)
-		u := sort.SearchInts(ys, query.u)
-		qs = append(qs, Q{x: query.l, d: d, u: u, t: false, idx: i}, Q{x: query.r, d: d, u: u, t: true, idx: i})
-	}
-
-	sort.Slice(sp.points, func(i, j int) bool { return sp.points[i].x < sp.points[j].x })
-	sort.Slice(qs, func(i, j int) bool { return qs[i].x < qs[j].x })
-
-	j := 0
-	bit := newBinaryIndexedTree(len(ys))
-	for i := range qs {
-		for j < n && sp.points[j].x < qs[i].x {
-			bit.Apply(sp.points[j].y, sp.points[j].w)
-			j++
-		}
-		if qs[i].t {
-			res[qs[i].idx] += bit.ProdRange(qs[i].d, qs[i].u)
-		} else {
-			res[qs[i].idx] -= bit.ProdRange(qs[i].d, qs[i].u)
-		}
-	}
-
-	return res
-}
-
-type binaryIndexedTree struct {
-	n    int
-	log  int
-	data []int
-}
-
-// 長さ n の 0で初期化された配列で構築する.
-func newBinaryIndexedTree(n int) *binaryIndexedTree {
-	return &binaryIndexedTree{n: n, log: bits.Len(uint(n)), data: make([]int, n+1)}
-}
-
-// 配列で構築する.
-func newBinaryIndexedTreeFrom(arr []int) *binaryIndexedTree {
-	res := newBinaryIndexedTree(len(arr))
-	res.build(arr)
-	return res
-}
-
-// 要素 i に値 v を加える.
-func (b *binaryIndexedTree) Apply(i int, v int) {
-	for i++; i <= b.n; i += i & -i {
-		b.data[i] += v
-	}
-}
-
-// [0, r) の要素の総和を求める.
-func (b *binaryIndexedTree) Prod(r int) int {
-	res := 0
-	for ; r > 0; r -= r & -r {
-		res += b.data[r]
-	}
-	return res
-}
-
-// [l, r) の要素の総和を求める.
-func (b *binaryIndexedTree) ProdRange(l, r int) int {
-	return b.Prod(r) - b.Prod(l)
-}
-
-// 区間[0,k]の総和がx以上となる最小のkを求める.数列が単調増加であることを要求する.
-func (b *binaryIndexedTree) LowerBound(x int) int {
-	i := 0
-	for k := 1 << b.log; k > 0; k >>= 1 {
-		if i+k <= b.n && b.data[i+k] < x {
-			x -= b.data[i+k]
-			i += k
-		}
-	}
-	return i
-}
-
-// 区間[0,k]の総和がxを上回る最小のkを求める.数列が単調増加であることを要求する.
-func (b *binaryIndexedTree) UpperBound(x int) int {
-	i := 0
-	for k := 1 << b.log; k > 0; k >>= 1 {
-		if i+k <= b.n && b.data[i+k] <= x {
-			x -= b.data[i+k]
-			i += k
-		}
-	}
-	return i
-}
-
-func (b *binaryIndexedTree) build(arr []int) {
-	if b.n != len(arr) {
-		panic("len of arr is not equal to n")
-	}
-	for i := 1; i <= b.n; i++ {
-		b.data[i] = arr[i-1]
-	}
-	for i := 1; i <= b.n; i++ {
-		j := i + (i & -i)
-		if j <= b.n {
-			b.data[j] += b.data[i]
-		}
-	}
 }
