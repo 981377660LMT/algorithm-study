@@ -69,18 +69,18 @@ class DsuOnTree {
     this._subSize[cur] = 1
     const nexts = this._tree[cur]
     if (nexts.length >= 2 && nexts[0] === pre) {
-      nexts[0] ^= nexts[1]
-      nexts[1] ^= nexts[0]
-      nexts[0] ^= nexts[1]
+      const tmp = nexts[0]
+      nexts[0] = nexts[1]
+      nexts[1] = tmp
     }
     for (let i = 0; i < nexts.length; i++) {
       const next = nexts[i]
       if (next === pre) continue
       this._subSize[cur] += this._dfs1(next, cur)
       if (this._subSize[next] > this._subSize[nexts[0]]) {
-        nexts[0] ^= nexts[i]
-        nexts[i] ^= nexts[0]
-        nexts[0] ^= nexts[i]
+        const tmp = nexts[0]
+        nexts[0] = nexts[i]
+        nexts[i] = tmp
       }
     }
     return this._subSize[cur]
@@ -130,6 +130,42 @@ if (require.main === module) {
     }
     function query(root: number): void {
       res[root] = mex
+    }
+  }
+
+  // 3004. 相同颜色的最大子树
+  function maximumSubtreeSize(edges: number[][], colors: number[]): number {
+    const n = colors.length
+    const adjList: number[][] = Array(n)
+    for (let i = 0; i < n; i++) adjList[i] = []
+    edges.forEach(([u, v]) => {
+      adjList[u].push(v)
+      adjList[v].push(u)
+    })
+
+    const dsu = new DsuOnTree(n, adjList)
+
+    let res = 0
+    const counter = new Uint32Array(Math.max(...colors) + 1)
+    let curCount = 0
+    let curKind = 0
+    dsu.run(add, remove, query)
+    return res
+
+    function add(root: number): void {
+      const color = colors[root]
+      counter[color]++
+      curCount++
+      if (counter[color] === 1) curKind++
+    }
+    function remove(root: number): void {
+      const color = colors[root]
+      counter[color]--
+      curCount--
+      if (!counter[color]) curKind--
+    }
+    function query(root: number): void {
+      if (curKind === 1) res = Math.max(res, curCount)
     }
   }
 }

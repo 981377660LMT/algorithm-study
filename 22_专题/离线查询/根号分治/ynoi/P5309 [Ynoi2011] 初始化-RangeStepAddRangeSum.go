@@ -45,36 +45,52 @@ func RangeStepAddRangeSum(nums []int, operations [][4]int) []int {
 		res := 0
 		if bid1 == bid2 {
 			for i := start; i < end; i++ {
-				res = (res + nums[i]) % MOD
+				// res = (res + nums[i]) % MOD
+				res += nums[i]
 			}
 		} else {
 			for i := start; i < blockEnd[bid1]; i++ {
-				res = (res + nums[i]) % MOD
+				// res = (res + nums[i]) % MOD
+				res += nums[i]
 			}
 			for bid := bid1 + 1; bid < bid2; bid++ {
-				res = (res + blockSum[bid]) % MOD
+				// res = (res + blockSum[bid]) % MOD
+				res += blockSum[bid]
 			}
 			for i := blockStart[bid2]; i < end; i++ {
-				res = (res + nums[i]) % MOD
+				// res = (res + nums[i]) % MOD
+				res += nums[i]
 			}
 		}
-		return res
+		return res % MOD
 	}
 
 	update := func(start, step, delta int) {
 		if step >= sqrt {
 			for i := start; i < len(nums); i += step {
 				bid := belong[i]
-				nums[i] = (nums[i] + delta) % MOD
-				blockSum[bid] = (blockSum[bid] + delta) % MOD
+				nums[i] += delta
+				if nums[i] >= MOD {
+					nums[i] %= MOD
+				}
+				blockSum[bid] += delta
+				if blockSum[bid] >= MOD {
+					blockSum[bid] %= MOD
+				}
 			}
 		} else {
 			curPre, curSuf := pre[step], suf[step]
 			for i := start; i+1 < len(curPre); i++ {
-				curPre[i+1] = (curPre[i+1] + delta) % MOD
+				curPre[i+1] += delta
+				if curPre[i+1] >= MOD {
+					curPre[i+1] %= MOD
+				}
 			}
 			for i := 0; i <= start; i++ {
-				curSuf[i] = (curSuf[i] + delta) % MOD
+				curSuf[i] += delta
+				if curSuf[i] >= MOD {
+					curSuf[i] %= MOD
+				}
 			}
 		}
 	}
@@ -87,15 +103,20 @@ func RangeStepAddRangeSum(nums []int, operations [][4]int) []int {
 			pos1, pos2 := start%step, (end-1)%step
 			curPre, curSuf := pre[step], suf[step]
 			if id1 == id2 {
-				res = (res + curPre[pos2+1] - curPre[pos1] + MOD) % MOD
+				// res = (res + curPre[pos2+1] - curPre[pos1] + MOD) % MOD
+				res += curPre[pos2+1] - curPre[pos1]
+
 			} else {
-				res = (res + curSuf[pos1]) % MOD
-				res = (res + (id2-id1-1)*curPre[step]) % MOD
-				res = (res + curPre[pos2+1]) % MOD
+				// res = (res + curSuf[pos1] + (id2-id1-1)*curPre[step] + curPre[pos2+1]) % MOD
+				res += curSuf[pos1] + (id2-id1-1)*curPre[step] + curPre[pos2+1]
 			}
 		}
 
-		return res % MOD
+		res = res % MOD
+		if res < 0 {
+			res += MOD
+		}
+		return res
 	}
 
 	res := []int{}
@@ -179,35 +200,6 @@ func UseBlock(n int, blockSize int) struct {
 	}{belong, blockStart, blockEnd, blockCount}
 }
 
-type V = int
-type Dictionary struct {
-	_idToValue []V
-	_valueToId map[V]int
-}
-
-// A dictionary that maps values to unique ids.
-func NewDictionary() *Dictionary {
-	return &Dictionary{
-		_valueToId: map[V]int{},
-	}
-}
-func (d *Dictionary) Id(value V) int {
-	res, ok := d._valueToId[value]
-	if ok {
-		return res
-	}
-	id := len(d._idToValue)
-	d._idToValue = append(d._idToValue, value)
-	d._valueToId[value] = id
-	return id
-}
-func (d *Dictionary) Value(id int) V {
-	return d._idToValue[id]
-}
-func (d *Dictionary) Size() int {
-	return len(d._idToValue)
-}
-
 func max(a, b int) int {
 	if a > b {
 		return a
@@ -219,29 +211,4 @@ func min(a, b int) int {
 		return a
 	}
 	return b
-}
-
-func bisectLeft(nums []int, target int) int {
-	left, right := 0, len(nums)-1
-	for left <= right {
-		mid := (left + right) >> 1
-		if nums[mid] < target {
-			left = mid + 1
-		} else {
-			right = mid - 1
-		}
-	}
-	return left
-}
-func bisectRight(nums []int, target int) int {
-	left, right := 0, len(nums)-1
-	for left <= right {
-		mid := (left + right) >> 1
-		if nums[mid] <= target {
-			left = mid + 1
-		} else {
-			right = mid - 1
-		}
-	}
-	return left
 }

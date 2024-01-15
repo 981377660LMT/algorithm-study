@@ -337,8 +337,8 @@
     - [RangeFreqQueryDynamic](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeFreqQueryDynamic.ts)
     - [UseBlock](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SqrtDecomposition/useBlock.ts)
     - [RangeModRangeSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeModRangeSum.ts)
-    - [RangeStepSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeStepSum.ts)
-    - [PointSetStepSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/PointSetStepSum.ts)
+    - [RangeStepSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeStepSum.go)
+    - [PointSetModSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/PointSetModSum.ts)
 
     - [Bootstrap](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E5%89%8D%E7%AB%AF%E7%BB%83%E4%B9%A0%E9%A2%98/bootstrap.ts)
     - [WindowMex](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E8%8E%AB%E9%98%9F/WindowMex.ts)
