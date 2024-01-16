@@ -1,3 +1,5 @@
+# 可删除元素的队列.(需要保证队列中不能有重复元素)
+
 from collections import deque
 from typing import Generic, Optional, Sequence, TypeVar
 
@@ -40,7 +42,7 @@ class RemovableQueue(Generic[V]):
 
 
 if __name__ == "__main__":
-    q = RemovableQueue([1, 2, 3, 4, 5])
+    q = RemovableQueue([1, 2, 1, 3, 4, 5])
     q.remove(1)
     q.remove(3)
     q.remove(5)

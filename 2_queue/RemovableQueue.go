@@ -1,3 +1,5 @@
+// 可删除元素的队列.(需要保证队列中不能有重复元素)
+
 package main
 
 import "fmt"

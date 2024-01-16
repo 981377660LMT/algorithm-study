@@ -1,83 +1,27 @@
-// https://atcoder.jp/contests/abc324/editorial/7399
+// 可删除元素、获取第k小值的双端队列.
+// 支持:
+// 1. 在队尾/队首添加元素
+// 2. 在队尾/队首删除元素
+// 3. 删除指定元素(需要保证队列中始终不能有重复元素，且删除的元素必须存在于队列中)
+// 4. 获取队首/队尾元素
+// 5. 获取队列中第k小的元素
+// 6. 获取队列长度
+
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math/bits"
-	"os"
 	"sort"
 	"strings"
 )
 
-// 给定一个数组，数组元素为1-n的排列
-// 有两种操作：
-// 1.把 A[version]中下标大于等于 x 的元素分裂成一个新的数组 Ai(A[version]中保留x个)。
-// 2.把 A[version]中值大于 x 的元素分裂成一个新的数组 Ai。
-// 这两种操作都不会改变元素相对顺序。
-// 输出每次分裂出的数组大小。
-//
-// SortedList + Deque 维护.
-// 启发式分裂：每次分裂出较小的那一半
 func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	nums := make([]int, n)
-	for i := range nums {
-		fmt.Fscan(in, &nums[i])
-	}
-
-	var q int
-	fmt.Fscan(in, &q)
-
-	history := make([]*SortedDeque, q+1)
-	history[0] = NewSortedDeque(func(a, b S) bool { return a < b }, nums...)
-	for i := 1; i < len(history); i++ {
-		history[i] = NewSortedDeque(func(a, b S) bool { return a < b })
-	}
-
-	for cur := 1; cur < q+1; cur++ {
-		var kind, pre, x int
-		fmt.Fscan(in, &kind, &pre, &x)
-
-		if kind == 1 { // 将 A[pre] 中下标大于等于 x 的元素分裂成一个新的数组 Ai
-			len1 := x
-			len2 := history[pre].Len() - x
-			if len1 < len2 { // 前面少，拆到前面
-				history[cur], history[pre] = history[pre], history[cur]
-				for j := 0; j < len1; j++ {
-					history[pre].Append(history[cur].PopLeft())
-				}
-			} else { // 后面少，拆到后面
-				for j := 0; j < len2; j++ {
-					history[cur].AppendLeft(history[pre].Pop())
-				}
-			}
-		} else { // 将 A[pre] 中值大于 x 的元素分裂成一个新的数组 Ai
-			len1 := history[pre].CountLessOrEqual(x)
-			len2 := history[pre].Len() - len1
-			if len1 < len2 { // 前面少，拆到前面
-				history[cur], history[pre] = history[pre], history[cur]
-				for j := 0; j < len1; j++ {
-					min_ := history[cur].Min()
-					history[cur].Remove(min_)
-					history[pre].Append(min_)
-				}
-			} else { // 后面少，拆到后面
-				for j := 0; j < len2; j++ {
-					max_ := history[pre].Max()
-					history[pre].Remove(max_)
-					history[cur].AppendLeft(max_)
-				}
-			}
-		}
-
-		fmt.Fprintln(out, history[cur].Len())
-	}
+	Q := NewSortedDeque(func(a, b int) bool { return a < b }, 2, 2, 3)
+	Q.Remove(2)
+	fmt.Println(Q.Len())
+	// fmt.Println(Q.Pop())
+	fmt.Println(Q.Kth(0))
 }
 
 // 1e5 -> 200, 2e5 -> 400
@@ -134,15 +78,6 @@ func (sd *SortedDeque) Tail() S {
 // 删除队列中所有值为value的元素.
 func (sd *SortedDeque) Remove(value S) {
 	count := sd.dq.Count(value)
-	if count == 0 {
-		return
-	}
-	// fast path
-	if count == 1 {
-		sd.sl.Discard(value)
-		sd.dq.Remove(value)
-		return
-	}
 	start := sd.sl.BisectLeft(value)
 	end := start + count
 	sd.sl.Erase(start, end)
@@ -159,14 +94,6 @@ func (sd *SortedDeque) Max() S {
 
 func (sd *SortedDeque) Kth(k int) S {
 	return sd.sl.At(k)
-}
-
-func (sd *SortedDeque) CountLess(value S) int {
-	return sd.sl.BisectLeft(value)
-}
-
-func (sd *SortedDeque) CountLessOrEqual(value S) int {
-	return sd.sl.BisectRight(value)
 }
 
 func (sd *SortedDeque) Len() int {
