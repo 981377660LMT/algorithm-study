@@ -1,4 +1,4 @@
-// 树上区间并查集 RangeUnionFindOnTree/UnionFindRangeOnTree
+// 树上区间并查集 RangeUnionFindOnTree/UnionFindRangeOnTree/UnionFindTree
 // https://atcoder.jp/contests/abc295/tasks/abc295_g
 // 给定一棵外向树，每次修改为连一条有向边 (u,v) 保证 v 可以到达 u，
 // 查询某一个节点能到达的编号最小的点。

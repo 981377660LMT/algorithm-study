@@ -133,10 +133,7 @@ if (require.main === module) {
   assert.strictEqual(preSum3d.query(0, 0, 0, 1, 1, 1), 60)
   assert.strictEqual(
     preSum3d.query(0, 0, 0, 2, 2, 2),
-    matrix3d.reduce(
-      (pre, cur) => pre + cur.reduce((pre, cur) => pre + cur.reduce((pre, cur) => pre + cur, 0), 0),
-      0
-    )
+    matrix3d.reduce((pre, cur) => pre + cur.reduce((pre, cur) => pre + cur.reduce((pre, cur) => pre + cur, 0), 0), 0)
   )
   console.log('test ok')
 

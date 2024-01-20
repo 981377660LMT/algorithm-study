@@ -18,6 +18,7 @@ func main() {
 	fmt.Println(nums)
 }
 
+// SOS DP (Sum over Subsets)
 func SubsetZeta(nums []int) {
 	if len(nums) == 0 {
 		return
@@ -32,7 +33,6 @@ func SubsetZeta(nums []int) {
 			t := s ^ mask
 			if s > t {
 				nums[s] += nums[t] // add
-
 			}
 		}
 	}

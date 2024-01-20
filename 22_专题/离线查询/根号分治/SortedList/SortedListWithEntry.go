@@ -1,95 +1,31 @@
 // https://atcoder.jp/contests/abc324/editorial/7399
+// 带有index和value两个排序条件的有序序列.
+// 类似 SortedDeque.
 
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math/bits"
-	"os"
 	"sort"
 	"strings"
 )
 
-// 给定一个数组，数组元素为1-n的排列
-// 有两种操作：
-// 1.把 A[version]中下标大于等于 x 的元素分裂成一个新的数组 Ai(A[version]中保留x个)。
-// 2.把 A[version]中值大于 x 的元素分裂成一个新的数组 Ai。
-// 这两种操作都不会改变元素相对顺序。
-// 输出每次分裂出的数组大小。
-//
-// 两个 SortedList 维护.
-// SortedList 启发式分裂：每次分裂出较小的那一半
 func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	nums := make([]int, n)
-	for i := range nums {
-		fmt.Fscan(in, &nums[i])
-	}
-
-	var q int
-	fmt.Fscan(in, &q)
-
-	history := make([]*SortedListWithEntry, q+1)
-	entries := make([]Entry, n)
-	for i := range entries {
-		entries[i] = Entry{index: int32(i), value: int32(nums[i])}
-	}
-	history[0] = NewSortedListWithEntry(
+	sl := NewSortedListWithEntry(
 		func(a, b Entry) bool { return a.index < b.index },
 		func(a, b Entry) bool { return a.value < b.value },
-		entries...,
 	)
-	for i := 1; i < len(history); i++ {
-		history[i] = NewSortedListWithEntry(
-			func(a, b Entry) bool { return a.index < b.index },
-			func(a, b Entry) bool { return a.value < b.value },
-		)
-	}
-
-	for cur := 1; cur < q+1; cur++ {
-		var kind, pre, x int
-		fmt.Fscan(in, &kind, &pre, &x)
-
-		if kind == 1 { // 将 A[pre] 中下标大于等于 x 的元素分裂成一个新的数组 Ai
-			len1 := x
-			len2 := history[pre].Len() - x
-			if len1 < len2 { // 前面少，拆到前面
-				history[cur], history[pre] = history[pre], history[cur]
-				for j := 0; j < len1; j++ {
-					history[pre].Add(history[cur].PopFront())
-				}
-			} else { // 后面少，拆到后面
-				for j := 0; j < len2; j++ {
-					history[cur].Add(history[pre].PopBack())
-				}
-			}
-		} else { // 将 A[pre] 中值大于 x 的元素分裂成一个新的数组 Ai
-			len1 := history[pre].SlValue.BisectRight(Entry{value: int32(x)})
-			len2 := history[pre].Len() - len1
-			if len1 < len2 { // 前面少，拆到前面
-				history[cur], history[pre] = history[pre], history[cur]
-				for j := 0; j < len1; j++ {
-					history[pre].Add(history[cur].PopMin())
-				}
-			} else { // 后面少，拆到后面
-				for j := 0; j < len2; j++ {
-					history[cur].Add(history[pre].PopMax())
-				}
-			}
-		}
-
-		fmt.Fprintln(out, history[cur].Len())
-	}
-
+	sl.Add(Entry{1, 2})
+	sl.Add(Entry{2, 1})
+	sl.Add(Entry{3, 3})
+	sl.Add(Entry{4, 4})
+	fmt.Println(sl.GetKthEntryByValue(0))
+	sl.PopBack()
+	fmt.Println(sl.SlIndex)
 }
 
-const _LOAD int = 50 // !块大小较小，适合频繁分裂的情形
+const _LOAD int = 100 // !块大小较小，适合频繁分裂的情形
 
 type Value = int32 // value 必须是基本类型
 type Entry = struct {
