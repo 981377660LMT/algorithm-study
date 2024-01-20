@@ -5,9 +5,6 @@ package copypasta
 
 func _(min, max func(int, int) int, abs func(int) int) {
 
-	// 练习：
-	// https://www.luogu.com.cn/training/231055
-
 	// 树上背包/树形背包/依赖背包
 	// todo 树上背包的上下界优化 https://ouuan.github.io/post/%E6%A0%91%E4%B8%8A%E8%83%8C%E5%8C%85%E7%9A%84%E4%B8%8A%E4%B8%8B%E7%95%8C%E4%BC%98%E5%8C%96/
 	//   子树合并背包的复杂度证明 https://blog.csdn.net/lyd_7_29/article/details/79854245

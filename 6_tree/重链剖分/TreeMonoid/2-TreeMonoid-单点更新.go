@@ -19,7 +19,7 @@ import (
 )
 
 func demo() {
-	tree := _NT(5)
+	tree := _NewTree(5)
 	tree.AddEdge(0, 1, 1)
 	tree.AddEdge(0, 2, 1)
 	tree.AddEdge(1, 3, 1)
@@ -246,7 +246,7 @@ type _T struct {
 	timer                int
 }
 
-func _NT(n int) *_T {
+func _NewTree(n int) *_T {
 	tree := make([][][2]int, n)
 	lid := make([]int, n)
 	rid := make([]int, n)

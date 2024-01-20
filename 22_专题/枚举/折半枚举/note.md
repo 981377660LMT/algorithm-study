@@ -69,3 +69,10 @@ function getSubArraySum(nums: number[]): number[] {
   return res
 }
 ```
+
+---
+
+折半搜索的两种形式：
+
+- dfs + 剪枝, 推荐使用
+- bfs(双向 bfs)
