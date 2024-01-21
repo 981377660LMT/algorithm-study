@@ -48,9 +48,9 @@ func main() {
 		if tree.Parent[v] != u {
 			u, v = v, u
 		}
-		left, right := tree.Id(v)
-		edgeInfo[i][0] = wm.CountRange(left, right, 0, u)
-		edgeInfo[i][1] = v - wm.CountRange(left, right, 0, v)
+		start, end := tree.Id(v)
+		edgeInfo[i][0] = wm.CountRange(start, end, 0, u)                             // [start,end)内值严格小于u的个数
+		edgeInfo[i][1] = wm.CountRange(0, start, 0, v) + wm.CountRange(end, n, 0, v) // [0,start)和[end,n)内值严格小于v的个数
 	}
 
 	treeMonoid := NewTreeMonoid(tree, edgeInfo, false)
@@ -67,7 +67,7 @@ func main() {
 	}
 
 	for _, v := range res {
-		fmt.Fprintln(out, v)
+		fmt.Fprint(out, v, " ")
 	}
 }
 
