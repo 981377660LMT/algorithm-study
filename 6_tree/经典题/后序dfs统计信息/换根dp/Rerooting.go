@@ -11,6 +11,7 @@ func maxOutput(n int, edges [][]int, price []int) int64 {
 	op := func(child1, child2 E) E {
 		return max(child1, child2)
 	}
+	// direction: 0: cur -> parent, 1: parent -> cur
 	composition := func(fromRes E, parent, cur int, direction uint8) E {
 		if direction == 0 {
 			return fromRes + price[cur] // child -> parent
@@ -56,12 +57,17 @@ func NewRerooting(n int) *Rerooting {
 	return &Rerooting{Tree: make([][]int, n), n: n}
 }
 
+func NewRerootingFromTree(tree [][]int) *Rerooting {
+	return &Rerooting{Tree: tree, n: len(tree)}
+}
+
 // 添加一条无向边.
 func (r *Rerooting) AddEdge(u, v int) {
 	r.Tree[u] = append(r.Tree[u], v)
 	r.Tree[v] = append(r.Tree[v], u)
 }
 
+// direction: 0: cur -> parent, 1: parent -> cur
 func (r *Rerooting) ReRooting(e func(root int) E, op func(child1, child2 E) E, composition func(fromRes E, parent, cur int, direction uint8) E) []E {
 	parents := make([]int, r.n)
 	for i := range parents {

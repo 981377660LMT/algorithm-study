@@ -13,7 +13,7 @@ import (
 const INF int = 1e18
 
 func main() {
-	// https://atcoder.jp/contests/abc174/tasks/abc174_f
+	// https://judge.yosupo.jp/problem/static_range_count_distinct
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -29,7 +29,7 @@ func main() {
 	for i := 0; i < q; i++ {
 		var l, r int
 		fmt.Fscan(in, &l, &r)
-		U.AddQuery(l-1, r)
+		U.AddQuery(l, r)
 	}
 	res := U.Run(func(i int) E { return 1 })
 	for _, v := range res {

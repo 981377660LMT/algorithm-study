@@ -3,14 +3,14 @@
 //  NewEulerianTrail(n int, directed bool) *EulerianTrail
 //  AddEdge(a, b int)
 
-//  EnumerateEulerianTrail(minLex) [][]int
-//  EnumerateSemiEulerianTrail(minLex) [][]int
+//  EnumerateEulerianTrail(minLex) [][]int -> 欧拉回路
+//  EnumerateSemiEulerianTrail(minLex) [][]int -> 欧拉路径
 
-//  GetEulerianTrail(minLex) []int
-//  GetEulerianTrailStartsWith(start, minLex) []int
-//  GetSemiEulerianTrail(minLex) []int
-//  GetSemiEulerianTrailStartsWith(start, minLex) []int
-//  GetPathFromEdgeIds(edgeIds []int) []int
+//  GetEulerianTrail(minLex) []int  -> 欧拉回路
+//  GetEulerianTrailStartsWith(start, minLex) []int  -> 欧拉回路
+//  GetSemiEulerianTrail(minLex) []int  -> 欧拉路径
+//  GetSemiEulerianTrailStartsWith(start, minLex) []int  -> 欧拉路径
+//  GetPathFromEdgeIds(edgeIds []int) []int -> 从边的编号获取点的编号
 
 package main
 
@@ -20,6 +20,63 @@ import (
 	"os"
 	"sort"
 )
+
+func main() {
+	// 有向图字典序最小的欧拉路径()
+	yosupo()
+}
+
+// 欧拉路径.
+// https://judge.yosupo.jp/problem/eulerian_trail_directed
+// https://judge.yosupo.jp/problem/eulerian_trail_undirected
+func yosupo() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var T int
+	fmt.Fscan(in, &T)
+
+	solve := func() {
+		var n, m int
+		fmt.Fscan(in, &n, &m)
+		// !特判不存在边的情况.
+		if m == 0 {
+			fmt.Fprintln(out, "Yes")
+			fmt.Fprintln(out, 0)
+			fmt.Fprintln(out)
+			return
+		}
+
+		et := NewEulerianTrail(n, false)
+
+		for i := 0; i < m; i++ {
+			var a, b int
+			fmt.Fscan(in, &a, &b)
+			et.AddEdge(a, b)
+		}
+
+		eids := et.GetSemiEulerianTrail(true)
+		if len(eids) == 0 {
+			fmt.Fprintln(out, "No")
+		} else {
+			fmt.Fprintln(out, "Yes")
+			path := et.GetPathFromEdgeIds(eids)
+			for _, v := range path {
+				fmt.Fprint(out, v, " ")
+			}
+			fmt.Fprintln(out)
+			for _, eid := range eids {
+				fmt.Fprint(out, eid, " ")
+			}
+			fmt.Fprintln(out)
+		}
+	}
+
+	for ; T > 0; T-- {
+		solve()
+	}
+}
 
 func yukicoder() {
 	// https://yukicoder.me/problems/no/583
@@ -105,13 +162,9 @@ func XXYYX() {
 	}
 }
 
-func main() {
-	有向图字典序最小的欧拉路径()
-}
-
 type EulerianTrail struct {
-	g          [][][2]int
-	es         [][2]int
+	Edges      [][2]int
+	Graph      [][][2]int // (next, edgeId)
 	m          int
 	usedVertex []bool
 	usedEdge   []bool
@@ -121,7 +174,7 @@ type EulerianTrail struct {
 
 func NewEulerianTrail(n int, directed bool) *EulerianTrail {
 	res := &EulerianTrail{
-		g:          make([][][2]int, n),
+		Graph:      make([][][2]int, n),
 		usedVertex: make([]bool, n),
 		deg:        make([]int, n),
 		directed:   directed,
@@ -130,34 +183,75 @@ func NewEulerianTrail(n int, directed bool) *EulerianTrail {
 }
 
 func (e *EulerianTrail) AddEdge(a, b int) {
-	e.es = append(e.es, [2]int{a, b})
-	e.g[a] = append(e.g[a], [2]int{b, e.m})
+	e.Edges = append(e.Edges, [2]int{a, b})
+	e.Graph[a] = append(e.Graph[a], [2]int{b, e.m})
 	if e.directed {
 		e.deg[a]++
 		e.deg[b]--
 	} else {
-		e.g[b] = append(e.g[b], [2]int{a, e.m})
+		e.Graph[b] = append(e.Graph[b], [2]int{a, e.m})
 		e.deg[a]++
 		e.deg[b]++
 	}
 	e.m++
 }
 
-func (e *EulerianTrail) GetPathFromEdgeIds(edgeIds []int) []int {
-	path := make([]int, 0, len(edgeIds)+1)
-	for i, id := range edgeIds {
-		a, b := e.es[id][0], e.es[id][1]
-		path = append(path, a)
-		if i == len(edgeIds)-1 {
-			path = append(path, b)
+func (e *EulerianTrail) GetPathFromEdgeIds(edgeIds []int) (path []int) {
+	path = make([]int, 0, len(edgeIds)+1)
+	if e.directed {
+		for i, id := range edgeIds {
+			a, b := e.Edges[id][0], e.Edges[id][1]
+			path = append(path, a)
+			if i == len(edgeIds)-1 {
+				path = append(path, b)
+			}
+		}
+	} else {
+		if len(edgeIds) == 0 {
+			return
+		}
+		if len(edgeIds) == 1 {
+			eid := edgeIds[0]
+			path = append(path, e.Edges[eid][0], e.Edges[eid][1])
+			return
+		}
+
+		f := func(start int, pre int) ([]int, bool) {
+			res := make([]int, 0, len(edgeIds)+1)
+			res = append(res, start, pre)
+			for i := 1; i < len(edgeIds); i++ {
+				eid := edgeIds[i]
+				a, b := e.Edges[eid][0], e.Edges[eid][1]
+				if a != pre {
+					a, b = b, a
+				}
+				if a != pre {
+					return nil, false
+				}
+				res = append(res, b)
+				pre = b
+			}
+			return res, true
+		}
+
+		a, b := e.Edges[edgeIds[0]][0], e.Edges[edgeIds[0]][1]
+		if res, ok := f(a, b); ok {
+			path = res
+			return
+		} else {
+			res, _ := f(b, a)
+			path = res
+			return
 		}
 	}
-	return path
+
+	return
 }
 
 // 枚举所有连通块的`欧拉回路`,返回边的编号.
-//  如果连通块内不存在欧拉回路,返回空.
-//  minLex: 字典序最小.
+//
+//	如果连通块内不存在欧拉回路,返回空.
+//	minLex: 字典序最小.
 func (e *EulerianTrail) EnumerateEulerianTrail(minLex bool) [][]int {
 	if e.directed {
 		for _, d := range e.deg {
@@ -176,8 +270,8 @@ func (e *EulerianTrail) EnumerateEulerianTrail(minLex bool) [][]int {
 	e.sortNeighbors(minLex)
 	e.usedEdge = make([]bool, e.m)
 	res := [][]int{}
-	for i := 0; i < len(e.g); i++ {
-		if !e.usedVertex[i] && len(e.g[i]) > 0 {
+	for i := 0; i < len(e.Graph); i++ {
+		if !e.usedVertex[i] && len(e.Graph[i]) > 0 {
 			res = append(res, e.work(i))
 		}
 	}
@@ -185,11 +279,12 @@ func (e *EulerianTrail) EnumerateEulerianTrail(minLex bool) [][]int {
 }
 
 // 获取整张图的从任意点出发的`欧拉回路`,返回边的编号.
-//  如果不存在欧拉回路,返回空.
-//  minLex: 字典序最小.
+//
+//	如果不存在欧拉回路,返回空.
+//	minLex: 字典序最小.
 func (e *EulerianTrail) GetEulerianTrail(minLex bool) (eids []int) {
 	groups := e.EnumerateEulerianTrail(minLex)
-	if len(groups) != 1 || len(groups[0]) != len(e.es) {
+	if len(groups) != 1 || len(groups[0]) != len(e.Edges) {
 		return
 	}
 	eids = groups[0]
@@ -197,8 +292,9 @@ func (e *EulerianTrail) GetEulerianTrail(minLex bool) (eids []int) {
 }
 
 // 获取整张图的从`start`出发的`欧拉回路`,返回边的编号.
-//  如果从`start`出发不存在欧拉回路,返回空.
-//  minLex: 字典序最小.
+//
+//	如果从`start`出发不存在欧拉回路,返回空.
+//	minLex: 字典序最小.
 func (e *EulerianTrail) GetEulerianTrailStartsWith(start int, minLex bool) (eids []int) {
 	if e.directed {
 		for _, d := range e.deg {
@@ -217,7 +313,7 @@ func (e *EulerianTrail) GetEulerianTrailStartsWith(start int, minLex bool) (eids
 	e.sortNeighbors(minLex)
 	e.usedEdge = make([]bool, e.m)
 	res := e.work(start)
-	if len(res) != len(e.es) {
+	if len(res) != len(e.Edges) {
 		return
 	}
 	eids = res
@@ -225,17 +321,18 @@ func (e *EulerianTrail) GetEulerianTrailStartsWith(start int, minLex bool) (eids
 }
 
 // 枚举所有连通块的`欧拉路径`(半欧拉回路),返回边的编号.
-//  如果连通块内不存在欧拉路径,返回空.
-//  minLex: 字典序最小.
+//
+//	如果连通块内不存在欧拉路径,返回空.
+//	minLex: 字典序最小.
 func (e *EulerianTrail) EnumerateSemiEulerianTrail(minLex bool) [][]int {
 	e.sortNeighbors(minLex)
 
-	uf := newUnionFindArray(len(e.g))
-	for _, es := range e.es {
+	uf := newUnionFindArray(len(e.Graph))
+	for _, es := range e.Edges {
 		uf.Union(es[0], es[1])
 	}
-	group := make([][]int, len(e.g))
-	for i := 0; i < len(e.g); i++ {
+	group := make([][]int, len(e.Graph))
+	for i := 0; i < len(e.Graph); i++ {
 		group[uf.Find(i)] = append(group[uf.Find(i)], i)
 	}
 
@@ -288,11 +385,12 @@ func (e *EulerianTrail) EnumerateSemiEulerianTrail(minLex bool) [][]int {
 }
 
 // 获取整张图的从任意点出发的`欧拉路径`,返回边的编号.
-//  如果不存在欧拉路径,返回空.
-//  minLex: 字典序最小.
+//
+//	如果不存在欧拉路径,返回空.
+//	minLex: 字典序最小.
 func (e *EulerianTrail) GetSemiEulerianTrail(minLex bool) (eids []int) {
 	groups := e.EnumerateSemiEulerianTrail(minLex)
-	if len(groups) == 0 || len(groups[0]) != len(e.es) {
+	if len(groups) == 0 || len(groups[0]) != len(e.Edges) {
 		return
 	}
 	eids = groups[0]
@@ -300,8 +398,9 @@ func (e *EulerianTrail) GetSemiEulerianTrail(minLex bool) (eids []int) {
 }
 
 // 获取整张图的从`start`出发的`欧拉路径`,返回边的编号.
-//  如果从`start`出发不存在欧拉路径,返回空.
-//  minLex: 字典序最小.
+//
+//	如果从`start`出发不存在欧拉路径,返回空.
+//	minLex: 字典序最小.
 func (e *EulerianTrail) GetSemiEulerianTrailStartsWith(start int, minLex bool) (eids []int) {
 	e.sortNeighbors(minLex)
 
@@ -309,7 +408,7 @@ func (e *EulerianTrail) GetSemiEulerianTrailStartsWith(start int, minLex bool) (
 
 	latte, malta := -1, -1
 	if e.directed {
-		for i := 0; i < len(e.g); i++ {
+		for i := 0; i < len(e.Graph); i++ {
 			if abs(e.deg[i]) > 1 {
 				return
 			} else if e.deg[i] == 1 {
@@ -320,7 +419,7 @@ func (e *EulerianTrail) GetSemiEulerianTrailStartsWith(start int, minLex bool) (
 			}
 		}
 	} else {
-		for i := 0; i < len(e.g); i++ {
+		for i := 0; i < len(e.Graph); i++ {
 			if e.deg[i]&1 == 1 {
 				if latte == -1 {
 					latte = i
@@ -344,7 +443,7 @@ func (e *EulerianTrail) GetSemiEulerianTrailStartsWith(start int, minLex bool) (
 	}
 
 	res := e.work(start)
-	if len(res) != len(e.es) {
+	if len(res) != len(e.Edges) {
 		return
 	}
 	eids = res
@@ -352,7 +451,7 @@ func (e *EulerianTrail) GetSemiEulerianTrailStartsWith(start int, minLex bool) (
 }
 
 func (e *EulerianTrail) GetEdge(index int) (int, int) {
-	return e.es[index][0], e.es[index][1]
+	return e.Edges[index][0], e.Edges[index][1]
 }
 
 func (e *EulerianTrail) work(s int) []int {
@@ -362,12 +461,12 @@ func (e *EulerianTrail) work(s int) []int {
 	for len(st) > 0 {
 		index := st[len(st)-1][0]
 		e.usedVertex[index] = true
-		if len(e.g[index]) == 0 {
+		if len(e.Graph[index]) == 0 {
 			ord = append(ord, st[len(st)-1][1])
 			st = st[:len(st)-1]
 		} else {
-			e_ := e.g[index][len(e.g[index])-1]
-			e.g[index] = e.g[index][:len(e.g[index])-1]
+			e_ := e.Graph[index][len(e.Graph[index])-1]
+			e.Graph[index] = e.Graph[index][:len(e.Graph[index])-1]
 			if e.usedEdge[e_[1]] {
 				continue
 			}
@@ -386,7 +485,7 @@ func (e *EulerianTrail) work(s int) []int {
 // 排在邻接表后面的点先出来.
 func (e *EulerianTrail) sortNeighbors(minLex bool) {
 	if minLex {
-		for _, es := range e.g {
+		for _, es := range e.Graph {
 			sort.Slice(es, func(i, j int) bool {
 				return es[i][0] > es[j][0]
 			})

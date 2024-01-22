@@ -145,6 +145,40 @@ class Solution:
 
         return [v * 2 for v in res[1:]]
 
+    def countOfPairs2(self, n: int, x: int, y: int) -> List[int]:
+        """O(1)查询."""
+        if x > y:
+            x, y = y, x
+        l, m, r = x - 1, y - x + 1, n - y
+
+        def max2(a: int, b: int) -> int:
+            return a if a > b else b
+
+        def f(l: int, m: int, r: int, d: int) -> int:  # 1 <= d <= n
+            if m <= 2:
+                return n - d
+            cnt = 0
+            if d < (m + 1) // 2:
+                cnt += m
+            elif m % 2 == 0 and d == m // 2:
+                cnt += m // 2
+            cnt += max2(l + r + 2 - d, 0)
+            cnt -= max2(l + 2 - d, 0)
+            cnt -= max2(l + 1 - d, 0)
+            cnt -= max2(r + 2 - d, 0)
+            cnt -= max2(r + 1 - d, 0)
+            cnt += max2(2 - d, 0)
+            m2 = m // 2
+            cnt += max2(l + m - m2 - d, 0)
+            cnt -= max2(m - m2 - d, 0) * 2
+            cnt += max2(l + m2 + 1 - d, 0)
+            cnt -= max2(m2 + 1 - d, 0) * 2
+            cnt += max2(r + m - m2 - d, 0)
+            cnt += max2(r + m2 + 1 - d, 0)
+            return cnt
+
+        return [f(l, m, r, d) * 2 for d in range(1, n + 1)]
+
 
 if __name__ == "__main__":
     print(Solution().countOfPairs(4, 1, 2))
