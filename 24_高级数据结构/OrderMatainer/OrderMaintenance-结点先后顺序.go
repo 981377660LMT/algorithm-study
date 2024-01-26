@@ -27,15 +27,41 @@
 // !维护元素顺序的链表/带插入全序集维护.
 // 用于维护元素的先后顺序, 以及判断元素是否在另一个元素的前面.
 
+// 还有一种 AVL方法：https://stackoverflow.com/questions/32839578/order-maintenance-data-structure-in-c
 package main
 
 import (
 	"fmt"
 	"math/rand"
+	"time"
 )
 
 func main() {
-	n := 1000
+	T := NewOrderMaintenace()
+	n := int(1e5)
+	nodes := make([]*Node, n)
+	for i := 0; i < n; i++ {
+		nodes[i] = T.Alloc()
+	}
+	time1 := time.Now()
+	cur := T.Head
+	for i := 0; i < n; i++ {
+		T.InsertAfter(cur, nodes[i])
+		cur = nodes[i]
+	}
+	for i := 0; i < n; i++ {
+		T.Erase(nodes[i])
+	}
+	time2 := time.Now()
+	fmt.Println(time2.Sub(time1))
+
+	// for _, node := range nodes {
+	// 	fmt.Println(node.key)
+	// }
+}
+
+func main2() {
+	n := 10000
 
 	// check with perm
 	perm := rand.Perm(n)
@@ -66,7 +92,7 @@ const M uint64 = ^(^uint64(0) >> 1)
 
 type Node struct {
 	prev, next *Node
-	label      uint64
+	key        uint64
 }
 
 type OrderMaintenace struct {
@@ -95,19 +121,19 @@ func (om *OrderMaintenace) Build(nums []int) []*Node {
 	pre := om.Head
 	for _, cur := range res {
 		om.InsertAfter(pre, cur)
-		cur = pre
+		pre = cur
 	}
 	return res
 }
 
 // 将y插入到x后面.
 func (om *OrderMaintenace) InsertAfter(x, y *Node) {
-	label := x.label
-	if om._width(x, x.next) <= 1 {
+	label := x.key
+	if om._gap(x, x.next) <= 1 {
 		mid := x.next
 		end := mid.next
 		required := uint64(3)
-		for om._width(x, end) <= 4*om._width(x, mid) && end != x {
+		for om._gap(x, end) <= 4*om._gap(x, mid) && end != x {
 			required++
 			end = end.next
 			if end == x {
@@ -119,22 +145,22 @@ func (om *OrderMaintenace) InsertAfter(x, y *Node) {
 		}
 		gap := M
 		if x != end {
-			gap = om._width(x, end) / required
+			gap = om._gap(x, end) / required
 		}
-		val := end.label
+		baseKey := end.key
 		for {
 			if end == om.Head {
-				val += M
+				baseKey += M
 			}
 			end = end.prev
 			if end == x {
 				break
 			}
-			val -= gap
-			end.label = val
+			baseKey -= gap
+			end.key = baseKey
 		}
 	}
-	y.label = label + om._width(x, x.next)/2
+	y.key = label + om._gap(x, x.next)/2
 	y.next = x.next
 	y.prev = x
 	y.next.prev = y
@@ -149,11 +175,11 @@ func (om *OrderMaintenace) Erase(x *Node) {
 
 // 判断x是否在y前面.
 func (om *OrderMaintenace) IsBefore(x, y *Node) bool {
-	return x.label > y.label
+	return x.key < y.key
 }
 
-func (om *OrderMaintenace) _width(x, y *Node) uint64 {
-	res := y.label - x.label
+func (om *OrderMaintenace) _gap(x, y *Node) uint64 {
+	res := y.key - x.key
 	if res-1 >= M {
 		res += M
 	}

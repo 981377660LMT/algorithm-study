@@ -27,6 +27,11 @@ import (
 )
 
 func main() {
+	fs := NewFastSetFrom(10, func(i int) bool { return i%2 == 0 })
+	fmt.Println(fs)
+}
+
+func demo() {
 	demo := func() {
 		n := int(1e7)
 		fs := NewFastSet(n)
@@ -102,7 +107,6 @@ func main() {
 type FastSet struct {
 	n, lg int
 	seg   [][]int
-	size  int
 }
 
 func NewFastSet(n int) *FastSet {
@@ -121,6 +125,23 @@ func NewFastSet(n int) *FastSet {
 	return res
 }
 
+func NewFastSetFrom(n int, f func(i int) bool) *FastSet {
+	res := NewFastSet(n)
+	for i := 0; i < n; i++ {
+		if f(i) {
+			res.seg[0][i>>6] |= 1 << (i & 63)
+		}
+	}
+	for h := 0; h < res.lg-1; h++ {
+		for i := 0; i < len(res.seg[h]); i++ {
+			if res.seg[h][i] != 0 {
+				res.seg[h+1][i>>6] |= 1 << (i & 63)
+			}
+		}
+	}
+	return res
+}
+
 func (fs *FastSet) Has(i int) bool {
 	return (fs.seg[0][i>>6]>>(i&63))&1 != 0
 }
@@ -133,9 +154,7 @@ func (fs *FastSet) Insert(i int) bool {
 		fs.seg[h][i>>6] |= 1 << (i & 63)
 		i >>= 6
 	}
-	fs.size++
 	return true
-
 }
 
 func (fs *FastSet) Erase(i int) bool {
@@ -150,7 +169,6 @@ func (fs *FastSet) Erase(i int) bool {
 		}
 		i >>= 6
 	}
-	fs.size--
 	return true
 }
 
@@ -240,7 +258,7 @@ func (fs *FastSet) String() string {
 }
 
 func (fs *FastSet) Size() int {
-	return fs.size
+	return fs.n
 }
 
 func (*FastSet) bsr(x int) int {
