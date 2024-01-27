@@ -215,28 +215,7 @@ if (require.main === module) {
     isLeaf: (node): node is Leaf => !('children' in node)
   })
 
-  T.insertNode([], { value: 233 })
-  T.insertNode([], { value: 234 })
-  T.insertNode([], { value: 235 })
   T.print()
-
-  T.insertNode([2], { value: 666, children: [] })
+  T.pruneTree(node => T.isNoneLeaf(node))
   T.print()
-
-  console.log('------------------')
-  T.pruneTree(node => node.value === 99)
-  T.print()
-
-  let path = T.insertNode([], { value: -1, children: [] })
-  T.print()
-  T.insertNode(path, { value: -1, children: [] })
-  T.print()
-  T.pruneTree(v => 'children' in v && v.children.length === 0)
-  T.print()
-
-  // T.updateNode([2, 0], { value: 666 })
-  // T.print()
-
-  // T.patchNode([0], { value: 233 })
-  // T.print()
 }

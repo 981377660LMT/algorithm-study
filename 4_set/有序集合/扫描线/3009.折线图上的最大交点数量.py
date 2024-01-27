@@ -1,33 +1,4 @@
-# https://leetcode.cn/problems/maximum-number-of-intersections-on-the-chart/description/
-# from collections import defaultdict
-
-# class Solution:
-#     def maxIntersectionCount(self, y: List[int]) -> int:
-#         in_dict = defaultdict(int)
-#         out_dict = defaultdict(int)
-#         n = len(y)
-#         cur_count = y.count(y[0])
-#         for i in range(1, n):
-#             min_y = min(y[i], y[i - 1])
-#             max_y = max(y[i], y[i - 1])
-#             in_dict[min_y] += 1
-#             out_dict[max_y] += 1
-#             if min_y < y[0] < max_y:
-#                 cur_count += 1
-#         lst = sorted(set(in_dict.keys()) | set(out_dict.keys()))
-#         max_count = cur_count
-#         cur_count = 0
-#         for num in lst:
-#             cur_count += in_dict[num] - out_dict[num]
-#             max_count = max(max_count, cur_count)
-#         return max_count
-
-# 作者：Arnold
-# 链接：https://leetcode.cn/problems/maximum-number-of-intersections-on-the-chart/solutions/2619799/python3sao-miao-xian-by-arnold-sb6ffylaw-wc1g/
-# 来源：力扣（LeetCode）
-# 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
-
-
+# 3009.折线图上的最大交点数量
 # https://leetcode.cn/problems/maximum-number-of-intersections-on-the-chart/description/
 # 有一条由 n 个点连接而成的折线图。给定一个 下标从 1 开始 的整数数组 y，第 k 个点的坐标是 (k, y[k])。
 # 图中没有水平线，即没有两个相邻的点有相同的 y 坐标。
@@ -37,6 +8,10 @@
 # 对于范围 [1, n - 1] 内的所有 i，都有 y[i] != y[i + 1]
 
 
+# 对每根线段，在y上利用差分进行区间更新.
+
+from collections import Counter
+from itertools import pairwise
 from typing import List, Tuple
 
 
@@ -45,5 +20,17 @@ def minmax(a: int, b: int) -> Tuple[int, int]:
 
 
 class Solution:
-    def maxIntersectionCount(self, ys: List[int]) -> int:
-        n = len(ys)
+    def maxIntersectionCount(self, y: List[int]) -> int:
+        diff = Counter()
+        for i, (a, b) in enumerate(pairwise(y)):
+            start = 2 * a
+            end = 2 * b + (0 if i == len(y) - 2 else -1 if b > a else 1)  # 重合需要-1(最后一条线段不会重合)
+            min_, max_ = minmax(start, end)
+            diff[min_] += 1
+            diff[max_ + 1] -= 1
+        res = 0
+        curCount = 0
+        for key in sorted(diff):
+            curCount += diff[key]
+            res = max(res, curCount)
+        return res

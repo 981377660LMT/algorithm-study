@@ -12,6 +12,7 @@ package main
 
 import (
 	"fmt"
+	"math/bits"
 	"strings"
 )
 
@@ -124,6 +125,80 @@ func (b *BITArray) String() string {
 		sb = append(sb, fmt.Sprintf("%d", b.QueryRange(i, i+1)))
 	}
 	return fmt.Sprintf("BitArray: [%v]", strings.Join(sb, ", "))
+}
+
+// 01树状数组.
+type BITArray01 struct {
+	n    int
+	size int // data、bit的长度
+	data []uint64
+	bit  *BITArray
+}
+
+func NewBITArray01(n int) *BITArray01 {
+	return NewBITArray01From(n, func(index int) bool { return false })
+}
+
+func NewBITArray01From(n int, f func(index int) bool) *BITArray01 {
+	size := n>>6 + 1
+	data := make([]uint64, size)
+	for i := 0; i < n; i++ {
+		if f(i) {
+			data[i>>6] |= 1 << (i & 63)
+		}
+	}
+	bit := NewBitArrayFrom(size, func(i int) int { return bits.OnesCount64(data[i]) })
+	return &BITArray01{n: n, size: size, data: data, bit: bit}
+}
+
+func (bit01 *BITArray01) QueryAll() int {
+	return bit01.bit.QueryAll()
+}
+
+func (bit01 *BITArray01) QueryPrefix(end int) int {
+	res := bit01.bit.QueryPrefix(end >> 6)
+	res += bits.OnesCount64(bit01.data[end>>6] & ((1 << (end & 63)) - 1))
+	return res
+}
+
+func (bit01 *BITArray01) QueryRange(start, end int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > bit01.n {
+		end = bit01.n
+	}
+	if start >= end {
+		return 0
+	}
+	if start == 0 {
+		return bit01.QueryPrefix(end)
+	}
+	res := 0
+	res -= bits.OnesCount64(bit01.data[start>>6] & ((1 << (start & 63)) - 1))
+	res += bits.OnesCount64(bit01.data[end>>6] & ((1 << (end & 63)) - 1))
+	res += bit01.bit.QueryRange(start>>6, end>>6)
+	return res
+}
+
+func (bit01 *BITArray01) Add(index int) {
+	bit01.data[index>>6] |= 1 << (index & 63)
+	bit01.bit.Add(index>>6, 1)
+}
+
+func (bit01 *BITArray01) Remove(index int) {
+	bit01.data[index>>6] &= ^(1 << (index & 63))
+	bit01.bit.Add(index>>6, -1)
+}
+
+func (bit01 *BITArray01) String() string {
+	res := []string{}
+	for i := 0; i < bit01.n; i++ {
+		if bit01.QueryRange(i, i+1) == 1 {
+			res = append(res, fmt.Sprintf("%d", i))
+		}
+	}
+	return fmt.Sprintf("BITArray01: [%v]", strings.Join(res, ", "))
 }
 
 // !Point Add Range Sum, 0-based.
