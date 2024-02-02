@@ -1,4 +1,8 @@
 https://oi-wiki.org/graph/virtual-tree/
+https://beet-aizu.github.io/library/tree/auxiliarytree.cpp
+https://www.cnblogs.com/ydtz/p/16276275.html
+https://smijake3.hatenablog.com/entry/2019/09/15/200200
+https://blog.sengxian.com/algorithms/virtual-tree
 
 - 有的时候，题目给你一棵树，然后有 q 组询问，每组询问为与树上有关的 k 个点的相关问题，
   明显的暗示: ∑k<=5e5
@@ -10,8 +14,3 @@ https://oi-wiki.org/graph/virtual-tree/
   1. LCA + 倍增查询压缩后边权最大/最小值
   2. 每次查询前将点集打标记 visited,查询完后再清除标记
   3. 将根节点加入点集后,建立出来的虚树一定包含根节点，方便 dp
-
----
-
-TODO:
-https://www.cnblogs.com/ydtz/p/16276275.html

@@ -1,11 +1,3 @@
-// 给定一张n点m边的`有向`带权图，
-// !其中有k个特殊点，问这k个点之间两两最短路的最小值是多少
-// https://www.luogu.com.cn/problem/solution/P5304
-// 1. 考虑将特殊点分为两个集合 A,B，s 连向 A 中的所有点， t 连向 B 中的所有点，那么 s 到 t 的最短路就是 A,B 两个集合的最短路的最小值
-// 2. 对于 k 个特殊点，枚举二进制里的第 i 位，如果第 i 位为 1，那么就把这个点放到 A 集合，否则放到 B 集合，然后求出 A,B 两个集合的最短路，取最小值即可
-// 3. 原理是，假设 k 个特殊点里最近的两个点是 a,b，那么 a,b 一定有一个二进制位是不同的，那么那次分组时一定被分到不同的集合里，从而肯定被算进了最后的答案之中最短路
-// 4. 注意是有向图，因此分组时需要正反跑两遍
-
 package main
 
 import (
@@ -15,50 +7,79 @@ import (
 	"os"
 )
 
+// https://atcoder.jp/contests/abc245/tasks/abc245_g
+// 给 N 个点，M 条边的无向带权图，每个点的颜色（值域为 [1,K]）。并给定 L 个点作为特殊点。
+// 询问 每个点到最近的与其颜色不同的特殊点的距离（无解输出 -1） 。
+
+// 枚举颜色的每个二进制位，把所有特殊点这一位上颜色是 1 的加入起点，跑最短路，更新所有终点中这一位上颜色是 0 的终点，
+// 然后倒过来，把所有特殊点这一位上颜色是 0 的加入起点，跑最短路，更新所有终点中这一位上颜色是 1 的终点。
+// 由于两个颜色不同一定至少有一个二进制位不同，因此上述算法可以保证所有终点都被颜色不同的起点更新到。 复杂度 O(mlognlogk)
+
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var T int
-	fmt.Fscan(in, &T)
+	var N, M, K, L int
+	fmt.Fscan(in, &N, &M, &K, &L)
+	colors := make([]int, N)
+	for i := 0; i < N; i++ {
+		fmt.Fscan(in, &colors[i])
+		colors[i]--
+	}
+	criticals := make([]int, L)
+	for i := 0; i < L; i++ {
+		fmt.Fscan(in, &criticals[i])
+		criticals[i]--
+	}
+	edges := make([][3]int, M)
+	for i := 0; i < M; i++ {
+		fmt.Fscan(in, &edges[i][0], &edges[i][1], &edges[i][2])
+		edges[i][0]--
+		edges[i][1]--
+	}
 
-	for i := 0; i < T; i++ {
-		var n, m, k int
-		fmt.Fscan(in, &n, &m, &k)
-		edges := make([][3]int, m)
-		for j := 0; j < m; j++ {
-			fmt.Fscan(in, &edges[j][0], &edges[j][1], &edges[j][2])
-			edges[j][0]--
-			edges[j][1]--
+	res := Solve(N, edges, colors, criticals)
+	for _, v := range res {
+		if v == INF {
+			v = -1
 		}
-		specials := make([]int, k)
-		for j := 0; j < k; j++ {
-			fmt.Fscan(in, &specials[j])
-			specials[j]--
-		}
-		fmt.Fprintln(out, Solve(n, edges, specials))
+		fmt.Fprint(out, v, " ")
 	}
 }
 
-func Solve(n int, edges [][3]int, specials []int) int {
-	START, END := n, n+1
-	res := INF
-	log := bits.Len(uint(maxs(specials...)))
-	adjList := NewInternalCsr(n+2, len(edges)*2)
+const INF int = 1e18
+
+func Solve(
+	n int, edges [][3]int, colors []int, criticals []int,
+) []int {
+	D := NewDictionary()
+	colors = append(colors[:0:0], colors...)
+	for i := range colors {
+		colors[i] = D.Id(colors[i])
+	}
+
+	res := make([]int, n)
+	for i := range res {
+		res[i] = INF
+	}
+	log := bits.Len(uint(maxs(colors...)))
+	adjList := NewInternalCsr(n, len(edges)*2)
 	cal := func(rev bool) {
 		for bit := 0; bit < log; bit++ {
-			var groupA, groupB []int
-			for _, v := range specials {
-				if v&(1<<bit) > 0 {
-					groupA = append(groupA, v)
-				} else {
-					groupB = append(groupB, v)
-				}
-			}
-
+			var starts []int
 			if rev {
-				groupA, groupB = groupB, groupA
+				for _, v := range criticals {
+					if colors[v]&(1<<bit) == 0 {
+						starts = append(starts, v)
+					}
+				}
+			} else {
+				for _, v := range criticals {
+					if colors[v]&(1<<bit) > 0 {
+						starts = append(starts, v)
+					}
+				}
 			}
 
 			adjList.Clear()
@@ -66,26 +87,32 @@ func Solve(n int, edges [][3]int, specials []int) int {
 			for _, edge := range edges {
 				from, to, weight := edge[0], edge[1], edge[2]
 				adjList.AddDirectedEdge(from, to, weight)
-			}
-			for _, v := range groupA {
-				adjList.AddDirectedEdge(START, v, 0)
-			}
-			for _, v := range groupB {
-				adjList.AddDirectedEdge(v, END, 0)
+				adjList.AddDirectedEdge(to, from, weight)
 			}
 
-			dist := DijkstraInternalCsr(n+2, adjList, START)
-			res = min(res, dist[END])
+			dist := DijkstraInternalCsr(n, adjList, starts)
+
+			if rev {
+				for i := range res {
+					if colors[i]&(1<<bit) > 0 {
+						res[i] = min(res[i], dist[i])
+					}
+				}
+			} else {
+				for i := range res {
+					if colors[i]&(1<<bit) == 0 {
+						res[i] = min(res[i], dist[i])
+					}
+				}
+			}
 		}
 	}
 
-	// 注意是有向图，因此分组时需要正反跑两遍
+	// 1 -> 0, 0 -> 1
 	cal(true)
 	cal(false)
 	return res
 }
-
-const INF int = 1e18
 
 type InternalCsr struct {
 	to     []int32
@@ -146,14 +173,16 @@ func (csr *InternalCsr) Copy() *InternalCsr {
 
 type Neighbor struct{ to, weight int }
 
-func DijkstraInternalCsr(n int, adjList *InternalCsr, start int) (dist []int) {
+func DijkstraInternalCsr(n int, adjList *InternalCsr, starts []int) (dist []int) {
 	dist = make([]int, n)
 	for i := range dist {
 		dist[i] = INF
 	}
-	dist[start] = 0
-
-	pq := NewHeap(func(a, b H) bool { return a.dist < b.dist }, []H{{dist: 0, node: start}})
+	pq := NewHeap(func(a, b H) bool { return a.dist < b.dist }, nil)
+	for _, v := range starts {
+		dist[v] = 0
+		pq.Push(H{dist: 0, node: v})
+	}
 
 	for pq.Len() > 0 {
 		curNode := pq.Pop()
@@ -278,4 +307,37 @@ func maxs(nums ...int) int {
 		}
 	}
 	return res
+}
+
+type V = int
+type Dictionary struct {
+	_idToValue []V
+	_valueToId map[V]int
+}
+
+// A dictionary that maps values to unique ids.
+func NewDictionary() *Dictionary {
+	return &Dictionary{
+		_valueToId: map[V]int{},
+	}
+}
+func (d *Dictionary) Id(value V) int {
+	res, ok := d._valueToId[value]
+	if ok {
+		return res
+	}
+	id := len(d._idToValue)
+	d._idToValue = append(d._idToValue, value)
+	d._valueToId[value] = id
+	return id
+}
+func (d *Dictionary) Value(id int) V {
+	return d._idToValue[id]
+}
+func (d *Dictionary) Has(value V) bool {
+	_, ok := d._valueToId[value]
+	return ok
+}
+func (d *Dictionary) Size() int {
+	return len(d._idToValue)
 }

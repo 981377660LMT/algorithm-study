@@ -434,6 +434,24 @@
       "    return adjList, edges, values"
     ]
   },
+  "unique": {
+    "scope": "go,golang",
+    "prefix": "unique",
+    "body": [
+      "func unique(nums []int) []int {",
+      " visited := make(map[int]struct{})",
+      " newNums := []int{}",
+      " for _, v := range nums {",
+      "\t if _, ok := visited[v]; !ok {",
+      "\t\t visited[v] = struct{}{}",
+      "\t\t newNums = append(newNums, v)",
+      "\t }",
+      " }",
+      " return newNums",
+      "}"
+    ],
+    "description": "unique"
+  },
   "go-记忆化dfs": {
     "scope": "go,golang",
     "prefix": "dfsIndexRemain",

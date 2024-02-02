@@ -27,7 +27,7 @@ import (
 )
 
 func main() {
-	fs := NewFastSetFrom(10, func(i int) bool { return i%2 == 0 })
+	fs := NewFastSetFrom(66, func(i int) bool { return true })
 	fmt.Println(fs)
 }
 

@@ -1,26 +1,235 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"sort"
 )
 
+const INF int = 1e18
+
 func main() {
-	rawTree := NewTree(5)
+	ColouredMountainHut()
+	// CF613D()
+}
+
+func demo() {
+	n := 5
+	rawTree := NewTree(n)
 	rawTree.AddEdge(0, 1, 1)
 	rawTree.AddEdge(0, 2, 2)
 	rawTree.AddEdge(1, 3, 3)
 	rawTree.AddEdge(1, 4, 4)
 	rawTree.Build(0)
 
-	nodes := []int{0, 1, 2, 3, 4}
-	newIds, newTree := CompressTree(rawTree, nodes)
+	isCritical := make([]bool, n)
+	criticals := []int{0, 1, 4}
+	for _, v := range criticals {
+		isCritical[v] = true
+	}
+	newIds, newTree := CompressTree(rawTree, criticals, false)
 	fmt.Println(newIds, newTree.Dist(0, 1, false))
+	for _, v := range criticals {
+		isCritical[v] = false
+	}
+}
+
+// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0439
+// 给定一棵树,每个点有一个颜色。
+// 对每一种颜色相同的点，求出每个点到其他点距离的最小值。保证每种颜色的点至少有两个。
+// !虚树上求点对距离.
+func ColouredMountainHut() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	colors := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &colors[i])
+	}
+	tree := NewTree(n)
+	for i := 0; i < n-1; i++ {
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		tree.AddEdge(u-1, v-1, 1)
+	}
+	tree.Build(0)
+
+	groupByColor := make(map[int][]int)
+	for i, c := range colors {
+		groupByColor[c] = append(groupByColor[c], i)
+	}
+
+	res := make([]int, n)
+	for i := 0; i < n; i++ {
+		res[i] = INF
+	}
+
+	isCritical := make([]bool, n)
+	for _, criticals := range groupByColor {
+		for _, v := range criticals {
+			isCritical[v] = true
+		}
+
+		newIds, newTree := CompressTree(tree, criticals, false)
+		adjList := newTree.Tree
+		starts := make([]int, 0, len(criticals)) // !获取critials 在新树上的编号
+		for i := 0; i < len(newIds); i++ {
+			if isCritical[newIds[i]] {
+				starts = append(starts, i)
+			}
+		}
+		minDistToOther, _ := MinDistToOther(adjList, starts)
+		for i := 0; i < len(starts); i++ {
+			node := newIds[starts[i]]
+			res[node] = min(res[node], minDistToOther[i])
+		}
+
+		for _, v := range criticals {
+			isCritical[v] = false
+		}
+	}
+
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
+}
+
+// 给定一棵树，每次询问给定 k个特殊点，找出尽量少的非特殊点使得删去这些点后特殊点两两不连通。∑k≤n.
+// 如果无法使得特殊点两两不连通，输出-1.
+// https://codeforces.com/problemset/problem/613/D
+func CF613D() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	tree := NewTree(n)
+	for i := 0; i < n-1; i++ {
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		tree.AddEdge(u-1, v-1, 1)
+	}
+	tree.Build(0)
+
+	// !dp[i] 表示子树中保留i个关键点时的最小删除点数
+	// ①:如果一个点被标记了,那么就要把他所有子树里有标记点的儿子都去掉
+	// ②:如果一个点没有被标记,但是这个点有两颗以上的子树里有标记点，那么这个点就要去掉,然后这棵子树就没有可标记点了
+	// ③:如果一个点子树里只有一个/没有标记点，那么就标记点的贡献挪到这个点上面来
+	solve := func(adjList [][][2]int, inCriticals []bool) int {
+		var dfs func(cur, pre int) [2]int // (zero, one)
+		dfs = func(cur, pre int) [2]int {
+			removeCost := 1
+			dp := [2]int{INF, INF}
+			if inCriticals[cur] {
+				removeCost = INF // 无法删除
+				dp[1] = 0
+			} else {
+				dp[0] = 0
+			}
+
+			for _, e := range adjList[cur] {
+				next := e[0]
+				if next == pre {
+					continue
+				}
+				subDp := dfs(next, cur)
+				ndp := [2]int{INF, INF}
+				for a := 0; a < 2; a++ {
+					for b := 0; b < 2; b++ {
+						if a == 1 && b == 1 { // !不能>=2个关键点
+							continue
+						}
+						ndp[a+b] = min(ndp[a+b], dp[a]+subDp[b])
+					}
+				}
+				dp = ndp
+				removeCost += min(subDp[0], subDp[1])
+			}
+
+			dp[0] = min(dp[0], removeCost)
+			return dp
+		}
+
+		dp := dfs(0, -1)
+		res := min(dp[0], dp[1])
+		if res >= INF {
+			res = -1
+		}
+		return res
+	}
+
+	isCritical := make([]bool, n)
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var k int
+		fmt.Fscan(in, &k)
+		criticals := make([]int, k)
+		for j := 0; j < k; j++ {
+			var v int
+			fmt.Fscan(in, &v)
+			v--
+			criticals[j] = v
+			isCritical[v] = true
+		}
+
+		nodes := append(criticals[:0:0], criticals...)
+		for _, v := range criticals {
+			if v != 0 {
+				nodes = append(nodes, tree.Parent[v]) // !父节点加进来
+			}
+		}
+		nodes = unique(nodes)
+
+		newIds, newTree := CompressTree(tree, nodes, true)
+		m := len(newIds)
+		inCriticals := make([]bool, m) // !压缩后的树中的节点是否在points中
+		for i := 0; i < m; i++ {
+			inCriticals[i] = isCritical[newIds[i]]
+		}
+		fmt.Println(solve(newTree.Tree, inCriticals))
+		for _, v := range criticals {
+			isCritical[v] = false
+		}
+	}
+}
+
+// 虚树+换根dp
+// https://codeforces.com/problemset/problem/1320/E
+func CF1320E() {
+
+}
+
+// P2495 [SDOI2011] 消耗战
+// 给定一棵树，每次询问给定 k个特殊点，需要断掉一些边使得从根节点无法到达任何特殊点，求最小需要断掉的边数。∑k≤2n.
+// https://www.luogu.com.cn/problem/P2495
+func P2495() {
+
+}
+
+// P4103 [HEOI2014] 大工程
+// 给定一棵树，每次询问给定 k个特殊点，求它们两两之间距离的距离和，最小距离和最大距离。∑k≤2n.
+// https://www.luogu.com.cn/problem/P4103
+func P4103() {
+
+}
+
+// No.901 K-ary εxtrεεmε
+// https://yukicoder.me/problems/3407
+// !给定q个查询,求虚树(最小的包含指定点集的连通子图)组成的的边权之和
+// !因为要从根结点出发的链上求路径边权之和,可以用前缀和(差分)来求
+func Yuki3407() {
+
 }
 
 // 返回树压缩后保留的节点编号和新的树.
-// 新的树保留了原树的边权.
-func CompressTree(rawTree *Tree, nodes []int) (remainNodes []int, newTree *Tree) {
+// !新的树保留了原树的边权.
+func CompressTree(rawTree *Tree, nodes []int, directed bool) (remainNodes []int, newTree *Tree) {
 	remainNodes = append(nodes[:0:0], nodes...)
 	sort.Slice(remainNodes, func(i, j int) bool { return rawTree.LID[remainNodes[i]] < rawTree.LID[remainNodes[j]] })
 	n := len(remainNodes)
@@ -64,6 +273,9 @@ func CompressTree(rawTree *Tree, nodes []int) (remainNodes []int, newTree *Tree)
 		v := remainNodes[i]
 		d := rawTree.DepthWeighted[v] - rawTree.DepthWeighted[p]
 		newTree.AddDirectedEdge(stack[len(stack)-1], i, d)
+		if !directed {
+			newTree.AddDirectedEdge(i, stack[len(stack)-1], d)
+		}
 		stack = append(stack, i)
 	}
 	newTree.Build(0)
@@ -423,4 +635,141 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
+
+func unique(nums []int) []int {
+	visited := make(map[int]struct{})
+	newNums := []int{}
+	for _, v := range nums {
+		if _, ok := visited[v]; !ok {
+			visited[v] = struct{}{}
+			newNums = append(newNums, v)
+		}
+	}
+	return newNums
+}
+
+func MinDistToOther(adjList [][][2]int, points []int) (dist []int, nearest []int) {
+	n := len(adjList)
+	dist = make([]int, n)
+	source1, source2 := make([]int, n), make([]int, n)
+	for i := 0; i < n; i++ {
+		dist[i] = INF
+		source1[i], source2[i] = -1, -1
+	}
+
+	pq := NewHeap(func(a, b H) bool { return a.dist < b.dist }, nil)
+	for _, v := range points {
+		pq.Push(H{dist: 0, node: v, source: v})
+	}
+
+	for pq.Len() > 0 {
+		item := pq.Pop()
+		curDist, cur, curSource := item.dist, item.node, item.source
+		if curSource == source1[cur] || curSource == source2[cur] {
+			continue
+		}
+		if source1[cur] == -1 {
+			source1[cur] = curSource
+		} else if source2[cur] == -1 {
+			source2[cur] = curSource
+		} else {
+			continue
+		}
+
+		if curSource != cur { // 出发点不为自己时，更新距离
+			dist[cur] = min(dist[cur], curDist)
+		}
+		for _, e := range adjList[cur] {
+			next, weight := e[0], e[1]
+			nextDist := curDist + weight
+			pq.Push(H{nextDist, next, curSource})
+		}
+	}
+
+	nearest = source2
+	for i, v := range points {
+		dist[i] = dist[v]
+		nearest[i] = nearest[v]
+	}
+	dist = dist[:len(points)]
+	nearest = nearest[:len(points)]
+	return
+}
+
+type H = struct{ dist, node, source int }
+
+func NewHeap(less func(a, b H) bool, nums []H) *Heap {
+	nums = append(nums[:0:0], nums...)
+	heap := &Heap{less: less, data: nums}
+	heap.heapify()
+	return heap
+}
+
+type Heap struct {
+	data []H
+	less func(a, b H) bool
+}
+
+func (h *Heap) Push(value H) {
+	h.data = append(h.data, value)
+	h.pushUp(h.Len() - 1)
+}
+
+func (h *Heap) Pop() (value H) {
+	if h.Len() == 0 {
+		panic("heap is empty")
+	}
+	value = h.data[0]
+	h.data[0] = h.data[h.Len()-1]
+	h.data = h.data[:h.Len()-1]
+	h.pushDown(0)
+	return
+}
+
+func (h *Heap) Top() (value H) {
+	value = h.data[0]
+	return
+}
+
+func (h *Heap) Len() int { return len(h.data) }
+
+func (h *Heap) heapify() {
+	n := h.Len()
+	for i := (n >> 1) - 1; i > -1; i-- {
+		h.pushDown(i)
+	}
+}
+
+func (h *Heap) pushUp(root int) {
+	for parent := (root - 1) >> 1; parent >= 0 && h.less(h.data[root], h.data[parent]); parent = (root - 1) >> 1 {
+		h.data[root], h.data[parent] = h.data[parent], h.data[root]
+		root = parent
+	}
+}
+
+func (h *Heap) pushDown(root int) {
+	n := h.Len()
+	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
+		right := left + 1
+		minIndex := root
+		if h.less(h.data[left], h.data[minIndex]) {
+			minIndex = left
+		}
+		if right < n && h.less(h.data[right], h.data[minIndex]) {
+			minIndex = right
+		}
+		if minIndex == root {
+			return
+		}
+		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
+		root = minIndex
+	}
 }

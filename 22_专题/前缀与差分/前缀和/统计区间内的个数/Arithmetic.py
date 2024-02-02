@@ -11,6 +11,20 @@
 from typing import Tuple
 
 
+def countOdds(lower: int, upper: int) -> int:
+    """区间[lower, upper]内的奇数个数."""
+    if lower > upper:
+        return 0
+    return arithmeticCount(lower, upper, 2, 1)
+
+
+def countEvens(lower: int, upper: int) -> int:
+    """区间[lower, upper]内的偶数个数."""
+    if lower > upper:
+        return 0
+    return arithmeticCount(lower, upper, 2, 0)
+
+
 def arithmeticCount(lower: int, upper: int, k: int, b: int) -> int:
     """区间[lower,upper]内形如k*x+b的个数."""
     if lower > upper:
@@ -158,6 +172,14 @@ if __name__ == "__main__":
                     res += cur
             return res
 
+        def countOddsNaive(low: int, high: int) -> int:
+            """区间[low, high]内的奇数个数."""
+            return sum(1 for i in range(low, high + 1) if i & 1)
+
+        def countEvensNaive(low: int, high: int) -> int:
+            """区间[low, high]内的偶数个数."""
+            return sum(1 for i in range(low, high + 1) if not i & 1)
+
         for _ in range(int(5e3)):
             x = random.randint(-int(5e3), int(5e3))
             k = random.randint(-int(5e3), int(5e3))
@@ -193,6 +215,15 @@ if __name__ == "__main__":
             assert res1 == res2, f"{res1} {res2}"
             res1 = arithmeticSum(lower, upper, k, b)
             res2 = arithmeticSumBruteForce(lower, upper, k, b)
+            assert res1 == res2, f"{res1} {res2}"
+        for _ in range(int(5e3)):
+            lower = random.randint(-int(5e3), int(5e3))
+            upper = random.randint(-int(5e3), int(5e3))
+            res1 = countOdds(lower, upper)
+            res2 = countOddsNaive(lower, upper)
+            assert res1 == res2, f"{res1} {res2}"
+            res1 = countEvens(lower, upper)
+            res2 = countEvensNaive(lower, upper)
             assert res1 == res2, f"{res1} {res2}"
 
         print("check success.")
