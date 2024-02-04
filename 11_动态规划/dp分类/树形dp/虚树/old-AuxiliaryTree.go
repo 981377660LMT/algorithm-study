@@ -16,14 +16,9 @@ import (
 	"sort"
 )
 
-// P4103 [HEOI2014] 大工程
-// https://www.luogu.com.cn/problem/P4103
-func P4103(n int, edges [][2]int, queries [][]int) []int {
+func main() {
 
 }
-
-// Kingdom and its Cities
-// https://www.luogu.com.cn/problem/CF613D
 
 type AuxiliaryTree struct {
 	G             [][]int // 原图邻接表(无向边)

@@ -26,7 +26,7 @@ func solve(grid [][]int, ops [][2]int) []int {
 		}
 	}
 
-	P := NewPreSum2D(leaves)
+	P := NewPreSum2DDense(leaves)
 	res := make([]int, 0, len(ops))
 	for _, op := range ops {
 		r, c := op[0], op[1]
@@ -48,9 +48,9 @@ const MOD int = 1e9 + 7
 
 type E = struct{ mul, zero int }
 
-func (*PreSum2D) e() E        { return E{1, 0} }
-func (*PreSum2D) op(a, b E) E { return E{a.mul * b.mul % MOD, a.zero + b.zero} }
-func (*PreSum2D) inv(a E) E   { return E{pow(a.mul, MOD-2, MOD), -a.zero} }
+func (*PreSum2DDense) e() E        { return E{1, 0} }
+func (*PreSum2DDense) op(a, b E) E { return E{a.mul * b.mul % MOD, a.zero + b.zero} }
+func (*PreSum2DDense) inv(a E) E   { return E{pow(a.mul, MOD-2, MOD), -a.zero} }
 func pow(base, exp, mod int) int {
 	base %= mod
 	res := 1
@@ -63,13 +63,13 @@ func pow(base, exp, mod int) int {
 	return res
 }
 
-type PreSum2D struct {
+type PreSum2DDense struct {
 	row, col int
 	data     []E
 }
 
-func NewPreSum2D(matrix [][]E) *PreSum2D {
-	res := &PreSum2D{}
+func NewPreSum2DDense(matrix [][]E) *PreSum2DDense {
+	res := &PreSum2DDense{}
 	row := len(matrix)
 	col := 0
 	if row > 0 {
@@ -104,9 +104,10 @@ func NewPreSum2D(matrix [][]E) *PreSum2D {
 }
 
 // [x1,x2) x [y1,y2)
-//  0 <= x1 <= x2 <= row
-//  0 <= y1 <= y2 <= col
-func (p *PreSum2D) Query(x1, x2, y1, y2 int) E {
+//
+//	0 <= x1 <= x2 <= row
+//	0 <= y1 <= y2 <= col
+func (p *PreSum2DDense) Query(x1, x2, y1, y2 int) E {
 	if x2 == 0 || y2 == 0 {
 		return p.e()
 	}
@@ -135,11 +136,6 @@ func (p *PreSum2D) Query(x1, x2, y1, y2 int) E {
 	return p.op(p.op(a, d), p.inv(p.op(b, c)))
 }
 
-//
-//
-//
-//
-//
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)

@@ -40,12 +40,12 @@ func solve(n int, edges [][3]int, q int, groups [][]int) []int {
 
 	lca := NewLCA(n, adjList, 0)
 	A := NewAuxiliaryTree(n, edges_)
-	visited := make([]bool, n) // 标记是否已经被分组
+	isCritical := make([]bool, n)
 	res := make([]int, q)
 	for i := 0; i < q; i++ {
 		points := groups[i]
 		for _, p := range points {
-			visited[p] = true
+			isCritical[p] = true
 		}
 
 		points = append(points, 0)    // 加上根节点组成虚树
@@ -62,7 +62,7 @@ func solve(n int, edges [][3]int, q int, groups [][]int) []int {
 				}
 				nextRes := dfs2(next, cur)
 				minWeight := lca.QueryMinWeight(cur, next, true)
-				if visited[next] {
+				if isCritical[next] {
 					res += minWeight
 				} else {
 					res += min(nextRes, minWeight)
@@ -73,7 +73,7 @@ func solve(n int, edges [][3]int, q int, groups [][]int) []int {
 
 		res[i] = dfs2(root, -1)
 		for _, p := range points {
-			visited[p] = false
+			isCritical[p] = false
 		}
 	}
 

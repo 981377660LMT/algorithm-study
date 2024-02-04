@@ -1,5 +1,5 @@
 import { BIT4 } from '../../../../6_tree/树状数组/经典题/BIT'
-import { DiffMatrix, PreSumMatrix } from '../../前缀和/二维前缀和/PreSumMatrix'
+import { DiffMatrix, PreSumMatrix } from '../../前缀和/二维前缀和/PreSum2DDense'
 
 // 二维树状数组更新
 function possibleToStamp(grid: number[][], h: number, w: number): boolean {

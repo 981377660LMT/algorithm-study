@@ -133,7 +133,7 @@
    - [Rerooting Dp](6_tree/%E7%BB%8F%E5%85%B8%E9%A2%98/%E5%90%8E%E5%BA%8Fdfs%E7%BB%9F%E8%AE%A1%E4%BF%A1%E6%81%AF/%E6%8D%A2%E6%A0%B9dp/Rerooting.py)
    - [BfsNumbering](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/dfs%E5%BA%8F/BfsNumbering.go)
    - [Tree Centroid](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/%E6%A0%91%E7%9A%84%E9%87%8D%E5%BF%83.py)
-   - [AuxiliaryTree](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E5%88%86%E7%B1%BB/%E6%A0%91%E5%BD%A2dp/%E8%99%9A%E6%A0%91/AuxiliaryTree.go)
+   - [AuxiliaryTree](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E5%88%86%E7%B1%BB/%E6%A0%91%E5%BD%A2dp/%E8%99%9A%E6%A0%91/CompressTree.go)
    - [LCA](6_tree/LCA%E9%97%AE%E9%A2%98/%E5%80%8D%E5%A2%9E/LCAHLD-FAST.py)
    - [OfflineLCA](6_tree/LCA%E9%97%AE%E9%A2%98/tarjan%E7%A6%BB%E7%BA%BF/OfflineLCA.ts)
    - [DFS Order](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/dfs%E5%BA%8F/DFSOrder.py)
@@ -342,7 +342,6 @@
     - [RangeModRangeSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeModRangeSum.ts)
     - [RangeStepSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/step/RangeStepSum.go)
     - [PointSetModSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/step/PointSetModSum.go)
-
     - [Bootstrap](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E5%89%8D%E7%AB%AF%E7%BB%83%E4%B9%A0%E9%A2%98/bootstrap.ts)
     - [WindowMex](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E8%8E%AB%E9%98%9F/WindowMex.ts)
     - [ParserCombinator](22_%E4%B8%93%E9%A2%98/%E6%A7%8B%E6%96%87%E8%A7%A3%E6%9E%90/%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90/ParserCombinators/verify/Parser.ts)

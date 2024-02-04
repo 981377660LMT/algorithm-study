@@ -41,6 +41,9 @@ const MOD int = 1e9 + 7
 
 // RangeAffinePointGet
 
+// 是否满足交换律.
+const COMMUTATIVE = true
+
 type Id = struct{ mul, add int }
 
 func (*SegmentTreeDual) id() Id { return Id{mul: 1} }
@@ -54,6 +57,7 @@ type SegmentTreeDual struct {
 	n            int
 	size, height int
 	lazy         []Id
+	unit         Id
 }
 
 func NewSegmentTreeDual(n int) *SegmentTreeDual {
@@ -65,16 +69,17 @@ func NewSegmentTreeDual(n int) *SegmentTreeDual {
 		height++
 	}
 	lazy := make([]Id, 2*size)
+	unit := res.id()
 	for i := 0; i < 2*size; i++ {
-		lazy[i] = res.id()
+		lazy[i] = unit
 	}
 	res.n = n
 	res.size = size
 	res.height = height
 	res.lazy = lazy
+	res.unit = unit
 	return res
 }
-
 func (seg *SegmentTreeDual) Get(index int) Id {
 	index += seg.size
 	for i := seg.height; i > 0; i-- {
@@ -82,7 +87,14 @@ func (seg *SegmentTreeDual) Get(index int) Id {
 	}
 	return seg.lazy[index]
 }
-
+func (seg *SegmentTreeDual) GetAll() []Id {
+	for i := 0; i < seg.size; i++ {
+		seg.propagate(i)
+	}
+	res := make([]Id, seg.n)
+	copy(res, seg.lazy[seg.size:seg.size+seg.n])
+	return res
+}
 func (seg *SegmentTreeDual) Update(left, right int, value Id) {
 	if left < 0 {
 		left = 0
@@ -95,12 +107,14 @@ func (seg *SegmentTreeDual) Update(left, right int, value Id) {
 	}
 	left += seg.size
 	right += seg.size
-	for i := seg.height; i > 0; i-- {
-		if (left>>i)<<i != left {
-			seg.propagate(left >> i)
-		}
-		if (right>>i)<<i != right {
-			seg.propagate((right - 1) >> i)
+	if !COMMUTATIVE {
+		for i := seg.height; i > 0; i-- {
+			if (left>>i)<<i != left {
+				seg.propagate(left >> i)
+			}
+			if (right>>i)<<i != right {
+				seg.propagate((right - 1) >> i)
+			}
 		}
 	}
 	for left < right {
@@ -116,16 +130,13 @@ func (seg *SegmentTreeDual) Update(left, right int, value Id) {
 		right >>= 1
 	}
 }
-
-func (st *SegmentTreeDual) GetAll() []Id {
-	for i := 0; i < st.size; i++ {
-		st.propagate(i)
+func (seg *SegmentTreeDual) propagate(k int) {
+	if seg.lazy[k] != seg.unit {
+		seg.lazy[k<<1] = seg.composition(seg.lazy[k], seg.lazy[k<<1])
+		seg.lazy[k<<1|1] = seg.composition(seg.lazy[k], seg.lazy[k<<1|1])
+		seg.lazy[k] = seg.unit
 	}
-	res := make([]Id, st.n)
-	copy(res, st.lazy[st.size:st.size+st.n])
-	return res
 }
-
 func (st *SegmentTreeDual) String() string {
 	var buf bytes.Buffer
 	buf.WriteByte('[')
@@ -137,12 +148,4 @@ func (st *SegmentTreeDual) String() string {
 	}
 	buf.WriteByte(']')
 	return buf.String()
-}
-
-func (seg *SegmentTreeDual) propagate(k int) {
-	if seg.lazy[k] != seg.id() {
-		seg.lazy[k<<1] = seg.composition(seg.lazy[k], seg.lazy[k<<1])
-		seg.lazy[k<<1|1] = seg.composition(seg.lazy[k], seg.lazy[k<<1|1])
-		seg.lazy[k] = seg.id()
-	}
 }

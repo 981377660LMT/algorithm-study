@@ -27,7 +27,8 @@ import (
 )
 
 func main() {
-	StampRally()
+	// StampRally()
+	CF1706E()
 	// StaticRangeKthSmallest()
 	// 矩阵乘法()
 	// 天天爱射击()
@@ -92,6 +93,66 @@ func StampRally() []int {
 		res[i]++
 	}
 	return res
+}
+
+// https://www.luogu.com.cn/problem/CF1706E
+// Qpwoeirut and Vertices
+// 给出 n 个点， m 条边的不带权连通无向图， q 次询问至少要加完编号前多少的边，
+// 才能使得 [start,end) 中的所有点两两连通。
+//
+// !把[start,end]区间内联通条件拆成(start,start+1),(start+1,start+2),...,(end-2,end-1)
+// 分别联通至少需要有几条边，答案取max即可.
+func CF1706E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var T int
+	fmt.Fscan(in, &T)
+
+	solve := func() {
+		var n, m, q int
+		fmt.Fscan(in, &n, &m, &q)
+		edges := make([][2]int, m)
+		for i := 0; i < m; i++ {
+			var u, v int
+			fmt.Fscan(in, &u, &v)
+			u, v = u-1, v-1
+			edges[i] = [2]int{u, v}
+		}
+
+		uf := NewUnionFindArray(n)
+		reset := func() {
+			uf.Clear()
+		}
+		mutate := func(mutationId int) {
+			u, v := edges[mutationId][0], edges[mutationId][1]
+			uf.Union(u, v)
+		}
+		predicate := func(queryId int) bool {
+			return uf.Find(queryId) == uf.Find(queryId+1)
+		}
+
+		res := ParallelBinarySearch(m, n-1, reset, mutate, predicate)
+
+		seg := NewSegmentTreeFrom(res)
+		for i := 0; i < q; i++ {
+			var start, end int
+			fmt.Fscan(in, &start, &end)
+			start--
+			end--
+			if start == end {
+				fmt.Fprint(out, 0, " ")
+			} else {
+				fmt.Fprint(out, seg.Query(start, end)+1, " ")
+			}
+		}
+		fmt.Fprintln(out)
+	}
+
+	for t := 0; t < T; t++ {
+		solve()
+	}
 }
 
 // 静态区间第 k 小
@@ -719,4 +780,195 @@ func (ufa *UnionFindArray) Clear() {
 
 func (ufa *UnionFindArray) GetSize(key int) int {
 	return -ufa.data[ufa.Find(key)]
+}
+
+const INF int = 1e18
+
+// PointSetRangeMax
+
+type E = int
+
+func (*SegmentTree) e() E        { return -INF }
+func (*SegmentTree) op(a, b E) E { return max(a, b) }
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+type SegmentTree struct {
+	n, size int
+	seg     []E
+}
+
+func NewSegmentTree(n int, f func(int) E) *SegmentTree {
+	res := &SegmentTree{}
+	size := 1
+	for size < n {
+		size <<= 1
+	}
+	seg := make([]E, size<<1)
+	for i := range seg {
+		seg[i] = res.e()
+	}
+	for i := 0; i < n; i++ {
+		seg[i+size] = f(i)
+	}
+	for i := size - 1; i > 0; i-- {
+		seg[i] = res.op(seg[i<<1], seg[i<<1|1])
+	}
+	res.n = n
+	res.size = size
+	res.seg = seg
+	return res
+}
+func NewSegmentTreeFrom(leaves []E) *SegmentTree {
+	res := &SegmentTree{}
+	n := len(leaves)
+	size := 1
+	for size < n {
+		size <<= 1
+	}
+	seg := make([]E, size<<1)
+	for i := range seg {
+		seg[i] = res.e()
+	}
+	for i := 0; i < n; i++ {
+		seg[i+size] = leaves[i]
+	}
+	for i := size - 1; i > 0; i-- {
+		seg[i] = res.op(seg[i<<1], seg[i<<1|1])
+	}
+	res.n = n
+	res.size = size
+	res.seg = seg
+	return res
+}
+func (st *SegmentTree) Get(index int) E {
+	if index < 0 || index >= st.n {
+		return st.e()
+	}
+	return st.seg[index+st.size]
+}
+func (st *SegmentTree) Set(index int, value E) {
+	if index < 0 || index >= st.n {
+		return
+	}
+	index += st.size
+	st.seg[index] = value
+	for index >>= 1; index > 0; index >>= 1 {
+		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+	}
+}
+func (st *SegmentTree) Update(index int, value E) {
+	if index < 0 || index >= st.n {
+		return
+	}
+	index += st.size
+	st.seg[index] = st.op(st.seg[index], value)
+	for index >>= 1; index > 0; index >>= 1 {
+		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+	}
+}
+
+// [start, end)
+func (st *SegmentTree) Query(start, end int) E {
+	if start < 0 {
+		start = 0
+	}
+	if end > st.n {
+		end = st.n
+	}
+	if start >= end {
+		return st.e()
+	}
+	leftRes, rightRes := st.e(), st.e()
+	start += st.size
+	end += st.size
+	for start < end {
+		if start&1 == 1 {
+			leftRes = st.op(leftRes, st.seg[start])
+			start++
+		}
+		if end&1 == 1 {
+			end--
+			rightRes = st.op(st.seg[end], rightRes)
+		}
+		start >>= 1
+		end >>= 1
+	}
+	return st.op(leftRes, rightRes)
+}
+func (st *SegmentTree) QueryAll() E { return st.seg[1] }
+func (st *SegmentTree) GetAll() []E {
+	res := make([]E, st.n)
+	copy(res, st.seg[st.size:st.size+st.n])
+	return res
+}
+
+// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
+func (st *SegmentTree) MaxRight(left int, predicate func(E) bool) int {
+	if left == st.n {
+		return st.n
+	}
+	left += st.size
+	res := st.e()
+	for {
+		for left&1 == 0 {
+			left >>= 1
+		}
+		if !predicate(st.op(res, st.seg[left])) {
+			for left < st.size {
+				left <<= 1
+				if tmp := st.op(res, st.seg[left]); predicate(tmp) {
+					res = tmp
+					left++
+				}
+			}
+			return left - st.size
+		}
+		res = st.op(res, st.seg[left])
+		left++
+		if (left & -left) == left {
+			break
+		}
+	}
+	return st.n
+}
+
+// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
+func (st *SegmentTree) MinLeft(right int, predicate func(E) bool) int {
+	if right == 0 {
+		return 0
+	}
+	right += st.size
+	res := st.e()
+	for {
+		right--
+		for right > 1 && right&1 == 1 {
+			right >>= 1
+		}
+		if !predicate(st.op(st.seg[right], res)) {
+			for right < st.size {
+				right = right<<1 | 1
+				if tmp := st.op(st.seg[right], res); predicate(tmp) {
+					res = tmp
+					right--
+				}
+			}
+			return right + 1 - st.size
+		}
+		res = st.op(st.seg[right], res)
+		if right&-right == right {
+			break
+		}
+	}
+	return 0
 }

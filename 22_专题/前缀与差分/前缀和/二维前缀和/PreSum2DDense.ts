@@ -70,7 +70,7 @@ class DiffMatrix {
 /**
  * 二维前缀和数组.查询静态矩阵中指定矩形区间的元素总和.
  */
-class PreSumMatrix {
+class PreSum2DDense {
   private readonly _preSum: number[]
   private readonly _col: number
 
@@ -84,8 +84,7 @@ class PreSumMatrix {
       const offsetP1 = (i + 1) * (col + 1)
       const matRow = mat[i]
       for (let j = 0; j < col; j++) {
-        preSum[offsetP1 + j + 1] =
-          matRow[j] + preSum[offsetP0 + j + 1] + preSum[offsetP1 + j] - preSum[offsetP0 + j]
+        preSum[offsetP1 + j + 1] = matRow[j] + preSum[offsetP0 + j + 1] + preSum[offsetP1 + j] - preSum[offsetP0 + j]
       }
     }
     this._preSum = preSum
@@ -107,7 +106,7 @@ class PreSumMatrix {
 }
 
 if (require.main === module) {
-  const nm = new PreSumMatrix([
+  const nm = new PreSum2DDense([
     [1, 2, 3],
     [4, 5, 6],
     [7, 8, 9]
@@ -116,4 +115,4 @@ if (require.main === module) {
   console.log(nm.queryRange(1, 1, 2, 2))
 }
 
-export { PreSumMatrix, DiffMatrix }
+export { PreSum2DDense, DiffMatrix }

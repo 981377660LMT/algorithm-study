@@ -203,7 +203,7 @@ class BitSet {
   private readonly _bucketCount: number
 
   constructor(readonly n: number) {
-    const size = (n + 31) >> 5
+    const size = (n >>> 5) + 1
     this._bucketCount = size
     this._bitset = new Uint32Array(size)
     this._fenwick = new Uint32Array(size)

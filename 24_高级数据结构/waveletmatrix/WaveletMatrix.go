@@ -19,11 +19,17 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 )
 
 func main() {
+	CF813E()
+}
+
+func demo() {
 	nums := []int{1, 2, 3, 1, 5, 6, 7, 8, 9, 10}
 	M := NewWaveletMatrix(nums)
 
@@ -41,12 +47,63 @@ func main() {
 
 const INF int = 1e18
 
+// Army Creation
+// https://www.luogu.com.cn/problem/CF813E
+// 有n个数，q次询问，每次询问[l,r]中最多可以选多少个数使得相同的数最多有k个，强制在线.
+// !k不变，可以预处理出每个数前面的第k个相同的数在哪.
+// !对于询问区间[l,r]，若前面的第k个数的位置小于l，则可以选择这个数
+func CF813E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, k int
+	fmt.Fscan(in, &n, &k)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	preRes := 0
+	parse := func(v int) int {
+		return (v+preRes)%n + 1
+	}
+
+	mp := make(map[int][]int)
+	for i, v := range nums {
+		mp[v] = append(mp[v], i)
+	}
+	maxStart := make([]int, n) // 选择下标为i的数时，区间的左端点需要严格小于maxStart[i]
+	for _, pos := range mp {
+		for i := k; i < len(pos); i++ {
+			maxStart[pos[i]] = pos[i-k] + 1
+		}
+	}
+	wm := NewWaveletMatrix(maxStart)
+	query := func(start, end int) int {
+		return wm.CountRange(start, end, 0, start+1)
+	}
+
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var start, end int
+		fmt.Fscan(in, &start, &end)
+		start = parse(start)
+		end = parse(end)
+		if start > end {
+			start, end = end, start
+		}
+		start--
+		preRes = query(start, end)
+		fmt.Fprintln(out, preRes)
+	}
+}
+
 // 给你一个长度为 n 下标从 0 开始的整数数组 nums ，它包含 1 到 n 的所有数字，请你返回上升四元组的数目。
 // 如果一个四元组 (i, j, k, l) 满足以下条件，我们称它是上升的：
 // 0 <= i < j < k < l < n 且
 // nums[i] < nums[k] < nums[j] < nums[l] 。
 // 4 <= nums.length <= 4000, nums 中所有数字 互不相同 ，nums 是一个排列。
-
 // https://leetcode.cn/problems/count-increasing-quadruplets/
 func countQuadruplets(nums []int) int64 {
 	W := NewWaveletMatrix(nums)
