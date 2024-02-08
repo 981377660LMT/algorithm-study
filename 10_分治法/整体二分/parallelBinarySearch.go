@@ -661,7 +661,7 @@ func (ft *BIT2DPointAddRangeSum) sumXPrefix(x, ry int) int {
 	return pos
 }
 
-func DiscretizeCompressed(nums []int, offset int) (getRank func(int) int, count int) {
+func DiscretizeCompressed(nums []int, offset int) (getRank func(value int) int, getValue func(rank int) int, count int) {
 	set := make(map[int]struct{}, len(nums))
 	for _, v := range nums {
 		set[v] = struct{}{}
@@ -677,6 +677,7 @@ func DiscretizeCompressed(nums []int, offset int) (getRank func(int) int, count 
 		mp[v] = i + offset
 	}
 	getRank = func(v int) int { return mp[v] }
+	getValue = func(r int) int { return rank[r-offset] }
 	count = len(nums)
 	return
 }

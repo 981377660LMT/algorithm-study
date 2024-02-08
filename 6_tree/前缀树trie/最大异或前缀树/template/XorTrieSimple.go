@@ -47,18 +47,18 @@ func max(a, b int) int {
 }
 
 type Node struct {
-	count    int
+	count    int32
 	children [2]*Node // 数组比 left,right 更快
 }
 
 type XORTrieSimple struct {
-	bit  int
+	bit  int32
 	root *Node
 }
 
 func NewXORTrie(upper int) *XORTrieSimple {
 	return &XORTrieSimple{
-		bit:  bits.Len(uint(upper)),
+		bit:  int32(bits.Len(uint(upper))),
 		root: &Node{},
 	}
 }

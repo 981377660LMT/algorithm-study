@@ -30,6 +30,7 @@ class FastSet {
     }
     this._lg = seg.length
     this._seg = seg
+    this._size = initValue ? this._n : 0
   }
 
   insert(i: number): boolean {
@@ -118,10 +119,7 @@ class FastSet {
    * 遍历[start,end)区间内的元素.
    */
   enumerateRange(start: number, end: number, f: (v: number) => void): void {
-    let x = start - 1
-    while (true) {
-      x = this.next(x + 1)
-      if (x >= end) break
+    for (let x = this.next(start); x < end; x = this.next(x + 1)) {
       f(x)
     }
   }

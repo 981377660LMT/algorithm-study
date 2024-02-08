@@ -5,7 +5,7 @@ class XorTrie {
   private readonly _multiset: boolean
   private readonly _maxLog: number
   private readonly _xEnd: number
-  private readonly _vList: number[]
+  private readonly _vList: Int32Array
   private readonly _edges: Int32Array
   private readonly _size: Int32Array
   private readonly _endCount: Int32Array
@@ -28,7 +28,7 @@ class XorTrie {
     this._multiset = allowMultipleElements
     this._maxLog = maxLog
     this._xEnd = 2 ** maxLog // !不要用1 << maxLog, 会溢出
-    this._vList = Array(maxLog + 1).fill(0)
+    this._vList = new Int32Array(maxLog + 1)
     this._edges = new Int32Array(2 * n).fill(-1)
     this._size = new Int32Array(n)
     this._endCount = new Int32Array(n)

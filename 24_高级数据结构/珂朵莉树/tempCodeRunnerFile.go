@@ -1,0 +1,1 @@
+	fs := NewFastSetFrom(n, func(i int) bool { return true })

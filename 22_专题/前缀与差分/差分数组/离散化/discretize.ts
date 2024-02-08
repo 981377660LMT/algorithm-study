@@ -34,12 +34,13 @@ function discretizeSparse(nums: number[], offset = 0): [getRank: (num: number) =
  * - getRank: 给定一个数,返回它的排名`(offset ~ offset + count)`.
  * - count: 离散化(去重)后的元素个数.
  */
-function discretizeCompressed(nums: number[], offset = 0): [getRank: (num: number) => number, count: number] {
+function discretizeCompressed(nums: number[], offset = 0): [getRank: (num: number) => number, getValue: (rank: number) => number, count: number] {
   const allNums = [...new Set(nums)].sort((a, b) => a - b)
   const mp = new Map<number, number>()
   for (let index = 0; index < allNums.length; index++) mp.set(allNums[index], index + offset)
   const getRank = (num: number) => mp.get(num)!
-  return [getRank, allNums.length]
+  const getValue = (rank: number) => allNums[rank - offset]
+  return [getRank, getValue, allNums.length]
 }
 
 /**

@@ -8,7 +8,7 @@
 
 
 from typing import List
-from 二维差分模板 import DiffMatrix
+from Diff2D import Diff2D
 
 
 class Solution:
@@ -27,13 +27,11 @@ class Solution:
 
         # 二维差分
         row, col = len(sortedX), len(sortedY)
-        diffMatrix = DiffMatrix([[0] * col for _ in range(row)])
+        diffMatrix = Diff2D([[0] * col for _ in range(row)])
         for x, y, side in forceField:
             r1, c1 = rankX[2 * x - side], rankY[2 * y - side]
             r2, c2 = rankX[2 * x + side], rankY[2 * y + side]
             diffMatrix.add(r1, c1, r2, c2, 1)
-
-        diffMatrix.update()
 
         res = 0
         for i in range(row):

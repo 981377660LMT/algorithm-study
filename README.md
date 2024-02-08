@@ -271,8 +271,8 @@
 
     - [1D PreSumSuffixSum](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/preSumSuffixSum.py)
     - [1D Diff](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/Diff.py)
-    - [2D PreSum Matrix](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
-    - [2D Diff Matrix](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86%E6%A8%A1%E6%9D%BF.py)
+    - [2D PreSum Matrix](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/Diff2D.py)
+    - [2D Diff Matrix](22_%E4%B8%93%E9%A2%98/%E5%89%8D%E7%BC%80%E4%B8%8E%E5%B7%AE%E5%88%86/%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E5%B7%AE%E5%88%86/Diff2D.py)
     - [SparseTable](22_%E4%B8%93%E9%A2%98/RMQ%E9%97%AE%E9%A2%98/SparseTable.py)
     - [SparseTableSqrt](22_%E4%B8%93%E9%A2%98/RMQ%E9%97%AE%E9%A2%98/SparseTableSqrt.ts)
     - [SqrtTree](22_%E4%B8%93%E9%A2%98/RMQ%E9%97%AE%E9%A2%98/SqrtTree.ts)
@@ -349,6 +349,8 @@
     - [MedianFinderSortedList](19_%E6%95%B0%E5%AD%A6/%E4%B8%AD%E4%BD%8D%E6%95%B0/MedianFinder/MedianFinderSortedList.go)
     - [CheckAllSubarray](22_%E4%B8%93%E9%A2%98/%E5%90%AF%E5%8F%91%E5%BC%8F%E5%90%88%E5%B9%B6/%E5%90%AF%E5%8F%91%E5%BC%8F%E5%88%86%E8%A3%82/CheckAllSubarray.go)
     - [BinaryGrouping](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%88%86%E7%BB%84/CF710F-StringQueries-%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%88%86%E7%BB%84.go)
+    - [StaticRangeCountDistinctOffline](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%A2%9C%E8%89%B2%E7%A7%8D%E7%B1%BB%E6%95%B0/StaticRangeCountDistinctOffline-01%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84%E7%A6%BB%E7%BA%BF%E6%B1%82%E5%8C%BA%E9%97%B4%E7%A7%8D%E7%B1%BB%E6%95%B0.go)
+    - [StaticRangeCountDistinctOnline](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%A2%9C%E8%89%B2%E7%A7%8D%E7%B1%BB%E6%95%B0/StaticRangeCountDistinctOnline-%E4%B8%BB%E5%B8%AD%E6%A0%91%E5%9C%A8%E7%BA%BF%E6%B1%82%E5%8C%BA%E9%97%B4%E7%A7%8D%E7%B1%BB%E6%95%B0.go)
     - WaveletMatrix
       - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)
       - [WaveletMatrixSum](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrixSum.go)

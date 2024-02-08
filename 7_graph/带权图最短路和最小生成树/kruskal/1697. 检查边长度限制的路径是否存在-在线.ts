@@ -3,16 +3,12 @@
 import { UnionFindArray } from '../../../14_并查集/UnionFind'
 import { SparseTable } from '../../../22_专题/RMQ问题/SparseTable'
 import { Tree } from '../../../6_tree/重链剖分/Tree'
-import { kruskal2 } from './模板'
+import { kruskal2 } from './Kruskal'
 
 // 1.求出最小生成树森林是最优的(Kruskal重构树)
 // 2.求出最小生成树森林后，再求出两个点路径上的最大边权
 
-function distanceLimitedPathsExist(
-  n: number,
-  edgeList: number[][],
-  queries: number[][]
-): boolean[] {
+function distanceLimitedPathsExist(n: number, edgeList: number[][], queries: number[][]): boolean[] {
   const [forestEdges] = kruskal2(n, edgeList)
   const uf = new UnionFindArray(n)
   const tree = new Tree(n)

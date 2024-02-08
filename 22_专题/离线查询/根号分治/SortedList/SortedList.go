@@ -49,8 +49,8 @@ import (
 )
 
 func main() {
-
-	abc241_d()
+	// abc241_d()
+	CF899F()
 }
 
 const INF int = 1e18
@@ -103,7 +103,70 @@ func abc241_d() {
 			}
 		}
 	}
+}
 
+// Letters Removing
+// https://www.luogu.com.cn/problem/CF899F
+// 长度为n的串，q次操作，删除一段区间内的所有为c的字符，输出删除完毕后的字符串。
+// 字符集为大小写字母+数字0-9.注意每次删除完后，下标会变化。
+//
+// !set维护每个字符的位置，再开一个树状数组维护从0到i被删了几个点，
+// !删除前可以先通过二分求出给出的位置在原字符串的位置，
+// !然后在set中二分出那个区间，每次删除只要在set中erase并且在树状数组那个下标+1即可
+func CF899F() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	var s string
+	fmt.Fscan(in, &s)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		nums[i] = int(s[i])
+	}
+
+	mp := make([]*SortedList, 128)
+	for i := 0; i < len(mp); i++ {
+		mp[i] = NewSortedList(func(a, b int) bool { return a < b })
+	}
+	for i, v := range nums {
+		mp[v].Add(i)
+	}
+	bit01 := NewBitArrayFrom(n, func(i int) int { return 1 }) // 维护是否被删除
+
+	for i := 0; i < q; i++ {
+		var left, right int
+		var c string
+		fmt.Fscan(in, &left, &right, &c)
+		left--
+		right--
+		num := int(c[0])
+
+		left = bit01.Kth(left)
+		right = bit01.Kth(right)
+		pos := mp[num]
+		for {
+			it := pos.BisectLeft(left)
+			if it == pos.Len() {
+				break
+			}
+			v := pos.At(it)
+			if v > right {
+				break
+			}
+			bit01.Add(v, -1)
+			pos.Discard(v)
+		}
+	}
+
+	total := bit01.QueryAll()
+	res := make([]string, total)
+	for i := 0; i < total; i++ {
+		res[i] = string(nums[bit01.Kth(i)])
+	}
+	fmt.Fprintln(out, strings.Join(res, ""))
 }
 
 // 1e5 -> 200, 2e5 -> 400
@@ -674,6 +737,117 @@ func (it *Iterator) Value() (res S, ok bool) {
 	res = block[it.index]
 	ok = true
 	return
+}
+
+// !Point Add Range Sum, 0-based.
+type BITArray struct {
+	n     int
+	total int
+	data  []int
+}
+
+func NewBitArray(n int) *BITArray {
+	res := &BITArray{n: n, data: make([]int, n)}
+	return res
+}
+
+func NewBitArrayFrom(n int, f func(i int) int) *BITArray {
+	total := 0
+	data := make([]int, n)
+	for i := 0; i < n; i++ {
+		data[i] = f(i)
+		total += data[i]
+	}
+	for i := 1; i <= n; i++ {
+		j := i + (i & -i)
+		if j <= n {
+			data[j-1] += data[i-1]
+		}
+	}
+	return &BITArray{n: n, total: total, data: data}
+}
+
+func (b *BITArray) Add(index int, v int) {
+	b.total += v
+	for index++; index <= b.n; index += index & -index {
+		b.data[index-1] += v
+	}
+}
+
+// [0, end).
+func (b *BITArray) QueryPrefix(end int) int {
+	if end > b.n {
+		end = b.n
+	}
+	res := 0
+	for ; end > 0; end -= end & -end {
+		res += b.data[end-1]
+	}
+	return res
+}
+
+// [start, end).
+func (b *BITArray) QueryRange(start, end int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.n {
+		end = b.n
+	}
+	if start >= end {
+		return 0
+	}
+	if start == 0 {
+		return b.QueryPrefix(end)
+	}
+	pos, neg := 0, 0
+	for end > start {
+		pos += b.data[end-1]
+		end &= end - 1
+	}
+	for start > end {
+		neg += b.data[start-1]
+		start &= start - 1
+	}
+	return pos - neg
+}
+
+func (b *BITArray) QueryAll() int {
+	return b.total
+}
+
+func (b *BITArray) MaxRight(check func(index, preSum int) bool) int {
+	i := 0
+	s := 0
+	k := 1
+	for 2*k <= b.n {
+		k *= 2
+	}
+	for k > 0 {
+		if i+k-1 < b.n {
+			t := s + b.data[i+k-1]
+			if check(i+k, t) {
+				i += k
+				s = t
+			}
+		}
+		k >>= 1
+	}
+	return i
+}
+
+// 0/1 树状数组查找第 k(0-based) 个1的位置.
+// UpperBound.
+func (b *BITArray) Kth(k int) int {
+	return b.MaxRight(func(index, preSum int) bool { return preSum <= k })
+}
+
+func (b *BITArray) String() string {
+	sb := []string{}
+	for i := 0; i < b.n; i++ {
+		sb = append(sb, fmt.Sprintf("%d", b.QueryRange(i, i+1)))
+	}
+	return fmt.Sprintf("BitArray: [%v]", strings.Join(sb, ", "))
 }
 
 func min(a, b int) int {

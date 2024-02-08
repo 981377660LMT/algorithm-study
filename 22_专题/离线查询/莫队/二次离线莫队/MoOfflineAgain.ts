@@ -171,7 +171,7 @@ if (require.main === module) {
   function staticRangeInversionsQuery(nums: number[], ranges: [start: number, end: number][]): number[] {
     const n = nums.length
     const q = ranges.length
-    const [rank, size] = discretizeCompressed(nums)
+    const [rank, _, size] = discretizeCompressed(nums)
     const newNums = new Uint32Array(n)
     for (let i = 0; i < n; i++) newNums[i] = rank(nums[i])
     const bit = new BITRangeBlockFastQuery(size)

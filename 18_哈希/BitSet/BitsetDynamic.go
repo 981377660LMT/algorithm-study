@@ -102,8 +102,8 @@ func CF911G() {
 		if x == y || start >= end {
 			return
 		}
-		slice1 := bitsets[x].Slice(start, end)
-		bitsets[y].IOrRange(start, end, slice1)
+		sliceX := bitsets[x].Slice(start, end)
+		bitsets[y].IOrRange(start, end, sliceX)
 		bitsets[x].DiscardRange(start, end)
 	}
 

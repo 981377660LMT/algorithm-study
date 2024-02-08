@@ -11,10 +11,70 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 	"strings"
 )
+
+func main() {
+	CF1288E()
+}
+
+// https://www.luogu.com.cn/problem/CF1288E
+// 给定一个数组，元素为0-n-1，不断进行把一个数组中的一个元素插入数组开头，求出每个元素出现位置的最小值和最大值。
+//
+// n+q 个位置，每个位置0/1表示这个位置是否有数字.
+// !虽然无法很方便的用数组来模拟每个数字向前移动的情况，但是我们可以很方便的用数组来模拟每个数字添加到尾部的操作
+// !因为难以整体移动数组，因此只能维护每个数出现的位置
+func CF1288E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	moved := make([]int, q)
+	for i := range moved {
+		fmt.Fscan(in, &moved[i])
+		moved[i]--
+	}
+
+	res := make([][2]int, n)
+	for i := 0; i < n; i++ {
+		res[i] = [2]int{i + 1, -1}
+	}
+
+	pos := make([]int, n) // 记录每个元素的位置
+	for i := 0; i < n; i++ {
+		pos[i] = n - 1 - i
+	}
+	bit := NewBITArray01From(
+		n+q,
+		func(i int) bool {
+			return i < n
+		},
+	)
+
+	// n-1, n-2, ..., 0, null ,null, null, ..., null 一共n+q个位置
+	for to := n; to < n+q; to++ {
+		v := moved[to-n]
+		from := pos[v]
+		res[v][1] = max(res[v][1], bit.QueryRange(from, n+q)) // 移动前的最大值
+		pos[v] = to
+		bit.Remove(from)
+		bit.Add(to)
+		res[v][0] = min(res[v][0], 1) // 移动后的最小值
+	}
+	for i := 0; i < n; i++ {
+		res[i][1] = max(res[i][1], bit.QueryRange(pos[i], n+q)) // 更新最大值
+	}
+
+	for i := 0; i < n; i++ {
+		fmt.Fprintln(out, res[i][0], res[i][1])
+	}
+}
 
 // !Point Add Range Sum, 0-based.
 type BITArray struct {
@@ -156,8 +216,9 @@ func (bit01 *BITArray01) QueryAll() int {
 }
 
 func (bit01 *BITArray01) QueryPrefix(end int) int {
-	res := bit01.bit.QueryPrefix(end >> 6)
-	res += bits.OnesCount64(bit01.data[end>>6] & ((1 << (end & 63)) - 1))
+	i, j := end>>6, end&63
+	res := bit01.bit.QueryPrefix(i)
+	res += bits.OnesCount64(bit01.data[i] & ((1 << j) - 1))
 	return res
 }
 
@@ -181,14 +242,29 @@ func (bit01 *BITArray01) QueryRange(start, end int) int {
 	return res
 }
 
-func (bit01 *BITArray01) Add(index int) {
-	bit01.data[index>>6] |= 1 << (index & 63)
-	bit01.bit.Add(index>>6, 1)
+func (bit01 *BITArray01) Add(index int) bool {
+	i, j := index>>6, index&63
+	if (bit01.data[i]>>j)&1 == 1 {
+		return false
+	}
+	bit01.data[i] |= 1 << j
+	bit01.bit.Add(i, 1)
+	return true
 }
 
-func (bit01 *BITArray01) Remove(index int) {
-	bit01.data[index>>6] &= ^(1 << (index & 63))
-	bit01.bit.Add(index>>6, -1)
+func (bit01 *BITArray01) Remove(index int) bool {
+	i, j := index>>6, index&63
+	if (bit01.data[i]>>j)&1 == 0 {
+		return false
+	}
+	bit01.data[i] ^= 1 << j
+	bit01.bit.Add(i, -1)
+	return true
+}
+
+func (bit01 *BITArray01) Has(index int) bool {
+	i, j := index>>6, index&63
+	return (bit01.data[i]>>j)&1 == 1
 }
 
 func (bit01 *BITArray01) String() string {
@@ -596,7 +672,7 @@ func max(a, b int) int {
 	return b
 }
 
-func main() {
+func demo() {
 
 	bitArray := NewBitArrayFrom(10, func(index int) int { return index + 1 })
 	fmt.Println(bitArray)

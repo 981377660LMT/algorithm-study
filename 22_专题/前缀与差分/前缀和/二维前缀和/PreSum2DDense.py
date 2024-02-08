@@ -6,12 +6,14 @@ class PreSum2DDense:
 
     __slots__ = "_preSum"
 
-    def __init__(self, A: List[List[int]]):
-        m, n = len(A), len(A[0])
-        preSum = [[0] * (n + 1) for _ in range(m + 1)]
-        for r in range(m):
-            for c in range(n):
-                preSum[r + 1][c + 1] = A[r][c] + preSum[r][c + 1] + preSum[r + 1][c] - preSum[r][c]
+    def __init__(self, mat: List[List[int]]):
+        ROW, COL = len(mat), len(mat[0])
+        preSum = [[0] * (COL + 1) for _ in range(ROW + 1)]
+        for r in range(ROW):
+            tmpSum0, tmpSum1 = preSum[r], preSum[r + 1]
+            tmpM = mat[r]
+            for c in range(COL):
+                tmpSum1[c + 1] = tmpM[c] + tmpSum0[c + 1] + tmpSum1[c] - tmpSum0[c]
         self._preSum = preSum
 
     def sumRegion(self, r1: int, c1: int, r2: int, c2: int) -> int:

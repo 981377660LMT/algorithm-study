@@ -389,12 +389,7 @@ func (fs *FastSet) Prev(i int) int {
 
 // 遍历[start,end)区间内的元素.
 func (fs *FastSet) Enumerate(start, end int, f func(i int)) {
-	x := start - 1
-	for {
-		x = fs.Next(x + 1)
-		if x >= end {
-			break
-		}
+	for x := fs.Next(start); x < end; x = fs.Next(x + 1) {
 		f(x)
 	}
 }

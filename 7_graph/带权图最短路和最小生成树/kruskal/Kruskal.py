@@ -2,32 +2,29 @@ from collections import defaultdict
 from typing import DefaultDict, List, Tuple
 
 
-def kruskal(n: int, edges: List[Tuple[int, int, int]]) -> Tuple[int, List[int]]:
-    """Kruskal算法求无向图最小生成树
+def kruskal(n: int, edges: List[Tuple[int, int, int]]) -> Tuple[int, List[bool], bool]:
+    """
+    Kruskal算法求无向图最小生成树(森林).
 
-    Args:
-        n (int): 节点`个数`,并查集初始化为(0,1,2,...,n-1)
-        edges (List[Tuple[int, int, int]]): 边的列表,每个元素是`(u, v, w)`表示无向边u到v,权重为w
-
-    Returns:
-        Tuple[int, List[Tuple[int, int, int]]]: 最小生成树的边权和,组成最小生成树的边的索引
-
-    - 如果不存在,则求出的是森林中的多个最小生成树
+    返回值:
+    - mstCost: 最小生成树(森林)的权值之和
+    - inMst: 是否在最小生成树(森林)中
+    - isTree: 是否是树
     """
     uf = UnionFindArray(n)
-    cost, res = 0, []
-
-    edgesWithIndex = sorted([(i, *edge) for i, edge in enumerate(edges)], key=lambda e: e[-1])
-    for ei, u, v, w in edgesWithIndex:
-        root1, root2 = uf.find(u), uf.find(v)
-        if root1 != root2:
-            cost += w
-            uf.union(root1, root2)
-            res.append(ei)
-            if len(res) == n - 1:
-                return cost, res
-
-    return -1, res
+    count = 0
+    mstCost, inMst, isTree = 0, [False] * len(edges), False
+    order = sorted(range(len(edges)), key=lambda x: edges[x][2])
+    for ei in order:
+        u, v, w = edges[ei]
+        if uf.union(u, v):
+            inMst[ei] = True
+            mstCost += w
+            count += 1
+            if count == n - 1:
+                isTree = True
+                break
+    return mstCost, inMst, isTree
 
 
 class UnionFindArray:
@@ -81,3 +78,18 @@ class UnionFindArray:
 
     def __len__(self) -> int:
         return self.part
+
+
+if __name__ == "__main__":
+    # https://www.luogu.com.cn/problem/P3366
+    # P3366 【模板】最小生成树
+    import sys
+
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
+    n, m = map(int, input().split())
+    edges = []
+    for _ in range(m):
+        u, v, w = map(int, input().split())
+        edges.append((u - 1, v - 1, w))
+    mstCost, _, isTree = kruskal(n, edges)
+    print(mstCost if isTree else "orz")

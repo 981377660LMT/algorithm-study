@@ -91,7 +91,7 @@ func StaticRangeInversionsQuery() {
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
-	getRank, size := DiscretizeCompressed(nums, 0)
+	getRank, _, size := DiscretizeCompressed(nums, 0)
 	for i := 0; i < n; i++ {
 		nums[i] = getRank(nums[i])
 	}
@@ -607,12 +607,7 @@ func (fs *FastSet) Prev(i int) int {
 
 // 遍历[start,end)区间内的元素.
 func (fs *FastSet) Enumerate(start, end int, f func(i int)) {
-	x := start - 1
-	for {
-		x = fs.Next(x + 1)
-		if x >= end {
-			break
-		}
+	for x := fs.Next(start); x < end; x = fs.Next(x + 1) {
 		f(x)
 	}
 }
@@ -645,22 +640,24 @@ func (*FastSet) bsf(x int) int {
 //
 //	getRank: 给定一个数，返回它的排名`(offset ~ offset + count)`.
 //	count: 离散化(去重)后的元素个数.
-func DiscretizeCompressed(nums []int, offset int) (getRank func(int) int, count int) {
-	set := make(map[int]struct{})
+func DiscretizeCompressed(nums []int, offset int) (getRank func(value int) int, getValue func(rank int) int, count int) {
+	set := make(map[int]struct{}, len(nums))
 	for _, v := range nums {
 		set[v] = struct{}{}
 	}
-	allNums := make([]int, 0, len(set))
-	for k := range set {
-		allNums = append(allNums, k)
+	count = len(set)
+	rank := make([]int, 0, count)
+	for v := range set {
+		rank = append(rank, v)
 	}
-	sort.Ints(allNums)
-	mp := make(map[int]int, len(allNums))
-	for i, v := range allNums {
+	sort.Ints(rank)
+	mp := make(map[int]int, count)
+	for i, v := range rank {
 		mp[v] = i + offset
 	}
 	getRank = func(v int) int { return mp[v] }
-	count = len(allNums)
+	getValue = func(r int) int { return rank[r-offset] }
+	count = len(nums)
 	return
 }
 

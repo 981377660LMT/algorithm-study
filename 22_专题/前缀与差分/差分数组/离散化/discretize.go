@@ -32,22 +32,24 @@ func DiscretizeSparse(nums []int, offset int) (getRank func(int) int, count int)
 //
 //		getRank: 给定一个数，返回它的排名`(offset ~ offset + count)`.
 //		count: 离散化(去重)后的元素个数.
-func DiscretizeCompressed(nums []int, offset int) (getRank func(int) int, count int) {
-	set := make(map[int]struct{})
+func DiscretizeCompressed(nums []int, offset int) (getRank func(value int) int, getValue func(rank int) int, count int) {
+	set := make(map[int]struct{}, len(nums))
 	for _, v := range nums {
 		set[v] = struct{}{}
 	}
-	allNums := make([]int, 0, len(set))
-	for k := range set {
-		allNums = append(allNums, k)
+	count = len(set)
+	rank := make([]int, 0, count)
+	for v := range set {
+		rank = append(rank, v)
 	}
-	sort.Ints(allNums)
-	mp := make(map[int]int, len(allNums))
-	for i, v := range allNums {
+	sort.Ints(rank)
+	mp := make(map[int]int, count)
+	for i, v := range rank {
 		mp[v] = i + offset
 	}
 	getRank = func(v int) int { return mp[v] }
-	count = len(allNums)
+	getValue = func(r int) int { return rank[r-offset] }
+	count = len(nums)
 	return
 }
 

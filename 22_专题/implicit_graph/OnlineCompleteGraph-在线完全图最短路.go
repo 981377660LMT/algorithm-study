@@ -16,9 +16,11 @@ const INF int = 1e18
 const MOD int = 998244353
 
 func main() {
+	// demo()
 	// CountingShortestPaths()
 	// SafetyJourney()
-	demo()
+	// demo()
+	CF920E()
 }
 
 func demo() {
@@ -157,6 +159,36 @@ func SafetyJourney() {
 	fmt.Fprintln(out, dp[TARGET])
 }
 
+// Connected Components?
+// https://www.luogu.com.cn/problem/CF920E
+// 给定一张n个点的完全图,删去m条边(剩余 (n*(n-1)/2 - m) 条边),求剩下的连通块数,以及每个连通块的大小.
+func CF920E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	banEdges := make([][2]int, m)
+	for i := 0; i < m; i++ {
+		fmt.Fscan(in, &banEdges[i][0], &banEdges[i][1])
+		banEdges[i][0]--
+		banEdges[i][1]--
+	}
+
+	uf := ComplementGraphUnionFind(n, banEdges)
+	groups := uf.GetGroups()
+	sizes := make([]int, 0, len(groups))
+	for _, v := range groups {
+		sizes = append(sizes, len(v))
+	}
+	sort.Ints(sizes)
+	fmt.Fprintln(out, len(sizes))
+	for _, v := range sizes {
+		fmt.Fprint(out, v, " ")
+	}
+}
+
 // 完全图最短路.
 //
 //	给定一个无向无权的完全图，求出完全图上从start到其他点的最短路.不可达的点距离为INF.
@@ -267,6 +299,7 @@ func ComplementGraphDistance(n int, banEdges [][2]int) (res [][3]int) {
 }
 
 // 完全图并查集.
+// 维护一个 set，保存当前未访问过的点。每一次dfs从未访问过的点出发，遍历到一个节点后删除对应元素。
 func ComplementGraphUnionFind(n int, banEdges [][2]int) *UnionFindArray {
 	ban := make([][]int, n)
 	for _, e := range banEdges {
@@ -281,34 +314,41 @@ func ComplementGraphUnionFind(n int, banEdges [][2]int) *UnionFindArray {
 		fs.Insert(i)
 	}
 
-	queue := []int{}
+	stack := make([]int, n) // dfs
+	ptr := 0
 	for i := 0; i < n; i++ {
 		if !fs.Has(i) {
 			continue
 		}
-		queue = append(queue, i)
-		for len(queue) > 0 {
-			cur := queue[0]
-			queue = queue[1:]
-			tmp := []int{}
-			for _, next := range ban[cur] {
-				if fs.Has(next) {
-					tmp = append(tmp, next)
+
+		stack[ptr] = i
+		ptr++
+		for ptr > 0 {
+			ptr--
+			leader := stack[ptr]
+
+			var removed []int
+			for _, to := range ban[leader] {
+				if fs.Has(to) {
+					removed = append(removed, to)
 				}
 			}
-			for _, v := range tmp {
+
+			for _, v := range removed {
 				fs.Erase(v)
 			}
-			fs.Enumerate(0, n, func(next int) {
-				fs.Erase(next)
-				queue = append(queue, next)
-				uf.Union(cur, next)
+			fs.Enumerate(0, n, func(to int) {
+				fs.Erase(to)
+				stack[ptr] = to
+				ptr++
+				uf.Union(leader, to)
 			})
-			for _, v := range tmp {
+			for _, v := range removed {
 				fs.Insert(v)
 			}
 		}
 	}
+
 	return uf
 }
 
@@ -541,12 +581,7 @@ func (fs *FastSet) Prev(i int) int {
 
 // 遍历[start,end)区间内的元素.
 func (fs *FastSet) Enumerate(start, end int, f func(i int)) {
-	x := start - 1
-	for {
-		x = fs.Next(x + 1)
-		if x >= end {
-			break
-		}
+	for x := fs.Next(start); x < end; x = fs.Next(x + 1) {
 		f(x)
 	}
 }

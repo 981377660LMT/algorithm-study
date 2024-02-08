@@ -45,7 +45,7 @@ func main() {
 	}
 	git := make(map[int]pair)
 
-	undefined := -1
+	undefined := int32(-1)
 	A := NewPersistentArray(undefined)
 	root := A.Alloc()
 	ptr := 0
@@ -53,7 +53,7 @@ func main() {
 		var op string
 		fmt.Fscan(in, &op)
 		if op == "ADD" {
-			var x int
+			var x int32
 			fmt.Fscan(in, &x)
 			root = A.Set(root, ptr, x)
 			ptr++
@@ -80,11 +80,11 @@ func main() {
 	}
 }
 
-type E = int
+type E = int32
 
 type AryNode struct {
 	data     E
-	children [16]*AryNode // !
+	children [16]*AryNode
 }
 
 type PersistentArray struct {
@@ -95,6 +95,7 @@ func NewPersistentArray(null E) *PersistentArray {
 	return &PersistentArray{null: null}
 }
 
+// TODO: pool 优化动态内存分配
 func (o *PersistentArray) Alloc() *AryNode {
 	return &AryNode{data: o.null}
 }
@@ -102,7 +103,7 @@ func (o *PersistentArray) Alloc() *AryNode {
 func (o *PersistentArray) Build(nums []E) *AryNode {
 	root := o.Alloc()
 	for i := 0; i < len(nums); i++ {
-		root = o.setWithoutCopy(root, i, nums[i])
+		root = o.mutableSet(root, i, nums[i])
 	}
 	return root
 }
@@ -140,7 +141,7 @@ func (o *PersistentArray) Copy(root *AryNode) *AryNode {
 	return &AryNode{data: root.data, children: root.children}
 }
 
-func (o *PersistentArray) setWithoutCopy(root *AryNode, index int, data E) *AryNode {
+func (o *PersistentArray) mutableSet(root *AryNode, index int, data E) *AryNode {
 	if root == nil {
 		root = o.Alloc()
 	}
@@ -148,6 +149,6 @@ func (o *PersistentArray) setWithoutCopy(root *AryNode, index int, data E) *AryN
 		root.data = data
 		return root
 	}
-	root.children[index&15] = o.setWithoutCopy(root.children[index&15], (index-1)>>4, data)
+	root.children[index&15] = o.mutableSet(root.children[index&15], (index-1)>>4, data)
 	return root
 }
