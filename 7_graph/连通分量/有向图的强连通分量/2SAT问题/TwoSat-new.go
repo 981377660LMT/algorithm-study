@@ -50,8 +50,351 @@ import (
 )
 
 func main() {
-	// https://judge.yosupo.jp/problem/two_sat
-	// N 変数  M 節の 2 Sat が与えられる。充足可能か判定し、可能ならば割り当てを一つ求めてください。
+	// 放置国旗()
+	// yosupo()
+	// yuki274()
+	P5782()
+	// yuki1078()
+}
+
+// P5782 [POI2001] 和平委员会
+// https://www.luogu.com.cn/problem/P5782
+// 每个党在议会中有 2个代表。代表从1编号到2n。编号为 2i-1 和 2i 的代表属于第i个党派。
+// 委员会必须满足下列条件：
+// 1. 每个党派都在委员会中恰有 1 个代表。
+// 2. 如果 2 个代表彼此厌恶，则他们不能都属于委员会。
+// 如果不能创立委员会，则输出信息 NIE。
+// 若能够成立，则输出包括 n 个从区间 1 到 2n 选出的整数，按升序写出，每行一个，这些数字为委员会中代表的编号。
+//
+// !命题i代表选择第i个代表
+func P5782() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	badPairs := make([][2]int, m)
+	for i := 0; i < m; i++ {
+		fmt.Fscan(in, &badPairs[i][0], &badPairs[i][1])
+		badPairs[i][0]--
+		badPairs[i][1]--
+	}
+
+	ts := NewTwoSat(2 * n)
+	for i := 0; i < n; i++ {
+		a, b := 2*i, 2*i+1
+		// ts.AddOr(a, b)
+		// ts.AddNand(a, b)
+		ts.AddXor(a, b)
+	}
+	for i := 0; i < m; i++ {
+		u, v := badPairs[i][0], badPairs[i][1]
+		ts.AddNand(u, v)
+	}
+
+	res, ok := ts.Solve()
+	if !ok {
+		fmt.Fprintln(out, "NIE")
+		return
+	}
+	for i := 0; i < 2*n; i++ {
+		if res[i] {
+			fmt.Fprintln(out, i+1)
+		}
+	}
+}
+
+// https://atcoder.jp/contests/practice2/tasks/practice2_h
+// 1-N号旗设置位置(放置国旗)
+// 第i号旗可以设置在xi位置或者yi位置
+// !任意两面旗距离需要大于D
+// 是否可以设置旗子
+// 1≤N≤1000
+// D,Xi,Yi<=1e9
+//
+// 命题i:第i个棋子放在xi位置,检查是否满足条件
+func 放置国旗() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, d int
+	fmt.Fscan(in, &n, &d)
+	x, y := make([]int, n), make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &x[i], &y[i])
+	}
+
+	ts := NewTwoSat(n)
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
+			// 00
+			if abs(x[i]-x[j]) < d {
+				ts.AddNand(i, j)
+			}
+
+			// 01
+			if abs(x[i]-y[j]) < d {
+				ts.AddNand(i, ts.Rev(j))
+			}
+
+			// 10
+			if abs(y[i]-x[j]) < d {
+				ts.AddNand(ts.Rev(i), j)
+			}
+
+			// 11
+			if abs(y[i]-y[j]) < d {
+				ts.AddNand(ts.Rev(i), ts.Rev(j))
+			}
+		}
+	}
+
+	res, ok := ts.Solve()
+	if !ok {
+		fmt.Fprintln(out, "No")
+		return
+	}
+	fmt.Fprintln(out, "Yes")
+	for i := 0; i < n; i++ {
+		if res[i] {
+			fmt.Fprintln(out, x[i])
+		} else {
+			fmt.Fprintln(out, y[i])
+		}
+	}
+}
+
+// No.274 The Wall-墙壁
+// https://yukicoder.me/problems/no/274
+// 用n个砖块构建墙壁,每个砖长度为m
+// 每个砖块上有一段颜色,砖块可以180度旋转
+// 将这n个砖块拼接成一面墙壁,使得每一列存在颜色的部分最多只有一个
+// 问是否能够拼接成功
+// n<=2000,m<=4000
+// n个命题分别为[第i个砖块不旋转]
+// 每两个之间验证四种情况
+func yuki274() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	color := make([][]int, n) // [left,right]
+	for i := 0; i < n; i++ {
+		var l, r int
+		fmt.Fscan(in, &l, &r)
+		color[i] = []int{l, r}
+	}
+
+	isOverlapped := func(left1, right1, left2, right2 int) bool {
+		start := max(left1, left2)
+		end := min(right1, right2)
+		return start <= end
+	}
+
+	// n个命题分别为[第i个砖块不旋转]
+	// 每两个之间验证四种情况
+	ts := NewTwoSat(n)
+	for i := 0; i < n; i++ {
+		left1, right1 := color[i][0], color[i][1]
+		revLeft1, revRight1 := m-1-right1, m-1-left1
+		for j := i + 1; j < n; j++ {
+			left2, right2 := color[j][0], color[j][1]
+			revLeft2, revRight2 := m-1-right2, m-1-left2
+			// 1. 两个砖块都不旋转
+			if isOverlapped(left1, right1, left2, right2) {
+				ts.AddNand(i, j)
+			}
+
+			// 2. 第一个砖块旋转,第二个砖块不旋转
+			if isOverlapped(revLeft1, revRight1, left2, right2) {
+				ts.AddNand(ts.Rev(i), j)
+			}
+
+			// 3. 第一个砖块不旋转,第二个砖块旋转
+			if isOverlapped(left1, right1, revLeft2, revRight2) {
+				ts.AddNand(i, ts.Rev(j))
+			}
+
+			// 4. 两个砖块都旋转
+			if isOverlapped(revLeft1, revRight1, revLeft2, revRight2) {
+				ts.AddNand(ts.Rev(i), ts.Rev(j))
+			}
+		}
+	}
+
+	_, ok := ts.Solve()
+	if !ok {
+		fmt.Fprintln(out, "NO")
+		return
+	}
+
+	fmt.Fprintln(out, "YES")
+}
+
+// No.470 Inverse S+T Problem
+// https://yukicoder.me/problems/no/470/editorial
+// 给定n个长度为3的字符串,由小写字母和大写字母组成
+// 求2n个非空串Si和Ti，使得 S[i] + T[i] = U[i],且这2n个串都不相同
+// n<=1e5
+
+// 长度为3的字符串划分成两个非空部分,要么是1/2,要么是2/1 => 2SAT
+// n很大的时候一定有重复串,可以排除
+// !n不大的时候用2SAT解决 :命题i代表S[i]用1个字符
+func yuki470() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+
+	words := make([]string, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &words[i])
+	}
+
+	// 只使用a-z和A-Z的字符,一个字符一定有重复的
+	if n > 26*2 {
+		fmt.Fprintln(out, "Impossible")
+		return
+	}
+
+	ts := NewTwoSat(n)
+	// 枚举所有的对,看哪些s[i]不能同时用一个字符划分
+	// かぶさる可能性のあるものを反転させたものをグラフに追加する  ??
+	for i := 0; i < n; i++ {
+		w1 := words[i]
+		for j := i + 1; j < n; j++ {
+			w2 := words[j]
+
+			// 1 1
+			s1, t1, s2, t2 := w1[0:1], w1[1:], w2[0:1], w2[1:]
+			if s1 == s2 || t1 == t2 {
+				ts.AddNand(i, j)
+			}
+
+			// 1 2
+			s1, t1, s2, t2 = w1[0:1], w1[1:], w2[0:2], w2[2:]
+			if s1 == t2 || t1 == s2 {
+				ts.AddNand(i, ts.Rev(j))
+			}
+
+			// 2 1
+			s1, t1, s2, t2 = w1[0:2], w1[2:], w2[0:1], w2[1:]
+			if s1 == t2 || t1 == s2 {
+				ts.AddNand(ts.Rev(i), j)
+			}
+
+			// 2 2
+			s1, t1, s2, t2 = w1[0:2], w1[2:], w2[0:2], w2[2:]
+			if s1 == s2 || t1 == t2 {
+				ts.AddNand(ts.Rev(i), ts.Rev(j))
+			}
+		}
+	}
+
+	res, ok := ts.Solve()
+	if !ok {
+		fmt.Fprintln(out, "Impossible")
+		return
+	}
+
+	for i := 0; i < n; i++ {
+		if res[i] {
+			s, t := words[i][0:1], words[i][1:]
+			fmt.Fprint(out, s, " ", t)
+		} else {
+			s, t := words[i][0:2], words[i][2:]
+			fmt.Fprint(out, s, " ", t)
+		}
+		fmt.Fprintln(out)
+	}
+}
+
+// No.1078 I love Matrix Construction
+// https://yukicoder.me/problems/no/1078
+// 给定长为n的数组S,T,U
+// 问能否构建出满足以下条件的n*n矩阵A
+// 1. A[i][j] 为0/1
+// 2. 对所有的 (i,j), A[S[i]][j]+A[j][T[i]]*2 != U[i]
+// n<=500
+func yuki1078() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+
+	S := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &S[i])
+		S[i]--
+	}
+	T := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &T[i])
+		T[i]--
+	}
+	U := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &U[i])
+	}
+
+	// 条件i为A[i][j]取0
+	ts := NewTwoSat(n * n)
+	for i := 0; i < n; i++ {
+		si := S[i]
+		ti := T[i]
+		for j := 0; j < n; j++ {
+			pos1 := si*n + j
+			pos2 := j*n + ti
+
+			if U[i] == 0 {
+				ts.AddNand(pos1, pos2) // 0,0
+			} else if U[i] == 1 {
+				ts.AddNand(ts.Rev(pos1), pos2) //1,0
+			} else if U[i] == 2 {
+				ts.AddNand(pos1, ts.Rev(pos2)) //0,1
+			} else if U[i] == 3 {
+				ts.AddNand(ts.Rev(pos1), ts.Rev(pos2)) //1,1
+			}
+
+		}
+	}
+
+	res, ok := ts.Solve()
+	if !ok {
+		fmt.Fprintln(out, -1)
+		return
+	}
+
+	matrix := make([][]int, n)
+	for i := 0; i < n; i++ {
+		matrix[i] = make([]int, n)
+	}
+
+	for i, v := range res {
+		if !v {
+			matrix[i/n][i%n] = 1
+		}
+	}
+
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			fmt.Fprint(out, matrix[i][j], " ")
+		}
+		fmt.Fprintln(out)
+	}
+}
+
+// https://judge.yosupo.jp/problem/two_sat
+// N 変数  M 節の 2 Sat が与えられる。充足可能か判定し、可能ならば割り当てを一つ求めてください。
+func yosupo() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -64,12 +407,14 @@ func main() {
 		var a, b, c int
 		fmt.Fscan(in, &a, &b, &c)
 		if a < 0 {
-			a = ts.Rev(-a - 1)
+			a++
+			a = ts.Rev(-a)
 		} else {
 			a--
 		}
 		if b < 0 {
-			b = ts.Rev(-b - 1)
+			b++
+			b = ts.Rev(-b)
 		} else {
 			b--
 		}
@@ -94,57 +439,122 @@ func main() {
 }
 
 type TwoSat struct {
-	sz  int
-	scc *scc
+	size  int
+	graph [][]int32
 }
 
 func NewTwoSat(n int) *TwoSat {
-	return &TwoSat{sz: n, scc: newScc(n + n)}
+	return &TwoSat{size: n, graph: make([][]int32, n*2)}
 }
 
 // u -> v <=> !v -> !u
 func (ts *TwoSat) AddIf(u, v int) {
-	ts.scc.AddEdge(u, v, 1)
-	ts.scc.AddEdge(ts.Rev(v), ts.Rev(u), 1)
+	ts.AddDirectedEdge(u, v)
+	ts.AddDirectedEdge(ts.Rev(v), ts.Rev(u))
 }
 
+// u,v 中至少有一个为真.
 // u or v <=> !u -> v
 func (ts *TwoSat) AddOr(u, v int) {
 	ts.AddIf(ts.Rev(u), v)
 }
 
+// u,v 中恰好有一个为真, 一个为假.
+// u xor v <=> u -> !v, v -> !u, !u -> v, !v -> u
+func (ts *TwoSat) AddXor(u, v int) {
+	ts.AddOr(u, v)
+	ts.AddNand(u, v)
+}
+
+// u,v 不同时为真.
 // u nand v <=> u -> !v
 func (ts *TwoSat) AddNand(u, v int) {
 	ts.AddIf(u, ts.Rev(v))
 }
 
+// 手动添加边(不推荐).常用于优化建图时.
+func (ts *TwoSat) AddDirectedEdge(u, v int) {
+	ts.graph[u] = append(ts.graph[u], int32(v))
+}
+
 // u <=> !u -> u
 func (ts *TwoSat) SetTrue(u int) {
-	ts.scc.AddEdge(ts.Rev(u), u, 1)
+	ts.AddDirectedEdge(ts.Rev(u), u)
 }
 
 // !u <=> u -> !u
 func (ts *TwoSat) SetFalse(u int) {
-	ts.scc.AddEdge(u, ts.Rev(u), 1)
+	ts.AddDirectedEdge(u, ts.Rev(u))
 }
 
 func (ts *TwoSat) Rev(u int) int {
-	if u >= ts.sz {
-		return u - ts.sz
+	if u >= ts.size {
+		return u - ts.size
 	}
-	return u + ts.sz
+	return u + ts.size
 }
 
 func (ts *TwoSat) Solve() (res []bool, ok bool) {
-	ts.scc.Build()
-	res = make([]bool, ts.sz)
-	for i := 0; i < ts.sz; i++ {
-		if ts.scc.Comp[i] == ts.scc.Comp[ts.Rev(i)] {
+	_, belong := StronglyConnectedComponentInt32(ts.graph)
+	res = make([]bool, ts.size)
+	for i := 0; i < int(ts.size); i++ {
+		if belong[i] == belong[ts.Rev(i)] {
 			return
 		}
-		res[i] = ts.scc.Comp[i] > ts.scc.Comp[ts.Rev(i)]
+		res[i] = belong[i] > belong[ts.Rev(i)]
 	}
 	ok = true
+	return
+}
+
+// 有向图强连通分量分解.
+func StronglyConnectedComponentInt32(graph [][]int32) (count int32, belong []int32) {
+	n := int32(len(graph))
+	belong = make([]int32, n)
+	low := make([]int32, n)
+	order := make([]int32, n)
+	for i := range order {
+		order[i] = -1
+	}
+	now := int32(0)
+	path := []int32{}
+
+	var dfs func(int32)
+	dfs = func(v int32) {
+		low[v] = now
+		order[v] = now
+		now++
+		path = append(path, v)
+		for _, to := range graph[v] {
+			if order[to] == -1 {
+				dfs(to)
+				low[v] = min32(low[v], low[to])
+			} else {
+				low[v] = min32(low[v], order[to])
+			}
+		}
+		if low[v] == order[v] {
+			for {
+				u := path[len(path)-1]
+				path = path[:len(path)-1]
+				order[u] = n
+				belong[u] = count
+				if u == v {
+					break
+				}
+			}
+			count++
+		}
+	}
+
+	for i := int32(0); i < n; i++ {
+		if order[i] == -1 {
+			dfs(i)
+		}
+	}
+	for i := int32(0); i < n; i++ {
+		belong[i] = count - 1 - belong[i]
+	}
 	return
 }
 
@@ -161,76 +571,23 @@ func max(a, b int) int {
 	}
 	return b
 }
-
-type scc struct {
-	G     [][]int // 原图
-	Comp  []int   //每个顶点所属的强连通分量的编号
-	rg    [][]int
-	order []int
-	used  []bool
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
 }
 
-func newScc(n int) *scc {
-	return &scc{G: make([][]int, n)}
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
 }
 
-func (scc *scc) AddEdge(from, to, cost int) {
-	scc.G[from] = append(scc.G[from], to)
-}
-
-func (scc *scc) Build() {
-	scc.rg = make([][]int, len(scc.G))
-	for i := range scc.G {
-		for _, e := range scc.G[i] {
-			scc.rg[e] = append(scc.rg[e], i)
-		}
+func abs(x int) int {
+	if x < 0 {
+		return -x
 	}
-
-	scc.Comp = make([]int, len(scc.G))
-	for i := range scc.Comp {
-		scc.Comp[i] = -1
-	}
-	scc.used = make([]bool, len(scc.G))
-	for i := range scc.G {
-		scc.dfs(i)
-	}
-	for i, j := 0, len(scc.order)-1; i < j; i, j = i+1, j-1 {
-		scc.order[i], scc.order[j] = scc.order[j], scc.order[i]
-	}
-
-	ptr := 0
-	for _, v := range scc.order {
-		if scc.Comp[v] == -1 {
-			scc.rdfs(v, ptr)
-			ptr++
-		}
-	}
-
-}
-
-// 获取顶点k所属的强连通分量的编号
-func (scc *scc) Get(k int) int {
-	return scc.Comp[k]
-}
-
-func (scc *scc) dfs(idx int) {
-	tmp := scc.used[idx]
-	scc.used[idx] = true
-	if tmp {
-		return
-	}
-	for _, e := range scc.G[idx] {
-		scc.dfs(e)
-	}
-	scc.order = append(scc.order, idx)
-}
-
-func (scc *scc) rdfs(idx int, cnt int) {
-	if scc.Comp[idx] != -1 {
-		return
-	}
-	scc.Comp[idx] = cnt
-	for _, e := range scc.rg[idx] {
-		scc.rdfs(e, cnt)
-	}
+	return x
 }

@@ -52,17 +52,28 @@ func main() {
 	fmt.Println(groupCount, groupId) // 3 [0 0 0 1 2]
 }
 
-// 在线求有向图的强连通分量.
+// kosaraju在线求有向图的强连通分量.常用于2-sat优化建图问题.
 //
 //	setUsed(v, rev)：将 v 设置为已使用, rev 表示是否是反图
 //	findUnused(v, rev)：返回未使用过的点中与 v 相邻的点, rev 表示是否是反图.不存在时返回 -1.
-func OnlineSCC(n int, setUsed func(v int, rev bool), findUnused func(v int, rev bool) int) (groupCount int, groupId []int) {
-	order := make([]int, n)
+//
+// 返回强连通分量的个数和每个点所属的分量编号.
+// !注意按照0到count-1的遍历结果为拓扑序逆序.
+//
+// 步骤:
+// https://www.cnblogs.com/RioTian/p/14026585.html
+// 1.通过后序遍历的方式遍历整个有向图，并且维护每个点的出栈顺序
+// 2.根据出栈顺序从大到小遍历反图
+// 3.对点u来说，在遍历反图时所有能够到达的v都和u在一个强连通分量当中
+func OnlineSCC(n int, setUsed func(cur int, rev bool), findUnused func(cur int, rev bool) int) (count int, belong []int) {
+	belong = make([]int, n)
 
-	next := n
+	stack := make([]int, n)
+	ptr := n
+
 	visited := make([]bool, n)
 	var dfs1 func(v int)
-	dfs1 = func(v int) {
+	dfs1 = func(v int) { // 原图
 		visited[v] = true
 		setUsed(v, false)
 		for {
@@ -72,8 +83,8 @@ func OnlineSCC(n int, setUsed func(v int, rev bool), findUnused func(v int, rev 
 			}
 			dfs1(to)
 		}
-		next--
-		order[next] = v
+		ptr--
+		stack[ptr] = v
 	}
 	for v := 0; v < n; v++ {
 		if !visited[v] {
@@ -81,12 +92,11 @@ func OnlineSCC(n int, setUsed func(v int, rev bool), findUnused func(v int, rev 
 		}
 	}
 
-	groupId = make([]int, n)
 	visited = make([]bool, n)
 	var dfs2 func(v int)
-	dfs2 = func(v int) {
+	dfs2 = func(v int) { // 反图
 		visited[v] = true
-		groupId[v] = groupCount
+		belong[v] = count
 		setUsed(v, true)
 		for {
 			to := findUnused(v, true)
@@ -96,10 +106,10 @@ func OnlineSCC(n int, setUsed func(v int, rev bool), findUnused func(v int, rev 
 			dfs2(to)
 		}
 	}
-	for _, v := range order {
+	for _, v := range stack {
 		if !visited[v] {
 			dfs2(v)
-			groupCount++
+			count++
 		}
 	}
 

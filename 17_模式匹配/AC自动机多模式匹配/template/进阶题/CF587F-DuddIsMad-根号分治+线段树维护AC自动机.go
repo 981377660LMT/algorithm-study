@@ -229,8 +229,14 @@ func (d *DI) Id(rawIndex int) int {
 
 // O(logn) 顺序遍历`[start,end)`区间对应的线段树节点.
 func (d *DI) EnumerateSegment(start, end int, f func(segmentId int)) {
-	if !(0 <= start && start <= end && end <= d.n) {
-		panic("invalid range")
+	if start < 0 {
+		start = 0
+	}
+	if end > d.n {
+		end = d.n
+	}
+	if start >= end {
+		return
 	}
 	for _, i := range d.getSegmentIds(start, end) {
 		f(i)
@@ -274,7 +280,7 @@ func (d *DI) IsLeaf(segmentId int) bool {
 
 func (d *DI) getSegmentIds(start, end int) []int {
 	if !(0 <= start && start <= end && end <= d.n) {
-		panic("invalid range")
+		return nil
 	}
 	leftRes, rightRes := []int{}, []int{}
 	for start, end = start+d.Offset, end+d.Offset; start < end; start, end = start>>1, end>>1 {

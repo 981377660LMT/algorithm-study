@@ -16,35 +16,36 @@ import (
 // 对每个车站,求出从该车站出发,可以到达的车站的数量
 // 1<=n<=2e5 0<=A<=B<=1e9 0<=x1<=x2<...<=xn<=1e9
 //
-// !将序列搬到线段树上加速区间操作.
+// !将序列搬到线段树上加速区间操作(线段树优化建图).
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, A, B int
+	var n int32
+	var A, B int
 	fmt.Fscan(in, &n, &A, &B)
 	positions := make([]int, n)
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		fmt.Fscan(in, &positions[i])
 	}
 
 	D := NewDivideInterval(n)
 	uf := NewUnionFindArray(D.Size())
 	weights := make([]int, D.Size())
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		weights[D.Id(i)] = 1
 	}
 
-	f := func(big, small int) {
+	f := func(big, small int32) {
 		weights[big] += weights[small]
 	}
-	var dfs func(int) // 线段树上dfs
-	dfs = func(cur int) {
+	var dfs func(int32) // 线段树上dfs
+	dfs = func(cur int32) {
 		if D.IsLeaf(cur) {
 			return
 		}
-		for k := 0; k < 2; k++ {
+		for k := int32(0); k < 2; k++ {
 			child := cur<<1 | k
 			if !uf.IsConnected(cur, child) {
 				uf.UnionWithCallback(cur, child, f)
@@ -53,29 +54,29 @@ func main() {
 		}
 	}
 
-	for i := 0; i < n; i++ {
-		start := sort.SearchInts(positions, positions[i]+A)
-		end := sort.SearchInts(positions, positions[i]+B+1)
-		D.EnumerateSegment(start, end, func(segmentId int) {
+	for i := int32(0); i < n; i++ {
+		start := int32(sort.SearchInts(positions, positions[i]+A))
+		end := int32(sort.SearchInts(positions, positions[i]+B+1))
+		D.EnumerateSegment(start, end, func(segmentId int32) {
 			uf.UnionWithCallback(D.Id(i), segmentId, f)
 			dfs(segmentId)
-		})
+		}, false)
 	}
 
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		fmt.Fprintln(out, weights[uf.Find(D.Id(i))])
 	}
 }
 
 type DivideInterval struct {
-	Offset int // 线段树中一共offset+n个节点,offset+i对应原来的第i个节点.
-	n      int
+	Offset int32 // 线段树中一共offset+n个节点,offset+i对应原来的第i个节点.
+	n      int32
 }
 
 // 线段树分割区间.
 // 将长度为n的序列搬到长度为offset+n的线段树上, 以实现快速的区间操作.
-func NewDivideInterval(n int) *DivideInterval {
-	offset := 1
+func NewDivideInterval(n int32) *DivideInterval {
+	offset := int32(1)
 	for offset < n {
 		offset <<= 1
 	}
@@ -83,21 +84,42 @@ func NewDivideInterval(n int) *DivideInterval {
 }
 
 // 获取原下标为i的元素在树中的(叶子)编号.
-func (d *DivideInterval) Id(rawIndex int) int {
+func (d *DivideInterval) Id(rawIndex int32) int32 {
 	return rawIndex + d.Offset
 }
 
 // O(logn) 顺序遍历`[start,end)`区间对应的线段树节点.
-func (d *DivideInterval) EnumerateSegment(start, end int, f func(segmentId int)) {
-	if !(0 <= start && start <= end && end <= d.n) {
-		panic("invalid range")
+// sorted表示是否按照节点编号从小到大的顺序遍历.
+func (d *DivideInterval) EnumerateSegment(start, end int32, f func(segmentId int32), sorted bool) {
+	if start < 0 {
+		start = 0
 	}
-	for _, i := range d.getSegmentIds(start, end) {
-		f(i)
+	if end > d.n {
+		end = d.n
+	}
+	if start >= end {
+		return
+	}
+
+	if sorted {
+		for _, i := range d.getSegmentIds(start, end) {
+			f(i)
+		}
+	} else {
+		for start, end = start+d.Offset, end+d.Offset; start < end; start, end = start>>1, end>>1 {
+			if start&1 == 1 {
+				f(start)
+				start++
+			}
+			if end&1 == 1 {
+				end--
+				f(end)
+			}
+		}
 	}
 }
 
-func (d *DivideInterval) EnumeratePoint(index int, f func(segmentId int)) {
+func (d *DivideInterval) EnumeratePoint(index int32, f func(segmentId int32)) {
 	if index < 0 || index >= d.n {
 		return
 	}
@@ -109,38 +131,38 @@ func (d *DivideInterval) EnumeratePoint(index int, f func(segmentId int)) {
 }
 
 // O(n) 从根向叶子方向push.
-func (d *DivideInterval) PushDown(f func(parent, child int)) {
-	for p := 1; p < d.Offset; p++ {
+func (d *DivideInterval) PushDown(f func(parent, child int32)) {
+	for p := int32(1); p < d.Offset; p++ {
 		f(p, p<<1)
 		f(p, p<<1|1)
 	}
 }
 
 // O(n) 从叶子向根方向update.
-func (d *DivideInterval) PushUp(f func(parent, child1, child2 int)) {
+func (d *DivideInterval) PushUp(f func(parent, child1, child2 int32)) {
 	for p := d.Offset - 1; p > 0; p-- {
 		f(p, p<<1, p<<1|1)
 	}
 }
 
 // 线段树的节点个数.
-func (d *DivideInterval) Size() int {
+func (d *DivideInterval) Size() int32 {
 	return d.Offset + d.n
 }
 
-func (d *DivideInterval) IsLeaf(segmentId int) bool {
+func (d *DivideInterval) IsLeaf(segmentId int32) bool {
 	return segmentId >= d.Offset
 }
 
-func (d *DivideInterval) Depth(u int) int {
+func (d *DivideInterval) Depth(u int32) int32 {
 	if u == 0 {
 		return 0
 	}
-	return bits.Len(uint(u)) - 1
+	return int32(bits.LeadingZeros32(uint32(u))) - 1
 }
 
 // 线段树(完全二叉树)中两个节点的最近公共祖先(两个二进制数字的最长公共前缀).
-func (d *DivideInterval) Lca(u, v int) int {
+func (d *DivideInterval) Lca(u, v int32) int32 {
 	if u == v {
 		return u
 	}
@@ -153,15 +175,15 @@ func (d *DivideInterval) Lca(u, v int) int {
 	if diff == 0 {
 		return u
 	}
-	len := bits.Len(uint(diff))
+	len := bits.Len32(uint32(diff))
 	return u >> len
 }
 
-func (d *DivideInterval) getSegmentIds(start, end int) []int {
+func (d *DivideInterval) getSegmentIds(start, end int32) []int32 {
 	if !(0 <= start && start <= end && end <= d.n) {
-		panic("invalid range")
+		return nil
 	}
-	leftRes, rightRes := []int{}, []int{}
+	var leftRes, rightRes []int32
 	for start, end = start+d.Offset, end+d.Offset; start < end; start, end = start>>1, end>>1 {
 		if start&1 == 1 {
 			leftRes = append(leftRes, start)
@@ -182,9 +204,9 @@ func (d *DivideInterval) getSegmentIds(start, end int) []int {
 //
 
 // NewUnionFindWithCallback ...
-func NewUnionFindArray(n int) *_UnionFindArray {
-	parent, rank := make([]int, n), make([]int, n)
-	for i := 0; i < n; i++ {
+func NewUnionFindArray(n int32) *_UnionFindArray {
+	parent, rank := make([]int32, n), make([]int32, n)
+	for i := int32(0); i < n; i++ {
 		parent[i] = i
 		rank[i] = 1
 	}
@@ -199,14 +221,14 @@ func NewUnionFindArray(n int) *_UnionFindArray {
 
 type _UnionFindArray struct {
 	// 连通分量的个数
-	Part int
+	Part int32
 
-	rank   []int
-	n      int
-	parent []int
+	rank   []int32
+	n      int32
+	parent []int32
 }
 
-func (ufa *_UnionFindArray) Union(key1, key2 int) bool {
+func (ufa *_UnionFindArray) Union(key1, key2 int32) bool {
 	root1, root2 := ufa.Find(key1), ufa.Find(key2)
 	if root1 == root2 {
 		return false
@@ -221,7 +243,7 @@ func (ufa *_UnionFindArray) Union(key1, key2 int) bool {
 	return true
 }
 
-func (ufa *_UnionFindArray) UnionWithCallback(key1, key2 int, cb func(big, small int)) bool {
+func (ufa *_UnionFindArray) UnionWithCallback(key1, key2 int32, cb func(big, small int32)) bool {
 	root1, root2 := ufa.Find(key1), ufa.Find(key2)
 	if root1 == root2 {
 		return false
@@ -236,7 +258,7 @@ func (ufa *_UnionFindArray) UnionWithCallback(key1, key2 int, cb func(big, small
 	return true
 }
 
-func (ufa *_UnionFindArray) Find(key int) int {
+func (ufa *_UnionFindArray) Find(key int32) int32 {
 	for ufa.parent[key] != key {
 		ufa.parent[key] = ufa.parent[ufa.parent[key]]
 		key = ufa.parent[key]
@@ -244,20 +266,20 @@ func (ufa *_UnionFindArray) Find(key int) int {
 	return key
 }
 
-func (ufa *_UnionFindArray) IsConnected(key1, key2 int) bool {
+func (ufa *_UnionFindArray) IsConnected(key1, key2 int32) bool {
 	return ufa.Find(key1) == ufa.Find(key2)
 }
 
-func (ufa *_UnionFindArray) GetGroups() map[int][]int {
-	groups := make(map[int][]int)
-	for i := 0; i < ufa.n; i++ {
+func (ufa *_UnionFindArray) GetGroups() map[int32][]int32 {
+	groups := make(map[int32][]int32)
+	for i := int32(0); i < ufa.n; i++ {
 		root := ufa.Find(i)
 		groups[root] = append(groups[root], i)
 	}
 	return groups
 }
 
-func (ufa *_UnionFindArray) Size(key int) int {
+func (ufa *_UnionFindArray) Size(key int32) int32 {
 	return ufa.rank[ufa.Find(key)]
 }
 

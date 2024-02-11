@@ -53,19 +53,34 @@ class DivideInterval {
   /**
    * O(logn) 顺序遍历`[start,end)`区间对应的线段树节点编号.
    *
+   * @param [sorted=false] 是否按照从小到大的顺序遍历.
+   *
    * ```ts
    * const D = new DivideInterval(13)
    * D.enumerateSegment(0, 1, i => console.log(i))  // 16
    * D.enumerateSegment(0, 3, i => console.log(i))  // 8 18
    * ```
    */
-  enumerateSegment(start: number, end: number, f: (segmentId: number) => void): void {
-    if (!(start >= 0 && start <= end && end <= this._n)) {
-      throw new Error('invalid range')
-    }
-    const ids = this._getSegmentIds(start, end)
-    for (let i = 0; i < ids.length; i++) {
-      f(ids[i])
+  enumerateSegment(start: number, end: number, f: (segmentId: number) => void, sorted = false): void {
+    if (start < 0) start = 0
+    if (end > this._n) end = this._n
+    if (start >= end) return
+    if (sorted) {
+      const ids = this._getSegmentIds(start, end)
+      for (let i = 0; i < ids.length; i++) {
+        f(ids[i])
+      }
+    } else {
+      for (start += this.offset, end += this.offset; start < end; start >>>= 1, end >>>= 1) {
+        if ((start & 1) === 1) {
+          f(start)
+          start++
+        }
+        if ((end & 1) === 1) {
+          end--
+          f(end)
+        }
+      }
     }
   }
 
@@ -108,7 +123,7 @@ class DivideInterval {
 
   private _getSegmentIds(start: number, end: number): number[] {
     if (!(start >= 0 && start <= end && end <= this._n)) {
-      throw new Error('invalid range')
+      return []
     }
     const leftRes: number[] = []
     const rightRes: number[] = []
