@@ -380,4 +380,16 @@ func (b Bitset) String() string {
 	return sb.String()
 }
 
+// 返回两个biset交集的第一个 1 的下标，若不存在则返回-1.
+func FindFirstOfAnd(b1, b2 Bitset) int {
+	minLen := min(len(b1), len(b2))
+	for i := 0; i < minLen; i++ {
+		and := b1[i] & b2[i]
+		if and != 0 {
+			return i<<6 | bits.TrailingZeros(and)
+		}
+	}
+	return -1
+}
+
 // https://nyaannyaan.github.io/library/misc/bitset-find-prev.hpp
