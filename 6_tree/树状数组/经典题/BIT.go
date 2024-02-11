@@ -19,7 +19,16 @@ import (
 )
 
 func main() {
-	CF1288E()
+	// CF1288E(
+	test01()
+}
+
+func test01() {
+	bit01 := NewBITArray01(10)
+	fmt.Println(bit01)
+	bit01.Add(1)
+	bit01.Add(2)
+	bit01.Add(4)
 }
 
 // https://www.luogu.com.cn/problem/CF1288E
@@ -267,6 +276,23 @@ func (bit01 *BITArray01) Has(index int) bool {
 	return (bit01.data[i]>>j)&1 == 1
 }
 
+// // 0<=k<bit01.QueryAll().
+// func (bit01 *BITArray01) Kth(k int) int {
+// 	end := 0
+// 	pos := bit01.bit.MaxRight(func(_ int, preSum int) bool {
+// 		if preSum <= k {
+// 			end = k - preSum
+// 		}
+// 		return preSum <= k
+// 	})
+// 	x := bit01.data[pos]
+// 	p := bits.OnesCount64(x)
+// 	bit := BinarySearch(0, 64, func(n int) bool {
+// 		return (p - bits.OnesCount64(x>>n)) <= end
+// 	})
+// 	return (pos << 6) + bit
+// }
+
 func (bit01 *BITArray01) String() string {
 	res := []string{}
 	for i := 0; i < bit01.n; i++ {
@@ -275,6 +301,25 @@ func (bit01 *BITArray01) String() string {
 		}
 	}
 	return fmt.Sprintf("BITArray01: [%v]", strings.Join(res, ", "))
+}
+
+func BinarySearch(ok, ng int, check func(mid int) bool) int {
+	for abs(ok-ng) > 1 {
+		mid := (ng + ok) >> 1
+		if check(mid) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
+func Topbit32(x int) int {
+	if x == 0 {
+		return -1
+	}
+	return 31 - bits.LeadingZeros32(uint32(x))
 }
 
 // !Point Add Range Sum, 0-based.
@@ -339,10 +384,7 @@ func (b *BITMap) QueryAll() int {
 func (b *BITMap) MaxRight(check func(index, preSum int) bool) int {
 	i := 0
 	s := 0
-	k := 1
-	for 2*k <= b.n {
-		k *= 2
-	}
+	k := 1 << Topbit32(b.n)
 	for k > 0 {
 		if i+k-1 < b.n {
 			t := s + b.data[i+k-1]
@@ -670,6 +712,13 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
 }
 
 func demo() {
