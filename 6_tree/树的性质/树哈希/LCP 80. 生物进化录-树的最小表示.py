@@ -30,7 +30,7 @@ class Solution:
     def evolutionaryRecord2(self, parents: List[int]) -> str:
         """O(nlogn) 双端队列优化字符串的拼接.
 
-        可以把字符串改成双端队列,拼接的时候用启发式合并,也是O(nlogn)的
+        可以把字符串改成双端队列,拼接的时候用启发式合并/启发式分裂,也是O(nlogn)的
         """
         n = len(parents)
         adjList = [[] for _ in range(n)]

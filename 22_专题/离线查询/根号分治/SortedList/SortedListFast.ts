@@ -345,6 +345,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
       const deleted = endIndex - startIndex
 
       if (erase) {
+        console.log(this._blocks, pos)
         if (deleted === block.length) {
           // !delete block
           this._blocks.splice(pos, 1)
@@ -849,4 +850,8 @@ if (require.main === module) {
     })
     return res % MOD
   }
+
+  const sl2 = new SortedListFast([2, 2, 3])
+  sl2.erase(0, 2)
+  console.log(sl2.toString())
 }
