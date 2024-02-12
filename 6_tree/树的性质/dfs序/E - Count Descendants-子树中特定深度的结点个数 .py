@@ -8,9 +8,9 @@
 # !2. 离线查询 + 树上启发式合并
 
 
+import sys
 from bisect import bisect_left, bisect_right
 from collections import defaultdict
-import sys
 from typing import List, Tuple
 
 

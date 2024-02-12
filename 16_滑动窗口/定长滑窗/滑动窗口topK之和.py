@@ -5,9 +5,9 @@ from heapq import heappop, heappush
 from typing import List
 
 
-def windowTopKSum(nums: List[int], windowSize: int, k: int) -> List[int]:
+def windowTopKSum(nums: List[int], windowSize: int, k: int, min=True) -> List[int]:
     n = len(nums)
-    ts = TopKSum(k)
+    ts = TopKSum(k, min=min)
     res = []
     for right in range(n):
         ts.add(nums[right])

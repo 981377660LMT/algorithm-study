@@ -280,6 +280,9 @@ func (o *SegmentTreeDivideAndConquerCopy) dfs(now int, state *State) {
 }
 
 func uniqueInplace(sorted *[]int) {
+	if len(*sorted) == 0 {
+		return
+	}
 	tmp := *sorted
 	slow := 0
 	for fast := 0; fast < len(tmp); fast++ {

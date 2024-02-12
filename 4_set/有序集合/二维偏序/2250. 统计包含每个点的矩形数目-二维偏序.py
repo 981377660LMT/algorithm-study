@@ -341,12 +341,11 @@ class BitVector:
 
     def __init__(self, N):
         self.cnum = (N + 255) >> 8
-
         self.bit = bytearray(self.cnum << 5)
         self.chunk = [0] * (self.cnum + 1)
         self.blocks = bytearray(self.cnum << 5)
-
         self.built = False
+        self.N = N
 
     def set(self, pos):
         self.bit[pos >> 3] |= 1 << (pos & 7)
@@ -360,7 +359,7 @@ class BitVector:
     def build(self):
         for i in range(self.cnum):
             k = i << 5
-            for j in range(31):
+            for _ in range(31):
                 self.blocks[k + 1] = self.blocks[k] + self.popcount(self.bit[k])
                 k += 1
             self.chunk[i + 1] = self.chunk[i] + self.blocks[k] + self.popcount(self.bit[k])

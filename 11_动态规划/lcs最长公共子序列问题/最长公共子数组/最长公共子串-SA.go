@@ -7,12 +7,22 @@
 
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
+// https://judge.yosupo.jp/problem/longest_common_substring
 func main() {
-	s1, s2 := "abcde", "cdeab"
-	start1, end1, start2, end2 := longestCommonSubstring1(s1, s2)
-	fmt.Println(s1[start1:end1], s2[start2:end2])
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s, t string
+	fmt.Fscan(in, &s, &t)
+	start1, end1, start2, end2 := longestCommonSubstring1(s, t)
+	fmt.Fprintln(out, start1, end1, start2, end2)
 }
 
 // 最长公共子串(最长公共子数组)
@@ -205,11 +215,11 @@ func GetSA(ords []int) (sa []int) {
 	return induce()[1:]
 }
 
-//  sa : 排第几的后缀是谁.
-//  rank : 每个后缀排第几.
-//  lcp : 排名相邻的两个后缀的最长公共前缀.
-// 	lcp[0] = 0
-// 	lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
+//	 sa : 排第几的后缀是谁.
+//	 rank : 每个后缀排第几.
+//	 lcp : 排名相邻的两个后缀的最长公共前缀.
+//		lcp[0] = 0
+//		lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
 func UseSA(ords []int) (sa, rank, lcp []int) {
 	n := len(ords)
 	sa = GetSA(ords)

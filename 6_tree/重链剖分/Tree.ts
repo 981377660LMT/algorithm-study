@@ -3,6 +3,8 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-constant-condition */
 
+import { bisectLeft } from '../../9_排序和搜索/二分/bisect'
+
 // https://beet-aizu.github.io/library/tree/heavylightdecomposition.cpp
 // HL分解将树上的路径分成logn条,分割之后只需要op操作logn条链即可
 // 如果原问题可以在序列上O(X)时间解决,那么在树上就可以在O(Xlogn)时间解决
@@ -42,6 +44,24 @@
 //   !边的序号用较深的那个顶点的欧拉序的起点编号表示.(欧拉序起点较大的那个点的起点)
 //   如上图, 0 -> 1 的边表示为 1, 1 -> 4 的边表示为 3
 //   !点 [in,out) 到父亲的边的序号为 `in`.
+
+/** 查询root的子树中,`绝对深度`为depth的顶点个数. */
+function levelCount(tree: Tree): (root: number, depth: number) => number {
+  const n = tree.depth.length
+  const groupByDepth = Array<number[]>(n)
+  for (let i = 0; i < n; i++) groupByDepth[i] = []
+  for (let i = 0; i < n; i++) groupByDepth[tree.depth[i]].push(tree.lid[i])
+  for (let i = 0; i < n; i++) groupByDepth[i].sort((a, b) => a - b)
+  const f = (root: number, depth: number) => {
+    const start = tree.lid[root]
+    const end = tree.rid[root]
+    const pos = groupByDepth[depth]
+    const count1 = bisectLeft(pos, start)
+    const count2 = bisectLeft(pos, end)
+    return count2 - count1
+  }
+  return f
+}
 
 class Tree {
   readonly depth: Uint32Array
@@ -493,6 +513,9 @@ if (require.main === module) {
   console.log(tree.isInSubtree(4, 1))
   console.log(tree.subSize(1, 3))
   console.log(tree.dist(2, 3, true))
+
+  const lc = levelCount(tree)
+  console.log(lc(0, 2))
 }
 
-export { Tree }
+export { Tree, levelCount }

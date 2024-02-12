@@ -28,7 +28,7 @@ func main() {
 		tree[v] = append(tree[v], u)
 	}
 
-	R := NewRangeAddPointGetTreeOffline(tree, 0, true)
+	R := NewRangeAddPointGetTreeOffline(tree, 0)
 	for i := 0; i < k; i++ {
 		var u, v int
 		fmt.Fscan(in, &u, &v)
@@ -60,7 +60,7 @@ type RangeAddPointGetTreeOffline struct {
 }
 
 // 树上差分离线版.区间加,单点查询.
-func NewRangeAddPointGetTreeOffline(tree [][]int, root int, isVertex bool) *RangeAddPointGetTreeOffline {
+func NewRangeAddPointGetTreeOffline(tree [][]int, root int) *RangeAddPointGetTreeOffline {
 	n := len(tree)
 	data := make([]E, n)
 	for i := 0; i < n; i++ {

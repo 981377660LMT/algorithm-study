@@ -24,18 +24,106 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"math/bits"
+	"os"
 	"sort"
 )
 
 func main() {
-	xorTrie := NewBinaryTrie(1e9, 1e5, true)
-	xorTrie.Add(2)
-	xorTrie.Add(1)
-	xorTrie.Add(3)
-	fmt.Println(xorTrie)
+	// xorTrie := NewBinaryTrie(1e9, 1e5, true)
+	// xorTrie.Add(2)
+	// xorTrie.Add(1)
+	// xorTrie.Add(3)
+	// fmt.Println(xorTrie)
+	CF842D()
+	// CF282E()
+}
+
+// https://www.luogu.com.cn/problem/CF842D
+// 给出你一个长度为 n 的非负整数序列以及 q 个询问，每次询问先给你一个整数 x ，然后：
+// 把序列中所有数异或上 x，输出序列的 mex（即最小的不在序列中的非负整数）。
+// 注意，在每个询问过后序列是发生变化的。
+// x,nums[i] <= 3e5
+func CF842D() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	const UPPER = 1 << 19
+	visited := make([]bool, UPPER)
+	for _, v := range nums {
+		visited[v] = true
+	}
+
+	trie := NewBinaryTrie(UPPER, UPPER, false)
+	for v := 0; v < UPPER; v++ {
+		if !visited[v] {
+			trie.Add(v)
+		}
+	}
+
+	curXor := 0
+	for i := 0; i < q; i++ {
+		var x int
+		fmt.Fscan(in, &x)
+		curXor ^= x
+		trie.XorAll(curXor)
+		fmt.Fprintln(out, trie.At(0))
+		trie.XorAll(curXor)
+	}
+}
+
+// https://www.luogu.com.cn/problem/CF282E
+// 给定一个数组，选择一个前缀与一个与之不相交的后缀，使得所有被选择的数的异或和最大。
+//
+// !将前缀异或加入trie，枚举后缀异或，查询最大值。
+func CF282E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+
+	}
+
+	max_ := 1
+	preXor := make([]int, n+1)
+	for i := 0; i < n; i++ {
+		preXor[i+1] = preXor[i] ^ nums[i]
+		max_ = max(max_, preXor[i+1])
+	}
+	sufXor := make([]int, n+1)
+	for i := 0; i < n; i++ {
+		sufXor[i+1] = sufXor[i] ^ nums[n-1-i]
+		max_ = max(max_, sufXor[i+1])
+	}
+
+	res := 0
+	trie := NewBinaryTrie(max_, n+1, true)
+	for _, v := range preXor {
+		trie.Add(v)
+	}
+	for _, v := range sufXor {
+		trie.XorAll(v)
+		res = max(res, trie.Max())
+		trie.XorAll(v)
+	}
+	fmt.Fprintln(out, res)
 }
 
 // https://leetcode.cn/problems/maximum-xor-of-two-numbers-in-an-array/
@@ -96,8 +184,9 @@ func maximumStrongPairXor(nums []int) int {
 // XorTrie.
 type BinaryTrie struct {
 	_multiset                        bool
-	_maxLog, _xEnd, _maxV, _lazy     int
-	_vList, _edges, _size, _endCount []int
+	_maxLog, _maxV                   int32
+	_xEnd, _lazy                     int
+	_vList, _edges, _size, _endCount []int32
 }
 
 // max: max of x
@@ -106,19 +195,19 @@ type BinaryTrie struct {
 func NewBinaryTrie(max, addLimit int, allowMultipleElements bool) *BinaryTrie {
 	maxLog := bits.Len(uint(max))
 	n := maxLog*addLimit + 1
-	edges := make([]int, 2*n)
+	edges := make([]int32, 2*n)
 	for i := range edges {
 		edges[i] = -1
 	}
 
 	return &BinaryTrie{
 		_multiset: allowMultipleElements,
-		_maxLog:   maxLog,
+		_maxLog:   int32(maxLog),
 		_xEnd:     1 << maxLog,
-		_vList:    make([]int, maxLog+1),
+		_vList:    make([]int32, maxLog+1),
 		_edges:    edges,
-		_size:     make([]int, n),
-		_endCount: make([]int, n),
+		_size:     make([]int32, n),
+		_endCount: make([]int32, n),
 	}
 }
 
@@ -127,9 +216,9 @@ func (bt *BinaryTrie) Add(x int) {
 		return
 	}
 	x ^= bt._lazy
-	v := 0
+	v := int32(0)
 	for i := bt._maxLog - 1; i > -1; i-- {
-		d := (x >> i) & 1
+		d := int32((x >> i) & 1)
 		if bt._edges[2*v+d] == -1 {
 			bt._maxV++
 			bt._edges[2*v+d] = bt._maxV
@@ -151,9 +240,9 @@ func (bt *BinaryTrie) Discard(x int) {
 		return
 	}
 	x ^= bt._lazy
-	v := 0
+	v := int32(0)
 	for i := bt._maxLog - 1; i > -1; i-- {
-		d := (x >> i) & 1
+		d := int32((x >> i) & 1)
 		if bt._edges[2*v+d] == -1 {
 			return
 		}
@@ -173,23 +262,24 @@ func (bt *BinaryTrie) Erase(x int, count int) {
 	if x < 0 || x >= bt._xEnd {
 		return
 	}
+	count32 := int32(count)
 	x ^= bt._lazy
-	v := 0
+	v := int32(0)
 	for i := bt._maxLog - 1; i > -1; i-- {
-		d := (x >> i) & 1
+		d := int32((x >> i) & 1)
 		if bt._edges[2*v+d] == -1 {
 			return
 		}
 		v = bt._edges[2*v+d]
 		bt._vList[i] = v
 	}
-	if count == -1 || bt._endCount[v] < count {
-		count = bt._endCount[v]
+	if count32 == -1 || bt._endCount[v] < count32 {
+		count32 = bt._endCount[v]
 	}
 	if bt._endCount[v] > 0 {
-		bt._endCount[v] -= count
+		bt._endCount[v] -= count32
 		for _, v := range bt._vList {
-			bt._size[v] -= count
+			bt._size[v] -= count32
 		}
 	}
 }
@@ -199,15 +289,15 @@ func (bt *BinaryTrie) Count(x int) int {
 		return 0
 	}
 	x ^= bt._lazy
-	v := 0
+	v := int32(0)
 	for i := bt._maxLog - 1; i > -1; i-- {
-		d := (x >> i) & 1
+		d := int32((x >> i) & 1)
 		if bt._edges[2*v+d] == -1 {
 			return 0
 		}
 		v = bt._edges[2*v+d]
 	}
-	return bt._endCount[v]
+	return int(bt._endCount[v])
 }
 
 func (bt *BinaryTrie) BisectLeft(x int) int {
@@ -217,8 +307,8 @@ func (bt *BinaryTrie) BisectLeft(x int) int {
 	if bt._xEnd <= x {
 		return bt.Size()
 	}
-	v := 0
-	res := 0
+	v := int32(0)
+	res := int32(0)
 	for i := bt._maxLog - 1; i > -1; i-- {
 		d := (x >> i) & 1
 		l := (bt._lazy >> i) & 1
@@ -232,17 +322,17 @@ func (bt *BinaryTrie) BisectLeft(x int) int {
 				res += bt._size[lc]
 			}
 			if rc == -1 {
-				return res
+				return int(res)
 			}
 			v = rc
 		} else {
 			if lc == -1 {
-				return res
+				return int(res)
 			}
 			v = lc
 		}
 	}
-	return res
+	return int(res)
 }
 
 func (bt *BinaryTrie) BisectRight(x int) int {
@@ -267,10 +357,11 @@ func (bt *BinaryTrie) Find(x int) int {
 //
 //	support negative index
 func (bt *BinaryTrie) At(k int) int {
-	if k < 0 {
-		k += bt._size[0]
+	k32 := int32(k)
+	if k32 < 0 {
+		k32 += bt._size[0]
 	}
-	v := 0
+	v := int32(0)
 	res := 0
 	for i := bt._maxLog - 1; i > -1; i-- {
 		l := (bt._lazy >> i) & 1
@@ -284,8 +375,8 @@ func (bt *BinaryTrie) At(k int) int {
 			res |= 1 << i
 			continue
 		}
-		if bt._size[lc] <= k {
-			k -= bt._size[lc]
+		if bt._size[lc] <= k32 {
+			k32 -= bt._size[lc]
 			v = rc
 			res |= 1 << i
 		} else {
@@ -312,7 +403,7 @@ func (bt *BinaryTrie) Has(x int) bool {
 }
 
 func (bt *BinaryTrie) Size() int {
-	return bt._size[0]
+	return int(bt._size[0])
 }
 
 func (bt *BinaryTrie) ForEach(f func(value, index int)) {
@@ -321,8 +412,8 @@ func (bt *BinaryTrie) ForEach(f func(value, index int)) {
 		l := (bt._lazy >> i) & 1
 		nextQueue := [][2]int{}
 		for _, v := range queue {
-			lc := bt._edges[2*v[0]]
-			rc := bt._edges[2*v[0]+1]
+			lc := int(bt._edges[2*v[0]])
+			rc := int(bt._edges[2*v[0]+1])
 			if l == 1 {
 				lc, rc = rc, lc
 			}
@@ -339,7 +430,7 @@ func (bt *BinaryTrie) ForEach(f func(value, index int)) {
 	i := 0
 	for _, item := range queue {
 		v, x := item[0], item[1]
-		for j := 0; j < bt._endCount[v]; j++ {
+		for j := 0; j < int(bt._endCount[v]); j++ {
 			f(x, i)
 			i++
 		}

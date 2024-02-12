@@ -5,6 +5,9 @@ import "fmt"
 // 有序数组原地去重.
 // Compact
 func UniqueInplace(sorted *([]int)) {
+	if len(*sorted) == 0 {
+		return
+	}
 	nums := *sorted
 	slow := 0
 	for fast := 0; fast < len(nums); fast++ {

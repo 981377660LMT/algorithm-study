@@ -1,38 +1,12 @@
 // https://ei1333.github.io/library/graph/tree/rmq-lowest-common-ancestor.hpp
 // オイラーツアーとスパーステーブルによって最小共通祖先を求める.
 // O(1) 求 LCA，O(nlogn) 预处理
+
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"math/bits"
-	"os"
 )
-
-func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	var q int
-	fmt.Fscan(in, &q)
-	lca := NewLCA(n)
-	for i := 1; i < n; i++ {
-		var parent int
-		fmt.Fscan(in, &parent)
-		lca.AddEdge(i, parent)
-	}
-	lca.Build(0)
-
-	for i := 0; i < q; i++ {
-		var u, v int
-		fmt.Fscan(in, &u, &v)
-		fmt.Fprintln(out, lca.LCA(u, v))
-	}
-}
 
 type LCARMQ struct {
 	Depth     []int
@@ -41,29 +15,26 @@ type LCARMQ struct {
 	st        *_St
 }
 
-func NewLCA(n int) *LCARMQ { return &LCARMQ{g: make([][]int, n)} }
-
-func (lca *LCARMQ) AddEdge(u, v int) {
-	lca.g[u] = append(lca.g[u], v)
-	lca.g[v] = append(lca.g[v], u)
-}
-
-func (lca *LCARMQ) Build(root int) {
-	n := len(lca.g)
-	lca.order = make([]int, 0, n*2-1)
-	lca.Depth = make([]int, 0, n*2-1)
-	lca.in = make([]int, n)
-	lca.dfs(root, -1, 0)
+func NewLCA(tree [][]int, roots []int) *LCARMQ {
+	res := &LCARMQ{g: tree}
+	n := len(res.g)
+	res.order = make([]int, 0, n*2-1)
+	res.Depth = make([]int, 0, n*2-1)
+	res.in = make([]int, n)
+	for _, root := range roots {
+		res.dfs(root, -1, 0)
+	}
 	vs := make([]int, 2*n-1)
 	for i := range vs {
 		vs[i] = i
 	}
-	lca.st = NewSparseTable(vs, func(i, j int) int {
-		if lca.Depth[i] < lca.Depth[j] {
+	res.st = NewSparseTable(vs, func(i, j int) int {
+		if res.Depth[i] < res.Depth[j] {
 			return i
 		}
 		return j
 	})
+	return res
 }
 
 func (lca *LCARMQ) LCA(u, v int) int {

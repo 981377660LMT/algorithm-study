@@ -1,4 +1,5 @@
 // https://atcoder.jp/contests/abc324/editorial/7399
+
 package main
 
 import (
@@ -17,8 +18,8 @@ import (
 // 这两种操作都不会改变元素相对顺序。
 // 输出每次分裂出的数组大小。
 //
-// SortedList + Deque 维护.
-// 启发式分裂：每次分裂出较小的那一半
+// 两个 SortedList 维护.
+// SortedList 启发式分裂：每次分裂出较小的那一半
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -34,10 +35,21 @@ func main() {
 	var q int
 	fmt.Fscan(in, &q)
 
-	history := make([]*SortedDeque, q+1)
-	history[0] = NewSortedDeque(func(a, b S) bool { return a < b }, nums...)
+	history := make([]*SortedListWithEntry, q+1)
+	entries := make([]Entry, n)
+	for i := range entries {
+		entries[i] = Entry{index: int32(i), value: int32(nums[i])}
+	}
+	history[0] = NewSortedListWithEntry(
+		func(a, b Entry) bool { return a.index < b.index },
+		func(a, b Entry) bool { return a.value < b.value },
+		entries...,
+	)
 	for i := 1; i < len(history); i++ {
-		history[i] = NewSortedDeque(func(a, b S) bool { return a < b })
+		history[i] = NewSortedListWithEntry(
+			func(a, b Entry) bool { return a.index < b.index },
+			func(a, b Entry) bool { return a.value < b.value },
+		)
 	}
 
 	for cur := 1; cur < q+1; cur++ {
@@ -50,150 +62,139 @@ func main() {
 			if len1 < len2 { // 前面少，拆到前面
 				history[cur], history[pre] = history[pre], history[cur]
 				for j := 0; j < len1; j++ {
-					history[pre].Append(history[cur].PopLeft())
+					history[pre].Add(history[cur].PopFront())
 				}
 			} else { // 后面少，拆到后面
 				for j := 0; j < len2; j++ {
-					history[cur].AppendLeft(history[pre].Pop())
+					history[cur].Add(history[pre].PopBack())
 				}
 			}
 		} else { // 将 A[pre] 中值大于 x 的元素分裂成一个新的数组 Ai
-			len1 := history[pre].CountLessOrEqual(x)
+			len1 := history[pre].SlValue.BisectRight(Entry{value: int32(x)})
 			len2 := history[pre].Len() - len1
 			if len1 < len2 { // 前面少，拆到前面
 				history[cur], history[pre] = history[pre], history[cur]
 				for j := 0; j < len1; j++ {
-					min_ := history[cur].Min()
-					history[cur].Remove(min_)
-					history[pre].Append(min_)
+					history[pre].Add(history[cur].PopMin())
 				}
 			} else { // 后面少，拆到后面
 				for j := 0; j < len2; j++ {
-					max_ := history[pre].Max()
-					history[pre].Remove(max_)
-					history[cur].AppendLeft(max_)
+					history[cur].Add(history[pre].PopMax())
 				}
 			}
 		}
 
 		fmt.Fprintln(out, history[cur].Len())
 	}
+
 }
 
-// 1e5 -> 200, 2e5 -> 400
-const _LOAD int = 200
+const _LOAD int = 50 // !块大小较小，适合频繁分裂的情形
 
-type S = int
-
-// 可删除元素、获取第k小值的双端队列.
-// !启用删除功能时，需要保证队列中始终不能有重复元素，且删除的元素必须存在于队列中.
-type SortedDeque struct {
-	sl *SortedList
-	dq *RemovableDeque
+type Value = int32 // value 必须是基本类型
+type Entry = struct {
+	index int32
+	value Value
 }
 
-func NewSortedDeque(less func(a, b S) bool, elements ...S) *SortedDeque {
-	elements = append(elements[:0:0], elements...)
-	res := &SortedDeque{sl: NewSortedList(less, elements...), dq: NewRemovableDeque(len(elements))}
-	for _, v := range elements {
-		res.dq.Append(v)
-	}
-	return res
+type SortedListWithEntry struct {
+	SlIndex *SortedList // 按照index排序
+	SlValue *SortedList // 按照value排序
 }
 
-func (sd *SortedDeque) Append(value S) {
-	sd.sl.Add(value)
-	sd.dq.Append(value)
+func NewSortedListWithEntry(
+	indexLess func(a, b Entry) bool,
+	valueLess func(a, b Entry) bool,
+	entries ...Entry,
+) *SortedListWithEntry {
+	sl1 := NewSortedList(indexLess, entries...)
+	sl2 := NewSortedList(valueLess, entries...)
+	return &SortedListWithEntry{sl1, sl2}
 }
 
-func (sd *SortedDeque) AppendLeft(value S) {
-	sd.sl.Add(value)
-	sd.dq.AppendLeft(value)
+func (sl *SortedListWithEntry) Add(value Entry) *SortedListWithEntry {
+	sl.SlIndex.Add(value)
+	sl.SlValue.Add(value)
+	return sl
 }
 
-func (sd *SortedDeque) Pop() S {
-	value := sd.dq.Pop()
-	sd.sl.Discard(value)
-	return value
+func (sl *SortedListWithEntry) GetKthEntryByIndex(kth int) Entry {
+	return sl.SlIndex.At(kth)
 }
 
-func (sd *SortedDeque) PopLeft() S {
-	value := sd.dq.PopLeft()
-	sd.sl.Discard(value)
-	return value
+func (sl *SortedListWithEntry) GetKthEntryByValue(kth int) Entry {
+	return sl.SlValue.At(kth)
 }
 
-func (sd *SortedDeque) Head() S {
-	return sd.dq.Head()
+func (sl *SortedListWithEntry) Front() Entry {
+	return sl.SlIndex.Min()
 }
 
-func (sd *SortedDeque) Tail() S {
-	return sd.dq.Tail()
+func (sl *SortedListWithEntry) Back() Entry {
+	return sl.SlIndex.Max()
 }
 
-// 删除队列中所有值为value的元素.
-func (sd *SortedDeque) Remove(value S) {
-	count := sd.dq.Count(value)
-	if count == 0 {
-		return
-	}
-	// fast path
-	if count == 1 {
-		sd.sl.Discard(value)
-		sd.dq.Remove(value)
-		return
-	}
-	start := sd.sl.BisectLeft(value)
-	end := start + count
-	sd.sl.Erase(start, end)
-	sd.dq.Remove(value)
+func (sl *SortedListWithEntry) Min() Entry {
+	return sl.SlValue.Min()
 }
 
-func (sd *SortedDeque) Min() S {
-	return sd.sl.Min()
+func (sl *SortedListWithEntry) Max() Entry {
+	return sl.SlValue.Max()
 }
 
-func (sd *SortedDeque) Max() S {
-	return sd.sl.Max()
+func (sl *SortedListWithEntry) PopFront() Entry {
+	popped := sl.SlIndex.Pop(0)
+	sl.SlValue.Discard(popped)
+	return popped
 }
 
-func (sd *SortedDeque) Kth(k int) S {
-	return sd.sl.At(k)
+func (sl *SortedListWithEntry) PopBack() Entry {
+	popped := sl.SlIndex.Pop(sl.Len() - 1)
+	sl.SlValue.Discard(popped)
+	return popped
 }
 
-func (sd *SortedDeque) CountLess(value S) int {
-	return sd.sl.BisectLeft(value)
+func (sl *SortedListWithEntry) PopMin() Entry {
+	popped := sl.SlValue.Pop(0)
+	sl.SlIndex.Discard(popped)
+	return popped
 }
 
-func (sd *SortedDeque) CountLessOrEqual(value S) int {
-	return sd.sl.BisectRight(value)
+func (sl *SortedListWithEntry) PopMax() Entry {
+	popped := sl.SlValue.Pop(sl.Len() - 1)
+	sl.SlIndex.Discard(popped)
+	return popped
 }
 
-func (sd *SortedDeque) Len() int {
-	return sd.sl.Len()
+func (sl *SortedListWithEntry) Discard(value Entry) bool {
+	return sl.SlIndex.Discard(value) && sl.SlValue.Discard(value)
+}
+
+func (sl *SortedListWithEntry) Len() int {
+	return sl.SlIndex.Len()
 }
 
 // 使用分块+树状数组维护的有序序列.
 type SortedList struct {
-	less              func(a, b S) bool
+	less              func(a, b Entry) bool
 	size              int
-	blocks            [][]S
-	mins              []S
+	blocks            [][]Entry
+	mins              []Entry
 	tree              []int
 	shouldRebuildTree bool
 }
 
-func NewSortedList(less func(a, b S) bool, elements ...S) *SortedList {
+func NewSortedList(less func(a, b Entry) bool, elements ...Entry) *SortedList {
 	elements = append(elements[:0:0], elements...)
 	res := &SortedList{less: less}
 	sort.Slice(elements, func(i, j int) bool { return less(elements[i], elements[j]) })
 	n := len(elements)
-	blocks := [][]S{}
+	blocks := [][]Entry{}
 	for start := 0; start < n; start += _LOAD {
 		end := min(start+_LOAD, n)
 		blocks = append(blocks, elements[start:end:end]) // !各个块互不影响, max参数也需要指定为end
 	}
-	mins := make([]S, len(blocks))
+	mins := make([]Entry, len(blocks))
 	for i, cur := range blocks {
 		mins[i] = cur[0]
 	}
@@ -204,10 +205,10 @@ func NewSortedList(less func(a, b S) bool, elements ...S) *SortedList {
 	return res
 }
 
-func (sl *SortedList) Add(value S) *SortedList {
+func (sl *SortedList) Add(value Entry) *SortedList {
 	sl.size++
 	if len(sl.blocks) == 0 {
-		sl.blocks = append(sl.blocks, []S{value})
+		sl.blocks = append(sl.blocks, []Entry{value})
 		sl.mins = append(sl.mins, value)
 		sl.shouldRebuildTree = true
 		return sl
@@ -216,13 +217,13 @@ func (sl *SortedList) Add(value S) *SortedList {
 	pos, index := sl._locRight(value)
 
 	sl._updateTree(pos, 1)
-	sl.blocks[pos] = append(sl.blocks[pos][:index], append([]S{value}, sl.blocks[pos][index:]...)...)
+	sl.blocks[pos] = append(sl.blocks[pos][:index], append([]Entry{value}, sl.blocks[pos][index:]...)...)
 	sl.mins[pos] = sl.blocks[pos][0]
 
 	// n -> load + (n - load)
 	if n := len(sl.blocks[pos]); _LOAD+_LOAD < n {
-		sl.blocks = append(sl.blocks[:pos+1], append([][]S{sl.blocks[pos][_LOAD:]}, sl.blocks[pos+1:]...)...)
-		sl.mins = append(sl.mins[:pos+1], append([]S{sl.blocks[pos][_LOAD]}, sl.mins[pos+1:]...)...)
+		sl.blocks = append(sl.blocks[:pos+1], append([][]Entry{sl.blocks[pos][_LOAD:]}, sl.blocks[pos+1:]...)...)
+		sl.mins = append(sl.mins[:pos+1], append([]Entry{sl.blocks[pos][_LOAD]}, sl.mins[pos+1:]...)...)
 		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD] // !注意max的设置(为了让左右互不影响)
 		sl.shouldRebuildTree = true
 	}
@@ -230,7 +231,7 @@ func (sl *SortedList) Add(value S) *SortedList {
 	return sl
 }
 
-func (sl *SortedList) Has(value S) bool {
+func (sl *SortedList) Has(value Entry) bool {
 	if len(sl.blocks) == 0 {
 		return false
 	}
@@ -238,7 +239,7 @@ func (sl *SortedList) Has(value S) bool {
 	return index < len(sl.blocks[pos]) && sl.blocks[pos][index] == value
 }
 
-func (sl *SortedList) Discard(value S) bool {
+func (sl *SortedList) Discard(value Entry) bool {
 	if len(sl.blocks) == 0 {
 		return false
 	}
@@ -250,7 +251,7 @@ func (sl *SortedList) Discard(value S) bool {
 	return false
 }
 
-func (sl *SortedList) Pop(index int) S {
+func (sl *SortedList) Pop(index int) Entry {
 	if index < 0 {
 		index += sl.size
 	}
@@ -263,7 +264,7 @@ func (sl *SortedList) Pop(index int) S {
 	return value
 }
 
-func (sl *SortedList) At(index int) S {
+func (sl *SortedList) At(index int) Entry {
 	if index < 0 {
 		index += sl.size
 	}
@@ -278,7 +279,7 @@ func (sl *SortedList) Erase(start, end int) {
 	sl.Enumerate(start, end, nil, true)
 }
 
-func (sl *SortedList) Lower(value S) (res S, ok bool) {
+func (sl *SortedList) Lower(value Entry) (res Entry, ok bool) {
 	pos := sl.BisectLeft(value)
 	if pos == 0 {
 		return
@@ -286,7 +287,7 @@ func (sl *SortedList) Lower(value S) (res S, ok bool) {
 	return sl.At(pos - 1), true
 }
 
-func (sl *SortedList) Higher(value S) (res S, ok bool) {
+func (sl *SortedList) Higher(value Entry) (res Entry, ok bool) {
 	pos := sl.BisectRight(value)
 	if pos == sl.size {
 		return
@@ -294,7 +295,7 @@ func (sl *SortedList) Higher(value S) (res S, ok bool) {
 	return sl.At(pos), true
 }
 
-func (sl *SortedList) Floor(value S) (res S, ok bool) {
+func (sl *SortedList) Floor(value Entry) (res Entry, ok bool) {
 	pos := sl.BisectRight(value)
 	if pos == 0 {
 		return
@@ -302,7 +303,7 @@ func (sl *SortedList) Floor(value S) (res S, ok bool) {
 	return sl.At(pos - 1), true
 }
 
-func (sl *SortedList) Ceiling(value S) (res S, ok bool) {
+func (sl *SortedList) Ceiling(value Entry) (res Entry, ok bool) {
 	pos := sl.BisectLeft(value)
 	if pos == sl.size {
 		return
@@ -311,18 +312,18 @@ func (sl *SortedList) Ceiling(value S) (res S, ok bool) {
 }
 
 // 返回第一个大于等于 `value` 的元素的索引/严格小于 `value` 的元素的个数.
-func (sl *SortedList) BisectLeft(value S) int {
+func (sl *SortedList) BisectLeft(value Entry) int {
 	pos, index := sl._locLeft(value)
 	return sl._queryTree(pos) + index
 }
 
 // 返回第一个严格大于 `value` 的元素的索引/小于等于 `value` 的元素的个数.
-func (sl *SortedList) BisectRight(value S) int {
+func (sl *SortedList) BisectRight(value Entry) int {
 	pos, index := sl._locRight(value)
 	return sl._queryTree(pos) + index
 }
 
-func (sl *SortedList) Count(value S) int {
+func (sl *SortedList) Count(value Entry) int {
 	return sl.BisectRight(value) - sl.BisectLeft(value)
 }
 
@@ -334,7 +335,7 @@ func (sl *SortedList) Clear() {
 	sl.shouldRebuildTree = true
 }
 
-func (sl *SortedList) ForEach(f func(value S, index int), reverse bool) {
+func (sl *SortedList) ForEach(f func(value Entry, index int), reverse bool) {
 	if !reverse {
 		count := 0
 		for i := 0; i < len(sl.blocks); i++ {
@@ -344,19 +345,20 @@ func (sl *SortedList) ForEach(f func(value S, index int), reverse bool) {
 				count++
 			}
 		}
-	} else {
-		count := 0
-		for i := len(sl.blocks) - 1; i >= 0; i-- {
-			block := sl.blocks[i]
-			for j := len(block) - 1; j >= 0; j-- {
-				f(block[j], count)
-				count++
-			}
+		return
+	}
+
+	count := 0
+	for i := len(sl.blocks) - 1; i >= 0; i-- {
+		block := sl.blocks[i]
+		for j := len(block) - 1; j >= 0; j-- {
+			f(block[j], count)
+			count++
 		}
 	}
 }
 
-func (sl *SortedList) Enumerate(start, end int, f func(value S), erase bool) {
+func (sl *SortedList) Enumerate(start, end int, f func(value Entry), erase bool) {
 	if start < 0 {
 		start = 0
 	}
@@ -391,8 +393,8 @@ func (sl *SortedList) Enumerate(start, end int, f func(value S), erase bool) {
 				for i := startIndex; i < endIndex; i++ {
 					sl._updateTree(pos, -1)
 				}
-				sl.blocks[pos] = append(block[:startIndex], block[endIndex:]...)
-				sl.mins[pos] = sl.blocks[pos][0]
+				block = append(block[:startIndex], block[endIndex:]...)
+				sl.mins[pos] = block[0]
 			}
 			sl.size -= deleted
 		}
@@ -402,7 +404,7 @@ func (sl *SortedList) Enumerate(start, end int, f func(value S), erase bool) {
 	}
 }
 
-func (sl *SortedList) Slice(start, end int) []S {
+func (sl *SortedList) Slice(start, end int) []Entry {
 	if start < 0 {
 		start = 0
 	}
@@ -413,7 +415,7 @@ func (sl *SortedList) Slice(start, end int) []S {
 		return nil
 	}
 	count := end - start
-	res := make([]S, 0, count)
+	res := make([]Entry, 0, count)
 	pos, index := sl._findKth(start)
 	for ; count > 0 && pos < len(sl.blocks); pos++ {
 		block := sl.blocks[pos]
@@ -426,11 +428,11 @@ func (sl *SortedList) Slice(start, end int) []S {
 	return res
 }
 
-func (sl *SortedList) Range(min, max S) []S {
+func (sl *SortedList) Range(min, max Entry) []Entry {
 	if sl.less(max, min) {
 		return nil
 	}
-	res := []S{}
+	res := []Entry{}
 	pos := sl._locBlock(min)
 	for i := pos; i < len(sl.blocks); i++ {
 		block := sl.blocks[i]
@@ -447,14 +449,14 @@ func (sl *SortedList) Range(min, max S) []S {
 	return res
 }
 
-func (sl *SortedList) Min() S {
+func (sl *SortedList) Min() Entry {
 	if sl.size == 0 {
 		panic("Min() called on empty SortedList")
 	}
 	return sl.mins[0]
 }
 
-func (sl *SortedList) Max() S {
+func (sl *SortedList) Max() Entry {
 	if sl.size == 0 {
 		panic("Max() called on empty SortedList")
 	}
@@ -465,7 +467,7 @@ func (sl *SortedList) Max() S {
 func (sl *SortedList) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("SortedList{")
-	sl.ForEach(func(value S, index int) {
+	sl.ForEach(func(value Entry, index int) {
 		if index > 0 {
 			sb.WriteByte(',')
 		}
@@ -495,7 +497,7 @@ func (sl *SortedList) _delete(pos, index int) {
 	sl.shouldRebuildTree = true
 }
 
-func (sl *SortedList) _locLeft(value S) (pos, index int) {
+func (sl *SortedList) _locLeft(value Entry) (pos, index int) {
 	if sl.size == 0 {
 		return
 	}
@@ -536,7 +538,7 @@ func (sl *SortedList) _locLeft(value S) (pos, index int) {
 	return
 }
 
-func (sl *SortedList) _locRight(value S) (pos, index int) {
+func (sl *SortedList) _locRight(value Entry) (pos, index int) {
 	if sl.size == 0 {
 		return
 	}
@@ -571,7 +573,7 @@ func (sl *SortedList) _locRight(value S) (pos, index int) {
 	return
 }
 
-func (sl *SortedList) _locBlock(value S) int {
+func (sl *SortedList) _locBlock(value Entry) int {
 	left, right := -1, len(sl.blocks)-1
 	for left+1 < right {
 		mid := (left + right) >> 1
@@ -651,200 +653,6 @@ func (sl *SortedList) _findKth(k int) (pos, index int) {
 		}
 	}
 	return pos + 1, k
-}
-
-type Value = int
-
-type Pair = struct {
-	value     Value
-	addedTime int
-}
-
-type RemovableDeque struct {
-	queue       *dq
-	counter     map[Value]int
-	removedTime map[Value]int
-	length      int
-	time        int
-}
-
-func NewRemovableDeque(cap int) *RemovableDeque {
-	return &RemovableDeque{
-		queue:       newDq(cap),
-		counter:     make(map[Value]int),
-		removedTime: make(map[Value]int),
-		length:      0,
-		time:        0,
-	}
-}
-
-func (rq *RemovableDeque) Append(value Value) {
-	rq.length++
-	rq.queue.Append(Pair{value, rq.time})
-	rq.counter[value]++
-}
-
-func (rq *RemovableDeque) AppendLeft(value Value) {
-	rq.length++
-	rq.queue.AppendLeft(Pair{value, rq.time})
-	rq.counter[value]++
-}
-
-func (rq *RemovableDeque) Pop() Value {
-	rq.length--
-	rq._normalizeTail()
-	res := rq.queue.Pop().value
-	if _, ok := rq.counter[res]; ok {
-		rq.counter[res]--
-		if rq.counter[res] == 0 {
-			delete(rq.counter, res)
-		}
-	}
-	return res
-}
-
-func (rq *RemovableDeque) PopLeft() Value {
-	rq.length--
-	rq._normalizeHead()
-	res := rq.queue.PopLeft().value
-	if _, ok := rq.counter[res]; ok {
-		rq.counter[res]--
-		if rq.counter[res] == 0 {
-			delete(rq.counter, res)
-		}
-	}
-	return res
-}
-
-func (rq *RemovableDeque) Head() Value {
-	rq._normalizeHead()
-	return rq.queue.Head().value
-}
-
-func (rq *RemovableDeque) Tail() Value {
-	rq._normalizeTail()
-	return rq.queue.Tail().value
-}
-
-// 删除deque中所有值为value的元素.
-func (rq *RemovableDeque) Remove(value Value) {
-	if _, ok := rq.counter[value]; ok {
-		rq.length -= rq.counter[value]
-		delete(rq.counter, value)
-		rq.removedTime[value] = rq.time
-		rq.time++
-	}
-}
-
-func (rq *RemovableDeque) Count(value Value) int {
-	return rq.counter[value]
-}
-
-func (rq *RemovableDeque) Empty() bool {
-	return rq.length == 0
-}
-
-func (rq *RemovableDeque) Len() int {
-	return rq.length
-}
-
-func (rq *RemovableDeque) String() string {
-	res := make([]Value, 0, rq.length)
-	for i := 0; i < rq.length; i++ {
-		p := rq.queue.At(i)
-		v, t := p.value, p.addedTime
-		if _, ok := rq.removedTime[v]; ok && t <= rq.removedTime[v] {
-			continue
-		}
-		res = append(res, v)
-	}
-	return fmt.Sprint(res)
-}
-
-func (rq *RemovableDeque) _normalizeHead() {
-	for rq.queue.Size() > 0 {
-		p := rq.queue.Head()
-		v, t := p.value, p.addedTime
-		if _, ok := rq.removedTime[v]; ok && t <= rq.removedTime[v] {
-			rq.queue.PopLeft()
-		} else {
-			break
-		}
-	}
-}
-
-func (rq *RemovableDeque) _normalizeTail() {
-	for rq.queue.Size() > 0 {
-		p := rq.queue.Tail()
-		v, t := p.value, p.addedTime
-		if _, ok := rq.removedTime[v]; ok && t <= rq.removedTime[v] {
-			rq.queue.Pop()
-		} else {
-			break
-		}
-	}
-}
-
-type dq struct{ l, r []Pair }
-
-func newDq(cap int) *dq { return &dq{make([]Pair, 0, 1+cap/2), make([]Pair, 0, 1+cap/2)} }
-
-func (q *dq) Empty() bool {
-	return len(q.l) == 0 && len(q.r) == 0
-}
-
-func (q *dq) Size() int {
-	return len(q.l) + len(q.r)
-}
-
-func (q *dq) AppendLeft(v Pair) {
-	q.l = append(q.l, v)
-}
-
-func (q *dq) Append(v Pair) {
-	q.r = append(q.r, v)
-}
-
-func (q *dq) PopLeft() Pair {
-	var v Pair
-	if len(q.l) > 0 {
-		q.l, v = q.l[:len(q.l)-1], q.l[len(q.l)-1]
-	} else {
-		v, q.r = q.r[0], q.r[1:]
-	}
-	return v
-}
-
-func (q *dq) Pop() Pair {
-	var v Pair
-	if len(q.r) > 0 {
-		q.r, v = q.r[:len(q.r)-1], q.r[len(q.r)-1]
-	} else {
-		v, q.l = q.l[0], q.l[1:]
-	}
-	return v
-}
-
-func (q *dq) Head() Pair {
-	if len(q.l) > 0 {
-		return q.l[len(q.l)-1]
-	}
-	return q.r[0]
-}
-
-func (q *dq) Tail() Pair {
-	if len(q.r) > 0 {
-		return q.r[len(q.r)-1]
-	}
-	return q.l[0]
-}
-
-// 0 <= i < q.Size()
-func (q *dq) At(i int) Pair {
-	if i < len(q.l) {
-		return q.l[len(q.l)-1-i]
-	}
-	return q.r[i-len(q.l)]
 }
 
 func min(a, b int) int {

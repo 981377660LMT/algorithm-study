@@ -1,4 +1,4 @@
-import { kruskal1 } from './模板'
+import { kruskal1 } from './Kruskal'
 
 type Edge<V = unknown> = [u: V, v: V, weight: number]
 

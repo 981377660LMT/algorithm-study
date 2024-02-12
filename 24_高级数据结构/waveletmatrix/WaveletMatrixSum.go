@@ -19,7 +19,71 @@ import (
 	"fmt"
 	"math/bits"
 	"os"
+	"sort"
+	"time"
 )
+
+func main() {
+	// demo()
+	CF1771F()
+}
+
+// Hossam and Range Minimum Query
+// https://www.luogu.com.cn/problem/CF1771F
+// 在线查询区间出现次数为奇数的数的最小值.
+//
+// 异或哈希+Wavelet Matrix二分: 最大值<x时，区间内的异或和是否为0(出现次数全是偶数次).
+func CF1771F() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	getRank, getValue, size := DiscretizeCompressed(nums, 0)
+	for i := 0; i < n; i++ {
+		nums[i] = getRank(nums[i])
+	}
+	R := NewRandom()
+	xorHash := make([]int, size)
+	for i := 0; i < size; i++ {
+		xorHash[i] = int(uint32(R.Rng()))
+	}
+	wm := NewWaveletMatrixSum(
+		nums, -1,
+		func() E { return 0 },
+		func(a, b E) E { return a ^ b },
+		func(a E) E { return a },
+		func(v int) E { return xorHash[v] },
+	)
+
+	preRes := 0
+	normalize := func(v int) int {
+		return v ^ preRes
+	}
+
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var left, right int
+		fmt.Fscan(in, &left, &right)
+		left = normalize(left)
+		right = normalize(right)
+		left--
+		res := wm.MaxRightValue(left, right, 0, func(preSum E) bool { return preSum == 0 })
+		if res == INF {
+			res = 0
+		} else {
+			res = getValue(res)
+		}
+		preRes = res
+		fmt.Fprintln(out, res)
+	}
+}
 
 func 区间最短距离和() {
 	// https://yukicoder.me/problems/no/924
@@ -46,7 +110,7 @@ func 区间最短距离和() {
 		preSum[i+1] = preSum[i] + nums[i]
 	}
 
-	wm := NewWaveletMatrixSum(nums, -1)
+	wm := NewWaveletMatrixSum(nums, -1, func() int { return 0 }, func(a, b int) int { return a + b }, func(a int) int { return -a }, nil)
 	for i := 0; i < q; i++ {
 		var left, right int
 		fmt.Fscan(in, &left, &right)
@@ -76,16 +140,16 @@ func abc281_e() {
 	for i := range nums {
 		fmt.Fscan(in, &nums[i])
 	}
-	wm := NewWaveletMatrixSum(nums, -1)
+	wm := NewWaveletMatrixSum(nums, -1, func() int { return 0 }, func(a, b int) int { return a + b }, func(a int) int { return -a }, nil)
 	for i := 0; i < n-m+1; i++ {
 		_, res := wm.Kth(i, i+m, k, 0)
 		fmt.Fprintln(out, res)
 	}
 }
 
-func maina() {
+func demo() {
 	nums := []int{3, 1, 2, 4, 5, 6, 7, 8, 9, 10}
-	wm := NewWaveletMatrixSum(nums, -1)
+	wm := NewWaveletMatrixSum(nums, -1, func() int { return 0 }, func(a, b int) int { return a + b }, func(a int) int { return -a }, nil)
 	fmt.Println(wm.CountRange(0, 10, 3, 7, 0))
 	fmt.Println(wm.Kth(0, 10, 3, 0))                                                    // 3
 	fmt.Println(wm.MaxRightValue(0, 10, 0, func(preSum E) bool { return preSum < 11 })) // 5 即值域在 [0,5) 中的数的和小于 11
@@ -98,21 +162,26 @@ const INF int = 1e18
 
 type E = int
 
-func (*WaveletMatrixSum) e() E        { return 0 }
-func (*WaveletMatrixSum) op(a, b E) E { return a + b }
-func (*WaveletMatrixSum) inv(a E) E   { return -a }
-
 type WaveletMatrixSum struct {
 	n, log int
 	mid    []int
 	bv     []*BitVector
 	preSum [][]E
 	unit   E
+	e      func() E
+	op     func(a, b E) E
+	inv    func(a E) E
 }
 
 // log:如果要支持异或,则需要按照异或的值来决定值域
-//  设为-1时表示不使用异或
-func NewWaveletMatrixSum(nums []E, log int) *WaveletMatrixSum {
+//
+//	设为-1时表示不使用异或
+func NewWaveletMatrixSum(
+	nums []E, log int,
+	e func() E, op func(a, b E) E, inv func(a E) E,
+	// f: 求和的变换函数.nil表示不变换，即v.
+	f func(v E) E,
+) *WaveletMatrixSum {
 	numsCopy := make([]E, len(nums))
 	max_ := 1
 	for i, v := range nums {
@@ -124,7 +193,7 @@ func NewWaveletMatrixSum(nums []E, log int) *WaveletMatrixSum {
 	if log == -1 {
 		log = bits.Len(uint(max_))
 	}
-	res := &WaveletMatrixSum{}
+	res := &WaveletMatrixSum{e: e, op: op, inv: inv}
 	res.unit = res.e()
 	n := len(numsCopy)
 	mid := make([]int, log)
@@ -144,7 +213,11 @@ func NewWaveletMatrixSum(nums []E, log int) *WaveletMatrixSum {
 	for d := log - 1; d >= -1; d-- {
 		p0, p1 := 0, 0
 		for i := 0; i < n; i++ {
-			preSum[d+1][i+1] = res.op(preSum[d+1][i], numsCopy[i])
+			tmp := numsCopy[i]
+			if f != nil {
+				tmp = f(tmp)
+			}
+			preSum[d+1][i+1] = res.op(preSum[d+1][i], tmp)
 		}
 		if d == -1 {
 			break
@@ -212,7 +285,8 @@ func (wm *WaveletMatrixSum) CountPrefix(left, right, x, xor int) (int, E) {
 }
 
 // 返回区间 [left, right) 中的 (第k小的元素, 前k个元素(不包括第k小的元素) 的 op 的结果)
-//  如果k < 0, 返回 (-1, 0); 如果k >= right-left, 返回 (-1, 区间 op 的结果)
+//
+//	如果k < 0, 返回 (-1, 0); 如果k >= right-left, 返回 (-1, 区间 op 的结果)
 func (wm *WaveletMatrixSum) Kth(left, right, k, xor int) (int, E) {
 	if k < 0 {
 		return -1, 0
@@ -251,9 +325,10 @@ func (wm *WaveletMatrixSum) Kth(left, right, k, xor int) (int, E) {
 }
 
 // 返回使得 check(prefixSum) 为 true 的最大值 val.
-//  !(即区间内小于 val 的数的和 prefixSum 满足 check函数, 找到这样的最大的 val)
-//  如果整个区间都满足, 返回 INF.
-//  eg: val = 5 => 即区间内值域在 [0,5) 中的数的和满足 check 函数.
+//
+//	!(即区间内小于 val 的数的聚合值 prefixSum 满足 check函数, 找到这样的最大的 val)
+//	如果整个区间都满足, 返回 INF.
+//	eg: val = 5 => 即区间内值域在 [0,5) 中的数的聚合值满足 check 函数.
 func (wm *WaveletMatrixSum) MaxRightValue(left, right, xor int, check func(preSum E) bool) E {
 	if check(wm.get(wm.log, left, right)) {
 		return INF
@@ -288,7 +363,8 @@ func (wm *WaveletMatrixSum) MaxRightValue(left, right, xor int, check func(preSu
 }
 
 // 返回使得 check(prefixSum) 为 true 的区间前缀个数的最大值.
-//  eg: count = 4 => 即区间内的数排序后, 前4个数的和满足 check 函数.
+//
+//	eg: count = 4 => 即区间内的数排序后, 前4个数的和满足 check 函数.
 func (wm *WaveletMatrixSum) MaxRightCount(left, right, xor int, check func(preSum E) bool) int {
 	if check(wm.get(wm.log, left, right)) {
 		return right - left
@@ -332,7 +408,8 @@ func (wm *WaveletMatrixSum) MaxRightCount(left, right, xor int, check func(preSu
 }
 
 // [left, right) 中小于等于 x 的数中最大的数
-//  如果不存在则返回-INF
+//
+//	如果不存在则返回-INF
 func (w *WaveletMatrixSum) Floor(start, end, value, xor int) int {
 	less, _ := w.CountPrefix(start, end, value, xor)
 	if less == 0 {
@@ -343,7 +420,8 @@ func (w *WaveletMatrixSum) Floor(start, end, value, xor int) int {
 }
 
 // [left, right) 中大于等于 x 的数中最小的数
-//  如果不存在则返回INF
+//
+//	如果不存在则返回INF
 func (w *WaveletMatrixSum) Ceiling(start, end, value, xor int) int {
 	less, _ := w.CountPrefix(start, end, value, xor)
 	if less == end-start {
@@ -402,4 +480,45 @@ func (bv *BitVector) Rank(k int, f int) int {
 		return ret
 	}
 	return k - ret
+}
+
+// (紧)离散化.
+//
+//	offset: 离散化的起始值偏移量.
+//
+//	getRank: 给定一个数，返回它的排名`(offset ~ offset + count)`.
+//	count: 离散化(去重)后的元素个数.
+func DiscretizeCompressed(nums []int, offset int) (getRank func(value int) int, getValue func(rank int) int, count int) {
+	set := make(map[int]struct{}, len(nums))
+	for _, v := range nums {
+		set[v] = struct{}{}
+	}
+	count = len(set)
+	rank := make([]int, 0, count)
+	for v := range set {
+		rank = append(rank, v)
+	}
+	sort.Ints(rank)
+	mp := make(map[int]int, count)
+	for i, v := range rank {
+		mp[v] = i + offset
+	}
+	getRank = func(v int) int { return mp[v] }
+	getValue = func(r int) int { return rank[r-offset] }
+	count = len(nums)
+	return
+}
+
+type Random struct {
+	seed     uint64
+	hashBase uint64
+}
+
+func NewRandom() *Random                 { return &Random{seed: uint64(time.Now().UnixNano()/2 + 1)} }
+func NewRandomWithSeed(seed int) *Random { return &Random{seed: uint64(seed)} }
+
+func (r *Random) Rng() uint64 {
+	r.seed ^= r.seed << 7
+	r.seed ^= r.seed >> 9
+	return r.seed
 }

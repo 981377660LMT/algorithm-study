@@ -135,6 +135,7 @@ class SegmentTreeDivideAndConquerUndo {
   }
 
   private _uniqueInplace(sorted: number[]): void {
+    if (sorted.length === 0) return
     let slow = 0
     for (let fast = 0; fast < sorted.length; fast++) {
       if (sorted[fast] !== sorted[slow]) sorted[++slow] = sorted[fast]

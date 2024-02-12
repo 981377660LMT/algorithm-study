@@ -11,58 +11,77 @@ import (
 func main() {
 	inv := AllRangeInversion([]int{5, 4, 3, 2, 1})
 	fmt.Println(inv[0][5])
-	fmt.Println(CountInversionRotate([]int{5, 4, 3, 2, 1}, false))
+	fmt.Println(CountInversionRotate([]int{5, 4, 3, 2, 1}))
 }
 
-func CountInversion(nums []int, small bool) int {
+// https://leetcode.cn/problems/shu-zu-zhong-de-ni-xu-dui-lcof/
+func reversePairs(record []int) int {
+	return CountInversion(record)
+}
+
+func CountInversion(nums []int) int {
 	if len(nums) == 0 {
 		return 0
 	}
-	if !small {
-		nums = Discretize(nums)
-	}
-	max_ := maxs(nums) + 1
-	if max_ > 1e7 {
-		nums = Discretize(nums)
-		max_ = maxs(nums) + 1
-	}
-
+	nums = append(nums[:0:0], nums...)
 	res := 0
-	bit := NewBitArray(max_)
-	for _, v := range nums {
-		res += bit.QueryRange(v+1, max_)
-		bit.Add(v, 1)
+	var mergeSort func(nums []int, l int, r int, temp []int)
+	mergeSort = func(nums []int, l int, r int, temp []int) {
+		if l >= r {
+			return
+		}
+		mid := (l + r) / 2
+		mergeSort(nums, l, mid, temp)
+		mergeSort(nums, mid+1, r, temp)
+		i := l
+		j := mid + 1
+		k := l
+		for i <= mid && j <= r {
+			if nums[i] > nums[j] {
+				res += (mid - i + 1)
+				temp[k] = nums[j]
+				j++
+				k++
+			} else {
+				temp[k] = nums[i]
+				i++
+				k++
+			}
+		}
+		for i <= mid {
+			temp[k] = nums[i]
+			i++
+			k++
+		}
+		for j <= r {
+			temp[k] = nums[j]
+			j++
+			k++
+		}
+		copy(nums[l:r+1], temp[l:r+1])
 	}
+	mergeSort(nums, 0, len(nums)-1, make([]int, len(nums)))
 	return res
 }
 
 // 轮转逆序对.
 // 返回一个数组，第 i 个元素表示将nums[i]作为首元素时的逆序对数.
-func CountInversionRotate(nums []int, small bool) []int {
+func CountInversionRotate(nums []int) []int {
 	if len(nums) == 0 {
 		return nil
 	}
 	n := len(nums)
-	if !small {
-		nums = Discretize(nums)
-	}
-	max_ := maxs(nums) + 1
-	if max_ > 1e7 {
-		nums = Discretize(nums)
-		max_ = maxs(nums) + 1
-	}
-
+	nums, size := Discretize(nums)
 	base := 0
-	bit := NewBitArray(max_)
+	bit := NewBitArray(size)
 	for _, v := range nums {
-		base += bit.QueryRange(v+1, max_)
+		base += bit.QueryRange(v+1, size)
 		bit.Add(v, 1)
 	}
-
 	res := make([]int, n)
 	for i, v := range nums {
 		res[i] = base
-		base += bit.QueryRange(v+1, max_) - bit.QueryPrefix(v)
+		base += bit.QueryRange(v+1, size) - bit.QueryPrefix(v)
 	}
 	return res
 }
@@ -86,7 +105,7 @@ func AllRangeInversion(nums []int) (inv [][]int) {
 	return dp
 }
 
-func Discretize(nums []int) []int {
+func Discretize(nums []int) (newNums []int, size int) {
 	set := make(map[int]struct{})
 	for _, v := range nums {
 		set[v] = struct{}{}
@@ -100,11 +119,11 @@ func Discretize(nums []int) []int {
 	for i, v := range allNums {
 		mp[v] = i
 	}
-	newNums := make([]int, len(nums))
+	newNums = make([]int, len(nums))
 	for i, v := range nums {
 		newNums[i] = mp[v]
 	}
-	return newNums
+	return newNums, len(allNums)
 }
 
 func maxs(nums []int) int {

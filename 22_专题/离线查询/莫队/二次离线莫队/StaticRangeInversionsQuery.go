@@ -75,10 +75,9 @@ func (mo *MoOfflineAgain) AddQuery(start, end int) {
 	mo.queryOrder++
 }
 
-// add: 将`A[index]`加入窗口中.
-// queryLeft: 窗口最左侧的`A[index]`对答案的贡献.
-// queryRight: 窗口最右侧的`A[index]`对答案的贡献.
-// `add` 操作次数为`O(n)`，`query` 操作次数为`O(nsqrt(n))`.
+// add: 将`A[index]`加入数据结构中.
+// queryLeft: 查询`A[index]`左侧(包含index本身)的贡献之和.
+// queryRight: 查询`A[index]`右侧(包含index本身)的贡献之和.
 func (mo *MoOfflineAgain) Run(
 	add func(index int),
 	queryLeft func(index int) AbelianGroup,
@@ -369,7 +368,7 @@ func main() {
 	}
 	ranges := make([][2]int, q)
 	for i := 0; i < q; i++ {
-		ranges[i] = [2]int{io.NextInt() - 1, io.NextInt()}
+		ranges[i] = [2]int{io.NextInt(), io.NextInt()}
 	}
 
 	res := StaticRangeInversionsQuery(nums, ranges)

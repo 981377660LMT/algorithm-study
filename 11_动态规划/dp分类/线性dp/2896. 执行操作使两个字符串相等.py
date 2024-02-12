@@ -20,6 +20,7 @@ def min(a: int, b: int) -> int:
     return a if a < b else b
 
 
+
 class Solution:
     def minOperations(self, s1: str, s2: str, x: int) -> int:
         """操作1相当于花费x/2翻转一个位置,操作2相当于花费pos[i]-pos[i-1]翻转两个位置.

@@ -14,6 +14,64 @@ import (
 )
 
 func main() {
+	CF1175E()
+}
+
+// Minimal Segment Cover (线段包含/线段覆盖)
+// https://www.luogu.com.cn/problem/CF1175E
+// 给定 n 个线段，每个线段形如 [l,r]，
+// 有 q 次查询，每次查询形如 [L,R]，求出所有线段的并集中包含 [L,R] 的最小线段数。
+// n,m<=2e5,0<=l<=r<=5e5
+//
+// !预处理出从一个左端点用一条线段最远能覆盖到哪个右端点,注意线段起点可能在这个左端点左边
+// 然后就可以倍增预处理出每个左端点用x条线段最远能覆盖到哪个右端点
+func CF1175E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	segments := make([][2]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &segments[i][0], &segments[i][1])
+	}
+	queries := make([][2]int, q)
+	for i := 0; i < q; i++ {
+		fmt.Fscan(in, &queries[i][0], &queries[i][1])
+	}
+
+	MAX := int(5e5 + 10)
+	maxRight := make([]int, MAX) // 每个左端点用一条线段最远能覆盖到哪个右端点
+	for i := 0; i < n; i++ {
+		maxRight[i] = i
+	}
+	for i := 0; i < n; i++ {
+		a, b := segments[i][0], segments[i][1]
+		maxRight[a] = max(maxRight[a], b)
+	}
+	for i := 1; i < MAX; i++ {
+		maxRight[i] = max(maxRight[i], maxRight[i-1]) // 注意线段起点可能在这个左端点左边
+	}
+
+	D := NewDoubling(MAX, MAX, func() E { return 0 }, func(e1, e2 E) E { return e1 + e2 })
+	for i := 0; i < MAX; i++ {
+		D.Add(i, maxRight[i], maxRight[i]-i)
+	}
+	D.Build()
+
+	for i := 0; i < q; i++ {
+		a, b := queries[i][0], queries[i][1]
+		k, _, _ := D.MaxStep(a, func(e E) bool { return a+e < b })
+		k++
+		if k > n {
+			k = -1
+		}
+		fmt.Fprintln(out, k)
+	}
+}
+
+func yuki1097() {
 	// https://yukicoder.me/problems/no/1097
 	// 给定一个数组和q次查询
 	// 初始时res为0，每次查询会执行k次操作:
@@ -32,7 +90,11 @@ func main() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	db := NewDoubling(n, 1e12+10)
+	db := NewDoubling(
+		n, 1e12+10,
+		func() E { return 0 },
+		func(e1, e2 E) E { return e1 + e2 },
+	)
 	for i := 0; i < n; i++ {
 		db.Add(i, (i+nums[i])%n, nums[i]) // res的模从i变为(i+nums[i])%n，res加上nums[i]
 	}
@@ -52,7 +114,11 @@ func main() {
 func getMaxFunctionValue(receiver []int, k int64) int64 {
 	n := len(receiver)
 	intK := int(k)
-	db := NewDoubling(n, intK+1)
+	db := NewDoubling(
+		n, intK+1,
+		func() E { return 0 },
+		func(e1, e2 E) E { return e1 + e2 },
+	)
 	for i := 0; i < n; i++ {
 		db.Add(i, receiver[i], i)
 	}
@@ -71,20 +137,18 @@ func getMaxFunctionValue(receiver []int, k int64) int64 {
 
 type E = int
 
-// monoidAdd
-func (*Doubling) e() E          { return 0 }
-func (*Doubling) op(e1, e2 E) E { return e1 + e2 }
-
 type Doubling struct {
 	n          int
 	log        int
 	isPrepared bool
 	to         []int
 	dp         []E
+	e          func() E
+	op         func(e1, e2 E) E
 }
 
-func NewDoubling(n, maxStep int) *Doubling {
-	res := &Doubling{}
+func NewDoubling(n, maxStep int, e func() E, op func(e1, e2 E) E) *Doubling {
+	res := &Doubling{e: e, op: op}
 	res.n = n
 	res.log = bits.Len(uint(maxStep))
 	size := n * res.log
@@ -163,7 +227,7 @@ func (d *Doubling) Jump(from, step int) (to int, res E) {
 }
 
 // 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号和操作的结果。
-func (d *Doubling) MaxStep(from int, check func(e E) bool) (step int, to int, res E) {
+func (d *Doubling) MaxStep(from int, check func(weight E) bool) (step int, to int, res E) {
 	if !d.isPrepared {
 		panic("Doubling is not prepared")
 	}
@@ -182,4 +246,18 @@ func (d *Doubling) MaxStep(from int, check func(e E) bool) (step int, to int, re
 
 	to = from
 	return
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

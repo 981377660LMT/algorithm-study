@@ -63,12 +63,69 @@ import (
 )
 
 func main() {
-	bs := NewBitsetDynamic(100, 0).Add(10).Add(33).Add(76).Add(80)
-	fmt.Println(bs)
-	bs.Rsh(17)
+	// bs := NewBitsetDynamic(100, 0).Add(10).Add(33).Add(76).Add(80)
+	// fmt.Println(bs)
+	// bs.Rsh(17)
+	// fmt.Println(bs)
 
-	fmt.Println(bs)
+	CF911G()
 	// yuki142()
+}
+
+// CF911G-Mass Change Queries
+// https://www.luogu.com.cn/problem/CF911G
+// 给出一个数列,有q个操作,每种操作是把区间[start,end)中等于x的数改成y.输出q步操作完的数列.
+// !1<=x<=y<=100.
+// !观察到值域很小，我们可以对每个值都开一个邻接表维护哪些下标有这个值。
+// O(nq/w) TLE 了
+func CF911G() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const MAX = 100
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	bitsets := make([]*BitSetDynamic, MAX+1)
+	for i := 0; i <= MAX; i++ {
+		bitsets[i] = NewBitsetDynamic(n+1, 0)
+	}
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+		bitsets[nums[i]].Add(i)
+	}
+
+	// 将区间[start,end)中等于x的数改成y.
+	update := func(start, end, x, y int) {
+		if x == y || start >= end {
+			return
+		}
+		sliceX := bitsets[x].Slice(start, end)
+		bitsets[y].IOrRange(start, end, sliceX)
+		bitsets[x].DiscardRange(start, end)
+	}
+
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var start, end, x, y int
+		fmt.Fscan(in, &start, &end, &x, &y)
+		start--
+		update(start, end, x, y)
+	}
+
+	for v := 0; v <= MAX; v++ {
+		bitsets[v].ForEach(func(pos int) bool {
+			nums[pos] = v
+			return false
+		})
+	}
+
+	for i := 0; i < n; i++ {
+		fmt.Fprint(out, nums[i], " ")
+	}
 }
 
 // https://yukicoder.me/problems/no/142
@@ -158,7 +215,7 @@ func NewBitsetDynamic(n int, filledValue int) *BitSetDynamic {
 	if !(filledValue == 0 || filledValue == 1) {
 		panic("filledValue should be 0 or 1")
 	}
-	data := make([]uint64, (n+63)>>6)
+	data := make([]uint64, n>>6+1)
 	if filledValue == 1 {
 		for i := range data {
 			data[i] = ^uint64(0)

@@ -5,7 +5,7 @@ package main
 import "fmt"
 
 func main() {
-	ehp := NewErasableHeap(func(a, b H) bool { return a < b }, []H{1, 2, 3, 4, 5})
+	ehp := NewErasableHeap(func(a, b H) bool { return a > b }, []H{1, 2, 3, 4, 5})
 	ehp.Erase(1)
 	ehp.Erase(4)
 	fmt.Println(ehp.Pop())
@@ -17,7 +17,7 @@ func main() {
 type H = int
 
 type ErasableHeap struct {
-	base   *Heap
+	data   *Heap
 	erased *Heap
 }
 
@@ -32,33 +32,33 @@ func (h *ErasableHeap) Erase(value H) {
 }
 
 func (h *ErasableHeap) Push(value H) {
-	h.base.Push(value)
+	h.data.Push(value)
 	h.normalize()
 }
 
 func (h *ErasableHeap) Pop() (value H) {
-	value = h.base.Pop()
+	value = h.data.Pop()
 	h.normalize()
 	return
 }
 
 func (h *ErasableHeap) Peek() (value H) {
-	value = h.base.Top()
+	value = h.data.Top()
 	return
 }
 
 func (h *ErasableHeap) Len() int {
-	return h.base.Len()
+	return h.data.Len()
 }
 
 func (h *ErasableHeap) Clear() {
-	h.base.Clear()
+	h.data.Clear()
 	h.erased.Clear()
 }
 
 func (h *ErasableHeap) normalize() {
-	for h.base.Len() > 0 && h.erased.Len() > 0 && h.base.Top() == h.erased.Top() {
-		h.base.Pop()
+	for h.data.Len() > 0 && h.erased.Len() > 0 && h.data.Top() == h.erased.Top() {
+		h.data.Pop()
 		h.erased.Pop()
 	}
 }

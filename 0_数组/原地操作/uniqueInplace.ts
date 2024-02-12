@@ -2,6 +2,7 @@
  * 有序数组原地去重.
  */
 function uniqueInplace(sorted: unknown[]): void {
+  if (sorted.length === 0) return
   let slow = 0
   for (let fast = 0; fast < sorted.length; fast++) {
     if (sorted[fast] !== sorted[slow]) sorted[++slow] = sorted[fast]
@@ -14,6 +15,7 @@ function uniqueInplace(sorted: unknown[]): void {
  * @param equals 判断两个元素是否相等的函数.
  */
 function uniqueInplace2<E>(sorted: E[], equals: (a: E, b: E) => boolean): void {
+  if (sorted.length === 0) return
   let slow = 0
   for (let fast = 0; fast < sorted.length; fast++) {
     if (!equals(sorted[fast], sorted[slow])) sorted[++slow] = sorted[fast]

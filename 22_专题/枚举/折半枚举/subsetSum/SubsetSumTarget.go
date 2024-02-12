@@ -566,7 +566,7 @@ func NewBitsetDynamic(n int, filledValue int) *BitSetDynamic {
 	if !(filledValue == 0 || filledValue == 1) {
 		panic("filledValue should be 0 or 1")
 	}
-	data := make([]uint64, (n+63)>>6)
+	data := make([]uint64, n>>6+1)
 	if filledValue == 1 {
 		for i := range data {
 			data[i] = ^uint64(0)

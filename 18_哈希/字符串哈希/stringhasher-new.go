@@ -14,6 +14,89 @@ import (
 	"os"
 )
 
+func main() {
+	CF1056E()
+}
+
+// 单词映射
+// https://www.luogu.com.cn/problem/CF1056E
+// 我们有一个由0，1组成的数字串s，还有一个字符串t。
+// 我们令s中的每一个0都对应一个串s1，令s中每一个1都对应另一个串s2，s1与s2不能完全相同。
+// 问有多少组不同的串对(s1,s2)，使得s被s1，s2替换后后与t完全相同。
+// 保证s中至少有一个0和一个1。
+// !eg: s='001',t='kokokokotlin' => 则0=>ko,1=>kotlin或者0=>koko,1=>tlin
+//
+// s 串的开头那个字符一定对应的是 t 串的一个前缀。因此我们只需要枚举这个字符对应串的长度就可以唯一确定它对应的串。
+func CF1056E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var source, target string
+	fmt.Fscan(in, &source, &target)
+
+	zero, one := 0, 0
+	for i := 0; i < len(source); i++ {
+		if source[i] == '0' {
+			zero++
+		} else {
+			one++
+		}
+	}
+
+	R1 := NewRollingHash(131, 1e9+7)
+	table1 := R1.Build(target)
+	getHash := func(start, end int) uint {
+		return R1.Query(table1, start, end)
+	}
+
+	n := len(target)
+	res := 0
+
+	check := func(x, y int) bool {
+		var h1, h2 []uint
+		ptr := 0
+		for i := 0; i < len(source); i++ {
+			if source[i] == '0' {
+				curHash := getHash(ptr, ptr+x)
+				if len(h1) > 0 && h1[0] != curHash {
+					return false
+				}
+				h1 = append(h1, curHash)
+				ptr += x
+			} else {
+				curHash := getHash(ptr, ptr+y)
+				if len(h2) > 0 && h2[0] != curHash {
+					return false
+				}
+				h2 = append(h2, curHash)
+				ptr += y
+			}
+		}
+		if ptr != n {
+			panic("ptr != n")
+		}
+		return h1[0] != h2[0]
+	}
+
+	for x := 1; x < n; x++ { // 枚举长度
+		y := (n - zero*x) / one
+		if y <= 0 {
+			break
+		}
+		if zero*x+one*y != n { // 不能整除
+			continue
+		}
+
+		if check(x, y) {
+			res++
+		}
+	}
+
+	fmt.Fprintln(out, res)
+
+}
+
 // 顺序遍历每个单词,问之前是否见过类似的单词.
 //
 //	`类似`: 最多交换一次相邻字符,可以得到相同的单词.
@@ -52,7 +135,7 @@ func ConditionalReflection(words []string) []bool {
 	return res
 }
 
-func main() {
+func yuki2102() {
 	// https://yukicoder.me/problems/no/2102
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -94,7 +177,7 @@ type RollingHash struct {
 	power []uint
 }
 
-// 131/13331/1713302033171(回文素数)
+// eg: NewRollingHash(131, 1e9+7)
 func NewRollingHash(base uint, mod uint) *RollingHash {
 	return &RollingHash{
 		base:  base,
@@ -156,6 +239,13 @@ func (r *RollingHash) expand(sz int) {
 
 func min(a, b int) int {
 	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
 		return a
 	}
 	return b

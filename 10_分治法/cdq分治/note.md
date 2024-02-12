@@ -1,30 +1,9 @@
-CDQ 分治
+CDQ 分治（基于归并排序的分治）
 todo https://oi-wiki.org/misc/cdq-divide/
-推荐 https://blog.nowcoder.net/n/f44d4aada5a24f619442dd6ddffa7320
-推荐 https://zhuanlan.zhihu.com/p/332996578
+推荐 **https://blog.nowcoder.net/n/f44d4aada5a24f619442dd6ddffa7320**
+推荐 **https://zhuanlan.zhihu.com/p/332996578**
 https://www.bilibili.com/video/BV1mC4y1s7ic
 [学习笔记]CDQ 分治和整体二分 https://www.luogu.com.cn/blog/Owencodeisking/post-xue-xi-bi-ji-cdq-fen-zhi-hu-zheng-ti-er-fen
-https://www.luogu.com.cn/blog/ljc20020730/cdq-fen-zhi-xue-xi-bi-ji
-动态逆序对 https://www.luogu.com.cn/problem/P3157 https://www.luogu.com.cn/problem/UVA11990
-CDQ 优化 DP https://www.luogu.com.cn/problem/P2487
-
----
-
-流程：
-
-1. 将问题转为数据结构问题，变为时间序列上的修改与查询
-2. 分治
-
----
-
-CDQ 优化 DP：先分治左半段，然后用这段值，双指针去更新 mid+1 到 r，再分治右半段
-
-https://www.cnblogs.com/ydtz/p/16603498.html
-
----
-
-CDQ 分治只能算作一种方法而非一种通用的算法，对于一段操作序列，我们从中间分开，先处理左边，再处理右边，最后加上左边对右边的影响。归并排序实际上就是一个 CDQ 分治。
-https://www.cnblogs.com/TianMeng-hyl/p/14978786.html
 
 ---
 
@@ -46,5 +25,10 @@ https://www.cnblogs.com/TianMeng-hyl/p/14978786.html
 
 ---
 
-https://blog.nowcoder.net/n/f44d4aada5a24f619442dd6ddffa7320
-https://www.luogu.com.cn/blog/Owencodeisking/post-xue-xi-bi-ji-cdq-fen-zhi-hu-zheng-ti-er-fen
+> CDQ 分治的意义
+> 如果一道题只用到了一层 CDQ，那这道题也一定能用其他数据结构解决，所以一般大家都见不到这个算法。
+> 不过不愿意写李超树和动态凸壳的人用 CDQ 分治来解动态凸壳的斜率优化问题倒是挺常见的。
+> 由于 CDQ 分治本身不使用其他任何数据结构，这表示我们还留有底牌。即使现在在做的问题上再加一维，直接把线段树等结构套进去就能做。
+> 说人话就是 CDQ 分治可以避免一部分的树套树，以及树套树套树。（还有一部分可以使用整体二分的思路去避免高级数据结构堆叠）
+> 个人觉得分治类算法无论是泛用性还是上限都很高，在允许暴力枚举当前分治的区间的前提下复杂度是优秀的 nlogn，如果题目复杂需要嵌套其他数据结构时，也比纯数据结构套数据结构来的更容易，但是在算法竞赛中又往往被忽视（一般遇到一个题先想用个什么数据结构去维护）。
+> 程序=算法+数据结构，而不是数据结构的嵌套和堆叠。

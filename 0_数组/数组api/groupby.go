@@ -18,6 +18,44 @@ func main() {
 		})
 }
 
+// !分割数组，每段中不同数字的个数不超过k个，求最少段数.
+func Solve(nums []int, k int) int {
+	nums = append(nums[:0:0], nums...)
+	n := len(nums)
+	D := NewDictionary()
+	for i := 0; i < n; i++ {
+		nums[i] = D.Id(nums[i])
+	}
+
+	counter := make([]int, D.Size())
+	count := 0
+	res := 0
+
+	ptr := 0
+	for ptr < n {
+		counter[nums[ptr]]++
+		count = 1
+		start := ptr
+		ptr++
+		for ptr < n {
+			v := nums[ptr]
+			if counter[v] == 0 {
+				count++
+			}
+			if count > k {
+				break
+			}
+			counter[v]++
+			ptr++
+		}
+		res++
+		for i := start; i < ptr; i++ {
+			counter[nums[i]]--
+		}
+	}
+	return res
+}
+
 type Element = int
 
 // 遍历连续相同元素的分组.相当于python中的`itertools.groupby`.
@@ -70,4 +108,37 @@ func EnumerateGroupByDivider(arr []Element, isDivider func(elementIndex int, cur
 		}
 		f(group, start, ptr)
 	}
+}
+
+type V = int
+type Dictionary struct {
+	_idToValue []V
+	_valueToId map[V]int
+}
+
+// A dictionary that maps values to unique ids.
+func NewDictionary() *Dictionary {
+	return &Dictionary{
+		_valueToId: map[V]int{},
+	}
+}
+func (d *Dictionary) Id(value V) int {
+	res, ok := d._valueToId[value]
+	if ok {
+		return res
+	}
+	id := len(d._idToValue)
+	d._idToValue = append(d._idToValue, value)
+	d._valueToId[value] = id
+	return id
+}
+func (d *Dictionary) Value(id int) V {
+	return d._idToValue[id]
+}
+func (d *Dictionary) Has(value V) bool {
+	_, ok := d._valueToId[value]
+	return ok
+}
+func (d *Dictionary) Size() int {
+	return len(d._idToValue)
 }

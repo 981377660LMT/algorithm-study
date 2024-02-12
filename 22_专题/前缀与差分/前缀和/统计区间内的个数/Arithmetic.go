@@ -18,6 +18,22 @@ func main() {
 	check()
 }
 
+// 区间[lower, upper]内的奇数个数.
+func CountOdds(lower, upper int) int {
+	if lower > upper {
+		return 0
+	}
+	return ArithmeticCount(lower, upper, 2, 1)
+}
+
+// 区间[lower, upper]内的偶数个数.
+func CountEvens(lower, upper int) int {
+	if lower > upper {
+		return 0
+	}
+	return ArithmeticCount(lower, upper, 2, 0)
+}
+
 // 区间[lower,upper]内形如 `k*x+b` 数的个数.
 func ArithmeticCount(lower, upper int, k int, b int) int {
 	if lower > upper {

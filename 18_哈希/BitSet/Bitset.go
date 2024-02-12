@@ -46,7 +46,7 @@ func main() {
 
 type Bitset []uint
 
-func NewBitset(n int) Bitset { return make(Bitset, n>>6+1) } // (n+64-1)>>6
+func NewBitset(n int) Bitset { return make(Bitset, n>>6+1) } // (n+64-1)>>6, 注意 n=0 的情况，n>>6+1的写法更好
 
 func (b Bitset) Has(p int) bool { return b[p>>6]&(1<<(p&63)) != 0 } // get
 func (b Bitset) Flip(p int)     { b[p>>6] ^= 1 << (p & 63) }
@@ -378,6 +378,18 @@ func (b Bitset) String() string {
 	sb.WriteString(strings.Join(nums, ","))
 	sb.WriteString("}")
 	return sb.String()
+}
+
+// 返回两个biset交集的第一个 1 的下标，若不存在则返回-1.
+func FindFirstOfAnd(b1, b2 Bitset) int {
+	minLen := min(len(b1), len(b2))
+	for i := 0; i < minLen; i++ {
+		and := b1[i] & b2[i]
+		if and != 0 {
+			return i<<6 | bits.TrailingZeros(and)
+		}
+	}
+	return -1
 }
 
 // https://nyaannyaan.github.io/library/misc/bitset-find-prev.hpp

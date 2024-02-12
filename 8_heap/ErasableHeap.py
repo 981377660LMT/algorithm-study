@@ -32,11 +32,6 @@ class ErasableHeap(Generic[T]):
         heappush(self._erased, value)
         self._normalize()
 
-    def _normalize(self) -> None:
-        while self._data and self._erased and self._data[0] == self._erased[0]:
-            heappop(self._data)
-            heappop(self._erased)
-
     def clear(self) -> None:
         self._data.clear()
         self._erased.clear()
@@ -46,6 +41,11 @@ class ErasableHeap(Generic[T]):
 
     def __getitem__(self, index: Literal[0]) -> T:
         return self._data[index]
+
+    def _normalize(self) -> None:
+        while self._data and self._erased and self._data[0] == self._erased[0]:
+            heappop(self._data)
+            heappop(self._erased)
 
 
 if __name__ == "__main__":
