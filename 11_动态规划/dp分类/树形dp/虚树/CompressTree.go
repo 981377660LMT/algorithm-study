@@ -105,6 +105,7 @@ func ColouredMountainHut() {
 	}
 }
 
+// Kingdom and its Cities
 // 给定一棵树，每次询问给定 k个特殊点，找出尽量少的非特殊点使得删去这些点后特殊点两两不连通。∑k≤n.
 // 如果无法使得特殊点两两不连通，输出-1.
 // https://codeforces.com/problemset/problem/613/D

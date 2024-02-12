@@ -13,11 +13,70 @@ import (
 
 const INF int = 1e18
 
+func main() {
+	// UnionOfInterval()
+	CF1638E()
+}
+
 func demo() {
 	odt := NewODT(10, -INF)
 	odt.Set(0, 3, 1)
 	odt.Set(3, 5, 2)
 	fmt.Println(odt.Len, odt.Count, odt)
+}
+
+// https://www.luogu.com.cn/problem/CF1638E
+// 给定一个长为n的数组.初始时每个元素的值为0，颜色为1.
+// 进行q次操作:
+// Color l r c : 将区间[l,r]内的元素的颜色变为c.
+// Add c x : 将颜色为c的元素的值加上x.
+// Query i : 查询第i个元素的值.
+// 其中颜色为1-N.
+//
+// 操作2：只能维护懒标记.
+// 操作1: 当颜色修改的时候，要把当前颜色之前没有加上的 tag 加上，需要一个数据结构来高效维护区间加，单点查。
+// 操作3: 单点查。
+func CF1638E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+
+	lazyAdd := make([]int, n+1)
+	bit := NewSimpleBitRangeAddPointGetArray(n + 1)
+	odt := NewODT(n, -1)
+	odt.Set(0, n, 1)
+
+	for i := 0; i < q; i++ {
+		var op string
+		fmt.Fscan(in, &op)
+		if op == "Color" {
+			var start, end, newColor int
+			fmt.Fscan(in, &start, &end, &newColor)
+			start--
+			odt.EnumerateRange(
+				start, end,
+				func(l, r int, x int) { bit.AddRange(l, r, lazyAdd[x]) }, // 加回来
+				true,
+			)
+			bit.AddRange(start, end, -lazyAdd[newColor]) // 覆盖完之后，当前的颜色之前加的数他并不需要加
+			odt.Set(start, end, newColor)
+		} else if op == "Add" {
+			var color, x int
+			fmt.Fscan(in, &color, &x)
+			lazyAdd[color] += x
+		} else if op == "Query" {
+			var index int
+			fmt.Fscan(in, &index)
+			index--
+			_, _, color := odt.Get(index, false)
+			res := bit.Get(index) + lazyAdd[color]
+			fmt.Fprintln(out, res)
+		}
+	}
+
 }
 
 func UnionOfInterval() {
@@ -41,10 +100,6 @@ func UnionOfInterval() {
 	})
 }
 
-func main() {
-	UnionOfInterval()
-}
-
 type Value = int
 
 type ODT struct {
@@ -57,7 +112,8 @@ type ODT struct {
 }
 
 // 指定区间长度 n 和哨兵 noneValue 建立一个 ODT.
-//  区间为[0,n).
+//
+//	区间为[0,n).
 func NewODT(n int, noneValue Value) *ODT {
 	res := &ODT{}
 	dat := make([]Value, n)
@@ -327,4 +383,85 @@ func (*_fastSet) bsr(x int) int {
 
 func (*_fastSet) bsf(x int) int {
 	return bits.TrailingZeros(uint(x))
+}
+
+type SimpleBitRangeAddPointGetArray struct {
+	bit *SimpleBit
+}
+
+func NewSimpleBitRangeAddPointGetArray(n int) *SimpleBitRangeAddPointGetArray {
+	return &SimpleBitRangeAddPointGetArray{bit: NewSimpleBit(n)}
+}
+
+func (b *SimpleBitRangeAddPointGetArray) AddRange(start, end int, delta int) {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.bit.n {
+		end = b.bit.n
+	}
+	if start >= end {
+		return
+	}
+	b.bit.Add(start, delta)
+	b.bit.Add(end, -delta)
+}
+
+func (b *SimpleBitRangeAddPointGetArray) Get(index int) int {
+	return b.bit.QueryPrefix(index + 1)
+}
+
+// !Point Add Range Sum, 0-based.
+type SimpleBit struct {
+	n    int
+	data []int
+}
+
+func NewSimpleBit(n int) *SimpleBit {
+	res := &SimpleBit{n: n, data: make([]int, n)}
+	return res
+}
+
+func (b *SimpleBit) Add(index int, v int) {
+	for index++; index <= b.n; index += index & -index {
+		b.data[index-1] += v
+	}
+}
+
+// [0, end).
+func (b *SimpleBit) QueryPrefix(end int) int {
+	if end > b.n {
+		end = b.n
+	}
+	res := 0
+	for ; end > 0; end -= end & -end {
+		res += b.data[end-1]
+	}
+	return res
+}
+
+// [start, end).
+func (b *SimpleBit) QueryRange(start, end int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.n {
+		end = b.n
+	}
+	if start >= end {
+		return 0
+	}
+	if start == 0 {
+		return b.QueryPrefix(end)
+	}
+	pos, neg := 0, 0
+	for end > start {
+		pos += b.data[end-1]
+		end &= end - 1
+	}
+	for start > end {
+		neg += b.data[start-1]
+		start &= start - 1
+	}
+	return pos - neg
 }
