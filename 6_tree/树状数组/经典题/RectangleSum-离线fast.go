@@ -10,7 +10,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/bits"
 	"os"
 	"sort"
 )
@@ -84,67 +83,72 @@ func RectangleSum(points []Point, queries []Query) []int {
 	sort.Slice(qs, func(i, j int) bool { return qs[i].x < qs[j].x })
 
 	j := 0
-	bit := newBinaryIndexedTree(len(ys))
+	bit := NewBit(len(ys))
 	for _, query := range qs {
 		for j < n && points[j].x < query.x {
-			bit.Apply(points[j].y, points[j].w)
+			bit.Add(points[j].y, points[j].w)
 			j++
 		}
 		if query.t {
-			res[query.idx] += bit.ProdRange(query.d, query.u)
+			res[query.idx] += bit.QueryRange(query.d, query.u)
 		} else {
-			res[query.idx] -= bit.ProdRange(query.d, query.u)
+			res[query.idx] -= bit.QueryRange(query.d, query.u)
 		}
 	}
 
 	return res
 }
 
-type binaryIndexedTree struct {
+type BIT struct {
 	n    int
-	log  int
 	data []int
 }
 
-func newBinaryIndexedTree(n int) *binaryIndexedTree {
-	return &binaryIndexedTree{n: n, log: bits.Len(uint(n)), data: make([]int, n+1)}
-}
-
-func newBinaryIndexedTreeFrom(arr []int) *binaryIndexedTree {
-	res := newBinaryIndexedTree(len(arr))
-	res.build(arr)
+func NewBit(n int) *BIT {
+	res := &BIT{n: n, data: make([]int, n)}
 	return res
 }
 
-func (b *binaryIndexedTree) Apply(i int, v int) {
-	for i++; i <= b.n; i += i & -i {
-		b.data[i] += v
+func (b *BIT) Add(index int, v int) {
+	for index++; index <= b.n; index += index & -index {
+		b.data[index-1] += v
 	}
 }
 
-func (b *binaryIndexedTree) Prod(r int) int {
+// [0, end).
+func (b *BIT) QueryPrefix(end int) int {
+	if end > b.n {
+		end = b.n
+	}
 	res := 0
-	for ; r > 0; r -= r & -r {
-		res += b.data[r]
+	for ; end > 0; end -= end & -end {
+		res += b.data[end-1]
 	}
 	return res
 }
 
-func (b *binaryIndexedTree) ProdRange(l, r int) int {
-	return b.Prod(r) - b.Prod(l)
-}
-
-func (b *binaryIndexedTree) build(arr []int) {
-	if b.n != len(arr) {
-		panic("len of arr is not equal to n")
+// [start, end).
+func (b *BIT) QueryRange(start, end int) int {
+	if start < 0 {
+		start = 0
 	}
-	for i := 1; i <= b.n; i++ {
-		b.data[i] = arr[i-1]
+	if end > b.n {
+		end = b.n
 	}
-	for i := 1; i <= b.n; i++ {
-		j := i + (i & -i)
-		if j <= b.n {
-			b.data[j] += b.data[i]
-		}
+	if start >= end {
+		return 0
 	}
+	if start == 0 {
+		return b.QueryPrefix(end)
+	}
+	pos, neg := 0, 0
+	for end > start {
+		pos += b.data[end-1]
+		end &= end - 1
+	}
+	for start > end {
+		neg += b.data[start-1]
+		start &= start - 1
+	}
+	return pos - neg
 }

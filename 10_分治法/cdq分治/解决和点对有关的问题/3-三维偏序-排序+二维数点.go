@@ -9,7 +9,6 @@ import (
 	"bufio"
 	"fmt"
 	stdio "io"
-	"math/bits"
 	"os"
 	"runtime/debug"
 	"sort"
@@ -59,11 +58,11 @@ func main() {
 	}()
 
 	n, _ := io.NextInt(), io.NextInt()
-	items := make([][3]int, n)
+	xs, ys, zs := make([]int, n), make([]int, n), make([]int, n)
 	for i := 0; i < n; i++ {
-		items[i] = [3]int{io.NextInt(), io.NextInt(), io.NextInt()}
+		xs[i], ys[i], zs[i] = io.NextInt(), io.NextInt(), io.NextInt()
 	}
-	res := Solve(items)
+	res := Solve(xs, ys, zs)
 
 	counter := make([]int, n)
 	for _, v := range res {
@@ -75,25 +74,21 @@ func main() {
 }
 
 // !对每个元素i,求出有多少个j满足xj<=xi,yj<=yi,zj<=zi且i!=j.
-func Solve(items [][3]int) []int {
-	n := len(items)
-	A, B, C := make([]int, n), make([]int, n), make([]int, n)
-	for i := 0; i < n; i++ {
-		A[i], B[i], C[i] = items[i][0], items[i][1], items[i][2]
-	}
+func Solve(xs, ys, zs []int) []int {
+	n := len(xs)
 	order := make([]int, n)
 	for i := 0; i < n; i++ {
 		order[i] = i
 	}
 	sort.Slice(order, func(i, j int) bool {
 		a, b := order[i], order[j]
-		if A[a] != A[b] {
-			return A[a] < A[b]
+		if xs[a] != xs[b] {
+			return xs[a] < xs[b]
 		}
-		if B[a] != B[b] {
-			return B[a] < B[b]
+		if ys[a] != ys[b] {
+			return ys[a] < ys[b]
 		}
-		return C[a] < C[b]
+		return zs[a] < zs[b]
 	})
 
 	S := NewPointAddRectangleSum(n)
@@ -102,8 +97,8 @@ func Solve(items [][3]int) []int {
 	roundId := make([]int, n)
 	for i := 0; i < n; i++ {
 		group := []int{order[i]}
-		b, c := B[order[i]], C[order[i]]
-		for i+1 < n && B[order[i+1]] == b && C[order[i+1]] == c { // 把第二、三个维度一样的一起拿出来(因为是小于等于)
+		b, c := ys[order[i]], zs[order[i]]
+		for i+1 < n && ys[order[i+1]] == b && zs[order[i+1]] == c { // 把第二、三个维度一样的一起拿出来(因为是小于等于)
 			i++
 			group = append(group, order[i])
 		}
@@ -253,96 +248,72 @@ func (sp *staticPointAddRectangleSum) Run() []int {
 	sort.Slice(qs, func(i, j int) bool { return qs[i].x < qs[j].x })
 
 	j := 0
-	bit := newBinaryIndexedTree(len(ys))
+	bit := NewBit(len(ys))
 	for i := range qs {
 		for j < n && sp.points[j].x < qs[i].x {
-			bit.Apply(sp.points[j].y, sp.points[j].w)
+			bit.Add(sp.points[j].y, sp.points[j].w)
 			j++
 		}
 		if qs[i].t {
-			res[qs[i].idx] += bit.ProdRange(qs[i].d, qs[i].u)
+			res[qs[i].idx] += bit.QueryRange(qs[i].d, qs[i].u)
 		} else {
-			res[qs[i].idx] -= bit.ProdRange(qs[i].d, qs[i].u)
+			res[qs[i].idx] -= bit.QueryRange(qs[i].d, qs[i].u)
 		}
 	}
 
 	return res
 }
 
-type binaryIndexedTree struct {
+type BIT struct {
 	n    int
-	log  int
 	data []int
 }
 
-// 長さ n の 0で初期化された配列で構築する.
-func newBinaryIndexedTree(n int) *binaryIndexedTree {
-	return &binaryIndexedTree{n: n, log: bits.Len(uint(n)), data: make([]int, n+1)}
-}
-
-// 配列で構築する.
-func newBinaryIndexedTreeFrom(arr []int) *binaryIndexedTree {
-	res := newBinaryIndexedTree(len(arr))
-	res.build(arr)
+func NewBit(n int) *BIT {
+	res := &BIT{n: n, data: make([]int, n)}
 	return res
 }
 
-// 要素 i に値 v を加える.
-func (b *binaryIndexedTree) Apply(i int, v int) {
-	for i++; i <= b.n; i += i & -i {
-		b.data[i] += v
+func (b *BIT) Add(index int, v int) {
+	for index++; index <= b.n; index += index & -index {
+		b.data[index-1] += v
 	}
 }
 
-// [0, r) の要素の総和を求める.
-func (b *binaryIndexedTree) Prod(r int) int {
+// [0, end).
+func (b *BIT) QueryPrefix(end int) int {
+	if end > b.n {
+		end = b.n
+	}
 	res := 0
-	for ; r > 0; r -= r & -r {
-		res += b.data[r]
+	for ; end > 0; end -= end & -end {
+		res += b.data[end-1]
 	}
 	return res
 }
 
-// [l, r) の要素の総和を求める.
-func (b *binaryIndexedTree) ProdRange(l, r int) int {
-	return b.Prod(r) - b.Prod(l)
-}
-
-// 区間[0,k]の総和がx以上となる最小のkを求める.数列が単調増加であることを要求する.
-func (b *binaryIndexedTree) LowerBound(x int) int {
-	i := 0
-	for k := 1 << b.log; k > 0; k >>= 1 {
-		if i+k <= b.n && b.data[i+k] < x {
-			x -= b.data[i+k]
-			i += k
-		}
+// [start, end).
+func (b *BIT) QueryRange(start, end int) int {
+	if start < 0 {
+		start = 0
 	}
-	return i
-}
-
-// 区間[0,k]の総和がxを上回る最小のkを求める.数列が単調増加であることを要求する.
-func (b *binaryIndexedTree) UpperBound(x int) int {
-	i := 0
-	for k := 1 << b.log; k > 0; k >>= 1 {
-		if i+k <= b.n && b.data[i+k] <= x {
-			x -= b.data[i+k]
-			i += k
-		}
+	if end > b.n {
+		end = b.n
 	}
-	return i
-}
-
-func (b *binaryIndexedTree) build(arr []int) {
-	if b.n != len(arr) {
-		panic("len of arr is not equal to n")
+	if start >= end {
+		return 0
 	}
-	for i := 1; i <= b.n; i++ {
-		b.data[i] = arr[i-1]
+	if start == 0 {
+		return b.QueryPrefix(end)
 	}
-	for i := 1; i <= b.n; i++ {
-		j := i + (i & -i)
-		if j <= b.n {
-			b.data[j] += b.data[i]
-		}
+	pos, neg := 0, 0
+	for end > start {
+		pos += b.data[end-1]
+		end &= end - 1
 	}
+	for start > end {
+		neg += b.data[start-1]
+		start &= start - 1
+	}
+	return pos - neg
 }
