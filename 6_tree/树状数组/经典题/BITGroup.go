@@ -3,19 +3,49 @@
 // QueryAll
 // QueryPrefix
 // MaxRight
+// MaxRightWithIndex
+// MinLeft
+// Kth
+// 树状数组树上二分
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/bits"
+)
 
 func main() {
-	bit2 := NewBITGroupRangeAddFrom(10, func(index int) E { return index })
-	fmt.Println(bit2)
-	bit2.UpdateRange(0, 10, 1)
-	fmt.Println(bit2)
-	fmt.Println(bit2.QueryRange(2, 5))
+	bit := NewBITGroupFrom(5, func(index int) E { return E(index) })
+	fmt.Println(bit)
+	fmt.Println(bit.MaxRight(0, func(s E) bool { return s <= 100 })) // 5
+	fmt.Println(bit.MaxRight(1, func(s E) bool { return s <= 3 }))   // 3
+	fmt.Println(bit.MinLeft(5, func(s E) bool { return s <= 7 }))    // 3
 }
 
+// https://leetcode.cn/problems/longest-uploaded-prefix/description/
+type LUPrefix struct {
+	bit *BITGroup
+}
+
+func Constructor(n int) LUPrefix {
+	return LUPrefix{bit: NewBITGroup(n + 1)}
+}
+
+func (this *LUPrefix) Upload(video int) {
+	this.bit.Update(video-1, 1)
+}
+
+func (this *LUPrefix) Longest() int {
+	return this.bit.MaxRightWithIndex(0, func(index int, sum E) bool { return sum == index })
+}
+
+/**
+ * Your LUPrefix object will be instantiated and called as such:
+ * obj := Constructor(n);
+ * obj.Upload(video);
+ * param_2 := obj.Longest();
+ */
 type E = int
 
 func e() E           { return 0 }
@@ -101,34 +131,108 @@ func (fw *BITGroup) QueryRange(start, end int) E {
 	return op(pos, inv(neg))
 }
 
-// 最大的 right 使得 check(QueryPrefix(right)) == true.
-//  check(value, right): value 对应的是 [0, right) 的和.
-//
-//  e.g.:
-//  0/1 树状数组找到第 k(0-indexed) 个 1:
-//  func (fw *BITGroup) Kth(k E) int {
-//  	return fw.MaxRight(func(preSum E, _ int) bool {
-//  		return preSum <= k
-//  	})
-//  }
-func (fw BITGroup) MaxRight(check func(value E, right int) bool) int {
-	i := 0
-	cur := e()
-	k := 1
-	for 2*k <= fw.n {
-		k *= 2
+func (fw *BITGroup) MaxRight(start int, predicate func(sum E) bool) int {
+	s := e()
+	i := start
+	getK := func() int {
+		for {
+			if i&1 == 1 {
+				s = op(s, inv(fw.data[i-1]))
+				i--
+			}
+			if i == 0 {
+				return bits.Len32(uint32(fw.n))
+			}
+			k := bits.TrailingZeros32(uint32(i)) - 1
+			if i+(1<<k) > fw.n {
+				return k
+			}
+			t := op(s, fw.data[i+(1<<k)-1])
+			if !predicate(t) {
+				return k
+			}
+			s = op(s, inv(fw.data[i-1]))
+			i -= i & -i
+		}
 	}
+	k := getK()
 	for k > 0 {
-		if i+k-1 < len(fw.data) {
-			t := op(cur, fw.data[i+k-1])
-			if check(t, i+k) {
-				i += k
-				cur = t
+		k--
+		if i+(1<<k)-1 < fw.n {
+			t := op(s, fw.data[i+(1<<k)-1])
+			if predicate(t) {
+				i += 1 << k
+				s = t
 			}
 		}
-		k >>= 1
 	}
 	return i
+}
+
+// MaxRightWithIndex
+func (fw *BITGroup) MaxRightWithIndex(start int, predicate func(index int, sum E) bool) int {
+	s := e()
+	i := start
+	getK := func() int {
+		for {
+			if i&1 == 1 {
+				s = op(s, inv(fw.data[i-1]))
+				i--
+			}
+			if i == 0 {
+				return bits.Len32(uint32(fw.n))
+			}
+			k := bits.TrailingZeros32(uint32(i)) - 1
+			if i+(1<<k) > fw.n {
+				return k
+			}
+			t := op(s, fw.data[i+(1<<k)-1])
+			if !predicate(i+(1<<k), t) {
+				return k
+			}
+			s = op(s, inv(fw.data[i-1]))
+			i -= i & -i
+		}
+	}
+	k := getK()
+	for k > 0 {
+		k--
+		if i+(1<<k)-1 < fw.n {
+			t := op(s, fw.data[i+(1<<k)-1])
+			if predicate(i+(1<<k), t) {
+				i += 1 << k
+				s = t
+			}
+		}
+	}
+	return i
+}
+
+func (fw *BITGroup) MinLeft(end int, predicate func(sum E) bool) int {
+	s := e()
+	i := end
+	k := 0
+	for i > 0 && predicate(s) {
+		s = op(s, fw.data[i-1])
+		k = bits.TrailingZeros32(uint32(i))
+		i -= i & -i
+	}
+	if predicate(s) {
+		return 0
+	}
+	for k > 0 {
+		k--
+		t := op(s, inv(fw.data[i+(1<<k)-1]))
+		if !predicate(t) {
+			i += 1 << k
+			s = t
+		}
+	}
+	return i + 1
+}
+
+func (fw *BITGroup) Kth(k int, start int) int {
+	return fw.MaxRight(start, func(x E) bool { return x <= k })
 }
 
 func (fw *BITGroup) String() string {

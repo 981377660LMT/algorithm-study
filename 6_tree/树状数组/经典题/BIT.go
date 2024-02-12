@@ -15,12 +15,61 @@ import (
 	"fmt"
 	"math/bits"
 	"os"
+	"sort"
 	"strings"
 )
 
 func main() {
-	// CF1288E(
-	test01()
+	yosupo()
+	// demo()
+	// test01()
+	// CF1288E()
+	// test01()
+}
+
+// https://judge.yosupo.jp/problem/predecessor_problem
+func yosupo() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	var t string
+	fmt.Fscan(in, &t)
+	bit01 := NewBITArray01From(n, func(i int) bool { return t[i] == '1' })
+	for i := 0; i < q; i++ {
+		var op, k int
+		fmt.Fscan(in, &op, &k)
+		if op == 0 {
+			bit01.Add(k)
+		} else if op == 1 {
+			bit01.Remove(k)
+		} else if op == 2 {
+			ok := bit01.Has(k)
+			if ok {
+				fmt.Fprintln(out, 1)
+			} else {
+				fmt.Fprintln(out, 0)
+			}
+		} else if op == 3 {
+			// n := bit01.QueryPrefix(k)
+			// if n == bit01.QueryAll() {
+			// 	fmt.Fprintln(out, -1)
+			// } else {
+			// 	fmt.Fprintln(out, bit01.Kth(n, 0))
+			// }
+			fmt.Fprintln(out, bit01.Next(k))
+		} else if op == 4 {
+			// n := bit01.QueryPrefix(k + 1)
+			// if n == 0 {
+			// 	fmt.Fprintln(out, -1)
+			// } else {
+			// 	fmt.Fprintln(out, bit01.Kth(n-1, 0))
+			// }
+			fmt.Fprintln(out, bit01.Prev(k))
+		}
+	}
 }
 
 func test01() {
@@ -29,6 +78,27 @@ func test01() {
 	bit01.Add(1)
 	bit01.Add(2)
 	bit01.Add(4)
+	fmt.Println(bit01.Kth(0, 0))
+	fmt.Println(bit01.Kth(1, 0))
+	fmt.Println(bit01.Kth(2, 0))
+	fmt.Println(bit01.Kth(3, 0))
+}
+
+// https://leetcode.cn/problems/longest-uploaded-prefix/description/
+type LUPrefix struct {
+	bit *BITArray
+}
+
+func Constructor(n int) LUPrefix {
+	return LUPrefix{bit: NewBitArray(n + 1)}
+}
+
+func (this *LUPrefix) Upload(video int) {
+	this.bit.Add(video-1, 1)
+}
+
+func (this *LUPrefix) Longest() int {
+	return this.bit.MaxRightWithIndex(0, func(index int, sum int) bool { return sum == index })
 }
 
 // https://www.luogu.com.cn/problem/CF1288E
@@ -162,30 +232,108 @@ func (b *BITArray) QueryAll() int {
 	return b.total
 }
 
-func (b *BITArray) MaxRight(check func(index, preSum int) bool) int {
-	i := 0
+func (b *BITArray) MaxRight(start int, predicate func(sum int) bool) int {
 	s := 0
-	k := 1
-	for 2*k <= b.n {
-		k *= 2
+	i := start
+	getK := func() int {
+		for {
+			if i&1 == 1 {
+				s -= b.data[i-1]
+				i--
+			}
+			if i == 0 {
+				return bits.Len32(uint32(b.n))
+			}
+			k := bits.TrailingZeros32(uint32(i)) - 1
+			if i+(1<<k) > b.n {
+				return k
+			}
+			t := s + b.data[i+(1<<k)-1]
+			if !predicate(t) {
+				return k
+			}
+			s -= b.data[i-1]
+			i -= i & -i
+		}
 	}
+	k := getK()
 	for k > 0 {
-		if i+k-1 < b.n {
-			t := s + b.data[i+k-1]
-			if check(i+k, t) {
-				i += k
+		k--
+		if i+(1<<k)-1 < b.n {
+			t := s + b.data[i+(1<<k)-1]
+			if predicate(t) {
+				i += 1 << k
 				s = t
 			}
 		}
-		k >>= 1
 	}
 	return i
 }
 
-// 0/1 树状数组查找第 k(0-based) 个1的位置.
-// UpperBound.
-func (b *BITArray) Kth(k int) int {
-	return b.MaxRight(func(index, preSum int) bool { return preSum <= k })
+// MaxRightWithIndex
+func (b *BITArray) MaxRightWithIndex(start int, predicate func(index int, sum int) bool) int {
+	s := 0
+	i := start
+	getK := func() int {
+		for {
+			if i&1 == 1 {
+				s -= b.data[i-1]
+				i--
+			}
+			if i == 0 {
+				return bits.Len32(uint32(b.n))
+			}
+			k := bits.TrailingZeros32(uint32(i)) - 1
+			if i+(1<<k) > b.n {
+				return k
+			}
+			t := s + b.data[i+(1<<k)-1]
+			if !predicate(i+(1<<k), t) {
+				return k
+			}
+			s -= b.data[i-1]
+			i -= i & -i
+		}
+	}
+	k := getK()
+	for k > 0 {
+		k--
+		if i+(1<<k)-1 < b.n {
+			t := s + b.data[i+(1<<k)-1]
+			if predicate(i+(1<<k), t) {
+				i += 1 << k
+				s = t
+			}
+		}
+	}
+	return i
+}
+
+func (b *BITArray) MinLeft(end int, predicate func(sum int) bool) int {
+	s := 0
+	i := end
+	k := 0
+	for i > 0 && predicate(s) {
+		s += b.data[i-1]
+		k = bits.TrailingZeros32(uint32(i))
+		i -= i & -i
+	}
+	if predicate(s) {
+		return 0
+	}
+	for k > 0 {
+		k--
+		t := s - b.data[i+(1<<k)-1]
+		if !predicate(t) {
+			i += 1 << k
+			s = t
+		}
+	}
+	return i + 1
+}
+
+func (b *BITArray) Kth(k int, start int) int {
+	return b.MaxRight(start, func(x int) bool { return x <= k })
 }
 
 func (b *BITArray) String() string {
@@ -276,22 +424,81 @@ func (bit01 *BITArray01) Has(index int) bool {
 	return (bit01.data[i]>>j)&1 == 1
 }
 
-// // 0<=k<bit01.QueryAll().
-// func (bit01 *BITArray01) Kth(k int) int {
-// 	end := 0
-// 	pos := bit01.bit.MaxRight(func(_ int, preSum int) bool {
-// 		if preSum <= k {
-// 			end = k - preSum
-// 		}
-// 		return preSum <= k
-// 	})
-// 	x := bit01.data[pos]
-// 	p := bits.OnesCount64(x)
-// 	bit := BinarySearch(0, 64, func(n int) bool {
-// 		return (p - bits.OnesCount64(x>>n)) <= end
-// 	})
-// 	return (pos << 6) + bit
-// }
+// 0<=k<bit01.QueryAll().
+// 如果不存在，返回 -1.
+func (bit01 *BITArray01) Kth(k int, start int) int {
+	if k >= bit01.QueryAll() {
+		return -1
+	}
+	k += bits.OnesCount64(bit01.data[start>>6] & ((1 << (start & 63)) - 1))
+	start >>= 6
+	mid := 0
+	check := func(preSum int) bool {
+		if preSum <= k {
+			if preSum > mid {
+				mid = preSum
+			}
+		}
+		return preSum <= k
+	}
+	pos := bit01.bit.MaxRight(start, check)
+	if pos == bit01.n {
+		return -1
+	}
+	k -= mid
+	x := bit01.data[pos]
+	p := bits.OnesCount64(x)
+	if p <= k {
+		return -1
+	}
+	k = sort.Search(64, func(n int) bool { return (p - bits.OnesCount64(x>>(n+1))) > k })
+	return pos<<6 | k
+}
+
+// 如果不存在，返回 -1.
+func (bit01 *BITArray01) Next(k int) int {
+	if k < 0 {
+		k = 0
+	}
+	if k >= bit01.n {
+		return -1
+	}
+	pos := k >> 6
+	k &= 63
+	x := bit01.data[pos] & ^((1 << k) - 1)
+	if x != 0 {
+		return pos<<6 | bits.TrailingZeros64(x)
+	}
+	pos = bit01.bit.Kth(0, pos+1)
+	if pos == bit01.size || bit01.data[pos] == 0 {
+		return -1
+	}
+	return pos<<6 | bits.TrailingZeros64(bit01.data[pos])
+}
+
+// 如果不存在，返回 -1.
+func (bit01 *BITArray01) Prev(k int) int {
+	if k >= bit01.n {
+		k = bit01.n - 1
+	}
+	if k < 0 {
+		return -1
+	}
+	pos := k >> 6
+	k &= 63
+	x := bit01.data[pos]
+	if k < 63 {
+		x &= (1 << (k + 1)) - 1
+	}
+	if x != 0 {
+		return pos<<6 | (bits.Len64(x) - 1)
+	}
+	pos = bit01.bit.MinLeft(pos, func(sum int) bool { return sum <= 0 }) - 1
+	if pos == -1 {
+		return -1
+	}
+	return pos<<6 | (bits.Len64(bit01.data[pos]) - 1)
+}
 
 func (bit01 *BITArray01) String() string {
 	res := []string{}
@@ -301,25 +508,6 @@ func (bit01 *BITArray01) String() string {
 		}
 	}
 	return fmt.Sprintf("BITArray01: [%v]", strings.Join(res, ", "))
-}
-
-func BinarySearch(ok, ng int, check func(mid int) bool) int {
-	for abs(ok-ng) > 1 {
-		mid := (ng + ok) >> 1
-		if check(mid) {
-			ok = mid
-		} else {
-			ng = mid
-		}
-	}
-	return ok
-}
-
-func Topbit32(x int) int {
-	if x == 0 {
-		return -1
-	}
-	return 31 - bits.LeadingZeros32(uint32(x))
 }
 
 // !Point Add Range Sum, 0-based.
@@ -384,7 +572,10 @@ func (b *BITMap) QueryAll() int {
 func (b *BITMap) MaxRight(check func(index, preSum int) bool) int {
 	i := 0
 	s := 0
-	k := 1 << Topbit32(b.n)
+	k := 1
+	for 2*k <= b.n {
+		k *= 2
+	}
 	for k > 0 {
 		if i+k-1 < b.n {
 			t := s + b.data[i+k-1]
@@ -727,7 +918,7 @@ func demo() {
 	fmt.Println(bitArray)
 	bitArray.Add(1, 1)
 	fmt.Println(bitArray)
-	fmt.Println(bitArray.Kth(0))
+	fmt.Println(bitArray.Kth(0, 0))
 
 	bp := NewBITRangeAddPointGetFrom(10, func(index int) int { return index + 1 })
 	fmt.Println(bp)
