@@ -1,29 +1,17 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"sort"
 )
 
 func main() {
+	abc202E()
+}
 
-	// in := bufio.NewReader(os.Stdin)
-	// out := bufio.NewWriter(os.Stdout)
-	// defer out.Flush()
-
-	// var n, q int
-	// fmt.Fscan(in, &n, &q)
-	// tree := NewTree(n)
-	// for i := 1; i < n; i++ {
-	// 	var a, b int
-	// 	fmt.Fscan(in, &a, &b)
-	// 	tree.AddEdge(a, b, 1)
-	// }
-	// tree.Build(0)
-	// for i := 0; i < q; i++ {
-	// 	var from, to, step int
-	// 	fmt.Fscan(in, &from, &to, &step)
-	// 	fmt.Fprintln(out, tree.Jump(from, to, step))
-	// }
+func demo() {
 	tree := NewTree(5)
 	tree.AddEdge(0, 1, 1)
 	tree.AddEdge(0, 2, 1)
@@ -40,6 +28,62 @@ func main() {
 	fmt.Println(tree.KthAncestor(4, 0))
 	fmt.Println(tree.GetHeavyChild(0))
 	fmt.Println(tree.GetHeavyPath(0))
+}
+
+// https://atcoder.jp/contests/abc202/tasks/abc202_e
+// !子树中特定深度的结点个数
+func abc202E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	parents := make([]int, n-1)
+	for i := 0; i < n-1; i++ {
+		fmt.Fscan(in, &parents[i])
+		parents[i]--
+	}
+
+	tree := NewTree(n)
+	for i := 0; i < n-1; i++ {
+		p := parents[i]
+		tree.AddDirectedEdge(p, i+1, 1)
+	}
+	tree.Build(0)
+	levelCount := LevelCount(tree)
+
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var root, dep int
+		fmt.Fscan(in, &root, &dep)
+		root--
+		fmt.Fprintln(out, levelCount(root, dep))
+	}
+}
+
+// 查询root的子树中,`绝对深度`为depth的顶点个数.
+func LevelCount(tree *Tree) func(root int, depth int) int {
+	n := int32(len(tree.Tree))
+	groupByDepth := make([][]int32, n)
+	for i := int32(0); i < n; i++ {
+		dep := int32(tree.Depth[i])
+		groupByDepth[dep] = append(groupByDepth[dep], int32(tree.LID[i]))
+	}
+	for _, v := range groupByDepth {
+		sort.Slice(v, func(i, j int) bool { return v[i] < v[j] })
+	}
+
+	f := func(root int, depth int) int {
+		start, end := int32(tree.LID[root]), int32(tree.RID[root])
+		pos := groupByDepth[depth]
+		count1 := sort.Search(len(pos), func(i int) bool { return pos[i] >= start })
+		count2 := sort.Search(len(pos), func(i int) bool { return pos[i] >= end })
+		return count2 - count1
+	}
+
+	return f
 }
 
 type Tree struct {

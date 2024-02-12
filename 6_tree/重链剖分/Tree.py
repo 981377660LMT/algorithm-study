@@ -1,4 +1,24 @@
-from typing import List, Tuple
+from bisect import bisect_left
+from typing import Callable, List, Tuple
+
+
+def levelCount(tree: "Tree") -> Callable[[int, int], int]:
+    """查询root的子树中,`绝对深度`为depth的顶点个数."""
+    n = len(tree.tree)
+    groupByDepth = [[] for _ in range(n)]
+    for dep, id in zip(tree.depth, tree.lid):
+        groupByDepth[dep].append(id)
+    for v in groupByDepth:
+        v.sort()
+
+    def f(root: int, depth: int) -> int:
+        start, end = tree.id(root)
+        pos = groupByDepth[depth]
+        count1 = bisect_left(pos, start)
+        count2 = bisect_left(pos, end)
+        return count2 - count1
+
+    return f
 
 
 class Tree:
@@ -187,32 +207,37 @@ class Tree:
         self.rid[cur] = self._dfn
 
 
-# test subtreeSize
 if __name__ == "__main__":
-    tree = Tree(6)
-    tree.addEdge(0, 1, 1)
-    tree.addEdge(0, 2, 1)
-    tree.addEdge(1, 3, 1)
-    tree.addEdge(1, 4, 1)
-    tree.addEdge(2, 5, 1)
-    tree.build(0)
-    print(tree.subSize(0, root=4))
-    print(tree.rootedLca(0, 1, 4))
-    print(tree.rootedLca(0, 1, 3))
-    print(tree.rootedParent(0, root=5))
 
-    class TreeAncestor:
-        def __init__(self, n: int, parent: List[int]):
-            self.tree = Tree(n)
-            for i, p in enumerate(parent):
-                if p != -1:
-                    self.tree.addEdge(p, i, 1)
-            self.tree.build(0)
+    def demo() -> None:
+        tree = Tree(6)
+        tree.addEdge(0, 1, 1)
+        tree.addEdge(0, 2, 1)
+        tree.addEdge(1, 3, 1)
+        tree.addEdge(1, 4, 1)
+        tree.addEdge(2, 5, 1)
+        tree.build(0)
+        print(tree.subSize(0, root=4))
+        print(tree.rootedLca(0, 1, 4))
+        print(tree.rootedLca(0, 1, 3))
+        print(tree.rootedParent(0, root=5))
 
-        def getKthAncestor(self, node: int, k: int) -> int:
-            return self.tree.kthAncestor(node, k)
+    # https://atcoder.jp/contests/abc202/tasks/abc202_e
+    def abc202_e() -> None:
+        import sys
 
+        sys.setrecursionlimit(10**6)
+        n = int(input())
+        parents = [int(x) - 1 for x in input().split()]
+        tree = Tree(n)
+        for i, p in enumerate(parents):
+            tree.addDirectedEdge(p, i + 1, 1)
+        tree.build(0)
 
-# Your TreeAncestor object will be instantiated and called as such:
-# obj = TreeAncestor(n, parent)
-# param_1 = obj.getKthAncestor(node,k)
+        lc = levelCount(tree)
+        q = int(input())
+        for _ in range(q):
+            root, dep = map(int, input().split())
+            print(lc(root - 1, dep))
+
+    abc202_e()
