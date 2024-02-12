@@ -23,6 +23,7 @@ func CountInversion(nums []int) int {
 	if len(nums) == 0 {
 		return 0
 	}
+	nums = append(nums[:0:0], nums...)
 	res := 0
 	var mergeSort func(nums []int, l int, r int, temp []int)
 	mergeSort = func(nums []int, l int, r int, temp []int) {
@@ -57,9 +58,7 @@ func CountInversion(nums []int) int {
 			j++
 			k++
 		}
-		for t := l; t <= r; t++ {
-			nums[t] = temp[t]
-		}
+		copy(nums[l:r+1], temp[l:r+1])
 	}
 	mergeSort(nums, 0, len(nums)-1, make([]int, len(nums)))
 	return res

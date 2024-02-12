@@ -20,11 +20,11 @@ Solution:
     solve(l, r) {
       if op[l...r] has no queries: return
       m = (l + r) / 2
+      solve(l, m)
+      solve(m+1, r)
       ds = statically built DS using insert operations in op[l...m]
       for each query operation i in op[m+1...r]:
         ans[i] += ds.query(op[i])
-      solve(l, m)
-      solve(m+1, r)
     }
 
 /**
