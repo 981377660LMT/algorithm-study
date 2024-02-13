@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	in := bufio.NewReaderSize(os.Stdin, 1<<20)
+	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
@@ -40,25 +40,26 @@ func main() {
 	}
 
 	D := NewDictionary()
-	for i, v := range values {
-		values[i] = D.Id(v)
-	}
 
 	lca := NewLCA(tree, []int{0})
-	// top, depth, dfn, parent := lca.top, lca.Depth, lca.dfn, lca.Parent
+	dfnValues := make([]int, n) // !注意要将value按照dfn序存储
+	for i := 0; i < n; i++ {
+		dfn := lca.dfn[i]
+		dfnValues[dfn] = D.Id(values[i])
+	}
 
-	blockSize := 1000
+	blockSize := 900
 	block := UseBlock(n, blockSize)
 	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
 	dp := make([][]Bitset, blockCount) // dp[i][j] 表示第 i 块到第 j 块的 bitset 的并 (0<=i<=j<blockCount)
 	for i := 0; i < blockCount; i++ {
 		tmp := make([]Bitset, blockCount)
-		for j := 0; j < blockCount; j++ {
+		for j := i; j < blockCount; j++ { // j可以从i开始
 			tmp[j] = NewBitset(D.Size())
 		}
 		dp[i] = tmp
 	}
-	for i, v := range values {
+	for i, v := range dfnValues {
 		bid := belong[i]
 		dp[bid][bid].Set(v)
 	}
@@ -69,23 +70,22 @@ func main() {
 	}
 	resSet := NewBitset(D.Size())
 
-	// [left,right]
 	updateBlock := func(start, end int) {
 		bid1, bid2 := belong[start], belong[end-1]
 		if bid1 == bid2 {
 			for i := start; i < end; i++ {
-				resSet.Set(values[i])
+				resSet.Set(dfnValues[i])
 			}
 			return
 		}
-		for i := start; i < blockEnd[bid1]; i++ {
-			resSet.Set(values[i])
-		}
-		for i := blockStart[bid2]; i < end; i++ {
-			resSet.Set(values[i])
-		}
 		if bid1+1 <= bid2-1 {
 			resSet.IOr(dp[bid1+1][bid2-1])
+		}
+		for i := start; i < blockEnd[bid1]; i++ {
+			resSet.Set(dfnValues[i])
+		}
+		for i := blockStart[bid2]; i < end; i++ {
+			resSet.Set(dfnValues[i])
 		}
 	}
 
@@ -112,7 +112,7 @@ func main() {
 	for i := 0; i < q; i++ {
 		var u, v int
 		fmt.Fscan(in, &u, &v)
-		u = u ^ lastRes
+		u ^= lastRes
 		u, v = u-1, v-1
 		lastRes = queryTree(u, v)
 		fmt.Fprintln(out, lastRes)
