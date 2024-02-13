@@ -30,6 +30,17 @@ func main() {
 		fmt.Fscan(in, &u, &v)
 		fmt.Fprintln(out, lca.LCA(u, v))
 	}
+	// testHeavy()
+}
+
+func testHeavy() {
+	n := 10
+	lca := NewLCA(n)
+	for i := 1; i < n; i++ {
+		lca.AddEdge(i-1, i, 1)
+	}
+	lca.Build(0)
+	fmt.Println(lca.GetHeavyPath(0))
 }
 
 type LCAHLD struct {

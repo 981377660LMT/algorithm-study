@@ -179,6 +179,48 @@ func (hld *LCAFast) Dist(u, v int) int {
 	return int(hld.Depth[u] + hld.Depth[v] - 2*hld.Depth[hld.LCA(u, v)])
 }
 
+func (hld *LCAFast) EnumeratePathDecomposition(u, v int, vertex bool, f func(start, end int)) {
+	u32, v32 := int32(u), int32(v)
+	for {
+		if hld.top[u32] == hld.top[v32] {
+			break
+		}
+		if hld.dfn[u32] < hld.dfn[v32] {
+			a, b := hld.dfn[hld.top[v32]], hld.dfn[v32]
+			if a > b {
+				a, b = b, a
+			}
+			f(int(a), int(b+1))
+			v32 = hld.Parent[hld.top[v32]]
+		} else {
+			a, b := hld.dfn[u32], hld.dfn[hld.top[u32]]
+			if a > b {
+				a, b = b, a
+			}
+			f(int(a), int(b+1))
+			u32 = hld.Parent[hld.top[u32]]
+		}
+	}
+
+	edgeInt := int32(1)
+	if vertex {
+		edgeInt = 0
+	}
+
+	if hld.dfn[u32] < hld.dfn[v32] {
+		a, b := hld.dfn[u32]+edgeInt, hld.dfn[v32]
+		if a > b {
+			a, b = b, a
+		}
+		f(int(a), int(b+1))
+	} else if hld.dfn[v32]+edgeInt <= hld.dfn[u32] {
+		a, b := hld.dfn[u32], hld.dfn[v32]+edgeInt
+		if a > b {
+			a, b = b, a
+		}
+		f(int(a), int(b+1))
+	}
+}
 func (hld *LCAFast) _build(cur, pre, dep int32) int {
 	subSize, heavySize, heavySon := 1, 0, int32(-1)
 	for _, next := range hld.Tree[cur] {
