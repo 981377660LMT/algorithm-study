@@ -1,84 +1,11 @@
-https://www.luogu.com.cn/problem/CF607B
-https://www.luogu.com.cn/problem/CF149D
-https://www.luogu.com.cn/problem/CF20C
-https://www.luogu.com.cn/problem/CF9D
-https://www.luogu.com.cn/problem/CF19B
-https://www.luogu.com.cn/problem/CF3B
-https://www.luogu.com.cn/problem/CF191C
-https://www.luogu.com.cn/problem/CF1092F
-https://www.luogu.com.cn/problem/CF1245D
-https://www.luogu.com.cn/problem/CF5C
-https://www.luogu.com.cn/problem/CF448C
-https://www.luogu.com.cn/problem/CF476D
-https://www.luogu.com.cn/problem/CF1036C
-https://www.luogu.com.cn/problem/CF730J
-https://www.luogu.com.cn/problem/CF685B
-https://www.luogu.com.cn/problem/CF739B
-https://www.luogu.com.cn/problem/CF914D
-https://www.luogu.com.cn/problem/CF510D
-https://www.luogu.com.cn/problem/CF577B
-https://www.luogu.com.cn/problem/CF16E
-https://www.luogu.com.cn/problem/CF366C
-https://www.luogu.com.cn/problem/CF540D
-https://www.luogu.com.cn/problem/CF41D
-https://www.luogu.com.cn/problem/CF25C
-https://www.luogu.com.cn/problem/CF148E
-https://www.luogu.com.cn/problem/CF1153D
-https://www.luogu.com.cn/problem/CF1545B
-https://www.luogu.com.cn/problem/CF1114D
-https://www.luogu.com.cn/problem/CF817D
-https://www.luogu.com.cn/problem/CF711D
-https://www.luogu.com.cn/problem/CF597C
-https://www.luogu.com.cn/problem/CF784F
-https://www.luogu.com.cn/problem/CF14E
-https://www.luogu.com.cn/problem/CF547B
-https://www.luogu.com.cn/problem/CF57C
-https://www.luogu.com.cn/problem/CF1527B2
-https://www.luogu.com.cn/problem/CF1328E
-https://www.luogu.com.cn/problem/CF1060D
-https://www.luogu.com.cn/problem/CF1242B
-https://www.luogu.com.cn/problem/CF459E
-https://www.luogu.com.cn/problem/CF14D
-https://www.luogu.com.cn/problem/C1012C
-https://www.luogu.com.cn/problem/CF1012B
-https://www.luogu.com.cn/problem/CF961E
-https://www.luogu.com.cn/problem/CF1175D
-https://www.luogu.com.cn/problem/CF61E
-https://www.luogu.com.cn/problem/CF1413C
-https://www.luogu.com.cn/problem/CF1627D
-https://www.luogu.com.cn/problem/CF294C
-https://www.luogu.com.cn/problem/CF1285D
-https://www.luogu.com.cn/problem/CF6E
-https://www.luogu.com.cn/problem/CF1558B
-https://www.luogu.com.cn/problem/CF472D
-https://www.luogu.com.cn/problem/CF832D
-https://www.luogu.com.cn/problem/CF1077F1
-https://www.luogu.com.cn/problem/CF1718A2
-https://www.luogu.com.cn/problem/CF1067A
-https://www.luogu.com.cn/problem/CF362C
-https://www.luogu.com.cn/problem/CF1354D
-https://www.luogu.com.cn/problem/CF222E
-https://www.luogu.com.cn/problem/CF1205B
-https://www.luogu.com.cn/problem/CF109C
-https://www.luogu.com.cn/problem/CF292D
-https://www.luogu.com.cn/problem/CF1700D
-https://www.luogu.com.cn/problem/CF55C
-https://www.luogu.com.cn/problem/CF1076E
-https://www.luogu.com.cn/problem/CF455B
-https://www.luogu.com.cn/problem/CF1155D
-https://www.luogu.com.cn/problem/CF1656D
-https://www.luogu.com.cn/problem/CF1313C2
-https://www.luogu.com.cn/problem/CF1276B
-https://www.luogu.com.cn/problem/CF1661D
-https://www.luogu.com.cn/problem/CF1679D
-https://www.luogu.com.cn/problem/CF883I
-https://www.luogu.com.cn/problem/CF1601B
-https://www.luogu.com.cn/problem/CF1404B
-https://www.luogu.com.cn/problem/CF1311F
-https://www.luogu.com.cn/problem/CF930C
-https://www.luogu.com.cn/problem/CF25D
-https://www.luogu.com.cn/problem/CF1197D
-https://www.luogu.com.cn/problem/CF1095F
+https://www.luogu.com.cn/problem/CF607B  TODO
+https://www.luogu.com.cn/problem/CF685B TODO 子树重心
+https://www.luogu.com.cn/problem/CF577B TODO
+https://www.luogu.com.cn/problem/CF292D TODO connected components
+https://www.luogu.com.cn/problem/CF1076E TODO
+https://www.luogu.com.cn/problem/CF883I  TODO
+https://www.luogu.com.cn/problem/CF1601B  TODO 青蛙跳井
+https://www.luogu.com.cn/problem/CF1095F TODO
 https://www.luogu.com.cn/problem/CF505C
 https://www.luogu.com.cn/problem/CFG5GG
 https://www.luogu.com.cn/problem/CF1307D
