@@ -105,18 +105,6 @@ func (ufa *UnionFindArray) Union(key1, key2 int) bool {
 	return true
 }
 
-// 定向合并.
-func (ufa *UnionFindArray) UnionTo(child, parent int) bool {
-	root1, root2 := ufa.Find(child), ufa.Find(parent)
-	if root1 == root2 {
-		return false
-	}
-	ufa.data[root1] += ufa.data[root2]
-	ufa.data[root2] = root1
-	ufa.Part--
-	return true
-}
-
 func (ufa *UnionFindArray) UnionWithCallback(key1, key2 int, cb func(big, small int)) bool {
 	root1, root2 := ufa.Find(key1), ufa.Find(key2)
 	if root1 == root2 {

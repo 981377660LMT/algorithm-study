@@ -1,5 +1,15 @@
 package main
 
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
+
+func main() {
+	CF1691D()
+}
+
 // 1504. 统计全 1 子矩形 O(ROW*COL)
 // https://leetcode.cn/problems/count-submatrices-with-all-ones/
 func numSubmat(mat [][]int) int {
@@ -17,6 +27,57 @@ func numSubmat(mat [][]int) int {
 		res += C.CountSubrectangle(true)
 	}
 	return res
+}
+
+// Max GEQ Sum
+// https://www.luogu.com.cn/problem/CF1691D
+// 给定一个数组，判断每个子数组最大值是否不小于其和.
+//
+// 1. 单调栈找到每个元素nums[i]作为最大值时的左右边界区间.
+// !2. 如果这个区间内包含nums[i]的最大子数组和>最大值, 则返回NO.
+// 3. 否则返回YES.
+func CF1691D() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	solve := func(nums []int) bool {
+		n := len(nums)
+		preSum := make([]int, n+1)
+		for i := 0; i < n; i++ {
+			preSum[i+1] = preSum[i] + nums[i]
+		}
+
+		Range := NewCartesianTree(nums, false).Range // 每个元素作为最大值时的左右边界.
+		seg := NewSeg(n+1, func(i int) E { return [2]int{preSum[i], preSum[i]} })
+
+		for i := 0; i < n; i++ {
+			start, end := Range[i][0], Range[i][1]
+			min_ := seg.Query(start, i+1)[0]
+			max_ := seg.Query(i+1, end+1)[1]
+			maxSum := max_ - min_ // 包含nums[i]的最大子数组和
+			if maxSum > nums[i] {
+				return false
+			}
+		}
+		return true
+	}
+
+	var T int
+	fmt.Fscan(in, &T)
+	for ; T > 0; T-- {
+		var n int
+		fmt.Fscan(in, &n)
+		nums := make([]int, n)
+		for i := 0; i < n; i++ {
+			fmt.Fscan(in, &nums[i])
+		}
+		if solve(nums) {
+			fmt.Fprintln(out, "YES")
+		} else {
+			fmt.Fprintln(out, "NO")
+		}
+	}
 }
 
 type CartesianTree struct {
@@ -128,7 +189,8 @@ func (c *CartesianTree) MaxRectangleArea() int {
 }
 
 // 直方图中的矩形数量.
-//  baseLine: 是否只统计高度为1的矩形.
+//
+//	baseLine: 是否只统计高度为1的矩形.
 func (c *CartesianTree) CountSubrectangle(onlyBaseLine bool) int {
 	if !c.isMin {
 		panic("need min")
@@ -159,9 +221,80 @@ func (c *CartesianTree) GetTree() (tree [][]int, root int) {
 	return
 }
 
-func max(a, b int) int {
-	if a >= b {
+const INF int = 1e18
+
+// RangeMinMax
+
+type E = [2]int
+
+func (*Seg) e() E        { return [2]int{INF, -INF} }
+func (*Seg) op(a, b E) E { return [2]int{min(a[0], b[0]), max(a[1], b[1])} }
+func min(a, b int) int {
+	if a < b {
 		return a
 	}
 	return b
 }
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+type Seg struct {
+	n, size int
+	seg     []E
+}
+
+func NewSeg(n int, f func(int) E) *Seg {
+	res := &Seg{}
+	size := 1
+	for size < n {
+		size <<= 1
+	}
+	seg := make([]E, size<<1)
+	for i := range seg {
+		seg[i] = res.e()
+	}
+	for i := 0; i < n; i++ {
+		seg[i+size] = f(i)
+	}
+	for i := size - 1; i > 0; i-- {
+		seg[i] = res.op(seg[i<<1], seg[i<<1|1])
+	}
+	res.n = n
+	res.size = size
+	res.seg = seg
+	return res
+}
+
+// [start, end)
+func (st *Seg) Query(start, end int) E {
+	if start < 0 {
+		start = 0
+	}
+	if end > st.n {
+		end = st.n
+	}
+	if start >= end {
+		return st.e()
+	}
+	leftRes, rightRes := st.e(), st.e()
+	start += st.size
+	end += st.size
+	for start < end {
+		if start&1 == 1 {
+			leftRes = st.op(leftRes, st.seg[start])
+			start++
+		}
+		if end&1 == 1 {
+			end--
+			rightRes = st.op(st.seg[end], rightRes)
+		}
+		start >>= 1
+		end >>= 1
+	}
+	return st.op(leftRes, rightRes)
+}
+func (st *Seg) QueryAll() E { return st.seg[1] }

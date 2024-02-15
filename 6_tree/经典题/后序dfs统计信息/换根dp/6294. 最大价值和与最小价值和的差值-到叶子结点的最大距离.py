@@ -1,14 +1,16 @@
-# 6294. 最大价值和与最小价值和的差值
+# 2538. 最大价值和与最小价值和的差值
+# https://leetcode.cn/problems/difference-between-maximum-and-minimum-price-sum/description/
 # 求每个点作为根节点时，到叶子节点的最大距离
 
 from typing import List
 from Rerooting import Rerooting
 
 
+E = int
+
+
 class Solution:
     def maxOutput(self, n: int, edges: List[List[int]], price: List[int]) -> int:
-        E = int
-
         def e(root: int) -> E:
             return 0
 

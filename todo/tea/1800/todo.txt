@@ -3,4 +3,4 @@ https://www.luogu.com.cn/problem/CF1548B TODO
 https://www.luogu.com.cn/problem/CF1213G TODO
 https://www.luogu.com.cn/problem/CF1096D TODO
 https://www.luogu.com.cn/problem/CF16C TODO
-https://www.luogu.com.cn/problem/CF1691D TODO CheckAllASubarray
+

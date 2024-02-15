@@ -27,20 +27,6 @@ class UnionFindArray {
     return true
   }
 
-  /**
-   * 定向合并.
-   */
-  unionTo(child: number, parent: number, callback?: (big: number, small: number) => void): boolean {
-    let childRoot = this.find(child)
-    let parentRoot = this.find(parent)
-    if (childRoot === parentRoot) return false
-    this._data[parentRoot] += this._data[childRoot]
-    this._data[childRoot] = parentRoot
-    this._part -= 1
-    callback && callback(parentRoot, childRoot)
-    return true
-  }
-
   find(x: number): number {
     // eslint-disable-next-line no-return-assign
     return this._data[x] < 0 ? x : (this._data[x] = this.find(this._data[x]))
@@ -110,20 +96,6 @@ class UnionFindMap<V extends number | string> {
     this._rank.set(rootY, this._rank.get(rootY)! + this._rank.get(rootX)!)
     this._part -= 1
     callback && callback(rootY, rootX)
-    return true
-  }
-
-  /**
-   * 定向合并.
-   */
-  unionTo(child: V, parent: V, callback?: (big: V, small: V) => void): boolean {
-    let childRoot = this.find(child)
-    let parentRoot = this.find(parent)
-    if (childRoot === parentRoot) return false
-    this._parent.set(childRoot, parentRoot)
-    this._rank.set(parentRoot, this._rank.get(parentRoot)! + this._rank.get(childRoot)!)
-    this._part -= 1
-    callback && callback(parentRoot, childRoot)
     return true
   }
 
