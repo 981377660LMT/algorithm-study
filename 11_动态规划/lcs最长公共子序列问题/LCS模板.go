@@ -1,14 +1,54 @@
-// 最长公共子序列 LCS模板
+// 最长公共子序列
 
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
 func main() {
-	fmt.Println(LongestCommonSubsequence("ba", "ana"))
-	fmt.Println(LongestCommonSubsequenceRestore("ba", "ana"))
-	fmt.Println(LongestCommonSubsequence("banana", "ana"))
-	fmt.Println(LongestCommonSubsequenceRestore("banana", "ana"))
+	// fmt.Println(LongestCommonSubsequence("ba", "ana"))
+	// fmt.Println(LongestCommonSubsequenceRestore("ba", "ana"))
+	// fmt.Println(LongestCommonSubsequence("banana", "ana"))
+	// fmt.Println(LongestCommonSubsequenceRestore("banana", "ana"))
+	judge()
+}
+
+// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_10_C&lang=ja
+func judge() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	solve := func(s1, s2 string) int {
+		res1 := LongestCommonSubsequence(s1, s2)
+		res2 := LongestCommonSubsequenceRestore(s1, s2)
+		for _, ij := range res2 {
+			i, j := ij[0], ij[1]
+			if s1[i] != s2[j] {
+				panic("assert s1[i] == s2[j]")
+			}
+		}
+		for i := 0; i < len(res2)-1; i++ {
+			if res2[i][0] >= res2[i+1][0] {
+				panic("assert res2[i][0] < res2[i+1][0]")
+			}
+			if res2[i][1] >= res2[i+1][1] {
+				panic("assert res2[i][1] < res2[i+1][1]")
+			}
+		}
+		return res1
+	}
+
+	var T int
+	fmt.Fscan(in, &T)
+	for ; T > 0; T-- {
+		var s1, s2 string
+		fmt.Fscan(in, &s1, &s2)
+		fmt.Fprintln(out, solve(s1, s2))
+	}
 }
 
 type Str = string

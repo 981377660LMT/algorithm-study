@@ -7,61 +7,86 @@
 // ZAlgorithm(s)  // s: string
 // Append(c)      // c: string
 // Get(i)         // i: index
-// GetAll()          // return []int
+// GetAll()       // return []int
 
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 )
 
 func main() {
-	Z := NewZAlgorithm("aaabaaaab")
-	fmt.Println(Z.GetAll())
-	Z.Append("a")
-	fmt.Println(Z.GetAll())
-	Z.Append("a")
-	fmt.Println(Z.GetAll())
-	fmt.Println(Z.S)
+	yosupo()
 }
 
-type ZAlgorithm struct {
-	S           []string
+func demo() {
+	s := "aaabaaaab"
+	Z := NewZAlgoOnline(0, func(i int) int { return int(s[i]) })
+	fmt.Println(Z.GetAll())
+	Z.Append(97) // 97 is the ascii code of 'a'
+	fmt.Println(Z.GetAll())
+	Z.Append(97) // 97 is the ascii code of 'a'
+	fmt.Println(Z.GetAll())
+	fmt.Println(Z.ords)
+}
+
+func yosupo() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s string
+	fmt.Fscan(in, &s)
+	n := len(s)
+	Z := NewZAlgoOnline(0, func(i int) int { return int(s[i]) })
+	for i := 0; i < n; i++ {
+		Z.Append(int(s[i]))
+	}
+	res := Z.GetAll()
+	for _, v := range res {
+		fmt.Fprint(out, v, " ")
+	}
+}
+
+type ZAlgoOnline struct {
+	ords        []int
 	deleted     []bool
-	deletedHist [][]int
-	z           []int
-	cur         []int
+	deletedHist [][]int32
+	z           []int32
+	cur         []int32
 }
 
-func NewZAlgorithm(s string) *ZAlgorithm {
-	res := &ZAlgorithm{}
-	for _, c := range s {
-		res.Append(string(c))
+func NewZAlgoOnline(n int, f func(i int) int) *ZAlgoOnline {
+	res := &ZAlgoOnline{}
+	for i := 0; i < n; i++ {
+		res.Append(f(i))
 	}
 	return res
 }
 
-func (za *ZAlgorithm) Append(char string) {
-	za.S = append(za.S, char)
-	za.deletedHist = append(za.deletedHist, []int{})
+func (za *ZAlgoOnline) Append(c int) {
+	za.ords = append(za.ords, c)
+	za.deletedHist = append(za.deletedHist, []int32{})
 	za.deleted = append(za.deleted, false)
 	za.z = append(za.z, 0)
 	za.z[0]++
 
-	len_ := len(za.S)
+	len_ := int32(len(za.ords))
 	if len_ == 1 {
 		return
 	}
-	if za.S[0] == char {
+	if za.ords[0] == c {
 		za.cur = append(za.cur, len_-1)
 	} else {
 		za.deleted[len_-1] = true
 	}
 
-	set := func(t, l int) {
+	set := func(t, l int32) {
 		za.deleted[t] = true
-		for len(za.deletedHist) <= l {
-			za.deletedHist = append(za.deletedHist, []int{})
+		for int32(len(za.deletedHist)) <= l {
+			za.deletedHist = append(za.deletedHist, []int32{})
 		}
 		za.deletedHist[l] = append(za.deletedHist[l], t)
 		za.z[t] = l - t - 1
@@ -71,7 +96,7 @@ func (za *ZAlgorithm) Append(char string) {
 		t := za.cur[0]
 		if za.deleted[t] {
 			za.cur = za.cur[1:]
-		} else if za.S[len_-t-1] == za.S[len(za.S)-1] {
+		} else if za.ords[len_-t-1] == za.ords[len(za.ords)-1] {
 			break
 		} else {
 			set(t, len_)
@@ -88,16 +113,16 @@ func (za *ZAlgorithm) Append(char string) {
 
 }
 
-func (za *ZAlgorithm) Get(i int) int {
+func (za *ZAlgoOnline) Get(i int) int {
 	if za.deleted[i] {
-		return za.z[i]
+		return int(za.z[i])
 	}
-	return len(za.S) - i
+	return len(za.ords) - i
 }
 
-func (za *ZAlgorithm) GetAll() []int {
-	res := make([]int, len(za.S))
-	for i := 0; i < len(za.S); i++ {
+func (za *ZAlgoOnline) GetAll() []int {
+	res := make([]int, len(za.ords))
+	for i := 0; i < len(za.ords); i++ {
 		res[i] = za.Get(i)
 	}
 	return res

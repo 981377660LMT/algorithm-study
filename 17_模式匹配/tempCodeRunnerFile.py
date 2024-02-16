@@ -1,2 +1,0 @@
-
-    assert isSubarray("aabbccdd", "dd")
