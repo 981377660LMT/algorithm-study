@@ -80,7 +80,7 @@ func main() {
 	// demo()
 
 	// CF17E()
-	CF835D()
+	// CF835D()
 	// CF906E()
 	// CF932G()
 
@@ -175,14 +175,53 @@ func CF17E() {
 // k = 1时，就是回文串的定义
 // k > 1时，不仅其本身为回文串，并且它的左半边和右半边都是k - 1阶回文串（奇数串左右半边不包括中心）
 //
-// !通过 fail 指针找到长度恰好为当前回文串长度一半的回文后缀
+// !通过节点u的 fail 指针找到长度不超过len(u)/2 的最长回文后缀
 func CF835D() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
+	var s string
+	fmt.Fscan(in, &s)
+
+	T := NewPalindromicTree()
+	T.AddString(s)
+
+	getHalfLink := func(pos int32) int32 {
+		// targetLen := T.Nodes[pos].Length / 2
+		// res := pos
+		// for T.Nodes[res].Length > targetLen {
+		// 	res = T.Nodes[res].Link
+		// }
+		// return res
+		return T.Nodes[pos].HalfLink
+	}
+
+	dp := make([]int, T.Size()) // !每一个节点对应的回文串的阶数
+	for i := 2; i < T.Size(); i++ {
+		half := getHalfLink(int32(i))
+		halfLen := int(T.Nodes[half].Length)
+		curLen := int(T.Nodes[i].Length)
+		if halfLen == curLen/2 {
+			dp[i] = dp[half] + 1
+		} else {
+			dp[i] = 1
+		}
+	}
+
+	freq := T.GetFrequency() // !每一个节点对应的回文串的个数
+
+	res := make([]int, len(s)+1)
+	for i := 2; i < T.Size(); i++ {
+		level := dp[i]
+		res[level] += freq[i]
+	}
+	for i := len(s) - 1; i >= 0; i-- {
+		res[i] += res[i+1]
+	}
+	for _, v := range res[1:] {
+		fmt.Fprint(out, v, " ")
+	}
 }
 
 // Reverses
@@ -434,14 +473,39 @@ func P4555() {
 // 询问要操作成给定的串需要多少次操作。
 //
 // !可以发现操作 2 越多越好，但是发现操作 2 只能得到长度为偶数的回文串，
-// 所以答案其实就是 在一个长度为偶数的回文串的基础上暴力添加字符 。
+// 所以答案其实就是 在一个长度为偶数的回文串的基础上暴力添加字符，即 min(dp[i]+n−len[i])
+//
+// 转移为：
+// !dp[u] = min(dp[u] , dp[halfLink] + len(u)/2 - len(halfLink) + 1) (补全到一半后复制)
 // TODO
 func P4762() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-	var n int
-	fmt.Fscan(in, &n)
+	// in := bufio.NewReader(os.Stdin)
+	// out := bufio.NewWriter(os.Stdout)
+	// defer out.Flush()
+
+	// solve := func(s string) int {
+	// 	n := len(s)
+	// 	T := NewPalindromicTree()
+	// 	T.AddString(s)
+	// 	dp := make([]int, T.Size())
+
+	// 	res := n
+	// 	for i := 2; i < T.Size(); i++ {
+	// 		len_ := int(T.Nodes[i].Length)
+	// 		if len_&1 == 0 {
+	// 			res = min(res, dp[i]+n-len_/2)
+	// 		}
+	// 	}
+	// 	return res
+	// }
+
+	// var T int
+	// fmt.Fscan(in, &T)
+	// for i := 0; i < T; i++ {
+	// 	var s string
+	// 	fmt.Fscan(in, &s)
+	// 	fmt.Println(solve(s))
+	// }
 }
 
 // P5496 【模板】回文自动机（PAM）
@@ -824,6 +888,7 @@ type Node struct {
 	Link      int32           // suffix link，指向当前回文串的最长真回文后缀的位置
 	Length    int32           // 结点代表的回文串的长度
 	Indexes   []int32         // 哪些位置的最长回文后缀
+	HalfLink  int32           // 长度不超过 len(u)//2 的最长回文后缀的位置
 	deltaLink int32           // u一直沿着link向上跳到第一使得diff[v] ≠ diff[u]的节点v，即u所在等差数列中长度最小的那个节点。
 }
 
@@ -853,17 +918,28 @@ func (pt *PalindromicTree) Add(x int32) int {
 	}
 	pt.lastPos = pt.Nodes[cur].Next[x]
 	if !hasKey {
-		pt.Nodes = append(pt.Nodes, pt.newNode(-1, pt.Nodes[cur].Length+2))
-		if pt.Nodes[len(pt.Nodes)-1].Length == 1 {
-			pt.Nodes[len(pt.Nodes)-1].Link = 1
+		newNode := pt.newNode(-1, pt.Nodes[cur].Length+2)
+		pt.Nodes = append(pt.Nodes, newNode)
+		if newNode.Length == 1 {
+			newNode.Link = 1
 		} else {
-			pt.Nodes[len(pt.Nodes)-1].Link = pt.Nodes[pt.findPrevPalindrome(pt.Nodes[cur].Link)].Next[x]
+			newNode.Link = pt.Nodes[pt.findPrevPalindrome(pt.Nodes[cur].Link)].Next[x]
 		}
 
-		if pt.diff(pt.lastPos) == pt.diff(pt.Nodes[len(pt.Nodes)-1].Link) {
-			pt.Nodes[len(pt.Nodes)-1].deltaLink = pt.Nodes[pt.Nodes[len(pt.Nodes)-1].Link].deltaLink
+		if newNode.Length <= 2 {
+			newNode.HalfLink = newNode.Link
 		} else {
-			pt.Nodes[len(pt.Nodes)-1].deltaLink = pt.Nodes[len(pt.Nodes)-1].Link
+			halfNode := pt.Nodes[pt.Nodes[cur].HalfLink]
+			for pt.Ords[pos] != pt.Ords[pos-halfNode.Length-1] || (halfNode.Length+2)*2 > newNode.Length {
+				halfNode = pt.Nodes[halfNode.Link]
+			}
+			newNode.HalfLink = halfNode.Next[x]
+		}
+
+		if pt.diff(pt.lastPos) == pt.diff(newNode.Link) {
+			newNode.deltaLink = pt.Nodes[newNode.Link].deltaLink
+		} else {
+			newNode.deltaLink = newNode.Link
 		}
 	}
 
@@ -1017,10 +1093,11 @@ func (pt *PalindromicTree) findPrevPalindrome(cur int32) int32 {
 
 // 当前位置的回文串长度减去当前回文串的最长后缀回文串的长度.
 func (pt *PalindromicTree) diff(pos int32) int32 {
-	if pt.Nodes[pos].Link <= 0 {
+	curNode := pt.Nodes[pos]
+	if curNode.Link <= 0 {
 		return -1
 	}
-	return pt.Nodes[pos].Length - pt.Nodes[pt.Nodes[pos].Link].Length
+	return curNode.Length - pt.Nodes[curNode.Link].Length
 }
 
 func (pt *PalindromicTree) outputDfs(cur, id int, res *[]int) bool {

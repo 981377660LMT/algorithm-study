@@ -107,17 +107,18 @@ func (pt *PalindromicTreeArray) Add(x byte) int {
 	}
 	pt.lastPos = pt.Nodes[cur].Next[x]
 	if !hasKey {
-		pt.Nodes = append(pt.Nodes, pt.newNode(-1, pt.Nodes[cur].Length+2))
-		if pt.Nodes[len(pt.Nodes)-1].Length == 1 {
-			pt.Nodes[len(pt.Nodes)-1].Link = 1
+		newNode := pt.newNode(-1, pt.Nodes[cur].Length+2)
+		pt.Nodes = append(pt.Nodes, newNode)
+		if newNode.Length == 1 {
+			newNode.Link = 1
 		} else {
-			pt.Nodes[len(pt.Nodes)-1].Link = pt.Nodes[pt.findPrevPalindrome(pt.Nodes[cur].Link)].Next[x]
+			newNode.Link = pt.Nodes[pt.findPrevPalindrome(pt.Nodes[cur].Link)].Next[x]
 		}
 
-		if pt.diff(pt.lastPos) == pt.diff(pt.Nodes[len(pt.Nodes)-1].Link) {
-			pt.Nodes[len(pt.Nodes)-1].deltaLink = pt.Nodes[pt.Nodes[len(pt.Nodes)-1].Link].deltaLink
+		if pt.diff(pt.lastPos) == pt.diff(newNode.Link) {
+			newNode.deltaLink = pt.Nodes[newNode.Link].deltaLink
 		} else {
-			pt.Nodes[len(pt.Nodes)-1].deltaLink = pt.Nodes[len(pt.Nodes)-1].Link
+			newNode.deltaLink = newNode.Link
 		}
 	}
 
