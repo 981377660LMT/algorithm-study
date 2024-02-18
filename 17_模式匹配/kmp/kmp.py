@@ -179,6 +179,13 @@ if __name__ == "__main__":
             index = indexOf(nums[::-1] + nums[::-1], sorted(nums)[::-1])
             return index if index != -1 else -1
 
+    # 3036. 匹配模式数组的子数组数目 II
+    # https://leetcode.cn/problems/number-of-subarrays-that-match-a-pattern-ii/description/
+    class Solution2:
+        def countMatchingSubarrays(self, nums: List[int], pattern: List[int]) -> int:
+            arr = [1 if a > b else -1 if a < b else 0 for a, b in zip(nums, nums[1:])]
+            return len(indexOfAll(arr, pattern))
+
     print(Solution().minimumRightShifts([3, 4, 5, 1, 2]))
     # [1,3,5]
     print(Solution().minimumRightShifts([1, 3, 5]))

@@ -100,11 +100,11 @@ func main() {
 }
 
 type SuffixArray struct {
-	Sa     []int // 排名第i的后缀是谁.
-	Rank   []int // 后缀s[i:]的排名是多少.
-	Height []int // 排名相邻的两个后缀的最长公共前缀.Height[0] = 0,Height[i] = LCP(s[sa[i]:], s[sa[i-1]:])
-	n      int
-	st     *St
+	Sa      []int // 排名第i的后缀是谁.
+	Rank    []int // 后缀s[i:]的排名是多少.
+	Height  []int // 排名相邻的两个后缀的最长公共前缀.Height[0] = 0,Height[i] = LCP(s[sa[i]:], s[sa[i-1]:])
+	n       int
+	minSt32 *St32
 }
 
 // !ord值很大时,需要先离散化.
@@ -126,15 +126,15 @@ func NewSuffixArrayWithString(s string) *SuffixArray {
 
 // 求任意两个子串s[a,b)和s[c,d)的最长公共前缀(lcp).
 func (suf *SuffixArray) Lcp(a, b int, c, d int) int {
-
 	cand := suf._lcp(a, c)
 	return min(cand, min(b-a, d-c))
 }
 
 // 比较任意两个子串s[a,b)和s[c,d)的字典序.
-//  s[a,b) < s[c,d) 返回-1.
-//  s[a,b) = s[c,d) 返回0.
-//  s[a,b) > s[c,d) 返回1.
+//
+//	s[a,b) < s[c,d) 返回-1.
+//	s[a,b) = s[c,d) 返回0.
+//	s[a,b) > s[c,d) 返回1.
 func (suf *SuffixArray) CompareSubstr(a, b int, c, d int) int {
 	len1, len2 := b-a, d-c
 	lcp := suf.Lcp(a, b, c, d)
@@ -155,8 +155,8 @@ func (suf *SuffixArray) CompareSubstr(a, b int, c, d int) int {
 
 // 求任意两个后缀s[i:]和s[j:]的最长公共前缀(lcp).
 func (suf *SuffixArray) _lcp(i, j int) int {
-	if suf.st == nil {
-		suf.st = NewStMin(suf.Height)
+	if suf.minSt32 == nil {
+		suf.minSt32 = NewStMin(suf.Height)
 	}
 	if i == j {
 		return suf.n - i
@@ -165,7 +165,7 @@ func (suf *SuffixArray) _lcp(i, j int) int {
 	if r1 > r2 {
 		r1, r2 = r2, r1
 	}
-	return suf.st.Query(r1+1, r2+1)
+	return suf.minSt32.Query(r1+1, r2+1)
 }
 
 func (suf *SuffixArray) _getSA(ords []int) (sa []int) {
@@ -336,26 +336,26 @@ func (suf *SuffixArray) _useSA(ords []int) (sa, rank, lcp []int) {
 	return
 }
 
-type St struct {
-	st     []int
-	lookup []int
+type St32 struct {
+	st     []int32
+	lookup []int32
 	n      int
 }
 
-func NewStMin(nums []int) *St {
-	res := &St{}
+func NewStMin(nums []int) *St32 {
+	res := &St32{}
 	n := len(nums)
 	b := bits.Len(uint(n))
-	st := make([]int, b*n)
+	st := make([]int32, b*n)
 	for i := range nums {
-		st[i] = nums[i]
+		st[i] = int32(nums[i])
 	}
 	for i := 1; i < b; i++ {
 		for j := 0; j+(1<<i) <= n; j++ {
-			st[i*n+j] = min(st[(i-1)*n+j], st[(i-1)*n+j+(1<<(i-1))])
+			st[i*n+j] = min32(st[(i-1)*n+j], st[(i-1)*n+j+(1<<(i-1))])
 		}
 	}
-	lookup := make([]int, n+1)
+	lookup := make([]int32, n+1)
 	for i := 2; i < len(lookup); i++ {
 		lookup[i] = lookup[i>>1] + 1
 	}
@@ -365,9 +365,9 @@ func NewStMin(nums []int) *St {
 	return res
 }
 
-func (st *St) Query(start, end int) int {
-	b := st.lookup[end-start]
-	return min(st.st[b*st.n+start], st.st[b*st.n+end-(1<<b)])
+func (st *St32) Query(start, end int) int {
+	b := int(st.lookup[end-start])
+	return int(min32(st.st[b*st.n+start], st.st[b*st.n+end-(1<<b)]))
 }
 
 // 用于求解`两个字符串s和t`相关性质的后缀数组.
@@ -402,9 +402,10 @@ func (suf *SuffixArray2) Lcp(a, b int, c, d int) int {
 }
 
 // 比较任意两个子串s[a,b)和t[c,d)的字典序.
-//  s[a,b) < t[c,d) 返回-1.
-//  s[a,b) = t[c,d) 返回0.
-//  s[a,b) > t[c,d) 返回1.
+//
+//	s[a,b) < t[c,d) 返回-1.
+//	s[a,b) = t[c,d) 返回0.
+//	s[a,b) > t[c,d) 返回1.
 func (suf *SuffixArray2) CompareSubstr(a, b int, c, d int) int {
 	return suf.SA.CompareSubstr(a, b, c+suf.offset, d+suf.offset)
 }
@@ -434,6 +435,14 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func min32(a, b int32) int32 {
+	if a <= b {
+		return a
+	}
+	return b
+
 }
 
 func max(a, b int) int {

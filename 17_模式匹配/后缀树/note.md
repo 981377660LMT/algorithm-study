@@ -1,3 +1,5 @@
+![suffix tree](23549d9fc1adfd388f3df385c36cb772.jpg)
+
 炫酷后缀树魔术
 https://www.luogu.com.cn/blog/EternalAlexander/xuan-ku-hou-zhui-shu-mo-shu
 

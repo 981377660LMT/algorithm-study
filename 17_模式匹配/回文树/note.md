@@ -1,10 +1,9 @@
 https://ei1333.github.io/library/string/palindromic-tree.hpp
 https://math314.hateblo.jp/entry/2016/12/19/005919
-https://blog.csdn.net/Clove_unique/article/details/53750322
 https://baobaobear.github.io/post/20200416-pam/
 https://mojashi.hatenablog.com/entry/2017/07/17/155520
 https://miti-7.hatenablog.com/entry/2016/03/14/195721
-https://www.zhihu.com/column/c_1182444932760125440
+https://zhuanlan.zhihu.com/p/581946378
 
 - 性质
   它的状态表示原字符串的一个回文子串
@@ -23,4 +22,5 @@ https://www.zhihu.com/column/c_1182444932760125440
 
 ---
 
+https://www.bilibili.com/video/BV1r54y1S7C1
 回文树的关键技术：奇偶字典树+后缀链跳跃

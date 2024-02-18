@@ -12,18 +12,51 @@ func main() {
 	fmt.Println(sa, rank, height)
 }
 
+//  sa : 排第几的后缀是谁.
+//  rank : 每个后缀排第几.
+//  lcp : 排名相邻的两个后缀的最长公共前缀.
+// 	lcp[0] = 0
+// 	lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
+func UseSA(ords []int) (sa, rank, lcp []int) {
+	n := len(ords)
+	sa = GetSA(ords)
+
+	rank = make([]int, n)
+	for i := range rank {
+		rank[sa[i]] = i
+	}
+
+	// !高度数组 lcp 也就是排名相邻的两个后缀的最长公共前缀。
+	// lcp[0] = 0
+	// lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
+	lcp = make([]int, n)
+	h := 0
+	for i, rk := range rank {
+		if h > 0 {
+			h--
+		}
+		if rk > 0 {
+			for j := sa[rk-1]; i+h < n && j+h < n && ords[i+h] == ords[j+h]; h++ {
+			}
+		}
+		lcp[rk] = h
+	}
+
+	return
+}
+
 func GetSA(ords []int) (sa []int) {
 	if len(ords) == 0 {
 		return []int{}
 	}
 
-	mn := min(ords...)
+	mn := mins(ords)
 	for i, x := range ords {
 		ords[i] = x - mn + 1
 	}
 	ords = append(ords, 0)
 	n := len(ords)
-	m := max(ords...) + 1
+	m := maxs(ords) + 1
 	isS := make([]bool, n)
 	isLms := make([]bool, n)
 	lms := make([]int, 0, n)
@@ -152,40 +185,7 @@ func GetSA(ords []int) (sa []int) {
 	return induce()[1:]
 }
 
-//  sa : 排第几的后缀是谁.
-//  rank : 每个后缀排第几.
-//  lcp : 排名相邻的两个后缀的最长公共前缀.
-// 	lcp[0] = 0
-// 	lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
-func UseSA(ords []int) (sa, rank, lcp []int) {
-	n := len(ords)
-	sa = GetSA(ords)
-
-	rank = make([]int, n)
-	for i := range rank {
-		rank[sa[i]] = i
-	}
-
-	// !高度数组 lcp 也就是排名相邻的两个后缀的最长公共前缀。
-	// lcp[0] = 0
-	// lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
-	lcp = make([]int, n)
-	h := 0
-	for i, rk := range rank {
-		if h > 0 {
-			h--
-		}
-		if rk > 0 {
-			for j := int(sa[rk-1]); i+h < n && j+h < n && ords[i+h] == ords[j+h]; h++ {
-			}
-		}
-		lcp[rk] = h
-	}
-
-	return
-}
-
-func min(a ...int) int {
+func mins(a []int) int {
 	mn := a[0]
 	for _, x := range a {
 		if x < mn {
@@ -195,7 +195,7 @@ func min(a ...int) int {
 	return mn
 }
 
-func max(a ...int) int {
+func maxs(a []int) int {
 	mx := a[0]
 	for _, x := range a {
 		if x > mx {
@@ -203,12 +203,4 @@ func max(a ...int) int {
 		}
 	}
 	return mx
-}
-
-func sum(a ...int) int {
-	s := 0
-	for _, x := range a {
-		s += x
-	}
-	return s
 }

@@ -56,3 +56,4 @@ https://www.bilibili.com/video/BV1qF411G7u5
 
 （广义）后缀自动机 - nekko 的文章 - 知乎
 https://zhuanlan.zhihu.com/p/34838533
+![Alt text](image-3.png)

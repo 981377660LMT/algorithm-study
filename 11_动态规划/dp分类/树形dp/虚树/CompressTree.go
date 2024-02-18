@@ -11,10 +11,11 @@ import (
 const INF int = 1e18
 
 func main() {
+	abc340()
 	// ColouredMountainHut()
 	// CF613D()
 	// Yuki3407()
-	P2495()
+	// P2495()
 }
 
 func demo() {
@@ -42,6 +43,97 @@ func demo() {
 	}
 }
 
+// G - Leaf Color
+// https://atcoder.jp/contests/abc340/tasks/abc340_g
+// 给定一棵树，每个点有一个颜色。
+// 求这棵树符合以下条件的导出子图(诱导子图)的个数模 998244353:
+// 所有叶子节点的颜色都相同.
+func abc340() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const MOD int = 998244353
+
+	var n int
+	fmt.Fscan(in, &n)
+	colors := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &colors[i])
+	}
+	tree := NewTree(n)
+	for i := 0; i < n-1; i++ {
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		u, v = u-1, v-1
+		tree.AddEdge(u, v, 1)
+	}
+	tree.Build(0)
+	groupByColor := make(map[int][]int)
+	for i, c := range colors {
+		groupByColor[c] = append(groupByColor[c], i)
+	}
+
+	// adjList := 压缩后的树, 0~len(criticals)-1
+	// inCriticals := 压缩后的树中的节点是否在criticals中
+	solve := func(adjList [][][2]int, inCriticals []bool) int {
+		curRes := 0
+
+		var dfs func(cur, pre int) int
+		dfs = func(cur, pre int) int { // cur 作为根时的方案数
+			dp := [3]int{1, 0, 0} // 不选孩子，选一个孩子，选>=2个孩子
+			for _, e := range adjList[cur] {
+				next := e[0]
+				if next == pre {
+					continue
+				}
+				x := dfs(next, cur)
+				ndp := dp
+				for i := 0; i < 3; i++ {
+					j := min(2, i+1)
+					ndp[j] = (ndp[j] + x*dp[i]%MOD) % MOD
+				}
+				dp = ndp
+			}
+
+			if inCriticals[cur] {
+				tmp := (dp[0] + dp[1] + dp[2]) % MOD
+				curRes = (curRes + tmp) % MOD
+				return tmp
+			} else {
+				curRes = (curRes + dp[2]) % MOD
+				return (dp[1] + dp[2]) % MOD
+			}
+		}
+
+		dfs(0, -1)
+		return curRes
+	}
+
+	res := 0
+	isCritical := make([]bool, n)
+	for _, criticals := range groupByColor {
+		for _, v := range criticals {
+			isCritical[v] = true
+		}
+
+		rawId, newTree := CompressTree(tree, criticals, true)
+		m := len(rawId)
+		inCriticals := make([]bool, m) // !压缩后的树中的节点是否在points中
+		for i := 0; i < m; i++ {
+			inCriticals[i] = isCritical[rawId[i]]
+		}
+
+		res = (res + solve(newTree.Tree, inCriticals)) % MOD
+
+		for _, v := range criticals {
+			isCritical[v] = false
+		}
+	}
+
+	fmt.Println(res)
+}
+
 // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0439
 // 给定一棵树,每个点有一个颜色。
 // 对每一种颜色相同的点，求出每个点到其他点距离的最小值。保证每种颜色的点至少有两个。
@@ -57,18 +149,22 @@ func ColouredMountainHut() {
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &colors[i])
 	}
-	tree := NewTree(n)
+	edges := make([][2]int, n-1)
 	for i := 0; i < n-1; i++ {
 		var u, v int
 		fmt.Fscan(in, &u, &v)
-		tree.AddEdge(u-1, v-1, 1)
+		edges[i] = [2]int{u - 1, v - 1}
 	}
-	tree.Build(0)
 
 	groupByColor := make(map[int][]int)
 	for i, c := range colors {
 		groupByColor[c] = append(groupByColor[c], i)
 	}
+	tree := NewTree(n)
+	for _, e := range edges {
+		tree.AddEdge(e[0], e[1], 1)
+	}
+	tree.Build(0)
 
 	res := make([]int, n)
 	for i := 0; i < n; i++ {
