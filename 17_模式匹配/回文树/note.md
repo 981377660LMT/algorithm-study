@@ -24,3 +24,4 @@ https://zhuanlan.zhihu.com/p/581946378
 
 https://www.bilibili.com/video/BV1r54y1S7C1
 回文树的关键技术：奇偶字典树+后缀链跳跃
+![Alt text](image.png)

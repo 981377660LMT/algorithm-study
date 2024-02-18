@@ -25,7 +25,7 @@ func main() {
 	for i := 0; i < q; i++ {
 		var a, b, c int
 		fmt.Fscan(in, &a, &b, &c)
-		fmt.Println(LCS.Query(a, b, c))
+		fmt.Fprintln(out, LCS.Query(a, b, c))
 	}
 }
 
