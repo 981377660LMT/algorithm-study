@@ -11,6 +11,7 @@ import (
 	"os"
 )
 
+// https://judge.yosupo.jp/problem/number_of_substrings
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -18,56 +19,58 @@ func main() {
 
 	var s string
 	fmt.Fscan(in, &s)
-	sa := NewSuffixAutomaton()
+	sa := NewSuffixAutomatonMap()
 	for _, c := range s {
 		sa.Add(c)
 	}
 	fmt.Fprintln(out, sa.CountSubstring())
 }
 
-const SIGMA int32 = 26   // 字符集大小
-const OFFSET int32 = 'a' // 字符集的起始字符
-
 type Node struct {
-	Next      [SIGMA]int32 // 孩子节点
-	Link      int32        // 后缀链接
-	MaxLength int32        // 当前节点对应的最长子串的长度
+	Next      map[int32]int32 // 孩子节点
+	Link      int32           // 后缀链接
+	MaxLength int32           // 当前节点对应的最长子串的长度
 }
 
-type SuffixAutomaton struct {
+type SuffixAutomatonMap struct {
 	Nodes   []*Node
 	lastPos int32 // 当前插入的字符对应的节点
 }
 
-func NewSuffixAutomaton() *SuffixAutomaton {
-	res := &SuffixAutomaton{}
+func NewSuffixAutomatonMap() *SuffixAutomatonMap {
+	res := &SuffixAutomatonMap{}
 	res.Nodes = append(res.Nodes, res.newNode(-1, 0))
 	return res
 }
 
-func (sa *SuffixAutomaton) Add(ord int32) {
-	c := ord - OFFSET
+func (sa *SuffixAutomatonMap) Add(ord int32) {
 	newNode := int32(len(sa.Nodes))
 	sa.Nodes = append(sa.Nodes, sa.newNode(-1, sa.Nodes[sa.lastPos].MaxLength+1))
 	p := sa.lastPos
-	for p != -1 && sa.Nodes[p].Next[c] == -1 {
-		sa.Nodes[p].Next[c] = newNode
+	for p != -1 {
+		_, has := sa.Nodes[p].Next[ord]
+		if has {
+			break
+		}
+		sa.Nodes[p].Next[ord] = newNode
 		p = sa.Nodes[p].Link
 	}
 	q := int32(0)
 	if p != -1 {
-		q = sa.Nodes[p].Next[c]
+		q = sa.Nodes[p].Next[ord]
 	}
 	if p == -1 || sa.Nodes[p].MaxLength+1 == sa.Nodes[q].MaxLength {
 		sa.Nodes[newNode].Link = q
 	} else {
 		newQ := int32(len(sa.Nodes))
 		sa.Nodes = append(sa.Nodes, sa.newNode(sa.Nodes[q].Link, sa.Nodes[p].MaxLength+1))
-		sa.Nodes[len(sa.Nodes)-1].Next = sa.Nodes[q].Next
+		for k, v := range sa.Nodes[q].Next {
+			sa.Nodes[newQ].Next[k] = v
+		}
 		sa.Nodes[q].Link = newQ
 		sa.Nodes[newNode].Link = newQ
-		for p != -1 && sa.Nodes[p].Next[c] == q {
-			sa.Nodes[p].Next[c] = newQ
+		for p != -1 && sa.Nodes[p].Next[ord] == q {
+			sa.Nodes[p].Next[ord] = newQ
 			p = sa.Nodes[p].Link
 		}
 	}
@@ -76,7 +79,7 @@ func (sa *SuffixAutomaton) Add(ord int32) {
 }
 
 // 后缀链接树.也叫 parent tree.
-func (sa *SuffixAutomaton) BuildTree() [][]int32 {
+func (sa *SuffixAutomatonMap) BuildTree() [][]int32 {
 	n := int32(len(sa.Nodes))
 	graph := make([][]int32, n)
 	for v := int32(0); v < n; v++ {
@@ -86,7 +89,7 @@ func (sa *SuffixAutomaton) BuildTree() [][]int32 {
 	return graph
 }
 
-func (sa *SuffixAutomaton) BuildDAG() [][]int32 {
+func (sa *SuffixAutomatonMap) BuildDAG() [][]int32 {
 	n := int32(len(sa.Nodes))
 	graph := make([][]int32, n)
 	for v := int32(0); v < n; v++ {
@@ -102,7 +105,7 @@ func (sa *SuffixAutomaton) BuildDAG() [][]int32 {
 // pos 位置对应的子串个数.
 // 用最长串的长度减去最短串的长度即可得到以当前节点为结尾的子串个数.
 // 最长串的长度记录在节点的 MaxLength 中,最短串的长度可以通过link对应的节点的 MaxLength 加 1 得到.
-func (sa *SuffixAutomaton) CountSubstringAt(pos int32) int32 {
+func (sa *SuffixAutomatonMap) CountSubstringAt(pos int32) int32 {
 	if pos == 0 {
 		return 0
 	}
@@ -110,7 +113,7 @@ func (sa *SuffixAutomaton) CountSubstringAt(pos int32) int32 {
 }
 
 // 本质不同的子串个数.
-func (sa *SuffixAutomaton) CountSubstring() int {
+func (sa *SuffixAutomatonMap) CountSubstring() int {
 	res := 0
 	for i := 0; i < len(sa.Nodes); i++ {
 		res += int(sa.CountSubstringAt(int32(i)))
@@ -118,10 +121,7 @@ func (sa *SuffixAutomaton) CountSubstring() int {
 	return res
 }
 
-func (sa *SuffixAutomaton) newNode(link, maxLength int32) *Node {
-	res := &Node{Link: link, MaxLength: maxLength}
-	for i := int32(0); i < SIGMA; i++ {
-		res.Next[i] = -1
-	}
+func (sa *SuffixAutomatonMap) newNode(link, maxLength int32) *Node {
+	res := &Node{Next: make(map[int32]int32), Link: link, MaxLength: maxLength}
 	return res
 }

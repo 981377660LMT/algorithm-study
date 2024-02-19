@@ -11,6 +11,7 @@ import (
 	"os"
 )
 
+// https://judge.yosupo.jp/problem/number_of_substrings
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)

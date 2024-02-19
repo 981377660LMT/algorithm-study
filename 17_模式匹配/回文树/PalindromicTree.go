@@ -77,7 +77,7 @@ import (
 )
 
 func main() {
-	// demo()
+	demo()
 
 	// CF17E()
 	// CF835D()
@@ -88,7 +88,7 @@ func main() {
 	// P3649()
 	// P4287()
 	// P4555()
-	P4762()
+	// P4762()
 	// P5496()
 	// P5555()
 
@@ -100,8 +100,8 @@ func main() {
 
 func demo() {
 	pt := NewPalindromicTree()
-	s := "eertree"
-	// s := "aabca"
+	// s := "eertree"
+	s := "aaaaa"
 	pt.AddString(s)
 
 	fmt.Println(pt.Size() - 2)     // 本质不同回文子串个数(不超过O(n))
@@ -112,7 +112,7 @@ func demo() {
 	}
 	fmt.Println(pt.BuildFailTree())
 	for i := 2; i < pt.Size(); i++ {
-		fmt.Println(pt.GetPalindrome(i))
+		fmt.Println(pt.GetPalindrome(i), pt.GetNode(i).Indexes)
 	}
 }
 
@@ -881,6 +881,57 @@ func checkPartitioning(s string) bool {
 	}
 
 	return res > 0
+}
+
+// 1960. 两个回文子字符串长度的最大乘积
+// https://leetcode.cn/problems/maximum-product-of-the-length-of-two-palindromic-substrings/description/
+// 你需要找到两个 `不重叠` 的回文 子字符串，它们的长度都必须为 奇数 ，使得它们长度的乘积最大。
+// 2 <= s.length <= 1e5
+func maxProduct(s string) int64 {
+	// s[i]结尾的最长奇回文串长度
+	getDp := func(n int, f func(i int) int32) []int {
+		res := make([]int, n+1)
+		T := NewPalindromicTree()
+
+		memo := make([]int32, n+2)
+		for i := range memo {
+			memo[i] = -1
+		}
+		// 沿着后缀链接向上跳，直到找到一个长度为奇数的回文串
+		var find func(int32) int32
+		find = func(pos int32) int32 {
+			if pos == 0 {
+				return 0
+			}
+			if memo[pos] != -1 {
+				return memo[pos]
+			}
+			if T.Nodes[pos].Length&1 == 1 {
+				return pos
+			}
+			memo[pos] = find(T.Nodes[pos].Link)
+			return memo[pos]
+		}
+
+		for i := 0; i < n; i++ {
+			pos := int32(T.Add(f(i)))
+			pos = find(pos)
+			res[i+1] = max(res[i], int(T.Nodes[pos].Length))
+		}
+		return res
+	}
+
+	n := len(s)
+	preMax := getDp(n, func(i int) int32 { return int32(s[i]) })
+	sufMax := getDp(n, func(i int) int32 { return int32(s[n-i-1]) })
+	for i, j := 0, len(sufMax)-1; i < j; i, j = i+1, j-1 {
+		sufMax[i], sufMax[j] = sufMax[j], sufMax[i]
+	}
+	res := 0
+	for i := 0; i < n; i++ {
+		res = max(res, preMax[i]*sufMax[i])
+	}
+	return int64(res)
 }
 
 type Node struct {
