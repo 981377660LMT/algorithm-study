@@ -1,192 +1,160 @@
-// # 子序列自动机
-// # 如果需要进行大量的子序列匹配，那么就不能用朴素的双指针匹配了
-// # !子序列自动机.适用于多次子序列匹配的场景.
-// # 1.nexts数组形式 26*n
-// # !O(26*n) 预处理 O(s) 查询
-// # 2.二分形式
-// # !O(n) 预处理 O(slogn) 查询
-
-// # API:
-// # - move(pos, newValue) -> nextPos:
-// #     查询当前位置的下一个特定字符的位置(下标严格大于pos).如果不存在，则为 n. 0<=pos<n
-// # - includes(t, sStart=0, sEnd=-1, tStart=0, tEnd=-1) -> bool:
-// #     查询s[sStart:sEnd]是否含有某序列t[tStart:tEnd].时间复杂度O(len(t)logn).
-// # !- !match(t, sStart=0, sEnd=-1, tStart=0, tEnd=-1) -> (hit,end):
-// #     在 s[sStart:sEnd] 中寻找子序列 t[tStart:tEnd].时间复杂度 O(len(t)logn).
-// #     适合处理需要多次匹配的场景.
-
-// from bisect import bisect_right
-// from collections import defaultdict
-// from typing import DefaultDict, Generic, List, Sequence, Tuple, TypeVar
-
-// class SubsequenceAutomaton1:
-//     __slots__ = ("_s", "_nexts", "_charset", "_offset")
-
-//     def __init__(self, s: str, charset=26, offset=97) -> None:
-//         """O(charset*n) 预处理.
-
-//         Args:
-//             s (str): 待匹配的字符串
-//             charset (int, optional): 字符集大小. 默认为 26.
-//             offset (int, optional): 字符集的起始字符. 默认为 97.
-//         """
-//         self._s = s
-//         self._charset = charset
-//         self._offset = offset
-//         self._nexts = self._build()
-//         """
-//         _nexts[i][j] 表示在 i 右侧的字符 j 的最近位置 (右侧表示下标严格大于i).
-//         如果不存在，则为 n.
-//         """
-
-//     def move(self, pos: int, char: str) -> int:
-//         """
-//         查询当前位置的下一个特定字符的位置(下标严格大于pos).
-//         如果不存在，则为 n.
-//         0<=pos<n.
-//         """
-//         return self._nexts[pos][ord(char) - self._offset]
-
-//     def includes(self, t: str, sStart=0, sEnd=-1, tStart=0, tEnd=-1) -> bool:
-//         """
-//         查询s[sStart:sEnd]是否含有某序列t[tStart:tEnd].
-//         时间复杂度O(len(t)).
-//         """
-//         hit, _ = self.match(t, sStart=sStart, sEnd=sEnd, tStart=tStart, tEnd=tEnd)
-//         if tEnd == -1:
-//             tEnd = len(t)
-//         return hit >= tEnd - tStart
-
-//     def match(self, t: str, sStart=0, sEnd=-1, tStart=0, tEnd=-1) -> Tuple[int, int]:
-//         """
-//         在 s[sStart:sEnd] 中寻找子序列 t[tStart:tEnd].
-//         时间复杂度 O(len(t)).
-
-//         Args:
-//             t: 待匹配的子序列
-//             sStart: s的起始索引
-//             sEnd: s的结束索引
-//             tStart: t的起始索引
-//             tEnd: t的结束索引
-//         Returns:
-//             (hit,end): (`匹配到的t的长度`, `匹配结束时s的索引`)
-//             此时,匹配结束时t的索引为`tStart+hit`.
-//             耗去的s的长度为`end-sStart`.
-//         """
-//         if sEnd == -1:
-//             sEnd = len(self._s)
-//         if sStart >= sEnd:
-//             return 0, sStart
-//         if tEnd == -1:
-//             tEnd = len(t)
-//         if tStart >= tEnd:
-//             return 0, sStart
-
-//         n = len(self._s)
-//         si, ti = sStart, tStart
-//         if self._s[sStart] == t[tStart]:  # !注意需要先判断第一个字符
-//             ti += 1
-//         while si < sEnd and ti < tEnd:
-//             nextPos = self.move(si, t[ti])
-//             if nextPos == n:
-//                 return ti - tStart, si
-//             si, ti = nextPos, ti + 1
-//         return ti - tStart, si
-
-//     def _build(self) -> List[Tuple[int]]:
-//         n = len(self._s)
-//         nexts = [None] * n
-//         last = [n] * self._charset
-//         offset = self._offset
-//         for i in range(n - 1, -1, -1):
-//             nexts[i] = tuple(last)  # type: ignore
-//             last[ord(self._s[i]) - offset] = i
-//         return nexts  # type: ignore
-
-// V = TypeVar("V")
-
-// class SubsequenceAutomaton2(Generic[V]):
-//     __slots__ = ("_seq", "_indexes")
-
-//     def __init__(self, seq: Sequence[V]) -> None:
-//         """O(n) 预处理."""
-//         self._seq = seq
-//         self._indexes = self._build()
-
-//     def move(self, pos: int, newValue: V) -> int:
-//         """
-//         查询当前位置的下一个特定字符的位置(下标严格大于pos).
-//         如果不存在，则为 n.
-//         0<=pos<n
-//         """
-//         indexes = self._indexes[newValue]
-//         nextPos = bisect_right(indexes, pos)
-//         return indexes[nextPos] if nextPos < len(indexes) else len(self._seq)
-
-//     def includes(self, t: Sequence[V], sStart=0, sEnd=-1, tStart=0, tEnd=-1) -> bool:
-//         """
-//         查询s[sStart:sEnd]是否含有某序列t[tStart:tEnd].
-//         时间复杂度O(len(t)logn).
-//         """
-//         hit, _ = self.match(t, sStart=sStart, sEnd=sEnd, tStart=tStart, tEnd=tEnd)
-//         if tEnd == -1:
-//             tEnd = len(t)
-//         return hit >= tEnd - tStart
-
-//     def match(self, t: Sequence[V], sStart=0, sEnd=-1, tStart=0, tEnd=-1) -> Tuple[int, int]:
-//         """
-//         在 s[sStart:sEnd] 中寻找子序列 t[tStart:tEnd].
-//         时间复杂度 O(len(t)logn).
-
-//         Args:
-//             t: 待匹配的子序列
-//             sStart: s的起始索引
-//             sEnd: s的结束索引
-//             tStart: t的起始索引
-//             tEnd: t的结束索引
-//         Returns:
-//             (hit,end): (`匹配到的的t的长度`, `匹配结束时s的索引`)
-//             此时,匹配结束时t的索引为`tStart+hit`.
-//             耗去的s的长度为`end-sStart`.
-//         """
-//         if sEnd == -1:
-//             sEnd = len(self._seq)
-//         if sStart >= sEnd:
-//             return 0, sStart
-//         if tEnd == -1:
-//             tEnd = len(t)
-//         if tStart >= tEnd:
-//             return 0, sStart
-
-//         n = len(self._seq)
-//         si, ti = sStart, tStart
-//         if self._seq[sStart] == t[tStart]:  # !注意需要先判断第一个字符
-//             ti += 1
-//         while si < sEnd and ti < tEnd:
-//             nextPos = self.move(si, t[ti])
-//             if nextPos == n:
-//                 return ti - tStart, si
-//             si, ti = nextPos, ti + 1
-//         return ti - tStart, si
-
-//     def _build(self) -> DefaultDict[V, List[int]]:
-//         indexes = defaultdict(list)
-//         for i, char in enumerate(self._seq):
-//             indexes[char].append(i)
-//         return indexes
-
-// if __name__ == "__main__":
-//     sa = SubsequenceAutomaton1("abcdebdde")
-//     assert sa.match("bde") == (3, 4)
-//     assert sa.match("bde", 1) == (3, 4)
-
-//     sa = SubsequenceAutomaton1("bbabbabbbbabaababab")
-
-//     assert sa.match("bbbbbbbbbbbb") == (12, 18)
-//     assert sa.includes("bbbbbbbbbbbb")
-
 package main
 
-func main() {
+// 792. 匹配子序列的单词数
+// https://leetcode.cn/problems/number-of-matching-subsequences/description/
+func numMatchingSubseq(s string, words []string) int {
+	n := int(len(s))
+	S := NewSubsequnceAutomatonArray(n, func(i int) byte { return s[i] })
+	res := 0
+	for _, w := range words {
+		if S.Includes(0, n, len(w), func(i int) byte { return w[i] }) {
+			res++
+		}
+	}
+	return res
+}
 
+const SIGMA byte = 26
+const OFFSET byte = 97
+
+type SubsequnceAutomatonArray struct {
+	n     int
+	s     func(i int) byte
+	nexts [][SIGMA]int32
+}
+
+// `O(∑*n)`预处理,`∑`为字符集大小.
+// `O(len(t))`查询,`len(t)`为待匹配序列的长度.
+func NewSubsequnceAutomatonArray(n int, s func(i int) byte) *SubsequnceAutomatonArray {
+	n32 := int32(n)
+	nexts := make([][SIGMA]int32, n32)
+	last := [SIGMA]int32{}
+	for i := range last {
+		last[i] = n32
+	}
+	for i := n - 1; i >= 0; i-- {
+		nexts[i] = last
+		last[s(i)-OFFSET] = int32(i)
+	}
+	return &SubsequnceAutomatonArray{n: n, s: s, nexts: nexts}
+}
+
+// 查询当前位置的下一个特定字符的位置(下标严格大于pos).
+// 如果不存在，则为 n.
+// 0<=pos<n.
+func (s *SubsequnceAutomatonArray) Move(pos int, newValue byte) int {
+	return int(s.nexts[pos][newValue-OFFSET])
+}
+
+// 查询`s[start:end)`内是否含有某序列`t`.
+func (s *SubsequnceAutomatonArray) Includes(start, end int, tLen int, t func(i int) byte) bool {
+	_, tPos := s.Match(start, end, tLen, t)
+	return tPos == tLen
+}
+
+// 在`s[start:end)`内寻找子序列`t`.
+// 返回 `匹配结束时s的索引`和`匹配结束时t的索引`.
+// 耗去的s的长度为`sPos-start`.
+func (s *SubsequnceAutomatonArray) Match(start, end int, tLen int, t func(i int) byte) (sPos, tPos int) {
+	if start >= end || tLen == 0 {
+		sPos = start
+		return
+	}
+	n := s.n
+	tEnd := tLen
+	si, ti := start, 0
+	if s.s(si) == t(ti) {
+		ti++
+	}
+	for si < end && ti < tEnd {
+		nextPos := s.Move(si, t(ti))
+		if nextPos == n {
+			sPos, tPos = ti, si
+			return
+		}
+		si = nextPos
+		ti++
+	}
+	sPos, tPos = si, ti
+	return
+}
+
+type SubsequnceAutomatonMap struct {
+	n       int
+	s       func(i int) int
+	indexes map[int][]int
+}
+
+// `O(n)`预处理.
+// `O(len(t)logn)`查询,`len(t)`为待匹配序列的长度.
+// !复杂度与字符种类数无关, 且占用空间更小.
+func NewSubsequnceAutomatonMap(n int, s func(i int) int) *SubsequnceAutomatonMap {
+	indexes := make(map[int][]int)
+	for i := 0; i < n; i++ {
+		v := s(i)
+		indexes[v] = append(indexes[v], i)
+	}
+	return &SubsequnceAutomatonMap{n: n, s: s, indexes: indexes}
+}
+
+// 查询当前位置的下一个特定字符的位置(下标严格大于pos).
+// 如果不存在，则为 n.
+// 0<=pos<n.
+func (s *SubsequnceAutomatonMap) Move(pos int, newValue int) int {
+	indexes, ok := s.indexes[newValue]
+	if !ok {
+		return s.n
+	}
+	nextPos := s.bisectRight(indexes, pos)
+	if nextPos < len(indexes) {
+		return indexes[nextPos]
+	} else {
+		return s.n
+	}
+}
+
+// 查询`s[start:end)`内是否含有某序列`t`.
+func (s *SubsequnceAutomatonMap) Includes(start, end int, tLen int, t func(i int) int) bool {
+	_, tPos := s.Match(start, end, tLen, t)
+	return tPos == tLen
+}
+
+// 在`s[start:end)`内寻找子序列`t`.
+// 返回 `匹配结束时s的索引`和`匹配结束时t的索引`.
+// 耗去的s的长度为`sPos-start`.
+func (s *SubsequnceAutomatonMap) Match(start, end int, tLen int, t func(i int) int) (sPos, tPos int) {
+	if start >= end || tLen == 0 {
+		sPos = start
+		return
+	}
+	n := s.n
+	tEnd := tLen
+	si, ti := start, 0
+	if s.s(si) == t(ti) {
+		ti++
+	}
+	for si < end && ti < tEnd {
+		nextPos := s.Move(si, t(ti))
+		if nextPos == n {
+			sPos, tPos = ti, si
+			return
+		}
+		si = nextPos
+		ti++
+	}
+	sPos, tPos = si, ti
+	return
+}
+
+func (s *SubsequnceAutomatonMap) bisectRight(arr []int, value int) int {
+	left, right := 0, len(arr)-1
+	for left <= right {
+		mid := (left + right) >> 1
+		if arr[mid] <= value {
+			left = mid + 1
+		} else {
+			right = mid - 1
+		}
+	}
+	return left
 }
