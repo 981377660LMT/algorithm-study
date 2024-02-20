@@ -1,4 +1,4 @@
-// 后缀数组举行区域构成的树，严格来说不能算suffixTree
+// 后缀数组矩形区域构成的树，严格来说不能算suffixTree
 // https://maspypy.github.io/library/string/suffix_tree.hpp
 //
 //   - s = abbbab
@@ -25,6 +25,16 @@
 //		    \
 //		      --- bab
 //
+// [行1，行2，列1，列2]
+// [[0 6 0 0] [0 2 0 2] [1 2 2 6] [2 6 0 1] [3 4 1 3] [4 6 1 2] [4 5 2 4] [5 6 2 5]]
+// _________________________
+// |_a_|_b_|___|___|___|___|
+// |_a_|_b_|_b_|_b_|_a_|_b_|
+// |_b_|___|___|___|___|___|
+// |_b_|_a_|_b_|___|___|___|
+// |_b_|_b_|_a_|_b_|___|___|
+// |_b_|_b_|_b_|_a_|_b_|___|
+
 // ```
 package main
 
@@ -38,8 +48,13 @@ func main() {
 	}
 	sa, _, lcp := UseSA(ords)
 	tree, ranges := SuffixTree(sa, lcp)
+	// [[1 3] [2] [] [4 5] [] [6 7] [] []]
+	// [[0 6 0 0] [0 2 0 2] [1 2 2 6] [2 6 0 1] [3 4 1 3] [4 6 1 2] [4 5 2 4] [5 6 2 5]]
 	fmt.Println(tree, ranges)
 }
+
+// TODO: https://yukicoder.me/problems/no/2361
+// https://maspypy.github.io/library/test/yukicoder/2361.test.cpp
 
 // 每个节点为后缀数组上的一个长方形区间.
 func SuffixTree(sa, height []int) (directedTree [][]int, ranges [][4]int) {
@@ -101,6 +116,8 @@ func SuffixTree(sa, height []int) (directedTree [][]int, ranges [][4]int) {
 	return
 }
 
+// !注意内部会修改ords.
+//
 //	 sa : 排第几的后缀是谁.
 //	 rank : 每个后缀排第几.
 //	 lcp : 排名相邻的两个后缀的最长公共前缀.
@@ -134,6 +151,7 @@ func UseSA(ords []int) (sa, rank, lcp []int) {
 	return
 }
 
+// !注意内部会修改ords.
 func GetSA(ords []int) (sa []int) {
 	if len(ords) == 0 {
 		return []int{}

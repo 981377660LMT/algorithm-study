@@ -18,9 +18,10 @@ import (
 
 // https://github.dev/EndlessCheng/codeforces-go/copypasta/strings.go
 // 求两个后缀最长公共前缀 O(nlogn)预处理 O(1)查询
-//  _, rank, height := suffixArray("banana")
-//  lcp := QueryLCP(rank, height)
-//  fmt.Println(lcp(2, 4)) // "nana" "na"  2
+//
+//	_, rank, height := suffixArray("banana")
+//	lcp := QueryLCP(rank, height)
+//	fmt.Println(lcp(2, 4)) // "nana" "na"  2
 func QueryLCP(rank, height []int) func(int, int) int {
 	n := len(rank)
 
