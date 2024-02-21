@@ -1,16 +1,17 @@
 # https://blog.csdn.net/Elemmir/article/details/50988467
-# 字典序第k小的子串
+# 所有不相同的子串中字典序第k小的子串
 # !二分出排名为K的子串是哪一个后缀的第几个未被计算过的前缀(每个后缀贡献子串数是这个后缀的长度减去其LCP)
 
 from itertools import accumulate
-from SA import useSA
+from SuffixArray import SuffixArray
 
 
 def solve(s: str, k: int) -> str:
     """字典序第k小的子串 k>=1"""
     n = len(s)
     ords = [ord(c) for c in s]
-    sa, _, height = useSA(ords)
+    S = SuffixArray(ords)
+    sa, height = S.sa, S.height
     counts = [(n - r - lcp) for r, lcp in zip(sa, height)]
     preSum = [0] + list(accumulate(counts))
 
@@ -48,7 +49,7 @@ if __name__ == "__main__":
 
     while True:
         n = randint(10, 100)
-        s = "".join([chr(randint(97, 122)) for _ in range(3 * n)])
+        s = "".join([chr(randint(97, 122)) for _ in range(2 * n)])
         k = randint(1, n * (n + 1) // 2)
         if bruteForce(s, k) != solve(s, k):
             print(s, k)

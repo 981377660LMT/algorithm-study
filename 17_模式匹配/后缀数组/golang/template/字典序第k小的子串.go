@@ -1,22 +1,61 @@
+// https://blog.csdn.net/Elemmir/article/details/50988467
+// 所有不相同的子串中字典序第k小的子串
+// !二分出排名为K的子串是哪一个后缀的第几个未被计算过的前缀(每个后缀贡献子串数是这个后缀的长度减去其LCP)
+
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
-	s := "abca"
-	ords := make([]int, len(s))
+	fmt.Println(KthSmallestSubstring("abab", 3)) // aba
+
+}
+
+type Sequence = string
+
+// 字典序第k小的子串.k>=1.
+func KthSmallestSubstring(s Sequence, k int) Sequence {
+	n := len(s)
+	ords := make([]int, n)
 	for i, c := range s {
 		ords[i] = int(c)
 	}
-	sa, rank, height := UseSA(ords)
-	fmt.Println(sa, rank, height)
+	sa, _, height := UseSA(ords)
+	counter := make([]int, n)
+	for i, r := range sa {
+		counter[i] = n - r - height[i]
+	}
+	preSum := make([]int, n+1)
+	for i := 0; i < n; i++ {
+		preSum[i+1] = preSum[i] + counter[i]
+	}
+
+	left, right := 0, n
+	for left <= right {
+		mid := (left + right) >> 1
+		if preSum[mid] < k {
+			left = mid + 1
+		} else {
+			right = mid - 1
+		}
+	}
+
+	remain := k - preSum[left-1] // 排名的k的子串是第left个后缀的第remain个`未出现`过的前缀,需要加上lcp
+	remain += height[left-1]
+	start := sa[left-1]
+	end := start + remain
+	return s[start:end]
 }
 
-//  sa : 排第几的后缀是谁.
-//  rank : 每个后缀排第几.
-//  lcp : 排名相邻的两个后缀的最长公共前缀.
-// 	lcp[0] = 0
-// 	lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
+// !注意内部会修改ords.
+//
+//	 sa : 排第几的后缀是谁.
+//	 rank : 每个后缀排第几.
+//	 lcp : 排名相邻的两个后缀的最长公共前缀.
+//		lcp[0] = 0
+//		lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
 func UseSA(ords []int) (sa, rank, lcp []int) {
 	n := len(ords)
 	sa = GetSA(ords)
@@ -45,6 +84,7 @@ func UseSA(ords []int) (sa, rank, lcp []int) {
 	return
 }
 
+// 注意内部会修改ords.
 func GetSA(ords []int) (sa []int) {
 	if len(ords) == 0 {
 		return []int{}

@@ -8,10 +8,7 @@ func main() {
 
 
 
-	讲解+例题+套题 https://oi-wiki.org/string/sa/
 	todo 题目推荐 https://www.luogu.com.cn/blog/luckyblock/post-bi-ji-hou-zhui-shuo-zu
-	CF 上的课程 https://codeforces.com/edu/course/2
-	CF tag https://codeforces.com/problemset?order=BY_RATING_ASC&tags=string+suffix+structures
 
 	题目总结：（部分参考《后缀数组——处理字符串的有力工具》，PDF 见 https://github.com/EndlessCheng/cp-pdf）
 	单个字符串

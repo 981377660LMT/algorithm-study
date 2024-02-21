@@ -58,7 +58,7 @@ func main() {
 
 // 每个节点为后缀数组上的一个长方形区间.
 func SuffixTree(sa, height []int) (directedTree [][]int, ranges [][4]int) {
-	height = height[1:]
+	height = append(height[:0:0], height[1:]...)
 	n := len(sa)
 	if n == 1 {
 		directedTree = make([][]int, 2)

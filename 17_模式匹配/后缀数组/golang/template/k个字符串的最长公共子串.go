@@ -15,8 +15,8 @@ import (
 
 const INF int = 1e18
 
+// 1923. 最长公共子路径
 // https://leetcode.cn/problems/longest-common-subpath/solution/hou-zhui-shu-zu-er-fen-da-an-by-endlessc-ocar/
-
 func MultiLCS(ords [][]int) (res int) {
 	sb := []int{}
 	cand := INF // 二分右边界

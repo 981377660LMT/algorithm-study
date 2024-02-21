@@ -1,12 +1,29 @@
 // https://github.com/EndlessCheng/codeforces-go/blob/646deb927bbe089f60fc0e9f43d1729a97399e5f/copypasta/strings.go#L556
 // https://visualgo.net/zh/suffixarray
-// 常用分隔符 #(35) $(36) _(95) |(124)
+// !常用分隔符 #(35) $(36) _(95) |(124)
 // SA-IS 与 DC3 的效率对比 https://riteme.site/blog/2016-6-19/sais.html#5
 // 注：Go1.13 开始使用 SA-IS 算法
 //
-// api:
-// func GetSA(ords []int) (sa []int)
-// func UseSA(ords []int) (sa, rank, lcp []int)
+// - 支持sa/rank/lcp
+// - 比较任意两个子串的字典序
+// - 求出任意两个子串的最长公共前缀(lcp)
+
+//  sa : 排第几的后缀是谁.
+//  rank : 每个后缀排第几.
+//  lcp : 排名相邻的两个后缀的最长公共前缀.
+// 	lcp[0] = 0
+// 	lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
+//
+//  "banana" -> sa: [5 3 1 0 4 2], rank: [3 2 5 1 4 0], lcp: [0 1 3 0 0 2]
+
+// !api:
+//  func NewSuffixArray(ords []int) *SuffixArray
+//  func NewSuffixArrayWithString(s string) *SuffixArray
+//  func (suf *SuffixArray) Lcp(a, b int, c, d int) int
+//  func (suf *SuffixArray) CompareSubstr(a, b int, c, d int) int
+//  func (suf *SuffixArray) LcpRange(left int, k int) (start, end int)
+//  func GetSA(ords []int) (sa []int)
+//  func UseSA(ords []int) (sa, rank, lcp []int)
 
 package main
 
@@ -14,14 +31,21 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 
 	"math/bits"
 )
 
 func main() {
+	abc213f()
+	// abc272f()
+
+	// P3804()
+
 	// NumberofSubstrings()
-	testLcpRange()
+
+	// testLcpRange()
 }
 
 // G3. Good Substrings
@@ -33,6 +57,116 @@ func CF316() {
 // https://codeforces.com/contest/126/submission/227749650
 func CF126() {
 
+}
+
+// P3804 【模板】后缀自动机（SAM）
+// https://www.luogu.com.cn/problem/P3804
+// 给定一个长度为 n 的只包含小写字母的字符串 s。
+// !对于所有 s 的出现次数不为 1 的子串，设其 value值为该 子串出现的次数 × 该子串的长度。
+// 请计算，value 的最大值是多少。
+// n <= 1e6
+//
+// !子串出现次数乘以次数的最大值-直方图最大矩形
+// 直方图最大矩形
+// 子串长度看成高,lcp范围看成宽
+// https://www.acwing.com/solution/content/25201/
+func P3804() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s string
+	fmt.Fscan(in, &s)
+	if len(s) <= 1 {
+		fmt.Fprintln(out, 0)
+		return
+	}
+	S := NewSuffixArrayWithString(s)
+	heights := S.Height
+	L, R := GetRange(heights, false, false, false) // 求每个元素作为最小值的影响范围(区间)
+	res := 0
+	for i := 0; i < len(heights); i++ {
+		res = max(res, heights[i]*(R[i]-L[i]+2))
+	}
+	fmt.Fprintln(out, res)
+}
+
+// F - Common Prefixes-每个后缀与所有后缀的LCP长度和
+// https://atcoder.jp/contests/abc213/tasks/abc213_f
+// 定义LCP(X,Y)为字符串X,Y的公共前缀长度(LCP)。
+// 给定长度为N的字符串S，设S表示从第i个字符开始的S的后缀(就是后缀数组里的那些后缀)。
+// !计算出:对于k=1,2,...,N,LCP(Sk,S1)+LCP(Sk,S2)+ +...+LCP(Sk,SN)的值。
+// n<=1e6
+//
+// !即求每个后缀与所有后缀的公共前缀长度和。
+// 对每个后缀，二分出>=height[i]的左右边界，然后求和即可.
+func abc213f() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	var s string
+	fmt.Fscan(in, &s)
+	S := NewSuffixArrayWithString(s)
+
+	res := make([]int, n)
+	height := S.Height
+
+	// lcp(sa[i],sa[j]) = min(height[i:j+1])
+	// 需要求每个高度作为最小值的左右边界，计算这个位置的贡献
+	leftMost, rigthMost := GetRange(height, false, false, true)
+	diff := make([]int, n+1)
+	for i := 0; i < n; i++ {
+		diff[leftMost[i]] += height[i]
+		diff[rigthMost[i]+1] -= height[i]
+	}
+	for i := 1; i < n+1; i++ {
+		diff[i] += diff[i-1]
+	}
+	fmt.Println(diff, leftMost, rigthMost)
+	for i := 0; i < n; i++ {
+		res[i] += diff[i]
+	}
+
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
+}
+
+// F - Two Strings
+// https://atcoder.jp/contests/abc272/tasks/abc272_f
+// 给定两个长为n的字符串s和t
+// 问s和t的所有轮转的子串中 s的轮转子串有多少个字典序 <= t的轮转子串
+//
+// 技巧:
+// 需要一起比较s和t的所有轮转字串的字典序
+// !构造一个新的字符串 s+s+'#'+t+t+'|'
+// (注意题目要的是小于等于, 这样保证两个字符串在比较完长度为n后S后面的#小于T中任意一个字符。)
+// !后缀数组求出每个串的rank
+// !然后在t的rank中 用s的每个子串rank二分出t中的pos
+func abc272f() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	var s, t string
+	fmt.Fscan(in, &s, &t)
+
+	SMALL, BIG := "#", "|"
+	sstt := s + s + SMALL + t + t + BIG
+	S := NewSuffixArrayWithString(sstt)
+	rank := S.Rank
+	sRank, tRank := rank[:n], rank[2*n+1:2*n+1+n]
+	sort.Ints(tRank)
+	res := 0
+	for _, r := range sRank {
+		res += n - sort.SearchInts(tRank, r)
+	}
+	fmt.Fprintln(out, res)
 }
 
 // !不同子串长度之和
@@ -781,6 +915,59 @@ func GetSA(ords []int) (sa []int) {
 	}
 	lms = buf
 	return induce()[1:]
+}
+
+// 求每个元素作为最值的影响范围(闭区间).
+func GetRange(nums []int, isMax, isLeftStrict, isRightStrict bool) (leftMost, rightMost []int) {
+	compareLeft := func(stackValue, curValue int) bool {
+		if isLeftStrict && isMax {
+			return stackValue <= curValue
+		} else if isLeftStrict && !isMax {
+			return stackValue >= curValue
+		} else if !isLeftStrict && isMax {
+			return stackValue < curValue
+		} else {
+			return stackValue > curValue
+		}
+	}
+
+	compareRight := func(stackValue, curValue int) bool {
+		if isRightStrict && isMax {
+			return stackValue <= curValue
+		} else if isRightStrict && !isMax {
+			return stackValue >= curValue
+		} else if !isRightStrict && isMax {
+			return stackValue < curValue
+		} else {
+			return stackValue > curValue
+		}
+	}
+
+	n := len(nums)
+	leftMost, rightMost = make([]int, n), make([]int, n)
+	for i := 0; i < n; i++ {
+		rightMost[i] = n - 1
+	}
+
+	stack := []int{}
+	for i := 0; i < n; i++ {
+		for len(stack) > 0 && compareRight(nums[stack[len(stack)-1]], nums[i]) {
+			rightMost[stack[len(stack)-1]] = i - 1
+			stack = stack[:len(stack)-1]
+		}
+		stack = append(stack, i)
+	}
+
+	stack = []int{}
+	for i := n - 1; i >= 0; i-- {
+		for len(stack) > 0 && compareLeft(nums[stack[len(stack)-1]], nums[i]) {
+			leftMost[stack[len(stack)-1]] = i + 1
+			stack = stack[:len(stack)-1]
+		}
+		stack = append(stack, i)
+	}
+
+	return
 }
 
 func mins(a []int) int {
