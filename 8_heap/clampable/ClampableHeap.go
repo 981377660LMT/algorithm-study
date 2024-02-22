@@ -98,6 +98,12 @@ func (h *ClampableHeap) Len() int {
 	return h.count
 }
 
+func (h *ClampableHeap) Clear() {
+	h.heap.Clear()
+	h.total = 0
+	h.count = 0
+}
+
 type H = struct {
 	value int
 	count int32
@@ -137,6 +143,8 @@ func (h *Heap) Top() (value H) {
 }
 
 func (h *Heap) Len() int { return len(h.data) }
+
+func (h *Heap) Clear() { h.data = h.data[:0] }
 
 func (h *Heap) heapify() {
 	n := h.Len()

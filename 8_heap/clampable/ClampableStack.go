@@ -77,3 +77,9 @@ func (h *ClampableStack) Sum() int {
 func (h *ClampableStack) Len() int {
 	return h.count
 }
+
+func (h *ClampableStack) Clear() {
+	h.stack = h.stack[:0]
+	h.total = 0
+	h.count = 0
+}

@@ -39,6 +39,11 @@ class ClampableStack:
     def sum(self) -> int:
         return self._total
 
+    def clear(self) -> None:
+        self._stack.clear()
+        self._total = 0
+        self._count = 0
+
     def __len__(self) -> int:
         return self._count
 

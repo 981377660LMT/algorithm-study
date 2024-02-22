@@ -103,56 +103,37 @@ func P3804() {
 //
 // https://blog.hamayanhamayan.com/entry/2021/08/09/010405
 func abc213f() {
-	// in := bufio.NewReader(os.Stdin)
-	// out := bufio.NewWriter(os.Stdout)
-	// defer out.Flush()
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-	// var n int
-	// fmt.Fscan(in, &n)
-	// var s string
-	// fmt.Fscan(in, &s)
-	n := 6
-	s := "aabaac"
+	var n int
+	fmt.Fscan(in, &n)
+	var s string
+	fmt.Fscan(in, &s)
+
 	S := NewSuffixArrayFromString(s)
+	sa, height := S.Sa, S.Height
 
-	sa, rank, height := S.Sa, S.Rank, S.Height
-	saRes := make([]int, n)
-	for i, v := range sa {
-		saRes[i] = n - v
+	res := make([]int, n)
+	for i := 0; i < n; i++ {
+		res[sa[i]] = n - sa[i]
 	}
 
 	// !lcp(sa[i],sa[j]) = min(height[i+1..j])
-	// 需要求每个高度作为最小值的左右边界，计算这个位置的贡献
-	leftMost, rigthMost := GetRange(height, false, false, false)
-	fmt.Println(saRes, height, leftMost, rigthMost)
-	// diff := make([]int, n+2)
-	// for i := 0; i < n; i++ {
-	// 	diff[leftMost[i]] += height[i]
-	// 	diff[rigthMost[i]+1] -= height[i]
-	// }
-	// for i := 1; i < len(diff); i++ {
-	// 	diff[i] += diff[i-1]
-	// }
-	// fmt.Println(diff, leftMost, rigthMost)
+	clampMaxStack := NewClampableStack(false) // 截断最大值的单调栈
 	for i := 0; i < n; i++ {
-		l, r, h := leftMost[i], rigthMost[i], height[i]
-		if h == 0 {
-			continue
-		}
-		// 对别人的贡献
-		for j := max(0, l-1); j <= r; j++ {
-			if i == j {
-				continue
-			}
-			saRes[j] += h
-		}
-		// saRes[i] += diff[i]
+		clampMaxStack.AddAndClamp(height[i])
+		res[sa[i]] += clampMaxStack.Sum() // s[i]与左侧所有后缀的lcp和
+	}
+	clampMaxStack.Clear()
+	for i := n - 1; i >= 0; i-- {
+		res[sa[i]] += clampMaxStack.Sum() // s[i]与右侧所有后缀的lcp和
+		clampMaxStack.AddAndClamp(height[i])
 	}
 
-	for i := 0; i < n; i++ {
-		v := saRes[rank[i]]
-		// fmt.Fprintln(out, v)
-		fmt.Println(v)
+	for _, v := range res {
+		fmt.Fprintln(out, v)
 	}
 }
 
@@ -736,7 +717,7 @@ func NewSuffixArray2(ords1, ords2 []int) *SuffixArray2 {
 	return &SuffixArray2{SA: sa, offset: len(ords1)}
 }
 
-func NewSuffixArray2WithString(s, t string) *SuffixArray2 {
+func NewSuffixArray2FromString(s, t string) *SuffixArray2 {
 	ords1 := make([]int, len(s))
 	for i, c := range s {
 		ords1[i] = int(c)
@@ -936,6 +917,70 @@ func GetSA(ords []int) (sa []int) {
 	}
 	lms = buf
 	return induce()[1:]
+}
+
+type ClampableStackItem = struct {
+	value int
+	count int32
+}
+
+type ClampableStack struct {
+	clampMin bool
+	total    int
+	count    int
+	stack    []ClampableStackItem
+}
+
+// clampMin：
+//
+//	为true时，调用AddAndClamp(x)后，容器内所有数最小值被截断(小于x的数变成x)；
+//	为false时，调用AddAndClamp(x)后，容器内所有数最大值被截断(大于x的数变成x).
+func NewClampableStack(clampMin bool) *ClampableStack {
+	return &ClampableStack{clampMin: clampMin}
+}
+
+func (h *ClampableStack) AddAndClamp(x int) {
+	newCount := 1
+	if h.clampMin {
+		for len(h.stack) > 0 {
+			top := h.stack[len(h.stack)-1]
+			if top.value > x {
+				break
+			}
+			h.stack = h.stack[:len(h.stack)-1]
+			v, c := top.value, int(top.count)
+			h.total -= v * c
+			newCount += c
+		}
+	} else {
+		for len(h.stack) > 0 {
+			top := h.stack[len(h.stack)-1]
+			if top.value < x {
+				break
+			}
+			h.stack = h.stack[:len(h.stack)-1]
+			v, c := top.value, int(top.count)
+			h.total -= v * c
+			newCount += c
+		}
+	}
+	h.total += x * newCount
+	h.count++
+	h.stack = append(h.stack, ClampableStackItem{value: x, count: int32(newCount)})
+}
+
+func (h *ClampableStack) Sum() int {
+	return h.total
+}
+
+func (h *ClampableStack) Len() int {
+	return h.count
+}
+
+func (h *ClampableStack) Clear() {
+	h.stack = h.stack[:0]
+	h.total = 0
+	h.count = 0
 }
 
 // 求每个元素作为最值的影响范围(闭区间).

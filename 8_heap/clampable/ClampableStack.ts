@@ -43,6 +43,12 @@ class ClampableStack {
     return this._total
   }
 
+  clear(): void {
+    this._stack.length = 0
+    this._total = 0
+    this._count = 0
+  }
+
   get size(): number {
     return this._count
   }
