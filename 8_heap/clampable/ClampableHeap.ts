@@ -9,13 +9,16 @@ class ClampableHeap {
   private _count = 0
 
   /**
-   * @param clampMin 为true时，支持容器内所有数与x取min；为false时，支持容器内所有数与x取max.
+   * @param clampMin
+   * 为true时，调用Clamp(x)后，容器内所有数最小值被截断(小于x的数变成x).
+   * 为false时，调用Clamp(x)后，容器内所有数最大值被截断(大于x的数变成x).
+   * 如果需要同时支持两种操作，可以使用双端堆.
    */
   constructor(clampMin: boolean) {
     this._clampMin = clampMin
     this._heap = this._clampMin
-      ? new Heap<Pair>((a, b) => b.value - a.value)
-      : new Heap<Pair>((a, b) => a.value - b.value)
+      ? new Heap<Pair>((a, b) => a.value - b.value)
+      : new Heap<Pair>((a, b) => b.value - a.value)
   }
 
   add(x: number): void {
@@ -29,7 +32,7 @@ class ClampableHeap {
     if (this._clampMin) {
       while (this._heap.size > 0) {
         const top = this._heap.peek()!
-        if (top.value < x) break
+        if (top.value > x) break
         this._heap.pop()
         this._total -= top.value * top.count
         newCount += top.count
@@ -37,7 +40,7 @@ class ClampableHeap {
     } else {
       while (this._heap.size > 0) {
         const top = this._heap.peek()!
-        if (top.value > x) break
+        if (top.value < x) break
         this._heap.pop()
         this._total -= top.value * top.count
         newCount += top.count
@@ -59,7 +62,7 @@ class ClampableHeap {
 export { ClampableHeap }
 
 if (require.main === module) {
-  const pq1 = new ClampableHeap(true)
+  const pq1 = new ClampableHeap(false)
   pq1.add(1)
   pq1.add(2)
   pq1.add(3)
@@ -70,7 +73,7 @@ if (require.main === module) {
   pq1.add(2)
   console.assert(pq1.sum() === 5)
 
-  const pq2 = new ClampableHeap(false)
+  const pq2 = new ClampableHeap(true)
   pq2.add(1)
   pq2.add(2)
   pq2.add(3)

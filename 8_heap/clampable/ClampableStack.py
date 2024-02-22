@@ -3,7 +3,9 @@ class ClampableStack:
 
     def __init__(self, clampMin: bool):
         """
-        clampMin 为true时,支持容器内所有数与x取min;为false时,支持容器内所有数与x取max.
+        clampMin:
+        为`true`时,调用`AddAndClamp(x)`后,容器内所有数最小值被截断(小于x的数变成x);
+        为`false`时,调用`AddAndClamp(x)`后,容器内所有数最大值被截断(大于x的数变成x).
         """
         self._clampMin = clampMin
         self._total = 0
@@ -15,7 +17,7 @@ class ClampableStack:
         if self._clampMin:
             while self._stack:
                 top = self._stack[-1]
-                if top[0] < x:
+                if top[0] > x:
                     break
                 self._stack.pop()
                 v, c = top
@@ -24,7 +26,7 @@ class ClampableStack:
         else:
             while self._stack:
                 top = self._stack[-1]
-                if top[0] > x:
+                if top[0] < x:
                     break
                 self._stack.pop()
                 v, c = top
@@ -42,12 +44,12 @@ class ClampableStack:
 
 
 if __name__ == "__main__":
-    cs = ClampableStack(clampMin=True)
+    cs = ClampableStack(clampMin=False)
     cs.addAndClamp(1)
     cs.addAndClamp(2)
     cs.addAndClamp(1)
     assert cs.sum() == 3
-    cs = ClampableStack(clampMin=False)
+    cs = ClampableStack(clampMin=True)
     cs.addAndClamp(1)
     cs.addAndClamp(2)
     cs.addAndClamp(1)

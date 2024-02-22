@@ -1,18 +1,20 @@
 // ChminStack/ChmaxStack
 // 设计一个高效的数据结构，支持两种操作：
 // 1.加入一个数x，然后所有元素与x取min；2.求容器内所有元素之和
+//
+// 一般配合后缀数组的height数组使用.
 
 package main
 
 import "fmt"
 
 func main() {
-	S := NewClampableStack(true)
+	S := NewClampableStack(false)
 	S.AddAndClamp(1)
 	S.AddAndClamp(2)
 	S.AddAndClamp(1)
 	fmt.Println(S.Sum()) // 3
-	S = NewClampableStack(false)
+	S = NewClampableStack(true)
 	S.AddAndClamp(1)
 	S.AddAndClamp(2)
 	S.AddAndClamp(1)
@@ -31,7 +33,9 @@ type ClampableStack struct {
 	stack    []H
 }
 
-// clampMin 为true时，支持容器内所有数与x取min；为false时，支持容器内所有数与x取max.
+// clampMin：
+//  为true时，调用AddAndClamp(x)后，容器内所有数最小值被截断(小于x的数变成x)；
+//  为false时，调用AddAndClamp(x)后，容器内所有数最大值被截断(大于x的数变成x).
 func NewClampableStack(clampMin bool) *ClampableStack {
 	return &ClampableStack{clampMin: clampMin}
 }
@@ -41,7 +45,7 @@ func (h *ClampableStack) AddAndClamp(x int) {
 	if h.clampMin {
 		for len(h.stack) > 0 {
 			top := h.stack[len(h.stack)-1]
-			if top.value < x {
+			if top.value > x {
 				break
 			}
 			h.stack = h.stack[:len(h.stack)-1]
@@ -52,7 +56,7 @@ func (h *ClampableStack) AddAndClamp(x int) {
 	} else {
 		for len(h.stack) > 0 {
 			top := h.stack[len(h.stack)-1]
-			if top.value > x {
+			if top.value < x {
 				break
 			}
 			h.stack = h.stack[:len(h.stack)-1]

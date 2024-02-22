@@ -3,13 +3,15 @@
 // ChminHeap/ChmaxHeap/ClampHeap
 // 设计一个高效的数据结构，支持三种操作：
 // 1. 添加一个数；2.容器内所有数与x取min；3.求容器内元素之和
+//
+// 一般配合后缀数组的height数组使用.
 
 package main
 
 import "fmt"
 
 func main() {
-	C := NewClampableHeap(true)
+	C := NewClampableHeap(false)
 	C.Add(1)
 	C.Add(2)
 	C.Add(3)
@@ -20,7 +22,7 @@ func main() {
 	C.Add(2)
 	fmt.Println(C.Sum()) // 5
 
-	C = NewClampableHeap(false)
+	C = NewClampableHeap(true)
 	C.Add(1)
 	C.Add(2)
 	C.Add(3)
@@ -39,14 +41,16 @@ type ClampableHeap struct {
 	heap     *Heap
 }
 
-// clampMin 为true时，支持容器内所有数与x取min；为false时，支持容器内所有数与x取max.
-// 如果需要同时支持两种操作，可以使用双端堆.
+// clampMin：
+//  为true时，调用Clamp(x)后，容器内所有数最小值被截断(小于x的数变成x)；
+//  为false时，调用Clamp(x)后，容器内所有数最大值被截断(大于x的数变成x).
+//  如果需要同时支持两种操作，可以使用双端堆.
 func NewClampableHeap(clampMin bool) *ClampableHeap {
 	var less func(a, b H) bool
 	if clampMin {
-		less = func(a, b H) bool { return a.value >= b.value }
-	} else {
 		less = func(a, b H) bool { return a.value <= b.value }
+	} else {
+		less = func(a, b H) bool { return a.value >= b.value }
 	}
 	return &ClampableHeap{clampMin: clampMin, heap: NewHeap(less)}
 }
@@ -62,7 +66,7 @@ func (h *ClampableHeap) Clamp(x int) {
 	if h.clampMin {
 		for h.heap.Len() > 0 {
 			top := h.heap.Top()
-			if top.value < x {
+			if top.value > x {
 				break
 			}
 			h.heap.Pop()
@@ -73,7 +77,7 @@ func (h *ClampableHeap) Clamp(x int) {
 	} else {
 		for h.heap.Len() > 0 {
 			top := h.heap.Top()
-			if top.value > x {
+			if top.value < x {
 				break
 			}
 			h.heap.Pop()
