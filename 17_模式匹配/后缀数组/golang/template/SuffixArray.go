@@ -15,7 +15,9 @@
 // 	lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
 //
 //  "banana" -> sa: [5 3 1 0 4 2], rank: [3 2 5 1 4 0], lcp: [0 1 3 0 0 2]
-
+//
+//  !lcp(sa[i],sa[j]) = min(height[i+1..j])
+//
 // !api:
 //  func NewSuffixArray(ords []int) *SuffixArray
 //  func NewSuffixArrayWithString(s string) *SuffixArray
@@ -81,7 +83,7 @@ func P3804() {
 		fmt.Fprintln(out, 0)
 		return
 	}
-	S := NewSuffixArrayWithString(s)
+	S := NewSuffixArrayFromString(s)
 	heights := S.Height
 	L, R := GetRange(heights, false, false, false) // 求每个元素作为最小值的影响范围(区间)
 	res := 0
@@ -96,42 +98,61 @@ func P3804() {
 // 定义LCP(X,Y)为字符串X,Y的公共前缀长度(LCP)。
 // 给定长度为N的字符串S，设S表示从第i个字符开始的S的后缀(就是后缀数组里的那些后缀)。
 // !计算出:对于k=1,2,...,N,LCP(Sk,S1)+LCP(Sk,S2)+ +...+LCP(Sk,SN)的值。
+// !即求每个后缀与所有后缀的公共前缀长度和。
 // n<=1e6
 //
-// !即求每个后缀与所有后缀的公共前缀长度和。
-// 对每个后缀，二分出>=height[i]的左右边界，然后求和即可.
+// https://blog.hamayanhamayan.com/entry/2021/08/09/010405
 func abc213f() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+	// in := bufio.NewReader(os.Stdin)
+	// out := bufio.NewWriter(os.Stdout)
+	// defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
-	var s string
-	fmt.Fscan(in, &s)
-	S := NewSuffixArrayWithString(s)
+	// var n int
+	// fmt.Fscan(in, &n)
+	// var s string
+	// fmt.Fscan(in, &s)
+	n := 6
+	s := "aabaac"
+	S := NewSuffixArrayFromString(s)
 
-	res := make([]int, n)
-	height := S.Height
+	sa, rank, height := S.Sa, S.Rank, S.Height
+	saRes := make([]int, n)
+	for i, v := range sa {
+		saRes[i] = n - v
+	}
 
-	// lcp(sa[i],sa[j]) = min(height[i:j+1])
+	// !lcp(sa[i],sa[j]) = min(height[i+1..j])
 	// 需要求每个高度作为最小值的左右边界，计算这个位置的贡献
-	leftMost, rigthMost := GetRange(height, false, false, true)
-	diff := make([]int, n+1)
+	leftMost, rigthMost := GetRange(height, false, false, false)
+	fmt.Println(saRes, height, leftMost, rigthMost)
+	// diff := make([]int, n+2)
+	// for i := 0; i < n; i++ {
+	// 	diff[leftMost[i]] += height[i]
+	// 	diff[rigthMost[i]+1] -= height[i]
+	// }
+	// for i := 1; i < len(diff); i++ {
+	// 	diff[i] += diff[i-1]
+	// }
+	// fmt.Println(diff, leftMost, rigthMost)
 	for i := 0; i < n; i++ {
-		diff[leftMost[i]] += height[i]
-		diff[rigthMost[i]+1] -= height[i]
-	}
-	for i := 1; i < n+1; i++ {
-		diff[i] += diff[i-1]
-	}
-	fmt.Println(diff, leftMost, rigthMost)
-	for i := 0; i < n; i++ {
-		res[i] += diff[i]
+		l, r, h := leftMost[i], rigthMost[i], height[i]
+		if h == 0 {
+			continue
+		}
+		// 对别人的贡献
+		for j := max(0, l-1); j <= r; j++ {
+			if i == j {
+				continue
+			}
+			saRes[j] += h
+		}
+		// saRes[i] += diff[i]
 	}
 
-	for _, v := range res {
-		fmt.Fprintln(out, v)
+	for i := 0; i < n; i++ {
+		v := saRes[rank[i]]
+		// fmt.Fprintln(out, v)
+		fmt.Println(v)
 	}
 }
 
@@ -158,7 +179,7 @@ func abc272f() {
 
 	SMALL, BIG := "#", "|"
 	sstt := s + s + SMALL + t + t + BIG
-	S := NewSuffixArrayWithString(sstt)
+	S := NewSuffixArrayFromString(sstt)
 	rank := S.Rank
 	sRank, tRank := rank[:n], rank[2*n+1:2*n+1+n]
 	sort.Ints(tRank)
@@ -385,7 +406,7 @@ func NewSuffixArray(ords []int) *SuffixArray {
 	return res
 }
 
-func NewSuffixArrayWithString(s string) *SuffixArray {
+func NewSuffixArrayFromString(s string) *SuffixArray {
 	ords := make([]int, len(s))
 	for i, c := range s {
 		ords[i] = int(c)
