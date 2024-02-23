@@ -1,3 +1,4 @@
+// k个字符串的最长公共子串
 // https://www.acwing.com/problem/content/2813/
 // 二分找出最低的height，使某个高于height的区间内包含所有的path
 

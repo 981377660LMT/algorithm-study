@@ -1,9 +1,9 @@
 // 后缀数组矩形区域构成的树，严格来说不能算suffixTree
 // https://maspypy.github.io/library/string/suffix_tree.hpp
 //
-//   - s = abbbab
+//!   - s = abbbab
 //
-//   - suffix array
+//!   - suffix array
 //     ab
 //     abbbab
 //     b
@@ -11,104 +11,196 @@
 //     bbab
 //     bbbab
 //
-//   - suffix tree
+//!   - suffix tree
 
-//		 ab --- bbab
-//		/
+//	  	 ab(1) --- bbab(2)
+//	  	/
+//	  ""(0)
+//	  	\
+//	  	 b(3) --- ab(4)
+//	  	  \
+//	  	   b(5) --- ab(6)
+//	  	    \
+//	  	     ---- bab(7)
 //
-//	""
+//!   - [行1，行2，列1，列2] 区域范围
+//     0 : [0 6 0 0]
+//     1 : [0 2 0 2]
+//     2 : [1 2 2 6]
+//     3 : [2 6 0 1]
+//     4 : [3 4 1 3]
+//     5 : [4 6 1 2]
+//     6 : [4 5 2 4]
+//     7 : [5 6 2 5]
 //
-//		\
-//		 b --- ab
-//		  \
-//		   b --- ab
-//		    \
-//		      --- bab
+//!   - 表格展示
+//    _________________________
+//    |_1_|_1_|___|___|___|___|
+//    |_1_|_1_|_2_|_2_|_2_|_2_|
+//    |_3_|___|___|___|___|___|
+//    |_3_|_4_|_4_|___|___|___|
+//    |_3_|_5_|_6_|_6_|___|___|
+//    |_3_|_5_|_7_|_7_|_7_|___|
 //
-// [行1，行2，列1，列2]
-// [[0 6 0 0] [0 2 0 2] [1 2 2 6] [2 6 0 1] [3 4 1 3] [4 6 1 2] [4 5 2 4] [5 6 2 5]]
-// _________________________
-// |_a_|_b_|___|___|___|___|
-// |_a_|_b_|_b_|_b_|_a_|_b_|
-// |_b_|___|___|___|___|___|
-// |_b_|_a_|_b_|___|___|___|
-// |_b_|_b_|_a_|_b_|___|___|
-// |_b_|_b_|_b_|_a_|_b_|___|
 
-// ```
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"index/suffixarray"
+	"os"
+	"reflect"
+	"unsafe"
+)
 
 func main() {
+	// demo()
+
+	// cf123d()
+
+	test()
+}
+
+func demo() {
 	s := "abbbab"
-	ords := make([]int, len(s))
-	for i, b := range s {
-		ords[i] = int(b)
-	}
-	sa, _, lcp := UseSA(ords)
-	tree, ranges := SuffixTree(sa, lcp)
+	sa, _, lcp := SuffixArray32(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+	tree, ranges := SuffixTreeFrom(sa, lcp)
+
 	// [[1 3] [2] [] [4 5] [] [6 7] [] []]
 	// [[0 6 0 0] [0 2 0 2] [1 2 2 6] [2 6 0 1] [3 4 1 3] [4 6 1 2] [4 5 2 4] [5 6 2 5]]
 	fmt.Println(tree, ranges)
 }
 
+func test() {
+	CA := NewCartesianTreeSimple32([]int32{1, 2, 1, 4, 2, 1, 3})
+	fmt.Println(CA.Root, CA.parent, "r")
+	s := "aabbabbaa"
+	_, ranges := SuffixTree(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+	checkRange := func(t [4]int32, xl, xr, yl, yr int32) {
+		a, b, c, d := t[0], t[1], t[2], t[3]
+		if a != xl || b != yl || c != xr || d != yr {
+			fmt.Println(a, b, c, d, xl, xr, yl, yr)
+			panic("error")
+		}
+	}
+	checkRange(ranges[0], 0, 0, 9, 0)
+	checkRange(ranges[1], 0, 0, 5, 1)
+	checkRange(ranges[2], 1, 1, 3, 2)
+	checkRange(ranges[3], 2, 2, 3, 9)
+	checkRange(ranges[4], 3, 1, 5, 4)
+	checkRange(ranges[5], 3, 4, 4, 5)
+	checkRange(ranges[6], 4, 4, 5, 8)
+	checkRange(ranges[7], 5, 0, 9, 1)
+	checkRange(ranges[8], 5, 1, 7, 2)
+	checkRange(ranges[9], 5, 2, 6, 3)
+	checkRange(ranges[10], 6, 2, 7, 6)
+	checkRange(ranges[11], 7, 1, 9, 3)
+	checkRange(ranges[12], 7, 3, 8, 4)
+	checkRange(ranges[13], 8, 3, 9, 7)
+}
+
+//	void solve() {
+//	  STR(S);
+//	  Suffix_Array X(S);
+//	  auto [G, dat] = suffix_tree(X);
+//	  ll ANS = 0;
+//	  for (auto&& [L, R, lo, hi]: dat) {
+//	    ll n = R - L;
+//	    ANS += (hi - lo) * n * (n + 1) / 2;
+//	  }
+//	  print(ANS);
+//	}
+//
+
+// CF123D String
+// https://www.luogu.com.cn/problem/CF123D
+// !给定一个字符串 s，定义 cnt(a) 为子串 a 在 s 中出现的次数,求∑cnt(a)*(cnt(a)+1)/2
+func cf123d() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s string
+	fmt.Fscan(in, &s)
+	_, ranges := SuffixTree(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+	res := 0
+	for i := 1; i < len(ranges); i++ {
+		rowStart, rowEnd, colStart, colEnd := ranges[i][0], ranges[i][1], ranges[i][2], ranges[i][3]
+		rowLen, colLen := int(rowEnd-rowStart), int(colEnd-colStart)
+		res += colLen * rowLen * (rowLen + 1) / 2
+	}
+	fmt.Fprintln(out, res)
+}
+
 // TODO: https://yukicoder.me/problems/no/2361
 // https://maspypy.github.io/library/test/yukicoder/2361.test.cpp
+func yukicoder2361() {
 
-// 每个节点为后缀数组上的一个长方形区间.
-func SuffixTree(sa, height []int) (directedTree [][]int, ranges [][4]int) {
-	height = append(height[:0:0], height[1:]...)
-	n := len(sa)
+}
+
+func SuffixTree(n int32, f func(i int32) int32) (directedTree [][]int32, ranges [][4]int32) {
+	sa, _, lcp := SuffixArray32(n, f)
+	return SuffixTreeFrom(sa, lcp)
+}
+
+// 每个节点为后缀数组上的一个矩形区间.
+func SuffixTreeFrom(sa, height []int32) (directedTree [][]int32, ranges [][4]int32) {
+	height = height[1:]
+	n := int32(len(sa))
 	if n == 1 {
-		directedTree = make([][]int, 2)
+		directedTree = make([][]int32, 2)
 		directedTree[0] = append(directedTree[0], 1)
-		ranges = append(ranges, [4]int{0, 1, 0, 0})
-		ranges = append(ranges, [4]int{0, 1, 0, 1})
+		ranges = append(ranges, [4]int32{0, 1, 0, 0})
+		ranges = append(ranges, [4]int32{0, 1, 0, 1})
 		return
 	}
 
-	var edges [][2]int
-	ranges = append(ranges, [4]int{0, n, 0, 0})
-	ct := NewCartesianTreeSimple(height, true)
-
-	var dfs func(parent, index int, h int)
-	dfs = func(parent, index int, h int) {
-		left, right := ct.Range[index][0], ct.Range[index][1]+1
-		hh := height[index]
+	var edges [][2]int32
+	ranges = append(ranges, [4]int32{0, n, 0, 0})
+	ct := NewCartesianTreeSimple32(height)
+	fmt.Println(ct.Range, height)
+	var dfs func(p, idx int32, h int32)
+	dfs = func(p, idx int32, h int32) {
+		left, right := ct.Range[idx][0], ct.Range[idx][1]+1
+		hh := height[idx]
 		if h < hh {
-			edges = append(edges, [2]int{parent, len(ranges)})
-			parent = len(ranges)
-			ranges = append(ranges, [4]int{left, right, h, hh})
+			m := int32(len(ranges))
+			edges = append(edges, [2]int32{p, m})
+			p = m
+			ranges = append(ranges, [4]int32{left, right, h, hh})
 		}
-		if ct.leftChild[index] == -1 {
-			if hh < n-sa[index] {
-				edges = append(edges, [2]int{parent, len(ranges)})
-				ranges = append(ranges, [4]int{index, index + 1, hh, n - sa[index]})
+
+		if ct.leftChild[idx] == -1 {
+			if hh < n-sa[idx] {
+				edges = append(edges, [2]int32{p, int32(len(ranges))})
+				ranges = append(ranges, [4]int32{idx, idx + 1, hh, n - sa[idx]})
 			}
 		} else {
-			dfs(parent, ct.leftChild[index], hh)
+			dfs(p, ct.leftChild[idx], hh)
 		}
-		if ct.rigthChild[index] == -1 {
-			if hh < n-sa[index+1] {
-				edges = append(edges, [2]int{parent, len(ranges)})
-				ranges = append(ranges, [4]int{index + 1, index + 2, hh, n - sa[index+1]})
+
+		if ct.rigthChild[idx] == -1 {
+			if hh < n-sa[idx+1] {
+				edges = append(edges, [2]int32{p, int32(len(ranges))})
+				ranges = append(ranges, [4]int32{idx + 1, idx + 2, hh, n - sa[idx+1]})
 			}
 		} else {
-			dfs(parent, ct.rigthChild[index], hh)
+			dfs(p, ct.rigthChild[idx], hh)
 		}
 	}
 
 	root := ct.Root
+	fmt.Println(root, "rot")
 	if height[root] > 0 {
-		edges = append(edges, [2]int{0, 1})
-		ranges = append(ranges, [4]int{0, n, 0, height[root]})
+		edges = append(edges, [2]int32{0, 1})
+		ranges = append(ranges, [4]int32{0, n, 0, height[root]})
 		dfs(1, root, height[root])
 	} else {
 		dfs(0, root, 0)
 	}
 
-	directedTree = make([][]int, len(ranges))
+	directedTree = make([][]int32, len(ranges))
 	for _, e := range edges {
 		u, v := e[0], e[1]
 		directedTree[u] = append(directedTree[u], v)
@@ -116,224 +208,61 @@ func SuffixTree(sa, height []int) (directedTree [][]int, ranges [][4]int) {
 	return
 }
 
-// !注意内部会修改ords.
-//
-//	 sa : 排第几的后缀是谁.
-//	 rank : 每个后缀排第几.
-//	 lcp : 排名相邻的两个后缀的最长公共前缀.
-//		lcp[0] = 0
-//		lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
-func UseSA(ords []int) (sa, rank, lcp []int) {
-	n := len(ords)
-	sa = GetSA(ords)
-
-	rank = make([]int, n)
-	for i := range rank {
+func SuffixArray32(n int32, f func(i int32) int32) (sa, rank, height []int32) {
+	s := make([]byte, 0, n*4)
+	for i := int32(0); i < n; i++ {
+		v := f(i)
+		s = append(s, byte(v>>24), byte(v>>16), byte(v>>8), byte(v))
+	}
+	_sa := *(*[]int32)(unsafe.Pointer(reflect.ValueOf(suffixarray.New(s)).Elem().FieldByName("sa").Field(0).UnsafeAddr()))
+	sa = make([]int32, 0, n)
+	for _, v := range _sa {
+		if v&3 == 0 {
+			sa = append(sa, v>>2)
+		}
+	}
+	rank = make([]int32, n)
+	for i := int32(0); i < n; i++ {
 		rank[sa[i]] = i
 	}
-
-	// !高度数组 lcp 也就是排名相邻的两个后缀的最长公共前缀。
-	// lcp[0] = 0
-	// lcp[i] = LCP(s[sa[i]:], s[sa[i-1]:])
-	lcp = make([]int, n)
-	h := 0
-	for i, rk := range rank {
+	height = make([]int32, n)
+	h := int32(0)
+	for i := int32(0); i < n; i++ {
+		rk := rank[i]
 		if h > 0 {
 			h--
 		}
 		if rk > 0 {
-			for j := sa[rk-1]; i+h < n && j+h < n && ords[i+h] == ords[j+h]; h++ {
+			for j := sa[rk-1]; i+h < n && j+h < n && f(i+h) == f(j+h); h++ {
 			}
 		}
-		lcp[rk] = h
+		height[rk] = h
 	}
-
 	return
 }
 
-// !注意内部会修改ords.
-func GetSA(ords []int) (sa []int) {
-	if len(ords) == 0 {
-		return []int{}
-	}
-
-	mn := mins(ords)
-	for i, x := range ords {
-		ords[i] = x - mn + 1
-	}
-	ords = append(ords, 0)
-	n := len(ords)
-	m := maxs(ords) + 1
-	isS := make([]bool, n)
-	isLms := make([]bool, n)
-	lms := make([]int, 0, n)
-	for i := 0; i < n; i++ {
-		isS[i] = true
-	}
-	for i := n - 2; i > -1; i-- {
-		if ords[i] == ords[i+1] {
-			isS[i] = isS[i+1]
-		} else {
-			isS[i] = ords[i] < ords[i+1]
-		}
-	}
-	for i := 1; i < n; i++ {
-		isLms[i] = !isS[i-1] && isS[i]
-	}
-	for i := 0; i < n; i++ {
-		if isLms[i] {
-			lms = append(lms, i)
-		}
-	}
-	bin := make([]int, m)
-	for _, x := range ords {
-		bin[x]++
-	}
-
-	induce := func() []int {
-		sa := make([]int, n)
-		for i := 0; i < n; i++ {
-			sa[i] = -1
-		}
-
-		saIdx := make([]int, m)
-		copy(saIdx, bin)
-		for i := 0; i < m-1; i++ {
-			saIdx[i+1] += saIdx[i]
-		}
-		for j := len(lms) - 1; j > -1; j-- {
-			i := lms[j]
-			x := ords[i]
-			saIdx[x]--
-			sa[saIdx[x]] = i
-		}
-
-		copy(saIdx, bin)
-		s := 0
-		for i := 0; i < m; i++ {
-			s, saIdx[i] = s+saIdx[i], s
-		}
-		for j := 0; j < n; j++ {
-			i := sa[j] - 1
-			if i < 0 || isS[i] {
-				continue
-			}
-			x := ords[i]
-			sa[saIdx[x]] = i
-			saIdx[x]++
-		}
-
-		copy(saIdx, bin)
-		for i := 0; i < m-1; i++ {
-			saIdx[i+1] += saIdx[i]
-		}
-		for j := n - 1; j > -1; j-- {
-			i := sa[j] - 1
-			if i < 0 || !isS[i] {
-				continue
-			}
-			x := ords[i]
-			saIdx[x]--
-			sa[saIdx[x]] = i
-		}
-
-		return sa
-	}
-
-	sa = induce()
-
-	lmsIdx := make([]int, 0, len(sa))
-	for _, i := range sa {
-		if isLms[i] {
-			lmsIdx = append(lmsIdx, i)
-		}
-	}
-	l := len(lmsIdx)
-	order := make([]int, n)
-	for i := 0; i < n; i++ {
-		order[i] = -1
-	}
-	ord := 0
-	order[n-1] = ord
-	for i := 0; i < l-1; i++ {
-		j, k := lmsIdx[i], lmsIdx[i+1]
-		for d := 0; d < n; d++ {
-			jIsLms, kIsLms := isLms[j+d], isLms[k+d]
-			if ords[j+d] != ords[k+d] || jIsLms != kIsLms {
-				ord++
-				break
-			}
-			if d > 0 && (jIsLms || kIsLms) {
-				break
-			}
-		}
-		order[k] = ord
-	}
-	b := make([]int, 0, l)
-	for _, i := range order {
-		if i >= 0 {
-			b = append(b, i)
-		}
-	}
-	var lmsOrder []int
-	if ord == l-1 {
-		lmsOrder = make([]int, l)
-		for i, ord := range b {
-			lmsOrder[ord] = i
-		}
-	} else {
-		lmsOrder = GetSA(b)
-	}
-	buf := make([]int, len(lms))
-	for i, j := range lmsOrder {
-		buf[i] = lms[j]
-	}
-	lms = buf
-	return induce()[1:]
-}
-
-func mins(a []int) int {
-	mn := a[0]
-	for _, x := range a {
-		if x < mn {
-			mn = x
-		}
-	}
-	return mn
-}
-
-func maxs(a []int) int {
-	mx := a[0]
-	for _, x := range a {
-		if x > mx {
-			mx = x
-		}
-	}
-	return mx
-}
-
-type CartesianTreeSimple struct {
+type CartesianTreeSimple32 struct {
 	// ![left, right) 每个元素作为最大/最小值时的左右边界.
 	//  左侧为严格扩展, 右侧为非严格扩展.
 	//  例如: [2, 1, 1, 5] => [[0 1] [0 4] [2 4] [3 4]]
-	Range                         [][2]int
-	Root                          int
-	n                             int
-	nums                          []int
-	leftChild, rigthChild, parent []int
-	isMin                         bool
+	Range                         [][2]int32
+	Root                          int32
+	n                             int32
+	nums                          []int32
+	leftChild, rigthChild, parent []int32
 }
 
-func NewCartesianTreeSimple(nums []int, isMin bool) *CartesianTreeSimple {
-	res := &CartesianTreeSimple{}
-	n := len(nums)
-	Range := make([][2]int, n)
-	lch := make([]int, n)
-	rch := make([]int, n)
-	par := make([]int, n)
+// min
+func NewCartesianTreeSimple32(nums []int32) *CartesianTreeSimple32 {
+	res := &CartesianTreeSimple32{}
+	n := int32(len(nums))
+	Range := make([][2]int32, n)
+	lch := make([]int32, n)
+	rch := make([]int32, n)
+	par := make([]int32, n)
 
-	for i := 0; i < n; i++ {
-		Range[i] = [2]int{-1, -1}
+	for i := int32(0); i < n; i++ {
+		Range[i] = [2]int32{-1, -1}
 		lch[i] = -1
 		rch[i] = -1
 		par[i] = -1
@@ -345,23 +274,19 @@ func NewCartesianTreeSimple(nums []int, isMin bool) *CartesianTreeSimple {
 	res.leftChild = lch
 	res.rigthChild = rch
 	res.parent = par
-	res.isMin = isMin
 
 	if n == 1 {
-		res.Range[0] = [2]int{0, 1}
+		res.Range[0] = [2]int32{0, 1}
 		return res
 	}
 
-	compare := func(i, j int) bool {
-		if isMin {
-			return nums[i] < nums[j] || (nums[i] == nums[j] && i < j)
-		}
-		return nums[i] > nums[j] || (nums[i] == nums[j] && i < j)
+	less := func(i, j int32) bool {
+		return (nums[i] < nums[j]) || (nums[i] == nums[j] && i < j)
 	}
 
-	stack := make([]int, 0)
-	for i := 0; i < n; i++ {
-		for len(stack) > 0 && compare(i, stack[len(stack)-1]) {
+	stack := make([]int32, 0)
+	for i := int32(0); i < n; i++ {
+		for len(stack) > 0 && less(i, stack[len(stack)-1]) {
 			res.leftChild[i] = stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 		}
@@ -374,7 +299,7 @@ func NewCartesianTreeSimple(nums []int, isMin bool) *CartesianTreeSimple {
 
 	stack = stack[:0]
 	for i := n - 1; i >= 0; i-- {
-		for len(stack) > 0 && compare(i, stack[len(stack)-1]) {
+		for len(stack) > 0 && less(i, stack[len(stack)-1]) {
 			res.rigthChild[i] = stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 		}
@@ -385,17 +310,47 @@ func NewCartesianTreeSimple(nums []int, isMin bool) *CartesianTreeSimple {
 		stack = append(stack, i)
 	}
 
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		if res.leftChild[i] != -1 {
 			res.parent[res.leftChild[i]] = i
 		}
 		if res.rigthChild[i] != -1 {
 			res.parent[res.rigthChild[i]] = i
 		}
+	}
+	for i := int32(0); i < n; i++ {
 		if res.parent[i] == -1 {
 			res.Root = i
 		}
 	}
 
 	return res
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
 }

@@ -160,6 +160,8 @@ func NewCartesianTree(nums []int, isMin bool) *CartesianTree {
 		if res.rigthChild[i] != -1 {
 			res.parent[res.rigthChild[i]] = i
 		}
+	}
+	for i := 0; i < n; i++ {
 		if res.parent[i] == -1 {
 			res.Root = i
 		}

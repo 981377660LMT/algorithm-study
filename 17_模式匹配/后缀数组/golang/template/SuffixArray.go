@@ -40,15 +40,19 @@ import (
 )
 
 func main() {
-	abc141e()
+
 	// abc213f()
 	// abc272f()
 
 	// P3804()
 
-	// NumberofSubstrings()
+	重复次数最多的连续重复子串()
 
 	// testLcpRange()
+}
+
+// https://codeforces.com/contest/126/submission/227749650
+func CF126() {
 }
 
 // G3. Good Substrings
@@ -57,9 +61,10 @@ func CF316() {
 	// itoa
 }
 
-// https://codeforces.com/contest/126/submission/227749650
-func CF126() {
-}
+// P2178 [NOI2015] 品酒大会
+// 结合并查集
+// https://www.luogu.com.cn/problem/P2178
+func P2178() {}
 
 // P3804 【模板】后缀自动机（SAM）
 // https://www.luogu.com.cn/problem/P3804
@@ -93,22 +98,44 @@ func P3804() {
 	fmt.Fprintln(out, res)
 }
 
-// 解法2 O(nlogn):
-//
-//	二分答案，对 height 分组，判定组内元素个数不小于 k, 类似 不可重叠最长重复子串 的做法
-func P2852() {
+// P4248 [AHOI2013] 差异
+// https://www.luogu.com.cn/problem/P4248
+func P4248() {}
 
-}
-
-// 长度不小于k的公共子串个数
-// https://blog.nowcoder.net/n/0a4cfff0f0bc424c9a29979dc7d8f586
-
-// 重复次数最多的连续重复子串
+// Periodic Substring
+// 重复次数最多的连续重复子串 (nlogn)
+// https://codeforces.com/edu/course/2/lesson/2/5/practice/contest/269656/problem/F
 // https://blog.nowcoder.net/n/47821f2464e146ea86d83b224a91d855
 // https://blog.nowcoder.net/n/f9c3bcdf807546bd9c8d8cc43df84079
+// !枚举连续串的长度 |s|，按照 |s| 对整个串进行分块，对相邻两块的块首计算 LCP(i,i+len)，然后看是否还能再重复一次
+func 重复次数最多的连续重复子串() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-// 连续的若干个相同子串
-// https://oi-wiki.org/string/sa/#%E8%BF%9E%E7%BB%AD%E7%9A%84%E8%8B%A5%E5%B9%B2%E4%B8%AA%E7%9B%B8%E5%90%8C%E5%AD%90%E4%B8%B2
+	var s string
+	fmt.Fscan(in, &s)
+
+	n := len(s)
+	S := NewSuffixArrayFromString(s)
+	res := 1
+	for len_ := 1; len_ < n; len_++ {
+		for start := 0; start+len_ < n; start += len_ {
+			repeatLen := S.Lcp(start, n, start+len_, n)
+			repeatCount := repeatLen/len_ + 1
+			// 前面可能还有 (len_ - repeatLen%len_) 个字符在第一个重复子串中
+			if p := start - (len_ - repeatLen%len_); p >= 0 && S.Lcp(p, n, p+len_, n) >= len_ {
+				repeatCount++
+			}
+			if repeatCount > res {
+				res = repeatCount
+			}
+		}
+	}
+
+	fmt.Fprintln(out, res)
+
+}
 
 // F - Common Prefixes-每个后缀与所有后缀的LCP长度和
 // https://atcoder.jp/contests/abc213/tasks/abc213_f
@@ -204,25 +231,6 @@ func diffSum(s string) int {
 	return res
 }
 
-// 1044. 最长重复子串(可重叠最长重复子串)
-// https://leetcode.cn/problems/longest-duplicate-substring/description/
-// 给你一个字符串 s ，考虑其所有 重复子串 ：即 s 的（连续）子串，在 s 中出现 2 次或更多次。这些出现之间可能存在重叠。
-// 返回 任意一个 可能具有最长长度的重复子串。如果 s 不含重复子串，那么答案为 "" 。
-// 子串就是后缀的前缀
-// !高度数组中的最大值对应的就是可重叠最长重复子串
-func longestDupSubstring(s string) string {
-	S := NewSuffixArrayFromString(s)
-	sa, height := S.Sa, S.Height
-	saIndex, maxHeight := 0, 0
-	for i, h := range height {
-		if h > maxHeight {
-			saIndex = i
-			maxHeight = h
-		}
-	}
-	return s[sa[saIndex] : sa[saIndex]+maxHeight]
-}
-
 // https://leetcode.cn/problems/largest-merge-of-two-strings/
 // 1754. 构造字典序最大的合并字符串
 func largestMerge(word1 string, word2 string) string {
@@ -255,71 +263,16 @@ func largestMerge(word1 string, word2 string) string {
 	return sb.String()
 }
 
-// 2261. 含最多 K 个可整除元素的子数组
-// https://leetcode.cn/problems/k-divisible-elements-subarrays/
-// 找出并返回满足要求的不同的子数组数，要求子数组中最多 k 个可被 p 整除的元素。
-func countDistinct(nums []int, k int, p int) (res int) {
-	n := len(nums)
-
-	mods := make([]int, n)
-	for i := range mods {
-		mods[i] = nums[i] % p
-	}
-
-	boolToInt := func(b bool) int {
-		if b {
-			return 1
-		}
-		return 0
-	}
-
-	// 1. 先用双指针O(n)的时间计算出所有满足条件的子数组的数量 注意要枚举后缀(固定left 移动right)
-	right, countK := 0, 0
-	suffixLen := make([]int, n) // 记录每个后缀取到的长度
-	for left := 0; left < n; left++ {
-		for right < n && countK+boolToInt((mods[right] == 0)) <= k {
-			countK += boolToInt((mods[right] == 0))
-			right++
-		}
-		res += right - left
-		suffixLen[left] = right - left
-		countK -= boolToInt(mods[left] == 0)
-	}
-
-	// 2. height数组去重
-	sa, _, height := UseSA(nums)
-	// 计算子串重复数量 按后缀排序的顺序枚举后缀 lcp(height)去重
-	for i := 0; i < n-1; i++ {
-		suffix1, suffix2 := sa[i], sa[i+1]
-		subLen1, subLen2 := suffixLen[suffix1], suffixLen[suffix2]
-		res -= min(height[i+1], min(subLen1, subLen2))
-	}
-	return
-}
-
-// https://judge.yosupo.jp/problem/number_of_substrings
-// 返回 s 的不同子字符串的个数(本质不同子串数)
-// 用所有子串的个数，减去相同子串的个数，就可以得到不同子串的个数。
-// !子串就是后缀的前缀 按后缀排序的顺序枚举后缀，每次新增的子串就是除了与上一个后缀的 LCP 剩下的前缀
-// !计算后缀数组和高度数组。根据高度数组的定义，所有高度之和就是相同子串的个数。(每一对相同子串在高度数组产生1贡献)
-func NumberofSubstrings() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var s string
-	fmt.Fscan(in, &s)
+// 2223. 构造字符串的总得分和
+// https://leetcode.cn/problems/sum-of-scores-of-built-strings/
+func sumScores(s string) int64 {
+	sa := NewSuffixArrayFromString(s)
 	n := len(s)
-	ords := make([]int, n)
-	for i, c := range s {
-		ords[i] = int(c)
+	res := 0
+	for i := 0; i < n; i++ {
+		res += sa.Lcp(0, n, i, n)
 	}
-	res := n * (n + 1) / 2
-	_, _, height := UseSA(ords)
-	for _, h := range height {
-		res -= h
-	}
-	fmt.Fprintln(out, res)
+	return int64(res)
 }
 
 func testLcpRange() {
@@ -455,14 +408,13 @@ func (suf *SuffixArray) LcpRange(left int, k int) (start, end int) {
 	return
 }
 
-func (suf *SuffixArray) Print(sa, ords []int) {
-	n := len(ords)
+func (suf *SuffixArray) Print(n int, f func(i int) int, sa []int) {
 	for _, v := range sa {
-		s := make([]string, 0, n-v)
+		s := make([]int, 0, n-v)
 		for i := v; i < n; i++ {
-			s = append(s, string(ords[i]))
+			s = append(s, f(i))
 		}
-		fmt.Println(strings.Join(s, ""))
+		fmt.Println(s)
 	}
 }
 
@@ -661,7 +613,7 @@ type LinearRMQ struct {
 //	消除了泛型.
 func NewLinearRMQ(nums []int) *LinearRMQ {
 	n := len(nums)
-	res := &LinearRMQ{n: n}
+	res := &LinearRMQ{n: n, nums: nums}
 	stack := make([]int, 0, 64)
 	small := make([]int, 0, n)
 	var large [][]int
@@ -697,8 +649,8 @@ func NewLinearRMQ(nums []int) *LinearRMQ {
 	return res
 }
 
-// 查询区间`[start, end)`中的最小值的索引.
-func (rmq *LinearRMQ) Query(start, end int) (minIndex int) {
+// 查询区间`[start, end)`中的最小值.
+func (rmq *LinearRMQ) Query(start, end int) int {
 	if start >= end {
 		panic(fmt.Sprintf("start(%d) should be less than end(%d)", start, end))
 	}
@@ -712,14 +664,14 @@ func (rmq *LinearRMQ) Query(start, end int) (minIndex int) {
 		cand1 := rmq._getMin(i, cache[left])
 		j := right<<6 + bits.TrailingZeros64(uint64(rmq.small[end]))
 		cand2 := rmq._getMin(cache[right-(1<<msb)], j)
-		return rmq._getMin(cand1, cand2)
+		return rmq.nums[rmq._getMin(cand1, cand2)]
 	}
 	if left == right {
 		i := (left-1)<<6 + bits.TrailingZeros64(uint64(rmq.small[left<<6-1]&(^0<<(start&63))))
 		j := left<<6 + bits.TrailingZeros64(uint64(rmq.small[end]))
-		return rmq._getMin(i, j)
+		return rmq.nums[rmq._getMin(i, j)]
 	}
-	return right<<6 + bits.TrailingZeros64(uint64(rmq.small[end]&(^0<<(start&63))))
+	return rmq.nums[right<<6+bits.TrailingZeros64(uint64(rmq.small[end]&(^0<<(start&63))))]
 }
 
 func (rmq *LinearRMQ) _getMin(i, j int) int {

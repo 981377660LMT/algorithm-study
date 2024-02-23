@@ -11,8 +11,13 @@ import (
 	"os"
 )
 
+// https://www.luogu.com.cn/problem/CF123D
+// 给出 s，求所有 s 的子串 p 在 s 中的出现位置的所有子串个数，字符串的重复子串只算一次。
+// 也可以用SAM做.
+func cf123d() {}
+
 // https://judge.yosupo.jp/problem/number_of_substrings
-func main() {
+func yosupo() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()

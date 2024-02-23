@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"index/suffixarray"
-	"math/bits"
 	"os"
 	"reflect"
 	"strings"
@@ -176,85 +175,6 @@ func SuffixArray32(n int32, f func(i int32) int32) (sa, rank, height []int32) {
 		height[rk] = h
 	}
 	return
-}
-
-type LinearRMQ struct {
-	small []int
-	large [][]int
-	less  func(i, j int) bool
-}
-
-// n: 序列长度.
-// less: 入参为两个索引,返回值表示索引i处的值是否小于索引j处的值.
-//
-//	消除了泛型.
-func NewLinearRMQ(n int, less func(i, j int) bool) *LinearRMQ {
-	res := &LinearRMQ{less: less}
-	stack := make([]int, 0, 64)
-	small := make([]int, 0, n)
-	var large [][]int
-	large = append(large, make([]int, 0, n>>6))
-	for i := 0; i < n; i++ {
-		for len(stack) > 0 && !less(stack[len(stack)-1], i) {
-			stack = stack[:len(stack)-1]
-		}
-		tmp := 0
-		if len(stack) > 0 {
-			tmp = small[stack[len(stack)-1]]
-		}
-		small = append(small, tmp|(1<<(i&63)))
-		stack = append(stack, i)
-		if (i+1)&63 == 0 {
-			large[0] = append(large[0], stack[0])
-			stack = stack[:0]
-		}
-	}
-
-	for i := 1; (i << 1) <= n>>6; i <<= 1 {
-		csz := n>>6 + 1 - (i << 1)
-		v := make([]int, csz)
-		for k := 0; k < csz; k++ {
-			back := large[len(large)-1]
-			v[k] = res._getMin(back[k], back[k+i])
-		}
-		large = append(large, v)
-	}
-
-	res.small = small
-	res.large = large
-	return res
-}
-
-// 查询区间`[start, end)`中的最小值的索引.
-func (rmq *LinearRMQ) Query(start, end int) (minIndex int) {
-	if start >= end {
-		panic(fmt.Sprintf("start(%d) should be less than end(%d)", start, end))
-	}
-	end--
-	left := start>>6 + 1
-	right := end >> 6
-	if left < right {
-		msb := bits.Len64(uint64(right-left)) - 1
-		cache := rmq.large[msb]
-		i := (left-1)<<6 + bits.TrailingZeros64(uint64(rmq.small[left<<6-1]&(^0<<(start&63))))
-		cand1 := rmq._getMin(i, cache[left])
-		j := right<<6 + bits.TrailingZeros64(uint64(rmq.small[end]))
-		cand2 := rmq._getMin(cache[right-(1<<msb)], j)
-		return rmq._getMin(cand1, cand2)
-	}
-	if left == right {
-		i := (left-1)<<6 + bits.TrailingZeros64(uint64(rmq.small[left<<6-1]&(^0<<(start&63))))
-		j := left<<6 + bits.TrailingZeros64(uint64(rmq.small[end]))
-		return rmq._getMin(i, j)
-	}
-	return right<<6 + bits.TrailingZeros64(uint64(rmq.small[end]&(^0<<(start&63))))
-}
-
-func (rmq *LinearRMQ) _getMin(i, j int) int {
-	if rmq.less(i, j) {
-		return i
-	}
-	return j
 }
 
 type MonoQueueItem = int32

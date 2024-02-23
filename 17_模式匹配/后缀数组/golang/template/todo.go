@@ -4,30 +4,7 @@ func main() {
 
 }
 
-	/* 后缀数组
-
-	
-		不可重叠最长重复子串 https://atcoder.jp/contests/abc141/tasks/abc141_e 
-			可参考《算法与实现》p.223 以及 https://oi-wiki.org/string/sa/#是否有某字符串在文本串中至少不重叠地出现了两次
-			重要技巧：按照 height 分组，每组中根据 sa 来处理组内后缀的位置
-		本质不同子串个数 LC1698 https://leetcode.cn/problems/number-of-distinct-substrings-in-a-string/
-			https://www.luogu.com.cn/problem/P2408
-			https://www.luogu.com.cn/problem/SP694
-			https://judge.yosupo.jp/problem/number_of_substrings
-			https://atcoder.jp/contests/practice2/tasks/practice2_i
-			https://codeforces.com/edu/course/2/lesson/2/5/practice/contest/269656/problem/A
-			枚举每个后缀，计算前缀总数，再减掉重复，即 height[i]
-			所以个数为 n*(n+1)/2-sum{height[i]} https://oi-wiki.org/string/sa/#_13
-			相似思路 LC2261 含最多 K 个可整除元素的子数组 https://leetcode.cn/problems/k-divisible-elements-subarrays/solution/by-freeyourmind-2m6j/
-		不同子串长度之和 https://codeforces.com/edu/course/2/lesson/3/4/practice/contest/272262/problem/H
-			思路同上，即 n*(n+1)*(n+2)/6-sum{height[i]*(height[i]+1)/2}
-		带限制的不同子串个数
-			https://codeforces.com/problemset/problem/271/D
-			这题可以枚举每个后缀，跳过 height[i] 个字符，然后在前缀和上二分
-		重复次数最多的连续重复子串 https://codeforces.com/edu/course/2/lesson/2/5/practice/contest/269656/problem/F http://poj.org/problem?id=3693 (数据弱)
-			核心思想是枚举长度然后计算 LCP(i,i+l)，然后看是否还能再重复一次，具体代码见 main/edu/2/suffixarray/step5/f/main.go
-		重复两次的最长连续重复子串 LC1316 https://leetcode.cn/problems/distinct-echo-substrings/
-			题解 https://leetcode.cn/problems/distinct-echo-substrings/solution/geng-kuai-de-onlog2n-jie-fa-hou-zhui-shu-8wby/
+	/* 后缀数组			
 		子串统计类题目
 			用单调栈统计矩形面积 + 用单调栈跳过已经统计的
 			https://codeforces.com/problemset/problem/123/D (注：这是《挑战》上推荐的题目)
