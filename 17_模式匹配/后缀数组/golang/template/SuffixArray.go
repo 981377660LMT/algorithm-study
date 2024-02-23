@@ -40,7 +40,8 @@ import (
 )
 
 func main() {
-	abc213f()
+	abc141e()
+	// abc213f()
 	// abc272f()
 
 	// P3804()
@@ -58,7 +59,6 @@ func CF316() {
 
 // https://codeforces.com/contest/126/submission/227749650
 func CF126() {
-
 }
 
 // P3804 【模板】后缀自动机（SAM）
@@ -92,6 +92,23 @@ func P3804() {
 	}
 	fmt.Fprintln(out, res)
 }
+
+// 解法2 O(nlogn):
+//
+//	二分答案，对 height 分组，判定组内元素个数不小于 k, 类似 不可重叠最长重复子串 的做法
+func P2852() {
+
+}
+
+// 长度不小于k的公共子串个数
+// https://blog.nowcoder.net/n/0a4cfff0f0bc424c9a29979dc7d8f586
+
+// 重复次数最多的连续重复子串
+// https://blog.nowcoder.net/n/47821f2464e146ea86d83b224a91d855
+// https://blog.nowcoder.net/n/f9c3bcdf807546bd9c8d8cc43df84079
+
+// 连续的若干个相同子串
+// https://oi-wiki.org/string/sa/#%E8%BF%9E%E7%BB%AD%E7%9A%84%E8%8B%A5%E5%B9%B2%E4%B8%AA%E7%9B%B8%E5%90%8C%E5%AD%90%E4%B8%B2
 
 // F - Common Prefixes-每个后缀与所有后缀的LCP长度和
 // https://atcoder.jp/contests/abc213/tasks/abc213_f
@@ -187,27 +204,23 @@ func diffSum(s string) int {
 	return res
 }
 
-// 1044. 最长重复子串
+// 1044. 最长重复子串(可重叠最长重复子串)
 // https://leetcode.cn/problems/longest-duplicate-substring/description/
 // 给你一个字符串 s ，考虑其所有 重复子串 ：即 s 的（连续）子串，在 s 中出现 2 次或更多次。这些出现之间可能存在重叠。
 // 返回 任意一个 可能具有最长长度的重复子串。如果 s 不含重复子串，那么答案为 "" 。
 // 子串就是后缀的前缀
 // !高度数组中的最大值对应的就是可重叠最长重复子串
 func longestDupSubstring(s string) string {
-	ords := make([]int, len(s))
-	for i, c := range s {
-		ords[i] = int(c)
-	}
-	S := NewSuffixArray(ords)
+	S := NewSuffixArrayFromString(s)
 	sa, height := S.Sa, S.Height
-	start, max := 0, 0
+	saIndex, maxHeight := 0, 0
 	for i, h := range height {
-		if h > max {
-			max = h
-			start = i
+		if h > maxHeight {
+			saIndex = i
+			maxHeight = h
 		}
 	}
-	return s[sa[start] : int(sa[start])+max]
+	return s[sa[saIndex] : sa[saIndex]+maxHeight]
 }
 
 // https://leetcode.cn/problems/largest-merge-of-two-strings/
@@ -369,12 +382,12 @@ func demo() {
 }
 
 type SuffixArray struct {
-	Sa      []int // 排名第i的后缀是谁.
-	Rank    []int // 后缀s[i:]的排名是多少.
-	Height  []int // 排名相邻的两个后缀的最长公共前缀.Height[0] = 0,Height[i] = LCP(s[sa[i]:], s[sa[i-1]:])
-	Ords    []int
-	n       int
-	minSt32 *St32 // 维护lcp的最小值
+	Sa     []int // 排名第i的后缀是谁.
+	Rank   []int // 后缀s[i:]的排名是多少.
+	Height []int // 排名相邻的两个后缀的最长公共前缀.Height[0] = 0,Height[i] = LCP(s[sa[i]:], s[sa[i-1]:])
+	Ords   []int
+	n      int
+	minSt  *LinearRMQ // 维护lcp的最小值
 }
 
 // !ord值很大时,需要先离散化.
@@ -433,12 +446,12 @@ func (suf *SuffixArray) LcpRange(left int, k int) (start, end int) {
 	if k == 0 {
 		return 0, suf.n
 	}
-	if suf.minSt32 == nil {
-		suf.minSt32 = NewStMin(suf.Height)
+	if suf.minSt == nil {
+		suf.minSt = NewLinearRMQ(suf.Height)
 	}
 	i := suf.Rank[left] + 1
-	start = suf.minSt32.MinLeft(i, func(e int) bool { return e >= k }) - 1 // 向左找
-	end = suf.minSt32.MaxRight(i, func(e int) bool { return e >= k })      // 向右找
+	start = suf.minSt.MinLeft(i, func(e int) bool { return e >= k }) - 1 // 向左找
+	end = suf.minSt.MaxRight(i, func(e int) bool { return e >= k })      // 向右找
 	return
 }
 
@@ -455,8 +468,8 @@ func (suf *SuffixArray) Print(sa, ords []int) {
 
 // 求任意两个后缀s[i:]和s[j:]的最长公共前缀(lcp).
 func (suf *SuffixArray) _lcp(i, j int) int {
-	if suf.minSt32 == nil {
-		suf.minSt32 = NewStMin(suf.Height)
+	if suf.minSt == nil {
+		suf.minSt = NewLinearRMQ(suf.Height)
 	}
 	if i == j {
 		return suf.n - i
@@ -465,7 +478,7 @@ func (suf *SuffixArray) _lcp(i, j int) int {
 	if r1 > r2 {
 		r1, r2 = r2, r1
 	}
-	return suf.minSt32.Query(r1+1, r2+1)
+	return suf.minSt.Query(r1+1, r2+1)
 }
 
 func (suf *SuffixArray) _getSA(ords []int) (sa []int) {
@@ -635,42 +648,89 @@ func (suf *SuffixArray) _useSA(ords []int) (sa, rank, lcp []int) {
 	return
 }
 
-type St32 struct {
-	st     []int32
-	lookup []int32
-	n      int
+type LinearRMQ struct {
+	n     int
+	nums  []int
+	small []int
+	large [][]int
 }
 
-func NewStMin(nums []int) *St32 {
-	res := &St32{}
+// n: 序列长度.
+// less: 入参为两个索引,返回值表示索引i处的值是否小于索引j处的值.
+//
+//	消除了泛型.
+func NewLinearRMQ(nums []int) *LinearRMQ {
 	n := len(nums)
-	b := bits.Len(uint(n))
-	st := make([]int32, b*n)
-	for i := range nums {
-		st[i] = int32(nums[i])
-	}
-	for i := 1; i < b; i++ {
-		for j := 0; j+(1<<i) <= n; j++ {
-			st[i*n+j] = min32(st[(i-1)*n+j], st[(i-1)*n+j+(1<<(i-1))])
+	res := &LinearRMQ{n: n}
+	stack := make([]int, 0, 64)
+	small := make([]int, 0, n)
+	var large [][]int
+	large = append(large, make([]int, 0, n>>6))
+	for i := 0; i < n; i++ {
+		for len(stack) > 0 && nums[stack[len(stack)-1]] > nums[i] {
+			stack = stack[:len(stack)-1]
+		}
+		tmp := 0
+		if len(stack) > 0 {
+			tmp = small[stack[len(stack)-1]]
+		}
+		small = append(small, tmp|(1<<(i&63)))
+		stack = append(stack, i)
+		if (i+1)&63 == 0 {
+			large[0] = append(large[0], stack[0])
+			stack = stack[:0]
 		}
 	}
-	lookup := make([]int32, n+1)
-	for i := 2; i < len(lookup); i++ {
-		lookup[i] = lookup[i>>1] + 1
+
+	for i := 1; (i << 1) <= n>>6; i <<= 1 {
+		csz := n>>6 + 1 - (i << 1)
+		v := make([]int, csz)
+		for k := 0; k < csz; k++ {
+			back := large[len(large)-1]
+			v[k] = res._getMin(back[k], back[k+i])
+		}
+		large = append(large, v)
 	}
-	res.st = st
-	res.lookup = lookup
-	res.n = n
+
+	res.small = small
+	res.large = large
 	return res
 }
 
-func (st *St32) Query(start, end int) int {
-	b := int(st.lookup[end-start])
-	return int(min32(st.st[b*st.n+start], st.st[b*st.n+end-(1<<b)]))
+// 查询区间`[start, end)`中的最小值的索引.
+func (rmq *LinearRMQ) Query(start, end int) (minIndex int) {
+	if start >= end {
+		panic(fmt.Sprintf("start(%d) should be less than end(%d)", start, end))
+	}
+	end--
+	left := start>>6 + 1
+	right := end >> 6
+	if left < right {
+		msb := bits.Len64(uint64(right-left)) - 1
+		cache := rmq.large[msb]
+		i := (left-1)<<6 + bits.TrailingZeros64(uint64(rmq.small[left<<6-1]&(^0<<(start&63))))
+		cand1 := rmq._getMin(i, cache[left])
+		j := right<<6 + bits.TrailingZeros64(uint64(rmq.small[end]))
+		cand2 := rmq._getMin(cache[right-(1<<msb)], j)
+		return rmq._getMin(cand1, cand2)
+	}
+	if left == right {
+		i := (left-1)<<6 + bits.TrailingZeros64(uint64(rmq.small[left<<6-1]&(^0<<(start&63))))
+		j := left<<6 + bits.TrailingZeros64(uint64(rmq.small[end]))
+		return rmq._getMin(i, j)
+	}
+	return right<<6 + bits.TrailingZeros64(uint64(rmq.small[end]&(^0<<(start&63))))
+}
+
+func (rmq *LinearRMQ) _getMin(i, j int) int {
+	if rmq.nums[i] < rmq.nums[j] {
+		return i
+	}
+	return j
 }
 
 // 返回最大的 right 使得 [left,right) 内的值满足 check.
-func (st *St32) MaxRight(left int, check func(e int) bool) int {
+func (st *LinearRMQ) MaxRight(left int, check func(e int) bool) int {
 	if left == st.n {
 		return st.n
 	}
@@ -687,7 +747,7 @@ func (st *St32) MaxRight(left int, check func(e int) bool) int {
 }
 
 // 返回最小的 left 使得 [left,right) 内的值满足 check.
-func (st *St32) MinLeft(right int, check func(e int) bool) int {
+func (st *LinearRMQ) MinLeft(right int, check func(e int) bool) int {
 	if right == 0 {
 		return 0
 	}
@@ -1034,6 +1094,71 @@ func GetRange(nums []int, isMax, isLeftStrict, isRightStrict bool) (leftMost, ri
 	}
 
 	return
+}
+
+type MonoQueueValue = int
+type MonoQueue struct {
+	MinQueue       []MonoQueueValue
+	_minQueueCount []int32
+	_less          func(a, b MonoQueueValue) bool
+	_len           int
+}
+
+func NewMonoQueue(less func(a, b MonoQueueValue) bool) *MonoQueue {
+	return &MonoQueue{
+		_less: less,
+	}
+}
+
+func (q *MonoQueue) Append(value MonoQueueValue) *MonoQueue {
+	count := int32(1)
+	for len(q.MinQueue) > 0 && q._less(value, q.MinQueue[len(q.MinQueue)-1]) {
+		q.MinQueue = q.MinQueue[:len(q.MinQueue)-1]
+		count += q._minQueueCount[len(q._minQueueCount)-1]
+		q._minQueueCount = q._minQueueCount[:len(q._minQueueCount)-1]
+	}
+	q.MinQueue = append(q.MinQueue, value)
+	q._minQueueCount = append(q._minQueueCount, count)
+	q._len++
+	return q
+}
+
+func (q *MonoQueue) Popleft() {
+	q._minQueueCount[0]--
+	if q._minQueueCount[0] == 0 {
+		q.MinQueue = q.MinQueue[1:]
+		q._minQueueCount = q._minQueueCount[1:]
+	}
+	q._len--
+}
+
+func (q *MonoQueue) Head() MonoQueueValue {
+	return q.MinQueue[0]
+}
+
+func (q *MonoQueue) Min() MonoQueueValue {
+	return q.MinQueue[0]
+}
+
+func (q *MonoQueue) Len() int {
+	return q._len
+}
+
+func (q *MonoQueue) String() string {
+	sb := []string{}
+	for i := 0; i < len(q.MinQueue); i++ {
+		sb = append(sb, fmt.Sprintf("%v", pair{q.MinQueue[i], q._minQueueCount[i]}))
+	}
+	return fmt.Sprintf("MonoQueue{%v}", strings.Join(sb, ", "))
+}
+
+type pair struct {
+	value MonoQueueValue
+	count int32
+}
+
+func (p pair) String() string {
+	return fmt.Sprintf("(value: %v, count: %v)", p.value, p.count)
 }
 
 func mins(a []int) int {

@@ -6,21 +6,10 @@ func main() {
 
 	/* 后缀数组
 
-
-
-
-	题目总结：（部分参考《后缀数组——处理字符串的有力工具》，PDF 见 https://github.com/EndlessCheng/cp-pdf）
-	单个字符串
-		模板题 https://www.luogu.com.cn/problem/P3809
-			https://judge.yosupo.jp/problem/suffixarray
-			https://loj.ac/p/111
-		可重叠最长重复子串 LC1044 https://leetcode.cn/problems/longest-duplicate-substring/ LC1062 https://leetcode.cn/problems/longest-repeating-substring/
-			相当于求 max(height)，实现见下面的 longestDupSubstring
-		不可重叠最长重复子串 https://atcoder.jp/contests/abc141/tasks/abc141_e http://poj.org/problem?id=1743
+	
+		不可重叠最长重复子串 https://atcoder.jp/contests/abc141/tasks/abc141_e 
 			可参考《算法与实现》p.223 以及 https://oi-wiki.org/string/sa/#是否有某字符串在文本串中至少不重叠地出现了两次
 			重要技巧：按照 height 分组，每组中根据 sa 来处理组内后缀的位置
-		可重叠的至少出现 k 次的最长重复子串 https://www.luogu.com.cn/problem/P2852 http://poj.org/problem?id=3261
-			二分答案，对 height 分组，判定组内元素个数不小于 k
 		本质不同子串个数 LC1698 https://leetcode.cn/problems/number-of-distinct-substrings-in-a-string/
 			https://www.luogu.com.cn/problem/P2408
 			https://www.luogu.com.cn/problem/SP694

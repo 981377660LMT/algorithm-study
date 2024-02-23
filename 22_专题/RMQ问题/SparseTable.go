@@ -31,9 +31,9 @@ func main() {
 		if s1.min > s2.min {
 			return s2
 		}
-		return S{min: s1.min, index: min(s1.index, s2.index)}
+		return S{min: s1.min, index: min32(s1.index, s2.index)}
 	}
-	rmq := NewSparseTableFast(n, func(i int) S { return S{min: nums[i], index: i} }, e, op)
+	rmq := NewSparseTableFast(n, func(i int) S { return S{min: nums[i], index: int32(i)} }, e, op)
 
 	for i := 0; i < q; i++ {
 		var start, end int
@@ -44,7 +44,10 @@ func main() {
 
 // RangeMaxWIthIndex
 
-type S = struct{ min, index int }
+type S = struct {
+	min   int
+	index int32
+}
 
 // Static RMQ, O(n)预处理, O(1)查询.
 type SparseTableFast struct {
@@ -52,7 +55,7 @@ type SparseTableFast struct {
 	leaves   []S
 	pre, suf []S
 	st       *SparseTable
-	data     []int
+	data     []int32
 	e        func() S
 	op       func(S, S) S
 }
@@ -79,8 +82,8 @@ func NewSparseTableFast(n int, f func(int) S, e func() S, op func(S, S) S) *Spar
 
 	// 处理长度小于或等于16的查询
 	// 在区间 [i, i+16) 内，如果 i+j 的位置上的值是 [i, i+j] 这个子区间的最小值，那么就将 j-th 位设置为1
-	data := make([]int, n)
-	stack := 0
+	data := make([]int32, n)
+	stack := int32(0)
 	for i := n - 1; i >= 0; i-- {
 		stack = (stack << 1) & 65535
 		for stack > 0 {
@@ -208,14 +211,14 @@ func (ds *SparseTable) MinLeft(right int, check func(e S) bool) int {
 	return ok
 }
 
-func topbit(x int) int {
+func topbit(x int32) int {
 	if x == 0 {
 		return -1
 	}
 	return 31 - bits.LeadingZeros32(uint32(x))
 }
 
-func lowbit(x int) int {
+func lowbit(x int32) int {
 	if x == 0 {
 		return -1
 	}
@@ -229,7 +232,21 @@ func min(a, b int) int {
 	return b
 }
 
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
 	if a > b {
 		return a
 	}

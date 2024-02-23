@@ -13,23 +13,53 @@ import (
 	"unsafe"
 )
 
-const INF int = 1e18
+const INF int32 = 1e9 + 10
+
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	words := make([][]int32, n)
+	for i := 0; i < n; i++ {
+		var s string
+		fmt.Fscan(in, &s)
+		words[i] = make([]int32, len(s))
+		for j, b := range s {
+			words[i][j] = int32(b - 'a' + 1)
+		}
+	}
+	fmt.Fprintln(out, MultiLCS(words))
+
+}
 
 // 1923. 最长公共子路径
 // https://leetcode.cn/problems/longest-common-subpath/solution/hou-zhui-shu-zu-er-fen-da-an-by-endlessc-ocar/
-func MultiLCS(ords [][]int) (res int) {
-	sb := []int{}
+func longestCommonSubpath(n int, paths [][]int) int {
+	path32 := make([][]int32, len(paths))
+	for i, p := range paths {
+		for _, v := range p {
+			path32[i] = append(path32[i], int32(v))
+		}
+	}
+	return MultiLCS(path32)
+}
+
+func MultiLCS(ords [][]int32) (res int) {
+	sb := []int32{}
 	cand := INF // 二分右边界
 	for _, p := range ords {
-		cand = min(cand, len(p))
+		cand = min32(cand, int32(len(p)))
 		sb = append(sb, INF) // dummy
 		sb = append(sb, p...)
 	}
-	n, k := len(sb), len(ords)
+	n, k := int32(len(sb)), int32(len(ords))
 
 	// 标记每个元素属于哪个数组
-	belong := make([]int, n)
-	id := -1
+	belong := make([]int32, n)
+	id := int32(-1)
 	for i, v := range sb {
 		if v == INF {
 			id++
@@ -39,18 +69,19 @@ func MultiLCS(ords [][]int) (res int) {
 		}
 	}
 
-	sa, _, height := suffixArrayNums(sb)
+	sa, _, height := SuffixArray32(int32(len(sb)), func(i int32) int32 { return int32(sb[i]) })
 
 	// 二分求答案
-	return sort.Search(cand, func(limit int) bool {
-		limit++ // bisect_right
-		visited := make([]int, k)
-		for i := 1; i < n; i++ {
-			if height[i] < limit {
+	return sort.Search(int(cand), func(limit int) bool {
+		limit32 := int32(limit)
+		limit32++ // bisect_right
+		visited := make([]int32, k)
+		for i := int32(1); i < n; i++ {
+			if height[i] < limit32 {
 				continue
 			}
-			count := 0
-			for start := i; i < n && height[i] >= limit; i++ {
+			count := int32(0)
+			for start := i; i < n && height[i] >= limit32; i++ {
 				// 检查 sa[i] 和 sa[i-1]
 				if j := belong[sa[i]]; j < k && visited[j] != start {
 					visited[j] = start
@@ -70,17 +101,10 @@ func MultiLCS(ords [][]int) (res int) {
 	})
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func suffixArrayNums(nums []int) (sa []int32, rank, height []int) {
-	n := len(nums)
+func SuffixArray32(n int32, f func(i int32) int32) (sa, rank, height []int32) {
 	s := make([]byte, 0, n*4)
-	for _, v := range nums {
+	for i := int32(0); i < n; i++ {
+		v := f(i)
 		s = append(s, byte(v>>24), byte(v>>16), byte(v>>8), byte(v))
 	}
 	_sa := *(*[]int32)(unsafe.Pointer(reflect.ValueOf(suffixarray.New(s)).Elem().FieldByName("sa").Field(0).UnsafeAddr()))
@@ -90,42 +114,50 @@ func suffixArrayNums(nums []int) (sa []int32, rank, height []int) {
 			sa = append(sa, v>>2)
 		}
 	}
-	rank = make([]int, n)
-	for i := range rank {
+	rank = make([]int32, n)
+	for i := int32(0); i < n; i++ {
 		rank[sa[i]] = i
 	}
-	height = make([]int, n)
-	h := 0
-	for i, rk := range rank {
+	height = make([]int32, n)
+	h := int32(0)
+	for i := int32(0); i < n; i++ {
+		rk := rank[i]
 		if h > 0 {
 			h--
 		}
 		if rk > 0 {
-			for j := int(sa[rk-1]); i+h < n && j+h < n && nums[i+h] == nums[j+h]; h++ {
+			for j := sa[rk-1]; i+h < n && j+h < n && f(i+h) == f(j+h); h++ {
 			}
 		}
 		height[rk] = h
 	}
-
 	return
 }
 
-func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	words := make([][]int, n)
-	for i := 0; i < n; i++ {
-		var s string
-		fmt.Fscan(in, &s)
-		words[i] = make([]int, len(s))
-		for j, b := range s {
-			words[i][j] = int(b - 'a' + 1)
-		}
+func min(a, b int) int {
+	if a < b {
+		return a
 	}
-	fmt.Fprintln(out, MultiLCS(words))
+	return b
+}
 
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
 }
