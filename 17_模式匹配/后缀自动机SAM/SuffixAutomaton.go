@@ -33,9 +33,25 @@ func P3975() {
 }
 
 // https://www.luogu.com.cn/problem/CF123D
-// 给出 s，求所有 s 的子串 p 在 s 中的出现位置的所有子串个数，字符串的重复子串只算一次。
-// 也可以用SAM做.
+// !枚举字符串 s 的每一个本质不同的子串 ss ，令 cnt(ss) 为子串 ss 在字符串 s 中出现的个数，求 ∑ cnt(ss)*(cnt(ss)+1)/2
 func cf123d() {}
+
+// P4070 [SDOI2016] 生成魔咒
+// https://www.luogu.com.cn/problem/P4070
+// 在线求本质不同子串数.
+// 按顺序在一个序列的末尾插入数字，每次求出插入后能得到的本质不同的子串个数。
+func p4070() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := range nums {
+		fmt.Fscan(in, &nums[i])
+	}
+}
 
 // https://judge.yosupo.jp/problem/number_of_substrings
 func yosupo() {

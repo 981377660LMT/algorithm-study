@@ -27,11 +27,11 @@ func main() {
 		拼接所有串（模式+文本，# 隔开），对每个模式 p 找其左右范围，满足该范围内 height[i] >= len(p)，这可以用 ST+二分或线段树二分求出，然后统计区间内的属于文本串的后缀
 逆向
 	todo 根据 sa 反推有多少个能生成 sa 的字符串 https://codeforces.com/problemset/problem/1526/E
-todo 待整理 http://poj.org/problem?id=3581
+
  https://www.luogu.com.cn/problem/P5546
- https://www.luogu.com.cn/problem/P2048
- https://www.luogu.com.cn/problem/P4248
- https://www.luogu.com.cn/problem/P4341
- https://www.luogu.com.cn/problem/P6095
- https://www.luogu.com.cn/problem/P4070
+
+
+
+
+
 */

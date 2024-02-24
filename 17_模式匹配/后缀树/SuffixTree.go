@@ -114,6 +114,38 @@ func demo() {
 	fmt.Println(s[start:end])
 }
 
+// P2048 [NOI2010] 超级钢琴
+// https://www.luogu.com.cn/problem/P2048
+// 求前k大长度在l到r长度的子串和。
+func p2048() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, k, left, right int
+	fmt.Fscan(in, &n, &k, &left, &right)
+	nums := make([]int32, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+}
+
+// P4341 [BJWC2010] 外星联络
+// https://www.luogu.com.cn/problem/P4341
+// 给一个字符串求所以出现次数大于 1 的子串所出现的次数。输出的顺序按对应的子串的字典序排列。
+func p4341() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	var s string
+	fmt.Fscan(in, &s)
+
+	_, ranges := SuffixTree(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+}
+
 // CF123D String
 // https://www.luogu.com.cn/problem/CF123D
 // !枚举字符串 s 的每一个本质不同的子串 ss ，令 cnt(ss) 为子串 ss 在字符串 s 中出现的个数，求 ∑ cnt(ss)*(cnt(ss)+1)/2

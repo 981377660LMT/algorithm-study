@@ -227,6 +227,20 @@ func P4248() {
 	fmt.Fprintln(out, res)
 }
 
+// P6095 [JSOI2015] 串分割
+// https://www.luogu.com.cn/problem/P6095
+// 后缀数组一个很好的作用就是可以用它来按照字典序二分字符串
+func P6095() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, k int
+	fmt.Fscan(in, &n, &k)
+	var s string
+	fmt.Fscan(in, &s)
+}
+
 // 对0<=i<j<n,求lcp(s[i:],s[j:])之和.
 func 所有后缀LCP之和(s string) int {
 	S := NewSuffixArrayFromString(s)
