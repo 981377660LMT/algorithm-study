@@ -24,6 +24,7 @@
 //  func (suf *SuffixArray) Lcp(a, b int, c, d int) int
 //  func (suf *SuffixArray) CompareSubstr(a, b int, c, d int) int
 //  func (suf *SuffixArray) LcpRange(left int, k int) (start, end int)
+//	func (suf *SuffixArray) Count(start, end int) int
 //  func GetSA(ords []int) (sa []int)
 //  func UseSA(ords []int) (sa, rank, lcp []int)
 
@@ -40,15 +41,21 @@ import (
 )
 
 func main() {
+	// CF126()
+	// CF316()
 
 	// abc213f()
 	// abc272f()
 
+	// p2178()
+	P2870()
 	// P3804()
+	// P4248()
 
-	重复次数最多的连续重复子串()
+	// 重复次数最多的连续重复子串()
+	// fmt.Println(所有后缀LCP之和("abaab"))
 
-	// testLcpRange()
+	// test()
 }
 
 // https://codeforces.com/contest/126/submission/227749650
@@ -61,10 +68,115 @@ func CF316() {
 	// itoa
 }
 
-// P2178 [NOI2015] 品酒大会
-// 结合并查集
 // https://www.luogu.com.cn/problem/P2178
-func P2178() {}
+// P2178 [NOI2015] 品酒大会
+// https://www.luogu.com.cn/problem/P2178
+// 对于每个 0<=i<n，求有多少对后缀满足 len(lcp) ≥ i，以及满足条件的两个后缀的权值乘积的最大值。
+//
+// !求出height数组后，按 height 从大到小把所有sa数组中相邻后缀合并.用并查集维护.
+func p2178() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int = 1e18
+
+	var n int
+	fmt.Fscan(in, &n)
+	var s string
+	fmt.Fscan(in, &s)
+	scores := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &scores[i])
+	}
+
+	S := NewSuffixArrayFromString(s)
+	sa, height := S.Sa, S.Height
+	indexes := make([][]int, n)
+	for i, h := range height {
+		indexes[h] = append(indexes[h], i)
+	}
+	uf := NewUnionFindArray(n)
+	groupInfo := make([][2]int, n) // (min,max)
+	for i := 0; i < n; i++ {
+		groupInfo[i] = [2]int{scores[sa[i]], scores[sa[i]]}
+	}
+
+	res1, res2 := make([]int, n), make([]int, n) // res1: 满足条件的对数, res2: 满足条件的两个后缀的权值乘积的最大值
+	curPair, curMax := 0, -INF
+	for i := n - 1; i >= 0; i-- {
+		for _, j := range indexes[i] {
+			if j == 0 {
+				continue
+			}
+
+			uf.Union(
+				j-1, j,
+				func(big, small int) {
+					bigSize, smallSize := uf.Size(big), uf.Size(small)
+					curPair += bigSize * smallSize
+					bigMin, smallMin := groupInfo[big][0], groupInfo[small][0]
+					bigMax, smallMax := groupInfo[big][1], groupInfo[small][1]
+					groupInfo[big][0] = min(bigMin, smallMin)
+					groupInfo[big][1] = max(bigMax, smallMax)
+					curMax = max(curMax, bigMax*smallMax)
+					curMax = max(curMax, bigMin*smallMin)
+				},
+			)
+		}
+
+		res1[i], res2[i] = curPair, curMax
+	}
+
+	for i := 0; i < n; i++ {
+		if res2[i] == -INF {
+			res2[i] = 0
+		}
+	}
+
+	for i := 0; i < n; i++ {
+		fmt.Fprintln(out, res1[i], res2[i])
+	}
+}
+
+// P2870 [USACO07DEC] Best Cow Line G
+// https://www.luogu.com.cn/problem/P2870
+// 从字符串首尾取字符最小化字典序
+// 每输出 80 个字母需要一个换行。
+func P2870() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	ords1, ords2 := make([]int, n), make([]int, n) // 原串,反串
+	for i := 0; i < n; i++ {
+		var c string
+		fmt.Fscan(in, &c)
+		v := int(c[0])
+		ords1[i], ords2[n-1-i] = v, v
+	}
+	S := NewSuffixArray2(ords1, ords2)
+
+	ptr1, ptr2 := 0, 0
+	count := 0
+	for count < n {
+		if S.CompareSubstr(ptr1, n, ptr2, n) == -1 {
+			fmt.Fprint(out, string(rune(ords1[ptr1])))
+			ptr1++
+		} else {
+			fmt.Fprint(out, string(rune(ords2[ptr2])))
+			ptr2++
+		}
+		count++
+
+		if count%80 == 0 {
+			fmt.Fprintln(out)
+		}
+	}
+
+}
 
 // P3804 【模板】后缀自动机（SAM）
 // https://www.luogu.com.cn/problem/P3804
@@ -100,7 +212,41 @@ func P3804() {
 
 // P4248 [AHOI2013] 差异
 // https://www.luogu.com.cn/problem/P4248
-func P4248() {}
+// 定义两个字符串 S 和 T 的差异 diff(S,T) 为这两个串的长度之和减去两倍的这两个串的最长公共前缀的长度。
+// 求所有的 diff(S,T) 之和。
+func P4248() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s string
+	fmt.Fscan(in, &s)
+
+	n := len(s)
+	res := n*(n-1)*(n+1)/2 - 2*所有后缀LCP之和(s)
+	fmt.Fprintln(out, res)
+}
+
+// 对0<=i<j<n,求lcp(s[i:],s[j:])之和.
+func 所有后缀LCP之和(s string) int {
+	S := NewSuffixArrayFromString(s)
+	height := S.Height
+
+	n := len(s)
+	res := 0
+	// !lcp(sa[i],sa[j]) = min(height[i+1..j])
+	clampMaxStack := NewClampableStack(false) // 截断最大值的单调栈
+	for i := 0; i < n; i++ {
+		clampMaxStack.AddAndClamp(height[i])
+		res += clampMaxStack.Sum() //  sa[i]与左侧所有后缀的lcp和
+	}
+	clampMaxStack.Clear()
+	for i := n - 1; i >= 0; i-- {
+		res += clampMaxStack.Sum() // sa[i]与右侧所有后缀的lcp和
+		clampMaxStack.AddAndClamp(height[i])
+	}
+	return res / 2
+}
 
 // Periodic Substring
 // 重复次数最多的连续重复子串 (nlogn)
@@ -168,11 +314,11 @@ func abc213f() {
 	clampMaxStack := NewClampableStack(false) // 截断最大值的单调栈
 	for i := 0; i < n; i++ {
 		clampMaxStack.AddAndClamp(height[i])
-		res[sa[i]] += clampMaxStack.Sum() // s[i]与左侧所有后缀的lcp和
+		res[sa[i]] += clampMaxStack.Sum() // sa[i]与左侧所有后缀的lcp和
 	}
 	clampMaxStack.Clear()
 	for i := n - 1; i >= 0; i-- {
-		res[sa[i]] += clampMaxStack.Sum() // s[i]与右侧所有后缀的lcp和
+		res[sa[i]] += clampMaxStack.Sum() // sa[i]与右侧所有后缀的lcp和
 		clampMaxStack.AddAndClamp(height[i])
 	}
 
@@ -181,7 +327,7 @@ func abc213f() {
 	}
 }
 
-// F - Two Strings
+// F - Two Strings(所有循环串的比较计数)
 // https://atcoder.jp/contests/abc272/tasks/abc272_f
 // 给定两个长为n的字符串s和t
 // 问s和t的所有轮转的子串中 s的轮转子串有多少个字典序 <= t的轮转子串
@@ -233,6 +379,7 @@ func diffSum(s string) int {
 
 // https://leetcode.cn/problems/largest-merge-of-two-strings/
 // 1754. 构造字典序最大的合并字符串
+// 从字符串首尾取字符最小化字典序
 func largestMerge(word1 string, word2 string) string {
 	ords1, ords2 := make([]int, len(word1)), make([]int, len(word2))
 	for i, c := range word1 {
@@ -275,8 +422,8 @@ func sumScores(s string) int64 {
 	return int64(res)
 }
 
-func testLcpRange() {
-	n := int(1e3)
+func test() {
+	n := int(1000)
 	ords := make([]int, n)
 	for i := 1; i < n; i++ {
 		ords[i] = i * i
@@ -309,8 +456,32 @@ func testLcpRange() {
 		return
 	}
 
-	fmt.Println(S.LcpRange(4, 0))
-	fmt.Println(LcpRange2(4, 0))
+	count2 := func(ords []int, start, end int) int {
+
+		target := ords[start:end]
+		len_ := end - start
+		if len_ == 0 {
+			return 0
+		}
+		res := 0
+
+		for i := 0; i+len_ <= n; i++ {
+			curOrds := ords[i : i+len_]
+			allOk := true
+			for j := 0; j < len_; j++ {
+				if curOrds[j] != target[j] {
+					allOk = false
+					break
+				}
+			}
+			if allOk {
+				res++
+			}
+		}
+		return res
+	}
+
+	// lcpRange
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			start1, end1 := S.LcpRange(i, j)
@@ -321,6 +492,19 @@ func testLcpRange() {
 			}
 		}
 	}
+
+	// count
+	for i := 0; i < n; i++ {
+		for j := i; j < n; j++ {
+			c1 := S.Count(i, j)
+			c2 := count2(ords, i, j)
+			if c1 != c2 {
+				fmt.Println(i, j, c1, c2)
+				panic("")
+			}
+		}
+	}
+
 	fmt.Println("pass")
 }
 
@@ -406,6 +590,21 @@ func (suf *SuffixArray) LcpRange(left int, k int) (start, end int) {
 	start = suf.minSt.MinLeft(i, func(e int) bool { return e >= k }) - 1 // 向左找
 	end = suf.minSt.MaxRight(i, func(e int) bool { return e >= k })      // 向右找
 	return
+}
+
+// 查询s[start:end)在s中的出现次数.
+func (suf *SuffixArray) Count(start, end int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > suf.n {
+		end = suf.n
+	}
+	if start >= end {
+		return 0
+	}
+	a, b := suf.LcpRange(start, end-start)
+	return b - a
 }
 
 func (suf *SuffixArray) Print(n int, f func(i int) int, sa []int) {
@@ -1113,6 +1312,47 @@ func (p pair) String() string {
 	return fmt.Sprintf("(value: %v, count: %v)", p.value, p.count)
 }
 
+type UnionFindArray struct {
+	data []int
+}
+
+func NewUnionFindArray(n int) *UnionFindArray {
+	data := make([]int, n)
+	for i := 0; i < n; i++ {
+		data[i] = -1
+	}
+	return &UnionFindArray{data: data}
+}
+
+// f: 合并两个分组前的钩子函数.
+func (ufa *UnionFindArray) Union(key1, key2 int, f func(big, small int)) bool {
+	root1, root2 := ufa.Find(key1), ufa.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+	if ufa.data[root1] > ufa.data[root2] {
+		root1, root2 = root2, root1
+	}
+	if f != nil {
+		f(root1, root2)
+	}
+	ufa.data[root1] += ufa.data[root2]
+	ufa.data[root2] = root1
+	return true
+}
+
+func (ufa *UnionFindArray) Find(key int) int {
+	if ufa.data[key] < 0 {
+		return key
+	}
+	ufa.data[key] = ufa.Find(ufa.data[key])
+	return ufa.data[key]
+}
+
+func (ufa *UnionFindArray) Size(key int) int {
+	return -ufa.data[ufa.Find(key)]
+}
+
 func mins(a []int) int {
 	mn := a[0]
 	for _, x := range a {
@@ -1149,6 +1389,13 @@ func min32(a, b int32) int32 {
 }
 
 func max(a, b int) int {
+	if a >= b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
 	if a >= b {
 		return a
 	}

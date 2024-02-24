@@ -236,6 +236,9 @@ func (d *Doubling) MaxStep(from int, check func(weight E) bool) (step int, to in
 	for k := d.log - 1; k >= 0; k-- {
 		pos := k*d.n + from
 		tmp := d.to[pos]
+		if tmp == -1 {
+			continue
+		}
 		next := d.op(res, d.dp[pos])
 		if check(next) {
 			step |= 1 << k

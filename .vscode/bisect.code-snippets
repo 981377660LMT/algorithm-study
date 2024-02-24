@@ -6651,5 +6651,21 @@
       ""
     ],
     "description": "UnionFindMapSimple"
+  },
+  "ReverseString": {
+    "scope": "go",
+    "prefix": "ReverseString",
+    "body": [
+      "func ReverseString(s string) string {",
+      "\tn := len(s)",
+      "\trunes := make([]rune, n)",
+      "\tfor _, r := range s {",
+      "\t\tn--",
+      "\t\trunes[n] = r",
+      "\t}",
+      "\treturn string(runes)",
+      "}"
+    ],
+    "description": "ReverseString"
   }
 }

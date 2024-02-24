@@ -11,6 +11,27 @@ import (
 	"os"
 )
 
+// P3975 [TJOI2015] 弦论
+// https://www.luogu.com.cn/problem/P3975
+func P3975() {
+	// in := bufio.NewReader(os.Stdin)
+	// out := bufio.NewWriter(os.Stdout)
+	// defer out.Flush()
+
+	// var s string
+	// fmt.Fscan(in, &s)
+	// var b, k int
+	// fmt.Fscan(in, &b, &k)
+
+	// unique := b == 0
+
+	// if !ok {
+	// 	fmt.Fprintln(out, -1)
+	// 	return
+	// }
+	// fmt.Fprintln(out, s[start:end])
+}
+
 // https://www.luogu.com.cn/problem/CF123D
 // 给出 s，求所有 s 的子串 p 在 s 中的出现位置的所有子串个数，字符串的重复子串只算一次。
 // 也可以用SAM做.
