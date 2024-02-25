@@ -1,4 +1,5 @@
 // https://www.luogu.com.cn/blog/yszs/ac-zi-dong-ji-fou-guo-shi-jian-fail-shu-di-gong-ju-pi-liao
+// fail 指针指向所有模式串的前缀中匹配当前状态的最长后缀(border)
 // !- !fail[i]表示在trie树上的第i个点表示的前缀，它在trie树上的最长后缀是第fail[i]个点表示的前缀。
 // !- 子串 = 前缀的后缀
 //   Trie树（AC自动机）的祖先节点 = 前缀

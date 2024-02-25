@@ -40,3 +40,7 @@ https://oi-wiki.org/ds/seg/#%E6%8B%93%E5%B1%95---%E7%8C%AB%E6%A0%91
 https://cnblogs.com/tzcwk/p/msfz.html
 离线版猫树分治：[label](%E7%8C%AB%E6%A0%91%E5%88%86%E6%B2%BB.go)
 在线版猫树分治：保存每层的分治结果，即`DisjointSparseTable`，空间占用大
+
+---
+
+https://www.luogu.com.cn/blog/juruo-lzy/xu-lie-fen-zhi-xue-xi-bi-ji

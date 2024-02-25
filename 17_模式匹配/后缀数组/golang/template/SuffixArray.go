@@ -43,6 +43,7 @@ import (
 func main() {
 	// CF126()
 	// CF316()
+	CF432D()
 
 	// abc213f()
 	// abc272f()
@@ -50,7 +51,7 @@ func main() {
 	// p2178()
 	// P2870()
 	// P3804()
-	P4051()
+	// P4051()
 	// P4248()
 
 	// 重复次数最多的连续重复子串()
@@ -59,14 +60,94 @@ func main() {
 	// test()
 }
 
-// https://codeforces.com/contest/126/submission/227749650
+// Password
+// https://www.luogu.com.cn/problem/CF126B
+// 给你一个字符串S（|S|<=1e6）.
+// !找到既是S前缀又是S后缀又在S中间出现过（既不是S前缀又不是S后缀）的子串.
+// 如果不存在输出“Just a legend”.
+//
+// !是前缀：rank[0] 对应后缀的前缀即为整个串的前缀.
+// !是后缀：说明这个后缀的字典序需要小于整个串的字典序，即排名小于rank[0].
+// !在中间出现过：
 func CF126() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int = 1e18
+
+	var s string
+	fmt.Fscan(in, &s)
+
+	S := NewSuffixArrayFromString(s)
+	sa, rank, height := S.Sa, S.Rank, S.Height
+	k := rank[0] // 整个串的排名
+
+	n := len(s)
+	resEnd := 0
+	lcp := INF
+	for i := k - 1; i >= 0; i-- { // 前缀的字典序一定小于整个串的字典序, 所以向上找
+		lcp = min(lcp, height[i+1])
+		length := n - sa[i]
+		if length == lcp { // is border
+			ok1 := k-i >= 2                      // 上方存在第三个相同的子串
+			ok2 := k+1 < n && height[k+1] >= lcp // 下方存在第三个相同的子串
+			if ok1 || ok2 {
+				resEnd = max(resEnd, length)
+			}
+		}
+	}
+
+	if resEnd == 0 {
+		fmt.Fprintln(out, "Just a legend")
+	} else {
+		fmt.Fprintln(out, s[:resEnd])
+	}
 }
 
 // G3. Good Substrings
 // https://codeforces.com/contest/316/submission/218670841
 func CF316() {
 	// itoa
+}
+
+// Prefixes and Suffixes
+// https://www.luogu.com.cn/problem/CF432D
+// “完美子串”定义为既是前缀又是后缀的子串.
+// 给定一个字符串，求这些串的(长度，个数).
+// 是前缀的后缀 <=> lcp(后缀x, s) == n - sa[x]
+func CF432D() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int = 1e18
+
+	var s string
+	fmt.Fscan(in, &s)
+
+	S := NewSuffixArrayFromString(s)
+	sa, rank, height := S.Sa, S.Rank, S.Height
+	k := rank[0] // 整个串的排名
+
+	n := len(s)
+
+	lcp := INF
+	res := [][2]int{{n, 1}} // 整个串
+	for i := k - 1; i >= 0; i-- {
+		lcp = min(lcp, height[i+1])
+		length := n - sa[i]
+		if length == lcp { // is border (是前缀的后缀)
+			start, end := sa[i], sa[i]+length
+			count := S.Count(start, end)
+			res = append(res, [2]int{length, count})
+		}
+	}
+
+	fmt.Fprintln(out, len(res))
+	for i := len(res) - 1; i >= 0; i-- {
+		fmt.Fprintln(out, res[i][0], res[i][1])
+	}
 }
 
 // https://www.luogu.com.cn/problem/P2178

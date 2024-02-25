@@ -178,6 +178,7 @@ type RollingHash struct {
 }
 
 // eg: NewRollingHash(131, 1e9+7)
+// mod: 999999937/999999929/999999893/999999797/999999761/999999757/999999751/999999739
 func NewRollingHash(base uint, mod uint) *RollingHash {
 	return &RollingHash{
 		base:  base,

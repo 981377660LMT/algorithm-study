@@ -65,7 +65,7 @@
 //
 //   - 2. 后缀树上每一个节点到根的路径都是 S 的一个非空子串。
 //
-//   - 3. 后缀树的 DFS 序就是后缀数组。
+// !  - 3. 后缀树的 DFS 序就是后缀数组(后缀树上dfs是按照字典序遍历子串).
 //
 //   - 4. 后缀树的一个子树对应到后缀数组上的一个区间。
 //
@@ -90,6 +90,8 @@ import (
 	"index/suffixarray"
 	"os"
 	"reflect"
+	"sort"
+	"strings"
 	"unsafe"
 )
 
@@ -106,7 +108,8 @@ func main() {
 	// p4341()
 	// p5341()
 
-	yukicoder2361()
+	// yukicoder2361()
+	abc280()
 }
 
 // https://oi-wiki.org/string/suffix-tree/
@@ -436,10 +439,187 @@ func longestCommonSubpath(n int, paths [][]int) int {
 	return 0
 }
 
-// TODO: https://yukicoder.me/problems/no/2361
-// https://maspypy.github.io/library/test/yukicoder/2361.test.cpp
+// https://yukicoder.me/problems/no/2361
+// 给定一个长为n的字符串s和q个询问.
+// 每个询问给出一个区间[start,end), 问有多少个子串的字典序严格小于s[start:end).
+//
+// !1.将查询的子串 s[start:end) 表示为"起点为start的后缀的长为(end-start)的一个前缀".
+// !2.离线查询，按照后缀起点将查询分组，便于后续按照字典序遍历查询.
+// !3.线段树维护sa数组上的查询长度最小值, 每次将查询长度最小的查询取出，保证遍历后缀树节点时可以按照字典序处理查询.
 func yukicoder2361() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	var s string
+	fmt.Fscan(in, &s)
+	queries := make([][2]int32, q)
+	for i := range queries {
+		fmt.Fscan(in, &queries[i][0], &queries[i][1])
+		queries[i][0]--
+	}
+
+	sa, rank, height := SuffixArray32(n, func(i int32) int32 { return int32(s[i]) })
+	type pair struct{ length, qid int32 } // 长度, 询问id
+	queryGroups := make([][]pair, n)      // 按照sa数组下标分组
+	for i := range queries {
+		start, end := queries[i][0], queries[i][1]
+		saIndex := rank[start]
+		queryGroups[saIndex] = append(queryGroups[saIndex], pair{length: end - start, qid: int32(i)})
+	}
+	for _, group := range queryGroups {
+		// 长度短的查询排在数组末尾，先取出
+		sort.Slice(group, func(i, j int) bool { return group[i].length > group[j].length })
+	}
+	seg := NewSegmentTree(int(n), func(i int) E { return E{value: INF32, index: -1} }) // !维护每个saIndex对应的查询长度最小值
+	updateRMQ := func(saIndex int32) {
+		group := queryGroups[saIndex]
+		if len(group) == 0 {
+			seg.Set(int(saIndex), E{value: INF32, index: -1})
+		} else {
+			minLength := group[len(group)-1].length
+			seg.Set(int(saIndex), E{value: minLength, index: saIndex})
+		}
+	}
+	for i := int32(0); i < n; i++ {
+		updateRMQ(i)
+	}
+
+	res := make([]int, q)
+	suffixTree, ranges := SuffixTreeFrom(sa, height)
+	smaller := 0
+	var dfs func(cur int32)
+	dfs = func(cur int32) {
+		rowStart, rowEnd, colStart, colEnd := int(ranges[cur][0]), int(ranges[cur][1]), int(ranges[cur][2]), int(ranges[cur][3])
+		freq, nodeCount := rowEnd-rowStart, colEnd-colStart
+		minLength, maxLength := colStart+1, colEnd
+
+		// !按照字典序取出存在于当前结点(矩形)内部的所有查询
+		for {
+			item := seg.Query(rowStart, rowEnd)
+			queryLength, saIndex := int(item.value), item.index
+			if queryLength > maxLength {
+				break
+			}
+			group := &queryGroups[saIndex]
+			qid := (*group)[len(*group)-1].qid
+			*group = (*group)[:len(*group)-1]
+			updateRMQ(saIndex)
+
+			res[qid] = smaller + freq*(queryLength-minLength) // 整个矩形区域的子串个数
+		}
+
+		smaller += freq * nodeCount
+		for _, next := range suffixTree[cur] {
+			dfs(next)
+		}
+	}
+	dfs(0)
+
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
+}
+
+// https://www.luogu.com.cn/problem/AT_abc280_h （多个字符串的第k小子串）
+// !给定n个字符串和q个查询,每次询问第 k 小子串,并输出它属于哪个字符串和它在原字符串中的位置.
+// 查询的k从1开始递增.
+//
+// 离线所有询问，按照字典序遍历，走到排名对应的节点求得答案即可
+func abc280() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const BIG rune = 'z' + 1
+
+	var m int32
+	fmt.Fscan(in, &m)
+	starts, ends := make([]int32, m), make([]int32, m)
+	sb := strings.Builder{}
+	for i := int32(0); i < m; i++ {
+		var s string
+		fmt.Fscan(in, &s)
+		starts[i] = int32(sb.Len())
+		sb.WriteString(s)
+		ends[i] = int32(sb.Len())
+		sb.WriteRune(BIG)
+	}
+
+	s := sb.String()
+	n := int32(len(s))
+	sa, rank, height := SuffixArray32(n, func(i int32) int32 { return int32(s[i]) })
+
+	// belong: 每个后缀所属的字符串编号
+	// size: 每个后缀在所属字符串中的长度
+	// at: 每个后缀在所属字符串中的起始位置
+	belong, size, at := make([]int32, n), make([]int32, n), make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		belong[i] = -1
+		size[i] = -1
+		at[i] = -1
+	}
+	for i := int32(0); i < m; i++ {
+		for j := starts[i]; j < ends[i]; j++ {
+			p := rank[j]
+			belong[p] = i
+			size[p] = ends[i] - j
+			at[p] = j - starts[i]
+		}
+	}
+
+	var q int
+	fmt.Fscan(in, &q)
+	queries := make([]int, q)
+	for i := 0; i < q; i++ {
+		fmt.Fscan(in, &queries[i])
+		queries[i]--
+	}
+
+	queryPtr := 0
+	smaller := 0
+	suffixTree, ranges := SuffixTreeFrom(sa, height)
+	res := make([][3]int32, 0, q) // (belong,start,end)
+	var dfs func(cur int32)
+	dfs = func(cur int32) {
+		if queryPtr == q {
+			return
+		}
+		rowStart, rowEnd, colStart, colEnd := ranges[cur][0], ranges[cur][1], ranges[cur][2], ranges[cur][3]
+
+		// !只有长度在[1,size[rowStart])的子串才是合法子串(不带分隔符)
+		if colStart >= size[rowStart] {
+			return
+		}
+		colEnd = min32(colEnd, size[rowStart]) // 保证不超过字符串长度
+
+		freq, nodeCount := rowEnd-rowStart, colEnd-colStart
+		curCount := int(freq) * int(nodeCount)
+		for ; queryPtr < q; queryPtr++ {
+			// 在这个区域中寻找字典序第k小的子串(0<=k<curCount)
+			k := queries[queryPtr] - smaller
+			if k >= curCount {
+				break
+			}
+			div := k / int(freq)
+			bid := belong[rowStart]
+			start := at[rowStart]
+			end := start + colStart + int32(div) + 1
+			res = append(res, [3]int32{bid, start, end})
+		}
+
+		smaller += curCount
+		for _, next := range suffixTree[cur] {
+			dfs(next)
+		}
+	}
+	dfs(0)
+
+	for _, v := range res {
+		fmt.Fprintln(out, v[0]+1, v[1]+1, v[2])
+	}
 }
 
 // directTree: 后缀树, 从 0 开始编号, 0 结点为虚拟根节点.
@@ -639,6 +819,197 @@ func NewCartesianTreeSimple32(nums []int32) *CartesianTreeSimple32 {
 	}
 
 	return res
+}
+
+// PointSetRangeMinIndex
+const INF32 int32 = 1e9 + 10
+
+type E = struct{ value, index int32 }
+
+func (*SegmentTree) e() E {
+	return E{value: INF32, index: -1}
+}
+func (*SegmentTree) op(a, b E) E {
+	if a.value < b.value {
+		return a
+	}
+	if a.value > b.value {
+		return b
+	}
+	if a.index < b.index {
+		return a
+	}
+	return b
+}
+
+type SegmentTree struct {
+	n, size int
+	seg     []E
+}
+
+func NewSegmentTree(n int, f func(int) E) *SegmentTree {
+	res := &SegmentTree{}
+	size := 1
+	for size < n {
+		size <<= 1
+	}
+	seg := make([]E, size<<1)
+	for i := range seg {
+		seg[i] = res.e()
+	}
+	for i := 0; i < n; i++ {
+		seg[i+size] = f(i)
+	}
+	for i := size - 1; i > 0; i-- {
+		seg[i] = res.op(seg[i<<1], seg[i<<1|1])
+	}
+	res.n = n
+	res.size = size
+	res.seg = seg
+	return res
+}
+func NewSegmentTreeFrom(leaves []E) *SegmentTree {
+	res := &SegmentTree{}
+	n := len(leaves)
+	size := 1
+	for size < n {
+		size <<= 1
+	}
+	seg := make([]E, size<<1)
+	for i := range seg {
+		seg[i] = res.e()
+	}
+	for i := 0; i < n; i++ {
+		seg[i+size] = leaves[i]
+	}
+	for i := size - 1; i > 0; i-- {
+		seg[i] = res.op(seg[i<<1], seg[i<<1|1])
+	}
+	res.n = n
+	res.size = size
+	res.seg = seg
+	return res
+}
+func (st *SegmentTree) Get(index int) E {
+	if index < 0 || index >= st.n {
+		return st.e()
+	}
+	return st.seg[index+st.size]
+}
+func (st *SegmentTree) Set(index int, value E) {
+	if index < 0 || index >= st.n {
+		return
+	}
+	index += st.size
+	st.seg[index] = value
+	for index >>= 1; index > 0; index >>= 1 {
+		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+	}
+}
+func (st *SegmentTree) Update(index int, value E) {
+	if index < 0 || index >= st.n {
+		return
+	}
+	index += st.size
+	st.seg[index] = st.op(st.seg[index], value)
+	for index >>= 1; index > 0; index >>= 1 {
+		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+	}
+}
+
+// [start, end)
+func (st *SegmentTree) Query(start, end int) E {
+	if start < 0 {
+		start = 0
+	}
+	if end > st.n {
+		end = st.n
+	}
+	if start >= end {
+		return st.e()
+	}
+	leftRes, rightRes := st.e(), st.e()
+	start += st.size
+	end += st.size
+	for start < end {
+		if start&1 == 1 {
+			leftRes = st.op(leftRes, st.seg[start])
+			start++
+		}
+		if end&1 == 1 {
+			end--
+			rightRes = st.op(st.seg[end], rightRes)
+		}
+		start >>= 1
+		end >>= 1
+	}
+	return st.op(leftRes, rightRes)
+}
+func (st *SegmentTree) QueryAll() E { return st.seg[1] }
+func (st *SegmentTree) GetAll() []E {
+	res := make([]E, st.n)
+	copy(res, st.seg[st.size:st.size+st.n])
+	return res
+}
+
+// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
+func (st *SegmentTree) MaxRight(left int, predicate func(E) bool) int {
+	if left == st.n {
+		return st.n
+	}
+	left += st.size
+	res := st.e()
+	for {
+		for left&1 == 0 {
+			left >>= 1
+		}
+		if !predicate(st.op(res, st.seg[left])) {
+			for left < st.size {
+				left <<= 1
+				if tmp := st.op(res, st.seg[left]); predicate(tmp) {
+					res = tmp
+					left++
+				}
+			}
+			return left - st.size
+		}
+		res = st.op(res, st.seg[left])
+		left++
+		if (left & -left) == left {
+			break
+		}
+	}
+	return st.n
+}
+
+// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
+func (st *SegmentTree) MinLeft(right int, predicate func(E) bool) int {
+	if right == 0 {
+		return 0
+	}
+	right += st.size
+	res := st.e()
+	for {
+		right--
+		for right > 1 && right&1 == 1 {
+			right >>= 1
+		}
+		if !predicate(st.op(st.seg[right], res)) {
+			for right < st.size {
+				right = right<<1 | 1
+				if tmp := st.op(st.seg[right], res); predicate(tmp) {
+					res = tmp
+					right--
+				}
+			}
+			return right + 1 - st.size
+		}
+		res = st.op(st.seg[right], res)
+		if right&-right == right {
+			break
+		}
+	}
+	return 0
 }
 
 func reverseString(s string) string {

@@ -7,7 +7,66 @@ import (
 )
 
 func main() {
-	yosupo()
+	CF1326D2()
+	// yosupo()
+}
+
+// Prefix-Suffix Palindrome (Hard version)
+// https://www.luogu.com.cn/problem/CF1326D2
+// 给定一个字符串。
+// 要求选取他的一个前缀(可以为空)和与该前缀不相交的一个后缀(可以为空)拼接成回文串，
+// 且该回文串长度最大。求方案.
+//
+// !先选取互为反串的最长前后缀，然后在剩余字符串中选取最长回文前缀或后缀。
+func CF1326D2() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	solve := func(s string) string {
+		n := len(s)
+		ptr := 0
+		for ptr < n && s[ptr] == s[n-1-ptr] {
+			ptr++
+		}
+		if ptr == n {
+			return s
+		}
+
+		M := NewManacher(s)
+		preStart, sufEnd := int32(ptr), int32(n-1-ptr+1)
+		preEnd, sufStart := int32(0), int32(0)
+
+		// 回文前缀
+		for e := sufEnd; e > preStart; e-- {
+			if M.IsPalindrome(preStart, e) {
+				preEnd = e
+				break
+			}
+		}
+		// 回文后缀
+		for s := preStart; s < sufEnd; s++ {
+			if M.IsPalindrome(s, sufEnd) {
+				sufStart = s
+				break
+			}
+		}
+
+		if len1, len2 := preEnd-preStart, sufEnd-sufStart; len1 >= len2 {
+			return s[:preEnd] + s[n-ptr:]
+		} else {
+			return s[:ptr] + s[sufStart:]
+		}
+
+	}
+
+	var T int
+	fmt.Fscan(in, &T)
+	for ; T > 0; T-- {
+		var s string
+		fmt.Fscan(in, &s)
+		fmt.Fprintln(out, solve(s))
+	}
 }
 
 // https://judge.yosupo.jp/problem/enumerate_palindromes

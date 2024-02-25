@@ -4,11 +4,7 @@ import "fmt"
 
 func main() {
 	s := "abcdbc"
-	leaves := make([]E, len(s))
-	for i := 0; i < len(s); i++ {
-		leaves[i] = FromElement(uint(s[i]))
-	}
-	seg := NewSegmentTree(leaves)
+	seg := NewSegmentTree(len(s), func(i int) E { return FromElement(uint(s[i])) })
 	fmt.Println(seg.Query(0, 3))
 	fmt.Println(seg.Query(3, 6))
 	seg.Set(3, FromElement('a'))
@@ -59,9 +55,9 @@ type SegmentTreeHash struct {
 	unit    E
 }
 
-func NewSegmentTree(leaves []E) *SegmentTreeHash {
+func NewSegmentTree(n int, f func(int) E) *SegmentTreeHash {
 	res := &SegmentTreeHash{}
-	n := len(leaves)
+
 	size := 1
 	for size < n {
 		size <<= 1
@@ -71,7 +67,7 @@ func NewSegmentTree(leaves []E) *SegmentTreeHash {
 		seg[i] = res.e()
 	}
 	for i := 0; i < n; i++ {
-		seg[i+size] = leaves[i]
+		seg[i+size] = f(i)
 	}
 	for i := size - 1; i > 0; i-- {
 		seg[i] = res.op(seg[i<<1], seg[i<<1|1])
