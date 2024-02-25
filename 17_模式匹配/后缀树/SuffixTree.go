@@ -94,13 +94,19 @@ import (
 )
 
 func main() {
-	demo()
+	// demo()
 
 	// cf123d()
+	// cf427d()
 	// cf802I()
 	// cf873F()
 
+	// P3181()
 	// p3804()
+	// p4341()
+	// p5341()
+
+	yukicoder2361()
 }
 
 // https://oi-wiki.org/string/suffix-tree/
@@ -112,38 +118,6 @@ func demo() {
 	fmt.Println(suffixTree, ranges)
 	start, end := RecoverSubstring(sa, 3, 1, 3)
 	fmt.Println(s[start:end])
-}
-
-// P2048 [NOI2010] 超级钢琴
-// https://www.luogu.com.cn/problem/P2048
-// 求前k大长度在l到r长度的子串和。
-func p2048() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, k, left, right int
-	fmt.Fscan(in, &n, &k, &left, &right)
-	nums := make([]int32, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
-	}
-}
-
-// P4341 [BJWC2010] 外星联络
-// https://www.luogu.com.cn/problem/P4341
-// 给一个字符串求所以出现次数大于 1 的子串所出现的次数。输出的顺序按对应的子串的字典序排列。
-func p4341() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	var s string
-	fmt.Fscan(in, &s)
-
-	_, ranges := SuffixTree(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
 }
 
 // CF123D String
@@ -164,6 +138,54 @@ func cf123d() {
 		rowStart, rowEnd, colStart, colEnd := ranges[i][0], ranges[i][1], ranges[i][2], ranges[i][3]
 		freq, nodeCount := int(rowEnd-rowStart), int(colEnd-colStart)
 		res += (freq * (freq + 1) / 2) * nodeCount
+	}
+	fmt.Fprintln(out, res)
+}
+
+// Match & Catch
+// https://www.luogu.com.cn/problem/CF427D
+// 求两个串的最短公共唯一子串
+// 令s12 := s1 + "#" + s2，遍历后缀树，对每个结点统计belong即可.
+func cf427d() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int32 = 1e9
+	var s1, s2 string
+	fmt.Fscan(in, &s1, &s2)
+	n1 := int32(len(s1))
+	s12 := s1 + "#" + s2
+	sa, _, height := SuffixArray32(int32(len(s12)), func(i int32) int32 { return int32(s12[i]) })
+	tree, ranges := SuffixTreeFrom(sa, height)
+
+	res := INF
+	var dfs func(cur int32)
+	dfs = func(cur int32) {
+		rowStart, rowEnd, colStart, colEnd := ranges[cur][0], ranges[cur][1], ranges[cur][2], ranges[cur][3]
+		freq, nodeCount := rowEnd-rowStart, colEnd-colStart
+		if nodeCount > 0 && freq == 2 {
+			belong1, belong2 := 0, 0
+			for i := rowStart; i < rowEnd; i++ {
+				if sa[i] < n1 {
+					belong1++
+				} else if sa[i] > n1 {
+					belong2++
+				}
+			}
+			if belong1 == 1 && belong2 == 1 {
+				minLength := colStart + 1
+				res = min32(res, minLength)
+			}
+		}
+		for _, v := range tree[cur] {
+			dfs(v)
+		}
+	}
+	dfs(0)
+
+	if res == INF {
+		res = -1
 	}
 	fmt.Fprintln(out, res)
 }
@@ -242,10 +264,45 @@ func cf873F() {
 	fmt.Fprintln(out, res)
 }
 
-// TODO: https://yukicoder.me/problems/no/2361
-// https://maspypy.github.io/library/test/yukicoder/2361.test.cpp
-func yukicoder2361() {
+// P3181 [HAOI2016] 找相同字符
+// 求两个字符的相同子串对数.两个方案不同当且仅当这两个子串中有一个位置不同。
+// https://www.luogu.com.cn/problem/P3181
+//
+// 令s12 := s1 + "#" + s2，遍历后缀树，对每个结点统计belong即可.
+func P3181() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
+	var s1, s2 string
+	fmt.Fscan(in, &s1, &s2)
+	n1 := int32(len(s1))
+	s12 := s1 + "#" + s2
+	sa, _, height := SuffixArray32(int32(len(s12)), func(i int32) int32 { return int32(s12[i]) })
+	tree, ranges := SuffixTreeFrom(sa, height)
+
+	res := 0
+	var dfs func(cur int32)
+	dfs = func(cur int32) {
+		rowStart, rowEnd, colStart, colEnd := ranges[cur][0], ranges[cur][1], ranges[cur][2], ranges[cur][3]
+		freq, nodeCount := rowEnd-rowStart, colEnd-colStart
+		if nodeCount > 0 && freq >= 2 {
+			belong1, belong2 := 0, 0
+			for i := rowStart; i < rowEnd; i++ {
+				if sa[i] < n1 {
+					belong1++
+				} else if sa[i] > n1 {
+					belong2++
+				}
+			}
+			res += int(belong1) * int(belong2) * int(nodeCount)
+		}
+		for _, v := range tree[cur] {
+			dfs(v)
+		}
+	}
+	dfs(0)
+	fmt.Fprintln(out, res)
 }
 
 // P3804 【模板】后缀自动机（SAM）
@@ -261,25 +318,135 @@ func p3804() {
 	tree, ranges := SuffixTree(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
 	res := 0
 
-	var dfs func(cur int32, dist int32)
-	dfs = func(cur int32, dist int32) {
+	var dfs func(cur int32)
+	dfs = func(cur int32) {
 		freq, nodeCount := ranges[cur][1]-ranges[cur][0], ranges[cur][3]-ranges[cur][2]
-		dist += nodeCount
-		if freq > 1 {
-			res = max(res, int(dist)*int(freq))
+		if nodeCount > 0 && freq > 1 {
+			maxLength := int(ranges[cur][3])
+			res = max(res, maxLength*int(freq))
 		}
 		for _, v := range tree[cur] {
-			dfs(v, dist)
+			dfs(v)
 		}
 	}
-	dfs(0, 0)
+	dfs(0)
 
 	fmt.Fprintln(out, res)
+}
+
+// P4341 [BJWC2010] 外星联络
+// https://www.luogu.com.cn/problem/P4341
+// 给一个字符串求所以出现次数大于 1 的子串所出现的次数。输出的顺序按对应的子串的字典序排列。
+func p4341() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	var s string
+	fmt.Fscan(in, &s)
+
+	tree, ranges := SuffixTree(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+	var res []int32
+	var dfs func(cur int32)
+	dfs = func(cur int32) {
+		freq, nodeCount := ranges[cur][1]-ranges[cur][0], ranges[cur][3]-ranges[cur][2]
+		if freq > 1 {
+			for i := int32(0); i < nodeCount; i++ {
+				res = append(res, freq)
+			}
+		}
+		for _, v := range tree[cur] {
+			dfs(v)
+		}
+	}
+	dfs(0)
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
+}
+
+// P5341 [TJOI2019] 甲苯先生和大中锋的字符串
+// https://www.luogu.com.cn/problem/P5341
+// 给定字符串s, 求出现 k 次的子串中出现次数的最多的长度。如果不存在子串出现 k 次，则输出 −1 。
+func p5341() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	solve := func(s string, k int32) int {
+		tree, ranges := SuffixTree(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+
+		lengthCounter := make([]int, len(s)+2)
+		add := func(min int32, max int32, val int) {
+			lengthCounter[min] += val
+			lengthCounter[max+1] -= val
+		}
+		build := func() {
+			for i := 1; i < len(lengthCounter); i++ {
+				lengthCounter[i] += lengthCounter[i-1]
+			}
+		}
+
+		var dfs func(cur int32)
+		dfs = func(cur int32) {
+			freq, nodeCount := ranges[cur][1]-ranges[cur][0], ranges[cur][3]-ranges[cur][2]
+			if nodeCount > 0 && freq == k {
+				minLength, maxLength := ranges[cur][2]+1, ranges[cur][3]
+				add(minLength, maxLength, 1)
+			}
+			for _, v := range tree[cur] {
+				dfs(v)
+			}
+		}
+		dfs(0)
+
+		build()
+		res, maxCount := -1, -1
+		for i, v := range lengthCounter {
+			if v > 0 && v >= maxCount {
+				maxCount = v
+				res = i
+			}
+		}
+		return res
+	}
+
+	var T int
+	fmt.Fscan(in, &T)
+	for ; T > 0; T-- {
+		var s string
+		var k int32
+		fmt.Fscan(in, &s, &k)
+		fmt.Fprintln(out, solve(s, k))
+	}
+}
+
+// TODO
+// 1923. 最长公共子路径(多个结点的最长公共子串)
+// https://leetcode.cn/problems/longest-common-subpath/solution/hou-zhui-shu-zu-er-fen-da-an-by-endlessc-ocar/
+func longestCommonSubpath(n int, paths [][]int) int {
+	path32 := make([][]int32, len(paths))
+	for i, p := range paths {
+		for _, v := range p {
+			path32[i] = append(path32[i], int32(v))
+		}
+	}
+	return 0
+}
+
+// TODO: https://yukicoder.me/problems/no/2361
+// https://maspypy.github.io/library/test/yukicoder/2361.test.cpp
+func yukicoder2361() {
+
 }
 
 // directTree: 后缀树, 从 0 开始编号, 0 结点为虚拟根节点.
 // ranges: 每个结点对应后缀数组上的 [行1，行2，列1，列2] 矩形区域.
 // !(行2-行1) 表示此startPos出现次数, (列2-列1) 表示结点包含的压缩的字符串长度(个数).
+// 对应后缀sa编号: [rowStart, rowEnd)
+// 对应字符串长度: [colStart+1, colEnd+1)
 func SuffixTree(n int32, f func(i int32) int32) (directedTree [][]int32, ranges [][4]int32) {
 	sa, _, lcp := SuffixArray32(n, f)
 	return SuffixTreeFrom(sa, lcp)

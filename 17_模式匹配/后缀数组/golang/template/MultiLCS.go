@@ -14,9 +14,12 @@ import (
 	"unsafe"
 )
 
-const INF int32 = 1e9 + 10
-
 func main() {
+	p5546()
+}
+
+// https://www.luogu.com.cn/problem/P2463
+func p5546() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -33,7 +36,6 @@ func main() {
 		}
 	}
 	fmt.Fprintln(out, MultiLCS(words))
-
 }
 
 // 1923. 最长公共子路径
@@ -48,6 +50,8 @@ func longestCommonSubpath(n int, paths [][]int) int {
 	return MultiLCS(path32)
 }
 
+const INF int32 = 1e9 + 10
+
 func MultiLCS(ords [][]int32) (res int) {
 	sb := []int32{}
 	cand := INF // 二分右边界
@@ -58,13 +62,13 @@ func MultiLCS(ords [][]int32) (res int) {
 	}
 	n, k := int32(len(sb)), int32(len(ords))
 
-	// 标记每个元素属于哪个数组
+	// 标记每个元素属于哪个数组, dummy 为 -1
 	belong := make([]int32, n)
 	id := int32(-1)
 	for i, v := range sb {
 		if v == INF {
 			id++
-			belong[i] = k
+			belong[i] = -1
 		} else {
 			belong[i] = id
 		}
@@ -72,28 +76,30 @@ func MultiLCS(ords [][]int32) (res int) {
 
 	sa, _, height := SuffixArray32(int32(len(sb)), func(i int32) int32 { return int32(sb[i]) })
 
-	// 二分求答案
-	return sort.Search(int(cand), func(limit int) bool {
-		limit32 := int32(limit)
-		limit32++ // bisect_right
+	// 二分求答案，找到连续的 height[i] >= mid 的区间，使得区间内包含所有的 path
+	return sort.Search(int(cand), func(mid int) bool {
+		mid32 := int32(mid)
+		mid32++ // bisect_right
 		visited := make([]int32, k)
-		for i := int32(1); i < n; i++ {
-			if height[i] < limit32 {
+		for i := int32(0); i < n; i++ {
+			if height[i] < mid32 || belong[sa[i]] == -1 {
 				continue
 			}
-			count := int32(0)
-			for start := i; i < n && height[i] >= limit32; i++ {
+
+			continuousCount := int32(0)
+			for start := i; i < n && height[i] >= mid32; i++ {
 				// 检查 sa[i] 和 sa[i-1]
-				if j := belong[sa[i]]; j < k && visited[j] != start {
+				if j := belong[sa[i]]; j != -1 && visited[j] != start {
 					visited[j] = start
-					count++
+					continuousCount++
 				}
-				if j := belong[sa[i-1]]; j < k && visited[j] != start {
+				if j := belong[sa[i-1]]; j != -1 && visited[j] != start {
 					visited[j] = start
-					count++
+					continuousCount++
 				}
 			}
-			if count == k { // 凑齐了来自所有数组的元素
+
+			if continuousCount == k { // 凑齐了来自所有数组的元素
 				return false
 			}
 		}

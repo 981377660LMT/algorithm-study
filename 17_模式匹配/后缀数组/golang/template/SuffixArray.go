@@ -48,8 +48,9 @@ func main() {
 	// abc272f()
 
 	// p2178()
-	P2870()
+	// P2870()
 	// P3804()
+	P4051()
 	// P4248()
 
 	// 重复次数最多的连续重复子串()
@@ -208,6 +209,28 @@ func P3804() {
 		res = max(res, heights[i]*(R[i]-L[i]+2))
 	}
 	fmt.Fprintln(out, res)
+}
+
+// P4051 [JSOI2007] 字符加密
+// https://www.luogu.com.cn/problem/P4051
+// 给定一个字符s，将所有轮转字符串按照字典序排序，输出排序后的每个串的最后一个字符.
+//
+// 变为s+s后排序，输出原串结尾字符即可
+func P4051() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+	var s string
+	fmt.Fscan(in, &s)
+	n := len(s)
+	s += s
+	S := NewSuffixArrayFromString(s)
+	sa := S.Sa
+	for _, v := range sa {
+		if v < n {
+			fmt.Fprint(out, string(s[v+n-1]))
+		}
+	}
 }
 
 // P4248 [AHOI2013] 差异

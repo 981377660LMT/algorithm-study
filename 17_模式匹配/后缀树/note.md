@@ -14,3 +14,7 @@ parent 树有一个性质,父亲是孩子的最长后缀( edp 不同)。
 ---
 
 https://37zigen.com/suffix-tree/
+
+---
+
+**处理两个或者多个字符非常有用**
