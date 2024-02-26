@@ -7,24 +7,18 @@
 
 
 from itertools import permutations
-from kmp import getNext
+from compressString import compressString
 
 
 def minimumString(a: str, b: str, c: str) -> str:
-    def maxCommon(pre: str, post: str) -> int:
-        """pre的后缀和post的前缀的最大公共长度"""
-        cat = post + "#" + pre
-        next_ = getNext(cat)
-        return next_[-1]
-
     res = []
     for perm in permutations([a, b, c]):
         w1, w2, w3 = perm
         if w2 not in w1:
-            common1 = maxCommon(w1, w2)
+            common1 = compressString(w1, w2)
             w1 = w1 + w2[common1:]
         if w3 not in w1:
-            common2 = maxCommon(w1, w3)
+            common2 = compressString(w1, w3)
             w1 = w1 + w3[common2:]
         res.append(w1)
 

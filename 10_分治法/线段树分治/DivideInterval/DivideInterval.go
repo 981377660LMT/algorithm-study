@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+func main() {
+	yuki1170()
+}
+
 // No.1170 Never Want to Walk
 // https://yukicoder.me/problems/no/1170
 // 数轴上有n个车站,第i个位置在xi
@@ -17,7 +21,7 @@ import (
 // 1<=n<=2e5 0<=A<=B<=1e9 0<=x1<=x2<...<=xn<=1e9
 //
 // !将序列搬到线段树上加速区间操作(线段树优化建图).
-func main() {
+func yuki1170() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -66,6 +70,12 @@ func main() {
 	for i := int32(0); i < n; i++ {
 		fmt.Fprintln(out, weights[uf.Find(D.Id(i))])
 	}
+}
+
+// G - Retroactive Range Chmax (可追溯区间最大值修改)
+// https://atcoder.jp/contests/abc342/tasks/abc342_g
+func abc342g() {
+
 }
 
 type DivideInterval struct {

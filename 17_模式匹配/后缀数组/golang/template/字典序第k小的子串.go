@@ -1,4 +1,5 @@
 // TODO: 后缀自动机版本
+// 字典序第k小的子串
 
 package main
 
@@ -63,7 +64,7 @@ func cf128B() {
 	fmt.Fprintln(out, s[start:end])
 }
 
-// 字典序第k小的子串.k>=1.
+// 字典序第k小子串.k>=1.
 // unique 表示是否对所有子串去重.
 func KthSmallestSubstring(n int32, f func(i int32) int32, k int, unique bool) (start, end int, ok bool) {
 	if unique {

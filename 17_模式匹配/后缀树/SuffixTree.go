@@ -99,7 +99,7 @@ func main() {
 	// demo()
 
 	// cf123d()
-	// cf427d()
+	cf427d()
 	// cf802I()
 	// cf873F()
 
@@ -109,7 +109,7 @@ func main() {
 	// p5341()
 
 	// yukicoder2361()
-	abc280()
+	// abc280()
 }
 
 // https://oi-wiki.org/string/suffix-tree/

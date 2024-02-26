@@ -103,15 +103,12 @@ class Solution:
         return (cal(s2, evil) - cal(s1, evil) + int(evil not in s1)) % MOD
 
 
-print(Solution().findGoodStrings(n=2, s1="gx", s2="gz", evil="x"))
-print(Solution().findGoodStrings(n=8, s1="leetcode", s2="leetgoes", evil="leet"))
-print(Solution().findGoodStrings(n=2, s1="aa", s2="da", evil="b"))
-print(Solution().findGoodStrings(n=8, s1="pzdanyao", s2="wgpmtywi", evil="sdka"))
-# 500543753
+if __name__ == "__main__":
+    print(Solution().findGoodStrings(n=2, s1="gx", s2="gz", evil="x"))
+    print(Solution().findGoodStrings(n=8, s1="leetcode", s2="leetgoes", evil="leet"))
+    print(Solution().findGoodStrings(n=2, s1="aa", s2="da", evil="b"))
+    print(Solution().findGoodStrings(n=8, s1="pzdanyao", s2="wgpmtywi", evil="sdka"))
+    # 500543753
 
-# 输出：51
-# 解释：总共有 25 个以 'a' 开头的好字符串："aa"，"ac"，"ad"，...，"az"。还有 25 个以 'c' 开头的好字符串："ca"，"cc"，"cd"，...，"cz"。最后，还有一个以 'd' 开头的好字符串："da"。
-
-# 来源：力扣（LeetCode）
-
-# 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+    # 输出：51
+    # 解释：总共有 25 个以 'a' 开头的好字符串："aa"，"ac"，"ad"，...，"az"。还有 25 个以 'c' 开头的好字符串："ca"，"cc"，"cd"，...，"cz"。最后，还有一个以 'd' 开头的好字符串："da"。

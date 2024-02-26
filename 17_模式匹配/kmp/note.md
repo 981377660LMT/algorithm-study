@@ -32,3 +32,9 @@ update
 
 https://baobaobear.github.io/post/20200210-ac/
 用 AC 自动机理解 KMP
+
+---
+
+border 的性质:
+
+- **如果 S 具有长为|S|-p 的 border，则说明 S 具有周期 p**

@@ -11,7 +11,7 @@ func main() {
 }
 
 // 原始根减少哈希冲突.
-var BASE = [...]uint64{
+var BASE = [...]uint{
 	37,
 	368789449308,
 	1852846309939,
@@ -116,7 +116,7 @@ var BASE = [...]uint64{
 
 // 获取字符串哈希的base.
 // seed为-1时随机选择一个base.
-func GetBase(seed int) uint64 {
+func GetBase(seed int) uint {
 	if seed == -1 {
 		seed = rand.Intn(len(BASE))
 	}

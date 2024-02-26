@@ -5,6 +5,10 @@
 //  Combine(h1, h2, h2len) : 哈希值h1和h2的拼接, h2的长度为h2len. (线段树的op操作)
 //  AddChar(h,c) : 哈希值h和字符c拼接形成的哈希值.
 //  Lcp(aTable, l1, r1, bTable, l2, r2) : O(logn)返回a[l1, r1)和b[l2, r2)的最长公共前缀.
+//
+// !此外，常用技巧为：
+// 1. 对哈希值排序，然后使用二分查找是否存在相同的哈希值。
+// 2. 按照字符串长度对哈希值分组，最多存在根号种不同的长度分组.
 
 package main
 
@@ -12,10 +16,84 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 )
 
 func main() {
-	CF1056E()
+	CF514C()
+	// CF1056E()
+}
+
+// Watto and Mechanism
+// https://www.luogu.com.cn/problem/CF514C
+// 给出 n 个已知字符串，q 次询问，每次询问给出一个字符串，
+// 问上面 n 个字符串中是否有一个字符串满足恰好有一个字母不同于询问的字符串。
+// n,m<=3e5, 所有串总长度<=6e5.
+// 所有字符串的字符属于{'a','b','c'}
+//
+// 哈希+长度分组
+func CF514C() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+
+	R := NewRollingHash(37, 2102001800968)
+	hashGroup := make(map[int][]uint) // 按照长度分组
+	for i := 0; i < n; i++ {
+		var s string
+		fmt.Fscan(in, &s)
+		table := R.Build(s)
+		hash := R.Query(table, 0, len(s))
+		hashGroup[len(s)] = append(hashGroup[len(s)], hash)
+	}
+	for _, group := range hashGroup {
+		sort.Slice(group, func(i, j int) bool {
+			return group[i] < group[j]
+		})
+	}
+
+	charHash := make([]uint, 3)
+	for i := 0; i < 3; i++ {
+		s := string(rune('a' + i))
+		table := R.Build(s)
+		charHash[i] = R.Query(table, 0, 1)
+	}
+
+	// 是否存在一个字符不同
+	query := func(s string) bool {
+		m := len(s)
+		table := R.Build(s)
+		for i := 0; i < m; i++ {
+			preHash := R.Query(table, 0, i)
+			sufHash := R.Query(table, i+1, m)
+			for j := 0; j < 3; j++ {
+				if j == int(s[i]-'a') {
+					continue
+				}
+				newHash := R.Combine(preHash, charHash[j], 1)
+				newHash = R.Combine(newHash, sufHash, m-(i+1))
+				if BinarySearch(hashGroup[m], newHash, true) != -1 {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	for i := 0; i < q; i++ {
+		var s string
+		fmt.Fscan(in, &s)
+
+		ok := query(s)
+		if ok {
+			fmt.Fprintln(out, "YES")
+		} else {
+			fmt.Fprintln(out, "NO")
+		}
+	}
 }
 
 // 单词映射
@@ -44,7 +122,7 @@ func CF1056E() {
 		}
 	}
 
-	R1 := NewRollingHash(131, 1e9+7)
+	R1 := NewRollingHash(131, 999999929)
 	table1 := R1.Build(target)
 	getHash := func(start, end int) uint {
 		return R1.Query(table1, start, end)
@@ -102,7 +180,6 @@ func CF1056E() {
 //	`类似`: 最多交换一次相邻字符,可以得到相同的单词.
 //	n<=2e5 sum(len(s))<=1e6
 func ConditionalReflection(words []string) []bool {
-
 	R := NewRollingHash(37, 2102001800968)
 	res := make([]bool, len(words))
 	visited := make(map[uint]struct{})
@@ -177,7 +254,9 @@ type RollingHash struct {
 	power []uint
 }
 
-// eg: NewRollingHash(131, 1e9+7)
+// eg:
+// NewRollingHash(37, 2102001800968)
+// NewRollingHash(131, 999999751)
 // mod: 999999937/999999929/999999893/999999797/999999761/999999757/999999751/999999739
 func NewRollingHash(base uint, mod uint) *RollingHash {
 	return &RollingHash{
@@ -235,6 +314,50 @@ func (r *RollingHash) expand(sz int) {
 		for i := preSz - 1; i < sz; i++ {
 			r.power[i+1] = (r.power[i] * r.base) % r.mod
 		}
+	}
+}
+
+type Int interface {
+	int | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64
+}
+
+// 查询非递减数组中目标值的第一个或最后一个位置.
+// arr: 非递减数组
+// target: 目标值
+// findFirst: 是否查询第一个位置. 默认为 true.
+// 返回目标值的第一个或最后一个位置. 如果目标值不存在, 返回-1.
+func BinarySearch[T Int](arr []T, target T, findFirst bool) int {
+	if len(arr) == 0 || arr[0] > target || arr[len(arr)-1] < target {
+		return -1
+	}
+	if findFirst {
+		left, right := 0, len(arr)-1
+		for left <= right {
+			mid := left + (right-left)>>1
+			if arr[mid] < target {
+				left = mid + 1
+			} else {
+				right = mid - 1
+			}
+		}
+		if left < len(arr) && arr[left] == target {
+			return left
+		}
+		return -1
+	} else {
+		left, right := 0, len(arr)-1
+		for left <= right {
+			mid := left + (right-left)>>1
+			if arr[mid] <= target {
+				left = mid + 1
+			} else {
+				right = mid - 1
+			}
+		}
+		if left > 0 && arr[left-1] == target {
+			return left - 1
+		}
+		return -1
 	}
 }
 

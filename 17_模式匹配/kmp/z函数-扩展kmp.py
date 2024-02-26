@@ -1,3 +1,5 @@
+# z函数-扩展kmp
+
 from typing import List
 
 
