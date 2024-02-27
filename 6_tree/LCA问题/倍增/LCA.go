@@ -15,16 +15,17 @@ func main() {
 }
 
 type LCAFast struct {
-	Depth, Parent      []int32
-	Tree               [][]int
-	dfn, top, heavySon []int32
-	idToNode           []int32
-	dfnId              int32
+	Depth, Parent           []int32
+	Tree                    [][]int
+	lid, rid, top, heavySon []int32
+	idToNode                []int32
+	dfnId                   int32
 }
 
 func NewLCA(tree [][]int, roots []int) *LCAFast {
 	n := len(tree)
-	dfn := make([]int32, n)      // vertex => dfn
+	lid := make([]int32, n) // vertex => dfn
+	rid := make([]int32, n)
 	top := make([]int32, n)      // 所处轻/重链的顶点（深度最小），轻链的顶点为自身
 	depth := make([]int32, n)    // 深度
 	parent := make([]int32, n)   // 父结点
@@ -32,7 +33,8 @@ func NewLCA(tree [][]int, roots []int) *LCAFast {
 	idToNode := make([]int32, n)
 	res := &LCAFast{
 		Tree:     tree,
-		dfn:      dfn,
+		lid:      lid,
+		rid:      rid,
 		top:      top,
 		Depth:    depth,
 		Parent:   parent,
@@ -58,11 +60,11 @@ func (hld *LCAFast) LCAMultiPoint(nodes []int) int {
 	minDfn, maxDfn := int32(1<<31-1), int32(-1)
 	for _, root := range nodes {
 		root32 := int32(root)
-		if hld.dfn[root32] < minDfn {
-			minDfn = hld.dfn[root32]
+		if hld.lid[root32] < minDfn {
+			minDfn = hld.lid[root32]
 		}
-		if hld.dfn[root32] > maxDfn {
-			maxDfn = hld.dfn[root32]
+		if hld.lid[root32] > maxDfn {
+			maxDfn = hld.lid[root32]
 		}
 	}
 	u, v := hld.idToNode[minDfn], hld.idToNode[maxDfn]
@@ -72,7 +74,7 @@ func (hld *LCAFast) LCAMultiPoint(nodes []int) int {
 func (hld *LCAFast) LCA(u, v int) int {
 	u32, v32 := int32(u), int32(v)
 	for {
-		if hld.dfn[u32] > hld.dfn[v32] {
+		if hld.lid[u32] > hld.lid[v32] {
 			u32, v32 = v32, u32
 		}
 		if hld.top[u32] == hld.top[v32] {
@@ -92,15 +94,15 @@ func (hld *LCAFast) EnumeratePathDecomposition(u, v int, vertex bool, f func(sta
 		if hld.top[u32] == hld.top[v32] {
 			break
 		}
-		if hld.dfn[u32] < hld.dfn[v32] {
-			a, b := hld.dfn[hld.top[v32]], hld.dfn[v32]
+		if hld.lid[u32] < hld.lid[v32] {
+			a, b := hld.lid[hld.top[v32]], hld.lid[v32]
 			if a > b {
 				a, b = b, a
 			}
 			f(int(a), int(b+1))
 			v32 = hld.Parent[hld.top[v32]]
 		} else {
-			a, b := hld.dfn[u32], hld.dfn[hld.top[u32]]
+			a, b := hld.lid[u32], hld.lid[hld.top[u32]]
 			if a > b {
 				a, b = b, a
 			}
@@ -114,19 +116,68 @@ func (hld *LCAFast) EnumeratePathDecomposition(u, v int, vertex bool, f func(sta
 		edgeInt = 0
 	}
 
-	if hld.dfn[u32] < hld.dfn[v32] {
-		a, b := hld.dfn[u32]+edgeInt, hld.dfn[v32]
+	if hld.lid[u32] < hld.lid[v32] {
+		a, b := hld.lid[u32]+edgeInt, hld.lid[v32]
 		if a > b {
 			a, b = b, a
 		}
 		f(int(a), int(b+1))
-	} else if hld.dfn[v32]+edgeInt <= hld.dfn[u32] {
-		a, b := hld.dfn[u32], hld.dfn[v32]+edgeInt
+	} else if hld.lid[v32]+edgeInt <= hld.lid[u32] {
+		a, b := hld.lid[u32], hld.lid[v32]+edgeInt
 		if a > b {
 			a, b = b, a
 		}
 		f(int(a), int(b+1))
 	}
+}
+
+// k: 0-based
+//
+//	如果不存在第k个祖先，返回-1
+func (hld *LCAFast) KthAncestor(root, k int) int {
+	root32 := int32(root)
+	k32 := int32(k)
+	if k32 > hld.Depth[root32] {
+		return -1
+	}
+	for {
+		u := hld.top[root32]
+		if hld.lid[root32]-k32 >= hld.lid[u] {
+			return int(hld.idToNode[hld.lid[root32]-k32])
+		}
+		k32 -= hld.lid[root32] - hld.lid[u] + 1
+		root32 = hld.Parent[u]
+	}
+}
+
+// 从 from 节点跳向 to 节点,跳过 step 个节点(0-indexed)
+//
+//	返回跳到的节点,如果不存在这样的节点,返回-1
+func (hld *LCAFast) Jump(from, to, step int) int {
+	if step == 1 {
+		if from == to {
+			return -1
+		}
+		if hld.IsInSubtree(to, from) {
+			return hld.KthAncestor(to, int(hld.Depth[to]-hld.Depth[from]-1))
+		}
+		return int(hld.Parent[from])
+	}
+	c := hld.LCA(from, to)
+	dac := hld.Depth[from] - hld.Depth[c]
+	dbc := hld.Depth[to] - hld.Depth[c]
+	if step > int(dac+dbc) {
+		return -1
+	}
+	if step <= int(dac) {
+		return hld.KthAncestor(from, step)
+	}
+	return hld.KthAncestor(to, int(dac+dbc-int32(step)))
+}
+
+// child 是否在 root 的子树中 (child和root不能相等)
+func (hld *LCAFast) IsInSubtree(child, root int) bool {
+	return hld.lid[root] <= hld.lid[child] && hld.lid[child] < hld.rid[root]
 }
 
 func (hld *LCAFast) _build(cur, pre, dep int32) int {
@@ -149,7 +200,7 @@ func (hld *LCAFast) _build(cur, pre, dep int32) int {
 
 func (hld *LCAFast) _markTop(cur, top int32) {
 	hld.top[cur] = top
-	hld.dfn[cur] = hld.dfnId
+	hld.lid[cur] = hld.dfnId
 	hld.idToNode[hld.dfnId] = cur
 	hld.dfnId++
 	if hld.heavySon[cur] != -1 {
@@ -161,6 +212,7 @@ func (hld *LCAFast) _markTop(cur, top int32) {
 			}
 		}
 	}
+	hld.rid[cur] = hld.dfnId
 }
 
 func max(a, b int) int {

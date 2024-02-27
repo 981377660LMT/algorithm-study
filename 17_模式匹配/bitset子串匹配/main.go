@@ -1,4 +1,5 @@
 // bitset子串匹配
+
 package main
 
 import (
@@ -9,6 +10,13 @@ import (
 	"strings"
 )
 
+func main() {
+	// cf914f()
+	cf963d()
+}
+
+// F. Substrings in a String
+// https://www.luogu.com.cn/problem/CF914F
 // 给定一个字符串s，有两种操作：
 // 1 pos c，将s[pos]改为c
 // 2 start end word，求字符串word在s[start:end]中出现的次数
@@ -16,7 +24,7 @@ import (
 // 由于字符种类少，因此可以 bitset 维护邻接表
 // 对每次询问匹配t，处理出一个bitset.对每个t[i]，让 res &= indexes[t[i]]>>i 即可.
 // 最后查询 [start,end-len(t)+1) 中合法的匹配起点个数。
-func main() {
+func cf914f() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -34,7 +42,7 @@ func main() {
 		indexes[s[i]-'a'].Add(i)
 	}
 
-	res := NewBitsetDynamic(n, 1)
+	validStarts := NewBitsetDynamic(n, 1)
 
 	// 将 s[pos] 修改为 c.
 	update := func(pos int, c byte) {
@@ -52,14 +60,14 @@ func main() {
 			return 0
 		}
 
-		res.Fill(1)
+		validStarts.Fill(1)
 		for i, c := range word {
 			tmp := indexes[c-'a'].Copy()
 			tmp.Rsh(i)
-			res.IAnd(tmp)
+			validStarts.IAnd(tmp)
 		}
 
-		starts := res.Slice(start, end-len(word)+1) // 合法的匹配起点
+		starts := validStarts.Slice(start, end-len(word)+1) // 合法的匹配起点
 		return starts.OnesCount(0, starts.Size())
 	}
 
@@ -83,6 +91,68 @@ func main() {
 			fmt.Fscan(in, &word)
 			fmt.Fprintln(out, query(start, end, []byte(word)))
 		}
+	}
+}
+
+// Frequency of String
+// https://www.luogu.com.cn/problem/CF963D
+// 给定一个字符串s和q个询问, 每个询问形如 (fi,wi) 表示次数和字符串.
+// !要求找到s的一个最短的子串t使得wi在t中至少出现fi次.求t的最短长度.
+func cf963d() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s string
+	fmt.Fscan(in, &s)
+	var q int
+	fmt.Fscan(in, &q)
+
+	n := len(s)
+	// 用于存储字符出现的位置
+	indexes := make([]*BitSetDynamic, 26)
+	for i := range indexes {
+		indexes[i] = NewBitsetDynamic(n, 0)
+	}
+	for i := 0; i < n; i++ {
+		indexes[s[i]-'a'].Add(i)
+	}
+
+	validStarts := NewBitsetDynamic(n, 1)
+	kthValidStart := make([]int, n) // 第(i+1)个合法起点的位置(0-based)
+
+	// 找到s的一个最短的子串t使得word在t中至少出现count次.
+	// 不存在则返回-1.
+	//
+	// !求出合法起点，然后向后找即可.
+	query := func(word []byte, count int) int {
+		validStarts.Fill(1)
+		for i, c := range word {
+			tmp := indexes[c-'a'].Copy()
+			tmp.Rsh(i)
+			validStarts.IAnd(tmp)
+		}
+		ptr := 0
+		validStarts.ForEach(func(pos int) bool {
+			kthValidStart[ptr] = pos
+			ptr++
+			return false
+		})
+		res := n + 1
+		for i := count - 1; i < ptr; i++ {
+			res = min(res, kthValidStart[i]-kthValidStart[i-(count-1)])
+		}
+		if res == n+1 {
+			return -1
+		}
+		return res + len(word)
+	}
+
+	for i := 0; i < q; i++ {
+		var count int
+		var word string
+		fmt.Fscan(in, &count, &word)
+		fmt.Fprintln(out, query([]byte(word), count))
 	}
 }
 

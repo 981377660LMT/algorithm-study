@@ -26,6 +26,25 @@ func main() {
 	fmt.Fprintln(out, sa.CountSubstring())
 }
 
+// P4070 [SDOI2016] 生成魔咒
+// https://www.luogu.com.cn/problem/P4070
+// 在线求本质不同子串数.
+// 按顺序在一个序列的末尾插入数字，每次求出插入后能得到的本质不同的子串个数。
+//
+// 插入每个字符后新增的子串个数为 len(cur) - len(link(cur))
+func p4070() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := range nums {
+		fmt.Fscan(in, &nums[i])
+	}
+}
+
 type Node struct {
 	Next      map[int32]int32 // 孩子节点
 	Link      int32           // 后缀链接
@@ -33,8 +52,8 @@ type Node struct {
 }
 
 type SuffixAutomatonMap struct {
-	Nodes   []*Node
-	lastPos int32 // 当前插入的字符对应的节点
+	Nodes  []*Node
+	CurPos int32 // 当前插入的字符对应的节点
 }
 
 func NewSuffixAutomatonMap() *SuffixAutomatonMap {
@@ -45,8 +64,8 @@ func NewSuffixAutomatonMap() *SuffixAutomatonMap {
 
 func (sa *SuffixAutomatonMap) Add(ord int32) {
 	newNode := int32(len(sa.Nodes))
-	sa.Nodes = append(sa.Nodes, sa.newNode(-1, sa.Nodes[sa.lastPos].MaxLength+1))
-	p := sa.lastPos
+	sa.Nodes = append(sa.Nodes, sa.newNode(-1, sa.Nodes[sa.CurPos].MaxLength+1))
+	p := sa.CurPos
 	for p != -1 {
 		_, has := sa.Nodes[p].Next[ord]
 		if has {
@@ -75,7 +94,7 @@ func (sa *SuffixAutomatonMap) Add(ord int32) {
 		}
 	}
 
-	sa.lastPos = newNode
+	sa.CurPos = newNode
 }
 
 // 后缀链接树.也叫 parent tree.

@@ -24,7 +24,8 @@ import (
 )
 
 func main() {
-	SeparateString()
+
+	// SeparateString()
 	// P5357()
 	// P3966()
 	// P3121()

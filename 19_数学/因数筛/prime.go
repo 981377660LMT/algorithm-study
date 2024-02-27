@@ -16,7 +16,10 @@ func main() {
 	fmt.Println(IsPrimeMillerRabin(4))
 	fmt.Println(PollardRhoPrimeFactor(100))
 	fmt.Println(GetPrimeFactorsBig(1e18 + 9))
-	EnumerateFactors(100, func(factor int) { fmt.Println(factor) })
+	EnumerateFactors(100, func(factor int) bool {
+		fmt.Println(factor)
+		return false
+	})
 	fmt.Println(GetFactors(10), SumFactors2(10))
 
 	for i := 1; i <= 1000; i++ {
@@ -129,7 +132,7 @@ func GetFactors(n int) []int {
 }
 
 // 空间复杂度为O(1)的枚举因子.枚举顺序为从小到大.
-func EnumerateFactors(n int, f func(factor int)) {
+func EnumerateFactors(n int, f func(factor int) (shouldBreak bool)) {
 	if n <= 0 {
 		return
 	}
@@ -137,7 +140,9 @@ func EnumerateFactors(n int, f func(factor int)) {
 	upper := int(math.Sqrt(float64(n)))
 	for ; i <= upper; i++ {
 		if n%i == 0 {
-			f(i)
+			if f(i) {
+				return
+			}
 		}
 	}
 	i--
@@ -146,7 +151,9 @@ func EnumerateFactors(n int, f func(factor int)) {
 	}
 	for ; i > 0; i-- {
 		if n%i == 0 {
-			f(n / i)
+			if f(n / i) {
+				return
+			}
 		}
 	}
 }

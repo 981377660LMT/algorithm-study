@@ -9,13 +9,15 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strings"
 )
 
 func main() {
+	P3538()
 	// P4391()
-	P5829()
+	// P5829()
 
 	// CF526D()
 
@@ -31,8 +33,49 @@ func repeatedSubstringPattern(s string) bool {
 	return Period(next, n-1) > 0
 }
 
-// P3538 [POI2012] OKR-A Horrible Poem
+// P3538 [POI2012] OKR-A Horrible Poem (子串最小循环节)
 // https://www.luogu.com.cn/problem/P3538
+// !给定一个小写英文字母组成的字符串s和q个查询，每个查询包含两个整数start和end，表示询问s[start:end)的最小循环节长度.
+// 如果不存在循环节(重复次数>=2)，返回end-start.
+//
+// !结论: 若s[start+k,end) == s[start:end-k)，则k为s[start:end)的一个循环节.
+// 由于循环节长度为串长的约数，枚举验证即可.
+func P3538() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	var s string
+	fmt.Fscan(in, &s)
+
+	R := NewRollingHash(131)
+	table := R.Build(s)
+
+	// 求s[start:end)的最小循环节长度
+	query := func(start, end int) (res int) {
+		m := end - start
+		EnumerateFactors(m, func(k int) bool {
+			if R.Query(table, start+k, end) == R.Query(table, start, end-k) {
+				res = k
+				return true
+			}
+			return false
+		})
+		return
+	}
+
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var start, end int
+		fmt.Fscan(in, &start, &end)
+		start--
+		fmt.Fprintln(out, query(start, end))
+	}
+
+}
 
 // P4391 [BOI2009] Radio Transmission 无线传输
 // https://www.luogu.com.cn/problem/P4391
@@ -267,31 +310,15 @@ func ZAlgoNums(nums []int) []int {
 
 type S = string
 
-func GetHash(s S, base uint) uint {
-	if len(s) == 0 {
-		return 0
-	}
-	res := uint(0)
-	for i := 0; i < len(s); i++ {
-		res = res*base + uint(s[i])
-	}
-	return res
-}
-
 type RollingHash struct {
 	base  uint
-	mod   uint
 	power []uint
 }
 
-// eg:
-// NewRollingHash(37, 2102001800968)
-// NewRollingHash(131, 999999751)
-// mod: 999999937/999999929/999999893/999999797/999999761/999999757/999999751/999999739
-func NewRollingHash(base uint, mod uint) *RollingHash {
+// 131/13331/1713302033171(回文素数)
+func NewRollingHash(base uint) *RollingHash {
 	return &RollingHash{
 		base:  base,
-		mod:   mod,
 		power: []uint{1},
 	}
 }
@@ -300,23 +327,23 @@ func (r *RollingHash) Build(s S) (hashTable []uint) {
 	sz := len(s)
 	hashTable = make([]uint, sz+1)
 	for i := 0; i < sz; i++ {
-		hashTable[i+1] = (hashTable[i]*r.base + uint(s[i])) % r.mod
+		hashTable[i+1] = hashTable[i]*r.base + uint(s[i])
 	}
 	return hashTable
 }
 
 func (r *RollingHash) Query(sTable []uint, start, end int) uint {
 	r.expand(end - start)
-	return (r.mod + sTable[end] - sTable[start]*r.power[end-start]%r.mod) % r.mod
+	return sTable[end] - sTable[start]*r.power[end-start]
 }
 
 func (r *RollingHash) Combine(h1, h2 uint, h2len int) uint {
 	r.expand(h2len)
-	return (h1*r.power[h2len] + h2) % r.mod
+	return h1*r.power[h2len] + h2
 }
 
 func (r *RollingHash) AddChar(hash uint, c byte) uint {
-	return (hash*r.base + uint(c)) % r.mod
+	return hash*r.base + uint(c)
 }
 
 // 两个字符串的最长公共前缀长度.
@@ -342,7 +369,7 @@ func (r *RollingHash) expand(sz int) {
 		preSz := len(r.power)
 		r.power = append(r.power, make([]uint, sz+1-preSz)...)
 		for i := preSz - 1; i < sz; i++ {
-			r.power[i+1] = (r.power[i] * r.base) % r.mod
+			r.power[i+1] = r.power[i] * r.base
 		}
 	}
 }
@@ -394,17 +421,45 @@ func (d *DiffArray) GetAll() []int {
 	return d.diff[:len(d.diff)-1]
 }
 
+// 空间复杂度为O(1)的枚举因子.枚举顺序为从小到大.
+func EnumerateFactors(n int, f func(factor int) (shouldBreak bool)) {
+	if n <= 0 {
+		return
+	}
+	i := 1
+	upper := int(math.Sqrt(float64(n)))
+	for ; i <= upper; i++ {
+		if n%i == 0 {
+			if f(i) {
+				return
+			}
+		}
+	}
+	i--
+	if i*i == n {
+		i--
+	}
+	for ; i > 0; i-- {
+		if n%i == 0 {
+			if f(n / i) {
+				return
+			}
+		}
+	}
+}
+
 type LCAFast struct {
-	Depth, Parent      []int32
-	Tree               [][]int
-	dfn, top, heavySon []int32
-	idToNode           []int32
-	dfnId              int32
+	Depth, Parent           []int32
+	Tree                    [][]int
+	lid, rid, top, heavySon []int32
+	idToNode                []int32
+	dfnId                   int32
 }
 
 func NewLCA(tree [][]int, roots []int) *LCAFast {
 	n := len(tree)
-	dfn := make([]int32, n)      // vertex => dfn
+	lid := make([]int32, n) // vertex => dfn
+	rid := make([]int32, n)
 	top := make([]int32, n)      // 所处轻/重链的顶点（深度最小），轻链的顶点为自身
 	depth := make([]int32, n)    // 深度
 	parent := make([]int32, n)   // 父结点
@@ -412,7 +467,8 @@ func NewLCA(tree [][]int, roots []int) *LCAFast {
 	idToNode := make([]int32, n)
 	res := &LCAFast{
 		Tree:     tree,
-		dfn:      dfn,
+		lid:      lid,
+		rid:      rid,
 		top:      top,
 		Depth:    depth,
 		Parent:   parent,
@@ -438,11 +494,11 @@ func (hld *LCAFast) LCAMultiPoint(nodes []int) int {
 	minDfn, maxDfn := int32(1<<31-1), int32(-1)
 	for _, root := range nodes {
 		root32 := int32(root)
-		if hld.dfn[root32] < minDfn {
-			minDfn = hld.dfn[root32]
+		if hld.lid[root32] < minDfn {
+			minDfn = hld.lid[root32]
 		}
-		if hld.dfn[root32] > maxDfn {
-			maxDfn = hld.dfn[root32]
+		if hld.lid[root32] > maxDfn {
+			maxDfn = hld.lid[root32]
 		}
 	}
 	u, v := hld.idToNode[minDfn], hld.idToNode[maxDfn]
@@ -452,7 +508,7 @@ func (hld *LCAFast) LCAMultiPoint(nodes []int) int {
 func (hld *LCAFast) LCA(u, v int) int {
 	u32, v32 := int32(u), int32(v)
 	for {
-		if hld.dfn[u32] > hld.dfn[v32] {
+		if hld.lid[u32] > hld.lid[v32] {
 			u32, v32 = v32, u32
 		}
 		if hld.top[u32] == hld.top[v32] {
@@ -472,15 +528,15 @@ func (hld *LCAFast) EnumeratePathDecomposition(u, v int, vertex bool, f func(sta
 		if hld.top[u32] == hld.top[v32] {
 			break
 		}
-		if hld.dfn[u32] < hld.dfn[v32] {
-			a, b := hld.dfn[hld.top[v32]], hld.dfn[v32]
+		if hld.lid[u32] < hld.lid[v32] {
+			a, b := hld.lid[hld.top[v32]], hld.lid[v32]
 			if a > b {
 				a, b = b, a
 			}
 			f(int(a), int(b+1))
 			v32 = hld.Parent[hld.top[v32]]
 		} else {
-			a, b := hld.dfn[u32], hld.dfn[hld.top[u32]]
+			a, b := hld.lid[u32], hld.lid[hld.top[u32]]
 			if a > b {
 				a, b = b, a
 			}
@@ -494,19 +550,68 @@ func (hld *LCAFast) EnumeratePathDecomposition(u, v int, vertex bool, f func(sta
 		edgeInt = 0
 	}
 
-	if hld.dfn[u32] < hld.dfn[v32] {
-		a, b := hld.dfn[u32]+edgeInt, hld.dfn[v32]
+	if hld.lid[u32] < hld.lid[v32] {
+		a, b := hld.lid[u32]+edgeInt, hld.lid[v32]
 		if a > b {
 			a, b = b, a
 		}
 		f(int(a), int(b+1))
-	} else if hld.dfn[v32]+edgeInt <= hld.dfn[u32] {
-		a, b := hld.dfn[u32], hld.dfn[v32]+edgeInt
+	} else if hld.lid[v32]+edgeInt <= hld.lid[u32] {
+		a, b := hld.lid[u32], hld.lid[v32]+edgeInt
 		if a > b {
 			a, b = b, a
 		}
 		f(int(a), int(b+1))
 	}
+}
+
+// k: 0-based
+//
+//	如果不存在第k个祖先，返回-1
+func (hld *LCAFast) KthAncestor(root, k int) int {
+	root32 := int32(root)
+	k32 := int32(k)
+	if k32 > hld.Depth[root32] {
+		return -1
+	}
+	for {
+		u := hld.top[root32]
+		if hld.lid[root32]-k32 >= hld.lid[u] {
+			return int(hld.idToNode[hld.lid[root32]-k32])
+		}
+		k32 -= hld.lid[root32] - hld.lid[u] + 1
+		root32 = hld.Parent[u]
+	}
+}
+
+// 从 from 节点跳向 to 节点,跳过 step 个节点(0-indexed)
+//
+//	返回跳到的节点,如果不存在这样的节点,返回-1
+func (hld *LCAFast) Jump(from, to, step int) int {
+	if step == 1 {
+		if from == to {
+			return -1
+		}
+		if hld.IsInSubtree(to, from) {
+			return hld.KthAncestor(to, int(hld.Depth[to]-hld.Depth[from]-1))
+		}
+		return int(hld.Parent[from])
+	}
+	c := hld.LCA(from, to)
+	dac := hld.Depth[from] - hld.Depth[c]
+	dbc := hld.Depth[to] - hld.Depth[c]
+	if step > int(dac+dbc) {
+		return -1
+	}
+	if step <= int(dac) {
+		return hld.KthAncestor(from, step)
+	}
+	return hld.KthAncestor(to, int(dac+dbc-int32(step)))
+}
+
+// child 是否在 root 的子树中 (child和root不能相等)
+func (hld *LCAFast) IsInSubtree(child, root int) bool {
+	return hld.lid[root] <= hld.lid[child] && hld.lid[child] < hld.rid[root]
 }
 
 func (hld *LCAFast) _build(cur, pre, dep int32) int {
@@ -529,7 +634,7 @@ func (hld *LCAFast) _build(cur, pre, dep int32) int {
 
 func (hld *LCAFast) _markTop(cur, top int32) {
 	hld.top[cur] = top
-	hld.dfn[cur] = hld.dfnId
+	hld.lid[cur] = hld.dfnId
 	hld.idToNode[hld.dfnId] = cur
 	hld.dfnId++
 	if hld.heavySon[cur] != -1 {
@@ -541,6 +646,7 @@ func (hld *LCAFast) _markTop(cur, top int32) {
 			}
 		}
 	}
+	hld.rid[cur] = hld.dfnId
 }
 
 func max(a, b int) int {

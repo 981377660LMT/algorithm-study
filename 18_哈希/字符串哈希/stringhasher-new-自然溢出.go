@@ -1,3 +1,4 @@
+// stringhasher-new-自然溢出
 // API:
 //  RollingHash(base) : 以base为底的哈希函数.
 //  Build(s) : O(n)返回s的哈希值表.

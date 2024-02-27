@@ -13,5 +13,5 @@ https://www.zhihu.com/column/c_1182444932760125440
 
 ---
 
-TODO: 线段树合并
+TODO: 线段树合并、可持久化线段树合并
 https://www.cnblogs.com/alex-wei/p/segment_tree_yyds.html

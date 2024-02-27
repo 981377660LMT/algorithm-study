@@ -110,3 +110,8 @@ ac 自动机是 suffixLink[u] -> u
 
 如果我们既知道前缀信息（trie），又知道后缀信息（fail），就可以做字符串匹配：
 前缀的后缀就是子串，只要遍历到所有前缀，对每个前缀做「后缀匹配」，就完成了字符串匹配（统计子串出现次数）
+
+---
+
+https://www.cnblogs.com/alex-wei/p/Common_String_Theory_Theory_automaton_related.html
+常见字符串算法 II：自动机相关

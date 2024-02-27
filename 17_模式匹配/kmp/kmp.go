@@ -15,7 +15,9 @@ import (
 func main() {
 	// a, b := "ababab", "a"
 	// fmt.Println(IndexOfAll(a, b, 0))
-	P4824()
+
+	// P4824()
+
 }
 
 // 面试题 17.17. 多次搜索
