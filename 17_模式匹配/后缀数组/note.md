@@ -53,3 +53,8 @@ Height[i] 来记录排名为 i 的非空后缀与排名为 i−1 的非空后缀
    ```
 
    - 属于 a 子串不属于 b 子串的字符串个数
+
+---
+
+纸糊船
+https://www.cnblogs.com/alex-wei/tag/%E7%BA%B8%E7%B3%8A%E8%88%B9/

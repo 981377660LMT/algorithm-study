@@ -31,3 +31,12 @@
 - 分治
 - 四边形不等式
 - offlineInlineDp
+
+---
+
+DP 优化方法大杂烩
+https://www.cnblogs.com/alex-wei/p/DP_Involution.html
+https://www.cnblogs.com/alex-wei/p/DP_optimization_method_II.html
+https://www.cnblogs.com/alex-wei/p/dp_tricks.html
+DP 做题记录
+https://www.cnblogs.com/alex-wei/p/simple_DP.html

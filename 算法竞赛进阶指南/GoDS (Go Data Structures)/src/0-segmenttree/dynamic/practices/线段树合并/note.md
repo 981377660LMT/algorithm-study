@@ -10,3 +10,8 @@ https://www.zhihu.com/column/c_1182444932760125440
   村落里的一共有 n 座房屋，并形成一个树状结构。
   然后救济粮分 m 次发放，每次选择两个房屋(x，y)，然后对于 `x 到 y 的路径上(含和 y )每座房子里发放一袋 z 类型的救济粮`。
   然后深绘里想知道，当所有的救济粮发放完毕后，每座房子里存放的最多的是哪种救济粮。
+
+---
+
+TODO: 线段树合并
+https://www.cnblogs.com/alex-wei/p/segment_tree_yyds.html

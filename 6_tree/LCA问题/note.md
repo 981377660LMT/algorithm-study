@@ -52,3 +52,8 @@ https://leetcode.cn/problems/kth-ancestor-of-a-tree-node/solution/on-o1mo-ban-by
 
 树上多个点的 LCA，就是 DFS 序最小的和 DFS 序最大的这两个点的 LCA
 https://www.zhihu.com/question/46440863/answer/165741734
+
+---
+
+简单树论
+https://www.cnblogs.com/alex-wei/p/Tree_Tree_Tree_Tree_Tree_Tree_Tree_Tree_Tree_Tree_Tree_Tree_Tree_Tree_Tree.html

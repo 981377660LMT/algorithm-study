@@ -11,6 +11,8 @@ import (
 	"os"
 )
 
+// 线段树合并可以求出 SAM 的每个节点的 endPos 集合
+
 // P3975 [TJOI2015] 弦论
 // https://www.luogu.com.cn/problem/P3975
 func P3975() {
