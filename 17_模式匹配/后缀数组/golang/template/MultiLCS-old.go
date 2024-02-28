@@ -1,14 +1,8 @@
-// k个字符串的最长公共子串
-// https://www.acwing.com/problem/content/2813/
-// 二分找出最低的height，使某个高于height的区间内包含所有的path
-
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"index/suffixarray"
-	"os"
 	"reflect"
 	"unsafe"
 )
@@ -20,26 +14,6 @@ func main() {
 	n := 5
 	paths := [][]int{{0, 1, 0, 1, 0, 1, 0, 1, 0}, {0, 1, 3, 0, 1, 4, 0, 1, 0}}
 	fmt.Println(longestCommonSubpath(n, paths))
-}
-
-// https://www.luogu.com.cn/problem/P2463
-func p5546() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	words := make([][]int32, n)
-	for i := 0; i < n; i++ {
-		var s string
-		fmt.Fscan(in, &s)
-		words[i] = make([]int32, len(s))
-		for j, b := range s {
-			words[i][j] = int32(b - 'a' + 1)
-		}
-	}
-	fmt.Fprintln(out, MultiLCS(words))
 }
 
 // 1923. 最长公共子路径
@@ -57,52 +31,58 @@ func longestCommonSubpath(n int, paths [][]int) int {
 const INF int32 = 1e9 + 10
 
 func MultiLCS(ords [][]int32) (res int) {
+	row := int32(len(ords))
 	sb := []int32{}
-	minLen := INF // 二分右边界
-	for _, p := range ords {
+	lid, rid := make([]int32, row), make([]int32, row)
+	minLen := INF
+	for i, p := range ords {
 		minLen = min32(minLen, int32(len(p)))
-		sb = append(sb, INF) // dummy
+		sb = append(sb, INF) // splitter
+		lid[i] = int32(len(sb))
 		sb = append(sb, p...)
+		rid[i] = int32(len(sb))
 	}
-	n, k := int32(len(sb)), int32(len(ords))
 
-	// 标记每个元素属于哪个数组, dummy 为 -1
+	n := int32(len(sb))
+	_, rank, height := SuffixArray32(n, func(i int32) int32 { return int32(sb[i]) })
 	belong := make([]int32, n)
-	id := int32(-1)
-	for i, v := range sb {
-		if v == INF {
-			id++
-			belong[i] = -1
-		} else {
-			belong[i] = id
+	for i := range belong {
+		belong[i] = -1
+	}
+	for sid := int32(0); sid < int32(row); sid++ {
+		for j := lid[sid]; j < rid[sid]; j++ {
+			p := rank[j]
+			belong[p] = sid
 		}
 	}
 
-	fmt.Println(belong)
-	// 二分求答案，找到连续的 height[i] >= mid 的区间，使得区间内包含所有的 path
-	sa, _, height := SuffixArray32(int32(len(sb)), func(i int32) int32 { return int32(sb[i]) })
-	check := func(mid32 int32) bool {
-		visited := make([]int32, k)
+	// 二分答案，遍历高度数组找到连续的 height[i] >= mid 的区间，使得区间内包含所有的 path
+	check := func(mid int32) bool {
+		visited := make([]int32, row)
+		for i := range visited {
+			visited[i] = -1
+		}
 		for i := int32(0); i < n; i++ {
-			if height[i] < mid32 || belong[sa[i]] == -1 {
+			if height[i] < mid || belong[i] == -1 {
 				continue
 			}
 
+			first := i // group leader
 			continuousCount := int32(0)
-			for start := i; i < n && height[i] >= mid32; i++ {
-				// 检查 sa[i]
-				if j := belong[sa[i]]; j != -1 && visited[j] != start {
-					visited[j] = start
+			for ; i < n && height[i] >= mid; i++ {
+				// 检查 i
+				if j := belong[i]; j != -1 && visited[j] != first {
+					visited[j] = first
 					continuousCount++
 				}
 				// 检查 sa[i-1]
-				if j := belong[sa[i-1]]; j != -1 && visited[j] != start {
-					visited[j] = start
+				if j := belong[i-1]; j != -1 && visited[j] != first {
+					visited[j] = first
 					continuousCount++
 				}
 			}
 
-			if continuousCount == k { // 凑齐了来自所有数组的元素
+			if continuousCount == row { // 凑齐了来自所有数组的元素
 				return true
 			}
 		}

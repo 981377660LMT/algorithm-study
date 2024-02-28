@@ -1,6 +1,4 @@
-https://nyaannyaan.github.io/library/string/suffix-automaton.hpp
 https://baobaobear.github.io/post/20200220-sam/
-https://w.atwiki.jp/uwicoder/pages/2842.html
 
 https://ouuan.github.io/post/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BAsam%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/
 https://etaoinwu.com/blog/%E6%84%9F%E6%80%A7%E7%90%86%E8%A7%A3-sam/

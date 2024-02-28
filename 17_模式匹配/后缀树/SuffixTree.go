@@ -99,7 +99,7 @@ func main() {
 	// demo()
 
 	// cf123d()
-	cf427d()
+	// cf427d()
 	// cf802I()
 	// cf873F()
 
@@ -109,7 +109,7 @@ func main() {
 	// p5341()
 
 	// yukicoder2361()
-	// abc280()
+	abc280()
 }
 
 // https://oi-wiki.org/string/suffix-tree/
@@ -426,19 +426,6 @@ func p5341() {
 	}
 }
 
-// TODO
-// 1923. 最长公共子路径(多个结点的最长公共子串)
-// https://leetcode.cn/problems/longest-common-subpath/solution/hou-zhui-shu-zu-er-fen-da-an-by-endlessc-ocar/
-func longestCommonSubpath(n int, paths [][]int) int {
-	path32 := make([][]int32, len(paths))
-	for i, p := range paths {
-		for _, v := range p {
-			path32[i] = append(path32[i], int32(v))
-		}
-	}
-	return 0
-}
-
 // https://yukicoder.me/problems/no/2361
 // 给定一个长为n的字符串s和q个询问.
 // 每个询问给出一个区间[start,end), 问有多少个子串的字典序严格小于s[start:end).
@@ -542,10 +529,10 @@ func abc280() {
 	for i := int32(0); i < m; i++ {
 		var s string
 		fmt.Fscan(in, &s)
+		sb.WriteRune(BIG)
 		starts[i] = int32(sb.Len())
 		sb.WriteString(s)
 		ends[i] = int32(sb.Len())
-		sb.WriteRune(BIG)
 	}
 
 	s := sb.String()

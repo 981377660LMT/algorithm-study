@@ -1,7 +1,17 @@
 // https://maspypy.github.io/library/string/suffix_automaton.hpp
 // https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/sam.go
-
 // Blumber 算法在线构建SAM
+//
+// note:
+//  1. 每一个节点都表示一段子串，所有节点表示的子串们都是唯一的
+//  2. len表示的是当前节点的最长长度，当前节点的子串长度范围是 [len-link.len+1, len]
+//  3. endPos 集合的大小可以通过topo排序求出来，实际上用桶排实现
+//     如果必须要求出 endPos 集合的话，可以用set实现树上自底向上启发式合并
+//     如果需要每个点的endPos集合都需要求出来的话，可以用动态开点线段树维护endPos集合，然后使用线段树的合并进行更新
+//
+// applications:
+//  1. 查找某个子串位于哪个节点 => 直接倍增往上跳到len[]合适的地方
+//  2. 最长可重叠重复子串 => endPos集合大于等于2的那些节点的最大的范围
 
 package main
 
@@ -10,8 +20,6 @@ import (
 	"fmt"
 	"os"
 )
-
-// 线段树合并可以求出 SAM 的每个节点的 endPos 集合
 
 // P3975 [TJOI2015] 弦论
 // https://www.luogu.com.cn/problem/P3975
@@ -34,9 +42,30 @@ func P3975() {
 	// fmt.Fprintln(out, s[start:end])
 }
 
-// https://www.luogu.com.cn/problem/CF123D
-// !枚举字符串 s 的每一个本质不同的子串 ss ，令 cnt(ss) 为子串 ss 在字符串 s 中出现的个数，求 ∑ cnt(ss)*(cnt(ss)+1)/2
-func cf123d() {}
+// Martian Strings
+// https://www.luogu.com.cn/problem/CF149E
+// 可以找到两个不相交的区间，满足这两个区间对应的子串拼起来和 wi相同
+func cf149e() {}
+
+// Fake News (hard)
+// https://www.luogu.com.cn/problem/CF802I
+// 给出 s，求所有 s 的本质不同子串 ss 在 s 中的出现次数平方和，重复的子串只算一次。
+func cf802I() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	solve := func() {
+		var s string
+		fmt.Fscan(in, &s)
+	}
+
+	var T int
+	fmt.Fscan(in, &T)
+	for ; T > 0; T-- {
+		solve()
+	}
+}
 
 // https://judge.yosupo.jp/problem/number_of_substrings
 func yosupo() {

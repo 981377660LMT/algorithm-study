@@ -41,9 +41,10 @@ import (
 )
 
 func main() {
+	CF19C()
 	// CF126()
 	// CF316()
-	CF432D()
+	// CF432D()
 
 	// abc213f()
 	// abc272f()
@@ -58,6 +59,76 @@ func main() {
 	// fmt.Println(所有后缀LCP之和("abaab"))
 
 	// test()
+}
+
+// Deletion of Repeats (删除连续重复子串)
+// https://www.luogu.com.cn/problem/CF19C
+// 给定一个长度为n的数组(字符串)。每个字母最多出现10次.
+// 要进行若干次删除操作，每次把字符串中的连续重复子串(repeat)形如 XX删除前一个 X 及其前面的所有字符。
+// 优先删除最短的重复子串，如果有多个就选择最左边的。
+// 输出最后的字符串。
+//
+// 1. 离散化
+// !2. 连续重复子串 <=> lcp(sa[i],sa[j]) >= j-i
+func CF19C() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	ords := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &ords[i])
+	}
+	D := NewDictionary[int]()
+	for i, v := range ords {
+		ords[i] = D.Id(v)
+	}
+
+	mp := make(map[int][]int)
+	for i, v := range ords {
+		mp[v] = append(mp[v], i)
+	}
+	S := NewSuffixArray(ords)
+	type pair = struct{ length, start int32 }
+	pq := NewHeap[pair](
+		func(a, b pair) bool {
+			if a.length != b.length {
+				return a.length < b.length
+			}
+			return a.start < b.start
+		},
+		nil,
+	)
+
+	for _, indexes := range mp {
+		for i, v1 := range indexes {
+			for j := i + 1; j < len(indexes); j++ {
+				v2 := indexes[j]
+				if lcp := S.Lcp(v1, n, v2, n); lcp >= v2-v1 {
+					pq.Push(pair{length: int32(v2 - v1), start: int32(v1)})
+				}
+			}
+		}
+	}
+
+	start := int32(0)
+	for pq.Len() > 0 {
+		p := pq.Pop()
+		if start <= p.start {
+			start = p.start + p.length
+		}
+	}
+
+	res := ords[start:]
+	for i := 0; i < len(res); i++ {
+		res[i] = D.Value(res[i])
+	}
+	fmt.Fprintln(out, len(res))
+	for _, v := range res {
+		fmt.Fprint(out, v, " ")
+	}
 }
 
 // Password
@@ -1469,6 +1540,106 @@ func (ufa *UnionFindArray) Find(key int) int {
 
 func (ufa *UnionFindArray) Size(key int) int {
 	return -ufa.data[ufa.Find(key)]
+}
+
+func NewHeap[H any](less func(a, b H) bool, nums []H) *Heap[H] {
+	nums = append(nums[:0:0], nums...)
+	heap := &Heap[H]{less: less, data: nums}
+	heap.heapify()
+	return heap
+}
+
+type Heap[H any] struct {
+	data []H
+	less func(a, b H) bool
+}
+
+func (h *Heap[H]) Push(value H) {
+	h.data = append(h.data, value)
+	h.pushUp(h.Len() - 1)
+}
+
+func (h *Heap[H]) Pop() (value H) {
+	if h.Len() == 0 {
+		panic("heap is empty")
+	}
+	value = h.data[0]
+	h.data[0] = h.data[h.Len()-1]
+	h.data = h.data[:h.Len()-1]
+	h.pushDown(0)
+	return
+}
+
+func (h *Heap[H]) Top() (value H) {
+	value = h.data[0]
+	return
+}
+
+func (h *Heap[H]) Len() int { return len(h.data) }
+
+func (h *Heap[H]) heapify() {
+	n := h.Len()
+	for i := (n >> 1) - 1; i > -1; i-- {
+		h.pushDown(i)
+	}
+}
+
+func (h *Heap[H]) pushUp(root int) {
+	for parent := (root - 1) >> 1; parent >= 0 && h.less(h.data[root], h.data[parent]); parent = (root - 1) >> 1 {
+		h.data[root], h.data[parent] = h.data[parent], h.data[root]
+		root = parent
+	}
+}
+
+func (h *Heap[H]) pushDown(root int) {
+	n := h.Len()
+	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
+		right := left + 1
+		minIndex := root
+		if h.less(h.data[left], h.data[minIndex]) {
+			minIndex = left
+		}
+		if right < n && h.less(h.data[right], h.data[minIndex]) {
+			minIndex = right
+		}
+		if minIndex == root {
+			return
+		}
+		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
+		root = minIndex
+	}
+}
+
+type Dictionary[V comparable] struct {
+	_idToValue []V
+	_valueToId map[V]int32
+}
+
+// A dictionary that maps values to unique ids.
+func NewDictionary[V comparable]() *Dictionary[V] {
+	return &Dictionary[V]{
+		_valueToId: map[V]int32{},
+	}
+}
+func (d *Dictionary[V]) Id(value V) int {
+	res, ok := d._valueToId[value]
+	if ok {
+		return int(res)
+	}
+	id := len(d._idToValue)
+	d._idToValue = append(d._idToValue, value)
+	d._valueToId[value] = int32(id)
+	return id
+}
+func (d *Dictionary[V]) Value(id int) V {
+	return d._idToValue[id]
+}
+func (d *Dictionary[V]) Has(value V) bool {
+	_, ok := d._valueToId[value]
+	return ok
+}
+func (d *Dictionary[V]) Size() int {
+	return len(d._idToValue)
 }
 
 func mins(a []int) int {
