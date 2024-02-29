@@ -34,7 +34,7 @@ func NewSequnceConcater[S Int](splitter S) *SequnceConcater[S] {
 }
 
 func (sc *SequnceConcater[S]) Concat(n int32, f func(int32) S) {
-	sc.Sequence = append(sc.Sequence, sc.splitter)
+	sc.Sequence = append(sc.Sequence, sc.splitter) // splitter
 	sc.lid = append(sc.lid, int32(len(sc.Sequence)))
 	for i := int32(0); i < n; i++ {
 		sc.Sequence = append(sc.Sequence, f(i))
