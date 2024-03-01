@@ -1,14 +1,20 @@
 // https://maspypy.github.io/library/string/suffix_automaton.hpp
 // https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/sam.go
+// https://yutong.site/sam/ 可视化
 // Blumber 算法在线构建SAM
 //
 // -s: aababa
 //
 // -fail tree
 //
-//			每个节点后面表的是该类中最长的串。
-//		  父亲是孩子的最长后缀( endPos 不同)，反串的parent树就满足 : 父亲是孩子的最长前缀 ( 不同 )。
+//		 每个节点后面表的是该类中最长的串。
+//		 父亲是孩子的最长后缀( endPos 不同)，反串的parent树就满足 : 父亲是孩子的最长前缀 ( 不同 )。
 //	   父亲的endPos是子节点的endPos求并(除开0).
+//     每个节点中的子串，都是以该节点为根的子树中的所有子串的后缀
+//     叶子节点一定包含原串的前缀（根据性质 1 反证可得），但原串的前缀不一定在叶子节点中（比如前缀 A 是前缀 AA 的后缀）
+//     由于【子串】等价于【前缀的后缀】，因此求子串在原串中的出现次数，
+//     可以先通过在 SAM 上找到该子串所处的节点，然后求以该节点为根的子树中，多有少个包含原串前缀的节点（性质 2）
+//     这可以通过在 rev 上统计子树信息来预处理得到
 //
 //					      0,1,2,3,4,5 ""
 //					     /              \
@@ -27,7 +33,7 @@
 // note:
 //  0. 后缀自动机 (Suffix Automaton, SAM) 是仅接受后缀且状态数最少的 DFA
 //  1. 每一个节点都表示一段子串，所有节点表示的子串们都是唯一的
-//  2. len表示的是当前节点的最长长度，当前节点的子串长度范围是 [len-link.len+1, len]
+//  2. len(cur)表示的是当前节点cur的最长长度，当前节点的子串长度范围是 [len(link)+1, len(cur)]
 //  3. endPos 集合的大小可以通过topo排序求出来，实际上用桶排实现
 //     如果必须要求出 endPos 集合的话，可以用set实现树上自底向上启发式合并
 //     如果需要每个点的endPos集合都需要求出来的话，可以用动态开点线段树维护endPos集合，然后使用线段树的合并进行更新
@@ -44,6 +50,10 @@
 //     一般有固定模式串的字符串处理问题和固定主串的字符串处理问题两大类问题。当固定模式串时，熟知的 AC 自动机算法便可以胜任这类问题。
 //     如果主串固定，一般采用对主串构造后缀树、后缀自动机来解决这一类问题。
 //  4. 对于SAM任何一个节点u，从根到这个节点的路线有 `maxLen(u)-minLen(u)+1` 条，而这条路线则表示原字符串的一个子串，且各不相同.
+//  5. 一个SAM 最多有 2n-1 个节点 和 3n-4 条转移边，最坏情况下为 abbb...bbb
+//  6. 两个不同的 endPos 等价的字符串中，较短者总是较长者的真后缀。因此，等价类中没有等长的字符串。
+//  7. 出现次数 => 在自动机上查找模式串 P 对应的节点，如果存在，则答案就是该节点的终点集合大小.
+
 package main
 
 import (
@@ -51,6 +61,9 @@ import (
 	"fmt"
 	"os"
 )
+
+func main() {
+}
 
 // P3975 [TJOI2015] 弦论
 // https://www.luogu.com.cn/problem/P3975
@@ -117,9 +130,12 @@ const SIGMA int32 = 26   // 字符集大小
 const OFFSET int32 = 'a' // 字符集的起始字符
 
 type Node struct {
-	Next      [SIGMA]int32 // 孩子节点
-	Link      int32        // 后缀链接
-	MaxLength int32        // 当前节点对应的最长子串的长度
+	Next [SIGMA]int32 // 转移边
+	Link int32        // 后缀链接
+
+	// 该节点（endpos 等价类）中最长的子串长度, link.MaxLen+1 为该节点（endpos 等价类）中最短的子串长度
+	// 等价类大小为 MaxLen-link.MaxLen
+	MaxLen int32
 }
 
 type SuffixAutomaton struct {
@@ -133,10 +149,11 @@ func NewSuffixAutomaton() *SuffixAutomaton {
 	return res
 }
 
+// 每次插入内部最多创建2个状态.
 func (sa *SuffixAutomaton) Add(ord int32) {
 	c := ord - OFFSET
 	newNode := int32(len(sa.Nodes))
-	sa.Nodes = append(sa.Nodes, sa.newNode(-1, sa.Nodes[sa.CurPos].MaxLength+1))
+	sa.Nodes = append(sa.Nodes, sa.newNode(-1, sa.Nodes[sa.CurPos].MaxLen+1))
 	p := sa.CurPos
 	for p != -1 && sa.Nodes[p].Next[c] == -1 {
 		sa.Nodes[p].Next[c] = newNode
@@ -146,11 +163,11 @@ func (sa *SuffixAutomaton) Add(ord int32) {
 	if p != -1 {
 		q = sa.Nodes[p].Next[c]
 	}
-	if p == -1 || sa.Nodes[p].MaxLength+1 == sa.Nodes[q].MaxLength {
+	if p == -1 || sa.Nodes[p].MaxLen+1 == sa.Nodes[q].MaxLen {
 		sa.Nodes[newNode].Link = q
 	} else {
 		newQ := int32(len(sa.Nodes))
-		sa.Nodes = append(sa.Nodes, sa.newNode(sa.Nodes[q].Link, sa.Nodes[p].MaxLength+1))
+		sa.Nodes = append(sa.Nodes, sa.newNode(sa.Nodes[q].Link, sa.Nodes[p].MaxLen+1))
 		sa.Nodes[len(sa.Nodes)-1].Next = sa.Nodes[q].Next
 		sa.Nodes[q].Link = newQ
 		sa.Nodes[newNode].Link = newQ
@@ -167,7 +184,7 @@ func (sa *SuffixAutomaton) Add(ord int32) {
 func (sa *SuffixAutomaton) BuildTree() [][]int32 {
 	n := int32(len(sa.Nodes))
 	graph := make([][]int32, n)
-	for v := int32(0); v < n; v++ {
+	for v := int32(1); v < n; v++ {
 		p := sa.Nodes[v].Link
 		graph[p] = append(graph[p], v)
 	}
@@ -187,6 +204,9 @@ func (sa *SuffixAutomaton) BuildDAG() [][]int32 {
 	return graph
 }
 
+// TODO，类似kmp移动.
+func (sa *SuffixAutomaton) Move(pos int32, input int32) int32 {}
+
 // pos 位置对应的子串个数.
 // 用最长串的长度减去最短串的长度即可得到以当前节点为结尾的子串个数.
 // 最长串的长度记录在节点的 MaxLength 中,最短串的长度可以通过link对应的节点的 MaxLength 加 1 得到.
@@ -194,7 +214,7 @@ func (sa *SuffixAutomaton) CountSubstringAt(pos int32) int32 {
 	if pos == 0 {
 		return 0
 	}
-	return sa.Nodes[pos].MaxLength - sa.Nodes[sa.Nodes[pos].Link].MaxLength
+	return sa.Nodes[pos].MaxLen - sa.Nodes[sa.Nodes[pos].Link].MaxLen
 }
 
 // 本质不同的子串个数.
@@ -207,7 +227,7 @@ func (sa *SuffixAutomaton) CountSubstring() int {
 }
 
 func (sa *SuffixAutomaton) newNode(link, maxLength int32) *Node {
-	res := &Node{Link: link, MaxLength: maxLength}
+	res := &Node{Link: link, MaxLen: maxLength}
 	for i := int32(0); i < SIGMA; i++ {
 		res.Next[i] = -1
 	}
