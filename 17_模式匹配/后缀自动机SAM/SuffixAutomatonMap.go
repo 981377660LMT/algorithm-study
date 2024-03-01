@@ -101,7 +101,7 @@ func (sa *SuffixAutomatonMap) Add(ord int32) {
 func (sa *SuffixAutomatonMap) BuildTree() [][]int32 {
 	n := int32(len(sa.Nodes))
 	graph := make([][]int32, n)
-	for v := int32(0); v < n; v++ {
+	for v := int32(1); v < n; v++ {
 		p := sa.Nodes[v].Link
 		graph[p] = append(graph[p], v)
 	}

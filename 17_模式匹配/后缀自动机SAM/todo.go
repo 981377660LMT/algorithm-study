@@ -9,28 +9,7 @@ import (
 /* 后缀自动机 Suffix automaton (SAM)
 
 如果我们既能知道前缀信息，又能知道后缀信息，就可以做字符串匹配
-
-将字符串的所有子串压缩后的结果
-【推荐】https://oi-wiki.org/string/sam/ 证明了 SAM 的状态数不会超过 2n-1 (n>=2)，最坏情况下为 abbb...bbb
-【推荐】可视化工具：SAM Drawer https://yutong.site/sam/ https://mivik.gitee.io/sam-visualizer/
-https://en.wikipedia.org/wiki/Suffix_automaton
-https://www.bilibili.com/video/av756051240/
-https://baobaobear.github.io/post/20200220-sam/
-https://ouuan.github.io/post/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BAsam%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/
-https://codeforces.com/blog/entry/20861
-《后缀自动机》，陈立杰
-《后缀自动机在字典树上的拓展》，刘研绎
-《后缀自动机及其应用》，张天扬
-炫酷后缀树魔术 https://eternalalexander.github.io/2019/10/31/%E5%90%8E%E7%BC%80%E6%A0%91%E7%AE%80%E4%BB%8B/
-后缀平衡树 https://www.luogu.com.cn/blog/CHiCO/CHiCO-Suffix-Balance-Tree
-
-【推荐】后缀自动机一·基本概念 http://hihocoder.com/problemset/problem/1441
-后缀自动机二·重复旋律5 http://hihocoder.com/problemset/problem/1445
-后缀自动机三·重复旋律6 http://hihocoder.com/problemset/problem/1449 SPOJ NSUBSTR https://www.luogu.com.cn/problem/SP8222
-    对每个 i，求长为 i 的且出现次数最多的子串的出现次数，可以在 dfs rev 的同时求出 maxCnt[o.len].max(o.cnt)，最后倒序更新一下 maxCnt
-后缀自动机四·重复旋律7 http://hihocoder.com/problemset/problem/1457
-后缀自动机五·重复旋律8 http://hihocoder.com/problemset/problem/1465
-后缀自动机六·重复旋律9 http://hihocoder.com/problemset/problem/1466
+https://www.luogu.com.cn/problem/SP8222
 https://ac.nowcoder.com/acm/contest/37092#question
 
 模板题：子串出现次数 https://www.luogu.com.cn/problem/P3804
