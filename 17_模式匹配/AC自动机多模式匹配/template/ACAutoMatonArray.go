@@ -1,10 +1,10 @@
-// https://www.luogu.com.cn/blog/yszs/ac-zi-dong-ji-fou-guo-shi-jian-fail-shu-di-gong-ju-pi-liao
-// fail 指针指向所有模式串的前缀中匹配当前状态的最长后缀(border)
-// !- !fail[i]表示在trie树上的第i个点表示的前缀，它在trie树上的最长后缀是第fail[i]个点表示的前缀。
+// fail 指针指向所有模式串的前缀中匹配当前状态的最长真后缀(border)
+// !https://www.cnblogs.com/alex-wei/p/Common_String_Theory_Theory_automaton_related.html
 // !- 子串 = 前缀的后缀
 //   Trie树（AC自动机）的祖先节点 = 前缀
 //   Fail树的祖先节点 = 后缀
 //   字符串x在字符串y中出现的次数 = `Fail树中x的子树`与`Trie树中y到根的路径`的交点个数
+//   一个单词在匹配串S中出现次数之和，等于它在S的所有前缀中作为后缀出现 的次数之和。
 //
 // 1.dp类型题: 一般都是dfs(index,pos):长度为index的字符串，当前trie状态为pos.
 //	枚举26种字符(字符集)转移.
