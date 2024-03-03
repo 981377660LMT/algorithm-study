@@ -16,7 +16,7 @@
 //	bbab
 //	bbbab
 //
-// !   - suffix tree
+// !   - suffix tree (每个结点是一个startPos等价类)
 //
 //		 ab(1) --- bbab(2)
 //		/

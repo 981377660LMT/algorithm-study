@@ -223,7 +223,10 @@ func max32(a, b int32) int32 {
 
 func main() {
 	// p4070()
-	longest_common_substring()
+	// longest_common_substring()
+
+	// [[0,1,2,3,4],[2,3,4],[4,0,1,2,3]]
+	fmt.Println(longestCommonSubpath(5, [][]int{{0, 1, 2, 3, 4}, {2, 3, 4}, {4, 0, 1, 2, 3}}))
 }
 
 // P4070 [SDOI2016] 生成魔咒
@@ -297,10 +300,60 @@ func longest_common_substring() {
 	fmt.Fprintln(out, sStart, sEnd, tStart, tEnd)
 }
 
-// 多串最长公共子串 (len(words)>=2)
+// 多串最长公共子串 (len(words)>=2) 常数大,O(n)
 // https://leetcode.cn/problems/longest-common-subpath/description/
-// 1. 把第一个串当做匹配串,其他的串建立 SAM
-// 2. 把第一个串(的每个前缀)在每个 SAM 上跑匹配，并记录每个前缀能匹配到的最长后缀.
-func MultiLCS(words [][]int32) (res int) {
+// 1. 把最短串串当做匹配串,其他的串建立 SAM
+// 2. 把最短串串(的每个前缀)在每个 SAM 上跑匹配，并记录每个前缀能匹配到的最长后缀.
+// TODO: 多串匹配广义SAM更加方便
+func MultiLCS(words [][]int32) int32 {
+	getShortestTextIndex := func() int {
+		minLen, textIndex := len(words[0]), 0
+		for i, word := range words {
+			if len(word) < minLen {
+				minLen, textIndex = len(word), i
+			}
+		}
+		return textIndex
+	}
 
+	textIndex := getShortestTextIndex()
+	text := words[textIndex]
+	hits := make([]int32, len(text)) // !前缀t[:i+1]匹配到的最长后缀
+	for i := range hits {
+		hits[i] = int32(i + 1)
+	}
+
+	for i, word := range words {
+		if i == textIndex {
+			continue
+		}
+		sam := NewSuffixAutomatonMap()
+		for _, c := range word {
+			sam.Add(c)
+		}
+		pos, len_ := int32(0), int32(0)
+		for i, c := range text {
+			pos, len_ = sam.Move(pos, len_, c)
+			hits[i] = min32(hits[i], len_)
+		}
+	}
+
+	res := int32(0)
+	for _, len_ := range hits {
+		res = max32(res, len_)
+	}
+	return res
+}
+
+// 1923. 最长公共子路径
+// https://leetcode.cn/problems/longest-common-subpath/description/
+func longestCommonSubpath(n int, paths [][]int) int {
+	paths32 := make([][]int32, len(paths))
+	for i, path := range paths {
+		paths32[i] = make([]int32, len(path))
+		for j, v := range path {
+			paths32[i][j] = int32(v)
+		}
+	}
+	return int(MultiLCS(paths32))
 }

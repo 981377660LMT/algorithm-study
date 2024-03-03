@@ -19,18 +19,18 @@
 //						    /					  	   \
 //						   /					  	    \
 //						  /						  	  	 \
-//						0,1,3,5 "a"(后)				 2,4 "ab"
-//						 /	 \	                /   "b"
+//						0,1,3,5 "a"(后)				 2,4 "b"
+//						 /	 \	                / "ab"
 //						/		  \						     /		  \
 //					 /       \              /        \
 //					/         \            /          \
-//				1,"aa"   3,5 "aba"(后)	2 "aab"    4 "aabab"
-//	                /  "ba"                    "abab"
-//					        /      \                     "bab"
-//					       /        \
-//				       3 "aaba"  5 "aababa"(后)
+//				1,"aa"   3,5 "ba"(后) 	2 "aab"      4 "bab"
+//	                / "aba"                     "abab"
+//					       /      \                    "aabab"
+//					      /        \
+//				       3 "aaba"   5 "baba"(后)
 //	                         "ababa"
-//	                          "baba"
+//	                        "aababa"
 //
 // note:
 //  0. 后缀自动机 (Suffix Automaton, SAM) 是仅接受后缀且状态数最少的 DFA.
@@ -64,8 +64,9 @@
 //     每一个结点都对应了一种子串，Parent Tree 的结点与 SAM 的结点一一对应
 //     但是, 后缀自动机的边不同于 parent 树上的边
 //     !11. 转移边：parent树往下走代表往前加字符，SAM转移边往后走代表往后加字符
-//     !12. 从SAM的DAG角度看，子串是后缀的一个前缀；
-//     !从SAM的Parent Tree角度看，子串是前缀的一个后缀。
+//     !12. 子串是什么：
+//          从SAM的DAG角度看，子串是后缀的一个前缀；
+//          !从SAM的Parent Tree角度看，子串是前缀的一个后缀。
 //     !13. SAM 与AC自动机的相似性：
 //     AC自动机的失配链接和后缀自动机的后缀链接都有性质：
 //     指向的两个状态都满足"后者的代表串是前者的代表串的真后缀"。
@@ -76,6 +77,8 @@
 //  16. 一般来讲,DAG上可能重复转移,是很难跑计数DP的。
 //     !但是我们知道后缀自动机的性质 : 任意两个节点的表示集合没有交。
 //     !所以我们只要统计路径数即可,不需要考虑重复问题。
+//  !17.可以通过parent树确定SAM的接受状态集合。找到MaxLen=n的结点，该结点到根的路径上的所有结点都是接受状态。
+//  !18.子串是
 //
 // applications:
 //  1. 查找某个子串位于哪个节点 => 直接倍增往上跳到len[]合适的地方
@@ -86,11 +89,15 @@
 //  4. 两个字符s和t的最长公共子串 => 对s建立SAM，对t的每个前缀，在SAM中寻找这个前缀的最长后缀，类似AC自动机跳fail.
 //  5. 最长不可重叠重复子串 => endPos 集合大于等于2，而且还需要考虑最靠右的那个位置和最靠左的那个位置之间的距离
 //     if(sz[u] >= 2) res = max(res, min(maxLen[u], r[u] - l[u]));
+//  6. 读入字符串时删除首部字符 => 记录已读入的字符串长度，若小于等于当前状态的 parent.MaxLen ，就转移到parent
+//  7. 判断子串/后缀 => 建出文本串的SAM，将模式串分别输入SAM，若无法转移到则不是子串，否则是；若转移到接受状态则是后缀，否则不是。
+
 package main
 
 import (
 	"bufio"
 	"fmt"
+	"math/bits"
 	"os"
 )
 
@@ -245,7 +252,8 @@ func (sam *SuffixAutomaton) DistinctSubstring() int {
 	return res
 }
 
-// 类似AC自动机转移，返回(转移后的位置, 转移后匹配的长度).
+// 类似AC自动机转移，输入一个字符，返回(转移后的位置, 转移后匹配的"最长后缀"长度).
+// pos: 当前状态, len: 当前匹配的长度, char: 输入字符.
 func (sam *SuffixAutomaton) Move(pos, len, char int32) (nextPos, nextLen int32) {
 	char -= OFFSET
 	if tmp := sam.Nodes[pos].Next[char]; tmp != -1 {
@@ -266,12 +274,92 @@ func (sam *SuffixAutomaton) Move(pos, len, char int32) (nextPos, nextLen int32) 
 	return
 }
 
+// 删除当前模式串首部字符，返回(转移后的位置, 转移后匹配的"最长后缀"长度).
+// pos: 当前状态, len: 当前匹配的长度, patternLen: 当前模式串长度.
+func (sam *SuffixAutomaton) MoveLeft(pos, len, patternLen int32) (nextPos, nextLen int32) {
+	if len < patternLen { // 没有完全匹配，可以不删字符，匹配到的首字母是模式串某个后缀的首字母
+		return pos, len
+	}
+	if len == 0 {
+		return 0, 0
+	}
+	len--
+	node := sam.Nodes[pos]
+	if len == sam.Nodes[node.Link].MaxLen {
+		pos = node.Link
+	}
+	return pos, len
+}
+
+// 给定模式串pattern，返回模式串的每个非空前缀s[:i+1]与SAM文本串的最长公共后缀长度.
+func (sam *SuffixAutomaton) LongestCommonSuffix(m int32, pattern func(i int32) int32) []int32 {
+	res := make([]int32, m)
+	pos, len := int32(0), int32(0)
+	for i := int32(0); i < m; i++ {
+		pos, len = sam.Move(pos, len, pattern(i))
+		res[i] = len
+	}
+	return res
+}
+
 func (sam *SuffixAutomaton) newNode(link, maxLen, end int32) *Node {
 	res := &Node{Link: link, MaxLen: maxLen, End: end}
 	for i := int32(0); i < SIGMA; i++ {
 		res.Next[i] = -1
 	}
 	return res
+}
+
+type S = int32
+
+// SparseTable 稀疏表: st[j][i] 表示区间 [i, i+2^j) 的贡献值.
+type SparseTable struct {
+	st     [][]S
+	lookup []int
+	e      func() S
+	op     func(S, S) S
+	n      int
+}
+
+func NewSparseTable(n int, f func(int) S, e func() S, op func(S, S) S) *SparseTable {
+	res := &SparseTable{}
+
+	b := bits.Len(uint(n))
+	st := make([][]S, b)
+	for i := range st {
+		st[i] = make([]S, n)
+	}
+	for i := 0; i < n; i++ {
+		st[0][i] = f(i)
+	}
+	for i := 1; i < b; i++ {
+		for j := 0; j+(1<<i) <= n; j++ {
+			st[i][j] = op(st[i-1][j], st[i-1][j+(1<<(i-1))])
+		}
+	}
+	lookup := make([]int, n+1)
+	for i := 2; i < len(lookup); i++ {
+		lookup[i] = lookup[i>>1] + 1
+	}
+	res.st = st
+	res.lookup = lookup
+	res.e = e
+	res.op = op
+	res.n = n
+	return res
+}
+
+func NewSparseTableFrom(leaves []S, e func() S, op func(S, S) S) *SparseTable {
+	return NewSparseTable(len(leaves), func(i int) S { return leaves[i] }, e, op)
+}
+
+// 查询区间 [start, end) 的贡献值.
+func (st *SparseTable) Query(start, end int) S {
+	if start >= end {
+		return st.e()
+	}
+	b := st.lookup[end-start]
+	return st.op(st.st[b][start], st.st[b][end-(1<<b)])
 }
 
 func abs32(a int32) int32 {
@@ -281,14 +369,43 @@ func abs32(a int32) int32 {
 	return a
 }
 
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 func main() {
-	// P3804()
 	// P3975()
+	P6640()
 
+	// cf235c()
 	// cf802I()
-	// number_of_substrings()
-	longest_common_substring()
 
+	// number_of_substrings()
+	// longest_common_substring()
 }
 
 // P3975 [TJOI2015] 弦论(字典序第k小子串)
@@ -373,10 +490,125 @@ func P3975() {
 	}
 }
 
+// P6640 [BJOI2020] 封印 (sam+RMQ)
+// https://www.luogu.com.cn/problem/P6640
+//
+// 给定两个字符串s和t，q次查询s[start:end)和t的最长公共子串长度.
+//
+// !1. 对t建SAM，求出s的每个前缀与t的最长公共后缀长度lcs[i].
+// !2. 对每个询问，答案为 `max(min(lcs[i], i-start+1) for i in range(start, end))`，不好处理.
+// !3. 考虑二分答案长度mid，则只需要判定`[start+mid-1,end)`区间内的lcs[i]最大值是否不小于mid即可。
+func P6640() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s, t string
+	fmt.Fscan(in, &s, &t)
+	sam := NewSuffixAutomaton()
+	for _, c := range t {
+		sam.Add(c)
+	}
+
+	// s的每个前缀s[:i+1]与t的最长公共后缀长度.
+	lcs := sam.LongestCommonSuffix(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+	rmq := NewSparseTableFrom(lcs, func() int32 { return 0 }, max32)
+	query := func(start, end int32) (res int32) {
+		// 暴力：
+		// for i := start; i < end; i++ {
+		// 	res = max32(res, min32(lcs[i], i-start+1))
+		// }
+
+		check := func(mid int32) bool {
+			return rmq.Query(int(start+mid-1), int(end)) >= mid
+		}
+		left, right := int32(1), end-start
+		for left <= right {
+			mid := (left + right) / 2
+			if check(mid) {
+				left = mid + 1
+			} else {
+				right = mid - 1
+			}
+		}
+		return int32(right)
+	}
+
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var start, end int32
+		fmt.Fscan(in, &start, &end)
+		start--
+		fmt.Fprintln(out, query(start, end))
+	}
+}
+
 // Martian Strings
 // https://www.luogu.com.cn/problem/CF149E
 // 可以找到两个不相交的区间，满足这两个区间对应的子串拼起来和 wi相同
 func cf149e() {}
+
+// Cyclical Quest
+// https://www.luogu.com.cn/problem/CF235C
+// https://www.cnblogs.com/h-lka/p/15169021.html
+// !给定一个主串S和n个询问串，求每个询问串的所有循环同构"去重"后在主串中出现的次数总和。
+//
+// !循环就是把询问串第一个字符拿去放在最后面(目前匹配到的串的第一个字符删掉,然后再加上一个)。
+// !在前面删除字符类似 parent tree 上跳的操作，后面加字符类似SAM上的转移操作。
+// 如果同一个询问串多次匹配到同一个节点,贡献只算一次,具体可以打标记实现。
+func cf235c() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var text string
+	fmt.Fscan(in, &text)
+	var q int
+	fmt.Fscan(in, &q)
+	words := make([]string, q)
+	for i := 0; i < q; i++ {
+		fmt.Fscan(in, &words[i])
+	}
+
+	sam := NewSuffixAutomaton()
+	for _, c := range text {
+		sam.Add(c)
+	}
+
+	endPosSize := sam.GetEndPosSize(sam.GetDfsOrder())
+	size := sam.Size()
+	visitedTime := make([]int32, size)
+	for i := range visitedTime {
+		visitedTime[i] = -1
+	}
+	for i, word := range words {
+		m := int32(len(word))
+		pos, len_ := int32(0), int32(0)
+		res := 0
+		for j := int32(0); j < m*2; j++ {
+			var v int32
+			if j < m {
+				v = int32(word[j])
+			} else {
+				v = int32(word[j-m])
+			}
+
+			pos, len_ = sam.Move(pos, len_, v)
+			if j >= m { // 移除模式串首部字符
+				pos, len_ = sam.MoveLeft(pos, len_, m+1)
+			}
+			if j >= m-1 {
+				if len_ == m && visitedTime[pos] < int32(i) {
+					visitedTime[pos] = int32(i)
+					res += int(endPosSize[pos])
+				}
+			}
+		}
+
+		fmt.Fprintln(out, res)
+	}
+}
 
 // Fake News (hard)
 // https://www.luogu.com.cn/problem/CF802I
@@ -463,7 +695,6 @@ func number_of_substrings() {
 
 // https://judge.yosupo.jp/problem/longest_common_substring
 // https://oi-wiki.org/string/sam/#%E4%B8%A4%E4%B8%AA%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E4%B8%B2
-// TODO: 多串匹配广义SAM更加方便
 func longest_common_substring() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -503,37 +734,4 @@ func longest_common_substring() {
 		sStart, sEnd, tStart, tEnd = tStart, tEnd, sStart, sEnd
 	}
 	fmt.Fprintln(out, sStart, sEnd, tStart, tEnd)
-}
-
-// LCS2 - Longest Common Substring II
-// https://www.luogu.com.cn/problem/SP1812
-// n个串的最长公共子串.
-func SP1812() {}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min32(a, b int32) int32 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max32(a, b int32) int32 {
-	if a > b {
-		return a
-	}
-	return b
 }

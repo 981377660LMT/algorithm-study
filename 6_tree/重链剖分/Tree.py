@@ -241,3 +241,14 @@ if __name__ == "__main__":
             print(lc(root - 1, dep))
 
     abc202_e()
+
+    # https://leetcode.cn/problems/count-pairs-of-connectable-servers-in-a-weighted-tree-network/description/
+    # 100226. 在带权树网络中统计可连接服务器对数目
+    class Solution:
+        def countPairsOfConnectableServers(
+            self, edges: List[List[int]], signalSpeed: int
+        ) -> List[int]:
+            n=len(edges)+1
+            tree = Tree(n)
+            for u, v, w in edges:
+                tree.addEdge(u, v, w)
