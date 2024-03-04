@@ -42,7 +42,6 @@ type Node struct {
 	Next   [SIGMA]int32 // SAM 转移边
 	Link   int32        // 后缀链接
 	MaxLen int32        // 当前节点对应的最长子串的长度
-	End    int32        // 最长的字符在原串的下标, 实点下标为非负数, 虚点下标为负数
 }
 
 type SuffixAutomaton struct {
@@ -52,7 +51,7 @@ type SuffixAutomaton struct {
 
 func NewSuffixAutomatonGeneral() *SuffixAutomaton {
 	res := &SuffixAutomaton{}
-	res.Nodes = append(res.Nodes, res.newNode(-1, 0, -1))
+	res.Nodes = append(res.Nodes, res.newNode(-1, 0))
 	return res
 }
 
@@ -77,7 +76,7 @@ func (sam *SuffixAutomaton) Add(lastPos int32, char int32) int32 {
 			return tmp
 		} else {
 			newQ := int32(len(sam.Nodes))
-			sam.Nodes = append(sam.Nodes, sam.newNode(nextNode.Link, lastNode.MaxLen+1, -abs32(nextNode.End)))
+			sam.Nodes = append(sam.Nodes, sam.newNode(nextNode.Link, lastNode.MaxLen+1))
 			sam.Nodes[newQ].Next = nextNode.Next
 			sam.Nodes[tmp].Link = newQ
 			for lastPos != -1 && sam.Nodes[lastPos].Next[c] == tmp {
@@ -90,7 +89,7 @@ func (sam *SuffixAutomaton) Add(lastPos int32, char int32) int32 {
 
 	newNode := int32(len(sam.Nodes))
 	// 新增一个实点以表示当前最长串
-	sam.Nodes = append(sam.Nodes, sam.newNode(-1, sam.Nodes[lastPos].MaxLen+1, sam.Nodes[lastPos].End+1))
+	sam.Nodes = append(sam.Nodes, sam.newNode(-1, sam.Nodes[lastPos].MaxLen+1))
 	p := lastPos
 	for p != -1 && sam.Nodes[p].Next[c] == -1 {
 		sam.Nodes[p].Next[c] = newNode
@@ -105,7 +104,7 @@ func (sam *SuffixAutomaton) Add(lastPos int32, char int32) int32 {
 	} else {
 		// 不够用，需要新增一个虚点
 		newQ := int32(len(sam.Nodes))
-		sam.Nodes = append(sam.Nodes, sam.newNode(sam.Nodes[q].Link, sam.Nodes[p].MaxLen+1, -abs32(sam.Nodes[q].End)))
+		sam.Nodes = append(sam.Nodes, sam.newNode(sam.Nodes[q].Link, sam.Nodes[p].MaxLen+1))
 		sam.Nodes[len(sam.Nodes)-1].Next = sam.Nodes[q].Next
 		sam.Nodes[q].Link = newQ
 		sam.Nodes[newNode].Link = newQ
@@ -174,36 +173,6 @@ func (sam *SuffixAutomaton) GetDfsOrder() []int32 {
 	return order
 }
 
-// 返回每个节点的endPos集合大小.
-// !注意：0号结点(空串)大小为n，有时需要置为0.
-func (sam *SuffixAutomaton) GetEndPosSize(dfsOrder []int32) []int32 {
-	size := sam.Size()
-	endPosSize := make([]int32, size)
-	for i := size - 1; i >= 1; i-- {
-		cur := dfsOrder[i]
-		if sam.Nodes[cur].End >= 0 { // 实点
-			endPosSize[cur]++
-		}
-		pre := sam.Nodes[cur].Link
-		endPosSize[pre] += endPosSize[cur]
-	}
-	return endPosSize
-}
-
-// TODO: 线段树合并维护 EndPos 集合
-func (sam *SuffixAutomaton) GetEndPos() {}
-
-// TODO: 快速定位子串
-// 倍增往上跳到len[]合适的地方
-func (sam *SuffixAutomaton) GetNodeBySubstring(start, end int32) {}
-
-// 给定结点编号和子串长度，返回该子串的起始和结束位置.
-func (sam *SuffixAutomaton) RecoverSubstring(pos int32, len int32) (start, end int32) {
-	end = abs32(sam.Nodes[pos].End) + 1
-	start = end - len
-	return
-}
-
 func (sam *SuffixAutomaton) DistinctSubstringAt(pos int32) int32 {
 	if pos == 0 {
 		return 0
@@ -220,58 +189,20 @@ func (sam *SuffixAutomaton) DistinctSubstring() int {
 	return res
 }
 
-// 类似AC自动机转移，输入一个字符，返回(转移后的位置, 转移后匹配的"最长后缀"长度).
-// pos: 当前状态, len: 当前匹配的长度, char: 输入字符.
-func (sam *SuffixAutomaton) Move(pos, len, char int32) (nextPos, nextLen int32) {
-	char -= OFFSET
-	if tmp := sam.Nodes[pos].Next[char]; tmp != -1 {
-		nextPos = tmp
-		nextLen = len + 1
-	} else {
-		for pos != -1 && sam.Nodes[pos].Next[char] == -1 {
-			pos = sam.Nodes[pos].Link
-		}
+// 获取pattern在sam上的位置.
+func (sam *SuffixAutomaton) GetPos(pattern string) (pos int32, ok bool) {
+	pos = 0
+	for _, c := range pattern {
+		pos = sam.Nodes[pos].Next[c-OFFSET]
 		if pos == -1 {
-			nextPos = 0
-			nextLen = 0
-		} else {
-			nextPos = sam.Nodes[pos].Next[char]
-			nextLen = sam.Nodes[pos].MaxLen + 1
+			return -1, false
 		}
 	}
-	return
+	return pos, true
 }
 
-// 删除当前模式串首部字符，返回(转移后的位置, 转移后匹配的"最长后缀"长度).
-// pos: 当前状态, len: 当前匹配的长度, patternLen: 当前模式串长度.
-func (sam *SuffixAutomaton) MoveLeft(pos, len, patternLen int32) (nextPos, nextLen int32) {
-	if len < patternLen { // 没有完全匹配，可以不删字符，匹配到的首字母是模式串某个后缀的首字母
-		return pos, len
-	}
-	if len == 0 {
-		return 0, 0
-	}
-	len--
-	node := sam.Nodes[pos]
-	if len == sam.Nodes[node.Link].MaxLen {
-		pos = node.Link
-	}
-	return pos, len
-}
-
-// 给定模式串pattern，返回模式串的每个非空前缀s[:i+1]与SAM文本串的最长公共后缀长度.
-func (sam *SuffixAutomaton) LongestCommonSuffix(m int32, pattern func(i int32) int32) []int32 {
-	res := make([]int32, m)
-	pos, len := int32(0), int32(0)
-	for i := int32(0); i < m; i++ {
-		pos, len = sam.Move(pos, len, pattern(i))
-		res[i] = len
-	}
-	return res
-}
-
-func (sam *SuffixAutomaton) newNode(link, maxLen, end int32) *Node {
-	res := &Node{Link: link, MaxLen: maxLen, End: end}
+func (sam *SuffixAutomaton) newNode(link, maxLen int32) *Node {
+	res := &Node{Link: link, MaxLen: maxLen}
 	for i := int32(0); i < SIGMA; i++ {
 		res.Next[i] = -1
 	}
