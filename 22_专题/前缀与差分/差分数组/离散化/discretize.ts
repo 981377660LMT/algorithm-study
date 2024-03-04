@@ -7,7 +7,10 @@
  * - getRank: 给定一个数,返回它的排名`(offset ~ offset + count)`.
  * - count: 离散化(去重)后的元素个数.
  */
-function discretizeSparse(nums: number[], offset = 0): [getRank: (num: number) => number, count: number] {
+function discretizeSparse(
+  nums: number[],
+  offset = 0
+): [getRank: (num: number) => number, count: number] {
   const allNums = [...new Set(nums)].sort((a, b) => a - b)
 
   // bisect_left
@@ -34,7 +37,10 @@ function discretizeSparse(nums: number[], offset = 0): [getRank: (num: number) =
  * - getRank: 给定一个数,返回它的排名`(offset ~ offset + count)`.
  * - count: 离散化(去重)后的元素个数.
  */
-function discretizeCompressed(nums: number[], offset = 0): [getRank: (num: number) => number, getValue: (rank: number) => number, count: number] {
+function discretizeCompressed(
+  nums: number[],
+  offset = 0
+): [getRank: (num: number) => number, getValue: (rank: number) => number, count: number] {
   const allNums = [...new Set(nums)].sort((a, b) => a - b)
   const mp = new Map<number, number>()
   for (let index = 0; index < allNums.length; index++) mp.set(allNums[index], index + offset)
@@ -59,11 +65,11 @@ function discretizeUnique(nums: number[]): [rank: Uint32Array, keys: number[]] {
 /**
  * 返回数组的排序索引.
  */
-function argSort<T>(arr: ArrayLike<T>): Uint32Array {
+function argSort(arr: ArrayLike<number>): Uint32Array {
   const n = arr.length
   const order = new Uint32Array(n)
   for (let i = 0; i < n; i++) order[i] = i
-  order.sort((a, b) => (arr[a] < arr[b] ? -1 : 1))
+  order.sort((i, j) => arr[i] - arr[j])
   return order
 }
 

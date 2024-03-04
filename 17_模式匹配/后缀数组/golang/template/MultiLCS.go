@@ -78,7 +78,6 @@ func MultiLCS(ords [][]int32) (res int) {
 		}
 	}
 
-	fmt.Println(belong)
 	// 二分求答案，找到连续的 height[i] >= mid 的区间，使得区间内包含所有的 path
 	sa, _, height := SuffixArray32(int32(len(sb)), func(i int32) int32 { return int32(sb[i]) })
 	check := func(mid32 int32) bool {
