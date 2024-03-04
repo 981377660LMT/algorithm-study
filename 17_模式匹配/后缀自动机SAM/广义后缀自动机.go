@@ -7,15 +7,25 @@
 //
 // note:
 //
-//	0.一个能接受多个串所有子串的自动机。
-//	1. 构建方式：
-//	   - 伪广义后缀自动机:
-//	     !如果给出的是多个字符串而不是一个trie，则可以使用.
-//	     对每个串，重复在同一个 SAM 上进行建立.
-//	     !每次建完一个串以后就把lastPos 指针移到root上面，接着建下一个串。
-//	     注意"插入字符串时需要看一下当前准备插入的位置是否已经有结点了".
-//	     如果有的话我们只需要在其基础上额外判断一下拆分 SAM 结点的情况；否则的话就和普通的 SAM 插入一模一样了
-//	   - Trie树上的广义后缀自动机：建立在 Trie 树上的 SAM 称为广义 SAM
+//  0. 一个能接受多个串所有子串的自动机。
+//  1. 构建方式：
+//     - 伪广义后缀自动机:
+//     !如果给出的是多个字符串而不是一个trie，则可以使用.
+//     对每个串，重复在同一个 SAM 上进行建立.
+//     !每次建完一个串以后就把lastPos 指针移到root上面，接着建下一个串。
+//     注意"插入字符串时需要看一下当前准备插入的位置是否已经有结点了".
+//     如果有的话我们只需要在其基础上额外判断一下拆分 SAM 结点的情况；否则的话就和普通的 SAM 插入一模一样了
+//     - Trie树上的广义后缀自动机：建立在 Trie 树上的 SAM 称为广义 SAM
+//  !2. 自动机和广义后缀自动机中"用于构建"该自动机的所有串的所有前缀节点的树链的并的长度和是 O(L*sqrt(L)) 的。
+//     !对文本串t[i]的每个前缀，在后缀链接树上向上跳标记每个endPos，表示该endPos包含了t[i]的子串.标记次数之和不超过O(Lsqrt(L)).
+//     记count[u]为结点u的子树中的endPos的原串个数，则sum(count)的数量级为O(Lsqrt(L))，L为所有串长之和.
+//     证明(利用根号分治)：
+//     则若一个串长S>SQRT(L)，这样的串显然不超SQRT(L)个，而由于广义 SAM 上的节点数量级线性所以这里的总贡献数量级为O(LSQRT(L))。
+//     而对于串长不超过SQRT(L)的串，贡献数量级为O(nSQRT(L))。
+//     https://blog.csdn.net/ylsoi/article/details/94476894
+//     https://ddosvoid.github.io/2020/10/18/%E6%B5%85%E8%B0%88%E6%A0%B9%E5%8F%B7%E7%AE%97%E6%B3%95/
+//     喵星球上的点名 https://www.luogu.com.cn/problem/P2336
+//     Sevenk Love Oimaster https://www.luogu.com.cn/problem/SP8093
 
 package main
 
@@ -303,7 +313,9 @@ func max32(a, b int32) int32 {
 }
 
 func main() {
-	P6139()
+	// P6139()
+	SP8093()
+
 }
 
 // P3181 [HAOI2016] 找相同字符 (分别维护不同串的 size)
@@ -340,7 +352,73 @@ func bzoj3926() {}
 // https://www.luogu.com.cn/problem/SP8093
 // 给定 n 个模板串，以及 q 个查询串
 // 依次查询每一个查询串是多少个模板串的子串
-func SP8093() {}
+//
+// 对原串建一个广义SAM，然后把每一个原串放到SAM上跑一跑，记录一下每一个状态属于多少个原串，用belongCount表示。
+// 这样的话查询串直接在SAM上跑，如果失配输出0，否则直接输出记录在上面的belongCount就好了。
+func SP8093() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	texts := make([]string, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &texts[i])
+	}
+	patterns := make([]string, q)
+	for i := 0; i < q; i++ {
+		fmt.Fscan(in, &patterns[i])
+	}
+
+	sam := NewSuffixAutomatonGeneral()
+	for _, v := range texts {
+		sam.AddString(v)
+	}
+
+	size := sam.Size()
+	nodes := sam.Nodes
+	belongCount := make([]int32, size) // 每个状态属于多少个原串
+	visitedTime := make([]int32, size)
+	for i := range visitedTime {
+		visitedTime[i] = -1
+	}
+
+	// 对文本串t[i]的每个前缀，在后缀链接树上向上跳标记每个endPos，表示该endPos包含了t[i]的子串.
+	// 标记次数之和不超过O(Lsqrt(L)).
+	markChain := func(sid int32, pos int32) {
+		for pos >= 0 && visitedTime[pos] != sid {
+			visitedTime[pos] = sid
+			belongCount[pos]++
+			pos = nodes[pos].Link
+		}
+	}
+
+	// 查询模式串是多少个文本串的子串.
+	query := func(pattern string) int32 {
+		pos := int32(0)
+		for _, c := range pattern {
+			pos = nodes[pos].Next[c-OFFSET]
+			if pos == -1 {
+				return 0
+			}
+		}
+		return belongCount[pos]
+	}
+
+	// 标记所有文本串的子串.
+	for i, w := range texts {
+		pos := int32(0)
+		for _, c := range w {
+			pos = nodes[pos].Next[c-OFFSET]
+			markChain(int32(i), pos)
+		}
+	}
+
+	for _, w := range patterns {
+		fmt.Fprintln(out, query(w))
+	}
+}
 
 // Good Substrings
 // https://www.luogu.com.cn/problem/CF316G2
