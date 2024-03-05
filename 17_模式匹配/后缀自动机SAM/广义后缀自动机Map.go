@@ -172,8 +172,9 @@ func (sam *SuffixAutomatonMapGeneral) DistinctSubstring() int {
 // 获取pattern在sam上的位置.如果不是子串，返回(0,false).
 func (sam *SuffixAutomatonMapGeneral) GetPos(m int32, pattern func(i int32) int32) (pos int32, ok bool) {
 	pos = 0
+	nodes := sam.Nodes
 	for i := int32(0); i < m; i++ {
-		if v, ok := sam.Nodes[pos].Next[pattern(i)]; ok {
+		if v, ok := nodes[pos].Next[pattern(i)]; ok {
 			pos = v
 		} else {
 			return 0, false
@@ -223,8 +224,8 @@ func max32(a, b int32) int32 {
 }
 
 func main() {
-	// P2336()
-	P6139()
+	P2336()
+	// P6139()
 }
 
 // P6139 【模板】广义后缀自动机（广义 SAM）
@@ -339,14 +340,12 @@ func P2336() {
 	belongCount2 := make([]int32, size) // 每个endPos包含多少个查询串.
 	for i, w := range patterns {
 		pos, ok := sam.GetPos(int32(len(w)), func(i int32) int32 { return w[i] })
-		fmt.Println(w, pos, ok, 111)
 		if ok {
 			res1[i] = belongCount1[pos]
 			belongCount2[pos]++
 		}
 	}
-
-	// 对每个模式串，向上跳统计包含了多少个查询串.
+	// 对每个模式串的前缀，向上跳统计包含了多少个查询串.
 	for i := range visitedTime {
 		visitedTime[i] = -1
 	}
@@ -363,15 +362,18 @@ func P2336() {
 		curRes := int32(0)
 
 		v1 := firstName[i]
-		pos1, _ := sam.GetPos(int32(len(v1)), func(i int32) int32 { return v1[i] })
-		curRes += queryChain(int32(i), pos1)
-		fmt.Println(curRes, i, v1, `1`)
+		pos1 := int32(0)
+		for _, c := range v1 {
+			pos1 = nodes[pos1].Next[c]
+			curRes += queryChain(int32(i), pos1)
+		}
 
 		v2 := secondName[i]
-		pos2, _ := sam.GetPos(int32(len(v2)), func(i int32) int32 { return v2[i] })
-		curRes += queryChain(int32(i), pos2)
-		fmt.Println(curRes, i, v2, `2`)
-
+		pos2 := int32(0)
+		for _, c := range v2 {
+			pos2 = nodes[pos2].Next[c]
+			curRes += queryChain(int32(i), pos2)
+		}
 		res2[i] = curRes
 	}
 
