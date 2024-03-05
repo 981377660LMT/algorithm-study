@@ -15,7 +15,6 @@ type Node struct {
 	Next   map[int32]int32 // SAM 转移边
 	Link   int32           // 后缀链接
 	MaxLen int32           // 当前节点对应的最长子串的长度
-	End    int32           // 最长的字符在原串的下标, 实点下标为非负数, 虚点下标为负数
 }
 
 type SuffixAutomatonMapGeneral struct {
@@ -25,7 +24,7 @@ type SuffixAutomatonMapGeneral struct {
 
 func NewSuffixAutomatonMapGeneral() *SuffixAutomatonMapGeneral {
 	res := &SuffixAutomatonMapGeneral{}
-	res.Nodes = append(res.Nodes, res.newNode(-1, 0, -1))
+	res.Nodes = append(res.Nodes, res.newNode(-1, 0))
 	return res
 }
 
@@ -49,7 +48,7 @@ func (sam *SuffixAutomatonMapGeneral) Add(lastPos int32, char int32) int32 {
 			return tmp
 		} else {
 			newQ := int32(len(sam.Nodes))
-			sam.Nodes = append(sam.Nodes, sam.newNode(nextNode.Link, lastNode.MaxLen+1, -abs32(nextNode.End)))
+			sam.Nodes = append(sam.Nodes, sam.newNode(nextNode.Link, lastNode.MaxLen+1))
 			for k, v := range nextNode.Next {
 				sam.Nodes[newQ].Next[k] = v
 			}
@@ -64,7 +63,7 @@ func (sam *SuffixAutomatonMapGeneral) Add(lastPos int32, char int32) int32 {
 
 	newNode := int32(len(sam.Nodes))
 	// 新增一个实点以表示当前最长串
-	sam.Nodes = append(sam.Nodes, sam.newNode(-1, sam.Nodes[lastPos].MaxLen+1, sam.Nodes[lastPos].End+1))
+	sam.Nodes = append(sam.Nodes, sam.newNode(-1, sam.Nodes[lastPos].MaxLen+1))
 	p := lastPos
 	for p != -1 {
 		_, has := sam.Nodes[p].Next[char]
@@ -83,7 +82,7 @@ func (sam *SuffixAutomatonMapGeneral) Add(lastPos int32, char int32) int32 {
 	} else {
 		// 不够用，需要新增一个虚点
 		newQ := int32(len(sam.Nodes))
-		sam.Nodes = append(sam.Nodes, sam.newNode(sam.Nodes[q].Link, sam.Nodes[p].MaxLen+1, -abs32(sam.Nodes[q].End)))
+		sam.Nodes = append(sam.Nodes, sam.newNode(sam.Nodes[q].Link, sam.Nodes[p].MaxLen+1))
 		for k, v := range sam.Nodes[q].Next {
 			sam.Nodes[newQ].Next[k] = v
 		}
@@ -97,10 +96,10 @@ func (sam *SuffixAutomatonMapGeneral) Add(lastPos int32, char int32) int32 {
 	return newNode
 }
 
-func (sam *SuffixAutomatonMapGeneral) AddString(s string) (lastPos int32) {
+func (sam *SuffixAutomatonMapGeneral) AddString(n int32, f func(i int32) int32) (lastPos int32) {
 	lastPos = 0
-	for _, c := range s {
-		lastPos = sam.Add(lastPos, c)
+	for i := int32(0); i < n; i++ {
+		lastPos = sam.Add(lastPos, f(i))
 	}
 	return
 }
@@ -154,29 +153,6 @@ func (sam *SuffixAutomatonMapGeneral) GetDfsOrder() []int32 {
 	return order
 }
 
-// 返回每个节点的endPos集合大小.
-// !注意：0号结点(空串)大小为n，有时需要置为0.
-func (sam *SuffixAutomatonMapGeneral) GetEndPosSize(dfsOrder []int32) []int32 {
-	size := sam.Size()
-	endPosSize := make([]int32, size)
-	for i := size - 1; i >= 1; i-- {
-		cur := dfsOrder[i]
-		if sam.Nodes[cur].End >= 0 { // 实点
-			endPosSize[cur]++
-		}
-		pre := sam.Nodes[cur].Link
-		endPosSize[pre] += endPosSize[cur]
-	}
-	return endPosSize
-}
-
-// 给定结点编号和子串长度，返回该子串的起始和结束位置.
-func (sam *SuffixAutomatonMapGeneral) RecoverSubstring(pos int32, len int32) (start, end int32) {
-	end = abs32(sam.Nodes[pos].End) + 1
-	start = end - len
-	return
-}
-
 func (sam *SuffixAutomatonMapGeneral) DistinctSubstringAt(pos int32) int32 {
 	if pos == 0 {
 		return 0
@@ -193,31 +169,21 @@ func (sam *SuffixAutomatonMapGeneral) DistinctSubstring() int {
 	return res
 }
 
-// 类似AC自动机转移，返回(转移后的位置, 转移后匹配的长度).
-func (sam *SuffixAutomatonMapGeneral) Move(pos, len, char int32) (nextPos, nextLen int32) {
-	if v, ok := sam.Nodes[pos].Next[char]; ok {
-		nextPos = v
-		nextLen = len + 1
-	} else {
-		for pos != -1 {
-			if _, ok := sam.Nodes[pos].Next[char]; ok {
-				break
-			}
-			pos = sam.Nodes[pos].Link
-		}
-		if pos == -1 {
-			nextPos = 0
-			nextLen = 0
+// 获取pattern在sam上的位置.如果不是子串，返回(0,false).
+func (sam *SuffixAutomatonMapGeneral) GetPos(m int32, pattern func(i int32) int32) (pos int32, ok bool) {
+	pos = 0
+	for i := int32(0); i < m; i++ {
+		if v, ok := sam.Nodes[pos].Next[pattern(i)]; ok {
+			pos = v
 		} else {
-			nextPos = sam.Nodes[pos].Next[char]
-			nextLen = sam.Nodes[pos].MaxLen + 1
+			return 0, false
 		}
 	}
-	return
+	return pos, true
 }
 
-func (sa *SuffixAutomatonMapGeneral) newNode(link, maxLength, end int32) *Node {
-	res := &Node{Next: make(map[int32]int32), Link: link, MaxLen: maxLength, End: end}
+func (sa *SuffixAutomatonMapGeneral) newNode(link, maxLength int32) *Node {
+	res := &Node{Next: make(map[int32]int32), Link: link, MaxLen: maxLength}
 	return res
 }
 
@@ -257,6 +223,7 @@ func max32(a, b int32) int32 {
 }
 
 func main() {
+	// P2336()
 	P6139()
 }
 
@@ -275,7 +242,7 @@ func P6139() {
 	for i := 0; i < n; i++ {
 		var s string
 		fmt.Fscan(in, &s)
-		sam.AddString(s)
+		sam.AddString(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
 	}
 	fmt.Fprintln(out, sam.DistinctSubstring())
 	fmt.Fprintln(out, sam.Size())
@@ -286,4 +253,132 @@ func P6139() {
 
 // P2336 [SCOI2012] 喵星球上的点名
 // https://www.luogu.com.cn/problem/P2336
-func P2336() {}
+//
+// 给定 n 个模板串，以及 q 个查询串.
+// 查询：
+// 1. 每一个查询串在多少个模板串中出现过(是多少个模板串的子串)
+// 2. 每一个模板串包含多少个查询串
+func P2336() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	firstName, secondName := make([][]int32, n), make([][]int32, n) // 每个模板串包括姓和名两个部分
+	for i := int32(0); i < n; i++ {
+		var k1 int32
+		fmt.Fscan(in, &k1)
+		cur1 := make([]int32, k1)
+		for j := int32(0); j < k1; j++ {
+			fmt.Fscan(in, &cur1[j])
+		}
+		firstName[i] = cur1
+		var k2 int32
+		fmt.Fscan(in, &k2)
+		cur2 := make([]int32, k2)
+		for j := int32(0); j < k2; j++ {
+			fmt.Fscan(in, &cur2[j])
+		}
+		secondName[i] = cur2
+	}
+	patterns := make([][]int32, q)
+	for i := int32(0); i < q; i++ {
+		var k int32
+		fmt.Fscan(in, &k)
+		cur := make([]int32, k)
+		for j := int32(0); j < k; j++ {
+			fmt.Fscan(in, &cur[j])
+		}
+		patterns[i] = cur
+	}
+
+	sam := NewSuffixAutomatonMapGeneral()
+	for i := int32(0); i < n; i++ {
+		v1, v2 := firstName[i], secondName[i]
+		sam.AddString(int32(len(v1)), func(i int32) int32 { return v1[i] })
+		sam.AddString(int32(len(v2)), func(i int32) int32 { return v2[i] })
+	}
+
+	size := sam.Size()
+	nodes := sam.Nodes
+	res1 := make([]int32, q) // !每一个查询串在多少个模板串中出现过(是多少个模板串的子串)
+	res2 := make([]int32, n) // !每一个模板串包含多少个查询串
+
+	belongCount1 := make([]int32, size) // 每个状态属于多少个原串的子串(原串前缀的后缀)
+	visitedTime := make([]int32, size)
+
+	// 对文本串t[i]的每个前缀，在后缀链接树上向上跳标记每个endPos，表示该endPos包含了t[i]的子串.
+	// 标记次数之和不超过O(Lsqrt(L)).
+	for i := range visitedTime {
+		visitedTime[i] = -1
+	}
+	markChain := func(sid int32, pos int32) {
+		for pos >= 0 && visitedTime[pos] != sid {
+			visitedTime[pos] = sid
+			belongCount1[pos]++
+			pos = nodes[pos].Link
+		}
+	}
+	// 标记所有文本串的子串.
+	for i := int32(0); i < n; i++ {
+		pos1 := int32(0)
+		w1 := firstName[i]
+		for _, c := range w1 {
+			pos1 = nodes[pos1].Next[c]
+			markChain(int32(i), pos1)
+		}
+		pos2 := int32(0)
+		w2 := secondName[i]
+		for _, c := range w2 {
+			pos2 = nodes[pos2].Next[c]
+			markChain(int32(i), pos2)
+		}
+	}
+
+	belongCount2 := make([]int32, size) // 每个endPos包含多少个查询串.
+	for i, w := range patterns {
+		pos, ok := sam.GetPos(int32(len(w)), func(i int32) int32 { return w[i] })
+		fmt.Println(w, pos, ok, 111)
+		if ok {
+			res1[i] = belongCount1[pos]
+			belongCount2[pos]++
+		}
+	}
+
+	// 对每个模式串，向上跳统计包含了多少个查询串.
+	for i := range visitedTime {
+		visitedTime[i] = -1
+	}
+	queryChain := func(sid int32, pos int32) int32 {
+		res := int32(0)
+		for pos >= 0 && visitedTime[pos] != sid {
+			visitedTime[pos] = sid
+			res += belongCount2[pos]
+			pos = nodes[pos].Link
+		}
+		return res
+	}
+	for i := int32(0); i < n; i++ {
+		curRes := int32(0)
+
+		v1 := firstName[i]
+		pos1, _ := sam.GetPos(int32(len(v1)), func(i int32) int32 { return v1[i] })
+		curRes += queryChain(int32(i), pos1)
+		fmt.Println(curRes, i, v1, `1`)
+
+		v2 := secondName[i]
+		pos2, _ := sam.GetPos(int32(len(v2)), func(i int32) int32 { return v2[i] })
+		curRes += queryChain(int32(i), pos2)
+		fmt.Println(curRes, i, v2, `2`)
+
+		res2[i] = curRes
+	}
+
+	for _, v := range res1 {
+		fmt.Fprintln(out, v)
+	}
+	for _, v := range res2 {
+		fmt.Fprint(out, v, " ")
+	}
+}
