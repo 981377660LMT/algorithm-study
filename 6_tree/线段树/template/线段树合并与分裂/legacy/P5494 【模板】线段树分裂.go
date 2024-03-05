@@ -197,7 +197,7 @@ func (o *LazyNode) QueryAll() int {
 	return 0
 }
 
-// 线段树合并
+// 线段树合并, 不用持久化
 func (o *LazyNode) Merge(b *LazyNode) *LazyNode {
 	if o == nil {
 		return b
@@ -205,6 +205,7 @@ func (o *LazyNode) Merge(b *LazyNode) *LazyNode {
 	if b == nil {
 		return o
 	}
+	// ! o = copyNode(o)
 	if o.left == o.right {
 		o.sum += b.sum
 		return o
@@ -216,7 +217,8 @@ func (o *LazyNode) Merge(b *LazyNode) *LazyNode {
 }
 
 // 线段树分裂
-//  将区间 [l,r] 从原树分离到 other 上, this 为原树的剩余部分
+//
+//	将区间 [l,r] 从原树分离到 other 上, this 为原树的剩余部分
 func (o *LazyNode) Split(left, right int) (this, other *LazyNode) {
 	this, other = o.split(nil, left, right)
 	return

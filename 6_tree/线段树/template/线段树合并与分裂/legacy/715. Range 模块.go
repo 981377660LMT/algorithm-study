@@ -9,7 +9,6 @@ func Constructor() RangeModule {
 }
 
 func (this *RangeModule) AddRange(left int, right int) {
-
 	this.segmentTree.Update(left, right-1, 1)
 }
 
@@ -28,50 +27,46 @@ func (this *RangeModule) RemoveRange(left int, right int) {
  * param_2 := obj.QueryRange(left,right);
  * obj.RemoveRange(left,right);
  */
+type Size = int32
 
 // !线段树维护的数据类型 区间和
-type Data = struct{ size, sum int }
-type Lazy = int
+type E = int
+type Id = int
 
-func e(left, right int) Data { return Data{size: right - left + 1} }
-func id() Lazy               { return -1 } // !-1表示monoid 0表示需要染成0 1表示需要染成1
-func op(left, right Data) Data {
-	return Data{left.size + right.size, left.sum + right.sum}
+func e1() E                { return 0 }
+func e2(start, end Size) E { return int(end - start + 1) } // 区间[start,end)的初始值.
+func id() Id               { return -1 }                   // !-1表示monoid 0表示需要染成0 1表示需要染成1
+func op(a, b E) E {
+	return a + b
 }
-func mapping(parent Lazy, child Data) Data {
-	if parent == -1 {
-		return child
+func mapping(f Id, g E, size Size) E {
+	if f == -1 {
+		return g
 	}
-	if parent == 0 {
-		return Data{child.size, 0}
-	}
-	return Data{child.size, child.size}
+	return f * int(size)
 }
-func composition(parent, child Lazy) Lazy {
-	if parent == -1 {
-		return child
+func composition(f, g Id) Id {
+	if f == -1 {
+		return g
 	}
-	return parent
+	return f
 }
 
-//
-//
-//
 // 指定区间上下界建立线段树
-func CreateSegmentTree(lower, upper int) *Node {
+func CreateSegmentTree(lower, upper Size) *Node {
 	root := newNode(lower, upper)
 	return root
 }
 
 type Node struct {
-	left, right           int
+	left, right           Size
 	leftChild, rightChild *Node
 
-	data Data
-	lazy Lazy
+	data E
+	lazy Id
 }
 
-func (o *Node) Update(left, right int, lazy Lazy) {
+func (o *Node) Update(left, right Size, lazy Id) {
 	if left <= o.left && o.right <= right {
 		o.propagate(lazy)
 		return
@@ -88,14 +83,14 @@ func (o *Node) Update(left, right int, lazy Lazy) {
 	o.pushUp()
 }
 
-func (o *Node) Query(left, right int) Data {
+func (o *Node) Query(left, right int) E {
 	if left <= o.left && o.right <= right {
 		return o.data
 	}
 
 	o.pushDown()
 	mid := (o.left + o.right) >> 1
-	res := e(left, right)
+	res := e2(left, right)
 	if left <= mid {
 		res = op(res, o.leftChild.Query(left, right))
 	}
@@ -106,12 +101,12 @@ func (o *Node) Query(left, right int) Data {
 	return res
 }
 
-func (o *Node) QueryAll() Data {
+func (o *Node) QueryAll() E {
 	return o.data
 }
 
-func newNode(left, right int) *Node {
-	return &Node{left: left, right: right, lazy: id(), data: e(left, right)}
+func newNode(left, right Size) *Node {
+	return &Node{left: left, right: right, lazy: id(), data: e2(left, right)}
 }
 
 // op
@@ -136,7 +131,7 @@ func (o *Node) pushDown() {
 }
 
 // mapping + composition
-func (o *Node) propagate(lazy Lazy) {
+func (o *Node) propagate(lazy Id) {
 	o.data = mapping(lazy, o.data)
 	o.lazy = composition(lazy, o.lazy)
 }

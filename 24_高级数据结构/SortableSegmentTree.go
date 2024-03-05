@@ -2,10 +2,14 @@
 // 单点修改+区间查询+区间排序
 
 // API:
-//  Set
-//  SortInc/SortDec/SortRange
-//  Query/QueryAll
-//  GetEntries
+//
+//	Set
+//	SortInc/SortDec/SortRange
+//	Query/QueryAll
+//	GetEntries
+//
+// 线段树分裂实现：和 set 维护连续段（ODT）的技巧一并使用，支持区间排序操作。
+// https://www.cnblogs.com/alex-wei/p/segment_tree_yyds.html
 
 package main
 

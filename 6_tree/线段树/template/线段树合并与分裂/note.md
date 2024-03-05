@@ -1,3 +1,12 @@
+# 线段树合并与分裂
+
+线段树合并顾名思义就是将多棵线段树合并成一棵，当然，它是对**动态开点线段树（并且往往是权值线段树）的合并**，因为动态开点线段树合并可以复用很多节点，而堆式建树的线段树合并起来复杂度就过高了。
+
+https://www.cnblogs.com/alex-wei/p/segment_tree_yyds.html
+https://zhuanlan.zhihu.com/p/575513452
+
+---
+
 https://www.zhihu.com/column/c_1182444932760125440
 
 - P3224 [HNOI2012]永无乡
@@ -15,3 +24,6 @@ https://www.zhihu.com/column/c_1182444932760125440
 
 TODO: 线段树合并、可持久化线段树合并
 https://www.cnblogs.com/alex-wei/p/segment_tree_yyds.html
+
+线段树合并可以求出 SAM 的每个节点的
+endPos 集合。
