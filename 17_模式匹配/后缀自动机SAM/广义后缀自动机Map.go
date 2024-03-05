@@ -38,6 +38,8 @@ func NewSuffixAutomatonMapGeneral() *SuffixAutomatonMapGeneral {
 //	    lastPos = sam.Add(lastPos,c)
 //	  }
 //	}
+//
+// 返回当前前缀对应的节点编号(lastPos).
 func (sam *SuffixAutomatonMapGeneral) Add(lastPos int32, char int32) int32 {
 	sam.n++
 
@@ -153,6 +155,23 @@ func (sam *SuffixAutomatonMapGeneral) GetDfsOrder() []int32 {
 	return order
 }
 
+// 对每个模式串，返回其在sam上各个endPos的大小.
+// dfsOrder: 后缀链接树的dfs顺序.
+// isPrefix: 判断pos是否是模式串的前缀.
+func (sam *SuffixAutomatonMapGeneral) GetEndPosSize(dfsOrder []int32, isPrefix func(pos int32) bool) []int32 {
+	size := sam.Size()
+	endPosSize := make([]int32, size)
+	for i := size - 1; i >= 1; i-- {
+		cur := dfsOrder[i]
+		if isPrefix(cur) { // 实点
+			endPosSize[cur]++
+		}
+		pre := sam.Nodes[cur].Link
+		endPosSize[pre] += endPosSize[cur]
+	}
+	return endPosSize
+}
+
 func (sam *SuffixAutomatonMapGeneral) DistinctSubstringAt(pos int32) int32 {
 	if pos == 0 {
 		return 0
@@ -227,30 +246,6 @@ func main() {
 	P2336()
 	// P6139()
 }
-
-// P6139 【模板】广义后缀自动机（广义 SAM）
-// https://www.luogu.com.cn/problem/P6139
-// 求多个字符串的本质不同子串个数.
-// 同时需要输出广义后缀自动机的点数.
-func P6139() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	sam := NewSuffixAutomatonMapGeneral()
-	for i := 0; i < n; i++ {
-		var s string
-		fmt.Fscan(in, &s)
-		sam.AddString(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
-	}
-	fmt.Fprintln(out, sam.DistinctSubstring())
-	fmt.Fprintln(out, sam.Size())
-}
-
-// 多个字符串的最长公共子串
-// 建立广义后缀自动机，然后拿size大小为n的节点的len更新答案
 
 // P2336 [SCOI2012] 喵星球上的点名
 // https://www.luogu.com.cn/problem/P2336
@@ -383,4 +378,76 @@ func P2336() {
 	for _, v := range res2 {
 		fmt.Fprint(out, v, " ")
 	}
+}
+
+// P6139 【模板】广义后缀自动机（广义 SAM）
+// https://www.luogu.com.cn/problem/P6139
+// 求多个字符串的本质不同子串个数.
+// 同时需要输出广义后缀自动机的点数.
+func P6139() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	sam := NewSuffixAutomatonMapGeneral()
+	for i := 0; i < n; i++ {
+		var s string
+		fmt.Fscan(in, &s)
+		sam.AddString(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+	}
+	fmt.Fprintln(out, sam.DistinctSubstring())
+	fmt.Fprintln(out, sam.Size())
+}
+
+// 多个字符串的最长公共子串
+// 建立广义后缀自动机，然后拿size大小为n的节点的len更新答案
+func MultiLCS(words [][]int32) int32 {
+	sam := NewSuffixAutomatonMapGeneral()
+	for _, word := range words {
+		sam.AddString(int32(len(word)), func(i int32) int32 { return word[i] })
+	}
+	size := sam.Size()
+	belongCount := make([]int32, size) // 每个状态属于多少个原串的子串(原串前缀的后缀)
+	visitedTime := make([]int32, size)
+	for i := range visitedTime {
+		visitedTime[i] = -1
+	}
+	// 对文本串t[i]的每个前缀，在后缀链接树上向上跳标记每个endPos，表示该endPos包含了t[i]的子串.
+	markChain := func(sid int32, pos int32) {
+		for pos >= 0 && visitedTime[pos] != sid {
+			visitedTime[pos] = sid
+			belongCount[pos]++
+			pos = sam.Nodes[pos].Link
+		}
+	}
+	for i, word := range words {
+		pos := int32(0)
+		for _, c := range word {
+			pos = sam.Nodes[pos].Next[c]
+			markChain(int32(i), pos)
+		}
+	}
+	n := int32(len(words))
+	res := int32(0)
+	for i := int32(0); i < size; i++ {
+		if belongCount[i] == n {
+			res = max32(res, sam.Nodes[i].MaxLen)
+		}
+	}
+	return res
+}
+
+// 1923. 最长公共子路径
+// https://leetcode.cn/problems/longest-common-subpath/description/
+func longestCommonSubpath(n int, paths [][]int) int {
+	paths32 := make([][]int32, len(paths))
+	for i, path := range paths {
+		paths32[i] = make([]int32, len(path))
+		for j, v := range path {
+			paths32[i][j] = int32(v)
+		}
+	}
+	return int(MultiLCS(paths32))
 }

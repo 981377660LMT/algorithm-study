@@ -31,6 +31,7 @@ func NewSuffixAutomatonMap() *SuffixAutomatonMap {
 }
 
 // 每次插入会增加一个实点，可能增加一个虚点.
+// 返回当前前缀对应的节点编号(lastPos).
 func (sam *SuffixAutomatonMap) Add(ord int32) int32 {
 	newNode := int32(len(sam.Nodes))
 	// 新增一个实点以表示当前最长串
@@ -304,7 +305,7 @@ func longest_common_substring() {
 // https://leetcode.cn/problems/longest-common-subpath/description/
 // 1. 把最短串串当做匹配串,其他的串建立 SAM
 // 2. 把最短串串(的每个前缀)在每个 SAM 上跑匹配，并记录每个前缀能匹配到的最长后缀.
-// TODO: 多串匹配广义SAM更加方便
+// 多串匹配广义SAM更加方便
 func MultiLCS(words [][]int32) int32 {
 	getShortestTextIndex := func() int {
 		minLen, textIndex := len(words[0]), 0

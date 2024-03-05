@@ -65,6 +65,8 @@ func NewSuffixAutomatonGeneral() *SuffixAutomaton {
 //	    lastPos = sam.Add(lastPos,c)
 //	  }
 //	}
+//
+// 返回当前前缀对应的节点编号(lastPos).
 func (sam *SuffixAutomaton) Add(lastPos int32, char int32) int32 {
 	c := char - OFFSET
 	sam.n++
@@ -173,6 +175,23 @@ func (sam *SuffixAutomaton) GetDfsOrder() []int32 {
 	return order
 }
 
+// 对每个模式串，返回其在sam上各个endPos的大小.
+// dfsOrder: 后缀链接树的dfs顺序.
+// isPrefix: 判断pos是否是模式串的前缀.
+func (sam *SuffixAutomaton) GetEndPosSize(dfsOrder []int32, isPrefix func(pos int32) bool) []int32 {
+	size := sam.Size()
+	endPosSize := make([]int32, size)
+	for i := size - 1; i >= 1; i-- {
+		cur := dfsOrder[i]
+		if isPrefix(cur) { // 实点
+			endPosSize[cur]++
+		}
+		pre := sam.Nodes[cur].Link
+		endPosSize[pre] += endPosSize[cur]
+	}
+	return endPosSize
+}
+
 func (sam *SuffixAutomaton) DistinctSubstringAt(pos int32) int32 {
 	if pos == 0 {
 		return 0
@@ -244,15 +263,56 @@ func max32(a, b int32) int32 {
 }
 
 func main() {
+	P3181()
 	// P6139()
-	SP8093()
 
+	// SP8093()
+
+	// CF427D()
 }
 
 // P3181 [HAOI2016] 找相同字符 (分别维护不同串的 size)
 // https://www.luogu.com.cn/problem/P3181
-// 求两个字符串的相同子串数量。
-func P3181() {}
+// !求两个字符串的相同子串数量。
+//
+// 输入SAM,求出每个串对应的endPosSize后，按照dfs序逆序dp.
+// 每个endPos的贡献为size1*size2*count.
+func P3181() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s, t string
+	fmt.Fscan(in, &s, &t)
+
+	sam := NewSuffixAutomatonGeneral()
+	maxSize := int32(2 * (len(s) + len(t)))
+	isPrefix1 := NewBitset(maxSize)
+	isPrefix2 := NewBitset(maxSize)
+	pos1 := int32(0)
+	for _, c := range s {
+		pos1 = sam.Add(pos1, c)
+		isPrefix1.Set(pos1)
+	}
+	pos2 := int32(0)
+	for _, c := range t {
+		pos2 = sam.Add(pos2, c)
+		isPrefix2.Set(pos2)
+	}
+
+	size := sam.Size()
+	dfsOrder := sam.GetDfsOrder()
+	endPosSize1 := sam.GetEndPosSize(dfsOrder, isPrefix1.Has)
+	endPosSize2 := sam.GetEndPosSize(dfsOrder, isPrefix2.Has)
+	res := 0
+	for i := size - 1; i >= 1; i-- {
+		node := sam.Nodes[i]
+		count := int(node.MaxLen - sam.Nodes[node.Link].MaxLen)
+		size1, size2 := int(endPosSize1[i]), int(endPosSize2[i])
+		res += size1 * size2 * count
+	}
+	fmt.Fprintln(out, res)
+}
 
 // P6139 【模板】广义后缀自动机（广义 SAM）
 // https://www.luogu.com.cn/problem/P6139
@@ -357,11 +417,62 @@ func CF316G2() {}
 
 // Match & Catch
 // https://www.luogu.com.cn/problem/CF427D
-// 给定两个字符串，求最短的满足各只出现一次的连续公共字串
-func CF427D() {}
+// 求两个串的最短公共唯一子串
+func CF427D() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int32 = 1e9 + 10
+
+	var s, t string
+	fmt.Fscan(in, &s, &t)
+
+	sam := NewSuffixAutomatonGeneral()
+	maxSize := int32(2 * (len(s) + len(t)))
+	isPrefix1 := NewBitset(maxSize)
+	isPrefix2 := NewBitset(maxSize)
+	pos1 := int32(0)
+	for _, c := range s {
+		pos1 = sam.Add(pos1, c)
+		isPrefix1.Set(pos1)
+	}
+	pos2 := int32(0)
+	for _, c := range t {
+		pos2 = sam.Add(pos2, c)
+		isPrefix2.Set(pos2)
+	}
+
+	size := sam.Size()
+	dfsOrder := sam.GetDfsOrder()
+	endPosSize1 := sam.GetEndPosSize(dfsOrder, isPrefix1.Has)
+	endPosSize2 := sam.GetEndPosSize(dfsOrder, isPrefix2.Has)
+
+	res := INF
+	for i := int32(1); i < size; i++ {
+		if endPosSize1[i] == 1 && endPosSize2[i] == 1 {
+			node := sam.Nodes[i]
+			minLen := sam.Nodes[node.Link].MaxLen + 1
+			res = min32(res, minLen)
+		}
+	}
+	if res == INF {
+		fmt.Fprintln(out, -1)
+	} else {
+		fmt.Fprintln(out, res)
+	}
+}
 
 // Forensic Examination [CF666E] (线段树合并维护 endPosSize)
 
 // G. Death DBMS (死亡笔记数据库管理系统)
 // https://codeforces.com/problemset/problem/1437/G
 func CF1437G() {}
+
+type Bitset []bool
+
+func NewBitset(n int32) Bitset { return make([]bool, n) }
+
+func (b Bitset) Has(p int32) bool { return b[p] }
+
+func (b Bitset) Set(p int32) { b[p] = true }

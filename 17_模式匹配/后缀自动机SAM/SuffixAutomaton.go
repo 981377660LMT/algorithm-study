@@ -125,6 +125,7 @@ func NewSuffixAutomaton() *SuffixAutomaton {
 }
 
 // 每次插入会增加一个实点，可能增加一个虚点.
+// 返回当前前缀对应的节点编号(lastPos).
 func (sam *SuffixAutomaton) Add(char int32) int32 {
 	c := char - OFFSET
 	newNode := int32(len(sam.Nodes))
@@ -400,13 +401,14 @@ func max32(a, b int32) int32 {
 
 func main() {
 	// P3975()
-	P6640()
+	// P6640()
 
 	// cf235c()
 	// cf802I()
 
 	// number_of_substrings()
 	// longest_common_substring()
+
 }
 
 // P3975 [TJOI2015] 弦论(字典序第k小子串)
