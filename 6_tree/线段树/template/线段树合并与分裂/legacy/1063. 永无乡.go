@@ -222,30 +222,6 @@ func (o *LazyNode) Merge(b *LazyNode) *LazyNode {
 	return o
 }
 
-// 线段树分裂
-//  将区间 [l,r] 从原树分离到 other 上, this 为原树的剩余部分
-func (o *LazyNode) Split(left, right int) (this, other *LazyNode) {
-	this, other = o.split(nil, left, right)
-	return
-}
-
-func (o *LazyNode) split(b *LazyNode, l, r int) (*LazyNode, *LazyNode) {
-	if o == nil || l > o.right || r < o.left {
-		return o, nil
-	}
-	if l <= o.left && o.right <= r {
-		return nil, o
-	}
-	if b == nil {
-		b = &LazyNode{left: o.left, right: o.right}
-	}
-	o.leftChild, b.leftChild = o.leftChild.split(b.leftChild, l, r)
-	o.rightChild, b.rightChild = o.rightChild.split(b.rightChild, l, r)
-	o.pushUp()
-	b.pushUp()
-	return o, b
-}
-
 // 权值线段树求第 k 小
 // 调用前需保证 1 <= k <= root.QueryAll()
 func (o *LazyNode) kth(k int) int {

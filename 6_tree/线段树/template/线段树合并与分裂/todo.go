@@ -91,6 +91,15 @@ func (o *lazyNode) query(l, r int) int {
 // EXTRA: 线段树合并
 // https://www.luogu.com.cn/problem/P5494
 // todo 一些题目 https://www.luogu.com.cn/blog/styx-ferryman/xian-duan-shu-ge-bing-zong-ru-men-dao-fang-qi
+//   https://codeforces.com/blog/entry/83969
+//   https://www.luogu.com.cn/problem/P4556
+//   https://www.luogu.com.cn/problem/P5298
+//   https://codeforces.com/problemset/problem/600/E
+// rt = rt.merge(rt2)
+
+// EXTRA: 线段树合并
+// https://www.luogu.com.cn/problem/P5494
+// todo 一些题目 https://www.luogu.com.cn/blog/styx-ferryman/xian-duan-shu-ge-bing-zong-ru-men-dao-fang-qi
 //
 //	 https://zhuanlan.zhihu.com/p/575513452
 //		https://codeforces.com/problemset/problem/600/E
