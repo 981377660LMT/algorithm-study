@@ -218,4 +218,45 @@ if (require.main === module) {
   T.print()
   T.pruneTree(node => T.isNoneLeaf(node))
   T.print()
+
+  // 合并两颗树
+  function testMergeFilterConfig(): void {
+    const tree1 = {
+      value: 0,
+      children: [
+        { value: 1 },
+        { value: 2 },
+        {
+          value: 99,
+          children: [{ value: 3 }, { value: 4 }, { value: 5 }, { value: 6 }]
+        },
+        { value: 7 },
+        { value: 8 }
+      ]
+    } satisfies NoneLeaf
+
+    const tree2 = {
+      value: 0,
+      children: [
+        { value: 1 },
+        { value: 2 },
+        {
+          value: 99,
+          children: [{ value: 3 }, { value: 4 }, { value: 5 }, { value: 6 }]
+        },
+        { value: 7 },
+        { value: 8 }
+      ]
+    } satisfies NoneLeaf
+
+    const utils = new TreeManager<NoneLeaf, Leaf>(tree1, {
+      getChildren: node => node.children,
+      isLeaf: (node): node is Leaf => !('children' in node)
+    })
+    utils.insertNode([], tree2)
+
+    utils.print()
+  }
+
+  testMergeFilterConfig()
 }
