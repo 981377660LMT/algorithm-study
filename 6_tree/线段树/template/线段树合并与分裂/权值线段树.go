@@ -12,8 +12,8 @@ import (
 func main() {
 	// demo()
 
-	// P3224()
-	P5494()
+	P3224()
+	// P5494()
 }
 
 func demo() {
@@ -117,6 +117,8 @@ func P3224() {
 // 2 p k q : 在 可重集 p 中加入k个q
 // 3 p x y : 输出可重集 p 中大于等于 x 且小于等于 y 的值的个数
 // 4 p k : 输出可重集 p 中第 k 小的值,不存在输出-1
+//
+// !需要全换成int (type int32 = int).
 func P5494() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -293,12 +295,12 @@ func (sm *SegmentTreeOnRange) _set(node *Node, index int32, value E, left, right
 	mid := (left + right) >> 1
 	if index <= mid {
 		if node.leftChild == nil {
-			node.leftChild = &Node{}
+			node.leftChild = sm.Alloc()
 		}
 		sm._set(node.leftChild, index, value, left, mid)
 	} else {
 		if node.leftChild == nil {
-			node.leftChild = &Node{}
+			node.leftChild = sm.Alloc()
 		}
 		sm._set(node.rightChild, index, value, mid+1, right)
 	}
@@ -313,12 +315,12 @@ func (sm *SegmentTreeOnRange) _update(node *Node, index int32, value E, left, ri
 	mid := (left + right) >> 1
 	if index <= mid {
 		if node.leftChild == nil {
-			node.leftChild = &Node{}
+			node.leftChild = sm.Alloc()
 		}
 		sm._update(node.leftChild, index, value, left, mid)
 	} else {
 		if node.rightChild == nil {
-			node.rightChild = &Node{}
+			node.rightChild = sm.Alloc()
 		}
 		sm._update(node.rightChild, index, value, mid+1, right)
 	}
@@ -332,7 +334,7 @@ func (sm *SegmentTreeOnRange) _merge(a, b *Node, left, right int32) *Node {
 		}
 		return a
 	}
-	newNode := &Node{}
+	newNode := sm.Alloc()
 	if left == right {
 		newNode.value = a.value + b.value
 		return newNode
@@ -370,7 +372,7 @@ func (sm *SegmentTreeOnRange) _split(a, b *Node, L, R int32, left, right int32) 
 		return nil, a
 	}
 	if b == nil {
-		b = &Node{}
+		b = sm.Alloc()
 	}
 	mid := (left + right) >> 1
 	a.leftChild, b.leftChild = sm._split(a.leftChild, b.leftChild, L, R, left, mid)

@@ -5,9 +5,8 @@
   树链上维护阿贝尔群
   `RangeAdd，pointGet`，链上加单点求职参考树状数组的差分 api
 
-  点的修改:u++,v++,lca--,fa[lca]--
-  边的修改:u++,v++,lca-=2
-  TODO:设计成一个 Wrapper 或 func，因为大多场合这都是其中一步
+  **点的修改**:u++,v++,lca--,fa[lca]--
+  **边的修改**:u++,v++,lca-=2
 
 ---
 

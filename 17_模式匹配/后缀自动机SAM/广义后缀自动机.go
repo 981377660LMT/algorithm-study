@@ -7,26 +7,34 @@
 //
 // note:
 //
-//  0. 一个能接受多个串所有子串的自动机。
-//  1. 构建方式：
-//     - 伪广义后缀自动机:
+// 0. 一个能接受多个串所有子串的自动机。
+// 1. 构建方式：
+//   - 伪广义后缀自动机:
 //     !如果给出的是多个字符串而不是一个trie，则可以使用.
 //     对每个串，重复在同一个 SAM 上进行建立.
 //     !每次建完一个串以后就把lastPos 指针移到root上面，接着建下一个串。
 //     注意"插入字符串时需要看一下当前准备插入的位置是否已经有结点了".
 //     如果有的话我们只需要在其基础上额外判断一下拆分 SAM 结点的情况；否则的话就和普通的 SAM 插入一模一样了
-//     - Trie树上的广义后缀自动机：建立在 Trie 树上的 SAM 称为广义 SAM
-//  !2. 自动机和广义后缀自动机中"用于构建"该自动机的所有串的所有前缀节点的树链的并的长度和是 O(L*sqrt(L)) 的。
-//     !对文本串t[i]的每个前缀，在后缀链接树上向上跳标记每个endPos，表示该endPos包含了t[i]的子串.标记次数之和不超过O(Lsqrt(L)).
-//     记count[u]为结点u的子树中的endPos的原串个数，则sum(count)的数量级为O(Lsqrt(L))，L为所有串长之和.
-//     证明(利用根号分治)：
-//     则若一个串长S>SQRT(L)，这样的串显然不超SQRT(L)个，而由于广义 SAM 上的节点数量级线性所以这里的总贡献数量级为O(LSQRT(L))。
-//     而对于串长不超过SQRT(L)的串，贡献数量级为O(nSQRT(L))。
-//     https://blog.csdn.net/ylsoi/article/details/94476894
-//     https://ddosvoid.github.io/2020/10/18/%E6%B5%85%E8%B0%88%E6%A0%B9%E5%8F%B7%E7%AE%97%E6%B3%95/
-//     喵星球上的点名 https://www.luogu.com.cn/problem/P2336
-//     Sevenk Love Oimaster https://www.luogu.com.cn/problem/SP8093
-
+//   - Trie树上的广义后缀自动机：建立在 Trie 树上的 SAM 称为广义 SAM
+//
+// !2. 自动机和广义后缀自动机中"用于构建"该自动机的所有串的所有前缀节点的树链的并的长度和是 O(L*sqrt(L)) 的。
+//
+//	!对文本串t[i]的每个前缀，在后缀链接树上向上跳标记每个endPos，表示该endPos包含了t[i]的子串.标记次数之和不超过O(Lsqrt(L)).
+//	记count[u]为结点u的子树中的endPos的原串个数，则sum(count)的数量级为O(Lsqrt(L))，L为所有串长之和.
+//	证明(利用根号分治)：
+//	则若一个串长S>SQRT(L)，这样的串显然不超SQRT(L)个，而由于广义 SAM 上的节点数量级线性所以这里的总贡献数量级为O(LSQRT(L))。
+//	而对于串长不超过SQRT(L)的串，贡献数量级为O(nSQRT(L))。
+//	https://blog.csdn.net/ylsoi/article/details/94476894
+//	https://ddosvoid.github.io/2020/10/18/%E6%B5%85%E8%B0%88%E6%A0%B9%E5%8F%B7%E7%AE%97%E6%B3%95/
+//	喵星球上的点名 https://www.luogu.com.cn/problem/P2336
+//	Sevenk Love Oimaster https://www.luogu.com.cn/problem/SP8093
+//
+// !3. 广义 SAM 出现子串查询：
+//
+//	  对于 n 个串的广义后缀自动机，求出每个点对应的字符串是哪些原串的子串。
+//		和线段树合并维护 Endpos 集合基本一致，将每个后缀对应的点附上对应串的标记，然后在树结构上 DFS 进行线段树合并即可得到每个串的出现位置。
+//
+// !4.sd
 package main
 
 import (

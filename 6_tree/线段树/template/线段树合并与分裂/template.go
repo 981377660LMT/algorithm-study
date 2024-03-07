@@ -7,89 +7,82 @@ import (
 )
 
 func main() {
-	// demo()
-
-	P3224()
+	CF600E()
 }
 
-// P3224 [HNOI2012] 永无乡
-// https://www.luogu.com.cn/problem/P3224
-// 永无乡包含 n座岛，编号从 1到 n，每座岛都有自己的独一无二的重要度，
-// 按照重要度可以将这 n座岛排名，名次用1到n来表示.
-// 现在有两种操作：
-// B x y 在x和y之间建立一座桥，使得x和y之间可以互相到达
-// Q x y 询问当前与岛 x连通的所有岛中第 k重要的是哪座岛,如果该岛屿不存在，则输出 −1.
+// Lomsat gelral
+// https://www.luogu.com.cn/problem/CF600E
+// 给你一棵有n个点的树(n≤1e5)，树上每个节点都有一种颜色ci(ci≤n)，
+// 求每个点子树出现最多的颜色的编号的和.
 //
-// 并查集维护连通性，用权值线段树维护集合的第k小数。
-// 当我们合并两个集合的时候，直接合并它们的线段树即可。
-func P3224() {
+// 每个结点开一个线段树维护(出现最多次颜色的个数，最多次颜色的和).
+func CF600E() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, m int32
-	fmt.Fscan(in, &n, &m)
-
-	uf := NewUnionFindArraySimple(n)
-	seg := NewSegmentTreeMerger(0, n-1)
-	roots := make([]*Node, n) // 每个岛的线段树
-	rankToId := make([]int32, n)
-	for i := int32(0); i < n; i++ {
-		var rank int32
-		fmt.Fscan(in, &rank)
-		rank--
-		rankToId[rank] = i
-		roots[i] = seg.Alloc()
-		seg.Update(roots[i], rank, 1)
+	var n int32
+	fmt.Fscan(in, &n)
+	colors := make([]int32, n)
+	for i := range colors {
+		fmt.Fscan(in, &colors[i])
 	}
 
-	// 在x和y之间建立一座桥，使得x和y之间可以互相到达
-	addEdge := func(u, v int32) {
-		uf.Union(u, v, func(big, small int32) {
-			roots[big] = seg.MergeDestructively(roots[big], roots[small])
-		})
-	}
-
-	for i := int32(0); i < m; i++ {
+	tree := make([][]int32, n)
+	for i := int32(0); i < n-1; i++ {
 		var u, v int32
 		fmt.Fscan(in, &u, &v)
-		if u < 1 || v < 1 || u > n || v > n {
-			continue
-		}
-		addEdge(u-1, v-1)
+		u, v = u-1, v-1
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
 	}
 
-	var q int
-	fmt.Fscan(in, &q)
-	for i := 0; i < q; i++ {
-		var op string
-		fmt.Fscan(in, &op)
-		if op == "B" {
-			var u, v int32
-			fmt.Fscan(in, &u, &v)
-			u, v = u-1, v-1
-			addEdge(u, v)
-		} else {
-			var u, k int32
-			fmt.Fscan(in, &u, &k)
-			u--
-			leader := uf.Find(u)
-			rank, ok := seg.Kth(roots[leader], k, func(node *Node) int32 {
-				return node.value
-			})
-			if !ok {
-				fmt.Fprintln(out, -1)
-			} else {
-				fmt.Fprintln(out, rankToId[rank]+1) // !输出岛的编号
+	res := make([]int, n)
+	roots := make([]*Node, n)
+	seg := NewSegmentTreeMerger(0, n)
+	for i := int32(0); i < n; i++ {
+		roots[i] = seg.Alloc()
+		seg.Set(roots[i], colors[i], E{score: int(colors[i]), maxCount: 1})
+	}
+
+	var dfs func(cur, pre int32)
+	dfs = func(cur, pre int32) {
+		for _, next := range tree[cur] {
+			if next == pre {
+				continue
 			}
+			dfs(next, cur)
+			roots[cur] = seg.MergeDestructively(roots[cur], roots[next])
 		}
+		res[cur] = seg.QueryAll(roots[cur]).score
+	}
+	dfs(0, -1)
+
+	for _, v := range res {
+		fmt.Fprint(out, v, " ")
 	}
 }
 
-type E = int32
+type E = struct {
+	score    int
+	maxCount int32
+}
 
-func e() E        { return 0 }
-func op(a, b E) E { return a + b }
+func e() E { return E{} }
+func op(a, b E) E {
+	if a.maxCount > b.maxCount {
+		return a
+	}
+	if a.maxCount < b.maxCount {
+		return b
+	}
+	a.score += b.score
+	return a
+}
+func merge(a, b E) E {
+	a.maxCount += b.maxCount
+	return a
+}
 
 type Node struct {
 	value                 E
@@ -255,7 +248,7 @@ func (sm *SegmentTreeMerger) _merge(a, b *Node, left, right int32) *Node {
 	}
 	newNode := sm.Alloc()
 	if left == right {
-		newNode.value = op(a.value, b.value)
+		newNode.value = merge(a.value, b.value)
 		return newNode
 	}
 	mid := (left + right) >> 1
@@ -273,7 +266,7 @@ func (sm *SegmentTreeMerger) _mergeDestructively(a, b *Node, left, right int32) 
 		return a
 	}
 	if left == right {
-		a.value = op(a.value, b.value)
+		a.value = merge(a.value, b.value)
 		return a
 	}
 	mid := (left + right) >> 1
@@ -306,47 +299,4 @@ func (sm *SegmentTreeMerger) _eval(node *Node) E {
 		return e()
 	}
 	return node.value
-}
-
-type UnionFindArraySimple struct {
-	Part int32
-	n    int32
-	data []int32
-}
-
-func NewUnionFindArraySimple(n int32) *UnionFindArraySimple {
-	data := make([]int32, n)
-	for i := int32(0); i < n; i++ {
-		data[i] = -1
-	}
-	return &UnionFindArraySimple{Part: n, n: n, data: data}
-}
-
-func (u *UnionFindArraySimple) Union(key1, key2 int32, cb func(big, small int32)) bool {
-	root1, root2 := u.Find(key1), u.Find(key2)
-	if root1 == root2 {
-		return false
-	}
-	if u.data[root1] > u.data[root2] {
-		root1, root2 = root2, root1
-	}
-	u.data[root1] += u.data[root2]
-	u.data[root2] = root1
-	u.Part--
-	if cb != nil {
-		cb(root1, root2)
-	}
-	return true
-}
-
-func (u *UnionFindArraySimple) Find(key int32) int32 {
-	if u.data[key] < 0 {
-		return key
-	}
-	u.data[key] = u.Find(u.data[key])
-	return u.data[key]
-}
-
-func (u *UnionFindArraySimple) GetSize(key int32) int32 {
-	return -u.data[u.Find(key)]
 }
