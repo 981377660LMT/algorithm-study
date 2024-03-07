@@ -1,64 +1,89 @@
-//	struct {
-//		int ls, rs, v;
-//	} T[M];
-//
-// int cnt, nn, R[N], P[N];
-// namespace segt {
-//
-//	int query(int x, int p, int l = 1, int r = nn) {
-//		if (l == r) return T[p].v;
-//		int mid = l + r >> 1;
-//		if (x <= mid)
-//				return query(x, T[p].ls, l, mid);
-//		else
-//				return query(x, T[p].rs, mid + 1, r);
-//	}
-//
-//	int kth(int k, int p, int l = 1, int r = nn) {
-//		if (l == r) return T[p].v >= k ? l : 0;
-//		int mid = l + r >> 1;
-//		if (T[T[p].ls].v >= k)
-//				return kth(k, T[p].ls, l, mid);
-//		else
-//				return kth(k - T[T[p].ls].v, T[p].rs, mid + 1, r);
-//	}
-//
-//	void pushup(int p) {
-//		T[p].v = T[T[p].ls].v + T[T[p].rs].v;
-//	}
-//
-//	void add(int x, int d, int &p, int l = 1, int r = nn) {
-//		if (!p) p = ++cnt;
-//		if (l == r) return (void)(T[p].v += d);
-//		int mid = l + r >> 1;
-//		if (x <= mid)
-//				add(x, d, T[p].ls, l, mid);
-//		else
-//				add(x, d, T[p].rs, mid + 1, r);
-//		pushup(p);
-//	}
-//
-//	int merge(int p, int q, int l = 1, int r = nn) {
-//		if (!p || !q) return p + q;
-//		if (l == r) return T[p].v += T[q].v, p;
-//		int mid = l + r >> 1;
-//		T[p].ls = merge(T[p].ls, T[q].ls, l, mid);
-//		T[p].rs = merge(T[p].rs, T[q].rs, mid + 1, r);
-//		pushup(p);
-//		return p;
-//	}
-
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
 func main() {
-	sm := NewSegmentTreeMerger(0, 10)
-	nodes := sm.Build(10, func(i int32) int32 { return i })
-	fmt.Println(nodes)
-	nodes[1] = sm.Merge(nodes[2], nodes[1])
-	fmt.Println(sm.QueryAll(nodes[1]))
-	fmt.Println(nodes)
+	// demo()
+
+	P3224()
+}
+
+// P3224 [HNOI2012] 永无乡
+// https://www.luogu.com.cn/problem/P3224
+// 永无乡包含 n座岛，编号从 1到 n，每座岛都有自己的独一无二的重要度，
+// 按照重要度可以将这 n座岛排名，名次用1到n来表示.
+// 现在有两种操作：
+// B x y 在x和y之间建立一座桥，使得x和y之间可以互相到达
+// Q x y 询问当前与岛 x连通的所有岛中第 k重要的是哪座岛,如果该岛屿不存在，则输出 −1.
+//
+// 并查集维护连通性，用权值线段树维护集合的第k小数。
+// 当我们合并两个集合的时候，直接合并它们的线段树即可。
+func P3224() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int32
+	fmt.Fscan(in, &n, &m)
+
+	uf := NewUnionFindArraySimple(n)
+	seg := NewSegmentTreeMerger(0, n-1)
+	roots := make([]*Node, n) // 每个岛的线段树
+	rankToId := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		var rank int32
+		fmt.Fscan(in, &rank)
+		rank--
+		rankToId[rank] = i
+		roots[i] = seg.Alloc()
+		seg.Update(roots[i], rank, 1)
+	}
+
+	// 在x和y之间建立一座桥，使得x和y之间可以互相到达
+	addEdge := func(u, v int32) {
+		uf.Union(u, v, func(big, small int32) {
+			roots[big] = seg.MergeDestructively(roots[big], roots[small])
+		})
+	}
+
+	for i := int32(0); i < m; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		if u < 1 || v < 1 || u > n || v > n {
+			continue
+		}
+		addEdge(u-1, v-1)
+	}
+
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var op string
+		fmt.Fscan(in, &op)
+		if op == "B" {
+			var u, v int32
+			fmt.Fscan(in, &u, &v)
+			u, v = u-1, v-1
+			addEdge(u, v)
+		} else {
+			var u, k int32
+			fmt.Fscan(in, &u, &k)
+			u--
+			leader := uf.Find(u)
+			rank, ok := seg.Kth(roots[leader], k, func(node *Node) int32 {
+				return node.value
+			})
+			if !ok {
+				fmt.Fprintln(out, -1)
+			} else {
+				fmt.Fprintln(out, rankToId[rank]+1) // !输出岛的编号
+			}
+		}
+	}
 }
 
 type E = int32
@@ -72,7 +97,7 @@ type Node struct {
 }
 
 func (n *Node) String() string {
-	return fmt.Sprintf("%d", n.value)
+	return fmt.Sprintf("%v", n.value)
 }
 
 type SegmentTreeMerger struct {
@@ -84,16 +109,18 @@ func NewSegmentTreeMerger(left, right int32) *SegmentTreeMerger {
 	return &SegmentTreeMerger{left: left, right: right}
 }
 
-func (sm *SegmentTreeMerger) Build(n int32, f func(i int32) E) []*Node {
-	res := make([]*Node, n)
-	for i := int32(0); i < n; i++ {
-		res[i] = sm.Alloc(i, f(i))
-	}
-	return res
+// NewRoot().
+func (sm *SegmentTreeMerger) Alloc() *Node {
+	return &Node{value: e()}
 }
 
-func (sm *SegmentTreeMerger) Alloc(index int32, value E) *Node {
-	return sm._alloc(index, value, sm.left, sm.right)
+// 权值线段树求第 k 小.
+// 调用前需保证 1 <= k <= node.value.
+func (sm *SegmentTreeMerger) Kth(node *Node, k int32, getCount func(node *Node) int32) (res int32, ok bool) {
+	if k < 1 || k > getCount(node) {
+		return
+	}
+	return sm._kth(k, node, sm.left, sm.right, getCount), true
 }
 
 func (sm *SegmentTreeMerger) Get(node *Node, index int32) E {
@@ -132,22 +159,26 @@ func (sm *SegmentTreeMerger) Split(node *Node, left, right int32) (this, other *
 	return
 }
 
-func (sm *SegmentTreeMerger) _alloc(index int32, value E, left, right int32) *Node {
+func (sm *SegmentTreeMerger) _kth(k int32, node *Node, left, right int32, getCount func(*Node) int32) int32 {
 	if left == right {
-		return &Node{value: value}
+		return left
 	}
 	mid := (left + right) >> 1
-	node := &Node{}
-	if index <= mid {
-		node.leftChild = sm._alloc(index, value, left, mid)
-	} else {
-		node.rightChild = sm._alloc(index, value, mid+1, right)
+	leftCount := int32(0)
+	if node.leftChild != nil {
+		leftCount = getCount(node.leftChild)
 	}
-	node.value = op(sm._eval(node.leftChild), sm._eval(node.rightChild))
-	return node
+	if leftCount >= k {
+		return sm._kth(k, node.leftChild, left, mid, getCount)
+	} else {
+		return sm._kth(k-leftCount, node.rightChild, mid+1, right, getCount)
+	}
 }
 
 func (sm *SegmentTreeMerger) _get(node *Node, index int32, left, right int32) E {
+	if node == nil {
+		return e()
+	}
 	if left == right {
 		return node.value
 	}
@@ -159,6 +190,9 @@ func (sm *SegmentTreeMerger) _get(node *Node, index int32, left, right int32) E 
 	}
 }
 func (sm *SegmentTreeMerger) _query(node *Node, L, R int32, left, right int32) E {
+	if node == nil {
+		return e()
+	}
 	if L <= left && right <= R {
 		return node.value
 	}
@@ -179,8 +213,14 @@ func (sm *SegmentTreeMerger) _set(node *Node, index int32, value E, left, right 
 	}
 	mid := (left + right) >> 1
 	if index <= mid {
+		if node.leftChild == nil {
+			node.leftChild = sm.Alloc()
+		}
 		sm._set(node.leftChild, index, value, left, mid)
 	} else {
+		if node.rightChild == nil {
+			node.rightChild = sm.Alloc()
+		}
 		sm._set(node.rightChild, index, value, mid+1, right)
 	}
 	node.value = op(sm._eval(node.leftChild), sm._eval(node.rightChild))
@@ -193,8 +233,14 @@ func (sm *SegmentTreeMerger) _update(node *Node, index int32, value E, left, rig
 	}
 	mid := (left + right) >> 1
 	if index <= mid {
+		if node.leftChild == nil {
+			node.leftChild = sm.Alloc()
+		}
 		sm._update(node.leftChild, index, value, left, mid)
 	} else {
+		if node.rightChild == nil {
+			node.rightChild = sm.Alloc()
+		}
 		sm._update(node.rightChild, index, value, mid+1, right)
 	}
 	node.value = op(sm._eval(node.leftChild), sm._eval(node.rightChild))
@@ -207,7 +253,7 @@ func (sm *SegmentTreeMerger) _merge(a, b *Node, left, right int32) *Node {
 		}
 		return a
 	}
-	newNode := &Node{}
+	newNode := sm.Alloc()
 	if left == right {
 		newNode.value = op(a.value, b.value)
 		return newNode
@@ -245,13 +291,13 @@ func (sm *SegmentTreeMerger) _split(a, b *Node, L, R int32, left, right int32) (
 		return nil, a
 	}
 	if b == nil {
-		b = &Node{leftChild: a.leftChild, rightChild: a.rightChild}
+		b = sm.Alloc()
 	}
 	mid := (left + right) >> 1
 	a.leftChild, b.leftChild = sm._split(a.leftChild, b.leftChild, L, R, left, mid)
 	a.rightChild, b.rightChild = sm._split(a.rightChild, b.rightChild, L, R, mid+1, right)
-	a.value = sm._eval(a.leftChild) + sm._eval(a.rightChild)
-	b.value = sm._eval(b.leftChild) + sm._eval(b.rightChild)
+	a.value = op(sm._eval(a.leftChild), sm._eval(a.rightChild))
+	b.value = op(sm._eval(b.leftChild), sm._eval(b.rightChild))
 	return a, b
 }
 
@@ -260,4 +306,47 @@ func (sm *SegmentTreeMerger) _eval(node *Node) E {
 		return e()
 	}
 	return node.value
+}
+
+type UnionFindArraySimple struct {
+	Part int32
+	n    int32
+	data []int32
+}
+
+func NewUnionFindArraySimple(n int32) *UnionFindArraySimple {
+	data := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		data[i] = -1
+	}
+	return &UnionFindArraySimple{Part: n, n: n, data: data}
+}
+
+func (u *UnionFindArraySimple) Union(key1, key2 int32, cb func(big, small int32)) bool {
+	root1, root2 := u.Find(key1), u.Find(key2)
+	if root1 == root2 {
+		return false
+	}
+	if u.data[root1] > u.data[root2] {
+		root1, root2 = root2, root1
+	}
+	u.data[root1] += u.data[root2]
+	u.data[root2] = root1
+	u.Part--
+	if cb != nil {
+		cb(root1, root2)
+	}
+	return true
+}
+
+func (u *UnionFindArraySimple) Find(key int32) int32 {
+	if u.data[key] < 0 {
+		return key
+	}
+	u.data[key] = u.Find(u.data[key])
+	return u.data[key]
+}
+
+func (u *UnionFindArraySimple) GetSize(key int32) int32 {
+	return -u.data[u.Find(key)]
 }

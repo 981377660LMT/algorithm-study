@@ -18,7 +18,11 @@ func main() {
 
 func demo() {
 	sm := NewSegmentTreeOnRange(0, 10)
-	nodes := sm.Build(10, func(i int32) int32 { return i })
+	nodes := make([]*Node, 10)
+	for i := range nodes {
+		nodes[i] = sm.Alloc()
+		sm.Update(nodes[i], int32(i), int32(i))
+	}
 	fmt.Println(nodes)
 	nodes[1] = sm.Merge(nodes[2], nodes[1])
 	fmt.Println(sm.QueryAll(nodes[1]))
@@ -26,6 +30,9 @@ func demo() {
 	fmt.Println(sm.Kth(nodes[1], 4))
 	a, b := sm.Split(nodes[1], 0, 5)
 	fmt.Println(a, b)
+	for i := 0; i < 10; i++ {
+		fmt.Println(sm.Query(nodes[1], int32(i), int32(i+1)))
+	}
 }
 
 // P3224 [HNOI2012] 永无乡
@@ -55,7 +62,8 @@ func P3224() {
 		fmt.Fscan(in, &rank)
 		rank--
 		rankToId[rank] = i
-		roots[i] = seg.Alloc(rank, 1)
+		roots[i] = seg.Alloc()
+		seg.Update(roots[i], rank, 1)
 	}
 
 	// 在x和y之间建立一座桥，使得x和y之间可以互相到达
@@ -126,7 +134,7 @@ func P5494() {
 	gits := make([]*Node, 1, q+1)
 	gits = append(gits, &Node{})
 	for i, count := range nums {
-		seg.Update(gits[1], int32(i), count)
+		seg.Update(gits[1], int32(i+1), count)
 	}
 
 	for i := int32(0); i < q; i++ {
@@ -171,7 +179,7 @@ type Node struct {
 }
 
 func (n *Node) String() string {
-	return fmt.Sprintf("%d", n.value)
+	return fmt.Sprintf("%v", n.value)
 }
 
 type SegmentTreeOnRange struct {
@@ -183,16 +191,9 @@ func NewSegmentTreeOnRange(min, max int32) *SegmentTreeOnRange {
 	return &SegmentTreeOnRange{min: min, max: max}
 }
 
-func (sm *SegmentTreeOnRange) Build(n int32, f func(i int32) E) []*Node {
-	res := make([]*Node, n)
-	for i := int32(0); i < n; i++ {
-		res[i] = sm.Alloc(i, f(i))
-	}
-	return res
-}
-
-func (sm *SegmentTreeOnRange) Alloc(index int32, value E) *Node {
-	return sm._alloc(index, value, sm.min, sm.max)
+// NewRoot().
+func (sm *SegmentTreeOnRange) Alloc() *Node {
+	return &Node{}
 }
 
 // 权值线段树求第 k 小.
@@ -240,21 +241,6 @@ func (sm *SegmentTreeOnRange) Split(node *Node, left, right int32) (this, other 
 	return
 }
 
-func (sm *SegmentTreeOnRange) _alloc(index int32, value E, left, right int32) *Node {
-	if left == right {
-		return &Node{value: value}
-	}
-	mid := (left + right) >> 1
-	node := &Node{}
-	if index <= mid {
-		node.leftChild = sm._alloc(index, value, left, mid)
-	} else {
-		node.rightChild = sm._alloc(index, value, mid+1, right)
-	}
-	node.value = sm._eval(node.leftChild) + sm._eval(node.rightChild)
-	return node
-}
-
 func (sm *SegmentTreeOnRange) _kth(k int32, node *Node, left, right int32) int32 {
 	if left == right {
 		return left
@@ -268,6 +254,9 @@ func (sm *SegmentTreeOnRange) _kth(k int32, node *Node, left, right int32) int32
 }
 
 func (sm *SegmentTreeOnRange) _get(node *Node, index int32, left, right int32) E {
+	if node == nil {
+		return 0
+	}
 	if left == right {
 		return node.value
 	}
@@ -279,23 +268,18 @@ func (sm *SegmentTreeOnRange) _get(node *Node, index int32, left, right int32) E
 	}
 }
 
-// TODO: 不存在时的处理，统一pushDown吗
 func (sm *SegmentTreeOnRange) _query(node *Node, L, R int32, left, right int32) E {
-
+	if node == nil {
+		return 0
+	}
 	if L <= left && right <= R {
 		return node.value
 	}
 	mid := (left + right) >> 1
 	if R <= mid {
-		if node.leftChild == nil {
-			return 0
-		}
 		return sm._query(node.leftChild, L, R, left, mid)
 	}
 	if L > mid {
-		if node.rightChild == nil {
-			return 0
-		}
 		return sm._query(node.rightChild, L, R, mid+1, right)
 	}
 	return sm._query(node.leftChild, L, R, left, mid) + sm._query(node.rightChild, L, R, mid+1, right)
@@ -308,8 +292,14 @@ func (sm *SegmentTreeOnRange) _set(node *Node, index int32, value E, left, right
 	}
 	mid := (left + right) >> 1
 	if index <= mid {
+		if node.leftChild == nil {
+			node.leftChild = &Node{}
+		}
 		sm._set(node.leftChild, index, value, left, mid)
 	} else {
+		if node.leftChild == nil {
+			node.leftChild = &Node{}
+		}
 		sm._set(node.rightChild, index, value, mid+1, right)
 	}
 	node.value = sm._eval(node.leftChild) + sm._eval(node.rightChild)

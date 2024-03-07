@@ -7,8 +7,6 @@ https://www.cnblogs.com/alex-wei/p/segment_tree_yyds.html
 
 ---
 
-https://www.zhihu.com/column/c_1182444932760125440
-
 - P3224 [HNOI2012]永无乡
   https://www.luogu.com.cn/problem/P3224
   用并查集维护连通性，用权值线段树维护集合的第 k 小数。
@@ -21,9 +19,6 @@ https://www.zhihu.com/column/c_1182444932760125440
   然后深绘里想知道，当所有的救济粮发放完毕后，每座房子里存放的最多的是哪种救济粮。
 
 ---
-
-TODO: 线段树合并、可持久化线段树合并
-https://www.cnblogs.com/alex-wei/p/segment_tree_yyds.html
 
 线段树合并可以求出 SAM 的每个节点的
 endPos 集合。
