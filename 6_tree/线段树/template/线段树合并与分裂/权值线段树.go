@@ -7,7 +7,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"runtime/debug"
 )
+
+// 允许的空间很大时，禁用gc加速
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 func main() {
 	// demo()
@@ -134,7 +140,7 @@ func P5494() {
 	}
 	seg := NewSegmentTreeOnRange(0, MAX)
 	gits := make([]*Node, 1, q+1)
-	gits = append(gits, &Node{})
+	gits = append(gits, seg.Alloc())
 	for i, count := range nums {
 		seg.Update(gits[1], int32(i+1), count)
 	}
@@ -176,12 +182,12 @@ func P5494() {
 type E = int32
 
 type Node struct {
-	value                 E
+	count                 E
 	leftChild, rightChild *Node
 }
 
 func (n *Node) String() string {
-	return fmt.Sprintf("%v", n.value)
+	return fmt.Sprintf("%v", n.count)
 }
 
 type SegmentTreeOnRange struct {
@@ -223,8 +229,8 @@ func (sm *SegmentTreeOnRange) QueryAll(node *Node) E {
 	return sm._eval(node)
 }
 
-func (sm *SegmentTreeOnRange) Update(node *Node, index int32, value E) {
-	sm._update(node, index, value, sm.min, sm.max)
+func (sm *SegmentTreeOnRange) Update(node *Node, index int32, count E) {
+	sm._update(node, index, count, sm.min, sm.max)
 }
 
 // 用一个新的节点存合并的结果，会生成重合节点数量的新节点.
@@ -260,7 +266,7 @@ func (sm *SegmentTreeOnRange) _get(node *Node, index int32, left, right int32) E
 		return 0
 	}
 	if left == right {
-		return node.value
+		return node.count
 	}
 	mid := (left + right) >> 1
 	if index <= mid {
@@ -275,7 +281,7 @@ func (sm *SegmentTreeOnRange) _query(node *Node, L, R int32, left, right int32) 
 		return 0
 	}
 	if L <= left && right <= R {
-		return node.value
+		return node.count
 	}
 	mid := (left + right) >> 1
 	if R <= mid {
@@ -287,9 +293,9 @@ func (sm *SegmentTreeOnRange) _query(node *Node, L, R int32, left, right int32) 
 	return sm._query(node.leftChild, L, R, left, mid) + sm._query(node.rightChild, L, R, mid+1, right)
 }
 
-func (sm *SegmentTreeOnRange) _set(node *Node, index int32, value E, left, right int32) {
+func (sm *SegmentTreeOnRange) _set(node *Node, index int32, count E, left, right int32) {
 	if left == right {
-		node.value = value
+		node.count = count
 		return
 	}
 	mid := (left + right) >> 1
@@ -297,19 +303,19 @@ func (sm *SegmentTreeOnRange) _set(node *Node, index int32, value E, left, right
 		if node.leftChild == nil {
 			node.leftChild = sm.Alloc()
 		}
-		sm._set(node.leftChild, index, value, left, mid)
+		sm._set(node.leftChild, index, count, left, mid)
 	} else {
 		if node.leftChild == nil {
 			node.leftChild = sm.Alloc()
 		}
-		sm._set(node.rightChild, index, value, mid+1, right)
+		sm._set(node.rightChild, index, count, mid+1, right)
 	}
-	node.value = sm._eval(node.leftChild) + sm._eval(node.rightChild)
+	node.count = sm._eval(node.leftChild) + sm._eval(node.rightChild)
 }
 
-func (sm *SegmentTreeOnRange) _update(node *Node, index int32, value E, left, right int32) {
+func (sm *SegmentTreeOnRange) _update(node *Node, index int32, count E, left, right int32) {
 	if left == right {
-		node.value += value
+		node.count += count
 		return
 	}
 	mid := (left + right) >> 1
@@ -317,14 +323,14 @@ func (sm *SegmentTreeOnRange) _update(node *Node, index int32, value E, left, ri
 		if node.leftChild == nil {
 			node.leftChild = sm.Alloc()
 		}
-		sm._update(node.leftChild, index, value, left, mid)
+		sm._update(node.leftChild, index, count, left, mid)
 	} else {
 		if node.rightChild == nil {
 			node.rightChild = sm.Alloc()
 		}
-		sm._update(node.rightChild, index, value, mid+1, right)
+		sm._update(node.rightChild, index, count, mid+1, right)
 	}
-	node.value = sm._eval(node.leftChild) + sm._eval(node.rightChild)
+	node.count = sm._eval(node.leftChild) + sm._eval(node.rightChild)
 }
 
 func (sm *SegmentTreeOnRange) _merge(a, b *Node, left, right int32) *Node {
@@ -336,13 +342,13 @@ func (sm *SegmentTreeOnRange) _merge(a, b *Node, left, right int32) *Node {
 	}
 	newNode := sm.Alloc()
 	if left == right {
-		newNode.value = a.value + b.value
+		newNode.count = a.count + b.count
 		return newNode
 	}
 	mid := (left + right) >> 1
 	newNode.leftChild = sm._merge(a.leftChild, b.leftChild, left, mid)
 	newNode.rightChild = sm._merge(a.rightChild, b.rightChild, mid+1, right)
-	newNode.value = sm._eval(newNode.leftChild) + sm._eval(newNode.rightChild)
+	newNode.count = sm._eval(newNode.leftChild) + sm._eval(newNode.rightChild)
 	return newNode
 }
 
@@ -354,13 +360,13 @@ func (sm *SegmentTreeOnRange) _mergeDestructively(a, b *Node, left, right int32)
 		return a
 	}
 	if left == right {
-		a.value += b.value
+		a.count += b.count
 		return a
 	}
 	mid := (left + right) >> 1
 	a.leftChild = sm._mergeDestructively(a.leftChild, b.leftChild, left, mid)
 	a.rightChild = sm._mergeDestructively(a.rightChild, b.rightChild, mid+1, right)
-	a.value = sm._eval(a.leftChild) + sm._eval(a.rightChild)
+	a.count = sm._eval(a.leftChild) + sm._eval(a.rightChild)
 	return a
 }
 
@@ -377,8 +383,8 @@ func (sm *SegmentTreeOnRange) _split(a, b *Node, L, R int32, left, right int32) 
 	mid := (left + right) >> 1
 	a.leftChild, b.leftChild = sm._split(a.leftChild, b.leftChild, L, R, left, mid)
 	a.rightChild, b.rightChild = sm._split(a.rightChild, b.rightChild, L, R, mid+1, right)
-	a.value = sm._eval(a.leftChild) + sm._eval(a.rightChild)
-	b.value = sm._eval(b.leftChild) + sm._eval(b.rightChild)
+	a.count = sm._eval(a.leftChild) + sm._eval(a.rightChild)
+	b.count = sm._eval(b.leftChild) + sm._eval(b.rightChild)
 	return a, b
 }
 
@@ -386,7 +392,7 @@ func (sm *SegmentTreeOnRange) _eval(node *Node) E {
 	if node == nil {
 		return 0
 	}
-	return node.value
+	return node.count
 }
 
 type UnionFindArraySimple struct {

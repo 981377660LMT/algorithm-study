@@ -124,6 +124,7 @@
      - [SegmentTreePersistent](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E5%8A%A8%E6%80%81%E5%BC%80%E7%82%B9/SegmentTreePersistent.ts)
      - [SegmentTree01](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/%E7%BB%8F%E5%85%B8%E9%A2%98/01%E7%BA%BF%E6%AE%B5%E6%A0%91/SegmentTree01.ts)
      - [SegmentTreeUtils](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/atcoder_segtree/SegmentTreeUtils.ts)
+     - [SegmentTreeMerger](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/%E7%BA%BF%E6%AE%B5%E6%A0%91%E5%90%88%E5%B9%B6%E4%B8%8E%E5%88%86%E8%A3%82/template.go)
 
 6. **Graph**
 

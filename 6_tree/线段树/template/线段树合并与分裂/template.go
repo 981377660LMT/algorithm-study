@@ -4,7 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"runtime/debug"
 )
+
+// 允许的空间很大时，禁用gc加速
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 func main() {
 	CF600E()
@@ -79,7 +85,7 @@ func op(a, b E) E {
 	a.score += b.score
 	return a
 }
-func merge(a, b E) E {
+func merge(a, b E) E { // 合并两个不同的树的结点的函数
 	a.maxCount += b.maxCount
 	return a
 }
