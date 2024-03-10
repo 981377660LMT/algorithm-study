@@ -79,7 +79,6 @@
 //     !但是我们知道后缀自动机的性质 : 任意两个节点的表示集合没有交。
 //     !所以我们只要统计路径数即可,不需要考虑重复问题。
 //     !17.可以通过parent树确定SAM的接受状态集合。找到MaxLen=n的结点，该结点到根的路径上的所有结点都是接受状态。
-//     !18.子串是
 //
 // applications:
 //  1. 查找某个子串位于哪个节点 => 直接倍增往上跳到len[]合适的地方
@@ -97,7 +96,7 @@
 //  10. 区间子“SAM”.
 //  11. 多次询问区间本质不同子串 => 扫描线+LCT 维护区间子串信息
 //  12. 维护endPos等价类最小End、最大End => 后缀链接树自底向上更新End下标信息
-//  13. 比较endPos上某些串的字典序 => 用DAG上的DFS序
+//  13. 判断子串s[a:b]是否为某个前缀s[:i]的子串 => 先定位子串到pos结点，然后判断该子串最早结束位置 endPosMinEnd[pos] <= i.
 
 package main
 
@@ -121,10 +120,10 @@ type Node struct {
 }
 
 type SuffixAutomaton struct {
-	Nodes   []*Node
-	LastPos int32 // 当前插入的字符对应的节点(实点，原串的一个前缀)
-	n       int32 // 当前字符串长度
-	// TODO: doubling
+	Nodes    []*Node
+	LastPos  int32 // 当前插入的字符对应的节点(实点，原串的一个前缀)
+	n        int32 // 当前字符串长度
+	doubling *DoublingSimple
 }
 
 func NewSuffixAutomaton() *SuffixAutomaton {
@@ -233,6 +232,7 @@ func (sam *SuffixAutomaton) GetEndPosSize(dfsOrder []int32) []int32 {
 	return endPosSize
 }
 
+// 每个endPos中(最长串)最小的end.
 // 返回每个节点对应子串中在原串中的最小结束位置i(0<=i<n).不存在则为INF.
 func (sam *SuffixAutomaton) GetEndPosMinEnd(dfsOrder []int32) []int32 {
 	size := sam.Size()
@@ -249,6 +249,7 @@ func (sam *SuffixAutomaton) GetEndPosMinEnd(dfsOrder []int32) []int32 {
 	return res
 }
 
+// 每个endPos中(最长串)最大的end.
 // 返回每个节点对应子串中在原串中的最大结束位置i(0<=i<n).不存在则为-1.
 func (sam *SuffixAutomaton) GetEndPosMaxEnd(dfsOrder []int32) []int32 {
 	size := sam.Size()
@@ -286,8 +287,11 @@ func (sam *SuffixAutomaton) GetEndPos(dfsOrder []int32) (seg *SegmentTreeOnRange
 }
 
 // 快速定位子串, 可以与其它字符串算法配合使用.
-// 倍增往上跳到MaxLen>=end-start的最近祖先.
-func (sam *SuffixAutomaton) GetNodeBySubstring(start, end int32) (pos int32) {
+// 倍增往上跳到 MaxLen>=end-start 的最后一个节点.
+// start: 子串起始位置, end: 子串结束位置, endPosOfEnd: 子串结束位置在fail树上的位置.
+func (sam *SuffixAutomaton) GetNodeBySubstring(start, end int32, endPosOfEnd int32) (pos int32) {
+	target := end - start
+	_, pos = sam.Doubling().MaxStep(endPosOfEnd, func(p int32) bool { return sam.Nodes[p].MaxLen >= target })
 	return
 }
 
@@ -362,6 +366,39 @@ func (sam *SuffixAutomaton) LongestCommonSuffix(m int32, pattern func(i int32) i
 		res[i] = len
 	}
 	return res
+}
+
+// 后缀连接树上倍增.
+func (sam *SuffixAutomaton) Doubling() *DoublingSimple {
+	if sam.doubling == nil {
+		size := sam.Size()
+		doubling := NewDoubling(size, int(size))
+		for i := int32(1); i < size; i++ {
+			doubling.Add(i, sam.Nodes[i].Link)
+		}
+		doubling.Build()
+		sam.doubling = doubling
+	}
+	return sam.doubling
+}
+
+func (sam *SuffixAutomaton) Print() {
+	var dfs func(int32, string)
+	nodeStr := make([]string, sam.Size())
+	dfs = func(cur int32, s string) {
+		nodeStr[cur] = s
+		for i, v := range sam.Nodes[cur].Next {
+			if v != -1 {
+				dfs(v, s+string(OFFSET+int32(i)))
+			}
+		}
+	}
+	dfs(0, "")
+	for i := int32(1); i < sam.Size(); i++ {
+		// pos string minLen maxLen link
+		minLen, maxLen := sam.Nodes[sam.Nodes[i].Link].MaxLen+1, sam.Nodes[i].MaxLen
+		fmt.Println(fmt.Sprintf("%v %v %v %v %v", i, nodeStr[i], minLen, maxLen, sam.Nodes[i].Link))
+	}
 }
 
 func (sam *SuffixAutomaton) newNode(link, maxLen, end int32) *Node {
@@ -633,116 +670,68 @@ func (sm *SegmentTreeOnRange) _eval(node *SegNode) E {
 	return node.count
 }
 
-type DoublingMax32 struct {
-	n          int
-	log        int
-	isPrepared bool
-	to         []int
-	dp         []E
-	e          func() E
-	op         func(e1, e2 E) E
+type DoublingSimple struct {
+	n   int32
+	log int32
+	to  []int32
 }
 
-func NewDoubling(n, maxStep int, e func() E, op func(e1, e2 E) E) *DoublingMax32 {
-	res := &DoublingMax32{e: e, op: op}
-	res.n = n
-	res.log = bits.Len(uint(maxStep))
+func NewDoubling(n int32, maxStep int) *DoublingSimple {
+	res := &DoublingSimple{n: n, log: int32(bits.Len(uint(maxStep)))}
 	size := n * res.log
-	res.to = make([]int, size)
-	res.dp = make([]E, size)
-	for i := 0; i < size; i++ {
+	res.to = make([]int32, size)
+	for i := int32(0); i < size; i++ {
 		res.to[i] = -1
-		res.dp[i] = res.e()
 	}
 	return res
 }
 
-// 初始状态(leaves):从 `from` 状态到 `to` 状态，边权为 `weight`.
-//
-//	0 <= from, to < n
-func (d *DoublingMax32) Add(from, to int, weight E) {
-	if d.isPrepared {
-		panic("Doubling is prepared")
-	}
-	if to < -1 || to >= d.n {
-		panic("to is out of range")
-	}
-
+func (d *DoublingSimple) Add(from, to int32) {
 	d.to[from] = to
-	d.dp[from] = weight
 }
 
-func (d *DoublingMax32) Build() {
-	if d.isPrepared {
-		panic("Doubling is prepared")
-	}
-
-	d.isPrepared = true
+func (d *DoublingSimple) Build() {
 	n := d.n
-	for k := 0; k < d.log-1; k++ {
-		for v := 0; v < n; v++ {
+	for k := int32(0); k < d.log-1; k++ {
+		for v := int32(0); v < n; v++ {
 			w := d.to[k*n+v]
 			next := (k+1)*n + v
 			if w == -1 {
 				d.to[next] = -1
-				d.dp[next] = d.dp[k*n+v]
 				continue
 			}
 			d.to[next] = d.to[k*n+w]
-			d.dp[next] = d.op(d.dp[k*n+v], d.dp[k*n+w])
 		}
 	}
 }
 
-// 从 `from` 状态开始，执行 `step` 次操作，返回最终状态的编号和操作的结果。
-//
-//	0 <= from < n
-//	如果最终状态不存在，返回 -1, e()
-func (d *DoublingMax32) Jump(from, step int) (to int, res E) {
-	if !d.isPrepared {
-		panic("Doubling is not prepared")
-	}
-	if step >= 1<<d.log {
-		panic("step is over max step")
-	}
-
-	res = d.e()
+// 求从 `from` 状态开始转移 `step` 次的最终状态的编号。
+// 不存在时返回 -1。
+func (d *DoublingSimple) Jump(from int32, step int) (to int32) {
 	to = from
-	for k := 0; k < d.log; k++ {
+	for k := int32(0); k < d.log; k++ {
 		if to == -1 {
-			break
+			return
 		}
-
 		if step&(1<<k) != 0 {
-			pos := k*d.n + to
-			res = d.op(res, d.dp[pos])
-			to = d.to[pos]
+			to = d.to[k*d.n+to]
 		}
 	}
 	return
 }
 
-// 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号和操作的结果。
-func (d *DoublingMax32) MaxStep(from int, check func(weight E) bool) (step int, to int, res E) {
-	if !d.isPrepared {
-		panic("Doubling is not prepared")
-	}
-
-	res = d.e()
+// 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号。
+func (d *DoublingSimple) MaxStep(from int32, check func(next int32) bool) (step int, to int32) {
 	for k := d.log - 1; k >= 0; k-- {
-		pos := k*d.n + from
-		tmp := d.to[pos]
+		tmp := d.to[k*d.n+from]
 		if tmp == -1 {
 			continue
 		}
-		next := d.op(res, d.dp[pos])
-		if check(next) {
+		if check(tmp) {
 			step |= 1 << k
 			from = tmp
-			res = next
 		}
 	}
-
 	to = from
 	return
 }
@@ -793,7 +782,11 @@ func main() {
 	// number_of_substrings()
 	// longest_common_substring()
 
-	// textMerge()
+	// nowCoder37092C()
+	// nowCoder37092D()
+	nowCoder37092J()
+
+	// testMerge()
 }
 
 // P3975 [TJOI2015] 弦论(字典序第k小子串)
@@ -1219,6 +1212,199 @@ func longest_common_substring() {
 	fmt.Fprintln(out, sStart, sEnd, tStart, tEnd)
 }
 
+// 葫芦的考验之定位子串
+// https://ac.nowcoder.com/acm/contest/37092/C
+// q次查询子串s[start:end)的出现次数.
+func nowCoder37092C() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s string
+	fmt.Fscan(in, &s)
+	var q int32
+	fmt.Fscan(in, &q)
+
+	sam := NewSuffixAutomaton()
+	prefixEnd := make([]int32, len(s))
+	for i, c := range s {
+		pos := sam.Add(c)
+		prefixEnd[i] = pos
+	}
+	dfsOrder := sam.GetDfsOrder()
+	endPosSize := sam.GetEndPosSize(dfsOrder)
+
+	query := func(start, end int32) int32 {
+		pos := sam.GetNodeBySubstring(start, end, prefixEnd[end-1])
+		return endPosSize[pos]
+	}
+
+	for i := int32(0); i < q; i++ {
+		var start, end int32
+		fmt.Fscan(in, &start, &end)
+		start--
+		fmt.Fprintln(out, query(start, end))
+	}
+}
+
+// Typewriter (后缀自动机优化dp)
+// https://ac.nowcoder.com/acm/contest/37092/D
+// https://blog.csdn.net/swustzhaoxingda/article/details/98024818
+// 初始时有一个空字符串，有两种操作：
+// 1. 在字符串末尾添加一个字符，代价为cost1；
+// 2. 复制一个已经出现的子串到末尾，代价为cost2。
+// 问最小代价使得字符串变为目标字符串s。
+//
+// 考虑配るdp，dp[i]表示变为s[:i]的最小代价.
+// 使用操作1，有 dp[i+1] = dp[i] + cost1。
+// 使用操作2，有 dp[i+len] = min(dp[i+len], dp[i]+cost2)，
+// 其中len是一个最大的长度使得s[i:i+len]是s[:i]的一个子串。
+// 二分len，然后判断s[i:i+len]是否是前缀s[:i]的一个子串即可。
+// 时间复杂度O(nlogn^2)
+func nowCoder37092D() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int = 1e18
+
+	var s string
+	fmt.Fscan(in, &s)
+	var cost1, cost2 int
+	fmt.Fscan(in, &cost1, &cost2)
+
+	n := int32(len(s))
+	sam := NewSuffixAutomaton()
+	prefixEnd := make([]int32, n)
+	for i, c := range s {
+		pos := sam.Add(c)
+		prefixEnd[i] = pos
+	}
+	endPosMinEnd := sam.GetEndPosMinEnd(sam.GetDfsOrder())
+
+	// 判断s[start:end]是否是前缀s[:prefix]的一个子串.
+	isSubstringOfPrefix := func(start, end int32, prefix int32) bool {
+		if end-start > prefix {
+			return false
+		}
+		pos := sam.GetNodeBySubstring(start, end, prefixEnd[end-1])
+		return endPosMinEnd[pos]+1 <= prefix
+	}
+
+	dp := make([]int, n+1)
+	for i := range dp {
+		dp[i] = INF
+	}
+	dp[0] = 0
+
+	for i := int32(0); i < n; i++ {
+		dp[i+1] = min(dp[i+1], dp[i]+cost1) // 操作1
+
+		ok := false
+		left, right := int32(1), min32(n-i, i)
+		for left <= right {
+			mid := (left + right) / 2
+			if isSubstringOfPrefix(i, i+mid, i) {
+				left = mid + 1
+				ok = true
+			} else {
+				right = mid - 1
+			}
+		}
+		if ok {
+			dp[i+right] = min(dp[i+right], dp[i]+cost2) // 操作2
+		}
+	}
+
+	fmt.Fprintln(out, dp[n])
+}
+
+// AStringGame (dag+sg数)
+// https://ac.nowcoder.com/acm/contest/37092/J
+//
+// 用sam跑出DAG图，再求出sg值。
+// SG值异或和等于0时先手必输，否则先手必胜。
+func nowCoder37092J() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	solve := func(text string, patterns []string) bool {
+		sam := NewSuffixAutomaton()
+		for _, c := range text {
+			sam.Add(c)
+		}
+
+		memo := make([]int32, sam.Size())
+		for i := range memo {
+			memo[i] = -1
+		}
+
+		var grundy func(int32) int32
+		grundy = func(state int32) int32 {
+			if memo[state] != -1 {
+				return memo[state]
+			}
+
+			nextStates := make(map[int32]struct{})
+			for _, next := range sam.Nodes[state].Next {
+				if next != -1 {
+					nextStates[grundy(next)] = struct{}{}
+				}
+			}
+
+			mex := int32(0)
+			for {
+				if _, ok := nextStates[mex]; !ok {
+					break
+				}
+				mex++
+			}
+			memo[state] = mex
+			return mex
+		}
+
+		sg := int32(0) // 初始状态的sg值为转移状态的sg值的异或和
+		for _, pattern := range patterns {
+			pos := int32(0)
+			for _, c := range pattern {
+				pos = sam.Nodes[pos].Next[c-OFFSET]
+				if pos == -1 {
+					break
+				}
+			}
+
+			if pos != -1 {
+				sg ^= grundy(pos)
+			}
+		}
+
+		return sg != 0
+	}
+
+	for {
+		var text string
+		fmt.Fscan(in, &text)
+		// 判断是否还有输入
+		if len(text) == 0 {
+			break
+		}
+		var n int32
+		fmt.Fscan(in, &n)
+		patterns := make([]string, n)
+		for i := int32(0); i < n; i++ {
+			fmt.Fscan(in, &patterns[i])
+		}
+
+		firstWin := solve(text, patterns)
+		if firstWin {
+			fmt.Fprintln(out, "Alice")
+		} else {
+			fmt.Fprintln(out, "Bob")
+		}
+	}
+}
+
 func testMerge() {
 	s := "aababa"
 	sam := NewSuffixAutomaton()
@@ -1229,7 +1415,7 @@ func testMerge() {
 	seg, endPos := sam.GetEndPos(dfsOrder)
 	for i, node := range endPos {
 		var pos []int32
-		seg.Enumerate(node, func(j int32, count int32) {
+		seg.Enumerate(node, func(j int32, _ int32) {
 			pos = append(pos, j)
 		})
 		fmt.Println(i, pos)

@@ -28,12 +28,14 @@ func main() {
 		if memo[state] != -1 {
 			return memo[state]
 		}
+
 		nextStates := make(map[int]struct{})
 		for p := range F[state] {
 			if state-p >= 2 { // 如果是拆分成两个子状态,则当前grundy数为子状态的异或和
 				nextStates[grundy(state-p)] = struct{}{}
 			}
 		}
+
 		mex := 0
 		for {
 			if _, ok := nextStates[mex]; !ok {
@@ -48,10 +50,6 @@ func main() {
 	fmt.Println(grundy(n))
 }
 
-//
-//
-//
-//
 // 埃氏筛
 type eratosthenesSieve struct {
 	minPrime []int

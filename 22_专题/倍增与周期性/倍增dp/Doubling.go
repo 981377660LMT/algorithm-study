@@ -14,7 +14,8 @@ import (
 )
 
 func main() {
-	CF1175E()
+	// CF1175E()
+	yuki1097()
 }
 
 // Minimal Segment Cover (线段包含/线段覆盖)
@@ -54,15 +55,15 @@ func CF1175E() {
 		maxRight[i] = max(maxRight[i], maxRight[i-1]) // 注意线段起点可能在这个左端点左边
 	}
 
-	D := NewDoubling(MAX, MAX, func() E { return 0 }, func(e1, e2 E) E { return e1 + e2 })
+	D := NewDoubling(int32(MAX), MAX, func() E { return 0 }, func(e1, e2 E) E { return e1 + e2 })
 	for i := 0; i < MAX; i++ {
-		D.Add(i, maxRight[i], maxRight[i]-i)
+		D.Add(int32(i), int32(maxRight[i]), maxRight[i]-i)
 	}
 	D.Build()
 
 	for i := 0; i < q; i++ {
 		a, b := queries[i][0], queries[i][1]
-		k, _, _ := D.MaxStep(a, func(e E) bool { return a+e < b })
+		k, _, _ := D.MaxStep(int32(a), func(_ int32, e E) bool { return a+e < b })
 		k++
 		if k > n {
 			k = -1
@@ -83,10 +84,10 @@ func yuki1097() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
+	var n int32
 	fmt.Fscan(in, &n)
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
+	nums := make([]int32, n)
+	for i := int32(0); i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
 
@@ -95,8 +96,8 @@ func yuki1097() {
 		func() E { return 0 },
 		func(e1, e2 E) E { return e1 + e2 },
 	)
-	for i := 0; i < n; i++ {
-		db.Add(i, (i+nums[i])%n, nums[i]) // res的模从i变为(i+nums[i])%n，res加上nums[i]
+	for i := int32(0); i < n; i++ {
+		db.Add(i, (i+nums[i])%n, int(nums[i])) // res的模从i变为(i+nums[i])%n，res加上nums[i]
 	}
 	db.Build()
 
@@ -112,20 +113,20 @@ func yuki1097() {
 
 // 8027. 在传球游戏中最大化函数值
 func getMaxFunctionValue(receiver []int, k int64) int64 {
-	n := len(receiver)
+	n := int32(len(receiver))
 	intK := int(k)
 	db := NewDoubling(
 		n, intK+1,
 		func() E { return 0 },
 		func(e1, e2 E) E { return e1 + e2 },
 	)
-	for i := 0; i < n; i++ {
-		db.Add(i, receiver[i], i)
+	for i := int32(0); i < n; i++ {
+		db.Add(i, int32(receiver[i]), int(i))
 	}
 	db.Build()
 
 	res := 0
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		_, v := db.Jump(i, intK+1)
 		if v > res {
 			res = v
@@ -138,23 +139,25 @@ func getMaxFunctionValue(receiver []int, k int64) int64 {
 type E = int
 
 type Doubling struct {
-	n          int
-	log        int
-	isPrepared bool
-	to         []int
-	dp         []E
-	e          func() E
-	op         func(e1, e2 E) E
+	n        int32
+	log      int32
+	prepared bool
+	to       []int32
+
+	// 边权
+	dp []E
+	e  func() E
+	op func(e1, e2 E) E
 }
 
-func NewDoubling(n, maxStep int, e func() E, op func(e1, e2 E) E) *Doubling {
+func NewDoubling(n int32, maxStep int, e func() E, op func(e1, e2 E) E) *Doubling {
 	res := &Doubling{e: e, op: op}
 	res.n = n
-	res.log = bits.Len(uint(maxStep))
+	res.log = int32(bits.Len(uint(maxStep)))
 	size := n * res.log
-	res.to = make([]int, size)
+	res.to = make([]int32, size)
 	res.dp = make([]E, size)
-	for i := 0; i < size; i++ {
+	for i := int32(0); i < size; i++ {
 		res.to[i] = -1
 		res.dp[i] = res.e()
 	}
@@ -164,8 +167,8 @@ func NewDoubling(n, maxStep int, e func() E, op func(e1, e2 E) E) *Doubling {
 // 初始状态(leaves):从 `from` 状态到 `to` 状态，边权为 `weight`.
 //
 //	0 <= from, to < n
-func (d *Doubling) Add(from, to int, weight E) {
-	if d.isPrepared {
+func (d *Doubling) Add(from, to int32, weight E) {
+	if d.prepared {
 		panic("Doubling is prepared")
 	}
 	if to < -1 || to >= d.n {
@@ -177,14 +180,14 @@ func (d *Doubling) Add(from, to int, weight E) {
 }
 
 func (d *Doubling) Build() {
-	if d.isPrepared {
+	if d.prepared {
 		panic("Doubling is prepared")
 	}
 
-	d.isPrepared = true
+	d.prepared = true
 	n := d.n
-	for k := 0; k < d.log-1; k++ {
-		for v := 0; v < n; v++ {
+	for k := int32(0); k < d.log-1; k++ {
+		for v := int32(0); v < n; v++ {
 			w := d.to[k*n+v]
 			next := (k+1)*n + v
 			if w == -1 {
@@ -202,8 +205,8 @@ func (d *Doubling) Build() {
 //
 //	0 <= from < n
 //	如果最终状态不存在，返回 -1, e()
-func (d *Doubling) Jump(from, step int) (to int, res E) {
-	if !d.isPrepared {
+func (d *Doubling) Jump(from int32, step int) (to int32, res E) {
+	if !d.prepared {
 		panic("Doubling is not prepared")
 	}
 	if step >= 1<<d.log {
@@ -212,11 +215,10 @@ func (d *Doubling) Jump(from, step int) (to int, res E) {
 
 	res = d.e()
 	to = from
-	for k := 0; k < d.log; k++ {
+	for k := int32(0); k < d.log; k++ {
 		if to == -1 {
 			break
 		}
-
 		if step&(1<<k) != 0 {
 			pos := k*d.n + to
 			res = d.op(res, d.dp[pos])
@@ -227,8 +229,8 @@ func (d *Doubling) Jump(from, step int) (to int, res E) {
 }
 
 // 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号和操作的结果。
-func (d *Doubling) MaxStep(from int, check func(weight E) bool) (step int, to int, res E) {
-	if !d.isPrepared {
+func (d *Doubling) MaxStep(from int32, check func(next int32, weight E) bool) (step int, to int32, res E) {
+	if !d.prepared {
 		panic("Doubling is not prepared")
 	}
 
@@ -240,7 +242,7 @@ func (d *Doubling) MaxStep(from int, check func(weight E) bool) (step int, to in
 			continue
 		}
 		next := d.op(res, d.dp[pos])
-		if check(next) {
+		if check(tmp, next) {
 			step |= 1 << k
 			from = tmp
 			res = next

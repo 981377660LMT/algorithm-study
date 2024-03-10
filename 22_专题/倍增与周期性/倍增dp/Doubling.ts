@@ -92,18 +92,22 @@ class Doubling<E> {
    * 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step`以及对应的状态编号和值.
    * 0 <= from < n.
    */
-  maxStep(from: number, check: (e: E) => boolean): { step: number; to: number; value: E } {
+  maxStep(
+    from: number,
+    check: (to: number, e: E) => boolean
+  ): { step: number; to: number; value: E } {
     if (!this._isPrepared) this.build()
     let res = this._e()
     let step = 0
     for (let k = this._log - 1; ~k; k--) {
       const pos = k * this._n + from
       const to = this._to[pos]
-      const next = this._op(res, this._dp[pos])
-      if (check(next)) {
+      if (to === -1) continue
+      const weight = this._op(res, this._dp[pos])
+      if (check(to, weight)) {
         step += 2 ** k
         from = to
-        res = next
+        res = weight
       }
     }
     return { step, to: from, value: res }

@@ -1,4 +1,4 @@
-from typing import List
+from typing import Callable, List, Tuple
 
 
 class Doubling:
@@ -42,6 +42,19 @@ class Doubling:
             if step & (1 << k):
                 to = self._to[k][to]
         return to
+
+    def maxStep(self, from_: int, check: Callable[[int], bool]) -> Tuple[int, int]:
+        """求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号."""
+        step = 0
+        to = from_
+        for k in range(self._log - 1, -1, -1):
+            tmp = self._to[k][to]
+            if to == -1:
+                continue
+            if check(tmp):
+                step |= 1 << k
+                to = tmp
+        return step, to
 
 
 if __name__ == "__main__":
