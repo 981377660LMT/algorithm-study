@@ -1,4 +1,5 @@
-// fail 指针指向所有模式串的前缀中匹配当前状态的最长真后缀(border)
+// 类似 KMP 的失配数组，失配指针的含义为：
+// 当前结点所表示字符串的最长真后缀 (border)，使得该后缀作为某个单词的前缀出现。
 // !https://www.cnblogs.com/alex-wei/p/Common_String_Theory_Theory_automaton_related.html
 // !- 子串 = 前缀的后缀
 //   Trie树（AC自动机）的祖先节点 = 前缀

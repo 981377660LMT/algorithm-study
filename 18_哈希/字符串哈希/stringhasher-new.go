@@ -20,8 +20,9 @@ import (
 )
 
 func main() {
-	CF514C()
+	// CF514C()
 	// CF1056E()
+	SP220()
 }
 
 // Watto and Mechanism
@@ -172,7 +173,85 @@ func CF1056E() {
 	}
 
 	fmt.Fprintln(out, res)
+}
 
+// PHRASES - Relevant Phrases of Annihilation
+// https://www.luogu.com.cn/problem/SP220
+// 给定n个字符串，求在每个字符串中至少出现两次且不重叠的最长子串长度.
+//
+// 解法1：广义SAM+维护endPos等价类最小End、最大End.但是复杂度与字符个数有关,不够好.
+// !解法2：二分长度+哈希分组
+func SP220() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	H := NewRollingHash(131, 999999751)
+
+	solve := func(words []string) int32 {
+		n := int32(len(words))
+		tables := make([][]uint, n)
+		for i := int32(0); i < n; i++ {
+			tables[i] = H.Build(words[i])
+		}
+
+		check := func(mid int32) bool {
+			counter := make([]map[uint]int32, n)
+			for i := int32(0); i < n; i++ {
+				counter[i] = make(map[uint]int32)
+			}
+			visited := make(map[uint]struct{})
+			for i, table := range tables {
+				m := int32(len(words[i]))
+				last := make(map[uint]int32) // 记录每个哈希值上一次出现的位置
+				for j := int32(0); j+mid <= m; j++ {
+					hash_ := H.Query(table, int(j), int(j+mid))
+					v, ok := last[hash_]
+					if !ok || v <= j { // 不重叠出现
+						last[hash_] = j + mid
+						counter[i][hash_]++
+						visited[hash_] = struct{}{}
+					}
+				}
+			}
+			for h := range visited {
+				ok := true
+				for _, c := range counter {
+					if c[h] < 2 {
+						ok = false
+						break
+					}
+				}
+				if ok {
+					return true
+				}
+			}
+			return false
+		}
+
+		left, right := int32(1), int32(len(words[0]))
+		for left <= right {
+			mid := (left + right) / 2
+			if check(mid) {
+				left = mid + 1
+			} else {
+				right = mid - 1
+			}
+		}
+		return right
+	}
+
+	var T int32
+	fmt.Fscan(in, &T)
+	for i := int32(0); i < T; i++ {
+		var n int32
+		fmt.Fscan(in, &n)
+		words := make([]string, n)
+		for j := int32(0); j < n; j++ {
+			fmt.Fscan(in, &words[j])
+		}
+		fmt.Fprintln(out, solve(words))
+	}
 }
 
 // 顺序遍历每个单词,问之前是否见过类似的单词.

@@ -16,9 +16,9 @@ func init() {
 }
 
 func main() {
-	// demo()
+	demo()
 
-	P3224()
+	// P3224()
 	// P5494()
 }
 
@@ -27,10 +27,13 @@ func demo() {
 	nodes := make([]*Node, 10)
 	for i := range nodes {
 		nodes[i] = sm.Alloc()
-		sm.Update(nodes[i], int32(i), int32(i))
+		sm.Update(nodes[i], int32(i), 1)
 	}
 	fmt.Println(nodes)
 	nodes[1] = sm.Merge(nodes[2], nodes[1])
+	sm.Enumerate(nodes[1], func(index int32, value int32) {
+		fmt.Println(index, value, 11)
+	})
 	fmt.Println(sm.QueryAll(nodes[1]))
 	fmt.Println(nodes)
 	fmt.Println(sm.Kth(nodes[1], 4))
@@ -249,6 +252,10 @@ func (sm *SegmentTreeOnRange) Split(node *Node, left, right int32) (this, other 
 	return
 }
 
+func (sm *SegmentTreeOnRange) Enumerate(node *Node, f func(i int32, count E)) {
+	sm._enumerate(node, sm.min, sm.max, f)
+}
+
 func (sm *SegmentTreeOnRange) _kth(k int32, node *Node, left, right int32) int32 {
 	if left == right {
 		return left
@@ -305,8 +312,8 @@ func (sm *SegmentTreeOnRange) _set(node *Node, index int32, count E, left, right
 		}
 		sm._set(node.leftChild, index, count, left, mid)
 	} else {
-		if node.leftChild == nil {
-			node.leftChild = sm.Alloc()
+		if node.rightChild == nil {
+			node.rightChild = sm.Alloc()
 		}
 		sm._set(node.rightChild, index, count, mid+1, right)
 	}
@@ -331,6 +338,19 @@ func (sm *SegmentTreeOnRange) _update(node *Node, index int32, count E, left, ri
 		sm._update(node.rightChild, index, count, mid+1, right)
 	}
 	node.count = sm._eval(node.leftChild) + sm._eval(node.rightChild)
+}
+
+func (sm *SegmentTreeOnRange) _enumerate(node *Node, left, right int32, f func(i int32, count E)) {
+	if node == nil {
+		return
+	}
+	if left == right {
+		f(left, node.count)
+		return
+	}
+	mid := (left + right) >> 1
+	sm._enumerate(node.leftChild, left, mid, f)
+	sm._enumerate(node.rightChild, mid+1, right, f)
 }
 
 func (sm *SegmentTreeOnRange) _merge(a, b *Node, left, right int32) *Node {

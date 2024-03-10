@@ -48,9 +48,9 @@
 //     !可以先通过在 SAM 上找到该子串所处的节点，然后求以该节点为根的子树中，有多少个包含原串前缀的节点
 //     !另一个含义——从SAM的根到这个结点的转移路径条数。
 //  7. 可以把SAM理解为把某个串的所有子串建立AC自动机。
-//     !8. 设 lcs(i,j) 为前缀i,j的最长公共后缀长度，其等于fail树上 LCA 的len 值。
+//  !8. 设 lcs(i,j) 为前缀i,j的最长公共后缀长度，其等于fail树上 LCA 的len 值。(反串可以将lcp转化为lcs)
 //  9. 一个endpos等价类内的串的长度连续.
-//     10.理解
+//  10.理解
 //     - 从 SAM 的定义上理解：
 //     SAM 可以看作一种加强版的 Trie，它可以高度压缩一个字符串的子串信息，
 //     !一条从根出发到`终止结点`的路径对应了原串的一个后缀，而任意一个从根出发的路径对应了原串一个子串。
@@ -64,11 +64,11 @@
 //     - 从结点的含义去理解：
 //     每一个结点都对应了一种子串，Parent Tree 的结点与 SAM 的结点一一对应
 //     但是, 后缀自动机的边不同于 parent 树上的边
-//     !11. 转移边：parent树往下走代表往前加字符，SAM转移边往后走代表往后加字符
-//     !12. 子串是什么：
+// !11. 转移边：parent树往下走代表往前加字符，SAM转移边往后走代表往后加字符
+// !12. 子串是什么：
 //     从SAM的DAG角度看，子串是后缀的一个前缀；
 //     !从SAM的Parent Tree角度看，子串是前缀的一个后缀。
-//     !13. SAM 与AC自动机的相似性：
+// !13. SAM 与AC自动机的相似性：
 //     AC自动机的失配链接和后缀自动机的后缀链接都有性质：
 //     指向的两个状态都满足"后者的代表串是前者的代表串的真后缀"。
 //     可以把 SAM 理解为把某个串的所有子串建立AC自动机.
@@ -96,6 +96,8 @@
 //  9. 线段树合并维护每个点的endPos集合 => DFS 树结构时将父结点的线段树并上儿子的线段树，注意使用不销毁点写法的线段树合并。
 //  10. 区间子“SAM”.
 //  11. 多次询问区间本质不同子串 => 扫描线+LCT 维护区间子串信息
+//  12. 维护endPos等价类最小End、最大End => 后缀链接树自底向上更新End下标信息
+//  13. 比较endPos上某些串的字典序 => 用DAG上的DFS序
 
 package main
 
@@ -105,6 +107,8 @@ import (
 	"math/bits"
 	"os"
 )
+
+const INF int32 = 1e9 + 10
 
 const SIGMA int32 = 26   // 字符集大小
 const OFFSET int32 = 'a' // 字符集的起始字符
@@ -120,6 +124,7 @@ type SuffixAutomaton struct {
 	Nodes   []*Node
 	LastPos int32 // 当前插入的字符对应的节点(实点，原串的一个前缀)
 	n       int32 // 当前字符串长度
+	// TODO: doubling
 }
 
 func NewSuffixAutomaton() *SuffixAutomaton {
@@ -228,14 +233,63 @@ func (sam *SuffixAutomaton) GetEndPosSize(dfsOrder []int32) []int32 {
 	return endPosSize
 }
 
-// TODO: 线段树合并维护 EndPos 集合
-// DFS 树结构时将父结点的线段树并上儿子的线段树，注意使用不销毁点写法的线段树合并。
-func (sam *SuffixAutomaton) GetEndPos() {}
+// 返回每个节点对应子串中在原串中的最小结束位置i(0<=i<n).不存在则为INF.
+func (sam *SuffixAutomaton) GetEndPosMinEnd(dfsOrder []int32) []int32 {
+	size := sam.Size()
+	res := make([]int32, size)
+	for i := range res {
+		res[i] = INF
+	}
+	for i := size - 1; i >= 1; i-- {
+		cur := dfsOrder[i]
+		res[cur] = abs32(sam.Nodes[cur].End)
+		pre := sam.Nodes[cur].Link
+		res[pre] = min32(res[pre], res[cur])
+	}
+	return res
+}
 
-// TODO: 快速定位子串
-// 倍增往上跳到len[]合适的地方
+// 返回每个节点对应子串中在原串中的最大结束位置i(0<=i<n).不存在则为-1.
+func (sam *SuffixAutomaton) GetEndPosMaxEnd(dfsOrder []int32) []int32 {
+	size := sam.Size()
+	res := make([]int32, size)
+	for i := range res {
+		res[i] = -1
+	}
+	for i := size - 1; i >= 1; i-- {
+		cur := dfsOrder[i]
+		res[cur] = abs32(sam.Nodes[cur].End)
+		pre := sam.Nodes[cur].Link
+		res[pre] = max32(res[pre], res[cur])
+	}
+	return res
+}
 
-func (sam *SuffixAutomaton) GetNodeBySubstring(start, end int32) {}
+// 线段树合并维护 endPos 集合.
+// 将父结点的线段树并上儿子的线段树，使用不销毁点写法的线段树合并。
+func (sam *SuffixAutomaton) GetEndPos(dfsOrder []int32) (seg *SegmentTreeOnRange, nodes []*SegNode) {
+	size := sam.Size()
+	seg = NewSegmentTreeOnRange(0, sam.n-1)
+	nodes = make([]*SegNode, size)
+	for i := int32(0); i < size; i++ {
+		nodes[i] = seg.Alloc()
+		if end := sam.Nodes[i].End; end >= 0 {
+			seg.Set(nodes[i], end, 1)
+		}
+	}
+	for i := size - 1; i >= 1; i-- {
+		cur := dfsOrder[i]
+		pre := sam.Nodes[cur].Link
+		nodes[pre] = seg.Merge(nodes[pre], nodes[cur])
+	}
+	return
+}
+
+// 快速定位子串, 可以与其它字符串算法配合使用.
+// 倍增往上跳到MaxLen>=end-start的最近祖先.
+func (sam *SuffixAutomaton) GetNodeBySubstring(start, end int32) (pos int32) {
+	return
+}
 
 // 给定结点编号和子串长度，返回该子串的起始和结束位置.
 func (sam *SuffixAutomaton) RecoverSubstring(pos int32, len int32) (start, end int32) {
@@ -370,6 +424,329 @@ func (st *SparseTable) Query(start, end int) S {
 	return st.op(st.st[b][start], st.st[b][end-(1<<b)])
 }
 
+type E = int32
+
+type SegNode struct {
+	count                 E
+	leftChild, rightChild *SegNode
+}
+
+func (n *SegNode) String() string {
+	return fmt.Sprintf("%v", n.count)
+}
+
+type SegmentTreeOnRange struct {
+	min, max int32
+}
+
+// 指定闭区间[min,max]建立权值线段树.
+func NewSegmentTreeOnRange(min, max int32) *SegmentTreeOnRange {
+	return &SegmentTreeOnRange{min: min, max: max}
+}
+
+// NewRoot().
+func (sm *SegmentTreeOnRange) Alloc() *SegNode {
+	return &SegNode{}
+}
+
+// 权值线段树求第 k 小.
+// 调用前需保证 1 <= k <= node.value.
+func (sm *SegmentTreeOnRange) Kth(node *SegNode, k int32) (value int32, ok bool) {
+	if k < 1 || k > sm._eval(node) {
+		return 0, false
+	}
+	return sm._kth(k, node, sm.min, sm.max), true
+}
+
+func (sm *SegmentTreeOnRange) Get(node *SegNode, index int32) E {
+	return sm._get(node, index, sm.min, sm.max)
+}
+
+func (sm *SegmentTreeOnRange) Set(node *SegNode, index int32, value E) {
+	sm._set(node, index, value, sm.min, sm.max)
+}
+
+func (sm *SegmentTreeOnRange) Query(node *SegNode, left, right int32) E {
+	return sm._query(node, left, right, sm.min, sm.max)
+}
+
+func (sm *SegmentTreeOnRange) QueryAll(node *SegNode) E {
+	return sm._eval(node)
+}
+
+func (sm *SegmentTreeOnRange) Update(node *SegNode, index int32, count E) {
+	sm._update(node, index, count, sm.min, sm.max)
+}
+
+// 用一个新的节点存合并的结果，会生成重合节点数量的新节点.
+func (sm *SegmentTreeOnRange) Merge(a, b *SegNode) *SegNode {
+	return sm._merge(a, b, sm.min, sm.max)
+}
+
+// 把第二棵树直接合并到第一棵树上，比较省空间，缺点是会丢失合并前树的信息.
+func (sm *SegmentTreeOnRange) MergeDestructively(a, b *SegNode) *SegNode {
+	return sm._mergeDestructively(a, b, sm.min, sm.max)
+}
+
+func (sm *SegmentTreeOnRange) Enumerate(node *SegNode, f func(i int32, count E)) {
+	sm._enumerate(node, sm.min, sm.max, f)
+}
+
+func (sm *SegmentTreeOnRange) _kth(k int32, node *SegNode, left, right int32) int32 {
+	if left == right {
+		return left
+	}
+	mid := (left + right) >> 1
+	if leftCount := sm._eval(node.leftChild); leftCount >= k {
+		return sm._kth(k, node.leftChild, left, mid)
+	} else {
+		return sm._kth(k-leftCount, node.rightChild, mid+1, right)
+	}
+}
+
+func (sm *SegmentTreeOnRange) _get(node *SegNode, index int32, left, right int32) E {
+	if node == nil {
+		return 0
+	}
+	if left == right {
+		return node.count
+	}
+	mid := (left + right) >> 1
+	if index <= mid {
+		return sm._get(node.leftChild, index, left, mid)
+	} else {
+		return sm._get(node.rightChild, index, mid+1, right)
+	}
+}
+
+func (sm *SegmentTreeOnRange) _query(node *SegNode, L, R int32, left, right int32) E {
+	if node == nil {
+		return 0
+	}
+	if L <= left && right <= R {
+		return node.count
+	}
+	mid := (left + right) >> 1
+	if R <= mid {
+		return sm._query(node.leftChild, L, R, left, mid)
+	}
+	if L > mid {
+		return sm._query(node.rightChild, L, R, mid+1, right)
+	}
+	return sm._query(node.leftChild, L, R, left, mid) + sm._query(node.rightChild, L, R, mid+1, right)
+}
+
+func (sm *SegmentTreeOnRange) _set(node *SegNode, index int32, count E, left, right int32) {
+	if left == right {
+		node.count = count
+		return
+	}
+	mid := (left + right) >> 1
+	if index <= mid {
+		if node.leftChild == nil {
+			node.leftChild = sm.Alloc()
+		}
+		sm._set(node.leftChild, index, count, left, mid)
+	} else {
+		if node.rightChild == nil {
+			node.rightChild = sm.Alloc()
+		}
+		sm._set(node.rightChild, index, count, mid+1, right)
+	}
+	node.count = sm._eval(node.leftChild) + sm._eval(node.rightChild)
+}
+
+func (sm *SegmentTreeOnRange) _update(node *SegNode, index int32, count E, left, right int32) {
+	if left == right {
+		node.count += count
+		return
+	}
+	mid := (left + right) >> 1
+	if index <= mid {
+		if node.leftChild == nil {
+			node.leftChild = sm.Alloc()
+		}
+		sm._update(node.leftChild, index, count, left, mid)
+	} else {
+		if node.rightChild == nil {
+			node.rightChild = sm.Alloc()
+		}
+		sm._update(node.rightChild, index, count, mid+1, right)
+	}
+	node.count = sm._eval(node.leftChild) + sm._eval(node.rightChild)
+}
+
+func (sm *SegmentTreeOnRange) _enumerate(node *SegNode, left, right int32, f func(i int32, count E)) {
+	if node == nil {
+		return
+	}
+	if left == right {
+		f(left, node.count)
+		return
+	}
+	mid := (left + right) >> 1
+	sm._enumerate(node.leftChild, left, mid, f)
+	sm._enumerate(node.rightChild, mid+1, right, f)
+}
+
+func (sm *SegmentTreeOnRange) _merge(a, b *SegNode, left, right int32) *SegNode {
+	if a == nil || b == nil {
+		if a == nil {
+			return b
+		}
+		return a
+	}
+	newNode := sm.Alloc()
+	if left == right {
+		newNode.count = a.count + b.count
+		return newNode
+	}
+	mid := (left + right) >> 1
+	newNode.leftChild = sm._merge(a.leftChild, b.leftChild, left, mid)
+	newNode.rightChild = sm._merge(a.rightChild, b.rightChild, mid+1, right)
+	newNode.count = sm._eval(newNode.leftChild) + sm._eval(newNode.rightChild)
+	return newNode
+}
+
+func (sm *SegmentTreeOnRange) _mergeDestructively(a, b *SegNode, left, right int32) *SegNode {
+	if a == nil || b == nil {
+		if a == nil {
+			return b
+		}
+		return a
+	}
+	if left == right {
+		a.count += b.count
+		return a
+	}
+	mid := (left + right) >> 1
+	a.leftChild = sm._mergeDestructively(a.leftChild, b.leftChild, left, mid)
+	a.rightChild = sm._mergeDestructively(a.rightChild, b.rightChild, mid+1, right)
+	a.count = sm._eval(a.leftChild) + sm._eval(a.rightChild)
+	return a
+}
+
+func (sm *SegmentTreeOnRange) _eval(node *SegNode) E {
+	if node == nil {
+		return 0
+	}
+	return node.count
+}
+
+type DoublingMax32 struct {
+	n          int
+	log        int
+	isPrepared bool
+	to         []int
+	dp         []E
+	e          func() E
+	op         func(e1, e2 E) E
+}
+
+func NewDoubling(n, maxStep int, e func() E, op func(e1, e2 E) E) *DoublingMax32 {
+	res := &DoublingMax32{e: e, op: op}
+	res.n = n
+	res.log = bits.Len(uint(maxStep))
+	size := n * res.log
+	res.to = make([]int, size)
+	res.dp = make([]E, size)
+	for i := 0; i < size; i++ {
+		res.to[i] = -1
+		res.dp[i] = res.e()
+	}
+	return res
+}
+
+// 初始状态(leaves):从 `from` 状态到 `to` 状态，边权为 `weight`.
+//
+//	0 <= from, to < n
+func (d *DoublingMax32) Add(from, to int, weight E) {
+	if d.isPrepared {
+		panic("Doubling is prepared")
+	}
+	if to < -1 || to >= d.n {
+		panic("to is out of range")
+	}
+
+	d.to[from] = to
+	d.dp[from] = weight
+}
+
+func (d *DoublingMax32) Build() {
+	if d.isPrepared {
+		panic("Doubling is prepared")
+	}
+
+	d.isPrepared = true
+	n := d.n
+	for k := 0; k < d.log-1; k++ {
+		for v := 0; v < n; v++ {
+			w := d.to[k*n+v]
+			next := (k+1)*n + v
+			if w == -1 {
+				d.to[next] = -1
+				d.dp[next] = d.dp[k*n+v]
+				continue
+			}
+			d.to[next] = d.to[k*n+w]
+			d.dp[next] = d.op(d.dp[k*n+v], d.dp[k*n+w])
+		}
+	}
+}
+
+// 从 `from` 状态开始，执行 `step` 次操作，返回最终状态的编号和操作的结果。
+//
+//	0 <= from < n
+//	如果最终状态不存在，返回 -1, e()
+func (d *DoublingMax32) Jump(from, step int) (to int, res E) {
+	if !d.isPrepared {
+		panic("Doubling is not prepared")
+	}
+	if step >= 1<<d.log {
+		panic("step is over max step")
+	}
+
+	res = d.e()
+	to = from
+	for k := 0; k < d.log; k++ {
+		if to == -1 {
+			break
+		}
+
+		if step&(1<<k) != 0 {
+			pos := k*d.n + to
+			res = d.op(res, d.dp[pos])
+			to = d.to[pos]
+		}
+	}
+	return
+}
+
+// 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号和操作的结果。
+func (d *DoublingMax32) MaxStep(from int, check func(weight E) bool) (step int, to int, res E) {
+	if !d.isPrepared {
+		panic("Doubling is not prepared")
+	}
+
+	res = d.e()
+	for k := d.log - 1; k >= 0; k-- {
+		pos := k*d.n + from
+		tmp := d.to[pos]
+		if tmp == -1 {
+			continue
+		}
+		next := d.op(res, d.dp[pos])
+		if check(next) {
+			step |= 1 << k
+			from = tmp
+			res = next
+		}
+	}
+
+	to = from
+	return
+}
+
 func abs32(a int32) int32 {
 	if a < 0 {
 		return -a
@@ -409,12 +786,14 @@ func main() {
 	// P3975()
 	// P6640()
 
+	// cf149e()
 	// cf235c()
 	// cf802I()
 
 	// number_of_substrings()
 	// longest_common_substring()
 
+	// textMerge()
 }
 
 // P3975 [TJOI2015] 弦论(字典序第k小子串)
@@ -553,10 +932,105 @@ func P6640() {
 	}
 }
 
-// Martian Strings
+// Martian Strings (火星字符串)
 // https://www.luogu.com.cn/problem/CF149E
-// 可以找到两个不相交的区间，满足这两个区间对应的子串拼起来和 wi相同
-func cf149e() {}
+// 给定一个主串s和q个模式串.
+// 问：对每个模式串pi，问主串中是否存在两个不相交的非空字串，拼起来和模式串相同。
+//
+// !需要知道，模式串的每个前缀在主串中的最小结束位置和后缀在主串中的最大起始位置.
+// 考虑对s的正串和反串分别建后缀自动机.
+// 正串sam的结点维护子串结束的最小位置，反串sam的结点维护子串起始的最大位置.
+// 对每个模式串，将其前缀在正串上匹配记录最小值，后缀在反串上匹配记录最大值.
+// 枚举分割点，如果两个区间的最小值和最大值都不为-1且最小值小于等于最大值，则找到了答案.
+func cf149e() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int32 = 1e9 + 10
+
+	var s string
+	fmt.Fscan(in, &s)
+	var q int32
+	fmt.Fscan(in, &q)
+
+	n := int32(len(s))
+	sam1 := NewSuffixAutomaton() // 正串sam
+	for _, c := range s {
+		sam1.Add(c)
+	}
+	minEnd := make([]int32, sam1.Size()) // 正串sam的结点维护子串结束的最小索引(包含)
+	for i := range minEnd {
+		minEnd[i] = INF
+	}
+	dfsOrder1 := sam1.GetDfsOrder()
+	for i := sam1.Size() - 1; i >= 1; i-- {
+		cur := dfsOrder1[i]
+		minEnd[cur] = abs32(sam1.Nodes[cur].End)
+		pre := sam1.Nodes[cur].Link
+		minEnd[pre] = min32(minEnd[pre], minEnd[cur])
+	}
+
+	sam2 := NewSuffixAutomaton() // 反串sam
+	for i := len(s) - 1; i >= 0; i-- {
+		sam2.Add(int32(s[i]))
+	}
+	maxStart := make([]int32, sam2.Size()) // 反串sam的结点维护子串起始的最大索引(包含)
+	for i := range maxStart {
+		maxStart[i] = -1
+	}
+	dfsOrder2 := sam2.GetDfsOrder()
+	for i := sam2.Size() - 1; i >= 1; i-- {
+		cur := dfsOrder2[i]
+		maxStart[cur] = n - 1 - abs32(sam2.Nodes[cur].End)
+		pre := sam2.Nodes[cur].Link
+		maxStart[pre] = max32(maxStart[pre], maxStart[cur])
+	}
+
+	query := func(pattern string) bool {
+		m := int32(len(pattern))
+		preMinEnd := make([]int32, m+1)
+		sufMaxStart := make([]int32, m+1)
+		for i := range preMinEnd {
+			preMinEnd[i] = INF
+			sufMaxStart[i] = -1
+		}
+
+		pos1 := int32(0)
+		for i := int32(0); i < m; i++ {
+			if pos1 = sam1.Nodes[pos1].Next[int32(pattern[i])-OFFSET]; pos1 != -1 {
+				preMinEnd[i+1] = minEnd[pos1]
+			} else {
+				break
+			}
+		}
+		pos2 := int32(0)
+		for i := m - 1; i >= 0; i-- {
+			if pos2 = sam2.Nodes[pos2].Next[int32(pattern[i])-OFFSET]; pos2 != -1 {
+				sufMaxStart[i+1] = maxStart[pos2]
+			} else {
+				break
+			}
+		}
+
+		for i := int32(1); i < m; i++ {
+			if preMinEnd[i] != INF && sufMaxStart[i+1] != -1 && preMinEnd[i] < sufMaxStart[i+1] {
+				return true
+			}
+		}
+		return false
+	}
+
+	res := int32(0)
+	for i := int32(0); i < q; i++ {
+		var pattern string
+		fmt.Fscan(in, &pattern)
+		if query(pattern) {
+			res++
+		}
+	}
+	fmt.Fprintln(out, res)
+}
 
 // Cyclical Quest
 // https://www.luogu.com.cn/problem/CF235C
@@ -743,4 +1217,22 @@ func longest_common_substring() {
 		sStart, sEnd, tStart, tEnd = tStart, tEnd, sStart, sEnd
 	}
 	fmt.Fprintln(out, sStart, sEnd, tStart, tEnd)
+}
+
+func testMerge() {
+	s := "aababa"
+	sam := NewSuffixAutomaton()
+	for _, c := range s {
+		sam.Add(c)
+	}
+	dfsOrder := sam.GetDfsOrder()
+	seg, endPos := sam.GetEndPos(dfsOrder)
+	for i, node := range endPos {
+		var pos []int32
+		seg.Enumerate(node, func(j int32, count int32) {
+			pos = append(pos, j)
+		})
+		fmt.Println(i, pos)
+	}
+	fmt.Println(sam.GetEndPos(dfsOrder))
 }

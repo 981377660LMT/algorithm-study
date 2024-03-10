@@ -1,5 +1,6 @@
 /**
  * 返回一个数字数组的排序后的索引.内部使用计数排序.
+ * @alias countingSort
  */
 function argSortCounting(nums: ArrayLike<number>, minArg: number, maxArg: number): Uint32Array {
   const counter = new Int32Array(maxArg - minArg + 1)

@@ -61,7 +61,7 @@ func LongestRepeatSubstring(
 		}
 	} else {
 		if minRepeatCount != 2 {
-			panic("暂不支持")
+			panic("暂不支持") // TODO: 二分+哈希
 		}
 		return solve3(n, f)
 	}

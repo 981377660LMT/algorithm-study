@@ -20,5 +20,4 @@ https://www.cnblogs.com/alex-wei/p/segment_tree_yyds.html
 
 ---
 
-线段树合并可以求出 SAM 的每个节点的
-endPos 集合。
+线段树合并可以求出 SAM 的每个节点的 endPos 集合。

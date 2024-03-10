@@ -41,9 +41,8 @@ import (
 )
 
 func main() {
-	CF19C()
+	// CF19C()
 	// CF126()
-	// CF316()
 	// CF432D()
 
 	// abc213f()
@@ -51,6 +50,7 @@ func main() {
 
 	// p2178()
 	// P2870()
+	// P3763()
 	// P3804()
 	// P4051()
 	// P4248()
@@ -174,12 +174,6 @@ func CF126() {
 	} else {
 		fmt.Fprintln(out, s[:resEnd])
 	}
-}
-
-// G3. Good Substrings
-// https://codeforces.com/contest/316/submission/218670841
-func CF316() {
-	// itoa
 }
 
 // Prefixes and Suffixes
@@ -328,7 +322,58 @@ func P2870() {
 			fmt.Fprintln(out)
 		}
 	}
+}
 
+// P3763 [TJOI2017] DNA (允许失配k次的字符串匹配)
+// https://www.luogu.com.cn/problem/P3763
+// 给定一个长n1的文本串和长n2的模式串，对文本串每个长为n2的子串，问允许失配3次的情况下，有多少个子串与模式串匹配。
+//
+// 使用lcp加速匹配.
+func P3763() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	solve := func(text, pattern string, k int) (res int) {
+		n1, n2 := len(text), len(pattern)
+		if n1 < n2 {
+			return 0
+		}
+
+		S := NewSuffixArray2FromString(text, pattern)
+		check := func(start, end int) bool {
+			failCount := 0
+			pos := start
+			for pos < end {
+				// 移动到下一个待匹配位置继续匹配
+				if text[pos] != pattern[pos-start] {
+					failCount++
+					if failCount > k {
+						return false
+					}
+					pos++
+				} else {
+					pos += S.Lcp(pos, end, n2-(end-pos), n2)
+				}
+			}
+			return true
+		}
+
+		for i := 0; i+n2 <= n1; i++ {
+			if check(i, i+n2) {
+				res++
+			}
+		}
+		return
+	}
+
+	var T int32
+	fmt.Fscan(in, &T)
+	for i := int32(0); i < T; i++ {
+		var text, pattern string
+		fmt.Fscan(in, &text, &pattern)
+		fmt.Fprintln(out, solve(text, pattern, 3))
+	}
 }
 
 // P3804 【模板】后缀自动机（SAM）
