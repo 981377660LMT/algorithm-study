@@ -784,7 +784,8 @@ func main() {
 
 	// nowCoder37092C()
 	// nowCoder37092D()
-	nowCoder37092J()
+	nowCoder37092E()
+	// nowCoder37092J()
 
 	// testMerge()
 }
@@ -1319,7 +1320,44 @@ func nowCoder37092D() {
 	fmt.Fprintln(out, dp[n])
 }
 
-// AStringGame (dag+sg数)
+// 葫芦的考验之定位子串2.0
+// https://ac.nowcoder.com/acm/contest/37092/E
+// q次查询子串s[start1:end1)在子串s[start2:end2)中出现的次数.
+//
+// 先定位子串s[start1:end1)的endPos结点，这个结点子树都包含了这个子串。
+func nowCoder37092E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s string
+	fmt.Fscan(in, &s)
+	var q int32
+	fmt.Fscan(in, &q)
+
+	sam := NewSuffixAutomaton()
+	prefixEnd := make([]int32, len(s))
+	for i, c := range s {
+		pos := sam.Add(c)
+		prefixEnd[i] = pos
+	}
+	dfsOrder := sam.GetDfsOrder()
+	endPosSize := sam.GetEndPosSize(dfsOrder)
+
+	query := func(start1, end1 int32, start2, end2 int32) int32 {
+		return 0
+	}
+
+	for i := int32(0); i < q; i++ {
+		var start1, end1, start2, end2 int32
+		fmt.Fscan(in, &start1, &end1, &start2, &end2)
+		start1--
+		start2--
+		fmt.Fprintln(out, query(start1, end1, start2, end2))
+	}
+}
+
+// AStringGame (dag+grundy数)
 // https://ac.nowcoder.com/acm/contest/37092/J
 //
 // 用sam跑出DAG图，再求出sg值。
