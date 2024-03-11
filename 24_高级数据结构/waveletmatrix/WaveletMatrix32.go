@@ -123,6 +123,7 @@ func countQuadruplets(nums []int) int64 {
 	return int64(res)
 }
 
+// 注意: nums[i] >= 0
 func NewWaveletMatrix32(n int32, f func(i int32) int32) *WaveletMatrix32 {
 	dataCopy := make([]int32, n)
 	max_ := int32(0)

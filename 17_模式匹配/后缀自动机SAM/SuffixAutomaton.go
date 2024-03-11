@@ -12,26 +12,27 @@
 //
 // -fail tree
 //
-//	    link 指向比当前结点短的最长后缀endPos集.
-//	    每个节点中的子串，都是以该节点为根的子树中的所有子串的"后缀"
+//	     !所有的叶子结点都是一个前缀，所有的前缀都是叶子结点(除开1号结点)，所有的叶子结点endPos大小都是1.
+//		    link 指向比当前结点短的最长后缀endPos集.
+//		    每个节点中的子串，都是以该节点为根的子树中的所有子串的"后缀"
 //
-//						      0,1,2,3,4,5 ""
-//						     /              \
-//						    /					  	   \
-//						   /					  	    \
-//						  /						  	  	 \
-//						0,1,3,5 "a"(后)				 2,4 "b"
-//						 /	 \	                / "ab"
-//						/		  \						     /		  \
-//					 /       \              /        \
-//					/         \            /          \
-//				1,"aa"   3,5 "ba"(后) 	2 "aab"      4 "bab"
-//	                / "aba"                     "abab"
-//					       /      \                    "aabab"
-//					      /        \
-//				       3 "aaba"   5 "baba"(后)
-//	                         "ababa"
-//	                        "aababa"
+//							      0,1,2,3,4,5 ""
+//							     /              \
+//							    /					  	   \
+//							   /					  	    \
+//							  /						  	  	 \
+//							0,1,3,5 "a"(后)				 2,4 "b"
+//							 /	 \	                / "ab"
+//							/		  \						     /		  \
+//						 /       \              /        \
+//						/         \            /          \
+//					1,"aa"   3,5 "ba"(后) 	2 "aab"      4 "bab"
+//		                / "aba"                     "abab"
+//						       /      \                    "aabab"
+//						      /        \
+//					       3 "aaba"   5 "baba"(后)
+//		                         "ababa"
+//		                        "aababa"
 //
 // note:
 //  0. 后缀自动机 (Suffix Automaton, SAM) 是仅接受后缀且状态数最少的 DFA.
@@ -48,9 +49,9 @@
 //     !可以先通过在 SAM 上找到该子串所处的节点，然后求以该节点为根的子树中，有多少个包含原串前缀的节点
 //     !另一个含义——从SAM的根到这个结点的转移路径条数。
 //  7. 可以把SAM理解为把某个串的所有子串建立AC自动机。
-//  !8. 设 lcs(i,j) 为前缀i,j的最长公共后缀长度，其等于fail树上 LCA 的len 值。(反串可以将lcp转化为lcs)
+//     !8. 设 lcs(i,j) 为前缀i,j的最长公共后缀长度，其等于fail树上 LCA 的len 值。(反串可以将lcp转化为lcs)
 //  9. 一个endpos等价类内的串的长度连续.
-//  10.理解
+//     10.理解
 //     - 从 SAM 的定义上理解：
 //     SAM 可以看作一种加强版的 Trie，它可以高度压缩一个字符串的子串信息，
 //     !一条从根出发到`终止结点`的路径对应了原串的一个后缀，而任意一个从根出发的路径对应了原串一个子串。
@@ -64,21 +65,25 @@
 //     - 从结点的含义去理解：
 //     每一个结点都对应了一种子串，Parent Tree 的结点与 SAM 的结点一一对应
 //     但是, 后缀自动机的边不同于 parent 树上的边
+//
 // !11. 转移边：parent树往下走代表往前加字符，SAM转移边往后走代表往后加字符
 // !12. 子串是什么：
-//     从SAM的DAG角度看，子串是后缀的一个前缀；
-//     !从SAM的Parent Tree角度看，子串是前缀的一个后缀。
+//
+//	从SAM的DAG角度看，子串是后缀的一个前缀；
+//	!从SAM的Parent Tree角度看，子串是前缀的一个后缀。
+//
 // !13. SAM 与AC自动机的相似性：
-//     AC自动机的失配链接和后缀自动机的后缀链接都有性质：
-//     指向的两个状态都满足"后者的代表串是前者的代表串的真后缀"。
-//     可以把 SAM 理解为把某个串的所有子串建立AC自动机.
-//  14. 增量构造中，每次从后面加入一个字符, 有两件事要干：
-//     找出能转移到这个状态的状态，建立链接；确定这个状态的min，即找到它在parent树上的父亲。
-//  15. 对于SAM任何一个节点u，从根到这个节点的路线有 `maxLen(u)-minLen(u)+1` 条，而这条路线则表示原字符串的一个子串，且各不相同.
-//  16. 一般来讲,DAG上可能重复转移,是很难跑计数DP的。
-//     !但是我们知道后缀自动机的性质 : 任意两个节点的表示集合没有交。
-//     !所以我们只要统计路径数即可,不需要考虑重复问题。
-//     !17.可以通过parent树确定SAM的接受状态集合。找到MaxLen=n的结点，该结点到根的路径上的所有结点都是接受状态。
+//
+//	   AC自动机的失配链接和后缀自动机的后缀链接都有性质：
+//	   指向的两个状态都满足"后者的代表串是前者的代表串的真后缀"。
+//	   可以把 SAM 理解为把某个串的所有子串建立AC自动机.
+//	14. 增量构造中，每次从后面加入一个字符, 有两件事要干：
+//	   找出能转移到这个状态的状态，建立链接；确定这个状态的min，即找到它在parent树上的父亲。
+//	15. 对于SAM任何一个节点u，从根到这个节点的路线有 `maxLen(u)-minLen(u)+1` 条，而这条路线则表示原字符串的一个子串，且各不相同.
+//	16. 一般来讲,DAG上可能重复转移,是很难跑计数DP的。
+//	   !但是我们知道后缀自动机的性质 : 任意两个节点的表示集合没有交。
+//	   !所以我们只要统计路径数即可,不需要考虑重复问题。
+//	   !17.可以通过parent树确定SAM的接受状态集合。找到MaxLen=n的结点，该结点到根的路径上的所有结点都是接受状态。
 //
 // applications:
 //  1. 查找某个子串位于哪个节点 => 直接倍增往上跳到len[]合适的地方
@@ -96,7 +101,10 @@
 //  10. 区间子“SAM”.
 //  11. 多次询问区间本质不同子串 => 扫描线+LCT 维护区间子串信息
 //  12. 维护endPos等价类最小End、最大End => 后缀链接树自底向上更新End下标信息
-//  13. 判断子串s[a:b]是否为某个前缀s[:i]的子串 => 先定位子串到pos结点，然后判断该子串最早结束位置 endPosMinEnd[pos] <= i.
+//  13. 判断子串s[a:b)是否为某个前缀s[:i)的子串 => 先定位子串到pos结点，然后判断该子串最早结束位置 endPosMinEnd[pos] <= i.
+//  14. 求子串s[a:b)在s[c:d)中的出现次数 =>
+//     先定位子串到pos结点，然后根据"子串是前缀的后缀"可知满足其他位置出现的s[a:b)都在pos的子树中。
+//     合法的endPos满足：记长度 m=b-a，叶子结点的 prefixEnd 在 [c+m-1,d) 之间.
 
 package main
 
@@ -382,23 +390,29 @@ func (sam *SuffixAutomaton) Doubling() *DoublingSimple {
 	return sam.doubling
 }
 
-func (sam *SuffixAutomaton) Print() {
-	var dfs func(int32, string)
-	nodeStr := make([]string, sam.Size())
-	dfs = func(cur int32, s string) {
-		nodeStr[cur] = s
-		for i, v := range sam.Nodes[cur].Next {
-			if v != -1 {
-				dfs(v, s+string(OFFSET+int32(i)))
-			}
+func (sam *SuffixAutomaton) Print(s string) {
+	dfsOrder := sam.GetDfsOrder()
+	tree := sam.BuildTree()
+	fmt.Println("---")
+	fmt.Println("Fail Tree")
+	for i := range tree {
+		if len(tree[i]) > 0 {
+			fmt.Println(i, tree[i])
 		}
 	}
-	dfs(0, "")
-	for i := int32(1); i < sam.Size(); i++ {
-		// pos string minLen maxLen link
-		minLen, maxLen := sam.Nodes[sam.Nodes[i].Link].MaxLen+1, sam.Nodes[i].MaxLen
-		fmt.Println(fmt.Sprintf("%v %v %v %v %v", i, nodeStr[i], minLen, maxLen, sam.Nodes[i].Link))
+	fmt.Println("---")
+	fmt.Println("EndPos")
+	fmt.Println("pos,longest,minLen,maxLen,prefixEnd")
+	for i := int32(1); i < int32(len(dfsOrder)); i++ {
+		pos := dfsOrder[i]
+		link := sam.Nodes[pos].Link
+		minLen, maxLen := sam.Nodes[link].MaxLen+1, sam.Nodes[pos].MaxLen
+		start, end := sam.RecoverSubstring(pos, maxLen)
+		sub := s[start:end]
+		prefixEnd := sam.Nodes[pos].End
+		fmt.Println(fmt.Sprintf("%v,%v,%v,%v,%v", pos, sub, minLen, maxLen, prefixEnd))
 	}
+	fmt.Println("---")
 }
 
 func (sam *SuffixAutomaton) newNode(link, maxLen, end int32) *Node {
@@ -736,6 +750,7 @@ func (d *DoublingSimple) MaxStep(from int32, check func(next int32) bool) (step 
 	return
 }
 
+// 注意f(i)>=0.
 func NewWaveletMatrix32(n int32, f func(i int32) int32) *WaveletMatrix32 {
 	dataCopy := make([]int32, n)
 	max_ := int32(0)
@@ -1066,7 +1081,7 @@ func main() {
 
 	// nowCoder37092C()
 	// nowCoder37092D()
-	nowCoder37092E()
+	// nowCoder37092E()
 	// nowCoder37092J()
 
 	// testMerge()
@@ -1624,19 +1639,36 @@ func nowCoder37092E() {
 		pos := sam.Add(c)
 		prefixEnd[i] = pos
 	}
-	dfsOrder := sam.GetDfsOrder()
-	endPosSize := sam.GetEndPosSize(dfsOrder)
 
-	// int ask(int l, int r, int L, int R) {
-	// 	int len = r - l + 1;
-	// 	int pos = query(p[r], len);
-	// 	return query(rt[::l[pos] - 1], rt[::r[pos]], 1, n, L + len - 1, R);
-	// }
+	failTree := sam.BuildTree()
+	size := sam.Size()
+	lid, rid := make([]int32, size), make([]int32, size)
+	dfn := int32(0)
+	var dfs func(cur int32)
+	dfs = func(cur int32) {
+		lid[cur] = dfn
+		dfn++
+		for _, next := range failTree[cur] {
+			dfs(next)
+		}
+		rid[cur] = dfn
+	}
+	dfs(0)
+
+	data := make([]int32, size)
+	for i, pos := range prefixEnd {
+		data[lid[pos]] = int32(i + 1)
+	}
+	wm := NewWaveletMatrix32(size, func(i int32) int32 { return data[i] })
+
+	// CountSubstringInRange
 	query := func(start1, end1 int32, start2, end2 int32) int32 {
 		if (end1 - start1) > (end2 - start2) {
 			return 0
 		}
 		pos := sam.LocateSubstring(start1, end1, prefixEnd[end1-1])
+		len_ := end1 - start1
+		return wm.CountRange(lid[pos], rid[pos], 1+(start2+len_-1), 1+end2)
 	}
 
 	for i := int32(0); i < q; i++ {

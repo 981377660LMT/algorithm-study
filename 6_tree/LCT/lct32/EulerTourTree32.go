@@ -1,6 +1,13 @@
 // 欧拉回路树(Euler Tour Tree)，可删除的并查集.
 // LCT 其实更适用于维护树链的信息，而 ETT 更加适用于维护 子树 的信息。例如，ETT 可以维护子树最小值而 LCT 不能。
-// https://www.luogu.com.cn/blog/feng-xu0702/euler-tour-tree
+//
+// NewEulerTourTree32
+// Link
+// Cut
+// Get
+// Set
+// UpdateSubTree
+// QuerySubTree
 //
 // TODO: 非常慢
 
@@ -43,47 +50,47 @@ func DynamicTreeVertexAddSubtreeSum() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int
+	var n, q int32
 	fmt.Fscan(in, &n, &q)
-	weights := make([]int, n)
-	for i := 0; i < n; i++ {
+	weights := make([]int32, n)
+	for i := int32(0); i < n; i++ {
 		fmt.Fscan(in, &weights[i])
 	}
-	edges := make([][2]int, n-1)
-	for i := 0; i < n-1; i++ {
-		var v1, v2 int
+	edges := make([][2]int32, n-1)
+	for i := int32(0); i < n-1; i++ {
+		var v1, v2 int32
 		fmt.Fscan(in, &v1, &v2)
-		edges[i] = [2]int{v1, v2}
+		edges[i] = [2]int32{v1, v2}
 	}
-	operations := make([][5]int, q)
-	for i := 0; i < q; i++ {
-		var kind int
+	operations := make([][5]int32, q)
+	for i := int32(0); i < q; i++ {
+		var kind int32
 		fmt.Fscan(in, &kind)
 		if kind == 0 {
-			var u, v, w, x int
+			var u, v, w, x int32
 			fmt.Fscan(in, &u, &v, &w, &x)
-			operations[i] = [5]int{kind, u, v, w, x}
+			operations[i] = [5]int32{kind, u, v, w, x}
 		} else if kind == 1 {
-			var p, x int
+			var p, x int32
 			fmt.Fscan(in, &p, &x)
-			operations[i] = [5]int{kind, p, x, 0, 0}
+			operations[i] = [5]int32{kind, p, x, 0, 0}
 		} else {
-			var u, p int
+			var u, p int32
 			fmt.Fscan(in, &u, &p)
-			operations[i] = [5]int{kind, u, p, 0, 0}
+			operations[i] = [5]int32{kind, u, p, 0, 0}
 		}
 	}
 
 	ett := NewEulerTourTree(n)
-	for i := 0; i < n; i++ {
-		ett.Set(i, weights[i])
+	for i := int32(0); i < n; i++ {
+		ett.Set(i, int(weights[i]))
 	}
-	for i := 0; i < n-1; i++ {
+	for i := int32(0); i < n-1; i++ {
 		u, v := edges[i][0], edges[i][1]
 		ett.Link(u, v)
 	}
 
-	for i := 0; i < q; i++ {
+	for i := int32(0); i < q; i++ {
 		kind := operations[i][0]
 		if kind == 0 {
 			u1, v1, u2, v2 := operations[i][1], operations[i][2], operations[i][3], operations[i][4]
@@ -91,10 +98,9 @@ func DynamicTreeVertexAddSubtreeSum() {
 			ett.Link(u2, v2)
 		} else if kind == 1 {
 			node, delta := operations[i][1], operations[i][2]
-			ett.Set(node, ett.Get(node)+delta)
+			ett.Set(node, ett.Get(node)+int(delta))
 		} else {
 			child, parent := operations[i][1], operations[i][2]
-
 			fmt.Fprintln(out, ett.QuerySubTree(parent, child))
 		}
 	}
@@ -102,53 +108,53 @@ func DynamicTreeVertexAddSubtreeSum() {
 }
 
 type E = int
-type Id = int
+type Id = int32
 
 func e() E                   { return 0 }
 func id() Id                 { return 0 }
 func op(a, b E) E            { return a + b }
-func mapping(f, x E) E       { return f + x }
+func mapping(f Id, g E) E    { return int(f) + g }
 func composition(f, g Id) Id { return f + g }
 
 type EulerTourTree struct {
-	ptr []map[int]*Node
+	ptr []map[int32]*Node
 }
 
-func NewEulerTourTree(n int) *EulerTourTree {
-	ptr := make([]map[int]*Node, n)
-	for i := 0; i < n; i++ {
-		ptr[i] = make(map[int]*Node)
+func NewEulerTourTree(n int32) *EulerTourTree {
+	ptr := make([]map[int32]*Node, n)
+	for i := int32(0); i < n; i++ {
+		ptr[i] = make(map[int32]*Node)
 		ptr[i][i] = &Node{from: i, to: i, size: 1}
 	}
 	return &EulerTourTree{ptr: ptr}
 }
 
 // 连接前必须保证不存在u-v的边.
-func (ett *EulerTourTree) Link(u, v int) {
+func (ett *EulerTourTree) Link(u, v int32) {
 	tu := Reroot(ett.getNode(u, u))
 	tv := Reroot(ett.getNode(v, v))
 	Join(Join(tu, ett.getNode(u, v)), Join(tv, ett.getNode(v, u)))
 }
 
 // 断开前必须保证存在u-v的边.
-func (ett *EulerTourTree) Cut(u, v int) {
+func (ett *EulerTourTree) Cut(u, v int32) {
 	a, _, c := SplitNode(ett.getNode(u, v), ett.getNode(v, u))
 	Join(a, c)
-	// delete(ett.ptr[u], v)
-	// delete(ett.ptr[v], u)
+	delete(ett.ptr[u], v)
+	delete(ett.ptr[v], u)
 }
 
-func (ett *EulerTourTree) IsConnected(u, v int) bool {
+func (ett *EulerTourTree) IsConnected(u, v int32) bool {
 	return Same(ett.getNode(u, u), ett.getNode(v, v))
 }
 
-func (ett *EulerTourTree) Get(v int) E {
+func (ett *EulerTourTree) Get(v int32) E {
 	t := ett.getNode(v, v)
 	Splay(t)
 	return t.value
 }
 
-func (ett *EulerTourTree) Set(v int, x E) {
+func (ett *EulerTourTree) Set(v int32, x E) {
 	t := ett.getNode(v, v)
 	Splay(t)
 	t.value = x
@@ -157,7 +163,7 @@ func (ett *EulerTourTree) Set(v int, x E) {
 
 // 更新子树信息.
 // parent为-1时，更新整棵树.
-func (ett *EulerTourTree) UpdateSubTree(parent, child int, lazy E) {
+func (ett *EulerTourTree) UpdateSubTree(parent, child int32, lazy Id) {
 	if parent != -1 {
 		ett.Cut(parent, child)
 	}
@@ -171,7 +177,7 @@ func (ett *EulerTourTree) UpdateSubTree(parent, child int, lazy E) {
 
 // 查询子树信息.
 // parent为-1时，查询整棵树.
-func (ett *EulerTourTree) QuerySubTree(parent int, child int) E {
+func (ett *EulerTourTree) QuerySubTree(parent, child int32) E {
 	if parent != -1 {
 		ett.Cut(parent, child)
 	}
@@ -184,7 +190,7 @@ func (ett *EulerTourTree) QuerySubTree(parent int, child int) E {
 	return res
 }
 
-func (ett *EulerTourTree) getNode(u, v int) *Node {
+func (ett *EulerTourTree) getNode(u, v int32) *Node {
 	nexts := ett.ptr[u]
 	if t, ok := nexts[v]; ok {
 		return t
@@ -198,16 +204,16 @@ func (ett *EulerTourTree) getNode(u, v int) *Node {
 type Node struct {
 	children [2]*Node
 	parent   *Node
-	from     int
-	to       int
-	size     int
-	value    int
-	sum      int
-	lazy     int
+	from     int32
+	to       int32
+	size     int32
+	value    E
+	sum      E
+	lazy     Id
 }
 
-func NewNode(from, to int) *Node {
-	var size int
+func NewNode(from, to int32) *Node {
+	var size int32
 	if from == to {
 		size = 1
 	}
@@ -246,7 +252,7 @@ func Reroot(t *Node) *Node {
 	return Join(b, a)
 }
 
-func Size(t *Node) int {
+func Size(t *Node) int32 {
 	if t == nil {
 		return 0
 	}
@@ -257,7 +263,7 @@ func Recalc(t *Node) *Node {
 	if t == nil {
 		return t
 	}
-	tmp := 0
+	tmp := int32(0)
 	if t.from == t.to {
 		tmp = 1
 	}
@@ -273,7 +279,7 @@ func Recalc(t *Node) *Node {
 }
 
 func PushDown(t *Node) {
-	if t.lazy != e() {
+	if t.lazy != id() {
 		t.value = mapping(t.lazy, t.value)
 		if left := t.children[0]; left != nil {
 			left.lazy = composition(t.lazy, left.lazy)
@@ -304,7 +310,7 @@ func Join(l, r *Node) *Node {
 	return Recalc(l)
 }
 
-func Split(t *Node) (a, b *Node) {
+func Split(t *Node) (*Node, *Node) {
 	Splay(t)
 	s := t.children[0]
 	t.children[0] = nil
@@ -314,9 +320,8 @@ func Split(t *Node) (a, b *Node) {
 	return s, Recalc(t)
 }
 
-func Split2(t *Node) (a, b *Node) {
+func Split2(t *Node) (*Node, *Node) {
 	Splay(t)
-
 	l := t.children[0]
 	r := t.children[1]
 	t.children[0] = nil
