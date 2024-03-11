@@ -255,6 +255,8 @@ if (require.main === module) {
     })
     utils.insertNode([], tree2)
 
+    utils.pruneTree(Boolean)
+    console.log(utils.getChildren(utils.root))
     utils.print()
   }
 

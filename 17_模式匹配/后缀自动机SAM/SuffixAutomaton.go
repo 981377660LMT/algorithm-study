@@ -289,7 +289,7 @@ func (sam *SuffixAutomaton) GetEndPos(dfsOrder []int32) (seg *SegmentTreeOnRange
 // 快速定位子串, 可以与其它字符串算法配合使用.
 // 倍增往上跳到 MaxLen>=end-start 的最后一个节点.
 // start: 子串起始位置, end: 子串结束位置, endPosOfEnd: 子串结束位置在fail树上的位置.
-func (sam *SuffixAutomaton) GetNodeBySubstring(start, end int32, endPosOfEnd int32) (pos int32) {
+func (sam *SuffixAutomaton) LocateSubstring(start, end int32, endPosOfEnd int32) (pos int32) {
 	target := end - start
 	_, pos = sam.Doubling().MaxStep(endPosOfEnd, func(p int32) bool { return sam.Nodes[p].MaxLen >= target })
 	return
@@ -734,6 +734,288 @@ func (d *DoublingSimple) MaxStep(from int32, check func(next int32) bool) (step 
 	}
 	to = from
 	return
+}
+
+func NewWaveletMatrix32(n int32, f func(i int32) int32) *WaveletMatrix32 {
+	dataCopy := make([]int32, n)
+	max_ := int32(0)
+	for i := int32(0); i < n; i++ {
+		v := f(i)
+		if v > max_ {
+			max_ = v
+		}
+		dataCopy[i] = v
+	}
+	maxLog := int32(bits.Len32(uint32(max_)) + 1)
+	mat := make([]*BitVector32, maxLog)
+	zs := make([]int32, maxLog)
+	buff1 := make([]int32, maxLog)
+	buff2 := make([]int32, maxLog)
+
+	ls, rs := make([]int32, n), make([]int32, n)
+	for dep := int32(0); dep < maxLog; dep++ {
+		mat[dep] = NewBitVector32(n + 1)
+		p, q := int32(0), int32(0)
+		for i := int32(0); i < n; i++ {
+			k := (dataCopy[i] >> (maxLog - dep - 1)) & 1
+			if k == 1 {
+				rs[q] = dataCopy[i]
+				mat[dep].Set(i)
+				q++
+			} else {
+				ls[p] = dataCopy[i]
+				p++
+			}
+		}
+
+		zs[dep] = p
+		mat[dep].Build()
+		ls = dataCopy
+		for i := int32(0); i < q; i++ {
+			dataCopy[p+i] = rs[i]
+		}
+	}
+
+	return &WaveletMatrix32{
+		n:      n,
+		maxLog: maxLog,
+		mat:    mat,
+		zs:     zs,
+		buff1:  buff1,
+		buff2:  buff2,
+	}
+}
+
+type WaveletMatrix32 struct {
+	n            int32
+	maxLog       int32
+	mat          []*BitVector32
+	zs           []int32
+	buff1, buff2 []int32
+}
+
+// [start, end) 内的 value 的個数.
+func (w *WaveletMatrix32) Count(start, end, value int32) int32 {
+	return w.count(value, end) - w.count(value, start)
+}
+
+// [start, end) 内 [lower, upper) 的个数.
+func (w *WaveletMatrix32) CountRange(start, end, lower, upper int32) int32 {
+	return w.freqDfs(0, start, end, 0, lower, upper)
+}
+
+// 第k(0-indexed)个value的位置.
+func (w *WaveletMatrix32) Index(value, k int32) int32 {
+	w.count(value, w.n)
+	for dep := w.maxLog - 1; dep >= 0; dep-- {
+		bit := (value >> uint(w.maxLog-dep-1)) & 1
+		k = w.mat[dep].IndexWithStart(bit, k, w.buff1[dep])
+		if k < 0 || k >= w.buff2[dep] {
+			return -1
+		}
+		k -= w.buff1[dep]
+	}
+	return k
+}
+
+func (w *WaveletMatrix32) IndexWithStart(value, k, start int32) int32 {
+	return w.Index(value, k+w.count(value, start))
+}
+
+// [start, end) 内第k(0-indexed)小的数(kth).
+func (w *WaveletMatrix32) Kth(start, end, k int32) int32 {
+	return w.KthMax(start, end, end-start-k-1)
+}
+
+// [start, end) 内第k(0-indexed)大的数.
+func (w *WaveletMatrix32) KthMax(start, end, k int32) int32 {
+	if k < 0 || k >= end-start {
+		return -1
+	}
+	res := int32(0)
+	for dep := int32(0); dep < w.maxLog; dep++ {
+		p, q := w.mat[dep].Count(1, start), w.mat[dep].Count(1, end)
+		if k < q-p {
+			start = w.zs[dep] + p
+			end = w.zs[dep] + q
+			res |= 1 << uint(w.maxLog-dep-1)
+		} else {
+			k -= q - p
+			start -= p
+			end -= q
+		}
+	}
+	return res
+}
+
+// [start, end) 内第k(0-indexed)小的数(kth).
+func (w *WaveletMatrix32) KthMin(start, end, k int32) int32 {
+	return w.KthMax(start, end, end-start-k-1)
+}
+
+// [start, end) 中比 value 严格小的数, 不存在返回 -INF.
+func (w *WaveletMatrix32) Lower(start, end, value int32) int32 {
+	k := w.lt(start, end, value)
+	if k != 0 {
+		return w.KthMin(start, end, k-1)
+	}
+	return -INF
+}
+
+// [start, end) 中比 value 严格大的数, 不存在返回 INF.
+func (w *WaveletMatrix32) Higher(start, end, value int32) int32 {
+	k := w.le(start, end, value)
+	if k == end-start {
+		return INF
+	}
+	return w.KthMin(start, end, k)
+}
+
+// [start, end) 中不超过 value 的最大值, 不存在返回 -INF.
+func (w *WaveletMatrix32) Floor(start, end, value int32) int32 {
+	count := w.Count(start, end, value)
+	if count > 0 {
+		return value
+	}
+	return w.Lower(start, end, value)
+}
+
+// [start, end) 中不小于 value 的最小值, 不存在返回 INF.
+func (w *WaveletMatrix32) Ceiling(start, end, value int32) int32 {
+	count := w.Count(start, end, value)
+	if count > 0 {
+		return value
+	}
+	return w.Higher(start, end, value)
+}
+
+func (w *WaveletMatrix32) access(k int32) int32 {
+	res := int32(0)
+	for dep := int32(0); dep < w.maxLog; dep++ {
+		bit := w.mat[dep].Get(k)
+		res = (res << 1) | bit
+		k = w.mat[dep].Count(bit, k) + w.zs[dep]*dep
+	}
+	return res
+}
+
+func (w *WaveletMatrix32) count(value, end int32) int32 {
+	left, right := int32(0), end
+	for dep := int32(0); dep < w.maxLog; dep++ {
+		w.buff1[dep] = left
+		w.buff2[dep] = right
+		bit := (value >> (w.maxLog - dep - 1)) & 1
+		left = w.mat[dep].Count(bit, left) + w.zs[dep]*bit
+		right = w.mat[dep].Count(bit, right) + w.zs[dep]*bit
+	}
+	return right - left
+}
+
+func (w *WaveletMatrix32) freqDfs(d, left, right, val, a, b int32) int32 {
+	if left == right {
+		return 0
+	}
+	if d == w.maxLog {
+		if a <= val && val < b {
+			return right - left
+		}
+		return 0
+	}
+
+	nv := (1 << (w.maxLog - d - 1)) | val
+	nnv := ((1 << (w.maxLog - d - 1)) - 1) | nv
+	if nnv < a || b <= val {
+		return 0
+	}
+	if a <= val && nnv < b {
+		return right - left
+	}
+	lc, rc := w.mat[d].Count(1, left), w.mat[d].Count(1, right)
+	return w.freqDfs(d+1, left-lc, right-rc, val, a, b) + w.freqDfs(d+1, lc+w.zs[d], rc+w.zs[d], nv, a, b)
+}
+
+func (w *WaveletMatrix32) ll(left, right, v int32) (int32, int32) {
+	res := int32(0)
+	for dep := int32(0); dep < w.maxLog; dep++ {
+		w.buff1[dep] = left
+		w.buff2[dep] = right
+		bit := v >> uint(w.maxLog-dep-1) & 1
+		if bit == 1 {
+			res += right - left + w.mat[dep].Count(1, left) - w.mat[dep].Count(1, right)
+		}
+		left = w.mat[dep].Count(bit, left) + w.zs[dep]*bit
+		right = w.mat[dep].Count(bit, right) + w.zs[dep]*bit
+	}
+	return res, right - left
+}
+
+func (w *WaveletMatrix32) lt(left, right, v int32) int32 {
+	a, _ := w.ll(left, right, v)
+	return a
+}
+
+func (w *WaveletMatrix32) le(left, right, v int32) int32 {
+	a, b := w.ll(left, right, v)
+	return a + b
+}
+
+type BitVector32 struct {
+	n     int32
+	block []int
+	sum   []int
+}
+
+func NewBitVector32(n int32) *BitVector32 {
+	blockCount := (n + 63) >> 6
+	return &BitVector32{
+		n:     n,
+		block: make([]int, blockCount+1),
+		sum:   make([]int, blockCount+1),
+	}
+}
+
+func (f *BitVector32) Set(i int32) {
+	f.block[i>>6] |= 1 << uint(i&63)
+}
+
+func (f *BitVector32) Build() {
+	for i := 0; i < len(f.block)-1; i++ {
+		f.sum[i+1] = f.sum[i] + bits.OnesCount(uint(f.block[i]))
+	}
+}
+
+func (f *BitVector32) Get(i int32) int32 {
+	return int32((f.block[i>>6] >> (i & 63))) & 1
+}
+
+func (f *BitVector32) Count(value, end int32) int32 {
+	mask := (1 << uint(end&63)) - 1
+	res := int32(f.sum[end>>6] + bits.OnesCount(uint(f.block[end>>6]&mask)))
+	if value == 1 {
+		return res
+	}
+	return end - res
+}
+
+func (f *BitVector32) Index(value, k int32) int32 {
+	if k < 0 || f.Count(value, f.n) <= k {
+		return -1
+	}
+
+	left, right := int32(0), f.n
+	for right-left > 1 {
+		mid := (left + right) >> 1
+		if f.Count(value, mid) >= k+1 {
+			right = mid
+		} else {
+			left = mid
+		}
+	}
+	return right - 1
+}
+
+func (f *BitVector32) IndexWithStart(value, k, start int32) int32 {
+	return f.Index(value, k+f.Count(value, start))
 }
 
 func abs32(a int32) int32 {
@@ -1236,7 +1518,7 @@ func nowCoder37092C() {
 	endPosSize := sam.GetEndPosSize(dfsOrder)
 
 	query := func(start, end int32) int32 {
-		pos := sam.GetNodeBySubstring(start, end, prefixEnd[end-1])
+		pos := sam.LocateSubstring(start, end, prefixEnd[end-1])
 		return endPosSize[pos]
 	}
 
@@ -1288,7 +1570,7 @@ func nowCoder37092D() {
 		if end-start > prefix {
 			return false
 		}
-		pos := sam.GetNodeBySubstring(start, end, prefixEnd[end-1])
+		pos := sam.LocateSubstring(start, end, prefixEnd[end-1])
 		return endPosMinEnd[pos]+1 <= prefix
 	}
 
@@ -1325,6 +1607,7 @@ func nowCoder37092D() {
 // q次查询子串s[start1:end1)在子串s[start2:end2)中出现的次数.
 //
 // 先定位子串s[start1:end1)的endPos结点，这个结点子树都包含了这个子串。
+// 转化成dfs序后waveletMatrix查询即可.
 func nowCoder37092E() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -1344,8 +1627,16 @@ func nowCoder37092E() {
 	dfsOrder := sam.GetDfsOrder()
 	endPosSize := sam.GetEndPosSize(dfsOrder)
 
+	// int ask(int l, int r, int L, int R) {
+	// 	int len = r - l + 1;
+	// 	int pos = query(p[r], len);
+	// 	return query(rt[::l[pos] - 1], rt[::r[pos]], 1, n, L + len - 1, R);
+	// }
 	query := func(start1, end1 int32, start2, end2 int32) int32 {
-		return 0
+		if (end1 - start1) > (end2 - start2) {
+			return 0
+		}
+		pos := sam.LocateSubstring(start1, end1, prefixEnd[end1-1])
 	}
 
 	for i := int32(0); i < q; i++ {
