@@ -58,9 +58,9 @@ func main() {
 
 type E = int // 子树和
 
-func (*TreeNode) e() E                { return 0 }
-func (*TreeNode) op(this, other E) E  { return this + other }
-func (*TreeNode) inv(this, other E) E { return this - other }
+func (*treeNode) e() E                { return 0 }
+func (*treeNode) op(this, other E) E  { return this + other }
+func (*treeNode) inv(this, other E) E { return this - other }
 
 type LinkCutTreeSubTree struct {
 	nodeId int32
@@ -73,8 +73,8 @@ func NewLinkCutTreeSubTree(check bool) *LinkCutTreeSubTree {
 	return &LinkCutTreeSubTree{edges: make(map[[2]int32]struct{}), check: check}
 }
 
-func (lct *LinkCutTreeSubTree) Build(n int32, f func(i int32) E) []*TreeNode {
-	nodes := make([]*TreeNode, n)
+func (lct *LinkCutTreeSubTree) Build(n int32, f func(i int32) E) []*treeNode {
+	nodes := make([]*treeNode, n)
 	for i := int32(0); i < n; i++ {
 		nodes[i] = lct.Alloc(f(i))
 	}
@@ -82,7 +82,7 @@ func (lct *LinkCutTreeSubTree) Build(n int32, f func(i int32) E) []*TreeNode {
 }
 
 // 要素の値を v としたノードを生成する.
-func (lct *LinkCutTreeSubTree) Alloc(key E) *TreeNode {
+func (lct *LinkCutTreeSubTree) Alloc(key E) *treeNode {
 	res := newTreeNode(key, lct.nodeId)
 	lct.nodeId++
 	lct.update(res)
@@ -90,13 +90,13 @@ func (lct *LinkCutTreeSubTree) Alloc(key E) *TreeNode {
 }
 
 // t を根に変更する.
-func (lct *LinkCutTreeSubTree) Evert(t *TreeNode) {
+func (lct *LinkCutTreeSubTree) Evert(t *treeNode) {
 	lct.expose(t)
 	lct.toggle(t)
 	lct.push(t)
 }
 
-func (lct *LinkCutTreeSubTree) LinkEdge(child, parent *TreeNode) (ok bool) {
+func (lct *LinkCutTreeSubTree) LinkEdge(child, parent *treeNode) (ok bool) {
 	if lct.check {
 		if lct.IsConnected(child, parent) {
 			return
@@ -117,7 +117,7 @@ func (lct *LinkCutTreeSubTree) LinkEdge(child, parent *TreeNode) (ok bool) {
 	return true
 }
 
-func (lct *LinkCutTreeSubTree) CutEdge(u, v *TreeNode) (ok bool) {
+func (lct *LinkCutTreeSubTree) CutEdge(u, v *treeNode) (ok bool) {
 	if lct.check {
 		id1, id2 := u.id, v.id
 		if id1 > id2 {
@@ -143,7 +143,7 @@ func (lct *LinkCutTreeSubTree) CutEdge(u, v *TreeNode) (ok bool) {
 //
 //	u と v が異なる連結成分なら nullptr を返す.
 //	!上記の操作は根を勝手に変えるため, 事前に Evert する必要があるかも.
-func (lct *LinkCutTreeSubTree) QueryLCA(u, v *TreeNode) *TreeNode {
+func (lct *LinkCutTreeSubTree) QueryLCA(u, v *treeNode) *treeNode {
 	if !lct.IsConnected(u, v) {
 		return nil
 	}
@@ -151,7 +151,7 @@ func (lct *LinkCutTreeSubTree) QueryLCA(u, v *TreeNode) *TreeNode {
 	return lct.expose(v)
 }
 
-func (lct *LinkCutTreeSubTree) KthAncestor(x *TreeNode, k int32) *TreeNode {
+func (lct *LinkCutTreeSubTree) KthAncestor(x *treeNode, k int32) *treeNode {
 	lct.expose(x)
 	for x != nil {
 		lct.push(x)
@@ -171,7 +171,7 @@ func (lct *LinkCutTreeSubTree) KthAncestor(x *TreeNode, k int32) *TreeNode {
 	return nil
 }
 
-func (lct *LinkCutTreeSubTree) GetParent(t *TreeNode) *TreeNode {
+func (lct *LinkCutTreeSubTree) GetParent(t *treeNode) *treeNode {
 	lct.expose(t)
 	p := t.l
 	if p == nil {
@@ -186,7 +186,7 @@ func (lct *LinkCutTreeSubTree) GetParent(t *TreeNode) *TreeNode {
 	}
 }
 
-func (lct *LinkCutTreeSubTree) Jump(from, to *TreeNode, k int32) *TreeNode {
+func (lct *LinkCutTreeSubTree) Jump(from, to *treeNode, k int32) *treeNode {
 	lct.Evert(to)
 	lct.expose(from)
 	for {
@@ -212,13 +212,13 @@ func (lct *LinkCutTreeSubTree) Jump(from, to *TreeNode, k int32) *TreeNode {
 // t を根とする部分木の要素の値の和を返す.
 //
 //	!Evert を忘れない！
-func (lct *LinkCutTreeSubTree) QuerySubTree(t *TreeNode) E {
+func (lct *LinkCutTreeSubTree) QuerySubTree(t *treeNode) E {
 	lct.expose(t)
 	return t.op(t.key, t.sub)
 }
 
 // t の値を v に変更する.
-func (lct *LinkCutTreeSubTree) Set(t *TreeNode, key E) *TreeNode {
+func (lct *LinkCutTreeSubTree) Set(t *treeNode, key E) *treeNode {
 	lct.expose(t)
 	t.key = key
 	lct.update(t)
@@ -226,17 +226,17 @@ func (lct *LinkCutTreeSubTree) Set(t *TreeNode, key E) *TreeNode {
 }
 
 // t の値を返す.
-func (lct *LinkCutTreeSubTree) Get(t *TreeNode) E {
+func (lct *LinkCutTreeSubTree) Get(t *treeNode) E {
 	return t.key
 }
 
 // u と v が同じ連結成分に属する場合は true, そうでなければ false を返す.
-func (lct *LinkCutTreeSubTree) IsConnected(u, v *TreeNode) bool {
+func (lct *LinkCutTreeSubTree) IsConnected(u, v *treeNode) bool {
 	return u == v || lct.GetRoot(u) == lct.GetRoot(v)
 }
 
-func (lct *LinkCutTreeSubTree) expose(t *TreeNode) *TreeNode {
-	rp := (*TreeNode)(nil)
+func (lct *LinkCutTreeSubTree) expose(t *treeNode) *treeNode {
+	rp := (*treeNode)(nil)
 	for cur := t; cur != nil; cur = cur.p {
 		lct.splay(cur)
 		if cur.r != nil {
@@ -253,7 +253,7 @@ func (lct *LinkCutTreeSubTree) expose(t *TreeNode) *TreeNode {
 	return rp
 }
 
-func (lct *LinkCutTreeSubTree) update(t *TreeNode) {
+func (lct *LinkCutTreeSubTree) update(t *treeNode) {
 	t.cnt = 1
 	if t.l != nil {
 		t.cnt += t.l.cnt
@@ -265,7 +265,7 @@ func (lct *LinkCutTreeSubTree) update(t *TreeNode) {
 	t.Merge(t.l, t.r)
 }
 
-func (lct *LinkCutTreeSubTree) rotr(t *TreeNode) {
+func (lct *LinkCutTreeSubTree) rotr(t *treeNode) {
 	x := t.p
 	y := x.p
 	x.l = t.r
@@ -288,7 +288,7 @@ func (lct *LinkCutTreeSubTree) rotr(t *TreeNode) {
 	}
 }
 
-func (lct *LinkCutTreeSubTree) rotl(t *TreeNode) {
+func (lct *LinkCutTreeSubTree) rotl(t *treeNode) {
 	x := t.p
 	y := x.p
 	x.r = t.l
@@ -311,12 +311,12 @@ func (lct *LinkCutTreeSubTree) rotl(t *TreeNode) {
 	}
 }
 
-func (lct *LinkCutTreeSubTree) toggle(t *TreeNode) {
+func (lct *LinkCutTreeSubTree) toggle(t *treeNode) {
 	t.l, t.r = t.r, t.l
 	t.rev = !t.rev
 }
 
-func (lct *LinkCutTreeSubTree) push(t *TreeNode) {
+func (lct *LinkCutTreeSubTree) push(t *treeNode) {
 	if t.rev {
 		if t.l != nil {
 			lct.toggle(t.l)
@@ -328,7 +328,7 @@ func (lct *LinkCutTreeSubTree) push(t *TreeNode) {
 	}
 }
 
-func (lct *LinkCutTreeSubTree) splay(t *TreeNode) {
+func (lct *LinkCutTreeSubTree) splay(t *treeNode) {
 	lct.push(t)
 	for !t.IsRoot() {
 		q := t.p
@@ -366,7 +366,7 @@ func (lct *LinkCutTreeSubTree) splay(t *TreeNode) {
 	}
 }
 
-func (lct *LinkCutTreeSubTree) GetRoot(t *TreeNode) *TreeNode {
+func (lct *LinkCutTreeSubTree) GetRoot(t *treeNode) *treeNode {
 	lct.expose(t)
 	for t.l != nil {
 		lct.push(t)
@@ -375,27 +375,27 @@ func (lct *LinkCutTreeSubTree) GetRoot(t *TreeNode) *TreeNode {
 	return t
 }
 
-type TreeNode struct {
+type treeNode struct {
 	key, sum, sub E
 	rev           bool
 	cnt           int32
 	id            int32
-	l, r, p       *TreeNode
+	l, r, p       *treeNode
 }
 
-func newTreeNode(key E, id int32) *TreeNode {
-	res := &TreeNode{key: key, sum: key, cnt: 1, id: id}
+func newTreeNode(key E, id int32) *treeNode {
+	res := &treeNode{key: key, sum: key, cnt: 1, id: id}
 	res.sub = res.e()
 	return res
 }
 
-func (n *TreeNode) IsRoot() bool {
+func (n *treeNode) IsRoot() bool {
 	return n.p == nil || (n.p.l != n && n.p.r != n)
 }
 
-func (n *TreeNode) Add(other *TreeNode)   { n.sub = n.op(n.sub, other.sum) }
-func (n *TreeNode) Erase(other *TreeNode) { n.sub = n.inv(n.sub, other.sum) }
-func (n *TreeNode) Merge(n1, n2 *TreeNode) {
+func (n *treeNode) Add(other *treeNode)   { n.sub = n.op(n.sub, other.sum) }
+func (n *treeNode) Erase(other *treeNode) { n.sub = n.inv(n.sub, other.sum) }
+func (n *treeNode) Merge(n1, n2 *treeNode) {
 	var tmp1, tmp2 E
 	if n1 != nil {
 		tmp1 = n1.sum
