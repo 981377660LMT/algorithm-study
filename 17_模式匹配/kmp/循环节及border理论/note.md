@@ -27,9 +27,8 @@
 2. 如果 S 具有长为|S|-p 的 border，则说明 S 具有周期 p
    注意这里的周期不是完整的周期, 例如 abcabcab，具有周期 5.
    如果需要完整周期，需要 `|S| % p === 0` 来判断
+3. 字符串 s 的所有 border 长度排序后可分成 O(log |s|) 段, 每段是一个等差数列。
 
 ---
-
-TODO
 
 https://www.cnblogs.com/alex-wei/p/Common_String_Theory_Theory.html

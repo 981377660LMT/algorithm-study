@@ -33,3 +33,11 @@ newHash = f'{hash1},{hash2}'
 
 自然溢出哈希冲突
 https://hos.ac/blog/#blog0003
+
+---
+
+update : 2024.3.12
+https://zhuanlan.zhihu.com/p/25855753
+
+- SDBM HASH
+- BKDR HASH

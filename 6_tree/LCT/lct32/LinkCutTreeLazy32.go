@@ -192,7 +192,7 @@ func (lct *LinkCutTreeLazy32) QueryLCA(u, v *treeNode) *treeNode {
 	return lct.expose(v)
 }
 
-func (lct *LinkCutTreeLazy32) QueryKthAncestor(x *treeNode, k int32) *treeNode {
+func (lct *LinkCutTreeLazy32) KthAncestor(x *treeNode, k int32) *treeNode {
 	lct.expose(x)
 	for x != nil {
 		lct.push(x)
@@ -210,6 +210,44 @@ func (lct *LinkCutTreeLazy32) QueryKthAncestor(x *treeNode, k int32) *treeNode {
 		}
 	}
 	return nil
+}
+
+func (lct *LinkCutTreeLazy32) GetParent(t *treeNode) *treeNode {
+	lct.expose(t)
+	p := t.l
+	if p == nil {
+		return nil
+	}
+	for {
+		lct.push(p)
+		if p.r == nil {
+			return p
+		}
+		p = p.r
+	}
+}
+
+func (lct *LinkCutTreeLazy32) Jump(from, to *treeNode, k int32) *treeNode {
+	lct.Evert(to)
+	lct.expose(from)
+	for {
+		lct.push(from)
+		rs := int32(0)
+		if from.r != nil {
+			rs = from.r.sz
+		}
+		if k < rs {
+			from = from.r
+			continue
+		}
+		if k == rs {
+			break
+		}
+		k -= rs + 1
+		from = from.l
+	}
+	lct.splay(from)
+	return from
 }
 
 // u から根までのパス上の頂点の値を二項演算でまとめた結果を返す.

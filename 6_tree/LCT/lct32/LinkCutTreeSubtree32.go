@@ -151,7 +151,7 @@ func (lct *LinkCutTreeSubTree) QueryLCA(u, v *TreeNode) *TreeNode {
 	return lct.expose(v)
 }
 
-func (lct *LinkCutTreeSubTree) QueryKthAncestor(x *TreeNode, k int32) *TreeNode {
+func (lct *LinkCutTreeSubTree) KthAncestor(x *TreeNode, k int32) *TreeNode {
 	lct.expose(x)
 	for x != nil {
 		lct.push(x)
@@ -169,6 +169,44 @@ func (lct *LinkCutTreeSubTree) QueryKthAncestor(x *TreeNode, k int32) *TreeNode 
 		}
 	}
 	return nil
+}
+
+func (lct *LinkCutTreeSubTree) GetParent(t *TreeNode) *TreeNode {
+	lct.expose(t)
+	p := t.l
+	if p == nil {
+		return nil
+	}
+	for {
+		lct.push(p)
+		if p.r == nil {
+			return p
+		}
+		p = p.r
+	}
+}
+
+func (lct *LinkCutTreeSubTree) Jump(from, to *TreeNode, k int32) *TreeNode {
+	lct.Evert(to)
+	lct.expose(from)
+	for {
+		lct.push(from)
+		rs := int32(0)
+		if from.r != nil {
+			rs = from.r.cnt
+		}
+		if k < rs {
+			from = from.r
+			continue
+		}
+		if k == rs {
+			break
+		}
+		k -= rs + 1
+		from = from.l
+	}
+	lct.splay(from)
+	return from
 }
 
 // t を根とする部分木の要素の値の和を返す.
