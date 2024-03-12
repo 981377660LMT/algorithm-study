@@ -653,17 +653,19 @@ func CF427D() {
 	}
 }
 
+// Little Elephant and Strings
+// https://www.luogu.com.cn/problem/CF204E
+func CF204E() {}
+
+// Three strings
+// https://www.luogu.com.cn/problem/CF452E
+func CF452E() {}
+
 // Forensic Examination [CF666E] (线段树合并维护 endPosSize)
 // https://www.luogu.com.cn/problem/CF666E
+// https://www.cnblogs.com/Troverld/p/14605742.html
 // https://codeforces.com/contest/666/submission/147767720
 func CF666E() {}
-
-// Security (线段树合并)
-// https://www.luogu.com.cn/problem/CF1037H
-//
-// 在后缀自动机的 DAWG 上贪心。使用线段树合并判断当前字符串是否作为[l,r]的子串出现过 。
-// https://codeforces.com/contest/1037/submission/147520554
-func CF1037H() {}
 
 // G. Death DBMS (死亡笔记数据库管理系统)
 // https://codeforces.com/problemset/problem/1437/G

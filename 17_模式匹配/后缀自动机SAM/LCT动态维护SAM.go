@@ -62,7 +62,7 @@ func P5212() {
 			}
 		}
 		node := nodes[pos]
-		lct.Evert(nodes[0])
+		lct.Evert(nodes[0]) // 查询子树和时，始终以0为根节点
 		return lct.QuerySubTree(node)
 	}
 

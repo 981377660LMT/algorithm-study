@@ -1388,6 +1388,12 @@ func cf235c() {
 	}
 }
 
+// Paper task
+// https://www.luogu.com.cn/problem/CF653F
+// 给定一个长度为n的括号串，问有多少种不同的合法括号子串
+// n<=5e5.
+func cf653f() {}
+
 // Fake News (hard)
 // https://www.luogu.com.cn/problem/CF802I
 // 求本质不同子串出现次数的平方和
@@ -1419,6 +1425,33 @@ func cf802I() {
 		solve()
 	}
 }
+
+// Security (线段树合并)
+// https://www.luogu.com.cn/problem/CF1037H
+// https://www.cnblogs.com/Troverld/p/14605723.html
+//
+// 在后缀自动机的 DAWG 上贪心。使用线段树合并判断当前字符串是否作为[l,r]的子串出现过 。
+// https://codeforces.com/contest/1037/submission/147520554
+func CF1037H() {}
+
+// Yet Another LCP Problem
+// https://www.luogu.com.cn/problem/CF1073G
+// https://www.cnblogs.com/Troverld/p/14605733.html
+// 给定一个长为n的字符串s和q次询问.
+// 每次询问给出两个数组A和B，求两两后缀最长公共前缀之和 ∑lcp(s[A[i]:], s[B[j]:]).
+func cf1073g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+}
+
+// Indie Album
+// https://www.luogu.com.cn/problem/CF1207G
+// https://www.cnblogs.com/Troverld/p/14605729.html
+func cf1207g() {}
 
 // P3804 【模板】后缀自动机（SAM）
 // https://www.luogu.com.cn/problem/P3804
@@ -1623,6 +1656,7 @@ func nowCoder37092D() {
 
 // 葫芦的考验之定位子串2.0
 // https://ac.nowcoder.com/acm/contest/37092/E
+// https://www.luogu.com.cn/problem/P4094 二分后转化为本题
 // q次查询子串s[start1:end1)在子串s[start2:end2)中出现的次数.
 //
 // 先定位子串s[start1:end1)的endPos结点，这个结点子树都包含了这个子串。
