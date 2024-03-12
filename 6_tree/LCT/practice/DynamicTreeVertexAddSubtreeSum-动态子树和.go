@@ -51,7 +51,7 @@ func main() {
 		} else {
 			var root, parent int
 			fmt.Fscan(in, &root, &parent)
-			lct.Evert(vs[parent])
+			lct.Evert(vs[parent]) // !查询前注意要调用 Evert 选定根节点(换根).
 			fmt.Fprintln(out, lct.QuerySubTree(vs[root]))
 		}
 	}
@@ -142,8 +142,9 @@ func (lct *LinkCutTreeSubTree) CutEdge(u, v *TreeNode) (ok bool) {
 }
 
 // u と v の lca を返す.
-//  u と v が異なる連結成分なら nullptr を返す.
-//  !上記の操作は根を勝手に変えるため, 事前に Evert する必要があるかも.
+//
+//	u と v が異なる連結成分なら nullptr を返す.
+//	!上記の操作は根を勝手に変えるため, 事前に Evert する必要があるかも.
 func (lct *LinkCutTreeSubTree) QueryLCA(u, v *TreeNode) *TreeNode {
 	if !lct.IsConnected(u, v) {
 		return nil
@@ -173,7 +174,8 @@ func (lct *LinkCutTreeSubTree) QueryKthAncestor(x *TreeNode, k int) *TreeNode {
 }
 
 // t を根とする部分木の要素の値の和を返す.
-//  !Evert を忘れない！
+//
+//	!Evert を忘れない！
 func (lct *LinkCutTreeSubTree) QuerySubTree(t *TreeNode) E {
 	lct.expose(t)
 	return t.op(t.key, t.sub)

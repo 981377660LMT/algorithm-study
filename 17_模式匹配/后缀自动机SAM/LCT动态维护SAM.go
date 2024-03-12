@@ -1,5 +1,3 @@
-// TODO: https://www.cnblogs.com/Xing-Ling/p/11755782.html
-
 package main
 
 import (
@@ -25,24 +23,76 @@ func P5212() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
+	normalize := func(chars []int32, mask int32) {
+		m := int32(len(chars))
+		for i := int32(0); i < m; i++ {
+			mask = (mask*131 + int32(i)) % m
+			chars[i], chars[mask] = chars[mask], chars[i]
+		}
+	}
+
+	sam := NewSuffixAutomaton()
+	lct := NewLinkCutTreeSubTreeSum()
+	nodes := []*treeNode{}
+
+	onCreate := func(pos int32) {
+		for int32(len(nodes)) <= pos {
+			nodes = append(nodes, lct.Alloc(0))
+		}
+	}
+	onLink := func(child, parent int32) {
+		lct.LinkEdge(nodes[child], nodes[parent])
+	}
+	onCut := func(child, parent int32) {
+		lct.CutEdge(nodes[child], nodes[parent])
+	}
+
+	update := func(bytes []int32) {
+		for _, b := range bytes {
+			lastPos := sam.Add(b, onCreate, onLink, onCut)
+			lct.Set(nodes[lastPos], 1)
+		}
+	}
+	query := func(bytes []int32) int32 {
+		pos := int32(0)
+		for _, b := range bytes {
+			pos = sam.Nodes[pos].Next[b-OFFSET]
+			if pos == -1 {
+				return 0
+			}
+		}
+		node := nodes[pos]
+		lct.Evert(nodes[0])
+		return lct.QuerySubTree(node)
+	}
+
 	var q int32
 	fmt.Fscan(in, &q)
 	var init string
 	fmt.Fscan(in, &init)
 
+	update([]int32(init))
+
+	mask := int32(0)
 	for i := int32(0); i < q; i++ {
-		var kind string
-		fmt.Fscan(in, &kind)
-		if kind == "QUERY" {
+		var op, s string
+		fmt.Fscan(in, &op, &s)
+		bytes := []int32(s)
+		normalize(bytes, mask)
+		if op == "QUERY" {
+			res := query(bytes)
+			fmt.Fprintln(out, res)
+			mask ^= res
 		} else {
+			update(bytes)
 		}
 	}
 }
 
 const INF int32 = 1e9 + 10
 
-const SIGMA int32 = 26   // 字符集大小
-const OFFSET int32 = 'a' // 字符集的起始字符
+const SIGMA int32 = 2    // 字符集大小
+const OFFSET int32 = 'A' // 字符集的起始字符
 
 type Node struct {
 	Next   [SIGMA]int32 // SAM 转移边
@@ -65,11 +115,15 @@ func NewSuffixAutomaton() *SuffixAutomaton {
 
 // 每次插入会增加一个实点，可能增加一个虚点.
 // 返回当前前缀对应的节点编号(lastPos).
-func (sam *SuffixAutomaton) Add(char int32, onAdd func()) int32 {
+func (sam *SuffixAutomaton) Add(
+	char int32,
+	onCreate func(pos int32), onLink func(child, parent int32), onCut func(child, parent int32),
+) int32 {
 	c := char - OFFSET
 	newNode := int32(len(sam.Nodes))
 	// 新增一个实点以表示当前最长串
 	sam.Nodes = append(sam.Nodes, sam.newNode(-1, sam.Nodes[sam.LastPos].MaxLen+1, sam.Nodes[sam.LastPos].End+1))
+	onCreate(newNode)
 	p := sam.LastPos
 	for p != -1 && sam.Nodes[p].Next[c] == -1 {
 		sam.Nodes[p].Next[c] = newNode
@@ -86,6 +140,10 @@ func (sam *SuffixAutomaton) Add(char int32, onAdd func()) int32 {
 		newQ := int32(len(sam.Nodes))
 		sam.Nodes = append(sam.Nodes, sam.newNode(sam.Nodes[q].Link, sam.Nodes[p].MaxLen+1, -abs32(sam.Nodes[q].End)))
 		sam.Nodes[len(sam.Nodes)-1].Next = sam.Nodes[q].Next
+		onCreate(newQ)
+		onLink(newQ, sam.Nodes[newQ].Link)
+		onCut(q, sam.Nodes[q].Link)
+		onLink(q, newQ)
 		sam.Nodes[q].Link = newQ
 		sam.Nodes[newNode].Link = newQ
 		for p != -1 && sam.Nodes[p].Next[c] == q {
@@ -95,6 +153,7 @@ func (sam *SuffixAutomaton) Add(char int32, onAdd func()) int32 {
 	}
 	sam.n++
 	sam.LastPos = newNode
+	onLink(newNode, sam.Nodes[newNode].Link)
 	return sam.LastPos
 }
 
@@ -113,15 +172,11 @@ func (sam *SuffixAutomaton) newNode(link, maxLen, end int32) *Node {
 type E = int32 // 子树和
 
 // 维护子树和的 LCT.
-type LinkCutTreeSubTreeSum struct {
-	nodeId int32
-	edges  map[[2]int32]struct{}
-	check  bool
-}
+type LinkCutTreeSubTreeSum struct{}
 
 // check: 删除、添加边时是否检查边的存在.
-func NewLinkCutTreeSubTreeSum(check bool) *LinkCutTreeSubTreeSum {
-	return &LinkCutTreeSubTreeSum{edges: make(map[[2]int32]struct{}), check: check}
+func NewLinkCutTreeSubTreeSum() *LinkCutTreeSubTreeSum {
+	return &LinkCutTreeSubTreeSum{}
 }
 
 func (lct *LinkCutTreeSubTreeSum) Build(n int32, f func(i int32) E) []*treeNode {
@@ -133,8 +188,7 @@ func (lct *LinkCutTreeSubTreeSum) Build(n int32, f func(i int32) E) []*treeNode 
 }
 
 func (lct *LinkCutTreeSubTreeSum) Alloc(key E) *treeNode {
-	res := newTreeNode(key, lct.nodeId)
-	lct.nodeId++
+	res := newTreeNode(key)
 	lct.update(res)
 	return res
 }
@@ -146,47 +200,23 @@ func (lct *LinkCutTreeSubTreeSum) Evert(t *treeNode) {
 	lct.push(t)
 }
 
-func (lct *LinkCutTreeSubTreeSum) LinkEdge(child, parent *treeNode) (ok bool) {
-	if lct.check {
-		if lct.IsConnected(child, parent) {
-			return
-		}
-		id1, id2 := child.id, parent.id
-		if id1 > id2 {
-			id1, id2 = id2, id1
-		}
-		tuple := [2]int32{id1, id2}
-		lct.edges[tuple] = struct{}{}
-	}
-
+// 需要保证 u,v 之间没有边.
+func (lct *LinkCutTreeSubTreeSum) LinkEdge(child, parent *treeNode) {
 	lct.Evert(child)
 	lct.expose(parent)
 	child.p = parent
 	parent.r = child
 	lct.update(parent)
-	return true
 }
 
-func (lct *LinkCutTreeSubTreeSum) CutEdge(u, v *treeNode) (ok bool) {
-	if lct.check {
-		id1, id2 := u.id, v.id
-		if id1 > id2 {
-			id1, id2 = id2, id1
-		}
-		tuple := [2]int32{id1, id2}
-		if _, has := lct.edges[tuple]; !has {
-			return
-		}
-		delete(lct.edges, tuple)
-	}
-
+// 需要保证u,v之间有边.
+func (lct *LinkCutTreeSubTreeSum) CutEdge(u, v *treeNode) {
 	lct.Evert(u)
 	lct.expose(v)
 	parent := v.l
 	v.l = nil
 	lct.update(v)
 	parent.p = nil
-	return true
 }
 
 func (lct *LinkCutTreeSubTreeSum) Lca(u, v *treeNode) *treeNode {
@@ -255,7 +285,7 @@ func (lct *LinkCutTreeSubTreeSum) Jump(from, to *treeNode, k int32) *treeNode {
 	return from
 }
 
-// !查询前注意要调用 Evert 使 t 成为根节点.
+// !查询前注意要调用 Evert 选定根节点(换根).
 func (lct *LinkCutTreeSubTreeSum) QuerySubTree(t *treeNode) E {
 	lct.expose(t)
 	return t.key + t.sub
@@ -274,6 +304,15 @@ func (lct *LinkCutTreeSubTreeSum) Get(t *treeNode) E {
 
 func (lct *LinkCutTreeSubTreeSum) IsConnected(u, v *treeNode) bool {
 	return u == v || lct.GetRoot(u) == lct.GetRoot(v)
+}
+
+func (lct *LinkCutTreeSubTreeSum) GetRoot(t *treeNode) *treeNode {
+	lct.expose(t)
+	for t.l != nil {
+		lct.push(t)
+		t = t.l
+	}
+	return t
 }
 
 func (lct *LinkCutTreeSubTreeSum) expose(t *treeNode) *treeNode {
@@ -406,25 +445,15 @@ func (lct *LinkCutTreeSubTreeSum) splay(t *treeNode) {
 	}
 }
 
-func (lct *LinkCutTreeSubTreeSum) GetRoot(t *treeNode) *treeNode {
-	lct.expose(t)
-	for t.l != nil {
-		lct.push(t)
-		t = t.l
-	}
-	return t
-}
-
 type treeNode struct {
-	key, sum, sub E
-	rev           bool
-	cnt           int32
-	id            int32
 	l, r, p       *treeNode
+	key, sum, sub E
+	cnt           int32
+	rev           bool
 }
 
-func newTreeNode(key E, id int32) *treeNode {
-	res := &treeNode{key: key, sum: key, cnt: 1, id: id}
+func newTreeNode(key E) *treeNode {
+	res := &treeNode{key: key, sum: key, cnt: 1}
 	return res
 }
 

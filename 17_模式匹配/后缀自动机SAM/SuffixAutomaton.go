@@ -127,6 +127,10 @@ type Node struct {
 	End    int32        // 最长的字符在原串的下标, 实点下标为非负数, 虚点下标为负数
 }
 
+func (n *Node) String() string {
+	return fmt.Sprintf("{Next:%v, Link:%v, MaxLen:%v, End:%v}", n.Next, n.Link, n.MaxLen, n.End)
+}
+
 type SuffixAutomaton struct {
 	Nodes    []*Node
 	LastPos  int32 // 当前插入的字符对应的节点(实点，原串的一个前缀)

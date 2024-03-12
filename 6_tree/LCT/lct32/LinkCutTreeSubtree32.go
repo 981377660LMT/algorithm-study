@@ -235,6 +235,15 @@ func (lct *LinkCutTreeSubTree) IsConnected(u, v *treeNode) bool {
 	return u == v || lct.GetRoot(u) == lct.GetRoot(v)
 }
 
+func (lct *LinkCutTreeSubTree) GetRoot(t *treeNode) *treeNode {
+	lct.expose(t)
+	for t.l != nil {
+		lct.push(t)
+		t = t.l
+	}
+	return t
+}
+
 func (lct *LinkCutTreeSubTree) expose(t *treeNode) *treeNode {
 	rp := (*treeNode)(nil)
 	for cur := t; cur != nil; cur = cur.p {
@@ -364,15 +373,6 @@ func (lct *LinkCutTreeSubTree) splay(t *treeNode) {
 			}
 		}
 	}
-}
-
-func (lct *LinkCutTreeSubTree) GetRoot(t *treeNode) *treeNode {
-	lct.expose(t)
-	for t.l != nil {
-		lct.push(t)
-		t = t.l
-	}
-	return t
 }
 
 type treeNode struct {
