@@ -133,23 +133,30 @@ class TreeManager<NoneLeaf, Leaf> {
     dfs(this.root, undefined, [])
   }
 
-  enumerateLeaf = (f: (leaf: Leaf) => void): void => {
-    this.enumerateTree(node => {
-      if (this.isLeaf(node)) f(node)
+  enumerateLeaf = (f: (leaf: Leaf, path: number[]) => boolean | void): void => {
+    this.enumerateTree((node, nodePath) => {
+      if (this.isLeaf(node)) {
+        return f(node, nodePath)
+      }
     })
   }
 
-  enumerateTree = (f: (node: Leaf | NoneLeaf) => void): void => {
-    const dfs = (cur: Leaf | NoneLeaf): void => {
-      f(cur)
-      if (this.isLeaf(cur)) return
-      const children = this.getChildren(cur)
-      for (let i = 0; i < children.length; i++) {
-        dfs(children[i])
+  enumerateTree = (f: (node: Leaf | NoneLeaf, path: number[]) => boolean | void): void => {
+    const dfs = (cur: Leaf | NoneLeaf, curPath: number[]): boolean | void => {
+      if (!this.isLeaf(cur)) {
+        f(cur, curPath)
+        for (let i = 0; i < this.getChildren(cur).length; i++) {
+          curPath.push(i)
+          const shoudBreak = dfs(this.getChildren(cur)[i], curPath)
+          curPath.pop()
+          if (shoudBreak) return true
+        }
+      } else {
+        return f(cur, curPath)
       }
     }
 
-    dfs(this.root)
+    dfs(this.root, [])
   }
 
   getPath = (node: Leaf | NoneLeaf): number[] => {
@@ -218,6 +225,9 @@ if (require.main === module) {
   T.print()
   T.pruneTree(node => T.isNoneLeaf(node))
   T.print()
+  T.enumerateTree((node, path) => {
+    console.log(node, path, 999)
+  })
 
   // 合并两颗树
   function testMergeFilterConfig(): void {
