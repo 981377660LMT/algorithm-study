@@ -27,8 +27,8 @@ import (
 )
 
 func main() {
-	DynamicTreeVertexAddSubtreeSum()
-	// DynamicTreeSubtreeAddSubtreeSum()
+	// DynamicTreeVertexAddSubtreeSum()
+	DynamicTreeSubtreeAddSubtreeSum()
 }
 
 // 动态单点加子树和
@@ -44,39 +44,39 @@ func DynamicTreeVertexAddSubtreeSum() {
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	weights := make([]int, n)
+	weights := make([]int32, n)
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &weights[i])
 	}
-	edges := make([][2]int, n-1)
+	edges := make([][2]int32, n-1)
 	for i := 0; i < n-1; i++ {
-		var v1, v2 int
+		var v1, v2 int32
 		fmt.Fscan(in, &v1, &v2)
-		edges[i] = [2]int{v1, v2}
+		edges[i] = [2]int32{v1, v2}
 	}
-	operations := make([][5]int, q)
+	operations := make([][5]int32, q)
 	for i := 0; i < q; i++ {
-		var kind int
+		var kind int32
 		fmt.Fscan(in, &kind)
 		if kind == 0 {
-			var u, v, w, x int
+			var u, v, w, x int32
 			fmt.Fscan(in, &u, &v, &w, &x)
-			operations[i] = [5]int{kind, u, v, w, x}
+			operations[i] = [5]int32{kind, u, v, w, x}
 		} else if kind == 1 {
-			var p, x int
+			var p, x int32
 			fmt.Fscan(in, &p, &x)
-			operations[i] = [5]int{kind, p, x, 0, 0}
+			operations[i] = [5]int32{kind, p, x, 0, 0}
 		} else {
-			var u, p int
+			var u, p int32
 			fmt.Fscan(in, &u, &p)
-			operations[i] = [5]int{kind, u, p, 0, 0}
+			operations[i] = [5]int32{kind, u, p, 0, 0}
 		}
 	}
 
 	lct := NewLinkCutTreeSubTreeAdd()
 	nodes := make([]*Node, n)
 	for i := 0; i < n; i++ {
-		nodes[i] = lct.Alloc(weights[i])
+		nodes[i] = lct.Alloc(int(weights[i]))
 	}
 	for i := 0; i < n-1; i++ {
 		u, v := edges[i][0], edges[i][1]
@@ -91,7 +91,7 @@ func DynamicTreeVertexAddSubtreeSum() {
 			lct.Link(nodes[u2], nodes[v2])
 		} else if kind == 1 {
 			node, delta := operations[i][1], operations[i][2]
-			lct.Set(nodes[node], lct.Get(nodes[node])+delta)
+			lct.Set(nodes[node], lct.Get(nodes[node])+int(delta))
 		} else {
 			child, parent := operations[i][1], operations[i][2]
 			lct.Evert(nodes[parent])
@@ -113,39 +113,39 @@ func DynamicTreeSubtreeAddSubtreeSum() {
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	weights := make([]int, n)
+	weights := make([]int32, n)
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &weights[i])
 	}
-	edges := make([][2]int, n-1)
+	edges := make([][2]int32, n-1)
 	for i := 0; i < n-1; i++ {
-		var v1, v2 int
+		var v1, v2 int32
 		fmt.Fscan(in, &v1, &v2)
-		edges[i] = [2]int{v1, v2}
+		edges[i] = [2]int32{v1, v2}
 	}
-	operations := make([][5]int, q)
+	operations := make([][5]int32, q)
 	for i := 0; i < q; i++ {
-		var kind int
+		var kind int32
 		fmt.Fscan(in, &kind)
 		if kind == 0 {
-			var u, v, w, x int
+			var u, v, w, x int32
 			fmt.Fscan(in, &u, &v, &w, &x)
-			operations[i] = [5]int{kind, u, v, w, x}
+			operations[i] = [5]int32{kind, u, v, w, x}
 		} else if kind == 1 {
-			var child, parent, delta int
+			var child, parent, delta int32
 			fmt.Fscan(in, &child, &parent, &delta)
-			operations[i] = [5]int{kind, child, parent, delta, 0}
+			operations[i] = [5]int32{kind, child, parent, delta, 0}
 		} else {
-			var child, parent int
+			var child, parent int32
 			fmt.Fscan(in, &child, &parent)
-			operations[i] = [5]int{kind, child, parent, 0, 0}
+			operations[i] = [5]int32{kind, child, parent, 0, 0}
 		}
 	}
 
 	lct := NewLinkCutTreeSubTreeAdd()
 	nodes := make([]*Node, n)
 	for i := 0; i < n; i++ {
-		nodes[i] = lct.Alloc(weights[i])
+		nodes[i] = lct.Alloc(int(weights[i]))
 	}
 	for i := 0; i < n-1; i++ {
 		u, v := edges[i][0], edges[i][1]
@@ -161,7 +161,7 @@ func DynamicTreeSubtreeAddSubtreeSum() {
 		} else if kind == 1 {
 			child, parent, delta := operations[i][1], operations[i][2], operations[i][3]
 			lct.Evert(nodes[parent])
-			lct.SubtreeAdd(nodes[child], delta)
+			lct.SubtreeAdd(nodes[child], int(delta))
 		} else {
 			child, parent := operations[i][1], operations[i][2]
 			lct.Evert(nodes[parent])
@@ -173,15 +173,15 @@ func DynamicTreeSubtreeAddSubtreeSum() {
 
 type E = int // 子树和
 
-func e() E             { return 0 }
-func add(a, b E) E     { return a + b }
-func sub(a, b E) E     { return a - b }
-func mul(a E, x int) E { return a * x }
+func e() E               { return 0 }
+func add(a, b E) E       { return a + b }
+func sub(a, b E) E       { return a - b }
+func mul(a E, x int32) E { return a * int(x) }
 
 type Node struct {
 	left, right, parent            *Node
 	key, sum, lazy, cancel, subsum E
-	cnt, subcnt                    int
+	cnt, subcnt                    int32
 	rev                            bool
 }
 
@@ -280,7 +280,7 @@ func (lct *LinkCutTreeSubTreeAdd) Lca(u, v *Node) *Node {
 	return lct._expose(v)
 }
 
-func (lct *LinkCutTreeSubTreeAdd) KthAncestor(node *Node, k int) *Node {
+func (lct *LinkCutTreeSubTreeAdd) KthAncestor(node *Node, k int32) *Node {
 	lct._expose(node)
 	for node != nil {
 		lct._pushDown(node)
@@ -463,7 +463,7 @@ func _makePrefer(t, other *Node) {
 
 func _merge(t, l, r *Node) {
 	var left, right E
-	var leftCnt, rightCnt int
+	var leftCnt, rightCnt int32
 	if l != nil {
 		left = l.sum
 		leftCnt = l.cnt

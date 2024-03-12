@@ -21,34 +21,34 @@ func main() {
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	nums := make([]int, n)
+	nums := make([]int32, n)
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
 
 	lct := NewLinkCutTreeSubTree(true)
-	vs := lct.Build(nums)
+	vs := lct.Build(int32(n), func(i int32) E { return int(nums[i]) })
 
 	for i := 0; i < n-1; i++ { // 连接树边
-		var v1, v2 int
+		var v1, v2 int32
 		fmt.Fscan(in, &v1, &v2)
 		lct.LinkEdge(vs[v1], vs[v2])
 	}
 
 	for i := 0; i < q; i++ {
-		var op int
+		var op int32
 		fmt.Fscan(in, &op)
 		if op == 0 {
-			var u, v, w, x int
+			var u, v, w, x int32
 			fmt.Fscan(in, &u, &v, &w, &x)
 			lct.CutEdge(vs[u], vs[v])
 			lct.LinkEdge(vs[w], vs[x])
 		} else if op == 1 {
-			var root, delta int
+			var root, delta int32
 			fmt.Fscan(in, &root, &delta)
-			lct.Set(vs[root], lct.Get(vs[root])+delta)
+			lct.Set(vs[root], lct.Get(vs[root])+int(delta))
 		} else {
-			var root, parent int
+			var root, parent int32
 			fmt.Fscan(in, &root, &parent)
 			lct.Evert(vs[parent]) // !注意查询子树前要先把父节点旋转到根节点
 			fmt.Fprintln(out, lct.QuerySubTree(vs[root]))
@@ -63,21 +63,20 @@ func (*TreeNode) op(this, other E) E  { return this + other }
 func (*TreeNode) inv(this, other E) E { return this - other }
 
 type LinkCutTreeSubTree struct {
-	nodeId int
-	edges  map[struct{ u, v int }]struct{}
+	nodeId int32
+	edges  map[[2]int32]struct{}
 	check  bool
 }
 
 // check: AddEdge/RemoveEdge で辺の存在チェックを行うかどうか.
 func NewLinkCutTreeSubTree(check bool) *LinkCutTreeSubTree {
-	return &LinkCutTreeSubTree{edges: make(map[struct{ u, v int }]struct{}), check: check}
+	return &LinkCutTreeSubTree{edges: make(map[[2]int32]struct{}), check: check}
 }
 
-// 各要素の値を vs[i] としたノードを生成し, その配列を返す.
-func (lct *LinkCutTreeSubTree) Build(vs []E) []*TreeNode {
-	nodes := make([]*TreeNode, len(vs))
-	for i, v := range vs {
-		nodes[i] = lct.Alloc(v)
+func (lct *LinkCutTreeSubTree) Build(n int32, f func(i int32) E) []*TreeNode {
+	nodes := make([]*TreeNode, n)
+	for i := int32(0); i < n; i++ {
+		nodes[i] = lct.Alloc(f(i))
 	}
 	return nodes
 }
@@ -106,7 +105,7 @@ func (lct *LinkCutTreeSubTree) LinkEdge(child, parent *TreeNode) (ok bool) {
 		if id1 > id2 {
 			id1, id2 = id2, id1
 		}
-		tuple := struct{ u, v int }{id1, id2}
+		tuple := [2]int32{id1, id2}
 		lct.edges[tuple] = struct{}{}
 	}
 
@@ -124,7 +123,7 @@ func (lct *LinkCutTreeSubTree) CutEdge(u, v *TreeNode) (ok bool) {
 		if id1 > id2 {
 			id1, id2 = id2, id1
 		}
-		tuple := struct{ u, v int }{id1, id2}
+		tuple := [2]int32{id1, id2}
 		if _, has := lct.edges[tuple]; !has {
 			return
 		}
@@ -141,8 +140,9 @@ func (lct *LinkCutTreeSubTree) CutEdge(u, v *TreeNode) (ok bool) {
 }
 
 // u と v の lca を返す.
-//  u と v が異なる連結成分なら nullptr を返す.
-//  !上記の操作は根を勝手に変えるため, 事前に Evert する必要があるかも.
+//
+//	u と v が異なる連結成分なら nullptr を返す.
+//	!上記の操作は根を勝手に変えるため, 事前に Evert する必要があるかも.
 func (lct *LinkCutTreeSubTree) QueryLCA(u, v *TreeNode) *TreeNode {
 	if !lct.IsConnected(u, v) {
 		return nil
@@ -151,7 +151,7 @@ func (lct *LinkCutTreeSubTree) QueryLCA(u, v *TreeNode) *TreeNode {
 	return lct.expose(v)
 }
 
-func (lct *LinkCutTreeSubTree) QueryKthAncestor(x *TreeNode, k int) *TreeNode {
+func (lct *LinkCutTreeSubTree) QueryKthAncestor(x *TreeNode, k int32) *TreeNode {
 	lct.expose(x)
 	for x != nil {
 		lct.push(x)
@@ -172,7 +172,8 @@ func (lct *LinkCutTreeSubTree) QueryKthAncestor(x *TreeNode, k int) *TreeNode {
 }
 
 // t を根とする部分木の要素の値の和を返す.
-//  !Evert を忘れない！
+//
+//	!Evert を忘れない！
 func (lct *LinkCutTreeSubTree) QuerySubTree(t *TreeNode) E {
 	lct.expose(t)
 	return t.op(t.key, t.sub)
@@ -339,12 +340,12 @@ func (lct *LinkCutTreeSubTree) GetRoot(t *TreeNode) *TreeNode {
 type TreeNode struct {
 	key, sum, sub E
 	rev           bool
-	cnt           int
-	id            int
+	cnt           int32
+	id            int32
 	l, r, p       *TreeNode
 }
 
-func newTreeNode(key E, id int) *TreeNode {
+func newTreeNode(key E, id int32) *TreeNode {
 	res := &TreeNode{key: key, sum: key, cnt: 1, id: id}
 	res.sub = res.e()
 	return res

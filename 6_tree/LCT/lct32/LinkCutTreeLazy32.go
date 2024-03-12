@@ -9,6 +9,7 @@
 //   mapping は要素と作用素をマージする二項演算,
 //   composition は作用素同士をマージする二項演算,
 // Build(vs): 各要素の値を vs[i] としたノードを生成し, その配列を返す.
+// Alloc(v): 要素の値を v としたノードを生成する.
 // Evert(t): t を根に変更する.
 // LinkEdge(child, parent): child の親を parent にする.如果已经连通则不进行操作。
 // CutEdge(u,v) : u と v の間の辺を切り離す.如果边不存在则不进行操作。
@@ -18,7 +19,6 @@
 // QueryLCA(u, v): u と v の lca を返す. u と v が異なる連結成分なら nullptr を返す.
 //   !上記の操作は根を勝手に変えるため、根を固定したい場合は Evert で根を固定してから操作する.
 // IsConnected(u, v): u と v が同じ連結成分に属する場合は true, そうでなければ false を返す.
-// Alloc(v): 要素の値を v としたノードを生成する.
 // UpdateToRoot(t, lazy): t から根までのパス上の頂点に作用素 lazy を加える.
 // Update(u, v, lazy): u から v までのパス上の頂点に作用素 lazy を加える.
 // Set(t, v): t の値を v に変更する.
@@ -35,7 +35,6 @@ import (
 )
 
 func main() {
-
 	// https://judge.yosupo.jp/problem/dynamic_tree_vertex_add_path_sum
 	// 0 u v w x  删除 u-v 边, 添加 w-x 边
 	// 1 p x  将 p 节点的值加上 x
@@ -45,16 +44,16 @@ func main() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int
+	var n, q int32
 	fmt.Fscan(in, &n, &q)
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
+	nums := make([]int32, n)
+	for i := int32(0); i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	lct := NewLinkCutTreeLazy(true)
-	vs := lct.Build(nums)
-	for i := 0; i < n-1; i++ { // 连接树边
+	lct := NewLinkCutTreeLazy32(true)
+	vs := lct.Build(n, func(i int32) E { return int(nums[i]) })
+	for i := int32(0); i < n-1; i++ { // 连接树边
 		var v1, v2 int
 		fmt.Fscan(in, &v1, &v2)
 		// lct.Evert(vs[v1])
@@ -62,11 +61,11 @@ func main() {
 		lct.LinkEdge(vs[v1], vs[v2])
 	}
 
-	for i := 0; i < q; i++ {
-		var op int
+	for i := int32(0); i < q; i++ {
+		var op int32
 		fmt.Fscan(in, &op)
 		if op == 0 {
-			var u, v, w, x int
+			var u, v, w, x int32
 			fmt.Fscan(in, &u, &v, &w, &x)
 			// lct.Evert(vs[u])
 			// lct.Cut(vs[v])
@@ -75,12 +74,12 @@ func main() {
 			// lct.Link(vs[w], vs[x])
 			lct.LinkEdge(vs[w], vs[x])
 		} else if op == 1 {
-			var p, x int
+			var p, x int32
 			fmt.Fscan(in, &p, &x)
 			// lct.Set(vs[p], vs[p].key+x)
 			lct.UpdatePath(vs[p], vs[p], x)
 		} else {
-			var u, v int
+			var u, v int32
 			fmt.Fscan(in, &u, &v)
 			fmt.Fprintln(out, lct.QueryPath(vs[u], vs[v]))
 		}
@@ -89,52 +88,53 @@ func main() {
 }
 
 type E = int
-type Id = int
+type Id = int32
 
 // 区间反转
-func (*LinkCutTreeLazy) rev(e E) E                               { return e }
-func (*LinkCutTreeLazy) id() Id                                  { return 0 }
-func (*LinkCutTreeLazy) op(a, b E) E                             { return a + b }
-func (*LinkCutTreeLazy) mapping(lazy Id, data E) E               { return data + lazy }
-func (*LinkCutTreeLazy) composition(parentLazy, childLazy Id) Id { return parentLazy + childLazy }
+func (*LinkCutTreeLazy32) rev(e E) E                               { return e }
+func (*LinkCutTreeLazy32) id() Id                                  { return 0 }
+func (*LinkCutTreeLazy32) op(a, b E) E                             { return a + b }
+func (*LinkCutTreeLazy32) mapping(lazy Id, data E) E               { return data + int(lazy) }
+func (*LinkCutTreeLazy32) composition(parentLazy, childLazy Id) Id { return parentLazy + childLazy }
 
-type LinkCutTreeLazy struct {
-	nodeId int
-	edges  map[struct{ u, v int }]struct{}
+type LinkCutTreeLazy32 struct {
+	nodeId int32
+	edges  map[[2]int32]struct{}
 	check  bool
 }
 
 // check: AddEdge/RemoveEdge で辺の存在チェックを行うかどうか.
-func NewLinkCutTreeLazy(check bool) *LinkCutTreeLazy {
-	return &LinkCutTreeLazy{edges: make(map[struct{ u, v int }]struct{}), check: check}
+func NewLinkCutTreeLazy32(check bool) *LinkCutTreeLazy32 {
+	return &LinkCutTreeLazy32{edges: make(map[[2]int32]struct{}), check: check}
 }
 
 // 各要素の値を vs[i] としたノードを生成し, その配列を返す.
-func (lct *LinkCutTreeLazy) Build(vs []E) []*treeNode {
-	nodes := make([]*treeNode, len(vs))
-	for i, v := range vs {
-		nodes[i] = lct.Alloc(v)
+func (lct *LinkCutTreeLazy32) Build(n int32, f func(i int32) E) []*treeNode {
+	nodes := make([]*treeNode, n)
+	for i := int32(0); i < n; i++ {
+		nodes[i] = lct.Alloc(f(i))
 	}
 	return nodes
 }
 
 // 要素の値を v としたノードを生成する.
-func (lct *LinkCutTreeLazy) Alloc(e E) *treeNode {
+func (lct *LinkCutTreeLazy32) Alloc(e E) *treeNode {
 	res := newTreeNode(e, lct.id(), lct.nodeId)
 	lct.nodeId++
 	return res
 }
 
 // t を根に変更する.
-func (lct *LinkCutTreeLazy) Evert(t *treeNode) {
+func (lct *LinkCutTreeLazy32) Evert(t *treeNode) {
 	lct.expose(t)
 	lct.toggle(t)
 	lct.push(t)
 }
 
 // 存在していない辺 uv を新たに張る.
-//  すでに存在している辺 uv に対しては何もしない.
-func (lct *LinkCutTreeLazy) LinkEdge(child, parent *treeNode) (ok bool) {
+//
+//	すでに存在している辺 uv に対しては何もしない.
+func (lct *LinkCutTreeLazy32) LinkEdge(child, parent *treeNode) (ok bool) {
 	if lct.check {
 		if lct.IsConnected(child, parent) {
 			return
@@ -143,7 +143,7 @@ func (lct *LinkCutTreeLazy) LinkEdge(child, parent *treeNode) (ok bool) {
 		if id1 > id2 {
 			id1, id2 = id2, id1
 		}
-		tuple := struct{ u, v int }{id1, id2}
+		tuple := [2]int32{id1, id2}
 		lct.edges[tuple] = struct{}{}
 	}
 
@@ -156,14 +156,15 @@ func (lct *LinkCutTreeLazy) LinkEdge(child, parent *treeNode) (ok bool) {
 }
 
 // 存在している辺を切り離す.
-//  存在していない辺に対しては何もしない.
-func (lct *LinkCutTreeLazy) CutEdge(u, v *treeNode) (ok bool) {
+//
+//	存在していない辺に対しては何もしない.
+func (lct *LinkCutTreeLazy32) CutEdge(u, v *treeNode) (ok bool) {
 	if lct.check {
 		id1, id2 := u.id, v.id
 		if id1 > id2 {
 			id1, id2 = id2, id1
 		}
-		tuple := struct{ u, v int }{id1, id2}
+		tuple := [2]int32{id1, id2}
 		if _, has := lct.edges[tuple]; !has {
 			return
 		}
@@ -180,9 +181,10 @@ func (lct *LinkCutTreeLazy) CutEdge(u, v *treeNode) (ok bool) {
 }
 
 // u と v の lca を返す.
-//  u と v が異なる連結成分なら nullptr を返す.
-//  !上記の操作は根を勝手に変えるため, 事前に Evert する必要があるかも.
-func (lct *LinkCutTreeLazy) QueryLCA(u, v *treeNode) *treeNode {
+//
+//	u と v が異なる連結成分なら nullptr を返す.
+//	!上記の操作は根を勝手に変えるため, 事前に Evert する必要があるかも.
+func (lct *LinkCutTreeLazy32) QueryLCA(u, v *treeNode) *treeNode {
 	if !lct.IsConnected(u, v) {
 		return nil
 	}
@@ -190,7 +192,7 @@ func (lct *LinkCutTreeLazy) QueryLCA(u, v *treeNode) *treeNode {
 	return lct.expose(v)
 }
 
-func (lct *LinkCutTreeLazy) QueryKthAncestor(x *treeNode, k int) *treeNode {
+func (lct *LinkCutTreeLazy32) QueryKthAncestor(x *treeNode, k int32) *treeNode {
 	lct.expose(x)
 	for x != nil {
 		lct.push(x)
@@ -211,43 +213,43 @@ func (lct *LinkCutTreeLazy) QueryKthAncestor(x *treeNode, k int) *treeNode {
 }
 
 // u から根までのパス上の頂点の値を二項演算でまとめた結果を返す.
-func (lct *LinkCutTreeLazy) QueryToRoot(u *treeNode) E {
+func (lct *LinkCutTreeLazy32) QueryToRoot(u *treeNode) E {
 	lct.expose(u)
 	return u.sum
 }
 
 // u から v までのパス上の頂点の値を二項演算でまとめた結果を返す.
-func (lct *LinkCutTreeLazy) QueryPath(u, v *treeNode) E {
+func (lct *LinkCutTreeLazy32) QueryPath(u, v *treeNode) E {
 	lct.Evert(u)
 	return lct.QueryToRoot(v)
 }
 
-//  t から根までのパス上の頂点に作用素 lazy を加える.
-func (lct *LinkCutTreeLazy) UpdateToRoot(t *treeNode, lazy Id) {
+// t から根までのパス上の頂点に作用素 lazy を加える.
+func (lct *LinkCutTreeLazy32) UpdateToRoot(t *treeNode, lazy Id) {
 	lct.expose(t)
 	lct.propagate(t, lazy)
 	lct.push(t)
 }
 
 // u から v までのパス上の頂点に作用素 lazy を加える.
-func (lct *LinkCutTreeLazy) UpdatePath(u, v *treeNode, lazy Id) {
+func (lct *LinkCutTreeLazy32) UpdatePath(u, v *treeNode, lazy Id) {
 	lct.Evert(u)
 	lct.UpdateToRoot(v, lazy)
 }
 
 // t の値を v に変更する.
-func (lct *LinkCutTreeLazy) Set(t *treeNode, v E) {
+func (lct *LinkCutTreeLazy32) Set(t *treeNode, v E) {
 	lct.expose(t)
 	t.key = v
 	lct.update(t)
 }
 
 // t の値を返す.
-func (lct *LinkCutTreeLazy) Get(t *treeNode) E {
+func (lct *LinkCutTreeLazy32) Get(t *treeNode) E {
 	return t.key
 }
 
-func (lct *LinkCutTreeLazy) GetRoot(t *treeNode) *treeNode {
+func (lct *LinkCutTreeLazy32) GetRoot(t *treeNode) *treeNode {
 	lct.expose(t)
 	for t.l != nil {
 		lct.push(t)
@@ -257,12 +259,12 @@ func (lct *LinkCutTreeLazy) GetRoot(t *treeNode) *treeNode {
 }
 
 // u と v が同じ連結成分に属する場合は true, そうでなければ false を返す.
-func (lct *LinkCutTreeLazy) IsConnected(u, v *treeNode) bool {
+func (lct *LinkCutTreeLazy32) IsConnected(u, v *treeNode) bool {
 	return u == v || lct.GetRoot(u) == lct.GetRoot(v)
 }
 
-func (lct *LinkCutTreeLazy) expose(t *treeNode) *treeNode {
-	rp := (*treeNode)(nil)
+func (lct *LinkCutTreeLazy32) expose(t *treeNode) *treeNode {
+	var rp *treeNode
 	for cur := t; cur != nil; cur = cur.p {
 		lct.splay(cur)
 		cur.r = rp
@@ -273,7 +275,7 @@ func (lct *LinkCutTreeLazy) expose(t *treeNode) *treeNode {
 	return rp
 }
 
-func (lct *LinkCutTreeLazy) update(t *treeNode) *treeNode {
+func (lct *LinkCutTreeLazy32) update(t *treeNode) *treeNode {
 	t.sz = 1
 	t.sum = t.key
 	if t.l != nil {
@@ -287,7 +289,7 @@ func (lct *LinkCutTreeLazy) update(t *treeNode) *treeNode {
 	return t
 }
 
-func (lct *LinkCutTreeLazy) rotr(t *treeNode) {
+func (lct *LinkCutTreeLazy32) rotr(t *treeNode) {
 	x := t.p
 	y := x.p
 	x.l = t.r
@@ -310,7 +312,7 @@ func (lct *LinkCutTreeLazy) rotr(t *treeNode) {
 	}
 }
 
-func (lct *LinkCutTreeLazy) rotl(t *treeNode) {
+func (lct *LinkCutTreeLazy32) rotl(t *treeNode) {
 	x := t.p
 	y := x.p
 	x.r = t.l
@@ -333,19 +335,19 @@ func (lct *LinkCutTreeLazy) rotl(t *treeNode) {
 	}
 }
 
-func (lct *LinkCutTreeLazy) toggle(t *treeNode) {
+func (lct *LinkCutTreeLazy32) toggle(t *treeNode) {
 	t.l, t.r = t.r, t.l
 	t.sum = lct.rev(t.sum)
 	t.rev = !t.rev
 }
 
-func (lct *LinkCutTreeLazy) propagate(t *treeNode, lazy Id) {
+func (lct *LinkCutTreeLazy32) propagate(t *treeNode, lazy Id) {
 	t.lazy = lct.composition(lazy, t.lazy)
 	t.key = lct.mapping(lazy, t.key)
 	t.sum = lct.mapping(lazy, t.sum)
 }
 
-func (lct *LinkCutTreeLazy) push(t *treeNode) {
+func (lct *LinkCutTreeLazy32) push(t *treeNode) {
 	if t.lazy != lct.id() {
 		if t.l != nil {
 			lct.propagate(t.l, t.lazy)
@@ -367,7 +369,7 @@ func (lct *LinkCutTreeLazy) push(t *treeNode) {
 	}
 }
 
-func (lct *LinkCutTreeLazy) splay(t *treeNode) {
+func (lct *LinkCutTreeLazy32) splay(t *treeNode) {
 	lct.push(t)
 	for !t.IsRoot() {
 		q := t.p
@@ -410,11 +412,11 @@ type treeNode struct {
 	key, sum E
 	lazy     Id
 	rev      bool
-	sz       int
-	id       int
+	sz       int32
+	id       int32
 }
 
-func newTreeNode(v E, lazy Id, id int) *treeNode {
+func newTreeNode(v E, lazy Id, id int32) *treeNode {
 	return &treeNode{key: v, sum: v, lazy: lazy, sz: 1, id: id}
 }
 
