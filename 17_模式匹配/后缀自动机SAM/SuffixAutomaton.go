@@ -1078,7 +1078,11 @@ func main() {
 
 	// cf149e()
 	// cf235c()
+	cf653f()
 	// cf802I()
+	// CF1037H()
+	// cf1073g()
+	// cf1207g()
 
 	// number_of_substrings()
 	// longest_common_substring()
@@ -1388,11 +1392,22 @@ func cf235c() {
 	}
 }
 
-// Paper task
+// Paper task (本质不同的合法括号子串计数)
 // https://www.luogu.com.cn/problem/CF653F
 // 给定一个长度为n的括号串，问有多少种不同的合法括号子串
 // n<=5e5.
-func cf653f() {}
+//
+// !令(为1，)为-1，括号序列合法当且仅当和为0且后缀和都不大于0.
+func cf653f() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	var s string
+	fmt.Fscan(in, &s)
+}
 
 // Fake News (hard)
 // https://www.luogu.com.cn/problem/CF802I
