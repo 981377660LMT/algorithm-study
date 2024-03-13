@@ -102,9 +102,13 @@
 //  11. 多次询问区间本质不同子串 => 扫描线+LCT 维护区间子串信息
 //  12. 维护endPos等价类最小End、最大End => 后缀链接树自底向上更新End下标信息
 //  13. 判断子串s[a:b)是否为某个前缀s[:i)的子串 => 先定位子串到pos结点，然后判断该子串最早结束位置 endPosMinEnd[pos] <= i.
-//  14. 求子串s[a:b)在s[c:d)中的出现次数 =>
-//     先定位子串到pos结点，然后根据"子串是前缀的后缀"可知满足其他位置出现的s[a:b)都在pos的子树中。
-//     合法的endPos满足：记长度 m=b-a，叶子结点的 prefixEnd 在 [c+m-1,d) 之间.
+//  !14. 求子串s[a:b)在s[c:d)中的出现次数 =>
+//      记长度 m=b-a
+//      - 方法1(waveletMatrix)：
+//        先定位子串到pos结点，然后根据"子串是前缀的后缀"可知满足其他位置出现的s[a:b)都在pos的子树中。
+//        合法的endPos满足：叶子结点的 End 在 [c+m-1,d) 之间.
+//      - 方法2(线段树合并)：
+//        先定位子串到pos结点，然后看pos结点的endPos集合在[c+m-1,d)之间的元素个数.
 
 package main
 
@@ -118,7 +122,7 @@ import (
 
 const INF int32 = 1e9 + 10
 
-const SIGMA int32 = 2    // 字符集大小
+const SIGMA int32 = 26   // 字符集大小
 const OFFSET int32 = 'a' // 字符集的起始字符
 
 type Node struct {
@@ -133,9 +137,10 @@ func (n *Node) String() string {
 }
 
 type SuffixAutomaton struct {
-	Nodes    []*Node
-	LastPos  int32 // 当前插入的字符对应的节点(实点，原串的一个前缀)
-	n        int32 // 当前字符串长度
+	Nodes   []*Node
+	LastPos int32 // 当前插入的字符对应的节点(实点，原串的一个前缀)
+	n       int32 // 当前字符串长度
+
 	doubling *DoublingSimple
 }
 
@@ -299,6 +304,7 @@ func (sam *SuffixAutomaton) GetEndPos(dfsOrder []int32) (seg *SegmentTreeOnRange
 	return
 }
 
+// 给定子串的起始位置和结束位置，返回子串在fail树上的位置.
 // 快速定位子串, 可以与其它字符串算法配合使用.
 // 倍增往上跳到 MaxLen>=end-start 的最后一个节点.
 // start: 子串起始位置, end: 子串结束位置, endPosOfEnd: 子串结束位置在fail树上的位置.
@@ -1113,10 +1119,11 @@ func main() {
 
 	// cf149e()
 	// cf235c()
-	cf653f()
+	// cf653f()
 	// cf802I()
+	cf873F()
 	// CF1037H()
-	// cf1073g()
+
 	// cf1207g()
 
 	// number_of_substrings()
@@ -1435,7 +1442,7 @@ func cf235c() {
 // 参考 https://atcoder.jp/contests/abc223/tasks/abc223_f
 // !令(为1，)为-1，括号序列合法当且仅当
 // - 和为0.
-// - "后缀和"都不大于0 => 后缀和的最小值不大于0.
+// - "后缀和"都不大于0 => min(preSum[start:end])>=preSum[end].
 //
 // 问题转化为：每个endPos上，end 固定时，求合法的start.
 // 先用最小值<=0条件二分出最左端的start起点，再统计使得[start:end)和为0的start的个数。
@@ -1472,7 +1479,10 @@ func cf653f() {
 		mp[preSum[i]] = append(mp[preSum[i]], i)
 	}
 
-	minSt := NewSparseTable(len(preSum), func(i int) S { return preSum[i] }, func() S { return INF32 }, func(a, b S) S { return min32(a, b) })
+	minSt := NewSparseTable(
+		len(preSum), func(i int) S { return preSum[i] },
+		func() S { return INF32 }, func(a, b S) S { return min32(a, b) },
+	)
 
 	// 求sortedArray中[min,max]范围内的元素个数.
 	rangeCount := func(sortedArray []int32, min, max int32) int32 {
@@ -1484,36 +1494,18 @@ func cf653f() {
 		return int32(b - a)
 	}
 
-	_ = rangeCount
+	// endPos为pos的结点的答案.
 	cal := func(pos int32) int32 {
 		link := sam.Nodes[pos].Link
 		minLen, maxLen := sam.Nodes[link].MaxLen+1, sam.Nodes[pos].MaxLen
 		end := abs32(sam.Nodes[pos].End) + 1 // 每个endPos随意选取一个结束位置
 		minStart := end - maxLen
-		_ = maxLen
 		maxStart := end - minLen
 
 		// end固定时，求合法的start范围.
-		minLeft := int32(minSt.MinLeft(int(end+1), func(e S) bool { return e <= 0 }))
-		res := int32(0)
-		for i := max32(minLeft, minStart); i <= maxStart; i++ {
-			curSum := 0
-			for j := i; j < end; j++ {
-				if s[j] == '(' {
-					curSum++
-				} else {
-					curSum--
-				}
-			}
-			if curSum == 0 {
-				res++
-			}
-		}
-		fmt.Println(pos, minLeft, end, res, 999)
-		return res
-
-		// sum := preSum[end]
-		// return rangeCount(mp[sum], max32(minLeft, minStart), maxStart)
+		sum := preSum[end]
+		minLeft := int32(minSt.MinLeft(int(end), func(e S) bool { return e >= sum }))
+		return rangeCount(mp[sum], max32(minLeft, minStart), maxStart)
 	}
 
 	res := 0
@@ -1555,26 +1547,148 @@ func cf802I() {
 	}
 }
 
-// Security (线段树合并)
-// https://www.luogu.com.cn/problem/CF1037H
-// https://www.cnblogs.com/Troverld/p/14605723.html
+// Forbidden Indices
+// https://codeforces.com/problemset/problem/873/F
+// 给出一个字符串 s，一个 01 串，长度均为 n（n≤2e5）.
+// !设 ss 为 s 的一个子串，求 `ss长度*不在被禁止位置结束的子串ss出现次数` 的最大值。
 //
-// 在后缀自动机的 DAWG 上贪心。使用线段树合并判断当前字符串是否作为[l,r]的子串出现过 。
-// https://codeforces.com/contest/1037/submission/147520554
-func CF1037H() {}
-
-// Yet Another LCP Problem
-// https://www.luogu.com.cn/problem/CF1073G
-// https://www.cnblogs.com/Troverld/p/14605733.html
-// 给定一个长为n的字符串s和q次询问.
-// 每次询问给出两个数组A和B，求两两后缀最长公共前缀之和 ∑lcp(s[A[i]:], s[B[j]:]).
-func cf1073g() {
+// 求endPosSize时注意禁止位置的叶子结点的endPosSize为0.
+func cf873F() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
 	var n int
 	fmt.Fscan(in, &n)
+	var s string
+	fmt.Fscan(in, &s)
+	var forbidden string
+	fmt.Fscan(in, &forbidden)
+
+	ok := make([]bool, n)
+	for i := 0; i < n; i++ {
+		ok[i] = forbidden[i] == '0'
+	}
+	sam := NewSuffixAutomaton()
+	for _, c := range s {
+		sam.Add(c)
+	}
+	dfsOrder := sam.GetDfsOrder()
+	size := sam.Size()
+	endPosSize := make([]int32, size)
+	for i := size - 1; i >= 1; i-- {
+		cur := dfsOrder[i]
+		if end := sam.Nodes[cur].End; end >= 0 && ok[end] {
+			endPosSize[cur]++
+		}
+		pre := sam.Nodes[cur].Link
+		endPosSize[pre] += endPosSize[cur]
+	}
+
+	res := 0
+	for i := int32(1); i < size; i++ {
+		res = max(res, int(sam.Nodes[i].MaxLen)*int(endPosSize[i]))
+	}
+	fmt.Fprintln(out, res)
+}
+
+// Security (线段树合并维护endPos集合)
+// https://www.luogu.com.cn/problem/CF1037H
+// 给定一个字符串text和q次询问.
+// 每次询问给叔 start,end,pattern，求字典序最小的t使得t是s[start:end)的子串且t的字典序严格大于pattern.
+// 输出这个t，如果无解输出-1。
+//
+//	!1. 为了求字典序最小的后继，在后缀自动机的 DAWG 上贪心。
+//	   字典序尽量小又要严格大于模式串pattern，则贪心让前面最多的字符相同，在后面再补一个比它大且最小的字符。
+//	   如果补不了，就倒着枚举位置，如果当前位置i能替换为一个比大的字符，找到最小的可替换字符c换掉它，答案为"pattern[:i]+c"。
+//	!2. 使用线段树合并求出某个子串在区间[start:end)中出现的次数.
+//
+// O(26nlogn)
+func CF1037H() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var text string
+	fmt.Fscan(in, &text)
+	var q int32
+	fmt.Fscan(in, &q)
+
+	sam := NewSuffixAutomaton()
+	for _, c := range text {
+		sam.Add(c)
+	}
+
+	seg, endPosNodes := sam.GetEndPos(sam.GetDfsOrder())
+
+	// 查询(pos,len)对应的子串在[start:end)中出现的次数.
+	// 采用线段树合并实现.
+	countSubstringInRange := func(pos, len int32, start, end int32) int32 {
+		return seg.Query(endPosNodes[pos], start+len-1, end-1)
+	}
+
+	// 查询s[start:end)中字典序最小的严格大于bytes的子串(字典序后继).
+	// 内部会修改bytes.
+	query := func(start, end int32, bytes *[]byte) bool {
+		n := int32(len(*bytes))
+		*bytes = append(*bytes, 0) // sentinel
+		newLen := int32(0)         // 答案的长度
+
+		var dfs func(pos, len int32) bool
+		dfs = func(pos, len int32) bool {
+			// 尝试往最后添加一个字符.
+			if len == n {
+				for i := int32(0); i < SIGMA; i++ {
+					nextPos, nextLen := sam.Nodes[pos].Next[i], len+1
+					if nextPos != -1 && countSubstringInRange(nextPos, nextLen, start, end) > 0 {
+						(*bytes)[len] = byte(i + 'a')
+						newLen = nextLen
+						return true
+					}
+				}
+				return false
+			}
+
+			if nextPos := sam.Nodes[pos].Next[(*bytes)[len]-'a']; nextPos != -1 {
+				nextLen := len + 1
+				if countSubstringInRange(nextPos, nextLen, start, end) > 0 {
+					if dfs(nextPos, nextLen) {
+						return true
+					}
+				}
+			}
+
+			// 逆序枚举位置，找到最小的可替换字符c换掉它
+			for i := (*bytes)[len] - 'a' + 1; i < byte(SIGMA); i++ {
+				if nextPos := sam.Nodes[pos].Next[i]; nextPos != -1 {
+					nextLen := len + 1
+					if countSubstringInRange(nextPos, nextLen, start, end) > 0 {
+						(*bytes)[len] = byte(i + 'a')
+						newLen = nextLen
+						return true
+					}
+				}
+			}
+			return false
+		}
+
+		ok := dfs(0, 0)
+		(*bytes) = (*bytes)[:newLen]
+		return ok
+	}
+
+	for i := int32(0); i < q; i++ {
+		var start, end int32
+		var pattern string
+		fmt.Fscan(in, &start, &end, &pattern)
+		start--
+		bytes := []byte(pattern)
+		if ok := query(start, end, &bytes); ok {
+			fmt.Fprintln(out, string(bytes))
+		} else {
+			fmt.Fprintln(out, -1)
+		}
+	}
 }
 
 // Indie Album
@@ -1829,6 +1943,7 @@ func nowCoder37092E() {
 	wm := NewWaveletMatrix32(size, func(i int32) int32 { return data[i] })
 
 	// CountSubstringInRange
+	// 查询s[start1:end1)在s[start2:end2)中出现的次数.
 	query := func(start1, end1 int32, start2, end2 int32) int32 {
 		if (end1 - start1) > (end2 - start2) {
 			return 0
