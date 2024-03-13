@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// F - Parenthesis Checking
 // https://atcoder.jp/contests/abc223/tasks/abc223_f
 // 给出一个括号串s和Q 次以下两种操作：
 // 1 l r，代表交换第 l 和第 r 个位置上的字符

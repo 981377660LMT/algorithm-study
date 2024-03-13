@@ -113,11 +113,12 @@ import (
 	"fmt"
 	"math/bits"
 	"os"
+	"sort"
 )
 
 const INF int32 = 1e9 + 10
 
-const SIGMA int32 = 26   // 字符集大小
+const SIGMA int32 = 2    // 字符集大小
 const OFFSET int32 = 'a' // 字符集的起始字符
 
 type Node struct {
@@ -477,6 +478,40 @@ func (st *SparseTable) Query(start, end int) S {
 	}
 	b := st.lookup[end-start]
 	return st.op(st.st[b][start], st.st[b][end-(1<<b)])
+}
+
+// 返回最大的 right 使得 [left,right) 内的值满足 check.
+func (st *SparseTable) MaxRight(left int, check func(e S) bool) int {
+	if left == st.n {
+		return st.n
+	}
+	ok, ng := left, st.n+1
+	for ok+1 < ng {
+		mid := (ok + ng) >> 1
+		if check(st.Query(left, mid)) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
+// 返回最小的 left 使得 [left,right) 内的值满足 check.
+func (st *SparseTable) MinLeft(right int, check func(e S) bool) int {
+	if right == 0 {
+		return 0
+	}
+	ok, ng := right, -1
+	for ng+1 < ok {
+		mid := (ok + ng) >> 1
+		if check(st.Query(mid, right)) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
 }
 
 type E = int32
@@ -1397,16 +1432,95 @@ func cf235c() {
 // 给定一个长度为n的括号串，问有多少种不同的合法括号子串
 // n<=5e5.
 //
-// !令(为1，)为-1，括号序列合法当且仅当和为0且后缀和都不大于0.
+// 参考 https://atcoder.jp/contests/abc223/tasks/abc223_f
+// !令(为1，)为-1，括号序列合法当且仅当
+// - 和为0.
+// - "后缀和"都不大于0 => 后缀和的最小值不大于0.
+//
+// 问题转化为：每个endPos上，end 固定时，求合法的start.
+// 先用最小值<=0条件二分出最左端的start起点，再统计使得[start:end)和为0的start的个数。
 func cf653f() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
+	const INF32 int32 = 1e9 + 10
 	var n int32
 	fmt.Fscan(in, &n)
 	var s string
 	fmt.Fscan(in, &s)
+
+	sam := NewSuffixAutomaton()
+	for _, c := range s {
+		if c == '(' {
+			sam.Add('a')
+		} else {
+			sam.Add('b')
+		}
+	}
+	preSum := make([]int32, n+1)
+	for i, c := range s {
+		if c == '(' {
+			preSum[i+1] = preSum[i] + 1
+		} else {
+			preSum[i+1] = preSum[i] - 1
+		}
+	}
+
+	mp := make(map[int32][]int32) // group by preSum
+	for i := int32(0); i < n+1; i++ {
+		mp[preSum[i]] = append(mp[preSum[i]], i)
+	}
+
+	minSt := NewSparseTable(len(preSum), func(i int) S { return preSum[i] }, func() S { return INF32 }, func(a, b S) S { return min32(a, b) })
+
+	// 求sortedArray中[min,max]范围内的元素个数.
+	rangeCount := func(sortedArray []int32, min, max int32) int32 {
+		if min > max {
+			return 0
+		}
+		a := sort.Search(len(sortedArray), func(i int) bool { return sortedArray[i] >= min })
+		b := sort.Search(len(sortedArray), func(i int) bool { return sortedArray[i] > max })
+		return int32(b - a)
+	}
+
+	_ = rangeCount
+	cal := func(pos int32) int32 {
+		link := sam.Nodes[pos].Link
+		minLen, maxLen := sam.Nodes[link].MaxLen+1, sam.Nodes[pos].MaxLen
+		end := abs32(sam.Nodes[pos].End) + 1 // 每个endPos随意选取一个结束位置
+		minStart := end - maxLen
+		_ = maxLen
+		maxStart := end - minLen
+
+		// end固定时，求合法的start范围.
+		minLeft := int32(minSt.MinLeft(int(end+1), func(e S) bool { return e <= 0 }))
+		res := int32(0)
+		for i := max32(minLeft, minStart); i <= maxStart; i++ {
+			curSum := 0
+			for j := i; j < end; j++ {
+				if s[j] == '(' {
+					curSum++
+				} else {
+					curSum--
+				}
+			}
+			if curSum == 0 {
+				res++
+			}
+		}
+		fmt.Println(pos, minLeft, end, res, 999)
+		return res
+
+		// sum := preSum[end]
+		// return rangeCount(mp[sum], max32(minLeft, minStart), maxStart)
+	}
+
+	res := 0
+	for i := int32(1); i < sam.Size(); i++ {
+		res += int(cal(i))
+	}
+	fmt.Fprintln(out, res)
 }
 
 // Fake News (hard)
