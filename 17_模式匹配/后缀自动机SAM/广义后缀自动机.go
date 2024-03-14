@@ -28,6 +28,7 @@
 //	https://ddosvoid.github.io/2020/10/18/%E6%B5%85%E8%B0%88%E6%A0%B9%E5%8F%B7%E7%AE%97%E6%B3%95/
 //	喵星球上的点名 https://www.luogu.com.cn/problem/P2336
 //	Sevenk Love Oimaster https://www.luogu.com.cn/problem/SP8093
+//  !可以被线段树合并优化成O(nlogn).
 //
 // !3. 广义 SAM 出现子串查询：
 //
@@ -42,8 +43,8 @@ import (
 	"os"
 )
 
-const SIGMA int32 = 10 // 字符集大小
-const OFFSET int32 = 0 // 字符集的起始字符
+const SIGMA int32 = 26   // 字符集大小
+const OFFSET int32 = 'a' // 字符集的起始字符
 
 type Node struct {
 	Next   [SIGMA]int32 // SAM 转移边
@@ -235,6 +236,241 @@ func (sam *SuffixAutomatonGeneral) newNode(link, maxLen int32) *Node {
 	return res
 }
 
+type E = int32
+
+func e() E { return 0 }
+func op(a, b E) E {
+	return a + b
+}
+func merge(a, b E) E { // 合并两个不同的树的结点的函数
+	return min32(1, a+b)
+}
+
+type SegNode struct {
+	value                 E
+	leftChild, rightChild *SegNode
+}
+
+func (n *SegNode) String() string {
+	return fmt.Sprintf("%v", n.value)
+}
+
+type SegmentTreeMerger struct {
+	left, right int32
+}
+
+// 指定闭区间[left,right]建立Merger.
+func NewSegmentTreeMerger(left, right int32) *SegmentTreeMerger {
+	return &SegmentTreeMerger{left: left, right: right}
+}
+
+// NewRoot().
+func (sm *SegmentTreeMerger) Alloc() *SegNode {
+	return &SegNode{value: e()}
+}
+
+// 权值线段树求第 k 小.
+// 调用前需保证 1 <= k <= node.value.
+func (sm *SegmentTreeMerger) Kth(node *SegNode, k int32, getCount func(node *SegNode) int32) (res int32, ok bool) {
+	if k < 1 || k > getCount(node) {
+		return
+	}
+	return sm._kth(k, node, sm.left, sm.right, getCount), true
+}
+
+func (sm *SegmentTreeMerger) Get(node *SegNode, index int32) E {
+	return sm._get(node, index, sm.left, sm.right)
+}
+
+func (sm *SegmentTreeMerger) Set(node *SegNode, index int32, value E) {
+	sm._set(node, index, value, sm.left, sm.right)
+}
+
+func (sm *SegmentTreeMerger) Query(node *SegNode, left, right int32) E {
+	return sm._query(node, left, right, sm.left, sm.right)
+}
+
+func (sm *SegmentTreeMerger) QueryAll(node *SegNode) E {
+	return sm._eval(node)
+}
+
+func (sm *SegmentTreeMerger) Update(node *SegNode, index int32, value E) {
+	sm._update(node, index, value, sm.left, sm.right)
+}
+
+// 用一个新的节点存合并的结果，会生成重合节点数量的新节点.
+func (sm *SegmentTreeMerger) Merge(a, b *SegNode) *SegNode {
+	return sm._merge(a, b, sm.left, sm.right)
+}
+
+// 把第二棵树直接合并到第一棵树上，比较省空间，缺点是会丢失合并前树的信息.
+func (sm *SegmentTreeMerger) MergeDestructively(a, b *SegNode) *SegNode {
+	return sm._mergeDestructively(a, b, sm.left, sm.right)
+}
+
+// 线段树分裂，将区间 [left,right] 从原树分离到 other 上, this 为原树的剩余部分.
+func (sm *SegmentTreeMerger) Split(node *SegNode, left, right int32) (this, other *SegNode) {
+	this, other = sm._split(node, nil, left, right, sm.left, sm.right)
+	return
+}
+
+func (sm *SegmentTreeMerger) _kth(k int32, node *SegNode, left, right int32, getCount func(*SegNode) int32) int32 {
+	if left == right {
+		return left
+	}
+	mid := (left + right) >> 1
+	leftCount := int32(0)
+	if node.leftChild != nil {
+		leftCount = getCount(node.leftChild)
+	}
+	if leftCount >= k {
+		return sm._kth(k, node.leftChild, left, mid, getCount)
+	} else {
+		return sm._kth(k-leftCount, node.rightChild, mid+1, right, getCount)
+	}
+}
+
+func (sm *SegmentTreeMerger) _get(node *SegNode, index int32, left, right int32) E {
+	if node == nil {
+		return e()
+	}
+	if left == right {
+		return node.value
+	}
+	mid := (left + right) >> 1
+	if index <= mid {
+		return sm._get(node.leftChild, index, left, mid)
+	} else {
+		return sm._get(node.rightChild, index, mid+1, right)
+	}
+}
+func (sm *SegmentTreeMerger) _query(node *SegNode, L, R int32, left, right int32) E {
+	if node == nil {
+		return e()
+	}
+	if L <= left && right <= R {
+		return node.value
+	}
+	mid := (left + right) >> 1
+	if R <= mid {
+		return sm._query(node.leftChild, L, R, left, mid)
+	}
+	if L > mid {
+		return sm._query(node.rightChild, L, R, mid+1, right)
+	}
+	return op(sm._query(node.leftChild, L, R, left, mid), sm._query(node.rightChild, L, R, mid+1, right))
+}
+
+func (sm *SegmentTreeMerger) _set(node *SegNode, index int32, value E, left, right int32) {
+	if left == right {
+		node.value = value
+		return
+	}
+	mid := (left + right) >> 1
+	if index <= mid {
+		if node.leftChild == nil {
+			node.leftChild = sm.Alloc()
+		}
+		sm._set(node.leftChild, index, value, left, mid)
+	} else {
+		if node.rightChild == nil {
+			node.rightChild = sm.Alloc()
+		}
+		sm._set(node.rightChild, index, value, mid+1, right)
+	}
+	node.value = op(sm._eval(node.leftChild), sm._eval(node.rightChild))
+}
+
+func (sm *SegmentTreeMerger) _update(node *SegNode, index int32, value E, left, right int32) {
+	if left == right {
+		node.value = op(node.value, value)
+		return
+	}
+	mid := (left + right) >> 1
+	if index <= mid {
+		if node.leftChild == nil {
+			node.leftChild = sm.Alloc()
+		}
+		sm._update(node.leftChild, index, value, left, mid)
+	} else {
+		if node.rightChild == nil {
+			node.rightChild = sm.Alloc()
+		}
+		sm._update(node.rightChild, index, value, mid+1, right)
+	}
+	node.value = op(sm._eval(node.leftChild), sm._eval(node.rightChild))
+}
+
+func (sm *SegmentTreeMerger) _merge(a, b *SegNode, left, right int32) *SegNode {
+	if a == nil || b == nil {
+		if a == nil {
+			return b
+		}
+		return a
+	}
+	newNode := sm.Alloc()
+	if left == right {
+		newNode.value = merge(a.value, b.value)
+		return newNode
+	}
+	mid := (left + right) >> 1
+	newNode.leftChild = sm._merge(a.leftChild, b.leftChild, left, mid)
+	newNode.rightChild = sm._merge(a.rightChild, b.rightChild, mid+1, right)
+	newNode.value = op(sm._eval(newNode.leftChild), sm._eval(newNode.rightChild))
+	return newNode
+}
+
+func (sm *SegmentTreeMerger) _mergeDestructively(a, b *SegNode, left, right int32) *SegNode {
+	if a == nil || b == nil {
+		if a == nil {
+			return b
+		}
+		return a
+	}
+	if left == right {
+		a.value = merge(a.value, b.value)
+		return a
+	}
+	mid := (left + right) >> 1
+	a.leftChild = sm._mergeDestructively(a.leftChild, b.leftChild, left, mid)
+	a.rightChild = sm._mergeDestructively(a.rightChild, b.rightChild, mid+1, right)
+	a.value = op(sm._eval(a.leftChild), sm._eval(a.rightChild))
+	return a
+}
+
+func (sm *SegmentTreeMerger) _split(a, b *SegNode, L, R int32, left, right int32) (*SegNode, *SegNode) {
+	if a == nil || L > right || R < left {
+		return a, nil
+	}
+	if L <= left && right <= R {
+		return nil, a
+	}
+	if b == nil {
+		b = sm.Alloc()
+	}
+	mid := (left + right) >> 1
+	a.leftChild, b.leftChild = sm._split(a.leftChild, b.leftChild, L, R, left, mid)
+	a.rightChild, b.rightChild = sm._split(a.rightChild, b.rightChild, L, R, mid+1, right)
+	a.value = op(sm._eval(a.leftChild), sm._eval(a.rightChild))
+	b.value = op(sm._eval(b.leftChild), sm._eval(b.rightChild))
+	return a, b
+}
+
+func (sm *SegmentTreeMerger) _eval(node *SegNode) E {
+	if node == nil {
+		return e()
+	}
+	return node.value
+}
+
+type Bitset []uint
+
+func NewBitset(n int32) Bitset    { return make(Bitset, n>>6+1) }
+func (b Bitset) Set(p int32)      { b[p>>6] |= 1 << (p & 63) }
+func (b Bitset) Has(p int32) bool { return b[p>>6]&(1<<(p&63)) != 0 }
+func (b Bitset) Reset(p int32)    { b[p>>6] &^= 1 << (p & 63) }
+func (b Bitset) Flip(p int32)     { b[p>>6] ^= 1 << (p & 63) }
+
 func abs32(a int32) int32 {
 	if a < 0 {
 		return -a
@@ -274,11 +510,14 @@ func main() {
 	// P4081()
 	// P6139()
 
-	bzoj3926()
+	// bzoj3926()
 	// SP8093()
 
+	// CF204E()
+	// CF204E线段树合并()
 	// CF316G3()
 	// CF427D()
+	CF452E()
 }
 
 // P3181 [HAOI2016] 找相同字符 (分别维护不同串的 size)
@@ -531,6 +770,175 @@ func SP8093() {
 	}
 }
 
+// Little Elephant and Strings (广义SAM根号技巧 + 记忆化dfs预处理)
+// https://www.luogu.com.cn/problem/CF204E
+// 给定n个字符串，对每个字符串，求出它有多少个子串属于至少k个字符串.
+//
+// - 标记时，使用 visitedTime 保证一个字符串的多个子串对同一个endPos只标记一次，复杂度O(Lsqrt(L)).
+// - 查询时，先预处理出合法的endPosCount个数，再一边转移一边查询.
+func CF204E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, k int32
+	fmt.Fscan(in, &n, &k)
+	words := make([]string, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &words[i])
+	}
+
+	sam := NewSuffixAutomatonGeneral()
+	for _, v := range words {
+		sam.AddString(v)
+	}
+
+	size := sam.Size()
+	nodes := sam.Nodes
+	belongCount := make([]int32, size) // 每个状态属于多少个原串
+	visitedTime := make([]int32, size)
+
+	// 对字符串t[i]的每个前缀，在后缀链接树上向上跳标记每个endPos，表示该endPos包含了t[i]的子串.
+	// 标记次数之和不超过O(Lsqrt(L)).
+	markChain := func(sid int32, pos int32) {
+		for pos > 0 && visitedTime[pos] != sid {
+			visitedTime[pos] = sid
+			belongCount[pos]++
+			pos = nodes[pos].Link
+		}
+	}
+
+	for i := int32(0); i < size; i++ {
+		visitedTime[i] = -1
+	}
+	// 标记所有文本串的子串.
+	for i, w := range words {
+		pos := int32(0)
+		for _, c := range w {
+			pos = nodes[pos].Next[c-OFFSET]
+			markChain(int32(i), pos)
+		}
+	}
+
+	// 查询每个字符串有多少个子串属于至少k个字符串.
+	// 注意不能暴力上跳，需要预处理从每个节点一直上跳获得的总合法子串个数.
+	memo := make([]int, size)
+	visited := make([]bool, size)
+	var dfs func(int32)
+	dfs = func(pos int32) {
+		if pos == 0 || visited[pos] {
+			return
+		}
+		visited[pos] = true
+		link := nodes[pos].Link
+		dfs(link)
+		memo[pos] += memo[link]
+	}
+	for i := int32(1); i < size; i++ {
+		if belongCount[i] >= k {
+			memo[i] = int(sam.DistinctSubstringAt(i))
+		}
+	}
+	for i := int32(1); i < size; i++ {
+		dfs(i)
+	}
+
+	res := make([]int, n)
+	for i, w := range words {
+		count := 0
+		pos := int32(0)
+		for _, c := range w {
+			pos = nodes[pos].Next[c-OFFSET]
+			count += memo[pos]
+		}
+		res[i] = count
+	}
+	for _, v := range res {
+		fmt.Fprint(out, v, " ")
+	}
+}
+
+// 将CF204E的markChain函数换成线段树合并处理.
+// 线段树合并更慢一些.
+func CF204E线段树合并() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, k int32
+	fmt.Fscan(in, &n, &k)
+	words := make([]string, n)
+	allLen := int32(0)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &words[i])
+		allLen += int32(len(words[i]))
+	}
+
+	sam := NewSuffixAutomatonGeneral()
+	seg := NewSegmentTreeMerger(0, n-1) // 维护每个endPos出现的字符串下标.
+	nodes := make([]*SegNode, allLen*2)
+	for i := range nodes {
+		nodes[i] = seg.Alloc()
+	}
+	for wi, v := range words {
+		pos := int32(0)
+		for _, c := range v {
+			pos = sam.Add(pos, c)
+			seg.Set(nodes[pos], int32(wi), 1)
+		}
+	}
+
+	size := sam.Size()
+	tree := sam.BuildTree()
+	isEndPosOk := make([]bool, size) // 状态属于>=k个原串则为ok.
+	var mergeEndPos func(int32)
+	mergeEndPos = func(cur int32) {
+		for _, next := range tree[cur] {
+			mergeEndPos(next)
+			nodes[cur] = seg.MergeDestructively(nodes[cur], nodes[next]) // 线段树合并
+		}
+		isEndPosOk[cur] = seg.QueryAll(nodes[cur]) >= k
+	}
+	mergeEndPos(0)
+
+	// 查询每个字符串有多少个子串属于至少k个字符串.
+	// 注意不能暴力上跳，需要预处理从每个节点一直上跳获得的总合法子串个数.
+	memo := make([]int, size)
+	visited := make([]bool, size)
+	var dfs func(int32)
+	dfs = func(pos int32) {
+		if pos == 0 || visited[pos] {
+			return
+		}
+		visited[pos] = true
+		link := sam.Nodes[pos].Link
+		dfs(link)
+		memo[pos] += memo[link]
+	}
+	for i := int32(1); i < size; i++ {
+		if isEndPosOk[i] {
+			memo[i] = int(sam.DistinctSubstringAt(i))
+		}
+	}
+	for i := int32(1); i < size; i++ {
+		dfs(i)
+	}
+
+	res := make([]int, n)
+	for i, w := range words {
+		count := 0
+		pos := int32(0)
+		for _, c := range w {
+			pos = sam.Nodes[pos].Next[c-OFFSET]
+			count += memo[pos]
+		}
+		res[i] = count
+	}
+	for _, v := range res {
+		fmt.Fprint(out, v, " ")
+	}
+}
+
 // Good Substrings
 // https://www.luogu.com.cn/problem/CF316G3
 // 给定一个文本串s和m个限制，问有多少个本质不同子串s'满足所有限制：
@@ -653,28 +1061,50 @@ func CF427D() {
 	}
 }
 
-// Little Elephant and Strings
-// https://www.luogu.com.cn/problem/CF204E
-func CF204E() {}
-
 // Three strings
 // https://www.luogu.com.cn/problem/CF452E
-func CF452E() {}
+//
+// 给定三个字符串s1,s2,s3，记最短串长度为L.
+// 对每个1<=len<=L，
+// 求三元组(i,j,k)的个数模1e9+7，满足s1[i:i+len-1]=s2[j:j+len-1]=s3[k:k+len-1].
+//
+// 先建一棵广义SAM，求出每个点可以到达的A,B,C的字串的个数，
+// 然后这个点贡献的值就是三个串分别的个数乘起来，发现一个点会对[minLen,maxLen]的答案都有贡献。
+// 差分求解即可.
+func CF452E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const MOD int32 = 1e9 + 7
+
+	var s1, s2, s3 string
+	fmt.Fscan(in, &s1, &s2, &s3)
+
+	L := min32(min32(int32(len(s1)), int32(len(s2))), int32(len(s3)))
+
+}
 
 // Forensic Examination [CF666E] (线段树合并维护 endPosSize)
 // https://www.luogu.com.cn/problem/CF666E
 // https://www.cnblogs.com/Troverld/p/14605742.html
 // https://codeforces.com/contest/666/submission/147767720
-func CF666E() {}
+func CF666E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+}
 
 // G. Death DBMS (死亡笔记数据库管理系统)
 // https://codeforces.com/problemset/problem/1437/G
-func CF1437G() {}
+func CF1437G() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-type Bitset []uint
-
-func NewBitset(n int32) Bitset    { return make(Bitset, n>>6+1) }
-func (b Bitset) Set(p int32)      { b[p>>6] |= 1 << (p & 63) }
-func (b Bitset) Has(p int32) bool { return b[p>>6]&(1<<(p&63)) != 0 }
-func (b Bitset) Reset(p int32)    { b[p>>6] &^= 1 << (p & 63) }
-func (b Bitset) Flip(p int32)     { b[p>>6] ^= 1 << (p & 63) }
+	var n int
+	fmt.Fscan(in, &n)
+}

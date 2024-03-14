@@ -44,7 +44,7 @@ func CF600E() {
 	}
 
 	res := make([]int, n)
-	roots := make([]*Node, n)
+	roots := make([]*SegNode, n)
 	seg := NewSegmentTreeMerger(0, n)
 	for i := int32(0); i < n; i++ {
 		roots[i] = seg.Alloc()
@@ -90,12 +90,12 @@ func merge(a, b E) E { // 合并两个不同的树的结点的函数
 	return a
 }
 
-type Node struct {
+type SegNode struct {
 	value                 E
-	leftChild, rightChild *Node
+	leftChild, rightChild *SegNode
 }
 
-func (n *Node) String() string {
+func (n *SegNode) String() string {
 	return fmt.Sprintf("%v", n.value)
 }
 
@@ -109,56 +109,56 @@ func NewSegmentTreeMerger(left, right int32) *SegmentTreeMerger {
 }
 
 // NewRoot().
-func (sm *SegmentTreeMerger) Alloc() *Node {
-	return &Node{value: e()}
+func (sm *SegmentTreeMerger) Alloc() *SegNode {
+	return &SegNode{value: e()}
 }
 
 // 权值线段树求第 k 小.
 // 调用前需保证 1 <= k <= node.value.
-func (sm *SegmentTreeMerger) Kth(node *Node, k int32, getCount func(node *Node) int32) (res int32, ok bool) {
+func (sm *SegmentTreeMerger) Kth(node *SegNode, k int32, getCount func(node *SegNode) int32) (res int32, ok bool) {
 	if k < 1 || k > getCount(node) {
 		return
 	}
 	return sm._kth(k, node, sm.left, sm.right, getCount), true
 }
 
-func (sm *SegmentTreeMerger) Get(node *Node, index int32) E {
+func (sm *SegmentTreeMerger) Get(node *SegNode, index int32) E {
 	return sm._get(node, index, sm.left, sm.right)
 }
 
-func (sm *SegmentTreeMerger) Set(node *Node, index int32, value E) {
+func (sm *SegmentTreeMerger) Set(node *SegNode, index int32, value E) {
 	sm._set(node, index, value, sm.left, sm.right)
 }
 
-func (sm *SegmentTreeMerger) Query(node *Node, left, right int32) E {
+func (sm *SegmentTreeMerger) Query(node *SegNode, left, right int32) E {
 	return sm._query(node, left, right, sm.left, sm.right)
 }
 
-func (sm *SegmentTreeMerger) QueryAll(node *Node) E {
+func (sm *SegmentTreeMerger) QueryAll(node *SegNode) E {
 	return sm._eval(node)
 }
 
-func (sm *SegmentTreeMerger) Update(node *Node, index int32, value E) {
+func (sm *SegmentTreeMerger) Update(node *SegNode, index int32, value E) {
 	sm._update(node, index, value, sm.left, sm.right)
 }
 
 // 用一个新的节点存合并的结果，会生成重合节点数量的新节点.
-func (sm *SegmentTreeMerger) Merge(a, b *Node) *Node {
+func (sm *SegmentTreeMerger) Merge(a, b *SegNode) *SegNode {
 	return sm._merge(a, b, sm.left, sm.right)
 }
 
 // 把第二棵树直接合并到第一棵树上，比较省空间，缺点是会丢失合并前树的信息.
-func (sm *SegmentTreeMerger) MergeDestructively(a, b *Node) *Node {
+func (sm *SegmentTreeMerger) MergeDestructively(a, b *SegNode) *SegNode {
 	return sm._mergeDestructively(a, b, sm.left, sm.right)
 }
 
 // 线段树分裂，将区间 [left,right] 从原树分离到 other 上, this 为原树的剩余部分.
-func (sm *SegmentTreeMerger) Split(node *Node, left, right int32) (this, other *Node) {
+func (sm *SegmentTreeMerger) Split(node *SegNode, left, right int32) (this, other *SegNode) {
 	this, other = sm._split(node, nil, left, right, sm.left, sm.right)
 	return
 }
 
-func (sm *SegmentTreeMerger) _kth(k int32, node *Node, left, right int32, getCount func(*Node) int32) int32 {
+func (sm *SegmentTreeMerger) _kth(k int32, node *SegNode, left, right int32, getCount func(*SegNode) int32) int32 {
 	if left == right {
 		return left
 	}
@@ -174,7 +174,7 @@ func (sm *SegmentTreeMerger) _kth(k int32, node *Node, left, right int32, getCou
 	}
 }
 
-func (sm *SegmentTreeMerger) _get(node *Node, index int32, left, right int32) E {
+func (sm *SegmentTreeMerger) _get(node *SegNode, index int32, left, right int32) E {
 	if node == nil {
 		return e()
 	}
@@ -188,7 +188,7 @@ func (sm *SegmentTreeMerger) _get(node *Node, index int32, left, right int32) E 
 		return sm._get(node.rightChild, index, mid+1, right)
 	}
 }
-func (sm *SegmentTreeMerger) _query(node *Node, L, R int32, left, right int32) E {
+func (sm *SegmentTreeMerger) _query(node *SegNode, L, R int32, left, right int32) E {
 	if node == nil {
 		return e()
 	}
@@ -205,7 +205,7 @@ func (sm *SegmentTreeMerger) _query(node *Node, L, R int32, left, right int32) E
 	return op(sm._query(node.leftChild, L, R, left, mid), sm._query(node.rightChild, L, R, mid+1, right))
 }
 
-func (sm *SegmentTreeMerger) _set(node *Node, index int32, value E, left, right int32) {
+func (sm *SegmentTreeMerger) _set(node *SegNode, index int32, value E, left, right int32) {
 	if left == right {
 		node.value = value
 		return
@@ -225,7 +225,7 @@ func (sm *SegmentTreeMerger) _set(node *Node, index int32, value E, left, right 
 	node.value = op(sm._eval(node.leftChild), sm._eval(node.rightChild))
 }
 
-func (sm *SegmentTreeMerger) _update(node *Node, index int32, value E, left, right int32) {
+func (sm *SegmentTreeMerger) _update(node *SegNode, index int32, value E, left, right int32) {
 	if left == right {
 		node.value = op(node.value, value)
 		return
@@ -245,7 +245,7 @@ func (sm *SegmentTreeMerger) _update(node *Node, index int32, value E, left, rig
 	node.value = op(sm._eval(node.leftChild), sm._eval(node.rightChild))
 }
 
-func (sm *SegmentTreeMerger) _merge(a, b *Node, left, right int32) *Node {
+func (sm *SegmentTreeMerger) _merge(a, b *SegNode, left, right int32) *SegNode {
 	if a == nil || b == nil {
 		if a == nil {
 			return b
@@ -264,7 +264,7 @@ func (sm *SegmentTreeMerger) _merge(a, b *Node, left, right int32) *Node {
 	return newNode
 }
 
-func (sm *SegmentTreeMerger) _mergeDestructively(a, b *Node, left, right int32) *Node {
+func (sm *SegmentTreeMerger) _mergeDestructively(a, b *SegNode, left, right int32) *SegNode {
 	if a == nil || b == nil {
 		if a == nil {
 			return b
@@ -282,7 +282,7 @@ func (sm *SegmentTreeMerger) _mergeDestructively(a, b *Node, left, right int32) 
 	return a
 }
 
-func (sm *SegmentTreeMerger) _split(a, b *Node, L, R int32, left, right int32) (*Node, *Node) {
+func (sm *SegmentTreeMerger) _split(a, b *SegNode, L, R int32, left, right int32) (*SegNode, *SegNode) {
 	if a == nil || L > right || R < left {
 		return a, nil
 	}
@@ -300,7 +300,7 @@ func (sm *SegmentTreeMerger) _split(a, b *Node, L, R int32, left, right int32) (
 	return a, b
 }
 
-func (sm *SegmentTreeMerger) _eval(node *Node) E {
+func (sm *SegmentTreeMerger) _eval(node *SegNode) E {
 	if node == nil {
 		return e()
 	}

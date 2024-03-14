@@ -1,5 +1,9 @@
 // 后缀树是一种维护一个字符串所有后缀的数据结构, 同时也是后缀数组矩形区域构成的树.
 // 后缀树的本质是后缀trie树的虚树.
+//
+// 优点：适合处理字典序问题(按照dfs序遍历后缀树就是按照字典序遍历子串)
+// 缺点：不如SAM灵活
+//
 // https://maspypy.github.io/library/string/suffix_tree.hpp
 // https://www.luogu.com.cn/blog/EternalAlexander/xuan-ku-hou-zhui-shu-mo-shu
 // https://oi-wiki.org/string/suffix-tree/
@@ -96,13 +100,12 @@ import (
 )
 
 func main() {
-	// demo()
+	demo()
 
 	// cf123d()
 	// cf427d()
 	// cf802I()
 	// cf873F()
-	cf1073g()
 
 	// P3181()
 	// p3804()
@@ -122,6 +125,7 @@ func demo() {
 	fmt.Println(suffixTree, ranges)
 	start, end := RecoverSubstring(sa, 3, 1, 3)
 	fmt.Println(s[start:end])
+	fmt.Println(LocateSuffixes(int32(len(s)), suffixTree, ranges))
 }
 
 // CF123D String
@@ -266,63 +270,6 @@ func cf873F() {
 		res = max(res, freq*length)
 	}
 	fmt.Fprintln(out, res)
-}
-
-// Yet Another LCP Problem (后缀树+虚树)
-// https://www.luogu.com.cn/problem/CF1073G
-// 给定一个长为n的字符串s和q次询问.
-// 每次询问给出两个数组A和B，求两两后缀最长公共前缀之和 ∑lcp(s[A[i]:], s[B[j]:]).
-//
-// 看到∑，想虚树
-// LCP 问题可以转化成后缀树上的 lca 问题，然后就可以建虚树，枚举 lca 即可.
-func cf1073g() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	var s string
-	fmt.Fscan(in, &s)
-
-	sa, _, height := SuffixArray32(n, func(i int32) int32 { return int32(s[i]) })
-	tree, ranges := SuffixTreeFrom(sa, height)
-	rawTree := NewTree32From(tree)
-
-	visited := make([]bool, len(tree))
-	for i := range visited {
-		visited[i] = false
-	}
-	query := func(qi int32, nums1, nums2 []int32) int {
-		points := append(nums1, nums2...)
-		for _, v := range points {
-			visited[v] = true
-		}
-		rawId, newTree := CompressTree32(rawTree, points, true)
-		m := len(rawId)
-		inCriticals := make([]bool, m) // !压缩后的树中的节点是否在points中
-		for i := 0; i < m; i++ {
-			inCriticals[i] = visited[rawId[i]]
-		}
-
-		for _, v := range points {
-			visited[v] = false
-		}
-	}
-
-	for i := int32(0); i < q; i++ {
-		var n1, n2 int32
-		fmt.Fscan(in, &n1, &n2)
-		nums1 := make([]int32, n1)
-		for j := int32(0); j < n1; j++ {
-			fmt.Fscan(in, &nums1[j])
-		}
-		nums2 := make([]int32, n2)
-		for j := int32(0); j < n2; j++ {
-			fmt.Fscan(in, &nums2[j])
-		}
-		fmt.Fprintln(out, query(i, nums1, nums2))
-	}
 }
 
 // P3181 [HAOI2016] 找相同字符
@@ -744,6 +691,27 @@ func SuffixTreeFrom(sa, height []int32) (directedTree [][]int32, ranges [][4]int
 func RecoverSubstring(sa []int32, row int32, colStart, colEnd int32) (start, end int32) {
 	start = sa[row] + colStart
 	end = sa[row] + colEnd
+	return
+}
+
+func LocateSuffixes(n int32, suffixTree [][]int32, ranges [][4]int32) (pos []int32) {
+	pos = make([]int32, n)
+	var dfs func(int32)
+	dfs = func(cur int32) {
+		isLeaf := len(suffixTree[cur]) == 0
+		if isLeaf {
+			rowStart, rowEnd := ranges[cur][0], ranges[cur][1]
+			fmt.Println(cur, rowStart, rowEnd, "*")
+			for i := rowStart; i < rowEnd; i++ {
+				pos[i] = cur
+			}
+		} else {
+			for _, v := range suffixTree[cur] {
+				dfs(v)
+			}
+		}
+	}
+	dfs(0)
 	return
 }
 
