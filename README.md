@@ -31,6 +31,7 @@
    - [PalindromicTree](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%9B%9E%E6%96%87%E6%A0%91/PalindromicTree.go)
    - [SuffixTree](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E6%A0%91/SuffixTree.go)
    - [SuffixAutomaton](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BASAM/SuffixAutomaton.go)
+   - [SuffixAutomatonGeneral](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BASAM/%E5%B9%BF%E4%B9%89%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BA.go)
 
 1. **Stack**
 

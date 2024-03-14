@@ -41,8 +41,8 @@ func CF1009F() {
 		tree[v] = append(tree[v], u)
 	}
 
-	seg := NewSegmentTreeOnRange(0, n)
-	roots := make([]*Node, n)
+	seg := NewSegmentTreeOnRangeWithIndex(0, n)
+	roots := make([]*SegNode2, n)
 	for i := int32(0); i < n; i++ {
 		roots[i] = seg.Alloc()
 	}
@@ -95,8 +95,8 @@ func P4556() {
 		tree[v] = append(tree[v], u)
 	}
 
-	seg := NewSegmentTreeOnRange(0, MAX)
-	roots := make([]*Node, n)
+	seg := NewSegmentTreeOnRangeWithIndex(0, MAX)
+	roots := make([]*SegNode2, n)
 	for i := int32(0); i < n; i++ {
 		roots[i] = seg.Alloc()
 	}
@@ -140,71 +140,72 @@ func P4556() {
 	}
 }
 
+// !注意不存在的情况(maxCount=0).
 type MaxCount = int32
-type Node struct {
+type SegNode2 struct {
 	MaxCount              MaxCount // 出现次数最多的权值出现的次数.
 	MaxIndex              int32    // 出现次数最多的权值.
-	leftChild, rightChild *Node
+	leftChild, rightChild *SegNode2
 }
 
-func (n *Node) String() string {
+func (n *SegNode2) String() string {
 	return fmt.Sprintf("%v", n.MaxCount)
 }
 
-type SegmentTreeOnRange struct {
+type SegmentTreeOnRangeWithIndex struct {
 	min, max int32
 }
 
 // 指定闭区间[min,max]建立权值线段树.
-func NewSegmentTreeOnRange(min, max int32) *SegmentTreeOnRange {
-	return &SegmentTreeOnRange{min: min, max: max}
+func NewSegmentTreeOnRangeWithIndex(min, max int32) *SegmentTreeOnRangeWithIndex {
+	return &SegmentTreeOnRangeWithIndex{min: min, max: max}
 }
 
 // NewRoot().
-func (sm *SegmentTreeOnRange) Alloc() *Node {
-	return &Node{}
+func (sm *SegmentTreeOnRangeWithIndex) Alloc() *SegNode2 {
+	return &SegNode2{}
 }
 
-func (sm *SegmentTreeOnRange) Get(node *Node, index int32) MaxCount {
+func (sm *SegmentTreeOnRangeWithIndex) Get(node *SegNode2, index int32) MaxCount {
 	return sm._get(node, index, sm.min, sm.max)
 }
 
-func (sm *SegmentTreeOnRange) Set(node *Node, index int32, count MaxCount) {
+func (sm *SegmentTreeOnRangeWithIndex) Set(node *SegNode2, index int32, count MaxCount) {
 	sm._set(node, index, count, sm.min, sm.max)
 }
 
-func (sm *SegmentTreeOnRange) Query(node *Node, left, right int32) (maxCount MaxCount, maxIndex int32) {
+func (sm *SegmentTreeOnRangeWithIndex) Query(node *SegNode2, left, right int32) (maxCount MaxCount, maxIndex int32) {
 	return sm._query(node, left, right, sm.min, sm.max)
 }
 
-func (sm *SegmentTreeOnRange) QueryAll(node *Node) (maxCount MaxCount, maxIndex int32) {
+func (sm *SegmentTreeOnRangeWithIndex) QueryAll(node *SegNode2) (maxCount MaxCount, maxIndex int32) {
 	if node == nil {
 		return
 	}
 	return node.MaxCount, node.MaxIndex
 }
 
-func (sm *SegmentTreeOnRange) Add(node *Node, index int32, count MaxCount) {
+func (sm *SegmentTreeOnRangeWithIndex) Add(node *SegNode2, index int32, count MaxCount) {
 	sm._update(node, index, count, sm.min, sm.max)
 }
 
 // 用一个新的节点存合并的结果，会生成重合节点数量的新节点.
-func (sm *SegmentTreeOnRange) Merge(a, b *Node) *Node {
+func (sm *SegmentTreeOnRangeWithIndex) Merge(a, b *SegNode2) *SegNode2 {
 	return sm._merge(a, b, sm.min, sm.max)
 }
 
 // 把第二棵树直接合并到第一棵树上，比较省空间，缺点是会丢失合并前树的信息.
-func (sm *SegmentTreeOnRange) MergeDestructively(a, b *Node) *Node {
+func (sm *SegmentTreeOnRangeWithIndex) MergeDestructively(a, b *SegNode2) *SegNode2 {
 	return sm._mergeDestructively(a, b, sm.min, sm.max)
 }
 
 // 线段树分裂，将区间 [left,right] 从原树分离到 other 上, this 为原树的剩余部分.
-func (sm *SegmentTreeOnRange) Split(node *Node, left, right int32) (this, other *Node) {
+func (sm *SegmentTreeOnRangeWithIndex) Split(node *SegNode2, left, right int32) (this, other *SegNode2) {
 	this, other = sm._split(node, nil, left, right, sm.min, sm.max)
 	return
 }
 
-func (sm *SegmentTreeOnRange) _get(node *Node, index int32, left, right int32) MaxCount {
+func (sm *SegmentTreeOnRangeWithIndex) _get(node *SegNode2, index int32, left, right int32) MaxCount {
 	if node == nil {
 		return 0
 	}
@@ -219,7 +220,7 @@ func (sm *SegmentTreeOnRange) _get(node *Node, index int32, left, right int32) M
 	}
 }
 
-func (sm *SegmentTreeOnRange) _query(node *Node, L, R int32, left, right int32) (maxCount MaxCount, maxIndex int32) {
+func (sm *SegmentTreeOnRangeWithIndex) _query(node *SegNode2, L, R int32, left, right int32) (maxCount MaxCount, maxIndex int32) {
 	if node == nil {
 		return
 	}
@@ -247,7 +248,7 @@ func (sm *SegmentTreeOnRange) _query(node *Node, L, R int32, left, right int32) 
 	}
 }
 
-func (sm *SegmentTreeOnRange) _set(node *Node, index int32, count MaxCount, left, right int32) {
+func (sm *SegmentTreeOnRangeWithIndex) _set(node *SegNode2, index int32, count MaxCount, left, right int32) {
 	if left == right {
 		node.MaxCount = count
 		node.MaxIndex = left
@@ -268,7 +269,7 @@ func (sm *SegmentTreeOnRange) _set(node *Node, index int32, count MaxCount, left
 	sm._pushUp(node)
 }
 
-func (sm *SegmentTreeOnRange) _update(node *Node, index int32, count MaxCount, left, right int32) {
+func (sm *SegmentTreeOnRangeWithIndex) _update(node *SegNode2, index int32, count MaxCount, left, right int32) {
 	if left == right {
 		node.MaxCount += count
 		node.MaxIndex = left
@@ -289,7 +290,7 @@ func (sm *SegmentTreeOnRange) _update(node *Node, index int32, count MaxCount, l
 	sm._pushUp(node)
 }
 
-func (sm *SegmentTreeOnRange) _merge(a, b *Node, left, right int32) *Node {
+func (sm *SegmentTreeOnRangeWithIndex) _merge(a, b *SegNode2, left, right int32) *SegNode2 {
 	if a == nil || b == nil {
 		if a == nil {
 			return b
@@ -309,7 +310,7 @@ func (sm *SegmentTreeOnRange) _merge(a, b *Node, left, right int32) *Node {
 	return newNode
 }
 
-func (sm *SegmentTreeOnRange) _mergeDestructively(a, b *Node, left, right int32) *Node {
+func (sm *SegmentTreeOnRangeWithIndex) _mergeDestructively(a, b *SegNode2, left, right int32) *SegNode2 {
 	if a == nil || b == nil {
 		if a == nil {
 			return b
@@ -328,7 +329,7 @@ func (sm *SegmentTreeOnRange) _mergeDestructively(a, b *Node, left, right int32)
 	return a
 }
 
-func (sm *SegmentTreeOnRange) _split(a, b *Node, L, R int32, left, right int32) (*Node, *Node) {
+func (sm *SegmentTreeOnRangeWithIndex) _split(a, b *SegNode2, L, R int32, left, right int32) (*SegNode2, *SegNode2) {
 	if a == nil || L > right || R < left {
 		return a, nil
 	}
@@ -346,14 +347,14 @@ func (sm *SegmentTreeOnRange) _split(a, b *Node, L, R int32, left, right int32) 
 	return a, b
 }
 
-func (sm *SegmentTreeOnRange) _evelCount(node *Node) MaxCount {
+func (sm *SegmentTreeOnRangeWithIndex) _evelCount(node *SegNode2) MaxCount {
 	if node == nil {
 		return 0
 	}
 	return node.MaxCount
 }
 
-func (sm *SegmentTreeOnRange) _pushUp(node *Node) {
+func (sm *SegmentTreeOnRangeWithIndex) _pushUp(node *SegNode2) {
 	left, right := node.leftChild, node.rightChild
 	b1, b2 := left == nil, right == nil
 	if b1 || b2 {

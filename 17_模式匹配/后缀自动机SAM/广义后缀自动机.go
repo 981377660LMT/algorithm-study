@@ -40,6 +40,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/bits"
 	"os"
 )
 
@@ -55,6 +56,8 @@ type Node struct {
 type SuffixAutomatonGeneral struct {
 	Nodes []*Node
 	n     int32 // 当前字符串长度
+
+	doubling *DoublingSimple
 }
 
 func NewSuffixAutomatonGeneral() *SuffixAutomatonGeneral {
@@ -126,10 +129,13 @@ func (sam *SuffixAutomatonGeneral) Add(lastPos int32, char int32) int32 {
 	return newNode
 }
 
-func (sam *SuffixAutomatonGeneral) AddString(s string) (lastPos int32) {
+func (sam *SuffixAutomatonGeneral) AddString(s string, prefixEndFn func(i, pos int32)) (lastPos int32) {
 	lastPos = 0
-	for _, c := range s {
+	for i, c := range s {
 		lastPos = sam.Add(lastPos, c)
+		if prefixEndFn != nil {
+			prefixEndFn(int32(i), lastPos)
+		}
 	}
 	return
 }
@@ -200,6 +206,16 @@ func (sam *SuffixAutomatonGeneral) GetEndPosSize(dfsOrder []int32, isPrefix func
 	return endPosSize
 }
 
+// 给定子串的起始位置和结束位置，返回子串在fail树上的位置.
+// 快速定位子串, 可以与其它字符串算法配合使用.
+// 倍增往上跳到 MaxLen>=end-start 的最后一个节点.
+// start: 子串起始位置, end: 子串结束位置, endPosOfEnd: 子串结束位置在fail树上的位置.
+func (sam *SuffixAutomatonGeneral) LocateSubstring(start, end int32, endPosOfEnd int32) (pos int32) {
+	target := end - start
+	_, pos = sam.Doubling().MaxStep(endPosOfEnd, func(p int32) bool { return sam.Nodes[p].MaxLen >= target })
+	return
+}
+
 func (sam *SuffixAutomatonGeneral) DistinctSubstringAt(pos int32) int32 {
 	if pos == 0 {
 		return 0
@@ -226,6 +242,20 @@ func (sam *SuffixAutomatonGeneral) GetPos(pattern string) (pos int32, ok bool) {
 		}
 	}
 	return pos, true
+}
+
+// 后缀连接树上倍增.
+func (sam *SuffixAutomatonGeneral) Doubling() *DoublingSimple {
+	if sam.doubling == nil {
+		size := sam.Size()
+		doubling := NewDoubling(size, int(size))
+		for i := int32(1); i < size; i++ {
+			doubling.Add(i, sam.Nodes[i].Link)
+		}
+		doubling.Build()
+		sam.doubling = doubling
+	}
+	return sam.doubling
 }
 
 func (sam *SuffixAutomatonGeneral) newNode(link, maxLen int32) *Node {
@@ -463,6 +493,319 @@ func (sm *SegmentTreeMerger) _eval(node *SegNode) E {
 	return node.value
 }
 
+// !注意不存在的情况(maxCount=0).
+type MaxCount = int32
+type SegNode2 struct {
+	MaxCount              MaxCount // 出现次数最多的权值出现的次数.
+	MaxIndex              int32    // 出现次数最多的权值.如果有多个，取最小的.
+	leftChild, rightChild *SegNode2
+}
+
+func (n *SegNode2) String() string {
+	return fmt.Sprintf("%v", n.MaxCount)
+}
+
+type SegmentTreeOnRangeWithIndex struct {
+	min, max int32
+}
+
+// 指定闭区间[min,max]建立权值线段树.
+func NewSegmentTreeOnRangeWithIndex(min, max int32) *SegmentTreeOnRangeWithIndex {
+	return &SegmentTreeOnRangeWithIndex{min: min, max: max}
+}
+
+// NewRoot().
+func (sm *SegmentTreeOnRangeWithIndex) Alloc() *SegNode2 {
+	return &SegNode2{}
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) Get(node *SegNode2, index int32) MaxCount {
+	return sm._get(node, index, sm.min, sm.max)
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) Set(node *SegNode2, index int32, count MaxCount) {
+	sm._set(node, index, count, sm.min, sm.max)
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) Query(node *SegNode2, left, right int32) (maxCount MaxCount, maxIndex int32) {
+	return sm._query(node, left, right, sm.min, sm.max)
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) QueryAll(node *SegNode2) (maxCount MaxCount, maxIndex int32) {
+	if node == nil {
+		return
+	}
+	return node.MaxCount, node.MaxIndex
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) Add(node *SegNode2, index int32, count MaxCount) {
+	sm._update(node, index, count, sm.min, sm.max)
+}
+
+// 用一个新的节点存合并的结果，会生成重合节点数量的新节点.
+func (sm *SegmentTreeOnRangeWithIndex) Merge(a, b *SegNode2) *SegNode2 {
+	return sm._merge(a, b, sm.min, sm.max)
+}
+
+// 把第二棵树直接合并到第一棵树上，比较省空间，缺点是会丢失合并前树的信息.
+func (sm *SegmentTreeOnRangeWithIndex) MergeDestructively(a, b *SegNode2) *SegNode2 {
+	return sm._mergeDestructively(a, b, sm.min, sm.max)
+}
+
+// 线段树分裂，将区间 [left,right] 从原树分离到 other 上, this 为原树的剩余部分.
+func (sm *SegmentTreeOnRangeWithIndex) Split(node *SegNode2, left, right int32) (this, other *SegNode2) {
+	this, other = sm._split(node, nil, left, right, sm.min, sm.max)
+	return
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) _get(node *SegNode2, index int32, left, right int32) MaxCount {
+	if node == nil {
+		return 0
+	}
+	if left == right {
+		return node.MaxCount
+	}
+	mid := (left + right) >> 1
+	if index <= mid {
+		return sm._get(node.leftChild, index, left, mid)
+	} else {
+		return sm._get(node.rightChild, index, mid+1, right)
+	}
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) _query(node *SegNode2, L, R int32, left, right int32) (maxCount MaxCount, maxIndex int32) {
+	if node == nil {
+		return
+	}
+	if L <= left && right <= R {
+		return node.MaxCount, node.MaxIndex
+	}
+	mid := (left + right) >> 1
+	if R <= mid {
+		return sm._query(node.leftChild, L, R, left, mid)
+	}
+	if L > mid {
+		return sm._query(node.rightChild, L, R, mid+1, right)
+	}
+	c1, i1 := sm._query(node.leftChild, L, R, left, mid)
+	c2, i2 := sm._query(node.rightChild, L, R, mid+1, right)
+	if c1 > c2 {
+		return c1, i1
+	} else if c1 < c2 {
+		return c2, i2
+	}
+	if i1 <= i2 {
+		return c1, i1
+	} else {
+		return c2, i2
+	}
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) _set(node *SegNode2, index int32, count MaxCount, left, right int32) {
+	if left == right {
+		node.MaxCount = count
+		node.MaxIndex = left
+		return
+	}
+	mid := (left + right) >> 1
+	if index <= mid {
+		if node.leftChild == nil {
+			node.leftChild = sm.Alloc()
+		}
+		sm._set(node.leftChild, index, count, left, mid)
+	} else {
+		if node.rightChild == nil {
+			node.rightChild = sm.Alloc()
+		}
+		sm._set(node.rightChild, index, count, mid+1, right)
+	}
+	sm._pushUp(node)
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) _update(node *SegNode2, index int32, count MaxCount, left, right int32) {
+	if left == right {
+		node.MaxCount += count
+		node.MaxIndex = left
+		return
+	}
+	mid := (left + right) >> 1
+	if index <= mid {
+		if node.leftChild == nil {
+			node.leftChild = sm.Alloc()
+		}
+		sm._update(node.leftChild, index, count, left, mid)
+	} else {
+		if node.rightChild == nil {
+			node.rightChild = sm.Alloc()
+		}
+		sm._update(node.rightChild, index, count, mid+1, right)
+	}
+	sm._pushUp(node)
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) _merge(a, b *SegNode2, left, right int32) *SegNode2 {
+	if a == nil || b == nil {
+		if a == nil {
+			return b
+		}
+		return a
+	}
+	newNode := sm.Alloc()
+	if left == right {
+		newNode.MaxCount = a.MaxCount + b.MaxCount
+		newNode.MaxIndex = left
+		return newNode
+	}
+	mid := (left + right) >> 1
+	newNode.leftChild = sm._merge(a.leftChild, b.leftChild, left, mid)
+	newNode.rightChild = sm._merge(a.rightChild, b.rightChild, mid+1, right)
+	sm._pushUp(newNode)
+	return newNode
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) _mergeDestructively(a, b *SegNode2, left, right int32) *SegNode2 {
+	if a == nil || b == nil {
+		if a == nil {
+			return b
+		}
+		return a
+	}
+	if left == right {
+		a.MaxCount += b.MaxCount
+		a.MaxIndex = left
+		return a
+	}
+	mid := (left + right) >> 1
+	a.leftChild = sm._mergeDestructively(a.leftChild, b.leftChild, left, mid)
+	a.rightChild = sm._mergeDestructively(a.rightChild, b.rightChild, mid+1, right)
+	sm._pushUp(a)
+	return a
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) _split(a, b *SegNode2, L, R int32, left, right int32) (*SegNode2, *SegNode2) {
+	if a == nil || L > right || R < left {
+		return a, nil
+	}
+	if L <= left && right <= R {
+		return nil, a
+	}
+	if b == nil {
+		b = sm.Alloc()
+	}
+	mid := (left + right) >> 1
+	a.leftChild, b.leftChild = sm._split(a.leftChild, b.leftChild, L, R, left, mid)
+	a.rightChild, b.rightChild = sm._split(a.rightChild, b.rightChild, L, R, mid+1, right)
+	sm._pushUp(a)
+	sm._pushUp(b)
+	return a, b
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) _evelCount(node *SegNode2) MaxCount {
+	if node == nil {
+		return 0
+	}
+	return node.MaxCount
+}
+
+func (sm *SegmentTreeOnRangeWithIndex) _pushUp(node *SegNode2) {
+	left, right := node.leftChild, node.rightChild
+	b1, b2 := left == nil, right == nil
+	if b1 || b2 {
+		if b1 && b2 {
+			return
+		}
+		if b1 {
+			node.MaxCount = right.MaxCount
+			node.MaxIndex = right.MaxIndex
+		} else {
+			node.MaxCount = left.MaxCount
+			node.MaxIndex = left.MaxIndex
+		}
+	} else {
+		if left.MaxCount > right.MaxCount {
+			node.MaxCount = left.MaxCount
+			node.MaxIndex = left.MaxIndex
+		} else if left.MaxCount < right.MaxCount {
+			node.MaxCount = right.MaxCount
+			node.MaxIndex = right.MaxIndex
+		} else {
+			if left.MaxIndex <= right.MaxIndex {
+				node.MaxCount = left.MaxCount
+				node.MaxIndex = left.MaxIndex
+			} else {
+				node.MaxCount = right.MaxCount
+				node.MaxIndex = right.MaxIndex
+			}
+		}
+	}
+}
+
+type DoublingSimple struct {
+	n   int32
+	log int32
+	to  []int32
+}
+
+func NewDoubling(n int32, maxStep int) *DoublingSimple {
+	res := &DoublingSimple{n: n, log: int32(bits.Len(uint(maxStep)))}
+	size := n * res.log
+	res.to = make([]int32, size)
+	for i := int32(0); i < size; i++ {
+		res.to[i] = -1
+	}
+	return res
+}
+
+func (d *DoublingSimple) Add(from, to int32) {
+	d.to[from] = to
+}
+
+func (d *DoublingSimple) Build() {
+	n := d.n
+	for k := int32(0); k < d.log-1; k++ {
+		for v := int32(0); v < n; v++ {
+			w := d.to[k*n+v]
+			next := (k+1)*n + v
+			if w == -1 {
+				d.to[next] = -1
+				continue
+			}
+			d.to[next] = d.to[k*n+w]
+		}
+	}
+}
+
+// 求从 `from` 状态开始转移 `step` 次的最终状态的编号。
+// 不存在时返回 -1。
+func (d *DoublingSimple) Jump(from int32, step int) (to int32) {
+	to = from
+	for k := int32(0); k < d.log; k++ {
+		if to == -1 {
+			return
+		}
+		if step&(1<<k) != 0 {
+			to = d.to[k*d.n+to]
+		}
+	}
+	return
+}
+
+// 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号。
+func (d *DoublingSimple) MaxStep(from int32, check func(next int32) bool) (step int, to int32) {
+	for k := d.log - 1; k >= 0; k-- {
+		tmp := d.to[k*d.n+from]
+		if tmp == -1 {
+			continue
+		}
+		if check(tmp) {
+			step |= 1 << k
+			from = tmp
+		}
+	}
+	to = from
+	return
+}
+
 type Bitset []uint
 
 func NewBitset(n int32) Bitset    { return make(Bitset, n>>6+1) }
@@ -517,7 +860,8 @@ func main() {
 	// CF204E线段树合并()
 	// CF316G3()
 	// CF427D()
-	CF452E()
+	// CF452E()
+	// CF666E()
 }
 
 // P3181 [HAOI2016] 找相同字符 (分别维护不同串的 size)
@@ -583,7 +927,7 @@ func P4081() {
 
 	sam := NewSuffixAutomatonGeneral()
 	for _, v := range words {
-		sam.AddString(v)
+		sam.AddString(v, nil)
 	}
 
 	size := sam.Size()
@@ -643,7 +987,7 @@ func P6139() {
 	for i := 0; i < n; i++ {
 		var s string
 		fmt.Fscan(in, &s)
-		sam.AddString(s)
+		sam.AddString(s, nil)
 	}
 	fmt.Fprintln(out, sam.DistinctSubstring())
 	fmt.Fprintln(out, sam.Size())
@@ -723,7 +1067,7 @@ func SP8093() {
 
 	sam := NewSuffixAutomatonGeneral()
 	for _, v := range texts {
-		sam.AddString(v)
+		sam.AddString(v, nil)
 	}
 
 	size := sam.Size()
@@ -790,7 +1134,7 @@ func CF204E() {
 
 	sam := NewSuffixAutomatonGeneral()
 	for _, v := range words {
-		sam.AddString(v)
+		sam.AddString(v, nil)
 	}
 
 	size := sam.Size()
@@ -1076,35 +1420,113 @@ func CF452E() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	const MOD int32 = 1e9 + 7
+	const MOD int = 1e9 + 7
 
 	var s1, s2, s3 string
 	fmt.Fscan(in, &s1, &s2, &s3)
 
 	L := min32(min32(int32(len(s1)), int32(len(s2))), int32(len(s3)))
 
+	maxSize := int32(2 * (len(s1) + len(s2) + len(s3)))
+	isPrefix := [3]Bitset{NewBitset(maxSize), NewBitset(maxSize), NewBitset(maxSize)}
+	sam := NewSuffixAutomatonGeneral()
+	for i, s := range []string{s1, s2, s3} {
+		pos := int32(0)
+		for _, c := range s {
+			pos = sam.Add(pos, c)
+			isPrefix[i].Set(pos)
+		}
+	}
+	size := sam.Size()
+	dfsOrder := sam.GetDfsOrder()
+	endPosSize := [3][]int32{nil, nil, nil}
+	for i := range endPosSize {
+		endPosSize[i] = sam.GetEndPosSize(dfsOrder, isPrefix[i].Has)
+	}
+
+	diff := make([]int, size+1)
+	for i := int32(1); i < size; i++ {
+		mul := int(endPosSize[0][i]) * int(endPosSize[1][i]) % MOD * int(endPosSize[2][i]) % MOD
+		link := sam.Nodes[i].Link
+		minLen, maxLen := sam.Nodes[link].MaxLen+1, sam.Nodes[i].MaxLen
+		diff[minLen] = (diff[minLen] + mul) % MOD
+		diff[maxLen+1] = (diff[maxLen+1] - mul + MOD) % MOD
+	}
+	for i := int32(1); i <= L; i++ {
+		diff[i] = (diff[i] + diff[i-1]) % MOD
+	}
+	for i := int32(1); i <= L; i++ {
+		fmt.Fprint(out, diff[i], " ")
+	}
 }
 
 // Forensic Examination [CF666E] (线段树合并维护 endPosSize)
 // https://www.luogu.com.cn/problem/CF666E
-// https://www.cnblogs.com/Troverld/p/14605742.html
-// https://codeforces.com/contest/666/submission/147767720
+// 给定一个字符串s和n个字符串words[i].
+// 处理q个查询，每次查询s[start1:end1)在words[start2:end2)的哪个串里出现次数最多.
+// 如果出现次数相同，返回最小的下标，并输出出现次数.
+//
+// 1.所有串建立广义SAM.
+// 2.对每个查询，倍增定位s[start1:end1)在fail树上的位置.
+// 3.利用线段树合并求出每个endPos的(最大出现次数，最小下标)。
 func CF666E() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
+	var s string
+	fmt.Fscan(in, &s)
+	var n int32
 	fmt.Fscan(in, &n)
-}
 
-// G. Death DBMS (死亡笔记数据库管理系统)
-// https://codeforces.com/problemset/problem/1437/G
-func CF1437G() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+	allLen := int32(len(s))
+	words := make([]string, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &words[i])
+		allLen += int32(len(words[i]))
+	}
 
-	var n int
-	fmt.Fscan(in, &n)
+	sam := NewSuffixAutomatonGeneral()
+	prefixEnd := make([]int32, len(s))
+	sam.AddString(s, func(i, pos int32) { prefixEnd[i] = pos })
+
+	seg := NewSegmentTreeOnRangeWithIndex(0, n-1)
+	nodes := make([]*SegNode2, 2*allLen)
+	for i := range nodes {
+		nodes[i] = seg.Alloc()
+	}
+	for wi, w := range words {
+		sam.AddString(w, func(_, pos int32) { seg.Set(nodes[pos], int32(wi), 1) })
+	}
+	dfsOrder := sam.GetDfsOrder()
+	for i := sam.Size() - 1; i >= 1; i-- {
+		cur := dfsOrder[i]
+		link := sam.Nodes[cur].Link
+		nodes[link] = seg.Merge(nodes[link], nodes[cur]) // 注意不能用MergeDestructively
+	}
+
+	// 每次查询s[start1:end1)在words[start2:end2)的哪个串里出现次数最多.
+	// 如果出现次数相同，返回最小的下标，并输出出现次数.
+	query := func(start1, end1 int32, start2, end2 int32) (maxCount int32, minIndex int32) {
+		pos := sam.LocateSubstring(start1, end1, prefixEnd[end1-1])
+		maxCount, minIndex = seg.Query(nodes[pos], start2, end2-1)
+		return
+	}
+
+	var q int32
+	fmt.Fscan(in, &q)
+	for i := int32(0); i < q; i++ {
+		var a, b, c, d int32
+		fmt.Fscan(in, &a, &b, &c, &d)
+		a--
+		c--
+		maxCount, minIndex := query(c, d, a, b)
+
+		// !注意不存在的情况
+		if maxCount == 0 {
+			fmt.Fprintln(out, a+1, 0)
+		} else {
+			fmt.Fprintln(out, minIndex+1, maxCount)
+		}
+	}
 }
