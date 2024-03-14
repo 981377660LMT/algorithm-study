@@ -27,8 +27,59 @@ import (
 )
 
 func main() {
+	CF1891F()
 	// DynamicTreeVertexAddSubtreeSum()
-	DynamicTreeSubtreeAddSubtreeSum()
+	// DynamicTreeSubtreeAddSubtreeSum()
+}
+
+// A Growing Tree
+// https://www.luogu.com.cn/problem/CF1891F
+// 给定一棵树，初始只有一个权值为0的结点.
+// q次操作:
+// 1 x: 添加一个新结点，父亲为x.
+// 2 x delta: 将x的子树中所有结点的权值加上delta.
+// 操作完后，输出每个结点的权值.
+func CF1891F() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	solve := func() {
+		var q int32
+		fmt.Fscan(in, &q)
+		lct := NewLinkCutTreeSubTreeAdd()
+		nodes := make([]*Node, 0, q+1)
+		nodes = append(nodes, lct.Alloc(0))
+
+		for i := int32(0); i < q; i++ {
+			var kind int32
+			fmt.Fscan(in, &kind)
+			if kind == 1 {
+				var x int32
+				fmt.Fscan(in, &x)
+				x--
+				nodes = append(nodes, lct.Alloc(0))
+				lct.Link(nodes[x], nodes[len(nodes)-1])
+			} else {
+				var x, delta int32
+				fmt.Fscan(in, &x, &delta)
+				x--
+				lct.Evert(nodes[0])
+				lct.SubtreeAdd(nodes[x], int(delta))
+			}
+		}
+
+		for i := 0; i < len(nodes); i++ {
+			fmt.Fprint(out, lct.Get(nodes[i]), " ")
+		}
+		fmt.Fprintln(out)
+	}
+
+	var T int32
+	fmt.Fscan(in, &T)
+	for i := int32(0); i < T; i++ {
+		solve()
+	}
 }
 
 // 动态单点加子树和
@@ -333,6 +384,7 @@ func (lct *LinkCutTreeSubTreeAdd) _expose(node *Node) *Node {
 	var rp *Node
 	for cur := node; cur != nil; cur = cur.parent {
 		lct._splay(cur)
+		lct._pushDown(cur)
 		if cur.right != nil {
 			_makeNormal(cur, cur.right)
 		}
@@ -407,7 +459,7 @@ func (lct *LinkCutTreeSubTreeAdd) _pushDown(t *Node) {
 	}
 }
 
-func (lct *LinkCutTreeSubTreeAdd) _pos(t *Node) int {
+func (lct *LinkCutTreeSubTreeAdd) _pos(t *Node) int32 {
 	if t.parent != nil {
 		if t.parent.left == t {
 			return -1
@@ -441,6 +493,7 @@ func (lct *LinkCutTreeSubTreeAdd) _rotate(t *Node) {
 	lct._pushUp(x)
 	lct._pushUp(t)
 	t.cancel = xc
+	t.parent = y
 	if t.parent = y; y != nil {
 		if y.left == x {
 			y.left = t

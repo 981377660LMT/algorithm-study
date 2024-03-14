@@ -129,11 +129,10 @@ func (st *SparseTableFast) Query(start, end int) S {
 
 // SparseTable 稀疏表: st[j][i] 表示区间 [i, i+2^j) 的贡献值.
 type SparseTable struct {
-	st     [][]S
-	lookup []int
-	e      func() S
-	op     func(S, S) S
-	n      int
+	st [][]S
+	e  func() S
+	op func(S, S) S
+	n  int
 }
 
 func NewSparseTable(n int, f func(int) S, e func() S, op func(S, S) S) *SparseTable {
@@ -152,12 +151,7 @@ func NewSparseTable(n int, f func(int) S, e func() S, op func(S, S) S) *SparseTa
 			st[i][j] = op(st[i-1][j], st[i-1][j+(1<<(i-1))])
 		}
 	}
-	lookup := make([]int, n+1)
-	for i := 2; i < len(lookup); i++ {
-		lookup[i] = lookup[i>>1] + 1
-	}
 	res.st = st
-	res.lookup = lookup
 	res.e = e
 	res.op = op
 	res.n = n
@@ -173,7 +167,7 @@ func (st *SparseTable) Query(start, end int) S {
 	if start >= end {
 		return st.e()
 	}
-	b := st.lookup[end-start]
+	b := bits.Len(uint(end-start)) - 1
 	return st.op(st.st[b][start], st.st[b][end-(1<<b)])
 }
 
