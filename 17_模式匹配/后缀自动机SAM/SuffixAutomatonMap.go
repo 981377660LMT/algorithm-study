@@ -223,12 +223,8 @@ func max32(a, b int32) int32 {
 }
 
 func main() {
-
 	// p4070()
 	// longest_common_substring()
-
-	// [[0,1,2,3,4],[2,3,4],[4,0,1,2,3]]
-	fmt.Println(longestCommonSubpath(5, [][]int{{0, 1, 2, 3, 4}, {2, 3, 4}, {4, 0, 1, 2, 3}}))
 }
 
 // P4070 [SDOI2016] 生成魔咒
@@ -269,7 +265,7 @@ func longest_common_substring() {
 	var s, t string
 	fmt.Fscan(in, &s, &t)
 	swap := false
-	if len(s) > len(t) { // 对短串建立SAM
+	if len(s) > len(t) { // !对短串建立SAM
 		s, t = t, s
 		swap = true
 	}

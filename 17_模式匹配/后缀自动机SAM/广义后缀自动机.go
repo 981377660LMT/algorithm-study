@@ -31,9 +31,9 @@
 //  !可以被线段树合并优化成O(nlogn).
 //
 // !3. 广义 SAM 出现子串查询：
-//
 //	  对于 n 个串的广义后缀自动机，求出每个点对应的字符串是哪些原串的子串。
-//		和线段树合并维护 Endpos 集合基本一致，将每个后缀对应的点附上对应串的标记，然后在树结构上 DFS 进行线段树合并即可得到每个串的出现位置。
+//		和线段树合并维护 Endpos 集合基本一致，将每个后缀对应的点附上对应串的标记，
+//    然后在树结构上 DFS 进行线段树合并即可得到每个串的出现位置。
 
 package main
 
@@ -881,17 +881,9 @@ func P3181() {
 	sam := NewSuffixAutomatonGeneral()
 	maxSize := int32(2 * (len(s) + len(t)))
 	isPrefix1 := NewBitset(maxSize)
+	sam.AddString(s, func(_, pos int32) { isPrefix1.Set(pos) })
 	isPrefix2 := NewBitset(maxSize)
-	pos1 := int32(0)
-	for _, c := range s {
-		pos1 = sam.Add(pos1, c)
-		isPrefix1.Set(pos1)
-	}
-	pos2 := int32(0)
-	for _, c := range t {
-		pos2 = sam.Add(pos2, c)
-		isPrefix2.Set(pos2)
-	}
+	sam.AddString(t, func(_, pos int32) { isPrefix2.Set(pos) })
 
 	size := sam.Size()
 	dfsOrder := sam.GetDfsOrder()
@@ -1373,17 +1365,9 @@ func CF427D() {
 	sam := NewSuffixAutomatonGeneral()
 	maxSize := int32(2 * (len(s) + len(t)))
 	isPrefix1 := NewBitset(maxSize)
+	sam.AddString(s, func(_, pos int32) { isPrefix1.Set(pos) })
 	isPrefix2 := NewBitset(maxSize)
-	pos1 := int32(0)
-	for _, c := range s {
-		pos1 = sam.Add(pos1, c)
-		isPrefix1.Set(pos1)
-	}
-	pos2 := int32(0)
-	for _, c := range t {
-		pos2 = sam.Add(pos2, c)
-		isPrefix2.Set(pos2)
-	}
+	sam.AddString(t, func(_, pos int32) { isPrefix2.Set(pos) })
 
 	size := sam.Size()
 	dfsOrder := sam.GetDfsOrder()

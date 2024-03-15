@@ -28,22 +28,6 @@ func main() {
 
 const INF int32 = 1e9 + 10
 
-// 745. 前缀和后缀搜索
-// https://leetcode.cn/problems/prefix-and-suffix-search/description/
-type WordFilter struct {
-}
-
-// 使用词典中的单词 words 初始化对象。
-func Constructor(words []string) WordFilter {
-
-}
-
-// 返回词典中具有前缀 prefix 和后缀 suff 的单词的下标。
-// 如果存在不止一个满足要求的下标，返回其中 最大的下标 。如果不存在这样的单词，返回 -1
-func (this *WordFilter) F(pref string, suff string) int {
-
-}
-
 // 100251. 数组中的最短非公共子字符串
 // https://leetcode.cn/problems/shortest-uncommon-substring-in-an-array/description/
 func shortestSubstrings(arr []string) []string {
