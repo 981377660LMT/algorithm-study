@@ -15,5 +15,6 @@
       然后对于 prefix = "ap", suffix = "le" 这样的查询，
       我们可以通过查询单词查找树找到 le#ap。
       ```
-   3. 子串关系就是子树，转化为二维数点问题
+   3. 单词数量、单个单词长度都很大：
+      根据长度设定阈值，哈希+分治
       https://codeforces.com/problemsets/acmsguru/problem/99999/505

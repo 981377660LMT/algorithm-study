@@ -1,5 +1,6 @@
 // https://kopricky.github.io/code/SegmentTrees/merge_segtree.html
 // 静态二维矩形区间计数(RectangleSum-MergeSegtree)
+// !慢
 
 package main
 

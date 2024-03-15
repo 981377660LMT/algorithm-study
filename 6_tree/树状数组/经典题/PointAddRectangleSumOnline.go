@@ -11,9 +11,9 @@ import (
 	"sort"
 )
 
-//  0 x y w : 向平面上添加一个点(x,y)并且权值为w
-//  1 left down right up : 查询矩形 left<=x<right down<=y<up 内的点权和
-//  n,q<=1e5 0<=xi,yi<=1e9
+// 0 x y w : 向平面上添加一个点(x,y)并且权值为w
+// 1 left down right up : 查询矩形 left<=x<right down<=y<up 内的点权和
+// n,q<=1e5 0<=xi,yi<=1e9
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -73,7 +73,8 @@ type CompressedPointAddRectangleSum struct {
 }
 
 // 二维矩形区域计数
-//  需要预先添加可能出现的所有点 (x,y,weight)
+//
+//	需要预先添加可能出现的所有点 (x,y,weight)
 func NewPointAddRectangleSum(points [][]int) *CompressedPointAddRectangleSum {
 	res := &CompressedPointAddRectangleSum{}
 
@@ -206,7 +207,19 @@ func (f *binaryIndexedTree) Add(i, x int) {
 }
 
 func (f *binaryIndexedTree) Sum(l, r int) int {
-	return f.sum(r) - f.sum(l)
+	if l == 0 {
+		return f.sum(r)
+	}
+	pos, neg := 0, 0
+	for r > l {
+		pos += f.bit[r]
+		r &= r - 1
+	}
+	for l > r {
+		neg += f.bit[l]
+		l &= l - 1
+	}
+	return pos - neg
 }
 
 func (f *binaryIndexedTree) sum(i int) int {
