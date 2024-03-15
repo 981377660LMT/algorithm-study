@@ -9,14 +9,17 @@
 
 package main
 
-type Pair struct{ x, y byte }
+func HashPair(first, second byte) int32 {
+	return (int32(first)-'a')*26 + int32(second-'a')
+}
+
 type TrieNode struct {
-	children map[Pair]*TrieNode
+	children map[int32]*TrieNode
 	endCount int32
 }
 
 func NewTrieNode() *TrieNode {
-	return &TrieNode{children: make(map[Pair]*TrieNode)}
+	return &TrieNode{children: make(map[int32]*TrieNode)}
 }
 
 func countPrefixSuffixPairs(words []string) int64 {
@@ -24,8 +27,8 @@ func countPrefixSuffixPairs(words []string) int64 {
 	root := NewTrieNode()
 	for _, w := range words {
 		cur := root
-		for i := range w {
-			p := Pair{w[i], w[len(w)-1-i]}
+		for j := range w {
+			p := HashPair(w[j], w[len(w)-1-j]) // (w[i], w[~i])
 			if cur.children[p] == nil {
 				cur.children[p] = NewTrieNode()
 			}
