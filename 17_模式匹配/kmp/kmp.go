@@ -16,6 +16,8 @@ func main() {
 	// a, b := "ababab", "a"
 	// fmt.Println(IndexOfAll(a, b, 0))
 
+	// SUFEQPRE()
+
 	// P4824()
 
 }
@@ -28,6 +30,37 @@ func multiSearch(big string, smalls []string) [][]int {
 		res[i] = IndexOfAll(big, small, 0, nil)
 	}
 	return res
+}
+
+// SUFEQPRE - Suffix Equal Prefix
+// 给你一个字符串 S，判断有多少个真后缀同时是其前缀。
+// 真后缀是指不同于原串的后缀。
+// 前缀=后缀的子串被称作 Border。
+// !然后我们可以知道一个性质：不断跳最长的 Border(fail) 可以遍历整一个串的所有 Border。
+func SUFEQPRE() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	query := func(s string) int {
+		fail := GetNext(s)
+		pos := fail[len(s)-1]
+		res := 0
+		for pos > 0 {
+			res++
+			pos = fail[pos-1]
+		}
+		return res
+	}
+
+	var T int
+	fmt.Fscan(in, &T)
+	for i := 0; i < T; i++ {
+		var s string
+		fmt.Fscan(in, &s)
+		res := query(s)
+		fmt.Fprintln(out, "Case", i+1, ":", res)
+	}
 }
 
 // https://www.luogu.com.cn/problem/P4824

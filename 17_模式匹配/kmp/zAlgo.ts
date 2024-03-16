@@ -23,7 +23,20 @@ function zAlgo(arr: ArrayLike<unknown>): Uint32Array {
   return z
 }
 
-export { zAlgo }
+/**
+ * 求s2的每个后缀与s1的最长公共前缀长度.
+ */
+function zAlgoTwoString(s1: string, s2: string): Uint32Array {
+  const n1 = s1.length
+  const n2 = s2.length
+  const z = zAlgo(s1 + s2)
+  for (let i = n1; i < n1 + n2; i++) {
+    z[i] = Math.min(z[i], n1)
+  }
+  return z.subarray(n1)
+}
+
+export { zAlgo, zAlgoTwoString }
 
 if (require.main === module) {
   // 2223. 构造字符串的总得分和
@@ -33,4 +46,6 @@ if (require.main === module) {
     const n = s.length
     return z.reduce((pre, cur) => pre + cur, 0) + n
   }
+
+  console.log(zAlgoTwoString('aaaa', 'aabaa'))
 }

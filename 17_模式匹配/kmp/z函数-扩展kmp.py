@@ -1,6 +1,6 @@
 # z函数-扩展kmp
 
-from typing import List
+from typing import Any, List, Sequence
 
 
 def max2(a: int, b: int) -> int:
@@ -11,22 +11,33 @@ def min2(a: int, b: int) -> int:
     return a if a < b else b
 
 
-def zAlgo(string: str) -> List[int]:
+def zAlgo(seq: Sequence[Any]) -> List[int]:
     """z算法求字符串每个后缀与原串的最长公共前缀长度
 
     z[0]=0
     z[i]是s[i:]与s的最长公共前缀(LCP)的长度 (i>=1)
     """
 
-    n = len(string)
+    n = len(seq)
     z = [0] * n
     left, right = 0, 0
     for i in range(1, n):
         z[i] = max2(min2(z[i - left], right - i + 1), 0)
-        while i + z[i] < n and string[z[i]] == string[i + z[i]]:
+        while i + z[i] < n and seq[z[i]] == seq[i + z[i]]:
             left, right = i, i + z[i]
             z[i] += 1
     return z
+
+
+def zAlgoTwoString(seq1: str, seq2: str) -> List[int]:
+    """
+    求出seq2的每个后缀与seq1的最长公共前缀长度.
+    """
+    n1, n2 = len(seq1), len(seq2)
+    z = zAlgo(seq1 + seq2)
+    for i in range(n1, n1 + n2):
+        z[i] = min2(z[i], n1)
+    return z[n1:]
 
 
 if __name__ == "__main__":

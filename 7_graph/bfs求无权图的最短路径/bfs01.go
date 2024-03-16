@@ -2,10 +2,6 @@
 
 package main
 
-func main() {
-
-}
-
 const INF int = 1e18
 
 func bfs(adjList [][]int, start int) (dist, pre []int) {
@@ -34,7 +30,7 @@ func bfs(adjList [][]int, start int) (dist, pre []int) {
 	return
 }
 
-func bfs01(adjList [][]int, start int) (dist, pre []int) {
+func bfs01(adjList [][][2]int, start int) (dist, pre []int) {
 	n := len(adjList)
 	dist = make([]int, n)
 	pre = make([]int, n)
@@ -47,12 +43,13 @@ func bfs01(adjList [][]int, start int) (dist, pre []int) {
 	dist[start] = 0
 	for queue.Size() > 0 {
 		cur := queue.PopLeft()
-		for _, next := range adjList[cur] {
-			cand := dist[cur] + next
+		for _, e := range adjList[cur] {
+			next, weight := e[0], e[1]
+			cand := dist[cur] + weight
 			if cand < dist[next] {
 				dist[next] = cand
 				pre[next] = cur
-				if next == 0 {
+				if weight == 0 {
 					queue.AppendLeft(next)
 				} else {
 					queue.Append(next)
@@ -63,7 +60,7 @@ func bfs01(adjList [][]int, start int) (dist, pre []int) {
 	return
 }
 
-func bfs01MultiStart(adjList [][]int, starts []int) (dist, pre, root []int) {
+func bfs01MultiStart(adjList [][][2]int, starts []int) (dist, pre, root []int) {
 	n := len(adjList)
 	dist = make([]int, n)
 	pre = make([]int, n)
@@ -81,13 +78,14 @@ func bfs01MultiStart(adjList [][]int, starts []int) (dist, pre, root []int) {
 	}
 	for queue.Size() > 0 {
 		cur := queue.PopLeft()
-		for _, next := range adjList[cur] {
-			cand := dist[cur] + next
+		for _, e := range adjList[cur] {
+			next, weight := e[0], e[1]
+			cand := dist[cur] + weight
 			if cand < dist[next] {
 				dist[next] = cand
 				pre[next] = cur
 				root[next] = root[cur]
-				if next == 0 {
+				if weight == 0 {
 					queue.AppendLeft(next)
 				} else {
 					queue.Append(next)
