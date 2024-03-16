@@ -10,115 +10,58 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
 	"sort"
 )
 
-const INF int = 1e18
+const INF32 int32 = 1e9 + 10
 
 // 2907.最大递增三元组的和
 // https://leetcode.cn/problems/maximum-profitable-triplets-with-increasing-prices-ii/
 func maxProfit(prices []int, profits []int) int {
-	n := len(prices)
-	xs := make([]int, n)
-	for i := 0; i < n; i++ {
-		xs[i] = i
+	n := int32(len(prices))
+	xs := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		xs[i] = int32(i)
+	}
+	prices32 := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		prices32[i] = int32(prices[i])
+	}
+	profits32 := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		profits32[i] = int32(profits[i])
 	}
 
-	tree := NewSegmentTree2DSparseWithWeights(xs, prices, profits, false)
-	res := -1
-	for i := 0; i < n; i++ {
-		x, y := i, prices[i]
+	tree := NewSegmentTree2DSparse32WithWeights(xs, prices32, profits32, false)
+	res := int32(-1)
+	for i := int32(0); i < n; i++ {
+		x, y := i, prices32[i]
 		max1 := tree.Query(0, x, 0, y)
 		if max1 == 0 {
 			continue
 		}
-		max2 := tree.Query(x+1, n, y+1, INF)
+		max2 := tree.Query(x+1, n, y+1, INF32)
 		if max2 == 0 {
 			continue
 		}
-		res = max(res, max1+max2+profits[i])
+		res = max32(res, max1+max2+profits32[i])
 	}
 
-	return res
-}
-
-func main() {
-	// https://judge.yosupo.jp/problem/point_add_rectangle_sum
-
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-	xs, ys, ws := make([]int, n), make([]int, n), make([]int, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &xs[i], &ys[i], &ws[i])
-	}
-	query := make([][4]int, q)
-	for i := 0; i < q; i++ {
-		var t int
-		fmt.Fscan(in, &t)
-		if t == 0 {
-			var x, y, w int
-			fmt.Fscan(in, &x, &y, &w)
-			xs = append(xs, x)
-			ys = append(ys, y)
-			ws = append(ws, 0)
-			query[i] = [4]int{-1, x, y, w}
-		} else {
-			var a, b, c, d int
-			fmt.Fscan(in, &a, &b, &c, &d)
-			query[i] = [4]int{a, c, b, d}
-		}
-	}
-
-	tree := NewSegmentTree2DSparseWithWeights(xs, ys, ws, true)
-	for i := 0; i < q; i++ {
-		a, b, c, d := query[i][0], query[i][1], query[i][2], query[i][3]
-		if a == -1 {
-			tree.Update(b, c, d)
-		} else {
-			fmt.Fprintln(out, tree.Query(a, b, c, d))
-		}
-	}
-}
-
-func main2() {
-	// https://judge.yosupo.jp/problem/rectangle_sum
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-	xs, ys, ws := make([]int, n), make([]int, n), make([]int, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &xs[i], &ys[i], &ws[i])
-	}
-	tree := NewSegmentTree2DSparseWithWeights(xs, ys, ws, true)
-	for i := 0; i < q; i++ {
-		var l, d, r, u int
-		fmt.Fscan(in, &l, &d, &r, &u)
-		fmt.Fprintln(out, tree.Query(l, r, d, u))
-	}
+	return int(res)
 }
 
 // 需要满足交换律.
-type E = int
+type E = int32
 
 func e() E        { return 0 }
-func op(a, b E) E { return a + b } // TODO
+func op(a, b E) E { return max32(a, b) }
 
-type SegmentTree2DSparse struct {
-	n          int
-	keyX       []int
-	keyY       []int
-	minX       int
-	indptr     []int
+type SegmentTree2DSparse32 struct {
+	n          int32
+	keyX       []int32
+	keyY       []int32
+	minX       int32
+	indptr     []int32
 	data       []E
 	discretize bool
 	unit       E
@@ -129,8 +72,8 @@ type SegmentTree2DSparse struct {
 //	为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
 //	为 false 时不对x维度二分离散化,而是直接用x的值作为下标(自动所有x给一个偏移量minX),
 //	x 维度数组长度为最大值减最小值.
-func NewSegmentTree2DSparse(xs, ys []int, discretize bool) *SegmentTree2DSparse {
-	res := &SegmentTree2DSparse{discretize: discretize, unit: e()}
+func NewSegmentTree2DSparse32(xs, ys []int32, discretize bool) *SegmentTree2DSparse32 {
+	res := &SegmentTree2DSparse32{discretize: discretize, unit: e()}
 	ws := make([]E, len(xs))
 	for i := range ws {
 		ws[i] = res.unit
@@ -144,14 +87,14 @@ func NewSegmentTree2DSparse(xs, ys []int, discretize bool) *SegmentTree2DSparse 
 //	为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
 //	为 false 时不对x维度二分离散化,而是直接用x的值作为下标(自动所有x给一个偏移量minX),
 //	x 维度数组长度为最大值减最小值.
-func NewSegmentTree2DSparseWithWeights(xs, ys []int, ws []E, discretize bool) *SegmentTree2DSparse {
-	res := &SegmentTree2DSparse{discretize: discretize, unit: e()}
+func NewSegmentTree2DSparse32WithWeights(xs, ys []int32, ws []E, discretize bool) *SegmentTree2DSparse32 {
+	res := &SegmentTree2DSparse32{discretize: discretize, unit: e()}
 	res._build(xs, ys, ws)
 	return res
 }
 
 // 点 (x,y) 的值加上 val.
-func (t *SegmentTree2DSparse) Update(x, y int, val E) {
+func (t *SegmentTree2DSparse32) Update(x, y int32, val E) {
 	i := t._xtoi(x)
 	i += t.n
 	for i > 0 {
@@ -161,7 +104,7 @@ func (t *SegmentTree2DSparse) Update(x, y int, val E) {
 }
 
 // [lx,rx) * [ly,ry)
-func (t *SegmentTree2DSparse) Query(lx, rx, ly, ry int) E {
+func (t *SegmentTree2DSparse32) Query(lx, rx, ly, ry int32) E {
 	L := t._xtoi(lx) + t.n
 	R := t._xtoi(rx) + t.n
 	val := t.unit
@@ -180,7 +123,7 @@ func (t *SegmentTree2DSparse) Query(lx, rx, ly, ry int) E {
 	return val
 }
 
-func (t *SegmentTree2DSparse) _add(i int, y int, val E) {
+func (t *SegmentTree2DSparse32) _add(i int32, y int32, val E) {
 	lid := t.indptr[i]
 	n := t.indptr[i+1] - t.indptr[i]
 	j := bisectLeft(t.keyY, y, lid, lid+n-1) - lid
@@ -192,7 +135,7 @@ func (t *SegmentTree2DSparse) _add(i int, y int, val E) {
 	}
 }
 
-func (t *SegmentTree2DSparse) _prodI(i int, ly, ry int) E {
+func (t *SegmentTree2DSparse32) _prodI(i int32, ly, ry int32) E {
 	lid := t.indptr[i]
 	n := t.indptr[i+1] - t.indptr[i]
 	left := bisectLeft(t.keyY, ly, lid, lid+n-1) - lid + n
@@ -214,17 +157,17 @@ func (t *SegmentTree2DSparse) _prodI(i int, ly, ry int) E {
 	return val
 }
 
-func (seg *SegmentTree2DSparse) _build(X, Y []int, wt []E) {
+func (seg *SegmentTree2DSparse32) _build(X, Y []int32, wt []E) {
 	if len(X) != len(Y) || len(X) != len(wt) {
 		panic("Lengths of X, Y, and wt must be equal.")
 	}
 
 	if seg.discretize {
 		seg.keyX = unique(X)
-		seg.n = len(seg.keyX)
+		seg.n = int32(len(seg.keyX))
 	} else {
 		if len(X) > 0 {
-			min_, max_ := 0, 0
+			min_, max_ := int32(0), int32(0)
 			for _, x := range X {
 				if x < min_ {
 					min_ = x
@@ -236,14 +179,14 @@ func (seg *SegmentTree2DSparse) _build(X, Y []int, wt []E) {
 			seg.minX = min_
 			seg.n = max_ - min_ + 1
 		}
-		seg.keyX = make([]int, seg.n)
-		for i := 0; i < seg.n; i++ {
+		seg.keyX = make([]int32, seg.n)
+		for i := int32(0); i < seg.n; i++ {
 			seg.keyX[i] = seg.minX + i
 		}
 	}
 
 	N := seg.n
-	keyYRaw := make([][]int, N+N)
+	keyYRaw := make([][]int32, N+N)
 	datRaw := make([][]E, N+N)
 	indices := argSort(Y)
 
@@ -262,18 +205,18 @@ func (seg *SegmentTree2DSparse) _build(X, Y []int, wt []E) {
 		}
 	}
 
-	seg.indptr = make([]int, N+N+1)
-	for i := 0; i < N+N; i++ {
-		seg.indptr[i+1] = seg.indptr[i] + len(keyYRaw[i])
+	seg.indptr = make([]int32, N+N+1)
+	for i := int32(0); i < N+N; i++ {
+		seg.indptr[i+1] = seg.indptr[i] + int32(len(keyYRaw[i]))
 	}
 	fullN := seg.indptr[N+N]
-	seg.keyY = make([]int, fullN)
+	seg.keyY = make([]int32, fullN)
 	seg.data = make([]E, 2*fullN)
 
-	for i := 0; i < N+N; i++ {
+	for i := int32(0); i < N+N; i++ {
 		off := 2 * seg.indptr[i]
 		n := seg.indptr[i+1] - seg.indptr[i]
-		for j := 0; j < n; j++ {
+		for j := int32(0); j < n; j++ {
 			seg.keyY[seg.indptr[i]+j] = keyYRaw[i][j]
 			seg.data[off+n+j] = datRaw[i][j]
 		}
@@ -283,9 +226,9 @@ func (seg *SegmentTree2DSparse) _build(X, Y []int, wt []E) {
 	}
 }
 
-func (seg *SegmentTree2DSparse) _xtoi(x int) int {
+func (seg *SegmentTree2DSparse32) _xtoi(x int32) int32 {
 	if seg.discretize {
-		return bisectLeft(seg.keyX, x, 0, len(seg.keyX)-1)
+		return bisectLeft(seg.keyX, x, 0, int32(len(seg.keyX)-1))
 	}
 	tmp := x - seg.minX
 	if tmp < 0 {
@@ -296,7 +239,7 @@ func (seg *SegmentTree2DSparse) _xtoi(x int) int {
 	return tmp
 }
 
-func bisectLeft(nums []int, x int, left, right int) int {
+func bisectLeft(nums []int32, x int32, left, right int32) int32 {
 	for left <= right {
 		mid := (left + right) >> 1
 		if nums[mid] < x {
@@ -308,16 +251,16 @@ func bisectLeft(nums []int, x int, left, right int) int {
 	return left
 }
 
-func unique(nums []int) (sorted []int) {
-	set := make(map[int]struct{}, len(nums))
+func unique(nums []int32) (sorted []int32) {
+	set := make(map[int32]struct{}, len(nums))
 	for _, v := range nums {
 		set[v] = struct{}{}
 	}
-	sorted = make([]int, 0, len(set))
+	sorted = make([]int32, 0, len(set))
 	for k := range set {
 		sorted = append(sorted, k)
 	}
-	sort.Ints(sorted)
+	sort.Slice(sorted, func(i, j int) bool { return sorted[i] < sorted[j] })
 	return
 }
 
@@ -335,10 +278,17 @@ func max(a, b int) int {
 	return b
 }
 
-func argSort(nums []int) []int {
-	order := make([]int, len(nums))
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func argSort(nums []int32) []int32 {
+	order := make([]int32, len(nums))
 	for i := range order {
-		order[i] = i
+		order[i] = int32(i)
 	}
 	sort.Slice(order, func(i, j int) bool { return nums[order[i]] < nums[order[j]] })
 	return order

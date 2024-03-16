@@ -634,6 +634,46 @@ func (b *BITRangeAddPointGetArray) String() string {
 	return fmt.Sprintf("BITRangeAddPointGetArray: [%v]", strings.Join(res, ", "))
 }
 
+type BITRangeAddPointGetArrayDual struct {
+	n    int
+	data []int
+}
+
+func NewBITRangeAddPointGetArrayDual(n int) *BITRangeAddPointGetArrayDual {
+	return &BITRangeAddPointGetArrayDual{n: n, data: make([]int, n)}
+}
+
+func (b *BITRangeAddPointGetArrayDual) AddRange(start, end int, delta int) {
+	neg := -delta
+	for start < end {
+		b.data[end-1] += delta
+		end -= end & -end
+	}
+	for end < start {
+		b.data[start-1] += neg
+		start -= start & -start
+	}
+}
+
+func (b *BITRangeAddPointGetArrayDual) Get(index int) int {
+	res := 0
+	for index++; index <= b.n; index += index & -index {
+		res += b.data[index-1]
+	}
+	return res
+}
+
+func (b *BITRangeAddPointGetArrayDual) GetAll() []int {
+	res := append(b.data[:0:0], b.data...)
+	for i := b.n; i >= 1; i-- {
+		j := i + (i & -i)
+		if j <= b.n {
+			res[i-1] += res[j-1]
+		}
+	}
+	return res
+}
+
 type BITRangeAddPointGetMap struct {
 	bit *BITMap
 }

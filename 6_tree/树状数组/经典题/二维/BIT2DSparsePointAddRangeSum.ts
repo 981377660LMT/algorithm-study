@@ -26,7 +26,12 @@ interface IOptions<E> {
 }
 
 class BIT2DSparse<E> {
-  private static _bisectLeft(arr: ArrayLike<number>, x: number, left: number, right: number): number {
+  private static _bisectLeft(
+    arr: ArrayLike<number>,
+    x: number,
+    left: number,
+    right: number
+  ): number {
     while (left <= right) {
       const mid = (left + right) >> 1
       if (arr[mid] < x) {
@@ -164,10 +169,6 @@ class BIT2DSparse<E> {
         this._minX = min
         this._n = max - min + 1
       }
-      this._keyX = Array(this._n)
-      for (let i = 0; i < this._n; i++) {
-        this._keyX[i] = this._minX + i
-      }
     }
 
     const n = this._n
@@ -222,7 +223,10 @@ class BIT2DSparse<E> {
       for (let j = 0; j < diff - 1; j++) {
         const k = j + ((j + 1) & -(j + 1))
         if (k < diff) {
-          this._data[this._indptr[i] + k] = this._op(this._data[this._indptr[i] + k], this._data[this._indptr[i] + j])
+          this._data[this._indptr[i] + k] = this._op(
+            this._data[this._indptr[i] + k],
+            this._data[this._indptr[i] + j]
+          )
         }
       }
     }
