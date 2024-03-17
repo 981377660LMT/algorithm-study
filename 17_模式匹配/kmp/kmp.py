@@ -27,6 +27,26 @@ def getNext(needle: Sequence[T]) -> List[int]:
     return next
 
 
+def getHalfLinkLength(needle: Sequence[T], nexts: List[int]) -> List[int]:
+    """halfLinkLength[i]表示[:i+1]这一段子串长度不超过串长一半的最长的border长度."""
+    n = len(needle)
+    depth = [0] * (n + 1)  # fail树结点深度
+    for i in range(1, n + 1):
+        parent = nexts[i - 1]
+        depth[i] = depth[parent] + 1
+    halfLinkLength = [0] * n
+    pos = 0
+    for i in range(1, n):
+        while pos and needle[i] != needle[pos]:
+            pos = nexts[pos - 1]
+        if needle[i] == needle[pos]:
+            pos += 1
+        while pos > ((i + 1) / 2):
+            pos = nexts[pos - 1]
+        halfLinkLength[i] = depth[pos]
+    return halfLinkLength
+
+
 def indexOfAll(
     longer: Sequence[T], shorter: Sequence[T], start=0, nexts: Optional[List[int]] = None
 ) -> List[int]:

@@ -19,6 +19,9 @@ func main() {
 	// SUFEQPRE()
 
 	// P4824()
+	s := "aaaaa"
+	sNext := GetNext(s)
+	fmt.Println(GetHalfLinkLength(s, sNext))
 
 }
 
@@ -113,6 +116,31 @@ func GetNext(pattern Str) []int {
 		next[i] = j
 	}
 	return next
+}
+
+// `halfLinkLength[i]`表示`[:i+1]`这一段子串长度不超过串长一半的最长的border长度.
+func GetHalfLinkLength(pattern Str, nexts []int) (halfLinkLength []int) {
+	n := len(pattern)
+	depth := make([]int32, n+1) // fail树结点深度
+	for i := 1; i <= n; i++ {
+		parent := nexts[i-1]
+		depth[i] = depth[parent] + 1
+	}
+	halfLinkLength = make([]int, n)
+	pos := 0
+	for i := 1; i < n; i++ {
+		for pos > 0 && pattern[i] != pattern[pos] {
+			pos = nexts[pos-1]
+		}
+		if pattern[i] == pattern[pos] {
+			pos++
+		}
+		for pos > (i+1)>>1 {
+			pos = nexts[pos-1]
+		}
+		halfLinkLength[i] = int(depth[pos])
+	}
+	return
 }
 
 // `O(n+m)` 寻找 `shorter` 在 `longer` 中的所有匹配位置.

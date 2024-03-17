@@ -96,3 +96,7 @@ if __name__ == "__main__":
                     left += 1
                 res = max(res, right - left + 1)
             return res
+
+    nums = [1, 2, 3, 4, 5]
+    D = distSumRange(nums)
+    print(D(1, 0, 5))

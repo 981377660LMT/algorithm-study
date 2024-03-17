@@ -1,31 +1,119 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"math/bits"
 	"sort"
 	"strings"
 )
 
-// 100123. 执行操作使频率分数最大
-// https://leetcode.cn/problems/apply-operations-to-maximize-frequency-score/description/
-func maxFrequencyScore(nums []int, k int64) int {
-	sort.Ints(nums)
-	sl := NewSortedListWithSum(func(a, b int) bool { return a < b })
-	proxy := NewMedianFinderSortedList(sl)
-	res, left := 0, 0
-	for right := 0; right < len(nums); right++ {
-		sl.Add(nums[right])
-		for left <= right && int64(proxy.DistSumToMedian()) > k {
-			sl.Discard(nums[left])
-			left++
-		}
-		res = max(res, right-left+1)
-	}
-	return res
+// 给你一个下标从 0 开始的二进制数组 nums，其长度为 n ；另给你一个 正整数 k 以及一个 非负整数 maxChanges 。
+
+// 灵茶山艾府在玩一个游戏，游戏的目标是让灵茶山艾府使用 最少 数量的 行动 次数从 nums 中拾起 k 个 1 。游戏开始时，灵茶山艾府可以选择数组 [0, n - 1] 范围内的任何索引index 站立。如果 nums[index] == 1 ，灵茶山艾府就会拾起一个 1 ，并且 nums[index] 变成0（这 不算 作一次行动）。之后，灵茶山艾府可以执行 任意数量 的 行动（包括零次），在每次行动中灵茶山艾府必须 恰好 执行以下动作之一：
+
+// 选择任意一个下标 j != index 且满足 nums[j] == 0 ，然后将 nums[j] 设置为 1 。这个动作最多可以执行 maxChanges 次。
+// 选择任意两个相邻的下标 x 和 y（|x - y| == 1）且满足 nums[x] == 1, nums[y] == 0 ，然后交换它们的值（将 nums[y] = 1 和 nums[x] = 0）。如果 y == index，在这次行动后灵茶山艾府拾起一个 1 ，并且 nums[y] 变成 0 。
+// 返回灵茶山艾府拾起 恰好 k 个 1 所需的 最少 行动次数。
+func main() {
+	// nums = [0,0,0,0], k = 2, maxChanges = 3
+	fmt.Println(minimumMoves([]int{0, 1, 0, 1, 0, 1, 0, 1}, 5, 1)) // 2
 }
 
-// 对每个位置，求移动m个1到这个位置的最小移动次数
+const INF int = 1e18
+
+func minimumMoves(nums []int, k int, maxChanges int) int64 {
+	fastPath := func(startIndex int) int {
+		ones := 0
+		step := 0
+		if nums[startIndex] == 1 {
+			ones++
+		}
+		if ones >= k {
+			return 0
+		}
+		if startIndex-1 >= 0 && nums[startIndex-1] == 1 {
+			ones++
+			step++
+			if ones >= k {
+				return step
+			}
+		}
+		if startIndex+1 < len(nums) && nums[startIndex+1] == 1 {
+			ones++
+			step++
+			if ones >= k {
+				return step
+			}
+		}
+		diff := k - ones
+		if diff > maxChanges {
+			return INF
+		}
+		return step + diff*2
+	}
+
+	n := len(nums)
+	res := INF
+	for i := 0; i < n; i++ {
+		tmp := fastPath(i)
+		if tmp != INF {
+			res = min(res, tmp)
+		}
+	}
+	if res != INF {
+		return int64(res)
+	}
+
+	// 枚举起点，把maxChanges用完还不能成功
+	// 这时候一定存在1
+	baseStep := maxChanges * 2
+	need := k - maxChanges // need个1到startIndex(包括startIndex自己的1)需要的最小总移动次数
+	minDist := make([]int, n)
+	for i := 0; i < n; i++ {
+		minDist[i] = INF
+	}
+
+	sl := NewSortedListWithSum(func(a, b int) bool { return a < b })
+	mf := NewMedianFinderSortedList(sl)
+	// 连续k个1对答案的贡献
+	onesIndex := []int{}
+	for i, v := range nums {
+		if v == 1 {
+			onesIndex = append(onesIndex, i)
+		}
+	}
+
+	right := need - 1
+	for i := 0; i < need; i++ {
+		sl.Add(onesIndex[i])
+	}
+	for i := 0; i < n; i++ {
+		cost1 := mf.DistSum(i)
+		minDist[i] = cost1
+		// 右边加一个，左边退一个是否更优
+		if right+1 < len(onesIndex) {
+			added := onesIndex[right+1]
+			sl.Add(added)
+			right++
+			popped := sl.Pop(0)
+			cost2 := mf.DistSum(i)
+			if cost2 < cost1 {
+				minDist[i] = cost2
+			} else {
+				// rollback
+				sl.Pop(-1)
+				sl.Add(popped)
+				right--
+			}
+		}
+	}
+
+	for i := 0; i < n; i++ {
+		res = min(res, minDist[i])
+	}
+	return int64(res + baseStep)
+}
 
 // SortedList 动态维护中位数信息.
 // `Proxy 的内部持有一个对 SortedList 的引用`.
@@ -800,6 +888,112 @@ func (it *Iterator) Value() (res E, ok bool) {
 	res = block[it.index]
 	ok = true
 	return
+}
+
+// RangeMinPointGet
+
+type Id = int
+
+const COMMUTATIVE = true
+
+func (*SegmentTreeDual) id() Id                 { return INF }
+func (*SegmentTreeDual) composition(f, g Id) Id { return min(f, g) }
+
+type SegmentTreeDual struct {
+	n            int
+	size, height int
+	lazy         []Id
+	unit         Id
+}
+
+func NewSegmentTreeDual(n int) *SegmentTreeDual {
+	res := &SegmentTreeDual{}
+	size := 1
+	height := 0
+	for size < n {
+		size <<= 1
+		height++
+	}
+	lazy := make([]Id, 2*size)
+	unit := res.id()
+	for i := 0; i < 2*size; i++ {
+		lazy[i] = unit
+	}
+	res.n = n
+	res.size = size
+	res.height = height
+	res.lazy = lazy
+	res.unit = unit
+	return res
+}
+func (seg *SegmentTreeDual) Get(index int) Id {
+	index += seg.size
+	for i := seg.height; i > 0; i-- {
+		seg.propagate(index >> i)
+	}
+	return seg.lazy[index]
+}
+func (seg *SegmentTreeDual) GetAll() []Id {
+	for i := 0; i < seg.size; i++ {
+		seg.propagate(i)
+	}
+	res := make([]Id, seg.n)
+	copy(res, seg.lazy[seg.size:seg.size+seg.n])
+	return res
+}
+func (seg *SegmentTreeDual) Update(left, right int, value Id) {
+	if left < 0 {
+		left = 0
+	}
+	if right > seg.n {
+		right = seg.n
+	}
+	if left >= right {
+		return
+	}
+	left += seg.size
+	right += seg.size
+	if !COMMUTATIVE {
+		for i := seg.height; i > 0; i-- {
+			if (left>>i)<<i != left {
+				seg.propagate(left >> i)
+			}
+			if (right>>i)<<i != right {
+				seg.propagate((right - 1) >> i)
+			}
+		}
+	}
+	for left < right {
+		if left&1 > 0 {
+			seg.lazy[left] = seg.composition(value, seg.lazy[left])
+			left++
+		}
+		if right&1 > 0 {
+			right--
+			seg.lazy[right] = seg.composition(value, seg.lazy[right])
+		}
+		left >>= 1
+		right >>= 1
+	}
+}
+func (seg *SegmentTreeDual) propagate(k int) {
+	if seg.lazy[k] != seg.unit {
+		seg.lazy[k<<1] = seg.composition(seg.lazy[k], seg.lazy[k<<1])
+		seg.lazy[k<<1|1] = seg.composition(seg.lazy[k], seg.lazy[k<<1|1])
+		seg.lazy[k] = seg.unit
+	}
+}
+func (st *SegmentTreeDual) String() string {
+	var buf bytes.Buffer
+	buf.WriteByte('[')
+	for i := 0; i < st.n; i++ {
+		if i > 0 {
+			buf.WriteByte(' ')
+		}
+		buf.WriteString(fmt.Sprint(st.Get(i)))
+	}
+	buf.WriteByte(']')
+	return buf.String()
 }
 
 func min(a, b int) int {

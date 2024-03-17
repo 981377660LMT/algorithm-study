@@ -24,6 +24,27 @@ function getNext(shorter: string | ArrayLike<number | string>): Uint32Array {
 }
 
 /**
+ * `O(n)` 求`[:i+1]`这一段子串长度不超过串长一半的最长的border长度.
+ */
+function getHalfLinkLength(str: ArrayLike<any>, nexts: ArrayLike<number>): Uint32Array {
+  const n = str.length
+  const depth = new Uint32Array(n + 1)
+  for (let i = 1; i < n + 1; i++) {
+    const parent = nexts[i - 1]
+    depth[i] = depth[parent] + 1
+  }
+  const halfLinkLength = new Uint32Array(n)
+  let pos = 0
+  for (let i = 1; i < n; i++) {
+    while (pos && str[i] !== str[pos]) pos = nexts[pos - 1]
+    pos += +(str[i] === str[pos])
+    while (pos > (i + 1) >>> 1) pos = nexts[pos - 1]
+    halfLinkLength[i] = depth[pos]
+  }
+  return halfLinkLength
+}
+
+/**
  * `O(n+m)` 寻找 `shorter` 在 `longer` 中的所有匹配位置.
  */
 function indexOfAll<S extends string | ArrayLike<number | string> = string>(
@@ -183,7 +204,7 @@ class KMP<T extends string | ArrayLike<number | string> = string> {
   }
 }
 
-export { getNext, indexOf, indexOfAll, getNext as getLPS, KMP }
+export { getNext, getHalfLinkLength, indexOf, indexOfAll, getNext as getLPS, KMP }
 
 if (require.main === module) {
   assert.deepStrictEqual(getNext('ababaaa'), new Uint32Array([0, 0, 1, 2, 3, 1, 1]))
@@ -207,4 +228,8 @@ if (require.main === module) {
   const longer2 = 'ababababababaaa'
   const ords2 = new Uint32Array(longer2.split('').map(c => c.charCodeAt(0)))
   console.log(kmp2.searchAll(ords2.subarray(0, 10)))
+
+  const ss = 'aaaaa'
+  const next = KMP.getNext(ss)
+  console.log(getHalfLinkLength(ss, next))
 }

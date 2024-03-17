@@ -167,7 +167,7 @@ func testTime() {
 const INF int = 1e18
 
 // 能否用nums中的若干个数凑出和为target.
-func SubsetSumTarget(nums []int, target int) (res []int, ok bool) {
+func SubsetSumTarget(nums []int, target int) (solution []int, ok bool) {
 	if target <= 0 {
 		return
 	}
@@ -205,7 +205,7 @@ func SubsetSumTarget(nums []int, target int) (res []int, ok bool) {
 // 能否用nums中的若干个数凑出和为target.
 //
 //	O(n*max(nums)))
-func SubsetSumTargetDp1(nums []int, target int) (res []int, ok bool) {
+func SubsetSumTargetDp1(nums []int, target int) (solution []int, ok bool) {
 	if target <= 0 {
 		return
 	}
@@ -287,7 +287,7 @@ func SubsetSumTargetDp1(nums []int, target int) (res []int, ok bool) {
 
 	for i := 0; i < n; i++ {
 		if used[i] {
-			res = append(res, i)
+			solution = append(solution, i)
 		}
 	}
 
@@ -298,7 +298,7 @@ func SubsetSumTargetDp1(nums []int, target int) (res []int, ok bool) {
 // 能否用nums中的若干个数凑出和为target.
 //
 //	O(sum(nums)^1.5)
-func SubsetSumTargetDp2(nums []int, target int) (res []int, ok bool) {
+func SubsetSumTargetDp2(nums []int, target int) (solution []int, ok bool) {
 	sum := 0
 	for _, v := range nums {
 		sum += v
@@ -341,7 +341,7 @@ func SubsetSumTargetDp2(nums []int, target int) (res []int, ok bool) {
 	}
 
 	for target > 0 {
-		res = append(res, last[target])
+		solution = append(solution, last[target])
 		target -= nums[last[target]]
 	}
 
@@ -352,7 +352,7 @@ func SubsetSumTargetDp2(nums []int, target int) (res []int, ok bool) {
 // Bitset优化dp.能否用nums中的若干个数凑出和为target.
 //
 //	O(n*target/w)
-func SubsetSumTargetDp3(nums []int, target int) (res []int, ok bool) {
+func SubsetSumTargetDp3(nums []int, target int) (solution []int, ok bool) {
 	_enumerateBits64 := func(s uint64, f func(bit int)) {
 		for s != 0 {
 			i := bits.TrailingZeros64(s)
@@ -411,7 +411,7 @@ func SubsetSumTargetDp3(nums []int, target int) (res []int, ok bool) {
 
 	for target > 0 {
 		i := last[target]
-		res = append(res, i)
+		solution = append(solution, i)
 		target -= nums[i]
 	}
 
@@ -422,7 +422,7 @@ func SubsetSumTargetDp3(nums []int, target int) (res []int, ok bool) {
 // 能否用nums中的若干个数凑出和为target.
 //
 //	O(sum(nums)^1.5/w).常数较大.
-func SubsetSumTargetDp4(nums []int, target int) (res []int, ok bool) {
+func SubsetSumTargetDp4(nums []int, target int) (solution []int, ok bool) {
 	sum := 0
 	for _, v := range nums {
 		sum += v
@@ -462,7 +462,7 @@ func SubsetSumTargetDp4(nums []int, target int) (res []int, ok bool) {
 			c := st[len(st)-1]
 			st = st[:len(st)-1]
 			if c < n {
-				res = append(res, c)
+				solution = append(solution, c)
 				continue
 			}
 			a, b := pre[c][0], pre[c][1]
@@ -477,7 +477,7 @@ func SubsetSumTargetDp4(nums []int, target int) (res []int, ok bool) {
 // 折半搜索.能否用nums中的若干个数凑出和为target.
 //
 //	O(2^(n/2))
-func SubsetSumTargetDp5(nums []int, target int) (res []int, ok bool) {
+func SubsetSumTargetDp5(nums []int, target int) (solution []int, ok bool) {
 	_merge := func(a, b [][2]int) [][2]int {
 		n1, n2 := len(a), len(b)
 		res := make([][2]int, n1+n2)
@@ -541,7 +541,7 @@ func SubsetSumTargetDp5(nums []int, target int) (res []int, ok bool) {
 	for left < len(dp1) && right >= 0 {
 		sum := dp1[left][0] + dp2[right][0]
 		if sum == target {
-			res = _resolveState(mid, dp1[left][1], n-mid, dp2[right][1])
+			solution = _resolveState(mid, dp1[left][1], n-mid, dp2[right][1])
 			ok = true
 			return
 		}
