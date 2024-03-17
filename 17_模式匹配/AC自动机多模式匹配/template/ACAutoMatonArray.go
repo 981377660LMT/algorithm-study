@@ -1,3 +1,6 @@
+// https://github.dev/EndlessCheng/codeforces-go/tree/master/copypasta
+// https://www.cnblogs.com/alex-wei/p/Common_String_Theory_Theory_automaton_related.html
+// https://zhuanlan.zhihu.com/p/533603249
 // 类似 KMP 的失配数组，失配指针的含义为：
 // 当前结点所表示字符串的最长真后缀 (border)，使得该后缀作为某个单词的前缀出现。
 // !https://www.cnblogs.com/alex-wei/p/Common_String_Theory_Theory_automaton_related.html
@@ -7,19 +10,55 @@
 //   字符串x在字符串y中出现的次数 = `Fail树中x的子树`与`Trie树中y到根的路径`的交点个数
 //   一个单词在匹配串S中出现次数之和，等于它在S的所有前缀中作为后缀出现 的次数之和。
 //
+//  - 单词her、say、she、shr、he构成的AC自动机。
+//    (i)表示的是link指针指向的节点。
+//
+//                       ""
+//                     /    \
+//                    /      \
+//                   h(1)     s
+//                  /       /   \
+//                e(2)    a     h(1)
+// 							 /       /     /    \
+//              r       y    e(2)    r
+//
+//
 // - notes:
-//
-//
+//   1. 如果我们既知道前缀信息（trie），又知道后缀信息（fail），就可以做字符串匹配：
+//      前缀的后缀就是子串，只要遍历到所有前缀，对每个前缀做「后缀匹配」，就完成了字符串匹配（统计子串出现次数）
+//   2. 动态增删模式串，同时询问「查询所有模式串在文本串中的出现次数」，可以改为离线（先把所有模式串加入 AC 自动机）
+//      当对一个节点增删 end 标记时，如果只对这一个节点修改，那么询问就需要遍历整个 fail 链，太慢了
+//      换个思路：改为 end 标记会对它的 fail 子树全部 +1/-1，这样就可以在遍历文本串时单点询问了
+//   3. 简单的AC自动机只能进行不重复统计，即统计字典中多少个字符串出现在目标串中。
+//      如果要重复计数的话，即同一个字符串出现在不同位置要重复计数，则依靠fail指针可能很耗时，因为需要遍历fail指针。
+//      可以使用树（fail树）上的前缀和来累计求解。如果涉及离线修改，则可以使用dfs序+树状数组来维护这个前缀和。
+//   4. 字符串之间的包含关系:
+//      !"子串是某个前缀的后缀", 遍历文本串的每个前缀，在fail树上找到对应最长后缀，然后在trie树上定位到对应串.
+//      !- 前缀在trie树上,一个字符串的所有前缀对应根节点到该节点的路径.
+//      !- 后缀在fail树上,结点p的子树对应字符的后缀均为结点p对应的字符串.
+//   5. 当 Children[i][c] 不能匹配文本串 text 中的某个字符时，Children[Fail[i]][c] 即为下一个待匹配节点.
+//   6. 多串问题 => 字典树/广义SAM
+//   7. 对于fail转移p1->p2，p2既是p1的最长真后缀，也是p2[i]的一个前缀.
+//   8. ACAM 接受且仅接受以给定词典中的某一个单词"结尾"的字符串.
+//   !9. 失配指针fail[p]的含义位p所表示字符串s[p]的最长真后缀，使得该后缀作为某个单词的前缀出现。
+//   10.节点也被称为 状态。
+//   !11.Move(pos,char)表示往状态pos后添加字符char，所得字符串的"最长的"与某个单词的"前缀"匹配的"后缀"所表示的状态。
+//   !12.终止节点代表一个单词，或"以一个单词结尾"。所有终止节点 组成的集合对应着 DFA 的 接受状态集合。
+//   !13.fail树性质
+//     - 对于节点p及其对应字符串pattern[p]，对于其子树内部所有节点q，都有pattern[q]是pattern[p]的后缀。
+//       反之也成立，即q是p的后缀<=>p在q的子树内。(这里与后缀自动机fail树的性质相同)
+//     - 若p是终止节点，则p的子树全部都是终止节点(border关系.)
+//     - 一个单词p在匹配串s中出现次数之和，等于它在s的"所有前缀"中作为"后缀"出现的次数之和，等于 fail 树从p到根节点上单词节点的数量
+//   !14.通常带修链求和要用到树剖，但查询具有特殊性质：一个端点是根。
+//       !链加+单点查询 可以变为 单点加+子树求和。
+//       !单点修改+链求和，可以转变为 子树修改+单点查询。(TODO:封装BIT方法.)
+//       只要包含一个单点操作，一个链操作，均可以将链操作转化为子树操作，即可将时间复杂度更大的树剖 BIT 换成普通 BIT。
 //
 // - applications:
-//   1.dp类型题: 一般都是dfs(index,pos):长度为index的字符串，当前trie状态为pos.
-//  	 枚举26种字符(字符集)转移.
-//   2.自定义结点信息题：用WordPos初始化状态，用SuffixLink转移.
-//   3.Trie图：用 Move 来获取每个点的临边.
-//   4.失配树：用SuffixLink来获取每个点的父亲.
-//   5.字符串之间的包含关系:
-//     根据"子串是某个前缀的后缀",
-//     遍历长串的每个前缀，在fail树上找到对应最长后缀，然后在trie树上定位到对应串.
+//   1. "不能出现若干单词" 的字符串 计数或最优化 问题 => ac自动机上dp: 一般都是dfs(index,pos):长度为index的字符串，当前trie状态为pos.
+//  	  枚举26种字符(字符集)转移.
+//   2. 自定义结点信息题：用WordPos初始化状态，用SuffixLink转移.
+//   !3. 查询x在y中的出现次数 => y到Trie树的根的每个结点上打标记(前缀)，查询fail树上x的子树内有标记的节点个数。
 
 package main
 
@@ -29,10 +68,13 @@ import (
 	"os"
 )
 
+// TODO: https://www.luogu.com.cn/problem/P3808，相同编号的串多次出现仅算一次
+// https://www.luogu.com.cn/problem/P3121
+
 func main() {
 
 	// SeparateString()
-	// P5357()
+	// P5357()  // TODO:文本串 在 AC 自动机上每经过一个节点就将其权值增加 ，则每个单词 在 中的出现次数即 在 fail 树上的子树节点权值和。时间复杂度线性对数。
 	// P3966()
 	// P3121()
 	// P4052()
@@ -410,6 +452,7 @@ func P3041() {
 		acm.AddString(s)
 	}
 	acm.BuildSuffixLink(true)
+
 	size := acm.Size()
 	counter := acm.GetCounter()
 	memo := make([][]int, k)
@@ -441,11 +484,21 @@ func P3041() {
 	fmt.Println(res)
 }
 
+// P7456 [CERC2018] The ABCD Murderer (结合线段树优化DP)
+// n 个模式串和一个文本串，问要拼成文本串最少需要几个模式串。其中模式串可重叠。
+func P7456() {
+
+}
+
+// A task for substrings
+// https://www.luogu.com.cn/problem/CF1801G
+func CF1801G() {}
+
 // 不调用 BuildSuffixLink 就是Trie，调用 BuildSuffixLink 就是AC自动机.
 // 每个状态对应Trie中的一个结点，也对应一个前缀.
 type ACAutoMatonArray struct {
-	WordPos            []int     // WordPos[i] 表示加入的第i个模式串对应的节点编号.
-	Parent             []int     // parent[v] 表示节点v的父节点.
+	WordPos            []int32   // WordPos[i] 表示加入的第i个模式串对应的节点编号(单词结点).
+	Parent             []int32   // parent[v] 表示节点v的父节点.
 	sigma              int32     // 字符集大小.
 	offset             int32     // 字符集的偏移量.
 	children           [][]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
@@ -454,81 +507,62 @@ type ACAutoMatonArray struct {
 	needUpdateChildren bool      // 是否需要更新children数组.
 }
 
-func NewACAutoMatonArray(sigma, offset int) *ACAutoMatonArray {
-	res := &ACAutoMatonArray{sigma: int32(sigma), offset: int32(offset)}
+func NewACAutoMatonArray(sigma, offset int32) *ACAutoMatonArray {
+	res := &ACAutoMatonArray{sigma: sigma, offset: offset}
 	res.Clear()
 	return res
 }
 
 // 添加一个字符串，返回最后一个字符对应的节点编号.
-func (trie *ACAutoMatonArray) AddString(str string) int {
+func (trie *ACAutoMatonArray) AddString(str string) int32 {
 	if len(str) == 0 {
 		return 0
 	}
-	pos := 0
+	pos := int32(0)
 	for _, s := range str {
-		ord := int32(s) - trie.offset
+		ord := s - trie.offset
 		if trie.children[pos][ord] == -1 {
 			trie.children[pos][ord] = trie.newNode()
 			trie.Parent[len(trie.Parent)-1] = pos
 		}
-		pos = int(trie.children[pos][ord])
-	}
-	trie.WordPos = append(trie.WordPos, pos)
-	return pos
-}
-
-// 功能与 AddString 相同.
-func (trie *ACAutoMatonArray) AddFrom(n int, getOrd func(i int) int) int {
-	if n == 0 {
-		return 0
-	}
-	pos := 0
-	for i := 0; i < n; i++ {
-		s := getOrd(i)
-		ord := int32(s) - trie.offset
-		if trie.children[pos][ord] == -1 {
-			trie.children[pos][ord] = trie.newNode()
-			trie.Parent[len(trie.Parent)-1] = pos
-		}
-		pos = int(trie.children[pos][ord])
+		pos = trie.children[pos][ord]
 	}
 	trie.WordPos = append(trie.WordPos, pos)
 	return pos
 }
 
 // 在pos位置添加一个字符，返回新的节点编号.
-func (trie *ACAutoMatonArray) AddChar(pos int, ord int) int {
-	ord -= int(trie.offset)
+func (trie *ACAutoMatonArray) AddChar(pos, ord int32) int32 {
+	ord -= trie.offset
 	if trie.children[pos][ord] != -1 {
-		return int(trie.children[pos][ord])
+		return trie.children[pos][ord]
 	}
 	trie.children[pos][ord] = trie.newNode()
 	trie.Parent[len(trie.Parent)-1] = pos
-	return int(trie.children[pos][ord])
+	return trie.children[pos][ord]
 }
 
 // pos: DFA的状态集, ord: DFA的字符集
-func (trie *ACAutoMatonArray) Move(pos int, ord int) int {
-	ord -= int(trie.offset)
+func (trie *ACAutoMatonArray) Move(pos, ord int32) int32 {
+	ord -= trie.offset
 	if trie.needUpdateChildren {
-		return int(trie.children[pos][ord])
+		return trie.children[pos][ord]
 	}
 	for {
 		nexts := trie.children[pos]
 		if nexts[ord] != -1 {
-			return int(nexts[ord])
+			return nexts[ord]
 		}
 		if pos == 0 {
 			return 0
 		}
-		pos = int(trie.suffixLink[pos])
+		pos = trie.suffixLink[pos]
 	}
 }
 
 // 自动机中的节点(状态)数量，包括虚拟节点0.
-func (trie *ACAutoMatonArray) Size() int {
-	return len(trie.children)
+func (trie *ACAutoMatonArray) Size() int32 {
+	return int32(len(trie.children))
 }
 
 func (trie *ACAutoMatonArray) Empty() bool {
@@ -597,8 +631,8 @@ func (trie *ACAutoMatonArray) Clear() {
 }
 
 // 获取每个状态包含的模式串的个数.
-func (trie *ACAutoMatonArray) GetCounter() []int {
-	counter := make([]int, len(trie.children))
+func (trie *ACAutoMatonArray) GetCounter() []int32 {
+	counter := make([]int32, len(trie.children))
 	for _, pos := range trie.WordPos {
 		counter[pos]++
 	}
@@ -611,16 +645,16 @@ func (trie *ACAutoMatonArray) GetCounter() []int {
 }
 
 // 获取每个状态包含的模式串的索引.
-func (trie *ACAutoMatonArray) GetIndexes() [][]int {
-	res := make([][]int, len(trie.children))
+func (trie *ACAutoMatonArray) GetIndexes() [][]int32 {
+	res := make([][]int32, len(trie.children))
 	for i, pos := range trie.WordPos {
-		res[pos] = append(res[pos], i)
+		res[pos] = append(res[pos], int32(i))
 	}
 	for _, v := range trie.bfsOrder {
 		if v != 0 {
 			from, to := trie.suffixLink[v], v
 			arr1, arr2 := res[from], res[to]
-			arr3 := make([]int, 0, len(arr1)+len(arr2))
+			arr3 := make([]int32, 0, len(arr1)+len(arr2))
 			i, j := 0, 0
 			for i < len(arr1) && j < len(arr2) {
 				for i < len(arr1) && j < len(arr2) {
@@ -652,42 +686,42 @@ func (trie *ACAutoMatonArray) GetIndexes() [][]int {
 }
 
 // 按照拓扑序进行转移(EnumerateFail).
-func (trie *ACAutoMatonArray) Dp(f func(from, to int)) {
+func (trie *ACAutoMatonArray) Dp(f func(from, to int32)) {
 	for _, v := range trie.bfsOrder {
 		if v != 0 {
-			f(int(trie.suffixLink[v]), int(v))
+			f(trie.suffixLink[v], v)
 		}
 	}
 }
 
-func (trie *ACAutoMatonArray) BuildFailTree() [][]int {
-	res := make([][]int, trie.Size())
-	trie.Dp(func(pre, cur int) {
+func (trie *ACAutoMatonArray) BuildFailTree() [][]int32 {
+	res := make([][]int32, trie.Size())
+	trie.Dp(func(pre, cur int32) {
 		res[pre] = append(res[pre], cur)
 	})
 	return res
 }
 
-func (trie *ACAutoMatonArray) BuildTrieTree() [][]int {
-	res := make([][]int, trie.Size())
-	for i := 1; i < trie.Size(); i++ {
+func (trie *ACAutoMatonArray) BuildTrieTree() [][]int32 {
+	res := make([][]int32, trie.Size())
+	for i := int32(1); i < trie.Size(); i++ {
 		res[trie.Parent[i]] = append(res[trie.Parent[i]], i)
 	}
 	return res
 }
 
 // 返回str在trie树上的节点位置.如果不存在，返回0.
-func (trie *ACAutoMatonArray) Search(str string) int {
+func (trie *ACAutoMatonArray) Search(str string) int32 {
 	if len(str) == 0 {
 		return 0
 	}
-	pos := 0
-	for _, s := range str {
-		if pos >= len(trie.children) || pos < 0 {
+	pos := int32(0)
+	for _, char := range str {
+		if pos >= int32(len(trie.children)) || pos < 0 {
 			return 0
 		}
-		ord := int32(s) - trie.offset
-		if next := int(trie.children[pos][ord]); next == -1 {
+		ord := char - trie.offset
+		if next := trie.children[pos][ord]; next == -1 {
 			return 0
 		} else {
 			pos = next
@@ -714,6 +748,20 @@ func min(a, b int) int {
 }
 
 func max(a, b int) int {
+	if a >= b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a <= b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
 	if a >= b {
 		return a
 	}

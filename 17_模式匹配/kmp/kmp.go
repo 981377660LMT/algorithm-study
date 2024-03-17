@@ -13,16 +13,9 @@ import (
 )
 
 func main() {
-	// a, b := "ababab", "a"
-	// fmt.Println(IndexOfAll(a, b, 0))
-
 	// SUFEQPRE()
-
+	P3193()
 	// P4824()
-	s := "aaaaa"
-	sNext := GetNext(s)
-	fmt.Println(GetHalfLinkLength(s, sNext))
-
 }
 
 // 面试题 17.17. 多次搜索
@@ -64,6 +57,20 @@ func SUFEQPRE() {
 		res := query(s)
 		fmt.Fprintln(out, "Case", i+1, ":", res)
 	}
+}
+
+// P3193 [HNOI2008] GT考试 (KMP+矩阵快速幂dp)
+// 求有多少个n位的数字串不包含m位的字符串
+// n<=1e9,m<=20
+//
+// dp[i][j] 表示长度为i的准考证和A匹配到了第j位的方案数.
+func P3193() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m, MOD int32
+	fmt.Fscan(in, &n, &m, &MOD)
 }
 
 // https://www.luogu.com.cn/problem/P4824

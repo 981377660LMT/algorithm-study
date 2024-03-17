@@ -273,7 +273,8 @@ func op(a, b E) E {
 	return a + b
 }
 func merge(a, b E) E { // 合并两个不同的树的结点的函数
-	return min32(1, a+b)
+	// return min32(1, a+b)
+	return a + b
 }
 
 type SegNode struct {
@@ -861,6 +862,7 @@ func main() {
 	// CF316G3()
 	// CF427D()
 	// CF452E()
+	CF547E()
 	// CF666E()
 }
 
@@ -1211,6 +1213,13 @@ func CF204E线段树合并() {
 	}
 
 	sam := NewSuffixAutomatonGeneral()
+	// func e() E { return 0 }
+	// func op(a, b E) E {
+	// 	return a + b
+	// }
+	// func merge(a, b E) E { // 合并两个不同的树的结点的函数
+	// 	return min32(1, a+b)
+	// }
 	seg := NewSegmentTreeMerger(0, n-1) // 维护每个endPos出现的字符串下标.
 	nodes := make([]*SegNode, allLen*2)
 	for i := range nodes {
@@ -1444,6 +1453,57 @@ func CF452E() {
 	}
 }
 
+// Mike and Friends
+// https://www.luogu.com.cn/problem/CF547E
+// 给定n个字符串words和q个查询.
+// 每次查询words[index]在words[start:end)中出现的次数.
+func CF547E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	allLen := int32(0)
+	words := make([]string, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &words[i])
+		allLen += int32(len(words[i]))
+	}
+
+	sam := NewSuffixAutomatonGeneral()
+	seg := NewSegmentTreeMerger(0, n-1)
+	nodes := make([]*SegNode, 2*allLen)
+	for i := range nodes {
+		nodes[i] = seg.Alloc()
+	}
+
+	endPos := make([]int32, n) // 每个串的pos
+	for wi, w := range words {
+		last := sam.AddString(w, func(_, pos int32) { seg.Set(nodes[pos], int32(wi), 1) })
+		endPos[wi] = last
+	}
+	dfsOrder := sam.GetDfsOrder()
+	for i := sam.Size() - 1; i >= 1; i-- {
+		cur := dfsOrder[i]
+		link := sam.Nodes[cur].Link
+		nodes[link] = seg.Merge(nodes[link], nodes[cur])
+	}
+
+	query := func(start, end, index int32) int32 {
+		pos := endPos[index]
+		return seg.Query(nodes[pos], start, end-1)
+	}
+
+	for i := int32(0); i < q; i++ {
+		var start, end, index int32
+		fmt.Fscan(in, &start, &end, &index)
+		start--
+		index--
+		fmt.Fprintln(out, query(start, end, index))
+	}
+}
+
 // Forensic Examination [CF666E] (线段树合并维护 endPosSize)
 // https://www.luogu.com.cn/problem/CF666E
 // 给定一个字符串s和n个字符串words[i].
@@ -1513,4 +1573,45 @@ func CF666E() {
 			fmt.Fprintln(out, minIndex+1, maxCount)
 		}
 	}
+}
+
+// 1408. 数组中的字符串匹配
+// https://leetcode.cn/problems/string-matching-in-an-array/description/
+// 对每个单词，如果它是另一个单词的子串，就把它加入答案中.
+func stringMatching(words []string) (res []string) {
+	sam := NewSuffixAutomatonGeneral()
+	endPos := make([]int32, len(words)) // 每个串的pos
+	for i, w := range words {
+		endPos[i] = sam.AddString(w, nil)
+	}
+
+	size := sam.Size()
+	nodes := sam.Nodes
+	belongCount := make([]int32, size) // 每个状态属于多少个原串
+	visitedTime := make([]int32, size)
+	for i := range visitedTime {
+		visitedTime[i] = -1
+	}
+
+	markChain := func(sid int32, pos int32) {
+		for pos >= 0 && visitedTime[pos] != sid {
+			visitedTime[pos] = sid
+			belongCount[pos]++
+			pos = nodes[pos].Link
+		}
+	}
+	for i, w := range words {
+		pos := int32(0)
+		for _, c := range w {
+			pos = nodes[pos].Next[c-OFFSET]
+			markChain(int32(i), pos)
+		}
+	}
+
+	for i, pos := range endPos {
+		if belongCount[pos] >= 2 {
+			res = append(res, words[i])
+		}
+	}
+	return
 }

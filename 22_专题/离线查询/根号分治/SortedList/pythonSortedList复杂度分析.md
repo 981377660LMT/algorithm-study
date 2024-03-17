@@ -1,4 +1,5 @@
 https://leetcode.cn/circle/discuss/LLJ0oX/view/Vvwa9T/
+![SortedList](SortedList.png)
 
 # SortedList 源码简析 (python)
 
