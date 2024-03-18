@@ -17,3 +17,8 @@ https://baobaobear.github.io/post/20191215-fhq-treap/
 !163 普通平衡树 FHQ Treap https://www.bilibili.com/video/BV1kY4y1j7LC
 164 文艺平衡树 FHQ Treap https://www.bilibili.com/video/BV1pd4y1D7Nu
 169 可持久化平衡树 https://www.bilibili.com/video/BV1sB4y1L79D
+
+---
+
+`无旋Treap`
+https://www.cnblogs.com/alex-wei/p/FHQTreap_Splay_LCT.html

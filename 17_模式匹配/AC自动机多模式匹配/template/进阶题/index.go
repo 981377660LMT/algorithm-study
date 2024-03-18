@@ -134,6 +134,16 @@ func CF1202E() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
+	ReverseString := func(s string) string {
+		n := len(s)
+		runes := make([]rune, n)
+		for _, r := range s {
+			n--
+			runes[n] = r
+		}
+		return string(runes)
+	}
+
 	var longer string
 	fmt.Fscan(in, &longer)
 
@@ -144,26 +154,17 @@ func CF1202E() {
 		fmt.Fscan(in, &words[i])
 	}
 
-	reverse := func(s string) string {
-		res := make([]byte, len(s))
-		for i := range s {
-			res[len(s)-1-i] = s[i]
-		}
-		return string(res)
-	}
-
 	acm := NewACAutoMatonArray(26, 97)
 	rAcm := NewACAutoMatonArray(26, 97)
 	for _, word := range words {
 		acm.AddString(word)
-		rAcm.AddString(reverse(word))
+		rAcm.AddString(ReverseString(word))
 	}
 	acm.BuildSuffixLink(true)
 	rAcm.BuildSuffixLink(true)
 
 	counter := acm.GetCounter()
 	rCounter := rAcm.GetCounter()
-
 	pre := make([]int, len(longer))
 	pos := 0
 	for i := 0; i < len(longer); i++ {
@@ -350,18 +351,16 @@ func CF163E() {
 	// dfs序
 	lid, rid := make([]int, n), make([]int, n)
 	dfn := 0
-	var dfs func(cur, pre int)
-	dfs = func(cur, pre int) {
+	var dfs func(cur int)
+	dfs = func(cur int) {
 		lid[cur] = dfn
 		dfn++
 		for _, next := range failTree[cur] {
-			if next != pre {
-				dfs(next, cur)
-			}
+			dfs(next)
 		}
 		rid[cur] = dfn
 	}
-	dfs(0, -1)
+	dfs(0)
 
 	ok := make([]bool, n)
 	bit := NewBITRangeAddPointGet(n)
@@ -566,7 +565,7 @@ func SP9941() {
 	}
 }
 
-// P2414 [NOI2011] 阿狸的打字机
+// P2414 [NOI2011] 阿狸的打字机 (TODO)
 // https://www.luogu.com.cn/problem/P2414
 // 打字机上只有 28 个按键，分别印有 26 个小写英文字母和 B、P 两个字母。
 // 经阿狸研究发现，这个打字机是这样工作的：
@@ -748,7 +747,7 @@ func CF1207G() {
 			res[qid] = bit.QueryRange(lid[qv], rid[qv])
 		}
 
-		for c, next := range trie1.children[triePos] {
+		for c, next := range trie1.Children[triePos] {
 			if next != -1 {
 				dfs(int(next), acm2.Move(acmPos, c+97))
 			}
@@ -1109,7 +1108,7 @@ func CF696D() {
 	}
 	for cur := 0; cur < size; cur++ {
 		for c := 0; c < 26; c++ {
-			next := acm.children[cur][c]
+			next := acm.Children[cur][c]
 			adjMatrix[cur][next] = max(adjMatrix[cur][next], nodeValue[next])
 		}
 	}
@@ -1212,7 +1211,7 @@ func SP1676() {
 	for cur := 0; cur < size; cur++ {
 		if counter[cur] == 0 {
 			for c := 0; c < 26; c++ {
-				next := acm.children[cur][c]
+				next := acm.Children[cur][c]
 				if counter[next] == 0 {
 					adjMatrix[cur][next]++
 				}
@@ -1239,11 +1238,11 @@ func SP1676() {
 type ACAutoMatonArray struct {
 	WordPos            []int     // WordPos[i] 表示加入的第i个模式串对应的节点编号.
 	Parent             []int     // parent[v] 表示节点v的父节点.
+	Link               []int32   // 又叫fail.指向当前trie节点(对应一个前缀)的最长真后缀对应结点，例如"bc"是"abc"的最长真后缀.
+	Children           [][]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
+	BfsOrder           []int32   // 结点的拓扑序,0表示虚拟节点.
 	sigma              int32     // 字符集大小.
 	offset             int32     // 字符集的偏移量.
-	children           [][]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
-	suffixLink         []int32   // 又叫fail.指向当前trie节点(对应一个前缀)的最长真后缀对应结点，例如"bc"是"abc"的最长真后缀.
-	bfsOrder           []int32   // 结点的拓扑序,0表示虚拟节点.
 	needUpdateChildren bool      // 是否需要更新children数组.
 }
 
@@ -1261,11 +1260,11 @@ func (trie *ACAutoMatonArray) AddString(str string) int {
 	pos := 0
 	for _, s := range str {
 		ord := int32(s) - trie.offset
-		if trie.children[pos][ord] == -1 {
-			trie.children[pos][ord] = trie.newNode()
+		if trie.Children[pos][ord] == -1 {
+			trie.Children[pos][ord] = trie.newNode()
 			trie.Parent[len(trie.Parent)-1] = pos
 		}
-		pos = int(trie.children[pos][ord])
+		pos = int(trie.Children[pos][ord])
 	}
 	trie.WordPos = append(trie.WordPos, pos)
 	return pos
@@ -1280,11 +1279,11 @@ func (trie *ACAutoMatonArray) AddFrom(n int, getOrd func(i int) int) int {
 	for i := 0; i < n; i++ {
 		s := getOrd(i)
 		ord := int32(s) - trie.offset
-		if trie.children[pos][ord] == -1 {
-			trie.children[pos][ord] = trie.newNode()
+		if trie.Children[pos][ord] == -1 {
+			trie.Children[pos][ord] = trie.newNode()
 			trie.Parent[len(trie.Parent)-1] = pos
 		}
-		pos = int(trie.children[pos][ord])
+		pos = int(trie.Children[pos][ord])
 	}
 	trie.WordPos = append(trie.WordPos, pos)
 	return pos
@@ -1293,39 +1292,39 @@ func (trie *ACAutoMatonArray) AddFrom(n int, getOrd func(i int) int) int {
 // 在pos位置添加一个字符，返回新的节点编号.
 func (trie *ACAutoMatonArray) AddChar(pos int, ord int) int {
 	ord -= int(trie.offset)
-	if trie.children[pos][ord] != -1 {
-		return int(trie.children[pos][ord])
+	if trie.Children[pos][ord] != -1 {
+		return int(trie.Children[pos][ord])
 	}
-	trie.children[pos][ord] = trie.newNode()
+	trie.Children[pos][ord] = trie.newNode()
 	trie.Parent[len(trie.Parent)-1] = pos
-	return int(trie.children[pos][ord])
+	return int(trie.Children[pos][ord])
 }
 
 // pos: DFA的状态集, ord: DFA的字符集
 func (trie *ACAutoMatonArray) Move(pos int, ord int) int {
 	ord -= int(trie.offset)
 	if trie.needUpdateChildren {
-		return int(trie.children[pos][ord])
+		return int(trie.Children[pos][ord])
 	}
 	for {
-		nexts := trie.children[pos]
+		nexts := trie.Children[pos]
 		if nexts[ord] != -1 {
 			return int(nexts[ord])
 		}
 		if pos == 0 {
 			return 0
 		}
-		pos = int(trie.suffixLink[pos])
+		pos = int(trie.Link[pos])
 	}
 }
 
 // 自动机中的节点(状态)数量，包括虚拟节点0.
 func (trie *ACAutoMatonArray) Size() int {
-	return len(trie.children)
+	return len(trie.Children)
 }
 
 func (trie *ACAutoMatonArray) Empty() bool {
-	return len(trie.children) == 1
+	return len(trie.Children) == 1
 }
 
 // 构建后缀链接(失配指针).
@@ -1334,46 +1333,46 @@ func (trie *ACAutoMatonArray) Empty() bool {
 // !move调用较少时，设置为false更快.
 func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 	trie.needUpdateChildren = needUpdateChildren
-	trie.suffixLink = make([]int32, len(trie.children))
-	for i := range trie.suffixLink {
-		trie.suffixLink[i] = -1
+	trie.Link = make([]int32, len(trie.Children))
+	for i := range trie.Link {
+		trie.Link[i] = -1
 	}
-	trie.bfsOrder = make([]int32, len(trie.children))
+	trie.BfsOrder = make([]int32, len(trie.Children))
 	head, tail := 0, 0
-	trie.bfsOrder[tail] = 0
+	trie.BfsOrder[tail] = 0
 	tail++
 	for head < tail {
-		v := trie.bfsOrder[head]
+		v := trie.BfsOrder[head]
 		head++
-		for i, next := range trie.children[v] {
+		for i, next := range trie.Children[v] {
 			if next == -1 {
 				continue
 			}
-			trie.bfsOrder[tail] = next
+			trie.BfsOrder[tail] = next
 			tail++
-			f := trie.suffixLink[v]
-			for f != -1 && trie.children[f][i] == -1 {
-				f = trie.suffixLink[f]
+			f := trie.Link[v]
+			for f != -1 && trie.Children[f][i] == -1 {
+				f = trie.Link[f]
 			}
-			trie.suffixLink[next] = f
+			trie.Link[next] = f
 			if f == -1 {
-				trie.suffixLink[next] = 0
+				trie.Link[next] = 0
 			} else {
-				trie.suffixLink[next] = trie.children[f][i]
+				trie.Link[next] = trie.Children[f][i]
 			}
 		}
 	}
 	if !needUpdateChildren {
 		return
 	}
-	for _, v := range trie.bfsOrder {
-		for i, next := range trie.children[v] {
+	for _, v := range trie.BfsOrder {
+		for i, next := range trie.Children[v] {
 			if next == -1 {
-				f := trie.suffixLink[v]
+				f := trie.Link[v]
 				if f == -1 {
-					trie.children[v][i] = 0
+					trie.Children[v][i] = 0
 				} else {
-					trie.children[v][i] = trie.children[f][i]
+					trie.Children[v][i] = trie.Children[f][i]
 				}
 			}
 		}
@@ -1383,21 +1382,21 @@ func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 func (trie *ACAutoMatonArray) Clear() {
 	trie.WordPos = trie.WordPos[:0]
 	trie.Parent = trie.Parent[:0]
-	trie.children = trie.children[:0]
-	trie.suffixLink = trie.suffixLink[:0]
-	trie.bfsOrder = trie.bfsOrder[:0]
+	trie.Children = trie.Children[:0]
+	trie.Link = trie.Link[:0]
+	trie.BfsOrder = trie.BfsOrder[:0]
 	trie.newNode()
 }
 
 // 获取每个状态包含的模式串的个数.
 func (trie *ACAutoMatonArray) GetCounter() []int {
-	counter := make([]int, len(trie.children))
+	counter := make([]int, len(trie.Children))
 	for _, pos := range trie.WordPos {
 		counter[pos]++
 	}
-	for _, v := range trie.bfsOrder {
+	for _, v := range trie.BfsOrder {
 		if v != 0 {
-			counter[v] += counter[trie.suffixLink[v]]
+			counter[v] += counter[trie.Link[v]]
 		}
 	}
 	return counter
@@ -1405,13 +1404,13 @@ func (trie *ACAutoMatonArray) GetCounter() []int {
 
 // 获取每个状态包含的模式串的索引.
 func (trie *ACAutoMatonArray) GetIndexes() [][]int {
-	res := make([][]int, len(trie.children))
+	res := make([][]int, len(trie.Children))
 	for i, pos := range trie.WordPos {
 		res[pos] = append(res[pos], i)
 	}
-	for _, v := range trie.bfsOrder {
+	for _, v := range trie.BfsOrder {
 		if v != 0 {
-			from, to := trie.suffixLink[v], v
+			from, to := trie.Link[v], v
 			arr1, arr2 := res[from], res[to]
 			arr3 := make([]int, 0, len(arr1)+len(arr2))
 			i, j := 0, 0
@@ -1446,9 +1445,9 @@ func (trie *ACAutoMatonArray) GetIndexes() [][]int {
 
 // 按照拓扑序进行转移(EnumerateFail).
 func (trie *ACAutoMatonArray) Dp(f func(from, to int)) {
-	for _, v := range trie.bfsOrder {
+	for _, v := range trie.BfsOrder {
 		if v != 0 {
-			f(int(trie.suffixLink[v]), int(v))
+			f(int(trie.Link[v]), int(v))
 		}
 	}
 }
@@ -1476,11 +1475,11 @@ func (trie *ACAutoMatonArray) Search(str string) int {
 	}
 	pos := 0
 	for _, s := range str {
-		if pos >= len(trie.children) || pos < 0 {
+		if pos >= len(trie.Children) || pos < 0 {
 			return 0
 		}
 		ord := int32(s) - trie.offset
-		if next := int(trie.children[pos][ord]); next == -1 {
+		if next := int(trie.Children[pos][ord]); next == -1 {
 			return 0
 		} else {
 			pos = next
@@ -1495,8 +1494,8 @@ func (trie *ACAutoMatonArray) newNode() int32 {
 	for i := range nexts {
 		nexts[i] = -1
 	}
-	trie.children = append(trie.children, nexts)
-	return int32(len(trie.children) - 1)
+	trie.Children = append(trie.Children, nexts)
+	return int32(len(trie.Children) - 1)
 }
 
 type T = int

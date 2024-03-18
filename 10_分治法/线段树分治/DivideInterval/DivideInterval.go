@@ -72,9 +72,20 @@ func yuki1170() {
 	}
 }
 
+// G - Smaller Sum
+// https://atcoder.jp/contests/abc339/tasks/abc339_g
+// 区间查询不下推区间，而是采用标记永久化.
+// https://github.com/maspypy/library/commit/8d79a4533f5cc686bb3b6fb44e1f8aea4a3f792f
+func abc339g() {}
+
 // G - Retroactive Range Chmax (可追溯区间最大值修改)
 // https://atcoder.jp/contests/abc342/tasks/abc342_g
 func abc342g() {
+
+}
+
+// https://www.luogu.com.cn/problem/SP11470
+func SP11470() {
 
 }
 
