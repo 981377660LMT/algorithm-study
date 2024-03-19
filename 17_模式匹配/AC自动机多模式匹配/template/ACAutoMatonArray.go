@@ -57,12 +57,17 @@
 //     - 模式串信息dp预处理 + 文本串单点查询：得到模式串在trie树上的位置，然后将结点信息沿着fail树向下dp传递，文本串查询时只需要单点查询;
 //     - 文本串跳fail查询：不使用dp预处理模式串信息，文本串查询时每次跳fail查询(注意如果求的是树链并，需要visited去重.)
 //  !16. 模式串作为后缀，文本串作为前缀.
+//  !17. AC自动机擅长多串模式匹配，还可以处理字符串权值带修的问题，而广义SAM就不擅长。
+//       !AC自动机擅长处理"多个串在某个串中"的出现次数，而广义SAM擅长处理"某个串在多个串中"的出现次数.
+//  !18. 注意trie树和fail树共用结点，类似sam的fail树和dag共用结点.
+//       在trie树/sam的dag往下走，相当于往后加字符，而在fail树往下走，相当于往前加字符.
 //
 // - applications:
 //  1. "不能出现若干单词" 的字符串 计数或最优化 问题 => ac自动机上dp: 一般都是dfs(index,pos):长度为index的字符串，当前trie状态为pos.
 //     枚举26种字符(字符集)转移.
 //  2. 自定义结点信息题：用WordPos初始化状态，用SuffixLink转移.
-//  !3. 查询x在y中的出现次数 => y到Trie树的根的每个结点上打标记(前缀)，查询fail树上x的子树内有标记的节点个数。
+//  !3. 查询x在y中的出现次数 => y到Trie树的根的每个结点上打标记(前缀)，查询fail树上x的子树内有标记的节点个数
+//                           => 离线查询：trie树上dfs标记前缀, 树状数组查询fail树子树和.
 //  !4. 每个模式串查询在文本串中出现的次数 => 文本串在每个结点上打标记(前缀)，查询fail树上模式串的子树内有标记的节点个数(子树和)。
 
 package main
@@ -79,13 +84,15 @@ func main() {
 
 	// SeparateString()
 
-	P3041()
+	// P3041()
 	// P3121()
 	// P3796()
 	// P3808()
 	// P3966()
 	// P4052()
 	// P5357()
+	P7456()
+
 }
 
 func demo() {
@@ -545,18 +552,48 @@ func P5357() {
 // 求出对于每个位置 i，以s[i]结尾的最长单词的长度maxLen 。
 // dp[i]=min(dp[j]), i-maxLen[i]<=j<i
 func P7456() {
-
-}
-
-// A task for substrings
-// https://www.luogu.com.cn/problem/CF1801G
-func CF1801G() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
+	var count int32
+	fmt.Fscan(in, &count)
+	var text string
+	fmt.Fscan(in, &text)
+	patterns := make([]string, count)
+	for i := range patterns {
+		fmt.Fscan(in, &patterns[i])
+	}
+
+	acm := NewACAutoMatonArray(26, 97)
+	for _, s := range patterns {
+		acm.AddString(s)
+	}
+	acm.BuildSuffixLink(false)
+
+	maxBorder := make([]int32, acm.Size()) // 每个状态(前缀)的最长border
+	for i, pos := range acm.WordPos {
+		maxBorder[pos] = max32(maxBorder[pos], int32(len(patterns[i])))
+	}
+	acm.Dp(func(from, to int32) { maxBorder[to] = max32(maxBorder[to], maxBorder[from]) })
+
+	n := int32(len(text))
+	dp := NewPointSetRangeMin(n+1, func(i int32) E { return INF32 })
+	dp.Set(0, 0)
+	pos := int32(0)
+	for i := int32(1); i <= n; i++ {
+		char := int32(text[i-1])
+		pos = acm.Move(pos, char)
+		preMin := dp.Query(i-maxBorder[pos], i)
+		dp.Set(i, preMin+1)
+	}
+
+	res := dp.Get(n)
+	if res <= n {
+		fmt.Fprintln(out, res)
+	} else {
+		fmt.Fprintln(out, -1)
+	}
 }
 
 // 1032. 字符流
@@ -1018,6 +1055,123 @@ func (b *BITRangeAddPointGetArray) String() string {
 		res = append(res, fmt.Sprintf("%d", b.Get(i)))
 	}
 	return fmt.Sprintf("BITRangeAddPointGetArray: [%v]", strings.Join(res, ", "))
+}
+
+// PointSetRangeMin
+
+type E = int32
+
+func (*PointSetRangeMin) e() E        { return INF32 }
+func (*PointSetRangeMin) op(a, b E) E { return min32(a, b) }
+
+type PointSetRangeMin struct {
+	n, size int32
+	seg     []E
+}
+
+func NewPointSetRangeMin(n int32, f func(int32) E) *PointSetRangeMin {
+	res := &PointSetRangeMin{}
+	size := int32(1)
+	for size < n {
+		size <<= 1
+	}
+	seg := make([]E, size<<1)
+	for i := range seg {
+		seg[i] = res.e()
+	}
+	for i := int32(0); i < n; i++ {
+		seg[i+size] = f(i)
+	}
+	for i := size - 1; i > 0; i-- {
+		seg[i] = res.op(seg[i<<1], seg[i<<1|1])
+	}
+	res.n = n
+	res.size = size
+	res.seg = seg
+	return res
+}
+func NewSegmentTreeFrom(leaves []E) *PointSetRangeMin {
+	res := &PointSetRangeMin{}
+	n := int32(len(leaves))
+	size := int32(1)
+	for size < n {
+		size <<= 1
+	}
+	seg := make([]E, size<<1)
+	for i := range seg {
+		seg[i] = res.e()
+	}
+	for i := int32(0); i < n; i++ {
+		seg[i+size] = leaves[i]
+	}
+	for i := size - 1; i > 0; i-- {
+		seg[i] = res.op(seg[i<<1], seg[i<<1|1])
+	}
+	res.n = n
+	res.size = size
+	res.seg = seg
+	return res
+}
+func (st *PointSetRangeMin) Get(index int32) E {
+	if index < 0 || index >= st.n {
+		return st.e()
+	}
+	return st.seg[index+st.size]
+}
+func (st *PointSetRangeMin) Set(index int32, value E) {
+	if index < 0 || index >= st.n {
+		return
+	}
+	index += st.size
+	st.seg[index] = value
+	for index >>= 1; index > 0; index >>= 1 {
+		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+	}
+}
+func (st *PointSetRangeMin) Update(index int32, value E) {
+	if index < 0 || index >= st.n {
+		return
+	}
+	index += st.size
+	st.seg[index] = st.op(st.seg[index], value)
+	for index >>= 1; index > 0; index >>= 1 {
+		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+	}
+}
+
+// [start, end)
+func (st *PointSetRangeMin) Query(start, end int32) E {
+	if start < 0 {
+		start = 0
+	}
+	if end > st.n {
+		end = st.n
+	}
+	if start >= end {
+		return st.e()
+	}
+	leftRes, rightRes := st.e(), st.e()
+	start += st.size
+	end += st.size
+	for start < end {
+		if start&1 == 1 {
+			leftRes = st.op(leftRes, st.seg[start])
+			start++
+		}
+		if end&1 == 1 {
+			end--
+			rightRes = st.op(st.seg[end], rightRes)
+		}
+		start >>= 1
+		end >>= 1
+	}
+	return st.op(leftRes, rightRes)
+}
+func (st *PointSetRangeMin) QueryAll() E { return st.seg[1] }
+func (st *PointSetRangeMin) GetAll() []E {
+	res := make([]E, st.n)
+	copy(res, st.seg[st.size:st.size+st.n])
+	return res
 }
 
 func min(a, b int) int {

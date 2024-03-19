@@ -16,8 +16,12 @@
 // https://www.nowcoder.com/discuss/353148839920082944
 // https://juejin.cn/post/6844904128150241294 使用替罪羊树实现KD-Tree的增删改查
 //
+// TODO: 采用nodes数组维护*Node，int32维护节点编号.
 // TODO: stack 维护一个内存池(重构操作会频繁的收回一个节点编号，并且再分配节点编号).
-
+//
+//	封装到alloc(props):number和free(nodeId:number)方法中.
+//
+// IsUnbalanced() bool
 package main
 
 // https://github.com/EndlessCheng/codeforces-go/blob/49f6570d86c17f5064a5b079360f4128acc520c4/copypasta/scapegoat_tree.go#L24

@@ -266,7 +266,7 @@ func (sam *SuffixAutomatonGeneral) newNode(link, maxLen int32) *Node {
 	return res
 }
 
-type E = int32
+type E = int
 
 func e() E { return 0 }
 func op(a, b E) E {
@@ -865,7 +865,6 @@ func main() {
 	// CF547E()
 	// CF666E()
 
-	CF1801G()
 }
 
 // P3181 [HAOI2016] 找相同字符 (分别维护不同串的 size)
@@ -1200,91 +1199,91 @@ func CF204E() {
 
 // 将CF204E的markChain函数换成线段树合并处理.
 // 线段树合并更慢一些.
-func CF204E线段树合并() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+// func CF204E线段树合并() {
+// 	in := bufio.NewReader(os.Stdin)
+// 	out := bufio.NewWriter(os.Stdout)
+// 	defer out.Flush()
 
-	var n, k int32
-	fmt.Fscan(in, &n, &k)
-	words := make([]string, n)
-	allLen := int32(0)
-	for i := int32(0); i < n; i++ {
-		fmt.Fscan(in, &words[i])
-		allLen += int32(len(words[i]))
-	}
+// 	var n, k int32
+// 	fmt.Fscan(in, &n, &k)
+// 	words := make([]string, n)
+// 	allLen := int32(0)
+// 	for i := int32(0); i < n; i++ {
+// 		fmt.Fscan(in, &words[i])
+// 		allLen += int32(len(words[i]))
+// 	}
 
-	sam := NewSuffixAutomatonGeneral()
-	// func e() E { return 0 }
-	// func op(a, b E) E {
-	// 	return a + b
-	// }
-	// func merge(a, b E) E { // 合并两个不同的树的结点的函数
-	// 	return min32(1, a+b)
-	// }
-	seg := NewSegmentTreeMerger(0, n-1) // 维护每个endPos出现的字符串下标.
-	nodes := make([]*SegNode, allLen*2)
-	for i := range nodes {
-		nodes[i] = seg.Alloc()
-	}
-	for wi, v := range words {
-		pos := int32(0)
-		for _, c := range v {
-			pos = sam.Add(pos, c)
-			seg.Set(nodes[pos], int32(wi), 1)
-		}
-	}
+// 	sam := NewSuffixAutomatonGeneral()
+// 	// func e() E { return 0 }
+// 	// func op(a, b E) E {
+// 	// 	return a + b
+// 	// }
+// 	// func merge(a, b E) E { // 合并两个不同的树的结点的函数
+// 	// 	return min32(1, a+b)
+// 	// }
+// 	seg := NewSegmentTreeMerger(0, n-1) // 维护每个endPos出现的字符串下标.
+// 	nodes := make([]*SegNode, allLen*2)
+// 	for i := range nodes {
+// 		nodes[i] = seg.Alloc()
+// 	}
+// 	for wi, v := range words {
+// 		pos := int32(0)
+// 		for _, c := range v {
+// 			pos = sam.Add(pos, c)
+// 			seg.Set(nodes[pos], int32(wi), 1)
+// 		}
+// 	}
 
-	size := sam.Size()
-	tree := sam.BuildTree()
-	isEndPosOk := make([]bool, size) // 状态属于>=k个原串则为ok.
-	var mergeEndPos func(int32)
-	mergeEndPos = func(cur int32) {
-		for _, next := range tree[cur] {
-			mergeEndPos(next)
-			nodes[cur] = seg.MergeDestructively(nodes[cur], nodes[next]) // 线段树合并
-		}
-		isEndPosOk[cur] = seg.QueryAll(nodes[cur]) >= k
-	}
-	mergeEndPos(0)
+// 	size := sam.Size()
+// 	tree := sam.BuildTree()
+// 	isEndPosOk := make([]bool, size) // 状态属于>=k个原串则为ok.
+// 	var mergeEndPos func(int32)
+// 	mergeEndPos = func(cur int32) {
+// 		for _, next := range tree[cur] {
+// 			mergeEndPos(next)
+// 			nodes[cur] = seg.MergeDestructively(nodes[cur], nodes[next]) // 线段树合并
+// 		}
+// 		isEndPosOk[cur] = seg.QueryAll(nodes[cur]) >= k
+// 	}
+// 	mergeEndPos(0)
 
-	// 查询每个字符串有多少个子串属于至少k个字符串.
-	// 注意不能暴力上跳，需要预处理从每个节点一直上跳获得的总合法子串个数.
-	memo := make([]int, size)
-	visited := make([]bool, size)
-	var dfs func(int32)
-	dfs = func(pos int32) {
-		if pos == 0 || visited[pos] {
-			return
-		}
-		visited[pos] = true
-		link := sam.Nodes[pos].Link
-		dfs(link)
-		memo[pos] += memo[link]
-	}
-	for i := int32(1); i < size; i++ {
-		if isEndPosOk[i] {
-			memo[i] = int(sam.DistinctSubstringAt(i))
-		}
-	}
-	for i := int32(1); i < size; i++ {
-		dfs(i)
-	}
+// 	// 查询每个字符串有多少个子串属于至少k个字符串.
+// 	// 注意不能暴力上跳，需要预处理从每个节点一直上跳获得的总合法子串个数.
+// 	memo := make([]int, size)
+// 	visited := make([]bool, size)
+// 	var dfs func(int32)
+// 	dfs = func(pos int32) {
+// 		if pos == 0 || visited[pos] {
+// 			return
+// 		}
+// 		visited[pos] = true
+// 		link := sam.Nodes[pos].Link
+// 		dfs(link)
+// 		memo[pos] += memo[link]
+// 	}
+// 	for i := int32(1); i < size; i++ {
+// 		if isEndPosOk[i] {
+// 			memo[i] = int(sam.DistinctSubstringAt(i))
+// 		}
+// 	}
+// 	for i := int32(1); i < size; i++ {
+// 		dfs(i)
+// 	}
 
-	res := make([]int, n)
-	for i, w := range words {
-		count := 0
-		pos := int32(0)
-		for _, c := range w {
-			pos = sam.Nodes[pos].Next[c-OFFSET]
-			count += memo[pos]
-		}
-		res[i] = count
-	}
-	for _, v := range res {
-		fmt.Fprint(out, v, " ")
-	}
-}
+// 	res := make([]int, n)
+// 	for i, w := range words {
+// 		count := 0
+// 		pos := int32(0)
+// 		for _, c := range w {
+// 			pos = sam.Nodes[pos].Next[c-OFFSET]
+// 			count += memo[pos]
+// 		}
+// 		res[i] = count
+// 	}
+// 	for _, v := range res {
+// 		fmt.Fprint(out, v, " ")
+// 	}
+// }
 
 // Good Substrings
 // https://www.luogu.com.cn/problem/CF316G3
@@ -1459,52 +1458,52 @@ func CF452E() {
 // https://www.luogu.com.cn/problem/CF547E
 // 给定n个字符串words和q个查询.
 // 每次查询words[index]在words[start:end)中出现的次数.
-func CF547E() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+// func CF547E() {
+// 	in := bufio.NewReader(os.Stdin)
+// 	out := bufio.NewWriter(os.Stdout)
+// 	defer out.Flush()
 
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	allLen := int32(0)
-	words := make([]string, n)
-	for i := int32(0); i < n; i++ {
-		fmt.Fscan(in, &words[i])
-		allLen += int32(len(words[i]))
-	}
+// 	var n, q int32
+// 	fmt.Fscan(in, &n, &q)
+// 	allLen := int32(0)
+// 	words := make([]string, n)
+// 	for i := int32(0); i < n; i++ {
+// 		fmt.Fscan(in, &words[i])
+// 		allLen += int32(len(words[i]))
+// 	}
 
-	sam := NewSuffixAutomatonGeneral()
-	seg := NewSegmentTreeMerger(0, n-1)
-	nodes := make([]*SegNode, 2*allLen)
-	for i := range nodes {
-		nodes[i] = seg.Alloc()
-	}
+// 	sam := NewSuffixAutomatonGeneral()
+// 	seg := NewSegmentTreeMerger(0, n-1)
+// 	nodes := make([]*SegNode, 2*allLen)
+// 	for i := range nodes {
+// 		nodes[i] = seg.Alloc()
+// 	}
 
-	endPos := make([]int32, n) // 每个串的pos
-	for wi, w := range words {
-		last := sam.AddString(w, func(_, pos int32) { seg.Set(nodes[pos], int32(wi), 1) })
-		endPos[wi] = last
-	}
-	dfsOrder := sam.GetDfsOrder()
-	for i := sam.Size() - 1; i >= 1; i-- {
-		cur := dfsOrder[i]
-		link := sam.Nodes[cur].Link
-		nodes[link] = seg.Merge(nodes[link], nodes[cur])
-	}
+// 	endPos := make([]int32, n) // 每个串的pos
+// 	for wi, w := range words {
+// 		last := sam.AddString(w, func(_, pos int32) { seg.Set(nodes[pos], int32(wi), 1) })
+// 		endPos[wi] = last
+// 	}
+// 	dfsOrder := sam.GetDfsOrder()
+// 	for i := sam.Size() - 1; i >= 1; i-- {
+// 		cur := dfsOrder[i]
+// 		link := sam.Nodes[cur].Link
+// 		nodes[link] = seg.Merge(nodes[link], nodes[cur])
+// 	}
 
-	query := func(start, end, index int32) int32 {
-		pos := endPos[index]
-		return seg.Query(nodes[pos], start, end-1)
-	}
+// 	query := func(start, end, index int32) int32 {
+// 		pos := endPos[index]
+// 		return seg.Query(nodes[pos], start, end-1)
+// 	}
 
-	for i := int32(0); i < q; i++ {
-		var start, end, index int32
-		fmt.Fscan(in, &start, &end, &index)
-		start--
-		index--
-		fmt.Fprintln(out, query(start, end, index))
-	}
-}
+// 	for i := int32(0); i < q; i++ {
+// 		var start, end, index int32
+// 		fmt.Fscan(in, &start, &end, &index)
+// 		start--
+// 		index--
+// 		fmt.Fprintln(out, query(start, end, index))
+// 	}
+// }
 
 // Forensic Examination [CF666E] (线段树合并维护 endPosSize)
 // https://www.luogu.com.cn/problem/CF666E
@@ -1575,17 +1574,6 @@ func CF666E() {
 			fmt.Fprintln(out, minIndex+1, maxCount)
 		}
 	}
-}
-
-// A task for substrings
-// https://www.luogu.com.cn/problem/CF1801G
-func CF1801G() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
 }
 
 // 1408. 数组中的字符串匹配

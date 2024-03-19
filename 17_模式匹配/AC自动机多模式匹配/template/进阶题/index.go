@@ -42,21 +42,172 @@ func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x
 func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
 
 func main() {
-
-	// CF1202E()
 	// P2292()
-	// P2336()
-	// CF163E()
-	// CF1437G()
-	// SP9941()
 	// P2414()
-	// CF1207G()
-	// CF86C()
-	CF547E()
+	// P2444()
+	// P5840Divljak()
+	// SP1676()
+	// SP9941()
 
+	// CF86C()
+	CF163E()
+	// CF547E()
+	// CF696D()
+	// CF1202E()
+	// CF1207G()
+	// CF1437G()
 }
 
-// P2444 [POI2000] 病毒
+// P2292 [HNOI2004] L 语言 (状压+AC自动机)
+// https://www.luogu.com.cn/problem/P2292
+// 给定n个模式串，和q个文本串
+// 对每个文本串，求出其最长的前缀，满足该前缀是由若干模式串（可以多次使用）首尾拼接而成的。
+// !n<=20 len(word[i])<=20
+// q<=50 len(text[i])<=1e6
+// 状压+AC自动机
+// dp[i]表示前i个字符是否能被理解.
+func P2292() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	words := make([]string, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &words[i])
+	}
+	texts := make([]string, q)
+	for i := 0; i < q; i++ {
+		fmt.Fscan(in, &texts[i])
+	}
+
+	acm := NewACAutoMatonArray(26, 97)
+	for _, word := range words {
+		acm.AddString(word)
+	}
+	acm.BuildSuffixLink(true)
+
+	lengthMask := make([]uint, acm.Size()) // !lengthMask[i] 表示第i个节点对应的模式串的长度的集合.
+	for i, p := range acm.WordPos {
+		lengthMask[p] |= 1 << len(words[i])
+	}
+	acm.Dp(func(from, to int) {
+		lengthMask[to] |= lengthMask[from]
+	})
+
+	for _, text := range texts {
+		pos, res := 0, -1
+		dp := uint(1) // 保存前64个位置的dp值,自然溢出
+		for i, v := range text {
+			pos = acm.Move(pos, int(v))
+			dp <<= 1
+			if dp&lengthMask[pos] != 0 {
+				dp |= 1
+				res = i
+			}
+		}
+		fmt.Fprintln(out, res+1)
+	}
+}
+
+// P2414 [NOI2011] 阿狸的打字机 (一个串在另一个串的出现次数)
+// https://www.luogu.com.cn/problem/P2414
+// 打字机上只有 28 个按键，分别印有 26 个小写英文字母和 B、P 两个字母。
+// 经阿狸研究发现，这个打字机是这样工作的：
+// - 输入小写字母，打字机的一个凹槽中会加入这个字母(这个字母加在凹槽的最后)。
+// - 按一下印有 B 的按键，打字机凹槽中最后一个字母会消失。
+// - 按一下印有 P 的按键，打字机会在纸上打印出凹槽中现有的所有字母并换行，但凹槽中的字母不会消失。
+// 例如，阿狸输入 aPaPBbP，纸上被打印的字符如下：
+//
+// a
+// aa
+// ab
+//
+// 我们把纸上打印出来的字符串从 1 开始顺序编号，一直到 n。
+// 打字机有一个非常有趣的功能，在打字机中暗藏一个带数字的小键盘，
+// 在小键盘上输入两个数 (x,y)（其中 1≤x,y≤n），打字机会显示第 x 个打印的字符串在第 y 个打印的字符串中出现了多少次。
+//
+// !即：给你一颗 Trie，每次询问两个节点 x和y，求 x 代表的字符串在 y 代表的字符串中出现了多少次。
+// !也即：给出若干个字符串，每次询问一个串在另一个串的出现次数。
+// !等价于:fail树中x的子树(对应一些更长的后缀)与trie树中y到根节点的路径(对应一些更短的前缀)的公共结点数.
+// 离线查询，将所有询问保存到y上，在 Trie树 上 dfs+回溯 即可.
+func P2414() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var command string
+	fmt.Fscan(in, &command)
+	acm := NewACAutoMatonArray(26, 97)
+	wordToPos := []int{}
+	pos := 0
+	for _, v := range command {
+		if v == 'B' {
+			if p := acm.Parent[pos]; p != -1 {
+				pos = p
+			} else {
+				pos = 0
+			}
+		} else if v == 'P' {
+			wordToPos = append(wordToPos, pos)
+		} else {
+			pos = acm.AddChar(pos, int(v))
+		}
+	}
+	acm.BuildSuffixLink(true)
+
+	failTree := acm.BuildFailTree()
+	trieTree := acm.BuildTrieTree()
+	type query struct{ id, pos int }
+	queryGroup := make([][]query, len(trieTree)) // trie树上的询问
+
+	var q int
+	fmt.Fscan(in, &q)
+	for i := 0; i < q; i++ {
+		var x, y int
+		fmt.Fscan(in, &x, &y)
+		x--
+		y--
+		patternPos, textPos := wordToPos[x], wordToPos[y]
+		queryGroup[textPos] = append(queryGroup[textPos], query{id: i, pos: patternPos})
+	}
+
+	lid, rid := make([]int, acm.Size()), make([]int, acm.Size())
+	dfn := 0
+	var dfsOrder func(cur int)
+	dfsOrder = func(cur int) {
+		lid[cur] = dfn
+		dfn++
+		for _, next := range failTree[cur] {
+			dfsOrder(next)
+		}
+		rid[cur] = dfn
+	}
+	dfsOrder(0)
+
+	bit := NewBitArray(acm.Size())
+	res := make([]int, q)
+	var dfs func(cur int) // trie树上dfs
+	dfs = func(cur int) {
+		bit.Add(lid[cur], 1) // dfs序为fail树的dfs序
+		for _, q := range queryGroup[cur] {
+			qi, pos := q.id, q.pos
+			res[qi] = bit.QueryRange(lid[pos], rid[pos])
+		}
+		for _, next := range trieTree[cur] {
+			dfs(next)
+		}
+		bit.Add(lid[cur], -1)
+	}
+	dfs(0)
+
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
+}
+
+// P2444 [POI2000] 病毒 (无限长模式串=>判环)
 // 给定一些01模式串,判断是否存在无限长01串不包含任何一个模式串.
 // https://www.luogu.com.cn/problem/P2444
 // sum(words[i].length) <= 3e4
@@ -124,388 +275,203 @@ func P2444() {
 	fmt.Fprintln(out, "NIE")
 }
 
-// You Are Given Some Strings...
-// https://www.luogu.com.cn/problem/CF1202E
-// 给定一个目标串，和一些模式串.
-// 求所有的模式串对(words[i], words[j])拼接后，在目标串中出现的次数之和.
-// !等价于：对文本串的每个前缀求出有多少模式串是他的后缀（后面那个只要把串反转就好）
-func CF1202E() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	ReverseString := func(s string) string {
-		n := len(s)
-		runes := make([]rune, n)
-		for _, r := range s {
-			n--
-			runes[n] = r
-		}
-		return string(runes)
-	}
-
-	var longer string
-	fmt.Fscan(in, &longer)
-
-	var n int
-	fmt.Fscan(in, &n)
-	words := make([]string, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &words[i])
-	}
-
-	acm := NewACAutoMatonArray(26, 97)
-	rAcm := NewACAutoMatonArray(26, 97)
-	for _, word := range words {
-		acm.AddString(word)
-		rAcm.AddString(ReverseString(word))
-	}
-	acm.BuildSuffixLink(true)
-	rAcm.BuildSuffixLink(true)
-
-	counter := acm.GetCounter()
-	rCounter := rAcm.GetCounter()
-	pre := make([]int, len(longer))
-	pos := 0
-	for i := 0; i < len(longer); i++ {
-		pos = acm.Move(pos, int(longer[i]))
-		pre[i] = counter[pos]
-	}
-
-	suf := make([]int, len(longer))
-	pos = 0
-	for i := len(longer) - 1; i >= 0; i-- {
-		pos = rAcm.Move(pos, int(longer[i]))
-		suf[i] = rCounter[pos]
-	}
-
-	res := 0
-	for i := 0; i < len(longer)-1; i++ {
-		res += pre[i] * suf[i+1]
-	}
-
-	fmt.Fprintln(out, res)
-}
-
-// P2292 [HNOI2004] L 语言
-// https://www.luogu.com.cn/problem/P2292
-// 给定n个模式串，和q个文本串
-// 对每个文本串，求出其最长的前缀，满足该前缀是由若干模式串（可以多次使用）首尾拼接而成的。
-// !n<=20 len(word[i])<=20
-// q<=50 len(text[i])<=1e6
-// 状压+AC自动机
-// dp[i]表示前i个字符是否能被理解.
-func P2292() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-	words := make([]string, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &words[i])
-	}
-	texts := make([]string, q)
-	for i := 0; i < q; i++ {
-		fmt.Fscan(in, &texts[i])
-	}
-
-	acm := NewACAutoMatonArray(26, 97)
-	for _, word := range words {
-		acm.AddString(word)
-	}
-	acm.BuildSuffixLink(true)
-
-	lengthMask := make([]uint, acm.Size()) // !lengthMask[i] 表示第i个节点对应的模式串的长度的集合.
-	for i, p := range acm.WordPos {
-		lengthMask[p] |= 1 << len(words[i])
-	}
-	acm.Dp(func(from, to int) {
-		lengthMask[to] |= lengthMask[from]
-	})
-
-	for _, text := range texts {
-		pos, res := 0, -1
-		dp := uint(1) // 保存前64个位置的dp值,自然溢出
-		for i, v := range text {
-			pos = acm.Move(pos, int(v))
-			dp <<= 1
-			if dp&lengthMask[pos] != 0 {
-				dp |= 1
-				res = i
-			}
-		}
-		fmt.Fprintln(out, res+1)
-	}
-}
-
-// https://www.luogu.com.cn/problem/P2336
-// P2336 [SCOI2012] 喵星球上的点名
-// 喵星球上的老师会选择 m 个串来点名，每次读出一个串的时候，如果这个串是一个喵星人的姓或名的子串，那么这个喵星人就必须答到。
-// !把每文本串的姓和名中间加一个字符变成一个串，于是这个题就变成了：
-// !给一些文本串和一些模式串，求每个模式串在多少个文本串中出现过，以及每个文本串里有多少个模式串。
-// bitset加速
-func P2336() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, m int
-	fmt.Fscan(in, &n, &m)
-	texts := make([][]int, n)
-	for i := 0; i < n; i++ {
-		var len1 int
-		fmt.Fscan(in, &len1)
-		nums1 := make([]int, len1)
-		for j := 0; j < len1; j++ {
-			fmt.Fscan(in, &nums1[j])
-		}
-		var len2 int
-		fmt.Fscan(in, &len2)
-		nums2 := make([]int, len2)
-		for j := 0; j < len2; j++ {
-			fmt.Fscan(in, &nums2[j])
-		}
-		texts[i] = append(texts[i], nums1...)
-		texts[i] = append(texts[i], -1e9) // -1表示分隔符
-		texts[i] = append(texts[i], nums2...)
-	}
-
-	patterns := make([][]int, m)
-	for i := 0; i < m; i++ {
-		var len int
-		fmt.Fscan(in, &len)
-		patterns[i] = make([]int, len)
-		for j := 0; j < len; j++ {
-			fmt.Fscan(in, &patterns[i][j])
-		}
-	}
-
-	acm := NewACAutoMatonMap()
-	for _, p := range patterns {
-		acm.AddString(p)
-	}
-	acm.BuildSuffixLink()
-
-	indexes := acm.GetIndexes()
-	freq1 := make([]int, m)
-	freq2 := make([]int, n)
-
-	bs := NewBS(m)
-	for i, text := range texts {
-		pos := 0
-		for _, v := range text {
-			pos = acm.Move(pos, v)
-			for _, p := range indexes[pos] {
-				bs.Set(p)
-			}
-		}
-		bs.ForEach(func(p int) {
-			freq1[p]++
-			freq2[i]++
-		})
-		bs.Clear()
-	}
-
-	for _, v := range freq1 {
-		fmt.Fprintln(out, v)
-	}
-	for _, v := range freq2 {
-		fmt.Fprint(out, v, " ")
-	}
-}
-
-// e-Government
-// https://www.luogu.com.cn/problem/CF163E
-// https://codeforces.com/contest/163/submission/215316998
-// 给定包含k个字符串的容器S。
-// 开始时，所有字符串都被启用。
-// 有q个操作，操作有三种类型：
-// 以‘？’开头的操作为询问操作，询问当前容器S中的每一个字符串匹配询问字符串的次数之和；
-// 以‘+’开头的操作为set操作，表示将编号为i的字符串启用；
-// 以‘-’开头的操作为reset操作，表示将编号为i的字符串禁用。
-// 注意当编号为i的字符串已经在容器中时，允许存在添加编号为i的字符串，删除亦然。
-// !不删除字符时，答案等于fail树中某个结点到根节点路径上点权之和;
-// !删除字符后，相当于将子树中所有结点权值减去1.
-// 一个端点为树根时，单点修改链上求和转化为子树修改单点求和
-// 树状数组+AC自动机
-func CF163E() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var q, k int
-	fmt.Fscan(in, &q, &k)
-	words := make([]string, k)
-	acm := NewACAutoMatonArray(26, 97)
-	for i := 0; i < k; i++ {
-		fmt.Fscan(in, &words[i])
-		acm.AddString(words[i])
-	}
-	acm.BuildSuffixLink(true)
-
-	n := acm.Size()
-	failTree := acm.BuildFailTree()
-
-	// dfs序
-	lid, rid := make([]int, n), make([]int, n)
-	dfn := 0
-	var dfs func(cur int)
-	dfs = func(cur int) {
-		lid[cur] = dfn
-		dfn++
-		for _, next := range failTree[cur] {
-			dfs(next)
-		}
-		rid[cur] = dfn
-	}
-	dfs(0)
-
-	ok := make([]bool, n)
-	bit := NewBITRangeAddPointGet(n)
-
-	add := func(index int) {
-		if ok[index] {
-			return
-		}
-		ok[index] = true
-		pos := acm.WordPos[index]
-		bit.AddRange(lid[pos], rid[pos], 1)
-	}
-	remove := func(index int) {
-		if !ok[index] {
-			return
-		}
-		ok[index] = false
-		pos := acm.WordPos[index]
-		bit.AddRange(lid[pos], rid[pos], -1)
-	}
-	getCount := func(pos int) int {
-		return bit.Get(lid[pos])
-	}
-	for i := 0; i < k; i++ {
-		add(i)
-	}
-
-	for i := 0; i < q; i++ {
-		var op string
-		fmt.Fscan(in, &op)
-		if op[0] == '+' {
-			id, _ := strconv.Atoi(op[1:])
-			id--
-			add(id)
-		} else if op[0] == '-' {
-			id, _ := strconv.Atoi(op[1:])
-			id--
-			remove(id)
-		} else {
-			text := op[1:]
-			res, pos := 0, 0
-			for _, v := range text {
-				pos = acm.Move(pos, int(v))
-				res += getCount(pos)
-			}
-			fmt.Println(res)
-		}
-	}
-}
-
-// Death DBMS - 死亡笔记数据库管理系统
-// https://www.luogu.com.cn/problem/CF1437G
-// 给定m个字符串，每个字符串有一个权值.初始时，所有字符串的权值都为0.
-// 给定q个操作，操作有两种类型：
-// 1 i v 表示将第i个字符串的权值修改为v.
-// 2 s 求所有是s的子串的字符串的权值最大值.
+// P5840 [COCI2015] Divljak (树链并+AC自动机)
+// https://www.luogu.com.cn/problem/P5840
+// https://blog.csdn.net/kxl5180/article/details/103876152
+// 给定n个字符串S1~Sn和一个空的字典。
+// 给定q个操作，每个操作包含两种：
+// 1 p: 向字典中插入一个字符串p
+// 2 i: 求出Si是字典中多少个串的子串（注意每个串最多算一次，与出现次数不同）
 //
-// 对所有 s 建出 AC 自动机。每次询问把 t 扔进去匹配，
-// 每个节点在 fail 树上的祖先都是这个节点所代表字符串的子串，树剖取最大值即可。
-// 注意重复的字符串,用一个可删除堆维护每个node处的最大值.
-func CF1437G() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+// 由于字典形态发生变化，考虑对S建出ACAM.
+// 一个问题是插入p时可能会对一个串造成许多贡献，需要去重(树链并)
+// !1.把所有待插入位置按dfs序排序，然后把每个点单点加的时候在每两个点lca处差分，这样就可以保证每个串只被计算一次贡献。
+// !2."树链加+单点查询" => "单点加+子树查询"
+func P5840Divljak() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
 
-	var m, q int
-	fmt.Fscan(in, &m, &q)
-
-	words := make([]string, m)
+	n := io.NextInt()
+	words := make([]string, n)
 	acm := NewACAutoMatonArray(26, 97)
-	for i := 0; i < m; i++ {
-		fmt.Fscan(in, &words[i])
+	for i := 0; i < n; i++ {
+		words[i] = io.Text()
 		acm.AddString(words[i])
 	}
 	acm.BuildSuffixLink(true)
+	wordPos := acm.WordPos
 
-	tree := NewTree(acm.Size())
+	failTree := NewTree(acm.Size())
 	acm.Dp(func(from, to int) {
-		tree.AddDirectedEdge(from, to, 1)
+		failTree.AddDirectedEdge(from, to, 1)
 	})
-	tree.Build(0)
+	failTree.Build(0)
 
-	values := make([]int, m)
-	heaps := make([]*ErasableHeap, acm.Size()) // 维护每个结点的最大值.
-	for i := range heaps {
-		heaps[i] = NewErasableHeap(func(a, b H) bool { return a > b }, []int{-INF})
-	}
-	for _, p := range acm.WordPos {
-		heaps[p].Push(0)
-	}
+	bit := NewBitArray(acm.Size())
 
-	seg := NewSegmentTree(acm.Size(), func(i int) E { return -INF })
-	for i := 0; i < acm.Size(); i++ {
-		seg.Set(tree.LID[i], heaps[i].Peek())
-	}
+	q := io.NextInt()
+	for i := 0; i < q; i++ {
+		kind := io.NextInt()
+		if kind == 1 {
+			s := io.Text()
+			dfn := []int{}
+			// !一次加入中只每个点最多只能加1，因此需要去重，同时对于同一条链上点，需要利用DFS序加LCA处理
+			// 本质上是一个树链求并。
+			// !按照dfn排序后，对每个i，将ui到根节点的链上点+1，将lca(ui,ui+1)到根节点的链上点-1即可
+			// !现在问题转化为了：" 路径加 " & " 单点求值 "。
+			// !可以使用树上差分将问题转化为：" 单点加 " & " 子树求和 "。
+			pos := 0
+			for i := 0; i < len(s); i++ {
+				pos = acm.Move(pos, int(s[i]))
+				dfn = append(dfn, failTree.LID[pos])
+			}
+			sort.Ints(dfn)
+			bit.Add(dfn[0], 1)
+			for i := 1; i < len(dfn); i++ {
+				bit.Add(dfn[i], 1)
+				u, v := failTree.IdToNode[dfn[i-1]], failTree.IdToNode[dfn[i]]
+				lca := failTree.LCA(u, v)
+				bit.Add(failTree.LID[lca], -1)
+			}
+		} else {
+			id := io.NextInt()
+			id--
 
-	update := func(index, value int) {
-		if values[index] == value {
-			return
+			// 统计的时候就用树状数组
+			pos := wordPos[id]
+			start, end := failTree.Id(pos)
+			kindOnChain := bit.QueryRange(start, end)
+			io.Println(kindOnChain)
 		}
-		node := acm.WordPos[index]
-		preValue := values[index]
-		values[index] = value
-		heaps[node].Erase(preValue)
-		heaps[node].Push(value)
-		lid := tree.LID[node]
-		seg.Set(lid, heaps[node].Peek())
 	}
+}
 
-	query := func(s string) int {
-		res := -1
-		pos := 0
-		for _, v := range s {
-			pos = acm.Move(pos, int(v))
-			tree.EnumeratePathDecomposition(0, pos, true, func(start, end int) {
-				cur := seg.Query(start, end)
-				res = max(res, cur)
-			})
+// GEN - Text Generator (AC自动机+矩阵快速幂)
+// https://www.luogu.com.cn/problem/SP1676
+// P4052 [JSOI2007] 文本生成器 的加强版.
+// 给定n(n<=10)个字符串(长度<=6)，要求构造一个长度为L(<=10^6)的字符串，至少包含n个字符串中任何一个，求方案数mod10007的值(所有字符都是大写字母)
+// 输入为多组数据，每组数据第一行N,L，接下来N行每行一个字符串
+//
+// 用总方案数减去不合法方案数(不包含模式串).
+// !等价于：有向图中转移k次后到达目的地的方案数.
+// !其中adjMatrix表示转移矩阵，只有当u和v都不是接受状态，adjMatrix[u][v]才为true.
+func SP1676() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	const MOD int = 10007
+	matMul := func(m1, m2 [][]int, mod int) [][]int {
+		res := make([][]int, len(m1))
+		for i := range res {
+			res[i] = make([]int, len(m2[0]))
+		}
+		for i := 0; i < len(m1); i++ {
+			for k := 0; k < len(m2); k++ {
+				for j := 0; j < len(m2[0]); j++ {
+					res[i][j] = (res[i][j] + m1[i][k]*m2[k][j]) % mod
+					if res[i][j] < 0 {
+						res[i][j] += mod
+					}
+				}
+			}
 		}
 		return res
 	}
 
-	for i := 0; i < q; i++ {
-		var kind int
-		fmt.Fscan(in, &kind)
-		if kind == 1 {
-			var index, value int
-			fmt.Fscan(in, &index, &value)
-			index--
-			update(index, value)
-		} else {
-			var s string
-			fmt.Fscan(in, &s)
-			fmt.Fprintln(out, query(s))
+	matPow := func(mat [][]int, exp int, mod int) [][]int {
+		n := len(mat)
+		matCopy := make([][]int, n)
+		for i := 0; i < n; i++ {
+			matCopy[i] = make([]int, n)
+			copy(matCopy[i], mat[i])
+		}
+		res := make([][]int, n)
+		for i := 0; i < n; i++ {
+			res[i] = make([]int, n)
+			res[i][i] = 1
+		}
+		for exp > 0 {
+			if exp&1 == 1 {
+				res = matMul(res, matCopy, mod)
+			}
+			matCopy = matMul(matCopy, matCopy, mod)
+			exp >>= 1
+		}
+		return res
+	}
+
+	qpow := func(a, b, mod int) int {
+		a %= mod
+		res := 1
+		for b > 0 {
+			if b&1 == 1 {
+				res = res * a % mod
+			}
+			a = a * a % mod
+			b >>= 1
+		}
+		return res
+	}
+
+	n, k := io.NextInt(), io.NextInt()
+	acm := NewACAutoMatonArray(26, 'A')
+	for i := 0; i < n; i++ {
+		s := io.Text()
+		acm.AddString(s)
+	}
+	acm.BuildSuffixLink(true)
+
+	counter := acm.GetCounter()
+	size := acm.Size()
+
+	adjMatrix := make([][]int, size)
+	for i := range adjMatrix {
+		adjMatrix[i] = make([]int, size)
+	}
+
+	for cur := 0; cur < size; cur++ {
+		if counter[cur] == 0 {
+			for c := 0; c < 26; c++ {
+				next := acm.Children[cur][c]
+				if counter[next] == 0 {
+					adjMatrix[cur][next]++
+				}
+			}
 		}
 	}
+
+	transition := matPow(adjMatrix, k, MOD)
+	bad := 0
+	for _, v := range transition[0] {
+		bad = (bad + v) % MOD
+	}
+
+	res := (qpow(26, k, MOD) - bad) % MOD
+	if res < 0 {
+		res += MOD
+	}
+
+	io.Println(res)
 }
 
-// GRE - GRE Words
+// GRE - GRE Words (AC自动机优化DP)
 // https://www.luogu.com.cn/problem/SP9941
-// 给定一个由字符串构成的序列，不同位置的字符串有自己权值。
+// 给定一个单词数组，每个单词都有权值.
 // 现在让你选出一个子序列，使得在这个子序列中，
 // !前面的串是后面的串的子串。
 // 请你求满足条件的子序列的权值的最大值。
 // 一个子序列权值是所有元素权值的和。
+//
+// 子串=前缀的后缀.
+// !对单词i的每个前缀,在fail树上求出到根的路径上的最大权值即可.
 // 线段树优化dp
 // dp[i] = max(dp[j]) + values[i], j 是 fail 树上 i 到根的路径上的点.
 func SP9941() {
@@ -565,204 +531,7 @@ func SP9941() {
 	}
 }
 
-// P2414 [NOI2011] 阿狸的打字机 (TODO)
-// https://www.luogu.com.cn/problem/P2414
-// 打字机上只有 28 个按键，分别印有 26 个小写英文字母和 B、P 两个字母。
-// 经阿狸研究发现，这个打字机是这样工作的：
-// - 输入小写字母，打字机的一个凹槽中会加入这个字母(这个字母加在凹槽的最后)。
-// - 按一下印有 B 的按键，打字机凹槽中最后一个字母会消失。
-// - 按一下印有 P 的按键，打字机会在纸上打印出凹槽中现有的所有字母并换行，但凹槽中的字母不会消失。
-// 例如，阿狸输入 aPaPBbP，纸上被打印的字符如下：
-//
-// a
-// aa
-// ab
-//
-// 我们把纸上打印出来的字符串从 1 开始顺序编号，一直到 n。
-// 打字机有一个非常有趣的功能，在打字机中暗藏一个带数字的小键盘，
-// 在小键盘上输入两个数 (x,y)（其中 1≤x,y≤n），打字机会显示第 x 个打印的字符串在第 y 个打印的字符串中出现了多少次。
-// !即：给你一颗 Trie，每次询问两个节点 x和y，求 x 代表的字符串在 y 代表的字符串中出现了多少次。
-// !也即：给出若干个字符串，每次询问一个串在另一个串的出现次数。
-// !等价于:fail树中x的子树(对应一些更长的后缀)与trie树中y到根节点的路径(对应一些更短的前缀)的公共结点数.
-// 离线查询，将所有询问保存到y上，在 Trie树 上 dfs+回溯 即可.
-// ACAM+树状数组
-func P2414() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var command string
-	fmt.Fscan(in, &command)
-	acm := NewACAutoMatonArray(26, 97)
-	wordToPos := []int{}
-	pos := 0
-	for _, v := range command {
-		if v == 'B' {
-			if p := acm.Parent[pos]; p != -1 {
-				pos = p
-			} else {
-				pos = 0
-			}
-		} else if v == 'P' {
-			wordToPos = append(wordToPos, pos)
-		} else {
-			pos = acm.AddChar(pos, int(v))
-		}
-	}
-	acm.BuildSuffixLink(true)
-
-	failTree := acm.BuildFailTree()
-	trieTree := acm.BuildTrieTree()
-	type query struct{ id, value int }
-	queryGroup := make([][]query, len(trieTree))
-
-	var q int
-	fmt.Fscan(in, &q)
-	for i := 0; i < q; i++ {
-		var x, y int
-		fmt.Fscan(in, &x, &y)
-		x--
-		y--
-		node1, node2 := wordToPos[x], wordToPos[y]
-		queryGroup[node2] = append(queryGroup[node2], query{id: i, value: node1})
-	}
-
-	lid, rid := make([]int, acm.Size()), make([]int, acm.Size())
-	dfn := 0
-	var dfsOrder func(cur, pre int)
-	dfsOrder = func(cur, pre int) {
-		lid[cur] = dfn
-		dfn++
-		for _, next := range failTree[cur] {
-			if next != pre {
-				dfsOrder(next, cur)
-			}
-		}
-		rid[cur] = dfn
-	}
-	dfsOrder(0, -1)
-
-	bit := NewBitArray(acm.Size())
-	res := make([]int, q)
-	var dfs func(cur int, pre int)
-	dfs = func(cur int, pre int) {
-		bit.Add(lid[cur], 1) // dfs序为fail树的dfs序
-		for _, q := range queryGroup[cur] {
-			qi, node := q.id, q.value
-			res[qi] = bit.QueryRange(lid[node], rid[node])
-		}
-		for _, next := range trieTree[cur] {
-			if next != pre {
-				dfs(next, cur)
-			}
-		}
-		bit.Add(lid[cur], -1)
-	}
-	dfs(0, -1)
-
-	for _, v := range res {
-		fmt.Fprintln(out, v)
-	}
-}
-
-// Indie Album
-// https://www.luogu.com.cn/problem/CF1207G
-// 有q1次操作,操作有两种类型：
-// 1 c : 新建一个字符c.
-// 2 i c : 在第i次操作的串后面加上字符c.
-// 接着是q2次询问,格式为：
-// i t: 每次询问版本为i的串中，t串出现了多少次。
-// q1,q2<=4e5, sum(len(text[i]))<=4e5
-//
-// !看见多字符串匹配，会想到AC自动机
-// 相当于：给定一些(posOnTrie, posOnACM)对，查询posOnACM对应的串在posOnTrie对应的串中出现了多少次
-// !离线查询，将查询挂在trieTree每个节点上，在trieTree上dfs，树状数组维护 failTree 的 dfs序.
-// 类似阿狸的打字机,离线+树状数组.
-func CF1207G() {
-	in := os.Stdin
-	out := os.Stdout
-	io = NewIost(in, out)
-	defer func() {
-		io.Writer.Flush()
-	}()
-
-	q1 := io.NextInt()
-	trie1 := NewACAutoMatonArray(26, 97)
-	posHistory := make([]int, q1)
-	for i := 0; i < q1; i++ {
-		kind := io.NextInt()
-		if kind == 1 {
-			c := io.Text()
-			posHistory[i] = trie1.AddChar(0, int(c[0]))
-		} else {
-			version := io.NextInt() - 1
-			c := io.Text()
-			posHistory[i] = trie1.AddChar(posHistory[version], int(c[0]))
-		}
-	}
-	// trie1.BuildSuffixLink(true)
-
-	q2 := io.NextInt()
-	acm2 := NewACAutoMatonArray(26, 97)
-	queries := make([][2]int, q2) // !(posOnTrie, posOnACM)：查询posOnACM对应的串在posOnTrie对应的串中出现了多少次
-	for i := 0; i < q2; i++ {
-		version := io.NextInt() - 1
-		text := io.Text()
-		textPos := acm2.AddString(text)
-		queries[i] = [2]int{posHistory[version], textPos}
-	}
-	acm2.BuildSuffixLink(true)
-
-	failTree := acm2.BuildFailTree()
-	lid, rid := make([]int, acm2.Size()), make([]int, acm2.Size())
-	dfn := 0
-	var dfsOrder func(cur, pre int)
-	dfsOrder = func(cur, pre int) {
-		lid[cur] = dfn
-		dfn++
-		for _, next := range failTree[cur] {
-			if next != pre {
-				dfsOrder(next, cur)
-			}
-		}
-		rid[cur] = dfn
-	}
-	dfsOrder(0, -1) // failTree 的 dfs序
-	bit := NewBitArray(acm2.Size())
-
-	queryGroup := make([][]int, trie1.Size())
-	for qid, query := range queries {
-		triePos := query[0]
-		queryGroup[triePos] = append(queryGroup[triePos], qid)
-	}
-	res := make([]int, q2)
-
-	// 在 trie 上 dfs，计算 failTree 的某个节点的子树权值.
-	var dfs func(triePos, acmPos int)
-	dfs = func(triePos, acmPos int) {
-		bit.Add(lid[acmPos], 1)
-
-		for _, qid := range queryGroup[triePos] {
-			qv := queries[qid][1]
-			res[qid] = bit.QueryRange(lid[qv], rid[qv])
-		}
-
-		for c, next := range trie1.Children[triePos] {
-			if next != -1 {
-				dfs(int(next), acm2.Move(acmPos, c+97))
-			}
-		}
-
-		bit.Add(lid[acmPos], -1)
-	}
-	dfs(0, 0)
-
-	for _, v := range res {
-		io.Println(v)
-	}
-}
-
-// Genetic engineering
+// Genetic engineering (AC自动机+DP)
 // https://www.luogu.com.cn/problem/CF86C
 // 给定w个由ATCG组成的字符串words，求构造一个长度为n的ATCG字符串s，使得:
 // 对字符串s任意一个位置i，存在left和right 满足 s[left:right] 至少与一个word匹配.(left<=i<=right)
@@ -908,7 +677,105 @@ func CF86C() {
 
 }
 
-// Mike and Friends
+// e-Government (动态多模式串计数)
+// https://www.luogu.com.cn/problem/CF163E
+// https://codeforces.com/contest/163/submission/215316998
+// 给定包含k个模式串的容器S。
+// 开始时，所有模式串都被启用。
+// 有q个操作，操作有三种类型：
+// - 以'?'开头的操作为询问操作，询问当前容器S中的每一个模式串在文本串中出现次数(子串)之和；
+// - 以'+'开头的操作为set操作，表示将编号为i的模式串启用；
+// - 以'-'开头的操作为reset操作，表示将编号为i的模式串禁用。
+// 注意当编号为i的模式串已经在容器中时，允许存在添加编号为i的模式串，删除亦然。
+//
+// 不删除字符时，答案等于fail树中某个结点到根节点路径上点权之和;
+// 删除字符后，相当于将子树中所有结点权值减去1.
+// !一个端点为树根时，"单点修改+链上求和" 转化为 "子树修改+单点求和";
+// 树状数组+AC自动机.
+func CF163E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var q, k int
+	fmt.Fscan(in, &q, &k)
+	words := make([]string, k)
+	acm := NewACAutoMatonArray(26, 97)
+	for i := 0; i < k; i++ {
+		fmt.Fscan(in, &words[i])
+		acm.AddString(words[i])
+	}
+	acm.BuildSuffixLink(true)
+
+	size := acm.Size()
+	failTree := acm.BuildFailTree()
+
+	// dfs序
+	lid, rid := make([]int, size), make([]int, size)
+	dfn := 0
+	var dfs func(cur int)
+	dfs = func(cur int) {
+		lid[cur] = dfn
+		dfn++
+		for _, next := range failTree[cur] {
+			dfs(next)
+		}
+		rid[cur] = dfn
+	}
+	dfs(0)
+
+	ok := make([]bool, size)
+	bit := NewBITRangeAddPointGet(size)
+
+	add := func(wid int) {
+		if ok[wid] {
+			return
+		}
+		ok[wid] = true
+		pos := acm.WordPos[wid]
+		bit.AddRange(lid[pos], rid[pos], 1)
+	}
+	discard := func(wid int) {
+		if !ok[wid] {
+			return
+		}
+		ok[wid] = false
+		pos := acm.WordPos[wid]
+		bit.AddRange(lid[pos], rid[pos], -1)
+	}
+
+	// !对文本串的每个前缀，查询多少个串作为其后缀出现.
+	queryChain := func(textPos int) int {
+		return bit.Get(lid[textPos])
+	}
+	for i := 0; i < k; i++ {
+		add(i)
+	}
+
+	for i := 0; i < q; i++ {
+		var op string
+		fmt.Fscan(in, &op)
+		if op[0] == '+' {
+			id, _ := strconv.Atoi(op[1:])
+			id--
+			add(id)
+		} else if op[0] == '-' {
+			id, _ := strconv.Atoi(op[1:])
+			id--
+			discard(id)
+		} else {
+			text := op[1:]
+			res, pos := 0, 0
+			for _, v := range text {
+				pos = acm.Move(pos, int(v))
+				res += queryChain(pos)
+			}
+			fmt.Println(res)
+		}
+	}
+}
+
+// Mike and Friends (一个串在多个模式串中出现的次数，离线查询)
 // https://www.luogu.com.cn/problem/CF547E
 // 给定n个字符串words和q个查询，每个查询为：
 // !(left, right, index) 查询 words[index]在 [left,right] 中出现了多少次(0<=left<=right<n).
@@ -989,83 +856,7 @@ func CF547E() {
 	}
 }
 
-// P5840 [COCI2015] Divljak
-// https://www.luogu.com.cn/problem/P5840
-// https://blog.csdn.net/kxl5180/article/details/103876152
-// 给定n个字符串s1~sn和一个空的字典。
-// 给定q个操作，每个操作包含两种：
-// 1 p: 向字典中插入一个字符串p
-// !2 i: 求出si是字典中多少个串的子串（注意每个串最多算一次，与出现次数不同）
-//
-// 一个问题是插入p时可能会对一个串造成许多贡献
-// !一个很妙的trick:
-// !把所有待插入位置按dfs序排序，
-// !然后把每个点单点加的时候在每两个点lca处差分，这样就可以保证每个串只被计算一次贡献。
-func P5840Divljak() {
-	in := os.Stdin
-	out := os.Stdout
-	io = NewIost(in, out)
-	defer func() {
-		io.Writer.Flush()
-	}()
-
-	n := io.NextInt()
-	words := make([]string, n)
-	wordsPos := make([]int, n) // 对应树中结点编号
-	acm := NewACAutoMatonArray(26, 97)
-	for i := 0; i < n; i++ {
-		words[i] = io.Text()
-		wordsPos[i] = acm.AddString(words[i])
-	}
-	acm.BuildSuffixLink(true)
-
-	failTree := NewTree(acm.Size())
-	acm.Dp(func(from, to int) {
-		failTree.AddDirectedEdge(from, to, 1)
-	})
-	failTree.Build(0)
-
-	bit := NewBitArray(acm.Size())
-
-	q := io.NextInt()
-	for i := 0; i < q; i++ {
-		kind := io.NextInt()
-		if kind == 1 {
-			s := io.Text()
-			dfn := []int{}
-			// !一次加入中只每个点最多只能加1，因此需要去重，同时对于同一条链上点，需要利用DFS序加LCA处理
-			// 本质上是一个树链求并。
-			// !按照dfn排序后，对每个i，将ui到根节点的链上点+1，将lca(ui,ui+1)到根节点的链上点-1即可
-			// !现在问题转化为了：" 路径加 " & " 单点求值 "。
-			// !可以使用树上差分将问题转化为：" 单点加 " & " 子树求和 "。
-			pos := 0
-			for i := 0; i < len(s); i++ {
-				pos = acm.Move(pos, int(s[i]))
-				dfn = append(dfn, failTree.LID[pos])
-			}
-			sort.Ints(dfn)
-			bit.Add(dfn[0], 1)
-			for i := 1; i < len(dfn); i++ {
-				bit.Add(dfn[i], 1)
-				u, v := failTree.IdToNode[dfn[i-1]], failTree.IdToNode[dfn[i]]
-				lca := failTree.LCA(u, v)
-				bit.Add(failTree.LID[lca], -1)
-			}
-		} else {
-			id := io.NextInt()
-			id--
-
-			// 统计的时候就用树状数组
-			pos := wordsPos[id]
-			start, end := failTree.Id(pos)
-			pointValue := bit.QueryRange(start, end)
-			io.Println(pointValue)
-		}
-	}
-
-}
-
-// Legen...
+// Legen... (AC自动机+矩阵快速幂，经过k条边的有向图最长路)
 // https://www.luogu.com.cn/problem/CF696D
 // 给定一些带有权重的单词(长度之和不超过200)，如果单词在串中出现c次，则获得c*分数的得分。
 // 创建一个长度为k(k<=1e14)的字符串，最大化得分。
@@ -1093,13 +884,11 @@ func CF696D() {
 	acm.BuildSuffixLink(true)
 
 	size := acm.Size()
-	nodeValue := make([]int, size)
+	values := make([]int, size) // 每个位置的权值
 	for i, p := range acm.WordPos {
-		nodeValue[p] += weights[i]
+		values[p] += weights[i]
 	}
-	acm.Dp(func(from, to int) {
-		nodeValue[to] += nodeValue[from]
-	})
+	acm.Dp(func(from, to int) { values[to] += values[from] })
 
 	// 转移临接矩阵保存边权dist
 	adjMatrix := newMatrix(size, size, -INF)
@@ -1109,7 +898,7 @@ func CF696D() {
 	for cur := 0; cur < size; cur++ {
 		for c := 0; c < 26; c++ {
 			next := acm.Children[cur][c]
-			adjMatrix[cur][next] = max(adjMatrix[cur][next], nodeValue[next])
+			adjMatrix[cur][next] = max(adjMatrix[cur][next], values[next])
 		}
 	}
 
@@ -1121,16 +910,83 @@ func CF696D() {
 	io.Print(max_)
 }
 
-// GEN - Text Generator
-// https://www.luogu.com.cn/problem/SP1676
-// P4052 [JSOI2007] 文本生成器 的加强版.
-// 给定n(n<=10)个字符串(长度<=6)，要求构造一个长度为L(<=10^6)的字符串，至少包含n个字符串中任何一个，求方案数mod10007的值(所有字符都是大写字母)
-// 输入为多组数据，每组数据第一行N,L，接下来N行每行一个字符串
+// You Are Given Some Strings... (前后缀分解+AC自动机)
+// https://www.luogu.com.cn/problem/CF1202E
+// 给定一个目标串，和一些模式串.
+// 求所有的模式串对(words[i], words[j])拼接后，在目标串中出现的次数之和.
+// !等价于：对文本串的每个前缀求出有多少模式串是他的后缀（后面那个只要把串反转就好）
+func CF1202E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	ReverseString := func(s string) string {
+		n := len(s)
+		runes := make([]rune, n)
+		for _, r := range s {
+			n--
+			runes[n] = r
+		}
+		return string(runes)
+	}
+
+	var text string
+	fmt.Fscan(in, &text)
+
+	var n int
+	fmt.Fscan(in, &n)
+	patterns := make([]string, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &patterns[i])
+	}
+
+	acm := NewACAutoMatonArray(26, 97)
+	rAcm := NewACAutoMatonArray(26, 97)
+	for _, word := range patterns {
+		acm.AddString(word)
+		rAcm.AddString(ReverseString(word))
+	}
+	acm.BuildSuffixLink(true)
+	rAcm.BuildSuffixLink(true)
+
+	counter := acm.GetCounter()
+	rCounter := rAcm.GetCounter()
+	pre := make([]int, len(text))
+	pos := 0
+	for i := 0; i < len(text); i++ {
+		pos = acm.Move(pos, int(text[i]))
+		pre[i] = counter[pos]
+	}
+
+	suf := make([]int, len(text))
+	pos = 0
+	for i := len(text) - 1; i >= 0; i-- {
+		pos = rAcm.Move(pos, int(text[i]))
+		suf[i] = rCounter[pos]
+	}
+
+	res := 0
+	for i := 0; i < len(text)-1; i++ {
+		res += pre[i] * suf[i+1]
+	}
+
+	fmt.Fprintln(out, res)
+}
+
+// Indie Album (一个串在另一个串中出现的次数,离线查询)
+// https://www.luogu.com.cn/problem/CF1207G
+// 有q1次操作,操作有两种类型：
+// 1 c : 新建一个字符c.
+// 2 i c : 在第i次操作的串后面加上字符c.
+// 接着是q2次询问,格式为：
+// i t: 每次询问版本为i的串中，t串出现了多少次。
+// q1,q2<=4e5, sum(len(text[i]))<=4e5
 //
-// 用总方案数减去不合法方案数(不包含模式串).
-// !等价于：有向图中转移k次后到达目的地的方案数.
-// !其中adjMatrix表示转移矩阵，只有当u和v都不是接受状态，adjMatrix[u][v]才为true.
-func SP1676() {
+// !看见多字符串匹配，会想到AC自动机
+// 相当于：给定一些(posOnTrie, posOnACM)对，查询posOnACM对应的串在posOnTrie对应的串中出现了多少次
+// !离线查询，将查询挂在trieTree每个节点上，在trieTree上dfs，树状数组维护 failTree 的 dfs序.
+// 类似阿狸的打字机,离线+树状数组.
+func CF1207G() {
 	in := os.Stdin
 	out := os.Stdout
 	io = NewIost(in, out)
@@ -1138,99 +994,168 @@ func SP1676() {
 		io.Writer.Flush()
 	}()
 
-	const MOD int = 10007
-	matMul := func(m1, m2 [][]int, mod int) [][]int {
-		res := make([][]int, len(m1))
-		for i := range res {
-			res[i] = make([]int, len(m2[0]))
+	q1 := io.NextInt()
+	trie1 := NewACAutoMatonArray(26, 97)
+	posHistory := make([]int, q1)
+	for i := 0; i < q1; i++ {
+		kind := io.NextInt()
+		if kind == 1 {
+			c := io.Text()
+			posHistory[i] = trie1.AddChar(0, int(c[0]))
+		} else {
+			version := io.NextInt() - 1
+			c := io.Text()
+			posHistory[i] = trie1.AddChar(posHistory[version], int(c[0]))
 		}
-		for i := 0; i < len(m1); i++ {
-			for k := 0; k < len(m2); k++ {
-				for j := 0; j < len(m2[0]); j++ {
-					res[i][j] = (res[i][j] + m1[i][k]*m2[k][j]) % mod
-					if res[i][j] < 0 {
-						res[i][j] += mod
-					}
-				}
+	}
+	// trie1.BuildSuffixLink(true)
+
+	q2 := io.NextInt()
+	acm2 := NewACAutoMatonArray(26, 97)
+	queries := make([][2]int, q2) // !(posOnTrie, posOnACM)：查询posOnACM对应的串在posOnTrie对应的串中出现了多少次
+	for i := 0; i < q2; i++ {
+		version := io.NextInt() - 1
+		text := io.Text()
+		textPos := acm2.AddString(text)
+		queries[i] = [2]int{posHistory[version], textPos}
+	}
+	acm2.BuildSuffixLink(true)
+
+	failTree := acm2.BuildFailTree()
+	lid, rid := make([]int, acm2.Size()), make([]int, acm2.Size())
+	dfn := 0
+	var dfsOrder func(cur, pre int)
+	dfsOrder = func(cur, pre int) {
+		lid[cur] = dfn
+		dfn++
+		for _, next := range failTree[cur] {
+			if next != pre {
+				dfsOrder(next, cur)
 			}
 		}
-		return res
+		rid[cur] = dfn
 	}
+	dfsOrder(0, -1) // failTree 的 dfs序
+	bit := NewBitArray(acm2.Size())
 
-	matPow := func(mat [][]int, exp int, mod int) [][]int {
-		n := len(mat)
-		matCopy := make([][]int, n)
-		for i := 0; i < n; i++ {
-			matCopy[i] = make([]int, n)
-			copy(matCopy[i], mat[i])
+	queryGroup := make([][]int, trie1.Size())
+	for qid, query := range queries {
+		triePos := query[0]
+		queryGroup[triePos] = append(queryGroup[triePos], qid)
+	}
+	res := make([]int, q2)
+
+	// 在 trie 上 dfs，计算 failTree 的某个节点的子树权值.
+	var dfs func(triePos, acmPos int)
+	dfs = func(triePos, acmPos int) {
+		bit.Add(lid[acmPos], 1)
+
+		for _, qid := range queryGroup[triePos] {
+			qv := queries[qid][1]
+			res[qid] = bit.QueryRange(lid[qv], rid[qv])
 		}
-		res := make([][]int, n)
-		for i := 0; i < n; i++ {
-			res[i] = make([]int, n)
-			res[i][i] = 1
-		}
-		for exp > 0 {
-			if exp&1 == 1 {
-				res = matMul(res, matCopy, mod)
+
+		for c, next := range trie1.Children[triePos] {
+			if next != -1 {
+				dfs(int(next), acm2.Move(acmPos, c+97))
 			}
-			matCopy = matMul(matCopy, matCopy, mod)
-			exp >>= 1
 		}
-		return res
-	}
 
-	qpow := func(a, b, mod int) int {
-		a %= mod
-		res := 1
-		for b > 0 {
-			if b&1 == 1 {
-				res = res * a % mod
-			}
-			a = a * a % mod
-			b >>= 1
-		}
-		return res
+		bit.Add(lid[acmPos], -1)
 	}
+	dfs(0, 0)
 
-	n, k := io.NextInt(), io.NextInt()
-	acm := NewACAutoMatonArray(26, 'A')
-	for i := 0; i < n; i++ {
-		s := io.Text()
-		acm.AddString(s)
+	for _, v := range res {
+		io.Println(v)
+	}
+}
+
+// Death DBMS - 死亡笔记数据库管理系统 (AC自动机+树链剖分)
+// https://www.luogu.com.cn/problem/CF1437G
+// 给定m个字符串，每个字符串有一个权值.初始时，所有字符串的权值都为0.
+// 给定q个操作，操作有两种类型：
+// 1 i v 表示将第i个字符串的权值修改为v.
+// 2 s 求所有是s的子串的字符串的权值最大值.
+//
+// 对所有模式串建出 AC 自动机。每次询问把 text 匹配，
+// 每个节点在 fail 树上的祖先都是这个节点所代表字符串的子串，树剖取最大值即可。
+// 注意重复的字符串,用一个可删除堆维护每个node处的最大值.
+func CF1437G() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var m, q int
+	fmt.Fscan(in, &m, &q)
+
+	patterns := make([]string, m)
+	acm := NewACAutoMatonArray(26, 97)
+	for i := 0; i < m; i++ {
+		fmt.Fscan(in, &patterns[i])
+		acm.AddString(patterns[i])
 	}
 	acm.BuildSuffixLink(true)
 
-	counter := acm.GetCounter()
-	size := acm.Size()
+	tree := NewTree(acm.Size())
+	acm.Dp(func(from, to int) {
+		tree.AddDirectedEdge(from, to, 1)
+	})
+	tree.Build(0)
 
-	adjMatrix := make([][]int, size)
-	for i := range adjMatrix {
-		adjMatrix[i] = make([]int, size)
+	values := make([]int, m)
+	heaps := make([]*ErasableHeap, acm.Size()) // 维护每个结点的最大值.
+	for i := range heaps {
+		heaps[i] = NewErasableHeap(func(a, b H) bool { return a > b }, []int{-INF})
+	}
+	for _, p := range acm.WordPos {
+		heaps[p].Push(0)
 	}
 
-	for cur := 0; cur < size; cur++ {
-		if counter[cur] == 0 {
-			for c := 0; c < 26; c++ {
-				next := acm.Children[cur][c]
-				if counter[next] == 0 {
-					adjMatrix[cur][next]++
-				}
-			}
+	seg := NewSegmentTree(acm.Size(), func(i int) E { return -INF })
+	for i := 0; i < acm.Size(); i++ {
+		seg.Set(tree.LID[i], heaps[i].Peek())
+	}
+
+	update := func(wid, value int) {
+		if values[wid] == value {
+			return
+		}
+		pos := acm.WordPos[wid]
+		preValue := values[wid]
+		values[wid] = value
+		heaps[pos].Erase(preValue)
+		heaps[pos].Push(value)
+		lid := tree.LID[pos]
+		seg.Set(lid, heaps[pos].Peek())
+	}
+
+	query := func(text string) int {
+		res := -1
+		pos := 0
+		for _, v := range text {
+			pos = acm.Move(pos, int(v))
+			tree.EnumeratePathDecomposition(0, pos, true, func(start, end int) {
+				cur := seg.Query(start, end)
+				res = max(res, cur)
+			})
+		}
+		return res
+	}
+
+	for i := 0; i < q; i++ {
+		var kind int
+		fmt.Fscan(in, &kind)
+		if kind == 1 {
+			var index, value int
+			fmt.Fscan(in, &index, &value)
+			index--
+			update(index, value)
+		} else {
+			var s string
+			fmt.Fscan(in, &s)
+			fmt.Fprintln(out, query(s))
 		}
 	}
-
-	transition := matPow(adjMatrix, k, MOD)
-	bad := 0
-	for _, v := range transition[0] {
-		bad = (bad + v) % MOD
-	}
-
-	res := (qpow(26, k, MOD) - bad) % MOD
-	if res < 0 {
-		res += MOD
-	}
-
-	io.Println(res)
 }
 
 // 不调用 BuildSuffixLink 就是Trie，调用 BuildSuffixLink 就是AC自动机.
