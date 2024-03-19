@@ -390,7 +390,7 @@ func (sl *SortedList) Enumerate(start, end int, f func(value Entry), erase bool)
 				pos--
 			} else {
 				// !delete [index, end)
-				sl._updateTree(pos, endIndex-startIndex)
+				sl._updateTree(pos, -deleted)
 				block = append(block[:startIndex], block[endIndex:]...)
 				sl.mins[pos] = block[0]
 			}

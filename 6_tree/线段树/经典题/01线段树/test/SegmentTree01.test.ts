@@ -83,7 +83,7 @@ describe('SegmentTree01', () => {
       const digit = randint(0, 1) as 0 | 1
       const k = randint(1, n)
       const res1 = seg.kth(digit, k)
-      const res2 = countKth(nums, digit, k)
+      let res2 = countKth(nums, digit, k)
       expect(res1).toBe(res2)
     }
   })

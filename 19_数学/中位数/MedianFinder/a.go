@@ -523,7 +523,8 @@ func (sl *SortedListWithSum) Enumerate(start, end int, f func(value E), erase bo
 					sl.allSum = op(sl.allSum, inv_)
 					sl.sums[pos] = op(sl.sums[pos], inv_)
 				}
-				sl._updateTree(pos, endIndex-startIndex)
+				sl._updateTree(pos, -deleted)
+
 				block = append(block[:startIndex], block[endIndex:]...)
 				sl.mins[pos] = block[0]
 			}

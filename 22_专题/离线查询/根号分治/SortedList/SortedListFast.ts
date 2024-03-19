@@ -348,7 +348,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
           pos--
         } else {
           // !delete [index, end)
-          this._updateTree(pos, -(endIndex - startIndex))
+          this._updateTree(pos, -deleted)
           block.splice(startIndex, deleted)
           this._mins[pos] = block[0]
         }

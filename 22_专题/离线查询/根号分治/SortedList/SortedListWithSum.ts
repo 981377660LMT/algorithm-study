@@ -212,7 +212,7 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> implements ISo
             this._allSum = this._op(this._allSum, inv)
             this._sums[pos] = this._op(this._sums[pos], inv)
           }
-          this._updateTree(pos, -(endIndex - startIndex))
+          this._updateTree(pos, -deleted)
           block.splice(startIndex, deleted)
           this._mins[pos] = block[0]
         }
