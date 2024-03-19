@@ -862,8 +862,10 @@ func main() {
 	// CF316G3()
 	// CF427D()
 	// CF452E()
-	CF547E()
+	// CF547E()
 	// CF666E()
+
+	CF1801G()
 }
 
 // P3181 [HAOI2016] 找相同字符 (分别维护不同串的 size)
@@ -1573,6 +1575,17 @@ func CF666E() {
 			fmt.Fprintln(out, minIndex+1, maxCount)
 		}
 	}
+}
+
+// A task for substrings
+// https://www.luogu.com.cn/problem/CF1801G
+func CF1801G() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
 }
 
 // 1408. 数组中的字符串匹配
