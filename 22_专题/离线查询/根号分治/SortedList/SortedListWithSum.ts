@@ -29,10 +29,7 @@ interface ISortedListFastWithSum<V> {
  * {@link sumSlice} 和 {@link sumRange} 的时间复杂度为 `O(sqrt(n))`.
  * {@link sumAll} 的时间复杂度为 `O(1)`.
  */
-class SortedListFastWithSum<V = number>
-  extends SortedListFast<V>
-  implements ISortedListFastWithSum<V>
-{
+class SortedListFastWithSum<V = number> extends SortedListFast<V> implements ISortedListFastWithSum<V> {
   private readonly _e: () => V
   private readonly _op: (a: V, b: V) => V
   private readonly _inv: (a: V) => V
@@ -211,11 +208,11 @@ class SortedListFastWithSum<V = number>
         } else {
           // !delete [index, end)
           for (let i = startIndex; i < endIndex; i++) {
-            this._updateTree(pos, -1)
             const inv = this._inv(block[i])
             this._allSum = this._op(this._allSum, inv)
             this._sums[pos] = this._op(this._sums[pos], inv)
           }
+          this._updateTree(pos, -(endIndex - startIndex))
           block.splice(startIndex, deleted)
           this._mins[pos] = block[0]
         }

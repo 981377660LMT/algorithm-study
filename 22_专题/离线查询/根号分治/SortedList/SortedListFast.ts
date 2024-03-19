@@ -53,9 +53,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
    * 长度为`1e5`的数组, 负载因子取`500`左右性能较好.
    */
   protected static _LOAD = 500
-  private static _isPrimitive(
-    o: unknown
-  ): o is number | string | boolean | symbol | bigint | null | undefined {
+  private static _isPrimitive(o: unknown): o is number | string | boolean | symbol | bigint | null | undefined {
     return o === null || (typeof o !== 'object' && typeof o !== 'function')
   }
 
@@ -83,10 +81,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
   constructor(compareFn: (a: V, b: V) => number)
   constructor(iterable: Iterable<V>, compareFn: (a: V, b: V) => number)
   constructor(compareFn: (a: V, b: V) => number, iterable: Iterable<V>)
-  constructor(
-    arg1?: Iterable<V> | ((a: V, b: V) => number),
-    arg2?: Iterable<V> | ((a: V, b: V) => number)
-  ) {
+  constructor(arg1?: Iterable<V> | ((a: V, b: V) => number), arg2?: Iterable<V> | ((a: V, b: V) => number)) {
     let defaultCompareFn = (a: V, b: V) => (a as unknown as number) - (b as unknown as number)
     let defaultData: V[] = []
     if (arg1 !== undefined) {
@@ -345,7 +340,6 @@ class SortedListFast<V = number> implements ISortedList<V> {
       const deleted = endIndex - startIndex
 
       if (erase) {
-        console.log(this._blocks, pos)
         if (deleted === block.length) {
           // !delete block
           this._blocks.splice(pos, 1)
@@ -354,7 +348,7 @@ class SortedListFast<V = number> implements ISortedList<V> {
           pos--
         } else {
           // !delete [index, end)
-          for (let i = startIndex; i < endIndex; i++) this._updateTree(pos, -1)
+          this._updateTree(pos, -(endIndex - startIndex))
           block.splice(startIndex, deleted)
           this._mins[pos] = block[0]
         }
@@ -707,12 +701,7 @@ if (require.main === module) {
   }
 
   // https://leetcode.cn/problems/maximum-number-of-tasks-you-can-assign/
-  function maxTaskAssign(
-    tasks: number[],
-    workers: number[],
-    pills: number,
-    strength: number
-  ): number {
+  function maxTaskAssign(tasks: number[], workers: number[], pills: number, strength: number): number {
     tasks.sort((a, b) => a - b)
     workers.sort((a, b) => a - b)
     let left = 0

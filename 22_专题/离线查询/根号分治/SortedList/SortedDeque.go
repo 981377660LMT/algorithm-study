@@ -315,9 +315,7 @@ func (sl *SortedList) Enumerate(start, end int, f func(value S), erase bool) {
 				pos--
 			} else {
 				// !delete [index, end)
-				for i := startIndex; i < endIndex; i++ {
-					sl._updateTree(pos, -1)
-				}
+				sl._updateTree(pos, endIndex-startIndex)
 				sl.blocks[pos] = append(block[:startIndex], block[endIndex:]...)
 				sl.mins[pos] = sl.blocks[pos][0]
 			}

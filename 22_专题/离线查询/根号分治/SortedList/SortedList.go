@@ -32,6 +32,9 @@
 //  func (sl *SortedList) String() string                                        {}
 //  func (sl *SortedList) Len() int                                              {}
 
+// TODO: cpp的set使用lowerBound获取迭代器之后，删除迭代器指向的元素，其他的迭代器不会失效
+// 现在SortedList的迭代器删除元素后，其他迭代器会实现
+
 // test:
 // https://leetcode.cn/problems/smallest-missing-genetic-value-in-each-subtree/submissions/
 // https://leetcode.cn/problems/sliding-subarray-beauty/
@@ -390,9 +393,7 @@ func (sl *SortedList) Enumerate(start, end int, f func(value S), erase bool) {
 				pos--
 			} else {
 				// !delete [index, end)
-				for i := startIndex; i < endIndex; i++ {
-					sl._updateTree(pos, -1)
-				}
+				sl._updateTree(pos, endIndex-startIndex)
 				block = append(block[:startIndex], block[endIndex:]...)
 				sl.mins[pos] = block[0]
 			}

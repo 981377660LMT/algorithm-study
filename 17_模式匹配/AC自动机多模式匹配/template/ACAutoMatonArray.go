@@ -56,6 +56,7 @@
 //  !15. 两种处理方式:
 //     - 模式串信息dp预处理 + 文本串单点查询：得到模式串在trie树上的位置，然后将结点信息沿着fail树向下dp传递，文本串查询时只需要单点查询;
 //     - 文本串跳fail查询：不使用dp预处理模式串信息，文本串查询时每次跳fail查询(注意如果求的是树链并，需要visited去重.)
+//  !16. 模式串作为后缀，文本串作为前缀.
 //
 // - applications:
 //  1. "不能出现若干单词" 的字符串 计数或最优化 问题 => ac自动机上dp: 一般都是dfs(index,pos):长度为index的字符串，当前trie状态为pos.
@@ -549,7 +550,14 @@ func P7456() {
 
 // A task for substrings
 // https://www.luogu.com.cn/problem/CF1801G
-func CF1801G() {}
+func CF1801G() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+}
 
 // 1032. 字符流
 // https://leetcode.cn/problems/stream-of-characters/description/
