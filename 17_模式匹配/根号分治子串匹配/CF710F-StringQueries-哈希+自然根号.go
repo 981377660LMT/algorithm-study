@@ -56,6 +56,7 @@ func main() {
 			hashTable := R.Build(s)
 			// !遍历每种长度的子串
 			for len_, group := range hashGroup {
+
 				for start := 0; start+len_ <= len(s); start++ {
 					hash := R.Query(hashTable, start, start+len_)
 					res += group[hash]

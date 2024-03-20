@@ -1,7 +1,5 @@
-// https://codeforces.com/contest/710/submission/187615267
 // https://www.cnblogs.com/TianMeng-hyl/p/14989441.html
 // https://www.cnblogs.com/Dfkuaid-210/p/bit_divide.html
-// https://codeforces.com/contest/710/submission/187615267
 
 package main
 
@@ -11,9 +9,11 @@ import (
 	"os"
 )
 
+// String Set Queries
+// https://www.luogu.com.cn/problem/CF710F
 // 1 s : 在数据结构中插入 s
 // 2 s : 在数据结构中删除 s
-// 3 s : 在数据结构中查询 s 出现的次数
+// 3 s : 查询集合中的所有字符串在给出的模板串中出现的次数
 //
 // !短的串丢进 trie 维护，长的串用 kmp 维护
 // !每次查询时，对文本串的所有后缀扔到 trie 里查询其前缀匹配个数，求总和。再把文本串与所有较大模式串单独 KMP。

@@ -3,22 +3,30 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
+	"strings"
 )
 
-// Duff is Mad
+// CF587F-DuddIsMad-根号分治+AC自动机
+// https://www.luogu.com.cn/problem/CF587F
 // !给定n个字符串，q次询问[start:end)中的字符串在s[index]中出现次数之和.
 // 字符串总长度<=1e5.
-// https://www.luogu.com.cn/problem/CF587F
 //
-// CF587F-DuddIsMad-根号分治+AC自动机
-// !对于长串，这样的串不超过sqrt(n)个，直接KMP预处理.
-// !对于短串，前缀和+树状数组处理.
+// 按照查询的文本串的长度进行根号分治.
+// !文本串为短串时，将所有模式串中的短串按照扫描线的顺序加入.扫描线+前缀和+树状数组处理.
+// 对每个(短)模式串，加入时fail树子树和+1, 文本串查询时累加其前缀结点之和.类似mike and friends中的技巧.
+// !文本串为长串时，这样的串不超过sqrt(n)个.
+// 转化为求出每个模式串在文本串中出现的次数(P3966 单词).
+// 文本串每个前缀+1，dfs求出子树和即可.
+// ps: 也可以kmp处理出每个模式串在此长串中出现次数.
 // https://mrsrz.github.io/CF587F/
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
+
+	const THRESHOLD int32 = 320
 
 	var n, q int32
 	fmt.Fscan(in, &n, &q)
@@ -28,12 +36,34 @@ func main() {
 	}
 
 	acam := NewACAutoMatonArray32()
-	wordPos := make([]int32, n)
-	for wi, w := range words {
-		pos := acam.AddString(w)
-		wordPos[wi] = pos
+	for _, w := range words {
+		acam.AddString(w)
 	}
 	acam.BuildSuffixLink(true)
+	wordPos := acam.WordPos
+
+	queries := make([][3]int32, q)              // left, right, index
+	leftQueryGroupOfShort := make([][]int32, n) // !用于处理短文本串的匹配
+	rightQueryGroupOfShort := make([][]int32, n)
+	queryGroupOfLong := make([][]int32, n) // !用于处理长文本串的匹配
+
+	for qi := int32(0); qi < q; qi++ {
+		var left, right, index int32
+		fmt.Fscan(in, &left, &right, &index)
+		left--
+		right--
+		index--
+		queries[qi] = [3]int32{left, right, index}
+		word := words[index]
+		if int32(len(word)) < THRESHOLD {
+			rightQueryGroupOfShort[right] = append(rightQueryGroupOfShort[right], qi)
+			if left > 0 {
+				leftQueryGroupOfShort[left-1] = append(leftQueryGroupOfShort[left-1], qi)
+			}
+		} else {
+			queryGroupOfLong[index] = append(queryGroupOfLong[index], qi)
+		}
+	}
 
 	size := acam.Size()
 	failTree := acam.BuildFailTree()
@@ -50,14 +80,70 @@ func main() {
 	}
 	dfsOrder(0)
 
-	query := func(start, end int32, index int32) int {}
+	// 文本串为短串时，将所有模式串按照扫描线的顺序加入
+	res := make([]int, q)
+	bit := NewBITRangeBlockRangeAddPointGet32(size)
+	for i := int32(0); i < n; i++ {
+		curPos := wordPos[i]
+		bit.AddRange(lid[curPos], rid[curPos], 1) // 模式串的子树+1，查询时和为文本串每个前缀结点之和
 
-	for i := int32(0); i < q; i++ {
-		var start, end, index int32
-		fmt.Fscan(in, &start, &end, &index)
-		start--
-		index--
-		fmt.Println(query(start, end, index))
+		queryChain := func(wid int32) int { // 前缀结点权值之和
+			word := words[wid]
+			pos := int32(0)
+			curSum := 0
+			for _, c := range word {
+				pos = acam.Move(pos, c)
+				curSum += bit.Get(lid[pos])
+			}
+			return curSum
+		}
+
+		for _, qid := range rightQueryGroupOfShort[i] {
+			wid := queries[qid][2]
+			res[qid] += queryChain(wid)
+		}
+		for _, qid := range leftQueryGroupOfShort[i] {
+			wid := queries[qid][2]
+			res[qid] -= queryChain(wid)
+		}
+	}
+
+	// 文本串为长串时，这样的串不超过sqrt(n)个
+	// 转化为求出每个模式串在文本串中出现的次数
+	for i := int32(0); i < n; i++ {
+		if len(queryGroupOfLong[i]) == 0 {
+			continue
+		}
+		word := words[i]
+		values := make([]int32, size)
+		pos := int32(0)
+		for _, c := range word {
+			pos = acam.Move(pos, c)
+			values[pos]++
+		}
+		subValues := make([]int32, size)
+		var dfs func(cur int32)
+		dfs = func(cur int32) {
+			subValues[cur] = values[cur]
+			for _, next := range failTree[cur] {
+				dfs(next)
+				subValues[cur] += subValues[next]
+			}
+		}
+		dfs(0)
+		preSum := make([]int, n+1)
+		for j := int32(0); j < n; j++ {
+			pos := wordPos[j]
+			preSum[j+1] = preSum[j] + int(subValues[pos])
+		}
+		for _, qid := range queryGroupOfLong[i] {
+			left, right := queries[qid][0], queries[qid][1]
+			res[qid] = preSum[right+1] - preSum[left]
+		}
+	}
+
+	for _, v := range res {
+		fmt.Fprintln(out, v)
 	}
 }
 
@@ -335,81 +421,113 @@ func CountIndexOfAll32(longer Str, shorter Str, position int32, nexts []int32) i
 	return res
 }
 
-// !Point Add Range Sum, 0-based.
-type BITArray struct {
-	n     int32
-	total int
-	data  []int
+// 基于分块实现的`树状数组`.
+// `O(1)`单点查询，`O(sqrt(n))`区间加.
+// 一般配合莫队算法使用.
+type BITRangeBlockRangeAddPointGet32 struct {
+	_n          int32
+	_belong     []int32
+	_blockStart []int32
+	_blockEnd   []int32
+	_nums       []int
+	_blockLazy  []int
 }
 
-func NewBitArray(n int32) *BITArray {
-	res := &BITArray{n: n, data: make([]int, n)}
-	return res
-}
-
-func NewBitArrayFrom(n int32, f func(i int32) int) *BITArray {
-	total := 0
-	data := make([]int, n)
-	for i := int32(0); i < n; i++ {
-		data[i] = f(i)
-		total += data[i]
+func NewBITRangeBlockRangeAddPointGet32(n int32) *BITRangeBlockRangeAddPointGet32 {
+	blockSize := int32(math.Sqrt(float64(n)) + 1)
+	blockCount := 1 + (n / blockSize)
+	belong := make([]int32, n)
+	for i := range belong {
+		belong[i] = int32(i) / blockSize
 	}
-	for i := int32(1); i <= n; i++ {
-		j := i + (i & -i)
-		if j <= n {
-			data[j-1] += data[i-1]
+	blockStart := make([]int32, blockCount)
+	blockEnd := make([]int32, blockCount)
+	for i := range blockStart {
+		blockStart[i] = int32(i) * blockSize
+		tmp := (int32(i) + 1) * blockSize
+		if tmp > n {
+			tmp = n
 		}
+		blockEnd[i] = tmp
 	}
-	return &BITArray{n: n, total: total, data: data}
-}
-
-func (b *BITArray) Add(index int32, v int) {
-	b.total += v
-	for index++; index <= b.n; index += index & -index {
-		b.data[index-1] += v
-	}
-}
-
-// [0, end).
-func (b *BITArray) QueryPrefix(end int32) int {
-	if end > b.n {
-		end = b.n
-	}
-	res := 0
-	for ; end > 0; end -= end & -end {
-		res += b.data[end-1]
+	nums := make([]int, n)
+	blockSum := make([]int, blockCount)
+	res := &BITRangeBlockRangeAddPointGet32{
+		_n:          n,
+		_belong:     belong,
+		_blockStart: blockStart,
+		_blockEnd:   blockEnd,
+		_nums:       nums,
+		_blockLazy:  blockSum,
 	}
 	return res
 }
 
-// [start, end).
-func (b *BITArray) QueryRange(start, end int32) int {
+func NewBITRangeBlockRangeAddPointGet32From(n int32, f func(i int32) int) *BITRangeBlockRangeAddPointGet32 {
+	res := NewBITRangeBlockRangeAddPointGet32(n)
+	res.Build(n, f)
+	return res
+}
+
+func (b *BITRangeBlockRangeAddPointGet32) Get(index int32) int {
+	if index < 0 || index >= b._n {
+		panic("index out of range")
+	}
+	return b._nums[index] + b._blockLazy[b._belong[index]]
+}
+
+func (b *BITRangeBlockRangeAddPointGet32) AddRange(start, end int32, delta int) {
 	if start < 0 {
 		start = 0
 	}
-	if end > b.n {
-		end = b.n
+	if end > b._n {
+		end = b._n
 	}
 	if start >= end {
-		return 0
+		return
 	}
-	if start == 0 {
-		return b.QueryPrefix(end)
+	bid1 := b._belong[start]
+	bid2 := b._belong[end-1]
+	if bid1 == bid2 {
+		for i := start; i < end; i++ {
+			b._nums[i] += delta
+		}
+		return
 	}
-	pos, neg := 0, 0
-	for end > start {
-		pos += b.data[end-1]
-		end &= end - 1
+	for i := start; i < b._blockEnd[bid1]; i++ {
+		b._nums[i] += delta
 	}
-	for start > end {
-		neg += b.data[start-1]
-		start &= start - 1
+	for bid := bid1 + 1; bid < bid2; bid++ {
+		b._blockLazy[bid] += delta
 	}
-	return pos - neg
+	for i := b._blockStart[bid2]; i < end; i++ {
+		b._nums[i] += delta
+	}
 }
 
-func (b *BITArray) QueryAll() int {
-	return b.total
+func (b *BITRangeBlockRangeAddPointGet32) Build(n int32, f func(i int32) int) {
+	if n != b._n {
+		panic("array length mismatch n")
+	}
+	for i := range b._nums {
+		b._nums[i] = f(int32(i))
+	}
+	for i := range b._blockLazy {
+		b._blockLazy[i] = 0
+	}
+}
+
+func (b *BITRangeBlockRangeAddPointGet32) String() string {
+	sb := strings.Builder{}
+	sb.WriteString("BITRangeBlock{")
+	for i := range b._nums {
+		if i > 0 {
+			sb.WriteString(", ")
+		}
+		sb.WriteString(fmt.Sprintf("%d", b.Get(int32(i))))
+	}
+	sb.WriteString("}")
+	return sb.String()
 }
 
 func min(a, b int) int {

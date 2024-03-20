@@ -188,14 +188,14 @@ func P2414() {
 
 	bit := NewBitArray(acm.Size())
 	res := make([]int, q)
-	var dfs func(cur int) // trie树上dfs
+	var dfs func(cur int)
 	dfs = func(cur int) {
 		bit.Add(lid[cur], 1) // dfs序为fail树的dfs序
 		for _, q := range queryGroup[cur] {
 			qi, pos := q.id, q.pos
 			res[qi] = bit.QueryRange(lid[pos], rid[pos])
 		}
-		for _, next := range trieTree[cur] {
+		for _, next := range trieTree[cur] { // trie树上dfs
 			dfs(next)
 		}
 		bit.Add(lid[cur], -1)
@@ -977,103 +977,6 @@ func CF1202E() {
 	}
 
 	fmt.Fprintln(out, res)
-}
-
-// Indie Album (一个串在另一个串中出现的次数,离线查询)
-// https://www.luogu.com.cn/problem/CF1207G
-// 有q1次操作,操作有两种类型：
-// 1 c : 新建一个字符c.
-// 2 i c : 在第i次操作的串后面加上字符c.
-// 接着是q2次询问,格式为：
-// i t: 每次询问版本为i的串中，t串出现了多少次。
-// q1,q2<=4e5, sum(len(text[i]))<=4e5
-//
-// !看见多字符串匹配，会想到AC自动机
-// 相当于：给定一些(posOnTrie, posOnACM)对，查询posOnACM对应的串在posOnTrie对应的串中出现了多少次
-// !离线查询，将查询挂在trieTree每个节点上，在trieTree上dfs，树状数组维护 failTree 的 dfs序.
-// 类似阿狸的打字机,离线+树状数组.
-func CF1207G() {
-	in := os.Stdin
-	out := os.Stdout
-	io = NewIost(in, out)
-	defer func() {
-		io.Writer.Flush()
-	}()
-
-	q1 := io.NextInt()
-	trie1 := NewACAutoMatonArray(26, 97)
-	posHistory := make([]int, q1)
-	for i := 0; i < q1; i++ {
-		kind := io.NextInt()
-		if kind == 1 {
-			c := io.Text()
-			posHistory[i] = trie1.AddChar(0, int(c[0]))
-		} else {
-			version := io.NextInt() - 1
-			c := io.Text()
-			posHistory[i] = trie1.AddChar(posHistory[version], int(c[0]))
-		}
-	}
-	// trie1.BuildSuffixLink(true)
-
-	q2 := io.NextInt()
-	acm2 := NewACAutoMatonArray(26, 97)
-	queries := make([][2]int, q2) // !(posOnTrie, posOnACM)：查询posOnACM对应的串在posOnTrie对应的串中出现了多少次
-	for i := 0; i < q2; i++ {
-		version := io.NextInt() - 1
-		text := io.Text()
-		textPos := acm2.AddString(text)
-		queries[i] = [2]int{posHistory[version], textPos}
-	}
-	acm2.BuildSuffixLink(true)
-
-	failTree := acm2.BuildFailTree()
-	lid, rid := make([]int, acm2.Size()), make([]int, acm2.Size())
-	dfn := 0
-	var dfsOrder func(cur, pre int)
-	dfsOrder = func(cur, pre int) {
-		lid[cur] = dfn
-		dfn++
-		for _, next := range failTree[cur] {
-			if next != pre {
-				dfsOrder(next, cur)
-			}
-		}
-		rid[cur] = dfn
-	}
-	dfsOrder(0, -1) // failTree 的 dfs序
-	bit := NewBitArray(acm2.Size())
-
-	queryGroup := make([][]int, trie1.Size())
-	for qid, query := range queries {
-		triePos := query[0]
-		queryGroup[triePos] = append(queryGroup[triePos], qid)
-	}
-	res := make([]int, q2)
-
-	// 在 trie 上 dfs，计算 failTree 的某个节点的子树权值.
-	var dfs func(triePos, acmPos int)
-	dfs = func(triePos, acmPos int) {
-		bit.Add(lid[acmPos], 1)
-
-		for _, qid := range queryGroup[triePos] {
-			qv := queries[qid][1]
-			res[qid] = bit.QueryRange(lid[qv], rid[qv])
-		}
-
-		for c, next := range trie1.Children[triePos] {
-			if next != -1 {
-				dfs(int(next), acm2.Move(acmPos, c+97))
-			}
-		}
-
-		bit.Add(lid[acmPos], -1)
-	}
-	dfs(0, 0)
-
-	for _, v := range res {
-		io.Println(v)
-	}
 }
 
 // Death DBMS - 死亡笔记数据库管理系统 (AC自动机+树链剖分)

@@ -10,9 +10,11 @@ import (
 	"os"
 )
 
+// String Set Queries
+// https://www.luogu.com.cn/problem/CF710F
 // 1 s : 在数据结构中插入 s
 // 2 s : 在数据结构中删除 s
-// 3 s : 在数据结构中查询 s 出现的次数
+// 3 s : 查询集合中的所有字符串在给出的模板串中出现的次数
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)

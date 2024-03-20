@@ -77,7 +77,10 @@ class BITRangeBlock {
   toString(): string {
     const sb: string[] = []
     sb.push('BITRangeBlock{')
-    sb.push(this._nums.join(', '))
+    for (let i = 0; i < this._n; i++) {
+      sb.push(String(this.queryRange(i, i + 1)))
+      if (i < this._n - 1) sb.push(', ')
+    }
     sb.push('}')
     return sb.join('')
   }
