@@ -59,6 +59,16 @@ func SUFEQPRE() {
 	}
 }
 
+// P3501 [POI2010] ANT-Antisymmetry (回文树)
+// https://www.luogu.com.cn/problem/P3501
+
+// P4036 [JSOI2008] 火星人 (后缀平衡树维护 hash 值, 动态lcp，二分求 Hash 值)
+// https://www.luogu.com.cn/problem/P4036
+
+// Anthem of Berland
+// https://www.luogu.com.cn/problem/CF808G
+func CF808G() {}
+
 // P3193 [HNOI2008] GT考试 (KMP+矩阵快速幂dp)
 // 求有多少个n位的数字串不包含m位的字符串
 // n<=1e9,m<=20

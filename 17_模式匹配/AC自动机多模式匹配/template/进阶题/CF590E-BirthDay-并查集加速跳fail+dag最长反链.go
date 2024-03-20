@@ -32,13 +32,13 @@ func main() {
 
 	acm := NewAC()
 	words := make([]string, n)
-	posId := make(map[int]int)
+	posToId := make(map[int]int)
 	for i := 0; i < n; i++ {
 		var s string
 		fmt.Fscan(in, &s)
-		pos := acm.AddString(s)
-		posId[pos] = i
 		words[i] = s
+		pos := acm.AddString(s)
+		posToId[pos] = i
 	}
 	acm.BuildSuffixLink(true)
 
@@ -48,12 +48,12 @@ func main() {
 	trans := NewTransitiveClosure(n)
 	for i := 0; i < n; i++ {
 		pos := 0
-		for _, s := range words[i] {
-			pos = int(acm.children[pos][int32(s)-OFFSET])
-			// 这一段需要加速，不重复计算(即如果为空，则之后都要跳过这个节点)
-			// 用并查集加速
+		for _, char := range words[i] {
+			pos = int(acm.children[pos][char-OFFSET])
+
+			// 用并查集加速(即如果为空，则之后都要跳过这个节点)
 			for cur := pos; cur != 0; cur = uf.Find(int(acm.suffixLink[cur])) {
-				id, ok := posId[cur]
+				id, ok := posToId[cur]
 				if !ok {
 					uf.Union(int(acm.suffixLink[cur]), cur, nil)
 				}
@@ -237,7 +237,7 @@ func NewMaxAntiChainSolver(n int, edges [][2]int) *MaxAntiChainSolver {
 	return &MaxAntiChainSolver{n: n, source: source, sink: sink, maxFlow: mf}
 }
 
-// dag最长反链.
+// dag最长反链(dag最大独立集).
 func (solver *MaxAntiChainSolver) MaxAntiChain() []int {
 	solver.calFlow()
 	isCut := solver.maxFlow.MinCut(solver.source)

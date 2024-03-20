@@ -20,13 +20,12 @@ import (
 // 转化为求出每个模式串在文本串中出现的次数(P3966 单词).
 // 文本串每个前缀+1，dfs求出子树和即可.
 // ps: 也可以kmp处理出每个模式串在此长串中出现次数.
-// https://mrsrz.github.io/CF587F/
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	const THRESHOLD int32 = 320
+	const THRESHOLD int32 = 300
 
 	var n, q int32
 	fmt.Fscan(in, &n, &q)
