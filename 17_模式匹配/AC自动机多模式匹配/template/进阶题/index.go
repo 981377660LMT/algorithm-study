@@ -562,26 +562,24 @@ func CF86C() {
 		}
 	}
 	n, w := io.NextInt(), io.NextInt()
-	words := make([]string, w)
+	patterns := make([]string, w)
 	acm := NewACAutoMatonArray(4, 0)
 	for i := 0; i < w; i++ {
 		word := io.Text()
-		words[i] = word
+		patterns[i] = word
 		acm.AddFrom(len(word), func(i int) int { return getOrd(word[i]) })
 	}
 	acm.BuildSuffixLink(true)
 
-	maxLen := make([]int, acm.Size()) // 每个节点匹配到的最大长度
+	maxBorder := make([]int, acm.Size()) // 每个节点匹配到的最大长度
 	for i, p := range acm.WordPos {
-		maxLen[p] = max(maxLen[p], len(words[i]))
+		maxBorder[p] = max(maxBorder[p], len(patterns[i]))
 	}
-	acm.Dp(func(from, to int) {
-		maxLen[to] = max(maxLen[to], maxLen[from])
-	})
+	acm.Dp(func(from, to int) { maxBorder[to] = max(maxBorder[to], maxBorder[from]) })
 
 	m := acm.Size()
 	upper := 0
-	for _, v := range words {
+	for _, v := range patterns {
 		upper = max(upper, len(v))
 	}
 
@@ -615,7 +613,7 @@ func CF86C() {
 			res := 0
 			for c := 0; c < 4; c++ {
 				nextPos := acm.Move(pos, c)
-				coverLen := maxLen[nextPos]
+				coverLen := maxBorder[nextPos]
 				nextNeed := need + 1
 				if coverLen >= nextNeed {
 					nextNeed = 0
@@ -652,7 +650,7 @@ func CF86C() {
 						for c := 0; c < 4; c++ {
 							nextPos := acm.Move(pos, c)
 							nextK := k + 1
-							if maxLen[nextPos] >= nextK {
+							if maxBorder[nextPos] >= nextK {
 								nextK = 0
 							}
 							if nextK <= upper {
@@ -779,9 +777,11 @@ func CF163E() {
 // https://www.luogu.com.cn/problem/CF547E
 // 给定n个字符串words和q个查询，每个查询为：
 // !(left, right, index) 查询 words[index]在 [left,right] 中出现了多少次(0<=left<=right<n).
-// 将区间查询转换为两个前缀的差.
+//
+// 将区间查询转换为两个前缀的差.统计每个单词在words[:i]中出现的次数.
 // 类似阿狸的打字机，模式串 fail 树向下，文本串 trie 树向上
-// 沿着trie文本串从根到结束位置点权+1，查询时为fail树某节点子树和.
+// 文本串沿着trie文本串从根到结束位置点权+1，模式串查询时为fail树某节点子树和.
+// "链加+单点查询" => "单点加+子树查询"
 func CF547E() {
 	in := os.Stdin
 	out := os.Stdout
@@ -798,6 +798,7 @@ func CF547E() {
 		acm.AddString(words[i])
 	}
 	acm.BuildSuffixLink(true)
+	wordPos := acm.WordPos
 
 	queries := make([][3]int, q)
 	leftQueryGroup := make([][]int, n)
@@ -818,36 +819,41 @@ func CF547E() {
 	failTree := acm.BuildFailTree()
 	lid, rid := make([]int, acm.Size()), make([]int, acm.Size())
 	dfn := 0
-	var dfsOrder func(cur, pre int)
-	dfsOrder = func(cur, pre int) {
+	var dfsOrder func(cur int)
+	dfsOrder = func(cur int) {
 		lid[cur] = dfn
 		dfn++
 		for _, next := range failTree[cur] {
-			if next != pre {
-				dfsOrder(next, cur)
-			}
+			dfsOrder(next)
 		}
 		rid[cur] = dfn
 	}
-	dfsOrder(0, -1)
+	dfsOrder(0)
 	bit := NewBitArray(acm.Size())
+
+	addChain := func(pos int) {
+		bit.Add(lid[pos], 1)
+	}
+	queryPoint := func(pos int) int {
+		return bit.QueryRange(lid[pos], rid[pos])
+	}
 
 	res := make([]int, q)
 	for i := 0; i < n; i++ {
 		pos := 0
 		for _, v := range words[i] {
 			pos = acm.Move(pos, int(v))
-			bit.Add(lid[pos], 1) // !沿着trie走，从根节点到endPos链上的点加1
+			addChain(pos) // !沿着trie走，从根节点到endPos链上的点加1
 		}
 		for _, qid := range rightQueryGroup[i] {
-			index := queries[qid][2]
-			node := acm.WordPos[index]
-			res[qid] += bit.QueryRange(lid[node], rid[node])
+			wid := queries[qid][2]
+			pos := wordPos[wid]
+			res[qid] += queryPoint(pos)
 		}
 		for _, qid := range leftQueryGroup[i] {
-			index := queries[qid][2]
-			node := acm.WordPos[index]
-			res[qid] -= bit.QueryRange(lid[node], rid[node])
+			wid := queries[qid][2]
+			pos := wordPos[wid]
+			res[qid] -= queryPoint(pos)
 		}
 	}
 
