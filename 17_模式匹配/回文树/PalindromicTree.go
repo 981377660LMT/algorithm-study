@@ -1125,11 +1125,11 @@ func (pt *PalindromicTree) newNode(link, length int32) *Node {
 
 // 沿着失配指针找到第一个满足 x+s+x 是原串回文后缀的位置.
 func (pt *PalindromicTree) findPrevPalindrome(cur int32) int32 {
-	pos := int32(len(pt.Ords) - 1)
+	last := int32(len(pt.Ords) - 1)
 	for {
-		rev := pos - 1 - pt.Nodes[cur].Length
+		rev := last - 1 - pt.Nodes[cur].Length
 		// !插入当前字符的条件str[i]==str[i-len-1]
-		if rev >= 0 && pt.Ords[rev] == pt.Ords[len(pt.Ords)-1] {
+		if rev >= 0 && pt.Ords[rev] == pt.Ords[last] {
 			break
 		}
 		cur = pt.Nodes[cur].Link

@@ -16,6 +16,8 @@ func main() {
 // 对于一个01字符串，如果将这个字符串0和1取反后，再将整个串反过来和原串一样，就称作“反对称”字符串。
 // 比如00001111和010101就是反对称的，1001就不是。
 // 现在给出一个长度为N的01字符串，求它有多少个子串是反对称的。
+//
+// 反对称一定是偶数长度的回文串.
 func P3501() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -25,6 +27,11 @@ func P3501() {
 	fmt.Fscan(in, &n)
 	var s01 string
 	fmt.Fscan(in, &s01)
+
+	// 7个反对称子串分别是：01（出现两次），10（出现两次），0101，1100和001011
+	M := NewManacher(s01)
+	equal := func(i, j int32) bool { return s01[i] == s01[j] }
+	M.SetEqual(equal)
 
 }
 
@@ -39,14 +46,21 @@ type Manacher struct {
 	maxOdd2    []int32
 	maxEven1   []int32
 	maxEven2   []int32
+	equal      func(i, j int32) bool
 }
 
 func NewManacher(seq Sequence) *Manacher {
+	defaultEqual := func(i, j int32) bool { return seq[i] == seq[j] }
 	m := &Manacher{
-		n:   int32(len(seq)),
-		seq: seq,
+		n:     int32(len(seq)),
+		seq:   seq,
+		equal: defaultEqual,
 	}
 	return m
+}
+
+func (ma *Manacher) SetEqual(equal func(i, j int32) bool) {
+	ma.equal = equal
 }
 
 // 查询切片s[start:end]是否为回文串.
@@ -94,7 +108,7 @@ func (ma *Manacher) GetOddRadius() []int32 {
 		} else {
 			k = min32(ma.oddRadius[left+right-i], right-i+1)
 		}
-		for i-k >= 0 && i+k < n && ma.seq[i-k] == ma.seq[i+k] {
+		for i-k >= 0 && i+k < n && ma.equal(i-k, i+k) {
 			k++
 		}
 		ma.oddRadius[i] = k
@@ -123,7 +137,7 @@ func (ma *Manacher) GetEvenRadius() []int32 {
 		} else {
 			k = min32(ma.evenRadius[left+right-i+1], right-i+1)
 		}
-		for i-k-1 >= 0 && i+k < n && ma.seq[i-k-1] == ma.seq[i+k] {
+		for i-k-1 >= 0 && i+k < n && ma.equal(i-k-1, i+k) {
 			k++
 		}
 		ma.evenRadius[i] = k
