@@ -35,13 +35,31 @@
 // Add(x): 末尾添加文字x，返回以这个字符为后缀的最长回文串的位置.
 // AddString(S): 末尾添加字符串S.
 // GetFrequency(): 每个顶点对应的回文串出现的次数.
-// CountPalindromes(): 计算本质不同回文子串个数.
+// RecoverPalindrome(pos): 返回pos位置的回文串.
 // UpdateDp(init, apply): 每次增加一个字符,用以当前字符为结尾的`所有本质不同回文串`更新dp值.
 // BuildFailTree(): 构造fail树.
-// GetPalindrome(pos): 返回pos位置的回文串.
 // GetNode(pos): 返回pos位置的回文串顶点.
 // Size(): 回文树中的顶点个数.
-
+//
+// eg: "eertree" -> [[1] [2 4 5] [3 7] [8] [6] [] [] [] []]
+//
+//											0(奇根)
+//											|
+//							-------	1(偶根)
+//	           /        |  \
+//		        /         |   \
+//		       /          |		 \
+//		      /           |     \
+//		     /            |      \
+//		    2(e)          4(r)   5(t)
+//		   /    \         |
+//			3(ee)  7(ertre) 6(rtr)
+//		  |
+//		  8(eertree)
+//
+// 0 为奇根, 1 为偶根.
+// 每条链对应一个前缀，沿着链往下走，相当于遍历当前前缀的所有回文后缀.
+//
 // 回文树里有两棵树，分别记录长度为奇数和偶数的回文串
 // 0号表示回文串长度为偶数的树，1号表示回文串长度为奇数的树
 // !每个节点代表一个回文串，记录转移c，如果在这个回文串前后都加上字符c形成的回文串原串的后缀,那么就添加儿子,否则就沿着fail指针往上找
@@ -99,20 +117,35 @@ func main() {
 }
 
 func demo() {
-	pt := NewPalindromicTree()
 	// s := "eertree"
 	s := "aaaaa"
-	pt.AddString(s)
 
-	fmt.Println(pt.Size() - 2)     // 本质不同回文子串个数(不超过O(n))
-	fmt.Println(pt.GetFrequency()) // 每个顶点对应的回文串出现的次数
-	for pos := 0; pos < pt.Size(); pos++ {
-		res := pt.GetPalindrome(pos)
-		fmt.Println(res)
+	// 返回回文树、每个前缀结尾的回文串个数.
+	NewPalindromicTreeAndEnds := func(n int, f func(int) int32) (tree *PalindromicTree, ends []int) {
+		tree = NewPalindromicTree()
+		ends = make([]int, n)
+		counter := make([]int, n+2)
+		for i := 0; i < n; i++ {
+			pos := tree.Add(f(i))
+			link := tree.Nodes[pos].Link
+			counter[pos] = counter[link] + 1
+			ends[i] = counter[pos]
+		}
+		return
 	}
+
+	pt, ends := NewPalindromicTreeAndEnds(len(s), func(i int) int32 { return int32(s[i]) })
+	for i := 0; i < pt.Size(); i++ {
+		start, end := pt.RecoverPalindrome(i)
+		fmt.Println(start, end, s[start:end])
+	}
+	fmt.Println("ends", ends)                  // 每个前缀结尾的回文串个数
+	fmt.Println("count", pt.Size()-2)          // 本质不同回文子串个数(不超过O(n))
+	fmt.Println("size", pt.GetFrequency()[2:]) // 每个顶点对应的回文串出现的次数
+
 	fmt.Println(pt.BuildFailTree())
 	for i := 2; i < pt.Size(); i++ {
-		fmt.Println(pt.GetPalindrome(i), pt.GetNode(i).Indexes)
+		fmt.Println(pt.GetNode(i).Indexes)
 	}
 }
 
@@ -1007,6 +1040,17 @@ func (pt *PalindromicTree) AddString(s string) {
 	}
 }
 
+// 给定节点位置,返回其代表的回文串.
+func (pt *PalindromicTree) RecoverPalindrome(pos int) (start, end int) {
+	if pos < 2 {
+		return
+	}
+	node := pt.Nodes[pos]
+	end = int(node.Indexes[0]) + 1
+	start = end - int(node.Length)
+	return
+}
+
 // Palindrome Series 优化DP
 // https://zhuanlan.zhihu.com/p/537113907
 // https://zhuanlan.zhihu.com/p/92874690
@@ -1038,7 +1082,7 @@ func (pt *PalindromicTree) Dp(f func(from, to int)) {
 	}
 }
 
-// 求出每个顶点对应的回文串出现的次数.
+// 求出每个顶点对应的回文串出现的次数(注意不是每个以每个前缀结尾的回文串的次数,而是每个顶点代表的回文串的次数)
 func (pt *PalindromicTree) GetFrequency() []int {
 	res := make([]int, pt.Size())
 	// !节点编号从大到小，就是 fail 树的拓扑序
@@ -1049,61 +1093,12 @@ func (pt *PalindromicTree) GetFrequency() []int {
 	return res
 }
 
-// 当前字符的本质不同回文串个数.
-func (pt *PalindromicTree) CountPalindromes() int {
-	res := 0
-	for i := 1; i < pt.Size(); i++ { // 除去根节点(奇根)
-		res += len(pt.Nodes[i].Indexes)
-	}
-	return res
-}
-
-// eg: "eertree" -> [[1] [2 4 5] [3 7] [8] [6] [] [] [] []]
-//
-//											0(奇根)
-//											|
-//							-------	1(偶根)
-//	           /        |  \
-//		        /         |   \
-//		       /          |		 \
-//		      /           |     \
-//		     /            |      \
-//		    2(e)          4(r)   5(t)
-//		   /    \         |
-//			3(ee)  7(ertre) 6(rtr)
-//		  |
-//		  8(eertree)
-//
-// 0 为奇根, 1 为偶根.
-// 每条链对应一个前缀，沿着链往下走，相当于遍历当前前缀的所有回文后缀.
 func (pt *PalindromicTree) BuildFailTree() [][]int {
 	n := pt.Size()
 	res := make([][]int, n)
 	for i := 1; i < n; i++ {
 		link := int(pt.Nodes[i].Link)
 		res[link] = append(res[link], i)
-	}
-	return res
-}
-
-// 输出每个顶点代表的回文串.
-func (pt *PalindromicTree) GetPalindrome(pos int) []int {
-	if pos == 0 {
-		return []int{-1}
-	}
-	if pos == 1 {
-		return []int{0}
-	}
-	var res []int
-	// 在偶树/奇树中找到当前节点的回文串
-	pt.outputDfs(0, pos, &res)
-	pt.outputDfs(1, pos, &res)
-	start := len(res) - 1
-	if pt.Nodes[pos].Length&1 == 1 {
-		start--
-	}
-	for i := start; i >= 0; i-- {
-		res = append(res, res[i])
 	}
 	return res
 }
@@ -1149,19 +1144,6 @@ func (pt *PalindromicTree) diff(pos int32) int32 {
 		return -1
 	}
 	return curNode.Length - pt.Nodes[curNode.Link].Length
-}
-
-func (pt *PalindromicTree) outputDfs(cur, id int, res *[]int) bool {
-	if cur == id {
-		return true
-	}
-	for key, next := range pt.Nodes[cur].Next {
-		if pt.outputDfs(int(next), id, res) {
-			*res = append(*res, int(key))
-			return true
-		}
-	}
-	return false
 }
 
 func max(a, b int) int {

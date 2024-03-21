@@ -14,18 +14,11 @@ import (
 
 func main() {
 	// SUFEQPRE()
-	P3193()
-	// P4824()
-}
 
-// 面试题 17.17. 多次搜索
-// https://leetcode.cn/problems/multi-search-lcci/
-func multiSearch(big string, smalls []string) [][]int {
-	res := make([][]int, len(smalls))
-	for i, small := range smalls {
-		res[i] = IndexOfAll(big, small, 0, nil)
-	}
-	return res
+	// P3193()
+	// P3501()
+	// P4036()
+	// P4824()
 }
 
 // SUFEQPRE - Suffix Equal Prefix
@@ -59,29 +52,9 @@ func SUFEQPRE() {
 	}
 }
 
-// P3501 [POI2010] ANT-Antisymmetry (回文树)
-// https://www.luogu.com.cn/problem/P3501
-
 // P4036 [JSOI2008] 火星人 (后缀平衡树维护 hash 值, 动态lcp，二分求 Hash 值)
 // https://www.luogu.com.cn/problem/P4036
-
-// Anthem of Berland
-// https://www.luogu.com.cn/problem/CF808G
-func CF808G() {}
-
-// P3193 [HNOI2008] GT考试 (KMP+矩阵快速幂dp)
-// 求有多少个n位的数字串不包含m位的字符串
-// n<=1e9,m<=20
-//
-// dp[i][j] 表示长度为i的准考证和A匹配到了第j位的方案数.
-func P3193() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, m, MOD int32
-	fmt.Fscan(in, &n, &m, &MOD)
-}
+func P4036() {}
 
 // https://www.luogu.com.cn/problem/P4824
 // 在longer中不断删除shorter，求剩下的字符串.
@@ -116,6 +89,16 @@ func P4824() {
 		res = append(res, longer[v])
 	}
 	fmt.Fprintln(out, string(res))
+}
+
+// 面试题 17.17. 多次搜索
+// https://leetcode.cn/problems/multi-search-lcci/
+func multiSearch(big string, smalls []string) [][]int {
+	res := make([][]int, len(smalls))
+	for i, small := range smalls {
+		res[i] = IndexOfAll(big, small, 0, nil)
+	}
+	return res
 }
 
 type Str = string

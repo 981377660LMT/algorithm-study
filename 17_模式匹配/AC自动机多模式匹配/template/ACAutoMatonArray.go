@@ -110,12 +110,15 @@ func main() {
 
 	// P3041()
 	// P3121()
+	P3193()
 	// P3796()
 	// P3808()
 	// P3966()
 	// P4052()
 	// P5357()
-	P7456()
+	// P7456()
+
+	// CF808G()
 
 }
 
@@ -272,6 +275,58 @@ func P3121() {
 		res = append(res, longer[v])
 	}
 	fmt.Fprintln(out, string(res))
+}
+
+// P3193 [HNOI2008] GT考试 (KMP+矩阵快速幂dp)
+// 给定一些长度之和为m的字符串evil.
+// 求有多少种长度为n的数字串不包含evil中的任意一个字符串.
+// n<=1e9,m<=100.
+//
+// dp[i][j] 表示长度为i的准考证和A匹配到了第j位的方案数.
+// O(m^3logn)
+// 预处理出转移的邻接矩阵，等价于有向图转移n次的路径数.
+func P3193() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m, MOD int
+	fmt.Fscan(in, &n, &m, &MOD)
+	wordCount := 1
+	evil := make([]string, wordCount)
+	for i := 0; i < wordCount; i++ {
+		fmt.Fscan(in, &evil[i])
+	}
+	acm := NewACAutoMatonArray(10, 48) // '0'-'9'
+	for _, word := range evil {
+		acm.AddString(word)
+	}
+	acm.BuildSuffixLink(true)
+	counter := acm.GetCounter()
+
+	size := acm.Size()
+	T := make([][]int, size)
+	for i := range T {
+		T[i] = make([]int, size)
+	}
+
+	for pos := int32(0); pos < size; pos++ {
+		if counter[pos] == 0 {
+			for char := '0'; char <= '9'; char++ {
+				nextPos := acm.Move(pos, char)
+				if counter[nextPos] == 0 {
+					T[pos][nextPos]++
+				}
+			}
+		}
+	}
+
+	T = MatPow(T, n, MOD)
+	res := 0
+	for _, v := range T[0] {
+		res = (res + v) % MOD
+	}
+	fmt.Fprintln(out, res)
 }
 
 // P3796 AC 自动机（简单版 II）
@@ -618,6 +673,68 @@ func P7456() {
 	} else {
 		fmt.Fprintln(out, -1)
 	}
+}
+
+// Anthem of Berland (AC自动机+dp)
+// https://www.luogu.com.cn/problem/CF808G
+// 给定s串和t串，其中s串包含小写字母和问号，t串只包含小写字母。
+// 假设有k个问号.你需要把每个问号替换成一个小写字母，一共有26^k种方案。
+// 求替换后t在s中出现的次数的最大值.
+//
+// len(s)*len(t)<=1e7
+//
+// dp[i][pos]表示s串的前i个字符，AC自动机上的状态为pos时，匹配次数的最大值.
+// t串还可以换成多个模式串.
+func CF808G() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s, t string
+	fmt.Fscan(in, &s, &t)
+
+	words := []string{t}
+	acm := NewACAutoMatonArray(26, 97)
+	for _, w := range words {
+		acm.AddString(w)
+	}
+	acm.BuildSuffixLink(true)
+	counter := acm.GetCounter()
+
+	size := acm.Size()
+	initDp := func() []int {
+		res := make([]int, size)
+		for i := range res {
+			res[i] = -1
+		}
+		return res
+	}
+
+	dp := initDp()
+	dp[0] = 0
+	for _, char := range s {
+		ndp := initDp()
+		for input := 'a'; input <= 'z'; input++ {
+			// 当前字符不合法，不能作为转移
+			if char != '?' && char != input {
+				continue
+			}
+			for pos := int32(0); pos < size; pos++ {
+				if dp[pos] == -1 {
+					continue
+				}
+				nextPos := acm.Move(pos, input)
+				ndp[nextPos] = max(ndp[nextPos], dp[pos]+int(counter[nextPos]))
+			}
+		}
+		dp = ndp
+	}
+
+	res := 0
+	for _, v := range dp {
+		res = max(res, v)
+	}
+	fmt.Fprintln(out, res)
 }
 
 // 1032. 字符流
@@ -1195,6 +1312,59 @@ func (st *PointSetRangeMin) QueryAll() E { return st.seg[1] }
 func (st *PointSetRangeMin) GetAll() []E {
 	res := make([]E, st.n)
 	copy(res, st.seg[st.size:st.size+st.n])
+	return res
+}
+
+func MatMul(m1, m2 [][]int, mod int) [][]int {
+	res := make([][]int, len(m1))
+	for i := range res {
+		res[i] = make([]int, len(m2[0]))
+	}
+	for i := 0; i < len(m1); i++ {
+		for k := 0; k < len(m2); k++ {
+			for j := 0; j < len(m2[0]); j++ {
+				res[i][j] = (res[i][j] + m1[i][k]*m2[k][j]) % mod
+				if res[i][j] < 0 {
+					res[i][j] += mod
+				}
+			}
+		}
+	}
+	return res
+}
+
+func MatPow(mat [][]int, exp int, mod int) [][]int {
+	n := len(mat)
+	matCopy := make([][]int, n)
+	for i := 0; i < n; i++ {
+		matCopy[i] = make([]int, n)
+		copy(matCopy[i], mat[i])
+	}
+	res := make([][]int, n)
+	for i := 0; i < n; i++ {
+		res[i] = make([]int, n)
+		res[i][i] = 1
+	}
+	for exp > 0 {
+		if exp&1 == 1 {
+			res = MatMul(res, matCopy, mod)
+		}
+		matCopy = MatMul(matCopy, matCopy, mod)
+		exp >>= 1
+	}
+	return res
+}
+
+func Pow(a, b, mod int) int {
+	a %= mod
+	res := 1
+	for b > 0 {
+		if b&1 == 1 {
+			res = res * a % mod
+		}
+		a = a * a % mod
+		b >>= 1
+	}
 	return res
 }
 
