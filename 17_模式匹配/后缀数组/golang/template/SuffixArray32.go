@@ -148,6 +148,9 @@ func NewSuffixArray(n int32, f func(i int32) int32) *SuffixArray32 {
 
 // 求任意两个子串s[a,b)和s[c,d)的最长公共前缀(lcp).
 func (suf *SuffixArray32) Lcp(a, b int32, c, d int32) int32 {
+	if a >= b || c >= d {
+		return 0
+	}
 	cand := suf._lcp(a, c)
 	return min32(cand, min32(b-a, d-c))
 }

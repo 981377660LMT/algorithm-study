@@ -32,8 +32,8 @@
 //
 // !3. 广义 SAM 出现子串查询：
 //	  对于 n 个串的广义后缀自动机，求出每个点对应的字符串是哪些原串的子串。
-//		和线段树合并维护 Endpos 集合基本一致，将每个后缀对应的点附上对应串的标记，
-//    然后在树结构上 DFS 进行线段树合并即可得到每个串的出现位置。
+//		和线段树合并维护 Endpos 集合基本一致，将"每个串的每个前缀"对应的点附上对应串的标记，
+//    然后在树结构上 DFS 进行线段树合并(pushUp到后缀)即可得到每个子串的出现位置。
 
 package main
 
@@ -863,8 +863,8 @@ func main() {
 	// CF427D()
 	// CF452E()
 	// CF547E()
+	CF616F()
 	// CF666E()
-
 }
 
 // P3181 [HAOI2016] 找相同字符 (分别维护不同串的 size)
@@ -1507,11 +1507,54 @@ func CF452E() {
 
 // Expensive Strings
 // https://www.luogu.com.cn/problem/CF616F
-func CF616F() {}
+// 给出n个字符串以及一个n个元素的c数组。
+// 定义一个字符串s的价值为:
+// !∑values[i]*p[s][i]*len(s) (i=1..n) ,其中p[s][i]表示s在第i个字符串中出现的次数。
+// 求所有字符串函数f(s)的最大值。
+// 注意字符串s不一定是t中的某个字符串。
+//
+// !答案为某个串的子串.
+// !一个等价类的串在所有串中的出现次数为子树之和.
+func CF616F() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-// CF822E Liar
-// https://www.luogu.com.cn/problem/solution/CF822E
-func CF822E() {}
+	var n int32
+	fmt.Fscan(in, &n)
+	words := make([]string, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &words[i])
+	}
+	values := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &values[i])
+	}
+	allLen := int32(0)
+	for _, w := range words {
+		allLen += int32(len(w))
+	}
+
+	sam := NewSuffixAutomatonGeneral()
+	subTreeValueSum := make([]int, 2*allLen)
+	for i, w := range words {
+		// !标记每个前缀
+		sam.AddString(w, func(_, pos int32) { subTreeValueSum[pos] += int(values[i]) })
+	}
+	size := sam.Size()
+	dfsOrder := sam.GetDfsOrder()
+	for i := size - 1; i > 0; i-- {
+		cur := dfsOrder[i]
+		link := sam.Nodes[cur].Link
+		subTreeValueSum[link] += subTreeValueSum[cur]
+	}
+
+	res := 0
+	for i := int32(1); i < size; i++ {
+		res = max(res, subTreeValueSum[i]*int(sam.Nodes[i].MaxLen))
+	}
+	fmt.Fprintln(out, res)
+}
 
 // Forensic Examination [CF666E] (线段树合并维护 endPosSize)
 // https://www.luogu.com.cn/problem/CF666E

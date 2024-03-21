@@ -7,8 +7,7 @@ import (
 )
 
 func main() {
-	// CF1326D2()
-	// yosupo()
+	P3501()
 }
 
 // P3501 [POI2010] ANT-Antisymmetry (!对于一个0/1序列，求出其中异或意义下回文的子串数量。)
@@ -16,6 +15,9 @@ func main() {
 // 对于一个01字符串，如果将这个字符串0和1取反后，再将整个串反过来和原串一样，就称作“反对称”字符串。
 // 比如00001111和010101就是反对称的，1001就不是。
 // 现在给出一个长度为N的01字符串，求它有多少个子串是反对称的。
+// eg:
+// 11001011
+// 7个反对称子串分别是：01（出现两次），10（出现两次），0101，1100和001011
 //
 // 反对称一定是偶数长度的回文串.
 func P3501() {
@@ -28,16 +30,21 @@ func P3501() {
 	var s01 string
 	fmt.Fscan(in, &s01)
 
-	// 7个反对称子串分别是：01（出现两次），10（出现两次），0101，1100和001011
-	M := NewManacher(s01)
-	equal := func(i, j int32) bool { return s01[i] == s01[j] }
+	M := NewManacherWithEqual(s01)
+	equal := func(i, j int32) bool { return s01[i] != s01[j] } // 异或意义下的回文
 	M.SetEqual(equal)
-
+	evenRadius := M.GetEvenRadius()
+	res := 0
+	for _, v := range evenRadius {
+		res += int(v)
+	}
+	fmt.Fprintln(out, res)
 }
 
 type Sequence = string
 
-type Manacher struct {
+// 自定义回文串判定函数的马拉车算法.
+type ManacherWithEqual struct {
 	n          int32
 	seq        Sequence
 	oddRadius  []int32
@@ -49,9 +56,9 @@ type Manacher struct {
 	equal      func(i, j int32) bool
 }
 
-func NewManacher(seq Sequence) *Manacher {
+func NewManacherWithEqual(seq Sequence) *ManacherWithEqual {
 	defaultEqual := func(i, j int32) bool { return seq[i] == seq[j] }
-	m := &Manacher{
+	m := &ManacherWithEqual{
 		n:     int32(len(seq)),
 		seq:   seq,
 		equal: defaultEqual,
@@ -59,13 +66,13 @@ func NewManacher(seq Sequence) *Manacher {
 	return m
 }
 
-func (ma *Manacher) SetEqual(equal func(i, j int32) bool) {
+func (ma *ManacherWithEqual) SetEqual(equal func(i, j int32) bool) {
 	ma.equal = equal
 }
 
 // 查询切片s[start:end]是否为回文串.
 // 空串不为回文串.
-func (ma *Manacher) IsPalindrome(start, end int32) bool {
+func (ma *ManacherWithEqual) IsPalindrome(start, end int32) bool {
 	n := ma.n
 	if start < 0 {
 		start += n
@@ -94,7 +101,7 @@ func (ma *Manacher) IsPalindrome(start, end int32) bool {
 
 // 获取每个中心点的奇回文半径`radius`.
 // 回文为`[pos-radius+1:pos+radius]`.
-func (ma *Manacher) GetOddRadius() []int32 {
+func (ma *ManacherWithEqual) GetOddRadius() []int32 {
 	if ma.oddRadius != nil {
 		return ma.oddRadius
 	}
@@ -123,7 +130,7 @@ func (ma *Manacher) GetOddRadius() []int32 {
 
 // 获取每个中心点的偶回文半径`radius`.
 // 回文为`[pos-radius:pos+radius]`.
-func (ma *Manacher) GetEvenRadius() []int32 {
+func (ma *ManacherWithEqual) GetEvenRadius() []int32 {
 	if ma.evenRadius != nil {
 		return ma.evenRadius
 	}
@@ -151,34 +158,34 @@ func (ma *Manacher) GetEvenRadius() []int32 {
 }
 
 // 以s[index]开头的最长奇回文子串的长度.
-func (ma *Manacher) GetLongestOddStartsAt(index int32) int32 {
+func (ma *ManacherWithEqual) GetLongestOddStartsAt(index int32) int32 {
 	ma._initOdds()
 	return ma.maxOdd1[index]
 }
 
 // 以s[index]结尾的最长奇回文子串的长度.
-func (ma *Manacher) GetLongestOddEndsAt(index int32) int32 {
+func (ma *ManacherWithEqual) GetLongestOddEndsAt(index int32) int32 {
 	ma._initOdds()
 	return ma.maxOdd2[index]
 }
 
 // 以s[index]开头的最长偶回文子串的长度.
-func (ma *Manacher) GetLongestEvenStartsAt(index int32) int32 {
+func (ma *ManacherWithEqual) GetLongestEvenStartsAt(index int32) int32 {
 	ma._initEvens()
 	return ma.maxEven1[index]
 }
 
 // 以s[index]结尾的最长偶回文子串的长度.
-func (ma *Manacher) GetLongestEvenEndsAt(index int32) int32 {
+func (ma *ManacherWithEqual) GetLongestEvenEndsAt(index int32) int32 {
 	ma._initEvens()
 	return ma.maxEven2[index]
 }
 
-func (ma *Manacher) Len() int32 {
+func (ma *ManacherWithEqual) Len() int32 {
 	return ma.n
 }
 
-func (ma *Manacher) _initOdds() {
+func (ma *ManacherWithEqual) _initOdds() {
 	if ma.maxOdd1 != nil {
 		return
 	}
@@ -206,7 +213,7 @@ func (ma *Manacher) _initOdds() {
 	}
 }
 
-func (ma *Manacher) _initEvens() {
+func (ma *ManacherWithEqual) _initEvens() {
 	if ma.maxEven1 != nil {
 		return
 	}

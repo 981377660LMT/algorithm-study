@@ -44,6 +44,7 @@ func main() {
 	// CF19C()
 	// CF126()
 	// CF432D()
+	CF822E()
 
 	// abc213f()
 	// abc272f()
@@ -212,6 +213,55 @@ func CF432D() {
 	fmt.Fprintln(out, len(res))
 	for i := len(res) - 1; i >= 0; i-- {
 		fmt.Fprintln(out, res[i][0], res[i][1])
+	}
+}
+
+// CF822E Liar (拼接不相交子串的最少代价)
+// https://www.luogu.com.cn/problem/solution/CF822E
+// 给定两个字符串s，t，长度分别为n，m。
+// 你需要选择s的若干个两两不相交的子串，然后将它们按照原先在s中出现的顺序合并起来，希望得到t。
+// !拼接的子串个数能否不超过limit.
+//
+// n,m<=1e5,limit<=30.
+//
+// !dp[i][j] 表示 s 的前 i 个字符选出j个子串时，t 最多能匹配到的位置。
+// 每次匹配尽量匹配完，即两个字符串两个后缀的lcp长度最优.
+// dp[i][j] -> dp[i+1][j] 跳过匹配位置
+func CF822E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	var s, t string
+	var limit int
+	fmt.Fscan(in, &n)
+	fmt.Fscan(in, &s)
+	fmt.Fscan(in, &m)
+	fmt.Fscan(in, &t)
+	fmt.Fscan(in, &limit)
+
+	S := NewSuffixArray2FromString(s, t)
+	dp := make([][]int, n+1)
+	for i := range dp {
+		dp[i] = make([]int, limit+1)
+	}
+	for i := 0; i < n; i++ {
+		for k := 0; k < limit+1; k++ {
+			dp[i+1][k] = max(dp[i+1][k], dp[i][k]) // 不选s的这个后缀
+			if k == limit {
+				break
+			}
+			// 后缀s[i:]和后缀t[dp[i][k]:]的lcp
+			lcp := S.Lcp(i, n, dp[i][k], m)
+			dp[i+lcp][k+1] = max(dp[i+lcp][k+1], dp[i][k]+lcp)
+		}
+	}
+
+	if dp[n][limit] == m {
+		fmt.Println("YES")
+	} else {
+		fmt.Println("NO")
 	}
 }
 
@@ -781,6 +831,9 @@ func NewSuffixArrayFromString(s string) *SuffixArray {
 
 // 求任意两个子串s[a,b)和s[c,d)的最长公共前缀(lcp).
 func (suf *SuffixArray) Lcp(a, b int, c, d int) int {
+	if a >= b || c >= d {
+		return 0
+	}
 	cand := suf._lcp(a, c)
 	return min(cand, min(b-a, d-c))
 }

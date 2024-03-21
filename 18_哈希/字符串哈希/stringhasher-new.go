@@ -20,9 +20,81 @@ import (
 )
 
 func main() {
+	P3501()
 	// CF514C()
 	// CF1056E()
-	SP220()
+	// SP220()
+}
+
+// P3501 [POI2010] ANT-Antisymmetry (!对于一个0/1序列，求出其中异或意义下回文的子串数量。)
+// https://www.luogu.com.cn/problem/P3501
+// 对于一个01字符串，如果将这个字符串0和1取反后，再将整个串反过来和原串一样，就称作“反对称”字符串。
+// 比如00001111和010101就是反对称的，1001就不是。
+// 现在给出一个长度为N的01字符串，求它有多少个子串是反对称的。
+// eg:
+// 11001011
+// 7个反对称子串分别是：01（出现两次），10（出现两次），0101，1100和001011
+//
+// 反对称一定是偶数长度的回文串.
+// 对每个位置i，哈希+二分求出以i为中心的最长偶数长度回文串的长度，然后累加即可.
+func P3501() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	var s01 string
+	fmt.Fscan(in, &s01)
+
+	getRev := func(s string) string {
+		sb := []byte(s)
+		for i := 0; i < len(sb); i++ {
+			if sb[i] == '0' {
+				sb[i] = '1'
+			} else {
+				sb[i] = '0'
+			}
+		}
+		for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+			sb[i], sb[j] = sb[j], sb[i]
+		}
+		return string(sb)
+	}
+	revS01 := getRev(s01)
+
+	R := NewRollingHash(131, 999999751)
+	table := R.Build(s01)
+	revTable := R.Build(revS01)
+
+	// [start,end)是否为反对称回文串.
+	check := func(start, end int32) bool {
+		if start < 0 || end > n {
+			return false
+		}
+		return R.Query(table, int(start), int(end)) == R.Query(revTable, int(n-end), int(n-start))
+	}
+
+	//以center为中心的最长偶数长度回文串的长度.
+	getMaxEvenRadius := func(center int32) int32 {
+		left, right := int32(1), n
+		for left <= right {
+			mid := (left + right) / 2
+			if check(center-mid+1, center+mid+1) {
+				left = mid + 1
+			} else {
+				right = mid - 1
+			}
+		}
+
+		return right
+	}
+
+	res := 0
+	for i := int32(0); i < n; i++ {
+		res += int(getMaxEvenRadius(int32(i)))
+	}
+	fmt.Fprintln(out, res)
 }
 
 // Watto and Mechanism
