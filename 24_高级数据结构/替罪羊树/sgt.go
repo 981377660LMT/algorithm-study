@@ -36,17 +36,69 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"runtime/debug"
+	"sort"
 	"strings"
 )
 
-// func init() {
-// 	debug.SetGCPercent(-1)
-// }
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 func main() {
-	// https://www.luogu.com.cn/problem/P3369
-	// https://www.luogu.com.cn/problem/P6136
+	P6136()
+}
+
+// P6136 【模板】普通平衡树（数据加强版）
+// https://www.luogu.com.cn/problem/P6136
+func P6136() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	sgt := NewScapegoatTree(func(key1, key2 SgtKey) bool { return key1 < key2 }, nums...)
+
+	lastRes := int32(0)
+	preRes := int32(0)
+	for i := int32(0); i < q; i++ {
+		var kind, x int32
+		fmt.Fscan(in, &kind, &x)
+		x ^= preRes
+		switch kind {
+		case 1:
+			sgt.Add(x)
+		case 2:
+			sgt.Discard(x)
+		case 3:
+			preRes = sgt.BisectLeft(x) + 1
+			lastRes ^= preRes
+		case 4:
+			preRes = sgt.At(x - 1)
+			lastRes ^= preRes
+		case 5:
+			preRes, _ = sgt.Prev(x)
+			lastRes ^= preRes
+		case 6:
+			preRes, _ = sgt.Next(x)
+			lastRes ^= preRes
+		default:
+			panic("invalid kind")
+		}
+	}
+
+	fmt.Fprintln(out, lastRes)
+}
+
+func demo() {
 	sgt := NewScapegoatTree(func(key1, key2 SgtKey) bool { return key1 < key2 })
 
 	sgt.Add(1)
@@ -94,15 +146,17 @@ type SgtNode struct {
 var EMPTY_NODE = &SgtNode{} // 空结点不使用nil，避免特判
 
 type ScapegoatTree struct {
-	less      func(key1, key2 SgtKey) bool
-	root      *SgtNode
-	recycles  []*SgtNode // 用于回收被删除的结点(注意: rebuild时才进入回收栈)
+	less func(key1, key2 SgtKey) bool
+	root *SgtNode
+	// recycles  []*SgtNode // 用于回收被删除的结点(注意: rebuild时才进入回收栈)
 	collector []*SgtNode // 用于dfs收集结点
 }
 
 func NewScapegoatTree(less func(key1, key2 SgtKey) bool, elements ...SgtKey) *ScapegoatTree {
 	res := &ScapegoatTree{less: less, root: EMPTY_NODE}
 	if len(elements) > 0 {
+		elements = append(elements[:0:0], elements...)
+		sort.Slice(elements, func(i, j int) bool { return less(elements[i], elements[j]) })
 		nodes := make([]*SgtNode, len(elements))
 		for i, key := range elements {
 			nodes[i] = res.Alloc(key)
@@ -113,17 +167,18 @@ func NewScapegoatTree(less func(key1, key2 SgtKey) bool, elements ...SgtKey) *Sc
 }
 
 func (t *ScapegoatTree) Alloc(key SgtKey) *SgtNode {
-	if len(t.recycles) > 0 {
-		res := t.recycles[len(t.recycles)-1]
-		t.recycles = t.recycles[:len(t.recycles)-1]
-		res.Key = key
-		res.left, res.right = EMPTY_NODE, EMPTY_NODE
-		res.existCount, res.allCount = 1, 1
-		res.exist = true
-		return res
-	} else {
-		return &SgtNode{Key: key, left: EMPTY_NODE, right: EMPTY_NODE, existCount: 1, allCount: 1, exist: true}
-	}
+	return &SgtNode{Key: key, left: EMPTY_NODE, right: EMPTY_NODE, existCount: 1, allCount: 1, exist: true}
+	// if len(t.recycles) > 0 {
+	// 	res := t.recycles[len(t.recycles)-1]
+	// 	t.recycles = t.recycles[:len(t.recycles)-1]
+	// 	res.Key = key
+	// 	res.left, res.right = EMPTY_NODE, EMPTY_NODE
+	// 	res.existCount, res.allCount = 1, 1
+	// 	res.exist = true
+	// 	return res
+	// } else {
+	// 	return &SgtNode{Key: key, left: EMPTY_NODE, right: EMPTY_NODE, existCount: 1, allCount: 1, exist: true}
+	// }
 }
 
 func (t *ScapegoatTree) Add(key SgtKey) {
@@ -135,14 +190,14 @@ func (t *ScapegoatTree) Add(key SgtKey) {
 
 // 删除前需要保证 key 存在.
 func (t *ScapegoatTree) Remove(key SgtKey) {
-	t._remove(t.root, key)
+	t._remove(t.root, t.BisectLeft(key)+1)
 	if t.root.existCount*2 < t.root.allCount {
 		t._rebuild(&t.root)
 	}
 }
 
 func (t *ScapegoatTree) Discard(key SgtKey) bool {
-	ok := t._discard(t.root, key)
+	ok := t._discard(t.root, t.BisectLeft(key)+1)
 	if !ok {
 		return false
 	}
@@ -275,9 +330,12 @@ func (t *ScapegoatTree) _collect(cur *SgtNode, nodes *[]*SgtNode) {
 	t._collect(cur.left, nodes)
 	if cur.exist {
 		*nodes = append(*nodes, cur)
-	} else {
-		t.recycles = append(t.recycles, cur)
 	}
+	// if cur.exist {
+	// 	*nodes = append(*nodes, cur)
+	// } else {
+	// 	t.recycles = append(t.recycles, cur)
+	// }
 	t._collect(cur.right, nodes)
 }
 
