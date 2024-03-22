@@ -19,15 +19,6 @@ import (
 	"os"
 )
 
-// P5353 树上后缀排序
-// https://www.luogu.com.cn/problem/P5353
-func main() {
-
-}
-
-// P6164 【模板】后缀平衡树
-// https://www.luogu.com.cn/problem/P6164
-
 // P5346 【XR-1】柯南家族
 // https://www.luogu.com.cn/problem/P5346
 func P5346() {
@@ -36,3 +27,12 @@ func P5346() {
 	defer out.Flush()
 
 }
+
+// P5353 树上后缀排序
+// https://www.luogu.com.cn/problem/P5353
+func main() {
+
+}
+
+// P6164 【模板】后缀平衡树
+// https://www.luogu.com.cn/problem/P6164

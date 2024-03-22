@@ -83,6 +83,7 @@
    - [PointAddRectangleSum](6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/PointAddRectangleSum-fast.go)
    - [RectangleSum](6_tree/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/%E7%BB%8F%E5%85%B8%E9%A2%98/RectangleSum-fast.go)
    - [Treap](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/js/Treap.ts)
+   - [替罪羊树](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%9B%BF%E7%BD%AA%E7%BE%8A%E6%A0%91/sgt.go)
    - [Rope](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%99%A8/rope.ts)
    - [SortedList](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/ATC-SortedList.py)
      [SortedList](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SortedList/SortedListFast.ts)

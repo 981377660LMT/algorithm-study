@@ -9,24 +9,69 @@
 // 然后，再用这些数据重新建一个平衡的二叉树，放回原位置。
 // 一个节点导致树的不平衡，就要导致整棵子树被拍扁，估计这也是“替罪羊”这个名字的由来吧
 //
-// !优点：可以维护子树内信息(其他平衡树做不到).
+// https://people.ksp.sk/~kuko/gnarley-trees/Scapegoat.html
+// lazy insert: let the tree grow and from time to time, when a subtree gets too imbalanced,
+//              rebuild the whole subtree from scratch into a perfectly balanced tree
+// lazy delete: just mark the node for deletion; when n/2 nodes are marked,
+//              rebuild the whole tree and throw away all deleted nodes
+//
+// !优点：不受到旋转机制弊端的影响.
 // 缺点：无法持久化、无法维护区间信息.
 //
+// 可以优化的地方：
+//  1.使用空节点代替nil，避免特判(优化分支).
+//  2.使用内存池，直接分配好内存，避免动态分配内存占用时间.
+//  3.使用回收栈，复用结点，避免频繁分配内存.
+//  4.使用非递归的方式求排名和第K大.
+//  5.使用int32代替结点指针，减少内存占用.
+//  6.Init、Clear 生命周期.
+//
+// https://zhuanlan.zhihu.com/p/21263304
+// https://taodaling.github.io/blog/2019/04/19/%E6%9B%BF%E7%BD%AA%E7%BE%8A%E6%A0%91/
 // https://riteme.site/blog/2016-4-6/scapegoat.html
-// https://www.nowcoder.com/discuss/353148839920082944
+// https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/scapegoat_tree.go
+// https://www.bilibili.com/video/BV1sP4y1i7WB/
 // https://juejin.cn/post/6844904128150241294 使用替罪羊树实现KD-Tree的增删改查
-//
-// TODO: 采用nodes数组维护*Node，int32维护节点编号.
-// TODO: stack 维护一个内存池(重构操作会频繁的收回一个节点编号，并且再分配节点编号).
-//
-//	封装到alloc(props):number和free(nodeId:number)方法中.
-//
-// IsUnbalanced() bool
+
 package main
 
-// https://github.com/EndlessCheng/codeforces-go/blob/49f6570d86c17f5064a5b079360f4128acc520c4/copypasta/scapegoat_tree.go#L24
-func main() {
+import (
+	"fmt"
+	"strings"
+)
 
+// func init() {
+// 	debug.SetGCPercent(-1)
+// }
+
+func main() {
+	// https://www.luogu.com.cn/problem/P3369
+	// https://www.luogu.com.cn/problem/P6136
+	sgt := NewScapegoatTree(func(key1, key2 SgtKey) bool { return key1 < key2 })
+
+	sgt.Add(1)
+	sgt.Add(1)
+	sgt.Add(2)
+	sgt.Add(2)
+	sgt.Add(2)
+	sgt.Add(3)
+	sgt.Add(-3)
+	sgt.Add(-3)
+
+	fmt.Println("---")
+	fmt.Println(sgt.BisectLeft(1))  // 5
+	fmt.Println(sgt.BisectRight(1)) // 5
+	fmt.Println(sgt.At(-1))         // 5
+	fmt.Println(sgt.At(3))          // 5
+	fmt.Println(sgt.At(4))          // 5
+	fmt.Println(sgt.Size(), 99)
+	fmt.Println(sgt.Pop(0))  // -3
+	fmt.Println(sgt.Next(2)) // -3
+
+	fmt.Println()
+	sgt.Enumerate(func(key SgtKey) { fmt.Print(key, " ") })
+	fmt.Println()
+	fmt.Println(sgt)
 }
 
 // alpha 的值越小，那么替罪羊树就越容易重构，那么树也就越平衡，查询的效率也就越高，自然修改（加点和删点）的效率也就低了；
@@ -36,48 +81,377 @@ func main() {
 const ALPHA_NUM int32 = 4
 const ALPHA_DENO int32 = 5
 
-// https://www.luogu.com.cn/problem/P3369
-// https://www.luogu.com.cn/problem/P6136
-
-// 重构时直接复用节点
 type SgtKey = int32
 
 type SgtNode struct {
 	Key         SgtKey
-	left, right int32
-	count       int32 // 次数
-	subCount    int32 // 子树次数之和
+	left, right *SgtNode
+	existCount  int32 // 子树有效结点的数量
+	allCount    int32 // 子树所有结点的数量
+	exist       bool
 }
+
+var EMPTY_NODE = &SgtNode{} // 空结点不使用nil，避免特判
 
 type ScapegoatTree struct {
-	nodes        []*SgtNode
-	recycles     []int32
-	deletedCount int32
+	less      func(key1, key2 SgtKey) bool
+	root      *SgtNode
+	recycles  []*SgtNode // 用于回收被删除的结点(注意: rebuild时才进入回收栈)
+	collector []*SgtNode // 用于dfs收集结点
 }
 
-func NewScapegoatTree() *ScapegoatTree {
-	return &ScapegoatTree{}
+func NewScapegoatTree(less func(key1, key2 SgtKey) bool) *ScapegoatTree {
+	return &ScapegoatTree{less: less, root: EMPTY_NODE}
 }
 
-func (t *ScapegoatTree) Alloc(key SgtKey) int32 {}
-
-func (t *ScapegoatTree) Free(nodeId int32) {}
-
-func (t *ScapegoatTree) IsUnbalanced(node *SgtNode) bool {}
-
-func (t *ScapegoatTree) Size(nodeId int32) int32 {
-	node := t.nodes[nodeId]
-	if node != nil {
-		return node.subCount
+func (t *ScapegoatTree) Alloc(key SgtKey) *SgtNode {
+	if len(t.recycles) > 0 {
+		res := t.recycles[len(t.recycles)-1]
+		t.recycles = t.recycles[:len(t.recycles)-1]
+		res.Key = key
+		res.left, res.right = EMPTY_NODE, EMPTY_NODE
+		res.existCount, res.allCount = 1, 1
+		res.exist = true
+		return res
+	} else {
+		return &SgtNode{Key: key, left: EMPTY_NODE, right: EMPTY_NODE, existCount: 1, allCount: 1, exist: true}
 	}
-	return 0
 }
 
-func (t *ScapegoatTree) PushUp(nodeId int32) {
-	node := t.nodes[nodeId]
-	node.subCount = node.count + t.Size(node.left) + t.Size(node.right)
+func (t *ScapegoatTree) Add(key SgtKey) {
+	scapegoat := t._insert(&t.root, key)
+	if *scapegoat != EMPTY_NODE {
+		t._rebuild(scapegoat)
+	}
 }
 
-func (t *ScapegoatTree) Insert(key SgtKey) int32 {}
-func (t *ScapegoatTree) Delete(key SgtKey)       {}
-func (t *ScapegoatTree) Prev(key SgtKey) int32   {}
+// 删除前需要保证 key 存在.
+func (t *ScapegoatTree) Remove(key SgtKey) {
+	t._remove(t.root, key)
+	if t.root.existCount*2 < t.root.allCount {
+		t._rebuild(&t.root)
+	}
+}
+
+func (t *ScapegoatTree) Discard(key SgtKey) bool {
+	ok := t._discard(t.root, key)
+	if !ok {
+		return false
+	}
+	if t.root.existCount*2 < t.root.allCount {
+		t._rebuild(&t.root)
+	}
+	return true
+}
+
+func (t *ScapegoatTree) Pop(index int32) SgtKey {
+	size := t.root.existCount
+	if index < 0 {
+		index += size
+	}
+	if index < 0 || index >= size {
+		panic(fmt.Sprintf("Pop(%d) not found", index))
+	}
+	index++
+	res := t._remove(t.root, index)
+	if t.root.existCount*2 < t.root.allCount {
+		t._rebuild(&t.root)
+	}
+	return res
+}
+
+func (t *ScapegoatTree) At(index int32) SgtKey {
+	size := t.root.existCount
+	if index < 0 {
+		index += size
+	}
+	if index < 0 || index >= size {
+		panic(fmt.Sprintf("at(%d) not found", index))
+	}
+	index++
+	cur := t.root
+	for cur != EMPTY_NODE {
+		if cur.left.existCount+1 == index && cur.exist {
+			return cur.Key
+		}
+		if cur.left.existCount >= index {
+			cur = cur.left
+		} else {
+			index -= cur.left.existCount
+			if cur.exist {
+				index--
+			}
+			cur = cur.right
+		}
+	}
+	panic(fmt.Sprintf("at(%d) not found", index))
+}
+
+// 严格小于key的数的个数.
+func (t *ScapegoatTree) BisectLeft(key SgtKey) int32 {
+	cur := t.root
+	res := int32(0)
+	for cur != EMPTY_NODE {
+		if !t.less(cur.Key, key) {
+			cur = cur.left
+		} else {
+			res += cur.left.existCount
+			if cur.exist {
+				res++
+			}
+			cur = cur.right
+		}
+	}
+	return res
+}
+
+// 小于等于key的数的个数.
+func (t *ScapegoatTree) BisectRight(key SgtKey) int32 {
+	cur := t.root
+	res := int32(0)
+	for cur != EMPTY_NODE {
+		if t.less(key, cur.Key) {
+			cur = cur.left
+		} else {
+			res += cur.left.existCount
+			if cur.exist {
+				res++
+			}
+			cur = cur.right
+		}
+	}
+	return res
+}
+
+func (t *ScapegoatTree) Prev(key SgtKey) (res SgtKey, ok bool) {
+	less := t.BisectLeft(key)
+	if less == 0 {
+		return
+	}
+	return t.At(less - 1), true
+}
+
+func (t *ScapegoatTree) Next(key SgtKey) (res SgtKey, ok bool) {
+	ngt := t.BisectRight(key)
+	if ngt == t.root.existCount {
+		return
+	}
+	return t.At(ngt), true
+}
+
+func (t *ScapegoatTree) Size() int32 {
+	return t.root.existCount
+}
+
+func (t *ScapegoatTree) Enumerate(f func(key SgtKey)) {
+	var dfs func(*SgtNode)
+	dfs = func(node *SgtNode) {
+		if node == EMPTY_NODE {
+			return
+		}
+		dfs(node.left)
+		if node.exist {
+			f(node.Key)
+		}
+		dfs(node.right)
+	}
+	dfs(t.root)
+}
+
+func (t *ScapegoatTree) _collect(cur *SgtNode, nodes *[]*SgtNode) {
+	if cur == EMPTY_NODE {
+		return
+	}
+	t._collect(cur.left, nodes)
+	if cur.exist {
+		*nodes = append(*nodes, cur)
+	} else {
+		t.recycles = append(t.recycles, cur)
+	}
+	t._collect(cur.right, nodes)
+}
+
+func (t *ScapegoatTree) _build(nodes []*SgtNode, left, right int32) *SgtNode {
+	if left >= right {
+		return EMPTY_NODE
+	}
+	mid := (left + right) >> 1
+	res := nodes[mid]
+	res.left = t._build(nodes, left, mid)
+	res.right = t._build(nodes, mid+1, right)
+	t._pushUp(res)
+	return res
+}
+
+func (t *ScapegoatTree) _rebuild(nodePtr **SgtNode) {
+	t.collector = t.collector[:0]
+	t._collect(*nodePtr, &t.collector)
+	*nodePtr = t._build(t.collector, 0, int32(len(t.collector)))
+}
+
+func (t *ScapegoatTree) _pushUp(node *SgtNode) {
+	node.existCount = node.left.existCount + node.right.existCount
+	if node.exist {
+		node.existCount++
+	}
+	node.allCount = node.left.allCount + node.right.allCount + 1
+}
+
+// 判断是否需要重构.
+func (t *ScapegoatTree) _isUnbalanced(node *SgtNode) bool {
+	// +5，避免不必要的重构
+	threshold := node.allCount*ALPHA_NUM + 5*ALPHA_DENO
+	return (node.left.allCount*ALPHA_DENO > threshold) || (node.right.allCount*ALPHA_DENO > threshold)
+}
+
+// 返回需要重构的结点.
+// 一次修改可能会变更整个搜索路径上的所有子树大小，如果多个子树需要重构，选择最大的那颗。
+func (t *ScapegoatTree) _insert(nodePtr **SgtNode, key SgtKey) **SgtNode {
+	if *nodePtr == EMPTY_NODE {
+		*nodePtr = t.Alloc(key)
+		return &EMPTY_NODE
+	} else {
+		node := *nodePtr
+		node.existCount++
+		node.allCount++
+		if t.less(key, node.Key) {
+			res := t._insert(&node.left, key)
+			if t._isUnbalanced(node.left) {
+				return nodePtr
+			} else {
+				return res
+			}
+		} else {
+			res := t._insert(&node.right, key)
+			if t._isUnbalanced(node.right) {
+				return nodePtr
+			} else {
+				return res
+			}
+		}
+	}
+}
+
+func (t *ScapegoatTree) _remove(node *SgtNode, k int32) SgtKey {
+	node.existCount--
+	offset := node.left.existCount
+	if node.exist {
+		offset++
+	}
+	if node.exist && k == offset {
+		node.exist = false
+		return node.Key
+	} else {
+		if k <= offset {
+			return t._remove(node.left, k)
+		} else {
+			return t._remove(node.right, k-offset)
+		}
+	}
+}
+
+func (t *ScapegoatTree) _discard(node *SgtNode, k int32) bool {
+	if node == EMPTY_NODE {
+		return false
+	}
+	node.existCount--
+	offset := node.left.existCount
+	if node.exist {
+		offset++
+	}
+	if node.exist && k == offset {
+		node.exist = false
+		return true
+	} else {
+		if k <= offset {
+			return t._discard(node.left, k)
+		} else {
+			return t._discard(node.right, k-offset)
+		}
+	}
+}
+
+func (o *SgtNode) String() string {
+	return fmt.Sprintf("%v", o.Key)
+}
+
+/*
+	逆时针旋转 90° 打印这棵树：根节点在最左侧，右子树在上侧，左子树在下侧
+
+效果如下（只打印 key）
+
+Root
+│           ┌── 95
+│       ┌── 94
+│   ┌── 90
+│   │   │           ┌── 89
+│   │   │       ┌── 88
+│   │   │       │   └── 87
+│   │   │       │       └── 81
+│   │   │   ┌── 74
+│   │   └── 66
+└── 62
+
+	│           ┌── 59
+	│       ┌── 58
+	│       │   └── 56
+	│       │       └── 47
+	│   ┌── 45
+	└── 40
+	    │       ┌── 37
+	    │   ┌── 28
+	    └── 25
+	        │           ┌── 18
+	        │       ┌── 15
+	        │   ┌── 11
+	        └── 6
+	            └── 0
+*/
+func (o *SgtNode) draw(treeSB, prefixSB *strings.Builder, isTail bool) {
+	prefix := prefixSB.String()
+
+	if o.right != EMPTY_NODE {
+		newPrefixSB := &strings.Builder{}
+		newPrefixSB.WriteString(prefix)
+		if isTail {
+			newPrefixSB.WriteString("│   ")
+		} else {
+			newPrefixSB.WriteString("    ")
+		}
+		o.right.draw(treeSB, newPrefixSB, false)
+	}
+
+	treeSB.WriteString(prefix)
+	if isTail {
+		treeSB.WriteString("└── ")
+	} else {
+		treeSB.WriteString("┌── ")
+	}
+	if o.exist {
+		treeSB.WriteString(o.String())
+	} else {
+		treeSB.WriteString("x")
+	}
+	treeSB.WriteByte('\n')
+
+	if o.left != EMPTY_NODE {
+		newPrefixSB := &strings.Builder{}
+		newPrefixSB.WriteString(prefix)
+		if isTail {
+			newPrefixSB.WriteString("    ")
+		} else {
+			newPrefixSB.WriteString("│   ")
+		}
+		o.left.draw(treeSB, newPrefixSB, true)
+	}
+}
+
+func (t *ScapegoatTree) String() string {
+	if t.root == EMPTY_NODE {
+		return "Empty\n"
+	}
+	treeSB := &strings.Builder{}
+	treeSB.WriteString("Root\n")
+	t.root.draw(treeSB, &strings.Builder{}, true)
+	return treeSB.String()
+}
