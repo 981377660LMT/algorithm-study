@@ -100,8 +100,16 @@ type ScapegoatTree struct {
 	collector []*SgtNode // 用于dfs收集结点
 }
 
-func NewScapegoatTree(less func(key1, key2 SgtKey) bool) *ScapegoatTree {
-	return &ScapegoatTree{less: less, root: EMPTY_NODE}
+func NewScapegoatTree(less func(key1, key2 SgtKey) bool, elements ...SgtKey) *ScapegoatTree {
+	res := &ScapegoatTree{less: less, root: EMPTY_NODE}
+	if len(elements) > 0 {
+		nodes := make([]*SgtNode, len(elements))
+		for i, key := range elements {
+			nodes[i] = res.Alloc(key)
+		}
+		res.root = res._build(nodes, 0, int32(len(nodes)))
+	}
+	return res
 }
 
 func (t *ScapegoatTree) Alloc(key SgtKey) *SgtNode {
