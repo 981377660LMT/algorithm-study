@@ -3,11 +3,11 @@
 // 为了防止二叉搜索树左右不平衡，我们引入平衡树，而其中思路最简单的是替罪羊树（Scapegoat tree）。
 // 替罪羊树 是一种依靠重构操作维持平衡的重量平衡树。
 // 替罪羊树会在插入、删除操作时，检测途经的节点，若发现失衡，则将以该节点为根的子树重构。
-// 当发现某个子树很不平衡时，暴力重构该子树使之平衡。
-// 若左子树或右子树占当前树的比例大于alpha(一般是0.7-0.8) ，则进行重构(很多教程还会判断已删除节点的个数占总大小的比例来决定重不重构)
+// 当发现某个子树很不平衡时，暴力重构该子树使之平衡(实现时，只重构子树最大的那一个结点(scapegoat))。
+// 若左子树或右子树占当前树的比例大于alpha(一般是0.7-0.8) ，则进行重构(很多教程还会判断已删除节点的个数占总大小的比例(0.5)来决定重不重构)
 // 重构分为两步操作：先进行一遍中序遍历，把该子树“拉平”，把其中所有数存入一个数组里（BST的性质决定这个数组一定是有序的）；
 // 然后，再用这些数据重新建一个平衡的二叉树，放回原位置。
-// 一个节点导致树的不平衡，就要导致整棵子树被拍扁，估计这也是“替罪羊”这个名字的由来吧
+// 一个节点导致树的不平衡，就要导致整棵子树被拍扁，估计这也是“替罪羊”这个名字的由来吧.
 //
 // https://people.ksp.sk/~kuko/gnarley-trees/Scapegoat.html
 // lazy insert: let the tree grow and from time to time, when a subtree gets too imbalanced,
@@ -228,7 +228,8 @@ func (t *ScapegoatTree) Prev(key SgtKey) (res SgtKey, ok bool) {
 	if less == 0 {
 		return
 	}
-	return t.At(less - 1), true
+	res, ok = t.At(less-1), true
+	return
 }
 
 func (t *ScapegoatTree) Next(key SgtKey) (res SgtKey, ok bool) {
@@ -236,7 +237,8 @@ func (t *ScapegoatTree) Next(key SgtKey) (res SgtKey, ok bool) {
 	if ngt == t.root.existCount {
 		return
 	}
-	return t.At(ngt), true
+	res, ok = t.At(ngt), true
+	return
 }
 
 func (t *ScapegoatTree) Size() int32 {
