@@ -38,3 +38,46 @@ const ALPHA_DENO int32 = 5
 
 // https://www.luogu.com.cn/problem/P3369
 // https://www.luogu.com.cn/problem/P6136
+
+// 重构时直接复用节点
+type SgtKey = int32
+
+type SgtNode struct {
+	Key         SgtKey
+	left, right int32
+	count       int32 // 次数
+	subCount    int32 // 子树次数之和
+}
+
+type ScapegoatTree struct {
+	nodes        []*SgtNode
+	recycles     []int32
+	deletedCount int32
+}
+
+func NewScapegoatTree() *ScapegoatTree {
+	return &ScapegoatTree{}
+}
+
+func (t *ScapegoatTree) Alloc(key SgtKey) int32 {}
+
+func (t *ScapegoatTree) Free(nodeId int32) {}
+
+func (t *ScapegoatTree) IsUnbalanced(node *SgtNode) bool {}
+
+func (t *ScapegoatTree) Size(nodeId int32) int32 {
+	node := t.nodes[nodeId]
+	if node != nil {
+		return node.subCount
+	}
+	return 0
+}
+
+func (t *ScapegoatTree) PushUp(nodeId int32) {
+	node := t.nodes[nodeId]
+	node.subCount = node.count + t.Size(node.left) + t.Size(node.right)
+}
+
+func (t *ScapegoatTree) Insert(key SgtKey) int32 {}
+func (t *ScapegoatTree) Delete(key SgtKey)       {}
+func (t *ScapegoatTree) Prev(key SgtKey) int32   {}
