@@ -13,417 +13,319 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"sort"
-	"strings"
+	"os"
+	"runtime/debug"
 )
+
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 // alpha 的值越小，那么替罪羊树就越容易重构，那么树也就越平衡，查询的效率也就越高，自然修改（加点和删点）的效率也就低了；
 // 反之，alpha 的值越大，那么替罪羊树就越不容易重构，那么树也就越不平衡，查询的效率也就越低，自然修改（加点和删点）的效率也就高了。
 // 所以，查询多，alpha 就应该小一些；修改多，alpha 就应该大一些。
-// alpha = 4/5
-const ALPHA_NUM int32 = 4
-const ALPHA_DENO int32 = 5
+// alpha = 3/4
+const ALPHA_NUM int32 = 3
+const ALPHA_DENO int32 = 4
 
-type SgtKey = int32
+var EMPTY_NODE = &Node{}
 
-type SgtNode struct {
-	Key         SgtKey
-	left, right *SgtNode
-	existCount  int32 // 子树有效结点的数量
-	allCount    int32 // 子树所有结点的数量
-	exist       bool
+type Char = int32
+
+type Node struct {
+	Weight      float64
+	left, right int32
+	size        int32 // 子树所有结点的数量
 }
 
-var EMPTY_NODE = &SgtNode{} // 空结点不使用nil，避免特判
-
-type ScapegoatTree struct {
-	less func(key1, key2 SgtKey) bool
-	root *SgtNode
-	// recycles  []*SgtNode // 用于回收被删除的结点(注意: rebuild时才进入回收栈)
-	collector []*SgtNode // 用于dfs收集结点
+type SuffixBalancedTree struct {
+	data         []Char
+	lower, upper float64
+	nodes        []*Node
+	root         int32
+	scapegoat    *int32  // 用于标记需要重构的结点
+	collector    []int32 // 用于dfs收集结点
 }
 
-func NewScapegoatTree(less func(key1, key2 SgtKey) bool, elements ...SgtKey) *ScapegoatTree {
-	res := &ScapegoatTree{less: less, root: EMPTY_NODE}
-	if len(elements) > 0 {
-		elements = append(elements[:0:0], elements...)
-		sort.Slice(elements, func(i, j int) bool { return less(elements[i], elements[j]) })
-		nodes := make([]*SgtNode, len(elements))
-		for i, key := range elements {
-			nodes[i] = res.Alloc(key)
-		}
-		res.root = res._build(nodes, 0, int32(len(nodes)))
+func NewSuffixBalancedTree(cap int32) *SuffixBalancedTree {
+	data := make([]Char, 0, max32(cap+1, 16))
+	nodes := make([]*Node, 0, max32(cap+1, 16))
+	data = append(data, 0)
+	nodes = append(nodes, EMPTY_NODE)
+	return &SuffixBalancedTree{data: data, nodes: nodes}
+}
+
+func (t *SuffixBalancedTree) AppendLeft(c Char) {
+	t.data = append(t.data, c)
+	if len(t.nodes) < len(t.data) {
+		t._alloc()
 	}
-	return res
-}
-
-func (t *ScapegoatTree) Alloc(key SgtKey) *SgtNode {
-	return &SgtNode{Key: key, left: EMPTY_NODE, right: EMPTY_NODE, existCount: 1, allCount: 1, exist: true}
-	// if len(t.recycles) > 0 {
-	// 	res := t.recycles[len(t.recycles)-1]
-	// 	t.recycles = t.recycles[:len(t.recycles)-1]
-	// 	res.Key = key
-	// 	res.left, res.right = EMPTY_NODE, EMPTY_NODE
-	// 	res.existCount, res.allCount = 1, 1
-	// 	res.exist = true
-	// 	return res
-	// } else {
-	// 	return &SgtNode{Key: key, left: EMPTY_NODE, right: EMPTY_NODE, existCount: 1, allCount: 1, exist: true}
-	// }
-}
-
-func (t *ScapegoatTree) Add(key SgtKey) {
-	scapegoat := t._insert(&t.root, key)
-	if *scapegoat != EMPTY_NODE {
-		t._rebuild(scapegoat)
+	t.scapegoat = nil
+	t._insert(&t.root, 0, 1)
+	if t.scapegoat != nil {
+		t._rebuild()
 	}
 }
 
-// 删除前需要保证 key 存在.
-func (t *ScapegoatTree) Remove(key SgtKey) {
-	t._remove(t.root, t.BisectLeft(key)+1)
-	if t.root.existCount*2 < t.root.allCount {
-		t._rebuild(&t.root)
-	}
+func (t *SuffixBalancedTree) PopLeft() {
+	t._delete(&t.root)
+	t.data = t.data[:len(t.data)-1]
 }
 
-func (t *ScapegoatTree) Discard(key SgtKey) bool {
-	ok := t._discard(t.root, t.BisectLeft(key)+1)
-	if !ok {
-		return false
-	}
-	if t.root.existCount*2 < t.root.allCount {
-		t._rebuild(&t.root)
-	}
-	return true
-}
-
-func (t *ScapegoatTree) Pop(index int32) SgtKey {
-	size := t.root.existCount
-	if index < 0 {
-		index += size
-	}
-	if index < 0 || index >= size {
-		panic(fmt.Sprintf("Pop(%d) not found", index))
-	}
+// 返回下标index的权值，权值越小，字典序越小.
+func (t *SuffixBalancedTree) Weight(index int32) float64 {
 	index++
-	res := t._remove(t.root, index)
-	if t.root.existCount*2 < t.root.allCount {
-		t._rebuild(&t.root)
-	}
-	return res
+	return t.nodes[int32(len(t.data))-index].Weight
 }
 
-func (t *ScapegoatTree) At(index int32) SgtKey {
-	size := t.root.existCount
-	if index < 0 {
-		index += size
-	}
-	if index < 0 || index >= size {
-		panic(fmt.Sprintf("at(%d) not found", index))
-	}
-	index++
-	cur := t.root
+// 返回下标index的排名(0-based).
+func (t *SuffixBalancedTree) Rank(index int32) int32 {
+	key := t.Weight(index)
+	res, cur := int32(0), t.nodes[t.root]
 	for cur != EMPTY_NODE {
-		if cur.left.existCount+1 == index && cur.exist {
-			return cur.Key
-		}
-		if cur.left.existCount >= index {
-			cur = cur.left
+		if key < cur.Weight {
+			cur = t.nodes[cur.left]
 		} else {
-			index -= cur.left.existCount
-			if cur.exist {
-				index--
-			}
-			cur = cur.right
+			res += t.nodes[cur.left].size + 1
+			cur = t.nodes[cur.right]
 		}
 	}
-	panic(fmt.Sprintf("at(%d) not found", index))
+	return res - 1
 }
 
-// 严格小于key的数的个数.
-func (t *ScapegoatTree) BisectLeft(key SgtKey) int32 {
-	cur := t.root
-	res := int32(0)
-	for cur != EMPTY_NODE {
-		if !t.less(cur.Key, key) {
-			cur = cur.left
-		} else {
-			res += cur.left.existCount
-			if cur.exist {
-				res++
+// 返回字典序小于s的后缀的个数.
+func (t *SuffixBalancedTree) RankStr(n int32, f func(i int32) Char) int32 {
+	res, cur := int32(0), t.root
+	for cur != 0 {
+		min_ := min32(cur, n) + 1
+		flag := int32(0)
+		for i := int32(0); i < min_; i++ {
+			v := f(i)
+			if v != t.data[cur-i] {
+				flag = v - t.data[cur-i]
+				break
 			}
-			cur = cur.right
+		}
+		if flag <= 0 {
+			cur = t.nodes[cur].left
+		} else {
+			res += t.nodes[t.nodes[cur].left].size + 1
+			cur = t.nodes[cur].right
 		}
 	}
 	return res
 }
 
-// 小于等于key的数的个数.
-func (t *ScapegoatTree) BisectRight(key SgtKey) int32 {
-	cur := t.root
-	res := int32(0)
-	for cur != EMPTY_NODE {
-		if t.less(key, cur.Key) {
-			cur = cur.left
-		} else {
-			res += cur.left.existCount
-			if cur.exist {
-				res++
-			}
-			cur = cur.right
-		}
-	}
-	return res
+func (t *SuffixBalancedTree) Sa() []int32 {
+	sa := make([]int32, t.Size())
+	ptr := 0
+	t.Enumerate(func(i int32) {
+		sa[ptr] = i
+		ptr++
+	})
+	return sa
 }
 
-func (t *ScapegoatTree) Prev(key SgtKey) (res SgtKey, ok bool) {
-	less := t.BisectLeft(key)
-	if less == 0 {
-		return
-	}
-	res, ok = t.At(less-1), true
-	return
-}
-
-func (t *ScapegoatTree) Next(key SgtKey) (res SgtKey, ok bool) {
-	ngt := t.BisectRight(key)
-	if ngt == t.root.existCount {
-		return
-	}
-	res, ok = t.At(ngt), true
-	return
-}
-
-func (t *ScapegoatTree) Size() int32 {
-	return t.root.existCount
-}
-
-func (t *ScapegoatTree) Enumerate(f func(key SgtKey)) {
-	var dfs func(*SgtNode)
-	dfs = func(node *SgtNode) {
-		if node == EMPTY_NODE {
+func (t *SuffixBalancedTree) Enumerate(f func(sa int32)) {
+	size := t.Size()
+	var dfs func(int32)
+	dfs = func(x int32) {
+		if x == 0 {
 			return
 		}
+		node := t.nodes[x]
 		dfs(node.left)
-		if node.exist {
-			f(node.Key)
-		}
+		f(size - x)
 		dfs(node.right)
 	}
 	dfs(t.root)
 }
 
-func (t *ScapegoatTree) _collect(cur *SgtNode, nodes *[]*SgtNode) {
-	if cur == EMPTY_NODE {
+func (t *SuffixBalancedTree) Size() int32 {
+	return int32(len(t.data)) - 1
+}
+
+func (t *SuffixBalancedTree) _alloc() {
+	t.nodes = append(t.nodes, &Node{size: 1})
+}
+
+func (t *SuffixBalancedTree) _delete(x *int32) {
+	// if *x == 0 {
+	// 	return
+	// }
+	y := int32(len(t.data) - 1)
+	nodeY := t.nodes[y]
+	nodeX := t.nodes[*x]
+	nodeX.size--
+	if *x == y {
+		*x = t._merge(nodeX.left, nodeX.right)
+	} else if nodeY.Weight < nodeX.Weight {
+		t._delete(&nodeX.left)
+	} else {
+		t._delete(&nodeX.right)
+	}
+}
+
+func (t *SuffixBalancedTree) _merge(x, y int32) int32 {
+	if x == 0 || y == 0 {
+		return x | y
+	}
+	nodeX, nodeY := t.nodes[x], t.nodes[y]
+	if nodeX.size > nodeY.size {
+		nodeX.right = t._merge(nodeX.right, y)
+		t._pushUp(x)
+		return x
+	} else {
+		nodeY.left = t._merge(x, nodeY.left)
+		t._pushUp(y)
+		return y
+	}
+}
+
+func (t *SuffixBalancedTree) _collect(cur int32) {
+	if cur == 0 {
 		return
 	}
-	t._collect(cur.left, nodes)
-	if cur.exist {
-		*nodes = append(*nodes, cur)
+	node := t.nodes[cur]
+	t._collect(node.left)
+	t.collector = append(t.collector, cur)
+	t._collect(node.right)
+}
+
+func (t *SuffixBalancedTree) _build(a, b int32, lower, upper float64) int32 {
+	if a > b {
+		return 0
 	}
-	// if cur.exist {
-	// 	*nodes = append(*nodes, cur)
-	// } else {
-	// 	t.recycles = append(t.recycles, cur)
-	// }
-	t._collect(cur.right, nodes)
+	mid := (a + b) >> 1
+	x := t.collector[mid]
+	node := t.nodes[x]
+	node.size = b - a + 1
+	node.Weight = (lower + upper) / 2
+	node.left = t._build(a, mid-1, lower, node.Weight)
+	node.right = t._build(mid+1, b, node.Weight, upper)
+	t._pushUp(x)
+	return x
 }
 
-func (t *ScapegoatTree) _build(nodes []*SgtNode, left, right int32) *SgtNode {
-	if left >= right {
-		return EMPTY_NODE
-	}
-	mid := (left + right) >> 1
-	res := nodes[mid]
-	res.left = t._build(nodes, left, mid)
-	res.right = t._build(nodes, mid+1, right)
-	t._pushUp(res)
-	return res
-}
-
-func (t *ScapegoatTree) _rebuild(nodePtr **SgtNode) {
-	t.collector = t.collector[:0]
-	t._collect(*nodePtr, &t.collector)
-	*nodePtr = t._build(t.collector, 0, int32(len(t.collector)))
-}
-
-func (t *ScapegoatTree) _pushUp(node *SgtNode) {
-	node.existCount = node.left.existCount + node.right.existCount
-	if node.exist {
-		node.existCount++
-	}
-	node.allCount = node.left.allCount + node.right.allCount + 1
-}
-
-// 判断是否需要重构.
-func (t *ScapegoatTree) _isUnbalanced(node *SgtNode) bool {
-	// +5，避免不必要的重构
-	threshold := node.allCount*ALPHA_NUM + 5*ALPHA_DENO
-	return (node.left.allCount*ALPHA_DENO > threshold) || (node.right.allCount*ALPHA_DENO > threshold)
-}
-
-// 返回需要重构的结点.
 // 一次修改可能会变更整个搜索路径上的所有子树大小，如果多个子树需要重构，选择最大的那颗。
-func (t *ScapegoatTree) _insert(nodePtr **SgtNode, key SgtKey) **SgtNode {
-	if *nodePtr == EMPTY_NODE {
-		*nodePtr = t.Alloc(key)
-		return &EMPTY_NODE
+func (t *SuffixBalancedTree) _insert(x *int32, lower, upper float64) {
+	if *x == 0 {
+		*x = int32(len(t.data) - 1)
+		node := t.nodes[*x]
+		node.left, node.right = 0, 0
+		node.Weight = (lower + upper) / 2
+		node.size = 1
+		return
+	}
+	y := int32(len(t.data) - 1)
+	xNode := t.nodes[*x]
+	// less
+	if t.data[y] < t.data[*x] || (t.data[y] == t.data[*x] && t.nodes[y-1].Weight < t.nodes[*x-1].Weight) {
+		t._insert(&xNode.left, lower, xNode.Weight)
 	} else {
-		node := *nodePtr
-		node.existCount++
-		node.allCount++
-		if t.less(key, node.Key) {
-			res := t._insert(&node.left, key)
-			if t._isUnbalanced(node.left) {
-				return nodePtr
-			} else {
-				return res
-			}
-		} else {
-			res := t._insert(&node.right, key)
-			if t._isUnbalanced(node.right) {
-				return nodePtr
-			} else {
-				return res
-			}
-		}
+		t._insert(&xNode.right, xNode.Weight, upper)
+	}
+	t._pushUp(*x)
+	if t._isUnbalanced(*x) {
+		t.scapegoat = x
+		t.lower = lower
+		t.upper = upper
 	}
 }
 
-func (t *ScapegoatTree) _remove(node *SgtNode, k int32) SgtKey {
-	node.existCount--
-	offset := node.left.existCount
-	if node.exist {
-		offset++
-	}
-	if node.exist && k == offset {
-		node.exist = false
-		return node.Key
-	} else {
-		if k <= offset {
-			return t._remove(node.left, k)
-		} else {
-			return t._remove(node.right, k-offset)
-		}
-	}
+func (t *SuffixBalancedTree) _rebuild() {
+	t.collector = t.collector[:0]
+	t._collect(*t.scapegoat)
+	*t.scapegoat = t._build(0, int32(len(t.collector))-1, t.lower, t.upper)
 }
 
-func (t *ScapegoatTree) _discard(node *SgtNode, k int32) bool {
-	if node == EMPTY_NODE {
-		return false
-	}
-	node.existCount--
-	offset := node.left.existCount
-	if node.exist {
-		offset++
-	}
-	if node.exist && k == offset {
-		node.exist = false
-		return true
-	} else {
-		if k <= offset {
-			return t._discard(node.left, k)
-		} else {
-			return t._discard(node.right, k-offset)
-		}
-	}
+func (t *SuffixBalancedTree) _pushUp(x int32) {
+	cur := t.nodes[x]
+	left, right := t.nodes[cur.left], t.nodes[cur.right]
+	cur.size = left.size + right.size + 1
 }
 
-func (o *SgtNode) String() string {
-	return fmt.Sprintf("%v", o.Key)
+func (t *SuffixBalancedTree) _isUnbalanced(x int32) bool {
+	// +5，避免不必要的重构
+	cur := t.nodes[x]
+	left, right := t.nodes[cur.left], t.nodes[cur.right]
+	threshold := cur.size*ALPHA_NUM + 5*ALPHA_DENO
+	return (left.size*ALPHA_DENO > threshold) || (right.size*ALPHA_DENO > threshold)
 }
 
-/*
-	逆时针旋转 90° 打印这棵树：根节点在最左侧，右子树在上侧，左子树在下侧
-
-效果如下（只打印 key）
-
-Root
-│           ┌── 95
-│       ┌── 94
-│   ┌── 90
-│   │   │           ┌── 89
-│   │   │       ┌── 88
-│   │   │       │   └── 87
-│   │   │       │       └── 81
-│   │   │   ┌── 74
-│   │   └── 66
-└── 62
-
-	│           ┌── 59
-	│       ┌── 58
-	│       │   └── 56
-	│       │       └── 47
-	│   ┌── 45
-	└── 40
-	    │       ┌── 37
-	    │   ┌── 28
-	    └── 25
-	        │           ┌── 18
-	        │       ┌── 15
-	        │   ┌── 11
-	        └── 6
-	            └── 0
-*/
-func (o *SgtNode) draw(treeSB, prefixSB *strings.Builder, isTail bool) {
-	prefix := prefixSB.String()
-
-	if o.right != EMPTY_NODE {
-		newPrefixSB := &strings.Builder{}
-		newPrefixSB.WriteString(prefix)
-		if isTail {
-			newPrefixSB.WriteString("│   ")
-		} else {
-			newPrefixSB.WriteString("    ")
-		}
-		o.right.draw(treeSB, newPrefixSB, false)
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
 	}
-
-	treeSB.WriteString(prefix)
-	if isTail {
-		treeSB.WriteString("└── ")
-	} else {
-		treeSB.WriteString("┌── ")
-	}
-	if o.exist {
-		treeSB.WriteString(o.String())
-	} else {
-		treeSB.WriteString("x")
-	}
-	treeSB.WriteByte('\n')
-
-	if o.left != EMPTY_NODE {
-		newPrefixSB := &strings.Builder{}
-		newPrefixSB.WriteString(prefix)
-		if isTail {
-			newPrefixSB.WriteString("    ")
-		} else {
-			newPrefixSB.WriteString("│   ")
-		}
-		o.left.draw(treeSB, newPrefixSB, true)
-	}
+	return b
 }
 
-func (t *ScapegoatTree) String() string {
-	if t.root == EMPTY_NODE {
-		return "Empty\n"
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
 	}
-	treeSB := &strings.Builder{}
-	treeSB.WriteString("Root\n")
-	t.root.draw(treeSB, &strings.Builder{}, true)
-	return treeSB.String()
+	return b
 }
 
 func main() {
+	// demo()
 
+	// P3809()
+	// P5346()
+	// P5353()
+	P6164()
+}
+
+func demo() {
+	tree := NewSuffixBalancedTree(0)
+
+	for i := 0; i < 100000; i++ {
+		tree.AppendLeft('a')
+	}
+	fmt.Println(tree.Size())
+	for i := 0; i < 100000; i++ {
+		tree.PopLeft()
+	}
+	// cbc
+	tree.AppendLeft('c')
+	tree.AppendLeft('b')
+	tree.AppendLeft('a')
+	fmt.Println(tree.Size())
+	fmt.Println(tree.data)
+	fmt.Println(tree.Weight(0))
+	fmt.Println(tree.Weight(1), 1)
+	fmt.Println(tree.Weight(2), 2)
+	fmt.Println(tree.Rank(2))
+	fmt.Println(tree.Rank(0))
+	fmt.Println(tree.Rank(1))
+	fmt.Println(tree.RankStr(6, func(i int32) Char { return 'c' }))
+
+	tree.Enumerate(func(i int32) { fmt.Println(i) })
+	fmt.Println(tree.Sa())
 }
 
 // P3809 【模板】后缀排序
 // https://www.luogu.com.cn/problem/P3809
 // 建出后缀平衡树之后，通过中序遍历得到后缀数组。
-func P3809() {}
+func P3809() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s string
+	fmt.Fscan(in, &s)
+	tree := NewSuffixBalancedTree(int32(len(s)))
+	for i := len(s) - 1; i >= 0; i-- {
+		tree.AppendLeft(int32(s[i]))
+	}
+
+	sa := tree.Sa()
+	for _, v := range sa {
+		fmt.Fprint(out, v+1, " ")
+	}
+}
 
 // P5346 【XR-1】柯南家族
 // https://www.luogu.com.cn/problem/P5346
