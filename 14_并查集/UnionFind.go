@@ -50,7 +50,7 @@ func (ufa *UnionFindArray) Union(key1, key2 int) bool {
 	return true
 }
 
-func (ufa *UnionFindArray) UnionWithCallback(key1, key2 int, cb func(big, small int)) bool {
+func (ufa *UnionFindArray) UnionWithCallback(key1, key2 int, afterMerge func(big, small int)) bool {
 	root1, root2 := ufa.Find(key1), ufa.Find(key2)
 	if root1 == root2 {
 		return false
@@ -63,8 +63,8 @@ func (ufa *UnionFindArray) UnionWithCallback(key1, key2 int, cb func(big, small 
 	ufa.data[root1] += ufa.data[root2]
 	ufa.data[root2] = root1
 	ufa.Part--
-	if cb != nil {
-		cb(root1, root2)
+	if afterMerge != nil {
+		afterMerge(root1, root2)
 	}
 	return true
 }
@@ -147,7 +147,7 @@ func (ufm *UnionFindMap) Union(key1, key2 int) bool {
 	return true
 }
 
-func (ufm *UnionFindMap) UnionWithCallback(key1, key2 int, cb func(big, small int)) bool {
+func (ufm *UnionFindMap) UnionWithCallback(key1, key2 int, afterMerge func(big, small int)) bool {
 	root1, root2 := ufm.Find(key1), ufm.Find(key2)
 	if root1 == root2 {
 		return false
@@ -160,8 +160,8 @@ func (ufm *UnionFindMap) UnionWithCallback(key1, key2 int, cb func(big, small in
 	ufm.data[root1] += ufm.data[root2]
 	ufm.data[root2] = root1
 	ufm.Part--
-	if cb != nil {
-		cb(root1, root2)
+	if afterMerge != nil {
+		afterMerge(root1, root2)
 	}
 	return true
 }

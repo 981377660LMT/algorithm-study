@@ -15,7 +15,7 @@ from functools import lru_cache
 
 class Solution:
     def minimumMoves(self, arr: List[int]) -> int:
-        @lru_cache(typed=False, maxsize=None)
+        @lru_cache(None)
         def dfs(left: int, right: int) -> int:
             """删除[left,right]回文子数组的最少操作次数"""
             if left > right:
@@ -23,7 +23,7 @@ class Solution:
             if right - left <= 1:
                 return 1 if arr[left] == arr[right] else 2
 
-            res = int(1e20)
+            res = int(1e18)
             if arr[left] == arr[right]:
                 res = min(res, dfs(left + 1, right - 1))  # 追加到两侧 不增加操作次数
 

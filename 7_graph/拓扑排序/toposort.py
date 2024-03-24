@@ -51,6 +51,49 @@ def topoSort(n: int, adjList: List[List[int]], directed=True) -> Tuple[List[int]
     return res, True
 
 
+from heapq import heapify, heappop, heappush
+from typing import List, Tuple
+
+
+def topoSortByHeap(
+    n: int, adjList: List[List[int]], directed=True, minFirst=True
+) -> Tuple[List[int], bool]:
+    """使用优先队列的拓扑排序."""
+    if directed:
+        deg = [0] * n
+        for i in range(n):
+            for j in adjList[i]:
+                deg[j] += 1
+    else:
+        deg = [len(adj) for adj in adjList]
+
+    startDeg = 0 if directed else 1
+    pq = [v if minFirst else -v for v in range(n) if deg[v] == startDeg]
+    heapify(pq)
+    res = []
+
+    if minFirst:
+        while pq:
+            cur = heappop(pq)
+            res.append(cur)
+            for next in adjList[cur]:
+                deg[next] -= 1
+                if deg[next] == startDeg:
+                    heappush(pq, next)
+    else:
+        while pq:
+            cur = -heappop(pq)
+            res.append(cur)
+            for next in adjList[cur]:
+                deg[next] -= 1
+                if deg[next] == startDeg:
+                    heappush(pq, -next)
+
+    if len(res) != n:
+        return [], False
+    return res, True
+
+
 if __name__ == "__main__":
 
     class Solution:
