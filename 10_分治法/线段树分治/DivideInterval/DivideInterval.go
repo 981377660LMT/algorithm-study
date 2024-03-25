@@ -11,25 +11,25 @@ import (
 
 func main() {
 	// abc339g()
-	abc342g()
-	// SP11470()
+	// abc342g()
+	SP11470()
 	// yuki1170()
 }
 
-type InnerTreeRangeSum struct {
+type InnerTreeAbc339g struct {
 	data   []int
 	preSum []int
 }
 
-func NewInnerTreeRangeSum() *InnerTreeRangeSum {
-	return &InnerTreeRangeSum{}
+func NewInnerTreeAbc339g() *InnerTreeAbc339g {
+	return &InnerTreeAbc339g{}
 }
 
-func (stl *InnerTreeRangeSum) Add(x int) {
+func (stl *InnerTreeAbc339g) Add(x int) {
 	stl.data = append(stl.data, x)
 }
 
-func (stl *InnerTreeRangeSum) Build() {
+func (stl *InnerTreeAbc339g) Build() {
 	sort.Ints(stl.data)
 	stl.preSum = make([]int, len(stl.data)+1)
 	for i, x := range stl.data {
@@ -38,7 +38,7 @@ func (stl *InnerTreeRangeSum) Build() {
 }
 
 // 小于等于upper的元素之和.
-func (stl *InnerTreeRangeSum) Query(upper int) int {
+func (stl *InnerTreeAbc339g) Query(upper int) int {
 	pos := sort.SearchInts(stl.data, upper+1)
 	return stl.preSum[pos]
 }
@@ -63,9 +63,9 @@ func abc339g() {
 	}
 
 	D := NewDivideInterval(int32(n))
-	innerTree := make([]*InnerTreeRangeSum, D.Size())
+	innerTree := make([]*InnerTreeAbc339g, D.Size())
 	for i := range innerTree {
-		innerTree[i] = NewInnerTreeRangeSum()
+		innerTree[i] = NewInnerTreeAbc339g()
 	}
 
 	add := func(index, delta int) {
@@ -109,15 +109,16 @@ func abc339g() {
 	}
 }
 
-type InnerTreeAbc342g struct {
-}
-
 // G - Retroactive Range Chmax (可追溯区间最大值修改)
 // https://atcoder.jp/contests/abc342/tasks/abc342_g
 // 维护一个数列，有以下三个操作：
 // 1 l r x: 将区间[l,r]中的所有元素与x取最大值.
 // 2 i: 将第i次操作删除，保证第i次操作是操作1.
 // 3 i: 查询当前数列中第i个元素的值.
+//
+// 树套树，内层树维护添加过的操作.
+// !更新/删除操作相当于更新/删除内层树中存储的信息.
+// !查询操作相当于找到所有更新操作取最大值.
 func abc342g() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -125,10 +126,117 @@ func abc342g() {
 
 	var n int
 	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := range nums {
+		fmt.Fscan(in, &nums[i])
+	}
+	var q int
+	fmt.Fscan(in, &q)
+	queries := make([][4]int, q)
+	for i := range queries {
+		var kind int
+		fmt.Fscan(in, &kind)
+		if kind == 1 {
+			var start, end, x int
+			fmt.Fscan(in, &start, &end, &x)
+			start--
+			queries[i] = [4]int{kind, start, end, x}
+		} else if kind == 2 {
+			var time int
+			fmt.Fscan(in, &time)
+			time--
+			queries[i] = [4]int{kind, time, 0, 0}
+		} else {
+			var index int
+			fmt.Fscan(in, &index)
+			index--
+			queries[i] = [4]int{kind, index, 0, 0}
+		}
+	}
+
+	D := NewDivideInterval(int32(n))
+	innerTree := make([]*ErasableHeapGeneric[[2]int], D.Size()) // (value, time)
+	for i := range innerTree {
+		innerTree[i] = NewErasableHeapGeneric[[2]int](func(a, b [2]int) bool { return a[0] > b[0] })
+	}
+
+	apply := func(start, end int, x int, time int) {
+		D.EnumerateSegment(
+			int32(start), int32(end),
+			func(segmentId int32) {
+				innerTree[segmentId].Push([2]int{x, time})
+			},
+			false,
+		)
+	}
+
+	revoke := func(time int) {
+		start, end, x := queries[time][1], queries[time][2], queries[time][3]
+		D.EnumerateSegment(
+			int32(start), int32(end),
+			func(segmentId int32) {
+				innerTree[segmentId].Erase([2]int{x, time})
+			},
+			false,
+		)
+	}
+
+	query := func(index int) int {
+		res := nums[index]
+		D.EnumeratePoint(
+			int32(index),
+			func(segmentId int32) {
+				if tree := innerTree[segmentId]; tree.Len() > 0 {
+					res = max(res, tree.Peek()[0])
+				}
+			},
+		)
+		return res
+	}
+
+	for i, item := range queries {
+		kind := item[0]
+		if kind == 1 {
+			start, end, x := item[1], item[2], item[3]
+			apply(start, end, x, i)
+		} else if kind == 2 {
+			time := item[1]
+			revoke(time)
+		} else {
+			index := item[1]
+			fmt.Fprintln(out, query(index))
+		}
+	}
 }
 
+// TTM - To the moon
 // https://www.luogu.com.cn/problem/SP11470
+// 给定一个数组nums和q次操作.操作有四种，初始时时间为0.
+// C l r d: 将区间[l,r]中的所有元素加上d，同时当前的时间戳加 1。
+// Q l r: 查询此时区间[l,r]中的所有元素之和。
+// H l r t: 查询时间戳为t时区间[l,r]中的所有元素之和。
+// B t : 将当前时间戳置为t.
+//
+// 翻译：
+// - 区间加法并创建新版本.
+// - 查询某个版本的区间和.
+// - 版本回溯.
+//
+// !可持久化线段树的单点修改 => 一般操作即可.
+// !可持久化线段树的区间修改 =>
+// 不能下传懒标记，共用子结点直接把标记传递下去会影响答案的正确性，需要标记永久化.
+// TODO
 func SP11470() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
 
 }
 
@@ -414,6 +522,135 @@ func (ufa *_UnionFindArray) String() string {
 	}
 	sb = append(sb, fmt.Sprintf("Part: %d", ufa.Part))
 	return strings.Join(sb, "\n")
+}
+
+type ErasableHeapGeneric[H comparable] struct {
+	data   *HeapGeneric[H]
+	erased *HeapGeneric[H]
+}
+
+func NewErasableHeapGeneric[H comparable](less func(a, b H) bool, nums ...H) *ErasableHeapGeneric[H] {
+	return &ErasableHeapGeneric[H]{NewHeap(less, nums...), NewHeap(less)}
+}
+
+// 从堆中删除一个元素,要保证堆中存在该元素.
+func (h *ErasableHeapGeneric[H]) Erase(value H) {
+	h.erased.Push(value)
+	h.normalize()
+}
+
+func (h *ErasableHeapGeneric[H]) Push(value H) {
+	h.data.Push(value)
+	h.normalize()
+}
+
+func (h *ErasableHeapGeneric[H]) Pop() (value H) {
+	value = h.data.Pop()
+	h.normalize()
+	return
+}
+
+func (h *ErasableHeapGeneric[H]) Peek() (value H) {
+	value = h.data.Top()
+	return
+}
+
+func (h *ErasableHeapGeneric[H]) Len() int {
+	return h.data.Len()
+}
+
+func (h *ErasableHeapGeneric[H]) Clear() {
+	h.data.Clear()
+	h.erased.Clear()
+}
+
+func (h *ErasableHeapGeneric[H]) normalize() {
+	for h.data.Len() > 0 && h.erased.Len() > 0 && h.data.Top() == h.erased.Top() {
+		h.data.Pop()
+		h.erased.Pop()
+	}
+}
+
+type HeapGeneric[H comparable] struct {
+	data []H
+	less func(a, b H) bool
+}
+
+func NewHeap[H comparable](less func(a, b H) bool, nums ...H) *HeapGeneric[H] {
+	nums = append(nums[:0:0], nums...)
+	heap := &HeapGeneric[H]{less: less, data: nums}
+	if len(nums) > 1 {
+		heap.heapify()
+	}
+	return heap
+}
+
+func (h *HeapGeneric[H]) Push(value H) {
+	h.data = append(h.data, value)
+	h.pushUp(h.Len() - 1)
+}
+
+func (h *HeapGeneric[H]) Pop() (value H) {
+	if h.Len() == 0 {
+		panic("heap is empty")
+	}
+
+	value = h.data[0]
+	h.data[0] = h.data[h.Len()-1]
+	h.data = h.data[:h.Len()-1]
+	h.pushDown(0)
+	return
+}
+
+func (h *HeapGeneric[H]) Top() (value H) {
+	if h.Len() == 0 {
+		panic("heap is empty")
+	}
+	value = h.data[0]
+	return
+}
+
+func (h *HeapGeneric[H]) Len() int { return len(h.data) }
+
+func (h *HeapGeneric[H]) Clear() {
+	h.data = h.data[:0]
+}
+
+func (h *HeapGeneric[H]) heapify() {
+	n := h.Len()
+	for i := (n >> 1) - 1; i > -1; i-- {
+		h.pushDown(i)
+	}
+}
+
+func (h *HeapGeneric[H]) pushUp(root int) {
+	for parent := (root - 1) >> 1; parent >= 0 && h.less(h.data[root], h.data[parent]); parent = (root - 1) >> 1 {
+		h.data[root], h.data[parent] = h.data[parent], h.data[root]
+		root = parent
+	}
+}
+
+func (h *HeapGeneric[H]) pushDown(root int) {
+	n := h.Len()
+	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
+		right := left + 1
+		minIndex := root
+
+		if h.less(h.data[left], h.data[minIndex]) {
+			minIndex = left
+		}
+
+		if right < n && h.less(h.data[right], h.data[minIndex]) {
+			minIndex = right
+		}
+
+		if minIndex == root {
+			return
+		}
+
+		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
+		root = minIndex
+	}
 }
 
 func min(a, b int) int {
