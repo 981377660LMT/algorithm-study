@@ -1,593 +1,963 @@
-// 后缀平衡树(动态后缀数组)
-// 陈立杰 <<重量平衡树和后缀平衡树在信息学奥赛中的应用>> 2013论文集
-// https://oi-wiki.org/string/suffix-bst/
-// https://www.cnblogs.com/cjfdf/p/10322533.html
-// https://www.luogu.com.cn/article/0e8jjpqk
-// https://www.luogu.com.cn/article/wq2yn9lr
-// https://www.luogu.com/article/1l23lxcd
-// https://blog.csdn.net/YxuanwKeith/article/details/52741250
-//
-// 后缀平衡树是一种"动态维护后缀排序"的数据结构。
-// 它支持在串S的开头添加/删除一个字符，复杂度不依赖于字符集的大小.
+// package template.string;
+
+// import java.util.ArrayDeque;
+// import java.util.Deque;
+
+// public class SuffixBalancedTreeLcp {
+//     private static final double FACTOR = 0.75;
+//     private static Node[] stk = new Node[0];
+//     private static int tail;
+//     public Node root;
+//     private ObjectHolder<Node> objectHolder = new ObjectHolder<>();
+//     private Deque<Node> dq;
+
+//     private static class ObjectHolder<V> {
+//         V data;
+
+//         public void clear() {
+//             data = null;
+//         }
+//     }
+
+//     public SuffixBalancedTreeLcp(int cap) {
+//         dq = new ArrayDeque<>(cap + 1);
+//         root = Node.NIL;
+//         Node dummy = new Node(Integer.MIN_VALUE);
+//         dummy.next = dummy;
+//         dummy.occur = 0;
+//         dummy.offsetToTail = -1;
+//         dummy.weight = 0;
+//         dq.addFirst(dummy);
+//     }
+
+//     private boolean check() {
+//         collect(root);
+//         for (int i = 1; i < tail; i++) {
+//             if (stk[i - 1].weight >= stk[i].weight) {
+//                 return false;
+//             }
+//             if (compare(stk[i - 1], stk[i]) >= 0) {
+//                 return false;
+//             }
+//         }
+//         for (int i = 0; i < tail; i++) {
+//             if (stk[i].occur < 0 || stk[i].occur > 1) {
+//                 return false;
+//             }
+//         }
+
+//         if (root.aliveSize + 1 != dq.size()) {
+//             return false;
+//         }
+
+//         return true;
+//     }
+
+//     public int lcp(Node a, Node b) {
+//         if (a.weight > b.weight) {
+//             Node tmp = a;
+//             a = b;
+//             b = tmp;
+//         }
+//         return rangeLCPExcludeL(root, 0, 1, a.weight, b.weight);
+//     }
+
+//     private int considerLcp(Node a, Node b) {
+//         if (a.key != b.key) {
+//             return 0;
+//         }
+//         return 1 + lcp(a.next, b.next);
+//     }
+
+//     private void recalcRightLcp(Node prev, Node next) {
+//         if (next == Node.NIL) {
+//             return;
+//         }
+//         next.prev = prev;
+//         int lcp = considerLcp(prev, next);
+//         updateLcp(root, next, lcp);
+//     }
+
+//     public Node addPrefix(int x) {
+//         objectHolder.clear();
+//         root = insert(root, x, dq.peekFirst(), objectHolder, 0, 1);
+//         Node node = objectHolder.data;
+//         int rank = rank(node);
+
+//         //fix lcp
+//         Node prev = rank == 1 ? Node.NIL : kth(root, rank - 1);
+//         Node next = rank == root.aliveSize ? Node.NIL : kth(root, rank + 1);
+//         recalcRightLcp(prev, node);
+//         recalcRightLcp(node, next);
+
+//         dq.addFirst(node);
+//         // assert check();
+//         return node;
+//     }
+
+//     public void removePrefix() {
+//         assert dq.size() > 1;
+//         Node deleted = dq.removeFirst();
+//         int rank = rank(deleted);
+//         Node next = rank == root.aliveSize ? Node.NIL : kth(root, rank + 1);
+
+//         //fix lcp
+//         if (next != Node.NIL) {
+//             int nextLcp = Math.min(next.lcp, deleted.lcp);
+//             next.prev = deleted.prev;
+//             updateLcp(root, next, nextLcp);
+//         }
+
+//         delete(root, deleted);
+//         // assert check();
+
+//         //clean or not
+//         if (root.aliveSize * 2 < root.size) {
+//             collect(root);
+//             int wpos = 0;
+//             for (int i = 0; i < tail; i++) {
+//                 if (stk[i].occur == 0) {
+//                     continue;
+//                 }
+//                 stk[wpos++] = stk[i];
+//             }
+//             root = refactor(0, wpos - 1, 0, 1);
+//         }
+//     }
+
+//     public int rank(Node node) {
+//         return rank(root, node);
+//     }
+
+//     public int leq(IntSequence seq) {
+//         return rank(root, seq);
+//     }
+
+//     public Node sa(int k) {
+//         k++;
+//         return kth(root, k);
+//     }
+
+//     public int[] sa() {
+//         collect(root);
+//         int[] sa = new int[size()];
+//         int wpos = 0;
+//         for (int i = 0; i < tail; i++) {
+//             if (stk[i].occur == 0) {
+//                 continue;
+//             }
+//             sa[wpos++] = stk[i].offsetToTail;
+//         }
+//         return sa;
+//     }
+
+//     public int size() {
+//         return root.aliveSize;
+//     }
+
+//     private static void ensureSpace(int n) {
+//         if (stk.length >= n) {
+//             return;
+//         }
+//         int nextSize = Math.max(1 << 16, stk.length);
+//         while (nextSize < n) {
+//             nextSize += nextSize;
+//         }
+//         stk = new Node[nextSize];
+//     }
+
+//     private static void updateLcp(Node root, Node target, int lcp) {
+//         root.pushDown();
+//         if (root == target) {
+//             root.lcp = lcp;
+//         } else {
+//             if (root.weight > target.weight) {
+//                 updateLcp(root.left, target, lcp);
+//             } else {
+//                 updateLcp(root.right, target, lcp);
+//             }
+//         }
+//         root.pushUp();
+//     }
+
+//     private static int insertCompare(Node a, int key, Node next) {
+//         if (a.key != key) {
+//             return Integer.compare(a.key, key);
+//         }
+//         return Double.compare(a.next.weight, next.weight);
+//     }
+
+//     private static int compare(Node root, IntSequence seq) {
+//         int len = seq.length();
+//         for (int i = 0; i < len; i++, root = root.next) {
+//             if (seq.get(i) != root.key) {
+//                 return Integer.compare(root.key, seq.get(i));
+//             }
+//         }
+//         return 0;
+//     }
+
+//     private static int compare(Node a, Node b) {
+//         for (int i = 0; a != b; i++, a = a.next, b = b.next) {
+//             if (a.key != b.key) {
+//                 return Integer.compare(a.key, b.key);
+//             }
+//         }
+//         return 0;
+//     }
+
+//     private static int rangeLCPExcludeL(Node root, double L, double R, double l, double r) {
+//         if (root == Node.NIL || R <= l || L > r) {
+//             return Integer.MAX_VALUE;
+//         }
+//         if (L > l && R <= r) {
+//             return root.rangeMinLCP;
+//         }
+//         root.pushDown();
+//         int ans = Math.min(rangeLCPExcludeL(root.left, L, root.weight, l, r), rangeLCPExcludeL(root.right, root.weight, R, l, r));
+//         if (root.occur > 0 && l < root.weight && root.weight <= r) {
+//             ans = Math.min(ans, root.lcp);
+//         }
+//         return ans;
+//     }
+
+//     private static Node kth(Node root, int k) {
+//         if (root == Node.NIL) {
+//             return root;
+//         }
+//         root.pushDown();
+//         Node ans;
+//         if (root.left.aliveSize >= k) {
+//             ans = kth(root.left, k);
+//         } else if (root.left.aliveSize + root.occur >= k) {
+//             ans = root;
+//         } else {
+//             ans = kth(root.right, k - root.left.aliveSize - root.occur);
+//         }
+//         //push up for calc purpose
+//         root.pushUp();
+//         return ans;
+//     }
+
+//     private static int rank(Node root, IntSequence seq) {
+//         if (root == Node.NIL) {
+//             return 0;
+//         }
+
+//         int ans = 0;
+// //        root = refactor(root, L, R);
+//         root.pushDown();
+//         int compRes = compare(root, seq);
+//         if (compRes > 0) {
+//             ans += rank(root.left, seq);
+//         } else {
+//             ans += root.aliveSize - root.right.aliveSize;
+//             ans += rank(root.right, seq);
+//         }
+// //        root.pushUp();
+//         return ans;
+//     }
+
+//     private static int rank(Node root, Node node) {
+//         if (root == Node.NIL) {
+//             return 0;
+//         }
+// //        root = refactor(root, L, R);
+//         root.pushDown();
+//         int ans = 0;
+//         if (root == node) {
+//             ans += root.aliveSize - root.right.aliveSize;
+//         } else {
+//             int compRes = root.compareTo(node);
+//             if (compRes > 0) {
+//                 ans += rank(root.left, node);
+//             } else {
+//                 ans += root.aliveSize - root.right.aliveSize;
+//                 ans += rank(root.right, node);
+//             }
+//         }
+// //        root.pushUp();
+//         return ans;
+//     }
+
+//     private static void init(int key, Node root, Node next, double weight) {
+//         root.key = key;
+//         root.weight = weight;
+//         root.next = next;
+//         root.occur++;
+//         root.offsetToTail = next.offsetToTail + 1;
+//         root.lcp = Integer.MAX_VALUE;
+//         root.prev = Node.NIL;
+//         root.pushUp();
+//     }
+
+//     private static Node newNode(int key, Node next, double weight) {
+//         Node root = new Node();
+//         init(key, root, next, weight);
+//         return root;
+//     }
+
+//     private static Node insert(Node root, int key, Node next, ObjectHolder<Node> insertNode, double L, double R) {
+//         if (root == Node.NIL) {
+//             root = newNode(key, next, (L + R) / 2);
+//             insertNode.data = root;
+//             return root;
+//         }
+//         root.pushDown();
+//         int cmpRes = insertCompare(root, key, next);
+//         if (cmpRes == 0) {
+//             insertNode.data = root;
+//             init(key, root, next, root.weight);
+//         } else if (cmpRes > 0) {
+//             root.left = insert(root.left, key, next, insertNode, L, root.weight);
+//         } else {
+//             root.right = insert(root.right, key, next, insertNode, root.weight, R);
+//         }
+//         root.pushUp();
+//         root = refactor(root, L, R);
+//         return root;
+//     }
+
+//     private static void delete(Node root, Node node) {
+//         assert root != Node.NIL;
+//         root.pushDown();
+//         if (root == node) {
+//             root.occur--;
+//         } else {
+//             int compRes = root.compareTo(node);
+//             if (compRes > 0) {
+//                 delete(root.left, node);
+//             } else {
+//                 delete(root.right, node);
+//             }
+//         }
+//         root.pushUp();
+//     }
+
+//     private static void collect(Node root) {
+//         ensureSpace(root.size);
+//         tail = 0;
+//         _collect(root);
+//         assert tail == root.size;
+//     }
+
+//     private static Node refactor(Node root, double L, double R) {
+//         double threshold = root.size * FACTOR;
+//         if (root.left.size > threshold || root.right.size > threshold) {
+//             collect(root);
+//             root = refactor(0, tail - 1, L, R);
+//         }
+//         return root;
+//     }
+
+//     private static void _collect(Node root) {
+//         if (root == Node.NIL) {
+//             return;
+//         }
+//         root.pushDown();
+//         _collect(root.left);
+//         stk[tail++] = root;
+//         _collect(root.right);
+//     }
+
+//     private static Node refactor(int l, int r, double L, double R) {
+//         if (l > r) {
+//             return Node.NIL;
+//         }
+//         int m = (l + r) / 2;
+//         Node root = stk[m];
+//         root.weight = (L + R) / 2;
+//         root.left = refactor(l, m - 1, L, root.weight);
+//         root.right = refactor(m + 1, r, root.weight, R);
+//         root.pushUp();
+//         return root;
+//     }
+
+//     @Override
+//     public String toString() {
+//         collect(root);
+//         StringBuilder ans = new StringBuilder("{");
+//         for (int i = 0; i < tail; i++) {
+//             ans.append(stk[i]).append(',');
+//         }
+//         if (ans.length() > 1) {
+//             ans.setLength(ans.length() - 1);
+//         }
+//         ans.append("}");
+//         return ans.toString();
+//     }
+
+//     public static class Node implements Cloneable, Comparable<Node> {
+//         public static final Node NIL = new Node();
+
+//         Node left = NIL;
+//         Node right = NIL;
+//         int size;
+//         int aliveSize;
+//         int key;
+//         byte occur;
+//         public double weight;
+//         Node next;
+//         //prev means the floor node
+//         Node prev = Node.NIL;
+//         public int offsetToTail;
+//         public int lcp = Integer.MAX_VALUE;
+//         private int rangeMinLCP = Integer.MAX_VALUE;
+
+//         static {
+//             NIL.left = NIL.right = NIL;
+//             NIL.size = NIL.aliveSize = 0;
+//             NIL.key = -1;
+//             NIL.offsetToTail = -1;
+//         }
+
+//         @Override
+//         public int compareTo(Node o) {
+//             return Double.compare(weight, o.weight);
+//         }
+
+//         public void pushUp() {
+//             if (this == NIL) {
+//                 return;
+//             }
+//             size = left.size + right.size + 1;
+//             aliveSize = left.aliveSize + right.aliveSize + occur;
+//             rangeMinLCP = Math.min(left.rangeMinLCP, right.rangeMinLCP);
+//             if (occur > 0) {
+//                 rangeMinLCP = Math.min(rangeMinLCP, lcp);
+//             }
+//         }
+
+//         public void pushDown() {
+
+//         }
+
+//         private Node() {
+//         }
+
+//         private Node(int key) {
+//             this.key = key;
+//             pushUp();
+//         }
+
+//         @Override
+//         public String toString() {
+//             StringBuilder ans = new StringBuilder("[");
+//             int remain = 10;
+//             Node node = this;
+//             for (; node != null && remain > 0; node = node.next == node ? null : node.next, remain--) {
+//                 ans.append(node.key).append(',');
+//             }
+//             if (node != null) {
+//                 ans.append(",...,");
+//             }
+//             if (ans.length() > 1) {
+//                 ans.setLength(ans.length() - 1);
+//             }
+//             ans.append("/").append(this.lcp);
+//             ans.append("]");
+//             return ans.toString();
+//         }
+//     }
+// }
 
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"runtime/debug"
+	"math"
+	"strings"
 )
 
-func init() {
-	debug.SetGCPercent(-1)
+func main() {
+	sbt := NewSuffixBalancedTreeLcp(10)
+	sbt.AddPrefix('a')
+	sbt.AddPrefix('c')
+	sbt.AddPrefix('b')
+	sbt.AddPrefix('a')
+	fmt.Println(sbt.SaAll()) // abca
 }
 
-// alpha 的值越小，那么替罪羊树就越容易重构，那么树也就越平衡，查询的效率也就越高，自然修改（加点和删点）的效率也就低了；
-// 反之，alpha 的值越大，那么替罪羊树就越不容易重构，那么树也就越不平衡，查询的效率也就越低，自然修改（加点和删点）的效率也就高了。
-// 所以，查询多，alpha 就应该小一些；修改多，alpha 就应该大一些。
 const ALPHA_NUM int32 = 4
 const ALPHA_DENO int32 = 5
 
-var EMPTY_NODE = &Node{}
-
-type Char = byte
-
-type Node struct {
-	Weight      float64
-	Len         int32 // 代表的后缀的长度
-	Id          int32
-	left, right int32
-	size        int32 // 子树所有结点的数量
+type SbtNode struct {
+	Weight             float64
+	OffsetToTail       int32
+	Lcp                int32
+	left, right        *SbtNode
+	aliveSize, allSize int32
+	key                int32
+	alive              bool
+	prev, next         *SbtNode
+	rangeMinLcp        int32
 }
 
-type SuffixBalancedTree struct {
-	Ords         []Char
-	Nodes        []*Node
-	lower, upper float64
-	root         int32
-
-	scapegoat *int32  // 临时保存，用于标记需要重构的结点
-	collector []int32 // 临时保存，用于dfs收集结点
+func CreateNILNode() *SbtNode {
+	res := &SbtNode{}
+	res.Lcp = math.MaxInt32
+	res.OffsetToTail = -1
+	res.left = res
+	res.right = res
+	res.key = -1
+	res.prev = res
+	res.rangeMinLcp = math.MaxInt32
+	return res
 }
 
-func NewSuffixBalancedTree(cap int32) *SuffixBalancedTree {
-	ords := make([]Char, 0, max32(cap+1, 16))
-	nodes := make([]*Node, 0, max32(cap+1, 16))
-	ords = append(ords, 0)
-	nodes = append(nodes, EMPTY_NODE)
-	return &SuffixBalancedTree{Ords: ords, Nodes: nodes}
-}
+var NIL = CreateNILNode()
 
-func (t *SuffixBalancedTree) AppendLeft(char Char, id int32) {
-	t.Ords = append(t.Ords, char)
-	if len(t.Nodes) < len(t.Ords) {
-		t._alloc()
-	}
-	t.scapegoat = nil
-	t._insert(&t.root, 0, 1, id)
-	if t.scapegoat != nil {
-		t._rebuild()
-	}
-}
-
-// 不使用标记删除.
-func (t *SuffixBalancedTree) PopLeft() {
-	t._delete(&t.root)
-	t.Ords = t.Ords[:len(t.Ords)-1]
-}
-
-// 用于树上后缀排序.
-// !hack: 自定义比较函数，用于插入时比较两个后缀的大小.
-// curPos: 当前插入的字符的位置(1-indexed).
-// searchPos: 当前遍历到的结点代表的后缀的位置(1-indexed).
-func (t *SuffixBalancedTree) Add(char Char, id int32, less func(tree *SuffixBalancedTree, curPos, searchPos int32) bool) {
-	t.Ords = append(t.Ords, char)
-	if len(t.Nodes) < len(t.Ords) {
-		t._alloc()
-	}
-	t.scapegoat = nil
-	t._insertWithLess(&t.root, 0, 1, id, less)
-	if t.scapegoat != nil {
-		t._rebuild()
-	}
-}
-
-// 返回后缀s[index:]的权值，权值越小，字典序越小.
-func (t *SuffixBalancedTree) Weight(index int32) float64 {
-	index++
-	return t.Nodes[int32(len(t.Ords))-index].Weight
-}
-
-func (t *SuffixBalancedTree) GetNode(index int32) *Node {
-	index++
-	return t.Nodes[int32(len(t.Ords))-index]
-}
-
-// 求排名第k个的后缀是谁(sa).
-func (t *SuffixBalancedTree) Kth(k int32) int32 {
-	k++
-	cur := t.Nodes[t.root]
-	for cur != EMPTY_NODE {
-		leftNode := t.Nodes[cur.left]
-		if leftNode.size+1 == k {
-			return t.Size() - cur.Len
-		}
-		if leftNode.size >= k {
-			cur = leftNode
-		} else {
-			k -= leftNode.size + 1
-			cur = t.Nodes[cur.right]
-		}
-	}
-	panic("unreachable")
-}
-
-// 返回后缀s[index:]的排名(0-based).
-func (t *SuffixBalancedTree) Rank(index int32) int32 {
-	key := t.Weight(index)
-	res, cur := int32(0), t.Nodes[t.root]
-	for cur != EMPTY_NODE {
-		if key < cur.Weight {
-			cur = t.Nodes[cur.left]
-		} else {
-			res += t.Nodes[cur.left].size + 1
-			cur = t.Nodes[cur.right]
-		}
-	}
-	return res - 1
-}
-
-// 返回字典序严格小于的后缀的个数.
-// 如果要求s出现的次数，可以用前驱后继相减得到.
-func (t *SuffixBalancedTree) BisectLeftString(n int32, f func(i int32) Char) int32 {
-	res, cur := int32(0), t.root
-	for cur != 0 {
-		compareRes := t._compareString(n, f, cur)
-		if compareRes <= 0 {
-			cur = t.Nodes[cur].left
-		} else {
-			res += t.Nodes[t.Nodes[cur].left].size + 1
-			cur = t.Nodes[cur].right
-		}
+func NewSbtNode() *SbtNode {
+	res := &SbtNode{
+		Lcp:  math.MaxInt32,
+		left: NIL, right: NIL,
+		prev:        NIL,
+		rangeMinLcp: math.MaxInt32,
 	}
 	return res
 }
 
-// 返回字典序小于等于s的后缀的个数.
-// 如果要求s出现的次数，可以用上下界相减得到, 见 P6164.
-func (t *SuffixBalancedTree) BisectRightString(n int32, f func(i int32) Char) int32 {
-	res, cur := int32(0), t.root
-	for cur != 0 {
-		compareRes := t._compareString(n, f, cur)
-		if compareRes < 0 {
-			cur = t.Nodes[cur].left
-		} else {
-			res += t.Nodes[t.Nodes[cur].left].size + 1
-			cur = t.Nodes[cur].right
-		}
+func NewSbtNodeWithKey(key int32) *SbtNode {
+	res := &SbtNode{
+		Lcp:  math.MaxInt32,
+		left: NIL, right: NIL,
+		prev:        NIL,
+		key:         key,
+		rangeMinLcp: math.MaxInt32,
 	}
+	res.PushUp()
 	return res
 }
 
-func (t *SuffixBalancedTree) Sa() []int32 {
-	size := t.Size()
-	ptr := 0
-	sa := make([]int32, size)
-	var dfs func(int32)
-	dfs = func(x int32) {
-		if x == 0 {
-			return
-		}
-		node := t.Nodes[x]
-		dfs(node.left)
-		sa[ptr] = size - x
-		ptr++
-		dfs(node.right)
-	}
-	dfs(t.root)
-	return sa
-}
-
-func (t *SuffixBalancedTree) Enumerate(f func(node *Node)) {
-	var dfs func(int32)
-	dfs = func(x int32) {
-		if x == 0 {
-			return
-		}
-		node := t.Nodes[x]
-		dfs(node.left)
-		f(node)
-		dfs(node.right)
-	}
-	dfs(t.root)
-}
-
-func (t *SuffixBalancedTree) Size() int32 {
-	return int32(len(t.Ords)) - 1
-}
-
-func (t *SuffixBalancedTree) _alloc() {
-	t.Nodes = append(t.Nodes, &Node{})
-}
-
-func (t *SuffixBalancedTree) _delete(x *int32) {
-	y := int32(len(t.Ords) - 1)
-	nodeY := t.Nodes[y]
-	nodeX := t.Nodes[*x]
-	nodeX.size--
-	if *x == y {
-		*x = t._merge(nodeX.left, nodeX.right)
-	} else if nodeY.Weight < nodeX.Weight {
-		t._delete(&nodeX.left)
-	} else {
-		t._delete(&nodeX.right)
-	}
-}
-
-func (t *SuffixBalancedTree) _merge(x, y int32) int32 {
-	if x == 0 || y == 0 {
-		return x | y
-	}
-	nodeX, nodeY := t.Nodes[x], t.Nodes[y]
-	if nodeX.size > nodeY.size {
-		nodeX.right = t._merge(nodeX.right, y)
-		t._pushUp(x)
-		return x
-	} else {
-		nodeY.left = t._merge(x, nodeY.left)
-		t._pushUp(y)
-		return y
-	}
-}
-
-func (t *SuffixBalancedTree) _collect(cur int32) {
-	if cur == 0 {
+func (n *SbtNode) PushUp() {
+	if n == NIL {
 		return
 	}
-	node := t.Nodes[cur]
-	t._collect(node.left)
-	t.collector = append(t.collector, cur)
-	t._collect(node.right)
-}
-
-func (t *SuffixBalancedTree) _build(a, b int32, lower, upper float64) int32 {
-	if a > b {
-		return 0
+	n.allSize = n.left.allSize + n.right.allSize + 1
+	n.aliveSize = n.left.aliveSize + n.right.aliveSize
+	if n.alive {
+		n.aliveSize++
 	}
-	mid := (a + b) >> 1
-	x := t.collector[mid]
-	node := t.Nodes[x]
-	node.Weight = (lower + upper) / 2
-	node.size = b - a + 1
-	node.left = t._build(a, mid-1, lower, node.Weight)
-	node.right = t._build(mid+1, b, node.Weight, upper)
-	t._pushUp(x)
-	return x
-}
-
-// 一次修改可能会变更整个搜索路径上的所有子树大小，如果多个子树需要重构，选择最大的那颗。
-func (t *SuffixBalancedTree) _insert(searchPos *int32, lower, upper float64, id int32) {
-	if *searchPos == 0 {
-		*searchPos = int32(len(t.Ords) - 1)
-		// init
-		node := t.Nodes[*searchPos]
-		node.Weight = (lower + upper) / 2
-		node.Len = t.Size()
-		node.Id = id
-		node.left, node.right = 0, 0
-		node.size = 1
-		return
-	}
-	curPos := int32(len(t.Ords) - 1)
-	xNode := t.Nodes[*searchPos]
-	// 默认比较函数，如果当前字符相等则去掉一个字符比较.
-	if t.Ords[curPos] < t.Ords[*searchPos] || (t.Ords[curPos] == t.Ords[*searchPos] && t.Nodes[curPos-1].Weight < t.Nodes[*searchPos-1].Weight) {
-		t._insert(&xNode.left, lower, xNode.Weight, id)
-	} else {
-		t._insert(&xNode.right, xNode.Weight, upper, id)
-	}
-	t._pushUp(*searchPos)
-	if t._isUnbalanced(*searchPos) {
-		t.scapegoat = searchPos
-		t.lower = lower
-		t.upper = upper
+	n.rangeMinLcp = min32(n.left.rangeMinLcp, n.right.rangeMinLcp)
+	if n.alive {
+		n.rangeMinLcp = min32(n.rangeMinLcp, n.Lcp)
 	}
 }
 
-func (t *SuffixBalancedTree) _insertWithLess(searchPos *int32, lower, upper float64, id int32, less func(tree *SuffixBalancedTree, curPos, searchPos int32) bool) {
-	if *searchPos == 0 {
-		*searchPos = int32(len(t.Ords) - 1)
-		// init
-		node := t.Nodes[*searchPos]
-		node.Weight = (lower + upper) / 2
-		node.Len = t.Size()
-		node.Id = id
-		node.left, node.right = 0, 0
-		node.size = 1
-		return
+func (n *SbtNode) PushDown() {}
+
+func (n *SbtNode) CompareTo(o *SbtNode) int8 {
+	if n.Weight < o.Weight {
+		return -1
 	}
-	curPos := int32(len(t.Ords) - 1)
-	xNode := t.Nodes[*searchPos]
-	if less(t, curPos, *searchPos) {
-		t._insertWithLess(&xNode.left, lower, xNode.Weight, id, less)
-	} else {
-		t._insertWithLess(&xNode.right, xNode.Weight, upper, id, less)
+	if n.Weight > o.Weight {
+		return 1
 	}
-	t._pushUp(*searchPos)
-	if t._isUnbalanced(*searchPos) {
-		t.scapegoat = searchPos
-		t.lower = lower
-		t.upper = upper
-	}
+	return 0
 }
 
-func (t *SuffixBalancedTree) _rebuild() {
-	t.collector = t.collector[:0]
-	t._collect(*t.scapegoat)
-	*t.scapegoat = t._build(0, int32(len(t.collector))-1, t.lower, t.upper)
-}
-
-func (t *SuffixBalancedTree) _pushUp(x int32) {
-	cur := t.Nodes[x]
-	left, right := t.Nodes[cur.left], t.Nodes[cur.right]
-	cur.size = left.size + right.size + 1
-}
-
-func (t *SuffixBalancedTree) _isUnbalanced(x int32) bool {
-	// +5，避免不必要的重构
-	cur := t.Nodes[x]
-	left, right := t.Nodes[cur.left], t.Nodes[cur.right]
-	threshold := cur.size*ALPHA_NUM + 5*ALPHA_DENO
-	return (left.size*ALPHA_DENO > threshold) || (right.size*ALPHA_DENO > threshold)
-}
-
-func (t *SuffixBalancedTree) _compareString(n1 int32, f1 func(i int32) Char, n2 int32) int8 {
-	for i := int32(0); i < n1; i++ {
-		if i >= n2 {
-			return 1
+func (n *SbtNode) String() string {
+	res := strings.Builder{}
+	res.WriteString("[")
+	remain := 10
+	node := n
+	for node != nil && remain > 0 {
+		res.WriteString(string(node.key))
+		res.WriteString(",")
+		node = node.next
+		if node == n {
+			node = nil
 		}
-		v1, v2 := f1(i), t.Ords[n2-i]
-		if v1 != v2 {
-			if v1 < v2 {
-				return -1
-			} else {
-				return 1
+		remain--
+	}
+	if node != nil {
+		res.WriteString(",...,")
+	}
+	res.WriteString("/")
+	res.WriteString(string(n.Lcp))
+	res.WriteString("]")
+	return res.String()
+}
+
+type SuffixBalancedTreeLcp struct {
+	Root  *SbtNode
+	nodes []*SbtNode
+
+	objectHolder **SbtNode
+	collector    []*SbtNode
+}
+
+func NewSuffixBalancedTreeLcp(cap int32) *SuffixBalancedTreeLcp {
+	nodes := make([]*SbtNode, 0, max32(cap+1, 16))
+	root := NIL
+	dummy := NewSbtNodeWithKey(math.MinInt32)
+	dummy.next = dummy
+	dummy.OffsetToTail = -1
+	nodes = append(nodes, dummy)
+	return &SuffixBalancedTreeLcp{
+		Root:         root,
+		nodes:        nodes,
+		objectHolder: new(*SbtNode),
+	}
+}
+
+func (sbt *SuffixBalancedTreeLcp) AddPrefix(x int32) *SbtNode {
+	sbt.Root = sbt._insert(sbt.Root, x, sbt.nodes[len(sbt.nodes)-1], sbt.objectHolder, 0, 1)
+	node := *sbt.objectHolder
+	rank := sbt.Rank(node)
+
+	// fix lcp
+	var prev, next *SbtNode
+	if rank == 1 {
+		prev = NIL
+	} else {
+		prev = sbt._kth(sbt.Root, rank-1)
+	}
+	if rank == sbt.Root.aliveSize {
+		next = NIL
+	} else {
+		next = sbt._kth(sbt.Root, rank+1)
+	}
+	sbt._recalcRightLcp(prev, node)
+	sbt._recalcRightLcp(node, next)
+
+	sbt.nodes = append(sbt.nodes, node)
+	return node
+}
+
+func (sbt *SuffixBalancedTreeLcp) RemovePrefix() {
+	deleted := sbt.nodes[len(sbt.nodes)-1]
+	sbt.nodes = sbt.nodes[:len(sbt.nodes)-1]
+	rank := sbt.Rank(deleted)
+	var next *SbtNode
+	if rank == sbt.Root.aliveSize {
+		next = NIL
+	} else {
+		next = sbt._kth(sbt.Root, rank+1)
+	}
+
+	// fix lcp
+	if next != NIL {
+		nextLcp := min32(next.Lcp, deleted.Lcp)
+		next.prev = deleted.prev
+		sbt._updateLcp(sbt.Root, next, nextLcp)
+	}
+
+	sbt._delete(sbt.Root, deleted)
+
+	// clean or not
+	if sbt.Root.aliveSize*2 < sbt.Root.allSize {
+		sbt._collect(sbt.Root)
+		ptr := int32(0)
+		for _, node := range sbt.collector {
+			if node.alive {
+				sbt.collector[ptr] = node
+				ptr++
 			}
 		}
+		sbt.Root = sbt._rebuild(0, ptr-1, 0, 1)
 	}
-	if n1 < n2 {
-		return -1
+}
+
+func (sbt *SuffixBalancedTreeLcp) Lcp(a, b *SbtNode) int32 {
+	if a.Weight > b.Weight {
+		a, b = b, a
+	}
+	return sbt._rangeLcpExcludeL(sbt.Root, 0, 1, a.Weight, b.Weight)
+}
+
+func (sbt *SuffixBalancedTreeLcp) Sa(k int32) *SbtNode {
+	k++
+	return sbt._kth(sbt.Root, k)
+}
+
+func (sbt *SuffixBalancedTreeLcp) Rank(node *SbtNode) int32 {
+	return sbt._rank(sbt.Root, node)
+}
+
+// <=
+func (sbt *SuffixBalancedTreeLcp) Leq(n int32, f func(i int32) int32) int32 {
+	return sbt._rankSequence(sbt.Root, n, f)
+}
+
+func (sbt *SuffixBalancedTreeLcp) SaAll() []int32 {
+	sbt._collect(sbt.Root)
+	res := make([]int32, sbt.Size())
+	ptr := 0
+	for _, node := range sbt.collector {
+		if node.alive {
+			res[ptr] = node.OffsetToTail
+			ptr++
+		}
+	}
+	return res
+}
+
+func (sbt *SuffixBalancedTreeLcp) Size() int32 {
+	return sbt.Root.aliveSize
+}
+
+func (sbt *SuffixBalancedTreeLcp) _insert(root *SbtNode, key int32, next *SbtNode, insertNode **SbtNode, L, R float64) *SbtNode {
+	if root == NIL {
+		root = sbt._newNode(key, next, (L+R)/2)
+		*insertNode = root
+		return root
+	}
+	root.PushDown()
+	compareRes := sbt._insertCompare(root, key, next)
+	if compareRes == 0 {
+		*insertNode = root
+		sbt._init(key, root, next, root.Weight)
+	} else if compareRes > 0 {
+		root.left = sbt._insert(root.left, key, next, insertNode, L, root.Weight)
 	} else {
+		root.right = sbt._insert(root.right, key, next, insertNode, root.Weight, R)
+	}
+	root.PushUp()
+	root = sbt._tryRebuild(root, L, R)
+	return root
+}
+
+func (sbt *SuffixBalancedTreeLcp) _delete(root *SbtNode, node *SbtNode) {
+	root.PushDown()
+	if root == node {
+		root.alive = false
+	} else {
+		compareRes := root.CompareTo(node)
+		if compareRes > 0 {
+			sbt._delete(root.left, node)
+		} else {
+			sbt._delete(root.right, node)
+		}
+	}
+	root.PushUp()
+}
+
+func (sbt *SuffixBalancedTreeLcp) _updateLcp(root *SbtNode, target *SbtNode, lcp int32) {
+	root.PushDown()
+	if root == target {
+		root.Lcp = lcp
+	} else {
+		if root.Weight > target.Weight {
+			sbt._updateLcp(root.left, target, lcp)
+		} else {
+			sbt._updateLcp(root.right, target, lcp)
+		}
+	}
+	root.PushUp()
+}
+
+func (sbt *SuffixBalancedTreeLcp) _rangeLcpExcludeL(root *SbtNode, L, R float64, l, r float64) int32 {
+	if root == NIL || R <= l || L > r {
+		return math.MaxInt32
+	}
+	if L > l && R <= r {
+		return root.rangeMinLcp
+	}
+	root.PushDown()
+	res := min32(sbt._rangeLcpExcludeL(root.left, L, root.Weight, l, r), sbt._rangeLcpExcludeL(root.right, root.Weight, R, l, r))
+	if root.alive && l < root.Weight && root.Weight <= r {
+		res = min32(res, root.Lcp)
+	}
+	return res
+}
+
+func (sbt *SuffixBalancedTreeLcp) _considerLcp(a, b *SbtNode) int32 {
+	if a.key != b.key {
 		return 0
 	}
+	return 1 + sbt.Lcp(a.next, b.next)
+}
+
+func (sbt *SuffixBalancedTreeLcp) _recalcRightLcp(prev, next *SbtNode) {
+	if next == NIL {
+		return
+	}
+	next.prev = prev
+	lcp := sbt._considerLcp(prev, next)
+	sbt._updateLcp(sbt.Root, next, lcp)
+}
+
+func (sbt *SuffixBalancedTreeLcp) _kth(root *SbtNode, k int32) (res *SbtNode) {
+	if root == NIL {
+		return NIL
+	}
+	root.PushDown()
+	if root.left.aliveSize >= k {
+		res = sbt._kth(root.left, k)
+	} else {
+		count := root.left.aliveSize
+		if root.alive {
+			count++
+		}
+		if count >= k {
+			res = root
+		} else {
+			res = sbt._kth(root.right, k-count)
+		}
+	}
+	root.PushUp()
+	return
+}
+
+func (sbt *SuffixBalancedTreeLcp) _rank(root, node *SbtNode) int32 {
+	if root == NIL {
+		return 0
+	}
+	root.PushDown()
+	if root == node {
+		return root.aliveSize - root.right.aliveSize
+	} else {
+		compareRes := root.CompareTo(node)
+		if compareRes > 0 {
+			return sbt._rank(root.left, node)
+		} else {
+			return root.aliveSize - root.right.aliveSize + sbt._rank(root.right, node)
+		}
+	}
+}
+
+func (sbt *SuffixBalancedTreeLcp) _rankSequence(root *SbtNode, n int32, f func(i int32) int32) int32 {
+	if root == NIL {
+		return 0
+	}
+	root.PushDown()
+	compareRes := root._sequenceCompare(root, n, f)
+	if compareRes > 0 {
+		return sbt._rankSequence(root.left, n, f)
+	} else {
+		return root.aliveSize - root.right.aliveSize + sbt._rankSequence(root.right, n, f)
+	}
+}
+
+func (sbt *SuffixBalancedTreeLcp) _tryRebuild(root *SbtNode, L, R float64) *SbtNode {
+	if sbt._isUnbalanced(root) {
+		sbt._collect(root)
+		root = sbt._rebuild(0, int32(len(sbt.collector)-1), L, R)
+	}
+	return root
+}
+
+func (sbt *SuffixBalancedTreeLcp) _rebuild(l, r int32, L, R float64) *SbtNode {
+	if l > r {
+		return NIL
+	}
+	m := (l + r) >> 1
+	root := sbt.collector[m]
+	root.Weight = (L + R) / 2
+	root.left = sbt._rebuild(l, m-1, L, root.Weight)
+	root.right = sbt._rebuild(m+1, r, root.Weight, R)
+	root.PushUp()
+	return root
+}
+
+func (sbt *SuffixBalancedTreeLcp) _isUnbalanced(node *SbtNode) bool {
+	left, right := node.left, node.right
+	// +5，避免不必要的重构
+	threshold := node.allSize*ALPHA_NUM + 5*ALPHA_DENO
+	return (left.allSize*ALPHA_DENO > threshold) || (right.allSize*ALPHA_DENO > threshold)
+}
+
+func (sbt *SuffixBalancedTreeLcp) _collect(node *SbtNode) {
+	sbt.collector = sbt.collector[:0]
+	sbt._doCollect(node)
+}
+
+func (sbt *SuffixBalancedTreeLcp) _doCollect(root *SbtNode) {
+	if root == NIL {
+		return
+	}
+	root.PushDown()
+	sbt._doCollect(root.left)
+	sbt.collector = append(sbt.collector, root)
+	sbt._doCollect(root.right)
+}
+
+func (sbt *SuffixBalancedTreeLcp) _newNode(key int32, next *SbtNode, weight float64) *SbtNode {
+	root := NewSbtNode()
+	sbt._init(key, root, next, weight)
+	return root
+}
+
+func (sbt *SuffixBalancedTreeLcp) _init(key int32, root, next *SbtNode, weight float64) {
+	root.key = key
+	root.Weight = weight
+	root.next = next
+	root.alive = true
+	root.OffsetToTail = next.OffsetToTail + 1
+	root.Lcp = math.MaxInt32
+	root.prev = NIL
+	root.PushUp()
+}
+
+func (sbt *SuffixBalancedTreeLcp) _insertCompare(a *SbtNode, key int32, next *SbtNode) int8 {
+	if a.key != key {
+		if a.key < key {
+			return -1
+		}
+		return 1
+	}
+	if a.next.Weight < next.Weight {
+		return -1
+	}
+	if a.next.Weight > next.Weight {
+		return 1
+	}
+	return 0
+
+}
+func (sbt *SbtNode) _sequenceCompare(root *SbtNode, n int32, f func(i int32) int32) int8 {
+	for i := int32(0); i < n; i++ {
+		v := f(i)
+		if root.key != v {
+			if root.key < v {
+				return -1
+			}
+			return 1
+		}
+		root = root.next
+	}
+	return 0
+}
+
+func (sbt *SuffixBalancedTreeLcp) _nodeCompare(a, b *SbtNode) int8 {
+	for a != b {
+		if a.key != b.key {
+			if a.key < b.key {
+				return -1
+			}
+			return 1
+		}
+		a = a.next
+		b = b.next
+	}
+	return 0
+}
+
+func (sbt *SuffixBalancedTreeLcp) String() string {
+	sbt._collect(sbt.Root)
+	res := strings.Builder{}
+	res.WriteString("{")
+	for i, node := range sbt.collector {
+		res.WriteString(node.String())
+		if i < len(sbt.collector)-1 {
+			res.WriteString(",")
+		}
+	}
+	res.WriteString("}")
+	return res.String()
 }
 
 func min32(a, b int32) int32 {
-	if a < b {
+	if a <= b {
 		return a
 	}
 	return b
 }
 
 func max32(a, b int32) int32 {
-	if a > b {
+	if a >= b {
 		return a
 	}
 	return b
-}
-
-func main() {
-	// demo()
-	// P3809()
-	// P5353()
-	P6164()
-}
-
-func demo() {
-	tree := NewSuffixBalancedTree(0)
-
-	for i := 0; i < 100000; i++ {
-		tree.AppendLeft('a', -1)
-	}
-	fmt.Println(tree.Size())
-	for i := 0; i < 100000; i++ {
-		tree.PopLeft()
-	}
-
-	// aaa
-	tree.AppendLeft('a', -1)
-	tree.AppendLeft('a', -1)
-	tree.AppendLeft('a', -1)
-	fmt.Println(tree.Size())
-	fmt.Println(tree.Ords)
-	fmt.Println(tree.Weight(0))
-	fmt.Println(tree.Weight(1), 1)
-	fmt.Println(tree.Weight(2), 2)
-	fmt.Println(tree.Rank(2))
-	fmt.Println(tree.Rank(0))
-	fmt.Println(tree.Rank(1))
-	fmt.Println(tree.BisectRightString(6, func(i int32) Char { return 'c' }), 999)
-
-	tree.Enumerate(func(node *Node) { fmt.Println(node.Len) })
-	fmt.Println(tree.Sa())
-	fmt.Println(tree.Kth(2))
-
-	s := "a"
-	bytes := []byte(s)
-	bytes = append(bytes, 255)
-	res1 := tree.BisectLeftString(int32(len(bytes)), func(i int32) Char { return bytes[i] })
-	bytes = bytes[:len(bytes)-1]
-	bytes[len(bytes)-1]--
-	res2 := tree.BisectLeftString(int32(len(bytes)), func(i int32) Char { return bytes[i] })
-	fmt.Println(res1-res2, res1, res2, 987)
-}
-
-// P3809 【模板】后缀排序
-// https://www.luogu.com.cn/problem/P3809
-// 建出后缀平衡树之后，通过中序遍历得到后缀数组。
-func P3809() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var s string
-	fmt.Fscan(in, &s)
-	tree := NewSuffixBalancedTree(int32(len(s)))
-	for i := len(s) - 1; i >= 0; i-- {
-		tree.AppendLeft(Char(s[i]), -1)
-	}
-
-	sa := tree.Sa()
-	for _, v := range sa {
-		fmt.Fprint(out, v+1, " ")
-	}
-}
-
-// P5353 树上后缀排序(树上SA)
-// https://www.luogu.com.cn/problem/P5353
-// 树上的每个字符串为根节点到每个结点路径组成的字符串.
-// 对这些字符串按照字典序排序.
-// 如果两个节点所代表的字符串完全相同，
-// 它们的大小由它们父亲排名的大小决定，即谁的父亲排名大谁就更大；
-// 如果仍相同，则由它们编号的大小决定，即谁的编号大谁就更大。
-//
-// !给定一棵以 1 为根包含 n 个节点的树，保证对于 2∼n 的每个节点，其父亲的编号均小于自己的编号。
-// 输出一行 n 个正整数，第 i 个正整数表示代表排名第 i 的字符串的节点编号。
-//
-// !因为父结点编号均小于子结点编号，所以可以按照编号从小到大的顺序插入，保证父结点在子结点之前插入.
-func P5353() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int32
-	fmt.Fscan(in, &n)
-	parents := make([]int32, n+1) // 1-indexed
-	for i := int32(2); i < n+1; i++ {
-		fmt.Fscan(in, &parents[i])
-	}
-	var values string // 每个结点上的字符
-	fmt.Fscan(in, &values)
-
-	sbt := NewSuffixBalancedTree(n)
-
-	// 如果两个节点所代表的字符串完全相同，
-	// 它们的大小由它们父亲排名的大小决定，即谁的父亲排名大谁就更大；
-	// 如果仍相同，则由它们编号的大小决定，即谁的编号大谁就更大。
-	for id := int32(0); id < n; id++ {
-		sbt.Add(
-			values[id], id,
-			func(tree *SuffixBalancedTree, curPos, searchPos int32) bool {
-				ords, nodes := tree.Ords, tree.Nodes
-				if ords[curPos] != ords[searchPos] {
-					return ords[curPos] < ords[searchPos]
-				}
-				parentWeight1, parentWeight2 := nodes[parents[curPos]].Weight, nodes[parents[searchPos]].Weight
-				if parentWeight1 != parentWeight2 {
-					return parentWeight1 < parentWeight2
-				}
-				return id < nodes[searchPos].Id // 注意curPos对应node的Id还未赋值，需要使用传入的id.
-			},
-		)
-	}
-
-	sbt.Enumerate(func(node *Node) {
-		fmt.Fprint(out, node.Id+1, " ")
-	})
-}
-
-// P5346 【XR-1】柯南家族 (树上后缀排序+二维数点)
-// https://www.luogu.com.cn/problem/P5346
-// 树上后缀排序+离散化+dfs序转化为二维区间第k小问题, waveletMatrix求解.
-func P5346() {}
-
-// P6164 【模板】后缀平衡树
-// https://www.luogu.com.cn/problem/P6164
-// 给定初始字符串 s 和 q 个操作：
-// 1.在当前字符串的后面插入若干个字符。
-// 2.在当前字符串的后面删除若干个字符。
-// 3.询问字符串 t 作为连续子串在当前字符串中出现了几次？
-//
-// t 的出现次数等于以 t 为前缀的后缀数量，
-// 而以 t 为前缀的后缀数量等于其后继的排名减去其前驱的排名.
-// 在 t 后面加入一个极大的字符，就可以构造出 t 的一个后继。
-// 将 t 的最后一个字符减小 1，就可以构造出 t 的一个前驱。
-// 现在要查询某一个串 t 在后缀平衡树中排名，由于不能保证 t 在后缀平衡树中出现过，所以每次只能暴力比较字符串大小。
-func P6164() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-	// reader, _ := os.Open("P6164_1.in")
-	// in := bufio.NewReader(reader)
-	// // out := bufio.NewWriter(os.Stdout)
-	// writer, _ := os.Create("P6164_1.out")
-	// out := bufio.NewWriter(writer)
-
-	var q int32
-	fmt.Fscan(in, &q)
-	var s string
-	fmt.Fscan(in, &s)
-	sbt := NewSuffixBalancedTree(q + int32(len(s)))
-	for _, c := range s {
-		sbt.AppendLeft(Char(c), -1)
-	}
-
-	decode := func(bytes []byte, mask int32) {
-		m := int32(len(bytes))
-		for i := int32(0); i < m; i++ {
-			mask = (mask*131 + i) % m
-			bytes[i], bytes[mask] = bytes[mask], bytes[i]
-		}
-	}
-
-	add := func(bytes []byte) {
-		for _, c := range bytes {
-			sbt.AppendLeft(Char(c), -1)
-		}
-	}
-
-	delete := func(k int32) {
-		for i := int32(0); i < k; i++ {
-			sbt.PopLeft()
-		}
-	}
-
-	// Count.
-	query := func(bytes []byte) int32 {
-		n := int32(len(bytes))
-		// !翻转字符串.
-		tmp := make([]byte, len(bytes)+1)
-		tmp[0] = 255
-		copy(tmp[1:], bytes)
-		res1 := sbt.BisectLeftString(n+1, func(i int32) Char { return tmp[n+1-1-i] })
-
-		res2 := sbt.BisectLeftString(n, func(i int32) Char { return bytes[n-1-i] })
-		return res1 - res2
-	}
-
-	preRes := int32(0)
-	for i := int32(0); i < q; i++ {
-		var kind string
-		fmt.Fscan(in, &kind)
-		if kind == "ADD" {
-			var str string
-			fmt.Fscan(in, &str)
-			bytes := []byte(str)
-			decode(bytes, preRes)
-			add(bytes)
-		} else if kind == "DEL" {
-			var k int32
-			fmt.Fscan(in, &k)
-			delete(k)
-		} else {
-			var str string
-			fmt.Fscan(in, &str)
-			bytes := []byte(str)
-			decode(bytes, preRes)
-			res := query(bytes)
-			fmt.Fprintln(out, res)
-			preRes = preRes ^ res
-		}
-	}
 }

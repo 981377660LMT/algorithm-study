@@ -55,20 +55,22 @@ def topoSortByHeap(
 
 
 # TODO: verify
+# 4个点，边为[(0,1),(0,2),(0,3)]，2这个点会被误判为关键点
 def superPoints(n: int, edges: List[Tuple[int, int]]) -> List[bool]:
-    adjList = [[] for _ in range(n)]
-    rAdjList = [[] for _ in range(n)]
-    for u, v in edges:
-        adjList[u].append(v)
-        rAdjList[v].append(u)
-    order = topoSortByHeap(n, adjList, minFirst=True)[0]
-    rOrder = topoSortByHeap(n, rAdjList, minFirst=True)[0]
-    print(order, rOrder)
-    rOrder.reverse()
-    return [a == b for a, b in zip(order, rOrder)]
+    # adjList = [[] for _ in range(n)]
+    # rAdjList = [[] for _ in range(n)]
+    # for u, v in edges:
+    #     adjList[u].append(v)
+    #     rAdjList[v].append(u)
+    # order = topoSortByHeap(n, adjList, minFirst=True)[0]
+    # rOrder = topoSortByHeap(n, rAdjList, minFirst=True)[0]
+    # print(order, rOrder)
+    # rOrder.reverse()
+    # return [a == b for a, b in zip(order, rOrder)]
+    ...
 
 
 if __name__ == "__main__":
-    n = 9
-    edges = [(0, 1), (1, 2), (2, 3), (2, 4), (3, 5), (4, 5), (5, 6), (5, 7), (5, 8)]
+    n = 4
+    edges = [(0, 1), (0, 2), (0, 3)]
     print(superPoints(n, edges))  # [True, True, True, True, True]
