@@ -13,6 +13,10 @@ import (
 )
 
 func main() {
+	main2()
+}
+
+func demo() {
 	seg := NewDynamicSegTreeSparse(0, 1e9+10, false)
 	root := seg.NewRoot()
 	root = seg.Set(root, 1, 1)

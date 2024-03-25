@@ -10,7 +10,126 @@ import (
 )
 
 func main() {
-	yuki1170()
+	// abc339g()
+	abc342g()
+	// SP11470()
+	// yuki1170()
+}
+
+type InnerTreeRangeSum struct {
+	data   []int
+	preSum []int
+}
+
+func NewInnerTreeRangeSum() *InnerTreeRangeSum {
+	return &InnerTreeRangeSum{}
+}
+
+func (stl *InnerTreeRangeSum) Add(x int) {
+	stl.data = append(stl.data, x)
+}
+
+func (stl *InnerTreeRangeSum) Build() {
+	sort.Ints(stl.data)
+	stl.preSum = make([]int, len(stl.data)+1)
+	for i, x := range stl.data {
+		stl.preSum[i+1] = stl.preSum[i] + x
+	}
+}
+
+// 小于等于upper的元素之和.
+func (stl *InnerTreeRangeSum) Query(upper int) int {
+	pos := sort.SearchInts(stl.data, upper+1)
+	return stl.preSum[pos]
+}
+
+// G - Smaller Sum
+// https://atcoder.jp/contests/abc339/tasks/abc339_g
+// 二维数点问题.
+// 给定长为n的数组nums和q次查询,每次查询给定区间[l,r]和x,求区间[l,r]中小于等于x的元素之和.
+// 本题强制在线。后一次询问给出的 l,r,x 需异或上前一次询问的答案。
+//
+// !二维区间查询不下推区间，而是采用标记永久化，减少空间使用.
+func abc339g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	D := NewDivideInterval(int32(n))
+	innerTree := make([]*InnerTreeRangeSum, D.Size())
+	for i := range innerTree {
+		innerTree[i] = NewInnerTreeRangeSum()
+	}
+
+	add := func(index, delta int) {
+		D.EnumeratePoint(int32(index), func(segmentId int32) {
+			innerTree[segmentId].Add(delta)
+		})
+	}
+
+	query := func(start, end int, x int) int {
+		res := 0
+		D.EnumerateSegment(
+			int32(start), int32(end),
+			func(segmentId int32) {
+				res += innerTree[segmentId].Query(x)
+			},
+			false,
+		)
+		return res
+	}
+
+	for i, num := range nums {
+		add(i, num)
+	}
+	for i := range innerTree {
+		innerTree[i].Build()
+	}
+
+	var q int
+	fmt.Fscan(in, &q)
+	preRes := 0
+	for i := 0; i < q; i++ {
+		var a, b, c int
+		fmt.Fscan(in, &a, &b, &c)
+		a ^= preRes
+		b ^= preRes
+		c ^= preRes
+		a--
+		res := query(a, b, c)
+		preRes = res
+		fmt.Fprintln(out, res)
+	}
+}
+
+type InnerTreeAbc342g struct {
+}
+
+// G - Retroactive Range Chmax (可追溯区间最大值修改)
+// https://atcoder.jp/contests/abc342/tasks/abc342_g
+// 维护一个数列，有以下三个操作：
+// 1 l r x: 将区间[l,r]中的所有元素与x取最大值.
+// 2 i: 将第i次操作删除，保证第i次操作是操作1.
+// 3 i: 查询当前数列中第i个元素的值.
+func abc342g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+}
+
+// https://www.luogu.com.cn/problem/SP11470
+func SP11470() {
+
 }
 
 // No.1170 Never Want to Walk
@@ -70,23 +189,6 @@ func yuki1170() {
 	for i := int32(0); i < n; i++ {
 		fmt.Fprintln(out, weights[uf.Find(D.Id(i))])
 	}
-}
-
-// G - Smaller Sum
-// https://atcoder.jp/contests/abc339/tasks/abc339_g
-// 区间查询不下推区间，而是采用标记永久化.
-// https://github.com/maspypy/library/commit/8d79a4533f5cc686bb3b6fb44e1f8aea4a3f792f
-func abc339g() {}
-
-// G - Retroactive Range Chmax (可追溯区间最大值修改)
-// https://atcoder.jp/contests/abc342/tasks/abc342_g
-func abc342g() {
-
-}
-
-// https://www.luogu.com.cn/problem/SP11470
-func SP11470() {
-
 }
 
 type DivideInterval struct {
@@ -264,7 +366,7 @@ func (ufa *_UnionFindArray) Union(key1, key2 int32) bool {
 	return true
 }
 
-func (ufa *_UnionFindArray) UnionWithCallback(key1, key2 int32, cb func(big, small int32)) bool {
+func (ufa *_UnionFindArray) UnionWithCallback(key1, key2 int32, preMerge func(big, small int32)) bool {
 	root1, root2 := ufa.Find(key1), ufa.Find(key2)
 	if root1 == root2 {
 		return false
@@ -272,10 +374,10 @@ func (ufa *_UnionFindArray) UnionWithCallback(key1, key2 int32, cb func(big, sma
 	if ufa.rank[root1] > ufa.rank[root2] {
 		root1, root2 = root2, root1
 	}
+	preMerge(root2, root1)
 	ufa.parent[root1] = root2
 	ufa.rank[root2] += ufa.rank[root1]
 	ufa.Part--
-	cb(root2, root1)
 	return true
 }
 
@@ -312,4 +414,18 @@ func (ufa *_UnionFindArray) String() string {
 	}
 	sb = append(sb, fmt.Sprintf("Part: %d", ufa.Part))
 	return strings.Join(sb, "\n")
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
