@@ -8,37 +8,64 @@ import (
 	"os"
 )
 
-// https://yukicoder.me/problems/no/705
 func main() {
+	CF868F()
+}
+
+// Yet Another Minimization Problem (决策单调性+莫队)
+// https://www.luogu.com.cn/problem/CF868F
+// 有一个长度为 n 的序列，要求将其分成 k 个子段，每个子段的花费是子段内相同元素的对数，求最小花费。
+// dp[k][i] 表示前 i 个元素分成 k 个子段的最小花费。
+func CF868F() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
-	A := make([]int, n)
-	X := make([]int, n)
-	Y := make([]int, n)
+	var n, k int
+	fmt.Fscan(in, &n, &k)
+	nums := make([]int, n)
 	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &A[i])
+		fmt.Fscan(in, &nums[i])
 	}
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &X[i])
+	D := NewDictionary()
+	for i, v := range nums {
+		nums[i] = D.Id(v)
 	}
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &Y[i])
-	}
-	f := func(i, j int) int {
-		a := A[j-1]
-		x := X[i]
-		y := Y[i]
-		dx := abs(a - x)
-		dy := abs(y)
-		return dx*dx*dx + dy*dy*dy
-	}
-	fmt.Fprintln(out, MongeShortestPath(n, f)[n])
-}
 
+	counter := make([]int, D.Size())
+	left, right, cost := 0, 0, 0
+	add := func(i int) {
+		cost += counter[nums[i]]
+		counter[nums[i]]++
+	}
+	remove := func(i int) {
+		counter[nums[i]]--
+		cost -= counter[nums[i]]
+	}
+	f := func(l, r int) int {
+		for left > l {
+			left--
+			add(left)
+		}
+		for right < r {
+			add(right)
+			right++
+		}
+		for left < l {
+			remove(left)
+			left++
+		}
+		for right > r {
+			right--
+			remove(right)
+		}
+		return cost
+	}
+
+	res := MongeShortestPathDEdge(n, k, 1e18, f)
+	fmt.Fprintln(out, res)
+
+}
 func abs(x int) int {
 	if x < 0 {
 		return -x
@@ -84,8 +111,8 @@ func MongeShortestPathDEdge(N, d, fLimit int, f func(i, j int) int) int {
 		panic("d > N")
 	}
 	calcL := func(lambda int) int {
-		cost := func(frm, to int) int {
-			return f(frm, to) + lambda
+		cost := func(from, to int) int {
+			return f(from, to) + lambda
 		}
 		dp := MongeShortestPath(N, cost)
 		return dp[N] - lambda*d
@@ -375,6 +402,40 @@ func _FibonacciSearch(f func(x int) int, start, end int, minimize bool) (int, in
 		return x, y
 	}
 	return x, -y
+}
+
+type V = int
+type Dictionary struct {
+	_idToValue []V
+	_valueToId map[V]int32
+}
+
+// A dictionary that maps values to unique ids.
+func NewDictionary() *Dictionary {
+	return &Dictionary{
+		_valueToId: map[V]int32{},
+	}
+}
+
+func (d *Dictionary) Id(value V) int {
+	res, ok := d._valueToId[value]
+	if ok {
+		return int(res)
+	}
+	id := len(d._idToValue)
+	d._idToValue = append(d._idToValue, value)
+	d._valueToId[value] = int32(id)
+	return id
+}
+func (d *Dictionary) Value(id int) V {
+	return d._idToValue[id]
+}
+func (d *Dictionary) Has(value V) bool {
+	_, ok := d._valueToId[value]
+	return ok
+}
+func (d *Dictionary) Size() int {
+	return len(d._idToValue)
 }
 
 func min(a, b int) int {

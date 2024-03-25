@@ -7,9 +7,24 @@ import (
 )
 
 func main() {
-	Yuki952()
+	// Yuki952()
 	// Yuki705()
 }
+
+// https://www.luogu.com.cn/problem/P1484
+func P1484() {}
+
+// P2619 [国家集训队] Tree I
+// https://www.luogu.com.cn/problem/P2619
+func P2619() {}
+
+// MST Company
+// https://www.luogu.com.cn/problem/CF125E
+func CF125E() {}
+
+// Gosha is hunting
+// https://www.luogu.com.cn/problem/CF739E
+func CF739E() {}
 
 // 危险的火药库
 // 有n个火药库，每个火药库有一个危险程度A[i].
@@ -301,4 +316,36 @@ func FibonacciSearch(f func(x int) int, start, end int, minimize bool) (int, int
 	}
 	return x, -y
 
+}
+
+type Dictionary[V comparable] struct {
+	_idToValue []V
+	_valueToId map[V]int32
+}
+
+// A dictionary that maps values to unique ids.
+func NewDictionary[V comparable]() *Dictionary[V] {
+	return &Dictionary[V]{
+		_valueToId: map[V]int32{},
+	}
+}
+func (d *Dictionary[V]) Id(value V) int {
+	res, ok := d._valueToId[value]
+	if ok {
+		return int(res)
+	}
+	id := len(d._idToValue)
+	d._idToValue = append(d._idToValue, value)
+	d._valueToId[value] = int32(id)
+	return id
+}
+func (d *Dictionary[V]) Value(id int) V {
+	return d._idToValue[id]
+}
+func (d *Dictionary[V]) Has(value V) bool {
+	_, ok := d._valueToId[value]
+	return ok
+}
+func (d *Dictionary[V]) Size() int {
+	return len(d._idToValue)
 }
