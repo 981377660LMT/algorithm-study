@@ -42,13 +42,13 @@ type Node struct {
 }
 
 type SuffixBalancedTree struct {
-	Ords         []Char
-	Nodes        []*Node
-	lower, upper float64
-	root         int32
+	Ords  []Char
+	Nodes []*Node
+	root  int32
 
-	scapegoat *int32  // 临时保存，用于标记需要重构的结点
-	collector []int32 // 临时保存，用于dfs收集结点
+	scapegoat    *int32  // 临时保存，用于标记需要重构的结点
+	lower, upper float64 // 临时保存，用于重构
+	collector    []int32 // 临时保存，用于dfs收集结点
 }
 
 func NewSuffixBalancedTree(cap int32) *SuffixBalancedTree {
