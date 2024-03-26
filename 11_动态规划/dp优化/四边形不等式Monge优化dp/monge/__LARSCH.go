@@ -1,3 +1,4 @@
+// SMAWK 的在线版本.适用于dp优化.
 // https://maspypy.github.io/library/convex/larsch.hpp
 // https://noshi91.github.io/Library/algorithm/larsch.cpp.html
 

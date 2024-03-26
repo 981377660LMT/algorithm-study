@@ -1,3 +1,4 @@
+// CDQ 分治优化 1D/1D 动态规划的转移
 // offline dp: 区间分成k等分 dp[k][j]=min(dp[k-1][i]+f(i,j)) (0<=i<j) (dfsIndexRemain)
 // online dp: 区间分成任意分 dp[j]=min(dp[i]+f(i,j)) (0<=i<j) (dfsIndex)
 
@@ -11,6 +12,8 @@
 // O(n^2)优化到O(nlogn^2)
 // 例子:
 // !dp[j]=min(dp[i]+(x[j]-x[i]-a)^2)
+
+// 还可以尝试 `MongeShortestPath`
 
 package main
 
@@ -77,13 +80,12 @@ func min(a, b int) int {
 	return b
 }
 
-// P1912 [NOI2009] 诗人小G
-// https://www.luogu.com.cn/problem/P1912
-func P1912() {}
-
-// P5504 [JSOI2011] 柠檬
-// https://www.luogu.com.cn/problem/P5504
-func P5504() {}
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
 
 func Yuki705() {
 	// 垃圾回收
@@ -124,11 +126,4 @@ func Yuki705() {
 	}
 	res := offlineOnlineDp(n, f)
 	fmt.Fprintln(out, res)
-}
-
-func abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
 }

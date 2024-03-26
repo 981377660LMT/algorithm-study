@@ -20,9 +20,10 @@ import (
 )
 
 // 对每个查询 0<=qi<q 求出 f(i,j) 取得最小值时的 (j, f(i,j)) (0<=j<W)
-//  !f(i,j): 0<=i<=Q-1, 0<=j<=W-1
-func monotoneminima(Q, W int, f func(i, j int) int, isMin bool) [][2]int {
-	dp := make([][2]int, Q) // dp[i] 表示第i行取到`最小值`的(索引,值)
+//
+//	!f(i,j): 0<=i<=Q-1, 0<=j<=W-1
+func monotoneminima(row, col int, f func(i, j int) int, isMin bool) [][2]int {
+	dp := make([][2]int, row) // dp[i] 表示第i行取到`最小值`的(索引,值)
 
 	var dfs func(top, bottom, left, right int)
 	dfs = func(top, bottom, left, right int) {
@@ -30,7 +31,7 @@ func monotoneminima(Q, W int, f func(i, j int) int, isMin bool) [][2]int {
 			return
 		}
 
-		mid := (top + bottom) / 2
+		mid := (top + bottom) >> 1
 		index := -1
 		res := 0
 		for i := left; i <= right; i++ {
@@ -52,7 +53,7 @@ func monotoneminima(Q, W int, f func(i, j int) int, isMin bool) [][2]int {
 		dfs(mid+1, bottom, index, right)
 	}
 
-	dfs(0, Q-1, 0, W-1)
+	dfs(0, row-1, 0, col-1)
 	return dp
 }
 

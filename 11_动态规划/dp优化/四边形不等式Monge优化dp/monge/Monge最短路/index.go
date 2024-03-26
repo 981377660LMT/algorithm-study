@@ -1,4 +1,5 @@
 // 王钦石二分(wqs二分)/Monge图d边最短路/aliens dp
+// !所有的斜率优化可以用Monge图最短路O(nlogn)解决.
 
 package main
 
@@ -42,7 +43,11 @@ func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x
 func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
 
 func main() {
-	CF321E()
+	// P1484()
+	// P2619()
+	P3195()
+
+	// CF321E()
 
 	// Yuki952()
 	// Yuki705()
@@ -55,6 +60,39 @@ func P1484() {}
 // P2619 [国家集训队] Tree I
 // https://www.luogu.com.cn/problem/P2619
 func P2619() {}
+
+// P3195 [HNOI2008] 玩具装箱(Monge图最短路)
+// https://www.luogu.com.cn/problem/P3195
+// !dp[j] = min(dp[i]+(preSum[j]-preSum[i]+j-i-1-C)^2)
+func P3195() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	n, C := io.NextInt(), io.NextInt()
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		nums[i] = io.NextInt()
+	}
+
+	preSum := make([]int, n+1)
+	for i := 0; i < n; i++ {
+		preSum[i+1] = preSum[i] + nums[i]
+	}
+
+	dp := MongeShortestPath(
+		n,
+		func(i, j int) int {
+			tmp := preSum[j] - preSum[i] + j - i - 1 - C
+			return tmp * tmp
+		},
+	)
+	res := dp[n]
+	io.Println(res)
+}
 
 // MST Company
 // https://www.luogu.com.cn/problem/CF125E
@@ -215,7 +253,7 @@ func MongeShortestPath(n int, f func(i, j int) int) []int {
 		if l+1 >= r {
 			return
 		}
-		m := (l + r) / 2
+		m := (l + r) >> 1
 		for i := x[l]; i <= x[r]; i++ {
 			check(i, m)
 		}
@@ -248,8 +286,8 @@ func MongeShortestPathDEdge(n, d, maxWeight int, f func(i, j int) int) int {
 		panic("d > N")
 	}
 	cal := func(x int) int {
-		g := func(frm, to int) int {
-			return f(frm, to) + x
+		g := func(from, to int) int {
+			return f(from, to) + x
 		}
 		cost := MongeShortestPath(n, g)[n]
 		return cost - x*d
