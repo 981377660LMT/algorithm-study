@@ -8,20 +8,55 @@
 //
 // https://www.cnblogs.com/purplevine/p/16990286.html
 // https://www.cnblogs.com/alex-wei/p/DP_optimization_method_II.html
+// https://www.luogu.com/article/vx7a76on
 
 package main
 
 import (
 	"bufio"
 	"fmt"
+	stdio "io"
 	"os"
+	"strconv"
 )
+
+// from https://atcoder.jp/users/ccppjsrb
+var io *Iost
+
+type Iost struct {
+	Scanner *bufio.Scanner
+	Writer  *bufio.Writer
+}
+
+func NewIost(fp stdio.Reader, wfp stdio.Writer) *Iost {
+	const BufSize = 2000005
+	scanner := bufio.NewScanner(fp)
+	scanner.Split(bufio.ScanWords)
+	scanner.Buffer(make([]byte, BufSize), BufSize)
+	return &Iost{Scanner: scanner, Writer: bufio.NewWriter(wfp)}
+}
+func (io *Iost) Text() string {
+	if !io.Scanner.Scan() {
+		panic("scan failed")
+	}
+	return io.Scanner.Text()
+}
+func (io *Iost) Atoi(s string) int                 { x, _ := strconv.Atoi(s); return x }
+func (io *Iost) Atoi64(s string) int64             { x, _ := strconv.ParseInt(s, 10, 64); return x }
+func (io *Iost) Atof64(s string) float64           { x, _ := strconv.ParseFloat(s, 64); return x }
+func (io *Iost) NextInt() int                      { return io.Atoi(io.Text()) }
+func (io *Iost) NextInt64() int64                  { return io.Atoi64(io.Text()) }
+func (io *Iost) NextFloat64() float64              { return io.Atof64(io.Text()) }
+func (io *Iost) Print(x ...interface{})            { fmt.Fprint(io.Writer, x...) }
+func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x...) }
+func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
 
 const INF int = 1e18
 
 func main() {
-	CF833B()
-	// CF868F()
+	// CF321E()
+	// CF833B()
+	CF868F()
 
 	// P4360()
 	// P5574()
@@ -29,7 +64,36 @@ func main() {
 
 // Ciel and Gondolas
 // https://www.luogu.com.cn/problem/CF321E
-func CF321E() {}
+//
+// 转移代价为二维前缀和.
+func CF321E() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	n, k := io.NextInt(), io.NextInt()
+	grid := make([][]int, n)
+	for i := 0; i < n; i++ {
+		grid[i] = make([]int, n)
+		for j := 0; j < n; j++ {
+			grid[i][j] = io.NextInt()
+		}
+	}
+
+	preSum2d := NewPreSum2DFrom(grid)
+
+	f := func(i, j int, _ int) int {
+		res := preSum2d.QueryRange(i, i, j-1, j-1)
+		return res
+	}
+	dp := DivideAndConquerOptimization(k, n, f)
+	res := dp[k][n]
+	res /= 2
+	io.Println(res)
+}
 
 // CF833B-The Bakery (决策单调性+莫队维护区间颜色个数)
 // https://www.luogu.com.cn/problem/CF833B
@@ -40,15 +104,17 @@ func CF321E() {}
 // dp[i][j]=max{dp[i-1][k]+cost(k+1,j) 1<=k<j
 // dp[i][j]意为前j个数被分成i段时的最大总价值.
 func CF833B() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
 
-	var n, k int
-	fmt.Fscan(in, &n, &k)
+	n, k := io.NextInt(), io.NextInt()
 	nums := make([]int, n)
 	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
+		nums[i] = io.NextInt()
 	}
 
 	D := NewDictionary()
@@ -91,7 +157,7 @@ func CF833B() {
 	}
 
 	dp := DivideAndConquerOptimization(k, n, f)
-	fmt.Fprintln(out, -dp[k][n])
+	io.Println(-dp[k][n])
 }
 
 // Yet Another Minimization Problem (决策单调性+莫队维护相同元素的对数)
@@ -99,15 +165,17 @@ func CF833B() {
 // 有一个长度为 n 的序列，要求将其分成 k 个子段，每个子段的花费是子段内相同元素的对数，求最小花费。
 // dp[k][i] 表示前 i 个元素分成 k 个子段的最小花费。
 func CF868F() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
 
-	var n, k int
-	fmt.Fscan(in, &n, &k)
+	n, k := io.NextInt(), io.NextInt()
 	nums := make([]int, n)
 	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
+		nums[i] = io.NextInt()
 	}
 	D := NewDictionary()
 	for i, v := range nums {
@@ -145,8 +213,12 @@ func CF868F() {
 	}
 
 	dp := DivideAndConquerOptimization(k, n, f)
-	fmt.Fprintln(out, dp[k][n])
+	io.Println(dp[k][n])
 }
+
+// P3195 [HNOI2008] 玩具装箱
+// https://www.luogu.com.cn/problem/P3195
+func P3195() {}
 
 // P4360 [CEOI2004] 锯木厂选址
 // https://www.luogu.com.cn/problem/P4360
@@ -195,7 +267,7 @@ func monotoneminima(H, W int, f func(i, j int) int) [][2]int {
 			return
 		}
 
-		mid := (top + bottom) / 2
+		mid := (top + bottom) >> 1
 		index := -1
 		res := 0
 		for i := left; i <= right; i++ {
@@ -245,4 +317,31 @@ func (d *Dictionary) Has(value V) bool {
 }
 func (d *Dictionary) Size() int {
 	return len(d._idToValue)
+}
+
+type PreSum2D struct {
+	preSum [][]int
+}
+
+func NewPreSum2D(row, col int, f func(int, int) int) *PreSum2D {
+	preSum := make([][]int, row+1)
+	for i := range preSum {
+		preSum[i] = make([]int, col+1)
+	}
+	for r := 0; r < row; r++ {
+		for c := 0; c < col; c++ {
+			preSum[r+1][c+1] = f(r, c) + preSum[r][c+1] + preSum[r+1][c] - preSum[r][c]
+		}
+	}
+	return &PreSum2D{preSum}
+}
+
+func NewPreSum2DFrom(mat [][]int) *PreSum2D {
+	return NewPreSum2D(len(mat), len(mat[0]), func(r, c int) int { return mat[r][c] })
+}
+
+// 查询sum(A[r1:r2+1, c1:c2+1])的值.
+// 0 <= r1 <= r2 < row, 0 <= c1 <= c2 < col.
+func (ps *PreSum2D) QueryRange(row1, col1, row2, col2 int) int {
+	return ps.preSum[row2+1][col2+1] - ps.preSum[row2+1][col1] - ps.preSum[row1][col2+1] + ps.preSum[row1][col1]
 }

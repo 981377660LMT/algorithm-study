@@ -1,16 +1,54 @@
+// 王钦石二分(wqs二分)/Monge图d边最短路/aliens dp
+
 package main
 
 import (
 	"bufio"
 	"fmt"
+	stdio "io"
 	"os"
+	"strconv"
 )
 
+// from https://atcoder.jp/users/ccppjsrb
+var io *Iost
+
+type Iost struct {
+	Scanner *bufio.Scanner
+	Writer  *bufio.Writer
+}
+
+func NewIost(fp stdio.Reader, wfp stdio.Writer) *Iost {
+	const BufSize = 2000005
+	scanner := bufio.NewScanner(fp)
+	scanner.Split(bufio.ScanWords)
+	scanner.Buffer(make([]byte, BufSize), BufSize)
+	return &Iost{Scanner: scanner, Writer: bufio.NewWriter(wfp)}
+}
+func (io *Iost) Text() string {
+	if !io.Scanner.Scan() {
+		panic("scan failed")
+	}
+	return io.Scanner.Text()
+}
+func (io *Iost) Atoi(s string) int                 { x, _ := strconv.Atoi(s); return x }
+func (io *Iost) Atoi64(s string) int64             { x, _ := strconv.ParseInt(s, 10, 64); return x }
+func (io *Iost) Atof64(s string) float64           { x, _ := strconv.ParseFloat(s, 64); return x }
+func (io *Iost) NextInt() int                      { return io.Atoi(io.Text()) }
+func (io *Iost) NextInt64() int64                  { return io.Atoi64(io.Text()) }
+func (io *Iost) NextFloat64() float64              { return io.Atof64(io.Text()) }
+func (io *Iost) Print(x ...interface{})            { fmt.Fprint(io.Writer, x...) }
+func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x...) }
+func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
+
 func main() {
+	CF321E()
+
 	// Yuki952()
 	// Yuki705()
 }
 
+// P1484 种树
 // https://www.luogu.com.cn/problem/P1484
 func P1484() {}
 
@@ -21,6 +59,39 @@ func P2619() {}
 // MST Company
 // https://www.luogu.com.cn/problem/CF125E
 func CF125E() {}
+
+// Ciel and Gondolas
+// https://www.luogu.com.cn/problem/CF321E
+//
+// 转移代价为二维前缀和.
+func CF321E() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	n, k := io.NextInt(), io.NextInt()
+	grid := make([][]int, n)
+	for i := 0; i < n; i++ {
+		grid[i] = make([]int, n)
+		for j := 0; j < n; j++ {
+			grid[i][j] = io.NextInt()
+		}
+	}
+
+	preSum2d := NewPreSum2DFrom(grid)
+
+	f := func(i, j int) int {
+		res := preSum2d.QueryRange(i, i, j-1, j-1)
+		return res
+	}
+
+	res := MongeShortestPathDEdge(n, k, 1e9, f)
+	res /= 2
+	io.Println(res)
+}
 
 // Gosha is hunting
 // https://www.luogu.com.cn/problem/CF739E
@@ -318,34 +389,62 @@ func FibonacciSearch(f func(x int) int, start, end int, minimize bool) (int, int
 
 }
 
-type Dictionary[V comparable] struct {
+type V = int
+type Dictionary struct {
 	_idToValue []V
-	_valueToId map[V]int32
+	_valueToId map[V]int
 }
 
 // A dictionary that maps values to unique ids.
-func NewDictionary[V comparable]() *Dictionary[V] {
-	return &Dictionary[V]{
-		_valueToId: map[V]int32{},
+func NewDictionary() *Dictionary {
+	return &Dictionary{
+		_valueToId: map[V]int{},
 	}
 }
-func (d *Dictionary[V]) Id(value V) int {
+func (d *Dictionary) Id(value V) int {
 	res, ok := d._valueToId[value]
 	if ok {
-		return int(res)
+		return res
 	}
 	id := len(d._idToValue)
 	d._idToValue = append(d._idToValue, value)
-	d._valueToId[value] = int32(id)
+	d._valueToId[value] = id
 	return id
 }
-func (d *Dictionary[V]) Value(id int) V {
+func (d *Dictionary) Value(id int) V {
 	return d._idToValue[id]
 }
-func (d *Dictionary[V]) Has(value V) bool {
+func (d *Dictionary) Has(value V) bool {
 	_, ok := d._valueToId[value]
 	return ok
 }
-func (d *Dictionary[V]) Size() int {
+func (d *Dictionary) Size() int {
 	return len(d._idToValue)
+}
+
+type PreSum2D struct {
+	preSum [][]int
+}
+
+func NewPreSum2D(row, col int, f func(int, int) int) *PreSum2D {
+	preSum := make([][]int, row+1)
+	for i := range preSum {
+		preSum[i] = make([]int, col+1)
+	}
+	for r := 0; r < row; r++ {
+		for c := 0; c < col; c++ {
+			preSum[r+1][c+1] = f(r, c) + preSum[r][c+1] + preSum[r+1][c] - preSum[r][c]
+		}
+	}
+	return &PreSum2D{preSum}
+}
+
+func NewPreSum2DFrom(mat [][]int) *PreSum2D {
+	return NewPreSum2D(len(mat), len(mat[0]), func(r, c int) int { return mat[r][c] })
+}
+
+// 查询sum(A[r1:r2+1, c1:c2+1])的值.
+// 0 <= r1 <= r2 < row, 0 <= c1 <= c2 < col.
+func (ps *PreSum2D) QueryRange(row1, col1, row2, col2 int) int {
+	return ps.preSum[row2+1][col2+1] - ps.preSum[row2+1][col1] - ps.preSum[row1][col2+1] + ps.preSum[row1][col1]
 }

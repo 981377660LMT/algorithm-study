@@ -4,31 +4,41 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 )
 
 func main() {
-	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	nas := NewNonAdjacentSelection(nums, true)
-	fmt.Println(nas.Restore(5))
+	// nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	// nas := NewNonAdjacentSelection(nums, true)
+	// fmt.Println(nas.Restore(5))
+
+	CF958E2()
 }
 
-func demo() {
+// 给定n个时间点。每个区间都以某两个时间点为左右端点，且每个区间的「代价」定义端点的时间之差。
+// !你要选择k个连续的区间，保证这个k个连续的区间没有交集，且代价总和最小。
+// n<=5e5,k<=5000
+// https://www.luogu.com.cn/problem/CF958E2
+func CF958E2() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n int
-	fmt.Fscan(in, &n)
+	var n, k int
+	fmt.Fscan(in, &k, &n)
 	nums := make([]int, n)
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	nas := NewNonAdjacentSelection(nums, false)
-	res := nas.Solve()
-	for i := 1; i < len(res); i++ {
-		fmt.Fprintln(out, res[i])
+	sort.Ints(nums)
+	diff := make([]int, n-1)
+	for i := 0; i < n-1; i++ {
+		diff[i] = nums[i+1] - nums[i]
 	}
+	S := NewNonAdjacentSelection(diff, true)
+	res := S.Solve()
+	fmt.Fprintln(out, res[k])
 }
 
 // 从数组不相邻选择 k(0<=k<=(n+1/2)) 个数,最大化和/最小化和.

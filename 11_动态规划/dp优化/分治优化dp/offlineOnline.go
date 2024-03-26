@@ -39,7 +39,7 @@ func offlineOnlineDp(n int, f func(i, j int) int) int {
 		if top == bottom {
 			return
 		}
-		mid := (top + bottom) / 2
+		mid := (top + bottom) >> 1
 		index := left
 		res := f(mid, index) + dp[index]
 		for i := left; i <= right; i++ {
@@ -49,7 +49,6 @@ func offlineOnlineDp(n int, f func(i, j int) int) int {
 				index = i
 			}
 		}
-
 		update(mid, res)
 		dfs(top, mid, left, index)
 		dfs(mid+1, bottom, index, right)
@@ -61,7 +60,7 @@ func offlineOnlineDp(n int, f func(i, j int) int) int {
 			update(left, f(left, right)+dp[right])
 			return
 		}
-		mid := (left + right) / 2
+		mid := (left + right) >> 1
 		solve(mid, right)
 		dfs(left, mid, mid, right)
 		solve(left, mid)
@@ -78,7 +77,15 @@ func min(a, b int) int {
 	return b
 }
 
-func main() {
+// P1912 [NOI2009] 诗人小G
+// https://www.luogu.com.cn/problem/P1912
+func P1912() {}
+
+// P5504 [JSOI2011] 柠檬
+// https://www.luogu.com.cn/problem/P5504
+func P5504() {}
+
+func Yuki705() {
 	// 垃圾回收
 	// https://yukicoder.me/problems/no/705
 	// 公园里有n个垃圾
