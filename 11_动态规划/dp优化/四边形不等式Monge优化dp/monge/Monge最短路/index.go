@@ -47,6 +47,7 @@ func main() {
 	// P2619()
 	P3195()
 
+	CF125E()
 	// CF321E()
 
 	// Yuki952()
@@ -55,11 +56,41 @@ func main() {
 
 // P1484 种树
 // https://www.luogu.com.cn/problem/P1484
-func P1484() {}
+// 不相邻选k个点,使得这k个点的和最大.
+func P1484() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	n, k := io.NextInt(), io.NextInt()
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		nums[i] = io.NextInt()
+	}
+}
 
 // P2619 [国家集训队] Tree I
 // https://www.luogu.com.cn/problem/P2619
-func P2619() {}
+// 给你一个无向带权连通图，每条边是黑色或白色。让你求一棵最小权的恰好有 k 条白色边的生成树。
+func P2619() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	n, m, k := io.NextInt(), io.NextInt(), io.NextInt()
+	edges := make([][4]int, m)
+	for i := 0; i < m; i++ {
+		u, v, w, color := io.NextInt(), io.NextInt(), io.NextInt(), io.NextInt()
+		u, v = u-1, v-1
+		edges[i] = [4]int{u, v, w, color}
+	}
+}
 
 // P3195 [HNOI2008] 玩具装箱(Monge图最短路)
 // https://www.luogu.com.cn/problem/P3195
@@ -96,7 +127,27 @@ func P3195() {
 
 // MST Company
 // https://www.luogu.com.cn/problem/CF125E
-func CF125E() {}
+// 求一种特殊的最小生成树。给定一个有 n 个节点和 m 条边的图，
+// 找出一个生成树满足从根节点 1 直接连向其余节点的边要恰好是 k 条，
+// 在此条件下生成树的权值和最小。不存在这样的生成树输出 -1。
+// n<=5000,m<=1e5,k<=5000.
+func CF125E() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	n, m, k := io.NextInt(), io.NextInt(), io.NextInt()
+	edges := make([][3]int, m)
+	for i := 0; i < m; i++ {
+		u, v, w := io.NextInt(), io.NextInt(), io.NextInt()
+		u, v = u-1, v-1
+		edges[i] = [3]int{u, v, w}
+	}
+
+}
 
 // Ciel and Gondolas
 // https://www.luogu.com.cn/problem/CF321E
@@ -130,10 +181,6 @@ func CF321E() {
 	res /= 2
 	io.Println(res)
 }
-
-// Gosha is hunting
-// https://www.luogu.com.cn/problem/CF739E
-func CF739E() {}
 
 // 危险的火药库
 // 有n个火药库，每个火药库有一个危险程度A[i].

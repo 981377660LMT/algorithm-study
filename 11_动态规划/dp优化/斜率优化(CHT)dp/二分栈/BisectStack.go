@@ -92,39 +92,7 @@ func P3195() {
 	_ = C
 }
 
-// const int N=1e5+5;
-
-// int n,h[N],s[N],p[N];
-// ll f[N],buc[N];
-// vector <int> st[N];
-// ll cal(int p,ll l){return f[p-1]+l*l*s[p];}
-
-// #define tp st[c][st[c].size()-1]
-// #define se st[c][st[c].size()-2]
-
-// int chk(int i,int j){
-// 	int l=p[j],r=buc[s[j]]+1;
-// 	while(l<r){
-// 		int m=l+r>>1;
-// 		if(cal(i,m-p[i]+1)<cal(j,m-p[j]+1))l=m+1;
-// 		else r=m;
-// 	} return l;
-// }
-
-//	int main(){
-//		cin>>n;
-//		for(int i=1;i<=n;i++)s[i]=read(),p[i]=++buc[s[i]];
-//		for(int i=1;i<=n;i++){
-//			int c=s[i];
-//			while(st[c].size()>1&&chk(se,tp)<=chk(tp,i))st[c].pop_back();
-//			st[c].push_back(i);
-//			while(st[c].size()>1&&chk(se,tp)<=p[i])st[c].pop_back();
-//			f[i]=cal(tp,p[i]-p[tp]+1);
-//		} cout<<f[n]<<endl;
-//		return 0;
-//	}
-//
-// P5504 [JSOI2011] 柠檬(二分栈)
+// P5504 [JSOI2011] 柠檬(二分栈, TODO：斜率优化)
 // https://www.luogu.com.cn/problem/P5504
 // 将一个数组分成若干段，每一段中选一个数作为这一段的代表数x.
 // 假设这个数有t个，那么这一段的得分为x*t*t.
@@ -133,6 +101,8 @@ func P3195() {
 //
 // dp[i]表示前i个数的最大得分.
 // 一个关键的结论是：只有左右端点元素相同的区间才有可能转移, 成为最佳决策.
+// !dp[j] = max(dp[i] + nums[i] * (idInGroup[j]-idInGroup[i]+1)^2), 其中i<j且nums[i]==nums[j].
+// 注意，需要给每个v值维护一个单调栈，栈中存储的是区间的左端点.
 func P5504() {
 	in := os.Stdin
 	out := os.Stdout
@@ -154,8 +124,8 @@ func P5504() {
 	counter := make([]int, D.Size())
 	idInGroup := make([]int, n)
 	for i, v := range nums {
-		counter[v]++
 		idInGroup[i] = counter[v]
+		counter[v]++
 	}
 
 	dp := make([]int, n+1)
@@ -163,16 +133,26 @@ func P5504() {
 		return dp[i-1] + len*len*nums[i]
 	}
 
-	check := func(i, j int) int {}
-
-	stack := make([]int, n)
-	top := 0
-
-	for i, v := range nums {
-		// for top>1
+	// TODO
+	check := func(i, j int) int {
+		return 0
 	}
 
-	// 出现次数的前缀和
+	stacks := make([][]int, D.Size())
+	top := func(v int) int { return stacks[v][len(stacks[v])-1] }
+	second := func(v int) int { return stacks[v][len(stacks[v])-2] }
+	for i, v := range nums {
+		for len(stacks[v]) > 1 && check(second(v), top(v)) <= check(top(v), i) {
+			stacks[v] = stacks[v][:len(stacks[v])-1]
+		}
+		stacks[v] = append(stacks[v], i)
+		for len(stacks[v]) > 1 && check(second(v), top(v)) <= idInGroup[i] {
+			stacks[v] = stacks[v][:len(stacks[v])-1]
+		}
+		dp[i] = cal(top(v), idInGroup[i]-idInGroup[top(v)]+1)
+	}
+
+	io.Println(dp[n])
 }
 
 // P5665 [CSP-S2019] 划分
