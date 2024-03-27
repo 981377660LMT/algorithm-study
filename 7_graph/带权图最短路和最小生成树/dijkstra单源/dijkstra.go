@@ -96,6 +96,39 @@ func DijkstraSiftHeap2(n int, graph [][][2]int, start, end int) (res int, path [
 	return
 }
 
+// 多源最短路, 返回(距离, 前驱, 根节点).
+// 用于求出离每个点最近的起点.
+func DijkstraMultiStart(n int, graph [][][2]int, starts []int) (dist []int, pre []int, roots []int) {
+	dist = make([]int, n)
+	pre = make([]int, n)
+	roots = make([]int, n)
+	for i := 0; i < n; i++ {
+		dist[i] = INF
+		pre[i] = -1
+		roots[i] = -1
+	}
+	pq := NewSiftHeap(n, func(i, j int32) bool { return dist[i] < dist[j] })
+	for _, v := range starts {
+		dist[v] = 0
+		roots[v] = v
+		pq.Push(v)
+	}
+	for pq.Size() > 0 {
+		cur := pq.Pop()
+		for _, e := range graph[cur] {
+			next, weight := e[0], e[1]
+			cand := dist[cur] + weight
+			if cand < dist[next] {
+				dist[next] = cand
+				roots[next] = roots[cur]
+				pre[next] = cur
+				pq.Push(next)
+			}
+		}
+	}
+	return
+}
+
 type SiftHeap struct {
 	heap []int32
 	pos  []int32

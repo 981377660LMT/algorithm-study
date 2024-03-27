@@ -81,12 +81,36 @@ def dijkstra3(
     return dist, preV, preE
 
 
-import sys
+# 多源最短路, 返回(距离, 前驱, 根节点).用于求出离每个点最近的起点.
+def dijkstraMultiRoot(
+    n: int, adjList: List[List[Tuple[int, int]]], roots: List[int]
+) -> Tuple[List[int], List[int], List[int]]:
+    dist = [INF] * n
+    pre = [-1] * n
+    root = [-1] * n
+    pq = [(0, v) for v in roots]
+    for v in roots:
+        dist[v] = 0
+        root[v] = v
+    while pq:
+        curDist, cur = heappop(pq)
+        if dist[cur] < curDist:
+            continue
+        for next, weight in adjList[cur]:
+            cand = dist[cur] + weight
+            if cand < dist[next]:
+                dist[next] = cand
+                root[next] = root[cur]
+                pre[next] = cur
+                heappush(pq, (dist[next], next))
+    return dist, pre, root
 
-sys.setrecursionlimit(int(1e6))
-input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 if __name__ == "__main__":
+    import sys
+
+    sys.setrecursionlimit(int(1e6))
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
     n, m, start, end = map(int, input().split())
     adjList = [[] for _ in range(n)]
     for _ in range(m):

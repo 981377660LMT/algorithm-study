@@ -22,7 +22,7 @@ def rob(nums: List[int]) -> int:
 
     dp0, dp1 = 0, nums[0]
     for i in range(1, len(nums)):
-        dp0, dp1 = max(dp0, dp1), max(dp0 + nums[i], dp1)
+        dp0, dp1 = max(dp0, dp1), dp0 + nums[i]
     return max(dp0, dp1)
 
 

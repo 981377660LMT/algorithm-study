@@ -163,7 +163,7 @@ func P5665() {}
 // 2945. 找到最大非递减数组的长度
 // https://leetcode.cn/problems/find-maximum-non-decreasing-array-length/description/
 func findMaximumLength(nums []int) int {
-
+	return 0
 }
 
 type V = int
