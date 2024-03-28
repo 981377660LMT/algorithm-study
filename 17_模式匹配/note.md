@@ -45,3 +45,12 @@ src/string-search.h 文件中一共定义了五种搜索算法：
 Boyer-Moore 算法平均要比 KMP 快 3-5 倍，在实际的工业生产中，比如 GNU grep,还有各种文本编辑器的查找功能（Ctrl+F）大多用的 BM（Boyer-Moore）算法。
 
 `注意 java 里的 indexOf 是暴力搜索`
+
+---
+
+惩罚函数与序列匹配问题(fft 加速通配符匹配)
+https://taodaling.github.io/blog/2019/06/14/%E5%BA%8F%E5%88%97%E9%97%AE%E9%A2%98/
+用惩罚函数的方式，我们可以非常灵活的定义惩罚函数，从而计算所有匹配子串。
+
+浅谈 FFT 在字符串匹配中的应用
+https://www.luogu.com.cn/article/rp0rk9nd
