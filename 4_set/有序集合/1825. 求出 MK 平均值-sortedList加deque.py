@@ -63,7 +63,7 @@ class MKAverage:
         self._sum = sum(self._sl[self._k : -self._k])
 
 
-class TopKSum:
+class TopKSumSortedList:
     __slots__ = ("_sl", "_k", "_topKSum")
 
     def __init__(self, k: int, isMin=True) -> None:

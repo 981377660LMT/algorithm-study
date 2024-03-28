@@ -6,6 +6,7 @@ import java.util.function.IntPredicate;
 
 /**
  * 更加优秀的树上倍增
+ * https://taodaling.github.io/blog/2020/03/18/binary-lifting/
  * https://codeforces.com/blog/entry/74847
  * <p>
  * O(log_2n) for all operation

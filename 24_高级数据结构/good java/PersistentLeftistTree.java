@@ -5,6 +5,8 @@ import template.utils.CloneSupportObject;
 import java.util.*;
 
 // TODO: 学习接口、命名、设计
+// 左偏树
+// https://taodaling.github.io/blog/2019/06/28/%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/
 public class PersistentLeftistTree<K> extends CloneSupportObject<PersistentLeftistTree<K>> {
     public static final PersistentLeftistTree NIL = new PersistentLeftistTree<>(null);
 
