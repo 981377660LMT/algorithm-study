@@ -126,10 +126,13 @@ https://taodaling.github.io/blog/categories/
 13. trie 合并
     https://www.luogu.com.cn/problem/CF778C
 14. lca
-    - 判断某个顶点 x 是否落在 u,v 的唯一路径上：首先 x 一定处在 lca(u,v)子树内，且 x 一定是 u 或 v 的祖先。
+    - 判断某个顶点 x 是否落在 u,v 的唯一路径上：
+      首先 x 一定处在 lca(u,v)子树内，且 x 一定是 u 或 v 的祖先。
     - 判断 x1,y1 的路径与 x2,y2 的路径是否有交点：
       两条路径假如有交点，记任意交点为 z，很显然 z 一定是 x1 或 y1 的祖先，且 z 还是 x2 或 y2 的祖先。
       因此可以推出 lca(x2,y2)一定是 x1 或 y1 的祖先，且 lca(x1,y1)还是 x2 或 y2 的祖先。
+      在一棵树上，对于路径 (x,y) 和路径 (u,v)，判断它们相交，等价于判断是否满足：
+      **lca(u,v) 在路径 (x,y) 上，或者 lca(x,y) 在路径 (u,v) 上**
 15. paxos (有点像桌游规则)
     https://taodaling.github.io/blog/2018/10/25/paxos/
     Paxos 算法是 Leslie Lamport 于 1990 年提出的一种基于消息传递且具有高度容错特性的**一致性算法**。
