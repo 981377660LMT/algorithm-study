@@ -197,35 +197,41 @@
 
 // }
 
-interface IBisectOptions<T> {
-  left?: number
-  right?: number
-  compareFn?: (a: T, b: T) => number
-}
+// interface IBisectOptions<T> {
+//   left?: number
+//   right?: number
+//   compareFn?: (a: T, b: T) => number
+// }
 
-class BinarySearch {
-  private constructor() {}
+// class BinarySearch {
+//   private constructor() {}
 
-  static firstTrueInt(predicate: (mid: number) => boolean, left: number, right: number): number {}
+//   static firstTrueInt(predicate: (mid: number) => boolean, left: number, right: number): number {}
 
-  static lastTrueInt(predicate: (mid: number) => boolean, left: number, right: number): number {}
+//   static lastTrueInt(predicate: (mid: number) => boolean, left: number, right: number): number {}
 
-  static firstTrueFloat64(predicate: (mid: number) => boolean, left: number, right: number, absError: number, relativeError: number): number {}
+//   static firstTrueFloat64(predicate: (mid: number) => boolean, left: number, right: number, absError: number, relativeError: number): number {}
 
-  static lastTrueFloat64(predicate: (mid: number) => boolean, left: number, right: number, absError: number, relativeError: number): number {
-    return BinarySearch.firstTrueFloat64(predicate, left, right, absError, relativeError)
-  }
+//   static lastTrueFloat64(predicate: (mid: number) => boolean, left: number, right: number, absError: number, relativeError: number): number {
+//     return BinarySearch.firstTrueFloat64(predicate, left, right, absError, relativeError)
+//   }
 
-  static lowerBound<T>(arr: ArrayLike<T>, target: T, options?: IBisectOptions<T>): number {
-    const { left = 0, right = arr.length - 1, compareFn = (a: any, b: any) => (a < b ? -1 : a > b ? 1 : 0) } = options || {}
-  }
+//   static lowerBound<T>(arr: ArrayLike<T>, target: T, options?: IBisectOptions<T>): number {
+//     const { left = 0, right = arr.length - 1, compareFn = (a: any, b: any) => (a < b ? -1 : a > b ? 1 : 0) } = options || {}
+//   }
 
-  static upperBound<T>(arr: ArrayLike<T>, target: T, options?: IBisectOptions<T>): number {
-    const { left = 0, right = arr.length - 1, compareFn = (a: any, b: any) => (a < b ? -1 : a > b ? 1 : 0) } = options || {}
-  }
-}
+//   static upperBound<T>(arr: ArrayLike<T>, target: T, options?: IBisectOptions<T>): number {
+//     const { left = 0, right = arr.length - 1, compareFn = (a: any, b: any) => (a < b ? -1 : a > b ? 1 : 0) } = options || {}
+//   }
+// }
 
-export { BinarySearch }
+// export { BinarySearch }
 
-if (require.main === module) {
+// if (require.main === module) {
+// }
+
+package main
+
+func main() {
+
 }

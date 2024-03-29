@@ -172,6 +172,33 @@ func CF899F() {
 	fmt.Fprintln(out, strings.Join(res, ""))
 }
 
+// 3073. 最大递增三元组
+// https://leetcode.cn/problems/maximum-increasing-triplet-value/description/
+// 给定一个数组 nums，返回满足 i < j < k 且 nums[i] < nums[j] < nums[k] 的三元组 (i, j, k)  的 最大值。
+// 三元组 (i, j, k)  的 值 为 nums[i] - nums[j] + nums[k]。
+func maximumTripletValue(nums []int) int {
+	left := NewSortedList(func(a, b int) bool { return a < b }, nums[0])
+	right := NewSortedList(func(a, b int) bool { return a < b }, nums[2:]...)
+
+	res := -INF
+	for j := 1; j < len(nums)-1; j++ {
+		cur := nums[j]
+		higher, ok1 := right.Higher(cur)
+		if !ok1 {
+			continue
+		}
+		lower, ok2 := left.Lower(cur)
+		if !ok2 {
+			continue
+		}
+		res = max(res, lower-cur+higher)
+		left.Add(cur)
+		right.Discard(nums[j+1])
+	}
+
+	return res
+}
+
 // 1e5 -> 200, 2e5 -> 400
 const _LOAD int = 200
 

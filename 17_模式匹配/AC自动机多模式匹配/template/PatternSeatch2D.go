@@ -52,6 +52,23 @@ func main() {
 	}
 }
 
+// 3078. 矩阵中的字母数字模式匹配 I
+// https://leetcode.cn/problems/match-alphanumerical-pattern-in-matrix-i/
+func findPattern(board [][]int, pattern []string) []int {
+	ords := make([][]int, len(board))
+	for i, row := range board {
+		ords[i] = make([]int, len(row))
+		for j, v := range row {
+			ords[i][j] = int(v)
+		}
+	}
+	res := PatternSearch2D(board, ords)
+	if len(res) == 0 {
+		return []int{-1, -1}
+	}
+	return []int{res[0][0], res[0][1]}
+}
+
 // 二维模式串匹配.
 // 返回所有匹配的左上角坐标.
 // O(row1*col1+row2*col2)
