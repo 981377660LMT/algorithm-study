@@ -132,6 +132,8 @@
 6. **图论**
 
    - [链式前向星存图](7_graph/%E9%93%BE%E5%BC%8F%E5%89%8D%E5%90%91%E6%98%9F%E5%AD%98%E5%9B%BE/ChainForwardStar.ts)
+   - [线性空间树上倍增](6_tree/LCA%E9%97%AE%E9%A2%98/CompressedBinaryLift/CompressedBinaryLift.go)
+   - [线性空间树上倍增-动态加边](6_tree/LCA%E9%97%AE%E9%A2%98/CompressedBinaryLift/CompressedBinaryLiftDynamic.go)
    - [重链剖分](6_tree/%E9%87%8D%E9%93%BE%E5%89%96%E5%88%86/HeavyLightDecomposition-beet.go)
    - [ProcessOfMergeingTree](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/ProcessOfMergeingTree.go)
    - [树的直径](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/%E7%9B%B4%E5%BE%84/%E6%A0%91%E7%9A%84%E7%9B%B4%E5%BE%84.py)

@@ -6933,5 +6933,41 @@
       "}"
     ],
     "description": "argSortCounting"
+  },
+  "A": {
+    "scope": "go",
+    "prefix": ["floorLog", "ceilLog"],
+    "body": [
+      "",
+      "func CeilLog32(x uint32) int {",
+      "\tif x <= 0 {",
+      "\t\treturn 0",
+      "\t}",
+      "\treturn 32 - bits.LeadingZeros32(x-1)",
+      "}",
+      "",
+      "func FloorLog32(x uint32) int {",
+      "\tif x <= 0 {",
+      "\t\tpanic(\"IllegalArgumentException\")",
+      "\t}",
+      "\treturn 31 - bits.LeadingZeros32(x)",
+      "}",
+      "",
+      "func CeilLog64(x uint64) int {",
+      "\tif x <= 0 {",
+      "\t\treturn 0",
+      "\t}",
+      "\treturn 64 - bits.LeadingZeros64(x-1)",
+      "}",
+      "",
+      "func FloorLog64(x uint64) int {",
+      "\tif x <= 0 {",
+      "\t\tpanic(\"IllegalArgumentException\")",
+      "\t}",
+      "\treturn 63 - bits.LeadingZeros64(x)",
+      "}",
+      ""
+    ],
+    "description": "log2"
   }
 }

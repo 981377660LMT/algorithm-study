@@ -29,8 +29,8 @@ def superPointOnDag(n: int, edges: List[Tuple[int, int]]) -> List[bool]:
     unReachable = set()
     res = [False] * n
     while queue:
-        len_ = len(queue)
         level = queue.copy()
+        len_ = len(queue)
         for _ in range(len_):
             cur = queue.popleft()
             for next_ in adjList[cur]:

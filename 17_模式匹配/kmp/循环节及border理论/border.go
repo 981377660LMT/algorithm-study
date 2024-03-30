@@ -17,11 +17,11 @@ import (
 )
 
 func main() {
-	// P2375()
+	P2375()
 	// P3426()
 	// P3435()
 	// P3449()
-	P3449V2()
+	// P3449V2()
 	// P3538()
 	// P4391()
 	// P5829()
@@ -54,21 +54,22 @@ func P2375() {
 	query := func(s string) []int32 {
 		n := int32(len(s))
 		nexts := GetNext(n, func(i int32) int32 { return int32(s[i]) })
-		db := NewDoubling(n+1, int(n+1))
-		depths := make([]int32, n+1)
+
+		parents := make([]int32, n+1)
+		parents[0] = -1
+		copy(parents[1:], nexts)
+		depth := make([]int32, n+1)
 		for i := int32(1); i <= n; i++ {
-			parent := nexts[i-1]
-			db.Add(i, parent)
-			depths[i] = depths[parent] + 1
+			depth[i] = depth[parents[i]] + 1
 		}
-		db.Build()
+		bl := NewCompressedBinaryLift(n+1, depth, parents)
 
 		res := make([]int32, n) // res[i]表示前缀s[:i+1]的最长border在失配树上的深度
 		for i := int32(1); i <= n; i++ {
 			halfLen := i >> 1
-			_, tmp := db.MaxStep(i, func(next int32) bool { return next > halfLen })
+			tmp := bl.LastTrue(i, func(next int32) bool { return next > halfLen })
 			halfLink := nexts[tmp-1]
-			res[i-1] = depths[halfLink]
+			res[i-1] = depth[halfLink]
 		}
 		return res
 	}
@@ -1015,70 +1016,146 @@ func (hld *LCA32) _markTop(cur, top int32) {
 	hld.rid[cur] = hld.dfnId
 }
 
-type DoublingSimple struct {
-	n   int32
-	log int32
-	to  []int32
+type CompressedBinaryLift struct {
+	Depth  []int32
+	Parent []int32
+	jump   []int32 // 指向当前节点的某个祖先节点.
 }
 
-func NewDoubling(n int32, maxStep int) *DoublingSimple {
-	res := &DoublingSimple{n: n, log: int32(bits.Len(uint(maxStep)))}
-	size := n * res.log
-	res.to = make([]int32, size)
-	for i := int32(0); i < size; i++ {
-		res.to[i] = -1
+func NewCompressedBinaryLift(n int32, depthOnTree, parentOnTree []int32) *CompressedBinaryLift {
+	res := &CompressedBinaryLift{
+		Depth:  depthOnTree,
+		Parent: parentOnTree,
+		jump:   make([]int32, n),
+	}
+	for i := int32(0); i < n; i++ {
+		res.jump[i] = -1
+	}
+	for i := int32(0); i < n; i++ {
+		res._consider(i)
 	}
 	return res
 }
 
-func (d *DoublingSimple) Add(from, to int32) {
-	d.to[from] = to
+func NewCompressedBinaryLiftFromTree(tree [][]int32, root int32) *CompressedBinaryLift {
+	n := int32(len(tree))
+	res := &CompressedBinaryLift{
+		Depth:  make([]int32, n),
+		Parent: make([]int32, n),
+		jump:   make([]int32, n),
+	}
+	res.Parent[root] = -1
+	res.jump[root] = root
+	res._setUp(tree, root)
+	return res
 }
 
-func (d *DoublingSimple) Build() {
-	n := d.n
-	for k := int32(0); k < d.log-1; k++ {
-		for v := int32(0); v < n; v++ {
-			w := d.to[k*n+v]
-			next := (k+1)*n + v
-			if w == -1 {
-				d.to[next] = -1
+func (bl *CompressedBinaryLift) FirstTrue(start int32, predicate func(end int32) bool) int32 {
+	for !predicate(start) {
+		if predicate(bl.jump[start]) {
+			start = bl.Parent[start]
+		} else {
+			if start == bl.jump[start] {
+				return -1
+			}
+			start = bl.jump[start]
+		}
+	}
+	return start
+}
+
+func (bl *CompressedBinaryLift) LastTrue(start int32, predicate func(end int32) bool) int32 {
+	if !predicate(start) {
+		return -1
+	}
+	for {
+		if predicate(bl.jump[start]) {
+			if start == bl.jump[start] {
+				return start
+			}
+			start = bl.jump[start]
+		} else if predicate(bl.Parent[start]) {
+			start = bl.Parent[start]
+		} else {
+			return start
+		}
+	}
+}
+
+func (bl *CompressedBinaryLift) UpToDepth(root int32, toDepth int32) int32 {
+	for bl.Depth[root] > toDepth {
+		if bl.Depth[bl.jump[root]] < toDepth {
+			root = bl.Parent[root]
+		} else {
+			root = bl.jump[root]
+		}
+	}
+	return root
+}
+
+func (bl *CompressedBinaryLift) KthAncestor(node, k int32) int32 {
+	targetDepth := bl.Depth[node] - k
+	return bl.FirstTrue(node, func(i int32) bool { return bl.Depth[i] <= targetDepth })
+}
+
+func (bl *CompressedBinaryLift) Lca(a, b int32) int32 {
+	if bl.Depth[a] > bl.Depth[b] {
+		a = bl.KthAncestor(a, bl.Depth[a]-bl.Depth[b])
+	} else if bl.Depth[a] < bl.Depth[b] {
+		b = bl.KthAncestor(b, bl.Depth[b]-bl.Depth[a])
+	}
+	for a != b {
+		if bl.jump[a] == bl.jump[b] {
+			a = bl.Parent[a]
+			b = bl.Parent[b]
+		} else {
+			a = bl.jump[a]
+			b = bl.jump[b]
+		}
+	}
+	return a
+}
+
+func (bl *CompressedBinaryLift) Dist(a, b int32) int32 {
+	return bl.Depth[a] + bl.Depth[b] - 2*bl.Depth[bl.Lca(a, b)]
+}
+
+func (bl *CompressedBinaryLift) _consider(root int32) {
+	if root == -1 || bl.jump[root] != -1 {
+		return
+	}
+	p := bl.Parent[root]
+	bl._consider(p)
+	bl._addLeaf(root, p)
+}
+
+func (bl *CompressedBinaryLift) _addLeaf(leaf, parent int32) {
+	if parent == -1 {
+		bl.jump[leaf] = leaf
+	} else if tmp := bl.jump[parent]; bl.Depth[parent]-bl.Depth[tmp] == bl.Depth[tmp]-bl.Depth[bl.jump[tmp]] {
+		bl.jump[leaf] = bl.jump[tmp]
+	} else {
+		bl.jump[leaf] = parent
+	}
+}
+
+func (bl *CompressedBinaryLift) _setUp(tree [][]int32, root int32) {
+	queue := []int32{root}
+	head := 0
+	for head < len(queue) {
+		cur := queue[head]
+		head++
+		nexts := tree[cur]
+		for _, next := range nexts {
+			if next == bl.Parent[cur] {
 				continue
 			}
-			d.to[next] = d.to[k*n+w]
+			bl.Depth[next] = bl.Depth[cur] + 1
+			bl.Parent[next] = cur
+			queue = append(queue, next)
+			bl._addLeaf(next, cur)
 		}
 	}
-}
-
-// 求从 `from` 状态开始转移 `step` 次的最终状态的编号。
-// 不存在时返回 -1。
-func (d *DoublingSimple) Jump(from int32, step int) (to int32) {
-	to = from
-	for k := int32(0); k < d.log; k++ {
-		if to == -1 {
-			return
-		}
-		if step&(1<<k) != 0 {
-			to = d.to[k*d.n+to]
-		}
-	}
-	return
-}
-
-// 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号。
-func (d *DoublingSimple) MaxStep(from int32, check func(next int32) bool) (step int, to int32) {
-	for k := d.log - 1; k >= 0; k-- {
-		tmp := d.to[k*d.n+from]
-		if tmp == -1 {
-			continue
-		}
-		if check(tmp) {
-			step |= 1 << k
-			from = tmp
-		}
-	}
-	to = from
-	return
 }
 
 type FastSet struct {
