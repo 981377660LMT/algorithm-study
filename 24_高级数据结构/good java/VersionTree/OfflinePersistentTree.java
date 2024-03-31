@@ -1,8 +1,25 @@
-package template.algo;
-
 import java.util.ArrayList;
 import java.util.List;
 
+public interface UndoOperation {
+    static final UndoOperation NIL = new UndoOperation() {
+        @Override
+        public void apply() {
+
+        }
+
+        @Override
+        public void undo() {
+
+        }
+    };
+
+    void apply();
+
+    void undo();
+}
+
+// VersionTree
 public class OfflinePersistentTree {
     Node[] nodes;
     int now = 0;

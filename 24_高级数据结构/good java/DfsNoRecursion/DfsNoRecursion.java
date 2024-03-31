@@ -3,6 +3,7 @@ package graphs.dfs;
 import java.util.*;
 import java.util.stream.Stream;
 
+// 图的深度优先遍历递归转迭代
 public class DfsNoRecursion {
     public static void dfs(List<Integer>[] graph, int root) {
         int n = graph.length;

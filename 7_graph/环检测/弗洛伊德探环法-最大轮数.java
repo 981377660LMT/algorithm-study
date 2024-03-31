@@ -12,10 +12,10 @@ public class FloydSearchCircle {
 
     /**
      * <pre>
-     * a circle comprised by t outcircle vertex and c incircle vertex
-     * v[1] -> v[2] -> ... -> v[t] -> v[t + 1] -> v[t + 2] -> ... -> v[t + c - 1] -> v[t + 1] -> ...
+     * a circle comprised by start outcircle vertex and period incircle vertex
+     * v[1] -> v[2] -> ... -> v[start] -> v[start + 1] -> v[start + 2] -> ... -> v[start + period - 1] -> v[start + 1] -> ...
      * use three participants in interactor
-     * if (t + c) > maxRound, null will be returned
+     * if (start + period) > maxRound, null will be returned
      * time complexity: O(2t+2c)
      * space complexity: O(1)
      * </pre>
@@ -34,19 +34,19 @@ public class FloydSearchCircle {
         if (!interactor.equal(0, 1)) {
             return null;
         }
-        int t = 0;
+        int start = 0;
         while (!interactor.equal(0, 2)) {
             interactor.next(0);
             interactor.next(2);
-            t++;
+            start++;
         }
-        int c = 1;
+        int period = 1;
         interactor.next(0);
         while (!interactor.equal(0, 2)) {
             interactor.next(0);
-            c++;
+            period++;
         }
-        return new int[]{t, c};
+        return new int[]{start, period};
     }
 
 }

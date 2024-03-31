@@ -29,9 +29,6 @@ public class DoubleEndPalindromeAutomaton {
     }
 
     public DoubleEndPalindromeAutomaton(int minCharacter, int maxCharacter, int frontAddition, int backAddition) {
-        this.minCharacter = minCharacter;
-        this.maxCharacter = maxCharacter;
-        range = maxCharacter - minCharacter + 1;
         int cap = frontAddition + backAddition;
         all = new ArrayList<>(2 + cap);
         data = new char[cap];
@@ -51,6 +48,7 @@ public class DoubleEndPalindromeAutomaton {
         all.clear();
         backBuildLast = frontBuildLast = odd;
     }
+
     public void buildFront(char c) {
         data[frontSize--] = c;
 

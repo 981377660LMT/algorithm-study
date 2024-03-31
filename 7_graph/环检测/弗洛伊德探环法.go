@@ -1,4 +1,4 @@
-// 弗罗伊德探环法(floyd探环法)
+// 弗罗伊德探环法(floyd探环法、floyd环检测)
 // https://ferin-15.github.io/program_contest_library/library/math/floyd_cycle_find.cpp.html
 
 package main
