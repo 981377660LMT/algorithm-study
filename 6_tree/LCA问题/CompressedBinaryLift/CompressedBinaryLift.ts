@@ -68,6 +68,7 @@ class CompressedBinaryLift {
   }
 
   upToDepth(root: number, toDepth: number): number {
+    if (!(0 <= toDepth && toDepth <= this.depth[root])) return -1
     while (this.depth[root] > toDepth) {
       if (this.depth[this._jump[root]] < toDepth) {
         root = this.parent[root]
@@ -80,7 +81,7 @@ class CompressedBinaryLift {
 
   kthAncestor(node: number, k: number): number {
     const targetDepth = this.depth[node] - k
-    return this.firstTrue(node, i => this.depth[i] <= targetDepth)
+    return this.upToDepth(node, targetDepth)
   }
 
   lca(a: number, b: number): number {

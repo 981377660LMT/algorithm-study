@@ -79,6 +79,9 @@ func (bl *CompressedBinaryLiftDynamic) LastTrue(start int32, predicate func(end 
 }
 
 func (bl *CompressedBinaryLiftDynamic) UpToDepth(root int32, toDepth int32) int32 {
+	if !(0 <= toDepth && toDepth <= bl.Depth[root]) {
+		return -1
+	}
 	for bl.Depth[root] > toDepth {
 		if bl.Depth[bl.jump[root]] < toDepth {
 			root = bl.Parent[root]
@@ -91,7 +94,7 @@ func (bl *CompressedBinaryLiftDynamic) UpToDepth(root int32, toDepth int32) int3
 
 func (bl *CompressedBinaryLiftDynamic) KthAncestor(node, k int32) int32 {
 	targetDepth := bl.Depth[node] - k
-	return bl.FirstTrue(node, func(i int32) bool { return bl.Depth[i] <= targetDepth })
+	return bl.UpToDepth(node, targetDepth)
 }
 
 func (bl *CompressedBinaryLiftDynamic) Lca(a, b int32) int32 {
