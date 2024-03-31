@@ -1,5 +1,6 @@
 package template.graph;
 
+// 动态最小生成树
 public class DynamicMST {
   private LCTNode[] nodes;
   private long totalWeight;

@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	assert()
+	// assert()
+	yosupo()
 }
 
 // https://judge.yosupo.jp/problem/lca

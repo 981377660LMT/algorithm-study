@@ -2,6 +2,7 @@ package template.problem;
 
 import template.algo.DancingLink;
 
+// 解数独
 public class SudokuProblem {
     /**
      * 0 means unknown

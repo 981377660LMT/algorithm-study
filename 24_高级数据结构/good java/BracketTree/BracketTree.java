@@ -12,6 +12,7 @@ import java.util.List;
 
 /**
  * It maintain the bracket sequence and help you to find the longest/number of correct substring.
+ * 查询区间最长有效括号的(长度, 个数).
  */
 public class BracketTree {
     int L;

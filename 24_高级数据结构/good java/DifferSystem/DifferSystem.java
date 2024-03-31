@@ -6,6 +6,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.TreeSet;
 
+// 差分约束系统
 public class DifferSystem {
   private static class Node {
     List<Edge> adj = new ArrayList<>();
@@ -148,6 +149,7 @@ public class DifferSystem {
     }
     return -r;
   }
+
 
   /**
    * After invoking this method, the value of i is max(ai - aj)

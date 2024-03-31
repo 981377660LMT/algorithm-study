@@ -4,6 +4,12 @@ import template.rand.Randomized;
 
 import java.util.*;
 
+// https://zhuanlan.zhihu.com/p/617477033
+// api:
+//   newSparseInstance
+//   newDenseInstance
+//   getSolution
+//   TODO: 精准覆盖习题练习
 public class DancingLink {
     int[] ans;
     Node[] rowDummy;
@@ -14,6 +20,47 @@ public class DancingLink {
     Deque<Node> dq;
     Deque<Node> ansDq;
 
+    public static DancingLink newSparseInstance(int[][] pos, int n, int m) {
+        DancingLink ans = new DancingLink();
+        ans.init(n, m);
+        Arrays.sort(pos, Comparator.<int[]>comparingInt(x -> x[0]).thenComparingInt(x -> x[1]));
+        for (int[] xy : pos) {
+            ans.add(xy[0], xy[1]);
+        }
+        ans.dq = new ArrayDeque<>(pos.length + n + m);
+        ans.dance();
+        return ans;
+    }
+
+    public static DancingLink newDenseInstance(boolean[][] mat, int n, int m) {
+        DancingLink ans = new DancingLink();
+        ans.init(n, m);
+        int cnt = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (mat[i][j]) {
+                    cnt++;
+                    ans.add(i, j);
+                }
+            }
+        }
+        ans.dq = new ArrayDeque<>(cnt + n + m);
+        ans.dance();
+        return ans;
+    }
+
+    /**
+     * null means no solution
+     *
+     * @return
+     */
+    public int[] getSolution() {
+        return ans;
+    }
+
+    private DancingLink() {
+    }
+    
     private Node newNode(int i, int j) {
         Node ans = new Node(i, j);
         return ans;
@@ -113,9 +160,6 @@ public class DancingLink {
         colHead.r = colDummy[0];
         colDummy[0].l = colHead;
         ansDq = new ArrayDeque<>(n);
-    }
-
-    private DancingLink() {
     }
 
     private void dfs0(Node root) {
@@ -234,45 +278,6 @@ public class DancingLink {
         }
 
         return false;
-    }
-
-    public static DancingLink newSparseInstance(int[][] pos, int n, int m) {
-        DancingLink ans = new DancingLink();
-        ans.init(n, m);
-        Arrays.sort(pos, Comparator.<int[]>comparingInt(x -> x[0]).thenComparingInt(x -> x[1]));
-        for (int[] xy : pos) {
-            ans.add(xy[0], xy[1]);
-        }
-        ans.dq = new ArrayDeque<>(pos.length + n + m);
-        ans.dance();
-        return ans;
-    }
-
-    public static DancingLink newDenseInstance(boolean[][] mat, int n, int m) {
-        DancingLink ans = new DancingLink();
-        ans.init(n, m);
-        int cnt = 0;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                if (mat[i][j]) {
-                    cnt++;
-                    ans.add(i, j);
-                }
-            }
-        }
-        ans.dq = new ArrayDeque<>(cnt + n + m);
-        ans.dance();
-        return ans;
-    }
-
-
-    /**
-     * null means no solution
-     *
-     * @return
-     */
-    public int[] getSolution() {
-        return ans;
     }
 
     private static class Node {
