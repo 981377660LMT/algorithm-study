@@ -1,13 +1,24 @@
 package template.graph;
 
-import template.utils.Sum;
-
 import java.util.Arrays;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 import java.util.function.Supplier;
 
-// 倍增结构优化建图
+public interface Sum<S> {
+  void add(S other);
+
+  /**
+   * copy s.data
+   *
+   * @param other
+   */
+  void copy(S other);
+
+  S clone();
+}
+
+// 用于倍增结构优化建图、查询路径聚合值.
 // https://taodaling.github.io/blog/2020/03/18/binary-lifting/
 public class CompressedBinaryLiftWithAttachment<S extends Sum<S>> implements LcaOnTree, KthAncestor {
     ParentOnTree pot;

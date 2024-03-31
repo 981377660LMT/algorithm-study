@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-// CF1093G-Multidimensional Queries
+// CF1093G-Multidimensional Queries (曼哈顿距离最大值)
 // https://www.luogu.com.cn/problem/CF1093G
 // 给定n个k维点(k<=5).
 // 1 i x1 x2 ... xk: 第i个点的坐标更新为(x1,x2,...,xk);

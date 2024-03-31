@@ -24,6 +24,7 @@
    - **欧拉序 + RMQ**， O(nlogn)/O(n)预处理 O(1)查询，这两点之间的区间中，深度最小点就是 LCA。这可以用 RMQ 解决；利用加一减 1RMQ 优化的线性时间 LCA。
      > https://www.cnblogs.com/pealicx/p/6859901.html
    - https://github.com/pranjalssh/CP_codes/blob/master/anta/!LCA.cpp 更快的 LCA
+   - **线性空间倍增**
 
 3. 支持在线加点删点
    - **link-cut tree** O(nlogn)预处理 O(logn)查询 ，树链剖分 + splay 维护链的信息
