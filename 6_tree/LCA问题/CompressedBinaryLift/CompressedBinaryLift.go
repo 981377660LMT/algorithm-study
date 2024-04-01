@@ -251,6 +251,7 @@ func NewTreePath(
 	}
 }
 
+// 从路径的起点开始，第k个节点(0-indexed).不存在则返回-1.
 func (t *TreePath) KthNodeOnPath(k int32) int32 {
 	if k <= t.depth[t.From]-t.depth[t.Lca] {
 		return t.kthAncestorFn(t.From, k)
@@ -258,7 +259,6 @@ func (t *TreePath) KthNodeOnPath(k int32) int32 {
 	return t.kthAncestorFn(t.To, t.Len()-k)
 }
 
-// 从路径的起点开始，第k个节点(0-indexed).不存在则返回-1.
 func (t *TreePath) OnPath(node int32) bool {
 	lcaFn := t.lcaFn
 	return lcaFn(node, t.Lca) == t.Lca &&
