@@ -9,7 +9,7 @@ https://taodaling.github.io/blog/2020/10/11/%E4%B8%80%E7%B1%BB%E6%92%A4%E9%94%80
 但是不是所有操作都可以通过仅记录操作信息就能撤销的，比如 chmin 操作，将某个变量 x 修改为 min(x,5)，这样我们就不能简单的撤销这样的操作了。
 更加好用的方式是**记录变量被修改前的状态**，比如 x=x0，这样就能保证对任何操作都能执行撤销。
 
-## 栈式撤销
+## 栈式撤销(StackAggregation，在线)
 
 撤销操作一般都需要栈式操作，即先完成的操作后撤销。
 这是非常重要的，因为后完成的操作可能**依赖于**先完成的操作带来的修改。
@@ -18,12 +18,12 @@ https://taodaling.github.io/blog/2020/10/11/%E4%B8%80%E7%B1%BB%E6%92%A4%E9%94%80
 **栈式撤销是非常自然的，比如在树上进行 DFS 操作。**
 于是在操作的时候我们每次函数返回后，所有的**局部变量都会被销毁，而调用者的变量会恢复**。
 
-## 队列撤销 (QueueAggregation)
+## 队列撤销 (QueueAggregation，在线)
 
 [[Tutorial] Supporting Queue-like Undoing on DS](https://codeforces.com/blog/entry/83467)
 最自然的撤销方式是栈式的，但是题目要求你**先撤销最旧的操作**.例如定长滑动窗口.可以通过栈式撤销来实现队列撤销。如果操作满足交换性（即操作的执行顺序不影响结果），那么答案是可以的。
 
-## 优先队列撤销
+## 优先队列撤销 (PriorityQueueAggregation，在线)
 
 [[Tutorial] Supporting Priority-Queue-like Undoing on DS](https://codeforces.com/blog/entry/111117)
 在实际情况下队列撤销并不是很使用，因为大部分情况，撤销操作都是乱序的。
@@ -34,7 +34,7 @@ https://taodaling.github.io/blog/2020/10/11/%E4%B8%80%E7%B1%BB%E6%92%A4%E9%94%80
 - 应用某个操作
 - 撤销优先级最高的操作
 
-## 非顺序撤销
+## 非顺序撤销(线段树分治，离线)
 
 一组操作，如果它既不是栈式，也不是队列撤销的话该怎么办。
 线段树分治.
