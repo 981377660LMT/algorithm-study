@@ -8,6 +8,7 @@ const EMPTY_OPERATION: IOperation = { apply: () => {}, undo: () => {} }
 class TreeNode {
   operation: IOperation
   children: TreeNode[] = []
+
   constructor(operation: IOperation) {
     this.operation = operation
   }
