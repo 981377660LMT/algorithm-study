@@ -7,18 +7,20 @@ import (
 )
 
 func main() {
-	tree := [][]int32{
-		{1, 2},
-		{3, 4},
-		{5, 6},
-		{},
-		{},
-		{},
-		{},
-	}
-	bl := NewCompressedBinaryLiftFromTree(tree, 0)
-	fmt.Println(bl.UpToDepth(6, 0)) // 2
+	// tree := [][]int32{
+	// 	{1, 2},
+	// 	{3, 4},
+	// 	{5, 6},
+	// 	{},
+	// 	{},
+	// 	{},
+	// 	{},
+	// }
+	// bl := NewCompressedBinaryLiftFromTree(tree, 0)
+	// fmt.Println(bl.UpToDepth(6, 0)) // 2
+
 	// yosupo()
+	P3398()
 }
 
 // https://judge.yosupo.jp/problem/lca
@@ -41,6 +43,40 @@ func yosupo() {
 		var u, v int32
 		fmt.Fscan(in, &u, &v)
 		fmt.Fprintln(out, bl.Lca(u, v))
+	}
+}
+
+// https://www.luogu.com.cn/problem/P3398
+func P3398() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	tree := make([][]int32, n)
+	for i := int32(0); i < n-1; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		u, v = u-1, v-1
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
+	}
+	bl := NewCompressedBinaryLiftFromTree(tree, 0)
+	query := func(a, b int32, c, d int32) bool {
+		path1 := bl.CreatePath(a, b)
+		path2 := bl.CreatePath(c, d)
+		return path1.HasIntersection(path2)
+	}
+	for i := int32(0); i < q; i++ {
+		var a, b, c, d int32
+		fmt.Fscan(in, &a, &b, &c, &d)
+		a, b, c, d = a-1, b-1, c-1, d-1
+		if query(a, b, c, d) {
+			fmt.Fprintln(out, "Y")
+		} else {
+			fmt.Fprintln(out, "N")
+		}
 	}
 }
 
@@ -155,6 +191,10 @@ func (bl *CompressedBinaryLift) Dist(a, b int32) int32 {
 	return bl.Depth[a] + bl.Depth[b] - 2*bl.Depth[bl.Lca(a, b)]
 }
 
+func (bl *CompressedBinaryLift) CreatePath(from, to int32) *TreePath {
+	return NewTreePath(from, to, bl.Depth, bl.KthAncestor, bl.Lca)
+}
+
 func (bl *CompressedBinaryLift) _consider(root int32) {
 	if root == -1 || bl.jump[root] != -1 {
 		return
@@ -191,4 +231,86 @@ func (bl *CompressedBinaryLift) _setUp(tree [][]int32, root int32) {
 			bl._addLeaf(next, cur)
 		}
 	}
+}
+
+type TreePath struct {
+	From, To      int32
+	Lca           int32
+	depth         []int32
+	kthAncestorFn func(node, k int32) int32
+	lcaFn         func(node1, node2 int32) int32
+}
+
+func NewTreePath(
+	from, to int32,
+	depth []int32, kthAncestorFn func(node, k int32) int32, lcaFn func(node1, node2 int32) int32,
+) *TreePath {
+	return &TreePath{
+		From: from, To: to, Lca: lcaFn(from, to),
+		depth: depth, kthAncestorFn: kthAncestorFn, lcaFn: lcaFn,
+	}
+}
+
+func (t *TreePath) KthNodeOnPath(k int32) int32 {
+	if k <= t.depth[t.From]-t.depth[t.Lca] {
+		return t.kthAncestorFn(t.From, k)
+	}
+	return t.kthAncestorFn(t.To, t.Len()-k)
+}
+
+// 从路径的起点开始，第k个节点(0-indexed).不存在则返回-1.
+func (t *TreePath) OnPath(node int32) bool {
+	lcaFn := t.lcaFn
+	return lcaFn(node, t.Lca) == t.Lca &&
+		(lcaFn(node, t.From) == node || lcaFn(node, t.To) == node)
+}
+
+func (t *TreePath) HasIntersection(other *TreePath) bool {
+	return t.OnPath(other.Lca) || other.OnPath(t.Lca)
+}
+
+// 求两条路径的交, 返回相交线段的两个端点.无交点则返回(-1, -1, false).
+func (t *TreePath) GetIntersection(other *TreePath) (p1, p2 int32, ok bool) {
+	a, b, c, d := t.From, t.To, other.From, other.To
+	lcaFn, depth := t.lcaFn, t.depth
+	x1, x2, x3, x4 := lcaFn(a, c), lcaFn(a, d), lcaFn(b, c), lcaFn(b, d)
+	p1, p2 = x1, x2
+	if depth[x2] > depth[p1] {
+		p2 = p1
+		p1 = x2
+	}
+	update := func(x int32) {
+		curDepth := depth[x]
+		if curDepth > depth[p1] {
+			p2 = p1
+			p1 = x
+		} else if curDepth > depth[p2] {
+			p2 = x
+		}
+	}
+	update(x3)
+	update(x4)
+	lca1, lca2 := t.Lca, other.Lca
+	if p1 != p2 {
+		return p1, p2, true
+	}
+	if depth[p1] < depth[lca1] || depth[p1] < depth[lca2] {
+		return -1, -1, false
+	}
+	return p1, p2, true
+}
+
+func (t *TreePath) CountIntersection(other *TreePath) int32 {
+	p1, p2, ok := t.GetIntersection(other)
+	if !ok {
+		return 0
+	}
+	if p1 == p2 {
+		return 1
+	}
+	return t.depth[p1] + t.depth[p2] - 2*t.depth[t.Lca] + 1
+}
+
+func (t *TreePath) Len() int32 {
+	return t.depth[t.From] + t.depth[t.To] - 2*t.depth[t.Lca]
 }

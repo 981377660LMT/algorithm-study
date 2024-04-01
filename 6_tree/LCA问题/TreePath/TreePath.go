@@ -1,5 +1,14 @@
 package main
 
+func main() {
+	P3398()
+}
+
+// https://www.luogu.com.cn/problem/P3398
+func P3398() {
+
+}
+
 type TreePath struct {
 	From, To      int32
 	Lca           int32
