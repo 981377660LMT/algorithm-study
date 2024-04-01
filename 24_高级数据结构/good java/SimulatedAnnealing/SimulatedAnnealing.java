@@ -168,19 +168,24 @@ class IntegerSolution extends SimulatedAnnealing<Integer> {
 
 
 /**
- * 模拟退火最大化解.
+ * 模拟退火优化.
  */
 public abstract class SimulatedAnnealing<S> {
   private S best;
   private double bestWeight = -1e100;
+
   private double threshold;
+
   /**
    * 玻尔兹曼常数.
    * 
    * The larger k is, the more possible to challenge .
    */
   private double k;
+
   /**
+   * 学习率.
+   * 
    * The smaller reduce is, the fast to reduce temperature
    */
   private double reduce;
@@ -226,6 +231,4 @@ public abstract class SimulatedAnnealing<S> {
   public double weightOfBest() {
     return bestWeight;
   }
-
-
 }
