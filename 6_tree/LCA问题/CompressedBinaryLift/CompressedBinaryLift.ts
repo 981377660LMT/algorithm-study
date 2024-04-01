@@ -41,7 +41,7 @@ class CompressedBinaryLift {
     }
   }
 
-  firstTrue(start: number, predicate: (end: number) => boolean): number {
+  firstTrue = (start: number, predicate: (end: number) => boolean): number => {
     while (!predicate(start)) {
       if (predicate(this._jump[start])) {
         start = this.parent[start]
@@ -53,7 +53,7 @@ class CompressedBinaryLift {
     return start
   }
 
-  lastTrue(start: number, predicate: (end: number) => boolean): number {
+  lastTrue = (start: number, predicate: (end: number) => boolean): number => {
     if (!predicate(start)) return -1
     while (true) {
       if (predicate(this._jump[start])) {
@@ -67,7 +67,7 @@ class CompressedBinaryLift {
     }
   }
 
-  upToDepth(root: number, toDepth: number): number {
+  upToDepth = (root: number, toDepth: number): number => {
     if (!(0 <= toDepth && toDepth <= this.depth[root])) return -1
     while (this.depth[root] > toDepth) {
       if (this.depth[this._jump[root]] < toDepth) {
@@ -79,12 +79,12 @@ class CompressedBinaryLift {
     return root
   }
 
-  kthAncestor(node: number, k: number): number {
+  kthAncestor = (node: number, k: number): number => {
     const targetDepth = this.depth[node] - k
     return this.upToDepth(node, targetDepth)
   }
 
-  lca(a: number, b: number): number {
+  lca = (a: number, b: number): number => {
     if (this.depth[a] > this.depth[b]) {
       a = this.kthAncestor(a, this.depth[a] - this.depth[b])
     } else if (this.depth[a] < this.depth[b]) {
@@ -102,18 +102,18 @@ class CompressedBinaryLift {
     return a
   }
 
-  dist(a: number, b: number): number {
+  dist = (a: number, b: number): number => {
     return this.depth[a] + this.depth[b] - 2 * this.depth[this.lca(a, b)]
   }
 
-  private _consider(root: number): void {
+  private _consider = (root: number): void => {
     if (root === -1 || this._jump[root] !== -1) return
     const p = this.parent[root]
     this._consider(p)
     this._addLeaf(root, p)
   }
 
-  private _addLeaf(leaf: number, parent: number): void {
+  private _addLeaf = (leaf: number, parent: number): void => {
     if (parent == -1) {
       this._jump[leaf] = leaf
     } else {
@@ -126,7 +126,7 @@ class CompressedBinaryLift {
     }
   }
 
-  private _setUp(tree: ArrayLike<ArrayLike<number>>, root: number): void {
+  private _setUp = (tree: MutableArrayLike<MutableArrayLike<number>>, root: number): void => {
     const queue: number[] = [root]
     let head = 0
     while (head < queue.length) {

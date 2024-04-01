@@ -89,7 +89,7 @@ class CompressedBinaryLiftWithSum<S = number> {
     }
   }
 
-  firstTrue(start: number, predicate: (end: number) => boolean): number {
+  firstTrue = (start: number, predicate: (end: number) => boolean): number => {
     while (!predicate(start)) {
       if (predicate(this._jump[start])) {
         start = this.parent[start]
@@ -101,11 +101,11 @@ class CompressedBinaryLiftWithSum<S = number> {
     return start
   }
 
-  firstTrueWithSum(
+  firstTrueWithSum = (
     start: number,
     predicate: (end: number, sum: S) => boolean,
     isEdge: boolean
-  ): { node: number; sum: S } {
+  ): { node: number; sum: S } => {
     if (isEdge) {
       let sum = this._e() // 不包含_singles[start]
       while (true) {
@@ -151,7 +151,7 @@ class CompressedBinaryLiftWithSum<S = number> {
     }
   }
 
-  lastTrue(start: number, predicate: (end: number) => boolean): number {
+  lastTrue = (start: number, predicate: (end: number) => boolean): number => {
     if (!predicate(start)) return -1
     while (true) {
       if (predicate(this._jump[start])) {
@@ -165,11 +165,11 @@ class CompressedBinaryLiftWithSum<S = number> {
     }
   }
 
-  lastTrueWithSum(
+  lastTrueWithSum = (
     start: number,
     predicate: (end: number, sum: S) => boolean,
     isEdge: boolean
-  ): { node: number; sum: S } {
+  ): { node: number; sum: S } => {
     if (isEdge) {
       let sum = this._e() // 不包含_singles[start]
       if (!predicate(start, sum)) {
@@ -229,7 +229,7 @@ class CompressedBinaryLiftWithSum<S = number> {
     }
   }
 
-  upToDepth(root: number, toDepth: number): number {
+  upToDepth = (root: number, toDepth: number): number => {
     if (!(toDepth >= 0 && toDepth <= this.depth[root])) return -1
     if (this.depth[root] < toDepth) return -1
     while (this.depth[root] > toDepth) {
@@ -242,7 +242,7 @@ class CompressedBinaryLiftWithSum<S = number> {
     return root
   }
 
-  upToDepthWithSum(root: number, toDepth: number, isEdge: boolean): { node: number; sum: S } {
+  upToDepthWithSum = (root: number, toDepth: number, isEdge: boolean): { node: number; sum: S } => {
     let sum = this._e() // 不包含_singles[root]
     if (!(toDepth >= 0 && toDepth <= this.depth[root])) return { node: -1, sum }
     while (this.depth[root] > toDepth) {
@@ -260,17 +260,17 @@ class CompressedBinaryLiftWithSum<S = number> {
     return { node: root, sum }
   }
 
-  kthAncestor(node: number, k: number): number {
+  kthAncestor = (node: number, k: number): number => {
     const targetDepth = this.depth[node] - k
     return this.upToDepth(node, targetDepth)
   }
 
-  kthAncestorWithSum(node: number, k: number, isEdge: boolean): { node: number; sum: S } {
+  kthAncestorWithSum = (node: number, k: number, isEdge: boolean): { node: number; sum: S } => {
     const targetDepth = this.depth[node] - k
     return this.upToDepthWithSum(node, targetDepth, isEdge)
   }
 
-  lca(a: number, b: number): number {
+  lca = (a: number, b: number): number => {
     if (this.depth[a] > this.depth[b]) {
       a = this.kthAncestor(a, this.depth[a] - this.depth[b])
     } else if (this.depth[a] < this.depth[b]) {
@@ -292,7 +292,7 @@ class CompressedBinaryLiftWithSum<S = number> {
    * 查询路径`a`到`b`的聚合值.
    * @param isEdge 是否是边权.
    */
-  lcaWithSum(a: number, b: number, isEdge: boolean): { node: number; sum: S } {
+  lcaWithSum = (a: number, b: number, isEdge: boolean): { node: number; sum: S } => {
     let e: S // 不包含_singles[a]和_singles[b]
     if (this.depth[a] > this.depth[b]) {
       const { node: end, sum } = this.upToDepthWithSum(a, this.depth[b], true)
@@ -326,18 +326,18 @@ class CompressedBinaryLiftWithSum<S = number> {
     return { node: a, sum: e }
   }
 
-  dist(a: number, b: number): number {
+  dist = (a: number, b: number): number => {
     return this.depth[a] + this.depth[b] - 2 * this.depth[this.lca(a, b)]
   }
 
-  private _consider(root: number): void {
+  private _consider = (root: number): void => {
     if (root === -1 || this._jump[root] !== -1) return
     const p = this.parent[root]
     this._consider(p)
     this._addLeaf(root, p)
   }
 
-  private _addLeaf(leaf: number, parent: number): void {
+  private _addLeaf = (leaf: number, parent: number): void => {
     if (parent == -1) {
       this._jump[leaf] = leaf
     } else {
@@ -353,7 +353,7 @@ class CompressedBinaryLiftWithSum<S = number> {
     }
   }
 
-  private _setUp(tree: ArrayLike<ArrayLike<number>>, root: number): void {
+  private _setUp = (tree: ArrayLike<ArrayLike<number>>, root: number): void => {
     const queue: number[] = [root]
     let head = 0
     while (head < queue.length) {

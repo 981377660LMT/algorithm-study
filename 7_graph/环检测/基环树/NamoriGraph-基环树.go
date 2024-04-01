@@ -244,6 +244,7 @@ func (ng *NamoriGraph) BuildTree() (directedGraph [][]Neighbor, tree *Tree) {
 	return
 }
 
+// 基环树求距离.
 func (ng *NamoriGraph) Dist(tree *Tree, u, v int) int {
 	bottom := ng.To[ng.Root]
 	// lca为在环上的点
