@@ -299,6 +299,12 @@
 
 package main
 
+import (
+	"math"
+	"math/rand"
+	"time"
+)
+
 func main() {
 
 }
@@ -337,21 +343,87 @@ type SimulatedAnnealing[S any] struct {
 	next    func(old S, temperature float64) S // 生成新解.
 	eval    func(status S) float64             // 评估解的质量.
 	abandon func(old S)                        // 处理舍弃的解.
+
+	calculated bool
 }
 
-func NewSimulatedAnnealing[S any]() *SimulatedAnnealing[S] {}
+func NewSimulatedAnnealing[S any](
+	next func(old S, temperature float64) S,
+	eval func(status S) float64,
+	abandon func(old S),
+) *SimulatedAnnealing[S] {
+	return &SimulatedAnnealing[S]{
+		bestWeight:           -1e100,
+		reduce:               0.99,
+		initTemperature:      2000,
+		thresholdTemperature: 1e-14,
+		k:                    1,
+		timeLimit:            -1,
+		next:                 next,
+		eval:                 eval,
+		abandon:              abandon,
+	}
+}
 
-func (sa *SimulatedAnnealing[S]) Optimize(initSolution S) {}
+func (sa *SimulatedAnnealing[S]) Optimize(initSolution S) {
+	if sa.timeLimit == -1 {
+		sa._run(initSolution)
+	} else {
+		sa._runWithinTimeLimit(initSolution, sa.timeLimit)
+	}
+}
 
-func (sa *SimulatedAnnealing[S]) GetBest() S {}
+func (sa *SimulatedAnnealing[S]) GetBest() S            { return sa.best }
+func (sa *SimulatedAnnealing[S]) WeightOfBest() float64 { return sa.bestWeight }
 
-func (sa *SimulatedAnnealing[S]) WeightOfBest() float64 {}
+func (sa *SimulatedAnnealing[S]) SetReduce(reduce float64) *SimulatedAnnealing[S] {
+	sa.reduce = reduce
+	return sa
+}
 
-func (sa *SimulatedAnnealing[S]) SetReduce(reduce float64) *SimulatedAnnealing[S]                   {}
-func (sa *SimulatedAnnealing[S]) SetInitTemperature(initTemperature float64) *SimulatedAnnealing[S] {}
-func (sa *SimulatedAnnealing[S]) SetThresholdTemperature(threshold float64) *SimulatedAnnealing[S]  {}
-func (sa *SimulatedAnnealing[S]) SetK(k float64) *SimulatedAnnealing[S]                             {}
-func (sa *SimulatedAnnealing[S]) SetTimeLimit(timeLimit float64) *SimulatedAnnealing[S]             {}
+func (sa *SimulatedAnnealing[S]) SetInitTemperature(initTemperature float64) *SimulatedAnnealing[S] {
+	sa.initTemperature = initTemperature
+	return sa
+}
 
-func (sa *SimulatedAnnealing[S]) _run(initSolution S)                                   {}
-func (sa *SimulatedAnnealing[S]) _runWithinTimeLimit(initSolution S, timeLimit float64) {}
+func (sa *SimulatedAnnealing[S]) SetThresholdTemperature(thresholdTemperature float64) *SimulatedAnnealing[S] {
+	sa.thresholdTemperature = thresholdTemperature
+	return sa
+}
+
+func (sa *SimulatedAnnealing[S]) SetK(k float64) *SimulatedAnnealing[S] {
+	sa.k = k
+	return sa
+}
+
+func (sa *SimulatedAnnealing[S]) SetTimeLimit(timeLimit float64) *SimulatedAnnealing[S] {
+	sa.timeLimit = timeLimit
+	return sa
+}
+
+func (sa *SimulatedAnnealing[S]) _run(initSolution S) {
+	now := initSolution
+	weight := sa.eval(now)
+	t := sa.initTemperature
+	for t > sa.thresholdTemperature {
+		next := sa.next(now, t)
+		nextWeight := sa.eval(next)
+		if nextWeight > weight || rand.Float64() < math.Exp((nextWeight-weight)/(sa.k*t)) {
+			sa.abandon(now)
+			now = next
+			weight = nextWeight
+		}
+		t *= sa.reduce
+	}
+
+	if !sa.calculated || sa.bestWeight < weight {
+		sa.best = now
+		sa.bestWeight = weight
+		sa.calculated = true
+	}
+}
+
+func (sa *SimulatedAnnealing[S]) _runWithinTimeLimit(initSolution S, timeLimit float64) {
+	t0 := time.Now()
+	now := initSolution
+}
