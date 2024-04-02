@@ -184,7 +184,7 @@ public abstract class SimulatedAnnealing<S> {
   private double k;
 
   /**
-   * 学习率.
+   * 学习率，温度衰减率.
    * 
    * The smaller reduce is, the fast to reduce temperature
    */

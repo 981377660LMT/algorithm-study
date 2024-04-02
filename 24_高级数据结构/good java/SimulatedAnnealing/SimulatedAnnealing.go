@@ -1,4 +1,3 @@
-
 // // https://www.cnblogs.com/matt-su/p/16101002.html
 
 // import java.util.Random;
@@ -224,3 +223,135 @@
 //     return bestWeight;
 //   }
 // }
+
+// /**
+//  * 模拟退火优化.
+//  */
+//  public abstract class SimulatedAnnealing<S> {
+//   private S best;
+//   private double bestWeight = -1e100;
+
+//   private double threshold;
+
+//   /**
+//    * 玻尔兹曼常数.
+//    *
+//    * The larger k is, the more possible to challenge .
+//    */
+//   private double k;
+
+//   /**
+//    * 学习率.
+//    *
+//    * The smaller reduce is, the fast to reduce temperature
+//    */
+//   private double reduce;
+
+//   public SimulatedAnnealing(double threshold, double k, double reduce) {
+//     this.threshold = threshold;
+//     this.k = k;
+//     this.reduce = reduce;
+//   }
+
+//   public abstract S next(S old, double temperature);
+
+//   public abstract double eval(S status);
+
+//   public void abandon(S old) {}
+
+//   public void optimize(double temperature, S init) {
+//     S now = init;
+//     double weight = eval(now);
+//     double t = temperature;
+//     while (t > threshold) {
+//       S next = next(now, t);
+//       double nextWeight = eval(next);
+//       if (nextWeight > weight
+//           || RandomWrapper.INSTANCE.nextDouble() < Math.exp((nextWeight - weight) / (k * t))) {
+//         abandon(now);
+//         now = next;
+//         weight = nextWeight;
+//       }
+//       t *= reduce;
+//     }
+
+//     if (best == null || bestWeight < weight) {
+//       best = now;
+//       bestWeight = weight;
+//     }
+//   }
+
+//   public S getBest() {
+//     return best;
+//   }
+
+//   public double weightOfBest() {
+//     return bestWeight;
+//   }
+// }
+
+// 模拟退火优化求解最大值(最优解).
+// https://www.cnblogs.com/shenben/p/11342308.html
+// https://vlight.me/2018/06/08/Simulated-Annealing/
+// https://oi-wiki.org//misc/simulated-annealing/
+// https://www.luogu.com/article/b2recz8n
+// 技巧：可以在时限内重复跑 SA 取最优值，防止脸黑
+
+package main
+
+func main() {
+
+}
+
+// 模板题 https://www.luogu.com.cn/problem/P1337
+// LC1515 https://leetcode.cn/problems/best-position-for-a-service-centre/
+// http://poj.org/problem?id=2420
+// UVa 10228 https://onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=14&page=show_problem&problem=1169
+// todo 教学题 https://atcoder.jp/contests/intro-heuristics/tasks/intro_heuristics_a
+//  https://atcoder.jp/contests/ahc001/tasks/ahc001_a
+//  https://atcoder.jp/contests/ahc002/tasks/ahc002_a
+
+// 参数说明:
+//
+//	initTemperature: 初始温度.一般设置为 1000 到 3000.
+//	threshold: 目标温度阈值.一般设置为 1e-8 到 1e-14.
+//	k: 玻尔兹曼常数.一般设置为 1.
+//	!reduce: 温度衰减率.一般设置为 0.99 到 0.999.对答案影响较大.
+//	initSolution: 初始解.
+//
+// 如何生成新解：
+//
+//	坐标系内：随机生成一个点，或者生成一个向量。
+//	序列问题：random.shuffle()或者随机交换两个元素。
+//	网格问题：可以看做二维序列，每次交换两个格子即可。
+type SimulatedAnnealing[S any] struct {
+	best       S       // 最优解.
+	bestWeight float64 // 最优解的分数.
+
+	reduce               float64 // 温度衰减率.默认值为 0.99.
+	initTemperature      float64 // 初始温度.默认值为 2000.
+	thresholdTemperature float64 // 温度阈值.默认值为 1e-14.
+	k                    float64 // 玻尔兹曼常数.默认值为 1.
+	timeLimit            float64 // 时间限制.默认为-1，表示不限制时间.
+
+	next    func(old S, temperature float64) S // 生成新解.
+	eval    func(status S) float64             // 评估解的质量.
+	abandon func(old S)                        // 处理舍弃的解.
+}
+
+func NewSimulatedAnnealing[S any]() *SimulatedAnnealing[S] {}
+
+func (sa *SimulatedAnnealing[S]) Optimize(initSolution S) {}
+
+func (sa *SimulatedAnnealing[S]) GetBest() S {}
+
+func (sa *SimulatedAnnealing[S]) WeightOfBest() float64 {}
+
+func (sa *SimulatedAnnealing[S]) SetReduce(reduce float64) *SimulatedAnnealing[S]                   {}
+func (sa *SimulatedAnnealing[S]) SetInitTemperature(initTemperature float64) *SimulatedAnnealing[S] {}
+func (sa *SimulatedAnnealing[S]) SetThresholdTemperature(threshold float64) *SimulatedAnnealing[S]  {}
+func (sa *SimulatedAnnealing[S]) SetK(k float64) *SimulatedAnnealing[S]                             {}
+func (sa *SimulatedAnnealing[S]) SetTimeLimit(timeLimit float64) *SimulatedAnnealing[S]             {}
+
+func (sa *SimulatedAnnealing[S]) _run(initSolution S)                                   {}
+func (sa *SimulatedAnnealing[S]) _runWithinTimeLimit(initSolution S, timeLimit float64) {}

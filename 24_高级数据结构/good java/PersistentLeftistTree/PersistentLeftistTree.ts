@@ -20,28 +20,18 @@ class PersistenteLeftistTree<K> {
     this._key = key
   }
 
-  static createFromIterable<K>(
-    iterable: Iterable<PersistenteLeftistTree<K>>,
-    comparator: (a: K, b: K) => number
-  ): PersistenteLeftistTree<K> {
+  static createFromIterable<K>(iterable: Iterable<PersistenteLeftistTree<K>>, comparator: (a: K, b: K) => number): PersistenteLeftistTree<K> {
     return this.createFromDeque(new ArrayDeque(iterable), comparator)
   }
 
-  static createFromDeque<K>(
-    deque: ArrayDeque<PersistenteLeftistTree<K>>,
-    comparator: (a: K, b: K) => number
-  ): PersistenteLeftistTree<K> {
+  static createFromDeque<K>(deque: ArrayDeque<PersistenteLeftistTree<K>>, comparator: (a: K, b: K) => number): PersistenteLeftistTree<K> {
     while (deque.length > 1) {
       deque.push(this.merge(deque.shift()!, deque.shift()!, comparator))
     }
     return deque.shift()!
   }
 
-  static merge<K>(
-    a: PersistenteLeftistTree<K>,
-    b: PersistenteLeftistTree<K>,
-    comparator: (a: K, b: K) => number
-  ): PersistenteLeftistTree<K> {
+  static merge<K>(a: PersistenteLeftistTree<K>, b: PersistenteLeftistTree<K>, comparator: (a: K, b: K) => number): PersistenteLeftistTree<K> {
     if (a === this._NIL) return b
     if (b === this._NIL) return a
     if (comparator(a._key, b._key) > 0) {
@@ -60,17 +50,11 @@ class PersistenteLeftistTree<K> {
     return a
   }
 
-  static pop<K>(
-    root: PersistenteLeftistTree<K>,
-    comparator: (a: K, b: K) => number
-  ): PersistenteLeftistTree<K> {
+  static pop<K>(root: PersistenteLeftistTree<K>, comparator: (a: K, b: K) => number): PersistenteLeftistTree<K> {
     return this.merge(root._left, root._right, comparator)
   }
 
-  static asIterator<V>(
-    heap: PersistenteLeftistTree<V>,
-    comparator: (a: V, b: V) => number
-  ): Iterator<V> {
+  static asIterator<V>(heap: PersistenteLeftistTree<V>, comparator: (a: V, b: V) => number): Iterator<V> {
     return new PersistentLeftistTreeIteratorAdapter(heap, comparator)
   }
 
@@ -106,10 +90,7 @@ class PersistenteLeftistTree<K> {
 }
 
 class PersistentLeftistTreeIteratorAdapter<V> implements Iterator<V> {
-  constructor(
-    private tree: PersistenteLeftistTree<V>,
-    private comparator: (a: V, b: V) => number
-  ) {}
+  constructor(private tree: PersistenteLeftistTree<V>, private comparator: (a: V, b: V) => number) {}
 
   next(): IteratorResult<V> {
     if (this.tree.isEmpty()) {
@@ -124,7 +105,13 @@ class PersistentLeftistTreeIteratorAdapter<V> implements Iterator<V> {
 export {}
 
 if (require.main === module) {
-  const iter = PersistenteLeftistTree.asIterator(new PersistenteLeftistTree(1), (a, b) => a - b)
+  const heap = PersistenteLeftistTree.createFromIterable(
+    [new PersistenteLeftistTree(3), new PersistenteLeftistTree(5), new PersistenteLeftistTree(4)],
+    (a, b) => a - b
+  )
+  const iter = PersistenteLeftistTree.asIterator(heap, (a, b) => a - b)
+  console.log(iter.next())
+  console.log(iter.next())
   console.log(iter.next())
   console.log(iter.next())
 }
