@@ -20,12 +20,12 @@ import java.util.Arrays;
  * 回答每个请求的时间复杂度为O(\log_2m)
  * </pre>
  */
-public class MaximumNotIntersectIntervals {
+public class MaxNonIntersectingIntervals {
   Interval[] movies;
   int m;
   int[][] jump;
 
-  public MaximumNotIntersectIntervals(Interval[] movies) {
+  public MaxNonIntersectingIntervals(Interval[] movies) {
     this.movies = movies;
     Arrays.sort(movies, (a, b) -> Long.compare(a.l, b.l));
     int wpos = 1;

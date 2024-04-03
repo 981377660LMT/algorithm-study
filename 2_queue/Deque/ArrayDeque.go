@@ -5,63 +5,69 @@
 
 package arraydeque
 
-type D = int
-type Deque struct{ l, r []D }
+type Deque[D any] struct{ left, right []D }
 
-func NewDeque2(cap int) *Deque { return &Deque{make([]D, 0, 1+cap/2), make([]D, 0, 1+cap/2)} }
-
-func (q Deque) Empty() bool {
-	return len(q.l) == 0 && len(q.r) == 0
+func NewDeque[D any](initCapacity int) *Deque[D] {
+	return &Deque[D]{make([]D, 0, 1+initCapacity/2), make([]D, 0, 1+initCapacity/2)}
 }
 
-func (q Deque) Size() int {
-	return len(q.l) + len(q.r)
+func (q *Deque[D]) Empty() bool {
+	return len(q.left) == 0 && len(q.right) == 0
 }
 
-func (q *Deque) AppendLeft(v D) {
-	q.l = append(q.l, v)
+func (q *Deque[D]) Len() int {
+	return len(q.left) + len(q.right)
 }
 
-func (q *Deque) Append(v D) {
-	q.r = append(q.r, v)
+func (q *Deque[D]) AppendLeft(v D) {
+	q.left = append(q.left, v)
 }
 
-func (q *Deque) PopLeft() (v D) {
-	if len(q.l) > 0 {
-		q.l, v = q.l[:len(q.l)-1], q.l[len(q.l)-1]
+func (q *Deque[D]) Append(v D) {
+	q.right = append(q.right, v)
+}
+
+func (q *Deque[D]) PopLeft() (v D) {
+	if len(q.left) > 0 {
+		q.left, v = q.left[:len(q.left)-1], q.left[len(q.left)-1]
 	} else {
-		v, q.r = q.r[0], q.r[1:]
+		v, q.right = q.right[0], q.right[1:]
 	}
 	return
 }
 
-func (q *Deque) Pop() (v D) {
-	if len(q.r) > 0 {
-		q.r, v = q.r[:len(q.r)-1], q.r[len(q.r)-1]
+func (q *Deque[D]) Pop() (v D) {
+	if len(q.right) > 0 {
+		q.right, v = q.right[:len(q.right)-1], q.right[len(q.right)-1]
 	} else {
-		v, q.l = q.l[0], q.l[1:]
+		v, q.left = q.left[0], q.left[1:]
 	}
 	return
 }
 
-func (q Deque) Front() D {
-	if len(q.l) > 0 {
-		return q.l[len(q.l)-1]
+func (q *Deque[D]) Front() D {
+	if len(q.left) > 0 {
+		return q.left[len(q.left)-1]
 	}
-	return q.r[0]
+	return q.right[0]
 }
 
-func (q Deque) Back() D {
-	if len(q.r) > 0 {
-		return q.r[len(q.r)-1]
+func (q *Deque[D]) Back() D {
+	if len(q.right) > 0 {
+		return q.right[len(q.right)-1]
 	}
-	return q.l[0]
+	return q.left[0]
 }
 
-// 0 <= i < q.Size()
-func (q Deque) At(i int) D {
-	if i < len(q.l) {
-		return q.l[len(q.l)-1-i]
+// 0 <= i < q.Len()
+func (q *Deque[D]) At(i int) D {
+	if i < len(q.left) {
+		return q.left[len(q.left)-1-i]
 	}
-	return q.r[i-len(q.l)]
+	return q.right[i-len(q.left)]
+}
+
+func (q *Deque[D]) Clear() {
+	q.left = q.left[:0]
+	q.right = q.right[:0]
 }

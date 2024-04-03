@@ -53,6 +53,8 @@ public class UndoQueue {
     op.apply();
   }
 
+  
+
   private void popAndUndo() {
     FlaggedCommutativeUndoOperation ans = dq.removeLast();
     ans.undo();

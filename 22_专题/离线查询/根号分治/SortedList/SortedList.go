@@ -365,24 +365,27 @@ func (sl *SortedList) Clear() {
 	sl.shouldRebuildTree = true
 }
 
-func (sl *SortedList) ForEach(f func(value S, index int), reverse bool) {
+func (sl *SortedList) ForEach(f func(value S, index int) bool, reverse bool) {
 	if !reverse {
 		count := 0
 		for i := 0; i < len(sl.blocks); i++ {
 			block := sl.blocks[i]
 			for j := 0; j < len(block); j++ {
-				f(block[j], count)
+				if f(block[j], count) {
+					return
+				}
 				count++
 			}
 		}
 		return
 	}
-
 	count := 0
 	for i := len(sl.blocks) - 1; i >= 0; i-- {
 		block := sl.blocks[i]
 		for j := len(block) - 1; j >= 0; j-- {
-			f(block[j], count)
+			if f(block[j], count) {
+				return
+			}
 			count++
 		}
 	}
@@ -516,11 +519,12 @@ func (sl *SortedList) Max() S {
 func (sl *SortedList) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("SortedList{")
-	sl.ForEach(func(value S, index int) {
+	sl.ForEach(func(value S, index int) bool {
 		if index > 0 {
 			sb.WriteByte(',')
 		}
 		sb.WriteString(fmt.Sprintf("%v", value))
+		return false
 	}, false)
 	sb.WriteByte('}')
 	return sb.String()

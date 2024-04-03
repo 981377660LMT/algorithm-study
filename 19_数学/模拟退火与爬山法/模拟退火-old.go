@@ -1,4 +1,5 @@
 // https://github.dev/EndlessCheng/codeforces-go/blob/016834c19c4289ae5999988585474174224f47e2/copypasta/odt_bst.go#L15
+// 模拟退火
 package main
 
 import (

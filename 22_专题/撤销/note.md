@@ -23,6 +23,9 @@ https://taodaling.github.io/blog/2020/10/11/%E4%B8%80%E7%B1%BB%E6%92%A4%E9%94%80
 [[Tutorial] Supporting Queue-like Undoing on DS](https://codeforces.com/blog/entry/83467)
 最自然的撤销方式是栈式的，但是题目要求你**先撤销最旧的操作**.例如定长滑动窗口.可以通过栈式撤销来实现队列撤销。如果操作满足交换性（即操作的执行顺序不影响结果），那么答案是可以的。
 
+https://codeforces.com/contest/1386/problem/C
+https://codeforces.com/contest/1423/problem/H
+
 ## 优先队列撤销 (PriorityQueueAggregation，在线)
 
 [[Tutorial] Supporting Priority-Queue-like Undoing on DS](https://codeforces.com/blog/entry/111117)
@@ -38,3 +41,7 @@ https://taodaling.github.io/blog/2020/10/11/%E4%B8%80%E7%B1%BB%E6%92%A4%E9%94%80
 
 一组操作，如果它既不是栈式，也不是队列撤销的话该怎么办。
 线段树分治.
+
+给定 n 个物品，第 i 件物品的价值为 vi，重量为 wi。之后考虑 q
+个请求。每个请求要么新增一个物品，要么删除一个物品，要么查询容量为 k 的背包最大能装走的物品总价值。其中 1≤n,1≤k≤103。
+https://codeforces.com/contest/601/problem/E
