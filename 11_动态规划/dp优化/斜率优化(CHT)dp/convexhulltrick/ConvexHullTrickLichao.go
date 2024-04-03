@@ -46,7 +46,7 @@ const INF int = 1e18
 
 type Line struct{ k, b, id int }
 type LichaoNode struct {
-	line Line
+	line *Line
 	l, r *LichaoNode
 }
 type ConvexHullTrickLichao struct {
@@ -65,7 +65,7 @@ func (cht *ConvexHullTrickLichao) AddLine(k, b, id int) {
 	if !cht.isMin {
 		k, b = -k, -b
 	}
-	line := Line{k, b, id}
+	line := &Line{k, b, id}
 	cht.root = cht.addLine(cht.root, line, cht.lower, cht.upper, cht.getY(line, cht.lower), cht.getY(line, cht.upper))
 }
 
@@ -74,7 +74,7 @@ func (cht *ConvexHullTrickLichao) AddSegment(start, end, k, b, id int) {
 	if !cht.isMin {
 		k, b = -k, -b
 	}
-	line := Line{k, b, id}
+	line := &Line{k, b, id}
 	cht.root = cht.addSegment(cht.root, line, start, end-1, cht.lower, cht.upper, cht.getY(line, cht.lower), cht.getY(line, cht.upper))
 }
 
@@ -87,7 +87,7 @@ func (cht *ConvexHullTrickLichao) Query(x int) (res, id int) {
 	return
 }
 
-func (cht *ConvexHullTrickLichao) addLine(t *LichaoNode, x Line, l, r, xL, xR int) *LichaoNode {
+func (cht *ConvexHullTrickLichao) addLine(t *LichaoNode, x *Line, l, r, xL, xR int) *LichaoNode {
 	if t == nil {
 		return &LichaoNode{line: x}
 	}
@@ -124,12 +124,12 @@ func (cht *ConvexHullTrickLichao) addLine(t *LichaoNode, x Line, l, r, xL, xR in
 	}
 }
 
-func (cht *ConvexHullTrickLichao) addSegment(t *LichaoNode, x Line, a, b, l, r, xL, xR int) *LichaoNode {
+func (cht *ConvexHullTrickLichao) addSegment(t *LichaoNode, x *Line, a, b, l, r, xL, xR int) *LichaoNode {
 	if r < a || b < l {
 		return t
 	}
 	if a <= l && r <= b {
-		y := Line{x.k, x.b, x.id}
+		y := &Line{x.k, x.b, x.id}
 		return cht.addLine(t, y, l, r, xL, xR)
 	}
 
@@ -139,7 +139,7 @@ func (cht *ConvexHullTrickLichao) addSegment(t *LichaoNode, x Line, a, b, l, r, 
 			return t
 		}
 	} else {
-		t = &LichaoNode{line: Line{0, INF, -1}}
+		t = &LichaoNode{line: &Line{0, INF, -1}}
 	}
 
 	mid := (l + r) >> 1
@@ -182,6 +182,6 @@ func (cht *ConvexHullTrickLichao) query(t *LichaoNode, l, r, x int) (res, id int
 	return
 }
 
-func (cht *ConvexHullTrickLichao) getY(line Line, x int) int {
+func (cht *ConvexHullTrickLichao) getY(line *Line, x int) int {
 	return line.k*x + line.b
 }

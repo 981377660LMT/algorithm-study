@@ -1,20 +1,3 @@
-// 注意cpp里的迭代器:
-// !Begin指向第一个元素,
-// !End指向最后一个元素的下一个位置,
-// 这里的迭代器设计为:
-// !Begin指向第一个元素的前一个位置,First指向第一个元素
-// !Last指向最后一个元素,End指向最后一个元素的下一个位置
-
-// https://maspypy.github.io/library/convex/cht.hpp
-
-// 在 C++ 中，long double 类型不等同于 float64。
-// !long double 是一种浮点数类型，具有比 double 类型更高的精度和范围 (18位)。
-// int 通常对应于 C++ 中的 double 类型，而非 long double 类型。
-// long double 类型的精度和范围因编译器和平台而异。
-// 在某些实现中，long double 可能与 double 类型具有相同的精度，
-// 而在其他实现中，它可能具有更高的精度。
-// 例如，在 x86 和 x86_64 架构上，long double 通常具有 80 位的扩展精度。
-
 package main
 
 import (
@@ -59,7 +42,8 @@ func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x
 func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
 
 func main() {
-	最大三角形面积()
+	// 最大三角形面积()
+	abc244_h()
 }
 
 func abc244_h() {
@@ -74,7 +58,7 @@ func abc244_h() {
 	}()
 
 	q := io.NextInt()
-	cht := NewLineContainer2D(q)
+	cht := NewL(q)
 	for i := 0; i < q; i++ {
 		a, b, x, y := io.NextInt(), io.NextInt(), io.NextInt(), io.NextInt()
 		cht.Add(a, b)
@@ -99,7 +83,7 @@ func 最大三角形面积() {
 		points[i] = [2]int{io.NextInt(), io.NextInt()}
 	}
 
-	cht := NewLineContainer2D(n)
+	cht := NewL(n)
 	for _, p := range points {
 		a, b := p[0], p[1]
 		cht.Add(a, -b)
@@ -120,16 +104,16 @@ type Line struct {
 	p1, p2 int // p=p1/p2
 }
 
-type LineContainer2D struct {
+type L struct {
 	minCHT, maxCHT *_LineContainer
 	kMax, kMin     int
 	bMax, bMin     int
 }
 
-func NewLineContainer2D(capacity int) *LineContainer2D {
-	return &LineContainer2D{
-		minCHT: _NewLineContainer(true, capacity),
-		maxCHT: _NewLineContainer(false, capacity),
+func NewL(capacity int) *L {
+	return &L{
+		minCHT: _NewL1(true, capacity),
+		maxCHT: _NewL1(false, capacity),
 		kMax:   -INF,
 		kMin:   INF,
 		bMax:   -INF,
@@ -138,7 +122,7 @@ func NewLineContainer2D(capacity int) *LineContainer2D {
 }
 
 // 追加 a*x + b*y.
-func (lc *LineContainer2D) Add(a, b int) {
+func (lc *L) Add(a, b int) {
 	lc.minCHT.Add(b, a)
 	lc.maxCHT.Add(b, a)
 	lc.kMax = max(lc.kMax, a)
@@ -148,7 +132,7 @@ func (lc *LineContainer2D) Add(a, b int) {
 }
 
 // 查询 x=xi,y=yi 时的最大值 max_{a,b} (ax + by).
-func (lc *LineContainer2D) QueryMax(x, y int) int {
+func (lc *L) QueryMax(x, y int) int {
 	if lc.minCHT.Size() == 0 {
 		return -INF
 	}
@@ -168,28 +152,29 @@ func (lc *LineContainer2D) QueryMax(x, y int) int {
 
 	// y/x
 	if x > 0 {
-		l := lc.maxCHT.sl.LowerBoundWith(y, x)
+		l := lc.maxCHT.sl.BisectLefByPair(y, x)
 		line := lc.maxCHT.sl.At(l)
 		a := line.b
 		b := line.k
 		return a*x + b*y
 	}
-	l := lc.minCHT.sl.LowerBoundWith(y, x)
+	l := lc.minCHT.sl.BisectLefByPair(y, x)
 	line := lc.minCHT.sl.At(l)
+	fmt.Println("line", line, l, lc.minCHT.sl.Len())
 	a := -line.b
 	b := -line.k
 	return a*x + b*y
 }
 
 // 查询 x=xi,y=yi 时的最小值 min_{a,b} (ax + by).
-func (lc *LineContainer2D) QueryMin(x, y int) int { return -lc.QueryMax(-x, -y) }
+func (lc *L) QueryMin(x, y int) int { return -lc.QueryMax(-x, -y) }
 
 type _LineContainer struct {
 	minimize bool
 	sl       *_SL
 }
 
-func _NewLineContainer(minimize bool, capacity int) *_LineContainer {
+func _NewL1(minimize bool, capacity int) *_LineContainer {
 	return &_LineContainer{
 		minimize: minimize,
 		sl:       _NSL(capacity),
@@ -201,9 +186,9 @@ func (lc *_LineContainer) Add(k, m int) {
 		k, m = -k, -m
 	}
 
-	newLine := Line{k: k, b: m}
+	newLine := &Line{k: k, b: m}
 	lc.sl.Add(newLine)
-	it1 := lc.sl.BisectRight(newLine.k) - 1
+	it1 := lc.sl.BisectRightByK(newLine.k) - 1
 	it2 := it1
 	line2 := lc.sl.At(it2)
 	it1++
@@ -243,7 +228,7 @@ func (lc *_LineContainer) Query(x int) int {
 	if lc.sl.Len() == 0 {
 		panic("empty container")
 	}
-	pos := lc.sl.LowerBoundWith(x, 1)
+	pos := lc.sl.BisectLefByPair(x, 1)
 	line := lc.sl.At(pos)
 	v := line.k*x + line.b
 	if lc.minimize {
@@ -252,7 +237,7 @@ func (lc *_LineContainer) Query(x int) int {
 	return v
 }
 
-func (lc *_LineContainer) Size() int { return lc.sl.Len() }
+func (lc *_LineContainer) Size() int32 { return lc.sl.Len() }
 
 // 这个函数在向集合添加新线或删除旧线时用于计算交点。
 // 计算线性函数x和y的交点，并将结果存储在x->p中。
@@ -278,23 +263,18 @@ func (lc *_LineContainer) insect(line1, line2 *Line) bool {
 	return !less(line1.p1, line1.p2, line2.p1, line2.p2)
 }
 
-// DIY: 传入自定义比较函数的LowerBound
-func (sl *_SL) LowerBoundWith(a, b int) int {
-	return sl.BisectLeftWith(a, b)
-}
-
-type _Value = Line
+type _Value = *Line
 
 type _node struct {
-	left, right int
-	size        int
+	left, right int32
+	size        int32
 	priority    uint64
 	value       _Value
 }
 
 type _SL struct {
 	seed  uint64
-	root  int
+	root  int32
 	nodes []_node
 }
 
@@ -303,32 +283,33 @@ func _NSL(initCapacity int) *_SL {
 		seed:  uint64(time.Now().UnixNano()/2 + 1),
 		nodes: make([]_node, 0, max(initCapacity, 16)),
 	}
-	dummy := &_node{size: 0, priority: sl.nextRand(), value: _Value{p2: 1}} // dummy node 0
+	dummy := &_node{size: 0, priority: sl.nextRand(), value: &Line{p2: 1}} // dummy node 0
 	sl.nodes = append(sl.nodes, *dummy)
 	return sl
 }
 
-func (sl *_SL) pushUp(root int) {
+func (sl *_SL) pushUp(root int32) {
 	sl.nodes[root].size = sl.nodes[sl.nodes[root].left].size + sl.nodes[sl.nodes[root].right].size + 1
 }
 
 func (sl *_SL) Add(value _Value) {
-	var x, y, z int
+	var x, y, z int32
 	sl.splitByValue(sl.root, value.k, &x, &y, false)
 	z = sl.newNode(value)
 	sl.root = sl.merge(sl.merge(x, z), y)
 }
 
-func (sl *_SL) At(index int) *_Value {
+func (sl *_SL) At(index int32) _Value {
+	fmt.Println(index, sl.Len(), 987)
 	if index < 0 || index >= sl.Len() {
 		return nil
 	}
-	return &sl.nodes[sl.kthNode(sl.root, index+1)].value
+	return sl.nodes[sl.kthNode(sl.root, index+1)].value
 }
 
-func (sl *_SL) Pop(index int) _Value {
+func (sl *_SL) Pop(index int32) _Value {
 	index += 1 // dummy offset
-	var x, y, z int
+	var x, y, z int32
 	sl.splitByRank(sl.root, index, &y, &z)
 	sl.splitByRank(y, index-1, &x, &y)
 	res := sl.nodes[y].value
@@ -336,24 +317,16 @@ func (sl *_SL) Pop(index int) _Value {
 	return res
 }
 
-func (sl *_SL) BisectLeft(k int) int {
-	var x, y int
-	sl.splitByValue(sl.root, k, &x, &y, true)
-	res := sl.nodes[x].size
-	sl.root = sl.merge(x, y)
-	return res
-}
-
-func (sl *_SL) BisectLeftWith(a, b int) int {
-	var x, y int
+func (sl *_SL) BisectLefByPair(a, b int) int32 {
+	var x, y int32
 	sl.splitByValueWith(sl.root, a, b, &x, &y)
 	res := sl.nodes[x].size
 	sl.root = sl.merge(x, y)
 	return res
 }
 
-func (sl *_SL) BisectRight(k int) int {
-	var x, y int
+func (sl *_SL) BisectRightByK(k int) int32 {
+	var x, y int32
 	sl.splitByValue(sl.root, k, &x, &y, false)
 	res := sl.nodes[x].size
 	sl.root = sl.merge(x, y)
@@ -363,18 +336,18 @@ func (sl *_SL) BisectRight(k int) int {
 func (sl *_SL) String() string {
 	sb := []string{"SortedList{"}
 	values := []string{}
-	for i := 0; i < sl.Len(); i++ {
+	for i := int32(0); i < sl.Len(); i++ {
 		values = append(values, fmt.Sprintf("%v", sl.At(i)))
 	}
 	sb = append(sb, strings.Join(values, ","), "}")
 	return strings.Join(sb, "")
 }
 
-func (sl *_SL) Len() int {
+func (sl *_SL) Len() int32 {
 	return sl.nodes[sl.root].size
 }
 
-func (sl *_SL) kthNode(root int, k int) int {
+func (sl *_SL) kthNode(root int32, k int32) int32 {
 	cur := root
 	for cur != 0 {
 		if sl.nodes[sl.nodes[cur].left].size+1 == k {
@@ -389,7 +362,7 @@ func (sl *_SL) kthNode(root int, k int) int {
 	return cur
 }
 
-func (sl *_SL) splitByValue(root int, k int, x, y *int, strictLess bool) {
+func (sl *_SL) splitByValue(root int32, k int, x, y *int32, strictLess bool) {
 	if root == 0 {
 		*x, *y = 0, 0
 		return
@@ -414,7 +387,7 @@ func (sl *_SL) splitByValue(root int, k int, x, y *int, strictLess bool) {
 	sl.pushUp(root)
 }
 
-func (sl *_SL) splitByValueWith(root int, a1, b1 int, x, y *int) {
+func (sl *_SL) splitByValueWith(root int32, a1, b1 int, x, y *int32) {
 	if root == 0 {
 		*x, *y = 0, 0
 		return
@@ -433,7 +406,7 @@ func (sl *_SL) splitByValueWith(root int, a1, b1 int, x, y *int) {
 // Split by rank.
 // Split the tree rooted at root into two trees, x and y, such that the size of x is k.
 // x is the left subtree, y is the right subtree.
-func (sl *_SL) splitByRank(root, k int, x, y *int) {
+func (sl *_SL) splitByRank(root, k int32, x, y *int32) {
 	if root == 0 {
 		*x, *y = 0, 0
 		return
@@ -449,7 +422,7 @@ func (sl *_SL) splitByRank(root, k int, x, y *int) {
 	}
 }
 
-func (sl *_SL) merge(x, y int) int {
+func (sl *_SL) merge(x, y int32) int32 {
 	if x == 0 || y == 0 {
 		return x + y
 	}
@@ -463,13 +436,13 @@ func (sl *_SL) merge(x, y int) int {
 	return y
 }
 
-func (sl *_SL) newNode(value _Value) int {
+func (sl *_SL) newNode(value _Value) int32 {
 	sl.nodes = append(sl.nodes, _node{
 		value:    value,
 		size:     1,
 		priority: sl.nextRand(),
 	})
-	return len(sl.nodes) - 1
+	return int32(len(sl.nodes) - 1)
 }
 
 // https://nyaannyaan.github.io/library/misc/rng.hpp
@@ -494,7 +467,8 @@ func min(a, b int) int {
 }
 
 // 分母不为0的分数比较大小
-//  a1/b1 < a2/b2
+//
+//	a1/b1 < a2/b2
 func less(a1, b1, a2, b2 int) bool {
 	if a1 == INF || a2 == INF { // 有一个是+-INF
 		return a1/b1 < a2/b2

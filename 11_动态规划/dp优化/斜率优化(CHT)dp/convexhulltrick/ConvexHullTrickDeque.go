@@ -60,7 +60,7 @@ func (cht *ConvexHullTrickDeque) AddLine(k, b, id int) {
 		k, b = -k, -b
 	}
 
-	line := Line{k, b, id}
+	line := &Line{k, b, id}
 	if cht.dq.Empty() {
 		cht.dq.AppendLeft(line)
 		return
@@ -122,8 +122,9 @@ func (cht *ConvexHullTrickDeque) Query(x int) (res, lineId int) {
 }
 
 // O(1) 查询 k*x + b 的最小(大)值以及对应的直线id.
-//  需要保证x是单调递增的.
-//  如果不存在直线,返回的id为-1.
+//
+//	需要保证x是单调递增的.
+//	如果不存在直线,返回的id为-1.
 func (cht *ConvexHullTrickDeque) QueryMonotoneInc(x int) (res, lineId int) {
 	if cht.dq.Empty() {
 		res, lineId = INF, -1
@@ -150,8 +151,9 @@ func (cht *ConvexHullTrickDeque) QueryMonotoneInc(x int) (res, lineId int) {
 }
 
 // O(1) 查询 k*x + b 的最小(大)值以及对应的直线id.
-//  需要保证x是单调递减的.
-//  如果不存在直线,返回的id为-1.
+//
+//	需要保证x是单调递减的.
+//	如果不存在直线,返回的id为-1.
 func (cht *ConvexHullTrickDeque) QueryMonotoneDec(x int) (res, lineId int) {
 	if cht.dq.Empty() {
 		res, lineId = INF, -1
@@ -177,14 +179,14 @@ func (cht *ConvexHullTrickDeque) QueryMonotoneDec(x int) (res, lineId int) {
 	return
 }
 
-func (cht *ConvexHullTrickDeque) check(a, b, c Line) bool {
+func (cht *ConvexHullTrickDeque) check(a, b, c *Line) bool {
 	if b.b == a.b || c.b == b.b {
 		return sign(b.k-a.k)*sign(c.b-b.b) >= sign(c.k-b.k)*sign(b.b-a.b)
 	}
 	return (b.k-a.k)*sign(c.b-b.b)*abs(c.b-b.b) >= (c.k-b.k)*sign(b.b-a.b)*abs(b.b-a.b)
 }
 
-func (cht *ConvexHullTrickDeque) getY(line Line, x int) (int, int) {
+func (cht *ConvexHullTrickDeque) getY(line *Line, x int) (int, int) {
 	return line.k*x + line.b, line.id
 }
 
@@ -205,9 +207,7 @@ func abs(x int) int {
 	return x
 }
 
-//
-//
-type E = Line
+type E = *Line
 type Deque struct{ l, r []E }
 
 func (q Deque) Empty() bool     { return len(q.l) == 0 && len(q.r) == 0 }
