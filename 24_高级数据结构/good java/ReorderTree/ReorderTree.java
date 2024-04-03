@@ -5,8 +5,6 @@ import template.rand.RandomWrapper;
 
 import java.util.function.IntFunction;
 
-
-
 public class RandomWrapper {
   private Random random;
 

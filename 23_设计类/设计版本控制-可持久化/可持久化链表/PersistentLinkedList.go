@@ -166,7 +166,7 @@ func Merge(a, b *PersistentTreap) *PersistentTreap {
 	if b == NIL {
 		return a
 	}
-	if int(random.Next()*(uint64(a.size)+uint64(b.size))>>32) < int(a.size) {
+	if int(random.Rng()*(uint64(a.size)+uint64(b.size))>>32) < int(a.size) {
 		a = a.Clone()
 		a.right = Merge(a.right, b)
 		a.PushUp()
@@ -218,5 +218,3 @@ func (r *Random) Rng() uint64 {
 	r.seed ^= r.seed >> 9
 	return r.seed & 0xFFFFFFFF
 }
-
-func (r *Random) Next() uint64 { return r.Rng() }
