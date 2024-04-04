@@ -1,12 +1,7 @@
-// https://codeforces.com/contest/1423/problem/H
+// https://codeforces.com/contest/1386/problem/C
 // 给定n条顶点，m条无向边，之后提供q个请求，第i个请求为li,ri，要求回答仅考虑编号在[li,ri]之间的边，判断所有顶点是否连通。其中1≤n,m≤105,1≤q≤106
 
-// https://codeforces.com/contest/1386/problem/C
-// 提供n个商品，第i件商品的价格为wi，价值为vi。
-// 我们总共有m单位金钱，希望能买到总价值最大的货物。
-// 换言之，我们希望选择一些商品，这些商品的总价格不超过m的前提下保证总价值最大。
-// 同时，如果我们同时购买k件物品，那么这k件物品中的一件我们可以免费以五折优化买走（如果价格不能整除2,则上取整），且上述优惠最多只能发生一次。
-// 问最大能取走的货物的总价值。其中1≤n,m≤3000，1≤wi,vi≤109，1≤k≤n。
+// https://codeforces.com/contest/1423/problem/H
 
 package main
 
@@ -17,7 +12,8 @@ import (
 )
 
 func main() {
-	demo()
+	// demo()
+	CF1386C()
 }
 
 func demo() {
@@ -36,46 +32,13 @@ func demo() {
 	fmt.Println(sum)
 }
 
-// int main() {
-// 	ios::sync_with_stdio(0), cin.tie(0);
-// 	cin >> n >> m >> q;
-// 	dsuqueue D(n);
-// 	e.resize(m);
-// 	for (auto &i : e) {
-// 		cin >> i.first >> i.second;
-// 		--i.first, --i.second;
-// 	}
-
-// 	R.resize(m);
-// 	for (int i = 0; i < m; i++)
-// 		D.unite(e[i].first, e[i].second);
-// 	int nxt = 0;
-// 	for (int i = 0; i < m; i++) {
-// 		while (!D.is_bipartite() && nxt < m) {
-// 			D.undo();
-// 			nxt++;
-// 		}
-// 		if (D.is_bipartite())
-// 			R[i] = nxt - 1;
-// 		else
-// 			R[i] = md;
-
-// 		D.unite(e[i].first, e[i].second);
-// 	}
-
-//		while (q--) {
-//			int l, r;
-//			cin >> l >> r;
-//			--l, --r;
-//			if (R[l] <= r) cout << "NO\n";
-//			else cout << "YES\n";
-//		}
-//	}
-//
 // Joker
 // https://www.luogu.com.cn/problem/CF1386C
 // 给定一张 n 个点 m 条边的图，q 次询问，每次询问删掉 [li,ri] 内的边，问这张图是否存在奇环。
 // 存在奇环<=>不是二分图
+//
+// !注意到对每个固定的左端点 i，向右删除边的过程是单调的，即删除的边越多，越容易使得图为二分图(不存在奇环)。
+// !因此可以滑动窗口处理出每个左端点固定时的最大右端点maxRight，然后对每个询问判断是否在这个区间内即可。
 func CF1386C() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -89,11 +52,22 @@ func CF1386C() {
 		edges[i][0]--
 		edges[i][1]--
 	}
-	queries := make([][2]int32, q)
+
+	uf := NewBipartiteChecker(n)
+	undoQueue := NewUndoQueue(m)
+	maxRight := make([]int32, m) // 左端点固定为i时，使得图为二分图(不存在奇环)的最大右端点(包含)
+
 	for i := int32(0); i < q; i++ {
-		fmt.Fscan(in, &queries[i][0], &queries[i][1])
-		queries[i][0]--
-		queries[i][1]--
+		var left, right int32 // [left, right]
+		fmt.Fscan(in, &left, &right)
+		left--
+		right--
+		isBipartite := maxRight[left] <= right
+		if isBipartite {
+			fmt.Fprintln(out, "NO")
+		} else {
+			fmt.Fprintln(out, "YES")
+		}
 	}
 }
 
@@ -111,14 +85,14 @@ func (op *FlaggedCommutativeOperation) Undo()  { op.undo() }
 
 // 支持撤销操作的队列，每个操作会被应用和撤销 O(logn) 次.
 type UndoQueue struct {
-	dq, bufA, bufB []*FlaggedCommutativeOperation
+	stack, bufA, bufB []*FlaggedCommutativeOperation
 }
 
-func NewUndoQueue(capacity int) *UndoQueue {
+func NewUndoQueue(capacity int32) *UndoQueue {
 	return &UndoQueue{
-		dq:   make([]*FlaggedCommutativeOperation, 0, capacity),
-		bufA: make([]*FlaggedCommutativeOperation, 0, capacity),
-		bufB: make([]*FlaggedCommutativeOperation, 0, capacity),
+		stack: make([]*FlaggedCommutativeOperation, 0, capacity),
+		bufA:  make([]*FlaggedCommutativeOperation, 0, capacity),
+		bufB:  make([]*FlaggedCommutativeOperation, 0, capacity),
 	}
 }
 
@@ -128,12 +102,12 @@ func (uq *UndoQueue) Append(op *FlaggedCommutativeOperation) {
 }
 
 func (uq *UndoQueue) PopLeft() *FlaggedCommutativeOperation {
-	if !uq.dq[len(uq.dq)-1].flag {
+	if !uq.stack[len(uq.stack)-1].flag {
 		uq._popAndUndo()
-		for len(uq.dq) > 0 && len(uq.bufB) != len(uq.bufA) {
+		for len(uq.stack) > 0 && len(uq.bufB) != len(uq.bufA) {
 			uq._popAndUndo()
 		}
-		if len(uq.dq) == 0 {
+		if len(uq.stack) == 0 {
 			for len(uq.bufB) > 0 {
 				res := uq.bufB[0]
 				uq.bufB = uq.bufB[1:]
@@ -153,22 +127,22 @@ func (uq *UndoQueue) PopLeft() *FlaggedCommutativeOperation {
 		}
 	}
 
-	res := uq.dq[len(uq.dq)-1]
-	uq.dq = uq.dq[:len(uq.dq)-1]
+	res := uq.stack[len(uq.stack)-1]
+	uq.stack = uq.stack[:len(uq.stack)-1]
 	res.Undo()
 	return res
 }
 
-func (uq *UndoQueue) Len() int {
-	return len(uq.dq)
+func (uq *UndoQueue) Len() int32 {
+	return int32(len(uq.stack))
 }
 
 func (uq *UndoQueue) Empty() bool {
-	return len(uq.dq) == 0
+	return len(uq.stack) == 0
 }
 
 func (uq *UndoQueue) Clear() {
-	n := len(uq.dq)
+	n := len(uq.stack)
 	for i := 0; i < n; i++ {
 		uq._popAndUndo()
 	}
@@ -177,13 +151,13 @@ func (uq *UndoQueue) Clear() {
 }
 
 func (uq *UndoQueue) _pushAndDo(op *FlaggedCommutativeOperation) {
-	uq.dq = append(uq.dq, op)
+	uq.stack = append(uq.stack, op)
 	op.Apply()
 }
 
 func (uq *UndoQueue) _popAndUndo() {
-	res := uq.dq[len(uq.dq)-1]
-	uq.dq = uq.dq[:len(uq.dq)-1]
+	res := uq.stack[len(uq.stack)-1]
+	uq.stack = uq.stack[:len(uq.stack)-1]
 	res.Undo()
 	if res.flag {
 		uq.bufA = append(uq.bufA, res)

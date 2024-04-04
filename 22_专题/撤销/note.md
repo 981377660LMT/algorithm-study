@@ -37,6 +37,8 @@ https://codeforces.com/contest/1423/problem/H
 - 应用某个操作
 - 撤销优先级最高的操作
 
+https://codeforces.com/contest/603/problem/E
+
 ## 非顺序撤销(线段树分治，离线)
 
 一组操作，如果它既不是栈式，也不是队列撤销的话该怎么办。
@@ -44,4 +46,5 @@ https://codeforces.com/contest/1423/problem/H
 
 给定 n 个物品，第 i 件物品的价值为 vi，重量为 wi。之后考虑 q
 个请求。每个请求要么新增一个物品，要么删除一个物品，要么查询容量为 k 的背包最大能装走的物品总价值。其中 1≤n,1≤k≤103。
+
 https://codeforces.com/contest/601/problem/E

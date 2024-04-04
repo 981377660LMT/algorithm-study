@@ -52,7 +52,7 @@ class UndoQueue {
     }
   }
 
-  private readonly _dq: IFlaggedCommutativeOperation[] = []
+  private readonly _stack: IFlaggedCommutativeOperation[] = []
   private readonly _bufA: IFlaggedCommutativeOperation[] = []
   private readonly _bufB: SimpleQueue<IFlaggedCommutativeOperation> = new SimpleQueue()
 
@@ -62,12 +62,12 @@ class UndoQueue {
   }
 
   popLeft(): IFlaggedCommutativeOperation | undefined {
-    if (!this._dq[this._dq.length - 1].flag) {
+    if (!this._stack[this._stack.length - 1].flag) {
       this._popAndUndo()
-      while (this._dq.length && this._bufB.length !== this._bufA.length) {
+      while (this._stack.length && this._bufB.length !== this._bufA.length) {
         this._popAndUndo()
       }
-      if (this._dq.length === 0) {
+      if (this._stack.length === 0) {
         while (this._bufB.length) {
           const res = this._bufB.shift()!
           res.flag = true
@@ -84,33 +84,33 @@ class UndoQueue {
       }
     }
 
-    const res = this._dq.pop()!
+    const res = this._stack.pop()!
     res.undo()
     return res
   }
 
   empty(): boolean {
-    return !this._dq.length
+    return !this._stack.length
   }
 
   clear(): void {
-    const n = this._dq.length
+    const n = this._stack.length
     for (let _ = 0; _ < n; _++) this.popLeft()
     this._bufA.length = 0
     this._bufB.clear()
   }
 
   get length(): number {
-    return this._dq.length
+    return this._stack.length
   }
 
   private _pushAndDo(op: IFlaggedCommutativeOperation): void {
-    this._dq.push(op)
+    this._stack.push(op)
     op.apply()
   }
 
   private _popAndUndo(): void {
-    const res = this._dq.pop()!
+    const res = this._stack.pop()!
     res.undo()
     res.flag ? this._bufA.push(res) : this._bufB.push(res)
   }

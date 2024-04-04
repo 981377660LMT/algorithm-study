@@ -30,6 +30,8 @@ func main() {
 	fmt.Println(count)
 }
 
+// https://codeforces.com/contest/603/problem/E
+
 // 满足交换律的操作，即(op1, op2) 和 (op2, op1) 作用效果相同.
 type PriorityCommutativeOperation struct {
 	apply, undo    func()
@@ -44,7 +46,9 @@ func (op *PriorityCommutativeOperation) Apply() { op.apply() }
 func (op *PriorityCommutativeOperation) Undo()  { op.undo() }
 
 // 支持撤销操作的优先队列，每个操作会被应用和撤销 O(logn) 次.
-// 注意操作的优先级必须唯一.
+// 注意：
+// 1. 操作的优先级必须唯一.
+// 2. 操作必须满足交换律.
 type UndoPriorityQueue struct {
 	sl                    *specializedSortedList
 	stack                 *undoStack
