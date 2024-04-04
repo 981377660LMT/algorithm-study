@@ -27,6 +27,7 @@ func lineAddGetMin() {
 	fmt.Fscan(in, &n, &q)
 	L := NewLineContainer1D(true)
 	for i := 0; i < n; i++ {
+
 		var k, m int
 		fmt.Fscan(in, &k, &m)
 		L.Add(k, m)

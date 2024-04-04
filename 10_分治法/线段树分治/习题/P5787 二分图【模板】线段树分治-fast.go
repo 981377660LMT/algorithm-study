@@ -8,13 +8,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"runtime/debug"
 	"sort"
 )
-
-func init() {
-	debug.SetGCPercent(-1)
-}
 
 func main() {
 	in := bufio.NewReader(os.Stdin)
@@ -24,42 +19,55 @@ func main() {
 	var n, m, k int
 	fmt.Fscan(in, &n, &m, &k)
 
-	mutations := make([][4]int32, m) // (u,v,start,end)
+	mutations := make([][4]int, m) // (u,v,start,end)
 	for i := 0; i < m; i++ {
-		var u, v, start, end int32
+		var u, v, start, end int
 		fmt.Fscan(in, &u, &v, &start, &end)
 		u--
 		v--
-		mutations[i] = [4]int32{u, v, start, end}
+		mutations[i] = [4]int{u, v, start, end}
 	}
 
-	queries := make([]int32, k)
+	queries := make([]int, k)
 	for i := range queries {
-		queries[i] = int32(i)
+		queries[i] = i
 	}
 
 	S := NewSegmentTreeDivideAndConquerUndo()
 	for id := range mutations {
 		start, end := mutations[id][2], mutations[id][3]
-		S.AddMutation(int(start), int(end), id)
+		S.AddMutation(start, end, id)
 	}
 	for id, time := range queries {
-		S.AddQuery(int(time), id)
+		S.AddQuery(time, id)
 	}
 
 	res := make([]bool, k)
-	checker := NewBipartiteChecker(int32(n)) // 带权并查集
-
+	uf := NewUnionFindWithDistAndUndo(n) // 带权并查集
+	history := []bool{true}
 	S.Run(
 		func(mutationId int) {
 			u, v := mutations[mutationId][0], mutations[mutationId][1]
-			checker.Union(u, v)
+			uf.SnapShot()
+			if !history[len(history)-1] {
+				history = append(history, false)
+				return
+			}
+			root1, dist1 := uf.Find(u)
+			root2, dist2 := uf.Find(v)
+			if root1 == root2 {
+				history = append(history, (dist1-dist2+1)&1 != 1)
+			} else {
+				uf.Union(u, v, 1)
+				history = append(history, true)
+			}
 		},
 		func() {
-			checker.Undo()
+			uf.Rollback(-1)
+			history = history[:len(history)-1]
 		},
 		func(queryId int) {
-			res[queryId] = checker.IsBipartite()
+			res[queryId] = history[len(history)-1]
 		},
 	)
 
@@ -230,100 +238,178 @@ func upperBound(arr []int, target int) int {
 	return left
 }
 
-type SetValueStep struct {
-	cell     *int32
-	oldValue int32
-	version  int32
+type T = int
+
+func e() T        { return 0 }
+func op(x, y T) T { return x + y }
+func inv(x T) T   { return -x }
+
+// 维护到每个组根节点距离的可撤销并查集.
+// 用于维护环的权值，树上的距离等.
+type UnionFindWithDistAndUndo struct {
+	data      *RollbackArray
+	snapShots []int
 }
 
-func NewSetValueStep(cell *int32, oldValue int32, version int32) *SetValueStep {
-	return &SetValueStep{cell: cell, oldValue: oldValue, version: version}
-}
-
-// func (s *SetValueStep) Apply()  { *s.cell = s.newValue }
-func (s *SetValueStep) Revert() { *s.cell = s.oldValue }
-
-// 在线二分图检测.
-type BipartiteChecker struct {
-	n            int32
-	parent       []int32
-	rank         []int32
-	color        []int32
-	version      int32
-	firstViolate int32
-	history      []*SetValueStep // plugin
-}
-
-func NewBipartiteChecker(n int32) *BipartiteChecker {
-	res := &BipartiteChecker{
-		n:            n,
-		parent:       make([]int32, n),
-		rank:         make([]int32, n),
-		color:        make([]int32, n),
-		firstViolate: -1,
+func NewUnionFindWithDistAndUndo(n int) *UnionFindWithDistAndUndo {
+	return &UnionFindWithDistAndUndo{
+		data: NewRollbackArray(n, func(index int) arrayItem { return arrayItem{parent: -1, dist: e()} }),
 	}
-	for i := int32(0); i < n; i++ {
-		res.parent[i] = i
+}
+
+// 将当前快照加入栈顶.
+func (uf *UnionFindWithDistAndUndo) SnapShot() int {
+	res := uf.data.GetTime()
+	uf.snapShots = append(uf.snapShots, res)
+	return res
+}
+
+func (uf *UnionFindWithDistAndUndo) GetTime() int {
+	return uf.data.GetTime()
+}
+
+// time=-1表示回滚到栈顶(上一次)快照的时间，并删除该快照.
+func (uf *UnionFindWithDistAndUndo) Rollback(time int) {
+	if time != -1 {
+		uf.data.Rollback(time)
+	} else {
+		if len(uf.snapShots) == 0 {
+			return
+		}
+		time = uf.snapShots[len(uf.snapShots)-1]
+		uf.snapShots = uf.snapShots[:len(uf.snapShots)-1]
+		uf.data.Rollback(time)
+	}
+}
+
+// distToRoot(parent) + dist = distToRoot(child).
+func (uf *UnionFindWithDistAndUndo) Union(parent int, child int, dist T) bool {
+	v1, x1 := uf.Find(parent)
+	v2, x2 := uf.Find(child)
+	if v1 == v2 {
+		return dist == op(x2, inv(x1))
+	}
+	s1, s2 := -uf.data.Get(v1).parent, -uf.data.Get(v2).parent
+	if s1 < s2 {
+		s1, s2 = s2, s1
+		v1, v2 = v2, v1
+		x1, x2 = x2, x1
+		dist = inv(dist)
+	}
+	// v1 <- v2
+	dist = op(x1, dist)
+	dist = op(dist, inv(x2))
+	uf.data.Set(v2, arrayItem{parent: v1, dist: dist})
+	uf.data.Set(v1, arrayItem{parent: -(s1 + s2), dist: e()})
+	return true
+}
+
+// 返回v所在组的根节点和到v到根节点的距离.
+func (uf *UnionFindWithDistAndUndo) Find(v int) (root int, distToRoot T) {
+	root, distToRoot = v, e()
+	for {
+		item := uf.data.Get(root)
+		if item.parent < 0 {
+			break
+		}
+		distToRoot = op(distToRoot, item.dist)
+		root = item.parent
+	}
+	return
+}
+
+// Dist(x, y) = DistToRoot(x) - DistToRoot(y).
+// 如果x和y不在同一个集合,抛出错误.
+func (uf *UnionFindWithDistAndUndo) Dist(x int, y int) T {
+	vx, dx := uf.Find(x)
+	vy, dy := uf.Find(y)
+	if vx != vy {
+		panic("x and y are not in the same set")
+	}
+	return op(dx, inv(dy))
+}
+
+func (uf *UnionFindWithDistAndUndo) DistToRoot(x int) T {
+	_, dx := uf.Find(x)
+	return dx
+}
+
+func (uf *UnionFindWithDistAndUndo) GetSize(x int) int {
+	root, _ := uf.Find(x)
+	return -uf.data.Get(root).parent
+}
+
+func (uf *UnionFindWithDistAndUndo) GetGroups() map[int][]int {
+	res := make(map[int][]int)
+	for i := 0; i < uf.data.Len(); i++ {
+		root, _ := uf.Find(i)
+		res[root] = append(res[root], i)
 	}
 	return res
 }
 
-func (b *BipartiteChecker) IsBipartite() bool {
-	return b.firstViolate == -1
+type arrayItem struct {
+	parent int
+	dist   T
 }
 
-// (leader, color)
-func (b *BipartiteChecker) Find(x int32) (int32, int32) {
-	if x == b.parent[x] {
-		return x, 0
-	}
-	leader, color := b.Find(b.parent[x])
-	color ^= b.color[x]
-	return leader, color
+type historyItem struct {
+	index int
+	value arrayItem
 }
 
-func (b *BipartiteChecker) Union(x, y int32) {
-	b.version++
-	color := int32(1)
-	leaderX, distX := b.Find(x)
-	x, color = leaderX, color^distX
-	leaderY, distY := b.Find(y)
-	y, color = leaderY, color^distY
-	if x == y {
-		if color == 1 && b.firstViolate == -1 {
-			b.firstViolate = b.version
-		}
-		b.setValue(&b.parent[0], b.parent[0])
-		return
+type RollbackArray struct {
+	n       int
+	data    []arrayItem
+	history []historyItem
+}
+
+func NewRollbackArray(n int, f func(index int) arrayItem) *RollbackArray {
+	data := make([]arrayItem, n)
+	for i := 0; i < n; i++ {
+		data[i] = f(i)
 	}
-	if b.rank[x] < b.rank[y] {
-		b.setValue(&b.parent[x], y)
-		b.setValue(&b.color[x], color)
-	} else {
-		b.setValue(&b.parent[y], x)
-		b.setValue(&b.color[y], color)
-		if b.rank[x] == b.rank[y] {
-			b.setValue(&b.rank[x], b.rank[x]+1)
-		}
+	return &RollbackArray{
+		n:    n,
+		data: data,
 	}
 }
 
-func (b *BipartiteChecker) Undo() {
-	if len(b.history) == 0 {
-		return
-	}
-	v := b.history[len(b.history)-1].version
-	if b.firstViolate == v {
-		b.firstViolate = -1
-	}
-	for len(b.history) > 0 && b.history[len(b.history)-1].version == v {
-		b.history[len(b.history)-1].Revert()
-		b.history = b.history[:len(b.history)-1]
+func (r *RollbackArray) GetTime() int {
+	return len(r.history)
+}
+
+func (r *RollbackArray) Rollback(time int) {
+	for len(r.history) > time {
+		pair := r.history[len(r.history)-1]
+		r.history = r.history[:len(r.history)-1]
+		r.data[pair.index] = pair.value
 	}
 }
 
-func (b *BipartiteChecker) setValue(cell *int32, newValue int32) {
-	step := NewSetValueStep(cell, *cell, b.version)
-	*cell = newValue // apply
-	b.history = append(b.history, step)
+func (r *RollbackArray) Undo() bool {
+	if len(r.history) == 0 {
+		return false
+	}
+	pair := r.history[len(r.history)-1]
+	r.history = r.history[:len(r.history)-1]
+	r.data[pair.index] = pair.value
+	return true
+}
+
+func (r *RollbackArray) Get(index int) arrayItem {
+	return r.data[index]
+}
+
+func (r *RollbackArray) Set(index int, value arrayItem) {
+	r.history = append(r.history, historyItem{index: index, value: r.data[index]})
+	r.data[index] = value
+}
+
+func (r *RollbackArray) GetAll() []arrayItem {
+	return append(r.data[:0:0], r.data...)
+}
+
+func (r *RollbackArray) Len() int {
+	return r.n
 }
