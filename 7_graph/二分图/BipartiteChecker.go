@@ -1,6 +1,6 @@
 package main
 
-// 在线二分图检测.
+// 在线二分图检测(维护到根节点的异或值实现).
 type BipartiteChecker struct {
 	n            int32
 	parent       []int32
