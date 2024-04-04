@@ -6,6 +6,10 @@ import (
 )
 
 func main() {
+	CF603E()
+}
+
+func demo() {
 	count := 0
 	ops := make([]*PriorityCommutativeOperation, 10)
 	for i := 0; i < 10; i++ {
@@ -31,6 +35,13 @@ func main() {
 }
 
 // https://codeforces.com/contest/603/problem/E
+// 给定一张 n 个点的无向图，初始没有边。
+// 依次加入 m 条带权的边(互不相等)，每次加入后询问是否存在一个边集，满足每个点的度数均为奇数。
+// 若存在，则还需要最小化边集中的最大边权。
+//
+// !等价于 “这个图中只存在大小为偶数的连通块”。
+// TODO
+func CF603E() {}
 
 // 满足交换律的操作，即(op1, op2) 和 (op2, op1) 作用效果相同.
 type PriorityCommutativeOperation struct {

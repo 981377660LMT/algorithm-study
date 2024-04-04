@@ -1,4 +1,9 @@
 """分割等和子集/划分为k个相等的子集"""
+# 698. 划分为k个相等的子集
+# https://leetcode.cn/problems/partition-to-k-equal-sum-subsets/description/
+# 1 <= k <= len(nums) <= 16
+# 0 < nums[i] < 10000
+# 每个元素的频率在 [1,4] 范围内
 
 
 from functools import lru_cache

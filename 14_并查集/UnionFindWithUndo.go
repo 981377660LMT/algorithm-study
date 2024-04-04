@@ -50,22 +50,22 @@ func main() {
 	fmt.Println(uf, uf.Part)
 }
 
-func NewUnionFindArrayWithUndo(n int) *UnionFindArrayWithUndo {
-	data := make([]int, n)
+func NewUnionFindArrayWithUndo(n int32) *UnionFindArrayWithUndo {
+	data := make([]int32, n)
 	for i := range data {
 		data[i] = -1
 	}
 	return &UnionFindArrayWithUndo{Part: n, n: n, data: data}
 }
 
-type historyItem struct{ a, b int }
+type historyItem struct{ a, b int32 }
 
 type UnionFindArrayWithUndo struct {
-	Part      int
-	n         int
-	innerSnap int
-	data      []int
-	history   []historyItem // (root,data)
+	Part      int32
+	n         int32
+	innerSnap int32
+	data      []int32
+	history   []*historyItem // (root,data)
 }
 
 // !撤销上一次合并操作，没合并成功也要撤销.
@@ -89,22 +89,22 @@ func (uf *UnionFindArrayWithUndo) Undo() bool {
 //
 //	!Snapshot() 之后可以调用 Rollback(-1) 回滚到这个状态.
 func (uf *UnionFindArrayWithUndo) Snapshot() {
-	uf.innerSnap = len(uf.history) >> 1
+	uf.innerSnap = int32(len(uf.history) >> 1)
 }
 
 // 回滚到指定的状态.
 //
 //	state 为 -1 表示回滚到上一次 `SnapShot` 时保存的状态.
 //	其他值表示回滚到状态id为state时的状态.
-func (uf *UnionFindArrayWithUndo) Rollback(state int) bool {
+func (uf *UnionFindArrayWithUndo) Rollback(state int32) bool {
 	if state == -1 {
 		state = uf.innerSnap
 	}
 	state <<= 1
-	if state < 0 || state > len(uf.history) {
+	if state < 0 || state > int32(len(uf.history)) {
 		return false
 	}
-	for state < len(uf.history) {
+	for state < int32(len(uf.history)) {
 		uf.Undo()
 	}
 	return true
@@ -123,10 +123,10 @@ func (uf *UnionFindArrayWithUndo) Reset() {
 	}
 }
 
-func (uf *UnionFindArrayWithUndo) Union(x, y int) bool {
+func (uf *UnionFindArrayWithUndo) Union(x, y int32) bool {
 	x, y = uf.Find(x), uf.Find(y)
-	uf.history = append(uf.history, historyItem{x, uf.data[x]})
-	uf.history = append(uf.history, historyItem{y, uf.data[y]})
+	uf.history = append(uf.history, &historyItem{x, uf.data[x]})
+	uf.history = append(uf.history, &historyItem{y, uf.data[y]})
 	if x == y {
 		return false
 	}
@@ -141,22 +141,22 @@ func (uf *UnionFindArrayWithUndo) Union(x, y int) bool {
 	return true
 }
 
-func (uf *UnionFindArrayWithUndo) Find(x int) int {
+func (uf *UnionFindArrayWithUndo) Find(x int32) int32 {
 	cur := x
 	for uf.data[cur] >= 0 {
 		cur = uf.data[cur]
 	}
 	return cur
 }
-func (ufa *UnionFindArrayWithUndo) SetPart(part int) { ufa.Part = part }
+func (ufa *UnionFindArrayWithUndo) SetPart(part int32) { ufa.Part = part }
 
-func (uf *UnionFindArrayWithUndo) IsConnected(x, y int) bool { return uf.Find(x) == uf.Find(y) }
+func (uf *UnionFindArrayWithUndo) IsConnected(x, y int32) bool { return uf.Find(x) == uf.Find(y) }
 
-func (uf *UnionFindArrayWithUndo) GetSize(x int) int { return -uf.data[uf.Find(x)] }
+func (uf *UnionFindArrayWithUndo) GetSize(x int32) int32 { return -uf.data[uf.Find(x)] }
 
-func (ufa *UnionFindArrayWithUndo) GetGroups() map[int][]int {
-	groups := make(map[int][]int)
-	for i := 0; i < ufa.n; i++ {
+func (ufa *UnionFindArrayWithUndo) GetGroups() map[int32][]int32 {
+	groups := make(map[int32][]int32)
+	for i := int32(0); i < ufa.n; i++ {
 		root := ufa.Find(i)
 		groups[root] = append(groups[root], i)
 	}
@@ -166,11 +166,11 @@ func (ufa *UnionFindArrayWithUndo) GetGroups() map[int][]int {
 func (ufa *UnionFindArrayWithUndo) String() string {
 	sb := []string{"UnionFindArray:"}
 	groups := ufa.GetGroups()
-	keys := make([]int, 0, len(groups))
+	keys := make([]int32, 0, len(groups))
 	for k := range groups {
 		keys = append(keys, k)
 	}
-	sort.Ints(keys)
+	sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
 	for _, root := range keys {
 		member := groups[root]
 		cur := fmt.Sprintf("%d: %v", root, member)
