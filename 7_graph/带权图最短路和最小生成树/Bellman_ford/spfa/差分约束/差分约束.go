@@ -3,7 +3,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 )
 
 const INF int = 1e18
@@ -33,6 +35,32 @@ func (d *DualShortestPath) AddEdge(i, j, w int) {
 	if w < 0 {
 		d.hasNeg = true
 	}
+}
+
+// f(i) - f(j) <= w
+func (d *DualShortestPath) LessThanOrEqualTo(i, j, w int) {
+	d.AddEdge(i, j, w)
+}
+
+// f(i) - f(j) >= w
+func (d *DualShortestPath) GreaterThanOrEqualTo(i, j, w int) {
+	d.LessThanOrEqualTo(j, i, -w)
+}
+
+// f(i) - f(j) < w
+func (d *DualShortestPath) LessThan(i, j, w int) {
+	d.LessThanOrEqualTo(i, j, w-1)
+}
+
+// f(i) - f(j) > w
+func (d *DualShortestPath) GreaterThan(i, j, w int) {
+	d.GreaterThanOrEqualTo(i, j, w+1)
+}
+
+// f(i) - f(j) == w
+func (d *DualShortestPath) EqualTo(i, j, w int) {
+	d.GreaterThanOrEqualTo(i, j, w)
+	d.LessThanOrEqualTo(i, j, w)
 }
 
 // 求 `f(i) - f(0)` 的最小值/最大值, 并检测是否有负环/正环
@@ -286,36 +314,12 @@ func (h *Heap) pushDown(root int) {
 	}
 }
 
-//
-//
-//
 func main() {
-	// 	// https://www.luogu.com.cn/problem/P5960
-	// 	// 求任意一组满足这个不等式组的解
-	// 	// 如果有多组解，请输出任意一组，无解请输出 NO。
-	// 	in := bufio.NewReader(os.Stdin)
-	// 	out := bufio.NewWriter(os.Stdout)
-	// 	defer out.Flush()
+	P3275()
+	// P5960()
+}
 
-	// 	var n, m int
-	// 	fmt.Fscan(in, &n, &m)
-	// 	DSP := NewDualShortestPath(n+10, true)
-	// 	for i := 0; i < m; i++ {
-	// 		// f(u)-f(v)<x
-	// 		var u, v, x int // 1<=u,v<=n
-	// 		fmt.Fscan(in, &u, &v, &x)
-	// 		DSP.AddEdge(u, v, x)
-	// 	}
-
-	// 	res, ok := DSP.Run()
-	// 	if !ok {
-	// 		fmt.Fprintln(out, "NO")
-	// 		return
-	// 	}
-	// 	for i := 1; i <= n; i++ {
-	// 		fmt.Fprint(out, res[i], " ")
-	// 	}
-
+func demo() {
 	n := 10
 	limits := [][]int{{1, 4, 2}, {3, 6, 2}, {10, 10, 1}}
 	D := NewDualShortestPath(n+10, false)
@@ -331,4 +335,80 @@ func main() {
 		fmt.Println("No solution")
 	}
 	fmt.Println(dist[n])
+}
+
+func P5960() {
+	// https://www.luogu.com.cn/problem/P5960
+	// 求任意一组满足这个不等式组的解
+	// 如果有多组解，请输出任意一组，无解请输出 NO。
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	DSP := NewDualShortestPath(n+1, false)
+	for i := 0; i < m; i++ {
+		var u, v, x int // 1<=u,v<=n
+		fmt.Fscan(in, &u, &v, &x)
+		DSP.LessThanOrEqualTo(u, v, x)
+	}
+
+	res, ok := DSP.Run()
+	if !ok {
+		fmt.Fprintln(out, "NO")
+		return
+	}
+	for i := 1; i <= n; i++ { // !0是虚拟结点
+		fmt.Fprint(out, res[i], " ")
+	}
+}
+
+// P3275 [SCOI2011] 糖果 (最小化)
+// https://www.luogu.com.cn/problem/P3275
+// 如果X=1，表示第 A 个小朋友分到的糖果必须和第 B 个小朋友分到的糖果一样多；
+// 如果X=2，表示第 A 个小朋友分到的糖果必须少于第 B 个小朋友分到的糖果；
+// 如果X=3，表示第 A 个小朋友分到的糖果必须不少于第 B 个小朋友分到的糖果；
+// 如果X=4，表示第 A 个小朋友分到的糖果必须多于第 B 个小朋友分到的糖果；
+// 如果X=5，表示第 A 个小朋友分到的糖果必须不多于第 B 个小朋友分到的糖果；
+// 输出一行，表示老师至少需要准备的糖果数，如果不能满足小朋友们的所有要求，就输出−1。
+func P3275() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	D := NewDualShortestPath(n+1, true)
+	for i := 0; i < m; i++ {
+		var op, a, b int
+		fmt.Fscan(in, &op, &a, &b) // 0是虚拟结点, 1~n是小朋友
+		if op == 1 {
+			D.EqualTo(a, b, 0)
+		} else if op == 2 {
+			D.LessThan(a, b, 0)
+		} else if op == 3 {
+			D.GreaterThanOrEqualTo(a, b, 0)
+		} else if op == 4 {
+			D.GreaterThan(a, b, 0)
+		} else {
+			D.LessThanOrEqualTo(a, b, 0)
+		}
+	}
+
+	// xi>=1 => xi- x0 >=1
+	for i := 1; i <= n; i++ {
+		D.GreaterThanOrEqualTo(i, 0, 0)
+	}
+	res, ok := D.Run()
+	if !ok {
+		fmt.Fprintln(out, -1)
+		return
+	}
+
+	v := n // >=1
+	for i := 1; i <= n; i++ {
+		v += res[i]
+	}
+	fmt.Fprintln(out, v)
 }
