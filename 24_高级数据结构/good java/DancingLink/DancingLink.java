@@ -17,7 +17,7 @@ public class DancingLink {
     Node colHead;
     int[] rowSize;
     int[] colSize;
-    Deque<Node> dq;
+    Deque<Node> stack;
     Deque<Node> ansDq;
 
     public static DancingLink newSparseInstance(int[][] pos, int n, int m) {
@@ -27,7 +27,7 @@ public class DancingLink {
         for (int[] xy : pos) {
             ans.add(xy[0], xy[1]);
         }
-        ans.dq = new ArrayDeque<>(pos.length + n + m);
+        ans.stack = new ArrayDeque<>(pos.length + n + m);
         ans.dance();
         return ans;
     }
@@ -44,7 +44,7 @@ public class DancingLink {
                 }
             }
         }
-        ans.dq = new ArrayDeque<>(cnt + n + m);
+        ans.stack = new ArrayDeque<>(cnt + n + m);
         ans.dance();
         return ans;
     }
@@ -167,7 +167,7 @@ public class DancingLink {
             return;
         }
         remove(root);
-        dq.addLast(root);
+        stack.addLast(root);
         if (root.col == -1 || root.row == -1) {
             return;
         }
@@ -190,7 +190,7 @@ public class DancingLink {
             return;
         }
         remove(root);
-        dq.addLast(root);
+        stack.addLast(root);
         if (root.col == -1 || root.row == -1) {
             return;
         }
@@ -213,7 +213,7 @@ public class DancingLink {
             return;
         }
         remove(root);
-        dq.addLast(root);
+        stack.addLast(root);
         if (root.col == -1 || root.row == -1) {
             return;
         }
@@ -232,8 +232,8 @@ public class DancingLink {
 
     private void undo(int size) {
         ansDq.removeLast();
-        while (dq.size() > size) {
-            recover(dq.removeLast());
+        while (stack.size() > size) {
+            recover(stack.removeLast());
         }
     }
 
@@ -265,7 +265,7 @@ public class DancingLink {
             if (iter.row == -1) {
                 iter = iter.d;
             }
-            int now = dq.size();
+            int now = stack.size();
             removeRow(iter.row);
             if (dance()) {
                 return true;
