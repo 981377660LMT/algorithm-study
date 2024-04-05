@@ -2,34 +2,40 @@ package main
 
 const INF int = 1e18
 
-// 在线bfs.
+// 在线dijsktra.
 //
 //	不预先给出图，而是通过两个函数 setUsed 和 findUnused 来在线寻找边.
 //	setUsed(u)：将 u 标记为已访问。
 //	findUnused(u)：找到和 u 邻接的一个未访问过的点。如果不存在, 返回 `-1`。
 func OnlineDijkstra(
 	n int, start int,
-	setUsed func(u int), findUnused func(cur int) (next int),
+	setUsed func(u int),
+	findUnused func(cur int) (next int, weight int),
 ) (dist []int) {
 	dist = make([]int, n)
 	for i := range dist {
 		dist[i] = INF
 	}
 	dist[start] = 0
-	queue := []int{start}
+	queue := NewHeap[[2]int](func(a, b [2]int) bool { return a[1] < b[1] }, [][2]int{{start, 0}}) // [u, dist[u]]
 	setUsed(start)
 
-	for len(queue) > 0 {
-		cur := queue[0]
-		queue = queue[1:]
+	for queue.Len() > 0 {
+		top := queue.Pop()
+		cur, curDist := top[0], top[1]
+		if dist[cur] < curDist {
+			continue
+		}
 		for {
-			next := findUnused(cur)
+			next, weight := findUnused(cur)
 			if next == -1 {
 				break
 			}
-			dist[next] = dist[cur] + 1 // weight
-			queue = append(queue, next)
 			setUsed(next)
+			if cand := curDist + weight; cand < dist[next] {
+				dist[next] = cand
+				queue.Push([2]int{next, cand})
+			}
 		}
 	}
 
