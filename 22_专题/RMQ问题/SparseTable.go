@@ -167,7 +167,7 @@ func (st *SparseTable) Query(start, end int) S {
 	if start >= end {
 		return st.e()
 	}
-	b := bits.Len(uint(end-start)) - 1
+	b := bits.Len(uint(end-start)) - 1 // log2
 	return st.op(st.st[b][start], st.st[b][end-(1<<b)])
 }
 
