@@ -12,22 +12,22 @@ func main() {
 
 }
 
-type DivideIntervalBinaryLift struct {
+type DividePathOnTreeByBinaryLift struct {
 	n, log int32
 	size   int32
 }
 
-func NewDivideIntervalBinaryLift(n int32) *DivideIntervalBinaryLift {
+func NewDividePathOnTreeByBinaryLift(n int32) *DividePathOnTreeByBinaryLift {
 	log := int32(bits.Len(uint(n))) - 1
 	size := n * (log + 1)
-	return &DivideIntervalBinaryLift{n: n, log: log, size: size}
+	return &DividePathOnTreeByBinaryLift{n: n, log: log, size: size}
 }
 
-func (d *DivideIntervalBinaryLift) EnumerateRange(start int32, end int, f func(jumpId int32)) {}
+func (d *DividePathOnTreeByBinaryLift) EnumerateRange(start int32, end int, f func(jumpId int32)) {}
 
-func (d *DivideIntervalBinaryLift) EnumerateRange2(start1, end1 int, start2, end2 int32, f func(jumpId int32)) {
+func (d *DividePathOnTreeByBinaryLift) EnumerateRange2(start1, end1 int, start2, end2 int32, f func(jumpId int32)) {
 }
 
-func (d *DivideIntervalBinaryLift) Size() int32 {
+func (d *DividePathOnTreeByBinaryLift) Size() int32 {
 	return d.size
 }

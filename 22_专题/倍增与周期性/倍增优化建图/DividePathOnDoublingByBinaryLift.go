@@ -34,7 +34,7 @@ func 拆点() {
 
 	n := int32(10)
 	edges := [][]int32{{0, 1}, {0, 2}, {1, 3}, {1, 4}, {2, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 9}}
-	db := NewDividePathOnDoublingBinaryLift(n, int(n))
+	db := NewDividePathOnDoublingByBinaryLift(n, int(n))
 	for _, e := range edges {
 		db.Add(e[1], e[0])
 	}
@@ -53,15 +53,15 @@ func 拆点() {
 	fmt.Println(values[:n])
 }
 
-type DividePathOnDoublingBinaryLift struct {
+type DividePathOnDoublingByBinaryLift struct {
 	n    int32
 	log  int32
 	size int32
 	jump []int32
 }
 
-func NewDividePathOnDoublingBinaryLift(n int32, maxStep int) *DividePathOnDoublingBinaryLift {
-	res := &DividePathOnDoublingBinaryLift{n: n, log: int32(bits.Len(uint(maxStep))) - 1}
+func NewDividePathOnDoublingByBinaryLift(n int32, maxStep int) *DividePathOnDoublingByBinaryLift {
+	res := &DividePathOnDoublingByBinaryLift{n: n, log: int32(bits.Len(uint(maxStep))) - 1}
 	res.size = n * (res.log + 1)
 	res.jump = make([]int32, res.size)
 	for i := range res.jump {
@@ -70,11 +70,11 @@ func NewDividePathOnDoublingBinaryLift(n int32, maxStep int) *DividePathOnDoubli
 	return res
 }
 
-func (d *DividePathOnDoublingBinaryLift) Add(from, to int32) {
+func (d *DividePathOnDoublingByBinaryLift) Add(from, to int32) {
 	d.jump[from] = to
 }
 
-func (d *DividePathOnDoublingBinaryLift) Build() {
+func (d *DividePathOnDoublingByBinaryLift) Build() {
 	n := d.n
 	for k := int32(0); k < d.log; k++ {
 		for v := int32(0); v < n; v++ {
@@ -91,7 +91,7 @@ func (d *DividePathOnDoublingBinaryLift) Build() {
 
 // 给定从 `from` 状态开始，转移 `len` 次的一段区间，遍历这段区间上的jumpId。
 // O(log(n)).
-func (d *DividePathOnDoublingBinaryLift) EnumerateJump(from int32, len int32, f func(jumpId int32)) {
+func (d *DividePathOnDoublingByBinaryLift) EnumerateJump(from int32, len int32, f func(jumpId int32)) {
 	cur := from
 	n, log := d.n, d.log
 	for k := log; k >= 0; k-- {
@@ -108,7 +108,7 @@ func (d *DividePathOnDoublingBinaryLift) EnumerateJump(from int32, len int32, f 
 
 // 下推路径信息，更新答案.
 // O(n*log(n)).
-func (d *DividePathOnDoublingBinaryLift) PushDown(f func(parent int32, child1, child2 int32)) {
+func (d *DividePathOnDoublingByBinaryLift) PushDown(f func(parent int32, child1, child2 int32)) {
 	n, log := d.n, d.log
 	for k := log - 1; k >= 0; k-- {
 		for i := int32(0); i < n; i++ {
@@ -123,13 +123,13 @@ func (d *DividePathOnDoublingBinaryLift) PushDown(f func(parent int32, child1, c
 	}
 }
 
-func (d *DividePathOnDoublingBinaryLift) Size() int32 {
+func (d *DividePathOnDoublingByBinaryLift) Size() int32 {
 	return d.size
 }
 
 // 求从 `from` 状态开始转移 `step` 次的最终状态的编号。
 // 不存在时返回 -1。
-func (d *DividePathOnDoublingBinaryLift) Jump(from int32, step int) (to int32) {
+func (d *DividePathOnDoublingByBinaryLift) Jump(from int32, step int) (to int32) {
 	to = from
 	for k := int32(0); k < d.log+1; k++ {
 		if to == -1 {
@@ -143,7 +143,7 @@ func (d *DividePathOnDoublingBinaryLift) Jump(from int32, step int) (to int32) {
 }
 
 // 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号。
-func (d *DividePathOnDoublingBinaryLift) MaxStep(from int32, check func(next int32) bool) (step int, to int32) {
+func (d *DividePathOnDoublingByBinaryLift) MaxStep(from int32, check func(next int32) bool) (step int, to int32) {
 	for k := d.log; k >= 0; k-- {
 		tmp := d.jump[k*d.n+from]
 		if tmp == -1 {

@@ -12,19 +12,19 @@ import (
 	"os"
 )
 
-type DivideIntervalBinaryLift struct {
+type DivideIntervalByBinaryLift struct {
 	n, log int32
 	size   int32
 }
 
-func NewDivideIntervalBinaryLift(n int32) *DivideIntervalBinaryLift {
+func NewDivideIntervalByBinaryLift(n int32) *DivideIntervalByBinaryLift {
 	log := int32(bits.Len(uint(n))) - 1
 	size := n * (log + 1)
-	return &DivideIntervalBinaryLift{n: n, log: log, size: size}
+	return &DivideIntervalByBinaryLift{n: n, log: log, size: size}
 }
 
 // 遍历[start,end)区间内的所有jump.
-func (d *DivideIntervalBinaryLift) EnumerateRange(start, end int32, f func(level, index int32)) {
+func (d *DivideIntervalByBinaryLift) EnumerateRange(start, end int32, f func(level, index int32)) {
 	if start >= end {
 		return
 	}
@@ -44,7 +44,7 @@ func (d *DivideIntervalBinaryLift) EnumerateRange(start, end int32, f func(level
 }
 
 // 遍历[start1,end1)区间和[start2,end2)区间内的所有jump.要求区间长度相等.
-func (d *DivideIntervalBinaryLift) EnumerateRange2(start1, end1 int32, start2, end2 int32, f func(level, index1, index2 int32)) {
+func (d *DivideIntervalByBinaryLift) EnumerateRange2(start1, end1 int32, start2, end2 int32, f func(level, index1, index2 int32)) {
 	if end1-start1 != end2-start2 {
 		panic("not same length")
 	}
@@ -69,7 +69,7 @@ func (d *DivideIntervalBinaryLift) EnumerateRange2(start1, end1 int32, start2, e
 
 // 从高的jump开始下推信息，更新底部jump的答案.
 // O(n*log(n)).
-func (d *DivideIntervalBinaryLift) PushDown(
+func (d *DivideIntervalByBinaryLift) PushDown(
 	f func(parentLevel, parentIndex int32, childLevel, childIndex1, childIndex2 int32),
 ) {
 	n, log := d.n, d.log
@@ -80,8 +80,8 @@ func (d *DivideIntervalBinaryLift) PushDown(
 	}
 }
 
-func (d *DivideIntervalBinaryLift) Size() int32 { return d.size }
-func (d *DivideIntervalBinaryLift) Log() int32  { return d.log }
+func (d *DivideIntervalByBinaryLift) Size() int32 { return d.size }
+func (d *DivideIntervalByBinaryLift) Log() int32  { return d.log }
 
 func main() {
 	P3295()
@@ -90,7 +90,7 @@ func main() {
 
 func demo() {
 	n := int32(10)
-	D := NewDivideIntervalBinaryLift(n)
+	D := NewDivideIntervalByBinaryLift(n)
 	values := make([]int32, D.Size())
 	D.EnumerateRange(3, 5, func(level, index int32) { values[level*n+index] = 10 })
 	D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
@@ -126,7 +126,7 @@ func P3295() {
 
 	var n, m int32
 	fmt.Fscan(in, &n, &m)
-	D := NewDivideIntervalBinaryLift(n)
+	D := NewDivideIntervalByBinaryLift(n)
 	ufs := make([]*UnionFindArraySimple32, D.Log()+1)
 	for i := range ufs {
 		ufs[i] = NewUnionFindArraySimple32(n)
