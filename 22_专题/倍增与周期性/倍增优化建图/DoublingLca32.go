@@ -1,6 +1,8 @@
 // DividePathOnTreeBinaryLift/DoublingLca
 // 倍增拆树上路径`path(from,to)`：倍增拆点将树上的一段路径拆成logn个点
-// TODO: 与`CompressedLCA`功能保持一致，并增加拆路径的功能.
+//
+// 一共拆分成[0,log]层，每层有n个元素.
+// !jumpId = level*n + index 表示第level层的第index个元素(0<=level<log+1,0<=index<n).
 
 package main
 
@@ -15,26 +17,6 @@ func main() {
 	// lca()
 	// jump()
 	test()
-}
-
-type DivideIntervalBinaryLift struct {
-	n, log int32
-	size   int32
-}
-
-func NewDivideIntervalBinaryLift(n int32) *DivideIntervalBinaryLift {
-	log := int32(bits.Len(uint(n))) - 1
-	size := n * (log + 1)
-	return &DivideIntervalBinaryLift{n: n, log: log, size: size}
-}
-
-func (d *DivideIntervalBinaryLift) EnumerateRange(start int32, end int, f func(jumpId int32)) {}
-
-func (d *DivideIntervalBinaryLift) EnumerateRange2(start1, end1 int, start2, end2 int32, f func(jumpId int32)) {
-}
-
-func (d *DivideIntervalBinaryLift) Size() int32 {
-	return d.size
 }
 
 // https://judge.yosupo.jp/problem/lca
@@ -104,6 +86,7 @@ func NewDoublingLca32(tree [][]int32, roots []int32) *DoublingLca32 {
 		n:     n,
 		log:   int32(bits.Len32(uint32(n))) - 1,
 	}
+	lca.size = n * (lca.log + 1)
 
 	lca.makeDp()
 	for _, root := range roots {
@@ -112,6 +95,32 @@ func NewDoublingLca32(tree [][]int32, roots []int32) *DoublingLca32 {
 	lca.updateDp()
 	return lca
 }
+
+// 倍增拆点，将树上的一段路径拆成logn个点.
+func (lca *DoublingLca32) EnumerateJump(root1, root2 int32, f func(level, index int32)) {
+	lca_ := lca.Lca(root1, root2)
+}
+
+// 遍历路径(start1,target1)和(start2,target2)上的所有jump.
+func (lca *DoublingLca32) EnumerateJump2(start1, target1, start2, target2 int32, f func(level, index1, index2 int32)) {
+}
+
+// 下推路径信息，更新答案.
+// O(n*log(n)).
+func (lca *DoublingLca32) PushDown(f func(pLevel, pIndex int32, cLevel, cIndex1, cIndex2 int32)) {
+	n, log := lca.n, lca.log
+	for k := log - 1; k >= 0; k-- {
+		for i := int32(0); i < n; i++ {
+			// push down jump(i,k+1) to jump(i,k) and jump(jump(i,k),k)
+			if to := lca.jump[k+1][i]; to != -1 {
+				f(k+1, i, k, i, lca.jump[k][i])
+			}
+		}
+	}
+}
+
+func (lca *DoublingLca32) Size() int32 { return lca.size }
+func (lca *DoublingLca32) Log() int32  { return lca.log }
 
 func (lca *DoublingLca32) Lca(root1, root2 int32) int32 {
 	if lca.Depth[root1] < lca.Depth[root2] {
@@ -180,49 +189,31 @@ func (lca *DoublingLca32) Jump(start, target, step int32) int32 {
 	return lca.KthAncestor(target, dist-step)
 }
 
-func (lca *DoublingLca32) FirstTrue(start int32, predicate func(end int32) bool) (step, to int32) {
-	// 判定条件取反，然后向上跳一层.
+func (lca *DoublingLca32) FirstTrue(start int32, predicate func(end int32) bool) int32 {
+	// `LastTrue`判定条件取反，然后向上跳一层.
 	if predicate(start) {
-		step, to = 0, start
-		return
+		return start
 	}
-
 	for k := lca.log; k >= 0; k-- {
 		tmp := lca.jump[k][start]
-		if tmp == -1 {
-			continue
-		}
-		if !predicate(tmp) {
-			step |= 1 << k
+		if tmp != -1 && !predicate(tmp) {
 			start = tmp
 		}
 	}
-
-	if p := lca.jump[0][start]; p == -1 {
-		step, to = -1, -1
-	} else {
-		step, to = step+1, p
-	}
-	return
+	return lca.jump[0][start] // 不存在则返回-1
 }
 
-func (lca *DoublingLca32) LastTrue(start int32, predicate func(end int32) bool) (step, to int32) {
+func (lca *DoublingLca32) LastTrue(start int32, predicate func(end int32) bool) int32 {
 	if !predicate(start) {
-		step, to = -1, -1
-		return
+		return -1
 	}
 	for k := lca.log; k >= 0; k-- {
 		tmp := lca.jump[k][start]
-		if tmp == -1 {
-			continue
-		}
-		if predicate(tmp) {
-			step |= 1 << k
+		if tmp != -1 && predicate(tmp) {
 			start = tmp
 		}
 	}
-	to = start
-	return
+	return start
 }
 
 func (lca *DoublingLca32) makeDp() {
@@ -323,48 +314,34 @@ func test() {
 	lca := NewDoublingLca32(tree, []int32{0})
 	fmt.Println(lca.Lca(3, 6)) // 1
 
-	step1, to1 := lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= -1 })
-	expect[int32](step1, -1)
+	to1 := lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= -1 })
 	expect[int32](to1, -1)
-	step1, to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= 1 })
-	expect[int32](step1, 2)
+	to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= 1 })
 	expect[int32](to1, 1)
-	step1, to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= 2 })
-	expect[int32](step1, 1)
+	to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= 2 })
 	expect[int32](to1, 4)
-	step1, to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= 3 })
-	expect[int32](step1, 0)
+	to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= 3 })
 	expect[int32](to1, 6)
-	step1, to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= 4 })
-	expect[int32](step1, 0)
+	to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= 4 })
 	expect[int32](to1, 6)
-	step1, to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] >= 2 })
-	expect[int32](step1, 0)
+	to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] >= 2 })
 	expect[int32](to1, 6)
-	step1, to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] >= 4 })
-	expect[int32](step1, -1)
+	to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] >= 4 })
 	expect[int32](to1, -1)
 
-	step2, to2 := lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] >= 1 })
-	expect[int32](step2, 2)
+	to2 := lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] >= 1 })
 	expect[int32](to2, 1)
-	step2, to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] >= 2 })
-	expect[int32](step2, 1)
+	to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] >= 2 })
 	expect[int32](to2, 4)
-	step2, to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] >= 3 })
-	expect[int32](step2, 0)
+	to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] >= 3 })
 	expect[int32](to2, 6)
-	step2, to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] >= 4 })
-	expect[int32](step2, -1)
+	to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] >= 4 })
 	expect[int32](to2, -1)
-	step2, to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] <= 2 })
-	expect[int32](step2, -1)
+	to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] <= 2 })
 	expect[int32](to2, -1)
-	step2, to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] <= 4 })
-	expect[int32](step2, 3)
+	to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] <= 4 })
 	expect[int32](to2, 0)
-	step2, to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] <= -1 })
-	expect[int32](step2, -1)
+	to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] <= -1 })
 	expect[int32](to2, -1)
 
 	fmt.Println("test passed")

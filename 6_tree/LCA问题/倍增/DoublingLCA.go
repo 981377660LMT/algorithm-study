@@ -276,8 +276,8 @@ func (lca *LCADoubling) fillDp() {
 				lca.dp[i+1][j] = -1
 			} else {
 				lca.dp[i+1][j] = lca.dp[i][pre]
-				lca.dpWeight1[i+1][j] = max(lca.dpWeight1[i][j], lca.dpWeight1[i][lca.dp[i][j]])
-				lca.dpWeight2[i+1][j] = min(lca.dpWeight2[i][j], lca.dpWeight2[i][lca.dp[i][j]])
+				lca.dpWeight1[i+1][j] = max(lca.dpWeight1[i][j], lca.dpWeight1[i][pre])
+				lca.dpWeight2[i+1][j] = min(lca.dpWeight2[i][j], lca.dpWeight2[i][pre])
 			}
 		}
 	}

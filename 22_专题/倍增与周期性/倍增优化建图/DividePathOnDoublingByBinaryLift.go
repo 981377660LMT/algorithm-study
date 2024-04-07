@@ -42,15 +42,21 @@ func 拆点() {
 
 	values := make([]int32, db.Size())
 	fmt.Println(db.Jump(7, 4))
-	db.EnumerateJump(7, 4, func(jumpId int32) {
+	db.EnumerateJump(7, 4, func(level, index int32) {
+		jumpId := level*n + index
 		values[jumpId] = max32(values[jumpId], 999)
 	})
 
-	db.PushDown(func(parent, child1, child2 int32) {
-		values[child1] = max32(values[child1], values[parent])
-		values[child2] = max32(values[child2], values[parent])
+	db.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
+		p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
+		values[c1] = max32(values[c1], values[p])
+		values[c2] = max32(values[c2], values[p])
 	})
 	fmt.Println(values[:n])
+
+	db.EnumerateJump2(7, 5, 3, func(level, index1, index2 int32) {
+		fmt.Println(level, index1, index2)
+	})
 }
 
 type DividePathOnDoublingByBinaryLift struct {
@@ -89,43 +95,56 @@ func (d *DividePathOnDoublingByBinaryLift) Build() {
 	}
 }
 
-// 给定从 `from` 状态开始，转移 `len` 次的一段区间，遍历这段区间上的jumpId。
+// 给定从 `from` 状态开始，转移 `step` 次的一段区间(一共step+1个点)，遍历这段区间上的jump。
 // O(log(n)).
-func (d *DividePathOnDoublingByBinaryLift) EnumerateJump(from int32, len int32, f func(jumpId int32)) {
+func (d *DividePathOnDoublingByBinaryLift) EnumerateJump(from int32, step int, f func(level, index int32)) {
 	cur := from
 	n, log := d.n, d.log
 	for k := log; k >= 0; k-- {
 		if cur == -1 {
 			return
 		}
-		if len&(1<<k) != 0 {
-			f(k*n + cur)
+		if step&(1<<k) != 0 {
+			f(k, cur)
 			cur = d.jump[k*n+cur]
 		}
 	}
-	f(cur)
+	f(0, cur)
 }
 
-// 下推路径信息，更新答案.
+// 从 `from1` 和 `from2` 状态开始转移 `step` 次(每段step+1个点)，遍历这两区间上的jump。
+// O(log(n)).
+func (d *DividePathOnDoublingByBinaryLift) EnumerateJump2(from1, from2 int32, step int, f func(level, index1, index2 int32)) {
+	cur1, cur2 := from1, from2
+	n, log := d.n, d.log
+	for k := log; k >= 0; k-- {
+		if step&(1<<k) != 0 {
+			f(k, cur1, cur2)
+			cur1, cur2 = d.jump[k*n+cur1], d.jump[k*n+cur2]
+			if cur1 == -1 || cur2 == -1 {
+				return
+			}
+		}
+	}
+	f(0, cur1, cur2)
+}
+
+// 下推路径信息，更新答案.s
 // O(n*log(n)).
-func (d *DividePathOnDoublingByBinaryLift) PushDown(f func(parent int32, child1, child2 int32)) {
+func (d *DividePathOnDoublingByBinaryLift) PushDown(f func(pLevel, pIndex int32, cLevel, cIndex1, cIndex2 int32)) {
 	n, log := d.n, d.log
 	for k := log - 1; k >= 0; k-- {
 		for i := int32(0); i < n; i++ {
 			// push down jump(i,k+1) to jump(i,k) and jump(jump(i,k),k)
-			parent := (k+1)*n + i
-			if to := d.jump[parent]; to != -1 {
-				left := k*n + i
-				right := k*n + d.jump[left]
-				f(parent, left, right)
+			if to := d.jump[(k+1)*n+i]; to != -1 {
+				f(k+1, i, k, i, d.jump[k*n+i])
 			}
 		}
 	}
 }
 
-func (d *DividePathOnDoublingByBinaryLift) Size() int32 {
-	return d.size
-}
+func (d *DividePathOnDoublingByBinaryLift) Size() int32 { return d.size }
+func (d *DividePathOnDoublingByBinaryLift) Log() int32  { return d.log }
 
 // 求从 `from` 状态开始转移 `step` 次的最终状态的编号。
 // 不存在时返回 -1。

@@ -1,3 +1,4 @@
+// 根号倍增/分块倍增/SqrtLift：牺牲单次查询复杂度以减少单次修改复杂度.
 // Permutation and Queries (CF1619H-Permutation and Queries-大步小步跳跃)
 // https://www.luogu.com.cn/problem/CF1619H
 // 给定一个长为n的排列P,要求支持q次操作:

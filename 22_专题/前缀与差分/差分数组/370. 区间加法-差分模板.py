@@ -1,8 +1,9 @@
-from typing import List
-from Diff import DiffArray
-
+# 370. 区间加法
+# https://leetcode.cn/problems/range-addition/description/
 # 假设你有一个长度为 n 的数组，初始情况下所有的数字均为 0，你将会被给出 k​​​​​​​ 个更新的操作。
 # 请你返回 k 次操作后的数组。
+from typing import List
+from Diff import DiffArray
 
 
 class Solution:

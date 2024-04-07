@@ -31,9 +31,9 @@ class LCA:
         if root1 == root2:
             return root1
         for i in range(self._bitlen - 1, -1, -1):
-            if self.dp[i][root1] != self.dp[i][root2]:
-                root1 = self.dp[i][root1]
-                root2 = self.dp[i][root2]
+            a, b = self.dp[i][root1], self.dp[i][root2]
+            if a != b:
+                root1, root2 = a, b
         return self.dp[0][root1]
 
     def queryDist(self, root1: int, root2: int) -> int:
@@ -99,10 +99,11 @@ class LCA:
             dp[0][j] = parent[j]
         for i in range(bitlen - 1):
             for j in range(n):
-                if dp[i][j] == -1:
+                tmp = dp[i][j]
+                if tmp == -1:
                     dp[i + 1][j] = -1
                 else:
-                    dp[i + 1][j] = dp[i][dp[i][j]]
+                    dp[i + 1][j] = dp[i][tmp]
         return dp
 
 

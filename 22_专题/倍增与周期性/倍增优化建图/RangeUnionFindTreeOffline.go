@@ -1,6 +1,8 @@
 // 并行合并的并查集(ParallelRangeUnionFindOffline).
 // 倍增结构与线段树的区别
 // 对于任意两段长度相等的区间，倍增的子树结构是相同的，而线段树的子树结构是不同的.
+// !倍增的子区间经过平移之后，仍然对应一个合法的子区间，而线段树的子区间平移之后不一定.
+// 基于倍增结构的这一特点，可以实现"区间并行操作".
 
 // 倍增技术的强大是基于一个很简单的倍增结构。
 // jump(u,i)表示u沿着出边移动2^i步所在的位置，
@@ -56,6 +58,7 @@ func (u *RangeUnionFindTreeOffline[U]) UnionRange(start1, start2 int32, len int3
 	if len <= 0 {
 		return
 	}
+	// !由于并查集合并满足幂等性，所以可以直接合并两个子jump.
 	k := bits.Len32(uint32(len)) - 1                      // log2
 	u.data[k].Union(start1, start2)                       // union jump(start1,k) and jump(start2,k)
 	u.data[k].Union(start1+len-(1<<k), start2+len-(1<<k)) // union jump(end1-(1<<k),k) and jump(end2-(1<<k),k)

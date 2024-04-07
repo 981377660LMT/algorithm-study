@@ -326,6 +326,17 @@ class CompressedBinaryLiftWithSum<S = number> {
     return { node: a, sum: e }
   }
 
+  jump = (start: number, target: number, step: number): number => {
+    const lca = this.lca(start, target)
+    const dep1 = this.depth[start]
+    const dep2 = this.depth[target]
+    const deplca = this.depth[lca]
+    const dist = dep1 + dep2 - 2 * deplca
+    if (step > dist) return -1
+    if (step <= dep1 - deplca) return this.kthAncestor(start, step)
+    return this.kthAncestor(target, dist - step)
+  }
+
   dist = (a: number, b: number): number => {
     return this.depth[a] + this.depth[b] - 2 * this.depth[this.lca(a, b)]
   }

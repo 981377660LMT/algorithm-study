@@ -1,7 +1,18 @@
-// DivideIntervalBinaryLift
+// DivideIntervalBinaryLift/反向st表
 // 倍增拆分序列上的区间 `[start,end)`
 // 一共拆分成[0,log]层，每层有n个元素.
 // !jumpId = level*n + index 表示第level层的第index个元素(0<=level<log+1,0<=index<n).
+//
+// api:
+//
+//	NewDivideIntervalByBinaryLift(n int32) *DivideIntervalByBinaryLift
+//	EnumerateRange(start, end int32, f func(level, index int32))
+//	EnumerateRangeDangerously(start, end int32, f func(level, index int32))
+//	EnumerateRange2(start1, end1 int32, start2, end2 int32, f func(level, index1, index2 int32))
+//	EnumerateRange2Dangerously(start1, end1 int32, start2, end2 int32, f func(level, index1, index2 int32))
+//	PushDown(f func(parentLevel, parentIndex int32, childLevel, childIndex1, childIndex2 int32))
+//	Size() int32
+//	Log() int32
 
 package main
 
@@ -23,7 +34,7 @@ func NewDivideIntervalByBinaryLift(n int32) *DivideIntervalByBinaryLift {
 	return &DivideIntervalByBinaryLift{n: n, log: log, size: size}
 }
 
-// 遍历[start,end)区间内的所有jump.
+// O(logn)遍历[start,end)区间内的所有jump.
 func (d *DivideIntervalByBinaryLift) EnumerateRange(start, end int32, f func(level, index int32)) {
 	if start >= end {
 		return
@@ -43,7 +54,18 @@ func (d *DivideIntervalByBinaryLift) EnumerateRange(start, end int32, f func(lev
 	f(0, cur)
 }
 
-// 遍历[start1,end1)区间和[start2,end2)区间内的所有jump.要求区间长度相等.
+// O(1)遍历[start,end)区间内的所有jump.
+// !要求运算幂等(idempotent).
+func (d *DivideIntervalByBinaryLift) EnumerateRangeDangerously(start, end int32, f func(level, index int32)) {
+	if start >= end {
+		return
+	}
+	k := int32(bits.Len32(uint32(end-start))) - 1
+	f(k, start)
+	f(k, end-(1<<k))
+}
+
+// O(logn)遍历[start1,end1)区间和[start2,end2)区间内的所有jump.要求区间长度相等.
 func (d *DivideIntervalByBinaryLift) EnumerateRange2(start1, end1 int32, start2, end2 int32, f func(level, index1, index2 int32)) {
 	if end1-start1 != end2-start2 {
 		panic("not same length")
@@ -67,6 +89,20 @@ func (d *DivideIntervalByBinaryLift) EnumerateRange2(start1, end1 int32, start2,
 	f(0, cur1, cur2)
 }
 
+// O(1)遍历[start1,end1)区间和[start2,end2)区间内的所有jump.要求区间长度相等.
+// !要求运算幂等(idempotent).
+func (d *DivideIntervalByBinaryLift) EnumerateRange2Dangerously(start1, end1 int32, start2, end2 int32, f func(level, index1, index2 int32)) {
+	if end1-start1 != end2-start2 {
+		panic("not same length")
+	}
+	if start1 >= end1 {
+		return
+	}
+	k := int32(bits.Len32(uint32(end1-start1))) - 1
+	f(k, start1, start2)
+	f(k, end1-(1<<k), end2-(1<<k))
+}
+
 // 从高的jump开始下推信息，更新底部jump的答案.
 // O(n*log(n)).
 func (d *DivideIntervalByBinaryLift) PushDown(
@@ -84,15 +120,15 @@ func (d *DivideIntervalByBinaryLift) Size() int32 { return d.size }
 func (d *DivideIntervalByBinaryLift) Log() int32  { return d.log }
 
 func main() {
-	P3295()
-	// demo()
+	// P3295()
+	demo()
 }
 
 func demo() {
 	n := int32(10)
 	D := NewDivideIntervalByBinaryLift(n)
 	values := make([]int32, D.Size())
-	D.EnumerateRange(3, 5, func(level, index int32) { values[level*n+index] = 10 })
+	D.EnumerateRange(1, 9, func(level, index int32) { values[level*n+index] += 5 })
 	D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
 		p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
 		values[c1] = max(values[c1], values[p])
@@ -136,7 +172,7 @@ func P3295() {
 		var start1, end1, start2, end2 int32
 		fmt.Fscan(in, &start1, &end1, &start2, &end2)
 		start1, start2 = start1-1, start2-1
-		D.EnumerateRange2(start1, end1, start2, end2, func(level, i1, i2 int32) {
+		D.EnumerateRange2Dangerously(start1, end1, start2, end2, func(level, i1, i2 int32) {
 			ufs[level].Union(i1, i2)
 		})
 	}
@@ -190,4 +226,26 @@ func (u *UnionFindArraySimple32) Find(key int32) int32 {
 
 func (u *UnionFindArraySimple32) GetSize(key int32) int32 {
 	return -u.data[u.Find(key)]
+}
+
+// 370. 区间加法
+// https://leetcode.cn/problems/range-addition/description/
+// 用于验证两种拆分方式对幂等性的要求.
+func getModifiedArray(length int, updates [][]int) []int {
+	n := int32(length)
+	D := NewDivideIntervalByBinaryLift(n)
+	values := make([]int, D.Size())
+	for _, u := range updates {
+		start, end, inc := u[0], u[1]+1, u[2]
+		// 这里不能用EnumerateRangeDangerously，因为加法不是幂等操作.
+		D.EnumerateRange(int32(start), int32(end), func(level, index int32) {
+			values[level*n+index] += inc
+		})
+	}
+	D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
+		p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
+		values[c1] += values[p]
+		values[c2] += values[p]
+	})
+	return values[:n]
 }

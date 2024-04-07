@@ -115,6 +115,19 @@ func (bl *CompressedBinaryLiftDynamic) Lca(a, b int32) int32 {
 	return a
 }
 
+func (lca *CompressedBinaryLiftDynamic) Jump(start, target, step int32) int32 {
+	lca_ := lca.Lca(start, target)
+	dep1, dep2, deplca := lca.Depth[start], lca.Depth[target], lca.Depth[lca_]
+	dist := dep1 + dep2 - 2*deplca
+	if step > dist {
+		return -1
+	}
+	if step <= dep1-deplca {
+		return lca.KthAncestor(start, step)
+	}
+	return lca.KthAncestor(target, dist-step)
+}
+
 func (bl *CompressedBinaryLiftDynamic) Dist(a, b int32) int32 {
 	return bl.Depth[a] + bl.Depth[b] - 2*bl.Depth[bl.Lca(a, b)]
 }

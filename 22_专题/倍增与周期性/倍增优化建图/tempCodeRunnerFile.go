@@ -1,3 +1,12 @@
-True(6, func(i int32) bool { return lca.Depth[i] >= 1 })
-	expect[int32](step2, 2)
-	expect[int32](to2, 1)
+
+	n, log := d.n, d.log
+	for k := log; k >= 0; k-- {
+		if cur == -1 {
+			return
+		}
+		if len&(1<<k) != 0 {
+			f(k*n + cur)
+			cur = d.jump[k*n+cur]
+		}
+	}
+	f(cur)

@@ -288,6 +288,19 @@ func (bl *CompressedBinaryLiftWithSumDynamic) LcaWithSum(a, b int32, isEdge bool
 	return a, e
 }
 
+func (bl *CompressedBinaryLiftWithSumDynamic) Jump(start, target, step int32) int32 {
+	lca := bl.Lca(start, target)
+	dep1, dep2, deplca := bl.Depth[start], bl.Depth[target], bl.Depth[lca]
+	dist := dep1 + dep2 - 2*deplca
+	if step > dist {
+		return -1
+	}
+	if step <= dep1-deplca {
+		return bl.KthAncestor(start, step)
+	}
+	return bl.KthAncestor(target, dist-step)
+}
+
 func (bl *CompressedBinaryLiftWithSumDynamic) Dist(a, b int32) int32 {
 	return bl.Depth[a] + bl.Depth[b] - 2*bl.Depth[bl.Lca(a, b)]
 }

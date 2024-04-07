@@ -20,7 +20,8 @@ func main() {
 	// fmt.Println(bl.UpToDepth(6, 0)) // 2
 
 	// yosupo()
-	P3398()
+	// P3398()
+	jump()
 }
 
 // https://judge.yosupo.jp/problem/lca
@@ -43,6 +44,31 @@ func yosupo() {
 		var u, v int32
 		fmt.Fscan(in, &u, &v)
 		fmt.Fprintln(out, bl.Lca(u, v))
+	}
+}
+
+func jump() {
+	// https://judge.yosupo.jp/problem/jump_on_tree
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+
+	tree := make([][]int32, n)
+	for i := int32(0); i < n-1; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
+	}
+	D := NewCompressedBinaryLiftFromTree(tree, 0)
+
+	for i := int32(0); i < q; i++ {
+		var from, to, k int32
+		fmt.Fscan(in, &from, &to, &k)
+		fmt.Fprintln(out, D.Jump(from, to, k))
 	}
 }
 
@@ -185,6 +211,19 @@ func (bl *CompressedBinaryLift) Lca(a, b int32) int32 {
 		}
 	}
 	return a
+}
+
+func (lca *CompressedBinaryLift) Jump(start, target, step int32) int32 {
+	lca_ := lca.Lca(start, target)
+	dep1, dep2, deplca := lca.Depth[start], lca.Depth[target], lca.Depth[lca_]
+	dist := dep1 + dep2 - 2*deplca
+	if step > dist {
+		return -1
+	}
+	if step <= dep1-deplca {
+		return lca.KthAncestor(start, step)
+	}
+	return lca.KthAncestor(target, dist-step)
 }
 
 func (bl *CompressedBinaryLift) Dist(a, b int32) int32 {

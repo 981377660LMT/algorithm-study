@@ -106,6 +106,17 @@ class CompressedBinaryLift {
     return this.depth[a] + this.depth[b] - 2 * this.depth[this.lca(a, b)]
   }
 
+  jump = (start: number, target: number, step: number): number => {
+    const lca = this.lca(start, target)
+    const dep1 = this.depth[start]
+    const dep2 = this.depth[target]
+    const deplca = this.depth[lca]
+    const dist = dep1 + dep2 - 2 * deplca
+    if (step > dist) return -1
+    if (step <= dep1 - deplca) return this.kthAncestor(start, step)
+    return this.kthAncestor(target, dist - step)
+  }
+
   private _consider = (root: number): void => {
     if (root === -1 || this._jump[root] !== -1) return
     const p = this.parent[root]
