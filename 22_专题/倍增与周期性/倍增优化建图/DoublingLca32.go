@@ -97,9 +97,6 @@ type DoublingLca32 struct {
 func NewDoublingLca32(tree [][]int32, roots []int32) *DoublingLca32 {
 	n := int32(len(tree))
 	depth := make([]int32, n)
-	for i := range depth {
-		depth[i] = -1
-	}
 	lca := &DoublingLca32{
 		Tree:  tree,
 		Depth: depth,
