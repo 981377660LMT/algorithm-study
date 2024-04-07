@@ -1,6 +1,4 @@
 
-// https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/graph_tree.go#L2140
-
 // 最近公共祖先 · 其一 · 基于树上倍增
 // 【模板讲解】树上倍增算法（以及最近公共祖先）
 // - 请看 https://leetcode.cn/problems/kth-ancestor-of-a-tree-node/solution/mo-ban-jiang-jie-shu-shang-bei-zeng-suan-v3rw/
@@ -87,6 +85,91 @@ func (*tree) lcaBinaryLifting(root int, g [][]int) {
 		}
 		return pa[v][0]
 	}
+	getDis := func(v, w int) int { return dep[v] + dep[w] - dep[getLCA(v, w)]*2 }
+
+	// EXTRA: 输入 v 和 to，to 可能是 v 的子孙，返回从 v 到 to 路径上的第二个节点（v 的一个儿子）
+	// 如果 to 不是 v 的子孙，返回 -1
+	// https://codeforces.com/problemset/problem/916/E
+	// https://codeforces.com/problemset/problem/1702/G2
+	down1 := func(v, to int) int {
+		if dep[to] <= dep[v] {
+			return -1
+		}
+		to = uptoDep(to, dep[v]+1)
+		if pa[to][0] == v {
+			return to
+		}
+		return -1
+	}
+
+	// EXTRA: 从 v 出发，向 to 方向走一步
+	// 输入需要保证 v != to
+	move1 := func(v, to int) int {
+		if v == to {
+			panic(-1)
+		}
+		if getLCA(v, to) == v { // to 在 v 下面
+			return uptoDep(to, dep[v]+1)
+		}
+		// lca 在 v 上面
+		return pa[v][0]
+	}
+
+	// EXTRA: 从 v 开始，向上跳 k 步
+	// 不存在则返回 -1
+	// O(1) 求法见长链剖分
+	uptoKthPa := func(v, k int) int {
+		for ; k > 0 && v != -1; k &= k - 1 {
+			v = pa[v][bits.TrailingZeros(uint(k))]
+		}
+		return v
+	}
+
+	// EXTRA: 输入 v 和 w，返回 v 到 w 路径上的中点
+	// 返回值是一个数组，因为可能有两个中点
+	// 在有两个中点的情况下，保证返回值的第一个中点离 v 更近
+	midPath := func(v, w int) []int {
+		lca := getLCA(v, w)
+		dv := dep[v] - dep[lca]
+		dw := dep[w] - dep[lca]
+		if dv == dw {
+			return []int{lca}
+		}
+		if dv > dw {
+			mid := uptoKthPa(v, (dv+dw)/2)
+			if (dv+dw)%2 == 0 {
+				return []int{mid}
+			}
+			return []int{mid, pa[mid][0]}
+		} else {
+			mid := uptoKthPa(w, (dv+dw)/2)
+			if (dv+dw)%2 == 0 {
+				return []int{mid}
+			}
+			return []int{pa[mid][0], mid} // pa[mid][0] 离 v 更近
+		}
+	}
+
+	{
+		// 加权树上二分
+		var dep []int // 加权深度，dfs 预处理略
+		// 从 v 开始向根移动至多 d 距离，返回最大移动次数，以及能移动到的离根最近的点
+		// NOIP2012·提高 疫情控制 https://www.luogu.com.cn/problem/P1084
+		// 变形 https://codeforces.com/problemset/problem/932/D
+		// 点权写法 https://codeforces.com/problemset/problem/1059/E 2400
+		uptoDep := func(v, d int) (int, int) {
+			step := 0
+			dv := dep[v]
+			for i := mx - 1; i >= 0; i-- {
+				if p := pa[v][i]; p != -1 && dv-dep[p] <= d {
+					step |= 1 << i
+					v = p
+				}
+			}
+			return step, v
+		}
+		_ = uptoDep
+	}
 
 	{
 		// EXTRA: 倍增的时候维护其他属性，如边权最值等
@@ -106,7 +189,6 @@ func (*tree) lcaBinaryLifting(root int, g [][]int) {
 		dep := make([]int, len(g))
 		var build func(v, p, d int)
 		build = func(v, p, d int) {
-			// 注意这里添加边权幺元
 			pa[v][0].p = p
 			dep[v] = d
 			for _, e := range g[v] {

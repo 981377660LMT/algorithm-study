@@ -12,7 +12,9 @@ import (
 )
 
 func main() {
-	jump()
+	// lca()
+	// jump()
+	test()
 }
 
 type DivideIntervalBinaryLift struct {
@@ -35,29 +37,27 @@ func (d *DivideIntervalBinaryLift) Size() int32 {
 	return d.size
 }
 
-// https://leetcode.cn/problems/closest-node-to-path-in-tree/
-func closestNode(n int, edges [][]int, query [][]int) []int {
+// https://judge.yosupo.jp/problem/lca
+func lca() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+
 	tree := make([][]int32, n)
-	for _, edge := range edges {
-		u, v := int32(edge[0]), int32(edge[1])
-		tree[u] = append(tree[u], v)
-		tree[v] = append(tree[v], u)
+	for i := 1; i < n; i++ {
+		var parent int32
+		fmt.Fscan(in, &parent)
+		tree[parent] = append(tree[parent], int32(i))
 	}
-
-	lca := NewDoublingLca32(tree, []int32{0})
-	res := make([]int, len(query))
-	for i, q := range query {
-		// lca里最深的那个
-		tmp := maxWithKey32(
-			func(x int32) int32 { return lca.Depth[x] },
-			lca.Lca(int32(q[0]), int32(q[1])),
-			lca.Lca(int32(q[0]), int32(q[2])),
-			lca.Lca(int32(q[1]), int32(q[2])),
-		)
-		res[i] = int(tmp)
+	bl := NewDoublingLca32(tree, []int32{0})
+	for i := 0; i < q; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		fmt.Fprintln(out, bl.Lca(u, v))
 	}
-
-	return res
 }
 
 func jump() {
@@ -74,6 +74,7 @@ func jump() {
 		var u, v int32
 		fmt.Fscan(in, &u, &v)
 		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
 	}
 	D := NewDoublingLca32(tree, []int32{0})
 
@@ -106,7 +107,7 @@ func NewDoublingLca32(tree [][]int32, roots []int32) *DoublingLca32 {
 
 	lca.makeDp()
 	for _, root := range roots {
-		lca.dfsAndInitDp(int32(root), -1)
+		lca.dfsAndInitDp(root, -1)
 	}
 	lca.updateDp()
 	return lca
@@ -179,14 +180,59 @@ func (lca *DoublingLca32) Jump(start, target, step int32) int32 {
 	return lca.KthAncestor(target, dist-step)
 }
 
+func (lca *DoublingLca32) FirstTrue(start int32, predicate func(end int32) bool) (step, to int32) {
+	// 判定条件取反，然后向上跳一层.
+	if predicate(start) {
+		step, to = 0, start
+		return
+	}
+
+	for k := lca.log; k >= 0; k-- {
+		tmp := lca.jump[k][start]
+		if tmp == -1 {
+			continue
+		}
+		if !predicate(tmp) {
+			step |= 1 << k
+			start = tmp
+		}
+	}
+
+	if p := lca.jump[0][start]; p == -1 {
+		step, to = -1, -1
+	} else {
+		step, to = step+1, p
+	}
+	return
+}
+
+func (lca *DoublingLca32) LastTrue(start int32, predicate func(end int32) bool) (step, to int32) {
+	if !predicate(start) {
+		step, to = -1, -1
+		return
+	}
+	for k := lca.log; k >= 0; k-- {
+		tmp := lca.jump[k][start]
+		if tmp == -1 {
+			continue
+		}
+		if predicate(tmp) {
+			step |= 1 << k
+			start = tmp
+		}
+	}
+	to = start
+	return
+}
+
 func (lca *DoublingLca32) makeDp() {
 	n, log := lca.n, lca.log
 	jump := make([][]int32, log+1)
 	for k := int32(0); k < log+1; k++ {
 		nums := make([]int32, n)
-		for i := range nums {
-			nums[i] = -1 // e()
-		}
+		// for i := range nums {
+		// 	nums[i] = -1		// e()
+		// }
 		jump[k] = nums
 	}
 	lca.jump = jump
@@ -253,4 +299,79 @@ func maxWithKey32(key func(x int32) int32, args ...int32) int32 {
 		}
 	}
 	return max
+}
+
+func test() {
+
+	//          0
+	//        /   \
+	//       1     2
+	//      / \     \
+	//     3   4     5
+	//         /
+	//        6
+
+	n := 7
+	edges := [][]int32{{0, 1}, {0, 2}, {1, 3}, {1, 4}, {2, 5}, {4, 6}}
+	tree := make([][]int32, n)
+	for _, e := range edges {
+		u, v := e[0], e[1]
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
+	}
+
+	lca := NewDoublingLca32(tree, []int32{0})
+	fmt.Println(lca.Lca(3, 6)) // 1
+
+	step1, to1 := lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= -1 })
+	expect[int32](step1, -1)
+	expect[int32](to1, -1)
+	step1, to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= 1 })
+	expect[int32](step1, 2)
+	expect[int32](to1, 1)
+	step1, to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= 2 })
+	expect[int32](step1, 1)
+	expect[int32](to1, 4)
+	step1, to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= 3 })
+	expect[int32](step1, 0)
+	expect[int32](to1, 6)
+	step1, to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= 4 })
+	expect[int32](step1, 0)
+	expect[int32](to1, 6)
+	step1, to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] >= 2 })
+	expect[int32](step1, 0)
+	expect[int32](to1, 6)
+	step1, to1 = lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] >= 4 })
+	expect[int32](step1, -1)
+	expect[int32](to1, -1)
+
+	step2, to2 := lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] >= 1 })
+	expect[int32](step2, 2)
+	expect[int32](to2, 1)
+	step2, to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] >= 2 })
+	expect[int32](step2, 1)
+	expect[int32](to2, 4)
+	step2, to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] >= 3 })
+	expect[int32](step2, 0)
+	expect[int32](to2, 6)
+	step2, to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] >= 4 })
+	expect[int32](step2, -1)
+	expect[int32](to2, -1)
+	step2, to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] <= 2 })
+	expect[int32](step2, -1)
+	expect[int32](to2, -1)
+	step2, to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] <= 4 })
+	expect[int32](step2, 3)
+	expect[int32](to2, 0)
+	step2, to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] <= -1 })
+	expect[int32](step2, -1)
+	expect[int32](to2, -1)
+
+	fmt.Println("test passed")
+}
+
+func expect[S comparable](actual, expected S) {
+	if actual != expected {
+		panic(fmt.Sprintf("actual: %v, expected: %v", actual, expected))
+	}
 }

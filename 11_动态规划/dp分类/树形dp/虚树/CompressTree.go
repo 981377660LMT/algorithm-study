@@ -828,9 +828,6 @@ type LCADoubling struct {
 func NewLCADoubling(tree [][][2]int, roots []int) *LCADoubling {
 	n := len(tree)
 	depth := make([]int32, n)
-	for i := range depth {
-		depth[i] = -1
-	}
 	lca := &LCADoubling{
 		Tree:          tree,
 		Depth:         depth,

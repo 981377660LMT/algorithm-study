@@ -4,8 +4,40 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"math/bits"
+	"os"
 )
+
+func main() {
+	jump()
+}
+
+func jump() {
+	// https://judge.yosupo.jp/problem/jump_on_tree
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+
+	tree := make([][][2]int, n)
+	for i := int(0); i < n-1; i++ {
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		tree[u] = append(tree[u], [2]int{v, 0})
+		tree[v] = append(tree[v], [2]int{u, 0})
+	}
+	D := NewLCADoubling(tree, []int{0})
+
+	for i := int(0); i < q; i++ {
+		var from, to, k int
+		fmt.Fscan(in, &from, &to, &k)
+		fmt.Fprintln(out, D.Jump(from, to, k))
+	}
+}
 
 // https://leetcode.cn/problems/closest-node-to-path-in-tree/
 // edges = [[0,1],[0,2],[0,3],[1,4],[2,5],[2,6]]
@@ -38,7 +70,7 @@ type LCADoubling struct {
 	Depth         []int32
 	DepthWeighted []int
 	n             int
-	bitLen        int
+	log           int
 	dp            [][]int32 // 节点j向上跳2^i步的父节点
 	dpWeight1     [][]int   // 节点j向上跳2^i步经过的最大边权
 	dpWeight2     [][]int   // 节点j向上跳2^i步经过的最小边权
@@ -52,7 +84,7 @@ func NewLCADoubling(tree [][][2]int, roots []int) *LCADoubling {
 		Depth:         depth,
 		DepthWeighted: make([]int, n),
 		n:             n,
-		bitLen:        bits.Len(uint(n)),
+		log:           bits.Len32(uint32(n)) - 1,
 	}
 	lca.dp, lca.dpWeight1, lca.dpWeight2 = makeDp(lca)
 	for _, root := range roots {
@@ -72,10 +104,9 @@ func (lca *LCADoubling) QueryLCA(root1, root2 int) int {
 		return root1
 	}
 	root132, root232 := int32(root1), int32(root2)
-	for i := lca.bitLen - 1; i >= 0; i-- {
-		if lca.dp[i][root132] != lca.dp[i][root232] {
-			root132 = lca.dp[i][root132]
-			root232 = lca.dp[i][root232]
+	for i := lca.log; i >= 0; i-- {
+		if a, b := lca.dp[i][root132], lca.dp[i][root232]; a != b {
+			root132, root232 = a, b
 		}
 	}
 	return int(lca.dp[0][root132])
@@ -101,7 +132,7 @@ func (lca *LCADoubling) QueryMaxWeight(root1, root2 int, isEdge bool) int {
 	}
 	toDepth := lca.Depth[root2]
 	root132, root232 := int32(root1), int32(root2)
-	for i := lca.bitLen - 1; i >= 0; i-- { // upToDepth
+	for i := lca.log; i >= 0; i-- { // upToDepth
 		if (lca.Depth[root132]-toDepth)&(1<<i) > 0 {
 			res = max(res, lca.dpWeight1[i][root132])
 			root132 = lca.dp[i][root132]
@@ -110,8 +141,8 @@ func (lca *LCADoubling) QueryMaxWeight(root1, root2 int, isEdge bool) int {
 	if root132 == root232 {
 		return res
 	}
-	for i := lca.bitLen - 1; i >= 0; i-- {
-		if lca.dp[i][root132] != lca.dp[i][root232] {
+	for i := lca.log; i >= 0; i-- {
+		if a, b := lca.dp[i][root132], lca.dp[i][root232]; a != b {
 			res = max(res, max(lca.dpWeight1[i][root132], lca.dpWeight1[i][root232]))
 			root132 = lca.dp[i][root132]
 			root232 = lca.dp[i][root232]
@@ -135,7 +166,7 @@ func (lca *LCADoubling) QueryMinWeight(root1, root2 int, isEdge bool) int {
 	}
 	toDepth := lca.Depth[root2]
 	root132, root232 := int32(root1), int32(root2)
-	for i := lca.bitLen - 1; i >= 0; i-- { // upToDepth
+	for i := lca.log; i >= 0; i-- { // upToDepth
 		if (lca.Depth[root132]-toDepth)&(1<<i) > 0 {
 			res = min(res, lca.dpWeight2[i][root132])
 			root132 = lca.dp[i][root132]
@@ -144,8 +175,8 @@ func (lca *LCADoubling) QueryMinWeight(root1, root2 int, isEdge bool) int {
 	if root132 == root232 {
 		return res
 	}
-	for i := lca.bitLen - 1; i >= 0; i-- {
-		if lca.dp[i][root132] != lca.dp[i][root232] {
+	for i := lca.log; i >= 0; i-- {
+		if a, b := lca.dp[i][root132], lca.dp[i][root232]; a != b {
 			res = min(res, min(lca.dpWeight2[i][root132], lca.dpWeight2[i][root232]))
 			root132 = lca.dp[i][root132]
 			root232 = lca.dp[i][root232]
@@ -186,7 +217,7 @@ func (lca *LCADoubling) UpToDepth(root, toDepth int) int {
 		return root
 	}
 	root32 := int32(root)
-	for i := lca.bitLen - 1; i >= 0; i-- {
+	for i := lca.log; i >= 0; i-- {
 		if (lca.Depth[root32]-toDepth32)&(1<<i) > 0 {
 			root32 = lca.dp[i][root32]
 		}
@@ -224,8 +255,9 @@ func (lca *LCADoubling) dfsAndInitDp(cur, pre, dep int32, dist int) {
 }
 
 func makeDp(lca *LCADoubling) (dp [][]int32, dpWeight1, dpWeight2 [][]int) {
-	dp, dpWeight1, dpWeight2 = make([][]int32, lca.bitLen), make([][]int, lca.bitLen), make([][]int, lca.bitLen)
-	for i := 0; i < lca.bitLen; i++ {
+	log := lca.log
+	dp, dpWeight1, dpWeight2 = make([][]int32, log+1), make([][]int, log+1), make([][]int, log+1)
+	for i := 0; i < log+1; i++ {
 		dp[i], dpWeight1[i], dpWeight2[i] = make([]int32, lca.n), make([]int, lca.n), make([]int, lca.n)
 		for j := 0; j < lca.n; j++ {
 			dp[i][j] = -1
@@ -237,7 +269,7 @@ func makeDp(lca *LCADoubling) (dp [][]int32, dpWeight1, dpWeight2 [][]int) {
 }
 
 func (lca *LCADoubling) fillDp() {
-	for i := 0; i < lca.bitLen-1; i++ {
+	for i := 0; i < lca.log; i++ {
 		for j := 0; j < lca.n; j++ {
 			pre := lca.dp[i][j]
 			if pre == -1 {
