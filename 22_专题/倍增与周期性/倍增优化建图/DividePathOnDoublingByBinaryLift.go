@@ -41,8 +41,9 @@ func 拆点() {
 	db.Build()
 
 	values := make([]int32, db.Size())
-	fmt.Println(db.Jump(7, 4))
-	db.EnumerateJump(7, 4, func(level, index int32) {
+	fmt.Println(db.Jump(9, 6))
+	db.EnumerateJump(9, 6, func(level, index int32) {
+		fmt.Println(level, index, "as")
 		jumpId := level*n + index
 		values[jumpId] = max32(values[jumpId], 999)
 	})
@@ -54,9 +55,9 @@ func 拆点() {
 	})
 	fmt.Println(values[:n])
 
-	db.EnumerateJump2(7, 5, 3, func(level, index1, index2 int32) {
-		fmt.Println(level, index1, index2)
-	})
+	// db.EnumerateJump2(7, 5, 3, func(level, index1, index2 int32) {
+	// 	fmt.Println(level, index1, index2)
+	// })
 }
 
 type DividePathOnDoublingByBinaryLift struct {
@@ -101,15 +102,24 @@ func (d *DividePathOnDoublingByBinaryLift) EnumerateJump(from int32, step int, f
 	cur := from
 	n, log := d.n, d.log
 	for k := log; k >= 0; k-- {
-		if cur == -1 {
-			return
-		}
 		if step&(1<<k) != 0 {
 			f(k, cur)
 			cur = d.jump[k*n+cur]
+			if cur == -1 {
+				return
+			}
 		}
 	}
 	f(0, cur)
+
+	// TODO: 这里能否拆成两段区间.
+	// k := int32(bits.Len(uint(step+1)) - 1)
+	// jumpLen := (step + 1) - (1 << k)
+	// from2 := d.Jump(from, jumpLen)
+	// f(k, from)
+	// f(k, from2)
+	// fmt.Println("jumpLen", jumpLen, "from2", from2)
+	// fmt.Println("k", k)
 }
 
 // 从 `from1` 和 `from2` 状态开始转移 `step` 次(每段step+1个点)，遍历这两区间上的jump。
@@ -137,6 +147,7 @@ func (d *DividePathOnDoublingByBinaryLift) PushDown(f func(pLevel, pIndex int32,
 		for i := int32(0); i < n; i++ {
 			// push down jump(i,k+1) to jump(i,k) and jump(jump(i,k),k)
 			if to := d.jump[(k+1)*n+i]; to != -1 {
+				fmt.Println("push down", k+1, i, k, i, to)
 				f(k+1, i, k, i, d.jump[k*n+i])
 			}
 		}

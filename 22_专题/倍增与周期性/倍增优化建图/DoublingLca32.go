@@ -96,9 +96,35 @@ func NewDoublingLca32(tree [][]int32, roots []int32) *DoublingLca32 {
 	return lca
 }
 
+// 遍历路径(start,target)上的所有jump.
 // 倍增拆点，将树上的一段路径拆成logn个点.
-func (lca *DoublingLca32) EnumerateJump(root1, root2 int32, f func(level, index int32)) {
-	lca_ := lca.Lca(root1, root2)
+func (lca *DoublingLca32) EnumerateJump(start, target int32, f func(level, index int32)) {
+	if lca.Depth[start] < lca.Depth[target] {
+		start, target = target, start
+	}
+	toDepth := lca.Depth[target]
+	if lca.Depth[start] > toDepth {
+		for i := lca.log; i >= 0; i-- {
+			if (lca.Depth[start]-toDepth)&(1<<i) > 0 {
+				f(i, start)
+				start = lca.jump[i][start]
+			}
+		}
+	}
+	if start == target {
+		f(0, start)
+		return
+	}
+	for i := lca.log; i >= 0; i-- {
+		if a, b := lca.jump[i][start], lca.jump[i][target]; a != b {
+			f(i, start)
+			f(i, target)
+			start, target = a, b
+		}
+	}
+	f(0, start)
+	f(0, target)
+	f(0, lca.jump[0][start])
 }
 
 // 遍历路径(start1,target1)和(start2,target2)上的所有jump.
@@ -343,6 +369,27 @@ func test() {
 	expect[int32](to2, 0)
 	to2 = lca.LastTrue(6, func(i int32) bool { return lca.Depth[i] <= -1 })
 	expect[int32](to2, -1)
+
+	values := make([]int32, lca.Size())
+	lca.EnumerateJump(6, 3, func(level, index int32) {
+		values[level*lca.n+index] += 2
+	})
+	lca.EnumerateJump(3, 5, func(level, index int32) {
+		values[level*lca.n+index] += 3
+	})
+	lca.EnumerateJump(4, 4, func(level, index int32) {
+		values[level*lca.n+index] += 5
+	})
+	lca.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
+		p, c1, c2 := pLevel*lca.n+pIndex, cLevel*lca.n+cIndex1, cLevel*lca.n+cIndex2
+		values[c1] += values[p]
+		values[c2] += values[p]
+	})
+
+	expected := []int32{3, 5, 3, 5, 7, 3, 2}
+	for i := 0; i < n; i++ {
+		expect[int32](values[i], expected[i])
+	}
 
 	fmt.Println("test passed")
 }
