@@ -23,10 +23,9 @@ func NewDividePathOnTreeByBinaryLift(n int32) *DividePathOnTreeByBinaryLift {
 	return &DividePathOnTreeByBinaryLift{n: n, log: log, size: size}
 }
 
-func (d *DividePathOnTreeByBinaryLift) EnumerateRange(start int32, end int, f func(jumpId int32)) {}
+func (d *DividePathOnTreeByBinaryLift) EnumeratePath(u, v int32, f func(level, index int32)) {}
 
-func (d *DividePathOnTreeByBinaryLift) EnumerateRange2(start1, end1 int, start2, end2 int32, f func(jumpId int32)) {
-}
+// func (d *DividePathOnTreeByBinaryLift) _findLca()
 
 func (d *DividePathOnTreeByBinaryLift) Size() int32 {
 	return d.size
