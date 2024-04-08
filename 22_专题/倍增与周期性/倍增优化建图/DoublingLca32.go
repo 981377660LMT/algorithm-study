@@ -99,6 +99,10 @@ func NewDoublingLca32(tree [][]int32, roots []int32) *DoublingLca32 {
 // 遍历路径(start,target)上的所有jump.
 // 倍增拆点，将树上的一段路径拆成logn个点.
 func (lca *DoublingLca32) EnumerateJump(start, target int32, f func(level, index int32)) {
+	if start == target {
+		f(0, start)
+		return
+	}
 	if lca.Depth[start] < lca.Depth[target] {
 		start, target = target, start
 	}
@@ -130,32 +134,30 @@ func (lca *DoublingLca32) EnumerateJump(start, target int32, f func(level, index
 // 遍历路径(start,target)上的所有jump.
 // !要求运算幂等(idempotent).
 func (lca *DoublingLca32) EnumerateJumpDangerously(start, target int32, f func(level, index int32)) {
-	if lca.Depth[start] < lca.Depth[target] {
-		start, target = target, start
-	}
-	toDepth := lca.Depth[target]
-	if lca.Depth[start] > toDepth {
-		for i := lca.log; i >= 0; i-- {
-			if (lca.Depth[start]-toDepth)&(1<<i) > 0 {
-				f(i, start)
-				start = lca.jump[i][start]
-			}
-		}
-	}
 	if start == target {
 		f(0, start)
 		return
 	}
-	for i := lca.log; i >= 0; i-- {
-		if a, b := lca.jump[i][start], lca.jump[i][target]; a != b {
-			f(i, start)
-			f(i, target)
-			start, target = a, b
-		}
+
+	divide := func(node, ancestor int32, f func(level, index int32)) {
+		len_ := lca.Depth[node] - lca.Depth[ancestor] + 1
+		k := int32(bits.Len32(uint32(len_))) - 1
+		jumpLen := len_ - (1 << k)
+		from2 := lca.KthAncestor(node, jumpLen)
+		f(k, node)
+		f(k, from2)
 	}
-	f(0, start)
-	f(0, target)
-	f(0, lca.jump[0][start])
+
+	if lca.Depth[start] < lca.Depth[target] {
+		start, target = target, start
+	}
+	lca_ := lca.Lca(start, target)
+	if lca_ == target {
+		divide(start, lca_, f)
+	} else {
+		divide(start, lca_, f)
+		divide(target, lca_, f)
+	}
 }
 
 // 遍历路径(start1,target1)和(start2,target2)上的所有jump.
@@ -422,8 +424,30 @@ func test() {
 		expect[int32](values[i], expected[i])
 	}
 
-	// TODO: test EnumerateJumpDangerously by idempoent function
+	// test EnumerateJumpDangerously by idempoent function
 	values = make([]int32, lca.Size())
+	lca.EnumerateJumpDangerously(6, 3, func(level, index int32) {
+		id := level*lca.n + index
+		values[id] = max32(values[id], 2)
+	})
+	lca.EnumerateJumpDangerously(3, 5, func(level, index int32) {
+		id := level*lca.n + index
+		values[id] = max32(values[id], 3)
+	})
+	lca.EnumerateJumpDangerously(4, 4, func(level, index int32) {
+		id := level*lca.n + index
+		values[id] = max32(values[id], 5)
+	})
+	lca.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
+		p, c1, c2 := pLevel*lca.n+pIndex, cLevel*lca.n+cIndex1, cLevel*lca.n+cIndex2
+		values[c1] = max32(values[c1], values[p])
+		values[c2] = max32(values[c2], values[p])
+	})
+
+	expected = []int32{3, 3, 3, 3, 5, 3, 2}
+	for i := 0; i < n; i++ {
+		expect[int32](values[i], expected[i])
+	}
 
 	fmt.Println("test passed")
 }
