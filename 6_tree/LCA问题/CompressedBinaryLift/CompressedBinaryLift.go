@@ -7,21 +7,12 @@ import (
 )
 
 func main() {
-	// tree := [][]int32{
-	// 	{1, 2},
-	// 	{3, 4},
-	// 	{5, 6},
-	// 	{},
-	// 	{},
-	// 	{},
-	// 	{},
-	// }
-	// bl := NewCompressedBinaryLiftFromTree(tree, 0)
-	// fmt.Println(bl.UpToDepth(6, 0)) // 2
 
 	// yosupo()
 	// P3398()
-	jump()
+	// jump()
+
+	CF519E()
 }
 
 // https://judge.yosupo.jp/problem/lca
@@ -103,6 +94,74 @@ func P3398() {
 		} else {
 			fmt.Fprintln(out, "N")
 		}
+	}
+}
+
+// A and B and Lecture Rooms (到树上两点距离相等的点的个数)
+// https://www.luogu.com.cn/problem/CF519E
+// 给定一棵n个点的无根树和q组询问，对于每一组询问，求出树上到某两点距离相等的点数（包含本身）。
+func CF519E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	tree := make([][]int32, n)
+	for i := int32(0); i < n-1; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		u, v = u-1, v-1
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
+	}
+
+	bl := NewCompressedBinaryLiftFromTree(tree, 0)
+	subSize := make([]int32, n)
+	var dfs func(v, p int32)
+	dfs = func(v, p int32) {
+		subSize[v] = 1
+		for _, to := range tree[v] {
+			if to == p {
+				continue
+			}
+			dfs(to, v)
+			subSize[v] += subSize[to]
+		}
+	}
+	dfs(0, -1)
+
+	query := func(a, b int32) int32 {
+		if a == b {
+			return n
+		}
+		lca := bl.Lca(a, b)
+		len_ := bl.Depth[a] + bl.Depth[b] - 2*bl.Depth[lca] + 1
+		if len_&1 == 0 {
+			return 0
+		}
+		if bl.Depth[a] < bl.Depth[b] {
+			a, b = b, a
+		}
+		// lca是否为中点
+		halfLen := len_ / 2
+		center := bl.KthAncestor(a, halfLen)
+		if lca == center {
+			p1, p2 := bl.KthAncestor(a, halfLen-1), bl.KthAncestor(b, halfLen-1)
+			return n - subSize[p1] - subSize[p2]
+		} else {
+			p1 := bl.KthAncestor(a, halfLen-1)
+			return subSize[center] - subSize[p1]
+		}
+	}
+
+	var q int32
+	fmt.Fscan(in, &q)
+	for i := int32(0); i < q; i++ {
+		var x, y int32
+		fmt.Fscan(in, &x, &y)
+		x, y = x-1, y-1
+		fmt.Fprintln(out, query(x, y))
 	}
 }
 

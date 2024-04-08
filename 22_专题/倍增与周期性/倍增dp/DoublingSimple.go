@@ -3,9 +3,73 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 )
+
+func main() {
+	arc060_c()
+}
+
+// [ARC060E] 高橋君とホテル
+// https://atcoder.jp/contests/arc060/tasks/arc060_c
+// 一条笔直的公路上有N个旅店，第i个旅店的坐标是xi
+// 高桥君旅行时有如下习惯：
+// 1.他一天最多行走长度不大于limit的路程
+// 2.他一定会选择一家旅店作为自己一天行程的终点
+// 现在他有Q组行程计划，对于每一组计划，他会从旅店a旅行到旅店b(a!=b)。
+// 你现在需要帮助他，求出每一组计划所需的最小天数.
+//
+// 当高桥君走到第 i 个旅店，为了快点走，他一定会走到离自己最远的、距离在范围内的旅店，所以下一个状态是确定的.
+// 二分求出初始状态转移，再MaxStep求出到达目的地的最小转移边数.
+func arc060_c() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	points := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &points[i])
+	}
+	var limit int
+	fmt.Fscan(in, &limit)
+
+	db := NewDoublingSimple(int32(n), n)
+	for i := 0; i < n; i++ {
+		left, right := i, n-1
+		for left <= right {
+			mid := (left + right) / 2
+			if d := points[mid] - points[i]; d <= limit {
+				left = mid + 1
+			} else {
+				right = mid - 1
+			}
+		}
+		db.Add(int32(i), int32(right))
+	}
+	db.Build()
+
+	query := func(from, to int32) int32 {
+		minStep, _ := db.FirstTrue(from, func(next int32) bool { return next >= to })
+		return int32(minStep)
+	}
+
+	var q int32
+	fmt.Fscan(in, &q)
+	for i := int32(0); i < q; i++ {
+		var from, to int32
+		fmt.Fscan(in, &from, &to)
+		from, to = from-1, to-1
+		if from > to {
+			from, to = to, from
+		}
+		fmt.Fprintln(out, query(from, to))
+	}
+}
 
 type TreeAncestor struct {
 	db *DoublingSimple
@@ -39,7 +103,7 @@ func demo() {
 	D.Build()
 
 	start := int32(0)
-	step, to := D.MaxStep(start, func(next int32) bool { return values[next] >= 50 })
+	step, to := D.LastTrue(start, func(next int32) bool { return values[next] >= 50 })
 	fmt.Println(step, to)
 	fmt.Println(D.Jump(start, step))
 	fmt.Println(values[to])
@@ -96,14 +160,34 @@ func (d *DoublingSimple) Jump(from int32, step int) (to int32) {
 	return
 }
 
-// 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号。
-func (d *DoublingSimple) MaxStep(from int32, check func(next int32) bool) (step int, to int32) {
+// 求从 `from` 状态开始转移，满足 `check` 为 `true` 的最小的 `step` 以及最终状态的编号。
+// 如果不存在，则返回 (-1, -1).
+func (d *DoublingSimple) FirstTrue(from int32, check func(next int32) bool) (step int, to int32) {
+	if check(from) {
+		return 0, from
+	}
 	for k := d.log; k >= 0; k-- {
-		tmp := d.jump[k*d.n+from]
-		if tmp == -1 {
-			continue
+		if tmp := d.jump[k*d.n+from]; tmp != -1 && !check(tmp) {
+			step |= 1 << k
+			from = tmp
 		}
-		if check(tmp) {
+	}
+	step++
+	to = d.jump[from]
+	if to == -1 {
+		step = -1
+	}
+	return
+}
+
+// 求从 `from` 状态开始转移，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号。
+// 如果不存在，则返回 (-1, -1).
+func (d *DoublingSimple) LastTrue(from int32, check func(next int32) bool) (step int, to int32) {
+	if !check(from) {
+		return -1, -1
+	}
+	for k := d.log; k >= 0; k-- {
+		if tmp := d.jump[k*d.n+from]; tmp != -1 && check(tmp) {
 			step |= 1 << k
 			from = tmp
 		}

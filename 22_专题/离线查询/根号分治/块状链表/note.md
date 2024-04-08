@@ -5,6 +5,8 @@
 
 # 块状链表(区块链)
 
+块状链表一般在用平衡树实现代码非常复杂时使用
+
 https://oi-wiki.org/ds/block-list/
 
 块状链表，顾名思义，就是把分块和链表结合起来的神奇数据结构。
@@ -16,3 +18,7 @@ https://www.cnblogs.com/LcyRegister/p/17047026.html
 https://www.luogu.com/article/jk8hy8ti 【模板】普通平衡树
 https://www.cnblogs.com/chenxiaoran666/p/Luogu4278.html 【洛谷 4278】带插入区间 K 小值（块状链表+值域分块）
 P4008 [NOI2003]文本编辑器
+
+---
+
+https://www.acwing.com/blog/content/28060/

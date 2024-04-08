@@ -14,8 +14,8 @@ import (
 )
 
 func main() {
-	// CF1175E()
-	yuki1097()
+	CF1175E()
+	// yuki1097()
 }
 
 // Minimal Segment Cover (线段包含/线段覆盖)
@@ -63,7 +63,7 @@ func CF1175E() {
 
 	for i := 0; i < q; i++ {
 		a, b := queries[i][0], queries[i][1]
-		k, _, _ := D.MaxStep(int32(a), func(_ int32, e E) bool { return a+e < b })
+		k, _, _ := D.LastTrue(int32(a), func(_ int32, e E) bool { return a+e < b })
 		k++
 		if k > n {
 			k = -1
@@ -228,10 +228,52 @@ func (d *Doubling) Jump(from int32, step int) (to int32, res E) {
 	return
 }
 
-// 求从 `from` 状态开始转移 `step` 次，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号和操作的结果。
-func (d *Doubling) MaxStep(from int32, check func(next int32, weight E) bool) (step int, to int32, res E) {
+// 求从 `from` 状态开始转移，满足 `check` 为 `true` 的最小的 `step` 以及最终状态的编号和操作的结果。
+// 如果不存在，则返回 (-1, -1, e()).
+func (d *Doubling) FirstTrue(from int32, check func(next int32, weight E) bool) (step int, to int32, res E) {
 	if !d.prepared {
 		panic("Doubling is not prepared")
+	}
+
+	if e := d.e(); check(from, e) {
+		return 0, from, e
+	}
+
+	res = d.e()
+	for k := d.log - 1; k >= 0; k-- {
+		pos := k*d.n + from
+		tmp := d.to[pos]
+		if tmp == -1 {
+			continue
+		}
+		next := d.op(res, d.dp[pos])
+		if !check(tmp, next) {
+			step |= 1 << k
+			from = tmp
+			res = next
+		}
+	}
+
+	p := d.to[from]
+	if p == -1 {
+		return -1, -1, d.e()
+	} else {
+		step++
+		to = p
+		res = d.op(res, d.dp[from])
+	}
+	return
+}
+
+// 求从 `from` 状态开始转移，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号和操作的结果。
+// 如果不存在，则返回 (-1, -1, e()).
+func (d *Doubling) LastTrue(from int32, check func(next int32, weight E) bool) (step int, to int32, res E) {
+	if !d.prepared {
+		panic("Doubling is not prepared")
+	}
+
+	if e := d.e(); !check(from, e) {
+		return -1, -1, e
 	}
 
 	res = d.e()

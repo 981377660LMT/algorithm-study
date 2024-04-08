@@ -7,59 +7,67 @@ import (
 )
 
 func main() {
+	CF587C()
 	// assert()
-	yosupo()
+	// yosupo()
 }
 
-// https://judge.yosupo.jp/problem/lca
-func yosupo() {
+// Duff in the Army (树上路径前k大)
+// https://www.luogu.com.cn/problem/CF587C
+// 维护树上路径前10大.
+// TODO.
+func CF587C() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-
+	var n, m, q int32
+	fmt.Fscan(in, &n, &m, &q)
 	tree := make([][]int32, n)
-	for i := 1; i < n; i++ {
-		var parent int32
-		fmt.Fscan(in, &parent)
-		tree[parent] = append(tree[parent], int32(i))
-	}
-	bl := NewCompressedBinaryLiftWithSumFromTree(tree, 0, func(i int32) S { return 0 })
-	for i := 0; i < q; i++ {
+	for i := int32(0); i < n-1; i++ {
 		var u, v int32
 		fmt.Fscan(in, &u, &v)
-		fmt.Fprintln(out, bl.Lca(u, v))
+		u, v = u-1, v-1
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
+	}
+
+	// 编号为i的人住在home[i].
+	home := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &home[i])
+		home[i]--
 	}
 }
-
-type S = int
-
-func (*CompressedBinaryLiftWithSum) e() S          { return 0 }
-func (*CompressedBinaryLiftWithSum) op(e1, e2 S) S { return e1 + e2 }
 
 // 空间复杂度`O(n)`的树上倍增，用于倍增结构优化建图、查询路径聚合值.
 //   - https://taodaling.github.io/blog/2020/03/18/binary-lifting/
 //   - https://codeforces.com/blog/entry/74847
 //   - https://codeforces.com/blog/entry/100826
-type CompressedBinaryLiftWithSum struct {
+type CompressedBinaryLiftWithSum[S any] struct {
 	Depth       []int32
 	Parent      []int32
 	jump        []int32 // 指向当前节点的某个祖先节点.
 	attachments []S     // 从当前结点到`jump`结点的路径上的聚合值(不包含`jump`结点).
 	singles     []S     // 当前结点的聚合值.
+	e           func() S
+	op          func(e1, e2 S) S
 }
 
 // values: 每个点的`点权`.
 // 如果需要查询边权，则每个点的`点权`设为`该点与其父亲结点的边权`, 根节点的`点权`设为`幺元`.
-func NewCompressedBinaryLiftWithSum(n int32, depthOnTree, parentOnTree []int32, values func(i int32) S) *CompressedBinaryLiftWithSum {
-	res := &CompressedBinaryLiftWithSum{
+func NewCompressedBinaryLiftWithSum[S any](
+	n int32, depthOnTree, parentOnTree []int32, values func(i int32) S,
+	e func() S, op func(e1, e2 S) S,
+) *CompressedBinaryLiftWithSum[S] {
+	res := &CompressedBinaryLiftWithSum[S]{
 		Depth:       depthOnTree,
 		Parent:      parentOnTree,
 		jump:        make([]int32, n),
 		attachments: make([]S, n),
 		singles:     make([]S, n),
+		e:           e,
+		op:          op,
 	}
 	for i := int32(0); i < n; i++ {
 		res.jump[i] = -1
@@ -72,14 +80,19 @@ func NewCompressedBinaryLiftWithSum(n int32, depthOnTree, parentOnTree []int32, 
 	return res
 }
 
-func NewCompressedBinaryLiftWithSumFromTree(tree [][]int32, root int32, values func(i int32) S) *CompressedBinaryLiftWithSum {
+func NewCompressedBinaryLiftWithSumFromTree[S any](
+	tree [][]int32, root int32, values func(i int32) S,
+	e func() S, op func(e1, e2 S) S,
+) *CompressedBinaryLiftWithSum[S] {
 	n := int32(len(tree))
-	res := &CompressedBinaryLiftWithSum{
+	res := &CompressedBinaryLiftWithSum[S]{
 		Depth:       make([]int32, n),
 		Parent:      make([]int32, n),
 		jump:        make([]int32, n),
 		attachments: make([]S, n),
 		singles:     make([]S, n),
+		e:           e,
+		op:          op,
 	}
 	for i := int32(0); i < n; i++ {
 		res.attachments[i] = res.e()
@@ -91,7 +104,7 @@ func NewCompressedBinaryLiftWithSumFromTree(tree [][]int32, root int32, values f
 	return res
 }
 
-func (bl *CompressedBinaryLiftWithSum) FirstTrue(start int32, predicate func(end int32) bool) int32 {
+func (bl *CompressedBinaryLiftWithSum[S]) FirstTrue(start int32, predicate func(end int32) bool) int32 {
 	for !predicate(start) {
 		if predicate(bl.jump[start]) {
 			start = bl.Parent[start]
@@ -105,7 +118,7 @@ func (bl *CompressedBinaryLiftWithSum) FirstTrue(start int32, predicate func(end
 	return start
 }
 
-func (bl *CompressedBinaryLiftWithSum) FirstTrueWithSum(start int32, predicate func(end int32, sum S) bool, isEdge bool) (int32, S) {
+func (bl *CompressedBinaryLiftWithSum[S]) FirstTrueWithSum(start int32, predicate func(end int32, sum S) bool, isEdge bool) (int32, S) {
 	if isEdge {
 		sum := bl.e() // 不包含_singles[start]
 		for {
@@ -147,7 +160,7 @@ func (bl *CompressedBinaryLiftWithSum) FirstTrueWithSum(start int32, predicate f
 	}
 }
 
-func (bl *CompressedBinaryLiftWithSum) LastTrue(start int32, predicate func(end int32) bool) int32 {
+func (bl *CompressedBinaryLiftWithSum[S]) LastTrue(start int32, predicate func(end int32) bool) int32 {
 	if !predicate(start) {
 		return -1
 	}
@@ -165,7 +178,7 @@ func (bl *CompressedBinaryLiftWithSum) LastTrue(start int32, predicate func(end 
 	}
 }
 
-func (bl *CompressedBinaryLiftWithSum) LastTrueWithSum(start int32, predicate func(end int32, sum S) bool, isEdge bool) (int32, S) {
+func (bl *CompressedBinaryLiftWithSum[S]) LastTrueWithSum(start int32, predicate func(end int32, sum S) bool, isEdge bool) (int32, S) {
 	if isEdge {
 		sum := bl.e() // 不包含_singles[start]
 		if !predicate(start, sum) {
@@ -217,7 +230,7 @@ func (bl *CompressedBinaryLiftWithSum) LastTrueWithSum(start int32, predicate fu
 	}
 }
 
-func (bl *CompressedBinaryLiftWithSum) UpToDepth(root int32, toDepth int32) int32 {
+func (bl *CompressedBinaryLiftWithSum[S]) UpToDepth(root int32, toDepth int32) int32 {
 	if !(0 <= toDepth && toDepth <= bl.Depth[root]) {
 		return -1
 	}
@@ -231,7 +244,7 @@ func (bl *CompressedBinaryLiftWithSum) UpToDepth(root int32, toDepth int32) int3
 	return root
 }
 
-func (bl *CompressedBinaryLiftWithSum) UpToDepthWithSum(root int32, toDepth int32, isEdge bool) (int32, S) {
+func (bl *CompressedBinaryLiftWithSum[S]) UpToDepthWithSum(root int32, toDepth int32, isEdge bool) (int32, S) {
 	sum := bl.e() // 不包含_singles[root]
 	if !(0 <= toDepth && toDepth <= bl.Depth[root]) {
 		return -1, sum
@@ -251,17 +264,17 @@ func (bl *CompressedBinaryLiftWithSum) UpToDepthWithSum(root int32, toDepth int3
 	return root, sum
 }
 
-func (bl *CompressedBinaryLiftWithSum) KthAncestor(node, k int32) int32 {
+func (bl *CompressedBinaryLiftWithSum[S]) KthAncestor(node, k int32) int32 {
 	targetDepth := bl.Depth[node] - k
 	return bl.UpToDepth(node, targetDepth)
 }
 
-func (bl *CompressedBinaryLiftWithSum) KthAncestorWithSum(node, k int32, isEdge bool) (int32, S) {
+func (bl *CompressedBinaryLiftWithSum[S]) KthAncestorWithSum(node, k int32, isEdge bool) (int32, S) {
 	targetDepth := bl.Depth[node] - k
 	return bl.UpToDepthWithSum(node, targetDepth, isEdge)
 }
 
-func (bl *CompressedBinaryLiftWithSum) Lca(a, b int32) int32 {
+func (bl *CompressedBinaryLiftWithSum[S]) Lca(a, b int32) int32 {
 	if bl.Depth[a] > bl.Depth[b] {
 		a = bl.KthAncestor(a, bl.Depth[a]-bl.Depth[b])
 	} else if bl.Depth[a] < bl.Depth[b] {
@@ -281,7 +294,7 @@ func (bl *CompressedBinaryLiftWithSum) Lca(a, b int32) int32 {
 
 // 查询路径`a`到`b`的聚合值.
 // isEdge 是否是边权.
-func (bl *CompressedBinaryLiftWithSum) LcaWithSum(a, b int32, isEdge bool) (int32, S) {
+func (bl *CompressedBinaryLiftWithSum[S]) LcaWithSum(a, b int32, isEdge bool) (int32, S) {
 	var e S // 不包含_singles[a]和_singles[b]
 	if bl.Depth[a] > bl.Depth[b] {
 		end, sum := bl.UpToDepthWithSum(a, bl.Depth[b], true)
@@ -311,7 +324,7 @@ func (bl *CompressedBinaryLiftWithSum) LcaWithSum(a, b int32, isEdge bool) (int3
 	return a, e
 }
 
-func (bl *CompressedBinaryLiftWithSum) Jump(start, target, step int32) int32 {
+func (bl *CompressedBinaryLiftWithSum[S]) Jump(start, target, step int32) int32 {
 	lca := bl.Lca(start, target)
 	dep1, dep2, deplca := bl.Depth[start], bl.Depth[target], bl.Depth[lca]
 	dist := dep1 + dep2 - 2*deplca
@@ -324,11 +337,11 @@ func (bl *CompressedBinaryLiftWithSum) Jump(start, target, step int32) int32 {
 	return bl.KthAncestor(target, dist-step)
 }
 
-func (bl *CompressedBinaryLiftWithSum) Dist(a, b int32) int32 {
+func (bl *CompressedBinaryLiftWithSum[S]) Dist(a, b int32) int32 {
 	return bl.Depth[a] + bl.Depth[b] - 2*bl.Depth[bl.Lca(a, b)]
 }
 
-func (bl *CompressedBinaryLiftWithSum) _consider(root int32) {
+func (bl *CompressedBinaryLiftWithSum[S]) _consider(root int32) {
 	if root == -1 || bl.jump[root] != -1 {
 		return
 	}
@@ -337,7 +350,7 @@ func (bl *CompressedBinaryLiftWithSum) _consider(root int32) {
 	bl._addLeaf(root, p)
 }
 
-func (bl *CompressedBinaryLiftWithSum) _addLeaf(leaf, parent int32) {
+func (bl *CompressedBinaryLiftWithSum[S]) _addLeaf(leaf, parent int32) {
 	if parent == -1 {
 		bl.jump[leaf] = leaf
 	} else if tmp := bl.jump[parent]; bl.Depth[parent]-bl.Depth[tmp] == bl.Depth[tmp]-bl.Depth[bl.jump[tmp]] {
@@ -350,7 +363,7 @@ func (bl *CompressedBinaryLiftWithSum) _addLeaf(leaf, parent int32) {
 	}
 }
 
-func (bl *CompressedBinaryLiftWithSum) _setUp(tree [][]int32, root int32) {
+func (bl *CompressedBinaryLiftWithSum[S]) _setUp(tree [][]int32, root int32) {
 	queue := []int32{root}
 	head := 0
 	for head < len(queue) {
@@ -387,81 +400,85 @@ func assert() {
 		tree[v] = append(tree[v], u)
 	}
 	values := []int{1, 1, 2, 3, 4, 5, 6}
-	bl := NewCompressedBinaryLiftWithSumFromTree(tree, 0, func(i int32) S { return values[i] })
+	bl := NewCompressedBinaryLiftWithSumFromTree[int](
+		tree, 0, func(i int32) int { return values[i] },
+		func() int { return 0 },
+		func(e1, e2 int) int { return e1 + e2 },
+	)
 
 	type pair struct {
 		node int32
-		sum  S
+		sum  int
 	}
 
 	// firstTrueWithSum
-	node, sum := bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return sum >= 0 }, true)
+	node, sum := bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return sum >= 0 }, true)
 	expect(pair{node, sum}, pair{6, 0})
-	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return sum >= 6 }, true)
+	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return sum >= 6 }, true)
 	expect(pair{node, sum}, pair{4, 6})
-	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return sum >= 10 }, true)
+	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return sum >= 10 }, true)
 	expect(pair{node, sum}, pair{1, 10})
-	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return sum >= 11 }, true)
+	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return sum >= 11 }, true)
 	expect(pair{node, sum}, pair{0, 11})
-	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return sum >= 15 }, true)
+	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return sum >= 15 }, true)
 	expect(pair{node, sum}, pair{-1, 11})
-	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return sum >= 0 }, false)
+	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return sum >= 0 }, false)
 	expect(pair{node, sum}, pair{6, 6})
-	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return sum >= 6 }, false)
+	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return sum >= 6 }, false)
 	expect(pair{node, sum}, pair{6, 6})
-	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return sum >= 10 }, false)
+	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return sum >= 10 }, false)
 	expect(pair{node, sum}, pair{4, 10})
-	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return sum >= 11 }, false)
+	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return sum >= 11 }, false)
 	expect(pair{node, sum}, pair{1, 11})
-	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return sum >= 12 }, false)
+	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return sum >= 12 }, false)
 	expect(pair{node, sum}, pair{0, 12})
-	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return sum >= 15 }, false)
+	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return sum >= 15 }, false)
 	expect(pair{node, sum}, pair{-1, 12})
-	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return bl.Depth[i] <= 1 }, true)
+	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return bl.Depth[i] <= 1 }, true)
 	expect(pair{node, sum}, pair{1, 10})
-	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum S) bool { return bl.Depth[i] <= 1 }, false)
+	node, sum = bl.FirstTrueWithSum(6, func(i int32, sum int) bool { return bl.Depth[i] <= 1 }, false)
 	expect(pair{node, sum}, pair{1, 11})
 
 	// lastTrueWithSum
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= -1 }, true)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= -1 }, true)
 	expect(pair{node, sum}, pair{-1, 0})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 0 }, true)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 0 }, true)
 	expect(pair{node, sum}, pair{6, 0})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 5 }, true)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 5 }, true)
 	expect(pair{node, sum}, pair{6, 0})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 6 }, true)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 6 }, true)
 	expect(pair{node, sum}, pair{4, 6})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 7 }, true)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 7 }, true)
 	expect(pair{node, sum}, pair{4, 6})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 10 }, true)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 10 }, true)
 	expect(pair{node, sum}, pair{1, 10})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 11 }, true)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 11 }, true)
 	expect(pair{node, sum}, pair{0, 11})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 12 }, true)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 12 }, true)
 	expect(pair{node, sum}, pair{0, 11})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 13 }, true)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 13 }, true)
 	expect(pair{node, sum}, pair{0, 11})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= -1 }, false)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= -1 }, false)
 	expect(pair{node, sum}, pair{-1, 6})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 0 }, false)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 0 }, false)
 	expect(pair{node, sum}, pair{-1, 6})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 5 }, false)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 5 }, false)
 	expect(pair{node, sum}, pair{-1, 6})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 6 }, false)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 6 }, false)
 	expect(pair{node, sum}, pair{6, 6})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 7 }, false)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 7 }, false)
 	expect(pair{node, sum}, pair{6, 6})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 10 }, false)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 10 }, false)
 	expect(pair{node, sum}, pair{4, 10})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 11 }, false)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 11 }, false)
 	expect(pair{node, sum}, pair{1, 11})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 12 }, false)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 12 }, false)
 	expect(pair{node, sum}, pair{0, 12})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return sum <= 13 }, false)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return sum <= 13 }, false)
 	expect(pair{node, sum}, pair{0, 12})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return bl.Depth[i] >= 2 }, true)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return bl.Depth[i] >= 2 }, true)
 	expect(pair{node, sum}, pair{4, 6})
-	node, sum = bl.LastTrueWithSum(6, func(i int32, sum S) bool { return bl.Depth[i] >= 2 }, false)
+	node, sum = bl.LastTrueWithSum(6, func(i int32, sum int) bool { return bl.Depth[i] >= 2 }, false)
 	expect(pair{node, sum}, pair{4, 10})
 
 	// upToDepthWithSum
@@ -485,7 +502,7 @@ func assert() {
 	}
 
 	// lcaWithSum
-	weigthSum := func(u, v int32, isEdge bool) S {
+	weigthSum := func(u, v int32, isEdge bool) int {
 		if bl.Depth[u] < bl.Depth[v] {
 			u, v = v, u
 		}

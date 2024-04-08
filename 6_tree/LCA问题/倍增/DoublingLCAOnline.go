@@ -73,7 +73,7 @@ func Rollbacks(operations [][2]int) []int {
 	history := []int{0} // 保存节点位置的stack
 	nodeMex := 0
 	curNode := 0
-	lca := NewDoublingLCAOnline(q+1, 0)
+	lca := NewDoublingLCAOnline(q + 1)
 	for _, op := range operations {
 		kind, x := op[0], op[1]
 		if kind == 1 {
@@ -133,12 +133,10 @@ type DoublingLCAOnline struct {
 	n             int
 	bitLen        int
 	dp            [][]int32
-	root          int
 }
 
 // 不预先给出整棵树,而是动态添加叶子节点,维护树节点的LCA和k级祖先.
-// 初始时只有一个根节点root.
-func NewDoublingLCAOnline(n int, root int) *DoublingLCAOnline {
+func NewDoublingLCAOnline(n int) *DoublingLCAOnline {
 	n += 1 // 防止越界
 	bit := bits.Len(uint(n))
 	dp := make([][]int32, bit)
@@ -151,14 +149,11 @@ func NewDoublingLCAOnline(n int, root int) *DoublingLCAOnline {
 	}
 	depth := make([]int32, n)
 	depthWeighted := make([]int, n)
-	return &DoublingLCAOnline{n: n, bitLen: bit, dp: dp, Depth: depth, DepthWeighted: depthWeighted, root: root}
+	return &DoublingLCAOnline{n: n, bitLen: bit, dp: dp, Depth: depth, DepthWeighted: depthWeighted}
 }
 
-// 在树中添加一条从parent到child的边.要求parent已经存在于树中.
+// 在树中添加一条从parent到child的边.要求parent已经存在于树中(或者为根节点),且child不存在于树中.
 func (lca *DoublingLCAOnline) AddDirectedEdge(parent, child int, weight int) {
-	if parent != lca.root && lca.Depth[parent] == 0 {
-		panic(fmt.Sprintf("parent %d not exists", parent))
-	}
 	lca.Depth[child] = lca.Depth[parent] + 1
 	lca.DepthWeighted[child] = lca.DepthWeighted[parent] + weight
 	lca.dp[0][child] = int32(parent)

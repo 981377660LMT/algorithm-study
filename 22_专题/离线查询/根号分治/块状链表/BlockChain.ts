@@ -399,4 +399,81 @@
 //     }
 // }
 
-class LinkedNode<E> {}
+// 用options对象传操作.
+
+// https://www.acwing.com/blog/content/28060/
+/**
+ * S: 聚合类型.
+ * U: 更新类型.
+ * E: 元素类型.
+ * B: 子类块类型.
+ */
+abstract class AbstractBlock<S, U, E, B extends AbstractBlock<S, U, E, B>> {
+  /** 分裂整块，block1包含前k个元素，block2包含后面的元素.*/
+  abstract split(k: number): { block1: B; block2: B }
+  abstract merge(other: B): B
+  /** 在index位置之后插入元素e，0表示第一个.*/
+  abstract insertAfter(index: number, e: E): void
+  abstract delete(index: number): void
+  abstract get(index: number): E
+  abstract reverse(): void
+
+  abstract fullyQuery(sum: S): void
+  abstract partialQuery(index: number, sum: S): void
+  abstract fullyUpdate(lazy: U): void
+  abstract partialUpdate(index: number, lazy: U): void
+  beforePartialQuery(): void {}
+  afterPartialUpdate(): void {}
+}
+
+class BlockChain<S, U, E, B extends AbstractBlock<S, U, E, B>> {
+  private readonly _head = new LinkedNode<B>()
+  private readonly _tail = new LinkedNode<B>()
+  private readonly _b: number
+  private _size = 0
+
+  constructor(
+    n: number,
+    blockSupplier: (start: number, end: number) => B,
+    blockSize = 2 * (1 + (Math.sqrt(n) | 0))
+  ) {
+    this._b = blockSize
+    this._size = n
+    LinkedNode.link(this._head, this._tail)
+    for (let start = 0; start < n; start += blockSize) {
+      let end = start + blockSize
+      if (end > n) end = n
+      const block = blockSupplier(start, end)
+      const node = new LinkedNode<B>()
+      node.data = block
+      node.size = end - start
+      LinkedNode.link(this._tail.prev!, node)
+      LinkedNode.link(node, this._tail)
+    }
+  }
+
+  split
+}
+
+class LinkedNode<E> {
+  static link<E>(a: LinkedNode<E>, b: LinkedNode<E>): void {
+    b.prev = a
+    a.next = b
+  }
+
+  static cut<E>(a: LinkedNode<E>, b: LinkedNode<E>): void {
+    a.next = undefined
+    b.prev = undefined
+  }
+
+  prev: LinkedNode<E> | undefined = undefined
+  next: LinkedNode<E> | undefined = undefined
+  data: E | undefined = undefined
+  size = 0
+}
+
+export {}
+
+if (require.main === module) {
+  const bl = new BlockChain<number, number, number>()
+}

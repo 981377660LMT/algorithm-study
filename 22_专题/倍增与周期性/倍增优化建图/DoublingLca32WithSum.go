@@ -34,7 +34,7 @@ func jump() {
 		tree[u] = append(tree[u], v)
 		tree[v] = append(tree[v], u)
 	}
-	D := NewDoublingLca32WithSum(tree, []int32{0}, make([]int, n))
+	D := NewDoublingLca32WithSum(tree, 0, make([]int, n))
 
 	for i := int32(0); i < q; i++ {
 		var from, to, k int32
@@ -62,7 +62,7 @@ type DoublingLca32WithSum struct {
 
 // values: 每个点的`点权`.
 // 如果需要查询边权，则每个点的`点权`设为`该点与其父亲结点的边权`, 根节点的`点权`设为`幺元`.
-func NewDoublingLca32WithSum(tree [][]int32, roots []int32, values []S) *DoublingLca32WithSum {
+func NewDoublingLca32WithSum(tree [][]int32, root int32, values []S) *DoublingLca32WithSum {
 	n := int32(len(tree))
 	depth := make([]int32, n)
 	lca := &DoublingLca32WithSum{
@@ -75,11 +75,100 @@ func NewDoublingLca32WithSum(tree [][]int32, roots []int32, values []S) *Doublin
 	lca.size = n * (lca.log + 1)
 
 	lca.makeDp()
-	for _, root := range roots {
+
+	if root != -1 {
 		lca.dfsAndInitDp(root, -1)
+	} else {
+		for i := range depth {
+			depth[i] = -1
+		}
+		for i := int32(0); i < n; i++ {
+			if lca.Depth[i] == -1 {
+				lca.Depth[i] = 0
+				lca.dfsAndInitDp(i, -1)
+			}
+		}
 	}
 	lca.updateDp()
 	return lca
+}
+
+// 遍历路径(start,target)上的所有jump.
+// 倍增拆点，将树上的一段路径拆成logn个点.
+func (lca *DoublingLca32WithSum) EnumerateJump(start, target int32, f func(level, index int32)) {
+	if start == target {
+		f(0, start)
+		return
+	}
+	if lca.Depth[start] < lca.Depth[target] {
+		start, target = target, start
+	}
+	toDepth := lca.Depth[target]
+	if lca.Depth[start] > toDepth {
+		for i := lca.log; i >= 0; i-- {
+			if (lca.Depth[start]-toDepth)&(1<<i) > 0 {
+				f(i, start)
+				start = lca.jump[i][start]
+			}
+		}
+	}
+	if start == target {
+		f(0, start)
+		return
+	}
+	for i := lca.log; i >= 0; i-- {
+		if a, b := lca.jump[i][start], lca.jump[i][target]; a != b {
+			f(i, start)
+			f(i, target)
+			start, target = a, b
+		}
+	}
+	f(0, start)
+	f(0, target)
+	f(0, lca.jump[0][start])
+}
+
+// 遍历路径(start,target)上的所有jump.
+// !要求运算幂等(idempotent).
+func (lca *DoublingLca32WithSum) EnumerateJumpDangerously(start, target int32, f func(level, index int32)) {
+	if start == target {
+		f(0, start)
+		return
+	}
+
+	divide := func(node, ancestor int32, f func(level, index int32)) {
+		len_ := lca.Depth[node] - lca.Depth[ancestor] + 1
+		k := int32(bits.Len32(uint32(len_))) - 1
+		jumpLen := len_ - (1 << k)
+		from2 := lca.KthAncestor(node, jumpLen)
+		f(k, node)
+		f(k, from2)
+	}
+
+	if lca.Depth[start] < lca.Depth[target] {
+		start, target = target, start
+	}
+	lca_ := lca.Lca(start, target)
+	if lca_ == target {
+		divide(start, lca_, f)
+	} else {
+		divide(start, lca_, f)
+		divide(target, lca_, f)
+	}
+}
+
+// 下推路径信息，更新答案.
+// O(n*log(n)).
+func (lca *DoublingLca32WithSum) PushDown(f func(pLevel, pIndex int32, cLevel, cIndex1, cIndex2 int32)) {
+	n, log := lca.n, lca.log
+	for k := log - 1; k >= 0; k-- {
+		for i := int32(0); i < n; i++ {
+			// push down jump(i,k+1) to jump(i,k) and jump(jump(i,k),k)
+			if to := lca.jump[k][i]; to != -1 {
+				f(k+1, i, k, i, to)
+			}
+		}
+	}
 }
 
 func (lca *DoublingLca32WithSum) Size() int32 { return lca.size }
@@ -403,7 +492,7 @@ func assert() {
 		tree[v] = append(tree[v], u)
 	}
 	values := []int{1, 1, 2, 3, 4, 5, 6}
-	bl := NewDoublingLca32WithSum(tree, []int32{0}, values)
+	bl := NewDoublingLca32WithSum(tree, 0, values)
 
 	type pair struct {
 		node int32

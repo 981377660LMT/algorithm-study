@@ -14,81 +14,8 @@ import (
 )
 
 func main() {
-	P5344()
-
-	// jump()
+	jump()
 	// test()
-}
-
-// P5344 【XR-1】逛森林
-// https://www.luogu.com.cn/problem/P5344
-// 1 u1 v1 u2 v2 w : 路径u1v1上所有结点可以花费w的代价到达路径u2v2上的所有结点，如果路径不连通则无效。
-// 2 u v w：结点u和v之间连接一条费用为w的无向边.如果u和v之间已经有边，则无效.
-// 最后求从结点s出发，到每个节点的最小花费.
-func P5344() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q, start int32
-	fmt.Fscan(in, &n, &q, &start)
-	operations := make([][6]int32, q)
-	for i := int32(0); i < q; i++ {
-		var op int32
-		fmt.Fscan(in, &op)
-		if op == 1 {
-			var u1, v1, u2, v2, w int32
-			fmt.Fscan(in, &u1, &v1, &u2, &v2, &w)
-			u1, v1, u2, v2 = u1-1, v1-1, u2-1, v2-1
-			operations[i] = [6]int32{op, u1, v1, u2, v2, w}
-		} else {
-			var u, v, w int32
-			fmt.Fscan(in, &u, &v, &w)
-			u, v = u-1, v-1
-			operations[i] = [6]int32{op, u, v, w}
-		}
-	}
-
-	uf := NewUnionFindArraySimple32(n)
-	valid := make([]bool, q) // 每个1操作是否有效
-	valid1Count := int32(0)  // 有效的op1的数量
-	tree := make([][]int32, n)
-	for i := int32(0); i < q; i++ {
-		op := &operations[i]
-		if op[0] == 1 {
-			u1, v1, u2, v2 := op[1], op[2], op[3], op[4]
-			valid[i] = uf.Find(u1) == uf.Find(v1) && uf.Find(u2) == uf.Find(v2)
-			if valid[i] {
-				valid1Count++
-			}
-		} else {
-			u, v := op[1], op[2]
-			if uf.Union(u, v) {
-				tree[u] = append(tree[u], v)
-				tree[v] = append(tree[v], u)
-				valid[i] = true
-			}
-		}
-	}
-
-	D := NewDoublingLca32(tree, -1)
-	pid := D.Size()
-	newGraph := make([][][2]int32, D.Size()+valid1Count+10)
-	addRangeToRange := func(u1, v1, u2, v2, w int32) {}
-	for i := int32(0); i < q; i++ {
-		op := &operations[i]
-		if !valid[i] {
-			continue
-		}
-		if op[0] == 1 {
-			u1, v1, u2, v2, w := op[1], op[2], op[3], op[4], op[5]
-			addRangeToRange(u1, v1, u2, v2, w)
-		} else {
-			u, v, w := op[1], op[2], op[3]
-			newGraph[u] = append(newGraph[u], [2]int32{v, w})
-			newGraph[v] = append(newGraph[v], [2]int32{u, w})
-		}
-	}
 }
 
 func jump() {
@@ -107,7 +34,17 @@ func jump() {
 		tree[u] = append(tree[u], v)
 		tree[v] = append(tree[v], u)
 	}
-	D := NewDoublingLca32(tree, 0)
+	D := NewDoublingLca32Dynamic(n)
+	var dfs func(int32, int32)
+	dfs = func(node, parent int32) {
+		for _, child := range tree[node] {
+			if child != parent {
+				D.AddLeaf(child, node)
+				dfs(child, node)
+			}
+		}
+	}
+	dfs(0, -1)
 
 	for i := int32(0); i < q; i++ {
 		var from, to, k int32
@@ -118,48 +55,46 @@ func jump() {
 
 const INF int = 1e18
 
-type DoublingLca32 struct {
-	Tree  [][]int32
+type DoublingLca32Dynamic struct {
 	Depth []int32
 
 	n, log, size int32
 	jump         [][]int32 // 节点j向上跳2^i步的父节点
 }
 
-// root=-1表示多个根节点.
-func NewDoublingLca32(tree [][]int32, root int32) *DoublingLca32 {
-	n := int32(len(tree))
+// 不预先给出整棵树,而是动态添加叶子节点.
+// 初始时只有一个根节点root.
+func NewDoublingLca32Dynamic(n int32) *DoublingLca32Dynamic {
 	depth := make([]int32, n)
-	lca := &DoublingLca32{
-		Tree:  tree,
-		Depth: depth,
-		n:     n,
-		log:   int32(bits.Len32(uint32(n))) - 1,
-	}
-	lca.size = n * (lca.log + 1)
-
-	lca.makeDp()
-	if root == -1 {
-		for i := range depth {
-			depth[i] = -1
+	log := int32(bits.Len32(uint32(n))) - 1
+	size := n * (log + 1)
+	jump := make([][]int32, log+1)
+	for i := int32(0); i <= log; i++ {
+		nums := make([]int32, n)
+		for j := int32(0); j < n; j++ {
+			nums[j] = -1
 		}
-		for i := int32(0); i < n; i++ {
-			if lca.Depth[i] == -1 {
-				lca.Depth[i] = 0
-				lca.dfsAndInitDp(i, -1)
-			}
-		}
-	} else {
-		lca.dfsAndInitDp(root, -1)
+		jump[i] = nums
 	}
+	return &DoublingLca32Dynamic{Depth: depth, n: n, log: log, size: size, jump: jump}
+}
 
-	lca.updateDp()
-	return lca
+// 在树中添加一条从parent到leaf的边，要求parent已经存在于树中(或者为根节点)，且leaf不在树中.
+func (lca *DoublingLca32Dynamic) AddLeaf(leaf int32, parent int32) {
+	lca.Depth[leaf] = lca.Depth[parent] + 1
+	lca.jump[0][leaf] = parent
+	for i := int32(1); i <= lca.log; i++ {
+		if from := lca.jump[i-1][leaf]; from != -1 {
+			lca.jump[i][leaf] = lca.jump[i-1][from]
+		} else {
+			break
+		}
+	}
 }
 
 // 遍历路径(start,target)上的所有jump.
 // 倍增拆点，将树上的一段路径拆成logn个点.
-func (lca *DoublingLca32) EnumerateJump(start, target int32, f func(level, index int32)) {
+func (lca *DoublingLca32Dynamic) EnumerateJump(start, target int32, f func(level, index int32)) {
 	if start == target {
 		f(0, start)
 		return
@@ -194,7 +129,7 @@ func (lca *DoublingLca32) EnumerateJump(start, target int32, f func(level, index
 
 // 遍历路径(start,target)上的所有jump.
 // !要求运算幂等(idempotent).
-func (lca *DoublingLca32) EnumerateJumpDangerously(start, target int32, f func(level, index int32)) {
+func (lca *DoublingLca32Dynamic) EnumerateJumpDangerously(start, target int32, f func(level, index int32)) {
 	if start == target {
 		f(0, start)
 		return
@@ -223,7 +158,7 @@ func (lca *DoublingLca32) EnumerateJumpDangerously(start, target int32, f func(l
 
 // 下推路径信息，更新答案.
 // O(n*log(n)).
-func (lca *DoublingLca32) PushDown(f func(pLevel, pIndex int32, cLevel, cIndex1, cIndex2 int32)) {
+func (lca *DoublingLca32Dynamic) PushDown(f func(pLevel, pIndex int32, cLevel, cIndex1, cIndex2 int32)) {
 	n, log := lca.n, lca.log
 	for k := log - 1; k >= 0; k-- {
 		for i := int32(0); i < n; i++ {
@@ -235,10 +170,10 @@ func (lca *DoublingLca32) PushDown(f func(pLevel, pIndex int32, cLevel, cIndex1,
 	}
 }
 
-func (lca *DoublingLca32) Size() int32 { return lca.size }
-func (lca *DoublingLca32) Log() int32  { return lca.log }
+func (lca *DoublingLca32Dynamic) Size() int32 { return lca.size }
+func (lca *DoublingLca32Dynamic) Log() int32  { return lca.log }
 
-func (lca *DoublingLca32) Lca(root1, root2 int32) int32 {
+func (lca *DoublingLca32Dynamic) Lca(root1, root2 int32) int32 {
 	if lca.Depth[root1] < lca.Depth[root2] {
 		root1, root2 = root2, root1
 	}
@@ -254,12 +189,12 @@ func (lca *DoublingLca32) Lca(root1, root2 int32) int32 {
 	return lca.jump[0][root1]
 }
 
-func (lca *DoublingLca32) Dist(root1, root2 int32, weighted bool) int32 {
+func (lca *DoublingLca32Dynamic) Dist(root1, root2 int32, weighted bool) int32 {
 	return lca.Depth[root1] + lca.Depth[root2] - 2*lca.Depth[lca.Lca(root1, root2)]
 }
 
 // 查询树节点root的第k个祖先(向上跳k步),如果不存在这样的祖先节点,返回 -1
-func (lca *DoublingLca32) KthAncestor(root, k int32) int32 {
+func (lca *DoublingLca32Dynamic) KthAncestor(root, k int32) int32 {
 	if k > lca.Depth[root] {
 		return -1
 	}
@@ -278,7 +213,7 @@ func (lca *DoublingLca32) KthAncestor(root, k int32) int32 {
 }
 
 // 从 root 开始向上跳到指定深度 toDepth,toDepth<=dep[v],返回跳到的节点
-func (lca *DoublingLca32) UpToDepth(root, toDepth int32) int32 {
+func (lca *DoublingLca32Dynamic) UpToDepth(root, toDepth int32) int32 {
 	if toDepth >= lca.Depth[root] {
 		return root
 	}
@@ -292,7 +227,7 @@ func (lca *DoublingLca32) UpToDepth(root, toDepth int32) int32 {
 
 // 从start节点跳向target节点,跳过step个节点(0-indexed)
 // 返回跳到的节点,如果不存在这样的节点,返回-1
-func (lca *DoublingLca32) Jump(start, target, step int32) int32 {
+func (lca *DoublingLca32Dynamic) Jump(start, target, step int32) int32 {
 	lca_ := lca.Lca(start, target)
 	dep1, dep2, deplca := lca.Depth[start], lca.Depth[target], lca.Depth[lca_]
 	dist := dep1 + dep2 - 2*deplca
@@ -305,7 +240,7 @@ func (lca *DoublingLca32) Jump(start, target, step int32) int32 {
 	return lca.KthAncestor(target, dist-step)
 }
 
-func (lca *DoublingLca32) FirstTrue(start int32, predicate func(end int32) bool) int32 {
+func (lca *DoublingLca32Dynamic) FirstTrue(start int32, predicate func(end int32) bool) int32 {
 	// `LastTrue`判定条件取反，然后向上跳一层.
 	if predicate(start) {
 		return start
@@ -319,7 +254,7 @@ func (lca *DoublingLca32) FirstTrue(start int32, predicate func(end int32) bool)
 	return lca.jump[0][start] // 不存在则返回-1
 }
 
-func (lca *DoublingLca32) LastTrue(start int32, predicate func(end int32) bool) int32 {
+func (lca *DoublingLca32Dynamic) LastTrue(start int32, predicate func(end int32) bool) int32 {
 	if !predicate(start) {
 		return -1
 	}
@@ -330,44 +265,6 @@ func (lca *DoublingLca32) LastTrue(start int32, predicate func(end int32) bool) 
 		}
 	}
 	return start
-}
-
-func (lca *DoublingLca32) makeDp() {
-	n, log := lca.n, lca.log
-	jump := make([][]int32, log+1)
-	for k := int32(0); k < log+1; k++ {
-		nums := make([]int32, n)
-		// for i := range nums {
-		// 	nums[i] = -1		// e()
-		// }
-		jump[k] = nums
-	}
-	lca.jump = jump
-}
-
-func (lca *DoublingLca32) dfsAndInitDp(cur, pre int32) {
-	lca.jump[0][cur] = pre
-	for _, next := range lca.Tree[cur] {
-		if next != pre {
-			lca.Depth[next] = lca.Depth[cur] + 1
-			lca.dfsAndInitDp(next, cur)
-		}
-	}
-}
-
-func (lca *DoublingLca32) updateDp() {
-	n, log := lca.n, lca.log
-	jump := lca.jump
-	for k := int32(0); k < log; k++ {
-		for v := int32(0); v < n; v++ {
-			j := jump[k][v]
-			if j == -1 {
-				jump[k+1][v] = -1 // e()
-			} else {
-				jump[k+1][v] = jump[k][j] // op()
-			}
-		}
-	}
 }
 
 func max(a, b int) int {
@@ -398,46 +295,6 @@ func min32(a, b int32) int32 {
 	return b
 }
 
-type UnionFindArraySimple32 struct {
-	Part int32
-	n    int32
-	data []int32
-}
-
-func NewUnionFindArraySimple32(n int32) *UnionFindArraySimple32 {
-	data := make([]int32, n)
-	for i := int32(0); i < n; i++ {
-		data[i] = -1
-	}
-	return &UnionFindArraySimple32{Part: n, n: n, data: data}
-}
-
-func (u *UnionFindArraySimple32) Union(key1, key2 int32) bool {
-	root1, root2 := u.Find(key1), u.Find(key2)
-	if root1 == root2 {
-		return false
-	}
-	if u.data[root1] > u.data[root2] {
-		root1, root2 = root2, root1
-	}
-	u.data[root1] += u.data[root2]
-	u.data[root2] = int32(root1)
-	u.Part--
-	return true
-}
-
-func (u *UnionFindArraySimple32) Find(key int32) int32 {
-	if u.data[key] < 0 {
-		return key
-	}
-	u.data[key] = u.Find(u.data[key])
-	return u.data[key]
-}
-
-func (u *UnionFindArraySimple32) GetSize(key int32) int32 {
-	return -u.data[u.Find(key)]
-}
-
 func test() {
 
 	//          0
@@ -448,7 +305,7 @@ func test() {
 	//         /
 	//        6
 
-	n := 7
+	n := int32(7)
 	edges := [][]int32{{0, 1}, {0, 2}, {1, 3}, {1, 4}, {2, 5}, {4, 6}}
 	tree := make([][]int32, n)
 	for _, e := range edges {
@@ -457,7 +314,18 @@ func test() {
 		tree[v] = append(tree[v], u)
 	}
 
-	lca := NewDoublingLca32(tree, 0)
+	lca := NewDoublingLca32Dynamic(n)
+	var dfs func(int32, int32)
+	dfs = func(node, parent int32) {
+		for _, child := range tree[node] {
+			if child != parent {
+				lca.AddLeaf(child, node)
+				dfs(child, node)
+			}
+		}
+	}
+	dfs(0, -1)
+
 	fmt.Println(lca.Lca(3, 6)) // 1
 
 	to1 := lca.FirstTrue(6, func(i int32) bool { return lca.Depth[i] <= -1 })
@@ -507,7 +375,7 @@ func test() {
 	})
 
 	expected := []int32{3, 5, 3, 5, 7, 3, 2}
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		expect[int32](values[i], expected[i])
 	}
 
@@ -537,7 +405,7 @@ func test() {
 	})
 
 	expected = []int32{3, 7, 3, 3, 7, 3, 7}
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		expect[int32](values[i], expected[i])
 	}
 
