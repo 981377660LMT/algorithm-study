@@ -10,6 +10,7 @@ func main() {
 // P5344 【XR-1】逛森林
 // https://www.luogu.com.cn/problem/P5344
 // 也可以隐式建图.
+// https://www.cnblogs.com/Athanasy/p/18026429
 
 // P9520 [JOISC2022] 监狱
 // https://www.luogu.com.cn/problem/P9520

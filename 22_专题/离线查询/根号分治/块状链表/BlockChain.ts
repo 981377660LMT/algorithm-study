@@ -398,3 +398,5 @@
 //         }
 //     }
 // }
+
+class LinkedNode<E> {}

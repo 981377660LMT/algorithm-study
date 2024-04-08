@@ -438,13 +438,18 @@ func test() {
 		id := level*lca.n + index
 		values[id] = max32(values[id], 5)
 	})
+	lca.EnumerateJumpDangerously(1, 6, func(level, index int32) {
+		id := level*lca.n + index
+		values[id] = max32(values[id], 7)
+	})
+
 	lca.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
 		p, c1, c2 := pLevel*lca.n+pIndex, cLevel*lca.n+cIndex1, cLevel*lca.n+cIndex2
 		values[c1] = max32(values[c1], values[p])
 		values[c2] = max32(values[c2], values[p])
 	})
 
-	expected = []int32{3, 3, 3, 3, 5, 3, 2}
+	expected = []int32{3, 7, 3, 3, 7, 3, 7}
 	for i := 0; i < n; i++ {
 		expect[int32](values[i], expected[i])
 	}
