@@ -127,6 +127,37 @@ func (lca *DoublingLca32) EnumerateJump(start, target int32, f func(level, index
 	f(0, lca.jump[0][start])
 }
 
+// 遍历路径(start,target)上的所有jump.
+// !要求运算幂等(idempotent).
+func (lca *DoublingLca32) EnumerateJumpDangerously(start, target int32, f func(level, index int32)) {
+	if lca.Depth[start] < lca.Depth[target] {
+		start, target = target, start
+	}
+	toDepth := lca.Depth[target]
+	if lca.Depth[start] > toDepth {
+		for i := lca.log; i >= 0; i-- {
+			if (lca.Depth[start]-toDepth)&(1<<i) > 0 {
+				f(i, start)
+				start = lca.jump[i][start]
+			}
+		}
+	}
+	if start == target {
+		f(0, start)
+		return
+	}
+	for i := lca.log; i >= 0; i-- {
+		if a, b := lca.jump[i][start], lca.jump[i][target]; a != b {
+			f(i, start)
+			f(i, target)
+			start, target = a, b
+		}
+	}
+	f(0, start)
+	f(0, target)
+	f(0, lca.jump[0][start])
+}
+
 // 遍历路径(start1,target1)和(start2,target2)上的所有jump.
 func (lca *DoublingLca32) EnumerateJump2(start1, target1, start2, target2 int32, f func(level, index1, index2 int32)) {
 }
@@ -390,6 +421,9 @@ func test() {
 	for i := 0; i < n; i++ {
 		expect[int32](values[i], expected[i])
 	}
+
+	// TODO: test EnumerateJumpDangerously by idempoent function
+	values = make([]int32, lca.Size())
 
 	fmt.Println("test passed")
 }
