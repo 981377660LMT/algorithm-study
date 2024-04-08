@@ -29,7 +29,7 @@ type DivideIntervalByBinaryLift struct {
 }
 
 func NewDivideIntervalByBinaryLift(n int32) *DivideIntervalByBinaryLift {
-	log := int32(bits.Len(uint(n))) - 1
+	log := int32(bits.Len32(uint32(n))) - 1
 	size := n * (log + 1)
 	return &DivideIntervalByBinaryLift{n: n, log: log, size: size}
 }

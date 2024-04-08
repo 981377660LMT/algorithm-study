@@ -138,8 +138,8 @@ func (lca *DoublingLca32) PushDown(f func(pLevel, pIndex int32, cLevel, cIndex1,
 	for k := log - 1; k >= 0; k-- {
 		for i := int32(0); i < n; i++ {
 			// push down jump(i,k+1) to jump(i,k) and jump(jump(i,k),k)
-			if to := lca.jump[k+1][i]; to != -1 {
-				f(k+1, i, k, i, lca.jump[k][i])
+			if to := lca.jump[k][i]; to != -1 {
+				f(k+1, i, k, i, to)
 			}
 		}
 	}

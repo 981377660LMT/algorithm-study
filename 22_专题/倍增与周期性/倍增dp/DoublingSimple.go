@@ -141,9 +141,9 @@ func (d *DoublingSimple) PushDown(f func(parent int32, child1, child2 int32)) {
 		for i := int32(0); i < n; i++ {
 			// push down jump(i,k+1) to jump(i,k) and jump(jump(i,k),k)
 			parent := (k+1)*n + i
-			if to := d.jump[parent]; to != -1 {
-				left := k*n + i
-				right := k*n + d.jump[left]
+			left := k*n + i
+			if to := d.jump[left]; to != -1 {
+				right := k*n + to
 				f(parent, left, right)
 			}
 		}
