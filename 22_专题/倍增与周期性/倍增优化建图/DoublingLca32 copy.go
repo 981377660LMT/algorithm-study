@@ -72,28 +72,14 @@ func P5344() {
 
 	D := NewDoublingLca32(tree, -1)
 	size := D.Size()
-	newGraph := make([][]Neighbor, n+size*2) // 底层真实点：[0,n)，倍增入点：[n,n+size)，倍增出点：[n+size,n+2*size).
-
-	rev := func(u int32) int32 {
-
-	}
+	newGraph := make([][]Neighbor, size*2) // 入点：[0,size)，出点：[size,2*size).
 	addEdge := func(from, to, w int32) {
 		newGraph[from] = append(newGraph[from], Neighbor{to, w})
 	}
 
-	// !1.倍增子结点的入点向上连接到父结点的入点，父结点的出点向下连接到子结点的出点.
-	//    注意倍增点jump(0,v)需要下推到真实点v和jump(0,v).
-	D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
-		p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
-		addEdge(c1, p, 0)
-		addEdge(c2, p, 0)
-		addEdge(p+size, c1+size, 0)
-		addEdge(p+size, c2+size, 0)
-	})
-
 	// !1.同一个点的入点和出点之间相互连边.
 	for i := int32(0); i < n; i++ {
-		addEdge(i, i+size, 0)
+		// addEdge(i, i+size, 0)
 		addEdge(i+size, i, 0)
 	}
 
@@ -129,6 +115,15 @@ func P5344() {
 			addEdge(v, u+size, w)
 		}
 	}
+
+	// !3.子结点的入点向上连接到父结点的入点，父结点的出点向下连接到子结点的出点.
+	D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
+		p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
+		addEdge(c1, p, 0)
+		addEdge(c2, p, 0)
+		addEdge(p+size, c1+size, 0)
+		addEdge(p+size, c2+size, 0)
+	})
 
 	dist := Dijkstra(int32(len(newGraph)), newGraph, start)
 	for i := int32(0); i < n; i++ {
