@@ -14,13 +14,15 @@ import (
 )
 
 func main() {
-	P5344()
+	// P5344()
+	// P9520()
+	CF1904F()
 
 	// jump()
 	// test()
 }
 
-// P5344 【XR-1】逛森林
+// P5344 【XR-1】逛森林 (倍增优化建图)
 // https://www.luogu.com.cn/problem/P5344
 // 1 u1 v1 u2 v2 w : 路径u1v1上所有结点可以花费w的代价到达路径u2v2上的所有结点，如果路径不连通则无效。
 // 2 u v w：结点u和v之间连接一条费用为w的无向边.如果u和v之间已经有边，则无效.
@@ -32,6 +34,7 @@ func P5344() {
 
 	var n, q, start int32
 	fmt.Fscan(in, &n, &q, &start)
+	start--
 	operations := make([][6]int32, q)
 	for i := int32(0); i < q; i++ {
 		var op int32
@@ -51,16 +54,12 @@ func P5344() {
 
 	uf := NewUnionFindArraySimple32(n)
 	valid := make([]bool, q) // 每个1操作是否有效
-	valid1Count := int32(0)  // 有效的op1的数量
 	tree := make([][]int32, n)
 	for i := int32(0); i < q; i++ {
 		op := &operations[i]
 		if op[0] == 1 {
 			u1, v1, u2, v2 := op[1], op[2], op[3], op[4]
 			valid[i] = uf.Find(u1) == uf.Find(v1) && uf.Find(u2) == uf.Find(v2)
-			if valid[i] {
-				valid1Count++
-			}
 		} else {
 			u, v := op[1], op[2]
 			if uf.Union(u, v) {
@@ -72,9 +71,33 @@ func P5344() {
 	}
 
 	D := NewDoublingLca32(tree, -1)
-	pid := D.Size()
-	newGraph := make([][][2]int32, D.Size()+valid1Count+10)
-	addRangeToRange := func(u1, v1, u2, v2, w int32) {}
+	size := D.Size()
+	newGraph := make([][]Neighbor, size*2) // 入点：[0,size)，出点：[size,2*size).
+
+	// !1.同一个点的入点和出点之间相互连边.
+	for i := int32(0); i < n; i++ {
+		newGraph[i] = append(newGraph[i], Neighbor{i + size, 0})
+		newGraph[i+size] = append(newGraph[i+size], Neighbor{i, 0})
+	}
+
+	// !2.区间入点和区间出点之间相互连边.
+	addRangeToRange := func(u1, v1, u2, v2, w int32) {
+		from, to := make([]int32, 0, 2), make([]int32, 0, 2)
+		D.EnumerateJumpDangerously(u1, v1, func(level, index int32) {
+			id := level*n + index
+			from = append(from, id)
+		})
+		D.EnumerateJumpDangerously(u2, v2, func(level, index int32) {
+			id := (level*n + index) + size
+			to = append(to, id)
+		})
+		for _, u := range from {
+			for _, v := range to {
+				newGraph[u] = append(newGraph[u], Neighbor{v, w})
+			}
+		}
+	}
+
 	for i := int32(0); i < q; i++ {
 		op := &operations[i]
 		if !valid[i] {
@@ -85,11 +108,88 @@ func P5344() {
 			addRangeToRange(u1, v1, u2, v2, w)
 		} else {
 			u, v, w := op[1], op[2], op[3]
-			newGraph[u] = append(newGraph[u], [2]int32{v, w})
-			newGraph[v] = append(newGraph[v], [2]int32{u, w})
+			newGraph[u] = append(newGraph[u], Neighbor{v + size, w})
+			newGraph[v] = append(newGraph[v], Neighbor{u + size, w})
+		}
+	}
+
+	// !3.子结点的入点向上连接到父结点的入点，父结点的出点向下连接到子结点的出点.
+	D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
+		p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
+		newGraph[c1] = append(newGraph[c1], Neighbor{p, 0})
+		newGraph[c2] = append(newGraph[c2], Neighbor{p, 0})
+		newGraph[p+size] = append(newGraph[p+size], Neighbor{c1 + size, 0})
+		newGraph[p+size] = append(newGraph[p+size], Neighbor{c2 + size, 0})
+	})
+
+	dist := Dijkstra(int32(len(newGraph)), newGraph, start)
+	for i := int32(0); i < n; i++ {
+		d := dist[i+size] // !出点
+		if d == INF {
+			d = -1
+		}
+		fmt.Fprint(out, d, " ")
+	}
+}
+
+// P9520 [JOISC2022] 监狱
+// https://www.luogu.com.cn/problem/P9520
+// 对于n个点的树，有m条起点与终点各不相同的行进路线形如 si→ti，允许从某个点移动至相邻点
+// !问能否在不存在某个点所在人数 >1的情况下完成所有行进路线。
+// 1<=m<=n
+//
+// 如果合法，一定有一种合法的方案使得每个人都是不停留地从头走到尾。
+// !将m个行进路线视为m个点，A先于B走是A向B连边，而存在冲突则是出现环。
+// 区间向区间连边后，拓扑排序判环.
+func P9520() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	solve := func(tree [][]int32, queries [][2]int32) bool {}
+
+	var T int32
+	fmt.Fscan(in, &T)
+	for i := int32(0); i < T; i++ {
+		var n int32
+		fmt.Fscan(in, &n)
+		tree := make([][]int32, n)
+		for i := int32(0); i < n-1; i++ {
+			var u, v int32
+			fmt.Fscan(in, &u, &v)
+			u--
+			v--
+			tree[u] = append(tree[u], v)
+			tree[v] = append(tree[v], u)
+		}
+
+		var m int32
+		fmt.Fscan(in, &m)
+		queries := make([][2]int32, m)
+		for i := int32(0); i < m; i++ {
+			var s, t int32
+			fmt.Fscan(in, &s, &t)
+			s--
+			t--
+			queries[i] = [2]int32{s, t}
+		}
+
+		ok := solve(tree, queries)
+		if ok {
+			fmt.Fprintln(out, "Yes")
+		} else {
+			fmt.Fprintln(out, "No")
 		}
 	}
 }
+
+// Beautiful Tree
+// https://www.luogu.com.cn/problem/CF1904F
+// 给出一棵树，与 m 条限制，每条限制为一条路径上点权最大/小的点的编号固定。
+// 请你为图分配 1∼n 的点权使得满足所有限制。
+// 限制可以看成规定点点权大/于路径上的其它点，我们把 a 的点权大于 b 的点权的限制视作一个有向边，则有解当且仅当没有环，拓扑排序分配即可。
+// !树剖 + 线段树优化建图O(nlog^2)，可以倍增优化成 O(nlogn)。
+func CF1904F() {}
 
 func jump() {
 	// https://judge.yosupo.jp/problem/jump_on_tree
@@ -436,6 +536,128 @@ func (u *UnionFindArraySimple32) Find(key int32) int32 {
 
 func (u *UnionFindArraySimple32) GetSize(key int32) int32 {
 	return -u.data[u.Find(key)]
+}
+
+type Neighbor struct {
+	to, weight int32
+}
+
+func Dijkstra(n int32, adjList [][]Neighbor, start int32) (dist []int) {
+	dist = make([]int, n)
+	for i := range dist {
+		dist[i] = INF
+	}
+	dist[start] = 0
+
+	pq := nhp(func(a, b H) int {
+		return a.dist - b.dist
+	}, []H{{start, 0}})
+
+	for pq.Len() > 0 {
+		curNode := pq.Pop()
+		cur, curDist := curNode.node, curNode.dist
+		if curDist > dist[cur] {
+			continue
+		}
+
+		for _, edge := range adjList[cur] {
+			next, weight := edge.to, edge.weight
+			if cand := curDist + int(weight); cand < dist[next] {
+				dist[next] = cand
+				pq.Push(H{next, cand})
+			}
+		}
+	}
+
+	return
+}
+
+type H = struct {
+	node int32
+	dist int
+}
+
+// Should return a number:
+//
+//	negative , if a < b
+//	zero     , if a == b
+//	positive , if a > b
+type Comparator func(a, b H) int
+
+func nhp(comparator Comparator, nums []H) *Heap {
+	nums = append(nums[:0:0], nums...)
+	heap := &Heap{comparator: comparator, data: nums}
+	heap.heapify()
+	return heap
+}
+
+type Heap struct {
+	data       []H
+	comparator Comparator
+}
+
+func (h *Heap) Push(value H) {
+	h.data = append(h.data, value)
+	h.pushUp(h.Len() - 1)
+}
+
+func (h *Heap) Pop() (value H) {
+	if h.Len() == 0 {
+		return
+	}
+
+	value = h.data[0]
+	h.data[0] = h.data[h.Len()-1]
+	h.data = h.data[:h.Len()-1]
+	h.pushDown(0)
+	return
+}
+
+func (h *Heap) Peek() (value H) {
+	if h.Len() == 0 {
+		return
+	}
+	value = h.data[0]
+	return
+}
+
+func (h *Heap) Len() int { return len(h.data) }
+
+func (h *Heap) heapify() {
+	n := h.Len()
+	for i := (n >> 1) - 1; i > -1; i-- {
+		h.pushDown(i)
+	}
+}
+
+func (h *Heap) pushUp(root int) {
+	for parent := (root - 1) >> 1; parent >= 0 && h.comparator(h.data[root], h.data[parent]) < 0; parent = (root - 1) >> 1 {
+		h.data[root], h.data[parent] = h.data[parent], h.data[root]
+		root = parent
+	}
+}
+
+func (h *Heap) pushDown(root int) {
+	n := h.Len()
+	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
+		right := left + 1
+		minIndex := root
+
+		if h.comparator(h.data[left], h.data[minIndex]) < 0 {
+			minIndex = left
+		}
+
+		if right < n && h.comparator(h.data[right], h.data[minIndex]) < 0 {
+			minIndex = right
+		}
+
+		if minIndex == root {
+			return
+		}
+
+		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
+		root = minIndex
+	}
 }
 
 func test() {
