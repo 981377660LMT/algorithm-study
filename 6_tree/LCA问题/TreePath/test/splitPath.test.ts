@@ -1,14 +1,92 @@
-import { CompressedBinaryLiftWithSum } from '../../CompressedBinaryLiftWithSum/CompressedBinaryLiftWithSum'
-import { ITreePath, TreePath } from '../TreePath'
+import { CompressedBinaryLift } from '../../CompressedBinaryLift/CompressedBinaryLift'
+import { splitPath, splitPathByJump } from '../splitPath'
+import { ITreePath } from '../TreePath'
 
-describe('TreePath.ts', () => {
+describe('splitPath.ts', () => {
   let n: number
   let edges: [number, number][]
   let tree: number[][]
-  let values: number[]
-  let bl: CompressedBinaryLiftWithSum
+  let bl: CompressedBinaryLift
+
   const createPath = (from: number, to: number): ITreePath => {
-    return new TreePath(from, to, { depth: bl.depth, kthAncestorFn: bl.kthAncestor, lcaFn: bl.lca })
+    const dep = {
+      splitFn: (
+        separator: number
+      ): { path1: ITreePath | undefined; path2: ITreePath | undefined } => {
+        const { from1, to1, from2, to2 } =
+          Math.random() > 0.5 // 1
+            ? splitPathByJump(from, to, separator, bl.jump.bind(bl))
+            : splitPath(from, to, separator, {
+                depth: bl.depth,
+                kthAncestorFn: bl.kthAncestor.bind(bl),
+                lcaFn: bl.lca.bind(bl)
+              })
+        let path1: ITreePath | undefined = undefined
+        let path2: ITreePath | undefined = undefined
+        if (from1 !== undefined && to1 !== undefined) {
+          path1 = new TreePathAdapter(from1, to1, dep)
+        }
+        if (from2 !== undefined && to2 !== undefined) {
+          path2 = new TreePathAdapter(from2, to2, dep)
+        }
+        return { path1, path2 }
+      }
+    }
+
+    return new TreePathAdapter(from, to, dep)
+  }
+
+  class TreePathAdapter implements ITreePath {
+    readonly from: number
+    readonly to: number
+    private readonly _splitFn: (separator: number) => {
+      path1: ITreePath | undefined
+      path2: ITreePath | undefined
+    }
+
+    constructor(
+      from: number,
+      to: number,
+      dependencies: {
+        splitFn: ITreePath['split']
+      }
+    ) {
+      this.from = from
+      this.to = to
+      this._splitFn = dependencies.splitFn.bind(dependencies)
+    }
+
+    split(separator: number): { path1: ITreePath | undefined; path2: ITreePath | undefined } {
+      return this._splitFn(separator)
+    }
+
+    kthNodeOnPath(k: number): number {
+      throw new Error('Method not implemented.')
+    }
+
+    onPath(node: number): boolean {
+      throw new Error('Method not implemented.')
+    }
+
+    hasIntersection(other: ITreePath): boolean {
+      throw new Error('Method not implemented.')
+    }
+
+    getIntersection(other: ITreePath): { p1: number; p2: number } | undefined {
+      throw new Error('Method not implemented.')
+    }
+
+    countIntersection(other: ITreePath): number {
+      throw new Error('Method not implemented.')
+    }
+
+    get lca(): number {
+      throw new Error('Method not implemented.')
+    }
+
+    get length(): number {
+      throw new Error('Method not implemented.')
+    }
   }
 
   beforeEach(() => {
@@ -34,96 +112,12 @@ describe('TreePath.ts', () => {
       tree[u].push(v)
       tree[v].push(u)
     })
-    values = [1, 1, 2, 3, 4, 5, 6]
-    bl = new CompressedBinaryLiftWithSum(tree, i => values[i], {
-      e: () => 0,
-      op: (a, b) => a + b
-    })
-  })
-
-  it('should support kthNodeOnPath', () => {
-    const path1 = createPath(3, 6)
-    expect(path1.kthNodeOnPath(0)).toBe(3)
-    expect(path1.kthNodeOnPath(1)).toBe(1)
-    expect(path1.kthNodeOnPath(2)).toBe(4)
-    expect(path1.kthNodeOnPath(3)).toBe(6)
-    expect(path1.kthNodeOnPath(4)).toBe(-1)
-    const path2 = createPath(6, 3)
-    expect(path2.kthNodeOnPath(0)).toBe(6)
-    expect(path2.kthNodeOnPath(1)).toBe(4)
-    expect(path2.kthNodeOnPath(2)).toBe(1)
-    expect(path2.kthNodeOnPath(3)).toBe(3)
-    expect(path2.kthNodeOnPath(4)).toBe(-1)
-    const path3 = createPath(3, 3)
-    expect(path3.kthNodeOnPath(0)).toBe(3)
-    expect(path3.kthNodeOnPath(1)).toBe(-1)
-    const path4 = createPath(5, 6)
-    expect(path4.kthNodeOnPath(0)).toBe(5)
-    expect(path4.kthNodeOnPath(1)).toBe(2)
-    expect(path4.kthNodeOnPath(2)).toBe(0)
-    expect(path4.kthNodeOnPath(3)).toBe(1)
-    expect(path4.kthNodeOnPath(4)).toBe(4)
-    expect(path4.kthNodeOnPath(5)).toBe(6)
-    expect(path4.kthNodeOnPath(6)).toBe(-1)
-  })
-
-  it('should support onPath', () => {
-    const path1 = createPath(3, 6)
-    expect(path1.onPath(3)).toBeTruthy()
-    expect(path1.onPath(1)).toBeTruthy()
-    expect(path1.onPath(4)).toBeTruthy()
-    expect(path1.onPath(6)).toBeTruthy()
-    expect(path1.onPath(0)).toBeFalsy()
-    expect(path1.onPath(2)).toBeFalsy()
-    expect(path1.onPath(5)).toBeFalsy()
-
-    const path2 = createPath(6, 3)
-    expect(path2.onPath(6)).toBeTruthy()
-    expect(path2.onPath(4)).toBeTruthy()
-    expect(path2.onPath(1)).toBeTruthy()
-    expect(path2.onPath(3)).toBeTruthy()
-    expect(path2.onPath(0)).toBeFalsy()
-    expect(path2.onPath(2)).toBeFalsy()
-    expect(path2.onPath(5)).toBeFalsy()
-
-    const path3 = createPath(3, 3)
-    expect(path3.onPath(3)).toBeTruthy()
-
-    const path4 = createPath(5, 6)
-    expect(path4.onPath(5)).toBeTruthy()
-    expect(path4.onPath(2)).toBeTruthy()
-    expect(path4.onPath(0)).toBeTruthy()
-    expect(path4.onPath(1)).toBeTruthy()
-    expect(path4.onPath(4)).toBeTruthy()
-    expect(path4.onPath(6)).toBeTruthy()
-    expect(path4.onPath(3)).toBeFalsy()
-  })
-
-  it('should support hasIntersection', () => {
-    expect(createPath(3, 5).hasIntersection(createPath(1, 6))).toBeTruthy()
-    expect(createPath(0, 5).hasIntersection(createPath(1, 6))).toBeFalsy()
-  })
-
-  it('should support getIntersection', () => {
-    const res1 = createPath(3, 5).getIntersection(createPath(1, 6))
-    expect(res1).toEqual({ p1: 1, p2: 1 })
-    const res2 = createPath(3, 6).getIntersection(createPath(1, 4))
-    expect(res2).toEqual({ p1: 4, p2: 1 })
-    const res3 = createPath(0, 5).getIntersection(createPath(1, 6))
-    expect(res3).toBeUndefined()
-  })
-
-  it('should support countIntersection', () => {
-    expect(createPath(3, 5).countIntersection(createPath(1, 6))).toBe(1)
-    expect(createPath(0, 5).countIntersection(createPath(1, 6))).toBe(0)
-    expect(createPath(3, 6).countIntersection(createPath(1, 4))).toBe(2)
-    expect(createPath(3, 3).countIntersection(createPath(3, 3))).toBe(1)
-    expect(createPath(5, 6).countIntersection(createPath(4, 2))).toBe(4)
+    bl = new CompressedBinaryLift(tree, 0)
   })
 
   // it('debug', () => {
-  //   const path3_6 = createPath(3, 6)
-  //   console.log(path3_6.split(4))
+  //   const p3_3 = createPath(3, 3)
+  //   console.log(p3_3.split(3))
   // })
 
   // 6种情况:

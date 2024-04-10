@@ -97,9 +97,9 @@ func P5344() {
 // https://www.luogu.com.cn/problem/CF1904F
 // 给出一棵树，与 m 条限制，每条限制为一条路径上点权最大/小的点的编号固定。
 // 请你为图分配 1∼n 的点权使得满足所有限制。
-// 限制可以看成规定点点权大/于路径上的其它点，我们把 a 的点权小于 b 的点权的限制视作一个有向边a→b。
-// 则有解当且仅当没有环，拓扑排序分配即可。
-// !树剖 + 线段树优化建图O(nlog^2)，可以倍增优化成 O(nlogn)。
+// 限制可以看成规定点点权大/于路径上的"其它点"，我们把 a 的点权小于 b 的点权的限制视作一个有向边a→b。
+// 则有解当且仅当整张图没有环，拓扑排序分配即可。
+// !倍增优化建图，优化成 O(nlogn) 条边。
 func CF1904F() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -116,14 +116,15 @@ func CF1904F() {
 		tree[v] = append(tree[v], u)
 	}
 
-	D := NewDoublingLca32(tree, 0)
+	D := NewRangeToRangeGraphOnTree(tree, 0)
 	size := D.Size()
-	newGraph := make([][]int32, size*2)
-	indeg := make([]int32, size*2)
+	newGraph := make([][]int32, size)
+	indeg := make([]int32, size)
 	addEdge := func(from, to int32) {
 		newGraph[from] = append(newGraph[from], to)
 		indeg[to]++
 	}
+	D.Init(addEdge)
 
 	for i := int32(0); i < n; i++ {
 		addEdge(i, i+size)
@@ -221,6 +222,9 @@ func NewRangeToRangeGraphOnTree(tree [][]int32, root int32) *RangeToRangeGraphOn
 	return g
 }
 
+// 总结点数.
+func (g *RangeToRangeGraphOnTree) Size() int32 { return g.n + g.offset*2 }
+
 // 建立内部连接.
 func (g *RangeToRangeGraphOnTree) Init(f func(from, to int32)) {
 	g.makeDp()
@@ -283,9 +287,6 @@ func (g *RangeToRangeGraphOnTree) AddRangeToRange(fromStart, fromEnd, toStart, t
 		}
 	}
 }
-
-// 总结点数.
-func (g *RangeToRangeGraphOnTree) Size() int32 { return g.n + g.offset*2 }
 
 func (g *RangeToRangeGraphOnTree) makeDp() {
 	n, log := g.n, g.log

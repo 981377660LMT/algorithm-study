@@ -427,6 +427,73 @@ func (t *TreePath) CountIntersection(other *TreePath) int32 {
 	return t.depth[p1] + t.depth[p2] - 2*t.depth[t.Lca] + 1
 }
 
+// 将路径以separator为分隔，按顺序分成两段.separtor必须在路径上.
+func (t *TreePath) Split(separator int32) (path1, path2 *TreePath) {
+	down, top := t.From, t.To
+	if down == top {
+		return nil, nil
+	}
+
+	swapped := false
+	if t.depth[down] < t.depth[top] {
+		down, top = top, down
+		swapped = true
+	}
+
+	from1, to1, from2, to2 := int32(-1), int32(-1), int32(-1), int32(-1)
+	if t.Lca == top {
+		// down和top在一条链上.
+		if separator == down {
+			from2 = t.kthAncestorFn(separator, 1)
+			to2 = top
+		} else if separator == top {
+			from1 = down
+			to1 = t.kthAncestorFn(down, t.depth[down]-t.depth[separator]-1)
+		} else {
+			from1 = down
+			to1 = t.kthAncestorFn(down, t.depth[down]-t.depth[separator]-1)
+			from2 = t.kthAncestorFn(separator, 1)
+			to2 = top
+		}
+	} else {
+		// down和top在lca两个子树上.
+		if separator == down {
+			from2 = t.kthAncestorFn(separator, 1)
+			to2 = top
+		} else if separator == top {
+			from1 = down
+			to1 = t.kthAncestorFn(separator, 1)
+		} else {
+			var jump1, jump2 int32
+			if separator == t.Lca {
+				jump1 = t.kthAncestorFn(down, t.depth[down]-t.depth[separator]-1)
+				jump2 = t.kthAncestorFn(top, t.depth[top]-t.depth[separator]-1)
+			} else if t.lcaFn(separator, down) == separator {
+				jump1 = t.kthAncestorFn(down, t.depth[down]-t.depth[separator]-1)
+				jump2 = t.kthAncestorFn(separator, 1)
+			} else {
+				jump1 = t.kthAncestorFn(separator, 1)
+				jump2 = t.kthAncestorFn(top, t.depth[top]-t.depth[separator]-1)
+			}
+			from1 = down
+			to1 = jump1
+			from2 = jump2
+			to2 = top
+		}
+	}
+
+	if swapped {
+		from1, to1, from2, to2 = to2, from2, to1, from1
+	}
+	if from1 != -1 && to1 != -1 {
+		path1 = NewTreePath(from1, to1, t.depth, t.kthAncestorFn, t.lcaFn)
+	}
+	if from2 != -1 && to2 != -1 {
+		path2 = NewTreePath(from2, to2, t.depth, t.kthAncestorFn, t.lcaFn)
+	}
+	return
+}
+
 func (t *TreePath) Len() int32 {
 	return t.depth[t.From] + t.depth[t.To] - 2*t.depth[t.Lca]
 }

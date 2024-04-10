@@ -181,6 +181,9 @@ func NewRangeToRangeGraph(n int32, rangeToRangeOpCount int32) *RangeToRangeGraph
 	return g
 }
 
+// 新图的结点数.
+func (g *RangeToRangeGraph) Size() int32 { return g.maxSize }
+
 func (g *RangeToRangeGraph) Init(f func(from, to int32)) {
 	n := g.n
 	for i := int32(2); i < n+n; i++ {
@@ -235,9 +238,6 @@ func (g *RangeToRangeGraph) AddRangeToRange(fromStart, fromEnd, toStart, toEnd i
 	g.AddFromRange(fromStart, fromEnd, newNode, f)
 	g.AddToRange(newNode, toStart, toEnd, f)
 }
-
-// 新图的结点数.
-func (g *RangeToRangeGraph) Size() int32 { return g.maxSize }
 
 func (g *RangeToRangeGraph) toUpperIdx(i int32) int32 {
 	if i >= g.n {
