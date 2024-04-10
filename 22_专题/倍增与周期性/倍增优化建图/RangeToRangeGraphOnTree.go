@@ -8,12 +8,8 @@ import (
 )
 
 func main() {
-	P5344()
-	// P9520()
-	// CF1904F()
-
-	// jump()
-	// test()
+	// P5344()
+	CF1904F()
 }
 
 // P5344 【XR-1】逛森林 (倍增优化建图)
@@ -95,6 +91,111 @@ func P5344() {
 		}
 		fmt.Fprint(out, d, " ")
 	}
+}
+
+// Beautiful Tree
+// https://www.luogu.com.cn/problem/CF1904F
+// 给出一棵树，与 m 条限制，每条限制为一条路径上点权最大/小的点的编号固定。
+// 请你为图分配 1∼n 的点权使得满足所有限制。
+// 限制可以看成规定点点权大/于路径上的其它点，我们把 a 的点权小于 b 的点权的限制视作一个有向边a→b。
+// 则有解当且仅当没有环，拓扑排序分配即可。
+// !树剖 + 线段树优化建图O(nlog^2)，可以倍增优化成 O(nlogn)。
+func CF1904F() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int32
+	fmt.Fscan(in, &n, &m)
+	tree := make([][]int32, n)
+	for i := int32(0); i < n-1; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		u, v = u-1, v-1
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
+	}
+
+	D := NewDoublingLca32(tree, 0)
+	size := D.Size()
+	newGraph := make([][]int32, size*2)
+	indeg := make([]int32, size*2)
+	addEdge := func(from, to int32) {
+		newGraph[from] = append(newGraph[from], to)
+		indeg[to]++
+	}
+
+	for i := int32(0); i < n; i++ {
+		addEdge(i, i+size)
+		addEdge(i+size, i)
+	}
+
+	addPointToRange := func(from, to1, to2 int32) {
+		D.EnumerateJumpDangerously(to1, to2, func(level, index int32) {
+			id := (level*n + index) + size
+			addEdge(from, id)
+		})
+	}
+
+	addRangeToPoint := func(from1, from2, to int32) {
+		D.EnumerateJumpDangerously(from1, from2, func(level, index int32) {
+			id := level*n + index
+			addEdge(id, to+size)
+		})
+	}
+
+	for i := int32(0); i < m; i++ {
+		var op, a, b, c int32
+		fmt.Fscan(in, &op, &a, &b, &c)
+		a, b, c = a-1, b-1, c-1
+		// 点c的点权是路径a到b上的最小值
+		if op == 1 {
+			addPointToRange(c, a, b)
+		} else {
+			// 点c的点权是路径a到b上的最大值
+			addRangeToPoint(a, b, c)
+		}
+	}
+
+	// !3.子结点的入点向上连接到父结点的入点，父结点的出点向下连接到子结点的出点.
+	D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
+		p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
+		addEdge(c1, p)
+		addEdge(c2, p)
+		addEdge(p+size, c1+size)
+		addEdge(p+size, c2+size)
+	})
+
+	queue := make([]int32, 0)
+	for i := int32(0); i < n; i++ {
+		if indeg[i] == 1 {
+			queue = append(queue, i)
+		}
+	}
+	fmt.Println(queue, indeg)
+	topoOrder := make([]int32, 0, size*2)
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		topoOrder = append(topoOrder, cur)
+		for _, next := range newGraph[cur] {
+			indeg[next]--
+			if indeg[next] == 0 {
+				queue = append(queue, next)
+			}
+		}
+	}
+	fmt.Println(indeg)
+	for _, d := range indeg {
+		if d > 0 {
+			fmt.Fprintln(out, -1)
+			return
+		}
+	}
+
+	// res := make([]int32, n)
+	fmt.Fprintln(out, topoOrder)
+
 }
 
 type RangeToRangeGraphOnTree struct {

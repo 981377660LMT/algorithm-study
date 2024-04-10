@@ -134,6 +134,7 @@
 6. **图论**
 
    - [树上倍增](22_%E4%B8%93%E9%A2%98/%E5%80%8D%E5%A2%9E%E4%B8%8E%E5%91%A8%E6%9C%9F%E6%80%A7/%E5%80%8D%E5%A2%9E%E4%BC%98%E5%8C%96%E5%BB%BA%E5%9B%BE/DoublingLca32.go)
+   - [线段树优化建图](14_%E5%B9%B6%E6%9F%A5%E9%9B%86/%E7%BB%8F%E5%85%B8%E9%A2%98/%E5%8C%BA%E9%97%B4%E5%B9%B6%E6%9F%A5%E9%9B%86/RangeToRangeGraph.go)
    - [倍增优化建图](22_%E4%B8%93%E9%A2%98/%E5%80%8D%E5%A2%9E%E4%B8%8E%E5%91%A8%E6%9C%9F%E6%80%A7/%E5%80%8D%E5%A2%9E%E4%BC%98%E5%8C%96%E5%BB%BA%E5%9B%BE/RangeToRangeGraphOnTree.go)
    - [链式前向星存图](7_graph/%E9%93%BE%E5%BC%8F%E5%89%8D%E5%90%91%E6%98%9F%E5%AD%98%E5%9B%BE/ChainForwardStar.ts)
    - [线性空间树上倍增](6_tree/LCA%E9%97%AE%E9%A2%98/CompressedBinaryLift/CompressedBinaryLift.go)

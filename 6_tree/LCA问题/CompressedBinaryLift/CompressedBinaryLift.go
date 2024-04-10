@@ -15,6 +15,11 @@ func main() {
 	CF519E()
 }
 
+/**
+ * Your DistanceLimitedPathsExist object will be instantiated and called as such:
+ * obj := Constructor(n, edgeList);
+ * param_1 := obj.Query(p,q,limit);
+ */
 // https://judge.yosupo.jp/problem/lca
 func yosupo() {
 	in := bufio.NewReader(os.Stdin)
@@ -190,6 +195,7 @@ func NewCompressedBinaryLift(n int32, depthOnTree, parentOnTree []int32) *Compre
 	return res
 }
 
+// root:-1表示无根.
 func NewCompressedBinaryLiftFromTree(tree [][]int32, root int32) *CompressedBinaryLift {
 	n := int32(len(tree))
 	res := &CompressedBinaryLift{
@@ -197,9 +203,21 @@ func NewCompressedBinaryLiftFromTree(tree [][]int32, root int32) *CompressedBina
 		Parent: make([]int32, n),
 		jump:   make([]int32, n),
 	}
-	res.Parent[root] = -1
-	res.jump[root] = root
-	res._setUp(tree, root)
+	if root != -1 {
+		res.Parent[root] = -1
+		res.jump[root] = root
+		res._setUp(tree, root)
+	} else {
+		for i := int32(0); i < n; i++ {
+			res.Parent[i] = -1
+		}
+		for i := int32(0); i < n; i++ {
+			if res.Parent[i] == -1 {
+				res.jump[i] = i
+				res._setUp(tree, i)
+			}
+		}
+	}
 	return res
 }
 
@@ -312,8 +330,8 @@ func (bl *CompressedBinaryLift) _addLeaf(leaf, parent int32) {
 	}
 }
 
-func (bl *CompressedBinaryLift) _setUp(tree [][]int32, root int32) {
-	queue := []int32{root}
+func (bl *CompressedBinaryLift) _setUp(tree [][]int32, cur int32) {
+	queue := []int32{cur}
 	head := 0
 	for head < len(queue) {
 		cur := queue[head]
