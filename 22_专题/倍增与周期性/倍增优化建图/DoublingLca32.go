@@ -76,17 +76,14 @@ func P5344() {
 	// !每个jump拆分成入点和出点，最后pushDown时，入点从儿子向父亲连边，出点从父亲向儿子连边.
 	D := NewDoublingLca32(tree, -1)
 	size := D.Size()
-	newGraph := make([][]Neighbour, n+size*2) // 底层真实点：[0,n)，倍增入点：[n,n+size)，倍增出点：[n+size,n+2*size).
+	newGraph := make([][]Neighbour, n+size*2) // !倍增入点：[0,size)，倍增出点：[size,2*size)，真实点：[2*size,2*size+n)
 
-	// rev := func(u int32) int32 {
-
-	// }
 	addEdge := func(from, to, w int32) {
 		newGraph[from] = append(newGraph[from], Neighbour{to, w})
 	}
 
 	// !1.倍增子结点的入点向上连接到父结点的入点，父结点的出点向下连接到子结点的出点.
-	//    注意倍增点jump(0,v)需要下推到真实点v和jump(0,v).
+	//    注意倍增点jump(0,v)需要下推到真实点v.
 	D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
 		p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
 		addEdge(c1, p, 0)
@@ -94,12 +91,6 @@ func P5344() {
 		addEdge(p+size, c1+size, 0)
 		addEdge(p+size, c2+size, 0)
 	})
-
-	// !1.同一个点的入点和出点之间相互连边.
-	for i := int32(0); i < n; i++ {
-		addEdge(i, i+size, 0)
-		addEdge(i+size, i, 0)
-	}
 
 	// !2.区间入点和区间出点之间相互连边.
 	addRangeToRange := func(u1, v1, u2, v2, w int32) {
@@ -134,9 +125,9 @@ func P5344() {
 		}
 	}
 
-	dist := DijkstraSiftHeap1(int32(len(newGraph)), newGraph, start)
+	dist := DijkstraSiftHeap1(int32(len(newGraph)), newGraph, start+2*size)
 	for i := int32(0); i < n; i++ {
-		d := dist[i+size] // !出点
+		d := dist[i+2*size]
 		if d == INF {
 			d = -1
 		}

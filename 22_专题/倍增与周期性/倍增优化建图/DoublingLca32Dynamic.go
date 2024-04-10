@@ -14,8 +14,8 @@ import (
 )
 
 func main() {
-	jump()
-	// test()
+	// jump()
+	test()
 }
 
 func jump() {

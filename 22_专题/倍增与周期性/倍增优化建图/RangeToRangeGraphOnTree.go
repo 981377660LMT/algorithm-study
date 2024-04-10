@@ -66,9 +66,9 @@ func P5344() {
 
 	R := NewRangeToRangeGraphOnTree(tree, -1)
 	size := R.Size()
-	newGraph := make([][]Neighbor, size)
+	newGraph := make([][]Neighbour, size)
 
-	R.Init(func(from, to int32) { newGraph[from] = append(newGraph[from], Neighbor{to, 0}) })
+	R.Init(func(from, to int32) { newGraph[from] = append(newGraph[from], Neighbour{to, 0}) })
 
 	for i := int32(0); i < q; i++ {
 		op := &operations[i]
@@ -78,16 +78,16 @@ func P5344() {
 		if op[0] == 1 {
 			u1, v1, u2, v2, w := op[1], op[2], op[3], op[4], op[5]
 			R.AddRangeToRange(u1, v1, u2, v2, func(from, to int32) {
-				newGraph[from] = append(newGraph[from], Neighbor{to, w})
+				newGraph[from] = append(newGraph[from], Neighbour{to, w})
 			})
 		} else {
 			u, v, w := op[1], op[2], op[3]
-			R.Add(u, v, func(from, to int32) { newGraph[from] = append(newGraph[from], Neighbor{to, w}) })
-			R.Add(v, u, func(from, to int32) { newGraph[from] = append(newGraph[from], Neighbor{to, w}) })
+			R.Add(u, v, func(from, to int32) { newGraph[from] = append(newGraph[from], Neighbour{to, w}) })
+			R.Add(v, u, func(from, to int32) { newGraph[from] = append(newGraph[from], Neighbour{to, w}) })
 		}
 	}
 
-	dist := Dijkstra(int32(len(newGraph)), newGraph, start)
+	dist := DijkstraSiftHeap1(int32(len(newGraph)), newGraph, start)
 	for i := int32(0); i < n; i++ {
 		d := dist[i] // !出点
 		if d == INF {
@@ -100,7 +100,7 @@ func P5344() {
 type RangeToRangeGraphOnTree struct {
 	tree           [][]int32
 	depth          []int32
-	n, log, offset int32 // 底层真实点：[0,n)，倍增入点：[n,n+offset)，倍增出点：[n+offset,n+2*offset).
+	n, log, offset int32 // !底层真实点：[0,n)，倍增入点：[n,n+offset)，倍增出点：[n+offset,n+2*offset).
 	root           int32
 	jump           [][]int32 // 节点j向上跳2^i步的父节点
 }
@@ -121,7 +121,6 @@ func NewRangeToRangeGraphOnTree(tree [][]int32, root int32) *RangeToRangeGraphOn
 }
 
 // 建立内部连接.
-// TODO: 这里有问题，还是对拍??
 func (g *RangeToRangeGraphOnTree) Init(f func(from, to int32)) {
 	g.makeDp()
 	if g.root == -1 {
@@ -199,15 +198,11 @@ func (g *RangeToRangeGraphOnTree) makeDp() {
 
 func (g *RangeToRangeGraphOnTree) dfsAndInitDp(cur, pre int32, f func(from, to int32)) {
 	g.jump[0][cur] = pre
-	// push down jump(0,next) to origin node.
+	// push down jump(0,cur).
 	in := g.n + cur
 	out := in + g.offset
 	f(cur, in)
 	f(out, cur)
-	// if pre != -1 {
-	// 	f(pre, in)
-	// 	f(out, pre)
-	// }
 	for _, next := range g.tree[cur] {
 		if next != pre {
 			g.depth[next] = g.depth[cur] + 1
@@ -235,7 +230,7 @@ func (g *RangeToRangeGraphOnTree) updateDp() {
 // !要求运算幂等(idempotent).
 func (g *RangeToRangeGraphOnTree) enumerateJumpDangerously(start, target int32, f func(id int32)) {
 	if start == target {
-		f(start)
+		f(start + g.n)
 		return
 	}
 	divide := func(node, ancestor int32, f func(id int32)) {
@@ -347,124 +342,127 @@ func (u *UnionFindArraySimple32) GetSize(key int32) int32 {
 
 const INF int = 1e18
 
-type Neighbor struct {
-	to, weight int32
+// 采用SiftHeap加速的dijkstra算法.求出起点到各点的最短距离.
+type Neighbour struct {
+	next   int32
+	weight int32
 }
 
-func Dijkstra(n int32, adjList [][]Neighbor, start int32) (dist []int) {
-	dist = make([]int, n)
-	for i := range dist {
+func DijkstraSiftHeap1(n int32, graph [][]Neighbour, start int32) []int {
+	dist := make([]int, n)
+	for i := int32(0); i < n; i++ {
 		dist[i] = INF
 	}
+	pq := NewSiftHeap32(n, func(i, j int32) bool { return dist[i] < dist[j] })
 	dist[start] = 0
-
-	pq := nhp(func(a, b H) int {
-		return a.dist - b.dist
-	}, []H{{start, 0}})
-
-	for pq.Len() > 0 {
-		curNode := pq.Pop()
-		cur, curDist := curNode.node, curNode.dist
-		if curDist > dist[cur] {
-			continue
-		}
-
-		for _, edge := range adjList[cur] {
-			next, weight := edge.to, edge.weight
-			if cand := curDist + int(weight); cand < dist[next] {
+	pq.Push(start)
+	for pq.Size() > 0 {
+		cur := pq.Pop()
+		for _, e := range graph[cur] {
+			next, weight := e.next, e.weight
+			cand := dist[cur] + int(weight)
+			if cand < dist[next] {
 				dist[next] = cand
-				pq.Push(H{next, cand})
+				pq.Push(next)
 			}
 		}
 	}
-
-	return
+	return dist
 }
 
-type H = struct {
-	node int32
-	dist int
+type SiftHeap32 struct {
+	heap []int32
+	pos  []int32
+	less func(i, j int32) bool
+	ptr  int32
 }
 
-// Should return a number:
-//
-//	negative , if a < b
-//	zero     , if a == b
-//	positive , if a > b
-type Comparator func(a, b H) int
-
-func nhp(comparator Comparator, nums []H) *Heap {
-	nums = append(nums[:0:0], nums...)
-	heap := &Heap{comparator: comparator, data: nums}
-	heap.heapify()
-	return heap
-}
-
-type Heap struct {
-	data       []H
-	comparator Comparator
-}
-
-func (h *Heap) Push(value H) {
-	h.data = append(h.data, value)
-	h.pushUp(h.Len() - 1)
-}
-
-func (h *Heap) Pop() (value H) {
-	if h.Len() == 0 {
-		return
+func NewSiftHeap32(n int32, less func(i, j int32) bool) *SiftHeap32 {
+	pos := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		pos[i] = -1
 	}
-
-	value = h.data[0]
-	h.data[0] = h.data[h.Len()-1]
-	h.data = h.data[:h.Len()-1]
-	h.pushDown(0)
-	return
-}
-
-func (h *Heap) Peek() (value H) {
-	if h.Len() == 0 {
-		return
-	}
-	value = h.data[0]
-	return
-}
-
-func (h *Heap) Len() int { return len(h.data) }
-
-func (h *Heap) heapify() {
-	n := h.Len()
-	for i := (n >> 1) - 1; i > -1; i-- {
-		h.pushDown(i)
+	return &SiftHeap32{
+		heap: make([]int32, n),
+		pos:  pos,
+		less: less,
 	}
 }
 
-func (h *Heap) pushUp(root int) {
-	for parent := (root - 1) >> 1; parent >= 0 && h.comparator(h.data[root], h.data[parent]) < 0; parent = (root - 1) >> 1 {
-		h.data[root], h.data[parent] = h.data[parent], h.data[root]
-		root = parent
+func (h *SiftHeap32) Push(i int32) {
+	if h.pos[i] == -1 {
+		h.pos[i] = h.ptr
+		h.heap[h.ptr] = i
+		h.ptr++
 	}
+	h._siftUp(i)
 }
 
-func (h *Heap) pushDown(root int) {
-	n := h.Len()
-	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
-		right := left + 1
-		minIndex := root
+// 如果不存在,则返回-1.
+func (h *SiftHeap32) Pop() int32 {
+	if h.ptr == 0 {
+		return -1
+	}
+	res := h.heap[0]
+	h.pos[res] = -1
+	h.ptr--
+	ptr := h.ptr
+	if ptr > 0 {
+		tmp := h.heap[ptr]
+		h.pos[tmp] = 0
+		h.heap[0] = tmp
+		h._siftDown(tmp)
+	}
+	return res
+}
 
-		if h.comparator(h.data[left], h.data[minIndex]) < 0 {
-			minIndex = left
+// 如果不存在,则返回-1.
+func (h *SiftHeap32) Peek() int32 {
+	if h.ptr == 0 {
+		return -1
+	}
+	return h.heap[0]
+}
+
+func (h *SiftHeap32) Size() int32 {
+	return h.ptr
+}
+
+func (h *SiftHeap32) _siftUp(i int32) {
+	curPos := h.pos[i]
+	p := int32(0)
+	for curPos != 0 {
+		p = h.heap[(curPos-1)>>1]
+		if !h.less(i, p) {
+			break
 		}
-
-		if right < n && h.comparator(h.data[right], h.data[minIndex]) < 0 {
-			minIndex = right
-		}
-
-		if minIndex == root {
-			return
-		}
-
-		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
-		root = minIndex
+		h.pos[p] = curPos
+		h.heap[curPos] = p
+		curPos = (curPos - 1) >> 1
 	}
+	h.pos[i] = curPos
+	h.heap[curPos] = i
+}
+
+func (h *SiftHeap32) _siftDown(i int32) {
+	curPos := h.pos[i]
+	c := int32(0)
+	for {
+		c = (curPos << 1) | 1
+		if c >= h.ptr {
+			break
+		}
+		if c+1 < h.ptr && h.less(h.heap[c+1], h.heap[c]) {
+			c++
+		}
+		if !h.less(h.heap[c], i) {
+			break
+		}
+		tmp := h.heap[c]
+		h.heap[curPos] = tmp
+		h.pos[tmp] = curPos
+		curPos = c
+	}
+	h.pos[i] = curPos
+	h.heap[curPos] = i
 }
