@@ -100,6 +100,8 @@ func P5344() {
 // 限制可以看成规定点点权大/于路径上的"其它点"，我们把 a 的点权小于 b 的点权的限制视作一个有向边a→b。
 // 则有解当且仅当整张图没有环，拓扑排序分配即可。
 // !倍增优化建图，优化成 O(nlogn) 条边。
+//
+// TODO:FIX ME
 func CF1904F() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -126,23 +128,24 @@ func CF1904F() {
 	}
 	D.Init(addEdge)
 
-	for i := int32(0); i < n; i++ {
-		addEdge(i, i+size)
-		addEdge(i+size, i)
+	addPointToRangeWithoutPoint := func(point, from, to int32) {
+		from1, to1, from2, to2 := SplitPathByJumpFn(from, to, point, D.jumpFn)
+		if from1 != -1 && to1 != -1 {
+			D.AddToRange(point, from1, to1, addEdge)
+		}
+		if from2 != -1 && to2 != -1 {
+			D.AddToRange(point, from2, to2, addEdge)
+		}
 	}
 
-	addPointToRange := func(from, to1, to2 int32) {
-		D.EnumerateJumpDangerously(to1, to2, func(level, index int32) {
-			id := (level*n + index) + size
-			addEdge(from, id)
-		})
-	}
-
-	addRangeToPoint := func(from1, from2, to int32) {
-		D.EnumerateJumpDangerously(from1, from2, func(level, index int32) {
-			id := level*n + index
-			addEdge(id, to+size)
-		})
+	addRangeToPointWithoutPoint := func(from, to, point int32) {
+		from1, to1, from2, to2 := SplitPathByJumpFn(from, to, point, D.jumpFn)
+		if from1 != -1 && to1 != -1 {
+			D.AddFromRange(from1, to1, point, addEdge)
+		}
+		if from2 != -1 && to2 != -1 {
+			D.AddFromRange(from2, to2, point, addEdge)
+		}
 	}
 
 	for i := int32(0); i < m; i++ {
@@ -151,34 +154,27 @@ func CF1904F() {
 		a, b, c = a-1, b-1, c-1
 		// 点c的点权是路径a到b上的最小值
 		if op == 1 {
-			addPointToRange(c, a, b)
+			addPointToRangeWithoutPoint(c, a, b)
 		} else {
 			// 点c的点权是路径a到b上的最大值
-			addRangeToPoint(a, b, c)
+			addRangeToPointWithoutPoint(a, b, c)
 		}
 	}
 
-	// !3.子结点的入点向上连接到父结点的入点，父结点的出点向下连接到子结点的出点.
-	D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
-		p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
-		addEdge(c1, p)
-		addEdge(c2, p)
-		addEdge(p+size, c1+size)
-		addEdge(p+size, c2+size)
-	})
-
 	queue := make([]int32, 0)
-	for i := int32(0); i < n; i++ {
-		if indeg[i] == 1 {
+	for i := int32(0); i < size; i++ {
+		if indeg[i] == 0 {
 			queue = append(queue, i)
 		}
 	}
-	fmt.Println(queue, indeg)
-	topoOrder := make([]int32, 0, size*2)
+	fmt.Println(queue)
+	topoOrder := make([]int32, 0, n)
 	for len(queue) > 0 {
 		cur := queue[0]
 		queue = queue[1:]
-		topoOrder = append(topoOrder, cur)
+		if cur < n {
+			topoOrder = append(topoOrder, cur)
+		}
 		for _, next := range newGraph[cur] {
 			indeg[next]--
 			if indeg[next] == 0 {
@@ -186,7 +182,8 @@ func CF1904F() {
 			}
 		}
 	}
-	fmt.Println(indeg)
+
+	fmt.Fprintln(out, topoOrder)
 	for _, d := range indeg {
 		if d > 0 {
 			fmt.Fprintln(out, -1)
@@ -194,9 +191,16 @@ func CF1904F() {
 		}
 	}
 
-	// res := make([]int32, n)
-	fmt.Fprintln(out, topoOrder)
+	res := make([]int32, n)
+	alloc := int32(1)
+	for _, cur := range topoOrder {
+		res[cur] = alloc
+		alloc++
+	}
 
+	for _, r := range res {
+		fmt.Fprint(out, r, " ")
+	}
 }
 
 type RangeToRangeGraphOnTree struct {
@@ -265,18 +269,17 @@ func (g *RangeToRangeGraphOnTree) Add(from, to int32, f func(from, to int32)) {
 	f(from, to)
 }
 
-// 从区间 [fromStart, fromEnd) 中的每个点到 to 都添加一条边.
+// 从路径 [fromStart, fromEnd] 中的每个点到 to 都添加一条边.
 func (g *RangeToRangeGraphOnTree) AddFromRange(fromStart, fromEnd, to int32, f func(from, to int32)) {
-	to += g.offset
-	g.enumerateJumpDangerously(fromStart, to, func(id int32) { f(id, to) })
+	g.enumerateJumpDangerously(fromStart, fromEnd, func(id int32) { f(id, to+g.offset) })
 }
 
-// 从 from 到区间 [toStart, toEnd) 中的每个点都添加一条边.
+// 从 from 到路径 [toStart, toEnd] 中的每个点都添加一条边.
 func (g *RangeToRangeGraphOnTree) AddToRange(from, toStart, toEnd int32, f func(from, to int32)) {
 	g.enumerateJumpDangerously(toStart, toEnd, func(id int32) { f(from, id+g.offset) })
 }
 
-// 从区间 [fromStart, fromEnd) 中的每个点到 [toStart, toEnd) 中的每个点都添加一条边.
+// 从路径 [fromStart, fromEnd] 中的每个点到 [toStart, toEnd] 中的每个点都添加一条边.
 func (g *RangeToRangeGraphOnTree) AddRangeToRange(fromStart, fromEnd, toStart, toEnd int32, f func(from, to int32)) {
 	from, to := make([]int32, 0, 2), make([]int32, 0, 2)
 	g.enumerateJumpDangerously(fromStart, fromEnd, func(id int32) { from = append(from, id) })
@@ -400,6 +403,44 @@ func (g *RangeToRangeGraphOnTree) upToDepth(root, toDepth int32) int32 {
 		}
 	}
 	return root
+}
+
+func (g *RangeToRangeGraphOnTree) jumpFn(start, target, step int32) int32 {
+	lca_ := g.lca(start, target)
+	dep1, dep2, deplca := g.depth[start], g.depth[target], g.depth[lca_]
+	dist := dep1 + dep2 - 2*deplca
+	if step > dist {
+		return -1
+	}
+	if step <= dep1-deplca {
+		return g.kthAncestor(start, step)
+	}
+	return g.kthAncestor(target, dist-step)
+}
+
+func SplitPathByJumpFn(
+	from, to, separator int32,
+	jumpFn func(start, target, step int32) int32,
+) (from1, to1, from2, to2 int32) {
+	from1, to1, from2, to2 = -1, -1, -1, -1
+	if from == to {
+		return
+	}
+	if separator == from {
+		from2 = jumpFn(from, to, 1)
+		to2 = to
+		return
+	}
+	if separator == to {
+		from1 = from
+		to1 = jumpFn(to, from, 1)
+		return
+	}
+	from1 = from
+	to1 = jumpFn(separator, from, 1)
+	from2 = jumpFn(separator, to, 1)
+	to2 = to
+	return
 }
 
 type UnionFindArraySimple32 struct {
