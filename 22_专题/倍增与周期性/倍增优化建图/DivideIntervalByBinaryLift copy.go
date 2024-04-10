@@ -137,23 +137,30 @@ func main() {
 		addEdge(p+size, c1+size, 0)
 		addEdge(p+size, c2+size, 0)
 	})
-	for i := int32(0); i < n-1; i++ {
+	for i := int32(0); i < n; i++ {
+		// to[u][0]=fa;in[u][0]=out[u][0]=u;
 		offset := 2 * size
-		p, c1, c2 := i, i+offset, i+offset+1
+		p, c1, c2 := i, i+offset, i+offset
+		// 反向连接
+		// addEdge(p, c1, 0)
+		// addEdge(p, c2, 0)
+		// addEdge(c1, p+size, 0)
+		// addEdge(c2, p+size, 0)
 		addEdge(c1, p, 0)
 		addEdge(c2, p, 0)
 		addEdge(p+size, c1, 0)
 		addEdge(p+size, c2, 0)
+
 	}
 
 	// !2.区间入点和区间出点之间相互连边.
 	addRangeToRange := func(u1, v1, u2, v2, w int32) {
 		from, to := make([]int32, 0, 2), make([]int32, 0, 2)
-		D.EnumerateRange(u1, v1, func(level, index int32) {
+		D.EnumerateRangeDangerously(u1, v1, func(level, index int32) {
 			id := level*n + index
 			from = append(from, id)
 		})
-		D.EnumerateRange(u2, v2, func(level, index int32) {
+		D.EnumerateRangeDangerously(u2, v2, func(level, index int32) {
 			id := (level*n + index) + size
 			to = append(to, id)
 		})
@@ -167,7 +174,7 @@ func main() {
 	addRangeToRange(0, 2, 2, 4, 1)
 	addRangeToRange(2, 4, 0, 2, 1)
 
-	dist := Dijkstra(int32(len(newGraph)), newGraph, 0+2*size)
+	dist := Dijkstra(int32(len(newGraph)), newGraph, 3+2*size)
 	fmt.Println(dist)
 	for i := int32(0); i < n; i++ {
 		d := dist[i+2*size] // !出点

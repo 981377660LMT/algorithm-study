@@ -47,7 +47,7 @@ func P5344() {
 	}
 
 	uf := NewUnionFindArraySimple32(n)
-	valid := make([]bool, q) // 每个1操作是否有效
+	valid := make([]bool, q) // 每个操作是否有效
 	tree := make([][]int32, n)
 	for i := int32(0); i < q; i++ {
 		op := &operations[i]
@@ -105,7 +105,7 @@ type RangeToRangeGraphOnTree struct {
 	jump           [][]int32 // 节点j向上跳2^i步的父节点
 }
 
-// root为-1.
+// root为-1表示无根.
 func NewRangeToRangeGraphOnTree(tree [][]int32, root int32) *RangeToRangeGraphOnTree {
 	n := int32(len(tree))
 	depth := make([]int32, n)
@@ -198,16 +198,18 @@ func (g *RangeToRangeGraphOnTree) makeDp() {
 
 func (g *RangeToRangeGraphOnTree) dfsAndInitDp(cur, pre int32, f func(from, to int32)) {
 	g.jump[0][cur] = pre
+	// push down jump(0,next) to origin node.
+	in := g.n + cur
+	out := in + g.offset
+	f(cur, in)
+	f(out, cur)
+	// if pre != -1 {
+	// 	f(pre, in)
+	// 	f(out, pre)
+	// }
 	for _, next := range g.tree[cur] {
 		if next != pre {
 			g.depth[next] = g.depth[cur] + 1
-			// push down jump(0,next) to origin node.
-			in := g.n + cur
-			out := in + g.offset
-			f(next, in)
-			f(cur, in)
-			f(out, next)
-			f(out, cur)
 			g.dfsAndInitDp(next, cur, f)
 		}
 	}

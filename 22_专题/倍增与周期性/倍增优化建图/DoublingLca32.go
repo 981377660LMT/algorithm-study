@@ -76,13 +76,13 @@ func P5344() {
 	// !每个jump拆分成入点和出点，最后pushDown时，入点从儿子向父亲连边，出点从父亲向儿子连边.
 	D := NewDoublingLca32(tree, -1)
 	size := D.Size()
-	newGraph := make([][]Neighbor, n+size*2) // 底层真实点：[0,n)，倍增入点：[n,n+size)，倍增出点：[n+size,n+2*size).
+	newGraph := make([][]Neighbour, n+size*2) // 底层真实点：[0,n)，倍增入点：[n,n+size)，倍增出点：[n+size,n+2*size).
 
-	rev := func(u int32) int32 {
+	// rev := func(u int32) int32 {
 
-	}
+	// }
 	addEdge := func(from, to, w int32) {
-		newGraph[from] = append(newGraph[from], Neighbor{to, w})
+		newGraph[from] = append(newGraph[from], Neighbour{to, w})
 	}
 
 	// !1.倍增子结点的入点向上连接到父结点的入点，父结点的出点向下连接到子结点的出点.
@@ -134,7 +134,7 @@ func P5344() {
 		}
 	}
 
-	dist := Dijkstra(int32(len(newGraph)), newGraph, start)
+	dist := DijkstraSiftHeap1(int32(len(newGraph)), newGraph, start)
 	for i := int32(0); i < n; i++ {
 		d := dist[i+size] // !出点
 		if d == INF {
@@ -844,128 +844,6 @@ func (h *SiftHeap32) _siftDown(i int32) {
 	}
 	h.pos[i] = curPos
 	h.heap[curPos] = i
-}
-
-type Neighbor struct {
-	to, weight int32
-}
-
-func Dijkstra(n int32, adjList [][]Neighbor, start int32) (dist []int) {
-	dist = make([]int, n)
-	for i := range dist {
-		dist[i] = INF
-	}
-	dist[start] = 0
-
-	pq := nhp(func(a, b H) int {
-		return a.dist - b.dist
-	}, []H{{start, 0}})
-
-	for pq.Len() > 0 {
-		curNode := pq.Pop()
-		cur, curDist := curNode.node, curNode.dist
-		if curDist > dist[cur] {
-			continue
-		}
-
-		for _, edge := range adjList[cur] {
-			next, weight := edge.to, edge.weight
-			if cand := curDist + int(weight); cand < dist[next] {
-				dist[next] = cand
-				pq.Push(H{next, cand})
-			}
-		}
-	}
-
-	return
-}
-
-type H = struct {
-	node int32
-	dist int
-}
-
-// Should return a number:
-//
-//	negative , if a < b
-//	zero     , if a == b
-//	positive , if a > b
-type Comparator func(a, b H) int
-
-func nhp(comparator Comparator, nums []H) *Heap {
-	nums = append(nums[:0:0], nums...)
-	heap := &Heap{comparator: comparator, data: nums}
-	heap.heapify()
-	return heap
-}
-
-type Heap struct {
-	data       []H
-	comparator Comparator
-}
-
-func (h *Heap) Push(value H) {
-	h.data = append(h.data, value)
-	h.pushUp(h.Len() - 1)
-}
-
-func (h *Heap) Pop() (value H) {
-	if h.Len() == 0 {
-		return
-	}
-
-	value = h.data[0]
-	h.data[0] = h.data[h.Len()-1]
-	h.data = h.data[:h.Len()-1]
-	h.pushDown(0)
-	return
-}
-
-func (h *Heap) Peek() (value H) {
-	if h.Len() == 0 {
-		return
-	}
-	value = h.data[0]
-	return
-}
-
-func (h *Heap) Len() int { return len(h.data) }
-
-func (h *Heap) heapify() {
-	n := h.Len()
-	for i := (n >> 1) - 1; i > -1; i-- {
-		h.pushDown(i)
-	}
-}
-
-func (h *Heap) pushUp(root int) {
-	for parent := (root - 1) >> 1; parent >= 0 && h.comparator(h.data[root], h.data[parent]) < 0; parent = (root - 1) >> 1 {
-		h.data[root], h.data[parent] = h.data[parent], h.data[root]
-		root = parent
-	}
-}
-
-func (h *Heap) pushDown(root int) {
-	n := h.Len()
-	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
-		right := left + 1
-		minIndex := root
-
-		if h.comparator(h.data[left], h.data[minIndex]) < 0 {
-			minIndex = left
-		}
-
-		if right < n && h.comparator(h.data[right], h.data[minIndex]) < 0 {
-			minIndex = right
-		}
-
-		if minIndex == root {
-			return
-		}
-
-		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
-		root = minIndex
-	}
 }
 
 func test() {
