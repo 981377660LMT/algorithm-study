@@ -20,6 +20,7 @@ import (
 	"bufio"
 	"fmt"
 	"math/bits"
+	"math/rand"
 	"os"
 )
 
@@ -123,63 +124,102 @@ func main() {
 	// P3295()
 	// demo()
 
-	n := int32(4)
-	D := NewDivideIntervalByBinaryLift(n)
-	size := D.Size()
-	newGraph := make([][]Neighbor, size*2+n) // 入点：[0,size)，出点：[size,2*size), 实际的底层结点：[2*size,2*size+n)
-	addEdge := func(from, to, w int32) {
-		newGraph[from] = append(newGraph[from], Neighbor{to, w})
-	}
-	D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
-		p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
-		addEdge(c1, p, 0)
-		addEdge(c2, p, 0)
-		addEdge(p+size, c1+size, 0)
-		addEdge(p+size, c2+size, 0)
-	})
-	for i := int32(0); i < n; i++ {
-		// to[u][0]=fa;in[u][0]=out[u][0]=u;
-		offset := 2 * size
-		p, c1, c2 := i, i+offset, i+offset
-		// 反向连接
-		// addEdge(p, c1, 0)
-		// addEdge(p, c2, 0)
-		// addEdge(c1, p+size, 0)
-		// addEdge(c2, p+size, 0)
-		addEdge(c1, p, 0)
-		addEdge(c2, p, 0)
-		addEdge(p+size, c1, 0)
-		addEdge(p+size, c2, 0)
-
-	}
-
-	// !2.区间入点和区间出点之间相互连边.
-	addRangeToRange := func(u1, v1, u2, v2, w int32) {
-		from, to := make([]int32, 0, 2), make([]int32, 0, 2)
-		D.EnumerateRangeDangerously(u1, v1, func(level, index int32) {
-			id := level*n + index
-			from = append(from, id)
+	solve := func(n int32, rangeToRangeInfo [][5]int32, start int32) []int {
+		D := NewDivideIntervalByBinaryLift(n)
+		size := D.Size()
+		newGraph := make([][]Neighbor, size*2+n) // 入点：[0,size)，出点：[size,2*size), 实际的底层结点：[2*size,2*size+n)
+		addEdge := func(from, to, w int32) {
+			newGraph[from] = append(newGraph[from], Neighbor{to, w})
+		}
+		D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
+			p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
+			addEdge(c1, p, 0)
+			addEdge(c2, p, 0)
+			addEdge(p+size, c1+size, 0)
+			addEdge(p+size, c2+size, 0)
 		})
-		D.EnumerateRangeDangerously(u2, v2, func(level, index int32) {
-			id := (level*n + index) + size
-			to = append(to, id)
-		})
-		for _, a := range from {
-			for _, b := range to {
-				addEdge(a, b, w)
+
+		for i := int32(0); i < n; i++ {
+			// to[u][0]=fa;in[u][0]=out[u][0]=u;
+			offset := 2 * size
+			p, c := i, i+offset
+			addEdge(c, p, 0)
+			addEdge(p+size, c, 0)
+		}
+
+		// !2.区间入点和区间出点之间相互连边.
+		addRangeToRange := func(u1, v1, u2, v2, w int32) {
+			from, to := make([]int32, 0, 2), make([]int32, 0, 2)
+			D.EnumerateRangeDangerously(u1, v1, func(level, index int32) {
+				id := level*n + index
+				from = append(from, id)
+			})
+			D.EnumerateRangeDangerously(u2, v2, func(level, index int32) {
+				id := (level*n + index) + size
+				to = append(to, id)
+			})
+			for _, a := range from {
+				for _, b := range to {
+					addEdge(a, b, w)
+				}
 			}
+		}
+
+		for _, info := range rangeToRangeInfo {
+			start1, end1, start2, end2, w := info[0], info[1], info[2], info[3], info[4]
+			addRangeToRange(start1, end1, start2, end2, w)
+		}
+
+		dist := Dijkstra(int32(len(newGraph)), newGraph, start+2*size)
+		res := make([]int, n)
+		for i := int32(0); i < n; i++ {
+			res[i] = dist[i+2*size]
+		}
+		return res
+	}
+
+	bruteForce := func(n int32, rangeToRangeInfo [][5]int32, start int32) []int {
+		adjList := make([][]Neighbor, n)
+		for _, info := range rangeToRangeInfo {
+			start1, end1, start2, end2, w := info[0], info[1], info[2], info[3], info[4]
+			for i := start1; i < end1; i++ {
+				for j := start2; j < end2; j++ {
+					adjList[i] = append(adjList[i], Neighbor{j, w})
+				}
+			}
+		}
+
+		dist := Dijkstra(n, adjList, start)
+		return dist
+	}
+
+	n := int32(rand.Intn(10000)) + 1
+	m := int32(rand.Intn(5)) + 1
+	rangeToRangeInfo := make([][5]int32, 0, m)
+	for i := int32(0); i < m; i++ {
+		start1, end1 := int32(rand.Intn(int(n))), int32(rand.Intn(int(n)))+1
+		start2, end2 := int32(rand.Intn(int(n))), int32(rand.Intn(int(n)))+1
+		if start1 > end1 {
+			start1, end1 = end1, start1
+		}
+		if start2 > end2 {
+			start2, end2 = end2, start2
+		}
+		w := int32(rand.Intn(100) + 1)
+		rangeToRangeInfo = append(rangeToRangeInfo, [5]int32{start1, end1, start2, end2, w})
+	}
+
+	start := int32(rand.Intn(int(n)))
+	res1 := solve(n, rangeToRangeInfo, start)
+	res2 := bruteForce(n, rangeToRangeInfo, start)
+	for i := range res1 {
+		if res1[i] != res2[i] {
+			fmt.Println("not equal")
+			return
 		}
 	}
 
-	addRangeToRange(0, 2, 2, 4, 1)
-	addRangeToRange(2, 4, 0, 2, 1)
-
-	dist := Dijkstra(int32(len(newGraph)), newGraph, 3+2*size)
-	fmt.Println(dist)
-	for i := int32(0); i < n; i++ {
-		d := dist[i+2*size] // !出点
-		fmt.Println(d)
-	}
+	fmt.Println("pass", n, len(rangeToRangeInfo), start)
 }
 
 func demo() {
