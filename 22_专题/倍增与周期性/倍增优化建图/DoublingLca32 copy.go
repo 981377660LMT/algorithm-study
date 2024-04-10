@@ -27,9 +27,6 @@ func main() {
 // 1 u1 v1 u2 v2 w : 路径u1v1上所有结点可以花费w的代价到达路径u2v2上的所有结点，如果路径不连通则无效。
 // 2 u v w：结点u和v之间连接一条费用为w的无向边.如果u和v之间已经有边，则无效.
 // 最后求从结点s出发，到每个节点的最小花费.
-//
-// 1. 倍增上的一段路径拆分成两个jump.
-// !2.每个jump拆分成入点和出点，最后pushDown时，入点从儿子向父亲连边，出点从父亲向儿子连边.
 func P5344() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -73,31 +70,16 @@ func P5344() {
 		}
 	}
 
-	// !每个jump拆分成入点和出点，最后pushDown时，入点从儿子向父亲连边，出点从父亲向儿子连边.
 	D := NewDoublingLca32(tree, -1)
 	size := D.Size()
-	newGraph := make([][]Neighbor, n+size*2) // 底层真实点：[0,n)，倍增入点：[n,n+size)，倍增出点：[n+size,n+2*size).
-
-	rev := func(u int32) int32 {
-
-	}
+	newGraph := make([][]Neighbor, size*2) // 入点：[0,size)，出点：[size,2*size).
 	addEdge := func(from, to, w int32) {
 		newGraph[from] = append(newGraph[from], Neighbor{to, w})
 	}
 
-	// !1.倍增子结点的入点向上连接到父结点的入点，父结点的出点向下连接到子结点的出点.
-	//    注意倍增点jump(0,v)需要下推到真实点v和jump(0,v).
-	D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
-		p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
-		addEdge(c1, p, 0)
-		addEdge(c2, p, 0)
-		addEdge(p+size, c1+size, 0)
-		addEdge(p+size, c2+size, 0)
-	})
-
 	// !1.同一个点的入点和出点之间相互连边.
 	for i := int32(0); i < n; i++ {
-		addEdge(i, i+size, 0)
+		// addEdge(i, i+size, 0)
 		addEdge(i+size, i, 0)
 	}
 
@@ -133,6 +115,15 @@ func P5344() {
 			addEdge(v, u+size, w)
 		}
 	}
+
+	// !3.子结点的入点向上连接到父结点的入点，父结点的出点向下连接到子结点的出点.
+	D.PushDown(func(pLevel, pIndex, cLevel, cIndex1, cIndex2 int32) {
+		p, c1, c2 := pLevel*n+pIndex, cLevel*n+cIndex1, cLevel*n+cIndex2
+		addEdge(c1, p, 0)
+		addEdge(c2, p, 0)
+		addEdge(p+size, c1+size, 0)
+		addEdge(p+size, c2+size, 0)
+	})
 
 	dist := Dijkstra(int32(len(newGraph)), newGraph, start)
 	for i := int32(0); i < n; i++ {
@@ -719,131 +710,6 @@ func (u *UnionFindArraySimple32) Find(key int32) int32 {
 
 func (u *UnionFindArraySimple32) GetSize(key int32) int32 {
 	return -u.data[u.Find(key)]
-}
-
-// 采用SiftHeap加速的dijkstra算法.求出起点到各点的最短距离.
-type Neighbour struct {
-	next   int32
-	weight int32
-}
-
-func DijkstraSiftHeap1(n int32, graph [][]Neighbour, start int32) []int {
-	dist := make([]int, n)
-	for i := int32(0); i < n; i++ {
-		dist[i] = INF
-	}
-	pq := NewSiftHeap32(n, func(i, j int32) bool { return dist[i] < dist[j] })
-	dist[start] = 0
-	pq.Push(start)
-	for pq.Size() > 0 {
-		cur := pq.Pop()
-		for _, e := range graph[cur] {
-			next, weight := e.next, e.weight
-			cand := dist[cur] + int(weight)
-			if cand < dist[next] {
-				dist[next] = cand
-				pq.Push(next)
-			}
-		}
-	}
-	return dist
-}
-
-type SiftHeap32 struct {
-	heap []int32
-	pos  []int32
-	less func(i, j int32) bool
-	ptr  int32
-}
-
-func NewSiftHeap32(n int32, less func(i, j int32) bool) *SiftHeap32 {
-	pos := make([]int32, n)
-	for i := int32(0); i < n; i++ {
-		pos[i] = -1
-	}
-	return &SiftHeap32{
-		heap: make([]int32, n),
-		pos:  pos,
-		less: less,
-	}
-}
-
-func (h *SiftHeap32) Push(i int32) {
-	if h.pos[i] == -1 {
-		h.pos[i] = h.ptr
-		h.heap[h.ptr] = i
-		h.ptr++
-	}
-	h._siftUp(i)
-}
-
-// 如果不存在,则返回-1.
-func (h *SiftHeap32) Pop() int32 {
-	if h.ptr == 0 {
-		return -1
-	}
-	res := h.heap[0]
-	h.pos[res] = -1
-	h.ptr--
-	ptr := h.ptr
-	if ptr > 0 {
-		tmp := h.heap[ptr]
-		h.pos[tmp] = 0
-		h.heap[0] = tmp
-		h._siftDown(tmp)
-	}
-	return res
-}
-
-// 如果不存在,则返回-1.
-func (h *SiftHeap32) Peek() int32 {
-	if h.ptr == 0 {
-		return -1
-	}
-	return h.heap[0]
-}
-
-func (h *SiftHeap32) Size() int32 {
-	return h.ptr
-}
-
-func (h *SiftHeap32) _siftUp(i int32) {
-	curPos := h.pos[i]
-	p := int32(0)
-	for curPos != 0 {
-		p = h.heap[(curPos-1)>>1]
-		if !h.less(i, p) {
-			break
-		}
-		h.pos[p] = curPos
-		h.heap[curPos] = p
-		curPos = (curPos - 1) >> 1
-	}
-	h.pos[i] = curPos
-	h.heap[curPos] = i
-}
-
-func (h *SiftHeap32) _siftDown(i int32) {
-	curPos := h.pos[i]
-	c := int32(0)
-	for {
-		c = (curPos << 1) | 1
-		if c >= h.ptr {
-			break
-		}
-		if c+1 < h.ptr && h.less(h.heap[c+1], h.heap[c]) {
-			c++
-		}
-		if !h.less(h.heap[c], i) {
-			break
-		}
-		tmp := h.heap[c]
-		h.heap[curPos] = tmp
-		h.pos[tmp] = curPos
-		curPos = c
-	}
-	h.pos[i] = curPos
-	h.heap[curPos] = i
 }
 
 type Neighbor struct {
