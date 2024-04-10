@@ -121,6 +121,7 @@ func NewRangeToRangeGraphOnTree(tree [][]int32, root int32) *RangeToRangeGraphOn
 }
 
 // 建立内部连接.
+// TODO: 这里有问题，还是对拍??
 func (g *RangeToRangeGraphOnTree) Init(f func(from, to int32)) {
 	g.makeDp()
 	if g.root == -1 {
