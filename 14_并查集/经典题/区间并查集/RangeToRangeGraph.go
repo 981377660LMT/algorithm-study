@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-const INF WeightType = 1e18
+const INF int = 1e18
 
 func main() {
 	CF786B()
@@ -26,36 +26,43 @@ func CF786B() {
 	var n, q, start int32
 	fmt.Fscan(in, &n, &q, &start)
 	start--
-	G := NewRangeToRangeGraph(n)
+	G := NewRangeToRangeGraph(n, 0)
+	newGraph := make([][]neighbor, G.Size())
+	G.Init(func(from, to int32) { newGraph[from] = append(newGraph[from], neighbor{to, 0}) })
 	for i := int32(0); i < q; i++ {
 		var op int32
 		fmt.Fscan(in, &op)
 		if op == 1 {
 			var from, to int32
-			var weight WeightType
+			var weight int32
 			fmt.Fscan(in, &from, &to, &weight)
 			from--
 			to--
-			G.Add(from, to, weight)
+			G.Add(from, to, func(from, to int32) {
+				newGraph[from] = append(newGraph[from], neighbor{to, weight})
+			})
 		} else if op == 2 {
 			var from, l, r int32
-			var weight WeightType
+			var weight int32
 			fmt.Fscan(in, &from, &l, &r, &weight)
 			from--
 			l--
-			G.AddToRange(from, l, r, weight)
+			G.AddToRange(from, l, r, func(from, to int32) {
+				newGraph[from] = append(newGraph[from], neighbor{to, weight})
+			})
 		} else if op == 3 {
 			var to, l, r int32
-			var weight WeightType
+			var weight int32
 			fmt.Fscan(in, &to, &l, &r, &weight)
 			to--
 			l--
-			G.AddFromRange(l, r, to, weight)
+			G.AddFromRange(l, r, to, func(from, to int32) {
+				newGraph[from] = append(newGraph[from], neighbor{to, weight})
+			})
 		}
 	}
 
-	newGraph, size := G.Build()
-	res := DijkstraInt32(size, newGraph, start)
+	res := DijkstraSiftHeap1(int32(len(newGraph)), newGraph, start)
 	for i := int32(0); i < n; i++ {
 		fmt.Fprint(out, res[i], " ")
 	}
@@ -78,13 +85,18 @@ func yuki1868() {
 		targets[i]-- // [0,n-1]内
 	}
 
-	R := NewRangeToRangeGraph(n)
+	R := NewRangeToRangeGraph(n, 0)
+	adjList := make([][]neighbor, R.Size())
+	R.Init(func(from, to int32) {
+		adjList[from] = append(adjList[from], neighbor{to, 0})
+	})
 	for i := int32(0); i < n-1; i++ {
-		R.AddToRange(i, i+1, targets[i]+1, 1) // 左闭右开
+		R.AddToRange(i, i+1, targets[i]+1, func(from, to int32) {
+			adjList[from] = append(adjList[from], neighbor{to, 1})
+		})
 	}
-	adjList, newN := R.Build()
 
-	dist, queue := make([]WeightType, newN), NewDeque(newN)
+	dist, queue := make([]int, int32(len(adjList))), NewDeque(int32(len(adjList)))
 	for i := range dist {
 		dist[i] = INF
 	}
@@ -95,8 +107,8 @@ func yuki1868() {
 		nexts := adjList[cur]
 		for i := 0; i < len(nexts); i++ {
 			e := &nexts[i]
-			next, weight := e.to, e.weight
-			cand := dist[cur] + weight
+			next, weight := e.next, e.weight
+			cand := dist[cur] + int(weight)
 			if cand < dist[next] {
 				dist[next] = cand
 				if weight == 0 {
@@ -114,17 +126,21 @@ func yuki1868() {
 func jump(nums []int) int {
 	// 45. 跳跃游戏 II
 	// https://leetcode.cn/problems/jump-game-ii/
-	n := len(nums)
-	G := NewRangeToRangeGraph(int32(n))
-	for i := 0; i < n; i++ {
-		G.AddToRange(int32(i), int32(i+1), min32(int32(i+nums[i]+1), int32(n)), 1)
+	n := int32(len(nums))
+	G := NewRangeToRangeGraph(int32(n), 0)
+	adjList := make([][]neighbor, G.Size())
+	G.Init(func(from, to int32) { adjList[from] = append(adjList[from], neighbor{to, 0}) })
+	for i := int32(0); i < n; i++ {
+		G.AddToRange(i, i+1, min32(i+1+int32(nums[i]), n), func(from, to int32) {
+			adjList[from] = append(adjList[from], neighbor{to, 1})
+		})
 	}
-	adjList, _ := G.Build()
-	bfs := func(start int32, adjList [][]neighbor) []WeightType {
+
+	bfs := func(start int32, adjList [][]neighbor) []int32 {
 		n := len(adjList)
-		dist := make([]WeightType, n)
+		dist := make([]int32, n)
 		for i := 0; i < n; i++ {
-			dist[i] = INF
+			dist[i] = 1e9
 		}
 		dist[start] = 0
 		queue := []int32{start}
@@ -134,108 +150,94 @@ func jump(nums []int) int {
 			nexts := adjList[cur]
 			for i := 0; i < len(nexts); i++ {
 				e := &nexts[i]
-				next, weight := e.to, e.weight
-				cand := dist[cur] + weight
+				next, weight := e.next, e.weight
+				cand := dist[cur] + int32(weight)
 				if cand < dist[next] {
 					dist[next] = cand
 					queue = append(queue, next)
 				}
 			}
 		}
-
 		return dist
 	}
 	dist := bfs(0, adjList)
 	return int(dist[n-1])
 }
 
-type WeightType = int
-type edge struct {
-	from, to int32
-	weight   WeightType
-}
-type neighbor struct {
-	to     int32
-	weight WeightType
-}
-
 type RangeToRangeGraph struct {
-	n     int32
-	nNode int32
-	edges []edge
+	n        int32
+	maxSize  int32
+	allocPtr int32
 }
 
-func NewRangeToRangeGraph(n int32) *RangeToRangeGraph {
+// 新建一个区间图，n 为原图的节点数，rangeToRangeOpCount 为区间到区间的最大操作次数.
+// 最后得到的新图的节点数为 n*3 + rangeToRangeOpCount，前n个节点为原图的节点。
+func NewRangeToRangeGraph(n int32, rangeToRangeOpCount int32) *RangeToRangeGraph {
 	g := &RangeToRangeGraph{
-		n:     n,
-		nNode: n * 3,
-	}
-	for i := int32(2); i < n+n; i++ {
-		g.edges = append(g.edges, edge{from: g.toUpperIdx(i / 2), to: g.toUpperIdx(i), weight: 0})
-	}
-	for i := int32(2); i < n+n; i++ {
-		g.edges = append(g.edges, edge{from: g.toLowerIdx(i), to: g.toLowerIdx(i / 2), weight: 0})
+		n:        n,
+		maxSize:  n*3 + rangeToRangeOpCount,
+		allocPtr: n * 3,
 	}
 	return g
 }
 
-// 添加有向边 from -> to, 权重为 weight.
-func (g *RangeToRangeGraph) Add(from, to int32, weight WeightType) {
-	g.edges = append(g.edges, edge{from: from, to: to, weight: weight})
+func (g *RangeToRangeGraph) Init(f func(from, to int32)) {
+	n := g.n
+	for i := int32(2); i < n+n; i++ {
+		f(g.toUpperIdx(i>>1), g.toUpperIdx(i))
+		f(g.toLowerIdx(i), g.toLowerIdx(i>>1))
+	}
 }
 
-// 从区间 [fromStart, fromEnd) 中的每个点到 to 都添加一条有向边，权重为 weight.
-func (g *RangeToRangeGraph) AddFromRange(fromStart, fromEnd, to int32, weight WeightType) {
-	l, r := int32(fromStart)+g.n, int32(fromEnd)+g.n
+// 添加有向边 from -> to.
+func (g *RangeToRangeGraph) Add(from, to int32, f func(from, to int32)) {
+	f(from, to)
+}
+
+// 从区间 [fromStart, fromEnd) 中的每个点到 to 都添加一条有向边.
+func (g *RangeToRangeGraph) AddFromRange(fromStart, fromEnd, to int32, f func(from, to int32)) {
+	l, r := fromStart+g.n, fromEnd+g.n
 	for l < r {
 		if l&1 == 1 {
-			g.Add(g.toLowerIdx(l), to, weight)
+			f(g.toLowerIdx(l), to)
 			l++
 		}
 		if r&1 == 1 {
 			r--
-			g.Add(g.toLowerIdx(r), to, weight)
+			f(g.toLowerIdx(r), to)
 		}
 		l >>= 1
 		r >>= 1
 	}
 }
 
-// 从 from 到区间 [toStart, toEnd) 中的每个点都添加一条有向边，权重为 weight.
-func (g *RangeToRangeGraph) AddToRange(from, toStart, toEnd int32, weight WeightType) {
-	l, r := int32(toStart)+g.n, int32(toEnd)+g.n
+// 从 from 到区间 [toStart, toEnd) 中的每个点都添加一条有向边.
+func (g *RangeToRangeGraph) AddToRange(from, toStart, toEnd int32, f func(from, to int32)) {
+	l, r := toStart+g.n, toEnd+g.n
 	for l < r {
 		if l&1 == 1 {
-			g.Add(from, g.toUpperIdx(l), weight)
+			f(from, g.toUpperIdx(l))
 			l++
 		}
 		if r&1 == 1 {
 			r--
-			g.Add(from, g.toUpperIdx(r), weight)
+			f(from, g.toUpperIdx(r))
 		}
 		l >>= 1
 		r >>= 1
 	}
 }
 
-// 从区间 [fromStart, fromEnd) 中的每个点到区间 [toStart, toEnd) 中的每个点都添加一条有向边，权重为 weight.
-func (g *RangeToRangeGraph) AddRangeToRange(fromStart, fromEnd, toStart, toEnd int32, weight WeightType) {
-	newNode := g.nNode
-	g.nNode++
-	g.AddFromRange(fromStart, fromEnd, newNode, weight)
-	g.AddToRange(newNode, toStart, toEnd, 0)
+// 从区间 [fromStart, fromEnd) 中的每个点到区间 [toStart, toEnd) 中的每个点都添加一条有向边.
+func (g *RangeToRangeGraph) AddRangeToRange(fromStart, fromEnd, toStart, toEnd int32, f func(from, to int32)) {
+	newNode := g.allocPtr
+	g.allocPtr++
+	g.AddFromRange(fromStart, fromEnd, newNode, f)
+	g.AddToRange(newNode, toStart, toEnd, f)
 }
 
-// 返回`新图的有向邻接表和新图的节点数`.
-func (g *RangeToRangeGraph) Build() (graph [][]neighbor, vertex int32) {
-	graph = make([][]neighbor, g.nNode)
-	for i := 0; i < len(g.edges); i++ {
-		e := &g.edges[i]
-		u, v, w := e.from, e.to, e.weight
-		graph[u] = append(graph[u], neighbor{v, w})
-	}
-	return graph, g.nNode
-}
+// 新图的结点数.
+func (g *RangeToRangeGraph) Size() int32 { return g.maxSize }
 
 func (g *RangeToRangeGraph) toUpperIdx(i int32) int32 {
 	if i >= g.n {
@@ -312,32 +314,33 @@ func (q Deque) At(i int) D {
 	return q.r[i-len(q.l)]
 }
 
-// 如果不存在则返回 -1.
-func DijkstraInt32(n int32, graph [][]neighbor, start int32) []WeightType {
-	pq := NewHeap(func(a, b H) bool { return a.dist < b.dist }, []H{{0, start}})
-	dist := make([]WeightType, n)
-	for i := range dist {
+// 采用SiftHeap加速的dijkstra算法.求出起点到各点的最短距离.
+type neighbor struct {
+	next   int32
+	weight int32
+}
+
+// 不存在则返回-1.
+func DijkstraSiftHeap1(n int32, graph [][]neighbor, start int32) []int {
+	dist := make([]int, n)
+	for i := int32(0); i < n; i++ {
 		dist[i] = INF
 	}
+	pq := NewSiftHeap32(n, func(i, j int32) bool { return dist[i] < dist[j] })
 	dist[start] = 0
-	for pq.Len() > 0 {
+	pq.Push(start)
+	for pq.Size() > 0 {
 		cur := pq.Pop()
-		curDist, curNode := cur.dist, cur.node
-		if curDist > dist[curNode] {
-			continue
-		}
-		nexts := graph[curNode]
-		for i := 0; i < len(nexts); i++ {
-			e := &nexts[i]
-			next, weight := e.to, e.weight
-			if tmp := curDist + weight; tmp < dist[next] {
-				dist[next] = tmp
-				pq.Push(H{tmp, next})
+		for _, e := range graph[cur] {
+			next, weight := e.next, e.weight
+			cand := dist[cur] + int(weight)
+			if cand < dist[next] {
+				dist[next] = cand
+				pq.Push(next)
 			}
-
 		}
 	}
-	for i := range dist {
+	for i := int32(0); i < n; i++ {
 		if dist[i] == INF {
 			dist[i] = -1
 		}
@@ -345,78 +348,103 @@ func DijkstraInt32(n int32, graph [][]neighbor, start int32) []WeightType {
 	return dist
 }
 
-type H = struct {
-	dist WeightType
-	node int32
+type SiftHeap32 struct {
+	heap []int32
+	pos  []int32
+	less func(i, j int32) bool
+	ptr  int32
 }
 
-func NewHeap(less func(a, b H) bool, nums []H) *Heap {
-	nums = append(nums[:0:0], nums...)
-	heap := &Heap{less: less, data: nums}
-	heap.heapify()
-	return heap
-}
-
-type Heap struct {
-	data []H
-	less func(a, b H) bool
-}
-
-func (h *Heap) Push(value H) {
-	h.data = append(h.data, value)
-	h.pushUp(h.Len() - 1)
-}
-
-func (h *Heap) Pop() (value H) {
-	if h.Len() == 0 {
-		panic("heap is empty")
+func NewSiftHeap32(n int32, less func(i, j int32) bool) *SiftHeap32 {
+	pos := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		pos[i] = -1
 	}
-	value = h.data[0]
-	h.data[0] = h.data[h.Len()-1]
-	h.data = h.data[:h.Len()-1]
-	h.pushDown(0)
-	return
-}
-
-func (h *Heap) Top() (value H) {
-	value = h.data[0]
-	return
-}
-
-func (h *Heap) Len() int { return len(h.data) }
-
-func (h *Heap) heapify() {
-	n := h.Len()
-	for i := (n >> 1) - 1; i > -1; i-- {
-		h.pushDown(i)
+	return &SiftHeap32{
+		heap: make([]int32, n),
+		pos:  pos,
+		less: less,
 	}
 }
 
-func (h *Heap) pushUp(root int) {
-	for parent := (root - 1) >> 1; parent >= 0 && h.less(h.data[root], h.data[parent]); parent = (root - 1) >> 1 {
-		h.data[root], h.data[parent] = h.data[parent], h.data[root]
-		root = parent
+func (h *SiftHeap32) Push(i int32) {
+	if h.pos[i] == -1 {
+		h.pos[i] = h.ptr
+		h.heap[h.ptr] = i
+		h.ptr++
 	}
+	h._siftUp(i)
 }
 
-func (h *Heap) pushDown(root int) {
-	n := h.Len()
-	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
-		right := left + 1
-		minIndex := root
-		if h.less(h.data[left], h.data[minIndex]) {
-			minIndex = left
+// 如果不存在,则返回-1.
+func (h *SiftHeap32) Pop() int32 {
+	if h.ptr == 0 {
+		return -1
+	}
+	res := h.heap[0]
+	h.pos[res] = -1
+	h.ptr--
+	ptr := h.ptr
+	if ptr > 0 {
+		tmp := h.heap[ptr]
+		h.pos[tmp] = 0
+		h.heap[0] = tmp
+		h._siftDown(tmp)
+	}
+	return res
+}
+
+// 如果不存在,则返回-1.
+func (h *SiftHeap32) Peek() int32 {
+	if h.ptr == 0 {
+		return -1
+	}
+	return h.heap[0]
+}
+
+func (h *SiftHeap32) Size() int32 {
+	return h.ptr
+}
+
+func (h *SiftHeap32) _siftUp(i int32) {
+	curPos := h.pos[i]
+	p := int32(0)
+	for curPos != 0 {
+		p = h.heap[(curPos-1)>>1]
+		if !h.less(i, p) {
+			break
 		}
-		if right < n && h.less(h.data[right], h.data[minIndex]) {
-			minIndex = right
-		}
-		if minIndex == root {
-			return
-		}
-		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
-		root = minIndex
+		h.pos[p] = curPos
+		h.heap[curPos] = p
+		curPos = (curPos - 1) >> 1
 	}
+	h.pos[i] = curPos
+	h.heap[curPos] = i
 }
+
+func (h *SiftHeap32) _siftDown(i int32) {
+	curPos := h.pos[i]
+	c := int32(0)
+	for {
+		c = (curPos << 1) | 1
+		if c >= h.ptr {
+			break
+		}
+		if c+1 < h.ptr && h.less(h.heap[c+1], h.heap[c]) {
+			c++
+		}
+		if !h.less(h.heap[c], i) {
+			break
+		}
+		tmp := h.heap[c]
+		h.heap[curPos] = tmp
+		h.pos[tmp] = curPos
+		curPos = c
+	}
+	h.pos[i] = curPos
+	h.heap[curPos] = i
+}
+
 func min(a, b int) int {
 	if a < b {
 		return a
