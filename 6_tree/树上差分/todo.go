@@ -1,4 +1,4 @@
-// https://github.com/981377660LMT/codeforces-go/blob/master/copypasta/graph_tree.go
+// https://github.com/EndlessCheng/codeforces-go/blob/master/copypasta/graph_tree.go
 
 // LCA 应用：树上差分
 // 操作为更新 v-w 路径上的点权或边权（初始为 0）
