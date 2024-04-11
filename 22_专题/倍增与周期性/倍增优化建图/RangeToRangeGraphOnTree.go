@@ -100,8 +100,6 @@ func P5344() {
 // 限制可以看成规定点点权大/于路径上的"其它点"，我们把 a 的点权小于 b 的点权的限制视作一个有向边a→b。
 // 则有解当且仅当整张图没有环，拓扑排序分配即可。
 // !倍增优化建图，优化成 O(nlogn) 条边。
-//
-// TODO:FIX ME
 func CF1904F() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -129,7 +127,7 @@ func CF1904F() {
 	D.Init(addEdge)
 
 	addPointToRangeWithoutPoint := func(point, from, to int32) {
-		from1, to1, from2, to2 := SplitPathByJumpFn(from, to, point, D.jumpFn)
+		from1, to1, from2, to2 := SplitPath(from, to, point, D.depth, D.kthAncestor, D.lca)
 		if from1 != -1 && to1 != -1 {
 			D.AddToRange(point, from1, to1, addEdge)
 		}
@@ -139,7 +137,7 @@ func CF1904F() {
 	}
 
 	addRangeToPointWithoutPoint := func(from, to, point int32) {
-		from1, to1, from2, to2 := SplitPathByJumpFn(from, to, point, D.jumpFn)
+		from1, to1, from2, to2 := SplitPath(from, to, point, D.depth, D.kthAncestor, D.lca)
 		if from1 != -1 && to1 != -1 {
 			D.AddFromRange(from1, to1, point, addEdge)
 		}
@@ -161,13 +159,12 @@ func CF1904F() {
 		}
 	}
 
-	queue := make([]int32, 0)
+	queue := make([]int32, 0, size)
 	for i := int32(0); i < size; i++ {
 		if indeg[i] == 0 {
 			queue = append(queue, i)
 		}
 	}
-	fmt.Println(queue)
 	topoOrder := make([]int32, 0, n)
 	for len(queue) > 0 {
 		cur := queue[0]
@@ -183,7 +180,6 @@ func CF1904F() {
 		}
 	}
 
-	fmt.Fprintln(out, topoOrder)
 	for _, d := range indeg {
 		if d > 0 {
 			fmt.Fprintln(out, -1)
@@ -271,7 +267,7 @@ func (g *RangeToRangeGraphOnTree) Add(from, to int32, f func(from, to int32)) {
 
 // 从路径 [fromStart, fromEnd] 中的每个点到 to 都添加一条边.
 func (g *RangeToRangeGraphOnTree) AddFromRange(fromStart, fromEnd, to int32, f func(from, to int32)) {
-	g.enumerateJumpDangerously(fromStart, fromEnd, func(id int32) { f(id, to+g.offset) })
+	g.enumerateJumpDangerously(fromStart, fromEnd, func(id int32) { f(id, to) })
 }
 
 // 从 from 到路径 [toStart, toEnd] 中的每个点都添加一条边.
@@ -440,6 +436,72 @@ func SplitPathByJumpFn(
 	to1 = jumpFn(separator, from, 1)
 	from2 = jumpFn(separator, to, 1)
 	to2 = to
+	return
+}
+
+func SplitPath(
+	from, to int32, separator int32,
+	depth []int32,
+	kthAncestorFn func(node, k int32) int32,
+	lcaFn func(node1, node2 int32) int32,
+) (from1, to1, from2, to2 int32) {
+	from1, to1, from2, to2 = -1, -1, -1, -1
+	if from == to {
+		return
+	}
+
+	down, top := from, to
+	swapped := false
+	if depth[down] < depth[top] {
+		down, top = top, down
+		swapped = true
+	}
+
+	lca := lcaFn(from, to)
+	if lca == top {
+		// down和top在一条链上.
+		if separator == down {
+			from2 = kthAncestorFn(separator, 1)
+			to2 = top
+		} else if separator == top {
+			from1 = down
+			to1 = kthAncestorFn(down, depth[down]-depth[separator]-1)
+		} else {
+			from1 = down
+			to1 = kthAncestorFn(down, depth[down]-depth[separator]-1)
+			from2 = kthAncestorFn(separator, 1)
+			to2 = top
+		}
+	} else {
+		// down和top在lca两个子树上.
+		if separator == down {
+			from2 = kthAncestorFn(separator, 1)
+			to2 = top
+		} else if separator == top {
+			from1 = down
+			to1 = kthAncestorFn(separator, 1)
+		} else {
+			var jump1, jump2 int32
+			if separator == lca {
+				jump1 = kthAncestorFn(down, depth[down]-depth[separator]-1)
+				jump2 = kthAncestorFn(top, depth[top]-depth[separator]-1)
+			} else if lcaFn(separator, down) == separator {
+				jump1 = kthAncestorFn(down, depth[down]-depth[separator]-1)
+				jump2 = kthAncestorFn(separator, 1)
+			} else {
+				jump1 = kthAncestorFn(separator, 1)
+				jump2 = kthAncestorFn(top, depth[top]-depth[separator]-1)
+			}
+			from1 = down
+			to1 = jump1
+			from2 = jump2
+			to2 = top
+		}
+	}
+
+	if swapped {
+		from1, to1, from2, to2 = to2, from2, to1, from1
+	}
 	return
 }
 
