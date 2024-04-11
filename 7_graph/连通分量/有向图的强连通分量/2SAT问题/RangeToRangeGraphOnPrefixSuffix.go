@@ -4,6 +4,12 @@ func main() {
 
 }
 
+// 4 ← 5 ← 6 ← 7  (前缀)
+// ↓	 ↓   ↓   ↓
+// 0   1   2   3
+// ↑	 ↑   ↑   ↑
+// 8 → 9 → 10 → 11 (后缀)
+
 // 前后缀优化建图.
 type RangeToRangeGraphOnPrefixSuffix struct {
 	n        int32
@@ -13,7 +19,7 @@ type RangeToRangeGraphOnPrefixSuffix struct {
 
 // 新建一个区间图，n 为原图的节点数，rangeToRangeOpCount 为区间到区间的最大操作次数.
 func NewRangeToRangeGraphOnPrefixSuffix(n int32, rangeToRangeOpCount int32) *RangeToRangeGraphOnPrefixSuffix {
-	return &RangeToRangeGraphOnPrefixSuffix{}
+	return &RangeToRangeGraphOnPrefixSuffix{n: n, maxSize: 3*n + rangeToRangeOpCount, allocPtr: 3 * n}
 }
 
 // 新图的结点数.前n个节点为原图的节点.
