@@ -9,7 +9,8 @@ import (
 
 func main() {
 	// P5344()
-	CF1904F()
+	// CF1904F()
+	P9520()
 }
 
 // P5344 【XR-1】逛森林 (倍增优化建图)
@@ -196,6 +197,124 @@ func CF1904F() {
 
 	for _, r := range res {
 		fmt.Fprint(out, r, " ")
+	}
+}
+
+// P9520 [JOISC2022] 监狱
+// https://www.luogu.com.cn/problem/P9520
+// https://www.cnblogs.com/5k-sync-closer/p/18035300
+// 对于n个点的树，有m条"起点与终点各不相同"的行进路线形如 si→ti，允许从某个点移动至相邻点
+// !问能否在不存在某个点所在人数 >1的情况下完成所有行进路线。
+// 1<=m<=n<=1.2e5
+//
+// 若 A 路径的起点在 B 路径上，则 A 必须比 B 先走，
+// 若 A 路径的终点在 B 路径上，则 B 必须比 A 先走。
+//
+// !1.如果 A 的起点在 B 的路径上，那么 A 必须先于 B 走 =>
+// 把每条路径向其起点连边，然后把每条路径除起点外的点向这条路径连边，
+// 此时 A 连向 A 的起点，而 A 路径的起点在 B 路径上，所以 A 的起点连向 B。
+// !2.如果 A 的终点在 B 的路径上，那么 B 必须先于 A 走 =>
+// 把每个终点向其路径连边，然后把每条路径向这条路径除终点外的点连边，
+// 此时 A 路径的终点在 B 路径上，所以 B 连向 A 的终点，而 A 的终点连向 A。
+// TODO
+func P9520() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	solve := func(tree [][]int32, routes [][2]int32) bool {
+		D := NewRangeToRangeGraphOnTree(tree, 0)
+		size := D.Size()
+		newGraph := make([][]int32, size)
+		indeg := make([]int32, size)
+		addEdge := func(from, to int32) {
+			newGraph[from] = append(newGraph[from], to)
+			indeg[to]++
+		}
+		D.Init(addEdge)
+
+		for _, route := range routes {
+			start, end := route[0], route[1]
+			// 每条路径向其起点连边
+			D.AddFromRange(start, end, start, addEdge)
+			// 每条路径除起点外的点向这条路径连边
+			from1, to1, from2, to2 := SplitPath(start, end, start, D.depth, D.kthAncestor, D.lca)
+			if from1 != -1 && to1 != -1 {
+				D.AddRangeToRange(from1, to1, start, end, addEdge)
+			}
+			if from2 != -1 && to2 != -1 {
+				D.AddRangeToRange(from2, to2, start, end, addEdge)
+			}
+
+			// 每个终点向其路径连边
+			D.AddToRange(start, end, end, addEdge)
+			// 每条路径向这条路径除终点外的点连边
+			from1, to1, from2, to2 = SplitPath(start, end, end, D.depth, D.kthAncestor, D.lca)
+			if from1 != -1 && to1 != -1 {
+				D.AddRangeToRange(start, end, from1, to1, addEdge)
+			}
+			if from2 != -1 && to2 != -1 {
+				D.AddRangeToRange(start, end, from2, to2, addEdge)
+			}
+		}
+
+		queue := make([]int32, 0, size)
+		for i := int32(0); i < size; i++ {
+			if indeg[i] == 0 {
+				queue = append(queue, i)
+			}
+		}
+		for len(queue) > 0 {
+			cur := queue[0]
+			queue = queue[1:]
+			for _, next := range newGraph[cur] {
+				indeg[next]--
+				if indeg[next] == 0 {
+					queue = append(queue, next)
+				}
+			}
+		}
+
+		for _, d := range indeg {
+			if d > 0 {
+				return false
+			}
+		}
+		return true
+	}
+
+	var T int32
+	fmt.Fscan(in, &T)
+	for i := int32(0); i < T; i++ {
+		var n int32
+		fmt.Fscan(in, &n)
+		tree := make([][]int32, n)
+		for i := int32(0); i < n-1; i++ {
+			var u, v int32
+			fmt.Fscan(in, &u, &v)
+			u--
+			v--
+			tree[u] = append(tree[u], v)
+			tree[v] = append(tree[v], u)
+		}
+
+		var m int32
+		fmt.Fscan(in, &m)
+		queries := make([][2]int32, m)
+		for i := int32(0); i < m; i++ {
+			var s, t int32
+			fmt.Fscan(in, &s, &t)
+			s--
+			t--
+			queries[i] = [2]int32{s, t}
+		}
+
+		ok := solve(tree, queries)
+		if ok {
+			fmt.Fprintln(out, "Yes")
+		} else {
+			fmt.Fprintln(out, "No")
+		}
 	}
 }
 

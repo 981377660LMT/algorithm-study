@@ -15,8 +15,6 @@ import (
 
 func main() {
 	P5344()
-	// P9520()
-	// CF1904F()
 
 	// jump()
 	// test()
@@ -137,61 +135,6 @@ func P5344() {
 			d = -1
 		}
 		fmt.Fprint(out, d, " ")
-	}
-}
-
-// P9520 [JOISC2022] 监狱
-// https://www.luogu.com.cn/problem/P9520
-// 对于n个点的树，有m条起点与终点各不相同的行进路线形如 si→ti，允许从某个点移动至相邻点
-// !问能否在不存在某个点所在人数 >1的情况下完成所有行进路线。
-// 1<=m<=n
-//
-// 如果 A 的起点在 B 的路径上，那么 A 必须先于 B 走。
-// 如果 A 的终点在 B 的路径上，那么 B 必须先于 A 走。
-// !将m个行进路线视为m个点，A先于B走是A向B连边，而存在冲突则是出现环。
-// 区间向区间连边后，拓扑排序判环.
-// TODO
-func P9520() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	solve := func(tree [][]int32, queries [][2]int32) bool {
-		return true
-	}
-
-	var T int32
-	fmt.Fscan(in, &T)
-	for i := int32(0); i < T; i++ {
-		var n int32
-		fmt.Fscan(in, &n)
-		tree := make([][]int32, n)
-		for i := int32(0); i < n-1; i++ {
-			var u, v int32
-			fmt.Fscan(in, &u, &v)
-			u--
-			v--
-			tree[u] = append(tree[u], v)
-			tree[v] = append(tree[v], u)
-		}
-
-		var m int32
-		fmt.Fscan(in, &m)
-		queries := make([][2]int32, m)
-		for i := int32(0); i < m; i++ {
-			var s, t int32
-			fmt.Fscan(in, &s, &t)
-			s--
-			t--
-			queries[i] = [2]int32{s, t}
-		}
-
-		ok := solve(tree, queries)
-		if ok {
-			fmt.Fprintln(out, "Yes")
-		} else {
-			fmt.Fprintln(out, "No")
-		}
 	}
 }
 
