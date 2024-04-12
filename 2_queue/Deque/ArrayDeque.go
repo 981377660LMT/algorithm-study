@@ -3,7 +3,9 @@
 // https://github.dev/EndlessCheng/codeforces-go/blob/master/misc/atcoder/abc274/e
 // NewDeque
 
-package arraydeque
+package main
+
+import "fmt"
 
 type Deque[D any] struct{ left, right []D }
 
@@ -70,4 +72,21 @@ func (q *Deque[D]) At(i int) D {
 func (q *Deque[D]) Clear() {
 	q.left = q.left[:0]
 	q.right = q.right[:0]
+}
+
+func (q *Deque[D]) ForEach(f func(v D)) {
+	for i := len(q.left) - 1; i >= 0; i-- {
+		f(q.left[i])
+	}
+	for i := 0; i < len(q.right); i++ {
+		f(q.right[i])
+	}
+}
+
+func main() {
+	dq := NewDeque[int](10)
+	for i := 0; i < 10; i++ {
+		dq.Append(i)
+	}
+	dq.ForEach(func(v int) { fmt.Print(v, " ") })
 }

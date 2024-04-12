@@ -134,4 +134,14 @@ describe('CompressedBinaryLiftWithSum.ts', () => {
       }
     }
   })
+
+  it('should support inSubtree', () => {
+    expect(bl.inSubtree(6, 6)).toBeTruthy()
+    expect(bl.inSubtree(6, 4)).toBeTruthy()
+    expect(bl.inSubtree(6, 1)).toBeTruthy()
+    expect(bl.inSubtree(6, 0)).toBeTruthy()
+    expect(bl.inSubtree(6, 2)).toBeFalsy()
+    expect(bl.inSubtree(6, 3)).toBeFalsy()
+    expect(bl.inSubtree(6, 5)).toBeFalsy()
+  })
 })

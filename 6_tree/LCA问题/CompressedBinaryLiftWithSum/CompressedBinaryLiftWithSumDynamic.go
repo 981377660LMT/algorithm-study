@@ -301,6 +301,11 @@ func (bl *CompressedBinaryLiftWithSumDynamic) Jump(start, target, step int32) in
 	return bl.KthAncestor(target, dist-step)
 }
 
+func (bl *CompressedBinaryLiftWithSumDynamic) InSubtree(maybeChild, maybeAncestor int32) bool {
+	return bl.Depth[maybeChild] >= bl.Depth[maybeAncestor] &&
+		bl.KthAncestor(maybeChild, bl.Depth[maybeChild]-bl.Depth[maybeAncestor]) == maybeAncestor
+}
+
 func (bl *CompressedBinaryLiftWithSumDynamic) Dist(a, b int32) int32 {
 	return bl.Depth[a] + bl.Depth[b] - 2*bl.Depth[bl.Lca(a, b)]
 }

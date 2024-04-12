@@ -341,6 +341,14 @@ class CompressedBinaryLiftWithSum<S = number> {
     return this.depth[a] + this.depth[b] - 2 * this.depth[this.lca(a, b)]
   }
 
+  inSubtree = (maybeChild: number, maybeAncestor: number): boolean => {
+    return (
+      this.depth[maybeChild] >= this.depth[maybeAncestor] &&
+      this.kthAncestor(maybeChild, this.depth[maybeChild] - this.depth[maybeAncestor]) ===
+        maybeAncestor
+    )
+  }
+
   private _consider = (root: number): void => {
     if (root === -1 || this._jump[root] !== -1) return
     const p = this.parent[root]
