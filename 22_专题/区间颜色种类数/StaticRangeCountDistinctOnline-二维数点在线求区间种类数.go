@@ -1,3 +1,7 @@
+// 给定一个序列 nums，之后给出 q 个查询，第 i 个查询为 start,end，询问 nums[start,end) 中有多少不同的数。
+// !定义一个新序列 last, last[i]表示第 i 个数之前与 nums[i] 相同的数中最大的下标（如果不存在则设为 −1）。
+// !那么现在查询询问的实际上是区间 last[start,end) 中有多少数小于 start。
+
 package main
 
 import (
@@ -30,17 +34,17 @@ func P1972() {
 		nums[i] = D.Id(v)
 	}
 
-	// last[i] 表示第i个数之前与nums[i]相同的数中最大的下标
-	last := make([]int32, n)
-	lastIndex := make([]int32, D.Size())
-	for i := range lastIndex {
-		lastIndex[i] = -1
+	last := make([]int32, n)      // last[i] 表示第i个数之前与nums[i]相同的数中最大的下标
+	mp := make([]int32, D.Size()) // 每个数最后出现的下标
+	for i := range mp {
+		mp[i] = -1
 	}
 	for i, v := range nums {
-		last[i] = lastIndex[v]
-		lastIndex[v] = int32(i)
+		last[i] = mp[v]
+		mp[v] = int32(i)
 	}
 
+	// 消除-1.
 	for i := 0; i < len(last); i++ {
 		last[i]++
 	}
@@ -53,7 +57,6 @@ func P1972() {
 		var start, end int32
 		fmt.Fscan(in, &start, &end)
 		start--
-		fmt.Fprintln(out, start, end, 0, start)
 		fmt.Fprintln(out, wm.CountRange(start, end, 0, start+1))
 	}
 }

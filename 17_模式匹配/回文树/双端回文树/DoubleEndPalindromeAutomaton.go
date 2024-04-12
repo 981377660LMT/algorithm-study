@@ -2,6 +2,8 @@ package main
 
 import "fmt"
 
+// https://loj.ac/p/141
+
 func main() {
 	tree := NewDoubleEndPalindromeAutomaton(100, 100)
 	tree.PushFront('a')

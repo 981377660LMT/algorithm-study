@@ -1,4 +1,5 @@
 // StaticRangeCountDistinctOnline-主席树在线求区间种类数
+// 较慢，推荐用二维数点的版本.
 
 package main
 
