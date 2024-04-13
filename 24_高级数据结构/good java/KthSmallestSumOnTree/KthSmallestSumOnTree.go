@@ -1,104 +1,9 @@
-// package template.graph;
-
-// import java.util.*;
-
-// /**
-//  * 给定一颗树，每条边上有一个非负权重，要求从根出发，找到路径权重最小的k条路径
-//  */
-// public class KthSmallestSumOnTree {
-//     /**
-//      * O(klog k)
-//      *
-//      * @param root
-//      * @param k
-//      */
-//     public static List<State> kthSmallestSumOnTree(Vertex root, int k) {
-//         List<State> ans = new ArrayList<>(k);
-//         PriorityQueue<State> pq = new PriorityQueue<>(2 * k, Comparator.comparingLong(x -> x.sum));
-//         pq.add(new State(root, null, 0));
-//         while (!pq.isEmpty() && ans.size() < k) {
-//             State state = pq.remove();
-//             ans.add(state);
-//             //child or bro
-//             if (state.iterator.hasNext()) {
-//                 Edge e = state.iterator.next();
-//                 pq.add(new State(e.to, state, state.sum + e.weight));
-//             }
-//             if (state.parent != null && state.parent.iterator.hasNext()) {
-//                 Edge e = state.parent.iterator.next();
-//                 pq.add(new State(e.to, state.parent, state.parent.sum + e.weight));
-//             }
-//         }
-//         return ans;
-//     }
-
-//     /**
-//      * O(klog k)
-//      *
-//      * @param root
-//      * @param k
-//      */
-//     public List<EdgeState> kthSmallestSumOnTreeWithEdge(Vertex root, int k) {
-//         List<EdgeState> ans = new ArrayList<>(k);
-//         PriorityQueue<EdgeState> pq = new PriorityQueue<>(2 * k, Comparator.comparingLong(x -> x.sum));
-//         pq.add(new EdgeState(root, null, 0, null));
-//         while (!pq.isEmpty() && ans.size() < k) {
-//             EdgeState state = pq.remove();
-//             ans.add(state);
-//             //child or bro
-//             if (state.iterator.hasNext()) {
-//                 Edge e = state.iterator.next();
-//                 pq.add(new EdgeState(e.to, state, state.sum + e.weight, e));
-//             }
-//             if (state.parent != null && state.parent.iterator.hasNext()) {
-//                 Edge e = state.parent.iterator.next();
-//                 pq.add(new EdgeState(e.to, state.parent, state.parent.sum + e.weight, e));
-//             }
-//         }
-//         return ans;
-//     }
-
-//     public static class State {
-//         public Vertex v;
-//         Iterator<Edge> iterator;
-//         public State parent;
-//         public long sum;
-
-//         public State(Vertex v, State parent, long sum) {
-//             this.v = v;
-//             this.parent = parent;
-//             this.sum = sum;
-//             iterator = v.children();
-//         }
-
-//         public State(Vertex v, Iterator<Edge> iterator, State parent, long sum) {
-//             this.v = v;
-//             this.iterator = iterator;
-//             this.parent = parent;
-//             this.sum = sum;
-//         }
-//     }
-
-//     public static class EdgeState extends State {
-//         public Edge edge;
-
-//         public EdgeState(Vertex v, State parent, long sum, Edge e) {
-//             super(v, parent, sum);
-//             this.edge = e;
-//         }
-//     }
-
-//     public interface Vertex {
-//         Iterator<Edge> children();
-//     }
-
-//     public static class Edge {
-//         public Vertex to;
-//         public long weight;
-//     }
-// }
-
 package main
+
+import (
+	"fmt"
+	"sort"
+)
 
 func main() {
 	//    0
@@ -110,7 +15,63 @@ func main() {
 	//      5   6
 
 	n := int32(7)
-	tree := make([]*vertex, n)
+	edges := [][3]int32{{0, 1, 5}, {0, 2, 4}, {2, 3, 3}, {2, 4, 2}, {4, 5, 1}, {4, 6, 0}}
+
+	rawTree := make([][][2]int32, n)
+	for _, edge := range edges {
+		u, v, w := edge[0], edge[1], edge[2]
+		rawTree[u] = append(rawTree[u], [2]int32{v, w})
+		rawTree[v] = append(rawTree[v], [2]int32{u, w})
+	}
+
+	root := int32(0)
+	rootedTree := make([][][2]int32, n)
+
+	queue := make([]int32, 0, n)
+	queue = append(queue, root)
+	visited := make([]bool, n)
+	visited[root] = true
+
+	vertexes := make([]*vertex, n)
+
+	// 转有根树和构建iterator在一次bfs中完成
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		for _, e := range rawTree[cur] {
+			next := e[0]
+			if !visited[next] {
+				visited[next] = true
+				queue = append(queue, next)
+				rootedTree[cur] = append(rootedTree[cur], e)
+			}
+		}
+
+		children := rootedTree[cur]
+		sort.Slice(children, func(i, j int) bool { return children[i][1] < children[j][1] })
+		vertexes[cur] = &vertex{Node: cur}
+		vertexes[cur].Children = func() *edgeIterator {
+			ptr := 0
+			return &edgeIterator{
+				Next: func() *edge {
+					if ptr < len(children) {
+						e := children[ptr]
+						ptr++
+						return &edge{To: vertexes[e[0]], Weight: int(e[1])}
+					}
+					return nil
+				},
+				HasNext: func() bool {
+					return ptr < len(children)
+				},
+			}
+		}
+	}
+
+	res := KthSmallestSumOnTree(vertexes[root], 6)
+	for _, state := range res {
+		fmt.Println(state)
+	}
 }
 
 // 给定一颗树，每条边上有一个非负权重，要求从根出发，找到路径权重最小的k条路径
@@ -126,10 +87,10 @@ func KthSmallestSumOnTree(root *vertex, k int32) []*state {
 			e := state.iterator.Next()
 			pq.Push(newState(e.To, state, state.Sum+int(e.Weight)))
 		}
-		// bro
-		if state.Parent != nil && state.Parent.iterator.HasNext() {
-			e := state.Parent.iterator.Next()
-			pq.Push(newState(e.To, state.Parent, state.Parent.Sum+int(e.Weight)))
+		// sibling
+		if state.ParentState != nil && state.ParentState.iterator.HasNext() {
+			e := state.ParentState.iterator.Next()
+			pq.Push(newState(e.To, state.ParentState, state.ParentState.Sum+int(e.Weight)))
 		}
 	}
 	return res
@@ -137,18 +98,22 @@ func KthSmallestSumOnTree(root *vertex, k int32) []*state {
 
 // 遍历的一个状态.
 type state struct {
-	Cur      *vertex
-	Parent   *state
-	Sum      int
-	iterator *edgeIterator
+	Cur         *vertex
+	ParentState *state
+	Sum         int
+	iterator    *edgeIterator
 }
 
 func newState(cur *vertex, parent *state, sum int) *state {
-	return &state{Cur: cur, Parent: parent, Sum: sum, iterator: cur.Children()}
+	return &state{Cur: cur, ParentState: parent, Sum: sum, iterator: cur.Children()}
 }
 
 func newStateWithIterator(cur *vertex, parent *state, sum int, iterator *edgeIterator) *state {
-	return &state{Cur: cur, Parent: parent, Sum: sum, iterator: iterator}
+	return &state{Cur: cur, ParentState: parent, Sum: sum, iterator: iterator}
+}
+
+func (s *state) String() string {
+	return fmt.Sprintf("vertex: %d, sum: %d", s.Cur.Node, s.Sum)
 }
 
 type edge struct {
@@ -157,7 +122,9 @@ type edge struct {
 }
 
 type vertex struct {
+	Node     int32
 	Children func() *edgeIterator
+	// CustomInfo
 }
 
 type edgeIterator struct {

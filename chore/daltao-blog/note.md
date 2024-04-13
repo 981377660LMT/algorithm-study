@@ -13,6 +13,7 @@ https://taodaling.github.io/blog/categories/
      先将金额转化为分(`*100`)，然后变成小球与隔板问题：`有N+K−1个不同的球，从中选择K−1个不同的球，每种选法的概率相等。`
      这个问题就是 `random.sample` 问题.
    - 桌游 rating 算法
+     https://github.com/981377660LMT/scoreboard
      - `Elo rating` 算法
      - ∑wixi (wi = 1/(i+T)；xi:胜利为 1，失败为-1) 对所有比赛进行加权求和
    - 数值信息压缩问题
@@ -161,6 +162,7 @@ https://taodaling.github.io/blog/categories/
 16. rsync 增量同步算法:如何减少同步文件时的**网络传输量**
     https://taodaling.github.io/blog/2018/10/14/rsync/
     https://zhuanlan.zhihu.com/p/59086295
+    https://github.com/981377660LMT/jsync
     如果服务器之间需要保持某些文件的一致，我们可以使用 scp 来复制，如果需要长期保持一致，可以配合 crontab 脚本来使用。但是此时我们有更优的方式，就是 rsync+crontab 来实现定时增量传输保持文件一致。
     rsync 是 linux 下同步文件的一个高效算法，用于同步更新两处计算机的文件和目录，并适当利用查找文件中的不同块以减少数据传输。rsync 的主要特点就是增量传输，只对变更的部分进行传送。
     假如我们现在需要同步两个文件保持一致，并且只想传送不同的部分，那么我们就需要对两边的文件做 **diff**，但是这两个问题在两台不同的机器上，无法做 diff。如果我们做 diff，就要把一个文件传到另一台机器上做 diff，但这样一来，我们就传了整个文件，这与我们只想传输不同部的初衷相背。于是我们就要想一个办法，让这两边的文件见不到面，但还能知道它们间有什么不同。这就是 rsync 的算法。
