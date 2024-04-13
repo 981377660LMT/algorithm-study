@@ -1,505 +1,360 @@
-// package template.algo;
-
-// import template.utils.Int2ToObjectFunction;
-// import template.utils.Pair;
-// import template.utils.SegmentUtils;
-
-// import java.util.function.Supplier;
-
-// /**
-//  * 块状链表.
-//  * all operation in this framework take O(N/B) while N is the maximum size and B is the block size
-//  *
-//  * @param <S>
-//  * @param <U>
-//  * @param <E>
-//  */
-// public class BlockChain<S, U, E, B extends BlockChain.Block<S, U, E, B>> {
-//     LinkedNode<B> head = new LinkedNode<>();
-//     LinkedNode<B> tail = new LinkedNode<>();
-//     int B;
-//     int size;
-
-//     public BlockChain(int B, Supplier<B> supplier) {
-//         //add an empty node
-//         B block = supplier.get();
-//         LinkedNode<B> node = new LinkedNode<>();
-//         node.data = block;
-//         node.size = 0;
-//         this.B = B;
-//         LinkedNode.link(tail.prev, node);
-//         LinkedNode.link(node, tail);
-//     }
-
-//     private BlockChain(int B, LinkedNode<B> begin, LinkedNode<B> end) {
-//         //add an empty node
-//         this.B = B;
-//         LinkedNode.link(head, begin);
-//         LinkedNode.link(end, tail);
-//         maintain();
-//     }
-
-//     public BlockChain(int n, int B, Int2ToObjectFunction<B> supplier) {
-//         assert n > 0;
-//         this.B = B;
-//         size = n;
-//         LinkedNode.link(head, tail);
-//         for (int i = 0; i < n; i += B) {
-//             int l = i;
-//             int r = i + B - 1;
-//             r = Math.min(r, n - 1);
-//             B block = supplier.apply(l, r);
-//             LinkedNode<B> node = new LinkedNode<>();
-//             node.data = block;
-//             node.size = r - l + 1;
-//             LinkedNode.link(tail.prev, node);
-//             LinkedNode.link(node, tail);
-//         }
-//     }
-
-//     void split(LinkedNode<B> node, int n) {
-//         //split if necessary
-//         LinkedNode<B> post = new LinkedNode<>();
-//         Pair<B, B> pair = node.data.split(n);
-//         LinkedNode.link(post, node.next);
-//         LinkedNode.link(node, post);
-//         post.data = pair.b;
-//         post.size = node.size - n;
-//         node.data = pair.a;
-//         node.size = n;
-//     }
-
-//     void afterInsertion(LinkedNode<B> node) {
-//         if (node.size >= 2 * B) {
-//             split(node, B);
-//         }
-//     }
-
-//     void mergeNode(LinkedNode<B> a, LinkedNode<B> b) {
-//         LinkedNode.link(a, b.next);
-//         a.data = a.data.merge(b.data);
-//         a.size += b.size;
-//     }
-
-//     void maintain() {
-//         size = 0;
-//         for (LinkedNode<B> node = head.next; node != tail; node = node.next) {
-//             size += node.size;
-//             if (node.size >= 2 * B) {
-//                 split(node, B);
-//             } else if (node.prev != head && node.size + node.prev.size <= B) {
-//                 mergeNode(node.prev, node);
-//             }
-//         }
-//     }
-
-//     private LinkedNode<B> findKth(int k) {
-//         for (LinkedNode<B> node = head.next; node != tail; node = node.next) {
-//             if (node.size < k) {
-//                 k -= node.size;
-//                 continue;
-//             }
-//             return node;
-//         }
-//         return tail;
-//     }
-
-//     private LinkedNode<B> splitKth(int k) {
-//         for (LinkedNode<B> node = head.next; node != tail; node = node.next) {
-//             if (node.size < k) {
-//                 k -= node.size;
-//                 continue;
-//             }
-//             if (k != 1) {
-//                 split(node, k - 1);
-//                 node = node.next;
-//             }
-//             return node;
-//         }
-//         return tail;
-//     }
-
-//     public E get(int index) {
-//         for (LinkedNode<B> node = head.next; node != tail; node = node.next) {
-//             if (node.size <= index) {
-//                 index -= node.size;
-//                 continue;
-//             }
-//             node.data.beforePartialQuery();
-//             return node.data.get(index);
-//         }
-//         throw new IndexOutOfBoundsException();
-//     }
-
-//     public int prefixSize(B block, boolean include) {
-//         int ans = 0;
-//         for (LinkedNode<B> node = head.next; node != tail; node = node.next) {
-//             if (node.data == block) {
-//                 if (include) {
-//                     ans += node.size;
-//                 }
-//                 break;
-//             }
-//             ans += node.size;
-//         }
-//         return ans;
-//     }
-
-//     /**
-//      * k-th in res.b
-//      *
-//      * @param k
-//      * @return
-//      */
-//     public Pair<BlockChain<S, U, E, B>, BlockChain<S, U, E, B>> split(int k, Supplier<B> supplier) {
-//         if (k == 1) {
-//             return new Pair<>(new BlockChain<>(B, supplier), this);
-//         }
-//         if (k > size) {
-//             return new Pair<>(this, new BlockChain<>(B, supplier));
-//         }
-//         LinkedNode<B> head = splitKth(k);
-//         LinkedNode<B> end = tail.prev;
-//         LinkedNode.link(head.prev, tail);
-//         BlockChain<S, U, E, B> b = new BlockChain<>(B, head, end);
-//         maintain();
-//         return new Pair<>(this, b);
-//     }
-
-//     /**
-//      * insert after the index-th elements, 0 means first
-//      *
-//      * @param index
-//      * @param e
-//      */
-//     public void insert(int index, E e) {
-//         for (LinkedNode<B> node = head.next; node != tail; node = node.next) {
-//             if (node.size < index) {
-//                 index -= node.size;
-//                 continue;
-//             }
-//             node.data.insert(index, e);
-//             node.size++;
-//             break;
-//         }
-//         maintain();
-//     }
-
-//     public void delete(int index) {
-//         for (LinkedNode<B> node = head.next; node != tail; node = node.next) {
-//             if (node.size <= index) {
-//                 index -= node.size;
-//                 continue;
-//             }
-//             node.data.delete(index);
-//             node.size--;
-//             break;
-//         }
-//         maintain();
-//     }
-
-//     @Override
-//     public String toString() {
-//         StringBuilder ans = new StringBuilder("[");
-//         for (LinkedNode<B> node = head.next; node != tail; node = node.next) {
-//             ans.append("<").append(node.data).append(">,");
-//         }
-//         if (ans.charAt(ans.length() - 1) == ',') {
-//             ans.setLength(ans.length() - 1);
-//         }
-//         ans.append("]");
-//         return ans.toString();
-//     }
-
-//     public void update(int L, int R, U upd) {
-//         int offset = 0;
-//         for (LinkedNode<B> node = head.next; node != tail; node = node.next) {
-//             int l = offset;
-//             int r = offset + node.size - 1;
-//             offset += node.size;
-//             if (SegmentUtils.enter(L, R, l, r)) {
-//                 node.data.fullyUpdate(upd);
-//             } else if (SegmentUtils.leave(L, R, l, r)) {
-//                 continue;
-//             } else {
-//                 for (int i = Math.max(l, L), to = Math.min(r, R); i <= to; i++) {
-//                     node.data.partialUpdate(i - l, upd);
-//                 }
-//                 node.data.afterPartialUpdate();
-//             }
-//         }
-//     }
-
-//     public void query(int L, int R, S sum) {
-//         int offset = 0;
-//         for (LinkedNode<B> node = head.next; node != tail; node = node.next) {
-//             int l = offset;
-//             int r = offset + node.size - 1;
-//             offset += node.size;
-//             if (SegmentUtils.enter(L, R, l, r)) {
-//                 node.data.fullyQuery(sum);
-//             } else if (SegmentUtils.leave(L, R, l, r)) {
-//                 continue;
-//             } else {
-//                 node.data.beforePartialQuery();
-//                 for (int i = Math.max(l, L), to = Math.min(r, R); i <= to; i++) {
-//                     node.data.partialQuery(i - l, sum);
-//                 }
-//             }
-//         }
-//     }
-
-//     /**
-//      * 将第k个元素旋转到第一的位置
-//      */
-//     public void rotate(int k) {
-//         LinkedNode<B> node = splitKth(k);
-
-//         //rotate
-//         LinkedNode<B> h1 = head.next;
-//         LinkedNode<B> e1 = node.prev;
-//         LinkedNode<B> h2 = node;
-//         LinkedNode<B> e2 = node.next;
-
-//         LinkedNode.link(head, h2);
-//         LinkedNode.link(e2, h1);
-//         LinkedNode.link(e1, tail);
-
-//         maintain();
-//     }
-
-//     private void reverse(LinkedNode<B> root, LinkedNode<B> p) {
-//         if (root == null) {
-//             return;
-//         }
-//         reverse(root.next, root);
-//         root.data.reverse();
-//         root.prev = root.next;
-//         root.next = p;
-//     }
-
-//     public void reverse(int l, int r) {
-//         LinkedNode<B> left = splitKth(l + 1);
-//         LinkedNode<B> right = splitKth(r + 2).prev;
-
-//         LinkedNode<B> begin = left.prev;
-//         LinkedNode<B> end = right.next;
-
-//         right.next = null;
-//         reverse(left, null);
-
-//         LinkedNode.link(begin, right);
-//         LinkedNode.link(left, end);
-
-//         maintain();
-//     }
-
-//     public int size() {
-//         return size;
-//     }
-
-//     public static interface Block<S, U, E, B extends Block<S, U, E, B>> {
-//         /**
-//          * insert after the index-th elements, 0 means first.
-//          *
-//          * factor 1
-//          */
-//         default void insert(int index, E e) {
-//             throw new UnsupportedOperationException();
-//         }
-
-//         /**
-//          * factor 1
-//          */
-//         default void delete(int index) {
-//             throw new UnsupportedOperationException();
-//         }
-//         /**
-//          * factor 1
-//          */
-//         default E get(int index) {
-//             throw new UnsupportedOperationException();
-//         }
-
-//         /**
-//          * res.a contain first n elements, and res.b contains others
-//          * after split, you can release this as you like
-//          *
-//          * factor 1
-//          */
-//         Pair<B, B> split(int n);
-
-//         /**
-//          * after merge, you can release block as you like
-//          *
-//          * factor 1
-//          * @param block
-//          * @return
-//          */
-//         B merge(B block);
-
-//         /**
-//          * factor 1
-//          */
-//         default void reverse() {
-//             throw new UnsupportedOperationException();
-//         }
-
-//         /**
-//          * factor n/B
-//          */
-//         void fullyQuery(S sum);
-//         /**
-//          * factor B
-//          */
-//         void partialQuery(int index, S sum);
-//         /**
-//          * factor n/B
-//          */
-//         void fullyUpdate(U upd);
-//         /**
-//          * factor B
-//          */
-//         void partialUpdate(int index, U upd);
-//         /**
-//          * factor 1
-//          */
-//         default void afterPartialUpdate() {
-
-//         }
-//         /**
-//          * factor 1
-//          */
-//         default void beforePartialQuery() {
-
-//         }
-
-//     }
-
-//     private static class LinkedNode<E> {
-//         LinkedNode<E> prev;
-//         LinkedNode<E> next;
-//         int size;
-//         E data;
-
-//         static <T> void link(LinkedNode<T> a, LinkedNode<T> b) {
-//             b.prev = a;
-//             a.next = b;
-//         }
-
-//         static <T> void cut(LinkedNode<T> a, LinkedNode<T> b) {
-//             a.next = null;
-//             b.prev = null;
-//         }
-
-//         @Override
-//         public String toString() {
-//             return "" + data;
-//         }
-//     }
-// }
-
-// 用options对象传操作.
-
-// /**
-//  * S: 聚合类型.
-//  * U: 更新类型.
-//  * E: 元素类型.
-//  */
-//  abstract class AbstractBlock<S, U, E> {
-//   /** 分裂整块，block1包含前k个元素，block2包含后面的元素.*/
-//   abstract split(k: number): { block1: AbstractBlock<S, U, E>; block2: AbstractBlock<S, U, E> }
-//   abstract merge(other: AbstractBlock<S, U, E>): AbstractBlock<S, U, E>
-//   /** 在index位置之后插入元素e，0表示第一个.*/
-//   abstract insertAfter(index: number, e: E): void
-//   abstract delete(index: number): void
-//   abstract get(index: number): E
-//   abstract reverse(): void
-
-//   abstract fullyQuery(sum: S): void
-//   abstract partialQuery(index: number, sum: S): void
-//   abstract fullyUpdate(lazy: U): void
-//   abstract partialUpdate(index: number, lazy: U): void
-//   beforePartialQuery(): void {}
-//   afterPartialUpdate(): void {}
-// }
-
-// class BlockChain<S, U, E, B extends AbstractBlock<S, U, E>> {
-//   head = createLinkedNode<B>(null)
-// }
-
-// interface LinkedNode<E> {
-//   prev: LinkedNode<E>
-//   next: LinkedNode<E>
-//   size: number
-//   data: E
-// }
-
-// const EMPTY_NODE = {} as LinkedNode<any>
-
-// function createLinkedNode<E>(data: E): LinkedNode<E> {
-//   return { prev: EMPTY_NODE, next: EMPTY_NODE, size: 0, data }
-// }
-
-// function linkNode<E>(a: LinkedNode<E>, b: LinkedNode<E>): void {
-//   b.prev = a
-//   a.next = b
-// }
-
-// function cutNode<E>(a: LinkedNode<E>, b: LinkedNode<E>): void {
-//   a.next = EMPTY_NODE
-//   b.prev = EMPTY_NODE
-// }
-
-// export {}
-
-//	if (require.main === module) {
-//	  const bl = new BlockChain<number, number, number>()
-//	}
-//
-
 // https://www.acwing.com/blog/content/28060/
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 func main() {
+	test()
+}
 
+type IBlock[S, U, V any] interface {
+	// 分裂整块，block1包含前k个元素，block2包含后面的元素.分裂后，可以回收原块内存.
+	Split(k int32) (block1 IBlock[S, U, V], block2 IBlock[S, U, V])
+	// 合并两个块，合并后，可以回收原块内存.
+	Merge(other IBlock[S, U, V]) IBlock[S, U, V]
+	// 在index下标之前插入元素.
+	InserBefore(index int32, e V)
+	Delete(index int32)
+	Get(index int32) V
+	Reverse()
+
+	FullyQuery(sum S)
+	PartialQuery(index int32, sum S)
+	FullyUpdate(lazy U)
+	PartialUpdate(index int32, lazy U)
+	BeforePartialQuery()
+	AfterPartialUpdate()
 }
 
 // 块状链表.
-type BlockChain[E, Id, V any] struct {
+type BlockChain[S, U, V any] struct {
+	Head, Tail *linkedNode[IBlock[S, U, V]]
+	b, size    int32
 }
 
-type IBlock[E, Id, V any] interface {
-	// // 在index位置之后插入元素e，0表示第一个.
-	// InsertAfter(index int32, e E)
-	// Delete(index int32)
-	// Get(index int32) E
-	// Reverse()
-
-	// 分裂整块，block1包含前k个元素，block2包含后面的元素.分裂后，可以回收原块内存.
-	Split(k int32) (block1 IBlock[E, Id, V], block2 IBlock[E, Id, V])
-	// 合并两个块，合并后，可以回收原块内存.
-	Merge(other IBlock[E, Id, V]) IBlock[E, Id, V]
+// blockSize: 2 * (int32(math.Sqrt(float64(n))) + 1)
+func NewBlockChain[S, U, V any](n int32, blockSupplier func(start, end int32) IBlock[S, U, V], blockSize int32) *BlockChain[S, U, V] {
+	if blockSize == -1 {
+		blockSize = 2 * (int32(math.Sqrt(float64(n))) + 1)
+	}
+	res := &BlockChain[S, U, V]{
+		b:    blockSize,
+		size: n,
+		Head: &linkedNode[IBlock[S, U, V]]{},
+		Tail: &linkedNode[IBlock[S, U, V]]{},
+	}
+	linkNode(res.Head, res.Tail)
+	for start := int32(0); start < n; start += blockSize {
+		end := start + blockSize
+		if end > n {
+			end = n
+		}
+		block := blockSupplier(start, end)
+		node := &linkedNode[IBlock[S, U, V]]{}
+		node.data = block
+		node.size = end - start
+		linkNode(res.Tail.prev, node)
+		linkNode(node, res.Tail)
+	}
+	return res
 }
 
-func init() {
-	var a IBlock[int, int, int]
-	a = &Foo{}
+func (bc *BlockChain[S, U, V]) _new2(b int32, supplier func() IBlock[S, U, V]) *BlockChain[S, U, V] {
+	res := &BlockChain[S, U, V]{
+		b:    b,
+		Head: &linkedNode[IBlock[S, U, V]]{},
+		Tail: &linkedNode[IBlock[S, U, V]]{},
+	}
+	block := supplier()
+	node := &linkedNode[IBlock[S, U, V]]{}
+	node.data = block
+	res.b = b
+	linkNode(res.Tail.prev, node)
+	linkNode(node, res.Tail)
+	return res
 }
 
-type M = IBlock[int, int, int]
-
-type Foo struct {
+func (bc *BlockChain[S, U, V]) _new3(b int32, begin, end *linkedNode[IBlock[S, U, V]]) *BlockChain[S, U, V] {
+	res := &BlockChain[S, U, V]{
+		b:    b,
+		Head: &linkedNode[IBlock[S, U, V]]{},
+		Tail: &linkedNode[IBlock[S, U, V]]{},
+	}
+	linkNode(res.Head, begin)
+	linkNode(end, res.Tail)
+	res._maintain()
+	return res
 }
 
-func (foo *Foo) Split(k int32) (IBlock[int, int, int], IBlock[int, int, int]) {
-	return 1, 2
+func (bc *BlockChain[S, U, V]) Get(index int32) V {
+	if index < 0 {
+		index += bc.size
+	}
+	for node := bc.Head.next; node != bc.Tail; node = node.next {
+		if node.size <= index {
+			index -= node.size
+			continue
+		}
+		node.data.BeforePartialQuery()
+		return node.data.Get(index)
+	}
+	panic("Index out of bounds")
 }
 
-func (foo *Foo) Merge(other IBlock[int, int, int]) IBlock[int, int, int] {
+func (bc *BlockChain[S, U, V]) PrefixSize(block IBlock[S, U, V], include bool) int32 {
+	res := int32(0)
+	for node := bc.Head.next; node != bc.Tail; node = node.next {
+		if node.data == block {
+			if include {
+				res += node.size
+			}
+			break
+		}
+		res += node.size
+	}
+	return res
+}
 
+func (bc *BlockChain[S, U, V]) Split(k int32, blockSupplier func() IBlock[S, U, V]) (first, second *BlockChain[S, U, V]) {
+	k++
+	if k == 1 {
+		return bc._new2(bc.b, blockSupplier), bc
+	}
+	if k > bc.size {
+		return bc, bc._new2(bc.b, blockSupplier)
+	}
+	head := bc._splitKth(k)
+	end := bc.Tail.prev
+	linkNode(head.prev, bc.Tail)
+	b := bc._new3(bc.b, head, end)
+	bc._maintain()
+	return bc, b
+}
+
+func (bc *BlockChain[S, U, V]) MergeDestructively(other *BlockChain[S, U, V]) *BlockChain[S, U, V] {
+	linkNode(bc.Tail.prev, other.Head.next)
+	bc.Tail = other.Tail
+	bc.size += other.size
+	return bc
+}
+
+func (bc *BlockChain[S, U, V]) InsertBefore(index int32, e V) {
+	if index < 0 {
+		index += bc.size
+	}
+	if index < 0 {
+		index = 0
+	}
+	if index > bc.size {
+		index = bc.size
+	}
+	for node := bc.Head.next; node != bc.Tail; node = node.next {
+		if node.size < index {
+			index -= node.size
+			continue
+		}
+		node.data.InserBefore(index, e)
+		node.size++
+		break
+	}
+	bc._maintain()
+}
+
+func (bc *BlockChain[S, U, V]) Delete(index int32) {
+	if index < 0 {
+		index += bc.size
+	}
+	for node := bc.Head.next; node != bc.Tail; node = node.next {
+		if node.size <= index {
+			index -= node.size
+			continue
+		}
+		node.data.Delete(index)
+		node.size--
+		break
+	}
+	bc._maintain()
+}
+
+func (bc *BlockChain[S, U, V]) Update(start, end int32, update U) {
+	if start < 0 {
+		start += bc.size
+	}
+	if end > bc.size {
+		end = bc.size
+	}
+	if start >= end {
+		return
+	}
+	end--
+	offset := int32(0)
+	for node := bc.Head.next; node != bc.Tail; node = node.next {
+		left := offset
+		right := offset + node.size - 1
+		offset += node.size
+		if bc._enter(start, end, left, right) {
+			node.data.FullyUpdate(update)
+		} else if bc._leave(start, end, left, right) {
+			continue
+		} else {
+			for i := max32(left, start); i <= min32(right, end); i++ {
+				node.data.PartialUpdate(i-left, update)
+			}
+			node.data.AfterPartialUpdate()
+		}
+	}
+}
+
+func (bc *BlockChain[S, U, V]) Query(start, end int32, sum S) {
+	if start < 0 {
+		start += bc.size
+	}
+	if end > bc.size {
+		end = bc.size
+	}
+	if start >= end {
+		return
+	}
+	end--
+	offset := int32(0)
+	for node := bc.Head.next; node != bc.Tail; node = node.next {
+		left := offset
+		right := offset + node.size - 1
+		offset += node.size
+		if bc._enter(start, end, left, right) {
+			node.data.FullyQuery(sum)
+		} else if bc._leave(start, end, left, right) {
+			continue
+		} else {
+			node.data.BeforePartialQuery()
+			for i := max32(left, start); i <= min32(right, end); i++ {
+				node.data.PartialQuery(i-left, sum)
+			}
+		}
+	}
+}
+
+func (bc *BlockChain[S, U, V]) RotateLeft(k int32) {
+	if k < 0 {
+		k += bc.size
+	}
+	if k >= bc.size {
+		k %= bc.size
+	}
+	if k == 0 {
+		return
+	}
+	k++
+	node := bc._splitKth(k)
+	h1 := bc.Head.next
+	e1 := node.prev
+	h2 := node
+	e2 := bc.Tail.prev
+	linkNode(bc.Head, h2)
+	linkNode(e2, h1)
+	linkNode(e1, bc.Tail)
+	bc._maintain()
+}
+
+func (bc *BlockChain[S, U, V]) Reverse(start, end int32) {
+	if start >= end {
+		return
+	}
+	end--
+	left := bc._splitKth(start + 1)
+	right := bc._splitKth(end + 2).prev
+	begin := left.prev
+	endNode := right.next
+	right.next = nil
+	bc._reverse(left, nil)
+	linkNode(begin, right)
+	linkNode(left, endNode)
+	bc._maintain()
+}
+
+func (bc *BlockChain[S, U, V]) GetAll() []V {
+	res := make([]V, 0, bc.size)
+	for node := bc.Head.next; node != bc.Tail; node = node.next {
+		for i := int32(0); i < node.size; i++ {
+			res = append(res, node.data.Get(i))
+		}
+	}
+	return res
+}
+
+func (bc *BlockChain[S, U, V]) EnumerateBlock(f func(block IBlock[S, U, V])) {
+	for node := bc.Head.next; node != bc.Tail; node = node.next {
+		f(node.data)
+	}
+}
+
+func (bc *BlockChain[S, U, V]) Len() int32 {
+	return bc.size
+}
+
+func (bc *BlockChain[S, U, V]) _reverse(root *linkedNode[IBlock[S, U, V]], p *linkedNode[IBlock[S, U, V]]) {
+	if root == nil {
+		return
+	}
+	bc._reverse(root.next, root)
+	root.data.Reverse()
+	root.prev = root.next
+	root.next = p
+}
+
+func (bc *BlockChain[S, U, V]) _split(node *linkedNode[IBlock[S, U, V]], k int32) {
+	post := &linkedNode[IBlock[S, U, V]]{}
+	block1, block2 := node.data.Split(k)
+	linkNode(post, node.next)
+	linkNode(node, post)
+	post.data = block2
+	post.size = node.size - k
+	node.data = block1
+	node.size = k
+}
+
+func (bc *BlockChain[S, U, V]) _mergeNode(a, b *linkedNode[IBlock[S, U, V]]) {
+	linkNode(a, b.next)
+	a.data = a.data.Merge(b.data)
+	a.size += b.size
+}
+
+func (bc *BlockChain[S, U, V]) _maintain() {
+	bc.size = 0
+	for node := bc.Head.next; node != bc.Tail; node = node.next {
+		bc.size += node.size
+		if node.size >= 2*bc.b {
+			bc._split(node, bc.b)
+		} else if node.prev != bc.Head && node.size+node.prev.size <= bc.b {
+			bc._mergeNode(node.prev, node)
+		}
+	}
+}
+
+func (bc *BlockChain[S, U, V]) _splitKth(k int32) *linkedNode[IBlock[S, U, V]] {
+	for node := bc.Head.next; node != bc.Tail; node = node.next {
+		if node.size < k {
+			k -= node.size
+			continue
+		}
+		if k != 1 {
+			bc._split(node, k-1)
+			node = node.next
+		}
+		return node
+	}
+	return bc.Tail
+}
+
+func (bc *BlockChain[S, U, V]) _enter(L, R, l, r int32) bool {
+	return L <= l && r <= R
+}
+
+func (bc *BlockChain[S, U, V]) _leave(L, R, l, r int32) bool {
+	return l > R || r < L
 }
 
 type linkedNode[V any] struct {
@@ -517,9 +372,97 @@ func linkNode[V any](a, b *linkedNode[V]) {
 	a.next = b
 }
 
-func cutNode[V any](a, b *linkedNode[V]) {
-	a.next = nil
-	b.prev = nil
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+// application
+type INumberArrayBlock = IBlock[*int, int, int]
+type NumberArrayBlock struct {
+	data []int
+	sum  int
+}
+
+func NewNumberArrayBlock(data []int) *NumberArrayBlock {
+	res := &NumberArrayBlock{data: data}
+	for _, v := range data {
+		res.sum += v
+	}
+	return res
+}
+
+func (nab *NumberArrayBlock) Split(k int32) (block1 INumberArrayBlock, block2 INumberArrayBlock) {
+	a, b := nab.data[:k], nab.data[k:]
+	return NewNumberArrayBlock(a), NewNumberArrayBlock(b)
+}
+
+func (nab *NumberArrayBlock) Merge(other INumberArrayBlock) INumberArrayBlock {
+	nab.data = append(nab.data, other.(*NumberArrayBlock).data...)
+	for _, v := range other.(*NumberArrayBlock).data {
+		nab.sum += v
+	}
+	return nab
+}
+
+func (nab *NumberArrayBlock) InserBefore(index int32, e int) {
+	nab.data = append(nab.data[:index], append([]int{e}, nab.data[index:]...)...)
+	nab.sum += e
+}
+
+func (nab *NumberArrayBlock) Delete(index int32) {
+	nab.sum -= nab.data[index]
+	nab.data = append(nab.data[:index], nab.data[index+1:]...)
+}
+
+func (nab *NumberArrayBlock) Get(index int32) int {
+	return nab.data[index]
+}
+
+func (nab *NumberArrayBlock) Reverse() {
+	for i, j := 0, len(nab.data)-1; i < j; i, j = i+1, j-1 {
+		nab.data[i], nab.data[j] = nab.data[j], nab.data[i]
+	}
+}
+
+func (nab *NumberArrayBlock) FullyQuery(sum *int) {
+	*sum += nab.sum
+}
+
+func (nab *NumberArrayBlock) PartialQuery(index int32, sum *int) {
+	*sum += nab.data[index]
+}
+
+func (nab *NumberArrayBlock) FullyUpdate(lazy int) {}
+
+func (nab *NumberArrayBlock) PartialUpdate(index int32, lazy int) {}
+
+func (nab *NumberArrayBlock) BeforePartialQuery() {}
+
+func (nab *NumberArrayBlock) AfterPartialUpdate() {}
+
+func test() {
+	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	blockChain := NewBlockChain(
+		10,
+		func(start, end int32) IBlock[*int, int, int] {
+			return NewNumberArrayBlock(nums[start:end])
+		},
+		-1,
+	)
+
+	sum := new(int)
+	blockChain.Query(0, 9, sum)
+	fmt.Println(*sum)
 }
 
 // 406. 根据身高重建队列

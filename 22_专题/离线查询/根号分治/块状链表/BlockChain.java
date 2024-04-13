@@ -7,7 +7,6 @@ import template.utils.SegmentUtils;
 import java.util.function.Supplier;
 
 /**
- * 块状链表.
  * all operation in this framework take O(N/B) while N is the maximum size and B is the block size
  *
  * @param <S>

@@ -33,3 +33,4 @@ console.log(myInstanceOf(1, Number)) // false
 // myInstanceOf(b, C) // true
 // C.prototype = {}
 // myInstanceOf(b, C) // false
+export {}
