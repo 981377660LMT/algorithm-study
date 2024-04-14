@@ -16,3 +16,7 @@ for state in range(1, 1 << n):
 ---
 
 https://compro.tsutaj.com//archive/181015_incexc.pdf
+
+---
+
+https://github.com/EndlessCheng/codeforces-go/blob/86d1fd150c7b53861a52fa81ce456666bf547691/copypasta/math_comb.go#L376

@@ -1,10 +1,10 @@
-// Offline sum of linear segments （区間一次関数加算クエリの累積和を用いたオフライン処理）
-// 区间一次函数叠加求和/区间等差数列求和
+// https://www.luogu.com.cn/problem/P1438
+// 在线区间一次函数叠加求和/区间等差数列求和
 
 // AddLinear(start, end, k, b):
-//   O(1) 为数组 [start, end) 的每个位置 i 加上 k*(i-start)+b.
-// Run():
-//   O(n) 返回数组的累加和.
+//   O(logn) 为数组 [start, end) 的每个位置 i 加上 k*(i-start)+b.
+// Get(index):
+//   O(logn) 返回数组的累加和.
 
 package main
 

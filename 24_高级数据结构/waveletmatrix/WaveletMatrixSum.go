@@ -1,3 +1,5 @@
+// !deprecated
+//
 // 维护区间贡献的 Wavelet Matrix
 // !注意查询区间贡献时, 异或无效
 
@@ -25,7 +27,8 @@ import (
 
 func main() {
 	// demo()
-	CF1771F()
+	// CF1771F()
+	区间最短距离和()
 }
 
 // Hossam and Range Minimum Query
@@ -455,31 +458,31 @@ func abs(a int) int {
 }
 
 type BitVector struct {
-	data [][2]int
+	bits   []uint64
+	preSum []int32
 }
 
 func NewBitVector(n int) *BitVector {
-	return &BitVector{data: make([][2]int, (n+63)>>5)}
+	return &BitVector{bits: make([]uint64, n>>6+1), preSum: make([]int32, n>>6+1)}
 }
 
 func (bv *BitVector) Set(i int) {
-	bv.data[i>>5][0] |= 1 << (i & 31)
+	bv.bits[i>>6] |= 1 << (i & 63)
 }
 
 func (bv *BitVector) Build() {
-	for i := 0; i < len(bv.data)-1; i++ {
-		bv.data[i+1][1] = bv.data[i][1] + bits.OnesCount(uint(bv.data[i][0]))
+	for i := 0; i < len(bv.bits)-1; i++ {
+		bv.preSum[i+1] = bv.preSum[i] + int32(bits.OnesCount64(bv.bits[i]))
 	}
 }
 
-// [0, k) 内の 1 の個数
 func (bv *BitVector) Rank(k int, f int) int {
-	a, b := bv.data[k>>5][0], bv.data[k>>5][1]
-	ret := b + bits.OnesCount(uint(a&((1<<(k&31))-1)))
+	m, s := bv.bits[k>>6], bv.preSum[k>>6]
+	res := int(s) + bits.OnesCount64(m&((1<<(k&63))-1))
 	if f == 1 {
-		return ret
+		return res
 	}
-	return k - ret
+	return k - res
 }
 
 // (紧)离散化.

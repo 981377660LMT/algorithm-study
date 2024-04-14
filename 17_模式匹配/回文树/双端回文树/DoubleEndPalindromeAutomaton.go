@@ -1,15 +1,21 @@
 package main
 
-import "fmt"
-
-// https://loj.ac/p/141
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
 func main() {
+	loj_141()
+}
+
+func demo() {
 	tree := NewDoubleEndPalindromeAutomaton(100, 100)
-	tree.PushFront('a')
-	tree.PushFront('b')
-	tree.PushFront('a')
-	tree.PushBack('b')
+	tree.AppendLeft('a')
+	tree.AppendLeft('b')
+	tree.AppendLeft('a')
+	tree.Append('b')
 
 	// abab
 	fmt.Println(tree.PalindromeSubstringCount())
@@ -17,6 +23,50 @@ func main() {
 	tree.Visit(func(node *TreeNode) {
 		fmt.Println(node)
 	})
+}
+
+// https://loj.ac/p/141
+// 1：在字符串 s 的末尾添加一个字符串；
+// 2：在字符串 s 的前端添加一个字符串的 反序；
+// 3：查询字符串 s 的所有非空回文子串的数量。
+func loj_141() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s string
+	fmt.Fscan(in, &s)
+
+	var q int32
+	fmt.Fscan(in, &q)
+
+	n := int32(len(s))
+
+	const S int32 = 4e5 + 10
+	P := NewDoubleEndPalindromeAutomaton(S, S)
+	for i := int32(0); i < n; i++ {
+		P.Append(int32(s[i]))
+	}
+
+	for i := int32(0); i < q; i++ {
+		var op int32
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var c string
+			fmt.Fscan(in, &c)
+			for _, v := range c {
+				P.Append(v)
+			}
+		} else if op == 2 {
+			var c string
+			fmt.Fscan(in, &c)
+			for _, v := range c {
+				P.AppendLeft(v)
+			}
+		} else {
+			fmt.Fprintln(out, P.PalindromeSubstringCount())
+		}
+	}
 }
 
 type TreeNode struct {
@@ -61,7 +111,7 @@ func NewDoubleEndPalindromeAutomaton(frontAddition, backAddition int32) *DoubleE
 	return res
 }
 
-func (tree *DoubleEndPalindromeAutomaton) PushFront(char int32) {
+func (tree *DoubleEndPalindromeAutomaton) AppendLeft(char int32) {
 	tree.data[tree.frontSize] = char
 	tree.frontSize--
 	trace := tree.frontBuildLast
@@ -96,7 +146,7 @@ func (tree *DoubleEndPalindromeAutomaton) PushFront(char int32) {
 	tree.palindromeSubstringCount += int(tree.frontBuildLast.Depth)
 }
 
-func (tree *DoubleEndPalindromeAutomaton) PushBack(char int32) {
+func (tree *DoubleEndPalindromeAutomaton) Append(char int32) {
 	tree.data[tree.backSize] = char
 	tree.backSize++
 	trace := tree.backBuildLast
@@ -131,18 +181,20 @@ func (tree *DoubleEndPalindromeAutomaton) PushBack(char int32) {
 	tree.palindromeSubstringCount += int(tree.backBuildLast.Depth)
 }
 
-func (tree *DoubleEndPalindromeAutomaton) Visit(consumer func(*TreeNode)) {
-	for i := len(tree.nodes) - 1; i >= 0; i-- {
-		consumer(tree.nodes[i])
-	}
-}
-
+// 回文子串总数.
 func (tree *DoubleEndPalindromeAutomaton) PalindromeSubstringCount() int {
 	return tree.palindromeSubstringCount
 }
 
+// 本质不同回文子串总数.
 func (tree *DoubleEndPalindromeAutomaton) DistinctPalindromeSubstring() int32 {
 	return int32(len(tree.nodes))
+}
+
+func (tree *DoubleEndPalindromeAutomaton) Visit(consumer func(*TreeNode)) {
+	for i := len(tree.nodes) - 1; i >= 0; i-- {
+		consumer(tree.nodes[i])
+	}
 }
 
 func (tree *DoubleEndPalindromeAutomaton) _alloc() *TreeNode {

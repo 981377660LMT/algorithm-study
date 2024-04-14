@@ -26,3 +26,12 @@ https://zhuanlan.zhihu.com/p/482150152
 非常类似 完全背包(无穷背包)
 
 一般的完全背包是 `O(容量*物品个数)`，同余最短路的背包是 `O(物品价值*物品个数log(物品个数))`
+
+---
+
+TODO：
+https://github.com/EndlessCheng/codeforces-go/blob/86d1fd150c7b53861a52fa81ce456666bf547691/copypasta/graph.go#L2008
+https://zhuanlan.zhihu.com/p/583236322
+https://www.cnblogs.com/alex-wei/p/17531487.html (同余最短路的转圈技巧)
+https://oi-wiki.org/graph/mod-shortest-path/
+https://zhuanlan.zhihu.com/p/672216458

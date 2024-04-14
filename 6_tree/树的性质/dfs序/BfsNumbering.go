@@ -4,6 +4,7 @@
 
 // !ID[v]：每个顶点的bfs序 (0-indexed)
 // !GetRange(v, dep)：以v为顶点的子树中, `绝对深度`为depth的顶点的bfs序的范围(左闭右开)
+// !DiskRange(v, r)：到v的距离不超过r的顶点的bfs序的范围.
 
 package main
 
@@ -27,6 +28,19 @@ import (
 //  5(6)
 
 func main() {
+	edges := [][2]int{{0, 1}, {0, 2}, {1, 3}, {1, 4}, {1, 6}, {3, 5}}
+	tree := make([][][2]int, 7)
+	for _, e := range edges {
+		tree[e[0]] = append(tree[e[0]], [2]int{e[1], 1})
+		tree[e[1]] = append(tree[e[1]], [2]int{e[0], 1})
+	}
+	B := NewBFSNumbering(tree, 0)
+	fmt.Println(B.GetRange(0, 1))  // 1 3
+	fmt.Println(B.GetRange(0, 2))  // 1 6
+	fmt.Println(B.DiskRange(1, 1)) // 3 6
+}
+
+func abc202e() {
 	// https://atcoder.jp/contests/abc202/tasks/abc202_e
 	// !子树中特定深度的结点个数
 	in := bufio.NewReader(os.Stdin)
@@ -93,6 +107,36 @@ func (b *BFSNumbering) GetRange(root, depth int) (start, end int) {
 	start = int(b.bs(left2-1, right2, left1))
 	end = int(b.bs(left2-1, right2, right1))
 	return
+}
+
+// dist(p,v)<=r
+// 到v的距离不超过r的顶点的bfs序的范围.
+func (b *BFSNumbering) DiskRange(v, r int) [][2]int {
+	if r < 0 {
+		return nil
+	}
+	var res [][2]int
+	d := int(b.Depth[v])
+	for k := 0; k <= r; k++ {
+		if v == -1 {
+			break
+		}
+		hi := d + r - k
+		lo := hi - 1
+		if lo < d {
+			lo = d
+		}
+		if b.Parent[v] == -1 {
+			lo = 0
+		}
+		for i := lo; i <= hi; i++ {
+			start, end := b.GetRange(v, i)
+			res = append(res, [2]int{start, end})
+		}
+		v = int(b.Parent[v])
+		d--
+	}
+	return res
 }
 
 func (b *BFSNumbering) build() {
