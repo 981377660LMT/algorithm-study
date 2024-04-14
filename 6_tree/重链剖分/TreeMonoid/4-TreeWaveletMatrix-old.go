@@ -8,7 +8,8 @@ import (
 )
 
 func main() {
-	L番目の数字()
+	// L番目の数字()
+	AnUnusualKinginPakenKingdom()
 }
 
 func AnUnusualKinginPakenKingdom() {
