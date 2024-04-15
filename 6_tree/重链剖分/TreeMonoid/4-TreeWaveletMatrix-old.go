@@ -8,8 +8,35 @@ import (
 )
 
 func main() {
+	demo()
 	// L番目の数字()
-	AnUnusualKinginPakenKingdom()
+	// AnUnusualKinginPakenKingdom()
+}
+
+func demo() {
+	//   0
+	//  / \
+	// 1   2
+	//    / \
+	//   3   4
+	//      /
+	//     5
+
+	tree := _NT(6)
+	tree.AddEdge(0, 1, 0)
+	tree.AddEdge(0, 2, 0)
+	tree.AddEdge(2, 3, 0)
+	tree.AddEdge(2, 4, 0)
+	tree.AddEdge(4, 5, 0)
+	tree.Build(0)
+
+	wm := NewTreeWaveletMatrix(tree, []int{0, 1, 2, 3, 4, 5}, true, -1, []int{0, 1, 2, 3, 4, 5})
+	fmt.Println(wm.CountPath(0, 5, 2, 5, 0))       // 2
+	fmt.Println(wm.CountSubtree(2, 2, 5, 0))       // 3
+	fmt.Println(wm.KthValueAndSumPath(0, 5, 2, 0)) // 4, 2
+	fmt.Println(wm.KthValueAndSumSubtree(2, 2, 0)) // 4, 5
+	fmt.Println(wm.KthPath(0, 5, 1, 0))            // 2
+	fmt.Println(wm.SumPath(0, 5, 1, 3, 0))         // 3
 }
 
 func AnUnusualKinginPakenKingdom() {
@@ -433,6 +460,7 @@ func (wm *WaveletMatrixSegments) KthSegments(segments [][2]int, k, xor int) E {
 			l0, r0 := wm.bv[d].Rank(L, 0), wm.bv[d].Rank(R, 0)
 			c += f*(R-L-r0+l0) + (f^1)*(r0-l0)
 		}
+
 		if count+c > k {
 			for i := range segments {
 				seg := &segments[i]
@@ -498,7 +526,8 @@ func (wm *WaveletMatrixSegments) Sum(left, right, k1, k2, xor int) E {
 }
 
 func (wm *WaveletMatrixSegments) SumSegments(segments [][2]int, k1, k2, xor int) E {
-	return wm.prefixSumSegments(segments, k2, xor) - wm.prefixSumSegments(segments, k1, xor)
+	segCopy := append(segments[:0:0], segments...)
+	return wm.prefixSumSegments(segments, k2, xor) - wm.prefixSumSegments(segCopy, k1, xor)
 }
 
 func (wm *WaveletMatrixSegments) SumAll(left, right int) E {

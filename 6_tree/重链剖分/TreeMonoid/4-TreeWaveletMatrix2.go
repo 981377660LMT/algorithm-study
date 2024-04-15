@@ -9,12 +9,45 @@ import (
 )
 
 func main() {
-	AnUnusualKinginPakenKingdom()
-	// L番目の数字()
+	// demo()
+	// AnUnusualKinginPakenKingdom()
+	L番目の数字()
+}
+
+func demo() {
+	//   0
+	//  / \
+	// 1   2
+	//    / \
+	//   3   4
+	//      /
+	//     5
+
+	tree := NewTree32(6)
+	tree.AddEdge(0, 1, 0)
+	tree.AddEdge(0, 2, 0)
+	tree.AddEdge(2, 3, 0)
+	tree.AddEdge(2, 4, 0)
+	tree.AddEdge(4, 5, 0)
+	tree.Build(0)
+
+	wm := NewTreeWaveletMatrix(tree, []int{0, 1, 2, 3, 4, 5}, true, []int{0, 1, 2, 3, 4, 5}, -1, false)
+	fmt.Println(wm.CountPath(0, 5, 2, 5, 0))       // 2
+	fmt.Println(wm.CountSubtree(2, 2, 5, 0))       // 3
+	fmt.Println(wm.KthValueAndSumPath(0, 5, 2, 0)) // 4, 2
+	fmt.Println(wm.KthValueAndSumSubtree(2, 2, 0)) // 4, 5
+	fmt.Println(wm.KthPath(0, 5, 1, 0))            // 2
+	fmt.Println(wm.KthSubtree(2, 1, 0))            // 3
+	fmt.Println(wm.MedianPath(0, 5, false, 0))     // 2
+	fmt.Println(wm.MedianSubtree(2, false, 0))     // 3
+	fmt.Println(wm.SumPath(0, 5, 1, 3, 0))         // 6
+	fmt.Println(wm.SumSubtree(2, 1, 3, 0))         // 7
+	fmt.Println(wm.SumAllPath(0, 5))               // 11
+	fmt.Println(wm.SumAllSubtree(2))               // 14
 }
 
 // https://atcoder.jp/contests/pakencamp-2022-day1/tasks/pakencamp_2022_day1_j
-// 路径上的中位数
+// !路径上的中位数(树上路径中位数)
 func AnUnusualKinginPakenKingdom() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -46,34 +79,34 @@ func AnUnusualKinginPakenKingdom() {
 	}
 }
 
+// https://atcoder.jp/contests/utpc2011/tasks/utpc2011_12
+// !路径上第k小的数(树上路径第k小)
 func L番目の数字() {
-	// // https://atcoder.jp/contests/utpc2011/tasks/utpc2011_12
-	// // 路径上第k小的数
 
-	// in := bufio.NewReader(os.Stdin)
-	// out := bufio.NewWriter(os.Stdout)
-	// defer out.Flush()
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-	// var n, q int
-	// fmt.Fscan(in, &n, &q)
-	// tree := _NT(n)
-	// values := make([]int, n)
-	// for i := 0; i < n; i++ {
-	// 	fmt.Fscan(in, &values[i])
-	// }
-	// for i := 0; i < n-1; i++ {
-	// 	var a, b int
-	// 	fmt.Fscan(in, &a, &b)
-	// 	tree.AddEdge(a-1, b-1, 1)
-	// }
-	// tree.Build(0)
-	// twm := NewTreeWaveletMatrix(tree, values, true, -1, nil)
-	// for i := 0; i < q; i++ {
-	// 	var a, b, k int
-	// 	fmt.Fscan(in, &a, &b, &k)
-	// 	a, b, k = a-1, b-1, k-1
-	// 	fmt.Fprintln(out, twm.KthPath(a, b, k, 0))
-	// }
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	tree := NewTree32(n)
+	values := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &values[i])
+	}
+	for i := int32(0); i < n-1; i++ {
+		var a, b int32
+		fmt.Fscan(in, &a, &b)
+		tree.AddEdge(a-1, b-1, 1)
+	}
+	tree.Build(0)
+	twm := NewTreeWaveletMatrix(tree, values, true, nil, -1, true)
+	for i := int32(0); i < q; i++ {
+		var a, b, k int32
+		fmt.Fscan(in, &a, &b, &k)
+		a, b, k = a-1, b-1, k-1
+		fmt.Fprintln(out, twm.KthPath(a, b, k, 0))
+	}
 }
 
 const INF WmValue = 1e18
@@ -88,7 +121,7 @@ func inv(a WmSum) WmSum   { return -a }
 type TreeWaveletMatrix struct {
 	tree     *Tree32
 	n        int32
-	wm       *WaveletMatrixWithSum
+	wm       *WaveletMatrixForTreeWithSum
 	isVertex bool
 	compress bool
 }
@@ -101,7 +134,7 @@ type TreeWaveletMatrix struct {
 func NewTreeWaveletMatrix(tree *Tree32, data []WmValue, isVertex bool, sumData []WmSum, log int32, compress bool) *TreeWaveletMatrix {
 	res := &TreeWaveletMatrix{
 		tree: tree, n: int32(len(tree.Tree)),
-		wm: &WaveletMatrixWithSum{}, isVertex: isVertex, compress: compress,
+		wm: &WaveletMatrixForTreeWithSum{}, isVertex: isVertex, compress: compress,
 	}
 	n := res.n
 	A1 := make([]WmValue, n)
@@ -235,7 +268,7 @@ func (twm *TreeWaveletMatrix) getSegments(s, t int32) [][2]int32 {
 	segments := twm.tree.GetPathDecomposition(s, t, twm.isVertex)
 	for i := 0; i < len(segments); i++ {
 		seg := &segments[i]
-		if seg[0] >= seg[1] {
+		if seg[0] > seg[1] {
 			seg[0], seg[1] = seg[1], seg[0]
 		}
 		seg[1]++
@@ -600,10 +633,10 @@ func (tree *Tree32) markTop(cur, top int32) {
 	tree.RID[cur] = tree.timer
 }
 
-type WaveletMatrixWithSum struct {
+type WaveletMatrixForTreeWithSum struct {
 	n, log   int32
 	mid      []int32
-	bv       []*BitVector
+	bv       []*bitVector
 	key      []WmValue
 	setLog   bool
 	presum   [][]WmSum
@@ -614,13 +647,13 @@ type WaveletMatrixWithSum struct {
 // sumData: 和数据，nil表示不需要和数据.
 // log: 如果需要支持异或查询则需要传入log，-1表示默认.
 // compress: 是否对nums进行离散化(值域较大(1e9)时可以离散化加速).
-func NewWaveletMatrixWithSum(nums []WmValue, sumData []WmSum, log int32, compress bool) *WaveletMatrixWithSum {
-	wm := &WaveletMatrixWithSum{}
+func NewWaveletMatrixForTreeWithSum(nums []WmValue, sumData []WmSum, log int32, compress bool) *WaveletMatrixForTreeWithSum {
+	wm := &WaveletMatrixForTreeWithSum{}
 	wm.build(nums, sumData, log, compress)
 	return wm
 }
 
-func (wm *WaveletMatrixWithSum) build(nums []WmValue, sumData []WmSum, log int32, compress bool) {
+func (wm *WaveletMatrixForTreeWithSum) build(nums []WmValue, sumData []WmSum, log int32, compress bool) {
 	numsCopy := append(nums[:0:0], nums...)
 	sumDataCopy := append(sumData[:0:0], sumData...)
 
@@ -654,9 +687,9 @@ func (wm *WaveletMatrixWithSum) build(nums []WmValue, sumData []WmSum, log int32
 		wm.log = int32(bits.Len(uint(tmp)))
 	}
 	wm.mid = make([]int32, wm.log)
-	wm.bv = make([]*BitVector, wm.log)
+	wm.bv = make([]*bitVector, wm.log)
 	for i := range wm.bv {
-		wm.bv[i] = NewBitVector(wm.n)
+		wm.bv[i] = newBitVector(wm.n)
 	}
 	if makeSum {
 		wm.presum = make([][]WmSum, 1+wm.log)
@@ -715,11 +748,11 @@ func (wm *WaveletMatrixWithSum) build(nums []WmValue, sumData []WmSum, log int32
 }
 
 // 区间 [start, end) 中范围在 [a, b) 中的元素的个数.
-func (wm *WaveletMatrixWithSum) CountRange(start, end int32, a, b WmValue, xorVal WmValue) int32 {
+func (wm *WaveletMatrixForTreeWithSum) CountRange(start, end int32, a, b WmValue, xorVal WmValue) int32 {
 	return wm.CountPrefix(start, end, b, xorVal) - wm.CountPrefix(start, end, a, xorVal)
 }
 
-func (wm *WaveletMatrixWithSum) SumRange(start, end, k1, k2 int32, xorVal WmValue) WmSum {
+func (wm *WaveletMatrixForTreeWithSum) SumRange(start, end, k1, k2 int32, xorVal WmValue) WmSum {
 	if k1 < 0 {
 		k1 = 0
 	}
@@ -735,7 +768,7 @@ func (wm *WaveletMatrixWithSum) SumRange(start, end, k1, k2 int32, xorVal WmValu
 }
 
 // 返回区间 [start, end) 中 范围在 [0, x) 中的元素的个数.
-func (wm *WaveletMatrixWithSum) CountPrefix(start, end int32, x WmValue, xor WmValue) int32 {
+func (wm *WaveletMatrixForTreeWithSum) CountPrefix(start, end int32, x WmValue, xor WmValue) int32 {
 	if xor != 0 {
 		if !wm.setLog {
 			panic("log should be set when xor is used")
@@ -782,13 +815,13 @@ func (wm *WaveletMatrixWithSum) CountPrefix(start, end int32, x WmValue, xor WmV
 }
 
 // 返回区间 [start, end) 中 [0, k) 的和.
-func (wm *WaveletMatrixWithSum) SumPrefix(start, end, k int32, xor WmValue) WmSum {
+func (wm *WaveletMatrixForTreeWithSum) SumPrefix(start, end, k int32, xor WmValue) WmSum {
 	_, sum := wm.KthValueAndSum(start, end, k, xor)
 	return sum
 }
 
 // [start, end)区间内第k(k>=0)小的元素.
-func (wm *WaveletMatrixWithSum) Kth(start, end, k int32, xorVal WmValue) WmValue {
+func (wm *WaveletMatrixForTreeWithSum) Kth(start, end, k int32, xorVal WmValue) WmValue {
 	if xorVal != 0 {
 		if !wm.setLog {
 			panic("log should be set")
@@ -831,7 +864,7 @@ func (wm *WaveletMatrixWithSum) Kth(start, end, k int32, xorVal WmValue) WmValue
 
 // 返回区间 [start, end) 中的 (第k小的元素, 前k个元素(不包括第k小的元素) 的 op 的结果).
 // 如果k >= end-start, 返回 (-1, 区间 op 的结果).
-func (wm *WaveletMatrixWithSum) KthValueAndSum(start, end, k int32, xorVal WmValue) (WmValue, WmSum) {
+func (wm *WaveletMatrixForTreeWithSum) KthValueAndSum(start, end, k int32, xorVal WmValue) (WmValue, WmSum) {
 	if start >= end {
 		return -1, e()
 	}
@@ -891,7 +924,7 @@ func (wm *WaveletMatrixWithSum) KthValueAndSum(start, end, k int32, xorVal WmVal
 }
 
 // upper: 向上取中位数还是向下取中位数.
-func (wm *WaveletMatrixWithSum) Median(start, end int32, upper bool, xorVal WmValue) WmValue {
+func (wm *WaveletMatrixForTreeWithSum) Median(start, end int32, upper bool, xorVal WmValue) WmValue {
 	n := end - start
 	var k int32
 	if upper {
@@ -902,12 +935,12 @@ func (wm *WaveletMatrixWithSum) Median(start, end int32, upper bool, xorVal WmVa
 	return wm.Kth(start, end, k, xorVal)
 }
 
-func (wm *WaveletMatrixWithSum) SumAll(start, end int32) WmSum {
+func (wm *WaveletMatrixForTreeWithSum) SumAll(start, end int32) WmSum {
 	return wm._get(wm.log, start, end)
 }
 
 // 使得predicate(count, sum)为true的最大的(count, sum).
-func (wm *WaveletMatrixWithSum) MaxRight(predicate func(int32, WmSum) bool, start, end int32, xorVal WmValue) (int32, WmSum) {
+func (wm *WaveletMatrixForTreeWithSum) MaxRight(predicate func(int32, WmSum) bool, start, end int32, xorVal WmValue) (int32, WmSum) {
 	if xorVal != 0 {
 		if !wm.setLog {
 			panic("log should be set when xor is used")
@@ -965,7 +998,7 @@ func (wm *WaveletMatrixWithSum) MaxRight(predicate func(int32, WmSum) bool, star
 // [start, end) 中小于等于 x 的数中最大的数
 //
 //	如果不存在则返回-INF
-func (wm *WaveletMatrixWithSum) Floor(start, end int32, x WmValue, xor WmValue) WmValue {
+func (wm *WaveletMatrixForTreeWithSum) Floor(start, end int32, x WmValue, xor WmValue) WmValue {
 	less := wm.CountPrefix(start, end, x, xor)
 	if less == 0 {
 		return -INF
@@ -977,7 +1010,7 @@ func (wm *WaveletMatrixWithSum) Floor(start, end int32, x WmValue, xor WmValue) 
 // [start, end) 中大于等于 x 的数中最小的数
 //
 //	如果不存在则返回INF
-func (wm *WaveletMatrixWithSum) Ceil(start, end int32, x WmValue, xor WmValue) int {
+func (wm *WaveletMatrixForTreeWithSum) Ceil(start, end int32, x WmValue, xor WmValue) int {
 	less := wm.CountPrefix(start, end, x, xor)
 	if less == end-start {
 		return INF
@@ -986,7 +1019,7 @@ func (wm *WaveletMatrixWithSum) Ceil(start, end int32, x WmValue, xor WmValue) i
 	return res
 }
 
-func (wm *WaveletMatrixWithSum) CountSegments(segments [][2]int32, a, b WmValue, xorVal WmValue) int32 {
+func (wm *WaveletMatrixForTreeWithSum) CountSegments(segments [][2]int32, a, b WmValue, xorVal WmValue) int32 {
 	res := int32(0)
 	for _, seg := range segments {
 		res += wm.CountRange(seg[0], seg[1], a, b, xorVal)
@@ -994,7 +1027,7 @@ func (wm *WaveletMatrixWithSum) CountSegments(segments [][2]int32, a, b WmValue,
 	return res
 }
 
-func (wm *WaveletMatrixWithSum) KthSegments(segments [][2]int32, k int32, xorVal WmValue) WmValue {
+func (wm *WaveletMatrixForTreeWithSum) KthSegments(segments [][2]int32, k int32, xorVal WmValue) WmValue {
 	totalLen := int32(0)
 	for _, seg := range segments {
 		totalLen += seg[1] - seg[0]
@@ -1013,7 +1046,8 @@ func (wm *WaveletMatrixWithSum) KthSegments(segments [][2]int32, k int32, xorVal
 			}
 		}
 		if count+c > k {
-			for _, seg := range segments {
+			for i := range segments {
+				seg := &segments[i]
 				l0, r0 := wm.bv[d].Rank(seg[0], false), wm.bv[d].Rank(seg[1], false)
 				if !f {
 					seg[0], seg[1] = l0, r0
@@ -1025,7 +1059,8 @@ func (wm *WaveletMatrixWithSum) KthSegments(segments [][2]int32, k int32, xorVal
 		} else {
 			count += c
 			res |= 1 << d
-			for _, seg := range segments {
+			for i := range segments {
+				seg := &segments[i]
 				l0, r0 := wm.bv[d].Rank(seg[0], false), wm.bv[d].Rank(seg[1], false)
 				if f {
 					seg[0], seg[1] = l0, r0
@@ -1042,7 +1077,7 @@ func (wm *WaveletMatrixWithSum) KthSegments(segments [][2]int32, k int32, xorVal
 	return res
 }
 
-func (wm *WaveletMatrixWithSum) KthValueAndSumSegments(segments [][2]int32, k int32, xorVal WmValue) (WmValue, WmSum) {
+func (wm *WaveletMatrixForTreeWithSum) KthValueAndSumSegments(segments [][2]int32, k int32, xorVal WmValue) (WmValue, WmSum) {
 	if xorVal != 0 {
 		if !wm.setLog {
 			panic("log should be set when xor is used")
@@ -1070,7 +1105,8 @@ func (wm *WaveletMatrixWithSum) KthValueAndSumSegments(segments [][2]int32, k in
 			}
 		}
 		if count+c > k {
-			for _, seg := range segments {
+			for i := range segments {
+				seg := &segments[i]
 				l0, r0 := wm.bv[d].Rank(seg[0], false), wm.bv[d].Rank(seg[1], false)
 				if !f {
 					seg[0], seg[1] = l0, r0
@@ -1082,7 +1118,8 @@ func (wm *WaveletMatrixWithSum) KthValueAndSumSegments(segments [][2]int32, k in
 		} else {
 			count += c
 			res |= 1 << d
-			for _, seg := range segments {
+			for i := range segments {
+				seg := &segments[i]
 				l0, r0 := wm.bv[d].Rank(seg[0], false), wm.bv[d].Rank(seg[1], false)
 				var s WmSum
 				if f {
@@ -1111,7 +1148,7 @@ func (wm *WaveletMatrixWithSum) KthValueAndSumSegments(segments [][2]int32, k in
 	return res, sum
 }
 
-func (wm *WaveletMatrixWithSum) MedianSegments(segments [][2]int32, upper bool, xorVal WmValue) WmValue {
+func (wm *WaveletMatrixForTreeWithSum) MedianSegments(segments [][2]int32, upper bool, xorVal WmValue) WmValue {
 	n := int32(0)
 	for _, seg := range segments {
 		n += seg[1] - seg[0]
@@ -1125,7 +1162,7 @@ func (wm *WaveletMatrixWithSum) MedianSegments(segments [][2]int32, upper bool, 
 	return wm.KthSegments(segments, k, xorVal)
 }
 
-func (wm *WaveletMatrixWithSum) SumAllSegments(segments [][2]int32) WmSum {
+func (wm *WaveletMatrixForTreeWithSum) SumAllSegments(segments [][2]int32) WmSum {
 	sum := e()
 	for _, seg := range segments {
 		sum = op(sum, wm._get(wm.log, seg[0], seg[1]))
@@ -1133,25 +1170,26 @@ func (wm *WaveletMatrixWithSum) SumAllSegments(segments [][2]int32) WmSum {
 	return sum
 }
 
-func (wm *WaveletMatrixWithSum) SumSegments(segments [][2]int32, k1, k2 int32, xorVal WmValue) WmSum {
+func (wm *WaveletMatrixForTreeWithSum) SumSegments(segments [][2]int32, k1, k2 int32, xorVal WmValue) WmSum {
 	if k1 >= k2 {
 		return e()
 	}
+	segCopy := append(segments[:0:0], segments...)
 	add := wm._prefixSumSegments(segments, k2, xorVal)
-	sub := wm._prefixSumSegments(segments, k1, xorVal)
+	sub := wm._prefixSumSegments(segCopy, k1, xorVal)
 	return op(add, inv(sub))
 }
 
-func (wm *WaveletMatrixWithSum) _prefixSumSegments(segments [][2]int32, k int32, xor WmValue) WmSum {
+func (wm *WaveletMatrixForTreeWithSum) _prefixSumSegments(segments [][2]int32, k int32, xor WmValue) WmSum {
 	_, sum := wm.KthValueAndSumSegments(segments, k, xor)
 	return sum
 }
 
-func (wm *WaveletMatrixWithSum) _get(d, l, r int32) WmSum {
+func (wm *WaveletMatrixForTreeWithSum) _get(d, l, r int32) WmSum {
 	return op(inv(wm.presum[d][l]), wm.presum[d][r])
 }
 
-func (wm *WaveletMatrixWithSum) _argSort(nums []WmValue) []int32 {
+func (wm *WaveletMatrixForTreeWithSum) _argSort(nums []WmValue) []int32 {
 	order := make([]int32, len(nums))
 	for i := range order {
 		order[i] = int32(i)
@@ -1160,7 +1198,7 @@ func (wm *WaveletMatrixWithSum) _argSort(nums []WmValue) []int32 {
 	return order
 }
 
-func (wm *WaveletMatrixWithSum) _maxs(nums []WmValue) WmValue {
+func (wm *WaveletMatrixForTreeWithSum) _maxs(nums []WmValue) WmValue {
 	res := nums[0]
 	for _, v := range nums {
 		if v > res {
@@ -1170,7 +1208,7 @@ func (wm *WaveletMatrixWithSum) _maxs(nums []WmValue) WmValue {
 	return res
 }
 
-func (wm *WaveletMatrixWithSum) _lowerBound(nums []WmValue, target WmValue) WmValue {
+func (wm *WaveletMatrixForTreeWithSum) _lowerBound(nums []WmValue, target WmValue) WmValue {
 	left, right := int32(0), int32(len(nums)-1)
 	for left <= right {
 		mid := (left + right) >> 1
@@ -1183,7 +1221,7 @@ func (wm *WaveletMatrixWithSum) _lowerBound(nums []WmValue, target WmValue) WmVa
 	return WmValue(left)
 }
 
-func (wm *WaveletMatrixWithSum) _binarySearch(f func(int32) bool, ok, ng int32) int32 {
+func (wm *WaveletMatrixForTreeWithSum) _binarySearch(f func(int32) bool, ok, ng int32) int32 {
 	for abs32(ok-ng) > 1 {
 		x := (ok + ng) >> 1
 		if f(x) {
@@ -1195,26 +1233,26 @@ func (wm *WaveletMatrixWithSum) _binarySearch(f func(int32) bool, ok, ng int32) 
 	return ok
 }
 
-type BitVector struct {
+type bitVector struct {
 	bits   []uint64
 	preSum []int32
 }
 
-func NewBitVector(n int32) *BitVector {
-	return &BitVector{bits: make([]uint64, n>>6+1), preSum: make([]int32, n>>6+1)}
+func newBitVector(n int32) *bitVector {
+	return &bitVector{bits: make([]uint64, n>>6+1), preSum: make([]int32, n>>6+1)}
 }
 
-func (bv *BitVector) Set(i int32) {
+func (bv *bitVector) Set(i int32) {
 	bv.bits[i>>6] |= 1 << (i & 63)
 }
 
-func (bv *BitVector) Build() {
+func (bv *bitVector) Build() {
 	for i := 0; i < len(bv.bits)-1; i++ {
 		bv.preSum[i+1] = bv.preSum[i] + int32(bits.OnesCount64(bv.bits[i]))
 	}
 }
 
-func (bv *BitVector) Rank(k int32, f bool) int32 {
+func (bv *bitVector) Rank(k int32, f bool) int32 {
 	m, s := bv.bits[k>>6], bv.preSum[k>>6]
 	res := s + int32(bits.OnesCount64(m&((1<<(k&63))-1)))
 	if f {
