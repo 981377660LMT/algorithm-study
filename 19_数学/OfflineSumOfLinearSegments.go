@@ -2,9 +2,14 @@
 // 区间一次函数叠加求和/区间等差数列求和
 
 // AddLinear(start, end, k, b):
-//   O(1) 为数组 [start, end) 的每个位置 i 加上 k*(i-start)+b.
+//
+//	O(1) 为数组 [start, end) 的每个位置 i 加上 k*(i-start)+b.
+//
 // Run():
-//   O(n) 返回数组的累加和.
+//
+//	 O(n) 返回数组的累加和.
+//
+//	OfflineRangeLinearAddRangeSum
 
 package main
 
