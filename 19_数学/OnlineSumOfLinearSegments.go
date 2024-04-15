@@ -6,6 +6,8 @@
 // Get(index):
 //   O(logn) 返回数组的累加和.
 
+// RangeLinearAddRangeSum
+
 package main
 
 import "fmt"

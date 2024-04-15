@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-const INF int = 1e18
+const INF32 int32 = 1 << 30
 
 // https://judge.yosupo.jp/problem/staticrmq
 func main() {
@@ -17,13 +17,13 @@ func main() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int
+	var n, q int32
 	fmt.Fscan(in, &n, &q)
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
+	nums := make([]int32, n)
+	for i := int32(0); i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
-	e := func() S { return S{min: INF, index: -1} }
+	e := func() S { return S{min: INF32, index: -1} }
 	op := func(s1, s2 S) S {
 		if s1.min < s2.min {
 			return s1
@@ -33,10 +33,10 @@ func main() {
 		}
 		return S{min: s1.min, index: min32(s1.index, s2.index)}
 	}
-	rmq := NewSparseTableFast(n, func(i int) S { return S{min: nums[i], index: int32(i)} }, e, op)
+	rmq := NewSparseTableFast(n, func(i int32) S { return S{min: nums[i], index: i} }, e, op)
 
-	for i := 0; i < q; i++ {
-		var start, end int
+	for i := int32(0); i < q; i++ {
+		var start, end int32
 		fmt.Fscan(in, &start, &end)
 		fmt.Fprintln(out, rmq.Query(start, end).min)
 	}
@@ -45,13 +45,13 @@ func main() {
 // RangeMaxWIthIndex
 
 type S = struct {
-	min   int
+	min   int32
 	index int32
 }
 
 // Static RMQ, O(n)预处理, O(1)查询.
 type SparseTableFast struct {
-	n        int
+	n        int32
 	leaves   []S
 	pre, suf []S
 	st       *SparseTable
@@ -60,15 +60,15 @@ type SparseTableFast struct {
 	op       func(S, S) S
 }
 
-func NewSparseTableFast(n int, f func(int) S, e func() S, op func(S, S) S) *SparseTableFast {
+func NewSparseTableFast(n int32, f func(int32) S, e func() S, op func(S, S) S) *SparseTableFast {
 	res := &SparseTableFast{}
 	bNum := n >> 4
 	leaves := make([]S, n)
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		leaves[i] = f(i)
 	}
 	pre, suf := append(leaves[:0:0], leaves...), append(leaves[:0:0], leaves...)
-	for i := 1; i < n; i++ {
+	for i := int32(1); i < n; i++ {
 		if i&15 != 0 {
 			pre[i] = op(pre[i-1], leaves[i])
 		}
@@ -78,7 +78,7 @@ func NewSparseTableFast(n int, f func(int) S, e func() S, op func(S, S) S) *Spar
 			suf[i-1] = op(leaves[i-1], suf[i])
 		}
 	}
-	st := NewSparseTable(bNum, func(i int) S { return suf[i<<4] }, e, op)
+	st := NewSparseTable(bNum, func(i int32) S { return suf[i<<4] }, e, op)
 
 	// 处理长度小于或等于16的查询
 	// 在区间 [i, i+16) 内，如果 i+j 的位置上的值是 [i, i+j] 这个子区间的最小值，那么就将 j-th 位设置为1
@@ -108,10 +108,10 @@ func NewSparseTableFast(n int, f func(int) S, e func() S, op func(S, S) S) *Spar
 }
 
 func NewSparseTableFastFrom(leaves []S, e func() S, op func(S, S) S) *SparseTableFast {
-	return NewSparseTableFast(len(leaves), func(i int) S { return leaves[i] }, e, op)
+	return NewSparseTableFast(int32(len(leaves)), func(i int32) S { return leaves[i] }, e, op)
 }
 
-func (st *SparseTableFast) Query(start, end int) S {
+func (st *SparseTableFast) Query(start, end int32) S {
 	if start >= end {
 		return st.e()
 	}
@@ -127,52 +127,8 @@ func (st *SparseTableFast) Query(start, end int) S {
 	return x
 }
 
-// SparseTable 稀疏表: st[j][i] 表示区间 [i, i+2^j) 的贡献值.
-type SparseTable struct {
-	st [][]S
-	e  func() S
-	op func(S, S) S
-	n  int
-}
-
-func NewSparseTable(n int, f func(int) S, e func() S, op func(S, S) S) *SparseTable {
-	res := &SparseTable{}
-
-	b := bits.Len(uint(n))
-	st := make([][]S, b)
-	for i := range st {
-		st[i] = make([]S, n)
-	}
-	for i := 0; i < n; i++ {
-		st[0][i] = f(i)
-	}
-	for i := 1; i < b; i++ {
-		for j := 0; j+(1<<i) <= n; j++ {
-			st[i][j] = op(st[i-1][j], st[i-1][j+(1<<(i-1))])
-		}
-	}
-	res.st = st
-	res.e = e
-	res.op = op
-	res.n = n
-	return res
-}
-
-func NewSparseTableFrom(leaves []S, e func() S, op func(S, S) S) *SparseTable {
-	return NewSparseTable(len(leaves), func(i int) S { return leaves[i] }, e, op)
-}
-
-// 查询区间 [start, end) 的贡献值.
-func (st *SparseTable) Query(start, end int) S {
-	if start >= end {
-		return st.e()
-	}
-	b := bits.Len(uint(end-start)) - 1 // log2
-	return st.op(st.st[b][start], st.st[b][end-(1<<b)])
-}
-
 // 返回最大的 right 使得 [left,right) 内的值满足 check.
-func (ds *SparseTable) MaxRight(left int, check func(e S) bool) int {
+func (ds *SparseTableFast) MaxRight(left int32, check func(e S) bool) int32 {
 	if left == ds.n {
 		return ds.n
 	}
@@ -189,11 +145,11 @@ func (ds *SparseTable) MaxRight(left int, check func(e S) bool) int {
 }
 
 // 返回最小的 left 使得 [left,right) 内的值满足 check.
-func (ds *SparseTable) MinLeft(right int, check func(e S) bool) int {
+func (ds *SparseTableFast) MinLeft(right int32, check func(e S) bool) int32 {
 	if right == 0 {
 		return 0
 	}
-	ok, ng := right, -1
+	ok, ng := right, int32(-1)
 	for ng+1 < ok {
 		mid := (ok + ng) >> 1
 		if check(ds.Query(mid, right)) {
@@ -205,18 +161,96 @@ func (ds *SparseTable) MinLeft(right int, check func(e S) bool) int {
 	return ok
 }
 
-func topbit(x int32) int {
-	if x == 0 {
-		return -1
-	}
-	return 31 - bits.LeadingZeros32(uint32(x))
+// SparseTable 稀疏表: st[j][i] 表示区间 [i, i+2^j) 的贡献值.
+type SparseTable struct {
+	st [][]S
+	e  func() S
+	op func(S, S) S
+	n  int32
 }
 
-func lowbit(x int32) int {
+func NewSparseTable(n int32, f func(int32) S, e func() S, op func(S, S) S) *SparseTable {
+	res := &SparseTable{}
+
+	b := bits.Len32(uint32(n))
+	st := make([][]S, b)
+	for i := range st {
+		st[i] = make([]S, n)
+	}
+	for i := int32(0); i < n; i++ {
+		st[0][i] = f(i)
+	}
+	for i := 1; i < b; i++ {
+		for j := int32(0); j+(1<<i) <= n; j++ {
+			st[i][j] = op(st[i-1][j], st[i-1][j+(1<<(i-1))])
+		}
+	}
+	res.st = st
+	res.e = e
+	res.op = op
+	res.n = n
+	return res
+}
+
+func NewSparseTableFrom(leaves []S, e func() S, op func(S, S) S) *SparseTable {
+	return NewSparseTable(int32(len(leaves)), func(i int32) S { return leaves[i] }, e, op)
+}
+
+// 查询区间 [start, end) 的贡献值.
+func (st *SparseTable) Query(start, end int32) S {
+	if start >= end {
+		return st.e()
+	}
+	b := bits.Len(uint(end-start)) - 1 // log2
+	return st.op(st.st[b][start], st.st[b][end-(1<<b)])
+}
+
+// 返回最大的 right 使得 [left,right) 内的值满足 check.
+func (ds *SparseTable) MaxRight(left int32, check func(e S) bool) int32 {
+	if left == ds.n {
+		return ds.n
+	}
+	ok, ng := left, ds.n+1
+	for ok+1 < ng {
+		mid := (ok + ng) >> 1
+		if check(ds.Query(left, mid)) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
+// 返回最小的 left 使得 [left,right) 内的值满足 check.
+func (ds *SparseTable) MinLeft(right int32, check func(e S) bool) int32 {
+	if right == 0 {
+		return 0
+	}
+	ok, ng := right, int32(-1)
+	for ng+1 < ok {
+		mid := (ok + ng) >> 1
+		if check(ds.Query(mid, right)) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
+func topbit(x int32) int32 {
 	if x == 0 {
 		return -1
 	}
-	return bits.TrailingZeros32(uint32(x))
+	return int32(bits.Len32(uint32(x)) - 1)
+}
+
+func lowbit(x int32) int32 {
+	if x == 0 {
+		return -1
+	}
+	return int32(bits.TrailingZeros32(uint32(x)))
 }
 
 func min(a, b int) int {

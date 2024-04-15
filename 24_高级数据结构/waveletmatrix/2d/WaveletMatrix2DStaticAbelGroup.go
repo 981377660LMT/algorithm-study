@@ -1,12 +1,41 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 	"sort"
 )
 
 func main() {
+	yosupo()
+}
+
+// https://judge.yosupo.jp/problem/rectangle_sum
+// 943 ms
+func yosupo() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	X, Y, W := make([]int32, n), make([]int32, n), make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &X[i], &Y[i], &W[i])
+	}
+	wm := NewWaveletMatrix2DStaticAbelGroup(n, func(i int32) (x, y XY, w AbelGroup) {
+		return X[i], Y[i], AbelGroup(W[i])
+	}, false, false)
+	for i := int32(0); i < q; i++ {
+		var a, c, b, d int32
+		fmt.Fscan(in, &a, &c, &b, &d)
+		fmt.Fprintln(out, wm.Query(a, b, c, d))
+	}
+}
+
+func demo() {
 	points := [][]int32{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
 	wm := NewWaveletMatrix2DStaticAbelGroup(int32(len(points)), func(i int32) (x, y XY, w AbelGroup) {
 		return XY(points[i][0]), XY(points[i][1]), AbelGroup(points[i][2])

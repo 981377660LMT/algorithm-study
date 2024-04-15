@@ -1,12 +1,91 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 	"sort"
 )
 
 func main() {
+	// yosupo1()
+	yosupo2()
+}
+
+// RectangleSum
+// https://judge.yosupo1.jp/problem/rectangle_sum
+// 1085 ms
+func yosupo1() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	X, Y, W := make([]int32, n), make([]int32, n), make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &X[i], &Y[i], &W[i])
+	}
+	wm := NewWaveletMatrix2DDynamicAbelGroup(n, func(i int32) (x, y XY, w AbelGroup) {
+		return X[i], Y[i], AbelGroup(W[i])
+	}, false, false)
+	for i := int32(0); i < q; i++ {
+		var a, c, b, d int32
+		fmt.Fscan(in, &a, &c, &b, &d)
+		fmt.Fprintln(out, wm.Query(a, b, c, d))
+	}
+}
+
+// PointAddRectangleSum
+// https://judge.yosupo.jp/problem/point_add_rectangle_sum
+// 524 ms
+func yosupo2() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	X, Y, W := make([]int32, n), make([]int32, n), make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &X[i], &Y[i], &W[i])
+	}
+	type query = [4]int32
+	queries := make([]query, q)
+	for i := int32(0); i < q; i++ {
+		var t int32
+		fmt.Fscan(in, &t)
+		if t == 0 {
+			var x, y, w int32
+			fmt.Fscan(in, &x, &y, &w)
+			X = append(X, x)
+			Y = append(Y, y)
+			W = append(W, 0)
+			queries[i] = query{-1, x, y, w}
+		} else {
+			var a, b, c, d int32
+			fmt.Fscan(in, &a, &b, &c, &d)
+			queries[i] = query{a, c, b, d}
+		}
+	}
+
+	wm := NewWaveletMatrix2DDynamicAbelGroup(
+		int32(len(X)), func(i int32) (x, y XY, w AbelGroup) { return X[i], Y[i], AbelGroup(W[i]) },
+		false, false,
+	)
+	ptr := n
+	for _, query := range queries {
+		if query[0] == -1 {
+			wm.Add(ptr, AbelGroup(query[3]))
+			ptr++
+		} else {
+			fmt.Fprintln(out, wm.Query(query[0], query[1], query[2], query[3]))
+		}
+	}
+}
+
+func demo() {
 	points := [][]int32{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
 	wm := NewWaveletMatrix2DDynamicAbelGroup(int32(len(points)), func(i int32) (x, y XY, w AbelGroup) {
 		return XY(points[i][0]), XY(points[i][1]), AbelGroup(points[i][2])
