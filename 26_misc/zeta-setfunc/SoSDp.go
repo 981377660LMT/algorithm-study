@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"fmt"
 	"math/bits"
+	"math/rand"
 	"os"
 )
 
@@ -15,10 +16,216 @@ func main() {
 	// CF383E()
 	// CF449D()
 	// CF1234F()
-	ARC100E()
+	// ARC100E()
 
 	// 维护集合最大和次大的写法()
 	// demo()
+
+	bruteForce1 := func(nums []int) int {
+		res := 0
+		for i := 0; i < len(nums); i++ {
+			for j := i + 1; j < len(nums); j++ {
+				res = max(res, nums[i]|nums[j])
+			}
+		}
+		return res
+	}
+	bruteForce2 := func(nums []int) (maxOnesCount int, index1, index2 int) {
+		maxOnesCount = 0
+		for i := 0; i < len(nums); i++ {
+			for j := i + 1; j < len(nums); j++ {
+				if c := bits.OnesCount32(uint32(nums[i] & nums[j])); c > maxOnesCount {
+					maxOnesCount = c
+					index1, index2 = i, j
+				}
+			}
+		}
+		return
+	}
+	bruteForce3 := func(nums []int) int {
+		res := 0
+		for i := 0; i < len(nums); i++ {
+			for j := i + 1; j < len(nums); j++ {
+				if nums[i]&nums[j] == 0 {
+					res++
+				}
+			}
+		}
+		return res
+	}
+	bruteForce4 := func(nums []int) (maxOnesCount int, index1, index2 int) {
+		maxOnesCount = 0
+		for i := 0; i < len(nums); i++ {
+			for j := i + 1; j < len(nums); j++ {
+				if c := bits.OnesCount32(uint32(nums[i] | nums[j])); c > maxOnesCount {
+					maxOnesCount = c
+					index1, index2 = i, j
+				}
+			}
+		}
+		return
+	}
+
+	T := 5
+	for i := 0; i < T; i++ {
+		nums := make([]int, 100)
+		for j := range nums {
+			nums[j] = rand.Intn(1e6)
+		}
+
+		actual1 := MaxBitwiseOrPair(nums)
+		expected1 := bruteForce1(nums)
+		if expected1 != actual1 {
+			fmt.Println(expected1, actual1, nums)
+			panic("not equal1")
+		}
+
+		actual2, index1, index2 := BitwiseAndPairWithMaxOnesCount(nums)
+		expected2, index1, index2 := bruteForce2(nums)
+		if expected2 != actual2 {
+			fmt.Println(expected2, actual2, nums, index1, index2)
+			panic("not equal2")
+		}
+
+		actual3 := 按位与为0的二元组(nums)
+		expected3 := bruteForce3(nums)
+		if expected3 != actual3 {
+			fmt.Println(expected3, actual3, nums)
+			panic("not equal3")
+		}
+
+		actual4, index1, index2 := BitwiseOrPairWithMaxOnesCount(nums)
+		expected4, index1, index2 := bruteForce4(nums)
+		if expected4 != actual4 {
+			fmt.Println(expected4, actual4, nums)
+			panic("not equal4")
+		}
+	}
+
+	fmt.Println(BitwiseOrPairWithMaxOnesCount([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}))
+
+	fmt.Println("pass")
+}
+
+// 按位或最大的二元组
+// 要求找到两个不同的下标i≠j，使得ai∣aj最大。
+// nums[i]<=1e6, n<=1e6
+// Max 2-OR Problem in O(MlogM)
+// !O(UlogU)  Boolean orthogonal detection
+// https://www.cs.toronto.edu/~deepkush/ovs.pdf
+// https://cs.stackexchange.com/questions/82743/for-given-set-of-integers-find-and-count-the-pairs-with-maximum-value-of-bitwis
+//
+// 1.由于i=j时结果一定不是最优，因此i≠j的约束可以无视.
+// !2.先将信息下推到子集，再对每个数，从高位比特开始枚举到最低比特，试填法判断这一位能否填1.
+func MaxBitwiseOrPair(nums []int) int {
+	log := max(bits.Len(uint(maxs(nums...))), 1)
+	dp := make([]bool, 1<<log)
+	for _, v := range nums {
+		dp[v] = true
+	}
+	SosDp2(log, func(cur, super int) { dp[cur] = dp[cur] || dp[super] })
+
+	res := 0
+	for _, num := range nums {
+		curOr := 0
+		for bit := log - 1; bit >= 0; bit-- {
+			curOr |= 1 << bit    // 试填法
+			if !dp[curOr&^num] { // 无法提供
+				curOr ^= 1 << bit
+			}
+		}
+		res = max(res, curOr)
+	}
+	return res
+}
+
+// 按位与1最多的二元组
+// !要求找到两个不同的下标i≠j，使得ai&aj包含的1最多。
+// nums[i]<=1e6, n<=1e6
+//
+// !等价于：找到某个特殊的数v，使得v的超集在数组中出现不少于两次
+// !将信息下推到子集，找到这个数v后，扫描一遍数组，从中任意拎两个v的超集出来.
+func BitwiseAndPairWithMaxOnesCount(nums []int) (maxOnesCount int, index1, index2 int) {
+	log := max(bits.Len(uint(maxs(nums...))), 1)
+	dp := make([]int, 1<<log)
+	for _, v := range nums {
+		dp[v]++
+	}
+	SosDp2(log, func(cur, super int) { dp[cur] += dp[super] })
+
+	maxOnesCount, index1, index2 = 0, -1, -1
+	bestAnd := 0
+	for i, v := range dp {
+		if v >= 2 {
+			if c := bits.OnesCount32(uint32(i)); c > maxOnesCount {
+				maxOnesCount = c
+				bestAnd = i
+			}
+		}
+	}
+
+	for i, v := range nums {
+		if v&bestAnd == bestAnd {
+			if index1 == -1 {
+				index1 = i
+			} else {
+				index2 = i
+				break
+			}
+		}
+	}
+
+	return
+}
+
+// 按位或1最多的二元组
+// !要求找到两个不同的下标i≠j，使得ai|aj包含的1最多。
+// https://taodaling.github.io/blog/2019/08/23/%E4%BA%8C%E8%BF%9B%E5%88%B6%E4%BD%8D%E8%BF%90%E7%AE%97/
+// nums[i]<=1e6, n<=1e6
+//
+// 这里的不同是没有意义的，因为要或运算后包含最多的1，那么必定会选择两个不同的值。
+// 我们可以这样求解，维护一个特殊的数组b，bi记录序列a中与i进行与运算后包含最多1的数。
+// 这个数组可以这样求，首先对于任意序列中的数ai，很显然与bai=ai。
+// 之后我们可以进行下推操作，将bi中的数下推给所有bj，其中j∈i。之后我们再进行一次上推操作，将每个数bi上推给自己的超集。
+// 上面这个算法看起来应该是O(3^k)，但是我们可以仅枚举恰好比当前集合小1和大1的子集或超集，就可以将时间复杂度降低为O(k2^k).
+// 现在我们要找或运算后拥有最多1的家伙了，直接暴力遍历每个序列a中的值，记现在的ai，
+// !那么要找与ai或运算后含最多1的数，实际上就是在找b[(2^k−1)⊕ai]，其中⊕表示异或运算。
+func BitwiseOrPairWithMaxOnesCount(nums []int) (maxOnesCount int, index1, index2 int) {
+	log := max(bits.Len(uint(maxs(nums...))), 1)
+	dp := make([]int, 1<<log) // dp[i] 表示与 i 进行与运算后包含最多1的数的下标.
+	for i := range dp {
+		dp[i] = -1
+	}
+	for i, v := range nums {
+		dp[v] = i
+	}
+	SosDp2(log, func(cur, super int) { dp[cur] = dp[super] })
+	SosDp1(log, func(cur, sub int) { dp[cur] = dp[sub] })
+
+	mask := 1<<log - 1
+	maxOnesCount, index1, index2 = 0, -1, -1
+	bestOr := 0
+	for i := range dp {
+		need := mask ^ i
+		if c := bits.OnesCount32(uint32(need)); c > maxOnesCount {
+			maxOnesCount = c
+			bestOr = need
+		}
+	}
+
+	fmt.Println(bestOr, 987)
+
+	for i, v := range nums {
+		if v|bestOr == bestOr {
+			if index1 == -1 {
+				index1 = i
+			} else {
+				index2 = i
+				break
+			}
+		}
+	}
+	return
 }
 
 // https://www.luogu.com.cn/problem/CF165E
@@ -257,9 +464,10 @@ func ARC100E() {
 // https://atcoder.jp/contests/arc136/tasks/arc136_d
 // 10进制的情形
 
-// 与运算为0的二元组个数
-// nums[i] <= 1e6
-func 与运算为0的二元组(nums []int) int {
+// 有多少对按位与为0的二元组/与运算为0的二元组个数
+// nums[i]<=1e6, n<=1e6
+// !信息上推到超集，再统计答案，注意除以2.
+func 按位与为0的二元组(nums []int) int {
 	log := max(bits.Len(uint(maxs(nums...))), 1)
 	dp := make([]int, 1<<log)
 	for _, v := range nums {
@@ -276,7 +484,7 @@ func 与运算为0的二元组(nums []int) int {
 	return res / 2
 }
 
-// 从子集转移的 SOS DP
+// 从子集转移的 SOS DP，将信息上推到超集
 // SubSetZeta
 func SosDp1(log int, f func(cur, sub int)) {
 	for i := 0; i < log; i++ {
@@ -288,7 +496,7 @@ func SosDp1(log int, f func(cur, sub int)) {
 	}
 }
 
-// 从超集转移的 SOS DP
+// 从超集转移的 SOS DP，将信息下推到子集
 // SuperSetZeta
 func SosDp2(log int, f func(cur, super int)) {
 	for i := 0; i < log; i++ {

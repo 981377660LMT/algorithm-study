@@ -26,3 +26,8 @@
 
   将左括号和右括号分别看作是 1 和 -1，那么有效的括号序列条件为
   **min(preSum[i]) >= 0 and preSum[-1] == 0**
+
+---
+
+括号问题：
+https://taodaling.github.io/blog/2020/12/07/%E6%8B%AC%E5%8F%B7%E9%97%AE%E9%A2%98/
