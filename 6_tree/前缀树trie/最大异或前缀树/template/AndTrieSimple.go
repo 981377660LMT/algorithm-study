@@ -6,8 +6,37 @@ package main
 import (
 	"fmt"
 	"math/bits"
-	"math/rand"
 )
+
+// https://www.geeksforgeeks.org/maximum-value-pair-array/
+func Solve(nums []int) int {
+	countValid := func(pattern int) int {
+		count := 0
+		for _, num := range nums {
+			// 这个数num是之前看过的数.
+			if (pattern & num) == pattern {
+				count++
+			}
+		}
+		return count
+	}
+
+	res := 0
+	max_ := 0
+	for _, num := range nums {
+		if num > max_ {
+			max_ = num
+		}
+	}
+	maxBit := bits.Len(uint(max_))
+	for bit := maxBit; bit >= 0; bit-- {
+		count := countValid(res | (1 << bit))
+		if count >= 2 {
+			res |= 1 << bit
+		}
+	}
+	return res
+}
 
 func main() {
 	solve1 := func(nums []int) int {
@@ -30,19 +59,27 @@ func main() {
 		return res
 	}
 
-	for i := 0; i < 1000; i++ {
-		nums := make([]int, 5)
-		for j := range nums {
-			nums[j] = rand.Intn(10)
-		}
-		res1, res2 := solve1(nums), solve2(nums)
-		if res1 != res2 {
-			fmt.Println(res1, res2, nums)
-			panic("not equal")
-		}
-	}
+	// for i := 0; i < 1000; i++ {
+	// 	nums := make([]int, 2)
+	// 	for j := range nums {
+	// 		nums[j] = rand.Intn(10)
+	// 	}
+	// 	res1, res2 := solve1(nums), solve2(nums)
+	// 	res3 := Solve(nums)
+	// 	if res2 != res3 {
+	// 		fmt.Println(res2, res3, nums)
+	// 		panic("not equal1")
+	// 	}
+	// 	if res1 != res2 {
+	// 		fmt.Println(res1, res2, nums)
+	// 		panic("not equal2")
+	// 	}
+	// }
+	fmt.Println(solve1([]int{3, 9}))
+	fmt.Println(solve2([]int{3, 9}))
 }
 
+// 从高往低 如果1超过2个 就往1走 否则就往0走
 type Node struct {
 	count    int32
 	children [2]*Node
@@ -90,13 +127,20 @@ func (bt *AndTrieSimple) Query(num int) (maxAnd int) {
 			return
 		}
 		bit := (num >> i) & 1
-		if bit == 1 && root.children[bit] != nil && root.children[bit].count > 0 {
-			maxAnd |= 1 << i
+		if bit == 1 {
+			if c := root.children[1]; c != nil && c.count > 0 {
+				maxAnd |= 1 << i
+				root = root.children[1]
+			} else {
+				root = root.children[0]
+			}
+		} else {
+			root = root.children[0]
 		}
-		root = root.children[bit]
 	}
 	return
 }
+
 func max(a, b int) int {
 	if a > b {
 		return a
