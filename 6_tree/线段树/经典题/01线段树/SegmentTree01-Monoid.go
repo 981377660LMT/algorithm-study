@@ -25,7 +25,7 @@ func handleQuery(nums1 []int, nums2 []int, queries [][]int) []int64 {
 	for _, query := range queries {
 		op, a, b := query[0], query[1], query[2]
 		if op == 1 {
-			seg01.Update(a, b+1, 1)
+			seg01.Update(a, b+1, true)
 		} else if op == 2 {
 			ones := seg01.QueryAll().ones
 			sum += ones * a
@@ -41,21 +41,21 @@ const INF = 1e18
 // RangeFlipRangeSum
 
 type E = struct{ zeros, ones int }
-type Id = int
+type Id = bool // flip
 
 func (*LazySegTree) e() E   { return E{} }
-func (*LazySegTree) id() Id { return 0 }
+func (*LazySegTree) id() Id { return false }
 func (*LazySegTree) op(left, right E) E {
 	return E{left.zeros + right.zeros, left.ones + right.ones}
 }
 func (*LazySegTree) mapping(f Id, g E) E {
-	if f == 1 {
+	if f {
 		return E{g.ones, g.zeros}
 	}
 	return g
 }
 func (*LazySegTree) composition(f, g Id) Id {
-	return f ^ g
+	return f != g
 }
 func min(a, b int) int {
 	if a < b {
@@ -103,7 +103,8 @@ func NewLazySegTree01(leaves []E) *LazySegTree {
 }
 
 // 查询切片[left:right]的值
-//   0<=left<=right<=len(tree.data)
+//
+//	0<=left<=right<=len(tree.data)
 func (tree *LazySegTree) Query(left, right int) E {
 	if left < 0 {
 		left = 0
@@ -144,7 +145,8 @@ func (tree *LazySegTree) QueryAll() E {
 }
 
 // 更新切片[left:right]的值
-//   0<=left<=right<=len(tree.data)
+//
+//	0<=left<=right<=len(tree.data)
 func (tree *LazySegTree) Update(left, right int, f Id) {
 	if left < 0 {
 		left = 0
