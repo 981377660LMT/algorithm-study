@@ -66,11 +66,11 @@ func main() {
 		return
 	}
 
-	T := 5
+	T := 100
 	for i := 0; i < T; i++ {
 		nums := make([]int, 100)
 		for j := range nums {
-			nums[j] = rand.Intn(1e6)
+			nums[j] = rand.Intn(1e5)
 		}
 
 		actual1 := MaxBitwiseOrPair(nums)
@@ -80,10 +80,10 @@ func main() {
 			panic("not equal1")
 		}
 
-		actual2, index1, index2 := BitwiseAndPairWithMaxOnesCount(nums)
-		expected2, index1, index2 := bruteForce2(nums)
+		actual2, i1, i2 := BitwiseAndPairWithMaxOnesCount(nums)
+		expected2, i3, i4 := bruteForce2(nums)
 		if expected2 != actual2 {
-			fmt.Println(expected2, actual2, nums, index1, index2)
+			fmt.Println(expected2, actual2, nums, i1, i2, i3, i4)
 			panic("not equal2")
 		}
 
@@ -94,15 +94,25 @@ func main() {
 			panic("not equal3")
 		}
 
-		actual4, index1, index2 := BitwiseOrPairWithMaxOnesCount(nums)
-		expected4, index1, index2 := bruteForce4(nums)
-		if expected4 != actual4 {
-			fmt.Println(expected4, actual4, nums)
+		actual4, i1, i2 := BitwiseOrPairWithMaxOnesCount(nums)
+		expected4, i3, i4 := bruteForce4(nums)
+		if expected4 != actual4 || i1 != i3 || i2 != i4 {
+			fmt.Println(expected4, actual4, nums, i1, i2, i3, i4)
 			panic("not equal4")
 		}
 	}
 
-	fmt.Println(BitwiseOrPairWithMaxOnesCount([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}))
+	for i := 0; i < T; i++ {
+		nums := make([]int, 100)
+		for j := range nums {
+			nums[j] = rand.Intn(1e4)
+		}
+		a, b, c := BitwiseOrPairWithMaxOnesCount(nums)
+		d, e, f := bruteForce4(nums)
+		if a != d || b != e || c != f {
+			panic("not equal")
+		}
+	}
 
 	fmt.Println("pass")
 }
@@ -183,47 +193,57 @@ func BitwiseAndPairWithMaxOnesCount(nums []int) (maxOnesCount int, index1, index
 // https://taodaling.github.io/blog/2019/08/23/%E4%BA%8C%E8%BF%9B%E5%88%B6%E4%BD%8D%E8%BF%90%E7%AE%97/
 // nums[i]<=1e6, n<=1e6
 //
-// 这里的不同是没有意义的，因为要或运算后包含最多的1，那么必定会选择两个不同的值。
-// 我们可以这样求解，维护一个特殊的数组b，bi记录序列a中与i进行与运算后包含最多1的数。
-// 这个数组可以这样求，首先对于任意序列中的数ai，很显然与bai=ai。
-// 之后我们可以进行下推操作，将bi中的数下推给所有bj，其中j∈i。之后我们再进行一次上推操作，将每个数bi上推给自己的超集。
-// 上面这个算法看起来应该是O(3^k)，但是我们可以仅枚举恰好比当前集合小1和大1的子集或超集，就可以将时间复杂度降低为O(k2^k).
-// 现在我们要找或运算后拥有最多1的家伙了，直接暴力遍历每个序列a中的值，记现在的ai，
-// !那么要找与ai或运算后含最多1的数，实际上就是在找b[(2^k−1)⊕ai]，其中⊕表示异或运算。
+// !1.标记信息下推到子集，onesCount信息上推到超集.
 func BitwiseOrPairWithMaxOnesCount(nums []int) (maxOnesCount int, index1, index2 int) {
 	log := max(bits.Len(uint(maxs(nums...))), 1)
-	dp := make([]int, 1<<log) // dp[i] 表示与 i 进行与运算后包含最多1的数的下标.
-	for i := range dp {
-		dp[i] = -1
+	dp := make([]int8, 1<<log) // dp[i] 表示与 i 进行与运算后包含最多1的数.
+	for _, v := range nums {
+		dp[v] = 1
 	}
-	for i, v := range nums {
-		dp[v] = i
+	SosDp2(log, func(cur, super int) { // 值信息下推到子集，标记
+		if dp[super] == 1 {
+			dp[cur] = 1
+		}
+	})
+	for i := 0; i < 1<<log; i++ {
+		if dp[i] == 1 {
+			dp[i] = int8(bits.OnesCount32(uint32(i)))
+		}
 	}
-	SosDp2(log, func(cur, super int) { dp[cur] = dp[super] })
-	SosDp1(log, func(cur, sub int) { dp[cur] = dp[sub] })
+	SosDp1(log, func(cur, sub int) { // onesCount信息上推到超集
+		if dp[sub] > dp[cur] {
+			dp[cur] = dp[sub]
+		}
+	})
 
 	mask := 1<<log - 1
-	maxOnesCount, index1, index2 = 0, -1, -1
-	bestOr := 0
-	for i := range dp {
-		need := mask ^ i
-		if c := bits.OnesCount32(uint32(need)); c > maxOnesCount {
-			maxOnesCount = c
-			bestOr = need
+	best1 := 0
+	for _, v := range nums {
+		rev := mask ^ v
+		count := bits.OnesCount32(uint32(v)) + int(dp[rev])
+		if count > maxOnesCount {
+			maxOnesCount = count
+			best1 = v
 		}
 	}
 
-	fmt.Println(bestOr, 987)
-
 	for i, v := range nums {
-		if v|bestOr == bestOr {
-			if index1 == -1 {
-				index1 = i
-			} else {
-				index2 = i
-				break
-			}
+		if v == best1 {
+			index1 = i
+			break
 		}
+	}
+	for i, v := range nums {
+		if i == index1 {
+			continue
+		}
+		if bits.OnesCount32(uint32(v|best1)) == maxOnesCount {
+			index2 = i
+			break
+		}
+	}
+	if index1 > index2 {
+		index1, index2 = index2, index1
 	}
 	return
 }
