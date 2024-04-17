@@ -82,7 +82,7 @@ func main() {
 
 		actual2, i1, i2 := BitwiseAndPairWithMaxOnesCount(nums)
 		expected2, i3, i4 := bruteForce2(nums)
-		if expected2 != actual2 {
+		if expected2 != actual2 || (bits.OnesCount(uint(nums[i1]&nums[i2])) != expected2) || (bits.OnesCount(uint(nums[i3]&nums[i4])) != expected2) {
 			fmt.Println(expected2, actual2, nums, i1, i2, i3, i4)
 			panic("not equal2")
 		}
@@ -218,21 +218,16 @@ func BitwiseOrPairWithMaxOnesCount(nums []int) (maxOnesCount int, index1, index2
 
 	mask := 1<<log - 1
 	best1 := 0
-	for _, v := range nums {
+	for i, v := range nums {
 		rev := mask ^ v
 		count := bits.OnesCount32(uint32(v)) + int(dp[rev])
 		if count > maxOnesCount {
 			maxOnesCount = count
 			best1 = v
+			index1 = i
 		}
 	}
 
-	for i, v := range nums {
-		if v == best1 {
-			index1 = i
-			break
-		}
-	}
 	for i, v := range nums {
 		if i == index1 {
 			continue
