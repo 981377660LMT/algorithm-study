@@ -41,6 +41,11 @@ def solve(nums: List[int]) -> int:
 
 
 if __name__ == "__main__":
+    # F - Xor Sum 3
+    # https://atcoder.jp/contests/abc141/tasks/abc141_f
+    n = int(input())
+    nums = list(map(int, input().split()))
+    print(solve(nums))
 
     def bruteForce(nums: List[int]) -> int:
         res = 0

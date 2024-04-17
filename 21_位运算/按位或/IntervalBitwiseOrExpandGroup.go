@@ -1,14 +1,32 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 )
 
 func main() {
+	agc015_d()
+}
+
+func demo() {
 	fmt.Println(decompose(5))
 	fmt.Println(compose([]int{1, 0, 0}))
 	fmt.Println(IntervalBitwiseOrExpandGroup(1, 9))
 	fmt.Println(IntervalBitwiseOrExpandGroup(1, 5))
+}
+
+// https://atcoder.jp/contests/agc015/tasks/agc015_d
+func agc015_d() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var left, right int
+	fmt.Fscan(in, &left, &right)
+
+	fmt.Fprintln(out, IntervalBitwiseOrExpandGroup(left, right))
 }
 
 // 区间按位或得到的数的个数.
