@@ -1,4 +1,4 @@
-// DividePathOnTreeBinaryLift/DoublingLca
+// DividePathOnTreeBinaryLift/DoublingLca(树上倍增)
 // 倍增拆树上路径`path(from,to)`：倍增拆点将树上的一段路径拆成logn个点
 //
 // 一共拆分成[0,log]层，每层有n个元素.
@@ -14,8 +14,71 @@ import (
 )
 
 func main() {
+	P7167()
 	// jump()
-	assert()
+	// assert()
+}
+
+// P7167 [eJOI2020 Day1] Fountain (树上倍增, 喷泉)
+// https://www.luogu.com.cn/problem/P7167
+// 给定 N 个直径为 Di​ ，容量为 Ci​  的从上到下的空圆盘。
+// 一个圆盘溢出的水会流到下方比它大的圆盘中。
+// Q 次询问如果往第 R 个圆盘倒 V 体积的水，水最后会流到哪个圆盘，
+// 如果流到底则输出 0，每个询问独立。
+//
+// !1.我们把每个圆盘和第一个直径比它大的圆盘之间连边，发现是一棵树，
+// !2.我们要求的就是找到最老的一个祖先，使这个点到这个祖先路径上圆盘的总容积不大于水量，可以使用树上倍增解决.
+func P7167() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	diameters := make([]int32, n)
+	capacities := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &diameters[i], &capacities[i])
+	}
+
+	rightNearestBigger := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		rightNearestBigger[i] = -1
+	}
+	stack := []int32{}
+	for i := int32(0); i < n; i++ {
+		for len(stack) > 0 && diameters[stack[len(stack)-1]] < diameters[i] {
+			rightNearestBigger[stack[len(stack)-1]] = i
+			stack = stack[:len(stack)-1]
+		}
+		stack = append(stack, i)
+	}
+
+	forest := make([][]int32, n)
+	for i := int32(0); i < n; i++ {
+		if to := rightNearestBigger[i]; to != -1 {
+			forest[to] = append(forest[to], i)
+		}
+	}
+	bl := NewDoublingLca32WithSum(forest, -1, capacities)
+
+	query := func(index int32, water int) (int32, bool) {
+		res, _ := bl.FirstTrueWithSum(index, func(end int32, sum int) bool { return sum >= water }, false)
+		return res, res != -1
+	}
+
+	for i := int32(0); i < q; i++ {
+		var index int32
+		var water int
+		fmt.Fscan(in, &index, &water)
+		index--
+		res, ok := query(index, water)
+		if ok {
+			fmt.Fprintln(out, res+1)
+		} else {
+			fmt.Fprintln(out, 0)
+		}
+	}
 }
 
 func jump() {

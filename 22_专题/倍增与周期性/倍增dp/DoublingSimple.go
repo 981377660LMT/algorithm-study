@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	arc060_c()
+	// arc060_c()
 }
 
 // [ARC060E] 高橋君とホテル
