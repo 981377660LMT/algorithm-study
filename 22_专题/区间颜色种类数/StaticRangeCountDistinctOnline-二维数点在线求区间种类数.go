@@ -44,7 +44,7 @@ func P1972() {
 		mp[v] = int32(i)
 	}
 
-	// 消除-1.
+	// 消除-1,offset为1.
 	for i := 0; i < len(last); i++ {
 		last[i]++
 	}
@@ -57,7 +57,7 @@ func P1972() {
 		var start, end int32
 		fmt.Fscan(in, &start, &end)
 		start--
-		fmt.Fprintln(out, wm.CountRange(start, end, 0, start+1))
+		fmt.Fprintln(out, wm.CountRange(start, end, 0, start+1)) // offset为1,变为[-1+1,start+1)
 	}
 }
 
@@ -322,26 +322,26 @@ func (w *WaveletMatrix32) le(left, right, v int32) int32 {
 
 type BitVector32 struct {
 	n     int32
-	block []int
-	sum   []int
+	block []uint64
+	sum   []int32
 }
 
 func NewBitVector32(n int32) *BitVector32 {
 	blockCount := (n + 63) >> 6
 	return &BitVector32{
 		n:     n,
-		block: make([]int, blockCount+1),
-		sum:   make([]int, blockCount+1),
+		block: make([]uint64, blockCount+1),
+		sum:   make([]int32, blockCount+1),
 	}
 }
 
 func (f *BitVector32) Set(i int32) {
-	f.block[i>>6] |= 1 << uint(i&63)
+	f.block[i>>6] |= 1 << (i & 63)
 }
 
 func (f *BitVector32) Build() {
 	for i := 0; i < len(f.block)-1; i++ {
-		f.sum[i+1] = f.sum[i] + bits.OnesCount(uint(f.block[i]))
+		f.sum[i+1] = f.sum[i] + int32(bits.OnesCount64(f.block[i]))
 	}
 }
 
@@ -350,8 +350,8 @@ func (f *BitVector32) Get(i int32) int32 {
 }
 
 func (f *BitVector32) Count(value, end int32) int32 {
-	mask := (1 << uint(end&63)) - 1
-	res := int32(f.sum[end>>6] + bits.OnesCount(uint(f.block[end>>6]&mask)))
+	mask := uint64((1 << (end & 63)) - 1)
+	res := f.sum[end>>6] + int32(bits.OnesCount64(f.block[end>>6]&mask))
 	if value == 1 {
 		return res
 	}
