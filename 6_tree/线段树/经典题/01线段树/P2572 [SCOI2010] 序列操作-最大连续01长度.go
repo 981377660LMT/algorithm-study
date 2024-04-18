@@ -1,4 +1,5 @@
 // P2572 [SCOI2010] 序列操作 (01线段树的基础上加上区间最大连续01长度)
+// https://www.luogu.com.cn/problem/P2572
 //
 // 给定一个01序列，要求支持如下操作：
 // 区间赋值
@@ -6,7 +7,7 @@
 // 查询区间内1的个数
 // 查询区间内最多有多少个连续的1
 //
-// !让两个懒标记互斥
+// !让两个懒标记互斥，区间覆盖优先级高于区间翻转
 
 package main
 
@@ -53,66 +54,22 @@ func main() {
 		return seg.Query(start, end).max1
 	}
 
-	_ = []interface{}{fillZero, fillOne, flip, onesCount, maxContinuousOnes}
-
-	fillZeroBruteforce := func(start, end int32) {
-		for i := start; i < end; i++ {
-			bits[i] = 0
-		}
-	}
-
-	fillOneBruteforce := func(start, end int32) {
-		for i := start; i < end; i++ {
-			bits[i] = 1
-		}
-	}
-
-	flipBruteforce := func(start, end int32) {
-		for i := start; i < end; i++ {
-			bits[i] ^= 1
-		}
-	}
-
-	onesCountBruteforce := func(start, end int32) int32 {
-		var res int32
-		for i := start; i < end; i++ {
-			res += int32(bits[i])
-		}
-		return res
-	}
-
-	maxContinuousOnesBruteforce := func(start, end int32) int32 {
-		var res, cur int32
-		for i := start; i < end; i++ {
-			if bits[i] == 1 {
-				cur++
-			} else {
-				cur = 0
-			}
-			res = max32(res, cur)
-		}
-		return res
-	}
-
-	for i := int32(0); i < n; i++ {
+	for i := int32(0); i < q; i++ {
 		var op, l, r int32
 		fmt.Fscan(in, &op, &l, &r)
-		if l > r {
-			l, r = r, l
-		}
 		r++
 
 		switch op {
 		case 0:
-			fillZeroBruteforce(l, r)
+			fillZero(l, r)
 		case 1:
-			fillOneBruteforce(l, r)
+			fillOne(l, r)
 		case 2:
-			flipBruteforce(l, r)
+			flip(l, r)
 		case 3:
-			fmt.Fprintln(out, onesCountBruteforce(l, r))
+			fmt.Fprintln(out, onesCount(l, r))
 		case 4:
-			fmt.Fprintln(out, maxContinuousOnesBruteforce(l, r))
+			fmt.Fprintln(out, maxContinuousOnes(l, r))
 		default:
 			panic("unknown operation")
 		}
@@ -187,10 +144,6 @@ func (*LazySegTree32) op(a, b E) E {
 }
 
 func (*LazySegTree32) mapping(f Id, g E) E {
-	if f.bit != -1 && f.flip == 1 {
-		panic("invalid ")
-	}
-
 	if f.bit == -1 {
 		if f.flip == 0 {
 			return g
@@ -219,13 +172,7 @@ func (*LazySegTree32) mapping(f Id, g E) E {
 }
 
 func (*LazySegTree32) composition(f, g Id) Id {
-	if f.bit != -1 && f.flip == 1 {
-		panic("invalid 2")
-	}
-	if g.bit != -1 && g.flip == 1 {
-		panic("invalid 3")
-	}
-
+	// !让两个懒标记互斥，不能同时存在
 	if f.bit != -1 {
 		g.bit = f.bit
 		g.flip = 0
