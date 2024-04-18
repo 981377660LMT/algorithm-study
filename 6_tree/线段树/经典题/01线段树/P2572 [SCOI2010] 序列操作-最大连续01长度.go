@@ -32,26 +32,26 @@ func main() {
 		fmt.Fscan(in, &bits[i])
 	}
 
-	seg := NewLazySegTree32(n, func(i int32) E { return FromElement(bits[i]) })
+	seg := NewRangeAssignRangeFlipRangeMaxContinuousOnes(n, func(i int32) int8 { return bits[i] })
 
 	fillZero := func(start, end int32) {
-		seg.Update(start, end, Id{bit: 0, flip: 0})
+		seg.FillZero(start, end)
 	}
 
 	fillOne := func(start, end int32) {
-		seg.Update(start, end, Id{bit: 1, flip: 0})
+		seg.FillOne(start, end)
 	}
 
 	flip := func(start, end int32) {
-		seg.Update(start, end, Id{bit: -1, flip: 1})
+		seg.Flip(start, end)
 	}
 
 	onesCount := func(start, end int32) int32 {
-		return seg.Query(start, end).count1
+		return seg.OnesCount(start, end)
 	}
 
 	maxContinuousOnes := func(start, end int32) int32 {
-		return seg.Query(start, end).max1
+		return seg.MaxContinuousOnes(start, end)
 	}
 
 	for i := int32(0); i < q; i++ {
@@ -80,7 +80,36 @@ const INF32 int32 = 1 << 30
 
 // RangeAssignRangeFlipRangeMaxContinuousOnes
 
-func FromElement(v int8) E {
+type RangeAssignRangeFlipRangeMaxContinuousOnes struct {
+	seg *lazySegTree32
+}
+
+func NewRangeAssignRangeFlipRangeMaxContinuousOnes(n int32, f func(int32) int8) *RangeAssignRangeFlipRangeMaxContinuousOnes {
+	seg := newLazySegTree32(n, func(i int32) E { return fromElement(f(i)) })
+	return &RangeAssignRangeFlipRangeMaxContinuousOnes{seg: seg}
+}
+
+func (r *RangeAssignRangeFlipRangeMaxContinuousOnes) FillZero(start, end int32) {
+	r.seg.Update(start, end, Id{bit: 0, flip: 0})
+}
+
+func (r *RangeAssignRangeFlipRangeMaxContinuousOnes) FillOne(start, end int32) {
+	r.seg.Update(start, end, Id{bit: 1, flip: 0})
+}
+
+func (r *RangeAssignRangeFlipRangeMaxContinuousOnes) Flip(start, end int32) {
+	r.seg.Update(start, end, Id{bit: -1, flip: 1})
+}
+
+func (r *RangeAssignRangeFlipRangeMaxContinuousOnes) OnesCount(start, end int32) int32 {
+	return r.seg.Query(start, end).count1
+}
+
+func (r *RangeAssignRangeFlipRangeMaxContinuousOnes) MaxContinuousOnes(start, end int32) int32 {
+	return r.seg.Query(start, end).max1
+}
+
+func fromElement(v int8) E {
 	res := E{}
 	if v == 0 {
 		res.pre0 = 1
@@ -107,15 +136,15 @@ type Id = struct {
 	flip int8 // 翻转标记, 0/1
 }
 
-func (*LazySegTree32) e() E {
+func (*lazySegTree32) e() E {
 	return E{}
 }
 
-func (*LazySegTree32) id() Id {
+func (*lazySegTree32) id() Id {
 	return Id{bit: -1, flip: 0}
 }
 
-func (*LazySegTree32) op(a, b E) E {
+func (*lazySegTree32) op(a, b E) E {
 	res := E{}
 
 	res.pre0 = a.pre0
@@ -143,7 +172,7 @@ func (*LazySegTree32) op(a, b E) E {
 	return res
 }
 
-func (*LazySegTree32) mapping(f Id, g E) E {
+func (*lazySegTree32) mapping(f Id, g E) E {
 	if f.bit == -1 {
 		if f.flip == 0 {
 			return g
@@ -171,7 +200,7 @@ func (*LazySegTree32) mapping(f Id, g E) E {
 	}
 }
 
-func (*LazySegTree32) composition(f, g Id) Id {
+func (*lazySegTree32) composition(f, g Id) Id {
 	// !让两个懒标记互斥，不能同时存在
 	if f.bit != -1 {
 		g.bit = f.bit
@@ -214,7 +243,7 @@ func max32(a, b int32) int32 {
 }
 
 // !template
-type LazySegTree32 struct {
+type lazySegTree32 struct {
 	n    int32
 	size int32
 	log  int32
@@ -222,8 +251,8 @@ type LazySegTree32 struct {
 	lazy []Id
 }
 
-func NewLazySegTree32(n int32, f func(int32) E) *LazySegTree32 {
-	tree := &LazySegTree32{}
+func newLazySegTree32(n int32, f func(int32) E) *lazySegTree32 {
+	tree := &lazySegTree32{}
 	tree.n = n
 	tree.log = int32(bits.Len32(uint32(n - 1)))
 	tree.size = 1 << tree.log
@@ -244,33 +273,10 @@ func NewLazySegTree32(n int32, f func(int32) E) *LazySegTree32 {
 	return tree
 }
 
-func NewLazySegTree32From(leaves []E) *LazySegTree32 {
-	tree := &LazySegTree32{}
-	n := int32(len(leaves))
-	tree.n = n
-	tree.log = int32(bits.Len32(uint32(n - 1)))
-	tree.size = 1 << tree.log
-	tree.data = make([]E, tree.size<<1)
-	tree.lazy = make([]Id, tree.size)
-	for i := range tree.data {
-		tree.data[i] = tree.e()
-	}
-	for i := range tree.lazy {
-		tree.lazy[i] = tree.id()
-	}
-	for i := int32(0); i < n; i++ {
-		tree.data[tree.size+i] = leaves[i]
-	}
-	for i := tree.size - 1; i >= 1; i-- {
-		tree.pushUp(i)
-	}
-	return tree
-}
-
 // 查询切片[left:right]的值
 //
 //	0<=left<=right<=len(tree.data)
-func (tree *LazySegTree32) Query(left, right int32) E {
+func (tree *lazySegTree32) Query(left, right int32) E {
 	if left < 0 {
 		left = 0
 	}
@@ -305,10 +311,10 @@ func (tree *LazySegTree32) Query(left, right int32) E {
 	}
 	return tree.op(sml, smr)
 }
-func (tree *LazySegTree32) QueryAll() E {
+func (tree *lazySegTree32) QueryAll() E {
 	return tree.data[1]
 }
-func (tree *LazySegTree32) GetAll() []E {
+func (tree *lazySegTree32) GetAll() []E {
 	res := make([]E, tree.n)
 	copy(res, tree.data[tree.size:tree.size+tree.n])
 	return res
@@ -317,7 +323,7 @@ func (tree *LazySegTree32) GetAll() []E {
 // 更新切片[left:right]的值
 //
 //	0<=left<=right<=len(tree.data)
-func (tree *LazySegTree32) Update(left, right int32, f Id) {
+func (tree *lazySegTree32) Update(left, right int32, f Id) {
 	if left < 0 {
 		left = 0
 	}
@@ -362,76 +368,7 @@ func (tree *LazySegTree32) Update(left, right int32, f Id) {
 	}
 }
 
-// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (tree *LazySegTree32) MinLeft(right int32, predicate func(data E) bool) int32 {
-	if right == 0 {
-		return 0
-	}
-	right += tree.size
-	for i := tree.log; i >= 1; i-- {
-		tree.pushDown((right - 1) >> i)
-	}
-	res := tree.e()
-	for {
-		right--
-		for right > 1 && right&1 != 0 {
-			right >>= 1
-		}
-		if !predicate(tree.op(tree.data[right], res)) {
-			for right < tree.size {
-				tree.pushDown(right)
-				right = right<<1 | 1
-				if tmp := tree.op(tree.data[right], res); predicate(tmp) {
-					res = tmp
-					right--
-				}
-			}
-			return right + 1 - tree.size
-		}
-		res = tree.op(tree.data[right], res)
-		if (right & -right) == right {
-			break
-		}
-	}
-	return 0
-}
-
-// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-func (tree *LazySegTree32) MaxRight(left int32, predicate func(data E) bool) int32 {
-	if left == tree.n {
-		return tree.n
-	}
-	left += tree.size
-	for i := tree.log; i >= 1; i-- {
-		tree.pushDown(left >> i)
-	}
-	res := tree.e()
-	for {
-		for left&1 == 0 {
-			left >>= 1
-		}
-		if !predicate(tree.op(res, tree.data[left])) {
-			for left < tree.size {
-				tree.pushDown(left)
-				left <<= 1
-				if tmp := tree.op(res, tree.data[left]); predicate(tmp) {
-					res = tmp
-					left++
-				}
-			}
-			return left - tree.size
-		}
-		res = tree.op(res, tree.data[left])
-		left++
-		if (left & -left) == left {
-			break
-		}
-	}
-	return tree.n
-}
-
-// 单点查询(不需要 pushUp/op 操作时使用)
-func (tree *LazySegTree32) Get(index int32) E {
+func (tree *lazySegTree32) Get(index int32) E {
 	index += tree.size
 	for i := tree.log; i >= 1; i-- {
 		tree.pushDown(index >> i)
@@ -440,7 +377,7 @@ func (tree *LazySegTree32) Get(index int32) E {
 }
 
 // 单点赋值
-func (tree *LazySegTree32) Set(index int32, e E) {
+func (tree *lazySegTree32) Set(index int32, e E) {
 	index += tree.size
 	for i := tree.log; i >= 1; i-- {
 		tree.pushDown(index >> i)
@@ -451,17 +388,17 @@ func (tree *LazySegTree32) Set(index int32, e E) {
 	}
 }
 
-func (tree *LazySegTree32) pushUp(root int32) {
+func (tree *lazySegTree32) pushUp(root int32) {
 	tree.data[root] = tree.op(tree.data[root<<1], tree.data[root<<1|1])
 }
-func (tree *LazySegTree32) pushDown(root int32) {
+func (tree *lazySegTree32) pushDown(root int32) {
 	if tree.lazy[root] != tree.id() {
 		tree.propagate(root<<1, tree.lazy[root])
 		tree.propagate(root<<1|1, tree.lazy[root])
 		tree.lazy[root] = tree.id()
 	}
 }
-func (tree *LazySegTree32) propagate(root int32, f Id) {
+func (tree *lazySegTree32) propagate(root int32, f Id) {
 	tree.data[root] = tree.mapping(f, tree.data[root])
 	// !叶子结点不需要更新lazy
 	if root < tree.size {
@@ -469,7 +406,7 @@ func (tree *LazySegTree32) propagate(root int32, f Id) {
 	}
 }
 
-func (tree *LazySegTree32) String() string {
+func (tree *lazySegTree32) String() string {
 	var sb []string
 	sb = append(sb, "[")
 	for i := int32(0); i < tree.n; i++ {
