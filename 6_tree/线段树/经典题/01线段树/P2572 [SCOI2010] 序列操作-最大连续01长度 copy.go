@@ -1,4 +1,5 @@
 // P2572 [SCOI2010] 序列操作 (01线段树的基础上加上区间最大连续01长度)
+// https://www.luogu.com.cn/problem/P2572
 //
 // 给定一个01序列，要求支持如下操作：
 // 区间赋值
@@ -7,6 +8,7 @@
 // 查询区间内最多有多少个连续的1
 //
 // !让两个懒标记互斥
+
 package main
 
 import (
@@ -17,103 +19,103 @@ import (
 )
 
 func main() {
-	nums := []int8{1, 0, 1, 1, 0, 1, 0, 0, 1, 1}
-	n := int32(len(nums))
-	seg := NewLazySegTree32(n, func(i int32) E { return FromElement(nums[i]) })
-
-	fillZero := func(start, end int32) {
-		seg.Update(start, end, Id{bit: 0, flip: 0})
-	}
-
-	fillOne := func(start, end int32) {
-		seg.Update(start, end, Id{bit: 1, flip: 0})
-	}
-
-	flip := func(start, end int32) {
-		seg.Update(start, end, Id{bit: -1, flip: 1})
-	}
-
-	onesCount := func(start, end int32) int32 {
-		return seg.Query(start, end).count1
-	}
-
-	maxContinuousOnes := func(start, end int32) int32 {
-		return seg.Query(start, end).max1
-	}
-
-	fillZeroBruteforce := func(start, end int32) {
-		for i := start; i < end; i++ {
-			nums[i] = 0
+	for i := 0; i < 50; i++ {
+		n := int32(1e3) + rand.Int31n(5e3)
+		nums := make([]int8, n)
+		for i := int32(0); i < n; i++ {
+			nums[i] = int8(rand.Intn(2))
 		}
-	}
+		seg := NewLazySegTree32(n, func(i int32) E { return FromElement(nums[i]) })
 
-	fillOneBruteforce := func(start, end int32) {
-		for i := start; i < end; i++ {
-			nums[i] = 1
+		fillZero := func(start, end int32) {
+			seg.Update(start, end, Id{bit: 0, flip: 0})
 		}
-	}
 
-	flipBruteforce := func(start, end int32) {
-		for i := start; i < end; i++ {
-			nums[i] ^= 1
+		fillOne := func(start, end int32) {
+			seg.Update(start, end, Id{bit: 1, flip: 0})
 		}
-	}
 
-	onesCountBruteforce := func(start, end int32) int32 {
-		var res int32
-		for i := start; i < end; i++ {
-			res += int32(nums[i])
+		flip := func(start, end int32) {
+			seg.Update(start, end, Id{bit: -1, flip: 1})
 		}
-		return res
-	}
 
-	maxContinuousOnesBruteforce := func(start, end int32) int32 {
-		var res, cur int32
-		for i := start; i < end; i++ {
-			if nums[i] == 1 {
-				cur++
-			} else {
-				cur = 0
+		onesCount := func(start, end int32) int32 {
+			return seg.Query(start, end).count1
+		}
+
+		maxContinuousOnes := func(start, end int32) int32 {
+			return seg.Query(start, end).max1
+		}
+
+		fillZeroBruteforce := func(start, end int32) {
+			for i := start; i < end; i++ {
+				nums[i] = 0
 			}
-			res = max32(res, cur)
 		}
-		return res
-	}
 
-	for i := int32(0); i < n; i++ {
-		op := rand.Int31n(5)
-		l := rand.Int31n(n)
-		r := rand.Int31n(n)
-		if l > r {
-			l, r = r, l
+		fillOneBruteforce := func(start, end int32) {
+			for i := start; i < end; i++ {
+				nums[i] = 1
+			}
 		}
-		r++
-		switch op {
-		case 0:
-			fillZero(l, r)
-			fillZeroBruteforce(l, r)
-		case 1:
-			fillOne(l, r)
-			fillOneBruteforce(l, r)
-		case 2:
-			flip(l, r)
 
-			flipBruteforce(l, r)
-		case 3:
-			if onesCount(l, r) != onesCountBruteforce(l, r) {
-				fmt.Println("error")
+		flipBruteforce := func(start, end int32) {
+			for i := start; i < end; i++ {
+				nums[i] ^= 1
 			}
-		case 4:
-			if maxContinuousOnes(l, r) != maxContinuousOnesBruteforce(l, r) {
-				fmt.Println("error")
+		}
+
+		onesCountBruteforce := func(start, end int32) int32 {
+			var res int32
+			for i := start; i < end; i++ {
+				res += int32(nums[i])
 			}
-		default:
-			panic("unknown operation")
+			return res
+		}
+
+		maxContinuousOnesBruteforce := func(start, end int32) int32 {
+			var res, cur int32
+			for i := start; i < end; i++ {
+				if nums[i] == 1 {
+					cur++
+				} else {
+					cur = 0
+				}
+				res = max32(res, cur)
+			}
+			return res
+		}
+
+		for i := int32(0); i < 100000; i++ {
+			op := rand.Int31n(5)
+			l := rand.Int31n(n)
+			r := l + rand.Int31n(n-l+1)
+
+			switch op {
+			case 0:
+				fillZero(l, r)
+				fillZeroBruteforce(l, r)
+			case 1:
+				fillOne(l, r)
+				fillOneBruteforce(l, r)
+			case 2:
+				flip(l, r)
+				flipBruteforce(l, r)
+			case 3:
+				if onesCount(l, r) != onesCountBruteforce(l, r) {
+					panic("error1")
+				}
+			case 4:
+				if maxContinuousOnes(l, r) != maxContinuousOnesBruteforce(l, r) {
+					panic("error2")
+				}
+			default:
+				panic("unknown operation")
+			}
 		}
 	}
 
 	fmt.Println("pass")
-
 }
 
 const INF32 int32 = 1 << 30
@@ -184,6 +186,10 @@ func (*LazySegTree32) op(a, b E) E {
 }
 
 func (*LazySegTree32) mapping(f Id, g E) E {
+	if f.bit != -1 && f.flip == 1 {
+		panic("invalid ")
+	}
+
 	if f.bit == -1 {
 		if f.flip == 0 {
 			return g
@@ -196,7 +202,9 @@ func (*LazySegTree32) mapping(f Id, g E) E {
 		}
 	} else {
 		size := g.count0 + g.count1
-		// f.bit ^= f.flip
+		if f.flip == 1 {
+			panic("invalid 1")
+		}
 		if f.bit == 0 {
 			g.pre0, g.pre1 = size, 0
 			g.suf0, g.suf1 = size, 0
@@ -213,14 +221,24 @@ func (*LazySegTree32) mapping(f Id, g E) E {
 }
 
 func (*LazySegTree32) composition(f, g Id) Id {
+	if f.bit != -1 && f.flip == 1 {
+		panic("invalid 2")
+	}
+	if g.bit != -1 && g.flip == 1 {
+		panic("invalid 3")
+	}
+
 	if f.bit != -1 {
 		g.bit = f.bit
 		g.flip = 0
-		return g
 	} else {
 		g.flip ^= f.flip
-		return g
+		if g.bit != -1 {
+			g.bit ^= g.flip
+			g.flip = 0
+		}
 	}
+	return g
 }
 
 func min(a, b int) int {

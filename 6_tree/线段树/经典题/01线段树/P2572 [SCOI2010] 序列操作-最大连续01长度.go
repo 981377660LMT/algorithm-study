@@ -7,6 +7,7 @@
 // 查询区间内最多有多少个连续的1
 //
 // !让两个懒标记互斥
+
 package main
 
 import (
@@ -52,22 +53,66 @@ func main() {
 		return seg.Query(start, end).max1
 	}
 
+	_ = []interface{}{fillZero, fillOne, flip, onesCount, maxContinuousOnes}
+
+	fillZeroBruteforce := func(start, end int32) {
+		for i := start; i < end; i++ {
+			bits[i] = 0
+		}
+	}
+
+	fillOneBruteforce := func(start, end int32) {
+		for i := start; i < end; i++ {
+			bits[i] = 1
+		}
+	}
+
+	flipBruteforce := func(start, end int32) {
+		for i := start; i < end; i++ {
+			bits[i] ^= 1
+		}
+	}
+
+	onesCountBruteforce := func(start, end int32) int32 {
+		var res int32
+		for i := start; i < end; i++ {
+			res += int32(bits[i])
+		}
+		return res
+	}
+
+	maxContinuousOnesBruteforce := func(start, end int32) int32 {
+		var res, cur int32
+		for i := start; i < end; i++ {
+			if bits[i] == 1 {
+				cur++
+			} else {
+				cur = 0
+			}
+			res = max32(res, cur)
+		}
+		return res
+	}
+
 	for i := int32(0); i < n; i++ {
 		var op, l, r int32
 		fmt.Fscan(in, &op, &l, &r)
+		if l > r {
+			l, r = r, l
+		}
 		r++
 
 		switch op {
 		case 0:
-			fillZero(l, r)
+			fillZeroBruteforce(l, r)
 		case 1:
-			fillOne(l, r)
+			fillOneBruteforce(l, r)
 		case 2:
-			flip(l, r)
+			flipBruteforce(l, r)
 		case 3:
-			fmt.Fprintln(out, onesCount(l, r))
+			fmt.Fprintln(out, onesCountBruteforce(l, r))
 		case 4:
-			fmt.Fprintln(out, maxContinuousOnes(l, r))
+			fmt.Fprintln(out, maxContinuousOnesBruteforce(l, r))
 		default:
 			panic("unknown operation")
 		}
@@ -142,6 +187,10 @@ func (*LazySegTree32) op(a, b E) E {
 }
 
 func (*LazySegTree32) mapping(f Id, g E) E {
+	if f.bit != -1 && f.flip == 1 {
+		panic("invalid ")
+	}
+
 	if f.bit == -1 {
 		if f.flip == 0 {
 			return g
@@ -154,7 +203,6 @@ func (*LazySegTree32) mapping(f Id, g E) E {
 		}
 	} else {
 		size := g.count0 + g.count1
-		// f.bit ^= f.flip
 		if f.bit == 0 {
 			g.pre0, g.pre1 = size, 0
 			g.suf0, g.suf1 = size, 0
@@ -171,14 +219,24 @@ func (*LazySegTree32) mapping(f Id, g E) E {
 }
 
 func (*LazySegTree32) composition(f, g Id) Id {
+	if f.bit != -1 && f.flip == 1 {
+		panic("invalid 2")
+	}
+	if g.bit != -1 && g.flip == 1 {
+		panic("invalid 3")
+	}
+
 	if f.bit != -1 {
 		g.bit = f.bit
 		g.flip = 0
-		return g
 	} else {
 		g.flip ^= f.flip
-		return g
+		if g.bit != -1 {
+			g.bit ^= g.flip
+			g.flip = 0
+		}
 	}
+	return g
 }
 
 func min(a, b int) int {
