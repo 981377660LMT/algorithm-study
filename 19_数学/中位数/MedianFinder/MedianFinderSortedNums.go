@@ -1,13 +1,62 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
 	"sort"
 )
 
 func main() {
-	test()
+	CF371E()
+	// test()
+}
+
+// Subway Innovation
+// https://www.luogu.com.cn/problem/CF371E
+// 在直线上给定 n 个点，定义其距离为横坐标的绝对值，请你保留 k 个点，使这些点两两之间的距离和最小，输出这 k 个点的坐标。
+func CF371E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	nums := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	var k int32
+	fmt.Fscan(in, &k)
+
+	points := make([][2]int32, 0, k)
+	for i := int32(0); i < n; i++ {
+		points = append(points, [2]int32{nums[i], i})
+	}
+	sort.Slice(points, func(i, j int) bool { return points[i][0] < points[j][0] })
+	sortedNums := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		sortedNums[i] = int(points[i][0])
+	}
+
+	D := NewMedianFinderSortedNums(sortedNums)
+	curSum := DistSumOfAllPairsRange(sortedNums, 0, k)
+	bestLeft, bestSum := int32(0), curSum
+	for left := int32(1); left+k-1 < n; left++ {
+		right := left + k - 1
+		// reove left-1, add right
+		curSum -= D.DistSumRange(sortedNums[left-1], left-1, right)
+		curSum += D.DistSumRange(sortedNums[right], left, right+1)
+		if curSum < bestSum {
+			bestLeft = left
+			bestSum = curSum
+		}
+	}
+
+	for i := bestLeft; i < bestLeft+k; i++ {
+		fmt.Fprint(out, points[i][1]+1, " ")
+	}
 }
 
 type MedianFinderSortedNums struct {
@@ -92,11 +141,11 @@ func DistSumOfAllPairs(sortedNums []int) int {
 	return res
 }
 
-func DistSumOfAllPairsRange(sortedNums []int, start, end int) int {
+func DistSumOfAllPairsRange(sortedNums []int, start, end int32) int {
 	res := 0
 	preSum := 0
 	for i := start; i < end; i++ {
-		res += sortedNums[i]*i - preSum
+		res += sortedNums[i]*int(i) - preSum
 		preSum += sortedNums[i]
 	}
 	return res

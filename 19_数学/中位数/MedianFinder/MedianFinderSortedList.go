@@ -1,37 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math/bits"
-	"os"
 	"sort"
 	"strings"
 )
-
-// Subway Innovation
-// https://www.luogu.com.cn/problem/CF371E
-// 在直线上给定 n 个点，定义其距离为横坐标的绝对值，请你保留 k 个点，使这些点两两之间的距离和最小，输出这 k 个点的坐标。
-func CF371E() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
-		fmt.Fscan(in, &nums[i])
-	}
-	var k int
-	fmt.Fscan(in, &k)
-
-	order := make([]int, n)
-	for i := 0; i < n; i++ {
-		order[i] = i
-	}
-	sort.Slice(order, func(i, j int) bool { return nums[order[i]] < nums[order[j]] })
-}
 
 // 100123. 执行操作使频率分数最大
 // https://leetcode.cn/problems/apply-operations-to-maximize-frequency-score/description/
