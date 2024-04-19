@@ -99,13 +99,6 @@ func GetMedian(sortedNums []int, start, end int) int {
 	return sortedNums[(end+start)/2]
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 // 有序数组中所有点到`x=k`的距离之和.
 func DistSum(sortedNums []int) func(k int) int {
 	n := len(sortedNums)
@@ -173,4 +166,11 @@ func DistSumOfAllPairsRange(sortedNums []int, start, end int) int {
 		preSum += sortedNums[i]
 	}
 	return res
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
