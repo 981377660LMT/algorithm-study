@@ -288,7 +288,7 @@ func (wm *WaveletMatrixWithSum) CountPrefix(start, end int32, x WmValue, xor WmV
 	if wm.compress {
 		x = wm._lowerBound(wm.key, x)
 	}
-	if x == 0 {
+	if x <= 0 {
 		return 0
 	}
 	if x >= 1<<wm.log {

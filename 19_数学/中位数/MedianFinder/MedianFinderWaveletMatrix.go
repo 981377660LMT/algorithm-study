@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"math/bits"
+	"math/rand"
 	"sort"
 )
 
 func main() {
-
+	test()
 }
 
 // waveletMatrix维护区间中位数信息.
@@ -20,8 +22,12 @@ func NewMedianFinderWaveletMatrix(wm *WaveletMatrixWithSum) *MedianFinderWavelet
 	return &MedianFinderWaveletMatrix{Wm: wm}
 }
 
-// 返回区间 [start, end) 中的中位数(向下取整).
-func (mf *MedianFinderWaveletMatrix) Median(start, end int32) int {
+func (mf *MedianFinderWaveletMatrix) Median() int {
+	return mf.MedianRange(0, mf.Wm.n)
+}
+
+// 返回区间 [start, end) 中的中位数(如果有两个中位数，返回较小的那个).
+func (mf *MedianFinderWaveletMatrix) MedianRange(start, end int32) int {
 	if start < 0 {
 		start = 0
 	}
@@ -34,7 +40,9 @@ func (mf *MedianFinderWaveletMatrix) Median(start, end int32) int {
 	return mf.Wm.Median(start, end, false, 0)
 }
 
-func (mf *MedianFinderWaveletMatrix) DistSum(to int) int {}
+func (mf *MedianFinderWaveletMatrix) DistSum(to int) int {
+	return mf.DistSumRange(to, 0, mf.Wm.n)
+}
 
 func (mf *MedianFinderWaveletMatrix) DistSumRange(to int, start, end int32) int {
 	if start < 0 {
@@ -46,6 +54,20 @@ func (mf *MedianFinderWaveletMatrix) DistSumRange(to int, start, end int32) int 
 	if start >= end {
 		return 0
 	}
+	m := end - start
+	less := mf.Wm.CountPrefix(start, end, WmValue(to), 0) // bisect_left
+	allSum := mf.Wm.SumAll(start, end)
+	if less == 0 {
+		return allSum - int(m)*to
+	}
+	if less == m {
+		return int(m)*to - allSum
+	}
+	sum1 := mf.Wm.SumPrefix(start, end, less, 0)
+	sum2 := allSum - sum1
+	leftSum := to*int(less) - sum1
+	rightSum := sum2 - to*int(m-less)
+	return leftSum + rightSum
 }
 
 func (mf *MedianFinderWaveletMatrix) DistSumToMedian() int {
@@ -64,15 +86,15 @@ func (mf *MedianFinderWaveletMatrix) DistSumToMedianRange(start, end int32) int 
 	}
 
 	m := end - start
-	lowerCount := m / 2
-	ceilCount := m - lowerCount
-	mid, lowerSum := mf.Wm.KthValueAndSum(start, end, lowerCount, 0)
+	count1 := m / 2
+	count2 := m - count1
+	mid, sum1 := mf.Wm.KthValueAndSum(start, end, count1, 0)
 	allSum := mf.Wm.SumAll(start, end)
-	ceilSum := allSum - lowerSum
+	sum2 := allSum - sum1
 
 	res := 0
-	res += mid*int(lowerCount) - lowerSum
-	res += ceilSum - mid*int(ceilCount)
+	res += mid*int(count1) - sum1
+	res += sum2 - mid*int(count2)
 	return res
 }
 
@@ -229,7 +251,7 @@ func (wm *WaveletMatrixWithSum) CountPrefix(start, end int32, x WmValue, xor WmV
 	if wm.compress {
 		x = wm._lowerBound(wm.key, x)
 	}
-	if x == 0 {
+	if x <= 0 {
 		return 0
 	}
 	if x >= 1<<wm.log {
@@ -580,4 +602,79 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func test() {
+
+	medianBruteForce := func(nums []int) int {
+		if len(nums) == 0 {
+			return 0
+		}
+		sortedNums := append([]int(nil), nums...)
+		sort.Ints(sortedNums)
+		mid := (len(sortedNums) - 1) / 2
+		return sortedNums[mid]
+	}
+
+	distSumBruteForce := func(nums []int, to int) int {
+		res := 0
+		for _, num := range nums {
+			res += abs(num - to)
+		}
+		return res
+	}
+
+	distSumRangeBruteForce := func(nums []int, to, start, end int) int {
+		res := 0
+		for i := start; i < end; i++ {
+			res += abs(nums[i] - to)
+		}
+		return res
+	}
+
+	distSumToMedianBruteForce := func(nums []int) int {
+		median := medianBruteForce(nums)
+		return distSumBruteForce(nums, median)
+	}
+
+	distSumToMedianRangeBruteForce := func(nums []int, start, end int) int {
+		median := medianBruteForce(nums[start:end])
+		return distSumRangeBruteForce(nums, median, start, end)
+	}
+
+	for tc := 0; tc < 1000; tc++ {
+		n := rand.Intn(1000) + 1
+		nums := make([]int, n)
+		for i := 0; i < n; i++ {
+			nums[i] = rand.Intn(1e6) - 5e5
+		}
+		mf := NewMedianFinderWaveletMatrix(NewWaveletMatrixWithSum(nums, nums, -1, true))
+
+		for i := 0; i < 100; i++ {
+			start, end := rand.Intn(n), rand.Intn(n)+1
+			if start > end {
+				start, end = end, start
+			}
+			to := rand.Intn(1e5) - 5e4
+
+			if mf.MedianRange(int32(start), int32(end)) != medianBruteForce(nums[start:end]) {
+				panic("err0")
+			}
+			if mf.DistSum(int(to)) != distSumBruteForce(nums, to) {
+				panic("err1")
+			}
+			if mf.DistSumRange(int(to), int32(start), int32(end)) != distSumRangeBruteForce(nums, to, start, end) {
+				panic("err2")
+			}
+			if mf.DistSumToMedian() != distSumToMedianBruteForce(nums) {
+				panic("err3")
+			}
+			if mf.DistSumToMedianRange(int32(start), int32(end)) != distSumToMedianRangeBruteForce(nums, start, end) {
+				fmt.Println(mf.DistSumToMedianRange(int32(start), int32(end)), distSumToMedianRangeBruteForce(nums, start, end))
+				panic("err4")
+			}
+		}
+	}
+
+	fmt.Println("pass")
 }

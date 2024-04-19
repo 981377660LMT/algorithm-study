@@ -63,17 +63,23 @@ func NewMedianFinderSortedList(sortedList *SortedListWithSum) *MedianFinderSorte
 	return &MedianFinderSortedList{List: sortedList}
 }
 
-// 返回向下取整的中位数.
+// 如果有两个中位数，返回较小的那个.
 func (mfs *MedianFinderSortedList) Median() (res int) {
-	if mfs.List.Len() == 0 {
-		panic("Median() called on empty MedianFinderSortedList")
+	return mfs.MedianRange(0, mfs.List.Len())
+}
+
+func (mfs *MedianFinderSortedList) MedianRange(start, end int) (res int) {
+	if start < 0 {
+		start = 0
 	}
-	if mfs.List.Len()&1 == 1 {
-		return mfs.List.At(mfs.List.Len() >> 1)
-	} else {
-		mid := mfs.List.Len() >> 1
-		return (mfs.List.At(mid-1) + mfs.List.At(mid)) >> 1
+	if n := mfs.List.Len(); end > n {
+		end = n
 	}
+	if start >= end {
+		return 0
+	}
+	mid := start + (end-start-1)>>1
+	return mfs.List.At(mid)
 }
 
 // 返回所有数到`to`的距离和.
