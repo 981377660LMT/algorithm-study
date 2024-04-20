@@ -8,22 +8,6 @@ import (
 	"strings"
 )
 
-func main() {
-	// [[1,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0],[0,0,1,0,1,0,1,0,0],[0,0,0,1,0,0,0,0,0],[0,0,1,0,1,0,0,0,0],[0,0,0,0,0,1,0,0,0],[0,0,1,0,0,0,1,0,0],[0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,1]]
-
-	fmt.Println(minMalwareSpread([][]int{
-		{1, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 1, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 1, 0, 1, 0, 1, 0, 0},
-		{0, 0, 0, 1, 0, 0, 0, 0, 0},
-		{0, 0, 1, 0, 1, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 1, 0, 0, 0},
-		{0, 0, 1, 0, 0, 0, 1, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 1, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 1},
-	}, []int{6, 0, 4}))
-}
-
 // 238. 除自身以外数组的乘积
 // https://leetcode.cn/problems/product-of-array-except-self/
 func productExceptSelf(nums []int) []int {
@@ -109,11 +93,11 @@ func minMalwareSpread(adjMatrix [][]int, virus []int) int {
 				if bad[nextRoot] {
 					continue
 				}
-				nextSize := uf.GetSizeByRoot(nextRoot)
+				nextSize := uf.GetSize(nextRoot)
 				uf.Union(cur, nextRoot)
+				historyStack = append(historyStack, [2]int32{newVirusCount, nextRoot})
 				newVirusCount += nextSize
 				bad[nextRoot] = true
-				historyStack = append(historyStack, [2]int32{newVirusCount, nextRoot})
 			}
 		},
 		func() {
@@ -267,8 +251,6 @@ func (ufa *UnionFindArrayWithUndo) SetPart(part int32) { ufa.Part = part }
 func (uf *UnionFindArrayWithUndo) IsConnected(x, y int32) bool { return uf.Find(x) == uf.Find(y) }
 
 func (uf *UnionFindArrayWithUndo) GetSize(x int32) int32 { return -uf.data[uf.Find(x)] }
-
-func (uf *UnionFindArrayWithUndo) GetSizeByRoot(root int32) int32 { return -uf.data[root] }
 
 func (ufa *UnionFindArrayWithUndo) GetGroups() map[int32][]int32 {
 	groups := make(map[int32][]int32)

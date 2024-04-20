@@ -1,3 +1,5 @@
+**查询分块/询问分块 解决在线查询问题**
+
 二进制分组参考分治中的[二进制分组](../../../../10_%E5%88%86%E6%ParallelSqrtSearchUndo2%BB%E6%B3%95/%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%88%86%E7%BB%84)
 
 ---
@@ -17,3 +19,5 @@
    [块内直接记录修改](<CF342E-Xenia and Tree.go>)
    [块内 undoredo](<P5443 [APIO2019] 桥梁.go>)
    [块内 undoredo](ParallelSqrtSearchUndo.go)
+
+---
