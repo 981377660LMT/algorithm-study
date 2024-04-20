@@ -20,7 +20,6 @@ import (
 
 func main() {
 	demo()
-
 }
 
 func demo() {
@@ -94,11 +93,11 @@ func (tc *TransitiveClosure) Build() {
 	tc.hasBuilt = true
 	n, canReach := tc.n, tc.canReach
 	for k := 0; k < n; k++ {
-		cacheK := canReach[k]
+		nextsK := canReach[k]
 		for i := 0; i < n; i++ {
-			cacheI := canReach[i]
-			if cacheI.Has(k) {
-				cacheI.IOr(cacheK)
+			nextsI := canReach[i]
+			if nextsI.Has(k) {
+				nextsI.IOr(nextsK)
 			}
 		}
 	}

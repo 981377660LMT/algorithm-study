@@ -1,81 +1,76 @@
-# 假设 M(initial) 是在恶意软件停止传播之后，整个网络中感染恶意软件的最终节点数。
-# 如果从 initial 中移除某一节点能够最小化 M(initial)， 返回该节点。如果有多个节点满足条件，就返回索引最小的节点。
-# 请注意，如果某个节点已从受感染节点的列表 initial 中删除，它以后仍有可能因恶意软件传播而受到感染。
+# 924. 尽量减少恶意软件的传播
+# https://leetcode.cn/problems/minimize-malware-spread/description/
+# 给定一个无向图，初始时有一些结点 initial 被病毒感染，每个病毒会感染整个联通块所有结点。
+# 你可以使一个 initial 中的结点免疫，免疫后该结点不会被感染。
+# 要使得最少的结点被感染，你需要使哪个结点免疫？
+# 如果有多个解，请返回编号最小的解。
+
+# !求只包含一个被感染节点的最大连通块
 
 
-from itertools import combinations
 from typing import List
-from collections import Counter
+from collections import defaultdict
 
 
 class Solution:
     def minMalwareSpread(self, graph: List[List[int]], initial: List[int]) -> int:
+        if len(initial) == 0:
+            return 0
+        if len(initial) == 1:
+            return initial[0]
+
         n = len(graph)
-        uf = UnionFindArray(n)
-        for i, j in combinations(range(n), 2):
-            if graph[i][j]:
-                uf.union(i, j)
+        bad = [False] * n
+        for v in initial:
+            bad[v] = True
+        uf = UnionFindArraySimple(n)
+        for i in range(n):
+            for j in range(i + 1, n):
+                if graph[i][j] == 1:
+                    uf.union(i, j)
 
-        virusGroup = Counter(uf.find(u) for u in initial)
-        res, maxSave = min(initial), -1
-        for node in initial:
-            root = uf.find(node)
-            if virusGroup[root] == 1:  # 初始感染者里这个流派只有一个人感染了,哪个流派人多就拯救哪个流派,否则会感染更多人
-                if uf.rank[root] > maxSave or uf.rank[root] == maxSave and node < res:
-                    res, maxSave = node, uf.rank[root]
-        return res
+        belong = [uf.find(i) for i in range(n)]
+        id = defaultdict(lambda: len(id))
+        belong = [id[b] for b in belong]
+        groupSize, groupBadCount = [0] * len(id), [0] * len(id)
+        for i, b in enumerate(belong):
+            groupSize[b] += 1
+            groupBadCount[b] += bad[i]
+
+        min_, argMin = n, -1
+        for v in initial:
+            b = belong[v]
+            if groupBadCount[b] == 1:
+                cand = n - groupSize[b]
+                if cand < min_ or (cand == min_ and v < argMin):
+                    min_, argMin = cand, v
+        return argMin if min_ < n else min(initial)
 
 
-from collections import defaultdict
-from typing import DefaultDict, List
-
-
-class UnionFindArray:
-
-    __slots__ = ("n", "part", "parent", "rank")
+class UnionFindArraySimple:
+    __slots__ = ("part", "n", "_data")
 
     def __init__(self, n: int):
-        self.n = n
         self.part = n
-        self.parent = list(range(n))
-        self.rank = [1] * n
+        self.n = n
+        self._data = [-1] * n
 
-    def find(self, x: int) -> int:
-        while x != self.parent[x]:
-            self.parent[x] = self.parent[self.parent[x]]
-            x = self.parent[x]
-        return x
-
-    def union(self, x: int, y: int) -> bool:
-        rootX = self.find(x)
-        rootY = self.find(y)
-        if rootX == rootY:
+    def union(self, key1: int, key2: int) -> bool:
+        root1, root2 = self.find(key1), self.find(key2)
+        if root1 == root2:
             return False
-        if self.rank[rootX] > self.rank[rootY]:
-            rootX, rootY = rootY, rootX
-        self.parent[rootX] = rootY
-        self.rank[rootY] += self.rank[rootX]
+        if self._data[root1] > self._data[root2]:
+            root1, root2 = root2, root1
+        self._data[root1] += self._data[root2]
+        self._data[root2] = root1
         self.part -= 1
         return True
 
-    def isConnected(self, x: int, y: int) -> bool:
-        return self.find(x) == self.find(y)
+    def find(self, key: int) -> int:
+        if self._data[key] < 0:
+            return key
+        self._data[key] = self.find(self._data[key])
+        return self._data[key]
 
-    def getGroups(self) -> DefaultDict[int, List[int]]:
-        groups = defaultdict(list)
-        for key in range(self.n):
-            root = self.find(key)
-            groups[root].append(key)
-        return groups
-
-    def getRoots(self) -> List[int]:
-        return list(set(self.find(key) for key in self.parent))
-
-    def __repr__(self) -> str:
-        return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
-
-    def __len__(self) -> int:
-        return self.part
-
-
-print(Solution().minMalwareSpread(graph=[[1, 1, 0], [1, 1, 0], [0, 0, 1]], initial=[0, 1]))
+    def getSize(self, key: int) -> int:
+        return -self._data[self.find(key)]

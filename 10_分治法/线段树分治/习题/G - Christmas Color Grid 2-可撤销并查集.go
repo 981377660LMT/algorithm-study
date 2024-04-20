@@ -1,5 +1,7 @@
 // G - Christmas Color Grid 2-可撤销并查集维护联通分量个数
 // https://atcoder.jp/contests/abc334/editorial/8995
+//
+// 类似 lc928 尽量减少恶意软件的传播II .
 
 package main
 

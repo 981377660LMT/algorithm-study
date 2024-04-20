@@ -4,7 +4,7 @@ package main
 
 type S = struct{ value int }
 
-// 线段树分治的特殊情形.
+// 线段树分治的特殊情形(分治删点).
 // 调用 `query` 时，`state` 为对除了 `index` 以外所有点均调用过了 `mutate` 的状态。但不保证调用 `mutate` 的顺序。
 // 总计会调用 $O(NlgN)$ 次的 `mutate` , $O(N)$ 次的 `copy` 和 `query`.
 // !将一个不可撤销的数据结构以`修改时拷贝`的方式变成`可撤销`的.
