@@ -118,6 +118,7 @@ class AVLTreeBitVector(BitVectorInterface):
         _popcount = AVLTreeBitVector._popcount
 
         def rec(lr: int) -> int:
+            print(lr)
             l, r = lr >> bit, lr & msk
             mid = (l + r) >> 1
             hl, hr = 0, 0
@@ -901,8 +902,8 @@ if __name__ == "__main__":
 
         print("ok")
 
-    test()
+    # test()
 
-    wm = AVLTreeBitVector([0] * 5)
+    wm = AVLTreeBitVector([0] * int(1e6))
     wm.set(0, 1)
-    print(wm)
+    print(wm.tolist()[:10])

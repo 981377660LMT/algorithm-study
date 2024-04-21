@@ -19,9 +19,15 @@ import (
 	"fmt"
 	"math/bits"
 	"math/rand"
+	"time"
 )
 
 func main() {
+	test()
+	testTime()
+}
+
+func demo() {
 	nums := []int8{0, 0}
 	wm := NewAVLTreeBitVector(int32(len(nums)), func(i int32) int8 {
 		return nums[i]
@@ -31,7 +37,6 @@ func main() {
 	fmt.Println(wm.ToList())
 	wm.Set(1, 1)
 	fmt.Println(wm.ToList())
-	test()
 }
 
 type AVLTreeBitVector struct {
@@ -40,7 +45,7 @@ type AVLTreeBitVector struct {
 	bitLen  []int32
 	key     []uint64 // 结点mask
 	total   []int32  // 子树onesCount之和
-	size    []int32  // 子树大小
+	size    []int32
 	left    []int32
 	right   []int32
 	balance []int8 // 左子树高度-右子树高度
@@ -371,8 +376,8 @@ func (t *AVLTreeBitVector) Kth1(k int32) int32 {
 	}
 	return l
 }
-func (t *AVLTreeBitVector) Kth(k int32, v bool) int32 {
-	if v {
+func (t *AVLTreeBitVector) Kth(k int32, v int8) int32 {
+	if v == 1 {
 		return t.Kth1(k)
 	}
 	return t.Kth0(k)
@@ -413,7 +418,7 @@ func (t *AVLTreeBitVector) Debug() {
 			acc += rec(right[node])
 		}
 		if acc != t.total[node] {
-			fmt.Println(node, acc, t.total[node])
+			// fmt.Println(node, acc, t.total[node])
 			panic("error")
 		}
 		return acc
@@ -422,8 +427,8 @@ func (t *AVLTreeBitVector) Debug() {
 }
 
 func (t *AVLTreeBitVector) _build(n int32, f func(i int32) int8) {
-	bit := bits.Len32(uint32(n)) + 2
-	mask := int32(1<<bit - 1)
+	bit := uint64(bits.Len32(uint32(n)) + 2)
+	mask := uint64(1<<bit - 1)
 	end := t.end
 	t.Reserve(n)
 	index := end
@@ -442,27 +447,27 @@ func (t *AVLTreeBitVector) _build(n int32, f func(i int32) int8) {
 	}
 	t.end = index
 
-	var rec func(lr int32) int32
-	rec = func(lr int32) int32 {
+	var rec func(lr uint64) uint64
+	rec = func(lr uint64) uint64 {
 		l, r := lr>>bit, lr&mask
 		mid := (l + r) >> 1
-		hl, hr := int32(0), int32(0)
+		hl, hr := uint64(0), uint64(0)
 		if l != mid {
 			le := rec(l<<bit | mid)
-			t.left[mid], hl = le>>bit, le&mask
+			t.left[mid], hl = int32(le>>bit), le&mask
 			t.size[mid] += t.size[t.left[mid]]
 			t.total[mid] += t.total[t.left[mid]]
 		}
 		if mid+1 != r {
 			ri := rec((mid+1)<<bit | r)
-			t.right[mid], hr = ri>>bit, ri&mask
+			t.right[mid], hr = int32(ri>>bit), ri&mask
 			t.size[mid] += t.size[t.right[mid]]
 			t.total[mid] += t.total[t.right[mid]]
 		}
 		t.balance[mid] = int8(hl - hr)
-		return mid<<bit | (max32(hl, hr) + 1)
+		return mid<<bit | (max64(hl, hr) + 1)
 	}
-	t.root = rec(end<<bit|t.end) >> bit
+	t.root = int32(rec(uint64(end)<<bit|uint64(t.end)) >> bit)
 }
 
 func (t *AVLTreeBitVector) _rotateL(node int32) int32 {
@@ -710,14 +715,21 @@ func max32(a, b int32) int32 {
 	return b
 }
 
+func max64(a, b uint64) uint64 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 func test() {
-	for i := 0; i < 500; i++ {
-		n := rand.Intn(300) + 50
+	for i := 0; i < 10; i++ {
+		n := rand.Intn(1e4) + 50
 		nums := make([]int8, n)
 		for i := 0; i < n; i++ {
 			nums[i] = int8(rand.Intn(2))
 		}
-		wm := NewAVLTreeBitVector(int32(n), func(i int32) int8 { return nums[i] })
+		bv := NewAVLTreeBitVector(int32(n), func(i int32) int8 { return nums[i] })
 
 		count := func(end int32, v int8) int32 {
 			res := int32(0)
@@ -756,38 +768,36 @@ func test() {
 		}
 		_ = pop
 
-		for j := 0; j < 50; j++ {
+		for j := 0; j < 1000; j++ {
 			// count
-			for i := 0; i < len(nums)+1; i++ {
-				if wm.Count0(int32(i)) != count(int32(i), 0) {
-					panic("error1")
-				}
-				if wm.Count1(int32(i)) != count(int32(i), 1) {
-					panic("error2")
-				}
+			countIndex := int32(rand.Intn(n + 1))
+			if bv.Count0(countIndex) != count(countIndex, 0) {
+				panic("error1")
+			}
+			if bv.Count1(countIndex) != count(countIndex, 1) {
+				panic("error2")
 			}
 
 			// kth
-			for i := 0; i < len(nums)+1; i++ {
-				if wm.Kth0(int32(i)) != kth(int32(i), 0) {
-					panic("error3")
-				}
-				if wm.Kth1(int32(i)) != kth(int32(i), 1) {
-					panic("error4")
-				}
+			kthIndex := int32(rand.Intn(n + 1))
+			if bv.Kth0(kthIndex) != kth(kthIndex, 0) {
+				panic("error3")
+			}
+			if bv.Kth1(kthIndex) != kth(kthIndex, 1) {
+				panic("error4")
 			}
 
 			// insert
 			insertIndex := rand.Intn(n + 1)
 			insertValue := int8(rand.Intn(2))
 			insert(int32(insertIndex), insertValue)
-			wm.Insert(int32(insertIndex), insertValue)
+			bv.Insert(int32(insertIndex), insertValue)
 
 			// fmt.Println(wm.ToList(), nums, "after insert", insertIndex, insertValue)
 
 			// pop
 			popIndex := rand.Intn(len(nums))
-			if wm.Pop(int32(popIndex)) != pop(int32(popIndex)) {
+			if bv.Pop(int32(popIndex)) != pop(int32(popIndex)) {
 				panic("error")
 			}
 
@@ -797,24 +807,24 @@ func test() {
 			setIndex := rand.Intn(len(nums))
 			setValue := int8(rand.Intn(2))
 			nums[setIndex] = setValue
-			wm.Set(int32(setIndex), setValue)
+			bv.Set(int32(setIndex), setValue)
 			// fmt.Println(wm.ToList(), nums, "after set", setIndex, setValue)
 
 			// len
-			if wm.Len() != int32(len(nums)) {
+			if bv.Len() != int32(len(nums)) {
 				panic("error")
 			}
 
 			// get
 			for i := 0; i < len(nums); i++ {
-				if wm.Get(int32(i)) != nums[i] {
-					fmt.Println(wm.ToList(), nums, i, n, len(nums))
+				if bv.Get(int32(i)) != nums[i] {
+					fmt.Println(bv.ToList(), nums, i, n, len(nums))
 					panic("error get")
 				}
 			}
 
 			// toList
-			list := wm.ToList()
+			list := bv.ToList()
 			for i := 0; i < len(nums); i++ {
 				if list[i] != nums[i] {
 					fmt.Println(list, nums, i, list[i], nums[i])
@@ -822,9 +832,44 @@ func test() {
 				}
 			}
 
-			wm.Debug()
+			bv.Debug()
 		}
 	}
 
 	fmt.Println("ok")
+}
+
+func testTime() {
+	n := int32(2e5)
+	startTime := time.Now()
+	bv := NewAVLTreeBitVector(n, func(i int32) int8 {
+		if i%2 == 0 {
+			return 0
+		}
+		return 1
+	})
+
+	// Count、Kth、Get
+	for i := int32(0); i < n; i++ {
+		bv.Count(i, 0)
+		bv.Count(n-i, 1)
+		bv.Kth(i, 0)
+		bv.Kth(n-i, 1)
+		bv.Get(i)
+	}
+	time1 := time.Now()
+
+	// Insert、Pop、Set
+	for i := int32(0); i < n; i++ {
+		bv.Insert(i, 1)
+		bv.Insert(i, 0)
+	}
+	for i := int32(0); i < n; i++ {
+		bv.Pop(n - i)
+		bv.Set(i, 1)
+	}
+	bv.ToList()
+	time2 := time.Now()
+	fmt.Println("time1", time1.Sub(startTime)) // 143.811ms
+	fmt.Println("time2", time2.Sub(time1))     // 137.6878ms
 }
