@@ -78,6 +78,11 @@ func (t *AVLTreeBitVector) Reserve(n int32) {
 }
 
 func (t *AVLTreeBitVector) Insert(index int32, v int8) {
+	if t.root == 0 {
+		t.root = t._makeNode(uint64(v), 1)
+		return
+	}
+
 	n := t.Len()
 	if index < 0 {
 		index += n
@@ -87,11 +92,6 @@ func (t *AVLTreeBitVector) Insert(index int32, v int8) {
 	}
 	if index > n {
 		index = n
-	}
-
-	if t.root == 0 {
-		t.root = t._makeNode(uint64(v), 1)
-		return
 	}
 
 	v32 := int32(v)
@@ -117,9 +117,9 @@ func (t *AVLTreeBitVector) Insert(index int32, v int8) {
 	}
 	index -= t.size[t.left[node]]
 	if t.bitLen[node] < W {
-		k := t.key[node]
+		mask := t.key[node]
 		bl := t.bitLen[node] - index
-		t.key[node] = (((k>>bl)<<1 | uint64(v)) << bl) | (k & ((1 << bl) - 1))
+		t.key[node] = (((mask>>bl)<<1 | uint64(v)) << bl) | (mask & ((1 << bl) - 1))
 		t.bitLen[node]++
 		t.size[node]++
 		t.total[node] += v32
@@ -128,12 +128,12 @@ func (t *AVLTreeBitVector) Insert(index int32, v int8) {
 	path = append(path, node)
 	t.size[node]++
 	t.total[node] += v32
-	k := t.key[node]
+	mask := t.key[node]
 	bl := W - index
-	k = (((k>>bl)<<1 | uint64(v)) << bl) | (k & ((1 << bl) - 1))
-	leftKey := k >> W
+	mask = (((mask>>bl)<<1 | uint64(v)) << bl) | (mask & ((1 << bl) - 1))
+	leftKey := mask >> W
 	leftKeyPopcount := int32(leftKey & 1)
-	t.key[node] = k & ((1 << W) - 1)
+	t.key[node] = mask & ((1 << W) - 1)
 	node = t.left[node]
 	d <<= 1
 	d |= 1
@@ -209,8 +209,12 @@ func (t *AVLTreeBitVector) Insert(index int32, v int8) {
 }
 
 func (t *AVLTreeBitVector) Pop(index int32) int8 {
+	n := t.Len()
 	if index < 0 {
-		index += t.Len()
+		index += n
+	}
+	if index < 0 || index >= n {
+		panic(fmt.Sprintf("index out of range: %d", index))
 	}
 	left, right, size := t.left, t.right, t.size
 	bitLen, keys, total := t.bitLen, t.key, t.total
@@ -223,9 +227,9 @@ func (t *AVLTreeBitVector) Pop(index int32) int8 {
 			break
 		}
 		path = append(path, node)
+		d <<= 1
 		if t > index {
 			node = left[node]
-			d <<= 1
 			d |= 1
 		} else {
 			node = right[node]
@@ -251,8 +255,12 @@ func (t *AVLTreeBitVector) Pop(index int32) int8 {
 }
 
 func (t *AVLTreeBitVector) Set(index int32, v int8) {
+	n := t.Len()
 	if index < 0 {
-		index += t.Len()
+		index += n
+	}
+	if index < 0 || index >= n {
+		panic(fmt.Sprintf("index out of range: %d", index))
 	}
 
 	left, right, bitLen, size, key, total := t.left, t.right, t.bitLen, t.size, t.key, t.total
@@ -263,6 +271,7 @@ func (t *AVLTreeBitVector) Set(index int32, v int8) {
 		path = append(path, node)
 		if tmp-bitLen[node] <= index && index < tmp {
 			index -= size[left[node]]
+			index = bitLen[node] - index - 1
 			if v == 1 {
 				key[node] |= 1 << index
 			} else {
@@ -281,7 +290,6 @@ func (t *AVLTreeBitVector) Set(index int32, v int8) {
 		path = path[:len(path)-1]
 		total[node] = t._popcount(key[node]) + total[left[node]] + total[right[node]]
 	}
-
 }
 
 func (t *AVLTreeBitVector) Get(index int32) int8 {
@@ -704,7 +712,7 @@ func max32(a, b int32) int32 {
 
 func test() {
 	for i := 0; i < 500; i++ {
-		n := rand.Intn(200) + 50
+		n := rand.Intn(300) + 50
 		nums := make([]int8, n)
 		for i := 0; i < n; i++ {
 			nums[i] = int8(rand.Intn(2))
@@ -786,10 +794,10 @@ func test() {
 			// fmt.Println(wm.ToList(), nums, "after pop", popIndex)
 
 			// set
-			// setIndex := rand.Intn(len(nums))
-			// setValue := int8(rand.Intn(2))
-			// nums[setIndex] = setValue
-			// wm.Set(int32(setIndex), setValue)
+			setIndex := rand.Intn(len(nums))
+			setValue := int8(rand.Intn(2))
+			nums[setIndex] = setValue
+			wm.Set(int32(setIndex), setValue)
 			// fmt.Println(wm.ToList(), nums, "after set", setIndex, setValue)
 
 			// len
@@ -798,21 +806,21 @@ func test() {
 			}
 
 			// get
-			// for i := 0; i < len(nums); i++ {
-			// 	if wm.Get(int32(i)) != nums[i] {
-			// 		fmt.Println(wm.ToList(), nums, i, n, len(nums))
-			// 		panic("error get")
-			// 	}
-			// }
+			for i := 0; i < len(nums); i++ {
+				if wm.Get(int32(i)) != nums[i] {
+					fmt.Println(wm.ToList(), nums, i, n, len(nums))
+					panic("error get")
+				}
+			}
 
 			// toList
-			// list := wm.ToList()
-			// for i := 0; i < len(nums); i++ {
-			// 	if list[i] != nums[i] {
-			// 		fmt.Println(list, nums, i, list[i], nums[i])
-			// 		panic("error toList")
-			// 	}
-			// }
+			list := wm.ToList()
+			for i := 0; i < len(nums); i++ {
+				if list[i] != nums[i] {
+					fmt.Println(list, nums, i, list[i], nums[i])
+					panic("error toList")
+				}
+			}
 
 			wm.Debug()
 		}

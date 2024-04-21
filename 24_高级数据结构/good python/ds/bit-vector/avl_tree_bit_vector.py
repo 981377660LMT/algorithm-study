@@ -334,9 +334,9 @@ class AVLTreeBitVector(BitVectorInterface):
                 k -= t
         k -= size[left[node]]
         if bit_len[node] < titan_pylib_AVLTreeBitVector_W:
-            v = keys[node]
+            mask = keys[node]
             bl = bit_len[node] - k
-            keys[node] = (((v >> bl) << 1 | key) << bl) | (v & ((1 << bl) - 1))
+            keys[node] = (((mask >> bl) << 1 | key) << bl) | (mask & ((1 << bl) - 1))
             bit_len[node] += 1
             size[node] += 1
             total[node] += key
@@ -344,12 +344,12 @@ class AVLTreeBitVector(BitVectorInterface):
         path.append(node)
         size[node] += 1
         total[node] += key
-        v = keys[node]
+        mask = keys[node]
         bl = titan_pylib_AVLTreeBitVector_W - k
-        v = (((v >> bl) << 1 | key) << bl) | (v & ((1 << bl) - 1))
-        left_key = v >> titan_pylib_AVLTreeBitVector_W
+        mask = (((mask >> bl) << 1 | key) << bl) | (mask & ((1 << bl) - 1))
+        left_key = mask >> titan_pylib_AVLTreeBitVector_W
         left_key_popcount = left_key & 1
-        keys[node] = v & ((1 << titan_pylib_AVLTreeBitVector_W) - 1)
+        keys[node] = mask & ((1 << titan_pylib_AVLTreeBitVector_W) - 1)
         node = left[node]
         d <<= 1
         d |= 1
@@ -809,6 +809,7 @@ class AVLTreeBitVector(BitVectorInterface):
             path.append(node)
             if t - bit_len[node] <= k < t:
                 k -= size[left[node]]
+                k = bit_len[node] - k - 1
                 if v:
                     key[node] |= 1 << k
                 else:
@@ -819,6 +820,7 @@ class AVLTreeBitVector(BitVectorInterface):
             else:
                 node = right[node]
                 k -= t
+
         while path:
             node = path.pop()
             total[node] = (
@@ -836,73 +838,71 @@ class AVLTreeBitVector(BitVectorInterface):
 
 
 if __name__ == "__main__":
+
+    def test():
+        for _ in range(40):
+            n = randint(1, 100) + 100
+            a = [randint(0, 1) for _ in range(n)]
+            wm = AVLTreeBitVector(a)
+
+            def countBf(nums):
+                return sum(nums)
+
+            def kthBf(nums, k, v):
+                cnt = 0
+                for i in range(len(nums)):
+                    if nums[i] == v:
+                        if cnt == k:
+                            return i
+                        cnt += 1
+                return -1
+
+            def insertBf(nums, k, v):
+                nums.insert(k, v)
+
+            def popBf(nums, k):
+                return nums.pop(k)
+
+            for _ in range(10):
+                # count
+                for i in range(len(a) + 1):
+                    assert wm.rank(i, 0) == i - countBf(a[:i])
+                    assert wm.rank(i, 1) == countBf(a[:i])
+                    assert wm.select(i, 0) == kthBf(a, i, 0)
+                    assert wm.select(i, 1) == kthBf(a, i, 1)
+
+                # insert
+                insertIndex = randint(0, len(a))
+                insertValue = randint(0, 1)
+                insertBf(a, insertIndex, insertValue)
+                wm.insert(insertIndex, insertValue)
+
+                # set
+                setIndex = randint(0, len(a) - 1)
+                setValue = randint(0, 1)
+                a[setIndex] = setValue
+                wm.set(setIndex, setValue)
+
+                # pop
+                popIndex = randint(0, len(a) - 1)
+                assert popBf(a, popIndex) == wm.pop(popIndex)
+
+                # len
+                assert len(a) == len(wm)
+
+                # get
+                for i in range(len(a)):
+                    assert a[i] == wm[i]
+
+                # tolist
+                assert a == wm.tolist()
+
+                wm._debug_acc()
+
+        print("ok")
+
+    test()
+
     wm = AVLTreeBitVector([0] * 5)
-    # wm.insert(0, 1)
+    wm.set(0, 1)
     print(wm)
-    # wm.pop(2)
-    # print(wm)
-    wm.set(1, 1)
-    print(wm)
-
-    print(all(a == b for a, b in zip(wm.tolist(), [wm[i] for i in range(len(wm))])))
-
-    for _ in range(10):
-        n = randint(1, 100) + 100
-        a = [randint(0, 1) for _ in range(n)]
-        wm = AVLTreeBitVector(a)
-
-        def countBf(nums):
-            return sum(nums)
-
-        def kthBf(nums, k, v):
-            cnt = 0
-            for i in range(len(nums)):
-                if nums[i] == v:
-                    if cnt == k:
-                        return i
-                    cnt += 1
-            return -1
-
-        def insertBf(nums, k, v):
-            nums.insert(k, v)
-
-        def popBf(nums, k):
-            return nums.pop(k)
-
-        for _ in range(100):
-            # count
-            for i in range(len(a) + 1):
-                assert wm.rank(i, 0) == i - countBf(a[:i])
-                assert wm.rank(i, 1) == countBf(a[:i])
-                assert wm.select(i, 0) == kthBf(a, i, 0)
-                assert wm.select(i, 1) == kthBf(a, i, 1)
-
-            # insert
-            insertIndex = randint(0, len(a))
-            insertValue = randint(0, 1)
-            insertBf(a, insertIndex, insertValue)
-            wm.insert(insertIndex, insertValue)
-
-            # set
-            # setIndex = randint(0, len(a) - 1)
-            # setValue = randint(0, 1)
-            # a[setIndex] = setValue
-            # wm.set(setIndex, setValue)
-
-            # pop
-            popIndex = randint(0, len(a) - 1)
-            assert popBf(a, popIndex) == wm.pop(popIndex)
-
-            # len
-            assert len(a) == len(wm)
-
-            # get
-            for i in range(len(a)):
-                assert a[i] == wm[i]
-
-            # tolist
-            assert a == wm.tolist()
-
-            wm._debug_acc()
-
-    print("ok")
