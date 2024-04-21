@@ -30,3 +30,5 @@ https://atcoder.jp/contests/abc350/tasks/abc350_g
      u,v 都是小点 => 邻接表 set 求交集
 
    和 java HashMap 超过阈值，链表转成红黑树异曲同工
+
+   TODO: 邻居 Facade 模板，底层两种实现，表层 Facade，根据阈值自动切换底层实现
