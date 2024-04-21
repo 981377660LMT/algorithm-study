@@ -902,7 +902,7 @@ if __name__ == "__main__":
 
         print("ok")
 
-    # test()
+    test()
 
     wm = AVLTreeBitVector([0] * int(1e6))
     wm.set(0, 1)
