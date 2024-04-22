@@ -468,6 +468,7 @@ func main() {
 }
 
 type WaveletMatrixStatic struct {
+	sigma int
 }
 
 type bitVector struct {
