@@ -381,6 +381,7 @@ class WaveletMatrix:
         while hq:
             length, x, l, bit = heappop(hq)
             length = -length
+            print(length, x, l, bit)
             if bit == -1:
                 ans.append((x, length))
                 k -= 1
@@ -466,3 +467,8 @@ class WaveletMatrix:
         return f"{self.__class__.__name__}({[self.access(i) for i in range(self.size)]})"
 
     __repr__ = __str__
+
+
+if __name__ == "__main__":
+    wm = WaveletMatrix(9, [3, 1, 4, 1, 5, 9, 2, 6])
+    print(wm.topk(0, 8, 3))

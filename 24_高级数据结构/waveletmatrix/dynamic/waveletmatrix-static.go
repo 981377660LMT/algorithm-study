@@ -1,474 +1,330 @@
 // WaveletMatrixStatic/StaticWaveletMatrix
-
-// class BitVectorInterface(ABC):
-//     @abstractmethod
-//     def access(self, k: int) -> int:
-//         raise NotImplementedError
-
-//     @abstractmethod
-//     def __getitem__(self, k: int) -> int:
-//         raise NotImplementedError
-
-//     @abstractmethod
-//     def rank0(self, r: int) -> int:
-//         raise NotImplementedError
-
-//     @abstractmethod
-//     def rank1(self, r: int) -> int:
-//         raise NotImplementedError
-
-//     @abstractmethod
-//     def rank(self, r: int, v: int) -> int:
-//         raise NotImplementedError
-
-//     @abstractmethod
-//     def select0(self, k: int) -> int:
-//         raise NotImplementedError
-
-//     @abstractmethod
-//     def select1(self, k: int) -> int:
-//         raise NotImplementedError
-
-//     @abstractmethod
-//     def select(self, k: int, v: int) -> int:
-//         raise NotImplementedError
-
-//     @abstractmethod
-//     def __len__(self) -> int:
-//         raise NotImplementedError
-
-//     @abstractmethod
-//     def __str__(self) -> str:
-//         raise NotImplementedError
-
-//     @abstractmethod
-//     def __repr__(self) -> str:
-//         raise NotImplementedError
-
-// from array import array
-
-// class BitVector(BitVectorInterface):
-//     """コンパクトな bit vector です。"""
-
-//     def __init__(self, n: int):
-//         """長さ ``n`` の ``BitVector`` です。
-
-//         bit を保持するのに ``array[I]`` を使用します。
-//         ``block_size= n / 32`` として、使用bitは ``32*block_size=2n bit`` です。
-
-//         累積和を保持するのに同様の ``array[I]`` を使用します。
-//         32bitごとの和を保存しています。同様に使用bitは ``2n bit`` です。
-//         """
-//         assert 0 <= n < 4294967295
-//         self.N = n
-//         self.block_size = (n + 31) >> 5
-//         b = bytes(4 * (self.block_size + 1))
-//         self.bit = array("I", b)
-//         self.acc = array("I", b)
-
-//     @staticmethod
-//     def _popcount(x: int) -> int:
-//         x = x - ((x >> 1) & 0x55555555)
-//         x = (x & 0x33333333) + ((x >> 2) & 0x33333333)
-//         x = x + (x >> 4) & 0x0F0F0F0F
-//         x += x >> 8
-//         x += x >> 16
-//         return x & 0x0000007F
-
-//     def set(self, k: int) -> None:
-//         """``k`` 番目の bit を ``1`` にします。
-//         :math:`O(1)` です。
-
-//         Args:
-//           k (int): インデックスです。
-//         """
-//         self.bit[k >> 5] |= 1 << (k & 31)
-
-//     def build(self) -> None:
-//         """構築します。
-//         **これ以降 ``set`` メソッドを使用してはいけません。**
-//         :math:`O(n)` です。
-//         """
-//         acc, bit = self.acc, self.bit
-//         for i in range(self.block_size):
-//             acc[i + 1] = acc[i] + BitVector._popcount(bit[i])
-
-//     def access(self, k: int) -> int:
-//         """``k`` 番目の bit を返します。
-//         :math:`O(1)` です。
-//         """
-//         return (self.bit[k >> 5] >> (k & 31)) & 1
-
-//     def __getitem__(self, k: int) -> int:
-//         return (self.bit[k >> 5] >> (k & 31)) & 1
-
-//     def rank0(self, r: int) -> int:
-//         """``a[0, r)`` に含まれる ``0`` の個数を返します。
-//         :math:`O(1)` です。
-//         """
-//         return r - (
-//             self.acc[r >> 5] + BitVector._popcount(self.bit[r >> 5] & ((1 << (r & 31)) - 1))
-//         )
-
-//     def rank1(self, r: int) -> int:
-//         """``a[0, r)`` に含まれる ``1`` の個数を返します。
-//         :math:`O(1)` です。
-//         """
-//         return self.acc[r >> 5] + BitVector._popcount(self.bit[r >> 5] & ((1 << (r & 31)) - 1))
-
-//     def rank(self, r: int, v: int) -> int:
-//         """``a[0, r)`` に含まれる ``v`` の個数を返します。
-//         :math:`O(1)` です。
-//         """
-//         return self.rank1(r) if v else self.rank0(r)
-
-//     def select0(self, k: int) -> int:
-//         """``k`` 番目の ``0`` のインデックスを返します。
-//         :math:`O(\\log{n})` です。
-//         """
-//         if k < 0 or self.rank0(self.N) <= k:
-//             return -1
-//         l, r = 0, self.block_size + 1
-//         while r - l > 1:
-//             m = (l + r) >> 1
-//             if m * 32 - self.acc[m] > k:
-//                 r = m
-//             else:
-//                 l = m
-//         indx = 32 * l
-//         k = k - (l * 32 - self.acc[l]) + self.rank0(indx)
-//         l, r = indx, indx + 32
-//         while r - l > 1:
-//             m = (l + r) >> 1
-//             if self.rank0(m) > k:
-//                 r = m
-//             else:
-//                 l = m
-//         return l
-
-//     def select1(self, k: int) -> int:
-//         """``k`` 番目の ``1`` のインデックスを返します。
-//         :math:`O(\\log{n})` です。
-//         """
-//         if k < 0 or self.rank1(self.N) <= k:
-//             return -1
-//         l, r = 0, self.block_size + 1
-//         while r - l > 1:
-//             m = (l + r) >> 1
-//             if self.acc[m] > k:
-//                 r = m
-//             else:
-//                 l = m
-//         indx = 32 * l
-//         k = k - self.acc[l] + self.rank1(indx)
-//         l, r = indx, indx + 32
-//         while r - l > 1:
-//             m = (l + r) >> 1
-//             if self.rank1(m) > k:
-//                 r = m
-//             else:
-//                 l = m
-//         return l
-
-//     def select(self, k: int, v: int) -> int:
-//         """``k`` 番目の ``v`` のインデックスを返します。
-//         :math:`O(\\log{n})` です。
-//         """
-//         return self.select1(k) if v else self.select0(k)
-
-//     def __len__(self):
-//         return self.N
-
-//     def __str__(self):
-//         return str([self.access(i) for i in range(self.N)])
-
-//     def __repr__(self):
-//         return f"{self.__class__.__name__}({self})"
-
-// from typing import Sequence, List, Tuple
-// from heapq import heappush, heappop
-// from array import array
-
-// class WaveletMatrix:
-//     """``WaveletMatrix`` です。
-//     静的であることに注意してください。
-
-//     以下の仕様の計算量には嘘があるかもしれません。import 元の ``BitVector`` の計算量も参考にしてください。
-
-//     - 参考:
-//       - `https://miti-7.hatenablog.com/entry/2018/04/28/152259 <https://miti-7.hatenablog.com/entry/2018/04/28/152259>`
-//       - `https://www.slideshare.net/pfi/ss-15916040 <https://www.slideshare.net/pfi/ss-15916040>`
-//       - `デwiki <https://scrapbox.io/data-structures/Wavelet_Matrix>`
-//     """
-
-//     def __init__(self, sigma: int, a: Sequence[int] = []):
-//         """``[0, sigma)`` の整数列を管理する ``WaveletMatrix`` を構築します。
-//         :math:`O(n\\log{\\sigma})` です。
-
-//         Args:
-//           sigma (int): 扱う整数の上限です。
-//           a (Sequence[int], optional): 構築する配列です。
-//         """
-//         self.sigma: int = sigma
-//         self.log: int = (sigma - 1).bit_length()
-//         self.mid: array[int] = array("I", bytes(4 * self.log))
-//         self.size: int = len(a)
-//         self.v: List[BitVector] = [BitVector(self.size) for _ in range(self.log)]
-//         self._build(a)
-
-//     def _build(self, a: Sequence[int]) -> None:
-//         # 列 a から wm を構築する
-//         for bit in range(self.log - 1, -1, -1):
-//             # bit目の0/1に応じてvを構築 + aを安定ソート
-//             v = self.v[bit]
-//             zero, one = [], []
-//             for i, e in enumerate(a):
-//                 if e >> bit & 1:
-//                     v.set(i)
-//                     one.append(e)
-//                 else:
-//                     zero.append(e)
-//             v.build()
-//             self.mid[bit] = len(zero)  # 境界をmid[bit]に保持
-//             a = zero + one
-
-//     def access(self, k: int) -> int:
-//         """k番目の値を返します。
-//         :math:`O(\\log{\\sigma})` です。
-
-//         Args:
-//           k (int): インデックスです。
-//         """
-//         assert (
-//             -self.size <= k < self.size
-//         ), f"IndexError: {self.__class__.__name__}.access({k}), size={self.size}"
-//         if k < 0:
-//             k += self.size
-//         s = 0  # 答え
-//         for bit in range(self.log - 1, -1, -1):
-//             if self.v[bit].access(k):
-//                 # k番目が立ってたら、
-//                 # kまでの1とすべての0が次のk
-//                 s |= 1 << bit
-//                 k = self.v[bit].rank1(k) + self.mid[bit]
-//             else:
-//                 # kまでの0が次のk
-//                 k = self.v[bit].rank0(k)
-//         return s
-
-//     def __getitem__(self, k: int) -> int:
-//         assert (
-//             -self.size <= k < self.size
-//         ), f"IndexError: {self.__class__.__name__}[{k}], size={self.size}"
-//         return self.access(k)
-
-//     def rank(self, r: int, x: int) -> int:
-//         """``a[0, r)`` に含まれる ``x`` の個数を返します。
-//         :math:`O(\\log{\\sigma})` です。
-//         """
-//         assert (
-//             0 <= r <= self.size
-//         ), f"IndexError: {self.__class__.__name__}.rank(), r={r}, size={self.size}"
-//         assert (
-//             0 <= x < 1 << self.log
-//         ), f"ValueError: {self.__class__.__name__}.rank(), x={x}, LIM={1<<self.log}"
-//         l = 0
-//         mid = self.mid
-//         for bit in range(self.log - 1, -1, -1):
-//             # 位置 r より左に x が何個あるか
-//             # x の bit 目で場合分け
-//             if x >> bit & 1:
-//                 # 立ってたら、次のl, rは以下
-//                 l = self.v[bit].rank1(l) + mid[bit]
-//                 r = self.v[bit].rank1(r) + mid[bit]
-//             else:
-//                 # そうでなければ次のl, rは以下
-//                 l = self.v[bit].rank0(l)
-//                 r = self.v[bit].rank0(r)
-//         return r - l
-
-//     def select(self, k: int, x: int) -> int:
-//         """``k`` 番目の ``v`` のインデックスを返します。
-//         :math:`O(\\log{\\sigma})` です。
-//         """
-//         assert (
-//             0 <= k < self.size
-//         ), f"IndexError: {self.__class__.__name__}.select({k}, {x}), k={k}, size={self.size}"
-//         assert (
-//             0 <= x < 1 << self.log
-//         ), f"ValueError: {self.__class__.__name__}.select({k}, {x}), x={x}, LIM={1<<self.log}"
-//         # x の開始位置 s を探す
-//         s = 0
-//         for bit in range(self.log - 1, -1, -1):
-//             if x >> bit & 1:
-//                 s = self.v[bit].rank0(self.size) + self.v[bit].rank1(s)
-//             else:
-//                 s = self.v[bit].rank0(s)
-//         s += k  # s から k 進んだ位置が、元の列で何番目か調べる
-//         for bit in range(self.log):
-//             if x >> bit & 1:
-//                 s = self.v[bit].select1(s - self.v[bit].rank0(self.size))
-//             else:
-//                 s = self.v[bit].select0(s)
-//         return s
-
-//     def kth_smallest(self, l: int, r: int, k: int) -> int:
-//         """``a[l, r)`` の中で k 番目に **小さい** 値を返します。
-//         :math:`O(\\log{\\sigma})` です。
-//         """
-//         assert (
-//             0 <= l <= r <= self.size
-//         ), f"IndexError: {self.__class__.__name__}.kth_smallest({l}, {r}, {k}), size={self.size}"
-//         assert (
-//             0 <= k < r - l
-//         ), f"IndexError: {self.__class__.__name__}.kth_smallest({l}, {r}, {k}), wrong k"
-//         s = 0
-//         mid = self.mid
-//         for bit in range(self.log - 1, -1, -1):
-//             r0, l0 = self.v[bit].rank0(r), self.v[bit].rank0(l)
-//             cnt = r0 - l0  # 区間内の 0 の個数
-//             if cnt <= k:  # 0 が k 以下のとき、 k 番目は 1
-//                 s |= 1 << bit
-//                 k -= cnt
-//                 # この 1 が次の bit 列でどこに行くか
-//                 l = l - l0 + mid[bit]
-//                 r = r - r0 + mid[bit]
-//             else:
-//                 # この 0 が次の bit 列でどこに行くか
-//                 l = l0
-//                 r = r0
-//         return s
-
-//     quantile = kth_smallest
-
-//     def kth_largest(self, l: int, r: int, k: int) -> int:
-//         """``a[l, r)`` の中で k 番目に **大きい値** を返します。
-//         :math:`O(\\log{\\sigma})` です。
-//         """
-//         assert (
-//             0 <= l <= r <= self.size
-//         ), f"IndexError: {self.__class__.__name__}.kth_largest({l}, {r}, {k}), size={self.size}"
-//         assert (
-//             0 <= k < r - l
-//         ), f"IndexError: {self.__class__.__name__}.kth_largest({l}, {r}, {k}), wrong k"
-//         return self.kth_smallest(l, r, r - l - k - 1)
-
-//     def topk(self, l: int, r: int, k: int) -> List[Tuple[int, int]]:
-//         """``a[l, r)`` の中で、要素を出現回数が多い順にその頻度とともに ``k`` 個返します。
-//         :math:`O(\\min(r-l, \\sigam) \\log(\\sigam))` です。
-
-//         Note:
-//           :math:`\\sigma` が大きい場合、計算量に注意です。
-
-//         Returns:
-//           List[Tuple[int, int]]: ``(要素, 頻度)`` を要素とする配列です。
-//         """
-//         assert (
-//             0 <= l <= r <= self.size
-//         ), f"IndexError: {self.__class__.__name__}.topk({l}, {r}, {k}), size={self.size}"
-//         assert 0 <= k < r - l, f"IndexError: {self.__class__.__name__}.topk({l}, {r}, {k}), wrong k"
-//         # heap[-length, x, l, bit]
-//         hq: List[Tuple[int, int, int, int]] = [(-(r - l), 0, l, self.log - 1)]
-//         ans = []
-//         while hq:
-//             length, x, l, bit = heappop(hq)
-//             length = -length
-//             if bit == -1:
-//                 ans.append((x, length))
-//                 k -= 1
-//                 if k == 0:
-//                     break
-//             else:
-//                 r = l + length
-//                 l0 = self.v[bit].rank0(l)
-//                 r0 = self.v[bit].rank0(r)
-//                 if l0 < r0:
-//                     heappush(hq, (-(r0 - l0), x, l0, bit - 1))
-//                 l1 = self.v[bit].rank1(l) + self.mid[bit]
-//                 r1 = self.v[bit].rank1(r) + self.mid[bit]
-//                 if l1 < r1:
-//                     heappush(hq, (-(r1 - l1), x | (1 << bit), l1, bit - 1))
-//         return ans
-
-//     def sum(self, l: int, r: int) -> int:
-//         """``topk`` メソッドを用いて ``a[l, r)`` の総和を返します。
-
-//         計算量に注意です。
-//         """
-//         assert False, "Yabai Keisanryo Error"
-//         return sum(k * v for k, v in self.topk(l, r, r - l))
-
-//     def _range_freq(self, l: int, r: int, x: int) -> int:
-//         """a[l, r) で x 未満の要素の数を返す"""
-//         ans = 0
-//         for bit in range(self.log - 1, -1, -1):
-//             l0, r0 = self.v[bit].rank0(l), self.v[bit].rank0(r)
-//             if x >> bit & 1:
-//                 # bit が立ってたら、区間の 0 の個数を答えに加算し、新たな区間は 1 のみ
-//                 ans += r0 - l0
-//                 # 1 が次の bit 列でどこに行くか
-//                 l += self.mid[bit] - l0
-//                 r += self.mid[bit] - r0
-//             else:
-//                 # 0 が次の bit 列でどこに行くか
-//                 l, r = l0, r0
-//         return ans
-
-//     def range_freq(self, l: int, r: int, x: int, y: int) -> int:
-//         """``a[l, r)`` に含まれる、 ``x`` 以上 ``y`` 未満である要素の個数を返します。
-//         :math:`O(\\log{\\sigma})` です。
-//         """
-//         assert (
-//             0 <= l <= r <= self.size
-//         ), f"IndexError: {self.__class__.__name__}.range_freq({l}, {r}, {x}, {y})"
-//         return self._range_freq(l, r, y) - self._range_freq(l, r, x)
-
-//     def prev_value(self, l: int, r: int, x: int) -> int:
-//         """``a[l, r)`` で、``x`` 以上 ``y`` 未満であるような要素のうち最大の要素を返します。
-//         :math:`O(\\log{\\sigma})` です。
-//         """
-//         assert (
-//             0 <= l <= r <= self.size
-//         ), f"IndexError: {self.__class__.__name__}.prev_value({l}, {r}, {x})"
-//         return self.kth_smallest(l, r, self._range_freq(l, r, x) - 1)
-
-//     def next_value(self, l: int, r: int, x: int) -> int:
-//         """``a[l, r)`` で、``x`` 以上 ``y`` 未満であるような要素のうち最小の要素を返します。
-//         :math:`O(\\log{\\sigma})` です。
-//         """
-//         assert (
-//             0 <= l <= r <= self.size
-//         ), f"IndexError: {self.__class__.__name__}.next_value({l}, {r}, {x})"
-//         return self.kth_smallest(l, r, self._range_freq(l, r, x))
-
-//     def range_count(self, l: int, r: int, x: int) -> int:
-//         """``a[l, r)`` に含まれる ``x`` の個数を返します。
-//         ``wm.rank(r, x) - wm.rank(l, x)`` と等価です。
-//         :math:`O(\\log{\\sigma})` です。
-//         """
-//         assert (
-//             0 <= l <= r <= self.size
-//         ), f"IndexError: {self.__class__.__name__}.range_count({l}, {r}, {x})"
-//         return self.rank(r, x) - self.rank(l, x)
-
-//     def __len__(self):
-//         return self.size
-
-//     def __str__(self):
-//         return f"{self.__class__.__name__}({[self.access(i) for i in range(self.size)]})"
-
-//     __repr__ = __str__
+// api:
+//  1. PrefixCount(end int32, x int) int32
+//  2. RangeCount(start, end int32, x int) int32
+//  3. RangeFreq(start, end int32, x, y int) int32
+//  4. Kth(k int32, x int) int32
+//  5. KthSmallest(start, end int32, k int32) int
+//  6. KthLargest(start, end int32, k int32) int
+//  7. TopK(start, end int32, k int32) []topKPair
+//  8. Floor(start, end int32, x int) (int, bool)
+//  9. Lower(start, end int32, x int) (int, bool)
+//  10. Ceil(start, end int32, x int) (int, bool)
+//  11. Higher(start, end int32, x int) (int, bool)
 
 package main
 
-import "math/bits"
+import (
+	"fmt"
+	"math"
+	"math/bits"
+	"math/rand"
+	"sort"
+	"time"
+)
 
 func main() {
-
+	test()
+	testTime()
 }
 
+func demo() {
+	nums := []int{3, 1, 4, 1, 5, 9, 2, 6}
+	wm := NewWaveletMatrixStatic(int32(len(nums)), func(i int32) int { return nums[i] }, maxs(nums)+1)
+	fmt.Println(wm.PrefixCount(10, 2))
+	fmt.Println(wm.Kth(0, 2))
+	fmt.Println(wm.KthSmallest(1, 4, 2))
+	fmt.Println(wm.TopK(0, 8, 3))
+	fmt.Println(wm.RangeFreq(0, 8, 1, 4))
+	fmt.Println(wm.RangeCount(0, 8, 1))
+	fmt.Println(wm.RangeCount(0, 8, 2))
+	fmt.Println(wm.Floor(0, 8, 3))
+	fmt.Println(wm.Ceil(0, 8, 3))
+	fmt.Println(wm.Lower(0, 8, 3))
+	fmt.Println(wm.Higher(0, 8, 3))
+}
+
+func maxs(nums []int) int {
+	max := nums[0]
+	for _, num := range nums {
+		if num > max {
+			max = num
+		}
+	}
+	return max
+}
+
+// 维护[0,maxValue].
 type WaveletMatrixStatic struct {
-	sigma int
+	size     int32
+	maxValue int
+	bitLen   int32
+	mid      []int32
+	bv       []*bitVector
+}
+
+type topKPair = struct {
+	value int
+	count int32
+}
+
+func NewWaveletMatrixStatic(n int32, f func(int32) int, sigma int) *WaveletMatrixStatic {
+	if sigma <= 0 {
+		sigma = 1
+	}
+	res := &WaveletMatrixStatic{
+		size:     n,
+		maxValue: sigma,
+		bitLen:   int32(bits.Len(uint(sigma))),
+	}
+	res.mid = make([]int32, res.bitLen)
+	res.bv = make([]*bitVector, res.bitLen)
+	if n > 0 {
+		res._build(n, f)
+	}
+	return res
+}
+
+func (wm *WaveletMatrixStatic) PrefixCount(end int32, x int) int32 {
+	if end > wm.size {
+		end = wm.size
+	}
+	if end <= 0 {
+		return 0
+	}
+	start := int32(0)
+	mid := wm.mid
+	for bit := wm.bitLen - 1; bit >= 0; bit-- {
+		if x>>bit&1 == 1 {
+			start = wm.bv[bit].Count1(start) + mid[bit]
+			end = wm.bv[bit].Count1(end) + mid[bit]
+		} else {
+			start = wm.bv[bit].Count0(start)
+			end = wm.bv[bit].Count0(end)
+		}
+	}
+	return end - start
+}
+
+func (wm *WaveletMatrixStatic) RangeCount(start, end int32, x int) int32 {
+	if start < 0 {
+		start = 0
+	}
+	if end > wm.size {
+		end = wm.size
+	}
+	if start >= end {
+		return 0
+	}
+	return wm.PrefixCount(end, x) - wm.PrefixCount(start, x)
+}
+
+func (wm *WaveletMatrixStatic) RangeFreq(start, end int32, floor, higher int) int32 {
+	if floor >= higher {
+		return 0
+	}
+	if start < 0 {
+		start = 0
+	}
+	if end > wm.size {
+		end = wm.size
+	}
+	if start >= end {
+		return 0
+	}
+	return wm._rangeFreq(start, end, higher) - wm._rangeFreq(start, end, floor)
+}
+
+// 返回第k个x所在的位置.
+func (wm *WaveletMatrixStatic) Kth(k int32, x int) int32 {
+	s := int32(0)
+	for bit := wm.bitLen - 1; bit >= 0; bit-- {
+		if x>>bit&1 == 1 {
+			s = wm.bv[bit].Count0(wm.size) + wm.bv[bit].Count1(s)
+		} else {
+			s = wm.bv[bit].Count0(s)
+		}
+	}
+	s += k
+	for bit := int32(0); bit < wm.bitLen; bit++ {
+		if x>>bit&1 == 1 {
+			s = wm.bv[bit].Kth1(s - wm.bv[bit].Count0(wm.size))
+		} else {
+			s = wm.bv[bit].Kth0(s)
+		}
+	}
+	return s
+}
+
+func (wm *WaveletMatrixStatic) KthSmallest(start, end int32, k int32) int {
+	if k < 0 || k >= end-start {
+		return -1
+	}
+	res := 0
+	for bit := wm.bitLen - 1; bit >= 0; bit-- {
+		l0, r0 := wm.bv[bit].Count0(start), wm.bv[bit].Count0(end)
+		if c := r0 - l0; c <= k {
+			res |= 1 << bit
+			k -= c
+			start += wm.mid[bit] - l0
+			end += wm.mid[bit] - r0
+		} else {
+			start, end = l0, r0
+		}
+	}
+	return res
+}
+func (wm *WaveletMatrixStatic) KthLargest(start, end int32, k int32) int {
+	return wm.KthSmallest(start, end, end-start-k-1)
+}
+
+// 按照出现次数排序，返回出现次数最多的k个元素.
+func (wm *WaveletMatrixStatic) TopK(start, end int32, k int32) (res []topKPair) {
+	if k == 0 {
+		return nil
+	}
+	type item struct {
+		len int32
+		x   int
+		l   int32
+		bit int8
+	}
+
+	pq := NewHeap[item](func(a, b item) bool {
+		// 频率相同，返回靠前的元素.
+		return a.len > b.len
+		// 频率相同，返回较小的元素.
+		// if a.len != b.len {
+		// 	return a.len > b.len
+		// }
+		// return a.x < b.x
+	}, nil)
+	pq.Push(item{len: end - start, x: 0, l: start, bit: int8(wm.bitLen - 1)})
+	for pq.Len() > 0 {
+		v := pq.Pop()
+		length, x, l, bit := v.len, v.x, v.l, v.bit
+		if bit == -1 {
+			res = append(res, topKPair{x, length})
+			k--
+			if k == 0 {
+				break
+			}
+		} else {
+			r := l + length
+			l0 := wm.bv[bit].Count0(l)
+			r0 := wm.bv[bit].Count0(r)
+			if l0 < r0 {
+				pq.Push(item{len: r0 - l0, x: x, l: l0, bit: bit - 1})
+			}
+			l1 := wm.bv[bit].Count1(l) + wm.mid[bit]
+			r1 := wm.bv[bit].Count1(r) + wm.mid[bit]
+			if l1 < r1 {
+				pq.Push(item{len: r1 - l1, x: x | 1<<bit, l: l1, bit: bit - 1})
+			}
+		}
+	}
+	return
+}
+
+func (wm *WaveletMatrixStatic) Floor(start, end int32, x int) (int, bool) {
+	less1 := wm._rangeFreq(start, end, x)
+	less2 := wm._rangeFreq(start, end, x+1)
+	if less2 > less1 {
+		return x, true
+	}
+	if less1 == 0 {
+		return -1, false
+	}
+	return wm.KthSmallest(start, end, less1-1), true
+}
+func (wm *WaveletMatrixStatic) Lower(start, end int32, x int) (int, bool) {
+	less := wm._rangeFreq(start, end, x)
+	if less == 0 {
+		return -1, false
+	}
+	return wm.KthSmallest(start, end, less-1), true
+}
+
+func (wm *WaveletMatrixStatic) Ceil(start, end int32, x int) (int, bool) {
+	less1 := wm._rangeFreq(start, end, x)
+	less2 := wm._rangeFreq(start, end, x+1)
+	if less2 > less1 {
+		return x, true
+	}
+	if less2 == end-start {
+		return -1, false
+	}
+	return wm.KthSmallest(start, end, less2), true
+}
+
+func (wm *WaveletMatrixStatic) Higher(start, end int32, x int) (int, bool) {
+	less := wm._rangeFreq(start, end, x+1)
+	if less == end-start {
+		return -1, false
+	}
+	return wm.KthSmallest(start, end, less), true
+}
+
+func (wm *WaveletMatrixStatic) Get(index int32) int {
+	if index < 0 {
+		index += wm.size
+	}
+	res := 0
+	for bit := wm.bitLen - 1; bit >= 0; bit-- {
+		if wm.bv[bit].Get(index) {
+			res |= 1 << bit
+			index = wm.bv[bit].Count1(index) + wm.mid[bit]
+		} else {
+			index = wm.bv[bit].Count0(index)
+		}
+	}
+	return res
+}
+
+func (wm *WaveletMatrixStatic) Len() int32 {
+	return wm.size
+}
+
+// 区间[start, end)中小于x的元素个数.
+func (wm *WaveletMatrixStatic) _rangeFreq(start, end int32, x int) int32 {
+	res := int32(0)
+	for bit := wm.bitLen - 1; bit >= 0; bit-- {
+		l0, r0 := wm.bv[bit].Count0(start), wm.bv[bit].Count0(end)
+		if x>>bit&1 == 1 {
+			res += r0 - l0
+			start += wm.mid[bit] - l0
+			end += wm.mid[bit] - r0
+		} else {
+			start, end = l0, r0
+		}
+	}
+	return res
+}
+func (wm *WaveletMatrixStatic) _build(n int32, f func(int32) int) {
+	data := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		data[i] = f(i)
+	}
+	zero, one := make([]int, n), make([]int, n)
+	for bit := wm.bitLen - 1; bit >= 0; bit-- {
+		wm.bv[bit] = newBitVector(n)
+		v := wm.bv[bit]
+		p, q := int32(0), int32(0)
+		for i, e := range data {
+			if e>>bit&1 == 1 {
+				v.Set(int32(i))
+				one[q] = e
+				q++
+			} else {
+				zero[p] = e
+				p++
+			}
+		}
+		v.Build()
+		wm.mid[bit] = p
+		zero, data = data, zero
+		copy(data[p:], one[:q])
+	}
 }
 
 type bitVector struct {
@@ -495,8 +351,8 @@ func (bv *bitVector) Build() {
 	}
 }
 
-func (bv *bitVector) Get(i int32) int32 {
-	return int32(bv.bit[i>>6] >> (i & 63) & 1)
+func (bv *bitVector) Get(i int32) bool {
+	return bv.bit[i>>6]>>(i&63)&1 == 1
 }
 
 func (bv *bitVector) Count0(end int32) int32 {
@@ -576,10 +432,322 @@ func (bv *bitVector) Kth(k int32, v int32) int32 {
 	return bv.Kth0(k)
 }
 
-func (bv *bitVector) GetAll() []int32 {
-	res := make([]int32, 0, bv.n)
+func (bv *bitVector) GetAll() []bool {
+	res := make([]bool, 0, bv.n)
 	for i := int32(0); i < bv.n; i++ {
 		res = append(res, bv.Get(i))
 	}
 	return res
+}
+
+func NewHeap[H any](less func(a, b H) bool, nums []H) *Heap[H] {
+	nums = append(nums[:0:0], nums...)
+	heap := &Heap[H]{less: less, data: nums}
+	heap.heapify()
+	return heap
+}
+
+type Heap[H any] struct {
+	data []H
+	less func(a, b H) bool
+}
+
+func (h *Heap[H]) Push(value H) {
+	h.data = append(h.data, value)
+	h.pushUp(h.Len() - 1)
+}
+
+func (h *Heap[H]) Pop() (value H) {
+	if h.Len() == 0 {
+		panic("heap is empty")
+	}
+	value = h.data[0]
+	h.data[0] = h.data[h.Len()-1]
+	h.data = h.data[:h.Len()-1]
+	h.pushDown(0)
+	return
+}
+
+func (h *Heap[H]) Top() (value H) {
+	value = h.data[0]
+	return
+}
+
+func (h *Heap[H]) Len() int { return len(h.data) }
+
+func (h *Heap[H]) heapify() {
+	n := h.Len()
+	for i := (n >> 1) - 1; i > -1; i-- {
+		h.pushDown(i)
+	}
+}
+
+func (h *Heap[H]) pushUp(root int) {
+	for parent := (root - 1) >> 1; parent >= 0 && h.less(h.data[root], h.data[parent]); parent = (root - 1) >> 1 {
+		h.data[root], h.data[parent] = h.data[parent], h.data[root]
+		root = parent
+	}
+}
+
+func (h *Heap[H]) pushDown(root int) {
+	n := h.Len()
+	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
+		right := left + 1
+		minIndex := root
+		if h.less(h.data[left], h.data[minIndex]) {
+			minIndex = left
+		}
+		if right < n && h.less(h.data[right], h.data[minIndex]) {
+			minIndex = right
+		}
+		if minIndex == root {
+			return
+		}
+		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
+		root = minIndex
+	}
+}
+
+func test() {
+	for i := 0; i < 100; i++ {
+		nums := make([]int, 1000)
+		for j := 0; j < 1000; j++ {
+			nums[j] = rand.Intn(1000)
+		}
+		wm := NewWaveletMatrixStatic(int32(len(nums)), func(i int32) int { return nums[i] }, maxs(nums))
+
+		prefixBf := func(end int32, x int) int32 {
+			res := int32(0)
+			for i := int32(0); i < end; i++ {
+				if nums[i] == x {
+					res++
+				}
+			}
+			return res
+		}
+
+		rangeBf := func(start, end int32, x int) int32 {
+			res := int32(0)
+			for i := start; i < end; i++ {
+				if nums[i] == x {
+					res++
+				}
+			}
+			return res
+		}
+
+		rangeFreqBf := func(start, end int32, x, y int) int32 {
+			res := int32(0)
+			for i := start; i < end; i++ {
+				if nums[i] >= x && nums[i] < y {
+					res++
+				}
+			}
+			return res
+		}
+
+		kthBf := func(k int32, x int) int32 {
+			cnt := int32(0)
+			for i := int32(0); i < int32(len(nums)); i++ {
+				if nums[i] == x {
+					if cnt == k {
+						return i
+					}
+					cnt++
+				}
+			}
+			return -1
+		}
+
+		kthSmallestBf := func(start, end, k int32) int {
+			arr := make([]int, 0, end-start)
+			for i := start; i < end; i++ {
+				arr = append(arr, nums[i])
+			}
+			sort.Ints(arr)
+			if int(k) >= len(arr) {
+				return -1
+			}
+			return arr[k]
+		}
+
+		kthLargestBf := func(start, end, k int32) int {
+			arr := make([]int, 0, end-start)
+			for i := start; i < end; i++ {
+				arr = append(arr, nums[i])
+			}
+			sort.Ints(arr)
+			if int(k) >= len(arr) {
+				return -1
+			}
+			return arr[len(arr)-1-int(k)]
+		}
+
+		topKBf := func(start, end, k int32) []topKPair {
+			m := map[int]int32{}
+			for i := start; i < end; i++ {
+				m[nums[i]]++
+			}
+			arr := make([]topKPair, 0, len(m))
+			for k, v := range m {
+				arr = append(arr, topKPair{k, v})
+			}
+			sort.Slice(arr, func(i, j int) bool {
+				if arr[i].count != arr[j].count {
+					return arr[i].count > arr[j].count
+				}
+				return arr[i].value < arr[j].value
+			})
+			if int(k) >= len(arr) {
+				return arr
+			}
+			return arr[:k]
+		}
+
+		floorBf := func(start, end int32, x int) (int, bool) {
+			res := math.MinInt
+			for i := start; i < end; i++ {
+				if nums[i] <= x && nums[i] > res {
+					res = nums[i]
+				}
+			}
+			if res == math.MinInt {
+				return -1, false
+			}
+			return res, true
+		}
+
+		lowerBf := func(start, end int32, x int) (int, bool) {
+			res := math.MinInt
+			for i := start; i < end; i++ {
+				if nums[i] < x && nums[i] > res {
+					res = nums[i]
+				}
+			}
+			if res == math.MinInt {
+				return -1, false
+			}
+			return res, true
+		}
+
+		ceilBf := func(start, end int32, x int) (int, bool) {
+			res := math.MaxInt
+			for i := start; i < end; i++ {
+				if nums[i] >= x && nums[i] < res {
+					res = nums[i]
+				}
+			}
+			if res == math.MaxInt {
+				return -1, false
+			}
+			return res, true
+		}
+
+		higherBf := func(start, end int32, x int) (int, bool) {
+			res := math.MaxInt
+			for i := start; i < end; i++ {
+				if nums[i] > x && nums[i] < res {
+					res = nums[i]
+				}
+			}
+
+			if res == math.MaxInt {
+				return -1, false
+			}
+			return res, true
+		}
+
+		for j := 0; j < 100; j++ {
+			start, end := rand.Intn(1000), rand.Intn(1000)
+			if start > end {
+				start, end = end, start
+			}
+			x := rand.Intn(1000)
+			if prefixBf(int32(end), x) != wm.PrefixCount(int32(end), x) {
+				panic("prefixBf")
+			}
+			if rangeBf(int32(start), int32(end), x) != wm.RangeCount(int32(start), int32(end), x) {
+				panic("rangeBf")
+			}
+
+			y := rand.Intn(1000)
+			if res1, res2 := rangeFreqBf(int32(start), int32(end), x, y), wm.RangeFreq(int32(start), int32(end), x, y); res1 != res2 {
+				fmt.Println(res1, res2, start, end, x, y)
+				panic("rangeFreqBf")
+			}
+
+			k := rand.Intn(1000)
+			if res1, res2 := kthBf(int32(k), x), wm.Kth(int32(k), x); res1 != res2 {
+				fmt.Println(res1, res2, k, x)
+				panic("kthBf")
+			}
+
+			if res1, res2 := kthSmallestBf(int32(start), int32(end), int32(k)), wm.KthSmallest(int32(start), int32(end), int32(k)); res1 != res2 {
+				fmt.Println(res1, res2, start, end, k)
+				panic("kthSmallestBf")
+			}
+
+			if res1, res2 := kthLargestBf(int32(start), int32(end), int32(k)), wm.KthLargest(int32(start), int32(end), int32(k)); res1 != res2 {
+				fmt.Println(res1, res2, start, end, k)
+				panic("kthLargestBf")
+			}
+
+			topK1 := topKBf(int32(start), int32(end), int32(k))
+			topK2 := wm.TopK(int32(start), int32(end), int32(k))
+			if len(topK1) != len(topK2) {
+				fmt.Println(len(topK1), len(topK2), start, end, k)
+				panic("topKBf")
+			}
+			for i := 0; i < len(topK1); i++ {
+				if topK1[i].count != topK2[i].count {
+					fmt.Println(topK1[i], topK2[i], start, end, k)
+					panic("topKBf")
+				}
+			}
+
+			funcs1 := []func(int32, int32, int) (int, bool){floorBf, lowerBf, ceilBf, higherBf}
+			funcs2 := []func(int32, int32, int) (int, bool){wm.Floor, wm.Lower, wm.Ceil, wm.Higher}
+			for i := 0; i < len(funcs1); i++ {
+				res1, ok1 := funcs1[i](int32(start), int32(end), x)
+				res2, ok2 := funcs2[i](int32(start), int32(end), x)
+				if res1 != res2 || ok1 != ok2 {
+					fmt.Println(res1, res2, start, end, x)
+					panic("funcs")
+				}
+			}
+		}
+	}
+
+	fmt.Println("pass")
+}
+
+func testTime() {
+	n := int32(2e5)
+	nums := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		nums[i] = rand.Intn(int(n))
+	}
+
+	time1 := time.Now()
+	wm := NewWaveletMatrixStatic(int32(len(nums)), func(i int32) int { return nums[i] }, maxs(nums))
+	fmt.Println("build time:", time.Since(time1))
+
+	for i := int32(0); i < n; i++ {
+		wm.PrefixCount(i, nums[i])
+		wm.RangeCount(0, i, nums[i])
+		wm.RangeFreq(0, i, nums[i], nums[i]+1)
+		wm.Kth(i, nums[i])
+		wm.KthSmallest(0, i, i)
+		wm.KthLargest(0, i, i)
+		wm.Floor(0, i, nums[i])
+		wm.Lower(0, i, nums[i])
+		wm.Ceil(0, i, nums[i])
+		wm.Higher(0, i, nums[i])
+	}
+
+	fmt.Println(time.Since(time1)) // 575.7913ms
+
+	time1 = time.Now()
+	wm.TopK(0, n, n/2)
+	fmt.Println(time.Since(time1)) // 47.2957ms
 }
