@@ -15,17 +15,41 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math"
 	"math/bits"
 	"math/rand"
+	"os"
 	"sort"
 	"time"
 )
 
 func main() {
-	test()
-	testTime()
+	// test()
+	// testTime()
+	yosupo()
+}
+
+// https://judge.yosupo.jp/problem/range_kth_smallest
+func yosupo() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	wm := NewWaveletMatrixStatic(int32(len(nums)), func(i int32) int { return nums[i] }, maxs(nums))
+	for i := 0; i < q; i++ {
+		var start, end, x int32
+		fmt.Fscan(in, &start, &end, &x)
+		fmt.Fprintln(out, wm.KthSmallest(start, end, x))
+	}
 }
 
 func demo() {
@@ -68,14 +92,14 @@ type topKPair = struct {
 	count int32
 }
 
-func NewWaveletMatrixStatic(n int32, f func(int32) int, sigma int) *WaveletMatrixStatic {
-	if sigma <= 0 {
-		sigma = 1
+func NewWaveletMatrixStatic(n int32, f func(int32) int, maxValue int) *WaveletMatrixStatic {
+	if maxValue <= 0 {
+		maxValue = 1
 	}
 	res := &WaveletMatrixStatic{
 		size:     n,
-		maxValue: sigma,
-		bitLen:   int32(bits.Len(uint(sigma))),
+		maxValue: maxValue,
+		bitLen:   int32(bits.Len(uint(maxValue))),
 	}
 	res.mid = make([]int32, res.bitLen)
 	res.bv = make([]*bitVector, res.bitLen)
