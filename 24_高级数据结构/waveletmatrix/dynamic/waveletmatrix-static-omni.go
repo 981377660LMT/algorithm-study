@@ -528,17 +528,20 @@ func main() {
 		fmt.Println(wm.Get(i))
 	}
 	fmt.Println("------")
-	fmt.Println(wm.Kth(0, 1))
-	fmt.Println(wm.Kth(1, 1))
-	fmt.Println(wm.Kth(2, 1))
-	fmt.Println(wm.Kth(3, 1))
-	fmt.Println(wm.Kth(4, 1))
+	// fmt.Println(wm.Kth(0, 1))
+	// fmt.Println(wm.Kth(1, 1))
+	// fmt.Println(wm.Kth(2, 1))
+	// fmt.Println(wm.Kth(3, 1))
+	fmt.Println(wm.Kth(4, 1), "wm.Kth(4, 1)")
+	// fmt.Println(wm.Kth(0, 2))
+	// fmt.Println(wm.Kth(1, 2))
+	// fmt.Println(wm.Kth(2, 2))
 
-	fmt.Println("------")
-	fmt.Println(wm.KthSmallest(0, 10, 0))
-	fmt.Println(wm.KthSmallest(0, 10, 1))
-	fmt.Println(wm.KthSmallest(0, 10, 2))
-	fmt.Println(wm.KthSmallest(0, 10, 3))
+	// fmt.Println("------")
+	// fmt.Println(wm.KthSmallest(0, 10, 0))
+	// fmt.Println(wm.KthSmallest(0, 10, 1))
+	// fmt.Println(wm.KthSmallest(0, 10, 2))
+	// fmt.Println(wm.KthSmallest(0, 10, 3))
 
 	checkKth := func(k, v uint64) uint64 {
 		cnt := uint64(0)
@@ -552,16 +555,40 @@ func main() {
 		}
 		return NOT_FOUND
 	}
+	_ = checkKth
 
-	for i := 0; i < 10; i++ {
+	checkCountPrefix := func(end, v uint64) uint64 {
+		cnt := uint64(0)
+		for i := uint64(0); i < end; i++ {
+			if nums[i] == v {
+				cnt++
+			}
+		}
+		return cnt
+	}
+	_ = checkCountPrefix
+
+	for i := 0; i < 100; i++ {
 		k := uint64(rand.Intn(10))
 		v := uint64(rand.Intn(10))
 		if wm.Kth(k, v) != checkKth(k, v) {
-			fmt.Println(wm.Kth(k, v), checkKth(k, v))
+			fmt.Println(wm.Kth(k, v), checkKth(k, v), k, v)
 			panic("error")
 		}
 	}
+
+	for i := 0; i < 100_000; i++ {
+		end := uint64(rand.Intn(len(nums) + 1))
+		v := uint64(rand.Intn(10))
+		if wm.CountPrefix(end, v) != checkCountPrefix(end, v) {
+			fmt.Println(wm.CountPrefix(end, v), checkCountPrefix(end, v), end, v)
+			panic("error")
+		}
+	}
+
 	fmt.Println("ok")
+	fmt.Println(wm.Kth(4, 1))
+	fmt.Println(wm.CountPrefix(10, 2))
 }
 
 type WaveletMatrixStaticOmni struct {
@@ -573,6 +600,8 @@ type WaveletMatrixStaticOmni struct {
 	maxElement    uint64
 	bitSize       uint64
 }
+
+//
 
 func NewWaveletMatrixStaticOmni(n uint64, f func(uint64) uint64) *WaveletMatrixStaticOmni {
 	if n <= 0 {
@@ -667,6 +696,83 @@ func (wm *WaveletMatrixStaticOmni) Get(pos uint64) uint64 {
 	return c
 }
 
+func (wm *WaveletMatrixStaticOmni) CountPrefix(end uint64, v uint64) uint64 {
+	if end <= 0 {
+		return 0
+	}
+	if end > wm.size {
+		end = wm.size
+	}
+	if v >= wm.maxElement {
+		return 0
+	}
+	beginPos, ok := wm.beginAlphabet[v]
+	if !ok {
+		return 0
+	}
+	for i := uint64(0); i < wm.bitSize; i++ {
+		bit := v >> (wm.bitSize - i - 1) & 1
+		end = wm.bvs[i].Count(end, bit == 1)
+		if bit == 1 {
+			end += wm.beginOne[i]
+		}
+	}
+	return end - beginPos
+}
+
+func (wm *WaveletMatrixStaticOmni) CountRange(start, end uint64, floor, higher uint64) uint64 {
+	if end > wm.size || start >= end || floor >= higher || floor >= wm.maxElement {
+		return 0
+	}
+	return wm.CountLessThan(start, end, higher) - wm.CountLessThan(start, end, floor)
+}
+
+func (wm *WaveletMatrixStaticOmni) CountLessThan(start, end uint64, v uint64) uint64 {
+	_, less, _ := wm.CountAll(start, end, v)
+	return less
+}
+
+func (wm *WaveletMatrixStaticOmni) CountMoreThan(start, end uint64, v uint64) uint64 {
+	_, _, more := wm.CountAll(start, end, v)
+	return more
+}
+
+// 区间[start, end)中等于v的个数、小于v的个数、大于v的个数.
+func (wm *WaveletMatrixStaticOmni) CountAll(start, end uint64, v uint64) (uint64, uint64, uint64) {
+	if start < 0 {
+		start = 0
+	}
+	if end > wm.size {
+		end = wm.size
+	}
+	if start >= end {
+		return 0, 0, 0
+	}
+	num := end - start
+	if v >= wm.maxElement {
+		return 0, num, 0
+	}
+	rankLessThan, rankMoreThan := uint64(0), uint64(0)
+	for i := uint64(0); i < wm.bitSize && start < end; i++ {
+		bit := v >> (wm.bitSize - i - 1) & 1
+		rank0Begin := wm.bvs[i].Count(start, false)
+		rank0End := wm.bvs[i].Count(end, false)
+		rank1Begin := start - rank0Begin
+		rank1End := end - rank0End
+		if bit == 1 {
+			rankLessThan += rank0End - rank0Begin
+			start = wm.beginOne[i] + rank1Begin
+			end = wm.beginOne[i] + rank1End
+		} else {
+			rankMoreThan += rank1End - rank1Begin
+			start = rank0Begin
+			end = rank0End
+		}
+	}
+	rank := num - rankLessThan - rankMoreThan
+	return rank, rankLessThan, rankMoreThan
+}
+
 // k: 0-indexed.
 func (wm *WaveletMatrixStaticOmni) Kth(k uint64, v uint64) uint64 {
 	k++
@@ -684,12 +790,15 @@ func (wm *WaveletMatrixStaticOmni) Kth(k uint64, v uint64) uint64 {
 		if bit == 1 {
 			index -= wm.beginOne[wm.bitSize-i-1]
 		}
-		index = wm.bvs[wm.bitSize-i-1].Kth(index-1, bit == 1)
+		if index == 0 {
+			return NOT_FOUND
+		}
+		index = wm.bvs[wm.bitSize-i-1].Kth(index, bit == 1)
 	}
 	if index == 0 {
 		return NOT_FOUND
 	}
-	return index
+	return index - 1
 }
 
 func (wm *WaveletMatrixStaticOmni) KthSmallest(start, end uint64, k uint64) uint64 {
