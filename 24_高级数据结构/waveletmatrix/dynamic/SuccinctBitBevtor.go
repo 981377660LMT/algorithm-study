@@ -10,7 +10,7 @@ import (
 func main() {
 	demo()
 	test()
-	// testTime()
+	testTime()
 }
 
 func demo() {
