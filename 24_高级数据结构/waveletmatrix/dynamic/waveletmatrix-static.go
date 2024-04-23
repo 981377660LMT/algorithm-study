@@ -11,6 +11,7 @@
 //  9. Lower(start, end int32, x int) (int, bool)
 //  10. Ceil(start, end int32, x int) (int, bool)
 //  11. Higher(start, end int32, x int) (int, bool)
+//  12. CountAll(start, end int32, x int) (same, less, more int32)
 
 package main
 
@@ -26,9 +27,10 @@ import (
 )
 
 func main() {
+
 	// test()
-	// testTime()
-	yosupo()
+	testTime()
+	// yosupo()
 }
 
 // https://judge.yosupo.jp/problem/range_kth_smallest
@@ -156,7 +158,7 @@ func (wm *WaveletMatrixStatic) RangeFreq(start, end int32, floor, higher int) in
 	if start >= end {
 		return 0
 	}
-	return wm._rangeFreq(start, end, higher) - wm._rangeFreq(start, end, floor)
+	return wm.CountLess(start, end, higher) - wm.CountLess(start, end, floor)
 }
 
 // 返回第k个x所在的位置.
@@ -251,18 +253,17 @@ func (wm *WaveletMatrixStatic) TopK(start, end int32, k int32) (res []topKPair) 
 }
 
 func (wm *WaveletMatrixStatic) Floor(start, end int32, x int) (int, bool) {
-	less1 := wm._rangeFreq(start, end, x)
-	less2 := wm._rangeFreq(start, end, x+1)
-	if less2 > less1 {
+	same, less, _ := wm.CountAll(start, end, x)
+	if same > 0 {
 		return x, true
 	}
-	if less1 == 0 {
+	if less == 0 {
 		return -1, false
 	}
-	return wm.KthSmallest(start, end, less1-1), true
+	return wm.KthSmallest(start, end, less-1), true
 }
 func (wm *WaveletMatrixStatic) Lower(start, end int32, x int) (int, bool) {
-	less := wm._rangeFreq(start, end, x)
+	less := wm.CountLess(start, end, x)
 	if less == 0 {
 		return -1, false
 	}
@@ -270,23 +271,54 @@ func (wm *WaveletMatrixStatic) Lower(start, end int32, x int) (int, bool) {
 }
 
 func (wm *WaveletMatrixStatic) Ceil(start, end int32, x int) (int, bool) {
-	less1 := wm._rangeFreq(start, end, x)
-	less2 := wm._rangeFreq(start, end, x+1)
-	if less2 > less1 {
+	same, less, _ := wm.CountAll(start, end, x)
+	if same > 0 {
 		return x, true
 	}
-	if less2 == end-start {
-		return -1, false
-	}
-	return wm.KthSmallest(start, end, less2), true
-}
-
-func (wm *WaveletMatrixStatic) Higher(start, end int32, x int) (int, bool) {
-	less := wm._rangeFreq(start, end, x+1)
 	if less == end-start {
 		return -1, false
 	}
 	return wm.KthSmallest(start, end, less), true
+}
+
+func (wm *WaveletMatrixStatic) Higher(start, end int32, x int) (int, bool) {
+	less := wm.CountLess(start, end, x+1)
+	if less == end-start {
+		return -1, false
+	}
+	return wm.KthSmallest(start, end, less), true
+}
+
+// 返回[start, end)中等于x的个数，小于x的个数，大于x的个数.
+func (wm *WaveletMatrixStatic) CountAll(start, end int32, x int) (same, less, more int32) {
+	if start < 0 {
+		start = 0
+	}
+	if end > wm.size {
+		end = wm.size
+	}
+	if start >= end {
+		return 0, 0, 0
+	}
+	num := end - start
+	for i := wm.bitLen - 1; i >= 0 && start < end; i-- {
+		bit := x >> i & 1
+		rank0Begin := wm.bv[i].Count0(start)
+		rank0End := wm.bv[i].Count0(end)
+		rank1Begin := start - rank0Begin
+		rank1End := end - rank0End
+		if bit == 1 {
+			less += rank0End - rank0Begin
+			start = wm.mid[i] + rank1Begin
+			end = wm.mid[i] + rank1End
+		} else {
+			more += rank1End - rank1Begin
+			start = rank0Begin
+			end = rank0End
+		}
+	}
+	same = num - less - more
+	return
 }
 
 func (wm *WaveletMatrixStatic) Get(index int32) int {
@@ -305,12 +337,8 @@ func (wm *WaveletMatrixStatic) Get(index int32) int {
 	return res
 }
 
-func (wm *WaveletMatrixStatic) Len() int32 {
-	return wm.size
-}
-
 // 区间[start, end)中小于x的元素个数.
-func (wm *WaveletMatrixStatic) _rangeFreq(start, end int32, x int) int32 {
+func (wm *WaveletMatrixStatic) CountLess(start, end int32, x int) int32 {
 	res := int32(0)
 	for bit := wm.bitLen - 1; bit >= 0; bit-- {
 		l0, r0 := wm.bv[bit].Count0(start), wm.bv[bit].Count0(end)
@@ -324,6 +352,11 @@ func (wm *WaveletMatrixStatic) _rangeFreq(start, end int32, x int) int32 {
 	}
 	return res
 }
+
+func (wm *WaveletMatrixStatic) Len() int32 {
+	return wm.size
+}
+
 func (wm *WaveletMatrixStatic) _build(n int32, f func(int32) int) {
 	data := make([]int, n)
 	for i := int32(0); i < n; i++ {
