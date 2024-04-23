@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"math/bits"
+	"math/rand"
 )
 
 // class WaveletMatrix {
@@ -520,12 +521,47 @@ import (
 //			}
 //	};
 func main() {
-	nums := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	nums := []uint64{1, 2, 1, 4, 5, 1, 7, 8, 2, 10}
 	wm := NewWaveletMatrixStaticOmni(uint64(len(nums)), func(i uint64) uint64 { return nums[i] })
 	_ = wm
 	for i := uint64(0); i < uint64(len(nums)); i++ {
 		fmt.Println(wm.Get(i))
 	}
+	fmt.Println("------")
+	fmt.Println(wm.Kth(0, 1))
+	fmt.Println(wm.Kth(1, 1))
+	fmt.Println(wm.Kth(2, 1))
+	fmt.Println(wm.Kth(3, 1))
+	fmt.Println(wm.Kth(4, 1))
+
+	fmt.Println("------")
+	fmt.Println(wm.KthSmallest(0, 10, 0))
+	fmt.Println(wm.KthSmallest(0, 10, 1))
+	fmt.Println(wm.KthSmallest(0, 10, 2))
+	fmt.Println(wm.KthSmallest(0, 10, 3))
+
+	checkKth := func(k, v uint64) uint64 {
+		cnt := uint64(0)
+		for i := uint64(0); i < uint64(len(nums)); i++ {
+			if nums[i] == v {
+				if cnt == k {
+					return i
+				}
+				cnt++
+			}
+		}
+		return NOT_FOUND
+	}
+
+	for i := 0; i < 10; i++ {
+		k := uint64(rand.Intn(10))
+		v := uint64(rand.Intn(10))
+		if wm.Kth(k, v) != checkKth(k, v) {
+			fmt.Println(wm.Kth(k, v), checkKth(k, v))
+			panic("error")
+		}
+	}
+	fmt.Println("ok")
 }
 
 type WaveletMatrixStaticOmni struct {
@@ -546,12 +582,13 @@ func NewWaveletMatrixStaticOmni(n uint64, f func(uint64) uint64) *WaveletMatrixS
 	for i := uint64(0); i < n; i++ {
 		data[i] = f(i)
 	}
-	maxElement := uint64(1)
+	maxElement := uint64(0)
 	for i := uint64(0); i < n; i++ {
 		if data[i] > maxElement {
 			maxElement = data[i]
 		}
 	}
+	maxElement++
 	bitSize := uint64(bits.Len64(maxElement))
 	if bitSize == 0 {
 		bitSize = 1
@@ -561,7 +598,7 @@ func NewWaveletMatrixStaticOmni(n uint64, f func(uint64) uint64) *WaveletMatrixS
 		bvs[i] = newSuccinctBitVector(n)
 	}
 	beginOne := make([]uint64, bitSize)
-	beginAlphabet := make(map[uint64]uint64)
+	beginAlphabet := make(map[uint64]uint64, n)
 	presSum := make([][]uint64, bitSize+1)
 	for i := uint64(0); i <= bitSize; i++ {
 		presSum[i] = make([]uint64, n+1)
@@ -630,6 +667,68 @@ func (wm *WaveletMatrixStaticOmni) Get(pos uint64) uint64 {
 	return c
 }
 
+// k: 0-indexed.
+func (wm *WaveletMatrixStaticOmni) Kth(k uint64, v uint64) uint64 {
+	k++
+	if v >= wm.maxElement {
+		return NOT_FOUND
+	}
+	var index uint64
+	if tmp, ok := wm.beginAlphabet[v]; !ok {
+		return NOT_FOUND
+	} else {
+		index = tmp + k
+	}
+	for i := uint64(0); i < wm.bitSize; i++ {
+		bit := v >> i & 1
+		if bit == 1 {
+			index -= wm.beginOne[wm.bitSize-i-1]
+		}
+		index = wm.bvs[wm.bitSize-i-1].Kth(index-1, bit == 1)
+	}
+	if index == 0 {
+		return NOT_FOUND
+	}
+	return index
+}
+
+func (wm *WaveletMatrixStaticOmni) KthSmallest(start, end uint64, k uint64) uint64 {
+	if end > wm.size || start >= end || k >= end-start {
+		return NOT_FOUND
+	}
+	val := uint64(0)
+	for i := uint64(0); i < wm.bitSize; i++ {
+		numOfZeroBegin := wm.bvs[i].Count(start, false)
+		numOfZeroEnd := wm.bvs[i].Count(end, false)
+		numOfZero := numOfZeroEnd - numOfZeroBegin
+		bit := uint64(0)
+		if k >= numOfZero {
+			bit = 1
+		}
+		if bit == 1 {
+			k -= numOfZero
+			start = wm.beginOne[i] + start - numOfZeroBegin
+			end = wm.beginOne[i] + end - numOfZeroEnd
+		} else {
+			start = numOfZeroBegin
+			end = numOfZeroBegin + numOfZero
+		}
+		val = (val << 1) | bit
+	}
+
+	left := uint64(0)
+	for i := uint64(0); i < wm.bitSize; i++ {
+		bit := (val >> (wm.bitSize - i - 1)) & 1
+		left = wm.bvs[i].Count(left, bit == 1)
+		if bit == 1 {
+			left += wm.beginOne[i]
+		}
+	}
+
+	rank := start + k - left + 1
+	return wm.Kth(val, rank) - 1
+}
+
 const NOT_FOUND = ^uint64(0)
 
 type succinctBitVector struct {
@@ -689,6 +788,7 @@ func (sbv *succinctBitVector) Count(end uint64, bit bool) uint64 {
 
 // !kth 从0开始.
 func (sbv *succinctBitVector) Kth(k uint64, bit bool) uint64 {
+
 	k++
 	if !bit && k > sbv.size-sbv.ones {
 		return NOT_FOUND

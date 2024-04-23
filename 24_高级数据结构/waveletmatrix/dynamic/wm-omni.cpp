@@ -91,8 +91,8 @@ public:
     }
 
     // i番目のcの位置 + 1を返す。rankは1-origin
-    uint64_t select(uint64_t c, uint64_t rank) {
-        assert(rank > 0);
+    uint64_t select(uint64_t c, uint64_t k) {
+        assert(k > 0);
         if (c >= maximum_element) {
             return NOTFOUND;
         }
@@ -100,7 +100,7 @@ public:
             return NOTFOUND;
         }
 
-        uint64_t index = this->begin_alphabet.at(c) + rank;
+        uint64_t index = this->begin_alphabet.at(c) + k;
         for (uint64_t i = 0; i < bit_arrays.size(); ++i){
             uint64_t bit = ((c >> i) & 1);      // 下からi番目のbit
             if (bit == 1) {

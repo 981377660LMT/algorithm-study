@@ -196,8 +196,8 @@ func min64(a, b uint64) uint64 {
 }
 
 func test() {
-	for i := 0; i < 10; i++ {
-		n := uint64(rand.Intn(1e4) + 10)
+	for i := 0; i < 100; i++ {
+		n := uint64(rand.Intn(2e3) + 10)
 		bits := make([]bool, n)
 		for i := uint64(0); i < n; i++ {
 			bits[i] = rand.Intn(2) == 1
