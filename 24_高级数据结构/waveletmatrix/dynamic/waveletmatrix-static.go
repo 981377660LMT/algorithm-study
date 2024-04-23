@@ -3,15 +3,25 @@
 //  1. PrefixCount(end int32, x int) int32
 //  2. RangeCount(start, end int32, x int) int32
 //  3. RangeFreq(start, end int32, x, y int) int32
+//
 //  4. Kth(k int32, x int) int32
+//
 //  5. KthSmallest(start, end int32, k int32) int
+//     KthSmallestIndex(start, end int32, k int32) int32
 //  6. KthLargest(start, end int32, k int32) int
+//     KthLargestIndex(start, end int32, k int32) int32
+//
 //  7. TopK(start, end int32, k int32) []topKPair
+//
 //  8. Floor(start, end int32, x int) (int, bool)
 //  9. Lower(start, end int32, x int) (int, bool)
 //  10. Ceil(start, end int32, x int) (int, bool)
 //  11. Higher(start, end int32, x int) (int, bool)
+//
 //  12. CountAll(start, end int32, x int) (same, less, more int32)
+//  13. CountSame(start, end int32, x int) int32
+//  14. CountLess(start, end int32, x int) int32
+//  15. CountMore(start, end int32, x int) int32
 
 package main
 
@@ -28,7 +38,7 @@ import (
 
 func main() {
 
-	// test()
+	test()
 	testTime()
 	// yosupo()
 }
@@ -142,7 +152,8 @@ func (wm *WaveletMatrixStatic) RangeCount(start, end int32, x int) int32 {
 	if start >= end {
 		return 0
 	}
-	return wm.PrefixCount(end, x) - wm.PrefixCount(start, x)
+	same, _, _ := wm.CountAll(start, end, x)
+	return same
 }
 
 func (wm *WaveletMatrixStatic) RangeFreq(start, end int32, floor, higher int) int32 {
@@ -200,8 +211,48 @@ func (wm *WaveletMatrixStatic) KthSmallest(start, end int32, k int32) int {
 	}
 	return res
 }
+
+func (wm *WaveletMatrixStatic) KthSmallestIndex(start, end int32, k int32) int32 {
+	if k < 0 || k >= end-start {
+		return -1
+	}
+	val := 0
+	for i := wm.bitLen - 1; i >= 0; i-- {
+		numOfZeroBegin := wm.bv[i].Count0(start)
+		numOfZeroEnd := wm.bv[i].Count0(end)
+		numOfZero := numOfZeroEnd - numOfZeroBegin
+		bit := 0
+		if k >= numOfZero {
+			bit = 1
+		}
+		if bit == 1 {
+			k -= numOfZero
+			start = wm.mid[i] + start - numOfZeroBegin
+			end = wm.mid[i] + end - numOfZeroEnd
+		} else {
+			start = numOfZeroBegin
+			end = numOfZeroBegin + numOfZero
+		}
+		val = (val << 1) | bit
+	}
+
+	left := int32(0)
+	for i := wm.bitLen - 1; i >= 0; i-- {
+		bit := int8((val >> i) & 1)
+		left = wm.bv[i].Count(left, bit)
+		if bit == 1 {
+			left += wm.mid[i]
+		}
+	}
+	rank := start + k - left
+	return wm.Kth(rank, val)
+}
+
 func (wm *WaveletMatrixStatic) KthLargest(start, end int32, k int32) int {
 	return wm.KthSmallest(start, end, end-start-k-1)
+}
+func (wm *WaveletMatrixStatic) KthLargestIndex(start, end int32, k int32) int32 {
+	return wm.KthSmallestIndex(start, end, end-start-k-1)
 }
 
 // 按照出现次数排序，返回出现次数最多的k个元素.
@@ -353,6 +404,16 @@ func (wm *WaveletMatrixStatic) CountLess(start, end int32, x int) int32 {
 	return res
 }
 
+// 区间[start, end)中大于x的元素个数.
+func (wm *WaveletMatrixStatic) CountMore(start, end int32, x int) int32 {
+	return end - start - wm.CountLess(start, end, x+1)
+}
+
+func (wm *WaveletMatrixStatic) CountSame(start, end int32, x int) int32 {
+	same, _, _ := wm.CountAll(start, end, x)
+	return same
+}
+
 func (wm *WaveletMatrixStatic) Len() int32 {
 	return wm.size
 }
@@ -420,7 +481,7 @@ func (bv *bitVector) Count1(end int32) int32 {
 	return bv.preSum[end>>6] + int32(bits.OnesCount64(bv.bit[end>>6]&(1<<(end&63)-1)))
 }
 
-func (bv *bitVector) Count(end int32, value int32) int32 {
+func (bv *bitVector) Count(end int32, value int8) int32 {
 	if value == 1 {
 		return bv.Count1(end)
 	}
@@ -482,7 +543,7 @@ func (bv *bitVector) Kth1(k int32) int32 {
 	return l
 }
 
-func (bv *bitVector) Kth(k int32, v int32) int32 {
+func (bv *bitVector) Kth(k int32, v int8) int32 {
 	if v == 1 {
 		return bv.Kth1(k)
 	}
@@ -628,6 +689,23 @@ func test() {
 			return arr[k]
 		}
 
+		kthSmallestIndexBf := func(start, end, k int32) int32 {
+			arrWithIndex := make([][2]int, 0, end-start)
+			for i := start; i < end; i++ {
+				arrWithIndex = append(arrWithIndex, [2]int{nums[i], int(i)})
+			}
+			sort.Slice(arrWithIndex, func(i, j int) bool {
+				if arrWithIndex[i][0] != arrWithIndex[j][0] {
+					return arrWithIndex[i][0] < arrWithIndex[j][0]
+				}
+				return arrWithIndex[i][1] < arrWithIndex[j][1]
+			})
+			if int(k) >= len(arrWithIndex) {
+				return -1
+			}
+			return int32(arrWithIndex[k][1])
+		}
+
 		kthLargestBf := func(start, end, k int32) int {
 			arr := make([]int, 0, end-start)
 			for i := start; i < end; i++ {
@@ -714,6 +792,42 @@ func test() {
 			return res, true
 		}
 
+		countAllBf := func(start, end int32, v int) (int32, int32, int32) {
+			rank, rankLessThan, rankMoreThan := int32(0), int32(0), int32(0)
+			for i := start; i < end; i++ {
+				if nums[i] == v {
+					rank++
+				}
+				if nums[i] < v {
+					rankLessThan++
+				}
+				if nums[i] > v {
+					rankMoreThan++
+				}
+			}
+			return rank, rankLessThan, rankMoreThan
+		}
+
+		countLessBf := func(start, end int32, x int) int32 {
+			res := int32(0)
+			for i := start; i < end; i++ {
+				if nums[i] < x {
+					res++
+				}
+			}
+			return res
+		}
+
+		countMoreBf := func(start, end int32, x int) int32 {
+			res := int32(0)
+			for i := start; i < end; i++ {
+				if nums[i] > x {
+					res++
+				}
+			}
+			return res
+		}
+
 		for j := 0; j < 100; j++ {
 			start, end := rand.Intn(1000), rand.Intn(1000)
 			if start > end {
@@ -744,6 +858,11 @@ func test() {
 				panic("kthSmallestBf")
 			}
 
+			if res1, res2 := kthSmallestIndexBf(int32(start), int32(end), int32(k)), wm.KthSmallestIndex(int32(start), int32(end), int32(k)); res1 != res2 {
+				fmt.Println(res1, res2, start, end, k)
+				panic("kthSmallestIndexBf")
+			}
+
 			if res1, res2 := kthLargestBf(int32(start), int32(end), int32(k)), wm.KthLargest(int32(start), int32(end), int32(k)); res1 != res2 {
 				fmt.Println(res1, res2, start, end, k)
 				panic("kthLargestBf")
@@ -772,6 +891,23 @@ func test() {
 					panic("funcs")
 				}
 			}
+
+			c1, c2, c3 := countAllBf(int32(start), int32(end), x)
+			c4, c5, c6 := wm.CountAll(int32(start), int32(end), x)
+			if c1 != c4 || c2 != c5 || c3 != c6 {
+				fmt.Println(c1, c4, c2, c5, c3, c6, start, end, x)
+				panic("countAllBf")
+			}
+
+			if res1, res2 := countLessBf(int32(start), int32(end), x), wm.CountLess(int32(start), int32(end), x); res1 != res2 {
+				fmt.Println(res1, res2, start, end, x)
+				panic("countLessBf")
+			}
+
+			if res1, res2 := countMoreBf(int32(start), int32(end), x), wm.CountMore(int32(start), int32(end), x); res1 != res2 {
+				fmt.Println(res1, res2, start, end, x)
+				panic("countMoreBf")
+			}
 		}
 	}
 
@@ -782,7 +918,7 @@ func testTime() {
 	n := int32(2e5)
 	nums := make([]int, n)
 	for i := int32(0); i < n; i++ {
-		nums[i] = rand.Intn(int(n))
+		nums[i] = rand.Intn(1e9 + 10)
 	}
 
 	time1 := time.Now()
@@ -795,14 +931,18 @@ func testTime() {
 		wm.RangeFreq(0, i, nums[i], nums[i]+1)
 		wm.Kth(i, nums[i])
 		wm.KthSmallest(0, i, i)
+		wm.KthSmallestIndex(0, i, i)
 		wm.KthLargest(0, i, i)
 		wm.Floor(0, i, nums[i])
 		wm.Lower(0, i, nums[i])
 		wm.Ceil(0, i, nums[i])
 		wm.Higher(0, i, nums[i])
+		wm.CountAll(0, i, nums[i])
+		wm.CountLess(0, i, nums[i])
+		wm.CountMore(0, i, nums[i])
 	}
 
-	fmt.Println(time.Since(time1)) // 575.7913ms
+	fmt.Println(time.Since(time1)) // 1.0175364s
 
 	time1 = time.Now()
 	wm.TopK(0, n, n/2)

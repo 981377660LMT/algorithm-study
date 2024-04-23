@@ -1,5 +1,5 @@
 // https://github.com/MitI-7/WaveletMatrix/blob/master/WaveletMatrix/WaveletMatrix.hpp
-// WaveletMatrixStaticOmni/StaticWaveletMatrixOmni
+// WaveletMatrixStatic64/StaticWaveletMatrix64
 // api:
 //  1. PrefixCount(end uint64, x uint64) uint64
 //  2. RangeCount(start, end uint64, x uint64) uint64
@@ -37,21 +37,22 @@ func main() {
 func demo() {
 
 	nums := []uint64{3, 4, 0, 2, 1}
-	wm := NewWaveletMatrixStaticFast(uint64(len(nums)), func(i uint64) uint64 { return nums[i] })
+	wm := NewWaveletMatrixStatic64(uint64(len(nums)), func(i uint64) uint64 { return nums[i] })
 	_ = wm
 
 }
 
-type WaveletMatrixStaticFast struct {
-	bvs           []*succinctBitVector
-	beginOne      []uint64
+type WaveletMatrixStatic64 struct {
+	bvs      []*succinctBitVector
+	beginOne []uint64
+	// 用哈希表更慢.
 	beginAlphabet map[uint64]uint64
 	size          uint64
 	maxElement    uint64
 	bitSize       uint64
 }
 
-func NewWaveletMatrixStaticFast(n uint64, f func(uint64) uint64) *WaveletMatrixStaticFast {
+func NewWaveletMatrixStatic64(n uint64, f func(uint64) uint64) *WaveletMatrixStatic64 {
 	if n <= 0 {
 		panic("n must be positive")
 	}
@@ -103,7 +104,7 @@ func NewWaveletMatrixStaticFast(n uint64, f func(uint64) uint64) *WaveletMatrixS
 		beginAlphabet[data[i]] = uint64(i)
 	}
 
-	return &WaveletMatrixStaticFast{
+	return &WaveletMatrixStatic64{
 		bvs:           bvs,
 		beginOne:      beginOne,
 		beginAlphabet: beginAlphabet,
@@ -113,7 +114,7 @@ func NewWaveletMatrixStaticFast(n uint64, f func(uint64) uint64) *WaveletMatrixS
 	}
 }
 
-func (wm *WaveletMatrixStaticFast) Get(pos uint64) uint64 {
+func (wm *WaveletMatrixStatic64) Get(pos uint64) uint64 {
 	if pos >= wm.size {
 		return NOT_FOUND
 	}
@@ -132,7 +133,7 @@ func (wm *WaveletMatrixStaticFast) Get(pos uint64) uint64 {
 	return c
 }
 
-func (wm *WaveletMatrixStaticFast) PrefixCount(end uint64, v uint64) uint64 {
+func (wm *WaveletMatrixStatic64) PrefixCount(end uint64, v uint64) uint64 {
 	if end <= 0 {
 		return 0
 	}
@@ -156,11 +157,11 @@ func (wm *WaveletMatrixStaticFast) PrefixCount(end uint64, v uint64) uint64 {
 	return end - beginPos
 }
 
-func (wm *WaveletMatrixStaticFast) RangeCount(start, end uint64, v uint64) uint64 {
+func (wm *WaveletMatrixStatic64) RangeCount(start, end uint64, v uint64) uint64 {
 	return wm.PrefixCount(end, v) - wm.PrefixCount(start, v)
 }
 
-func (wm *WaveletMatrixStaticFast) RangeFreq(start, end uint64, floor, higher uint64) uint64 {
+func (wm *WaveletMatrixStatic64) RangeFreq(start, end uint64, floor, higher uint64) uint64 {
 	if end > wm.size || start >= end || floor >= higher || floor >= wm.maxElement {
 		return 0
 	}
@@ -168,7 +169,7 @@ func (wm *WaveletMatrixStaticFast) RangeFreq(start, end uint64, floor, higher ui
 }
 
 // k: 0-indexed.
-func (wm *WaveletMatrixStaticFast) Kth(k uint64, v uint64) uint64 {
+func (wm *WaveletMatrixStatic64) Kth(k uint64, v uint64) uint64 {
 	if v >= wm.maxElement {
 		return NOT_FOUND
 	}
@@ -192,7 +193,7 @@ func (wm *WaveletMatrixStaticFast) Kth(k uint64, v uint64) uint64 {
 	return s
 }
 
-func (wm *WaveletMatrixStaticFast) KthSmallestIndex(start, end uint64, k uint64) uint64 {
+func (wm *WaveletMatrixStatic64) KthSmallestIndex(start, end uint64, k uint64) uint64 {
 	if end > wm.size || start >= end || k >= end-start {
 		return NOT_FOUND
 	}
@@ -228,7 +229,7 @@ func (wm *WaveletMatrixStaticFast) KthSmallestIndex(start, end uint64, k uint64)
 	return wm.Kth(rank, val)
 }
 
-func (wm *WaveletMatrixStaticFast) KthSmallest(start, end uint64, k uint64) uint64 {
+func (wm *WaveletMatrixStatic64) KthSmallest(start, end uint64, k uint64) uint64 {
 	if end > wm.size || start >= end || k >= end-start {
 		return NOT_FOUND
 	}
@@ -247,16 +248,16 @@ func (wm *WaveletMatrixStaticFast) KthSmallest(start, end uint64, k uint64) uint
 	return res
 }
 
-func (wm *WaveletMatrixStaticFast) KthLargest(start, end uint64, k uint64) uint64 {
+func (wm *WaveletMatrixStatic64) KthLargest(start, end uint64, k uint64) uint64 {
 	return wm.KthSmallest(start, end, end-start-k-1)
 }
 
-func (wm *WaveletMatrixStaticFast) KthLargestIndex(start, end uint64, k uint64) uint64 {
+func (wm *WaveletMatrixStatic64) KthLargestIndex(start, end uint64, k uint64) uint64 {
 	return wm.KthSmallestIndex(start, end, end-start-k-1)
 }
 
 // 区间[start, end)中等于v的个数、小于v的个数、大于v的个数.
-func (wm *WaveletMatrixStaticFast) CountAll(start, end uint64, v uint64) (uint64, uint64, uint64) {
+func (wm *WaveletMatrixStatic64) CountAll(start, end uint64, v uint64) (uint64, uint64, uint64) {
 	if start < 0 {
 		start = 0
 	}
@@ -291,17 +292,17 @@ func (wm *WaveletMatrixStaticFast) CountAll(start, end uint64, v uint64) (uint64
 	return rank, rankLessThan, rankMoreThan
 }
 
-func (wm *WaveletMatrixStaticFast) CountLessThan(start, end uint64, v uint64) uint64 {
+func (wm *WaveletMatrixStatic64) CountLessThan(start, end uint64, v uint64) uint64 {
 	_, less, _ := wm.CountAll(start, end, v)
 	return less
 }
 
-func (wm *WaveletMatrixStaticFast) CountMoreThan(start, end uint64, v uint64) uint64 {
+func (wm *WaveletMatrixStatic64) CountMoreThan(start, end uint64, v uint64) uint64 {
 	_, _, more := wm.CountAll(start, end, v)
 	return more
 }
 
-func (wm *WaveletMatrixStaticFast) Floor(start, end uint64, x uint64) uint64 {
+func (wm *WaveletMatrixStatic64) Floor(start, end uint64, x uint64) uint64 {
 	same, less, _ := wm.CountAll(start, end, x)
 	if same > 0 {
 		return x
@@ -311,7 +312,7 @@ func (wm *WaveletMatrixStaticFast) Floor(start, end uint64, x uint64) uint64 {
 	}
 	return wm.KthSmallest(start, end, less-1)
 }
-func (wm *WaveletMatrixStaticFast) Lower(start, end uint64, x uint64) uint64 {
+func (wm *WaveletMatrixStatic64) Lower(start, end uint64, x uint64) uint64 {
 	_, less, _ := wm.CountAll(start, end, x)
 	if less == 0 {
 		return NOT_FOUND
@@ -319,7 +320,7 @@ func (wm *WaveletMatrixStaticFast) Lower(start, end uint64, x uint64) uint64 {
 	return wm.KthSmallest(start, end, less-1)
 }
 
-func (wm *WaveletMatrixStaticFast) Ceil(start, end uint64, x uint64) uint64 {
+func (wm *WaveletMatrixStatic64) Ceil(start, end uint64, x uint64) uint64 {
 	same, less, _ := wm.CountAll(start, end, x)
 	if same > 0 {
 		return x
@@ -330,7 +331,7 @@ func (wm *WaveletMatrixStaticFast) Ceil(start, end uint64, x uint64) uint64 {
 	return wm.KthSmallest(start, end, less)
 }
 
-func (wm *WaveletMatrixStaticFast) Higher(start, end uint64, x uint64) uint64 {
+func (wm *WaveletMatrixStatic64) Higher(start, end uint64, x uint64) uint64 {
 	if start >= end {
 		return NOT_FOUND
 	}
@@ -525,7 +526,7 @@ func test() {
 		for j := 0; j < len(nums); j++ {
 			nums[j] = uint64(rand.Intn(5))
 		}
-		wm := NewWaveletMatrixStaticFast(uint64(len(nums)), func(u uint64) uint64 {
+		wm := NewWaveletMatrixStatic64(uint64(len(nums)), func(u uint64) uint64 {
 			return nums[u]
 		})
 
@@ -755,7 +756,7 @@ func testTime() {
 	}
 
 	time1 := time.Now()
-	wm := NewWaveletMatrixStaticFast(uint64(len(nums)), func(u uint64) uint64 { return nums[u] })
+	wm := NewWaveletMatrixStatic64(uint64(len(nums)), func(u uint64) uint64 { return nums[u] })
 	fmt.Println("build time:", time.Since(time1))
 
 	for i := uint64(0); i < n; i++ {
