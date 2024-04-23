@@ -14,9 +14,14 @@ package main
 import (
 	"fmt"
 	"math/bits"
+	"time"
 )
 
 func main() {
+	testTime()
+}
+
+func demo() {
 	bv := NewBitVector(10)
 	bv.Set(3)
 	bv.Set(8)
@@ -142,4 +147,27 @@ func (bv *BitVector) GetAll() []int32 {
 		res = append(res, bv.Get(i))
 	}
 	return res
+}
+func testTime() {
+	n := int32(1e7)
+	bv := NewBitVector(n)
+	for i := int32(0); i < n; i++ {
+		if i%4 != 0 {
+			bv.Set(i)
+		}
+	}
+
+	time1 := time.Now()
+	bv.Build()
+	fmt.Println(time.Since(time1))
+
+	for i := int32(0); i < n; i++ {
+		bv.Get(i)
+		bv.Count(i, 1)
+		bv.Count(i, 0)
+		bv.Kth(i, 1)
+		bv.Kth(i, 0)
+	}
+
+	fmt.Println(time.Since(time1))
 }
