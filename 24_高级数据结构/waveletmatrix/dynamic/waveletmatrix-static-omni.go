@@ -838,6 +838,229 @@ func (wm *WaveletMatrixStaticOmni) KthSmallest(start, end uint64, k uint64) uint
 	return wm.Kth(val, rank) - 1
 }
 
+func (wm *WaveletMatrixStaticOmni) TopK(start, end uint64, k uint64) [][2]uint64 {
+	res := [][2]uint64{}
+	type item struct {
+		width, left, right, depth, value uint64
+	}
+	// (频率、深度、值)排序
+	pq := NewHeap[item](func(a, b item) bool {
+		if a.width != b.width {
+			return a.width < b.width
+		}
+		if a.depth != b.depth {
+			return a.depth > b.depth
+		}
+		if a.value != b.value {
+			return a.value > b.value
+		}
+		return true
+	}, nil)
+
+	pq.Push(item{end - start, start, end, 0, 0})
+	for pq.Len() > 0 {
+		element := pq.Pop()
+		left, right, depth, value := element.left, element.right, element.depth, element.value
+		if depth >= wm.bitSize {
+			res = append(res, [2]uint64{value, right - left})
+			if uint64(len(res)) >= k {
+				break
+			}
+			continue
+		}
+
+		left0 := wm.bvs[depth].Count(left, false)
+		right0 := wm.bvs[depth].Count(right, false)
+		if left0 < right0 {
+			pq.Push(item{right0 - left0, left0, right0, depth + 1, value})
+		}
+
+		left1 := wm.beginOne[depth] + wm.bvs[depth].Count(left, true)
+		right1 := wm.beginOne[depth] + wm.bvs[depth].Count(right, true)
+		if left1 < right1 {
+			pq.Push(item{right1 - left1, left1, right1, depth + 1, value | (1 << (wm.bitSize - depth - 1))})
+		}
+	}
+
+	return res
+}
+
+func (wm *WaveletMatrixStaticOmni) RangeSum(start, end uint64, floor, higher uint64) uint64 {
+	if end > wm.size || start >= end || floor >= higher || floor >= wm.maxElement {
+		return 0
+	}
+	return wm._rangeSum(start, end, 0, 0, floor, higher)
+}
+
+// 区间前驱.
+func (wm *WaveletMatrixStaticOmni) PrevValue(start, end, floor, higher uint64) uint64 {
+	if floor >= higher || higher == 0 {
+		return NOT_FOUND
+	}
+	if start >= end {
+		return NOT_FOUND
+	}
+	if floor >= wm.maxElement || end == 0 {
+		return NOT_FOUND
+	}
+	higher--
+	type item struct {
+		start, end, depth, c uint64
+		tight                bool
+	}
+	stack := make([]item, 0)
+	stack = append(stack, item{start, end, 0, 0, true})
+	for len(stack) > 0 {
+		last := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		b, e, depth, c, tight := last.start, last.end, last.depth, last.c, last.tight
+		if depth == wm.bitSize {
+			if c >= floor {
+				return c
+			}
+			continue
+		}
+		bit := (higher >> (wm.bitSize - depth - 1)) & 1
+		rank0Begin := wm.bvs[depth].Count(b, false)
+		rank0End := wm.bvs[depth].Count(e, false)
+		rank1Begin := b - rank0Begin
+		rank1End := e - rank0End
+
+		b0 := rank0Begin
+		e0 := rank0End
+		if b0 != e0 {
+			c0 := (c << 1) | 0
+			stack = append(stack, item{b0, e0, depth + 1, c0, tight && bit == 0})
+		}
+
+		b1 := wm.beginOne[depth] + rank1Begin
+		e1 := wm.beginOne[depth] + rank1End
+		if b1 != e1 {
+			if !tight || bit == 1 {
+				c1 := (c << 1) | 1
+				stack = append(stack, item{b1, e1, depth + 1, c1, tight})
+			}
+		}
+	}
+
+	return NOT_FOUND
+}
+
+// 区间后继.
+func (wm *WaveletMatrixStaticOmni) NextValue(start, end, floor, higher uint64) uint64 {
+	if floor >= higher || higher == 0 {
+		return NOT_FOUND
+	}
+	if start >= end {
+		return NOT_FOUND
+	}
+	if floor >= wm.maxElement || end == 0 {
+		return NOT_FOUND
+	}
+	type item struct {
+		start, end, depth, c uint64
+		tight                bool
+	}
+
+	stack := make([]item, 0)
+	stack = append(stack, item{start, end, 0, 0, true})
+	for len(stack) > 0 {
+		last := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		b, e, depth, c, tight := last.start, last.end, last.depth, last.c, last.tight
+		if depth == wm.bitSize {
+			if c < higher {
+				return c
+			}
+			continue
+		}
+		bit := (floor >> (wm.bitSize - depth - 1)) & 1
+		rank0Begin := wm.bvs[depth].Count(b, false)
+		rank0End := wm.bvs[depth].Count(e, false)
+		rank1Begin := b - rank0Begin
+		rank1End := e - rank0End
+
+		b1 := wm.beginOne[depth] + rank1Begin
+		e1 := wm.beginOne[depth] + rank1End
+		if b1 != e1 {
+			c1 := (c << 1) | 1
+			stack = append(stack, item{b1, e1, depth + 1, c1, tight && bit == 1})
+		}
+
+		b0 := rank0Begin
+		e0 := rank0End
+		if b0 != e0 {
+			if !tight || bit == 0 {
+				c0 := (c << 1) | 0
+				stack = append(stack, item{b0, e0, depth + 1, c0, tight})
+			}
+		}
+	}
+
+	return NOT_FOUND
+}
+
+func (wm *WaveletMatrixStaticOmni) Intersect(s1, e1, s2, e2 uint64) [][3]uint64 {
+	if s1 >= e1 || s2 >= e2 {
+		return nil
+	}
+	intersection := make([][3]uint64, 0)
+	queue := [][6]uint64{{s1, e1, s2, e2, 0, 0}} // s1, e1, s2, e2, depth, value
+	for len(queue) > 0 {
+		e := queue[0]
+		queue = queue[1:]
+		s1, e1, s2, e2, depth, value := e[0], e[1], e[2], e[3], e[4], e[5]
+		if depth == wm.bitSize {
+			intersection = append(intersection, [3]uint64{value, e1 - s1, e2 - s2})
+			continue
+		}
+		bit := (value >> (wm.bitSize - depth - 1)) & 1
+		rank0Begin := wm.bvs[depth].Count(s1, false)
+		rank0End := wm.bvs[depth].Count(e1, false)
+		rank1Begin := s1 - rank0Begin
+		rank1End := e1 - rank0End
+		if bit == 1 {
+			queue = append(queue, [6]uint64{rank0Begin, rank0End, rank1Begin, rank1End, depth + 1, value})
+		}
+		rank0Begin = wm.bvs[depth].Count(s2, false)
+		rank0End = wm.bvs[depth].Count(e2, false)
+		rank1Begin = s2 - rank0Begin
+		rank1End = e2 - rank0End
+		if bit == 1 {
+			queue = append(queue, [6]uint64{rank0Begin, rank0End, rank1Begin, rank1End, depth + 1, value | (1 << (wm.bitSize - depth - 1))})
+		}
+	}
+
+	return intersection
+}
+
+func (wm *WaveletMatrixStaticOmni) _rangeSum(start, end, depth, c, x, y uint64) uint64 {
+	if start == end {
+		return 0
+	}
+	if depth == wm.bitSize {
+		if x <= c && c < y {
+			return c * (end - start)
+		}
+		return 0
+	}
+	nextC := ((1 << (wm.bitSize - depth - 1)) | c)
+	allOneC := (((1 << (wm.bitSize - depth - 1)) - 1) | nextC)
+	if allOneC < x || y <= c {
+		return 0
+	}
+
+	if x <= c && allOneC < y {
+		return wm.presSum[depth+1][end] - wm.presSum[depth+1][start]
+	}
+
+	rank0Begin := wm.bvs[depth].Count(start, false)
+	rank0End := wm.bvs[depth].Count(end, false)
+	rank1Begin := start - rank0Begin
+	rank1End := end - rank0End
+	return wm._rangeSum(rank0Begin, rank0End, depth+1, c, x, y) + wm._rangeSum(wm.beginOne[depth]+rank1Begin, wm.beginOne[depth]+rank1End, depth+1, nextC, x, y)
+}
+
 const NOT_FOUND = ^uint64(0)
 
 type succinctBitVector struct {
@@ -1004,6 +1227,73 @@ func (sbv *succinctBitVector) _selectInBlock(x uint64, rank uint64) uint64 {
 	return pos
 }
 
+func NewHeap[H any](less func(a, b H) bool, nums []H) *Heap[H] {
+	nums = append(nums[:0:0], nums...)
+	heap := &Heap[H]{less: less, data: nums}
+	heap.heapify()
+	return heap
+}
+
+type Heap[H any] struct {
+	data []H
+	less func(a, b H) bool
+}
+
+func (h *Heap[H]) Push(value H) {
+	h.data = append(h.data, value)
+	h.pushUp(h.Len() - 1)
+}
+
+func (h *Heap[H]) Pop() (value H) {
+	if h.Len() == 0 {
+		panic("heap is empty")
+	}
+	value = h.data[0]
+	h.data[0] = h.data[h.Len()-1]
+	h.data = h.data[:h.Len()-1]
+	h.pushDown(0)
+	return
+}
+
+func (h *Heap[H]) Top() (value H) {
+	value = h.data[0]
+	return
+}
+
+func (h *Heap[H]) Len() int { return len(h.data) }
+
+func (h *Heap[H]) heapify() {
+	n := h.Len()
+	for i := (n >> 1) - 1; i > -1; i-- {
+		h.pushDown(i)
+	}
+}
+
+func (h *Heap[H]) pushUp(root int) {
+	for parent := (root - 1) >> 1; parent >= 0 && h.less(h.data[root], h.data[parent]); parent = (root - 1) >> 1 {
+		h.data[root], h.data[parent] = h.data[parent], h.data[root]
+		root = parent
+	}
+}
+
+func (h *Heap[H]) pushDown(root int) {
+	n := h.Len()
+	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
+		right := left + 1
+		minIndex := root
+		if h.less(h.data[left], h.data[minIndex]) {
+			minIndex = left
+		}
+		if right < n && h.less(h.data[right], h.data[minIndex]) {
+			minIndex = right
+		}
+		if minIndex == root {
+			return
+		}
+		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
+		root = minIndex
+	}
+}
 func min64(a, b uint64) uint64 {
 	if a < b {
 		return a
