@@ -26,9 +26,10 @@ import (
 )
 
 func main() {
-	// demo()
+
+	demo()
 	// CF1771F()
-	区间最短距离和()
+	// 区间最短距离和()
 }
 
 // Hossam and Range Minimum Query

@@ -29,7 +29,7 @@
 //  17. Pop(index int32) int
 //  18. Set(index int32, x int)
 
-// 常数较大.
+// !常数较大.最好预先离散化，减少值域大小.
 
 package main
 
@@ -45,9 +45,8 @@ import (
 )
 
 func main() {
-
-	test()
-	testTime()
+	// test()
+	// testTime()
 	yosupo()
 }
 
@@ -64,15 +63,66 @@ func yosupo() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	wm := NewWaveletMatrixDynamic(int32(len(nums)), func(i int32) int { return nums[i] }, maxs(nums))
+	newNums, origin := DiscretizeFast(nums)
+	wm := NewWaveletMatrixDynamic(int32(len(nums)), func(i int32) int { return int(newNums[i]) }, len(origin))
+
 	for i := 0; i < q; i++ {
 		var start, end, x int32
 		fmt.Fscan(in, &start, &end, &x)
-		fmt.Fprintln(out, wm.KthSmallest(start, end, x))
+		res := wm.KthSmallest(start, end, x)
+		fmt.Fprintln(out, origin[res])
 	}
 }
 
+// 将nums中的元素进行离散化，返回新的数组和对应的原始值.
+// origin[newNums[i]] == nums[i]
+func DiscretizeFast(nums []int) (newNums []int32, origin []int) {
+	newNums = make([]int32, len(nums))
+	origin = make([]int, 0, len(newNums))
+	order := argSort(int32(len(nums)), func(i, j int32) bool { return nums[i] < nums[j] })
+	for _, i := range order {
+		if len(origin) == 0 || origin[len(origin)-1] != nums[i] {
+			origin = append(origin, nums[i])
+		}
+		newNums[i] = int32(len(origin) - 1)
+	}
+	origin = origin[:len(origin):len(origin)]
+	return
+}
+
+func BisectLeft(nums []int, target int) int32 {
+	left, right := int32(0), int32(len(nums)-1)
+	for left <= right {
+		mid := (left + right) >> 1
+		if nums[mid] < target {
+			left = mid + 1
+		} else {
+			right = mid - 1
+		}
+	}
+	return left
+}
+
+func argSort(n int32, less func(i, j int32) bool) []int32 {
+	order := make([]int32, n)
+	for i := range order {
+		order[i] = int32(i)
+	}
+	sort.Slice(order, func(i, j int) bool { return less(order[i], order[j]) })
+	return order
+}
+
 func maxs(nums []int) int {
+	max := nums[0]
+	for _, num := range nums {
+		if num > max {
+			max = num
+		}
+	}
+	return max
+}
+
+func maxs32(nums []int32) int32 {
 	max := nums[0]
 	for _, num := range nums {
 		if num > max {
@@ -1765,23 +1815,23 @@ func testTime() {
 
 	for i := int32(0); i < n; i++ {
 		wm.PrefixCount(i, nums[i])
-		wm.RangeCount(0, i, nums[i])
-		wm.RangeFreq(0, i, nums[i], nums[i]+1)
-		wm.Kth(i, nums[i])
-		wm.KthSmallest(0, i, i)
-		wm.KthSmallestIndex(0, i, i)
-		wm.KthLargest(0, i, i)
-		wm.Floor(0, i, nums[i])
-		wm.Lower(0, i, nums[i])
-		wm.Ceil(0, i, nums[i])
-		wm.Higher(0, i, nums[i])
-		wm.CountAll(0, i, nums[i])
-		wm.CountLess(0, i, nums[i])
-		wm.CountMore(0, i, nums[i])
-		wm.CountSame(0, i, nums[i])
-		wm.Set(i, nums[i])
-		wm.Insert(i, nums[i])
-		wm.Pop(i)
+		// wm.RangeCount(0, i, nums[i])
+		// wm.RangeFreq(0, i, nums[i], nums[i]+1)
+		// wm.Kth(i, nums[i])
+		// wm.KthSmallest(0, i, i)
+		// wm.KthSmallestIndex(0, i, i)
+		// wm.KthLargest(0, i, i)
+		// wm.Floor(0, i, nums[i])
+		// wm.Lower(0, i, nums[i])
+		// wm.Ceil(0, i, nums[i])
+		// wm.Higher(0, i, nums[i])
+		// wm.CountAll(0, i, nums[i])
+		// wm.CountLess(0, i, nums[i])
+		// wm.CountMore(0, i, nums[i])
+		// wm.CountSame(0, i, nums[i])
+		// wm.Set(i, nums[i])
+		// wm.Insert(i, nums[i])
+		// wm.Pop(i)
 	}
 
 	fmt.Println(time.Since(time1)) // 9.2127399s

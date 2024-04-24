@@ -1276,11 +1276,7 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": [
-      "前后缀滑窗",
-      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
-      "不存在时为INF"
-    ]
+    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -4451,14 +4447,7 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": [
-      "func gcd(a, b int) int {",
-      "  for b != 0 {",
-      "    a, b = b, a%b",
-      "  }",
-      "  return a",
-      "}"
-    ],
+    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -5415,14 +5404,7 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": [
-      "n = len(nums)",
-      "res = 0",
-      "for left in range(n):",
-      "\t\tcur = []",
-      "\t\tfor right in range(left, n):",
-      "\t\t\t\t..."
-    ],
+    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -6393,6 +6375,39 @@
     ],
     "description": "离散化"
   },
+  "discretizeFast": {
+    "scope": "go",
+    "prefix": "DiscretizeFast",
+    "body": [
+      "",
+      "// 将nums中的元素进行离散化，返回新的数组和对应的原始值.",
+      "// origin[newNums[i]] == nums[i]",
+      "func Discretize(nums []int) (newNums []int32, origin []int) {",
+      "\tnewNums = make([]int32, len(nums))",
+      "\torigin = make([]int, 0, len(newNums))",
+      "\torder := argSort(int32(len(nums)), func(i, j int32) bool { return nums[i] < nums[j] })",
+      "\tfor _, i := range order {",
+      "\t\tif len(origin) == 0 || origin[len(origin)-1] != nums[i] {",
+      "\t\t\torigin = append(origin, nums[i])",
+      "\t\t}",
+      "\t\tnewNums[i] = int32(len(origin) - 1)",
+      "\t}",
+      "\torigin = origin[:len(origin):len(origin)]",
+      "\treturn",
+      "}",
+      "",
+      "func argSort(n int32, less func(i, j int32) bool) []int32 {",
+      "\torder := make([]int32, n)",
+      "\tfor i := range order {",
+      "\t\torder[i] = int32(i)",
+      "\t}",
+      "\tsort.Slice(order, func(i, j int) bool { return less(order[i], order[j]) })",
+      "\treturn order",
+      "}",
+      ""
+    ],
+    "description": "离散化"
+  },
   "getFactors-go": {
     "scope": "go",
     "prefix": "getFactors",
@@ -6489,21 +6504,13 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": [
-      "\t\tconst counter = new Map<number, number>()",
-      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
-    ],
+    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": [
-      "\\counter := make(map[int]int)",
-      "\tfor _, v := range nums {",
-      "\t\\counter[v]++",
-      "\t}"
-    ],
+    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
     "description": "counter计数"
   },
   "rangeFreq-python": {
@@ -7351,11 +7358,7 @@
   "Int": {
     "scope": "go",
     "prefix": "Int",
-    "body": [
-      "type Int interface {",
-      "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64",
-      "}"
-    ],
+    "body": ["type Int interface {", "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64", "}"],
     "description": "Int 泛型"
   },
   "heap-go": {

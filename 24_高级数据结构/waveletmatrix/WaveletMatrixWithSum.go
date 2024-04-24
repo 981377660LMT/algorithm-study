@@ -27,18 +27,18 @@ import (
 )
 
 func main() {
-	// demo()
+	demo()
 	// 区间最短距离和()
 	// abc281_e()
 
-	yuki919()
+	// yuki919()
 	// yuki1332()
 	// yuki2065()
 }
 
 func demo() {
 	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	wm := NewWaveletMatrixWithSum(nums, nums, -1, false)
+	wm := NewWaveletMatrixWithSum(nums, nums, -1, true)
 	fmt.Println(wm.CountRange(0, 3, 3, 7, 0))
 	fmt.Println(wm.KthValueAndSum(1, 5, 0, 0))
 	nums = []int{1, 2, 3, 4, 5}
