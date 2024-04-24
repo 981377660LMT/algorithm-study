@@ -30,6 +30,8 @@
 //  18. Set(index int32, x int)
 
 // !常数较大.最好预先离散化，减少值域大小.
+// - 计数问题，需要将x离散化成BisectLeft(origin, x).
+// - 区间第k小问题，需要答案转换成origin[答案].
 
 package main
 
@@ -549,6 +551,7 @@ type AVLTreeBitVector struct {
 }
 
 const W int32 = 63
+const W8 int8 = 63
 
 func newAVLTreeBitVector(data []int8) *AVLTreeBitVector {
 	res := &AVLTreeBitVector{
@@ -582,7 +585,7 @@ func (t *AVLTreeBitVector) Reserve(n int32) {
 
 func (t *AVLTreeBitVector) Insert(index int32, v int8) {
 	if t.root == 0 {
-		t.root = t._makeNode(uint64(v), 1)
+		t.root = t._makeNodeWithBitLen1(uint64(v))
 		return
 	}
 
@@ -647,12 +650,12 @@ func (t *AVLTreeBitVector) Insert(index int32, v int8) {
 	d |= 1
 	if node == 0 {
 		last := path[len(path)-1]
-		if t.bitLen[last] < int8(W) {
+		if t.bitLen[last] < W8 {
 			t.bitLen[last]++
 			t.key[last] = (t.key[last] << 1) | leftKey
 			return
 		} else {
-			t.left[last] = t._makeNode(leftKey, 1)
+			t.left[last] = t._makeNodeWithBitLen1(leftKey)
 		}
 	} else {
 		path = append(path, node)
@@ -666,12 +669,12 @@ func (t *AVLTreeBitVector) Insert(index int32, v int8) {
 			t.total[node] += leftKeyPopcount
 			d <<= 1
 		}
-		if t.bitLen[node] < int8(W) {
+		if t.bitLen[node] < W8 {
 			t.bitLen[node]++
 			t.key[node] = (t.key[node] << 1) | leftKey
 			return
 		} else {
-			t.right[node] = t._makeNode(leftKey, 1)
+			t.right[node] = t._makeNodeWithBitLen1(leftKey)
 		}
 	}
 	newNode := int32(0)
@@ -1093,20 +1096,20 @@ func (t *AVLTreeBitVector) _pref(r int32) int32 {
 	return s
 }
 
-func (t *AVLTreeBitVector) _makeNode(v uint64, bitLen int8) int32 {
+func (t *AVLTreeBitVector) _makeNodeWithBitLen1(v uint64) int32 {
 	end := t.end
 	if end >= int32(len(t.key)) {
 		t.key = append(t.key, v)
-		t.bitLen = append(t.bitLen, bitLen)
-		t.size = append(t.size, int32(bitLen))
+		t.bitLen = append(t.bitLen, 1)
+		t.size = append(t.size, 1)
 		t.total = append(t.total, t._popcount(v))
 		t.left = append(t.left, 0)
 		t.right = append(t.right, 0)
 		t.balance = append(t.balance, 0)
 	} else {
 		t.key[end] = v
-		t.bitLen[end] = bitLen
-		t.size[end] = int32(bitLen)
+		t.bitLen[end] = 1
+		t.size[end] = 1
 		t.total[end] = t._popcount(v)
 	}
 	t.end++
@@ -1223,7 +1226,7 @@ func (t *AVLTreeBitVector) _popcount(v uint64) int32 {
 
 func (t *AVLTreeBitVector) _insertAndCount(index int32, v int8) int32 {
 	if t.root == 0 {
-		t.root = t._makeNode(uint64(v), 1)
+		t.root = t._makeNodeWithBitLen1(uint64(v))
 		return 0
 	}
 	v32 := int32(v)
@@ -1281,12 +1284,12 @@ func (t *AVLTreeBitVector) _insertAndCount(index int32, v int8) int32 {
 	d |= 1
 	if node == 0 {
 		last := path[len(path)-1]
-		if t.bitLen[last] < int8(W) {
+		if t.bitLen[last] < W8 {
 			t.bitLen[last]++
 			t.key[last] = (t.key[last] << 1) | leftKey
 			return s
 		} else {
-			t.left[last] = t._makeNode(leftKey, 1)
+			t.left[last] = t._makeNodeWithBitLen1(leftKey)
 		}
 	} else {
 		path = append(path, node)
@@ -1300,12 +1303,12 @@ func (t *AVLTreeBitVector) _insertAndCount(index int32, v int8) int32 {
 			t.total[node] += leftKeyPopcount
 			d <<= 1
 		}
-		if t.bitLen[node] < int8(W) {
+		if t.bitLen[node] < W8 {
 			t.bitLen[node]++
 			t.key[node] = (t.key[node] << 1) | leftKey
 			return s
 		} else {
-			t.right[node] = t._makeNode(leftKey, 1)
+			t.right[node] = t._makeNodeWithBitLen1(leftKey)
 		}
 	}
 	newNode := int32(0)

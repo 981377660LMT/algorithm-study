@@ -23,7 +23,9 @@
 //  14. CountLess(start, end int32, x int) int32
 //  15. CountMore(start, end int32, x int) int32
 
-// !值域较大时，可以预先离散化以减少值域大小.
+// !常数较大.最好预先离散化，减少值域大小.
+// - 计数问题，需要将x离散化成BisectLeft(origin, x).
+// - 区间第k小问题，需要答案转换成origin[答案].
 
 package main
 
