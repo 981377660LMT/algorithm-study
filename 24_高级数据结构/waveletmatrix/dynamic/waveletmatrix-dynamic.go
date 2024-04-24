@@ -45,8 +45,8 @@ import (
 )
 
 func main() {
-	// test()
-	// testTime()
+	test()
+	testTime()
 	yosupo()
 }
 
@@ -1815,23 +1815,23 @@ func testTime() {
 
 	for i := int32(0); i < n; i++ {
 		wm.PrefixCount(i, nums[i])
-		// wm.RangeCount(0, i, nums[i])
-		// wm.RangeFreq(0, i, nums[i], nums[i]+1)
-		// wm.Kth(i, nums[i])
-		// wm.KthSmallest(0, i, i)
-		// wm.KthSmallestIndex(0, i, i)
-		// wm.KthLargest(0, i, i)
-		// wm.Floor(0, i, nums[i])
-		// wm.Lower(0, i, nums[i])
-		// wm.Ceil(0, i, nums[i])
-		// wm.Higher(0, i, nums[i])
-		// wm.CountAll(0, i, nums[i])
-		// wm.CountLess(0, i, nums[i])
-		// wm.CountMore(0, i, nums[i])
-		// wm.CountSame(0, i, nums[i])
-		// wm.Set(i, nums[i])
-		// wm.Insert(i, nums[i])
-		// wm.Pop(i)
+		wm.RangeCount(0, i, nums[i])
+		wm.RangeFreq(0, i, nums[i], nums[i]+1)
+		wm.Kth(i, nums[i])
+		wm.KthSmallest(0, i, i)
+		wm.KthSmallestIndex(0, i, i)
+		wm.KthLargest(0, i, i)
+		wm.Floor(0, i, nums[i])
+		wm.Lower(0, i, nums[i])
+		wm.Ceil(0, i, nums[i])
+		wm.Higher(0, i, nums[i])
+		wm.CountAll(0, i, nums[i])
+		wm.CountLess(0, i, nums[i])
+		wm.CountMore(0, i, nums[i])
+		wm.CountSame(0, i, nums[i])
+		wm.Set(i, nums[i])
+		wm.Insert(i, nums[i])
+		wm.Pop(i)
 	}
 
 	fmt.Println(time.Since(time1)) // 9.2127399s
