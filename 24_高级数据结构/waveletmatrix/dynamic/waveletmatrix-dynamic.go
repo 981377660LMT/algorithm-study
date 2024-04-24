@@ -52,7 +52,6 @@ func main() {
 
 	// CF455D()
 	// libraryQuery()
-	arc033C()
 	// yosupo()
 }
 
@@ -186,51 +185,6 @@ func libraryQuery() {
 
 	for t := 0; t < T; t++ {
 		solve()
-	}
-}
-
-// C - データ構造
-// https://atcoder.jp/contests/arc033/tasks/arc033_3
-// 1 x: 插入x.
-// 2 x: 查询第k小的数，并删除这个数,
-// n,q<=2e5.
-func arc033C() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var q int32
-	fmt.Fscan(in, &q)
-	queries := make([][2]int32, q)
-	for i := int32(0); i < q; i++ {
-		fmt.Fscan(in, &queries[i][0], &queries[i][1])
-		if queries[i][0] == 2 {
-			queries[i][1]--
-		}
-	}
-
-	allNums := make([]int, 0, q)
-	for _, query := range queries {
-		if query[0] == 1 {
-			allNums = append(allNums, int(query[1]))
-		}
-	}
-	_, origin := DiscretizeFast(allNums)
-	sentinel := len(origin) + 1
-	wm := NewWaveletMatrixDynamic(1, func(i int32) int { return sentinel }, sentinel)
-
-	for _, query := range queries {
-		if query[0] == 1 {
-			x := int(query[1])
-			x = int(BisectLeft(origin, x))
-			wm.Insert(0, x)
-		} else {
-			k := query[1]
-			res := wm.KthSmallest(0, wm.Len(), k)
-			fmt.Fprintln(out, origin[res])
-			index := wm.Kth(0, res)
-			wm.Pop(index)
-		}
 	}
 }
 
