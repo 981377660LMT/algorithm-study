@@ -1,14 +1,41 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
 	"math/rand"
+	"os"
 	"sort"
 )
 
 func main() {
-	test()
+	// test()
+	yuki738()
+}
+
+// No.738 平らな農地
+// https://yukicoder.me/problems/no/738
+// !滑动窗口所有数到中位数的距离和
+func yuki738() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, k int32
+	fmt.Fscan(in, &n, &k)
+	nums := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	wm := NewWaveletMatrixWithSum(nums, nums, -1, true)
+	res := INF
+	mf := NewMedianFinderWaveletMatrix(wm)
+	for i := int32(0); i < n-k+1; i++ {
+		start, end := i, i+k
+		res = min(res, mf.DistSumToMedianRange(start, end))
+	}
+	fmt.Fprintln(out, res)
 }
 
 // waveletMatrix维护区间中位数信息.

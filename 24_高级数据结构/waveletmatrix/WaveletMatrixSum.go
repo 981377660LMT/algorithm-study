@@ -19,6 +19,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"math/bits"
 	"os"
 	"sort"
@@ -27,9 +28,44 @@ import (
 
 func main() {
 
-	demo()
+	区间前驱后继()
+	// demo()
 	// CF1771F()
 	// 区间最短距离和()
+}
+
+// https://yukicoder.me/problems/no/1332
+func 区间前驱后继() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	wm := NewWaveletMatrixSum(nums, -1, func() int { return 0 }, func(a, b int) int { return a + b }, func(a int) int { return -a }, nil)
+	var q int32
+	fmt.Fscan(in, &q)
+	for i := int32(0); i < q; i++ {
+		var start, end, x int
+		fmt.Fscan(in, &start, &end, &x)
+		start--
+
+		res := math.MaxInt
+		floor := wm.Floor(start, end, x, 0)
+		if floor != -INF {
+			res = min(res, abs(x-floor))
+		}
+		ceil := wm.Ceiling(start, end, x, 0)
+		if ceil != INF {
+			res = min(res, abs(x-ceil))
+		}
+		fmt.Fprintln(out, res)
+	}
 }
 
 // Hossam and Range Minimum Query

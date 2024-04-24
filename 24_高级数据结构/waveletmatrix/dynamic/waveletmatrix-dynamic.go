@@ -47,9 +47,10 @@ import (
 )
 
 func main() {
-	test()
-	testTime()
-	yosupo()
+	// test()
+	// testTime()
+	// yosupo()
+	libraryQuery()
 }
 
 // https://judge.yosupo.jp/problem/range_kth_smallest
@@ -73,6 +74,48 @@ func yosupo() {
 		fmt.Fscan(in, &start, &end, &x)
 		res := wm.KthSmallest(start, end, x)
 		fmt.Fprintln(out, origin[res])
+	}
+}
+
+// https://www.hackerrank.com/challenges/library-query/problem
+// 0 start end k: 输出第k小的元素.
+// 1 x v: 将第x个元素修改为v.
+func libraryQuery() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var T int
+	fmt.Fscan(in, &T)
+
+	solve := func() {
+		var n int32
+		fmt.Fscan(in, &n)
+		nums := make([]int, n)
+		for i := int32(0); i < n; i++ {
+			fmt.Fscan(in, &nums[i])
+		}
+
+		var q int32
+		fmt.Fscan(in, &q)
+		for i := int32(0); i < q; i++ {
+			var op int
+			fmt.Fscan(in, &op)
+			if op == 0 {
+				var start, end, k int32
+				fmt.Fscan(in, &start, &end, &k)
+				start--
+				k--
+			} else {
+				var x, v int
+				fmt.Fscan(in, &x, &v)
+				x--
+			}
+		}
+	}
+
+	for t := 0; t < T; t++ {
+		solve()
 	}
 }
 
@@ -214,6 +257,9 @@ func (wm *WaveletMatrixDynamic) Set(index int32, x int) {
 }
 
 func (wm *WaveletMatrixDynamic) PrefixCount(end int32, x int) int32 {
+	if x > wm.maxValue {
+		return 0
+	}
 	if end > wm.size {
 		end = wm.size
 	}
@@ -235,6 +281,9 @@ func (wm *WaveletMatrixDynamic) PrefixCount(end int32, x int) int32 {
 }
 
 func (wm *WaveletMatrixDynamic) RangeCount(start, end int32, x int) int32 {
+	if x > wm.maxValue {
+		return 0
+	}
 	if start < 0 {
 		start = 0
 	}
@@ -250,6 +299,9 @@ func (wm *WaveletMatrixDynamic) RangeCount(start, end int32, x int) int32 {
 
 func (wm *WaveletMatrixDynamic) RangeFreq(start, end int32, floor, higher int) int32 {
 	if floor >= higher {
+		return 0
+	}
+	if floor > wm.maxValue {
 		return 0
 	}
 	if start < 0 {
@@ -443,6 +495,9 @@ func (wm *WaveletMatrixDynamic) CountAll(start, end int32, x int) (same, less, m
 	if start >= end {
 		return 0, 0, 0
 	}
+	if x > wm.maxValue {
+		return 0, end - start, 0
+	}
 	num := end - start
 	for i := wm.bitLen - 1; i >= 0 && start < end; i-- {
 		bit := x >> i & 1
@@ -482,6 +537,18 @@ func (wm *WaveletMatrixDynamic) Get(index int32) int {
 
 // 区间[start, end)中小于x的元素个数.
 func (wm *WaveletMatrixDynamic) CountLess(start, end int32, x int) int32 {
+	if start < 0 {
+		start = 0
+	}
+	if end > wm.size {
+		end = wm.size
+	}
+	if start >= end {
+		return 0
+	}
+	if x > wm.maxValue {
+		return end - start
+	}
 	res := int32(0)
 	for bit := wm.bitLen - 1; bit >= 0; bit-- {
 		l0, r0 := wm.bv[bit].Count0(start), wm.bv[bit].Count0(end)
@@ -1482,6 +1549,27 @@ func max64(a, b uint64) uint64 {
 		return a
 	}
 	return b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
 }
 
 func test() {

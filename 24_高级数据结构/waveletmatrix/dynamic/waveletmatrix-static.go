@@ -44,7 +44,10 @@ func main() {
 
 	// test()
 	// testTime()
-	yosupo()
+	// yosupo()
+
+	// 区间前驱后继()
+
 }
 
 // https://judge.yosupo.jp/problem/range_kth_smallest
@@ -68,6 +71,41 @@ func yosupo() {
 		fmt.Fscan(in, &start, &end, &x)
 		res := wm.KthSmallest(start, end, x)
 		fmt.Fprintln(out, origin[res])
+	}
+}
+
+func 区间前驱后继() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	wm := NewWaveletMatrixStatic(n, func(i int32) int { return nums[i] }, maxs(nums))
+
+	var q int32
+	fmt.Fscan(in, &q)
+	for i := int32(0); i < q; i++ {
+		var start, end int32
+		var x int
+		fmt.Fscan(in, &start, &end, &x)
+		start--
+
+		res := math.MaxInt
+		floor, ok := wm.Floor(start, end, x)
+		if ok {
+			res = min(res, abs(x-floor))
+		}
+		ceil, ok := wm.Ceil(start, end, x)
+		if ok {
+			res = min(res, abs(x-ceil))
+		}
+		fmt.Fprintln(out, res)
 	}
 }
 
@@ -177,6 +215,9 @@ func NewWaveletMatrixStatic(n int32, f func(int32) int, maxValue int) *WaveletMa
 }
 
 func (wm *WaveletMatrixStatic) PrefixCount(end int32, x int) int32 {
+	if x > wm.maxValue {
+		return 0
+	}
 	if end > wm.size {
 		end = wm.size
 	}
@@ -198,6 +239,9 @@ func (wm *WaveletMatrixStatic) PrefixCount(end int32, x int) int32 {
 }
 
 func (wm *WaveletMatrixStatic) RangeCount(start, end int32, x int) int32 {
+	if x > wm.maxValue {
+		return 0
+	}
 	if start < 0 {
 		start = 0
 	}
@@ -213,6 +257,9 @@ func (wm *WaveletMatrixStatic) RangeCount(start, end int32, x int) int32 {
 
 func (wm *WaveletMatrixStatic) RangeFreq(start, end int32, floor, higher int) int32 {
 	if floor >= higher {
+		return 0
+	}
+	if floor > wm.maxValue {
 		return 0
 	}
 	if start < 0 {
@@ -397,6 +444,9 @@ func (wm *WaveletMatrixStatic) Higher(start, end int32, x int) (int, bool) {
 
 // 返回[start, end)中等于x的个数，小于x的个数，大于x的个数.
 func (wm *WaveletMatrixStatic) CountAll(start, end int32, x int) (same, less, more int32) {
+	if x > wm.maxValue {
+		return 0, end - start, 0
+	}
 	if start < 0 {
 		start = 0
 	}
@@ -445,6 +495,18 @@ func (wm *WaveletMatrixStatic) Get(index int32) int {
 
 // 区间[start, end)中小于x的元素个数.
 func (wm *WaveletMatrixStatic) CountLess(start, end int32, x int) int32 {
+	if start < 0 {
+		start = 0
+	}
+	if end > wm.size {
+		end = wm.size
+	}
+	if start >= end {
+		return 0
+	}
+	if x > wm.maxValue {
+		return end - start
+	}
 	res := int32(0)
 	for bit := wm.bitLen - 1; bit >= 0; bit-- {
 		l0, r0 := wm.bv[bit].Count0(start), wm.bv[bit].Count0(end)
@@ -681,11 +743,32 @@ func (h *Heap[H]) pushDown(root int) {
 	}
 }
 
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 func test() {
 	for i := 0; i < 100; i++ {
-		nums := make([]int, 1000)
-		for j := 0; j < 1000; j++ {
-			nums[j] = rand.Intn(1000)
+		nums := make([]int, int(1e5))
+		for j := 0; j < int(1e5); j++ {
+			nums[j] = rand.Intn(1e9)
 		}
 		wm := NewWaveletMatrixStatic(int32(len(nums)), func(i int32) int { return nums[i] }, maxs(nums))
 
@@ -883,7 +966,7 @@ func test() {
 			return res
 		}
 
-		for j := 0; j < 100; j++ {
+		for j := 0; j < 50; j++ {
 			start, end := rand.Intn(1000), rand.Intn(1000)
 			if start > end {
 				start, end = end, start
@@ -939,11 +1022,18 @@ func test() {
 			funcs1 := []func(int32, int32, int) (int, bool){floorBf, lowerBf, ceilBf, higherBf}
 			funcs2 := []func(int32, int32, int) (int, bool){wm.Floor, wm.Lower, wm.Ceil, wm.Higher}
 			for i := 0; i < len(funcs1); i++ {
-				res1, ok1 := funcs1[i](int32(start), int32(end), x)
-				res2, ok2 := funcs2[i](int32(start), int32(end), x)
-				if res1 != res2 || ok1 != ok2 {
-					fmt.Println(res1, res2, start, end, x)
-					panic("funcs")
+				for j := 0; j < 50; j++ {
+					start, end := rand.Intn(len(nums)), rand.Intn(len(nums))
+					if start > end {
+						start, end = end, start
+					}
+					x := rand.Intn(int(1e9))
+					res1, ok1 := funcs1[i](int32(start), int32(end), x)
+					res2, ok2 := funcs2[i](int32(start), int32(end), x)
+					if res1 != res2 || ok1 != ok2 {
+						fmt.Println(res1, res2, start, end, x)
+						panic("funcs")
+					}
 				}
 			}
 

@@ -1,4 +1,3 @@
-// https://yukicoder.me/problems/no/1332
 // 区间最近值(无序数组区间前驱后继)查询
 // !对每个查询[left,right,x],输出左闭右开区间内的数到给定数x的最小距离
 // n<=3e5 q<=1e5 nums[i]<=1e9
@@ -62,7 +61,8 @@ func abs(a int) int {
 const INF int = 1e18
 
 // 指定された配列から WaveletMatrix を構築する.
-//  data:変換する配列(data[i]は0以上)
+//
+//	data:変換する配列(data[i]は0以上)
 func NewWaveletMatrix(data []int) *WaveletMatrix {
 	dataCopy := make([]int, len(data))
 	max_ := 0
@@ -122,7 +122,8 @@ type WaveletMatrix struct {
 }
 
 // [start, end) に含まれる value の個数を求める.
-//  alias: Rank
+//
+//	alias: Rank
 func (w *WaveletMatrix) Count(start, end, value int) int {
 	return w.count(value, end) - w.count(value, start)
 }
@@ -134,7 +135,8 @@ func (w *WaveletMatrix) CountRange(start, end, lower, upper int) int {
 }
 
 // k(0-indexed) 番目の value の位置を求める.
-//  alias: Select
+//
+//	alias: Select
 func (w *WaveletMatrix) Index(value, k int) int {
 	w.count(value, w.n)
 	for dep := w.maxLog - 1; dep >= 0; dep-- {
@@ -153,7 +155,8 @@ func (w *WaveletMatrix) IndexWithStart(value, k, start int) int {
 }
 
 // [start, end) に含まれる要素の中で k(0-indexed) 番目に大きいものを求める.
-//  alias: Quantile
+//
+//	alias: Quantile
 func (w *WaveletMatrix) KthMax(start, end, k int) int {
 	if k < 0 || k >= end-start {
 		return -1
@@ -175,14 +178,16 @@ func (w *WaveletMatrix) KthMax(start, end, k int) int {
 }
 
 // [start, end) に含まれる要素の中で k(0-indexed) 番目に小さいものを求める.
-//  alias: Rquantile
+//
+//	alias: Rquantile
 func (w *WaveletMatrix) KthMin(start, end, k int) int {
 	return w.KthMax(start, end, end-start-k-1)
 }
 
 // [start, end) に含まれる要素の中で value の次に小さいものを求める.存在しない場合は -INF を返す.
-//  value >= 0
-//  alias: Pred
+//
+//	value >= 0
+//	alias: Pred
 func (w *WaveletMatrix) Lower(start, end, value int) int {
 	k := w.lt(start, end, value)
 	if k != 0 {
@@ -192,8 +197,9 @@ func (w *WaveletMatrix) Lower(start, end, value int) int {
 }
 
 // [start, end) に含まれる要素の中で value より大きいものを求める.存在しない場合は INF を返す.
-//  value >= 0
-//  alias: Succ
+//
+//	value >= 0
+//	alias: Succ
 func (w *WaveletMatrix) Higher(start, end, value int) int {
 	k := w.le(start, end, value)
 	if k == end-start {
