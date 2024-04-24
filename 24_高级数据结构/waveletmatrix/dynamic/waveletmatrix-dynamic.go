@@ -49,8 +49,189 @@ import (
 func main() {
 	// test()
 	// testTime()
+
+	// CF455D()
+	// libraryQuery()
+	arc033C()
 	// yosupo()
-	libraryQuery()
+}
+
+// Serega and Fun
+// https://www.luogu.com.cn/problem/CF455D
+// 1 start end: 区间[start, end)向右移动.
+// 2 start end v: 区间[start, end)中k出现次数.
+// 强制在线.
+// n,q<=1e5.
+func CF455D() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	set := make(map[int]struct{})
+	for _, num := range nums {
+		set[num] = struct{}{}
+	}
+
+	newNums, origin := DiscretizeFast(nums)
+	wm := NewWaveletMatrixDynamic(int32(len(nums)), func(i int32) int { return int(newNums[i]) }, len(origin))
+
+	rotateRight := func(start, end int32) {
+		value := wm.Get(end - 1)
+		wm.Pop(end - 1)
+		wm.Insert(start, value)
+	}
+
+	query := func(start, end int32, v int) int32 {
+		if _, has := set[v]; !has {
+			return 0
+		}
+		v = int(BisectLeft(origin, v))
+		return wm.RangeCount(start, end, v)
+	}
+
+	preRes := int32(0)
+	var q int32
+	fmt.Fscan(in, &q)
+	for i := int32(0); i < q; i++ {
+		var op int32
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var l, r int32
+			fmt.Fscan(in, &l, &r)
+			l, r = (l+preRes-1)%n+1, (r+preRes-1)%n+1
+			if l > r {
+				l, r = r, l
+			}
+			l--
+			rotateRight(l, r)
+		} else {
+			var l, r, v int32
+			fmt.Fscan(in, &l, &r, &v)
+			l, r, v = (l+preRes-1)%n+1, (r+preRes-1)%n+1, (v+preRes-1)%n+1
+			if l > r {
+				l, r = r, l
+			}
+			l--
+			preRes = query(l, r, int(v))
+			fmt.Fprintln(out, preRes)
+		}
+	}
+}
+
+// https://www.hackerrank.com/challenges/library-query/problem
+// 0 start end k: 输出第k小的元素.
+// 1 x v: 将第x个元素修改为v.
+func libraryQuery() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var T int
+	fmt.Fscan(in, &T)
+
+	solve := func() {
+		var n int32
+		fmt.Fscan(in, &n)
+		nums := make([]int, n)
+		for i := int32(0); i < n; i++ {
+			fmt.Fscan(in, &nums[i])
+		}
+		var q int32
+		fmt.Fscan(in, &q)
+		operations := make([][4]int32, q)
+		for i := int32(0); i < q; i++ {
+			var op int
+			fmt.Fscan(in, &op)
+			if op == 0 {
+				var start, end, k int32
+				fmt.Fscan(in, &start, &end, &k)
+				start--
+				k--
+				operations[i] = [4]int32{0, start, end, k}
+			} else {
+				var x, v int32
+				fmt.Fscan(in, &x, &v)
+				x--
+				operations[i] = [4]int32{1, x, v, 0}
+			}
+		}
+
+		allNums := make([]int, 0, n+q)
+		allNums = append(allNums, nums...)
+		for _, op := range operations {
+			if op[0] == 1 {
+				allNums = append(allNums, int(op[2]))
+			}
+		}
+		newNums, origin := DiscretizeFast(allNums)
+		wm := NewWaveletMatrixDynamic(int32(len(nums)), func(i int32) int { return int(newNums[i]) }, len(origin))
+		for _, op := range operations {
+			if op[0] == 0 {
+				start, end, k := op[1], op[2], op[3]
+				res := wm.KthSmallest(start, end, k)
+				fmt.Fprintln(out, origin[res])
+			} else {
+				index, value := op[1], op[2]
+				value = BisectLeft(origin, int(value))
+				wm.Set(index, int(value))
+			}
+		}
+	}
+
+	for t := 0; t < T; t++ {
+		solve()
+	}
+}
+
+// C - データ構造
+// https://atcoder.jp/contests/arc033/tasks/arc033_3
+// 1 x: 插入x.
+// 2 x: 查询第k小的数，并删除这个数,
+// n,q<=2e5.
+func arc033C() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var q int32
+	fmt.Fscan(in, &q)
+	queries := make([][2]int32, q)
+	for i := int32(0); i < q; i++ {
+		fmt.Fscan(in, &queries[i][0], &queries[i][1])
+		if queries[i][0] == 2 {
+			queries[i][1]--
+		}
+	}
+
+	allNums := make([]int, 0, q)
+	for _, query := range queries {
+		if query[0] == 1 {
+			allNums = append(allNums, int(query[1]))
+		}
+	}
+	_, origin := DiscretizeFast(allNums)
+	sentinel := len(origin) + 1
+	wm := NewWaveletMatrixDynamic(1, func(i int32) int { return sentinel }, sentinel)
+
+	for _, query := range queries {
+		if query[0] == 1 {
+			x := int(query[1])
+			x = int(BisectLeft(origin, x))
+			wm.Insert(0, x)
+		} else {
+			k := query[1]
+			res := wm.KthSmallest(0, wm.Len(), k)
+			fmt.Fprintln(out, origin[res])
+			index := wm.Kth(0, res)
+			wm.Pop(index)
+		}
+	}
 }
 
 // https://judge.yosupo.jp/problem/range_kth_smallest
@@ -74,48 +255,6 @@ func yosupo() {
 		fmt.Fscan(in, &start, &end, &x)
 		res := wm.KthSmallest(start, end, x)
 		fmt.Fprintln(out, origin[res])
-	}
-}
-
-// https://www.hackerrank.com/challenges/library-query/problem
-// 0 start end k: 输出第k小的元素.
-// 1 x v: 将第x个元素修改为v.
-func libraryQuery() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var T int
-	fmt.Fscan(in, &T)
-
-	solve := func() {
-		var n int32
-		fmt.Fscan(in, &n)
-		nums := make([]int, n)
-		for i := int32(0); i < n; i++ {
-			fmt.Fscan(in, &nums[i])
-		}
-
-		var q int32
-		fmt.Fscan(in, &q)
-		for i := int32(0); i < q; i++ {
-			var op int
-			fmt.Fscan(in, &op)
-			if op == 0 {
-				var start, end, k int32
-				fmt.Fscan(in, &start, &end, &k)
-				start--
-				k--
-			} else {
-				var x, v int
-				fmt.Fscan(in, &x, &v)
-				x--
-			}
-		}
-	}
-
-	for t := 0; t < T; t++ {
-		solve()
 	}
 }
 
