@@ -33,6 +33,8 @@
 // - 计数问题，需要将x离散化成BisectLeft(origin, x).
 // - 区间第k小问题，需要答案转换成origin[答案].
 
+// TODO: golang 太慢，需要使用 Rust 版本
+
 package main
 
 import (
