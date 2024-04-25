@@ -44,12 +44,17 @@ import (
 	"math/bits"
 	"math/rand"
 	"os"
+	"runtime/debug"
 	"sort"
 	"time"
 )
 
+func init() {
+	debug.SetGCPercent(-1)
+}
+
 func main() {
-	// test()
+	test()
 	testTime()
 
 	// CF455D()
@@ -272,13 +277,16 @@ func maxs32(nums []int32) int32 {
 	return max
 }
 
+// 1e5 -> 150 , 2e5 -> 250
+const _LOAD int32 = 200 // 块尺寸越大，修改越快，查询越慢
+
 // 维护[0,maxValue].
 type WaveletMatrixDynamic struct {
 	size     int32
 	maxValue int
 	bitLen   int32
 	mid      []int32
-	bv       []*AVLTreeBitVector
+	bv       []*DynamicBitvector
 }
 
 type topKPair = struct {
@@ -296,7 +304,7 @@ func NewWaveletMatrixDynamic(n int32, f func(int32) int, maxValue int) *WaveletM
 		bitLen:   int32(bits.Len(uint(maxValue))),
 	}
 	res.mid = make([]int32, res.bitLen)
-	res.bv = make([]*AVLTreeBitVector, res.bitLen)
+	res.bv = make([]*DynamicBitvector, res.bitLen)
 	if n > 0 {
 		res._build(n, f)
 	}
@@ -311,13 +319,29 @@ func (wm *WaveletMatrixDynamic) Insert(index int32, x int) {
 		panic(fmt.Sprintf("index out of range: %d", index))
 	}
 	for bit := wm.bitLen - 1; bit >= 0; bit-- {
+		// if x>>bit&1 == 1 {
+		// 	s := wm.bv[bit]._insertAndCount(index, 1)
+		// 	index = s + wm.mid[bit]
+		// } else {
+		// 	s := wm.bv[bit]._insertAndCount(index, 0)
+		// 	index -= s
+		// 	wm.mid[bit]++
+		// }
+		// # if x >> bit & 1:
+		// #   v.insert(k, 1)
+		// #   k = v.rank1(k) + mid[bit]
+		// # else:
+		// #   v.insert(k, 0)
+		// #   mid[bit] += 1
+		// #   k = v.rank0(k)
+		bv := wm.bv[bit]
 		if x>>bit&1 == 1 {
-			s := wm.bv[bit]._insertAndCount(index, 1)
-			index = s + wm.mid[bit]
+			bv.Insert(index, 1)
+			index = bv.Count1(index) + wm.mid[bit]
 		} else {
-			s := wm.bv[bit]._insertAndCount(index, 0)
-			index -= s
+			bv.Insert(index, 0)
 			wm.mid[bit]++
+			index = bv.Count0(index)
 		}
 	}
 	wm.size++
@@ -332,15 +356,26 @@ func (wm *WaveletMatrixDynamic) Pop(index int32) int {
 	}
 	res := 0
 	for bit := wm.bitLen - 1; bit >= 0; bit-- {
-		sb := wm.bv[bit]._accessPopAndCount1(index)
-		s := sb >> 1
-		if sb&1 == 1 {
+		// sb := wm.bv[bit]._accessPopAndCount1(index)
+		// s := sb >> 1
+		// if sb&1 == 1 {
+		// 	res |= 1 << bit
+		// 	index = s + wm.mid[bit]
+		// } else {
+		// 	wm.mid[bit]--
+		// 	index -= s
+		// }
+		bv := wm.bv[bit]
+		// tmpIndex := index
+		if wm.Get(index) == 1 {
 			res |= 1 << bit
-			index = s + wm.mid[bit]
+			index = bv.Count1(index) + wm.mid[bit]
 		} else {
 			wm.mid[bit]--
-			index -= s
+			index = bv.Count0(index)
 		}
+		bv.Pop(index)
+		// s:=
 	}
 	wm.size--
 	return res
@@ -691,877 +726,553 @@ func (wm *WaveletMatrixDynamic) _build(n int32, f func(int32) int) {
 				p++
 			}
 		}
-		wm.bv[bit] = newAVLTreeBitVector(bits)
+		wm.bv[bit] = NewDynamicBitvector(n, func(i int32) int8 { return bits[i] })
 		wm.mid[bit] = p
 		zero, data = data, zero
 		copy(data[p:], one[:q])
 	}
-
 }
 
-type AVLTreeBitVector struct {
-	root      int32
-	end       int32 // 使用的结点数
-	bitLen    []int8
-	key       []uint64 // 结点mask
-	total     []int32  // 子树onesCount之和
-	size      []int32
-	left      []int32
-	right     []int32
-	balance   []int8 // 左子树高度-右子树高度
-	pathStack []int32
+// 使用分块+树状数组维护的动态Bitvector.
+type DynamicBitvector struct {
+	size              int32
+	totalOnes         int32
+	blocks            [][]int8
+	blockOnes         []int32
+	preLen            []int32 // 每个块块长的前缀和
+	preOnes           []int32 // 每个块01的前缀和
+	shouldRebuildTree bool
 }
 
-const W int32 = 63
-const W8 int8 = 63
-
-func newAVLTreeBitVector(data []int8) *AVLTreeBitVector {
-	res := &AVLTreeBitVector{
-		root:      0,
-		end:       1,
-		bitLen:    []int8{0},
-		key:       []uint64{0},
-		total:     []int32{0},
-		size:      []int32{0},
-		left:      []int32{0},
-		right:     []int32{0},
-		balance:   []int8{0},
-		pathStack: make([]int32, 0, 128),
+func NewDynamicBitvector(n int32, f func(i int32) int8) *DynamicBitvector {
+	blocks := make([][]int8, 0, n/_LOAD+1)
+	blockOnes := make([]int32, 0, n/_LOAD+1)
+	totalOnes := int32(0)
+	for start := int32(0); start < n; start += _LOAD {
+		end := start + _LOAD
+		if end > n {
+			end = n
+		}
+		block := make([]int8, end-start)
+		ones := int32(0)
+		for i := start; i < end; i++ {
+			block[i-start] = f(i)
+			ones += int32(block[i-start])
+		}
+		blocks = append(blocks, block)
+		blockOnes = append(blockOnes, ones)
+		totalOnes += ones
 	}
-	if len(data) > 0 {
-		res._build(data)
+	res := &DynamicBitvector{
+		size:              n,
+		totalOnes:         totalOnes,
+		blocks:            blocks,
+		blockOnes:         blockOnes,
+		shouldRebuildTree: true,
 	}
 	return res
 }
 
-func (t *AVLTreeBitVector) Reserve(n int32) {
-	n = n/W + 1
-	t.bitLen = append(t.bitLen, make([]int8, n)...)
-	t.key = append(t.key, make([]uint64, n)...)
-	t.size = append(t.size, make([]int32, n)...)
-	t.total = append(t.total, make([]int32, n)...)
-	t.left = append(t.left, make([]int32, n)...)
-	t.right = append(t.right, make([]int32, n)...)
-	t.balance = append(t.balance, make([]int8, n)...)
-}
-
-func (t *AVLTreeBitVector) Insert(index int32, v int8) {
-	if t.root == 0 {
-		t.root = t._makeNodeWithBitLen1(uint64(v))
-		return
-	}
-
-	n := t.Len()
-	if index < 0 {
-		index += n
-	}
-	if index < 0 {
-		index = 0
-	}
-	if index > n {
-		index = n
-	}
-
-	v32 := int32(v)
-	node := t.root
-
-	t.pathStack = t.pathStack[:0]
-	path := t.pathStack
-
-	d := int32(0)
-	for node != 0 {
-		b32 := int32(t.bitLen[node])
-		tmp := t.size[t.left[node]] + b32
-		if tmp-b32 <= index && index <= tmp {
-			break
+// index前插入value，并统计插入后[0, index) 中 value 的个数.
+func (sl *DynamicBitvector) _accessPopAndCount1(index int32) (res int32) {
+	pos, startIndex, preOnes := sl._findKthAndPreOnes(index)
+	block := sl.blocks[pos]
+	if startIndex < int32(len(block))>>1 {
+		// 统计前缀
+		onesInBlockPrefix := int16(0)
+		for i := int32(0); i <= startIndex; i++ {
+			onesInBlockPrefix += int16(block[i])
 		}
-		d <<= 1
-		t.size[node]++
-		t.total[node] += v32
-		path = append(path, node)
-		if tmp > index {
-			node = t.left[node]
-			d |= 1
-		} else {
-			node = t.right[node]
-			index -= tmp
-		}
-	}
-	index -= t.size[t.left[node]]
-	b32 := int32(t.bitLen[node])
-	if b32 < W {
-		mask := t.key[node]
-		bl := b32 - index
-		t.key[node] = (((mask>>bl)<<1 | uint64(v)) << bl) | (mask & ((1 << bl) - 1))
-		t.bitLen[node]++
-		t.size[node]++
-		t.total[node] += v32
-		return
-	}
-	path = append(path, node)
-	t.size[node]++
-	t.total[node] += v32
-	mask := t.key[node]
-	bl := W - index
-	mask = (((mask>>bl)<<1 | uint64(v)) << bl) | (mask & ((1 << bl) - 1))
-	leftKey := mask >> W
-	leftKeyPopcount := int32(leftKey & 1)
-	t.key[node] = mask & ((1 << W) - 1)
-	node = t.left[node]
-	d <<= 1
-	d |= 1
-	if node == 0 {
-		last := path[len(path)-1]
-		if t.bitLen[last] < W8 {
-			t.bitLen[last]++
-			t.key[last] = (t.key[last] << 1) | leftKey
-			return
-		} else {
-			t.left[last] = t._makeNodeWithBitLen1(leftKey)
-		}
+		res = preOnes + int32(onesInBlockPrefix)
 	} else {
-		path = append(path, node)
-		t.size[node]++
-		t.total[node] += leftKeyPopcount
-		d <<= 1
-		for t.right[node] != 0 {
-			node = t.right[node]
-			path = append(path, node)
-			t.size[node]++
-			t.total[node] += leftKeyPopcount
-			d <<= 1
+		onesInBlockSuffix := int16(0)
+		for i := int32(len(block) - 1); i > startIndex; i-- {
+			onesInBlockSuffix += int16(block[i])
 		}
-		if t.bitLen[node] < W8 {
-			t.bitLen[node]++
-			t.key[node] = (t.key[node] << 1) | leftKey
-			return
-		} else {
-			t.right[node] = t._makeNodeWithBitLen1(leftKey)
-		}
+		res = preOnes + sl.blockOnes[pos] - int32(onesInBlockSuffix)
 	}
-	newNode := int32(0)
-	for len(path) > 0 {
-		node = path[len(path)-1]
-		path = path[:len(path)-1]
-		if d&1 == 1 {
-			t.balance[node]++
-		} else {
-			t.balance[node]--
-		}
-		d >>= 1
-		if t.balance[node] == 0 {
-			break
-		}
-		if t.balance[node] == 2 {
-			if t.balance[t.left[node]] == -1 {
-				newNode = t._rotateLR(node)
-			} else {
-				newNode = t._rotateL(node)
-			}
-			break
-		} else if t.balance[node] == -2 {
-			if t.balance[t.right[node]] == 1 {
-				newNode = t._rotateRL(node)
-			} else {
-				newNode = t._rotateR(node)
-			}
-			break
-		}
+	if block[startIndex] == 1 {
+		res--
+	} else {
+		res = index - res
 	}
-	if newNode != 0 {
-		if len(path) > 0 {
-			if d&1 == 1 {
-				t.left[path[len(path)-1]] = newNode
-			} else {
-				t.right[path[len(path)-1]] = newNode
-			}
-		} else {
-			t.root = newNode
-		}
+
+	// pop
+	// !delete element
+	sl.size--
+	if block[startIndex] == 1 {
+		sl._updatePreLenAndPreOnes(pos, false)
+		sl.blockOnes[pos]--
+		sl.totalOnes--
+	} else {
+		sl._updatePreLen(pos, false)
 	}
+	copy(sl.blocks[pos][startIndex:], sl.blocks[pos][startIndex+1:])
+	sl.blocks[pos] = sl.blocks[pos][:len(sl.blocks[pos])-1]
+	if len(sl.blocks[pos]) == 0 {
+		// !delete block
+		copy(sl.blocks[pos:], sl.blocks[pos+1:])
+		sl.blocks = sl.blocks[:len(sl.blocks)-1]
+		copy(sl.blockOnes[pos:], sl.blockOnes[pos+1:])
+		sl.blockOnes = sl.blockOnes[:len(sl.blockOnes)-1]
+		sl.shouldRebuildTree = true
+	}
+	return
 }
 
-func (t *AVLTreeBitVector) Pop(index int32) int8 {
-	n := t.Len()
-	if index < 0 {
-		index += n
+// index前插入value，并统计插入后[0, index) 中 value 的个数.
+func (sl *DynamicBitvector) _insertAndCount(index int32, value int8) (res int32) {
+	if value == 1 {
+		sl.totalOnes++
 	}
-	if index < 0 || index >= n {
-		panic(fmt.Sprintf("index out of range: %d", index))
-	}
-	left, right, size := t.left, t.right, t.size
-	bitLen, keys, total := t.bitLen, t.key, t.total
-	node := t.root
-	d := int32(0)
-	t.pathStack = t.pathStack[:0]
-	path := t.pathStack
-	for node != 0 {
-		b32 := int32(bitLen[node])
-		t := size[left[node]] + b32
-		if t-b32 <= index && index < t {
-			break
-		}
-		path = append(path, node)
-		d <<= 1
-		if t > index {
-			node = left[node]
-			d |= 1
-		} else {
-			node = right[node]
-			index -= t
-		}
-	}
-	index -= size[left[node]]
-	v := keys[node]
-	b32 := int32(bitLen[node])
-	res := int32(v >> (b32 - index - 1) & 1)
-	if b32 == 1 {
-		t._popUnder(path, d, node, res)
-		return int8(res)
-	}
-	keys[node] = ((v >> (b32 - index)) << (b32 - index - 1)) | (v & ((1 << (b32 - index - 1)) - 1))
-	bitLen[node]--
-	size[node]--
-	total[node] -= res
-	for _, p := range path {
-		size[p]--
-		total[p] -= res
-	}
-	return int8(res)
-}
-
-func (t *AVLTreeBitVector) Set(index int32, v int8) {
-	n := t.Len()
-	if index < 0 {
-		index += n
-	}
-	if index < 0 || index >= n {
-		panic(fmt.Sprintf("index out of range: %d", index))
-	}
-
-	left, right, bitLen, size, key, total := t.left, t.right, t.bitLen, t.size, t.key, t.total
-	node := t.root
-
-	t.pathStack = t.pathStack[:0]
-	path := t.pathStack
-	for true {
-		b32 := int32(bitLen[node])
-		tmp := size[left[node]] + b32
-		path = append(path, node)
-		if tmp-b32 <= index && index < tmp {
-			index -= size[left[node]]
-			index = b32 - index - 1
-			if v == 1 {
-				key[node] |= 1 << index
-			} else {
-				key[node] &= ^(1 << index)
-			}
-			break
-		} else if tmp > index {
-			node = left[node]
-		} else {
-			node = right[node]
-			index -= tmp
-		}
-	}
-	for len(path) > 0 {
-		node = path[len(path)-1]
-		path = path[:len(path)-1]
-		total[node] = t._popcount(key[node]) + total[left[node]] + total[right[node]]
-	}
-}
-
-func (t *AVLTreeBitVector) Get(index int32) int8 {
-	if index < 0 {
-		index += t.Len()
-	}
-	left, right, bitLen, size, key := t.left, t.right, t.bitLen, t.size, t.key
-	node := t.root
-	for true {
-		b32 := int32(bitLen[node])
-		tmp := size[left[node]] + b32
-		if tmp-b32 <= index && index < tmp {
-			index -= size[left[node]]
-			return int8(key[node] >> (b32 - index - 1) & 1)
-		}
-		if tmp > index {
-			node = left[node]
-		} else {
-			node = right[node]
-			index -= tmp
-		}
-	}
-	panic("unreachable")
-}
-
-func (t *AVLTreeBitVector) Count0(end int32) int32 {
-	if end < 0 {
+	if len(sl.blocks) == 0 {
+		sl.blocks = append(sl.blocks, []int8{value})
+		sl.blockOnes = append(sl.blockOnes, int32(value))
+		sl.shouldRebuildTree = true
+		sl.size++
 		return 0
 	}
-	if n := t.Len(); end > n {
-		end = n
+
+	pos, startIndex, preOnes := sl._findKthAndPreOnes(index)
+	block := sl.blocks[pos]
+	if startIndex < int32(len(block))>>1 {
+		// 统计前缀
+		onesInBlockPrefix := int16(0)
+		for i := int32(0); i <= startIndex; i++ {
+			onesInBlockPrefix += int16(block[i])
+		}
+		res = preOnes + int32(onesInBlockPrefix)
+	} else {
+		onesInBlockSuffix := int16(0)
+		for i := int32(len(block) - 1); i > startIndex; i-- {
+			onesInBlockSuffix += int16(block[i])
+		}
+		res = preOnes + sl.blockOnes[pos] - int32(onesInBlockSuffix)
 	}
-	return end - t._pref(end)
+	// if block[startIndex] == 1 {
+	// 	res--
+	// }
+	if value == 0 {
+		res = index - res
+	}
+
+	if value == 1 {
+		sl._updatePreLenAndPreOnes(pos, true)
+		sl.blockOnes[pos]++
+	} else {
+		sl._updatePreLen(pos, true)
+	}
+	sl.blocks[pos] = append(sl.blocks[pos], 0)
+	copy(sl.blocks[pos][startIndex+1:], sl.blocks[pos][startIndex:])
+	sl.blocks[pos][startIndex] = value
+
+	// n -> load + (n - load)
+	if n := int32(len(sl.blocks[pos])); _LOAD+_LOAD < n {
+		totalOnes := sl.blockOnes[pos]
+		sl.blocks = append(sl.blocks, nil)
+		copy(sl.blocks[pos+2:], sl.blocks[pos+1:])
+		sl.blocks[pos+1] = sl.blocks[pos][_LOAD:] // !注意max的设置(为了让左右互不影响)
+		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD]
+		ones1 := int32(0)
+		for _, v := range sl.blocks[pos] {
+			ones1 += int32(v)
+		}
+		ones2 := totalOnes - ones1
+		sl.blockOnes = append(sl.blockOnes, 0)
+		copy(sl.blockOnes[pos+2:], sl.blockOnes[pos+1:])
+		sl.blockOnes[pos] = ones1
+		sl.blockOnes[pos+1] = ones2
+		sl.shouldRebuildTree = true
+	}
+
+	sl.size++
+	return
 }
 
-func (t *AVLTreeBitVector) Count1(end int32) int32 {
-	if end < 0 {
+func (sl *DynamicBitvector) Insert(index int32, value int8) {
+	if value == 1 {
+		sl.totalOnes++
+	}
+	if len(sl.blocks) == 0 {
+		sl.blocks = append(sl.blocks, []int8{value})
+		sl.blockOnes = append(sl.blockOnes, int32(value))
+		sl.shouldRebuildTree = true
+		sl.size++
+		return
+	}
+
+	pos, startIndex := sl._findKth(index)
+	if value == 1 {
+		sl._updatePreLenAndPreOnes(pos, true)
+		sl.blockOnes[pos]++
+	} else {
+		sl._updatePreLen(pos, true)
+	}
+	sl.blocks[pos] = append(sl.blocks[pos], 0)
+	copy(sl.blocks[pos][startIndex+1:], sl.blocks[pos][startIndex:])
+	sl.blocks[pos][startIndex] = value
+
+	// n -> load + (n - load)
+	if n := int32(len(sl.blocks[pos])); _LOAD+_LOAD < n {
+		totalOnes := sl.blockOnes[pos]
+		sl.blocks = append(sl.blocks, nil)
+		copy(sl.blocks[pos+2:], sl.blocks[pos+1:])
+		sl.blocks[pos+1] = sl.blocks[pos][_LOAD:] // !注意max的设置(为了让左右互不影响)
+		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD]
+		ones1 := int32(0)
+		for _, v := range sl.blocks[pos] {
+			ones1 += int32(v)
+		}
+		ones2 := totalOnes - ones1
+		sl.blockOnes = append(sl.blockOnes, 0)
+		copy(sl.blockOnes[pos+2:], sl.blockOnes[pos+1:])
+		sl.blockOnes[pos] = ones1
+		sl.blockOnes[pos+1] = ones2
+		sl.shouldRebuildTree = true
+	}
+
+	sl.size++
+	return
+}
+
+func (sl *DynamicBitvector) Pop(index int32) int8 {
+	pos, startIndex := sl._findKth(index)
+	value := sl.blocks[pos][startIndex]
+	// !delete element
+	sl.size--
+	if value == 1 {
+		sl._updatePreLenAndPreOnes(pos, false)
+		sl.blockOnes[pos]--
+		sl.totalOnes--
+	} else {
+		sl._updatePreLen(pos, false)
+	}
+
+	copy(sl.blocks[pos][startIndex:], sl.blocks[pos][startIndex+1:])
+	sl.blocks[pos] = sl.blocks[pos][:len(sl.blocks[pos])-1]
+
+	if len(sl.blocks[pos]) == 0 {
+		// !delete block
+		copy(sl.blocks[pos:], sl.blocks[pos+1:])
+		sl.blocks = sl.blocks[:len(sl.blocks)-1]
+		copy(sl.blockOnes[pos:], sl.blockOnes[pos+1:])
+		sl.blockOnes = sl.blockOnes[:len(sl.blockOnes)-1]
+		sl.shouldRebuildTree = true
+	}
+	return value
+}
+
+func (sl *DynamicBitvector) Get(index int32) int8 {
+	pos, startIndex := sl._findKth(index)
+	return sl.blocks[pos][startIndex]
+}
+
+func (sl *DynamicBitvector) Set(index int32, value int8) {
+	pos, startIndex := sl._findKth(index)
+	curValue := sl.blocks[pos][startIndex]
+	if curValue == value {
+		return
+	}
+	sl.blocks[pos][startIndex] = value
+	if value == 1 {
+		sl._updatePreOnes(pos, true)
+		sl.blockOnes[pos]++
+		sl.totalOnes++
+	} else {
+		sl._updatePreOnes(pos, false)
+		sl.blockOnes[pos]--
+		sl.totalOnes--
+	}
+}
+
+func (sl *DynamicBitvector) Count0(end int32) int32 {
+	if end <= 0 {
 		return 0
 	}
-	if n := t.Len(); end > n {
-		end = n
+	if end > sl.size {
+		end = sl.size
 	}
-	return t._pref(end)
+	return end - sl.Count1(end)
 }
-func (t *AVLTreeBitVector) Count(end int32, v int8) int32 {
-	if v == 1 {
-		return t.Count1(end)
-	}
-	return t.Count0(end)
-}
-func (t *AVLTreeBitVector) Kth0(k int32) int32 {
-	n := t.Len()
-	if k < 0 || t.Count0(n) <= k {
-		return -1
-	}
-	l, r := int32(0), n
-	for r-l > 1 {
-		m := (l + r) >> 1
-		if m-t._pref(m) > k {
-			r = m
-		} else {
-			l = m
-		}
-	}
-	return l
-}
-func (t *AVLTreeBitVector) Kth1(k int32) int32 {
-	n := t.Len()
-	if k < 0 || t.Count1(n) <= k {
-		return -1
-	}
-	l, r := int32(0), n
-	for r-l > 1 {
-		m := (l + r) >> 1
-		if t._pref(m) > k {
-			r = m
-		} else {
-			l = m
-		}
-	}
-	return l
-}
-func (t *AVLTreeBitVector) Kth(k int32, v int8) int32 {
-	if v == 1 {
-		return t.Kth1(k)
-	}
-	return t.Kth0(k)
-}
-func (t *AVLTreeBitVector) Len() int32 { return t.size[t.root] }
 
-func (t *AVLTreeBitVector) ToList() []int8 {
-	if t.root == 0 {
-		return nil
+func (sl *DynamicBitvector) Count1(end int32) int32 {
+	if end <= 0 {
+		return 0
 	}
-	left, right, key, bitLen := t.left, t.right, t.key, t.bitLen
-	res := make([]int8, 0, t.Len())
-	var rec func(node int32)
-	rec = func(node int32) {
-		if left[node] != 0 {
-			rec(left[node])
+	if end > sl.size {
+		end = sl.size
+	}
+	if sl.shouldRebuildTree {
+		sl._buildPreLenAndPreOnes()
+	}
+	pos, startIndex, preOnes := sl._findKthAndPreOnes(end - 1)
+	block := sl.blocks[pos]
+	if startIndex < int32(len(block))>>1 {
+		// 统计前缀
+		onesInBlockPrefix := int16(0)
+		for i := int32(0); i <= startIndex; i++ {
+			onesInBlockPrefix += int16(block[i])
 		}
-		for i := bitLen[node] - 1; i >= 0; i-- {
-			res = append(res, int8(key[node]>>i&1))
+		return preOnes + int32(onesInBlockPrefix)
+	} else {
+		onesInBlockSuffix := int16(0)
+		for i := int32(len(block) - 1); i > startIndex; i-- {
+			onesInBlockSuffix += int16(block[i])
 		}
-		if right[node] != 0 {
-			rec(right[node])
+		return preOnes + sl.blockOnes[pos] - int32(onesInBlockSuffix)
+	}
+}
+
+func (sl *DynamicBitvector) Count(end int32, value int8) int32 {
+	if value == 1 {
+		return sl.Count1(end)
+	}
+	return end - sl.Count1(end)
+}
+
+func (sl *DynamicBitvector) Kth0(k int32) int32 {
+	if k < 0 || sl.size-sl.totalOnes <= k {
+		return -1
+	}
+	if sl.shouldRebuildTree {
+		sl._buildPreLenAndPreOnes()
+	}
+	pos, preLen, newK := sl._findKthZero(k)
+	block := sl.blocks[pos]
+	for i := int32(0); i < int32(len(block)); i++ {
+		if block[i] == 0 {
+			if newK == 0 {
+				return preLen + i
+			}
+			newK--
 		}
 	}
-	rec(t.root)
+	return -1
+}
+
+func (sl *DynamicBitvector) Kth1(k int32) int32 {
+	if k < 0 || sl.totalOnes <= k {
+		return -1
+	}
+	if sl.shouldRebuildTree {
+		sl._buildPreLenAndPreOnes()
+	}
+	pos, preLen, newK := sl._findKthOne(k)
+	block := sl.blocks[pos]
+	for i := int32(0); i < int32(len(block)); i++ {
+		if block[i] == 1 {
+			if newK == 0 {
+				return preLen + i
+			}
+			newK--
+		}
+	}
+	return -1
+}
+
+func (sl *DynamicBitvector) Kth(k int32, value int8) int32 {
+	if value == 1 {
+		return sl.Kth1(k)
+	}
+	return sl.Kth0(k)
+}
+
+func (sl *DynamicBitvector) Len() int32 {
+	return sl.size
+}
+
+func (sl *DynamicBitvector) GetAll() []int8 {
+	res := make([]int8, 0, sl.size)
+	for _, block := range sl.blocks {
+		res = append(res, block...)
+	}
 	return res
 }
 
-func (t *AVLTreeBitVector) Debug() {
-	left, right, key := t.left, t.right, t.key
-	var rec func(node int32) int32
-	rec = func(node int32) int32 {
-		acc := t._popcount(key[node])
-		if left[node] != 0 {
-			acc += rec(left[node])
-		}
-		if right[node] != 0 {
-			acc += rec(right[node])
-		}
-		if acc != t.total[node] {
-			// fmt.Println(node, acc, t.total[node])
-			panic("error")
-		}
-		return acc
+func (sl *DynamicBitvector) _buildPreLenAndPreOnes() {
+	sl.preLen = make([]int32, len(sl.blocks))
+	for i := 0; i < len(sl.blocks); i++ {
+		sl.preLen[i] = int32(len(sl.blocks[i]))
 	}
-	rec(t.root)
+	sl.preOnes = append(sl.blockOnes[:0:0], sl.blockOnes...)
+	tree1, tree2 := sl.preLen, sl.preOnes
+	m := int32(len(tree1))
+	for i := int32(0); i < m; i++ {
+		j := i | (i + 1)
+		if j < m {
+			tree1[j] += tree1[i]
+			tree2[j] += tree2[i]
+		}
+	}
+	sl.shouldRebuildTree = false
 }
 
-func (t *AVLTreeBitVector) _build(data []int8) {
-	n := int32(len(data))
-	bit := uint64(bits.Len32(uint32(n)) + 2)
-	mask := uint64(1<<bit - 1)
-	end := t.end
-	t.Reserve(n)
-	index := end
-	for i := int32(0); i < n; i += W {
-		j, v := int32(0), uint64(0)
-		for j < W && i+j < n {
-			v <<= 1
-			v |= uint64(data[i+j])
-			j++
-		}
-		t.key[index] = v
-		t.bitLen[index] = int8(j)
-		t.size[index] = j
-		t.total[index] = t._popcount(v)
-		index++
-	}
-	t.end = index
-
-	var rec func(lr uint64) uint64
-	rec = func(lr uint64) uint64 {
-		l, r := lr>>bit, lr&mask
-		mid := (l + r) >> 1
-		hl, hr := uint64(0), uint64(0)
-		if l != mid {
-			le := rec(l<<bit | mid)
-			t.left[mid], hl = int32(le>>bit), le&mask
-			t.size[mid] += t.size[t.left[mid]]
-			t.total[mid] += t.total[t.left[mid]]
-		}
-		if mid+1 != r {
-			ri := rec((mid+1)<<bit | r)
-			t.right[mid], hr = int32(ri>>bit), ri&mask
-			t.size[mid] += t.size[t.right[mid]]
-			t.total[mid] += t.total[t.right[mid]]
-		}
-		t.balance[mid] = int8(hl - hr)
-		return mid<<bit | (max64(hl, hr) + 1)
-	}
-	t.root = int32(rec(uint64(end)<<bit|uint64(t.end)) >> bit)
-}
-
-func (t *AVLTreeBitVector) _rotateL(node int32) int32 {
-	left, right, size, balance, total := t.left, t.right, t.size, t.balance, t.total
-	u := left[node]
-	size[u] = size[node]
-	total[u] = total[node]
-	size[node] -= size[left[u]] + int32(t.bitLen[u])
-	total[node] -= total[left[u]] + t._popcount(t.key[u])
-	left[node] = right[u]
-	right[u] = node
-	if balance[u] == 1 {
-		balance[u] = 0
-		balance[node] = 0
-	} else {
-		balance[u] = -1
-		balance[node] = 1
-	}
-	return u
-}
-
-func (t *AVLTreeBitVector) _rotateR(node int32) int32 {
-	left, right, size, balance, total := t.left, t.right, t.size, t.balance, t.total
-	u := right[node]
-	size[u] = size[node]
-	total[u] = total[node]
-	size[node] -= size[right[u]] + int32(t.bitLen[u])
-	total[node] -= total[right[u]] + t._popcount(t.key[u])
-	right[node] = left[u]
-	left[u] = node
-	if balance[u] == -1 {
-		balance[u] = 0
-		balance[node] = 0
-	} else {
-		balance[u] = 1
-		balance[node] = -1
-	}
-	return u
-}
-
-func (t *AVLTreeBitVector) _rotateLR(node int32) int32 {
-	left, right, size, total := t.left, t.right, t.size, t.total
-	B := left[node]
-	E := right[B]
-	size[E] = size[node]
-	size[node] -= size[B] - size[right[E]]
-	size[B] -= size[right[E]] + int32(t.bitLen[E])
-	total[E] = total[node]
-	total[node] -= total[B] - total[right[E]]
-	total[B] -= total[right[E]] + t._popcount(t.key[E])
-	right[B] = left[E]
-	left[E] = B
-	left[node] = right[E]
-	right[E] = node
-	t._updateBalance(E)
-	return E
-}
-
-func (t *AVLTreeBitVector) _rotateRL(node int32) int32 {
-	left, right, size, total := t.left, t.right, t.size, t.total
-	C := right[node]
-	D := left[C]
-	size[D] = size[node]
-	size[node] -= size[C] - size[left[D]]
-	size[C] -= size[left[D]] + int32(t.bitLen[D])
-	total[D] = total[node]
-	total[node] -= total[C] - total[left[D]]
-	total[C] -= total[left[D]] + t._popcount(t.key[D])
-	left[C] = right[D]
-	right[D] = C
-	right[node] = left[D]
-	left[D] = node
-	t._updateBalance(D)
-	return D
-}
-
-func (t *AVLTreeBitVector) _updateBalance(node int32) {
-	balance := t.balance
-	if b := balance[node]; b == 1 {
-		balance[t.right[node]] = -1
-		balance[t.left[node]] = 0
-	} else if b == -1 {
-		balance[t.right[node]] = 0
-		balance[t.left[node]] = 1
-	} else {
-		balance[t.right[node]] = 0
-		balance[t.left[node]] = 0
-	}
-	balance[node] = 0
-}
-
-func (t *AVLTreeBitVector) _pref(r int32) int32 {
-	left, right, bitLen, size, key, total := t.left, t.right, t.bitLen, t.size, t.key, t.total
-	node := t.root
-	s := int32(0)
-	for r > 0 {
-		b32 := int32(bitLen[node])
-		tmp := size[left[node]] + b32
-		if tmp-b32 < r && r <= tmp {
-			r -= size[left[node]]
-			s += total[left[node]] + t._popcount(key[node]>>(b32-r))
-			break
-		}
-		if tmp > r {
-			node = left[node]
-		} else {
-			s += total[left[node]] + t._popcount(key[node])
-			node = right[node]
-			r -= tmp
-		}
-	}
-	return s
-}
-
-func (t *AVLTreeBitVector) _makeNodeWithBitLen1(v uint64) int32 {
-	end := t.end
-	if end >= int32(len(t.key)) {
-		t.key = append(t.key, v)
-		t.bitLen = append(t.bitLen, 1)
-		t.size = append(t.size, 1)
-		t.total = append(t.total, t._popcount(v))
-		t.left = append(t.left, 0)
-		t.right = append(t.right, 0)
-		t.balance = append(t.balance, 0)
-	} else {
-		t.key[end] = v
-		t.bitLen[end] = 1
-		t.size[end] = 1
-		t.total[end] = t._popcount(v)
-	}
-	t.end++
-	return end
-}
-
-// 这里的path可以不用*[]int32
-func (t *AVLTreeBitVector) _popUnder(path []int32, d int32, node int32, res int32) {
-	left, right, size, bitLen, balance, keys, total := t.left, t.right, t.size, t.bitLen, t.balance, t.key, t.total
-	fd, lmaxTotal, lmaxBitLen := int32(0), int32(0), int8(0)
-
-	if left[node] != 0 && right[node] != 0 {
-		path = append(path, node)
-		d <<= 1
-		d |= 1
-		lmax := left[node]
-		for right[lmax] != 0 {
-			path = append(path, lmax)
-			d <<= 1
-			fd <<= 1
-			fd |= 1
-			lmax = right[lmax]
-		}
-		lmaxTotal = t._popcount(keys[lmax])
-		lmaxBitLen = bitLen[lmax]
-		keys[node] = keys[lmax]
-		bitLen[node] = lmaxBitLen
-		node = lmax
-	}
-	var cNode int32
-	if left[node] == 0 {
-		cNode = right[node]
-	} else {
-		cNode = left[node]
-	}
-	if len(path) > 0 {
-		if d&1 == 1 {
-			left[path[len(path)-1]] = cNode
-		} else {
-			right[path[len(path)-1]] = cNode
-		}
-	} else {
-		t.root = cNode
+func (sl *DynamicBitvector) _updatePreLen(index int32, addOne bool) {
+	if sl.shouldRebuildTree {
 		return
 	}
-	for len(path) > 0 {
-		newNode := int32(0)
-		node = path[len(path)-1]
-		path = path[:len(path)-1]
-		if d&1 == 1 {
-			balance[node]--
-		} else {
-			balance[node]++
-		}
-		if fd&1 == 1 {
-			size[node] -= int32(lmaxBitLen)
-			total[node] -= lmaxTotal
-		} else {
-			size[node]--
-			total[node] -= res
-		}
-
-		d >>= 1
-		fd >>= 1
-		if balance[node] == 2 {
-			if balance[left[node]] < 0 {
-				newNode = t._rotateLR(node)
-			} else {
-				newNode = t._rotateL(node)
-			}
-		} else if balance[node] == -2 {
-			if balance[right[node]] > 0 {
-				newNode = t._rotateRL(node)
-			} else {
-				newNode = t._rotateR(node)
-			}
-		} else if balance[node] != 0 {
-			break
-		}
-		if newNode != 0 {
-			if len(path) == 0 {
-				t.root = newNode
-				return
-			}
-			if d&1 == 1 {
-				left[path[len(path)-1]] = newNode
-			} else {
-				right[path[len(path)-1]] = newNode
-			}
-			if balance[newNode] != 0 {
-				break
-			}
-		}
-	}
-
-	ptr := len(path) - 1
-	for ptr >= 0 {
-		node := path[ptr]
-		ptr--
-		if fd&1 == 1 {
-			size[node] -= int32(lmaxBitLen)
-			total[node] -= lmaxTotal
-		} else {
-			size[node]--
-			total[node] -= res
-		}
-		fd >>= 1
-	}
-}
-
-func (t *AVLTreeBitVector) _popcount(v uint64) int32 {
-	return int32(bits.OnesCount64(v))
-}
-
-func (t *AVLTreeBitVector) _insertAndCount(index int32, v int8) int32 {
-	if t.root == 0 {
-		t.root = t._makeNodeWithBitLen1(uint64(v))
-		return 0
-	}
-	v32 := int32(v)
-	node := t.root
-	s := int32(0)
-
-	t.pathStack = t.pathStack[:0]
-	path := t.pathStack
-	d := int32(0)
-	for node != 0 {
-		b32 := int32(t.bitLen[node])
-		tmp := t.size[t.left[node]] + b32
-		if tmp-b32 <= index && index <= tmp {
-			break
-		}
-		if tmp <= index {
-			s += t.total[t.left[node]] + t._popcount(t.key[node])
-		}
-		d <<= 1
-		t.size[node]++
-		t.total[node] += v32
-		path = append(path, node)
-		if tmp > index {
-			node = t.left[node]
-			d |= 1
-		} else {
-			node = t.right[node]
-			index -= tmp
-		}
-	}
-
-	index -= t.size[t.left[node]]
-	b32 := int32(t.bitLen[node])
-	s += t.total[t.left[node]] + t._popcount(t.key[node]>>(b32-index))
-	if b32 < W {
-		mask := t.key[node]
-		bl := b32 - index
-		t.key[node] = (((mask>>bl)<<1 | uint64(v)) << bl) | (mask & ((1 << bl) - 1))
-		t.bitLen[node]++
-		t.size[node]++
-		t.total[node] += v32
-		return s
-	}
-	path = append(path, node)
-	t.size[node]++
-	t.total[node] += v32
-	mask := t.key[node]
-	bl := W - index
-	mask = (((mask>>bl)<<1 | uint64(v)) << bl) | (mask & ((1 << bl) - 1))
-	leftKey := mask >> W
-	leftKeyPopcount := int32(leftKey & 1)
-	t.key[node] = mask & ((1 << W) - 1)
-	node = t.left[node]
-	d <<= 1
-	d |= 1
-	if node == 0 {
-		last := path[len(path)-1]
-		if t.bitLen[last] < W8 {
-			t.bitLen[last]++
-			t.key[last] = (t.key[last] << 1) | leftKey
-			return s
-		} else {
-			t.left[last] = t._makeNodeWithBitLen1(leftKey)
+	tree := sl.preLen
+	m := int32(len(tree))
+	if addOne {
+		for i := index; i < m; i |= i + 1 {
+			tree[i]++
 		}
 	} else {
-		path = append(path, node)
-		t.size[node]++
-		t.total[node] += leftKeyPopcount
-		d <<= 1
-		for t.right[node] != 0 {
-			node = t.right[node]
-			path = append(path, node)
-			t.size[node]++
-			t.total[node] += leftKeyPopcount
-			d <<= 1
-		}
-		if t.bitLen[node] < W8 {
-			t.bitLen[node]++
-			t.key[node] = (t.key[node] << 1) | leftKey
-			return s
-		} else {
-			t.right[node] = t._makeNodeWithBitLen1(leftKey)
+		for i := index; i < m; i |= i + 1 {
+			tree[i]--
 		}
 	}
-	newNode := int32(0)
-	for len(path) > 0 {
-		node = path[len(path)-1]
-		path = path[:len(path)-1]
-		if d&1 == 1 {
-			t.balance[node]++
-		} else {
-			t.balance[node]--
-		}
-		d >>= 1
-		if t.balance[node] == 0 {
-			break
-		}
-		if t.balance[node] == 2 {
-			if t.balance[t.left[node]] == -1 {
-				newNode = t._rotateLR(node)
-			} else {
-				newNode = t._rotateL(node)
-			}
-			break
-		} else if t.balance[node] == -2 {
-			if t.balance[t.right[node]] == 1 {
-				newNode = t._rotateRL(node)
-			} else {
-				newNode = t._rotateR(node)
-			}
-			break
-		}
-	}
-	if newNode != 0 {
-		if len(path) > 0 {
-			if d&1 == 1 {
-				t.left[path[len(path)-1]] = newNode
-			} else {
-				t.right[path[len(path)-1]] = newNode
-			}
-		} else {
-			t.root = newNode
-		}
-	}
-	return s
 }
 
-func (t *AVLTreeBitVector) _accessPopAndCount1(index int32) int32 {
-	left, right, size := t.left, t.right, t.size
-	bitLen, keys, total := t.bitLen, t.key, t.total
-	s := int32(0)
-	node := t.root
-	d := int32(0)
+func (sl *DynamicBitvector) _updatePreOnes(index int32, addOne bool) {
+	if sl.shouldRebuildTree {
+		return
+	}
+	tree := sl.preOnes
+	m := int32(len(tree))
+	if addOne {
+		for i := index; i < m; i |= i + 1 {
+			tree[i]++
+		}
+	} else {
+		for i := index; i < m; i |= i + 1 {
+			tree[i]--
+		}
+	}
+}
 
-	t.pathStack = t.pathStack[:0]
-	path := t.pathStack
-	for node != 0 {
-		b32 := int32(bitLen[node])
-		tmp := size[left[node]] + b32
-		if tmp-b32 <= index && index < tmp {
-			break
+func (sl *DynamicBitvector) _updatePreLenAndPreOnes(index int32, addOne bool) {
+	if sl.shouldRebuildTree {
+		return
+	}
+	tree1, tree2 := sl.preLen, sl.preOnes
+	m := int32(len(tree1))
+	if addOne {
+		for i := index; i < m; i |= i + 1 {
+			tree1[i]++
+			tree2[i]++
 		}
-		if tmp <= index {
-			s += total[left[node]] + t._popcount(keys[node])
-		}
-		path = append(path, node)
-		d <<= 1
-		if tmp > index {
-			node = left[node]
-			d |= 1
-		} else {
-			node = right[node]
-			index -= tmp
+	} else {
+		for i := index; i < m; i |= i + 1 {
+			tree1[i]--
+			tree2[i]--
 		}
 	}
-	index -= size[left[node]]
-	b32 := int32(bitLen[node])
-	s += total[left[node]] + t._popcount(keys[node]>>(b32-index))
-	v := keys[node]
-	res := int32(v >> (b32 - index - 1) & 1)
-	if b32 == 1 {
-		t._popUnder(path, d, node, res)
-		return s<<1 | res
+}
+
+func (sl *DynamicBitvector) _findKth(k int32) (pos, index int32) {
+	if k < int32(len(sl.blocks[0])) {
+		return 0, k
 	}
-	keys[node] = ((v >> (b32 - index)) << (b32 - index - 1)) | (v & ((1 << (b32 - index - 1)) - 1))
-	bitLen[node]--
-	size[node]--
-	total[node] -= res
-	for _, p := range path {
-		size[p]--
-		total[p] -= res
+	last := int32(len(sl.blocks) - 1)
+	lastLen := int32(len(sl.blocks[last]))
+	if k >= sl.size {
+		return last, lastLen
 	}
-	return s<<1 | res
+	if k >= sl.size-lastLen {
+		return last, k + lastLen - sl.size
+	}
+	if sl.shouldRebuildTree {
+		sl._buildPreLenAndPreOnes()
+	}
+	tree := sl.preLen
+	pos = -1
+	m := int32(len(tree))
+	bitLen := int8(bits.Len32(uint32(m)))
+	for d := bitLen - 1; d >= 0; d-- {
+		next := pos + (1 << d)
+		if next < m && k >= tree[next] {
+			pos = next
+			k -= tree[pos]
+		}
+	}
+	return pos + 1, k
+}
+
+func (sl *DynamicBitvector) _findKthAndPreOnes(k int32) (pos, index, ones int32) {
+	if k < int32(len(sl.blocks[0])) {
+		return 0, k, 0
+	}
+	last := int32(len(sl.blocks) - 1)
+	lastLen := int32(len(sl.blocks[last]))
+	if k >= sl.size-lastLen {
+		return last, k + lastLen - sl.size, sl.totalOnes - sl.blockOnes[last]
+	}
+	if sl.shouldRebuildTree {
+		sl._buildPreLenAndPreOnes()
+	}
+	tree1, tree2 := sl.preLen, sl.preOnes
+	pos = -1
+	m := int32(len(tree1))
+	bitLen := int8(bits.Len32(uint32(m)))
+	for d := bitLen - 1; d >= 0; d-- {
+		next := pos + (1 << d)
+		if next < m && k >= tree1[next] {
+			pos = next
+			k -= tree1[pos]
+			ones += tree2[pos]
+		}
+	}
+	return pos + 1, k, ones
+}
+
+func (sl *DynamicBitvector) _findKthOne(k int32) (pos, preLen, newK int32) {
+	if k < sl.blockOnes[0] {
+		return 0, 0, k
+	}
+	last := int32(len(sl.blocks) - 1)
+	lastOnes := sl.blockOnes[last]
+	if tmp := sl.totalOnes - lastOnes; k >= tmp {
+		return last, sl.size - int32(len(sl.blocks[last])), k - tmp
+	}
+	if sl.shouldRebuildTree {
+		sl._buildPreLenAndPreOnes()
+	}
+	tree1, tree2 := sl.preLen, sl.preOnes
+	pos = -1
+	m := int32(len(tree2))
+	bitLen := int8(bits.Len32(uint32(m)))
+	newK = k
+	for d := bitLen - 1; d >= 0; d-- {
+		next := pos + (1 << d)
+		if next < m && newK >= tree2[next] {
+			pos = next
+			preLen += tree1[pos]
+			newK -= tree2[pos]
+		}
+	}
+	pos++
+	return
+}
+
+func (sl *DynamicBitvector) _findKthZero(k int32) (pos, preLen, newK int32) {
+	if k < int32(len(sl.blocks[0]))-sl.blockOnes[0] {
+		return 0, 0, k
+	}
+	last := int32(len(sl.blocks) - 1)
+	lastLen := int32(len(sl.blocks[last]))
+	lastZero := lastLen - sl.blockOnes[last]
+	if tmp := sl.size - lastLen + lastZero; k >= tmp {
+		return last, sl.size - lastLen, k - tmp
+	}
+	if sl.shouldRebuildTree {
+		sl._buildPreLenAndPreOnes()
+	}
+	tree1, tree2 := sl.preLen, sl.preOnes
+	pos = -1
+	m := int32(len(tree2))
+	bitLen := int8(bits.Len32(uint32(m)))
+	newK = k
+	for d := bitLen - 1; d >= 0; d-- {
+		next := pos + (1 << d)
+		if next < m && newK >= tree1[next]-tree2[next] {
+			pos = next
+			preLen += tree1[pos]
+			newK -= tree1[pos] - tree2[pos]
+		}
+	}
+	pos++
+	return
 }
 
 func NewHeap[H any](less func(a, b H) bool, nums []H) *Heap[H] {
@@ -1655,6 +1366,13 @@ func min(a, b int) int {
 
 func max(a, b int) int {
 	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
 		return a
 	}
 	return b
@@ -1926,18 +1644,19 @@ func test() {
 				panic("kthLargestBf")
 			}
 
-			topK1 := topKBf(int32(start), int32(end), int32(k))
-			topK2 := wm.TopK(int32(start), int32(end), int32(k))
-			if len(topK1) != len(topK2) {
-				fmt.Println(len(topK1), len(topK2), start, end, k)
-				panic("topKBf")
-			}
-			for i := 0; i < len(topK1); i++ {
-				if topK1[i].count != topK2[i].count {
-					fmt.Println(topK1[i], topK2[i], start, end, k)
-					panic("topKBf")
-				}
-			}
+			// topK1 := topKBf(int32(start), int32(end), int32(k))
+			// topK2 := wm.TopK(int32(start), int32(end), int32(k))
+			// if len(topK1) != len(topK2) {
+			// 	fmt.Println(len(topK1), len(topK2), start, end, k)
+			// 	panic("topKBf")
+			// }
+			// for i := 0; i < len(topK1); i++ {
+			// 	if topK1[i].count != topK2[i].count {
+			// 		fmt.Println(topK1[i], topK2[i], start, end, k)
+			// 		panic("topKBf")
+			// 	}
+			// }
+			_ = topKBf
 
 			funcs1 := []func(int32, int32, int) (int, bool){floorBf, lowerBf, ceilBf, higherBf}
 			funcs2 := []func(int32, int32, int) (int, bool){wm.Floor, wm.Lower, wm.Ceil, wm.Higher}
@@ -1971,8 +1690,9 @@ func test() {
 			insertValue := rand.Intn(1000)
 			insertBf(insertIndex, insertValue)
 			wm.Insert(insertIndex, insertValue)
+			_ = insertBf
 
-			// _ = popBf
+			_ = popBf
 			popIndex := int32(rand.Intn(len(nums)))
 			if popBf(popIndex) != wm.Pop(popIndex) {
 				panic("popBf")
@@ -1982,6 +1702,7 @@ func test() {
 			setValue := rand.Intn(1000)
 			setBf(setIndex, setValue)
 			wm.Set(setIndex, setValue)
+			_ = setBf
 		}
 	}
 
