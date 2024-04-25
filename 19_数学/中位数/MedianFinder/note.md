@@ -8,6 +8,7 @@
   [MedianFinderWaveletMatrix](MedianFinderWaveletMatrix.go)
 - 有序容器维护区间距离和 => Sortedlist
   [MedianFinderSortedList](MedianFinderSortedList.go)
+  [DynamicMedian](DynamicMedian.go) (维护到中位数的距离之和)
 
 ```
 Api:

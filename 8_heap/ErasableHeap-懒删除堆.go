@@ -19,26 +19,30 @@ type H = int
 type ErasableHeap struct {
 	data   *Heap
 	erased *Heap
+	size   int
 }
 
 func NewErasableHeap(less func(a, b H) bool, nums []H) *ErasableHeap {
-	return &ErasableHeap{NewHeap(less, nums), NewHeap(less, nil)}
+	return &ErasableHeap{NewHeap(less, nums), NewHeap(less, nil), len(nums)}
 }
 
 // 从堆中删除一个元素,要保证堆中存在该元素.
 func (h *ErasableHeap) Erase(value H) {
 	h.erased.Push(value)
 	h.normalize()
+	h.size--
 }
 
 func (h *ErasableHeap) Push(value H) {
 	h.data.Push(value)
 	h.normalize()
+	h.size++
 }
 
 func (h *ErasableHeap) Pop() (value H) {
 	value = h.data.Pop()
 	h.normalize()
+	h.size--
 	return
 }
 
@@ -48,12 +52,13 @@ func (h *ErasableHeap) Peek() (value H) {
 }
 
 func (h *ErasableHeap) Len() int {
-	return h.data.Len()
+	return h.size
 }
 
 func (h *ErasableHeap) Clear() {
 	h.data.Clear()
 	h.erased.Clear()
+	h.size = 0
 }
 
 func (h *ErasableHeap) normalize() {

@@ -1,7 +1,7 @@
-// 动态中位数，用两个可删除堆(对顶堆)实现
+// 动态中位数，用两个平衡树(对顶)实现
 // api:
 // 1. Insert(x T)
-// 2. Erase(x T)
+// 2. Discard(x T) bool
 // 3. Median() (low, high T)
 // 4. DistToMedian() T
 // 5. Size() int32
@@ -11,13 +11,14 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/bits"
+	"math/rand"
 	"os"
 	"sort"
 )
 
 func main() {
 	yuki738()
+	// test()
 }
 
 const INF int = 1e18
@@ -52,8 +53,8 @@ func yuki738() {
 	fmt.Fprintln(out, res)
 }
 
-// 1e5 -> 200, 2e5 -> 400
-const _LOAD int = 200
+// 1e5 -> 100, 2e5 -> 200
+const _LOAD int = 75
 
 type S = int
 
@@ -68,7 +69,7 @@ type DynamicMedian struct {
 func NewDynamicMedian() *DynamicMedian {
 	return &DynamicMedian{
 		lower: NewSortedList(func(a, b S) bool { return a < b }),
-		upper: NewSortedList(func(a, b S) bool { return a < b }),
+		upper: NewSortedList(func(a, b S) bool { return a > b }),
 	}
 }
 
@@ -85,15 +86,15 @@ func (d *DynamicMedian) Insert(value S) {
 }
 
 func (d *DynamicMedian) Discard(value S) bool {
-	if d.lower.Has(value) {
-		d.lower.Discard(value)
+	if d.lower.Discard(value) {
 		d.lowerSum -= value
 		d.size--
+		d.balance()
 		return true
-	} else if d.upper.Has(value) {
-		d.upper.Discard(value)
+	} else if d.upper.Discard(value) {
 		d.upperSum -= value
 		d.size--
+		d.balance()
 		return true
 	} else {
 		return false
@@ -107,9 +108,9 @@ func (d *DynamicMedian) Median() (low, high S) {
 	}
 	if d.size&1 == 0 {
 		low = d.lower.Max()
-		high = d.upper.Min()
+		high = d.upper.Max()
 	} else {
-		low = d.upper.Min()
+		low = d.upper.Max()
 		high = low
 	}
 	return
@@ -119,16 +120,9 @@ func (d *DynamicMedian) DistToMedian() S {
 	if d.size == 0 {
 		return 0
 	}
-	fmt.Println(d.lower.Len(), d.upper.Len())
 	low, _ := d.Median()
-	sum1 := low*d.lower.Len() - d.lowerSum
-	if sum1 < 0 {
-		sum1 = -sum1
-	}
-	sum2 := low*d.upper.Len() - d.upperSum
-	if sum2 < 0 {
-		sum2 = -sum2
-	}
+	sum1 := low*S(d.lower.Len()) - d.lowerSum
+	sum2 := d.upperSum - low*S(d.upper.Len())
 	return sum1 + sum2
 }
 
@@ -138,33 +132,39 @@ func (d *DynamicMedian) balance() {
 	// 偶数个数时，|lower heap| == |upper heap|
 	// 奇数个数时，|lower heap| + 1 == |upper heap|
 	for d.lower.Len()+1 < d.upper.Len() {
-		d.lower.Add(d.upper.Pop(0))
+		upperMin := d.upper._popLast()
+		d.lower._appendLast(upperMin)
+		d.lowerSum += upperMin
+		d.upperSum -= upperMin
 	}
 	for d.lower.Len() > d.upper.Len() {
-		d.upper.Add(d.lower.Pop(0))
+		lowerMin := d.lower._popLast()
+		d.upper._appendLast(lowerMin)
+		d.upperSum += lowerMin
+		d.lowerSum -= lowerMin
 	}
 
-	if d.size&1 == 0 {
-		if d.lower.size != d.upper.size {
-			panic("size error")
-		}
-	} else {
-		if d.lower.size+1 != d.upper.size {
-			panic("size error")
-		}
-	}
+	// if d.size&1 == 0 {
+	// 	if d.lower.size != d.upper.size {
+	// 		panic("size error")
+	// 	}
+	// } else {
+	// 	if d.lower.size+1 != d.upper.size {
+	// 		panic("size error")
+	// 	}
+	// }
 
 	if d.lower.Len() == 0 || d.upper.Len() == 0 {
 		return
 	}
 
-	if d.lower.Max() > d.upper.Min() {
-		upperMin := d.upper.Pop(0)
+	if d.lower.Max() > d.upper.Max() {
+		upperMin := d.upper._popLast()
 		d.lower.Add(upperMin)
 		d.lowerSum += upperMin
 		d.upperSum -= upperMin
 
-		lowerMax := d.lower.Pop(d.lower.Len() - 1)
+		lowerMax := d.lower._popLast()
 		d.upper.Add(lowerMax)
 		d.upperSum += lowerMax
 		d.lowerSum -= lowerMax
@@ -210,13 +210,10 @@ func (sl *_sl) Add(value S) *_sl {
 		sl.shouldRebuildTree = true
 		return sl
 	}
-
 	pos, index := sl._locRight(value)
-
 	sl._updateTree(pos, 1)
 	sl.blocks[pos] = append(sl.blocks[pos][:index], append([]S{value}, sl.blocks[pos][index:]...)...)
 	sl.mins[pos] = sl.blocks[pos][0]
-
 	// n -> load + (n - load)
 	if n := len(sl.blocks[pos]); _LOAD+_LOAD < n {
 		sl.blocks = append(sl.blocks[:pos+1], append([][]S{sl.blocks[pos][_LOAD:]}, sl.blocks[pos+1:]...)...)
@@ -227,25 +224,40 @@ func (sl *_sl) Add(value S) *_sl {
 	return sl
 }
 
-func (sl *_sl) Has(value S) bool {
+func (sl *_sl) _appendLast(value S) *_sl {
+	sl.size++
 	if len(sl.blocks) == 0 {
-		return false
+		sl.blocks = append(sl.blocks, []S{value})
+		sl.mins = append(sl.mins, value)
+		sl.shouldRebuildTree = true
+		return sl
 	}
-	pos, index := sl._locLeft(value)
-	return index < len(sl.blocks[pos]) && sl.blocks[pos][index] == value
+	pos := len(sl.blocks) - 1
+	sl._updateTree(pos, 1)
+	sl.blocks[pos] = append(sl.blocks[pos], value)
+	// n -> load + (n - load)
+	if n := len(sl.blocks[pos]); _LOAD+_LOAD < n {
+		sl.blocks = append(sl.blocks[:pos+1], append([][]S{sl.blocks[pos][_LOAD:]}, sl.blocks[pos+1:]...)...)
+		sl.mins = append(sl.mins[:pos+1], append([]S{sl.blocks[pos][_LOAD]}, sl.mins[pos+1:]...)...)
+		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD] // !注意max的设置(为了让左右互不影响)
+		sl.shouldRebuildTree = true
+	}
+	return sl
 }
 
-func (sl *_sl) Pop(index int) S {
-	if index < 0 {
-		index += sl.size
+func (sl *_sl) _popLast() S {
+	sl.size--
+	pos := len(sl.blocks) - 1
+	res := sl.blocks[pos][len(sl.blocks[pos])-1]
+	sl._updateTree(pos, -1)
+	sl.blocks[pos] = sl.blocks[pos][:len(sl.blocks[pos])-1]
+	if len(sl.blocks[pos]) == 0 {
+		// !delete block
+		sl.blocks = sl.blocks[:pos]
+		sl.mins = sl.mins[:pos]
+		sl.shouldRebuildTree = true
 	}
-	if index < 0 || index >= sl.size {
-		panic("index out of range")
-	}
-	pos, startIndex := sl._findKth(index)
-	value := sl.blocks[pos][startIndex]
-	sl._delete(pos, startIndex)
-	return value
+	return res
 }
 
 func (sl *_sl) Discard(value S) bool {
@@ -258,13 +270,6 @@ func (sl *_sl) Discard(value S) bool {
 		return true
 	}
 	return false
-}
-
-func (sl *_sl) Min() S {
-	if sl.size == 0 {
-		panic("Min() called on empty SortedList")
-	}
-	return sl.mins[0]
 }
 
 func (sl *_sl) Max() S {
@@ -293,47 +298,6 @@ func (sl *_sl) _delete(pos, index int) {
 	sl.blocks = append(sl.blocks[:pos], sl.blocks[pos+1:]...)
 	sl.mins = append(sl.mins[:pos], sl.mins[pos+1:]...)
 	sl.shouldRebuildTree = true
-}
-
-func (sl *_sl) _locLeft(value S) (pos, index int) {
-	if sl.size == 0 {
-		return
-	}
-
-	// find pos
-	left := -1
-	right := len(sl.blocks) - 1
-	for left+1 < right {
-		mid := (left + right) >> 1
-		if !sl.less(sl.mins[mid], value) {
-			right = mid
-		} else {
-			left = mid
-		}
-	}
-	if right > 0 {
-		block := sl.blocks[right-1]
-		if !sl.less(block[len(block)-1], value) {
-			right--
-		}
-	}
-	pos = right
-
-	// find index
-	cur := sl.blocks[pos]
-	left = -1
-	right = len(cur)
-	for left+1 < right {
-		mid := (left + right) >> 1
-		if !sl.less(cur[mid], value) {
-			right = mid
-		} else {
-			left = mid
-		}
-	}
-
-	index = right
-	return
 }
 
 func (sl *_sl) _locRight(value S) (pos, index int) {
@@ -369,25 +333,6 @@ func (sl *_sl) _locRight(value S) (pos, index int) {
 
 	index = right
 	return
-}
-
-func (sl *_sl) _locBlock(value S) int {
-	left, right := -1, len(sl.blocks)-1
-	for left+1 < right {
-		mid := (left + right) >> 1
-		if !sl.less(sl.mins[mid], value) {
-			right = mid
-		} else {
-			left = mid
-		}
-	}
-	if right > 0 {
-		block := sl.blocks[right-1]
-		if !sl.less(block[len(block)-1], value) {
-			right--
-		}
-	}
-	return right
 }
 
 func (sl *_sl) _buildTree() {
@@ -428,31 +373,6 @@ func (sl *_sl) _queryTree(end int) int {
 	return sum
 }
 
-func (sl *_sl) _findKth(k int) (pos, index int) {
-	if k < len(sl.blocks[0]) {
-		return 0, k
-	}
-	last := len(sl.blocks) - 1
-	lastLen := len(sl.blocks[last])
-	if k >= sl.size-lastLen {
-		return last, k + lastLen - sl.size
-	}
-	if sl.shouldRebuildTree {
-		sl._buildTree()
-	}
-	tree := sl.tree
-	pos = -1
-	bitLength := bits.Len32(uint32(len(tree)))
-	for d := bitLength - 1; d >= 0; d-- {
-		next := pos + (1 << d)
-		if next < len(tree) && k >= tree[next] {
-			pos = next
-			k -= tree[pos]
-		}
-	}
-	return pos + 1, k
-}
-
 func min(a, b int) int {
 	if a < b {
 		return a
@@ -465,4 +385,111 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
+
+func test() {
+	for i := 0; i < 1000; i++ {
+		M := NewDynamicMedian()
+		sortedNums := make([]int, 0)
+
+		add := func(x int) {
+
+			sortedNums = append(sortedNums, x)
+			sort.Ints(sortedNums)
+		}
+
+		discard := func(x int) {
+
+			for i, v := range sortedNums {
+				if v == x {
+					sortedNums = append(sortedNums[:i], sortedNums[i+1:]...)
+					break
+				}
+			}
+		}
+
+		median := func() (low, high int) {
+			if len(sortedNums) == 0 {
+				return
+			}
+			n := len(sortedNums)
+			if n&1 == 0 {
+				low = sortedNums[n/2-1]
+				high = sortedNums[n/2]
+			} else {
+				low = sortedNums[n/2]
+				high = low
+			}
+			return
+		}
+
+		distToMedian := func() int {
+			if len(sortedNums) == 0 {
+				return 0
+			}
+			low, _ := median()
+			res := 0
+			for _, v := range sortedNums {
+				res += abs(v - low)
+			}
+			return res
+		}
+
+		size := func() int {
+			return len(sortedNums)
+		}
+
+		for j := 0; j < 1000; j++ {
+			x := rand.Intn(10)
+
+			// add
+			M.Insert(x)
+			add(x)
+
+			// discard
+			y := rand.Intn(10)
+			M.Discard(y)
+			discard(y)
+
+			// median
+			low, high := M.Median()
+			low2, high2 := median()
+			if low != low2 || high != high2 {
+				fmt.Println("error")
+				fmt.Println(low, high, low2, high2)
+				fmt.Println(sortedNums)
+				panic("error")
+			}
+
+			// distToMedian
+			res := M.DistToMedian()
+			res2 := distToMedian()
+			if res != res2 {
+				fmt.Println("error")
+				fmt.Println(res, res2)
+				fmt.Println(sortedNums)
+				panic("error")
+			}
+
+			// size
+			sz := M.Size()
+			sz2 := size()
+			if sz != int32(sz2) {
+				fmt.Println("error")
+				fmt.Println(sz, sz2)
+				fmt.Println(sortedNums)
+				panic("error")
+			}
+
+		}
+
+	}
+	fmt.Println("pass")
 }

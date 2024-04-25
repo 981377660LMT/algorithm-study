@@ -527,26 +527,30 @@ func (ufa *_UnionFindArray) String() string {
 type ErasableHeapGeneric[H comparable] struct {
 	data   *HeapGeneric[H]
 	erased *HeapGeneric[H]
+	size   int
 }
 
 func NewErasableHeapGeneric[H comparable](less func(a, b H) bool, nums ...H) *ErasableHeapGeneric[H] {
-	return &ErasableHeapGeneric[H]{NewHeap(less, nums...), NewHeap(less)}
+	return &ErasableHeapGeneric[H]{NewHeap(less, nums...), NewHeap(less), len(nums)}
 }
 
 // 从堆中删除一个元素,要保证堆中存在该元素.
 func (h *ErasableHeapGeneric[H]) Erase(value H) {
 	h.erased.Push(value)
 	h.normalize()
+	h.size--
 }
 
 func (h *ErasableHeapGeneric[H]) Push(value H) {
 	h.data.Push(value)
 	h.normalize()
+	h.size++
 }
 
 func (h *ErasableHeapGeneric[H]) Pop() (value H) {
 	value = h.data.Pop()
 	h.normalize()
+	h.size--
 	return
 }
 
@@ -556,12 +560,13 @@ func (h *ErasableHeapGeneric[H]) Peek() (value H) {
 }
 
 func (h *ErasableHeapGeneric[H]) Len() int {
-	return h.data.Len()
+	return h.size
 }
 
 func (h *ErasableHeapGeneric[H]) Clear() {
 	h.data.Clear()
 	h.erased.Clear()
+	h.size = 0
 }
 
 func (h *ErasableHeapGeneric[H]) normalize() {

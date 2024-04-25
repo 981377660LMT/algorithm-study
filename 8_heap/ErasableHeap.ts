@@ -21,6 +21,7 @@ type Comparator<E> = (a: E, b: E) => number
 class ErasableHeap<E> {
   private readonly _data: Heap<E>
   private readonly _erased: Heap<E>
+  private _size: number
 
   constructor()
   constructor(array: E[])
@@ -49,16 +50,19 @@ class ErasableHeap<E> {
 
     this._data = new Heap(defaultArray, defaultComparator)
     this._erased = new Heap(defaultComparator)
+    this._size = this._data.size
   }
 
   push(value: E): void {
     this._data.push(value)
     this._normalize()
+    this._size++
   }
 
   pop(): E | undefined {
     const value = this._data.pop()
     this._normalize()
+    if (value !== undefined) this._size--
     return value
   }
 
@@ -73,6 +77,7 @@ class ErasableHeap<E> {
   discard(value: E): void {
     this._erased.push(value)
     this._normalize()
+    this._size--
   }
 
   private _normalize(): void {
@@ -83,7 +88,7 @@ class ErasableHeap<E> {
   }
 
   get size(): number {
-    return this._data.size
+    return this._size
   }
 }
 
@@ -95,6 +100,7 @@ class ErasableHeap<E> {
 class _ErasableHeap2<E> {
   private readonly _data: Heap<E>
   private readonly _erased: Map<E, number> = new Map()
+  private _size: number
 
   constructor()
   constructor(array: E[])
@@ -122,15 +128,19 @@ class _ErasableHeap2<E> {
     }
 
     this._data = new Heap(defaultArray, defaultComparator)
+    this._size = this._data.size
   }
 
   push(value: E): void {
     this._data.push(value)
+    this._size++
   }
 
   pop(): E | undefined {
     this._expire()
-    return this._data.pop()
+    const res = this._data.pop()
+    if (res !== undefined) this._size--
+    return res
   }
 
   peek(): E | undefined {
@@ -144,6 +154,7 @@ class _ErasableHeap2<E> {
    */
   discard(value: E): void {
     this._erased.set(value, (this._erased.get(value) || 0) + 1)
+    this._size--
   }
 
   private _expire(): void {
@@ -157,7 +168,7 @@ class _ErasableHeap2<E> {
   }
 
   get size(): number {
-    return this._data.size
+    return this._size
   }
 }
 

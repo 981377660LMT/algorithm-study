@@ -7,21 +7,24 @@ T = TypeVar("T")
 
 
 class ErasableHeap(Generic[T]):
-    __slots__ = ("_data", "_erased")
+    __slots__ = ("_data", "_erased", "_size")
 
     def __init__(self, items: Optional[Iterable[T]] = None) -> None:
         self._erased = []
         self._data = [] if items is None else list(items)
         if self._data:
             heapify(self._data)
+        self._size = len(self._data)
 
     def push(self, value: T) -> None:
         heappush(self._data, value)
         self._normalize()
+        self._size += 1
 
     def pop(self) -> T:
         value = heappop(self._data)
         self._normalize()
+        self._size -= 1
         return value
 
     def peek(self) -> T:
@@ -31,13 +34,15 @@ class ErasableHeap(Generic[T]):
         """从堆中删除一个元素,要保证堆中存在该元素."""
         heappush(self._erased, value)
         self._normalize()
+        self._size -= 1
 
     def clear(self) -> None:
         self._data.clear()
         self._erased.clear()
+        self._size = 0
 
     def __len__(self) -> int:
-        return len(self._data)
+        return self._size
 
     def __getitem__(self, index: Literal[0]) -> T:
         return self._data[index]
