@@ -17,8 +17,8 @@ import (
 )
 
 func main() {
-	yuki738()
-	// test()
+	// yuki738()
+	test()
 }
 
 const INF int = 1e18
@@ -447,14 +447,14 @@ func test() {
 		}
 
 		for j := 0; j < 1000; j++ {
-			x := rand.Intn(10)
+			x := rand.Intn(10000)
 
 			// add
 			M.Insert(x)
 			add(x)
 
 			// discard
-			y := rand.Intn(10)
+			y := rand.Intn(10000)
 			M.Discard(y)
 			discard(y)
 
