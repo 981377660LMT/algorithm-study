@@ -98,14 +98,15 @@ func NewDynamicBitvector(n int32, f func(i int32) int8) *DynamicBitvector {
 }
 
 func (sl *DynamicBitvector) Insert(index int32, value int8) {
-	if value == 1 {
-		sl.totalOnes++
-	}
+
 	if len(sl.blocks) == 0 {
 		sl.blocks = append(sl.blocks, []int8{value})
 		sl.blockOnes = append(sl.blockOnes, int32(value))
 		sl.shouldRebuildTree = true
 		sl.size++
+		if value == 1 {
+			sl.totalOnes++
+		}
 		return
 	}
 
@@ -113,6 +114,7 @@ func (sl *DynamicBitvector) Insert(index int32, value int8) {
 	if value == 1 {
 		sl._updatePreLenAndPreOnes(pos, true)
 		sl.blockOnes[pos]++
+		sl.totalOnes++
 	} else {
 		sl._updatePreLen(pos, true)
 	}

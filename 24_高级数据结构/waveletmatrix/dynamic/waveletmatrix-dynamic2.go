@@ -44,18 +44,14 @@ import (
 	"math/bits"
 	"math/rand"
 	"os"
-	"runtime/debug"
 	"sort"
 	"time"
 )
 
-func init() {
-	debug.SetGCPercent(-1)
-}
-
 func main() {
+
 	test()
-	testTime()
+	// testTime()
 
 	// CF455D()
 	// libraryQuery()
@@ -319,30 +315,23 @@ func (wm *WaveletMatrixDynamic) Insert(index int32, x int) {
 		panic(fmt.Sprintf("index out of range: %d", index))
 	}
 	for bit := wm.bitLen - 1; bit >= 0; bit-- {
-		// if x>>bit&1 == 1 {
-		// 	s := wm.bv[bit]._insertAndCount(index, 1)
-		// 	index = s + wm.mid[bit]
-		// } else {
-		// 	s := wm.bv[bit]._insertAndCount(index, 0)
-		// 	index -= s
-		// 	wm.mid[bit]++
-		// }
-		// # if x >> bit & 1:
-		// #   v.insert(k, 1)
-		// #   k = v.rank1(k) + mid[bit]
-		// # else:
-		// #   v.insert(k, 0)
-		// #   mid[bit] += 1
-		// #   k = v.rank0(k)
-		bv := wm.bv[bit]
 		if x>>bit&1 == 1 {
-			bv.Insert(index, 1)
-			index = bv.Count1(index) + wm.mid[bit]
+			s := wm.bv[bit]._insertAndCount1(index, 1)
+			index = s + wm.mid[bit]
 		} else {
-			bv.Insert(index, 0)
+			s := wm.bv[bit]._insertAndCount1(index, 0)
+			index -= s
 			wm.mid[bit]++
-			index = bv.Count0(index)
 		}
+		// bv := wm.bv[bit]
+		// if x>>bit&1 == 1 {
+		// 	bv.Insert(index, 1)
+		// 	index = bv.Count1(index) + wm.mid[bit]
+		// } else {
+		// 	bv.Insert(index, 0)
+		// 	wm.mid[bit]++
+		// 	index = bv.Count0(index)
+		// }
 	}
 	wm.size++
 }
@@ -356,26 +345,15 @@ func (wm *WaveletMatrixDynamic) Pop(index int32) int {
 	}
 	res := 0
 	for bit := wm.bitLen - 1; bit >= 0; bit-- {
-		// sb := wm.bv[bit]._accessPopAndCount1(index)
-		// s := sb >> 1
-		// if sb&1 == 1 {
-		// 	res |= 1 << bit
-		// 	index = s + wm.mid[bit]
-		// } else {
-		// 	wm.mid[bit]--
-		// 	index -= s
-		// }
-		bv := wm.bv[bit]
-		// tmpIndex := index
-		if wm.Get(index) == 1 {
+		sb := wm.bv[bit]._accessPopAndCount1(index)
+		s := sb >> 1
+		if sb&1 == 1 {
 			res |= 1 << bit
-			index = bv.Count1(index) + wm.mid[bit]
+			index = s + wm.mid[bit]
 		} else {
 			wm.mid[bit]--
-			index = bv.Count0(index)
+			index -= s
 		}
-		bv.Pop(index)
-		// s:=
 	}
 	wm.size--
 	return res
@@ -773,29 +751,24 @@ func NewDynamicBitvector(n int32, f func(i int32) int8) *DynamicBitvector {
 	return res
 }
 
-// index前插入value，并统计插入后[0, index) 中 value 的个数.
 func (sl *DynamicBitvector) _accessPopAndCount1(index int32) (res int32) {
-	pos, startIndex, preOnes := sl._findKthAndPreOnes(index)
+	pos, startIndex, preOnes := sl._findKthOneAndPreOnes(index)
 	block := sl.blocks[pos]
 	if startIndex < int32(len(block))>>1 {
 		// 统计前缀
 		onesInBlockPrefix := int16(0)
-		for i := int32(0); i <= startIndex; i++ {
+		for i := int32(0); i < startIndex; i++ {
 			onesInBlockPrefix += int16(block[i])
 		}
 		res = preOnes + int32(onesInBlockPrefix)
 	} else {
 		onesInBlockSuffix := int16(0)
-		for i := int32(len(block) - 1); i > startIndex; i-- {
+		for i := int32(len(block) - 1); i >= startIndex; i-- {
 			onesInBlockSuffix += int16(block[i])
 		}
 		res = preOnes + sl.blockOnes[pos] - int32(onesInBlockSuffix)
 	}
-	if block[startIndex] == 1 {
-		res--
-	} else {
-		res = index - res
-	}
+	res = res<<1 | int32(block[startIndex])
 
 	// pop
 	// !delete element
@@ -821,44 +794,39 @@ func (sl *DynamicBitvector) _accessPopAndCount1(index int32) (res int32) {
 }
 
 // index前插入value，并统计插入后[0, index) 中 value 的个数.
-func (sl *DynamicBitvector) _insertAndCount(index int32, value int8) (res int32) {
-	if value == 1 {
-		sl.totalOnes++
-	}
+func (sl *DynamicBitvector) _insertAndCount1(index int32, value int8) (res int32) {
 	if len(sl.blocks) == 0 {
 		sl.blocks = append(sl.blocks, []int8{value})
 		sl.blockOnes = append(sl.blockOnes, int32(value))
 		sl.shouldRebuildTree = true
 		sl.size++
+		if value == 1 {
+			sl.totalOnes++
+		}
 		return 0
 	}
 
-	pos, startIndex, preOnes := sl._findKthAndPreOnes(index)
+	pos, startIndex, preOnes := sl._findKthOneAndPreOnes(index)
 	block := sl.blocks[pos]
 	if startIndex < int32(len(block))>>1 {
 		// 统计前缀
 		onesInBlockPrefix := int16(0)
-		for i := int32(0); i <= startIndex; i++ {
+		for i := int32(0); i < startIndex; i++ {
 			onesInBlockPrefix += int16(block[i])
 		}
 		res = preOnes + int32(onesInBlockPrefix)
 	} else {
 		onesInBlockSuffix := int16(0)
-		for i := int32(len(block) - 1); i > startIndex; i-- {
+		for i := int32(len(block) - 1); i >= startIndex; i-- {
 			onesInBlockSuffix += int16(block[i])
 		}
 		res = preOnes + sl.blockOnes[pos] - int32(onesInBlockSuffix)
-	}
-	// if block[startIndex] == 1 {
-	// 	res--
-	// }
-	if value == 0 {
-		res = index - res
 	}
 
 	if value == 1 {
 		sl._updatePreLenAndPreOnes(pos, true)
 		sl.blockOnes[pos]++
+		sl.totalOnes++
 	} else {
 		sl._updatePreLen(pos, true)
 	}
@@ -890,14 +858,14 @@ func (sl *DynamicBitvector) _insertAndCount(index int32, value int8) (res int32)
 }
 
 func (sl *DynamicBitvector) Insert(index int32, value int8) {
-	if value == 1 {
-		sl.totalOnes++
-	}
 	if len(sl.blocks) == 0 {
 		sl.blocks = append(sl.blocks, []int8{value})
 		sl.blockOnes = append(sl.blockOnes, int32(value))
 		sl.shouldRebuildTree = true
 		sl.size++
+		if value == 1 {
+			sl.totalOnes++
+		}
 		return
 	}
 
@@ -905,6 +873,7 @@ func (sl *DynamicBitvector) Insert(index int32, value int8) {
 	if value == 1 {
 		sl._updatePreLenAndPreOnes(pos, true)
 		sl.blockOnes[pos]++
+		sl.totalOnes++
 	} else {
 		sl._updatePreLen(pos, true)
 	}
@@ -1005,7 +974,7 @@ func (sl *DynamicBitvector) Count1(end int32) int32 {
 	if sl.shouldRebuildTree {
 		sl._buildPreLenAndPreOnes()
 	}
-	pos, startIndex, preOnes := sl._findKthAndPreOnes(end - 1)
+	pos, startIndex, preOnes := sl._findKthOneAndPreOnes(end - 1)
 	block := sl.blocks[pos]
 	if startIndex < int32(len(block))>>1 {
 		// 统计前缀
@@ -1189,7 +1158,7 @@ func (sl *DynamicBitvector) _findKth(k int32) (pos, index int32) {
 	return pos + 1, k
 }
 
-func (sl *DynamicBitvector) _findKthAndPreOnes(k int32) (pos, index, ones int32) {
+func (sl *DynamicBitvector) _findKthOneAndPreOnes(k int32) (pos, index, ones int32) {
 	if k < int32(len(sl.blocks[0])) {
 		return 0, k, 0
 	}
@@ -1386,6 +1355,7 @@ func abs(a int) int {
 }
 
 func test() {
+
 	for i := 0; i < 10; i++ {
 		nums := make([]int, 1000)
 		for j := 0; j < 1000; j++ {
@@ -1694,7 +1664,8 @@ func test() {
 
 			_ = popBf
 			popIndex := int32(rand.Intn(len(nums)))
-			if popBf(popIndex) != wm.Pop(popIndex) {
+			if res1, res2 := popBf(popIndex), wm.Pop(popIndex); res1 != res2 {
+				fmt.Println(res1, res2, popIndex)
 				panic("popBf")
 			}
 

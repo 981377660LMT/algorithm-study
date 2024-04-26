@@ -118,7 +118,6 @@ class AVLTreeBitVector(BitVectorInterface):
         _popcount = AVLTreeBitVector._popcount
 
         def rec(lr: int) -> int:
-            print(lr)
             l, r = lr >> bit, lr & msk
             mid = (l + r) >> 1
             hl, hr = 0, 0
@@ -840,6 +839,13 @@ class AVLTreeBitVector(BitVectorInterface):
 
 if __name__ == "__main__":
 
+    def test_insert_and_rank1():
+        bv = AVLTreeBitVector([1, 1, 1])
+        print(bv._insert_and_rank1(3, 1))
+        print(bv.tolist())
+        print(bv._insert_and_rank1(3, 0))
+        print(bv.tolist())
+
     def test():
         for _ in range(40):
             n = randint(1, 100) + 100
@@ -902,8 +908,9 @@ if __name__ == "__main__":
 
         print("ok")
 
-    test()
+    test_insert_and_rank1()
+    # test()
 
-    wm = AVLTreeBitVector([0] * int(1e6))
-    wm.set(0, 1)
-    print(wm.tolist()[:10])
+    # wm = AVLTreeBitVector([0] * int(1e6))
+    # wm.set(0, 1)
+    # print(wm.tolist()[:10])
