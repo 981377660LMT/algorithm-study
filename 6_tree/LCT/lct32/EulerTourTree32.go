@@ -1,15 +1,21 @@
-// 欧拉回路树(Euler Tour Tree)，可删除的并查集.
-// LCT 其实更适用于维护树链的信息，而 ETT 更加适用于维护 子树 的信息。例如，ETT 可以维护子树最小值而 LCT 不能。
+// 欧拉树 Euler Tour Tree
+// 专门用于处理动态树的子树问题.
 //
-// NewEulerTourTree32
-// Link
-// Cut
-// Get
-// Set
-// UpdateSubTree
-// QuerySubTree
-//
-// TODO: 非常慢
+// api:
+//  NewEtt(n int32, f func(i int32) E) *Ett
+//  Build(adjList [][]int32)
+//  Link(u, v int32)
+//  LinkSafely(u, v int32) bool
+//  Cut(u, v int32)
+//  CutSafely(u, v int32) bool
+//  Reroot(v int32)
+//  Find(v int32) *ettNode
+//  IsConnected(u, v int32) bool
+//  Get(v int32) E
+//  Set(v int32, x E)
+//  UpdateSubtree(v, p int32, f Id)
+//  QuerySubtree(v, p int32) E
+//  Part() int32
 
 package main
 
@@ -17,26 +23,29 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"runtime/debug"
 )
 
+func init() {
+	debug.SetGCPercent(-1)
+}
+
 func main() {
+	// demo()
 	DynamicTreeVertexAddSubtreeSum()
 }
 
 func demo() {
-	ett := NewEulerTourTree(10)
+	ett := NewEtt(10, func(i int32) E { return int(i) })
 	fmt.Println(ett.IsConnected(1, 2))
 	ett.Link(1, 2)
 	fmt.Println(ett.IsConnected(1, 2))
 	ett.Cut(1, 2)
 	fmt.Println(ett.IsConnected(1, 2))
-	fmt.Println(ett.QuerySubTree(-1, 1))
-	// ett.Set(1, 1)
-	// ett.Set(1, 1)
-	// ett.Set(1, 1)
-	// ett.Set(1, 1)
-	ett.UpdateSubTree(-1, 1, 1)
-	fmt.Println(ett.QuerySubTree(-1, 1))
+	fmt.Println(ett.QuerySubtree(1, -1))
+
+	adjList := [][]int32{{1}, {0, 2}, {1}}
+	ett.Build(adjList)
 }
 
 // 动态单点加子树和
@@ -56,12 +65,14 @@ func DynamicTreeVertexAddSubtreeSum() {
 	for i := int32(0); i < n; i++ {
 		fmt.Fscan(in, &weights[i])
 	}
-	edges := make([][2]int32, n-1)
+	tree := make([][]int32, n)
 	for i := int32(0); i < n-1; i++ {
 		var v1, v2 int32
 		fmt.Fscan(in, &v1, &v2)
-		edges[i] = [2]int32{v1, v2}
+		tree[v1] = append(tree[v1], v2)
+		tree[v2] = append(tree[v2], v1)
 	}
+
 	operations := make([][5]int32, q)
 	for i := int32(0); i < q; i++ {
 		var kind int32
@@ -81,14 +92,8 @@ func DynamicTreeVertexAddSubtreeSum() {
 		}
 	}
 
-	ett := NewEulerTourTree(n)
-	for i := int32(0); i < n; i++ {
-		ett.Set(i, int(weights[i]))
-	}
-	for i := int32(0); i < n-1; i++ {
-		u, v := edges[i][0], edges[i][1]
-		ett.Link(u, v)
-	}
+	ett := NewEtt(n, func(i int32) E { return int(weights[i]) })
+	ett.Build(tree)
 
 	for i := int32(0); i < q; i++ {
 		kind := operations[i][0]
@@ -101,10 +106,9 @@ func DynamicTreeVertexAddSubtreeSum() {
 			ett.Set(node, ett.Get(node)+int(delta))
 		} else {
 			child, parent := operations[i][1], operations[i][2]
-			fmt.Fprintln(out, ett.QuerySubTree(parent, child))
+			fmt.Fprintln(out, ett.QuerySubtree(child, parent))
 		}
 	}
-
 }
 
 type E = int
@@ -116,288 +120,412 @@ func op(a, b E) E            { return a + b }
 func mapping(f Id, g E) E    { return int(f) + g }
 func composition(f, g Id) Id { return f + g }
 
-type EulerTourTree struct {
-	ptr []map[int32]*Node
+type ettNode struct {
+	key, data        E
+	lazy             Id
+	par, left, right *ettNode
 }
 
-func NewEulerTourTree(n int32) *EulerTourTree {
-	ptr := make([]map[int32]*Node, n)
-	for i := int32(0); i < n; i++ {
-		ptr[i] = make(map[int32]*Node)
-		ptr[i][i] = &Node{from: i, to: i, size: 1}
-	}
-	return &EulerTourTree{ptr: ptr}
+func newEttNode(key E, lazy Id) *ettNode {
+	return &ettNode{key: key, data: key, lazy: lazy}
 }
 
-// 连接前必须保证不存在u-v的边.
-func (ett *EulerTourTree) Link(u, v int32) {
-	tu := Reroot(ett.getNode(u, u))
-	tv := Reroot(ett.getNode(v, v))
-	Join(Join(tu, ett.getNode(u, v)), Join(tv, ett.getNode(v, u)))
+type Ett struct {
+	n            int32
+	groupNumbers int32
+	ptrVertex    []*ettNode
+	ptrEdge      map[int]*ettNode
 }
 
-// 断开前必须保证存在u-v的边.
-func (ett *EulerTourTree) Cut(u, v int32) {
-	a, _, c := SplitNode(ett.getNode(u, v), ett.getNode(v, u))
-	Join(a, c)
-	delete(ett.ptr[u], v)
-	delete(ett.ptr[v], u)
-}
-
-func (ett *EulerTourTree) IsConnected(u, v int32) bool {
-	return Same(ett.getNode(u, u), ett.getNode(v, v))
-}
-
-func (ett *EulerTourTree) Get(v int32) E {
-	t := ett.getNode(v, v)
-	Splay(t)
-	return t.value
-}
-
-func (ett *EulerTourTree) Set(v int32, x E) {
-	t := ett.getNode(v, v)
-	Splay(t)
-	t.value = x
-	Recalc(t)
-}
-
-// 更新子树信息.
-// parent为-1时，更新整棵树.
-func (ett *EulerTourTree) UpdateSubTree(parent, child int32, lazy Id) {
-	if parent != -1 {
-		ett.Cut(parent, child)
-	}
-	t := ett.getNode(child, child)
-	Splay(t)
-	t.lazy = composition(lazy, t.lazy)
-	if parent != -1 {
-		ett.Link(parent, child)
-	}
-}
-
-// 查询子树信息.
-// parent为-1时，查询整棵树.
-func (ett *EulerTourTree) QuerySubTree(parent, child int32) E {
-	if parent != -1 {
-		ett.Cut(parent, child)
-	}
-	t := ett.getNode(child, child)
-	Splay(t)
-	res := t.sum
-	if parent != -1 {
-		ett.Link(parent, child)
-	}
+// 点权.
+func NewEtt(n int32, f func(i int32) E) *Ett {
+	res := &Ett{n: n, groupNumbers: n, ptrEdge: make(map[int]*ettNode, 2*n)}
+	res._build(n, f)
 	return res
 }
 
-func (ett *EulerTourTree) getNode(u, v int32) *Node {
-	nexts := ett.ptr[u]
-	if t, ok := nexts[v]; ok {
-		return t
-	} else {
-		t = NewNode(u, v)
-		nexts[v] = t
-		return t
-	}
-}
+// 按照临接表连接所有边.
+func (ett *Ett) Build(adjList [][]int32) {
+	n := len(adjList)
+	visited := make([]bool, n)
+	a := make([]int, 0, 3*n)
 
-type Node struct {
-	children [2]*Node
-	parent   *Node
-	from     int32
-	to       int32
-	size     int32
-	value    E
-	sum      E
-	lazy     Id
-}
-
-func NewNode(from, to int32) *Node {
-	var size int32
-	if from == to {
-		size = 1
-	}
-	return &Node{
-		from:  from,
-		to:    to,
-		size:  size,
-		value: e(),
-		sum:   e(),
-		lazy:  id(),
-	}
-}
-
-func GetRoot(t *Node) *Node {
-	if t == nil {
-		return nil
-	}
-	for t.parent != nil {
-		t = t.parent
-	}
-	return t
-}
-
-func Same(t, s *Node) bool {
-	if t != nil {
-		Splay(t)
-	}
-	if s != nil {
-		Splay(s)
-	}
-	return GetRoot(t) == GetRoot(s)
-}
-
-func Reroot(t *Node) *Node {
-	a, b := Split(t)
-	return Join(b, a)
-}
-
-func Size(t *Node) int32 {
-	if t == nil {
-		return 0
-	}
-	return t.size
-}
-
-func Recalc(t *Node) *Node {
-	if t == nil {
-		return t
-	}
-	tmp := int32(0)
-	if t.from == t.to {
-		tmp = 1
-	}
-	t.size = tmp + Size(t.children[0]) + Size(t.children[1])
-	t.sum = t.value
-	if t.children[0] != nil {
-		t.sum = op(t.children[0].sum, t.sum)
-	}
-	if t.children[1] != nil {
-		t.sum = op(t.sum, t.children[1].sum)
-	}
-	return t
-}
-
-func PushDown(t *Node) {
-	if t.lazy != id() {
-		t.value = mapping(t.lazy, t.value)
-		if left := t.children[0]; left != nil {
-			left.lazy = composition(t.lazy, left.lazy)
-			left.sum = mapping(t.lazy, left.sum)
-		}
-		if right := t.children[1]; right != nil {
-			right.lazy = composition(t.lazy, right.lazy)
-			right.sum = mapping(t.lazy, right.sum)
-		}
-		t.lazy = id()
-	}
-	Recalc(t)
-}
-
-func Join(l, r *Node) *Node {
-	if l == nil {
-		return r
-	}
-	if r == nil {
-		return l
-	}
-	for l.children[1] != nil {
-		l = l.children[1]
-	}
-	Splay(l)
-	l.children[1] = r
-	r.parent = l
-	return Recalc(l)
-}
-
-func Split(t *Node) (*Node, *Node) {
-	Splay(t)
-	s := t.children[0]
-	t.children[0] = nil
-	if s != nil {
-		s.parent = nil
-	}
-	return s, Recalc(t)
-}
-
-func Split2(t *Node) (*Node, *Node) {
-	Splay(t)
-	l := t.children[0]
-	r := t.children[1]
-	t.children[0] = nil
-	if l != nil {
-		l.parent = nil
-	}
-	t.children[1] = nil
-	if r != nil {
-		r.parent = nil
-	}
-	return l, r
-}
-
-func SplitNode(s, t *Node) (a, b, c *Node) {
-	a, b = Split2(s)
-	if Same(a, t) {
-		c, d := Split2(t)
-		return c, d, b
-	} else {
-		c, d := Split2(t)
-		return a, c, d
-	}
-}
-
-func Rotate(t *Node, b bool) {
-	var v uint8
-	if b {
-		v = 1
-	}
-	p := t.parent
-	g := p.parent
-	p.children[1^v] = t.children[v]
-	if p.children[1^v] != nil {
-		t.children[v].parent = p
-	}
-	t.children[v] = p
-	p.parent = t
-	Recalc(p)
-	Recalc(t)
-	t.parent = g
-	if t.parent != nil {
-		if g.children[0] == p {
-			g.children[0] = t
-		} else {
-			g.children[1] = t
-		}
-		Recalc(g)
-	}
-}
-
-func Splay(t *Node) {
-	PushDown(t)
-	for t.parent != nil {
-		p := t.parent
-		g := p.parent
-		if g == nil {
-			PushDown(p)
-			PushDown(t)
-			Rotate(t, p.children[0] == t)
-		} else {
-			PushDown(g)
-			PushDown(p)
-			PushDown(t)
-			var b uint8
-			var f bool
-			if g.children[0] == p {
-				b = 1
-				f = true
+	var dfs func(v, p int32)
+	dfs = func(v, p int32) {
+		a = append(a, int(v)*n+int(v))
+		for _, x := range adjList[v] {
+			if x == p {
+				continue
 			}
-			if p.children[1^b] == t {
-				Rotate(p, f)
-				Rotate(t, f)
+			a = append(a, int(v)*n+int(x))
+			dfs(x, v)
+			a = append(a, int(x)*n+int(v))
+		}
+	}
+
+	var rec func(l, r int32) *ettNode
+	rec = func(l, r int32) *ettNode {
+		mid := (l + r) >> 1
+		u, v := a[mid]/n, a[mid]%n
+		var node *ettNode
+		if u == v {
+			node = ett.ptrVertex[u]
+			visited[u] = true
+		} else {
+			node = newEttNode(e(), id())
+			ett.ptrEdge[a[mid]] = node
+		}
+		if l != mid {
+			node.left = rec(l, mid)
+			node.left.par = node
+		}
+		if mid+1 != r {
+			node.right = rec(mid+1, r)
+			node.right.par = node
+		}
+		ett._update(node)
+		return node
+	}
+
+	for root := int32(0); root < int32(n); root++ {
+		if visited[root] {
+			continue
+		}
+		a = a[:0]
+		dfs(root, -1)
+		rec(0, int32(len(a)))
+	}
+}
+
+// 要保证u和v不在同一个连通块中.
+func (ett *Ett) Link(u, v int32) {
+	ett.Reroot(u)
+	ett.Reroot(v)
+	uvNode := newEttNode(e(), id())
+	vuNode := newEttNode(e(), id())
+	n, ui, vi := int(ett.n), int(u), int(v)
+	ett.ptrEdge[ui*n+vi] = uvNode
+	ett.ptrEdge[vi*n+ui] = vuNode
+	uNode, vNode := ett.ptrVertex[u], ett.ptrVertex[v]
+	ett._merge(uNode, uvNode)
+	ett._merge(uvNode, vNode)
+	ett._merge(vNode, vuNode)
+	ett.groupNumbers--
+}
+
+func (ett *Ett) LinkSafely(u, v int32) bool {
+	if ett.IsConnected(u, v) {
+		return false
+	}
+	ett.Link(u, v)
+	return true
+}
+
+// 要保证u和v在同一个连通块中.
+func (ett *Ett) Cut(u, v int32) {
+	ett.Reroot(v)
+	ett.Reroot(u)
+	n := int(ett.n)
+	ui, vi := int(u), int(v)
+	uvNode := ett.ptrEdge[ui*n+vi]
+	vuNode := ett.ptrEdge[vi*n+ui]
+	delete(ett.ptrEdge, ui*n+vi)
+	delete(ett.ptrEdge, vi*n+ui)
+	var a, c *ettNode
+	a, _ = ett._splitLeft(uvNode)
+	_, c = ett._splitRight(vuNode)
+	a = ett._pop(a)
+	c = ett._popleft(c)
+	ett._merge(a, c)
+	ett.groupNumbers++
+}
+
+func (ett *Ett) CutSafely(u, v int32) bool {
+	if _, has := ett.ptrEdge[int(u)*int(ett.n)+int(v)]; !has {
+		return false
+	}
+	ett.Cut(u, v)
+	return true
+}
+
+// Evert.
+func (ett *Ett) Reroot(v int32) {
+	node := ett.ptrVertex[v]
+	x, y := ett._splitRight(node)
+	ett._merge(y, x)
+	ett._splay(node)
+}
+
+func (ett *Ett) Find(v int32) *ettNode {
+	return ett._leftSplay(ett.ptrVertex[v])
+}
+
+func (ett *Ett) IsConnected(u, v int32) bool {
+	uNode, vNode := ett.ptrVertex[u], ett.ptrVertex[v]
+	ett._splay(uNode)
+	ett._splay(vNode)
+	return uNode.par != nil || uNode == vNode
+}
+
+func (ett *Ett) Get(v int32) E {
+	node := ett.ptrVertex[v]
+	ett._splay(node)
+	return node.key
+}
+
+func (ett *Ett) Set(v int32, x E) {
+	node := ett.ptrVertex[v]
+	ett._splay(node)
+	node.key = x
+	ett._update(node)
+}
+
+func (ett *Ett) UpdateSubtree(cur, parent int32, lazy Id) {
+	node := ett.ptrVertex[cur]
+	ett.Reroot(cur)
+	if parent == -1 {
+		ett._splay(node)
+		node.key = mapping(lazy, node.key)
+		node.data = mapping(lazy, node.data)
+		node.lazy = composition(lazy, node.lazy)
+		return
+	}
+	ett.Reroot(parent)
+	ni, pi, vi := int(ett.n), int(parent), int(cur)
+	a, b := ett._splitRight(ett.ptrEdge[vi*ni+pi])
+	b, d := ett._splitLeft(ett.ptrEdge[pi*ni+vi])
+	ett._splay(node)
+	node.key = mapping(lazy, node.key)
+	node.data = mapping(lazy, node.data)
+	node.lazy = composition(lazy, node.lazy)
+	ett._propagate(node)
+	ett._merge(a, b)
+	ett._merge(b, d)
+}
+
+func (ett *Ett) QuerySubtree(cur, parent int32) E {
+	node := ett.ptrVertex[cur]
+	ett.Reroot(cur)
+	if parent == -1 {
+		ett._splay(node)
+		return node.data
+	}
+	ett.Reroot(parent)
+	ni, pi, vi := int(ett.n), int(parent), int(cur)
+	a, b := ett._splitRight(ett.ptrEdge[pi*ni+vi])
+	b, d := ett._splitLeft(ett.ptrEdge[vi*ni+pi])
+	ett._splay(node)
+	res := node.data
+	ett._merge(a, b)
+	ett._merge(b, d)
+	return res
+}
+
+func (ett *Ett) Part() int32 {
+	return ett.groupNumbers
+}
+
+func (ett *Ett) _build(n int32, f func(i int32) E) {
+	ett.ptrVertex = make([]*ettNode, n)
+	for i := int32(0); i < n; i++ {
+		ett.ptrVertex[i] = newEttNode(f(i), id())
+	}
+}
+
+func (ett *Ett) _popleft(v *ettNode) *ettNode {
+	v = ett._leftSplay(v)
+	if v.right != nil {
+		v.right.par = nil
+	}
+	return v.right
+}
+
+func (ett *Ett) _pop(v *ettNode) *ettNode {
+	v = ett._rightSplay(v)
+	if v.left != nil {
+		v.left.par = nil
+	}
+	return v.left
+}
+
+func (ett *Ett) _splitLeft(v *ettNode) (*ettNode, *ettNode) {
+	ett._splay(v)
+	x, y := v, v.right
+	if y != nil {
+		y.par = nil
+	}
+	x.right = nil
+	ett._update(x)
+	return x, y
+}
+
+func (ett *Ett) _splitRight(v *ettNode) (*ettNode, *ettNode) {
+	ett._splay(v)
+	x := v.left
+	y := v
+	if x != nil {
+		x.par = nil
+	}
+	y.left = nil
+	ett._update(y)
+	return x, y
+}
+
+func (ett *Ett) _merge(u, v *ettNode) {
+	if u == nil || v == nil {
+		return
+	}
+	u = ett._rightSplay(u)
+	ett._splay(v)
+	u.right = v
+	v.par = u
+	ett._update(u)
+}
+
+func (ett *Ett) _splay(node *ettNode) {
+	ett._propagate(node)
+	for node.par != nil && node.par.par != nil {
+		pnode := node.par
+		gnode := pnode.par
+		ett._propagate(gnode)
+		ett._propagate(pnode)
+		ett._propagate(node)
+		node.par = gnode.par
+		var tmp1, tmp2 *ettNode
+		if (gnode.left == pnode) == (pnode.left == node) {
+			if pnode.left == node {
+				tmp1 = node.right
+				pnode.left = tmp1
+				node.right = pnode
+				pnode.par = node
+				tmp2 = pnode.right
+				gnode.left = tmp2
+				pnode.right = gnode
+				gnode.par = pnode
 			} else {
-				Rotate(t, !f)
-				Rotate(t, f)
+				tmp1 = node.left
+				pnode.right = tmp1
+				node.left = pnode
+				pnode.par = node
+				tmp2 = pnode.left
+				gnode.right = tmp2
+				pnode.left = gnode
+				gnode.par = pnode
+			}
+			if tmp1 != nil {
+				tmp1.par = pnode
+			}
+			if tmp2 != nil {
+				tmp2.par = gnode
+			}
+		} else {
+			if pnode.left == node {
+				tmp1 = node.right
+				pnode.left = tmp1
+				node.right = pnode
+				tmp2 = node.left
+				gnode.right = tmp2
+				node.left = gnode
+				pnode.par = node
+				gnode.par = node
+			} else {
+				tmp1 = node.left
+				pnode.right = tmp1
+				node.left = pnode
+				tmp2 = node.right
+				gnode.left = tmp2
+				node.right = gnode
+				pnode.par = node
+				gnode.par = node
+			}
+			if tmp1 != nil {
+				tmp1.par = pnode
+			}
+			if tmp2 != nil {
+				tmp2.par = gnode
 			}
 		}
+		ett._update(gnode)
+		ett._update(pnode)
+		ett._update(node)
+		if node.par == nil {
+			return
+		}
+		if node.par.left == gnode {
+			node.par.left = node
+		} else {
+			node.par.right = node
+		}
+	}
+
+	if node.par == nil {
+		return
+	}
+	pnode := node.par
+	ett._propagate(pnode)
+	ett._propagate(node)
+	if pnode.left == node {
+		pnode.left = node.right
+		if pnode.left != nil {
+			pnode.left.par = pnode
+		}
+		node.right = pnode
+	} else {
+		pnode.right = node.left
+		if pnode.right != nil {
+			pnode.right.par = pnode
+		}
+		node.left = pnode
+	}
+	node.par = nil
+	pnode.par = node
+	ett._update(pnode)
+	ett._update(node)
+}
+
+func (ett *Ett) _leftSplay(node *ettNode) *ettNode {
+	ett._splay(node)
+	for node.left != nil {
+		node = node.left
+	}
+	ett._splay(node)
+	return node
+}
+
+func (ett *Ett) _rightSplay(node *ettNode) *ettNode {
+	ett._splay(node)
+	for node.right != nil {
+		node = node.right
+	}
+	ett._splay(node)
+	return node
+}
+
+func (ett *Ett) _propagate(node *ettNode) {
+	if node == nil || node.lazy == id() {
+		return
+	}
+	if node.left != nil {
+		node.left.key = mapping(node.lazy, node.left.key)
+		node.left.data = mapping(node.lazy, node.left.data)
+		node.left.lazy = composition(node.lazy, node.left.lazy)
+	}
+	if node.right != nil {
+		node.right.key = mapping(node.lazy, node.right.key)
+		node.right.data = mapping(node.lazy, node.right.data)
+		node.right.lazy = composition(node.lazy, node.right.lazy)
+	}
+	node.lazy = id()
+}
+
+func (ett *Ett) _update(node *ettNode) {
+	ett._propagate(node.left)
+	ett._propagate(node.right)
+	node.data = node.key
+	if node.left != nil {
+		node.data = op(node.left.data, node.data)
+	}
+	if node.right != nil {
+		node.data = op(node.data, node.right.data)
 	}
 }
