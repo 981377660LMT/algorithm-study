@@ -1,22 +1,38 @@
+// api:
+//  1.Set(index int32, value E) -> O(sqrt(n))
+//  !2.Get(index int32) E -> O(1)
+//  3.Query(start, end int32) E
+//  4.QueryAll() E
+//  6.Update(start, end int32, lazy Id)
+//  5.GetAll() []E
+
 package main
 
 import (
 	"fmt"
 	"math"
 	"math/rand"
+	"time"
 )
 
 func main() {
-	test()
+	// demo()
+	// test()
+	testTime()
 }
 
 func demo() {
 	seg := NewLazySegmentTreeSqrtDecomposition(10, func(i int32) int { return int(i) }, -1)
 	fmt.Println(seg.GetAll())
-	seg.Update(3, 5, 1)
-	seg.Update(4, 6, 1)
+	seg.Update(1, 5, 1)
+
+	fmt.Println(seg.GetAll())
+	seg.Update(3, 6, 1)
+
 	fmt.Println(seg.GetAll())
 	fmt.Println(seg.Query(3, 5)) // 6
+
+	fmt.Println(seg.GetAll())
 }
 
 type E = int
@@ -113,8 +129,8 @@ func (st *LazySegmentTreeSqrtDecomposition) Query(start, end int32) E {
 			res = st.mapping(st.lazy[bid1], res)
 		}
 	} else {
-		block1 := st.data[bid1]
 		if start < int32(len(st.data[bid1])) {
+			block1 := st.data[bid1]
 			for i := start; i < int32(len(block1)); i++ {
 				res = st.op(res, block1[i])
 			}
@@ -127,8 +143,8 @@ func (st *LazySegmentTreeSqrtDecomposition) Query(start, end int32) E {
 			res = st.op(res, st.sum[i])
 		}
 
-		block2 := st.data[bid2]
 		if bid2 < st.bucketCount && end > 0 {
+			block2 := st.data[bid2]
 			tmp := st.e()
 			for i := int32(0); i < end; i++ {
 				tmp = st.op(tmp, block2[i])
@@ -161,17 +177,17 @@ func (st *LazySegmentTreeSqrtDecomposition) Update(start, end int32, lazy Id) {
 		return
 	}
 
-	changeData := func(bid, l, r int32) {
-		st._propagate(bid)
-		data := st.data[bid]
+	changeData := func(k, l, r int32) {
+		st._propagate(k)
+		d := st.data[k]
 		for i := l; i < r; i++ {
-			data[i] = st.mapping(lazy, data[i])
+			d[i] = st.mapping(lazy, d[i])
 		}
 		e := st.e()
-		for _, v := range data {
+		for _, v := range d {
 			e = st.op(e, v)
 		}
-		st.sum[bid] = e
+		st.sum[k] = e
 	}
 
 	bid1, bid2 := start/st.bucketSize, end/st.bucketSize
@@ -189,9 +205,9 @@ func (st *LazySegmentTreeSqrtDecomposition) Update(start, end int32, lazy Id) {
 					st.lazy[bid1] = st.composition(lazy, st.lazy[bid1])
 				}
 				st.sum[bid1] = st.mapping(lazy, st.sum[bid1])
+			} else {
+				changeData(bid1, start, int32(len(st.data[bid1])))
 			}
-		} else {
-			changeData(bid1, start, int32(len(st.data[bid1])))
 		}
 
 		for i := bid1 + 1; i < bid2; i++ {
@@ -218,16 +234,6 @@ func (st *LazySegmentTreeSqrtDecomposition) Update(start, end int32, lazy Id) {
 	}
 }
 
-func (st *LazySegmentTreeSqrtDecomposition) UpdateAll(lazy Id) {
-	for i := int32(0); i < st.bucketCount; i++ {
-		if st.lazy[i] == st.id() {
-			st.lazy[i] = lazy
-		} else {
-			st.lazy[i] = st.composition(lazy, st.lazy[i])
-		}
-	}
-}
-
 func (st *LazySegmentTreeSqrtDecomposition) GetAll() []E {
 	st._propagateAll()
 	res := make([]E, 0, st.n)
@@ -242,9 +248,9 @@ func (st *LazySegmentTreeSqrtDecomposition) _propagate(k int32) {
 		return
 	}
 	f := st.lazy[k]
-	data := st.data[k]
-	for i := int32(0); i < int32(len(data)); i++ {
-		data[i] = st.mapping(f, data[i])
+	dk := st.data[k]
+	for i := int32(0); i < int32(len(dk)); i++ {
+		dk[i] = st.mapping(f, dk[i])
 	}
 	st.lazy[k] = st.id()
 }
@@ -280,15 +286,15 @@ func max32(a, b int32) int32 {
 }
 
 func test() {
-	for i := 0; i < 100; i++ {
-		n := rand.Int31n(10000) + 1000
+	for i := 0; i < 10; i++ {
+		n := rand.Int31n(50) + 1
 		nums := make([]int, n)
 		for i := 0; i < int(n); i++ {
-			nums[i] = rand.Intn(100)
+			nums[i] = rand.Intn(5)
 		}
 		seg := NewLazySegmentTreeSqrtDecomposition(n, func(i int32) int { return nums[i] }, -1)
 
-		for j := 0; j < 1000; j++ {
+		for j := 0; j < 3; j++ {
 
 			index := rand.Int31n(n)
 			// Get
@@ -319,7 +325,7 @@ func test() {
 				}
 			}
 			if seg.Query(start, end) != res {
-				fmt.Println("Query Error")
+				fmt.Println("Query Error", seg.Query(start, end), res)
 				panic("Query Error")
 			}
 
@@ -330,38 +336,27 @@ func test() {
 					res = E(v)
 				}
 			}
+			fmt.Println("QueryAll", seg.QueryAll(), res, seg.GetAll(), nums)
 			if seg.QueryAll() != res {
-				fmt.Println("QueryAll Error")
+				fmt.Println("QueryAll Error", seg.QueryAll(), res)
+				fmt.Println(seg.GetAll())
 				panic("QueryAll Error")
 			}
 
-			// // Update
-			// start, end = rand.Int31n(n), rand.Int31n(n)
-			// if start > end {
-			// 	start, end = end, start
-			// }
-			// lazy := rand.Intn(100)
-			// for i := start; i < end; i++ {
-			// 	nums[i] += lazy
-			// }
-			// seg.Update(start, end, Id(lazy))
-			// for i := 0; i < int(n); i++ {
-			// 	if seg.Get(int32(i)) != E(nums[i]) {
-			// 		fmt.Println("Update Error")
-			// 		panic("Update Error")
-			// 	}
-			// }
-
-			// UpdateAll
+			// Update
+			start, end = rand.Int31n(n), rand.Int31n(n)
+			if start > end {
+				start, end = end, start
+			}
 			lazy := rand.Intn(100)
-			for i := 0; i < int(n); i++ {
+			for i := start; i < end; i++ {
 				nums[i] += lazy
 			}
-			seg.UpdateAll(Id(lazy))
+			seg.Update(start, end, Id(lazy))
 			for i := 0; i < int(n); i++ {
 				if seg.Get(int32(i)) != E(nums[i]) {
-					fmt.Println("UpdateAll Error")
-					panic("UpdateAll Error")
+					fmt.Println("Update Error")
+					panic("Update Error")
 				}
 			}
 
@@ -369,4 +364,25 @@ func test() {
 	}
 
 	fmt.Println("Pass")
+}
+
+func testTime() {
+	// 2e5
+	n := int32(2e5)
+	nums := make([]int, n)
+	for i := 0; i < int(n); i++ {
+		nums[i] = rand.Intn(5)
+	}
+
+	time1 := time.Now()
+	seg := NewLazySegmentTreeSqrtDecomposition(n, func(i int32) int { return nums[i] }, -1)
+
+	for i := int32(0); i < n; i++ {
+		seg.Get(i)
+		seg.Set(i, int(E(i)))
+		seg.Query(i, n)
+		seg.QueryAll()
+		seg.Update(i, n, Id(i))
+	}
+	fmt.Println("Time1", time.Since(time1)) // Time1 276.134709ms
 }

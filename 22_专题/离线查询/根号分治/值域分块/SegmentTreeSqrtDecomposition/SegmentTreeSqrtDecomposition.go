@@ -1,13 +1,22 @@
+// api:
+//  1.Set(index int32, value E) -> O(sqrt(n))
+//  2.Query(start, end int32) E -> O(sqrt(n))
+//  3.QueryAll() E -> O(sqrt(n))
+//  !4.Get(index int32) E -> O(1)
+//  5.GetAll() []E -> O(n)
+
 package main
 
 import (
 	"fmt"
 	"math"
 	"math/rand"
+	"time"
 )
 
 func main() {
 	test()
+	testTime()
 }
 
 func demo() {
@@ -190,4 +199,24 @@ func test() {
 
 	}
 	fmt.Println("Pass")
+}
+
+func testTime() {
+	// 2e5
+	n := int32(2e5)
+	nums := make([]int, n)
+	for i := 0; i < int(n); i++ {
+		nums[i] = rand.Intn(5)
+	}
+
+	time1 := time.Now()
+	seg := NewSegmentTreeSqrtDecomposition(n, func(i int32) int { return nums[i] }, -1)
+
+	for i := int32(0); i < n; i++ {
+		seg.Get(i)
+		seg.Set(i, int(E(i)))
+		seg.Query(i, n)
+		seg.QueryAll()
+	}
+	fmt.Println("Time1", time.Since(time1)) // Time1 128.573042ms
 }
