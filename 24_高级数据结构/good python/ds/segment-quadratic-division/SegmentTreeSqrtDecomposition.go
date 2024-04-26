@@ -3,9 +3,14 @@ package main
 import (
 	"fmt"
 	"math"
+	"math/rand"
 )
 
 func main() {
+	test()
+}
+
+func demo() {
 	seg := NewSegmentTreeSqrtDecomposition(10, func(i int32) int { return int(i) }, -1)
 	fmt.Println(seg.GetAll())
 	seg.Set(3, 5)
@@ -119,4 +124,70 @@ func (st *SegmentTreeSqrtDecomposition) GetAll() []E {
 		}
 	}
 	return res
+}
+
+func test() {
+	for i := int32(0); i < 100; i++ {
+		n := rand.Int31n(10000) + 1000
+		nums := make([]int, n)
+		for i := int32(0); i < n; i++ {
+			nums[i] = rand.Intn(100)
+		}
+		seg := NewSegmentTreeSqrtDecomposition(n, func(i int32) E { return E(nums[i]) }, -1)
+
+		for j := 0; j < 1000; j++ {
+			// Get
+			index := rand.Int31n(n)
+			if seg.Get(index) != E(nums[index]) {
+				fmt.Println("Get Error")
+				panic("Get Error")
+			}
+
+			// Set
+			index = rand.Int31n(n)
+			value := rand.Intn(100)
+			nums[index] = value
+			seg.Set(index, E(value))
+			if seg.Get(index) != E(value) {
+				fmt.Println("Set Error")
+				panic("Set Error")
+			}
+
+			// Query
+			start, end := rand.Int31n(n), rand.Int31n(n)
+			if start > end {
+				start, end = end, start
+			}
+			sum_ := E(0)
+			for i := start; i < end; i++ {
+				sum_ += E(nums[i])
+			}
+			if seg.Query(start, end) != sum_ {
+				fmt.Println("Query Error")
+				panic("Query Error")
+			}
+
+			// QueryAll
+			sum_ = E(0)
+			for _, v := range nums {
+				sum_ += E(v)
+			}
+			if seg.QueryAll() != sum_ {
+				fmt.Println("QueryAll Error")
+				panic("QueryAll Error")
+			}
+
+			// GetAll
+			all := seg.GetAll()
+			for i, v := range all {
+				if v != E(nums[i]) {
+					fmt.Println("GetAll Error")
+					panic("GetAll Error")
+				}
+			}
+
+		}
+
+	}
+	fmt.Println("Pass")
 }
