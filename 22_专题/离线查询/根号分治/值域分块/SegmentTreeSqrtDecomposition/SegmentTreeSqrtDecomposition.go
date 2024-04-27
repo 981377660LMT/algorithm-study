@@ -4,6 +4,8 @@
 //  3.QueryAll() E -> O(sqrt(n))
 //  !4.Get(index int32) E -> O(1)
 //  5.GetAll() []E -> O(n)
+//  6.MaxRight(start int32, predicate func(end int32, sum E) bool) int32
+//  7.MinLeft(end int32, predicate func(start int32, sum E) bool) int32
 
 package main
 
@@ -15,6 +17,7 @@ import (
 )
 
 func main() {
+	// demo()
 	test()
 	testTime()
 }
@@ -26,6 +29,13 @@ func demo() {
 	seg.Set(4, 6)
 	fmt.Println(seg.GetAll())
 	fmt.Println(seg.Query(3, 5)) // 11
+	fmt.Println("----------------")
+	fmt.Println(seg.MaxRight(3, func(end int32, sum E) bool { return sum <= 10 }))     // 4
+	fmt.Println(seg.MaxRight(3, func(end int32, sum E) bool { return sum <= 11 }))     // 5
+	fmt.Println(seg.MaxRight(5, func(start int32, sum E) bool { return sum <= 1000 })) // 10
+	fmt.Println(seg.MinLeft(5, func(start int32, sum E) bool { return sum <= 10 }))    // 4
+	fmt.Println(seg.MinLeft(5, func(start int32, sum E) bool { return sum <= 11 }))    // 3
+	fmt.Println(seg.MinLeft(5, func(start int32, sum E) bool { return sum <= 1001 }))  // 0
 }
 
 type E = int
@@ -69,6 +79,9 @@ func NewSegmentTreeSqrtDecomposition(n int32, f func(i int32) E, bucketSize int3
 func (st *SegmentTreeSqrtDecomposition) Set(index int32, value E) {
 	bid := index / st.bucketSize
 	pos := index - bid*st.bucketSize
+	if st.buckets[bid][pos] == value {
+		return
+	}
 	st.buckets[bid][pos] = value
 	newSum := st.e()
 	for _, v := range st.buckets[bid] {
@@ -135,6 +148,107 @@ func (st *SegmentTreeSqrtDecomposition) GetAll() []E {
 	return res
 }
 
+// 查询最大的 end 使得切片 [start:end] 内的值满足 predicate.
+func (st *SegmentTreeSqrtDecomposition) MaxRight(start int32, predicate func(end int32, sum E) bool) int32 {
+	if start >= st.n {
+		return st.n
+	}
+
+	curSum := st.e()
+	res := start
+	bid := start / st.bucketSize
+
+	// 散块内
+	{
+		pos := start - bid*st.bucketSize
+		block := st.buckets[bid]
+		m := int32(len(block))
+		for ; pos < m; pos++ {
+			nextRes, nextSum := res+1, st.op(curSum, block[pos])
+			if predicate(nextRes, nextSum) {
+				res, curSum = nextRes, nextSum
+			} else {
+				return res
+			}
+		}
+	}
+	bid++
+
+	// 整块跳跃
+	{
+		m := st.bucketCount
+		for ; bid < m; bid++ {
+			nextRes := res + int32(len(st.buckets[bid]))
+			nextSum := st.op(curSum, st.bucketSums[bid])
+			if predicate(nextRes, nextSum) {
+				res, curSum = nextRes, nextSum
+			} else {
+				// 答案在这个块内
+				block := st.buckets[bid]
+				for _, v := range block {
+					nextRes, nextSum = res+1, st.op(curSum, v)
+					if predicate(nextRes, nextSum) {
+						res, curSum = nextRes, nextSum
+					} else {
+						return res
+					}
+				}
+			}
+		}
+	}
+
+	return res
+}
+
+// 查询最小的 start 使得切片 [start:end] 内的值满足 predicate.
+func (st *SegmentTreeSqrtDecomposition) MinLeft(end int32, predicate func(start int32, sum E) bool) int32 {
+	if end <= 0 {
+		return 0
+	}
+
+	curSum := st.e()
+	res := end
+	bid := (end - 1) / st.bucketSize
+
+	// 散块内
+	{
+		pos := (end - 1) - bid*st.bucketSize
+		block := st.buckets[bid]
+		for ; pos >= 0; pos-- {
+			nextRes, nextSum := res-1, st.op(block[pos], curSum)
+			if predicate(nextRes, nextSum) {
+				res, curSum = nextRes, nextSum
+			} else {
+				return res
+			}
+		}
+	}
+	bid--
+
+	// 整块跳跃
+	{
+		for ; bid >= 0; bid-- {
+			nextRes := res - int32(len(st.buckets[bid]))
+			nextSum := st.op(st.bucketSums[bid], curSum)
+			if predicate(nextRes, nextSum) {
+				res, curSum = nextRes, nextSum
+			} else {
+				// 答案在这个块内
+				block := st.buckets[bid]
+				for i := int32(len(block)) - 1; i >= 0; i-- {
+					nextRes, nextSum = res-1, st.op(block[i], curSum)
+					if predicate(nextRes, nextSum) {
+						res, curSum = nextRes, nextSum
+					} else {
+						return res
+					}
+				}
+			}
+		}
+	}
+	return res
+}
+
 func test() {
 	for i := int32(0); i < 100; i++ {
 		n := rand.Int31n(10000) + 1000
@@ -195,6 +309,49 @@ func test() {
 				}
 			}
 
+			// MaxRight
+			maxRightBf := func(start int32, predicate func(end int32, sum E) bool) (res int32) {
+				res = start
+				curSum := seg.e()
+				for i := start; i < n; i++ {
+					curSum = seg.op(curSum, E(nums[i]))
+					if !predicate(i+1, curSum) {
+						return
+					}
+					res = i + 1
+				}
+				return
+			}
+
+			minLeftBf := func(end int32, predicate func(start int32, sum E) bool) (res int32) {
+				res = end
+				curSum := seg.e()
+				for i := end - 1; i >= 0; i-- {
+					curSum = seg.op(curSum, E(nums[i]))
+					if !predicate(i, curSum) {
+						return
+					}
+					res = i
+				}
+				return
+			}
+
+			{
+				start := rand.Int31n(n)
+				upper := rand.Intn(100)
+				res1 := seg.MaxRight(start, func(end int32, sum E) bool { return sum <= E(upper) })
+				res2 := maxRightBf(start, func(end int32, sum E) bool { return sum <= E(upper) })
+				if res1 != res2 {
+					fmt.Println("MaxRight Error")
+					panic("MaxRight Error")
+				}
+				res3 := seg.MinLeft(start, func(start int32, sum E) bool { return sum <= E(upper) })
+				res4 := minLeftBf(start, func(start int32, sum E) bool { return sum <= E(upper) })
+				if res3 != res4 {
+					fmt.Println("MinLeft Error")
+					panic("MinLeft Error")
+				}
+			}
 		}
 
 	}
@@ -202,11 +359,11 @@ func test() {
 }
 
 func testTime() {
-	// 2e5
-	n := int32(2e5)
+	// 1e5
+	n := int32(1e5)
 	nums := make([]int, n)
 	for i := 0; i < int(n); i++ {
-		nums[i] = rand.Intn(5)
+		nums[i] = rand.Intn(100)
 	}
 
 	time1 := time.Now()
@@ -217,6 +374,8 @@ func testTime() {
 		seg.Set(i, int(E(i)))
 		seg.Query(i, n)
 		seg.QueryAll()
+		seg.MaxRight(i, func(end int32, sum E) bool { return sum <= nums[i] })
+		seg.MinLeft(i, func(start int32, sum E) bool { return sum <= nums[i] })
 	}
-	fmt.Println("Time1", time.Since(time1)) // Time1 128.573042ms
+	fmt.Println("Time1", time.Since(time1)) // Time1 49.79925ms
 }

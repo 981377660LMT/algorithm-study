@@ -165,22 +165,33 @@ func (sl *SortedListWithSum) SumSlice(start, end int) E {
 		return e()
 	}
 
+	bid1, startIndex1 := sl._findKth(start)
+	bid2, startIndex2 := sl._findKth(end)
+	start, end = startIndex1, startIndex2
 	res := e()
-	pos, index := sl._findKth(start)
-	count := end - start
-	for ; count > 0 && pos < len(sl.blocks); pos++ {
-		block := sl.blocks[pos]
-		endIndex := min(len(block), index+count)
-		curCount := endIndex - index
-		if curCount == len(block) {
-			res = op(res, sl.sums[pos])
-		} else {
-			for j := index; j < endIndex; j++ {
-				res = op(res, block[j])
+	if bid1 == bid2 {
+		block := sl.blocks[bid1]
+		for i := start; i < end; i++ {
+			res = op(res, block[i])
+		}
+	} else {
+		if start < len(sl.blocks[bid1]) {
+			block1 := sl.blocks[bid1]
+			for i := start; i < len(block1); i++ {
+				res = op(res, block1[i])
 			}
 		}
-		count -= curCount
-		index = 0
+		for i := bid1 + 1; i < bid2; i++ {
+			res = op(res, sl.sums[i])
+		}
+		if m := len(sl.blocks); bid2 < m && end > 0 {
+			block2 := sl.blocks[bid2]
+			tmp := e()
+			for i := 0; i < end; i++ {
+				tmp = op(tmp, block2[i])
+			}
+			res = op(res, tmp)
+		}
 	}
 	return res
 }

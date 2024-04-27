@@ -64,22 +64,27 @@ class SortedListFastWithSum<V = number> extends SortedListFast<V> implements ISo
     if (end > this._len) end = this._len
     if (start >= end) return this._e()
 
+    const { pos: bid1, index: startIndex1 } = this._findKth(start)
+    const { pos: bid2, index: startIndex2 } = this._findKth(end - 1)
+    start = startIndex1
+    end = startIndex2 + 1
     let res = this._e()
-    let { pos, index } = this._findKth(start)
-    let count = end - start
-    for (; count && pos < this._blocks.length; pos++) {
-      const block = this._blocks[pos]
-      const endPos = Math.min(block.length, index + count)
-      const curCount = endPos - index
-      if (curCount === block.length) {
-        res = this._op(res, this._sums[pos])
-      } else {
-        for (let j = index; j < endPos; j++) res = this._op(res, block[j])
+    if (bid1 === bid2) {
+      const block = this._blocks[bid1]
+      for (let i = start; i < end; i++) res = this._op(res, block[i])
+    } else {
+      if (start < this._blocks[bid1].length) {
+        const block1 = this._blocks[bid1]
+        for (let i = start; i < block1.length; i++) res = this._op(res, block1[i])
       }
-      count -= curCount
-      index = 0
+      for (let i = bid1 + 1; i < bid2; i++) res = this._op(res, this._sums[i])
+      if (bid2 < this._blocks.length && end > 0) {
+        const block2 = this._blocks[bid2]
+        let tmp = this._e()
+        for (let i = 0; i < end; i++) tmp = this._op(tmp, block2[i])
+        res = this._op(res, tmp)
+      }
     }
-
     return res
   }
 

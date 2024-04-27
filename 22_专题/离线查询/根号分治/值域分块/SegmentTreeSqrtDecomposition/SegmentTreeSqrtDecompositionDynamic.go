@@ -3,12 +3,14 @@
 //  2.Pop(index int32) V -> sqrt(n)
 //  3.Set(index int32, v V) -> sqrt(n)
 //  4.Get(index int32) V -> O(log(sqrt(n)))
-//  5.Sum(start, end int32) V -> O(sqrt(n))
-//    SumAll() V
+//  5.Query(start, end int32) V -> O(sqrt(n))
+//    QueryAll() V
 //  6.Clear()
 //  7.Len() int32
 //  8.GetAll() []V
 //  9.ForEach(f func(i int32, v V) bool)
+// 10.MaxRight(start int32, predicate func(end int32, sum E) bool) int32
+// 11.MinLeft(end int32, predicate func(start int32, sum E) bool) int32
 
 package main
 
@@ -173,7 +175,7 @@ func (sl *SegmentTreeSqrtDecompositionDynamic) Set(index int32, value E) {
 	sl._updateSum(pos)
 }
 
-func (sl *SegmentTreeSqrtDecompositionDynamic) Sum(start, end int32) E {
+func (sl *SegmentTreeSqrtDecompositionDynamic) Query(start, end int32) E {
 	if start < 0 {
 		start = 0
 	}
@@ -184,29 +186,38 @@ func (sl *SegmentTreeSqrtDecompositionDynamic) Sum(start, end int32) E {
 		return sl.e()
 	}
 
+	bid1, startIndex1 := sl._findKth(start)
+	bid2, startIndex2 := sl._findKth(end)
+	start, end = startIndex1, startIndex2
 	res := sl.e()
-	pos, index := sl._findKth(start)
-	count := end - start
-	m := int32(len(sl.blocks))
-	for ; count > 0 && pos < m; pos++ {
-		block := sl.blocks[pos]
-		bl := int32(len(block))
-		endIndex := min32(bl, index+count)
-		curCount := endIndex - index
-		if curCount == bl {
-			res = sl.op(res, sl.blockSum[pos])
-		} else {
-			for j := index; j < endIndex; j++ {
-				res = sl.op(res, block[j])
+	if bid1 == bid2 {
+		block := sl.blocks[bid1]
+		for i := start; i < end; i++ {
+			res = sl.op(res, block[i])
+		}
+	} else {
+		if start < int32(len(sl.blocks[bid1])) {
+			block1 := sl.blocks[bid1]
+			for i := start; i < int32(len(block1)); i++ {
+				res = sl.op(res, block1[i])
 			}
 		}
-		count -= curCount
-		index = 0
+		for i := bid1 + 1; i < bid2; i++ {
+			res = sl.op(res, sl.blockSum[i])
+		}
+		if m := int32(len(sl.blocks)); bid2 < m && end > 0 {
+			block2 := sl.blocks[bid2]
+			tmp := sl.e()
+			for i := int32(0); i < end; i++ {
+				tmp = sl.op(tmp, block2[i])
+			}
+			res = sl.op(res, tmp)
+		}
 	}
 	return res
 }
 
-func (sl *SegmentTreeSqrtDecompositionDynamic) SumAll() E {
+func (sl *SegmentTreeSqrtDecompositionDynamic) QueryAll() E {
 	res := sl.e()
 	for _, v := range sl.blockSum {
 		res = sl.op(res, v)
@@ -244,6 +255,107 @@ func (sl *SegmentTreeSqrtDecompositionDynamic) ForEach(f func(i int32, v E) (sho
 			ptr++
 		}
 	}
+}
+
+// 查询最大的 end 使得切片 [start:end] 内的值满足 predicate.
+func (st *SegmentTreeSqrtDecompositionDynamic) MaxRight(start int32, predicate func(end int32, sum E) bool) int32 {
+	if start >= st.n {
+		return st.n
+	}
+
+	curSum := st.e()
+	res := start
+	bid, startPos := st._findKth(start)
+
+	// 散块内
+	{
+		pos := startPos
+		block := st.blocks[bid]
+		m := int32(len(block))
+		for ; pos < m; pos++ {
+			nextRes, nextSum := res+1, st.op(curSum, block[pos])
+			if predicate(nextRes, nextSum) {
+				res, curSum = nextRes, nextSum
+			} else {
+				return res
+			}
+		}
+	}
+	bid++
+
+	// 整块跳跃
+	{
+		m := int32(len(st.blocks))
+		for ; bid < m; bid++ {
+			nextRes := res + int32(len(st.blocks[bid]))
+			nextSum := st.op(curSum, st.blockSum[bid])
+			if predicate(nextRes, nextSum) {
+				res, curSum = nextRes, nextSum
+			} else {
+				// 答案在这个块内
+				block := st.blocks[bid]
+				for _, v := range block {
+					nextRes, nextSum = res+1, st.op(curSum, v)
+					if predicate(nextRes, nextSum) {
+						res, curSum = nextRes, nextSum
+					} else {
+						return res
+					}
+				}
+			}
+		}
+	}
+
+	return res
+}
+
+// 查询最小的 start 使得切片 [start:end] 内的值满足 predicate.
+func (st *SegmentTreeSqrtDecompositionDynamic) MinLeft(end int32, predicate func(start int32, sum E) bool) int32 {
+	if end <= 0 {
+		return 0
+	}
+
+	curSum := st.e()
+	res := end
+	bid, startPos := st._findKth(end - 1)
+
+	// 散块内
+	{
+		pos := startPos
+		block := st.blocks[bid]
+		for ; pos >= 0; pos-- {
+			nextRes, nextSum := res-1, st.op(block[pos], curSum)
+			if predicate(nextRes, nextSum) {
+				res, curSum = nextRes, nextSum
+			} else {
+				return res
+			}
+		}
+	}
+	bid--
+
+	// 整块跳跃
+	{
+		for ; bid >= 0; bid-- {
+			nextRes := res - int32(len(st.blocks[bid]))
+			nextSum := st.op(st.blockSum[bid], curSum)
+			if predicate(nextRes, nextSum) {
+				res, curSum = nextRes, nextSum
+			} else {
+				// 答案在这个块内
+				block := st.blocks[bid]
+				for i := int32(len(block)) - 1; i >= 0; i-- {
+					nextRes, nextSum = res-1, st.op(block[i], curSum)
+					if predicate(nextRes, nextSum) {
+						res, curSum = nextRes, nextSum
+					} else {
+						return res
+					}
+				}
+			}
+		}
+	}
+	return res
 }
 
 func (sl *SegmentTreeSqrtDecompositionDynamic) _rebuildTree() {
@@ -349,7 +461,7 @@ func test() {
 		n := rand.Int31n(10000) + 1000
 		nums := make([]int, n)
 		for i := int32(0); i < n; i++ {
-			nums[i] = rand.Intn(100)
+			nums[i] = rand.Intn(1000)
 		}
 		seg := NewSegmentTreeSqrtDecompositionDynamic(n, func(i int32) E { return E(nums[i]) }, -1)
 
@@ -380,7 +492,7 @@ func test() {
 			for i := start; i < end; i++ {
 				sum_ = seg.op(sum_, E(nums[i]))
 			}
-			if seg.Sum(start, end) != sum_ {
+			if seg.Query(start, end) != sum_ {
 				fmt.Println("Query Error")
 				panic("Query Error")
 			}
@@ -390,7 +502,7 @@ func test() {
 			for _, v := range nums {
 				sum_ = seg.op(sum_, E(v))
 			}
-			if seg.SumAll() != sum_ {
+			if seg.QueryAll() != sum_ {
 				fmt.Println("QueryAll Error")
 				panic("QueryAll Error")
 			}
@@ -427,18 +539,63 @@ func test() {
 				sum_ = seg.op(sum_, v)
 				return false
 			})
-			if sum_ != seg.SumAll() {
+			if sum_ != seg.QueryAll() {
 				fmt.Println("ForEach Error")
 				panic("ForEach Error")
 			}
+
+			// MaxRight
+			maxRightBf := func(start int32, predicate func(end int32, sum E) bool) (res int32) {
+				res = start
+				curSum := seg.e()
+				for i := start; i < int32(len(nums)); i++ {
+					curSum = seg.op(curSum, E(nums[i]))
+					if !predicate(i+1, curSum) {
+						return
+					}
+					res = i + 1
+				}
+				return
+			}
+
+			minLeftBf := func(end int32, predicate func(start int32, sum E) bool) (res int32) {
+				res = end
+				curSum := seg.e()
+				for i := end - 1; i >= 0; i-- {
+					curSum = seg.op(curSum, E(nums[i]))
+					if !predicate(i, curSum) {
+						return
+					}
+					res = i
+				}
+				return
+			}
+
+			{
+				start := rand.Int31n(n)
+				upper := rand.Intn(100)
+				res1 := seg.MaxRight(start, func(end int32, sum E) bool { return sum <= E(upper) })
+				res2 := maxRightBf(start, func(end int32, sum E) bool { return sum <= E(upper) })
+				if res1 != res2 {
+					fmt.Println("MaxRight Error")
+					panic("MaxRight Error")
+				}
+				res3 := seg.MinLeft(start, func(start int32, sum E) bool { return sum <= E(upper) })
+				res4 := minLeftBf(start, func(start int32, sum E) bool { return sum <= E(upper) })
+				if res3 != res4 {
+					fmt.Println("MinLeft Error")
+					panic("MinLeft Error")
+				}
+			}
+
 		}
 	}
 	fmt.Println("Pass")
 }
 
 func testTime() {
-	// 2e5
-	n := int32(2e5)
+	// 1e5
+	n := int32(1e5)
 	nums := make([]int, n)
 	for i := 0; i < int(n); i++ {
 		nums[i] = rand.Intn(5)
@@ -450,13 +607,14 @@ func testTime() {
 	for i := int32(0); i < n; i++ {
 		seg.Get(i)
 		seg.Set(i, i)
-		seg.Sum(i, n)
-		seg.SumAll()
+		seg.Query(i, n)
+		seg.QueryAll()
 		seg.Insert(i, i)
 		if i&1 == 0 {
 			seg.Pop(i)
 		}
-		seg.SumAll()
+		seg.MaxRight(i, func(end int32, sum E) bool { return true })
+		seg.MinLeft(i, func(start int32, sum E) bool { return true })
 	}
-	fmt.Println("Time1", time.Since(time1)) // Time1 336.550792ms
+	fmt.Println("Time1", time.Since(time1)) // Time1 318.991125ms
 }

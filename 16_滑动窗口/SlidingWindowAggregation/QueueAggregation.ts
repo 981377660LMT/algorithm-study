@@ -58,9 +58,7 @@ class _StackAggregation<T> {
 
   push(x: T): void {
     this._values.push(x)
-    this._folds.push(
-      this._values.length === 1 ? x : this._op(this._folds[this._folds.length - 1], x)
-    )
+    this._folds.push(this._values.length === 1 ? x : this._op(this._folds[this._folds.length - 1], x))
   }
 
   pop(): T | undefined {

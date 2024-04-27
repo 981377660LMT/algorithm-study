@@ -24,7 +24,7 @@ import (
 
 func main() {
 	// demo()
-	// test()
+	test()
 	testTime()
 }
 
@@ -186,24 +186,33 @@ func (sl *SqrtArrayMonoid) Sum(start, end int32) E {
 		return sl.e()
 	}
 
+	bid1, startIndex1 := sl._findKth(start)
+	bid2, startIndex2 := sl._findKth(end)
+	start, end = startIndex1, startIndex2
 	res := sl.e()
-	pos, index := sl._findKth(start)
-	count := end - start
-	m := int32(len(sl.blocks))
-	for ; count > 0 && pos < m; pos++ {
-		block := sl.blocks[pos]
-		bl := int32(len(block))
-		endIndex := min32(bl, index+count)
-		curCount := endIndex - index
-		if curCount == bl {
-			res = sl.op(res, sl.blockSum[pos])
-		} else {
-			for j := index; j < endIndex; j++ {
-				res = sl.op(res, block[j])
+	if bid1 == bid2 {
+		block := sl.blocks[bid1]
+		for i := start; i < end; i++ {
+			res = sl.op(res, block[i])
+		}
+	} else {
+		if start < int32(len(sl.blocks[bid1])) {
+			block1 := sl.blocks[bid1]
+			for i := start; i < int32(len(block1)); i++ {
+				res = sl.op(res, block1[i])
 			}
 		}
-		count -= curCount
-		index = 0
+		for i := bid1 + 1; i < bid2; i++ {
+			res = sl.op(res, sl.blockSum[i])
+		}
+		if m := int32(len(sl.blocks)); bid2 < m && end > 0 {
+			block2 := sl.blocks[bid2]
+			tmp := sl.e()
+			for i := int32(0); i < end; i++ {
+				tmp = sl.op(tmp, block2[i])
+			}
+			res = sl.op(res, tmp)
+		}
 	}
 	return res
 }
