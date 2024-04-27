@@ -1,4 +1,4 @@
-// 分块数组/SqrtArray/SqrtArrayWithSum
+// 动态分块数组/SqrtArray/SqrtArrayWithSum
 //
 // api:
 //  1.Insert(index int32, v V)
@@ -139,7 +139,9 @@ func (sl *SqrtArrayMonoid) Pop(index int32) E {
 
 	copy(sl.blocks[pos][startIndex:], sl.blocks[pos][startIndex+1:])
 	sl.blocks[pos] = sl.blocks[pos][:len(sl.blocks[pos])-1]
-	sl._updateSum(pos)
+	if value != sl.e() {
+		sl._updateSum(pos)
+	}
 
 	if len(sl.blocks[pos]) == 0 {
 		// !delete block

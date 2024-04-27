@@ -1,4 +1,4 @@
-// 分块数组/SqrtArray/SqrtArrayWithSum
+// 动态分块数组/SqrtArray/SqrtArrayWithSum
 //
 // api:
 //  1.Insert(index int32, v V)
