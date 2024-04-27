@@ -4,6 +4,8 @@
 
 
 # 多重集合としての AVL 木です。 配列を用いてノードを表現しています。 size を持ちます。
+# 仅用于保存
+
 from typing import Protocol
 
 

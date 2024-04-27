@@ -197,7 +197,7 @@ func (mfs *MedianFinderSortedList) DistSumToMedianRange(start, end int) int {
 }
 
 // 1e5 -> 200, 2e5 -> 400
-const _LOAD int = 500
+const _LOAD int = 200
 
 type E = int
 

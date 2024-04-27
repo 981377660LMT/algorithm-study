@@ -58,5 +58,11 @@ def kbonacci2(k: int, n: int) -> int:
     return linear_recursion_solver(C[::-1], A, n, 0, 1) % MOD
 
 
-k, n = map(int, input().split())
-print(kbonacci2(k, n - 1))
+class Solution:
+    def numberOfStableArrays(self, zero: int, one: int, limit: int) -> int:
+        return kbonacci2(limit + 1, zero + one)
+
+
+print(Solution().numberOfStableArrays(1, 1, 2))  # 2
+print(Solution().numberOfStableArrays(1, 2, 1))  # 1
+print(Solution().numberOfStableArrays(3, 3, 2))  # 14

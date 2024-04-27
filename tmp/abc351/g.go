@@ -1,31 +1,156 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	stdio "io"
 	"math/bits"
+	"os"
 	"sort"
+	"strconv"
 	"strings"
 )
 
-// 100123. 执行操作使频率分数最大
-// https://leetcode.cn/problems/apply-operations-to-maximize-frequency-score/description/
-func maxFrequencyScore(nums []int, k int64) int {
-	sort.Ints(nums)
-	sl := NewSortedListWithSum(func(a, b int) bool { return a < b })
-	proxy := NewMedianFinderSortedList(sl)
-	res, left := 0, 0
-	for right := 0; right < len(nums); right++ {
-		sl.Add(nums[right])
-		for left <= right && int64(proxy.DistSumToMedian()) > k {
-			sl.Discard(nums[left])
-			left++
-		}
-		res = max(res, right-left+1)
-	}
-	return res
+var io *Iost
+
+type Iost struct {
+	Scanner *bufio.Scanner
+	Writer  *bufio.Writer
 }
 
-// 对每个位置，求移动m个1到这个位置的最小移动次数
+func NewIost(fp stdio.Reader, wfp stdio.Writer) *Iost {
+	const BufSize = 2000005
+	scanner := bufio.NewScanner(fp)
+	scanner.Split(bufio.ScanWords)
+	scanner.Buffer(make([]byte, BufSize), BufSize)
+	return &Iost{Scanner: scanner, Writer: bufio.NewWriter(wfp)}
+}
+func (io *Iost) Text() string {
+	if !io.Scanner.Scan() {
+		panic("scan failed")
+	}
+	return io.Scanner.Text()
+}
+func (io *Iost) Atoi(s string) int                 { x, _ := strconv.Atoi(s); return x }
+func (io *Iost) Atoi64(s string) int64             { x, _ := strconv.ParseInt(s, 10, 64); return x }
+func (io *Iost) Atof64(s string) float64           { x, _ := strconv.ParseFloat(s, 64); return x }
+func (io *Iost) NextInt() int                      { return io.Atoi(io.Text()) }
+func (io *Iost) NextInt64() int64                  { return io.Atoi64(io.Text()) }
+func (io *Iost) NextFloat64() float64              { return io.Atof64(io.Text()) }
+func (io *Iost) Print(x ...interface{})            { fmt.Fprint(io.Writer, x...) }
+func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x...) }
+func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
+
+// # 座標平面上に
+// # N 個の点
+// # P
+// # 1
+// # ​
+// #  ,P
+// # 2
+// # ​
+// #  ,…,P
+// # N
+// # ​
+// #   があり、点
+// # P
+// # i
+// # ​
+// #   の座標は
+// # (X
+// # i
+// # ​
+// #  ,Y
+// # i
+// # ​
+// #  ) です。
+// # 2 つの点
+// # A,B の距離
+// # dist(A,B) を次のように定義します。
+
+// # 最初、ウサギが点
+// # A にいる。
+// # (x,y) にいるウサギは
+// # (x+1,y+1),
+// # (x+1,y−1),
+// # (x−1,y+1),
+// # (x−1,y−1) のいずれかに
+// # 1 回のジャンプで移動することができる。
+// # 点
+// # A から点
+// # B まで移動するために必要なジャンプの回数の最小値を
+// # dist(A,B) として定義する。
+// # ただし、何度ジャンプを繰り返しても点
+// # A から点
+// # B まで移動できないとき、
+// # dist(A,B)=0 とする。
+
+// # i=1
+// # ∑
+// # N−1
+// # ​
+
+// # j=i+1
+// # ∑
+// # N
+// # ​
+// #  dist(P
+// # i
+// # ​
+// #  ,P
+// # j
+// # ​
+// #  ) を求めてください。
+
+// # 每次移动奇偶不变，所以考虑前缀中奇偶相同的点即可
+// !切比雪夫距离转曼哈顿距离
+func main() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	n := io.NextInt()
+	x := make([]int, n)
+	y := make([]int, n)
+	newX := make([]int, n)
+	newY := make([]int, n)
+	for i := 0; i < n; i++ {
+		x[i] = io.NextInt()
+		y[i] = io.NextInt()
+		newX[i] = y[i] - x[i]
+		newY[i] = x[i] + y[i]
+	}
+
+	sl00 := NewSortedListWithSum(func(a, b int) bool { return a < b })
+	sl01 := NewSortedListWithSum(func(a, b int) bool { return a < b })
+	sl10 := NewSortedListWithSum(func(a, b int) bool { return a < b })
+	sl11 := NewSortedListWithSum(func(a, b int) bool { return a < b })
+	M00 := NewMedianFinderSortedList(sl00)
+	M01 := NewMedianFinderSortedList(sl01)
+	M10 := NewMedianFinderSortedList(sl10)
+	M11 := NewMedianFinderSortedList(sl11)
+	res := 0
+	for i := 0; i < n; i++ {
+		sum_ := x[i] + y[i]
+		x, y := newX[i], newY[i]
+		if sum_&1 == 0 {
+			res += M00.DistSum(x)
+			sl00.Add(x)
+			res += M01.DistSum(y)
+			sl01.Add(y)
+		} else {
+			res += M10.DistSum(x)
+			sl10.Add(x)
+			res += M11.DistSum(y)
+			sl11.Add(y)
+		}
+	}
+
+	io.Println(res / 2)
+}
 
 // SortedList 动态维护中位数信息.
 // `Proxy 的内部持有一个对 SortedList 的引用`.

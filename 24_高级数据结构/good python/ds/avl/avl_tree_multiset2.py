@@ -1,4 +1,6 @@
 # 多重集合としての AVL 木です。 配列を用いてノードを表現しています。 size を持たないので軽めです。
+# 仅用于保存
+
 
 # from titan_pylib.data_structures.avl_tree.avl_tree_multiset2 import AVLTreeMultiset2
 # from titan_pylib.my_class.supports_less_than import SupportsLessThan
