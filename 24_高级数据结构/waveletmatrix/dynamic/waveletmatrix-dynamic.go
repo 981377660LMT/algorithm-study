@@ -49,8 +49,8 @@ import (
 )
 
 func main() {
-	// test()
-	testTime()
+	test()
+	// testTime()
 
 	// CF455D()
 	// libraryQuery()
@@ -1668,9 +1668,9 @@ func abs(a int) int {
 }
 
 func test() {
-	for i := 0; i < 10; i++ {
-		nums := make([]int, 1000)
-		for j := 0; j < 1000; j++ {
+	for i := 0; i < 20; i++ {
+		nums := make([]int, 2000)
+		for j := 0; j < 2000; j++ {
 			nums[j] = rand.Intn(1000)
 		}
 		wm := NewWaveletMatrixDynamic(int32(len(nums)), func(i int32) int { return nums[i] }, maxs(nums))
@@ -1885,7 +1885,7 @@ func test() {
 			nums[index] = v
 		}
 
-		for j := 0; j < 100; j++ {
+		for j := 0; j < 1000; j++ {
 			start, end := rand.Intn(1000), rand.Intn(1000)
 			if start > end {
 				start, end = end, start
@@ -2015,9 +2015,9 @@ func testTime() {
 		wm.CountLess(0, i, nums[i])
 		wm.CountMore(0, i, nums[i])
 		wm.CountSame(0, i, nums[i])
-		// wm.Set(i, nums[i])
-		// wm.Insert(i, nums[i])
-		// wm.Pop(i)
+		wm.Set(i, nums[i])
+		wm.Insert(i, nums[i])
+		wm.Pop(i)
 	}
 
 	fmt.Println(time.Since(time1)) // 9.2127399s

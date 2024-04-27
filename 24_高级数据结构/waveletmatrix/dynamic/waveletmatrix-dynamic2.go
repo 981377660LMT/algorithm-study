@@ -33,8 +33,6 @@
 // - 计数问题，需要将x离散化成BisectLeft(origin, x).
 // - 区间第k小问题，需要答案转换成origin[答案].
 
-// TODO: golang 太慢，需要使用 Rust 版本
-
 package main
 
 import (
@@ -50,10 +48,10 @@ import (
 
 func main() {
 
-	test()
+	// test()
 	// testTime()
 
-	// CF455D()
+	CF455D()
 	// libraryQuery()
 	// yosupo()
 }
@@ -323,15 +321,6 @@ func (wm *WaveletMatrixDynamic) Insert(index int32, x int) {
 			index -= s
 			wm.mid[bit]++
 		}
-		// bv := wm.bv[bit]
-		// if x>>bit&1 == 1 {
-		// 	bv.Insert(index, 1)
-		// 	index = bv.Count1(index) + wm.mid[bit]
-		// } else {
-		// 	bv.Insert(index, 0)
-		// 	wm.mid[bit]++
-		// 	index = bv.Count0(index)
-		// }
 	}
 	wm.size++
 }
@@ -1356,9 +1345,9 @@ func abs(a int) int {
 
 func test() {
 
-	for i := 0; i < 10; i++ {
-		nums := make([]int, 1000)
-		for j := 0; j < 1000; j++ {
+	for i := 0; i < 20; i++ {
+		nums := make([]int, 3000)
+		for j := 0; j < 3000; j++ {
 			nums[j] = rand.Intn(1000)
 		}
 		wm := NewWaveletMatrixDynamic(int32(len(nums)), func(i int32) int { return nums[i] }, maxs(nums))
@@ -1573,7 +1562,7 @@ func test() {
 			nums[index] = v
 		}
 
-		for j := 0; j < 100; j++ {
+		for j := 0; j < 2000; j++ {
 			start, end := rand.Intn(1000), rand.Intn(1000)
 			if start > end {
 				start, end = end, start
@@ -1614,18 +1603,18 @@ func test() {
 				panic("kthLargestBf")
 			}
 
-			// topK1 := topKBf(int32(start), int32(end), int32(k))
-			// topK2 := wm.TopK(int32(start), int32(end), int32(k))
-			// if len(topK1) != len(topK2) {
-			// 	fmt.Println(len(topK1), len(topK2), start, end, k)
-			// 	panic("topKBf")
-			// }
-			// for i := 0; i < len(topK1); i++ {
-			// 	if topK1[i].count != topK2[i].count {
-			// 		fmt.Println(topK1[i], topK2[i], start, end, k)
-			// 		panic("topKBf")
-			// 	}
-			// }
+			topK1 := topKBf(int32(start), int32(end), int32(k))
+			topK2 := wm.TopK(int32(start), int32(end), int32(k))
+			if len(topK1) != len(topK2) {
+				fmt.Println(len(topK1), len(topK2), start, end, k)
+				panic("topKBf")
+			}
+			for i := 0; i < len(topK1); i++ {
+				if topK1[i].count != topK2[i].count {
+					fmt.Println(topK1[i], topK2[i], start, end, k)
+					panic("topKBf")
+				}
+			}
 			_ = topKBf
 
 			funcs1 := []func(int32, int32, int) (int, bool){floorBf, lowerBf, ceilBf, higherBf}
@@ -1662,12 +1651,12 @@ func test() {
 			wm.Insert(insertIndex, insertValue)
 			_ = insertBf
 
-			_ = popBf
 			popIndex := int32(rand.Intn(len(nums)))
 			if res1, res2 := popBf(popIndex), wm.Pop(popIndex); res1 != res2 {
 				fmt.Println(res1, res2, popIndex)
 				panic("popBf")
 			}
+			_ = popBf
 
 			setIndex := int32(rand.Intn(len(nums)))
 			setValue := rand.Intn(1000)
@@ -1707,9 +1696,9 @@ func testTime() {
 		wm.CountLess(0, i, nums[i])
 		wm.CountMore(0, i, nums[i])
 		wm.CountSame(0, i, nums[i])
-		// wm.Set(i, nums[i])
-		// wm.Insert(i, nums[i])
-		// wm.Pop(i)
+		wm.Set(i, nums[i])
+		wm.Insert(i, nums[i])
+		wm.Pop(i)
 	}
 
 	fmt.Println(time.Since(time1)) // 9.2127399s

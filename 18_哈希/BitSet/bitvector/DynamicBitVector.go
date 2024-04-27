@@ -55,7 +55,7 @@ func demo() {
 }
 
 // 1e5 -> 150 , 2e5 -> 250
-const _LOAD int32 = 250 // 块尺寸越大，修改越快，查询越慢
+const _LOAD int32 = 200 // 块尺寸越大，修改越快，查询越慢
 
 // 使用分块+树状数组维护的动态Bitvector.
 type DynamicBitvector struct {
@@ -559,7 +559,7 @@ func test() {
 		}
 		_ = pop
 
-		for j := 0; j < 1000; j++ {
+		for j := 0; j < 10000; j++ {
 			// insert
 			insertIndex := rand.Intn(n + 1)
 			insertValue := int8(rand.Intn(2))

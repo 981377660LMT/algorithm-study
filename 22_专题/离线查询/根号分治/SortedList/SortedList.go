@@ -252,9 +252,13 @@ func (sl *SortedList) Add(value S) *SortedList {
 
 	// n -> load + (n - load)
 	if n := len(sl.blocks[pos]); _LOAD+_LOAD < n {
-		sl.blocks = append(sl.blocks[:pos+1], append([][]S{sl.blocks[pos][_LOAD:]}, sl.blocks[pos+1:]...)...)
-		sl.mins = append(sl.mins[:pos+1], append([]S{sl.blocks[pos][_LOAD]}, sl.mins[pos+1:]...)...)
-		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD] // !注意max的设置(为了让左右互不影响)
+		sl.blocks = append(sl.blocks, nil)
+		copy(sl.blocks[pos+2:], sl.blocks[pos+1:])
+		sl.blocks[pos+1] = sl.blocks[pos][_LOAD:]
+		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD]
+		sl.mins = append(sl.mins, 0)
+		copy(sl.mins[pos+2:], sl.mins[pos+1:])
+		sl.mins[pos+1] = sl.blocks[pos+1][0]
 		sl.shouldRebuildTree = true
 	}
 
@@ -538,15 +542,18 @@ func (sl *SortedList) _delete(pos, index int) {
 	// !delete element
 	sl.size--
 	sl._updateTree(pos, -1)
-	sl.blocks[pos] = append(sl.blocks[pos][:index], sl.blocks[pos][index+1:]...)
+	copy(sl.blocks[pos][index:], sl.blocks[pos][index+1:])
+	sl.blocks[pos] = sl.blocks[pos][:len(sl.blocks[pos])-1]
 	if len(sl.blocks[pos]) > 0 {
 		sl.mins[pos] = sl.blocks[pos][0]
 		return
 	}
 
 	// !delete block
-	sl.blocks = append(sl.blocks[:pos], sl.blocks[pos+1:]...)
-	sl.mins = append(sl.mins[:pos], sl.mins[pos+1:]...)
+	copy(sl.blocks[pos:], sl.blocks[pos+1:])
+	sl.blocks = sl.blocks[:len(sl.blocks)-1]
+	copy(sl.mins[pos:], sl.mins[pos+1:])
+	sl.mins = sl.mins[:len(sl.mins)-1]
 	sl.shouldRebuildTree = true
 }
 
