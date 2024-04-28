@@ -5,23 +5,28 @@
  * 周期函数的幂(k次转移后的状态).
  */
 class PeriodicFunctionPower<State extends number | string> {
-  readonly offset: number
-  readonly cycle: number
-  private readonly _data: State[] = []
-  private readonly _used: Map<State, number> = new Map()
+  readonly cycleStart: number
+  readonly cycleLength: number
+  readonly preCycle: State[]
+  readonly cycle: State[]
 
   /**
    * @param s0 初始状态.
    * @param next 状态转移函数.
    */
   constructor(s0: State, next: (cur: State) => State) {
-    while (!this._used.has(s0)) {
-      this._used.set(s0, this._data.length)
-      this._data.push(s0)
-      s0 = next(s0)
+    const visited = new Map<State, number>()
+    const history: State[] = []
+    let now = s0
+    while (!visited.has(now)) {
+      visited.set(now, history.length)
+      history.push(now)
+      now = next(now)
     }
-    this.offset = this._used.get(s0)!
-    this.cycle = this._data.length - this.offset
+    this.cycleStart = visited.get(now)!
+    this.cycleLength = history.length - this.cycleStart
+    this.preCycle = history.slice(0, this.cycleStart)
+    this.cycle = history.slice(this.cycleStart)
   }
 
   /**
@@ -29,8 +34,10 @@ class PeriodicFunctionPower<State extends number | string> {
    * k>=0.
    */
   query(k: number): State {
-    const index = k < this.offset ? k : ((k - this.offset) % this.cycle) + this.offset
-    return this._data[index]
+    if (k < this.cycleStart) return this.preCycle[k]
+    k -= this.cycleStart
+    k %= this.cycleLength
+    return this.cycle[k]
   }
 }
 

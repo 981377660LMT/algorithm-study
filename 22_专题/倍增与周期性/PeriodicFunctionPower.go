@@ -1,12 +1,20 @@
-// PeriodicFunctionPower
+// PeriodicFunctionPower/CycleDecomposition
 // 周期函数的幂(k次转移后的状态)
 
 package main
 
+import "fmt"
+
+func main() {
+	S := NewPeriodicFunctionPower[int](0, func(cur int) int { return 2 + cur%3 })
+	fmt.Println(S.CycleStart, S.CycleLength, S.PreCycle, S.Cycle) // 1 3 [0] [2 4 3]
+}
+
 // https://leetcode.cn/problems/prison-cells-after-n-days/submissions/
 func prisonAfterNDays(cells []int, n int) []int {
 	s0 := [8]int{cells[0], cells[1], cells[2], cells[3], cells[4], cells[5], cells[6], cells[7]}
-	F := NewPeriodicFunctionPower(s0, func(cur State) State {
+	type State = [8]int
+	F := NewPeriodicFunctionPower[State](s0, func(cur State) State {
 		var next State
 		for i := 1; i < 7; i++ {
 			if cur[i-1] == cur[i+1] {
@@ -19,38 +27,42 @@ func prisonAfterNDays(cells []int, n int) []int {
 	return []int{res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7]}
 }
 
-type State = [8]int
-type PeriodicFunctionPower struct {
-	Offset int // 周期开始的位置
-	Cycle  int // 周期长度
-	data   []State
-	used   map[State]int
+type PeriodicFunctionPower[S comparable] struct {
+	CycleStart  int // 周期开始的位置
+	CycleLength int // 周期长度
+	PreCycle    []S // 周期开始前的状态
+	Cycle       []S // 周期内的状态
+	history     []S
+	visited     map[S]int
 }
 
 // NewPeriodicFunctionPower 创建周期函数的幂(k次转移后的状态).
 //  s0 初始状态.
 //  next 状态转移函数.
-func NewPeriodicFunctionPower(s0 State, next func(State) State) *PeriodicFunctionPower {
-	res := &PeriodicFunctionPower{
-		data: []State{},
-		used: map[State]int{},
+func NewPeriodicFunctionPower[S comparable](s0 S, next func(S) S) *PeriodicFunctionPower[S] {
+	res := &PeriodicFunctionPower[S]{
+		history: []S{},
+		visited: map[S]int{},
 	}
-	for _, ok := res.used[s0]; !ok; _, ok = res.used[s0] {
-		res.used[s0] = len(res.data)
-		res.data = append(res.data, s0)
+	for _, ok := res.visited[s0]; !ok; _, ok = res.visited[s0] {
+		res.visited[s0] = len(res.history)
+		res.history = append(res.history, s0)
 		s0 = next(s0)
 	}
-	res.Offset = res.used[s0]
-	res.Cycle = len(res.data) - res.Offset
+	res.CycleStart = res.visited[s0]
+	res.CycleLength = len(res.history) - res.CycleStart
+	res.PreCycle = res.history[:res.CycleStart]
+	res.Cycle = res.history[res.CycleStart:]
 	return res
 }
 
 // Query 查询k次转移后的状态(第k项).
 //  k>=0.
-func (p *PeriodicFunctionPower) Query(k int) State {
-	index := k
-	if k >= p.Offset {
-		index = (k-p.Offset)%p.Cycle + p.Offset
+func (p *PeriodicFunctionPower[S]) Query(k int) S {
+	if k < p.CycleStart {
+		return p.PreCycle[k]
 	}
-	return p.data[index]
+	k -= p.CycleStart
+	k %= p.CycleLength
+	return p.Cycle[k]
 }
