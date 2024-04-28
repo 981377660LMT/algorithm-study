@@ -1,7 +1,12 @@
-// SafeHash
-// 字符串哈希模数最好用2^61-1
-// 安全で爆速なRollingHashの話 -> 模2^61-1
-// https://qiita.com/keymoon/items/11fac5627672a6d6a9f6
+// dynamicHashString/hashStringDynamic
+// 动态哈希.
+//
+// api:
+//  1. Insert(i, c): 在第i个位置插入字符c.
+//  2. Pop(i): 删除第i个位置的字符.
+//  3. Set(i, c): 将第i个位置的字符设置为c.
+//  4. Reverse(start, end): 将[start, end)范围内的字符翻转.
+//  5. Get(start, end): 获取[start, end)的哈希值.
 
 package main
 
