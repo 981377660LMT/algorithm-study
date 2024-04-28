@@ -10,6 +10,7 @@
 // QueryToRoot(u): u から根までのパス上の頂点の値を二項演算でまとめた結果を返す.
 // QueryPath(u, v): u から v までのパス上の頂点の値を二項演算でまとめた結果を返す.
 // KthAncestor(x, k): x から根までのパスに出現するノードを並べたとき, 0-indexed で k 番目のノードを返す.
+// Dist(u, v): u と v の距離を返す.
 // LCA(u, v): u と v の lca を返す. u と v が異なる連結成分なら nullptr を返す.
 //  !上記の操作は根を勝手に変えるため、根を固定したい場合は Evert で根を固定してから操作する.
 // IsConnected(u, v): u と v が同じ連結成分に属する場合は true, そうでなければ false を返す.
@@ -297,6 +298,12 @@ func (lct *LinkCutTree32) Jump(from, to *treeNode, k int32) *treeNode {
 	}
 	lct.splay(from)
 	return from
+}
+
+func (lct *LinkCutTree32) Dist(u, v *treeNode) int32 {
+	lct.Evert(u)
+	lct.expose(v)
+	return v.sz - 1
 }
 
 // u から根までのパス上の頂点の値を二項演算でまとめた結果を返す.

@@ -209,6 +209,12 @@ func (lct *LinkCutTreeSubTree) Jump(from, to *treeNode, k int32) *treeNode {
 	return from
 }
 
+func (lct *LinkCutTreeSubTree) Dist(u, v *treeNode) int32 {
+	lct.Evert(u)
+	lct.expose(v)
+	return v.cnt - 1
+}
+
 // t を根とする部分木の要素の値の和を返す.
 //
 //	!Evert を忘れない！

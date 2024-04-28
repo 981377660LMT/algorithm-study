@@ -1,4 +1,4 @@
-// 线性Lca.
+// 线性Lca/FastLca
 
 package main
 

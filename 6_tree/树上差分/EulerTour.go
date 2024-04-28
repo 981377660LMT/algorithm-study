@@ -7,12 +7,85 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 )
 
 func main() {
-	demo()
+	// demo()
+	// yosopo()
+
+	abc294_g()
+
+}
+
+func yosopo() {
+	// https://judge.yosupo.jp/problem/lca
+
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	tree := make([][]neighbor, n)
+	for i := int32(1); i < n; i++ {
+		var parent int32
+		fmt.Fscan(in, &parent)
+		tree[parent] = append(tree[parent], neighbor{i, 0})
+	}
+	et := NewEulerTour(tree, 0, nil)
+
+	for i := int32(0); i < q; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		fmt.Fprintln(out, et.Lca(u, v))
+	}
+}
+
+// G - Distance Queries on a Tree
+// https://atcoder.jp/contests/abc294/tasks/abc294_g
+// 1 i w: 边i的权值变为w.
+// 2 u v: 求u和v之间的距离(边权).
+func abc294_g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	edges := make([][3]int32, n-1)
+	tree := make([][]neighbor, n)
+	for i := range edges {
+		var u, v, w int32
+		fmt.Fscan(in, &u, &v, &w)
+		u, v = u-1, v-1
+		edges[i] = [3]int32{u, v, w}
+		tree[u] = append(tree[u], neighbor{v, E(w)})
+		tree[v] = append(tree[v], neighbor{u, E(w)})
+	}
+
+	et := NewEulerTour(tree, 0, nil)
+	var q int32
+	fmt.Fscan(in, &q)
+	for i := int32(0); i < q; i++ {
+		var op int32
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var i, w int32
+			fmt.Fscan(in, &i, &w)
+			i--
+			u, v := edges[i][0], edges[i][1]
+			et.SetEdge(u, v, E(w))
+		} else {
+			var u, v int32
+			fmt.Fscan(in, &u, &v)
+			u, v = u-1, v-1
+			fmt.Fprintln(out, et.PathEcost(u, v))
+		}
+	}
 }
 
 func demo() {
@@ -67,7 +140,7 @@ type EulerTour struct {
 	vertexCost                                       []E
 	path                                             []int32
 	vCostSubtree, vCostPath, eCostSubtree, eCostPath *bitGroup32
-	mask                                             int32
+	mask                                             int
 	st                                               *SegmentTree32
 }
 
@@ -114,7 +187,7 @@ func NewEulerTour(adjList [][]neighbor, root int32, vertexCost []E) *EulerTour {
 				eCost2[curTime] = ec
 				vCost1[curTime] = vertexCost[v]
 				vCost2[curTime] = vertexCost[v]
-				if len(adjList[v]) == 1 {
+				if len(adjList[v]) <= 1 { // 叶子节点
 					nodeOut[v] = curTime + 1
 				}
 				for _, e := range adjList[v] {
@@ -128,13 +201,13 @@ func NewEulerTour(adjList [][]neighbor, root int32, vertexCost []E) *EulerTour {
 					stack = append(stack, neighbor{next: x, cost: c})
 				}
 			} else {
-				v = ^v
-				path[curTime] = v
+				curV := ^v
+				path[curTime] = curV
 				eCost1[curTime] = e()
 				eCost2[curTime] = inv(ec)
 				vCost1[curTime] = e()
-				vCost2[curTime] = inv(vertexCost[v])
-				nodeOut[v] = curTime
+				vCost2[curTime] = inv(vertexCost[curV])
+				nodeOut[curV] = curTime
 			}
 		}
 	}
@@ -162,11 +235,7 @@ func NewEulerTour(adjList [][]neighbor, root int32, vertexCost []E) *EulerTour {
 	res.eCostPath = newBITGroup32From(2*n, func(i int32) E { return eCost2[i] })
 	bit := bits.Len32(uint32(len(path)))
 	res.mask = (1 << bit) - 1
-	a := make([]int32, len(path))
-	for i, v := range path {
-		a[i] = (depth[v] << bit) + int32(i) // (深度，编号)
-	}
-	res.st = NewSegmentTree32From(a)
+	res.st = NewSegmentTree32(int32(len(path)), func(i int32) SegData { return int(depth[path[i]])<<bit + int(i) })
 	return res
 }
 
@@ -341,24 +410,12 @@ func (fw *bitGroup32) QueryRange(start, end int32) E {
 
 // PointSetRangeMin
 
-const INF32 int32 = 1 << 30
+const INF int = 1e18
 
-type SegData = int32
+type SegData = int
 
-func (*SegmentTree32) e() SegData              { return INF32 }
-func (*SegmentTree32) op(a, b SegData) SegData { return min32(a, b) }
-func min32(a, b int32) int32 {
-	if a < b {
-		return a
-	}
-	return b
-}
-func max32(a, b int32) int32 {
-	if a > b {
-		return a
-	}
-	return b
-}
+func (*SegmentTree32) e() SegData              { return INF }
+func (*SegmentTree32) op(a, b SegData) SegData { return min(a, b) }
 
 type SegmentTree32 struct {
 	n, size int32
@@ -385,54 +442,6 @@ func NewSegmentTree32(n int32, f func(int32) SegData) *SegmentTree32 {
 	res.size = size
 	res.seg = seg
 	return res
-}
-func NewSegmentTree32From(leaves []SegData) *SegmentTree32 {
-	res := &SegmentTree32{}
-	n := int32(len(leaves))
-	size := int32(1)
-	for size < n {
-		size <<= 1
-	}
-	seg := make([]SegData, size<<1)
-	for i := range seg {
-		seg[i] = res.e()
-	}
-	for i := int32(0); i < n; i++ {
-		seg[i+size] = leaves[i]
-	}
-	for i := size - 1; i > 0; i-- {
-		seg[i] = res.op(seg[i<<1], seg[i<<1|1])
-	}
-	res.n = n
-	res.size = size
-	res.seg = seg
-	return res
-}
-func (st *SegmentTree32) Get(index int32) SegData {
-	if index < 0 || index >= st.n {
-		return st.e()
-	}
-	return st.seg[index+st.size]
-}
-func (st *SegmentTree32) Set(index int32, value SegData) {
-	if index < 0 || index >= st.n {
-		return
-	}
-	index += st.size
-	st.seg[index] = value
-	for index >>= 1; index > 0; index >>= 1 {
-		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
-	}
-}
-func (st *SegmentTree32) Update(index int32, value SegData) {
-	if index < 0 || index >= st.n {
-		return
-	}
-	index += st.size
-	st.seg[index] = st.op(st.seg[index], value)
-	for index >>= 1; index > 0; index >>= 1 {
-		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
-	}
 }
 
 // [start, end)
@@ -463,9 +472,23 @@ func (st *SegmentTree32) Query(start, end int32) SegData {
 	}
 	return st.op(leftRes, rightRes)
 }
-func (st *SegmentTree32) QueryAll() SegData { return st.seg[1] }
-func (st *SegmentTree32) GetAll() []SegData {
-	res := make([]SegData, st.n)
-	copy(res, st.seg[st.size:st.size+st.n])
-	return res
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

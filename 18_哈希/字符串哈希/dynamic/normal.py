@@ -1,585 +1,448 @@
-# from titan_pylib.string.dynamic_hash_string import DynamicHashString
+# from titan_pylib.string.hash_string import HashString
 # ref: https://qiita.com/keymoon/items/11fac5627672a6d6a9f6
-# from titan_pylib.data_structures.splay_tree.reversible_lazy_splay_tree_array import ReversibleLazySplayTreeArrayData, ReversibleLazySplayTreeArray
-from array import array
-from typing import Generic, List, TypeVar, Tuple, Callable, Iterable, Optional, Union, Sequence
-from __pypy__ import newlist_hint
+# from titan_pylib.data_structures.segment_tree.segment_tree import SegmentTree
+# from titan_pylib.data_structures.segment_tree.segment_tree_interface import SegmentTreeInterface
+from abc import ABC, abstractmethod
+from typing import TypeVar, Generic, Union, Iterable, Callable, List
 
 T = TypeVar("T")
-F = TypeVar("F")
 
 
-class ReversibleLazySplayTreeArrayData(Generic[T, F]):
-    def __init__(
-        self,
-        op: Optional[Callable[[T, T], T]] = None,
-        mapping: Optional[Callable[[F, T], T]] = None,
-        composition: Optional[Callable[[F, F], F]] = None,
-        e: T = None,
-        id: F = None,
-    ) -> None:
-        self.op: Callable[[T, T], T] = (lambda s, t: e) if op is None else op
-        self.mapping: Callable[[F, T], T] = (lambda f, s: e) if op is None else mapping
-        self.composition: Callable[[F, F], F] = (lambda f, g: id) if op is None else composition
-        self.e: T = e
-        self.id: F = id
-        self.keydata: List[T] = [e, e, e]
-        self.lazy: List[F] = [id]
-        self.arr: array[int] = array("I", bytes(16))
-        # left:  arr[node<<2]
-        # right: arr[node<<2|1]
-        # size:  arr[node<<2|2]
-        # rev:   arr[node<<2|3]
-        self.end: int = 1
+class SegmentTreeInterface(ABC, Generic[T]):
+    @abstractmethod
+    def __init__(self, n_or_a: Union[int, Iterable[T]], op: Callable[[T, T], T], e: T):
+        raise NotImplementedError
 
-    def reserve(self, n: int) -> None:
-        if n <= 0:
-            return
-        self.keydata += [self.e] * (3 * n)
-        self.lazy += [self.id] * n
-        self.arr += array("I", bytes(16 * n))
+    @abstractmethod
+    def set(self, k: int, v: T) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get(self, k: int) -> T:
+        raise NotImplementedError
+
+    @abstractmethod
+    def prod(self, l: int, r: int) -> T:
+        raise NotImplementedError
+
+    @abstractmethod
+    def all_prod(self) -> T:
+        raise NotImplementedError
+
+    @abstractmethod
+    def max_right(self, l: int, f: Callable[[T], bool]) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    def min_left(self, r: int, f: Callable[[T], bool]) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    def tolist(self) -> List[T]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def __getitem__(self, k: int) -> T:
+        raise NotImplementedError
+
+    @abstractmethod
+    def __setitem__(self, k: int, v: T) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def __str__(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def __repr__(self):
+        raise NotImplementedError
 
 
-class ReversibleLazySplayTreeArray(Generic[T, F]):
-    def __init__(
-        self,
-        data: "ReversibleLazySplayTreeArrayData",
-        n_or_a: Union[int, Iterable[T]] = 0,
-        _root: int = 0,
-    ):
-        self.data = data
-        self.root = _root
-        if not n_or_a:
-            return
+from typing import Generic, Iterable, TypeVar, Callable, Union, List
+
+T = TypeVar("T")
+
+
+class SegmentTree(SegmentTreeInterface, Generic[T]):
+    """セグ木です。非再帰です。"""
+
+    def __init__(self, n_or_a: Union[int, Iterable[T]], op: Callable[[T, T], T], e: T) -> None:
+        """``SegmentTree`` を構築します。
+        :math:`O(n)` です。
+
+        Args:
+          n_or_a (Union[int, Iterable[T]]): ``n: int`` のとき、 ``e`` を初期値として長さ ``n`` の ``SegmentTree`` を構築します。
+                                            ``a: Iterable[T]`` のとき、 ``a`` から ``SegmentTree`` を構築します。
+          op (Callable[[T, T], T]): 2項演算の関数です。
+          e (T): 単位元です。
+        """
+        self._op = op
+        self._e = e
         if isinstance(n_or_a, int):
-            a = [data.e for _ in range(n_or_a)]
-        elif not isinstance(n_or_a, Sequence):
-            a = list(n_or_a)
+            self._n = n_or_a
+            self._log = (self._n - 1).bit_length()
+            self._size = 1 << self._log
+            self._data = [e] * (self._size << 1)
         else:
-            a = n_or_a
-        if a:
-            self._build(a)
+            n_or_a = list(n_or_a)
+            self._n = len(n_or_a)
+            self._log = (self._n - 1).bit_length()
+            self._size = 1 << self._log
+            _data = [e] * (self._size << 1)
+            _data[self._size : self._size + self._n] = n_or_a
+            for i in range(self._size - 1, 0, -1):
+                _data[i] = op(_data[i << 1], _data[i << 1 | 1])
+            self._data = _data
 
-    def _build(self, a: Sequence[T]) -> None:
-        def rec(l: int, r: int) -> int:
-            mid = (l + r) >> 1
-            if l != mid:
-                arr[mid << 2] = rec(l, mid)
-            if mid + 1 != r:
-                arr[mid << 2 | 1] = rec(mid + 1, r)
-            self._update(mid)
-            return mid
+    def set(self, k: int, v: T) -> None:
+        """一点更新です。
+        :math:`O(\\log{n})` です。
 
-        n = len(a)
-        keydata, arr = self.data.keydata, self.data.arr
-        end = self.data.end
-        self.data.reserve(n + end - len(keydata) // 2 + 1)
-        self.data.end += n
-        for i, e in enumerate(a):
-            keydata[(end + i) * 3 + 0] = e
-            keydata[(end + i) * 3 + 1] = e
-            keydata[(end + i) * 3 + 2] = e
-        self.root = rec(end, n + end)
+        Args:
+          k (int): 更新するインデックスです。
+          v (T): 更新する値です。
 
-    def _make_node(self, key: T) -> int:
-        data = self.data
-        if data.end >= len(data.arr) // 4:
-            data.keydata.append(key)
-            data.keydata.append(key)
-            data.keydata.append(key)
-            data.lazy.append(data.id)
-            data.arr.append(0)
-            data.arr.append(0)
-            data.arr.append(1)
-            data.arr.append(0)
-        else:
-            data.keydata[data.end * 3 + 0] = key
-            data.keydata[data.end * 3 + 1] = key
-            data.keydata[data.end * 3 + 2] = key
-        data.end += 1
-        return data.end - 1
-
-    def _propagate(self, node: int) -> None:
-        data = self.data
-        arr = data.arr
-        if arr[node << 2 | 3]:
-            keydata = data.keydata
-            keydata[node * 3 + 1], keydata[node * 3 + 2] = (
-                keydata[node * 3 + 2],
-                keydata[node * 3 + 1],
-            )
-            arr[node << 2], arr[node << 2 | 1] = arr[node << 2 | 1], arr[node << 2]
-            arr[node << 2 | 3] = 0
-            arr[arr[node << 2] << 2 | 3] ^= 1
-            arr[arr[node << 2 | 1] << 2 | 3] ^= 1
-        nlazy = data.lazy[node]
-        if nlazy == data.id:
-            return
-        lnode, rnode = arr[node << 2], arr[node << 2 | 1]
-        keydata, lazy = data.keydata, data.lazy
-        lazy[node] = data.id
-        if lnode:
-            lazy[lnode] = data.composition(nlazy, lazy[lnode])
-            keydata[lnode * 3 + 0] = data.mapping(nlazy, keydata[lnode * 3 + 0])
-            keydata[lnode * 3 + 1] = data.mapping(nlazy, keydata[lnode * 3 + 1])
-            keydata[lnode * 3 + 2] = data.mapping(nlazy, keydata[lnode * 3 + 2])
-        if rnode:
-            lazy[rnode] = data.composition(nlazy, lazy[rnode])
-            keydata[rnode * 3 + 0] = data.mapping(nlazy, keydata[rnode * 3 + 0])
-            keydata[rnode * 3 + 1] = data.mapping(nlazy, keydata[rnode * 3 + 1])
-            keydata[rnode * 3 + 2] = data.mapping(nlazy, keydata[rnode * 3 + 2])
-
-    def _update_triple(self, x: int, y: int, z: int) -> None:
-        # data = self.data
-        # keydata, arr = data.keydata, data.arr
-        # lx, rx = arr[x<<2], arr[x<<2|1]
-        # ly, ry = arr[y<<2], arr[y<<2|1]
-        # self._propagate(lx)
-        # self._propagate(rx)
-        # self._propagate(ly)
-        # self._propagate(ry)
-        # arr[z<<2|2] = arr[x<<2|2]
-        # arr[x<<2|2] = 1 + arr[lx<<2|2] + arr[rx<<2|2]
-        # arr[y<<2|2] = 1 + arr[ly<<2|2] + arr[ry<<2|2]
-        # keydata[z*3+1] = keydata[x*3+1]
-        # keydata[z*3+2] = keydata[x*3+2]
-        # keydata[x*3+1] = data.op(data.op(keydata[lx*3+1], keydata[x*3]), keydata[rx*3+1])
-        # keydata[x*3+2] = data.op(data.op(keydata[rx*3+2], keydata[x*3]), keydata[lx*3+2])
-        # keydata[y*3+1] = data.op(data.op(keydata[ly*3+1], keydata[y*3]), keydata[ry*3+1])
-        # keydata[y*3+2] = data.op(data.op(keydata[ry*3+2], keydata[y*3]), keydata[ly*3+2])
-        self._update(x)
-        self._update(y)
-        self._update(z)
-
-    def _update_double(self, x: int, y: int) -> None:
-        # data = self.data
-        # keydata, arr = data.keydata, data.arr
-        # lx, rx = arr[x<<2], arr[x<<2|1]
-        # self._propagate(lx)
-        # self._propagate(rx)
-        # arr[y<<2|2] = arr[x<<2|2]
-        # arr[x<<2|2] = 1 + arr[lx<<2|2] + arr[rx<<2|2]
-        # keydata[y*3+1] = keydata[x*3+1]
-        # keydata[y*3+2] = keydata[x*3+2]
-        # keydata[x*3+1] = data.op(data.op(keydata[lx*3+1], keydata[x*3]), keydata[rx*3+1])
-        # keydata[x*3+2] = data.op(data.op(keydata[rx*3+2], keydata[x*3]), keydata[lx*3+2])
-        self._update(x)
-        self._update(y)
-
-    def _update(self, node: int) -> None:
-        data = self.data
-        keydata, arr = data.keydata, data.arr
-        lnode, rnode = arr[node << 2], arr[node << 2 | 1]
-        self._propagate(lnode)
-        self._propagate(rnode)
-        arr[node << 2 | 2] = 1 + arr[lnode << 2 | 2] + arr[rnode << 2 | 2]
-        keydata[node * 3 + 1] = data.op(
-            data.op(keydata[lnode * 3 + 1], keydata[node * 3 + 0]), keydata[rnode * 3 + 1]
-        )
-        keydata[node * 3 + 2] = data.op(
-            data.op(keydata[rnode * 3 + 2], keydata[node * 3 + 0]), keydata[lnode * 3 + 2]
-        )
-
-    def _splay(self, path: List[int], d: int) -> None:
-        arr = self.data.arr
-        g = d & 1
-        while len(path) > 1:
-            pnode = path.pop()
-            gnode = path.pop()
-            f = d >> 1 & 1
-            node = arr[pnode << 2 | g ^ 1]
-            nnode = (pnode if g == f else node) << 2 | f
-            arr[pnode << 2 | g ^ 1] = arr[node << 2 | g]
-            arr[node << 2 | g] = pnode
-            arr[gnode << 2 | f ^ 1] = arr[nnode]
-            arr[nnode] = gnode
-            self._update_triple(gnode, pnode, node)
-            if not path:
-                return
-            d >>= 2
-            g = d & 1
-            arr[path[-1] << 2 | g ^ 1] = node
-        pnode = path.pop()
-        node = arr[pnode << 2 | g ^ 1]
-        arr[pnode << 2 | g ^ 1] = arr[node << 2 | g]
-        arr[node << 2 | g] = pnode
-        self._update_double(pnode, node)
-
-    def _kth_elm_splay(self, node: int, k: int) -> int:
-        arr = self.data.arr
+        制約:
+          :math:`-n \\leq n \\leq k < n`
+        """
+        assert (
+            -self._n <= k < self._n
+        ), f"IndexError: {self.__class__.__name__}.set({k}, {v}), n={self._n}"
         if k < 0:
-            k += arr[node << 2 | 2]
-        d = 0
-        path = []
-        while True:
-            self._propagate(node)
-            t = arr[arr[node << 2] << 2 | 2]
-            if t == k:
-                if path:
-                    self._splay(path, d)
-                return node
-            d = d << 1 | (t > k)
-            path.append(node)
-            node = arr[node << 2 | (t < k)]
-            if t < k:
-                k -= t + 1
+            k += self._n
+        k += self._size
+        self._data[k] = v
+        for _ in range(self._log):
+            k >>= 1
+            self._data[k] = self._op(self._data[k << 1], self._data[k << 1 | 1])
 
-    def _left_splay(self, node: int) -> int:
-        if not node:
-            return 0
-        self._propagate(node)
-        arr = self.data.arr
-        if not arr[node << 2]:
-            return node
-        path = []
-        while arr[node << 2]:
-            path.append(node)
-            node = arr[node << 2]
-            self._propagate(node)
-        self._splay(path, (1 << len(path)) - 1)
-        return node
+    def get(self, k: int) -> T:
+        """一点取得です。
+        :math:`O(1)` です。
 
-    def _right_splay(self, node: int) -> int:
-        if not node:
-            return 0
-        self._propagate(node)
-        arr = self.data.arr
-        if not arr[node << 2 | 1]:
-            return node
-        path = []
-        while arr[node << 2 | 1]:
-            path.append(node)
-            node = arr[node << 2 | 1]
-            self._propagate(node)
-        self._splay(path, 0)
-        return node
+        Args:
+          k (int): インデックスです。
 
-    def reserve(self, n: int) -> None:
-        self.data.reserve(n)
-
-    def merge(self, other: "ReversibleLazySplayTreeArray") -> None:
-        assert self.data is other.data
-        if not other.root:
-            return
-        if not self.root:
-            self.root = other.root
-            return
-        self.root = self._right_splay(self.root)
-        self.data.arr[self.root << 2 | 1] = other.root
-        self._update(self.root)
-
-    def split(
-        self, k: int
-    ) -> Tuple["ReversibleLazySplayTreeArray", "ReversibleLazySplayTreeArray"]:
+        制約:
+          :math:`-n \\leq n \\leq k < n`
+        """
         assert (
-            -len(self) < k <= len(self)
-        ), f"IndexError: ReversibleLazySplayTreeArray.split({k}), len={len(self)}"
+            -self._n <= k < self._n
+        ), f"IndexError: {self.__class__.__name__}.get({k}), n={self._n}"
         if k < 0:
-            k += len(self)
-        if k >= self.data.arr[self.root << 2 | 2]:
-            return self, ReversibleLazySplayTreeArray(self.data, _root=0)
-        self.root = self._kth_elm_splay(self.root, k)
-        left = ReversibleLazySplayTreeArray(self.data, _root=self.data.arr[self.root << 2])
-        self.data.arr[self.root << 2] = 0
-        self._update(self.root)
-        return left, self
-
-    def _internal_split(self, k: int) -> Tuple[int, int]:
-        if k >= self.data.arr[self.root << 2 | 2]:
-            return self.root, 0
-        self.root = self._kth_elm_splay(self.root, k)
-        left = self.data.arr[self.root << 2]
-        self._propagate(left)
-        self.data.arr[self.root << 2] = 0
-        self._update(self.root)
-        return left, self.root
-
-    def reverse(self, l: int, r: int) -> None:
-        assert (
-            0 <= l <= r <= len(self)
-        ), f"IndexError: ReversibleLazySplayTreeArray.reverse({l}, {r}), len={len(self)}"
-        if l == r:
-            return
-        data = self.data
-        left, right = self._internal_split(r)
-        if l:
-            left = self._kth_elm_splay(left, l - 1)
-        data.arr[(data.arr[left << 2 | 1] if l else left) << 2 | 3] ^= 1
-        if right:
-            data.arr[right << 2] = left
-            self._update(right)
-        self.root = right if right else left
-
-    def all_reverse(self) -> None:
-        self.data.arr[self.root << 2 | 3] ^= 1
-        self._propagate(self.root)
-
-    def apply(self, l: int, r: int, f: F) -> None:
-        assert (
-            0 <= l <= r <= len(self)
-        ), f"IndexError: ReversibleLazySplayTreeArray.apply({l}, {r}), len={len(self)}"
-        data = self.data
-        left, right = self._internal_split(r)
-        keydata, lazy = data.keydata, data.lazy
-        if l:
-            left = self._kth_elm_splay(left, l - 1)
-        node = data.arr[left << 2 | 1] if l else left
-        keydata[node * 3 + 0] = data.mapping(f, keydata[node * 3 + 0])
-        keydata[node * 3 + 1] = data.mapping(f, keydata[node * 3 + 1])
-        keydata[node * 3 + 2] = data.mapping(f, keydata[node * 3 + 2])
-        lazy[node] = data.composition(f, lazy[node])
-        if l:
-            self._update(left)
-        if right:
-            data.arr[right << 2] = left
-            self._update(right)
-        self.root = right if right else left
-
-    def all_apply(self, f: F) -> None:
-        if not self.root:
-            return
-        data, node = self.data, self.root
-        data.keydata[node * 3 + 0] = data.mapping(f, data.keydata[node * 3 + 0])
-        data.keydata[node * 3 + 1] = data.mapping(f, data.keydata[node * 3 + 1])
-        data.keydata[node * 3 + 2] = data.mapping(f, data.keydata[node * 3 + 2])
-        data.lazy[node] = data.composition(f, data.lazy[node])
+            k += self._n
+        return self._data[k + self._size]
 
     def prod(self, l: int, r: int) -> T:
-        assert (
-            0 <= l <= r <= len(self)
-        ), f"IndexError: LazySplayTree.prod({l}, {r}), len={len(self)}"
-        data = self.data
-        left, right = self._internal_split(r)
-        if l:
-            left = self._kth_elm_splay(left, l - 1)
-        node = data.arr[left << 2 | 1] if l else left
-        self._propagate(node)
-        res = data.keydata[node * 3 + 1]
-        if right:
-            data.arr[right << 2] = left
-            self._update(right)
-        self.root = right if right else left
-        return res
+        """区間 ``[l, r)`` の総積を返します。
+        :math:`O(\\log{n})` です。
+
+        Args:
+          l (int): インデックスです。
+          r (int): インデックスです。
+
+        制約:
+          :math:`0 \\leq l \\leq r \\leq n`
+        """
+        assert 0 <= l <= r <= self._n, f"IndexError: {self.__class__.__name__}.prod({l}, {r})"
+        l += self._size
+        r += self._size
+        lres = self._e
+        rres = self._e
+        while l < r:
+            if l & 1:
+                lres = self._op(lres, self._data[l])
+                l += 1
+            if r & 1:
+                rres = self._op(self._data[r ^ 1], rres)
+            l >>= 1
+            r >>= 1
+        return self._op(lres, rres)
 
     def all_prod(self) -> T:
-        return self.data.keydata[self.root * 3 + 1]
+        """区間 ``[0, n)`` の総積を返します。
+        :math:`O(1)` です。
+        """
+        return self._data[1]
 
-    def insert(self, k: int, key: T) -> None:
+    def max_right(self, l: int, f: Callable[[T], bool]) -> int:
+        """Find the largest index R s.t. f([l, R)) == True. / O(\\log{n})"""
         assert (
-            -len(self) <= k <= len(self)
-        ), f"IndexError: ReversibleLazySplayTreeArray.insert({k}, {key}), len={len(self)}"
-        if k < 0:
-            k += len(self)
-        data = self.data
-        node = self._make_node(key)
-        if not self.root:
-            self._update(node)
-            self.root = node
-            return
-        arr = data.arr
-        if k == data.arr[self.root << 2 | 2]:
-            arr[node << 2] = self._right_splay(self.root)
-        else:
-            node_ = self._kth_elm_splay(self.root, k)
-            if arr[node_ << 2]:
-                arr[node << 2] = arr[node_ << 2]
-                arr[node_ << 2] = 0
-                self._update(node_)
-            arr[node << 2 | 1] = node_
-        self._update(node)
-        self.root = node
+            0 <= l <= self._n
+        ), f"IndexError: {self.__class__.__name__}.max_right({l}, f) index out of range"
+        # assert f(self._e), \
+        #     f'{self.__class__.__name__}.max_right({l}, f), f({self._e}) must be true.'
+        if l == self._n:
+            return self._n
+        l += self._size
+        s = self._e
+        while True:
+            while l & 1 == 0:
+                l >>= 1
+            if not f(self._op(s, self._data[l])):
+                while l < self._size:
+                    l <<= 1
+                    if f(self._op(s, self._data[l])):
+                        s = self._op(s, self._data[l])
+                        l |= 1
+                return l - self._size
+            s = self._op(s, self._data[l])
+            l += 1
+            if l & -l == l:
+                break
+        return self._n
 
-    def append(self, key: T) -> None:
-        data = self.data
-        node = self._right_splay(self.root)
-        self.root = self._make_node(key)
-        data.arr[self.root << 2] = node
-        self._update(self.root)
-
-    def appendleft(self, key: T) -> None:
-        node = self._left_splay(self.root)
-        self.root = self._make_node(key)
-        self.data.arr[self.root << 2 | 1] = node
-        self._update(self.root)
-
-    def pop(self, k: int = -1) -> T:
-        assert -len(self) <= k < len(self), f"IndexError: ReversibleLazySplayTreeArray.pop({k})"
-        data = self.data
-        if k == -1:
-            node = self._right_splay(self.root)
-            self._propagate(node)
-            self.root = data.arr[node << 2]
-            return data.keydata[node * 3 + 0]
-        self.root = self._kth_elm_splay(self.root, k)
-        res = data.keydata[self.root * 3 + 0]
-        if not data.arr[self.root << 2]:
-            self.root = data.arr[self.root << 2 | 1]
-        elif not data.arr[self.root << 2 | 1]:
-            self.root = data.arr[self.root << 2]
-        else:
-            node = self._right_splay(data.arr[self.root << 2])
-            data.arr[node << 2 | 1] = data.arr[self.root << 2 | 1]
-            self.root = node
-            self._update(self.root)
-        return res
-
-    def popleft(self) -> T:
-        assert self, "IndexError: ReversibleLazySplayTreeArray.popleft()"
-        node = self._left_splay(self.root)
-        self.root = self.data.arr[node << 2 | 1]
-        return self.data.keydata[node * 3 + 0]
-
-    def rotate(self, x: int) -> None:
-        # 「末尾をを削除し先頭に挿入」をx回
-        n = self.data.arr[self.root << 2 | 2]
-        l, self = self.split(n - (x % n))
-        self.merge(l)
+    def min_left(self, r: int, f: Callable[[T], bool]) -> int:
+        """Find the smallest index L s.t. f([L, r)) == True. / O(\\log{n})"""
+        assert (
+            0 <= r <= self._n
+        ), f"IndexError: {self.__class__.__name__}.min_left({r}, f) index out of range"
+        # assert f(self._e), \
+        #     f'{self.__class__.__name__}.min_left({r}, f), f({self._e}) must be true.'
+        if r == 0:
+            return 0
+        r += self._size
+        s = self._e
+        while True:
+            r -= 1
+            while r > 1 and r & 1:
+                r >>= 1
+            if not f(self._op(self._data[r], s)):
+                while r < self._size:
+                    r = r << 1 | 1
+                    if f(self._op(self._data[r], s)):
+                        s = self._op(self._data[r], s)
+                        r ^= 1
+                return r + 1 - self._size
+            s = self._op(self._data[r], s)
+            if r & -r == r:
+                break
+        return 0
 
     def tolist(self) -> List[T]:
-        node = self.root
-        arr, keydata = self.data.arr, self.data.keydata
-        stack = newlist_hint(len(self))
-        res = newlist_hint(len(self))
-        while stack or node:
-            if node:
-                self._propagate(node)
-                stack.append(node)
-                node = arr[node << 2]
-            else:
-                node = stack.pop()
-                res.append(keydata[node * 3 + 0])
-                node = arr[node << 2 | 1]
-        return res
+        """リストにして返します。
+        :math:`O(n)` です。
+        """
+        return [self.get(i) for i in range(self._n)]
 
-    def clear(self) -> None:
-        self.root = 0
-
-    def __setitem__(self, k: int, key: T):
-        assert (
-            -len(self) <= k < len(self)
-        ), f"IndexError: ReversibleLazySplayTreeArray.__setitem__({k})"
-        self.root = self._kth_elm_splay(self.root, k)
-        self.data.keydata[self.root * 3 + 0] = key
-        self._update(self.root)
+    def show(self) -> None:
+        """デバッグ用のメソッドです。"""
+        print(
+            f"<{self.__class__.__name__}> [\n"
+            + "\n".join(
+                [
+                    "  " + " ".join(map(str, [self._data[(1 << i) + j] for j in range(1 << i)]))
+                    for i in range(self._log + 1)
+                ]
+            )
+            + "\n]"
+        )
 
     def __getitem__(self, k: int) -> T:
         assert (
-            -len(self) <= k < len(self)
-        ), f"IndexError: ReversibleLazySplayTreeArray.__getitem__({k})"
-        self.root = self._kth_elm_splay(self.root, k)
-        return self.data.keydata[self.root * 3 + 0]
+            -self._n <= k < self._n
+        ), f"IndexError: {self.__class__.__name__}.__getitem__({k}), n={self._n}"
+        return self.get(k)
 
-    def __iter__(self):
-        self.__iter = 0
-        return self
+    def __setitem__(self, k: int, v: T):
+        assert (
+            -self._n <= k < self._n
+        ), f"IndexError: {self.__class__.__name__}.__setitem__{k}, {v}), n={self._n}"
+        self.set(k, v)
 
-    def __next__(self):
-        if self.__iter == self.data.arr[self.root << 2 | 2]:
-            raise StopIteration
-        res = self.__getitem__(self.__iter)
-        self.__iter += 1
-        return res
+    def __len__(self) -> int:
+        return self._n
 
-    def __reversed__(self):
-        for i in range(len(self)):
-            yield self.__getitem__(-i - 1)
-
-    def __len__(self):
-        return self.data.arr[self.root << 2 | 2]
-
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.tolist())
 
-    def __bool__(self):
-        return self.root != 0
-
-    def __repr__(self):
-        return f"ReversibleLazySplayTreeArray({self})"
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self})"
 
 
-from typing import Optional, Dict, Final
+from typing import Optional, List, Dict, Final
 import random
 import string
 
-_titan_pylib_DynamicHashString_MOD: Final[int] = (1 << 61) - 1
-_titan_pylib_DynamicHashString_DIC: Final[Dict[str, int]] = {
+_titan_pylib_HashString_MOD: Final[int] = (1 << 61) - 1
+_titan_pylib_HashString_DIC: Final[Dict[str, int]] = {
     c: i for i, c in enumerate(string.ascii_lowercase, 1)
 }
-_titan_pylib_DynamicHashString_MASK30: Final[int] = (1 << 30) - 1
-_titan_pylib_DynamicHashString_MASK31: Final[int] = (1 << 31) - 1
-_titan_pylib_DynamicHashString_MASK61: Final[int] = _titan_pylib_DynamicHashString_MOD
+_titan_pylib_HashString_MASK30: Final[int] = (1 << 30) - 1
+_titan_pylib_HashString_MASK31: Final[int] = (1 << 31) - 1
+_titan_pylib_HashString_MASK61: Final[int] = _titan_pylib_HashString_MOD
 
 
-class DynamicHashStringBase:
-    """動的な文字列に対するロリハです。
-
-    平衡二分木にモノイドを載せてるだけです。こんなライブラリ必要ないです。
-    """
+class HashStringBase:
+    """HashStringのベースクラスです。"""
 
     def __init__(self, n: int, base: int = -1, seed: Optional[int] = None) -> None:
+        """
+        :math:`O(n)` です。
+
+        Args:
+          n (int): 文字列の長さの上限です。
+          base (int, optional): Defaults to -1.
+          seed (Optional[int], optional): Defaults to None.
+        """
         random.seed(seed)
         base = random.randint(37, 10**9) if base < 0 else base
         powb = [1] * (n + 1)
+        invb = [1] * (n + 1)
+        invbpow = pow(base, -1, _titan_pylib_HashString_MOD)
         for i in range(1, n + 1):
-            powb[i] = self.get_mul(powb[i - 1], base)
-        op = lambda s, t: (self.unite(s[0], t[0], t[1]), s[1] + t[1])
-        e = (0, 0)
-        self.data = ReversibleLazySplayTreeArrayData(op=op, e=e)
+            powb[i] = HashStringBase.get_mul(powb[i - 1], base)
+            invb[i] = HashStringBase.get_mul(invb[i - 1], invbpow)
+        print(powb)
+        print(invb)
+        print(invbpow)
         self.n = n
         self.powb = powb
+        self.invb = invb
 
     @staticmethod
     def get_mul(a: int, b: int) -> int:
         au = a >> 31
-        ad = a & _titan_pylib_DynamicHashString_MASK31
+        ad = a & _titan_pylib_HashString_MASK31
         bu = b >> 31
-        bd = b & _titan_pylib_DynamicHashString_MASK31
+        bd = b & _titan_pylib_HashString_MASK31
         mid = ad * bu + au * bd
         midu = mid >> 30
-        midd = mid & _titan_pylib_DynamicHashString_MASK30
-        return DynamicHashStringBase.get_mod(au * bu * 2 + midu + (midd << 31) + ad * bd)
+        midd = mid & _titan_pylib_HashString_MASK30
+        return HashStringBase.get_mod(au * bu * 2 + midu + (midd << 31) + ad * bd)
 
     @staticmethod
     def get_mod(x: int) -> int:
-        # 商と余りを計算して足す->割る
         xu = x >> 61
-        xd = x & _titan_pylib_DynamicHashString_MASK61
+        xd = x & _titan_pylib_HashString_MASK61
         res = xu + xd
-        if res >= _titan_pylib_DynamicHashString_MOD:
-            res -= _titan_pylib_DynamicHashString_MOD
+        if res >= _titan_pylib_HashString_MOD:
+            res -= _titan_pylib_HashString_MOD
+
         return res
 
     def unite(self, h1: int, h2: int, k: int) -> int:
-        # h1, h2, k
         # len(h2) == k
         # h1 <- h2
         return self.get_mod(self.get_mul(h1, self.powb[k]) + h2)
 
 
-class DynamicHashString:
-    def __init__(self, hsb: DynamicHashStringBase, s: str) -> None:
+class HashString:
+    def __init__(self, hsb: HashStringBase, s: str, update: bool = False) -> None:
+        """ロリハを構築します。
+        :math:`O(n)` です。
+
+        Args:
+          hsb (HashStringBase): ベースクラスです。
+          s (str): ロリハを構築する文字列です。
+          update (bool, optional): ``update=True`` のとき、1点更新が可能になります。
+        """
+        n = len(s)
+        data = [0] * n
+        acc = [0] * (n + 1)
+        powb = hsb.powb
+        for i, c in enumerate(s):
+            data[i] = hsb.get_mul(powb[n - i - 1], ord(c))
+            acc[i + 1] = hsb.get_mod(acc[i] + data[i])
         self.hsb = hsb
-        self.splay = ReversibleLazySplayTreeArray(
-            hsb.data, ((_titan_pylib_DynamicHashString_DIC[c], 1) for c in s)
-        )
-
-    def insert(self, k: int, c: str) -> None:
-        self.splay.insert(k, (_titan_pylib_DynamicHashString_DIC[c], 1))
-
-    def pop(self, k: int) -> int:
-        return self.splay.pop(k)
-
-    def reverse(self, l: int, r: int) -> None:
-        self.splay.reverse(l, r)
+        self.n = n
+        self.acc = acc
+        self.used_seg = False
+        if update:
+            self.seg = SegmentTree(data, lambda s, t: (s + t) % _titan_pylib_HashString_MOD, 0)
 
     def get(self, l: int, r: int) -> int:
-        return self.splay.prod(l, r)
+        """``s[l, r)`` のハッシュ値を返します。
+        1点更新処理後は :math:`O(\\log{n})` 、そうでなければ :math:`O(1)` です。
+
+        Args:
+          l (int): インデックスです。
+          r (int): インデックスです。
+
+        Returns:
+          int: ハッシュ値です。
+        """
+        if self.used_seg:
+            return self.hsb.get_mul(self.seg.prod(l, r), self.hsb.invb[self.n - r])
+        return self.hsb.get_mul(
+            self.hsb.get_mod(self.acc[r] - self.acc[l]), self.hsb.invb[self.n - r]
+        )
 
     def __getitem__(self, k: int) -> int:
+        """``s[k]`` のハッシュ値を返します。
+        1点更新処理後は :math:`O(\\log{n})` 、そうでなければ :math:`O(1)` です。
+
+        Args:
+          k (int): インデックスです。
+
+        Returns:
+          int: ハッシュ値です。
+        """
         return self.get(k, k + 1)
 
     def set(self, k: int, c: str) -> None:
-        self.splay[k] = (_titan_pylib_DynamicHashString_DIC[c], 1)
+        """`k` 番目の文字を `c` に更新します。
+        :math:`O(\\log{n})` です。また、今後の ``get()`` が :math:`O(\\log{n})` になります。
+
+        Args:
+          k (int): インデックスです。
+          c (str): 更新する文字です。
+        """
+        self.used_seg = True
+        self.seg[k] = self.hsb.get_mul(self.hsb.powb[self.n - k - 1], ord(c))
 
     def __setitem__(self, k: int, c: str) -> None:
         return self.set(k, c)
+
+    def __len__(self):
+        return self.n
+
+    def get_lcp(self) -> List[int]:
+        """lcp配列を返します。
+        :math:`O(n\\log{n})` です。
+        """
+        a = [0] * self.n
+        memo = [-1] * (self.n + 1)
+        for i in range(self.n):
+            ok, ng = 0, self.n - i + 1
+            while ng - ok > 1:
+                mid = (ok + ng) >> 1
+                if memo[mid] == -1:
+                    memo[mid] = self.get(0, mid)
+                if memo[mid] == self.get(i, i + mid):
+                    ok = mid
+                else:
+                    ng = mid
+            a[i] = ok
+        return a
+
+
+if __name__ == "__main__":
+    s = "asezfvgbadpihoamgkcmco"
+    base = HashStringBase(len(s), 37)
+    hs = HashString(base, s)
+    for i in range(4):
+        print(hs.get(i, i + 1))
+
+    class Solution:
+        def sumScores(self, s: str) -> int:
+            def countPre(curLen: int, start: int) -> int:
+                left, right = 1, curLen
+                while left <= right:
+                    mid = (left + right) // 2
+                    if hasher.get(start, start + mid) == hasher.get(0, mid):
+                        left = mid + 1
+                    else:
+                        right = mid - 1
+                return right
+
+            n = len(s)
+            base = HashStringBase(n, -1)
+            hasher = HashString(base, s)
+            res = 0
+            for i in range(1, n + 1):
+                if s[-i] != s[0]:
+                    continue
+                count = countPre(i, n - i)
+                res += count
+            return res

@@ -139,8 +139,8 @@ func main() {
 				io.Println(0)
 				preRes = 0
 			} else {
-				d := lct.QueryPath(nodes[B], nodes[C])
-				if d != 3 {
+				d := lct.Dist(nodes[B], nodes[C])
+				if d != 2 {
 					io.Println(0)
 					preRes = 0
 				} else {
@@ -319,6 +319,12 @@ func (lct *LinkCutTree32) QueryToRoot(u *treeNode) E {
 func (lct *LinkCutTree32) QueryPath(u, v *treeNode) E {
 	lct.Evert(u)
 	return lct.QueryToRoot(v)
+}
+
+func (lct *LinkCutTree32) Dist(u, v *treeNode) int32 {
+	lct.Evert(u)
+	lct.expose(v)
+	return v.sz - 1
 }
 
 // t の値を v に変更する.

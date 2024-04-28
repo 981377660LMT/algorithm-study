@@ -331,6 +331,12 @@ func (lct *LinkCutTreeSubTreeAdd) Lca(u, v *Node) *Node {
 	return lct._expose(v)
 }
 
+func (lct *LinkCutTreeSubTreeAdd) Dist(u, v *Node) int32 {
+	lct.Evert(u)
+	lct._expose(v)
+	return v.cnt - 1
+}
+
 func (lct *LinkCutTreeSubTreeAdd) KthAncestor(node *Node, k int32) *Node {
 	lct._expose(node)
 	for node != nil {

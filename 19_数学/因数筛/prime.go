@@ -14,6 +14,7 @@ import (
 func main() {
 	fmt.Println(SegmentedSieve(0, 100))
 	fmt.Println(IsPrimeMillerRabin(4))
+	fmt.Println(IsPrimeMillerRabin(1<<61 - 1))
 	fmt.Println(PollardRhoPrimeFactor(100))
 	fmt.Println(GetPrimeFactorsBig(1e18 + 9))
 	EnumerateFactors(100, func(factor int) bool {

@@ -296,6 +296,12 @@ func (lct *LinkCutTreeLazy32) GetRoot(t *treeNode) *treeNode {
 	return t
 }
 
+func (lct *LinkCutTreeLazy32) Dist(u, v *treeNode) int32 {
+	lct.Evert(u)
+	lct.expose(v)
+	return v.sz - 1
+}
+
 // u と v が同じ連結成分に属する場合は true, そうでなければ false を返す.
 func (lct *LinkCutTreeLazy32) IsConnected(u, v *treeNode) bool {
 	return u == v || lct.GetRoot(u) == lct.GetRoot(v)
