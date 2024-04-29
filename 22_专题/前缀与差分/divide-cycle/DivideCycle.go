@@ -1,3 +1,4 @@
+// 环区间分解(环分解，环遍历)
 // DivideCycle/CycleDivide
 
 package main
@@ -5,12 +6,12 @@ package main
 import "fmt"
 
 func main() {
-	DivideCycle(10, 8, 9, func(start, end int, times int) {
+	DivideCycle(10, 8, 90, func(start, end int, times int) {
 		fmt.Println(start, end, times)
 	})
 }
 
-// 环区间分解(环分解，环遍历)
+// 将环上的区间分解为形如`[start, end)`的区间，每个区间遍历`times`次.
 func DivideCycle(n int, start int, end int, f func(start, end int, times int)) {
 	if start >= end || n <= 0 {
 		return

@@ -7620,5 +7620,65 @@
       ""
     ],
     "description": "subtreeInfo"
+  },
+  "DivideCycle": {
+    "scope": "go",
+    "prefix": ["DivideCycle", "divideCycle", "cycleDivide"],
+    "body": [
+      "",
+      "// 环区间分解(环分解，环遍历)",
+      "func DivideCycle(n int, start int, end int, f func(start, end int, times int)) {",
+      "\tif start >= end || n <= 0 {",
+      "\t\treturn",
+      "\t}",
+      "\tloop := (end - start) / n",
+      "\tif loop > 0 {",
+      "\t\tf(0, n, loop)",
+      "\t}",
+      "\tif (end-start)%n == 0 {",
+      "\t\treturn",
+      "\t}",
+      "\tstart %= n",
+      "\tend %= n",
+      "\tif start < end {",
+      "\t\tf(start, end, 1)",
+      "\t} else {",
+      "\t\tf(start, n, 1)",
+      "\t\tif end > 0 {",
+      "\t\t\tf(0, end, 1)",
+      "\t\t}",
+      "\t}",
+      "}",
+      ""
+    ],
+    "description": "DivideCycle"
+  },
+  "divideCycle": {
+    "scope": "python",
+    "prefix": ["divideCycle", "cycleDivide"],
+    "body": [
+      "from typing import Generator, Tuple",
+      "",
+      "",
+      "def divideCycle(n: int, start: int, end: int) -> Generator[Tuple[int, int, int], None, None]:",
+      "\t\t\"\"\"将环分解为若干形如 (start, end, times) 的区间.\"\"\"",
+      "\t\tif start >= end or n <= 0:",
+      "\t\t\t\treturn",
+      "\t\tloop = (end - start) // n",
+      "\t\tif loop > 0:",
+      "\t\t\t\tyield 0, n, loop",
+      "\t\tif (end - start) % n == 0:",
+      "\t\t\t\treturn",
+      "\t\tstart %= n",
+      "\t\tend %= n",
+      "\t\tif start < end:",
+      "\t\t\t\tyield start, end, 1",
+      "\t\telse:",
+      "\t\t\t\tyield start, n, 1",
+      "\t\t\t\tif end > 0:",
+      "\t\t\t\t\t\tyield 0, end, 1",
+      ""
+    ],
+    "description": "divideCycle"
   }
 }
