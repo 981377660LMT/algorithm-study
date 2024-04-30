@@ -2,7 +2,9 @@ import { swapRange } from './swapRange'
 
 function rotateLeft(arr: Array<unknown>, start: number, end: number, step: number): void {
   const n = end - start
+  if (n <= 1 || step === 0) return
   if (step >= n) step %= n
+  if (step === 0) return
   swapRange(arr, start, start + step)
   swapRange(arr, start + step, end)
   swapRange(arr, start, end)
@@ -10,7 +12,9 @@ function rotateLeft(arr: Array<unknown>, start: number, end: number, step: numbe
 
 function rotateRight(arr: Array<unknown>, start: number, end: number, step: number): void {
   const n = end - start
+  if (n <= 1 || step === 0) return
   if (step >= n) step %= n
+  if (step === 0) return
   swapRange(arr, start, end - step)
   swapRange(arr, end - step, end)
   swapRange(arr, start, end)
@@ -23,5 +27,7 @@ if (require.main === module) {
   rotateLeft(arr, 3, 7, 3)
   console.log(arr)
   rotateRight(arr, 3, 7, 3)
+  console.log(arr)
+  rotateRight(arr, 1, 2, 3)
   console.log(arr)
 }

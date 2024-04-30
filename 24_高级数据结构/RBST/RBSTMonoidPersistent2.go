@@ -43,19 +43,18 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
+	"time"
 )
 
-func demo() {
-	// tree1 := Build([]E{{1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}})
-	// fmt.Println(QueryAll(tree1))
-	// tree2 := Update(tree1, 1, 3, 1)
-	// fmt.Println(QueryAll(tree2))
-	// fmt.Println(QueryAll(tree1))
+func main() {
+	// arc030_4()
+	testTime()
 }
 
 // https://atcoder.jp/contests/arc030/tasks/arc030_4
-func main() {
+func arc030_4() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -71,11 +70,11 @@ func main() {
 	root := Build(leaves)
 
 	for i := 0; i < q; i++ {
-		var t, a, b, c, d, v int
+		var t, a, b, c, d, v int32
 		fmt.Fscan(in, &t)
 		if t == 1 {
 			fmt.Fscan(in, &a, &b, &v)
-			root = Update(root, a-1, b, v)
+			root = Update(root, a-1, b, int(v))
 		} else if t == 2 {
 			fmt.Fscan(in, &a, &b, &c, &d)
 			root = CopyWithin(root, a-1, c-1, d)
@@ -88,7 +87,7 @@ func main() {
 
 const INF int = 1e18
 
-const _PERSISTENT = false // !是否启用持久化
+const _PERSISTENT = true // !是否启用持久化
 
 // RangeAddRangeSum
 
@@ -99,8 +98,8 @@ func rev(e E) E     { return e }
 func e() E          { return 0 }
 func id() Id        { return 0 }
 func op(e1, e2 E) E { return e1 + e2 }
-func mapping(f Id, e E, size int) E {
-	return f*size + e
+func mapping(f Id, e E, size int32) E {
+	return f*int(size) + e
 }
 func composition(f, g Id) Id { return f + g }
 func less(e1, e2 E) bool     { return e1 < e2 }
@@ -115,7 +114,7 @@ type Node struct {
 	value       E
 	data        E
 	lazy        Id
-	size        int
+	size        int32
 	isReversed  bool
 }
 
@@ -177,7 +176,7 @@ func Merge(left, right *Node) *Node {
 }
 
 // split root to [0,k) and [k,n)
-func SplitByRank(root *Node, k int) (*Node, *Node) {
+func SplitByRank(root *Node, k int32) (*Node, *Node) {
 	if root == nil {
 		return nil, nil
 	}
@@ -199,7 +198,7 @@ func SplitByRank(root *Node, k int) (*Node, *Node) {
 }
 
 // 左中右子树:[0, l) and [l, r) and [r, n).
-func Split3ByRank(root *Node, l, r int) (*Node, *Node, *Node) {
+func Split3ByRank(root *Node, l, r int32) (*Node, *Node, *Node) {
 	if root == nil {
 		return nil, nil, nil
 	}
@@ -228,7 +227,7 @@ func SplitByValue(root *Node, value E) (*Node, *Node) {
 }
 
 // Fold.
-func Query(node **Node, start, end int) (res E) {
+func Query(node **Node, start, end int32) (res E) {
 	if start >= end {
 		return e()
 	}
@@ -251,7 +250,7 @@ func QueryAll(node *Node) E {
 }
 
 // Apply.
-func Update(node *Node, start, end int, f Id) *Node {
+func Update(node *Node, start, end int32, f Id) *Node {
 	if start >= end {
 		return node
 	}
@@ -270,7 +269,15 @@ func UpdateAll(node *Node, f Id) *Node {
 	return node
 }
 
-func Reverse(node *Node, start, end int) *Node {
+func Set(root *Node, k int32, v E) *Node {
+	return _setRec(root, k, v)
+}
+
+func Get(root *Node, k int32) E {
+	return _getRec(root, k, false, id())
+}
+
+func Reverse(node *Node, start, end int32) *Node {
 	if start >= end {
 		return node
 	}
@@ -286,7 +293,7 @@ func ReverseAll(node *Node) *Node {
 	return node
 }
 
-func Size(node *Node) int {
+func Size(node *Node) int32 {
 	if node == nil {
 		return 0
 	}
@@ -347,6 +354,30 @@ func _toggle(node *Node) {
 	node.isReversed = !node.isReversed
 }
 
+func (rbst *RBSTAbelGroup) _setRec(root *Node, k int32, v E) *Node {
+	if root == nil {
+		return nil
+	}
+	rbst._pushDown(root)
+	leftSize := rbst.Size(root.left)
+	if k < leftSize {
+		root = rbst._copyNode(root)
+		root.left = rbst._setRec(root.left, k, v)
+		rbst._pushUp(root)
+		return root
+	} else if k == leftSize {
+		root = rbst._copyNode(root)
+		root.value = v
+		rbst._pushUp(root)
+		return root
+	} else {
+		root = rbst._copyNode(root)
+		root.right = rbst._setRec(root.right, k-leftSize-1, v)
+		rbst._pushUp(root)
+		return root
+	}
+}
+
 var _x uint32 = 123456789
 var _y uint32 = 362436069
 var _z uint32 = 521288629
@@ -357,20 +388,6 @@ func _nextRand() uint32 {
 	_x, _y, _z = _y, _z, _w
 	_w = (_w ^ (_w >> 19)) ^ (t ^ (t >> 8))
 	return _w
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 func _copyNode(node *Node) *Node {
@@ -388,7 +405,7 @@ func _copyNode(node *Node) *Node {
 	}
 }
 
-func CopyWithin(root *Node, target int, start, end int) *Node {
+func CopyWithin(root *Node, target int32, start, end int32) *Node {
 	if !_PERSISTENT {
 		panic("CopyWithin should be used in persistent mode")
 	}
@@ -402,7 +419,7 @@ func CopyWithin(root *Node, target int, start, end int) *Node {
 	return root
 }
 
-func Pop(root *Node, index int) (newRoot *Node, res E) {
+func Pop(root *Node, index int32) (newRoot *Node, res E) {
 	n := Size(root)
 	if index < 0 {
 		index += n
@@ -415,13 +432,13 @@ func Pop(root *Node, index int) (newRoot *Node, res E) {
 }
 
 // Remove [start, stop) from list.
-func Erase(root *Node, start, stop int) *Node {
+func Erase(root *Node, start, stop int32) *Node {
 	x, _, z := Split3ByRank(root, start, stop)
 	return Merge(x, z)
 }
 
 // Insert node before pos.
-func Insert(root *Node, pos int, node *Node) *Node {
+func Insert(root *Node, pos int32, node *Node) *Node {
 	n := Size(root)
 	if pos < 0 {
 		pos += n
@@ -437,7 +454,7 @@ func Insert(root *Node, pos int, node *Node) *Node {
 }
 
 // Rotate [start, stop) to the right `k` times.
-func RotateRight(root *Node, start, stop, k int) *Node {
+func RotateRight(root *Node, start, stop, k int32) *Node {
 	start++
 	n := stop - start + 1 - k%(stop-start+1)
 
@@ -448,7 +465,7 @@ func RotateRight(root *Node, start, stop, k int) *Node {
 }
 
 // Rotate [start, stop) to the left `k` times.
-func RotateLeft(root *Node, start, stop, k int) *Node {
+func RotateLeft(root *Node, start, stop, k int32) *Node {
 	start++
 	k %= (stop - start + 1)
 
@@ -474,14 +491,14 @@ func GetAll(node *Node) []E {
 	return res
 }
 
-func MaxRight(root *Node, e E, f func(E) bool) int {
+func MaxRight(root *Node, e E, f func(E) bool) int32 {
 	if root == nil {
 		return 0
 	}
 	_pushDown(root)
 	now := root
 	prodNow := e
-	res := 0
+	res := int32(0)
 	for {
 		if now.left != nil {
 			_pushDown(now.left)
@@ -508,7 +525,7 @@ func MaxRight(root *Node, e E, f func(E) bool) int {
 	}
 }
 
-func MinLeft(root *Node, e E, f func(E) bool) int {
+func MinLeft(root *Node, e E, f func(E) bool) int32 {
 	if root == nil {
 		return 0
 	}
@@ -541,4 +558,60 @@ func MinLeft(root *Node, e E, f func(E) bool) int {
 		now = now.left
 	}
 
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+func testTime() {
+	n := int(2e5)
+	arr := make([]int, n)
+	for i := 0; i < n; i++ {
+		arr[i] = rand.Intn(100) + 1
+	}
+
+	root := Build(arr)
+
+	time1 := time.Now()
+	for j := 0; j < int(2e5); j++ {
+		root = Update(root, int32(j), int32(j+1), Id(j))
+		tree.Set(int32(j), E(j))
+		tree.Get(int32(j))
+		tree.Insert(int32(j), E(j))
+		tree.Pop(int32(j))
+		tree.Update(int32(j), int32(n), Id(j))
+		tree.UpdateAll(Id(j))
+		tree.Reverse(int32(j), int32(n))
+		tree.ReverseAll()
+		tree.Query(int32(j), int32(n))
+		tree.QueryAll()
+		a, b := tree.Split(int32(j))
+		a.Merge(b)
+		tree = a
+	}
+	fmt.Println(time.Since(time1)) // 485.857042ms
 }

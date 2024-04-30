@@ -72,11 +72,11 @@ func main2() {
 	root := R.Build(leaves)
 
 	for i := 0; i < q; i++ {
-		var t, a, b, c, d, v int
+		var t, a, b, c, d, v int32
 		fmt.Fscan(in, &t)
 		if t == 1 {
 			fmt.Fscan(in, &a, &b, &v)
-			root = R.UpdateRange(root, a-1, b, v)
+			root = R.UpdateRange(root, a-1, b, int(v))
 		} else if t == 2 {
 			fmt.Fscan(in, &a, &b, &c, &d)
 			root = R.CopyWithin(root, a-1, c-1, d)
@@ -119,12 +119,12 @@ func demo() {
 type E = int
 type Id = int
 
-func e() E                          { return 0 }
-func id() Id                        { return 0 }
-func op(e1, e2 E) E                 { return e1 + e2 }
-func mapping(f Id, e E, size int) E { return f*size + e }
-func composition(f, g Id) Id        { return f + g }
-func less(e1, e2 E) bool            { return e1 < e2 }
+func e() E                            { return 0 }
+func id() Id                          { return 0 }
+func op(e1, e2 E) E                   { return e1 + e2 }
+func mapping(f Id, e E, size int32) E { return f*int(size) + e }
+func composition(f, g Id) Id          { return f + g }
+func less(e1, e2 E) bool              { return e1 < e2 }
 
 //
 //
@@ -135,7 +135,7 @@ type Node struct {
 	left, right *Node
 	value, data E
 	lazy        Id
-	size        int
+	size        int32
 	isReversed  bool
 }
 
@@ -205,7 +205,7 @@ func (rbst *RBSTAbelGroup) Merge4(a, b, c, d *Node) *Node {
 }
 
 // 左右子树:[0, k) and [k, n).
-func (rbst *RBSTAbelGroup) SplitByRank(root *Node, k int) (*Node, *Node) {
+func (rbst *RBSTAbelGroup) SplitByRank(root *Node, k int32) (*Node, *Node) {
 	if root == nil {
 		return nil, nil
 	}
@@ -213,7 +213,7 @@ func (rbst *RBSTAbelGroup) SplitByRank(root *Node, k int) (*Node, *Node) {
 }
 
 // 左中右子树:[0, l) and [l, r) and [r, n).
-func (rbst *RBSTAbelGroup) Split3ByRank(root *Node, l, r int) (*Node, *Node, *Node) {
+func (rbst *RBSTAbelGroup) Split3ByRank(root *Node, l, r int32) (*Node, *Node, *Node) {
 	if root == nil {
 		return nil, nil, nil
 	}
@@ -223,7 +223,7 @@ func (rbst *RBSTAbelGroup) Split3ByRank(root *Node, l, r int) (*Node, *Node, *No
 }
 
 // 四个子树:[0, i) and [i, j) and [j, k) and [k, n).
-func (rbst *RBSTAbelGroup) Split4ByRank(root *Node, i, j, k int) (*Node, *Node, *Node, *Node) {
+func (rbst *RBSTAbelGroup) Split4ByRank(root *Node, i, j, k int32) (*Node, *Node, *Node, *Node) {
 	if root == nil {
 		return nil, nil, nil, nil
 	}
@@ -251,7 +251,7 @@ func (rbst *RBSTAbelGroup) SplitByValue(root *Node, value E) (*Node, *Node) {
 	}
 }
 
-func (rbst *RBSTAbelGroup) Query(root *Node, start, end int) E {
+func (rbst *RBSTAbelGroup) Query(root *Node, start, end int32) E {
 	if start >= end || root == nil {
 		return e()
 	}
@@ -265,7 +265,7 @@ func (rbst *RBSTAbelGroup) QueryAll(root *Node) E {
 	return root.data
 }
 
-func (rbst *RBSTAbelGroup) Reverse(root *Node, start, end int) *Node {
+func (rbst *RBSTAbelGroup) Reverse(root *Node, start, end int32) *Node {
 	if end-start <= 1 || root == nil {
 		return root
 	}
@@ -275,11 +275,11 @@ func (rbst *RBSTAbelGroup) Reverse(root *Node, start, end int) *Node {
 	return rbst.Merge3(left, mid, right)
 }
 
-func (rbst *RBSTAbelGroup) UpdateRange(root *Node, start, end int, f Id) *Node {
+func (rbst *RBSTAbelGroup) UpdateRange(root *Node, start, end int32, f Id) *Node {
 	return rbst._updateRangeRec(root, start, end, f)
 }
 
-func (rbst *RBSTAbelGroup) CopyWithin(root *Node, target int, start, end int) *Node {
+func (rbst *RBSTAbelGroup) CopyWithin(root *Node, target int32, start, end int32) *Node {
 	if !rbst.persistent {
 		panic("CopyWithin only works on persistent RBST")
 	}
@@ -293,11 +293,11 @@ func (rbst *RBSTAbelGroup) CopyWithin(root *Node, target int, start, end int) *N
 	return root
 }
 
-func (rbst *RBSTAbelGroup) Set(root *Node, k int, v E) *Node {
+func (rbst *RBSTAbelGroup) Set(root *Node, k int32, v E) *Node {
 	return rbst._setRec(root, k, v)
 }
 
-func (rbst *RBSTAbelGroup) Get(root *Node, k int) E {
+func (rbst *RBSTAbelGroup) Get(root *Node, k int32) E {
 	return rbst._getRec(root, k, false, id())
 }
 
@@ -363,7 +363,7 @@ func (rbst *RBSTAbelGroup) _splitMaxRightRec(root *Node, x *E, check func(v E) b
 	return root, n2
 }
 
-func (rbst *RBSTAbelGroup) Size(root *Node) int {
+func (rbst *RBSTAbelGroup) Size(root *Node) int32 {
 	if root == nil {
 		return 0
 	}
@@ -454,7 +454,7 @@ func (rbst *RBSTAbelGroup) _mergeRec(left, right *Node) *Node {
 	}
 }
 
-func (rbst *RBSTAbelGroup) _splitRec(root *Node, k int) (*Node, *Node) {
+func (rbst *RBSTAbelGroup) _splitRec(root *Node, k int32) (*Node, *Node) {
 	if root == nil {
 		return nil, nil
 	}
@@ -475,7 +475,7 @@ func (rbst *RBSTAbelGroup) _splitRec(root *Node, k int) (*Node, *Node) {
 	}
 }
 
-func (rbst *RBSTAbelGroup) _setRec(root *Node, k int, v E) *Node {
+func (rbst *RBSTAbelGroup) _setRec(root *Node, k int32, v E) *Node {
 	if root == nil {
 		return nil
 	}
@@ -499,7 +499,7 @@ func (rbst *RBSTAbelGroup) _setRec(root *Node, k int, v E) *Node {
 	}
 }
 
-func (rbst *RBSTAbelGroup) _updateRangeRec(root *Node, l, r int, lazy Id) *Node {
+func (rbst *RBSTAbelGroup) _updateRangeRec(root *Node, l, r int32, lazy Id) *Node {
 	rbst._pushDown(root)
 	root = rbst._copyNode(root)
 	if l == 0 && r == root.size {
@@ -510,20 +510,20 @@ func (rbst *RBSTAbelGroup) _updateRangeRec(root *Node, l, r int, lazy Id) *Node 
 	}
 	leftSize := rbst.Size(root.left)
 	if l < leftSize {
-		root.left = rbst._updateRangeRec(root.left, l, min(r, leftSize), lazy)
+		root.left = rbst._updateRangeRec(root.left, l, min32(r, leftSize), lazy)
 	}
 	if l <= leftSize && leftSize < r {
 		root.value = mapping(lazy, root.value, 1)
 	}
 	k := 1 + leftSize
 	if k < r {
-		root.right = rbst._updateRangeRec(root.right, max(k, l)-k, r-k, lazy)
+		root.right = rbst._updateRangeRec(root.right, max32(k, l)-k, r-k, lazy)
 	}
 	rbst._pushUp(root)
 	return root
 }
 
-func (rbst *RBSTAbelGroup) _getRec(root *Node, k int, rev bool, lazy Id) E {
+func (rbst *RBSTAbelGroup) _getRec(root *Node, k int32, rev bool, lazy Id) E {
 	left, right := root.left, root.right
 	if rev {
 		left, right = right, left
@@ -541,7 +541,7 @@ func (rbst *RBSTAbelGroup) _getRec(root *Node, k int, rev bool, lazy Id) E {
 	}
 }
 
-func (rbst *RBSTAbelGroup) _queryRec(root *Node, l, r int, rev bool) E {
+func (rbst *RBSTAbelGroup) _queryRec(root *Node, l, r int32, rev bool) E {
 	if l == 0 && r == root.size {
 		return root.data
 	}
@@ -553,16 +553,16 @@ func (rbst *RBSTAbelGroup) _queryRec(root *Node, l, r int, rev bool) E {
 	nextRev := rev != root.isReversed
 	res := e()
 	if l < leftSize {
-		y := rbst._queryRec(left, l, min(r, leftSize), nextRev)
-		res = op(res, mapping(root.lazy, y, min(r, leftSize)-l))
+		y := rbst._queryRec(left, l, min32(r, leftSize), nextRev)
+		res = op(res, mapping(root.lazy, y, min32(r, leftSize)-l))
 	}
 	if l <= leftSize && leftSize < r {
 		res = op(res, root.value)
 	}
 	k := 1 + leftSize
 	if k < r {
-		y := rbst._queryRec(right, max(k, l)-k, r-k, nextRev)
-		res = op(res, mapping(root.lazy, y, r-max(k, l)))
+		y := rbst._queryRec(right, max32(k, l)-k, r-k, nextRev)
+		res = op(res, mapping(root.lazy, y, r-max32(k, l)))
 	}
 	return res
 }
@@ -588,7 +588,7 @@ func max(a, b int) int {
 	return b
 }
 
-func (rbst *RBSTAbelGroup) Pop(root *Node, index int) (newRoot *Node, res E) {
+func (rbst *RBSTAbelGroup) Pop(root *Node, index int32) (newRoot *Node, res E) {
 	n := rbst.Size(root)
 	if index < 0 {
 		index += n
@@ -601,13 +601,13 @@ func (rbst *RBSTAbelGroup) Pop(root *Node, index int) (newRoot *Node, res E) {
 }
 
 // Remove [start, stop) from list.
-func (rbst *RBSTAbelGroup) Erase(root *Node, start, stop int) *Node {
+func (rbst *RBSTAbelGroup) Erase(root *Node, start, stop int32) *Node {
 	x, _, z := rbst.Split3ByRank(root, start, stop)
 	return rbst.Merge(x, z)
 }
 
 // Insert node before pos.
-func (rbst *RBSTAbelGroup) Insert(root *Node, pos int, node *Node) *Node {
+func (rbst *RBSTAbelGroup) Insert(root *Node, pos int32, node *Node) *Node {
 	n := rbst.Size(root)
 	if pos < 0 {
 		pos += n
@@ -623,7 +623,7 @@ func (rbst *RBSTAbelGroup) Insert(root *Node, pos int, node *Node) *Node {
 }
 
 // Rotate [start, stop) to the right `k` times.
-func (rbst *RBSTAbelGroup) RotateRight(root *Node, start, stop, k int) *Node {
+func (rbst *RBSTAbelGroup) RotateRight(root *Node, start, stop, k int32) *Node {
 	start++
 	n := stop - start + 1 - k%(stop-start+1)
 
@@ -634,7 +634,7 @@ func (rbst *RBSTAbelGroup) RotateRight(root *Node, start, stop, k int) *Node {
 }
 
 // Rotate [start, stop) to the left `k` times.
-func (rbst *RBSTAbelGroup) RotateLeft(root *Node, start, stop, k int) *Node {
+func (rbst *RBSTAbelGroup) RotateLeft(root *Node, start, stop, k int32) *Node {
 	start++
 	k %= (stop - start + 1)
 
@@ -642,4 +642,18 @@ func (rbst *RBSTAbelGroup) RotateLeft(root *Node, start, stop, k int) *Node {
 	y, z := rbst.SplitByRank(y, k)
 	z, p := rbst.SplitByRank(z, stop-start+1-k)
 	return rbst.Merge(rbst.Merge(rbst.Merge(x, z), y), p)
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
 }
