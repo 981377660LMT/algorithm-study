@@ -50,6 +50,10 @@ import (
 
 const INF int = 1e18
 
+func main() {
+	main2()
+}
+
 // https://atcoder.jp/contests/arc030/tasks/arc030_4
 func main2() {
 	in := bufio.NewReader(os.Stdin)
@@ -83,7 +87,7 @@ func main2() {
 	}
 }
 
-func main() {
+func demo() {
 	R := NewRBSTAbelGroup(false)
 	root := R.Build([]E{1, 2, 3, 4, 5})
 	fmt.Println(R.GetAll(root)) // [1 2 3 4 5]

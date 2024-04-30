@@ -31,7 +31,12 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"runtime/debug"
 )
+
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 const MOD int = 998244353
 

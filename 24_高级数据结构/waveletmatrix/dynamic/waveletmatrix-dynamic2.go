@@ -49,7 +49,7 @@ import (
 func main() {
 
 	// test()
-	// testTime()
+	testTime()
 
 	CF455D()
 	// libraryQuery()
@@ -271,8 +271,8 @@ func maxs32(nums []int32) int32 {
 	return max
 }
 
-// 1e5 -> 150 , 2e5 -> 250
-const _LOAD int32 = 200 // 块尺寸越大，修改越快，查询越慢
+// 1e5 -> 100 , 2e5 -> 200
+const _LOAD int32 = 100 // 块尺寸越大，修改越快，查询越慢
 
 // 维护[0,maxValue].
 type WaveletMatrixDynamic struct {

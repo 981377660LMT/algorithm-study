@@ -49,8 +49,8 @@ import (
 )
 
 func main() {
-	test()
-	// testTime()
+	// test()
+	testTime()
 
 	// CF455D()
 	// libraryQuery()
@@ -726,7 +726,7 @@ func newAVLTreeBitVector(data []int8) *AVLTreeBitVector {
 		left:      []int32{0},
 		right:     []int32{0},
 		balance:   []int8{0},
-		pathStack: make([]int32, 0, 128),
+		pathStack: make([]int32, 0, 32),
 	}
 	if len(data) > 0 {
 		res._build(data)

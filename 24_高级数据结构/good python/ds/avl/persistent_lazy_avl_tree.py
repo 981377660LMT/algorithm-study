@@ -1,4 +1,5 @@
 # from titan_pylib.data_structures.avl_tree.persistent_lazy_avl_tree import PersistentLazyAVLTree
+from random import randint
 from typing import Generic, Iterable, Optional, TypeVar, Callable, List, Tuple, Union
 
 T = TypeVar("T")
@@ -47,7 +48,7 @@ class PersistentLazyAVLTree(Generic[T, F]):
         self,
         a: Iterable[T],
         op: Callable[[T, T], T],
-        mapping: Callable[[F, T], T],
+        mapping: Callable[[F, T, int], T],
         composition: Callable[[F, F], F],
         e: T,
         id: F,
@@ -55,7 +56,7 @@ class PersistentLazyAVLTree(Generic[T, F]):
     ) -> None:
         self.root: Optional[PersistentLazyAVLTree.Node] = _root
         self.op: Callable[[T, T], T] = op
-        self.mapping: Callable[[F, T], T] = mapping
+        self.mapping: Callable[[F, T, int], T] = mapping
         self.composition: Callable[[F, F], F] = composition
         self.e: T = e
         self.id: F = id
@@ -94,14 +95,14 @@ class PersistentLazyAVLTree(Generic[T, F]):
             node.lazy = self.id
             if node.left:
                 l = node.left.copy()
-                l.data = self.mapping(lazy, l.data)
-                l.key = self.mapping(lazy, l.key)
+                l.data = self.mapping(lazy, l.data, l.size)
+                l.key = self.mapping(lazy, l.key, l.size)
                 l.lazy = self.composition(lazy, l.lazy)
                 node.left = l
             if node.right:
                 r = node.right.copy()
-                r.data = self.mapping(lazy, r.data)
-                r.key = self.mapping(lazy, r.key)
+                r.data = self.mapping(lazy, r.data, r.size)
+                r.key = self.mapping(lazy, r.key, r.size)
                 r.lazy = self.composition(lazy, r.lazy)
                 node.right = r
 
@@ -279,8 +280,8 @@ class PersistentLazyAVLTree(Generic[T, F]):
                     continue
                 self._propagate(node)
                 if l <= left and right < r:
-                    node.key = self.mapping(f, node.key)
-                    node.data = self.mapping(f, node.data)
+                    node.key = self.mapping(f, node.key, node.size)
+                    node.data = self.mapping(f, node.data, node.size)
                     node.lazy = f if node.lazy == self.id else self.composition(f, node.lazy)
                 else:
                     lsize = node.left.size if node.left else 0
@@ -290,7 +291,7 @@ class PersistentLazyAVLTree(Generic[T, F]):
                         node.left = left_copy
                         stack.append((left_copy, left, left + lsize))
                     if l <= left + lsize < r:
-                        node.key = self.mapping(f, node.key)
+                        node.key = self.mapping(f, node.key, node.size)
                     if node.right:
                         r_copy = node.right.copy()
                         node.right = r_copy
@@ -382,3 +383,36 @@ class PersistentLazyAVLTree(Generic[T, F]):
 
     def __repr__(self):
         return f"PersistentLazyAVLTree({self})"
+
+
+if __name__ == "__main__":
+    # test sum
+    for _ in range(100):
+        n = randint(0, 3)
+        a = [randint(0, 3) for _ in range(n)]
+        tree = PersistentLazyAVLTree(
+            a,  # [(value, size)
+            e=0,
+            id=0,
+            op=lambda x, y: x + y,
+            mapping=lambda f, x, s: x + f * s,
+            composition=lambda f, g: f + g,
+        )
+        for _ in range(100):
+            for i in range(n):
+                for j in range(i + 1, n + 1):
+                    sum1 = tree.prod(i, j)
+                    sum2 = sum(a[i:j])
+                    if sum1 != sum2:
+                        print(i, j, sum1, sum2, a)
+                        exit()
+            # apply
+            s, t = randint(0, n), randint(0, n)
+            if s > t:
+                s, t = t, s
+            f = randint(0, 100)
+            tree = tree.apply(s, t, f)
+            for i in range(s, t):
+                a[i] += f
+
+    print("PASSED")
