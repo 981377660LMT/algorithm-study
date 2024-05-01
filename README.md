@@ -21,6 +21,7 @@
    - [Substring Matching](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/isSubarray.py)
    - [SubsequenceAutomaton](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%AD%90%E5%BA%8F%E5%88%97%E8%87%AA%E5%8A%A8%E6%9C%BA/SubsequenceAutomaton.py)
    - [Rabin-Karp Algorithm](18_%E5%93%88%E5%B8%8C/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%93%88%E5%B8%8C/StringHasher-new.ts)
+   - [DynamicHash](18_%E5%93%88%E5%B8%8C/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%93%88%E5%B8%8C/dynamic)
    - [String Minimum Representation](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95/%E6%9C%80%E5%B0%8F%E8%A1%A8%E7%A4%BA%E6%B3%95.py)
    - [KMP Algorithm](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/kmp/kmp.py)
    - [Z-Algorithm](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/kmp/z%E5%87%BD%E6%95%B0-%E6%89%A9%E5%B1%95kmp.py)

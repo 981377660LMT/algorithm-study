@@ -15,6 +15,7 @@
 //   ToList() []E
 //   Size() int32
 
+// !这里的Monoid必须要满足交换律(commutative)
 package main
 
 import (

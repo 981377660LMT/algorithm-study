@@ -43,14 +43,11 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/rand"
 	"os"
-	"time"
 )
 
 func main() {
-	// arc030_4()
-	testTime()
+	arc030_4()
 }
 
 // https://atcoder.jp/contests/arc030/tasks/arc030_4
@@ -269,14 +266,6 @@ func UpdateAll(node *Node, f Id) *Node {
 	return node
 }
 
-func Set(root *Node, k int32, v E) *Node {
-	return _setRec(root, k, v)
-}
-
-func Get(root *Node, k int32) E {
-	return _getRec(root, k, false, id())
-}
-
 func Reverse(node *Node, start, end int32) *Node {
 	if start >= end {
 		return node
@@ -352,30 +341,6 @@ func _toggle(node *Node) {
 	node.left, node.right = node.right, node.left
 	node.data = rev(node.data)
 	node.isReversed = !node.isReversed
-}
-
-func (rbst *RBSTAbelGroup) _setRec(root *Node, k int32, v E) *Node {
-	if root == nil {
-		return nil
-	}
-	rbst._pushDown(root)
-	leftSize := rbst.Size(root.left)
-	if k < leftSize {
-		root = rbst._copyNode(root)
-		root.left = rbst._setRec(root.left, k, v)
-		rbst._pushUp(root)
-		return root
-	} else if k == leftSize {
-		root = rbst._copyNode(root)
-		root.value = v
-		rbst._pushUp(root)
-		return root
-	} else {
-		root = rbst._copyNode(root)
-		root.right = rbst._setRec(root.right, k-leftSize-1, v)
-		rbst._pushUp(root)
-		return root
-	}
 }
 
 var _x uint32 = 123456789
@@ -586,32 +551,4 @@ func max32(a, b int32) int32 {
 		return a
 	}
 	return b
-}
-func testTime() {
-	n := int(2e5)
-	arr := make([]int, n)
-	for i := 0; i < n; i++ {
-		arr[i] = rand.Intn(100) + 1
-	}
-
-	root := Build(arr)
-
-	time1 := time.Now()
-	for j := 0; j < int(2e5); j++ {
-		root = Update(root, int32(j), int32(j+1), Id(j))
-		tree.Set(int32(j), E(j))
-		tree.Get(int32(j))
-		tree.Insert(int32(j), E(j))
-		tree.Pop(int32(j))
-		tree.Update(int32(j), int32(n), Id(j))
-		tree.UpdateAll(Id(j))
-		tree.Reverse(int32(j), int32(n))
-		tree.ReverseAll()
-		tree.Query(int32(j), int32(n))
-		tree.QueryAll()
-		a, b := tree.Split(int32(j))
-		a.Merge(b)
-		tree = a
-	}
-	fmt.Println(time.Since(time1)) // 485.857042ms
 }

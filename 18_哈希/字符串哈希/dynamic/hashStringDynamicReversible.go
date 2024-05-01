@@ -1,5 +1,5 @@
 // dynamicHashString/hashStringDynamic
-// 动态哈希.
+// 支持区间翻转的动态哈希.
 //
 // api:
 //  1. Insert(i, c): 在第i个位置插入字符c.
@@ -7,6 +7,8 @@
 //  3. Set(i, c): 将第i个位置的字符设置为c.
 //  4. Get(start, end): 获取[start, end)的哈希值.
 //  5. GetAll(): 获取所有字符的哈希值.
+//  6. Reverse(start, end): 将[start, end)的字符反转.
+//  7. ReverseAll(): 将所有字符反转.
 
 package main
 
@@ -33,12 +35,13 @@ func init() {
 func demo() {
 	s := "asezfvgbadpihoamgkcmco"
 	base := NewDynamicHashStringBase(len(s), 37)
-	hs := NewDynamicHashString(len(s), func(i int) uint { return uint(s[i]) }, base)
+	hs := NewDynamicHashStringReverible(len(s), func(i int) uint { return uint(s[i]) }, base)
 	fmt.Println(hs.Get(0, 1))
 	fmt.Println(hs.Get(1, 2))
 	fmt.Println(hs.Get(2, 3))
 	hs.Set(0, 1)
 	fmt.Println(hs.Get(0, 1))
+	hs.Reverse(0, 3)
 	fmt.Println(hs.Get(0, 1))
 	fmt.Println(hs.Get(1, 2))
 	fmt.Println(hs.Get(2, 3))
@@ -57,11 +60,14 @@ func abc331_f() {
 	fmt.Fscan(in, &s)
 
 	base := NewDynamicHashStringBase(len(s), 0)
-	hasher1 := NewDynamicHashString(len(s), func(i int) uint { return uint(s[i]) }, base)
-	hasher2 := NewDynamicHashString(len(s), func(i int) uint { return uint(s[n-i-1]) }, base)
+	hasher1 := NewDynamicHashStringReverible(len(s), func(i int) uint { return uint(s[i]) }, base)
 
 	isPalindrome := func(start, end int) bool {
-		return hasher1.Get(start, end) == hasher2.Get(n-end, n-start)
+		hash1 := hasher1.Get(start, end)
+		hasher1.Reverse(start, end)
+		hash2 := hasher1.Get(start, end)
+		hasher1.Reverse(start, end)
+		return hash1 == hash2
 	}
 
 	for i := 0; i < q; i++ {
@@ -73,7 +79,6 @@ func abc331_f() {
 			fmt.Fscan(in, &pos, &c)
 			pos--
 			hasher1.Set(pos, uint(c[0]))
-			hasher2.Set(n-pos-1, uint(c[0]))
 		} else {
 			var l, r int
 			fmt.Fscan(in, &l, &r)
@@ -91,7 +96,7 @@ func abc331_f() {
 func sumScores(s string) int64 {
 	n := len(s)
 	base := NewDynamicHashStringBase(n, 0)
-	hasher := NewDynamicHashString(n, func(i int) uint { return uint(s[i]) }, base)
+	hasher := NewDynamicHashStringReverible(n, func(i int) uint { return uint(s[i]) }, base)
 	countPre := func(curLen, start int) int {
 		left, right := 1, curLen
 		for left <= right {
@@ -177,15 +182,15 @@ func (hsb *DynamicHashStringBase) Mod(x uint) uint {
 	return res
 }
 
-type DynamicHashString struct {
+type DynamicHashStringReversible struct {
 	n    int
 	base *DynamicHashStringBase
-	avl  *avlTreeWithSum
+	avl  *avlTreeWithSumReversibleNoncommutative
 }
 
-func NewDynamicHashString(n int, f func(i int) uint, base *DynamicHashStringBase) *DynamicHashString {
-	res := &DynamicHashString{n: n, base: base}
-	res.avl = newAVLTreeWithSum(
+func NewDynamicHashStringReverible(n int, f func(i int) uint, base *DynamicHashStringBase) *DynamicHashStringReversible {
+	res := &DynamicHashStringReversible{n: n, base: base}
+	res.avl = newAVLTreeWithSumReversibleNoncommutative(
 		int32(n), func(i int32) E { return E{hash: f(int(i)), len: 1} },
 		func() E { return E{} },
 		func(a, b E) E { return E{hash: base.Concat(a.hash, b.hash, uint(b.len)), len: a.len + b.len} },
@@ -193,17 +198,32 @@ func NewDynamicHashString(n int, f func(i int) uint, base *DynamicHashStringBase
 	return res
 }
 
-func (hs *DynamicHashString) Insert(index int, c uint) {
+func (hs *DynamicHashStringReversible) Insert(index int, c uint) {
 	hs.avl.Insert(int32(index), E{hash: c, len: 1})
 	hs.n++
 }
 
-func (hs *DynamicHashString) Pop(index int) uint {
+func (hs *DynamicHashStringReversible) Pop(index int) uint {
 	hs.n--
 	return hs.avl.Pop(int32(index)).hash
 }
 
-func (hs *DynamicHashString) Get(start, end int) uint {
+func (hs *DynamicHashStringReversible) Reverse(start, end int) {
+	if start < 0 {
+		start = 0
+	}
+	if end > hs.n {
+		end = hs.n
+	}
+	if start >= end {
+		return
+	}
+	hs.avl.Reverse(int32(start), int32(end))
+}
+
+func (hs *DynamicHashStringReversible) ReverseAll() { hs.avl.ReverseAll() }
+
+func (hs *DynamicHashStringReversible) Get(start, end int) uint {
 	if start < 0 {
 		start = 0
 	}
@@ -219,18 +239,16 @@ func (hs *DynamicHashString) Get(start, end int) uint {
 	return hs.avl.Query(int32(start), int32(end)).hash
 }
 
-func (hs *DynamicHashString) GetAll() uint {
-	return hs.avl.QueryAll().hash
-}
+func (hs *DynamicHashStringReversible) GetAll() uint { return hs.avl.QueryAll().hash }
 
-func (hs *DynamicHashString) Set(index int, c uint) {
+func (hs *DynamicHashStringReversible) Set(index int, c uint) {
 	if index < 0 || index >= hs.n {
 		return
 	}
 	hs.avl.Set(int32(index), E{hash: c, len: 1})
 }
 
-func (hs *DynamicHashString) Len() int { return hs.n }
+func (hs *DynamicHashStringReversible) Len() int { return hs.n }
 
 type E = struct {
 	hash uint
@@ -240,13 +258,15 @@ type E = struct {
 type aNode struct {
 	key         E
 	data        E
+	revData     E
 	left, right *aNode
 	height      int8
 	size        int32
+	rev         bool
 }
 
 func _newANode(key E) *aNode {
-	return &aNode{key: key, data: key, height: 1, size: 1}
+	return &aNode{key: key, data: key, revData: key, height: 1, size: 1}
 }
 
 func (n *aNode) Balance() int8 {
@@ -262,29 +282,36 @@ func (n *aNode) Balance() int8 {
 	return n.left.height - n.right.height
 }
 
+func (n *aNode) String() string {
+	if n.left == nil && n.right == nil {
+		return fmt.Sprintf("key=%v, height=%v, size=%v\n", n.key, n.height, n.size)
+	}
+	return fmt.Sprintf("key=%v, height=%v, size=%v,\n left:%v,\n right:%v\n", n.key, n.height, n.size, n.left, n.right)
+}
+
 var (
 	tmpPath = make([]*aNode, 0, 128)
 )
 
-type avlTreeWithSum struct {
+type avlTreeWithSumReversibleNoncommutative struct {
 	root *aNode
 	e    func() E
 	op   func(E, E) E
 }
 
-func newAVLTreeWithSum(n int32, f func(int32) E, e func() E, op func(E, E) E) *avlTreeWithSum {
-	res := &avlTreeWithSum{e: e, op: op}
+func newAVLTreeWithSumReversibleNoncommutative(n int32, f func(int32) E, e func() E, op func(E, E) E) *avlTreeWithSumReversibleNoncommutative {
+	res := &avlTreeWithSumReversibleNoncommutative{e: e, op: op}
 	if n > 0 {
 		res._build(n, f)
 	}
 	return res
 }
 
-func (t *avlTreeWithSum) Merge(other *avlTreeWithSum) {
+func (t *avlTreeWithSumReversibleNoncommutative) Merge(other *avlTreeWithSumReversibleNoncommutative) {
 	t.root = t._mergeNode(t.root, other.root)
 }
 
-func (t *avlTreeWithSum) Insert(k int32, key E) {
+func (t *avlTreeWithSumReversibleNoncommutative) Insert(k int32, key E) {
 	n := t.Size()
 	if k < 0 {
 		k += n
@@ -299,12 +326,12 @@ func (t *avlTreeWithSum) Insert(k int32, key E) {
 	t.root = t._mergeWithRoot(a, _newANode(key), b)
 }
 
-func (t *avlTreeWithSum) Split(k int32) (*avlTreeWithSum, *avlTreeWithSum) {
+func (t *avlTreeWithSumReversibleNoncommutative) Split(k int32) (*avlTreeWithSumReversibleNoncommutative, *avlTreeWithSumReversibleNoncommutative) {
 	a, b := t._splitNode(t.root, k)
 	return _newWithRoot(a, t.e, t.op), _newWithRoot(b, t.e, t.op)
 }
 
-func (t *avlTreeWithSum) Pop(k int32) E {
+func (t *avlTreeWithSumReversibleNoncommutative) Pop(k int32) E {
 	if k < 0 {
 		k += t.Size()
 	}
@@ -314,7 +341,7 @@ func (t *avlTreeWithSum) Pop(k int32) E {
 	return tmp.key
 }
 
-func (t *avlTreeWithSum) Set(k int32, key E) {
+func (t *avlTreeWithSumReversibleNoncommutative) Set(k int32, key E) {
 	if k < 0 {
 		k += t.Size()
 	}
@@ -322,7 +349,7 @@ func (t *avlTreeWithSum) Set(k int32, key E) {
 	tmpPath = tmpPath[:0]
 	path := tmpPath
 	for {
-
+		t._propagate(node)
 		path = append(path, node)
 		t := int32(0)
 		if node.left != nil {
@@ -344,15 +371,15 @@ func (t *avlTreeWithSum) Set(k int32, key E) {
 	}
 }
 
-func (t *avlTreeWithSum) Clear() { t.root = nil }
+func (t *avlTreeWithSumReversibleNoncommutative) Clear() { t.root = nil }
 
-func (t *avlTreeWithSum) ToList() []E {
+func (t *avlTreeWithSumReversibleNoncommutative) ToList() []E {
 	node := t.root
 	stack := make([]*aNode, 0)
 	res := make([]E, 0, t.Size())
 	for len(stack) > 0 || node != nil {
 		if node != nil {
-
+			t._propagate(node)
 			stack = append(stack, node)
 			node = node.left
 		} else {
@@ -365,13 +392,13 @@ func (t *avlTreeWithSum) ToList() []E {
 	return res
 }
 
-func (t *avlTreeWithSum) Get(k int32) E {
+func (t *avlTreeWithSumReversibleNoncommutative) Get(k int32) E {
 	if k < 0 {
 		k += t.Size()
 	}
 	node := t.root
 	for {
-
+		t._propagate(node)
 		t := int32(0)
 		if node.left != nil {
 			t = node.left.size
@@ -386,8 +413,35 @@ func (t *avlTreeWithSum) Get(k int32) E {
 		}
 	}
 }
+func (avl *avlTreeWithSumReversibleNoncommutative) Reverse(start, end int32) {
+	if start < 0 {
+		start = 0
+	}
+	if n := avl.Size(); end > n {
+		end = n
+	}
+	if start >= end {
+		return
+	}
+	if start == 0 && end == avl.Size() {
+		avl.ReverseAll()
+		return
+	}
+	s, t := avl._splitNode(avl.root, end)
+	r, s := avl._splitNode(s, start)
+	s.rev = !s.rev
+	s.data, s.revData = s.revData, s.data
+	avl.root = avl._mergeNode(avl._mergeNode(r, s), t)
+}
 
-func (avl *avlTreeWithSum) Query(start, end int32) E {
+func (avl *avlTreeWithSumReversibleNoncommutative) ReverseAll() {
+	if avl.root == nil {
+		return
+	}
+	avl.root.rev = !avl.root.rev
+}
+
+func (avl *avlTreeWithSumReversibleNoncommutative) Query(start, end int32) E {
 	if start < 0 {
 		start = 0
 	}
@@ -402,7 +456,11 @@ func (avl *avlTreeWithSum) Query(start, end int32) E {
 		if right <= start || end <= left {
 			return avl.e()
 		}
+		avl._propagate(node)
 		if start <= left && right < end {
+			if node.rev {
+				return node.revData
+			}
 			return node.data
 		}
 		lsize := int32(0)
@@ -424,25 +482,25 @@ func (avl *avlTreeWithSum) Query(start, end int32) E {
 	return dfs(avl.root, 0, avl.Size())
 }
 
-func (avl *avlTreeWithSum) QueryAll() E {
+func (avl *avlTreeWithSumReversibleNoncommutative) QueryAll() E {
 	if avl.root == nil {
 		return avl.e()
 	}
 	return avl.root.data
 }
 
-func (t *avlTreeWithSum) Size() int32 {
+func (t *avlTreeWithSumReversibleNoncommutative) Size() int32 {
 	if t.root == nil {
 		return 0
 	}
 	return t.root.size
 }
 
-func _newWithRoot(root *aNode, e func() E, op func(a, b E) E) *avlTreeWithSum {
-	return &avlTreeWithSum{root: root, e: e, op: op}
+func _newWithRoot(root *aNode, e func() E, op func(a, b E) E) *avlTreeWithSumReversibleNoncommutative {
+	return &avlTreeWithSumReversibleNoncommutative{root: root, e: e, op: op}
 }
 
-func (t *avlTreeWithSum) _build(n int32, f func(int32) E) {
+func (t *avlTreeWithSumReversibleNoncommutative) _build(n int32, f func(int32) E) {
 	var dfs func(l, r int32) *aNode
 	dfs = func(l, r int32) *aNode {
 		mid := (l + r) >> 1
@@ -459,23 +517,26 @@ func (t *avlTreeWithSum) _build(n int32, f func(int32) E) {
 	t.root = dfs(0, n)
 }
 
-func (t *avlTreeWithSum) _update(node *aNode) {
+func (t *avlTreeWithSumReversibleNoncommutative) _update(node *aNode) {
 	node.size = 1
 	node.data = node.key
+	node.revData = node.key
 	node.height = 1
-	if node.left != nil {
-		node.size += node.left.size
-		node.data = t.op(node.left.data, node.data)
-		node.height = max8(node.left.height+1, 1)
+	if left := node.left; left != nil {
+		node.size += left.size
+		node.data = t.op(left.data, node.data)
+		node.revData = t.op(node.revData, left.revData)
+		node.height = max8(left.height+1, 1)
 	}
-	if node.right != nil {
-		node.size += node.right.size
-		node.data = t.op(node.data, node.right.data)
-		node.height = max8(node.height, node.right.height+1)
+	if right := node.right; right != nil {
+		node.size += right.size
+		node.data = t.op(node.data, right.data)
+		node.revData = t.op(right.revData, node.revData)
+		node.height = max8(node.height, right.height+1)
 	}
 }
 
-func (t *avlTreeWithSum) _rotateRight(node *aNode) *aNode {
+func (t *avlTreeWithSumReversibleNoncommutative) _rotateRight(node *aNode) *aNode {
 	u := node.left
 	node.left = u.right
 	u.right = node
@@ -484,7 +545,7 @@ func (t *avlTreeWithSum) _rotateRight(node *aNode) *aNode {
 	return u
 }
 
-func (t *avlTreeWithSum) _rotateLeft(node *aNode) *aNode {
+func (t *avlTreeWithSumReversibleNoncommutative) _rotateLeft(node *aNode) *aNode {
 	u := node.right
 	node.right = u.left
 	u.left = node
@@ -493,10 +554,12 @@ func (t *avlTreeWithSum) _rotateLeft(node *aNode) *aNode {
 	return u
 }
 
-func (t *avlTreeWithSum) _balanceLeft(node *aNode) *aNode {
+func (t *avlTreeWithSumReversibleNoncommutative) _balanceLeft(node *aNode) *aNode {
+	t._propagate(node.left)
 	var u *aNode
 	if node.left.left == nil || node.left.left.height+2 == node.left.height {
 		u = node.left.right
+		t._propagate(u)
 		node.left.right = u.left
 		u.left = node.left
 		node.left = u.right
@@ -512,10 +575,12 @@ func (t *avlTreeWithSum) _balanceLeft(node *aNode) *aNode {
 	return u
 }
 
-func (t *avlTreeWithSum) _balanceRight(node *aNode) *aNode {
+func (t *avlTreeWithSumReversibleNoncommutative) _balanceRight(node *aNode) *aNode {
+	t._propagate(node.right)
 	var u *aNode
 	if node.right.right == nil || node.right.right.height+2 == node.right.height {
 		u = node.right.left
+		t._propagate(u)
 		node.right.left = u.right
 		u.right = node.right
 		node.right = u.left
@@ -531,7 +596,7 @@ func (t *avlTreeWithSum) _balanceRight(node *aNode) *aNode {
 	return u
 }
 
-func (t *avlTreeWithSum) _mergeWithRoot(l, root, r *aNode) *aNode {
+func (t *avlTreeWithSumReversibleNoncommutative) _mergeWithRoot(l, root, r *aNode) *aNode {
 	diff := int8(0)
 	if l == nil {
 		if r != nil {
@@ -545,6 +610,7 @@ func (t *avlTreeWithSum) _mergeWithRoot(l, root, r *aNode) *aNode {
 		}
 	}
 	if diff > 1 {
+		t._propagate(l)
 		l.right = t._mergeWithRoot(l.right, root, r)
 		t._update(l)
 		if l.left == nil {
@@ -558,6 +624,7 @@ func (t *avlTreeWithSum) _mergeWithRoot(l, root, r *aNode) *aNode {
 		}
 		return l
 	} else if diff < -1 {
+		t._propagate(r)
 		r.left = t._mergeWithRoot(l, root, r.left)
 		t._update(r)
 		if r.right == nil {
@@ -578,7 +645,7 @@ func (t *avlTreeWithSum) _mergeWithRoot(l, root, r *aNode) *aNode {
 	}
 }
 
-func (t *avlTreeWithSum) _mergeNode(l, r *aNode) *aNode {
+func (t *avlTreeWithSumReversibleNoncommutative) _mergeNode(l, r *aNode) *aNode {
 	if l == nil {
 		return r
 	}
@@ -589,8 +656,8 @@ func (t *avlTreeWithSum) _mergeNode(l, r *aNode) *aNode {
 	return t._mergeWithRoot(l, root, r)
 }
 
-func (t *avlTreeWithSum) _popRight(node *aNode) (*aNode, *aNode) {
-
+func (t *avlTreeWithSumReversibleNoncommutative) _popRight(node *aNode) (*aNode, *aNode) {
+	t._propagate(node)
 	tmpPath = tmpPath[:0]
 	path := tmpPath
 	mx := node
@@ -598,7 +665,7 @@ func (t *avlTreeWithSum) _popRight(node *aNode) (*aNode, *aNode) {
 		path = append(path, node)
 		mx = node.right
 		node = node.right
-
+		t._propagate(node)
 	}
 	path = append(path, node.left)
 	len_ := len(path)
@@ -633,10 +700,11 @@ func (t *avlTreeWithSum) _popRight(node *aNode) (*aNode, *aNode) {
 	return path[0], mx
 }
 
-func (t *avlTreeWithSum) _splitNode(node *aNode, k int32) (*aNode, *aNode) {
+func (t *avlTreeWithSumReversibleNoncommutative) _splitNode(node *aNode, k int32) (*aNode, *aNode) {
 	if node == nil {
 		return nil, nil
 	}
+	t._propagate(node)
 	tmp := k
 	if node.left != nil {
 		tmp -= node.left.size
@@ -652,6 +720,25 @@ func (t *avlTreeWithSum) _splitNode(node *aNode, k int32) (*aNode, *aNode) {
 	}
 	left, right := t._splitNode(node.right, tmp-1)
 	return t._mergeWithRoot(node.left, node, left), right
+}
+
+func (avl *avlTreeWithSumReversibleNoncommutative) _propagate(node *aNode) {
+	if node == nil {
+		return
+	}
+	l, r := node.left, node.right
+	if node.rev {
+		node.left, node.right = r, l
+		if l != nil {
+			l.rev = !l.rev
+			l.data, l.revData = l.revData, l.data
+		}
+		if r != nil {
+			r.rev = !r.rev
+			r.data, r.revData = r.revData, r.data
+		}
+		node.rev = false
+	}
 }
 
 func max8(x, y int8) int8 {
@@ -682,7 +769,7 @@ func test() {
 			nums[j] = rand.Intn(100)
 		}
 		base := NewDynamicHashStringBase(len(nums), 0)
-		hasher := NewDynamicHashString(len(nums), func(i int) uint { return uint(nums[i]) }, base)
+		hasher := NewDynamicHashStringReverible(len(nums), func(i int) uint { return uint(nums[i]) }, base)
 		for j := 0; j < 500; j++ {
 			// Set
 			index := rand.Intn(len(nums))
@@ -716,6 +803,24 @@ func test() {
 				}
 			}
 
+			// Reverse
+			start, end = rand.Intn(len(nums)), rand.Intn(len(nums))
+			if start > end {
+				start, end = end, start
+			}
+			hasher.Reverse(start, end)
+			for i, j := start, end-1; i < j; i, j = i+1, j-1 {
+				nums[i], nums[j] = nums[j], nums[i]
+			}
+
+			// ReverseAll
+			{
+				hasher.ReverseAll()
+				for i, j := 0, len(nums)-1; i < j; i, j = i+1, j-1 {
+					nums[i], nums[j] = nums[j], nums[i]
+				}
+			}
+
 			// Pop
 			index = rand.Intn(len(nums))
 			if hasher.Pop(index) != uint(nums[index]) {
@@ -743,14 +848,16 @@ func testTime() {
 	}
 	time1 := time.Now()
 	base := NewDynamicHashStringBase(len(nums), 0)
-	hasher := NewDynamicHashString(len(nums), func(i int) uint { return uint(nums[i]) }, base)
+	hasher := NewDynamicHashStringReverible(len(nums), func(i int) uint { return uint(nums[i]) }, base)
 
 	for i := 0; i < n; i++ {
 		hasher.Set(i, uint(nums[i]))
 		hasher.Get(0, i+1)
 		hasher.GetAll()
+		hasher.Reverse(0, i+1)
+		hasher.ReverseAll()
 		hasher.Pop(i)
 		hasher.Insert(i, uint(nums[i]))
 	}
-	fmt.Println(time.Since(time1)) // 396.156ms
+	fmt.Println(time.Since(time1)) // 751.756708ms
 }

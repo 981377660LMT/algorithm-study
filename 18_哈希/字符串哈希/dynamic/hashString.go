@@ -292,28 +292,13 @@ func newSegmentTreeFrom(leaves []E) *segmentTree {
 	res.seg = seg
 	return res
 }
-func (st *segmentTree) Get(index int) E {
-	if index < 0 || index >= st.n {
-		return st.e()
-	}
-	return st.seg[index+st.size]
-}
+
 func (st *segmentTree) Set(index int, value E) {
 	if index < 0 || index >= st.n {
 		return
 	}
 	index += st.size
 	st.seg[index] = value
-	for index >>= 1; index > 0; index >>= 1 {
-		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
-	}
-}
-func (st *segmentTree) Update(index int, value E) {
-	if index < 0 || index >= st.n {
-		return
-	}
-	index += st.size
-	st.seg[index] = st.op(st.seg[index], value)
 	for index >>= 1; index > 0; index >>= 1 {
 		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
 	}
@@ -346,10 +331,4 @@ func (st *segmentTree) Query(start, end int) E {
 		end >>= 1
 	}
 	return st.op(leftRes, rightRes)
-}
-func (st *segmentTree) QueryAll() E { return st.seg[1] }
-func (st *segmentTree) GetAll() []E {
-	res := make([]E, st.n)
-	copy(res, st.seg[st.size:st.size+st.n])
-	return res
 }

@@ -15,20 +15,15 @@
 //  ToList() []V
 //  Size() int32
 
-// !这里的Monoid必须要满足交换律(commutative)
+// !这里的Monoid可以不满足交换律(commutative)
 
 package main
 
 import (
 	"fmt"
 	"math/rand"
-	"runtime/debug"
 	"time"
 )
-
-func init() {
-	debug.SetGCPercent(-1)
-}
 
 func main() {
 	test()
@@ -43,6 +38,7 @@ func op(x, y E) E { return x + y }
 type aNode struct {
 	key         E
 	data        E
+	revData     E
 	left, right *aNode
 	height      int8
 	size        int32
@@ -50,7 +46,7 @@ type aNode struct {
 }
 
 func _newANode(key E) *aNode {
-	return &aNode{key: key, data: key, height: 1, size: 1}
+	return &aNode{key: key, data: key, revData: key, height: 1, size: 1}
 }
 
 func (n *aNode) Balance() int8 {
@@ -66,34 +62,29 @@ func (n *aNode) Balance() int8 {
 	return n.left.height - n.right.height
 }
 
-func (n *aNode) String() string {
-	if n.left == nil && n.right == nil {
-		return fmt.Sprintf("key=%v, height=%v, size=%v\n", n.key, n.height, n.size)
-	}
-	return fmt.Sprintf("key=%v, height=%v, size=%v,\n left:%v,\n right:%v\n", n.key, n.height, n.size, n.left, n.right)
-}
-
 var (
 	tmpPath = make([]*aNode, 0, 128)
 )
 
-type AVLTreeWithSumReversible struct {
+type avlTreeWithSumReversible struct {
 	root *aNode
+	e    func() E
+	op   func(E, E) E
 }
 
-func NewAVLTreeWithSumReversible(n int32, f func(int32) E) *AVLTreeWithSumReversible {
-	res := &AVLTreeWithSumReversible{}
+func newAVLTreeWithSumReversible(n int32, f func(int32) E, e func() E, op func(E, E) E) *avlTreeWithSumReversible {
+	res := &avlTreeWithSumReversible{e: e, op: op}
 	if n > 0 {
 		res._build(n, f)
 	}
 	return res
 }
 
-func (t *AVLTreeWithSumReversible) Merge(other *AVLTreeWithSumReversible) {
+func (t *avlTreeWithSumReversible) Merge(other *avlTreeWithSumReversible) {
 	t.root = t._mergeNode(t.root, other.root)
 }
 
-func (t *AVLTreeWithSumReversible) Insert(k int32, key E) {
+func (t *avlTreeWithSumReversible) Insert(k int32, key E) {
 	n := t.Size()
 	if k < 0 {
 		k += n
@@ -108,12 +99,12 @@ func (t *AVLTreeWithSumReversible) Insert(k int32, key E) {
 	t.root = t._mergeWithRoot(a, _newANode(key), b)
 }
 
-func (t *AVLTreeWithSumReversible) Split(k int32) (*AVLTreeWithSumReversible, *AVLTreeWithSumReversible) {
+func (t *avlTreeWithSumReversible) Split(k int32) (*avlTreeWithSumReversible, *avlTreeWithSumReversible) {
 	a, b := t._splitNode(t.root, k)
-	return _newWithRoot(a), _newWithRoot(b)
+	return _newWithRoot(a, t.e, t.op), _newWithRoot(b, t.e, t.op)
 }
 
-func (t *AVLTreeWithSumReversible) Pop(k int32) E {
+func (t *avlTreeWithSumReversible) Pop(k int32) E {
 	if k < 0 {
 		k += t.Size()
 	}
@@ -123,7 +114,7 @@ func (t *AVLTreeWithSumReversible) Pop(k int32) E {
 	return tmp.key
 }
 
-func (t *AVLTreeWithSumReversible) Set(k int32, key E) {
+func (t *avlTreeWithSumReversible) Set(k int32, key E) {
 	if k < 0 {
 		k += t.Size()
 	}
@@ -153,9 +144,9 @@ func (t *AVLTreeWithSumReversible) Set(k int32, key E) {
 	}
 }
 
-func (t *AVLTreeWithSumReversible) Clear() { t.root = nil }
+func (t *avlTreeWithSumReversible) Clear() { t.root = nil }
 
-func (t *AVLTreeWithSumReversible) ToList() []E {
+func (t *avlTreeWithSumReversible) ToList() []E {
 	node := t.root
 	stack := make([]*aNode, 0)
 	res := make([]E, 0, t.Size())
@@ -174,7 +165,7 @@ func (t *AVLTreeWithSumReversible) ToList() []E {
 	return res
 }
 
-func (t *AVLTreeWithSumReversible) Get(k int32) E {
+func (t *avlTreeWithSumReversible) Get(k int32) E {
 	if k < 0 {
 		k += t.Size()
 	}
@@ -195,7 +186,7 @@ func (t *AVLTreeWithSumReversible) Get(k int32) E {
 		}
 	}
 }
-func (avl *AVLTreeWithSumReversible) Reverse(start, end int32) {
+func (avl *avlTreeWithSumReversible) Reverse(start, end int32) {
 	if start < 0 {
 		start = 0
 	}
@@ -205,20 +196,25 @@ func (avl *AVLTreeWithSumReversible) Reverse(start, end int32) {
 	if start >= end {
 		return
 	}
-	s, t := avl._splitNode(avl.root, end)
-	r, s := avl._splitNode(s, start)
-	s.rev = !s.rev
-	avl.root = avl._mergeNode(avl._mergeNode(r, s), t)
+	if start == 0 && end == avl.Size() {
+		avl.ReverseAll()
+		return
+	}
+	nm, nr := avl._splitNode(avl.root, end)
+	nl, nm := avl._splitNode(nm, start)
+	nm.rev = !nm.rev
+	nm.data, nm.revData = nm.revData, nm.data
+	avl.root = avl._mergeNode(avl._mergeNode(nl, nm), nr)
 }
 
-func (avl *AVLTreeWithSumReversible) ReverseAll() {
+func (avl *avlTreeWithSumReversible) ReverseAll() {
 	if avl.root == nil {
 		return
 	}
 	avl.root.rev = !avl.root.rev
 }
 
-func (avl *AVLTreeWithSumReversible) Query(start, end int32) E {
+func (avl *avlTreeWithSumReversible) Query(start, end int32) E {
 	if start < 0 {
 		start = 0
 	}
@@ -226,55 +222,58 @@ func (avl *AVLTreeWithSumReversible) Query(start, end int32) E {
 		end = n
 	}
 	if start >= end || avl.root == nil {
-		return e()
+		return avl.e()
 	}
 	var dfs func(node *aNode, left, right int32) E
 	dfs = func(node *aNode, left, right int32) E {
 		if right <= start || end <= left {
-			return e()
+			return avl.e()
 		}
 		avl._propagate(node)
 		if start <= left && right < end {
+			if node.rev {
+				return node.revData
+			}
 			return node.data
 		}
 		lsize := int32(0)
 		if node.left != nil {
 			lsize = node.left.size
 		}
-		res := e()
+		res := avl.e()
 		if node.left != nil {
 			res = dfs(node.left, left, left+lsize)
 		}
 		if tmp := left + lsize; start <= tmp && tmp < end {
-			res = op(res, node.key)
+			res = avl.op(res, node.key)
 		}
 		if node.right != nil {
-			res = op(res, dfs(node.right, left+lsize+1, right))
+			res = avl.op(res, dfs(node.right, left+lsize+1, right))
 		}
 		return res
 	}
 	return dfs(avl.root, 0, avl.Size())
 }
 
-func (avl *AVLTreeWithSumReversible) QueryAll() E {
+func (avl *avlTreeWithSumReversible) QueryAll() E {
 	if avl.root == nil {
-		return e()
+		return avl.e()
 	}
 	return avl.root.data
 }
 
-func (t *AVLTreeWithSumReversible) Size() int32 {
+func (t *avlTreeWithSumReversible) Size() int32 {
 	if t.root == nil {
 		return 0
 	}
 	return t.root.size
 }
 
-func _newWithRoot(root *aNode) *AVLTreeWithSumReversible {
-	return &AVLTreeWithSumReversible{root: root}
+func _newWithRoot(root *aNode, e func() E, op func(a, b E) E) *avlTreeWithSumReversible {
+	return &avlTreeWithSumReversible{root: root, e: e, op: op}
 }
 
-func (t *AVLTreeWithSumReversible) _build(n int32, f func(int32) E) {
+func (t *avlTreeWithSumReversible) _build(n int32, f func(int32) E) {
 	var dfs func(l, r int32) *aNode
 	dfs = func(l, r int32) *aNode {
 		mid := (l + r) >> 1
@@ -291,23 +290,26 @@ func (t *AVLTreeWithSumReversible) _build(n int32, f func(int32) E) {
 	t.root = dfs(0, n)
 }
 
-func (t *AVLTreeWithSumReversible) _update(node *aNode) {
+func (t *avlTreeWithSumReversible) _update(node *aNode) {
 	node.size = 1
 	node.data = node.key
+	node.revData = node.key
 	node.height = 1
-	if node.left != nil {
-		node.size += node.left.size
-		node.data = op(node.left.data, node.data)
-		node.height = max8(node.left.height+1, 1)
+	if left := node.left; left != nil {
+		node.size += left.size
+		node.data = t.op(left.data, node.data)
+		node.revData = t.op(node.revData, left.revData)
+		node.height = max8(left.height+1, 1)
 	}
-	if node.right != nil {
-		node.size += node.right.size
-		node.data = op(node.data, node.right.data)
-		node.height = max8(node.height, node.right.height+1)
+	if right := node.right; right != nil {
+		node.size += right.size
+		node.data = t.op(node.data, right.data)
+		node.revData = t.op(right.revData, node.revData)
+		node.height = max8(node.height, right.height+1)
 	}
 }
 
-func (t *AVLTreeWithSumReversible) _rotateRight(node *aNode) *aNode {
+func (t *avlTreeWithSumReversible) _rotateRight(node *aNode) *aNode {
 	u := node.left
 	node.left = u.right
 	u.right = node
@@ -316,7 +318,7 @@ func (t *AVLTreeWithSumReversible) _rotateRight(node *aNode) *aNode {
 	return u
 }
 
-func (t *AVLTreeWithSumReversible) _rotateLeft(node *aNode) *aNode {
+func (t *avlTreeWithSumReversible) _rotateLeft(node *aNode) *aNode {
 	u := node.right
 	node.right = u.left
 	u.left = node
@@ -325,7 +327,7 @@ func (t *AVLTreeWithSumReversible) _rotateLeft(node *aNode) *aNode {
 	return u
 }
 
-func (t *AVLTreeWithSumReversible) _balanceLeft(node *aNode) *aNode {
+func (t *avlTreeWithSumReversible) _balanceLeft(node *aNode) *aNode {
 	t._propagate(node.left)
 	var u *aNode
 	if node.left.left == nil || node.left.left.height+2 == node.left.height {
@@ -346,7 +348,7 @@ func (t *AVLTreeWithSumReversible) _balanceLeft(node *aNode) *aNode {
 	return u
 }
 
-func (t *AVLTreeWithSumReversible) _balanceRight(node *aNode) *aNode {
+func (t *avlTreeWithSumReversible) _balanceRight(node *aNode) *aNode {
 	t._propagate(node.right)
 	var u *aNode
 	if node.right.right == nil || node.right.right.height+2 == node.right.height {
@@ -367,7 +369,7 @@ func (t *AVLTreeWithSumReversible) _balanceRight(node *aNode) *aNode {
 	return u
 }
 
-func (t *AVLTreeWithSumReversible) _mergeWithRoot(l, root, r *aNode) *aNode {
+func (t *avlTreeWithSumReversible) _mergeWithRoot(l, root, r *aNode) *aNode {
 	diff := int8(0)
 	if l == nil {
 		if r != nil {
@@ -416,7 +418,7 @@ func (t *AVLTreeWithSumReversible) _mergeWithRoot(l, root, r *aNode) *aNode {
 	}
 }
 
-func (t *AVLTreeWithSumReversible) _mergeNode(l, r *aNode) *aNode {
+func (t *avlTreeWithSumReversible) _mergeNode(l, r *aNode) *aNode {
 	if l == nil {
 		return r
 	}
@@ -427,7 +429,7 @@ func (t *AVLTreeWithSumReversible) _mergeNode(l, r *aNode) *aNode {
 	return t._mergeWithRoot(l, root, r)
 }
 
-func (t *AVLTreeWithSumReversible) _popRight(node *aNode) (*aNode, *aNode) {
+func (t *avlTreeWithSumReversible) _popRight(node *aNode) (*aNode, *aNode) {
 	t._propagate(node)
 	tmpPath = tmpPath[:0]
 	path := tmpPath
@@ -471,7 +473,7 @@ func (t *AVLTreeWithSumReversible) _popRight(node *aNode) (*aNode, *aNode) {
 	return path[0], mx
 }
 
-func (t *AVLTreeWithSumReversible) _splitNode(node *aNode, k int32) (*aNode, *aNode) {
+func (t *avlTreeWithSumReversible) _splitNode(node *aNode, k int32) (*aNode, *aNode) {
 	if node == nil {
 		return nil, nil
 	}
@@ -493,7 +495,7 @@ func (t *AVLTreeWithSumReversible) _splitNode(node *aNode, k int32) (*aNode, *aN
 	return t._mergeWithRoot(node.left, node, left), right
 }
 
-func (avl *AVLTreeWithSumReversible) _propagate(node *aNode) {
+func (avl *avlTreeWithSumReversible) _propagate(node *aNode) {
 	if node == nil {
 		return
 	}
@@ -502,9 +504,11 @@ func (avl *AVLTreeWithSumReversible) _propagate(node *aNode) {
 		node.left, node.right = r, l
 		if l != nil {
 			l.rev = !l.rev
+			l.data, l.revData = l.revData, l.data
 		}
 		if r != nil {
 			r.rev = !r.rev
+			r.data, r.revData = r.revData, r.data
 		}
 		node.rev = false
 	}
@@ -533,20 +537,24 @@ func max32(x, y int32) int32 {
 
 func test() {
 	arr := []int{1, 2, 3, 4, 5}
-	tree := NewAVLTreeWithSumReversible(int32(len(arr)), func(i int32) E { return E(arr[i]) })
-	fmt.Println(tree.Pop(0))
+	tree := newAVLTreeWithSumReversible(
+		int32(len(arr)), func(i int32) E { return E(arr[i]) },
+		func() E { return 0 }, func(x, y E) E { return x + y },
+	)
 	tree.ReverseAll()
-	fmt.Println(tree.ToList())
 
-	for i := 0; i < 1000; i++ {
-		n := rand.Intn(1000) + 500
+	for i := 0; i < 500; i++ {
+		n := rand.Intn(1000) + 1000
 		arr = make([]int, n)
 		for j := 0; j < n; j++ {
 			arr[j] = rand.Intn(100) + 1
 		}
-		tree = NewAVLTreeWithSumReversible(int32(len(arr)), func(i int32) E { return E(arr[i]) })
+		tree = newAVLTreeWithSumReversible(
+			int32(len(arr)), func(i int32) E { return E(arr[i]) },
+			func() E { return 0 }, func(x, y E) E { return x + y },
+		)
 
-		for j := 0; j < 500; j++ {
+		for j := 0; j < 1000; j++ {
 			// set
 			{
 				index, value := rand.Intn(len(arr)), rand.Intn(100)+1
@@ -560,7 +568,6 @@ func test() {
 				if arr[index] != int(tree.Get(int32(index))) {
 					panic("error get")
 				}
-
 			}
 
 			// insert
@@ -654,7 +661,6 @@ func test() {
 
 			// split + merge
 			{
-
 				l, r := rand.Intn(len(arr)), rand.Intn(len(arr))
 				if l > r {
 					l, r = r, l
@@ -677,7 +683,10 @@ func testTime() {
 		arr[i] = rand.Intn(100) + 1
 	}
 
-	tree := NewAVLTreeWithSumReversible(int32(len(arr)), func(i int32) E { return E(arr[i]) })
+	tree := newAVLTreeWithSumReversible(
+		int32(len(arr)), func(i int32) E { return E(arr[i]) },
+		func() E { return 0 }, func(x, y E) E { return x + y },
+	)
 
 	time1 := time.Now()
 	for j := 0; j < int(2e5); j++ {
