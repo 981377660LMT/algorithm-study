@@ -174,13 +174,11 @@ func (fg *FunctionalGraph) Build() {
 			fg.root[i] = i
 		}
 	}
-
 	for i := 0; i < n; i++ {
 		if fg.root[i] == i {
 			fg.root[uf.Find(i)] = i
 		}
 	}
-
 	for i := 0; i < n; i++ {
 		fg.root[i] = fg.root[uf.Find(i)]
 	}
