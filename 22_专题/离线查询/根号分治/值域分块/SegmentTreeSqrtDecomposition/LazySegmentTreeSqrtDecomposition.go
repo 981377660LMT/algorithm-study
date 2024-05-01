@@ -2,8 +2,9 @@
 //  1.Set(index int32, value E) -> O(sqrt(n))
 //  !2.Get(index int32) E -> O(1)
 //  3.Query(start, end int32) E
-//  4.QueryAll() E
-//  6.Update(start, end int32, lazy Id)
+//    QueryAll() E
+//  4.Update(start, end int32, lazy Id)
+//    UpdateAll(lazy Id)
 //  5.GetAll() []E
 //  6.MaxRight(start int32, predicate func(end int32, sum E) bool) int32
 //  7.MinLeft(end int32, predicate func(start int32, sum E) bool) int32
@@ -65,6 +66,9 @@ type LazySegmentTreeSqrtDecomposition struct {
 func NewLazySegmentTreeSqrtDecomposition(n int32, f func(i int32) E, bucketSize int32) *LazySegmentTreeSqrtDecomposition {
 	if bucketSize == -1 {
 		bucketSize = int32(math.Sqrt(float64(n))) + 1
+	}
+	if bucketSize < 100 {
+		bucketSize = 100 // 防止 blockSize 过小
 	}
 	bucketCount := (n + bucketSize - 1) / bucketSize
 	res := &LazySegmentTreeSqrtDecomposition{n: n, bucketSize: bucketSize, bucketCount: bucketCount}
@@ -234,6 +238,17 @@ func (st *LazySegmentTreeSqrtDecomposition) Update(start, end int32, lazy Id) {
 				changeData(bid2, 0, end)
 			}
 		}
+	}
+}
+
+func (st *LazySegmentTreeSqrtDecomposition) UpdateAll(lazy Id) {
+	for i := int32(0); i < int32(len(st.data)); i++ {
+		if st.lazy[i] == st.id() {
+			st.lazy[i] = lazy
+		} else {
+			st.lazy[i] = st.composition(lazy, st.lazy[i])
+		}
+		st.sum[i] = st.mapping(lazy, st.sum[i])
 	}
 }
 
@@ -467,6 +482,15 @@ func test() {
 				}
 			}
 
+			// UpdateAll
+			{
+				lazy := rand.Intn(100)
+				for i := 0; i < int(n); i++ {
+					nums[i] += lazy
+				}
+				seg.UpdateAll(Id(lazy))
+			}
+
 			// MaxRight
 			maxRightBf := func(start int32, predicate func(end int32, sum E) bool) (res int32) {
 				res = start
@@ -533,9 +557,10 @@ func testTime() {
 		seg.Set(i, int(E(i)))
 		seg.Query(i, n)
 		seg.QueryAll()
+		seg.UpdateAll(Id(i))
 		seg.Update(i, n, Id(i))
 		seg.MaxRight(i, func(end int32, sum E) bool { return true })
 		seg.MinLeft(i, func(start int32, sum E) bool { return true })
 	}
-	fmt.Println("Time1", time.Since(time1)) // Time1 228.479833ms
+	fmt.Println("Time1", time.Since(time1)) // Time1 271.12ms
 }

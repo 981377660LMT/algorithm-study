@@ -43,6 +43,7 @@ func demo() {
 	fmt.Println(bv.GetAll())
 }
 
+// 不用泛型，泛型会导致性能下降.
 type E = int32
 
 func (*SegmentTreeSqrtDecompositionDynamic) e() E        { return 0 }
@@ -63,7 +64,9 @@ func NewSegmentTreeSqrtDecompositionDynamic(n int32, f func(i int32) E, blockSiz
 	if blockSize == -1 {
 		blockSize = int32(math.Sqrt(float64(n))) + 1
 	}
-
+	if blockSize < 100 {
+		blockSize = 100 // 防止 blockSize 过小
+	}
 	res := &SegmentTreeSqrtDecompositionDynamic{n: n, blockSize: blockSize, threshold: blockSize << 1, shouldRebuildTree: true}
 	blockCount := (n + blockSize - 1) / blockSize
 	blocks, blockSum := make([][]E, blockCount), make([]E, blockCount)

@@ -6,6 +6,7 @@
 //  5.Query(start, end int32) V -> O(sqrt(n))
 //    QueryAll() V
 //  6.Update(start, end int32, lazy Id) -> O(sqrt(n))
+//    UpdateAll(lazy Id)
 //  7.Clear()
 //  8.Len() int32
 //  9.GetAll() []V
@@ -73,6 +74,9 @@ type LazySegmentTreeSqrtDecompositionDynamic struct {
 func NewLazySegmentTreeSqrtDecompositionDynamic(n int32, f func(i int32) E, blockSize int32) *LazySegmentTreeSqrtDecompositionDynamic {
 	if blockSize == -1 {
 		blockSize = int32(math.Sqrt(float64(n))) + 1
+	}
+	if blockSize < 100 {
+		blockSize = 100 // 防止 blockSize 过小
 	}
 	bucketCount := (n + blockSize - 1) / blockSize
 	res := &LazySegmentTreeSqrtDecompositionDynamic{n: n, blockSize: blockSize, threshold: blockSize << 1, shouldRebuildTree: true}
@@ -331,6 +335,17 @@ func (st *LazySegmentTreeSqrtDecompositionDynamic) Update(start, end int32, lazy
 				changeData(bid2, 0, end)
 			}
 		}
+	}
+}
+
+func (st *LazySegmentTreeSqrtDecompositionDynamic) UpdateAll(lazy Id) {
+	for i := int32(0); i < int32(len(st.data)); i++ {
+		if st.lazy[i] == st.id() {
+			st.lazy[i] = lazy
+		} else {
+			st.lazy[i] = st.composition(lazy, st.lazy[i])
+		}
+		st.sum[i] = st.mapping(lazy, st.sum[i])
 	}
 }
 
@@ -679,6 +694,15 @@ func test() {
 				}
 			}
 
+			// UpdateAll
+			{
+				lazy := rand.Intn(100)
+				for i := 0; i < int(int32(len(nums))); i++ {
+					nums[i] += lazy
+				}
+				seg.UpdateAll(Id(lazy))
+			}
+
 			// Insert
 			index = rand.Int31n(n)
 			value = rand.Intn(100)
@@ -765,6 +789,7 @@ func testTime() {
 		seg.Query(i, n)
 		seg.QueryAll()
 		seg.Update(i, n, Id(i))
+		seg.UpdateAll(Id(i))
 		seg.Insert(i, int(E(i)))
 		if i&1 == 0 {
 			seg.Pop(i)
@@ -772,5 +797,5 @@ func testTime() {
 		seg.MaxRight(i, func(end int32, sum E) bool { return true })
 		seg.MinLeft(i, func(start int32, sum E) bool { return true })
 	}
-	fmt.Println("Time1", time.Since(time1)) // Time1 353.148084ms
+	fmt.Println("Time1", time.Since(time1)) // Time1 420.430375ms
 }

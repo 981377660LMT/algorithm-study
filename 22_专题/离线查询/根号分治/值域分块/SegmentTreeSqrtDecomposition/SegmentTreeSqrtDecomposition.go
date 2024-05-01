@@ -56,6 +56,9 @@ func NewSegmentTreeSqrtDecomposition(n int32, f func(i int32) E, bucketSize int3
 	if bucketSize == -1 {
 		bucketSize = int32(math.Sqrt(float64(n))) + 1
 	}
+	if bucketSize < 100 {
+		bucketSize = 100 // 防止 blockSize 过小
+	}
 	bucketCount := (n + bucketSize - 1) / bucketSize
 	res := &SegmentTreeSqrtDecomposition{n: n, bucketSize: bucketSize, bucketCount: bucketCount}
 	buckets, bucketSum := make([][]E, bucketCount), make([]E, bucketCount)
