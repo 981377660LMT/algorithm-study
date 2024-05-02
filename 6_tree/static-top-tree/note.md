@@ -45,6 +45,9 @@ Static Top Tree 的方法
 
 ---
 
+マージテクと高さ O(logn) のマージ過程との融合
+https://www.mathenachia.blog/mergetech-and-logn/#bracket-star
+
 HLD、LCT 的方法
 
 - https://ouuan.github.io/post/tree-dp-with-modification/

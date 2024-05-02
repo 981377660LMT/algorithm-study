@@ -70,7 +70,9 @@ func init() {
 }
 
 func main() {
-	abc351g()
+	// abc351g()
+	p4719()
+	// P4719_bruteforce()
 }
 
 // [ABC351G] Hash on Tree (DynamicTreeHash，动态树哈希)
@@ -105,7 +107,7 @@ func abc351g() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	stt := NewStaticTopTree(tree)
+	stt := NewStaticTopTree(tree, 0)
 
 	type PointCluster = int // 子树哈希值
 
@@ -126,6 +128,7 @@ func abc351g() {
 		return x * y % MOD
 	}
 	// p簇离根节点更近.
+	// compress就是仿射变换.
 	compress := func(p, c PathCluster) PathCluster {
 		return PathCluster{mul: p.mul * c.mul % MOD, add: (p.mul*c.add + p.add) % MOD}
 	}
@@ -138,6 +141,135 @@ func abc351g() {
 		nums[v] = x
 		newRes := dp.Update(int32(v))
 		fmt.Fprintln(out, newRes.add)
+	}
+}
+
+// https://www.luogu.com.cn/problem/P4719
+// P4719 【模板】"动态 DP" & 动态树分治
+//
+// 给定一棵 n 个点的树，点带点权。
+// 有 m 次操作，每次操作给定 x,y，表示修改点 x 的权值为y.
+// 你需要在每次操作之后求出这棵树的最大权独立集的权值大小。
+//
+// dp[i][0/1] 表示选/不选这个点.
+// dp[i][0] = sum(max(dp[j][0], dp[j][1])), j 是 i 的儿子.
+// dp[i][1] = sum(dp[j][0]) + w[i], j 是 i 的儿子.
+func p4719() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int = 1e18
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	weights := make([]int, n)
+	for i := range weights {
+		fmt.Fscan(in, &weights[i])
+	}
+	tree := make([][]int32, n)
+	for i := int32(0); i < n-1; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		u, v = u-1, v-1
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
+	}
+	rootedTree := ToRootedTree32(tree, 0)
+
+	stt := NewStaticTopTree(rootedTree, 0)
+
+	type PointCluster = struct{ exclude, include int }
+	type PathCluster = int
+	vertex := func(v int32) PathCluster {
+		return max(weights[v], 0)
+	}
+	addEdge := func(t PathCluster) PointCluster { return PointCluster{include: t} }
+	addVertex := func(t PointCluster, v int32) PathCluster {
+		return max(t.include, t.exclude+weights[v])
+	}
+	rake := func(x, y PointCluster) PointCluster {
+		return PointCluster{include: x.include + y.include, exclude: x.exclude + y.exclude}
+	}
+	compress := func(p, c PathCluster) PathCluster {
+		return p + c
+	}
+	dp := NewStaticTopTreeDP(stt, vertex, addEdge, addVertex, rake, compress)
+
+	for i := int32(0); i < q; i++ {
+		var x, y int
+		fmt.Fscan(in, &x, &y)
+		x--
+		weights[x] = y
+		newRes := dp.Update(int32(x))
+		fmt.Fprintln(out, newRes)
+	}
+}
+
+func P4719_bruteforce() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int = 1e18
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	weights := make([]int, n)
+	for i := range weights {
+		fmt.Fscan(in, &weights[i])
+	}
+	tree := make([][]int32, n)
+	for i := int32(0); i < n-1; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		u, v = u-1, v-1
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
+	}
+
+	dp0, dp1 := make([]int, n), make([]int, n)
+	parent := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		parent[i] = -1
+	}
+
+	var dfs func(cur, pre int32)
+	dfs = func(cur, pre int32) {
+		dp0[cur], dp1[cur] = 0, weights[cur]
+		parent[cur] = pre
+		for _, next := range tree[cur] {
+			if next == pre {
+				continue
+			}
+			dfs(next, cur)
+			dp0[cur] += max(dp1[next], dp0[next])
+			dp1[cur] += dp0[next]
+		}
+	}
+	dfs(0, -1)
+
+	update := func(v int32) {
+		// 重算所有祖先
+		for ; v != -1; v = parent[v] {
+			dp0[v], dp1[v] = 0, weights[v]
+			for _, next := range tree[v] {
+				if next == parent[v] {
+					continue
+				}
+				dp0[v] += max(dp1[next], dp0[next])
+				dp1[v] += dp0[next]
+			}
+		}
+	}
+
+	for i := int32(0); i < q; i++ {
+		var x, y int
+		fmt.Fscan(in, &x, &y)
+		x--
+		weights[x] = y
+		update(int32(x))
+		fmt.Fprintln(out, max(dp0[0], dp1[0]))
 	}
 }
 
@@ -243,16 +375,16 @@ type StaticTopTree struct {
 	Nodes []*sttNode // 子树合并(分解)过程.
 }
 
-func NewStaticTopTree(tree [][]int32) *StaticTopTree {
-	res := &StaticTopTree{Tree: tree}
-	res._dfs(0)
-	n := len(tree)
+func NewStaticTopTree(rootedTree [][]int32, root int32) *StaticTopTree {
+	res := &StaticTopTree{Tree: rootedTree}
+	res._dfs(root)
+	n := len(rootedTree)
 	vs := make([]*sttNode, n, 4*n)
 	for i := 0; i < n; i++ {
 		vs[i] = newSttNode(vertex, -1, -1)
 	}
 	res.Nodes = vs
-	a, _ := res._compress(0)
+	a, _ := res._compress(root)
 	res.Root = a
 	res.Nodes = res.Nodes[:len(res.Nodes):len(res.Nodes)]
 	return res
@@ -350,4 +482,39 @@ func (stt *StaticTopTree) _addVertex(u int32) (int32, int32) {
 		it, size := stt._rake(u)
 		return stt._makeNode(addVertex, it, -1, u), size + 1
 	}
+}
+
+// 无根树转有根树.
+func ToRootedTree32(tree [][]int32, root int32) [][]int32 {
+	n := len(tree)
+	rootedTree := make([][]int32, n)
+	visited := make([]bool, n)
+	visited[root] = true
+	queue := []int32{root}
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		for _, next_ := range tree[cur] {
+			if !visited[next_] {
+				visited[next_] = true
+				queue = append(queue, next_)
+				rootedTree[cur] = append(rootedTree[cur], next_)
+			}
+		}
+	}
+	return rootedTree
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
