@@ -8,10 +8,18 @@ import (
 
 func main() {
 	// demo()
-	abc351g()
+	// abc351g()
+	// p4719()
+
+	yosupo()
 }
 
 func demo() {
+	//    0
+	//   / \
+	//  1   2
+	//      |
+	//      3
 	tree := NewTree32(4)
 	tree.AddEdge(0, 1, 1)
 	tree.AddEdge(0, 2, 1)
@@ -61,8 +69,6 @@ func abc351g() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	stt := NewStaticTopTree(tree)
-
 	type Data = struct{ mul, add int }
 	single := func(v int32) Data {
 		return Data{1, nums[v]}
@@ -78,7 +84,7 @@ func abc351g() {
 		return Data{(mul1 * mul2) % MOD, (mul1*add2 + add1) % MOD}
 	}
 
-	dp := NewStaticTopTreeDP[Data](stt)
+	dp := NewStaticTopTreeDP[Data](NewStaticTopTree(tree))
 	dp.InitDP(single, rake, compress)
 
 	for i := int32(0); i < q; i++ {
@@ -90,6 +96,160 @@ func abc351g() {
 		fmt.Fprintln(out, newRes.add)
 	}
 }
+
+// TODO
+// https://www.luogu.com.cn/problem/P4719
+// P4719 【模板】"动态 DP" & 动态树分治
+//
+// 给定一棵 n 个点的树，点带点权。
+// 有 m 次操作，每次操作给定 x,y，表示修改点 x 的权值为y.
+// 你需要在每次操作之后求出这棵树的最大权独立集的权值大小。
+//
+// dp[i][0/1] 表示选/不选这个点.
+// dp[i][0] = sum(max(dp[j][0], dp[j][1])), j 是 i 的儿子.
+// dp[i][1] = sum(dp[j][0]) + w[i], j 是 i 的儿子.
+//
+// !维护簇的两个端点分别选和不选时的答案
+// 对于 base cluster 端点都选答案为 -INF，否则为 0。
+func p4719() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int = 1e18
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	weights := make([]int, n)
+	for i := range weights {
+		fmt.Fscan(in, &weights[i])
+	}
+	tree := NewTree32(n)
+	for i := int32(0); i < n-1; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		u, v = u-1, v-1
+		tree.AddEdge(u, v, 0)
+	}
+	tree.Build(0)
+
+	// TODO
+	type Data = struct{ exclude, include int } // 簇的两个端点分别都选和都不选时的答案
+	single := func(v int32) Data {
+		return Data{exclude: 0, include: -INF}
+	}
+	rake := func(x, y Data, u, v int32) Data {
+		x.exclude += max(y.exclude, y.include)
+		x.include += max(0, y.exclude)
+		return x
+	}
+	compress := func(x, y Data, a, b, c int32) Data {
+		x.exclude += max(y.exclude, y.include)
+		x.include += y.exclude
+		return x
+	}
+
+	dp := NewStaticTopTreeDP[Data](NewStaticTopTree(tree))
+	dp.InitDP(single, rake, compress)
+	for i := int32(0); i < q; i++ {
+		var x, y int
+		fmt.Fscan(in, &x, &y)
+		x--
+		weights[x] = y
+		newRes := dp.Update(int32(x), single, rake, compress)
+		fmt.Fprintln(out, max(newRes.exclude, newRes.include))
+	}
+}
+
+// Point Set Tree Path Composite Sum (Fixed Root)
+// https://judge.yosupo.jp/problem/point_set_tree_path_composite_sum_fixed_root
+// 0 p x: 将点 p 的值设为 x
+// 1 ei mul add: 将边 ei 的值设为 (x -> mul * x + add)
+func yosupo() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const MOD int = 998244353
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	weights := make([]int, n)
+	for i := range weights {
+		fmt.Fscan(in, &weights[i])
+	}
+	mul, add := make([]int, n-1), make([]int, n-1)
+	tree := NewTree32(n)
+	for i := int32(0); i < n-1; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		tree.AddEdge(u, v, 0)
+		var m, a int
+		fmt.Fscan(in, &m, &a)
+		mul[i], add[i] = m, a
+	}
+	tree.Build(0)
+
+	type Data = struct{ mul, add, count, res int }
+	single := func(v int32) Data {
+		if v == 0 {
+			return Data{mul: 1, add: 0, count: 1, res: weights[v]}
+		}
+		eid := tree.VToE(v) // 父边的id
+		m, a := mul[eid], add[eid]
+		return Data{mul: m, add: a, count: 1, res: (m*weights[v] + a) % MOD}
+	}
+	rake := func(x, y Data, u, v int32) Data {
+		return Data{mul: x.mul, add: x.add, count: x.count + y.count, res: (x.res + y.res) % MOD}
+	}
+	compress := func(x, y Data, a, b, c int32) Data {
+		mul1, add1 := x.mul, x.add
+		mul2, add2 := y.mul, y.add
+		// x -> (cx+d) -> a(cx+d)+b
+		aa, bb := mul1*mul2%MOD, (mul1*add2+add1)%MOD
+		count := x.count + y.count
+		res := (x.res + mul1*y.res + add1*y.count) % MOD
+		return Data{mul: aa, add: bb, count: count, res: res}
+	}
+
+	dp := NewStaticTopTreeDP[Data](NewStaticTopTree(tree))
+	dp.InitDP(single, rake, compress)
+	for i := int32(0); i < q; i++ {
+		var op int32
+		fmt.Fscan(in, &op)
+		if op == 0 {
+			var p, x int
+			fmt.Fscan(in, &p, &x)
+			weights[p] = x
+			dp.Update(int32(p), single, rake, compress)
+		} else {
+			var eid, m, a int
+			fmt.Fscan(in, &eid, &m, &a)
+			mul[eid], add[eid] = m, a
+			v := tree.EToV(int32(eid))
+			dp.Update(v, single, rake, compress)
+		}
+		x := dp.Get()
+		fmt.Fprintln(out, x.res)
+	}
+}
+
+// !Cluster中维护的信息不包含子树根节点的信息.
+//
+//	!Single(v) : v 与其父边组成的 Cluster.
+//        x
+//       /
+//      ◯
+//	!Rake(x, y, u, v) : 形成以 uv 为上下边界的 Cluster, v可能为-1.
+//        x           x
+//       / \   ->    /
+//      ◯   ◯       ◯
+//	!Compress(x, y, a, b, c) : 从上到下，依次为 (a,b] + (b,c]. a或c可能为-1.
+//        x             x
+//       /   		       /
+//      ◯  +    ->    /
+//     /             /
+//    ◯             ◯
 
 type StaticTopTreeDP[Data any] struct {
 	stt *StaticTopTree
@@ -149,11 +309,6 @@ func (stdp *StaticTopTreeDP[Data]) _update(
 	}
 }
 
-// Cluster 不包含根节点的信息.
-//
-//	Single(v) : v 与其父边组成的 Cluster.
-//	Rake(x, y, u, v) : 形成以 uv 为上下边界的 Cluster,v可能为-1.
-//	Compress(x, y, a, b, c) : 从上到下，依次为 (a,b] + (b,c].
 type StaticTopTree struct {
 	n                             int32
 	tree                          *Tree32
@@ -262,6 +417,7 @@ func (stt *StaticTopTree) _buildDfs(v int32) int32 {
 type neighbor = struct {
 	to   int32
 	cost int
+	eid  int32
 }
 
 type Tree32 struct {
@@ -272,24 +428,33 @@ type Tree32 struct {
 	Parent        []int32
 	Head          []int32 // 重链头
 	Tree          [][]neighbor
+	Edges         [][2]int32
+	vToE          []int32 // 节点v的父边的id
 	n             int32
 }
 
 func NewTree32(n int32) *Tree32 {
-	res := &Tree32{Tree: make([][]neighbor, n), n: n}
+	res := &Tree32{Tree: make([][]neighbor, n), Edges: make([][2]int32, 0, n-1), n: n}
 	return res
 }
 
 func (t *Tree32) AddEdge(u, v int32, w int) {
-	t.AddDirectedEdge(u, v, w)
-	t.AddDirectedEdge(v, u, w)
+	eid := int32(len(t.Edges))
+	t.Tree[u] = append(t.Tree[u], neighbor{to: v, cost: w, eid: eid})
+	t.Tree[v] = append(t.Tree[v], neighbor{to: u, cost: w, eid: eid})
+	t.Edges = append(t.Edges, [2]int32{u, v})
 }
 
 func (t *Tree32) AddDirectedEdge(from, to int32, cost int) {
-	t.Tree[from] = append(t.Tree[from], neighbor{to: to, cost: cost})
+	eid := int32(len(t.Edges))
+	t.Tree[from] = append(t.Tree[from], neighbor{to: to, cost: cost, eid: eid})
+	t.Edges = append(t.Edges, [2]int32{from, to})
 }
 
 func (t *Tree32) Build(root int32) {
+	if root != -1 && int32(len(t.Edges)) != t.n-1 {
+		panic("edges count != n-1")
+	}
 	n := t.n
 	t.Lid = make([]int32, n)
 	t.Rid = make([]int32, n)
@@ -298,9 +463,11 @@ func (t *Tree32) Build(root int32) {
 	t.DepthWeighted = make([]int, n)
 	t.Parent = make([]int32, n)
 	t.Head = make([]int32, n)
+	t.vToE = make([]int32, n)
 	for i := int32(0); i < n; i++ {
 		t.Depth[i] = -1
 		t.Head[i] = root
+		t.vToE[i] = -1
 	}
 	if root != -1 {
 		t._dfsSize(root, -1)
@@ -313,59 +480,6 @@ func (t *Tree32) Build(root int32) {
 				t._dfsSize(i, -1)
 				t._dfsHld(i, &time)
 			}
-		}
-	}
-}
-
-func (t *Tree32) _dfsSize(cur, pre int32) {
-	size := t.Rid
-	t.Parent[cur] = pre
-	if pre != -1 {
-		t.Depth[cur] = t.Depth[pre] + 1
-	} else {
-		t.Depth[cur] = 0
-	}
-	size[cur] = 1
-	nexts := t.Tree[cur]
-	for i := int32(len(nexts)) - 2; i >= 0; i-- {
-		e := nexts[i+1]
-		if t.Depth[e.to] == -1 {
-			nexts[i], nexts[i+1] = nexts[i+1], nexts[i]
-		}
-	}
-	hldSize := int32(0)
-	for i, e := range nexts {
-		to := e.to
-		if t.Depth[to] == -1 {
-			t.DepthWeighted[to] = t.DepthWeighted[cur] + e.cost
-			t._dfsSize(to, cur)
-			size[cur] += size[to]
-			if size[to] > hldSize {
-				hldSize = size[to]
-				if i != 0 {
-					nexts[0], nexts[i] = nexts[i], nexts[0]
-				}
-			}
-		}
-	}
-}
-
-func (t *Tree32) _dfsHld(cur int32, times *int32) {
-	t.Lid[cur] = *times
-	*times++
-	t.Rid[cur] += t.Lid[cur]
-	t.IdToNode[t.Lid[cur]] = cur
-	heavy := true
-	for _, e := range t.Tree[cur] {
-		to := e.to
-		if t.Depth[to] > t.Depth[cur] {
-			if heavy {
-				t.Head[to] = t.Head[cur]
-			} else {
-				t.Head[to] = to
-			}
-			heavy = false
-			t._dfsHld(to, times)
 		}
 	}
 }
@@ -616,6 +730,74 @@ func (tree *Tree32) Eid(u, v int32) int32 {
 	return tree.Lid[v]
 }
 
+// 点v对应的父边的边id.如果v是根节点则返回-1.
+func (tre *Tree32) VToE(v int32) int32 {
+	return tre.vToE[v]
+}
+
+// 第i条边对应的深度更深的那个节点.
+func (tree *Tree32) EToV(i int32) int32 {
+	u, v := tree.Edges[i][0], tree.Edges[i][1]
+	if tree.Parent[u] == v {
+		return u
+	}
+	return v
+}
+
+func (t *Tree32) _dfsSize(cur, pre int32) {
+	size := t.Rid
+	t.Parent[cur] = pre
+	if pre != -1 {
+		t.Depth[cur] = t.Depth[pre] + 1
+	} else {
+		t.Depth[cur] = 0
+	}
+	size[cur] = 1
+	nexts := t.Tree[cur]
+	for i := int32(len(nexts)) - 2; i >= 0; i-- {
+		e := nexts[i+1]
+		if t.Depth[e.to] == -1 {
+			nexts[i], nexts[i+1] = nexts[i+1], nexts[i]
+		}
+	}
+	hldSize := int32(0)
+	for i, e := range nexts {
+		to := e.to
+		if t.Depth[to] == -1 {
+			t.DepthWeighted[to] = t.DepthWeighted[cur] + e.cost
+			t.vToE[to] = e.eid
+			t._dfsSize(to, cur)
+			size[cur] += size[to]
+			if size[to] > hldSize {
+				hldSize = size[to]
+				if i != 0 {
+					nexts[0], nexts[i] = nexts[i], nexts[0]
+				}
+			}
+		}
+	}
+}
+
+func (t *Tree32) _dfsHld(cur int32, times *int32) {
+	t.Lid[cur] = *times
+	*times++
+	t.Rid[cur] += t.Lid[cur]
+	t.IdToNode[t.Lid[cur]] = cur
+	heavy := true
+	for _, e := range t.Tree[cur] {
+		to := e.to
+		if t.Depth[to] > t.Depth[cur] {
+			if heavy {
+				t.Head[to] = t.Head[cur]
+			} else {
+				t.Head[to] = to
+			}
+			heavy = false
+			t._dfsHld(to, times)
+		}
+	}
+}
+
 func newHeap[H any](less func(a, b H) bool, nums []H) *heap[H] {
 	nums = append(nums[:0:0], nums...)
 	heap := &heap[H]{less: less, data: nums}
@@ -682,4 +864,18 @@ func (h *heap[H]) pushDown(root int) {
 		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
 		root = minIndex
 	}
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

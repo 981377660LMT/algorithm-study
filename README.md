@@ -254,7 +254,7 @@
     - [UnboundedKnapsackRemovable](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98/%E6%8A%80%E5%B7%A7/%E6%92%A4%E9%94%80%E8%83%8C%E5%8C%85/%E5%AE%8C%E5%85%A8%E8%83%8C%E5%8C%85/UnboundedKnapsackRemovable.py)
     - [BoundedKnapsackRemovable](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98/%E6%8A%80%E5%B7%A7/%E6%92%A4%E9%94%80%E8%83%8C%E5%8C%85/%E5%A4%9A%E9%87%8D%E8%83%8C%E5%8C%85/BoundedKnapsackRemovable.py)
     - [TreeKnapsackDpSquare](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98/5_%E6%9C%89%E4%BE%9D%E8%B5%96%E7%9A%84%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98-%E6%A0%91%E4%B8%8A%E8%83%8C%E5%8C%85/TreeKnapsackDp.go)
-    - [StaticTopTreeDp](6_tree/static-top-tree/StaticTopTree.go)
+    - [StaticTopTreeDp](6_tree/static-top-tree/StaticTopTreeFast.go)
 
 11. **Math**
 

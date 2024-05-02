@@ -39,9 +39,12 @@
 //     ◯    ◯  	    ◯    ◯
 
 //  5. Compress: 用一条重边合并两个簇
-//          ◯          ◯
-//       +   \   ->   / \
-//     ◯      ◯      ◯   ◯
+//        ◯             ◯
+//       /   		       /
+//      ◯  +    ->    /
+//     /             /
+//    ◯             ◯
+//
 
 // !- StaticTopTree 构建(分解)方法:
 //  1. 删除与根节点相连的一条重边(compress).
@@ -70,8 +73,7 @@ func init() {
 }
 
 func main() {
-	// abc351g()
-	p4719()
+	abc351g()
 	// P4719_bruteforce()
 }
 
@@ -109,28 +111,28 @@ func abc351g() {
 
 	stt := NewStaticTopTree(tree, 0)
 
-	type PointCluster = int // 子树哈希值
+	type Point = int // 子树哈希值
 
 	// !pathCluster中离根远的端点哈希值为x时，离根近的端点哈希值为mul*x+add
 	// 最后整棵树的哈希值即为add.
-	type PathCluster = struct{ mul, add int } // mul*x+add
+	type Path = struct{ mul, add int } // mul*x+add
 
-	vertex := func(v int32) PathCluster {
-		return PathCluster{mul: 1, add: nums[v]}
+	vertex := func(v int32) Path {
+		return Path{mul: 1, add: nums[v]}
 	}
-	addEdge := func(t PathCluster) PointCluster {
-		return t.add
+	addEdge := func(p Path) Point {
+		return p.add
 	}
-	addVertex := func(t PointCluster, v int32) PathCluster {
-		return PathCluster{mul: t, add: nums[v]}
+	addVertex := func(x Point, v int32) Path {
+		return Path{mul: x, add: nums[v]}
 	}
-	rake := func(x, y PointCluster) PointCluster {
+	rake := func(x, y Point) Point {
 		return x * y % MOD
 	}
 	// p簇离根节点更近.
 	// compress就是仿射变换.
-	compress := func(p, c PathCluster) PathCluster {
-		return PathCluster{mul: p.mul * c.mul % MOD, add: (p.mul*c.add + p.add) % MOD}
+	compress := func(p, c Path) Path {
+		return Path{mul: p.mul * c.mul % MOD, add: (p.mul*c.add + p.add) % MOD}
 	}
 
 	dp := NewStaticTopTreeDP(stt, vertex, addEdge, addVertex, rake, compress)
@@ -141,68 +143,6 @@ func abc351g() {
 		nums[v] = x
 		newRes := dp.Update(int32(v))
 		fmt.Fprintln(out, newRes.add)
-	}
-}
-
-// https://www.luogu.com.cn/problem/P4719
-// P4719 【模板】"动态 DP" & 动态树分治
-//
-// 给定一棵 n 个点的树，点带点权。
-// 有 m 次操作，每次操作给定 x,y，表示修改点 x 的权值为y.
-// 你需要在每次操作之后求出这棵树的最大权独立集的权值大小。
-//
-// dp[i][0/1] 表示选/不选这个点.
-// dp[i][0] = sum(max(dp[j][0], dp[j][1])), j 是 i 的儿子.
-// dp[i][1] = sum(dp[j][0]) + w[i], j 是 i 的儿子.
-func p4719() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	const INF int = 1e18
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	weights := make([]int, n)
-	for i := range weights {
-		fmt.Fscan(in, &weights[i])
-	}
-	tree := make([][]int32, n)
-	for i := int32(0); i < n-1; i++ {
-		var u, v int32
-		fmt.Fscan(in, &u, &v)
-		u, v = u-1, v-1
-		tree[u] = append(tree[u], v)
-		tree[v] = append(tree[v], u)
-	}
-	rootedTree := ToRootedTree32(tree, 0)
-
-	stt := NewStaticTopTree(rootedTree, 0)
-
-	type PointCluster = struct{ exclude, include int }
-	type PathCluster = int
-	vertex := func(v int32) PathCluster {
-		return max(weights[v], 0)
-	}
-	addEdge := func(t PathCluster) PointCluster { return PointCluster{include: t} }
-	addVertex := func(t PointCluster, v int32) PathCluster {
-		return max(t.include, t.exclude+weights[v])
-	}
-	rake := func(x, y PointCluster) PointCluster {
-		return PointCluster{include: x.include + y.include, exclude: x.exclude + y.exclude}
-	}
-	compress := func(p, c PathCluster) PathCluster {
-		return p + c
-	}
-	dp := NewStaticTopTreeDP(stt, vertex, addEdge, addVertex, rake, compress)
-
-	for i := int32(0); i < q; i++ {
-		var x, y int
-		fmt.Fscan(in, &x, &y)
-		x--
-		weights[x] = y
-		newRes := dp.Update(int32(x))
-		fmt.Fprintln(out, newRes)
 	}
 }
 
@@ -280,11 +220,11 @@ type StaticTopTreeDP[PointCluster, PathCluster any] struct {
 
 	// 节点初始值.
 	vertex func(v int32) PathCluster
-	// pathCluster转为子树的返回值.
+	// 子树的贡献值.
 	addEdge func(t PathCluster) PointCluster
-	// 将点v加入子树.
+	// 将点v加入子树，向父节点返回答案.
 	addVertex func(t PointCluster, v int32) PathCluster
-	// 合并两个子树.
+	// 合并两个子树的贡献.
 	rake func(x, y PointCluster) PointCluster
 	// 合并两个pathCluster，p簇离根节点更近.
 	compress func(p, c PathCluster) PathCluster
