@@ -1,5 +1,4 @@
 // https://nyaannyaan.github.io/library/tree/dynamic-rerooting.hpp
-// TODO，学习写函数
 
 package main
 
@@ -20,6 +19,10 @@ func main() {
 
 // No.768 Tapris and Noel play the game on Treeone
 // https://yukicoder.me/problems/no/768
+// Alice和Bob在一棵树上玩游戏.
+// Alice先手，可以选择树上的一个点，然后Bob也可以选择相邻的一个未访问过的点...
+// 两人轮流选择，直到没有可选的点则游戏结束.
+// 问Alice是否有必胜策略，输出Alice的必胜策略的起始点.
 func yuki768() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)

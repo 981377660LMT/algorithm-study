@@ -19,7 +19,6 @@ T = TypeVar("T")
 
 
 class Rerooting(Generic[T]):
-
     __slots__ = ("adjList", "_n", "_decrement")
 
     def __init__(self, n: int, decrement: int = 0):
