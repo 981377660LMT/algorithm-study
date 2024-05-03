@@ -3,31 +3,48 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/bits"
 	"os"
-	"sort"
 )
 
 func main() {
 	// P4151()
-	demo()
+	yosupo()
+	// demo()
+
 }
 
-func demo() {
-	v1, v2 := NewVectorSpace(nil), NewVectorSpace(nil)
-	v1.Add(1)
-	v1.Add(2)
-	v1.Add(3)
-	v2.Add(1)
-	v2.Add(5)
-	v2.Add(7)
-	v2.Add(8)
+// https://judge.yosupo.jp/problem/intersection_of_f2_vector_spaces
+func yosupo() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-	fmt.Println(v1.Or(v2))
-	fmt.Println(v1)
-	fmt.Println(v1.And(v2))
-	fmt.Println(v1.And(NewVectorSpace(nil)))
-	fmt.Println(v1)
+	solve := func(arr1, arr2 []uint) []uint {
+		return F2Intersection(arr1, arr2)
+	}
+
+	var T int32
+	fmt.Fscan(in, &T)
+	for i := int32(0); i < T; i++ {
+		var n int32
+		fmt.Fscan(in, &n)
+		arr1 := make([]uint, n)
+		for i := int32(0); i < n; i++ {
+			fmt.Fscan(in, &arr1[i])
+		}
+		var m int32
+		fmt.Fscan(in, &m)
+		arr2 := make([]uint, m)
+		for i := int32(0); i < m; i++ {
+			fmt.Fscan(in, &arr2[i])
+		}
+		res := solve(arr1, arr2)
+		fmt.Fprint(out, len(res), " ")
+		for _, base := range res {
+			fmt.Fprint(out, base, " ")
+		}
+		fmt.Fprintln(out)
+	}
 }
 
 // P4151 [WC2011] 最大XOR和路径
@@ -60,21 +77,20 @@ func P4151() {
 			uf.Union(u, v, w)
 		} else {
 			cycleXor := uf.Dist(u, v) ^ w
-			vs.Add(cycleXor)
+			vs.Add(uint(cycleXor))
 		}
 	}
 
 	dist := uf.Dist(start, end)
-	fmt.Fprintln(out, vs.Max(dist))
+	fmt.Fprintln(out, vs.Max(uint(dist)))
 }
 
 // VectorSpace，线性基空间.支持线性基合并.
 type VectorSpace struct {
-	bases  []int
-	maxBit int
+	Bases []uint
 }
 
-func NewVectorSpace(nums []int) *VectorSpace {
+func NewVectorSpace(nums []uint) *VectorSpace {
 	res := &VectorSpace{}
 	for _, num := range nums {
 		res.Add(num)
@@ -83,168 +99,129 @@ func NewVectorSpace(nums []int) *VectorSpace {
 }
 
 // 插入一个向量,如果插入成功(不能被表出)返回True,否则返回False.
-func (lb *VectorSpace) Add(num int) bool {
-	for _, base := range lb.bases {
+func (lb *VectorSpace) Add(num uint) bool {
+	for _, base := range lb.Bases {
 		if base == 0 || num == 0 {
 			break
 		}
-		num = min(num, num^base)
+		num = minu(num, num^base)
 	}
 	if num != 0 {
-		lb.bases = append(lb.bases, num)
-		lb.maxBit = max(lb.maxBit, num)
+		lb.Bases = append(lb.Bases, num)
 		return true
 	}
 	return false
 }
 
+// 插入一个向量,如果插入成功(不能被表出)返回新的线性基,否则返回0.
+func (lb *VectorSpace) Add2(num uint) uint {
+	for _, base := range lb.Bases {
+		if base == 0 || num == 0 {
+			break
+		}
+		num = minu(num, num^base)
+	}
+	if num != 0 {
+		lb.Bases = append(lb.Bases, num)
+		return num
+	}
+	return 0
+}
+
 // 求xor与所有向量异或的最大值.
-func (lb *VectorSpace) Max(xor int) int {
+func (lb *VectorSpace) Max(xor uint) uint {
 	res := xor
-	for _, base := range lb.bases {
-		res = max(res, res^base)
+	for _, base := range lb.Bases {
+		res = maxu(res, res^base)
 	}
 	return res
 }
 
 // 求xor与所有向量异或的最小值.
-func (lb *VectorSpace) Min(xorVal int) int {
+func (lb *VectorSpace) Min(xorVal uint) uint {
 	res := xorVal
-	for _, base := range lb.bases {
-		res = min(res, res^base)
+	for _, base := range lb.Bases {
+		res = minu(res, res^base)
 	}
 	return res
 }
 
 func (lb *VectorSpace) Copy() *VectorSpace {
-	res := &VectorSpace{}
-	res.bases = append(res.bases, lb.bases...)
-	res.maxBit = lb.maxBit
-	return res
+	return &VectorSpace{
+		Bases: append(lb.Bases[:0:0], lb.Bases...),
+	}
 }
 
 func (lb *VectorSpace) Clear() {
-	lb.bases = lb.bases[:0]
-	lb.maxBit = 0
+	lb.Bases = lb.Bases[:0]
 }
 
-func (lb *VectorSpace) Len() int {
-	return len(lb.bases)
+func (lb *VectorSpace) Len() int32 {
+	return int32(len(lb.Bases))
 }
 
-func (lb *VectorSpace) ForEach(f func(base int)) {
-	for _, base := range lb.bases {
+func (lb *VectorSpace) ForEach(f func(base uint)) {
+	for _, base := range lb.Bases {
 		f(base)
 	}
 }
 
-func (lb *VectorSpace) Has(v int) bool {
-	for _, w := range lb.bases {
+func (lb *VectorSpace) Has(v uint) bool {
+	for _, w := range lb.Bases {
 		if v == 0 {
 			break
 		}
-		v = min(v, v^w)
+		v = minu(v, v^w)
 	}
 	return v == 0
 }
 
-// Merge.
-func (lb *VectorSpace) Or(other *VectorSpace) *VectorSpace {
-	v1, v2 := lb, other
+func (lb *VectorSpace) String() string {
+	return fmt.Sprintf("%v", lb.Bases)
+}
+
+// Or.
+// 线性基合并.
+func Merge(v1, v2 *VectorSpace) *VectorSpace {
 	if v1.Len() < v2.Len() {
 		v1, v2 = v2, v1
 	}
 	res := v1.Copy()
-	for _, base := range v2.bases {
+	for _, base := range v2.Bases {
 		res.Add(base)
 	}
 	return res
 }
 
-func (lb *VectorSpace) And(other *VectorSpace) *VectorSpace {
-	maxDim := max(lb.maxBit, other.maxBit)
-	x := lb.orthogonalSpace(maxDim)
-	y := other.orthogonalSpace(maxDim)
-	if x.Len() < y.Len() {
-		x, y = y, x
+// Or.
+// 线性基合并.
+func MergeDestructively(v1, v2 *VectorSpace) *VectorSpace {
+	if v1.Len() < v2.Len() {
+		v1, v2 = v2, v1
 	}
-	for _, base := range y.bases {
-		x.Add(base)
+	for _, base := range v2.Bases {
+		v1.Add(base)
 	}
-	return x.orthogonalSpace(maxDim)
+	return v1
 }
 
-func (lb *VectorSpace) String() string {
-	return fmt.Sprintf("%v", lb.bases)
-}
-
-// 正交空间.
-func (lb *VectorSpace) orthogonalSpace(maxDim int) *VectorSpace {
-	lb.normalize(true)
-	m := maxDim
-	tmp := make([]int, m)
-	for _, base := range lb.bases {
-		tmp[bits.Len(uint(base))-1] = base
+// Intersection.(And)
+// 注意此时最大值不超过2**30.
+func F2Intersection(A, B []uint) []uint {
+	tmp := &VectorSpace{}
+	for _, a := range A {
+		tmp.Add(a<<32 + a)
 	}
-	tmp = Transpose(m, m, tmp, true)
-	res := &VectorSpace{}
-	for j, v := range tmp {
-		if v>>j&1 == 1 {
-			continue
+	upper := uint(1 << 32)
+	var res []uint
+	for _, b := range B {
+		v := b << 32
+		u := tmp.Add2(v)
+		if u < upper {
+			res = append(res, u)
 		}
-		res.Add(v | 1<<j)
 	}
 	return res
-}
-
-func (lb *VectorSpace) normalize(reverse bool) {
-	for j, v := range lb.bases {
-		for i := 0; i < j; i++ {
-			lb.bases[i] = min(lb.bases[i], lb.bases[i]^v)
-		}
-	}
-	if !reverse {
-		sort.Ints(lb.bases)
-	} else {
-		sort.Sort(sort.Reverse(sort.IntSlice(lb.bases)))
-	}
-}
-
-// 矩阵转置,O(n+m)log(n+m)
-func Transpose(row, col int, grid []int, inPlace bool) []int {
-	if len(grid) != row {
-		panic("row not match")
-	}
-	if !inPlace {
-		grid = append(grid[:0:0], grid...)
-	}
-	log := 0
-	max_ := max(row, col)
-	for 1<<log < max_ {
-		log++
-	}
-	if len(grid) < 1<<log {
-		*&grid = append(grid, make([]int, 1<<log-len(grid))...)
-	}
-	width := 1 << log
-	mask := int(1)
-	for i := 0; i < log; i++ {
-		mask |= (mask << (1 << i))
-	}
-	for t := 0; t < log; t++ {
-		width >>= 1
-		mask ^= (mask >> width)
-		for i := 0; i < 1<<t; i++ {
-			for j := 0; j < width; j++ {
-				x := &grid[width*(2*i)+j]
-				y := &grid[width*(2*i+1)+j]
-				*x = ((*y << width) & mask) ^ *x
-				*y = ((*x & mask) >> width) ^ *y
-				*x = ((*y << width) & mask) ^ *x
-			}
-		}
-	}
-	return grid[:col]
 }
 
 func min(a, b int) int {
@@ -254,7 +231,21 @@ func min(a, b int) int {
 	return b
 }
 
+func minu(a, b uint) uint {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func maxu(a, b uint) uint {
 	if a > b {
 		return a
 	}

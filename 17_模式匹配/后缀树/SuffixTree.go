@@ -116,6 +116,20 @@ func main() {
 	abc280()
 }
 
+// 最长的只出现一次的子串长度.
+func maxSubstringLength(s string) int {
+	_, ranges := SuffixTree(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+	res := -1
+	for i := 1; i < len(ranges); i++ {
+		rowStart, rowEnd, _, colEnd := ranges[i][0], ranges[i][1], ranges[i][2], ranges[i][3]
+		freq := int(rowEnd - rowStart)
+		if freq == 1 {
+			res = max(res, int(colEnd))
+		}
+	}
+	return res
+}
+
 // https://oi-wiki.org/string/suffix-tree/
 func demo() {
 	// s := "cabab"

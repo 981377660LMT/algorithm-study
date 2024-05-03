@@ -15,7 +15,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/bits"
 	"os"
 	"sort"
 )
@@ -145,7 +144,7 @@ func main() {
 	}
 }
 
-type State = *VectorSpace
+type State = *VectorSpaceInt
 
 type segMutation struct{ start, end, id int }
 type segQuery struct{ time, id int }
@@ -418,14 +417,13 @@ func (adq *AddRemoveQuery) getMonotone(lastTime int) []Event {
 	return adq.events
 }
 
-// VectorSpace，线性基空间.支持线性基合并.
-type VectorSpace struct {
-	bases  []int
-	maxBit int
+// VectorSpaceInt，线性基空间.支持线性基合并.
+type VectorSpaceInt struct {
+	bases []int
 }
 
-func NewVectorSpace(nums []int) *VectorSpace {
-	res := &VectorSpace{}
+func NewVectorSpace(nums []int) *VectorSpaceInt {
+	res := &VectorSpaceInt{}
 	for _, num := range nums {
 		res.Add(num)
 	}
@@ -433,7 +431,7 @@ func NewVectorSpace(nums []int) *VectorSpace {
 }
 
 // 插入一个向量,如果插入成功(不能被表出)返回True,否则返回False.
-func (lb *VectorSpace) Add(num int) bool {
+func (lb *VectorSpaceInt) Add(num int) bool {
 	for _, base := range lb.bases {
 		if base == 0 || num == 0 {
 			break
@@ -442,14 +440,13 @@ func (lb *VectorSpace) Add(num int) bool {
 	}
 	if num != 0 {
 		lb.bases = append(lb.bases, num)
-		lb.maxBit = max(lb.maxBit, num)
 		return true
 	}
 	return false
 }
 
 // 求xor与所有向量异或的最大值.
-func (lb *VectorSpace) Max(xor int) int {
+func (lb *VectorSpaceInt) Max(xor int) int {
 	res := xor
 	for _, base := range lb.bases {
 		res = max(res, res^base)
@@ -458,7 +455,7 @@ func (lb *VectorSpace) Max(xor int) int {
 }
 
 // 求xor与所有向量异或的最小值.
-func (lb *VectorSpace) Min(xor int) int {
+func (lb *VectorSpaceInt) Min(xor int) int {
 	res := xor
 	for _, base := range lb.bases {
 		res = min(res, res^base)
@@ -466,24 +463,17 @@ func (lb *VectorSpace) Min(xor int) int {
 	return res
 }
 
-func (lb *VectorSpace) Copy() *VectorSpace {
-	res := &VectorSpace{}
+func (lb *VectorSpaceInt) Copy() *VectorSpaceInt {
+	res := &VectorSpaceInt{}
 	res.bases = append(res.bases, lb.bases...)
-	res.maxBit = lb.maxBit
 	return res
 }
 
-func (lb *VectorSpace) Len() int {
+func (lb *VectorSpaceInt) Len() int {
 	return len(lb.bases)
 }
 
-func (lb *VectorSpace) ForEach(f func(base int)) {
-	for _, base := range lb.bases {
-		f(base)
-	}
-}
-
-func (lb *VectorSpace) Has(v int) bool {
+func (lb *VectorSpaceInt) Has(v int) bool {
 	for _, w := range lb.bases {
 		if v == 0 {
 			break
@@ -494,7 +484,7 @@ func (lb *VectorSpace) Has(v int) bool {
 }
 
 // Merge.
-func (lb *VectorSpace) Or(other *VectorSpace) *VectorSpace {
+func (lb *VectorSpaceInt) Or(other *VectorSpaceInt) *VectorSpaceInt {
 	v1, v2 := lb, other
 	if v1.Len() < v2.Len() {
 		v1, v2 = v2, v1
@@ -506,90 +496,8 @@ func (lb *VectorSpace) Or(other *VectorSpace) *VectorSpace {
 	return res
 }
 
-func (lb *VectorSpace) And(other *VectorSpace) *VectorSpace {
-	maxDim := max(lb.maxBit, other.maxBit)
-	x := lb.orthogonalSpace(maxDim)
-	y := other.orthogonalSpace(maxDim)
-	if x.Len() < y.Len() {
-		x, y = y, x
-	}
-	for _, base := range y.bases {
-		x.Add(base)
-	}
-	return x.orthogonalSpace(maxDim)
-}
-
-func (lb *VectorSpace) String() string {
+func (lb *VectorSpaceInt) String() string {
 	return fmt.Sprintf("%v", lb.bases)
-}
-
-// 正交空间.
-func (lb *VectorSpace) orthogonalSpace(maxDim int) *VectorSpace {
-	lb.normalize(true)
-	m := maxDim
-	tmp := make([]int, m)
-	for _, base := range lb.bases {
-		tmp[bits.Len(uint(base))-1] = base
-	}
-	tmp = Transpose(m, m, tmp, true)
-	res := &VectorSpace{}
-	for j, v := range tmp {
-		if v>>j&1 == 1 {
-			continue
-		}
-		res.Add(v | 1<<j)
-	}
-	return res
-}
-
-func (lb *VectorSpace) normalize(reverse bool) {
-	for j, v := range lb.bases {
-		for i := 0; i < j; i++ {
-			lb.bases[i] = min(lb.bases[i], lb.bases[i]^v)
-		}
-	}
-	if !reverse {
-		sort.Ints(lb.bases)
-	} else {
-		sort.Sort(sort.Reverse(sort.IntSlice(lb.bases)))
-	}
-}
-
-// 矩阵转置,O(n+m)log(n+m)
-func Transpose(row, col int, grid []int, inPlace bool) []int {
-	if len(grid) != row {
-		panic("row not match")
-	}
-	if !inPlace {
-		grid = append(grid[:0:0], grid...)
-	}
-	log := 0
-	max_ := max(row, col)
-	for 1<<log < max_ {
-		log++
-	}
-	if len(grid) < 1<<log {
-		*&grid = append(grid, make([]int, 1<<log-len(grid))...)
-	}
-	width := 1 << log
-	mask := int(1)
-	for i := 0; i < log; i++ {
-		mask |= (mask << (1 << i))
-	}
-	for t := 0; t < log; t++ {
-		width >>= 1
-		mask ^= (mask >> width)
-		for i := 0; i < 1<<t; i++ {
-			for j := 0; j < width; j++ {
-				x := &grid[width*(2*i)+j]
-				y := &grid[width*(2*i+1)+j]
-				*x = ((*y << width) & mask) ^ *x
-				*y = ((*x & mask) >> width) ^ *y
-				*x = ((*y << width) & mask) ^ *x
-			}
-		}
-	}
-	return grid[:col]
 }
 
 func min(a, b int) int {

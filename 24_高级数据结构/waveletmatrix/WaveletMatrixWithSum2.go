@@ -1,20 +1,20 @@
 // 维护区间贡献的 Wavelet Matrix
 // !注意查询区间贡献时, 异或无效
-
-// CountRange(start, end, a, b, xor) - 区间 [start, end) 中值在 [a, b) 之间的数的个数和这些数的和.
-// CountPrefix(start, end, x, xor) - 区间 [start, end) 中值在 [0, x) 之间的数的个数和这些数的和.
-// SumRange(start, end, k1, k2, xor) - 区间 [start, end) 中第 k1 到第k2小的数的和(0-based，左闭右开).
-// SumPrefix(start, end, k, xor) - 区间 [start, end) 中前k小的数的和.
-
-// Kth(start, end, k, xor) - 区间 [start, end) 中第 k(k>=0) 小的数.
-// KthValueAndSum(start, end, k, xor) - 区间 [start, end) 中第 k 小的数(0-indexed) 和前 k 小的数的和(不包括这个数).
-// Median(start, end, upper, xor) - 区间 [start, end) 中的中位数.
-// SumAll(start, end) - 区间 [start, end) 中所有数的和.
-
-// Floor(start, end, x, xor) - 区间 [start, end) 中值小于等于 x 的最大值
-// Ceil(start, end, x, xor) - 区间 [start, end) 中值大于等于 x 的最小值
-
-// MaxRight(start, end, xor, check) - 返回使得 check(count,prefixSum) 为 true 的最大(count,prefixSum), 其中prefixSum为[0,val)内的数的和.
+//
+// api:
+//  !RangeCountAndSum(start, end, a, b, xor) - 区间 [start, end) 中值在 [a, b) 之间的数的个数和这些数的和.
+//  !KthValueAndSum(start, end, k, xor) - 区间 [start, end) 中第 k 小的数和前 k 小的数的和.
+//
+//  Kth(start, end, k, xor) - 区间 [start, end) 中第 k 小的数.
+//  Median(start, end, upper, xor) - 区间 [start, end) 中的中位数.
+//  Floor(start, end, x, xor) - 区间 [start, end) 中值小于等于 x 的最大值
+//  Ceil(start, end, x, xor) - 区间 [start, end) 中值大于等于 x 的最小值
+//
+//  SumAll(start, end) - 区间 [start, end) 中所有数的和.
+//  SumRange(start, end, a, b, xor) - 区间 [start, end) 中值在 [a, b) 之间的数的和.
+//  SumSlice(start, end, k1, k2, xor) - 区间 [start, end) 中第 k1 到第 k2 小的数的和.
+//
+//  MaxRight(start, end, xor, check) - 返回使得 check(count,prefixSum) 为 true 的最大(count,prefixSum), 其中prefixSum为[0,val)内的数的和.
 
 package main
 
@@ -28,6 +28,7 @@ import (
 
 func main() {
 	demo()
+	// yosupo_range_kth_smallest()
 	// 区间最短距离和()
 	// abc281_e()
 
@@ -39,7 +40,7 @@ func main() {
 func demo() {
 	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	wm := NewWaveletMatrixWithSum(nums, nums, -1, true)
-	fmt.Println(wm.CountRange(0, 3, 3, 7, 0))
+	fmt.Println(wm.RangeCountAndSum(0, 7, 3, 8, 0))
 	fmt.Println(wm.KthValueAndSum(1, 5, 0, 0))
 	nums = []int{1, 2, 3, 4, 5}
 	wm = NewWaveletMatrixWithSum(nums, nums, -1, false)
@@ -48,9 +49,32 @@ func demo() {
 	fmt.Println(wm.SumAll(0, 4))
 
 	fmt.Println(wm.Floor(0, 5, 4, 0))
+	fmt.Println(wm.Ceil(0, 5, 4, 0))
 	fmt.Println(wm.Kth(0, 5, 1, 0))
 }
 
+// https://judge.yosupo.jp/problem/range_kth_smallest
+func yosupo_range_kth_smallest() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	wm := NewWaveletMatrixWithSum(nums, nil, -1, true)
+	for i := 0; i < q; i++ {
+		var l, r, k int32
+		fmt.Fscan(in, &l, &r, &k)
+		fmt.Fprintln(out, wm.Kth(l, r, k, 0))
+	}
+}
+
+// https://atcoder.jp/contests/abc281/tasks/abc281_e
 func abc281_e() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -61,7 +85,7 @@ func abc281_e() {
 	for i := range nums {
 		fmt.Fscan(in, &nums[i])
 	}
-	wm := NewWaveletMatrixWithSum(nums, nums, -1, false)
+	wm := NewWaveletMatrixWithSum(nums, nums, -1, true)
 	for i := int32(0); i < n-m+1; i++ {
 		_, res := wm.KthValueAndSum(i, i+m, k, 0)
 		fmt.Fprintln(out, res)
@@ -83,19 +107,12 @@ func 区间最短距离和() {
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	OFFSET := int(1e9 + 10)
 	nums := make([]int, n)
 	for i := range nums {
 		fmt.Fscan(in, &nums[i])
-		nums[i] += OFFSET
 	}
 
-	preSum := make([]int, n+1)
-	for i := 0; i < n; i++ {
-		preSum[i+1] = preSum[i] + nums[i]
-	}
-
-	wm := NewWaveletMatrixWithSum(nums, nums, -1, false)
+	wm := NewWaveletMatrixWithSum(nums, nums, -1, true)
 	for i := 0; i < q; i++ {
 		var start, end int32
 		fmt.Fscan(in, &start, &end)
@@ -105,7 +122,7 @@ func 区间最短距离和() {
 		lowerCount := n / 2
 		ceilCount := n - lowerCount
 		mid, lowerSum := wm.KthValueAndSum(start, end, lowerCount, 0)
-		allSum := preSum[end] - preSum[start]
+		allSum := wm.SumAll(start, end)
 		ceilSum := allSum - lowerSum
 
 		res := 0
@@ -166,7 +183,7 @@ func yuki919() {
 
 }
 
-// No.1332 Range Nearest Query
+// No.1332 Range Nearest Query (区间前驱后继)
 // https://yukicoder.me/problems/no/1332
 // 区间最近值(无序数组区间前驱后继)查询
 // !对每个查询[left,right,x],输出左闭右开区间内的数到给定数x的最小距离
@@ -225,9 +242,7 @@ func yuki2065() {
 		var x int
 		fmt.Fscan(in, &start, &end, &x)
 		start--
-
-		lessCount := M.CountRange(start, end, 0, x, 0)     // 小于x的数的个数
-		lessSum := M.SumRange(start, end, 0, lessCount, 0) // 小于x的数的和
+		lessCount, lessSum := M.RangeCountAndSum(start, end, 0, x, 0) // 小于x的数的个数
 		res := lessSum + int((end-start-lessCount))*x
 		fmt.Fprintln(out, res)
 	}
@@ -244,12 +259,13 @@ func (*WaveletMatrixWithSum) inv(a WmSum) WmSum   { return -a }
 
 type WaveletMatrixWithSum struct {
 	n, log   int32
+	setLog   bool
+	compress bool
+	useSum   bool
 	mid      []int32
 	bv       []*BitVector
 	key      []WmValue
-	setLog   bool
 	presum   [][]WmSum
-	compress bool
 }
 
 // nums: 数组元素.
@@ -268,13 +284,15 @@ func (wm *WaveletMatrixWithSum) build(nums []WmValue, sumData []WmSum, log int32
 
 	wm.n = int32(len(numsCopy))
 	wm.log = log
-	wm.compress = compress
 	wm.setLog = log != -1
+	wm.compress = compress
+	wm.useSum = len(sumData) > 0
 	if wm.n == 0 {
 		wm.log = 0
+		wm.presum = [][]WmSum{{wm.e()}}
 		return
 	}
-	makeSum := len(sumData) > 0
+
 	if compress {
 		if wm.setLog {
 			panic("compress and log should not be set at the same time")
@@ -287,6 +305,7 @@ func (wm *WaveletMatrixWithSum) build(nums []WmValue, sumData []WmSum, log int32
 			}
 			numsCopy[i] = WmValue(len(wm.key) - 1)
 		}
+		wm.key = wm.key[:len(wm.key):len(wm.key)]
 	}
 	if wm.log == -1 {
 		tmp := wm._maxs(numsCopy)
@@ -300,7 +319,7 @@ func (wm *WaveletMatrixWithSum) build(nums []WmValue, sumData []WmSum, log int32
 	for i := range wm.bv {
 		wm.bv[i] = NewBitVector(wm.n)
 	}
-	if makeSum {
+	if wm.useSum {
 		wm.presum = make([][]WmSum, 1+wm.log)
 		for i := range wm.presum {
 			sums := make([]WmSum, wm.n+1)
@@ -319,7 +338,7 @@ func (wm *WaveletMatrixWithSum) build(nums []WmValue, sumData []WmSum, log int32
 	S0, S1 := make([]WmSum, wm.n), make([]WmSum, wm.n)
 	for d := wm.log - 1; d >= -1; d-- {
 		p0, p1 := int32(0), int32(0)
-		if makeSum {
+		if wm.useSum {
 			tmp := wm.presum[d+1]
 			for i := int32(0); i < wm.n; i++ {
 				tmp[i+1] = wm.op(tmp[i], S[i])
@@ -331,13 +350,13 @@ func (wm *WaveletMatrixWithSum) build(nums []WmValue, sumData []WmSum, log int32
 		for i := int32(0); i < wm.n; i++ {
 			f := (A[i] >> d & 1) == 1
 			if !f {
-				if makeSum {
+				if wm.useSum {
 					S0[p0] = S[i]
 				}
 				A0[p0] = A[i]
 				p0++
 			} else {
-				if makeSum {
+				if wm.useSum {
 					S1[p1] = S[i]
 				}
 				wm.bv[d].Set(i)
@@ -356,124 +375,63 @@ func (wm *WaveletMatrixWithSum) build(nums []WmValue, sumData []WmSum, log int32
 	}
 }
 
-// 区间 [start, end) 中范围在 [a, b) 中的元素的个数.
-func (wm *WaveletMatrixWithSum) CountRange(start, end int32, a, b WmValue, xorVal WmValue) int32 {
-	return wm.CountPrefix(start, end, b, xorVal) - wm.CountPrefix(start, end, a, xorVal)
-}
-
-func (wm *WaveletMatrixWithSum) SumRange(start, end, k1, k2 int32, xorVal WmValue) WmSum {
-	if k1 < 0 {
-		k1 = 0
-	}
-	if k2 > end-start {
-		k2 = end - start
-	}
-	if k1 >= k2 {
-		return wm.e()
-	}
-	add := wm.SumPrefix(start, end, k2, xorVal)
-	sub := wm.SumPrefix(start, end, k1, xorVal)
-	return wm.op(add, wm.inv(sub))
-}
-
-// 返回区间 [start, end) 中 范围在 [0, x) 中的元素的个数.
-func (wm *WaveletMatrixWithSum) CountPrefix(start, end int32, x WmValue, xor WmValue) int32 {
-	if xor != 0 {
+// 返回区间 [start, end) 中 值在 [a, b) 中的元素个数以及这些元素的和.
+func (wm *WaveletMatrixWithSum) RangeCountAndSum(start, end int32, a, b WmValue, xorValue WmValue) (int32, WmSum) {
+	if xorValue != 0 {
 		if !wm.setLog {
 			panic("log should be set when xor is used")
 		}
 	}
-	if wm.compress {
-		x = wm._lowerBound(wm.key, x)
+	if start < 0 {
+		start = 0
 	}
-	if x <= 0 {
-		return 0
+	if end > wm.n {
+		end = wm.n
 	}
-	if x >= 1<<wm.log {
-		return end - start
-	}
-	count := int32(0)
-	for d := wm.log - 1; d >= 0; d-- {
-		add := (x>>d)&1 == 1
-		f := (xor>>d)&1 == 1
-		l0, r0 := wm.bv[d].Rank(start, false), wm.bv[d].Rank(end, false)
-		kf := int32(0)
-		if f {
-			kf = (end - start - r0 + l0)
-		} else {
-			kf = (r0 - l0)
-		}
-		if add {
-			count += kf
-			if f {
-				start, end = l0, r0
-			} else {
-				start += wm.mid[d] - l0
-				end += wm.mid[d] - r0
-			}
-		} else {
-			if !f {
-				start, end = l0, r0
-			} else {
-				start += wm.mid[d] - l0
-				end += wm.mid[d] - r0
-			}
-		}
-	}
-	return count
-}
-
-// 返回区间 [start, end) 中 [0, k) 的和.
-func (wm *WaveletMatrixWithSum) SumPrefix(start, end, k int32, xor WmValue) WmSum {
-	_, sum := wm.KthValueAndSum(start, end, k, xor)
-	return sum
-}
-
-// [start, end)区间内第k(k>=0)小的元素.
-func (wm *WaveletMatrixWithSum) Kth(start, end, k int32, xorVal WmValue) WmValue {
-	if xorVal != 0 {
-		if !wm.setLog {
-			panic("log should be set")
-		}
-	}
-	count := int32(0)
-	res := WmValue(0)
-	for d := wm.log - 1; d >= 0; d-- {
-		f := (xorVal>>d)&1 == 1
-		l0, r0 := wm.bv[d].Rank(start, false), wm.bv[d].Rank(end, false)
-		var c int32
-		if f {
-			c = (end - start) - (r0 - l0)
-		} else {
-			c = r0 - l0
-		}
-		if count+c > k {
-			if !f {
-				start, end = l0, r0
-			} else {
-				start += wm.mid[d] - l0
-				end += wm.mid[d] - r0
-			}
-		} else {
-			count += c
-			res |= 1 << d
-			if !f {
-				start += wm.mid[d] - l0
-				end += wm.mid[d] - r0
-			} else {
-				start, end = l0, r0
-			}
-		}
+	if start >= end || a >= b {
+		return 0, wm.e()
 	}
 	if wm.compress {
-		res = wm.key[res]
+		a = wm._lowerBound(wm.key, a)
+		b = wm._lowerBound(wm.key, b)
 	}
-	return res
+	count, sum := int32(0), wm.e()
+	var dfs func(d, l, r int32, lx, rx WmValue)
+	dfs = func(d, l, r int32, lx, rx WmValue) {
+		if rx <= a || b <= lx {
+			return
+		}
+		if a <= lx && rx <= b {
+			count += r - l
+			if wm.useSum {
+				sum = wm.op(sum, wm._get(d, l, r))
+			}
+			return
+		}
+		d--
+		mx := (lx + rx) >> 1
+		l0, r0 := wm.bv[d].Rank(l, false), wm.bv[d].Rank(r, false)
+		l1, r1 := l+wm.mid[d]-l0, r+wm.mid[d]-r0
+		if xorValue>>d&1 == 1 {
+			l0, l1 = l1, l0
+			r0, r1 = r1, r0
+		}
+		dfs(d, l0, r0, lx, mx)
+		dfs(d, l1, r1, mx, rx)
+	}
+	dfs(wm.log, start, end, 0, 1<<wm.log)
+	return count, sum
 }
 
 // 返回区间 [start, end) 中的 (第k小的元素, 前k个元素(不包括第k小的元素) 的 op 的结果).
 // 如果k >= end-start, 返回 (-1, 区间 op 的结果).
 func (wm *WaveletMatrixWithSum) KthValueAndSum(start, end, k int32, xorVal WmValue) (WmValue, WmSum) {
+	if start < 0 {
+		start = 0
+	}
+	if end > wm.n {
+		end = wm.n
+	}
 	if start >= end {
 		return -1, wm.e()
 	}
@@ -485,51 +443,45 @@ func (wm *WaveletMatrixWithSum) KthValueAndSum(start, end, k int32, xorVal WmVal
 			panic("log should be set when xor is used")
 		}
 	}
-	if len(wm.presum) == 0 {
-		panic("sumData is not provided")
-	}
-	count := int32(0)
-	sum := wm.e()
-	res := WmValue(0)
+
+	sum, val := wm.e(), WmValue(0)
 	for d := wm.log - 1; d >= 0; d-- {
-		f := (xorVal>>d)&1 == 1
 		l0, r0 := wm.bv[d].Rank(start, false), wm.bv[d].Rank(end, false)
-		c := int32(0)
-		if f {
-			c = (end - start) - (r0 - l0)
-		} else {
-			c = r0 - l0
+		l1, r1 := start+wm.mid[d]-l0, end+wm.mid[d]-r0
+		if (xorVal>>d)&1 == 1 {
+			l0, l1 = l1, l0
+			r0, r1 = r1, r0
 		}
-		if count+c > k {
-			if !f {
-				start, end = l0, r0
-			} else {
-				start += wm.mid[d] - l0
-				end += wm.mid[d] - r0
-			}
+		if k < r0-l0 {
+			start, end = l0, r0
 		} else {
-			var s WmSum
-			if f {
-				s = wm._get(d, start+wm.mid[d]-l0, end+wm.mid[d]-r0)
-			} else {
-				s = wm._get(d, l0, r0)
-			}
-			count += c
-			sum = wm.op(sum, s)
-			res |= 1 << d
-			if !f {
-				start += wm.mid[d] - l0
-				end += wm.mid[d] - r0
-			} else {
-				start, end = l0, r0
+			k -= r0 - l0
+			val |= 1 << d
+			start, end = l1, r1
+			if wm.useSum {
+				sum = wm.op(sum, wm._get(d, l0, r0))
 			}
 		}
 	}
-	sum = wm.op(sum, wm._get(0, start, start+k-count))
+	if wm.useSum {
+		sum = wm.op(sum, wm._get(0, start, start+k))
+	}
 	if wm.compress {
-		res = wm.key[res]
+		val = wm.key[val]
 	}
-	return res, sum
+	return val, sum
+}
+
+// [start, end)区间内第k(k>=0)小的元素.
+func (wm *WaveletMatrixWithSum) Kth(start, end, k int32, xorVal WmValue) WmValue {
+	if k < 0 {
+		k = 0
+	}
+	if n := end - start - 1; k > n {
+		k = n
+	}
+	v, _ := wm.KthValueAndSum(start, end, k, xorVal)
+	return v
 }
 
 // upper: 向上取中位数还是向下取中位数.
@@ -537,14 +489,165 @@ func (wm *WaveletMatrixWithSum) Median(start, end int32, upper bool, xorVal WmVa
 	n := end - start
 	var k int32
 	if upper {
-		k = n / 2
+		k = n >> 1
 	} else {
-		k = (n - 1) / 2
+		k = (n - 1) >> 1
 	}
 	return wm.Kth(start, end, k, xorVal)
 }
 
+// [start, end) 中小于等于 x 的数中最大的数.
+//
+//	如果不存在则返回-INF.
+func (wm *WaveletMatrixWithSum) Floor(start, end int32, x WmValue, xor WmValue) WmValue {
+	if xor != 0 {
+		if !wm.setLog {
+			panic("log should be set when xor is used")
+		}
+	}
+	if start < 0 {
+		start = 0
+	}
+	if end > wm.n {
+		end = wm.n
+	}
+	if start >= end {
+		return -INF
+	}
+	res := -INF
+	x++
+	if wm.compress {
+		x = wm._lowerBound(wm.key, x)
+	}
+	var dfs func(d, l, r int32, lx, rx WmValue)
+	dfs = func(d, l, r int32, lx, rx WmValue) {
+		if rx-1 <= res || l == r || x <= lx {
+			return
+		}
+		if d == 0 {
+			res = max(res, lx)
+			return
+		}
+		d--
+		mx := (lx + rx) >> 1
+		l0, r0 := wm.bv[d].Rank(l, false), wm.bv[d].Rank(r, false)
+		l1, r1 := l+wm.mid[d]-l0, r+wm.mid[d]-r0
+		if xor>>d&1 == 1 {
+			l0, l1 = l1, l0
+			r0, r1 = r1, r0
+		}
+		dfs(d, l1, r1, mx, rx)
+		dfs(d, l0, r0, lx, mx)
+	}
+	dfs(wm.log, start, end, 0, 1<<wm.log)
+	if wm.compress && res != -INF {
+		res = wm.key[res]
+	}
+	return res
+}
+
+// [start, end) 中大于等于 x 的数中最小的数
+//
+//	如果不存在则返回INF
+func (wm *WaveletMatrixWithSum) Ceil(start, end int32, x WmValue, xor WmValue) int {
+	if xor != 0 {
+		if !wm.setLog {
+			panic("log should be set when xor is used")
+		}
+	}
+	if start < 0 {
+		start = 0
+	}
+	if end > wm.n {
+		end = wm.n
+	}
+	if start >= end {
+		return INF
+	}
+	if wm.compress {
+		x = wm._lowerBound(wm.key, x)
+	}
+	res := INF
+	var dfs func(d, l, r int32, lx, rx WmValue)
+	dfs = func(d, l, r int32, lx, rx WmValue) {
+		if res <= lx || l == r || rx <= x {
+			return
+		}
+		if d == 0 {
+			res = min(res, lx)
+			return
+		}
+		d--
+		mx := (lx + rx) >> 1
+		l0, r0 := wm.bv[d].Rank(l, false), wm.bv[d].Rank(r, false)
+		l1, r1 := l+wm.mid[d]-l0, r+wm.mid[d]-r0
+		if xor>>d&1 == 1 {
+			l0, l1 = l1, l0
+			r0, r1 = r1, r0
+		}
+		dfs(d, l0, r0, lx, mx)
+		dfs(d, l1, r1, mx, rx)
+	}
+	dfs(wm.log, start, end, 0, 1<<wm.log)
+	if wm.compress && res < INF {
+		res = wm.key[res]
+	}
+	return res
+}
+
+// 返回区间 [start, end) 中 范围在 [a, b) 中的元素的和.
+func (wm *WaveletMatrixWithSum) SumRange(start, end int32, a, b WmValue, xorVal WmValue) WmSum {
+	if !wm.useSum {
+		panic("sum data must be provided")
+	}
+	if start < 0 {
+		start = 0
+	}
+	if end > wm.n {
+		end = wm.n
+	}
+	if start >= end || a >= b {
+		return wm.e()
+	}
+	_, sum := wm.RangeCountAndSum(start, end, a, b, xorVal)
+	return sum
+}
+
+// 返回区间 [start, end) 中 排名在 [k1, k2) 中的元素的和.
+func (wm *WaveletMatrixWithSum) SumSlice(start, end, k1, k2 int32, xorVal WmValue) WmSum {
+	if !wm.useSum {
+		panic("sum data must be provided")
+	}
+	if k1 < 0 {
+		k1 = 0
+	}
+	if k2 > end-start {
+		k2 = end - start
+	}
+	if start < 0 {
+		start = 0
+	}
+	if end > wm.n {
+		end = wm.n
+	}
+	if start >= end || k1 >= k2 {
+		return wm.e()
+	}
+	_, sum1 := wm.KthValueAndSum(start, end, k1, xorVal)
+	_, sum2 := wm.KthValueAndSum(start, end, k2, xorVal)
+	return wm.op(sum2, wm.inv(sum1))
+}
+
 func (wm *WaveletMatrixWithSum) SumAll(start, end int32) WmSum {
+	if start < 0 {
+		start = 0
+	}
+	if end > wm.n {
+		end = wm.n
+	}
+	if start >= end {
+		return wm.e()
+	}
 	return wm._get(wm.log, start, end)
 }
 
@@ -555,45 +658,26 @@ func (wm *WaveletMatrixWithSum) MaxRight(predicate func(int32, WmSum) bool, star
 			panic("log should be set when xor is used")
 		}
 	}
-	if start == end {
-		return end - start, wm.e()
+	if start >= end {
+		return 0, wm.e()
 	}
 	if s := wm._get(wm.log, start, end); predicate(end-start, s) {
 		return end - start, s
 	}
-	count := int32(0)
-	sum := wm.e()
+	count, sum := int32(0), wm.e()
 	for d := wm.log - 1; d >= 0; d-- {
-		f := (xorVal>>d)&1 == 1
 		l0, r0 := wm.bv[d].Rank(start, false), wm.bv[d].Rank(end, false)
-		c := int32(0)
-		if f {
-			c = (end - start) - (r0 - l0)
-		} else {
-			c = (r0 - l0)
+		l1, r1 := start+wm.mid[d]-l0, end+wm.mid[d]-r0
+		if xorVal>>d&1 == 1 {
+			l0, l1 = l1, l0
+			r0, r1 = r1, r0
 		}
-		var s WmSum
-		if f {
-			s = wm._get(d, start+wm.mid[d]-l0, end+wm.mid[d]-r0)
+		if s := wm.op(sum, wm._get(d, l0, r0)); predicate(count+r0-l0, s) {
+			count += r0 - l0
+			sum = s
+			start, end = l1, r1
 		} else {
-			s = wm._get(d, l0, r0)
-		}
-		if tmp := wm.op(sum, s); predicate(count+c, tmp) {
-			count += c
-			sum = tmp
-			if f {
-				start, end = l0, r0
-			} else {
-				start += wm.mid[d] - l0
-				end += wm.mid[d] - r0
-			}
-		} else {
-			if !f {
-				start, end = l0, r0
-			} else {
-				start += wm.mid[d] - l0
-				end += wm.mid[d] - r0
-			}
+			start, end = l0, r0
 		}
 	}
 	k := wm._binarySearch(func(k int32) bool {
@@ -604,32 +688,11 @@ func (wm *WaveletMatrixWithSum) MaxRight(predicate func(int32, WmSum) bool, star
 	return count, sum
 }
 
-// [start, end) 中小于等于 x 的数中最大的数
-//
-//	如果不存在则返回-INF
-func (wm *WaveletMatrixWithSum) Floor(start, end int32, x WmValue, xor WmValue) WmValue {
-	less := wm.CountPrefix(start, end, x, xor)
-	if less == 0 {
-		return -INF
-	}
-	res := wm.Kth(start, end, less-1, xor)
-	return res
-}
-
-// [start, end) 中大于等于 x 的数中最小的数
-//
-//	如果不存在则返回INF
-func (wm *WaveletMatrixWithSum) Ceil(start, end int32, x WmValue, xor WmValue) int {
-	less := wm.CountPrefix(start, end, x, xor)
-	if less == end-start {
-		return INF
-	}
-	res := wm.Kth(start, end, less, xor)
-	return res
-}
-
 func (wm *WaveletMatrixWithSum) _get(d, l, r int32) WmSum {
-	return wm.op(wm.inv(wm.presum[d][l]), wm.presum[d][r])
+	if wm.useSum {
+		return wm.op(wm.presum[d][r], wm.inv(wm.presum[d][l]))
+	}
+	return wm.e()
 }
 
 func (wm *WaveletMatrixWithSum) _argSort(nums []WmValue) []int32 {
