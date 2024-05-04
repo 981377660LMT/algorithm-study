@@ -715,7 +715,6 @@ func LocateSuffixes(n int32, suffixTree [][]int32, ranges [][4]int32) (pos []int
 		isLeaf := len(suffixTree[cur]) == 0
 		if isLeaf {
 			rowStart, rowEnd := ranges[cur][0], ranges[cur][1]
-			fmt.Println(cur, rowStart, rowEnd, "*")
 			for i := rowStart; i < rowEnd; i++ {
 				pos[i] = cur
 			}

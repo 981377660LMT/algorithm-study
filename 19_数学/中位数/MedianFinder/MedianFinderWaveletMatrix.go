@@ -10,13 +10,36 @@ import (
 )
 
 func main() {
-	test()
-	// yuki738()
+	// test()
+	yuki738()
+}
+
+// 1703. 得到连续 K 个 1 的最少相邻交换次数
+// https://leetcode.cn/problems/minimum-adjacent-swaps-for-k-consecutive-ones/description/
+// 给你一个整数数组 nums 和一个整数 k 。 nums 仅包含 0 和 1 。每一次移动，你可以选择 相邻 两个数字并将它们交换。
+// 请你返回使 nums 中包含 k 个 连续 1 的 最少 交换次数。
+//
+// !将每个1转换为i-len(onesIndex).
+// 然后变成大小为k的滑动窗口所有数到中位数的距离和.
+func minMoves(nums []int, k int) int {
+	onesIndex := make([]int, 0, len(nums))
+	for i, v := range nums {
+		if v == 1 {
+			onesIndex = append(onesIndex, i-len(onesIndex))
+		}
+	}
+	onesIndex = onesIndex[:len(onesIndex):len(onesIndex)]
+	dist := SlidingWindowDistSumToMedian(onesIndex, k)
+	res := INF
+	for _, d := range dist {
+		res = min(res, d)
+	}
+	return res
 }
 
 // No.738 平らな農地
 // https://yukicoder.me/problems/no/738
-// !滑动窗口所有数到中位数的距离和
+// !大小为k的滑动窗口所有数到中位数的距离和
 func yuki738() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -28,14 +51,28 @@ func yuki738() {
 	for i := int32(0); i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
-	wm := NewWaveletMatrixWithSum(nums, nums, -1, true)
+	dist := SlidingWindowDistSumToMedian(nums, int(k))
 	res := INF
-	mf := NewMedianFinderWaveletMatrix(wm)
-	for i := int32(0); i < n-k+1; i++ {
-		start, end := i, i+k
-		res = min(res, mf.DistSumToMedianRange(start, end))
+	for _, d := range dist {
+		res = min(res, d)
 	}
 	fmt.Fprintln(out, res)
+}
+
+// 对每个大小为k的滑动窗口，求出所有数到中位数的距离和.
+func SlidingWindowDistSumToMedian(nums []int, k int) []int {
+	if len(nums) < k {
+		return nil
+	}
+	n := len(nums)
+	wm := NewWaveletMatrixWithSum(nums, nums, -1, true)
+	mf := NewMedianFinderWaveletMatrix(wm)
+	res := make([]int, 0, n-k+1)
+	for i := 0; i < n-k+1; i++ {
+		start, end := int32(i), int32(i+k)
+		res = append(res, mf.DistSumToMedianRange(start, end))
+	}
+	return res
 }
 
 // waveletMatrix维护区间中位数信息.

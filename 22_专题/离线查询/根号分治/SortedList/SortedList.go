@@ -902,3 +902,72 @@ func max(a, b int) int {
 	}
 	return b
 }
+
+// hack.如果已知元素是最大/最小的, 可以使用下面的方法.
+func (sl *SortedList) _appendFirst(value S) {
+	sl.size++
+	if len(sl.blocks) == 0 {
+		sl.blocks = append(sl.blocks, []S{value})
+		sl.mins = append(sl.mins, value)
+		sl.shouldRebuildTree = true
+		return
+	}
+	pos := 0
+	sl._updateTree(pos, 1)
+	sl.blocks[pos] = append(sl.blocks[pos], 0)
+	copy(sl.blocks[pos][1:], sl.blocks[pos])
+	sl.blocks[pos][0] = value
+	sl._adjust(pos)
+	return
+}
+func (sl *SortedList) _appendLast(value S) {
+	sl.size++
+	if len(sl.blocks) == 0 {
+		sl.blocks = append(sl.blocks, []S{value})
+		sl.mins = append(sl.mins, value)
+		sl.shouldRebuildTree = true
+		return
+	}
+	pos := len(sl.blocks) - 1
+	sl._updateTree(pos, 1)
+	sl.blocks[pos] = append(sl.blocks[pos], value)
+	sl._adjust(pos)
+	return
+}
+func (sl *SortedList) _popFirst() S {
+	pos, startIndex := 0, 0
+	value := sl.blocks[pos][startIndex]
+	sl._delete(pos, startIndex)
+	return value
+}
+func (sl *SortedList) _popLast() S {
+	pos := len(sl.blocks) - 1
+	startIndex := len(sl.blocks[pos]) - 1
+	value := sl.blocks[pos][startIndex]
+	// !delete element
+	sl.size--
+	sl._updateTree(pos, -1)
+	sl.blocks[pos] = sl.blocks[pos][:len(sl.blocks[pos])-1]
+	if len(sl.blocks[pos]) > 0 {
+		return value
+	}
+
+	// !delete block
+	sl.blocks = sl.blocks[:pos]
+	sl.mins = sl.mins[:pos]
+	sl.shouldRebuildTree = true // TODO: 能否不重建树
+	return value
+}
+func (sl *SortedList) _adjust(pos int) {
+	// n -> load + (n - load)
+	if n := len(sl.blocks[pos]); _LOAD+_LOAD < n {
+		sl.blocks = append(sl.blocks, nil)
+		copy(sl.blocks[pos+2:], sl.blocks[pos+1:])
+		sl.blocks[pos+1] = sl.blocks[pos][_LOAD:]
+		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD]
+		sl.mins = append(sl.mins, 0)
+		copy(sl.mins[pos+2:], sl.mins[pos+1:])
+		sl.mins[pos+1] = sl.blocks[pos+1][0]
+		sl.shouldRebuildTree = true
+	}
+}

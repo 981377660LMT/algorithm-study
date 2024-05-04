@@ -11,14 +11,79 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
 	"math/rand"
+	"os"
 	"strings"
 )
 
 func main() {
-	test()
+	// test()
+	abc285_f()
+}
+
+// F - Substring of Sorted String (排序后的子串)
+// https://www.luogu.com.cn/problem/AT_abc285_f
+// 1 x c:将第x字符替换为c.
+// 2 l r: 将s中的字符升序排列，得到新字符t，问s[l:r]是否为t的子串.
+//
+// 需要维护区间字符单调性和字符出现个数.
+// 判断排序后的子串：
+//  1. 区间需要是单调递增的.
+//  2. 区间内的完整出现的字符需要等于整个字符串中的字符个数.
+func abc285_f() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	var s string
+	fmt.Fscan(in, &s)
+	var q int32
+	fmt.Fscan(in, &q)
+
+	S := NewAlphaPresumDynamic(n, func(i int32) int32 { return int32(s[i]) })
+
+	set := func(index int32, value int32) {
+		S.Set(index, value)
+	}
+
+	query := func(start, end int32) bool {
+		if !S.IsAscending(start, end) {
+			return false
+		}
+		firstChar, lastChar := S.Get(start), S.Get(end-1)
+		for c := firstChar + 1; c < lastChar; c++ {
+			if S.Count(start, end, c) != S.Count(0, n, c) {
+				return false
+			}
+		}
+		return true
+	}
+
+	for i := int32(0); i < q; i++ {
+		var op int32
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var x int32
+			var c string
+			fmt.Fscan(in, &x, &c)
+			x--
+			set(x, int32(c[0]))
+		} else {
+			var l, r int32
+			fmt.Fscan(in, &l, &r)
+			l--
+			if query(l, r) {
+				fmt.Fprintln(out, "Yes")
+			} else {
+				fmt.Fprintln(out, "No")
+			}
+		}
+	}
 }
 
 const SIGMA int32 = 26
@@ -160,6 +225,9 @@ func (a *AlphaPresumDynamic) Count(start, end, c int32) int32 {
 	}
 	if start >= end {
 		return 0
+	}
+	if start == 0 && end == a.n {
+		return a.tree[c-OFFSET].QueryAll()
 	}
 	return a.tree[c-OFFSET].QueryRange(start, end)
 }
@@ -317,6 +385,9 @@ func (bit01 *bITArray01) QueryRange(start, end int32) int32 {
 		return 0
 	}
 	if start == 0 {
+		if end == bit01.n {
+			return bit01.QueryAll()
+		}
 		return bit01.QueryPrefix(end)
 	}
 	res := int32(0)

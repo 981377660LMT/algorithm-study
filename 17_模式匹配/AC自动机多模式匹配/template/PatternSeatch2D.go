@@ -1,4 +1,5 @@
 // 2D Pattern Search (Baker-Bird Algorithm)
+// 二维kmp
 
 package main
 
@@ -93,10 +94,10 @@ func PatternSearch2D(
 		}
 	}
 
-	pf := PrefixFunction(aho.WordPos)
+	next := GetNext(aho.WordPos)
 	res := [][2]int{}
 	for j := range longerStates {
-		match := KMP(longerStates[j], aho.WordPos, pf)
+		match := IndexOfAll(longerStates[j], aho.WordPos, next)
 		for _, i := range match {
 			res = append(res, [2]int{i, j - len(shorter[0]) + 1})
 		}
@@ -256,7 +257,7 @@ func (ac *ACAutoMatonMap) Size() int {
 	return len(ac.children)
 }
 
-func PrefixFunction(s []int) []int {
+func GetNext(s []int) []int {
 	n := len(s)
 	res := make([]int, n)
 	len := 0
@@ -276,7 +277,7 @@ func PrefixFunction(s []int) []int {
 	return res
 }
 
-func KMP(longer []int, shorter []int, pf []int) []int {
+func IndexOfAll(longer []int, shorter []int, next []int) []int {
 	n, m := len(longer), len(shorter)
 	match := []int{}
 	i, j := 0, 0
@@ -287,10 +288,10 @@ func KMP(longer []int, shorter []int, pf []int) []int {
 		}
 		if j == m {
 			match = append(match, i-j)
-			j = pf[j-1]
+			j = next[j-1]
 		} else if i < n && shorter[j] != longer[i] {
 			if j != 0 {
-				j = pf[j-1]
+				j = next[j-1]
 			} else {
 				i++
 			}

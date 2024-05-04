@@ -1,7 +1,10 @@
 // 动态区间频率查询
 // 0.单点修改，查询区间某元素出现次数(PointSetRangeFreq)
+//   !注意这个使用`RangeFreqQueryPointSet`，不要用下面这个.
 // 1.区间加，查询区间某元素出现次数(RangeAddRangeFreq)
 // 2.区间赋值，查询区间某元素出现次数(RangeAssignRangeFreq)
+//
+// !如果要支持insert/pop操作，使用"WaveletMatrixDynamic"
 
 package main
 

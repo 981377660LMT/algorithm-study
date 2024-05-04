@@ -10,17 +10,24 @@ from typing import Counter
 class Solution:
     def maxPotholes(self, road: str, budget: int) -> int:
         groups = [(char, len(list(group))) for char, group in groupby(road)]
-        onesCounter = Counter([v for k, v in groups if k == "x"])
-        freqs = onesCounter.most_common()
+        onesCounter = Counter(v for k, v in groups if k == "x")
         res, remain = 0, budget
-        for len_, count in freqs:
+        for len_, count in sorted(onesCounter.items(), reverse=True):
             cost = len_ + 1
-            canTake = min(count, remain // cost)
-            res += canTake
-            remain -= canTake * cost
+            # 这个长度可以全部修完
+            if cost * count <= remain:
+                res += count * len_
+                remain -= cost * count
+            else:
+                div = remain // cost
+                res += div * len_
+                remain = remain - cost * div
+                if remain >= 1:
+                    res += remain - 1
+                break
 
         return res
 
 
-# road = "..xxxxx", budget = 4
-print(Solution().maxPotholes(road="..xxxxx", budget=4))  # 2
+print(Solution().maxPotholes(road="..xxxxx", budget=4))  # 3
+print(Solution().maxPotholes(road="x.xx", budget=3))  # 2

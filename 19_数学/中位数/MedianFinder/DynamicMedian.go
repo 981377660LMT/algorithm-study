@@ -237,9 +237,13 @@ func (sl *_sl) _appendLast(value S) *_sl {
 	sl.blocks[pos] = append(sl.blocks[pos], value)
 	// n -> load + (n - load)
 	if n := len(sl.blocks[pos]); _LOAD+_LOAD < n {
-		sl.blocks = append(sl.blocks[:pos+1], append([][]S{sl.blocks[pos][_LOAD:]}, sl.blocks[pos+1:]...)...)
-		sl.mins = append(sl.mins[:pos+1], append([]S{sl.blocks[pos][_LOAD]}, sl.mins[pos+1:]...)...)
-		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD] // !注意max的设置(为了让左右互不影响)
+		sl.blocks = append(sl.blocks, nil)
+		copy(sl.blocks[pos+2:], sl.blocks[pos+1:])
+		sl.blocks[pos+1] = sl.blocks[pos][_LOAD:]
+		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD]
+		sl.mins = append(sl.mins, 0)
+		copy(sl.mins[pos+2:], sl.mins[pos+1:])
+		sl.mins[pos+1] = sl.blocks[pos+1][0]
 		sl.shouldRebuildTree = true
 	}
 	return sl
