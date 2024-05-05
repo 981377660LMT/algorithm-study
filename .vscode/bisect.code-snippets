@@ -1227,6 +1227,24 @@
     ],
     "description": "定长滑窗"
   },
+  "定长滑窗-go": {
+    "scope": "go",
+    "prefix": "window1",
+    "body": [
+      "\tn := len(nums)",
+      "\tres, curSum := INF, 0",
+      "\tfor right := 0; right < n; right++ {",
+      "\t\tcurSum += nums[right]",
+      "\t\tif right >= k {",
+      "\t\t\tcurSum -= nums[right-k]",
+      "\t\t}",
+      "\t\tif right >= k-1 {",
+      "\t\t\tres = min(res, curSum)",
+      "\t\t}",
+      "\t}"
+    ],
+    "description": "定长滑窗"
+  },
   "不定长滑窗": {
     "scope": "python",
     "prefix": "window2",
@@ -1262,6 +1280,23 @@
     ],
     "description": "不定长滑窗"
   },
+  "不定长滑窗-go": {
+    "scope": "go",
+    "prefix": "window2",
+    "body": [
+      "\tres, left, n := 0, 0, len(nums)",
+      "\tcurSum := 0",
+      "\tfor right := 0; right < n; right++ {",
+      "\t\tcurSum += nums[right]",
+      "\t\tfor left <= right && $1 {",
+      "\t\t\tcurSum -= nums[left]",
+      "\t\t\tleft++",
+      "\t\t}",
+      "\t\tres = max(res, right-left+1)",
+      "\t}"
+    ],
+    "description": "不定长滑窗"
+  },
   "前后缀滑窗": {
     "scope": "python",
     "prefix": "window3",
@@ -1276,7 +1311,11 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
+    "description": [
+      "前后缀滑窗",
+      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
+      "不存在时为INF"
+    ]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -4447,7 +4486,14 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
+    "body": [
+      "func gcd(a, b int) int {",
+      "  for b != 0 {",
+      "    a, b = b, a%b",
+      "  }",
+      "  return a",
+      "}"
+    ],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -5404,7 +5450,14 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
+    "body": [
+      "n = len(nums)",
+      "res = 0",
+      "for left in range(n):",
+      "\t\tcur = []",
+      "\t\tfor right in range(left, n):",
+      "\t\t\t\t..."
+    ],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -6504,13 +6557,21 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
+    "body": [
+      "\t\tconst counter = new Map<number, number>()",
+      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
+    ],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
+    "body": [
+      "\\counter := make(map[int]int)",
+      "\tfor _, v := range nums {",
+      "\t\\counter[v]++",
+      "\t}"
+    ],
     "description": "counter计数"
   },
   "rangeFreq-python": {
@@ -7358,7 +7419,11 @@
   "Int": {
     "scope": "go",
     "prefix": "Int",
-    "body": ["type Int interface {", "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64", "}"],
+    "body": [
+      "type Int interface {",
+      "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64",
+      "}"
+    ],
     "description": "Int 泛型"
   },
   "heap-go": {

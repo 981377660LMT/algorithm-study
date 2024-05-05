@@ -1,5 +1,5 @@
 def enumerateSubset(mask: int):
-    """枚举子集(包含空集)"""
+    """降序枚举子集(包含空集)"""
     g1 = mask
     while g1 > 0:
         yield g1
@@ -8,7 +8,7 @@ def enumerateSubset(mask: int):
 
 
 def enumerateSuperset(n: int, mask: int):
-    """枚举超集
+    """升序枚举超集
 
     Args:
         n: 集合大小

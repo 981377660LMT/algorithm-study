@@ -25,6 +25,7 @@ const INF int = 1e18
 type Finder struct {
 	n, lg int
 	seg   [][]int
+	size  int
 }
 
 func NewFinder(n int) *Finder {
@@ -40,8 +41,23 @@ func NewFinder(n int) *Finder {
 	}
 	res.seg = seg
 	res.lg = len(seg)
-	for i := 0; i < res.n; i++ {
-		res.Insert(i)
+	return res
+}
+
+func NewFinderFrom(n int, f func(i int) bool) *Finder {
+	res := NewFinder(n)
+	for i := 0; i < n; i++ {
+		if f(i) {
+			res.seg[0][i>>6] |= 1 << (i & 63)
+			res.size++
+		}
+	}
+	for h := 0; h < res.lg-1; h++ {
+		for i := 0; i < len(res.seg[h]); i++ {
+			if res.seg[h][i] != 0 {
+				res.seg[h+1][i>>6] |= 1 << (i & 63)
+			}
+		}
 	}
 	return res
 }
@@ -50,21 +66,32 @@ func (fs *Finder) Has(i int) bool {
 	return (fs.seg[0][i>>6]>>(i&63))&1 != 0
 }
 
-func (fs *Finder) Insert(i int) {
+func (fs *Finder) Insert(i int) bool {
+	if fs.Has(i) {
+		return false
+	}
 	for h := 0; h < fs.lg; h++ {
 		fs.seg[h][i>>6] |= 1 << (i & 63)
 		i >>= 6
 	}
+	fs.size++
+	return true
 }
 
-func (fs *Finder) Erase(i int) {
+func (fs *Finder) Erase(i int) bool {
+	if !fs.Has(i) {
+		return false
+	}
 	for h := 0; h < fs.lg; h++ {
-		fs.seg[h][i>>6] &= ^(1 << (i & 63))
-		if fs.seg[h][i>>6] != 0 {
+		cache := fs.seg[h]
+		cache[i>>6] &= ^(1 << (i & 63))
+		if cache[i>>6] != 0 {
 			break
 		}
 		i >>= 6
 	}
+	fs.size--
+	return true
 }
 
 // 返回大于等于i的最小元素.如果不存在,返回n.
@@ -77,10 +104,11 @@ func (fs *Finder) Next(i int) int {
 	}
 
 	for h := 0; h < fs.lg; h++ {
-		if i>>6 == len(fs.seg[h]) {
+		cache := fs.seg[h]
+		if i>>6 == len(cache) {
 			break
 		}
-		d := fs.seg[h][i>>6] >> (i & 63)
+		d := cache[i>>6] >> (i & 63)
 		if d == 0 {
 			i = i>>6 + 1
 			continue
@@ -131,12 +159,7 @@ func (fs *Finder) Prev(i int) int {
 
 // 遍历[start,end)区间内的元素.
 func (fs *Finder) Enumerate(start, end int, f func(i int)) {
-	x := start - 1
-	for {
-		x = fs.Next(x + 1)
-		if x >= end {
-			break
-		}
+	for x := fs.Next(start); x < end; x = fs.Next(x + 1) {
 		f(x)
 	}
 }
@@ -149,6 +172,10 @@ func (fs *Finder) String() string {
 		}
 	}
 	return fmt.Sprintf("Finder{%v}", strings.Join(res, ", "))
+}
+
+func (fs *Finder) Size() int {
+	return fs.size
 }
 
 func (*Finder) bsr(x int) int {

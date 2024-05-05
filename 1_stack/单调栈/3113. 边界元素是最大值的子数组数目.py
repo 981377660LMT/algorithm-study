@@ -6,7 +6,7 @@
 # !满足子数组中第一个和最后一个元素都是这个子数组中的最大值。
 # 树上版本 https://leetcode.cn/problems/number-of-good-paths/
 
-from bisect import bisect_left
+from bisect import bisect_left, bisect_right
 from collections import defaultdict
 from typing import List
 from 每个元素作为最值的影响范围 import getRange
@@ -40,17 +40,23 @@ class Solution:
     def numberOfSubarrays2(self, nums: List[int]) -> int:
         """
         第一个数是区间最小值，最后一个数是区间最大值.
-        对每个左端点, 求出它可以作为最小值的区间范围(左严格右非严格), 然后在这个范围里看有哪些右端点合法.
-        合法的右端点用前缀最大值检测.
+        维护两个单调栈.
+        第一个单调栈求右边第一个>a[i]的下标lg[i].
+        然后第二个栈维护的是候选的左端点，淘汰那些不可能作为左端点的下标.
+        然后在第二个栈上二分找a[i]对应可能的左边.
         """
-        ranges = getRange(nums, isMax=False, isLeftStrict=True, isRightStrict=False)
         res = 0
-        for i, (_, right) in enumerate(ranges):
-            preMax = nums[i]
-            for j in range(i, right + 1):  # 左端点开始
-                preMax = max2(preMax, nums[j])
-                if preMax == nums[j]:
-                    res += 1
+        rightBigger = [-1]
+        leftCand = []  # 从栈底到栈顶递增的栈, 考虑所有可能的左边界
+        for i, v in enumerate(nums):
+            while len(rightBigger) > 1 and nums[rightBigger[-1]] <= v:
+                rightBigger.pop()
+            top = rightBigger[-1]
+            rightBigger.append(i)
+            res += len(leftCand) - bisect_right(leftCand, top) + 1
+            while leftCand and nums[leftCand[-1]] > v:
+                leftCand.pop()
+            leftCand.append(i)
         return res
 
 
@@ -85,7 +91,3 @@ if __name__ == "__main__":
         print("check2 pass")
 
     check2()
-
-
-# TODO:
-# !统计一个数组的所有子数组满足左端点为区间最小值，右端点为区间最大值的这样的子数组的数量

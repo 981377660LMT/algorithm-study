@@ -13,14 +13,6 @@
 # 否则我们肯定可以通过第二种操作使得他们变成a = b+c的形式
 
 
-import sys
-import os
-
-sys.setrecursionlimit(int(1e6))
-input = lambda: sys.stdin.readline().rstrip("\r\n")
-MOD = int(1e9 + 7)
-
-
 def main() -> None:
     a, b, c = sorted(map(int, input().split()))
     if c > a + b:
@@ -33,11 +25,3 @@ def main() -> None:
         exit(0)
 
     print(c)
-
-
-if __name__ == "__main__":
-    if os.environ.get("USERNAME", " ") == "caomeinaixi":
-        while True:
-            main()
-    else:
-        main()

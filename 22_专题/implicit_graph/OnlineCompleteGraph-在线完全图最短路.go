@@ -5,11 +5,8 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/bits"
 	"os"
 	"sort"
-	"strconv"
-	"strings"
 )
 
 const INF int = 1e18
@@ -300,298 +297,96 @@ func ComplementGraphDistance(n int, banEdges [][2]int) (res [][3]int) {
 
 // 完全图并查集.
 // 维护一个 set，保存当前未访问过的点。每一次dfs从未访问过的点出发，遍历到一个节点后删除对应元素。
-func ComplementGraphUnionFind(n int, banEdges [][2]int) *UnionFindArray {
+func ComplementGraphUnionFind(n int, banEdges [][2]int) *UnionFindArraySimple {
 	ban := make([][]int, n)
 	for _, e := range banEdges {
 		u, v := e[0], e[1]
 		ban[u] = append(ban[u], v)
 		ban[v] = append(ban[v], u)
 	}
-
-	uf := NewUnionFindArray(n)
-	fs := NewFastSet(n)
-	for i := 0; i < n; i++ {
-		fs.Insert(i)
-	}
-
-	stack := make([]int, n) // dfs
+	queue, toVisit := make([]int, n), make([]int, n)
+	bad := make([]bool, n)
 	ptr := 0
 	for i := 0; i < n; i++ {
-		if !fs.Has(i) {
-			continue
-		}
-
-		stack[ptr] = i
+		toVisit[ptr] = i
 		ptr++
-		for ptr > 0 {
-			ptr--
-			leader := stack[ptr]
-
-			var removed []int
-			for _, to := range ban[leader] {
-				if fs.Has(to) {
-					removed = append(removed, to)
+	}
+	uf := NewUnionFindArraySimple(n)
+	for ptr > 0 {
+		head, tail := 0, 0
+		queue[tail] = toVisit[ptr-1]
+		ptr--
+		tail++
+		for head < tail {
+			cur := queue[head]
+			head++
+			for _, next := range ban[cur] {
+				bad[next] = true
+			}
+			for i := ptr - 1; i >= 0; i-- {
+				next := toVisit[i]
+				if bad[next] {
+					continue
 				}
+				queue[tail] = next
+				tail++
+				toVisit[i], toVisit[ptr-1] = toVisit[ptr-1], toVisit[i]
+				ptr--
+				uf.Union(cur, next)
 			}
-
-			for _, v := range removed {
-				fs.Erase(v)
-			}
-			fs.Enumerate(0, n, func(to int) {
-				fs.Erase(to)
-				stack[ptr] = to
-				ptr++
-				uf.Union(leader, to)
-			})
-			for _, v := range removed {
-				fs.Insert(v)
+			for _, next := range ban[cur] {
+				bad[next] = false
 			}
 		}
 	}
-
 	return uf
 }
 
-type UnionFindArray struct {
-	// 连通分量的个数
+type UnionFindArraySimple struct {
 	Part int
 	n    int
-	data []int
+	data []int32
 }
 
-func NewUnionFindArray(n int) *UnionFindArray {
-	data := make([]int, n)
+func NewUnionFindArraySimple(n int) *UnionFindArraySimple {
+	data := make([]int32, n)
 	for i := 0; i < n; i++ {
 		data[i] = -1
 	}
-	return &UnionFindArray{
-		Part: n,
-		n:    n,
-		data: data,
-	}
+	return &UnionFindArraySimple{Part: n, n: n, data: data}
 }
 
-// 按秩合并.
-func (ufa *UnionFindArray) Union(key1, key2 int) bool {
-	root1, root2 := ufa.Find(key1), ufa.Find(key2)
+func (u *UnionFindArraySimple) Union(key1 int, key2 int) bool {
+	root1, root2 := u.Find(key1), u.Find(key2)
 	if root1 == root2 {
 		return false
 	}
-	if ufa.data[root1] > ufa.data[root2] {
-		root1 ^= root2
-		root2 ^= root1
-		root1 ^= root2
+	if u.data[root1] > u.data[root2] {
+		root1, root2 = root2, root1
 	}
-	ufa.data[root1] += ufa.data[root2]
-	ufa.data[root2] = root1
-	ufa.Part--
+	u.data[root1] += u.data[root2]
+	u.data[root2] = int32(root1)
+	u.Part--
 	return true
 }
 
-func (ufa *UnionFindArray) UnionWithCallback(key1, key2 int, cb func(big, small int)) bool {
-	root1, root2 := ufa.Find(key1), ufa.Find(key2)
-	if root1 == root2 {
-		return false
-	}
-	if ufa.data[root1] > ufa.data[root2] {
-		root1 ^= root2
-		root2 ^= root1
-		root1 ^= root2
-	}
-	ufa.data[root1] += ufa.data[root2]
-	ufa.data[root2] = root1
-	ufa.Part--
-	if cb != nil {
-		cb(root1, root2)
-	}
-	return true
-}
-
-func (ufa *UnionFindArray) Find(key int) int {
-	if ufa.data[key] < 0 {
+func (u *UnionFindArraySimple) Find(key int) int {
+	if u.data[key] < 0 {
 		return key
 	}
-	ufa.data[key] = ufa.Find(ufa.data[key])
-	return ufa.data[key]
+	u.data[key] = int32(u.Find(int(u.data[key])))
+	return int(u.data[key])
 }
 
-func (ufa *UnionFindArray) IsConnected(key1, key2 int) bool {
-	return ufa.Find(key1) == ufa.Find(key2)
+func (u *UnionFindArraySimple) GetSize(key int) int {
+	return int(-u.data[u.Find(key)])
 }
 
-func (ufa *UnionFindArray) GetSize(key int) int {
-	return -ufa.data[ufa.Find(key)]
-}
-
-func (ufa *UnionFindArray) GetGroups() map[int][]int {
+func (u *UnionFindArraySimple) GetGroups() map[int][]int {
 	groups := make(map[int][]int)
-	for i := 0; i < ufa.n; i++ {
-		root := ufa.Find(i)
-		groups[root] = append(groups[root], i)
+	for k := range u.data {
+		root := u.Find(k)
+		groups[root] = append(groups[root], k)
 	}
 	return groups
-}
-
-func (ufa *UnionFindArray) String() string {
-	sb := []string{"UnionFindArray:"}
-	groups := ufa.GetGroups()
-	keys := make([]int, 0, len(groups))
-	for k := range groups {
-		keys = append(keys, k)
-	}
-	sort.Ints(keys)
-	for _, root := range keys {
-		member := groups[root]
-		cur := fmt.Sprintf("%d: %v", root, member)
-		sb = append(sb, cur)
-	}
-	sb = append(sb, fmt.Sprintf("Part: %d", ufa.Part))
-	return strings.Join(sb, "\n")
-}
-
-type FastSet struct {
-	n, lg int
-	seg   [][]int
-	size  int
-}
-
-func NewFastSet(n int) *FastSet {
-	res := &FastSet{n: n}
-	seg := [][]int{}
-	n_ := n
-	for {
-		seg = append(seg, make([]int, (n_+63)>>6))
-		n_ = (n_ + 63) >> 6
-		if n_ <= 1 {
-			break
-		}
-	}
-	res.seg = seg
-	res.lg = len(seg)
-	return res
-}
-
-func (fs *FastSet) Has(i int) bool {
-	return (fs.seg[0][i>>6]>>(i&63))&1 != 0
-}
-
-func (fs *FastSet) Insert(i int) bool {
-	if fs.Has(i) {
-		return false
-	}
-	for h := 0; h < fs.lg; h++ {
-		fs.seg[h][i>>6] |= 1 << (i & 63)
-		i >>= 6
-	}
-	fs.size++
-	return true
-
-}
-
-func (fs *FastSet) Erase(i int) bool {
-	if !fs.Has(i) {
-		return false
-	}
-	for h := 0; h < fs.lg; h++ {
-		cache := fs.seg[h]
-		cache[i>>6] &= ^(1 << (i & 63))
-		if cache[i>>6] != 0 {
-			break
-		}
-		i >>= 6
-	}
-	fs.size--
-	return true
-}
-
-// 返回大于等于i的最小元素.如果不存在,返回n.
-func (fs *FastSet) Next(i int) int {
-	if i < 0 {
-		i = 0
-	}
-	if i >= fs.n {
-		return fs.n
-	}
-
-	for h := 0; h < fs.lg; h++ {
-		cache := fs.seg[h]
-		if i>>6 == len(cache) {
-			break
-		}
-		d := cache[i>>6] >> (i & 63)
-		if d == 0 {
-			i = i>>6 + 1
-			continue
-		}
-		// find
-		i += fs.bsf(d)
-		for g := h - 1; g >= 0; g-- {
-			i <<= 6
-			i += fs.bsf(fs.seg[g][i>>6])
-		}
-
-		return i
-	}
-
-	return fs.n
-}
-
-// 返回小于等于i的最大元素.如果不存在,返回-1.
-func (fs *FastSet) Prev(i int) int {
-	if i < 0 {
-		return -1
-	}
-	if i >= fs.n {
-		i = fs.n - 1
-	}
-
-	for h := 0; h < fs.lg; h++ {
-		if i == -1 {
-			break
-		}
-		d := fs.seg[h][i>>6] << (63 - i&63)
-		if d == 0 {
-			i = i>>6 - 1
-			continue
-		}
-		// find
-		i += fs.bsr(d) - 63
-		for g := h - 1; g >= 0; g-- {
-			i <<= 6
-			i += fs.bsr(fs.seg[g][i>>6])
-		}
-
-		return i
-	}
-
-	return -1
-}
-
-// 遍历[start,end)区间内的元素.
-func (fs *FastSet) Enumerate(start, end int, f func(i int)) {
-	for x := fs.Next(start); x < end; x = fs.Next(x + 1) {
-		f(x)
-	}
-}
-
-func (fs *FastSet) String() string {
-	res := []string{}
-	for i := 0; i < fs.n; i++ {
-		if fs.Has(i) {
-			res = append(res, strconv.Itoa(i))
-		}
-	}
-	return fmt.Sprintf("FastSet{%v}", strings.Join(res, ", "))
-}
-
-func (fs *FastSet) Size() int {
-	return fs.size
-}
-
-func (*FastSet) bsr(x int) int {
-	return 63 - bits.LeadingZeros(uint(x))
-}
-
-func (*FastSet) bsf(x int) int {
-	return bits.TrailingZeros(uint(x))
 }

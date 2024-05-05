@@ -14,9 +14,12 @@ function foo() {
  * 升序枚举state所有子集的子集.
  * 0b1101 -> 0,1,4,5,8,9,12,13.
  */
-function enumerateSubsetOfStateAscending(state: number, callback: (subset: number) => void): void {
+function enumerateSubsetOfStateAscending(
+  state: number,
+  callback: (subset: number) => void | boolean
+): void {
   for (let x = 0; ; x = (x - state) & state) {
-    callback(x)
+    if (callback(x)) return
     if (x === state) break
   }
 }
@@ -25,9 +28,12 @@ function enumerateSubsetOfStateAscending(state: number, callback: (subset: numbe
  * 降序枚举state所有子集的子集.
  * 0b1101 -> 13,12,9,8,5,4,1,0.
  */
-function enumerateSubsetOfStateDescending(state: number, callback: (subset: number) => void): void {
+function enumerateSubsetOfStateDescending(
+  state: number,
+  callback: (subset: number) => void | boolean
+): void {
   for (let x = state; ; x = (x - 1) & state) {
-    callback(x)
+    if (callback(x)) return
     if (x === 0) break
   }
 }
@@ -39,11 +45,11 @@ function enumerateSubsetOfStateDescending(state: number, callback: (subset: numb
 function enumerateSupersetOfState(
   n: number,
   state: number,
-  callback: (superset: number) => void
+  callback: (superset: number) => void | boolean
 ): void {
   const upper = 1 << n
   for (let x = state; x < upper; x = (x + 1) | state) {
-    callback(x)
+    if (callback(x)) return
   }
 }
 
@@ -52,11 +58,15 @@ function enumerateSupersetOfState(
  * 一共有C(n,k)个子集.
  * C(4,2) -> 3,5,6,9,10,12.
  */
-function enumerateSubsetOfSizeK(n: number, k: number, callback: (subset: number) => void): void {
+function enumerateSubsetOfSizeK(
+  n: number,
+  k: number,
+  callback: (subset: number) => void | boolean
+): void {
   if (k <= 0 || k > n) return
   const upper = 1 << n
   for (let x = (1 << k) - 1; x < upper; ) {
-    callback(x)
+    if (callback(x)) return
     const t = x | (x - 1)
     // nextCombination (gosper hack)
     x = (t + 1) | (((~t & -~t) - 1) >>> (32 - Math.clz32(x & -x)))

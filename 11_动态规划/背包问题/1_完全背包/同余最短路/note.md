@@ -29,9 +29,6 @@ https://zhuanlan.zhihu.com/p/482150152
 
 ---
 
-TODO：
-https://github.com/EndlessCheng/codeforces-go/blob/86d1fd150c7b53861a52fa81ce456666bf547691/copypasta/graph.go#L2008
-https://zhuanlan.zhihu.com/p/583236322
 https://www.cnblogs.com/alex-wei/p/17531487.html (同余最短路的转圈技巧)
-https://oi-wiki.org/graph/mod-shortest-path/
 https://zhuanlan.zhihu.com/p/672216458
+https://oi-wiki.org/graph/mod-shortest-path/

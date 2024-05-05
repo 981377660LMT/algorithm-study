@@ -9,6 +9,7 @@ Static Top Tree 的方法
   https://zenn.dev/blue_jam/articles/0526c70b74f6bb
 - 模版
   https://maspypy.github.io/library/graph/ds/static_toptree.hpp
+  https://hitonanode.github.io/cplib-cpp/data_structure/static_toptree.hpp
 
 - 博客
   [top tree 杂谈](https://negiizhao.blog.uoj.ac/blog/4912)

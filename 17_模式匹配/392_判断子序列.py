@@ -1,10 +1,12 @@
 from collections import defaultdict
 from bisect import bisect_right
-from typing import List, Tuple
+from typing import List, Tuple, Any, Sequence
 
 
 # 392. 判断子序列
-def isSubSequence(longer: str, shorter: str) -> bool:
+
+
+def isSubSequence(longer: Sequence[Any], shorter: Sequence[Any]) -> bool:
     if len(shorter) > len(longer):
         return False
     it = iter(longer)

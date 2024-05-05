@@ -145,7 +145,6 @@ func (ds *DifferSystem) Clear(n int32) {
 
 func (ds *DifferSystem) _spfa() bool {
 	if ds.allPos {
-		fmt.Println(111)
 		ds._dijkstra()
 		return true
 	}

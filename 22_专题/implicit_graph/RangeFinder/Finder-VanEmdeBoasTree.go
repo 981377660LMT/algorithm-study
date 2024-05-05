@@ -21,7 +21,7 @@ func main() {
 		fmt.Println(van.Prev(1), van.Prev(2), van.Prev(3), van.Prev(100), van.Prev(-1000000000000))
 		van.Erase(1)
 		fmt.Println(van.Min(), van.Max(), van.Size())
-		van.Insert(-111)
+		van.Insert(111)
 		fmt.Println(van.Min(), van.Max(), van.Size())
 		fmt.Println(van.Has(-111), van.Prev(-1), van.Min())
 		fmt.Println(van)
