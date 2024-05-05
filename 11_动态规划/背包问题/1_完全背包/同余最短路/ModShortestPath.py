@@ -9,13 +9,20 @@
 # !也就是 x 加上每一个 ai,即连一条从 x 到 (x+ai) mod base 的边，边权为 ai
 # 这样建完图从 0 号点开始跑最短路,每转移一条长度为 d 的边就对应着线性组合加了一个 d
 # 得到最后的 dist 数组
-
 # !注意:一共有len(A)*min(A)条边
+#
+# ---
+# !更新：同余最短路的转圈技巧.O(n*min(A))时间复杂度.
 
-from typing import List, Sequence, Tuple
-from heapq import heappop, heappush
+from math import gcd
+from typing import List, Tuple
+
 
 INF = int(1e18)
+
+
+def min2(a: int, b: int) -> int:
+    return a if a < b else b
 
 
 def modShortestPath(coeffs: List[int]) -> Tuple[int, List[int]]:
@@ -36,26 +43,16 @@ def modShortestPath(coeffs: List[int]) -> Tuple[int, List[int]]:
         return 0, []
 
     base = min(coeffs)
-    adjList = [[] for _ in range(base)]
-    for mod in range(base):
-        for v in coeffs:
-            adjList[mod].append(((mod + v) % base, v))
-    dist = dijkstra(base, adjList, 0)
-    return base, dist
-
-
-def dijkstra(n: int, adjList: Sequence[Sequence[Tuple[int, int]]], start: int) -> List[int]:
-    dist = [INF] * n
-    dist[start] = 0
-    pq = [(0, start)]
-
-    while pq:
-        curDist, cur = heappop(pq)
-        if dist[cur] < curDist:
-            continue
-        for next, weight in adjList[cur]:
-            cand = dist[cur] + weight
-            if cand < dist[next]:
-                dist[next] = cand
-                heappush(pq, (dist[next], next))
-    return dist
+    dp = [INF] * base  # dp[i]表示模base余数为i时，最小的k
+    dp[0] = 0
+    for v in coeffs:
+        cycle = gcd(base, v)  # 在这些环上转移
+        for j in range(cycle):
+            cur = j
+            count = 0
+            while count < 2:  # 转两圈，涵盖从每个点出发的情况
+                next = (cur + v) % base
+                dp[next] = min2(dp[next], dp[cur] + v)
+                cur = next
+                count += cur == j
+    return base, dp
