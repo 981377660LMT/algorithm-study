@@ -208,6 +208,31 @@ https://www.bilibili.com/video/BV15y421h7j7
   - 引用计数（Reference Counting）
     - Rc<T>，Arc<T>
 
+# 字符串 String 与 &str(str:字符串字面量)
+
+- String 是一个堆分配的**可变字符串**类型
+  ```rust
+  pub struct String {
+      vec: Vec<u8>,
+  }
+  ```
+- &str 是一个不可变的**字符串切片**引用，在栈上分配
+
+  初始指针+长度
+
+  ```rust
+  pub struct &str {
+      ptr: *const u8,  // 指向存储在其他地方的utf-8编码的字符串数据
+      len: usize,
+  }
+  ```
+
+String 具有所有权，&str 所有权
+如何选择：
+
+- struct 属性中用 String
+- 函数参数用&str(如果不想交出所有权)
+
 ---
 
 Rust 的内存管理模型基于以下几个核心概念：

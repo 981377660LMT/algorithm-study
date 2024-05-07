@@ -1,3 +1,6 @@
+mod error_handling;
+mod test_collections;
+
 static mut MY_STATIC: i32 = 42;
 
 fn main() {
@@ -31,10 +34,10 @@ fn main() {
 
         // move 赋值是所有权转移，原来的变量就不能再使用
         // 如果需要拷贝，需要.clone()方法复制
-        let s1 = String::from("hello");
-        let s2 = s1;
-        // println!("{s1}"); //    value borrowed here after move
-        let s3 = s2.clone();
+        let s1: String = String::from("hello");
+        let s2: String = s1; // s1 的所有权转移给s2
+                             // println!("{s1}"); //    value borrowed here after move
+        let s3: String = s2.clone();
         println!("s2 = {}, s3 = {}", s2, s3);
         // take_ownership(s3); // s3的所有权转移到函数内
         // println!("{s3}"); //    value borrowed here after move
@@ -55,5 +58,106 @@ fn main() {
         //   returns a reference to data owned by the current function
         //   &s
         // }
+
+        fn first_word(s: &str) -> &str {
+            let bytes = s.as_bytes();
+            for (i, &item) in bytes.iter().enumerate() {
+                if item == b' ' {
+                    return &s[0..i];
+                }
+            }
+            &s[..]
+        }
+
+        let back = first_word("hello world");
+        println!("first word: {}", back);
+    }
+
+    // 3.2 String 和 &str
+    {
+        let name = String::from("hello");
+        let course = "Rust".to_owned();
+        let new_name = name.replace("hello", "world");
+        println!("new_name = {}", new_name);
+        let rust = "Rust";
+
+        struct User {
+            name: String,
+            age: u32,
+        }
+
+        let user = User {
+            name: "Tom".to_string(),
+            age: 18,
+        };
+        println!("user:{}", { user.name });
+    }
+}
+
+fn first_word_index(s: &str) -> &str {
+    let bytes = s.as_bytes();
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &s[0..i];
+        }
+    }
+    let d = Rectangle {
+        width: 1,
+        height: 2,
+    };
+
+    &s[..]
+}
+
+fn demo() {
+    let s = Rectangle::new(1, 1);
+}
+
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn new(width: u32, height: u32) -> Rectangle {
+        Rectangle { width, height }
+    }
+
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+
+enum IpAddrKind {
+    V4,
+    V6,
+}
+
+fn test_option() {
+    let some_num: Option<i32> = Some(5);
+    let absent_num: Option<i32> = None;
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter,
+}
+
+fn test_match(coin: Coin) -> u8 {
+    match coin {
+        Coin::Penny => {
+            println!("Lucky penny!");
+            1
+        }
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter => 25,
     }
 }
