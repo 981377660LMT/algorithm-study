@@ -80,7 +80,7 @@ https://www.bilibili.com/video/BV15y421h7j7
 
     fn main() {
         unsafe {
-            MY_STATIC = 100;
+            MY_STATIC = 100;d
             println!("MY_STATIC: {}", MY_STATIC);
         }
     }

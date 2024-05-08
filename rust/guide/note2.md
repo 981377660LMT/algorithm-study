@@ -572,3 +572,45 @@ use std::io::Result as IoResult;
 - 什么时候需要 panic
   当代码可能处于损坏状态时，panic 是合适的
   bad state: 无效的值、无效的参数、不一致的状态、缺失的值
+
+---
+
+- 泛型
+- 函数定义中的泛型
+  结构体中的泛型
+  枚举中的泛型
+  方法定义中的泛型
+
+- 偏特化：针对具体的类型实现方法（对满足特定条件的泛型类型实现方法）
+  偏特化（Partial Specialization）是泛型编程中的一个概念，主要用于模板（在 Rust 中称为泛型）编程中。它允许开发者为模板提供一个特殊的实现，这个实现只适用于模板参数的一个子集。偏特化可以提供更加精确或优化的实现，针对特定类型或类型组合的特殊行为。
+
+  在 Rust 中，由于语言设计的限制和安全性考虑，直接的偏特化是不支持的。**Rust 采用 trait 和 trait bounds 来实现类似偏特化的功能**。通过为泛型类型实现不同的 trait，可以根据类型特征选择不同的行为实现。
+
+  例如，你可以为一个泛型结构体实现不同的 trait，根据类型的不同选择不同的实现：
+
+  ```rust
+  trait GenericTrait {
+      fn do_something(&self);
+  }
+
+  // 对所有的 T 实现 GenericTrait
+  impl<T> GenericTrait for T {
+      fn do_something(&self) {
+          println!("Generic implementation");
+      }
+  }
+
+  // 对满足特定条件的 T 实现 GenericTrait
+  impl<T: std::fmt::Display> GenericTrait for T {
+      fn do_something(&self) {
+          println!("Specialized implementation for Display types: {}", self);
+      }
+  }
+  ```
+
+  在这个例子中，尽管 Rust 不直接支持偏特化，但通过 trait 和 trait bounds，我们可以为特定的类型或满足特定条件的类型组合提供特殊的行为实现，这在实践中可以达到类似偏特化的效果。然而，需要注意的是，这种方式并不是真正的偏特化，因为 Rust 的 trait 实现是基于全局的，不能基于部分类型参数进行特化。
+
+- trait
+  trait：抽象的定义共享行为
+  trait bounds：类型约束
+- 生命周期

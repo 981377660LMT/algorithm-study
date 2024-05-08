@@ -1,5 +1,6 @@
 mod error_handling;
 mod test_collections;
+mod test_func;
 
 static mut MY_STATIC: i32 = 42;
 
