@@ -2,3 +2,11 @@
 name = "guide"
 version = "0.1.0"
 edition = "2021"
+
+
+[profile.dev]
+opt-level = 0 # Optimize for compile time
+
+
+[profile.release]
+opt-level = 3 # Optimize for runtime

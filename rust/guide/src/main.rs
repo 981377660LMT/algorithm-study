@@ -1,6 +1,11 @@
 mod error_handling;
+mod lifecycle;
+mod pub_use;
+mod smart_pointer;
+mod test_closoure;
 mod test_collections;
 mod test_func;
+mod test_iterator;
 
 static mut MY_STATIC: i32 = 42;
 

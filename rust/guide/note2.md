@@ -610,7 +610,384 @@ use std::io::Result as IoResult;
 
   在这个例子中，尽管 Rust 不直接支持偏特化，但通过 trait 和 trait bounds，我们可以为特定的类型或满足特定条件的类型组合提供特殊的行为实现，这在实践中可以达到类似偏特化的效果。然而，需要注意的是，这种方式并不是真正的偏特化，因为 Rust 的 trait 实现是基于全局的，不能基于部分类型参数进行特化。
 
+- 单态化（monomorphization）：为需要的类型都生成类
+
 - trait
-  trait：抽象的定义共享行为
+  trait：抽象的定义共享`行为`
   trait bounds：类型约束
+
+---
+
 - 生命周期
+  rust 的每个引用都有自己的生命周期
+  生命周期是引用有效的作用域
+  生命周期注解：告诉编译器引用的生命周期
+
+  存在的主要原因：
+
+  - 避免悬垂引用
+
+- 生命周期标注语法
+  描述了多个引用的生命周期之间的**关系**，不会影响引用的生命周期
+  以'开头，通常是短小的单词
+  单个生命周期标注本身没有意义
+
+  ```rust
+  // !取生命周期最短的那个
+  fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+      if x.len() > y.len() {
+          x
+      } else {
+          y
+      }
+  }
+  ```
+
+- 生命周期的省略
+
+  - 每个引用都有一个生命周期
+  - 需要为使用生命周期的函数或 struct 的每个引用添加生命周期标注
+
+  没有显示标注生命周期的情况下，编译器使用三条规则来判断引用的生命周期：
+
+  1. 每个引用类型的参数都有它自己的生命周期参数
+  2. 如果只有一个输入生命周期参数，那么它被赋给所有输出生命周期参数
+  3. 如果方法有多个输入生命周期参数，不过其中之一是 &self 或 &mut self，**那么 self 的生命周期被赋予所有输出生命周期参数**
+
+  如果编译器无法根据这些规则推断生命周期，编译器会报错
+
+- 静态生命周期
+  - 'static 是一个特殊的生命周期：整个程序的持续时间
+  - 谨慎使用
+
+---
+
+- 自动化测试
+  测试体的 3a
+
+  - arrange 准备数据
+  - act 执行代码
+  - assert 验证结果
+
+  测试函数需要使用 #[cfg(test)] 注解 #[cfg(test)] 注解告诉 Rust 只在执行 cargo test 时才编译和运行测试代码，而在运行 cargo build 时不这么做。 #[test] 注解告诉 Rust 这是一个测试函数
+
+  ```rust
+  #[cfg(test)]
+  mod tests {
+      #[test]
+      fn it_works() {
+          assert_eq!(2 + 2, 4);
+      }
+  }
+  ```
+
+  cargo test
+  **每个测试函数都会在一个新线程中运行**
+  当主线程发现某个测试函数 panic 时，会终止测试，但其他测试函数会继续运行
+
+- 断言宏
+  assert_eq!
+  assert_ne!
+
+- 自定义错误消息
+  assert_eq!(2 + 2, 4, "2 + 2 不等于 4");
+- 检查 panic
+
+  ```rust
+  #[should_panic]
+  #[should_panic(expected = "Panic message")] // 检查 panic 的消息
+
+  ```
+
+- 测试中使用 Result<T, E> 返回
+
+  ```rust
+  #[cfg(test)]
+  mod tests {
+      use super::*;
+
+      #[test]
+      fn it_works() -> Result<(), String> {
+          if 2 + 2 == 4 {
+              Ok(())
+          } else {
+              Err(String::from("2 + 2 不等于 4"))
+          }
+      }
+  }
+  ```
+
+- 改变测试行为
+  添加命令行参数
+
+  - 默认行为：
+    1. 并行运行测试
+    2. 所有测试都会运行
+    3. 捕获（不显示）所有输出，使读取与测试结果相关的输出更容易
+  - 命令行参数：
+
+    1. --test-threads=1：顺序运行测试
+    2. --ignored：只运行被忽略的测试
+    3. --test：只运行包含 test 标记的测试
+    4. --nocapture：显示测试输出
+
+    两种：
+
+    - 针对 cargo test 命令行的参数，紧跟在 cargo test 后面
+    - 针对测试可执行文件的参数，紧跟在--后面
+
+    ```shell
+    cargo test --help
+    cargo test -- --test-threads=1
+    ```
+
+- 串行、并行运行测试
+- 只运行特定测试
+  模式匹配
+
+  ```shell
+  cargo test one_hundred
+  ```
+
+- 忽略某些测试
+  使用 ignore 属性
+
+  ```rust
+  #[test]
+  #[ignore]
+  fn expensive_test() {
+      // code
+  }
+  ```
+
+- 测试的分类
+  - 单元测试：测试一个模块、一个函数或一个方法；小、专注，可测试私有函数
+    `[cfg(test)]`标注
+  - 集成测试：测试整个程序的某个功能；和其他外部代码一样使用你的代码，只能测试 public API
+    不需要`#[cfg(test)]`标注，因为完全位于被测试库的外部(tests 目录)，集成测试的覆盖率非常重要
+- 针对 binary crate 的集成测试
+  只能独立运行，可以在 main.rs 中编写胶水代码
+
+---
+
+二进制程序关注点分离的指导性原则
+
+- 将程序拆分为 main.rs 和 lib.rs，业务逻辑放入 lib.rs
+- 命令行解析逻辑较少时，放在 main.rs 也行
+- 命令行解析逻辑较多时，需要将解析逻辑从 main.rs 移动到 lib.rs
+
+---
+
+exit(0)表示程序正常退出；除了 0 之外，其他参数均代表程序异常退出，如：exit(1),exit(-1)。
+
+---
+
+Box<dyn Trait> 是 trait 对象，可以在运行时指定具体类型
+
+---
+
+设置环境变量
+
+```shell
+CASE_INSENSITIVE=1 cargo run to poem.txt
+```
+
+---
+
+将错误信息输出到标准错误流
+
+```rust
+eprintln!("Application error: {}", e);
+```
+
+---
+
+闭包：可以捕获环境的匿名函数(普通函数不能捕获)
+
+闭包的类型推断与类型标注
+
+- Fn Trait
+
+  - FnOnce：取得所有权
+  - FnMut：可变借用
+  - Fn：不可变借用
+    - 创建闭包时，Rust 会根据闭包体如何使用环境来推断闭包是 FnOnce、FnMut 还是 Fn
+    - 所有的闭包都实现了 FnOnce，因为它可以被调用一次
+    - 如果一个闭包没有移动环境中的任何值，那么它实现 FnMut
+    - 如果一个闭包没有对环境中的任何值进行可变借用，那么它实现 Fn
+
+- 缺点：内存开销
+
+- move 关键字：强制闭包获取环境值的所有权
+  - 当将闭包**传递给新线程以移动数据使其归新线程所有**时，此技术最为有用
+    所有权移动都是为了准确的内存回收
+
+---
+
+- 迭代器
+  iterator trait 和 next 方法
+
+  ```rust
+  trait Iterator {
+      type Item;  // 关联类型
+
+      fn next(&mut self) -> Option<Self::Item>;  // Self::Item 是关联类型
+  }
+  ```
+
+  next: 返回 Option，Some 包含
+  下一个值，None 表示结束
+
+- 迭代方法：
+  .iter()：不可变引用上创建迭代器，用于读取集合中的值
+  .iter_mut()：迭代可变的引用，用于修改集合中的值
+  .into_iter()：创建的的迭代器会获取所有权，用于移动集合中的值
+
+- 消耗、产生迭代器
+
+  - 消耗适配器：调用 next 方法，consumer
+    例如：sum、collect
+  - 产生迭代器：不调用 next 方法，supplier
+    迭代器适配器
+    例如：map、filter
+
+- 闭包捕获环境
+
+- 迭代器与循环的性能
+  **迭代器性能更好**
+  - Rust 的迭代器是**零成本抽象(Zero-Cost Abstraction)**，不会导致性能损失
+  - Rust 的迭代器是**惰性的**，只有在需要时才会执行
+
+---
+
+cargo、crates.io
+
+- release profile(发布配置) 自定义构建
+
+  ```toml
+  [profile.dev]
+  opt-level = 0
+
+  [profile.release]
+  opt-level = 3
+  ```
+
+- https://crates.io/ 上发布库
+
+  **文档注释：**
+
+  - 用于生成文档，显示公共 API 的注释
+  - 使用 ///
+  - 支持 markdown
+
+  ````rust
+  /// Adds one to the number given.
+  /// # Examples
+  /// ```
+  /// let arg = 5;
+  /// let answer = my_crate::add_one(arg);
+  /// assert_eq!(6, answer);
+  /// ```
+  /// # Panics
+  /// The function will panic if the argument is 100.
+  ///
+  /// # Errors
+  /// The function will return an error if the argument is 101.
+  ///
+  /// # Safety
+  /// The function is not safe to call with a negative number.
+  ///
+  /// # Performance
+  /// The function is optimized for speed, not size.
+  ````
+
+  生成 html 文档
+
+  ```shell
+  cargo doc --open // 生成文档并打开浏览器
+  ```
+
+  常用章节：
+  `# Examples`
+  `# Panics`
+  `# Errors`
+  `# Safety`
+
+  **文档注释作为测试**
+
+  描述包/模块的注释
+  符号：//!
+
+  ```rust
+  //! # My Crate
+
+  ```
+
+  发包流程：
+
+  - 获取 api tokens
+    https://crates.io/settings/tokens
+  - 登录
+    cargo login [token]
+  - 为新的 crate 添加元数据
+    name 不能重名
+    description
+    license
+    version
+    author
+  - 发布
+    cargo publish
+
+  注意，crate 一旦发布，就不能删除，且该版本无法覆盖(不可变 hh)
+  目的：依赖于该版本的项目可继续正常工作
+
+  - 撤回版本
+    防止新项目依赖于该版本
+    已经存在的项目不受影响
+    yank 一个版本： cargo yank --vers 1.0.1
+    取消 yank： cargo yank --vers 1.0.1 --undo
+
+- cargo 工作空间：通过 workspaces 组织大工程
+
+  - 一个 Cargo.toml 文件
+  - 多个二进制或库 crate
+  - 一个 target 目录
+  - 一个 lock 文件
+  - 一个输出目录
+
+  ```shell
+  cargo new my_workspace --bin
+  cd my_workspace
+  cargo new my_bin --bin
+  cargo new my_lib --lib
+  ```
+
+  - 一个 Cargo.toml 文件
+
+    ```toml
+    [workspace]
+    members = [
+        "my_bin",
+        "my_lib",
+    ]
+    ```
+
+  - 一个 target 目录
+  - 一个 lock 文件
+  - 一个输出目录
+
+- 从https://crates.io/ 安装二进制 crate
+  cargo install：安装的 crate 会被放在 ~/.cargo/bin 目录下
+
+---
+
+- 智能指针 smart pointer
+  通常用 struct 实现，并实现了
+  Deref 和 Drop trait
+
+  - Box<T>：堆上分配 (unique_ptr)
+  - Rc<T>：引用计数 (shared_ptr)
+  - RefCell<T>：内部可变性
+  - Arc<T>：原子引用计数
+  - Mutex<T>：互斥锁
+  - RwLock<T>：读写锁
