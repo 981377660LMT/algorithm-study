@@ -985,9 +985,352 @@ cargo、crates.io
   通常用 struct 实现，并实现了
   Deref 和 Drop trait
 
+  Deref：允许智能指针表现得像引用
+  Drop：允许在值离开作用域时执行代码
+
   - Box<T>：堆上分配 (unique_ptr)
-  - Rc<T>：引用计数 (shared_ptr)
+  - Rc<T>：启用多重所有权的引用计数 (shared_ptr)
   - RefCell<T>：内部可变性
   - Arc<T>：原子引用计数
   - Mutex<T>：互斥锁
   - RwLock<T>：读写锁
+
+1. 使用 Box<T> 指向 Heap 上的数据
+   指针在 stack，数据在 heap
+
+   ```rust
+   fn main() {
+       let b = Box::new(5);
+       println!("b = {}", b);
+   }
+   ```
+
+   使用 Box 赋能递归类型
+   编译时，rust 需要知道一个类型所占的空间大小，而递归类型的大小无法在编译时确定，所以需要使用 Box 来解决
+
+   ```rust
+   // 函数式语言中的 Cons List
+   // Lisp 数据结构
+   enum List {
+       Cons(i32, Box<List>),
+       Nil,
+   }
+   ```
+
+   - Rust 如何确定为枚举分配的内存大小
+     最大的成员的大小
+
+     ```rust
+      enum Message {
+          Quit,
+          Move { x: i32, y: i32 },
+          Write(String),
+          ChangeColor(i32, i32, i32),
+      }
+     ```
+
+     Box<T>是一个指针，大小是固定的(8)，所以可以确定枚举的大小
+
+   - 作用：
+     - 只提供了"间接"存储和 heap 内存分配的功能
+     - 无性能开销
+     - 适合需要"间接"存储的场景，例如 Cons List
+     - 实现了 Deref 和 Drop trait
+
+2. Deref Trait
+
+   - 自定义解引用运算符`*`的行为
+   - 自动调用 Deref 方法
+
+   ```rust
+
+   impl Deref for MyBox<T> {
+       type Target = T;
+
+       fn deref(&self) -> &T {
+           &self.0
+       }
+   }
+   ```
+
+   - Rust 会自动调用 deref 方法，直到找到不再实现 Deref 的类型
+
+   Deref coercion (隐式解引用转换)
+
+   - 发生于函数和方法调用，**如果参数类型与函数签名不匹配**，Rust 会尝试使用 Deref coercion，即会自动调用 Deref 方法，直到找到不再实现 Deref 的类型
+   - 适用于函数和方法调用
+
+   ```rust
+   fn hello(name: &str) {
+       println!("Hello, {}!", name);
+   }
+
+   let m = MyBox::new(String::from("Rust"));
+   hello(&m); // hello(m.deref())
+
+
+   ```
+
+   &MyBox<String> -> &String -> &str
+
+3. Drop Trait
+
+   - Rust 会在值离开作用域时自动调用 drop 方法
+     例如文件句柄、网络连接、锁等资源的释放
+   - 执行清理工作
+   - 与 RAII 结合使用
+   - 与 C++ 的析构函数类似
+
+   ```rust
+   impl Drop for MyBox<T> {
+       fn drop(&mut self) {
+           println!("Dropping MyBox with data: {}", self.0);
+       }
+   }
+   ```
+
+   - 禁止手动调用 x.drop()，但可以使用 std::mem::drop 主动调用，**提前清理**
+
+---
+
+Trait 更像契约，而不是接口
+
+4. Rc<T>:引用计数智能指针
+   **一个值有多个所有者**(图)，只能用于单线程场景
+   通过不可变引用，使你可以在程序不同部分之间共享只读数据
+
+   使用场景：需要在 heap 上分配内存，这些数据被程序的多个部分读取(只读)，无法确定哪个部分最后使用完这些数据
+   Rc::clone，克隆指针
+   Rc::string_count，获取引用计数
+
+   ```rust
+    use std::rc::Rc;
+
+    fn main() {
+        let a = Rc::new(5);
+        let b = Rc::clone(&a);
+        let c = Rc::clone(&a);
+
+        println!("a = {}, b = {}, c = {}", a, b, c);
+    }
+   ```
+
+5. RefCell<T>与内部可变性(interior mutability)
+   内部可变性：
+   rust 设计模式之一
+   允许你在只持有不可变引用的前提下对数据进行修改，只能用于单线程场景
+
+   - 数据结构使用了 unsafe 代码来绕过 rust 正常的可变性和借用规则
+
+   RefCell<T>
+   区别于 Rc<T>，RefCell<T> 代表其数据的**唯一所有权**
+
+   RefCell<T>与 Box<T>的区别：
+   Box<T>:编译阶段强制代码遵守借用规则
+   RefCell<T>:运行时检查
+
+   - 使用 RefCell<T>在运行时记录借用信息
+     两个方法(安全接口)：
+     - borrow
+       返回智能指针 Ref<T>，它实现了 Deref
+       每次调用 borrow，不可变借用计数加一
+       离开作用域时，计数减一
+     - borrow_mut
+       返回智能指针 RefMut<T>，它实现了 Deref
+       每次调用 borrow_mut，可变借用计数加一
+       离开作用域时，计数减一
+   - 任何一个给定时间里，只允许拥有多个不可变借用或一个可变借用（**类似读写锁？**）
+
+---
+
+选择 Box<T>、Rc<T>、RefCell<T>的依据：
+
+- 同一数据所有者：
+  Box<T>：一个
+  Rc<T>：多个
+  RefCell<T>：一个
+- 可变性：
+  Box<T>：可变、不可变借用
+  Rc<T>：不可变借用
+  RefCell<T>：可变、不可变借用
+- 检查时机：
+  Box<T>：编译时
+  Rc<T>：编译时
+  RefCell<T>：运行时
+
+6. 循环引用导致内存泄漏
+   类似：c++ 的 shared_ptr 循环引用导致内存泄漏
+
+```rust
+use std::rc::Rc;
+use std::cell::RefCell;
+
+#[derive(Debug)]
+struct Node {
+    value: i32,
+    children: RefCell<Vec<Rc<Node>>>,
+}
+
+fn main() {
+    let leaf = Rc::new(Node {
+        value: 3,
+        children: RefCell::new(vec![]),
+    });
+
+    let branch = Rc::new(Node {
+        value: 5,
+        children: RefCell::new(vec![Rc::clone(&leaf)]),
+    });
+
+    *leaf.children.borrow_mut() = vec![Rc::clone(&branch)];
+
+    println!("{:?}", branch);
+}
+```
+
+防止内存泄露的方法：
+
+1. 依靠开发者保证，不能依靠编译器
+2. 重新组织数据结构，一些引用来表达所有权，一些引用不表达所有权
+3. Rc<T>换成 Weak<T>，弱引用，不增加强引用计数
+   downgrade: Rc -> Weak
+   upgrade: Weak -> Rc
+
+```rust
+use std::rc::{Rc, Weak};
+use std::cell::RefCell;
+
+#[derive(Debug)]
+struct Node {
+    value: i32,
+    parent: RefCell<Weak<Node>>,
+    children: RefCell<Vec<Rc<Node>>>,
+}
+
+fn main() {
+    let leaf = Rc::new(Node {
+        value: 3,
+        parent: RefCell::new(Weak::new()),
+        children: RefCell::new(vec![]),
+    });
+
+    let branch = Rc::new(Node {
+        value: 5,
+        parent: RefCell::new(Weak::new()),
+        children: RefCell::new(vec![Rc::clone(&leaf)]),
+    });
+
+    *leaf.parent.borrow_mut() = Rc::downgrade(&branch);
+
+    println!("{:?}", branch);
+}
+```
+
+---
+
+并发
+
+1. thread::spawn
+2. move 强制闭包获取所有权
+
+```rs
+use std::{thread, time::Duration};
+
+fn main() {
+    let v = vec![1, 2, 3];
+    let join_handle = thread::spawn(move || {
+        for i in 1..10 {
+            println!("hi number {} from the spawned thread!", i);
+            thread::sleep(Duration::from_millis(1));
+        }
+        println!("{:?}", v)
+    });
+    // drop(v); // v is moved to the spawned thread, so it's not available here anymore
+
+    for i in 1..5 {
+        println!("hi number {} from the main thread!", i);
+        thread::sleep(Duration::from_millis(1));
+    }
+
+    join_handle.join().unwrap();
+}
+```
+
+3. 使用**消息传递**来跨线程传递数据
+   一种很流行且能保证并发安全的消息传递机制是消息传递
+   线程(或 actor)通过彼此发送消息来通信，而不是共享数据
+   golang 名言：**不要用共享内存来通信，而要用通信来共享内存**
+
+   Channel
+   多个生产者，单个消费者(mpsc)
+   生产者: sender.send
+   消费者: receiver.recv、receiver.try_recv
+
+4. 共享来实现并发
+5. Send、Sync trait
+   Send：允许在线程间传递所有权
+   Sync：允许多线程访问
+
+---
+
+面向对象编程
+Trait
+
+- 静态派发(static dispatch)：编译时确定调用的方法
+- 动态派发(dynamic dispatch)：运行时确定调用的方法
+
+Trait 对象必须保证对象安全：
+
+- 只能把对象安全的 trait 作为 trait 对象
+- 返回类型不能是 Self
+- 不能包含有泛型参数的方法
+
+---
+
+模式匹配
+
+- match、if let、while let
+- 可辩驳性(rufutable)：模式是否会无法匹配
+
+---
+
+高级特性
+
+- unsafe rust
+  - 解引用原始指针(野指针)
+  - 调用不安全函数或方法
+  - 访问或修改可变静态变量
+  - 实现不安全 trait
+
+注意：
+
+- unsafe 并没有关闭借用检查或禁用任何其他 Rust 安全检查
+- 任何内存安全相关的错误必须留在 unsafe 块中
+- 需要尽可能**隔离**unsafe 代码，最好将其封装在安全的抽象中，提供安全的接口
+
+- 使用 extern 函数调用外部代码
+  FFI(Forerign Function Interface)
+
+  -#[no_mangle]：禁止 Rust 编译器修改函数名
+
+---
+
+泛型与关联类型
+
+- 泛型：在编译时不确定具体类型
+- 关联类型：在 trait 中定义的类型
+
+---
+
+宏(macro)
+
+- 一组相关特性的集合称谓
+  - macro_rules! 构建的声明宏(declarative macros)
+  - 3 种过程宏(procedural macros)
+    - 自定义 derive
+    - 自定义属性
+    - 自定义函数式宏
+
+宏是所有语法的抽象
+
+Lombok 的实现原理

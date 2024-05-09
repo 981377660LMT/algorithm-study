@@ -4,8 +4,10 @@ mod pub_use;
 mod smart_pointer;
 mod test_closoure;
 mod test_collections;
+mod test_concurrent;
 mod test_func;
 mod test_iterator;
+mod web_server;
 
 static mut MY_STATIC: i32 = 42;
 
