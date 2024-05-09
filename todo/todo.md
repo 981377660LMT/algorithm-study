@@ -24,3 +24,8 @@
      据说是压缩率最高，效率很好的的 Trie 变体。
    - Louds trie
      https://zhuanlan.zhihu.com/p/38194127
+
+华为笔试：
+给定一些 x 轴正半轴上的点(N<=10) ,每个点的起点数组 offset，每个点周期 period(<=256，offset < period)，
+这些点从 offset[i]开始每隔 period[i]就会出现一次，但最大不会超过 INT_MAX
+求使得每个点至少出现一次的最小窗口长度和左端点，如果有多个结果相同取左端点最小的
