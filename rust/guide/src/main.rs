@@ -1,5 +1,6 @@
 mod error_handling;
 mod lifecycle;
+mod misc;
 mod pub_use;
 mod smart_pointer;
 mod test_closoure;
