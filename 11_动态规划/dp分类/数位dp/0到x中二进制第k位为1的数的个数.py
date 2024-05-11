@@ -1,4 +1,6 @@
 # 0到x中二进制第k位为1的数的个数
+# 转迭代求法、推广到n进制
+
 
 from functools import lru_cache
 from random import randint
