@@ -10,9 +10,9 @@ func NewSameFreqCheckerAddOnly[K comparable]() *SameFreqCheckerAddOnly[K] {
 	return &SameFreqCheckerAddOnly[K]{counter: make(map[K]int32)}
 }
 
-func (s *SameFreqCheckerAddOnly[K]) Add(num K) {
-	pre := s.counter[num]
-	s.counter[num] = pre + 1
+func (s *SameFreqCheckerAddOnly[K]) Add(v K) {
+	pre := s.counter[v]
+	s.counter[v] = pre + 1
 	s.maxFreq = max32(s.maxFreq, pre+1)
 	s.count++
 }
@@ -30,9 +30,9 @@ func NewSameFreqChecker[K comparable]() *SameFreqChecker[K] {
 	return &SameFreqChecker[K]{counter: make(map[K]int32), freqCounter: make(map[int32]int32)}
 }
 
-func (s *SameFreqChecker[K]) Add(num K) {
-	preC := s.counter[num]
-	s.counter[num] = preC + 1
+func (s *SameFreqChecker[K]) Add(v K) {
+	preC := s.counter[v]
+	s.counter[v] = preC + 1
 	s.freqCounter[preC+1] = s.freqCounter[preC+1] + 1
 	if preC > 0 {
 		preF := s.freqCounter[preC]
@@ -44,15 +44,15 @@ func (s *SameFreqChecker[K]) Add(num K) {
 	}
 }
 
-func (s *SameFreqChecker[K]) Discard(num K) bool {
-	preC := s.counter[num]
+func (s *SameFreqChecker[K]) Discard(v K) bool {
+	preC := s.counter[v]
 	if preC == 0 {
 		return false
 	}
 	if preC == 1 {
-		delete(s.counter, num)
+		delete(s.counter, v)
 	} else {
-		s.counter[num] = preC - 1
+		s.counter[v] = preC - 1
 	}
 	preF := s.freqCounter[preC]
 	if preF == 1 {

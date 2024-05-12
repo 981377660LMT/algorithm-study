@@ -1,4 +1,4 @@
-curSum 这种参数由 visited 唯一确定
+ecurSum 这种参数由 visited 唯一确定
 **因此时间复杂度仍然是 O(2^n)的**
 
 [473. 火柴拼正方形-状压 dp](473.%20%E7%81%AB%E6%9F%B4%E6%8B%BC%E6%AD%A3%E6%96%B9%E5%BD%A2-%E7%8A%B6%E5%8E%8Bdp.py)

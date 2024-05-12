@@ -24,9 +24,9 @@ class SameFreqCheckerAddOnly:
         self._maxFreq = 0
         self._count = 0
 
-    def add(self, num: Any) -> None:
-        pre = self._counter.get(num, 0)
-        self._counter[num] = pre + 1
+    def add(self, v: Any) -> None:
+        pre = self._counter.get(v, 0)
+        self._counter[v] = pre + 1
         self._maxFreq = max2(self._maxFreq, pre + 1)
         self._count += 1
 
@@ -41,9 +41,9 @@ class SameFreqChecker:
         self._counter = dict()
         self._freqCounter = dict()
 
-    def add(self, num: Any) -> None:
-        preC = self._counter.get(num, 0)
-        self._counter[num] = preC + 1
+    def add(self, v: Any) -> None:
+        preC = self._counter.get(v, 0)
+        self._counter[v] = preC + 1
         self._freqCounter[preC + 1] = self._freqCounter.get(preC + 1, 0) + 1
         if preC > 0:
             preF = self._freqCounter.get(preC, 0)
@@ -52,14 +52,14 @@ class SameFreqChecker:
             else:
                 self._freqCounter[preC] = preF - 1
 
-    def discard(self, num: Any) -> bool:
-        preC = self._counter.get(num, 0)
+    def discard(self, v: Any) -> bool:
+        preC = self._counter.get(v, 0)
         if preC == 0:
             return False
         if preC == 1:
-            self._counter.pop(num)
+            self._counter.pop(v)
         else:
-            self._counter[num] = preC - 1
+            self._counter[v] = preC - 1
         preF = self._freqCounter.get(preC, 0)
         if preF == 1:
             self._freqCounter.pop(preC)
@@ -108,15 +108,15 @@ if __name__ == "__main__":
         def __init__(self) -> None:
             self.counter = dict()
 
-        def add(self, num: Any) -> None:
-            self.counter[num] = self.counter.get(num, 0) + 1
+        def add(self, v: Any) -> None:
+            self.counter[v] = self.counter.get(v, 0) + 1
 
-        def remove(self, num: Any) -> None:
-            if num not in self.counter:
+        def remove(self, v: Any) -> None:
+            if v not in self.counter:
                 return
-            self.counter[num] -= 1
-            if self.counter[num] == 0:
-                self.counter.pop(num)
+            self.counter[v] -= 1
+            if self.counter[v] == 0:
+                self.counter.pop(v)
 
         def check(self) -> bool:
             return len(set(self.counter.values())) == 1

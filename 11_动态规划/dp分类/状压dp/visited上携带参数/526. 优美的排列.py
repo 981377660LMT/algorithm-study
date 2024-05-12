@@ -14,15 +14,19 @@ from functools import lru_cache
 class Solution:
     def countArrangement(self, n: int) -> int:
         @lru_cache(None)
-        def dfs(index: int, state: int) -> int:
-            if index == n:
+        def dfs(state: int) -> int:
+            if state == mask:
                 return 1
             res = 0
+            index = state.bit_count()
             for cur in range(1, n + 1):
-                if not state & (1 << cur) and (
-                    cur % (index + 1) == 0 or (index + 1) % cur == 0
-                ):
-                    res += dfs(index + 1, state | (1 << cur))
+                if state & (1 << cur):
+                    continue
+                if cur % (index + 1) == 0 or (index + 1) % cur == 0:
+                    res += dfs(state | (1 << cur))
             return res
 
-        return dfs(0, 0)
+        mask = sum(1 << i for i in range(1, n + 1))
+        res = dfs(0)
+        dfs.cache_clear()
+        return res

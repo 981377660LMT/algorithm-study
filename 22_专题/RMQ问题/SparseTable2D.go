@@ -27,11 +27,44 @@ func main() {
 	fmt.Println(query(1, 1, 2, 2))
 }
 
+// 给你一个由 正整数 组成、大小为 m x n 的矩阵 grid。你可以从矩阵中的任一单元格移动到另一个位于正下方或正右侧的任意单元格（不必相邻）。从值为 c1 的单元格移动到值为 c2 的单元格的得分为 c2 - c1 。
+// 你可以从 任一 单元格开始，并且必须至少移动一次。
+// 返回你能得到的 最大 总得分。
+const INF int = 1e18
+
+func maxScore(grid [][]int) int {
+	ROW, COL := len(grid), len(grid[0])
+	res := -INF
+	st := NewSparseTable2D(grid, min)
+	for i := 0; i < ROW; i++ {
+		for j := 0; j < COL; j++ {
+			// up
+			if i > 0 {
+				upMin := st(0, j, i-1, j)
+				res = max(res, grid[i][j]-upMin)
+			}
+			// left
+			if j > 0 {
+				leftMin := st(i, 0, i, j-1)
+				res = max(res, grid[i][j]-leftMin)
+			}
+
+			// left and up
+			if i > 0 && j > 0 {
+				upLeftMin := st(0, 0, i-1, j-1)
+				res = max(res, grid[i][j]-upLeftMin)
+			}
+		}
+	}
+	return res
+}
+
 type S = int
 
-//  query: 查询 [row1,col1,row2,col2] 闭区间的贡献值
-//     0 <= row1 <= row2 < len(matrix)
-//     0 <= col1 <= col2 < len(matrix[0])
+// query: 查询 [row1,col1,row2,col2] 闭区间的贡献值
+//
+//	0 <= row1 <= row2 < len(matrix)
+//	0 <= col1 <= col2 < len(matrix[0])
 func NewSparseTable2D(matrix [][]S, op func(S, S) S) (query func(row1, col1, row2, col2 int) S) {
 	n, m := len(matrix), len(matrix[0])
 	rowSize := bits.Len(uint(n))   // 1+logn

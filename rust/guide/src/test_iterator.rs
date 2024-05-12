@@ -11,7 +11,7 @@ fn main() {
 }
 
 fn iterator_sum() {
-    let nums = vec![1, 2, 3, 4, 5];
+    let nums = [1, 2, 3, 4, 5];
     let sum: i32 = nums.iter().sum();
     assert_eq!(sum, 15);
 }
