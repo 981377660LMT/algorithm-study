@@ -1,0 +1,8 @@
+[package]
+name = "practices"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+templates = { path = "../templates" }
+rand = "0.8.5"
