@@ -1,4 +1,5 @@
 mod error_handling;
+mod half_hour;
 mod leetcode;
 mod lifecycle;
 mod misc;
