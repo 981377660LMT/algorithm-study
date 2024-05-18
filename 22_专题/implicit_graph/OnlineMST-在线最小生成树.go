@@ -210,7 +210,7 @@ func OnlineMSTIncremental(
 		for i := 0; i < n; i++ {
 			for _, v := range groups[i] {
 				w, x := find(v)
-				if x < weight[i] {
+				if w != -1 && x < weight[i] {
 					weight[i] = x
 					who[i] = [2]int{v, w}
 				}
@@ -224,7 +224,7 @@ func OnlineMSTIncremental(
 		for i := n - 1; i >= 0; i-- {
 			for _, v := range groups[i] {
 				w, x := find(v)
-				if x < weight[i] {
+				if w != -1 && x < weight[i] {
 					weight[i] = x
 					who[i] = [2]int{v, w}
 				}

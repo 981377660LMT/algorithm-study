@@ -1,21 +1,32 @@
+/** ISlice. */
 interface ISequence<T> {
   readonly length: number
   at(index: number): T | undefined
+  set(index: number, value: T): void
   subsequence(start: number, end: number): ISequence<T>
+}
+
+interface MutableArrayLike<T> {
+  readonly length: number
+  [index: number]: T
 }
 
 const EMPTY_SEQUENCE: ISequence<any> = {
   length: 0,
   at: () => undefined,
+  set: () => {},
   subsequence: () => EMPTY_SEQUENCE
 }
 
+/**
+ * SliceWrapper.
+ */
 class ArraySequenceAdapter<T> implements ISequence<T> {
-  private readonly _data: ArrayLike<T>
+  private readonly _data: MutableArrayLike<T>
   private readonly _start: number
   private readonly _end: number
 
-  constructor(data: ArrayLike<T>, start = 0, end = data.length) {
+  constructor(data: MutableArrayLike<T>, start = 0, end = data.length) {
     this._data = data
     this._start = start
     this._end = end
@@ -26,6 +37,13 @@ class ArraySequenceAdapter<T> implements ISequence<T> {
     if (index < 0) index += n
     if (index < 0 || index >= n) return undefined
     return this._data[this._start + index]
+  }
+
+  set(index: number, value: T): void {
+    const n = this.length
+    if (index < 0) index += n
+    if (index < 0 || index >= n) return
+    this._data[this._start + index] = value
   }
 
   subsequence(start: number, end: number): ISequence<T> {
@@ -61,6 +79,10 @@ class FunctionSequenceAdapter<T> implements ISequence<T> {
     return this._f(this._start + index)
   }
 
+  set(): void {
+    throw new Error('Not supported')
+  }
+
   subsequence(start: number, end: number): ISequence<T> {
     const n = this.length
     if (start < 0) start += n
@@ -76,7 +98,7 @@ class FunctionSequenceAdapter<T> implements ISequence<T> {
   }
 }
 
-function createSequence<T>(data: ArrayLike<T>, start?: number, end?: number): ISequence<T>
+function createSequence<T>(data: MutableArrayLike<T>, start?: number, end?: number): ISequence<T>
 function createSequence<T>(f: (i: number) => T, start: number, end: number): ISequence<T>
 function createSequence<T>(
   dataOrF: ArrayLike<T> | ((i: number) => T),
