@@ -6,18 +6,27 @@
 # 1≤N<100
 # https://www.acwing.com/activity/content/code/content/4041182/
 
+# 范围内的数字中digit出现的次数
 
-# TODO: k进制
-def countDigit(n: int, digit: int) -> int:
+
+def countDigit(n: int, digit: int, base=10) -> int:
     """O(lgn)求[1,n]中digit出现的次数."""
     res = 0
     left, right = 0, 0
-    len_ = len(str(n))
+
+    def calLen(n: int) -> int:
+        res = 0
+        while n:
+            res += 1
+            n //= base
+        return res
+
+    len_ = calLen(n)
     for i in range(1, len_ + 1):
-        right = 10 ** (i - 1)
-        left = n // (right * 10)
+        right = base ** (i - 1)
+        left = n // (right * base)
         res += left * right if digit else (left - 1) * right
-        d = (n // right) % 10
+        d = (n // right) % base
         if d == digit:
             res += n % right + 1
         elif d > digit:
@@ -25,20 +34,15 @@ def countDigit(n: int, digit: int) -> int:
     return res
 
 
-def countDigitIn(left: int, right: int, digit: int) -> int:
+def countDigitIn(left: int, right: int, digit: int, base=10) -> int:
     """统计[left,right]中digit出现的次数."""
     if left > right:
         return 0
     if left == 0:
-        return countDigit(right, digit) + (digit == 0)
-    return countDigit(right, digit) - countDigit(left - 1, digit)
+        return countDigit(right, digit, base=base) + (digit == 0)
+    return countDigit(right, digit, base=base) - countDigit(left - 1, digit, base=base)
 
 
-while True:
-    left, right = sorted(map(int, input().split()))
-    if left == right == 0:
-        break
-    res = []
-    for i in range(10):
-        res.append(str(countDigitIn(left, right, digit=i)))
-    print(" ".join(res))
+if __name__ == "__main__":
+    print(countDigitIn(1, 12, 1, base=2))
+    print(sum(v.bit_count() for v in range(1, 13)))
