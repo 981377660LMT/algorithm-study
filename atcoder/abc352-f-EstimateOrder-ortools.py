@@ -8,9 +8,6 @@
 # https://atcoder.jp/contests/abc352/submissions/53115584 ortools 619 ms
 # https://atcoder.jp/contests/abc352/submissions/53125345 z3 1847 ms
 # https://atcoder.jp/contests/abc352/submissions/53130190 pulp 844 ms
-#
-# https://blog.51cto.com/u_11866025/5833945
-# https://developers.google.cn/optimization?hl=zh-cn
 
 
 import sys
@@ -18,10 +15,10 @@ import sys
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 
-from copy import deepcopy
-
-
 if __name__ == "__main__":
+    from copy import deepcopy
+    from ortools.sat.python import cp_model
+
     N, M = map(int, input().split())
 
     model = cp_model.CpModel()
@@ -38,7 +35,7 @@ if __name__ == "__main__":
 
     solver = cp_model.CpSolver()
 
-    ret = []
+    res = []
     for i in range(N):
         feasible_ranks: list[int] = []
 
@@ -53,6 +50,6 @@ if __name__ == "__main__":
             if len(feasible_ranks) > 1:
                 break
 
-        ret.append(feasible_ranks[0] if len(feasible_ranks) == 1 else -1)
+        res.append(feasible_ranks[0] if len(feasible_ranks) == 1 else -1)
 
-    print(*ret)
+    print(*res)

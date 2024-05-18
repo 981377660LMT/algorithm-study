@@ -60,6 +60,7 @@ func P4298祭祀() {
 	fmt.Fprintln(out)
 }
 
+// Ex - Hakata
 // https://atcoder.jp/contests/abc237/tasks/abc237_h
 // 给定一个字符串, 你需要从中选出若干回文子串, 并且使得选出的串不存在某一个是另一个的子串, 问最多能选出多少子串.
 // n<=200
@@ -157,6 +158,9 @@ func abc237ex() {
 	res := S.MaxAntiChain()
 	fmt.Fprintln(out, len(res))
 }
+
+// TODO: 增加权重
+// https://atcoder.jp/contests/abc354/tasks/abc354_g
 
 const INF int = 1e18
 
