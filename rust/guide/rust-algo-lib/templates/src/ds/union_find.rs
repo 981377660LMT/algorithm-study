@@ -22,6 +22,7 @@ impl UnionFind {
     /// # Example
     ///
     /// ```
+    /// use templates::ds::union_find::UnionFind;
     /// let mut uf = UnionFind::new(10);
     /// uf.union(0, 1, None);
     /// uf.union(0, 2, Some(|big, small| println!("{} {}", big, small)));

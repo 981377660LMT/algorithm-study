@@ -1,5 +1,5 @@
-// use templates::ds::union_find;
-use templates::ds::union_find;
+mod atcoder;
+mod yosupo;
 
 fn main() {
     println!("Hello, world!");
