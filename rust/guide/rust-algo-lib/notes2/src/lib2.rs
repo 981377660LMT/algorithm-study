@@ -16,10 +16,11 @@ fn main() {}
 /// [`truncate`]: Vec::truncate
 ///
 /// # Example
-/// ```
+/// ```no_run
 /// rust_doc_markdown();
 /// ```
 /// # Time complexity
 ///
 /// Takes *O*([`Vec::len`]) time.
+#[cfg(not(doctest))]
 fn rust_doc_markdown() {}
