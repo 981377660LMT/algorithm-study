@@ -1,3 +1,6 @@
+// use templates::ds::union_find;
+use templates::{ds::union_find, macros::add};
+
 fn main() {
     println!("Hello, world!");
     // 没有返回值的函数在 Rust 中是有单独的定义的：发散函数( diverge function )

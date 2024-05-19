@@ -78,6 +78,7 @@ class BitSequence:
 
     def bitIndexToNum(self, bitIndex: int) -> Tuple[int, int]:
         """BitSequence 下标为 bitIndex 对应的(数值, 二进制表示中的第几位)."""
+        return self.bitIndexToNumFast(bitIndex)
         if bitIndex == 0:
             return 0, 0
         left, right = 0, 1 << self._maxLog
@@ -88,6 +89,23 @@ class BitSequence:
             else:
                 right = mid - 1
         return left, bitIndex - self.numPreCount(left - 1) - 1
+
+    def bitIndexToNumFast(self, bitIndex: int) -> Tuple[int, int]:
+        """BitSequence 下标为 bitIndex 对应的(数值, 二进制表示中的第几位)."""
+        if bitIndex == 0:
+            return 0, 0
+        bitIndex -= 1
+        n, preCount = 0, 0
+        for i in range((bitIndex + 1).bit_length() - 1, 0, -1):
+            c = (preCount << i) + (i << (i - 1))
+            if c <= bitIndex:
+                bitIndex -= c
+                preCount += 1
+                n |= 1 << i
+        if preCount <= bitIndex:
+            bitIndex -= preCount
+            n += 1
+        return n, bitIndex
 
 
 if __name__ == "__main__":
@@ -105,7 +123,7 @@ if __name__ == "__main__":
     print(S.numPreSum(6))
     print(sum(v.bit_count() for v in range(7)))
     for i in range(25):
-        print("i", i, S.bitIndexToNum(i))
+        print("i", i, S.bitIndexToNumFast(i))
 
     def test_bit_sequence():
         from random import randint
