@@ -1,5 +1,5 @@
 // use templates::ds::union_find;
-use templates::{ds::union_find, macros::add};
+use templates::ds::union_find;
 
 fn main() {
     println!("Hello, world!");
