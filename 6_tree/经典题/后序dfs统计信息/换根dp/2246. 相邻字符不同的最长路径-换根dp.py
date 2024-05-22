@@ -42,7 +42,7 @@ class _Rerooting(Generic[T]):
         self.adjList = [[] for _ in range(n)]
         self._n = n
         self._decrement = decrement
-
+g
     def addEdge(self, u: int, v: int) -> None:
         u -= self._decrement
         v -= self._decrement

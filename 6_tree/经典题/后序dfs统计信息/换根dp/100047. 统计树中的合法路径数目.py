@@ -3,8 +3,9 @@
 # https://leetcode.cn/problems/count-valid-paths-in-a-tree/description/
 # !求数中的合法路径数目(路径长度>=2)，路径上的质数个数恰好为1.
 
-from typing import List, Tuple
 from Rerooting import Rerooting
+
+from typing import List, Tuple
 from collections import Counter
 
 
