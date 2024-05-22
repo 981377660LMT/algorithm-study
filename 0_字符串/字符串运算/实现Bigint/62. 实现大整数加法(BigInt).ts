@@ -14,7 +14,7 @@ function add(num1: string, num2: string): string {
     const d2 = j < 0 ? 0 : Number(num2[j])
     const sum = d1 + d2 + carry
     res = `${sum % 10}${res}`
-    carry = ~~(sum / 10)
+    carry = Math.floor(sum / 10)
     i--
     j--
   }
@@ -24,6 +24,7 @@ function add(num1: string, num2: string): string {
 
 if (require.main === module) {
   console.log(add('999999999999999999', '1'))
+  console.log(add('', ''))
 }
 
 export { add }
