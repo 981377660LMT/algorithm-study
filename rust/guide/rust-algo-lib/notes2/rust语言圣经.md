@@ -19,3 +19,173 @@
   处理程序：操作系统会根据页面表或其他映射信息确定页面所在的位置（通常是磁盘），并将页面加载到主存中的空闲页面框中。
   更新页表：操作系统更新页表中有关该页面的信息，包括物理地址等。
   恢复程序：一旦页面加载到内存中，操作系统会重新启动之前暂停的程序，使其继续执行。
+
+3. 变量遮蔽(shadowing)
+   变量遮蔽(shadowing)是指在同一作用域中，你可以定义一个与之前变量同名的新变量，这样新变量会遮蔽之前的变量。
+   变量遮蔽的用处在于，如果你在某个作用域内无需再使用之前的变量（在被遮蔽后，无法再访问到之前的同名变量），就可以重复的使用变量名字，**而不用绞尽脑汁去想更多的名字**。
+   例如，假设有一个程序要统计一个空格字符串的空格数量：
+
+   ```RUST
+    // 字符串类型
+    let spaces = " ";
+    // usize 数值类型
+    let spaces = spaces.len();
+
+    // 变量遮蔽可以帮我们节省些脑细胞，不用去想如 str_spaces 和 num_spaces 此类的变量名
+   ```
+
+4. 对于 Rust 语言而言，这种**基于语句（statement）和表达式（expression）的方式**是非常重要的，你需要能明确的区分这两个概念, 但是对于很多其它语言而言，这两个往往无需区分。**基于表达式是函数式语言的重要特征，表达式总要返回值。**
+   表达式如果不返回任何值，会隐式地返回一个 () 。
+
+5. unicode 字符集与 utf-8 编码
+   Unicode 和 UTF-8 是两个相关但不同的概念。
+
+   Unicode 是一种字符集，它定义了每个字符的唯一标识符（码点）。Unicode 码点可以表示各种语言、符号和表情等字符。每个 Unicode 码点都有一个唯一的整数值，通常用 "U+" 后跟十六进制数字表示，例如 U+0041 表示字符 "A"。
+
+   UTF-8 是一种字符编码方案，它定义了如何将 Unicode 码点编码为字节序列。UTF-8 使用变长编码，根据字符的码点范围，使用不同长度的字节序列来表示字符。UTF-8 编码的特点是兼容 ASCII 编码，对于 ASCII 字符，使用一个字节表示，而对于非 ASCII 字符，使用多个字节表示。
+
+   下面是一个示例，展示了字符 "A" 在 Unicode 和 UTF-8 中的表示：
+
+   Unicode 码点：U+0041
+   UTF-8 编码：0x41
+   在这个示例中，字符 "A" 的 Unicode 码点是 U+0041，它是一个表示 "A" 的唯一标识符。而在 UTF-8 编码中，字符 "A" 使用一个字节 0x41 来表示，因为它与 ASCII 字符集中的对应字符是相同的。
+
+   总结来说，Unicode 是一个字符集，定义了字符的唯一标识符，而 UTF-8 是一种字符编码方案，定义了如何将 Unicode 码点编码为字节序列。UTF-8 是一种变长编码，可以有效地表示各种字符，并且兼容 ASCII 编码。
+
+6. String 与 &str
+   String: StringBuilder，具有所有权
+   str: 真正的字符串，字符串字面值
+   &str: 字符串切片，对 str 的不可变引用，不具有所有权
+
+7. 操作 UTF-8 字符串
+   字符（rune）
+   如果你想要以 `Unicode 字符`的方式遍历字符串，最好的办法是使用 chars 方法，例如：
+
+   ```RUST
+    for c in "中国人".chars() {
+        println!("{}", c);
+    }
+   ```
+
+   字节（byte）
+   这种方式是返回字符串的底层字节数组表现形式：
+
+   ```RUST
+    for b in "中国人".bytes() {
+        println!("{}", b);
+    }
+   ```
+
+   获取子串
+   想要准确的从 UTF-8 字符串中获取子串是较为复杂的事情
+   可以考虑尝试下这个库：utf8_slice。
+
+8. RAII
+   Rust 语言中的 RAII（Resource Acquisition Is Initialization）是一种**资源获取即初始化**的编程范式，它是 Rust 语言的一个重要特性。
+   RAII 的核心思想是，资源的生命周期应该与其所在作用域的生命周期相对应，资源的释放应该在资源所在作用域结束时自动进行。这种方式可以避免资源泄漏和资源使用后未释放的问题，提高程序的可靠性和安全性。
+   在 Rust 语言中，RAII 通常通过结构体和实现 Drop trait 来实现。结构体中包含了需要管理的资源，Drop trait 中实现了资源的释放逻辑。当结构体的实例超出作用域时，Drop trait 中的 drop 方法会被自动调用，从而释放资源。
+   RAII 是 Rust 语言的一个重要特性，它可以帮助程序员避免资源泄漏和资源使用后未释放的问题，提高程序的可靠性和安全性。
+9. 单元结构体(Unit-like Struct)
+   如果你定义一个类型，但是不关心该类型的内容, 只关心它的行为时，就可以使用 单元结构体：
+
+```RUST
+struct AlwaysEqual;
+
+let subject = AlwaysEqual;
+
+// 我们不关心 AlwaysEqual 的字段数据，只关心它的行为，因此将它声明为单元结构体，然后再为它实现某个特征
+impl SomeTrait for AlwaysEqual {
+}
+```
+
+10. 结构体数据的所有权
+    在之前的 User 结构体的定义中，有一处细节：**我们使用了自身拥有所有权的 String 类型而不是基于引用的 &str 字符串切片类型。**
+    这是一个有意而为之的选择：因为**我们想要这个结构体拥有它所有的数据，而不是从其它地方借用数据**。
+    **如果你想在结构体中使用一个引用，就必须加上生命周期，否则就会报错：**
+11. 任何类型的数据都可以放入枚举成员中: 例如字符串、数值、结构体甚至另一个枚举。
+    利用枚举同一化类型。
+12. Option 确实是一个比较不错的设计，在 JavaScript 中比较混淆的就有 undefined 和 null，undefined 代表变量的值未定义，null 代表变量的值默认为空值。
+
+---
+
+- 命名规范
+  https://course.rs/practice/naming.html
+
+  - 变量命名
+    对于 type-level 的构造 Rust 倾向于使用驼峰命名法，而对于 value-level 的构造使用蛇形命名法
+    对于驼峰命名法，复合词的缩略形式我们认为是一个单独的词语，所以只对首字母进行大写：**使用 Uuid 而不是 UUID**，Usize 而不是 USize，Stdin 而不是 StdIn。
+    对于蛇形命名法，缩略词用全小写：**is_xid_start。**
+    对于蛇形命名法（包括全大写的 SCREAMING_SNAKE_CASE），除了最后一部分，其它部分的词语都**不能由单个字母组成： btree_map 而不是 b_tree_map，PI_2 而不是 PI2.**
+
+  - 特征命名
+    特征的名称应该使用动词，而不是形容词或者名词，例如 Print 和 Draw 明显好于 Printable 和 Drawable。
+  - 类型转换要遵守 `as_，to_，into_` 命名惯例(C-CONV)
+    类型转换应该通过方法调用的方式实现，其中的前缀规则如下：
+
+    - `as_`：表示类型转换，无性能开销，borrowed -> borrowed.
+    - `to_`：表示类型转换，性能开销大，返回一个新的值。
+    - `into_`：表示类型转换，转换本身是零消耗的，ownership 转移，返回一个新的值。
+
+    例子：
+
+    - str::as_bytes() 把 str 变成 UTF-8 字节数组，性能开销是 0。输入是一个借用的 &str，输出也是一个借用的 &str
+    - Path::to_str 会执行一次昂贵的 UTF-8 字节数组检查，输入和输出都是借用的。对于这种情况，如果把方法命名为 as_str 是不正确的，因为这个方法的开销还挺大
+    - str::to_lowercase() 在调用过程中会遍历字符串的字符，且可能会分配新的内存对象。输入是一个借用的 str，输出是一个有独立所有权的 String
+    - String::into_bytes() 返回 String 底层的 Vec<u8> 数组，转换本身是零消耗的。该方法获取 String 的所有权，然后返回一个新的有独立所有权的 Vec<u8>
+    - 当一个单独的值被某个类型所包装时，访问该类型的内部值应通过 `into_inner()`方法来访问
+
+    `如果 mut 限定符在返回类型中出现，那么在命名上也应该体现出来。`
+    例如，Vec::as_mut_slice 就说明它返回了一个 mut 切片，在这种情况下 as_mut_slice 比 as_slice_mut 更适合
+
+    ```rust
+    // 返回类型是一个 `mut` 切片
+    fn as_mut_slice(&mut self) -> &mut [T];
+    ```
+
+  - 读访问器(Getter)的名称遵循 Rust 的命名规范(C-GETTER)
+    除了少数例外，在 Rust 代码中 **get 前缀不用于 Getter**。
+
+    ```rust
+    pub struct S {
+        first: First,
+        second: Second,
+    }
+
+    impl S {
+        // 而不是 get_first
+        pub fn first(&self) -> &First {
+            &self.first
+        }
+
+        // 而不是 get_first_mut，get_mut_first，or mut_first
+        pub fn first_mut(&mut self) -> &mut First {
+            &mut self.first
+        }
+    }
+    ```
+
+    当有且仅有一个值能被 Getter 所获取时，才使用 get 前缀。
+    例如，Cell::get 能直接访问到 Cell 中的内容。
+
+  - 一个集合上的方法，如果返回迭代器，需遵循命名规则：iter，iter_mut，into_iter (C-ITER)
+
+  ```RUST
+  fn iter(&self) -> Iter             // Iter implements Iterator<Item = &U>
+  fn iter_mut(&mut self) -> IterMut  // IterMut implements Iterator<Item = &mut U>
+  fn into_iter(self) -> IntoIter     // IntoIter implements Iterator<Item = U>
+  ```
+
+  - Cargo Feature 的名称不应该包含占位词(C-FEATURE)
+    不要在 Cargo feature 中包含无法传达任何意义的词，例如 use-abc 或 with-abc，直接命名为 abc 即可。
+  - 命名要使用**一致性的词序**(C-WORD-ORDER)
+    这是一些标准库中的错误类型:
+
+    JoinPathsError
+    ParseBoolError
+    ParseCharError
+    ParseFloatError
+    ParseIntError
+    RecvTimeoutError
+    StripPrefixError
+    它们都使用了 **谓语-宾语-错误** 的词序，如果我们想要表达一个网络地址无法分析的错误，由于词序一致性的原则，命名应该如下 ParseAddrError，而不是 AddrParseError。
+    词序和个人习惯有很大关系，想要注意的是，你可以选择合适的词序，**但是要在包的范畴内保持一致性，就如标准库中的包一样**。

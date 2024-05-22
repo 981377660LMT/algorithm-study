@@ -12,7 +12,6 @@
  */
 function boundedKnapsackDp(values: ArrayLike<number>, weights: ArrayLike<number>, counts: ArrayLike<number>, maxCapacity: number): number {
   type Item = { max: number; j: number }
-
   const n = values.length
   const dp = Array(maxCapacity + 1).fill(0)
   const queue = Array<Item>(maxCapacity + 1)
