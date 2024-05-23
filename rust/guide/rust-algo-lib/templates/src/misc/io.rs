@@ -27,6 +27,7 @@ mod scanner {
 }
 // ---------- end scannner ----------
 
+use std::io::Write; // !for writeln!
 pub fn run_with_io(f: impl Fn(&mut scanner::Scanner, &mut std::io::BufWriter<std::io::Stdout>)) {
     use std::io::Read;
     let mut s = String::new();
@@ -39,8 +40,6 @@ pub fn run_with_io(f: impl Fn(&mut scanner::Scanner, &mut std::io::BufWriter<std
 
 #[allow(unused)]
 fn demo() {
-    use std::io::Write; // !for writeln!
-
     run_with_io(|sc, out| {
         let n: usize = sc.next();
         writeln!(out, "{}", n).ok();
