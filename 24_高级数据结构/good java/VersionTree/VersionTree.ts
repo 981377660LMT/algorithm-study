@@ -15,7 +15,7 @@ class TreeNode {
 }
 
 /**
- * @alias OfflinePersistentTree
+ * @alias OfflinePersistentTree 版本树
  */
 class VersionTree {
   private readonly _nodes: TreeNode[]
