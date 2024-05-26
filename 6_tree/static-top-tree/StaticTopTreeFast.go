@@ -9,9 +9,9 @@ import (
 func main() {
 	// demo()
 	// abc351g()
-	// p4719()
+	p4719()
 
-	yosupo()
+	// yosupo()
 }
 
 func demo() {
@@ -73,11 +73,13 @@ func abc351g() {
 	single := func(v int32) Data {
 		return Data{1, nums[v]}
 	}
+	// 向上. x -> x+add
 	rake := func(x, y Data, u, v int32) Data {
 		x.mul = (x.mul * y.add) % MOD
 		x.add = (x.add * y.add) % MOD
 		return x
 	}
+	// 合并两段.
 	compress := func(x, y Data, a, b, c int32) Data {
 		mul1, add1 := x.mul, x.add
 		mul2, add2 := y.mul, y.add
@@ -97,7 +99,7 @@ func abc351g() {
 	}
 }
 
-// TODO
+// !树上最大独立集
 // https://www.luogu.com.cn/problem/P4719
 // P4719 【模板】"动态 DP" & 动态树分治
 //
@@ -105,12 +107,7 @@ func abc351g() {
 // 有 m 次操作，每次操作给定 x,y，表示修改点 x 的权值为y.
 // 你需要在每次操作之后求出这棵树的最大权独立集的权值大小。
 //
-// dp[i][0/1] 表示选/不选这个点.
-// dp[i][0] = sum(max(dp[j][0], dp[j][1])), j 是 i 的儿子.
-// dp[i][1] = sum(dp[j][0]) + w[i], j 是 i 的儿子.
-//
-// !维护簇的两个端点分别选和不选时的答案
-// 对于 base cluster 端点都选答案为 -INF，否则为 0。
+// !与线段树维护最大独立集相同.
 func p4719() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -133,31 +130,41 @@ func p4719() {
 	}
 	tree.Build(0)
 
-	// TODO
-	type Data = struct{ exclude, include int } // 簇的两个端点分别都选和都不选时的答案
+	// top、down 是否选择
+	type Data = struct{ f00, f01, f10, f11 int }
 	single := func(v int32) Data {
-		return Data{exclude: 0, include: -INF}
+		return Data{f11: max(0, weights[v])}
 	}
 	rake := func(x, y Data, u, v int32) Data {
-		x.exclude += max(y.exclude, y.include)
-		x.include += max(0, y.exclude)
-		return x
+		// !注意top端点选择需要相同
+		res := Data{
+			f00: max(x.f00+y.f01, x.f00+y.f00),
+			f01: max(x.f01+y.f01, x.f01+y.f00),
+			f10: max(x.f10+y.f10, x.f10+y.f11),
+			f11: max(x.f11+y.f10, x.f11+y.f11),
+		}
+		return res
 	}
 	compress := func(x, y Data, a, b, c int32) Data {
-		x.exclude += max(y.exclude, y.include)
-		x.include += y.exclude
-		return x
+		res := Data{}
+		res.f00 = max(x.f00+y.f10, x.f01+y.f00)
+		res.f01 = max(x.f00+y.f11, x.f01+y.f01)
+		res.f10 = max(x.f10+y.f10, x.f11+y.f00)
+		res.f11 = max(x.f10+y.f11, x.f11+y.f01)
+		return res
 	}
 
 	dp := NewStaticTopTreeDP[Data](NewStaticTopTree(tree))
+
 	dp.InitDP(single, rake, compress)
 	for i := int32(0); i < q; i++ {
 		var x, y int
 		fmt.Fscan(in, &x, &y)
 		x--
 		weights[x] = y
+
 		newRes := dp.Update(int32(x), single, rake, compress)
-		fmt.Fprintln(out, max(newRes.exclude, newRes.include))
+		fmt.Fprintln(out, newRes.f11)
 	}
 }
 
@@ -165,6 +172,7 @@ func p4719() {
 // https://judge.yosupo.jp/problem/point_set_tree_path_composite_sum_fixed_root
 // 0 p x: 将点 p 的值设为 x
 // 1 ei mul add: 将边 ei 的值设为 (x -> mul * x + add)
+// !边权
 func yosupo() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)

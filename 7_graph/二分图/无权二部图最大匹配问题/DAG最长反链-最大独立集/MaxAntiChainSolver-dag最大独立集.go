@@ -11,8 +11,8 @@ import (
 
 func main() {
 	// abc237ex()
-	P4298祭祀()
-
+	// P4298祭祀()
+	abc354_g()
 }
 
 // P4298 [CTSC2008] 祭祀
@@ -159,11 +159,108 @@ func abc237ex() {
 	fmt.Fprintln(out, len(res))
 }
 
-// TODO: 增加权重
-// dag上的最大带权独立集
+// G - Select Strings(dag上的最大带权独立集)
 // https://atcoder.jp/contests/abc354/tasks/abc354_g
+// 给定n个字符串,每个字符串有一个权值.
+// 从中选出若干字符串,使得选出的字符串互不包含,且权值和最大.
+// n<=100.|s|<=5000.
+func abc354_g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-const INF int = 1e18
+	var n int
+	fmt.Fscan(in, &n)
+	words := make([]string, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &words[i])
+	}
+	scores := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &scores[i])
+	}
+
+	zAlgo := func(s string) []int {
+		n := len(s)
+		if n == 0 {
+			return nil
+		}
+		z := make([]int, n)
+		j := 0
+		for i := 1; i < n; i++ {
+			var k int
+			if j+z[j] <= i {
+				k = 0
+			} else {
+				k = min(j+z[j]-i, z[i-j])
+			}
+			for i+k < n && s[k] == s[i+k] {
+				k++
+			}
+			if j+z[j] < i+z[i] {
+				j = i
+			}
+			z[i] = k
+		}
+		z[0] = n
+		return z
+	}
+
+	// O(n+m)判断`shorter`是否是`longer`的子串.
+	isSubstring := func(longer, shorter string) bool {
+		if len(shorter) > len(longer) {
+			return false
+		}
+		if len(shorter) == 0 {
+			return true
+		}
+		n, m := len(longer), len(shorter)
+		z := zAlgo(shorter + longer)
+		for i := m; i < n+m; i++ {
+			if z[i] >= m {
+				return true
+			}
+		}
+		return false
+	}
+
+	// !去重
+	{
+		mp := make(map[string]int)
+		for i, w := range words {
+			mp[w] = max(mp[w], scores[i])
+		}
+		words = words[:0]
+		scores = scores[:0]
+		for w, s := range mp {
+			words = append(words, w)
+			scores = append(scores, s)
+		}
+		n = len(words)
+	}
+
+	var edges [][2]int
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			if i == j {
+				continue
+			}
+			if isSubstring(words[i], words[j]) {
+				edges = append(edges, [2]int{i, j})
+			}
+		}
+	}
+
+	S := NewMaxAntiChainSolverWithWeights(n, edges, scores)
+	maxAntiChain := S.MaxAntiChain()
+	res := 0
+	for _, v := range maxAntiChain {
+		res += scores[v]
+	}
+	fmt.Fprintln(out, res)
+}
+
+const INF int = 2e18
 
 type MaxAntiChainSolver struct {
 	n            int
@@ -182,6 +279,21 @@ func NewMaxAntiChainSolver(n int, edges [][2]int) *MaxAntiChainSolver {
 	for i := 0; i < n; i++ {
 		mf.AddEdge(source, i+n, 1)
 		mf.AddEdge(i, sink, 1)
+		mf.AddEdge(i, i+n, INF)
+	}
+	return &MaxAntiChainSolver{n: n, source: source, sink: sink, maxFlow: mf}
+}
+
+func NewMaxAntiChainSolverWithWeights(n int, edges [][2]int, weights []int) *MaxAntiChainSolver {
+	source, sink := 2*n, 2*n+1
+	mf := NewMaxFlowAtcoder(2*n + 2)
+	for _, e := range edges {
+		u, v := e[0], e[1]
+		mf.AddEdge(u+n, v, INF)
+	}
+	for i := 0; i < n; i++ {
+		mf.AddEdge(source, i+n, weights[i])
+		mf.AddEdge(i, sink, weights[i])
 		mf.AddEdge(i, i+n, INF)
 	}
 	return &MaxAntiChainSolver{n: n, source: source, sink: sink, maxFlow: mf}
@@ -404,7 +516,14 @@ func (mf *MaxFlowAtcoder) MinCut(s int) (visited []bool) {
 }
 
 func min(a, b int) int {
-	if a <= b {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
 		return a
 	}
 	return b

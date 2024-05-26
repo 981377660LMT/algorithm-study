@@ -73,8 +73,7 @@ func init() {
 }
 
 func main() {
-	abc351g()
-	// P4719_bruteforce()
+	// abc351g()
 }
 
 // [ABC351G] Hash on Tree (DynamicTreeHash，动态树哈希)
@@ -143,73 +142,6 @@ func abc351g() {
 		nums[v] = x
 		newRes := dp.Update(int32(v))
 		fmt.Fprintln(out, newRes.add)
-	}
-}
-
-func P4719_bruteforce() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	const INF int = 1e18
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	weights := make([]int, n)
-	for i := range weights {
-		fmt.Fscan(in, &weights[i])
-	}
-	tree := make([][]int32, n)
-	for i := int32(0); i < n-1; i++ {
-		var u, v int32
-		fmt.Fscan(in, &u, &v)
-		u, v = u-1, v-1
-		tree[u] = append(tree[u], v)
-		tree[v] = append(tree[v], u)
-	}
-
-	dp0, dp1 := make([]int, n), make([]int, n)
-	parent := make([]int32, n)
-	for i := int32(0); i < n; i++ {
-		parent[i] = -1
-	}
-
-	var dfs func(cur, pre int32)
-	dfs = func(cur, pre int32) {
-		dp0[cur], dp1[cur] = 0, weights[cur]
-		parent[cur] = pre
-		for _, next := range tree[cur] {
-			if next == pre {
-				continue
-			}
-			dfs(next, cur)
-			dp0[cur] += max(dp1[next], dp0[next])
-			dp1[cur] += dp0[next]
-		}
-	}
-	dfs(0, -1)
-
-	update := func(v int32) {
-		// 重算所有祖先
-		for ; v != -1; v = parent[v] {
-			dp0[v], dp1[v] = 0, weights[v]
-			for _, next := range tree[v] {
-				if next == parent[v] {
-					continue
-				}
-				dp0[v] += max(dp1[next], dp0[next])
-				dp1[v] += dp0[next]
-			}
-		}
-	}
-
-	for i := int32(0); i < q; i++ {
-		var x, y int
-		fmt.Fscan(in, &x, &y)
-		x--
-		weights[x] = y
-		update(int32(x))
-		fmt.Fprintln(out, max(dp0[0], dp1[0]))
 	}
 }
 

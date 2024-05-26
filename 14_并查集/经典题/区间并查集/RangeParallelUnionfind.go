@@ -13,8 +13,9 @@ import (
 )
 
 func main() {
-	P3295()
+	// P3295()
 	// atc2018()
+	abc349_g()
 }
 
 func demo() {
@@ -25,6 +26,7 @@ func demo() {
 	})
 }
 
+// 萌萌哒
 // https://www.luogu.com.cn/problem/P3295
 // 给定一个长度为n的大数，每个大数元素为0到9之间的整数(注意不能有前导零)。
 // 再给定一些约束条件，形如[start1,end1,start2,end2]，表示[start1,end1)区间内的数和[start2,end2)区间内的数相等。
@@ -100,6 +102,81 @@ func atc2018() {
 		}
 	}
 	fmt.Fprintln(out, "Yes")
+}
+
+// G - Palindrome Construction (并查集)
+// https://atcoder.jp/contests/abc349/tasks/abc349_g
+// 给定一个数组A[i], A[i]表示以位置i为中心的极长回文串的半径(奇数长度回文).
+// 求出满足条件的字典序最小的正整数序列.如果不存在输出No.
+// https://atcoder.jp/contests/abc349/submissions/52345482
+//
+// !类似后缀数组解决最长回文串问题，将字符串反串添加在后面.
+// !回文关系转化为区间相等关系.
+func abc349_g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	nums := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	rangeUf := NewUnionFindRangeParallel(n * 2)
+	for i := int32(0); i < n; i++ {
+		l, r := i-nums[i], i+nums[i]
+		rangeUf.UnionParallelly(l, n+(n-1-r), 2*nums[i]+1) // !必须相等
+	}
+	uf := rangeUf.Build(nil)
+
+	groups := make([][]int32, n)
+	for i := int32(0); i < n; i++ {
+		root := uf.Find(i)
+		groups[root] = append(groups[root], i)
+	}
+	notSame := make([][]int32, n)
+	for i := int32(0); i < n; i++ {
+		l, r := i-nums[i]-1, i+nums[i]+1 // !不能相等
+		if 0 <= l && r < n {
+			root1, root2 := uf.Find(l), uf.Find(r)
+			if root1 == root2 {
+				fmt.Println("No")
+				return
+			}
+			notSame[root1] = append(notSame[root1], root2)
+			notSame[root2] = append(notSame[root2], root1)
+		}
+	}
+
+	res := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		if res[i] != 0 {
+			continue
+		}
+
+		root := uf.Find(i)
+		ng := make(map[int32]struct{})
+		for _, v := range notSame[root] {
+			if res[v] != 0 {
+				ng[res[v]] = struct{}{}
+			}
+		}
+		for v := int32(1); ; v++ {
+			if _, ok := ng[v]; !ok {
+				for _, u := range groups[root] {
+					res[u] = v
+				}
+				break
+			}
+		}
+	}
+
+	fmt.Println("Yes")
+	for _, v := range res {
+		fmt.Fprint(out, v, " ")
+	}
 }
 
 // 并行合并的并查集.
@@ -181,7 +258,9 @@ func (uf *_unionFindRange) Union(x, y int32, f func(big, small int32)) bool {
 	uf.parent[rootX] = rootY
 	uf.rank[rootY] += uf.rank[rootX]
 	uf.Part--
-	f(rootY, rootX)
+	if f != nil {
+		f(rootY, rootX)
+	}
 	return true
 }
 

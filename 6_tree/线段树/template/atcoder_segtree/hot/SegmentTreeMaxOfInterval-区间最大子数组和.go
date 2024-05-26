@@ -1,7 +1,7 @@
-// MaxInterval
+// MaxInterval/SegmentTreeMaxOfInterval/RangeMaxSubSum
 // 最大子段和/最大子数组和
 // 最小子段和/最小子数组和
-// 小白逛公园 : 动态子段和
+// 小白逛公园 : 动态子段和/区间最大子段和
 
 package main
 
@@ -78,14 +78,14 @@ func maximumSegmentSum(nums []int, removeQueries []int) []int64 {
 
 // 区间前缀和/区间后缀和.
 type Interval struct {
-	sum  int // 区间和
-	len  int // 区间长度
-	max  int // !连续子数组和的最大值(非空区间)
-	lmax int // !前缀和的最大值
-	rmax int // !后缀和的最大值
-	min  int // !连续子数组和的最小值(非空区间)
-	lmin int // !前缀和的最小值
-	rmin int // !后缀和的最小值
+	sum  int   // 区间和
+	len  int32 // 区间长度
+	max  int   // !连续子数组和的最大值(非空区间)
+	lmax int   // !前缀和的最大值
+	rmax int   // !后缀和的最大值
+	min  int   // !连续子数组和的最小值(非空区间)
+	lmin int   // !前缀和的最小值
+	rmin int   // !后缀和的最小值
 }
 
 // 建立长度为1, 值为value的区间.
@@ -118,7 +118,7 @@ func FromElementWithLength(value int, length int) Interval {
 		tmp2 *= length
 	}
 	return Interval{
-		sum: sum, len: length,
+		sum: sum, len: int32(length),
 		max: tmp1, lmax: tmp1, rmax: tmp1,
 		min: tmp2, lmin: tmp2, rmin: tmp2,
 	}

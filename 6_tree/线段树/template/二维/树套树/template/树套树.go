@@ -3,7 +3,6 @@
 package main
 
 func main() {
-
 }
 
 type InnerTree = struct{}

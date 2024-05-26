@@ -1,4 +1,5 @@
 // SegmentTreeLongestOne-区间最长连续1
+// LongestContinuousOnesInSegment
 
 package main
 
@@ -23,9 +24,9 @@ func main() {
 type V = int
 
 type E = struct {
-	size                       int
-	preOne, sufOne, longestOne int // 前缀1的个数, 后缀1的个数, 最长1的个数
-	leftV, rightV              V   // 左端点值, 右端点值
+	size                       int32
+	preOne, sufOne, longestOne int32 // 前缀1的个数, 后缀1的个数, 最长1的个数
+	leftV, rightV              V     // 左端点值, 右端点值
 
 	// !TODO
 	pairCount int // 区间内所有极长连续1段的贡献和 sum(len_i*(len_i+1)/2)
@@ -59,16 +60,16 @@ func (*SegmentTreeLongestOne) op(a, b E) E {
 		if b.sufOne == b.size {
 			res.sufOne += a.sufOne
 		}
-		res.longestOne = max(max(a.longestOne, b.longestOne), a.sufOne+b.preOne)
+		res.longestOne = max32(max32(a.longestOne, b.longestOne), a.sufOne+b.preOne)
 
 		// !TODO
-		n1, n2 := a.sufOne, b.preOne
-		n3 := n1 + n2
+		n1, n2 := int(a.sufOne), int(b.preOne)
+		n3 := int(n1 + n2)
 		res.pairCount = a.pairCount + b.pairCount + n3*(n3+1)/2 - n1*(n1+1)/2 - n2*(n2+1)/2
 	} else {
 		res.preOne = a.preOne
 		res.sufOne = b.sufOne
-		res.longestOne = max(a.longestOne, b.longestOne)
+		res.longestOne = max32(a.longestOne, b.longestOne)
 
 		// !TODO
 		res.pairCount = a.pairCount + b.pairCount
@@ -243,6 +244,20 @@ func min(a, b int) int {
 
 func max(a, b int) int {
 	if a > b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
 		return a
 	}
 	return b

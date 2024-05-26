@@ -68,6 +68,5 @@
   "python.formatting.provider": "black",
   "code-runner.executorMap": {
     "typescript": "ts-node-dev --respawn --transpile-only"
-  },
-  "commentTranslate.multiLineMerge": true
+  }
 }

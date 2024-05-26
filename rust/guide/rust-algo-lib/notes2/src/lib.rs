@@ -1,5 +1,6 @@
 use std::time::Instant;
 
+mod lc;
 mod lib2;
 mod std_test;
 mod test_traits;

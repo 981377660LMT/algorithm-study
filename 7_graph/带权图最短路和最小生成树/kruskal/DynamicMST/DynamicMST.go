@@ -1,4 +1,5 @@
 // 动态最小生成树.
+// https://www.luogu.com.cn/article/xe7hqlw3
 // Api:
 // 1. NewDynamicMST(n int) *DynamicMST
 // 2. (mst *DynamicMST) AddEdge(aId, bId int32, weight int)
@@ -19,12 +20,13 @@ func init() {
 	debug.SetGCPercent(-1)
 }
 
-func demo() {
+func main() {
 	mst := NewDynamicMST(5)
 	mst.AddEdge(0, 1, 1)
 	mst.AddEdge(1, 2, 2)
 	mst.AddEdge(2, 3, 3)
 	mst.AddEdge(3, 4, 4)
+	mst.AddEdge(3, 4, 0)
 	mst.AddEdge(0, 4, 0)
 	fmt.Println(mst.GetTotalWeight())  // 6
 	fmt.Println(mst.GetEdgeNum())      // 4
