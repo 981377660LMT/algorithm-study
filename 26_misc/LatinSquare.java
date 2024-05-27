@@ -82,7 +82,7 @@ public class LatinSquare {
         if (type == 0) {
             table = jv;
             //jv
-            inv = cast[0].index() == 1 ? 0 : 1;
+            inv = cast[0].index() == 0 ? 0 : 1;
         } else if (type == 1) {
             table = iv;
             //iv
