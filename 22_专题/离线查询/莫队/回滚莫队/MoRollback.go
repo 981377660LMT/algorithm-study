@@ -20,7 +20,7 @@ func main() {
 
 const INF int = 1e9 + 10
 
-// 区间最近值问题
+// 区间最近值问题(区间绝对值最小)
 func SolveCf765F(nums []int, queries [][]int) []int {
 	n, q := len(nums), len(queries)
 	S := NewFastSet(n)

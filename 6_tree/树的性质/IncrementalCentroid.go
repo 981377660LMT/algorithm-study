@@ -638,6 +638,23 @@ func _newFastSet(n int) *_fastSet {
 	return res
 }
 
+func _NewFastSetFrom(n int, f func(i int) bool) *_fastSet {
+	res := _newFastSet(n)
+	for i := 0; i < n; i++ {
+		if f(i) {
+			res.seg[0][i>>6] |= 1 << (i & 63)
+		}
+	}
+	for h := 0; h < res.lg-1; h++ {
+		for i := 0; i < len(res.seg[h]); i++ {
+			if res.seg[h][i] != 0 {
+				res.seg[h+1][i>>6] |= 1 << (i & 63)
+			}
+		}
+	}
+	return res
+}
+
 func (fs *_fastSet) Has(i int) bool {
 	return (fs.seg[0][i>>6]>>uint((i&63)))&1 != 0
 }
