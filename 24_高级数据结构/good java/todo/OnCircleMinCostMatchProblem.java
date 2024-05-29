@@ -45,23 +45,23 @@ public class OnCircleMinCostMatchProblem {
             throw new IllegalArgumentException();
         }
 
-        int n = people.length;
-        problem = new CandyAssignProblem(c, n * 2);
-        peopleMap = new LongObjectHashMap<>(n, false);
-        houseMap = new LongObjectHashMap<>(n, false);
-        matching = new int[n];
-        pending = new IntegerArrayList(n);
+        int m = people.length;
+        problem = new CandyAssignProblem(c, m * 2);
+        peopleMap = new LongObjectHashMap<>(m, false);
+        houseMap = new LongObjectHashMap<>(m, false);
+        matching = new int[m];
+        pending = new IntegerArrayList(m);
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < m; i++) {
             getIntegerList(peopleMap, people[i]).add(i);
             getIntegerList(houseMap, houses[i]).add(i);
         }
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < m; i++) {
             problem.assignCandyOn(people[i], 1);
         }
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < m; i++) {
             problem.requireCandyOn(houses[i], 1);
         }
 
@@ -100,7 +100,7 @@ public class OnCircleMinCostMatchProblem {
             }
             buildMatching((i + 1) % problem.candieCnt);
         }
-
+        
         int last = DigitUtils.mod(i - 1, problem.candieCnt);
         if (problem.candies[last].a < 0) {
             while (pending.size() < -problem.candies[last].a) {

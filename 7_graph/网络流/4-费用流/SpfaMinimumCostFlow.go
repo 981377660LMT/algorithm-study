@@ -1,6 +1,39 @@
 package main
 
+import "fmt"
+
 const INF int = 2e18
+
+func main() {
+	// nums1 = [1,2], nums2 = [2,3]
+	fmt.Println(minimumXORSum([]int{1, 2}, []int{2, 3})) // 2
+}
+
+// 1879. 两个数组最小的异或值之和
+// https://leetcode.cn/problems/minimum-xor-sum-of-two-arrays/description/
+func minimumXORSum(nums1 []int, nums2 []int) int {
+	n := int32(len(nums1))
+	START, END := 2*n+1, 2*n+2
+	graph := make([][]*CostFlowEdge, END+1)
+	addEdge := func(from, to int32, flow, cost int) {
+		e1 := NewCostFlowEdge(to, 0, true, cost)
+		e2 := NewCostFlowEdge(from, flow, false, -cost)
+		e1.rev = e2
+		e2.rev = e1
+		graph[from] = append(graph[from], e1)
+		graph[to] = append(graph[to], e2)
+	}
+	for i := int32(0); i < n; i++ {
+		addEdge(START, i, 1, 0)
+		addEdge(i+n, END, 1, 0)
+		for j := int32(0); j < n; j++ {
+			addEdge(i, j+n, 1, nums1[i]^nums2[j])
+		}
+	}
+	mcmf := NewSpfaMinimumCostFlow()
+	_, cost := mcmf.Apply(graph, START, END, INF)
+	return cost
+}
 
 type SpfaMinimumCostFlow struct {
 	queue    []int32
@@ -8,14 +41,14 @@ type SpfaMinimumCostFlow struct {
 	inque    []bool
 	prev     []*CostFlowEdge
 	net      [][]*CostFlowEdge
-	callback func(int, int) bool
+	callback func(flow, cost int) (keep bool)
 }
 
 func NewSpfaMinimumCostFlow() *SpfaMinimumCostFlow {
 	return &SpfaMinimumCostFlow{}
 }
 
-func (mcf *SpfaMinimumCostFlow) SetCallback(callback func(flow, cost int) bool) {
+func (mcf *SpfaMinimumCostFlow) SetCallback(callback func(flow, cost int) (keep bool)) {
 	mcf.callback = callback
 }
 
