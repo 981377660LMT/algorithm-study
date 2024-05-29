@@ -202,7 +202,8 @@ func SubsetSumTarget(nums []int, target int) (solution []int, ok bool) {
 	return SubsetSumTargetDp5(nums, target)
 }
 
-// 能否用nums中的若干个数凑出和为target.
+// 能否用nums中的若干个数凑出和为target(KnapsackProblemWithBoundedWeights).
+// "Linear Time Algorithms for Knapsack Problems with Bounded Weights" by David Pisinger
 //
 //	O(n*max(nums)))
 func SubsetSumTargetDp1(nums []int, target int) (solution []int, ok bool) {

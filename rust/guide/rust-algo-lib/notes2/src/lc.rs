@@ -86,4 +86,6 @@ impl Solution {
 
         (res % 1_000_000_007) as i32
     }
+
+    fn bar(args: &[String]) {}
 }

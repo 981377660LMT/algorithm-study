@@ -53,8 +53,8 @@ func (b *Buffer[T]) Alloc() T {
 		b.cleaner(res)
 		return res
 	} else {
-		res := b.recycles[0]
-		b.recycles = b.recycles[1:]
+		res := b.recycles[len(b.recycles)-1]
+		b.recycles = b.recycles[:len(b.recycles)-1]
 		return res
 	}
 }

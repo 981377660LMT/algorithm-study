@@ -8,7 +8,16 @@ import "sort"
 func main() {
 	groups := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
 	ks := NewKthSmallestGroupSum(groups...)
-	ks.FirstKthSmallestSet(5, func(sum int) { println(sum) })
+	ks.FirstKthSmallestSum(5, func(sum int) { println(sum) })
+}
+
+// 1439. 有序矩阵中的第 k 个最小数组和
+// https://leetcode.cn/problems/find-the-kth-smallest-sum-of-a-matrix-with-sorted-rows/description/
+func kthSmallest(mat [][]int, k int) int {
+	S := NewKthSmallestGroupSum(mat...)
+	var res int
+	S.FirstKthSmallestSum(int32(k), func(sum int) { res = sum })
+	return res
 }
 
 type KthSmallestGroupSum struct {
@@ -17,6 +26,7 @@ type KthSmallestGroupSum struct {
 	sum    int
 }
 
+// !内部会对groups进行排序.
 func NewKthSmallestGroupSum(groups ...[]int) *KthSmallestGroupSum {
 	res := &KthSmallestGroupSum{groups: groups}
 	sort.Slice(res.groups, func(i, j int) bool { return len(res.groups[i]) < len(res.groups[j]) })
@@ -37,7 +47,7 @@ func NewKthSmallestGroupSum(groups ...[]int) *KthSmallestGroupSum {
 }
 
 // k>=1.
-func (ks *KthSmallestGroupSum) FirstKthSmallestSet(k int32, consumer func(sum int)) {
+func (ks *KthSmallestGroupSum) FirstKthSmallestSum(k int32, consumer func(sum int)) {
 	if ks.start == int32(len(ks.groups)) {
 		consumer(ks.sum)
 		return
