@@ -1,16 +1,55 @@
 // Dynamic Shortest Path
-// 动态最短路，带修改的无向图最短路/带修改的最短路问题
+// 指定起点终点的动态最短路，带修改的无向图最短路/带修改的最短路问题
 
 package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
+	stdio "io"
+	"math/bits"
+	"math/rand"
 	"os"
+	"sort"
+	"strconv"
+	"time"
 )
 
+var io *Iost
+
+type Iost struct {
+	Scanner *bufio.Scanner
+	Writer  *bufio.Writer
+}
+
+func NewIost(fp stdio.Reader, wfp stdio.Writer) *Iost {
+	const BufSize = 2000005
+	scanner := bufio.NewScanner(fp)
+	scanner.Split(bufio.ScanWords)
+	scanner.Buffer(make([]byte, BufSize), BufSize)
+	return &Iost{Scanner: scanner, Writer: bufio.NewWriter(wfp)}
+}
+func (io *Iost) Text() string {
+	if !io.Scanner.Scan() {
+		panic("scan failed")
+	}
+	return io.Scanner.Text()
+}
+func (io *Iost) Atoi(s string) int                 { x, _ := strconv.Atoi(s); return x }
+func (io *Iost) Atoi64(s string) int64             { x, _ := strconv.ParseInt(s, 10, 64); return x }
+func (io *Iost) Atof64(s string) float64           { x, _ := strconv.ParseFloat(s, 64); return x }
+func (io *Iost) NextInt() int                      { return io.Atoi(io.Text()) }
+func (io *Iost) NextInt64() int64                  { return io.Atoi64(io.Text()) }
+func (io *Iost) NextFloat64() float64              { return io.Atof64(io.Text()) }
+func (io *Iost) Print(x ...interface{})            { fmt.Fprint(io.Writer, x...) }
+func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x...) }
+func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
+
 func main() {
-	CF843D()
+	// CF843D()
+	CF1163F()
+	// demo()
 }
 
 // DynamicShortestPath
@@ -19,13 +58,54 @@ func main() {
 // 2 m e1...em: e1到em边的权值+1
 // n,m<=1e5,q<=1e3
 func CF843D() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+}
 
-	var n, m, q int32
-	fmt.Fscan(in, &n, &m, &q)
+// Indecisive Taxi Fee
+// https://www.luogu.com.cn/problem/CF1163F
+// 给定n个顶点m条无向带权边构成的连通图，指定起点和终点。
+// 之后q个请求，第i请求询问，假如修改编号为ei的边的权重为wi，
+// 要求回答起点到终点的最短距离（注意每个请求不会对之后的请求产生影响）。
+// 其中1≤n,m,q≤106，且每条边的权重为1到1e9之间
+func CF1163F() {
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
+
+	n, m, q := int32(io.NextInt()), int32(io.NextInt()), int32(io.NextInt())
 	sp := NewUndirectedModifiableShortestPath(n, m, 0, n-1)
+	for i := int32(0); i < m; i++ {
+		u, v, w := int32(io.NextInt()), int32(io.NextInt()), int32(io.NextInt())
+		u, v = u-1, v-1
+		sp.AddEdge(u, v, int(w))
+	}
+	for i := int32(0); i < q; i++ {
+		ei, w := int32(io.NextInt()), int32(io.NextInt())
+		ei--
+		io.Println(sp.QueryOnModifyEdge(ei, int(w)))
+	}
+}
+
+func demo() {
+	n := int32(2e5)
+	m := int32(2e5)
+	time1 := time.Now()
+	S := NewUndirectedModifiableShortestPath(n, m, 0, n-1)
+	for i := int32(0); i < m; i++ {
+		S.AddEdge(int32(rand.Intn(int(n))), int32(rand.Intn(int(n))), rand.Intn(1000000000)+1)
+	}
+	for i := int32(0); i < m; i++ {
+		S.QueryOnModifyEdge(m-i-1, rand.Intn(1000000000)+1)
+	}
+	fmt.Println(time.Since(time1))
 }
 
 const INF int = 2e18
@@ -33,7 +113,7 @@ const INF32 int32 = 1e9 + 10
 
 type UndirectedModifiableShortestPath struct {
 	curTag   int32
-	seg      *segment
+	seg      *segmentTreeDual32
 	nodes    []*node
 	edges    []*edge
 	src      *node
@@ -69,6 +149,7 @@ func (sp *UndirectedModifiableShortestPath) AddEdge(u, v int32, cost int) {
 }
 
 func (sp *UndirectedModifiableShortestPath) MinDist() int {
+	sp.prepare()
 	return sp.dst.distToSrc
 }
 
@@ -90,7 +171,7 @@ func (sp *UndirectedModifiableShortestPath) QueryOnModifyEdge(i int32, cost int)
 	if e.tag == -1 {
 		res = min(res, sp.dst.distToSrc)
 	} else {
-		val := sp.seg.Query(e.tag, e.tag, 1, sp.curTag)
+		val := sp.seg.Get(e.tag)
 		res = min(res, val)
 	}
 	return res
@@ -105,7 +186,7 @@ func (sp *UndirectedModifiableShortestPath) update(a, b *node, w int) {
 	dist := a.distToSrc + b.distToDst + w
 	l := sp.prev(a)
 	r := sp.post(b)
-	sp.seg.Update(l+1, r-1, 1, sp.curTag, dist)
+	sp.seg.Update(l+1, r, dist)
 }
 
 func (sp *UndirectedModifiableShortestPath) post(root *node) int32 {
@@ -150,7 +231,7 @@ func (sp *UndirectedModifiableShortestPath) prepare() {
 	}
 	sp.prepared = true
 
-	pq := newErasableHeapGeneric(func(a, b *node) bool {
+	pq := newSortedList32(func(a, b S) bool {
 		if a.distToSrc == b.distToSrc {
 			return a.id < b.id
 		}
@@ -158,35 +239,35 @@ func (sp *UndirectedModifiableShortestPath) prepare() {
 	})
 
 	sp.src.distToSrc = 0
-	pq.Push(sp.src)
+	pq.Add(sp.src)
 	for pq.Len() > 0 {
-		head := pq.Pop()
+		head := pq._popFirst()
 		for _, e := range head.adj {
 			node := e.Other(head)
 			if tmp := head.distToSrc + e.w; node.distToSrc > tmp {
-				pq.Erase(node)
+				pq.Discard(node)
 				node.distToSrc = tmp
-				pq.Push(node)
+				pq.Add(node)
 			}
 		}
 	}
 
 	sp.dst.distToDst = 0
-	pq = newErasableHeapGeneric(func(a, b *node) bool {
+	pq = newSortedList32(func(a, b S) bool {
 		if a.distToDst == b.distToDst {
 			return a.id < b.id
 		}
 		return a.distToDst < b.distToDst
 	})
-	pq.Push(sp.dst)
+	pq.Add(sp.dst)
 	for pq.Len() > 0 {
-		head := pq.Pop()
+		head := pq._popFirst()
 		for _, e := range head.adj {
 			node := e.Other(head)
 			if tmp := head.distToDst + e.w; node.distToDst > tmp {
-				pq.Erase(node)
+				pq.Discard(node)
 				node.distToDst = tmp
-				pq.Push(node)
+				pq.Add(node)
 			}
 		}
 	}
@@ -200,12 +281,15 @@ func (sp *UndirectedModifiableShortestPath) prepare() {
 				break
 			}
 		}
+		if next == nil {
+			return
+		}
 		sp.curTag++
 		next.tag = sp.curTag
 		trace = next.Other(trace)
 	}
 
-	sp.seg = newSegment(1, sp.curTag)
+	sp.seg = newSegmentTreeDual32(sp.curTag + 1)
 	for _, e := range sp.edges {
 		if e.tag != -1 {
 			continue
@@ -243,200 +327,402 @@ func newNode() *node {
 	return &node{l: -INF32, r: -INF32}
 }
 
-type segment struct {
-	left, right *segment
-	min         int
+// RangeChminPointGet
+
+type Id = int
+
+const COMMUTATIVE = true
+
+func (*segmentTreeDual32) id() Id                 { return INF }
+func (*segmentTreeDual32) composition(f, g Id) Id { return min(f, g) }
+
+type segmentTreeDual32 struct {
+	n            int32
+	size, height int32
+	lazy         []Id
+	unit         Id
 }
 
-func newSegment(l, r int32) *segment {
-	if l < r {
-		m := (l + r) >> 1
-		res := &segment{left: newSegment(l, m), right: newSegment(m+1, r), min: INF}
-		res.pushUp()
-		return res
+func newSegmentTreeDual32(n int32) *segmentTreeDual32 {
+	res := &segmentTreeDual32{}
+	size := int32(1)
+	height := int32(0)
+	for size < n {
+		size <<= 1
+		height++
 	}
-	return &segment{min: INF}
+	lazy := make([]Id, 2*size)
+	unit := res.id()
+	for i := int32(0); i < 2*size; i++ {
+		lazy[i] = unit
+	}
+	res.n = n
+	res.size = size
+	res.height = height
+	res.lazy = lazy
+	res.unit = unit
+	return res
 }
-
-func (s *segment) modify(x int) {
-	s.min = min(s.min, x)
+func (seg *segmentTreeDual32) Get(index int32) Id {
+	index += seg.size
+	for i := seg.height; i > 0; i-- {
+		seg.propagate(index >> i)
+	}
+	return seg.lazy[index]
 }
-
-func (s *segment) pushUp() {}
-
-func (s *segment) pushDown() {
-	s.left.modify(s.min)
-	s.right.modify(s.min)
-	s.min = INF
+func (seg *segmentTreeDual32) GetAll() []Id {
+	for i := int32(0); i < seg.size; i++ {
+		seg.propagate(i)
+	}
+	res := make([]Id, seg.n)
+	copy(res, seg.lazy[seg.size:seg.size+seg.n])
+	return res
 }
-
-func (s *segment) covered(ll, rr, l, r int32) bool {
-	return ll <= l && rr >= r
-}
-
-func (s *segment) noIntersection(ll, rr, l, r int32) bool {
-	return ll > r || rr < l
-}
-
-func (s *segment) Update(ll, rr, l, r int32, x int) {
-	if s.noIntersection(ll, rr, l, r) {
+func (seg *segmentTreeDual32) Update(left, right int32, value Id) {
+	if left < 0 {
+		left = 0
+	}
+	if right > seg.n {
+		right = seg.n
+	}
+	if left >= right {
 		return
 	}
-	if s.covered(ll, rr, l, r) {
-		s.modify(x)
+	left += seg.size
+	right += seg.size
+	if !COMMUTATIVE {
+		for i := seg.height; i > 0; i-- {
+			if (left>>i)<<i != left {
+				seg.propagate(left >> i)
+			}
+			if (right>>i)<<i != right {
+				seg.propagate((right - 1) >> i)
+			}
+		}
+	}
+	for left < right {
+		if left&1 > 0 {
+			seg.lazy[left] = seg.composition(value, seg.lazy[left])
+			left++
+		}
+		if right&1 > 0 {
+			right--
+			seg.lazy[right] = seg.composition(value, seg.lazy[right])
+		}
+		left >>= 1
+		right >>= 1
+	}
+}
+func (seg *segmentTreeDual32) propagate(k int32) {
+	if seg.lazy[k] != seg.unit {
+		seg.lazy[k<<1] = seg.composition(seg.lazy[k], seg.lazy[k<<1])
+		seg.lazy[k<<1|1] = seg.composition(seg.lazy[k], seg.lazy[k<<1|1])
+		seg.lazy[k] = seg.unit
+	}
+}
+func (st *segmentTreeDual32) String() string {
+	var buf bytes.Buffer
+	buf.WriteByte('[')
+	for i := int32(0); i < st.n; i++ {
+		if i > 0 {
+			buf.WriteByte(' ')
+		}
+		buf.WriteString(fmt.Sprint(st.Get(i)))
+	}
+	buf.WriteByte(']')
+	return buf.String()
+}
+
+// 1e5 -> 200, 2e5 -> 400
+const _LOAD int32 = 200
+
+type S = *node
+
+var EMPTY S
+
+// 使用分块+树状数组维护的有序序列.
+type sortedList32 struct {
+	less              func(a, b S) bool
+	size              int32
+	blocks            [][]S
+	mins              []S
+	tree              []int32
+	shouldRebuildTree bool
+}
+
+func newSortedList32(less func(a, b S) bool, elements ...S) *sortedList32 {
+	elements = append(elements[:0:0], elements...)
+	res := &sortedList32{less: less}
+	sort.Slice(elements, func(i, j int) bool { return less(elements[i], elements[j]) })
+	n := int32(len(elements))
+	blocks := [][]S{}
+	for start := int32(0); start < n; start += _LOAD {
+		end := min32(start+_LOAD, n)
+		blocks = append(blocks, elements[start:end:end]) // !各个块互不影响, max参数也需要指定为end
+	}
+	mins := make([]S, len(blocks))
+	for i, cur := range blocks {
+		mins[i] = cur[0]
+	}
+	res.size = n
+	res.blocks = blocks
+	res.mins = mins
+	res.shouldRebuildTree = true
+	return res
+}
+
+func (sl *sortedList32) Add(value S) *sortedList32 {
+	sl.size++
+	if len(sl.blocks) == 0 {
+		sl.blocks = append(sl.blocks, []S{value})
+		sl.mins = append(sl.mins, value)
+		sl.shouldRebuildTree = true
+		return sl
+	}
+
+	pos, index := sl._locRight(value)
+
+	sl._updateTree(pos, 1)
+	sl.blocks[pos] = append(sl.blocks[pos][:index], append([]S{value}, sl.blocks[pos][index:]...)...)
+	sl.mins[pos] = sl.blocks[pos][0]
+
+	// n -> load + (n - load)
+	if n := int32(len(sl.blocks[pos])); _LOAD+_LOAD < n {
+		sl.blocks = append(sl.blocks, nil)
+		copy(sl.blocks[pos+2:], sl.blocks[pos+1:])
+		sl.blocks[pos+1] = sl.blocks[pos][_LOAD:]
+		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD]
+		sl.mins = append(sl.mins, EMPTY)
+		copy(sl.mins[pos+2:], sl.mins[pos+1:])
+		sl.mins[pos+1] = sl.blocks[pos+1][0]
+		sl.shouldRebuildTree = true
+	}
+
+	return sl
+}
+
+func (sl *sortedList32) Discard(value S) bool {
+	if len(sl.blocks) == 0 {
+		return false
+	}
+	pos, index := sl._locRight(value)
+	if index > 0 && sl.blocks[pos][index-1] == value {
+		sl._delete(pos, index-1)
+		return true
+	}
+	return false
+}
+
+func (sl *sortedList32) Clear() {
+	sl.size = 0
+	sl.blocks = sl.blocks[:0]
+	sl.mins = sl.mins[:0]
+	sl.tree = sl.tree[:0]
+	sl.shouldRebuildTree = true
+}
+
+func (sl *sortedList32) Range(min, max S) []S {
+	if sl.less(max, min) {
+		return nil
+	}
+	res := []S{}
+	pos := sl._locBlock(min)
+	m := int32(len(sl.blocks))
+	for i := pos; i < m; i++ {
+		block := sl.blocks[i]
+		for j := 0; j < len(block); j++ {
+			x := block[j]
+			if sl.less(max, x) {
+				return res
+			}
+			if !sl.less(x, min) {
+				res = append(res, x)
+			}
+		}
+	}
+	return res
+}
+
+func (sl *sortedList32) Len() int32 {
+	return sl.size
+}
+
+func (sl *sortedList32) _delete(pos, index int32) {
+	// !delete element
+	sl.size--
+	sl._updateTree(pos, -1)
+	copy(sl.blocks[pos][index:], sl.blocks[pos][index+1:])
+	sl.blocks[pos] = sl.blocks[pos][:len(sl.blocks[pos])-1]
+	if len(sl.blocks[pos]) > 0 {
+		sl.mins[pos] = sl.blocks[pos][0]
 		return
 	}
-	s.pushDown()
-	m := (l + r) >> 1
-	s.left.Update(ll, rr, l, m, x)
-	s.right.Update(ll, rr, m+1, r, x)
-	s.pushUp()
+
+	// !delete block
+	copy(sl.blocks[pos:], sl.blocks[pos+1:])
+	sl.blocks = sl.blocks[:len(sl.blocks)-1]
+	copy(sl.mins[pos:], sl.mins[pos+1:])
+	sl.mins = sl.mins[:len(sl.mins)-1]
+	sl.shouldRebuildTree = true
 }
 
-func (s *segment) Query(ll, rr, l, r int32) int {
-	if s.noIntersection(ll, rr, l, r) {
-		return INF
-	}
-	if s.covered(ll, rr, l, r) {
-		return s.min
-	}
-	s.pushDown()
-	m := (l + r) >> 1
-	return min(s.left.Query(ll, rr, l, m), s.right.Query(ll, rr, m+1, r))
-}
-
-type erasableHeapGeneric[H comparable] struct {
-	data   *heapGeneric[H]
-	erased *heapGeneric[H]
-	size   int32
-}
-
-func newErasableHeapGeneric[H comparable](less func(a, b H) bool, nums ...H) *erasableHeapGeneric[H] {
-	return &erasableHeapGeneric[H]{newHeapGeneric(less, nums...), newHeapGeneric(less), int32(len(nums))}
-}
-
-// 从堆中删除一个元素,要保证堆中存在该元素.
-func (h *erasableHeapGeneric[H]) Erase(value H) {
-	h.erased.Push(value)
-	h.normalize()
-	h.size--
-}
-
-func (h *erasableHeapGeneric[H]) Push(value H) {
-	h.data.Push(value)
-	h.normalize()
-	h.size++
-}
-
-func (h *erasableHeapGeneric[H]) Pop() (value H) {
-	value = h.data.Pop()
-	h.normalize()
-	h.size--
-	return
-}
-
-func (h *erasableHeapGeneric[H]) Peek() (value H) {
-	value = h.data.Top()
-	return
-}
-
-func (h *erasableHeapGeneric[H]) Len() int32 {
-	return h.size
-}
-
-func (h *erasableHeapGeneric[H]) Clear() {
-	h.data.Clear()
-	h.erased.Clear()
-	h.size = 0
-}
-
-func (h *erasableHeapGeneric[H]) normalize() {
-	for h.data.Len() > 0 && h.erased.Len() > 0 && h.data.Top() == h.erased.Top() {
-		h.data.Pop()
-		h.erased.Pop()
-	}
-}
-
-type heapGeneric[H comparable] struct {
-	data []H
-	less func(a, b H) bool
-}
-
-func newHeapGeneric[H comparable](less func(a, b H) bool, nums ...H) *heapGeneric[H] {
-	nums = append(nums[:0:0], nums...)
-	heap := &heapGeneric[H]{less: less, data: nums}
-	if len(nums) > 1 {
-		heap.heapify()
-	}
-	return heap
-}
-
-func (h *heapGeneric[H]) Push(value H) {
-	h.data = append(h.data, value)
-	h.pushUp(h.Len() - 1)
-}
-
-func (h *heapGeneric[H]) Pop() (value H) {
-	if h.Len() == 0 {
-		panic("heap is empty")
+func (sl *sortedList32) _locLeft(value S) (pos, index int32) {
+	if sl.size == 0 {
+		return
 	}
 
-	value = h.data[0]
-	h.data[0] = h.data[h.Len()-1]
-	h.data = h.data[:h.Len()-1]
-	h.pushDown(0)
-	return
-}
-
-func (h *heapGeneric[H]) Top() (value H) {
-	if h.Len() == 0 {
-		panic("heap is empty")
-	}
-	value = h.data[0]
-	return
-}
-
-func (h *heapGeneric[H]) Len() int32 { return int32(len(h.data)) }
-
-func (h *heapGeneric[H]) Clear() {
-	h.data = h.data[:0]
-}
-
-func (h *heapGeneric[H]) heapify() {
-	n := h.Len()
-	for i := (n >> 1) - 1; i > -1; i-- {
-		h.pushDown(i)
-	}
-}
-
-func (h *heapGeneric[H]) pushUp(root int32) {
-	for parent := (root - 1) >> 1; parent >= 0 && h.less(h.data[root], h.data[parent]); parent = (root - 1) >> 1 {
-		h.data[root], h.data[parent] = h.data[parent], h.data[root]
-		root = parent
-	}
-}
-
-func (h *heapGeneric[H]) pushDown(root int32) {
-	n := h.Len()
-	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
-		right := left + 1
-		minIndex := root
-
-		if h.less(h.data[left], h.data[minIndex]) {
-			minIndex = left
+	// find pos
+	left := int32(-1)
+	right := int32(len(sl.blocks) - 1)
+	for left+1 < right {
+		mid := (left + right) >> 1
+		if !sl.less(sl.mins[mid], value) {
+			right = mid
+		} else {
+			left = mid
 		}
-
-		if right < n && h.less(h.data[right], h.data[minIndex]) {
-			minIndex = right
-		}
-
-		if minIndex == root {
-			return
-		}
-
-		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
-		root = minIndex
 	}
+	if right > 0 {
+		block := sl.blocks[right-1]
+		if !sl.less(block[len(block)-1], value) {
+			right--
+		}
+	}
+	pos = right
+
+	// find index
+	cur := sl.blocks[pos]
+	left = -1
+	right = int32(len(cur))
+	for left+1 < right {
+		mid := (left + right) >> 1
+		if !sl.less(cur[mid], value) {
+			right = mid
+		} else {
+			left = mid
+		}
+	}
+
+	index = right
+	return
+}
+
+func (sl *sortedList32) _locRight(value S) (pos, index int32) {
+	if sl.size == 0 {
+		return
+	}
+
+	// find pos
+	left := int32(0)
+	right := int32(len(sl.blocks))
+	for left+1 < right {
+		mid := (left + right) >> 1
+		if sl.less(value, sl.mins[mid]) {
+			right = mid
+		} else {
+			left = mid
+		}
+	}
+	pos = left
+
+	// find index
+	cur := sl.blocks[pos]
+	left = -1
+	right = int32(len(cur))
+	for left+1 < right {
+		mid := (left + right) >> 1
+		if sl.less(value, cur[mid]) {
+			right = mid
+		} else {
+			left = mid
+		}
+	}
+
+	index = right
+	return
+}
+
+func (sl *sortedList32) _locBlock(value S) int32 {
+	left, right := int32(-1), int32(len(sl.blocks)-1)
+	for left+1 < right {
+		mid := (left + right) >> 1
+		if !sl.less(sl.mins[mid], value) {
+			right = mid
+		} else {
+			left = mid
+		}
+	}
+	if right > 0 {
+		block := sl.blocks[right-1]
+		if !sl.less(block[len(block)-1], value) {
+			right--
+		}
+	}
+	return right
+}
+
+func (sl *sortedList32) _buildTree() {
+	sl.tree = make([]int32, len(sl.blocks))
+	for i := 0; i < len(sl.blocks); i++ {
+		sl.tree[i] = int32(len(sl.blocks[i]))
+	}
+	tree := sl.tree
+	for i := 0; i < len(tree); i++ {
+		j := i | (i + 1)
+		if j < len(tree) {
+			tree[j] += tree[i]
+		}
+	}
+	sl.shouldRebuildTree = false
+}
+
+func (sl *sortedList32) _updateTree(index, delta int32) {
+	if sl.shouldRebuildTree {
+		return
+	}
+	tree := sl.tree
+	m := int32(len(tree))
+	for i := index; i < m; i |= i + 1 {
+		tree[i] += delta
+	}
+}
+
+func (sl *sortedList32) _queryTree(end int32) int32 {
+	if sl.shouldRebuildTree {
+		sl._buildTree()
+	}
+	tree := sl.tree
+	sum := int32(0)
+	for end > 0 {
+		sum += tree[end-1]
+		end &= end - 1
+	}
+	return sum
+}
+
+func (sl *sortedList32) _findKth(k int32) (pos, index int32) {
+	if k < int32(len(sl.blocks[0])) {
+		return 0, k
+	}
+	last := int32(len(sl.blocks) - 1)
+	lastLen := int32(len(sl.blocks[last]))
+	if k >= sl.size-lastLen {
+		return last, k + lastLen - sl.size
+	}
+	if sl.shouldRebuildTree {
+		sl._buildTree()
+	}
+	tree := sl.tree
+	pos = -1
+	bitLength := bits.Len32(uint32(len(tree)))
+	for d := bitLength - 1; d >= 0; d-- {
+		next := pos + (1 << d)
+		if next < int32(len(tree)) && k >= tree[next] {
+			pos = next
+			k -= tree[pos]
+		}
+	}
+	return pos + 1, k
 }
 
 func min(a, b int) int {
@@ -451,4 +737,25 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func (sl *sortedList32) _popFirst() S {
+	pos, startIndex := int32(0), int32(0)
+	value := sl.blocks[pos][startIndex]
+	sl._delete(pos, startIndex)
+	return value
 }

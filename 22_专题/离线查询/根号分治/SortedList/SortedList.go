@@ -204,6 +204,8 @@ const _LOAD int = 200
 
 type S = int
 
+var EMPTY S
+
 // 使用分块+树状数组维护的有序序列.
 type SortedList struct {
 	less              func(a, b S) bool
@@ -256,7 +258,7 @@ func (sl *SortedList) Add(value S) *SortedList {
 		copy(sl.blocks[pos+2:], sl.blocks[pos+1:])
 		sl.blocks[pos+1] = sl.blocks[pos][_LOAD:]
 		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD]
-		sl.mins = append(sl.mins, 0)
+		sl.mins = append(sl.mins, EMPTY)
 		copy(sl.mins[pos+2:], sl.mins[pos+1:])
 		sl.mins[pos+1] = sl.blocks[pos+1][0]
 		sl.shouldRebuildTree = true
@@ -914,7 +916,7 @@ func (sl *SortedList) _appendFirst(value S) {
 	}
 	pos := 0
 	sl._updateTree(pos, 1)
-	sl.blocks[pos] = append(sl.blocks[pos], 0)
+	sl.blocks[pos] = append(sl.blocks[pos], EMPTY)
 	copy(sl.blocks[pos][1:], sl.blocks[pos])
 	sl.blocks[pos][0] = value
 	sl._adjust(pos)
@@ -965,7 +967,7 @@ func (sl *SortedList) _adjust(pos int) {
 		copy(sl.blocks[pos+2:], sl.blocks[pos+1:])
 		sl.blocks[pos+1] = sl.blocks[pos][_LOAD:]
 		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD]
-		sl.mins = append(sl.mins, 0)
+		sl.mins = append(sl.mins, EMPTY)
 		copy(sl.mins[pos+2:], sl.mins[pos+1:])
 		sl.mins[pos+1] = sl.blocks[pos+1][0]
 		sl.shouldRebuildTree = true

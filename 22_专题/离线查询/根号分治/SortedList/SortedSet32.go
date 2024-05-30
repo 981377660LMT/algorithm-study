@@ -80,6 +80,8 @@ const _LOAD int32 = 200
 
 type S = int32
 
+var EMPTY S
+
 // 使用分块+树状数组维护的有序序列.
 type SortedSet32 struct {
 	less              func(a, b S) bool
@@ -697,7 +699,7 @@ func (sl *SortedSet32) _appendFirst(value S) {
 	}
 	pos := int32(0)
 	sl._updateTree(pos, 1)
-	sl.blocks[pos] = append(sl.blocks[pos], 0)
+	sl.blocks[pos] = append(sl.blocks[pos], EMPTY)
 	copy(sl.blocks[pos][1:], sl.blocks[pos])
 	sl.blocks[pos][0] = value
 	sl._adjust(pos)
@@ -748,7 +750,7 @@ func (sl *SortedSet32) _adjust(pos int32) {
 		copy(sl.blocks[pos+2:], sl.blocks[pos+1:])
 		sl.blocks[pos+1] = sl.blocks[pos][_LOAD:]
 		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD]
-		sl.mins = append(sl.mins, 0)
+		sl.mins = append(sl.mins, EMPTY)
 		copy(sl.mins[pos+2:], sl.mins[pos+1:])
 		sl.mins[pos+1] = sl.blocks[pos+1][0]
 		sl.shouldRebuildTree = true

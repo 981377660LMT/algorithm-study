@@ -58,6 +58,8 @@ const _LOAD int = 75
 
 type S = int
 
+var EMPTY S
+
 type DynamicMedian struct {
 	size     int32
 	lower    *_sl
@@ -241,7 +243,7 @@ func (sl *_sl) _appendLast(value S) *_sl {
 		copy(sl.blocks[pos+2:], sl.blocks[pos+1:])
 		sl.blocks[pos+1] = sl.blocks[pos][_LOAD:]
 		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD]
-		sl.mins = append(sl.mins, 0)
+		sl.mins = append(sl.mins, EMPTY)
 		copy(sl.mins[pos+2:], sl.mins[pos+1:])
 		sl.mins[pos+1] = sl.blocks[pos+1][0]
 		sl.shouldRebuildTree = true
