@@ -37,14 +37,17 @@ func LIS(nums []int, strict bool) int {
 	return len(lis)
 }
 
-// 求以每个位置为结尾的LIS长度(包括自身)
-func LISDp(nums []int, strict bool) []int {
-	if len(nums) == 0 {
-		return []int{}
+const INF int = 2e18
+
+// 返回每个位置为结尾的LIS长度(包括自身)
+func LISDp(nums []int, strict bool) (int32, []int32) {
+	n := int32(len(nums))
+	dp := make([]int, n)
+	for i := range dp {
+		dp[i] = INF
 	}
-	n := len(nums)
-	res := make([]int, n)
-	lis := []int{}
+	lis := int32(0)
+	lisRank := make([]int32, n)
 	var f func([]int, int) int
 	if strict {
 		f = sort.SearchInts
@@ -53,20 +56,18 @@ func LISDp(nums []int, strict bool) []int {
 			return sort.SearchInts(a, x+1)
 		}
 	}
-	for i := 0; i < n; i++ {
-		pos := f(lis, nums[i])
-		if pos == len(lis) {
-			lis = append(lis, nums[i])
-			res[i] = len(lis)
-		} else {
-			lis[pos] = nums[i]
-			res[i] = pos + 1
+	for i := int32(0); i < n; i++ {
+		pos := int32(f(dp, nums[i]))
+		dp[pos] = nums[i]
+		lisRank[i] = pos + 1
+		if lis < pos+1 {
+			lis = pos + 1
 		}
 	}
-	return res
+	return lis, lisRank
 }
 
-// 求LIS 返回(LIS,LIS的组成下标)
+// 求LI，返回(LIS,LIS的组成下标)
 func GetLIS(nums []int, strict bool) ([]int, []int) {
 	n := len(nums)
 	lis := []int{}            // lis[i] 表示长度为 i 的上升子序列的最小末尾值
