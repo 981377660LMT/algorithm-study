@@ -5,7 +5,7 @@
 # !注意:比较慢,有时可以用Intervals-珂朵莉树代替
 
 
-from typing import Optional, Tuple, Union
+from typing import Generator, List, Optional, Tuple, Union
 from sortedcontainers import SortedList
 
 INF = int(1e18)
@@ -102,6 +102,20 @@ class SegmentSet:
             return None
         return self._st[pos - 1]
 
+    def irange(self, min: int, max: int) -> Generator[Tuple[int, int], None, None]:
+        """遍历 SegmentSet 中在 `[min,max]` 内的所有区间范围."""
+        if min > max:
+            return
+        it = self._st.bisect_right((min, INF)) - 1
+        if it < 0:
+            it = 0
+        for v in self._st[it:]:
+            if v[0] > max:
+                break
+            left = v[0] if v[0] >= min else min
+            right = v[1] if v[1] <= max else max
+            yield left, right
+
     @property
     def count(self) -> int:
         return self._count
@@ -148,6 +162,8 @@ if __name__ == "__main__":
     assert ss.count == sum(right - left + 1 for left, right in ss)
     assert len(ss) == 2
     assert ss.getInterval(5) == (5, 6)
+    for left, right in ss.irange(3, 5):
+        print(left, right, ss)
 
     # 前驱后继
     def pre(pos: int):
@@ -203,3 +219,12 @@ if __name__ == "__main__":
 
         def removeRange(self, left: int, right: int) -> None:
             self.ss.erase(left, right)
+
+    # 100311. 无需开会的工作日
+    class Solution:
+        def countDays(self, days: int, meetings: List[List[int]]) -> int:
+            seg = SegmentSet()
+            for l, r in meetings:
+                seg.insert(l, r)
+            res = list(seg)
+            return days - sum(r - l + 1 for l, r in res)

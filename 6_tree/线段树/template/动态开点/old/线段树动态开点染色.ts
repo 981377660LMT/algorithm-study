@@ -76,7 +76,7 @@ class SegmentTree {
     if (root.value === right - left + 1) {
       root.left.value = mid - left + 1
       root.right.value = right - mid
-    } else if (root.value === 0) {
+    } else if (!root.value) {
       root.left.value = 0
       root.right.value = 0
     }
