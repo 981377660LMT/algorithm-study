@@ -1,5 +1,5 @@
 # 本质不同子串个数 = 所有子串个数 - 相同子串个数
-from SA import useSA
+from oldSA1 import useSA
 
 
 def countDistinct(s: str) -> int:
@@ -11,8 +11,10 @@ def countDistinct(s: str) -> int:
     https://leetcode-cn.com/problems/number-of-distinct-substrings-in-a-string/solution/on-hou-zhui-shu-zu-by-endlesscheng-jo3p/
     https://leetcode-cn.com/problems/number-of-distinct-substrings-in-a-string/solution/python-ji-bai-100-onfu-za-du-saissuan-fa-mwz7/
     """
-    _sa, _rank, height = useSA(list(map(ord, s)))
     n = len(s)
+    if n == 0:
+        return 0
+    _sa, _rank, height = useSA(list(map(ord, s)))
     # print(SA, RK, H)
     # [0, 1, 2, 3] [0, 1, 2, 3] [0, 0, 0, 0]
     return n * (n + 1) // 2 - sum(height)
