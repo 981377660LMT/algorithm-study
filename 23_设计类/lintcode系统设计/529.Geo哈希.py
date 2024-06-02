@@ -1,5 +1,6 @@
 """
 Geohash是一个哈希函数,用于将位置坐标对转换为base32字符串。
+本是上是寻找一种四叉树线性编码方式.
 """
 
 from typing import List

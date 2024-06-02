@@ -2,8 +2,8 @@
 # 注意:
 # 1.所有区间都是闭区间 例如 [1,1] 表示 长为1的区间,起点为1
 # !2.有交集的区间会被合并,例如 [1,2]和[2,3]会被合并为[1,3]
-
 # !注意:比较慢,有时可以用Intervals-珂朵莉树代替
+
 
 from typing import Optional, Tuple, Union
 from sortedcontainers import SortedList
@@ -12,11 +12,11 @@ INF = int(1e18)
 
 
 class SegmentSet:
-    __slots__ = ("_st", "count")
+    __slots__ = ("_st", "_count")
 
     def __init__(self):
-        self.count = 0  # 区间元素的个数
         self._st = SortedList()
+        self._count = 0  # 区间元素的个数
 
     def insert(self, left: int, right: int) -> None:
         """插入闭区间[left, right]."""
@@ -35,15 +35,15 @@ class SegmentSet:
                 right = tmp2
             removed = sum(right - left + 1 for left, right in self._st[it1:it2])
             del self._st[it1:it2]
-            self.count -= removed
+            self._count -= removed
         self._st.add((left, right))
-        self.count += right - left + 1
+        self._count += right - left + 1
 
     def erase(self, left: int, right: int) -> None:
         """删除闭区间[left, right]."""
         if left > right:
             return
-        it1 = self._st.bisect_left((left, -INF))
+        it1 = self._st.bisect_right((left, -INF))
         it2 = self._st.bisect_right((right, INF))
         if it1 != 0 and left <= self._st[it1 - 1][1]:
             it1 -= 1
@@ -56,13 +56,13 @@ class SegmentSet:
             nr = right
         removed = sum(right - left + 1 for left, right in self._st[it1:it2])
         del self._st[it1:it2]
-        self.count -= removed
+        self._count -= removed
         if nl < left:
             self._st.add((nl, left))
-            self.count += left - nl + 1
+            self._count += left - nl + 1
         if right < nr:
             self._st.add((right, nr))
-            self.count += nr - right + 1
+            self._count += nr - right + 1
 
     def nextStart(self, x: int) -> Optional[int]:
         """返回第一个大于等于x的`区间起点`.如果不存在,返回None."""
@@ -101,6 +101,10 @@ class SegmentSet:
         if pos == 0 or self._st[pos - 1][1] < x:
             return None
         return self._st[pos - 1]
+
+    @property
+    def count(self) -> int:
+        return self._count
 
     def __contains__(self, arg: Union[int, Tuple[int, int]]) -> bool:
         if isinstance(arg, int):
@@ -142,7 +146,7 @@ if __name__ == "__main__":
     assert (1, 4) in ss
     assert 7 not in ss
     assert ss.count == sum(right - left + 1 for left, right in ss)
-    assert len(ss) == 3
+    assert len(ss) == 2
     assert ss.getInterval(5) == (5, 6)
 
     # 前驱后继
@@ -172,3 +176,30 @@ if __name__ == "__main__":
                 assert F.floor(i) == pre(i), (i, F.floor(i), pre(i))
                 assert F.ceiling(i) == nxt(i), (i, F.ceiling(i), nxt(i))
     print("Done!")
+
+    # https://leetcode.cn/problems/count-integers-in-intervals/description/
+    # 2276. 统计区间中的整数数目
+    class CountIntervals:
+        def __init__(self):
+            self.ss = SegmentSet()
+
+        def add(self, left: int, right: int) -> None:
+            self.ss.insert(left, right)
+
+        def count(self) -> int:
+            return self.ss.count
+
+    # 715. Range 模块
+    # https://leetcode.cn/problems/range-module/submissions/
+    class RangeModule:
+        def __init__(self):
+            self.ss = SegmentSet()
+
+        def addRange(self, left: int, right: int) -> None:
+            self.ss.insert(left, right)
+
+        def queryRange(self, left: int, right: int) -> bool:
+            return (left, right) in self.ss
+
+        def removeRange(self, left: int, right: int) -> None:
+            self.ss.erase(left, right)

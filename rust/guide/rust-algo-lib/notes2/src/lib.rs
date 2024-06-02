@@ -1,3 +1,4 @@
+mod pattern;
 use std::time::Instant;
 
 mod lc;

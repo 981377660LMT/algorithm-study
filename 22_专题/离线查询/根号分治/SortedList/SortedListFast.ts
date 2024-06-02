@@ -44,16 +44,18 @@ interface ISortedList<V> {
  * !如果数组较短(<2000),直接使用`bisectInsort`维护即可.
  */
 class SortedListFast<V = number> implements ISortedList<V> {
-  static setLoadFactor(load = 500): void {
+  static setLoadFactor(load = 200): void {
     this._LOAD = load
   }
 
   /**
    * 负载因子，用于控制每个块的长度.
-   * 长度为`1e5`的数组, 负载因子取`500`左右性能较好.
+   * 长度为`1e5`的数组, 负载因子取`200`左右性能较好.
    */
-  protected static _LOAD = 500
-  private static _isPrimitive(o: unknown): o is number | string | boolean | symbol | bigint | null | undefined {
+  protected static _LOAD = 200
+  private static _isPrimitive(
+    o: unknown
+  ): o is number | string | boolean | symbol | bigint | null | undefined {
     return o === null || (typeof o !== 'object' && typeof o !== 'function')
   }
 
@@ -81,7 +83,10 @@ class SortedListFast<V = number> implements ISortedList<V> {
   constructor(compareFn: (a: V, b: V) => number)
   constructor(iterable: Iterable<V>, compareFn: (a: V, b: V) => number)
   constructor(compareFn: (a: V, b: V) => number, iterable: Iterable<V>)
-  constructor(arg1?: Iterable<V> | ((a: V, b: V) => number), arg2?: Iterable<V> | ((a: V, b: V) => number)) {
+  constructor(
+    arg1?: Iterable<V> | ((a: V, b: V) => number),
+    arg2?: Iterable<V> | ((a: V, b: V) => number)
+  ) {
     let defaultCompareFn = (a: V, b: V) => (a as unknown as number) - (b as unknown as number)
     let defaultData: V[] = []
     if (arg1 !== undefined) {
@@ -120,12 +125,11 @@ class SortedListFast<V = number> implements ISortedList<V> {
     _mins[pos] = block[0]
     // !-> [x]*load + [x]*(block.length - load)
     if (load + load < block.length) {
-      _blocks.splice(pos + 1, 0, block.slice(load))
-      _mins.splice(pos + 1, 0, block[load])
-      block.splice(load)
+      const rightBlock = block.splice(load)
+      _blocks.splice(pos + 1, 0, rightBlock)
+      _mins.splice(pos + 1, 0, rightBlock[0])
       this._shouldRebuildTree = true
     }
-
     return this
   }
 
@@ -175,8 +179,8 @@ class SortedListFast<V = number> implements ISortedList<V> {
     }
     const block = this._blocks
     if (!block.length) return false
-    equals = equals || ((a: V, b: V) => a === b)
     const { pos, index } = this._locLeft(value)
+    equals = equals || ((a: V, b: V) => a === b)
     return index < block[pos].length && equals(block[pos][index], value)
   }
 
@@ -186,8 +190,8 @@ class SortedListFast<V = number> implements ISortedList<V> {
     }
     const block = this._blocks
     if (!block.length) return false
-    equals = equals || ((a: V, b: V) => a === b)
     const { pos, index } = this._locRight(value)
+    equals = equals || ((a: V, b: V) => a === b)
     if (index && equals(block[pos][index - 1], value)) {
       this._delete(pos, index - 1)
       return true
@@ -649,7 +653,8 @@ class SortedListFast<V = number> implements ISortedList<V> {
         k -= tree[pos]
       }
     }
-    return { pos: pos + 1, index: k }
+    pos++
+    return { pos, index: k }
   }
 }
 
@@ -701,7 +706,12 @@ if (require.main === module) {
   }
 
   // https://leetcode.cn/problems/maximum-number-of-tasks-you-can-assign/
-  function maxTaskAssign(tasks: number[], workers: number[], pills: number, strength: number): number {
+  function maxTaskAssign(
+    tasks: number[],
+    workers: number[],
+    pills: number,
+    strength: number
+  ): number {
     tasks.sort((a, b) => a - b)
     workers.sort((a, b) => a - b)
     let left = 0

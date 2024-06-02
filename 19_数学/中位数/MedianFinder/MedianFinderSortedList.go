@@ -454,8 +454,8 @@ func (sl *SortedListWithSum) Enumerate(start, end int, f func(value E), erase bo
 				}
 				sl._updateTree(pos, -deleted)
 
-				block = append(block[:startIndex], block[endIndex:]...)
-				sl.mins[pos] = block[0]
+				sl.blocks[pos] = append(sl.blocks[pos][:startIndex], sl.blocks[pos][endIndex:]...)
+				sl.mins[pos] = sl.blocks[pos][0]
 			}
 			sl.size -= deleted
 		}

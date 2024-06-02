@@ -1,5 +1,6 @@
 // 欧拉树 Euler Tour Tree
 // 专门用于处理动态树的子树问题.
+// !非常慢
 //
 // api:
 //  NewEtt(n int32, f func(i int32) E) *Ett

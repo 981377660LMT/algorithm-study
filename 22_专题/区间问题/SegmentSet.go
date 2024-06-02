@@ -4,45 +4,48 @@ package main
 
 import (
 	"fmt"
+	"math/bits"
+
+	"sort"
 	"strings"
-	"time"
 )
 
 const INF int = 1e18
 
-type CountIntervals struct {
-	seg *SegmentSet
+// https://leetcode.cn/problems/range-module/submissions/
+// Range模块/Range 模块
+type RangeModule struct {
+	ss *SegmentSet
 }
 
-func Constructor() CountIntervals {
-	return CountIntervals{seg: NewSegmentSet(1e5)}
+func Constructor() RangeModule {
+	return RangeModule{ss: NewSegmentSet()}
 }
 
-func (this *CountIntervals) Add(left int, right int) {
-	this.seg.Insert(left, right)
+func (this *RangeModule) AddRange(left int, right int) {
+	this.ss.Insert(left, right)
 }
 
-func (this *CountIntervals) Count() int {
-	return this.seg.Count
+func (this *RangeModule) QueryRange(left int, right int) bool {
+	return this.ss.HasInterval(left, right)
+}
+
+func (this *RangeModule) RemoveRange(left int, right int) {
+	this.ss.Erase(left, right)
 }
 
 // 管理区间的数据结构.
-//  1.所有区间都是闭区间 例如 [1,1] 表示 长为1的区间,起点为1;
-//  2.有交集的区间会被合并,例如 [1,2]和[2,3]会被合并为[1,3].
+//
+//	1.所有区间都是闭区间 例如 [1,1] 表示 长为1的区间,起点为1;
+//	2.有交集的区间会被合并,例如 [1,2]和[2,3]会被合并为[1,3].
 type SegmentSet struct {
-	Count int // 区间元素个数
-	sl    *_SL
+	sl        *sortedList
+	count     int // 区间元素个数
+	flyWeight S
 }
 
-func NewSegmentSet(initCap int) *SegmentSet {
-	return &SegmentSet{
-		sl: _NSL(func(a, b Value) int {
-			if a[0] != b[0] {
-				return a[0] - b[0]
-			}
-			return a[1] - b[1]
-		}, initCap),
-	}
+func NewSegmentSet() *SegmentSet {
+	return &SegmentSet{sl: NewSortedList(func(a, b S) bool { return a.left < b.left }), flyWeight: Interval{}}
 }
 
 // 插入闭区间[left,right].
@@ -50,100 +53,97 @@ func (ss *SegmentSet) Insert(left, right int) {
 	if left > right {
 		return
 	}
-	it1 := ss.sl.BisectRight(Value{left, INF})
-	it2 := ss.sl.BisectRight(Value{right, INF})
-	if it1 != 0 && left <= ss.sl.At(it1 - 1)[1] {
+	it1 := ss.sl.BisectRight(ss.getFlyWeight(left, INF))
+	it2 := ss.sl.BisectRight(ss.getFlyWeight(right, INF))
+	if it1 != 0 && left <= ss.sl.At(it1-1).right {
 		it1--
 	}
 	if it1 != it2 {
-		tmp1 := ss.sl.At(it1)[0]
+		tmp1 := ss.sl.At(it1).left
 		if tmp1 < left {
 			left = tmp1
 		}
-		tmp2 := ss.sl.At(it2 - 1)[1]
+		tmp2 := ss.sl.At(it2 - 1).right
 		if tmp2 > right {
 			right = tmp2
 		}
 		removed := 0
-		for i := it1; i < it2; i++ {
-			cur := ss.sl.At(i)
-			removed += cur[1] - cur[0] + 1
-		}
-		ss.sl.Erase(it1, it2)
-		ss.Count -= removed
+		ss.sl.Enumerate(it1, it2, func(value S) {
+			removed += value.right - value.left + 1
+		}, true)
+		ss.count -= removed
 	}
-	ss.sl.Add(Value{left, right})
-	ss.Count += right - left + 1
+	ss.sl.Add(Interval{left, right})
+	ss.count += right - left + 1
 }
 
 func (ss *SegmentSet) Erase(left, right int) {
 	if left > right {
 		return
 	}
-	it1 := ss.sl.BisectLeft(Value{left, -INF})
-	it2 := ss.sl.BisectRight(Value{right, INF})
-	if it1 != 0 && left <= ss.sl.At(it1 - 1)[1] {
+	it1 := ss.sl.BisectRight(ss.getFlyWeight(left, INF))
+	it2 := ss.sl.BisectRight(ss.getFlyWeight(right, INF))
+	if it1 != 0 && left <= ss.sl.At(it1-1).right {
 		it1--
 	}
 	if it1 == it2 {
 		return
 	}
-	nl, nr := ss.sl.At(it1)[0], ss.sl.At(it2 - 1)[1]
+	nl, nr := ss.sl.At(it1).left, ss.sl.At(it2-1).right
 	if left < nl {
 		nl = left
 	}
 	if right > nr {
 		nr = right
 	}
+
 	removed := 0
-	for i := it1; i < it2; i++ {
-		cur := ss.sl.At(i)
-		removed += cur[1] - cur[0] + 1
-	}
-	ss.sl.Erase(it1, it2)
-	ss.Count -= removed
+	ss.sl.Enumerate(it1, it2, func(value S) {
+		removed += value.right - value.left + 1
+	}, true)
+	ss.count -= removed
 	if nl < left {
-		ss.sl.Add(Value{nl, left})
-		ss.Count += left - nl + 1
+		ss.sl.Add(Interval{nl, left})
+		ss.count += left - nl + 1
 	}
 	if right < nr {
-		ss.sl.Add(Value{right, nr})
-		ss.Count += nr - right + 1
+		ss.sl.Add(Interval{right, nr})
+		ss.count += nr - right + 1
 	}
 }
 
 // 返回第一个大于等于x的区间起点.
 func (ss *SegmentSet) NextStart(x int) (res int, ok bool) {
-	it := ss.sl.BisectLeft(Value{x, -INF})
+	it := ss.sl.BisectLeft(ss.getFlyWeight(x, -INF))
 	if it == ss.sl.Len() {
 		return
 	}
-	res = ss.sl.At(it)[0]
+	res = ss.sl.At(it).left
 	ok = true
 	return
 }
 
 // 返回最后一个小于等于x的区间起点.
 func (ss *SegmentSet) PrevStart(x int) (res int, ok bool) {
-	it := ss.sl.BisectRight(Value{x, INF})
+	it := ss.sl.BisectRight(ss.getFlyWeight(x, INF)) - 1
 	if it == 0 {
 		return
 	}
-	res = ss.sl.At(it - 1)[0]
+	res = ss.sl.At(it - 1).left
 	ok = true
 	return
 }
 
 // 返回区间内第一个大于等于x的元素.
 func (ss *SegmentSet) Ceiling(x int) (res int, ok bool) {
-	it := ss.sl.BisectRight(Value{x, INF})
-	if it != 0 && ss.sl.At(it - 1)[1] >= x {
+	it := ss.sl.BisectRight(ss.getFlyWeight(x, INF))
+	if it != 0 && ss.sl.At(it-1).right >= x {
 		res = x
 		ok = true
 		return
 	}
 	if it != ss.sl.Len() {
-		res = ss.sl.At(it)[0]
+		res = ss.sl.At(it).left
 		ok = true
 		return
 	}
@@ -152,23 +152,23 @@ func (ss *SegmentSet) Ceiling(x int) (res int, ok bool) {
 
 // 返回区间内最后一个小于等于x的元素.
 func (ss *SegmentSet) Floor(x int) (res int, ok bool) {
-	it := ss.sl.BisectRight(Value{x, INF})
+	it := ss.sl.BisectRight(ss.getFlyWeight(x, INF))
 	if it == 0 {
 		return
 	}
 	ok = true
-	if ss.sl.At(it - 1)[1] >= x {
+	if ss.sl.At(it-1).right >= x {
 		res = x
 		return
 	}
-	res = ss.sl.At(it - 1)[1]
+	res = ss.sl.At(it - 1).right
 	return
 }
 
 // 返回包含x的区间.
-func (ss *SegmentSet) GetInterval(x int) (res [2]int, ok bool) {
-	it := ss.sl.BisectRight(Value{x, INF})
-	if it == 0 || ss.sl.At(it - 1)[1] < x {
+func (ss *SegmentSet) GetInterval(x int) (res S, ok bool) {
+	it := ss.sl.BisectRight(ss.getFlyWeight(x, INF))
+	if it == 0 || ss.sl.At(it-1).right < x {
 		return
 	}
 	res = ss.sl.At(it - 1)
@@ -177,39 +177,62 @@ func (ss *SegmentSet) GetInterval(x int) (res [2]int, ok bool) {
 }
 
 func (ss *SegmentSet) Has(i int) bool {
-	it := ss.sl.BisectRight(Value{i, INF})
-	return it != 0 && ss.sl.At(it - 1)[1] >= i
+	it := ss.sl.BisectRight(ss.getFlyWeight(i, INF))
+	return it != 0 && ss.sl.At(it-1).right >= i
 }
 
 func (ss *SegmentSet) HasInterval(left, right int) bool {
 	if left > right {
 		return false
 	}
-	it1 := ss.sl.BisectRight(Value{left, INF})
+	it1 := ss.sl.BisectRight(ss.getFlyWeight(left, INF))
 	if it1 == 0 {
 		return false
 	}
-	it2 := ss.sl.BisectRight(Value{right, INF})
+	it2 := ss.sl.BisectRight(ss.getFlyWeight(right, INF))
 	if it1 != it2 {
 		return false
 	}
-	return ss.sl.At(it1 - 1)[1] >= right
+	return ss.sl.At(it1-1).right >= right
 }
 
 // 返回第index个区间.
-func (ss *SegmentSet) At(index int) [2]int {
+func (ss *SegmentSet) At(index int) S {
 	return ss.sl.At(index)
 }
 
-func (ss *SegmentSet) GetAll() [][2]int {
-	return ss.sl.InOrder()
+func (ss *SegmentSet) GetAll() []S {
+	res := make([]S, 0, ss.sl.Len())
+	ss.sl.ForEach(func(value S, _ int) bool {
+		res = append(res, value)
+		return false
+	}, false)
+	return res
+}
+
+// 遍历 [L,R] 内的所有区间范围.
+func (ss *SegmentSet) EnumerateRange(L, R int, f func(left, right int)) {
+	if L > R {
+		return
+	}
+	it := ss.sl.BisectRight(ss.getFlyWeight(L, INF)) - 1
+	if it < 0 {
+		it++
+	}
+	ss.sl.EnumerateSlice(it, ss.sl.Len(), func(interval S) bool {
+		if interval.left > R {
+			return true
+		}
+		f(max(interval.left, L), min(interval.right, R))
+		return false
+	})
 }
 
 func (ss *SegmentSet) String() string {
 	res := []string{}
 	all := ss.GetAll()
 	for _, v := range all {
-		res = append(res, fmt.Sprintf("[%d,%d]", v[0], v[1]))
+		res = append(res, fmt.Sprintf("[%d,%d]", v.left, v.right))
 	}
 	return strings.Join(res, ",")
 }
@@ -218,239 +241,495 @@ func (ss *SegmentSet) Len() int {
 	return ss.sl.Len()
 }
 
-type Value = [2]int // [start,end]
-
-type node struct {
-	left, right int
-	size        int
-	priority    uint64
-	value       Value
+func (ss *SegmentSet) Count() int {
+	return ss.count
 }
 
-type _SL struct {
-	seed       uint64
-	root       int
-	comparator func(a, b Value) int
-	nodes      []node
+func (ss *SegmentSet) Clear() {
+	ss.sl.Clear()
+	ss.count = 0
 }
 
-func _NSL(comparator func(a, b Value) int, initCapacity int) *_SL {
-	sl := &_SL{
-		seed:       uint64(time.Now().UnixNano()/2 + 1),
-		comparator: comparator,
-		nodes:      make([]node, 0, max(initCapacity, 16)),
+func (ss *SegmentSet) getFlyWeight(left, right int) S {
+	ss.flyWeight.left = left
+	ss.flyWeight.right = right
+	return ss.flyWeight
+}
+
+// 1e5 -> 200, 2e5 -> 400
+const _LOAD int = 100
+
+type Interval = struct{ left, right int }
+type S = Interval
+
+// 使用分块+树状数组维护的有序序列.
+type sortedList struct {
+	less              func(a, b S) bool
+	size              int
+	blocks            [][]S
+	mins              []S
+	tree              []int32
+	shouldRebuildTree bool
+}
+
+func NewSortedList(less func(a, b S) bool, elements ...S) *sortedList {
+	elements = append(elements[:0:0], elements...)
+	res := &sortedList{less: less}
+	sort.Slice(elements, func(i, j int) bool { return less(elements[i], elements[j]) })
+	n := len(elements)
+	blocks := [][]S{}
+	for start := 0; start < n; start += _LOAD {
+		end := min(start+_LOAD, n)
+		blocks = append(blocks, elements[start:end:end]) // !各个块互不影响, max参数也需要指定为end
 	}
-	sl.nodes = append(sl.nodes, node{size: 0, priority: sl.nextRand()}) // dummy node 0
+	mins := make([]S, len(blocks))
+	for i, cur := range blocks {
+		mins[i] = cur[0]
+	}
+	res.size = n
+	res.blocks = blocks
+	res.mins = mins
+	res.shouldRebuildTree = true
+	return res
+}
+
+func (sl *sortedList) Add(value S) *sortedList {
+	sl.size++
+	if len(sl.blocks) == 0 {
+		sl.blocks = append(sl.blocks, []S{value})
+		sl.mins = append(sl.mins, value)
+		sl.shouldRebuildTree = true
+		return sl
+	}
+
+	pos, index := sl._locRight(value)
+
+	sl._updateTree(pos, 1)
+	sl.blocks[pos] = append(sl.blocks[pos][:index], append([]S{value}, sl.blocks[pos][index:]...)...)
+	sl.mins[pos] = sl.blocks[pos][0]
+
+	// n -> load + (n - load)
+	if n := len(sl.blocks[pos]); _LOAD+_LOAD < n {
+		sl.blocks = append(sl.blocks[:pos+1], append([][]S{sl.blocks[pos][_LOAD:]}, sl.blocks[pos+1:]...)...)
+		sl.mins = append(sl.mins[:pos+1], append([]S{sl.blocks[pos][_LOAD]}, sl.mins[pos+1:]...)...)
+		sl.blocks[pos] = sl.blocks[pos][:_LOAD:_LOAD] // !注意max的设置(为了让左右互不影响)
+		sl.shouldRebuildTree = true
+	}
+
 	return sl
 }
 
-func (sl *_SL) pushUp(root int) {
-	sl.nodes[root].size = sl.nodes[sl.nodes[root].left].size + sl.nodes[sl.nodes[root].right].size + 1
+func (sl *sortedList) Has(value S) bool {
+	if len(sl.blocks) == 0 {
+		return false
+	}
+	pos, index := sl._locLeft(value)
+	return index < len(sl.blocks[pos]) && sl.blocks[pos][index] == value
 }
 
-func (sl *_SL) Add(value Value) {
-	var x, y, z int
-	sl.splitByValue(sl.root, value, &x, &y, false)
-	z = sl.newNode(value)
-	sl.root = sl.merge(sl.merge(x, z), y)
+func (sl *sortedList) Discard(value S) bool {
+	if len(sl.blocks) == 0 {
+		return false
+	}
+	pos, index := sl._locRight(value)
+	if index > 0 && sl.blocks[pos][index-1] == value {
+		sl._delete(pos, index-1)
+		return true
+	}
+	return false
 }
 
-func (sl *_SL) At(index int) Value {
-	return sl.nodes[sl.kthNode(sl.root, index+1)].value
+func (sl *sortedList) Pop(index int) S {
+	if index < 0 {
+		index += sl.size
+	}
+	if index < 0 || index >= sl.size {
+		panic("index out of range")
+	}
+	pos, startIndex := sl._findKth(index)
+	value := sl.blocks[pos][startIndex]
+	sl._delete(pos, startIndex)
+	return value
 }
 
-func (sl *_SL) Pop(index int) Value {
-	index += 1 // dummy offset
-	var x, y, z int
-	sl.splitByRank(sl.root, index, &y, &z)
-	sl.splitByRank(y, index-1, &x, &y)
-	res := sl.nodes[y].value
-	sl.root = sl.merge(x, z)
-	return res
+func (sl *sortedList) At(index int) S {
+	if index < 0 {
+		index += sl.size
+	}
+	if index < 0 || index >= sl.size {
+		panic("index out of range")
+	}
+	pos, startIndex := sl._findKth(index)
+	return sl.blocks[pos][startIndex]
 }
 
-func (sl *_SL) Discard(value Value) {
-	var x, y, z int
-	sl.splitByValue(sl.root, value, &x, &z, false)
-	sl.splitByValue(x, value, &x, &y, true)
-	y = sl.merge(sl.nodes[y].left, sl.nodes[y].right)
-	sl.root = sl.merge(sl.merge(x, y), z)
+func (sl *sortedList) Erase(start, end int) {
+	sl.Enumerate(start, end, nil, true)
 }
 
-// Remove [start, stop) from list.
-func (sl *_SL) Erase(start, stop int) {
-	var x, y, z int
-	start++ // dummy offset
-	sl.splitByRank(sl.root, stop, &y, &z)
-	sl.splitByRank(y, start-1, &x, &y)
-	sl.root = sl.merge(x, z)
-}
-
-func (sl *_SL) BisectLeft(value Value) int {
-	var x, y int
-	sl.splitByValue(sl.root, value, &x, &y, true)
-	res := sl.nodes[x].size
-	sl.root = sl.merge(x, y)
-	return res
-}
-
-func (sl *_SL) BisectRight(value Value) int {
-	var x, y int
-	sl.splitByValue(sl.root, value, &x, &y, false)
-	res := sl.nodes[x].size
-	sl.root = sl.merge(x, y)
-	return res
-}
-
-// 求小于等于 value 的最大值.
-func (sl *_SL) Prev(value Value) (res Value, ok bool) {
-	var x, y int
-	sl.splitByValue(sl.root, value, &x, &y, false)
-	if x == 0 {
-		ok = false
+func (sl *sortedList) Lower(value S) (res S, ok bool) {
+	pos := sl.BisectLeft(value)
+	if pos == 0 {
 		return
 	}
-	res = sl.nodes[sl.kthNode(x, sl.nodes[x].size)].value
-	sl.root = sl.merge(x, y)
-	ok = true
+	return sl.At(pos - 1), true
+}
+
+func (sl *sortedList) Higher(value S) (res S, ok bool) {
+	pos := sl.BisectRight(value)
+	if pos == sl.size {
+		return
+	}
+	return sl.At(pos), true
+}
+
+func (sl *sortedList) Floor(value S) (res S, ok bool) {
+	pos := sl.BisectRight(value)
+	if pos == 0 {
+		return
+	}
+	return sl.At(pos - 1), true
+}
+
+func (sl *sortedList) Ceiling(value S) (res S, ok bool) {
+	pos := sl.BisectLeft(value)
+	if pos == sl.size {
+		return
+	}
+	return sl.At(pos), true
+}
+
+// 返回第一个大于等于 `value` 的元素的索引/严格小于 `value` 的元素的个数.
+func (sl *sortedList) BisectLeft(value S) int {
+	pos, index := sl._locLeft(value)
+	return sl._queryTree(pos) + index
+}
+
+// 返回第一个严格大于 `value` 的元素的索引/小于等于 `value` 的元素的个数.
+func (sl *sortedList) BisectRight(value S) int {
+	pos, index := sl._locRight(value)
+	return sl._queryTree(pos) + index
+}
+
+func (sl *sortedList) Count(value S) int {
+	return sl.BisectRight(value) - sl.BisectLeft(value)
+}
+
+func (sl *sortedList) Clear() {
+	sl.size = 0
+	sl.blocks = sl.blocks[:0]
+	sl.mins = sl.mins[:0]
+	sl.tree = sl.tree[:0]
+	sl.shouldRebuildTree = true
+}
+func (sl *sortedList) ForEach(f func(value S, index int) bool, reverse bool) {
+	if !reverse {
+		count := 0
+		for i := 0; i < len(sl.blocks); i++ {
+			block := sl.blocks[i]
+			for j := 0; j < len(block); j++ {
+				if f(block[j], count) {
+					return
+				}
+				count++
+			}
+		}
+		return
+	}
+	count := 0
+	for i := len(sl.blocks) - 1; i >= 0; i-- {
+		block := sl.blocks[i]
+		for j := len(block) - 1; j >= 0; j-- {
+			if f(block[j], count) {
+				return
+			}
+			count++
+		}
+	}
+}
+func (sl *sortedList) Enumerate(start, end int, f func(value S), erase bool) {
+	if start < 0 {
+		start = 0
+	}
+	if end > sl.size {
+		end = sl.size
+	}
+	if start >= end {
+		return
+	}
+
+	pos, startIndex := sl._findKth(start)
+	count := end - start
+	for ; count > 0 && pos < len(sl.blocks); pos++ {
+		block := sl.blocks[pos]
+		endIndex := min(len(block), startIndex+count)
+		if f != nil {
+			for j := startIndex; j < endIndex; j++ {
+				f(block[j])
+			}
+		}
+		deleted := endIndex - startIndex
+
+		if erase {
+			if deleted == len(block) {
+				// !delete block
+				sl.blocks = append(sl.blocks[:pos], sl.blocks[pos+1:]...)
+				sl.mins = append(sl.mins[:pos], sl.mins[pos+1:]...)
+				sl.shouldRebuildTree = true
+				pos--
+			} else {
+				// !delete [index, end)
+				sl._updateTree(pos, -deleted)
+				sl.blocks[pos] = append(sl.blocks[pos][:startIndex], sl.blocks[pos][endIndex:]...)
+				sl.mins[pos] = sl.blocks[pos][0]
+			}
+			sl.size -= deleted
+		}
+
+		count -= deleted
+		startIndex = 0
+	}
+}
+
+func (sl *sortedList) Min() S {
+	if sl.size == 0 {
+		panic("Min() called on empty SortedList")
+	}
+	return sl.mins[0]
+}
+
+func (sl *sortedList) Max() S {
+	if sl.size == 0 {
+		panic("Max() called on empty SortedList")
+	}
+	lastBlock := sl.blocks[len(sl.blocks)-1]
+	return lastBlock[len(lastBlock)-1]
+}
+
+func (sl *sortedList) EnumerateSlice(start, end int, f func(value S) bool) {
+	if start < 0 {
+		start = 0
+	}
+	if end > sl.size {
+		end = sl.size
+	}
+	if start >= end {
+		return
+	}
+	count := end - start
+	pos, index := sl._findKth(start)
+	for ; count > 0 && pos < len(sl.blocks); pos++ {
+		block := sl.blocks[pos]
+		endPos := min(len(block), index+count)
+		for j := index; j < endPos; j++ {
+			if f(block[j]) {
+				return
+			}
+		}
+		count -= endPos - index
+		index = 0
+	}
+}
+
+func (sl *sortedList) String() string {
+	sb := strings.Builder{}
+	sb.WriteString("SortedList{")
+	sl.ForEach(func(value S, index int) bool {
+		if index > 0 {
+			sb.WriteByte(',')
+		}
+		sb.WriteString(fmt.Sprintf("%v", value))
+		return false
+	}, false)
+	sb.WriteByte('}')
+	return sb.String()
+}
+
+func (sl *sortedList) Len() int {
+	return sl.size
+}
+
+func (sl *sortedList) _delete(pos, index int) {
+	// !delete element
+	sl.size--
+	sl._updateTree(pos, -1)
+	sl.blocks[pos] = append(sl.blocks[pos][:index], sl.blocks[pos][index+1:]...)
+	if len(sl.blocks[pos]) > 0 {
+		sl.mins[pos] = sl.blocks[pos][0]
+		return
+	}
+
+	// !delete block
+	sl.blocks = append(sl.blocks[:pos], sl.blocks[pos+1:]...)
+	sl.mins = append(sl.mins[:pos], sl.mins[pos+1:]...)
+	sl.shouldRebuildTree = true
+}
+
+func (sl *sortedList) _locLeft(value S) (pos, index int) {
+	if sl.size == 0 {
+		return
+	}
+
+	// find pos
+	left := -1
+	right := len(sl.blocks) - 1
+	for left+1 < right {
+		mid := (left + right) >> 1
+		if !sl.less(sl.mins[mid], value) {
+			right = mid
+		} else {
+			left = mid
+		}
+	}
+	if right > 0 {
+		block := sl.blocks[right-1]
+		if !sl.less(block[len(block)-1], value) {
+			right--
+		}
+	}
+	pos = right
+
+	// find index
+	cur := sl.blocks[pos]
+	left = -1
+	right = len(cur)
+	for left+1 < right {
+		mid := (left + right) >> 1
+		if !sl.less(cur[mid], value) {
+			right = mid
+		} else {
+			left = mid
+		}
+	}
+
+	index = right
 	return
 }
 
-// 求大于等于 value 的最小值.
-func (sl *_SL) Next(value Value) (res Value, ok bool) {
-	var x, y int
-	sl.splitByValue(sl.root, value, &x, &y, true)
-	if y == 0 {
-		ok = false
+func (sl *sortedList) _locRight(value S) (pos, index int) {
+	if sl.size == 0 {
 		return
 	}
-	res = sl.nodes[sl.kthNode(y, 1)].value
-	sl.root = sl.merge(x, y)
-	ok = true
+
+	// find pos
+	left := 0
+	right := len(sl.blocks)
+	for left+1 < right {
+		mid := (left + right) >> 1
+		if sl.less(value, sl.mins[mid]) {
+			right = mid
+		} else {
+			left = mid
+		}
+	}
+	pos = left
+
+	// find index
+	cur := sl.blocks[pos]
+	left = -1
+	right = len(cur)
+	for left+1 < right {
+		mid := (left + right) >> 1
+		if sl.less(value, cur[mid]) {
+			right = mid
+		} else {
+			left = mid
+		}
+	}
+
+	index = right
 	return
 }
 
-func (sl *_SL) String() string {
-	sb := []string{"SortedList{"}
-	values := []string{}
-	for i := 0; i < sl.Len(); i++ {
-		values = append(values, fmt.Sprintf("%v", sl.At(i)))
-	}
-	sb = append(sb, strings.Join(values, ","), "}")
-	return strings.Join(sb, "")
-}
-
-func (sl *_SL) Len() int {
-	return sl.nodes[sl.root].size
-}
-
-func (sl *_SL) kthNode(root int, k int) int {
-	cur := root
-	for cur != 0 {
-		if sl.nodes[sl.nodes[cur].left].size+1 == k {
-			break
-		} else if sl.nodes[sl.nodes[cur].left].size >= k {
-			cur = sl.nodes[cur].left
+func (sl *sortedList) _locBlock(value S) int {
+	left, right := -1, len(sl.blocks)-1
+	for left+1 < right {
+		mid := (left + right) >> 1
+		if !sl.less(sl.mins[mid], value) {
+			right = mid
 		} else {
-			k -= sl.nodes[sl.nodes[cur].left].size + 1
-			cur = sl.nodes[cur].right
+			left = mid
 		}
 	}
-	return cur
-}
-
-func (sl *_SL) splitByValue(root int, value Value, x, y *int, strictLess bool) {
-	if root == 0 {
-		*x, *y = 0, 0
-		return
-	}
-
-	if strictLess {
-		if sl.comparator(sl.nodes[root].value, value) < 0 {
-			*x = root
-			sl.splitByValue(sl.nodes[root].right, value, &sl.nodes[root].right, y, strictLess)
-		} else {
-			*y = root
-			sl.splitByValue(sl.nodes[root].left, value, x, &sl.nodes[root].left, strictLess)
-		}
-	} else {
-		if sl.comparator(sl.nodes[root].value, value) <= 0 {
-			*x = root
-			sl.splitByValue(sl.nodes[root].right, value, &sl.nodes[root].right, y, strictLess)
-		} else {
-			*y = root
-			sl.splitByValue(sl.nodes[root].left, value, x, &sl.nodes[root].left, strictLess)
+	if right > 0 {
+		block := sl.blocks[right-1]
+		if !sl.less(block[len(block)-1], value) {
+			right--
 		}
 	}
-
-	sl.pushUp(root)
+	return right
 }
 
-// Split by rank.
-// Split the tree rooted at root into two trees, x and y, such that the size of x is k.
-// x is the left subtree, y is the right subtree.
-func (sl *_SL) splitByRank(root, k int, x, y *int) {
-	if root == 0 {
-		*x, *y = 0, 0
+func (sl *sortedList) _buildTree() {
+	sl.tree = make([]int32, len(sl.blocks))
+	for i := 0; i < len(sl.blocks); i++ {
+		sl.tree[i] = int32(len(sl.blocks[i]))
+	}
+	tree := sl.tree
+	for i := 0; i < len(tree); i++ {
+		j := i | (i + 1)
+		if j < len(tree) {
+			tree[j] += tree[i]
+		}
+	}
+	sl.shouldRebuildTree = false
+}
+
+func (sl *sortedList) _updateTree(index, delta int) {
+	if sl.shouldRebuildTree {
 		return
 	}
-
-	if k <= sl.nodes[sl.nodes[root].left].size {
-		*y = root
-		sl.splitByRank(sl.nodes[root].left, k, x, &sl.nodes[root].left)
-		sl.pushUp(*y)
-	} else {
-		*x = root
-		sl.splitByRank(sl.nodes[root].right, k-sl.nodes[sl.nodes[root].left].size-1, &sl.nodes[root].right, y)
-		sl.pushUp(*x)
+	tree := sl.tree
+	d32 := int32(delta)
+	for i := index; i < len(tree); i |= i + 1 {
+		tree[i] += d32
 	}
 }
 
-func (sl *_SL) merge(x, y int) int {
-	if x == 0 || y == 0 {
-		return x + y
+func (sl *sortedList) _queryTree(end int) int {
+	if sl.shouldRebuildTree {
+		sl._buildTree()
 	}
-
-	if sl.nodes[x].priority < sl.nodes[y].priority {
-		sl.nodes[x].right = sl.merge(sl.nodes[x].right, y)
-		sl.pushUp(x)
-		return x
+	tree := sl.tree
+	sum := int32(0)
+	for end > 0 {
+		sum += tree[end-1]
+		end &= end - 1
 	}
-	sl.nodes[y].left = sl.merge(x, sl.nodes[y].left)
-	sl.pushUp(y)
-	return y
+	return int(sum)
 }
 
-// Return all elements in index order.
-func (sl *_SL) InOrder() []Value {
-	res := make([]Value, 0, sl.Len())
-	sl.inOrder(sl.root, &res)
-	return res
-}
-
-func (sl *_SL) inOrder(root int, res *[]Value) {
-	if root == 0 {
-		return
+func (sl *sortedList) _findKth(k int) (pos, index int) {
+	if k < len(sl.blocks[0]) {
+		return 0, k
 	}
-	sl.inOrder(sl.nodes[root].left, res)
-	*res = append(*res, sl.nodes[root].value)
-	sl.inOrder(sl.nodes[root].right, res)
+	last := len(sl.blocks) - 1
+	lastLen := len(sl.blocks[last])
+	if k >= sl.size-lastLen {
+		return last, k + lastLen - sl.size
+	}
+	if sl.shouldRebuildTree {
+		sl._buildTree()
+	}
+	tree := sl.tree
+	pos = -1
+	k32 := int32(k)
+	bitLength := bits.Len32(uint32(len(tree)))
+	for d := bitLength - 1; d >= 0; d-- {
+		next := pos + (1 << d)
+		if next < len(tree) && k32 >= tree[next] {
+			pos = next
+			k32 -= tree[pos]
+		}
+	}
+	return pos + 1, int(k32)
 }
 
-func (sl *_SL) newNode(value Value) int {
-	sl.nodes = append(sl.nodes, node{
-		value:    value,
-		size:     1,
-		priority: sl.nextRand(),
-	})
-	return len(sl.nodes) - 1
-}
-
-// https://nyaannyaan.github.io/library/misc/rng.hpp
-func (sl *_SL) nextRand() uint64 {
-	sl.seed ^= sl.seed << 7
-	sl.seed ^= sl.seed >> 9
-	return sl.seed
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func max(a, b int) int {
