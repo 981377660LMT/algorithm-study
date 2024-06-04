@@ -6,7 +6,7 @@
 
 // API:
 //  insert(left, right)              向区间集合中插入一个区间.
-//  discard(left, right)               从区间集合中删除一个区间.
+//  discard(left, right)             从区间集合中删除一个区间.
 //  nextStart(x)                     返回第一个大于等于x的区间起点.
 //  prevStart(x)                     返回最后一个小于等于x的区间起点.
 //  ceiling(x)                       返回区间内第一个大于等于x的元素.
@@ -45,8 +45,8 @@ class SegmentSet {
     if (left > right) {
       return
     }
-    let it1 = this._sl.bisectRight(this.getFlyWeight(left, INF))
-    const it2 = this._sl.bisectRight(this.getFlyWeight(right, INF))
+    let it1 = this._sl.bisectRight(this._getFlyWeight(left, INF))
+    const it2 = this._sl.bisectRight(this._getFlyWeight(right, INF))
     if (it1 > 0 && this._sl.at(it1 - 1)!.right >= left) {
       it1--
     }
@@ -77,8 +77,8 @@ class SegmentSet {
     if (left > right) {
       return false
     }
-    let it1 = this._sl.bisectRight(this.getFlyWeight(left, INF))
-    const it2 = this._sl.bisectRight(this.getFlyWeight(right, INF))
+    let it1 = this._sl.bisectRight(this._getFlyWeight(left, INF))
+    const it2 = this._sl.bisectRight(this._getFlyWeight(right, INF))
     if (it1 > 0 && this._sl.at(it1 - 1)!.right >= left) {
       it1--
     }
@@ -112,7 +112,7 @@ class SegmentSet {
    * 返回第一个大于等于x的区间起点.
    */
   nextStart(x: number): number | undefined {
-    const it = this._sl.bisectLeft(this.getFlyWeight(x, -INF))
+    const it = this._sl.bisectLeft(this._getFlyWeight(x, -INF))
     if (it === this._sl.length) {
       return undefined
     }
@@ -123,7 +123,7 @@ class SegmentSet {
    * 返回最后一个小于等于x的区间起点.
    */
   prevStart(x: number): number | undefined {
-    const it = this._sl.bisectRight(this.getFlyWeight(x, INF)) - 1
+    const it = this._sl.bisectRight(this._getFlyWeight(x, INF)) - 1
     if (it < 0) {
       return undefined
     }
@@ -134,7 +134,7 @@ class SegmentSet {
    * 返回区间内第一个大于等于x的元素.
    */
   floor(x: number): number | undefined {
-    const it = this._sl.bisectRight(this.getFlyWeight(x, INF))
+    const it = this._sl.bisectRight(this._getFlyWeight(x, INF))
     if (it === 0) {
       return undefined
     }
@@ -145,7 +145,7 @@ class SegmentSet {
    * 返回区间内第一个小于等于x的元素.
    */
   ceiling(x: number): number | undefined {
-    const it = this._sl.bisectRight(this.getFlyWeight(x, INF))
+    const it = this._sl.bisectRight(this._getFlyWeight(x, INF))
     if (it > 0 && this._sl.at(it - 1)!.right >= x) {
       return x
     }
@@ -159,7 +159,7 @@ class SegmentSet {
    * 返回包含x的区间.
    */
   getInterval(x: number): Interval | undefined {
-    const it = this._sl.bisectRight(this.getFlyWeight(x, INF))
+    const it = this._sl.bisectRight(this._getFlyWeight(x, INF))
     if (it === 0 || this._sl.at(it - 1)!.right < x) {
       return undefined
     }
@@ -170,7 +170,7 @@ class SegmentSet {
    * 判断x是否在区间集合中.
    */
   includes(x: number): boolean {
-    const it = this._sl.bisectRight(this.getFlyWeight(x, INF))
+    const it = this._sl.bisectRight(this._getFlyWeight(x, INF))
     return it > 0 && this._sl.at(it - 1)!.right >= x
   }
 
@@ -181,11 +181,11 @@ class SegmentSet {
     if (left > right) {
       return false
     }
-    const it1 = this._sl.bisectRight(this.getFlyWeight(left, INF))
+    const it1 = this._sl.bisectRight(this._getFlyWeight(left, INF))
     if (it1 === 0) {
       return false
     }
-    const it2 = this._sl.bisectRight(this.getFlyWeight(right, INF))
+    const it2 = this._sl.bisectRight(this._getFlyWeight(right, INF))
     if (it1 !== it2) {
       return false
     }
@@ -222,7 +222,7 @@ class SegmentSet {
     if (min > max) {
       return
     }
-    let it = this._sl.bisectRight(this.getFlyWeight(min, INF)) - 1
+    let it = this._sl.bisectRight(this._getFlyWeight(min, INF)) - 1
     if (it < 0) it++
     const islice = this._sl.slice(it, this._sl.length)
     for (const v of islice) {
@@ -240,7 +240,7 @@ class SegmentSet {
     if (min > max) {
       return
     }
-    let it = this._sl.bisectRight(this.getFlyWeight(min, INF)) - 1
+    let it = this._sl.bisectRight(this._getFlyWeight(min, INF)) - 1
     if (it < 0) it++
     const islice = this._sl.slice(it, this._sl.length)
     for (const v of islice) {
@@ -255,12 +255,6 @@ class SegmentSet {
     return `SegmentSet(${this.getAll().join(', ')})`
   }
 
-  getFlyWeight(left: number, right: number): Interval {
-    this._flyWeight.left = left
-    this._flyWeight.right = right
-    return this._flyWeight
-  }
-
   *[Symbol.iterator](): IterableIterator<Interval> {
     yield* this._sl
   }
@@ -271,6 +265,12 @@ class SegmentSet {
 
   get count(): number {
     return this._count
+  }
+
+  private _getFlyWeight(left: number, right: number): Interval {
+    this._flyWeight.left = left
+    this._flyWeight.right = right
+    return this._flyWeight
   }
 }
 
