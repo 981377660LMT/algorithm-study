@@ -230,6 +230,30 @@ impl SomeTrait for AlwaysEqual {
    性能高，毕竟直接用裸指针操作
    代码更简单更符合直觉: 对比下 Option<Rc<RefCell<Node>>>
 
+# unsafe
+
+FFI(Foreign Function Interface) 外部函数接口
+FFI 之所以存在是由于现实中很多代码库都是由不同语言编写的，如果我们需要使用某个库，但是它是由其它语言编写的，那么往往只有两个选择：
+
+- 对该库进行重写或者移植
+- 使用 FFI
+
+当然，除了 FFI 还有一个办法可以解决`跨语言调用的问题`，那就是将其作为一个独立的服务，然后使用网络调用的方式去访问，HTTP，gRPC 都可以。
+
+```rs
+// 调用 C 标准库中的 abs 函数：
+extern "C" {
+    // ABI(Application Binary Interface) 是指应用程序二进制接口，它定义了函数的调用约定，包括参数传递、返回值等
+    fn abs(input: i32) -> i32;
+}
+
+fn main() {
+    unsafe {
+        println!("Absolute value of -3 according to C: {}", abs(-3));
+    }
+}
+```
+
 ---
 
 - 命名规范
@@ -313,3 +337,7 @@ impl SomeTrait for AlwaysEqual {
     StripPrefixError
     它们都使用了 **谓语-宾语-错误** 的词序，如果我们想要表达一个网络地址无法分析的错误，由于词序一致性的原则，命名应该如下 ParseAddrError，而不是 AddrParseError。
     词序和个人习惯有很大关系，想要注意的是，你可以选择合适的词序，**但是要在包的范畴内保持一致性，就如标准库中的包一样**。
+
+---
+
+- #[no_mangle]，它用于告诉 Rust 编译器：不要乱改函数的名称
