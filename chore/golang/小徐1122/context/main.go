@@ -44,6 +44,7 @@ package main
 
 import (
 	"errors"
+	"internal/reflectlite"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -53,9 +54,6 @@ import (
 var closedchan = make(chan struct{})
 
 func init() { close(closedchan) }
-
-func main() {
-}
 
 // go 1.19// Context携带截止时间、取消信号和其他值跨API边界传递。
 //
@@ -168,7 +166,9 @@ type canceler interface {
 	Done() <-chan struct{}
 }
 
-func WithCancel(parent Context) (ctx Context, cancel func()) {
+type CancelFunc func()
+
+func WithCancel(parent Context) (ctx Context, cancel CancelFunc) {
 	if parent == nil {
 		panic("nil parent")
 	}
@@ -338,7 +338,40 @@ type timerCtx struct {
 	deadline time.Time
 }
 
-func (c *timerCtx) Deadline() (deadline time.Time, ok bool) { return c.deadline, true }
+func WithTimeOut(parent Context, timeout time.Duration) (Context, CancelFunc) {
+	return WithDeadline(parent, time.Now().Add(timeout))
+}
+
+func WithDeadline(parent Context, deadline time.Time) (Context, CancelFunc) {
+	if parent == nil {
+		panic("nil parent")
+	}
+	if cur, ok := parent.Deadline(); ok && deadline.Before(cur) {
+		// The current deadline is already sooner than the new one.
+		return WithCancel(parent)
+	}
+	c := &timerCtx{
+		deadline: deadline,
+	}
+	c.cancelCtx.propagateCancel(parent, c)
+	dur := time.Until(deadline)
+	if dur <= 0 {
+		c.cancel(true, DeadlineExceeded)
+		return c, func() { c.cancel(false, Canceled) }
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.err == nil {
+		c.timer = time.AfterFunc(dur, func() {
+			c.cancel(true, DeadlineExceeded)
+		})
+	}
+	return c, func() { c.cancel(true, Canceled) }
+}
+
+func (c *timerCtx) Deadline() (deadline time.Time, ok bool) {
+	return c.deadline, true
+}
 
 func (c *timerCtx) cancel(removeFromParent bool, err error) {
 	c.cancelCtx.cancel(false, err)
@@ -353,10 +386,73 @@ func (c *timerCtx) cancel(removeFromParent bool, err error) {
 	c.mu.Unlock()
 }
 
+// valueCtx 类似于 threadLocal，通过key-value的方式存储数据。
+// valueCtx 不适合视为存储介质，存放`大量`的 kv 数据
+// 只适合存放少量作用域较大的全局 meta 数据.
+type valueCtx struct {
+	Context
+	key, val any
+}
+
+// WithValue returns a copy of parent in which the value associated with key is
+// val.
+//
+// Use context Values only for request-scoped data that transits processes and
+// APIs, not for passing optional parameters to functions.
+//
+// The provided key must be comparable and should not be of type
+// string or any other built-in type to avoid collisions between
+// packages using context. Users of WithValue should define their own
+// types for keys. To avoid allocating when assigning to an
+// interface{}, context keys often have concrete type
+// struct{}. Alternatively, exported context key variables' static
+// type should be a pointer or interface.
+func WithValue(parent Context, key, val any) Context {
+	if parent == nil {
+		panic("nil parent")
+	}
+	if key == nil {
+		panic("nil key")
+	}
+	if !reflectlite.TypeOf(key).Comparable() {
+		panic("key is not comparable")
+	}
+	return &valueCtx{parent, key, val}
+}
+
+func (c *valueCtx) Value(key any) any {
+	if c.key == key {
+		return c.val
+	}
+	return value(c.Context, key)
+}
+
 // 向上查找 value.
+// 由下而上，由子及父，依次对 key 进行匹配；
+// 其中 cancelCtx、timerCtx、emptyCtx 类型会有特殊的处理方式；
+// 找到匹配的 key，则将该组 value 进行返回.
 func value(c Context, key any) any {
 	for {
 		switch ctx := c.(type) {
+		case *valueCtx:
+			if key == ctx.key {
+				return ctx.val
+			}
+			c = ctx.Context
+		case *cancelCtx:
+			if key == &cancelCtxKey {
+				return c
+			}
+			c = ctx.Context
+		case *timerCtx:
+			if key == &cancelCtxKey {
+				return &ctx.cancelCtx
+			}
+			c = ctx.Context
+		case *emptyCtx:
+			return nil
+		default:
+			return c.Value(key)
 		}
 	}
 }
