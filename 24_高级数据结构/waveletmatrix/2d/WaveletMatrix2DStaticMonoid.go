@@ -83,6 +83,9 @@ func (wm *WaveletMatrix2DStaticMonoid) Count(x1, x2, y1, y2 XY) int32 {
 	if wm.n == 0 {
 		return 0
 	}
+	if x1 >= x2 || y1 >= y2 {
+		return 0
+	}
 	x1, x2 = wm.xToIdx.Get(x1, wm.smallX), wm.xToIdx.Get(x2, wm.smallX)
 	y1, y2 = wm.yToIdx.Get(y1, wm.smallY), wm.yToIdx.Get(y2, wm.smallY)
 	return wm._prefixCount(y1, y2, x2) - wm._prefixCount(y1, y2, x1)
@@ -92,7 +95,7 @@ func (wm *WaveletMatrix2DStaticMonoid) Query(x1, x2, y1, y2 XY) Monoid {
 	if wm.n == 0 {
 		return e()
 	}
-	if x1 > x2 || y1 > y2 {
+	if x1 >= x2 || y1 >= y2 {
 		return e()
 	}
 	x1, x2 = wm.xToIdx.Get(x1, wm.smallX), wm.xToIdx.Get(x2, wm.smallX)

@@ -12,6 +12,36 @@ func main() {
 	yosupo()
 }
 
+// https://leetcode.cn/problems/find-the-number-of-ways-to-place-people-ii/
+// 如果围栏的 内部 或者 边缘 上有任何其他人，Alice 都会难过。
+func numberOfPairs(points [][]int) int {
+	wm := NewWaveletMatrix2DStaticAbelGroup(
+		int32(len(points)),
+		func(i int32) (x, y XY, w AbelGroup) {
+			return int32(points[i][0]), int32(points[i][1]), 1
+		},
+		false,
+		false,
+	)
+
+	res := int32(0)
+	for i := int32(0); i < int32(len(points)); i++ {
+		x1, y1 := int32(points[i][0]), int32(points[i][1])
+		for j := int32(0); j < int32(len(points)); j++ {
+			if i == j {
+				continue
+			}
+			x2, y2 := int32(points[j][0]), int32(points[j][1])
+			count := wm.Count(x1, x2+1, y2, y1+1)
+			if count == 2 {
+				res++
+			}
+		}
+	}
+
+	return int(res)
+}
+
 // https://judge.yosupo.jp/problem/rectangle_sum
 // 943 ms
 func yosupo() {
@@ -75,6 +105,9 @@ func (wm *WaveletMatrix2DStaticAbelGroup) Count(x1, x2, y1, y2 XY) int32 {
 	if wm.n == 0 {
 		return 0
 	}
+	if x1 >= x2 || y1 >= y2 {
+		return 0
+	}
 	x1, x2 = wm.xToIdx.Get(x1, wm.smallX), wm.xToIdx.Get(x2, wm.smallX)
 	y1, y2 = wm.yToIdx.Get(y1, wm.smallY), wm.yToIdx.Get(y2, wm.smallY)
 	return wm._prefixCount(y1, y2, x2) - wm._prefixCount(y1, y2, x1)
@@ -84,7 +117,7 @@ func (wm *WaveletMatrix2DStaticAbelGroup) Query(x1, x2, y1, y2 XY) AbelGroup {
 	if wm.n == 0 {
 		return e()
 	}
-	if x1 > x2 || y1 > y2 {
+	if x1 >= x2 || y1 >= y2 {
 		return e()
 	}
 	x1, x2 = wm.xToIdx.Get(x1, wm.smallX), wm.xToIdx.Get(x2, wm.smallX)

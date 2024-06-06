@@ -16,14 +16,13 @@ class PreSum2DDense:
                 tmpSum1[c + 1] = tmpM[c] + tmpSum0[c + 1] + tmpSum1[c] - tmpSum0[c]
         self._preSum = preSum
 
-    def sumRegion(self, r1: int, c1: int, r2: int, c2: int) -> int:
-        """查询sum(A[r1:r2+1, c1:c2+1])的值::
-
-        preSumMatrix.sumRegion(0, 0, 2, 2) # 左上角(0, 0)到右下角(2, 2)的值
-        """
+    def sumRegion(self, x1: int, x2: int, y1: int, y2: int) -> int:
+        """查询sum(A[x1:x2+1, y1:y2+1])的值(包含边界)."""
+        if x1 > x2 or y1 > y2:
+            return 0
         return (
-            self._preSum[r2 + 1][c2 + 1]
-            - self._preSum[r2 + 1][c1]
-            - self._preSum[r1][c2 + 1]
-            + self._preSum[r1][c1]
+            self._preSum[x2 + 1][y2 + 1]
+            - self._preSum[x2 + 1][y1]
+            - self._preSum[x1][y2 + 1]
+            + self._preSum[x1][y1]
         )

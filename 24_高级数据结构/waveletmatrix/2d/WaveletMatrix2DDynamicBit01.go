@@ -1,112 +1,46 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"math/bits"
-	"os"
 	"sort"
 )
 
-func main() {
-	// yosupo1()
-	yosupo2()
-}
+const INF32 int32 = 1e9 + 10
 
-// RectangleSum
-// https://judge.yosupo1.jp/problem/rectangle_sum
-// 1085 ms
-func yosupo1() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	X, Y, W := make([]int32, n), make([]int32, n), make([]int32, n)
-	for i := int32(0); i < n; i++ {
-		fmt.Fscan(in, &X[i], &Y[i], &W[i])
-	}
-	wm := NewWaveletMatrix2DDynamicAbelGroup(n, func(i int32) (x, y XY, w AbelGroup) {
-		return X[i], Y[i], AbelGroup(W[i])
-	}, false, false)
-	for i := int32(0); i < q; i++ {
-		var a, c, b, d int32
-		fmt.Fscan(in, &a, &c, &b, &d)
-		fmt.Fprintln(out, wm.Query(a, b, c, d))
-	}
-}
-
-// PointAddRectangleSum
-// https://judge.yosupo.jp/problem/point_add_rectangle_sum
-// 524 ms
-func yosupo2() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	X, Y, W := make([]int32, n), make([]int32, n), make([]int32, n)
-	for i := int32(0); i < n; i++ {
-		fmt.Fscan(in, &X[i], &Y[i], &W[i])
-	}
-	type query = [4]int32
-	queries := make([]query, q)
-	for i := int32(0); i < q; i++ {
-		var t int32
-		fmt.Fscan(in, &t)
-		if t == 0 {
-			var x, y, w int32
-			fmt.Fscan(in, &x, &y, &w)
-			X = append(X, x)
-			Y = append(Y, y)
-			W = append(W, 0)
-			queries[i] = query{-1, x, y, w}
-		} else {
-			var a, b, c, d int32
-			fmt.Fscan(in, &a, &b, &c, &d)
-			queries[i] = query{a, c, b, d}
-		}
-	}
-
+// https://leetcode.cn/problems/find-the-number-of-ways-to-place-people-ii/
+// 如果围栏的 内部 或者 边缘 上有任何其他人，Alice 都会难过。
+func numberOfPairs(points [][]int) int {
 	wm := NewWaveletMatrix2DDynamicAbelGroup(
-		int32(len(X)), func(i int32) (x, y XY, w AbelGroup) { return X[i], Y[i], AbelGroup(W[i]) },
-		false, false,
+		int32(len(points)),
+		func(i int32) (x, y XY, w bool) {
+			return int32(points[i][0]), int32(points[i][1]), true
+		},
+		false,
+		false,
 	)
-	ptr := n
-	for _, query := range queries {
-		if query[0] == -1 {
-			wm.Add(ptr, AbelGroup(query[3]))
-			ptr++
-		} else {
-			fmt.Fprintln(out, wm.Query(query[0], query[1], query[2], query[3]))
+
+	res := int32(0)
+	for i := int32(0); i < int32(len(points)); i++ {
+		x1, y1 := int32(points[i][0]), int32(points[i][1])
+		for j := int32(0); j < int32(len(points)); j++ {
+			if i == j {
+				continue
+			}
+			x2, y2 := int32(points[j][0]), int32(points[j][1])
+			count := wm.Count(x1, x2+1, y2, y1+1)
+			if count == 2 {
+				res++
+			}
 		}
 	}
-}
 
-func demo() {
-	points := [][]int32{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
-	wm := NewWaveletMatrix2DDynamicAbelGroup(int32(len(points)), func(i int32) (x, y XY, w AbelGroup) {
-		return XY(points[i][0]), XY(points[i][1]), AbelGroup(points[i][2])
-	}, false, false)
-	fmt.Println(wm.Count(1, 5, 2, 8)) // 2
-	fmt.Println(wm.Query(1, 5, 2, 8)) // 9
-	fmt.Println(wm.QueryPrefix(2, 3)) // 3
-	wm.Add(0, 1)
-	fmt.Println(wm.QueryPrefix(2, 3)) // 4
+	return int(res)
 }
 
 type XY = int32
-type Weight = int32
-type AbelGroup = int
-
-func e() AbelGroup                { return 0 }
-func op(a, b AbelGroup) AbelGroup { return a + b }
-func inv(a AbelGroup) AbelGroup   { return -a }
 
 // y维度升序排列，x维度按照BinaryTrie构建.
-type WaveletMatrix2DDynamicAbelGroup struct {
+type WaveletMatrix2DDynamicBit01 struct {
 	smallX, smallY bool
 	xToIdx, yToIdx *ToIdx
 	n, lg          int32
@@ -114,34 +48,46 @@ type WaveletMatrix2DDynamicAbelGroup struct {
 	bv             []*bitVector
 	newIdx         []int32
 	A              []int32
-	dat            []*bitGroup
+	dat            []*bitArray0132
 }
 
 func NewWaveletMatrix2DDynamicAbelGroup(
-	n int32, f func(i int32) (x, y XY, w AbelGroup),
+	n int32, f func(i int32) (x, y XY, w bool),
 	smallX, smallY bool,
-) *WaveletMatrix2DDynamicAbelGroup {
-	res := &WaveletMatrix2DDynamicAbelGroup{smallX: smallX, smallY: smallY, xToIdx: NewToIdx(), yToIdx: NewToIdx()}
+) *WaveletMatrix2DDynamicBit01 {
+	res := &WaveletMatrix2DDynamicBit01{smallX: smallX, smallY: smallY, xToIdx: NewToIdx(), yToIdx: NewToIdx()}
 	res._build(n, f)
 	return res
 }
 
-// pointIndex: 初始化时的点的索引.
-// w: 权值.
-func (wm *WaveletMatrix2DDynamicAbelGroup) Add(pointIndex int32, w AbelGroup) {
-	pointIndex = wm.newIdx[pointIndex]
-	a := wm.A[pointIndex]
+// pid: 初始化时的点的索引.
+func (wm *WaveletMatrix2DDynamicBit01) Add(pid int32) {
+	pid = wm.newIdx[pid]
+	a := wm.A[pid]
 	for d := wm.lg - 1; d >= 0; d-- {
 		if (a>>d)&1 == 1 {
-			pointIndex = wm.mid[d] + wm.bv[d].Rank(pointIndex, true)
+			pid = wm.mid[d] + wm.bv[d].Rank(pid, true)
 		} else {
-			pointIndex = wm.bv[d].Rank(pointIndex, false)
+			pid = wm.bv[d].Rank(pid, false)
 		}
-		wm.dat[d].Update(pointIndex, w)
+		wm.dat[d].Add(pid)
 	}
 }
 
-func (wm *WaveletMatrix2DDynamicAbelGroup) Count(x1, x2, y1, y2 XY) int32 {
+func (wm *WaveletMatrix2DDynamicBit01) Remove(pid int32) {
+	pid = wm.newIdx[pid]
+	a := wm.A[pid]
+	for d := wm.lg - 1; d >= 0; d-- {
+		if (a>>d)&1 == 1 {
+			pid = wm.mid[d] + wm.bv[d].Rank(pid, true)
+		} else {
+			pid = wm.bv[d].Rank(pid, false)
+		}
+		wm.dat[d].Remove(pid)
+	}
+}
+
+func (wm *WaveletMatrix2DDynamicBit01) Count(x1, x2, y1, y2 XY) int32 {
 	if wm.n == 0 {
 		return 0
 	}
@@ -153,36 +99,34 @@ func (wm *WaveletMatrix2DDynamicAbelGroup) Count(x1, x2, y1, y2 XY) int32 {
 	return wm._countInner(y1, y2, x2) - wm._countInner(y1, y2, x1)
 }
 
-func (wm *WaveletMatrix2DDynamicAbelGroup) Query(x1, x2, y1, y2 XY) AbelGroup {
+func (wm *WaveletMatrix2DDynamicBit01) Query(x1, x2, y1, y2 XY) int32 {
 	if wm.n == 0 {
-		return e()
+		return 0
 	}
 	if x1 >= x2 || y1 >= y2 {
-		return e()
+		return 0
 	}
 	x1, x2 = wm.xToIdx.Get(x1, wm.smallX), wm.xToIdx.Get(x2, wm.smallX)
 	y1, y2 = wm.yToIdx.Get(y1, wm.smallY), wm.yToIdx.Get(y2, wm.smallY)
-	add := wm._sumInner(y1, y2, x2)
-	sub := wm._sumInner(y1, y2, x1)
-	return op(add, inv(sub))
+	return wm._sumInner(y1, y2, x2) - wm._sumInner(y1, y2, x1)
 }
 
-func (wm *WaveletMatrix2DDynamicAbelGroup) QueryPrefix(x, y XY) AbelGroup {
+func (wm *WaveletMatrix2DDynamicBit01) QueryPrefix(x, y XY) int32 {
 	if wm.n == 0 {
-		return e()
+		return 0
 	}
 	x = wm.xToIdx.Get(x, wm.smallX)
 	y = wm.yToIdx.Get(y, wm.smallY)
 	return wm._sumInner(0, y, x)
 }
 
-func (wm *WaveletMatrix2DDynamicAbelGroup) _build(n int32, f func(i int32) (x, y XY, w AbelGroup)) {
+func (wm *WaveletMatrix2DDynamicBit01) _build(n int32, f func(i int32) (x, y XY, w bool)) {
 	wm.n = n
 	if n == 0 {
 		wm.lg = 0
 		return
 	}
-	tmp, Y, S := make([]XY, n), make([]XY, n), make([]AbelGroup, n)
+	tmp, Y, S := make([]XY, n), make([]XY, n), make([]bool, n)
 	for i := int32(0); i < n; i++ {
 		tmp[i], Y[i], S[i] = f(i)
 	}
@@ -204,14 +148,14 @@ func (wm *WaveletMatrix2DDynamicAbelGroup) _build(n int32, f func(i int32) (x, y
 	for i := range wm.bv {
 		wm.bv[i] = newBitVector(n)
 	}
-	wm.dat = make([]*bitGroup, wm.lg)
+	wm.dat = make([]*bitArray0132, wm.lg)
 	wm.A = make([]int32, n)
 	for i := int32(0); i < n; i++ {
 		wm.A[i] = wm.xToIdx.Get(tmp[i], wm.smallX)
 	}
 
 	A0, A1 := make([]XY, n), make([]XY, n)
-	S0, S1 := make([]AbelGroup, n), make([]AbelGroup, n)
+	S0, S1 := make([]bool, n), make([]bool, n)
 	for d := wm.lg - 1; d >= 0; d-- {
 		p0, p1 := int32(0), int32(0)
 		for i := int32(0); i < n; i++ {
@@ -233,14 +177,14 @@ func (wm *WaveletMatrix2DDynamicAbelGroup) _build(n int32, f func(i int32) (x, y
 			wm.A[p0+i] = A1[i]
 			S[p0+i] = S1[i]
 		}
-		wm.dat[d] = NewBITGroupFrom(n, func(i int32) AbelGroup { return S[i] })
+		wm.dat[d] = newBitArray0132From(n, func(i int32) bool { return S[i] })
 	}
 	for i := int32(0); i < n; i++ {
 		wm.A[i] = wm.xToIdx.Get(tmp[i], wm.smallX)
 	}
 }
 
-func (wm *WaveletMatrix2DDynamicAbelGroup) _countInner(L, R, x int32) int32 {
+func (wm *WaveletMatrix2DDynamicBit01) _countInner(L, R, x int32) int32 {
 	cnt := int32(0)
 	for d := wm.lg - 1; d >= 0; d-- {
 		l0, r0 := wm.bv[d].Rank(L, false), wm.bv[d].Rank(R, false)
@@ -255,15 +199,15 @@ func (wm *WaveletMatrix2DDynamicAbelGroup) _countInner(L, R, x int32) int32 {
 	return cnt
 }
 
-func (wm *WaveletMatrix2DDynamicAbelGroup) _sumInner(L, R, x int32) AbelGroup {
+func (wm *WaveletMatrix2DDynamicBit01) _sumInner(L, R, x int32) int32 {
 	if x == 0 {
-		return e()
+		return 0
 	}
-	sum := e()
+	sum := int32(0)
 	for d := wm.lg - 1; d >= 0; d-- {
 		l0, r0 := wm.bv[d].Rank(L, false), wm.bv[d].Rank(R, false)
 		if (x>>d)&1 == 1 {
-			sum = op(sum, wm.dat[d].QueryRange(l0, r0))
+			sum += wm.dat[d].QueryRange(l0, r0)
 			L += wm.mid[d] - l0
 			R += wm.mid[d] - r0
 		} else {
@@ -333,82 +277,136 @@ func (bv *bitVector) Rank(k int32, f bool) int32 {
 	return k - res
 }
 
-type bitGroup struct {
-	n     int32
-	data  []AbelGroup
-	total AbelGroup
+// 01树状数组.
+type bitArray0132 struct {
+	n    int32
+	size int32 // data、bit的长度
+	data []uint64
+	bit  *bitArray32
 }
 
-func newBITGroup(n int32) *bitGroup {
-	data := make([]AbelGroup, n)
-	for i := range data {
-		data[i] = e()
+func newBitArray0132(n int32) *bitArray0132 {
+	size := int32(n>>6 + 1)
+	data := make([]uint64, size)
+	bit := newBitArray32(size)
+	return &bitArray0132{n: n, size: size, data: data, bit: bit}
+}
+
+func newBitArray0132From(n int32, f func(index int32) bool) *bitArray0132 {
+	size := n>>6 + 1
+	data := make([]uint64, size)
+	for i := int32(0); i < n; i++ {
+		if f(i) {
+			data[i>>6] |= 1 << (i & 63)
+		}
 	}
-	return &bitGroup{n: n, data: data, total: e()}
+	bit := newBitArray32From(size, func(i int32) int32 { return int32(bits.OnesCount64(data[i])) })
+	return &bitArray0132{n: n, size: size, data: data, bit: bit}
+}
+func (bit01 *bitArray0132) QueryPrefix(end int32) int32 {
+	i, j := end>>6, end&63
+	res := bit01.bit.QueryPrefix(i)
+	res += int32(bits.OnesCount64(bit01.data[i] & ((1 << j) - 1)))
+	return res
 }
 
-func NewBITGroupFrom(n int32, f func(index int32) AbelGroup) *bitGroup {
-	total := e()
-	data := make([]AbelGroup, n)
-	for i := range data {
-		data[i] = f(int32(i))
-		total = op(total, data[i])
+func (bit01 *bitArray0132) QueryRange(start, end int32) int32 {
+	if start >= end {
+		return 0
+	}
+	if start == 0 {
+		return bit01.QueryPrefix(end)
+	}
+	res := int32(0)
+	res -= int32(bits.OnesCount64(bit01.data[start>>6] & ((1 << (start & 63)) - 1)))
+	res += int32(bits.OnesCount64(bit01.data[end>>6] & ((1 << (end & 63)) - 1)))
+	res += bit01.bit.QueryRange(start>>6, end>>6)
+	return res
+}
+
+func (bit01 *bitArray0132) Add(index int32) bool {
+	i, j := index>>6, index&63
+	if (bit01.data[i]>>j)&1 == 1 {
+		return false
+	}
+	bit01.data[i] |= 1 << j
+	bit01.bit.Add(i, 1)
+	return true
+}
+
+func (bit01 *bitArray0132) Remove(index int32) bool {
+	i, j := index>>6, index&63
+	if (bit01.data[i]>>j)&1 == 0 {
+		return false
+	}
+	bit01.data[i] ^= 1 << j
+	bit01.bit.Add(i, -1)
+	return true
+}
+
+func (bit01 *bitArray0132) Has(index int32) bool {
+	i, j := index>>6, index&63
+	return (bit01.data[i]>>j)&1 == 1
+}
+
+// !Point Add Range Sum, 0-based.
+type bitArray32 struct {
+	n    int32
+	data []int32
+}
+
+func newBitArray32(n int32) *bitArray32 {
+	res := &bitArray32{n: n, data: make([]int32, n)}
+	return res
+}
+
+func newBitArray32From(n int32, f func(i int32) int32) *bitArray32 {
+	data := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		data[i] = f(i)
 	}
 	for i := int32(1); i <= n; i++ {
 		j := i + (i & -i)
 		if j <= n {
-			data[j-1] = op(data[j-1], data[i-1])
+			data[j-1] += data[i-1]
 		}
 	}
-	return &bitGroup{n: n, data: data, total: total}
+	return &bitArray32{n: n, data: data}
 }
 
-func (fw *bitGroup) Update(i int32, x AbelGroup) {
-	fw.total = op(fw.total, x)
-	for i++; i <= fw.n; i += i & -i {
-		fw.data[i-1] = op(fw.data[i-1], x)
+func (b *bitArray32) Add(index int32, v int32) {
+	for index++; index <= b.n; index += index & -index {
+		b.data[index-1] += v
 	}
 }
 
-func (fw *bitGroup) QueryAll() AbelGroup { return fw.total }
-
-// [0, end)
-func (fw *bitGroup) QueryPrefix(end int32) AbelGroup {
-	if end > fw.n {
-		end = fw.n
-	}
-	res := e()
-	for end > 0 {
-		res = op(res, fw.data[end-1])
-		end &= end - 1
+// [0, end).
+func (b *bitArray32) QueryPrefix(end int32) int32 {
+	res := int32(0)
+	for ; end > 0; end -= end & -end {
+		res += b.data[end-1]
 	}
 	return res
 }
 
-// [start, end)
-func (fw *bitGroup) QueryRange(start, end int32) AbelGroup {
-	if start < 0 {
-		start = 0
-	}
-	if end > fw.n {
-		end = fw.n
+// [start, end).
+func (b *bitArray32) QueryRange(start, end int32) int32 {
+	if start >= end {
+		return 0
 	}
 	if start == 0 {
-		return fw.QueryPrefix(end)
+		return b.QueryPrefix(end)
 	}
-	if start > end {
-		return e()
-	}
-	pos, neg := e(), e()
+	pos, neg := int32(0), int32(0)
 	for end > start {
-		pos = op(pos, fw.data[end-1])
+		pos += b.data[end-1]
 		end &= end - 1
 	}
 	for start > end {
-		neg = op(neg, fw.data[start-1])
+		neg += b.data[start-1]
 		start &= start - 1
 	}
-	return op(pos, inv(neg))
+	return pos - neg
 }
 
 func mins(nums []XY, defaultValue XY) XY {

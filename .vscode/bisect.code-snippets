@@ -8012,5 +8012,33 @@
       ""
     ],
     "description": "input for rust"
+  },
+  "SortedSet": {
+    "scope": "go",
+    "prefix": "SortedSet",
+    "body": [
+      "",
+      "type Int interface {",
+      "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64",
+      "}",
+      "",
+      "func SortedSet[T Int](n int32, getX func(i int32) T) (newX []T, xtoi map[T]int32) {",
+      "\tallNums := make(map[T]struct{})",
+      "\tfor i := int32(0); i < n; i++ {",
+      "\t\tallNums[getX(i)] = struct{}{}",
+      "\t}",
+      "\tnewX = make([]T, 0, len(allNums))",
+      "\tfor x := range allNums {",
+      "\t\tnewX = append(newX, x)",
+      "\t}",
+      "\tsort.Slice(newX, func(i, j int) bool { return newX[i] < newX[j] })",
+      "\txtoi = make(map[T]int32, len(newX))",
+      "\tfor i, x := range newX {",
+      "\t\txtoi[x] = int32(i)",
+      "\t}",
+      "\treturn",
+      "}"
+    ],
+    "description": "离散化"
   }
 }

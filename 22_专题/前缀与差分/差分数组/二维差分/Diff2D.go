@@ -11,6 +11,7 @@ func main() {
 	fmt.Println(D.Query(1, 1)) // 15
 }
 
+// 二维差分(DiffMatrix2D).
 type Diff2D struct {
 	Matrix   [][]int
 	diff     [][]int

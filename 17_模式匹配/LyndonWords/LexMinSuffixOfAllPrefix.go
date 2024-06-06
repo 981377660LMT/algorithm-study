@@ -1,31 +1,23 @@
+// LexMinSuffixOfAllPrefix/MinLexSuffixOfAllPrefix
+// 所有前缀的字典序最小后缀(的长度).
+
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"os"
-)
+import "fmt"
 
 func main() {
-	yosupo()
+	s := "ababa"
+	res := LexMinSuffixOfAllPrefix(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+	fmt.Println(res)
 }
 
-// https://judge.yosupo.jp/problem/lyndon_factorization
-func yosupo() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var s string
-	fmt.Fscan(in, &s)
+// res[i] 表示前缀 s[0:i) 的字典序最小后缀的长度.
+func LexMinSuffixOfAllPrefix(n int32, f func(i int32) int32) []int32 {
 	L := NewIncrementalLyndonFactorization()
-	for _, c := range s {
-		L.Add(c)
+	for i := int32(0); i < n; i++ {
+		L.Add(f(i))
 	}
-	res := L.Factorize()
-	for _, v := range res {
-		fmt.Fprint(out, v, " ")
-	}
+	return L.MinSuffixLen
 }
 
 type IncrementalLyndonFactorization struct {

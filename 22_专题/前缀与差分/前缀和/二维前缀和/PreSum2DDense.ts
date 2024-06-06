@@ -21,7 +21,8 @@ class PreSum2DDense {
         const offset0 = r * (col + 1)
         const offset1 = (r + 1) * (col + 1)
         for (let c = 0; c < col; c++) {
-          preSum[offset1 + c + 1] = arg2(r, c) + preSum[offset0 + c + 1] + preSum[offset1 + c] - preSum[offset0 + c]
+          preSum[offset1 + c + 1] =
+            arg2(r, c) + preSum[offset0 + c + 1] + preSum[offset1 + c] - preSum[offset0 + c]
         }
       }
     } else {
@@ -30,7 +31,8 @@ class PreSum2DDense {
         const offset1 = (r + 1) * (col + 1)
         const matRow = arg0[r]
         for (let c = 0; c < col; c++) {
-          preSum[offset1 + c + 1] = matRow[c] + preSum[offset0 + c + 1] + preSum[offset1 + c] - preSum[offset0 + c]
+          preSum[offset1 + c + 1] =
+            matRow[c] + preSum[offset0 + c + 1] + preSum[offset1 + c] - preSum[offset0 + c]
         }
       }
     }
@@ -40,15 +42,15 @@ class PreSum2DDense {
   }
 
   /**
-   * 返回 左上角 `(row1, col1)` 、右下角 `(row2, col2)` 闭区间所描述的子矩阵的元素总和 。
+   * 查询sum(A[x1:x2+1, y1:y2+1])的值(包含边界).
    */
-  queryRange(row1: number, col1: number, row2: number, col2: number): number {
+  queryRange(x1: number, x2: number, y1: number, y2: number): number {
     const col = this._col + 1
     return (
-      this._preSum[(row2 + 1) * col + col2 + 1] -
-      this._preSum[(row2 + 1) * col + col1] -
-      this._preSum[row1 * col + col2 + 1] +
-      this._preSum[row1 * col + col1]
+      this._preSum[(x2 + 1) * col + y2 + 1] -
+      this._preSum[(x2 + 1) * col + y1] -
+      this._preSum[x1 * col + y2 + 1] +
+      this._preSum[x1 * col + y1]
     )
   }
 }
