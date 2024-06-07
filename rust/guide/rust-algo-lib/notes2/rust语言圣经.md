@@ -299,6 +299,60 @@ fn main() {
    |创建| 0.3 微秒| 17 微秒|
    |线程切换| 0.2 微秒| 1.7 微秒|
 
+# cargo 使用
+
+Cargo 为了实现目标，做了四件事：
+
+- 引入两个元数据文件，包含项目的方方面面信息: Cargo.toml 和 Cargo.lock
+- 获取和构建项目的依赖，例如 Cargo.toml 中的依赖包版本描述，以及从 crates.io 下载包
+- 调用 rustc (或其它编译器) 并使用的正确的参数来构建项目，例如 cargo build
+- 引入一些惯例，让项目的使用更加简单
+
+1. 标准 package 结构
+
+```
+一个典型的 Package 目录结构如下：
+
+.
+├── Cargo.lock
+├── Cargo.toml
+├── src/
+│   ├── lib.rs
+│   ├── main.rs
+│   └── bin/
+│       ├── named-executable.rs
+│       ├── another-executable.rs
+│       └── multi-file-executable/
+│           ├── main.rs
+│           └── some_module.rs
+├── benches/
+│   ├── large-input.rs
+│   └── multi-file-bench/
+│       ├── main.rs
+│       └── bench_module.rs
+├── examples/
+│   ├── simple.rs
+│   └── multi-file-example/
+│       ├── main.rs
+│       └── ex_module.rs
+└── tests/
+    ├── some-integration-tests.rs
+    └── multi-file-test/
+        ├── main.rs
+        └── test_module.rs
+```
+
+2. 是否上传本地的 Cargo.lock
+
+- 从实践角度出发，如果你构建的是三方`库`类型的服务，请把 Cargo.lock 加入到 .gitignore 中。
+- 若构建的是一个面向用户终端的产品，例如可以像`命令行工具、应用程序`一样执行，那就把 Cargo.lock 上传到源代码目录中。
+
+3. 指定依赖项
+
+4. 条件编译 Features
+   Conditional compilation
+   Feature 可以通过 Cargo.toml 中的 [features] 部分来定义：其中每个 feature 通过列表的方式指定了它所能启用的其他 feature 或可选依赖。
+
 ---
 
 - 命名规范
