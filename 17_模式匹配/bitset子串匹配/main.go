@@ -163,6 +163,7 @@ type BitSetDynamic struct {
 }
 
 // 建立一个大小为 n 的 bitset，初始值为 filledValue.
+// [0,n).
 func NewBitsetDynamic(n int, filledValue int) *BitSetDynamic {
 	if !(filledValue == 0 || filledValue == 1) {
 		panic("filledValue should be 0 or 1")
@@ -242,6 +243,7 @@ func (bs *BitSetDynamic) FlipRange(start, end int) {
 }
 
 // 左移 k 位 (<<k).
+// !不能配合切片使用.必须保证lsh后的值域不超过原值域.
 func (b *BitSetDynamic) Lsh(k int) {
 	if k == 0 {
 		return

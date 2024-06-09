@@ -94,10 +94,15 @@ class BitSet {
   private _n: number
   private _bits: Uint32Array
 
+  /**
+   * @param n 左闭右开区间`[0, n)`.
+   */
   constructor(n: number, filledValue: 0 | 1 = 0) {
     if (n < 0) throw new RangeError('n must be non-negative')
     this._n = n
-    this._bits = filledValue ? new Uint32Array((n >>> 5) + 1).fill(~0) : new Uint32Array((n >>> 5) + 1)
+    this._bits = filledValue
+      ? new Uint32Array((n >>> 5) + 1).fill(~0)
+      : new Uint32Array((n >>> 5) + 1)
     if (n) this._bits[this._bits.length - 1] >>>= (this._bits.length << 5) - n
   }
 
@@ -174,6 +179,7 @@ class BitSet {
   /**
    * 左移k位(<<k).
    * !TODO:需要处理位移超出n位后多出来的1的情况.
+   * @warning **不能配合切片使用.必须保证lsh后的位数不超过原位数**.
    */
   lsh(k: number): BitSet {
     if (!k) return this
@@ -187,7 +193,8 @@ class BitSet {
       this._bits.copyWithin(shift, 0)
     } else {
       for (let i = this._bits.length - 1; i > shift; i--) {
-        this._bits[i] = (this._bits[i - shift] << offset) | (this._bits[i - shift - 1] >>> (32 - offset))
+        this._bits[i] =
+          (this._bits[i - shift] << offset) | (this._bits[i - shift - 1] >>> (32 - offset))
       }
       this._bits[shift] = this._bits[0] << offset
     }
@@ -211,7 +218,8 @@ class BitSet {
       this._bits.copyWithin(0, shift)
     } else {
       for (let i = 0; i < limit; i++) {
-        this._bits[i] = (this._bits[i + shift] >>> offset) | (this._bits[i + shift + 1] << (32 - offset))
+        this._bits[i] =
+          (this._bits[i + shift] >>> offset) | (this._bits[i + shift + 1] << (32 - offset))
       }
       this._bits[limit] = this._bits[this._bits.length - 1] >>> offset
     }

@@ -1,5 +1,7 @@
+mod design_book;
+mod example;
 mod pattern;
-use std::time::Instant;
+use std::{time::Instant, vec};
 
 mod lc;
 mod lib2;
@@ -12,199 +14,80 @@ struct Person<'a> {
     age: u8,
 }
 
-fn main() {
-    let name = "Peter";
-    let age = 27;
-    let peter = Person { name, age };
-    println!("{:?}", peter);
-
-    // 专门用于调试的断言
-    debug_assert_eq!(peter.age, 27);
-
-    let now = Instant::now();
-    Solution::find_permutation(vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
-    println!("{:?}", now.elapsed());
-    let now = Instant::now();
-    let mut sum: i64 = 0;
-    for i in 0..1e9 as i32 {
-        sum += i as i64;
-    }
-    println!("{}", sum);
-    println!("{:?}", now.elapsed());
-
-    debug_assert_eq!(1, 2);
-
-    let cond = if 1 > 0 { 1 } else { 0 };
-} // Person { name: "Peter", age: 27 }
-
-// package main
-
-// import "sort"
-
-// const INF int32 = 1e9 + 10
-
-// func findPermutation(nums []int) []int {
-// 	if sort.IntsAreSorted(nums) {
-// 		return append([]int(nil), nums...)
-// 	}
-// 	n := int32(len(nums))
-// 	newNums := make([]int32, n)
-// 	for i := range nums {
-// 		newNums[i] = int32(nums[i])
-// 	}
-
-// 	resCost, res := INF, []int32{INF}
-// 	for i := int32(0); i < n; i++ {
-// 		memo := make([]int32, n*(1<<n)*n)
-// 		for i := range memo {
-// 			memo[i] = -1
-// 		}
-// 		next_ := make([]int32, n*(1<<n)*n)
-// 		hash := func(index, visited, pre int32) int32 {
-// 			return index*(1<<n)*n + visited*n + pre
-// 		}
-
-// 		first := i
-// 		var dfs func(index, visited, pre int32) int32
-// 		dfs = func(index, visited, pre int32) int32 {
-// 			if index == n {
-// 				return abs(pre - newNums[first])
-// 			}
-// 			hash_ := hash(index, visited, pre)
-// 			if memo[hash_] != -1 {
-// 				return memo[hash_]
-// 			}
-
-// 			resCost := INF
-// 			for next := int32(0); next < n; next++ {
-// 				if visited&(1<<next) > 0 {
-// 					continue
-// 				}
-// 				nextCost := dfs(index+1, visited|(1<<next), next) + abs(pre-newNums[next])
-// 				if nextCost < resCost {
-// 					resCost = nextCost
-// 					curHash := hash(index, visited, pre)
-// 					nextHash := hash(index+1, visited|(1<<next), next)
-// 					next_[curHash] = nextHash
-// 				}
-// 			}
-// 			memo[hash_] = resCost
-// 			return resCost
-// 		}
-// 		tmp := dfs(1, 1<<i, i)
-
-// 		if tmp < resCost {
-// 			resCost = tmp
-// 			curRes := []int32{i}
-// 			curState := hash(1, 1<<i, i)
-// 			for i := int32(1); i < n; i++ {
-// 				curState = next_[curState]
-// 				curRes = append(curRes, curState%n)
-// 			}
-// 			res = curRes
-// 		}
-// 	}
-
-// 	newRes := make([]int, n)
-// 	for i := range res {
-// 		newRes[i] = int(res[i])
-// 	}
-// 	return newRes
-// }
-
-// func abs(a int32) int32 {
-// 	if a < 0 {
-// 		return -a
-// 	}
-// 	return a
-// }
-
-const INF: i32 = 1e9 as i32 + 10;
-
-struct Solution;
+struct Solution {}
 
 impl Solution {
-    pub fn find_permutation(nums: Vec<i32>) -> Vec<i32> {
+    fn maximum_length(nums: Vec<i32>, k: i32) -> i32 {
         let n = nums.len() as i32;
-        let mut res_cost = INF;
-        let mut res = vec![INF];
-        let mut memo = vec![-1; (n * (1 << n) * n) as usize];
-        let mut transfer = vec![0; (n * (1 << n) * n) as usize];
+        let mut memo = vec![0i16; (n * (n + 1) * (k + 1)) as usize];
+        (0..memo.len()).for_each(|i| {
+            memo[i] = -1;
+        });
+
+        // fn dfs(
+        //     index: i32,
+        //     pre: i32,
+        //     count: i32,
+        //     n: i32,
+        //     k: i32,
+        //     memo: &mut Vec<i16>,
+        //     nums: &Vec<i32>,
+        // ) -> i16 {
+        //     if count > k {
+        //         return -1;
+        //     }
+        //     if index == n {
+        //         return 0;
+        //     }
+
+        //     let hash = (index * n * (k + 1) + pre * (k + 1) + count) as usize;
+        //     if memo[hash] != -1 {
+        //         return memo[hash];
+        //     }
+
+        //     let mut res = 0;
+        //     let bad = (pre != 0 && nums[(pre - 1) as usize] != nums[index as usize]) as i32;
+        //     res = res.max(dfs(index + 1, index + 1, count + bad, n, k, memo, nums) + 1);
+        //     res = res.max(dfs(index + 1, pre, count, n, k, memo, nums));
+        //     memo[hash] = res;
+        //     res
+        // }
+
+        // dfs(0, 0, 0, n, k, &mut memo, &nums) as i32
+        let mut dp = vec![-1; (n * (n + 1) * (k + 1)) as usize];
+        (0..dp.len()).for_each(|i| {
+            dp[i] = -1;
+        });
+
+        dp[0] = 0;
         for i in 0..n {
-            for i in 0..memo.len() {
-                memo[i] = -1;
-            }
-            fn hash(n: i32, index: i32, visited: i32, pre: i32) -> i32 {
-                index * (1 << n) * n + visited * n + pre
-            }
-
-            fn dfs(
-                index: i32,
-                visited: i32,
-                pre: i32,
-                memo: &mut Vec<i32>,
-                transfer: &mut Vec<i32>,
-                nums: &Vec<i32>,
-                n: i32,
-                first: usize,
-            ) -> i32 {
-                if index == n {
-                    return (pre - nums[first]).abs();
-                }
-                let hash_ = hash(n, index, visited, pre);
-                if memo[hash_ as usize] != -1 {
-                    return memo[hash_ as usize];
-                }
-
-                let mut res_cost = INF;
-                for next in 0..n {
-                    if visited & (1 << next) > 0 {
+            for j in 0..=i {
+                for c in 0..=k {
+                    let hash = (i * n * (k + 1) + j * (k + 1) + c) as usize;
+                    if dp[hash] == -1 {
                         continue;
                     }
-                    let next_cost = dfs(
-                        index + 1,
-                        visited | (1 << next),
-                        next,
-                        memo,
-                        transfer,
-                        nums,
-                        n,
-                        first,
-                    ) + (pre - nums[next as usize]).abs();
-                    if next_cost < res_cost {
-                        res_cost = next_cost;
-                        let cur_hash = hash(n, index, visited, pre);
-                        let next_hash = hash(n, index + 1, visited | (1 << next), next);
-                        transfer[cur_hash as usize] = next_hash;
-                    }
+
+                    let res = dp[hash];
+                    let bad = (j != 0 && nums[(j - 1) as usize] != nums[i as usize]) as i32;
+                    let hash = (i + 1) * n * (k + 1) + i * (k + 1) + c + bad;
+                    dp[hash as usize] = dp[hash as usize].max(res + 1);
+                    let hash = (i + 1) * n * (k + 1) + j * (k + 1) + c;
+                    dp[hash as usize] = dp[hash as usize].max(res);
                 }
-                memo[hash_ as usize] = res_cost;
-                return res_cost;
             }
+        }
 
-            let tmp = dfs(1, 1 << i, i, &mut memo, &mut transfer, &nums, n, i as usize);
-
-            if tmp < res_cost {
-                res_cost = tmp;
-                let mut cur_res = vec![i];
-                let mut cur_state = hash(n, 1, 1 << i, i);
-                for _ in 1..n {
-                    cur_state = transfer[cur_state as usize];
-                    cur_res.push(cur_state % n);
+        let mut res = 0;
+        for i in 0..n {
+            for j in 0..=i {
+                for c in 0..=k {
+                    let hash = (i * n * (k + 1) + j * (k + 1) + c) as usize;
+                    res = res.max(dp[hash]);
                 }
-                res = cur_res;
             }
         }
 
         res
     }
-}
-
-fn is_sorted<T: PartialOrd>(nums: &Vec<T>) -> bool {
-    for i in 1..nums.len() {
-        if nums[i] < nums[i - 1] {
-            return false;
-        }
-    }
-    true
 }

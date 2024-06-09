@@ -161,6 +161,7 @@ type BitSetDynamic32 struct {
 }
 
 // 建立一个大小为 n 的 bitset，初始值为 filledValue.
+// [0,n).
 func NewBitsetDynamic32(n int32, filledValue int32) *BitSetDynamic32 {
 	if !(filledValue == 0 || filledValue == 1) {
 		panic("filledValue should be 0 or 1")
