@@ -68,5 +68,7 @@
   "python.formatting.provider": "black",
   "code-runner.executorMap": {
     "typescript": "ts-node-dev --respawn --transpile-only"
-  }
+  },
+  "rust-analyzer.runnables.command": "cargo watch",
+  "rust-analyzer.runnables.extraTestBinaryArgs": ["--nocapture", "--color=always"]
 }

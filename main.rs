@@ -90,4 +90,6 @@ pub mod leetcode;
 pub mod rust;
 
 /// Root.
-fn main() {}
+fn main() {
+    println!("111")
+}

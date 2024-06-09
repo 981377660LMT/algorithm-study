@@ -1,13 +1,21 @@
-use crate::rust::{ds::union_find::UnionFind, misc::io::run_with_io};
-use std::io::Write;
+use crate::rust::{
+    ds::union_find::UnionFind,
+    misc::io::{run_with_io, scanner::Scanner},
+};
+
+use std::io::{BufWriter, Stdout, Write};
 
 fn main() {
-    let mut uf = UnionFind::new(10);
-    println!("{}", uf.is_connected(0, 1));
     run_with_io(|reader, writer| {
-        let a: i32 = reader.next();
-        writeln!(writer, "{}", a).unwrap();
-    })
+        run(reader, writer);
+    });
+}
+
+fn run(reader: &mut Scanner, writer: &mut BufWriter<Stdout>) {
+    let a: i32 = reader.next();
+    let b: i32 = reader.next();
+    writeln!(writer, "{}", a).unwrap();
+    writeln!(writer, "{}", b).unwrap();
 }
 
 #[cfg(test)]
