@@ -1,6 +1,19 @@
 [package]
-name = "js-algorithm"
+name = "rust-algorithm"
 version = "0.1.0"
 edition = "2021"
 
+
+[[bin]]
+name = "main"
+path = "main.rs"
+
+
+[package.metadata.scripts]
+run = "cargo run"
+check = "cargo check"
+build = "cargo build"
+release = "cargo build --release"
+
 [dependencies]
+rand = "0.8.5"
