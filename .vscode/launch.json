@@ -40,14 +40,11 @@
       "projectName": "js-algorithm_ad32c0b2"
     },
     {
-      "name": "ts-node",
-      "type": "node",
+      "name": "rust",
+      "type": "lldb",
       "request": "launch",
-      "args": ["${relativeFile}"],
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "cwd": "${workspaceRoot}",
-      "protocol": "inspector",
-      "internalConsoleOptions": "openOnSessionStart"
+      "program": "${file}",
+      "console": "integratedTerminal"
     }
   ]
 }

@@ -85,6 +85,8 @@ pub mod misc;
 pub mod atcoder;
 pub mod chore;
 pub mod leetcode;
+
+#[path = "./rust/rust-algo-lib/templates/src/lib.rs"]
 pub mod rust;
 
 /// Root.

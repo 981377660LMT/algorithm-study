@@ -8040,5 +8040,21 @@
       "}"
     ],
     "description": "离散化"
+  },
+  "test": {
+    "scope": "rust",
+    "prefix": "test",
+    "body": [
+      "#[cfg(test)]",
+      "mod tests {",
+      "\t\tuse super::*;",
+      "",
+      "\t\t#[test]",
+      "\t\tfn test() {",
+      "\t\t\t\tprintln!(\"Hello, world!\")",
+      "\t\t}",
+      "}"
+    ],
+    "description": "test"
   }
 }
