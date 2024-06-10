@@ -24,6 +24,6 @@ mod tests {
 
     #[test]
     fn test() {
-        main()
+        main();
     }
 }

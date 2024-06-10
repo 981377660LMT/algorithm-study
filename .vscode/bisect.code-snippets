@@ -8051,11 +8051,10 @@
       "",
       "\t\t#[test]",
       "\t\tfn test() {",
-      "\t\t\t\tprintln!(\"Hello, world!\")",
+      "\t\t\t\tmain();",
       "\t\t}",
       "}"
     ],
     "description": "test"
-  },
-  
+  }
 }
