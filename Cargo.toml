@@ -9,17 +9,13 @@ name = "main"
 path = "main.rs"
 
 
-[profile.test]
-
-
 [package.metadata.scripts]
 run = "cargo run"
 check = "cargo check"
 build = "cargo build"
 release = "cargo build --release"
 
+
 [dependencies]
 rand = "0.8.5"
-
-[build-dependencies]
-rustsourcebundler = { git = "https://github.com/lpenz/rust-sourcebundler" }
+templates = { path = "./rust/rust-algo-lib/templates" }

@@ -1,4 +1,4 @@
-use crate::rust::{
+use templates::{
     ds::union_find::UnionFind,
     misc::io::{run_with_io, scanner::Scanner},
 };
