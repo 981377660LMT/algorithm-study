@@ -5,6 +5,7 @@
 # n<=100.|s|<=5000.
 
 
+from itertools import accumulate
 from ortools.sat.python import cp_model
 
 
@@ -12,6 +13,7 @@ def max2(a: int, b: int) -> int:
     return a if a > b else b
 
 
+accumulate()
 if __name__ == "__main__":
     n = int(input())
     words = [input() for _ in range(n)]

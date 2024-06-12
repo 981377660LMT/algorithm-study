@@ -8,13 +8,58 @@
 
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
 func main() {
+	yosupoSTNumbering()
+}
+
+func demo() {
 	//   0
 	//  / \
 	// 1 - 2
 	fmt.Println(STNumbering([][]int32{{1, 2}, {0, 2}, {0, 1}}, 0, 2)) // [0 1 2], true
+}
+
+// https://judge.yosupo.jp/problem/st_numbering
+func yosupoSTNumbering() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	solve := func() {
+		var n, m, s, t int32
+		fmt.Fscan(in, &n, &m, &s, &t)
+		graph := make([][]int32, n)
+		for i := int32(0); i < m; i++ {
+			var u, v int32
+			fmt.Fscan(in, &u, &v)
+			graph[u] = append(graph[u], v)
+			graph[v] = append(graph[v], u)
+		}
+
+		res, ok := STNumbering(graph, s, t)
+		if !ok {
+			fmt.Fprintln(out, "No")
+			return
+		}
+
+		fmt.Fprintln(out, "Yes")
+		for _, v := range res {
+			fmt.Fprint(out, v, " ")
+		}
+		fmt.Fprintln(out)
+	}
+
+	var T int32
+	fmt.Fscan(in, &T)
+	for i := int32(0); i < T; i++ {
+		solve()
+	}
 }
 
 // 返回无向图定位后的st编号res.
