@@ -1,9 +1,9 @@
 /* eslint-disable no-shadow */
 
-function transform<
-  From extends object & { children?: From[] | null | undefined },
-  To extends object
->(from: Iterable<From>, mapFrom: (from: From) => To): To[] {
+function transform<From extends { children?: From[] | null | undefined }, To extends object>(
+  from: Iterable<From>,
+  mapFrom: (from: From) => To
+): To[] {
   const res: To[] = []
   for (const f of from) dfs(f)
   return res

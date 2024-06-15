@@ -17,7 +17,7 @@
 interface Operation<From, To, Id> {
   getId: (from: From) => Id
   getParentId: (from: From) => Id | null | undefined
-  mapFrom: (from: From) => To
+  mapFrom?: (from: From) => To
 }
 
 function transform<
@@ -25,7 +25,7 @@ function transform<
   To extends object & { children?: To[] | null | undefined },
   Id extends PropertyKey = PropertyKey
 >(from: Iterable<From>, operation: Operation<From, To, Id>): To[] {
-  const { getId, getParentId, mapFrom } = operation
+  const { getId, getParentId, mapFrom = v => v as unknown as To } = operation
   const ROOT_SYMBOL = Symbol('ROOT')
   const ID_SYMBOL = Symbol('ID')
 
@@ -47,6 +47,7 @@ function transform<
       if (!cur.children) cur.children = []
       cur.children.push(node)
       dfs(node, next[ID_SYMBOL])
+      if (ID_SYMBOL in node) delete node[ID_SYMBOL]
     }
   }
 }
@@ -64,8 +65,8 @@ if (require.main === module) {
     ],
     {
       getId: data => data.code,
-      getParentId: data => data.parentCode,
-      mapFrom: data => ({ name: data.name, code: data.code })
+      getParentId: data => data.parentCode
+      // mapFrom: data => ({ name: data.name, code: data.code })
     }
   )
 
