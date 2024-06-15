@@ -324,3 +324,381 @@ zone.js 接管了浏览器提供的异步 API，比如点击事件、计时器�
 
 一般把 NoSQL 和关系数据库进行结合使用，`各取所长`，需要使用关系特性的时候我们使用关系数据库，需要使用 NoSQL 特性的时候我们使用 NoSQL 数据库，各得其所。NoSQL 数据库是关系数据库在某些方面（性能，扩展）的一个弥补。
 举个简单的例子吧，比如用户评论的存储，评论大概有主键 id、评论的对象 aid、评论内容 content、用户 uid 等字段。我们能确定的是评论内容 content 肯定不会在数据库中用 where content=’’ 查询，评论内容也是一个大文本字段。`那么我们可以把主键 id、评论对象 aid、用户 id 存储在数据库，评论内容存储在 NoSQL`，这样数据库就节省了存储 content 占用的磁盘空间，从而节省大量 IO，对 content 也更容易做 Cache。
+
+# 多人协作如何进行冲突处理
+
+Operational transformation(OT)
+OT 算法最初是为在纯文本文档的协作编辑中的一致性维护和并发控制而发明的，在本文中我们也主要掌握一致性维护相关的一些方法。
+
+- 1.1. 协同软件的冲突
+- 1.2. 操作的拆分(step)
+  只要拆分得足够仔细，对于子表的所有用户行为，都可以由这些操作来组合成最终的效果。
+  例如，
+  复制粘贴一张子表，可以拆分为插入-重命名-更新内容；
+  剪切一张子表，可以拆分为插入-更新内容-删除-移动其他子表。
+  通过分析用户行为，我们可以提取出这些基本操作。
+- 1.3. 操作间的冲突处理
+  `n*n`，多对多的处理思路是加虚拟节点(也可以及是多个类型虚拟节点)
+- 1.4. 最终一致性的实现
+  OT 算法的一个核心目标，是实现`最终一致性`。
+  为什么会有最终一致性的需求呢？
+  > 最终一致性=没有一致性，随便搞搞就行了
+
+# 在线文档的网络层设计思考
+
+1. 认识网络层
+   - 1.1. 网络层职责
+   - 1.2. 网络层设计
+     - 1.2.1. 连接层
+   - 1.3. 接入层
+
+# 大型前端项目要怎么跟踪和分析函数调用链
+
+https://godbasin.github.io/2020/06/21/trace-stash/
+https://course.rs/logs/observe/intro.html
+
+`指标(metric)`：用于表示在某一段时间内，一个行为出现的次数和分布
+`日志(log)`：记录在某一个时间点发生的一次事件
+`链路(trace)`：记录一次请求所经过的完整的服务链路，可能会横跨线程、进程，也可能会横跨服务(分布式、微服务)
+
+---
+
+1. 方案设计
+   1.1. 现状
+   一般来说，对于大型项目或是新人加入，维护过程（熟悉代码、定位问题、性能优化等）比较痛的有以下问题：
+
+   - 函数执行情况黑盒
+     函数调用链不清晰
+     函数耗时不清楚
+     代码异常定位困难
+   - 用户行为难以复现
+
+     1.2. 目标
+     1.3. 整体方案设计
+     1.4. 方案细节设计
+
+2. 函数调用链的设计和实现
+   2.1. 单次追踪对象
+   2.2. 追踪堆栈
+   2.3. 装饰器逻辑
+
+# 谈谈依赖和解耦
+
+大型项目总避免不了各种模块间相互依赖，如果模块之间耦合严重，随着功能的增加，项目到后期会越来越难以维护。今天我们一起来思考下，大家常说的代码解耦到底要怎么做？
+
+1. 依赖是怎么产生的
+   1.1. 接口管理
+   依赖其实在`接口设计完成的时候就出来了`，虽然这是我们自己设计的接口，但它依赖于上游按照约定来调用。而上游有调整的时候，我们是需要跟随者适配或者调整的。
+   `这是来自于“甲方按照约定接口来调用服务”、“乙方按照约定接口来提供服务”的依赖。`
+
+   1.2. 状态管理
+   由接口管理产生的依赖通常来自外部，而应用内部也会有依赖的产生，常见的包括状态管理和事件管理。
+   最简单的，生命周期就是一种状态。
+   由于程序会有状态变化，因此我们的功能实现必然依赖程序的状态。
+   `这是来自于对某个程序“按照预期运行”进行合理设计而产生的依赖。`
+
+   1.3. 功能管理
+   当我们根据功能将代码拆分成一个个模块之后，功能模块的管理也同样会产生一些依赖。
+
+   1.4. 依赖来自于约束
+   为了方便管理，我们设计了一些约定，并基于“大家都会遵守约定”的前提来提供更好、更便捷的服务。
+   举个例子，前端框架中为了更清晰地管理渲染层、数据层和逻辑处理，常用的设计包括 MVC、MVVM 等。
+   而要使这样的架构设计发挥出效果，我们需要遵守其中的使用规范，不可以在数据层里直接修改界面等。
+   可以看到，`依赖来自于对代码的设计`。
+
+2. 依赖可以解耦吗
+
+   2.1. 依赖的划分
+   我们想要减少的，是不合理的依赖。而通过合理的设计，可以进行恰当的解耦。
+
+   2.1.1. 无状态的函数式编程？
+   我们需要对功能模块进行划分，划分出有状态和无状态的功能，来将状态管理放置到更小的范围，避免“牵一发而动全身”。
+   在这里，我们进行了`状态有无的划分`。
+
+   2.1.2. 单向流的数据管理(dag)？
+   在这里，我们进行了`模块内外数据`的划分。
+
+   2.1.3. 服务化
+   服务化，是系统解耦最常用的一种方式。
+   通过将功能进行业务领域的拆分，我们得到了不同领域的服务，常见的例如电商系统拆分成订单系统、购物车系统、商品系统、商家系统、支付系统等等。
+   而如今打得火热的“微服务”，也都是基于领域建模的一种实现方式。
+   在这里，我们进行了`业务领域`的划分。
+
+   2.1.4. 模块化与依赖注入？
+   `功能应用`的划分。
+
+# 响应式编程在前端领域的应用
+
+响应式编程基于观察者模式，是一种面向数据流和变化传播的声明式编程方式。
+以 rxjs 为例.
+
+1. 什么是响应式编程
+   - 1.1. 异步数据流
+   - 1.2. 响应式编程在前端领域
+     - 1.2.1. HTTP 请求与重试
+     - 1.2.2. 用户输入
+       在用户频繁交互的场景，数据的流式处理可以让我们很方便地进行节流和防抖。除此之外，模块间的调用和事件通信同样可以通过这种方式来进行处理。
+   - 1.3. 比较其他技术
+     - 1.3.1. Promise
+       - 是否有状态
+         Promise 会发生状态扭转，状态扭转不可逆；
+         而 Observable 是无状态的，数据流可以源源不断，可用于随着时间的推移获取多个值
+       - 是否立即执行
+         Promise 在定义时就会被执行；而 Observable 只有在被订阅时才会执行
+       - 是否可取消
+         Promise 无法取消；而 Observable 可以通过 unsubscribe 来取消订阅
+     - 1.3.2. 事件
+2. 响应式编程提供了怎样的服务
+   - 2.1. 热观察与冷观察
+     Hot Observable，可以理解为现场直播，我们进场的时候只能看到即时的内容
+     Cold Observable，可以理解为点播（电影），我们打开的时候会从头播放(如果我们想要在拉群后，自动同步之前的聊天记录，通过冷观察就可以做到。)
+   - 2.2. 合流
+     merge：多个 Observable 合并为一个
+     combine：所有的 Observable 都有值之后，才会触发
+   - 2.3. 其他使用方式
+     - 2.3.1. timer
+     - 2.3.2. 数组/可迭代对象
+
+# VSCode 源码解读：事件系统设计
+
+TL;DR
+
+- 提供标准化的 Event 和 Emitter 能力
+- 通过注册 Emitter，并对外提供类似生命周期的方法 onXxxxx 的方式，来进行事件的订阅和监听
+- 通过提供通用类 Disposable，统一管理相关资源的注册和销毁
+- 通过使用同样的方式`this._register()`注册事件和订阅事件，将事件相关资源的处理统一挂载到 dispose()方法中
+
+---
+
+前端大型项目中要怎么管理满天飞的事件、模块间各种显示和隐式调用的问题
+
+**看源码的方式有很多种，带着疑问有目的性地看，会简单很多。**
+
+1. VS Code 事件
+
+   - 1.1. Q1: VS Code 中的事件管理代码在哪？base\common\event.ts
+   - 1.2. Q2: VS Code 中的事件都包括了哪些能力？
+     除了常见的 once 和 DOM 事件等兼容，还提供了比较丰富的事件能力：
+
+     - 防抖动
+     - 可链式调用
+     - 缓存
+     - Promise 转事件
+
+   - 1.3. Q3: VS Code 中的事件的触发和监听是怎么实现的？
+     Emitter 以 Event 为对象，以简洁的方式提供了事件的订阅、触发、清理等能力
+
+     ```ts
+     // 这是事件发射器的一些生命周期和设置
+
+     export interface EmitterOptions {
+       onFirstListenerAdd?: Function
+       onFirstListenerDidAdd?: Function
+       onListenerDidAdd?: Function
+       onLastListenerRemove?: Function
+       leakWarningThreshold?: number
+     }
+
+     export class Emitter<T> {
+       // 可传入生命周期方法和设置
+       constructor(options?: EmitterOptions) {}
+
+       // 允许大家订阅此发射器的事件
+       get event(): Event<T> {
+         // 此处会根据传入的生命周期相关设置，在对应的场景下调用相关的生命周期方法
+       }
+
+       // 向订阅者触发事件
+       fire(event: T): void {}
+
+       // 清理相关的 listener 和队列等
+       dispose() {}
+     }
+     ```
+
+   - 1.4. Q4: 项目中的事件是怎么管理的？
+     Emitter 似乎有些简单了，我们只能看到单个事件发射器的使用。那各个模块之间的事件订阅和触发又是怎么实现的呢？
+
+     - 把 eventEmitter 绑在对象上(注册事件发射器)
+     - 对外提供定义的事件
+     - 在特定时机向订阅者触发事件
+
+     ```ts
+     // 这里我们只摘录相关的代码
+     class WindowManager {
+       public static readonly INSTANCE = new WindowManager()
+       // 注册一个事件发射器
+       private readonly _onDidChangeZoomLevel = new Emitter<number>()
+       // 将该发射器允许大家订阅的事件取出来
+       public readonly onDidChangeZoomLevel: Event<number> = this._onDidChangeZoomLevel.event
+
+       public setZoomLevel(zoomLevel: number, isTrusted: boolean): void {
+         if (this._zoomLevel === zoomLevel) {
+           return
+         }
+         this._zoomLevel = zoomLevel
+         // 当 zoomLevel 有变更时，触发该事件
+         this._onDidChangeZoomLevel.fire(this._zoomLevel)
+       }
+     }
+
+     const instance = new WindowManager(opts)
+     instance.onDidChangeZoomLevel(() => {
+       // 该干啥干啥
+     })
+     ```
+
+   - 1.5. Q5: 事件满天飞，不会导致性能问题吗？
+     如果在某个组件里做了事件订阅这样的操作，当组件销毁的时候是需要取消事件订阅的。
+     否则该订阅内容会在内存中一直存在，除了一些异常问题，还可能引起内存泄露。
+     一些地方的使用方式是：
+
+     ```ts
+     // 这里使用了this._register(new Emitter<T>())这样的方式注册事件发射器，我们能看到该方法继承自Disposable。
+     export class Scrollable extends Disposable {
+       private _onScroll = this._register(new Emitter<ScrollEvent>())
+       public readonly onScroll: Event<ScrollEvent> = this._onScroll.event
+
+       private _setState(newState: ScrollState): void {
+         const oldState = this._state
+         if (oldState.equals(newState)) {
+           return
+         }
+         this._state = newState
+         // 状态变更的时候，触发事件
+         this._onScroll.fire(this._state.createScrollEvent(oldState))
+       }
+     }
+
+     export abstract class Disposable implements IDisposable {
+       // 用一个 Set 来存储注册的事件发射器
+       private readonly _store = new DisposableStore()
+
+       constructor() {
+         trackDisposable(this)
+       }
+
+       // 处理事件发射器
+       public dispose(): void {
+         markTracked(this)
+
+         this._store.dispose()
+       }
+
+       // 注册一个事件发射器
+       protected _register<T extends IDisposable>(t: T): T {
+         if ((t as unknown as Disposable) === this) {
+           throw new Error('Cannot register a disposable on itself!')
+         }
+         return this._store.add(t)
+       }
+     }
+     ```
+
+     Dispose 模式主要用来资源管理，资源比如内存被对象占用，则会通过调用方法来释放。
+
+     ```ts
+     export interface IDisposable {
+       dispose(): void
+     }
+     export class DisposableStore implements IDisposable {
+       private _toDispose = new Set<IDisposable>()
+       private _isDisposed = false
+
+       // 处置所有注册的 Disposable，并将其标记为已处置
+       // 将来添加到此对象的所有 Disposable 都将在 add 中处置。
+       public dispose(): void {
+         if (this._isDisposed) {
+           return
+         }
+
+         markTracked(this)
+         this._isDisposed = true
+         this.clear()
+       }
+
+       // 丢弃所有已登记的 Disposable，但不要将其标记为已处置
+       public clear(): void {
+         this._toDispose.forEach(item => item.dispose())
+         this._toDispose.clear()
+       }
+
+       // 添加一个 Disposable
+       public add<T extends IDisposable>(t: T): T {
+         markTracked(t)
+         // 如果已处置，则不添加
+         if (this._isDisposed) {
+           // 报错提示之类的
+         } else {
+           // 未处置，则可添加
+           this._toDispose.add(t)
+         }
+         return t
+       }
+     }
+     ```
+
+   - 1.6. Q6: 上面只销毁了事件触发器本身的资源，那对于订阅者来说，要怎么销毁订阅的 Listener 呢？
+
+# VSCode 源码解读：IPC 通信机制
+
+1. Electron 的 通信机制
+2. Electron 与 NW.js
+
+   - 2.0.1. NW.js 内部架构
+   - 2.0.2. Electron 内部架构
+     Electron 强调 Chromium 源代码和应用程序进行分离，因此并没有将 Node.js 和 Chromium 整合在一起。
+     在 Electron 中，分为主进程(main process)和渲染器进程(renderer processes)：
+     那么，不在一个进程当然涉及`跨进程通信`。于是，在 Electron 中，可以通过以下方式来进行主进程和渲染器进程的通信：
+
+     - 利用 ipcMain 和 ipcRenderer 模块进行 `IPC` 方式通信，它们是处理应用程序后端（ipcMain）和前端应用窗口（ipcRenderer）之间的进程间通信的事件触发。
+     - 利用 remote 模块进行 `RPC` 方式通信。
+       > remote 模块返回的每个对象（包括函数），表示主进程中的一个对象（称为远程对象或远程函数）。当调用远程对象的方法时，调用远程函数、或者使用远程构造函数 (函数) 创建新对象时，实际上是在发送同步进程消息
+
+3. VSCode 的通信机制
+
+   - 3.1. VSCode 多进程架构
+     VSCode 采用多进程架构，VSCode 启动后主要有下面的几个进程：
+
+     主进程
+     渲染进程，多个，包括 Activitybar、Sidebar、Panel、Editor 等等
+     插件宿主进程
+     Debug 进程
+     Search 进程
+
+   - 3.2. IPC 通信
+     主进程和渲染进程的通信基础还是 Electron 的 webContents.send、ipcRender.send、ipcMain.on。
+     - 3.2.1. 协议
+       ```ts
+       export interface IMessagePassingProtocol {
+         send(buffer: VSBuffer): void
+         onMessage: Event<VSBuffer>
+       }
+       ```
+     - 3.2.2. 频道：VSCode 通过频道来区分不同的通信类型
+       ```ts
+       /**
+        * IChannel是对命令集合的抽象
+        * call 总是返回一个至多带有单个返回值的 Promise
+        */
+       export interface IChannel {
+         call<T>(command: string, arg?: any, cancellationToken?: CancellationToken): Promise<T>
+         listen<T>(event: string, arg?: any): Event<T>
+       }
+       ```
+     - 3.2.3. 客户端与服务端
+     - 3.2.4. 连接：一个连接(Connection)由 ChannelClient 和 ChannelServer 组成。
+       ```ts
+       interface Connection<TContext> extends Client<TContext> {
+         readonly channelServer: ChannelServer<TContext> // 服务端
+         readonly channelClient: ChannelClient // 客户端
+       }
+       ```
+
+# 复杂渲染引擎架构与设计
+
+## 收集与渲染
+
+1. 渲染数据的收集
+2. 收集与绘制的功能划分
+3. 渲染数据享元

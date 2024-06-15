@@ -21,7 +21,7 @@
 //   onScheduleTask?: Function; // 当任务进行调度时，触发该函数
 //   onInvokeTask?: Function; // 当触发任务执行时，触发该函数
 //   onCancelTask?: Function; // 当任务被取消时，触发该函数
-//   onHasTask?: Function; // 通知任务队列的状态改变
+//   onHasTask?: Function; // Zone内Task状态变化后触发
 // }
 // !用于性能分析：监听异步方法的执行时间
 // !在框架中的应用：实现自动重新渲染(用来检查异步任务是否执行完毕，然后触发对应的回调方法)
@@ -65,3 +65,5 @@ function assert(condition: boolean, message?: string): void {
     throw new Error(message)
   }
 }
+
+export {}
