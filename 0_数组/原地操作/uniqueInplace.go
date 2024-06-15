@@ -3,20 +3,21 @@ package main
 import "fmt"
 
 // 有序数组原地去重.
-// Compact
+// Compact/dedup.
 func UniqueInplace(sorted *([]int)) {
 	if len(*sorted) == 0 {
 		return
 	}
 	nums := *sorted
-	slow := 0
+	size := 0
 	for fast := 0; fast < len(nums); fast++ {
-		if nums[fast] != nums[slow] {
-			slow++
-			nums[slow] = nums[fast]
+		if nums[fast] != nums[size] {
+			size++
+			nums[size] = nums[fast]
 		}
 	}
-	*sorted = nums[:slow+1]
+	size++
+	*sorted = nums[:size]
 }
 
 func main() {

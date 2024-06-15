@@ -15,18 +15,13 @@ INF = int(1e20)
 # 请你返回删除所有数字字符以后剩下的字符串。
 class Solution:
     def clearDigits(self, s: str) -> str:
-        while any(c.isdigit() for c in s):
-            for i in range(len(s)):
-                if s[i].isdigit():
-                    j = i - 1
-                    while j >= 0 and s[j].isdigit():
-                        j -= 1
-                    if j == -1:
-                        s = s[i + 1 :]
-                    else:
-                        s = s[:j] + s[i + 1 :]
-                    break
-        return s
+        stack = []
+        for c in s:
+            if c.isdigit():
+                stack.pop()
+            else:
+                stack.append(c)
+        return "".join(stack)
 
 
 print(Solution().clearDigits("cb34"))

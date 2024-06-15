@@ -2971,7 +2971,7 @@
       "\t}",
       "\treturn b",
       "}",
-      "func max(a, b int32) int32 {",
+      "func max32(a, b int32) int32 {",
       "\tif a > b {",
       "\t\treturn a",
       "\t}",
@@ -8056,5 +8056,29 @@
       "}"
     ],
     "description": "test"
+  },
+  "sortedSet-2": {
+    "scope": "go",
+    "prefix": "SortedSet32",
+    "body": [
+      "func SortedSet32(nums []int) (newNums []int32, size int32) {",
+      "\ttmp := append(nums[:0:0], nums...)",
+      "\tsort.Ints(tmp)",
+      "\tfor fast := 0; fast < len(tmp); fast++ {",
+      "\t\tif tmp[fast] != tmp[size] {",
+      "\t\t\tsize++",
+      "\t\t\ttmp[size] = tmp[fast]",
+      "\t\t}",
+      "\t}",
+      "\tsize++",
+      "\ttmp = tmp[:size]",
+      "\tnewNums = make([]int32, len(nums))",
+      "\tfor i, v := range nums {",
+      "\t\tnewNums[i] = int32(sort.SearchInts(tmp, v))",
+      "\t}",
+      "\treturn",
+      "}"
+    ],
+    "description": "a"
   }
 }
