@@ -1,6 +1,3 @@
-// 维护区间递增/区间递减
-// 区间元素个数<=1，视为递增/递减.
-
 package main
 
 import (
@@ -12,18 +9,21 @@ import (
 )
 
 func main() {
-	// arr := []int{3, 2, 3}
-	// less := func(a, b int) bool { return a < b }
-	// solver := NewAscendingSolver(
-	// 	int32(len(arr)), func(i int32) int { return arr[i] },
-	// 	less,
-	// )
-	// fmt.Println(solver.IsAscending(0, 1))
-	// fmt.Println(solver.IsAscending(1, 2))
+	arr := []int{3, 2, 3}
+	less := func(a, b int) bool { return a < b }
+	solver := NewAscendingSolver(
+		int32(len(arr)), func(i int32) int { return arr[i] },
+		less,
+	)
+	// up，down 信息在后面那个数字上
+	fmt.Println(solver.down) // [1] => arr[1]>arr[0]
+	fmt.Println(solver.up)   // [2] => arr[2]>arr[1]
 
 	test()
 }
 
+// 树状数组维护区间递增/区间递减
+// 区间元素个数<=1，视为递增/递减.
 type AscendingSolver[V cmp.Ordered] struct {
 	n    int32
 	arr  []V
