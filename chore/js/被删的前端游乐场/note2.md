@@ -424,3 +424,216 @@ https://godbasin.github.io/2020/10/07/monitor-and-report/
 2. 结束语
    “能用机器解决的问题，就不要依赖人。” – 《被删的开发手册》
    项目维护阶段的最大痛点，其实在于开发`无法聚焦自身`的工作内容，常常需要在各种系统中进行操作和切换，从而带来`开发效率的下降，以及注意力分散`、无法更全面的思考导致了不合理的设计、新的 BUG 引入，而影响了`系统的质量`。
+
+# 前端性能优化--卡顿的监控和定位
+
+卡顿，顾名思义则是代码执行产生长耗时，导致浏览器无法及时响应用户的操作
+卡顿产生的时候常常无法进行其他操作，甚至控制台也打开不了
+
+1. 卡顿检测
+   1.1. Worker 心跳方案
+
+   Worker 更多时候用于检测`网页崩溃`，用来检测卡顿的效果其实还不如使用 window.requestAnimationFrame，因为`线程通信的耗时和延迟`导致该方案不大准确
+
+   1.2. window.requestAnimationFrame 方案
+   setTimeout/setInterval 计时器只能保证将回调添加至浏览器的回调队列(宏任务)的时间，不能保证回调队列的运行时间，因此使用 window.requestAnimationFrame 会更合适
+   假设我们认为页面中存在超过特定时间（比如 1s）的长耗时任务即存在明显卡顿，则我们可以判断两次 window.requestAnimationFrame 执行间超过一定时间，则发生了卡顿。
+
+   1.3. Long Tasks API 方案
+
+   1.4. **PerformanceObserver 卡顿检测**
+
+2. 卡顿埋点上报
+   2.1. 卡顿打点
+   2.2. 心跳打点
+   2.3. JavaScript 加载打点
+3. 结束语
+
+# 前端性能优化--用户卡顿检测
+
+1. 用户感觉的“卡”
+
+   - 1.1. 用户侧卡顿
+
+     如果你有认真整理用户反馈，便会发现，对于大型应用比如在线表格/网页游戏等，`相比于加载过程中偶尔一两秒的卡顿，更让他们难以接受的问题有频繁出现卡顿、某个操作卡顿耗时过长、某个较频繁的操作必现卡顿等`。
+
+     - 1.1.1. 1. 同步任务卡顿
+
+     可以在监听到用户交互时进行耗时计算：
+
+     ```ts
+     window.addEventListener('click', () => {
+       const startTime = new Date().getTime()
+       requestAnimationFrame(() => {
+         const duringTime = new Date().getTime() - startTime
+         // 交互后超过 1s 才响应
+         if (duringTime > 1000) {
+           // 则判断为卡顿
+         }
+       }, 0)
+     })
+     ```
+
+     - 1.1.2. 2. 异步任务卡顿
+       当页面交互发生卡顿时，用户常常会在页面中进行操作，来确认页面是否无响应。因此，我们可以通过这样的代码判断：
+
+     ```ts
+     let clickCount = 0
+     let hasClick = false
+     window.addEventListener('click', () => {
+       clickCount++
+       if (hasClick) return
+       hasClick = true
+       setTimeout(() => {
+         // 卡顿过程中发生了连续点击操作
+         if (clickCount > 2) {
+           // 则判断为卡顿
+         }
+         // 清空数据
+         clickCount = 0
+         hasClick = false
+       }, 0)
+     })
+     ```
+
+   - 1.2. 总卡顿指标设计
+
+我们开发在实现功能的时候，常常会从编程出发去思考问题，但实际上我们可以更贴近用户一些滴~
+
+# 前端性能优化--卡顿心跳检测
+
+1. requestAnimationFrame 心跳检测
+   1.1. 启动和停止检测
+   1.2. 页面隐藏
+
+   ```ts
+   class HeartbeatMonitor {
+     // 上一次心跳的时间
+     private preHeartBeatTime: number
+     // 心跳定时器
+     private heartBeatTimer: number | null = null
+
+     constructor() {
+       document.addEventListener('visibilitychange', () => {
+         if (document.visibilityState === 'hidden') {
+           this.stop()
+         } else {
+           this.start()
+         }
+       })
+     }
+
+     /**
+      * 开启卡顿监控
+      */
+     start() {
+       if (!this.heartBeatTimer) this.checkNextTick()
+     }
+
+     /**
+      * 结束卡顿监控
+      */
+     stop() {
+       // 取消 requestAnimationFrame
+       if (this.heartBeatTimer) cancelAnimationFrame(this.heartBeatTimer)
+       this.heartBeatTimer = null
+     }
+
+     private checkNextTick() {
+       this.preHeartBeatTime = Date.now()
+       this.heartBeatTimer = requestAnimationFrame(() => {
+         const currentTime = Date.now()
+         // 取出执行耗时
+         let timeDistance = currentTime - this.preHeartBeatTime
+         // 超过 1s 则认为是卡顿了
+         if (timeDistance > 1000) {
+           // 注：dispatchEvent 为伪代码，具体可自行实现
+           // 对外抛事件表示发生了卡顿
+           this.dispatchEvent('jank')
+         } else {
+           // 对外抛事件表示为普通心跳
+           this.dispatchEvent('heartbeat')
+         }
+         // 继续下一次检测
+         this.checkNextTick()
+       })
+     }
+   }
+   ```
+
+# 有趣的 PerformanceObserver
+
+1. PerformanceObserver
+   1.1. 常见的性能指标数据获取
+   1.2. PerformanceObserver 对象
+   1.3. PageSpeed Insights (PSI) 前端性能指标
+   1.4. resource observe 获取资源加载时机
+   1.5. 自定义性能指标
+   1.6. 参考
+
+# 前端性能优化--数据指标体系
+
+1. 前端性能指标体系
+
+   - 1.1. 常见的前端性能指标
+
+     - 内容呈现
+       First Contentful Paint (FCP)：首次内容绘制，衡量从网页开始加载到网页任何部分呈现在屏幕上所用的时间
+       Largest Contentful Paint (LCP)：最大内容绘制，衡量从网页开始加载到屏幕上渲染最大的文本块或图片元素所用的时间
+     - 网页交互
+       First Input Delay (FID)：首次输入延迟，衡量用户首次与页面交互到页面响应的时间
+       Interaction to Next Paint (INP)：衡量与网页进行每次点按、点击或键盘交互的延迟时间，并根据互动次数选择该网页最差的互动延迟时间（或接近最高延迟时间）作为单个代表性值，以描述网页的整体响应速度
+
+   - 1.2. PageSpeed Insights (PSI)
+   - 1.3. 核心网页指标
+     - 1.3.1. FID：
+     - 1.3.2. LCP
+     - 1.3.3. CLS
+     - 1.3.4. Interaction to Next Paint (INP)
+     - 1.3.5. web-vitals JavaScript 库
+   - 1.4. 评估体验质量
+   - 1.5. 参考
+
+# 让你的长任务在 50 毫秒内结束
+
+考虑将任务执行耗时控制在 50 ms 左右。每执行完一个任务，如果耗时超过 50 ms，将剩余任务设为异步，放到下一次执行，给到页面响应用户操作和更新渲染的时间。
+
+1. 让你的长任务保持在 50 ms 内
+
+   为什么是 50 毫秒呢？
+
+   这个数值并不是随便写的，主要来自于 Google 员工开发的 RAIL 模型。
+
+   - 1.1. RAIL 模型
+     RAIL 表示 Web 应用生命周期的四个不同方面：`响应（Response）、动画（Animation）、空闲（Idel）和加载（Load）。`
+     由于用户对每种情境有不同的性能预期，因此，系统会根据情境以及关于用户如何看待延迟的用户体验调研来确定效果目标。
+
+     四个阈值：
+
+     - 0-16 ms：大概是用户感受到流畅的动画体验的数值。只要每秒渲染 60 帧，这类动画就会感觉很流畅，也就是每帧 16 毫秒（包括浏览器将新帧绘制到屏幕上所需的时间），让应用生成一帧大约 10 毫秒
+     - 100 毫秒：大概是让用户感觉系统立即`做出反应`的极限，这意味着除了显示结果之外不需要特殊的反馈
+     - 1 秒：大概是用户`思想流保持不间断`的极限，即使用户会注意到延迟。一般情况下，`大于 0.1 秒小于 1.0 秒的延迟不需要特殊反馈，但用户确实失去了直接操作数据的感觉`
+     - 10 秒：大概是让用户的`注意力集中在对话上的极限`。对于较长的延迟，用户会希望在等待计算机完成的同时执行其他任务，因此应该向他们提供反馈，指示计算机预计何时完成。如果响应时间可能变化很大，则延迟期间的反馈尤其重要，因为用户将不知道会发生什么。
+
+   - 1.2. 在 50 毫秒内处理事件
+     RAIL 对其他的生命周期也提出了对应的准则，总体为：
+
+     响应（Response）：在` 50 毫秒`内处理事件
+     动画（Animation）：在 `10 毫秒`内生成一帧
+     空闲（Idel）：最大限度地延长空闲时间
+     加载（Load）：提交内容并在 `5 秒`内实现互动
+
+2. 长任务优化
+   任何连续不间断的且主 UI 线程繁忙 50 毫秒及以上的时间区间。
+   我们录制一段 Performance，当主线程同步执行的任务超过 50 毫秒时，该任务块会被标记为红色
+   - 2.1. 识别长任务
+     - 2.1.1. 使用 Chrome Devtools
+     - 2.1.2. 使用 Long Tasks API
+     - 2.1.3. 识别大型脚本
+     - 2.1.4. 自定义性能指标
+   - 2.2. 优化长任务
+     - 2.2.1. 过大的 JavaScript 脚本：拆
+     - 2.2.2. 过长的 JavaScript 执行任务
+       - 2.2.2.1. 串行任务的拆分：将不同任务的调用从同步改成异步即可
+       - 2.2.2.2. 单个超大任务的拆分
+   - 2.2.3. 参考
