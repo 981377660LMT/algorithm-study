@@ -26,8 +26,7 @@ function reArrange<T>(arr: T[], order: ArrayLike<number>): T[] {
 export { reArrange }
 
 if (require.main === module) {
-  const nums = [5, -7, 3, 5]
-  const order = argSort(nums, (a, b) => a - b)
+  const order = argSort([5, -7, 3, 6], (a, b) => a - b)
   console.log(order)
-  console.log(reArrange(nums, order))
+  console.log(reArrange([5, -7, 3, 6], order))
 }
