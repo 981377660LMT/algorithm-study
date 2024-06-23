@@ -13,7 +13,10 @@ class SlidingWindowRateLimiter {
   allowed(requestCount: number): boolean {
     const now = Date.now()
     let head = 0
-    while (head < this._window.length && now - this._window[head].timeStamp > this._windowLengthMs) {
+    while (
+      head < this._window.length &&
+      now - this._window[head].timeStamp > this._windowLengthMs
+    ) {
       this._countInWindow -= this._window[head].requestCount
       head++
     }

@@ -3,7 +3,9 @@ from itertools import accumulate
 
 MOD = int(1e9 + 7)
 
+
 # 629. K个逆序对数组
+# 插入dp
 class Solution:
     def kInversePairs(self, n: int, k: int) -> int:
         """
@@ -33,4 +35,5 @@ class Solution:
 
 print(Solution().kInversePairs(n=3, k=1))  # 2
 print(Solution().kInversePairs(n=1000, k=1000))  # 2
+print(Solution().kInversePairs(n=5, k=3))  # 15
 # 663677020

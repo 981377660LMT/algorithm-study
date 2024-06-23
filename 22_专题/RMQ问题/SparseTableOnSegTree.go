@@ -90,6 +90,51 @@ func cf713D() {
 	}
 }
 
+// 3148. 矩阵中的最大得分
+// https://leetcode.cn/problems/maximum-difference-score-in-a-grid/description/
+// 给你一个由 正整数 组成、大小为 m x n 的矩阵 grid。你可以从矩阵中的任一单元格移动到另一个位于正下方或正右侧的任意单元格（不必相邻）。从值为 c1 的单元格移动到值为 c2 的单元格的得分为 c2 - c1 。
+// 你可以从 任一 单元格开始，并且必须至少移动一次。
+// 返回你能得到的 最大 总得分。
+
+const INF32 int32 = 1e9 + 10
+
+func maxScore(grid [][]int) int {
+	grid32 := make([][]int32, len(grid))
+	for i := range grid {
+		grid32[i] = make([]int32, len(grid[i]))
+		for j := range grid[i] {
+			grid32[i][j] = int32(grid[i][j])
+		}
+	}
+
+	ROW, COL := int32(len(grid32)), int32(len(grid32[0]))
+	res := -INF32
+	st := NewSparseTableOnSegTreeFrom(grid32, func() int32 { return INF32 }, min32)
+	for i := int32(0); i < ROW; i++ {
+		for j := int32(0); j < COL; j++ {
+			// up
+			if i > 0 {
+				upMin := st.Query(0, i, j, j+1)
+				res = max32(res, grid32[i][j]-upMin)
+			}
+			// left
+			if j > 0 {
+				leftMin := st.Query(i, i+1, 0, j)
+				res = max32(res, grid32[i][j]-leftMin)
+			}
+
+			// left and up
+			if i > 0 && j > 0 {
+				upLeftMin := st.Query(0, i, 0, j)
+				res = max32(res, grid32[i][j]-upLeftMin)
+			}
+		}
+	}
+
+	return int(res)
+}
+
+// 更快的 SparseTable2DFast.
 type SparseTableOnSegTree[E any] struct {
 	row, col int32
 	e        func() E
@@ -156,7 +201,7 @@ type SparseTable[E any] struct {
 func NewSparseTable[E any](n int32, f func(int32) E, e func() E, op func(E, E) E) *SparseTable[E] {
 	res := &SparseTable[E]{}
 
-	b := bits.Len(uint(n))
+	b := int32(bits.Len32(uint32(n)))
 	st := make([][]E, b)
 	for i := range st {
 		st[i] = make([]E, n)
@@ -164,7 +209,7 @@ func NewSparseTable[E any](n int32, f func(int32) E, e func() E, op func(E, E) E
 	for i := int32(0); i < n; i++ {
 		st[0][i] = f(i)
 	}
-	for i := 1; i < b; i++ {
+	for i := int32(1); i < b; i++ {
 		for j := int32(0); j+(1<<i) <= n; j++ {
 			st[i][j] = op(st[i-1][j], st[i-1][j+(1<<(i-1))])
 		}
@@ -185,7 +230,7 @@ func (st *SparseTable[E]) Query(start, end int32) E {
 	if start >= end {
 		return st.e()
 	}
-	b := bits.Len(uint(end-start)) - 1
+	b := int32(bits.Len32(uint32(end-start))) - 1
 	return st.op(st.st[b][start], st.st[b][end-(1<<b)])
 }
 
@@ -198,6 +243,20 @@ func max32(a, b int32) int32 {
 
 func min32(a, b int32) int32 {
 	if a < b {
+		return a
+	}
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
 		return a
 	}
 	return b

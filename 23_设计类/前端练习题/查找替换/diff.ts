@@ -6,5 +6,7 @@ interface IDiff {
   added: CellMatrix
   colSortChanged: boolean
   rowSortChanged: boolean
-  meta?: {}
+  meta?: {
+    tooManyChanges?: boolean
+  }
 }
