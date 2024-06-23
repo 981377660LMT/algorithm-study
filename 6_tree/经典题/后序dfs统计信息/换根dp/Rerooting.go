@@ -2,9 +2,11 @@
 
 package main
 
+// 2538. 最大价值和与最小价值和的差值
 // https://leetcode.cn/problems/difference-between-maximum-and-minimum-price-sum/
 // !求每个点作为根节点时，到叶子节点的最大点权和(不包括自身)
 func maxOutput(n int, edges [][]int, price []int) int64 {
+	type E = int
 	e := func(root int) E {
 		return 0
 	}
@@ -19,7 +21,7 @@ func maxOutput(n int, edges [][]int, price []int) int64 {
 		return fromRes + price[parent] // parent -> child
 	}
 
-	R := NewRerooting(n)
+	R := NewRerooting[E](n)
 	for _, edge := range edges {
 		R.AddEdge(edge[0], edge[1])
 	}
@@ -45,35 +47,30 @@ func maxs(nums ...int) int {
 	return res
 }
 
-//
-//
-type E = int
-type Rerooting struct {
+type Rerooting[E any] struct {
 	Tree [][]int
 	n    int
 }
 
-func NewRerooting(n int) *Rerooting {
-	return &Rerooting{Tree: make([][]int, n), n: n}
+func NewRerooting[E any](n int) *Rerooting[E] {
+	return &Rerooting[E]{Tree: make([][]int, n), n: n}
 }
 
-func NewRerootingFromTree(tree [][]int) *Rerooting {
-	return &Rerooting{Tree: tree, n: len(tree)}
+func NewRerootingFromTree[E any](tree [][]int) *Rerooting[E] {
+	return &Rerooting[E]{Tree: tree, n: len(tree)}
 }
 
-// 添加一条无向边.
-func (r *Rerooting) AddEdge(u, v int) {
+func (r *Rerooting[E]) AddEdge(u, v int) {
 	r.Tree[u] = append(r.Tree[u], v)
 	r.Tree[v] = append(r.Tree[v], u)
 }
 
-// direction: 0: cur -> parent, 1: parent -> cur
-func (r *Rerooting) ReRooting(e func(root int) E, op func(child1, child2 E) E, composition func(fromRes E, parent, cur int, direction uint8) E) []E {
+func (r *Rerooting[E]) ReRooting(e func(root int) E, op func(child1, child2 E) E, composition func(fromRes E, parent, cur int, direction uint8) E) []E {
 	parents := make([]int, r.n)
 	for i := range parents {
 		parents[i] = -1
 	}
-	order := []int{0} // root = 0
+	order := []int{0}
 	stack := []int{0}
 	for len(stack) > 0 {
 		cur := stack[len(stack)-1]

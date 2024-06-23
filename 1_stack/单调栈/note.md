@@ -22,3 +22,15 @@
 		left[i] = j
 	}
 ```
+
+---
+
+`单调栈dp`
+
+```py
+ranges = getRange(height, isMax=True, isLeftStrict=False, isRightStrict=False)
+dp = [0] * (n + 1)
+for i, h in enumerate(height):
+    leftBiggerIndex = ranges[i][0]
+    dp[i + 1] = dp[leftBiggerIndex] + (i - leftBiggerIndex + 1) * h
+```
