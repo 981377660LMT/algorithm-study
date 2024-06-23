@@ -101,6 +101,14 @@ class SegmentTree01 {
     return this._kthOne(1, k, 1, this._n) - 1
   }
 
+  get(index: number): 0 | 1 {
+    return this.onesCount(index, index + 1) as 0 | 1
+  }
+
+  set(index: number, value: 0 | 1): void {
+    this._set(1, index + 1, value, 1, this._n)
+  }
+
   toString(): string {
     const sb: string[] = []
     this._toString(1, 1, this._n, sb)
@@ -202,6 +210,18 @@ class SegmentTree01 {
     return this._kthZero((root << 1) | 1, k - leftZero, mid + 1, right)
   }
 
+  private _set(root: number, position: number, value: 0 | 1, left: number, right: number): void {
+    if (left === right) {
+      this._ones[root] = value
+      return
+    }
+    this._pushDown(root, left, right)
+    const mid = (left + right) >>> 1
+    if (position <= mid) this._set(root << 1, position, value, left, mid)
+    else this._set((root << 1) | 1, position, value, mid + 1, right)
+    this._pushUp(root)
+  }
+
   private _toString(root: number, left: number, right: number, sb: string[]): void {
     if (left === right) {
       sb.push(this._ones[root] === 1 ? '1' : '0')
@@ -259,13 +279,11 @@ if (require.main === module) {
     }
 
     fix(idx: number): void {
-      if (this.tree01.onesCount(idx, idx + 1) === 1) return
-      this.tree01.flip(idx, idx + 1)
+      this.tree01.set(idx, 1)
     }
 
     unfix(idx: number): void {
-      if (this.tree01.onesCount(idx, idx + 1) === 0) return
-      this.tree01.flip(idx, idx + 1)
+      this.tree01.set(idx, 0)
     }
 
     flip(): void {

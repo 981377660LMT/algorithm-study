@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	// test()
-	CF242E()
+	test()
+	// CF242E()
 }
 
 // XOR on Segment RangeXorRangeSum (区间异或区间和)
@@ -205,6 +205,14 @@ func (tree *SegmentTree01) Kth(digit, k int) int {
 	return tree.kthOne(1, k, 1, tree.n) - 1
 }
 
+func (tree *SegmentTree01) Get(position int) int {
+	return tree.OnesCount(position, position+1)
+}
+
+func (tree *SegmentTree01) Set(position, value int) {
+	tree.set(1, position+1, value, 1, tree.n)
+}
+
 func (tree *SegmentTree01) String() string {
 	var sb []string
 	tree.toString(1, 1, tree.n, &sb)
@@ -338,6 +346,20 @@ func (tree *SegmentTree01) kthOne(root, k, l, r int) int {
 		return tree.kthOne(root<<1, k, l, mid)
 	}
 	return tree.kthOne(root<<1|1, k-tree.ones[root<<1], mid+1, r)
+}
+
+func (tree *SegmentTree01) set(root, position, value, l, r int) {
+	if l == r {
+		tree.ones[root] = value
+		return
+	}
+	mid := (l + r) >> 1
+	if position <= mid {
+		tree.set(root<<1, position, value, l, mid)
+	} else {
+		tree.set(root<<1|1, position, value, mid+1, r)
+	}
+	tree.pushUp(root)
 }
 
 func (tree *SegmentTree01) toString(root, l, r int, sb *[]string) {
@@ -486,6 +508,19 @@ func test() {
 			} else if arrIndexOf != segIndex {
 				panic("checkSame failed at indexOf")
 			}
+
+			// get
+			for j := 0; j < n; j++ {
+				if nums01[j] != seg01.Get(j) {
+					panic("checkSame failed at get")
+				}
+			}
+
+			// set
+			position = rand.Intn(n)
+			value := rand.Intn(2)
+			nums01[position] = value
+			seg01.Set(position, value)
 		}
 	}
 

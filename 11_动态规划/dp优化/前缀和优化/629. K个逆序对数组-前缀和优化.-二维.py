@@ -1,11 +1,13 @@
+# 629. K个逆序对数组
+# https://leetcode.cn/problems/k-inverse-pairs-array/
+# 插入dp
+
 from itertools import accumulate
 
 
 MOD = int(1e9 + 7)
 
 
-# 629. K个逆序对数组
-# 插入dp
 class Solution:
     def kInversePairs(self, n: int, k: int) -> int:
         """
@@ -19,17 +21,12 @@ class Solution:
         """
         dp = [0] * (k + 1)
         dp[0] = 1
-
         for i in range(1, n):
-            ndp = [0] * (k + 1)
-            ndp[0] = 1
-
+            ndp = dp[:]
             dpSum = [0] + list(accumulate(dp))
             for j in range(1, k + 1):
                 ndp[j] = (dpSum[j + 1] - dpSum[max(0, j - i)]) % MOD  # !一共(i+1)项
-
             dp = ndp
-
         return dp[k]
 
 
