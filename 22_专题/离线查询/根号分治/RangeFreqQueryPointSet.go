@@ -6,14 +6,46 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
 	"math/rand"
+	"os"
 	"sort"
 )
 
 func main() {
-	test()
+	// test()
+	pointSetRangeFreq()
+}
+
+// https://judge.yosupo.jp/problem/point_set_range_frequency
+func pointSetRangeFreq() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	rfq := NewRangeFreqQueryPointSet(n, func(i int32) S { return S(nums[i]) }, func(a, b S) bool { return a < b })
+	for i := int32(0); i < q; i++ {
+		var op int32
+		fmt.Fscan(in, &op)
+		if op == 0 {
+			var index, value int32
+			fmt.Fscan(in, &index, &value)
+			rfq.Set(index, value)
+		} else {
+			var start, end, value int32
+			fmt.Fscan(in, &start, &end, &value)
+			fmt.Fprintln(out, rfq.RangeFreq(start, end, value))
+		}
+	}
 }
 
 type RangeFreqQueryPointSet struct {

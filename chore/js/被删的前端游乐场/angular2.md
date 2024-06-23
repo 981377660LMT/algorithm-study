@@ -270,3 +270,150 @@ zone.js 提供了丰富的生命周期钩子，可以使用 zone.js 的区域能
 - `测试某个函数的执行耗时`，但因为函数内有`异步`逻辑，无法得到准确的执行时间：使用生命周期钩子配合可得到具体的耗时
 
 # Angular 框架解读--Zone 区域之 ngZone
+
+NgZone 基于 zone.js 之上再做了一层封装，通过 fork 创建出子区域作为 Angular 区域，
+使得在 Angular Zone 内函数中的`所有异步操作可以在正确的时间自动触发变更检测`。
+
+默认情况下，所有异步操作都在 Angular Zone 内，这会自动触发变更检测(handleChange)。
+另一个常见的情况是我们不想触发变更检测（`比如不希望像 scroll 等事件过于频繁地进行变更检测，从而导致性能问题`），此时可以使用 NgZone 的 runOutsideAngular()方法，来自己实现变更检测的逻辑。
+
+# Angular 框架解读--模块化组织
+
+说到模块化，前端开发首先会想到 ES6 的模块，这两者其实并没有什么关联：
+
+ES6 模块以文件为单位；Angular 模块则是以 NgModule 为单位。
+ES6 模块用于跨文件的功能调用；Angular 模块用于组织有特定意义的功能块。
+ES6 模块在编译阶段确认各个模块的依赖关系，模块间关系扁平；Angular 模块则可以带有深度的层次结构。
+
+NgModule 把组件、指令和管道打包成内聚的功能块，每个模块聚焦于一个特性区域、业务领域、工作流或通用工具。运行时，模块相关的信息存储在 NgModuleDef 中：
+
+```ts
+// NgModuleDef 是运行时用于组装组件、指令、管道和注入器的内部数据结构
+export interface NgModuleDef<T> {
+  // 表示模块的令牌，由DI使用
+  type: T
+  // 要引导的组件列表
+  bootstrap: Type<any>[] | (() => Type<any>[])
+  // 此模块声明的组件、指令和管道的列表
+  declarations: Type<any>[] | (() => Type<any>[])
+  // 此模块导入的模块列表或 ModuleWithProviders
+  imports: Type<any>[] | (() => Type<any>[])
+  // 该模块导出的模块、ModuleWithProviders、组件、指令或管道的列表
+  exports: Type<any>[] | (() => Type<any>[])
+  // 为该模块计算的 transitiveCompileScopes 的缓存值
+  transitiveCompileScopes: NgModuleTransitiveScopes | null
+  // 声明 NgModule 中允许的元素的一组模式
+  schemas: SchemaMetadata[] | null
+  // 应为其注册模块的唯一ID
+  id: string | null
+}
+```
+
+宏观来讲，NgModule 是组织 Angular 应用的一种方式，它们通过@NgModule 装饰器中的元数据来实现这一点，这些元数据可以分成三类：
+
+- 静态的：编译器配置，通过 `declarations` 数组来配置。用于告诉编译器指令的选择器，并通过选择器匹配的方式，决定要把该指令应用到模板中的什么位置
+- 运行时：通过 `providers` 数组提供给注入器的配置
+- 组合/分组：通过 `imports 和 exports` 数组来把多个 **NgModule** 放在一起，并让它们可用
+
+## 模块化组织
+
+每个 Angular 应用有至少一个模块，该模块称为根模块（AppModule）。Angular 应用的启动，便是由根模块开始的，可以参考后续的依赖注入的引导过程内容。
+
+# Angular 框架解读--依赖注入的基本概念
+
+1. 依赖注入
+
+- 1.1. 依赖倒置原则、控制反转、依赖注入
+
+  - 依赖倒置原则（DIP）：`模块间不应该直接依赖对方，应该依赖一个抽象的规则（接口或者时抽象类）`
+  - 控制反转（IoC）: `模块间的依赖关系从程序内部提到外部来实例化管理`。即对象在被创建的时候，由一个调控系统内所有对象的外界实体控制，并将其所依赖的对象的引用传递(注入)给它。
+    实现控制反转主要有两种方式：
+    依赖注入：被动的接收依赖对象
+    依赖查找：主动索取依赖的对象
+  - 依赖注入（DI）：`是控制反转的最为常见的一种技术`
+    依赖倒置和控制反转两者相辅相成，常常可以一起使用，可有效地降低模块间的耦合。
+
+2.  Angular 中的依赖注入
+    DI 框架会在实例化某个类时，向其提供这个类所声明的依赖项（依赖项：指当类需要执行其功能时，所需要的服务或对象）。
+
+- 2.1. Injector 注入器
+  Injector 注入器用于创建依赖，会`维护一个容器来管理这些依赖`，并尽可能地复用它们。注入器会提供依赖的一个单例，并把这个单例对象注入到多个组件中。
+  我们可以将需要共享的依赖实例添加到注入器中，并通过 Token 查询和检索注入器来获取相应的依赖实例。
+
+  ```ts
+  export abstract class Injector {
+    // 找不到依赖
+    static THROW_IF_NOT_FOUND = THROW_IF_NOT_FOUND
+    // NullInjector 是树的顶部
+    // 如果你在树中向上走了很远，以至于要在 NullInjector 中寻找服务，那么将收到错误消息，或者对于 @Optional()，返回 null
+    static NULL: Injector = new NullInjector()
+
+    // 通过 Token 查询和检索注入器来获取相应的依赖实例
+    // 查找依赖的过程也是向上遍历注入器树的过程
+    abstract get<T>(
+      token: Type<T> | AbstractType<T> | InjectionToken<T>,
+      notFoundValue?: T,
+      flags?: InjectFlags
+    ): T
+
+    // 创建一个新的 Injector 实例，该实例提供一个或多个依赖项
+    // 创建一个新的Injector实例时，传入的参数包括Provider：Injector不会直接创建依赖，而是通过Provider来完成的
+    // 如果指定的注入器无法解析某个依赖，它就会请求父注入器来解析它
+    static create(options: {
+      providers: StaticProvider[]
+      parent?: Injector
+      name?: string
+    }): Injector
+
+    // ɵɵdefineInjectable 用于构造一个 InjectableDef
+    // 它定义 DI 系统将如何构造 Token，并且在哪些 Injector 中可用
+    static ɵprov = ɵɵdefineInjectable({
+      token: Injector,
+      providedIn: 'any' as any,
+      // ɵɵinject 生成的指令：从当前活动的 Injector 注入 Token
+      factory: () => ɵɵinject(INJECTOR)
+    })
+
+    static __NG_ELEMENT_ID__ = InjectorMarkers.Injector
+  }
+  ```
+
+- 2.2. Provider 提供者
+
+Provider 提供者用来`告诉注入器应该如何获取或创建依赖`，要想让注入器能够创建服务（或提供其它类型的依赖），必须使用某个提供者配置好注入器。
+
+- 2.3. Angular 中的依赖注入服务
+  在 Angular 中，`服务就是一个带有@Injectable 装饰器的类`，它封装了可以在应用程序中复用的非 UI 逻辑和代码。Angular 把组件和服务分开，是为了增进模块化程度和可复用性。
+
+3.  总结
+    对于注入器、提供者和可注入服务，我们可以简单地这样理解：
+
+    - 注入器用于创建依赖，会维护一个容器来管理这些依赖，并尽可能地复用它们。
+    - 一个注入器中的依赖服务，只有一个实例。
+    - 注入器需要使用提供者来管理依赖，并通过 token（DI 令牌）来进行关联。
+    - 提供者用于告诉注入器应该如何获取或创建依赖。
+    - 可注入服务类会根据元数据编译后，得到可注入对象，该对象可用于创建实例。
+
+    注入器：老板，管人(依赖)的
+    提供者：老板的助手们
+    可注入服务：干活的
+
+# Angular 框架解读--多级依赖注入设计
+
+# Angular 框架解读--依赖注入的引导过程
+
+# Angular 框架解读--Ivy 编译器整体设计
+
+# Angular 框架解读--Ivy 编译器的视图数据和依赖解析
+
+# Angular 框架解读--Ivy 编译器之 CLI 编译器
+
+# Angular 框架解读--Ivy 编译器之心智模型
+
+# Angular 框架解读--Ivy 编译器之 AOT/JIT
+
+# Angular 框架解读--Ivy 编译器之增量 DOM
+
+# Angular 框架解读--Ivy 编译器之变更检测
+
+在 Angular 中将被标记为 `CheckAlways 或者 Dirty` 的组件进行视图刷新，在每个变更周期中，会执行` template()模板函数中的更新模式下逻辑`。而在 template()模板函数中的具体指令逻辑中，还会根据原来的值和新的值进行比较，`有差异的时候才会进行更新`。
