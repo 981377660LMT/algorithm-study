@@ -73,13 +73,37 @@ https://juejin.cn/post/7088894106113409032?searchId=20240624231144C761F2A7160495
 1.  对象的响应性实现原理
 2.  非对象的响应性实现原理
 
-Q & A
+**Q & A**
 
 - 设计存储空间的数据结构
+
+  ```ts
+  WeakMap<object, Map<PropertyKey, Set<() => void>>>
+  ```
+
 - 分支切换导致冗余依赖的问题
+  每次副作用函数重新执行的时候，我们要先把它从所有与之关联的依赖集合中删除。执行后会建立新的关联
+
 - 嵌套副作用函数的问题
+  `执行 fn 前入栈，执行 fn 后出栈`
+
+  ```ts
+  const effectFn = () => {
+    /** 每次执行副作用函数之前，先清理依赖. */
+    cleanup(effectFn)
+    activeEffect = effectFn
+    effectStack.push(effectFn)
+    fn()
+    effectStack.pop()
+    activeEffect = effectStack.length > 0 ? effectStack[effectStack.length - 1] : undefined
+  }
+  ```
+
 - 副作用函数无限调用自身导致栈溢出
+  在 trigger 中执行副作用函数的时候，`不执行当前正在处理的副作用函数`，即 activeEffect
 - 响应式系统的可调度性
+  1. 把 options 挂在 effectFn 上
+  2. 如果一个副作用函数存在调度器，就用调度器执行副作用函数
 
 ## 渲染器(Renderer)
 
