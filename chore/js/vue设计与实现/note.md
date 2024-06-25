@@ -70,8 +70,85 @@ https://juejin.cn/post/7088894106113409032?searchId=20240624231144C761F2A7160495
   - `嵌套的 effect 与 effect 栈`
     如果有嵌套的 effect 执行，我们就需要在保存当前 effect 函数的同时，记录之前的 effect 函数，并在当前的函数之前完之后，把上一层的 effect 赋值为 activeEffect。很简单的会想到用栈来实现这个功能。
 
-5. 对象的响应性实现原理
-6. 非对象的响应性实现原理
+5. 对象的响应性实现原理 : `Proxy`
+   Proxy 只能代理对象，不能代理非对象原始值，比如字符串。
+   Proxy 会拦截对对象的基本语义，并重新定义对象的基本操作
+
+6. 非对象的响应性实现原理：
+
+- `引入 ref 的概念`
+  既然原始值无法使用 Proxy 我们就只能把原始值包裹起来
+  为了判断一个对象是否是原始值的包裹对象，`添加一个不可写不可枚举属性来判断`
+
+  ```js
+  function ref(val) {
+    const wrapper = {
+      value: val
+    }
+    Object.defineProperty(wrapper, '__v_isref', {
+      value: true
+    })
+    return reactive(wrapper)
+  }
+  ```
+
+- 响应丢失问题：通过扩展运算符获取响应式对象的值后，我们得到的值变成了普通对象
+  可以在新建对象，然后把对应属性的 get 访问器设置为读取之前对象的值，这样就可以出发响应了
+  如果属性多的时候，需要进行批量转换
+
+```js
+function toRef(obj, key) {
+  const wrapper = {
+    get value() {
+      return obj[key]
+    },
+    set(val) {
+      obj[key] = val
+    }
+  }
+  Object.defineProperty(wrapper, '__v_isref', {
+    value: true
+  })
+  return wrapper
+}
+
+function toRefs(obj) {
+  const ret = {}
+  for (let key in obj) {
+    ret[key] = toRef(obj, key)
+  }
+  return ret
+}
+const newObj = { ...toRefs(obj) }
+
+const newObj = {
+  foo: toRef(obj, 'foo'),
+  bar: toRef(obj, 'bar')
+}
+```
+
+- 自动脱 ref
+  我们在模板中使用 ref 对象值的时候，不需要用户再添加 .value 去使用，所以需要有一个自动脱 ref 的功能。
+  思路就是`通过一个 Proxy 代理对象，在读取的值为 ref 时，再读取对象的 .value 值，同时设置值也应该有自动设置到 value 属性的功能`
+
+```js
+function proxyRefs(target) {
+  return new Proxy(target, {
+    get(target, key, receiver) {
+      const value = Reflect.get(target, key, receiver)
+      return value.__v_isRef ? value.value : value
+    },
+    set(target, key, newValue, receiver) {
+      const value = target[key]
+      if (value.__v_isRef) {
+        value.value = newValue
+        return true
+      }
+      Reflect.set(target, key, newValue, receiver)
+    }
+  })
+}
+```
 
 **Q & A**
 
@@ -112,12 +189,62 @@ https://juejin.cn/post/7088894106113409032?searchId=20240624231144C761F2A7160495
 将虚拟 DOM 渲染成真实 DOM
 
 7. 渲染器的设计
+
+- 渲染器需要有跨平台的能力
+- 在浏览器端会渲染为真实的 DOM 元素
+- 我们实现 createRenderer 函数，它会创建不同平台的渲染器。其中 render 用于浏览器。渲染分两种情况，挂载和后续渲染（存在旧节点），我们在内部使用 patch 去实现具体渲染（暂未实现）。
+
+```js
+function createRenderer() {
+  // n1 旧node
+  // n2 新node
+  // container 容器
+  // patch可以用户挂载 也可以用于后续渲染
+  function patch(n1, n2, container) {}
+
+  function render(vnode, container) {
+    if (vnode) {
+      // 如果有新 vnode 就和旧 vnode 一起用 patch 处理
+      patch(container._vnode, node, container)
+    } else {
+      // 没有新 vnode 但是有旧 vnode 直接清空 DOM 即可
+      if (container._vnode) {
+        container.innerHTML = ''
+      }
+    }
+    // 把旧 vnode 缓存到 container
+    container._vnode = vnode
+  }
+
+  function hydrate(vnode, container) {
+    // 服务端渲染
+  }
+
+  return {
+    render,
+    hydrate
+  }
+}
+```
+
+- 自定义渲染器
+  把平台相关的函数提取出来，并通过参数传入，然后封装多平台通用的渲染器
+  挂载要依赖平台的实现，比如创建元素，插入元素，我们把这些通过 options 统一传入
+
 8. DOM 的挂载和更新的逻辑
-9. Diff 算法
+
+- 事件的处理
+  **存储一个事件处理函数，并把真正的事件函数赋值到该函数**
+- 事件冒泡与更新时机问题
+  记录事件触发的时间和事件绑定的时间，只有触发时间在绑定时间之后才会执行
+
+9.  Diff 算法
+    快速 Diff 算法
 
 ## 组件化
 
 10. 组件的实现原理
+    在渲染器内部的实现看，一个组件是一个特殊类型的虚拟 DOM 节点。之前在 patch 我们判断了 VNode 的 type 值来处理，现在来处理类型为对象的情况
 
 - setup 函数
   返回一个函数，该函数将作为组件的 render 函数
