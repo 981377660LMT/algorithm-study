@@ -124,5 +124,42 @@ if (require.main === module) {
   // !批处理更新
   // 我们也可以指定副作用函数的执行次数，比如我们对同一个变量连续操作了多次，我们只需要对最终的结果执行副作用函数，中间值可以被忽略。
   // 基于调度器实现这个功能
-  function demo2() {}
+  //
+  // !通过 Set 实现去重，防止函数执行多次，通过 isflushing 做标记，执行过程中不会再次执行
+  function demo2() {
+    const jobQueue = new Set<() => void>()
+    const p = Promise.resolve()
+
+    let isFlushing = false
+    function flushJob(): void {
+      if (isFlushing) return
+      isFlushing = true
+      p.then(() => {
+        jobQueue.forEach(job => job())
+      }).finally(() => {
+        isFlushing = false
+      })
+    }
+
+    effect(
+      () => {
+        console.log('age:', reactiveData.age)
+      },
+      {
+        scheduler(fn) {
+          jobQueue.add(fn)
+          flushJob()
+        }
+      }
+    )
+
+    reactiveData.age++
+    reactiveData.age++
+    reactiveData.age++
+    reactiveData.age++
+    reactiveData.age++
+    console.log('结束')
+  }
+
+  demo2()
 }

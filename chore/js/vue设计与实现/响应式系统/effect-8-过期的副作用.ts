@@ -1,7 +1,9 @@
-// https://www.cnblogs.com/wenruo/p/17050995.html
-// watch 通过 effect 实现，第一个参数遍历传入的对象，读取对象的每一个值，
-// 第二个参数是一个回调函数，在 scheduler 中执行，也就是依赖每次更新都会执行。
-// 不过 watch 第一个参数不一定亚奥传入一个值，也会传一个 getter 函数。同时，在 watch 中我们还希望获取改变前后的值
+// effect-8-过期的副作用
+// 竞态问题，连续发送两次请求，后面的先返回，导致先发送的返回结果覆盖了后面的请求。而一般的需求是，保留最后一次请求的结果。
+// 类似取消Promise的操作，我们可以通过一个标识来判断是否需要执行副作用函数。
+// !假设在 watch 我们会发送一个异步请求，可以通过在 watch 的回调函数中新增一个 onInvalidate 参数解决。
+//
+// !先返回的请求可以使用onInvalidate函数作用到后返回的请求上
 
 interface IEffectFn<R = any> {
   (): R
@@ -113,6 +115,26 @@ function trigger(target: object, key: PropertyKey): void {
   })
 }
 
+function tranverse(value: unknown, visited = new Set()): any {
+  if (typeof value !== 'object' || value === null || visited.has(value)) {
+    return
+  }
+  visited.add(value)
+  if (Array.isArray(value)) {
+    value.forEach(item => tranverse(item, visited))
+  }
+  if (value instanceof Map) {
+    value.forEach((_, key) => tranverse(key, visited))
+  }
+  if (value instanceof Set) {
+    value.forEach(item => tranverse(item, visited))
+  }
+  for (const key in value) {
+    tranverse((value as Record<any, any>)[key], visited)
+  }
+  return value
+}
+
 export {}
 
 interface IWathcOptions {
@@ -130,7 +152,7 @@ interface IWathcOptions {
 
 function watch<T>(
   source: () => T,
-  cb: (newValue: T, oldValue: T | undefined) => void,
+  cb: (newValue: T, oldValue: T | undefined, onInvaliate: (fn: () => void) => void) => void,
   options: IWathcOptions = {}
 ) {
   let getter: () => T
@@ -145,12 +167,27 @@ function watch<T>(
   let oldValue: T
   let newValue: T
 
+  /** 用于存储用户注册的过期回调. */
+  let cleanup: () => void
+  function onInvaliate(fn: () => void) {
+    cleanup = fn
+  }
+
   // 把scheduler调度函数提取为job函数
   // 在 scheduler 手动调用副作用函数，获取最新的值并缓存，然后在回调时传入。
   // 这里使用了 lazy，是为了手动调用第一次副作用函数以获取 oldValue
   const job = () => {
-    newValue = getter()
-    cb(newValue, oldValue)
+    newValue = effectFn()
+
+    // !在执行回调函数之前 先执行过期函数
+    // 我们在回调函数中会调用失效函数 会把过期函数绑在cleanup上
+    // !我们先调用的回调会先把失效函数绑定
+    // 而如果在上一次回调函数执行之前 就触发了下一次的执行 就会调用失效函数
+    // 也就是上一次的回调函数对应的失效函数 则上一次的结果会被取消
+    if (cleanup) {
+      cleanup()
+    }
+    cb(newValue, oldValue, onInvaliate)
     oldValue = newValue
   }
 
@@ -173,35 +210,35 @@ function watch<T>(
   }
 }
 
-function tranverse(value: unknown, visited = new Set()): any {
-  if (typeof value !== 'object' || value === null || visited.has(value)) {
-    return
-  }
-  visited.add(value)
-  if (Array.isArray(value)) {
-    value.forEach(item => tranverse(item, visited))
-  }
-  if (value instanceof Map) {
-    value.forEach((_, key) => tranverse(key, visited))
-  }
-  if (value instanceof Set) {
-    value.forEach(item => tranverse(item, visited))
-  }
-  for (const key in value) {
-    tranverse((value as Record<any, any>)[key], visited)
-  }
-  return value
-}
-
 if (require.main === module) {
+  let t = 0
+  const mock = () => {
+    return new Promise(resolve => {
+      if (++t <= 2) {
+        // 模拟一下 前两次需要1s返回 第3次立即返回
+        t = 1000
+      }
+      setTimeout(() => {
+        resolve(1)
+      }, t)
+    })
+  }
+
+  let finalData: any
+
   watch(
     () => reactiveData.age,
-    (newValue, oldValue) => {
-      console.log('watch callback', { newValue, oldValue })
-    },
-    { flush: 'post' }
+    async (newValue, oldValue, onInvalidate) => {
+      console.log('foo 的值变了', newValue, oldValue)
+      let expired = false
+      onInvalidate(() => {
+        expired = true
+      })
+      const res = await mock()
+      console.log(expired ? '过期了' : '未过期', 'newValue=' + newValue)
+      if (!expired) {
+        finalData = res
+      }
+    }
   )
-
-  reactiveData.age++
-  console.log('结束')
 }
