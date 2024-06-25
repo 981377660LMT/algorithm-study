@@ -138,11 +138,7 @@ class Zone implements AmbientZone {
     this._parent = parent
     this._name = zoneSpec ? zoneSpec.name || 'unnamed' : '<root>'
     this._properties = (zoneSpec && zoneSpec.properties) || {}
-    this._zoneDelegate = new ZoneDelegate(
-      this,
-      this._parent && this._parent._zoneDelegate,
-      zoneSpec
-    )
+    this._zoneDelegate = new ZoneDelegate(this, this._parent && this._parent._zoneDelegate, zoneSpec)
   }
   // fork 会产生子区域
   public fork(zoneSpec: ZoneSpec): AmbientZone {
@@ -152,12 +148,7 @@ class Zone implements AmbientZone {
   }
   // 在区域中同步运行某段代码
   public run(callback: Function, applyThis?: any, applyArgs?: any[], source?: string): any
-  public run<T>(
-    callback: (...args: any[]) => T,
-    applyThis?: any,
-    applyArgs?: any[],
-    source?: string
-  ): T {
+  public run<T>(callback: (...args: any[]) => T, applyThis?: any, applyArgs?: any[], source?: string): T {
     // 准备执行，入栈处理
     _currentZoneFrame = { parent: _currentZoneFrame, zone: this }
     try {
@@ -199,20 +190,9 @@ zone.js 是如何识别出异步任务的呢？
 ```ts
 interface ZoneSpec {
   // 允许拦截 Zone.fork，对该区域进行 fork 时，请求将转发到此方法以进行拦截
-  onFork?: (
-    parentZoneDelegate: ZoneDelegate,
-    currentZone: Zone,
-    targetZone: Zone,
-    zoneSpec: ZoneSpec
-  ) => Zone
+  onFork?: (parentZoneDelegate: ZoneDelegate, currentZone: Zone, targetZone: Zone, zoneSpec: ZoneSpec) => Zone
   // 允许拦截回调的 wrap
-  onIntercept?: (
-    parentZoneDelegate: ZoneDelegate,
-    currentZone: Zone,
-    targetZone: Zone,
-    delegate: Function,
-    source: string
-  ) => Function
+  onIntercept?: (parentZoneDelegate: ZoneDelegate, currentZone: Zone, targetZone: Zone, delegate: Function, source: string) => Function
   // 允许拦截回调调用
   onInvoke?: (
     parentZoneDelegate: ZoneDelegate,
@@ -224,42 +204,15 @@ interface ZoneSpec {
     source?: string
   ) => any
   // 允许拦截错误处理
-  onHandleError?: (
-    parentZoneDelegate: ZoneDelegate,
-    currentZone: Zone,
-    targetZone: Zone,
-    error: any
-  ) => boolean
+  onHandleError?: (parentZoneDelegate: ZoneDelegate, currentZone: Zone, targetZone: Zone, error: any) => boolean
   // 允许拦截任务计划
-  onScheduleTask?: (
-    parentZoneDelegate: ZoneDelegate,
-    currentZone: Zone,
-    targetZone: Zone,
-    task: Task
-  ) => Task
+  onScheduleTask?: (parentZoneDelegate: ZoneDelegate, currentZone: Zone, targetZone: Zone, task: Task) => Task
   // 允许拦截任务回调调用
-  onInvokeTask?: (
-    parentZoneDelegate: ZoneDelegate,
-    currentZone: Zone,
-    targetZone: Zone,
-    task: Task,
-    applyThis: any,
-    applyArgs?: any[]
-  ) => any
+  onInvokeTask?: (parentZoneDelegate: ZoneDelegate, currentZone: Zone, targetZone: Zone, task: Task, applyThis: any, applyArgs?: any[]) => any
   // 允许拦截任务取消
-  onCancelTask?: (
-    parentZoneDelegate: ZoneDelegate,
-    currentZone: Zone,
-    targetZone: Zone,
-    task: Task
-  ) => any
+  onCancelTask?: (parentZoneDelegate: ZoneDelegate, currentZone: Zone, targetZone: Zone, task: Task) => any
   // 通知对任务队列为空状态的更改
-  onHasTask?: (
-    parentZoneDelegate: ZoneDelegate,
-    currentZone: Zone,
-    targetZone: Zone,
-    hasTaskState: HasTaskState
-  ) => void
+  onHasTask?: (parentZoneDelegate: ZoneDelegate, currentZone: Zone, targetZone: Zone, hasTaskState: HasTaskState) => void
 }
 ```
 
@@ -350,20 +303,12 @@ export interface NgModuleDef<T> {
 
     // 通过 Token 查询和检索注入器来获取相应的依赖实例
     // 查找依赖的过程也是向上遍历注入器树的过程
-    abstract get<T>(
-      token: Type<T> | AbstractType<T> | InjectionToken<T>,
-      notFoundValue?: T,
-      flags?: InjectFlags
-    ): T
+    abstract get<T>(token: Type<T> | AbstractType<T> | InjectionToken<T>, notFoundValue?: T, flags?: InjectFlags): T
 
     // 创建一个新的 Injector 实例，该实例提供一个或多个依赖项
     // 创建一个新的Injector实例时，传入的参数包括Provider：Injector不会直接创建依赖，而是通过Provider来完成的
     // 如果指定的注入器无法解析某个依赖，它就会请求父注入器来解析它
-    static create(options: {
-      providers: StaticProvider[]
-      parent?: Injector
-      name?: string
-    }): Injector
+    static create(options: { providers: StaticProvider[]; parent?: Injector; name?: string }): Injector
 
     // ɵɵdefineInjectable 用于构造一个 InjectableDef
     // 它定义 DI 系统将如何构造 Token，并且在哪些 Injector 中可用
@@ -404,16 +349,31 @@ Provider 提供者用来`告诉注入器应该如何获取或创建依赖`，要
 
 # Angular 框架解读--Ivy 编译器整体设计
 
+https://www.bilibili.com/video/BV12v4y1w7P5/?vd_source=e825037ab0c37711b6120bbbdabda89e
+
+- 通过`增量编译`缩短构建时间
+- 减少构建大小
+
+1. ngtsc：TypeScript 编译器，将 Angular 装饰器化为静态属性
+2. Ngcc：处理来自 npm 代码并生成等效的 Ivy 版本，就像使用 ngtsc 编译代码一样
+
+标记模版 -> 将标记内容解析为 HTML AST -> 将 HTML AST 转换为 Angular 模版 AST -> 将模版 AST 转换为模版函数
+parse、transform、generate
+
 # Angular 框架解读--Ivy 编译器的视图数据和依赖解析
 
 # Angular 框架解读--Ivy 编译器之 CLI 编译器
 
 # Angular 框架解读--Ivy 编译器之心智模型
 
+**装饰器就是编译器**
+
 # Angular 框架解读--Ivy 编译器之 AOT/JIT
 
 # Angular 框架解读--Ivy 编译器之增量 DOM
 
 # Angular 框架解读--Ivy 编译器之变更检测
+
+增量编译
 
 在 Angular 中将被标记为 `CheckAlways 或者 Dirty` 的组件进行视图刷新，在每个变更周期中，会执行` template()模板函数中的更新模式下逻辑`。而在 template()模板函数中的具体指令逻辑中，还会根据原来的值和新的值进行比较，`有差异的时候才会进行更新`。
