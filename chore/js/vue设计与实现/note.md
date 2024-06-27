@@ -8,13 +8,38 @@ https://juejin.cn/post/7197980894363156540?searchId=20240624231144C761F2A7160495
 
 https://juejin.cn/post/7088894106113409032?searchId=20240624231144C761F2A716049568C738
 
+- 响应系统：监听可变数据，数据变化时触发回调函数
+- 渲染器：将 VDOM 挂载或更新为真实 DOM ，其中涉及到 diff 算法
+- 组件化：支持把一个大型系统拆分为若干组件，形成组件树
+- 编译器：把 Vue 模板编译为 JS 代码 （对应 React 中的 JSX）
+- **Reflect API 的作用就是：能改变对象 getter 里的 this(receiver)**
+- **渲染时高效切换 DOM 事件**
+  Vue 模板中绑定了事件，那渲染为真实 DOM 也需要绑定 DOM 事件。
+  如果事件更新了，按照一般的思路是先 removeEventListener 然后再 addEventListener ，就是两次 DOM 操作 —— DOM 操作是昂贵的。
+  Vue 对此进行了优化，极大减少了 DOM 操作。其实很简单：
+
+  ```js
+  invoker = { value: someFn }
+
+  elem.addEventListener(type, invoker.value)
+
+  // 如果事件更新，只修改 invoker.value 即可，不用进行 DOM 操作
+  ```
+
+- **异步更新**
+  响应式原本是同步的，即 data 属性变化之后，effectFn 会同步触发执行。
+  但如果多次修改 data 属性，会同步触发多次 effectFn 执行，如果用于渲染 DOM 就太浪费性能了。
+  所以，Vue 在此基础上进行了优化，改为异步渲染，`即多次修改 data 属性，只会在最后一次触发 effectFn 执行，中间不会连续触发`。
+
 ## 框架设计概览
 
 1. 权衡的艺术
+   框架的设计，本身就是一种权衡的艺术
 
    - 命令式 vs 声明式
      `命令式关注过程，声明式关注结果`
      `框架设计要做的就是，保持可维护性，同时让性能损失更少`
+     前端开发中，无论是 jQuery Vue 还是 React ，其实都是两者的结合：用声明式去写 UI 配置，用命令式去做业务逻辑处理。
    - 虚拟 DOM
      性能：innerHTML < 虚拟 DOM < 原生 JavaScript
      心智负担/可维护性：虚拟 DOM < innerHTML < 原生 JavaScript
@@ -242,7 +267,11 @@ function createRenderer() {
   记录事件触发的时间和事件绑定的时间，只有触发时间在绑定时间之后才会执行
 
 9.  Diff 算法
-    快速 Diff 算法
+    Vue3 使用了快速 diff 算法，参考了 ivi 和 inferno 。思路是：
+
+    先进行双端比较
+    剩余的部分计算出最长递增子序列（一个很常见的算法），以找到不用重建和移动的节点
+    最后处理剩余部分
 
 ## 组件化
 
