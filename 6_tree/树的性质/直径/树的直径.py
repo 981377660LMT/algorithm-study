@@ -177,3 +177,24 @@ if __name__ == "__main__":
     assert calDiameter1(adjList) == (3, (0, 3))
     assert len(calDiameter2(adjList)) == 4
     assert len(calDiameter3(adjList)) == 4
+
+    # 100318. 合并两棵树后的最小直径(连边后树的最小直径) -> 连接直径中点
+    # https://leetcode.cn/problems/find-minimum-diameter-after-merging-two-trees/description/
+    class Solution:
+        def minimumDiameterAfterMerge(
+            self, edges1: List[List[int]], edges2: List[List[int]]
+        ) -> int:
+            n1, n2 = len(edges1) + 1, len(edges2) + 1
+            adjList1 = [[] for _ in range(n1)]
+            adjList2 = [[] for _ in range(n2)]
+            for u, v in edges1:
+                adjList1[u].append(v)
+                adjList1[v].append(u)
+            for u, v in edges2:
+                adjList2[u].append(v)
+                adjList2[v].append(u)
+
+            d1, _ = getTreeDiameter(n1, adjList1)
+            d2, _ = getTreeDiameter(n2, adjList2)
+
+            return max(d1, d2, (d1 + 1) // 2 + (d2 + 1) // 2 + 1)
