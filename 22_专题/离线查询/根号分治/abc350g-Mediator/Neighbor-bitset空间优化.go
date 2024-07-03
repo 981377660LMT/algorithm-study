@@ -18,7 +18,7 @@ func main() {
 	abc350_g()
 }
 
-// [ABC350G] Mediator
+// [ABC350G] Mediator (Roaring Bitmaps)
 // https://www.luogu.com.cn/problem/AT_abc350_g
 // 初始时，有 N 个点，编号为 0 到 N-1,没有边存在.
 // 有 Q 次操作，每次操作有三个整数 a, b, c.
