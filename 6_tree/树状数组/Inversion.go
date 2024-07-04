@@ -105,6 +105,25 @@ func AllRangeInversion(nums []int) (inv [][]int) {
 	return dp
 }
 
+// 求两个数组转换后的逆序对数量.
+func CountInvBetween(from, to []int) int {
+	n := len(from)
+	mp := make(map[int][]int)
+	for i, num := range to {
+		mp[num] = append(mp[num], i)
+	}
+	toArr := make([]int, n)
+	for i := n - 1; i >= 0; i-- {
+		cur := mp[from[i]]
+		if len(cur) == 0 {
+			return -1
+		}
+		toArr[i] = cur[len(cur)-1]
+		mp[from[i]] = cur[:len(cur)-1]
+	}
+	return CountInversion(toArr)
+}
+
 func Discretize(nums []int) (newNums []int, size int) {
 	set := make(map[int]struct{})
 	for _, v := range nums {

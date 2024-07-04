@@ -112,7 +112,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-
     if os.environ.get("USERNAME", " ") == "caomeinaixi":
         while True:
             main()

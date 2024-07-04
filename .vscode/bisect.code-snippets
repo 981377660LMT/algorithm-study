@@ -1409,11 +1409,7 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": [
-      "前后缀滑窗",
-      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
-      "不存在时为INF"
-    ]
+    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -4697,14 +4693,7 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": [
-      "func gcd(a, b int) int {",
-      "  for b != 0 {",
-      "    a, b = b, a%b",
-      "  }",
-      "  return a",
-      "}"
-    ],
+    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -5661,14 +5650,7 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": [
-      "n = len(nums)",
-      "res = 0",
-      "for left in range(n):",
-      "\t\tcur = []",
-      "\t\tfor right in range(left, n):",
-      "\t\t\t\t..."
-    ],
+    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -6768,21 +6750,13 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": [
-      "\t\tconst counter = new Map<number, number>()",
-      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
-    ],
+    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": [
-      "\\counter := make(map[int]int)",
-      "\tfor _, v := range nums {",
-      "\t\\counter[v]++",
-      "\t}"
-    ],
+    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
     "description": "counter计数"
   },
   "rangeFreq-python": {
@@ -7285,6 +7259,7 @@
     ],
     "description": "random"
   },
+
   "UnionFindArraySimple": {
     "scope": "python",
     "prefix": "UnionFindArraySimple",
@@ -7385,7 +7360,7 @@
       "\treturn &UnionFindArraySimple32{Part: n, n: n, data: data}",
       "}",
       "",
-      "func (u *UnionFindArraySimple32) Union(key1, key2 int32) bool {",
+      "func (u *UnionFindArraySimple32) Union(key1, key2 int32, preMerge func(big, small int32)) bool {",
       "\troot1, root2 := u.Find(key1), u.Find(key2)",
       "\tif root1 == root2 {",
       "\t\treturn false",
@@ -7393,8 +7368,11 @@
       "\tif u.data[root1] > u.data[root2] {",
       "\t\troot1, root2 = root2, root1",
       "\t}",
+      "\tif preMerge != nil {",
+      "\t\tpreMerge(root1, root2)",
+      "\t}",
       "\tu.data[root1] += u.data[root2]",
-      "\tu.data[root2] = int32(root1)",
+      "\tu.data[root2] = root1",
       "\tu.Part--",
       "\treturn true",
       "}",
@@ -7409,8 +7387,7 @@
       "",
       "func (u *UnionFindArraySimple32) GetSize(key int32) int32 {",
       "\treturn -u.data[u.Find(key)]",
-      "}",
-      ""
+      "}"
     ],
     "description": "UnionFindArraySimple32"
   },
@@ -7630,11 +7607,7 @@
   "Int": {
     "scope": "go",
     "prefix": "Int",
-    "body": [
-      "type Int interface {",
-      "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64",
-      "}"
-    ],
+    "body": ["type Int interface {", "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64", "}"],
     "description": "Int 泛型"
   },
   "heap-go": {
@@ -8044,17 +8017,7 @@
   "test": {
     "scope": "rust",
     "prefix": "test",
-    "body": [
-      "#[cfg(test)]",
-      "mod tests {",
-      "\t\tuse super::*;",
-      "",
-      "\t\t#[test]",
-      "\t\tfn test() {",
-      "\t\t\t\tmain();",
-      "\t\t}",
-      "}"
-    ],
+    "body": ["#[cfg(test)]", "mod tests {", "\t\tuse super::*;", "", "\t\t#[test]", "\t\tfn test() {", "\t\t\t\tmain();", "\t\t}", "}"],
     "description": "test"
   },
   "sortedSet-2": {
