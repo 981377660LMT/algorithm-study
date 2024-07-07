@@ -62,9 +62,12 @@ def find(s: str, isMin=True) -> str:
 
 from typing import List, Sequence
 
+
 # https://leetcode.cn/u/freeyourmind/
 def getSA(ords: Sequence[int]) -> List[int]:
     """返回sa数组 即每个排名对应的后缀"""
+    if not ords:
+        return []
 
     def inducedSort(LMS: List[int]) -> List[int]:
         SA = [-1] * (n)

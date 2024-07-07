@@ -1,40 +1,48 @@
-# 这个快一些
-
-from typing import List, Sequence, Tuple
+# IndexOfAllSa/IndexOfAllMultiString/Lookup/LookupAll
 
 
-def useSA(ords: Sequence[int]) -> Tuple[List[int], List[int], List[int]]:
-    """返回 sa, rank, height 数组.ord值很大时,需要先离散化.
+from typing import List, Sequence
 
-    Args:
-        ords: 可比较的整数序列
 
-    Returns:
-        sa: 每个排名对应的后缀
-        rank: 每个后缀对应的排名
-        height: 第 i 名的后缀与它前一名的后缀的 `最长公共前缀(LCP)`的长度
+def lookupAll(longer: str, longerSa: List[int], shorter: str) -> List[int]:
     """
-    sa = getSA(ords)
-    n, k = len(sa), 0
-    rank, height = [0] * n, [0] * n
-    for i, saIndex in enumerate(sa):
-        rank[saIndex] = i
+    返回s在原串中所有匹配的位置(无序).
+    O(len(s)*log(n))+len(result).
+    """
 
-    for i in range(n):
-        if k > 0:
-            k -= 1
-        while (
-            i + k < n
-            and rank[i] - 1 >= 0
-            and sa[rank[i] - 1] + k < n
-            and ords[i + k] == ords[sa[rank[i] - 1] + k]
-        ):
-            k += 1
-        height[rank[i]] = k
-    return sa, rank, height
+    if len(longer) == 0 or len(shorter) == 0 or len(longer) < len(shorter):
+        return []
+
+    def check1(mid: int) -> bool:
+        return longer[longerSa[mid] :] >= shorter
+
+    def check2(mid: int) -> bool:
+        ptr1 = longerSa[mid + left1]
+        n1, n2 = len(longer) - ptr1, len(shorter)
+        if n1 < n2:
+            return True
+        return longer[ptr1 : ptr1 + n2] != shorter
+
+    n = len(longerSa)
+    left1, right1 = 0, n - 1
+    while left1 <= right1:
+        mid = (left1 + right1) // 2
+        if check1(mid):
+            right1 = mid - 1
+        else:
+            left1 = mid + 1
+
+    left2, right2 = 0, n - left1 - 1
+    while left2 <= right2:
+        mid = (left2 + right2) // 2
+        if check2(mid):
+            right2 = mid - 1
+        else:
+            left2 = mid + 1
+
+    return [longerSa[k] for k in range(left1, left1 + left2)]
 
 
-# https://leetcode.cn/u/freeyourmind/
 def getSA(ords: Sequence[int]) -> List[int]:
     """
     返回sa数组 即每个排名对应的后缀.
@@ -101,5 +109,9 @@ def getSA(ords: Sequence[int]) -> List[int]:
 
 
 if __name__ == "__main__":
-    print(useSA(list(map(ord, "abca"))))  # ([3, 0, 1, 2], [1, 2, 3, 0], [0, 1, 0, 0])
-    print(getSA([1, 2, 3, 1]))  # [3, 0, 1, 2]
+    # https://leetcode.cn/problems/multi-search-lcci/
+    # 面试题 17.17. 多次搜索
+    class Solution:
+        def multiSearch(self, big: str, smalls: List[str]) -> List[List[int]]:
+            sa = getSA([ord(c) for c in big])
+            return [sorted(lookupAll(big, sa, small)) for small in smalls]

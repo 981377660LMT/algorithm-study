@@ -44,7 +44,7 @@ func main() {
 	// CF19C()
 	// CF126()
 	// CF432D()
-	CF822E()
+	// CF822E()
 
 	// abc213f()
 	// abc272f()
@@ -59,7 +59,7 @@ func main() {
 	// 重复次数最多的连续重复子串()
 	// fmt.Println(所有后缀LCP之和("abaab"))
 
-	// test()
+	test()
 }
 
 // Deletion of Repeats (删除连续重复子串)
@@ -790,6 +790,14 @@ func test() {
 	}
 
 	fmt.Println("pass")
+
+	// lookup
+	{
+		t := []int{1, 2, 3, 1, 2}
+		sa := NewSuffixArray(t)
+		s := []int{1, 2}
+		fmt.Println(sa.Lookup(s))
+	}
 }
 
 func demo() {
@@ -800,6 +808,7 @@ func demo() {
 	}
 	sa, rank, height := UseSA(ords)
 	fmt.Println(sa, rank, height)
+
 }
 
 type SuffixArray struct {
@@ -894,6 +903,26 @@ func (suf *SuffixArray) Count(start, end int) int {
 	return b - a
 }
 
+// 返回s在原串中所有匹配的位置(无序).
+// O(len(s)*log(n))+len(result).
+func (suf *SuffixArray) Lookup(target []int) (result []int) {
+	sa, cur := suf.Sa, suf.Ords
+	// find matching suffix index range [i:j]
+	// find the first index where s would be the prefix
+	i := sort.Search(len(sa), func(i int) bool {
+		return suf._compareSlice(cur[sa[i]:], target) >= 0
+	})
+	// starting at i, find the first index at which s is not a prefix
+	j := i + sort.Search(len(sa)-i, func(j int) bool {
+		return !suf._hasPrefix(cur[sa[i+j]:], target)
+	})
+	result = make([]int, j-i)
+	for k := range result {
+		result[k] = sa[i+k]
+	}
+	return
+}
+
 func (suf *SuffixArray) Print(n int, f func(i int) int, sa []int) {
 	for _, v := range sa {
 		s := make([]int, 0, n-v)
@@ -917,6 +946,41 @@ func (suf *SuffixArray) _lcp(i, j int) int {
 		r1, r2 = r2, r1
 	}
 	return suf.minSt.Query(r1+1, r2+1)
+}
+
+// s 是否以prefix为前缀.
+func (suf *SuffixArray) _hasPrefix(s []int, prefix []int) bool {
+	if len(s) < len(prefix) {
+		return false
+	}
+	for i, v := range prefix {
+		if s[i] != v {
+			return false
+		}
+	}
+	return true
+}
+
+func (suf *SuffixArray) _compareSlice(a, b []int) int {
+	n1, n2 := len(a), len(b)
+	ptr1, ptr2 := 0, 0
+	for ptr1 < n1 && ptr2 < n2 {
+		if a[ptr1] < b[ptr2] {
+			return -1
+		}
+		if a[ptr1] > b[ptr2] {
+			return 1
+		}
+		ptr1++
+		ptr2++
+	}
+	if ptr1 == n1 && ptr2 == n2 {
+		return 0
+	}
+	if ptr1 == n1 {
+		return -1
+	}
+	return 1
 }
 
 func (suf *SuffixArray) _getSA(ords []int) (sa []int) {

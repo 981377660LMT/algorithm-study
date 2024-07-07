@@ -34,6 +34,7 @@ import (
 	"fmt"
 	"index/suffixarray"
 	"reflect"
+	"sort"
 	"strings"
 	"unsafe"
 
@@ -52,8 +53,8 @@ func test() {
 		ords[i] ^= ords[i-1]
 	}
 
-	S := NewSuffixArray(int32(len(ords)), func(i int32) int32 { return ords[i] })
-	S2 := NewSuffixArray(int32(len(ords)), func(i int32) int32 { return ords[i] })
+	S := NewSuffixArray32(int32(len(ords)), func(i int32) int32 { return ords[i] })
+	S2 := NewSuffixArray32(int32(len(ords)), func(i int32) int32 { return ords[i] })
 	LcpRange2 := func(left, k int32) (start, end int32) {
 		curRank := S2.Rank[left]
 		for i := curRank; i >= 0; i-- {
@@ -139,7 +140,7 @@ type SuffixArray32 struct {
 	minSt  *LinearRMQ32 // 维护lcp的最小值
 }
 
-func NewSuffixArray(n int32, f func(i int32) int32) *SuffixArray32 {
+func NewSuffixArray32(n int32, f func(i int32) int32) *SuffixArray32 {
 	res := &SuffixArray32{n: n}
 	sa, rank, lcp := SuffixArray32Simple(n, f)
 	res.Sa, res.Rank, res.Height = sa, rank, lcp
@@ -209,6 +210,68 @@ func (suf *SuffixArray32) Count(start, end int32) int32 {
 	}
 	a, b := suf.LcpRange(start, end-start)
 	return b - a
+}
+
+// 返回s在原串中所有匹配的位置(无序).
+// O(len(s)*log(n))+len(result).
+func (suf *SuffixArray32) Lookup(m int32, f func(i int32) int32) (result []int32) {
+	if m == 0 {
+		return
+	}
+	target := make([]int32, m)
+	for i := int32(0); i < m; i++ {
+		target[i] = f(i)
+	}
+	sa, cur := suf.Sa, suf.Ords
+	// find matching suffix index range [i:j]
+	// find the first index where s would be the prefix
+	i := sort.Search(len(sa), func(i int) bool {
+		return suf._compareSlice32(cur[sa[i]:], target) >= 0
+	})
+	// starting at i, find the first index at which s is not a prefix
+	j := i + sort.Search(len(sa)-i, func(j int) bool {
+		return !suf._hasPrefix(cur[sa[i+j]:], target)
+	})
+	result = make([]int32, j-i)
+	for k := range result {
+		result[k] = sa[i+k]
+	}
+	return
+}
+
+func (suf *SuffixArray32) _compareSlice32(a, b []int32) int8 {
+	n1, n2 := len(a), len(b)
+	ptr1, ptr2 := 0, 0
+	for ptr1 < n1 && ptr2 < n2 {
+		if a[ptr1] < b[ptr2] {
+			return -1
+		}
+		if a[ptr1] > b[ptr2] {
+			return 1
+		}
+		ptr1++
+		ptr2++
+	}
+	if ptr1 == n1 && ptr2 == n2 {
+		return 0
+	}
+	if ptr1 == n1 {
+		return -1
+	}
+	return 1
+}
+
+// s 是否以prefix为前缀.
+func (suf *SuffixArray32) _hasPrefix(s []int32, prefix []int32) bool {
+	if len(s) < len(prefix) {
+		return false
+	}
+	for i, v := range prefix {
+		if s[i] != v {
+			return false
+		}
+	}
+	return true
 }
 
 // 求任意两个后缀s[i:]和s[j:]的最长公共前缀(lcp).
@@ -344,7 +407,7 @@ type SuffixArray2 struct {
 // !ords[i]>=0.
 func NewSuffixArray2(ords1, ords2 []int32) *SuffixArray2 {
 	newNums := append(ords1, ords2...)
-	sa := NewSuffixArray(int32(len(newNums)), func(i int32) int32 { return newNums[i] })
+	sa := NewSuffixArray32(int32(len(newNums)), func(i int32) int32 { return newNums[i] })
 	return &SuffixArray2{SA: sa, offset: int32(len(ords1))}
 }
 
