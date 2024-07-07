@@ -7,6 +7,10 @@ def min2(a: int, b: int) -> int:
     return a if a < b else b
 
 
+def max2(a: int, b: int) -> int:
+    return a if a > b else b
+
+
 class ACAutoMatonArray:
     """
     不调用`BuildSuffixLink`就是Trie,调用`BuildSuffixLink`就是AC自动机.
@@ -49,14 +53,14 @@ class ACAutoMatonArray:
         self.wordPos.append(pos)
         return pos
 
-    def addChar(self, pos: int, ord: int) -> int:
+    def addChar(self, pos: int, char: str) -> int:
         """在pos位置添加一个字符,返回新的节点编号."""
-        ord -= self._offset
-        if self.children[pos][ord] != -1:
-            return self.children[pos][ord]
-        self.children[pos][ord] = self._newNode()
+        ord_ = ord(char) - self._offset
+        if self.children[pos][ord_] != -1:
+            return self.children[pos][ord_]
+        self.children[pos][ord_] = self._newNode()
         self.parent[-1] = pos
-        return self.children[pos][ord]
+        return self.children[pos][ord_]
 
     def buildSuffixLink(self, needUpdateChildren: bool = True):
         """
@@ -96,15 +100,15 @@ class ACAutoMatonArray:
                     else:
                         children[v][i] = children[f][i]
 
-    def move(self, pos: int, ord: int) -> int:
-        """pos: DFA的状态集, ord: DFA的字符集."""
-        ord -= self._offset
+    def move(self, pos: int, char: str) -> int:
+        """pos: DFA的状态集, char: DFA的字符集."""
+        ord_ = ord(char) - self._offset
         if self._needUpdateChildren:
-            return self.children[pos][ord]
+            return self.children[pos][ord_]
         while True:
             nexts = self.children[pos]
-            if nexts[ord] != -1:
-                return nexts[ord]
+            if nexts[ord_] != -1:
+                return nexts[ord_]
             if pos == 0:
                 return 0
             pos = self.link[pos]
@@ -236,9 +240,64 @@ if __name__ == "__main__":
             dp[0] = 0
             pos = 0
             for i, char in enumerate(target):
-                pos = acm.move(pos, ord(char))
+                pos = acm.move(pos, char)
                 cur = pos
                 while cur != 0:
                     dp[i + 1] = min2(dp[i + 1], dp[i + 1 - nodeDepth[cur]] + nodeCosts[cur])
                     cur = acm.link[cur]
             return dp[n] if dp[n] != INF else -1
+
+        # 2781. 最长合法子字符串的长度
+        # https://leetcode.cn/problems/length-of-the-longest-valid-substring/
+        def longestValidSubstring(self, word: str, forbidden: List[str]) -> int:
+            acm = ACAutoMatonArray(sigma=26, offset=97)
+            for s in forbidden:
+                acm.addString(s)
+            acm.buildSuffixLink(True)
+
+            minWordLen = [INF] * acm.size  # 每个状态匹配到的模式串的最小长度
+            for i, pos in enumerate(acm.wordPos):
+                minWordLen[pos] = len(forbidden[i])
+            for link, cur in acm.dp():
+                minWordLen[cur] = min2(minWordLen[cur], minWordLen[link])
+
+            res, left, pos = 0, 0, 0
+            for right, char in enumerate(word):
+                pos = acm.move(pos, char)
+                left = max2(left, right - minWordLen[pos] + 2)
+                res = max2(res, right - left + 1)
+            return res
+
+        # 面试题 17.17. 多次搜索
+        # https://leetcode.cn/problems/multi-search-lcci/
+        def multiSearch(self, big: str, smalls: List[str]) -> List[List[int]]:
+            """多模式匹配indexOfAll."""
+            acm = ACAutoMatonArray()
+            for s in smalls:
+                acm.addString(s)
+            acm.buildSuffixLink()
+
+            matchIndexes = acm.getIndexes()
+            res = [[] for _ in range(len(smalls))]
+            pos = 0
+            for i, char in enumerate(big):
+                pos = acm.move(pos, char)
+                for index in matchIndexes[pos]:
+                    res[index].append(i - len(smalls[index]) + 1)
+            return res
+
+        # 1032. 字符流
+        # https://leetcode.cn/problems/stream-of-characters/
+        class StreamChecker:
+            def __init__(self, words: List[str]):
+                self._acm = ACAutoMatonArray()
+                for w in words:
+                    self._acm.addString(w)
+                self._acm.buildSuffixLink()
+                self._counter = self._acm.getCounter()
+                self._pos = 0
+
+            def query(self, letter: str) -> bool:
+                """从字符流中接收一个新字符，如果字符流中的任一非空后缀能匹配 words 中的某一字符串，返回 true"""
+                self._pos = self._acm.move(self._pos, letter)
+                return self._counter[self._pos] > 0
