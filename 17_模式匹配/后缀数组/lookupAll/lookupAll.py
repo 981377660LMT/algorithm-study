@@ -40,7 +40,7 @@ def lookupAll(longer: Sequence[Any], longerSa: List[int], shorter: Sequence[Any]
         else:
             left2 = mid + 1
 
-    return [longerSa[k] for k in range(left1, left1 + left2)]
+    return longerSa[left1 : left1 + left2]
 
 
 def getSA(ords: Sequence[int]) -> List[int]:
