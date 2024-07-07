@@ -7,7 +7,6 @@
 # AC自动机又叫AhoCorasick
 
 
-from functools import lru_cache
 from typing import Generator, Generic, Iterable, List, Tuple, TypeVar
 
 INF = int(2e18)
@@ -22,15 +21,16 @@ class ACAutoMatonMap(Generic[T]):
     每个状态对应Trie中的一个结点, 也对应一个字符串.
     """
 
-    __slots__ = ("wordPos", "_children", "_suffixLink", "_bfsOrder")
+    __slots__ = ("wordPos", "_children", "_link", "_linkWord", "_bfsOrder")
 
     def __init__(self):
         self.wordPos = []
         """wordPos[i] 表示加入的第i个模式串对应的节点编号."""
         self._children = [{}]
         """_children[v][c] 表示节点v通过字符c转移到的节点."""
-        self._suffixLink = []
+        self._link = []
         """又叫fail.指向当前节点最长真后缀对应结点,例如"bc"是"abc"的最长真后缀."""
+        self._linkWord = []
         self._bfsOrder = []
         """结点的拓扑序,0表示虚拟节点."""
 
@@ -60,7 +60,7 @@ class ACAutoMatonMap(Generic[T]):
         return nextState
 
     def move(self, pos: int, char: T) -> int:
-        children, link = self._children, self._suffixLink
+        children, link = self._children, self._link
         while True:
             nexts = children[pos]
             if char in nexts:
@@ -73,7 +73,7 @@ class ACAutoMatonMap(Generic[T]):
         """
         构建后缀链接(失配指针).
         """
-        self._suffixLink = [-1] * len(self._children)
+        self._link = [-1] * len(self._children)
         self._bfsOrder = [0] * len(self._children)
         head, tail = 0, 1
         while head < tail:
@@ -82,33 +82,59 @@ class ACAutoMatonMap(Generic[T]):
             for char, next_ in self._children[v].items():
                 self._bfsOrder[tail] = next_
                 tail += 1
-                f = self._suffixLink[v]
+                f = self._link[v]
                 while f != -1 and char not in self._children[f]:
-                    f = self._suffixLink[f]
-                self._suffixLink[next_] = f
+                    f = self._link[f]
+                self._link[next_] = f
                 if f == -1:
-                    self._suffixLink[next_] = 0
+                    self._link[next_] = 0
                 else:
-                    self._suffixLink[next_] = self._children[f][char]
+                    self._link[next_] = self._children[f][char]
+
+    def linkWord(self, pos: int) -> int:
+        """
+        `linkWord`指向当前节点的最长后缀对应的节点.
+        区别于`_link`,`linkWord`指向的节点对应的单词不会重复.
+        即不会出现`_link`指向某个长串局部的恶化情况.
+
+        时间复杂度 O(sqrt(n)).
+        """
+        if len(self._linkWord) == 0:
+            hasWord = [False] * len(self._children)
+            for v in self.wordPos:
+                hasWord[v] = True
+            self._linkWord = [0] * len(self._children)
+            link, linkWord = self._link, self._linkWord
+            for v in self._bfsOrder:
+                if v != 0:
+                    p = link[v]
+                    linkWord[v] = p if hasWord[p] else linkWord[p]
+        return self._linkWord[pos]
 
     def getCounter(self) -> List[int]:
-        """获取每个状态匹配到的模式串的个数."""
+        """
+        获取每个状态包含的模式串的个数.
+        时空复杂度 O(n).
+        """
         counter = [0] * len(self._children)
         for pos in self.wordPos:
             counter[pos] += 1
         for v in self._bfsOrder:
             if v != 0:
-                counter[v] += counter[self._suffixLink[v]]
+                counter[v] += counter[self._link[v]]
         return counter
 
     def getIndexes(self) -> List[List[int]]:
-        """获取每个状态匹配到的模式串的索引."""
+        """
+        获取每个状态包含的模式串的索引(有序).
+        时空复杂度 O(nsqrtn).
+        """
         res = [[] for _ in range(len(self._children))]
         for i, pos in enumerate(self.wordPos):
             res[pos].append(i)
         for v in self._bfsOrder:
             if v != 0:
-                from_, _children = self._suffixLink[v], v
+                from_, _children = self._link[v], v
                 arr1, arr2 = res[from_], res[_children]
                 arr3 = [0] * (len(arr1) + len(arr2))
                 i, j, k = 0, 0, 0
@@ -138,13 +164,13 @@ class ACAutoMatonMap(Generic[T]):
     def dp(self) -> Generator[Tuple[int, int], None, None]:
         for v in self._bfsOrder:
             if v != 0:
-                yield self._suffixLink[v], v
+                yield self._link[v], v
 
     def buildFailTree(self) -> List[List[int]]:
         adjList = [[] for _ in range(len(self._children))]
         for v in self._bfsOrder:
             if v != 0:
-                adjList[self._suffixLink[v]].append(v)
+                adjList[self._link[v]].append(v)
         return adjList
 
     def buildTrieTree(self) -> List[List[int]]:
@@ -179,38 +205,54 @@ class ACAutoMatonMap(Generic[T]):
     def clear(self) -> None:
         self.wordPos = []
         self._children = [{}]
-        self._suffixLink = []
+        self._link = []
+        self._linkWord = []
         self._bfsOrder = []
 
     @property
     def size(self) -> int:
         return len(self._children)
 
+    def __len__(self) -> int:
+        return len(self._children)
+
 
 if __name__ == "__main__":
-    # 1032. 字符流
-    # https://leetcode.cn/problems/stream-of-characters/description/
-    class StreamChecker:
-        __slots__ = ("ac", "counter", "pos")
 
-        def __init__(self, wordPos: List[str]):
-            self.ac = ACAutoMatonMap()
-            for word in wordPos:
-                self.ac.addString(word)
-            self.ac.buildSuffixLink()
-            self.counter = self.ac.getCounter()
-            self.pos = 0
+    def min2(a: int, b: int) -> int:
+        return a if a < b else b
 
-        def query(self, letter: str) -> bool:
-            self.pos = self.ac.move(self.pos, letter)
-            return self.counter[self.pos] > 0
+    class Solution:
+        # 100350. 最小代价构造字符串
+        # https://leetcode.cn/problems/construct-string-with-minimum-cost/description/
+        def minimumCost(self, target: str, words: List[str], costs: List[int]) -> int:
+            acm = ACAutoMatonMap()
+            for word in words:
+                acm.addString(word)
+            acm.buildSuffixLink()
 
-    # https://leetcode.cn/problems/multi-search-lcci/
-    # 给定一个较长字符串big和一个包含较短字符串的数组smalls，
-    # 设计一个方法，根据smalls中的每一个较短字符串，对big进行搜索。
-    # !输出smalls中的字符串在big里出现的所有位置positions，
-    # 其中positions[i]为smalls[i]出现的所有位置。
-    class Solution1:
+            nodeCosts, nodeDepth = [INF] * acm.size, [0] * acm.size
+            for i, pos in enumerate(acm.wordPos):
+                nodeCosts[pos] = min2(nodeCosts[pos], costs[i])
+                nodeDepth[pos] = len(words[i])
+
+            n = len(target)
+            dp = [INF] * (n + 1)
+            dp[0] = 0
+            pos = 0
+            for i, char in enumerate(target):
+                pos = acm.move(pos, char)
+                cur = pos
+                while cur:
+                    dp[i + 1] = min2(dp[i + 1], dp[i + 1 - nodeDepth[cur]] + nodeCosts[cur])
+                    cur = acm.linkWord(cur)
+            return dp[n] if dp[n] != INF else -1
+
+        # https://leetcode.cn/problems/multi-search-lcci/
+        # 给定一个较长字符串big和一个包含较短字符串的数组smalls，
+        # 设计一个方法，根据smalls中的每一个较短字符串，对big进行搜索。
+        # !输出smalls中的字符串在big里出现的所有位置positions，
+        # 其中positions[i]为smalls[i]出现的所有位置。
         def multiSearch(self, big: str, smalls: List[str]) -> List[List[int]]:
             acm = ACAutoMatonMap()
             for s in smalls:
@@ -226,24 +268,23 @@ if __name__ == "__main__":
                     res[index].append(i - len(smalls[index]) + 1)
             return res
 
-    # 2781. 最长合法子字符串的长度
-    # https://leetcode.cn/problems/length-of-the-longest-valid-substring/
-    # 给你一个字符串 word 和一个字符串数组 forbidden 。
-    # 如果一个字符串不包含 forbidden 中的任何字符串，我们称这个字符串是 合法 的。
-    # 请你返回字符串 word 的一个 最长合法子字符串 的长度。
-    # 子字符串 指的是一个字符串中一段连续的字符，它可以为空。
-    #
-    # 1 <= word.length <= 1e5
-    # word 只包含小写英文字母。
-    # 1 <= forbidden.length <= 1e5
-    # !1 <= forbidden[i].length <= 1e5
-    # !sum(len(forbidden)) <= 1e7
-    # forbidden[i] 只包含小写英文字母。
-    #
-    # 思路:
-    # 类似字符流, 需要处理出每个位置为结束字符的包含至少一个模式串的`最短后缀`.
-    # !那么此时左端点就对应这个位置+1
-    class Solution:
+        # 2781. 最长合法子字符串的长度
+        # https://leetcode.cn/problems/length-of-the-longest-valid-substring/
+        # 给你一个字符串 word 和一个字符串数组 forbidden 。
+        # 如果一个字符串不包含 forbidden 中的任何字符串，我们称这个字符串是 合法 的。
+        # 请你返回字符串 word 的一个 最长合法子字符串 的长度。
+        # 子字符串 指的是一个字符串中一段连续的字符，它可以为空。
+        #
+        # 1 <= word.length <= 1e5
+        # word 只包含小写英文字母。
+        # 1 <= forbidden.length <= 1e5
+        # !1 <= forbidden[i].length <= 1e5
+        # !sum(len(forbidden)) <= 1e7
+        # forbidden[i] 只包含小写英文字母。
+        #
+        # 思路:
+        # 类似字符流, 需要处理出每个位置为结束字符的包含至少一个模式串的`最短后缀`.
+        # !那么此时左端点就对应这个位置+1
         def longestValidSubstring(self, word: str, forbidden: List[str]) -> int:
             def min(a: int, b: int) -> int:
                 return a if a < b else b
@@ -270,11 +311,29 @@ if __name__ == "__main__":
 
             return res
 
+    # 1032. 字符流
+    # https://leetcode.cn/problems/stream-of-characters/description/
+    class StreamChecker:
+        __slots__ = ("ac", "counter", "pos")
+
+        def __init__(self, wordPos: List[str]):
+            self.ac = ACAutoMatonMap()
+            for word in wordPos:
+                self.ac.addString(word)
+            self.ac.buildSuffixLink()
+            self.counter = self.ac.getCounter()
+            self.pos = 0
+
+        def query(self, letter: str) -> bool:
+            self.pos = self.ac.move(self.pos, letter)
+            return self.counter[self.pos] > 0
+
     # https://www.luogu.com.cn/problem/P3311
     # 我们称一个正整数 x 是幸运数，当且仅当它的十进制表示中不包含数字串集合 words 中任意一个元素作为其子串。
     # ac自动机 + 数位dp
     def p3311() -> None:
         import sys
+        from functools import lru_cache
 
         sys.setrecursionlimit(int(1e6))
         input = lambda: sys.stdin.readline().rstrip("\r\n")

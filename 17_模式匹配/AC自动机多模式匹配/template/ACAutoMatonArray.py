@@ -1,3 +1,5 @@
+# ACAutoMatonMap 更快.
+
 from typing import Generator, List, Tuple
 
 INF = int(1e18)
@@ -20,9 +22,10 @@ class ACAutoMatonArray:
     __slots__ = (
         "wordPos",
         "parent",
-        "link",
         "children",
         "_bfsOrder",
+        "_link",
+        "_linkWord",
         "_sigma",
         "_offset",
         "_needUpdateChildren",
@@ -31,9 +34,10 @@ class ACAutoMatonArray:
     def __init__(self, sigma: int = 26, offset: int = 97):
         self.wordPos = []
         self.parent = []
-        self.link = []
         self.children = []
         self._bfsOrder = []
+        self._link = []
+        self._linkWord = []
         self._sigma = sigma
         self._offset = offset
         self._needUpdateChildren = False
@@ -68,9 +72,9 @@ class ACAutoMatonArray:
         needUpdateChildren 表示是否需要更新children数组(连接trie图).
         """
         self._needUpdateChildren = needUpdateChildren
-        self.link = [-1] * len(self.children)
+        self._link = [-1] * len(self.children)
         self._bfsOrder = [0] * len(self.children)
-        link, order, children = self.link, self._bfsOrder, self.children
+        link, order, children = self._link, self._bfsOrder, self.children
         head, tail = 0, 0
         order[tail] = 0
         tail += 1
@@ -111,13 +115,34 @@ class ACAutoMatonArray:
                 return nexts[ord_]
             if pos == 0:
                 return 0
-            pos = self.link[pos]
+            pos = self._link[pos]
+
+    def linkWord(self, pos: int) -> int:
+        """
+        `linkWord`指向当前节点的最长后缀对应的节点.
+        区别于`_link`,`linkWord`指向的节点对应的单词不会重复.
+        即不会出现`_link`指向某个长串局部的恶化情况.
+
+        时间复杂度 O(sqrt(n)).
+        """
+        if len(self._linkWord) == 0:
+            hasWord = [False] * len(self.children)
+            for v in self.wordPos:
+                hasWord[v] = True
+            self._linkWord = [0] * len(self.children)
+            link, linkWord = self._link, self._linkWord
+            for v in self._bfsOrder:
+                if v != 0:
+                    p = link[v]
+                    linkWord[v] = p if hasWord[p] else linkWord[p]
+        return self._linkWord[pos]
 
     def clear(self) -> None:
         self.wordPos.clear()
         self.parent.clear()
         self.children.clear()
-        self.link.clear()
+        self._link.clear()
+        self._linkWord.clear()
         self._bfsOrder.clear()
         self._newNode()
 
@@ -129,7 +154,7 @@ class ACAutoMatonArray:
         counter = [0] * len(self.children)
         for pos in self.wordPos:
             counter[pos] += 1
-        link = self.link
+        link = self._link
         for v in self._bfsOrder:
             if v != 0:
                 counter[v] += counter[link[v]]
@@ -145,7 +170,7 @@ class ACAutoMatonArray:
             res[pos].append(i)
         for v in self._bfsOrder:
             if v != 0:
-                from_, to = self.link[v], v
+                from_, to = self._link[v], v
                 arr1, arr2 = res[from_], res[to]
                 arr3 = []
                 i, j = 0, 0
@@ -167,7 +192,7 @@ class ACAutoMatonArray:
 
     def dp(self) -> Generator[Tuple[int, int], None, None]:
         """按照拓扑序进行转移, 每次返回(link, cur)."""
-        link = self.link
+        link = self._link
         for v in self._bfsOrder:
             if v != 0:
                 yield link[v], v
@@ -190,7 +215,7 @@ class ACAutoMatonArray:
 
     def buildFailTree(self) -> List[List[int]]:
         res = [[] for _ in range(len(self.children))]
-        link = self.link
+        link = self._link
         for v in self._bfsOrder:
             if v != 0:
                 res[link[v]].append(v)
@@ -242,9 +267,9 @@ if __name__ == "__main__":
             for i, char in enumerate(target):
                 pos = acm.move(pos, char)
                 cur = pos
-                while cur != 0:
+                while cur:
                     dp[i + 1] = min2(dp[i + 1], dp[i + 1 - nodeDepth[cur]] + nodeCosts[cur])
-                    cur = acm.link[cur]
+                    cur = acm.linkWord(cur)
             return dp[n] if dp[n] != INF else -1
 
         # 2781. 最长合法子字符串的长度
@@ -301,3 +326,8 @@ if __name__ == "__main__":
                 """从字符流中接收一个新字符，如果字符流中的任一非空后缀能匹配 words 中的某一字符串，返回 true"""
                 self._pos = self._acm.move(self._pos, letter)
                 return self._counter[self._pos] > 0
+
+    # "twnpxyhva"
+    # ["pxyhva","twnpxyhva","wnpx"]
+    # [3,19,8]
+    print(Solution().minimumCost("twnpxyhva", ["pxyhva", "twnpxyhva", "wnpx"], [3, 19, 8]) == 8)

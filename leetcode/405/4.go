@@ -7,13 +7,6 @@ func minimumCost(target string, words []string, costs []int) int {
 	for _, word := range words {
 		trie.AddString(word)
 	}
-	nodeCosts := make([]int, trie.Size())
-	for i := range nodeCosts {
-		nodeCosts[i] = INF
-	}
-	for i, pos := range trie.WordPos {
-		nodeCosts[pos] = min(nodeCosts[pos], costs[i])
-	}
 
 	trie.BuildSuffixLink(true)
 	dp := make([]int, len(target)+1)
@@ -24,14 +17,11 @@ func minimumCost(target string, words []string, costs []int) int {
 	indexes := trie.GetIndexes() // 每个状态包含的模式串的索引
 	for i, char := range target {
 		pos = trie.Move(pos, char)
-		// for _, wordIndex := range indexes[pos] {
-		// 	wordLen := len(words[wordIndex])
-		// 	if i+1 >= wordLen {
-		// 		dp[i+1] = min(dp[i+1], dp[i+1-wordLen]+costs[wordIndex])
-		// 	}
-		// }
-		for cur := pos; cur != 0; cur = trie.Link[cur] {
-
+		for _, wordIndex := range indexes[pos] {
+			wordLen := len(words[wordIndex])
+			if i+1 >= wordLen {
+				dp[i+1] = min(dp[i+1], dp[i+1-wordLen]+costs[wordIndex])
+			}
 		}
 	}
 	if dp[len(target)] == INF {
@@ -200,7 +190,6 @@ func (trie *ACAutoMatonArray) GetCounter() []int32 {
 // 获取每个状态包含的模式串的索引.(模式串长度和较小时使用)
 // fail指针每次命中，都至少有一个比指针深度更长的单词出现，因此每个位置最坏情况下不超过O(sqrt(n))次命中
 // O(n*sqrt(n))
-// TODO: roaring bitmaps
 func (trie *ACAutoMatonArray) GetIndexes() [][]int32 {
 	res := make([][]int32, len(trie.Children))
 	for i, pos := range trie.WordPos {
