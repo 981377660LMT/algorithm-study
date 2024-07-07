@@ -143,16 +143,14 @@ class ACAutoMatonArray {
         let p2 = 0
         let p3 = 0
         while (p1 < arr1.length && p2 < arr2.length) {
-          while (p1 < arr1.length && p2 < arr2.length) {
-            if (arr1[p1] < arr2[p2]) {
-              arr3[p3++] = arr1[p1++]
-            } else if (arr1[p1] > arr2[p2]) {
-              arr3[p3++] = arr2[p2++]
-            } else {
-              arr3[p3++] = arr1[p1]
-              p1++
-              p2++
-            }
+          if (arr1[p1] < arr2[p2]) {
+            arr3[p3++] = arr1[p1++]
+          } else if (arr1[p1] > arr2[p2]) {
+            arr3[p3++] = arr2[p2++]
+          } else {
+            arr3[p3++] = arr1[p1]
+            p1++
+            p2++
           }
         }
         while (p1 < arr1.length) arr3[p3++] = arr1[p1++]

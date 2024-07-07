@@ -334,21 +334,21 @@ func (trie *ACAutoMatonArray) GetIndexes() [][]int {
 			arr1, arr2 := res[from], res[to]
 			arr3 := make([]int, 0, len(arr1)+len(arr2))
 			i, j := 0, 0
+
 			for i < len(arr1) && j < len(arr2) {
-				for i < len(arr1) && j < len(arr2) {
-					if arr1[i] < arr2[j] {
-						arr3 = append(arr3, arr1[i])
-						i++
-					} else if arr1[i] > arr2[j] {
-						arr3 = append(arr3, arr2[j])
-						j++
-					} else {
-						arr3 = append(arr3, arr1[i])
-						i++
-						j++
-					}
+				if arr1[i] < arr2[j] {
+					arr3 = append(arr3, arr1[i])
+					i++
+				} else if arr1[i] > arr2[j] {
+					arr3 = append(arr3, arr2[j])
+					j++
+				} else {
+					arr3 = append(arr3, arr1[i])
+					i++
+					j++
 				}
 			}
+
 			for i < len(arr1) {
 				arr3 = append(arr3, arr1[i])
 				i++
