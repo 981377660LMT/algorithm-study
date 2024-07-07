@@ -1,10 +1,10 @@
 # IndexOfAllSa/IndexOfAllMultiString/Lookup/LookupAll
 
 
-from typing import List, Sequence
+from typing import Any, List, Sequence
 
 
-def lookupAll(longer: str, longerSa: List[int], shorter: str) -> List[int]:
+def lookupAll(longer: Sequence[Any], longerSa: List[int], shorter: Sequence[Any]) -> List[int]:
     """
     返回s在原串中所有匹配的位置(无序).
     O(len(s)*log(n))+len(result).
@@ -14,7 +14,7 @@ def lookupAll(longer: str, longerSa: List[int], shorter: str) -> List[int]:
         return []
 
     def check1(mid: int) -> bool:
-        return longer[longerSa[mid] :] >= shorter
+        return longer[longerSa[mid] :] >= shorter  # type: ignore
 
     def check2(mid: int) -> bool:
         ptr1 = longerSa[mid + left1]
@@ -115,3 +115,8 @@ if __name__ == "__main__":
         def multiSearch(self, big: str, smalls: List[str]) -> List[List[int]]:
             sa = getSA([ord(c) for c in big])
             return [sorted(lookupAll(big, sa, small)) for small in smalls]
+
+    longer = [1, 2, 31, 1, 2]
+    shorter = [1, 2]
+    longerSa = getSA(longer)
+    print(lookupAll(longer, longerSa, shorter))  # [3, 0]
