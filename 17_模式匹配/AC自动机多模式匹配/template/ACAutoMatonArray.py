@@ -3,6 +3,10 @@ from typing import Generator, List, Tuple
 INF = int(1e18)
 
 
+def min2(a: int, b: int) -> int:
+    return a if a < b else b
+
+
 class ACAutoMatonArray:
     """
     不调用`BuildSuffixLink`就是Trie,调用`BuildSuffixLink`就是AC自动机.
@@ -209,10 +213,6 @@ class ACAutoMatonArray:
         self.parent.append(-1)
         self.children.append([-1] * self._sigma)
         return len(self.children) - 1
-
-
-def min2(a: int, b: int) -> int:
-    return a if a < b else b
 
 
 if __name__ == "__main__":
