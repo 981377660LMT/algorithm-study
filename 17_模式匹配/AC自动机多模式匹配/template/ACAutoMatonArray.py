@@ -1,4 +1,4 @@
-# ACAutoMatonMap 更快.
+# !ACAutoMatonMap 更快.
 
 from typing import Generator, List, Tuple
 
@@ -170,8 +170,8 @@ class ACAutoMatonArray:
             res[pos].append(i)
         for v in self._bfsOrder:
             if v != 0:
-                from_, to = self._link[v], v
-                arr1, arr2 = res[from_], res[to]
+                from_, _children = self._link[v], v
+                arr1, arr2 = res[from_], res[_children]
                 arr3 = []
                 i, j = 0, 0
                 while i < len(arr1) and j < len(arr2):
@@ -185,9 +185,8 @@ class ACAutoMatonArray:
                         arr3.append(arr1[i])
                         i += 1
                         j += 1
-                arr3 += arr1[i:]
-                arr3 += arr2[j:]
-                res[to] = arr3
+                arr3 += arr1[i:] + arr2[j:]
+                res[_children] = arr3
         return res
 
     def dp(self) -> Generator[Tuple[int, int], None, None]:

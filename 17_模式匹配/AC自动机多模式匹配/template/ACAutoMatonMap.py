@@ -21,13 +21,13 @@ class ACAutoMatonMap(Generic[T]):
     每个状态对应Trie中的一个结点, 也对应一个字符串.
     """
 
-    __slots__ = ("wordPos", "_children", "_link", "_linkWord", "_bfsOrder")
+    __slots__ = ("wordPos", "children", "_link", "_linkWord", "_bfsOrder")
 
     def __init__(self):
         self.wordPos = []
         """wordPos[i] 表示加入的第i个模式串对应的节点编号."""
-        self._children = [{}]
-        """_children[v][c] 表示节点v通过字符c转移到的节点."""
+        self.children = [{}]
+        """children[v][c] 表示节点v通过字符c转移到的节点."""
         self._link = []
         """又叫fail.指向当前节点最长真后缀对应结点,例如"bc"是"abc"的最长真后缀."""
         self._linkWord = []
@@ -39,28 +39,28 @@ class ACAutoMatonMap(Generic[T]):
             return 0
         pos = 0
         for char in string:
-            nexts = self._children[pos]
+            nexts = self.children[pos]
             if char in nexts:
                 pos = nexts[char]
             else:
-                nextState = len(self._children)
+                nextState = len(self.children)
                 nexts[char] = nextState
                 pos = nextState
-                self._children.append({})
+                self.children.append({})
         self.wordPos.append(pos)
         return pos
 
     def addChar(self, pos: int, char: T) -> int:
-        nexts = self._children[pos]
+        nexts = self.children[pos]
         if char in nexts:
             return nexts[char]
-        nextState = len(self._children)
+        nextState = len(self.children)
         nexts[char] = nextState
-        self._children.append({})
+        self.children.append({})
         return nextState
 
     def move(self, pos: int, char: T) -> int:
-        children, link = self._children, self._link
+        children, link = self.children, self._link
         while True:
             nexts = children[pos]
             if char in nexts:
@@ -73,23 +73,23 @@ class ACAutoMatonMap(Generic[T]):
         """
         构建后缀链接(失配指针).
         """
-        self._link = [-1] * len(self._children)
-        self._bfsOrder = [0] * len(self._children)
+        self._link = [-1] * len(self.children)
+        self._bfsOrder = [0] * len(self.children)
         head, tail = 0, 1
         while head < tail:
             v = self._bfsOrder[head]
             head += 1
-            for char, next_ in self._children[v].items():
+            for char, next_ in self.children[v].items():
                 self._bfsOrder[tail] = next_
                 tail += 1
                 f = self._link[v]
-                while f != -1 and char not in self._children[f]:
+                while f != -1 and char not in self.children[f]:
                     f = self._link[f]
                 self._link[next_] = f
                 if f == -1:
                     self._link[next_] = 0
                 else:
-                    self._link[next_] = self._children[f][char]
+                    self._link[next_] = self.children[f][char]
 
     def linkWord(self, pos: int) -> int:
         """
@@ -100,10 +100,10 @@ class ACAutoMatonMap(Generic[T]):
         时间复杂度 O(sqrt(n)).
         """
         if len(self._linkWord) == 0:
-            hasWord = [False] * len(self._children)
+            hasWord = [False] * len(self.children)
             for v in self.wordPos:
                 hasWord[v] = True
-            self._linkWord = [0] * len(self._children)
+            self._linkWord = [0] * len(self.children)
             link, linkWord = self._link, self._linkWord
             for v in self._bfsOrder:
                 if v != 0:
@@ -116,7 +116,7 @@ class ACAutoMatonMap(Generic[T]):
         获取每个状态包含的模式串的个数.
         时空复杂度 O(n).
         """
-        counter = [0] * len(self._children)
+        counter = [0] * len(self.children)
         for pos in self.wordPos:
             counter[pos] += 1
         for v in self._bfsOrder:
@@ -129,35 +129,27 @@ class ACAutoMatonMap(Generic[T]):
         获取每个状态包含的模式串的索引(有序).
         时空复杂度 O(nsqrtn).
         """
-        res = [[] for _ in range(len(self._children))]
+        res = [[] for _ in range(len(self.children))]
         for i, pos in enumerate(self.wordPos):
             res[pos].append(i)
         for v in self._bfsOrder:
             if v != 0:
                 from_, _children = self._link[v], v
                 arr1, arr2 = res[from_], res[_children]
-                arr3 = [0] * (len(arr1) + len(arr2))
-                i, j, k = 0, 0, 0
+                arr3 = []
+                i, j = 0, 0
                 while i < len(arr1) and j < len(arr2):
                     if arr1[i] < arr2[j]:
-                        arr3[k] = arr1[i]
+                        arr3.append(arr1[i])
                         i += 1
                     elif arr1[i] > arr2[j]:
-                        arr3[k] = arr2[j]
+                        arr3.append(arr2[j])
                         j += 1
                     else:
-                        arr3[k] = arr1[i]
+                        arr3.append(arr1[i])
                         i += 1
                         j += 1
-                    k += 1
-                while i < len(arr1):
-                    arr3[k] = arr1[i]
-                    i += 1
-                    k += 1
-                while j < len(arr2):
-                    arr3[k] = arr2[j]
-                    j += 1
-                    k += 1
+                arr3 += arr1[i:] + arr2[j:]
                 res[_children] = arr3
         return res
 
@@ -167,17 +159,17 @@ class ACAutoMatonMap(Generic[T]):
                 yield self._link[v], v
 
     def buildFailTree(self) -> List[List[int]]:
-        adjList = [[] for _ in range(len(self._children))]
+        adjList = [[] for _ in range(len(self.children))]
         for v in self._bfsOrder:
             if v != 0:
                 adjList[self._link[v]].append(v)
         return adjList
 
     def buildTrieTree(self) -> List[List[int]]:
-        adjList = [[] for _ in range(len(self._children))]
+        adjList = [[] for _ in range(len(self.children))]
 
         def dfs(pos: int) -> None:
-            for next_ in self._children[pos].values():
+            for next_ in self.children[pos].values():
                 adjList[pos].append(next_)
                 dfs(next_)
 
@@ -190,9 +182,9 @@ class ACAutoMatonMap(Generic[T]):
             return 0
         pos = 0
         for char in string:
-            if pos < 0 or pos >= len(self._children):
+            if pos < 0 or pos >= len(self.children):
                 return 0
-            nexts = self._children[pos]
+            nexts = self.children[pos]
             if char in nexts:
                 pos = nexts[char]
             else:
@@ -200,21 +192,21 @@ class ACAutoMatonMap(Generic[T]):
         return pos
 
     def empty(self) -> bool:
-        return len(self._children) == 1
+        return len(self.children) == 1
 
     def clear(self) -> None:
         self.wordPos = []
-        self._children = [{}]
+        self.children = [{}]
         self._link = []
         self._linkWord = []
         self._bfsOrder = []
 
     @property
     def size(self) -> int:
-        return len(self._children)
+        return len(self.children)
 
     def __len__(self) -> int:
-        return len(self._children)
+        return len(self.children)
 
 
 if __name__ == "__main__":

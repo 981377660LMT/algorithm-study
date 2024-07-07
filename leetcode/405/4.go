@@ -199,29 +199,27 @@ func (trie *ACAutoMatonArray) GetIndexes() [][]int32 {
 		if v != 0 {
 			from, to := trie.Link[v], v
 			arr1, arr2 := res[from], res[to]
-			arr3 := make([]int32, 0, len(arr1)+len(arr2))
-			i, j := 0, 0
+			arr3 := make([]int32, len(arr1)+len(arr2))
+			i, j, k := 0, 0, 0
 			for i < len(arr1) && j < len(arr2) {
 				if arr1[i] < arr2[j] {
-					arr3 = append(arr3, arr1[i])
+					arr3[k] = arr1[i]
 					i++
 				} else if arr1[i] > arr2[j] {
-					arr3 = append(arr3, arr2[j])
+					arr3[k] = arr2[j]
 					j++
 				} else {
-					arr3 = append(arr3, arr1[i])
+					arr3[k] = arr1[i]
 					i++
 					j++
 				}
+				k++
 			}
-			for i < len(arr1) {
-				arr3 = append(arr3, arr1[i])
-				i++
-			}
-			for j < len(arr2) {
-				arr3 = append(arr3, arr2[j])
-				j++
-			}
+			copy(arr3[k:], arr1[i:])
+			k += len(arr1) - i
+			copy(arr3[k:], arr2[j:])
+			k += len(arr2) - j
+			arr3 = arr3[:k:k]
 			res[to] = arr3
 		}
 	}

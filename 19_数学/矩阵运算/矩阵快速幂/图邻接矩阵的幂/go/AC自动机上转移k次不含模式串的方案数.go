@@ -327,40 +327,36 @@ func (trie *ACAutoMatonArray) GetCounter() []int {
 }
 
 // 获取每个状态包含的模式串的索引.
-func (trie *ACAutoMatonArray) GetIndexes() [][]int {
-	res := make([][]int, len(trie.children))
+func (trie *ACAutoMatonArray) GetIndexes() [][]int32 {
+	res := make([][]int32, len(trie.children))
 	for i, pos := range trie.WordPos {
-		res[pos] = append(res[pos], i)
+		res[pos] = append(res[pos], int32(i))
 	}
 	for _, v := range trie.bfsOrder {
 		if v != 0 {
 			from, to := trie.suffixLink[v], v
 			arr1, arr2 := res[from], res[to]
-			arr3 := make([]int, 0, len(arr1)+len(arr2))
-			i, j := 0, 0
-
+			arr3 := make([]int32, len(arr1)+len(arr2))
+			i, j, k := 0, 0, 0
 			for i < len(arr1) && j < len(arr2) {
 				if arr1[i] < arr2[j] {
-					arr3 = append(arr3, arr1[i])
+					arr3[k] = arr1[i]
 					i++
 				} else if arr1[i] > arr2[j] {
-					arr3 = append(arr3, arr2[j])
+					arr3[k] = arr2[j]
 					j++
 				} else {
-					arr3 = append(arr3, arr1[i])
+					arr3[k] = arr1[i]
 					i++
 					j++
 				}
+				k++
 			}
-
-			for i < len(arr1) {
-				arr3 = append(arr3, arr1[i])
-				i++
-			}
-			for j < len(arr2) {
-				arr3 = append(arr3, arr2[j])
-				j++
-			}
+			copy(arr3[k:], arr1[i:])
+			k += len(arr1) - i
+			copy(arr3[k:], arr2[j:])
+			k += len(arr2) - j
+			arr3 = arr3[:k:k]
 			res[to] = arr3
 		}
 	}
