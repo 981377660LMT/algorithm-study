@@ -214,7 +214,7 @@ https://book.douban.com/review/13169504/
 
 ## 第六章：通用化（General-Purpose Modules are Deeper）
 
-通用化的模块更容易变得深度以及隐藏信息
+通用化的模块更`容易变得深度以及隐藏信息`
 
 - 做一定的抽象，不仅仅满足当前的需求；同时不过度抽象，当实现当前需求时感到难用
   比如：文本编辑器中插入、删除字符串。比较合适的设计的是
@@ -242,11 +242,15 @@ https://book.douban.com/review/13169504/
   - 接口使用起来方便吗？这个可以防止通用化做的太过，如果`使用不方便`有可能是过度通用化了。
 
 - 总结
+  通用接口比专用接口具有许多优点。
+  通用接口提供了类之间的更清晰的分隔。
+  而专用接口则倾向于在类之间泄漏信息。
+  `使模块具有某种通用性`是降低整体系统复杂性的最佳方法之一。
 
 ## 第七章: `分层抽象`（Different Layers, Different Abstractions）
 
 每一层都关注不同的问题，对应不同的抽象，上层只能调用相邻下层的接口，下层不能调用上层，最典型的案例就是 OSI 分层模型
-当分层后发现相邻层存在只是传递了参数给另一层的调用情况时，说明两层的模块之间职责划分有问题，增加了复杂性但没有增加能力，需要调整。
+当分层后发现相邻层存在`只是传递了参数给另一层的调用情况时(Pass-through methods，直通方法)`，说明两层的模块之间职责划分有问题，增加了复杂性但没有增加能力，需要调整。
 对于 Dispatcher、Decorator 的设计来说，虽然 interface 重复，但`增加了能力`，所以认为没有问题
 存在一些参数需要跨层传递时，推荐直接使用共享 Context 对象.
 
@@ -265,12 +269,30 @@ https://book.douban.com/review/13169504/
 
 ## 第九章: 合并还是分开？
 
+给定两个功能，它们应该在同一位置一起实现，还是应该分开实现？
 这章讲了什么情况下模块应该合并，什么情况下应该拆分。
-合并和分开模块的目的是为了最少的依赖，最好的信息隐藏以及深度接口
+合并和分开模块的目的是为了最少的依赖，最好的`信息隐藏以及深度接口`
 
+- 分开导致的一些可能问题：
+
+  1. 代码重复
+  2. 需要额外管理这些分开的模块的代码
+  3. 分开以后不容易寻找相关的模块
+
+- 如果两块代码是相关就应该放在一起，一些相关的暗示：
+  - 共享信息(例如最好在同一位置读取和解析请求)
+  - 一起使用；使用了 A 就一定会使用 B，使用了 B 就一定会使用 A。
+  - 重复概念
+  - 如果不看一个模块另外一个模块就无法理解
 - 方法代码行数问题
-  长度其实不重要关键是要把抽象做好，一个方法做一个事情而要做完整。
+  长度其实不重要关键是要`把抽象做好`，一个方法做一个事情而要做完整。
   如果抽象做的清晰，自然方法的行数也不会太多，因为可以把一个抽象再做细分么。
+
+- 长方法并不总是坏的
+  例如，假设一个方法包含按顺序执行的五个 20 行代码块。如果这些块是`相对独立`的，则可以一次读取并理解该方法的一个块。将每个块移动到单独的方法中并没有太大的好处。如果这些块具有复杂的交互作用，则将它们`保持在一起`就显得尤为重要，这样读者就可以一次看到所有代码。如果每个块使用单独的方法，则读者将不得不在这些扩展方法之间`来回切换`，以了解它们如何协同工作。如果方法具有简单的签名并且易于阅读，则包含数百行代码的方法就可以了。这些方法很深入（很多功能，简单的接口），很好。
+- 拆分的方法
+  1. 提取子任务
+  2. 拆分为两个单独的方法 -> 每个结果方法的接口应该比原始方法的接口更简单
 
 ## 第十章: 错误处理
 
@@ -306,6 +328,13 @@ The overall idea behind comments is to capture information that was in the mind 
 
 ## 第十三章: 注释应该描述代码中不明显的内容
 
+编写注释的原因是，使用编程语言编写的语句`无法捕获编写代码时开发人员想到的所有重要信息`。
+注释记录了这些信息，以便后来的开发人员可以轻松地理解和修改代码。注释的指导原则是，注释应描述代码中不明显的内容。
+
+- 注释的最重要原因之一是抽象
+  注释可以提供一个更简单，更高级的视图（“调用此方法后，网络流量将被限制为每秒 maxBandwidth 字节”）
+- 不要重复注释
+
 ## 第十四章: 命名
 
 - 当不知道怎么命名的时候，往往会意味着代码的设计有一些问题，需要重构了！
@@ -315,7 +344,7 @@ The overall idea behind comments is to capture information that was in the mind 
 
 ## 第十六章: 修改老代码
 
-## 第十七章: 保持一致性
+## 第十七章: 保持一致性(Consistency)
 
 维护一致性不容易，有几个方法
 
@@ -327,18 +356,87 @@ The overall idea behind comments is to capture information that was in the mind 
 
 几个可能导致代码不清晰的地方：
 
-1. 事件驱动
-2. 通用 container，pair
-3. 定义和声明类型不同，说实话我没搞懂这个
+1. 异步编程:主要是控制流不清晰，请求和返回不连贯，需要额外的信息去串起来。主要通过注释来解决
+2. 泛型容器；当用来做一个返回的类型时，它提供的方法很难准确表达具体的业务信息
+3. 定义和声明类型不同
 4. 代码行为超出阅读者预期
 
 ## 第十九章: 软件开发趋势和软件复杂度
 
+每当您遇到有关新软件开发范例的提案时，就必须从复杂性的角度对其进行挑战：`该提案确实有助于最大程度地降低大型软件系统的复杂性吗？`从表面上看，许多建议听起来不错，但是如果您深入研究，您会发现其中一些会使复杂性恶化，而不是更好。
+
 ## 第二十章: 为性能而设计
+
+- 干净的设计和高性能是兼容的(golang 后缀数组实现)
+- 复杂的代码通常会很慢，因为它会执行多余或多余的工作
+- `找到对性能最重要的关键路径并使它们尽可能简单`
 
 ## 第二十一章: 结论
 
+这本书是关于一件事的：复杂性。
+
 ## 总结
+
+- Summary of Design Principles 设计原则摘要
+
+1. Complexity is incremental: you have to sweat the small stuff (see p. 11).
+   复杂性是逐步增加的
+2. Working code isn’t enough (see p. 14).
+   能工作的代码还不够
+3. Make continual small investments to improve system design (see p. 15).
+   持续进行少量投资以改善系统设计
+4. Modules should be deep (see p. 22)
+   模块应该是深的
+5. Interfaces should be designed to make the most common usage as simple as possible (see p. 27).
+   **接口的设计应尽可能简化最常见的用法**
+6. It’s more important for a module to have a simple interface than a simple implementation (see pp. 3. 55, 71).
+   **一个模块具有一个简单的接口比一个简单的实现更重要**
+7. General-purpose modules are deeper (see p. 39).
+   通用型模块更深
+8. Separate general-purpose and special-purpose code (see p. 62).
+   通用和专用代码分开
+9. Different layers should have different abstractions (see p. 45).
+   不同的层应具有不同的抽象
+10. Pull complexity downward (see p. 55).
+    复杂度尽可能下沉
+11. Define errors (and special cases) out of existence (see p. 79).
+12. Design it twice (see p. 91).
+13. Comments should describe things that are not obvious from the code (see p. 101).
+    注释应描述代码中不明显的内容
+14. Software should be designed for ease of reading, not ease of writing (see p. 149).
+    软件的设计应易于阅读而不是易于编写
+15. The increments of software development should be abstractions, not features (see p. 154).
+    软件开发的增量应该是抽象而不是功能
+
+- Summary of Red Flags 危险信号
+
+1. Shallow Module: the interface for a class or method isn’t much simpler than its implementation (see pp. 25, 110).
+   浅模块：类或方法的接口并不比其实现简单得多
+2. Information Leakage: a design decision is reflected in multiple modules (see p. 31).
+   信息泄漏：设计决策反映在多个模块中
+3. Temporal Decomposition: the code structure is based on the order in which operations are executed, not on information hiding (see p. 32).
+   时间分解：代码结构基于执行操作的顺序，而不是信息隐藏
+4. Overexposure: An API forces callers to be aware of rarely used features in order to use commonly used features (see p. 36).
+   过度暴露：为了使用常用功能，API 强制调用者注意很少使用的功能，
+5. Pass-Through Method: a method does almost nothing except pass its arguments to another method with a similar signature (see p. 46).
+   Pass-Through Method：一种方法几乎不执行任何操作，只是将其参数传递给具有相似签名的另一种方法
+6. Repetition: a nontrivial piece of code is repeated over and over (see p. 62).
+   重复：一遍又一遍的重复代码
+7. Special-General Mixture: special-purpose code is not cleanly separated from general purpose code (see p. 65).
+   特殊通用混合物：特殊用途代码未与通用代码完全分开
+8. Conjoined Methods: two methods have so many dependencies that its hard to understand the implementation of one without understanding the implementation of the other (see p. 72).
+   联合方法：两种方法之间的依赖性很大，以至于很难理解一种方法的实现而又不理解另一种方法的实现
+9. Comment Repeats Code: all of the information in a comment is immediately obvious from the code next to the comment (see p. 104).
+   注释重复代码：注释旁边的代码会立即显示注释中的所有信息
+10. Implementation Documentation Contaminates Interface: an interface comment describes implementation details not needed by users of the thing 1. being documented (see p. 114).
+    实施文档污染了界面：界面注释描述了所记录事物的用户不需要的实施细节
+11. Vague Name: the name of a variable or method is so imprecise that it doesn’t convey much useful information (see p. 123).
+12. Hard to Pick Name: it is difficult to come up with a precise and intuitive name for an entity (see p. 125).
+    难以选择的名称：很难为实体提供准确而直观的名称
+13. Hard to Describe: in order to be complete, the documentation for a variable or method must be long. (see p. 131).
+    难以描述：为了完整起见，变量或方法的文档必须很长
+14. Nonobvious Code: the behavior or meaning of a piece of code cannot be understood easily. (see p. 148).
+    非显而易见的代码：一段代码的行为或含义不容易理解
 
 ---
 

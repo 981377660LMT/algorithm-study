@@ -219,8 +219,6 @@ func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 // `linkWord`指向当前节点的最长后缀对应的节点.
 // 区别于`link`,`linkWord`指向的节点对应的单词不会重复.
 // 即不会出现`link`指向某个长串局部的恶化情况.
-//
-// 时间复杂度 O(sqrt(n)).
 func (trie *ACAutoMatonArray) LinkWord(pos int32) int32 {
 	if len(trie.linkWord) == 0 {
 		hasWord := make([]bool, len(trie.Children))

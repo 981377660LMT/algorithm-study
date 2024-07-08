@@ -96,8 +96,6 @@ class ACAutoMatonMap(Generic[T]):
         `linkWord`指向当前节点的最长后缀对应的节点.
         区别于`_link`,`linkWord`指向的节点对应的单词不会重复.
         即不会出现`_link`指向某个长串局部的恶化情况.
-
-        时间复杂度 O(sqrt(n)).
         """
         if len(self._linkWord) == 0:
             hasWord = [False] * len(self.children)
