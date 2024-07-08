@@ -1,3 +1,5 @@
+被删的前端游乐场
+
 https://godbasin.github.io/categories/
 https://godbasin.github.io/front-end-playground/front-end-basic/front-end/front-end-1.html
 
@@ -368,8 +370,6 @@ https://godbasin.github.io/2020/08/23/online-doc-network/
    - 1.3. 接入层：管理数据版本、冲突处理、与数据层的连接等
      接收数据（服务端 -> 数据层）：管理来自服务端的数据；冲突处理、应用
      发送数据（数据层 -> 服务端）：管理需要提交给服务端的数据：数据提交、拉补版本
-
-
 
 # 大型前端项目要怎么跟踪和分析函数调用链
 
