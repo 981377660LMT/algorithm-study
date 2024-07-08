@@ -1,3 +1,4 @@
+from bisect import bisect_left
 from typing import Callable, Tuple
 
 
@@ -12,6 +13,10 @@ def sortSearch(start: int, end: int, f: Callable[[int], bool]) -> Tuple[int, boo
         else:
             j = h
     return i, i < end and f(i)
+
+
+def sortSearch2(start: int, end: int, f: Callable[[int], bool]) -> int:
+    return bisect_left(range(start, end), True, key=f)
 
 
 def sortSearchInts(arr: list[int], target: int) -> int:
