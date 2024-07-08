@@ -114,12 +114,13 @@ func main() {
 
 	// P3041()
 	// P3121()
-	P3193()
+	// P3193()
 	// P3796()
 	// P3808()
 	// P3966()
 	// P4052()
 	// P5357()
+	P5357_link()
 	// P7456()
 
 	// CF808G()
@@ -626,6 +627,47 @@ func P5357() {
 
 	for _, pos := range acm.WordPos {
 		fmt.Fprintln(out, subValues[pos])
+	}
+}
+
+func P5357_link() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	words := make([]string, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &words[i])
+	}
+	var s string
+	fmt.Fscan(in, &s)
+
+	acm := NewACAutoMatonArray(26, 'a')
+	for _, word := range words {
+		acm.AddString(word)
+	}
+	acm.BuildSuffixLink(true)
+
+	wordIndexes := make([][]int32, acm.Size())
+	for i, pos := range acm.WordPos {
+		wordIndexes[pos] = append(wordIndexes[pos], int32(i))
+	}
+
+	res := make([]int32, n)
+	pos := int32(0)
+	for _, char := range s {
+		pos = acm.Move(pos, char)
+		for cur := pos; cur > 0; cur = acm.LinkWord(cur) {
+			for _, idx := range wordIndexes[cur] {
+				res[idx]++
+			}
+		}
+	}
+
+	for _, v := range res {
+		fmt.Fprintln(out, v)
 	}
 }
 

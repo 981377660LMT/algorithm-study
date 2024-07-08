@@ -6,21 +6,54 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
+	"fmt"
 	"index/suffixarray"
+	"os"
 	"reflect"
 	"sort"
 	"unsafe"
 )
 
-func LookupAllBytes(longer []byte, longerSa []int32, shorter []byte) []int32 {
+func main() {
+	P5357()
+}
+
+// P5357 【模板】AC 自动机（二次加强版）
+// https://www.luogu.com.cn/problem/P5357
+// 分别求出每个模式串在文本串中出现的次数。
+func P5357() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	words := make([]string, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &words[i])
+	}
+	var s string
+	fmt.Fscan(in, &s)
+
+	sa := GetSa32(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+	sBytes := []byte(s)
+	for _, word := range words {
+		start, end := LookupAllBytes(sBytes, sa, []byte(word))
+		fmt.Fprintln(out, end-start)
+	}
+}
+
+// 返回匹配位置为longer[saStart:saEnd].
+func LookupAllBytes(longer []byte, longerSa []int32, shorter []byte) (saStart, saEnd int32) {
 	if len(longer) == 0 || len(shorter) == 0 || len(longer) < len(shorter) {
-		return nil
+		return 0, 0
 	}
 	n := len(longer)
 	i := sort.Search(n, func(i int) bool { return bytes.Compare(longer[longerSa[i]:], shorter) >= 0 })
 	j := i + sort.Search(n-i, func(j int) bool { return !bytes.HasPrefix(longer[longerSa[j+i]:], shorter) })
-	return append(longerSa[:0:0], longerSa[i:j]...)
+	return int32(i), int32(j)
 }
 
 func GetSa32(n int32, f func(i int32) int32) (sa []int32) {
@@ -135,7 +168,8 @@ func multiSearch2(big string, smalls []string) [][]int {
 	res := make([][]int, len(smalls))
 	sa := GetSa32(int32(len(big)), func(i int32) int32 { return int32(big[i]) })
 	for i, small := range smalls {
-		indexes := LookupAllBytes([]byte(big), sa, []byte(small))
+		start, end := LookupAllBytes([]byte(big), sa, []byte(small))
+		indexes := append(sa[:0:0], sa[start:end]...)
 		sort.Slice(indexes, func(i, j int) bool { return indexes[i] < indexes[j] })
 		res[i] = make([]int, len(indexes))
 		for j, idx := range indexes {

@@ -1,17 +1,19 @@
 # IndexOfAllSa/IndexOfAllMultiString/Lookup/LookupAll
 
 
-from typing import Any, List, Sequence
+from typing import Any, List, Sequence, Tuple
 
 
-def lookupAll(longer: Sequence[Any], longerSa: List[int], shorter: Sequence[Any]) -> List[int]:
+def lookupAll(
+    longer: Sequence[Any], longerSa: List[int], shorter: Sequence[Any]
+) -> Tuple[int, int]:
     """
-    返回s在原串中所有匹配的位置(无序).
+    返回s在原串中所有匹配的位置区间(无序).
     O(len(s)*log(n))+len(result).
     """
 
     if len(longer) == 0 or len(shorter) == 0 or len(longer) < len(shorter):
-        return []
+        return 0, 0
 
     def check1(mid: int) -> bool:
         return longer[longerSa[mid] :] >= shorter  # type: ignore
@@ -40,7 +42,7 @@ def lookupAll(longer: Sequence[Any], longerSa: List[int], shorter: Sequence[Any]
         else:
             left2 = mid + 1
 
-    return longerSa[left1 : left1 + left2]
+    return left1, left1 + left2
 
 
 def getSA(ords: Sequence[int]) -> List[int]:
@@ -114,9 +116,25 @@ if __name__ == "__main__":
     class Solution:
         def multiSearch(self, big: str, smalls: List[str]) -> List[List[int]]:
             sa = getSA([ord(c) for c in big])
-            return [sorted(lookupAll(big, sa, small)) for small in smalls]
+            res = []
+            for small in smalls:
+                start, end = lookupAll(big, sa, small)
+                res.append(sorted(sa[start:end]))
+            return res
 
-    longer = [1, 2, 31, 1, 2]
-    shorter = [1, 2]
-    longerSa = getSA(longer)
-    print(lookupAll(longer, longerSa, shorter))  # [3, 0]
+    # P5357 【模板】AC 自动机（二次加强版）
+    # https://www.luogu.com.cn/problem/P5357
+    # 分别求出每个模式串在文本串中出现的次数。
+    def p5357() -> None:
+        import sys
+
+        input = lambda: sys.stdin.readline().rstrip("\r\n")
+        n = int(input())
+        words = [input() for _ in range(n)]
+        s = input()
+        sa = getSA([ord(c) for c in s])
+        for word in words:
+            start, end = lookupAll(s, sa, word)
+            print(end - start)
+
+    p5357()
