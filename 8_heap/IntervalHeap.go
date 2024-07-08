@@ -32,7 +32,6 @@ func main() {
 			fmt.Fscan(in, &x)
 			pq.Push(x)
 		} else if t == 1 {
-
 			fmt.Fprintln(out, pq.PopMin())
 		} else {
 			fmt.Fprintln(out, pq.PopMax())

@@ -2,7 +2,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 func main() {
 	ehp := NewErasableHeap(func(a, b H) bool { return a > b }, []H{1, 2, 3, 4, 5})
@@ -12,6 +15,15 @@ func main() {
 	fmt.Println(ehp.Len())
 	fmt.Println(ehp.Pop())
 	fmt.Println(ehp.Pop())
+
+	time1 := time.Now()
+	for i := 0; i < 1000000; i++ {
+		ehp.Push(i)
+	}
+	for i := 0; i < 1000000; i++ {
+		ehp.Erase(i)
+	}
+	fmt.Println(time.Since(time1))
 }
 
 type H = int
