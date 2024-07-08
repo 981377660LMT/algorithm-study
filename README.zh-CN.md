@@ -28,6 +28,7 @@
    - [在线 Z 算法](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/kmp/ZAlgorithm-Online.go)
    - [Manacher](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E9%A9%AC%E6%8B%89%E8%BD%A6%E6%8B%89%E9%A9%AC/Manacher.py)
    - [后缀数组](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E6%95%B0%E7%BB%84/SuffixArray.py)
+   - [LookupAll](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E6%95%B0%E7%BB%84/lookupAll)
    - [AC 自动机](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/AC%E8%87%AA%E5%8A%A8%E6%9C%BA%E5%A4%9A%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/template/ACAutoMatonMap.py)
    - [回文树](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%9B%9E%E6%96%87%E6%A0%91/PalindromicTree.go)
    - [后缀树](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E6%A0%91/SuffixTree.go)

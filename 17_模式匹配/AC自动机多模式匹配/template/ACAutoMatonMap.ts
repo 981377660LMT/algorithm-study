@@ -4,9 +4,10 @@
 
 class ACAutoMatonMap<T = string> {
   /** wordPos[i] 表示加入的第i个模式串对应的节点编号. */
-  readonly wordPos: number[] = [] //
+  readonly wordPos: number[] = []
   private _children: Map<T, number>[] = [new Map()]
-  private _suffixLink!: Int32Array
+  private _link!: Int32Array
+  private _linkWord?: Int32Array
   private _bfsOrder!: Int32Array
 
   addString(str: ArrayLike<T>): number {
@@ -48,12 +49,12 @@ class ACAutoMatonMap<T = string> {
       if (pos === 0) {
         return 0
       }
-      pos = this._suffixLink[pos]
+      pos = this._link[pos]
     }
   }
 
   buildSuffixLink() {
-    this._suffixLink = new Int32Array(this._children.length).fill(-1)
+    this._link = new Int32Array(this._children.length).fill(-1)
     this._bfsOrder = new Int32Array(this._children.length)
     let head = 0
     let tail = 1
@@ -63,20 +64,38 @@ class ACAutoMatonMap<T = string> {
       this._children[v].forEach((next, char) => {
         this._bfsOrder[tail] = next
         tail++
-        let f = this._suffixLink[v]
+        let f = this._link[v]
         while (f !== -1) {
           if (this._children[f].has(char)) {
             break
           }
-          f = this._suffixLink[f]
+          f = this._link[f]
         }
         if (f === -1) {
-          this._suffixLink[next] = 0
+          this._link[next] = 0
         } else {
-          this._suffixLink[next] = this._children[f].get(char)!
+          this._link[next] = this._children[f].get(char)!
         }
       })
     }
+  }
+
+  linkWord(pos: number): number {
+    if (this._linkWord) return this._linkWord[pos]
+    const size = this.size
+    this._linkWord = new Int32Array(size)
+    const hasWord = new Uint8Array(size)
+    for (let i = 0; i < this.wordPos.length; i++) hasWord[this.wordPos[i]] = 1
+    const link = this._link
+    const linkWord = this._linkWord
+    for (let i = 0; i < this._bfsOrder.length; i++) {
+      const v = this._bfsOrder[i]
+      if (v !== 0) {
+        const p = link[v]
+        linkWord[v] = hasWord[p] ? p : linkWord[p]
+      }
+    }
+    return this._linkWord[pos]
   }
 
   getCounter(): Uint32Array {
@@ -86,7 +105,7 @@ class ACAutoMatonMap<T = string> {
     })
     this._bfsOrder.forEach(v => {
       if (v !== 0) {
-        counter[v] += counter[this._suffixLink[v]]
+        counter[v] += counter[this._link[v]]
       }
     })
     return counter
@@ -101,7 +120,7 @@ class ACAutoMatonMap<T = string> {
     }
     this._bfsOrder.forEach(v => {
       if (v !== 0) {
-        const from = this._suffixLink[v]
+        const from = this._link[v]
         const arr1 = res[from]
         const arr2 = res[v]
         const arr3 = Array(arr1.length + arr2.length)
@@ -130,7 +149,7 @@ class ACAutoMatonMap<T = string> {
   dp(f: (from: number, to: number) => void): void {
     this._bfsOrder.forEach(v => {
       if (v !== 0) {
-        f(this._suffixLink[v], v)
+        f(this._link[v], v)
       }
     })
   }
@@ -185,7 +204,8 @@ class ACAutoMatonMap<T = string> {
   clear(): void {
     this.wordPos.length = 0
     this._children = [new Map()]
-    this._suffixLink = new Int32Array(0)
+    this._link = new Int32Array(0)
+    this._linkWord = undefined
     this._bfsOrder = new Int32Array(0)
   }
 
@@ -197,6 +217,37 @@ class ACAutoMatonMap<T = string> {
 export { ACAutoMatonMap }
 
 if (require.main === module) {
+  const INF = 2e15
+
+  // 100350. 最小代价构造字符串
+  // https://leetcode.cn/problems/construct-string-with-minimum-cost/description/
+  function minimumCost(target: string, words: string[], costs: number[]): number {
+    const acm = new ACAutoMatonMap()
+    for (let i = 0; i < words.length; i++) {
+      acm.addString(words[i])
+    }
+    acm.buildSuffixLink()
+
+    const nodeCosts = new Uint32Array(acm.size).fill(-1)
+    const nodeDepth = new Uint32Array(acm.size)
+    for (let i = 0; i < acm.wordPos.length; i++) {
+      const pos = acm.wordPos[i]
+      nodeCosts[pos] = Math.min(nodeCosts[pos], costs[i])
+      nodeDepth[pos] = words[i].length
+    }
+
+    const dp = Array(target.length + 1).fill(INF)
+    dp[0] = 0
+    let pos = 0
+    for (let i = 0; i < target.length; i++) {
+      pos = acm.move(pos, target[i])
+      for (let cur = pos; cur !== 0; cur = acm.linkWord(cur)) {
+        dp[i + 1] = Math.min(dp[i + 1], dp[i + 1 - nodeDepth[cur]] + nodeCosts[cur])
+      }
+    }
+    return dp[target.length] === INF ? -1 : dp[target.length]
+  }
+
   // https://leetcode.cn/problems/length-of-the-longest-valid-substring/description/
   function longestValidSubstring(word: string, forbidden: string[]): number {
     const acm = new ACAutoMatonMap()

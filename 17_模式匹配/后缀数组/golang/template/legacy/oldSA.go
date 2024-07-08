@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"index/suffixarray"
 	"reflect"
-	"sort"
 	"unsafe"
 )
 
@@ -79,16 +78,7 @@ func suffixArray(s string) (sa []int32, rank, height []int) {
 	return
 }
 
-// !查询所有索引位置
-func indexOfAll(rawString, searchString string) []int {
-	sa := suffixarray.New([]byte(rawString))
-	indexes := sa.Lookup([]byte(searchString), -1)
-	sort.Ints(indexes)
-	return indexes
-}
-
 func main() {
-	fmt.Println(indexOfAll("bananaaaaa", "a")) // [1 3 5 6 7 8 9]
 
 	sa, rank, height := suffixArray("abcdea")
 	fmt.Println("sa:", sa)         // "abcdea" => [5 0 1 2 3 4]

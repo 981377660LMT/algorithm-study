@@ -52,10 +52,10 @@ func main() {
 			pos = int(acm.children[pos][char-OFFSET])
 
 			// 用并查集加速(即如果为空，则之后都要跳过这个节点)
-			for cur := pos; cur != 0; cur = uf.Find(int(acm.suffixLink[cur])) {
+			for cur := pos; cur != 0; cur = uf.Find(int(acm.suffixLinkUnsafe[cur])) {
 				id, ok := posToId[cur]
 				if !ok {
-					uf.Union(int(acm.suffixLink[cur]), cur, nil)
+					uf.Union(int(acm.suffixLinkUnsafe[cur]), cur, nil)
 				}
 				if ok && id != i {
 					trans.AddDirectedEdge(i, id)
@@ -85,7 +85,7 @@ const OFFSET int32 = 'a'
 // 每个状态对应Trie中的一个结点，也对应一个字符串.
 type AC struct {
 	children           [][SIGMA]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
-	suffixLink         []int32        // 又叫fail.指向当前trie节点(对应一个前缀)的最长真后缀对应结点，例如"bc"是"abc"的最长真后缀.
+	suffixLinkUnsafe   []int32        // 又叫fail.指向当前trie节点(对应一个前缀)的最长真后缀对应结点，例如"bc"是"abc"的最长真后缀.
 	bfsOrder           []int32        // 结点的拓扑序,0表示虚拟节点.
 	needUpdateChildren bool           // 是否需要更新children数组.
 }
@@ -127,7 +127,7 @@ func (trie *AC) Move(pos int, ord int) int {
 		if pos == 0 {
 			return 0
 		}
-		pos = int(trie.suffixLink[pos])
+		pos = int(trie.suffixLinkUnsafe[pos])
 	}
 }
 
@@ -146,9 +146,9 @@ func (trie *AC) Empty() bool {
 // !move调用较少时，设置为false更快.
 func (trie *AC) BuildSuffixLink(needUpdateChildren bool) {
 	trie.needUpdateChildren = needUpdateChildren
-	trie.suffixLink = make([]int32, len(trie.children))
-	for i := range trie.suffixLink {
-		trie.suffixLink[i] = -1
+	trie.suffixLinkUnsafe = make([]int32, len(trie.children))
+	for i := range trie.suffixLinkUnsafe {
+		trie.suffixLinkUnsafe[i] = -1
 	}
 	trie.bfsOrder = make([]int32, len(trie.children))
 	head, tail := 0, 0
@@ -163,15 +163,15 @@ func (trie *AC) BuildSuffixLink(needUpdateChildren bool) {
 			}
 			trie.bfsOrder[tail] = next
 			tail++
-			f := trie.suffixLink[v]
+			f := trie.suffixLinkUnsafe[v]
 			for f != -1 && trie.children[f][i] == -1 {
-				f = trie.suffixLink[f]
+				f = trie.suffixLinkUnsafe[f]
 			}
-			trie.suffixLink[next] = f
+			trie.suffixLinkUnsafe[next] = f
 			if f == -1 {
-				trie.suffixLink[next] = 0
+				trie.suffixLinkUnsafe[next] = 0
 			} else {
-				trie.suffixLink[next] = trie.children[f][i]
+				trie.suffixLinkUnsafe[next] = trie.children[f][i]
 			}
 		}
 	}
@@ -181,7 +181,7 @@ func (trie *AC) BuildSuffixLink(needUpdateChildren bool) {
 	for _, v := range trie.bfsOrder {
 		for i, next := range trie.children[v] {
 			if next == -1 {
-				f := trie.suffixLink[v]
+				f := trie.suffixLinkUnsafe[v]
 				if f == -1 {
 					trie.children[v][i] = 0
 				} else {
@@ -196,7 +196,7 @@ func (trie *AC) BuildSuffixLink(needUpdateChildren bool) {
 func (acm *AC) Dp(f func(from, to int)) {
 	for _, v := range acm.bfsOrder {
 		if v != 0 {
-			f(int(acm.suffixLink[v]), int(v))
+			f(int(acm.suffixLinkUnsafe[v]), int(v))
 		}
 	}
 }

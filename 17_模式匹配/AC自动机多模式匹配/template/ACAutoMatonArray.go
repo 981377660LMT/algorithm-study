@@ -94,6 +94,10 @@
 //             转化为求出每个模式串在文本串中出现的次数(P3966 单词).
 //             文本串每个前缀+1，dfs求出子树和即可.
 
+// !注意不能直接用link跳fail，会被卡到O(n^2).
+// 某个串很长时，一直指向的是这个长串的局部.
+// 需要使用linkWord.
+
 package main
 
 import (
@@ -430,7 +434,7 @@ func P3808() {
 			}
 			visited[pos] = true
 			res += endCount[pos]
-			pos = acm.Link[pos]
+			pos = acm.link[pos]
 		}
 		return res
 	}
@@ -834,12 +838,13 @@ func multiSearch(big string, smalls []string) [][]int {
 type ACAutoMatonArray struct {
 	WordPos            []int32   // WordPos[i] 表示加入的第i个模式串对应的节点编号(单词结点).
 	Parent             []int32   // parent[v] 表示节点v的父节点.
-	Link               []int32   // 又叫fail.指向当前trie节点(对应一个前缀)的最长真后缀对应结点，例如"bc"是"abc"的最长真后缀.
 	Children           [][]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
 	BfsOrder           []int32   // 结点的拓扑序,0表示虚拟节点.
-	sigma              int32     // 字符集大小.
-	offset             int32     // 字符集的偏移量.
-	needUpdateChildren bool      // 是否需要更新children数组.
+	link               []int32   // 又叫fail.指向当前trie节点(对应一个前缀)的最长真后缀对应结点，例如"bc"是"abc"的最长真后缀.
+	linkWord           []int32
+	sigma              int32 // 字符集大小.
+	offset             int32 // 字符集的偏移量.
+	needUpdateChildren bool  // 是否需要更新children数组.
 }
 
 func NewACAutoMatonArray(sigma, offset int32) *ACAutoMatonArray {
@@ -891,7 +896,7 @@ func (trie *ACAutoMatonArray) Move(pos, ord int32) int32 {
 		if pos == 0 {
 			return 0
 		}
-		pos = trie.Link[pos]
+		pos = trie.link[pos]
 	}
 }
 
@@ -910,9 +915,9 @@ func (trie *ACAutoMatonArray) Empty() bool {
 // !move调用较少时，设置为false更快.
 func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 	trie.needUpdateChildren = needUpdateChildren
-	trie.Link = make([]int32, len(trie.Children))
-	for i := range trie.Link {
-		trie.Link[i] = -1
+	trie.link = make([]int32, len(trie.Children))
+	for i := range trie.link {
+		trie.link[i] = -1
 	}
 	trie.BfsOrder = make([]int32, len(trie.Children))
 	head, tail := 0, 0
@@ -927,15 +932,15 @@ func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 			}
 			trie.BfsOrder[tail] = next
 			tail++
-			f := trie.Link[v]
+			f := trie.link[v]
 			for f != -1 && trie.Children[f][i] == -1 {
-				f = trie.Link[f]
+				f = trie.link[f]
 			}
-			trie.Link[next] = f
+			trie.link[next] = f
 			if f == -1 {
-				trie.Link[next] = 0
+				trie.link[next] = 0
 			} else {
-				trie.Link[next] = trie.Children[f][i]
+				trie.link[next] = trie.Children[f][i]
 			}
 		}
 	}
@@ -945,7 +950,7 @@ func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 	for _, v := range trie.BfsOrder {
 		for i, next := range trie.Children[v] {
 			if next == -1 {
-				f := trie.Link[v]
+				f := trie.link[v]
 				if f == -1 {
 					trie.Children[v][i] = 0
 				} else {
@@ -956,11 +961,39 @@ func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 	}
 }
 
+// `linkWord`指向当前节点的最长后缀对应的节点.
+// 区别于`_link`,`linkWord`指向的节点对应的单词不会重复.
+// 即不会出现`_link`指向某个长串局部的恶化情况.
+//
+// 时间复杂度 O(sqrt(n)).
+func (trie *ACAutoMatonArray) LinkWord(pos int32) int32 {
+	if len(trie.linkWord) == 0 {
+		hasWord := make([]bool, len(trie.Children))
+		for _, p := range trie.WordPos {
+			hasWord[p] = true
+		}
+		trie.linkWord = make([]int32, len(trie.Children))
+		link, linkWord := trie.link, trie.linkWord
+		for _, v := range trie.BfsOrder {
+			if v != 0 {
+				p := link[v]
+				if hasWord[p] {
+					linkWord[v] = p
+				} else {
+					linkWord[v] = linkWord[p]
+				}
+			}
+		}
+	}
+	return trie.linkWord[pos]
+}
+
 func (trie *ACAutoMatonArray) Clear() {
 	trie.WordPos = trie.WordPos[:0]
 	trie.Parent = trie.Parent[:0]
 	trie.Children = trie.Children[:0]
-	trie.Link = trie.Link[:0]
+	trie.link = trie.link[:0]
+	trie.linkWord = trie.linkWord[:0]
 	trie.BfsOrder = trie.BfsOrder[:0]
 	trie.newNode()
 }
@@ -973,13 +1006,16 @@ func (trie *ACAutoMatonArray) GetCounter() []int32 {
 	}
 	for _, v := range trie.BfsOrder {
 		if v != 0 {
-			counter[v] += counter[trie.Link[v]]
+			counter[v] += counter[trie.link[v]]
 		}
 	}
 	return counter
 }
 
 // 获取每个状态包含的模式串的索引.(模式串长度和较小时使用)
+// fail指针每次命中，都至少有一个比指针深度更长的单词出现，因此每个位置最坏情况下不超过O(sqrt(n))次命中
+// O(n*sqrt(n))
+// TODO: roaring bitmaps 优化空间复杂度.
 func (trie *ACAutoMatonArray) GetIndexes() [][]int32 {
 	res := make([][]int32, len(trie.Children))
 	for i, pos := range trie.WordPos {
@@ -987,33 +1023,29 @@ func (trie *ACAutoMatonArray) GetIndexes() [][]int32 {
 	}
 	for _, v := range trie.BfsOrder {
 		if v != 0 {
-			from, to := trie.Link[v], v
+			from, to := trie.link[v], v
 			arr1, arr2 := res[from], res[to]
-			arr3 := make([]int32, 0, len(arr1)+len(arr2))
-			i, j := 0, 0
+			arr3 := make([]int32, len(arr1)+len(arr2))
+			i, j, k := 0, 0, 0
 			for i < len(arr1) && j < len(arr2) {
-				for i < len(arr1) && j < len(arr2) {
-					if arr1[i] < arr2[j] {
-						arr3 = append(arr3, arr1[i])
-						i++
-					} else if arr1[i] > arr2[j] {
-						arr3 = append(arr3, arr2[j])
-						j++
-					} else {
-						arr3 = append(arr3, arr1[i])
-						i++
-						j++
-					}
+				if arr1[i] < arr2[j] {
+					arr3[k] = arr1[i]
+					i++
+				} else if arr1[i] > arr2[j] {
+					arr3[k] = arr2[j]
+					j++
+				} else {
+					arr3[k] = arr1[i]
+					i++
+					j++
 				}
+				k++
 			}
-			for i < len(arr1) {
-				arr3 = append(arr3, arr1[i])
-				i++
-			}
-			for j < len(arr2) {
-				arr3 = append(arr3, arr2[j])
-				j++
-			}
+			copy(arr3[k:], arr1[i:])
+			k += len(arr1) - i
+			copy(arr3[k:], arr2[j:])
+			k += len(arr2) - j
+			arr3 = arr3[:k:k]
 			res[to] = arr3
 		}
 	}
@@ -1024,7 +1056,7 @@ func (trie *ACAutoMatonArray) GetIndexes() [][]int32 {
 func (trie *ACAutoMatonArray) Dp(f func(from, to int32)) {
 	for _, v := range trie.BfsOrder {
 		if v != 0 {
-			f(trie.Link[v], v)
+			f(trie.link[v], v)
 		}
 	}
 }

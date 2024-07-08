@@ -1,4 +1,7 @@
 // IncrementalSCC
+// 应用场景:
+// 1. 维护各个时间点的强连通分量
+// 2. 以时刻为边权建立最小生成树，求两点首次在同一个 scc 中的时刻
 
 package main
 
@@ -8,96 +11,83 @@ import (
 	"os"
 )
 
-// // https://codeforces.com/blog/entry/91608
-// // https://codeforces.com/contest/1989/problem/F
-// // グラフの辺番号 0, 1, 2, ... 順に辺を足していく.
-// // 各辺 i に対してそれがサイクルに含まれるような時刻の最小値 or infty を返す.
-// // これで mst を作って path max query すれば 2 点が同じ scc になる時刻も求まる
-// template <typename GT>
-// vc<int> incremental_scc(GT& G) {
-//   static_assert(GT::is_directed);
-//   int N = G.N, M = G.M;
-//   vc<int> merge_time(M, infty<int>);
-//   vc<tuple<int, int, int>> dat;
-//   FOR(i, M) {
-//     auto& e = G.edges[i];
-//     dat.eb(i, e.frm, e.to);
-//   }
-
-//   vc<int> new_idx(N, -1);
-//   // L 時点ではサイクルには含まれず, R 時点では含まれる
-//   auto dfs
-//       = [&](auto& dfs, vc<tuple<int, int, int>>& dat, int L, int R) -> void {
-//     if (dat.empty() || R == L + 1) return;
-//     int M = (L + R) / 2;
-//     int n = 0;
-//     for (auto& [i, a, b]: dat) {
-//       if (new_idx[a] == -1) new_idx[a] = n++;
-//       if (new_idx[b] == -1) new_idx[b] = n++;
-//     }
-
-//	    Graph<int, 1> G(n);
-//	    for (auto& [i, a, b]: dat) {
-//	      if (i < M) G.add(new_idx[a], new_idx[b]);
-//	    }
-//	    G.build();
-//	    auto [nc, comp] = strongly_connected_component(G);
-//	    vc<tuple<int, int, int>> dat1, dat2;
-//	    for (auto [i, a, b]: dat) {
-//	      a = new_idx[a], b = new_idx[b];
-//	      if (i < M) {
-//	        if (comp[a] == comp[b]) {
-//	          chmin(merge_time[i], M), dat1.eb(i, a, b);
-//	        } else {
-//	          dat2.eb(i, comp[a], comp[b]);
-//	        }
-//	      } else {
-//	        dat2.eb(i, comp[a], comp[b]);
-//	      }
-//	    }
-//	    for (auto& [i, a, b]: dat) new_idx[a] = new_idx[b] = -1;
-//	    dfs(dfs, dat1, L, M), dfs(dfs, dat2, M, R);
-//	  };
-//	  dfs(dfs, dat, 0, M + 1);
-//	  return merge_time;
-//	}
-// void solve() {
-//   INT(N, M);
-//   VEC(mint, X, N);
-
-//   Graph<int, 1> G(N);
-//   G.read_graph(M, 0, 0);
-
-//   auto time = incremental_scc(G);
-//   vc<vc<int>> IDS(M + 1);
-//   FOR(i, M) {
-//     if (time[i] != infty<int>) IDS[time[i]].eb(i);
-//   }
-
-//	  UnionFind uf(N);
-//	  mint ANS = 0;
-//	  FOR(t, 1, M + 1) {
-//	    for (auto &i: IDS[t]) {
-//	      int a = G.edges[i].frm;
-//	      int b = G.edges[i].to;
-//	      a = uf[a], b = uf[b];
-//	      if (a == b) continue;
-//	      ANS += X[a] * X[b];
-//	      uf.merge(a, b);
-//	      X[uf[a]] = X[a] + X[b];
-//	    }
-//	    print(ANS);
-//	  }
-//	}
-//
-
-const MOD int = 998244353
-
-// https://judge.yosupo.jp/problem/incremental_scc
 func main() {
+	CF1989F()
+	// yosupo()
+}
+
+// Simultaneous Coloring
+// https://www.luogu.com.cn/problem/CF1989F
+//
+// 给定一个ROW * COL的棋盘，你可以把一行染成R或者一列染成B，
+// 你可以同时染色多行或者多列，并如果有交叉的染色你可以控制它为 R 或 B。
+// 定义一次染色的代价为选择的行和列的数量的平方(如果正好选择1个，代价为0);
+// 现在有 q 个要求，每个要求为方格 (x,y) 为 R 或 B，
+// 问你将达成前 i(i≤q) 个要求的代价分别为多少。
+//
+// 棋盘模型转二分图，如果要求染红则从左部（行）连向右部（列），否则从右部连向左部
+// !答案即为大小 >1 的 SCC 大小平方和
+func CF1989F() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
+
+	var ROW, COL, Q int32
+	fmt.Fscan(in, &ROW, &COL, &Q)
+
+	edges := make([][2]int32, 0, Q)
+	for i := int32(0); i < Q; i++ {
+		var x, y int32
+		var c string
+		fmt.Fscan(in, &x, &y, &c)
+		x--
+		y--
+		if c == "R" {
+			edges = append(edges, [2]int32{ROW + y, x})
+		} else {
+			edges = append(edges, [2]int32{x, ROW + y})
+		}
+	}
+
+	time := IncrementalScc(ROW+COL, edges)
+	events := make([][]int32, Q+1)
+	for i, t := range time {
+		if t != INF32 {
+			events[t] = append(events[t], int32(i))
+		}
+	}
+
+	cost := func(v int) int {
+		if v <= 1 {
+			return 0
+		}
+		return v * v
+	}
+
+	res := 0
+	uf := NewUnionFindArraySimple32(ROW + COL)
+	for t := int32(1); t <= Q; t++ {
+		eids := events[t]
+		for _, eid := range eids {
+			u, v := edges[eid][0], edges[eid][1]
+			uf.Union(u, v, func(big, small int32) {
+				size1, size2 := int(uf.GetSize(big)), int(uf.GetSize(small))
+				res -= cost(size1)
+				res -= cost(size2)
+				res += cost(size1 + size2)
+			})
+		}
+		fmt.Fprintln(out, res)
+	}
+}
+
+// https://judge.yosupo.jp/problem/incremental_scc
+func yosupo() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const MOD int = 998244353
 
 	var n, m int32
 	fmt.Fscan(in, &n, &m)
@@ -106,16 +96,15 @@ func main() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	graph := make([][]int32, n)
 	edges := make([][2]int32, 0, m)
 	for i := int32(0); i < m; i++ {
 		var u, v int32
 		fmt.Fscan(in, &u, &v)
 		edges = append(edges, [2]int32{u, v})
-		graph[u] = append(graph[u], v)
+
 	}
 
-	time := IncrementalScc(graph, edges)
+	time := IncrementalScc(n, edges)
 	groupByTime := make([][]int32, m+1)
 	for i, t := range time {
 		if t != INF32 {
@@ -125,18 +114,19 @@ func main() {
 
 	uf := NewUnionFindArraySimple32(n)
 	res := 0
+	// 每个时间点的强连通分量
 	for t := int32(1); t <= m; t++ {
 		eids := groupByTime[t]
 		for _, eid := range eids {
-			e := edges[eid]
-			a, b := uf.Find(e[0]), uf.Find(e[1])
-			if a == b {
-				continue
-			}
-			res += nums[a] * nums[b]
-			uf.Union(a, b)
-			nums[uf.Find(a)] = nums[a] + nums[b]
+			u, v := edges[eid][0], edges[eid][1]
+			uf.Union(u, v, func(big, small int32) {
+				res += nums[big] * nums[small]
+				res %= MOD
+				nums[big] += nums[small]
+				nums[big] %= MOD
+			})
 		}
+		fmt.Fprintln(out, res)
 	}
 }
 
@@ -146,8 +136,8 @@ const INF32 int32 = 1e9 + 10
 // 对于每条边 i，返回它在包含的环中的最小时间.
 // 如果它不在环中，返回 INF32.
 // !用途：mst + path max query 可以求出两点首次在同一个 scc 中的时刻.
-func IncrementalScc(directedGraph [][]int32, directedEdges [][2]int32) (mergeTime []int32) {
-	n, m := int32(len(directedGraph)), int32(len(directedEdges))
+func IncrementalScc(n int32, directedEdges [][2]int32) (mergeTime []int32) {
+	m := int32(len(directedEdges))
 	mergeTime = make([]int32, m)
 	for i := range mergeTime {
 		mergeTime[i] = INF32
@@ -184,12 +174,15 @@ func IncrementalScc(directedGraph [][]int32, directedEdges [][2]int32) (mergeTim
 		newGraph := make([][]int32, n)
 		for j := range data {
 			i, a, b := data[j][0], data[j][1], data[j][2]
+			a, b = newId[a], newId[b]
 			if i < mid {
-				newGraph[newId[a]] = append(newGraph[newId[a]], newId[b])
+				newGraph[a] = append(newGraph[a], b)
 			}
 		}
-		_, belong := StronglyConnectedComponent(newGraph)
-		var dat1, dat2 [][3]int32
+
+		belong := StronglyConnectedComponent(n, newGraph)
+
+		var data1, data2 [][3]int32
 		for j := range data {
 			i, a, b := data[j][0], data[j][1], data[j][2]
 			a, b = newId[a], newId[b]
@@ -198,72 +191,72 @@ func IncrementalScc(directedGraph [][]int32, directedEdges [][2]int32) (mergeTim
 					if mid < mergeTime[i] {
 						mergeTime[i] = mid
 					}
-					dat1 = append(dat1, [3]int32{i, a, b})
+					data1 = append(data1, [3]int32{i, a, b})
 				} else {
-					dat2 = append(dat2, [3]int32{i, belong[a], belong[b]})
+					data2 = append(data2, [3]int32{i, belong[a], belong[b]})
 				}
 			} else {
-				dat2 = append(dat2, [3]int32{i, belong[a], belong[b]})
+				data2 = append(data2, [3]int32{i, belong[a], belong[b]})
 			}
 		}
 		for j := range data {
 			a, b := data[j][1], data[j][2]
 			newId[a], newId[b] = -1, -1
 		}
-		dfs(data, L, mid)
-		dfs(data, mid, R)
+		dfs(data1, L, mid)
+		dfs(data2, mid, R)
 	}
 
 	dfs(data, 0, m+1)
 	return
 }
 
-func StronglyConnectedComponent(directedGraph [][]int32) (count int32, belong []int32) {
-	n := int32(len(directedGraph))
-	comp, low, ord := make([]int32, n), make([]int32, n), make([]int32, n)
-	for i := range ord {
-		ord[i] = -1
-	}
-	path := make([]int32, 0)
-	now := int32(0)
-	var dfs func(int32)
-	dfs = func(v int32) {
-		ord[v] = now
-		low[v] = now
-		now++
-		path = append(path, v)
-		for _, to := range directedGraph[v] {
-			if ord[to] == -1 {
-				dfs(to)
-				if low[to] < low[v] {
-					low[v] = low[to]
+func StronglyConnectedComponent(n int32, graph [][]int32) (belong []int32) {
+	dfsOrder := make([]int32, n)
+	dfsId := int32(0)
+	stack := make([]int32, n)
+	stackPtr := int32(0)
+	inStack := make([]bool, n)
+	belong = make([]int32, n)
+	compId := int32(0)
+
+	var dfs func(int32) int32
+	dfs = func(cur int32) int32 {
+		dfsId++
+		dfsOrder[cur] = dfsId
+		curLow := dfsId
+		stack[stackPtr] = cur
+		stackPtr++
+		inStack[cur] = true
+		for _, next := range graph[cur] {
+			if dfsOrder[next] == 0 {
+				nextLow := dfs(next)
+				if nextLow < curLow {
+					curLow = nextLow
 				}
-			} else {
-				if ord[to] < low[v] {
-					low[v] = ord[to]
-				}
+			} else if inStack[next] && dfsOrder[next] < curLow {
+				curLow = dfsOrder[next]
 			}
 		}
-		if low[v] == ord[v] {
+		if dfsOrder[cur] == curLow {
 			for {
-				cur := path[len(path)-1]
-				path = path[:len(path)-1]
-				ord[cur] = n
-				comp[cur] = count
-				if cur == v {
+				top := stack[stackPtr-1]
+				stackPtr--
+				inStack[top] = false
+				belong[top] = compId
+				if top == cur {
 					break
 				}
 			}
-			count++
+			compId++
 		}
+		return curLow
 	}
-	for i := int32(0); i < n; i++ {
-		if ord[i] == -1 {
-			dfs(i)
+
+	for i, order := range dfsOrder {
+		if order == 0 {
+			dfs(int32(i))
 		}
-	}
-	for i := int32(0); i < n; i++ {
-		comp[i] = count - 1 - comp[i]
 	}
 	return
 }
@@ -282,7 +275,7 @@ func NewUnionFindArraySimple32(n int32) *UnionFindArraySimple32 {
 	return &UnionFindArraySimple32{Part: n, n: n, data: data}
 }
 
-func (u *UnionFindArraySimple32) Union(key1, key2 int32, preMerge func(big, small int32)) bool {
+func (u *UnionFindArraySimple32) Union(key1, key2 int32, beforeMerge func(big, small int32)) bool {
 	root1, root2 := u.Find(key1), u.Find(key2)
 	if root1 == root2 {
 		return false
@@ -290,8 +283,8 @@ func (u *UnionFindArraySimple32) Union(key1, key2 int32, preMerge func(big, smal
 	if u.data[root1] > u.data[root2] {
 		root1, root2 = root2, root1
 	}
-	if preMerge != nil {
-		preMerge(root1, root2)
+	if beforeMerge != nil {
+		beforeMerge(root1, root2)
 	}
 	u.data[root1] += u.data[root2]
 	u.data[root2] = root1

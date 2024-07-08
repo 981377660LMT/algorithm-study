@@ -10,7 +10,8 @@ class ACAutoMatonArray {
   private _children: Int32Array
 
   /** 又叫fail.指向当前节点最长真后缀对应结点，例如"bc"是"abc"的最长真后缀. */
-  private _suffixLink!: Int32Array
+  private _link!: Int32Array
+  private _linkWord?: Int32Array
 
   private _bfsOrder!: Int32Array
   private _needUpdateChildren!: boolean
@@ -59,7 +60,7 @@ class ACAutoMatonArray {
       const hash = pos * this._sigma + ord
       if (this._children[hash] !== -1) return this._children[hash]
       if (pos === 0) return 0
-      pos = this._suffixLink[pos]
+      pos = this._link[pos]
     }
   }
 
@@ -68,7 +69,7 @@ class ACAutoMatonArray {
    */
   buildSuffixLink(needUpdateChildren = false) {
     this._needUpdateChildren = needUpdateChildren
-    this._suffixLink = new Int32Array(this._nodeCount).fill(-1)
+    this._link = new Int32Array(this._nodeCount).fill(-1)
     this._bfsOrder = new Int32Array(this._nodeCount)
     let head = 0
     let tail = 1
@@ -82,15 +83,15 @@ class ACAutoMatonArray {
           continue
         }
         this._bfsOrder[tail++] = next
-        let f = this._suffixLink[v]
+        let f = this._link[v]
         while (f !== -1 && this._children[f * this._sigma + i] === -1) {
-          f = this._suffixLink[f]
+          f = this._link[f]
         }
-        this._suffixLink[next] = f
+        this._link[next] = f
         if (f === -1) {
-          this._suffixLink[next] = 0
+          this._link[next] = 0
         } else {
-          this._suffixLink[next] = this._children[f * this._sigma + i]
+          this._link[next] = this._children[f * this._sigma + i]
         }
       }
     }
@@ -101,7 +102,7 @@ class ACAutoMatonArray {
       for (let j = 0; j < this._sigma; j++) {
         const next = this._children[offset + j]
         if (next === -1) {
-          const f = this._suffixLink[v]
+          const f = this._link[v]
           if (f === -1) {
             this._children[offset + j] = 0
           } else {
@@ -110,6 +111,24 @@ class ACAutoMatonArray {
         }
       }
     }
+  }
+
+  linkWord(pos: number): number {
+    if (this._linkWord) return this._linkWord[pos]
+    const size = this.size
+    this._linkWord = new Int32Array(size)
+    const hasWord = new Uint8Array(size)
+    for (let i = 0; i < this.wordPos.length; i++) hasWord[this.wordPos[i]] = 1
+    const link = this._link
+    const linkWord = this._linkWord
+    for (let i = 0; i < this._bfsOrder.length; i++) {
+      const v = this._bfsOrder[i]
+      if (v !== 0) {
+        const p = link[v]
+        linkWord[v] = hasWord[p] ? p : linkWord[p]
+      }
+    }
+    return this._linkWord[pos]
   }
 
   /** 获取每个状态匹配到的模式串的个数. */
@@ -121,7 +140,7 @@ class ACAutoMatonArray {
     for (let i = 0; i < this._bfsOrder.length; i++) {
       const v = this._bfsOrder[i]
       if (v !== 0) {
-        counter[v] += counter[this._suffixLink[v]]
+        counter[v] += counter[this._link[v]]
       }
     }
     return counter
@@ -135,7 +154,7 @@ class ACAutoMatonArray {
     for (let i = 0; i < this._bfsOrder.length; i++) {
       const v = this._bfsOrder[i]
       if (v !== 0) {
-        const from = this._suffixLink[v]
+        const from = this._link[v]
         const arr1 = res[from]
         const arr2 = res[v]
         const arr3 = Array(arr1.length + arr2.length)
@@ -143,16 +162,14 @@ class ACAutoMatonArray {
         let p2 = 0
         let p3 = 0
         while (p1 < arr1.length && p2 < arr2.length) {
-          while (p1 < arr1.length && p2 < arr2.length) {
-            if (arr1[p1] < arr2[p2]) {
-              arr3[p3++] = arr1[p1++]
-            } else if (arr1[p1] > arr2[p2]) {
-              arr3[p3++] = arr2[p2++]
-            } else {
-              arr3[p3++] = arr1[p1]
-              p1++
-              p2++
-            }
+          if (arr1[p1] < arr2[p2]) {
+            arr3[p3++] = arr1[p1++]
+          } else if (arr1[p1] > arr2[p2]) {
+            arr3[p3++] = arr2[p2++]
+          } else {
+            arr3[p3++] = arr1[p1]
+            p1++
+            p2++
           }
         }
         while (p1 < arr1.length) arr3[p3++] = arr1[p1++]
@@ -167,7 +184,7 @@ class ACAutoMatonArray {
     for (let i = 0; i < this._bfsOrder.length; i++) {
       const v = this._bfsOrder[i]
       if (v !== 0) {
-        f(this._suffixLink[v], v)
+        f(this._link[v], v)
       }
     }
   }
@@ -223,6 +240,37 @@ class ACAutoMatonArray {
 export { ACAutoMatonArray }
 
 if (require.main === module) {
+  const INF = 2e15
+
+  // 100350. 最小代价构造字符串
+  // https://leetcode.cn/problems/construct-string-with-minimum-cost/description/
+  function minimumCost(target: string, words: string[], costs: number[]): number {
+    const acm = new ACAutoMatonArray({ lengthSum: words.reduce((sum, w) => sum + w.length, 0) })
+    for (let i = 0; i < words.length; i++) {
+      acm.addString(words[i])
+    }
+    acm.buildSuffixLink(true)
+
+    const nodeCosts = new Uint32Array(acm.size).fill(-1)
+    const nodeDepth = new Uint32Array(acm.size)
+    for (let i = 0; i < acm.wordPos.length; i++) {
+      const pos = acm.wordPos[i]
+      nodeCosts[pos] = Math.min(nodeCosts[pos], costs[i])
+      nodeDepth[pos] = words[i].length
+    }
+
+    const dp = Array(target.length + 1).fill(INF)
+    dp[0] = 0
+    let pos = 0
+    for (let i = 0; i < target.length; i++) {
+      pos = acm.move(pos, target.charCodeAt(i))
+      for (let cur = pos; cur !== 0; cur = acm.linkWord(cur)) {
+        dp[i + 1] = Math.min(dp[i + 1], dp[i + 1 - nodeDepth[cur]] + nodeCosts[cur])
+      }
+    }
+    return dp[target.length] === INF ? -1 : dp[target.length]
+  }
+
   // https://leetcode.cn/problems/length-of-the-longest-valid-substring/description/
   function longestValidSubstring(word: string, forbidden: string[]): number {
     const lengthSum = forbidden.reduce((sum, w) => sum + w.length, 0)

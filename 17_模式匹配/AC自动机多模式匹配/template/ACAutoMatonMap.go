@@ -28,13 +28,48 @@ func longestValidSubstring(word string, forbidden []string) int {
 	return res
 }
 
+func minimumCost(target string, words []string, costs []int) int {
+	trie := NewACAutoMatonMap()
+	for _, word := range words {
+		trie.AddString([]byte(word))
+	}
+
+	nodeCosts := make([]int, trie.Size())
+	nodeDepth := make([]int, trie.Size())
+	for i := range nodeCosts {
+		nodeCosts[i] = INF
+	}
+	for i, pos := range trie.WordPos {
+		nodeCosts[pos] = min(nodeCosts[pos], costs[i])
+		nodeDepth[pos] = len(words[i])
+	}
+
+	trie.BuildSuffixLink()
+	dp := make([]int, len(target)+1)
+	for i := 1; i <= len(target); i++ {
+		dp[i] = INF
+	}
+	pos := 0
+	for i, char := range target {
+		pos = trie.Move(pos, byte(char))
+		for cur := pos; cur != 0; cur = trie.LinkWord(cur) {
+			dp[i+1] = min(dp[i+1], dp[i+1-nodeDepth[cur]]+nodeCosts[cur])
+		}
+	}
+	if dp[len(target)] == INF {
+		return -1
+	}
+	return dp[len(target)]
+}
+
 type T = byte
 
 type ACAutoMatonMap struct {
-	WordPos    []int         // WordPos[i] 表示加入的第i个模式串对应的节点编号.
-	children   []map[T]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
-	suffixLink []int32       // 又叫fail.指向当前节点最长真后缀对应结点.
-	bfsOrder   []int32       // 结点的拓扑序,0表示虚拟节点.
+	WordPos  []int         // WordPos[i] 表示加入的第i个模式串对应的节点编号.
+	children []map[T]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
+	link     []int32       // 又叫fail.指向当前节点最长真后缀对应结点.
+	linkWord []int32
+	bfsOrder []int32 // 结点的拓扑序,0表示虚拟节点.
 }
 
 func NewACAutoMatonMap() *ACAutoMatonMap {
@@ -107,14 +142,14 @@ func (ac *ACAutoMatonMap) Move(pos int, ord T) int {
 		if pos == 0 {
 			return 0
 		}
-		pos = int(ac.suffixLink[pos])
+		pos = int(ac.link[pos])
 	}
 }
 
 func (ac *ACAutoMatonMap) BuildSuffixLink() {
-	ac.suffixLink = make([]int32, len(ac.children))
-	for i := range ac.suffixLink {
-		ac.suffixLink[i] = -1
+	ac.link = make([]int32, len(ac.children))
+	for i := range ac.link {
+		ac.link[i] = -1
 	}
 	ac.bfsOrder = make([]int32, len(ac.children))
 	head, tail := 0, 1
@@ -124,20 +159,42 @@ func (ac *ACAutoMatonMap) BuildSuffixLink() {
 		for char, next := range ac.children[v] {
 			ac.bfsOrder[tail] = next
 			tail++
-			f := ac.suffixLink[v]
+			f := ac.link[v]
 			for f != -1 {
 				if _, ok := ac.children[f][char]; ok {
 					break
 				}
-				f = ac.suffixLink[f]
+				f = ac.link[f]
 			}
 			if f == -1 {
-				ac.suffixLink[next] = 0
+				ac.link[next] = 0
 			} else {
-				ac.suffixLink[next] = ac.children[f][char]
+				ac.link[next] = ac.children[f][char]
 			}
 		}
 	}
+}
+
+func (ac *ACAutoMatonMap) LinkWord(pos int) int {
+	if len(ac.linkWord) == 0 {
+		hasWord := make([]bool, len(ac.children))
+		for _, p := range ac.WordPos {
+			hasWord[p] = true
+		}
+		ac.linkWord = make([]int32, len(ac.children))
+		link, linkWord := ac.link, ac.linkWord
+		for _, v := range ac.bfsOrder {
+			if v != 0 {
+				p := link[v]
+				if hasWord[p] {
+					linkWord[v] = p
+				} else {
+					linkWord[v] = linkWord[p]
+				}
+			}
+		}
+	}
+	return int(ac.linkWord[pos])
 }
 
 func (ac *ACAutoMatonMap) Empty() bool {
@@ -148,7 +205,8 @@ func (ac *ACAutoMatonMap) Clear() {
 	ac.WordPos = ac.WordPos[:0]
 	ac.children = ac.children[:1]
 	ac.children[0] = map[T]int32{}
-	ac.suffixLink = ac.suffixLink[:0]
+	ac.link = ac.link[:0]
+	ac.linkWord = ac.linkWord[:0]
 	ac.bfsOrder = ac.bfsOrder[:0]
 }
 
@@ -159,7 +217,7 @@ func (ac *ACAutoMatonMap) GetCounter() []int {
 	}
 	for _, v := range ac.bfsOrder {
 		if v != 0 {
-			counter[v] += counter[ac.suffixLink[v]]
+			counter[v] += counter[ac.link[v]]
 		}
 	}
 	return counter
@@ -172,7 +230,7 @@ func (ac *ACAutoMatonMap) GetIndexes() [][]int {
 	}
 	for _, v := range ac.bfsOrder {
 		if v != 0 {
-			from, to := ac.suffixLink[v], v
+			from, to := ac.link[v], v
 			arr1, arr2 := res[from], res[to]
 			arr3 := make([]int, 0, len(arr1)+len(arr2))
 			i, j := 0, 0
@@ -206,7 +264,7 @@ func (ac *ACAutoMatonMap) GetIndexes() [][]int {
 func (ac *ACAutoMatonMap) Dp(f func(from, to int)) {
 	for _, v := range ac.bfsOrder {
 		if v != 0 {
-			f(int(ac.suffixLink[v]), int(v))
+			f(int(ac.link[v]), int(v))
 		}
 	}
 }

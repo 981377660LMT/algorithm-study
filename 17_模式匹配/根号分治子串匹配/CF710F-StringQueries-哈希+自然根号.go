@@ -24,7 +24,7 @@ func main() {
 	out := bufio.NewWriter(os.Stdout)
 
 	R := NewSimpleHash(BASE, MOD)
-	hashGroup := make(map[int]map[uint]int) // 每个长度对应一个counter
+	hashGroupByLen := make(map[int]map[uint]int) // !每个长度对应一个counter
 
 	var q int
 	fmt.Fscan(in, &q)
@@ -32,21 +32,20 @@ func main() {
 		var op int
 		var s string
 		fmt.Fscan(in, &op, &s)
-
 		if op == 1 {
 			hash := GetHash(s, BASE, MOD)
 			len_ := len(s)
-			if _, ok := hashGroup[len_]; !ok {
-				hashGroup[len_] = make(map[uint]int)
+			if _, ok := hashGroupByLen[len_]; !ok {
+				hashGroupByLen[len_] = make(map[uint]int)
 			}
-			hashGroup[len_][hash]++
+			hashGroupByLen[len_][hash]++
 		} else if op == 2 {
 			hash := GetHash(s, BASE, MOD)
 			len_ := len(s)
-			if _, ok := hashGroup[len_]; !ok {
+			if _, ok := hashGroupByLen[len_]; !ok {
 				continue
 			}
-			inner := hashGroup[len_]
+			inner := hashGroupByLen[len_]
 			if _, ok := inner[hash]; !ok {
 				continue
 			}
@@ -55,8 +54,7 @@ func main() {
 			res := 0
 			hashTable := R.Build(s)
 			// !遍历每种长度的子串
-			for len_, group := range hashGroup {
-
+			for len_, group := range hashGroupByLen {
 				for start := 0; start+len_ <= len(s); start++ {
 					hash := R.Query(hashTable, start, start+len_)
 					res += group[hash]
