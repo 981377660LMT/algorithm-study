@@ -400,3 +400,15 @@ if (require.main === module) {
 1GB ~1e8 个 int64
 
 函数内的递归 lambda 会额外消耗非常多的内存（100~200MB / 1e6 递归深度）
+
+---
+
+golang 手动释放内存:
+
+```go
+// method 1
+runtime.GC()
+
+// method 2
+defer debug.FreeOSMemory()
+```

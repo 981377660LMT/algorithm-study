@@ -1,6 +1,7 @@
 https://go7hic.github.io/A-Philosophy-of-Software-Design/#/
 https://zjykzk.github.io/posts/cs/design/aposd/
 https://book.douban.com/review/13169504/
+https://blog.csdn.net/yh88623131/category_12078681.html
 
 作者写了这本书，并开设了斯坦福 CS 190 的课程
 《软件复杂度应对之道》这个书名可能会更贴切一些。
@@ -137,6 +138,8 @@ https://book.douban.com/review/13169504/
   浅层模块是其接口与其提供的功能相比相对复杂的模块。
   浅类有时是不可避免的，但是它们`在管理复杂性方面没有提供太多帮助`。
 
+  > 多维表格有太多这样的浅类，增加了认知负担，没有提供任何帮助。
+
   ```java
   private void addNullValueForAttribute(String attribute) {
       data.put(attribute, null);
@@ -187,6 +190,7 @@ https://book.douban.com/review/13169504/
 
 ## 第五章：信息隐藏(和泄露)（Information Hiding (and Leakage)）
 
+不同模块负责的内容应该正交（互不相关）
 这章指导我们正确的进行模块`信息的隐藏（实现）`和`信息暴露（文档）`
 在日常开发中，需要仔细了解某个 service 或者方法的实现才敢去用它，这正是因为他们的接口设计的不好，该泄露的没有泄露，该隐藏的没有隐藏，理想情况下我们直接看文档直接使用就行了
 
@@ -210,6 +214,7 @@ https://book.douban.com/review/13169504/
 - `Temporal decomposition(时间分解)` 导致信息泄漏
   时间分解：按照过程顺序拆分模块(bad)
   `按照角色知识拆分模块，而不是按照过程拆分(good)`
+  `设计模块的时候，关注每个需要执行的任务上，而不是他们的执行顺序。`
   比如：读一个文件，修改文件内容，最后写文件。如果把三个操作封装成三个模块，就会把编码算法这个信息分布在读模块和写模块当中。
 
 ## 第六章：通用化（General-Purpose Modules are Deeper）
@@ -380,7 +385,7 @@ The overall idea behind comments is to capture information that was in the mind 
 - Summary of Design Principles 设计原则摘要
 
 1. Complexity is incremental: you have to sweat the small stuff (see p. 11).
-   复杂性是逐步增加的
+   软件复杂度是慢慢积累起来的，你必须锱铢必较
 2. Working code isn’t enough (see p. 14).
    能工作的代码还不够
 3. Make continual small investments to improve system design (see p. 15).
@@ -388,18 +393,19 @@ The overall idea behind comments is to capture information that was in the mind 
 4. Modules should be deep (see p. 22)
    模块应该是深的
 5. Interfaces should be designed to make the most common usage as simple as possible (see p. 27).
-   **接口的设计应尽可能简化最常见的用法**
+   **接口设计应当使得最常用的路径越简单越好**
 6. It’s more important for a module to have a simple interface than a simple implementation (see pp. 3. 55, 71).
    **一个模块具有一个简单的接口比一个简单的实现更重要**
 7. General-purpose modules are deeper (see p. 39).
-   通用型模块更深
+   模块应当尽量设计的通用
 8. Separate general-purpose and special-purpose code (see p. 62).
-   通用和专用代码分开
+   分离通用的代码和特定需求的代码(往小了说就是抽取公共函数或者公共类，往大了说就是建立共享服务或者中台系统)
 9. Different layers should have different abstractions (see p. 45).
-   不同的层应具有不同的抽象
+   不同的层应具有不同的抽象(如果不同层次的抽象是一样的，那必然会导致大量的重复代码和没有意义的类)
 10. Pull complexity downward (see p. 55).
-    复杂度尽可能下沉
+    把复杂性放在底层
 11. Define errors (and special cases) out of existence (see p. 79).
+    通过定义让错误（和特殊场景）没有机会发生
 12. Design it twice (see p. 91).
 13. Comments should describe things that are not obvious from the code (see p. 101).
     注释应描述代码中不明显的内容
