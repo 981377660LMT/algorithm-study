@@ -41,3 +41,10 @@ https://zhuanlan.zhihu.com/p/25855753
 
 - SDBM HASH
 - BKDR HASH
+
+---
+
+hack 哈希
+
+anti-hash
+https://heltion.github.io/anti-hash/
