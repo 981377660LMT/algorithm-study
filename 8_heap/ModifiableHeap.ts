@@ -9,11 +9,11 @@ type Token<T> = {
  */
 class ModifiableHeap<T> {
   private readonly _data: Token<T>[]
-  private readonly _less: (a: T, b: T) => boolean
+  private readonly _less: (a: Token<T>, b: Token<T>) => boolean
 
   constructor({ data, less }: { data: T[]; less: (a: T, b: T) => boolean }) {
     this._data = data.map((value, heapIndex) => ({ value, heapIndex }))
-    this._less = less
+    this._less = (a, b) => less(a.value, b.value)
     if (this._data.length > 1) this._heapify()
   }
 
@@ -65,7 +65,7 @@ class ModifiableHeap<T> {
     const { _data, _less } = this
     while (j) {
       const i = (j - 1) >>> 1 // parent
-      if (i === j || !_less(_data[j].value, _data[i].value)) break
+      if (i === j || !_less(_data[j], _data[i])) break
       this._swap(i, j)
       j = i
     }
@@ -79,8 +79,8 @@ class ModifiableHeap<T> {
       if (j1 >= n || j1 < 0) break
       let j = j1
       const j2 = j1 + 1
-      if (j2 < n && _less(_data[j2].value, _data[j1].value)) j = j2
-      if (!_less(_data[j].value, _data[i].value)) break
+      if (j2 < n && _less(_data[j2], _data[j1])) j = j2
+      if (!_less(_data[j], _data[i])) break
       this._swap(i, j)
       i = j
     }
