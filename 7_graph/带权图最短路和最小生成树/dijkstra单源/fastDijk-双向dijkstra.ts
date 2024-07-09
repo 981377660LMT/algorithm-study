@@ -24,15 +24,15 @@ function fastDijkstra(
   dist[start] = 0
   drev[end] = 0
 
-  const pq1 = new Heap<[dist: number, vertex: number]>((a, b) => a[0] - b[0])
-  const pq2 = new Heap<[dist: number, vertex: number]>((a, b) => a[0] - b[0])
+  const pq1 = new Heap<[dist: number, vertex: number]>({ data: [], less: (a, b) => a[0] < b[0] })
+  const pq2 = new Heap<[dist: number, vertex: number]>({ data: [], less: (a, b) => a[0] < b[0] })
   pq1.push([0, start])
   pq2.push([0, end])
 
   let res = -1
   while (pq1.size && pq2.size) {
-    const d1 = pq1.peek()![0]
-    const d2 = pq2.peek()![0]
+    const d1 = pq1.top()![0]
+    const d2 = pq2.top()![0]
     if (res >= 0 && d1 + d2 >= res) break
     if (d1 <= d2) {
       const [d, u] = pq1.pop()!

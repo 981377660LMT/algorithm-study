@@ -86,7 +86,7 @@ function dijkstra(n: number, adjList: [next: number, weight: number][][], start:
   const dist = Array(n)
   for (let i = 0; i < n; ++i) dist[i] = INF
   dist[start] = 0
-  const queue = new Heap<[dist: number, vertex: number]>((a, b) => a[1] - b[1])
+  const queue = new Heap<[dist: number, vertex: number]>({ data: [], less: (a, b) => a[1] < b[1] })
   queue.push([0, start])
 
   while (queue.size) {

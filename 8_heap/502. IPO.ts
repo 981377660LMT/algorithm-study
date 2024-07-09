@@ -18,14 +18,17 @@ import { Heap } from './Heap'
  */
 function findMaximizedCapital(k: number, w: number, profits: number[], capital: number[]): number {
   const pairs = capital.map<[capital: number, index: number]>((c, i) => [c, i])
-  const pq1 = new Heap<[capital: number, index: number]>(pairs, (a, b) => a[0] - b[0])
+  const pq1 = new Heap<[capital: number, index: number]>({
+    data: pairs,
+    less: (a, b) => a[0] < b[0]
+  })
 
-  const pq2 = new Heap<number>((a, b) => b - a)
+  const pq2 = new Heap<number>({ data: [], less: (a, b) => b < a })
 
   let res = w
   for (let i = 0; i < k; i++) {
     // !所有可以启动的项目全部放入大根堆，然后选一个利润最大的
-    while (pq1.size > 0 && pq1.peek()![0] <= res) {
+    while (pq1.size > 0 && pq1.top()![0] <= res) {
       const [_, index] = pq1.pop()!
       pq2.push(profits[index])
     }

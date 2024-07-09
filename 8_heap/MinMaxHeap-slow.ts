@@ -29,14 +29,11 @@ class MinMaxHeap<T> {
   private readonly _maxHeapH: Heap<T>
   private readonly _maxHeapP: Heap<T>
 
-  constructor(
-    minHeapComparator: (a: T, b: T) => number,
-    maxHeapComparator: (a: T, b: T) => number
-  ) {
-    this._minHeapH = new Heap(minHeapComparator)
-    this._minHeapP = new Heap(minHeapComparator)
-    this._maxHeapH = new Heap(maxHeapComparator)
-    this._maxHeapP = new Heap(maxHeapComparator)
+  constructor(minHeapLessFunc: (a: T, b: T) => boolean, maxHeapLessFunc: (a: T, b: T) => boolean) {
+    this._minHeapH = new Heap({ data: [], less: minHeapLessFunc })
+    this._minHeapP = new Heap({ data: [], less: minHeapLessFunc })
+    this._maxHeapH = new Heap({ data: [], less: maxHeapLessFunc })
+    this._maxHeapP = new Heap({ data: [], less: maxHeapLessFunc })
   }
 
   push(value: T): void {
@@ -65,12 +62,12 @@ class MinMaxHeap<T> {
 
   get min(): T | undefined {
     this._normalize()
-    return this._minHeapH.peek()
+    return this._minHeapH.top()
   }
 
   get max(): T | undefined {
     this._normalize()
-    return this._maxHeapH.peek()
+    return this._maxHeapH.top()
   }
 
   get size(): number {
@@ -78,11 +75,11 @@ class MinMaxHeap<T> {
   }
 
   private _normalize(): void {
-    while (this._minHeapP.size && this._minHeapP.peek() === this._minHeapH.peek()) {
+    while (this._minHeapP.size && this._minHeapP.top() === this._minHeapH.top()) {
       this._minHeapP.pop()
       this._minHeapH.pop()
     }
-    while (this._maxHeapP.size && this._maxHeapP.peek() === this._maxHeapH.peek()) {
+    while (this._maxHeapP.size && this._maxHeapP.top() === this._maxHeapH.top()) {
       this._maxHeapP.pop()
       this._maxHeapH.pop()
     }
@@ -93,8 +90,8 @@ export {}
 
 if (require.main === module) {
   const pq = new MinMaxHeap<number>(
-    (a, b) => a - b,
-    (a, b) => b - a
+    (a, b) => a < b,
+    (a, b) => b < a
   )
   pq.push(3)
   pq.push(1)
@@ -112,8 +109,8 @@ if (require.main === module) {
   // time
   const n = 5e5
   const pq2 = new MinMaxHeap<number>(
-    (a, b) => a - b,
-    (a, b) => b - a
+    (a, b) => a < b,
+    (a, b) => b < a
   )
 
   console.time('MinMaxHeap')
@@ -124,8 +121,6 @@ if (require.main === module) {
   for (let i = 0; i < n; i++) {
     pq2.popMax()
     pq2.popMin()
-    pq.min
-    pq.max
   }
   console.timeEnd('MinMaxHeap') // MinMaxHeap: 772.526ms
 }

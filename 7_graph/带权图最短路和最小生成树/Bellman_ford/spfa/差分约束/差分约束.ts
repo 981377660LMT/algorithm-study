@@ -116,7 +116,7 @@ class DualShortestPath {
   private _dijkMax(): [dist: number[], ok: boolean] {
     const dist = Array(this._n).fill(INF)
     dist[0] = 0
-    const heap = new Heap<[dist: number, node: number]>((a, b) => a[0] - b[0])
+    const heap = new Heap<[dist: number, node: number]>({ less: (a, b) => a[0] < b[0], data: [] })
     heap.push([0, 0])
     while (heap.size) {
       const [curDist, cur] = heap.pop()!

@@ -14,10 +14,10 @@ class TopKSum {
   private _sum = 0
   private _k: number
   private readonly _min: boolean
-  private readonly _in = new Heap()
-  private readonly _out = new Heap()
-  private readonly _dIn = new Heap()
-  private readonly _dOut = new Heap()
+  private readonly _in = new Heap<number>({ data: [], less: (a, b) => a < b })
+  private readonly _out = new Heap<number>({ data: [], less: (a, b) => a < b })
+  private readonly _dIn = new Heap<number>({ data: [], less: (a, b) => a < b })
+  private readonly _dOut = new Heap<number>({ data: [], less: (a, b) => a < b })
   private readonly _counter = new Map<number, number>()
 
   /**
@@ -46,10 +46,10 @@ class TopKSum {
     if (!this._min) x = -x
     if (!this._counter.has(x)) return
     this._counter.set(x, this._counter.get(x)! - 1)
-    if (this._in.size && -this._in.peek()! === x) {
+    if (this._in.size && -this._in.top()! === x) {
       this._sum -= x
       this._in.pop()
-    } else if (this._in.size && -this._in.peek()! > x) {
+    } else if (this._in.size && -this._in.top()! > x) {
       this._sum -= x
       this._dIn.push(-x)
     } else {
@@ -79,7 +79,7 @@ class TopKSum {
   private _modify(): void {
     while (this._out.size && this._in.size - this._dIn.size < this._k) {
       const p = this._out.pop()!
-      if (this._dOut.size && p === this._dOut.peek()!) {
+      if (this._dOut.size && p === this._dOut.top()!) {
         this._dOut.pop()
       } else {
         this._sum += p
@@ -89,7 +89,7 @@ class TopKSum {
 
     while (this._in.size - this._dIn.size > this._k) {
       const p = -this._in.pop()!
-      if (this._dIn.size && p === -this._dIn.peek()!) {
+      if (this._dIn.size && p === -this._dIn.top()!) {
         this._dIn.pop()
       } else {
         this._sum -= p
@@ -97,7 +97,7 @@ class TopKSum {
       }
     }
 
-    while (this._dIn.size && this._in.size && this._in.peek()! === this._dIn.peek()!) {
+    while (this._dIn.size && this._in.size && this._in.top()! === this._dIn.top()!) {
       this._in.pop()
       this._dIn.pop()
     }

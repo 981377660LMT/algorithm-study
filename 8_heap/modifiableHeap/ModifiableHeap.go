@@ -26,6 +26,7 @@ func main() {
 		mh.Remove(token)
 		fmt.Println(mh.Top().value) // 3
 	}
+
 }
 
 type ModifiableHeap[T any] struct{ wrapper *wrapper[T] }

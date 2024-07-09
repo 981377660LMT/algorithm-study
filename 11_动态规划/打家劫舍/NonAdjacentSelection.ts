@@ -46,7 +46,10 @@ class NonAdjacentSelection {
 
     const pairs: { add: number; index: number }[] = Array(n)
     for (let i = 0; i < n; i++) pairs[i] = { add: val[i + 1], index: i + 1 }
-    const pq = new Heap<{ add: number; index: number }>((a, b) => b.add - a.add, pairs)
+    const pq = new Heap<{ add: number; index: number }>({
+      less: (a, b) => b.add < a.add,
+      data: pairs
+    })
 
     const res: number[] = [0]
     while (pq.size) {
