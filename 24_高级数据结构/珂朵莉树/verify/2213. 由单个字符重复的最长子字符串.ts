@@ -16,7 +16,7 @@ function longestRepeating(s: string, queryCharacters: string, queryIndices: numb
   const res = Array(q).fill(1)
 
   const odt = new ODT(n, -1) // !珂朵莉树维护区间字符类型
-  const lens = new ErasableHeap<number>((a, b) => b - a) // !有序容器维护每个连续段的长度
+  const lens = new ErasableHeap<number>((a, b) => a > b) // !有序容器维护每个连续段的长度
   enumerateGroup(s, (group, start, end) => {
     const value = group[0].charCodeAt(0) - 97
     odt.set(start, end, value)
@@ -36,7 +36,7 @@ function longestRepeating(s: string, queryCharacters: string, queryIndices: numb
     const first = leftSeg ? leftSeg[0] : 0
     const last = rightSeg ? rightSeg[1] : n
     odt.enumerateRange(first, last, (start, end, value) => {
-      if (value !== -1) lens.discard(end - start)
+      if (value !== -1) lens.remove(end - start)
     })
 
     odt.set(pos, pos + 1, target)
@@ -58,10 +58,9 @@ const res = longestRepeating(
   'mrbkgpioaeypvvvwnlegkjkhxgilqlzwmnusspcrqiaapkzljfodokdosufidsxfbygmnaxhsvmejdmcpqhbghtkoyzwgzgt',
   'csfiuruhfmxsdeiftbjaopdxndjfalmubseikqotnrisayzrlwgnsmqqavetaaapsifyjcernvxbpgbmnffuwaaruy',
   [
-    14, 43, 39, 65, 4, 15, 80, 55, 24, 51, 91, 41, 29, 48, 41, 74, 4, 49, 28, 1, 28, 75, 57, 72, 61,
-    0, 45, 43, 19, 6, 28, 87, 47, 27, 85, 73, 34, 26, 84, 47, 55, 34, 34, 48, 79, 23, 3, 11, 44, 2,
-    61, 68, 44, 92, 51, 13, 32, 86, 41, 23, 59, 73, 6, 12, 79, 35, 5, 24, 6, 5, 32, 52, 75, 76, 80,
-    4, 83, 41, 77, 57, 52, 88, 86, 21, 6, 48, 9, 61, 50, 48
+    14, 43, 39, 65, 4, 15, 80, 55, 24, 51, 91, 41, 29, 48, 41, 74, 4, 49, 28, 1, 28, 75, 57, 72, 61, 0, 45, 43, 19, 6, 28, 87, 47, 27, 85, 73, 34, 26,
+    84, 47, 55, 34, 34, 48, 79, 23, 3, 11, 44, 2, 61, 68, 44, 92, 51, 13, 32, 86, 41, 23, 59, 73, 6, 12, 79, 35, 5, 24, 6, 5, 32, 52, 75, 76, 80, 4,
+    83, 41, 77, 57, 52, 88, 86, 21, 6, 48, 9, 61, 50, 48
   ]
 )
 console.log(res)

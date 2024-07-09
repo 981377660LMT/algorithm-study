@@ -9,7 +9,7 @@ import { ODT } from '../ODT-fastset'
  */
 class LongestRepeating<T> {
   private static readonly _NONE: any = Symbol('NONE')
-  private readonly _lens = new ErasableHeap<number>((a, b) => b - a)
+  private readonly _lens = new ErasableHeap<number>((a, b) => a > b)
   private readonly _n: number
   private readonly _odt: ODT<T>
 
@@ -54,7 +54,7 @@ class LongestRepeating<T> {
     const first = leftSeg ? leftSeg[0] : 0
     const last = rightSeg ? rightSeg[1] : this._n
     this._odt.enumerateRange(first, last, (s, e) => {
-      this._lens.discard(e - s)
+      this._lens.remove(e - s)
     })
     this._odt.set(start, end, value)
     this._odt.enumerateRange(first, last, (s, e) => {
@@ -69,7 +69,7 @@ class LongestRepeating<T> {
     const first = leftSeg ? leftSeg[0] : 0
     const last = rightSeg ? rightSeg[1] : this._n
     this._odt.enumerateRange(first, last, (s, e) => {
-      this._lens.discard(e - s)
+      this._lens.remove(e - s)
     })
     this._odt.set(index, index + 1, value)
     this._odt.enumerateRange(first, last, (s, e) => {

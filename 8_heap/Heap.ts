@@ -5,12 +5,18 @@
 // 注意堆的索引从0开始，而线段树的索引从1开始
 // 堆:root (root<<1)+1 (root<<1)+2
 // 线段树: root root<<1 root<<1|1
+//
+// !1.比较器最好用less，而不是compare，因为less更块.
+// n=2e7 nlogn
+// less: 830ms
+// compare: 900ms
+// !2.更快的写法是不用class, 直接用函数.
+// class: 830ms
+// function: 800ms
 
 import assert from 'assert'
 
-type Comparator<T> = (a: T, b: T) => number
-
-class Heap<E = number> {
+class Heap<T> {
   /**
    * 破坏性地合并两个堆，返回合并后的堆.采用启发式合并.
    */
@@ -20,119 +26,119 @@ class Heap<E = number> {
       heap1 = heap2
       heap2 = tmp
     }
-    for (let i = 0; i < heap2.size; i++) heap1.push(heap2._heap[i])
+    for (let i = 0; i < heap2.size; i++) heap1.push(heap2._data[i])
     return heap1
   }
 
-  private _heap: E[]
-  private readonly _comparator: Comparator<E>
+  private readonly _data: T[]
+  private readonly _less: (a: T, b: T) => boolean
 
-  constructor()
-  constructor(array: E[])
-  constructor(comparator: Comparator<E>)
-  constructor(array: E[], comparator: Comparator<E>)
-  constructor(comparator: Comparator<E>, array: E[])
-  constructor(arrayOrComparator1?: E[] | Comparator<E>, arrayOrComparator2?: E[] | Comparator<E>) {
-    let defaultArray: E[] = []
-    let defaultComparator = (a: E, b: E) => (a as unknown as number) - (b as unknown as number)
-
-    if (arrayOrComparator1) {
-      if (Array.isArray(arrayOrComparator1)) {
-        defaultArray = arrayOrComparator1
-      } else {
-        defaultComparator = arrayOrComparator1
-      }
-    }
-
-    if (arrayOrComparator2) {
-      if (Array.isArray(arrayOrComparator2)) {
-        defaultArray = arrayOrComparator2
-      } else {
-        defaultComparator = arrayOrComparator2
-      }
-    }
-
-    this._comparator = defaultComparator
-    this._heap = defaultArray
-    if (this._heap.length > 1) this._heapify()
+  constructor({ data, less }: { data: T[]; less: (a: T, b: T) => boolean }) {
+    this._data = data.slice()
+    this._less = less
+    if (this._data.length > 1) this._heapify()
   }
 
-  push(value: E): void {
-    this._heap.push(value)
-    this._pushUp(this._heap.length - 1)
+  push(value: T): void {
+    this._data.push(value)
+    this._up(this._data.length - 1)
   }
 
-  pop(): E | undefined {
-    if (this._heap.length <= 1) return this._heap.pop()
-    const res = this._heap[0]
-    this._heap[0] = this._heap.pop()!
-    this._pushDown(0)
-    return res
+  pop(): T {
+    if (!this._data.length) throw new Error('pop from an empty heap')
+    const n = this._data.length - 1
+    this._swap(0, n)
+    this._down(0, n)
+    return this._data.pop()!
   }
 
-  peek(): E | undefined {
-    return this._heap[0]
-  }
-
-  clear(): void {
-    this._heap = []
-  }
-
-  get size(): number {
-    return this._heap.length
+  top(): T {
+    if (!this._data.length) throw new Error('top from an empty heap')
+    return this._data[0]
   }
 
   /**
-   * 堆化的复杂度是 `O(n)`
+   * 弹出并返回堆顶，同时将 value 入堆.
+   * `pop` + `push` 的快速版本.
    */
+  replace(value: T): T {
+    if (!this._data.length) throw new Error('replace from an empty heap')
+    const top = this._data[0]
+    this._data[0] = value
+    this._fix(0)
+    return top
+  }
+
+  /**
+   * 先将 value 入堆，然后弹出并返回堆顶.
+   * `push` + `pop` 的快速版本.
+   */
+  pushPop(value: T): T {
+    if (this._data.length && this._less(this._data[0], value)) {
+      const tmp = this._data[0]
+      this._data[0] = value
+      value = tmp
+      this._fix(0)
+    }
+    return value
+  }
+
+  clear(): void {
+    this._data.length = 0
+  }
+
+  get size(): number {
+    return this._data.length
+  }
+
   private _heapify(): void {
-    const n = this._heap.length
-    for (let i = (n >> 1) - 1; ~i; i--) {
-      this._pushDown(i)
+    const n = this._data.length
+    for (let i = (n >>> 1) - 1; ~i; i--) {
+      this._down(i, n)
     }
   }
 
-  private _pushUp(root: number): void {
-    let parent = (root - 1) >> 1
-    while (parent >= 0 && this._comparator(this._heap[root], this._heap[parent]) < 0) {
-      const tmp = this._heap[root]
-      this._heap[root] = this._heap[parent]
-      this._heap[parent] = tmp
-      root = parent
-      parent = (parent - 1) >> 1
+  private _up(j: number): void {
+    const { _data, _less } = this
+    while (j) {
+      const i = (j - 1) >>> 1 // parent
+      if (i === j || !_less(_data[j], _data[i])) break
+      this._swap(i, j)
+      j = i
     }
   }
 
-  private _pushDown(root: number): void {
-    // 还有孩子，即不是叶子节点
-    const n = this._heap.length
-    for (let left = (root << 1) | 1; left < n; left = (root << 1) | 1) {
-      const right = left + 1
-      let minIndex = root
-
-      if (this._comparator(this._heap[left], this._heap[minIndex]) < 0) {
-        minIndex = left
-      }
-
-      if (right < n && this._comparator(this._heap[right], this._heap[minIndex]) < 0) {
-        minIndex = right
-      }
-
-      if (minIndex === root) return
-
-      const tmp = this._heap[root]
-      this._heap[root] = this._heap[minIndex]
-      this._heap[minIndex] = tmp
-
-      root = minIndex
+  private _down(i0: number, n: number): boolean {
+    const { _data, _less } = this
+    let i = i0
+    while (true) {
+      const j1 = (i << 1) | 1
+      if (j1 >= n || j1 < 0) break
+      let j = j1
+      const j2 = j1 + 1
+      if (j2 < n && _less(_data[j2], _data[j1])) j = j2
+      if (!_less(_data[j], _data[i])) break
+      this._swap(i, j)
+      i = j
     }
+    return i > i0
+  }
+
+  private _fix(i: number): void {
+    if (!this._down(i, this._data.length)) this._up(i)
+  }
+
+  private _swap(i: number, j: number): void {
+    const tmp = this._data[i]
+    this._data[i] = this._data[j]
+    this._data[j] = tmp
   }
 }
 
 export { Heap }
 
 if (require.main === module) {
-  const heap = new Heap()
+  const heap = new Heap({ data: [], less: (a: number, b: number) => a < b })
   heap.push(1)
   heap.push(8)
   heap.push(3)
@@ -141,5 +147,15 @@ if (require.main === module) {
   assert.strictEqual(heap.pop(), 3)
   assert.strictEqual(heap.pop(), 5)
   assert.strictEqual(heap.pop(), 8)
-  assert.strictEqual(heap.pop(), undefined)
+
+  const N = 1e7
+  console.time('Heap')
+  const heap2 = new Heap<number>({ data: [], less: (a, b) => a < b })
+  for (let i = 0; i < N; i++) {
+    heap2.push(i)
+  }
+  for (let i = 0; i < N; i++) {
+    heap2.pop()
+  }
+  console.timeEnd('Heap')
 }
