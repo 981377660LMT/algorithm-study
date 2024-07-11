@@ -6,6 +6,7 @@ https://github.com/notes-folder/refactoring
 - `便于理解，便于修改`，是重构这个方法最直白的解释了
 - 伪代码反而是最好的代码，因为它不注重细节，注重业务，便于人们理解，“我不管你怎么实现，我就要这种效果”，几乎没有 bug
 - 好的代码，应该是接近人类语言或者说人的思维，让人能够很顺畅的读懂、去理解代码是去做什么的，怎么做的。`可读性`在某种意义上，是好代码和坏代码的区别。
+- DDD：构建合理的业务模型，如果建模是错的，不能反映客观规律事实，后续就是噩梦
 
 ## 第 1 章 重构，第一个示例
 
@@ -41,13 +42,15 @@ https://github.com/notes-folder/refactoring
 - switch 惊悚现身
   出现 switch、if…else 的时候，需要联想到多台和策略的抽象来替换；
 - 全局数据。（Global Data）(PS：慎用单例模式)
-- 发散式变化（Divergent Change）
-- 霰弹式修改
-- 纯数据类（Data Class）
+- 发散式变化（Divergent Change）、霰弹式修改(shotgun surgery)
+  某个类经常因为不同的原因在不同的方向上发生变化
+  如果每遇到某种变化，你都必须在`许多不同的类内做出许多小修改`
+- **纯数据类（Data Class）**
   类比 DDD 思想，尽可能的让我们的数据类也能拥有行为
   btw，`纯数据类用 type，否则用 interface?`
 - 被拒绝的遗赠（Refused Bequest）
 - 依恋情结（feature envy）
+  函数对某个类的兴趣高过对自己所处类的兴趣
 - 数据泥团（Data Clumps）
   `总是绑在一起出现的数据应该有自己的对象`
   删掉众多数据中的一项。如果这么做，其他数据有没有因而失去意义？如果它们不再有意义，这就是一个明确信号：你应该为它们产生一个新对象
@@ -58,6 +61,10 @@ https://github.com/notes-folder/refactoring
 - 变换函数（Change Preventers）
   如果变换函数返回的本质是原来对象上`添加了更多的信息，用 enrich 命名，新类型也可以套一层rich<T>=T&{...}`。
   如果它生成的是跟原来`完全不同的对象，就用 transform/convert/to 命名`
+- 中间人（Middle Man）
+  如果某个类接口有`一半的函数都委托给其它类，就属于过度委托`
+- 不适当的亲密（Inappropriate Intimacy）
+  两个类关系过于亲密，花费太多时间去探究彼此的 private 成分，此时建议要么合并，要么将共同点提取到一个新类
 
 ## 第 4 章 构筑测试体系
 
@@ -171,17 +178,17 @@ function getPayAmount() {
 - 移除中间人 Remove Middle Man
   **delegating methods 过多时，需要移除(多维表格问题)**
 
-```js
-manager = aPerson.manager
+  ```js
+  manager = aPerson.manager
 
-class Person {
-  get manager() {
-    return this.department.manager
+  class Person {
+    get manager() {
+      return this.department.manager
+    }
   }
-}
 
-manager = aPerson.department.manager
-```
+  manager = aPerson.department.manager
+  ```
 
 - 以委托取代超类 Replace Superclass with Delegate
 - 以委托取代子类 Replace Subclass with Delegate
