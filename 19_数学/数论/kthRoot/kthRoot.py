@@ -66,3 +66,12 @@ if __name__ == "__main__":
     # 1<=k<=1e9
     def solve(k: int) -> int:
         ...
+
+    import sys
+
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
+
+    T = int(input())
+    for _ in range(T):
+        A, K = map(int, input().split())
+        print(floorRoot2(A, K))
