@@ -22,22 +22,31 @@ func main() {
 
 // P5357 【模板】AC 自动机（二次加强版）
 // https://www.luogu.com.cn/problem/P5357
+// G - Count Substring Query
+// https://atcoder.jp/contests/abc362/tasks/abc362_g
 // 分别求出每个模式串在文本串中出现的次数。
 func P5357() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
+	var s string
+	fmt.Fscan(in, &s)
 	var n int32
 	fmt.Fscan(in, &n)
 	words := make([]string, n)
 	for i := int32(0); i < n; i++ {
 		fmt.Fscan(in, &words[i])
 	}
-	var s string
-	fmt.Fscan(in, &s)
 
 	sa := GetSa32(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+
+	// f := UseLookupAll(int32(len(s)), func(i int32) int32 { return int32(s[i]) }, sa)
+	// for _, word := range words {
+	// 	start, end := f(int32(len(word)), func(i int32) int32 { return int32(word[i]) })
+	// 	fmt.Fprintln(out, end-start)
+	// }
+
 	sBytes := []byte(s)
 	for _, word := range words {
 		start, end := LookupAllBytes(sBytes, sa, []byte(word))
@@ -74,7 +83,7 @@ func GetSa32(n int32, f func(i int32) int32) (sa []int32) {
 
 // 返回s在原串中所有匹配的位置(无序).
 // O(len(s)*log(n))+len(result).
-type LookupAllFunc func(m int32, shorter func(i int32) int32) (result []int32)
+type LookupAllFunc func(m int32, shorter func(i int32) int32) (saStart, saEnd int32)
 
 // sa: 可选参数.
 func UseLookupAll(n int32, longer func(i int32) int32, sa []int32) LookupAllFunc {
@@ -131,9 +140,9 @@ func UseLookupAll(n int32, longer func(i int32) int32, sa []int32) LookupAllFunc
 	for i := int32(0); i < n; i++ {
 		longerOrds[i] = longer(i)
 	}
-	f := func(m int32, shorter func(i int32) int32) []int32 {
+	f := func(m int32, shorter func(i int32) int32) (saStart, saEnd int32) {
 		if n == 0 || m == 0 {
-			return nil
+			return 0, 0
 		}
 		target := make([]int32, m)
 		for i := int32(0); i < m; i++ {
@@ -142,7 +151,7 @@ func UseLookupAll(n int32, longer func(i int32) int32, sa []int32) LookupAllFunc
 		sa, cur := sa, longerOrds
 		i := sort.Search(len(sa), func(i int) bool { return compareSlice32(cur[sa[i]:], target) >= 0 })
 		j := i + sort.Search(len(sa)-i, func(j int) bool { return !hasPrefix(cur[sa[i+j]:], target) })
-		return append(sa[:0:0], sa[i:j]...)
+		return int32(i), int32(j)
 	}
 
 	return f
@@ -152,9 +161,11 @@ func UseLookupAll(n int32, longer func(i int32) int32, sa []int32) LookupAllFunc
 // https://leetcode.cn/problems/multi-search-lcci/description/
 func multiSearch(big string, smalls []string) [][]int {
 	res := make([][]int, len(smalls))
-	f := UseLookupAll(int32(len(big)), func(i int32) int32 { return int32(big[i]) }, nil)
+	sa := GetSa32(int32(len(big)), func(i int32) int32 { return int32(big[i]) })
+	f := UseLookupAll(int32(len(big)), func(i int32) int32 { return int32(big[i]) }, sa)
 	for i, small := range smalls {
-		indexes := f(int32(len(small)), func(i int32) int32 { return int32(small[i]) })
+		start, end := f(int32(len(small)), func(i int32) int32 { return int32(small[i]) })
+		indexes := append(sa[:0:0], sa[start:end]...)
 		sort.Slice(indexes, func(i, j int) bool { return indexes[i] < indexes[j] })
 		res[i] = make([]int, len(indexes))
 		for j, idx := range indexes {
