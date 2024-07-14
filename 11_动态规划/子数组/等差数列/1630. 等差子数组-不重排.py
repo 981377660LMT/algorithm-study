@@ -1,6 +1,7 @@
-from typing import List
-
 # 预处理leftMost数组
+# 区间等差数列
+
+from typing import List
 
 
 class Solution:
