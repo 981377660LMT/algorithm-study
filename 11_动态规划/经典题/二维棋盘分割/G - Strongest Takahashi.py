@@ -1,3 +1,4 @@
+# https://atcoder.jp/contests/abc233/tasks/abc233_g
 # 简要题意:给定一张NxN (1<N <50）网格，
 # 里面若干个格子有障碍'#'。
 # 每次可以选择一个D×D的区域然后消耗D点体力将其中的障碍消去。
