@@ -1,9 +1,17 @@
-# 给定一个非负整数，你至多可以交换一次数字中的任意两位。
-# 返回你能得到的最大值。
-
-# 给定数字的范围是 [0, 1e8]
+# 670. 最大交换
 # 最大交换
 # 给一串数字，最多交换其中两位，求最大值
+# https://leetcode.cn/problems/maximum-swap/
+# 交换数位
+# 给定一个非负整数，你至多可以交换一次数字中的任意两位。
+# 返回你能得到的最大值。
+# 给定数字的范围是 [0, 1e8]
+#
+# 交换相邻两位：
+# 100352. 交换后字典序最小的字符串
+# https://leetcode.cn/problems/lexicographically-smallest-string-after-a-swap/description/
+
+
 class Solution:
     def maximumSwap(self, num: int) -> int:
         """

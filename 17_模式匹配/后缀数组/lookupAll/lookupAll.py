@@ -1,6 +1,7 @@
 # IndexOfAllSa/IndexOfAllMultiString/Lookup/LookupAll
 
 
+from bisect import bisect_left
 from typing import Any, List, Sequence, Tuple
 
 
@@ -12,37 +13,12 @@ def lookupAll(
     O(len(s)*log(n))+len(result).
     """
 
-    if len(longer) == 0 or len(shorter) == 0 or len(longer) < len(shorter):
+    n, m = len(longer), len(shorter)
+    if n == 0 or m == 0 or n < m:
         return 0, 0
-
-    def check1(mid: int) -> bool:
-        return longer[longerSa[mid] :] >= shorter  # type: ignore
-
-    def check2(mid: int) -> bool:
-        ptr1 = longerSa[mid + left1]
-        n1, n2 = len(longer) - ptr1, len(shorter)
-        if n1 < n2:
-            return True
-        return longer[ptr1 : ptr1 + n2] != shorter
-
-    n = len(longerSa)
-    left1, right1 = 0, n - 1
-    while left1 <= right1:
-        mid = (left1 + right1) // 2
-        if check1(mid):
-            right1 = mid - 1
-        else:
-            left1 = mid + 1
-
-    left2, right2 = 0, n - left1 - 1
-    while left2 <= right2:
-        mid = (left2 + right2) // 2
-        if check2(mid):
-            right2 = mid - 1
-        else:
-            left2 = mid + 1
-
-    return left1, left1 + left2
+    start = bisect_left(longerSa, True, key=lambda x: longer[x : x + m] >= shorter)  # type: ignore
+    end = bisect_left(longerSa, True, key=lambda x: longer[x : x + m] > shorter)  # type: ignore
+    return start, end
 
 
 def getSA(ords: Sequence[int]) -> List[int]:
@@ -124,17 +100,20 @@ if __name__ == "__main__":
 
     # P5357 【模板】AC 自动机（二次加强版）
     # https://www.luogu.com.cn/problem/P5357
+    # G - Count Substring Query
+    # https://atcoder.jp/contests/abc362/tasks/abc362_g
     # 分别求出每个模式串在文本串中出现的次数。
-    def p5357() -> None:
+
+    def abc362_g() -> None:
         import sys
 
         input = lambda: sys.stdin.readline().rstrip("\r\n")
+        s = input()
         n = int(input())
         words = [input() for _ in range(n)]
-        s = input()
         sa = getSA([ord(c) for c in s])
         for word in words:
             start, end = lookupAll(s, sa, word)
             print(end - start)
 
-    p5357()
+    abc362_g()

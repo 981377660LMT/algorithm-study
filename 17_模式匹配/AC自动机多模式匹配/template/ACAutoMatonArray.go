@@ -119,8 +119,11 @@ func main() {
 	// P3808()
 	// P3966()
 	// P4052()
+
 	// P5357()
-	P5357_link()
+	// P5357_link()
+	P5357_dp()
+
 	// P7456()
 
 	// CF808G()
@@ -671,6 +674,40 @@ func P5357_link() {
 	}
 }
 
+// !推荐做法.
+func P5357_dp() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	words := make([]string, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &words[i])
+	}
+	var s string
+	fmt.Fscan(in, &s)
+
+	acm := NewACAutoMatonArray(26, 'a')
+	for _, word := range words {
+		acm.AddString(word)
+	}
+	acm.BuildSuffixLink(true)
+
+	counter := make([]int32, acm.Size())
+	pos := int32(0)
+	for _, char := range s {
+		pos = acm.Move(pos, char)
+		counter[pos]++
+	}
+	acm.DpReverse(func(link, cur int32) { counter[link] += counter[cur] })
+
+	for _, v := range acm.WordPos {
+		fmt.Fprintln(out, counter[v])
+	}
+}
+
 // P7456 [CERC2018] The ABCD Murderer (结合线段树优化DP)
 // n 个模式串和一个文本串，问要拼成文本串最少需要几个模式串。其中模式串可重叠。
 //
@@ -1092,9 +1129,19 @@ func (trie *ACAutoMatonArray) GetIndexes() [][]int32 {
 	return res
 }
 
-// 按照拓扑序进行转移(EnumerateFail).
-func (trie *ACAutoMatonArray) Dp(f func(from, to int32)) {
+// 按照拓扑序自顶向下进行转移(EnumerateFail).
+func (trie *ACAutoMatonArray) Dp(f func(link, cur int32)) {
 	for _, v := range trie.BfsOrder {
+		if v != 0 {
+			f(trie.link[v], v)
+		}
+	}
+}
+
+// 按照拓扑序逆序自底向上进行转移(EnumerateFailReverse).
+func (trie *ACAutoMatonArray) DpReverse(f func(link, cur int32)) {
+	for i := len(trie.BfsOrder) - 1; i >= 0; i-- {
+		v := trie.BfsOrder[i]
 		if v != 0 {
 			f(trie.link[v], v)
 		}

@@ -1,3 +1,5 @@
+# 3081. 替换字符串中的问号使分数最小
+# https://leetcode.cn/problems/replace-question-marks-in-string-to-minimize-its-value/
 # 给你一个字符串 s 。s[i] 要么是小写英文字母，要么是问号 '?' 。
 # 对于长度为 m 且 只 含有小写英文字母的字符串 t .
 # !我们定义函数 cost(i) 为下标 i 之前（也就是范围 [0, i - 1] 中）出现过与 t[i] 相同 字符出现的次数。

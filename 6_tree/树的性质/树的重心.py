@@ -6,6 +6,10 @@ AdjMap = Mapping[int, Iterable[int]]
 Tree = Union[AdjList, AdjMap]
 
 
+def max2(a: int, b: int) -> int:
+    return a if a > b else b
+
+
 def getCenter(n: int, tree: "Tree", root=0) -> List[int]:
     """求重心"""
 
@@ -16,8 +20,8 @@ def getCenter(n: int, tree: "Tree", root=0) -> List[int]:
                 continue
             dfs(next, cur)
             subsize[cur] += subsize[next]
-            weight[cur] = max(weight[cur], subsize[next])
-        weight[cur] = max(weight[cur], n - subsize[cur])
+            weight[cur] = max2(weight[cur], subsize[next])
+        weight[cur] = max2(weight[cur], n - subsize[cur])
         if weight[cur] <= n / 2:
             res.append(cur)
 

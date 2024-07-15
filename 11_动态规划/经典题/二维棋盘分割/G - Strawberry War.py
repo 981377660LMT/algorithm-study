@@ -1,3 +1,6 @@
+# https://atcoder.jp/contests/abc298/tasks/abc298_g
+# TODO
+
 # 長方形のケーキがあります。このケーキは
 # H 行
 # W 列に並ぶ区画に分かれていて、上から

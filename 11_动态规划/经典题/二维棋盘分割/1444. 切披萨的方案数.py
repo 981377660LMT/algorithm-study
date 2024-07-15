@@ -1,78 +1,79 @@
-from typing import List
-from functools import lru_cache
-
+# 1444. 切披萨的方案数
+# https://leetcode.cn/problems/number-of-ways-of-cutting-a-pizza/description/
+# 切披萨的每一刀，先要选择是向垂直还是水平方向切
+# 你需要切披萨 k-1 次，得到 k 块披萨并送给别人。
+# !如果垂直地切披萨，那么需要把左边的部分送给一个人，如果水平地切，那么需要把上面的部分送给一个人.
+# 请你返回确保每一块披萨包含 至少 一个苹果的切披萨方案数。由于答案可能是个很大的数字，请你返回它对 10^9 + 7 取余的结果。
+#
 # 1 <= rows, cols <= 50
 # 1 <= k <= 10
 
-# 切披萨的每一刀，先要选择是向垂直还是水平方向切
-# 你需要切披萨 k-1 次，得到 k 块披萨并送给别人。
-# 请你返回确保每一块披萨包含 至少 一个苹果的切披萨方案数。由于答案可能是个很大的数字，请你返回它对 10^9 + 7 取余的结果。
+from typing import List
+from functools import lru_cache
 
 
 MOD = int(1e9 + 7)
 
 
-class P:
-    def __init__(self, A: List[List[str]]):
-        m, n = len(A), len(A[0])
-
-        preSum = [[0] * (n + 1) for _ in range(m + 1)]
-        for r in range(m):
-            for c in range(n):
-                preSum[r + 1][c + 1] = (
-                    int(A[r][c] == "A") + preSum[r][c + 1] + preSum[r + 1][c] - preSum[r][c]
-                )
-
-        self.preSum = preSum
-
-    def sumRegion(self, r1: int, c1: int, r2: int, c2: int) -> int:
-        """查询sum(A[r1:r2+1, c1:c2+1])的值::
-
-        P.sumRegion(0, 0, 2, 2) # 左上角(0, 0)到右下角(2, 2)的值
-        """
-        if r1 > r2 or c1 > c2:
-            return 0
-        return (
-            self.preSum[r2 + 1][c2 + 1]
-            - self.preSum[r2 + 1][c1]
-            - self.preSum[r1][c2 + 1]
-            + self.preSum[r1][c1]
-        )
-
-
 class Solution:
     def ways(self, pizza: List[str], k: int) -> int:
-        """你需要切披萨 k-1 次，得到 k 块披萨并送给别人。
-
+        """
+        你需要切披萨 k-1 次，得到 k 块披萨并送给别人。
         请你返回确保每一块披萨包含 至少 一个苹果的切披萨方案数
         """
 
         @lru_cache(None)
-        def dfs(sr: int, sc: int, k: int) -> int:
-            """左上角(x, y)到右下角(row-1, col-1)能否再切k次"""
-            if k == 0:
-                return int(M.sumRegion(sr, sc, ROW - 1, COL - 1) > 0)
+        def dfs(row: int, col: int, remain: int) -> int:
+            """左上角(row,col)到右下角(ROW-1,COL-1)的披萨,还剩remain刀的切法"""
+            if remain <= 0:
+                return 1 if P.sumRegion(row, ROW - 1, col, COL - 1) > 0 else 0
 
             res = 0
 
-            # !下一块左上角的位置
-            for r in range(sr + 1, ROW):
-                if M.sumRegion(sr, sc, r - 1, COL - 1) > 0:
-                    res += dfs(r, sc, k - 1)
-                    res %= MOD
+            # !横着切
+            for r in range(row, ROW):
+                if P.sumRegion(row, r, col, COL - 1) > 0:
+                    res += dfs(r + 1, col, remain - 1)
+            # !竖着切
+            for c in range(col, COL):
+                if P.sumRegion(row, ROW - 1, col, c) > 0:
+                    res += dfs(row, c + 1, remain - 1)
 
-            for c in range(sc + 1, COL):
-                if M.sumRegion(sr, sc, ROW - 1, c - 1) > 0:
-                    res += dfs(sr, c, k - 1)
-                    res %= MOD
+            return res % MOD
 
-            return res
-
-        M = P([list(row) for row in pizza])
+        P = PreSum2DDense([[1 if v == "A" else 0 for v in list(row)] for row in pizza])
         ROW, COL = len(pizza), len(pizza[0])
         return dfs(0, 0, k - 1)
 
 
-print(Solution().ways(pizza=["A..", "AAA", "..."], k=3))
-# 输出：3
-# 解释：上图展示了三种切披萨的方案。注意每一块披萨都至少包含一个苹果。
+class PreSum2DDense:
+    """二维前缀和模板(矩阵不可变)"""
+
+    __slots__ = "_preSum"
+
+    def __init__(self, mat: List[List[int]]):
+        ROW, COL = len(mat), len(mat[0])
+        preSum = [[0] * (COL + 1) for _ in range(ROW + 1)]
+        for r in range(ROW):
+            tmpSum0, tmpSum1 = preSum[r], preSum[r + 1]
+            tmpM = mat[r]
+            for c in range(COL):
+                tmpSum1[c + 1] = tmpM[c] + tmpSum0[c + 1] + tmpSum1[c] - tmpSum0[c]
+        self._preSum = preSum
+
+    def sumRegion(self, x1: int, x2: int, y1: int, y2: int) -> int:
+        """查询sum(A[x1:x2+1, y1:y2+1])的值(包含边界)."""
+        if x1 > x2 or y1 > y2:
+            return 0
+        return (
+            self._preSum[x2 + 1][y2 + 1]
+            - self._preSum[x2 + 1][y1]
+            - self._preSum[x1][y2 + 1]
+            + self._preSum[x1][y1]
+        )
+
+
+if __name__ == "__main__":
+    # assert Solution().ways(pizza=["A..", "AAA", "..."], k=3) == 3
+    print(Solution().ways(pizza=[".A..A", "A.A..", "A.AA.", "AAAA.", "A.AA."], k=5))
+    assert Solution().ways(pizza=[".A..A", "A.A..", "A.AA.", "AAAA.", "A.AA."], k=5) == 153

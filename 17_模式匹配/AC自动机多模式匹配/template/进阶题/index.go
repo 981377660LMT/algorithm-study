@@ -1309,6 +1309,16 @@ func (trie *ACAutoMatonArray) Dp(f func(from, to int)) {
 	}
 }
 
+// 按照拓扑序逆序自底向上进行转移(EnumerateFailReverse).
+func (trie *ACAutoMatonArray) DpReverse(f func(link, cur int)) {
+	for i := len(trie.BfsOrder) - 1; i >= 0; i-- {
+		v := trie.BfsOrder[i]
+		if v != 0 {
+			f(int(trie.link[v]), int(v))
+		}
+	}
+}
+
 func (trie *ACAutoMatonArray) BuildFailTree() [][]int {
 	res := make([][]int, trie.Size())
 	trie.Dp(func(pre, cur int) {

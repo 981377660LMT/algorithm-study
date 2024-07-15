@@ -1,4 +1,4 @@
-# 2136. 全部开花的最早一天 (机器A串行，机器B并行)
+# 2136. 全部开花的最早一天 (机器A串行，机器B并行/种花问题)
 # 播种后，花可以自动生长.
 # https://leetcode-cn.com/problems/earliest-possible-day-of-full-bloom/comments/1323899
 # https://www.luogu.com.cn/problem/P1248
