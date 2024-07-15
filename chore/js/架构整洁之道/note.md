@@ -32,8 +32,130 @@ https://github.com/leewaiho/Clean-Architecture-zh/blob/master/docs/part1.md
 直到今天，我们也一共只有三个编程范式，而且未来几乎不可能再出现新的：
 
 - 结构化编程（structured programming）
+
+  Structured programming imposes discipline on direct transfer of control.
+  结构化编程对程序`控制权的直接转移`进行了限制和规范。
+  限制了 goto 语句
+
 - 面向对象编程（object-oriented programming）
+
+  Object-oriented programming imposes discipline on indirect transfer of control.
+  面向对象编程对程序`控制权的间接转移`进行了限制和规范。
+  限制了函数指针
+
 - 函数式编程（functional programming）
+  Functional programming imposes discipline upon assignment.
+  函数式编程对程序中的`赋值`进行了限制和规范
+  限制了赋值语句
+
+多态是我们跨越架构边界的手段，函数式编程是我们规范和限制数据存放位置与访问权限的手段，结构化编程则是各模块的算法实现基础
+Notice how well those three align with the three big concerns of architecture: function, separation of components, and data management.
+这和软件架构的三大关注重点不谋而合：`功能性、组件独立性以及数据管理`
+
+## Chap4. STRUCTURED PROGRAMMING 结构化编程
+
+All programs can be constructed from just three structures: `sequence, selection, and iteration`
+人们可以用顺序结构、分支结构、循环结构这三种结构构造出任何程序
+
+## Chap5. OBJECT-ORIENTED PROGRAMMING 面向对象编程
+
+多态其实不过就是函数指针的一种应用：
+在 C++中，类中的每个虚函数（virtual function）的地址都被记录在一个名叫 vtable 的数据结构里。我们对虚函数的每次调用都要先查询这个表，其衍生类的构造函数负责将该衍生类的虚函数地址加载到整个对象的 vtable 中
+
+## Chap6. FUNCTIONAL PROGRAMMING 函数式编程
+
+**一个架构设计良好的应用程序应该将状态修改的部分和不需要修改状态的部分隔离成单独的组件，然后用合适的机制来保护可变量**
+
+## Part3. DESIGN PRINCIPLES 设计原则
+
+## Chap7. SRP: THE SINGLE RESPONSIBILITY PRINCIPLE SRP：单一职责原则
+
+任何一个软件模块都应该只对一个用户（User）或系统利益相关者（Stakeholder）负责。
+任何一个软件模块都应该只对某一类行为者(actor)负责。
+
+## Chap8. OCP: THE OPEN-CLOSED PRINCIPLE OCP：开闭原则
+
+## Chap9. LSP: THE LISKOV SUBSTITUTION PRINCIPLE LSP：里氏替换原则
+
+## Chap10. ISP: THE INTERFACE SEGREGATION PRINCIPLE ISP：接口隔离原则
+
+## Chap11. DIP: THE DEPENDENCY INVERSION PRINCIPLE DIP：依赖反转原则
+
+- 在源代码层次的依赖关系中引用抽象类型
+- 反例：java String 类，原因：
+  - 软件系统在实际构造中不可避免地需要依赖到一些具体实现
+  - String 类本身是非常稳定的
+- 在应用 DIP 时，我们也`不必考虑稳定的操作系统或者平台设施，因为这些系统接口很少会有变动`
+  ` 我们主要应该关注的是软件系统内部那些会经常变动的（volatile）具体实现模块`，这些模块是不停开发的，也就会经常出现变更。
+
+## Part4. COMPONENT PRINCIPLES 组件构建原则
+
+## Chap12. COMPONENTS 组件
+
+组件是软件的部署单元，是整个软件系统在部署过程中可以独立完成部署的最小实体
+
+## Chap13. COMPONENT COHESION 组件聚合
+
+The granule of reuse is the granule of release.
+软件复用的最小粒度应等同于其发布的最小粒度
+
+## Chap14. COMPONENT COUPLING 组件耦合
+
+- 无依赖环原则
+- 每周构建
+- 打破循环依赖
+  1. 依赖倒置原则(DIP)：调用接口
+  2. 抽离公共依赖
+- 稳定性指标
+  根据入向依赖和出向依赖的数量来判断组件的稳定性
+- **并不是所有组件都应该是稳定的**
+  取决于抽象程度
+- **一个组件的抽象化程度应该与其稳定性保持一致**
+  衡量抽象化程度：组件中类的数量/组件中抽象类和接口的数量
+
+## Part5. ARCHITECTURE 软件架构
+
+## Chap15. WHAT IS ARCHITECTURE? 什么是软件架构
+
+## Chap16. INDEPENDENCE 独立性
+
+## Chap17. BOUNDARIES: DRAWING LINES 划分边界
+
+## Chap18. BOUNDARY ANATOMY 边界剖析
+
+## Chap19. POLICY AND LEVEL 策略与层次
+
+## Chap20. BUSINESS RULES 业务逻辑
+
+## Chap21. SCREAMING ARCHITECTURE 尖叫的软件架构
+
+## Chap22. THE CLEAN ARCHITECTURE 整洁架构
+
+## Chap23. PRESENTERS AND HUMBLE OBJECTS 展示器和谦卑对象
+
+## Chap24. PARTIAL BOUNDARIES 不完全边界
+
+## Chap25. LAYERS AND BOUNDARIES 层次与边界
+
+## Chap26. THE MAIN COMPONENT Main 组件
+
+## Chap27. SERVICES: GREAT AND SMALL 服务：宏观与微观
+
+## Chap28. THE TEST BOUNDARY 测试边界
+
+## Chap29. CLEAN EMBEDDED ARCHITECTURE 整洁的嵌入式架构
+
+## Part6. DETAILS 实现细节
+
+## Chap30. THE DATABASE IS A DETAIL 数据库只是实现细节
+
+## Chap31. THE WEB IS A DETAIL Web 是实现细节
+
+## Chap32. FRAMEWORKS ARE DETAILS 应用程序框架是实现细节
+
+## Chap33. CASE STUDY: VIDEO SALES 案例分析：视频销售网站
+
+## Chap34. THE MISSING CHAPTER 拾遗
 
 ---
 
