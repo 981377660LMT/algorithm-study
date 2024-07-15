@@ -14,3 +14,5 @@ var checkPerfectNumber = function (num: number): boolean {
 }
 
 console.log(checkPerfectNumber(28))
+
+export {}
