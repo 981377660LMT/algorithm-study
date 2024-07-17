@@ -7,6 +7,8 @@ https://github.com/leewaiho/Clean-Architecture-zh/blob/master/docs/part1.md
 
 ## Part1. INTRODUCTION 概述
 
+软件架构就是“用最小的人力成本来满足构建和维护系统的需求”
+
 ## Chap1. WHAT IS DESIGN AND ARCHITECTURE? 设计与架构到底是什么
 
 设计（Design）：
@@ -31,6 +33,8 @@ https://github.com/leewaiho/Clean-Architecture-zh/blob/master/docs/part1.md
 ## Part2. STARTING WITH THE BRICKS: PROGRAMMING PARADIGMS 从基础构件开始：编程范式
 
 ## Chap3. PARADIGM OVERVIEW 编程范式总览
+
+**编程范式对程序员的写法灵活性进行了限制。**
 
 直到今天，我们也一共只有三个编程范式，而且未来几乎不可能再出现新的：
 
@@ -91,6 +95,7 @@ All programs can be constructed from just three structures: `sequence, selection
 ## Chap12. COMPONENTS 组件
 
 组件是软件的部署单元，是整个软件系统在部署过程中可以独立完成部署的最小实体
+**组件化是插件架构的基础**
 
 ## Chap13. COMPONENT COHESION 组件聚合
 
@@ -117,14 +122,19 @@ The granule of reuse is the granule of release.
 
 ## Chap15. WHAT IS ARCHITECTURE? 什么是软件架构
 
+要坚定地在一线写代码，架构师应该是解决问题最强的那个人而不是高高在上指点江山的人(不贴合业务也设计不出啥好架构)
+
 - 软件架构师自身需要是程序员，并且必须一直坚持做一线程序员，绝对不要听从那些说应该让软件架构师从代码中解放出来以专心解决高阶问题的伪建议。也许软件架构师生产的代码量不是最多的，但是他们必须不停地承接编程任务。如果不亲身承受因系统设计而带来的麻烦，`就体会不到设计不佳所带来的痛苦，接着就会逐渐迷失正确的设计方向`
   - 用例(Use Cases)
     架构必须能支持其自身的设计意图，让系统的行为意图在架构层面上可见。
   - 开发(Development)
+    方便开发
   - 部署(Deployment)
     一键式的轻松部署
   - 运行(Operation)
+    揭示系统运行：好的架构可以使开发人员对系统的运行过程一目了然
   - 维护(Maintenance)
+    降低探秘（确定修改位置）、风险（确定影响范围）成本
 
 ## Chap16. INDEPENDENCE 独立性
 
@@ -138,10 +148,12 @@ The granule of reuse is the granule of release.
 
 ## Chap19. POLICY AND LEVEL 策略与层次
 
-## Chap20. BUSINESS RULES 业务逻辑
+## Chap20. BUSINESS RULES 业务逻辑————DDD 思想的来源
 
 Business rules are rules or procedures that make or save the business money
 业务逻辑是一个软件系统存在的意义，它们属于核心功能，是系统用来赚钱或省钱的那部分代码，是整个系统中的皇冠明珠
+关键业务逻辑和关键业务数据是紧密相关的，所以它们很适合被放在同一个对象中处理，称为业务实体（Entity）。
+`业务逻辑应该是系统中最独立、复用性最高的代码`， 不掺杂用户界面（比如 httpservletrequest）或者所使用的数据库相关的东西（比如数据 model）。
 
 ## Chap21. SCREAMING ARCHITECTURE 尖叫的软件架构
 
@@ -150,18 +162,19 @@ Business rules are rules or procedures that make or save the business money
 "我看到了一些看起来像是模型的代码——但它们的视图和控制器在哪里？”
 这时你的回答应该是：
 “哦，我们现在先不考虑这些细节问题，回头再来决定应该怎么做。”
+**简单理解就是先实现核心的业务逻辑，最后具体使用 React 框架还是 Vue 框架可以往后推迟，因为核心业务逻辑与框架是解耦的**
 
 ## Chap22. THE CLEAN ARCHITECTURE 整洁架构
 
 ## Chap23. PRESENTERS AND HUMBLE OBJECTS 展示器和谦卑对象
 
-0. 谦卑对象模式最初的设计目的是帮助单元测试的编写者区分容易测试的行为与难以测试的行为，并将它们隔离
+0. 谦卑对象模式最初的设计目的是帮助单元测试的编写者区分容易测试的行为与难以测试的行为，并将它们隔离。难以测试的一组叫谦卑组
 1. PRESENTERS AND VIEWS 展示器与视图
    利用谦卑对象模式将 GUI 的这两种行为拆分成展示器与视图两部分
 
    - 视图部分属于难以测试的谦卑对象。这种对象的代码通常应该越简单越好，它只应负责将数据填充到 GUI 上，而不应该对数据进行任何处理
    - 展示器则是可测试的对象。`展示器的工作是负责从应用程序中接收数据，然后按视图的需要将这些数据格式化，以便视图将其呈现在屏幕上`。
-   - 视图部分除了加载视图模型所需要的值，不应该再做任何其他事情。因此，我们才能说`视图是谦卑对象。`
+   - 视图部分除了加载视图模型所需要的值，不应该再做任何其他事情。因此，我们才能说`视图是谦卑对象。`一般是 View 的数据模型，比如 React 中的 state 对象。
 
 2. 在每个系统架构的边界处，都有可能发现谦卑对象模式的存在。因为跨边界的通信肯定需要用到某种简单的数据结构，而`边界会自然而然地将系统分割成难以测试的部分与容易测试的部分，`所以通过在系统的边界处运用谦卑对象模式，我们可以大幅地提高整个系统的可测试性。
 
@@ -242,13 +255,11 @@ https://www.meetkiki.com/archives/%E5%86%8D%E8%AF%BB%E3%80%8A%E6%9E%B6%E6%9E%84%
 - 面向对象的软件设计到底是什么，怎么用一句话形容这个行为？很多人只能意会，无法言表，看完这本书，终于知道怎么说了，那就是两个控制：
 
 1. 分离系统中变与不变的内容，对变化的部分进行控制
+   例如：插槽
 2. 分析系统中的各种依赖关系（对象、组件），对这些依赖关系进行控制
 
 https://juejin.cn/post/7160552589250166820
 
 https://juejin.cn/post/7124624443279671332#heading-22
-https://juejin.cn/post/7236549738009608253?searchId=2024071700280969DFD466C315BFD61F27
-https://juejin.cn/post/7057328195728572453?searchId=2024071700280969DFD466C315BFD61F27
-https://juejin.cn/post/7083120240560701477?searchId=2024071700280969DFD466C315BFD61F27
 
 https://qiankunli.github.io/2019/08/20/clean_architecture_note.html

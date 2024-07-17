@@ -1,6 +1,6 @@
 [重构 改善既有代码的设计第二版](https://book-refactoring2.ifmicro.com/)
 https://github.com/notes-folder/refactoring
-
+https://juejin.cn/post/7255581952874102821
 需要批判性地阅读本书
 
 - `便于理解，便于修改`，是重构这个方法最直白的解释了
@@ -42,9 +42,14 @@ https://github.com/notes-folder/refactoring
 - switch 惊悚现身
   出现 switch、if…else 的时候，需要联想到多台和策略的抽象来替换；
 - 全局数据。（Global Data）(PS：慎用单例模式)
-- 发散式变化（Divergent Change）、霰弹式修改(shotgun surgery)
+  一般需要通过封装变量的方式将这种全局的数据进行封装，通过方法进行改变
+  封装变量的好处：1. 利于监控与定位问题 2. 如果这个变量需要跟一些协同变量同时改变，函数可以做到收口
+- 发散式变化（Divergent Change）
   某个类经常因为不同的原因在不同的方向上发生变化
+  违反单一职责
+- 霰弹式修改(shotgun surgery)
   如果每遇到某种变化，你都必须在`许多不同的类内做出许多小修改`
+  `模块拆分的过细`
 - **纯数据类（Data Class）**
   类比 DDD 思想，尽可能的让我们的数据类也能拥有行为
   btw，`纯数据类用 type，否则用 interface?`
@@ -67,6 +72,11 @@ https://github.com/notes-folder/refactoring
   两个类关系过于亲密，花费太多时间去探究彼此的 private 成分，此时建议要么合并，要么将共同点提取到一个新类
 
 ## 第 4 章 构筑测试体系
+
+- 每当你收到一个 bug 时，请先写一个单元测试来暴露这个问题
+- 不要幻想把所有场景都覆盖测试，只覆盖那些关键、容易出错的地方就够了
+- 将 UI 与业务逻辑隔离，这样才能写测试用例直接测逻辑部分
+- 确保测试 case 在不该通过时真的会失败
 
 ## 第 5 章 介绍重构名录(Most Useful Set Of Refactoring)
 
@@ -192,3 +202,5 @@ function getPayAmount() {
 
 - 以委托取代超类 Replace Superclass with Delegate
 - 以委托取代子类 Replace Subclass with Delegate
+  - 继承这张牌只能打一次，如果后续子类朝着不同的方向演化，那继承就明显不合适
+  - 继承给类之间引入了非常重的耦合关系，在超类上做任何修改都会影响到子类
