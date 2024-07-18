@@ -1,6 +1,9 @@
 领域驱动设计模式、原理与实践
 https://huhao.dev/posts/2932e594/
 https://mp.weixin.qq.com/s/Gk-tyzx78L6XahZDrMsUYQ
+https://blog.csdn.net/weixin_36027743/article/details/113365974
+https://fishedee.com/2020/11/28/%E3%80%8A%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E3%80%81%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E8%B7%B5%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/
+https://cloud.tencent.com/developer/article/1423794
 
 ## 领域驱动设计（Domain-Driven Design, DDD）：
 

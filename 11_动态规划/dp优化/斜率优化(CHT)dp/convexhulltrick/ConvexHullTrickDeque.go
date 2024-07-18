@@ -10,6 +10,28 @@ import (
 )
 
 func main() {
+	fmt.Println(maxScore([]int{4, 5, 2, 8, 9, 1, 3}))
+	fmt.Println(maxScore([]int{1, 5, 8}))
+
+}
+
+// dp[j]=max(dp[j],dp[i]+(j-i)*nums[j])
+// !dp[j]=max(dp[j],-i*nums[j]+dp[i]+j*nums[j])
+// !dp过程中将直线(-i,dp[i])不断加入到CHT中，查询时查询x=nums[j]时的最大值即可
+func maxScore(nums []int) int64 {
+	n := len(nums)
+	dp := make([]int, n)
+	cht := NewConvexHullTrickDeque(false)
+	cht.AddLine(0, 0, -1)
+	for j, v := range nums {
+		cur, _ := cht.QueryMonotoneInc(v)
+		dp[j] = cur + v*j
+		cht.AddLine(-j, dp[j], -1)
+	}
+	return int64(dp[n-1])
+}
+
+func abc2018() {
 	// https://atcoder.jp/contests/colopl2018-final-open/tasks/colopl2018_final_c
 	// 对每个i 求 f(i,j)=a[j]+(j-i)^2 的最小值
 	// 化简得 f(i,j)=(a[j]+j^2-2ij)+i^2

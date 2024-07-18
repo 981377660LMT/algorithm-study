@@ -17,6 +17,10 @@ import (
 	"sort"
 )
 
+func main() {
+	lineAddGetMin()
+}
+
 func lineAddGetMin() {
 	// https://judge.yosupo.jp/problem/line_add_get_min
 	in := bufio.NewReader(os.Stdin)
@@ -47,8 +51,20 @@ func lineAddGetMin() {
 	}
 }
 
-func main() {
-	lineAddGetMin()
+// dp[j]=max(dp[j],dp[i]+(j-i)*nums[j])
+// !dp[j]=max(dp[j],-i*nums[j]+dp[i]+j*nums[j])
+// !dp过程中将直线(-i,dp[i])不断加入到CHT中，查询时查询x=nums[j]时的最大值即可
+func maxScore(nums []int) int64 {
+	n := len(nums)
+	dp := make([]int, n)
+	cht := NewLineContainer1D(false)
+	cht.Add(0, 0)
+	for j, v := range nums {
+		cur := cht.Query(v)
+		dp[j] = cur + v*j
+		cht.Add(-j, dp[j])
+	}
+	return int64(dp[n-1])
 }
 
 const INF int = 2e18

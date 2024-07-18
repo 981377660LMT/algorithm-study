@@ -24,7 +24,7 @@ import (
 )
 
 // !f(i,j): 左闭右开区间[i,j)的代价(0<=i<j<=n)
-func offlineOnlineDp(n int, f func(i, j int) int) int {
+func OfflineOnlineDp(n int, f func(i, j int) int) int {
 	dp := make([]int, n+1)
 	used := make([]bool, n+1)
 	used[n] = true
@@ -124,6 +124,6 @@ func Yuki705() {
 		b := abs(ys[i])
 		return a + b
 	}
-	res := offlineOnlineDp(n, f)
+	res := OfflineOnlineDp(n, f)
 	fmt.Fprintln(out, res)
 }

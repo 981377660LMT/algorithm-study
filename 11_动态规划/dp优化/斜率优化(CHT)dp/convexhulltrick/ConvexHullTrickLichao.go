@@ -13,7 +13,43 @@ import (
 	"os"
 )
 
-func main() {
+// dp[j]=max(dp[j],dp[i]+(j-i)*nums[j])
+// !dp[j]=max(dp[j],-i*nums[j]+dp[i]+j*nums[j])
+// !dp过程中将直线(-i,dp[i])不断加入到CHT中，查询时查询x=nums[j]时的最大值即可
+func maxScore(nums []int) int64 {
+	n := len(nums)
+	dp := make([]int, n)
+	cht := NewConvexHullTrickLichao(false, mins(nums...), maxs(nums...))
+	cht.AddLine(0, 0, -1)
+	for j, v := range nums {
+		cur, _ := cht.Query(v)
+		dp[j] = cur + v*j
+		cht.AddLine(-j, dp[j], -1)
+	}
+	return int64(dp[n-1])
+}
+
+func mins(nums ...int) int {
+	res := nums[0]
+	for i := 1; i < len(nums); i++ {
+		if nums[i] < res {
+			res = nums[i]
+		}
+	}
+	return res
+}
+
+func maxs(nums ...int) int {
+	res := nums[0]
+	for i := 1; i < len(nums); i++ {
+		if nums[i] > res {
+			res = nums[i]
+		}
+	}
+	return res
+}
+
+func abc2018() {
 	// https://atcoder.jp/contests/colopl2018-final-open/tasks/colopl2018_final_c
 	// 对每个i 求 f(i,j)=a[j]+(j-i)^2 的最小值
 	// 化简得 f(i,j)=(a[j]+j^2-2ij)+i^2
