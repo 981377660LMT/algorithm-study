@@ -5,6 +5,7 @@
 // q<=2e5
 
 // TODO WA
+
 package main
 
 import (
@@ -35,8 +36,9 @@ func main() {
 const INF int = 1e18
 
 // (a,b,x,y)
-//  (a,b) -> 添加直线ax+by
-//  (x,y) -> 求出所有直线ax+by的最大值
+//
+//	(a,b) -> 添加直线ax+by
+//	(x,y) -> 求出所有直线ax+by的最大值
 func LinearMaximization(queries [][4]int) []int {
 	res := make([]int, len(queries))
 	chs := []*ConvexHull{}

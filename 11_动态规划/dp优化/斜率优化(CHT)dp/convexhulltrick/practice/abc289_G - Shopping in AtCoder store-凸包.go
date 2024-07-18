@@ -1,4 +1,5 @@
 // G - Shopping in AtCoder store
+// https://atcoder.jp/contests/abc289/tasks/abc289_g
 // 商品定价
 // n个顾客，每个人有一个购买的欲望wanti,
 // m件物品，每一件物品有一个价值pricei,
@@ -61,7 +62,7 @@ func shoppingInAtCoderStore(wants []int, prices []int) []int {
 	// yj = (j+1)*(wantj+x) =  (j+1)*x + (j+1)*wantj
 	cht := NewConvexHullTrickLichao(false, 0, 1e9+10)
 	for j := 0; j < len(wants); j++ {
-		cht.AddLine(j+1, wants[j]*(j+1), j)
+		cht.AddLine(j+1, wants[j]*(j+1), -1)
 	}
 
 	res := make([]int, len(prices))

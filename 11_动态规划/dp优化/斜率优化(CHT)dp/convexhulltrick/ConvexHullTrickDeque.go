@@ -10,8 +10,9 @@ import (
 )
 
 func main() {
-	fmt.Println(maxScore([]int{4, 5, 2, 8, 9, 1, 3}))
-	fmt.Println(maxScore([]int{1, 5, 8}))
+	// fmt.Println(maxScore([]int{4, 5, 2, 8, 9, 1, 3}))
+	// fmt.Println(maxScore([]int{1, 5, 8}))
+	abc2018()
 }
 
 // 3221. Maximum Array Hopping Score II (ConvexHullTrick优化dp/斜率优化dp)
@@ -36,7 +37,7 @@ func abc2018() {
 	// https://atcoder.jp/contests/colopl2018-final-open/tasks/colopl2018_final_c
 	// 对每个i 求 f(i,j)=a[j]+(j-i)^2 的最小值
 	// 化简得 f(i,j)=(a[j]+j^2-2ij)+i^2
-	// 其中j变化的函数是关于i的一次函数(直线) -2j*i+j^2+a[j]
+	// 其中j变化的函数是关于i的一次函数(直线) -i*2j+j^2+a[j]
 	// !将这n条直线加入到CHT中,然后对每个i求最小值即可
 
 	in := bufio.NewReader(os.Stdin)
@@ -52,12 +53,12 @@ func abc2018() {
 
 	cht := NewConvexHullTrickDeque(true)
 	for i := 0; i < n; i++ {
-		cht.AddLine(-2*i, i*i+A[i], i)
+		cht.AddLine(-2*i, i*i+A[i], -1)
 	}
 
 	for i := 0; i < n; i++ {
-		// res, _ := cht.QueryMonotoneInc(i)
-		res, _ := cht.Query(i)
+		res, _ := cht.QueryMonotoneInc(i)
+		// res, _ := cht.Query(i)
 		fmt.Fprintln(out, res+i*i)
 	}
 }
