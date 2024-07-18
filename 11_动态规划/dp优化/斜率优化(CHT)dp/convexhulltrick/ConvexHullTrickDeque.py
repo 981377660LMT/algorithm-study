@@ -18,7 +18,10 @@ class ConvexHullTrickDeque:
         self._dq = deque()
 
     def addLine(self, k: int, b: int, id: int = -1) -> None:
-        """追加一条直线.需要保证斜率k是单调递增或者是单调递减的."""
+        """
+        追加一条直线 k*x + b.
+        需要保证斜率k是单调递增或者是单调递减的.
+        """
         if not self._isMin:
             k, b = -k, -b
         line = (k, b, id)
@@ -44,7 +47,10 @@ class ConvexHullTrickDeque:
             dp.append(line)
 
     def query(self, x: int) -> Tuple[int, int]:
-        """O(logn) 查询 k*x + b 的最小(大)值以及对应的直线id.如果不存在直线,返回的id为-1."""
+        """
+        O(logn) 查询 k*x + b 的最小(大)值以及对应的直线id.
+        如果不存在直线,返回的id为-1.
+        """
         if not self._dq:
             res, lineId = INF, -1
             if not self._isMin:
@@ -67,7 +73,11 @@ class ConvexHullTrickDeque:
         return res, lineId
 
     def queryMonotoneInc(self, x: int) -> Tuple[int, int]:
-        """O(1) 查询 k*x + b 的最小(大)值以及对应的直线id.需要保证x是单调递增的.如果不存在直线,返回的id为-1."""
+        """
+        O(1) 查询 k*x + b 的最小(大)值以及对应的直线id.
+        需要保证x是单调递增的.
+        如果不存在直线,返回的id为-1.
+        """
         if not self._dq:
             res, lineId = INF, -1
             if not self._isMin:
@@ -87,7 +97,11 @@ class ConvexHullTrickDeque:
         return res, lineId
 
     def queryMonotoneDec(self, x: int) -> Tuple[int, int]:
-        """O(1) 查询 k*x + b 的最小(大)值以及对应的直线id.需要保证x是单调递减的.如果不存在直线,返回的id为-1."""
+        """
+        O(1) 查询 k*x + b 的最小(大)值以及对应的直线id.
+        需要保证x是单调递减的.
+        如果不存在直线,返回的id为-1.
+        """
         if not self._dq:
             res, lineId = INF, -1
             if not self._isMin:
@@ -125,7 +139,7 @@ class ConvexHullTrickDeque:
 
 
 if __name__ == "__main__":
-    # 3221. Maximum Array Hopping Score II
+    # 3221. 最大数组跳跃得分 II
     # https://leetcode.cn/problems/maximum-array-hopping-score-ii/
     # dp[j]=max(dp[j],dp[i]+(j-i)*nums[j])
     # !dp[j]=max(dp[j],-i*nums[j]+dp[i]+j*nums[j])

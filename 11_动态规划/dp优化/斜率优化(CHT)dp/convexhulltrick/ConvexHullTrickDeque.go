@@ -12,9 +12,10 @@ import (
 func main() {
 	fmt.Println(maxScore([]int{4, 5, 2, 8, 9, 1, 3}))
 	fmt.Println(maxScore([]int{1, 5, 8}))
-
 }
 
+// 3221. Maximum Array Hopping Score II (ConvexHullTrick优化dp/斜率优化dp)
+// https://leetcode.cn/problems/maximum-array-hopping-score-ii/description/
 // dp[j]=max(dp[j],dp[i]+(j-i)*nums[j])
 // !dp[j]=max(dp[j],-i*nums[j]+dp[i]+j*nums[j])
 // !dp过程中将直线(-i,dp[i])不断加入到CHT中，查询时查询x=nums[j]时的最大值即可
