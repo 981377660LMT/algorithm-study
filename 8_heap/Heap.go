@@ -14,7 +14,7 @@ func main() {
 	for i := 0; i < 1000000; i++ {
 		mh.Pop()
 	}
-	fmt.Println(time.Since(time1)) // 0.03
+	fmt.Println(time.Since(time1)) // 93.878542ms
 }
 
 type IHeap[T any] interface {

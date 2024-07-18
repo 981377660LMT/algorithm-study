@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const Log = console
 
 const VALID_HOOKS = [
@@ -11,9 +13,22 @@ const VALID_HOOKS = [
   'beforeGetComponentInstance'
 ]
 
+type HookItem = {
+  cb: Function
+  location: string
+
+  previousHook: HookItem | null
+  nextHook: HookItem | null
+  removed?: boolean
+}
+
 export default class Hooks {
   // Flags for what hooks have handlers registered
-  states: any = {}
+
+  /**
+   * id 是否注册过钩子
+   */
+  states: Record<string, boolean> = {}
 
   // Doubly-LinkedList of hooks by id.
   // - hooks[id] points to head of list
@@ -25,10 +40,17 @@ export default class Hooks {
   //       nextHook: reference to next hook in list
   //       removed: a flag that is set if the item was removed
   //   }
-  hooks: any = {}
+  /**
+   * 以双向链表形式存储每个钩子的回调函数列表.
+   */
+  hooks: Record<string, HookItem> = {}
 
   // Hooks by label
-  labelledHooks: any = {}
+  /**
+   * label 反查 hooks.
+   * 以 label 为 key, 以 id 为 value, 以回调函数为值.
+   */
+  labelledHooks: Record<string, Record<string, HookItem>> = {}
 
   // constructor() {
   //     super(this)
@@ -87,7 +109,7 @@ export default class Hooks {
     }
     Log.debug(`Adding hook '${hookId}' from ${callModule}`)
 
-    const hookItem = {
+    const hookItem: HookItem = {
       cb: callback,
       location: callModule,
       previousHook: null,
@@ -144,7 +166,7 @@ export default class Hooks {
     }
   }
 
-  removeHook(id: string | number, hookItem: { previousHook: any; nextHook: any; removed: boolean }) {
+  removeHook(id: string | number, hookItem: { previousHook: any; nextHook: any; removed?: boolean }) {
     let previousHook = hookItem.previousHook
     let nextHook = hookItem.nextHook
 
@@ -163,7 +185,9 @@ export default class Hooks {
     }
   }
 
-  trigger(hookId: string | number, payload: any, done: () => void) {
+  trigger(hookId: string | number, payload: any): Promise<any>
+  trigger(hookId: string | number, payload: any, done: () => void): void
+  trigger(hookId: string | number, payload: any, done?: () => void) {
     let hookItem = this.hooks[hookId]
     if (!hookItem) {
       if (done) {
@@ -173,6 +197,7 @@ export default class Hooks {
         return Promise.resolve()
       }
     }
+
     if (!done) {
       return new Promise((resolve, reject) => {
         this.invokeStack(hookItem, payload, function (err: any) {
@@ -192,7 +217,11 @@ export default class Hooks {
     }
   }
 
-  invokeStack(hookItem: { removed: any; nextHook: any; cb: any }, payload: any, done: { (err: any): void; (arg0: unknown): void }) {
+  // invokeStack 方法通过递归地调用链表中的回调函数，实现了对钩子上注册的回调的有序执行。
+  // 它支持同步和异步回调，通过 done 函数统一处理执行完毕或出现错误的情况
+  private invokeStack(hookItem: { removed?: any; nextHook: any; cb: any }, payload: any, done: { (err: any): void; (arg0: unknown): void }) {
+    callNextHook()
+
     function callNextHook(err?: undefined) {
       if (!hookItem || err) {
         done(err)
@@ -226,6 +255,7 @@ export default class Hooks {
         }
       }
     }
+
     function handleResolve(result: undefined) {
       if (result === undefined) {
         hookItem = hookItem.nextHook
@@ -234,7 +264,6 @@ export default class Hooks {
         done(result)
       }
     }
-    callNextHook()
   }
 
   clear() {
