@@ -151,7 +151,8 @@ The granule of reuse is the granule of release.
 ## Chap20. BUSINESS RULES 业务逻辑————DDD 思想的来源
 
 Business rules are rules or procedures that make or save the business money
-业务逻辑是一个软件系统存在的意义，它们属于核心功能，是系统用来赚钱或省钱的那部分代码，是整个系统中的皇冠明珠
+
+业务逻辑是一个软件系统存在的意义，它们属于核心功能，`是系统用来赚钱或省钱的那部分代码`，是整个系统中的皇冠明珠
 关键业务逻辑和关键业务数据是紧密相关的，所以它们很适合被放在同一个对象中处理，称为业务实体（Entity）。
 `业务逻辑应该是系统中最独立、复用性最高的代码`， 不掺杂用户界面（比如 httpservletrequest）或者所使用的数据库相关的东西（比如数据 model）。
 
