@@ -17,7 +17,7 @@ class ConvexHullTrickDeque:
         self._isMin = isMin
         self._dq = deque()
 
-    def addLine(self, k: int, b: int, id: int = -1) -> None:
+    def addLineMonotone(self, k: int, b: int, id: int = -1) -> None:
         """
         追加一条直线 k*x + b.
         需要保证斜率k是单调递增或者是单调递减的.
@@ -149,9 +149,9 @@ if __name__ == "__main__":
             n = len(nums)
             dp = [0] * n
             cht = ConvexHullTrickDeque(isMin=False)
-            cht.addLine(0, 0)
+            cht.addLineMonotone(0, 0)
             for j, v in enumerate(nums):
                 cur, _ = cht.queryMonotoneInc(v)
                 dp[j] = cur + v * j
-                cht.addLine(-j, dp[j])
+                cht.addLineMonotone(-j, dp[j])
             return dp[n - 1]

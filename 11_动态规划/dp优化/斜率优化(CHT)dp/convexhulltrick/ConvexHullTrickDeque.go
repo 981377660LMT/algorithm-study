@@ -24,11 +24,11 @@ func maxScore(nums []int) int64 {
 	n := len(nums)
 	dp := make([]int, n)
 	cht := NewConvexHullTrickDeque(false)
-	cht.AddLine(0, 0, -1)
+	cht.AddLineMonotone(0, 0, -1)
 	for j, v := range nums {
 		cur, _ := cht.QueryMonotoneInc(v)
 		dp[j] = cur + v*j
-		cht.AddLine(-j, dp[j], -1)
+		cht.AddLineMonotone(-j, dp[j], -1)
 	}
 	return int64(dp[n-1])
 }
@@ -53,7 +53,7 @@ func abc2018() {
 
 	cht := NewConvexHullTrickDeque(true)
 	for i := 0; i < n; i++ {
-		cht.AddLine(-2*i, i*i+A[i], -1)
+		cht.AddLineMonotone(-2*i, i*i+A[i], -1)
 	}
 
 	for i := 0; i < n; i++ {
@@ -79,7 +79,7 @@ func NewConvexHullTrickDeque(isMin bool) *ConvexHullTrickDeque {
 }
 
 // 追加一条直线.需要保证斜率k是单调递增或者是单调递减的.
-func (cht *ConvexHullTrickDeque) AddLine(k, b, id int) {
+func (cht *ConvexHullTrickDeque) AddLineMonotone(k, b, id int) {
 	if !cht.isMin {
 		k, b = -k, -b
 	}

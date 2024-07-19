@@ -14,11 +14,11 @@ func frog3(h []int, c int) int {
 	cht := NewConvexHullTrickDeque(true)
 	dp := make([]int, n)
 	dp[0] = 0
-	cht.AddLine(-2*h[0], h[0]*h[0]+dp[0], 0)
+	cht.AddLineMonotone(-2*h[0], h[0]*h[0]+dp[0], 0)
 	for j := 1; j < n; j++ {
 		best, _ := cht.Query(h[j])
 		dp[j] = best + h[j]*h[j] + c
-		cht.AddLine(-2*h[j], h[j]*h[j]+dp[j], j)
+		cht.AddLineMonotone(-2*h[j], h[j]*h[j]+dp[j], j)
 	}
 
 	return dp[n-1]
@@ -39,12 +39,12 @@ func 特别行动队(h []int, a, b, c int) int {
 	cht := NewConvexHullTrickDeque(false) // 注意这里是最大值
 	dp := make([]int, n+1)
 	dp[0] = 0
-	cht.AddLine(-2*a*preSum[0], a*preSum[0]*preSum[0]+dp[0]-b*preSum[0], 0)
+	cht.AddLineMonotone(-2*a*preSum[0], a*preSum[0]*preSum[0]+dp[0]-b*preSum[0], 0)
 
 	for j := 1; j < n+1; j++ {
 		best, _ := cht.Query(preSum[j])
 		dp[j] = best + a*preSum[j]*preSum[j] + b*preSum[j] + c
-		cht.AddLine(-2*a*preSum[j], a*preSum[j]*preSum[j]+dp[j]-b*preSum[j], j)
+		cht.AddLineMonotone(-2*a*preSum[j], a*preSum[j]*preSum[j]+dp[j]-b*preSum[j], j)
 	}
 
 	return dp[n]
@@ -65,12 +65,12 @@ func 打印文章(h []int, c int) int {
 	cht := NewConvexHullTrickDeque(true)
 	dp := make([]int, n+1)
 	dp[0] = 0
-	cht.AddLine(-2*preSum[0], preSum[0]*preSum[0]+dp[0], 0)
+	cht.AddLineMonotone(-2*preSum[0], preSum[0]*preSum[0]+dp[0], 0)
 
 	for j := 1; j < n+1; j++ {
 		best, _ := cht.Query(preSum[j])
 		dp[j] = best + preSum[j]*preSum[j] + c
-		cht.AddLine(-2*preSum[j], preSum[j]*preSum[j]+dp[j], j)
+		cht.AddLineMonotone(-2*preSum[j], preSum[j]*preSum[j]+dp[j], j)
 	}
 
 	return dp[n]
@@ -235,7 +235,7 @@ func NewConvexHullTrickDeque(isMin bool) *ConvexHullTrickDeque {
 }
 
 // 追加一条直线.需要保证斜率k是单调递增或者是单调递减的.
-func (cht *ConvexHullTrickDeque) AddLine(k, b, id int) {
+func (cht *ConvexHullTrickDeque) AddLineMonotone(k, b, id int) {
 	if !cht.isMin {
 		k, b = -k, -b
 	}

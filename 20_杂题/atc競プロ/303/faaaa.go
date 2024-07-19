@@ -61,7 +61,7 @@ func main() {
 		for i := 0; i < n; i++ {
 			time, damage := magic[i][0], magic[i][1]
 			b := min(mid, time) * damage
-			ch.AddLine(-time, b, i)
+			ch.AddLineMonotone(-time, b, i)
 		}
 
 		cur := 0
@@ -138,7 +138,7 @@ func NewConvexHullTrickDeque(isMin bool) *ConvexHullTrickDeque {
 }
 
 // 追加一条直线.需要保证斜率k是单调递增或者是单调递减的.
-func (cht *ConvexHullTrickDeque) AddLine(k, b, id int) {
+func (cht *ConvexHullTrickDeque) AddLineMonotone(k, b, id int) {
 	if !cht.isMin {
 		k, b = -k, -b
 	}
@@ -205,8 +205,9 @@ func (cht *ConvexHullTrickDeque) Query(x int) (res, lineId int) {
 }
 
 // O(1) 查询 k*x + b 的最小(大)值以及对应的直线id.
-//  需要保证x是单调递增的.
-//  如果不存在直线,返回的id为-1.
+//
+//	需要保证x是单调递增的.
+//	如果不存在直线,返回的id为-1.
 func (cht *ConvexHullTrickDeque) QueryMonotoneInc(x int) (res, lineId int) {
 	if cht.dq.Empty() {
 		res, lineId = INF, -1
@@ -233,8 +234,9 @@ func (cht *ConvexHullTrickDeque) QueryMonotoneInc(x int) (res, lineId int) {
 }
 
 // O(1) 查询 k*x + b 的最小(大)值以及对应的直线id.
-//  需要保证x是单调递减的.
-//  如果不存在直线,返回的id为-1.
+//
+//	需要保证x是单调递减的.
+//	如果不存在直线,返回的id为-1.
 func (cht *ConvexHullTrickDeque) QueryMonotoneDec(x int) (res, lineId int) {
 	if cht.dq.Empty() {
 		res, lineId = INF, -1
@@ -288,8 +290,6 @@ func abs(x int) int {
 	return x
 }
 
-//
-//
 type E = Line
 type Deque struct{ l, r []E }
 
