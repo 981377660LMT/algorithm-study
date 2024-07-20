@@ -355,27 +355,6 @@ func (sl *SortedList32) Range(min, max S) []S {
 	return res
 }
 
-func (sl *SortedList32) IteratorAt(index int32) *Iterator {
-	if index < 0 {
-		index += sl.size
-	}
-	if index < 0 || index >= sl.size {
-		panic("Index out of range")
-	}
-	pos, startIndex := sl._findKth(index)
-	return sl._iteratorAt(pos, startIndex)
-}
-
-func (sl *SortedList32) LowerBound(value S) *Iterator {
-	pos, index := sl._locLeft(value)
-	return sl._iteratorAt(pos, index)
-}
-
-func (sl *SortedList32) UpperBound(value S) *Iterator {
-	pos, index := sl._locRight(value)
-	return sl._iteratorAt(pos, index)
-}
-
 func (sl *SortedList32) Min() S {
 	if sl.size == 0 {
 		panic("Min() called on empty SortedList")
@@ -591,6 +570,29 @@ func (sl *SortedList32) _iteratorAt(pos, index int32) *Iterator {
 	return &Iterator{sl: sl, pos: pos, index: index}
 }
 
+func (sl *SortedList32) IteratorAt(index int32) *Iterator {
+	if index < 0 {
+		index += sl.size
+	}
+	if index < 0 || index >= sl.size {
+		panic("Index out of range")
+	}
+	pos, startIndex := sl._findKth(index)
+	return sl._iteratorAt(pos, startIndex)
+}
+
+// 返回一个迭代器，指向键值>= value的第一个元素.
+func (sl *SortedList32) LowerBound(value S) *Iterator {
+	pos, index := sl._locLeft(value)
+	return sl._iteratorAt(pos, index)
+}
+
+// 返回一个迭代器，指向键值> value的第一个元素.
+func (sl *SortedList32) UpperBound(value S) *Iterator {
+	pos, index := sl._locRight(value)
+	return sl._iteratorAt(pos, index)
+}
+
 type Iterator struct {
 	sl    *SortedList32
 	pos   int32
@@ -598,56 +600,78 @@ type Iterator struct {
 }
 
 func (it *Iterator) HasNext() bool {
-	return it.pos < int32(len(it.sl.blocks))-1 || it.index < int32(len(it.sl.blocks[it.pos]))-1
+	b := it.sl.blocks
+	m := int32(len(b))
+	if it.pos < m-1 {
+		return true
+	}
+	return it.pos == m-1 && it.index < int32(len(b[it.pos]))-1
 }
 
-func (it *Iterator) Next() (res S, ok bool) {
-	if !it.HasNext() {
-		return
-	}
+func (it *Iterator) Next() {
 	it.index++
 	if it.index == int32(len(it.sl.blocks[it.pos])) {
 		it.pos++
 		it.index = 0
 	}
-	res = it.sl.blocks[it.pos][it.index]
-	ok = true
-	return
 }
 
 func (it *Iterator) HasPrev() bool {
-	return it.pos > 0 || it.index > 0
+	if it.pos > 0 {
+		return true
+	}
+	return it.pos == 0 && it.index > 0
 }
 
-func (it *Iterator) Prev() (res S, ok bool) {
-	if !it.HasPrev() {
-		return
-	}
+func (it *Iterator) Prev() {
 	it.index--
 	if it.index == -1 {
 		it.pos--
 		it.index = int32(len(it.sl.blocks[it.pos]) - 1)
 	}
-	res = it.sl.blocks[it.pos][it.index]
-	ok = true
-	return
 }
 
-func (it *Iterator) Remove() {
-	it.sl._delete(it.pos, it.index)
+func (it *Iterator) IsBegin() bool {
+	return it.pos == 0 && it.index == 0
 }
 
-func (it *Iterator) Value() (res S, ok bool) {
-	if it.pos < 0 || it.pos >= it.sl.Len() {
-		return
+func (it *Iterator) IsEnd() bool {
+	m := int32(len(it.sl.blocks))
+	return it.pos == m && it.index == 0
+}
+
+// GetMut
+func (it *Iterator) Value() S {
+	return it.sl.blocks[it.pos][it.index]
+}
+
+func (it *Iterator) NextValue() S {
+	newPos, newIndex := it.pos, it.index
+	newIndex++
+	if newIndex == int32(len(it.sl.blocks[it.pos])) {
+		newPos++
+		newIndex = 0
 	}
-	block := it.sl.blocks[it.pos]
-	if it.index < 0 || it.index >= int32(len(block)) {
-		return
+	return it.sl.blocks[newPos][newIndex]
+}
+
+func (it *Iterator) PrevValue() S {
+	newPos, newIndex := it.pos, it.index
+	newIndex--
+	if newIndex == -1 {
+		newPos--
+		newIndex = int32(len(it.sl.blocks[newPos]) - 1)
 	}
-	res = block[it.index]
-	ok = true
-	return
+	return it.sl.blocks[newPos][newIndex]
+}
+
+func (it *Iterator) ToIndex() int32 {
+	res := it.sl._queryTree(it.pos)
+	return res + it.index
+}
+
+func (it *Iterator) Copy() *Iterator {
+	return &Iterator{sl: it.sl, pos: it.pos, index: it.index}
 }
 
 func min(a, b int) int {

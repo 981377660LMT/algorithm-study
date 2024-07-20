@@ -79,7 +79,7 @@ func abc244_h() {
 	}()
 
 	q := io.NextInt()
-	cht := NewLineContainer2D(q)
+	cht := NewLineContainer2D()
 	for i := 0; i < q; i++ {
 		a, b, x, y := io.NextInt(), io.NextInt(), io.NextInt(), io.NextInt()
 		cht.Add(a, b)
@@ -104,7 +104,7 @@ func 最大三角形面积() {
 		points[i] = [2]int{io.NextInt(), io.NextInt()}
 	}
 
-	cht := NewLineContainer2D(n)
+	cht := NewLineContainer2D()
 	for _, p := range points {
 		a, b := p[0], p[1]
 		cht.Add(a, -b)
@@ -118,7 +118,7 @@ func 最大三角形面积() {
 	io.Println(res)
 }
 
-const INF int = 2e18
+const INF int = 4e18
 
 type Line struct {
 	k, b   int
@@ -131,10 +131,10 @@ type LineContainer2D struct {
 	bMax, bMin     int
 }
 
-func NewLineContainer2D(capacity int) *LineContainer2D {
+func NewLineContainer2D() *LineContainer2D {
 	return &LineContainer2D{
-		minCHT: _NewLineContainer(true, capacity),
-		maxCHT: _NewLineContainer(false, capacity),
+		minCHT: _NewLineContainer(true),
+		maxCHT: _NewLineContainer(false),
 		kMax:   -INF,
 		kMin:   INF,
 		bMax:   -INF,
@@ -173,14 +173,12 @@ func (lc *LineContainer2D) QueryMax(x, y int) int {
 
 	// y/x
 	if x > 0 {
-		l := lc.maxCHT.sl.BisectLeftByPair(y, x)
-		line := lc.maxCHT.sl.At(l)
+		line := lc.maxCHT.sl.BisectLeftByPairForValue(y, x)
 		a := line.b
 		b := line.k
 		return a*x + b*y
 	}
-	l := lc.minCHT.sl.BisectLeftByPair(y, x)
-	line := lc.minCHT.sl.At(l)
+	line := lc.minCHT.sl.BisectLeftByPairForValue(y, x)
 	a := -line.b
 	b := -line.k
 	return a*x + b*y
@@ -203,7 +201,7 @@ type _LineContainer struct {
 	sl       *SpecializedSortedList
 }
 
-func _NewLineContainer(minimize bool, capacity int) *_LineContainer {
+func _NewLineContainer(minimize bool) *_LineContainer {
 	return &_LineContainer{
 		minimize: minimize,
 		sl:       NewSpecializedSortedList(func(a, b *Line) bool { return a.k < b.k }),
@@ -217,38 +215,55 @@ func (lc *_LineContainer) Add(k, m int) {
 
 	newLine := &Line{k: k, b: m}
 	lc.sl.Add(newLine)
-	it1 := lc.sl.BisectRightByK(newLine.k) - 1
-	it2 := it1
-	line2 := lc.sl.At(it2)
-	it1++
-	it3 := it2
-	for lc.insect(line2, lc.sl.At(it1)) {
-		lc.sl.Pop(it1)
+
+	iter := lc.sl.BisectRightByKForIterator(k)
+	iter.Prev()
+
+	{
+		probe := iter.Copy()
+		probe.Next()
+		start := probe.ToIndex()
+		removeCount := int32(0)
+		for lc.insect(iter, probe) {
+			probe.Next()
+			removeCount++
+		}
+		lc.sl.Erase(start, start+removeCount)
 	}
 
-	if it3 != 0 {
-		it3--
-		line3 := lc.sl.At(it3)
-		if lc.insect(line3, line2) {
-			lc.sl.Pop(it2)
-			lc.insect(line3, lc.sl.At(it2))
+	{
+		probe := iter.Copy()
+		if !iter.IsBegin() {
+			iter.Prev()
+			if lc.insect(iter, probe) {
+				probIndex := probe.ToIndex()
+				probe.Next()
+				lc.insect(iter, probe)
+				lc.sl.Pop(probIndex)
+			}
 		}
 	}
 
-	if it3 == 0 {
+	if iter.IsBegin() {
 		return
 	}
 
-	dp1, dp2 := lc.sl.At(it3-1), lc.sl.At(it3)
-	for it3 != 0 {
-		it2 := it3
-		if lessPair(dp1.p1, dp1.p2, dp2.p1, dp2.p2) {
-			break
+	{
+		var pivot *Line
+		if iter.HasNext() {
+			pivot = iter.NextValue()
 		}
-		it3--
-		lc.sl.Pop(it2)
-		lc.insect(dp1, lc.sl.At(it2))
-		dp1, dp2 = lc.sl.At(it3-1), dp1
+		end := iter.ToIndex() + 1
+		removeCount := int32(0)
+		for !iter.IsBegin() {
+			iter.Prev()
+			if lessLine(iter.Value(), iter.NextValue()) {
+				break
+			}
+			lc.insectLine(iter.Value(), pivot)
+			removeCount++
+		}
+		lc.sl.Erase(end-removeCount, end)
 	}
 }
 
@@ -257,8 +272,7 @@ func (lc *_LineContainer) Query(x int) int {
 	if lc.sl.Len() == 0 {
 		panic("empty container")
 	}
-	pos := lc.sl.BisectLeftByPair(x, 1)
-	line := lc.sl.At(pos)
+	line := lc.sl.BisectLeftByPairForValue(x, 1)
 	v := line.k*x + line.b
 	if lc.minimize {
 		return -v
@@ -272,7 +286,31 @@ func (lc *_LineContainer) Size() int32 { return lc.sl.Len() }
 
 // 这个函数在向集合添加新线或删除旧线时用于计算交点。
 // 计算线性函数x和y的交点，并将结果存储在x->p中。
-func (lc *_LineContainer) insect(line1, line2 *Line) bool {
+func (lc *_LineContainer) insect(iterX, iterY *Iterator) bool {
+	if iterY.IsEnd() {
+		line1 := iterX.Value()
+		line1.p1 = INF
+		line1.p2 = 1
+		return false
+	}
+	line1, line2 := iterX.Value(), iterY.Value()
+	if line1.k == line2.k {
+		if line1.b > line2.b {
+			line1.p1 = INF
+			line1.p2 = 1
+		} else {
+			line1.p1 = INF
+			line1.p2 = -1
+		}
+	} else {
+		// lc_div
+		line1.p1 = line2.b - line1.b
+		line1.p2 = line1.k - line2.k
+	}
+	return !lessPair(line1.p1, line1.p2, line2.p1, line2.p2)
+}
+
+func (lc *_LineContainer) insectLine(line1, line2 *Line) bool {
 	if line2 == nil {
 		line1.p1 = INF
 		line1.p2 = 1
@@ -320,7 +358,11 @@ func lessPair(a1, b1, a2, b2 int) bool {
 	return diff^mul < 0
 }
 
-const _LOAD int32 = 50 // 75/100/150/200
+func lessLine(a, b *Line) bool {
+	return lessPair(a.p1, a.p2, b.p1, b.p2)
+}
+
+const _LOAD int32 = 75 // 75/100/150/200
 
 type S = *Line
 
@@ -352,6 +394,55 @@ func NewSpecializedSortedList(less func(a, b S) bool, elements ...S) *Specialize
 	res.mins = mins
 	res.shouldRebuildTree = true
 	return res
+}
+
+func (sl *SpecializedSortedList) Erase(start, end int32) {
+	sl.Enumerate(start, end, nil, true)
+}
+
+func (sl *SpecializedSortedList) Enumerate(start, end int32, f func(value S), erase bool) {
+	if start < 0 {
+		start = 0
+	}
+	if end > sl.size {
+		end = sl.size
+	}
+	if start >= end {
+		return
+	}
+
+	pos, startIndex := sl._findKth(start)
+	count := end - start
+	m := int32(len(sl.blocks))
+	for ; count > 0 && pos < m; pos++ {
+		block := sl.blocks[pos]
+		endIndex := min32(int32(len(block)), startIndex+count)
+		if f != nil {
+			for j := startIndex; j < endIndex; j++ {
+				f(block[j])
+			}
+		}
+		deleted := endIndex - startIndex
+
+		if erase {
+			if deleted == int32(len(block)) {
+				// !delete block
+				sl.blocks = append(sl.blocks[:pos], sl.blocks[pos+1:]...)
+				sl.mins = append(sl.mins[:pos], sl.mins[pos+1:]...)
+				sl.shouldRebuildTree = true
+				pos--
+			} else {
+				// !delete [index, end)
+				sl._updateTree(pos, -deleted)
+				sl.blocks[pos] = append(sl.blocks[pos][:startIndex], sl.blocks[pos][endIndex:]...)
+				sl.mins[pos] = sl.blocks[pos][0]
+			}
+			sl.size -= deleted
+		}
+
+		count -= deleted
+		startIndex = 0
+	}
 }
 
 func (sl *SpecializedSortedList) Add(value S) *SpecializedSortedList {
@@ -398,9 +489,21 @@ func (sl *SpecializedSortedList) BisectRightByK(k int) int32 {
 	return sl._queryTree(pos) + index
 }
 
+// 返回一个迭代器，指向键值> key的第一个元素.
+// UpperBoundByK.
+func (sl *SpecializedSortedList) BisectRightByKForIterator(k int) *Iterator {
+	pos, index := sl._locRightByK(k)
+	return &Iterator{sl: sl, pos: pos, index: index}
+}
+
 func (sl *SpecializedSortedList) BisectLeftByPair(a, b int) int32 {
 	pos, index := sl._locLeftByPair(a, b)
 	return sl._queryTree(pos) + index
+}
+
+func (sl *SpecializedSortedList) BisectLeftByPairForValue(a, b int) S {
+	pos, index := sl._locLeftByPair(a, b)
+	return sl.blocks[pos][index]
 }
 
 func (sl *SpecializedSortedList) Clear() {
@@ -607,6 +710,85 @@ func (sl *SpecializedSortedList) _findKth(k int32) (pos, index int32) {
 	return pos + 1, k
 }
 
+type Iterator struct {
+	sl         *SpecializedSortedList
+	pos, index int32
+}
+
+func (it *Iterator) HasNext() bool {
+	b := it.sl.blocks
+	m := int32(len(b))
+	if it.pos < m-1 {
+		return true
+	}
+	return it.pos == m-1 && it.index < int32(len(b[it.pos]))-1
+}
+
+func (it *Iterator) Next() {
+	it.index++
+	if it.index == int32(len(it.sl.blocks[it.pos])) {
+		it.pos++
+		it.index = 0
+	}
+}
+
+func (it *Iterator) HasPrev() bool {
+	if it.pos > 0 {
+		return true
+	}
+	return it.pos == 0 && it.index > 0
+}
+
+func (it *Iterator) Prev() {
+	it.index--
+	if it.index == -1 {
+		it.pos--
+		it.index = int32(len(it.sl.blocks[it.pos]) - 1)
+	}
+}
+
+// GetMut
+func (it *Iterator) Value() S {
+	return it.sl.blocks[it.pos][it.index]
+}
+
+func (it *Iterator) NextValue() S {
+	newPos, newIndex := it.pos, it.index
+	newIndex++
+	if newIndex == int32(len(it.sl.blocks[it.pos])) {
+		newPos++
+		newIndex = 0
+	}
+	return it.sl.blocks[newPos][newIndex]
+}
+
+func (it *Iterator) PrevValue() S {
+	newPos, newIndex := it.pos, it.index
+	newIndex--
+	if newIndex == -1 {
+		newPos--
+		newIndex = int32(len(it.sl.blocks[newPos]) - 1)
+	}
+	return it.sl.blocks[newPos][newIndex]
+}
+
+func (it *Iterator) ToIndex() int32 {
+	res := it.sl._queryTree(it.pos)
+	return res + it.index
+}
+
+func (it *Iterator) Copy() *Iterator {
+	return &Iterator{sl: it.sl, pos: it.pos, index: it.index}
+}
+
+func (it *Iterator) IsBegin() bool {
+	return it.pos == 0 && it.index == 0
+}
+
+func (it *Iterator) IsEnd() bool {
+	m := int32(len(it.sl.blocks))
+	return it.pos == m && it.index == 0
+}
 func min32(a, b int32) int32 {
 	if a < b {
 		return a
